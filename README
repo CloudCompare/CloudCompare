@@ -1,0 +1,28 @@
+CloudCompare V2.4
+
+Homepage: http://www.danielgm.net/cc/
+
+
+== Introduction ==
+
+CloudCompare is a 3D point cloud (and triangular mesh) processing software.
+It has been originally designed to perform comparison between two 3D points clouds
+(such as the ones obtained with a laser scanner) or between a point cloud and a
+triangular mesh. It relies on a specific octree structure that enables great
+performances in this particular function. It was also meant to deal with huge point
+clouds (typically more than 10 millions points, and up to 120 millions with 2 Gb
+of memory).
+
+More: http://en.wikipedia.org/wiki/CloudCompare
+
+== Compilation ==
+
+Refer to the wiki (http://www.danielgm.net/cc/doc/wiki/index.php5?title=Compilation_CMake)
+for up-to-date information.
+
+Basically, you have to:
+- clone this repository
+- install mandatory dependencies (OpenGL,  etc.) and optional ones if you really need them
+(mainly to support particular file formats, or for some plugins)
+- launch CMake (from the trunk root)
+- enjoy!

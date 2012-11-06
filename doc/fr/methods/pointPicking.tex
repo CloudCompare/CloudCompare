@@ -1,0 +1,25 @@
+\subsection{Point picking}
+\label{subsection:pointPicking}
+
+L'outil de \textit{picking} de points permet de sélectionner un ou plusieurs points 3D (parmi les nuages affichés) pour afficher des étiquettes avec des informations diverses (notamment des mesures entre points : distance, angle, etc.).
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{Partie3_Fonctions/pointPicking.png}
+\caption{\label{fig:pointPicking}Interface de \textit{picking} de points 3D}
+\end{center}
+\end{figure}
+
+L'outil de picking de points s'active dans la vue 3D courante. Une barre d'icônes apparaît alors dans son coin haut-droit et l'interface principale de CloudCompare est \textit{gelée} (la plupart des icônes et menus ne sont plus accessibles, mis à part les options d'affichage). Celle-ci est rétablie quand l'utilisateur quitte l'outil (dernière icône à droite en forme de croix rouge).\\
+En pratique, cet outil permet de créer des étiquettes (voir section~\ref{etiquettes_2D} associée à un ou plusieurs points ou à une zone de l'écran. Les 3 premières icônes de la barre d'outil permettent de créer une étiquette liée à un, deux ou trois points respectivement :
+\begin{itemize}
+\item 1 point : l'utilisateur sélectionne un point et une étiquette 2D standard apparaît avec les informations relatives à ce point (coordonnées, indice dans le nuage, couleur, valeur scalaire active, etc.). 
+\item 2 points : l'utilisateur sélectionne deux points successivement (lors de la sélection du premier point, l'étiquette précédente apparaît) et des informations sur le segment ainsi défini sont alors affichées (dont particulièrement la distance entre les deux points).
+\item 3 points : l'utilisateur sélectionne trois points successivement (lors de la sélection du premier point et du second point, les deux étiquettes précédentes apparaîssent) et des informations sur le triplet de points ainsi défini sont alors affichées (dont particulièrement la normale et la surface du triangle correspondant ainsi que l'angle au niveau du premier point).
+\item La quatrième icône permet de créer une étiquette de type \emph{zone 2D}.
+\item La cinquième icône (disquette) permet de sauver l'étiquette courante sous la forme d'une vraie entité (autrement la création d'une nouvelle étiquette ou quitter l'outil entraine la supression de l'étiquette courante).
+\item L'icône suivante permet de réinitialiser l'outil (suppression de l'étiquette courante).
+\item Et enfin la dernière icône permet de quitter l'outil (suppression de l'étiquette courante).
+\end{itemize}
+
+

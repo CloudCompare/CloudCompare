@@ -1,0 +1,18 @@
+\subsection{Apply transformation}
+\label{subsection:applyTransformation}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{Partie3_Fonctions/applyTransformation.png}
+\caption{\label{fig:applyTransformation}Interface de définition d'une transformation 3D (\textit{avec aide affichée})}
+\end{center}
+\end{figure}
+
+Cet outil permet à l'utilisateur de spécifier une transformation 3D (matrice $4\times4$ composée d'une matrice de rotation dans la partie supérieure à gauche et d'un vecteur translation dans la partie supérieure de la dernière colonne). Cette transformation (ou son inverse si la case à cocher \textit{Apply inverse transformation} est activée) peut alors être appliquée aux entitées sélectionnées.\\
+\par
+Remarques :
+\begin{itemize}
+\item une aide peut-être affichée en appuyant sur le bouton en haut à gauche (voir figure~\ref{fig:applyTransformation}).
+\item après une transformation manuelle (voir section~\ref{subsection:graphicalTransformation}) ou un recalage de type ICP (voir section~\ref{subsection:register}) CloudCompare affiche dans la console la transformation appliquée aux entités. Cette transformation peut-être sélectionnée dans la console et récupérée - en \textit{copiant} le texte avec CTRL+C - puis \textit{collée} - CRTL+V - dans l'outil (attention, il faut faire attention aux premiers caractères du texte collé qui correspondent à l'heure du message et qui doivent donc être supprimmés avant d'appliquer la transformation !). Ceci permet notamment soit d'annuler une transformation (en appliquant la transformation inverse) ou alors d'appliquer la même transformation à une autre entitée après un recalage (on peut en effet vouloir segmenter/nettoyer un nuage avant d'appliquer l'algorithme ICP - pour obtenir un meilleur recalage - puis appliquer la transformation obtenue au nuage d'origine).\\
+\end{itemize}
+

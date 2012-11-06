@@ -1,0 +1,12 @@
+[FormatInfo]
+Type=TeXnicCenterProjectInformation
+Version=4
+
+[ProjectInfo]
+MainFile=Documentation.tex
+UseBibTeX=0
+UseMakeIndex=0
+ActiveProfile=LaTeX => PDF
+ProjectLanguage=
+ProjectDialect=
+

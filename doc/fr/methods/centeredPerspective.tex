@@ -1,0 +1,28 @@
+\subsection{Display > Toggle Centered Perspective}
+\label{subsection:centeredPerspective}
+
+\par
+Dans le processus d'affichage, la projection\index{projection!pour visualisation} définit la manière dont les
+objets 3D sont dessinés à l'écran de visualisation 2D.
+L'affichage de \emph{CloudCompare} propose deux types de projections :
+\begin{itemize}
+\item parallèle orthographique : les points sont projetés orthogonalement sur le plan image.
+Le champ de vision correspond à un cylindre.
+\item perspective\index{perspective|see{projection pour visualisation}} : les points sont projetés vers un unique point n'appartenant
+pas au plan image. Le champ de vision correspond à un cône.
+\end{itemize}
+Le plan image peut être assimilé à l'écran de visualisation.
+\\
+\par
+Dans \emph{CloudCompare}, la commande \emph{Toggle Centered Perspective} permet de basculer entre
+l'affichage par projection orthographique, qui est le mode d'affichage par défaut, et
+l'affichage par projection perspective.
+Lorsque cette commande est activée, le centre de rotation du point de vue est automatiquement
+placé sur le centre de la scène observée. Lors des phases interactives (mouvement de souris
+dans un contexte graphique - cf. section \ref{subsection:Interactivité}), la caméra tournera donc
+autour des objets de la scène.
+\\
+\par
+Si elle est sollicitée une seconde fois, cette commande rétablit l'affichage suivant une projection orthographique.\\
+\par
+\textcolor[rgb]{1.00,0.00,0.00}{Raccourci clavier : F3}

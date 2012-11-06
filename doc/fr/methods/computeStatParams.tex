@@ -1,0 +1,28 @@
+\subsection{Tools > Statistics > Compute stat. params}
+\label{subsection:computeStatParams}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.4\textwidth]{Partie3_Fonctions/computeStatParamsExample.jpg}
+\caption{\label{fig:computeStatParamsExample}Exemple d'estimation automatique des paramètres d'une loi normale pour un champ scalaire}
+\end{center}
+\end{figure}
+
+\index{statistiques!paramètres}
+\index{Weibull|see{statistiques}}
+\index{normale, loi|see{statistiques}}
+Cette fonction calcule les paramètres de la loi statistique choisie (Gauss ou Weibull) à partir des valeurs du champ scalaire
+actif du nuage sélectionné. La fonction renvoie typiquement la moyenne et l'écart-type du champ scalaire courant si
+la loi est Normale, ou les paramètres $(a,b)$ si c'est une loi de Weibull (auquel cas \emph{CloudCompare} affiche 
+aussi des estimations de la moyenne et de l'écart-type dans la console\index{console} - voir section~\ref{section:mainWindow}).
+\\
+\par
+La méthode représente graphiquement l'adéquation entre la loi calculée (trait blanc) et l'histogramme\index{histogramme} du champ scalaire\index{champ scalaire}
+dans une fenêtre qui apparaît à la fin du calcul (voir figure\ref{fig:computeStatParamsExample}). Les valeurs des paramètres
+de la loi sont affichées en haut de la fenêtre. \emph{CloudCompare} renvoie enfin, via la console, la distance du $\chi^{2}$
+entre la distribution estimée et les valeurs du champ scalaire.
+\\
+\par
+Remarque : les paramètres de la loi ainsi estimés pourront typiquement être utilisés dans la fonction de test statistique local\index{statistiques!test}
+(voir section~\ref{subsection:statisticalTest}), qui permet de filtrer un nuage de point dont on a calculé les 
+distances\index{distances} par rapport à un nuage (ou un maillage) de référence.

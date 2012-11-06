@@ -1,0 +1,136 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Toggle (features)
+\end_layout
+
+\begin_layout Standard
+Ce sous-menu permet de changer l'état courant de visibilité de l'entité
+ elle-même (
+\shape italic
+Visibility
+\shape default
+) ou certains attributs de l'entité sélectionnée :
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\shape italic
+Normals
+\shape default
+ : utilise les normales (ou non) lors de l'affichage de l'entité (les normales
+ font varier l'intensité du point ou du triangle en fonction de la position
+ de la lumière)
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\shape italic
+Colors
+\shape default
+ : utilise les couleurs lors de l'affichage de l'entité 
+\end_layout
+
+\begin_layout Labeling
+\labelwidthstring 00.00.0000
+
+\shape italic
+SF
+\shape default
+ : utilise le champ scalaire courant en guise de fausse couleurs lors de
+ l'affichage de l'entité (toujours prioritaire sur les éventuelles couleurs
+ de l'entité)
+\end_layout
+
+\begin_layout Standard
+Cela est équivalent à utiliser les cases à cocher correspondantes dans la
+ zone d'affichage des propriétés de l'entité sélectionnée (voir section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:commonProperties"
+
+\end_inset
+
+).
+ Il est par contre possible par ce biais d'appliquer la modification à toutes
+ les entités sélectionnées.
+\end_layout
+
+\end_body
+\end_document

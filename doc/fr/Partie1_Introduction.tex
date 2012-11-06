@@ -1,0 +1,140 @@
+\chapternonum{Introduction}
+\label{cha:Introduction}
+
+\section{Présentation\index{presentation}}
+
+\emph{CloudCompare} est un logiciel de traitement et de comparaison de nuages de points 3D denses (ainsi que de maillages triangulaires dans une certaine mesure). Son développement a été initié à partir de 2004 dans le cadre d\textquoteright{}une thèse CIFRE financée par EDF R\&D et encadrée par l\textquoteright{}Ecole Nationale Supérieure des Télécommunications (ENST \textendash{} désormais Telecom ParisTech \textendash{} laboratoire TSI, équipe TII). Il se poursuit depuis et est désormais un projet \textit{open-source} indépendant. CloudCompare n\textquoteright{}est pas voué à un usage commercial. \\
+\par
+Historiquement, ce logiciel a été conçu pour traiter des nuages de points denses (tels que ceux issus d'un scanner laser 3D) dans le but de les comparer pour en extraire les différences. Il permet donc typiquement :
+\begin{itemize}
+\item de calculer les distances locales entre deux nuages de points denses ou entre un nuage et un maillage triangulaire (figure de gauche ci-dessous) ;
+\item de filtrer le bruit de mesure du scanner laser pour mettre en évidence les \textquotedbl{}vraies\textquotedbl{} différences (figure du milieu) ;
+\item de segmenter les points restants en sous-ensembles correspondant à des objets
+distincts (figure de droite).
+\end{itemize}
+\includegraphics[width=1\textwidth]{images/Partie1_Introduction/illustration_CloudCompare.jpg}\\
+\par
+Depuis, CloudCompare a beaucoup évolué et il offre désormais de nombreuses fonctions d'édition (transformation rigide interactive, segmentation interactive), de recalage automatique (type ICP), de modélisation (calcul de maillages surfaciques type Delaunay ou Poisson), de reprojection (selon le point de vue du scanner, selon une direction principale, sur un cylindre ou un cône, etc.), de calcul morphologiques (rugosité, courbure, etc.) et autres. A travers un système de plugins, l'utilisateur a aussi accès à des fonctionalités et librairies externes (des algorithmes issus du monde de la recherche - reconstruction de maillage par approche de type
+Poisson, filtrage des points non visibles, etc. - des périphériques d'acquisition comme la Kinect de
+Microsoft, ou encore des shaders évolués pour faciliter la visualisation des entités 3D - Eye Dome Lighting
+ ou SSAO, etc.). \\
+\par
+L'originalité de \emph{CloudCompare} tient à plusieurs aspects :
+\begin{itemize}
+\item les structures de données utilisées : notamment un \textquotedbl{}octree\textquotedbl{}
+particulier permettant de traiter très rapidement des nuages de points
+volumineux (plusieurs millions de points 3D).
+\item un grand nombre de choix et de méthodes pour le calcul de distance 
+entre nuages de points ou entre un nuage et un maillage triangulaire (tous basés sur
+la notion de \textit{distance au plus proche voisin}) ;
+et un calcul très rapide mais moins précis basé sur une distance de \emph{Chanfrein} ;
+\item la possibilité de prendre en compte les différences d'échantillonnage entre les jeux
+de données comparés ;
+\item la possibilité de filtrer le bruit de mesure a posteriori ;
+\item la possibilité de prendre en compte la visibilité du scanner pour chaque jeu de
+données ;
+\item la gestion de champs scalaires mutliples associés à un même nuage de points (comme des distances typiquement). Ces champs scalaires peuvent être affichés par coloration dynamique des points. Ils peuvent permettre aussi de moduler l'affichage de l'entité (par filtrage des points associés à certaines valeurs) ou encore de segmenter le nuage associé. Plus généralement, ils servent d'entrée à de nombreux alogrithmes, ils peuvent être composés ensembles, etc.
+\item enfin, plusieurs types de rendus évolués (soit temps réel via des shaders ou \textit{offline} via un
+calcul de \textit{Portion de Ciel Visible} par exemple) permettent une forte amélioration de la lisibilité
+des données 3D à l\textquoteright{}écran.\\
+\end{itemize}
+\par
+Il est enfin important de noter que bien que \emph{CloudCompare} soit capable
+de gérer des maillages triangulaires, ce type d'entité reste avant tout
+pour \emph{CloudCompare} un nuage de points (les sommets du maillage) muni
+d\textquoteright{}une structure particulière (des triangles), à côté de nombreuses autres
+structures (octree, kd-tree, couleurs, normales, champs scalaires, photos calibrées, etc.).
+L\textquoteright{}utilisateur est donc invité à toujours garder cette
+particularité à l\textquoteright{}esprit lorsqu\textquoteright{}il
+utilise \emph{CloudCompare}, et il devra en particulier toujours faire attention
+au rôle de chaque entité 3D dans les traitements proposés par ce logiciel.
+
+
+\section{Licence\index{licence}}
+
+Le logiciel \emph{CloudCompare} est constitué de plusieurs
+\index{composants logiciels}composants logiciels :
+\begin{itemize}
+\item La librairie \textbf{CClib} (algorithmes)
+\item La librairie \textbf{qCC\_db} (base de données)
+\item Le programme \textbf{qCC} qui utilise ces librairies
+\\
+\end{itemize}
+Installer et utiliser ces composants signifie que vous acceptez les termes
+et les conditions de leurs licences respectives. La version 2.4 et les versions
+antérieures de ces deux composants logiciels sont la propriété d\textquoteright{}EDF
+R\&D et de TELECOM ParisTech.\\
+
+\par
+\textbf{Licence de la librairie CClib} : \\
+La librairie CClib est diffusée sous la licence GNU LGPL (GNU
+Lesser General Public Licence) telle qu\textquoteright{}elle a été
+publiée par la FSF (Free Software Foundation) ici :
+\href{http://www.gnu.org/licenses/lgpl.html}{http://www.gnu.org/licenses/lgpl.html}\\
+
+\par
+\textbf{Licence de la librairie qCC\_db} : \\
+La librairie qCC\_db est diffusée sous la licence GNU GPL (GNU General Public Licence)
+telle qu\textquoteright{}elle a été publiée par la FSF (Free Software Foundation) ici : \href{http://www.gnu.org/licenses/gpl.html}{http://www.gnu.org/licenses/gpl.html}\\
+
+\par
+\textbf{Licence du programme exécutable qCC} : \\
+Le programme qCC est diffusé sous la licence GNU GPL (GNU General
+Public Licence) tel qu\textquoteright{}elle a été publiée par la FSF
+(Free Software Foundation) ici :
+\href{http://www.gnu.org/licenses/gpl.html}{http://www.gnu.org/licenses/gpl.html}\\
+\\
+
+EDF R\&D et TELECOM ParisTech accordent à l'utilisateur les droits
+d'installer et d\textquoteright{}utiliser le logiciel \emph{CloudCompare}
+après l'avoir téléchargé depuis le site \href{http://www.danielgm.net/cc}{http://www.danielgm.net/cc}.
+Le logiciel \emph{CloudCompare} est fourni en l\textquoteright{}état, sans
+aucune garantie explicite ou implicite. Les auteurs déclinent toute
+responsabilité pour tout dommage direct ou indirect. L\textquoteright{}utilisateur
+assume tous les risques et responsabilités quant à la qualité du logiciel
+\emph{CloudCompare} et de son utilisation.
+
+
+\section{Installation du binaire (Windows)\index{installation}}
+
+\emph{CloudCompare} fonctionne sous les systèmes d'exploitation Windows (XP, Vista \& Seven)
+et Linux (Debian, Ubuntu, etc.) et pour des architectures 32 ou 64 bits.\\
+\par
+Les versions binaires de \emph{CloudCompare} pour Windows téléchargeables sur le site officiel
+ne comportent pas de programme d'installation. Il suffit de décompresser l'archive .zip
+contenant \index{exécutable}l'exécutable et les \index{DLL (Dynamic Link Libraries)}DLLs.\\
+Voici la liste minimale des fichiers que vous devez trouver après décompression
+de l'archive :
+\begin{itemize}
+\item qCC.exe (exécutable principal)
+\item history.txt (l'historique des modifications)
+\item license.txt (la license d'utilisation)
+\item CC\_DLL.dll (librairie CClib)
+\item QCC\_DB\_DLL.dll (librairie qCC\_db)
+\item QtCore4.dll (DLL Qt - \href{http://qt.nokia.com}{qt.nokia.com})
+\item QtGui4.dll (DLL Qt - \href{http://qt.nokia.com}{qt.nokia.com})
+\item QtOpenGL4.dll (DLL Qt - \href{http://qt.nokia.com}{qt.nokia.com})
+\\
+\end{itemize}
+
+\par
+Et de manière optionnelle :
+\begin{itemize}
+\item un certain nombre de DLLs supplémentaires nécessaires à certains plugins 
+(freenect.dll, etc.) ou à la prise en charge de formats de fichiers (liblas.dll, etc.)
+\item un sous-répertoire \textit{plugins} contenant les DLLs de chaque plugin
+\item un sous-répertoire \textit{shaders} contenant les fichiers requis par certains plugins
+\item un sous-répertoire \textit{imageformats} contenant les librairies nécessaires à la lecture
+et l'écriture de fichiers images
+\\
+\end{itemize}
+
+\par
+Sous Linux, il faut impérativement compiler le projet pour l'utiliser (voir ci-dessous).
+
+
+\section{Compilation du projet\index{compilation}}
+
+L'intégralité du code de \emph{CloudCompare} est écrite en C++. Le projet utilise désormais le générateur de projets de compilation \emph{CMake} (\href{http://www.cmake.org/}{http://www.cmake.org}).\\
+\par
+Pour compiler le projet, référez vous au \emph{wiki} : \href{http://www.danielgm.net/cc/doc/wiki}{http://www.danielgm.net/cc/doc/wiki}\\

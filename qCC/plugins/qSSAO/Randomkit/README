@@ -1,0 +1,198 @@
+# RANDOMKIT, Version 1.6
+# Copyright J.S. Roy (js@jeannot.org), 2003-2005
+# See the LICENSE file for copyright information.
+# @(#) $Jeannot: README,v 1.18 2006/02/19 14:40:26 js Exp $
+
+ABOUT
+=====
+Randomkit is a set of C functions to generate random numbers, using the
+Mersenne Twister pseudo-RNG, Sobol's low discrepancy RNG and ISAAC cryptographic
+RNG.
+
+The last version (and other software) is available at the URL:
+http://www.jeannot.org/~js/code/index.en.html
+
+ACKNOWLEDGEMENTS
+================
+Original design and code for the Mersenne Twister RNG:
+A C-program for MT19937, with initialization improved 2002/1/26.
+Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
+The reference implementation and high performance implementations are
+available at the following URL: http://www.math.keio.ac.jp/~matumoto/emt.html
+Original algorithm for the implementation of rk_interval function from
+Richard J. Wagner's implementation of the Mersenne Twister RNG, optimised by
+Magnus Jonsson.
+Constants used in the rk_double implementation by Isaku Wada.
+Methodology for primitive polynomial generation inspired by scott duplichan's
+ppsearch code.
+Original sobol algorithm from Numerical Recipes, 2nd edition, by Press et al.
+The inverse normal cdf formulas are from Peter J. Acklam.
+The initialization directions were found in Ferdinando Ametrano's
+implementation of Sobol QRNG in QuantLib.
+ISAAC RNG by By Bob Jenkins. Based on Bob Jenkins public domain code.
+
+More over, two additionnal files getopt.c and getopt.h from the Apache project
+are included to enable building the list_primitive executable on Windows. These
+files have their own license (at the begining of their source).
+
+BUILDING
+========
+On Unix, if you have a random number generator device not located at
+/dev/urandom, you should define the RK_DEV_URANDOM macro accordingy. I.e.:
+CFLAGS += -DRK_DEV_URANDOM="/dev/myrandomdevice"
+The same applies to RK_DEV_RANDOM which defaults to /dev/random.
+
+On Windows, if you do not have access to the Windows crypto API, you should
+define the RK_NO_WINCRYPT macro.
+
+A Makefile is provided to test the correctness of the RNG. The 'test' target
+should execute, check if the random device is found (or not) and return "Test
+successful." on each tests if the RNG unit tests passed.
+
+Note: The code assume that long integers are either 32 or 64 bits.
+
+USE
+===
+
+PSEUDO RANDOM NUMBER GENERATION
+-------------------------------
+
+Recommended as an all purpose RNG.
+See randomkit_example.c for an example.
+
+Typical use:
+
+{
+  rk_state state;
+  unsigned long seed = 1, random_value;
+  
+  rk_seed(seed, &state); /* Initialize the RNG */
+  ...
+  random_value = rk_random(&state); /* a random value in [0..RK_MAX] */
+}
+
+Instead of rk_seed, you can use rk_randomseed which will get a random seed
+from /dev/urandom (or the WinCrypt API on Windows), or the clock/pid/ticks,
+if /dev/urandom (resp. WinCrypt) is unavailable:
+
+{
+  rk_state state;
+  unsigned long random_value;
+  
+  rk_randomseed(&state); /* Initialize the RNG with a random seed */
+  ...
+  random_value = rk_random(&state); /* a random value in [0..RK_MAX] */
+}
+
+Additionnaly, the following functions are provided:
+
+rk_long: returns a random long between 0 and LONG_MAX inclusive.
+rk_ulong: returns a random unsigned long between 0 and ULONG_MAX, inclusive.
+rk_interval: returns a random unsigned long between 0 and a user supplied
+maximum integer, inclusive.
+rk_double: returns a random double between 0.0 and 1.0, 1.0 excluded.
+rk_copy: copy a random generator and its state.
+rk_fill: fill a buffer with random bytes.
+rk_devfill: fill a buffer using random bytes from the random device.
+rk_altfill: fill a buffer using rk_devfill if possible or rk_fill if it is not.
+rk_gauss: return a gaussian deviate (zero mean, variance unity).
+
+See rk_mt.h for the precise interface.
+
+QUASI RANDOM NUMBER GENERATION
+------------------------------
+
+See sobol_example.c for an example.
+
+Typical use:
+
+int dimension = 2;
+rk_sobol_state s;
+rk_sobol_error rc;
+double x[dimension], y[dimension];
+
+/* Init */
+if (rc = rk_sobol_init(dimension, &s, NULL, NULL, NULL))
+{
+  fprintf(stderr, "%s\n", rk_sobol_strerror[rc]);
+  abort();
+}
+  
+/* Draw uniform quasirandom doubles */
+if (rc = rk_sobol_double(&s, x))
+{
+  fprintf(stderr, "%s\n", rk_sobol_strerror[rc]);
+  abort();
+}
+  
+/* Draw gaussian quasirandom doubles */
+if (rc = rk_sobol_gauss(&s, y))
+{
+  fprintf(stderr, "%s\n", rk_sobol_strerror[rc]);
+  abort();
+}
+
+/* Free allocated memory */
+rk_sobol_free(&s);
+
+Additionnaly, the following functions are provided:
+rk_sobol_reinit: quickly reinitialize a sobol generator.
+rk_sobol_setcount: change the starting point in the sequence.
+rk_sobol_randomshift: XOR the sequence randomly for Randomized Quasi-MC.
+rk_sobol_copy: copy a sobol generator and its state.
+
+See rk_sobol.h for the precise interface.
+
+BINARY PRIMITIVE POLYNOMIALS GENERATION
+---------------------------------------
+
+See list_primitive.c for an example and See rk_primitive.h for the precise
+interface.
+
+The isprimitive function test the primitivity of a binary polynomial of degree
+lower or equal to the size of an unsigned long integer (usually 32 or 64 bits).
+
+CRYPTOGRAPHIC PSEUDO RANDOM NUMBER GENERATION
+---------------------------------------------
+
+Recommended when inability to derive the seed from the RNG output is required.
+See isaac_example.c for an example.
+
+Typical use:
+
+{
+  rk_isaac_state state;
+  unsigned long seed = 1, random_value;
+  
+  rk_isaac_seed(seed, &state); /* Initialize the RNG */
+  ...
+  random_value = rk_isaac_random(&state); /* a random value in [0..RK_MAX] */
+}
+
+Instead of rk_isaac_seed, you can use rk_isaac_randomseed which will get a
+random seed from /dev/random (or the WinCrypt API on Windows), or the
+clock/pid/ticks, if /dev/random (resp. WinCrypt) is unavailable:
+
+{
+  rk_isaac_state state;
+  unsigned long random_value;
+  
+  rk_isaac_randomseed(&state); /* Initialize the RNG with a random seed */
+  ...
+  random_value = rk_isaac_random(&state); /* a random value in [0..RK_MAX] */
+}
+
+Additionnaly, the following functions are provided:
+
+rk_isaac_long: returns a random long between 0 and LONG_MAX inclusive.
+rk_isaac_ulong: returns a random unsigned long between 0 and ULONG_MAX,
+inclusive.
+rk_isaac_interval: returns a random unsigned long between 0 and a user supplied
+maximum integer, inclusive.
+rk_isaac_double: returns a random double between 0.0 and 1.0, 1.0 excluded.
+rk_isaac_copy: copy a random generator and its state.
+rk_isaac_fill: fill a buffer with random bytes.
+rk_isaac_gauss: return a gaussian deviate (zero mean, variance unity).
+rk_seed_isaac: seed a MT RNG using an ISAAC RNG.
+
+See rk_isaac.h for the precise interface.

@@ -1,0 +1,19 @@
+\subsection{Octree > Resample}
+\label{subsection:resampleWithOctree}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.25\textwidth]{Partie3_Fonctions/resampleWithOctreeDlg.png}
+\caption{\label{fig:resampleWithOctreeDlg}Interface pour ré-échantillonnage par Octree}
+\end{center}
+\end{figure}
+
+\index{echantillonner@échantillonner!re-echantillonner@ré-échantillonner}
+Fonction de ré-échantillonnage (grossier) d'un nuage. L'utilisateur spécifie un nombre approximatif de points (via
+l'interface~\ref{fig:resampleWithOctreeDlg}), et \emph{CloudCompare} détermine alors le niveau d'octree ayant un
+nombre de cellules le plus proche de cette valeur. Le nuage ré-échantillonné est alors formé en remplaçant chaque
+cellule par un point \emph{représentatif} (actuellement, le centre de gravité des points présents à l'intérieur de
+la cellule).\\
+\par
+Remarque : cette méthode est différente de la méthode \emph{Subsample} (Cf. section~\ref{subsection:subsample})
+car elle crée de nouveaux points 3D à des positions différentes de celles des points d'origine, contrairement à la méthode \emph{Subsample} qui ne fait que sélectionner des points existants dans le nuage d'origine.

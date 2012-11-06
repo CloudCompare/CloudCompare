@@ -1,0 +1,144 @@
+\chapter{Fonctions}
+\label{cha:Fonctions}
+
+Dans ce chapitre sont détaillées les fonctions accessibles via le menu principal. Elles sont classées par ordre d'apparition.
+
+\section{Menu 'File'}
+\label{sec:fileMenu}
+
+\input{methods/openFile}
+\input{methods/saveFile}
+
+\section{Menu 'Edit'}
+\label{sec:editMenu}
+
+%Submenu Colors
+\input{methods/setUniqueColor}
+\input{methods/colorize}
+\input{methods/heightRamp}
+
+%Submenu Normals
+\input{methods/computeNormals}
+\input{methods/convertNormalsToHSV}
+\input{methods/invertNormals}
+\input{methods/resolveNormalsDirection}
+
+%Submenu Octree
+\input{methods/computeOctree}
+\input{methods/resampleWithOctree}
+
+%Submenu Mesh
+\input{methods/computeDelaunayMesh}
+\input{methods/computeBestFitQuadric}
+\input{methods/samplePoints}
+\input{methods/laplacianSmooth}
+\input{methods/measureSurface}
+\input{methods/smoothMeshSF}
+\input{methods/enhanceMeshSF}
+
+%Submenu Sensor
+\input{methods/showGBLDepthBuffer}
+\input{methods/exportGBLDepthBuffer}
+\input{methods/sensorProjection}
+\input{methods/modifySensor}
+\input{methods/computeSensorRanges}
+\input{methods/computeSensorScatteringAngles}
+
+%Submenu Scalar Fields
+\input{methods/scalarFieldGradient}
+\input{methods/scalarFieldGaussianFilter}
+\input{methods/scalarFieldBilateralFilter}
+\input{methods/scalarFieldFilterByValue}
+\input{methods/scalarFieldDiff}
+\input{methods/scalarFieldMultiply}
+\input{methods/scalarFieldConvertToRGB}
+\input{methods/scalarFieldRename}
+
+%Submenu Bounding-box
+\input{methods/bbFitPrincipalComponent}
+
+%No submenu
+\input{methods/pointPicking}
+\input{methods/pointListPicking}
+
+\input{methods/clone}
+\input{methods/fuse}
+\input{methods/applyTransformation}
+\input{methods/multiply}
+\input{methods/subsample}
+\input{methods/synchronize}
+\input{methods/toggleFeatures}
+
+\section{Menu 'Tools'}
+\label{sec:editMenu}
+
+%Submenu Projection
+\input{methods/unroll}
+\input{methods/heightGridGeneration}
+
+%Submenu Registration
+\input{methods/register}
+\input{methods/align}
+
+%Submenu Distance
+\input{methods/chooseRole}
+\input{methods/cloud2cloudDist}
+\input{methods/cloud2meshDist}
+\input{methods/closestPointSet}
+
+%Submenu Statistics
+\input{methods/computeStatParams}
+\input{methods/statisticalTest}
+
+%Submenu Segmentation
+\input{methods/labelConnectedComponents}
+\input{methods/classifyWithKmeans}
+\input{methods/segmentWithFrontPropag}
+
+%Submenu Other
+\input{methods/computeDensity}
+\input{methods/computeCurvature}
+\input{methods/computeRoughness}
+\input{methods/computePlaneOrientation}
+
+
+\section{Menu 'Display'}
+\label{sec:displayMenu}
+\input{methods/fullscreen}
+\input{methods/refresh}
+\input{methods/frameRate}
+\input{methods/centeredPerspective}
+\input{methods/viewerPerspective}
+\input{methods/renderToFile}
+\input{methods/displaySettings}
+\input{methods/cameraSettings}
+\input{methods/saveViewportAsObj}
+
+%Submenu Lights
+\input{methods/sunLight}
+\input{methods/customLight}
+
+%Submenu Shaders & filters
+\input{methods/shadersAndFilters}
+
+\input{methods/console}
+\input{methods/toolbars}
+
+\section{Menu 'Plugins'}
+Dans ce menu sont rangés automatiquement les entrées correspondant à chaque plugin chargé au démarrage de CloudCompare. Pour plus d'information sur ces plugins, voir le chapitre suivant (\ref{cha:Plugins}).
+
+\section{Menu '3D Views'}
+\label{sec:triDiViewsMenu}
+\input{methods/viewsNew}
+\input{methods/viewsClose}
+\input{methods/viewsCloseAll}
+\input{methods/viewsTile}
+\input{methods/viewsCascade}
+\input{methods/viewsNext}
+\input{methods/viewsPrevious}
+
+\section{Menu 'Help'}
+\label{sec:helpMenu}
+\input{methods/help}
+\input{methods/about}
+\input{methods/aboutPlugin}

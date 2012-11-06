@@ -1,0 +1,222 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+qSSAO - Screen Space Ambient Occlusion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+qSSAO, ambient occlusion
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:qSSAO"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Le plugin qSSAO est un shader évolué permettant de simuler en temps réel
+ 
+\begin_inset Quotes fld
+\end_inset
+
+l'éclairage global
+\begin_inset Quotes frd
+\end_inset
+
+ (global illumination) des objets affichés dans une vue 3D (selon une stratégie
+ équivalente à celle du plugin qEDL - Cf.
+ section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qEDL"
+
+\end_inset
+
+).
+ Il permet de visualiser les détails des maillages ou nuages dépourvus de
+ toute information complémentaire (couleur, normales, etc.).
+ Ce type de shader est utilisé pour simuler l'éclairage ambiant dans certains
+ jeux vidéos (Crysis,etc.
+ - Cf.
+ wikipedia).
+\end_layout
+
+\begin_layout Standard
+Comme dans le cas de qEDL, la seule contrainte pour obtenir un bon rendu
+ est que la surface des entités affichées soit continue.
+ Il faut donc en particulier faire attention pour les nuages de points à
+ ce que la taille des points affichées soit suffisante (i.e.
+ éviter les trous dus à une densité trop faible par rapport au zoom courant).
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/qSSAO_example.jpg
+	width 70text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:SSAOExample"
+
+\end_inset
+
+Rendu classique d'un nuage de point sans couleur (à gauche) et rendu "SSAO"
+ temps-réel (à droite)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Remarques :
+\end_layout
+
+\begin_layout Itemize
+Il vaut mieux aussi désactiver les éventuelles normales (leur effet est
+ redondant et la somme des deux est assez disgracieuse)
+\end_layout
+
+\begin_layout Itemize
+ce plugin repose sur des structures OpenGL assez avancées (Frame Buffer
+ Object, etc.) et nécessite donc une 
+\begin_inset Quotes fld
+\end_inset
+
+vraie
+\begin_inset Quotes frd
+\end_inset
+
+ carte graphique (la plupart des cartes graphiques 
+\shape italic
+Intel
+\shape default
+ intégrées par exemple ne le supporte pas).
+\end_layout
+
+\begin_layout Itemize
+actuellement, la valeur 
+\shape italic
+d'éclairement
+\shape default
+ calculée par ce shader (valeur inférieure à 1) est composée avec la couleur
+ des points par multiplication.
+ Si ceux-ci sont noirs, ils resteront noirs et aucun effet ne sera visible.
+ Si les entités ont des couleurs, ils faut que celles-ci soient claires
+ idéalement.
+ Et si les entités n'ont pas de couleur, il faut spécifier une couleur par
+ défaut blanche ou au moins claire.
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,8895 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Chapter
+Interface
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "cha:Interface"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Fenêtre principale
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "section:mainWindow"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+La fenêtre principale de 
+\emph on
+CloudCompare
+\emph default
+ est constituée des éléments suivants :
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/MainWindow.png
+	width 100text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\color red
+1
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+menus, barre de
+\end_layout
+
+\end_inset
+
+Barre de menus de l'application
+\begin_inset Newline newline
+\end_inset
+
+ Cette barre permet d'accéder à la majorité des fonctions de 
+\emph on
+CloudCompare
+\emph default
+ ainsi qu'aux paramètres de l'application et à divers outils de gestion
+ de l’interface graphique.
+ En fonction des objets sélectionnés, certains des menus ou sous-menus ne
+ sont pas accessibles (par exemple, les menus 
+\begin_inset Quotes ard
+\end_inset
+
+ Edit 
+\begin_inset Quotes ald
+\end_inset
+
+ et 
+\begin_inset Quotes ard
+\end_inset
+
+ Tools 
+\begin_inset Quotes ald
+\end_inset
+
+ restent inactifs tant qu'aucun objet n'est sélectionné et le sous-menu
+ 
+\begin_inset Quotes ard
+\end_inset
+
+ Scalar fields 
+\begin_inset Quotes ald
+\end_inset
+
+ du menu 
+\begin_inset Quotes ard
+\end_inset
+
+ Edit 
+\begin_inset Quotes ald
+\end_inset
+
+ ne sera accessible que si l'entité sélectionnée possède au moins un champ
+ scalaire).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\color red
+2-5
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+outils, barre de
+\end_layout
+
+\end_inset
+
+Barres d'outils
+\begin_inset Newline newline
+\end_inset
+
+ Les différentes icônes de ces barres permettent d'accéder rapidement aux
+ fonctions principales de 
+\emph on
+CloudCompare
+\emph default
+.
+ Ces fonctions sont généralement aussi accessibles via les menus situés
+ au dessus (voir 
+\series bold
+\color red
+1
+\series default
+\color inherit
+) mis à part les deux outils de modification interactive des entités 3D
+ (segmentation et transformation) et certains outils de modification de
+ l'affichage 3D (zoom, centre de rotation, points de vue prédéfinis, etc.).
+ 
+\end_layout
+
+\begin_layout Itemize
+la barre 
+\series bold
+\color red
+2
+\series default
+\color inherit
+ (
+\emph on
+Main tools
+\emph default
+) contient des icônes des fonctions de traitement des entités 3D.
+ 
+\end_layout
+
+\begin_layout Itemize
+la barre 
+\series bold
+\color red
+3
+\series default
+\color inherit
+ (
+\emph on
+Scalar field tools
+\emph default
+) contient des icônes de fonctions de traitement des champs scalaires.
+ 
+\end_layout
+
+\begin_layout Itemize
+la barre 
+\series bold
+\color red
+4
+\series default
+\color inherit
+ (
+\emph on
+Plugins
+\emph default
+) contient les icônes des plugins.
+ La première partie est consacrée aux plugins de type 
+\emph on
+OpenGL filters
+\emph default
+ (shaders) et la seconde aux plugins standards (algorithmes).
+ Cette barre est remplie dynamiquement en fonction des plugins chargés par
+ le programme au lancement.
+ 
+\end_layout
+
+\begin_layout Itemize
+la barre 
+\series bold
+\color red
+5
+\series default
+\color inherit
+ (
+\emph on
+Viewing tools
+\emph default
+) permet de modifier les paramètres de visualisation 3D.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Toutes ces barres sont déplaçables (par 
+\emph on
+glisser-déplacer
+\emph default
+ ou 
+\emph on
+drag & drop
+\emph default
+ en anglais).
+ Leur visibilité peut être modifiée via le sous-menu 
+\begin_inset Quotes ard
+\end_inset
+
+ Display > Toolbars 
+\begin_inset Quotes ald
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\color red
+6
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+Arbre de navigation|voir
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+navigation
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+Arbre de navigation
+\begin_inset Newline newline
+\end_inset
+
+ Dans cette zone apparait une représentation graphique de la 
+\emph on
+base de données
+\emph default
+ actuellement en mémoire.
+ Elle permet de visualiser sous forme d'arborescence l'ensemble des entités
+ chargées ou créées par l'application (voir section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Arbre-de-navigation"
+
+\end_inset
+
+).
+ Il est notamment possible de sélectionner une ou plusieurs entités en cliquant
+ sur leur nom dans cet arbre (l'autre manière de sélectionner des entités
+ est de cliquer sur leur représentation dans la vue 3D associée - voir 
+\series bold
+\color red
+8
+\series default
+\color inherit
+).
+ Lorsque une entité est sélectionnée, des informations et options sont affichées
+ dans la vue 
+\series bold
+\color red
+7
+\series default
+\color inherit
+ (voir ci-dessous).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\color red
+7
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+propriétés, fenêtre de
+\end_layout
+
+\end_inset
+
+Fenêtre de propriétés
+\begin_inset Newline newline
+\end_inset
+
+ Si une seule entité est sélectionnée, cette vue contient des informations
+ et certaines options d'affichage notamment (voir section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Fenetre_proprietes"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\color red
+8
+\series default
+\color inherit
+: 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+Vues 3D
+\end_layout
+
+\end_inset
+
+Vues 3D
+\begin_inset Newline newline
+\end_inset
+
+ Ces vues permettent de visualiser en trois dimensions les entités géométriques
+ (nuages, maillages, etc.).
+ 
+\emph on
+CloudCompare
+\emph default
+ offre la possibilité de créer plusieurs vues 3D à la fois.
+ Ces vues peuvent être gérées via le menu dédié 
+\begin_inset Quotes ard
+\end_inset
+
+ 3D Views 
+\begin_inset Quotes ald
+\end_inset
+
+.
+ Chaque entité peut-être affectée à une vue 3D particulière via ses propriétés
+ (voir la liste déroulante 
+\emph on
+Current Display
+\emph default
+ des propriétés communes en section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:commonProperties"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+\color red
+9
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+console
+\end_layout
+
+\end_inset
+
+console
+\begin_inset Newline newline
+\end_inset
+
+ Cette zone contient l'historique des informations liées à l'exécution de
+ 
+\emph on
+CloudCompare
+\emph default
+ (typiquement des informations supplémentaires non essentielles délivrées
+ par les algorithmes).
+ Elle peut être affichée ou masqué via la commande 
+\emph on
+Console
+\emph default
+ du menu 
+\begin_inset Quotes ard
+\end_inset
+
+ Display 
+\begin_inset Quotes ald
+\end_inset
+
+ (raccourci clavier : F8).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Dans la suite de cette section, nous allons détailler les fonctionnalités
+ relatives à la manipulation et à la visualisation des différentes entités
+ de la base de données de 
+\emph on
+CloudCompare
+\emph default
+.
+ L'utilisateur pourra se référer directement au chapitre suivant (Chapitre
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "cha:Fonctions"
+
+\end_inset
+
+) pour obtenir des informations détaillées sur les fonctions et algorithmes
+ applicables à ces entités.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Base de données
+\end_layout
+
+\begin_layout Subsection
+Arbre de navigation
+\begin_inset CommandInset label
+LatexCommand label
+name "Arbre-de-navigation"
+
+\end_inset
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+navigation, fenêtre de
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/DBTree.png
+	width 30text%
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Comme nous l'avons vu précédemment, 
+\emph on
+CloudCompare
+\emph default
+ affiche l'ensemble des entités disponibles (chargées ou créées par l'applicatio
+n) dans l'arbre de navigation qui se trouve par défaut dans la partie supérieure
+ gauche de la fenêtre principale.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On peut y trouver les éléments suivants :
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset Tabular
+<lyxtabular version="3" rows="13" columns="2">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="middle" width="5text%">
+<column alignment="left" valignment="middle" width="95text%">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/hObjectSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Un groupe d'entités.
+ Cet élément peut correspondre par exemple à un fichier ouvert (auquel cas
+ il contient toutes les entités chargées à partir de ce fichier).
+ Il peut aussi être créé et peuplé manuellement (voir plus bas).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/CloudSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Un nuage de points.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/MeshSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Un maillage triangulaire simple.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/MeshGroupSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Un ensemble de maillages triangulaires partageant les mêmes sommets (qui
+ sont alors contenus dans un seul nuage de points, qu'on retrouve toujours
+ plus bas dans l'arborescence sous le nom 
+\begin_inset Quotes ard
+\end_inset
+
+ vertices 
+\begin_inset Quotes ald
+\end_inset
+
+).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/OctreeSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Une structure de type 
+\shape italic
+octree
+\shape default
+.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/SensorSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Un objet de type capteur laser terrestre.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/ImageSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Une photo non calibrée.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/calibratedImageSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Une photo calibrée.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/labelSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Une étiquette 2D standard (associée à un ou plusieurs point).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/rectLabelSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Une étiquette 
+\shape italic
+zone 2D
+\shape default
+ (associée à un point de vue).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/dbSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Un tableau de données partagé par plusieurs entités (des normales par exemple).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/materialSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Un ensemble de matériaux (généralement associé à un ou plusieurs maillages).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/viewportSymbol.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Un point de vue 3D (avec les paramètres de visualisation associés).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+De manière classique, 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+arborescence|voir
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+navigation
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+l'arborescence peut être développée ou repliée en cliquant respectivement
+ sur les boutons 
+\begin_inset Graphics
+	filename images/Partie2_Interface/Button+.png
+
+\end_inset
+
+ et 
+\begin_inset Graphics
+	filename images/Partie2_Interface/Button-.png
+
+\end_inset
+
+ situés à gauche des jonctions de l'arbre.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+La case à cocher située à gauche du nom d'un élément permet elle d'activer
+ ou de désactiver la branche de l'arbre qui en part.
+ La notion de désactivation est plus forte qu'un simple affichage/masquage
+ de l'entité (toute entité affichable dans une vue 3D possède une propriété
+ générique 
+\emph on
+Visible
+\emph default
+ qui permet de gérer ceci - voir plus loin).
+ La désactivation d'une entité s'applique à l'entité elle-même et à toutes
+ les entités qui lui sont rattachées dans l’arborescence).
+ Ces entités ne sont pas affichées et ne sont pas non plus concernées par
+ certaines opérations (comme la segmentation graphique interactive, voir
+ section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:graphicalSegmentation"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Remarque : les groupes d'entités sont juste des 
+\emph on
+conteneurs
+\emph default
+.
+ Ils n'agrègent pas les caractéristiques des éléments qu'ils contiennent
+ (un groupe de nuage n'est pas considéré comme un nuage).
+ Typiquement, un groupe ne peut pas être utilisé comme entrée pour les fonctions
+ de 
+\emph on
+CloudCompare
+\emph default
+ : il ne sert que de classeur.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Sélectionner des entités
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+sélectionner!des entités
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Pour sélectionner une entité, deux possibilités s'offrent à l'utilisateur
+ : cliquer avec le bouton gauche de la souris soit sur l'entrée correspondante
+ dans l'arbre de navigation, soit sur sa représentation dans la vue 3D (ceci
+ est vraie pour certaines entités seulement : nuages, maillages et étiquettes
+ 2D).
+ Dans les deux cas, l'entrée correspondante dans l'arbre de navigation apparait
+ surlignée et l'entité est entourée d'une 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+boite englobante
+\end_layout
+
+\end_inset
+
+ boite englobante dans 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+Vue 3D
+\end_layout
+
+\end_inset
+
+la vue 3D où apparait l'entité.
+ Lorsqu'un élément est sélectionné, les informations qui s'y rapportent
+ apparaissent dans la fenêtre de propriétés (voir section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Fenetre_proprietes"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Il est possible de sélectionner plusieurs entités en ayant recours aux méthodes
+ classiques de 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+sélection multiple|voir
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+sélectionner
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+sélection multiple : 
+\end_layout
+
+\begin_layout Itemize
+sélection des entités une par une en cliquant dessus (dans l'arbre de navigation
+ ou dans une vue 3D) tout en maintenant la touche CTRL enfoncée.
+ Pour dé-sélectionner un objet tout en conservant ceux qui ont déjà été
+ sélectionnés, il faut cliquer une nouvelle fois dessus tout en maintenant
+ la touche CTRL enfoncée.
+ 
+\end_layout
+
+\begin_layout Itemize
+sélection d'une série continue d'entités avec la touche MAJ (dans l'arbre
+ de navigation uniquement) : sélectionner la première entité, presser et
+ maintenir la touche MAJ enfoncée tout en sélectionnant la dernière entité.
+ 
+\end_layout
+
+\begin_layout Itemize
+toujours dans l'arbre de navigation, on peut enfin survoler les objets à
+ sélectionner en maintenant le bouton gauche de la souris enfoncé.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+La plupart des fonctions de 
+\emph on
+CloudCompare
+\emph default
+ ne s'appliquent qu'aux entités sélectionnées.
+ Les entrées des menus correspondantes ne sont d'ailleurs actives que lorsque
+ l'utilisateur a sélectionné le type et le nombre d'entités appropriés (par
+ exemple, deux nuages ou un nuage et un maillage pour le calcul de distances).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Interactions avancées avec l'arbre de navigation
+\end_layout
+
+\begin_layout Standard
+Il est possible de déplacer les entités dans l'arbre de navigation par 
+\emph on
+drag & drop
+\emph default
+ (pour les regrouper dans un même 
+\begin_inset Quotes ard
+\end_inset
+
+ groupe 
+\begin_inset Quotes ald
+\end_inset
+
+ par exemple).
+ Les 
+\begin_inset Quotes ard
+\end_inset
+
+ groupes 
+\begin_inset Quotes ald
+\end_inset
+
+ sont crées automatiquement lors du chargement depuis un fichier (auquel
+ cas le groupe prend le nom du fichier) mais ils peuvent aussi être créés
+ par clic sur un élément de l'arbre de navigation (ou dans une partie vide
+ pour créer le groupe à la racine).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Attention : déplacer ainsi les entités change leurs relations hiérarchiques
+ (ce qui peut avoir des conséquences importantes lors de certaines actions,
+ comme la sauvegarde ou la suppression de l'entité parente).
+ De plus les entités ne peuvent pas être déplacées n'importe où pour maintenir
+ la cohérence interne de la base de données.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/contextMenuRightClick.png
+	width 40text%
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Un clic droit sur un élément de l'arbre de navigation fait apparaitre un
+ menu contextuel (dont le contenu dépend de l'entité).
+ On retrouve toujours les entrées suivantes : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Toggle
+\emph default
+ - inverse l'état d'activation de l'entité 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Delete
+\emph default
+ - supprime l'entité 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Add empty group
+\emph default
+ - rajoute un 
+\begin_inset Quotes ard
+\end_inset
+
+ groupe 
+\begin_inset Quotes ald
+\end_inset
+
+ (sous l'entité)
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Si l'entité est affichable en 3D (nuage, maillage, étiquette 2D, etc.), des
+ options supplémentaires permettent d'inverser l'état de 
+\emph on
+visibilité
+\emph default
+ de l'entité elle-même et de ses composantes éventuelles (couleurs, normales,
+ champ scalaire, etc.).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Enfin, si l'entité possède plusieurs sous-entités dans l'arbre, des options
+ permettant la réorganisation de ces sous-entités peuvent apparaitre (tri
+ automatique par nom, ou tri par type).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Entités particulières
+\end_layout
+
+\begin_layout Subsubsection
+L'octree
+\begin_inset CommandInset label
+LatexCommand label
+name "sub:octree"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+octree
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+L'octree est une structure destinée à accélérer les traitements sur des
+ données spatiales.
+ Il s'agit d'un découpage récursif et hiérarchique de l'espace (en 
+\emph on
+cubes
+\emph default
+).
+ 
+\emph on
+CloudCompare
+\emph default
+ associe les nuages de points avec une telle structure dans de très nombreux
+ cas pour accélérer ses traitements.
+ C'est un type L’octree particulier qui est particulièrement rapide à construire
+, et optimisé pour la recherche de plus proches voisins (
+\shape italic
+ce n'est par contre pas un octree efficace pour l'affichage de type L.O.D.
+ - level of detail - typiquement
+\shape default
+).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+D'un point de vue général, l'octree est défini par 
+\emph on
+niveaux de subdivison
+\emph default
+ : 
+\end_layout
+
+\begin_layout Itemize
+Le premier niveau (niveau 0) est le plus petit cube englobant entièrement
+ le nuage de points (une version 
+\shape italic
+cubifiée
+\shape default
+ de la boite englobante).
+ 
+\end_layout
+
+\begin_layout Itemize
+Au niveau 
+\begin_inset Formula $N+1$
+\end_inset
+
+, l'octree est construit en subdivisant chacun des cubes du niveau 
+\begin_inset Formula $N$
+\end_inset
+
+ en 8 sous-cubes de même taille (en pratique on ne se souvient que des sous-cube
+s contenant au moins un point).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Il n'est pas inintéressant pour l'utilisateur de comprendre le principe
+ de cette structure, puisqu'elle occupe une place centrale dans 
+\emph on
+CloudCompare
+\emph default
+.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Plus le niveau d'octree est élevé : 
+\end_layout
+
+\begin_layout Itemize
+plus le nombre de cubes à traiter est élevé : potentiellement 
+\begin_inset Formula $8^{N}=2^{3N}$
+\end_inset
+
+ cubes au niveau 
+\begin_inset Formula $N$
+\end_inset
+
+.
+ Pour un ordre d'idées, et bien que cela soit très peu probable, on peut
+ donc avoir jusqu'à 
+\begin_inset Formula $2^{21}=2~097~152$
+\end_inset
+
+ de cubes au niveau 7 de l'octree.
+ Au niveau 10, on a 
+\begin_inset Formula $2^{30}$
+\end_inset
+
+ cubes, soit un peu plus d'un milliard ! (là encore, cela est extrêmement
+ peu probable ...
+ d'autant plus qu'il faudrait au moins autant de points).
+ En pratique, beaucoup de cubes sont vides et ne sont donc pas conservés
+ en mémoire, d'où une structure généralement beaucoup plus compacte.
+ Enfin, 
+\emph on
+CloudCompare
+\emph default
+ utilise un codage spécial de l'octree qui fait que sa taille est toujours
+ égale au nombre de points du nuage, et ne dépend donc pas de la répartition
+ spatiale de celui-ci.
+ 
+\series bold
+C'est aussi pour cette raison que le niveau maximal d'un octree est fixé
+ à 10 dans la version actuelle de 
+\emph on
+CloudCompare
+\series default
+\emph default
+ (ce qui permet de coder la position de chaque point et pour tous les niveaux
+ de l'octree sur 3*10 = 30 bits, ce qui tient dans une valeur entière de
+ 4 octets = 32 bits, soit un codage par point pas trop gourmand en mémoire).
+ 
+\end_layout
+
+\begin_layout Itemize
+plus les cubes sont petits : si 
+\begin_inset Formula $a_{N}$
+\end_inset
+
+ est la taille d'une arête du cube au niveau 
+\begin_inset Formula $N$
+\end_inset
+
+ (donc 
+\begin_inset Formula $a_{0}$
+\end_inset
+
+ est la taille du cube initial), 
+\begin_inset Formula $a_{N}=\frac{a_{0}}{2^{N}}$
+\end_inset
+
+.
+ En effet, par construction, on divise par deux la taille des cubes selon
+ chaque dimension lorsque l'on descend d'un niveau.
+ Par exemple, les cellules de l'octree au niveau 5 d'un octree sont 32 fois
+ plus petites que la cellule initiale englobant tout le nuage (au niveau
+ 0).
+ 
+\end_layout
+
+\begin_layout Itemize
+plus le nombre de points par cube est faible : intuitivement, les cubes
+ étant plus petits, ils contiennent (statistiquement) moins de points.
+ 
+\end_layout
+
+\begin_layout Itemize
+plus l'enveloppe de l'octree (la surface globale qui serait formée par l'ensembl
+e des surfaces externes des cubes) est proche du nuage de points originale.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/OctreeLevel1.png
+	width 30text%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/Partie2_Interface/OctreeLevel3.png
+	width 30text%
+
+\end_inset
+
+
+\begin_inset space \hfill{}
+\end_inset
+
+
+\begin_inset Graphics
+	filename images/Partie2_Interface/OctreeLevel6.png
+	width 30text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:octreeLevel"
+
+\end_inset
+
+Cellules à différents niveaux d'octree : niveau 1 (gauche), 3 (milieu) et
+ 6 (droite).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les 3 captures d'écran de la figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:octreeLevel"
+
+\end_inset
+
+ donnent un aperçu de la répartition et de la taille des cellules d'octree
+ à différents niveaux de subdivision.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Beaucoup de traitements sur les nuages de points ont recours à un octree.
+ Lorsque cela est possible, le niveau d'octree optimal pour les calculs
+ à effectuer est déterminé de manière automatique par 
+\emph on
+CloudCompare
+\emph default
+.
+ Toutefois, certains algorithmes peuvent demander à l'utilisateur de spécifier
+ un niveau spécifique à utiliser.
+ Dans ces situations, il s'agit généralement pour l'utilisateur de trouver
+ un niveau qui aboutisse au meilleur compromis entre le nombre de cubes
+ à traiter (qu'on ne veut généralement pas trop grand, donc une valeur de
+ niveau pas trop élevée) et le nombre moyen de points par cube (qu'on ne
+ veut généralement le plus petit possible, donc une valeur de niveau ...
+ pas trop faible).
+ Trouver le bon niveau peut parfois nécessiter une certaine expérience.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Étiquettes 2D et annotation graphique
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+etiquettes
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "etiquettes_2D"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+CloudCompare permet d'annoter
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+annotation
+\end_layout
+
+\end_inset
+
+ un ensemble d'entités 3D via des étiquettes (
+\shape italic
+2D labels
+\shape default
+) de différents types.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Remarque : ces étiquettes peuvent être sauvées via le format binaire propre
+ à CloudCompare (BIN).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Étiquette standard
+\series default
+
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:standardLabel"
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/standardLabels.png
+	width 80text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:standardLabels"
+
+\end_inset
+
+Étiquettes standards
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Le premier type, 
+\emph on
+2D label
+\emph default
+, correspond aux étiquettes (mobiles) rattachées à un ou plusieurs points
+ : 
+\end_layout
+
+\begin_layout Itemize
+un point : l'étiquette continent les coordonnées du point, son indice dans
+ le nuage et les valeurs de ses différents champs (couleur, normale, champ
+ scalaire affiché) 
+\end_layout
+
+\begin_layout Itemize
+deux points (segment) : l'étiquette contient les coordonnées de chaque point
+ et leur indice respectif dans le(s) nuage(s) ainsi que la distance entre
+ les deux points 
+\end_layout
+
+\begin_layout Itemize
+trois points (triangle) : l'étiquette contient les coordonnées de chaque
+ point et leur indice respectif dans le(s) nuage(s), l'aire du triangle
+ ainsi défini, la normale au triangle, et enfin l'angle au niveau du premier
+ point (
+\shape slanted
+l'ordre de sélection des points est donc important
+\shape default
+)
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+La représentation graphique des étiquettes standards peut être modulée en
+ fonction des besoins : leur titre peut être affiché en 3D à côté du ou
+ des points auxquelles elles sont associées, tandis que leur représentation
+ 2D peut être soit affichée totalement, soit affichée de manière condensée
+ soit encore cachée.
+ La représentation 2D a de plus une transparence réglable (via les paramètres
+ d'affichage généraux de CloudCompare - voir section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:displaySettings"
+
+\end_inset
+
+).
+ A l'instar des nuages de points ou les maillages, les étiquettes standards
+ peuvent être sélectionnées à l'écran (sélection multiple ou individuelle).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Les étiquettes rattachées à un unique point peuvent être créées très facilement
+ (
+\shape italic
+à la volée
+\shape default
+) par un simple clic sur le point en maintenant la touche SHIFT enfoncée.
+ Autrement, tous les autres type d'étiquettes peuvent être crées avec l'outil
+ 'Point Picking' (Cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:pointPicking"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Étiquette 
+\emph on
+zone 2D
+\series default
+\emph default
+
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:zoneLabel"
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/zoneLabels.png
+	width 50text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:zone2DLabels"
+
+\end_inset
+
+Étiquettes 
+\emph on
+zone 2D
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Le second type d'étiquette, 
+\emph on
+2D area label
+\emph default
+, correspond aux étiquettes fixes rattachées à un point de vue.
+ Ce sont des zones rectangulaires (définies par l'utilisateur à l'écran)
+ associées à un commentaire textuel.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Étant donné que ce qui apparait dans la zone délimitée par l'étiquette dépend
+ du point de vue (orientation de la caméra, etc.), l'étiquette n'apparait
+ que lorsque la caméra est dans la même position (et avec les mêmes paramètres)
+ que lorsqu'elle a été créée (seuls certains paramètres peuvent être compensés
+ automatiquement, comme le zoom ou le panning en mode orthographique).
+ Pour simplifier la tâche de l'utilisateur, les étiquettes 
+\emph on
+zone 2D
+\emph default
+ sont donc capables de rétablir ces paramètres dans la vue 3D associée (un
+ bouton 
+\emph on
+Apply
+\emph default
+ se trouve dans les propriétés de l'étiquette - voir section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:zoneLabelProp"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Section
+Affichage des entités
+\end_layout
+
+\begin_layout Subsection
+Vues 3D
+\begin_inset CommandInset label
+LatexCommand label
+name "Contexte-graphique"
+
+\end_inset
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+Vue 3D
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Présentation
+\end_layout
+
+\begin_layout Standard
+Les vues 3D (voir figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:Context3D"
+
+\end_inset
+
+) sont les sous-fenêtres dans lesquelles sont affichées les entités.
+ Elles possèdent un fond (qui peut-être un dégradé de couleur ou une couleur
+ unique - voir les paramètres d'affichage généraux en section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:displaySettings"
+
+\end_inset
+
+), par dessus lequel sont affichées les entités 3D (nuages, maillages, etc.)
+ et encore par dessus, des éléments d'interface ou des entités 2D (étiquettes,
+ échelle de couleur, etc.).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Voici les éléments standards qui composent une vue 3D : 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+1
+\series default
+\color inherit
+ : les entités 3D, éventuellement encadrées par leur boite englobante
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Aussi appelée 
+\shape italic
+bounding-box
+\shape default
+.
+ Il s'agit du plus petit parallélépipède rectangle aligné avec les axes
+ principaux (X,Y,Z) et qui contienne l'intégralité des entités sélectionnées
+\end_layout
+
+\end_inset
+
+ si elles sont sélectionnées).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+2
+\series default
+\color inherit
+ : l'échelle
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+echelle@échelle!de distances
+\end_layout
+
+\end_inset
+
+ fournit une référence pour l'estimation des dimensions.
+ Sa longueur est exprimée dans l'unité 
+\shape italic
+implicite
+\shape default
+ courante (i.e.
+ l'unité implicite des coordonnées de la ou des entités affichées, telles
+ qu'elles ont été chargées depuis leur fichier d'origine - 
+\emph on
+CloudCompare
+\emph default
+ n'utilise pas d'unité explicite).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+3
+\series default
+\color inherit
+ : le 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+trièdre d'orientation
+\end_layout
+
+\end_inset
+
+trièdre d'orientation représente l'orientation courante des trois axes principau
+x : X (rouge), Y (vert) et Z (bleu).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+4
+\series default
+\color inherit
+ : nom du 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+champ scalaire
+\end_layout
+
+\end_inset
+
+champ scalaire actif et sa 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+rampe de couleurs
+\end_layout
+
+\end_inset
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+echelle@échelle!de couleurs|voir
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+rampe de couleurs
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+rampe de couleurs associée.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+5
+\series default
+\color inherit
+ : informations temporaires concernant l'affichage ou l'action en cours.
+ Il peut s'agir de la dimension courante de la vue 3D (en pixels - après
+ un redimensionnement de la fenêtre), du type de projection utilisé, etc.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+6
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+étiquette 2D
+\end_layout
+
+\end_inset
+
+étiquette 2D standard (ici associée à un point 3D d'un nuage).
+ Ces étiquettes s'affichent toujours par dessus les objets 3D (leur transparence
+ est réglable).
+ Pour plus d'information, Cf.
+ section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "etiquettes_2D"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+7
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+Annotation
+\end_layout
+
+\end_inset
+
+étiquette 
+\shape italic
+zone 2D
+\shape default
+.
+ Ces étiquettes particulières permettent d'annoter une zone précise de l'écran
+ et sont donc liées à un point de vue (qu'elles sont capable de rétablir
+ sur demande) et non à une entité.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/View3D.png
+	width 80text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:Context3D"
+
+\end_inset
+
+Éléments standards d'une vue 3D
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Seuls l'échelle et le trièdre d'orientation sont visibles en permanence.
+ Les autres informations dépendent de l'état courant de l'application.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Interagir avec une vue 3D
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:Interactivité"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Vous pouvez interagir avec une vue 3D en utilisant la
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+souris
+\end_layout
+
+\end_inset
+
+ souris (figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:mouseButtons"
+
+\end_inset
+
+) :
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/Souris.png
+	width 40text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:mouseButtons"
+
+\end_inset
+
+Commandes via la souris (L : [SELECTION/ROTATION], M : [ZOOM], R : [PAN])
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+L
+\series default
+\color inherit
+ - clic gauche court : [SELECTION] cliquez sur un objet dans la vue 3D pour
+ le sélectionner.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+L
+\series default
+\color inherit
+ - clic gauche maintenu : [ROTATION] maintenez le bouton gauche de la souris
+ enfoncé et déplacez la souris pour effectuer une rotation du point de vue
+ autour du 
+\shape italic
+pivot
+\shape default
+ courant (cf.
+ sections 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:centeredPerspective"
+
+\end_inset
+
+ et 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:viewerPerspective"
+
+\end_inset
+
+ ou encore les paramètres caméras en section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:cameraSettings"
+
+\end_inset
+
+ ou enfin l'outil de picking du centre de rotation en section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Options-affichage"
+
+\end_inset
+
+).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+M
+\series default
+\color inherit
+ - roulement : [ZOOM] faites rouler la molette vers l'avant (ou vers 
+\begin_inset Quotes ard
+\end_inset
+
+le haut 
+\begin_inset Quotes ald
+\end_inset
+
+) pour effectuer un 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+zoom
+\end_layout
+
+\end_inset
+
+zoom positif dans la vue 3D et inversement, faites rouler la molette vers
+ l'arrière (ou 
+\begin_inset Quotes ard
+\end_inset
+
+le bas 
+\begin_inset Quotes ald
+\end_inset
+
+) pour effectuer un zoom négatif.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+R
+\series default
+\color inherit
+ - clic droit court : sur les étiquettes 2D, un clic droit court permet
+ de la condenser ou inversement de rétablir son extension maximale.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+R
+\series default
+\color inherit
+ - clic droit maintenu : [PANNING] maintenez le bouton droit de la souris
+ enfoncé et déplacez la souris pour effectuer une translation du point de
+ vue dans le plan écran.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Par défaut, la visualisation se fait selon une projection orthographique
+ (sans perspective) et le centre de rotation est positionné sur le centre
+ de la boite englobant toutes les entités affichées dans la vue 3D.
+ Lors du changement de point de vue (rotation, translation), les gros nuages
+ de points ou les gros maillages sont temporairement sous échantillonnés
+ de manière à permettre le rendu interactif des mouvements (ce comportement
+ est paramétrable - voir section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:displaySettings"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Utiliser plusieurs vues 3D
+\begin_inset CommandInset label
+LatexCommand label
+name "Environnement-multi-contextes"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Dans CloudCompare, un nombre quelconque de vues 3D peut être créé, et chaque
+ entité peut être assignée séparément à une vue 3D particulière.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Pour créer une nouvelle vue 3D, cliquez sur la commande 
+\emph on
+New
+\emph default
+ dans le menu 
+\begin_inset Quotes ard
+\end_inset
+
+ 3D views 
+\begin_inset Quotes ald
+\end_inset
+
+, ou utilisez le raccourci clavier CTRL+F3.
+ Une nouvelle fenêtre apparait alors (par défaut elle sera maximisée).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Pour partager l'espace d'affichage entre les différentes vues 3D, différents
+ choix s'offrent à l'utilisateur : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Tile
+\emph default
+ (partitionnement) : chaque fenêtre occupe une portion "équivalente de l'espace
+ disponible, les fenêtres ne se chevauchent pas.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Cascade
+\emph default
+ : chaque fenêtre occupe la même portion d'espace prédéfinie, elles sont
+ décalées de manière régulière en se chevauchant.
+ 
+\end_layout
+
+\begin_layout Itemize
+redimensionnement manuel : de manière classique chaque vue 3D peut-être
+ déplacée et redimensionnée, en s'aidant notamment des boutons 
+\begin_inset Graphics
+	filename images/Partie2_Interface/ReduceContext.png
+
+\end_inset
+
+(minimiser la vue) et 
+\begin_inset Graphics
+	filename images/Partie2_Interface/MinimizeContext.png
+
+\end_inset
+
+(réduire la vue) disponibles en haut à droite de chaque fenêtre.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Il est aussi possible de naviguer entre les différentes vues via les commandes
+ 
+\emph on
+Next
+\emph default
+ et 
+\emph on
+Previous
+\emph default
+ du menu 
+\begin_inset Quotes ard
+\end_inset
+
+ 3D views 
+\begin_inset Quotes ald
+\end_inset
+
+, ou en accédant directement à la vue désirée en cliquant sur son nom dans
+ ce même menu.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Pour fermer une vue 3D, utilisez l'entrée 
+\emph on
+Close
+\emph default
+ du menu 
+\begin_inset Quotes ard
+\end_inset
+
+ 3D views 
+\begin_inset Quotes ald
+\end_inset
+
+ (après avoir activé cette fenêtre en cliquant dessus) ou plus simplement
+ utilisez le bouton 
+\begin_inset Graphics
+	filename images/Partie2_Interface/CloseContext.png
+
+\end_inset
+
+ de la fenêtre.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Enfin, pour changer la 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+afficher!des objets
+\end_layout
+
+\end_inset
+
+vue 3D dans laquelle une entité apparait, sélectionnez cette entité puis
+ modifiez la valeur courante de la liste déroulante 
+\emph on
+Current Display
+\emph default
+ dans la fenêtre de propriétés.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/ChangeContext.png
+	width 40text%
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Remarque : il est possible de n'afficher une entité dans aucune vue 3D en
+ choisissant 
+\emph on
+None
+\emph default
+ comme 
+\shape italic
+contexte
+\shape default
+ de destination.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Camera link
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:cameraLink"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les vues 3D sont indépendantes les unes des autres, et les changements de
+ point de vue dans une vue 3D particulière n'ont a priori aucune répercussion
+ sur les autres vues 3D.
+ Toutefois, il est possible de synchroniser les mouvements de caméra pour
+ qu'ils soient appliqués à toutes les 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+Vues 3D
+\end_layout
+
+\end_inset
+
+ vues 3D en même temps.
+ Pour ce faire il suffit de cocher l'option 
+\emph on
+Camera link
+\emph default
+ située juste sous l'arbre de navigation.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/CameraLink.png
+	width 30text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Options d'affichage
+\begin_inset CommandInset label
+LatexCommand label
+name "Options-affichage"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Barre d'outils 
+\shape italic
+Viewing Tools
+\end_layout
+
+\begin_layout Standard
+Un certain nombre d'icônes et d'outils permettent à l'utilisateur de contrôler
+ l'affichage courant.
+ La majeure partie d'entre eux sont accessibles via la 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+outils, barre de
+\end_layout
+
+\end_inset
+
+barre d'outils 
+\emph on
+Viewing tools
+\emph default
+ : 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="7" columns="2">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="middle" width="5text%">
+<column alignment="left" valignment="middle" width="95text%">
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/ViewToolBar.png
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/cc_settings.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Changer les paramètres 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+eclairage@éclairage
+\end_layout
+
+\end_inset
+
+d'affichage généraux (couleurs, matériaux, taille de la police, précision
+ numérique des valeurs affichées, etc.
+ - voir section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:displaySettings"
+
+\end_inset
+
+).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/Camera.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Changer les paramètres de caméra de la fenêtre 3D courante (orientation
+ et centre de rotation, etc.
+ - voir section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:cameraSettings"
+
+\end_inset
+
+).
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/ZoomGlobal.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+zoom
+\end_layout
+
+\end_inset
+
+Zoomer et recentrer la 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+point de vue
+\end_layout
+
+\end_inset
+
+caméra pour rendre visibles toutes les entités affichées dans la vue 3D
+ courante.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/cc_pickCenter.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Sélection du centre de rotation par picking d'un point à l'écran.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/ZoomCenter.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Zoomer et recentrer la caméra sur la ou les entités sélectionnées.
+ Aucun effet si aucun objet n'est sélectionné.
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/ChangeView.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Les 6 derniers boutons permettent de basculer entre différents points de
+ vue prédéfinis (dans l'ordre où les boutons apparaissent : haut, avant,
+ gauche, arrière, droit, bas).
+ Ces points de vue sont définis par rapport au 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+trièdre d'orientation
+\end_layout
+
+\end_inset
+
+trièdre d'orientation.
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Menu 
+\shape italic
+Display
+\end_layout
+
+\begin_layout Standard
+D'autres fonctionnalités relatives à l'affichage sont accessibles via le
+ menu 
+\emph on
+Display
+\emph default
+ : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Full screen
+\emph default
+ : basculer la fenêtre principale entre l'affichage standard et l'affichage
+ 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+plein écran
+\end_layout
+
+\end_inset
+
+plein écran (raccourci clavier: F11).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Refresh
+\emph default
+ : forcer l'actualisation de l'affichage (raccourci clavier : F5).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Test frame rate
+\emph default
+ : lancer un test d'estimation du 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+rafraichissement, taux de
+\end_layout
+
+\end_inset
+
+taux de rafraichissement (exprimé en 'f.p.s' = 
+\shape italic
+frame per second
+\shape default
+ ou images par seconde en français) pour la vue 3D courante.
+ En théorie, plus il y a de triangles ou de points à afficher, plus le taux
+ de rafraichissement devrait être faible.
+ Il est admis qu'en deçà d'une vingtaine d'images par seconde, l'humain
+ perçoit l'affichage comme étant saccadé (au delà de 24 f.p.s, l'affichage
+ est perçu comme étant fluide).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Toggle centered perspective
+\emph default
+ : basculer entre la projection par défaut (parallèle orthographique) et
+ la projection perspective avec le centre de rotation de la caméra placé
+ par défaut sur le centre de la boite englobant toutes les entités affichées
+ (raccourci clavier : F3).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Toggle viewer based perspective
+\emph default
+ : basculer entre la projection par défaut (parallèle orthographique) et
+ la projection perspective avec le centre de rotation de la caméra placé
+ par défaut en son centre optique (l'oeil virtuel de l'utilisateur) (raccourci
+ clavier : F4).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Light > Toggle sun light
+\emph default
+ : activer ou 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+eclairage@éclairage
+\end_layout
+
+\end_inset
+
+désactiver la lumière globale (raccourci clavier : F6).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Light > Toggle custom light 
+\emph default
+: activer ou désactiver la lumière personnalisée (raccourci clavier : F7).
+ Cette source de lumière peut être déplacée en maintenant la touche CTRL
+ enfoncée tout en faisant un 
+\emph on
+pan
+\emph default
+ avec la souris à l'écran - voir section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:Interactivité"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Remarque : les effets d'ombrage permis par les normales d'un nuage ou d'un
+ maillage ne sont visibles que si au moins une source lumineuse est active.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Taille des points 3D
+\begin_inset CommandInset label
+LatexCommand label
+name "pointSizeModification"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+La taille des points affichés dans une vue 3D est modifiable via des 
+\shape italic
+interacteurs
+\shape default
+ qui apparaissent directement en surimpression de la vue lorsque la souris
+ survole son coin haut-gauche.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/PointSizeDlg.png
+	width 30text%
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Pour modifier la 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+taille des points
+\end_layout
+
+\end_inset
+
+taille d'affichage des points, il suffit de cliquer sur '-' ou '+'.
+ Un point de référence à la taille courante apparait entre les deux interacteurs.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Fenêtre de propriétés
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+propriétés, fenêtre de
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "Fenetre_proprietes"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+La fenêtre de propriétés contient toutes les informations sur l'entité sélection
+née, ainsi que des options modifiables par l'utilisateur (visibilité de
+ certains composants, etc.).
+\end_layout
+
+\begin_layout Subsection
+Propriétés communes des entités affichables
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:commonProperties"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Certains champs sont communs à (presque) toutes les entités affichables.
+ On les retrouve dans la section 
+\emph on
+CC Object
+\emph default
+ : 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/CommonProperties.png
+	width 40text%
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Name
+\emph default
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+renommer
+\end_layout
+
+\end_inset
+
+nom de l'entité.
+ Il peut être modifié en cliquant sur l'entrée correspondant à l'entité
+ dans l'arbre de navigation (voir 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Arbre-de-navigation"
+
+\end_inset
+
+) ou encore en utilisant le raccourci clavier F2.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Unique ID
+\emph default
+ : toutes les entités CloudCompare sont représentées en interne par un identifia
+nt unique.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Children
+\emph default
+ : le nombre de sous-éléments (ou 
+\shape italic
+enfants
+\shape default
+) rattachés à cette entité.
+ Dans la capture ci-dessus par exemple, l'objet sélectionné est un groupe
+ de maillages regroupant 758 sous-maillages, un nuage de points et un tableau
+ de normales compressées, soit 760 sous-entités au total).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Visible
+\emph default
+ : spécifie si l'entité doit être affichée dans la vue 3D associée ou non.
+ La propriété 'Visible' n'est pas héréditaire (contrairement à l'état d'activati
+on de l'entité, qui correspond à la case à cocher présente au niveau de
+ l'arbre de navigation et qui concerne toutes les entités présentes dans
+ le reste de la branche).
+ Si l'entité est sélectionnée, la boite englobante reste visible même si
+ la propriété 
+\emph on
+Visible
+\emph default
+ est désactivée.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Colors
+\emph default
+ (optionnelle) : si l'entité sélectionnée possède des couleurs, une case
+ à cocher 
+\emph on
+Colors
+\emph default
+ apparait ici.
+ Elle permet de spécifier si ces couleurs doivent être utilisées lors de
+ l'affichage de l'entité ou non.
+ Remarque : la propriété 
+\emph on
+Scalar field
+\emph default
+ (voir ci-dessous) est toujours prioritaire par rapport à 
+\emph on
+Colors
+\emph default
+.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Normals
+\emph default
+ (optionnelle) : si l'entité sélectionnée possède des normales, une case
+ à cocher 
+\emph on
+Normals
+\emph default
+ apparait ici.
+ Elle permet de spécifier si ces normales doivent être utilisées lors de
+ l'affichage de l'entité ou non.
+ Les normales
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+normales
+\end_layout
+
+\end_inset
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+eclairage@éclairage
+\end_layout
+
+\end_inset
+
+ permettent d'obtenir un rendu visuel semi-réaliste des objets en faisant
+ varier la teinte des points ou facettes associées en fonction de la position
+ de l'éclairage.
+ Si les normales sont désactivées, la surface de l'objet est affichée dans
+ une couleur uniforme (effet 
+\begin_inset Quotes ard
+\end_inset
+
+silhouette 
+\begin_inset Quotes ald
+\end_inset
+
+, avec une perte de la perception des profondeurs).
+ 
+\shape italic
+Le plugin 
+\emph on
+qEDL
+\emph default
+ (voir section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qEDL"
+
+\end_inset
+
+) est une excellente alternative aux normales.
+ Il simule en temps réel un éclairage encore plus réaliste, sans information
+ autre que la position des points ou des objets.
+
+\shape default
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Scalar field
+\emph default
+ (optionnelle) : si l'entité sélectionnée possède un ou plusieurs champs
+ scalaires, une case à cocher 
+\emph on
+Scalar field
+\emph default
+ apparait ici.
+ Elle permet de spécifier si le champ scalaire couramment affiché (voir
+ la liste déroulante 
+\emph on
+Current
+\emph default
+ dans la section 
+\emph on
+Scalar field
+\emph default
+ des propriétés) doit être utilisé lors de l'affichage de l'entité ou non.
+ Si un champ scalaire courant est défini dans la liste déroulante 
+\emph on
+Current
+\emph default
+, alors ce champ scalaire sera toujours affiché en priorité par rapport
+ aux éventuelles couleurs de l'entité.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Current display
+\emph default
+ : cette liste déroulante permet de choisir la vue 3D dans laquelle l'objet
+ sera affiché (cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Environnement-multi-contextes"
+
+\end_inset
+
+).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Box dimensions
+\emph default
+ : les dimensions de la boite englobante de l'entité.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Box center
+\emph default
+ : le centre de la boite englobante de l'entité.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection
+Propriétés propres aux nuages de points
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:pointCloudProperties"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+La section 
+\emph on
+Cloud
+\emph default
+ est réservée aux nuages de points.
+ Elle contient les champs suivants : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Points
+\emph default
+ : le nombre de points du nuage.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Global shift
+\emph default
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+centrage automatique au chargement
+\end_layout
+
+\end_inset
+
+ : la translation qui a été éventuellement appliquée au chargement du nuage
+ par CloudCompare (généralement pour ramener ses coordonnées à des valeurs
+ compatibles avec un stockage en flottant sur 32 bits).
+ C'est typiquement le cas des nuages exprimés dans des systèmes de coordonnées
+ à l'échelle d'un pays (UTM, etc.), avec des valeurs dépassant les millions.
+ Dans ce cas, CloudCompare propose à l'utilisateur de recentrer automatiquement
+ l'entité.
+ Cette translation est conservée tout au long de la vie de l'entité puis
+ elle sera éventuellement ré-appliquée aux points lors la sauvegarde de
+ l'entité (si le format le permet).
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/PointCloudProperties.png
+	width 40text%
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection
+Propriétés propres aux maillages ou groupes de maillages
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "propMaillages"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/MeshProperties.png
+	width 30text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+maillage
+\end_layout
+
+\end_inset
+
+ Les entités maillages ou groupes de maillages deux types d'entités partagent
+ les mêmes propriétés : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Faces
+\emph default
+ : le nombre de facettes composant le maillage.
+ Dans le cas d'un groupe de maillages, ce nombre correspond au nombre total
+ de facettes de tous les sous-maillages rattachés à ce groupe.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Wireframe
+\emph default
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+fil de fer, rendu
+\end_layout
+
+\end_inset
+
+
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+WireFrame|voir
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+fil de fer
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+permet d'activer le rendu en 
+\begin_inset Quotes ard
+\end_inset
+
+fil de fer 
+\begin_inset Quotes ald
+\end_inset
+
+ du maillage (seules les arrêtes des triangles sont affichées et non l'intérieur
+ - voir figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:MeshWireframeRendering"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/MeshWireframeRendering.png
+	width 60text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:MeshWireframeRendering"
+
+\end_inset
+
+Exemple de rendu en 
+\shape italic
+fil de fer
+\shape default
+ d'un maillage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Propriétés communes aux nuages et maillages
+\end_layout
+
+\begin_layout Subsubsection
+Champs scalaires (Scalar fields)
+\begin_inset CommandInset label
+LatexCommand label
+name "Champs-scalaires"
+
+\end_inset
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+champ scalaire
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Certains traitements effectués sur les nuages de points permettent d'associer
+ à chaque point une valeur numérique (un 
+\shape italic
+scalaire
+\shape default
+).
+ L'ensemble de ces valeurs scalaires constitue une structure appelée 
+\emph on
+Champ Scalaire
+\emph default
+ (ou 
+\emph on
+Scalar field
+\emph default
+).
+ Les champs scalaires sont toujours rattachés à un nuage de points.
+ Néanmoins, pour une meilleure ergonomie, les maillages dont les sommets
+ portent des champs scalaires se comportent comme s'ils portaient eux-même
+ ces champs scalaires (ils sont d'ailleurs aussi capables de les utiliser
+ lors de leur affichage 3D).
+ Les propriétés propres à ces champs scalaires apparaissent donc de la même
+ manière au niveau d'un nuage de point qu'au niveau d'un maillage dont les
+ sommets portent un champ scalaire.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/SFProperties.png
+	width 35text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Il est possible de rattacher plusieurs champs scalaires à un même nuage,
+ mais un seul peut être actif (i.e.
+ 
+\shape italic
+affiché
+\shape default
+) à un instant donné.
+ Le nombre de champs scalaires associés à une entité correspond d'ailleurs
+ à la première entrée (
+\emph on
+Number
+\emph default
+) de la section 
+\emph on
+Scalar Field
+\emph default
+.
+ 
+\end_layout
+
+\begin_layout Standard
+En dessous se trouve une liste déroulante (
+\emph on
+Current
+\emph default
+) permettant de spécifier le champ scalaire actif.
+ Chaque champ scalaire à un nom unique.
+ Celui-ci peut-être modifié par l'utilisateur via la commande 
+\begin_inset Quotes ard
+\end_inset
+
+ Edit > Scalar fields > Rename 
+\begin_inset Quotes ald
+\end_inset
+
+ (Cf.
+ section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:sfRename"
+
+\end_inset
+
+).
+ 
+\end_layout
+
+\begin_layout Standard
+Ensuite vient l'entrée 
+\emph on
+Color ramp
+\emph default
+ permettant de choisir la rampe de couleur
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+rampe!de couleurs
+\end_layout
+
+\end_inset
+
+ utilisée pour l'affichage du champ scalaire sous forme de fausses couleurs
+ (voir la section suivante pour plus de détails).
+ Elle est suivie de l'entrée 
+\emph on
+Color ramp steps
+\emph default
+ qui permet de spécifier le nombre de couleurs différentes utilisées pour
+ l'affichage en fausses couleurs.
+ Par exemple, utiliser un nombre très faible de couleurs sur une entité
+ dense permet d'obtenir un effet 
+\shape italic
+lignes de niveau
+\shape default
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Enfin, la dernière entrée de la section 
+\emph on
+Scalar Field
+\emph default
+ est la case à cocher 
+\emph on
+Postive
+\emph default
+ qui permet de spécifier si le champ scalaire doit être considéré comme
+ strictement positif (auquel cas toutes les valeurs négatives sont considérées
+ comme étant des valeurs invalides, de type 
+\emph on
+NaN
+\emph default
+ = 
+\shape italic
+not a number
+\shape default
+).
+ Sinon, CloudCompare considère toutes les valeurs comme étant valides.
+ Cette propriété influe directement sur la manière dont la correspondance
+ 
+\shape italic
+valeur scalaire - couleur
+\shape default
+ est calculée (voir ci-dessous).
+\end_layout
+
+\begin_layout Subsubsection
+Rampe de couleurs (SF Scale)
+\begin_inset CommandInset label
+LatexCommand label
+name "Rampe-de-couleurs"
+
+\end_inset
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+Rampe de couleur
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+La section 
+\emph on
+SF Scale
+\emph default
+ est consacrée à l'affichage du champ scalaire actif en fausses couleurs.
+ Elle est en pratique toujours présente si un champ scalaire est activé
+ (i.e.
+ sélectionné dans la liste déroulante 
+\emph on
+Current
+\emph default
+ - voir ci-dessus).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Différentes 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+rampes de couleurs
+\end_layout
+
+\end_inset
+
+ rampes de couleurs (ou encore 
+\shape italic
+échelles de couleurs
+\shape default
+) sont disponibles.
+ Chacune correspond à un dégradé de couleurs, la première couleur étant
+ associée à la valeur minimale 
+\emph on
+de saturation
+\emph default
+ du champ scalaire et la dernière couleur à la valeur maximale 
+\emph on
+de saturation
+\emph default
+.
+ Les couleurs intermédiaires sont associées aux valeur scalaires équivalentes
+ de manière linéaire.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Remarque : dans le cas d'un champ scalaire non strictement positif, il est
+ possible de spécifier une échelle de couleur avec saturation 
+\emph on
+absolue
+\emph default
+, auquel cas l'échelle de couleur courante est coupée en deux et est utilisée
+ de manière symétrique pour les valeurs négatives ou positives (voir plus
+ bas).
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="5" columns="2">
+<features tabularvalignment="middle">
+<column alignment="left" valignment="top" width="15text%">
+<column alignment="center" valignment="top" width="80text%">
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+valeur minimale
+\begin_inset space \hfill{}
+\end_inset
+
+valeur maximale
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Bleu à rouge : 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/ScalarRampBlueRed.png
+	width 70text%
+	rotateAngle 270
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Niveaux de gris : 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/ScalarRampGrey.png
+	width 70text%
+	rotateAngle 270
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Rouge à jaune : 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/ScalarRampYellowRed.png
+	width 70text%
+	rotateAngle 270
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Rouge à blanc : 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/ScalarRampRedWhite.png
+	width 70text%
+	rotateAngle 270
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+CloudCompare
+\emph default
+ permet à l'utilisateur de paramétrer finement 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+plage!de saturation
+\end_layout
+
+\end_inset
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+plage!d'affichage
+\end_layout
+
+\end_inset
+
+ la manière dont les valeurs du champ scalaire courant sont affichées en
+ fausses couleurs (et ce de manière dynamique).
+ Quatre valeurs clés sont modifiables interactivement : 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/SFViewerCursors.png
+	width 100text%
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+1
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+min!displayed value|voir
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+plage d'affichage
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Valeur minimale affichée (
+\shape slanted
+min displayed value
+\shape default
+).
+ Toutes les valeurs scalaires inférieures sont ignorées (et sont alors considéré
+es comme étant de type 
+\emph on
+NaN
+\emph default
+ - voir plus bas).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+2
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+min!saturation value|voir
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+plage de saturation
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Valeur minimale de saturation (
+\shape italic
+min saturation value
+\shape default
+).
+ Tous les valeurs inférieures (et donc comprises entre 
+\shape italic
+min displayed
+\shape default
+ et 
+\shape italic
+min saturation
+\shape default
+) sont affichées avec la (même) couleur, 
+\begin_inset Quotes ard
+\end_inset
+
+la plus faible 
+\begin_inset Quotes ald
+\end_inset
+
+ de la rampe (ici en bleu).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+3
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+max!saturation value|voir
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+plage de saturation
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Valeur maximale de saturation (
+\shape italic
+max saturation value
+\shape default
+).
+ Tous les valeurs supérieures (et donc comprises entre 
+\shape italic
+max saturation
+\shape default
+ et 
+\shape italic
+max displayed
+\shape default
+) sont affichées avec la (même) couleur, 
+\begin_inset Quotes ard
+\end_inset
+
+la plus forte 
+\begin_inset Quotes ald
+\end_inset
+
+ de la rampe (ici en rouge).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\color red
+4
+\series default
+\color inherit
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+max!displayed value|voir
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+plage d'affichage
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Valeur maximale affichée (
+\shape italic
+max displayed value
+\shape default
+).
+ Toutes les valeurs scalaires supérieures sont ignorées (et sont alors considéré
+es comme étant de type 
+\emph on
+NaN
+\emph default
+ - voir plus bas).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+La manière dont sont traitées les 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+NaN|voir
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+valeurs ignorées
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+valeurs ignorées
+\end_layout
+
+\end_inset
+
+valeurs de type 
+\emph on
+NaN
+\emph default
+ (valeurs invalides ou volontairement ignorées par l'utilisateur via le
+ réglage des valeurs 
+\shape italic
+min displayed
+\shape default
+ 
+\series bold
+\color red
+(1)
+\series default
+\color inherit
+ et 
+\shape italic
+max displayed
+\shape default
+) 
+\series bold
+\color red
+(4)
+\series default
+\color inherit
+ se règle via la case à cocher 
+\emph on
+Nan in grey
+\emph default
+.
+ Si celle-ci est cochée, les points associés à ces valeurs scalaires sont
+ affichés avec une couleur grise par défaut.
+ Sinon ces points ne sont pas affichés.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les quatre valeurs clés présentées précédemment permettent donc de définir
+ plusieurs plages : 
+\end_layout
+
+\begin_layout Itemize
+les valeurs affichables, pour lesquelles les points sont effectivement affichés
+ en fausses couleurs.
+ Le comportement en dehors de cette plage dépend de la propriété 
+\emph on
+Nan in grey
+\emph default
+.
+ 
+\end_layout
+
+\begin_layout Itemize
+la plage de saturation, en dehors de laquelle la variation des couleurs
+ est désactivée.
+ La borne inférieure de cet intervalle est associée à la première couleur
+ de l'échelle, la borne supérieure à la dernière couleur, et le reste des
+ couleurs est réparti linéairement entre ces bornes.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+CloudCompare
+\emph default
+ vérifie en permanence la cohérence des valeurs saisies : on ne peut pas
+ avoir 
+\series bold
+\color red
+(1)
+\series default
+\color inherit
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $>$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\series bold
+\color red
+(4)
+\series default
+\color inherit
+ ni 
+\series bold
+\color red
+(2)
+\series default
+\color inherit
+
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $>$
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+
+\series bold
+\color red
+(3)
+\series default
+\color inherit
+.
+ Toute modification valide d'une de ces valeurs est immédiatement répercutée
+ sur l'affichage, de manière interactive.Par défaut les valeurs de saturation
+ ne peuvent donc pas sortir des bornes 'min displayed value' 
+\series bold
+\color red
+(1)
+\series default
+\color inherit
+ et 'max displayed value' 
+\series bold
+\color red
+(4)
+\series default
+\color inherit
+, et ces bornes sont imposées par les données elles-même (
+\emph on
+CloudCompare
+\emph default
+ calcule automatiquement ces bornes à partir des valeurs effectives du champ
+ scalaire).
+ Or, il arrive que pour des raisons esthétiques ou pratiques l'utilisateur
+ veuille voir apparaitre des bornes différentes (en particulier au niveau
+ de la représentation graphique de l'échelle de couleur dans la vue 3D),
+ ou une saturation qui commence par exemple à partir de 0 dans tous les
+ cas de figure.
+ Il existe donc la propriété 
+\emph on
+release boundaries
+\emph default
+ qui permet une fois activée de modifier manuellement les bornes 'min displayed'
+ et 'max displayed' (il suffit pour cela de modifier manuellement les valeurs
+ textuelles correspondantes en les remplaçants par les nouvelles bornes
+ désirées).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+D'autres options sont disponibles : 
+\end_layout
+
+\begin_layout Itemize
+l'option 
+\emph on
+log scale
+\emph default
+ permet d'afficher les fausses couleurs (et les valeurs textuelles correspondant
+es à l'écran) selon une échelle logarithmique.
+ 
+\end_layout
+
+\begin_layout Itemize
+comme évoqué plus haut, dans le cas d'un champ scalaire non strictement
+ positif, une option 
+\emph on
+absolute saturation
+\emph default
+ apparait.
+ Si l’utilisateur la coche, alors les valeurs 'min staturation' 
+\series bold
+\color red
+(2)
+\series default
+\color inherit
+ et 'max saturation' 
+\series bold
+\color red
+(3)
+\series default
+\color inherit
+ changent de sens : elles deviennent forcément positives et concernent à
+ la fois les valeurs négatives et les valeurs positives (par symétrie).
+ La variation automatique des couleurs ne se passera donc qu'entre -'max
+ saturation' et -'min saturation' et entre +'min saturation' et +'max saturation
+'.
+ Les couleurs stagneront en dessous de -'max saturation' (couleur 
+\shape italic
+minimale
+\shape default
+ de la rampe - 
+\series bold
+bleu
+\series default
+ typiquement), entre -'min saturation' et +'min saturation' (couleur 
+\shape italic
+centrale
+\shape default
+ de la rampe - 
+\series bold
+vert
+\series default
+ typiquement) et enfin au dessus de +'max saturation' (couleur 
+\shape italic
+maximale
+\shape default
+ de la rampe - 
+\series bold
+rouge
+\series default
+ typiquement).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Enfin, la rampe de couleurs avec les valeurs numériques remarquables associées
+ (min, max, valeurs de saturation, etc.) peut être affichée à côté des entités
+ dans la même vue 3D (cf.
+ figure de la section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Contexte-graphique"
+
+\end_inset
+
+).
+ Il faut cocher la case 
+\emph on
+display scale
+\emph default
+ en fin de section 
+\emph on
+SF scale
+\emph default
+.
+ Une seule rampe de couleur peut-être affichée à la fois.
+ De plus, si l'entité associée est cachée ou désactivée, la rampe de couleur
+ ne sera pas affichée.
+ 
+\end_layout
+
+\begin_layout Subsection
+Propriété de l'octree
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+octree, propriétés
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:octreeProp"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+L'octree est indissociable du nuage de points auquel il est rattaché.
+ Il s'agit d'une structure abstraite, disponible dans l'interface de 
+\emph on
+CloudCompare
+\emph default
+ et affichable uniquement à titre informatif (elle peut aussi être supprimée
+ pour libérer de la mémoire si besoin).
+ L'affichage de la structure proposé par 
+\emph on
+CloudCompare
+\emph default
+ ne permet de visualiser qu'un niveau à la fois.
+ Vous pouvez changer le 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+octree
+\end_layout
+
+\end_inset
+
+niveau d'affichage de l'octree en incrémentant/décrémentant le champ 
+\emph on
+Display level
+\emph default
+ de la section 
+\emph on
+Octree
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/OctreeDisplayLevel.png
+	width 35text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Les niveaux qui peuvent être affichés vont de 1 à 10.
+ Le niveau 0 ne peut être sélectionné (il n'est d'ailleurs en pratique jamais
+ utilisé, pas même pour les calculs, puisque l'octree au niveau 0 correspond
+ ni plus ni moins au nuage dans son intégralité, contenu dans une unique
+ cellule).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Il se peut que l'affichage ralentisse considérablement au delà d'un certain
+ niveau de subdivision (en fonction des capacités de l'ordinateur sur lequel
+ le programme s'exécute), à cause du nombre conséquent d'éléments à afficher.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+L'octree peut être visualisé sous différentes formes : 
+\end_layout
+
+\begin_layout Itemize
+Fil de fer (Wire) : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+fil de fer, rendu
+\end_layout
+
+\end_inset
+
+seules les arrêtes des cubes sont représentées (attention : lourd).
+ 
+\end_layout
+
+\begin_layout Itemize
+Points : chaque cube est représenté par le centre de gravité des points
+ qui y sont inclus.
+ 
+\end_layout
+
+\begin_layout Itemize
+Surfacique (Plain cubes) : la surface des cubes est affichée intégralement
+ (attention : très lourd).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Le mode d'affichage courant de l'octree est contrôlé par la liste déroulante
+ 
+\emph on
+Display type
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/OctreeDisplayType.png
+	width 30text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection
+Propriétés des étiquettes standards
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+etiquette standard, propriétés
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:stdLabelProp"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les étiquettes 2D 
+\shape italic
+standards
+\shape default
+ sont des étiquettes graphiques qui s'affichent en surimpression de la vue
+ 3D et qui peuvent être associées à un ou plusieurs points (voir section
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:standardLabel"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/StandardLabelProperties.png
+	width 40text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Outre les options standards des objets affichables dans les vues 3D (voir
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:commonProperties"
+
+\end_inset
+
+), ces étiquettes possèdent plusieurs champs regroupés dans la section 
+\emph on
+Label
+\emph default
+ : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Body
+\emph default
+ - le corps de l'étiquette (généré automatiquement).
+ Pour information (et pour export, via copier-coller, si nécessaire).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Show 2D label
+\emph default
+ - permet de cacher la partie 2D de l'étiquette 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Show 3D legend(s)
+\emph default
+ - permet de cacher la rappel du nom de l'étiquette à côté du ou des points
+ associés en 3D 
+\end_layout
+
+\begin_layout Subsection
+Propriétés des étiquettes zone 2D
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+etiquette zone, propriétés
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:zoneLabelProp"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les étiquettes 
+\shape italic
+zone 2D
+\shape default
+ sont des étiquettes graphiques qui s'affichent en surimpression de la vue
+ 3D et qui sont associée à un point de vue (voir section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:zoneLabel"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/ZoneLabelProperties.png
+	width 30text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Les étiquettes 
+\shape italic
+zones 2D
+\shape default
+, outre leur nom (qui apparait en dessous du rectangle correspondant à l'étiquet
+te - ce nom est d'ailleurs modifiable comme pour toute entité) n'ont qu'un
+ bouton 
+\emph on
+Apply
+\emph default
+ dans leurs propriétés.
+ Celui-ci provoque l'application des paramètres de caméra associés à l'étiquette
+ dans la vue 3D (et donc cela force l'apparition de l'étiquette, qui ne
+ se dessine à l'écran que si les paramètres de caméra courants coïncident
+ avec ceux de la caméra lors de la création de l'étiquette).
+\end_layout
+
+\begin_layout Subsection
+Propriétés des points de vues
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+point de vue, propriétés
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:viewportProp"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Il est possible à tout moment de sauver le point de vue courant (avec tous
+ les paramètres de visualisation associés, comme la taille des points, etc.)
+ via la commande 
+\begin_inset Quotes ard
+\end_inset
+
+ Display > Save viewport as object 
+\begin_inset Quotes ald
+\end_inset
+
+ ou le raccourci clavier Ctrl+V.
+ L'objet correspondant 
+\shape italic
+Viewport
+\shape default
+ se comporte exactement comme une étiquette zone (mis à part qu'il n'a pas
+ de représentation associée).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Propriétés des images
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+image
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:imageProp"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Des images (calibrées ou non) peuvent être associées aux entités 3D.
+ Dans le cas des images calibrées (i.e.
+ pour lesquelles on dispose de toutes les informations de calibrage intrinsèques
+ et extrinsèques par rapport aux données) il est possible de les afficher
+ en surimpression de la vue 3D.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Ces images peuvent être importées via les formats E57, ICM ou encore via
+ l'import de fichiers Bundler (OUT).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/CalibratedImageGlobal.png
+	width 90text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:CalibratedImageFig"
+
+\end_inset
+
+Vue d'une image calibrée en surimpression d'un nuage
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les images ont toutes en commun la section 
+\emph on
+Image
+\emph default
+ : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Width
+\emph default
+ - largeur de l'image (en pixels) 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Height
+\emph default
+ - hauteur de l'image (en pixels) 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Alpha
+\emph default
+ - curseur permettant de régler la transparence (entre 0 et 100%) 
+\end_layout
+
+\begin_layout Standard
+La section 
+\emph on
+Calibrated Image
+\emph default
+ est par contre réservée aux images calibrées : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Apply viewport
+\emph default
+ - change les paramètres de la vue 3D associée à l'image pour coïncider
+ avec ceux de l'appareil 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+f.o.v.
+
+\emph default
+ - 
+\shape italic
+field of view
+\shape default
+ ou ouverture angulaire (en degrés) 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Optical center
+\emph default
+ - centre optique 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Orientation
+\emph default
+ - direction de visée 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Angle
+\emph default
+ - Angle de rotation autour de l'axe de visée (en degrés)
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection
+Propriétés des capteurs laser (terrestres)
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+capteur, propriétés
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:sensorProp"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les objets capteurs terrestres (
+\shape italic
+Ground Based Lidar sensor
+\shape default
+) ont une représentation 
+\shape italic
+in situ
+\shape default
+ symbolique (un cube sur un trépied).
+ Ils ont aussi une section propre dans la fenêtre de propriétés (section
+ 
+\emph on
+GBL sensor
+\emph default
+) : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+dPhi
+\emph default
+ - le pas angulaire selon l'axe de rotation principal (en radians) 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+dTheta
+\emph default
+ - le pas angulaire selon l'axe de rotation secondaire (en radians) 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Uncertainty
+\emph default
+ - l'incertitude en profondeur (utilisée lors de la comparaison de nuages
+ de points) 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Display scale
+\emph default
+ - échelle relative de la représentation symbolique 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/gblSensorProperties.png
+	width 80text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:gblSensorPropertiesFig"
+
+\end_inset
+
+Représentation symbolique d'un capteur laser terrestre
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Modification interactive des entités
+\end_layout
+
+\begin_layout Subsection
+Segmentation manuelle
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+segmentation manuelle
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:graphicalSegmentation"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+L'outil 
+\shape italic
+segmentation manuelle
+\shape default
+ (ou 
+\shape italic
+segmentation graphique interactive
+\shape default
+) est accessible via l'icône 
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnSegment.png
+
+\end_inset
+
+ de la barre d'outils supérieure (
+\shape italic
+Main toolbar
+\shape default
+).
+ Il permet de "découper" manuellement à l'écran la ou les entités sélectionnées.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Cet outil permet en effet de définir un contour à l'écran (voir figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:graphicalSegmentationExample"
+
+\end_inset
+
+), puis de choisir si l'ont veut "garder" les points ou les triangles présents
+ à l'intérieur ou à l'extérieur de ce contour.
+ Le processus est répétable à volonté, et les points/triangles rejetés sont
+ cachés au fur et à mesure.
+ Si l'utilisateur valide sa segmentation, les entités sélectionnées sont
+ chacune divisées en deux : une partie correspondant aux points/triangles
+ sélectionnés et l'autre avec les points/triangles restants.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Note : dans le cas des maillages, les triangles présents sur la frontière
+ du contour ne sont pas 
+\shape italic
+découpés
+\shape default
+ à proprement parler (on ne garde que les triangles dont les 3 sommets sont
+ totalement inclus dans la frontière, et les autres triangles sont considérés
+ comme étant 
+\shape italic
+à l'extérieur
+\shape default
+).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Deux types de contours sont disponibles : 
+\end_layout
+
+\begin_layout Itemize
+contour de type 'polyligne' : l'utilisateur peut définir les sommets successifs
+ d'une polyligne par clics gauches successifs à l'écran.
+ Une fois le premier clic effectué, CloudCompare fait apparaitre en temps
+ réel la forme de la polyligne en suivant le pointeur de la souris comme
+ si celui-ci correspondait à un nouveau sommet.
+ Un clic droit permet de figer le contour (nécessaire pour effectuer une
+ segmentation - voir ci-dessous).
+ Enfin, tout clic gauche intervenant après que le contour ait été figé réinitial
+ise celui-ci.
+ 
+\end_layout
+
+\begin_layout Itemize
+contour de type 'rectangle' : ce mode permet de définir des contours rectangulai
+res à l'écran.
+ Un simple clic droit permet de définir le premier coin du contour puis
+ un second le coin opposé.
+ Il n'est pas nécessaire de maintenir le bouton enfoncé entre les deux clics.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/graphicalSegmentation.jpg
+	width 80text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:graphicalSegmentationExample"
+
+\end_inset
+
+Outil de segmentation manuelle
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+En pratique, l'outil s'active dans la vue 3D courante (d'ailleurs seules
+ les entités affichées dans cette vue sont pris en compte par CloudCompare).
+ L'interface principale de CloudCompare est 
+\shape italic
+gelée
+\shape default
+ (la plupart des icônes et menus ne sont plus accessibles, mis à part les
+ options d'affichage).
+ Celle-ci est rétablie quand l'utilisateur quitte l'outil (dernière icône
+ à droite en forme de croix rouge).
+\begin_inset Newline newline
+\end_inset
+
+ Une barre d'icônes apparait dans le coin haut-droit de la vue 3D : 
+\end_layout
+
+\begin_layout Itemize
+la première icône permet de mettre en pause la segmentation (ce qui permet
+ de récupérer le comportement normal de la souris et de faire tourner les
+ entités 3D entre deux phases de contourage/découpe par exemple).
+ Attention, si la segmentation est mise en pause, le contour actuellement
+ dessiné disparait.
+ Et si une segmentation est validée (voir plus bas), le processus est automatiqu
+ement mis en pause.
+ 
+\end_layout
+
+\begin_layout Itemize
+l'icône suivante permet de choisir le mode de sélection (polyligne - par
+ défaut - ou rectangulaire).
+ En mode 'polyligne' il est toujours possible de définir un contour rectangulair
+e en maintenant la touche CTRL et le bouton gauche de la souris enfoncés.
+ 
+\end_layout
+
+\begin_layout Itemize
+l'icône suivante permet d'appliquer la segmentation selon le contour courant
+ et en gardant affichés les points 
+\emph on
+à l'intérieur
+\emph default
+ du contour.
+ Les autres points sont alors cachés et la segmentation est mise en pause.
+ Le contour doit être fermé.
+ 
+\end_layout
+
+\begin_layout Itemize
+l'icône suivante permet d'appliquer la segmentation inverse (en gardant
+ affichés les points 
+\emph on
+à l'extérieur
+\emph default
+ du contour).
+ 
+\end_layout
+
+\begin_layout Itemize
+l'icône suivante correspond à une réinitialisation complète de la sélection
+ (tous les points redeviennent visibles).
+ 
+\end_layout
+
+\begin_layout Itemize
+l'avant dernière icône permet de valider la segmentation globale et de quitter
+ (les entités sélectionnées seront chacune scindées en deux).
+ 
+\end_layout
+
+\begin_layout Itemize
+enfin la dernière icône permet d'annuler la segmentation et de quitter (aucune
+ opération ne sera effectuée).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Subsection
+Rotation/translation manuelle
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+translation manuelle
+\end_layout
+
+\end_inset
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+rotation manuelle
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:graphicalTransformation"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+L'outil 
+\shape italic
+transformation manuelle
+\shape default
+ (ou 
+\shape italic
+transformation graphique interactive
+\shape default
+) est accessible via l'icône 
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnMove.png
+
+\end_inset
+
+.
+ Il permet d'appliquer une rotation et/ou une translation manuelle aux entités
+ sélectionnées.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+A l'instar de l'outil de segmentation interactive (voir ci-dessus), l'outil
+ s'active dans la vue 3D courante (et seules les entités affichées dans
+ cette vue sont pris en compte par CloudCompare).
+ L'interface principale de CloudCompare est aussi 
+\shape italic
+gelée
+\shape default
+.
+ Trois icônes apparaissent en haut à droite de la vue 3D : 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnTranslateRotate.png
+	width 15text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+la première permet de réinitialiser la transformation appliquées aux entités
+ sélectionnées.
+ 
+\end_layout
+
+\begin_layout Itemize
+la seconde permet de valider la transformation et de quitter.
+ 
+\end_layout
+
+\begin_layout Itemize
+la dernière permet d'annuler la transformation et de quitter.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+La transformation se fait interactivement avec la souris, en utilisant les
+ mêmes conventions que pour la transformation du point de vue (Cf.
+ section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:Interactivité"
+
+\end_inset
+
+) : le bouton gauche permet de tourner les entités (par rapport au centre
+ de gravité des boites englobantes de toutes les unités sélectionnées) et
+ le bouton droit permet de translater les entités dans le plan de l'écran.
+ Dans ce mode, seules les entités sélectionnées bougeront, les autres restant
+ fixes.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Note: si le processus est validé par l'utilisateur, la transformation effectivem
+ent appliquée est affichée dans la console (sous forme textuelle).
+ 
+\shape italic
+Cette information peut-être récupérée par copier-coller.
+\end_layout
+
+\begin_layout Section
+Barres de progression
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+progression, barre de
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Certains traitements ou opérations de 
+\emph on
+CloudCompare
+\emph default
+ nécessitent un temps de traitement relativement long, pouvant aller de
+ quelques secondes à quelques minutes selon les capacités de l'ordinateur
+ sur lequel l'application s'exécute, ainsi que le paramétrage de la fonction
+ et la complexité inhérente au traitement effectué.
+ La barre de progression est une fenêtre apparaissant durant les calculs
+ non immédiats, donnant un aperçu de l'état d'avancement du traitement.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Graphics
+	filename images/Partie2_Interface/ProgressBar.png
+	width 20text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Parmi les commandes affichant une barre de progression, certaines laissent
+ la possibilité d'arrêter
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+arrêter un calcul
+\end_layout
+
+\end_inset
+
+ le calcul en cours d'exécution, via un bouton 
+\emph on
+Cancel
+\emph default
+ (l'arrêt du processus n'est pas forcément immédiat, le système ne prenant
+ en compte l'appui sur le bouton que lorsqu'il est suffisamment "disponible").
+ Lorsque ce bouton n'est pas visible, le traitement ne peut être interrompu
+ avant la fin.
+\end_layout
+
+\begin_layout Section
+Barres d'outils
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+outils, barre de
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Vous trouverez ci dessous la liste des boutons disponibles dans les diverses
+ barres d'outils de 
+\emph on
+CloudCompare
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="44" columns="3">
+<features islongtable="true" longtabularalignment="center">
+<column alignment="center" valignment="middle" width="7text%">
+<column alignment="left" valignment="middle" width="40text%">
+<column alignment="left" valignment="middle" width="50text%">
+<row endhead="true">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Bouton
+\series default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Commande
+\series default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row endfirsthead="true">
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Bouton
+\series default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Commande
+\series default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Description
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" topline="true" leftline="true" rightline="true" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Barre d'outils 
+\emph on
+Main tools
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" leftline="true" rightline="true" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/MainToolBar.png
+	scale 90
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnOpen.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+ouvrir des objets
+\end_layout
+
+\end_inset
+
+Open 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:openFile"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnSave.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Save 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:saveFile"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/pointPickingBtn.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Point picking 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:pointPicking"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/pointListPickingBtn.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Point list picking 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:pointListPicking"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnClone.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Clone 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:clone"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnFuse.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Fuse 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:fuse"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnDelete.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Delete 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Supprimer les objets sélectionnés
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnRegister.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Register 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:register"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnAlign.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Align 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:align"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnSubsample.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Subsample 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:subsample"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnSamplePts.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Sample points 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:samplePoints"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnCCDist.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Cloud/Cloud distance 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:cloud2cloudDist"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnCMDist.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Cloud/Mesh distance 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:cloud2meshDist"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnStatTest.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Statistical test 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:statisticalTest"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnLabel.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Label connected components 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:labelConnectedComponents"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnSegment.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Segment 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:graphicalSegmentation"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnMove.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Translate/Rotate 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:graphicalTransformation"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" topline="true" leftline="true" rightline="true" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Barre d'outils 
+\emph on
+Scalar Field Tools
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" leftline="true" rightline="true" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/SFToolBar.png
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnHisto.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Show histogram 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Afficher l'histogramme
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+histogramme
+\end_layout
+
+\end_inset
+
+ du champ scalaire courant
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnComputeStat.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Compute statistical parameters 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:computeStatParams"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnFilterValue.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Filter by value 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:scalarFieldFilterByValue"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnGradient.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Gradient 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:scalarFieldGradient"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnGaussianFilter.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Gaussian filter 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:scalarFieldGaussianFilter"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnSFRemove.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Delete current scalar field 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Supprimer le champ scalaire actif du nuage sélectionné
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/BtnDiff.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Difference 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:scalarFieldDiff"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" topline="true" leftline="true" rightline="true" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Barre d'outils 
+\emph on
+Plugins
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" leftline="true" rightline="true" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/PluginToolBar.png
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" leftline="true" rightline="true" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\shape italic
+peut contenir des éléments différents que ceux listés ici (en fonction des
+ plugins disponibles)
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/cc_qEDL.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Eye Dome Lighting (shader) 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qHPR"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/cc_qSSAO.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Screen Space Ambient Occlusion (shader) 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qSSAO"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/cc_qHPR.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Hidden Points Removal 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qHPR"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/cc_qKinect.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Kinect Cloud Capture 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qKinect"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/cc_qPCL.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+PCL bridge 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qPCL"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/cc_qPCV.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ShadeVis Ambient Occlusion 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qPCV"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/cc_qPoissonRecon.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Poisson Surface Reconstruction 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qPoissonRecon"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/cc_qRANSAC_SD.png
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Ransac Shape Detection 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qRansacSD"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" topline="true" leftline="true" rightline="true" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Barre d'outils 
+\emph on
+Viewing Tools
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" topline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" leftline="true" rightline="true" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename images/Partie2_Interface/ViewToolBar.png
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell multicolumn="1" alignment="none" valignment="top" bottomline="true" leftline="true" rightline="true" usebox="none" special="c">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\shape italic
+cette barre d'outils est présentée en détail en section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Options-affichage"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell multicolumn="2" alignment="center" valignment="top" bottomline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les barres d'outils peuvent être affichées ou cachées via le sous-menu 
+\begin_inset Quotes ard
+\end_inset
+
+ Display > Toolbars 
+\begin_inset Quotes ald
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Raccourcis clavier
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+raccourcis clavier
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Voici les raccourcis clavier disponibles dans 
+\emph on
+CloudCompare
+\emph default
+ : 
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="23" columns="4">
+<features islongtable="true" longtabularalignment="center">
+<column alignment="left" valignment="top" width="10text%">
+<column alignment="left" valignment="top" width="15text%">
+<column alignment="left" valignment="top" width="45text%">
+<column alignment="left" valignment="top" width="15text%">
+<row endhead="true">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Touche(s)
+\series default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Commande
+\series default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Action
+\series default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Remarque
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row endfirsthead="true">
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Touche(s)
+\series default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Commande
+\series default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Action
+\series default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\series bold
+Remarque
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F1 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Help 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+aide
+\end_layout
+
+\end_inset
+
+affiche l'aide de 
+\emph on
+CloudCompare
+\emph default
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="none" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F2 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Rename 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+renommer
+\end_layout
+
+\end_inset
+
+renomme l'entité sélectionnée 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+l'entité doit être sélectionnée dans l'arbre de navigation
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F3 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Toggle centered perspective 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+point de vue
+\end_layout
+
+\end_inset
+
+active / désactive la projection perspective avec centre de rotation au
+ niveau des entités 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Options-affichage"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CTRL
+\begin_inset space ~
+\end_inset
+
++
+\begin_inset space ~
+\end_inset
+
+F3 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+New 3D View 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ouvrir une nouvelle vue 3D 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="none" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F4 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Toggle viewer based perspective 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+point de vue
+\end_layout
+
+\end_inset
+
+active / désactive la projection prespective avec centre de rotation confondu
+ avec l'oeil de l'utilisateur 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Options-affichage"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CTRL
+\begin_inset space ~
+\end_inset
+
++
+\begin_inset space ~
+\end_inset
+
+F4 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+Vue 3D
+\end_layout
+
+\end_inset
+
+Close 3D View 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+fermer la vue 3D courante 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="none" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F5 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Refresh 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+rafraîchir l'affichage 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="none" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F6 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Toogle sun light 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+eclairage@éclairage
+\end_layout
+
+\end_inset
+
+active / désactive la source lumineuse globale 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Options-affichage"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F7 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Toggle custom light 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+active / désactive la source lumineuse secondaire 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Options-affichage"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F8 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Toggle console
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+console
+\end_layout
+
+\end_inset
+
+affiche / cache la console 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="none" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+F11 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Full screen 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+plein écran
+\end_layout
+
+\end_inset
+
+active / désactive l'affichage en plein écran 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="none" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CTRL
+\begin_inset space ~
+\end_inset
+
++
+\begin_inset space ~
+\end_inset
+
+O 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Open 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+ouvrir un fichier
+\end_layout
+
+\end_inset
+
+pour ouvrir un fichier 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:openFile"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CTRL
+\begin_inset space ~
+\end_inset
+
++
+\begin_inset space ~
+\end_inset
+
+S 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Open 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+sauver un fichier
+\end_layout
+
+\end_inset
+
+pour sauver les entités sélectionnées 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:saveFile"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+ALT
+\begin_inset space ~
+\end_inset
+
++
+\begin_inset space ~
+\end_inset
+
+C 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Set Unique Color 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+pour appliquer une couleur unique aux entités sélectionnées 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:setUniqueColor"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+CTRL
+\begin_inset space ~
+\end_inset
+
++
+\begin_inset space ~
+\end_inset
+
+V 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Save Viewport 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+sauver un point de vue
+\end_layout
+
+\end_inset
+
+créé un objet 
+\emph on
+Point de vue
+\emph default
+ correspondant au point de vue actuel (vue 3D active) 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:viewportProp"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+V 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Toggle entity visibility 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+inverse l'état d'affichage des entités sélectionnées 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:commonProperties"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+N 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Toggle normals visibility 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+inverse l'état d'affichage des normales des entités sélectionnées 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:commonProperties"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+C 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Toggle normals visibility 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+inverse l'état d'affichage des couleurs des entités sélectionnées 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:commonProperties"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+S 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Toggle normals visibility 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+inverse l'état d'affichage du champ scalaire (courant) des entités sélectionnées
+ 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:commonProperties"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Del/Suppr 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Delete 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+supprimer
+\end_layout
+
+\end_inset
+
+supprime les entités sélectionnées 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="none" valignment="top" topline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+SHIFT
+\begin_inset space ~
+\end_inset
+
++
+\begin_inset space ~
+\end_inset
+
+left clic 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+Create 2D Label 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+etiquette, créer
+\end_layout
+
+\end_inset
+
+créé une étiquette 2D standard associée au point désigné par le clic gauche
+ (dans la vue 3D) 
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="left" valignment="top" topline="true" bottomline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+cf.
+ section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:standardLabel"
+
+\end_inset
+
+ 
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

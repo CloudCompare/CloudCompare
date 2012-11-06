@@ -1,0 +1,24 @@
+\subsection{Scalar Fields > Gradient}
+\label{subsection:scalarFieldGradient}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{Partie3_Fonctions/sfGradientExample.jpg}
+\caption{\label{fig:sfGradientExample}Interface de paramètre pour le calcul des normales}
+\end{center}
+\end{figure}
+
+\index{champ scalaire}
+\index{gradient}
+Cette fonction permet de calculer les normes du gradient du champ scalaire actif.\\
+\par \emph{CloudCompare} demande à l'utilisateur de préciser si le champ scalaire correspond à une distance\index{distances} euclidienne (telles que les distances calculées entre deux nuages ou entre un nuage et un maillage - voir~\ref{subsection:cloud2cloudDist} ou \ref{subsection:cloud2meshDist}). Si oui, l'algorithme filtrera les valeurs aberrantes (qui sont alors facilement détectables car dans ce cas la valeur absolue du gradient ne peut être supérieure à 1).
+\\
+\par
+Remarques :
+\begin{itemize}
+\item L'algorithme crée un nouveau type de champ scalaire (\emph{Gradient norms}).
+\item Comme pour du traitement d'image 2D classique, le gradient permet notamment de mettre en valeur les zones de fortes variations du champ scalaire (on met ainsi en évidence les bords des zones de changement par exemple - voir
+figure~\ref{fig:sfGradientExample}).
+\item Comme pour du traitement d'image 2D classique, il est souvent nécessaire d'appliquer un filtre\index{filtrage!gaussien} gaussien aux données avant et/ou après un calcul du gradient (Cf. section~\ref{subsection:scalarFieldGaussianFilter}).
+\item Le fait que la valeur de la norme du gradient ne soit jamais supérieure à 1 est vrai en réalité pour tout champ scalaire dont les valeurs varient proportionnellement à la distance entre les points (c'est donc le cas d'un champ de distances).
+\end{itemize}

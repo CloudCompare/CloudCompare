@@ -1,0 +1,37 @@
+\subsection{Tools > Projection > Unroll}
+\label{subsection:unroll}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{Partie3_Fonctions/unrollDlg.png}
+\caption{\label{fig:unrollDlg}Interface de paramètrage pour l'outil de \emph{développement} d'un nuage}
+\end{center}
+\end{figure}
+
+\index{developper@développer}
+\index{derouler@dérouler|see{développer}}
+Cette fonction permet de \emph{développer} sur un plan un nuage de point considéré comme étant porté par une
+forme de révolution (cylindre ou un cone). Voir figure~\ref{fig:unrollExample}.
+\\
+\par
+Il faut pour cela renseigner différents paramètres définissant la forme de révolution :
+\begin{itemize}
+\item le type (cylindre ou cone)
+\item la dimension selon laquelle est positionnée l'axe de développement (X, Y ou Z pour l'instant)
+\item un point par lequel passe cet axe (dans le cas où la checkbox \emph{auto axis} est sélectionnée, ce point est automatiquement
+remplacé par le centre de gravité du nuage)
+\item le rayon du cylindre ou la base du cone
+\item et l'angle d'ouverture du cone le cas échéant\\
+\end{itemize}
+\par
+\textcolor[rgb]{1.00,0.00,0.00}{Attention, pour optimiser la mémoire, cette fonction applique la transformée
+directement sur l'entité sélectionnée ! Il peut être nécessaire d'utiliser avant l'outil de clonage\index{cloner} -
+voir section~\ref{subsection:clone}.}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{Partie3_Fonctions/unroll.jpg}
+\caption{\label{fig:unrollExample}Exemple de résultat : nuage de points cylindrique (à gauche), et sa développée
+(à droite)}
+\end{center}
+\end{figure}

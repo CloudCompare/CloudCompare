@@ -1,0 +1,18 @@
+\subsection{Normals > Resolve direction}
+\label{subsection:resolveNormalsDirection}
+
+\index{normales}
+\textcolor{red}{Cette fonction est une ébauche. Pour obtenir des normales signées, utilisez la méthode \textit{Estimate Normals and Curvature} de la librairie PCL via le plugin qPCL (voir \ref{subsection:qPCL}).}\\
+
+\par
+Cette fonction tente de résoudre le sens des normales d'un nuage de proche en proche, par propagation d'un ou plusieurs fronts sur le nuage (algorithme de type \emph{Fast Marching}).\\
+\par
+La propagation se fait sur une grille 3D (ici l'octree) et il faut donc choisir un niveau d'octree
+auquel appliquer l'algorithme. Le choix du bon paramètre n'est malheureusement pas évident, car un niveau
+faible va entraîner des cellules de taille importante, d'où une propagation aisée et rapide mais une mauvaise
+prise en compte des circonvolutions locales, alors qu'un niveau élevé va entraîner l'inverse. De plus, plus
+la propagation est difficile - i.e. par morceaux - plus le risque de voir des zones proches ayant des sens
+opposés est forte. Il faut donc essayer l'algorithme à différents niveaux d'octree, en commençant typiquement
+à 5 ou 6, puis augmenter le niveau jusqu'à trouver une valeur satisfaisante.\\
+\par
+Note: la résolution du sens des normales est au sens global près, il peut donc être nécessaire d'utiliser la fonction Invert\index{inversion} (Cf. section~\ref{subsection:invertNormals}) pour obtenir le résultat final recherché.

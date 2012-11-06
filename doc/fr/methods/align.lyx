@@ -1,0 +1,554 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Tools > Registration > Align
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:align"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\color red
+Cette méthode est une méthode 
+\shape italic
+recherche
+\shape default
+ (i.e.
+ fortement instable).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/alignDlg.png
+	width 60text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:alignDlg"
+
+\end_inset
+
+Interface de paramétrage pour l'outil de recalage grossier de deux entités
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Cette fonction permet de recaler
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+recalage
+\end_layout
+
+\end_inset
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+aligner des nuages|see
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+recalage
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ grossièrement deux nuages de points (algorithme 
+\emph on
+"4 points Congruent Sets For Robust Registration"
+\emph default
+ de Aiger, Mitra et Cohen-Or, Siggraph 2008).
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Model and Data
+\emph default
+ : située en haut à gauche de la boite de dialogue, cette zone permet d'indiquer
+ les rôles
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+role@rôle
+\end_layout
+
+\end_inset
+
+ respectifs des deux nuages à recaler (le 
+\emph on
+model
+\emph default
+ est le nuage de référence - qui ne bouge pas - par rapport auquel viendra
+ s'aligner le nuage 
+\emph on
+data
+\emph default
+).
+ Comme le recalage calculé est un recalage 
+\shape italic
+rigide
+\shape default
+, seules des translations et des rotations seront appliquées au nuage 
+\emph on
+data
+\emph default
+.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Sampling
+\emph default
+ : cette zone concerne l'étape préalable de sous-échantillonnage
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+echantillonner@échantillonner!sous-echantillonner@sous-échantillonner
+\end_layout
+
+\end_inset
+
+ des nuages de points.
+ Cela permet d'améliorer sensiblement l'efficacité de l'algorithme.
+ En effet, quelques dizaines de milliers de points suffisent généralement
+ à obtenir un bon recalage, alors que la complexité de l'algorithme augmente
+ rapidement en fonction du nombre de points.
+ L'utilisateur devrait toujours chercher à minimiser le nombre de points
+ pris en compte, quitte à relancer l'algorithme avec plus de points si besoin.
+ Voici les paramètres du sous-échantillonnage : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Method
+\emph default
+ : méthode de sous-échantillonnage (voir section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:subsample"
+
+\end_inset
+
+).
+ Sélectionnez 
+\emph on
+None
+\emph default
+ pour ne pas sous-échantillonner 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Model
+\emph default
+ : un slider et/ou un champ avec variateur permet de choisir le nombre de
+ points conservé pour le nuage de référence 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Data
+\emph default
+ : idem, un slider et/ou un champ avec variateur permet de choisir le nombre
+ de points conservé pour le nuage recalé
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+Alignment parameters
+\emph default
+ : cette zone correspond aux paramètres de l'algorithme de recalage en tant
+ que tel.
+ Nous expliquons en détail ces paramètres : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Number of trials
+\emph default
+ : l'algorithme procède par essais successifs et ne retient que celui ayant
+ fourni le meilleur résultat.
+ Ce champ permet de choisir le nombre d'essais à effectuer.
+ Plus la valeur saisie est grande, plus le calcul sera long, mais plus la
+ probabilité d'obtenir de bons résultats sera élevée.
+ Il peut donc être nécessaire d'adapter ce paramètre en fonction du nombre
+ de points composant les nuages pour obtenir un bon alignement dans un temps
+ raisonnable.
+ Pour donner un ordre d'idée, une cinquantaine d'essais pour recaler deux
+ nuages de 5000 points chacun permet d'obtenir un résultat convenable en
+ quelques minutes (de l'ordre de 2 à 5 minutes, tout dépend de l'ordinateur
+ sur lequel le programme s'exécute).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Overlap
+\emph default
+ : ce paramètre, compris entre 0.0 et 1.0, correspond à une estimation du
+ taux de recouvrement entre les deux nuages lorsqu'ils sont correctement
+ alignés.
+ Un taux de recouvrement de 1 signifie que les deux nuages se recouvrent
+ quasiment entièrement, 0 signifiant que les nuages sont disjoints (dans
+ ce cas, le recalage n'a pas beaucoup de sens).
+ Une estimation très approximative du recouvrement est en général suffisante,
+ il ne s'agit en aucun cas de renseigner avec précision la valeur effective.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Delta
+\emph default
+ : ce paramètre correspond à une estimation a priori de la distance moyenne
+ qui existera entre les points des deux nuages après qu'ils aient été recalés.
+ Il sert de critère d'arrêt et agit comme une tolérance à l'erreur : plus
+ il est proche de 0, plus on contraint les nuages à être proches, mais plus
+ la probabilité de trouver une bonne solution est faible.
+ En principe, si 
+\emph on
+Delta
+\emph default
+ vaut zéro, le programme ne pourra pas trouver d'alignement entre les deux
+ nuages.
+ En règle générale, pour obtenir de bons résultats, 
+\emph on
+Delta
+\emph default
+ doit correspondre à la résolution (inverse de la densité) du nuage de référence.
+ L'interface propose un bouton 
+\emph on
+Estimate
+\emph default
+ qui permet d'estimer de manière automatique ce paramètre en se basant sur
+ un calcul de la densité moyenne du nuage de référence.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Limit max.
+ number of candidates
+\emph default
+ : lorsque ce champ est activé (pour cela, cocher la case qui y est associé),
+ il est possible de fixer le nombre maximal de candidats que le programme
+ est autorisé à traiter pour chaque essai.
+ En effet, lors d'un essai, le processus recherche dans le nuage servant
+ de données des ensembles de points pouvant mener à un bon recalage.
+ Ces ensembles sont calculés en fonction des paramètres cités précédemment,
+ et le programme peut être amené à trouver un nombre énorme de candidats
+ (quelques centaines de milliers d'ensembles).
+ Ce paramètre permet de ne sélectionner parmi ces candidats que ceux qui
+ sont considérés comme étant les meilleurs, et donc de raccourcir considérableme
+nt le temps de traitement de chaque essai.
+ En contrepartie, on se prive potentiellement de trouver le meilleur recalage
+ à cause de l'heuristique utilisée pour retenir les meilleurs candidats.
+ Lorsque ce champ est désactivé, le nombre maximal de candidats est illimité,
+ ce qui peut conduire à de très grands temps de calcul.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/alignExample.png
+	width 80text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:alignExample"
+
+\end_inset
+
+Alignement de deux nuages se recouvrant partiellement.
+ A gauche la configuration initiale, à droite le résultat du recalage avec
+ un recouvrement estimé à 90% (
+\emph on
+Overlap
+\emph default
+
+\begin_inset Formula $=0,9$
+\end_inset
+
+) et une vingtaine d'essais (
+\emph on
+Number of trials
+\emph default
+
+\begin_inset Formula $=20$
+\end_inset
+
+).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les paramètres 
+\emph on
+Delta
+\emph default
+ et 
+\emph on
+Overlap
+\emph default
+ nécessitent donc que l'utilisateur ait une idée a priori de ce que seront
+ les nuages après avoir été alignés.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+La figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:alignExample"
+
+\end_inset
+
+ présente le résultat obtenu en alignant deux scans d'une peluche relevés
+ sous deux angles sensiblement différents.
+ En théorie, la fonction 
+\emph on
+Align
+\emph default
+ est capable de traiter des nuages avec des taux de recouvrement beaucoup
+ plus faibles que ceux présentés en exemple.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Les alignements calculés via cette fonctionnalité dépendent grandement de
+ la configuration des nuages à traiter.
+ En effet, leur géométrie ainsi que le degré de ressemblance les rendent
+ plus ou moins facilement comparables.
+ De ce fait, il se peut que les résultats fournis dans certains cas semblent
+ relativement mauvais.
+ Dans ces situations, vous pouvez alors utiliser la fonction de recalage
+ fin décrite en section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:register"
+
+\end_inset
+
+.
+ Il est même conseillé, de manière générale, d'avoir recours au recalage
+ fin après utilisation de cette fonction.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Remarque : cette fonction crée une copie du nuage 
+\emph on
+Data
+\emph default
+ avant de lui appliqué la transformation qui la rapproche du nuage 
+\emph on
+Model
+\emph default
+.
+ Il n'est donc pas nécessaire de cloner le nuage 
+\emph on
+Data
+\emph default
+ avant.
+\end_layout
+
+\end_body
+\end_document

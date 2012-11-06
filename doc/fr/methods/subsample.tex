@@ -1,0 +1,26 @@
+\subsection{Subsample}
+\label{subsection:subsample}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.4\textwidth]{Partie3_Fonctions/subsamplingDlg.png}
+\caption{\label{fig:subsamplingDlg}Interface de paramètrage pour le sous-échantillonnage de nuages}
+\end{center}
+\end{figure}
+
+\index{echantillonner@échantillonner!sous-echantillonner@sous-échantillonner}
+Fonction de sous-échantillonnage des points d'un nuage.\\
+\par
+Différentes méthodes sont disponibles. Le choix (ainsi que le paramétrage) se fait via une boîte de dialogue (voir figure~\ref{fig:subsamplingDlg}) :
+\begin{itemize}
+\item \emph{Random} : sous-échantillonnage aléatoire (les points sont tirés au hasard). L'utilisateur choisit le nombre de points restants.
+\item \emph{Space} : sous-échantillonnage spatial. L'utilisateur choisit la densité du nuage résultant via l'espace moyen inter-points maximal (valeur approximative).
+\item \emph{Octree} : sous-échantillonnage rapide via l'octree\index{octree}. On garde un point par cellule de
+l'octree à un niveau donné de subdivision. L'utilisateur choisit le niveau de subdivision (plus le niveau est faible et moins le nombre de points est important).\\
+\end{itemize}
+\par
+Remarques :
+\begin{itemize}
+\item Le \textbf{sous}-échantillonnage diffère du \textbf{ré}-échantillonnage (cf. section~\ref{subsection:resampleWithOctree}) dans le sens où il ne crée pas de nouveaux points mais se contente de sélectionner un sous-ensemble de points à partir du nuage source.
+\item La méthode de sous-échantillonnage rapide via l'octree choisit le point le plus proche du centre dans chaque cellule. Ainsi l'écart entre les points est à peu près constant (si le nuage initial est suffisamment dense).
+\end{itemize}

@@ -1,0 +1,5 @@
+<RCC>
+  <qresource prefix="/CC/plugin/qSSAO" >
+    <file>cc_ssao.png</file>
+  </qresource>
+</RCC>

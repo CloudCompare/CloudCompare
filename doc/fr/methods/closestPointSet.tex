@@ -1,0 +1,21 @@
+\subsection{Tools > Distances > Closest Point Set}
+\label{subsection:closestPointSet}
+
+Cette fonction calcule pour chaque point du nuage \emph{de référence}, le point le plus proche dans le nuage \emph{compared}.
+L'ensemble de ces "points les plus proches" forme un nouveau nuage (\emph{Closest Point Set} ou CPS).
+\\
+\par
+Remarques
+\begin{itemize}
+\item Pour appeler cette fonction, il faut sélectionner exactement deux nuages de points.
+\item On retrouve l'interface générique de choix du rôle\index{role@rôle} de chaque liste (Cf. section~\ref{subsection:chooseRole},
+qui permet à l'utilisateur de préciser quel est le nuage d'où sont extraits les points du CPS (nuage \emph{compared})et quel est le nuage
+de référence.
+\item Le résultat est un nuage qui a exactement le même nombre de points que le nuage de référence, et dont 
+chaque point appartient au nuage \emph{compared} (par définition). Par construction, il peut y avoir des doublons. 
+C'est un résultat qui est utilisé, par exemple, par l'algorithme de recalage\index{recalage} entre deux nuages de 
+points (Cf. section~\ref{subsection:register}).
+%On peut aussi l'utiliser pour obtenir la partie d'un maillage "la plus proche" d'un nuage de point (en effet, lorsque le nuage
+%est composé des sommets d'un maillage, \emph{CloudCompare} segmente automatiquement le maillage en même temps que les sommets -
+%ceci est un comportement générique).
+\end{itemize}

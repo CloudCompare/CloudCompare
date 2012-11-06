@@ -1,0 +1,158 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Tools > Other > Density
+\end_layout
+
+\begin_layout Standard
+Cette méthode permet d'estimer la densité locale d'un nuage de points.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+En pratique, pour chaque point du nuage, on cherche son voisin le plus proche.
+ Soit 
+\begin_inset Formula $d_{i}$
+\end_inset
+
+ la distance entre le point d'indice 
+\begin_inset Formula $i$
+\end_inset
+
+ et son plus proche voisin.
+ Alors la densité locale est simplement estimée en première approximation
+ comme étant l'inverse du volume de la sphère de rayon 
+\begin_inset Formula $d_{i}$
+\end_inset
+
+ :
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Formula $dens_{i}=$
+\end_inset
+
+
+\begin_inset Formula $\left(\frac{4}{3}\pi d_{i}^{3}\right)^{-1}$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\paragraph_spacing double
+\noindent
+Le résultat est stocké sous forme d'un champ scalaire nommé 
+\begin_inset Quotes fld
+\end_inset
+
+Local density
+\begin_inset Quotes frd
+\end_inset
+
+ (celui sera écrasé s'il existe déjà).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Remarques :
+\end_layout
+
+\begin_layout Itemize
+cette méthode peut être appliquée à plusieurs nuages à la fois (sélection
+ multiple)
+\end_layout
+
+\begin_layout Itemize
+cette méthode d'estimation de la densité est assez approximative (et assez
+ 
+\shape slanted
+bruitée
+\shape default
+) mais très rapide
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,841 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="94.011505"
+   height="20.660053"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.48.3.1 r9886"
+   sodipodi:docname="icons.svg">
+  <defs
+     id="defs4">
+    <linearGradient
+       id="linearGradient4062">
+      <stop
+         id="stop4070"
+         offset="0"
+         style="stop-color:#ff9999;stop-opacity:0.49803922;" />
+      <stop
+         style="stop-color:#e9ff54;stop-opacity:1;"
+         offset="0.5"
+         id="stop4074" />
+      <stop
+         style="stop-color:#99ff99;stop-opacity:1;"
+         offset="1"
+         id="stop4066" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4062"
+       id="linearGradient4068"
+       x1="145.29607"
+       y1="1043.2157"
+       x2="140.21603"
+       y2="1034.1776"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="9.153744"
+     inkscape:cx="116.20129"
+     inkscape:cy="-2.765592"
+     inkscape:document-units="px"
+     inkscape:current-layer="g3130"
+     showgrid="false"
+     showguides="true"
+     inkscape:guide-bbox="true"
+     inkscape:snap-midpoints="false"
+     inkscape:snap-object-midpoints="true"
+     inkscape:snap-nodes="true"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="1680"
+     inkscape:window-height="1000"
+     inkscape:window-x="0"
+     inkscape:window-y="25"
+     inkscape:window-maximized="1"
+     inkscape:snap-global="false"
+     inkscape:snap-bbox="true"
+     inkscape:object-nodes="true"
+     inkscape:snap-smooth-nodes="true"
+     inkscape:bbox-nodes="true"
+     inkscape:snap-bbox-edge-midpoints="true"
+     inkscape:object-paths="true">
+    <sodipodi:guide
+       orientation="1,0"
+       position="-26.711111,28.930964"
+       id="guide3069" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="-0.44714716,10.476012"
+       id="guide3071" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="10.052853,20.976012"
+       id="guide3867" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="153.25968,3.7078954"
+       id="guide3902" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="58.052849,20.975984"
+       id="guide3930" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="64.454501,27.420474"
+       id="guide3098" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="squares"
+     style="display:none"
+     transform="translate(-37.191444,-0.48156374)">
+    <rect
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3865"
+       width="21"
+       height="21"
+       x="36.744297"
+       y="0.16560371" />
+    <rect
+       transform="translate(0,-1031.3622)"
+       y="1031.5278"
+       x="60.744297"
+       height="21"
+       width="21"
+       id="rect3891"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <rect
+       transform="translate(0,-1031.3622)"
+       y="1031.5278"
+       x="84.744293"
+       height="21"
+       width="21"
+       id="rect3924"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <rect
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3007"
+       width="21"
+       height="21"
+       x="110.61803"
+       y="0.16563202" />
+    <rect
+       y="0.16563202"
+       x="136.77252"
+       height="21"
+       width="21"
+       id="rect3018"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <rect
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="rect3032"
+       width="21"
+       height="21"
+       x="164.4129"
+       y="0.16563202" />
+    <rect
+       y="0.16563202"
+       x="192.13766"
+       height="21"
+       width="21"
+       id="rect3100"
+       style="color:#000000;fill:none;stroke:#000000;stroke-width:0.1;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+  </g>
+  <g
+     inkscape:label="Livello 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-37.191444,-1031.8438)">
+    <path
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(0.64574383,0,0,0.66524543,88.710658,1050.9074)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3793"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sift.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(0.64574383,0,0,0.66524543,82.28994,1047.2959)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3797"
+       style="color:#000000;fill:#dd2a2b;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.10000000000000001;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sift.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:type="arc"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3805"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(0.64574383,0,0,0.66524543,84.296422,1041.1425)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sift.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:type="arc"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3807"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(-0.64574383,0,0,0.66524543,159.72764,1042.8814)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sift.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(-0.64574383,0,0,0.66524543,158.52377,1048.4997)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3809"
+       style="color:#000000;fill:#dd2a2b;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.10000000000000001;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sift.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:type="arc"
+       style="color:#000000;fill:#dd2a2b;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.10000000000000001;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3811"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(-0.64574383,0,0,0.66524543,153.97575,1038.3336)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sift.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(-0.64574383,0,0,0.66524543,153.03938,1044.3528)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3813"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sift.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:#93ba65;stroke-width:3.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 47.244297,1042.0278 0,-8.4822"
+       id="path3073"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/load.png"
+       inkscape:export-xdpi="92.620003"
+       inkscape:export-ydpi="92.620003" />
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path3843"
+       d="m 47.244297,1042.0278 8.482142,0"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:#93ba65;stroke-width:3.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/load.png"
+       inkscape:export-xdpi="92.620003"
+       inkscape:export-ydpi="92.620003" />
+    <path
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:#93ba65;stroke-width:3.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 38.762155,1042.0278 8.482142,0"
+       id="path3845"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/load.png"
+       inkscape:export-xdpi="92.620003"
+       inkscape:export-ydpi="92.620003" />
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path3847"
+       d="m 47.244297,1042.0278 0,8.4822"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:#93ba65;stroke-width:3.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/load.png"
+       inkscape:export-xdpi="92.620003"
+       inkscape:export-ydpi="92.620003" />
+    <text
+       xml:space="preserve"
+       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#4e4e4b;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       x="48.226452"
+       y="1050.4742"
+       id="text3898"
+       sodipodi:linespacing="125%"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/load.png"
+       inkscape:export-xdpi="92.620003"
+       inkscape:export-ydpi="92.620003"><tspan
+         sodipodi:role="line"
+         id="tspan3900"
+         x="48.226452"
+         y="1050.4742">L</tspan></text>
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path3904"
+       d="m 71.244295,1042.0278 0,-8.4822"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:#93ba65;stroke-width:3.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/save.png"
+       inkscape:export-xdpi="109.3476"
+       inkscape:export-ydpi="109.3476" />
+    <path
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:#93ba65;stroke-width:3.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 71.244295,1050.51 0,-8.4822"
+       id="path3910"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/save.png"
+       inkscape:export-xdpi="109.3476"
+       inkscape:export-ydpi="109.3476" />
+    <path
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:#93ba65;stroke-width:3.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       d="m 71.244295,1050.7858 -6.270568,-5.7122"
+       id="path3912"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="cc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/save.png"
+       inkscape:export-xdpi="109.3476"
+       inkscape:export-ydpi="109.3476" />
+    <path
+       sodipodi:nodetypes="cc"
+       inkscape:connector-curvature="0"
+       id="path3914"
+       d="m 71.244295,1050.7978 6.270568,-5.7122"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:#93ba65;stroke-width:3.20000005;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/save.png"
+       inkscape:export-xdpi="109.3476"
+       inkscape:export-ydpi="109.3476" />
+    <text
+       sodipodi:linespacing="125%"
+       id="text3906"
+       y="1050.4742"
+       x="72.226448"
+       style="font-size:15px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#4e4e4b;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       xml:space="preserve"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/save.png"
+       inkscape:export-xdpi="109.3476"
+       inkscape:export-ydpi="109.3476"><tspan
+         y="1050.4742"
+         x="72.226448"
+         id="tspan3908"
+         sodipodi:role="line">S</tspan></text>
+    <path
+       inkscape:connector-curvature="0"
+       id="path3968"
+       d="m 94.882678,1039.0514 c -0.63253,-0.1974 -0.98926,-0.8929 -0.79335,-1.5468 0.0757,-0.2525 0.32054,-0.5444 0.57874,-0.6899 0.20584,-0.116 0.26266,-0.1285 0.58078,-0.128 0.30115,5e-4 0.38344,0.017 0.56378,0.1114 0.58978,0.3096 0.83096,1.0303 0.54226,1.6204 -0.26548,0.5427 -0.8947,0.8132 -1.47221,0.6329 z"
+       style="fill:#4e4e4b;fill-opacity:1;stroke:#4e4e4b;stroke-opacity:1"
+       sodipodi:nodetypes="ccccccc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/pcl.png"
+       inkscape:export-xdpi="92.618683"
+       inkscape:export-ydpi="92.618683" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path3970"
+       d="m 89.579628,1042.3289 c -1.29148,-0.2343 -2.27781,-1.0686 -2.56257,-2.1676 -0.0809,-0.3123 -0.084,-0.953 -0.006,-1.2461 0.18692,-0.7022 0.69804,-1.3622 1.34356,-1.7349 0.11853,-0.068 0.13451,-0.096 0.11617,-0.2038 -0.064,-0.3748 -0.0696,-0.5311 -0.0292,-0.8214 0.22162,-1.5934 1.84703,-2.7254 3.61773,-2.5195 l 0.40858,0.047 0.13556,-0.157 c 0.66959,-0.7755 1.56293,-1.1751 2.62725,-1.1751 1.02752,0 1.85373,0.3298 2.51476,1.004 l 0.31868,0.3249 0.39049,-0.046 c 0.72059,-0.085 1.574462,0.096 2.207952,0.4684 0.16035,0.094 0.44082,0.3208 0.6263,0.506 0.56081,0.5601 0.84154,1.2697 0.78912,1.9949 -0.0132,0.1825 -0.0339,0.3692 -0.046,0.4148 -0.0175,0.066 0.0243,0.1108 0.20487,0.2193 1.04085,0.6255 1.56621,1.9035 1.2315,2.9958 -0.14204,0.4635 -0.35266,0.8104 -0.70731,1.165 -0.51327,0.5131 -1.18826,0.8445 -1.93006,0.9477 -0.49916,0.069 -10.861452,0.054 -11.251412,-0.017 z m 11.622272,-0.7361 c 0.92564,-0.3153 1.5541,-0.98 1.68749,-1.785 0.14067,-0.8489 -0.36965,-1.703 -1.29263,-2.1634 -0.21635,-0.1079 -0.39833,-0.2012 -0.40441,-0.2073 -0.006,-0.01 0.0395,-0.1308 0.10139,-0.2773 0.0984,-0.233 0.11237,-0.3206 0.11192,-0.7018 -4.1e-4,-0.3582 -0.0173,-0.476 -0.0949,-0.6629 -0.28634,-0.6895 -0.93894,-1.2263 -1.747512,-1.4375 -0.39042,-0.102 -1.12853,-0.093 -1.53493,0.02 -0.18431,0.051 -0.31689,0.069 -0.32526,0.045 -0.0491,-0.1409 -0.38068,-0.5675 -0.57727,-0.7428 -0.28192,-0.2512 -0.79864,-0.5137 -1.19244,-0.6056 -0.40632,-0.095 -1.22047,-0.062 -1.59716,0.064 -0.3126,0.1047 -0.73367,0.3441 -0.98285,0.5589 -0.12881,0.111 -0.46942,0.5627 -0.5709,0.7571 -0.002,0 -0.1437,-0.03 -0.3142,-0.077 -0.40603,-0.1118 -1.14402,-0.1201 -1.53379,-0.017 -0.71319,0.1883 -1.36362,0.6816 -1.63955,1.2435 -0.25901,0.5274 -0.28358,1.008 -0.0793,1.5508 0.0555,0.1474 0.10092,0.2734 0.10092,0.2798 0,0.01 -0.17843,0.098 -0.39651,0.2046 -0.53121,0.2584 -0.90378,0.6169 -1.12707,1.0846 -0.15416,0.3229 -0.15655,0.3355 -0.15655,0.8257 0,0.4789 0.005,0.5084 0.13687,0.7777 0.24536,0.5017 0.74339,0.9514 1.30731,1.1806 0.53737,0.2183 0.38654,0.2134 6.29271,0.2059 l 5.496712,-0.01 0.33188,-0.113 z"
+       style="fill:#93ba65;fill-opacity:1;stroke:#93ba65;stroke-opacity:1"
+       sodipodi:nodetypes="ccccccccssccccccccccccccscccccccccccccccccscsscccccc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/pcl.png"
+       inkscape:export-xdpi="92.618683"
+       inkscape:export-ydpi="92.618683" />
+    <path
+       inkscape:connector-curvature="0"
+       id="path3972"
+       d="m 96.186838,1049.9648 c -1.04448,-0.2815 -1.82862,-1.078 -2.12458,-2.1582 -0.10094,-0.3684 -0.10144,-1.1634 -9.6e-4,-1.5349 0.29107,-1.0763 1.09977,-1.9007 2.1417,-2.1833 0.40281,-0.1093 1.16632,-0.1003 1.58883,0.019 0.56746,0.1599 1.18383,0.5395 1.2788,0.7877 0.0647,0.1691 -0.0214,0.408 -0.18376,0.5096 -0.18675,0.1169 -0.35643,0.079 -0.64098,-0.1437 -0.49026,-0.3835 -0.84683,-0.5004 -1.45139,-0.4757 -0.52011,0.021 -0.84593,0.1624 -1.23369,0.5348 -0.47051,0.4518 -0.68569,0.9915 -0.68483,1.7176 8.3e-4,0.7006 0.20276,1.2205 0.64737,1.6666 0.7581,0.7606 1.85483,0.7802 2.75283,0.049 0.21345,-0.1738 0.29931,-0.2187 0.41811,-0.2187 0.31804,0 0.51688,0.2862 0.39746,0.572 -0.12421,0.2973 -0.78094,0.708 -1.37083,0.8573 -0.43301,0.1096 -1.12951,0.11 -1.53408,0 z"
+       style="fill:#93ba65;fill-opacity:1;stroke:#93ba65;stroke-opacity:1"
+       sodipodi:nodetypes="csccccccccscsscccc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/pcl.png"
+       inkscape:export-xdpi="92.618683"
+       inkscape:export-ydpi="92.618683" />
+    <path
+       style="fill:#4e4e4b;fill-opacity:1;stroke:#4e4e4b;stroke-opacity:1"
+       d="m 87.168158,1051.6852 c -0.25874,-0.1124 -0.25772,-0.1021 -0.25772,-2.6065 0,-1.8393 0.0117,-2.3242 0.0635,-2.6207 0.19601,-1.124 0.96759,-2.0251 2.03064,-2.3713 0.4484,-0.146 1.19458,-0.1808 1.65954,-0.077 0.95537,0.2125 1.79771,0.9517 2.13324,1.8718 0.52236,1.4325 -0.0354,3.0027 -1.32913,3.742 -0.60302,0.3446 -1.48039,0.4741 -2.17695,0.3214 -0.42089,-0.092 -0.92769,-0.3291 -1.22717,-0.5733 l -0.23611,-0.1926 -0.0128,1.129 c -0.014,1.2382 -0.0182,1.2595 -0.26759,1.3779 -0.15946,0.076 -0.20467,0.076 -0.37941,-3e-4 z m 3.2768,-2.5141 c 0.12091,-0.025 0.34645,-0.112 0.50119,-0.1925 1.29548,-0.6745 1.54491,-2.5553 0.4814,-3.6299 -1.0318,-1.0427 -2.7236,-0.7614 -3.35673,0.5581 -0.62369,1.2998 0.0315,2.8947 1.33304,3.2447 0.27184,0.073 0.74325,0.082 1.0411,0.02 z m 12.354102,0.7067 c -0.93913,-0.2396 -1.72456,-0.9279 -2.05597,-1.8017 -0.21291,-0.5614 -0.22268,-0.7115 -0.22418,-3.4432 -0.002,-2.8708 -0.0128,-2.7669 0.31127,-2.8789 0.14805,-0.051 0.18437,-0.05 0.31152,0.01 0.28065,0.1332 0.26545,-0.022 0.28873,2.9515 0.0185,2.3658 0.0294,2.7172 0.0889,2.8654 0.31706,0.7902 0.86251,1.2932 1.59087,1.4671 0.26758,0.064 0.36882,0.1319 0.43515,0.292 0.042,0.1013 0.0433,0.1648 0.006,0.289 -0.0868,0.2899 -0.30612,0.3623 -0.75235,0.2485 z"
+       id="path3974"
+       inkscape:connector-curvature="0"
+       sodipodi:nodetypes="csccccsccccccccccsccccccccscccccc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/pcl.png"
+       inkscape:export-xdpi="92.618683"
+       inkscape:export-ydpi="92.618683" />
+    <path
+       style="color:#000000;fill:url(#linearGradient4068);fill-opacity:1;stroke:#93ba65;stroke-width:0.37400000000000000;stroke-opacity:1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate;stroke-miterlimit:4;stroke-dasharray:none"
+       d="m 142.93163,1045.7931 5.20842,-4.3738 -5.15239,-8.6603 -5.38386,3.0205 z"
+       id="path3977"
+       inkscape:connector-curvature="0"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/normal_curvature.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <g
+       id="g4056"
+       transform="matrix(0.93967903,-0.15370373,0.19332669,0.74708863,-192.41494,284.86766)"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/normal_curvature.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109"
+       style="stroke:#dd2a2b">
+      <path
+         inkscape:export-ydpi="109"
+         inkscape:export-xdpi="109"
+         inkscape:export-filename="/home/luca/Code/qPCL/icons/normal_curvature.png"
+         sodipodi:nodetypes="cc"
+         inkscape:connector-curvature="0"
+         id="path3979"
+         d="m 143.46272,1038.6541 11.75835,-4.8303"
+         style="color:#000000;fill:none;stroke:#dd2a2b;stroke-width:1.12123727999999989;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      <g
+         style="stroke-width:2.28430556999999990;stroke-miterlimit:4;stroke-dasharray:none;stroke:#dd2a2b"
+         id="g3989"
+         transform="matrix(-0.13979917,-0.25365403,0.78930131,-0.29126207,-678.21405,1363.2327)">
+        <path
+           style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:#dd2a2b;stroke-width:2.28430556999999990;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           d="m 71.244295,1070.7858 -6.270568,-5.7122"
+           id="path3991"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="cc"
+           inkscape:export-filename="/home/luca/Code/qPCL/icons/save.png"
+           inkscape:export-xdpi="109.3476"
+           inkscape:export-ydpi="109.3476" />
+        <path
+           sodipodi:nodetypes="cc"
+           inkscape:connector-curvature="0"
+           id="path3993"
+           d="m 71.244295,1070.7978 6.270568,-5.7122"
+           style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:#dd2a2b;stroke-width:2.28430556999999990;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           inkscape:export-filename="/home/luca/Code/qPCL/icons/save.png"
+           inkscape:export-xdpi="109.3476"
+           inkscape:export-ydpi="109.3476" />
+      </g>
+    </g>
+    <text
+       transform="scale(0.74916906,1.3348122)"
+       sodipodi:linespacing="125%"
+       id="text3036"
+       y="787.67712"
+       x="182.4646"
+       style="font-size:11.23753548px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#4e4e4b;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       xml:space="preserve"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/normal_curvature.png"
+       inkscape:export-xdpi="109.3476"
+       inkscape:export-ydpi="109.3476"><tspan
+         y="787.67712"
+         x="182.4646"
+         id="tspan3038"
+         sodipodi:role="line">N+C</tspan></text>
+    <path
+       inkscape:export-ydpi="109"
+       inkscape:export-xdpi="109"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+       sodipodi:nodetypes="caaac"
+       inkscape:connector-curvature="0"
+       id="path3054"
+       d="m 166.51947,1041.9288 c 0,0 0.0409,-4.2541 1.60183,-5.1391 1.95264,-1.1072 4.42719,2.3233 6.5457,1.5814 2.16959,-0.7599 1.94697,-5.165 4.22827,-5.4481 1.67849,-0.2084 3.99652,3.1263 3.99652,3.1263"
+       style="color:#000000;fill:none;stroke:#dd2a2b;stroke-width:0.95912564000000000;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+    <text
+       inkscape:export-ydpi="109.3476"
+       inkscape:export-xdpi="109.3476"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+       xml:space="preserve"
+       style="font-size:11.23753548px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#4e4e4b;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       x="220.15051"
+       y="787.67712"
+       id="text3046"
+       sodipodi:linespacing="125%"
+       transform="scale(0.74916906,1.3348122)"><tspan
+         sodipodi:role="line"
+         id="tspan3048"
+         x="220.15051"
+         y="787.67712">MLS</tspan></text>
+    <path
+       sodipodi:type="arc"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3070"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(0.32287192,0,0,0.33262272,163.86212,1038.1858)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:type="arc"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3072"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(0.32287192,0,0,0.33262272,156.02121,1037.0869)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(0.32287192,0,0,0.33262272,150.38055,1037.5974)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3074"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(-0.32287192,0,0,0.33262272,184.72633,1041.1935)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3076"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:type="arc"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3078"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(-0.32287192,0,0,0.33262272,191.38809,1034.6856)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       sodipodi:type="arc"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3082"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(-0.32287192,0,0,0.33262272,199.01309,1034.7993)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <text
+       inkscape:export-ydpi="109.3476"
+       inkscape:export-xdpi="109.3476"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sift.png"
+       xml:space="preserve"
+       style="font-size:11.23753548px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#4e4e4b;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       x="147.55324"
+       y="786.98279"
+       id="text3017"
+       sodipodi:linespacing="125%"
+       transform="scale(0.74916908,1.3348122)"><tspan
+         sodipodi:role="line"
+         id="tspan3019"
+         x="147.55324"
+         y="786.98279">SIFT</tspan></text>
+    <text
+       transform="scale(0.74916906,1.3348122)"
+       sodipodi:linespacing="125%"
+       id="text3104"
+       y="787.67712"
+       x="257.1579"
+       style="font-size:11.23753548px;font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#4e4e4b;fill-opacity:1;stroke:none;font-family:Sans;-inkscape-font-specification:Sans Bold"
+       xml:space="preserve"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+       inkscape:export-xdpi="109.3476"
+       inkscape:export-ydpi="109.3476"><tspan
+         y="787.67712"
+         x="257.1579"
+         id="tspan3106"
+         sodipodi:role="line">SOR</tspan></text>
+    <path
+       inkscape:export-ydpi="109"
+       inkscape:export-xdpi="109"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(0.32287192,0,0,0.33262272,191.58692,1038.1858)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3108"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc" />
+    <path
+       inkscape:export-ydpi="109"
+       inkscape:export-xdpi="109"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(0.32287192,0,0,0.33262272,183.74601,1037.0869)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3110"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc" />
+    <path
+       inkscape:export-ydpi="109"
+       inkscape:export-xdpi="109"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+       sodipodi:type="arc"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3112"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(0.32287192,0,0,0.33262272,178.10535,1037.5974)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true" />
+    <path
+       inkscape:export-ydpi="109"
+       inkscape:export-xdpi="109"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+       sodipodi:type="arc"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3114"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(-0.32287192,0,0,0.33262272,212.45113,1041.1935)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true" />
+    <path
+       inkscape:export-ydpi="109"
+       inkscape:export-xdpi="109"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(-0.32287192,0,0,0.33262272,219.11289,1034.6856)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3116"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc" />
+    <path
+       inkscape:export-ydpi="109"
+       inkscape:export-xdpi="109"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(-0.32287192,0,0,0.33262272,226.73789,1034.7993)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3118"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc" />
+    <path
+       sodipodi:type="arc"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3120"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(0.32287192,0,0,0.33262272,185.58692,1040.1858)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <path
+       inkscape:export-ydpi="109"
+       inkscape:export-xdpi="109"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+       sodipodi:open="true"
+       sodipodi:end="12.527331"
+       sodipodi:start="6.2485671"
+       transform="matrix(0.32287192,0,0,0.33262272,195.58692,1040.1858)"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       sodipodi:ry="2.9464285"
+       sodipodi:rx="3.0357144"
+       sodipodi:cy="-5.7314472"
+       sodipodi:cx="49.244938"
+       id="path3122"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       sodipodi:type="arc" />
+    <path
+       sodipodi:type="arc"
+       style="color:#000000;fill:#93ba65;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.1;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+       id="path3124"
+       sodipodi:cx="49.244938"
+       sodipodi:cy="-5.7314472"
+       sodipodi:rx="3.0357144"
+       sodipodi:ry="2.9464285"
+       d="m 52.278833,-5.8334269 a 3.0357144,2.9464285 0 1 1 -4.94e-4,-0.013019"
+       transform="matrix(0.32287192,0,0,0.33262272,189.58692,1042.1858)"
+       sodipodi:start="6.2485671"
+       sodipodi:end="12.527331"
+       sodipodi:open="true"
+       inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+       inkscape:export-xdpi="109"
+       inkscape:export-ydpi="109" />
+    <g
+       id="g3130"
+       transform="matrix(0.1410589,-0.1410589,0.1410589,0.1410589,48.10263,918.6007)"
+       style="stroke-width:2.50642395;stroke-miterlimit:4;stroke-dasharray:none">
+      <g
+         id="g3902"
+         transform="translate(-110.55461,-88.482412)"
+         inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+         inkscape:export-xdpi="109"
+         inkscape:export-ydpi="109">
+        <path
+           style="color:#000000;fill:none;stroke:#dd2a2b;stroke-width:2.50642395;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           d="m 226.51947,1038.9891 16.37232,0"
+           id="path3126"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="cc"
+           inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+           inkscape:export-xdpi="109"
+           inkscape:export-ydpi="109" />
+        <path
+           inkscape:export-ydpi="109"
+           inkscape:export-xdpi="109"
+           inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+           sodipodi:nodetypes="cc"
+           inkscape:connector-curvature="0"
+           id="path3128"
+           d="m 234.70563,1047.1753 0,-16.3724"
+           style="color:#000000;fill:none;stroke:#dd2a2b;stroke-width:2.50642395;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+      </g>
+      <g
+         transform="translate(-87.514332,-56.92304)"
+         id="g3906"
+         inkscape:export-filename="/home/luca/Code/qPCL/icons/sor_outlier_remover.png"
+         inkscape:export-xdpi="109"
+         inkscape:export-ydpi="109">
+        <path
+           inkscape:export-ydpi="109"
+           inkscape:export-xdpi="109"
+           inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+           sodipodi:nodetypes="cc"
+           inkscape:connector-curvature="0"
+           id="path3908"
+           d="m 226.51947,1038.9891 16.37232,0"
+           style="color:#000000;fill:none;stroke:#dd2a2b;stroke-width:2.50642395;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+        <path
+           style="color:#000000;fill:none;stroke:#dd2a2b;stroke-width:2.50642395;stroke-linecap:round;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+           d="m 234.70563,1047.1753 0,-16.3724"
+           id="path3911"
+           inkscape:connector-curvature="0"
+           sodipodi:nodetypes="cc"
+           inkscape:export-filename="/home/luca/Code/qPCL/icons/mls_smoothing.png"
+           inkscape:export-xdpi="109"
+           inkscape:export-ydpi="109" />
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,15 @@
+\subsection{Mesh > Delaunay 2D}
+\label{subsection:computeDelaunay2DMesh}
+
+\index{Delaunay|see{triangulation}}
+\index{maillage!calculer à partir d'un nuage|see{triangulation}}
+\index{triangulation}
+
+Cette fonction permet de calculer un maillage 2D$\frac{1}{2}$ de type Delaunay à partir d'un nuage de points.\\
+\par
+Puisque la méthode produit un maillage 2D$\frac{1}{2}$ à partir d'un nuage de points 3D, CloudCompare doit projeter préalablement celui-ci sur un plan avant de calculer sa triangulation associée. Ainsi cette méthode est-elle déclinée en deux versions :
+\begin{itemize}
+\item \emph{axis aligned plane} : \emph{CloudCompare} estime que les altitudes sont portées par l'axe principal Z et les points sont donc projetés sur le plan (XY)
+\item \emph{best LS plane} : approche plus générique, où les points sont projetés sur le plan interpolant le mieux
+le nuage au sens des moindres carrés (cette méthode est particulièrement adaptée aux nuages assez \emph{plats} dont les altitudes ne sont pas forcément portées par Z).
+\end{itemize}

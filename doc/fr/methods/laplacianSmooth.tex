@@ -1,0 +1,19 @@
+\subsection{Mesh > Smooth (Laplacian)}
+\label{subsection:samplePoints}
+\index{echantillonner@échantillonner!des points sur un maillage}
+
+Cette fonction lisse un maillage par approche de type Laplacien (voir figure~\ref{fig:laplacianSmooth}). Attention, ce type d'approche ne conserve pas la volume du maillage. De plus, les sommets du maillage sont déplacés.\\
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{Partie3_Fonctions/meshLaplacianSmooth.png}
+\caption{\label{fig:laplacianSmooth}Maillage avant (à gauche) et après (à droite) lissage de type \textit{Laplacien}}
+\end{center}
+\end{figure}
+
+\par
+Avant d'appliquer cette fonction, CloudCompare demande à l'utilisateur de définir deux paramètres :
+\begin{itemize}
+\item le nombre d'itérations : plus les itérations sont nombreuses, plus le lissage est fort... et plus la méthode est longue.
+\item la force du lissage à chaque itération : plus celle-ci est élevée, et plus le lissage est fort (ce qui peut permettre de diminuer le nombre d'itérations - voir ci-dessus) mais plus les risques de problèmes topologiques sont élevés.\\
+\end{itemize}

@@ -1,0 +1,64 @@
+\subsection{Tools > Statistics > Statistical test}
+\label{subsection:statisticalTest}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.4\textwidth]{Partie3_Fonctions/statisticalTestDlg.png}
+\caption{\label{fig:statisticalTestDlg}Exemple d'estimation automatique des paramètres d'une loi normale pour un champ scalaire}
+\end{center}
+\end{figure}
+
+\index{champ scalaire}
+\index{statistiques!test}
+\index{statistiques!paramètres}
+\index{Gauss|see{loi normale}}
+Cette fonction, centrale dans \emph{CloudCompare}, permet d'appliquer un test du $\chi^{2}$ local sur un nuage de point muni d'un champ scalaire.
+Le test du $\chi^{2}$ est appliqué à chaque point à partir de l'histogramme des valeurs scalaires de ses $n$ voisins ($n$ étant
+un des paramètres de l'algorithme). Le test confronte cet histogramme\index{histogramme} avec une distribution théorique à deux paramètres ($\mu$
+et $\sigma$ dans le cas d'une loi normale par exemple).
+\\
+\par
+Avant de spécifier les paramètres, l'utilisateur doit choisir le type de distribution théorique (il a le choix actuellement entre
+\emph{Gauss} et \emph{Weibull}). Le résultat est un nouveau champ scalaire (une valeur pour chaque point - la métrique du $\chi^{2}$ -
+qui donne une information sur la concordance locale entre la valeur scalaire et la distribution testée). La théorie du test du
+$\chi^{2}$ nous fournit un seuil (calculé à partir de la marge d'erreur $p(\chi^{2})$, dernier paramètre de l'algorithme) qui permet
+de classer les points en fonction de leur non-appartenance à la loi testée. Cette loi représentera typiquement le bruit de mesure,
+et on obtiendra ainsi l'ensemble des points dont la distance (à l'autre nuage/maillage) ne fait pas partie du bruit de mesure (par exemple).
+Ainsi, on aura les points qui ont effectivement subi une modification, un changement, et on évitera de prendre en compte des points
+en réalité immobiles mais dont la distance n'est pas nulle car elle est bruitée. Une fois le nuage séparé en deux classes,
+on peut garder le groupe des points \emph{hors distribution} (voir figure~\ref{fig:statisticalTestExample}, en rouge) et les
+segmenter\index{segmentation} par exemple en fonction de la proximité relative des points (par une extraction des composantes connexes - Cf.
+section~\ref{subsection:labelConnectedComponents}).\index{composantes connexes}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{Partie3_Fonctions/statisticalTestExample.jpg}
+\caption{\label{fig:statisticalTestExample}Champ des écarts initial (en haut à gauche), filtrage statistique (en haut à droite),
+puis extraction des points \emph{hors distribution théorique} (en bas à gauche) et enfin extraction des composantes connexes
+(en bas à droite).}
+\end{center}
+\end{figure}
+
+Remarques :
+\begin{itemize}
+\item Pour appeler cette fonction, il faut sélectionner une seule entité 3D, munie d'un champ scalaire actif.
+\item Pour régler le paramètre $p(\chi^{2})$, il est important de comprendre que le test du $\chi^{2}$ permet uniquement de rejeter
+l'hypothèse selon laquelle \emph{les valeurs du champ scalaire prises sur le voisinage de chaque point suivent la loi testée}, mais
+pas l'inverse. Ainsi, plus la marge d'erreur est faible, et plus le seuil du $\chi^{2}$ sera grand (on rejette moins souvent
+l'hypothèse citée précédemment, et on classe donc moins de points comme \emph{ne suivant pas la loi testée}).
+\item \textcolor[rgb]{1.00,0.00,0.00}{Inversement, plus $p(\chi^{2})$ est grand, plus on aura de points "hors la loi", colorés en rouge.}
+Notez que ce paramètre sert uniquement à pré-positionner les potentiomètres de réglage des couleurs (seuils de coupure et de saturation
+des valeurs du champ scalaire) pour l'affichage du résultat à l'écran (Cf. section~\ref{Champs-scalaires}). Ces potentiomètres peuvent
+être ensuite déplacés par l'utilisateur avant extraction effective des points (par appel de la fonction \emph{Scalar Fields > Filter
+by Value}, qui va créer un nouveau nuage de points ne comportant que les points présentement affichés à l'écran, c.à.d. les points ne
+suivant pas la distribution théorique). De plus, la distance du $\chi^{2}$ est extrêmement divergente et ceci donne une grande marge
+de manoeuvre à l'algorithme. Ainsi, une modification relativement grande du seuil de coupure n'aura que peut d'effet sur la
+classification. Au pire, on risque de rater un tout petit nombre de points (au niveau des bordures des zones limites).
+\item Pour obtenir des résultats précis, il faut par contre connaître ou mesurer la distribution du bruit de mesure
+(une sorte de bruit moyen, en première approximation, comprenant l'erreur de mesure dûe au capteur, à la surface scannée, à la lumière,
+à la température ambiante lors de la mesure, à la création du maillage dans le cas d'une comparaison nuage/maillage, etc.).
+Les paramètres de la distribution statistique correspondante peuvent donc être définis à partir de connaissances a priori
+mais peuvent aussi être déterminés à partir d'un champ scalaire (une portion du nuage typiquement) avec la fonction de calcul de paramètres statistiques
+à partir d'un champ scalaire (Cf. section~\ref{subsection:computeStatParams}).
+\item L'algorithme crée un nouveau champ scalaire nomme (\emph{Chi2 Distances}). Ce champ est ajouté au nuage de points courant.
+\end{itemize}

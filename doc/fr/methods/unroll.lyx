@@ -1,0 +1,365 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Tools > Projection > Unroll
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:unroll"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/unrollDlg.png
+	width 60text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:unrollDlg"
+
+\end_inset
+
+Interface de paramétrage pour le calcul d'une 
+\shape italic
+développée
+\shape default
+ d'un nuage selon un cylindre ou un cône.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+developper@développer
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+derouler@dérouler|see
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+développer
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ Cette fonction permet de 
+\emph on
+développer
+\emph default
+ (ou encore 
+\shape italic
+dérouler
+\shape default
+) un nuage de point considéré comme étant porté par une forme de révolution
+ (cylindre ou un cône).
+ Voir figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:unrollExample"
+
+\end_inset
+
+.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Il faut pour cela renseigner différents paramètres définissant la forme
+ de révolution : 
+\end_layout
+
+\begin_layout Itemize
+le type (cylindre ou cône) 
+\end_layout
+
+\begin_layout Itemize
+la dimension selon laquelle est positionnée l'axe de révolution (X, Y ou
+ Z pour l'instant) 
+\end_layout
+
+\begin_layout Itemize
+si la forme est un cylindre l'utilisateur devra spécifier :
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+le rayon du cylindre 
+\end_layout
+
+\begin_layout Itemize
+et éventuellement un point par lequel passe l'axe de révolution (il faut
+ pour cela décocher la case à cocher 
+\emph on
+Auto (gravity-center)
+\emph default
+, autrement - comme le nom de la case à cocher l'indique - le centre de
+ gravité du nuage est pris par défaut) 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+si la forme est un cône :
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+la base du cône 
+\end_layout
+
+\begin_layout Itemize
+son apex (i.e.
+ un point 3D)
+\end_layout
+
+\begin_layout Itemize
+l'angle d'ouverture du cône (exprimé à l'apex du cône, relativement à l'axe)
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+textcolor{red}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Attention, pour optimiser la mémoire, cette fonction applique la transformée
+ directement sur l'entité sélectionnée ! Il peut être nécessaire d'utiliser
+ avant l'outil de clonage
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+cloner
+\end_layout
+
+\end_inset
+
+ - voir section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:clone"
+
+\end_inset
+
+.
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/unroll.jpg
+	width 90text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:unrollExample"
+
+\end_inset
+
+Exemple de 
+\shape italic
+développée
+\shape default
+ cylindrique : nuage original (à gauche) et sa développée (à droite)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

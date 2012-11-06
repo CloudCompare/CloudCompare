@@ -1,0 +1,27 @@
+\subsection{Mesh > Sample Points}
+\label{subsection:samplePoints}
+\index{echantillonner@échantillonner!des points sur un maillage}
+
+Cette fonction échantillonne de manière aléatoire des points sur une surface décrite par un maillage triangulaire (voir figure~\ref{fig:pointsSampling}).\\
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{Partie3_Fonctions/pointsSampling.jpg}
+\caption{\label{fig:pointsSampling}Illustration du principe de l'échantillonnage de points sur un maillage}
+\end{center}
+\end{figure}
+
+\par
+Cette fonction génère un nouveau nuage de points. L'utilisateur à le choix via l'interface~\ref{fig:samplePointsOnMeshDlg} de spécifier :
+\begin{itemize}
+\item soit le nombre total de points désiré (approximatif).
+\item soit la densité par unité de surface. Attention, la surface est exprimée dans l'unité implicite (au carré) des sommets du maillage. Pour connaître la surface totale du maillage \index{surface, mesurer}, vous pouvez appeler préalablement la fonction << Mesh > Measure surface >> (section~\ref{subsection:measureSurface}).\\
+\end{itemize}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.3\textwidth]{Partie3_Fonctions/samplePointsOnMeshDlg.png}
+\caption{\label{fig:samplePointsOnMeshDlg}Interface pour l'échantillonnage de points sur un maillage}
+\end{center}
+\end{figure}
+

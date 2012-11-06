@@ -1,0 +1,753 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+
+\backslash
+chapternonum{
+\end_layout
+
+\end_inset
+
+Introduction
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "cha:Introduction"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Présentation
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+presentation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+CloudCompare
+\emph default
+ est un logiciel de traitement et de comparaison de nuages de points 3D
+ denses (ainsi que de maillages triangulaires dans une certaine mesure).
+ Son développement a été initié à partir de 2004 dans le cadre d
+\begin_inset Quotes ers
+\end_inset
+
+une thèse CIFRE financée par EDF R&D et encadrée par l
+\begin_inset Quotes ers
+\end_inset
+
+École Nationale Supérieure des Télécommunications (ENST – désormais Telecom
+ ParisTech – laboratoire TSI, équipe TII).
+ Il se poursuit depuis et est désormais un projet 
+\shape italic
+open-source
+\shape default
+ indépendant.
+ CloudCompare n
+\begin_inset Quotes ers
+\end_inset
+
+est pas voué à un usage commercial.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Historiquement, ce logiciel a été conçu pour traiter des nuages de points
+ denses (tels que ceux issus d'un scanner laser 3D) dans le but de les comparer
+ pour en extraire les différences.
+ Il permet donc typiquement : 
+\end_layout
+
+\begin_layout Itemize
+de calculer les distances locales entre deux nuages de points denses ou
+ entre un nuage et un maillage triangulaire (figure de gauche ci-dessous)
+ 
+\end_layout
+
+\begin_layout Itemize
+de filtrer le bruit de mesure du scanner laser pour mettre en évidence les
+ "vraies" différences (figure du milieu) 
+\end_layout
+
+\begin_layout Itemize
+de segmenter les points restants en sous-ensembles correspondant à des objets
+ distincts (figure de droite) 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Graphics
+	filename images/Partie1_Introduction/illustration_CloudCompare.jpg
+	width 90text%
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Depuis, CloudCompare a beaucoup évolué et il offre désormais de nombreuses
+ fonctions d'édition (transformation rigide interactive, segmentation interactiv
+e), de recalage automatique (type ICP), de modélisation (calcul de maillages
+ surfaciques type Delaunay ou Poisson), de reprojection (selon le point
+ de vue du scanner, selon une direction principale, sur un cylindre ou un
+ cône, etc.), de calcul morphologiques (rugosité, courbure, etc.) et autres.
+ A travers un système de plugins, l'utilisateur a aussi accès à des fonctionnali
+tés et librairies externes (des algorithmes issus du monde de la recherche
+ - reconstruction de maillage par approche de type Poisson, filtrage des
+ points non visibles, etc.
+ - des périphériques d'acquisition comme la Kinect de Microsoft, ou encore
+ des shaders évolués pour faciliter la visualisation des entités 3D - Eye
+ Dome Lighting ou SSAO, etc.).
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+L'originalité de 
+\emph on
+CloudCompare
+\emph default
+ tient à plusieurs aspects : 
+\end_layout
+
+\begin_layout Itemize
+les structures de données utilisées : notamment un "octree" particulier
+ permettant de traiter très rapidement des nuages de points volumineux (plusieur
+s millions de points 3D)
+\end_layout
+
+\begin_layout Itemize
+un grand nombre de choix et de méthodes pour le calcul de distance entre
+ nuages de points ou entre un nuage et un maillage triangulaire (tous basés
+ sur la notion de 
+\shape italic
+distance au plus proche voisin
+\shape default
+)
+\end_layout
+
+\begin_layout Itemize
+la possibilité de prendre en compte les différences d'échantillonnage entre
+ les jeux de données comparés
+\end_layout
+
+\begin_layout Itemize
+la possibilité de filtrer le bruit de mesure a postériori
+\end_layout
+
+\begin_layout Itemize
+la possibilité de prendre en compte la visibilité du scanner pour chaque
+ jeu de données
+\end_layout
+
+\begin_layout Itemize
+la gestion de champs scalaires multiples associés à un même nuage de points
+ (comme des distances typiquement).
+ Ces champs scalaires peuvent être affichés par coloration dynamique des
+ points.
+ Ils peuvent permettre aussi de moduler l'affichage de l'entité (par filtrage
+ des points associés à certaines valeurs) ou encore de segmenter le nuage
+ associé.
+ Plus généralement, ils servent d'entrée à de nombreux algorithmes, ils
+ peuvent être composés ensembles, etc.
+ 
+\end_layout
+
+\begin_layout Itemize
+enfin, plusieurs types de rendus évolués (soit temps réel via des shaders
+ ou 
+\shape italic
+offline
+\shape default
+ via un calcul de 
+\shape italic
+Portion de Ciel Visible
+\shape default
+ par exemple) permettent une forte amélioration de la lisibilité des données
+ 3D à l
+\begin_inset Quotes ers
+\end_inset
+
+écran.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Il est enfin important de noter que bien que 
+\emph on
+CloudCompare
+\emph default
+ soit capable de gérer des maillages triangulaires, ce type d'entité reste
+ avant tout pour 
+\emph on
+CloudCompare
+\emph default
+ un nuage de points (les sommets du maillage) muni d
+\begin_inset Quotes ers
+\end_inset
+
+une structure particulière (des triangles), à côté de nombreuses autres
+ structures (octree, kd-tree, couleurs, normales, champs scalaires, photos
+ calibrées, etc.).
+ L
+\begin_inset Quotes ers
+\end_inset
+
+utilisateur est donc invité à toujours garder cette particularité à l
+\begin_inset Quotes ers
+\end_inset
+
+esprit lorsqu
+\begin_inset Quotes ers
+\end_inset
+
+il utilise 
+\emph on
+CloudCompare
+\emph default
+, et il devra en particulier toujours faire attention au rôle de chaque
+ entité 3D dans les traitements proposés par ce logiciel.
+\end_layout
+
+\begin_layout Section
+Licence
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+licence
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Le logiciel 
+\emph on
+CloudCompare
+\emph default
+ est constitué de plusieurs 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+composants logiciels
+\end_layout
+
+\end_inset
+
+composants logiciels : 
+\end_layout
+
+\begin_layout Itemize
+La librairie 
+\series bold
+CClib
+\series default
+ (algorithmes) 
+\end_layout
+
+\begin_layout Itemize
+La librairie 
+\series bold
+qCC_db
+\series default
+ (base de données) 
+\end_layout
+
+\begin_layout Itemize
+Le programme 
+\series bold
+qCC
+\series default
+ qui utilise ces librairies 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Installer et utiliser ces composants signifie que vous acceptez les termes
+ et les conditions de leurs licences respectives.
+ La version 2.4 et les versions antérieures de ces deux composants logiciels
+ sont la propriété d
+\begin_inset Quotes ers
+\end_inset
+
+EDF R&D et de TELECOM ParisTech.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Licence de la librairie CClib
+\series default
+ : 
+\begin_inset Newline newline
+\end_inset
+
+ La librairie CClib est diffusée sous la licence GNU LGPL (GNU Lesser General
+ Public Licence) telle qu
+\begin_inset Quotes ers
+\end_inset
+
+elle a été publiée par la FSF (Free Software Foundation) ici : 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://www.gnu.org/licenses/lgpl.html"
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Licence de la librairie qCC_db
+\series default
+ : 
+\begin_inset Newline newline
+\end_inset
+
+ La librairie qCC_db est diffusée sous la licence GNU GPL (GNU General Public
+ Licence) telle qu
+\begin_inset Quotes ers
+\end_inset
+
+elle a été publiée par la FSF (Free Software Foundation) ici : 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://www.gnu.org/licenses/gpl.html"
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Licence du programme exécutable qCC
+\series default
+ : 
+\begin_inset Newline newline
+\end_inset
+
+ Le programme qCC est diffusé sous la licence GNU GPL (GNU General Public
+ Licence) tel qu
+\begin_inset Quotes ers
+\end_inset
+
+elle a été publiée par la FSF (Free Software Foundation) ici : 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://www.gnu.org/licenses/gpl.html"
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+EDF R&D et TELECOM ParisTech accordent à l'utilisateur les droits d'installer
+ et d
+\begin_inset Quotes ers
+\end_inset
+
+utiliser le logiciel 
+\emph on
+CloudCompare
+\emph default
+ après l'avoir téléchargé depuis le site 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://www.danielgm.net/cc"
+
+\end_inset
+
+.
+ Le logiciel 
+\emph on
+CloudCompare
+\emph default
+ est fourni en l
+\begin_inset Quotes ers
+\end_inset
+
+état, sans aucune garantie explicite ou implicite.
+ Les auteurs déclinent toute responsabilité pour tout dommage direct ou
+ indirect.
+ L
+\begin_inset Quotes ers
+\end_inset
+
+utilisateur assume tous les risques et responsabilités quant à la qualité
+ du logiciel 
+\emph on
+CloudCompare
+\emph default
+ et de son utilisation.
+\end_layout
+
+\begin_layout Section
+Installation du binaire (Windows)
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+installation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+CloudCompare
+\emph default
+ fonctionne sous les systèmes d'exploitation Windows (XP, Vista & Seven)
+ et Linux (Debian, Ubuntu, etc.) et pour des architectures 32 ou 64 bits.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Les versions binaires de 
+\emph on
+CloudCompare
+\emph default
+ pour Windows téléchargeables sur le site officiel ne comportent pas de
+ programme d'installation.
+ Il suffit de décompresser l'archive .zip contenant 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+exécutable
+\end_layout
+
+\end_inset
+
+l'exécutable et les 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+DLL (Dynamic Link Libraries)
+\end_layout
+
+\end_inset
+
+DLLs.
+\begin_inset Newline newline
+\end_inset
+
+ Voici la liste minimale des fichiers que vous devez trouver après décompression
+ de l'archive : 
+\end_layout
+
+\begin_layout Itemize
+qCC.exe (exécutable principal) 
+\end_layout
+
+\begin_layout Itemize
+history.txt (l'historique des modifications) 
+\end_layout
+
+\begin_layout Itemize
+license.txt (la licence d'utilisation) 
+\end_layout
+
+\begin_layout Itemize
+CC_DLL.dll (librairie CClib) 
+\end_layout
+
+\begin_layout Itemize
+QCC_DB_DLL.dll (librairie qCC_db) 
+\end_layout
+
+\begin_layout Itemize
+QtCore4.dll (DLL Qt - 
+\begin_inset CommandInset href
+LatexCommand href
+target "qt.nokia.com"
+
+\end_inset
+
+) 
+\end_layout
+
+\begin_layout Itemize
+QtGui4.dll (DLL Qt - 
+\begin_inset CommandInset href
+LatexCommand href
+target "qt.nokia.com"
+
+\end_inset
+
+) 
+\end_layout
+
+\begin_layout Itemize
+QtOpenGL4.dll (DLL Qt - 
+\begin_inset CommandInset href
+LatexCommand href
+target "qt.nokia.com"
+
+\end_inset
+
+) 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Et de manière optionnelle : 
+\end_layout
+
+\begin_layout Itemize
+un certain nombre de DLLs supplémentaires nécessaires à certains plugins
+ (freenect.dll, etc.) ou à la prise en charge de formats de fichiers (liblas.dll,
+ etc.) 
+\end_layout
+
+\begin_layout Itemize
+un sous-répertoire 
+\shape italic
+plugins
+\shape default
+ contenant les DLLs de chaque plugin 
+\end_layout
+
+\begin_layout Itemize
+un sous-répertoire 
+\shape italic
+shaders
+\shape default
+ contenant les fichiers requis par certains plugins 
+\end_layout
+
+\begin_layout Itemize
+un sous-répertoire 
+\shape italic
+imageformats
+\shape default
+ contenant les librairies nécessaires à la lecture et l'écriture de fichiers
+ images 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Sous Linux, il faut impérativement compiler le projet pour l'utiliser (voir
+ ci-dessous).
+\end_layout
+
+\begin_layout Section
+Compilation du projet
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+compilation
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+L'intégralité du code de 
+\emph on
+CloudCompare
+\emph default
+ est écrite en C++.
+ Le projet utilise désormais le générateur de projets de compilation 
+\emph on
+CMake
+\emph default
+ (
+\begin_inset CommandInset href
+LatexCommand href
+name "http://www.cmake.org"
+target "http://www.cmake.org/"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Pour compiler le projet, référez vous au 
+\emph on
+wiki
+\emph default
+ : 
+\begin_inset CommandInset href
+LatexCommand href
+target "http://www.danielgm.net/cc/doc/wiki"
+
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\end_body
+\end_document

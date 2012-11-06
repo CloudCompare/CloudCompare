@@ -1,0 +1,116 @@
+\documentclass[a4paper,10pt,onecolumn,french]{book}
+\usepackage{helvet}
+\renewcommand{\familydefault}{\sfdefault}
+\usepackage[T1]{fontenc}
+\usepackage[latin9]{inputenc}
+\usepackage{geometry}
+\geometry{verbose,a4paper,tmargin=3cm,bmargin=3cm,lmargin=1.5cm,rmargin=1.5cm}
+\setcounter{secnumdepth}{3}
+\setcounter{tocdepth}{3}
+\usepackage{color}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{graphicx}
+\usepackage{bbding}
+\usepackage{makeidx}
+%\usepackage{hyperref}
+\usepackage[unicode=true, pdfusetitle,
+ bookmarks=true,bookmarksnumbered=false,bookmarksopen=false,
+ breaklinks=false,backref=false,colorlinks=true,linkcolor=blue]
+ {hyperref}
+
+\makeatletter
+\providecommand{\tabularnewline}{\\}
+\@ifundefined{definecolor}
+ {\usepackage{color}}{}
+\makeatother
+
+\usepackage{babel}
+\addto\extrasfrench{\providecommand{\og}{\leavevmode\flqq~}\providecommand{\fg}{\ifdim\lastskip>\z@\unskip\fi~\frqq}}
+
+% RAJOUT PAR DGM LE 12/01/09
+
+\graphicspath{{./}{images/}}
+
+\usepackage{fancyhdr}
+\newcommand{\chapternonum}[1]{\chapter*{#1\markboth{#1}{#1}}}
+\pagestyle{fancy}
+\fancyhf{}
+%----       le numéro de la page       ----
+%---- à gauche sur les pages de gauche ----
+%---- à droite sur les pages de droite ----
+\fancyhead[LE,RO]{\thepage}
+%---- \leftmark, cad le chapitre, à droite des pages de gauche
+\fancyhead[RE]{\textsc{\leftmark}}
+%---- \rightmark, cad la section, à gauche des pages de droite
+\fancyhead[LO]{\textsc{\rightmark}}
+%---- les barres ----%
+\renewcommand{\headrulewidth}{1pt}
+\renewcommand{\footrulewidth}{1pt}
+\addtolength{\headheight}{1pt}
+%---- on redefinit le style plain (\chapter le force pour la
+%---- première page de tout chapitre
+\fancypagestyle{plain}{
+  \fancyhead[RE]{}
+  \fancyhead[LO]{}
+}
+
+% POUR LES FRACTIONS JOLIES
+% http://www.ctan.org/tex-archive/macros/eplain/
+\def\fract#1/#2{\leavevmode
+   \kern.1em \raise .5ex \hbox{\the\scriptfont0 #1}%
+   \kern-.1em $/$%
+   \kern-.15em \lower .25ex \hbox{\the\scriptfont0 #2}%
+}%
+
+% FIN RAJOUT DGM LE 12/01/09
+
+\title{CloudCompare - Guide de l'utilisateur}
+\author{Daniel Girardeau-Montaut, Aurélien Bey et Raphaël Marc}
+\date{}
+
+%---- pour traiter les entrees d'index ----
+\makeindex
+
+\begin{document}
+
+%---- Page de titre en français ----
+\input{titre}
+
+\frontmatter
+
+%\maketitle
+
+%---- Table des matières ----
+\tableofcontents \markboth{Table des matières}{Table des matières}
+
+\mainmatter
+
+%---- TOC ----
+\markright{Table des matières}
+\addcontentsline{toc}{chapter}{Introduction}
+
+%---- Introduction ----
+\input{Partie1_Introduction}
+
+%---- Interface ----
+\input{Partie2_Interface}
+
+%---- Fonctions ----
+\input{Partie3_Fonctions}
+
+%---- Plugins ----
+\input{Partie4_Plugins}
+
+%---- Appendix ----
+\begin{appendix}
+\input{Annexes}
+\end{appendix}
+
+%---- Index ----
+%\addcontentsline{toc}{chapter}{Index}
+%\printindex{}
+
+\backmatter
+
+\end{document}

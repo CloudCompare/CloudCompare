@@ -1,0 +1,19 @@
+\subsection{Scalar Fields > Gaussian Filter}
+\label{subsection:scalarFieldGaussianFilter}
+
+\index{filtrage!gaussien}
+\index{contraste!lissage|see{filtrage}}
+\index{champ scalaire}
+
+Application d'un filtre gaussien au champ scalaire actif.
+\\
+\par
+L'utilisateur doit définir le noyau \emph{sigma} du filtre gaussien. Pour régler ce paramètre simplement, on peut se servir de l'octree\index{octree}, en prenant typiquement comme valeur la taille d'une cellule au niveau 8 pour un filtrage doux, 7 pour un filtrage relativement fort, etc. (la taille d'une cellule est affichée au niveau de la console lorsqu'on affiche un \emph{rendu} du nuage via l'octree - Cf. section~\ref{subsection:octreeProp}).
+\\
+\par
+Remarques :
+\begin{itemize}
+\item A partir de \emph{sigma}, on peut déduire très simplement le rayon de la sphère en 3D délimitant le voisinage qui sera considéré autour de chaque point. On calcule en effet pour chaque point la moyenne des valeurs scalaires de ses voisins, pondérée par la distance selon une loi gaussienne. Etant donné que $3\sigma$ correspond à un écrasement du poids de 99,9\%, CloudCompare ne considére pas les points plus éloignés.
+\item Plus le noyau est grand, plus le calcul est lent.
+\item Cette fonction est très utile pour lisser le résultat d'un calcul du gradient\index{gradient} (section~\ref{subsection:scalarFieldGradient}) mais aussi d'un calcul de Portion de Ciel Visible (section~\ref{subsection:PCV}) sur un nuage de points par exemple.
+\end{itemize}

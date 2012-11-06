@@ -1,0 +1,29 @@
+\subsection{Point list picking}
+\label{subsection:pointListPicking}
+
+L'outil de \textit{picking} d'une liste de points permet de sélectionner interactivement une liste de points 3D d'un nuage (et de la sauver dans un fichier ou un nouveau nuage).
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{Partie3_Fonctions/pointListPicking.png}
+\caption{\label{fig:pointPicking}Interface de \textit{picking} d'une liste de points 3D}
+\end{center}
+\end{figure}
+
+L'outil de picking d'une liste de points s'active dans la vue 3D courante et pour un nuage de point qui doit être préalablement sélectionné. Une interface apparaît alors dans son coin haut-droit et l'interface principale de CloudCompare est \textit{gelée} (la plupart des icônes et menus ne sont plus accessibles, mis à part les options d'affichage). Celle-ci est rétablie quand l'utilisateur quitte l'outil (dernière icône à droite en forme de croix rouge).\\
+Cet outil permet de sélectionner une liste de points (par clicks successifs sur les points dans la vue 3D). Chaque point est ajouté à un tableau qui affiche les points dans leur ordre de sélection avec 5 colonnes : l'indice du point dans la liste (cet indice apparaît aussi à côté du point dans la vue 3D) ; l'indice du point dans le nuage ; et les coordonnées du point dans les 3 dernières colonnes (X, Y et Z).\\
+Une fois la liste formée, il est possible de l'exporter avec l'icône ``disquette'' (celle-ci fait apparaître une liste déroulante) :
+\begin{itemize}
+\item (x,y,z) : exporte la liste sous la forme d'un fichier de points (ASCII - un point par ligne) avec uniquement les coordonnées des points (x,y,z)
+\item (local index,x,y,z) : exporte la liste sous la forme d'un fichier de points (ASCII - un point par ligne) avec les coordonnées des points précédées de l'indice du point dans la liste (i,x,y,z)
+\item (new cloud) : exporte la liste sous la forme d'un nouveau nuage de points\\
+\end{itemize}
+
+Les autres icônes permettent de :
+\begin{itemize}
+\item supprimer le dernier point dans la liste (première icône - ``flêche'' qui se mord la queue)
+\item valider la sélection et fermer l'outil (icône avec symbole vert). Dans ce cas les points de la liste sont conservés dans un sous groupe \textit{Picked points list} sous forme d'étiquettes (cachées en 2D par défaut). Si une liste de points est associée à un nuage, ouvrir à nouveau l'outil avec ce nuage rétablira automatiquement la liste dans le tableau (qui pourra donc être modifiée à nouveau).
+\item annuler la sélection et fermer l'outil (icône avec une croix rouge). Dans ce cas toutes les modifications apportées sont annulées (si une liste prééxistait elle sera rétablie).\\
+\end{itemize}
+
+Il est aussi possible de changer la taille des marqueurs de points (via le champ \textit{marker size} en bas à gauche) et aussi de changer l'indice de départ de la liste (champ \textit{local start index}).\\

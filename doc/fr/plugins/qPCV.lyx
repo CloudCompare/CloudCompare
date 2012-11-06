@@ -1,0 +1,479 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+qPCV - ShadeVis Ambient Occlusion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+qPCV, ambient occlusion
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+Portion de Ciel Visible
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+eclairage@éclairage!simuler
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:qPCV"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Cet outil permet de calculer rapidement l'illumination des points d'un nuage
+ ou des sommets d'un maillage par détermination de la "
+\series bold
+P
+\series default
+ortion de 
+\series bold
+C
+\series default
+iel 
+\series bold
+V
+\series default
+isible" (P.C.V.
+ - voir figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:PCVExample"
+
+\end_inset
+
+).
+ Des termes équivalents ou des concepts proches sont : 
+\shape italic
+global illumination
+\shape default
+, 
+\shape italic
+ambient occlusion
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/PCVExample.jpg
+	width 60text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:PCVExample"
+
+\end_inset
+
+Rendu classique avec normales (gauche) et rendu "PCV" (droite)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Cet éclairage consiste à calculer pour chaque point la 
+\shape italic
+quantité
+\shape default
+ de ciel qu'il voit, ou autrement dit la quantité d'énergie lumineuse qu'il
+ recevrait si l’entité était éclairée uniformément.
+ Ceci permet de colorier les points en fonction de leur profondeur relative
+ et fait très bien ressortir le relief et la micro-géométrie.
+ En pratique le calcul est effectué avec un algorithme équivalent à 
+\emph on
+ShadeVis
+\emph default
+ (proposé initialement par Cignoni et al.
+ du VCG).
+ Pour des raisons d'efficacité, l'algorithme discrétise la demi-sphère (ou
+ la sphère complète) représentant 
+\begin_inset Quotes fld
+\end_inset
+
+le ciel
+\begin_inset Quotes frd
+\end_inset
+
+ et l'estimation de la 
+\shape italic
+portion de ciel visible
+\shape default
+ peut donc être plus ou moins précise.
+ De même, l'algorithme se fait via la carte graphique, à une résolution
+ donnée (les points sont affichés dans chaque direction pour déterminer
+ à chaque fois ceux qui sont visibles ou non).
+ Là encore, en fonction de la résolution choisie (et de la densité du nuage
+ si l'entité est un nuage) les occlusions peuvent être déterminées avec
+ plus ou moins de finesse.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les deux principaux paramètres de l'algorithme, modifiables via la boite
+ de dialogue associée à la fonction (figure 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:PCVParamWindow"
+
+\end_inset
+
+), sont donc : 
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Light rays
+\shape default
+ - le nombre de « rayons » lumineux.
+ Pour chaque direction d'éclairement (rayon), l'algorithme projette les
+ entités selon cette direction et calcule la visibilité des points (ou des
+ sommets d'un maillage).
+ Cette information de visibilité est accumulée pour chaque direction et
+ permet de calculer l'éclairement global.
+ Plus le nombre de rayons est grand, et plus la dynamique de la valeur d'éclaire
+ment sera grande.
+ Par contre, le temps de calcul est directement proportionnel au nombre
+ de rayon.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Resolution
+\shape default
+ - la résolution du buffer de rendu.
+ La projection des entités selon une direction se fait dans un buffer 
+\shape italic
+OpenGL
+\shape default
+ dont la résolution va jouer sur le pouvoir de séparation entre points.
+ Plus la résolution est forte, et mieux les points seront dissociés (d'où
+ un meilleur calcul de leur éclairement propre et une meilleure finesse
+ du résultat).
+ Par contre, si la résolution est trop grande, outre un temps de calcul
+ et une consommation mémoire plus importants (cela dépend des performances
+ de la carte graphique), il faut aussi se méfier du fait que le nuage peut
+ devenir "poreux" et laisser passer la lumière (voir remarque ci-dessous).
+ Dans le cas d'un maillage ceci ne pose pas problème.
+ Les cartes graphiques actuelles assurent des performances de plus en plus
+ grandes, il ne faut donc pas hésiter à utiliser des valeurs importantes
+ pour ces deux paramètres.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/PCVParamWindow.png
+	width 30text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:PCVParamWindow"
+
+\end_inset
+
+Interface de paramétrage de qPCV
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Remarques : 
+\end_layout
+
+\begin_layout Itemize
+L'algorithme crée un nouveau type de champ scalaire (« PCV ») avec la rampe
+ de couleur « Gray » (niveaux de gris) automatiquement associée.
+ 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textcolor{red}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+La lumière simulée par l'algorithme 
+\shape italic
+ShadeVis
+\shape default
+ est considérée comme provenant de l'hémisphère des Z positifs.
+ Z correspondant à la direction verticale, le nuage de points doit donc
+ être orienté en conséquence avant tout calcul.
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+.
+ Si la case à cocher "360° mode" est cochée, la lumière vient du globe complet
+ et il n'y a plus de direction particulière.
+ 
+\end_layout
+
+\begin_layout Itemize
+Puisque l'illumination calculée par cet algorithme est un champ scalaire,
+ il est possible de jouer avec les potentiomètres de saturation pour régler
+ le contraste.
+ Dans le cas d'un maillage, on peut aussi utiliser les fonctions de moyenne
+ et de rehaussement du contraste (voir sections
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:smoothMeshSF"
+
+\end_inset
+
+ et 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:enhanceMeshSF"
+
+\end_inset
+
+).
+ Une fois les paramètres correctement réglés, on peut transformer le champ
+ scalaire en 
+\emph on
+couleurs
+\emph default
+ avec la fonction « Scalar Fields > Convert to RGB » (section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:scalarFieldConvertToRGB"
+
+\end_inset
+
+).
+ 
+\end_layout
+
+\begin_layout Itemize
+L'éclairage provenant du ciel est représenté de manière discrète par un
+ nombre limité de « rayons » lumineux, qui sont échantillonnés de manière
+ uniforme sur l'hémisphère (ou la sphère complète si le mode 360° est activé).
+ Il n'y a pas pour autant de lancer de rayons dans 
+\emph on
+ShadeVis
+\emph default
+ (on devrait plutôt parler de direction d'observation - Cf.
+ l'article de Cignoni et al.
+ pour plus d'informations).
+ 
+\end_layout
+
+\begin_layout Itemize
+Dans le cas des maillages, il est possible d'accélérer l'algorithme si le
+ maillage est fermé (option «
+\begin_inset space ~
+\end_inset
+
+closed mesh
+\begin_inset space ~
+\end_inset
+
+», activée par défaut).
+ 
+\end_layout
+
+\begin_layout Itemize
+Dans le cas des nuages de points, il faut faire attention à ce que la résolution
+ ne soit pas trop grande, sinon des «
+\begin_inset space ~
+\end_inset
+
+trous
+\begin_inset space ~
+\end_inset
+
+» peuvent apparaitre entre les points lors du rendu interne : ceci est simplemen
+t dû au fait que la densité d'un nuage est limitée, et que pour un niveau
+ de zoom suffisant, on observera toujours des zones sans information entre
+ les points.
+ 
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,26 @@
+\subsection{Tools > Distances > Cloud/Mesh dist.}
+\label{subsection:cloud2meshDist}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.4\textwidth]{Partie3_Fonctions/cloud2MeshDistExample.jpg}
+\caption{\label{fig:cloud2MeshDistExample}Exemple de résultat de calcul de distances entre un nuage et un maillage}
+\end{center}
+\end{figure}
+
+
+Cette fonction permet de calculer les distances\index{distances} (approximatives ou exactes) entre un nuage de points et un maillage.
+\\
+\par
+Cette fonction est largement équivalente au calcul de distances entre nuages (section~\ref{subsection:cloud2cloudDist}) mis à part
+quelques détails :
+\begin{itemize}
+\item si un seule des deux entités sélectionnées est un maillage, le choix des rôles (section~\ref{subsection:chooseRole}) n'est
+pas nécessaire (le maillage est forcément l'entité de référence).
+\item si les deux entités sélectionnées sont des maillages, les sommets de l'entité \emph{comparée} seront utilisés en guise de
+\emph{nuage}. Il peut être intéressant d'utiliser la fonction d'échantillonnage\index{echantillonner@échantillonner!des points sur un maillage} de points sur un maillage (Cf.
+section~\ref{subsection:samplePoints}) préalablement, pour avoir une meilleure vision des différences entre maillages
+(si cela est le résultat escompté).
+\item cette fonction rajoute un champ scalaire \emph{C2M Distances} au nuage de référence (nuage comparé).
+\item le choix d'une modélisation locale (\emph{Local model}) n'est pas possible puisque l'entité de référence est ici un maillage.
+\end{itemize}

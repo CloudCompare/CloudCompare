@@ -1,0 +1,188 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Tools > Other > Roughness
+\end_layout
+
+\begin_layout Standard
+Cette méthode permet d'estimer la 
+\shape italic
+rugosité
+\shape default
+ locale d'un nuage de points (voir figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:roughnessExample"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+En pratique la rugosité en un point est calculée comme étant la distance
+ entre le point et le meilleur plan passant par ses plus proches voisins
+ (au sens des moindres carrés).
+ L'idée est que si la surface est lisse, et idéalement plane, la distance
+ par rapport au plan sera nulle.
+ Au contraire, si la surface est non lisse (ou bruitée), cette distance
+ augmentera.
+\end_layout
+
+\begin_layout Standard
+Le seul paramètre de l'algorithme est le rayon du voisinage sphérique (
+\shape italic
+kernel size
+\shape default
+).
+\end_layout
+
+\begin_layout Standard
+Cette méthode créé un champ scalaire qui commence par 
+\begin_inset Quotes fld
+\end_inset
+
+Roughness
+\begin_inset Quotes frd
+\end_inset
+
+ avec la taille du voisinage entre parenthèse (comme toujours, si un champ
+ scalaire avec le même nom existe déjà il sera écrasé).
+\end_layout
+
+\begin_layout Standard
+Si le nombre de points dans un voisinage est insuffisant pour calculer un
+ plan local - inférieur à 3 typiquement - le calcul de rugosité ne peut
+ pas se faire et une valeur invalide (
+\shape italic
+NaN
+\shape default
+) sera associée au point (qui apparaitra donc en gris par défaut).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/roughnessExample.png
+	width 50text%
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:roughnessExample"
+
+\end_inset
+
+Exemple de calcul de rugosité sur un nuage de points (graviers)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

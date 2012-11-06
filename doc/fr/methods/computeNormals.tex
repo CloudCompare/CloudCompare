@@ -1,0 +1,26 @@
+\subsection{Normals > Compute}
+\label{subsection:computeNormals}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.4\textwidth]{Partie3_Fonctions/computeNormalsDlg.png}
+\caption{\label{fig:computeNormalsDlg}Interface pour le calcul des normales}
+\end{center}
+\end{figure}
+
+\index{normales}
+\textcolor{red}{Cette fonction ne permet pas de calculer des normales signées. Pour ceci utilisez la méthode \textit{Estimate Normals and Curvature} de la librairie PCL via le plugin qPCL (voir \ref{subsection:qPCL}).}
+\\
+\par
+Cette fonction permet de calculer les normales (non signées) d'un nuage de points.\\
+\par
+L'utilisateur peut spécifier le modèle d'approximation locale de la surface parmi :
+\begin{itemize}
+\item Plane : plan aux moindres carrés (le plus rapide)
+\item Height function : quadrique (le plus précis)
+\item Triangulation : triangulation 2D$\frac{1}{2}$ de type Delaunay (intérmédiaire)\\
+\end{itemize}
+
+L'utilisateur doit aussi spécifier la taille du voisinage pour la modélisation locale (\textit{local radius} : plus celui-ci est grand et plus le résultat sera lisse ... et le calcul lent).\\
+
+Enfin, si une direction privilégiée pour les normales est disponible, l'utilisateur peut la spécifier pour aider CloudCompare à \textit{signer} les normales. Il faut activer la case à cocher \textsl{Prefered orientation} et spécifier une des 6 orientations par défaut (-X,+X,-Y,+Y,-Z,+Z). Autrement, l'utilisateur peut tenter sa chance auprès de la méthode \emph{Resolve direction} (Cf. section~\ref{subsection:resolveNormalsDirection}).

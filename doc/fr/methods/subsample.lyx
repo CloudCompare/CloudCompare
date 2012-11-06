@@ -1,0 +1,248 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Subsample
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:subsample"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/subsamplingDlg.png
+	width 40text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:subsamplingDlg"
+
+\end_inset
+
+Interface de paramétrage pour le sous-échantillonnage de nuages
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+echantillonner@échantillonner!sous-echantillonner@sous-échantillonner
+\end_layout
+
+\end_inset
+
+ Fonction de sous-échantillonnage des points d'un nuage.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Différentes méthodes sont disponibles.
+ Le choix (ainsi que le paramétrage) se fait via une boite de dialogue (voir
+ figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:subsamplingDlg"
+
+\end_inset
+
+) : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Random
+\emph default
+ : sous-échantillonnage aléatoire (les points sont tirés au hasard).
+ L'utilisateur choisit le nombre de points restants.
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Space
+\emph default
+ : sous-échantillonnage spatial.
+ L'utilisateur choisit la densité du nuage résultant via l'espace moyen
+ inter-points maximal (valeur approximative).
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Octree
+\emph default
+ : sous-échantillonnage rapide via l'octree
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+octree
+\end_layout
+
+\end_inset
+
+.
+ On garde un point par cellule de l'octree à un niveau donné de subdivision.
+ L'utilisateur choisit le niveau de subdivision (plus le niveau est faible
+ et moins le nombre de points est important).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Remarques : 
+\end_layout
+
+\begin_layout Itemize
+Le 
+\series bold
+sous
+\series default
+-échantillonnage diffère du 
+\series bold
+ré
+\series default
+-échantillonnage (cf.
+ section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:resampleWithOctree"
+
+\end_inset
+
+) dans le sens où il ne crée pas de nouveaux points mais se contente de
+ sélectionner un sous-ensemble de points à partir du nuage source.
+ 
+\end_layout
+
+\begin_layout Itemize
+La méthode de sous-échantillonnage rapide via l'octree choisit le point
+ le plus proche du centre dans chaque cellule.
+ Ainsi l'écart entre les points est à peu près constant (si le nuage initial
+ est suffisamment dense).
+ 
+\end_layout
+
+\end_body
+\end_document

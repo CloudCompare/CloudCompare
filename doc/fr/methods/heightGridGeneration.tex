@@ -1,0 +1,63 @@
+\subsection{Tools > Projection > Height Grid Generation}
+
+\label{subsection:heightGridGeneration}
+
+\index{projection!sur grille}
+\index{grille|see{projection sur grille}}
+Cette fonction permet de projeter un nuage de point sur une grille
+régulière suivant l'axe Z.\\
+
+\begin{figure}[!h]
+\begin{centering}
+\includegraphics[width=0.45\textwidth]{Partie3_Fonctions/heightGridGenerationDlg.png}
+\caption{\label{fig:heightGridGenerationDlg}Interface de paramètrage pour
+l'outil de projection d'un nuage sur une grille}
+\end{centering}
+\end{figure}
+
+Une interface (figure~\ref{fig:heightGridGenerationDlg}) permet
+de régler différents paramètres :
+\begin{itemize}
+\item \emph{grid step} : le pas de la grille exprimé dans l'unité des coordonnées du nuage de points
+\item \emph{type of projection} : ce paramètre peut prendre l'une des 2
+valeurs suivantes :
+
+\begin{itemize}
+\item \textit{maximum height} : soit E$_{ij}$ le sous-ensemble de points du nuage
+qui est projeté dans la case (i,j) de la grille. Pour chaque case (i,j)
+de la grille, on retient comme altitude Z celle du point le plus haut
+dans E$_{ij}$.
+\item \textit{average height} : pour chaque case (i,j) de la grille, on
+retient comme altitude Z l'altitude moyenne des points de E$_{ij}$.
+\end{itemize}
+\item \emph{fill empty cells with} : certaines cases de la grille régulière
+restent vides après projection (aucun point du nuage ne s'y projette).
+Ce paramètre indique avec quelle valeur l'on doit renseigner ces cases et peut prendre l'une des 3 valeurs suivantes :
+
+\begin{itemize}
+\item \textit{minimum height :} les cases vides sont renseignées avec l'altitude
+Z minimale parmi tous les points du nuage.
+\item \textit{average height} : les cases vides sont renseignées avec l'altitude
+Z moyenne de tous les points du nuage.
+\item \textit{maximum height} : les cases vides sont renseignées avec l'altitude
+Z maximale parmi tous les points du nuage.\\
+\end{itemize}
+\end{itemize}
+\par
+Cette fonction génère deux fichiers (dans le répertoire du binaire
+de \emph{CloudCompare} par défaut) :
+\begin{itemize}
+\item \emph{height\_grid\_image.tiff} : l'image raster 2D codée sur 256 niveaux
+de gris correspondant aux altitudes Z des points projetés dans les cases de la grille ;
+\item \emph{height\_grid\_text\_file.txt} : les données de la grille sous un format ASCII (fichier exploitable
+simplement par un programme).\\
+\end{itemize}
+\par
+Voir figure~\ref{fig:heightGridGenerationExample} pour exemple de résultat produit par cette fonction.
+
+\begin{figure}[!htb]
+\begin{centering}
+\includegraphics[width=0.95\textwidth]{Partie3_Fonctions/HeightGridImageExample.jpg}
+\par\end{centering}
+\caption{\label{fig:heightGridGenerationExample}Exemple de résultat : vue 3D à gauche, image 2D des hauteurs à droite}
+\end{figure}

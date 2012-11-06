@@ -1,0 +1,17 @@
+\subsection{Mesh > Scalar Field > Smooth}
+\label{subsection:smoothMeshSF}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{Partie3_Fonctions/smoothAndEnhanceMeshSF.png}
+\caption{\label{fig:smoothAndEnhanceMeshSF}Exemple de résultats obtenus avec les options \emph{smooth} et \emph{enhance} d'un champ scalaire porté par les sommets d'un maillage}
+\end{center}
+\end{figure}
+
+\index{champ scalaire}
+\index{lissage|see{filtrage}}
+\index{filtrage}
+Cette méthode lisse spatialement les valeurs d'un champ scalaire porté par les sommets d'un maillage, en utilisant la topologie du maillage. La valeur scalaire au niveau d'un sommet est remplacée par une moyenne (pondérée par la distance) des valeurs scalaires portées par les sommets voisins.\\
+\par
+Remarque : cette fonction est beaucoup plus rapide que la fonction \emph{Gaussian filter}\index{filtrage!gaussien}
+(section~\ref{subsection:scalarFieldGaussianFilter}) appliquée à un nuage de points non structuré. Elle ne permet par contre pas de régler la taille du \textit{noyau} de lissage.

@@ -1,0 +1,41 @@
+\subsection{Sensor > Create}
+\label{subsection:sensorProjection}
+
+\index{capteur}
+Cette fonction permet ce créer une entité \emph{capteur} (de type scanner laser terrestre par défaut) associé à un nuage. Le nuage doit être sélectionné avant d'appeler cette fonction.\\
+\par
+Cela permet de modéliser a posteriori le scanner qui a permis l'acquisition du nuage de points sélectionné. L'objet scanner peut-être utilisé notamment pour filter les points \textit{non comparables} lors du calcul de distance entre deux nuages de points (Cf. section~\ref{subsection:cloud2cloudDist}).\\
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.4\textwidth]{Partie3_Fonctions/sensorProjectionDlg.png}
+\caption{\label{fig:sensorProjectionDlg}Interface de paramètrage pour la création d'un \emph{capteur}}
+\end{center}
+\end{figure}
+
+Lors de la création d'un \emph{capteur}, de nombreux paramètres sont réglables (via les différents onglets de
+l'interface~\ref{fig:sensorProjectionDlg}) :
+\begin{itemize}
+\item \emph{rotation order} : ordre des rotations du scanner (moteur, miroir). Nous utilisons ici les angles
+$\theta$ et $\phi$ suivant les conventions habituelles des coordonnées sphériques :
+$\theta$ représente l'angle (le débattement) horizontal du \emph{capteur},
+$\phi$ représente l'angle vertical du \emph{capteur}. Il existe deux choix actuellement :
+$\theta$ puis $\phi$ (type \emph{GS} de \emph{Trimble}) ou $\phi$ puis $\theta$ (type \emph{Soisic} de \emph{Trimble}).
+\item \emph{Position (center)/(X,Y,Z)} : position X,Y,Z du centre optique du scanner (exprimée dans le référentiel
+du nuage de point)
+\item \emph{Position (center)/Sensor base} : écart entre l'émetteur laser et le récepteur (utile pour un capteur
+à triangulation comme le \emph{Soisic} typiquement).
+\item \emph{Orientation} : repère du capteur exprimé par rapport au repère du nuage (trois vecteurs).
+Par défaut, la matrice formée par ces trois vecteurs est laisée à l'identité, ce qui revient à avoir une
+orientation \emph{droite} selon les 3 axes du repère courant.
+\item \emph{Angular steps/dPhi} : pas angulaires (en degrés) du capteur selon $\phi$.
+\item \emph{Angular steps/dTheta} : pas angulaires (en degrés) du capteur selon $\theta$.
+\item \emph{Other/Uncertainty} : l'incertitude sur la mesure laser, en pourcentage (déduite automatiquement
+lors de la projection).
+\item \emph{Other/Max. range} : la portée maximale (déduite automatiquement lors de la projection).\\
+\end{itemize}
+\par
+Une fois les paramètres renseignés, \emph{CloudCompare} créé un objet \emph{GBL sensor} associé au nuage.
+Celui-ci contient entre autre une carte de profondeur du nuage (voir section~\ref{subsection:showGBLDepthBuffer}).
+Enfin l'objet \textbf{capteur} est affichable \emph{en situation} sous la forme d'un petit capteur 3D schématique
+\index{afficher!des capteurs} (voir figure~\ref{fig:gblDepthBuffer} et section~\ref{subsection:sensorProp}).

@@ -1,0 +1,51 @@
+\subsection{Open (file)}
+\label{subsection:openFile}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{Partie3_Fonctions/fileOpenDlg.png}
+\caption{\label{fig:fileOpenDlg}Interface de sélection d'un fichier}
+\end{center}
+\end{figure}
+
+\index{fichiers!ouvrir}
+Permet de charger un fichier via une interface standard (figure~\ref{fig:fileOpenDlg}).\\
+\par
+Remarques :
+\begin{itemize}
+\item Raccourci clavier : \textcolor{red}{CTRL+O}
+\item Si le chargement du fichier est réussi,  les entités correspondantes seront automatiquement affichées dans la vue 3D active.
+\item Le menu déroulant \emph{Look in} / \emph{Regarder dans} permet d'accéder à divers chemins usuels, ainsi qu'aux
+chemins récemment utilisés
+\item Le menu déroulant \emph{Files of type} / \emph{Fichiers du type} permet de choisir un filtre pour l'affichage des fichiers tout en donnant à CloudCompare une information sur le type de fichier à ouvrir (si le filtre est << All (*.*) >>, CloudCompare tentera de détecter automatiquement le bon type en fonction de son extension)
+\end{itemize}
+
+\subsubsection{Formats supportés}
+
+Pour une liste des formats supportés, se référer à la section~\ref{section:fileFormats} des annexes.
+
+\subsubsection{Moyen alternatifs de chargement de fichiers}
+
+Il existe d'autres moyen de charger des fichiers dans CloudCompare:
+\begin{itemize}
+\item via la ligne de commande (voir annexes~\ref{subsection:commandeLine})
+\item ou par \textit{drag \& drop} des fichiers (sélectionnés dans l'explorateur de Windows typiquement) directement dans une vue 3D de CloudCompare.\\
+\end{itemize}
+
+Note : dans ces deux cas CloudCompare tentera de deviner le format de fichier via leur extension.
+
+\subsubsection{Cas des entités ayant des coordonnées très grandes}
+
+Si l'entité chargée a des coordonnées très grandes (au moins une des composante supérieure à $10^6$), CloudCompare le signifiera à l'utilisateur et lui proposera de recentrer automatiquement l'entité (voir figure~\ref{fig:recenterDialog}). Par défaut le recentrage se fait sur le premier point lu dans le fichier. Ce mécanisme permet d'éviter de perdre de l'information car CloudCompare stocke les coordonnées des points sur 32 bits.\\
+
+L'information de recentrage est conservée avec le nuage de points (voir les propriétés du nuage en section~\ref{subsection:pointCloudProperties}). Elle sera conservée telle quelle si le fichier est sauvegardé dans le format binaire BIN. Et CloudCompare pourra même rétablir les coordonnées originales si l'entité est sauvée dans les formats supportants les coordonnées sur 64 bits (LAS et E57) ou les formats ASCII (ASCII, OBJ, MA, VTK). Attention néanmoins, certaines opérations peuvent faire perdre cette information à CloudCompare (fusion avec un nuage non recentré, etc.)\\
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{Partie3_Fonctions/ccRecenterDialog.png}
+\caption{\label{fig:recenterDialog}Interface de recentrage d'un nuage au chargement}
+\end{center}
+\end{figure}
+
+Remarque: si l'utilisateur charge plusieurs fichiers à la fois (via une sélection mutliple dans la boite de dialogue de chargement par exemple) et que CloudCompare détecte un dépassement de coordonnées pour l'un des nuages, l'utilisateur a alors le choix d'appliquer un recentrage à chaque nuage individuellement ou à tous les nuages qui suivent (et qui nécessitent un recentrage).
+

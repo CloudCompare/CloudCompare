@@ -1,0 +1,13 @@
+\subsection{Colors > Colorize}
+\label{subsection:colorize}
+
+\index{couleurs}
+Même interface que la fonction "Set Unique" (\ref{subsection:setUniqueColor} - voir ci-dessus).\\
+\par
+Cette fonction permet de modifier les couleurs actuelles des points par multiplication des composantes de la couleur actuelle par celles de la couleur sélectionnée.\\
+\par
+Soit $(r,g,b)$ les composantes rouge, vert et bleu d'un point, et $(r_m,g_m,b_m)$ la couleur à \textit{multiplier} :\\
+	\[
+		(r',g',b')=(r*\frac{r_m}{255},g*\frac{g_m}{255},b*\frac{b_m}{255})\\
+	\]
+Remarque : si l'entité n'a pas de couleur, alors la fonction se comportera comme "Set Unique".

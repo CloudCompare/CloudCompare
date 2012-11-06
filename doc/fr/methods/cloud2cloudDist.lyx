@@ -1,0 +1,624 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Tools > Distances > Cloud/Cloud dist.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:cloud2cloudDist"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/cloud2cloudDistDlg.png
+	width 40text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:cloud2cloudDistDlg"
+
+\end_inset
+
+Interface de paramétrage pour le calcul de distances entre deux nuages de
+ points
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Cette fonction permet de calculer les distances
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+distances
+\end_layout
+
+\end_inset
+
+ entre chaque point d'un nuage par rapport à un autre nuage (distance 
+\shape italic
+au plus proche voisin
+\shape default
+ par défaut).
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Lors de l'appel de cette fonction, et après avoir choisi le rôle
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+role@rôle
+\end_layout
+
+\end_inset
+
+ de chaque nuage (Cf.
+ section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:chooseRole"
+
+\end_inset
+
+), un premier calcul de distances approximatives entre les deux nuages (distance
+s de Chanfrein, calculées via l'octree) est effectué de manière automatique.
+ Cela permet d'afficher dans la partie supérieure de l'interface
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:cloud2cloudDistDlg"
+
+\end_inset
+
+ (
+\emph on
+Approx.
+ results
+\emph default
+) diverses informations - voir ci-dessous - ainsi que de déterminer le niveau
+ d'octree optimal auquel effectuer le calcul précis.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Les informations affichées dans le tableau 
+\emph on
+Approx.
+ results
+\emph default
+ sont : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Min.
+ dist.
+
+\emph default
+ : distance approximative minimale 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Max.
+ dist.
+
+\emph default
+ : distance approximative maximale 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Mean.
+ dist.
+
+\emph default
+ : distance approximative moyenne 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Sigma
+\emph default
+ : écart type des distances approximatives
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Max relative error
+\emph default
+ : erreur relative maximale de l'approximation.
+ Cette erreur est exprimée sous forme d'une fonction de 
+\begin_inset Formula $d$
+\end_inset
+
+ (la distance) car elle est dépendante de la distance réelle des points.
+ Elle décroit généralement rapidement quand 
+\begin_inset Formula $d$
+\end_inset
+
+ croît, ce qui veut dire que l'approximation de la distance minimale est
+ généralement très mauvaise, mais celle de la distance maximale peut-être
+ assez fiable.
+\end_layout
+
+\begin_layout Standard
+L'utilisateur peut aussi afficher l'histogramme des distances approximatives
+ (en appuyant sur l’icône 
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/cc_histogramIcon.png
+
+\end_inset
+
+), mais celui-ci est généralement assez peu détaillé étant donné le principe
+ du calcul des distances de Chanfrein via l'octree.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+La partie inférieure de la boite de dialogue (
+\emph on
+Precise results
+\emph default
+) permet le paramétrage du calcul précis des distances.
+ L'utilisateur peut saisir les valeurs suivantes : 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Local model
+\emph default
+ : indique quelle 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+modele@modèle
+\end_layout
+
+\end_inset
+
+modélisation 
+\series bold
+locale
+\series default
+ sera appliquée au nuage de référence pour améliorer globalement la précision
+ du calcul de distance dans le cas où l'échantillonnage du nuage de référence
+ est faible.
+ En effet, si l'échantillonnage de la surface est faible, la distance au
+ point le plus proche ne représente que très approximativement la distance
+ à la surface représentée par le nuage de point.
+ CloudCompare peut donc tenter de modéliser localement la surface en considérant
+ le point le plus proche et quelques uns de ses plus proches voisins.
+ L'amélioration dépend donc de la qualité du modèle utilisé (en contrepartie
+ le coût en temps de calcul sera plus important).
+ Il est aussi important de noter que cette amélioration n'est valide que
+ globalement (statistiquement parlant), car elle peut générer pour certains
+ points des erreurs importantes (dus au fait que la modélisation locale
+ calculée à partir de quelques points - potentiellement bruités - est généraleme
+nt assez approximative).
+ Les modélisations locales disponibles sont : 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+NONE
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ : pas de modélisation locale (comportement par défaut), on calcule la distance
+ au point le plus proche.
+ Ceci est le choix indiqué pour les nuages de référence très denses (i.e.
+ dont la densité est supérieure à la précision attendue)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Least Square Plane
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ : approximation locale du nuage par un plan (ajusté aux moindres carrés)
+ - peu précis mais rapide.
+ 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+2D
+\begin_inset Formula $\frac{1}{2}$
+\end_inset
+
+ triangulation
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ : approximation locale du nuage par une triangulation de Delaunay 2D
+\begin_inset Formula $\frac{1}{2}$
+\end_inset
+
+ (après projection des points sur un plan ajusté aux moindres carrés) -
+ vitesse et précision intermédiaires.
+ 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Height Function
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ : approximation locale du nuage par une quadrique du type 
+\begin_inset Formula $z=ax+by+cx^{2}+dy^{2}+exy$
+\end_inset
+
+ (là encore, après projection des points sur un plan ajusté aux moindres
+ carrés) - meilleure précision mais vitesse réduite.
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+
+\emph on
+Max.
+ dist
+\emph default
+ : permet à l'utilisateur de définir une distance au delà de laquelle il
+ n'est pas nécessaire de calculer une distance précise.
+ Cela permet d'améliorer fortement les performances du calcul, en particulier
+ sur des nuages ayant peu de zones communes (en évitant ainsi de calculer
+ des distances éloignées - les plus couteuses - alors que leur détermination
+ précise est généralement inutile).
+ 
+\emph on
+Les points concernés conservent alors leur distance approximative.
+ Les informations affichées dans la partie supérieure peuvent grandement
+ aider à fixer cette valeur limite.
+
+\emph default
+ 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Octree level
+\emph default
+ : 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+octree
+\end_layout
+
+\end_inset
+
+ce paramètre de l'algorithme est normalement déterminé au mieux par 
+\emph on
+CloudCompare
+\emph default
+, mais il est possible de le forcer au cas où l'heuristique de détermination
+ serait défaillante.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Signed distances
+\emph default
+ : cette case à cocher n'est active que si l'option 
+\shape italic
+split X,Y and Z components
+\shape default
+ est activée.
+ Voir ci-dessous.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+flip normals
+\shape default
+ : non accessible dans ce mode
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+split X,Y and Z components
+\shape default
+ : créé en sortie 3 champs scalaires supplémentaires correspondant aux coordonné
+es X, Y et Z des vecteurs de 
+\shape italic
+déplacement
+\shape default
+ entre chaque point du nuage comparé et le point le plus proche dans le
+ nuage de référence.
+ Lorsque ce mode est activé, la case à cocher 
+\emph on
+Signed distances
+\emph default
+ permet de spécifier si les composantes X, Y et Z de déplacement doivent
+ être calculées en valeurs absolue ou non.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+multi-threaded
+\shape default
+ : active le mode 'multi-thread' (un thread par 
+\shape italic
+core
+\shape default
+) qui accélère grandement les calculs mais prend toutes les ressources de
+ l'ordinateur.
+\end_layout
+
+\begin_layout Standard
+Remarques : 
+\end_layout
+
+\begin_layout Itemize
+Cette fonction rajoute un champ scalaire 
+\emph on
+C2C Distances
+\emph default
+ au nuage de référence (attention, si un champ scalaire avec le même nom
+ existe déjà, il sera écrasé).
+ 
+\end_layout
+
+\begin_layout Itemize
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textcolor{red}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Pour calculer les distance précises il est nécessaire d'appuyer sur le bouton
+ rouge 
+\emph on
+Compute
+\emph default
+.
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Itemize
+Toutes les distances calculées par cette fonction ou entrées sous forme
+ de paramètres sont exprimées dans la même unité que les coordonnées du
+ nuage de points (il n'y a plus d'unité explicite dans 
+\emph on
+CloudCompare
+\emph default
+).
+ 
+\end_layout
+
+\end_body
+\end_document

@@ -1,0 +1,378 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Open (file)
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:openFile"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/fileOpenDlg.png
+	width 50text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:fileOpenDlg"
+
+\end_inset
+
+Interface de sélection d'un fichier
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+fichiers!ouvrir
+\end_layout
+
+\end_inset
+
+ Permet de charger un fichier via une interface standard (figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:fileOpenDlg"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Remarques : 
+\end_layout
+
+\begin_layout Itemize
+Raccourci clavier : 
+\color red
+CTRL+O
+\color inherit
+ 
+\end_layout
+
+\begin_layout Itemize
+Si le chargement du fichier est réussi, les entités correspondantes seront
+ automatiquement affichées dans la vue 3D active.
+ 
+\end_layout
+
+\begin_layout Itemize
+Le menu déroulant 
+\emph on
+Look in
+\emph default
+ / 
+\emph on
+Regarder dans
+\emph default
+ permet d'accéder à divers chemins usuels, ainsi qu'aux chemins récemment
+ utilisés 
+\end_layout
+
+\begin_layout Itemize
+Le menu déroulant 
+\emph on
+Files of type
+\emph default
+ / 
+\emph on
+Fichiers du type
+\emph default
+ permet de choisir un filtre pour l'affichage des fichiers tout en donnant
+ à CloudCompare une information sur le type de fichier à ouvrir (si le filtre
+ est 
+\begin_inset Quotes ard
+\end_inset
+
+ All (*.*) 
+\begin_inset Quotes ald
+\end_inset
+
+, CloudCompare tentera de détecter automatiquement le bon type en fonction
+ de son extension) 
+\end_layout
+
+\begin_layout Subsubsection
+Formats supportés
+\end_layout
+
+\begin_layout Standard
+Pour une liste des formats supportés, se référer à la section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "section:fileFormats"
+
+\end_inset
+
+ des annexes.
+\end_layout
+
+\begin_layout Subsubsection
+Moyen alternatifs de chargement de fichiers
+\end_layout
+
+\begin_layout Standard
+Il existe d'autres moyen de charger des fichiers dans CloudCompare: 
+\end_layout
+
+\begin_layout Itemize
+via la ligne de commande (voir annexes
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:commandeLine"
+
+\end_inset
+
+) 
+\end_layout
+
+\begin_layout Itemize
+ou par 
+\shape italic
+drag & drop
+\shape default
+ des fichiers (sélectionnés dans l'explorateur de Windows typiquement) directeme
+nt dans une vue 3D de CloudCompare.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Note : dans ces deux cas CloudCompare tentera de deviner le format de fichier
+ via leur extension.
+\end_layout
+
+\begin_layout Subsubsection
+Cas des entités ayant des coordonnées très grandes
+\end_layout
+
+\begin_layout Standard
+Si l'entité chargée a des coordonnées très grandes (au moins une des composante
+ supérieure à 
+\begin_inset Formula $10^{6}$
+\end_inset
+
+), CloudCompare le signifiera à l'utilisateur et lui proposera de recentrer
+ automatiquement l'entité (voir figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:recenterDialog"
+
+\end_inset
+
+).
+ Par défaut le recentrage se fait sur le premier point lu dans le fichier.
+ Ce mécanisme permet d'éviter de perdre de l'information car CloudCompare
+ stocke les coordonnées des points sur 32 bits.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+L'information de recentrage est conservée avec le nuage de points (voir
+ les propriétés du nuage en section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:pointCloudProperties"
+
+\end_inset
+
+).
+ Elle sera conservée telle quelle si le fichier est sauvegardé dans le format
+ binaire BIN.
+ Et CloudCompare pourra même rétablir les coordonnées originales si l'entité
+ est sauvée dans les formats supportant les coordonnées sur 64 bits (LAS
+ et E57) ou les formats ASCII (ASCII, OBJ, MA, VTK).
+ Attention néanmoins, certaines opérations peuvent faire perdre cette informatio
+n à CloudCompare (fusion avec un nuage non recentré, etc.)
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/ccRecenterDialog.png
+	width 50text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:recenterDialog"
+
+\end_inset
+
+Interface de recentrage d'un nuage au chargement
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Remarque: si l'utilisateur charge plusieurs fichiers à la fois (via une
+ sélection multiple dans la boite de dialogue de chargement par exemple)
+ et que CloudCompare détecte un dépassement de coordonnées pour l'un des
+ nuages, l'utilisateur a alors le choix d'appliquer un recentrage à chaque
+ nuage individuellement ou à tous les nuages qui suivent (et qui nécessitent
+ un recentrage).
+\end_layout
+
+\end_body
+\end_document

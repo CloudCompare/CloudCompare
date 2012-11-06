@@ -1,0 +1,148 @@
+#LyX file created by tex2lyx 2.0.4
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\paperfontsize 10
+\spacing single
+\use_hyperref 1
+\pdf_bookmarks 1
+\pdf_bookmarksnumbered 0
+\pdf_bookmarksopen 0
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks 0
+\pdf_pdfborder 0
+\pdf_colorlinks 1
+\pdf_backref false
+\pdf_pdfusetitle 1
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+
+Colors > Colorize
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:colorize"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+
+couleurs
+\end_layout
+
+\end_inset
+
+ Même interface que la fonction "Set Unique" (
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:setUniqueColor"
+
+\end_inset
+
+ - voir ci-dessus).
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+
+Cette fonction permet de modifier les couleurs actuelles des points par multiplication des composantes de la couleur actuelle par celles de la couleur sélectionnée.
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+
+Soit 
+\begin_inset Formula $(r,g,b)$
+\end_inset
+
+ les composantes rouge, vert et bleu d'un point, et 
+\begin_inset Formula $(r_m,g_m,b_m)$
+\end_inset
+
+ la couleur à 
+\shape italic
+multiplier
+\shape default
+ :
+\begin_inset Newline newline
+\end_inset
+
+ 
+\begin_inset Formula \[
+		(r',g',b')=(r*\frac{r_m}{255},g*\frac{g_m}{255},b*\frac{b_m}{255})\\
+	\]
+\end_inset
+
+Remarque : si l'entité n'a pas de couleur, alors la fonction se comportera comme "Set Unique". 
+\end_layout
+
+\end_body
+\end_document

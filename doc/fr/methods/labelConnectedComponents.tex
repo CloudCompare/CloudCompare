@@ -1,0 +1,43 @@
+\subsection{Tools > Segmentation > Label Connected Components}
+\label{subsection:labelConnectedComponents}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.2\textwidth]{Partie3_Fonctions/labelConnectedComponentsDlg.png}
+\caption{\label{fig:labelConnectedComponentsDlg}Interface de paramétrage de la méthode d'extraction des composantes connexes}
+\end{center}
+\end{figure}
+
+\index{composantes connexes}
+Cette fonction permet de décomposer un nuage de points en sous-nuages compacts.
+Si le nuage sélectionné est composé de plusieurs groupes de points suffisamment dissociés (distants)
+les uns des autres, il est possible de le subdiviser assez simplement via l'octree\index{octree}.
+Ceci est fait dans \emph{CloudCompare} grâce à une approche d'\emph{extraction des composantes connexes}.
+C'est un algorithme courant, généralement appliqué aux images 2D binaires et qui a été étendu ici à une
+grille 3D binaire. Cette fonction produit en sortie une entité par sous-nuage de points (regroupées dans
+un nouveau groupe d'entité au niveau de l'arbre de navigation de \emph{CloudCompare}).
+La figure~\ref{fig:statisticalTestExample} en bas à droite est une bonne illustration de son utilité.
+\\
+\par
+L'utilisateur choisit principalement le niveau d'octree auquel l'algorithme sera appliqué (\emph{Octree Level}).
+Celui-ci va en fait définir grossièrement le seuil de distance au-delà duquel les groupes de points (les
+\emph{composantes connexes}) seront considérés comme non connexes. Plus le niveau d'octree est grand, plus le
+seuil de distance est faible, plus on extraira de sous-groupes (ce qui n'est pas forcément souhaitable).
+\\
+\par
+Un deuxième paramètre important est le nombre minimal de points par composante connexe (\emph{Min. points}).
+Si un groupe est composé d'un nombre de points inférieur à ce nombre, alors il ne sera pas extrait sous la
+forme d'une nouvelle entité. Ceci permet de limiter le nombre de nuages créés par l'algorithme.
+\\
+\par
+Enfin, l'option \emph{random colors} permet de dire à \emph{CloudCompare} de générer des couleurs au hasard
+pour chaque nouveau nuage.\\
+\par
+Remarques :
+\begin{itemize}
+\item Plus le niveau d'octree est grand et plus la mémoire nécessaire (la RAM) est importante. Le niveau d'octree est donc un paramètre
+sensible qu'il est difficile de régler a priori, sans expérience. Une approche par niveaux successifs peut donc être nécessaire (en commençant
+typiquement au niveau 7). On peut aussi afficher l'octree (représentation \emph{Wire} ou
+\emph{Cubes}, Cf. section~\ref{subsection:affichageOctree}) pour estimer visuellement les tailles des cellules aux différents niveaux.
+\item Pour appeler cette fonction, il faut sélectionner une seule entité 3D.
+\end{itemize}

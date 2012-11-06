@@ -1,0 +1,184 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection*
+Choix des rôles (interface générique)
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:chooseRole"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status open
+
+\begin_layout Plain Layout
+role@rôle
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\size normal
+Cette interface générique (figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:chooseRoleDlg"
+
+\end_inset
+
+) est utilisée par toutes les méthodes de calcul de distance, ainsi qu'un
+ certain nombre d'autres méthodes (qui l'utilisent comme telle ou sous une
+ forme équivalente).
+ Elle permet à l'utilisateur d'attribuer interactivement un rôle spécifique
+ à deux entités qui ont été sélectionnées en même temps.
+ 
+\emph on
+CloudCompare
+\emph default
+ force la coloration des entités en fonction du rôle qui leur est couramment
+ affecté via cette interface.
+ Dans le cas des distances par exemple, le nuage de référence est représenté
+ en jaune et le nuage à comparer (celui qui portera le champ scalaire après
+ calcul) est en rouge.
+ Un bouton 
+\emph on
+swap
+\emph default
+ permet d'intervertir le rôle (et donc la coloration) des deux entités.
+\end_layout
+
+\begin_layout Standard
+
+\size normal
+\begin_inset Float figure
+placement !h
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+
+\size normal
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/chooseRoleDlg.jpg
+	width 90text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+
+\size normal
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:chooseRoleDlg"
+
+\end_inset
+
+Interface standard de choix des rôles des entités
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

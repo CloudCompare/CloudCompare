@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PointPropertiesDlg</class>
+ <widget class="QDialog" name="PointPropertiesDlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>201</width>
+    <height>26</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Points Properties</string>
+  </property>
+  <layout class="QHBoxLayout">
+   <property name="margin">
+    <number>2</number>
+   </property>
+   <item>
+    <widget class="QToolButton" name="pointPropertiesButton">
+     <property name="toolTip">
+      <string comment="Display selected point properties">Select one point and display its information</string>
+     </property>
+     <property name="statusTip">
+      <string comment="Display selected point properties">Select one point and display its information</string>
+     </property>
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Comp/images/comp/pointProperties.png</normaloff>:/CC/Comp/images/comp/pointProperties.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="pointPointDistanceButton">
+     <property name="toolTip">
+      <string comment="Compute point to point distance">Select 2 points and display segment information (length, etc.)</string>
+     </property>
+     <property name="statusTip">
+      <string comment="Compute point to point distance">Select 2 points and display segment information (length, etc.)</string>
+     </property>
+     <property name="whatsThis">
+      <string/>
+     </property>
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Comp/images/comp/pointDistance.png</normaloff>:/CC/Comp/images/comp/pointDistance.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="pointsAngleButton">
+     <property name="toolTip">
+      <string>Select 3 points and display corresponding triangle information</string>
+     </property>
+     <property name="statusTip">
+      <string>Select 3 points and display corresponding triangle information</string>
+     </property>
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Comp/images/comp/pointsAngle.png</normaloff>:/CC/Comp/images/comp/pointsAngle.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="rectZoneToolButton">
+     <property name="toolTip">
+      <string>Define a rectangular 2D label</string>
+     </property>
+     <property name="statusTip">
+      <string>Define a rectangular 2D label</string>
+     </property>
+     <property name="text">
+      <string>2D zone</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Comp/images/comp/rectangleSelect.png</normaloff>:/CC/Comp/images/comp/rectangleSelect.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="saveLabelButton">
+     <property name="toolTip">
+      <string>Save current label (added to cloud children)</string>
+     </property>
+     <property name="statusTip">
+      <string>Save current label (added to cloud children)</string>
+     </property>
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Menu/images/menu/save.png</normaloff>:/CC/Menu/images/menu/save.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="razButton">
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Comp/images/comp/raz.png</normaloff>:/CC/Comp/images/comp/raz.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="cancelButton">
+     <property name="text">
+      <string>...</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/Comp/images/comp/cancel.png</normaloff>:/CC/Comp/images/comp/cancel.png</iconset>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../icones.qrc"/>
+ </resources>
+ <connections/>
+</ui>

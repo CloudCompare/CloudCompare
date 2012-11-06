@@ -1,0 +1,37 @@
+Methods not yet implemented/linked with CCLib (in mainwindow.cpp):
+void MainWindow::doActionMultiplySF
+void MainWindow::doActionKMeans
+void MainWindow::doActionFrontPropagation
+void MainWindow::doActionLoadShader
+
+Issues:
+- when a mesh is deleted, its parent cloud (if it has one) stays hidden
+- when a mesh is deleted, its parent cloud (if it has one) keeps its normals. When we compute a new mesh, we keep the old normals, which are not necessarily in the good direction
+
+*** Requests ***
+
+- export/open PTG files
+- export/open SHP files (--> GDAL)
+- export geotiff (--> GDAL)
+- add "expand" and "collapse" options on the DB tree elements
+
+In french (because I'm lazy today):
+- uniformiser l'échelle de plusieurs entités
+- détection automatique de la première ligne (header) des fichiers TXT (X Y Z, etc.)
+- calcul de distance selon une direction (cylindre)
+- distances signées entre nuages
+- calcul basé sur un nuage sous-échantillonné
+
+*** And from the forum topic 'recent requests' ***
+
+From Konrad W.:
+[*] Something like the plane shader from point tools where the depth is coloured with the Hue channel
+
+From Rav M.:
+[*] Aligning camera (perpendicularly to a face) by chosing 3 points/vertexes or group of points
+[*] Add front and back cutting plane
+[*] move and rotate global coordinate (X,Y,Z) or aligning it like camera and then adding another parts to correct scene in right place.
+
+From Gianluca C.:
+[*] find a way to transfer the colors from the pointcloud to the Poisson reconstructed surface (qPoissonRecon)
+[*] to overlay an image over the mesh with some common points and "drape" the photo on the surface

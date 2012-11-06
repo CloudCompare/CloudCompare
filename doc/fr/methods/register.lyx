@@ -1,0 +1,454 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Tools > Registration > Register
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:register"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/registrationDlg.png
+	width 50text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:registrationDlg"
+
+\end_inset
+
+Interface de paramètrage pour l'outil de recalage de deux entités
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+recalage
+\end_layout
+
+\end_inset
+
+ Cette fonction permet de recaler deux nuages de points (algorithme 
+\emph on
+"Iterative Closest Point"
+\emph default
+ de Besl et McKay, IEEE Trans.
+ PAMI 1992).
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textcolor{red}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+Attention : pour que ce recalage fonctionne, il est nécessaire que les deux
+ nuages soit approximativement alignés (vous pouvez utiliser l'outil de
+ recalage manuel par rotation / translation - voir section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:graphicalTransformation"
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+Cette fonction ne permet pas d'aligner des nuages positionnés et orientés
+ de manière quelconque.
+ Son rôle est essentiellement d'affiner le recalage initial entre deux nuages
+ de points.
+ 
+\begin_inset Newline newline
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+La boite de dialogue de l'outil 
+\shape italic
+Register
+\shape default
+ contient plusieurs parties :
+\end_layout
+
+\begin_layout Itemize
+La partie supérieure (
+\emph on
+Role assignation
+\emph default
+) permet à l'utilisateur d'attribuer interactivement le rôle
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+role@rôle
+\end_layout
+
+\end_inset
+
+ de chaque entité.
+ Le 
+\emph on
+Model
+\emph default
+ est le nuage de référence (qui ne bouge pas) et 
+\emph on
+Data
+\emph default
+ désigne le nuage à recaler (il pourra bouger si nécessaire).
+ Pour aider l'utilisateur, 
+\emph on
+CloudCompare
+\emph default
+ force la coloration des entités et leur affichage (
+\emph on
+model
+\emph default
+ en rouge et 
+\emph on
+data
+\emph default
+ en jaune).
+ Un bouton permet d'intervertir ces roles si besoin (
+\emph on
+swap
+\emph default
+).
+ 
+\end_layout
+
+\begin_layout Itemize
+La partie centrale (
+\emph on
+Stop criterion
+\emph default
+) permet de définir le critère d'arrêt : l'utilisateur choisit soit un nombre
+ d'itérations fixe (ceci permet d'éviter un temps de calcul trop long, mais
+ ne garantit pas la qualité du recalage) ou au contraire une diminution
+ minimale de l'erreur de recalage entre deux itérations (si la diminution
+ de l'erreur de recalage est inférieure, le gain en qualité de recalage
+ est considéré comme insuffisant et l'algorithme s'arrête (ceci garantit
+ une meilleure qualité de recalage mais peut prendre potentiellement beaucoup
+ plus de temps).
+ 
+\end_layout
+
+\begin_layout Itemize
+Enfin la partie inférieure de définir des options 
+\begin_inset Quotes fld
+\end_inset
+
+recherche
+\begin_inset Quotes frd
+\end_inset
+
+ (elles ne devraient pas être utilisées lors d'une utilisation classique)
+ :
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\emph on
+Random sampling limit
+\emph default
+ : comme suggéré par différents auteur, l'algorithme ICP peut-être fortement
+ accéléré sans perdre trop de précision si on sélectionne un nombre limité
+ de points au hasard à chaque itération.
+ CloudCompare utilise cet heuristique (avec comme valeur seuil par défaut
+ 20,000 points - en dessous de cette limite les nuages ne sont pas sous-échantil
+lonnés).
+ Si l'utilisateur a besoin d'une précision très forte ou qu'un comportement
+ étrange du au sous-échantillonnage est suspecté, il est possible d'augmenter
+ cette valeur seuil) 
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+use displayed model scalar field as weights
+\emph default
+ : pondération du rôle de chaque point du nuage de référence (
+\shape italic
+model
+\shape default
+) dans le recalage global en fonction de leur valeur scalaire associée
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+use displayed data scalar field as weights
+\emph default
+: pondération du rôle de chaque point du nuage recalé (
+\shape italic
+data
+\shape default
+) dans le recalage global en fonction de leur valeur scalaire associée
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Enable furthest point removal
+\emph default
+ : heuristique adaptée au recalage d'entités légèrement différentes (puisque
+ 
+\emph on
+CloudCompare
+\emph default
+ est justement fait pour comparer des nuages potentiellement différents,
+ alors que l'algorithme ICP est pensé pour recaler des nuages représentant
+ les mêmes formes).
+ Cet heuristique consiste à écarter les points trop éloignés à chaque itération,
+ pour éviter que les différences entre les nuages ne faussent la position
+ finale.
+ La suppression des points à chaque itération étant difficile à gérer, cet
+ heuristique en est encore à l'état d'ébauche ...
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+textcolor{red}
+\end_layout
+
+\end_inset
+
+
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+{
+\end_layout
+
+\end_inset
+
+en particulier, cette option ne doit pas être cochée si les deux nuages
+ représentent les mêmes objets.
+\begin_inset ERT
+status collapsed
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Remarques :
+\end_layout
+
+\begin_layout Itemize
+cette fonction applique directement la transformation à l'entité 
+\shape italic
+data
+\shape default
+.
+ Il peut donc être nécessaire de cloner cette entité avant d'appliquer la
+ fonction.
+ Autrement si la mémoire disponible est limitée, la transformation étant
+ aussi affichée sous forme de matrice dans la console (voir section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "section:mainWindow"
+
+\end_inset
+
+), il est possible de l'annuler en copiant cette transformation puis en
+ appliquant la transformation inverse avec l'outil 'Apply transformation'
+ (voir section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:applyTransformation"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Itemize
+si l'entité 
+\shape italic
+data
+\shape default
+ est un maillage dont les sommets sont vérouillés, la transformation sera
+ affichée dans la console mais l'entité ne sera par modifiée.
+ Il faut là encore copier la transformation depuis la console puis l'appliquer
+ directement aux sommets du maillage (toujours avec l'outil 'Apply transformatio
+n').
+\end_layout
+
+\end_body
+\end_document

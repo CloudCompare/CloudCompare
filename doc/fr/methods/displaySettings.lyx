@@ -1,0 +1,572 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Display > Display Settings
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:displaySettings"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Cette fonction affiche la boite de dialogue permettant de régler les paramètres
+ d'affichage 
+\emph on
+de CloudCompare
+\emph default
+.
+ La boite de dialogue est séparée en 3 parties.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Les boutons en bas de la fenêtre permettent d'appliquer les paramètres (
+\emph on
+Ok
+\emph default
+ et 
+\emph on
+Apply
+\emph default
+ - ce dernier ne ferme pas la boite de dialogue mais applique tout de même
+ les paramètres à la vue courante), de réaffecter les valeurs par défaut
+ à tous les paramètres (
+\emph on
+Reset
+\emph default
+), ou de quitter l'interface sans prendre en compte les modifications (
+\emph on
+Cancel
+\emph default
+).
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Groupe de paramètres 
+\shape italic
+Colors and Materials
+\shape default
+ - figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:displaySettings"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/LightAndMaterials.png
+	width 50text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:displaySettings"
+
+\end_inset
+
+Interface(s) de paramétrage des options d'affichage - groupe 'Colors and
+ Materials'
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Le premier cadre (
+\emph on
+Light
+\emph default
+) est dédié au paramétrage de la 
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+eclairage@éclairage!ambiant, diffus, spéculaire
+\end_layout
+
+\end_inset
+
+source lumineuse.
+ L'utilisateur a la possibilité de définir une couleur pour chacune des
+ trois composantes de base de la lumière (ambiante, diffuse et spéculaire)
+ :
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+La composante ambiante (
+\emph on
+Ambient
+\emph default
+) est la lumière constante, dans laquelle la scène baigne : de nuit par
+ exemple, la composante ambiante est noire (aucune lumière ambiante).
+\end_layout
+
+\begin_layout Itemize
+La composante diffuse (
+\emph on
+Diffuse
+\emph default
+) définit la couleur réfléchie par les objets indépendamment de la position
+ de la caméra.
+\end_layout
+
+\begin_layout Itemize
+Pour finir, la composante spéculaire (
+\emph on
+Specular
+\emph default
+) définit la couleur ré-émise par les objets en direction de la caméra :
+ plus cette composante est lumineuse, plus les objets semblent brillants
+ (au contraire plus elle est sombre, plus les objets semblent mats).
+ 
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Le second cadre (
+\emph on
+Default materials
+\emph default
+) permet de paramétrer le matériau par défaut utilisé pour l'affichage des
+ maillages ainsi que la couleur par défaut des nuages de points :
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+Pour les maillages, l'utilisateur a la possibilité de définir une couleur
+ différente pour chaque côté de la surface (
+\emph on
+Mesh front
+\emph default
+ / 
+\emph on
+Mesh back
+\emph default
+) ainsi que la composante spéculaire (
+\shape italic
+Mesh specular
+\shape default
+).
+\end_layout
+
+\begin_layout Itemize
+Pour les nuages de points, seule la couleur par défaut des points peut être
+ définie (
+\shape italic
+Points
+\shape default
+).
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+Le dernier cadre (Colors) permet de modifier la couleurs d'autres éléments
+ :
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+
+\emph on
+Background
+\emph default
+ permet de régler la couleur de fond des vues 3D.
+ En fonction de l'état de la case à cocher 
+\shape italic
+Display gradient background
+\shape default
+ (voir ci-dessous), le fond apparaitra avec une couleur unie (la couleur
+ 
+\shape italic
+Background
+\shape default
+) ou sous forme d'un dégradé partant de cette couleur vers l'inverse de
+ la couleur par défaut des points (
+\shape italic
+Points
+\shape default
+).
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Bounding-box
+\emph default
+ permet de changer la couleur de la boite englobante apparaissant autour
+ des entités sélectionnées.
+\end_layout
+
+\begin_layout Itemize
+
+\emph on
+Text
+\emph default
+ permet de paramétrer la couleur du texte affiché dans les vues 3D.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+Chacun des boutons colorés permet de saisir une couleur pour le paramètre
+ qui lui est associé, via l'interface de sélection des couleurs présentée
+ en section 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:setUniqueColor"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsubsection
+Groupe de paramètres 
+\shape italic
+Color scale (scalar field) - 
+\shape default
+figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:displaySettings2"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/LightAndMaterials2.png
+	width 50text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:displaySettings2"
+
+\end_inset
+
+Interface(s) de paramétrage des options d'affichage - groupe 'Color scale
+ (scalar field)'
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Ce groupe permet de régler des options propres à l'affichage de la barre
+ de couleurs (associée au champ scalaire actif) :
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Always show 0
+\shape default
+ - fait toujours apparaitre la valeur 0 (même si les bornes du champs scalaire
+ ne contiennent pas 0).
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Always symmetrical
+\shape default
+ - force la barre de couleur associée à un champ scalaire non strictement
+ positif à être symétrique autour de 0 (même si les bornes du champ scalaire
+ ne sont pas à cheval sur 0).
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Square size
+\shape default
+ - définit la taille des cubes formant la barre de couleurs (en pixels).
+\end_layout
+
+\begin_layout Subsubsection
+Groupe de paramètres 
+\shape italic
+Other display options - 
+\shape default
+figure
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "fig:displaySettings3"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/LightAndMaterials3.png
+	width 50text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:displaySettings3"
+
+\end_inset
+
+Interface(s) de paramétrage des options d'affichage - groupe 'Other display
+ options'
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Ce groupe permet de régler diverses options d'affichage :
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Default font size
+\shape default
+ - taille des textes affichés à l'écran (taille de la police de caractères)
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Labels transparency
+\shape default
+ - transparence des étiquettes 2D (voir section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:standardLabel"
+
+\end_inset
+
+)
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Displayed numbers precision
+\shape default
+ - précision des chiffres affichés (rampe de couleur associée à un champ
+ scalaire, histogramme, etc.)
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Show middle screen cross
+\shape default
+ - spécifie si la croix au centre des vues 3D doit être affichée ou non
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Display gradient background
+\shape default
+ - spécifie si le fond doit être affiché avec un gradient entre deux couleurs
+ ou comme une seule couleur unie
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Decimate big clouds (>1M) when moved
+\shape default
+ - par défaut, 
+\shape italic
+CloudCompare
+\shape default
+ n'affiche qu'une partie des points lorsque un nuage de taille importante
+ est déplacé dans une vue 3D (pour accélérer l'affichage).
+ Cela peut néanmoins parfois être très mauvais pour la perception des formes,
+ ou tout simplement inutile sur des grosses configurations.
+\end_layout
+
+\begin_layout Itemize
+
+\shape italic
+Decimate big meshes (>250K) when moved
+\shape default
+ - par défaut, 
+\shape italic
+CloudCompare
+\shape default
+ n'affiche que les sommets lorsque un maillage de taille importante est
+ déplacé dans une vue 3D (pour accélérer l'affichage).
+ Cela peut néanmoins parfois être très mauvais pour la perception des formes,
+ ou tout simplement inutile sur des grosses configurations.
+\end_layout
+
+\end_body
+\end_document

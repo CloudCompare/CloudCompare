@@ -1,0 +1,215 @@
+#LyX 2.0 created this file. For more info see http://www.lyx.org/
+\lyxformat 413
+\begin_document
+\begin_header
+\textclass book
+\use_default_options false
+\maintain_unincluded_children false
+\language french
+\language_package default
+\inputencoding latin9
+\fontencoding T1
+\font_roman default
+\font_sans helvet
+\font_typewriter default
+\font_default_family sfdefault
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize 10
+\spacing single
+\use_hyperref true
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks false
+\pdf_pdfborder false
+\pdf_colorlinks true
+\pdf_backref false
+\pdf_pdfusetitle true
+\pdf_quoted_options "linkcolor=blue"
+\papersize a4paper
+\use_geometry true
+\use_amsmath 1
+\use_esint 1
+\use_mhchem 0
+\use_mathdots 0
+\cite_engine basic
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\leftmargin 1.5cm
+\topmargin 3cm
+\rightmargin 1.5cm
+\bottommargin 3cm
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language french
+\papercolumns 1
+\papersides 2
+\paperpagestyle fancy
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+qPoissonRecon - Poisson Surface Reconstruction
+\end_layout
+
+\begin_layout Standard
+\begin_inset Index idx
+status collapsed
+
+\begin_layout Plain Layout
+qPoissonRecon, Poisson reconstruction
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset CommandInset label
+LatexCommand label
+name "subsection:qPoissonRecon"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Le plugin qPoissonRecon est un portage de l'algorithme de Kazhdan et al.
+ via l'interfaçage de l'outil 
+\shape italic
+PoissonRecon
+\shape default
+ (V3) disponible en ligne 
+\begin_inset CommandInset href
+LatexCommand href
+name "ici"
+target "http://www.cs.jhu.edu/~misha/Code/PoissonRecon"
+
+\end_inset
+
+.
+ Cet algorithme permet la reconstruction de maillages surfaciques fermés
+ à partir de nuages de points 3D munis de normales.
+ Il repose sur une résolution de l'équation de Poisson sur une grille d'octree
+ adaptative (propre à l'outil, sans aucun rapport avec la structure octree
+ utilisée par 
+\shape italic
+CloudCompare
+\shape default
+).
+\end_layout
+
+\begin_layout Standard
+Pour fonctionner, l'outil a donc besoin d'un nuage muni de normales (si
+ besoin, voir l'outil de calcul de normales du plugin qPCL en section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:qPCL"
+
+\end_inset
+
+).
+ Le seul paramètre est le niveau de subdivision maximal de l'octree adaptatif
+ utilisé par l'algorithme.
+ Plus ce niveau est élevé, et plus la reconstruction sera précise.
+ En contrepartie, le temps de calcul et la mémoire nécessaire sont fortement
+ augmentés.
+ Ce niveau d'octree peut-être librement choisi par l'utilisateur (jusqu'à
+ 24) mais dépasser le niveau 13 ou 14 est généralement difficile sur une
+ machine standard.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !htb
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Graphics
+	filename ../images/Partie3_Fonctions/qPoissonReconExample.png
+	width 90text%
+
+\end_inset
+
+ 
+\begin_inset Caption
+
+\begin_layout Plain Layout
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:qPoissonReconExample"
+
+\end_inset
+
+Reconstruction surfacique de type Poisson à partir d'un nuage aux niveaux
+ 7 (à gauche), 8 (au centre) et 9 (à droite)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Remarques :
+\end_layout
+
+\begin_layout Itemize
+cet algorithme est pensé pour calculer des maillages de formes fermées.
+ L'appliquer à une forme ouverte (terrain, scan partiel d'un objet, etc.)
+ va généralement faire apparaitre des topologies étranges sur les bords
+ de l'objet.
+ Il est donc souvent nécessaire de les éditer manuellement pour retirer
+ les facettes correspondantes (voir section
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "subsection:graphicalSegmentation"
+
+\end_inset
+
+).
+\end_layout
+
+\end_body
+\end_document

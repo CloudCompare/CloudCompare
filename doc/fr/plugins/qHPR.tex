@@ -1,0 +1,52 @@
+\section{qHPR - Hidden Point Removal}
+\index{qHPR, filtrage de points}
+\label{subsection:qHPR}
+
+\par
+La fonction \textbf{H}idden \textbf{P}oints \textbf{R}emoval tente, comme son nom
+l'indique, de filtrer le nuage de points sélectionné de sorte à ne conserver que les
+points \emph{visibles} (correspondant à la surface implicite effectivement visible depuis
+le point de vue courant\index{point de vue}). Les points considérés comme étant masqués
+sont alors cachés. Le résultat dépend donc fortement du point de vue.\\
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.5\textwidth]{Partie3_Fonctions/HPRExample.jpg}
+\caption{\label{fig:PCVExample}Nuage de point complet (en haut) et nuage de point filtré avec la technique "HPR" (en bas)}
+\end{center}
+\end{figure}
+
+\par
+La notion de visibilité pour les points d'un nuage est relativement complexe à estimer.
+En effet il est très peu probable qu'un point soit réellement masqué par
+d'autres points dans un nuage, puisque celà nécessiterait un alignement parfait entre paires
+de points ou une densité du nuage telle que les points soient quasiment en contact. Cette fonction
+approxime donc la notion de visibilité via un calcul d'enveloppe convexe. Elle se base sur l'article
+\emph{Direct Visibility of Point Sets} de Katz, Tal et Basri, SIGGRAPH 2007.
+\\
+\par
+Pour calculer les occlusions par HPR, il est nécessaire que le contexte graphique du nuage soit en
+projection perspective (cf. section \ref{subsection:centeredPerspective}). Si ce n'est pas le cas,
+un message d'erreur prévient l'utilisateur lui demandant d'activer la projection perspective\index{projection!pour visualisation}.
+L'utilisateur doit ensuite choisir le niveau d'octree utilisé par la fonction (figure \ref{fig:HPRLevelChoice}).
+Le niveau d'octree\index{octree} permet d'accélerer le calcul de l'enveloppe convexe (structure assez lourde)
+en réduisant le nombre de points utilisés (par sous-échantillonnage). Plus le niveau est élevé, et plus
+le calcul d'occlusion sera fin, mais plus le traitement sera long.
+\\
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.3\textwidth]{Partie3_Fonctions/HPRLevelChoice}
+\caption{\label{fig:HPRLevelChoice}Interface de choix de niveau d'octree}
+\end{center}
+\end{figure}
+
+\par
+Une fois le filtrage effectué, celui-ci n'est valide que pour la position de caméra courante (et des positions très
+proches dans une certaine mensure). Il faut relancer l'outil pour mettre à jour le filtrage selon tout nouveau point
+de vue.\\
+\par
+\textcolor[rgb]{1.00,0.00,0.00}{Attention, les points cachés par cette méthodes ne peuvent pas être ré-affichés
+via une méthode ad-hoc (pour l'instant). Il faut en attendant utiliser un artifice : activer l'outil de segmentation
+manuelle sur le nuage (l'icône des "ciseaux" - section~\ref{subsection:graphicalSegmentation}) qui réinitialise
+l'information de visibilité par point) puis quitter ce mode.}

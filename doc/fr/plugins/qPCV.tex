@@ -1,0 +1,83 @@
+\section{qPCV - ShadeVis Ambient Occlusion}
+\index{qPCV, ambient occlusion}
+\index{Portion de Ciel Visible}
+\index{eclairage@éclairage!simuler}
+\label{subsection:qPCV}
+
+\par
+Cet outil permet de calculer rapidement l'illumination des points d'un nuage ou des
+sommets d'un maillage par détermination de la "\textbf{P}ortion de \textbf{C}iel \textbf{V}isible"
+(P.C.V. - voir figure~\ref{fig:PCVExample}).
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{Partie3_Fonctions/PCVExample.jpg}
+\caption{\label{fig:PCVExample}Rendu classique avec normales (gauche) et rendu "PCV" (droite)}
+\end{center}
+\end{figure}
+
+Cet éclairage consiste à calculer pour chaque point la quantité de ciel qu'il voit, ou
+autrement dit la quantité d'énergie lumineuse qu'il recevrait si le nuage était éclairé
+uniformément. Ceci permet de colorier les points en fonction de leur profondeur
+relative et fait très bien ressortir le relief et la micro-géométrie. En pratique le calcul
+est effectué avec un algorithme équivalent à \emph{ShadeVis} (proposé initialement par
+Cignoni et al. du VCG).
+\\
+\par
+Les deux principaux paramètres de l'algorithme, modifiables via la boîte de dialogue associée
+à la fonction (figure \ref{fig:PCVParamWindow}), sont :
+\begin{itemize}
+\item le nombre de « rayons » lumineux. Pour chaque direction d'éclairement (rayon), l'algorithme
+projette, via la carte graphique, les entités selon cette direction et calcule la visibilité des
+points (ou des sommets d'un maillage). Cette information est accumulée pour chaque direction et
+permet de calculer l'éclairement global. Plus le nombre de rayons est grand, et plus la dynamique
+est importante et les différences d'éclairement entre deux points fines. Par contre, le temps de
+calcul est proportionnel au nombre de rayon.
+\item la résolution du buffer de rendu. La projection des entités selon une direction se fait dans
+un buffer vidéo dont la résolution va jouer sur le pouvoir de séparation entre points. Plus la
+résolution est forte, et mieux les points seront dissociés (d'où un meilleur calcul de leur
+éclairement propre et une meilleure finesse du résultat). Par contre, si la résolution est trop
+grande, outre un temps de calcul et une consommation mémoire plus importants (cela dépend des
+performances de la carte graphique), il faut aussi se méfier du fait que le nuage peut devenir
+"poreu" et laisser passer la lumière (voir remarque ci-dessous). Dans le cas d'un maillage ceci
+ne pose pas problème. Les cartes graphiques actuelles assurent des performances très intéressantes
+dans l'absolu, il ne faut donc pas hésiter à utiliser des valeurs importantes pour ces paramètres
+(telles que les valeurs par défaut).\\
+\end{itemize}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.3\textwidth]{Partie3_Fonctions/PCVParamWindow}
+\caption{\label{fig:PCVParamWindow}Interface de paramétrage de PCV}
+\end{center}
+\end{figure}
+
+\par
+Remarques :
+\begin{itemize}
+\item L'algorithme crée un nouveau type de champ scalaire (« PCV ») et la rampe de
+couleur « Gray » (niveaux de gris) est automatiquement activée.
+\item \textcolor[rgb]{1.0,0.0,0.0}{La lumière simulée par l'algorithme PCV est considérée
+comme provenant de l'hémisphère des Z positifs. Z correspondant à la direction verticale,
+le nuage de points doit donc être orienté en conséquence avant tout calcul.}. Si la
+checkbox "360° mode" est cochée, la lumière vient du globe complet et la direction ne joue plus.
+\item Puisque l'illumination calculée par cet algorithme est un champ scalaire, il est
+possible de jouer avec les potentiomètres de saturation pour régler le contraste. Dans
+le cas d'un maillage, on peut aussi utiliser les fonctions de moyenne et de
+rehaussement du contraste (voir sections~\ref{subsection:smoothMeshSF} et
+\ref{subsection:enhanceMeshSF}). Une fois les paramètres correctement réglés, on peut transformer
+le champ scalaire en \emph{couleurs} avec la fonction « Scalar Fields > Convert to RGB »
+(section~\ref{subsection:scalarFieldConvertToRGB}).
+\item L'éclairage provenant du ciel est représenté de manière discrète par un nombre limité de « rayons » lumineux,
+qui sont échantillonnés de manière uniforme sur l'hémisphère (ou la sphère complète
+si le mode 360° est activé). Il n'y a pas pour autant de lancer de rayons dans \emph{ShadeVis}
+(on devrait plutôt parler de direction d'observation - Cf. l'article de Cignoni et al. pour
+plus d'informations).
+\item Dans le cas des maillages, il est possible d'accélérer l'algorithme si le maillage est
+fermé (option «~closed mesh~», activée par défaut).
+\item Dans le cas des nuages de points, il faut faire attention à ce que la résolution ne
+soit pas trop grande, sinon des «~trous~» peuvent apparaître entre les points lors du
+rendu interne : cceci est simplement dû au fait que la densité d'un nuage est limitée, et
+que pour un niveau de zoom suffisant, on observera toujours des zones sans
+information entre les points.
+\end{itemize}

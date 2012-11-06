@@ -1,0 +1,90 @@
+\subsection{Tools > Registration > Align}
+\label{subsection:align}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{Partie3_Fonctions/alignDlg.png}
+\caption{\label{fig:alignDlg}Interface de paramétrage pour l'outil de recalage grossier de deux entités}
+\end{center}
+\end{figure}
+
+Cette fonction permet de recaler\index{recalage}\index{aligner des nuages|see{recalage}} grossièrement deux nuages de points (algorithme \emph{"4 points Congruent Sets For Robust
+Registration"} de Aiger, Mitra et Cohen-Or, Siggraph 2008).
+\\
+\par
+Une première zone de saisie (en haut à gauche) permet d'indiquer les 2 nuages à recaler et leurs rôles\index{role@rôle}
+respectifs (\emph{Model and Data} : le \emph{Model} est le nuage de référence (qui ne bouge pas) sur lequel viendra s'aligner (si possible)
+le nuage \emph{Data}.
+Comme le recalage calculé est un recalage rigide, seules des translations et des rotations peuvent être appliquées
+à l'ensemble du nuage \emph{Data}.
+Plusieurs autres paramètres doivent être renseignés par l'utilisateur pour une utilisation optimale de cette méthode.
+\\
+\par
+\emph{Sampling} : cette zone concerne l'étape préalable de sous-échantillonnage\index{echantillonner@échantillonner!sous-echantillonner@sous-échantillonner}
+des nuages de points. Cela permet d'améliorer sensiblement l'efficacité de l'algorithme.
+En effet, quelques dizaines de milliers de points suffisent généralement à obtenir un bon
+recalage, alors que la complexité de l'algorithme augmente rapidement en fonction du nombre de points. L'utilisateur devrait toujours
+chercher à minimiser le nombre de points pris en compte, quitte à relancer l'algorithme avec plus de points si besoin.
+Voici les paramètres du sous-échantillonnage :
+\begin{itemize}
+\item \emph{Method} : méthode de sous-échantillonnage (voir section~\ref{subsection:subsample}). Sélectionnez \emph{None} pour ne pas sous-échantillonner
+\item \emph{Model} : un slider et/ou un champ avec variateur permet de choisir le nombre de points conservé pour le nuage de référence
+\item \emph{Data} : idem, un slider et/ou un champ avec variateur permet de choisir le nombre de points conservé pour le nuage recalé\\
+\end{itemize}
+\par
+\emph{Registration parameters} : cette zone correspond aux paramètres de l'algorithme de recalage en tant que tel.
+Nous expliquons en détail ces paramètres :
+\begin{itemize}
+\item \emph{Number of trials} : l'algorithme procède par essais successifs et ne retient que celui ayant fourni le meilleur résultat.
+Ce champ permet de choisir le nombre d'essais à effectuer. Plus la valeur saisie est grande, plus le calcul sera long, mais plus la
+probabilité d'obtenir de bons résultats sera élevée. Il peut donc être nécessaire d'adapter ce paramètre en fonction du nombre de points
+composant les nuages pour obtenir un bon alignement dans un temps raisonnable. Pour donner un ordre d'idée, une cinquantaine d'essais
+pour recaler deux nuages de 5000 points chacun permet d'obtenir un résultat convenable en quelques minutes (de l'ordre de 2 à 5 minutes,
+tout dépend de l'ordinateur sur lequel le programme s'exécute).
+\item \emph{Overlap} : ce paramètre, compris entre 0.0 et 1.0, correspond à une estimation du taux de recouvrement entre les deux nuages
+lorsqu'ils sont correctement alignés. Un taux de recouvrement de 1 signifie que les deux nuages se recouvrent quasiment entièrement, 0
+signifiant que les nuages sont disjoints (dans ce cas, le recalage n'a pas beaucoup de sens). Une estimation très approximative
+du recouvrement est en général suffisante, il ne s'agit en aucun cas de renseigner avec précision la valeur effective.
+\item \emph{Delta} : ce paramètre correspond à une estimation a priori de la distance moyenne qui existera entre les points des deux nuages
+après qu'ils aient été recalés. Il sert de critère d'arrêt et agit comme une tolérance à l'erreur : plus il est proche de 0, plus on contraint
+les nuages à être proches, mais plus la probabilité de trouver une bonne solution est faible. En principe, si \emph{Delta} vaut zéro, le 
+programme ne pourra pas trouver d'alignement entre les deux nuages. En règle générale, pour obtenir de bons résultats, \emph{Delta} doit 
+correspondre à la résolution (inverse de la densité) du nuage de référence. L'interface propose un bouton \emph{Estimate} qui permet 
+d'estimer de manière automatique ce paramètre en se basant sur un calcul de la densité moyenne du nuage de référence.
+\item \emph{Limit max. number of candidates} : lorsque ce champ est activé (pour celà, cocher la case qui y est associé), il est possible de fixer
+le nombre maximal de candidats que le programme est autorisé à traiter pour chaque essai. En effet, lors d'un essai, le processus recherche
+dans le nuage servant de données des ensembles de points pouvant mener à un bon recalage. Ces ensembles sont calculés en fonction des paramètres cités
+précédemment, et le programmme peut être amené à trouver un nombre énorme de candidats (quelques centaines de milliers d'ensembles). Ce paramètre permet
+de ne sélectionner parmi ces candidats que ceux qui sont considérés comme étant les meilleurs, et donc de raccourcir considérablement le temps de
+traitement de chaque essai. En contrepartie, on se prive potentiellement de trouver le meilleur recalage à cause de l'heuristique utilisée pour retenir
+les meilleurs candidats. Lorsque ce champ est désactivé, le nombre maximal de candidats est illimité, ce qui peut conduire à de très grands temps de calcul.
+\end{itemize}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{Partie3_Fonctions/alignExample}
+\caption{\label{fig:alignExample}Alignement de deux nuages se recouvrant partiellement.
+A gauche la configuration initiale, à droite le résultat du recalage avec un recouvrement estimé à 90\%
+(\emph{Overlap}~$=\:0,9$) et une vingtaine d'essais (\emph{Number of trials}).}
+\end{center}
+\end{figure}
+
+\par
+Les paramètres \emph{Delta} et \emph{Overlap} nécessitent donc que l'utilisateur ait une idée a priori de ce que seront les nuages après avoir
+été alignés.
+\\
+\par
+La figure \ref{fig:alignExample} présente le résultat obtenu en alignant deux scans d'une peluche relevés sous deux angles sensiblement
+différents. En théorie, la fonction \emph{Align} est capable de traiter des nuages avec des taux de recouvrement beaucoup plus faibles que ceux
+présentés en exemple.
+\\
+\par
+Les alignement calculés via cette fonctionnalité dépendent grandement de la configuration des nuages à traiter. En effet, leur géométrie
+ainsi que le degré de ressemblance les rendent plus ou moins facilement comparables. De ce fait, il se peut que les résultats fournis dans
+certains cas semblent relativement mauvais. Dans ces situations, vous pouvez alors utiliser la fonction de recalage fin décrite en
+section~\ref{subsection:register}. Il est même conseillé, de manière générale, d'avoir recours au recalage fin après utilisation de cette
+fonctionnalité.
+\\
+\par
+\textcolor[rgb]{1.0,0.0,0.0}{Cette fonction crée une copie du nuage \emph{Data} aligné sur le nuage \emph{Model}.
+Il n'est donc pas nécessaire de cloner les nuages avant, puisqu'ils ne sont pas modifiés directement.}

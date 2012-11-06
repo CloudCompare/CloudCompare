@@ -1,0 +1,69 @@
+\subsection{Tools > Distances > Cloud/Cloud dist.}
+\label{subsection:cloud2cloudDist}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.3\textwidth]{Partie3_Fonctions/cloud2cloudDistDlg.png}
+\caption{\label{fig:cloud2cloudDistDlg}Interface de paramètrage pour le calcul de distances entre deux nuages de points}
+\end{center}
+\end{figure}
+
+Cette fonction permet de calculer les distances\index{distances} (approximatives ou exactes) entre deux nuages de points.
+\\
+\par
+Lors de l'appel de cette fonction, et après avoir choisi le rôle\index{role@rôle} de chaque nuage
+(Cf. section~\ref{subsection:chooseRole}), un premier calcul de distances approximatives entre les deux nuages
+(distances de Chanfrein, calculées via l'octree) est effectué de manière automatique. Cela permet d'afficher
+dans la partie supérieure de l'interface~\ref{fig:cloud2cloudDistDlg} (\emph{Approx. results}) diverses
+informations sur les distances qui peuvent alors être calculées précisément.
+\\
+\par
+Ces informations sont :
+\begin{itemize}
+\item \emph{Min. dist.} : distance (approximative) minimale
+\item \emph{Max. dist.} : distance (approximative) maximale
+\item \emph{Mean. dist.} : distance (approximative) moyenne
+\item \emph{Sigma} : écart type
+\item \emph{Max relative error} : erreur relative maximale de l'approximation (exprimée sous forme d'une fonction de
+$d$ - la distance, car cette erreur est dépendante de la distance réelle des points, et généralement décroît
+rapidement quand $d$ croît, ce qui veut dire que l'approximation de la distance minimale est généralement très
+mauvaise, mais celle de la distance maximale peut-être assez fiable).\\
+\end{itemize}
+\par
+L'utilisateur peut enfin afficher l'histogramme des distances approximatives calculées (en appuyant sur l'icone
+\includegraphics{images/Partie3_Fonctions/cc_histogramIcon}), mais celui-ci est généralement assez peu détaillé étant donné le principe du calcul des distances de
+Chanfrein via l'octree.
+\\
+\par
+La partie inférieure (\emph{Precise results}) permet le paramétrage du calcul précis des distances.
+L'utilisateur peut saisir les valeurs suivantes :
+\begin{itemize}
+\item \emph{Local model} : indique quelle \index{modele@modèle}une modélisation locale sera appliquée au nuage de référence pour améliorer la précision
+du calcul de distance nuage à nuage (dans une certaine mesure). Cette technique permet une amélioration de la précision globale (et non forcément locale).
+Cette amélioration dépend du modèle choisi, et se fait au prix d'un certain ralentissement de la fonction (qui dépend lui aussi du
+modèle choisi) :
+\begin{itemize}
+\item {NONE} : pas de modélisation locale (comportement par défaut), on calcule la distance au point le plus proche.
+\item {Least Square Plane} : approximation locale du nuage par un plan (ajusté aux moindres carrés) - peu précis mais rapide.
+\item {2D$\frac{1}{2}$ triangulation} : approximation locale du nuage par une triangulation de Delaunay 2D$\frac{1}{2}$ (après
+projection des points sur un plan ajusté aux moindres carrés) - vitesse et précision intermédiaires.
+\item {Height Function} : approximation locale du nuage par une fonction de hauteur du type $z = ax+by+cx^2+dy^2+exy$ (là encore,
+après projection des points sur un plan ajusté aux moindres carrés) - meilleure précision mais vitesse réduite.
+\end{itemize}
+\item \emph{Max. dist} : permet à l'utilisateur de définir une distance au delà de laquelle il n'est pas nécessaire de calculer
+une distance précise. Cela permet d'améliorer fortement les performances du calcul, en particulier sur des nuages ayant peu
+de zones communes (en évitant ainsi de calculer des distances éloignées - les plus coûteuses - alors que leur connaissance
+précise est généralement inutile). \emph{Les points concernés conservent alors leur distance approximative. Les informations
+affichées dans la partie supérieure peuvent grandement aider à fixer cette valeur limite.}
+\item \emph{Octree level} : \index{octree}ce paramètre de l'algorithme est normalement adapté au mieux par \emph{CloudCompare}, mais il est
+possible de le forcer au cas où l'heuristique de détermination est défaillante.\\
+\end{itemize}
+\par
+Remarques :
+\begin{itemize}
+\item Cette fonction rajoute un champ scalaire \emph{C2C Distances} au nuage de référence.
+\item \textcolor[rgb]{1.00,0.00,0.00}{Pour calculer les distance précises il est nécessaire d'appuyer sur le bouton rouge \emph{Compute}.}
+Autrement, seules les distances approximatives sont conservées.
+\item Toutes les distances calculées par cette fonction ou rentrées en paramètre sont exprimées dans la même
+unité que les coordonnées du nuage de points (il n'y a plus d'unité explicite dans \emph{CloudCompare 2.1}).
+\end{itemize}

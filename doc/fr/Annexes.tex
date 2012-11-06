@@ -1,0 +1,252 @@
+\chapter{Annexes}
+\label{cha:Annexes}
+
+\section{Formats de fichiers}
+\label{section:fileFormats}
+
+
+\subsection{Fichiers de primitives 2D/3D reconnus\index{fichiers!formats}\index{fichiers!ouvrir|see{ouvrir des objets}}\index{ouvrir des objets}}
+
+\begin{center}
+\begin{tabular}{|>{\raggedright}m{0.1\textwidth}|>{\raggedright}m{0.07\textwidth}|>{\centering}m{0.05\textwidth}|>{\centering}m{0.05\textwidth}|>{\centering}m{0.05\textwidth}|>{\centering}m{0.05\textwidth}|>{\centering}m{0.05\textwidth}|>{\centering}m{0.05\textwidth}|>{\centering}m{0.05\textwidth}|>{\raggedright}m{0.15\textwidth}|}
+\hline
+Extension  & Type  & P  & M  & RGB  & NG  & N  & S  & Autre  & Description\tabularnewline
+\hline
+\hline
+asc, txt, neu, xyz, etc.  & ascii  & \CheckmarkBold{}  &  & \CheckmarkBold{}  & \CheckmarkBold{}  & \CheckmarkBold{}  & \CheckmarkBold{}  &  & nuage de points ASCII\tabularnewline
+\hline
+bin  & binaire  & \CheckmarkBold{}  &  & \CheckmarkBold{}  &  & \CheckmarkBold{}  & \CheckmarkBold{}  &  & nuage(s) de points, format binaire spécifique à CloudCompare\tabularnewline
+\hline
+ply  & ascii / binaire  & \CheckmarkBold{}  & \CheckmarkBold{}  & \CheckmarkBold{}  & \CheckmarkBold{}  & \CheckmarkBold{}  & \CheckmarkBold{}  & \CheckmarkBold{}  & maillage (Stanford)\tabularnewline
+\hline
+obj  & ascii  &  & \CheckmarkBold{}  &  &  & \CheckmarkBold{}  &  & \CheckmarkBold{}  & maillage (Wavefront)\tabularnewline
+\hline
+soi  & ascii  & \CheckmarkBold{}  &  &  & \CheckmarkBold{}  &  &  &  & nuage(s) (Soisic, Mensi)\tabularnewline
+\hline
+(c)bin  & binaire  & \CheckmarkBold{}  &  & \CheckmarkBold{}  &  &  &  &  & nuage (C. Hernandez)\tabularnewline
+\hline
+pn  & binaire  & \CheckmarkBold{}  &  &  &  & \CheckmarkBold{}  &  &  & nuage (point + normale)\tabularnewline
+\hline
+pv, pcv  & binaire  & \CheckmarkBold{}  &  &  &  &  & \CheckmarkBold{}  &  & nuage (point + valeur)\tabularnewline
+\hline
+icm  & ascii  &  &  &  &  &  &  & \CheckmarkBold{}  & association nuages/images\tabularnewline
+\hline
+\end{tabular}\\
+
+\par\end{center}
+
+\begin{tabular}{lll}
+P  & :  & Points\tabularnewline
+M  & :  & Maillages\tabularnewline
+RGB  & :  & Couleurs (Red, Green, Blue)\tabularnewline
+NG  & :  & Niveaux de Gris\tabularnewline
+N  & :  & Normales\tabularnewline
+S  & :  & Scalaires\tabularnewline
+\end{tabular}\\
+
+
+
+\subsection{Chargement et sauvegarde}
+
+\begin{center}
+\begin{tabular}{|>{\raggedright}m{0.15\textwidth}|>{\centering}m{0.1\textwidth}|>{\centering}m{0.1\textwidth}|}
+\cline{2-3}
+\multicolumn{1}{>{\raggedright}m{0.15\textwidth}||}{} & Chargement  & Sauvegarde\tabularnewline
+\hline
+asc, txt, neu, xyz, etc.  & \CheckmarkBold{}  & \CheckmarkBold{}\tabularnewline
+\hline
+bin  & \CheckmarkBold{}  & \CheckmarkBold{}\tabularnewline
+\hline
+ply  & \CheckmarkBold{}  & \CheckmarkBold{}\tabularnewline
+\hline
+obj  & \CheckmarkBold{}  & \CheckmarkBold{}\tabularnewline
+\hline
+soi  & \CheckmarkBold{}  & \tabularnewline
+\hline
+(c)bin  & \CheckmarkBold{}  & \tabularnewline
+\hline
+pn  & \CheckmarkBold{}  & \CheckmarkBold{}\tabularnewline
+\hline
+pv, pcv  & \CheckmarkBold{}  & \tabularnewline
+\hline
+icm  & \CheckmarkBold{}  & \tabularnewline
+\hline
+\end{tabular}\\
+
+\par\end{center}
+
+\subsection{Formats ASCII}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{images/Partie4_Annexes/asciiFilterDialog.png}
+\caption{\label{fig:asciiFilterDialog}Interface de paramètrage de la lecture de fichiers ASCII.}
+\end{center}
+\end{figure}
+
+
+\par
+Les nuages de points stockés sous format ASCII ne suivent pas tous le même schéma selon l'application
+à partir de laquelle ils ont été créés, notamment concernant :
+\begin{itemize}
+\item la quantité d'information renseignée pour chaque point. La seule certitude est que l'on dispose
+systématiquement des coordonnées cartésiennes (X, Y, Z) des points. Peuvent s'ajouter à cela les normales,
+couleurs et intensités.
+\item l'ordre d'apparition des informations présentes.
+\item les caractères de séparation des informations.
+\item d'éventuels en-têtes\index{en-tete@en-tête} de fichiers permettant d'apporter diverses informations,
+généralement liées à l'application ayant permis la sauvegarde du fichier. 
+\end{itemize}
+
+
+
+\par
+Pour palier à ce problème, CloudCompare propose, à l'ouverture de tels fichiers, une boîte de dialogue (figure \ref{fig:asciiFilterDialog})
+permettant à l'utilisateur de paramètrer la lecture des données. Ainsi, il est possible d'ouvrir n'importe
+quel fichier ASCII, quelque soit l'application ayant permis de le créer, sous réserve que les données
+qui s'y trouvent soient suffisamment structurées :
+\begin{itemize}
+\item chaque ligne correspond à un point
+\item chaque donnée est séparée de la suivante par un caractère unique commun à l'ensemble du fichier
+(typiquement une tabulation ou un espace)
+\item la quantité d'information ainsi que l'ordre d'appartion des ces informations sont les mêmes
+pour chaque ligne (donc pour chaque point)
+\end{itemize}
+
+
+
+\par
+La partie centrale de la boîte de dialogue d'ouverture de fichiers ASCII est un tableau dans lequel chaque ligne
+correspond à une ligne du fichier lu (donc à un point), et chaque colonne correspond à une information.
+L'utilisateur a la possibilité de modifier l'information portée par une colonne, en sélectionnant l'élément
+pertinent dans la liste déroulante en tête de colonne (figure \ref{fig:asciiInformationChoice}).\\
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.13\textwidth]{images/Partie4_Annexes/asciiInformationChoice.png}
+\caption{\label{fig:asciiInformationChoice}Sélection de l'information portée par une colonne.}
+\end{center}
+\end{figure}
+
+Remarques :
+\begin{itemize}
+\item il est possible d'ignorer le contenu d'une colonne lors de la lecture, en sélectionnant l'élément
+"Ignore" en tête de colonne (par exemple lorsqu'on ne sait pas à quoi correspond une colonne, il est judicieux de
+l'ignorer plutôt que de faire une manipulation pouvant induire des erreurs dans la construction du nuage de points).
+\item lorsque le premier élément d'un vecteur est sélectionné pour une colonne, les colonnes suivantes sont
+automatiquement modifiées si elles ne sont pas déja renseignées, de sorte à recréer le vecteur (si l'utilisateur
+sélectionne Nx pour une colonne par exemple, et que les deux colonnes suivantes sont non encore paramétrées,
+alors elles seront automatiquement basculées à Ny et Nz respectivement).
+\end{itemize}
+
+
+\par
+Cette boîte de dialogue permet aussi d'indiquer à partir de quelle ligne la lecture de données peut commencer,
+de manière à pouvoir ignorer d'éventuels en-têtes de fichiers ne portant aucune information liée au nuage de
+points. Pour celà, il suffit de renseigner le champ "Skip lines". Par exemple, dans la figure \ref{fig:asciiFilterDialog},
+les deux premières lignes composent l'en-tête du fichier, et la lecture doit donc commencer à partir de la
+troisième ligne (il faut donc renseigner la valeur 2 pour le champ "Skip lines").\\
+
+
+\par
+Pour finir, il est possible de renseigner le caractère servant de séparateur\index{separateur@séparateur} dans le fichier
+(caractère séparant deux informations successives sur une même ligne), via le champ "Separator". Les boutons "ESP" (espace),
+"TAB" (tabulation), "," (virgule) et ";" (point virgule) permettent de sélectionner rapidement les caractères les plus
+communément utilisés à cet effet.\\
+
+\par
+Une fois l'interface paramétrée, cliquez sur OK pour lancer le chargement du fichier.\\
+
+
+
+\subsection{Formats spéciaux}
+
+
+%DGM: pas inclus dans la version 2.1
+%
+%\subsubsection{Fichiers de défauts (.txt)}
+%
+%Liste de défauts surfaciques sur un ouvrage de génie civil (polylignes
+%3D accompagnées de diverses caractéristiques). Source : EDF/DTG.\\
+
+
+
+\subsubsection{Fichier ICM}
+
+Fichier d'association entre un nuage de points et un fichier VRML
+de définition des photos calibrées (caméra + fichier image).\\
+
+
+Exemple :
+
+\begin{tabular}{>{\raggedright}p{0.4\textwidth}>{\raggedright}p{0.4\textwidth}}
+\hline
+\multicolumn{2}{c}{\textcolor{blue}{fichier <<toto.icm >>}}\tabularnewline
+\hline
+\#CC\_ICM\_FILE  & //header\tabularnewline
+FILENAME=pa4.asc  & //Fichier de points\tabularnewline
+FILETYPE=ASC  & //Type du fichier de points\tabularnewline
+IMAGES\_DESCRIPTOR=photo\_match.wrl  & //Fichier VRML de description des photos calibrées\tabularnewline
+\hline
+\end{tabular}\\
+
+
+\begin{tabular}{>{\raggedright}p{0.4\textwidth}>{\raggedright}p{0.4\textwidth}}
+\hline
+\multicolumn{2}{c}{\textcolor{blue}{fichier <<photos\_match.wrl >>}}\tabularnewline
+\hline
+\#VRML v2.0 utf8  & \tabularnewline
+ & \tabularnewline
+DEF photo1.jpg Viewpoint\{  & //Header photo \#1\tabularnewline
+fieldOfView 0.621379  & //F.O.V.\tabularnewline
+position -10.5418 -15.6091 5.95961  & //Centre optique\tabularnewline
+description <<VANNE + PETIT TUYEAU >>  & //Description\tabularnewline
+orientation 0.70724 -0.37292 -0.600618 3.74252  & //Vecteur <<visée >>\tabularnewline
+\}  & //Fin de photo \#1\tabularnewline
+ & \tabularnewline
+DEF photo2.jpg Viewpoint\{  & //Header photo \#2\tabularnewline
+fieldOfView 0.621379  & //etc.\tabularnewline
+position -3.9782 -21.276 5.95616  & \tabularnewline
+description <<PORTE >>  & \tabularnewline
+orientation 0.572629 0.696275 -0.432778 2.02135  & \tabularnewline
+\}  & \tabularnewline
+\hline
+\end{tabular}\\
+
+
+Un tel fichier VRML peut être généré quasi-automatiquement par
+un logiciel comme \emph{RealWorks} (Mensi).\\
+
+
+\subsubsection{Fichier d'export de carte de profondeur}
+\label{subsection:depthMapFileDescription}
+
+Fichier ASCII d'export de carte de profondeur associée à un \emph{capteur}. Peut être généré via la fonction
+\emph{Sensor > Ground-Based Lidar > Export depth buffer} (section~\ref{subsection:exportGBLDepthBuffer}).
+\\
+
+
+Exemple :
+
+\begin{tabular}{>{\raggedright}p{0.4\textwidth}>{\raggedright}p{0.4\textwidth}}
+\hline
+\multicolumn{2}{c}{\textcolor{blue}{fichier <<Ground Based Laser Scanner.txt >>}}\tabularnewline
+\hline
+// CLOUDCOMPARE DEPTH MAP  & \tabularnewline
+// Associated cloud: Cloud \#0 & \emph{associated cloud name (as disp. in CC)}\tabularnewline
+// dPhi   = 0.005000 [ -0.383052 : 0.319331 ] & \emph{horizontal angular step}\tabularnewline
+// dTheta = 0.005000 [ -1.626588 : 0.137948 ] & \emph{vertical angular step}\tabularnewline
+// pMax   = 78823.398438  & \emph{max depth}\tabularnewline
+// L      = 353 & \emph{number of horiz. pixels}\tabularnewline
+// H      = 141 & \emph{number of vert. pixels}\tabularnewline
+///////////////////////// & \tabularnewline
+0.000000 0.000000 18132.496094 & 1st pixel coordinates (i,j) and depth (z) \tabularnewline
+1.000000 0.000000 15145.963154 & 2nd pixel coordinates (i,j) and depth (z) \tabularnewline
+... & \tabularnewline
+352.000000 140.000000 132135.321542 & L*H pixel coordinates (i,j) and depth (z) \tabularnewline
+\hline
+\end{tabular}\\
+
+
+\section{Ligne de commande}
+\label{subsection:commandeLine}

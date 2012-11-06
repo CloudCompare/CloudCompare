@@ -1,0 +1,44 @@
+\subsection{Tools > Registration > Register}
+\label{subsection:register}
+
+\begin{figure}[!htb]
+\begin{center}
+\includegraphics[width=0.4\textwidth]{Partie3_Fonctions/registrationDlg.png}
+\caption{\label{fig:registrationDlg}Interface de paramètrage pour l'outil de recalage de deux entités}
+\end{center}
+\end{figure}
+
+\index{recalage}
+Cette fonction permet de recaler deux nuages de points (algorithme \emph{"Iterative Closest Point"} de Besl et McKay, IEEE Trans. PAMI 1992).
+\\
+\par
+\textcolor[rgb]{1.0,0.0,0.0}{Attention : pour que ce recalage fonctionne, il est nécessaire que les deux nuages soit à peu près alignés.\\}
+\par
+Cette fonction ne permet en aucun cas d'aligner des nuages positionnés et orientés de manière quelconque.
+Son rôle est essentiellement d'affiner le recalage des nuages de points dont on estime qu'ils sont grossièrement alignés. La fonction \emph{Align}
+décrite en section \ref{subsection:align} permet de faire en sorte que les nuages soient approximativement alignés et la
+fonction \emph{Register} peut être utilisée sur les deux nuages résultant de cette fonction \emph{Align}.
+\\
+\par
+La zone supérieure (\emph{Model and Data}) de la fenêtre de paramètrage permet à l'utilisateur d'attribuer interactivement le rôle\index{role@rôle}
+de chaque entité. Le \emph{Model} est le nuage de référence (qui ne bouge pas) et \emph{Data} désigne le nuage à recaler (il pourra bouger si nécessaire).
+Pour aider l'utilisateur, \emph{CloudCompare} force la coloration des entités et leur affichage (\emph{model} en rouge et \emph{data} en jaune)
+selon le même principe que l'interface de choix des rôles avant un calcul de distances (voir paragraphe ci-dessous).
+Un bouton permet d'intervertir ces roles si besoin (\emph{swap}).
+\\
+\par
+La partie inférieure (\emph{Registration parameters}) correspond aux paramètres de l'algorithme de recalage en tant que tel.
+Voici leur détail :
+\begin{itemize}
+\item \emph{Stop criterion} : l'utilisateur choisit soit un nombre d'itérations fixe (ceci permet d'éviter un temps de calcul trop long,
+mais ne garantit pas la qualité du recalage) ou au contraire une diminution de l'erreur minimale entre deux itérations
+pour justifier d'autres itérations : autrement, l'algorithme s'arrête, estimant que le gain en précision est insuffisant
+(ce qui garantit une meilleure qualité mais peut prendre potentiellement beaucoup de temps).
+\item \emph{Enable furthest point removal} : heuristique adaptée au recalage d'entités légèrement différentes (puisque
+\emph{CloudCompare} est justement fait pour comparer des nuages potentiellement différents, alors que l'algorithme est pensé
+pour recaler des nuages représentant les mêmes objets !). Cet heuristique consiste à écarter les points
+trop éloignés à chaque itération du recalage (et ce de plus en plus), pour éviter que les différences entre les nuages
+ne fassent trop \emph{glisser} la position finale du nuage recalé).
+
+\textcolor[rgb]{1.0,0.0,0.0}{Donc cette option ne doit pas être cochée si les deux nuages représentent les mêmes objets.}
+\end{itemize}

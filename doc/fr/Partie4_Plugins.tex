@@ -1,0 +1,27 @@
+\chapter{Plugins}
+\label{cha:Plugins}
+
+\label{sec:pluginsMenu}
+\par
+\index{plugin}
+Les plugins sont des extensions proposant des fonctionnalités avancées, mais qui ne sont pas intégrées
+directement dans \emph{CloudCompare} pour différentes raisons. L'application peut parfaitement fonctionner sans ces fonctions, dont le domaine d'application est généralement un peu eloigné du \textit{coeur de métier} de \emph{CloudCompare}.\\
+\par
+Ils correspondent à des fichiers de type \textit{librairie dynamique} (extensions ".dll" sous Windows et ".so" sous Linux) qui sont chargés automatiquement au démarrage de l'application et rangés dans le menu << Plugin >> et la barre d'outils éponyme.\\
+\par
+Sont présentés ici tous les plugins \textit{officiels} de \emph{CloudCompare}. Il est toutefois possible que vous ne retrouviez pas tous ces plugins dans votre installation, ce qui encore une fois n'entrave en rien le bon fonctionnement de \emph{CloudCompare}.
+
+%Submenu GL filters
+\input{plugins/qEDL}
+\input{plugins/qSSAO}
+
+%Submenu Standard plugins
+\input{plugins/qPCV}
+\input{plugins/qHPR}
+\input{plugins/qPCL}
+\input{plugins/qPoissonRecon}
+\input{plugins/qKinect}
+\input{plugins/qRansacSD}
+
+
+

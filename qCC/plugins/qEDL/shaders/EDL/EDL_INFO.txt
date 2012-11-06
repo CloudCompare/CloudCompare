@@ -1,0 +1,8 @@
+Version modifiée de l'EDL
+-------------------------
+
+On a enlevé le faux ombrage se produisant sur des pixels de fond 
+	pixels de fond concernés : aucune géométrie sur ces pixels, mais voisins d'un pixel de géométrie dans l'espace image)
+	conséquence avant changement : le pixel est affiché en noir
+
+Modification : C. Boucheny, 21/12/2011

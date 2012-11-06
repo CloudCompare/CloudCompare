@@ -227,10 +227,17 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 	}
 	else if (anObject->isKindOf(CC_MESH))
 	{
-		ccGenericMesh* mesh = static_cast<ccGenericMesh*>(anObject);
-		mesh->getAssociatedCloud()->razVisibilityArray();
-		m_toSegment.push_back(mesh);
-		result = true;
+		if (anObject->isKindOf(CC_PRIMITIVE))
+		{
+			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment primitives yet! Sorry...");
+		}
+		else
+		{
+			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(anObject);
+			mesh->getAssociatedCloud()->razVisibilityArray();
+			m_toSegment.push_back(mesh);
+			result = true;
+		}
 	}
 	else
 	{

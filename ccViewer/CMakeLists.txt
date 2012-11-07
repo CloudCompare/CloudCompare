@@ -90,14 +90,18 @@ endif()
 # install program
 install_ext( TARGETS ccViewer ${ccViewer_dest_release} ${ccViewer_dest_debug} )
 
+# Auxiliary files
+set( auxFiles bin_other/license.txt )
+
 if( WIN32 )
 	# Export Qt dlls
 	install_Qt_Dlls( ${ccViewer_dest_release} ${ccViewer_dest_debug} )
 
-	# Install auxiliary files
-	set( auxFiles bin/license.txt bin/start.bat )
-	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} ${ccViewer_dest_release} ${ccViewer_dest_debug} )
-	endforeach()
+	# Additional auxiliary file(s)
+	list( APPEND auxFiles bin_other/start.bat )
 endif()
 
+# Install auxiliary files
+foreach( filename ${auxFiles} )
+	install_ext( FILES ${filename} ${ccViewer_dest_release} ${ccViewer_dest_debug} )
+endforeach()

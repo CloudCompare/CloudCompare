@@ -1,0 +1,2 @@
+@set PATH=.
+qCC.exe

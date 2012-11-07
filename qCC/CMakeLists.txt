@@ -121,15 +121,19 @@ install_ext( TARGETS qCC ${qCC_dest_release} ${qCC_dest_debug} )
 install_ext( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.frag ${qCC_dest_release}/shaders ${qCC_dest_debug}/shaders )
 install_ext( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.vert ${qCC_dest_release}/shaders ${qCC_dest_debug}/shaders )
 
+# Auxiliary files
+set( auxFiles bin_other/history.txt bin_other/license.txt )
+
 if( WIN32 )
 	# Export Qt dlls & plugins
 	install_Qt_Dlls( ${qCC_dest_release} ${qCC_dest_debug} )
 	install_Qt_ImageFormats( ${qCC_dest_release} ${qCC_dest_debug} )
 
-	# Install auxiliary files
-	set( auxFiles bin/history.txt bin/license.txt bin/start.bat )
-	foreach( filename ${auxFiles} )
-		install_ext( FILES ${filename} ${qCC_dest_release} ${qCC_dest_debug} )
-	endforeach()
+	# Additional auxiliary file(s)
+	list( APPEND auxFiles bin_other/start.bat )
 endif()
 
+# Install auxiliary files
+foreach( filename ${auxFiles} )
+	install_ext( FILES ${filename} ${qCC_dest_release} ${qCC_dest_debug} )
+endforeach()

@@ -1,0 +1,2 @@
+@set PATH=.
+ccViewer.exe

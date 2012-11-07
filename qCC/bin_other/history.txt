@@ -1,14 +1,31 @@
 *** CloudCompare versions history ***
 
-v2.4 ??/??/2012
+v2.4 11/06/2012
+- Bug fixes:
+	* plane orientation tool was always returning a wrong plane normal ( N(0,0,1) by default )
+	* segmenting a primitive or an entity with associated primitives would make CC crash
+		(primitive segmentation is disabled for the moment!)
+
+v2.4 10/31/2012
 - New primitive objects: cone, torus, dish, box, snout and profile extrusion
 - New format handled (and the first 'CAD' one): Aveva PDMS '.mac' scripts
 	(support for all above primitives + already existing ones: cylinder, planes and spheres)
-- Height grid generation dialog (=rasterization) upgraded:
-	* option to keep scalar field(s) (and how to interpolate the values in each cell)
-	* the user can now choose the main projection dimension (X, Y or Z)
-- Bug fix: the normal index for each face vertex was missing when saving a mesh with per-vertex normals to an OBJ file.
+- Height grid generation (=rasterization) upgraded:
+	* source cloud's scalar field(s) can now be projected as well (+ various opions to interpolate the SF values in each cell)
+	* main projection dimension can be set (X, Y or Z)
+- Points sampling on a mesh upgraded:
+	* source mesh per-triangle or per-vertices normals are now taken into account
+	* user can choose to interpolate colors and/or textures
+- New filters available in qPCL plugin (thanks to Luca):
+	* remove outliers using statistical approach (SIFT keypoints)
+	* smooth (and optionally upsample) a point cloud using MLS estimators
+- New button added in the graphical segmentation tool: "confirm and delete hidden points".
+	It's a shortcut: hidden points are automatically be deleted and the original cloud is not split in two.
+- New entries in the DB tree context menu: "Expand branch" and "Collapse branch" (to fully expand/collapse a branch)
+- Bug fixes:
+	* the normal index for each face vertex was missing when saving a mesh with per-vertex normals to an OBJ file.
 	(this would typically make Meshlab crash ;). Just open them with this new version of CC and overwrite them to fix them.
+	* potential crash when using the research option 'enable furthest points removal' during registration (ICP)
 - PLY files saved by CloudCompare have (once again) field names "compatible" with MeshLab.
 	The 'vertex_indices' field has changed to 'vertex_indexes' in the last versions of CC ... and this make Meshlab crash...
 	(I've already ranted about that before: the PLY format doesn't impose any particular field name and it's the responsiblity

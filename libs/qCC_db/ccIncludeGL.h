@@ -34,8 +34,13 @@
 #include <QGLWidget>
 #include <QGLFormat>
 
+#ifdef __APPLE__
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
+#else
+#include <GL/gl.h>
+#include <GL/glu.h>
+#endif
 
 #ifndef GL_INVALID_TEXTURE_ID
 #define GL_INVALID_TEXTURE_ID 0xffffffff

@@ -203,7 +203,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* theMesh,
 				double x = double(rand())/(double)RAND_MAX;
 				double y = double(rand())/(double)RAND_MAX;
 
-				//we test if the generated point lies in the rigth side of (AB)
+				//we test if the generated point lies on the right side of (AB)
 				if (x+y>1.0)
 				{
                     x=1.0-x;

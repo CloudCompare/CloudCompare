@@ -329,7 +329,9 @@
 #include <float.h>
 #endif /* CPU86 */
 #ifdef LINUX
-//#include <fpu_control.h>
+#ifndef __APPLE__
+#include <fpu_control.h>
+#endif
 #endif /* LINUX */
 #ifdef TRILIBRARY
 #include "triangle.h"
@@ -4684,7 +4686,9 @@ void exactinit()
   /*  cword = 4735; */
   cword = 4722;                 /* set FPU control word for double precision */
 #endif /* not SINGLE */
-  //  _FPU_SETCW(cword);
+#ifndef __APPLE__
+    _FPU_SETCW(cword);
+#endif
 #endif /* LINUX */
 
   every_other = 1;

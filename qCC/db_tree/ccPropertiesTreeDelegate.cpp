@@ -86,7 +86,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 
 	QStandardItem* item = m_model->itemFromIndex(index);
 
-    if (item->data().isValid())
+	if (item && item->data().isValid())
     {
         switch (item->data().toInt())
         {

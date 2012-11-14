@@ -1,5 +1,5 @@
 ********************************************
-*         COMPILATION WITH CAMKE           *
+*         COMPILATION WITH CMAKE           *
 *                                          *
 *    Last modification: 07/02/2012 (DGM)   *
 *                                          *

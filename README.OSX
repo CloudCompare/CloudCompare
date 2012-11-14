@@ -1,0 +1,20 @@
+
+Notes for compiling on OS X.
+
+== Pre-requisites ==
+
+brew install qt
+brew install glew
+brew install cmake
+
+== Compiling ==
+
+git checkout OSX_10.6
+mkdir build
+cd build
+cmake ..
+make
+./ccViewer/ccViewer # works
+./qCC/qCC # crashes for now
+
+== EOF ==

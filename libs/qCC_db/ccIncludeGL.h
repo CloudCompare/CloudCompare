@@ -34,8 +34,8 @@
 #include <QGLWidget>
 #include <QGLFormat>
 
-#include <GL/gl.h>
-#include <GL/glu.h>
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
 
 #ifndef GL_INVALID_TEXTURE_ID
 #define GL_INVALID_TEXTURE_ID 0xffffffff

@@ -4030,7 +4030,7 @@ void MainWindow::activateSegmentationMode()
 
     if (m_gsTool->getNumberOfValidEntities()==0)
     {
-        ccConsole::Error("No selected entity in active window!");
+        ccConsole::Error("No segmentable entity in active window!");
         return;
     }
 

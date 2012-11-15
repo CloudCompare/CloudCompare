@@ -14,7 +14,5 @@ mkdir build
 cd build
 cmake ..
 make
-./ccViewer/ccViewer # works
-./qCC/qCC # crashes for now
 
 == EOF ==

@@ -336,6 +336,8 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 
     const ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
 	assert(item);
+	if (!item)
+        return QVariant();
 
     if (role == Qt::DisplayRole)
     {
@@ -448,31 +450,37 @@ bool ccDBRoot::setData(const QModelIndex &index, const QVariant &value, int role
                 return false;
 
             ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
+			assert(item);
+			if (item)
+			{
+				item->setName(qPrintable(value.toString()));
 
-            item->setName(qPrintable(value.toString()));
+				//particular case: labels name is their title!
+				if (item->isKindOf(CC_2D_LABEL))
+					if (item->isVisible() && item->isEnabled() && item->getDisplay())
+						item->getDisplay()->redraw();
 
-			//particular case: labels name is their title!
-			if (item->isKindOf(CC_2D_LABEL))
-				if (item->isVisible() && item->isEnabled() && item->getDisplay())
-					item->getDisplay()->redraw();
+				reflectObjectPropChange(item);
 
-            reflectObjectPropChange(item);
-
-            emit dataChanged(index, index);
+				emit dataChanged(index, index);
+			}
 
             return true;
          }
          else if (role == Qt::CheckStateRole)
          {
             ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
+			assert(item);
+			if (item)
+			{
+				if (value == Qt::Checked)
+					item->setEnabled(true);
+				else
+					item->setEnabled(false);
 
-             if (value == Qt::Checked)
-                item->setEnabled(true);
-            else
-                item->setEnabled(false);
-
-            redrawCCObjectAndChildren(item);
-            //reflectObjectPropChange(item);
+				redrawCCObjectAndChildren(item);
+				//reflectObjectPropChange(item);
+			}
 
             return true;
          }
@@ -488,6 +496,9 @@ QModelIndex ccDBRoot::index(int row, int column, const QModelIndex &parentIndex)
         return QModelIndex();
 
     ccHObject *parent = (parentIndex.isValid() ? static_cast<ccHObject*>(parentIndex.internalPointer()) : m_treeRoot);
+	assert(parent);
+	if (!parent)
+        return QModelIndex();
     ccHObject *child = parent->getChild(row);
     if (child)
         return createIndex(row, column, child);
@@ -521,6 +532,9 @@ QModelIndex ccDBRoot::parent(const QModelIndex &index) const
         return QModelIndex();
 
     ccHObject *childItem = static_cast<ccHObject*>(index.internalPointer());
+	assert(childItem);
+	if (!childItem)
+        return QModelIndex();
     ccHObject *parentItem = childItem->getParent();
 
 	assert(parentItem);
@@ -532,16 +546,14 @@ QModelIndex ccDBRoot::parent(const QModelIndex &index) const
 
 int ccDBRoot::rowCount(const QModelIndex &parent) const
 {
-    ccHObject *parentItem;
-    /*if (parent.column() > 0)
-        return 0;*/
-
-    if (!parent.isValid())
+    ccHObject *parentItem = 0;
+	if (!parent.isValid())
         parentItem = m_treeRoot;
     else
         parentItem = static_cast<ccHObject*>(parent.internalPointer());
-
-    return parentItem->getChildrenNumber();
+	
+	assert(parentItem);
+    return (parentItem ? parentItem->getChildrenNumber() : 0);
 }
 
 int ccDBRoot::columnCount(const QModelIndex &parent) const
@@ -562,8 +574,12 @@ void ccDBRoot::changeSelection(const QItemSelection & selected, const QItemSelec
 		for (int i=0;i<deselectedItems.count();++i)
 		{
 			ccHObject* element = static_cast<ccHObject*>(deselectedItems.at(i).internalPointer());
-			element->setSelected(false);
-			element->prepareDisplayForRefresh();
+			assert(element);
+			if (element)
+			{
+				element->setSelected(false);
+				element->prepareDisplayForRefresh();
+			}
 		}
 	}
 
@@ -573,9 +589,12 @@ void ccDBRoot::changeSelection(const QItemSelection & selected, const QItemSelec
 		for (int i=0;i<selectedItems.count();++i)
 		{
 			ccHObject* element = static_cast<ccHObject*>(selectedItems.at(i).internalPointer());
-
-			element->setSelected(true);
-			element->prepareDisplayForRefresh();
+			assert(element);
+			if (element)
+			{
+				element->setSelected(true);
+				element->prepareDisplayForRefresh();
+			}
 		}
 	}
 
@@ -719,7 +738,7 @@ int ccDBRoot::countSelectedEntities(CC_CLASS_ENUM filter)
     for (i=0;i<selCount; ++i)
     {
         ccHObject* anObject = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-        if (anObject->isKindOf(filter))
+        if (anObject && anObject->isKindOf(filter))
             ++realCount;
     }
 
@@ -737,7 +756,7 @@ int ccDBRoot::getSelectedEntities(ccHObject::Container& selEntities,
     for (i=0;i<selCount; ++i)
     {
         ccHObject* anObject = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-        if (anObject->isKindOf(filter))
+        if (anObject && anObject->isKindOf(filter))
             selEntities.push_back(anObject);
     }
 
@@ -793,17 +812,21 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 
     //class type based filtering
     const ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
-	if (item->isA(CC_HIERARCHY_OBJECT) ||
-		item->isKindOf(CC_POINT_CLOUD) ||
-		item->isKindOf(CC_MESH)        ||
-		item->isKindOf(CC_IMAGE)       ||
-		item->isKindOf(CC_PRIMITIVE))
+	assert(item);
+	if (item)
 	{
-		defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
-	}
-	else if (item->isKindOf(CC_2D_VIEWPORT_OBJECT))
-	{
-		defaultFlags |= Qt::ItemIsDragEnabled;
+		if (item->isA(CC_HIERARCHY_OBJECT) ||
+			item->isKindOf(CC_POINT_CLOUD) ||
+			item->isKindOf(CC_MESH)        ||
+			item->isKindOf(CC_IMAGE)       ||
+			item->isKindOf(CC_PRIMITIVE))
+		{
+			defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+		}
+		else if (item->isKindOf(CC_2D_VIEWPORT_OBJECT))
+		{
+			defaultFlags |= Qt::ItemIsDragEnabled;
+		}
 	}
 
     return defaultFlags;
@@ -979,7 +1002,7 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 	ccHObject* item = static_cast<ccHObject*>(clickIndex.internalPointer());
 	assert(item);
 
-	if (item->getChildrenNumber()==0)
+	if (!item || item->getChildrenNumber()==0)
 		return;
 	
 	//we recursively expand sub-branches
@@ -1151,6 +1174,9 @@ void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 	for (i=0;i<selCount;++i)
     {
         ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+		assert(item);
+		if (!item)
+			continue;
 		switch(prop)
 		{
 		case 0: //enable state
@@ -1189,7 +1215,8 @@ void ccDBRoot::addEmptyGroup()
 	if (index.isValid())
 	{
 		ccHObject* parent = static_cast<ccHObject*>(index.internalPointer());
-		parent->addChild(newGroup);
+		if (parent)
+			parent->addChild(newGroup);
 	}
 
 	addElement(newGroup);
@@ -1219,6 +1246,9 @@ void ccDBRoot::showContextMenu(const QPoint& pnt)
 			for (i=0;i<selCount;++i)
 			{
 				ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+				assert(item);
+				if (!item)
+					continue;
 				if (item->getChildrenNumber()>1)
 					hasMoreThan2Children=true;
 				leafObject |= item->isLeaf();
@@ -1280,7 +1310,7 @@ QItemSelectionModel::SelectionFlags ccCustomQTreeView::selectionCommand(const QM
 		if (!selectedIndexes.empty() && !selectionModel()->isSelected(index))
 		{
 			ccHObject* selectedItem = static_cast<ccHObject*>(index.internalPointer());
-			if (selectedItem->isA(CC_2D_LABEL) != static_cast<ccHObject*>(selectedIndexes[0].internalPointer())->isA(CC_2D_LABEL))
+			if (selectedItem && selectedItem->isA(CC_2D_LABEL) != static_cast<ccHObject*>(selectedIndexes[0].internalPointer())->isA(CC_2D_LABEL))
 				return QItemSelectionModel::ClearAndSelect;
 		}
 	}

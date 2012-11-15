@@ -1013,7 +1013,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
     QStandardItem* item = m_model->itemFromIndex(index);
 
-    if (!item->data().isValid() || (item->column()==0 && item->data().toInt()!=OBJECT_CLOUD_SF_EDITOR))
+    if (!item || !item->data().isValid() || (item->column()==0 && item->data().toInt()!=OBJECT_CLOUD_SF_EDITOR))
         return NULL;
 
     switch (item->data().toInt())
@@ -1200,7 +1200,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 //
 //		QStandardItem* item = m_model->itemFromIndex(index);
 //
-//		if (!item->data().isValid() || (item->column()==0 && item->data().toInt()!=OBJECT_CLOUD_SF_EDITOR))
+//		if (!item || !item->data().isValid() || (item->column()==0 && item->data().toInt()!=OBJECT_CLOUD_SF_EDITOR))
 //			return false;
 //
 //		switch (item->data().toInt())
@@ -1226,7 +1226,7 @@ void ccPropertiesTreeDelegate::updateEditorGeometry(QWidget* editor, const QStyl
 
 	QStandardItem* item = m_model->itemFromIndex(index);
 
-	if (item->data().isValid() && item->data().toInt()==OBJECT_CLOUD_SF_EDITOR && item->column()==0)
+	if (item && item->data().isValid() && item->data().toInt()==OBJECT_CLOUD_SF_EDITOR && item->column()==0)
 	{
 		sfEditDlg *sfd = qobject_cast<sfEditDlg*>(editor);
 		if (!sfd)
@@ -1244,7 +1244,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 
     QStandardItem* item = m_model->itemFromIndex(index);
 
-    if (!item->data().isValid() || (item->column()==0 && item->data().toInt()!=OBJECT_CLOUD_SF_EDITOR))
+    if (!item || !item->data().isValid() || (item->column()==0 && item->data().toInt()!=OBJECT_CLOUD_SF_EDITOR))
         return;
 
     switch (item->data().toInt())

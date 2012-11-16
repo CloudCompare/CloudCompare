@@ -210,7 +210,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* theMesh,
                     y=1.0-y;
                 }
 
-				CCVector3 P = (*O) + x*u + y*v;
+				CCVector3 P = (*O) + (PointCoordinateType)x * u + (PointCoordinateType)y * v;
 
 				sampledCloud->addPoint(P);
 				if (triIndices)

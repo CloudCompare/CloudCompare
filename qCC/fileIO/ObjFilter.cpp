@@ -27,6 +27,8 @@
 //Qt
 #include <QApplication>
 #include <QFileInfo>
+#include <QStringList>
+#include <QString>
 #include <QImage>
 
 //qCC_db
@@ -244,8 +246,6 @@ struct facetElement
 	}
 };
 
-#define OBJ_LOADER_WHITESPACE " \t\n\r"
-
 CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
 	ccConsole::Print("[ObjFilter::Load] %s",filename);
@@ -255,12 +255,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	if (!fp)
 		return CC_FERR_READING;
 
-	//buffers
-	char line[MAX_ASCII_FILE_LINE_LENGTH];
-
-	//current vertex
-	CCVector3 P;
-	double Pd[3]={0.0,0.0,0.0};
+	//current vertex shift
 	double Pshift[3]={0.0,0.0,0.0};
 
 	//current normal
@@ -307,7 +302,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	int maxTriNormIndex = -1;
 
 	//new group name
-	char objectName[1024]="default";
+	QString objectName("default");
 
 	//progress dialog
 	ccProgressDialog progressDlg(false);
@@ -330,21 +325,25 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 							EMPTY_GROUP = 1,
 							INVALID_NORMALS = 2,
 							INVALID_INDEX = 3,
-							NOT_ENOUGH_MEMORY = 4
+							NOT_ENOUGH_MEMORY = 4,
+							INVALID_LINE = 5,
 	};
-	const unsigned objWarningsCount = 5;
+	const unsigned objWarningsCount = 6;
 	bool objWarnings[objWarningsCount];
 	memset(objWarnings,0,sizeof(bool)*objWarningsCount);
 
 	int lineCount=0;
-	const char* current_token=0;
+	QStringList tokens;
+
+	//buffer
+	char currentLine[MAX_ASCII_FILE_LINE_LENGTH];
 
 	while (!stop)
 	{
 		//if we don't need to rescan last line
 		if (!restart)
 		{
-			scanLine = (fgets (line , MAX_ASCII_FILE_LINE_LENGTH , fp) > 0);
+			scanLine = (fgets (currentLine , MAX_ASCII_FILE_LINE_LENGTH , fp) > 0);
 
 			//no more line in file?
 			if (!scanLine)
@@ -352,18 +351,19 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				//we save current group and that's it!
 				saveCurrentGroup = true;
 				stop = true;
+				tokens.clear();
 			}
 			else
 			{
 				if ((++lineCount % 4096) == 0)
 					progressDlg.update(lineCount>>12);
 
-				current_token = strtok( line, OBJ_LOADER_WHITESPACE);
+				tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
 
 				//skip comments & empty lines
-				if( !current_token || current_token[0]=='/' || current_token[0]=='#')
+				if( tokens.empty() || tokens.front().startsWith('/',Qt::CaseInsensitive) || tokens.front().startsWith('#',Qt::CaseInsensitive) )
 					continue;
-		}
+			}
 		}
 		else
 		{
@@ -373,7 +373,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 		//standard line scan
 		if (scanLine)
 		{
-			if (strcmp(current_token, "v")==0) //v = vertex
+			if (tokens.front() == "v")
 			{
 				if (pointsRead >= maxPoints)
 				{
@@ -386,9 +386,15 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					}
 				}
 
-				Pd[0] = atof( strtok(NULL, OBJ_LOADER_WHITESPACE));
-				Pd[1] = atof( strtok(NULL, OBJ_LOADER_WHITESPACE));
-				Pd[2] = atof( strtok(NULL, OBJ_LOADER_WHITESPACE));
+				//malformed line?
+				if (tokens.size() < 4)
+				{
+					objWarnings[INVALID_LINE]=true;
+					error=true;
+					break;
+				}
+
+				double Pd[3] = { tokens[1].toDouble(), tokens[2].toDouble(), tokens[3].toDouble() };
 
 				//first point: check for 'big' coordinates
 				if (pointsRead==0)
@@ -413,14 +419,14 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					}
 				}
 
-				P.x = (float)(Pd[0]+Pshift[0]);
-				P.y = (float)(Pd[1]+Pshift[1]);
-				P.z = (float)(Pd[2]+Pshift[2]);
+				CCVector3 P((PointCoordinateType)(Pd[0]+Pshift[0]),
+							(PointCoordinateType)(Pd[1]+Pshift[1]),
+							(PointCoordinateType)(Pd[2]+Pshift[2]));
 
 				vertices->addPoint(P);
 				++pointsRead;
 			}
-			else if (strcmp(current_token, "vt")==0) //vt = vertex texture
+			else if (tokens.front() == "vt") //vt = vertex texture
 			{
 				if (texCoordsRead==maxTexCoords)
 				{
@@ -439,14 +445,22 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					}
 				}
 
-				T[0] = (float)atof( strtok(NULL, OBJ_LOADER_WHITESPACE));
-				T[1] = (float)atof( strtok(NULL, OBJ_LOADER_WHITESPACE));
+				//malformed line?
+				if (tokens.size() < 3)
+				{
+					objWarnings[INVALID_LINE]=true;
+					error=true;
+					break;
+				}
+
+				T[0] = tokens[1].toDouble();
+				T[1] = tokens[2].toDouble();
 
 				texCoords->addElement(T);
 				++texCoordsRead;
 				//*/
 			}
-			else if (strcmp(current_token, "vn")==0) //vn = vertex normal --> in fact it can also be a facet normal!!!
+			else if (tokens.front() == "vn") //vn = vertex normal --> in fact it can also be a facet normal!!!
 			{
 				if (normsRead == maxNorms)
 					{
@@ -465,9 +479,17 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					}
 				}
 
-				N.x = (float)atof( strtok(NULL, OBJ_LOADER_WHITESPACE));
-				N.y = (float)atof( strtok(NULL, OBJ_LOADER_WHITESPACE));
-				N.z = (float)atof( strtok(NULL, OBJ_LOADER_WHITESPACE));
+				//malformed line?
+				if (tokens.size() < 4)
+				{
+					objWarnings[INVALID_LINE]=true;
+					error=true;
+					break;
+				}
+
+				N.x = (PointCoordinateType)tokens[1].toDouble();
+				N.y = (PointCoordinateType)tokens[2].toDouble();
+				N.z = (PointCoordinateType)tokens[3].toDouble();
 
 				if (fabs(N.norm2() - 1.0)<0.05)
 					objWarnings[INVALID_NORMALS]=true;
@@ -477,57 +499,52 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				++normsRead;
 				//*/
 			}
-			else if (strcmp(current_token, "g")==0) //new group
+			else if (tokens.front() == "g") //new group
 			{
 				saveCurrentGroup = true;
 				createNewGroup = true;
 				//we get the object name
-				const char* groupName = strtok(NULL, "\n\r");
-				strcpy(objectName,groupName ? groupName : "default");
+				QString objectName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "default");
 			}
-			else if (line[0]=='f') //new facet
+			else if (tokens.front().startsWith('f')) //new facet
 			{
+				//malformed line?
+				if (tokens.size() < 4)
+				{
+					objWarnings[INVALID_LINE]=true;
+					error=true;
+					break;
+				}
+
 				if (!tri)
 				{
 					restart = true;
 					createNewGroup = true;
-					//we get the object name
-					strcpy(objectName,"default");
+					//we reset the object name
+					objectName = "default";
 				}
 				else
 				{
 					//we reset current facet 'state'
 					currentFace.clear(); //current face element
 
-					while ((current_token = strtok( 0, OBJ_LOADER_WHITESPACE)) && !error)
+					for (int i=1; i<tokens.size(); ++i)
 					{
 						//new summit
 						facetElement fe; //(0,0,0) by default
-						const char* _char = current_token; //pointer on current character
-						int slashes=0;
-
-						//we split the token into groups of '/' (we can't use strtok again!!!)
-						while (*_char)
+						QStringList vertexTokens = tokens[i].split('/');
+						if (vertexTokens.size()==0 || vertexTokens[0].isNull())
 						{
-							if (*_char=='/')
-							{
-								//delimiter
-								++slashes;
-								if (slashes>2)
-								{
-									ccConsole::Error("Malformed file: more than 3 slahses ('/') in the same face block (line %i)!",lineCount);
-									error=true;
-									break;
-								}
-							}
-							else
-							{
-								//read next element (vert/tex coord/normal)
-								sscanf(_char,"%i",fe.indexes+slashes);
-								while (_char[1] != 0 && _char[1] !='/')
-									++_char;
-							}
-							++_char;
+							objWarnings[INVALID_LINE]=true;
+							error=true;
+						}
+						else
+						{
+							fe.vIndex = vertexTokens[0].toInt();
+							if (vertexTokens.size()>1 && !vertexTokens[1].isEmpty())
+								fe.tcIndex = vertexTokens[1].toInt();
+							if (vertexTokens.size()>2 && !vertexTokens[2].isEmpty())
+								fe.nIndex = vertexTokens[2].toInt();
 						}
 
 						currentFace.push_back(fe);
@@ -668,56 +685,68 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					}
 				}
 			}
-			else if (strcmp(current_token, "usemtl") == 0) // material (see MTL file)
+			else if (tokens.front() == "usemtl") // material (see MTL file)
 			{
 				if (materials) //otherwise we have failed to load MTL file!!!
 				{
-					const char* mtlName = strtok( 0, OBJ_LOADER_WHITESPACE);
-					currentMaterial = (mtlName ? materials->findMaterial(mtlName) : -1);
+					//DGM: in case there's space characters in the material name, we must read it again from the original line buffer
+					//QString mtlName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "");
+					QString mtlName = QString(currentLine+7).trimmed();
+					currentMaterial = (!mtlName.isEmpty() ? materials->findMaterial(mtlName) : -1);
 					currentMaterialDefined = true;
 				}
 			}
-			else if (strcmp(current_token, "mtllib") == 0) // MTL file
+			else if (tokens.front() == "mtllib") // MTL file
 			{
-				//we build the whole MTL filename + path
-				QString mtlFilename = QString(strtok(0, "\t\n\r"));
-				ccConsole::Print("[ObjFilter::Load] Material file: %s",qPrintable(mtlFilename));
-				QString mtlPath = QFileInfo(filename).canonicalPath();
-				//we try to load it
-				if (!materials)
+				//malformed line?
+				if (tokens.size() < 2 || tokens[1].isEmpty())
 				{
-					materials = new ccMaterialSet("materials");
-					materials->link();
-				}
-				
-				unsigned oldSize = materials->size();
-				QStringList errors;
-				if (ccMaterialSet::ParseMTL(mtlPath,mtlFilename,*materials,errors))
-				{
-					ccConsole::Print("[ObjFilter::Load] %i materials loaded",materials->size()-oldSize);
+					objWarnings[INVALID_LINE]=true;
 				}
 				else
 				{
-					ccConsole::Error("[ObjFilter::Load] Failed to load material file! (should be in '%s')",qPrintable(mtlPath+'/'+mtlFilename));
-					materialsLoadFailed = true;
-				}
+					//we build the whole MTL filename + path
+					//DGM: in case there's space characters in the filename, we must read it again from the original line buffer
+					//QString mtlFilename = tokens[1];
+					QString mtlFilename = QString(currentLine+7).trimmed();
+					ccConsole::Print("[ObjFilter::Load] Material file: %s",qPrintable(mtlFilename));
+					QString mtlPath = QFileInfo(filename).canonicalPath();
+					//we try to load it
+					if (!materials)
+					{
+						materials = new ccMaterialSet("materials");
+						materials->link();
+					}
+					
+					unsigned oldSize = materials->size();
+					QStringList errors;
+					if (ccMaterialSet::ParseMTL(mtlPath,mtlFilename,*materials,errors))
+					{
+						ccConsole::Print("[ObjFilter::Load] %i materials loaded",materials->size()-oldSize);
+					}
+					else
+					{
+						ccConsole::Error("[ObjFilter::Load] Failed to load material file! (should be in '%s')",qPrintable(mtlPath+'/'+QString(mtlFilename)));
+						materialsLoadFailed = true;
+					}
 
-				if (!errors.empty())
-				{
-					for (int i=0;i<errors.size();++i)
-						ccConsole::Warning("[ObjFilter::Load::MTL parser] %s",qPrintable(errors[i]));
-				}
-				if (materials->empty())
-				{
-					materials->release();
-					materials=0;
-					materialsLoadFailed = true;
+					if (!errors.empty())
+					{
+						for (int i=0; i<errors.size(); ++i)
+							ccConsole::Warning("[ObjFilter::Load::MTL parser] %s",qPrintable(errors[i]));
+					}
+					if (materials->empty())
+					{
+						materials->release();
+						materials=0;
+						materialsLoadFailed = true;
+					}
 				}
 			}
-			else if (strcmp(current_token, "s") == 0) // shading group
-			{
-				//ignored!
-			}
+			//else if (tokens.front() == "s") // shading group
+			//{
+			//	//ignored!
+			//}
 		}
 
 		if (error)
@@ -778,7 +807,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			assert(!tri);
 
 			tri = new ccMesh(vertices);
-			tri->setName(objectName);
+			tri->setName(qPrintable(objectName));
 
 			//we always reserve some triangles
 			maxFaces=128;
@@ -951,6 +980,8 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 		ccConsole::Warning("[ObjFilter::Load] File is malformed! Check indexes...");
 	if (objWarnings[NOT_ENOUGH_MEMORY])
 		ccConsole::Warning("[ObjFilter::Load] Not enough memory!");
+	if (objWarnings[INVALID_LINE])
+		ccConsole::Warning("[ObjFilter::Load] File is malformed! Missing data.");
 
 	return (error ? (objWarnings[NOT_ENOUGH_MEMORY] ? CC_FERR_NOT_ENOUGH_MEMORY : CC_FERR_MALFORMED_FILE) : CC_FERR_NO_ERROR);
 }

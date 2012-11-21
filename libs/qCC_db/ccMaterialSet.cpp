@@ -29,6 +29,8 @@
 
 //Qt
 #include <QDataStream>
+#include <QStringList>
+#include <QString>
 
 //System
 #include <assert.h>
@@ -93,14 +95,15 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 	while( fgets(current_line, MAX_ASCII_FILE_LINE_LENGTH, fp) )
 	{
 		++current_line_index;
-		const char* current_token = strtok( current_line, MTL_LOADER_WHITESPACE);
 
-		//skip comments
-		if (!current_token || current_token[0]=='/' || current_token[0]=='#')
+		QStringList tokens = QString(current_line).split(QRegExp("\\s+"),QString::SkipEmptyParts);
+
+		//skip comments & empty lines
+		if( tokens.empty() || tokens.front().startsWith('/',Qt::CaseInsensitive) || tokens.front().startsWith('#',Qt::CaseInsensitive) )
 			continue;
 
 		//start material
-		if (strcmp(current_token, "newmtl")==0)
+		if (tokens.front() == "newmtl")
 		{
 			//push the precedent material
 			if (current_mtl_index>=0)
@@ -110,77 +113,89 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			currentMaterial = ccMaterial();
 			materials.resize(materials.size()+1);
 			// get the name
-			currentMaterial.name = QString(strtok(NULL, MTL_LOADER_WHITESPACE));
+			currentMaterial.name = (tokens.size()>1 ? tokens[1] : "undefined");
 
 		}
 		else if (current_mtl_index>=0) //we already have a "current" material
 		{
 			//ambient
-			if (strcmp(current_token, "Ka")==0)
+			if (tokens.front() == "Ka")
 			{
-				currentMaterial.ambient[0] = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
-				currentMaterial.ambient[1] = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
-				currentMaterial.ambient[2] = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
+				if (tokens.size() > 3)
+				{
+					currentMaterial.ambient[0] = tokens[1].toFloat();
+					currentMaterial.ambient[1] = tokens[2].toFloat();
+					currentMaterial.ambient[2] = tokens[3].toFloat();
+				}
 			}
 
 			//diff
-			else if (strcmp(current_token, "Kd")==0)
+			else if (tokens.front() == "Kd")
 			{
-				currentMaterial.diffuseFront[0] = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
-				currentMaterial.diffuseFront[1] = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
-				currentMaterial.diffuseFront[2] = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
-				memcpy(currentMaterial.diffuseBack,currentMaterial.diffuseFront,sizeof(float)*3);
+				if (tokens.size() > 3)
+				{
+					currentMaterial.diffuseFront[0] = tokens[1].toFloat();
+					currentMaterial.diffuseFront[1] = tokens[2].toFloat();
+					currentMaterial.diffuseFront[2] = tokens[3].toFloat();
+					//duplicate
+					memcpy(currentMaterial.diffuseBack,currentMaterial.diffuseFront,sizeof(float)*3);
+				}
 			}
 
 			//specular
-			else if (strcmp(current_token, "Ks")==0)
+			else if (tokens.front() == "Ks")
 			{
-				currentMaterial.specular[0] = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
-				currentMaterial.specular[1] = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
-				currentMaterial.specular[2] = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
+				if (tokens.size() > 3)
+				{
+					currentMaterial.specular[0] = tokens[1].toFloat();
+					currentMaterial.specular[1] = tokens[2].toFloat();
+					currentMaterial.specular[2] = tokens[3].toFloat();
+				}
 			}
 			//shiny
-			else if (strcmp(current_token, "Ns")==0)
+			else if (tokens.front() == "Ns")
 			{
-				double shiny = atof( strtok(NULL, MTL_LOADER_WHITESPACE));
-				currentMaterial.setShininess((float)shiny);
+				if (tokens.size() > 1)
+					currentMaterial.setShininess(tokens[1].toFloat());
 			}
 			//transparent
-			else if (strcmp(current_token, "d")==0 || strcmp(current_token, "Tr")==0)
+			else if (tokens.front() == "d" || tokens.front() == "Tr")
 			{
-				float trans = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
-				currentMaterial.setTransparency(trans);
+				if (tokens.size() > 1)
+					currentMaterial.setTransparency(tokens[1].toFloat());
 			}
 			//reflection
-			else if (strcmp(current_token, "r")==0)
+			else if (tokens.front() == "r")
 			{
 				//ignored
-				//currentMaterial.reflect = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
+				//if (tokens.size() > 1)
+				//	currentMaterial.reflect = tokens[1].toFloat();
 			}
 			//glossy
-			else if (strcmp(current_token, "sharpness")==0)
+			else if (tokens.front() == "sharpness")
 			{
 				//ignored
-				//currentMaterial.glossy = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
+				//if (tokens.size() > 1)
+				//	currentMaterial.glossy = tokens[1].toFloat();
 			}
 			//refract index
-			else if (strcmp(current_token, "Ni")==0)
+			else if (tokens.front() == "Ni")
 			{
 				//ignored
-				//currentMaterial.refract_index = (float)atof( strtok(NULL, MTL_LOADER_WHITESPACE));
+				//if (tokens.size() > 1)
+				//	currentMaterial.refract_index = tokens[1].toFloat();
 			}
 			// illumination type
-			else if (strcmp(current_token, "illum")==0)
+			else if (tokens.front() == "illum")
 			{
 				//ignored
 			}
 			// texture map
-			else if (strcmp(current_token, "map_Ka")==0
-				|| strcmp(current_token, "map_Kd")==0
-				|| strcmp(current_token, "map_Ks")==0
-				)
+			else if (tokens.front() == "map_Ka"
+					|| tokens.front() == "map_Kd"
+					|| tokens.front() == "map_Ks")
 			{
-				QString texture_filename=QString(strtok(NULL, "\t\n\r"));
+				QString texture_filename = QString(current_line+7).trimmed();
 				QString fullTexName = path+QString('/')+texture_filename;
 				QImage image;
 				image.load(fullTexName);
@@ -195,7 +210,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 			}
 			else
 			{
-				errors << QString("Unknown command '%1' at line %2").arg(current_token).arg(current_line_index);
+				errors << QString("Unknown command '%1' at line %2").arg(tokens.front()).arg(current_line_index);
 			}
 		}
 	}

@@ -4937,6 +4937,7 @@ void MainWindow::doComputePlaneOrientation()
 				pPlane->setVisible(true);
 				pPlane->enableStippling(true);
 				cloud->prepareDisplayForRefresh_recursive();
+				addToDB(pPlane);
 			}
 		}
 	}

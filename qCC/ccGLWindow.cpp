@@ -1629,9 +1629,11 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	m_lodActivated = false;
 	QApplication::restoreOverrideCursor();
 
+#ifndef __APPLE__
 	if (event->button() == Qt::RightButton)
+#endif
 #ifdef __APPLE__
-		|| (QApplication::keyboardModifiers () & Qt::MetaModifier)
+	  if ((event->button() == Qt::RightButton) || (QApplication::keyboardModifiers () & Qt::MetaModifier))
 #endif
 	{
 		if (!m_cursorMoved)

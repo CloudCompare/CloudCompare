@@ -1447,7 +1447,23 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 {
 	m_cursorMoved = false;
 
-	if (event->buttons() & Qt::LeftButton)
+	if ((event->buttons() & Qt::RightButton)
+#ifdef __APPLE__
+		|| (QApplication::keyboardModifiers () & Qt::MetaModifier)
+#endif
+		)
+	{
+		if (m_interactionMode != SEGMENT_ENTITY) //mouse movement = panning (2D translation)
+		{
+			m_lastMousePos = event->pos();
+			m_lodActivated = true;
+
+			QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor));
+		}
+
+		emit rightButtonClicked(event->x()-(width()>>1),(height()>>1)-event->y());
+	}
+	else if (event->buttons() & Qt::LeftButton)
 	{
 		if (m_interactionMode != SEGMENT_ENTITY) //mouse movement = rotation
 		{
@@ -1464,18 +1480,6 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 		}
 
 		emit leftButtonClicked(event->x()-(width()>>1),(height()>>1)-event->y());
-	}
-	else if (event->buttons() & Qt::RightButton)
-	{
-		if (m_interactionMode != SEGMENT_ENTITY) //mouse movement = panning (2D translation)
-		{
-			m_lastMousePos = event->pos();
-			m_lodActivated = true;
-
-			QApplication::setOverrideCursor(QCursor(Qt::SizeAllCursor));
-		}
-
-		emit rightButtonClicked(event->x()-(width()>>1),(height()>>1)-event->y());
 	}
 	else
 	{
@@ -1530,40 +1534,11 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	int dy = y - m_lastMousePos.y();
 	m_lastMousePos = event->pos();
 
-	if (event->buttons() & Qt::LeftButton) //rotation
-	{
-		//specific case: move label(s)
-		if (!m_activeLabels.empty())
-		{
-			for (std::vector<cc2DLabel*>::iterator it=m_activeLabels.begin(); it!=m_activeLabels.end(); ++it)
-				(*it)->move((float)dx/(float)width(),(float)dy/(float)height());
-		}
-		else
-		{
-			tbPointToVector(x, y, width(), height(), m_currentMouseOrientation);
-
-			ccGLMatrix rotMat = ccGLUtils::GenerateGLRotationMatrixFromVectors(m_lastMouseOrientation.u,m_currentMouseOrientation.u);
-			m_lastMouseOrientation = m_currentMouseOrientation;
-			m_updateFBO=true;
-
-			if (m_interactionMode == TRANSFORM_ENTITY)
-			{
-				rotMat = m_params.baseViewMat.transposed() * rotMat * m_params.baseViewMat;
-
-				emit rotation(rotMat);
-			}
-			else
-			{
-				rotateViewMat(rotMat);
-
-				QApplication::changeOverrideCursor(QCursor(Qt::ClosedHandCursor));
-
-				//feedback
-				emit viewMatRotated(rotMat);
-			}
-		}
-	}
-	else  if (event->buttons() & Qt::RightButton)
+	if ((event->buttons() & Qt::RightButton)
+#ifdef __APPLE__
+		|| (QApplication::keyboardModifiers () & Qt::MetaModifier)
+#endif
+		)
 	{
 		if (!m_params.perspectiveView || m_params.objectCenteredPerspective)
 		{
@@ -1601,6 +1576,39 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			}
 		}
 	}
+	else if (event->buttons() & Qt::LeftButton) //rotation
+	{
+		//specific case: move label(s)
+		if (!m_activeLabels.empty())
+		{
+			for (std::vector<cc2DLabel*>::iterator it=m_activeLabels.begin(); it!=m_activeLabels.end(); ++it)
+				(*it)->move((float)dx/(float)width(),(float)dy/(float)height());
+		}
+		else
+		{
+			tbPointToVector(x, y, width(), height(), m_currentMouseOrientation);
+
+			ccGLMatrix rotMat = ccGLUtils::GenerateGLRotationMatrixFromVectors(m_lastMouseOrientation.u,m_currentMouseOrientation.u);
+			m_lastMouseOrientation = m_currentMouseOrientation;
+			m_updateFBO=true;
+
+			if (m_interactionMode == TRANSFORM_ENTITY)
+			{
+				rotMat = m_params.baseViewMat.transposed() * rotMat * m_params.baseViewMat;
+
+				emit rotation(rotMat);
+			}
+			else
+			{
+				rotateViewMat(rotMat);
+
+				QApplication::changeOverrideCursor(QCursor(Qt::ClosedHandCursor));
+
+				//feedback
+				emit viewMatRotated(rotMat);
+			}
+		}
+	}
 
 	m_cursorMoved = true;
 
@@ -1621,7 +1629,36 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	m_lodActivated = false;
 	QApplication::restoreOverrideCursor();
 
-	if (event->button() == Qt::LeftButton)
+#ifndef __APPLE__
+	if (event->button() == Qt::RightButton)
+#endif
+#ifdef __APPLE__
+	  if ((event->button() == Qt::RightButton) || (QApplication::keyboardModifiers () & Qt::MetaModifier))
+#endif
+	{
+		if (!m_cursorMoved)
+		{
+			//specific case: interaction with label(s)
+			updateActiveLabelsList(event->x(),event->y(),false);
+			if (!m_activeLabels.empty())
+			{
+				cc2DLabel* label = m_activeLabels[0];
+				m_activeLabels.clear();
+				if (label->acceptClick(event->x(),height()-1-event->y(),Qt::RightButton))
+				{
+					event->accept();
+					redraw();
+					return;
+				}
+			}
+		}
+		else
+		{
+			redraw();
+			event->accept();
+		}
+	}
+	else if (event->button() == Qt::LeftButton)
 	{
 		if (m_cursorMoved)
 		{
@@ -1706,34 +1743,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	}
 	else
 	{
-		if (event->button() == Qt::RightButton)
-		{
-			if (!m_cursorMoved)
-			{
-				//specific case: interaction with label(s)
-				updateActiveLabelsList(event->x(),event->y(),false);
-				if (!m_activeLabels.empty())
-				{
-					cc2DLabel* label = m_activeLabels[0];
-					m_activeLabels.clear();
-					if (label->acceptClick(event->x(),height()-1-event->y(),Qt::RightButton))
-					{
-						event->accept();
-						redraw();
-						return;
-					}
-				}
-			}
-			else
-			{
-				redraw();
-				event->accept();
-			}
-		}
-		else
-		{
-			event->ignore();
-		}
+		event->ignore();
 	}
 
 	m_cursorMoved = false;

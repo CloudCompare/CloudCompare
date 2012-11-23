@@ -45,16 +45,16 @@ void PlyOpenDlg::testBeforeAccept()
 
     if (zeroCoord>1)
     {
-        QMessageBox::warning(0, "Error",
-            "At least two vertex coordinates (X,Y,Z) must be defined!");
+        QMessageBox::warning(0, "Error", "At least two vertex coordinates (X,Y,Z) must be defined!");
         return;
     }
 
     //we must assure that no property is assigned to more than one field
-    int i,n = xComboBox->count();
-    assert(n>0);
-    int* assignedIndexCount = new int[n];
-    memset(assignedIndexCount,0,n*sizeof(int));
+    int n = xComboBox->count();
+	int p = facesComboBox->count();
+    assert(n+p>=2);
+    int* assignedIndexCount = new int[n+p];
+    memset(assignedIndexCount,0,(n+p)*sizeof(int));
 
     ++assignedIndexCount[xComboBox->currentIndex()];
     ++assignedIndexCount[yComboBox->currentIndex()];
@@ -67,19 +67,23 @@ void PlyOpenDlg::testBeforeAccept()
     ++assignedIndexCount[nxComboBox->currentIndex()];
     ++assignedIndexCount[nyComboBox->currentIndex()];
     ++assignedIndexCount[nzComboBox->currentIndex()];
-    //++assignedIndexCount[facesComboBox->currentIndex()];
+    ++assignedIndexCount[n+facesComboBox->currentIndex()];
+    ++assignedIndexCount[n+textCoordsComboBox->currentIndex()];
 
-    for (i=1;i<n;++i)
+	bool isValid = true;
+
+    for (int i=1;i<n+p;++i)
         if (assignedIndexCount[i]>1)
         {
-            delete[] assignedIndexCount;
+			isValid = false;
             QMessageBox::warning(0, "Error",
                 QString("Can't assign same property to multiple fields! (%1)").arg(xComboBox->itemText(i)));
-            return;
+			break;
         }
 
     delete[] assignedIndexCount;
     assignedIndexCount=0;
 
-    emit fullyAccepted();
+	if (isValid)
+		emit fullyAccepted();
 }

@@ -26,6 +26,8 @@
 
 //Qt
 #include <QProgressDialog>
+#include <QImage>
+#include <QFileInfo>
 
 //CCLib
 #include <ScalarField.h>
@@ -34,6 +36,8 @@
 //qCC_db
 #include <ccMesh.h>
 #include <ccPointCloud.h>
+#include <ccMaterial.h>
+#include <ccMaterialSet.h>
 
 #include "PlyOpenDlg.h"
 #include "../ccConsole.h"
@@ -428,6 +432,9 @@ static int face_cb(p_ply_argument argument)
 {
 	ccMesh* mesh=0;
 	ply_get_argument_user_data(argument, (void**)(&mesh), NULL);
+	assert(mesh);
+	if (!mesh)
+		return 1;
 
     long length, value_index;
 	ply_get_argument_property(argument, NULL, &length, &value_index);
@@ -440,7 +447,7 @@ static int face_cb(p_ply_argument argument)
 	if (value_index<0 || value_index>2)
         return 1;
 
-	s_tri[value_index] = unsigned(ply_get_argument_value(argument));
+	s_tri[value_index] = (unsigned)ply_get_argument_value(argument);
 
 	if (value_index==2)
 	{
@@ -454,11 +461,49 @@ static int face_cb(p_ply_argument argument)
     return 1;
 }
 
+static float s_texCoord[6];
+static unsigned s_texCoordCount = 0;
+static bool s_invalidTexCoordinates = false;
+static int texCoords_cb(p_ply_argument argument)
+{
+	TextureCoordsContainer* texCoords=0;
+	ply_get_argument_user_data(argument, (void**)(&texCoords), NULL);
+	assert(texCoords);
+	if (!texCoords)
+		return 1;
+
+    long length, value_index;
+	ply_get_argument_property(argument, NULL, &length, &value_index);
+	//unsupported/invalid coordinates!
+	if (length != 6)
+	{
+		s_invalidTexCoordinates = true;
+		return 1;
+	}
+	if (value_index<0 || value_index>5)
+        return 1;
+
+	s_texCoord[value_index] = (float)ply_get_argument_value(argument);
+
+	if (((value_index+1)%2)==0)
+	{
+		texCoords->addElement(s_texCoord+value_index-1);
+	    ++s_texCoordCount;
+
+        if ((s_texCoordCount % PROCESS_EVENTS_FREQ) == 0)
+            QCoreApplication::processEvents();
+	}
+
+    return 1;
+}
+
 CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
 	//reset statics!
 	s_triCount = 0;
 	s_unsupportedPolygonType = false;
+	s_texCoordCount = 0;
+	s_invalidTexCoordinates = false;
 	s_scalarCount=0;
 	s_IntensityCount=0;
 	s_ColorCount=0;
@@ -478,7 +523,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
     /****************/
 
 	//open a PLY file for reading
-        p_ply ply = ply_open(filename,NULL, 0, NULL);
+	p_ply ply = ply_open(filename,NULL, 0, NULL);
 	if (!ply)
         return CC_FERR_READING;
 
@@ -494,14 +539,30 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	e_ply_storage_mode storage_mode;
 	get_plystorage_mode(ply,&storage_mode);
 
+    /*****************/
+	/***  Texture  ***/
+    /*****************/
+	//eventual texture file declared in the comments (keyword: TEXTUREFILE)
+	QString textureFileName;
+	//texture coordinates
+	TextureCoordsContainer* texCoords = 0;
+
     /******************/
 	/***  Comments  ***/
     /******************/
+	{
+		const char* lastComment = NULL;
 
-	//display comments
-	const char* lastComment = NULL;
-	while ((lastComment = ply_get_next_comment(ply, lastComment)))
-		ccConsole::Print("[PLY][Comment] %s",lastComment);
+		//display comments
+		while ((lastComment = ply_get_next_comment(ply, lastComment)))
+		{
+			ccConsole::Print("[PLY][Comment] %s",lastComment);
+
+			//specific case: TextureFile 'filename.ext'
+			if (QString(lastComment).toUpper().startsWith("TEXTUREFILE "))
+				textureFileName = QString(lastComment).mid(12).trimmed();
+		}
+	}
 
     /*******************************/
 	/***  Elements & properties  ***/
@@ -601,10 +662,11 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
     /**********************/
 	/***  Objects info  ***/
     /**********************/
-
-	const char* lastObjInfo = NULL;
-	while ((lastObjInfo = ply_get_next_obj_info(ply, lastObjInfo)))
-		ccConsole::Print("[PLY][Info] %s",lastObjInfo);
+	{
+		const char* lastObjInfo = NULL;
+		while ((lastObjInfo = ply_get_next_obj_info(ply, lastObjInfo)))
+			ccConsole::Print("[PLY][Info] %s",lastObjInfo);
+	}
 
     /****************/
 	/***  Dialog  ***/
@@ -625,9 +687,10 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	int& iIndex = stdPropIndexes[9];
 	int& sfIndex = stdPropIndexes[10];
 
-	static const unsigned nListProp=1;
-	int listPropIndexes[nListProp]={0};
+	static const unsigned nListProp=2;
+	int listPropIndexes[nListProp]={0,0};
 	int& facesIndex = listPropIndexes[0];
+	int& texCoordsIndex = listPropIndexes[1];
 
 	//Combo box items for standard properties (coordinates, color components, etc.)
 	QStringList stdPropsText;
@@ -684,8 +747,13 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		QString elementName = QString(meshElements[pp.elemIndex].elementName).toUpper();
 		QString propName = QString(pp.propName).toUpper();
 
-		if (facesIndex == 0 && (elementName.contains("FACE") || elementName.contains("TRI")) && propName.contains("IND"))
-			facesIndex = i+1;
+		if (elementName.contains("FACE") || elementName.contains("TRI"))
+		{
+			if (facesIndex == 0 && propName.contains("IND"))
+				facesIndex = i+1;
+			if (texCoordsIndex == 0 && propName.contains("COORD"))
+				texCoordsIndex = i+1;
+		}
     }
 
     //combo-box max visible items
@@ -770,6 +838,10 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 			pod.facesComboBox->setCurrentIndex(facesIndex);
 			pod.facesComboBox->setMaxVisibleItems(listPropsCount);
 
+			pod.textCoordsComboBox->addItems(listPropsText);
+			pod.textCoordsComboBox->setCurrentIndex(texCoordsIndex);
+			pod.textCoordsComboBox->setMaxVisibleItems(listPropsCount);
+
 			//We execute dialog
 			if (!pod.exec())
 			{
@@ -791,6 +863,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 			bIndex = pod.bComboBox->currentIndex();
 			iIndex = pod.iComboBox->currentIndex();
 			facesIndex = pod.facesComboBox->currentIndex();
+			texCoordsIndex = pod.textCoordsComboBox->currentIndex();
 			sfIndex = pod.sfComboBox->currentIndex();
 		}
 	}
@@ -1094,12 +1167,37 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
         }
 	}
 
+	if (texCoordsIndex>0)
+	{
+		plyProperty& pp = listProperties[texCoordsIndex-1];
+		assert(pp.type==16); //we only accept PLY_LIST here!
+
+		texCoords = new TextureCoordsContainer();
+		texCoords->link();
+
+        long numberOfCoordinates = meshElements[pp.elemIndex].elementInstances;
+		assert(numberOfCoordinates == numberOfFacets);
+
+        if (!texCoords->reserve(numberOfCoordinates*3))
+        {
+            ccConsole::Error("Not enough memory to load texture coordinates (they will be ignored)!");
+            ccConsole::Warning("[PLY] Texture coordinates ignored!");
+			texCoords->release();
+            texCoords = 0;
+        }
+        else
+        {
+            ply_set_read_cb(ply, meshElements[pp.elemIndex].elementName, pp.propName, texCoords_cb, texCoords, 0);
+        }
+	}
+
     QProgressDialog progressDlg(QString("Loading in progress..."),0,0,0,0,Qt::Popup);
     progressDlg.setMinimumDuration(0);
 	progressDlg.setModal(true);
 	progressDlg.show();
 	QApplication::processEvents();
 
+	//let 'Rply' do the job;)
     int success = ply_read(ply);
 
     progressDlg.close();
@@ -1123,6 +1221,13 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		delete mesh;
 		mesh=0;
     }
+
+	if (texCoords && (s_invalidTexCoordinates || s_texCoordCount != 3*mesh->size()))
+	{
+		ccConsole::Error("Invalid texture coordinates! (they will be ignored)");
+		texCoords->release();
+		texCoords=0;
+	}
 
 	//we save coordinates shift information
 	if (s_ShiftApplyAll && coordinatesShiftEnabled && coordinatesShift)
@@ -1200,14 +1305,62 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
         cloud->setName("Vertices");
 		//cloud->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!
 
+		//associated texture
+		if (texCoords)
+		{
+			if (!textureFileName.isEmpty())
+			{
+				QString textureFilePath = QFileInfo(filename).absolutePath()+QString('/')+textureFileName;
+				QImage texture = QImage(textureFilePath);
+				if (!texture.isNull())
+				{
+					if (mesh->reservePerTriangleTexCoordIndexes() && mesh->reservePerTriangleMtlIndexes())
+					{
+						ccConsole::Print("[PLY][Texture] Successuflly loaded texture '%s' (%ix%i pixels)",qPrintable(textureFileName),texture.width(),texture.height());
+						//materials
+						ccMaterialSet* materials = new ccMaterialSet("materials");
+						ccMaterial material(textureFileName);
+						material.texture = texture;
+						memcpy(material.specular,ccColor::bright,sizeof(float)*4);
+						memcpy(material.ambient,ccColor::bright,sizeof(float)*4);
+						materials->push_back(material);
+						mesh->setMaterialSet(materials);
+						mesh->setTexCoordinatesTable(texCoords);
+						for (unsigned i=0;i<mesh->size();++i)
+						{
+							mesh->addTriangleMtlIndex(0);
+							mesh->addTriangleTexCoordIndexes(i*3,i*3+1,i*3+2);
+						}
+						mesh->showMaterials(true);
+						mesh->addChild(materials,true);
+					}
+					else
+					{
+						ccConsole::Warning("[PLY][Texture] Failed to reserve per-triangle texture coordinates! (not enough memory?)");
+					}
+				}
+				else
+				{
+					ccConsole::Warning("[PLY][Texture] Failed to load texture '%s'",qPrintable(textureFilePath));
+				}
+			}
+			else
+			{
+				ccConsole::Warning("[PLY][Texture] Texture coordinates loaded without an associated image! (we look for the 'TextureFile' keyword in comments)");
+			}
+		}
+
         if (cloud->hasColors())
             mesh->showColors(true);
         if (cloud->hasDisplayedScalarField())
             mesh->showSF(true);
-        if (cloud->hasNormals())
+		if (cloud->hasNormals())
             mesh->showNormals(true);
         else
             mesh->computeNormals();
+
+		if (mesh->hasMaterials())
+			mesh->showNormals(false);
 
         container.addChild(mesh);
     }
@@ -1215,6 +1368,12 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
     {
         container.addChild(cloud);
     }
+
+	if (texCoords)
+	{
+		texCoords->release();
+		texCoords = 0;
+	}
 
 	return CC_FERR_NO_ERROR;
 }

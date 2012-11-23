@@ -104,8 +104,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned b
 	{
 		const CCVector3* P = vertices->getPoint(i);
 		if (fprintf(theFile,"v %f %f %f\n",-shift[0]+(double)P->x,
-											-shift[1]+(double)P->y,
-											-shift[2]+(double)P->z) < 0)
+			-shift[1]+(double)P->y,
+			-shift[2]+(double)P->z) < 0)
 			return CC_FERR_WRITING;
 	}
 
@@ -122,7 +122,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned b
 				return CC_FERR_WRITING;
 		}
 	}
-	
+
 	//if mesh hasn't per-triangle normals, we try per-vertices ones
 	bool withVertNormals = vertices->hasNormals();
 	if (!withTriNormals && withVertNormals)
@@ -322,11 +322,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	//common warnings that can appear multiple time (we avoid to send too many messages to the console!)
 	enum OBJ_WARNINGS {		DISCARED_GROUP = 0,
-							EMPTY_GROUP = 1,
-							INVALID_NORMALS = 2,
-							INVALID_INDEX = 3,
-							NOT_ENOUGH_MEMORY = 4,
-							INVALID_LINE = 5,
+		EMPTY_GROUP = 1,
+		INVALID_NORMALS = 2,
+		INVALID_INDEX = 3,
+		NOT_ENOUGH_MEMORY = 4,
+		INVALID_LINE = 5,
 	};
 	const unsigned objWarningsCount = 6;
 	bool objWarnings[objWarningsCount];
@@ -420,8 +420,8 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				}
 
 				CCVector3 P((PointCoordinateType)(Pd[0]+Pshift[0]),
-							(PointCoordinateType)(Pd[1]+Pshift[1]),
-							(PointCoordinateType)(Pd[2]+Pshift[2]));
+					(PointCoordinateType)(Pd[1]+Pshift[1]),
+					(PointCoordinateType)(Pd[2]+Pshift[2]));
 
 				vertices->addPoint(P);
 				++pointsRead;
@@ -463,7 +463,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			else if (tokens.front() == "vn") //vn = vertex normal --> in fact it can also be a facet normal!!!
 			{
 				if (normsRead == maxNorms)
-					{
+				{
 					if (!normals)
 					{
 						normals = new NormsIndexesTableType;
@@ -717,7 +717,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						materials = new ccMaterialSet("materials");
 						materials->link();
 					}
-					
+
 					unsigned oldSize = materials->size();
 					QStringList errors;
 					if (ccMaterialSet::ParseMTL(mtlPath,mtlFilename,*materials,errors))
@@ -901,7 +901,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 
 				//normals: if the obj file doesn't provide any, should we compute them?
 				if (!normals)
-					{
+				{
 					if (!materials) //yes if no material is available!
 					{
 						ccConsole::Print("[ObjFilter::Load] Mesh has no normal! We will compute them automatically");

@@ -51,7 +51,7 @@ endif()
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list *.qrc )
 #file( GLOB rc_list *.rc )
-file( GLOB txt_list TODO.txt bin/history.txt )
+file( GLOB txt_list TODO.txt bin_other/history.txt )
 
 # find Qt mocable files
 find_mocable_files( mocable_list ${header_list} )

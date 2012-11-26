@@ -45,7 +45,7 @@ public:
     //! Default constructor
     /** \param name object name (optional)
     **/
-    ccHObject(const char* name=0);
+    ccHObject(QString name=QString());
 
     //! Default destructor
     virtual ~ccHObject();

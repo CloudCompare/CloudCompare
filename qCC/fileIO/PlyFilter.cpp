@@ -220,7 +220,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 
 	ply_close(ply);
 
-	ccLog::Print("[PLY] Entity '%s' successfully saved to file '%s'",mesh ? mesh->getName() : vertices->getName(),filename);
+	ccLog::Print(QString("[PLY] Entity '%1' successfully saved to file '%2'").arg(mesh ? mesh->getName() : vertices->getName()).arg(filename));
 
 	return CC_FERR_NO_ERROR;
 }

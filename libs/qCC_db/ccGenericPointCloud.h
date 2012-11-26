@@ -60,7 +60,7 @@ class ccGenericPointCloud : public ccHObject,  virtual public CCLib::GenericInde
 public:
 
     //! Default constructor
-    ccGenericPointCloud(const char* _name = NULL);
+    ccGenericPointCloud(QString name = QString());
 
     //! Default destructor
 	virtual ~ccGenericPointCloud();

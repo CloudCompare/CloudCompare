@@ -585,7 +585,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 		{
 			//do nothing
 		}
-		else if (nextline.isNull()) //End of file?
+		else if (nextline.isEmpty()) //End of file?
 		{
 			break;
 		}

@@ -41,9 +41,9 @@
 //system
 #include <assert.h>
 
-ccPointCloud::ccPointCloud(const char* _name)
+ccPointCloud::ccPointCloud(QString name)
 	: ChunkedPointCloud()
-	, ccGenericPointCloud(_name)
+	, ccGenericPointCloud(name)
 	, m_rgbColors(0)
 	, m_normals(0)
 	, m_currentDisplayedScalarField(0)
@@ -109,7 +109,7 @@ ccPointCloud::ccPointCloud(const CCLib::GenericIndexedCloud* cloud)
 
 ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccPointCloud* source)
 	: ChunkedPointCloud()
-	, ccGenericPointCloud(source->getName())
+	, ccGenericPointCloud(source ? source->getName() : QString())
 	, m_rgbColors(0)
 	, m_normals(0)
 	, m_currentDisplayedScalarField(0)
@@ -251,14 +251,12 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccPointCloud* sourc
     const double* shift = source->getOriginalShift();
     setOriginalShift(shift[0],shift[1],shift[2]);
 
-    char buffer[256];
-    sprintf(buffer,"%s.extract",source->getName());
-    setName(buffer);
+	setName(source->getName()+QString(".extract"));
 }
 
 ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccGenericPointCloud* source)
 	: ChunkedPointCloud()
-	, ccGenericPointCloud(source->getName())
+	, ccGenericPointCloud(source ? source->getName() : QString())
 	, m_rgbColors(0)
 	, m_normals(0)
 	, m_currentDisplayedScalarField(0)
@@ -371,9 +369,7 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccGenericPointCloud
     const double* shift = source->getOriginalShift();
     setOriginalShift(shift[0],shift[1],shift[2]);
 
-    char buffer[256];
-    sprintf(buffer,"%s.extract",source->getName());
-    setName(buffer);
+	setName(source->getName()+QString(".extract"));
 }
 
 ccPointCloud::~ccPointCloud()
@@ -420,9 +416,7 @@ ccPointCloud* ccPointCloud::clone()
     const double* shift = getOriginalShift();
     result->setOriginalShift(shift[0],shift[1],shift[2]);
 
-    char buffer[256];
-    sprintf(buffer,"%s.clone",getName());
-    result->setName(buffer);
+	result->setName(getName()+QString(".clone"));
 
     return result;
 }
@@ -638,7 +632,7 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
     //Has the cloud been recentered?
 	const double* shift = addedCloud->getOriginalShift();
 	if (fabs(shift[0])+fabs(shift[1])+fabs(shift[1])>0.0)
-		ccLog::Warning("[ccPointCloud::fusion] Global shift information for cloud '%s' will be lost!",addedCloud->getName());
+		ccLog::Warning(QString("[ccPointCloud::fusion] Global shift information for cloud '%1' will be lost!").arg(addedCloud->getName()));
 
     //children (not yet reserved)
 	unsigned c,childrenCount = addedCloud->getChildrenNumber();
@@ -665,7 +659,7 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 			}
 			else
 			{
-				ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to clone sub mesh %s!",mesh->getName());
+				ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to clone sub mesh %1!").arg(mesh->getName()));
 			}
 		}
 		else if (child->isKindOf(CC_IMAGE))
@@ -1818,14 +1812,14 @@ void ccPointCloud::hidePointsByScalarValue(DistanceType minVal, DistanceType max
 {
     if (!razVisibilityArray())
     {
-        //ccConsole::Error("[Cloud %s] Visibility table could not be instantiated!",getName());
+        ccLog::Error(QString("[Cloud %1] Visibility table could not be instantiated!").arg(getName()));
         return;
     }
 
 	CCLib::ScalarField* sf = getCurrentOutScalarField();
     if (!sf)
     {
-		//ccConsole::Error("[Cloud %s] Internal error: no activated output scalar field!",getName());
+		ccLog::Error(QString("[Cloud %1] Internal error: no activated output scalar field!").arg(getName()));
         return;
     }
 
@@ -1844,7 +1838,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 {
     if (!isVisibilityTableInstantiated())
     {
-        //ccConsole::Error("[Cloud %s] Visibility table not instantiated!",getName());
+        ccLog::Error(QString("[Cloud %1] Visibility table not instantiated!").arg(getName()));
         return 0;
     }
 
@@ -1854,7 +1848,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
     //nothing to do!
     if (!rc || rc->size()==0)
     {
-        //ccConsole::Error("No Points in selection!\n");
+        ccLog::Error("[ccPointCloud::createNewCloudFromVisibilitySelection] No points in selection!");
         if (rc)
 			delete rc;
         return 0;
@@ -1873,7 +1867,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
         return NULL;
     }
 
-    result->setName(qPrintable(QString("%0.part").arg(getName())));
+    result->setName(getName()+QString(".part"));
 
     //shall the visible points be erased from this cloud?
     if (removeSelectedPoints && !isLocked())

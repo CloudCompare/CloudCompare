@@ -52,12 +52,12 @@ public:
 	ccPlane(PointCoordinateType xWidth,
 			PointCoordinateType yWidth,
 			const ccGLMatrix* transMat = 0,
-			const char* name = "Plane");
+			QString name = QString("Plane"));
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
 	**/
-	ccPlane(const char* name = "Plane");
+	ccPlane(QString name = QString("Plane"));
 
     //! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_PLANE; }

@@ -33,7 +33,7 @@ ccCone::ccCone(PointCoordinateType bottomRadius,
 				PointCoordinateType xOff/*=0*/,
 				PointCoordinateType yOff/*=0*/,
 				const ccGLMatrix* transMat/*=0*/,
-				const char* name/*="Cylinder"*/,
+				QString name/*="Cylinder"*/,
 				unsigned precision/*=24*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_bottomRadius(abs(bottomRadius))
@@ -45,7 +45,7 @@ ccCone::ccCone(PointCoordinateType bottomRadius,
 	setDrawingPrecision(std::max<unsigned>(precision,4)); //automatically calls buildUp & applyTransformationToVertices
 }
 
-ccCone::ccCone(const char* name/*="Cylinder"*/)
+ccCone::ccCone(QString name/*="Cylinder"*/)
 	: ccGenericPrimitive(name)
 	, m_bottomRadius(0)
 	, m_topRadius(0)

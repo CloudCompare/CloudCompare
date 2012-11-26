@@ -117,7 +117,7 @@ void ccPointListPickingDlg::linkWithCloud(ccPointCloud* cloud)
 		for (unsigned i=0;i<m_associatedCloud->getChildrenNumber();++i)
 		{
 			ccHObject* child = m_associatedCloud->getChild(i);
-			if (child->isA(CC_HIERARCHY_OBJECT) && strcmp(child->getName(),"Picked points list")==0)
+			if (child->isA(CC_HIERARCHY_OBJECT) && child->getName() == "Picked points list")
 			{
 				m_orderedLabelsContainer = child;
 				break;

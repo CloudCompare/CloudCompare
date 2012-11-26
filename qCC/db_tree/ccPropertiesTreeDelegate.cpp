@@ -843,7 +843,7 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(cc2DViewportObject* _obj)
     item->setFlags(Qt::ItemIsEnabled);
     m_model->setItem(curRow,0,item);
 
-	item = new QStandardItem(_obj->getName() ? _obj->getName() : "undefined");
+	item = new QStandardItem(!_obj->getName().isEmpty() ? _obj->getName() : "undefined");
 	item->setFlags(Qt::ItemIsEnabled);
 	m_model->setItem(curRow,1,item);
 
@@ -974,7 +974,7 @@ template<int N, class ScalarType> void ccPropertiesTreeDelegate::fillWithChunked
     item->setFlags(Qt::ItemIsEnabled);
     m_model->setItem(curRow,0,item);
 
-	item = new QStandardItem(_obj->getName() ? _obj->getName() : "undefined");
+	item = new QStandardItem(!_obj->getName().isEmpty() ? _obj->getName() : "undefined");
 	item->setFlags(Qt::ItemIsEnabled);
 	m_model->setItem(curRow,1,item);
 

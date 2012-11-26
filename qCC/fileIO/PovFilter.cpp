@@ -62,7 +62,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
         {
             clouds.push_back(static_cast<ccGenericPointCloud*>(hClouds[i]));
             if (cloudSensors.size()>1)
-                ccConsole::Warning("Found more than one ground-based LIDAR sensor associated to entity '%s'. Only the first will be saved!",hClouds[i]->getName());
+                ccConsole::Warning(QString("Found more than one ground-based LIDAR sensor associated to entity '%1'. Only the first will be saved!").arg(hClouds[i]->getName()));
 
             sensors.push_back(static_cast<ccGBLSensor*>(cloudSensors[0]));
         }
@@ -370,16 +370,16 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                     switch (errorCode)
                     {
                     case -1:
-                        ccConsole::Print("[PovFilter::loadFile] Error on cloud #%i (%s): nothing to project?! Must be a bug, sorry ;)\n",i,theCloud->getName());
+                        ccConsole::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): nothing to project?! Must be a bug, sorry ;)").arg(i).arg(theCloud->getName()));
                         break;
                     case -2:
-                        ccConsole::Print("[PovFilter::loadFile] Error on cloud #%i (%s): the resulting depth map seems much too big! Check parameters, or reduce angular steps ...\n",i,theCloud->getName());
+                        ccConsole::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): the resulting depth map seems much too big! Check parameters, or reduce angular steps ...").arg(i).arg(theCloud->getName()));
                         break;
                     case -3:
-                        ccConsole::Print("[PovFilter::loadFile] Error on cloud #%i (%s): the resulting depth map is void (too small)! Check parameters and input, or increase angular steps ...\n",i,theCloud->getName());
+                        ccConsole::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): the resulting depth map is void (too small)! Check parameters and input, or increase angular steps ...").arg(i).arg(theCloud->getName()));
                         break;
                     case -4:
-                        ccConsole::Print("[PovFilter::loadFile] Error on cloud #%i (%s): not enough memory!\n",i,theCloud->getName());
+                        ccConsole::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): not enough memory!").arg(i).arg(theCloud->getName()));
                         break;
                     }
 

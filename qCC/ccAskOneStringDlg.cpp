@@ -37,6 +37,6 @@ ccAskOneStringDlg::ccAskOneStringDlg(const QString& label,
     valueLabel->setText(label);
     lineEdit->setText(initVal);
 
-    if (!windowTitle.isNull())
+    if (!windowTitle.isEmpty())
         setWindowTitle(windowTitle);
 }

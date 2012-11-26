@@ -45,7 +45,7 @@ public:
 		\param name name
 		\param transMat optional 3D transformation applied to the primitive vertices (can be set afterwards with ccDrawableObject::setGLTransformation + ccDrawableObject::applyGLTransformation_recursive)
 	**/
-	ccGenericPrimitive(const char* name = 0, const ccGLMatrix* transMat = 0);
+	ccGenericPrimitive(QString name = QString(), const ccGLMatrix* transMat = 0);
 
 	//! Clones primitive
 	virtual ccGenericPrimitive* clone() const = 0;

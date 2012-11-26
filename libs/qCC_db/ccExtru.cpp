@@ -39,7 +39,7 @@
 ccExtru::ccExtru(const std::vector<CCVector2>& profile,
 				 PointCoordinateType height,
 				 const ccGLMatrix* transMat /*= 0*/,
-				 const char* name /*="Extrusion"*/)
+				 QString name/*="Extrusion"*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_height(height)
 {
@@ -50,7 +50,7 @@ ccExtru::ccExtru(const std::vector<CCVector2>& profile,
 	applyTransformationToVertices();
 }
 
-ccExtru::ccExtru(const char* name /*= "Plane"*/)
+ccExtru::ccExtru(QString name/*="Plane"*/)
 	: ccGenericPrimitive(name)
 	, m_height(0)
 {

@@ -69,11 +69,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 					if (result != CC_FERR_NO_ERROR)
 						return result;
 					else
-						ccLog::Print("[AsciiFilter::saveToFile] Cloud '%s' saved in: %s",child->getName(),qPrintable(subFilename));
+						ccLog::Print(QString("[AsciiFilter::saveToFile] Cloud '%1' saved in: %2").arg(child->getName()).arg(subFilename));
 				}
 				else
 				{
-					ccLog::Warning("[AsciiFilter::saveToFile] Entity '%s' can't be saved this way!",child->getName());
+					ccLog::Warning(QString("[AsciiFilter::saveToFile] Entity '%1' can't be saved this way!").arg(child->getName()));
 				}
 			}
 			
@@ -106,11 +106,8 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
     //avancement du chargement
     ccProgressDialog pdlg(true);
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
-    char buffer[256];
-    sprintf(buffer,"Saving cloud [%s]",cloud->getName());
-    pdlg.setMethodTitle(buffer);
-	sprintf(buffer,"Number of points: %i",numberOfPoints);
-    pdlg.setInfo(buffer);
+    pdlg.setMethodTitle(qPrintable(QString("Saving cloud [%1]").arg(cloud->getName())));
+    pdlg.setInfo(qPrintable(QString("Number of points: %1").arg(numberOfPoints)));
     pdlg.start();
 
 	const double* shift = cloud->getOriginalShift();
@@ -351,7 +348,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 				int sfIndex = cloud->getNumberOfScalarFields()+1;
 				bool isPositive = (openSequence[i].type==ASCII_OPEN_DLG_Positive_Scalar);
 				QString sfName = openSequence[i].header;
-				if (sfName.isNull())
+				if (sfName.isEmpty())
 				{
 					sfName = "Scalar field";
 					if (sfIndex > 1)

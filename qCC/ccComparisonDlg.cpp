@@ -777,7 +777,7 @@ void ccComparisonDlg::showHisto()
 
     ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
     ccHistogramWindow* win = hDlg->window();
-    const char* cloudName = compCloud->getName();
+    QString cloudName = compCloud->getName();
     hDlg->setWindowTitle(QString("[Approximate Distances] %0.%1").arg(cloudName));
 	win->setInfoStr(qPrintable(QString("[%0] (%1 pts) - Approximate Distances").arg(cloudName).arg(compCloud->size())));
 	win->setValues(sf);
@@ -807,7 +807,7 @@ void ccComparisonDlg::applyAndExit()
         int sfIdx = compCloud->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
         if (sfIdx>=0)
         {
-            if (sfName.isNull()) //hum,hum
+            if (sfName.isEmpty()) //hum,hum
             {
                 ccConsole::Warning("Something went wrong!");
                 compCloud->deleteScalarField(sfIdx);
@@ -865,7 +865,7 @@ void ccComparisonDlg::cancelAndExit()
             sfIdx=-1;
         }
 
-        if (!oldSfName.isNull())
+        if (!oldSfName.isEmpty())
         {
             int oldSfIdx = compCloud->getScalarFieldIndexByName(qPrintable(oldSfName));
             if (oldSfIdx)

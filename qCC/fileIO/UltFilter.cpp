@@ -196,7 +196,7 @@ CC_FILE_ERROR UltFilter::saveToFile(ccHObject* entity, const char* filename)
 	//Vertices
 	const double* shift = theCloud->getOriginalShift();
 	if (fabs(shift[0])+fabs(shift[0])+fabs(shift[0])>0.0)
-        ccConsole::Warning("[ULTFilter::save] Can't recenter cloud %s on ULT/ULD file save!",theCloud->getName());
+        ccConsole::Warning(QString("[ULTFilter::save] Can't recenter cloud %1 on ULT/ULD file save!").arg(theCloud->getName()));
 
 	for (unsigned i=0;i<count;++i)
 	{

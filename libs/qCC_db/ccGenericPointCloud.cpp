@@ -32,8 +32,8 @@
 #include "ccSensor.h"
 #include "ccPlane.h"
 
-ccGenericPointCloud::ccGenericPointCloud(const char* _name)
-	: ccHObject(_name)
+ccGenericPointCloud::ccGenericPointCloud(QString name)
+	: ccHObject(name)
 	, m_visibilityArray(0)
 {
     setVisible(true);
@@ -190,7 +190,7 @@ ccPlane* ccGenericPointCloud::fitPlane(double* rms /*= 0*/)
 	//invalid matrix?
 	if (!eig.isValid())
 	{
-		//ccConsole::Warning("[ccPointCloud::fitPlane] Failed to compute plane/normal for cloud '%s'",getName());
+		//ccConsole::Warning(QString("[ccPointCloud::fitPlane] Failed to compute plane/normal for cloud '%1'").arg(getName()));
 		return 0;
 	}
 	eig.sortEigenValuesAndVectors();

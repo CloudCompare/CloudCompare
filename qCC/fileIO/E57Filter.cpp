@@ -175,14 +175,14 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	ccBBox bbox = cloud->getBB();
 	if (!bbox.isValid())
 	{
-		ccLog::Error("[E57Filter::SaveScan] Internal error: cloud '%s' has an invalid bounding box?!",cloud->getName());
+		ccLog::Error(QString("[E57Filter::SaveScan] Internal error: cloud '%1' has an invalid bounding box?!").arg(cloud->getName()));
 		return false;
 	}
 
 	unsigned pointCount = cloud->size();
 	if (pointCount==0)
 	{
-		ccLog::Error("[E57Filter::SaveScan] Cloud '%s' is empty!",cloud->getName());
+		ccLog::Error(QString("[E57Filter::SaveScan] Cloud '%1' is empty!").arg(cloud->getName()));
 		return false;
 	}
 
@@ -195,8 +195,8 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	scanNode.set("guid", e57::StringNode(imf, guidStr.toStdString()));	//required
 
 	//Name
-	if(cloud->getName() && cloud->getName()[0] != 0)
-		scanNode.set("name", e57::StringNode(imf, cloud->getName()));
+	if (!cloud->getName().isEmpty())
+		scanNode.set("name", e57::StringNode(imf, cloud->getName().toStdString()));
 	else
 		scanNode.set("name", e57::StringNode(imf, QString("Scan %1").arg(s_absoluteScanIndex).toStdString()));
 
@@ -547,8 +547,8 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	imageNode.set("guid", e57::StringNode(imf, GetNewGuid().toStdString()));	//required
 
 	//Name
-	if(image->getName() && image->getName()[0] != 0)
-		imageNode.set("name", e57::StringNode(imf, image->getName()));
+	if(!image->getName().isEmpty())
+		imageNode.set("name", e57::StringNode(imf, image->getName().toStdString()));
 	else
 		imageNode.set("name", e57::StringNode(imf, QString("Image %1").arg(s_absoluteImageIndex).toStdString()));
 
@@ -836,13 +836,13 @@ bool NodeStructureToTree(ccHObject* currentTreeNode, e57::Node currentE57Node)
 		default:
 		{
 			infoStr += QString( "[INVALID]");
-			obj->setName(qPrintable(infoStr));
+			obj->setName(infoStr);
 			return false;
 		}
 		break;
 	}
 
-	obj->setName(qPrintable(infoStr));
+	obj->setName(infoStr);
 	return true;
 }
 
@@ -2100,7 +2100,7 @@ CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bo
 					name += QString(nodeName.c_str());
 				else
 					name += QString::number(i);
-				scan->setName(qPrintable(name));
+				scan->setName(name);
 				container.addChild(scan);
 
 				//we also add the scan to the GUID/object map
@@ -2155,7 +2155,7 @@ CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bo
 			if (image)
 			{
 				//no name?
-				if (image->getName()==0 || image->getName()[0]==0)
+				if (image->getName().isEmpty())
 				{
 					QString name("Image");
 					e57::ustring nodeName = imageNode.elementName();
@@ -2163,7 +2163,7 @@ CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bo
 						name += QString(nodeName.c_str());
 					else
 						name += QString::number(i);
-					image->setName(qPrintable(name));
+					image->setName(name);
 				}
 				image->setEnabled(false); //not displayed by default
 

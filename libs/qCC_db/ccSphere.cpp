@@ -29,7 +29,7 @@
 
 ccSphere::ccSphere(PointCoordinateType radius,
 				   const ccGLMatrix* transMat/*=0*/,
-				   const char* name/*="Sphere"*/,
+				   QString name/*=QString("Sphere")*/,
 				   unsigned precision/*=24*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_radius(radius)
@@ -37,7 +37,7 @@ ccSphere::ccSphere(PointCoordinateType radius,
 	setDrawingPrecision(std::max<unsigned>(precision,4));  //automatically calls buildUp + 	applyTransformationToVertices
 }
 
-ccSphere::ccSphere(const char* name /*= "Sphere"*/)
+ccSphere::ccSphere(QString name/*=QString("Sphere")*/)
 	: ccGenericPrimitive(name)
 	, m_radius(0)
 {

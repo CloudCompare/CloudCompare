@@ -443,7 +443,7 @@ ccGenericMesh* ccMeshGroup::createNewMeshFromSelection(bool removeSelectedVertic
 
     if (mg->getChildrenNumber())
     {
-        mg->setName(qPrintable(QString("%0.part").arg(getName())));
+        mg->setName(getName()+QString(".part"));
         if (!vertices) //if we have created vertices for this mesh
         {
             mg->addChild(newVertices);
@@ -501,7 +501,7 @@ ccGenericMesh* ccMeshGroup::clone(ccGenericPointCloud* vertices/*=0*/)
 
     if (mg->getChildrenNumber())
     {
-        mg->setName(qPrintable(QString("%0.clone").arg(getName())));
+        mg->setName(getName()+QString(".clone"));
 
         if (!vertices) //if we have created vertices for this mesh
         {

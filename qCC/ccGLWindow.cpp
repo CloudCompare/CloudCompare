@@ -431,7 +431,7 @@ void ccGLWindow::paintGL()
 			//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
 			//glColor3ubv(textCol);
 			glColor3f((float)textCol[0]/(float)MAX_COLOR_COMP,(float)textCol[1]/(float)MAX_COLOR_COMP,(float)textCol[2]/(float)MAX_COLOR_COMP);
-			renderText(10, m_glHeight-(float)borderWidth+15,QString("[GL filter] %1").arg(m_activeGLFilter->getName())/*,m_font*/); //we ignore the custom font size
+			renderText(10, m_glHeight-(float)borderWidth+15,QString("[GL filter] ")+m_activeGLFilter->getName()/*,m_font*/); //we ignore the custom font size
 		}
 
 		//trihedral
@@ -452,7 +452,7 @@ void ccGLWindow::paintGL()
 			glColor3f((float)col[0]/(float)MAX_COLOR_COMP,(float)col[1]/(float)MAX_COLOR_COMP,(float)col[2]/(float)MAX_COLOR_COMP);
 			renderText(10, m_glHeight-20, m_messageToDisplayLowerLeft,m_font);
 		}
-		if (!m_messageToDisplayCenter.isNull())
+		if (!m_messageToDisplayCenter.isEmpty())
 		{
 			QFont newFont(m_font);
 			newFont.setPointSize(12);

@@ -21,7 +21,6 @@
 #include "cc2sm.h"
 #include "sm2cc.h"
 #include "filtering.h"
-#include "iostream"
 
 #include <boost/make_shared.hpp>
 
@@ -59,11 +58,7 @@ int StatisticalOutliersRemover::compute()
         return 0;
 
     //create a suitable name for the entity
-    std::stringstream name;
-    name << cloud->getName() << "_k" << m_k << "_std" << m_std;
-
-
-    final_cloud->setName(qPrintable(name.str().c_str()));
+    final_cloud->setName(QString("%1_k%2_std%3").arg(cloud->getName()).arg(m_k).arg(m_std));
 
     ccHObject* cloud_container = new ccHObject();
     QString container_name = "Statistical Outlier Remover Output";

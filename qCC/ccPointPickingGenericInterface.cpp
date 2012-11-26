@@ -62,12 +62,12 @@ bool ccPointPickingGenericInterface::addCloud(const ccPointCloud* cloud)
 {
     if (cloud->getDisplay() != m_win)
     {
-        ccConsole::Warning("[Point picking] Can't use cloud '%s' cause it's not displayed in the active 3D view!", cloud->getName());
+        ccConsole::Warning(QString("[Point picking] Can't use cloud '%1' cause it's not displayed in the active 3D view!").arg(cloud->getName()));
         return false;
     }
     else if (!cloud->isVisible() || !cloud->isActive())
     {
-        ccConsole::Warning("[Point picking] Can't use cloud '%s' cause it's not visible!", cloud->getName());
+        ccConsole::Warning(QString("[Point picking] Can't use cloud '%1' cause it's not visible!").arg(cloud->getName()));
         return false;
     }
 

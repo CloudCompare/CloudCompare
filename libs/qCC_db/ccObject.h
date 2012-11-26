@@ -25,7 +25,11 @@
 #ifndef CC_OBJECT_HEADER
 #define CC_OBJECT_HEADER
 
+//Local
 #include "ccSerializableObject.h"
+
+//Qt
+#include <QString>
 
 //! Object state flag
 enum CC_OBJECT_FLAG {
@@ -115,16 +119,16 @@ public:
     //! Default constructor
     /** \param name object name (optional)
     **/
-    ccObject(const char* name = 0);
+    ccObject(QString name = QString());
 
     //! Returns class ID
     virtual CC_CLASS_ENUM getClassID() const = 0;
 
     //! Returns object name
-    virtual const char* getName() const;
+    virtual QString getName() const;
 
     //! Sets object name
-    virtual void setName(const char* name);
+    virtual void setName(const QString& name);
 
     //! Returns object unqiue ID
     virtual unsigned getUniqueID() const;
@@ -217,7 +221,7 @@ protected:
 	static void UpdateLastUniqueID(unsigned lastID);
 
     //! Object name
-    char m_name[256];
+    QString m_name;
 
     //! Object flags
     unsigned m_flags;

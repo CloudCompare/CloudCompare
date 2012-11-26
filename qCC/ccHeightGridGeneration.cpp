@@ -81,7 +81,7 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 
     //=========================================================================================================
     ccConsole::Print("[ccHeightGridGeneration] 1 - Initialization");
-	ccConsole::Print("Input cloud: '%s' (%i points)", cloud->getName(), cloud->size());
+	ccConsole::Print(QString("Input cloud: '%1' (%2 points)").arg(cloud->getName()).arg(cloud->size()));
 
 	assert(proj_dimension<3);
 	const unsigned char Z = proj_dimension;
@@ -162,7 +162,7 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 			}
 			else
 			{
-				ccLog::Error("[ccHeightGridGeneration] Failed to allocate memory for SF '%s' (and potentially the next ones)!",cloudGrid->getScalarField(i)->getName());
+				ccLog::Error(QString("[ccHeightGridGeneration] Failed to allocate memory for SF '%1' (and potentially the next ones)!").arg(cloudGrid->getScalarField(i)->getName()));
 				break;
 			}
 		}

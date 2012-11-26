@@ -71,7 +71,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
     //Has the cloud been recentered?
 	const double* shift = theCloud->getOriginalShift();
 	if (fabs(shift[0])+fabs(shift[0])+fabs(shift[0])>0.0)
-        ccConsole::Warning("[PNFilter::save] Can't recenter cloud %s on PN file save!",theCloud->getName());
+        ccConsole::Warning(QString("[PNFilter::save] Can't recenter cloud %1 on PN file save!").arg(theCloud->getName()));
 
 	bool hasNorms = theCloud->hasNormals();
 	PointCoordinateType defaultNorm[3] = {0.0,0.0,1.0};

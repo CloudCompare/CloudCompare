@@ -78,7 +78,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
     //Has the cloud been recentered?
 	const double* shift = theCloud->getOriginalShift();
 	if (fabs(shift[0])+fabs(shift[0])+fabs(shift[0])>0.0)
-        ccConsole::Warning("[PVFilter::save] Can't recenter cloud %s on PV file save!",theCloud->getName());
+        ccConsole::Warning(QString("[PVFilter::save] Can't recenter cloud %1 on PV file save!").arg(theCloud->getName()));
 
 	//progress dialog
 	ccProgressDialog pdlg(true); //cancel available

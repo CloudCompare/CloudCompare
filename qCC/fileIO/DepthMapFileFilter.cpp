@@ -101,7 +101,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 
     if (!sensor->getParent()->isKindOf(CC_POINT_CLOUD))
     {
-        ccConsole::Warning("Warning: sensor '%s' is not associated to a point cloud!",sensor->getName());
+        ccConsole::Warning(QString("Warning: sensor '%1' is not associated to a point cloud!").arg(sensor->getName()));
         return CC_FERR_NO_ERROR; //this is not a severe error (the process can go on)
     }
 
@@ -111,7 +111,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
     CCLib::GroundBasedLidarSensor::DepthBuffer db = sensor->getDepthBuffer();
 
     fprintf(fp,"// CLOUDCOMPARE DEPTH MAP\n");
-    fprintf(fp,"// Associated cloud: %s\n",cloud->getName());
+    fprintf(fp,"// Associated cloud: %s\n",qPrintable(cloud->getName()));
     fprintf(fp,"// dPhi   = %f [ %f : %f ]\n",sensor->getDeltaPhi(),
             sensor->getPhiMin(),
             sensor->getPhiMax());
@@ -137,7 +137,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
         unsigned nbPoints = cloud->size();
         if (nbPoints == 0)
         {
-            ccConsole::Warning("Warning: sensor '%s' is associated to an empty cloud!",sensor->getName());
+            ccConsole::Warning(QString("Warning: sensor '%1' is associated to an empty cloud!").arg(sensor->getName()));
             return CC_FERR_NO_ERROR; //this is not a severe error (the process can go on)
         }
         else

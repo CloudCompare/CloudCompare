@@ -249,13 +249,12 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
         for (unsigned i=0;i<childrenCount;++i)
         {
             ccHObject* child = container->getChild(i);
-			const char* name = child->getName();
-			if (strncmp(name,"unnamed",7)==0)
+			QString newName = child->getName();
+			if (newName.startsWith("unnamed"))
 			{
 				//we automatically replace occurences of 'unnamed' in entities names by the base filename (no path, no extension)
-				QString newName(name);
 				newName.replace(QString("unnamed"),fi.baseName());
-				child->setName(qPrintable(newName));
+				child->setName(newName);
 			}
         }
     }

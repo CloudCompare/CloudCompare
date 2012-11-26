@@ -207,11 +207,11 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 {
     //FIXME
     /*if (anObject->isLocked())
-        ccConsole::Warning("Can't use entity [%s] cause it's locked!",anObject->getName());
+        ccConsole::Warning(QString("Can't use entity [%1] cause it's locked!").arg(anObject->getName()));
     else */
     if (anObject->getDisplay() != m_associatedWin)
     {
-        ccConsole::Warning("[Graphical Segmentation Tool] Can't use entity [%s] cause it's not displayed in the active 3D view!",anObject->getName());
+        ccConsole::Warning(QString("[Graphical Segmentation Tool] Can't use entity [%1] cause it's not displayed in the active 3D view!").arg(anObject->getName()));
 		return false;
     }
 

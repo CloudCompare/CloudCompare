@@ -59,13 +59,13 @@ public:
 				PointCoordinateType xOff = 0,
 				PointCoordinateType yOff = 0,
 				const ccGLMatrix* transMat = 0,
-				const char* name = "Cone",
+				QString name = QString("Cone"),
 				unsigned precision = 24);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
 	**/
-	ccCone(const char* name = "Cone");
+	ccCone(QString name = QString("Cone"));
 
     //! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_CONE; }

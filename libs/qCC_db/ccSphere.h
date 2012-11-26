@@ -50,13 +50,13 @@ public:
 	**/
 	ccSphere(PointCoordinateType radius,
 				const ccGLMatrix* transMat = 0,
-				const char* name = "Sphere",
+				QString name = QString("Sphere"),
 				unsigned precision = 24);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
 	**/
-	ccSphere(const char* name = "Sphere");
+	ccSphere(QString name = QString("Sphere"));
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_SPHERE; }

@@ -27,13 +27,13 @@
 ccCylinder::ccCylinder(PointCoordinateType radius,
 					   PointCoordinateType height,
 					   const ccGLMatrix* transMat/*=0*/,
-					   const char* name/*="Cylinder"*/,
+					   QString name/*=QString("Cylinder")*/,
 					   unsigned precision/*=24*/)
 	: ccCone(radius,radius,height,0,0,transMat,name,precision)
 {
 }
 
-ccCylinder::ccCylinder(const char* name/*="Cylinder"*/)
+ccCylinder::ccCylinder(QString name/*=QString("Cylinder")*/)
 	: ccCone(name)
 {
 }

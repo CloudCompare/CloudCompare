@@ -81,7 +81,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned b
 	unsigned numberOfTriangles = mesh->size();
 	if (numberOfTriangles==0)
 	{
-		ccConsole::Warning("No facet in mesh %s !",mesh->getName());
+		ccConsole::Warning(QString("No facet in mesh %1 !").arg(mesh->getName()));
 		return CC_FERR_NO_ERROR;
 	}
 
@@ -159,7 +159,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned b
 		else if (subMesh->isA(CC_MESH))
 		{
 			ccMesh* st = static_cast<ccMesh*>(subMesh);
-			if (fprintf(theFile,"g %s\n",st->getName()) < 0)
+			if (fprintf(theFile,"g %s\n",qPrintable(st->getName())) < 0)
 				return CC_FERR_WRITING;
 
 			unsigned triNum = st->size();
@@ -533,7 +533,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						//new summit
 						facetElement fe; //(0,0,0) by default
 						QStringList vertexTokens = tokens[i].split('/');
-						if (vertexTokens.size()==0 || vertexTokens[0].isNull())
+						if (vertexTokens.size()==0 || vertexTokens[0].isEmpty())
 						{
 							objWarnings[INVALID_LINE]=true;
 							error=true;

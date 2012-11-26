@@ -74,7 +74,7 @@ public:
 		added to this cloud, at least partially).
 		\param name cloud name (optional)
     **/
-    ccPointCloud(const char* name=0);
+    ccPointCloud(QString name = QString());
 
     //! Creates a new point cloud object from a ReferenceCloud
 	/** "Reference clouds" are a set of indexes referring to a real point cloud.

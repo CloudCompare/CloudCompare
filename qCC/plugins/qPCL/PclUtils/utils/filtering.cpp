@@ -39,8 +39,8 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
     int n_scalars = inCloud->getNumberOfScalarFields();
     for (int i = 0; i < n_scalars; ++i)
       {
-        CCLib::ScalarField * field = inCloud->getScalarField(i);
-        const char * name = field->getName();
+        CCLib::ScalarField* field = inCloud->getScalarField(i);
+        const char* name = field->getName();
 
         //we need to verify no scalar field with the same name exists in the output cloud
         int id = outCloud->getScalarFieldIndexByName(name);

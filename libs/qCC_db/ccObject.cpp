@@ -59,24 +59,21 @@ void ccObject::UpdateLastUniqueID(unsigned lastID)
     QSettings().setValue("UniqueID", lastID);
 }
 
-ccObject::ccObject(const char* name)
+ccObject::ccObject(QString name)
 {
     m_flags = CC_ENABLED;
     m_uniqueID = GetNextUniqueID();
-    setName(name);
+    setName(name.isEmpty() ? "unnamed" : name);
 }
 
-const char* ccObject::getName() const
+QString ccObject::getName() const
 {
     return m_name;
 }
 
-void ccObject::setName(const char* name)
+void ccObject::setName(const QString& name)
 {
-    if (name)
-        strncpy(m_name,name,256);
-    else
-        strcpy(m_name,"unnamed");
+	m_name = name;
 }
 
 unsigned ccObject::getUniqueID() const
@@ -141,9 +138,11 @@ bool ccObject::toFile(QFile& out) const
 	if (out.write((const char*)&uniqueID,4)<0)
 		return WriteError();
 
-	//name (dataVersion>=20)
-	if (out.write(m_name,256)<0)
-		return WriteError();
+	//name (dataVersion>=22)
+	{
+		QDataStream outStream(&out);
+		outStream << m_name;
+	}
 
 	//flags (dataVersion>=20)
 	uint32_t flags = (uint32_t)m_flags;
@@ -188,9 +187,19 @@ bool ccObject::fromFile(QFile& in, short dataVersion)
 		return ReadError();
 	m_uniqueID = (unsigned)uniqueID;
 
-	//name (dataVersion>=20)
-	if (in.read(m_name,256)<0)
-		return ReadError();
+	//name
+	if (dataVersion < 22) //old style
+	{
+		char name[256];
+		if (in.read(name,256)<0)
+			return ReadError();
+		setName(name);
+	}
+	else //(dataVersion>=22)
+	{
+		QDataStream inStream(&in);
+		inStream >> m_name;
+	}
 
 	//flags (dataVersion>=20)
 	uint32_t flags = 0;

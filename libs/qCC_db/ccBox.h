@@ -51,12 +51,12 @@ public:
 	**/
 	ccBox(const CCVector3& dims,
 				const ccGLMatrix* transMat = 0,
-				const char* name = "Box");
+				QString name = QString("Box"));
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
 	**/
-	ccBox(const char* name = "Box");
+	ccBox(QString name = QString("Box"));
 
     //! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_BOX; }

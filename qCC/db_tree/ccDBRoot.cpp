@@ -276,7 +276,7 @@ void ccDBRoot::deleteSelectedEntities()
         }
         else
         {
-			ccConsole::Error("Object '%s' can't be deleted this way!",orderedObj.obj->getName());
+			ccConsole::Error(QString("Object '%1' can't be deleted this way!").arg(orderedObj.obj->getName()));
         }
     }
 
@@ -307,7 +307,7 @@ void ccDBRoot::deleteSelectedEntities()
 					for (unsigned j=1;j<label->size();++j) //the first point is always the parent cloud!
 						if (label->getPoint(j).cloud == anObject)
 						{
-							ccLog::Warning("Label '%s' will be deleted as it is dependent on '%s'",label->getName(),anObject->getName());
+							ccLog::Warning(QString("Label '%1' will be deleted as it is dependent on '%2'").arg(label->getName()).arg(anObject->getName()));
 							label->clear();
 							toBeDeleted.push_back(ccOrderedHObject(label,0));
 						}
@@ -354,7 +354,7 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
     }
     if (role == Qt::EditRole)
     {
-       return QVariant(QString(item->getName()));
+       return QVariant(item->getName());
     }
     else if (role == Qt::DecorationRole)
     {
@@ -878,11 +878,11 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		ccHObject *item = m_treeRoot->find(uniqueID);
 		if (!item)
 			continue;
-		//ccConsole::Print("[Drag & Drop] Source: %s",item->getName());
+		//ccConsole::Print(QString("[Drag & Drop] Source: %1").arg(item->getName()));
 
 		//old parent
 		ccHObject* oldParent = item->getParent();
-		//ccConsole::Print("[Drag & Drop] Parent: %s",(oldParent ? oldParent->getName() : "none"));
+		//ccConsole::Print(QString("[Drag & Drop] Parent: %1").arg(oldParent ? oldParent->getName() : "none")));
 
 		//let's check if we can actually move the entity
 		if (oldParent)
@@ -1087,12 +1087,12 @@ void ccDBRoot::sortSelectedEntitiesSiblings(SortRules sortRule)
 			{
 				unsigned firstChildIndex = k;
 				ccHObject* firstChild = item->getChild(k);
-				QString firstChildName = QString(firstChild->getName()).toUpper();
+				QString firstChildName = firstChild->getName().toUpper();
 
 				for (unsigned j=k+1;j<childCount;++j)
 				{
 					bool swap = false;
-					QString currentName = QString(item->getChild(j)->getName()).toUpper();
+					QString currentName = item->getChild(j)->getName().toUpper();
 					switch(sortRule)
 					{
 					case SORT_A2Z:

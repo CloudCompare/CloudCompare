@@ -72,21 +72,21 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 	//we don't handle entities associated to another context
 	if (entity->getDisplay()!=m_associatedWin)
 	{
-		ccConsole::Warning("[Graphical Transformation Tool] Can't use entity '%s' cause it's not displayed in the active 3D view!",entity->getName());
+		ccConsole::Warning(QString("[Graphical Transformation Tool] Can't use entity '%1' cause it's not displayed in the active 3D view!").arg(entity->getName()));
 		return false;
 	}
 
 	//we can't tranform locked entities
 	if (entity->isLocked())
 	{
-		ccConsole::Warning("[Graphical Transformation Tool] Can't transform entity '%s' cause it's locked!",entity->getName());
+		ccConsole::Warning(QString("[Graphical Transformation Tool] Can't transform entity '%1' cause it's locked!").arg(entity->getName()));
 		return false;
 	}
 
 	//we can't tranform child meshes
 	if (entity->isA(CC_MESH) && entity->getParent() && entity->getParent()->isKindOf(CC_MESH))
 	{
-		ccConsole::Warning("[Graphical Transformation Tool] Entity '%s' can't be modified as it is part of a mesh group. You should 'clone' it first.",entity->getName());
+		ccConsole::Warning(QString("[Graphical Transformation Tool] Entity '%1' can't be modified as it is part of a mesh group. You should 'clone' it first.").arg(entity->getName()));
 		return false;
 	}
 

@@ -169,7 +169,7 @@ bool ccCalibratedImage::undistort()
 	//m_aspectRatio = (aspect ratio is not changed)
 	m_k1 = m_k2 = 0;
 
-	setName(qPrintable(QString(getName())+QString("_undistort")));
+	setName(getName()+QString("_undistort"));
 
 	return true;
 }
@@ -813,7 +813,7 @@ ccPointCloud* ccCalibratedImage::orthoRectifyAsCloud(CCLib::GenericIndexedCloud*
 
 	PointCoordinateType defaultZ = 0.0;
 
-	ccPointCloud* proj = new ccPointCloud(qPrintable(QString("%1.ortho-rectified").arg(getName())));
+	ccPointCloud* proj = new ccPointCloud(getName()+QString(".ortho-rectified"));
 	if (!proj->reserve(m_width*m_height))
 	{
 		delete proj;

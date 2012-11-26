@@ -28,7 +28,7 @@
 #include "ccPlane.h"
 #include "ccPointCloud.h"
 
-ccBox::ccBox(const CCVector3& dims, const ccGLMatrix* transMat/*= 0*/, const char* name/*="Box"*/)
+ccBox::ccBox(const CCVector3& dims, const ccGLMatrix* transMat/*= 0*/, QString name/*=QString("Box")*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_dims(dims)
 {
@@ -66,7 +66,7 @@ bool ccBox::buildUp()
 	return (vertices() && vertices()->size() == 24 && vertices()->hasNormals() && this->size() == 12);
 }
 
-ccBox::ccBox(const char* name/*="Box"*/)
+ccBox::ccBox(QString name/*=QString("Box")*/)
 	: ccGenericPrimitive(name)
 	, m_dims(0,0,0)
 {

@@ -48,6 +48,7 @@
 - 'new' evolutive version, starts by 4 bytes ("CCB2")
 * V2.0 - 05/04/2012 - upgrade to serialized version
 * V2.1 - 07/02/2012 - points & 2D labels upgraded
+* V2.2 - 11/26/2012 - object name is now a QString
 **/
 static unsigned s_currentBinVersion = 21; //2.1
 
@@ -134,7 +135,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 		{
 			if (!root->find(dependencies.back()->getUniqueID()))
 			{
-				ccLog::Warning("Dependency broken: entity '%s' must also be in selection in order to save '%s'",dependencies.back()->getName(),currentObject->getName());
+				ccLog::Warning(QString("Dependency broken: entity '%1' must also be in selection in order to save '%2'").arg(dependencies.back()->getName()).arg(currentObject->getName()));
 				result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 			}
 			dependencies.pop_back();
@@ -239,7 +240,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 							mesh->setMaterialSet(0,false);
 						//DGM: can't delete it, too dangerous (bad pointers ;)
 						//delete root;
-						ccLog::Warning("[BinFilter::loadFileV2] Couldn't find vertices (ID=%i) for mesh '%s' in the file!",cloudID,mesh->getName());
+						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find vertices (ID=%1) for mesh '%2' in the file!").arg(cloudID).arg(mesh->getName()));
 						return CC_FERR_MALFORMED_FILE;
 					}
 				}
@@ -256,7 +257,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 					//we have a (less severe) problem here ;)
 					mesh->setMaterialSet(0,false);
 					mesh->showMaterials(false);
-					ccLog::Warning("[BinFilter::loadFileV2] Couldn't find shared materials set (ID=%i) for mesh '%s' in the file!",matSetID,mesh->getName());
+					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared materials set (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
 					result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 				}
 			}
@@ -272,7 +273,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 					//we have a (less severe) problem here ;)
 					mesh->setTriNormsTable(0,false);
 					mesh->showTriNorms(false);
-					ccLog::Warning("[BinFilter::loadFileV2] Couldn't find shared normals (ID=%i) for mesh '%s' in the file!",matSetID,mesh->getName());
+					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared normals (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
 					result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 				}
 			}
@@ -287,7 +288,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 				{
 					//we have a (less severe) problem here ;)
 					mesh->setTexCoordinatesTable(0,false);
-					ccLog::Warning("[BinFilter::loadFileV2] Couldn't find shared texture coordinates (ID=%i) for mesh '%s' in the file!",matSetID,mesh->getName());
+					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared texture coordinates (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
 					result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 				}
 			}
@@ -305,7 +306,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 				poly->setAssociatedCloud(0);
 				//DGM: can't delete it, too dangerous (bad pointers ;)
 				//delete root;
-				ccLog::Warning("[BinFilter::loadFileV2] Couldn't find vertices (ID=%i) for polyline '%s' in the file!",cloudID,poly->getName());
+				ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find vertices (ID=%1) for polyline '%2' in the file!").arg(cloudID).arg(poly->getName()));
 				return CC_FERR_MALFORMED_FILE;
 			}
 		}
@@ -328,13 +329,13 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 				else
 				{
 					//we have a problem here ;)
-					ccLog::Warning("[BinFilter::loadFileV2] Couldn't find cloud (ID=%i) associated to label '%s' in the file!",cloudID,label->getName());
+					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find cloud (ID=%1) associated to label '%2' in the file!").arg(cloudID).arg(label->getName()));
 					if (label->getParent())
 						label->getParent()->removeChild(label);
 					if (!label->getFlagState(CC_FATHER_DEPENDANT))
 					{
 						//DGM: can't delete it, too dangerous (bad pointers ;)
-						delete label;
+						//delete label;
 					}
 					label=0;
 					break;
@@ -345,10 +346,12 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 			{
 				assert(correctedPickedPoints.size() == label->size());
 				bool visible = label->isVisible();
+				QString originalName(label->getName());
 				label->clear();
 				for (unsigned i=0;i<correctedPickedPoints.size();++i)
 					label->addPoint(correctedPickedPoints[i].cloud,correctedPickedPoints[i].index);
 				label->setVisible(visible);
+				label->setName(originalName);
 			}
 		}
 

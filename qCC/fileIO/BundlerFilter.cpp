@@ -187,7 +187,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 	{
 		importImages = true;
 		orthoRectifyImagesAsImages = true;
-		useAltKeypoints = !_altKeypointsFilename.isNull();
+		useAltKeypoints = !_altKeypointsFilename.isEmpty();
 		if (useAltKeypoints)
 			altKeypointsFilename = _altKeypointsFilename;
 		undistortImages = _undistortImages;
@@ -232,7 +232,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 			//{
 			//	//read filename first!
 			//	currentLine = stream.readLine();
-			//	if (currentLine.isNull())
+			//	if (currentLine.isEmpty())
 			//		return CC_FERR_READING;
 			//	if (importImages)
 			//	{
@@ -245,7 +245,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 
 			//f, k1 and k2
 			currentLine = stream.readLine();
-			if (currentLine.isNull())
+			if (currentLine.isEmpty())
 				return CC_FERR_READING;
 			if (importImages)
 				sscanf(qPrintable(currentLine),"%f %f %f",&it->f,&it->k1,&it->k2);
@@ -255,7 +255,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 			for (unsigned l=0;l<3;++l)
 			{
 				currentLine = stream.readLine();
-				if (currentLine.isNull())
+				if (currentLine.isEmpty())
 					return CC_FERR_READING;
 				if (importImages)
 				{
@@ -270,7 +270,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 			}
 			//Translation
 			currentLine = stream.readLine();
-			if (currentLine.isNull())
+			if (currentLine.isEmpty())
 				return CC_FERR_READING;
 			if (importImages)
 				sscanf(qPrintable(currentLine),"%f %f %f",mat+12,mat+13,mat+14);
@@ -306,7 +306,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 			//{
 			//	//skip "----------Points" line!
 			//	currentLine = stream.readLine();
-			//	if (currentLine.isNull())
+			//	if (currentLine.isEmpty())
 			//		return CC_FERR_READING;
 			//}
 
@@ -318,7 +318,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 				currentLine = stream.readLine();
 				if (currentLine.startsWith("--")) //skip lines starting with '--' (yes it happens in some weird version of Bundler?!)
 					currentLine = stream.readLine();
-				if (currentLine.isNull())
+				if (currentLine.isEmpty())
 				{
 					delete keypointsCloud;
 					return CC_FERR_READING;
@@ -328,7 +328,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 
 				//RGB
 				currentLine = stream.readLine();
-				if (currentLine.isNull())
+				if (currentLine.isEmpty())
 				{
 					delete keypointsCloud;
 					return CC_FERR_READING;
@@ -359,7 +359,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 				}
 				
 				//view list (currentLine should already be read, see above)
-				if (currentLine.isNull())
+				if (currentLine.isEmpty())
 				{
 					delete keypointsCloud;
 					return CC_FERR_READING;
@@ -639,7 +639,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 
 			if (keypointsImage.size()<4)
 			{
-				ccConsole::Warning("[BundlerFilter::loadFile] Not enough keypoints descriptors for image '%s'!",image->getName());
+				ccConsole::Warning(QString("[BundlerFilter::loadFile] Not enough keypoints descriptors for image '%1'!").arg(image->getName()));
 			}
 			else
 			{
@@ -792,7 +792,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 					}
 					else
 					{
-						ccConsole::Warning("[BundlerFilter::loadFile] Failed to ortho-rectify image '%s'!",image->getName());
+						ccConsole::Warning(QString("[BundlerFilter::loadFile] Failed to ortho-rectify image '%1'!").arg(image->getName()));
 					}
 				}
 
@@ -802,7 +802,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 					if (orthoCloud)
 						container.addChild(orthoCloud);
 					else
-						ccConsole::Warning("[BundlerFilter::loadFile] Failed to ortho-rectify image '%s' as a cloud!",image->getName());
+						ccConsole::Warning(QString("[BundlerFilter::loadFile] Failed to ortho-rectify image '%1' as a cloud!").arg(image->getName()));
 				}
 			}
 		}
@@ -810,7 +810,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 		//undistortion
 		if (undistortImages)
 			if (!image->undistort())
-				ccConsole::Warning("[BundlerFilter::loadFile] Failed to undistort image '%s'!",image->getName());
+				ccConsole::Warning(QString("[BundlerFilter::loadFile] Failed to undistort image '%1'!").arg(image->getName()));
 
 		//DTM color 'blending'
 		if (generateColoredDTM)

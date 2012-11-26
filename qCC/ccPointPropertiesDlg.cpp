@@ -280,7 +280,7 @@ void ccPointPropertiesDlg::processPickedPoint(ccPointCloud* cloud, unsigned poin
 
 	//output info to Console
 	QStringList body = m_label->getLabelContent(ccGui::Parameters().displayedNumPrecision);
-	ccConsole::Print(QString("[Picked] %1").arg(m_label->getName()));
+	ccConsole::Print(QString("[Picked] ")+m_label->getName());
 	for (int i=0;i<body.size();++i)
 		ccConsole::Print(QString("[Picked]\t- ")+body[i]);
 

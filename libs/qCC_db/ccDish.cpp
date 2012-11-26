@@ -31,7 +31,7 @@ ccDish::ccDish(PointCoordinateType radius,
 			   PointCoordinateType height,
 			   PointCoordinateType radius2/*=0*/,
 			   const ccGLMatrix* transMat/*=0*/,
-			   const char* name/*="Dish"*/,
+			   QString name/*="Dish"*/,
 			   unsigned precision/*=24*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_baseRadius(radius)
@@ -43,7 +43,7 @@ ccDish::ccDish(PointCoordinateType radius,
 	setDrawingPrecision(std::max<unsigned>(precision,4));  //automatically calls buildUp + 	applyTransformationToVertices
 }
 
-ccDish::ccDish(const char* name /*= "Sphere"*/)
+ccDish::ccDish(QString name/*="Sphere"*/)
 	: ccGenericPrimitive(name)
 	, m_baseRadius(0)
 	, m_secondRadius(0)

@@ -233,7 +233,7 @@ int qPoissonReconPlugin::doAction(ccHObject::Container& selectedEntities,
 	}
 
 	ccMesh* newMesh = new ccMesh(newPC);
-	newMesh->setName(qPrintable(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(depth)));
+	newMesh->setName(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(depth));
 	newMesh->reserve(nr_faces);
 	newMesh->addChild(newPC);
 

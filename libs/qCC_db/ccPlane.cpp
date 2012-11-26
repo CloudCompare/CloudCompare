@@ -28,7 +28,7 @@
 #include "ccPointCloud.h"
 #include "ccNormalVectors.h"
 
-ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const ccGLMatrix* transMat /*= 0*/, const char* name /*= "Plane"*/)
+ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const ccGLMatrix* transMat /*= 0*/, QString name/*=QString("Plane")*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_xWidth(xWidth)
 	, m_yWidth(yWidth)
@@ -64,7 +64,7 @@ bool ccPlane::buildUp()
 	return true;
 }
 
-ccPlane::ccPlane(const char* name /*= "Plane"*/)
+ccPlane::ccPlane(QString name /*=QString("Plane")*/)
 	: ccGenericPrimitive(name)
 	, m_xWidth(0)
 	, m_yWidth(0)

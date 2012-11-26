@@ -27,7 +27,7 @@
 #include "ccGenericPrimitive.h"
 #include "ccPointCloud.h"
 
-ccGenericPrimitive::ccGenericPrimitive(const char* name /*= 0*/, const ccGLMatrix* transMat /*= 0*/)
+ccGenericPrimitive::ccGenericPrimitive(QString name/*=QString()*/, const ccGLMatrix* transMat /*= 0*/)
 	: ccMesh(new ccPointCloud("vertices"))
 	, m_drawPrecision(0)
 {

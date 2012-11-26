@@ -106,7 +106,7 @@ QString ccCommandLineParser::Export2BIN(CloudDesc& cloudDesc, QString suffix)
 
 	if (cloudDesc.indexInFile>=0)
 		suffix.prepend(QString("%1_").arg(cloudDesc.indexInFile));
-	QString cloudName = QString("%1_%2").arg(cloudDesc.pc->getName() ? cloudDesc.pc->getName() : info.baseName()).arg(suffix);
+	QString cloudName = QString("%1_%2").arg(!cloudDesc.pc->getName().isEmpty() ? cloudDesc.pc->getName() : info.baseName()).arg(suffix);
 	cloudDesc.pc->setName(qPrintable(cloudName));
 
 	QString outputFilename = QString("%1/%2_%3_%4.bin").arg(info.path()).arg(info.baseName()).arg(suffix).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
@@ -200,7 +200,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 				{
 					ccPointCloud* cloud = m_clouds[i].pc;
 					const QString& cloudFilename = m_clouds[i].filename;
-					Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(cloud->getName() ? cloud->getName() : "no name"));
+					Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 					CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(cloud,count,_progressDlg);
 					if (!refCloud)
@@ -213,7 +213,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 					refCloud=0;
 					CloudDesc cloudDesc(&result,cloudFilename,m_clouds[i].indexInFile);
 					QString errorStr = Export2BIN(cloudDesc,"RANDOM_SUBSAMPLED");
-					if (!errorStr.isNull())
+					if (!errorStr.isEmpty())
 						return Error(errorStr);
 				}
 
@@ -233,7 +233,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 				{
 					ccPointCloud* cloud = m_clouds[i].pc;
 					const QString& cloudFilename = m_clouds[i].filename;
-					Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(cloud->getName() ? cloud->getName() : "no name"));
+					Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 					CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud,step,0,_progressDlg);
 					if (!refCloud)
@@ -246,7 +246,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 					refCloud=0;
 					CloudDesc cloudDesc(&result,cloudFilename,m_clouds[i].indexInFile);
 					QString errorStr = Export2BIN(cloudDesc,"SPATIAL_SUBSAMPLED");
-					if (!errorStr.isNull())
+					if (!errorStr.isEmpty())
 						return Error(errorStr);
 				}
 			}
@@ -265,7 +265,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 				{
 					ccPointCloud* cloud = m_clouds[i].pc;
 					const QString& cloudFilename = m_clouds[i].filename;
-					Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(cloud->getName() ? cloud->getName() : "no name"));
+					Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 					CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(cloud,octreeLevel,CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,_progressDlg);
 					if (!refCloud)
@@ -278,7 +278,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 					refCloud=0;
 					CloudDesc cloudDesc(&result,cloudFilename,m_clouds[i].indexInFile);
 					QString errorStr = Export2BIN(cloudDesc,QString("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
-					if (!errorStr.isNull())
+					if (!errorStr.isEmpty())
 						return Error(errorStr);
 				}
 			}
@@ -334,7 +334,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 				{
 					//save output
 					QString errorStr = Export2BIN(m_clouds[i],QString("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize));
-					if (!errorStr.isNull())
+					if (!errorStr.isEmpty())
 						return Error(errorStr);
 				}
 			}
@@ -358,7 +358,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 				{
 					//save output
 					QString errorStr = Export2BIN(m_clouds[i],QString("DENSITY"));
-					if (!errorStr.isNull())
+					if (!errorStr.isEmpty())
 						return Error(errorStr);
 				}
 			}
@@ -415,7 +415,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 				{
 					//save output
 					QString errorStr = Export2BIN(m_clouds[i],euclidian ? "EUCLIDIAN_SF_GRAD" : "SF_GRAD");
-					if (!errorStr.isNull())
+					if (!errorStr.isEmpty())
 						return Error(errorStr);
 				}
 			}
@@ -449,7 +449,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 				{
 					//save output
 					QString errorStr = Export2BIN(m_clouds[i],QString("ROUGHNESS_KERNEL_%2").arg(kernelSize));
-					if (!errorStr.isNull())
+					if (!errorStr.isEmpty())
 						return Error(errorStr);
 				}
 			}

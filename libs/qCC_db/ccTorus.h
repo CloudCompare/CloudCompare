@@ -59,13 +59,13 @@ public:
 				bool rectangularSection = false,
 				PointCoordinateType rectSectionHeight = 0,
 				const ccGLMatrix* transMat = 0,
-				const char* name = "Torus",
+				QString name = QString("Torus"),
 				unsigned precision = 24);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
 	**/
-	ccTorus(const char* name = "Torus");
+	ccTorus(QString name = QString("Torus"));
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TORUS; }

@@ -294,7 +294,7 @@ ccGenericMesh* ccMesh::clone(ccGenericPointCloud* vertices/*=0*/)
 	cloneMesh->showColors(colorsShown());
 	cloneMesh->showSF(sfShown());
 	cloneMesh->showMaterials(materialsShown());
-	cloneMesh->setName(qPrintable(QString("%0.clone").arg(getName())));
+	cloneMesh->setName(getName()+QString(".clone"));
 	cloneMesh->setVisible(isVisible());
 	cloneMesh->setEnabled(isEnabled());
 
@@ -1106,7 +1106,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 	ccGenericPointCloud::VisibilityTableType* visibilityArray = m_associatedCloud->getTheVisibilityArray();
 	if (!visibilityArray || !visibilityArray->isAllocated())
 	{
-		//ccConsole::Error("[Mesh %s] Visibility table not instantiated!",getName());
+		//ccConsole::Error(QString("[Mesh %1] Visibility table not instantiated!").arg(getName()));
 		return NULL;
 	}
 
@@ -1208,7 +1208,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 			}
 			else
 			{
-				newTri->setName(qPrintable(QString("%0.part").arg(getName())));
+				newTri->setName(getName()+QString(".part"));
 
 				//shall we add any advanced features?
 				bool addFeatures = false;

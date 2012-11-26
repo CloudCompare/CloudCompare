@@ -438,7 +438,7 @@ void MainWindow::doPluginAction()
         else if (errorCode!=0)
         {
 			QString errMessage = ccStdPlugin->getErrorMessage(errorCode);
-			ccConsole::Error("%s",(errMessage.isNull() ? "Unknown error" : qPrintable(errMessage)));
+			ccConsole::Error("%s",(errMessage.isEmpty() ? "Unknown error" : qPrintable(errMessage)));
         }
     }
     else if (type==CC_GL_FILTER_PLUGIN)
@@ -801,7 +801,7 @@ void MainWindow::doActionComputeOctree()
 			}
 			else
 			{
-				ccConsole::Warning("Octree computation on entity '%s' failed!",ent->getName());
+				ccConsole::Warning(QString("Octree computation on entity '%1' failed!").arg(ent->getName()));
 			}
         }
     }
@@ -839,7 +839,7 @@ void MainWindow::doActionResampleWithOctree()
                 octree = cloud->computeOctree(&pDlg);
 				if (!octree)
 				{
-					ccConsole::Error("Could not compute octree for cloud '%s'",cloud->getName());
+					ccConsole::Error(QString("Could not compute octree for cloud '%1'").arg(cloud->getName()));
 					continue;
 				}
 			}
@@ -1094,7 +1094,7 @@ void MainWindow::doActionMeasureMeshSurface()
             double S = CCLib::MeshSamplingTools::computeMeshArea(static_cast<ccGenericMesh*>(ent));
             //we force the console to display itself
             forceConsoleDisplay();
-            ccConsole::Print("[Mesh Surface Measurer] Mesh %s: S=%f (square units)",ent->getName(),S);
+            ccConsole::Print(QString("[Mesh Surface Measurer] Mesh %1: S=%2 (square units)").arg(ent->getName()).arg(S));
         }
     }
 }
@@ -1414,7 +1414,7 @@ void MainWindow::doActionModifySensor()
             }
             else
             {
-                ccConsole::Error("Internal error: sensor ('%s') parent is not a point cloud!",sensor->getName());
+                ccConsole::Error(QString("Internal error: sensor ('%1') parent is not a point cloud!").arg(sensor->getName()));
             }
         }
     }
@@ -1460,7 +1460,7 @@ void MainWindow::doActionExportDepthBuffer()
 
     dialog.selectFilter(CC_FILE_TYPE_FILTERS[currentDBSaveDlgFilter]);
 
-    QString filename = QString(m_selectedEntities[0]->getName())+QString(".")+QString(CC_FILE_TYPE_DEFAULT_EXTENSION[currentDBSaveDlgFilter]);
+    QString filename = m_selectedEntities[0]->getName()+QString(".")+QString(CC_FILE_TYPE_DEFAULT_EXTENSION[currentDBSaveDlgFilter]);
     dialog.selectFile(filename);
 
     if (dialog.exec())
@@ -1625,7 +1625,7 @@ void MainWindow::doActionSamplePoints()
                 }
 
                 //we rename the resulting cloud
-                cloud->setName(qPrintable(QString("%1.sampled").arg(mesh->getName())));
+                cloud->setName(mesh->getName()+QString(".sampled"));
                 cloud->setDisplay(mesh->getDisplay());
                 cloud->prepareDisplayForRefresh();
                 addToDB(cloud,true,0,false,false);
@@ -1663,7 +1663,7 @@ void MainWindow::doActionFilterByValue()
             }
             else
             {
-                ccConsole::Warning("Entity [%s] has no active scalar field !",ent->getName());
+                ccConsole::Warning(QString("Entity [%1] has no active scalar field !").arg(ent->getName()));
             }
         }
     }
@@ -1861,7 +1861,7 @@ void MainWindow::doApplyActiveSFAction(int action)
 				cloud->prepareDisplayForRefresh();
 			}
 			else
-				ccConsole::Warning("No active scalar field on entity '%s'",ent->getName());
+				ccConsole::Warning(QString("No active scalar field on entity '%1'").arg(ent->getName()));
 			break;
 		case 1: //Activate previous SF
 			if (sfIdx>=0)
@@ -1897,7 +1897,7 @@ void MainWindow::doActionRenameSF()
             //if there is no displayed SF --> nothing to do!
             if (!sf)
             {
-				ccConsole::Warning("Cloud %s has no displayed scalar field!",pc->getName());
+				ccConsole::Warning(QString("Cloud %1 has no displayed scalar field!").arg(pc->getName()));
 			}
 			else
 			{
@@ -1987,7 +1987,7 @@ void MainWindow::doActionSFGaussianFilter()
                 pc->setCurrentInScalarField(sfIdx);
             else
             {
-                ccConsole::Error("Failed to create scalar field for cloud '%s' (not enough memory?)",pc->getName());
+                ccConsole::Error(QString("Failed to create scalar field for cloud '%1' (not enough memory?)").arg(pc->getName()));
                 continue;
             }
 
@@ -1998,7 +1998,7 @@ void MainWindow::doActionSFGaussianFilter()
                 octree = pc->computeOctree(&pDlg);
 				if (!octree)
 				{
-					ccConsole::Error("Couldn't compute octree for cloud '%s'!",pc->getName());
+					ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
 					continue;
 				}
 			}
@@ -2019,12 +2019,12 @@ void MainWindow::doActionSFGaussianFilter()
             }
             else
             {
-                ccConsole::Error("Faild to comput entity [%s] octree! (not enough memory?)",pc->getName());
+                ccConsole::Error(QString("Failed to compute entity [%1] octree! (not enough memory?)").arg(pc->getName()));
             }
         }
         else
         {
-            ccConsole::Warning("Entity [%s] has no active scalar field!",pc->getName());
+            ccConsole::Warning(QString("Entity [%1] has no active scalar field!").arg(pc->getName()));
         }
     }
 
@@ -2094,7 +2094,7 @@ void MainWindow::doActionSFBilateralFilter()
                 pc->setCurrentInScalarField(sfIdx);
             else
             {
-                ccConsole::Error("Failed to create scalar field for cloud '%s' (not enough memory?)",pc->getName());
+                ccConsole::Error(QString("Failed to create scalar field for cloud '%1' (not enough memory?)").arg(pc->getName()));
                 continue;
             }
 
@@ -2105,7 +2105,7 @@ void MainWindow::doActionSFBilateralFilter()
                 octree = pc->computeOctree(&pDlg);
                 if (!octree)
                 {
-                    ccConsole::Error("Couldn't compute octree for cloud '%s'!",pc->getName());
+                    ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
                     continue;
                 }
             }
@@ -2128,7 +2128,7 @@ void MainWindow::doActionSFBilateralFilter()
         }
         else
         {
-            ccConsole::Warning("Entity [%s] has no active scalar field!",pc->getName());
+            ccConsole::Warning(QString("Entity [%1] has no active scalar field!").arg(pc->getName()));
         }
     }
 
@@ -2175,7 +2175,7 @@ void MainWindow::doMeshSFAction(ccGenericMesh::MESH_SCALAR_FIELD_PROCESS process
                 }
                 else
                 {
-                    ccConsole::Warning("Mesh [%s] vertices have no activated scalar field!",mesh->getName());
+                    ccConsole::Warning(QString("Mesh [%1] vertices have no activated scalar field!").arg(mesh->getName()));
                 }
             }
         }
@@ -2212,7 +2212,7 @@ void MainWindow::doActionSmoothMeshLaplacian()
 			}
 			else
 			{
-				ccConsole::Warning("Failed to apply Laplacian smoothing to mesh '%s'",mesh->getName());
+				ccConsole::Warning(QString("Failed to apply Laplacian smoothing to mesh '%1'").arg(mesh->getName()));
             }
         }
     }
@@ -2349,7 +2349,7 @@ void MainWindow::doActionFuse()
         }
 		else
 		{
-			ccConsole::Warning("Entity '%s' is neither a cloud nor a mesh, can't fuse it!",ent->getName());
+			ccConsole::Warning(QString("Entity '%1' is neither a cloud nor a mesh, can't fuse it!").arg(ent->getName()));
 		}
 
 		//security (we don't want to encounter it again)
@@ -2594,7 +2594,7 @@ void MainWindow::doActionRegister()
                 static_cast<ccGenericMesh*>(data)->refreshBB();
 
             data->prepareDisplayForRefresh_recursive();
-            data->setName(qPrintable(QString("%0.registered").arg(data->getName())));
+            data->setName(data->getName()+QString(".registered"));
             zoomOn(data);
         }
     }
@@ -2637,7 +2637,6 @@ void MainWindow::doAction4pcsRegister()
     ccGenericPointCloud *model, *data;
     CCLib::PointProjectionTools::Transformation transform;
     CCLib::ReferenceCloud *subModel, *subData;
-    char buffer[1024];
 
     if (m_selectedEntities.size() != 2)
     {
@@ -2689,10 +2688,9 @@ void MainWindow::doAction4pcsRegister()
             newDataCloud = static_cast<ccPointCloud*>(data)->clone();
         else
             newDataCloud = new ccPointCloud(data);
-        sprintf(buffer, "%s.registered", data->getName());
         if (data->getParent())
             data->getParent()->addChild(newDataCloud);
-        newDataCloud->setName(buffer);
+        newDataCloud->setName(data->getName()+QString(".registered"));
         newDataCloud->applyTransformation(transform);
         newDataCloud->getBoundingBox(min.u, max.u);
         newDataCloud->setDisplay(data->getDisplay());
@@ -2713,7 +2711,6 @@ void MainWindow::doAction4pcsRegister()
 //Aurelien BEY le 4/12/2008 : ajout de la fonction de sous échantillonage de nuages de points
 void MainWindow::doActionSubsample()
 {
-    char buffer[256];
     if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isA(CC_POINT_CLOUD)) //TODO
     {
         ccConsole::Error("Select 1 point cloud!");
@@ -2737,8 +2734,7 @@ void MainWindow::doActionSubsample()
     }
 
     ccPointCloud *newPointCloud = new ccPointCloud(sampledCloud,pointCloud);
-    sprintf(buffer, "%s.subsampled", pointCloud->getName());
-    newPointCloud->setName(buffer);
+    newPointCloud->setName(pointCloud->getName()+QString(".subsampled"));
     newPointCloud->setDisplay(pointCloud->getDisplay());
     newPointCloud->prepareDisplayForRefresh();
     if (pointCloud->getParent())
@@ -2848,7 +2844,7 @@ void MainWindow::doActionStatisticalTest()
                     theOctree = pc->computeOctree(&pDlg);
                     if (!theOctree)
                     {
-						ccConsole::Error("Couldn't compute octree for cloud '%s'!",pc->getName());
+						ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
                         break;
                     }
                 }
@@ -2929,7 +2925,7 @@ void MainWindow::doActionComputeStatParams()
                 unsigned numberOfClasses=0,finalNumberOfClasses=0;
                 double* npis = 0;
                 unsigned* histo = 0;
-                char buffer[256];
+				char buffer[256];
 
                 distrib->computeParameters(pc,!sf->isPositive());
                 if (distrib->isValid())
@@ -2970,7 +2966,7 @@ void MainWindow::doActionComputeStatParams()
                 }
                 else
 				{
-                    ccConsole::Warning("[Entity: %s]-[SF: %s] Couldn't compute distribution parameters!",pc->getName(),pc->getScalarFieldName(outSfIdx));
+                    ccConsole::Warning(QString("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName()).arg(pc->getScalarFieldName(outSfIdx)));
 				}
             }
         }
@@ -3011,7 +3007,7 @@ void MainWindow::doActionLabelConnectedComponents()
                     theOctree = cloud->computeOctree(&pDlg);
                     if (!theOctree)
                     {
-                        ccConsole::Error("Couldn't compute octree for cloud '%s'!",cloud->getName());
+                        ccConsole::Error(QString("Couldn't compute octree for cloud '%s'!").arg(cloud->getName()));
                         break;
                     }
                 }
@@ -3038,7 +3034,7 @@ void MainWindow::doActionLabelConnectedComponents()
                 }
                 else
                 {
-                    ccConsole::Warning("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from list %s...",cloud->getName());
+                    ccConsole::Warning(QString("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
                 }
 
                 //we delete the CCs label scalar field (we don't need it anymore)
@@ -3057,9 +3053,7 @@ void MainWindow::doActionLabelConnectedComponents()
                     //pc->setCurrentScalarField(pc->getCurrentDisplayedScalarFieldIndex());
 
                     //we create a new group to store all CCs
-                    char buffer[256];
-                    sprintf(buffer,"%s [CCs]",cloud->getName());
-                    ccHObject* ccGroup = new ccHObject(buffer);
+                    ccHObject* ccGroup = new ccHObject(cloud->getName()+QString(" [CCs]"));
 
                     int nCC = 0;
                     //for every CCs
@@ -3086,8 +3080,7 @@ void MainWindow::doActionLabelConnectedComponents()
 								}
 
 								newList->setVisible(true);
-								sprintf(buffer,"CC#%i",nCC);
-								newList->setName(buffer);
+								newList->setName(QString("CC#%1").arg(nCC));
 
 								//we add new CC to group
 								ccGroup->addChild(newList);
@@ -3111,7 +3104,7 @@ void MainWindow::doActionLabelConnectedComponents()
                         addToDB(ccGroup,true,0,true,false);
                     }
 
-                    ccConsole::Print("Cloud [%s]: %i component(s)",cloud->getName(),nCC);
+                    ccConsole::Print(QString("Cloud [%1]: %2 component(s)").arg(cloud->getName()).arg(nCC));
 
                     cloud->prepareDisplayForRefresh();
                     cloud->setEnabled(false);
@@ -3242,9 +3235,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
                 ccMesh* mesh = new ccMesh(dummyMesh, cloud);
                 if (mesh)
                 {
-                    char buffer[1024];
-                    sprintf(buffer,"%s.mesh",cloud->getName());
-                    mesh->setName(buffer);
+                    mesh->setName(cloud->getName()+QString(".mesh"));
                     mesh->setDisplay(cloud->getDisplay());
 					if (cloud->hasColors() && !cloud->hasNormals())
 						mesh->showNormals(false);
@@ -3330,7 +3321,7 @@ void MainWindow::doActionComputeQuadric3D()
                 const CCVector3* G = Yk.getGravityCenter();
                 if (!G)
                 {
-                    ccConsole::Warning("Failed to get gravity center of cloud '%s'!",cloud->getName());
+                    ccConsole::Warning(QString("Failed to get gravity center of cloud '%1'!").arg(cloud->getName()));
                     continue;
                 }
 
@@ -3385,7 +3376,7 @@ void MainWindow::doActionComputeQuadric3D()
 
 				quadMesh->computeNormals();
 				quadMesh->addChild(vertices);
-				quadMesh->setName(qPrintable(QString("Quadric(%1)").arg(cloud->getName())));
+				quadMesh->setName(QString("Quadric(%1)").arg(cloud->getName()));
                 addToDB(quadMesh, true, 0, false, false);
                 quadMesh->setDisplay(cloud->getDisplay());
                 quadMesh->prepareDisplayForRefresh();
@@ -3449,7 +3440,7 @@ void MainWindow::doActionComputeQuadric3D()
             }
             else
             {
-                ccConsole::Warning("Failed to compute quadric on cloud '%s'",cloud->getName());
+                ccConsole::Warning(QString("Failed to compute quadric on cloud '%1'").arg(cloud->getName()));
             }
         }
     }
@@ -3516,9 +3507,7 @@ void MainWindow::doActionComputeCPS()
         else
             newCloud = new ccPointCloud(&CPSet);
 
-        char buffer[1024];
-        sprintf(buffer,"[%s]->CPSet(%s)",srcCloud->getName(),compCloud->getName());
-        newCloud->setName(buffer);
+        newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName()).arg(compCloud->getName()));
         addToDB(newCloud, true, 0, false, false);
         newCloud->setDisplay(compCloud->getDisplay());
         newCloud->prepareDisplayForRefresh();
@@ -3589,7 +3578,7 @@ void MainWindow::doActionComputeNormals()
 			if (!cloud->getOctree())
 				if (!cloud->computeOctree(&pDlg))
 				{
-					ccConsole::Error("Could not compute octree for cloud '%s'",cloud->getName());
+					ccConsole::Error(QString("Could not compute octree for cloud '%1'").arg(cloud->getName()));
 					continue;
 				}
 
@@ -3599,7 +3588,7 @@ void MainWindow::doActionComputeNormals()
 			NormsIndexesTableType* normsIndexes = new NormsIndexesTableType;
 			if (!ccNormalVectors::ComputeCloudNormals(cloud, *normsIndexes, model, defaultRadius, preferedOrientation, (CCLib::GenericProgressCallback*)&pDlg, cloud->getOctree()))
 			{
-				ccConsole::Error("Failed to compute normals on cloud '%s'",cloud->getName());
+				ccConsole::Error(QString("Failed to compute normals on cloud '%1'").arg(cloud->getName()));
 				continue;
 			}
 			ccConsole::Print("[ComputeCloudNormals] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
@@ -3608,7 +3597,7 @@ void MainWindow::doActionComputeNormals()
 			{
                 if (!cloud->resizeTheNormsTable())
 				{
-					ccConsole::Error("Failed to instantiate normals array on cloud '%s'",cloud->getName());
+					ccConsole::Error(QString("Failed to instantiate normals array on cloud '%1'").arg(cloud->getName()));
 					continue;
 				}
 			}
@@ -3630,7 +3619,7 @@ void MainWindow::doActionComputeNormals()
 			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(m_selectedEntities[i]);
 			if (!mesh->computeNormals())
 			{
-				ccConsole::Error("Failed to compute normals on mesh '%s'",mesh->getName());
+				ccConsole::Error(QString("Failed to compute normals on mesh '%1'").arg(mesh->getName()));
 				continue;
 			}
 			mesh->showNormals(true);
@@ -3667,7 +3656,7 @@ void MainWindow::doActionResolveNormalsDirection()
         if (!cloud->getOctree())
             if (!cloud->computeOctree((CCLib::GenericProgressCallback*)&pDlg))
             {
-                ccConsole::Error("Could not compute octree for cloud '%s'",cloud->getName());
+                ccConsole::Error(QString("Could not compute octree for cloud '%1'").arg(cloud->getName()));
                 continue;
             }
 
@@ -4670,15 +4659,13 @@ void MainWindow::showSelectedEntitiesHistogram()
             {
                 ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
 
-                const char* cloudName = cloud->getName();
+                const QString& cloudName = cloud->getName();
                 hDlg->setWindowTitle(QString("Histogram[%0.%1]").arg(cloudName).arg(sf->getName()));
 
-                char buffer[256];
                 unsigned numberOfPoints = cloud->size();
-                sprintf(buffer,"[%s] (%i pts) - %s",cloudName,numberOfPoints,sf->getName());
 
-                ccHistogramWindow* win = hDlg->window();
-                win->setInfoStr(buffer);
+				ccHistogramWindow* win = hDlg->window();
+                win->setInfoStr(qPrintable(QString("[%1] (%2 pts) - %3").arg(cloudName).arg(numberOfPoints).arg(sf->getName())));
                 win->setValues(sf);
                 win->setNumberOfClasses(ccMin(int(sqrt(double(numberOfPoints))),128));
                 win->histoValuesShouldBeDestroyed(false);
@@ -4706,7 +4693,7 @@ void MainWindow::clone()
             }
             else
             {
-                ccConsole::Error("An error occured while cloning cloud %s",selectedEntities[i]->getName());
+                ccConsole::Error(QString("An error occured while cloning cloud %1").arg(selectedEntities[i]->getName()));
             }
         }
         else if (selectedEntities[i]->isKindOf(CC_PRIMITIVE))
@@ -4719,7 +4706,7 @@ void MainWindow::clone()
             }
             else
             {
-				ccConsole::Error("An error occured while cloning primitive %s",selectedEntities[i]->getName());
+				ccConsole::Error(QString("An error occured while cloning primitive %1").arg(selectedEntities[i]->getName()));
             }
         }
         else if (selectedEntities[i]->isKindOf(CC_MESH))
@@ -4732,7 +4719,7 @@ void MainWindow::clone()
             }
             else
             {
-				ccConsole::Error("An error occured while cloning mesh %s",selectedEntities[i]->getName());
+				ccConsole::Error(QString("An error occured while cloning mesh %1").arg(selectedEntities[i]->getName()));
             }
         }
     }
@@ -4891,14 +4878,14 @@ void MainWindow::doComputePlaneOrientation()
 
 			if (!pPlane)
 			{
-				ccConsole::Warning("\tWarning: failed to fit a plane on cloud '%s'",cloud->getName());
+				ccConsole::Warning(QString("\tWarning: failed to fit a plane on cloud '%1'").arg(cloud->getName()));
 			}
 			else
 			{
 				//as all information appears in Console...
 				forceConsoleDisplay();
 
-				ccConsole::Print("[Orientation] cloud '%s'",cloud->getName());
+				ccConsole::Print(QString("[Orientation] cloud '%1'").arg(cloud->getName()));
 				ccConsole::Print("\t- plane fitting RMS: %f",rms);
 
 				const ccGLMatrix& planteTrans = pPlane->getTransformation();
@@ -5162,7 +5149,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                     pc->setCurrentInScalarField(sfIdx);
                 else
                 {
-                    ccConsole::Error("Failed to create scalar field on cloud '%s' (not enough memory?)",pc->getName());
+                    ccConsole::Error(QString("Failed to create scalar field on cloud '%1' (not enough memory?)").arg(pc->getName()));
                     continue;
                 }
             }
@@ -5176,7 +5163,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                 octree = cloud->computeOctree(&pDlg);
 				if (!octree)
 				{
-					ccConsole::Error("Couldn't compute octree for cloud '%s'!",cloud->getName());
+					ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(cloud->getName()));
 					break;
 				}
 			}
@@ -5267,7 +5254,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
             }
             else
             {
-                ccConsole::Warning("Failed to apply processing to cloud '%s'",cloud->getName());
+                ccConsole::Warning(QString("Failed to apply processing to cloud '%1'").arg(cloud->getName()));
                 if (pc && sfIdx>=0)
                 {
                     pc->deleteScalarField(sfIdx);
@@ -5505,9 +5492,9 @@ void MainWindow::addToDB(ccHObject* obj,
 				mat.data()[14] = (float)Pshift[2];
 				mat.data()[0] = mat.data()[5] = mat.data()[10] = scale;
 				obj->applyGLTransformation_recursive(&mat);
-				ccConsole::Warning("Entity '%s' will be recentered: translation=(%.2f,%.2f,%.2f)",obj->getName(),Pshift[0],Pshift[1],Pshift[2]);
+				ccConsole::Warning(QString("Entity '%1' will be recentered: translation=(%2,%3,%4)").arg(obj->getName()).arg(Pshift[0],0,'f',2).arg(Pshift[1],0,'f',2).arg(Pshift[2],0,'f',2));
 				if (scale != 1.0)
-					ccConsole::Warning("Entity '%s' will be rescaled: scale=%f",obj->getName(),scale);
+					ccConsole::Warning(QString("Entity '%1' will be rescaled: scale=%2").arg(obj->getName().arg(scale)));
 
 				//update 'original shift' for clouds
 				if (obj->isKindOf(CC_POINT_CLOUD))
@@ -5881,7 +5868,7 @@ void MainWindow::saveFile()
 	{
 		ccConsole::Warning("Warning, the following selected entites won't be saved:");
 		for (unsigned i=0;i<other.getChildrenNumber();++i)
-			ccConsole::Warning("\t- %s",other.getChild(i)->getName());
+			ccConsole::Warning(QString("\t- %1s").arg(other.getChild(i)->getName()));
 	}
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
@@ -5909,7 +5896,7 @@ void MainWindow::saveFile()
 			if (!hasOther)
 				ccConsole::Warning("Warning, the following selected entites won't be saved:"); //display this warning only if not already done
 			for (unsigned i=0;i<otherSerializable.getChildrenNumber();++i)
-				ccConsole::Warning("\t- %s",otherSerializable.getChild(i)->getName());
+				ccConsole::Warning(QString("\t- %1").arg(otherSerializable.getChild(i)->getName()));
 		}
 
 		if (hasCloud || hasMesh)

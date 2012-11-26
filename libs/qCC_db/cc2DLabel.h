@@ -22,8 +22,10 @@ class cc2DLabel : public ccHObject
 public:
 
 	//! Default constructor
-	cc2DLabel(const char* name=0);
+	cc2DLabel(QString name = QString("label"));
 
+	//inherited from ccObject
+    virtual QString getName() const;
 	//inherited from ccHObject
     virtual CC_CLASS_ENUM getClassID() const {return CC_2D_LABEL;};
 	virtual bool isSerializable() const { return true; }

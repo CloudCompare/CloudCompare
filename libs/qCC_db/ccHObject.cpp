@@ -58,7 +58,7 @@
 #include <stdint.h>
 #include <assert.h>
 
-ccHObject::ccHObject(const char* name/*=0*/)
+ccHObject::ccHObject(QString name/*=QString()*/)
 	: ccObject(name)
 	, ccDrawableObject()
 	, m_parent(0)

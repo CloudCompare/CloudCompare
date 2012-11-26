@@ -55,13 +55,13 @@ public:
 		PointCoordinateType height,
 		PointCoordinateType radius2 = 0,
 		const ccGLMatrix* transMat = 0,
-		const char* name = "Dish",
+		QString name = QString("Dish"),
 		unsigned precision = 24);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
 	**/
-	ccDish(const char* name = "Dish");
+	ccDish(QString name = QString("Dish"));
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_DISH; }

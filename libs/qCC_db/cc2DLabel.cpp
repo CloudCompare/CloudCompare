@@ -32,8 +32,8 @@
 //System
 #include <assert.h>
 
-cc2DLabel::cc2DLabel(const char* name/*=0*/)
-	: ccHObject(name ? name : "label")
+cc2DLabel::cc2DLabel(QString name/*=QString()*/)
+	: ccHObject(name.isEmpty() ? "label" : name)
 	, m_showFullBody(true)
 	, m_dispIn3D(true)
 	, m_dispIn2D(true)
@@ -43,6 +43,33 @@ cc2DLabel::cc2DLabel(const char* name/*=0*/)
 
 	lockVisibility(false);
 	setEnabled(true);
+}
+
+QString cc2DLabel::getName() const
+{
+	QString processedName = m_name;
+
+	unsigned count = m_points.size();
+	if (count>0)
+	{
+		processedName.replace(QString("pt_0_idx"),QString::number(m_points[0].index));
+		if (count>1)
+		{
+			processedName.replace(QString("pt_1_idx"),QString::number(m_points[1].index));
+			if (m_points[0].cloud)
+				processedName.replace(QString("pt_0_cloud_id"),QString::number(m_points[0].cloud->getUniqueID()));
+			if (m_points[1].cloud)
+				processedName.replace(QString("pt_1_cloud_id"),QString::number(m_points[1].cloud->getUniqueID()));
+			if (count>2)
+			{
+				processedName.replace(QString("pt_2_idx"),QString::number(m_points[2].index));
+				if (m_points[2].cloud)
+					processedName.replace(QString("pt_2_cloud_id"),QString::number(m_points[2].cloud->getUniqueID()));
+			}
+		}
+	}
+
+	return processedName;
 }
 
 void cc2DLabel::setPosition(float x, float y)
@@ -79,19 +106,19 @@ bool cc2DLabel::addPoint(ccGenericPointCloud* cloud, unsigned pointIndex)
 	switch(m_points.size())
 	{
 	case 1:
-		setName(qPrintable(QString("Point #%1").arg(pointIndex)));
+		setName("Point #pt_0_idx");
 		break;
 	case 2:
 		if (m_points[0].cloud == cloud)
-			setName(qPrintable(QString("Vector #%1 - #%2").arg(m_points[0].index).arg(pointIndex)));
+			setName("Vector #pt_0_idx - #pt_0_idx");
 		else
-			setName(qPrintable(QString("Vector #%1(@%2) - #%3@(@%4)").arg(m_points[0].index).arg(m_points[0].cloud->getUniqueID()).arg(pointIndex).arg(cloud->getUniqueID())));
+			setName("Vector #pt_0_idx(@pt_0_cloud_id) - #pt_1_idx@(@pt_1_cloud_id)");
 		break;
 	case 3:
 		if (m_points[0].cloud == cloud && m_points[1].cloud == cloud)
-			setName(qPrintable(QString("Triplet #%1 - #%2 - #%3").arg(m_points[0].index).arg(m_points[1].index).arg(pointIndex)));
+			setName("Triplet #pt_0_idx - #pt_1_idx - #pt_2_idx");
 		else
-			setName(qPrintable(QString("Triplet #%1 - #%2(@%3) - #%4(@%5)").arg(m_points[0].index)/*.arg(m_points[0].cloud->getUniqueID())*/.arg(m_points[1].index).arg(m_points[1].cloud->getUniqueID()).arg(pointIndex).arg(cloud->getUniqueID())));
+			setName("Triplet #pt_0_idx(@pt_0_cloud_id) - #pt_1_idx(@pt_1_cloud_id) - #pt_2_idx(@pt_2_cloud_id)");
 		break;
 	}
 
@@ -444,7 +471,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				for (unsigned j=0; j<count; j++)
 				{
 					const CCVector3* P = m_points[j].cloud->getPoint(m_points[j].index);
-					QString title = (count == 1 ? QString(getName()) : QString("P#%0").arg(m_points[j].index));
+					QString title = (count == 1 ? getName() : QString("P#%0").arg(m_points[j].index));
 					context._win->display3DLabel( title, *P+CCVector3(context.pickedPointsTextShift), ccColor::magenta, font);
 				}
 				glPopAttrib();

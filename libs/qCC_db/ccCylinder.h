@@ -51,13 +51,13 @@ public:
 	ccCylinder(PointCoordinateType radius,
 				PointCoordinateType height,
 				const ccGLMatrix* transMat = 0,
-				const char* name = "Cylinder",
+				QString name = QString("Cylinder"),
 				unsigned precision = 24);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
 	**/
-	ccCylinder(const char* name = "Cylinder");
+	ccCylinder(QString name = QString("Cylinder"));
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_CYLINDER; }

@@ -307,7 +307,7 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 	if (shapes.size() != 0)
 	{
 		unsigned shiftCount=0;
-		ccHObject* group = new ccHObject(qPrintable(QString("Ransac Detected Shapes (%1)").arg(ent->getName())));
+		ccHObject* group = new ccHObject(QString("Ransac Detected Shapes (%1)").arg(ent->getName()));
 		for (i=0;i<shapes.size();++i)
 		{
 			PrimitiveShape* shape = shapes[i].first;

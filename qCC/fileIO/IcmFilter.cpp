@@ -136,7 +136,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
     FILE *fp;
     if ((fp = fopen(qPrintable(completeImageDescFilename), "rt"))==NULL)
     {
-		ccConsole::Error("[IcmFilter::loadCalibratedImages] Error opening file %s!",qPrintable(completeImageDescFilename));
+		ccConsole::Error(QString("[IcmFilter::loadCalibratedImages] Error opening file %1!").arg(completeImageDescFilename));
         return -1;
     }
 
@@ -161,7 +161,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			if (!CI->load(QString("%0/%1").arg(path).arg(imageFileName),errorStr))
 			{
 				delete CI;
-				ccConsole::Warning("[IcmFilter] Failed to load image %s (%s)! Process stopped ...",imageFileName,qPrintable(errorStr));
+				ccConsole::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped ...").arg(imageFileName).arg(errorStr));
 				fclose(fp);
 				return loadedImages;
 			}

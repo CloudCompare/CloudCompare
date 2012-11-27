@@ -208,7 +208,7 @@ void ccHistogramWindow::paintGL()
 	//top-left corner
 	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
 	glColor3f(1.0f,1.0f,1.0f);
-	renderText(c_outerMargin, c_outerMargin+c_strHeight-c_strDescent, qPrintable(strMetrics.elidedText(QString("%0 [%1 classes]").arg(infoStr).arg(numberOfClasses),Qt::ElideRight,xMinusButton-c_outerMargin)), m_renderingFont);
+	renderText(c_outerMargin, c_outerMargin+c_strHeight-c_strDescent, strMetrics.elidedText(QString("%0 [%1 classes]").arg(infoStr).arg(numberOfClasses),Qt::ElideRight,xMinusButton-c_outerMargin), m_renderingFont);
 
 	//custom labels
 	stringVector::const_iterator p;

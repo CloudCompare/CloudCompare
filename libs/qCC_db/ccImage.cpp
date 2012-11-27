@@ -54,7 +54,7 @@ ccImage::ccImage()
 }
 
 ccImage::ccImage(const QImage& image, const QString& name)
-	: ccHObject(qPrintable(name))
+	: ccHObject(name)
 	, m_width(image.width())
 	, m_height(image.height())
 	, m_texU(1.0f)
@@ -85,7 +85,7 @@ bool ccImage::load(const QString& filename, QString& error)
 
 	setImage(image);
 
-	setName(qPrintable(QFileInfo(filename).fileName()));
+	setName(QFileInfo(filename).fileName());
 	setEnabled(true);
 
 #ifdef INCLUDE_IMAGE_FILENAME

@@ -1316,7 +1316,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 				{
 					if (mesh->reservePerTriangleTexCoordIndexes() && mesh->reservePerTriangleMtlIndexes())
 					{
-						ccConsole::Print("[PLY][Texture] Successuflly loaded texture '%s' (%ix%i pixels)",qPrintable(textureFileName),texture.width(),texture.height());
+						ccConsole::Print(QString("[PLY][Texture] Successuflly loaded texture '%1' (%2x%3 pixels)").arg(textureFileName).arg(texture.width()).arg(texture.height()));
 						//materials
 						ccMaterialSet* materials = new ccMaterialSet("materials");
 						ccMaterial material(textureFileName);
@@ -1341,7 +1341,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 				}
 				else
 				{
-					ccConsole::Warning("[PLY][Texture] Failed to load texture '%s'",qPrintable(textureFilePath));
+					ccConsole::Warning(QString("[PLY][Texture] Failed to load texture '%1'").arg(textureFilePath));
 				}
 			}
 			else

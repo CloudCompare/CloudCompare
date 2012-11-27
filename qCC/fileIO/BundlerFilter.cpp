@@ -424,7 +424,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 			|| (!altKeypointsContainer->getChild(0)->isKindOf(CC_POINT_CLOUD) && !altKeypointsContainer->getChild(0)->isKindOf(CC_MESH)))
 		{
 			if (!altKeypointsContainer)
-				ccConsole::Error("[BundlerFilter::loadFile] Failed to load alternative keypoints file:\n'%s'",qPrintable(altKeypointsFilename));
+				ccConsole::Error(QString("[BundlerFilter::loadFile] Failed to load alternative keypoints file:\n'%1'").arg(altKeypointsFilename));
 			else
 				ccConsole::Error("[BundlerFilter::loadFile] Can't use this kind of entities as keypoints (need one and only one cloud or mesh)");
 
@@ -452,7 +452,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 		QFile imageListFile(imageListFilename);
 		if (!imageListFile.exists() || !imageListFile.open(QIODevice::ReadOnly))
 		{
-			ccConsole::Error("[BundlerFilter::loadFile] Failed to open image list file! (%s)",qPrintable(imageListFilename));
+			ccConsole::Error(QString("[BundlerFilter::loadFile] Failed to open image list file! (%1)").arg(imageListFilename));
 			if (!importKeypoints && keypointsCloud)
 				delete keypointsCloud;
 			if (!importKeypoints && altEntity)
@@ -475,7 +475,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 				imageFilenames << parts[0];
 			else
 			{
-				ccConsole::Error("[BundlerFilter::loadFile] Couldn't extract image name from line %i in file '%s'!",lineIndex,qPrintable(imageListFilename));
+				ccConsole::Error(QString("[BundlerFilter::loadFile] Couldn't extract image name from line %1 in file '%2'!").arg(lineIndex).arg(imageListFilename));
 				break;
 			}
 		}
@@ -484,9 +484,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 	if (imageFilenames.size() < (int)camCount) //not enough images!
 	{
 		if (imageFilenames.isEmpty())
-			ccConsole::Error("[BundlerFilter::loadFile] No filename could be extracted from file '%s'!",qPrintable(imageListFilename));
+			ccConsole::Error(QString("[BundlerFilter::loadFile] No filename could be extracted from file '%1'!").arg(imageListFilename));
 		else
-			ccConsole::Error("[BundlerFilter::loadFile] Only %i filenames (out of %i) could be extracted\nfrom file '%s'!",imageFilenames.size(),qPrintable(imageListFilename));
+			ccConsole::Error(QString("[BundlerFilter::loadFile] Only %1 filenames (out of %2) could be extracted\nfrom file '%3'!").arg(imageFilenames.size()).arg(camCount).arg(imageListFilename));
 		if (!importKeypoints && keypointsCloud)
 			delete keypointsCloud;
 		if (!importKeypoints && altEntity)
@@ -585,13 +585,13 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 		QString errorStr;
 		if (!image->load(imageDir.absoluteFilePath(imageFilenames[i]),errorStr))
 		{
-			ccConsole::Error("[BundlerFilter::loadFile] %s (image '%s')",qPrintable(errorStr),qPrintable(imageFilenames[i]));
+			ccConsole::Error(QString("[BundlerFilter::loadFile] %1 (image '%2')").arg(errorStr).arg(imageFilenames[i]));
 			delete image;
 			image=0;
 			break;
 		}
 
-		image->setName(qPrintable(imageFilenames[i]));
+		image->setName(imageFilenames[i]);
 
 		//associate image with calibration information
 		image->setFocal(cameras[i].f * scaleFactor);
@@ -662,7 +662,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 						info.w = orthoImage->getW();
 						info.h = orthoImage->getH();
 						orthoImage->data().save(imageDir.absoluteFilePath(info.name));
-						ccConsole::Print(qPrintable(QString("[BundlerFilter] Ortho-rectified version of image '%1' saved to '%2'").arg(imageFilenames[i]).arg(imageDir.absoluteFilePath(info.name))));
+						ccConsole::Print(QString("[BundlerFilter] Ortho-rectified version of image '%1' saved to '%2'").arg(imageFilenames[i]).arg(imageDir.absoluteFilePath(info.name)));
 
 #ifdef TEST_TEXTURED_BUNDLER_IMPORT
 
@@ -766,7 +766,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 						}
 
 						rectMesh->showMaterials(true);
-						rectMesh->setName(qPrintable(info.name));
+						rectMesh->setName(info.name);
 
 						//associate texture coordinates table
 						rectMesh->setTexCoordinatesTable(texCoords);
@@ -958,9 +958,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 						BinFilter bf;
 						QString outputFile = imageDir.absoluteFilePath("colored_dtm_vertices.bin");
 						if (bf.saveToFile(mntCloud,qPrintable(outputFile)) == CC_FERR_NO_ERROR)
-							ccConsole::Print(qPrintable(QString("[BundlerFilter] Color DTM vertices automatically saved to '%2'").arg(outputFile)));
+							ccConsole::Print(QString("[BundlerFilter] Color DTM vertices automatically saved to '%2'").arg(outputFile));
 						else
-							ccConsole::Warning(qPrintable(QString("[BundlerFilter] Failed to save DTM vertices to '%2'").arg(outputFile)));
+							ccConsole::Warning(QString("[BundlerFilter] Failed to save DTM vertices to '%2'").arg(outputFile));
 					}
 				}
 				else

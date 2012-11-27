@@ -355,7 +355,7 @@ void ccPointPropertiesDlg::close2DZone()
 	}
 	else
 	{
-		m_rect2DLabel->setName(qPrintable(title));
+		m_rect2DLabel->setName(title);
 		s_last2DLabelComment = title;
 	}
 

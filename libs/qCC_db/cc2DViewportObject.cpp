@@ -25,7 +25,7 @@
 //Local
 #include "cc2DViewportObject.h"
 
-cc2DViewportObject::cc2DViewportObject(const char* name/*=0*/)
+cc2DViewportObject::cc2DViewportObject(QString name/*=QString()*/)
 	: ccHObject(name)
 {
 }

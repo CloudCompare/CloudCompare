@@ -392,7 +392,7 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
             FILE* pFile = fopen(gridFileTXT,"wt");
             if (pFile)
             {
-				ccConsole::Print("\tOutput file: %s",qPrintable(outputFilePath+QString(gridFileTXT)));
+				ccConsole::Print(QString("\tOutput file: %1").arg(outputFilePath+QString(gridFileTXT)));
                 //ccConsole::Print("Ecriture dans fichier....");
                 for (unsigned j=0; j<grid_size_Y; ++j)
                 {
@@ -411,7 +411,7 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
             }
             else
             {
-                ccConsole::Warning("[ccHeightGridGeneration] Failed to write '%s' file!",qPrintable(outputFilePath+QString(gridFileTXT)));
+                ccConsole::Warning(QString("[ccHeightGridGeneration] Failed to write '%1' file!").arg(outputFilePath+QString(gridFileTXT)));
             }
         }
 
@@ -454,13 +454,13 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 
 				static QString outputFilenameTIF("height_grid_image.tif");
 				if (bitmap8.save(outputFilenameTIF))
-                    ccConsole::Print("\tOutput file: %s",qPrintable(outputFilePath+outputFilenameTIF));
+                    ccConsole::Print(QString("\tOutput file: ")+outputFilePath+outputFilenameTIF);
                 else
                 {
                     ccConsole::Error("Failed to save TIF file! (check that 'qtiff4.dll' is in the 'imageformats' directory alongside CC executable)");
                     static QString outputFilenamePNG("height_grid_image.png");
                     if (bitmap8.save(outputFilenamePNG))
-                        ccConsole::Print("\tOutput file: %s",qPrintable(outputFilePath+outputFilenamePNG));
+                        ccConsole::Print(QString("\tOutput file: ")+outputFilePath+outputFilenamePNG);
                     else
                         ccConsole::Error("Failed to save PNG file also! (hum, the problem must be a serious one ;)");
                 }

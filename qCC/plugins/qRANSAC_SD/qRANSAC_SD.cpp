@@ -406,7 +406,7 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 				float radius = sphere->Internal().Radius();
 				Vec3f C = sphere->Internal().Center();
 
-				pcShape->setName(qPrintable(QString("Sphere (r=%1)").arg(radius,0,'f')));
+				pcShape->setName(QString("Sphere (r=%1)").arg(radius,0,'f'));
 
 				//we build matrix from these vecctors
 				ccGLMatrix glMat;
@@ -432,7 +432,7 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 				float h = hMax-hMin;
 				G += N * (hMin+h*0.5);
 
-				pcShape->setName(qPrintable(QString("Cylinder (r=%1/h=%2)").arg(r,0,'f').arg(h,0,'f')));
+				pcShape->setName(QString("Cylinder (r=%1/h=%2)").arg(r,0,'f').arg(h,0,'f'));
 
 				//we look for real cylinder extents
 				/*std::pair<float,float> param;

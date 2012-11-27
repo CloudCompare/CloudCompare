@@ -107,7 +107,7 @@ QString ccCommandLineParser::Export2BIN(CloudDesc& cloudDesc, QString suffix)
 	if (cloudDesc.indexInFile>=0)
 		suffix.prepend(QString("%1_").arg(cloudDesc.indexInFile));
 	QString cloudName = QString("%1_%2").arg(!cloudDesc.pc->getName().isEmpty() ? cloudDesc.pc->getName() : info.baseName()).arg(suffix);
-	cloudDesc.pc->setName(qPrintable(cloudName));
+	cloudDesc.pc->setName(cloudName);
 
 	QString outputFilename = QString("%1/%2_%3_%4.bin").arg(info.path()).arg(info.baseName()).arg(suffix).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
 

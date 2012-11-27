@@ -318,7 +318,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	FILE* fp = fopen(qPrintable(filename),"wt");
 	if (!fp)
 	{
-		ccConsole::Error("Failed to open file '%s' for saving!",qPrintable(filename));
+		ccConsole::Error(QString("Failed to open file '%1' for saving!").arg(filename));
 		return;
 	}
 
@@ -342,7 +342,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 
 	fclose(fp);
 
-	ccConsole::Print("File '%s' successfully saved!",qPrintable(filename));
+	ccConsole::Print(QString("File '%1' successfully saved!").arg(filename));
 }
 
 void ccPointListPickingDlg::updateList()
@@ -372,7 +372,7 @@ void ccPointListPickingDlg::updateList()
 		//point index in list
 		tableWidget->setVerticalHeaderItem(i,new QTableWidgetItem(QString("%1").arg(i+startIndex)));
 		//update name as well
-		labels[i]->setName(qPrintable(QString("Point #%1").arg(i+startIndex)));
+		labels[i]->setName(QString("Point #%1").arg(i+startIndex));
 		//point absolute index (in cloud)
 		tableWidget->setItem(i,0,new QTableWidgetItem(QString("%1").arg(PP.index)));
 

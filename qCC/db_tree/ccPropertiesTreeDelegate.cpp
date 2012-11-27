@@ -1408,7 +1408,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	switch (item->data().toInt())
 	{
 	case OBJECT_NAME:
-		m_currentObject->setName(qPrintable(item->text()));
+		m_currentObject->setName(item->text());
 		emit ccObjectPropertiesChanged(m_currentObject);
 		break;
 	case OBJECT_VISIBILITY:

@@ -453,7 +453,7 @@ bool ccDBRoot::setData(const QModelIndex &index, const QVariant &value, int role
 			assert(item);
 			if (item)
 			{
-				item->setName(qPrintable(value.toString()));
+				item->setName(value.toString());
 
 				//particular case: labels name is their title!
 				if (item->isKindOf(CC_2D_LABEL))

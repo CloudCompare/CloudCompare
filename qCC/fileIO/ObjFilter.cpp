@@ -709,7 +709,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					//DGM: in case there's space characters in the filename, we must read it again from the original line buffer
 					//QString mtlFilename = tokens[1];
 					QString mtlFilename = QString(currentLine+7).trimmed();
-					ccConsole::Print("[ObjFilter::Load] Material file: %s",qPrintable(mtlFilename));
+					ccConsole::Print(QString("[ObjFilter::Load] Material file: ")+mtlFilename);
 					QString mtlPath = QFileInfo(filename).canonicalPath();
 					//we try to load it
 					if (!materials)
@@ -726,14 +726,14 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					}
 					else
 					{
-						ccConsole::Error("[ObjFilter::Load] Failed to load material file! (should be in '%s')",qPrintable(mtlPath+'/'+QString(mtlFilename)));
+						ccConsole::Error(QString("[ObjFilter::Load] Failed to load material file! (should be in '%1')").arg(mtlPath+'/'+QString(mtlFilename)));
 						materialsLoadFailed = true;
 					}
 
 					if (!errors.empty())
 					{
 						for (int i=0; i<errors.size(); ++i)
-							ccConsole::Warning("[ObjFilter::Load::MTL parser] %s",qPrintable(errors[i]));
+							ccConsole::Warning(QString("[ObjFilter::Load::MTL parser] ")+errors[i]);
 					}
 					if (materials->empty())
 					{
@@ -807,7 +807,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			assert(!tri);
 
 			tri = new ccMesh(vertices);
-			tri->setName(qPrintable(objectName));
+			tri->setName(objectName);
 
 			//we always reserve some triangles
 			maxFaces=128;

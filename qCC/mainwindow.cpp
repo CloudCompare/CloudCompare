@@ -259,7 +259,7 @@ void MainWindow::loadPlugins()
     foreach (QObject *plugin, QPluginLoader::staticInstances())
 		addPluginToPluginGroup(plugin);
 
-    ccConsole::Print("Application path: %s",qPrintable(QCoreApplication::applicationDirPath()));
+    ccConsole::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
     m_pluginsPath = QCoreApplication::applicationDirPath();
 
     // TODO DGM: I wanted to get automatically the debug versions of plugins, but QT throws an error
@@ -272,7 +272,7 @@ void MainWindow::loadPlugins()
     m_pluginsPath += QString("/plugins");
     //#endif
 
-    ccConsole::Print("Plugins lookup dir.: %s",qPrintable(m_pluginsPath));
+    ccConsole::Print(QString("Plugins lookup dir.: %1").arg(m_pluginsPath));
 
     QStringList filters;
 #if defined(Q_OS_WIN)
@@ -289,7 +289,7 @@ void MainWindow::loadPlugins()
         QObject *plugin = loader.instance();
         if (plugin)
         {
-            ccConsole::Print("Found new plugin! ('%s')",qPrintable(filename));
+            ccConsole::Print(QString("Found new plugin! ('%1')").arg(filename));
             if (addPluginToPluginGroup(plugin))
             {
                 m_pluginFileNames += filename;
@@ -301,7 +301,7 @@ void MainWindow::loadPlugins()
         }
         else
         {
-            ccConsole::Warning(qPrintable(QString("[%1] %2").arg(pluginsDir.absoluteFilePath(filename)).arg(loader.errorString())));
+            ccConsole::Warning(QString("[%1] %2").arg(pluginsDir.absoluteFilePath(filename)).arg(loader.errorString()));
         }
     }
 
@@ -438,7 +438,7 @@ void MainWindow::doPluginAction()
         else if (errorCode!=0)
         {
 			QString errMessage = ccStdPlugin->getErrorMessage(errorCode);
-			ccConsole::Error("%s",(errMessage.isEmpty() ? "Unknown error" : qPrintable(errMessage)));
+			ccConsole::Error(errMessage.isEmpty() ? QString("Unknown error") : errMessage);
         }
     }
     else if (type==CC_GL_FILTER_PLUGIN)
@@ -1499,11 +1499,11 @@ void MainWindow::doActionExportDepthBuffer()
         }
 
         CC_FILE_ERROR result = FileIOFilter::SaveToFile(toSave,
-                               qPrintable(fileNames.at(0)),
-                               fType);
+														qPrintable(fileNames.at(0)),
+														fType);
 
         if (result!=CC_FERR_NO_ERROR)
-            FileIOFilter::DisplayErrorMessage(result,"saving depth buffer",qPrintable(fileNames.at(0)));
+            FileIOFilter::DisplayErrorMessage(result,"saving depth buffer",fileNames.at(0));
 
         if (multEntities)
             delete toSave;
@@ -3179,7 +3179,7 @@ void MainWindow::doActionHeightGridGeneration()
             if (cloud->getParent())
                 cloud->getParent()->addChild(outputGrid);
 
-            outputGrid->setName(qPrintable(QString("%1.heightGrid(%2)").arg(cloud->getName()).arg(gridStep,0,'g',3)));
+            outputGrid->setName(QString("%1.heightGrid(%2)").arg(cloud->getName()).arg(gridStep,0,'g',3));
             ccGenericGLDisplay* win = cloud->getDisplay();
             outputGrid->setDisplay(win);
             //zoomOn(outputGrid);
@@ -4457,7 +4457,7 @@ void MainWindow::doActionSaveViewportAsCamera()
     if (!win)
         return;
  
-	cc2DViewportObject* viewportObject = new cc2DViewportObject(qPrintable(QString("Viewport #%1").arg(++s_viewportIndex)));
+	cc2DViewportObject* viewportObject = new cc2DViewportObject(QString("Viewport #%1").arg(++s_viewportIndex));
 	viewportObject->setParameters(win->getViewportParameters());
 
 	addToDB(viewportObject,true,0,false,false);
@@ -4792,7 +4792,7 @@ void MainWindow::doActionScalarFieldArithmetic()
 	{
 		if (sfIdx==sf1Idx || sfIdx==sf2Idx)
 		{
-			ccConsole::Error(qPrintable(QString("Resulting scalar field will have the same name\nas one of the operand (%1)! Rename it first...").arg(sfName)));
+			ccConsole::Error(QString("Resulting scalar field will have the same name\nas one of the operand (%1)! Rename it first...").arg(sfName));
 			return;
 		}
 		QMessageBox msgBox(QMessageBox::Warning, "Same scalar field name", "Resulting scalar field already exists! Overwrite it?", QMessageBox::Ok | QMessageBox::Cancel);
@@ -4903,7 +4903,7 @@ void MainWindow::doComputePlaneOrientation()
                 int iStrike = (int)strike;
                 int iDip = (int)dip;
 				QString strikeAndDipStr = QString("N%1°E - %2°SE").arg(iStrike,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
-				ccConsole::Print("\t- strike/dip: %s",qPrintable(strikeAndDipStr));
+				ccConsole::Print(QString("\t- strike/dip: %1").arg(strikeAndDipStr));
 
 				//hack: output the transformation matrix that would make this normal points towards +Z
 				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N,CCVector3(0,0,1.0f));
@@ -4917,7 +4917,7 @@ void MainWindow::doComputePlaneOrientation()
 				ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
 				ccConsole::Print("[Orientation] You can copy this matrix values (CTRL+C) and paste them in the 'Apply transformation tool' dialog");
 
-				pPlane->setName(qPrintable(QString("Strike plane ")+strikeAndDipStr));
+				pPlane->setName(QString("Strike plane ")+strikeAndDipStr);
 				pPlane->applyGLTransformation_recursive(); //not yet in DB
 				cloud->addChild(pPlane);
 				pPlane->setDisplay(cloud->getDisplay());
@@ -5117,7 +5117,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                         {
                             inputSFisPositive = pc->getCurrentDisplayedScalarField()->isPositive();
                             pc->setCurrentOutScalarField(outSfIdx);
-                            sfName = qPrintable(QString("%1(%2)").arg(CC_GRADIENT_NORMS_FIELD_NAME).arg(pc->getScalarFieldName(outSfIdx)));
+                            sfName = QString("%1(%2)").arg(CC_GRADIENT_NORMS_FIELD_NAME).arg(pc->getScalarFieldName(outSfIdx));
                         }
 
                     }
@@ -5930,7 +5930,7 @@ void MainWindow::saveFile()
 	}
 
 	if (result!=CC_FERR_NO_ERROR)
-		FileIOFilter::DisplayErrorMessage(result,"saving",qPrintable(selectedFilename));
+		FileIOFilter::DisplayErrorMessage(result,"saving",selectedFilename);
 
     //we update current file path
     currentPath = QFileInfo(selectedFilename).absolutePath();

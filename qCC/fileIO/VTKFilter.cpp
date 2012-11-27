@@ -223,7 +223,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	//comment
 	nextline = inFile.readLine();
-	ccConsole::Print("[VTK] %s",qPrintable(nextline));
+	ccConsole::Print(QString("[VTK] ")+nextline);
 
 	ccMesh* mesh=0;
 	ccPointCloud* vertices=0;
@@ -252,7 +252,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 		}
 		else
 		{
-			ccConsole::Error("VTK entity '%s' is not supported!",qPrintable(dataType));
+			ccConsole::Error(QString("VTK entity '%1' is not supported!").arg(dataType));
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
 	}
@@ -290,7 +290,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 			//}
 			//else if (dataFormat != "FLOAT")
 			//{
-			//	ccConsole::Error("Non floating point data (%s) is not supported!",qPrintable(dataFormat));
+			//	ccConsole::Error(QString("Non floating point data (%1) is not supported!").arg(dataFormat));
 			//	error=CC_FERR_WRONG_FILE_TYPE;
 			//	break;
 			//}
@@ -562,7 +562,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 				}
 				parts = nextline.split(" ",QString::SkipEmptyParts);
 				if (parts.size()>1 && parts[1].toUpper() != "DEFAULT")
-					ccConsole::Warning("[VTK] Lookup table other than default (%s) not supported!",qPrintable(parts[1]));
+					ccConsole::Warning(QString("[VTK] Lookup table other than default (%1) not supported!").arg(parts[1]));
 
 				int newSFIndex = vertices->addScalarField(qPrintable(sfName),false);
 				CCLib::ScalarField* sf = vertices->getScalarField(newSFIndex);

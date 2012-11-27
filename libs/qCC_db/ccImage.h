@@ -79,10 +79,10 @@ public:
 
 #ifdef INCLUDE_IMAGE_FILENAME
 	//! Returns complete filename
-	const char* getCompleteFileName() const {return qPrintable(m_completeFileName);}
+	QString getCompleteFileName() const {return m_completeFileName;}
 
 	//! Sets complete filename
-	void setCompleteFileName(const char* name) {m_completeFileName = QString(name);}
+	void setCompleteFileName(const QString& name) {m_completeFileName = name;}
 #endif
 
 	//! Returns coresponding QImage

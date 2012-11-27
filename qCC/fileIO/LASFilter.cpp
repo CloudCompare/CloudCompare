@@ -318,7 +318,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 
 			fileChunkPos = pointsRead;
 			fileChunkSize = ccMin(nbOfPoints-pointsRead,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
-			loadedCloud = new ccPointCloud(qPrintable(QString("unnamed - Cloud #%1").arg(k++)));
+			loadedCloud = new ccPointCloud(QString("unnamed - Cloud #%1").arg(k++));
 			if (!loadedCloud->reserveThePointsTable(fileChunkSize))
 			{
 				delete loadedCloud;

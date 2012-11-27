@@ -20,7 +20,7 @@ class cc2DViewportObject : public ccHObject
 public:
 
 	//! Default constructor
-	cc2DViewportObject(const char* name=0);
+	cc2DViewportObject(QString name=QString());
 
 	//inherited from ccHObject
     virtual CC_CLASS_ENUM getClassID() const {return CC_2D_VIEWPORT_OBJECT;};

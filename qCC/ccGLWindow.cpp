@@ -108,7 +108,7 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
 
 	//GL window own DB
-	m_winDBRoot = new ccHObject(qPrintable(QString("DB.3DView_%1").arg(m_uniqueID)));
+	m_winDBRoot = new ccHObject(QString("DB.3DView_%1").arg(m_uniqueID));
 
 	//default font point size
 	setFontPointSize(10);
@@ -676,15 +676,15 @@ void ccGLWindow::dragEnterEvent(QDragEnterEvent *event)
 	for (unsigned i=0;i<mimeData->formats().size();++i)
 	{
 	QString format = mimeData->formats().at(i);
-	ccConsole::Print("Drop format: %s",qPrintable(format));
+	ccConsole::Print(QString("Drop format: %1").arg(format));
 	if (mimeData->hasFormat("FileNameW"))
 	{
 	QByteArray byteData = mimeData->data(format);
-	ccConsole::Print("\tdata: %s",qPrintable(QString::fromUtf16((ushort*)byteData.data(), byteData.size() / 2)));
+	ccConsole::Print(QString("\tdata: %1").arg(QString::fromUtf16((ushort*)byteData.data(), byteData.size() / 2)));
 	}
 	else
 	{
-	ccConsole::Print("\tdata: %s",qPrintable(QString(mimeData->data(format))));
+	ccConsole::Print(QString("\tdata: %1").arg(QString(mimeData->data(format))));
 	}
 	}
 	//*/
@@ -712,7 +712,7 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 #endif
 			//fileNames[i] = QUrl(fileNames[i].trimmed()).toLocalFile(); //toLocalFile removes the end of filenames sometimes!
 #ifdef _DEBUG
-			ccConsole::Print("File dropped: %s",qPrintable(fileNames[i]));
+			ccConsole::Print(QString("File dropped: %1").arg(fileNames[i]));
 #endif
 		}
 
@@ -737,7 +737,7 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 	event->acceptProposedAction();
 	}
 
-	ccConsole::Print("Drop file(s): %s",qPrintable(filename));
+	ccConsole::Print(QString("Drop file(s): %1").arg(filename));
 	//*/
 
 	event->ignore();
@@ -2511,7 +2511,7 @@ bool ccGLWindow::initGLFilter(int w, int h)
 	m_activeGLFilter=0;
 
 	QString shadersPath = QApplication::applicationDirPath() + QString("/shaders");
-	//ccConsole::Print("Shaders path: %s",qPrintable(shadersPath));
+	//ccConsole::Print(QString("Shaders path: %1").arg(shadersPath));
 
 	if (!_filter->init(w,h,qPrintable(shadersPath)))
 	{

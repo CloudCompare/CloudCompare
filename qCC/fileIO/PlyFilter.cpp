@@ -1326,6 +1326,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 						materials->push_back(material);
 						mesh->setMaterialSet(materials);
 						mesh->setTexCoordinatesTable(texCoords);
+						mesh->addChild(texCoords);
 						for (unsigned i=0;i<mesh->size();++i)
 						{
 							mesh->addTriangleMtlIndex(0);

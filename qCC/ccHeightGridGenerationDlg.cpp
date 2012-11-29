@@ -38,6 +38,7 @@ ccHeightGridGenerationDlg::ccHeightGridGenerationDlg(QWidget* parent/*=0*/)
 
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
     connect(fillEmptyCells, SIGNAL(currentIndexChanged(int)), this, SLOT(projectionChanged(int)));
+    connect(generateCloudCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
     connect(generateImageCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
     connect(generateASCIICheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
 
@@ -74,12 +75,12 @@ unsigned char ccHeightGridGenerationDlg::getProjectionDimension() const
 
 void ccHeightGridGenerationDlg::projectionChanged(int)
 {
-    emptyValueDoubleSpinBox->setEnabled(getFillEmptyCellsStrategy() == ccHeightGridGeneration::CUSTOM_HEIGHT);
+    emptyValueDoubleSpinBox->setEnabled(getFillEmptyCellsStrategy() == ccHeightGridGeneration::FILL_CUSTOM_HEIGHT);
 }
 
 void ccHeightGridGenerationDlg::toggleFillEmptyCells(bool)
 {
-    emptyCellsFrame->setEnabled(generateCloudCheckBox->isChecked() || generateASCIICheckBox->isChecked());
+    emptyCellsFrame->setEnabled(generateCloudCheckBox->isChecked() || generateImageCheckBox->isChecked());
 }
 
 double ccHeightGridGenerationDlg::getCustomHeightForEmptyCells() const
@@ -92,13 +93,13 @@ ccHeightGridGeneration::ProjectionType ccHeightGridGenerationDlg::getTypeOfProje
     switch (typeOfProjection->currentIndex())
     {
         case 0:
-            return ccHeightGridGeneration::MINIMUM_HEIGHT;
+            return ccHeightGridGeneration::PROJ_MINIMUM_HEIGHT;
         case 1:
-            return ccHeightGridGeneration::AVERAGE_HEIGHT;
+            return ccHeightGridGeneration::PROJ_AVERAGE_HEIGHT;
         case 2:
-            return ccHeightGridGeneration::MAXIMUM_HEIGHT;
-        case 3:
-            //CUSTOM_HEIGHT: this is not a valid projection:
+            return ccHeightGridGeneration::PROJ_MAXIMUM_HEIGHT;
+        default:
+            //shouldn't be possible for this option!
             assert(false);
     }
 
@@ -113,34 +114,39 @@ ccHeightGridGeneration::ProjectionType ccHeightGridGenerationDlg::getTypeOfSFInt
     switch (scalarFieldProjection->currentIndex())
     {
         case 0:
-            return ccHeightGridGeneration::MINIMUM_HEIGHT;
+            return ccHeightGridGeneration::PROJ_MINIMUM_HEIGHT;
         case 1:
-            return ccHeightGridGeneration::AVERAGE_HEIGHT;
+            return ccHeightGridGeneration::PROJ_AVERAGE_HEIGHT;
         case 2:
-            return ccHeightGridGeneration::MAXIMUM_HEIGHT;
-        case 3:
-            //CUSTOM_HEIGHT: this is not a valid projection:
+            return ccHeightGridGeneration::PROJ_MAXIMUM_HEIGHT;
+        default:
+            //shouldn't be possible for this option!
             assert(false);
     }
 
     return ccHeightGridGeneration::INVALID_PROJECTION_TYPE;
 }
 
-ccHeightGridGeneration::ProjectionType ccHeightGridGenerationDlg::getFillEmptyCellsStrategy() const
+ccHeightGridGeneration::EmptyCellFillOption ccHeightGridGenerationDlg::getFillEmptyCellsStrategy() const
 {
     switch (fillEmptyCells->currentIndex())
     {
         case 0:
-            return ccHeightGridGeneration::MINIMUM_HEIGHT;
+            return ccHeightGridGeneration::LEAVE_EMPTY;
         case 1:
-            return ccHeightGridGeneration::AVERAGE_HEIGHT;
+            return ccHeightGridGeneration::FILL_MINIMUM_HEIGHT;
         case 2:
-            return ccHeightGridGeneration::MAXIMUM_HEIGHT;
+            return ccHeightGridGeneration::FILL_AVERAGE_HEIGHT;
         case 3:
-            return ccHeightGridGeneration::CUSTOM_HEIGHT;
+            return ccHeightGridGeneration::FILL_MAXIMUM_HEIGHT;
+        case 4:
+            return ccHeightGridGeneration::FILL_CUSTOM_HEIGHT;
+        default:
+            //shouldn't be possible for this option!
+            assert(false);
     }
 
-    return ccHeightGridGeneration::INVALID_PROJECTION_TYPE;
+    return ccHeightGridGeneration::LEAVE_EMPTY;
 }
 
 void ccHeightGridGenerationDlg::loadSettings()
@@ -170,7 +176,7 @@ void ccHeightGridGenerationDlg::loadSettings()
 	interpolateSFCheckBox->setChecked(sfProj);
 	scalarFieldProjection->setCurrentIndex(sfProjStrategy);
 
-    toggleFillEmptyCells(genImage || genASCII);
+    toggleFillEmptyCells(false);
 }
 
 void ccHeightGridGenerationDlg::saveSettings()

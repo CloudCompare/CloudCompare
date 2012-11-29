@@ -36,11 +36,18 @@ class ccHeightGridGeneration
 public:
 
     //! Types of projection
-    enum ProjectionType {   MAXIMUM_HEIGHT  = 0,
-                            AVERAGE_HEIGHT  = 1,
-                            MINIMUM_HEIGHT  = 2,
-                            CUSTOM_HEIGHT   = 3,
-                            INVALID_PROJECTION_TYPE = 255,
+    enum ProjectionType {   PROJ_MINIMUM_HEIGHT			= 0,
+							PROJ_MAXIMUM_HEIGHT			= 1,
+							PROJ_AVERAGE_HEIGHT			= 2,
+                            INVALID_PROJECTION_TYPE		= 255,
+    };
+
+    //! Option for handling empty cells
+    enum EmptyCellFillOption {	LEAVE_EMPTY				= 0,
+								FILL_MINIMUM_HEIGHT		= 1,
+								FILL_MAXIMUM_HEIGHT		= 2,
+								FILL_CUSTOM_HEIGHT		= 3,
+								FILL_AVERAGE_HEIGHT		= 4,
     };
 
 	//! Default constructor
@@ -51,7 +58,7 @@ public:
                         float grid_step,
 						unsigned char proj_dimension,
                         ProjectionType type_of_projection,
-                        ProjectionType fillEmptyCells,
+                        EmptyCellFillOption fillEmptyCells = LEAVE_EMPTY,
 						ProjectionType sfInterpolation = INVALID_PROJECTION_TYPE,
                         double customEmptyCellsHeight = -1.0,
                         bool generateImage = true,

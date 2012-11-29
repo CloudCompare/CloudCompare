@@ -63,7 +63,7 @@ class ccHeightGridGenerationDlg : public QDialog, public Ui::HeightGridGeneratio
         ccHeightGridGeneration::ProjectionType getTypeOfSFInterpolation() const;
 
         //! Returns strategy for empty cell filling
-        ccHeightGridGeneration::ProjectionType getFillEmptyCellsStrategy() const;
+        ccHeightGridGeneration::EmptyCellFillOption getFillEmptyCellsStrategy() const;
 
         //! Returns user defined height for empty cells
         double getCustomHeightForEmptyCells() const;

@@ -64,8 +64,8 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
                                      float grid_step,
 									 unsigned char proj_dimension,
                                      ProjectionType projectionType,
-                                     ProjectionType fillEmptyCells,
-									 ProjectionType sfInterpolation/*= INVALID_PROJECTION_TYPE*/,
+                                     EmptyCellFillOption fillEmptyCells/*=LEAVE_EMPTY*/,
+									 ProjectionType sfInterpolation/*=INVALID_PROJECTION_TYPE*/,
                                      double customEmptyCellsHeight/*=-1.0*/,
                                      bool generateImage /*= true*/,
                                      bool generateASCII /*= false*/,
@@ -191,19 +191,19 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 		{
 			switch (projectionType)
 			{
-			case MAXIMUM_HEIGHT:
+			case PROJ_MINIMUM_HEIGHT:
+				// Set the minimum height
+				if (thePoint->u[Z] < aCell->height)
+					aCell->height = thePoint->u[Z];
+				break;
+			case PROJ_MAXIMUM_HEIGHT:
 				// Set the maximum height
 				if (thePoint->u[Z] > aCell->height)
 					aCell->height = thePoint->u[Z];
 				break;
-			case AVERAGE_HEIGHT:
+			case PROJ_AVERAGE_HEIGHT:
 				// Sum the points heights
 				aCell->height += thePoint->u[Z];
-				break;
-			case MINIMUM_HEIGHT:
-				// Set the minimum height
-				if (thePoint->u[Z] < aCell->height)
-					aCell->height = thePoint->u[Z];
 				break;
 			default:
 				assert(false);
@@ -238,17 +238,17 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 						{
 							switch (sfInterpolation)
 							{
-							case MAXIMUM_HEIGHT:
+							case PROJ_MINIMUM_HEIGHT:
+								// keep the minimum value
+								gridScalarFields[k][pos] = std::min<double>(formerValue,sfValue);
+								break;
+							case PROJ_MAXIMUM_HEIGHT:
 								// keep the maximum value
 								gridScalarFields[k][pos] = std::max<double>(formerValue,sfValue);
 								break;
-							case AVERAGE_HEIGHT:
+							case PROJ_AVERAGE_HEIGHT:
 								//we sum all values (we will divide them later)
 								gridScalarFields[k][pos] += sfValue;
-								break;
-							case MINIMUM_HEIGHT:
-								// keep the minimum value
-								gridScalarFields[k][pos] = std::min<double>(formerValue,sfValue);
 								break;
 							default:
 								break;
@@ -273,7 +273,7 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 
 	//update grids for 'average' cases
 	{
-		if (sfInterpolation == AVERAGE_HEIGHT)
+		if (sfInterpolation == PROJ_AVERAGE_HEIGHT)
 		{
 			for (unsigned k=0;k<gridScalarFields.size(); ++k)
 			{
@@ -299,13 +299,14 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 			}
 		}
 
-		if (projectionType == AVERAGE_HEIGHT)
+		//we need to finish the average height computation
+		if (projectionType == PROJ_AVERAGE_HEIGHT)
 		{
 			for (unsigned j=0;j<grid_size_Y;++j)
 			{
 				hgCell* cell = grid[j];
 				for (unsigned i=0;i<grid_size_X;++i,++cell)
-					if (cell->nbPoints)
+					if (cell->nbPoints>1)
 						cell->height /= (double)cell->nbPoints;
 			}
 		}
@@ -319,9 +320,10 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
     {
         for (unsigned j=0; j<grid_size_X; ++j)
         {
-            if (grid[i][j].nbPoints != 0)
+            if (grid[i][j].nbPoints) //non empty cell
             {
-                double h = grid[i][j].height;
+                double h = (double)grid[i][j].height;
+
                 if (nonEmptyCells++)
                 {
                     if (h < minHeight)
@@ -338,251 +340,318 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
         }
     }
 
-    if (nonEmptyCells>0)
-    {
-        meanHeight /= (double)nonEmptyCells;
-        ccConsole::Print("\tAverage height = %f", meanHeight);
-        ccConsole::Print("\tMinimal height = %f", minHeight);
-        ccConsole::Print("\tMaximal height = %f", maxHeight);
-    }
-    else
+    if (!nonEmptyCells)
     {
         ccConsole::Warning("[ccHeightGridGeneration] grid is empty!");
     }
-
-    if (nonEmptyCells && (generateASCII || generateImage || cloudGrid))
+	else
     {
-        //=========================================================================================================
-        ccConsole::Print("[ccHeightGridGeneration] 4 - Fill the empty cells (containing no projected point) with a special value...");
-        double empty_cell_value = -1.0;
-        switch (fillEmptyCells)
-        {
-        case MAXIMUM_HEIGHT:
-            empty_cell_value = maxHeight;
-            ccConsole::Print("empty_cell_value = %f",maxHeight);
-            break;
-        case AVERAGE_HEIGHT:
-            empty_cell_value = meanHeight;
-            ccConsole::Print("empty_cell_value = %f",meanHeight);
-            break;
-        case MINIMUM_HEIGHT:
-            empty_cell_value = minHeight;
-            ccConsole::Print("empty_cell_value = %f",minHeight);
-            break;
-        case CUSTOM_HEIGHT:
-            empty_cell_value = customEmptyCellsHeight;
-            break;
-        default:
-            assert(false);
-        }
+        ccConsole::Print("\tMinimal height = %f", minHeight);
+        meanHeight /= (double)nonEmptyCells;
+        ccConsole::Print("\tAverage height = %f", meanHeight);
+        ccConsole::Print("\tMaximal height = %f", maxHeight);
 
-        /*for (i=0; i<grid_size_Y; ++i)
-            for (j=0; j<grid_size_X; ++j)
-                if (grid[i][j].nbPoints == 0)
-                    grid[i][j].height = empty_cell_value;
-        //*/
+		if (generateASCII || generateImage || cloudGrid)
+		{
+			//=========================================================================================================
+			if (fillEmptyCells == FILL_AVERAGE_HEIGHT)
+			{
+				//we set the custom height as the average one (so we will be able to ignore this strategy aftewards!)
+				fillEmptyCells = FILL_CUSTOM_HEIGHT;
+				customEmptyCellsHeight = meanHeight;
+			}
+			
+			double empty_cell_height = 0.0;
+			switch (fillEmptyCells)
+			{
+			case LEAVE_EMPTY:
+				//nothing to do
+				break;
+			case FILL_MINIMUM_HEIGHT:
+				empty_cell_height = minHeight;
+				break;
+			case FILL_MAXIMUM_HEIGHT:
+				empty_cell_height = maxHeight;
+				break;
+			case FILL_CUSTOM_HEIGHT:
+				//update min and max height by the way!
+				if (customEmptyCellsHeight <= minHeight)
+					minHeight = customEmptyCellsHeight;
+				else if (customEmptyCellsHeight >= maxHeight)
+					maxHeight = customEmptyCellsHeight;
+				empty_cell_height = customEmptyCellsHeight;
+				break;
+			case FILL_AVERAGE_HEIGHT:
+			default:
+				assert(false);
+			}
+			
+			if (fillEmptyCells != LEAVE_EMPTY)
+			{
+				ccConsole::Print("[ccHeightGridGeneration] Empty cells (containing no projected point) will be filled with the followin value:");
+				ccConsole::Print("\tempty_cell_value = %f",minHeight);
+			}
 
-        //=========================================================================================================
-		QString outputFilePath = QDir::currentPath()+QString("/");
-        if (generateASCII)
-        {
-            ccConsole::Print("[ccHeightGridGeneration] 5 - Generation of the text file containing the regular height grid...");
+			QString outputFilePath = QDir::currentPath()+QString("/");
 
-			const char gridFileTXT[] = "height_grid_text_file.txt";
-            FILE* pFile = fopen(gridFileTXT,"wt");
-            if (pFile)
-            {
-				ccConsole::Print(QString("\tOutput file: %1").arg(outputFilePath+QString(gridFileTXT)));
-                //ccConsole::Print("Ecriture dans fichier....");
-                for (unsigned j=0; j<grid_size_Y; ++j)
-                {
-                    if (progressCb)
-                        progressCb->update(30.0 + 60.0*((float)j/(float)grid_size_Y));
+			//=========================================================================================================
+			if (generateASCII)
+			{
+				ccConsole::Print("[ccHeightGridGeneration] Saving the height grid as a text file...");
 
-                    const hgCell* aCell = grid[j];
-                    for (unsigned i=0; i<grid_size_X; ++i)
-                    {
-                        fprintf(pFile,"%8.2f ",(aCell->nbPoints>0 ? aCell->height : empty_cell_value));
-                        ++aCell;
-                    }
-                    fprintf(pFile,"\n");
-                }
-                fclose (pFile);
-            }
-            else
-            {
-                ccConsole::Warning(QString("[ccHeightGridGeneration] Failed to write '%1' file!").arg(outputFilePath+QString(gridFileTXT)));
-            }
-        }
+				const char gridFilenameTXT[] = "height_grid_text_file.txt";
+				FILE* pFile = fopen(gridFilenameTXT,"wt");
+				if (pFile)
+				{
+					ccConsole::Print(QString("\tOutput file: %1").arg(outputFilePath+QString(gridFilenameTXT)));
 
-        //=========================================================================================================
-        if (generateImage)
-        {
-            ccConsole::Print("[ccHeightGridGeneration] 6 - Generation of the image file corresponding to the height grid...");
-			QImage bitmap8(grid_size_X,grid_size_Y,QImage::Format_Indexed8);
+					for (unsigned j=0; j<grid_size_Y; ++j)
+					{
+						if (progressCb)
+							progressCb->update(30.0 + 50.0*((float)j/(float)grid_size_Y));
 
-            if (!bitmap8.isNull())
-            {
-                double range = maxHeight - minHeight;
+						const hgCell* aCell = grid[j];
+						for (unsigned i=0; i<grid_size_X; ++i,++aCell)
+							fprintf(pFile,"%.8f ", aCell->nbPoints ? aCell->height : empty_cell_height);
 
-                // Build a custom palette (greyscale + transparent color)
-				QVector<QRgb> palette(256);
-                for (unsigned i = 1; i < 255; i++)
-					palette[i] = qRgba(i,i,i,255);
-                palette[255] = qRgba(255,0,255,0); //transparent color for empty cells
-				bitmap8.setColorTable(palette);
-				bitmap8.fill(255);
+						fprintf(pFile,"\n");
+					}
 
-				// Filling the image with the height grid:
-                for (unsigned j=0; j<grid_size_Y; ++j)
-                {
-                    const hgCell* aCell = grid[j];
-                    for (unsigned i=0; i<grid_size_X; ++i)
-                    {
-                        if (aCell->nbPoints)
-                        {
-                            double relative_height = (double)aCell->height - minHeight;
-                            unsigned char val = (unsigned char)floor((relative_height/range)*254.99); //warning: 255 = transparent color
-                            bitmap8.setPixel(i,grid_size_Y-1-j,val);
-                        }
-                        ++aCell;
-                    }
+					fclose (pFile);
+				}
+				else
+				{
+					ccConsole::Warning(QString("[ccHeightGridGeneration] Failed to write '%1' file!").arg(outputFilePath+QString(gridFilenameTXT)));
+				}
+			}
 
-                    if (progressCb)
-                        progressCb->update(90.0 + 10.0*((float)j/(float)grid_size_Y));
-                }
+			//=========================================================================================================
+			if (generateImage)
+			{
+				ccConsole::Print("[ccHeightGridGeneration] Saving the height grid as an image...");
 
-				static QString outputFilenameTIF("height_grid_image.tif");
-				if (bitmap8.save(outputFilenameTIF))
-                    ccConsole::Print(QString("\tOutput file: ")+outputFilePath+outputFilenameTIF);
-                else
-                {
-                    ccConsole::Error("Failed to save TIF file! (check that 'qtiff4.dll' is in the 'imageformats' directory alongside CC executable)");
-                    static QString outputFilenamePNG("height_grid_image.png");
-                    if (bitmap8.save(outputFilenamePNG))
-                        ccConsole::Print(QString("\tOutput file: ")+outputFilePath+outputFilenamePNG);
-                    else
-                        ccConsole::Error("Failed to save PNG file also! (hum, the problem must be a serious one ;)");
-                }
-            }
-            else
-            {
-                ccConsole::Warning("[ccHeightGridGeneration] Failed to save output image!");
-            }
-        }
+				QImage bitmap8(grid_size_X,grid_size_Y,QImage::Format_Indexed8);
+				if (!bitmap8.isNull())
+				{
+					// Build a custom palette (greyscale)
+					QVector<QRgb> palette(256);
+					for (unsigned i = 0; i < 256; i++)
+						palette[i] = qRgba(i,i,i,255);
+					double maxColorComp = 255.99; //.99 --> to avoid round-off issues later!
 
-        //=========================================================================================================
-        if (cloudGrid)
-        {
-            ccConsole::Print("[ccHeightGridGeneration] 7 - Generation of the output height grid as a cloud...");
+					if (fillEmptyCells == LEAVE_EMPTY)
+					{
+						palette[255] = qRgba(255,0,255,0); //magenta/transparent color for empty cells (in place of pure white)
+						maxColorComp = 254.99;
+					}
 
-            int sfIdx = -1;
-            CCLib::ScalarField* sf = 0;
+					bitmap8.setColorTable(palette);
+					//bitmap8.fill(255);
+
+					unsigned empty_cell_color_index = 0;
+					switch (fillEmptyCells)
+					{
+					case LEAVE_EMPTY:
+						empty_cell_color_index = 255; //should be transparent!
+						break;
+					case FILL_MINIMUM_HEIGHT:
+						empty_cell_color_index = 0;
+						break;
+					case FILL_MAXIMUM_HEIGHT:
+						empty_cell_color_index = 255;
+						break;
+					case FILL_CUSTOM_HEIGHT:
+						{
+							double normalizedHeight = (customEmptyCellsHeight-minHeight)/(maxHeight-minHeight);
+							//min and max should have already been updated with custom empty cell height!
+							assert(normalizedHeight>=0.0 && normalizedHeight<=1.0);
+							empty_cell_color_index = (unsigned)floor(normalizedHeight*maxColorComp);
+						}
+						break;
+					case FILL_AVERAGE_HEIGHT:
+					default:
+						assert(false);
+					}
+
+					ccConsole::Print("\tempty_cell_color_index = %1",empty_cell_color_index);
+
+					double range = maxHeight - minHeight;
+					if (range < ZERO_TOLERANCE)
+						range = 1.0;
+
+					// Filling the image with grid values
+					for (unsigned j=0; j<grid_size_Y; ++j)
+					{
+						const hgCell* aCell = grid[j];
+						for (unsigned i=0; i<grid_size_X; ++i,++aCell)
+						{
+							if (aCell->nbPoints)
+							{
+								double normalized_height = ((double)aCell->height - minHeight)/range;
+								assert(normalized_height>=0.0 && normalized_height<=1.0);
+								unsigned char val = (unsigned char)floor(normalized_height*maxColorComp);
+								bitmap8.setPixel(i,grid_size_Y-1-j,val);
+							}
+							else
+							{
+								bitmap8.setPixel(i,grid_size_Y-1-j,empty_cell_color_index);
+							}
+						}
+
+						if (progressCb)
+							progressCb->update(80.0f + 10.0f*((float)j/(float)grid_size_Y));
+					}
+
+					static QString outputFilenameTIF("height_grid_image.tif");
+					if (bitmap8.save(outputFilenameTIF))
+					{
+						ccConsole::Print(QString("\tOutput file: ")+outputFilePath+outputFilenameTIF);
+					}
+					else
+					{
+						ccConsole::Error("Failed to save TIF file! (check that 'qtiff4.dll' is in the 'imageformats' directory alongside CC executable)");
+						static QString outputFilenamePNG("height_grid_image.png");
+						if (bitmap8.save(outputFilenamePNG))
+							ccConsole::Print(QString("\tOutput file: ")+outputFilePath+outputFilenamePNG);
+						else
+							ccConsole::Error("Failed to save PNG file as well! (hum, the problem must be more serious;)");
+					}
+				}
+				else
+				{
+					ccConsole::Error("[ccHeightGridGeneration] Failed to create output image! (not enough memory?)");
+				}
+			}
+
+			//=========================================================================================================
+			if (cloudGrid)
+			{
+				ccConsole::Print("[ccHeightGridGeneration] Saving the height grid as a cloud...");
+
+				int sfIdx = -1;
+				CCLib::ScalarField* sf = 0;
 
 #ifdef _DEBUG
-            //the input point cloud should be empty!
-            sfIdx = cloudGrid->getScalarFieldIndexByName(CC_HEIGHT_GRID_FIELD_NAME);
-            assert(sfIdx<0);
+				//the input point cloud should be empty!
+				sfIdx = cloudGrid->getScalarFieldIndexByName(CC_HEIGHT_GRID_FIELD_NAME);
+				assert(sfIdx<0);
 #endif
-            sfIdx = cloudGrid->addScalarField(CC_HEIGHT_GRID_FIELD_NAME, minHeight >= 0.0);
-            if (sfIdx<0)
-                ccConsole::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing height grid values! Try to free some memory ...");
-            else
-            {
-                cloudGrid->setCurrentInScalarField(sfIdx);
-                sf = cloudGrid->getCurrentInScalarField();
-                assert(sf);
-            }
-
-            if (cloudGrid->reserve(nonEmptyCells))
-            {
-                CCVector3 P(0.0);
-				P.u[Y]=Mins[Y];
-                unsigned n=0;
-                for (unsigned j=0; j<grid_size_Y; ++j)
-                {
-                    const hgCell* aCell = grid[j];
-                    P.u[X] = Mins[X];
-                    for (unsigned i=0; i<grid_size_X; ++i)
-                    {
-                        if (aCell->nbPoints)
-                        {
-                            P.u[Z] = aCell->height;
-                            cloudGrid->addPoint(P);
-
-                            //if a SF is available, with set the point height as its associated scalar
-                            if (sf)
-                                cloudGrid->setPointScalarValue(n++,aCell->height);
-                        }
-                        P.u[X] += grid_step;
-                        ++aCell;
-                    }
-                    P.u[Y] += grid_step;
-
-                }
-
-                if (sf)
-                {
-                    sf->computeMinAndMax();
-                    cloudGrid->setCurrentDisplayedScalarField(sfIdx);
-                    cloudGrid->showSF(true);
-                }
-
-				//former scalar fields
-				for (unsigned k=0;k<gridScalarFields.size(); ++k)
+				sfIdx = cloudGrid->addScalarField(CC_HEIGHT_GRID_FIELD_NAME, minHeight >= 0.0);
+				if (sfIdx<0)
 				{
-					double* _sfGrid = gridScalarFields[k];
-					if (_sfGrid) //valid SF grid
+					ccConsole::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing height grid values! Try to free some memory ...");
+				}
+				else
+				{
+					cloudGrid->setCurrentInScalarField(sfIdx);
+					sf = cloudGrid->getCurrentInScalarField();
+					assert(sf);
+				}
+
+				unsigned pointsCount = (fillEmptyCells != LEAVE_EMPTY ? grid_size_X*grid_size_Y : nonEmptyCells);
+				if (cloudGrid->reserve(pointsCount))
+				{
+					CCVector3 P(0.0);
+					P.u[Y]=Mins[Y];
+	                
+					unsigned n=0;
+					for (unsigned j=0; j<grid_size_Y; ++j)
 					{
-						//the input point cloud should be empty!
-						CCLib::ScalarField* formerSf = pc->getScalarField(k);
-						assert(formerSf);
-
-						//we try to create an equivalent SF on the output grid
-						int sfIdx = cloudGrid->addScalarField(formerSf->getName(),formerSf->isPositive());
-						if (sfIdx<0) //if we are not lucky, the input cloud already had a SF with CC_HEIGHT_GRID_FIELD_NAME as name
-							sfIdx = cloudGrid->addScalarField(qPrintable(QString(formerSf->getName()).prepend(".old")),formerSf->isPositive());
-
-						if (sfIdx<0)
-							ccConsole::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing SF '%s' values! Try to free some memory ...",formerSf->getName());
-						else
+						const hgCell* aCell = grid[j];
+						P.u[X] = Mins[X];
+						for (unsigned i=0; i<grid_size_X; ++i,++aCell)
 						{
-							CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
-							assert(sf);
-							//set sf values
-							for (unsigned j=0; j<grid_size_Y; ++j)
+							if (aCell->nbPoints) //non empty cell
 							{
-								const hgCell* aCell = grid[j];
-								for (unsigned i=0; i<grid_size_X; ++i, ++_sfGrid, ++aCell)
-									if (aCell->nbPoints)
-										sf->addElement(*_sfGrid);
+								P.u[Z] = aCell->height;
+								cloudGrid->addPoint(P);
+
+								//if a SF is available, we set the point height as its associated scalar
+								if (sf)
+									cloudGrid->setPointScalarValue(n++,aCell->height);
 							}
-							sf->computeMinAndMax();
-							assert(sf->currentSize()==nonEmptyCells);
+							else if (fillEmptyCells != LEAVE_EMPTY) //empty cell
+							{
+								P.u[Z] = empty_cell_height;
+								cloudGrid->addPoint(P);
+
+								//if a SF is available, we set the point height as the default one
+								if (sf)
+									cloudGrid->setPointScalarValue(n++,empty_cell_height);
+							}
+	                        
+							P.u[X] += grid_step;
+						}
+
+						P.u[Y] += grid_step;
+					}
+
+					if (sf)
+					{
+						sf->computeMinAndMax();
+						cloudGrid->setCurrentDisplayedScalarField(sfIdx);
+						cloudGrid->showSF(true);
+					}
+
+					//former scalar fields
+					for (unsigned k=0;k<gridScalarFields.size(); ++k)
+					{
+						double* _sfGrid = gridScalarFields[k];
+						if (_sfGrid) //valid SF grid
+						{
+							//the input point cloud should be empty!
+							CCLib::ScalarField* formerSf = pc->getScalarField(k);
+							assert(formerSf);
+
+							//we try to create an equivalent SF on the output grid
+							int sfIdx = cloudGrid->addScalarField(formerSf->getName(),formerSf->isPositive());
+							if (sfIdx<0) //if we aren't lucky, the input cloud already had a SF with CC_HEIGHT_GRID_FIELD_NAME as name
+								sfIdx = cloudGrid->addScalarField(qPrintable(QString(formerSf->getName()).append(".old")),formerSf->isPositive());
+
+							if (sfIdx<0)
+								ccConsole::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing SF '%s' values! Try to free some memory ...",formerSf->getName());
+							else
+							{
+								CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
+								assert(sf);
+								//set sf values
+								DistanceType emptyCellSFValue = (formerSf->isPositive() ? HIDDEN_VALUE : BIG_VALUE);
+								for (unsigned j=0; j<grid_size_Y; ++j)
+								{
+									const hgCell* aCell = grid[j];
+									for (unsigned i=0; i<grid_size_X; ++i, ++_sfGrid, ++aCell)
+										if (aCell->nbPoints)
+											sf->addElement(*_sfGrid);
+										else if (fillEmptyCells != LEAVE_EMPTY)
+											sf->addElement(emptyCellSFValue);
+								}
+								sf->computeMinAndMax();
+								assert(sf->currentSize()==pointsCount);
+							}
 						}
 					}
 				}
-
-            }
-            else
-            {
-                ccConsole::Warning("[ccHeightGridGeneration] Coudln't create cloud! (not enough memory)");
-            }
-        }
+				else
+				{
+					ccConsole::Warning("[ccHeightGridGeneration] Coudln't create cloud! (not enough memory)");
+				}
+			}
+		}
     }
 
     ccConsole::Print("This is the end my friend...");
 
-    // deallocation of the height grid
+    // unallocation of the height grid...
     if (grid)
     {
         for (unsigned i=0; i<grid_size_Y; ++i)
             if (grid[i])
                 delete[] grid[i];
         delete[] grid;
+		grid=0;
     }
 
-	//and of the scalar fields
+	//...and of the scalar fields
 	{
 		for (unsigned i=0;i<gridScalarFields.size();++i)
 		{

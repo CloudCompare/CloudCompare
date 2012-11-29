@@ -68,7 +68,7 @@
         <string>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</string>
        </property>
        <property name="currentIndex">
-        <number>2</number>
+        <number>1</number>
        </property>
        <item>
         <property name="text">
@@ -144,7 +144,7 @@
          <string>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</string>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>1</number>
         </property>
         <item>
          <property name="text">
@@ -192,17 +192,22 @@
         </property>
         <item>
          <property name="text">
+          <string>leave empty</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>minimum height</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>average height</string>
          </property>
         </item>
         <item>
          <property name="text">
           <string>maximum height</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>minimum height</string>
          </property>
         </item>
         <item>
@@ -233,7 +238,7 @@
          <double>999999999.000000000000000</double>
         </property>
         <property name="value">
-         <double>-1.000000000000000</double>
+         <double>0.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -329,6 +334,22 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>interpolateSFCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>scalarFieldProjection</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>102</x>
+     <y>102</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>296</x>
+     <y>102</y>
     </hint>
    </hints>
   </connection>

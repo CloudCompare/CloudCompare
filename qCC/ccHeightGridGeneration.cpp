@@ -550,16 +550,15 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 							CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
 							assert(sf);
 							//set sf values
-							unsigned n=0;
 							for (unsigned j=0; j<grid_size_Y; ++j)
 							{
 								const hgCell* aCell = grid[j];
 								for (unsigned i=0; i<grid_size_X; ++i, ++_sfGrid, ++aCell)
 									if (aCell->nbPoints)
-										sf->setValue(n++,*_sfGrid);
+										sf->addElement(*_sfGrid);
 							}
 							sf->computeMinAndMax();
-							assert(n==nonEmptyCells);
+							assert(sf->currentSize()==nonEmptyCells);
 						}
 					}
 				}

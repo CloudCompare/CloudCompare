@@ -92,9 +92,18 @@ public:
 
 		//array data (dataVersion>=20)
 		//--> we write each chunk as a block (faster)
-		for (unsigned i=0;i<chunkArray.chunksCount();++i)
-			if (out.write((const char*)chunkArray.chunkStartPtr(i),sizeof(ScalarType)*N*chunkArray.chunkSize(i))<0)
-				return ccSerializableObject::WriteError();
+		while (count!=0)
+		{
+			for (unsigned i=0;i<chunkArray.chunksCount();++i)
+			{
+				//DGM: since dataVersion>=22, we make sure to write as much items as declared in 'currentSize'!
+				unsigned toWrite = std::min<unsigned>(count,chunkArray.chunkSize(i));
+				if (out.write((const char*)chunkArray.chunkStartPtr(i),sizeof(ScalarType)*N*toWrite)<0)
+					return ccSerializableObject::WriteError();
+				assert(toWrite<=count);
+				count -= toWrite;
+			}
+		}
 
 		return true;
 	}

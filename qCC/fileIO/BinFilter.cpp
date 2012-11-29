@@ -50,7 +50,7 @@
 * V2.1 - 07/02/2012 - points & 2D labels upgraded
 * V2.2 - 11/26/2012 - object name is now a QString
 **/
-static unsigned s_currentBinVersion = 22; //2.1
+static unsigned s_currentBinVersion = 22; //2.2
 
 int BinFilter::ReadEntityHeader(QFile& in, unsigned &numberOfPoints, HeaderFlags& header)
 {
@@ -203,7 +203,8 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 
 	if (!root->fromFile(in,binVersion))
 	{
-		delete root;
+		//DGM: can't delete it, too dangerous (bad pointers ;)
+		//delete root;
 		return CC_FERR_CONSOLE_ERROR;
 	}
 

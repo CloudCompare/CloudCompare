@@ -1038,6 +1038,18 @@ void MainWindow::doActionClearProperty(int prop)
         ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
 		{
+			//specific case: clear normals on a mesh with per-triangle normals
+			if (prop == 1 && ent->isKindOf(CC_MESH))
+			{
+				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+				if (mesh->hasTriNormals())
+				{
+					mesh->setTriNormsTable(0);
+					ent->prepareDisplayForRefresh();
+					continue;
+				}
+			}
+
 			DisplayLockedVerticesWarning();
 			continue;
 		}

@@ -1353,6 +1353,14 @@ void ccMesh::removePerTriangleNormalIndexes()
 	m_triNormalIndexes=0;
 }
 
+void ccMesh::setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoReleaseOldTable/*=true*/)
+{
+	ccGenericMesh::setTriNormsTable(triNormsTable,autoReleaseOldTable);
+
+	if (!m_triNormals)
+		removePerTriangleNormalIndexes();
+}
+
 bool ccMesh::reservePerTriangleNormalIndexes()
 {
 	assert(!m_triNormalIndexes); //try to avoid doing this twice!

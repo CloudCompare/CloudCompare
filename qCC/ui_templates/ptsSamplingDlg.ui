@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>141</height>
+    <height>145</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -190,6 +190,38 @@
     <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>dDoubleSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>296</x>
+     <y>17</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>296</x>
+     <y>42</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pnRadioButton</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pnSpinBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>102</x>
+     <y>17</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>102</x>
+     <y>42</y>
     </hint>
    </hints>
   </connection>

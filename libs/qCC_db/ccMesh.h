@@ -170,6 +170,12 @@ public:
 	//! Removes any per-triangle triplets of normal indexes
 	void removePerTriangleNormalIndexes();
 
+	//inherited from ccGenericMesh
+	/** Re-implemented to automatically release 'per triangle normal indexes'
+		if per-triangle normals table is removed (triNormsTable==0).
+	**/
+	virtual void setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoReleaseOldTable = true);
+
 	/********************************************************/
 	/************    PER-TRIANGLE MATERIAL    ***************/
 	/********************************************************/

@@ -99,7 +99,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* theMesh,
 
 	unsigned theoricNumberOfPoints = unsigned(Stotal * samplingDensity);
 
-	return samplePointsOnMesh(theMesh,samplingDensity,theoricNumberOfPoints,progressCb);
+	return samplePointsOnMesh(theMesh,samplingDensity,theoricNumberOfPoints,progressCb,triIndices);
 }
 
 SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* theMesh,

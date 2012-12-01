@@ -67,8 +67,8 @@ void PlyOpenDlg::testBeforeAccept()
     ++assignedIndexCount[nxComboBox->currentIndex()];
     ++assignedIndexCount[nyComboBox->currentIndex()];
     ++assignedIndexCount[nzComboBox->currentIndex()];
-    ++assignedIndexCount[n+facesComboBox->currentIndex()];
-    ++assignedIndexCount[n+textCoordsComboBox->currentIndex()];
+    ++assignedIndexCount[facesComboBox->currentIndex() > 0 ? n+facesComboBox->currentIndex() : 0];
+    ++assignedIndexCount[textCoordsComboBox->currentIndex() > 0 ? n+textCoordsComboBox->currentIndex() : 0];
 
 	bool isValid = true;
 

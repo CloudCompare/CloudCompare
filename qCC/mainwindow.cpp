@@ -3917,7 +3917,6 @@ void MainWindow::placeMDIDialog(ccMDIDialogs& mdiDlg)
         return;
 
     int dx=0,dy=0;
-
     switch (mdiDlg.position)
     {
     case Qt::TopLeftCorner:
@@ -3938,7 +3937,9 @@ void MainWindow::placeMDIDialog(ccMDIDialogs& mdiDlg)
         break;
     }
 
-    mdiDlg.dialog->move(geometry().topLeft() + mdiArea->pos() + QPoint(dx,dy));
+	//show();
+   mdiDlg.dialog->move(mdiArea->mapToGlobal(QPoint(dx,dy)));
+   mdiDlg.dialog->raise();
 }
 
 void MainWindow::updateMDIDialogsPlacement()

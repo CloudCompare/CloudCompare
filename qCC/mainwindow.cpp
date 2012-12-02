@@ -164,13 +164,13 @@ MainWindow::MainWindow()
     connect(m_ccRoot, SIGNAL(selectionChanged()), this, SLOT(updateUIWithSelection()));
 
     //MDI Area
-    mdiArea = new QMdiArea(this);
-    setCentralWidget(mdiArea);
-    connect(mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateMenus()));
+    m_mdiArea = new QMdiArea(this);
+    setCentralWidget(m_mdiArea);
+    connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateMenus()));
 
     //Window Mapper
-    windowMapper = new QSignalMapper(this);
-    connect(windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
+    m_windowMapper = new QSignalMapper(this);
+    connect(m_windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
 
 	//Keyboard shortcuts
 	connect(actionToggleVisibility,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesVisibility()));	//'V': toggles selected items visibility
@@ -197,47 +197,47 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
-	assert(m_ccRoot && mdiArea && windowMapper);
+	assert(m_ccRoot && m_mdiArea && m_windowMapper);
     m_ccRoot->disconnect();
-    mdiArea->disconnect();
-    windowMapper->disconnect();
+    m_mdiArea->disconnect();
+    m_windowMapper->disconnect();
 
-    mdiDialogs.clear();
-    mdiArea->closeAllSubWindows();
+	//we don't want any other dialog/function to use the following structures
+	ccDBRoot* ccRoot = m_ccRoot;
+	m_ccRoot = 0;
+	if (m_mdiArea)
+	{
+		QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
+		for (int i=0;i<subWindowList.size();++i)
+			static_cast<ccGLWindow*>(subWindowList[i]->widget())->setSceneDB(0);
+    }
+    m_cpeDlg = 0;
+    m_gsTool = 0;
+    m_transTool = 0;
+    m_compDlg=0;
+    m_ppDlg = 0;
+    m_plpDlg = 0;
+    m_pluginsGroup = 0;
+
+	//release all 'overlay' dialogs
+	while (!m_mdiDialogs.empty())
+	{
+		m_mdiDialogs.back().dialog->stop(false);
+		m_mdiDialogs.back().dialog->setParent(0);
+		delete m_mdiDialogs.back().dialog;
+		m_mdiDialogs.pop_back();
+	}
+    //m_mdiDialogs.clear();
+    m_mdiArea->closeAllSubWindows();
 
     /*//QT takes care of all siblings!
-
-    if (m_cpeDlg)
-        delete m_cpeDlg;
-    m_cpeDlg = 0;
-
-    if (m_gsTool)
-        delete m_gsTool;
-    m_gsTool = 0;
-
-    if (m_transTool)
-        delete m_transTool;
-    m_transTool = 0;
-
-    if (m_compDlg)
-        delete m_compDlg;
-    m_compDlg=0;
-
-    if (m_ppDlg)
-        delete m_ppDlg;
-    m_ppDlg = 0;
-
-    if (m_plpDlg)
-        delete m_plpDlg;
-    m_plpDlg = 0;
-
     if (m_pluginsGroup)
         delete m_pluginsGroup;
     m_pluginsGroup=0;
     //*/
 
-	delete m_ccRoot;
-    m_ccRoot = 0;
+	if (ccRoot)
+		delete ccRoot;
 }
 
 ccPluginInterface* MainWindow::getValidPlugin(QObject* plugin)
@@ -466,7 +466,7 @@ void MainWindow::doPluginAction()
 void MainWindow::connectActions()
 {
     assert(m_ccRoot);
-    assert(mdiArea);
+    assert(m_mdiArea);
 
     /*** MAIN MENU ***/
 
@@ -582,12 +582,12 @@ void MainWindow::connectActions()
     //"3D Views" menu
     connect(menu3DViews,                        SIGNAL(aboutToShow()),  this,       SLOT(update3DViewsMenu()));
     connect(actionNew3DView,                    SIGNAL(triggered()),    this,       SLOT(new3DView()));
-    connect(actionClose3DView,                  SIGNAL(triggered()),    mdiArea,    SLOT(closeActiveSubWindow()));
-    connect(actionCloseAll3DViews,              SIGNAL(triggered()),    mdiArea,    SLOT(closeAllSubWindows()));
-    connect(actionTile3DViews,                  SIGNAL(triggered()),    mdiArea,    SLOT(tileSubWindows()));
-    connect(actionCascade3DViews,               SIGNAL(triggered()),    mdiArea,    SLOT(cascadeSubWindows()));
-    connect(actionNext3DView,                   SIGNAL(triggered()),    mdiArea,    SLOT(activateNextSubWindow()));
-    connect(actionPrevious3DView,               SIGNAL(triggered()),    mdiArea,    SLOT(activatePreviousSubWindow()));
+    connect(actionClose3DView,                  SIGNAL(triggered()),    m_mdiArea,  SLOT(closeActiveSubWindow()));
+    connect(actionCloseAll3DViews,              SIGNAL(triggered()),    m_mdiArea,  SLOT(closeAllSubWindows()));
+    connect(actionTile3DViews,                  SIGNAL(triggered()),    m_mdiArea,  SLOT(tileSubWindows()));
+    connect(actionCascade3DViews,               SIGNAL(triggered()),    m_mdiArea,  SLOT(cascadeSubWindows()));
+    connect(actionNext3DView,                   SIGNAL(triggered()),    m_mdiArea,  SLOT(activateNextSubWindow()));
+    connect(actionPrevious3DView,               SIGNAL(triggered()),    m_mdiArea,  SLOT(activatePreviousSubWindow()));
 
     //"About" menu entry
     connect(actionHelp,                         SIGNAL(triggered()),    this,       SLOT(help()));
@@ -3796,12 +3796,15 @@ void MainWindow::doActionUnroll()
 
 ccGLWindow *MainWindow::getActiveGLWindow()
 {
-    QMdiSubWindow *activeSubWindow = mdiArea->activeSubWindow();
+	if (!m_mdiArea)
+		return 0;
+
+    QMdiSubWindow *activeSubWindow = m_mdiArea->activeSubWindow();
     if (activeSubWindow)
         return static_cast<ccGLWindow*>(activeSubWindow->widget());
     else
     {
-        QList<QMdiSubWindow*> subWindowList = mdiArea->subWindowList();
+        QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
         if (!subWindowList.isEmpty())
             return static_cast<ccGLWindow*>(subWindowList[0]->widget());
     }
@@ -3811,10 +3814,10 @@ ccGLWindow *MainWindow::getActiveGLWindow()
 
 ccGLWindow* MainWindow::new3DView()
 {
-	assert(m_ccRoot);
+	assert(m_ccRoot && m_mdiArea);
 
 	//already existing window?
-	QList<QMdiSubWindow*> subWindowList = mdiArea->subWindowList();
+	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
 	ccGLWindow* otherWin=0;
 	if (!subWindowList.isEmpty())
 		otherWin=static_cast<ccGLWindow*>(subWindowList[0]->widget());
@@ -3825,7 +3828,7 @@ ccGLWindow* MainWindow::new3DView()
     child->setMinimumSize(400,300);
     child->resize(500,400);
 
-    mdiArea->addSubWindow(child);
+    m_mdiArea->addSubWindow(child);
 
     connect(child,      SIGNAL(entitySelectionChanged(int)),		m_ccRoot,	SLOT(selectEntity(int)));
     connect(child,      SIGNAL(zoomChanged(float)),					this,       SLOT(updateWindowZoomChange(float)));
@@ -3861,12 +3864,12 @@ void MainWindow::prepareWindowDeletion(QObject* glWindow)
 
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    if (m_uiFrozen)
-    {
-        ccConsole::Error("Close current dialog/interactor first!");
-        event->ignore();
-    }
-    else
+    //if (m_uiFrozen)
+    //{
+    //    ccConsole::Error("Close current dialog/interactor first!");
+    //    event->ignore();
+    //}
+    //else
     {
 		if (m_ccRoot && m_ccRoot->getRootEntity()->getChildrenNumber()==0
 			|| QMessageBox::question(this,"Quit","Are you sure you want to quit?",QMessageBox::Ok,QMessageBox::Cancel)!=QMessageBox::Cancel)
@@ -3894,26 +3897,26 @@ void MainWindow::resizeEvent(QResizeEvent* event)
     updateMDIDialogsPlacement();
 }
 
-void MainWindow::registerMDIDialog(QDialog* dlg, Qt::Corner pos)
+void MainWindow::registerMDIDialog(ccOverlayDialog* dlg, Qt::Corner pos)
 {
     //check for existence
-    for (unsigned i=0; i<mdiDialogs.size(); ++i)
+    for (unsigned i=0; i<m_mdiDialogs.size(); ++i)
     {
-        if (mdiDialogs[i].dialog == dlg)
+        if (m_mdiDialogs[i].dialog == dlg)
         {
             //we only update position in this case
-            mdiDialogs[i].position = pos;
+            m_mdiDialogs[i].position = pos;
             return;
         }
     }
 
     //otherwise we add it to DB
-    mdiDialogs.push_back(ccMDIDialogs(dlg,pos));
+    m_mdiDialogs.push_back(ccMDIDialogs(dlg,pos));
 }
 
 void MainWindow::placeMDIDialog(ccMDIDialogs& mdiDlg)
 {
-    if (!mdiDlg.dialog || !mdiDlg.dialog->isVisible() || !mdiArea)
+    if (!mdiDlg.dialog || !mdiDlg.dialog->isVisible() || !m_mdiArea)
         return;
 
     int dx=0,dy=0;
@@ -3924,28 +3927,28 @@ void MainWindow::placeMDIDialog(ccMDIDialogs& mdiDlg)
         dy = 5;
         break;
     case Qt::TopRightCorner:
-        dx = std::max(5,mdiArea->width() - mdiDlg.dialog->width() - 5);
+        dx = std::max(5,m_mdiArea->width() - mdiDlg.dialog->width() - 5);
         dy = 5;
         break;
     case Qt::BottomLeftCorner:
         dx = 5;
-        dy = std::max(5,mdiArea->height() - mdiDlg.dialog->height() - 5);
+        dy = std::max(5,m_mdiArea->height() - mdiDlg.dialog->height() - 5);
         break;
     case Qt::BottomRightCorner:
-        dx = std::max(5,mdiArea->width() - mdiDlg.dialog->width() - 5);
-        dy = std::max(5,mdiArea->height() - mdiDlg.dialog->height() - 5);
+        dx = std::max(5,m_mdiArea->width() - mdiDlg.dialog->width() - 5);
+        dy = std::max(5,m_mdiArea->height() - mdiDlg.dialog->height() - 5);
         break;
     }
 
 	//show();
-   mdiDlg.dialog->move(mdiArea->mapToGlobal(QPoint(dx,dy)));
+   mdiDlg.dialog->move(m_mdiArea->mapToGlobal(QPoint(dx,dy)));
    mdiDlg.dialog->raise();
 }
 
 void MainWindow::updateMDIDialogsPlacement()
 {
-    for (unsigned i=0; i<mdiDialogs.size(); ++i)
-        placeMDIDialog(mdiDialogs[i]);
+    for (unsigned i=0; i<m_mdiDialogs.size(); ++i)
+        placeMDIDialog(m_mdiDialogs[i]);
 }
 
 void MainWindow::toggleFullScreen(bool state)
@@ -4020,7 +4023,7 @@ void MainWindow::activateSegmentationMode()
     if (!m_gsTool)
     {
         m_gsTool = new ccGraphicalSegmentationTool(this);
-        connect(m_gsTool, SIGNAL(segmentationFinished(bool)), this, SLOT(deactivateSegmentationMode(bool)));
+        connect(m_gsTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateSegmentationMode(bool)));
 
         registerMDIDialog(m_gsTool,Qt::TopRightCorner);
     }
@@ -4122,7 +4125,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
     }
 
     if (m_gsTool)
-        m_gsTool->stop(!deleteHiddenPoints);
+		m_gsTool->removeAllEntities(!deleteHiddenPoints);
 
     //we enable all GL windows
     enableAll();
@@ -4163,17 +4166,6 @@ void MainWindow::activatePointListPickingMode()
         return;
 	}
 
-#ifndef CC_OPENGL_POINT_PICKING
-    unsigned i,selNum=0;
-
-    for (i=0; i<m_selectedEntities.size(); i++)
-        if (m_selectedEntities[i]->isKindOf(CC_POINT_CLOUD))
-            selNum++;
-
-    if (selNum==0)
-        return;
-#endif
-
     if (!m_plpDlg)
     {
         m_plpDlg = new ccPointListPickingDlg(this);
@@ -4184,18 +4176,6 @@ void MainWindow::activatePointListPickingMode()
 
     m_plpDlg->linkWith(win);
 	m_plpDlg->linkWithCloud(pc);
-
-#ifndef CC_OPENGL_POINT_PICKING
-    for (i=0; i<m_selectedEntities.size(); ++i)
-        if (m_selectedEntities[i]->isKindOf(CC_POINT_CLOUD))
-            m_plpDlg->addCloud(static_cast<ccPointCloud*>(m_selectedEntities[i]));
-
-    if (m_plpDlg->getNbClouds()==0)
-    {
-        ccConsole::Error("No selected cloud in active window!");
-        return;
-    }
-#endif
 
     freezeUI(true);
 
@@ -4212,7 +4192,7 @@ void MainWindow::deactivatePointListPickingMode(bool state)
 {
     if (m_plpDlg)
 	{
-        m_plpDlg->linkWith(0);
+        //m_plpDlg->linkWith(0);
 		m_plpDlg->linkWithCloud(0);
 	}
 
@@ -4230,17 +4210,6 @@ void MainWindow::activatePointsPropertiesMode()
     if (!win)
         return;
 
-#ifndef CC_OPENGL_POINT_PICKING
-    unsigned i,selNum=0;
-
-    for (i=0; i<m_selectedEntities.size(); i++)
-        if (m_selectedEntities[i]->isKindOf(CC_POINT_CLOUD))
-            selNum++;
-
-    if (selNum==0)
-        return;
-#endif
-
 	if (m_ccRoot)
 		m_ccRoot->selectEntity(0); //we don't want any entity selected (especially existing labels!)
 
@@ -4255,20 +4224,6 @@ void MainWindow::activatePointsPropertiesMode()
 
     m_ppDlg->linkWith(win);
 
-#ifndef CC_OPENGL_POINT_PICKING
-    for (i=0; i<m_selectedEntities.size(); ++i)
-        if (m_selectedEntities[i]->isKindOf(CC_POINT_CLOUD))
-            m_ppDlg->addCloud(static_cast<ccPointCloud*>(m_selectedEntities[i]));
-
-    if (m_ppDlg->getNbClouds()==0)
-    {
-        ccConsole::Error("No selected cloud in active window!");
-        return;
-    }
-#else
-
-#endif
-
     freezeUI(true);
 
     //we disable all other windows
@@ -4282,8 +4237,8 @@ void MainWindow::activatePointsPropertiesMode()
 
 void MainWindow::deactivatePointsPropertiesMode(bool state)
 {
-    if (m_ppDlg)
-        m_ppDlg->linkWith(0);
+    //if (m_ppDlg)
+    //    m_ppDlg->linkWith(0);
 
     //we enable all GL windows
     enableAll();
@@ -4329,7 +4284,7 @@ void MainWindow::activateTranslateRotateMode()
     //try to activate "moving mode" in current GL window
     if (m_transTool->start())
 	{
-		connect(m_transTool, SIGNAL(transformationFinished(bool)), this, SLOT(deactivateTranslateRotateMode(bool)));
+		connect(m_transTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateTranslateRotateMode(bool)));
 		registerMDIDialog(m_transTool,Qt::TopRightCorner);
 		freezeUI(true);
         updateMDIDialogsPlacement();
@@ -4344,11 +4299,8 @@ void MainWindow::activateTranslateRotateMode()
 
 void MainWindow::deactivateTranslateRotateMode(bool state)
 {
-    if (m_transTool)
-	{
-        m_transTool->stop();
-		m_transTool->close();
-	}
+	//if (m_transTool)
+	//	m_transTool->close();
 
     //we reactivate all GL windows
     enableAll();
@@ -4444,7 +4396,7 @@ void MainWindow::doActionRenderToFile()
 void MainWindow::doActionEditCamera()
 {
     //current active MDI area
-    QMdiSubWindow* qWin = mdiArea->activeSubWindow();
+    QMdiSubWindow* qWin = m_mdiArea->activeSubWindow();
     if (!qWin)
         return;
 
@@ -4453,12 +4405,12 @@ void MainWindow::doActionEditCamera()
         m_cpeDlg = new ccCameraParamEditDlg(qWin);
                 //m_cpeDlg->makeFrameless(); //this does not work on linux
         m_cpeDlg->linkWith(qWin);
-        connect(mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), m_cpeDlg, SLOT(linkWith(QMdiSubWindow*)));
+        connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), m_cpeDlg, SLOT(linkWith(QMdiSubWindow*)));
 
         registerMDIDialog(m_cpeDlg,Qt::BottomLeftCorner);
     }
 
-    m_cpeDlg->show();
+    m_cpeDlg->start();
 
     updateMDIDialogsPlacement();
 }
@@ -5995,10 +5947,8 @@ void MainWindow::updateMenus()
     //oher actions
     actionSegment->setEnabled(hasMdiChild && hasSelectedEntities);
     actionTranslateRotate->setEnabled(hasMdiChild && hasSelectedEntities);
-#ifdef CC_OPENGL_POINT_PICKING
-    actionPointPicking->setEnabled(hasMdiChild);
+	actionPointPicking->setEnabled(hasMdiChild);
     actionPointListPicking->setEnabled(hasMdiChild);
-#endif
     actionTestFrameRate->setEnabled(hasMdiChild);
     actionRenderToFile->setEnabled(hasMdiChild);
     actionToggleSunLight->setEnabled(hasMdiChild);
@@ -6032,7 +5982,7 @@ void MainWindow::update3DViewsMenu()
     menu3DViews->addAction(actionNext3DView);
     menu3DViews->addAction(actionPrevious3DView);
 
-    QList<QMdiSubWindow *> windows = mdiArea->subWindowList();
+    QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
     if (!windows.isEmpty())
     {
         //Dynamic Separator
@@ -6048,29 +5998,29 @@ void MainWindow::update3DViewsMenu()
             QAction *action  = menu3DViews->addAction(text);
             action->setCheckable(true);
             action ->setChecked(child == (QWidget*)getActiveGLWindow());
-            connect(action, SIGNAL(triggered()), windowMapper, SLOT(map()));
-            windowMapper->setMapping(action, windows.at(i));
+            connect(action, SIGNAL(triggered()), m_windowMapper, SLOT(map()));
+            m_windowMapper->setMapping(action, windows.at(i));
         }
     }
 }
 
 void MainWindow::setActiveSubWindow(QWidget *window)
 {
-    if (!window)
+    if (!window || !m_mdiArea)
         return;
-    mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
+    m_mdiArea->setActiveSubWindow(qobject_cast<QMdiSubWindow *>(window));
 }
 
 void MainWindow::redrawAll()
 {
-    QList<QMdiSubWindow *> windows = mdiArea->subWindowList();
+    QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
         static_cast<ccGLWindow*>(windows.at(i)->widget())->redraw();
 }
 
 void MainWindow::refreshAll()
 {
-    QList<QMdiSubWindow *> windows = mdiArea->subWindowList();
+    QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
         static_cast<ccGLWindow*>(windows.at(i)->widget())->refresh();
 
@@ -6115,14 +6065,14 @@ void MainWindow::expandDBTreeWithSelection(ccHObject::Container& selection)
 
 void MainWindow::enableAll()
 {
-    QList<QMdiSubWindow *> windows = mdiArea->subWindowList();
+    QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
         windows.at(i)->setEnabled(true);
 }
 
 void MainWindow::disableAll()
 {
-    QList<QMdiSubWindow *> windows = mdiArea->subWindowList();
+    QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
         windows.at(i)->setEnabled(false);
 }
@@ -6130,7 +6080,7 @@ void MainWindow::disableAll()
 void MainWindow::disableAllBut(ccGLWindow* win)
 {
     //we disable all other windows
-    QList<QMdiSubWindow*> windows = mdiArea->subWindowList();
+    QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
         if (static_cast<ccGLWindow*>(windows.at(i)->widget()) != win)
             windows.at(i)->setEnabled(false);
@@ -6225,12 +6175,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	
 	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount>0);
 
-#ifndef CC_OPENGL_POINT_PICKING
-    actionPointPicking->setEnabled(atLeastOneCloud && activeWindow);
-    actionPointListPicking->setEnabled(atLeastOneCloud && activeWindow);
-#else
 	actionPointListPicking->setEnabled(exactlyOneEntity);
-#endif
 
 	//==2
     bool exactlyTwoEntities = (selInfo.selCount==2);
@@ -6270,7 +6215,7 @@ void MainWindow::updateWindowZoomChange(float zoomFactor)
 
     ccGLWindow* sendingWindow = static_cast<ccGLWindow*>(sender());
 
-    QList<QMdiSubWindow *> windows = mdiArea->subWindowList();
+    QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
     {
         ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
@@ -6289,7 +6234,7 @@ void MainWindow::updateWindowPanChange(float ddx, float ddy)
 
     ccGLWindow* sendingWindow = static_cast<ccGLWindow*>(sender());
 
-    QList<QMdiSubWindow *> windows = mdiArea->subWindowList();
+    QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
     {
         ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
@@ -6308,7 +6253,7 @@ void MainWindow::updateWindowOnViewMatRotation(const ccGLMatrix& rotMat)
 
     ccGLWindow* sendingWindow = static_cast<ccGLWindow*>(sender());
 
-    QList<QMdiSubWindow *> windows = mdiArea->subWindowList();
+    QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
     {
         ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
@@ -6374,7 +6319,7 @@ void MainWindow::DestroyInstance()
 
 void MainWindow::GetGLWindows(std::vector<ccGLWindow*>& glWindows)
 {
-    QList<QMdiSubWindow *> windows = TheInstance()->mdiArea->subWindowList();
+    QList<QMdiSubWindow *> windows = TheInstance()->m_mdiArea->subWindowList();
     unsigned winNum = windows.size();
 
     if (winNum==0)
@@ -6394,7 +6339,7 @@ ccGLWindow* MainWindow::GetActiveGLWindow()
 
 ccGLWindow* MainWindow::GetGLWindow(const QString& title)
 {
-    QList<QMdiSubWindow *> windows = TheInstance()->mdiArea->subWindowList();
+    QList<QMdiSubWindow *> windows = TheInstance()->m_mdiArea->subWindowList();
     unsigned winNum = windows.size();
 
     if (winNum==0)

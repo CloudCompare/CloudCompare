@@ -27,8 +27,8 @@ project( ccViewer )
 set( SAMPLE_PROJECT_VERSION_MAJOR 1 )
 set( SAMPLE_PROJECT_VERSION_MINOR 14 )
 
-set( QCC_HEADERS ../qCC/ccConsole.h ../qCC/ccGLUtils.h ../qCC/ccGLWindow.h ../qCC/ccGuiParameters.h ../qCC/ccRenderingTools.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccShiftAndScaleCloudDlg.h ../qCC/fileIO/*.h )
-set( QCC_SOURCES ../qCC/ccConsole.cpp ../qCC/ccGLUtils.cpp ../qCC/ccGLWindow.cpp ../qCC/ccGuiParameters.cpp ../qCC/ccRenderingTools.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccShiftAndScaleCloudDlg.cpp ../qCC/fileIO/*.cpp ../qCC/fileIO/*.c )
+set( QCC_HEADERS ../qCC/ccConsole.h ../qCC/ccGLUtils.h ../qCC/ccGLWindow.h ../qCC/ccGuiParameters.h ../qCC/ccOverlayDialog.h ../qCC/ccRenderingTools.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccShiftAndScaleCloudDlg.h ../qCC/fileIO/*.h )
+set( QCC_SOURCES ../qCC/ccConsole.cpp ../qCC/ccGLUtils.cpp ../qCC/ccGLWindow.cpp ../qCC/ccGuiParameters.cpp ../qCC/ccOverlayDialog.cpp ../qCC/ccRenderingTools.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccShiftAndScaleCloudDlg.cpp ../qCC/fileIO/*.cpp ../qCC/fileIO/*.c )
 set( QCC_DIALOGS ../qCC/ui_templates/cameraParamDlg.ui ../qCC/ui_templates/displayOptionsDlg.ui ../qCC/ui_templates/shiftAndScaleCloudDlg.ui ../qCC/ui_templates/open*.ui )
 
 file( GLOB header_list *.h ${QCC_HEADERS} )

@@ -245,7 +245,8 @@ void ccPointListPickingDlg::removeLastEntry()
 
 	updateList();
 
-	m_win->redraw();
+	if (m_associatedWin)
+		m_associatedWin->redraw();
 }
 
 void ccPointListPickingDlg::startIndexChanged(int value)
@@ -258,7 +259,8 @@ void ccPointListPickingDlg::startIndexChanged(int value)
 		ccGui::Set(guiParams);
 
 		updateList();
-		m_win->redraw();
+		if (m_associatedWin)
+			m_associatedWin->redraw();
 	}
 }
 
@@ -273,7 +275,8 @@ void ccPointListPickingDlg::markerSizeChanged(int size)
 	{
 		guiParams.pickedPointsSize = (unsigned)size;
 		ccGui::Set(guiParams);
-		m_win->redraw();
+		if (m_associatedWin)
+			m_associatedWin->redraw();
 	}
 }
 
@@ -415,5 +418,6 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 
 	updateList();
 
-	m_win->redraw();
+	if (m_associatedWin)
+		m_associatedWin->redraw();
 }

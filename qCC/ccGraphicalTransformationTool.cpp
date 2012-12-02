@@ -32,11 +32,9 @@
 #include "mainwindow.h"
 
 ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
-	: QDialog(parent)
+	: ccOverlayDialog(parent)
 	, Ui::GraphicalTransformationDlg()
 	, m_toTransform(0)
-	, m_associatedWin(0)
-	, m_started(false)
 {
 	setupUi(this);
 	setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);
@@ -50,11 +48,10 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 
 ccGraphicalTransformationTool::~ccGraphicalTransformationTool()
 {
-	assert(!m_started);
-
 	clear();
 
-	delete m_toTransform;
+	if (m_toTransform)
+		delete m_toTransform;
 	m_toTransform=0;
 }
 
@@ -120,23 +117,26 @@ unsigned ccGraphicalTransformationTool::getNumberOfValidEntities()
 	return m_toTransform->getChildrenNumber();
 }
 
-void ccGraphicalTransformationTool::linkWith(ccGLWindow* win)
+bool ccGraphicalTransformationTool::linkWith(ccGLWindow* win)
 {
-	if (m_associatedWin == win)
-		return;
-
-	m_associatedWin = win;
+	if (!ccOverlayDialog::linkWith(win))
+		return false;
 	
 	assert(m_toTransform);
-	assert(m_toTransform->getChildrenNumber()==0);
+	assert(!win || m_toTransform->getChildrenNumber()==0);
 	m_toTransform->setDisplay(win);
+	
+	return true;
 }
 
 bool ccGraphicalTransformationTool::start()
 {
-	assert(!m_started);
-	assert(m_associatedWin);
+	assert(!m_processing);
 	assert(m_toTransform);
+
+	assert(m_associatedWin);
+	if (!m_associatedWin)
+		return false;
 
 	unsigned childNum=m_toTransform->getChildrenNumber();
 	if (childNum==0)
@@ -155,26 +155,25 @@ bool ccGraphicalTransformationTool::start()
 	connect(m_associatedWin, SIGNAL(translation(const CCVector3&)),	this, SLOT(glTranslate(const CCVector3&)));
 	m_associatedWin->displayNewMessage("[Rotation/Translation mode]",3600);
 	m_associatedWin->updateGL();
-	m_started = true;
 
-	show();
-
-	return true;
+	return ccOverlayDialog::start();
 }
 
-void ccGraphicalTransformationTool::stop()
+void ccGraphicalTransformationTool::stop(bool state)
 {
-	if (!m_associatedWin)
-		return;
+	if (m_associatedWin)
+	{
+		//deactivate "moving mode" in associated GL window
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+		m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
+		m_associatedWin->setUnclosable(false);
+		disconnect(m_associatedWin, SIGNAL(rotation(const ccGLMatrix&)),	this, SLOT(glRotate(const ccGLMatrix&)));
+		disconnect(m_associatedWin, SIGNAL(translation(const CCVector3&)),	this, SLOT(glTranslate(const CCVector3&)));
+		m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]");
+		m_associatedWin->updateGL();
+	}
 
-	//deactivate "moving mode" in associated GL window
-	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
-	m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-	m_associatedWin->setUnclosable(false);
-	disconnect(m_associatedWin, 0, this, 0);
-	m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]");
-	m_associatedWin->updateGL();
-	m_started = false;
+	ccOverlayDialog::stop(state);
 }
 
 void ccGraphicalTransformationTool::glTranslate(const CCVector3& t)
@@ -236,7 +235,7 @@ void ccGraphicalTransformationTool::apply()
 		child->prepareDisplayForRefresh_recursive();
 	}
 
-	emit transformationFinished(true);
+	stop(true);
 
 	clear();
 
@@ -255,7 +254,7 @@ void ccGraphicalTransformationTool::cancel()
 		child->prepareDisplayForRefresh_recursive();
 	}
 
-	emit transformationFinished(false);
+	stop(false);
 
 	clear();
 

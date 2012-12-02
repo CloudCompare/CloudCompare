@@ -25,12 +25,15 @@
 #ifndef CC_GRAPHICAL_TRANSFORMATION_TOOLS_HEADER
 #define CC_GRAPHICAL_TRANSFORMATION_TOOLS_HEADER
 
-#include <QDialog>
+//Local
+#include <ccOverlayDialog.h>
 
 #include <ui_graphicalTransformationDlg.h>
 
+//qCC_db
 #include <ccGLMatrix.h>
 
+//system
 #include <vector>
 
 class ccGLWindow;
@@ -39,7 +42,7 @@ class ccHObject;
 //! Dialog + mechanism for graphical transformation of entities
 /** Mouse driven rotation and translation of selected entities at screen.
 **/
-class ccGraphicalTransformationTool : public QDialog, public Ui::GraphicalTransformationDlg
+class ccGraphicalTransformationTool : public ccOverlayDialog, public Ui::GraphicalTransformationDlg
 {
     Q_OBJECT
 
@@ -50,8 +53,10 @@ public:
 	//! Default destructor
 	virtual ~ccGraphicalTransformationTool();
 
-	//! Links this dialog with a given 3D window
-    void linkWith(ccGLWindow* win);
+	//inherited from ccOverlayDialog
+    virtual bool linkWith(ccGLWindow* win);
+	virtual bool start();
+	virtual void stop(bool state);
 
     //! Adds an entity to the 'selected' entities set
     /** Only the 'selected' entities are moved.
@@ -61,12 +66,6 @@ public:
 
     //! Returns
     unsigned getNumberOfValidEntities();
-
-    //! Shows dialog and starts graphical interaction
-	bool start();
-
-    //! Hides dialog and ends graphical interaction
-	void stop();
 
 protected slots:
 
@@ -85,11 +84,6 @@ protected slots:
     //! applies rotation (graphically) to selected entities
     void glRotate(const ccGLMatrix&);
 
-signals:
-
-    //! Signal emitted when the process ends
-    void transformationFinished(bool);
-
 protected:
 
     //! Clear all variables and 'unlink' dialog
@@ -101,9 +95,6 @@ protected:
     //! List of entities to be transformed
     ccHObject*  m_toTransform;
 
-    //! Associated window
-    ccGLWindow* m_associatedWin;
-
     //! Current rotation
     ccGLMatrix  m_rotation;
 
@@ -114,9 +105,6 @@ protected:
     /** The rotation center is actually the center of gravity of the selected 'entities'
     **/
     CCVector3   m_rotationCenter;
-
-	//! Start state
-	bool		m_started;
 };
 
 #endif

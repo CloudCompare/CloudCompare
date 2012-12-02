@@ -25,9 +25,6 @@
 #ifndef CC_COMMON_HEADER
 #define CC_COMMON_HEADER
 
-//! Use OpenGL 'select' mechanism for point picking
-#define CC_OPENGL_POINT_PICKING
-
 //STANDARD SCALAR FIELD NAMES
 #define CC_CLOUD2CLOUD_DISTANCES_DEFAULT_SF_NAME "C2C distances"
 #define CC_TEMP_CHAMFER_DISTANCES_DEFAULT_SF_NAME "Temp. Chamfer distances"

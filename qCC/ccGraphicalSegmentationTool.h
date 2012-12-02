@@ -25,8 +25,8 @@
 #ifndef CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
 #define CC_GRAPHICAL_SEGMENTATION_TOOLS_HEADER
 
-//Qt
-#include <QDialog>
+//Local
+#include <ccOverlayDialog.h>
 
 //qCC_db
 #include <ccHObject.h>
@@ -42,7 +42,7 @@ class ccPointCloud;
 class ccGLWindow;
 
 //! Graphical segmentation mechanism (with polyline)
-class ccGraphicalSegmentationTool : public QDialog, public Ui::GraphicalSegmentationDlg
+class ccGraphicalSegmentationTool : public ccOverlayDialog, public Ui::GraphicalSegmentationDlg
 {
     Q_OBJECT
 
@@ -66,18 +66,16 @@ public:
 	//! Returns a given entity in the the 'to be segmented' pool
 	ccHObject* getEntity(unsigned pos);
 
-	//! Links the manager with a 3D display
-    void linkWith(ccGLWindow* win);
-
-	//! Starts process
-	bool start();
-	//! Stops process
-	/** \unallocateVisibilityArrays whether to unalloacte visiblity arrays on processed entity (warning: entities must still be valid!)
-	**/
-	void stop(bool unallocateVisibilityArrays = true);
+	//inherited from ccOverlayDialog
+    virtual bool linkWith(ccGLWindow* win);
+	virtual bool start();
+	virtual void stop(bool accepted);
 
 	//! Returns whether hidden points should be delete after segmentation
 	bool deleteHiddenPoints() const { return m_deleteHiddenPoints; }
+
+	//! Remove entities from the 'to be segmented' pool
+	void removeAllEntities(bool unallocateVisibilityArrays);
 
 protected slots:
     void segmentIn();
@@ -94,9 +92,6 @@ protected slots:
 	void pauseSegmentationMode(bool);
 	void doSetPolylineSelection();
 	void doSetRectangularSelection();
-
-signals:
-    void segmentationFinished(bool);
 
 protected:
 
@@ -120,15 +115,12 @@ protected:
 	};
 
 	//! Current process state
-	int m_state;
+	unsigned m_state;
 
 	//! Segmentation polyline
 	ccPolyline* m_segmentationPoly;
 	//! Segmentation polyline vertices
 	ccPointCloud* m_polyVertices;
-
-	//! Associated 3D display
-	ccGLWindow* m_associatedWin;
 
 	//! Selection mode
 	bool m_rectangularSelection;

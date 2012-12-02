@@ -25,20 +25,23 @@
 #ifndef CC_CAMERA_PARAM_EDIT_DLG_HEADER
 #define CC_CAMERA_PARAM_EDIT_DLG_HEADER
 
-#include <QDialog>
+//Local
+#include "ccOverlayDialog.h"
+#include "ccGLWindow.h"
 
 #include <ui_cameraParamDlg.h>
 
-#include "ccGLWindow.h"
+//qCC_db
 #include <ccGLMatrix.h>
 
+//system
 #include <map>
 
 class QMdiSubWindow;
 class ccGLWindow;
 
 //! Dialog to interactively edit the camera pose parameters
-class ccCameraParamEditDlg : public QDialog, public Ui::CameraParamDlg
+class ccCameraParamEditDlg : public ccOverlayDialog, public Ui::CameraParamDlg
 {
     Q_OBJECT
 
@@ -47,7 +50,7 @@ public:
     //! Default constructor
 	ccCameraParamEditDlg(QWidget* parent);
 
-    //! Default destructor
+    //! Destructor
 	virtual ~ccCameraParamEditDlg();
 
 	//! Makes this dialog frameless
@@ -56,8 +59,9 @@ public:
     //! Returns matrix corresponding to dialog values
     ccGLMatrix getMatrix();
 
-	//! Links this dialog with a given window
-    void linkWith(ccGLWindow* qWin);
+	//inherited from ccOverlayDialog
+	virtual bool start();
+    virtual bool linkWith(ccGLWindow* win);
 
 public slots:
 
@@ -106,9 +110,6 @@ protected slots:
     void revertToPushedMatrix();
 
 protected:
-
-	//! Associated GL window
-    ccGLWindow* associatedWin;
 
     //! Type of the pushed matrices map structure
     typedef std::map<ccGLWindow*,ccGLMatrix> PushedMatricesMapType;

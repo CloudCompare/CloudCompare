@@ -28,7 +28,11 @@
 #include <CCMiscTools.h>
 
 //OpenGL
+#ifdef __APPLE__
+#include <OpenGL/glu.h>
+#else
 #include <GL/glu.h>
+#endif
 
 //system
 #include <assert.h>

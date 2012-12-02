@@ -61,6 +61,7 @@ class ccPointPropertiesDlg;
 class ccCameraParamEditDlg;
 class ccPointListPickingDlg;
 class ccDrawableObject;
+class ccOverlayDialog;
 
 //class MainWindow 
 
@@ -398,17 +399,17 @@ protected:
     /***        MDI AREA        ***/
     /******************************/
 
-    QMdiArea* mdiArea;
-    QSignalMapper* windowMapper;
+    QMdiArea* m_mdiArea;
+    QSignalMapper* m_windowMapper;
 
     //! CloudCompare MDI area overlay dialogs
     struct ccMDIDialogs
     {
-        QDialog* dialog;
+        ccOverlayDialog* dialog;
         Qt::Corner position;
 
         //! Constructor with dialog and position
-        ccMDIDialogs(QDialog* dlg, Qt::Corner pos)
+        ccMDIDialogs(ccOverlayDialog* dlg, Qt::Corner pos)
         {
             dialog = dlg;
             position = pos;
@@ -419,13 +420,13 @@ protected:
     void placeMDIDialog(ccMDIDialogs& mdiDlg);
 
     //! Registers a MDI area overlay dialog
-    void registerMDIDialog(QDialog* dlg, Qt::Corner pos);
+    void registerMDIDialog(ccOverlayDialog* dlg, Qt::Corner pos);
 
     //! Automatically updates all registered MDI dialogs placement
     void updateMDIDialogsPlacement();
 
     //! Registered MDI area overlay dialogs
-    std::vector<ccMDIDialogs> mdiDialogs;
+    std::vector<ccMDIDialogs> m_mdiDialogs;
 
     /*** dialogs ***/
 

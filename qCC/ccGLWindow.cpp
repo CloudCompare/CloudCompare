@@ -1720,10 +1720,8 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 					PICKING_MODE pickingMode = m_pickingMode;
 					if (pickingMode == ENTITY_PICKING && QApplication::keyboardModifiers() & Qt::ShiftModifier)
 						pickingMode = AUTO_POINT_PICKING;
-#ifndef CC_OPENGL_POINT_PICKING
-					if (m_pickingMode != POINT_PICKING)
-#endif
-						startPicking(event->x(),event->y(),pickingMode);
+
+					startPicking(event->x(),event->y(),pickingMode);
 
 					emit leftButtonClicked(event->x(), event->y());
 
@@ -1788,11 +1786,9 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 		break;
 	case POINT_PICKING:
 	case AUTO_POINT_PICKING:
-#ifdef CC_OPENGL_POINT_PICKING
 		pickingFlags |= CC_DRAW_NAMES;
 		pickingFlags |= CC_DRAW_POINT_NAMES;
 		break;
-#endif
 	case TRIANGLE_PICKING:
 		pickingFlags |= CC_DRAW_NAMES;
 		pickingFlags |= CC_DRAW_TRI_NAMES;
@@ -1888,7 +1884,7 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 		emit entitySelectionChanged(selectedID);
 		m_updateFBO=true;
 	}
-#ifdef CC_OPENGL_POINT_PICKING
+
 	//"3D point" picking
 	else if (pickingMode == POINT_PICKING)
 	{
@@ -1918,7 +1914,6 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 			}
 		}
 	}
-#endif
 
 	return selectedID;
 }

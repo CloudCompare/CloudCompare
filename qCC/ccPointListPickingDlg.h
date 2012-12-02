@@ -30,6 +30,7 @@
 #include "ccPointPickingGenericInterface.h"
 
 class cc2DLabel;
+class ccHObject;
 
 //! Dialog/interactor to graphically pick a list of points
 /** Options let the user to export the list to an ASCII file, to a new cloud, etc.

@@ -117,7 +117,7 @@
     </widget>
    </item>
    <item>
-    <widget class="QToolButton" name="cancelButton">
+    <widget class="QToolButton" name="closeButton">
      <property name="text">
       <string>...</string>
      </property>

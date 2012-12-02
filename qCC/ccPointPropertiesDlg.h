@@ -32,6 +32,7 @@
 
 class cc2DLabel;
 class cc2DViewportLabel;
+class ccHObject;
 
 //! Dialog for simple point picking (information, distance, etc.)
 class ccPointPropertiesDlg : public ccPointPickingGenericInterface, public Ui::PointPropertiesDlg
@@ -40,17 +41,19 @@ class ccPointPropertiesDlg : public ccPointPickingGenericInterface, public Ui::P
 
 public:
 
+	//! Default constructor
 	ccPointPropertiesDlg(QWidget* parent);
+	//! Default destructor
 	virtual ~ccPointPropertiesDlg();
 
     //inherited from ccPointPickingGenericInterface
 	virtual bool start();
 	virtual void stop(bool state);
-    virtual void linkWith(ccGLWindow* win);
+    virtual bool linkWith(ccGLWindow* win);
 
 protected slots:
 
-    void cancel();
+    void onClose();
     void activatePointPropertiesDisplay();
     void activateDistanceDisplay();
     void activateAngleDisplay();

@@ -24,6 +24,7 @@
 
 #include "ccGraphicalSegmentationTool.h"
 
+//Local
 #include "ccGLWindow.h"
 #include "ccConsole.h"
 
@@ -45,13 +46,12 @@
 #include <assert.h>
 
 ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
-	: QDialog(parent)
+	: ccOverlayDialog(parent)
 	, Ui::GraphicalSegmentationDlg()
     , m_somethingHasChanged(false)
 	, m_state(0)
 	, m_segmentationPoly(0)
 	, m_polyVertices(0)
-	, m_associatedWin(0)
 	, m_rectangularSelection(false)
 	, m_deleteHiddenPoints(false)
 {
@@ -89,8 +89,6 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 
 ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
 {
-    stop();
-
     if (m_segmentationPoly)
         delete m_segmentationPoly;
     m_segmentationPoly=0;
@@ -100,21 +98,38 @@ ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
     m_polyVertices=0;
 }
 
-void ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
+bool ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
 {
-    assert(m_polyVertices && m_segmentationPoly);
+    assert(m_segmentationPoly);
 
-    if (m_associatedWin)
-        stop();
+	ccGLWindow* oldWin = m_associatedWin;
 
-    m_associatedWin = win;
+	if (!ccOverlayDialog::linkWith(win))
+		return false;
 
-    connect(m_associatedWin, SIGNAL(leftButtonClicked(int,int)), this, SLOT(addPointToPolyline(int,int)));
-    connect(m_associatedWin, SIGNAL(rightButtonClicked(int,int)), this, SLOT(closePolyLine(int,int)));
-	connect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(updatePolyLine(int,int,Qt::MouseButtons)));
-	connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
+	if (oldWin)
+	{
+		disconnect(m_associatedWin, SIGNAL(leftButtonClicked(int,int)), this, SLOT(addPointToPolyline(int,int)));
+		disconnect(m_associatedWin, SIGNAL(rightButtonClicked(int,int)), this, SLOT(closePolyLine(int,int)));
+		disconnect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(updatePolyLine(int,int,Qt::MouseButtons)));
+		disconnect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
+
+		if (m_segmentationPoly)
+			m_segmentationPoly->setDisplay(0);
+	}
 	
-    m_segmentationPoly->setDisplay(m_associatedWin);
+	if (m_associatedWin)
+	{
+		connect(m_associatedWin, SIGNAL(leftButtonClicked(int,int)), this, SLOT(addPointToPolyline(int,int)));
+		connect(m_associatedWin, SIGNAL(rightButtonClicked(int,int)), this, SLOT(closePolyLine(int,int)));
+		connect(m_associatedWin, SIGNAL(mouseMoved(int,int,Qt::MouseButtons)), this, SLOT(updatePolyLine(int,int,Qt::MouseButtons)));
+		connect(m_associatedWin, SIGNAL(buttonReleased()), this, SLOT(closeRectangle()));
+
+		if (m_segmentationPoly)
+			m_segmentationPoly->setDisplay(m_associatedWin);
+	}
+
+	return true;
 }
 
 bool ccGraphicalSegmentationTool::start()
@@ -141,12 +156,31 @@ bool ccGraphicalSegmentationTool::start()
 
     reset();
 
-    show();
-
-    return true;
+	return ccOverlayDialog::start();
 }
 
-void ccGraphicalSegmentationTool::stop(bool unallocateVisibilityArrays/*=true*/)
+void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArrays)
+{
+	if (unallocateVisibilityArrays)
+	{
+		while (!m_toSegment.empty())
+		{
+			ccHObject* entity = m_toSegment.back();
+			m_toSegment.pop_back();
+
+			if (entity->isKindOf(CC_POINT_CLOUD))
+				static_cast<ccGenericPointCloud*>(entity)->unallocateVisibilityArray();
+			else if (entity->isKindOf(CC_MESH))
+				static_cast<ccGenericMesh*>(entity)->getAssociatedCloud()->unallocateVisibilityArray();
+		}
+	}
+	else
+	{
+		m_toSegment.clear();
+	}
+}
+
+void ccGraphicalSegmentationTool::stop(bool accepted)
 {
     assert(m_polyVertices && m_segmentationPoly);
 
@@ -157,27 +191,9 @@ void ccGraphicalSegmentationTool::stop(bool unallocateVisibilityArrays/*=true*/)
 	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
     m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
     m_associatedWin->setUnclosable(false);
-    disconnect(m_associatedWin, 0, this, 0);
-
-    m_segmentationPoly->setDisplay(0);
 	m_associatedWin->removeFromOwnDB(m_segmentationPoly);
-    m_associatedWin=0;
 
-	if (!unallocateVisibilityArrays)
-		m_toSegment.clear();
-
-    while (!m_toSegment.empty())
-    {
-        ccHObject* entity = m_toSegment.back();
-        m_toSegment.pop_back();
-
-        if (entity->isKindOf(CC_POINT_CLOUD))
-            static_cast<ccGenericPointCloud*>(entity)->unallocateVisibilityArray();
-        else if (entity->isKindOf(CC_MESH))
-            static_cast<ccGenericMesh*>(entity)->getAssociatedCloud()->unallocateVisibilityArray();
-    }
-
-    close();
+	ccOverlayDialog::stop(accepted);
 }
 
 void ccGraphicalSegmentationTool::reset()
@@ -573,18 +589,18 @@ void ccGraphicalSegmentationTool::doSetRectangularSelection()
 void ccGraphicalSegmentationTool::apply()
 {
 	m_deleteHiddenPoints = false;
-    emit segmentationFinished(true);
+	stop(true);
 }
 
 void ccGraphicalSegmentationTool::applyAndDelete()
 {
 	m_deleteHiddenPoints = true;
-    emit segmentationFinished(true);
+	stop(true);
 }
 
 void ccGraphicalSegmentationTool::cancel()
 {
 	reset();
 	m_deleteHiddenPoints = false;
-    emit segmentationFinished(false);
+	stop(false);
 }

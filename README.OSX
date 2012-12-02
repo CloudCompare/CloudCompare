@@ -14,5 +14,23 @@ mkdir build
 cd build
 cmake ..
 make
+make install
+
+== Plugins ==
+
+Plugins successfully tested:
+- qBlur
+- qEDL
+- qHPR
+- qPCV
+- qSSAO
+
+Plugins not working (yet):
+- qPoissonRecon
+- qRansacSD
+
+Plugins not tested (yet):
+- qPCL
+- qKinect
 
 == EOF ==

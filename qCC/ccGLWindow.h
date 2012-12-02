@@ -216,7 +216,6 @@ signals:
 	//! Signal emitted when an entity is selected in the 3D view
     void entitySelectionChanged(int uniqueID);
 
-    #ifdef CC_OPENGL_POINT_PICKING
     //! Signal emitted in point picking mode to declare picking of a given point
     /** \param cloudID cloud unique ID
         \param pointIndex point index in cloud
@@ -224,7 +223,6 @@ signals:
 		\parm y mouse cursor y position
     **/
     void pointPicked(int cloudUniqueID, unsigned pointIndex, int x, int y);
-    #endif
 
 	//! Signal emitted when the window base view matrix is changed
     void viewMatRotated(const ccGLMatrix& rotMat);

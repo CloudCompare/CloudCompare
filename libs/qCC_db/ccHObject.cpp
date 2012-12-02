@@ -395,8 +395,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
         }
     }
 
-	Container::iterator it = m_children.begin();
-    for (;it!=m_children.end();++it)
+    for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
 		(*it)->draw(context);
 
     if (selected && draw3D && drawInThisContext)
@@ -435,8 +434,7 @@ void ccHObject::applyGLTransformation_recursive(ccGLMatrix* trans/*=NULL*/)
 		updateModificationTime();
 	}
 
-	Container::iterator it = m_children.begin();
-    for (;it!=m_children.end();++it)
+    for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
 		(*it)->applyGLTransformation_recursive(trans);
 
     if (_trans)
@@ -450,8 +448,7 @@ void ccHObject::setDisplay_recursive(ccGenericGLDisplay* win)
 {
     setDisplay(win);
 
-	Container::iterator it = m_children.begin();
-    for (;it!=m_children.end();++it)
+    for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
 		(*it)->setDisplay_recursive(win);
 }
 
@@ -459,8 +456,7 @@ void ccHObject::setSelected_recursive(bool state)
 {
 	setSelected(state);
 
-	Container::iterator it = m_children.begin();
-    for (;it!=m_children.end();++it)
+    for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
 		(*it)->setSelected_recursive(state);
 }
 
@@ -469,8 +465,7 @@ void ccHObject::removeFromDisplay_recursive(ccGenericGLDisplay* win)
 {
     removeFromDisplay(win);
 
-	Container::iterator it = m_children.begin();
-    for (;it!=m_children.end();++it)
+    for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
 		(*it)->removeFromDisplay_recursive(win);
 }
 
@@ -478,8 +473,7 @@ void ccHObject::refreshDisplay_recursive()
 {
     refreshDisplay();
 
-	Container::iterator it = m_children.begin();
-    for (;it!=m_children.end();++it)
+    for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
 		(*it)->refreshDisplay_recursive();
 }
 
@@ -487,8 +481,7 @@ void ccHObject::prepareDisplayForRefresh_recursive()
 {
     prepareDisplayForRefresh();
 
-	Container::iterator it = m_children.begin();
-    for (;it!=m_children.end();++it)
+    for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
 		(*it)->prepareDisplayForRefresh_recursive();
 }
 

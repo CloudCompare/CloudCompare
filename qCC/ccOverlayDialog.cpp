@@ -17,59 +17,87 @@
 //
 //*********************** Last revision of this file ***********************
 //$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
+//$Rev:: 2257                                                              $
+//$LastChangedDate:: 2012-10-11 23:48:15 +0200 (jeu., 11 oct. 2012)        $
 //**************************************************************************
 //
 
-#ifndef CC_POINT_PICKING_GENERIC_INTERFACE_HEADER
-#define CC_POINT_PICKING_GENERIC_INTERFACE_HEADER
+#include "ccOverlayDialog.h"
 
 //Local
-#include "ccOverlayDialog.h"
-#include "ccCommon.h"
-
-//CCLib
-#include <CCGeom.h>
+#include "ccGLWindow.h"
+#include "ccConsole.h"
 
 //system
-#include <vector>
+#include <assert.h>
 
-class ccGLWindow;
-class ccPointCloud;
-
-/** Generic interface for any dialog/graphical interactor that relies on point picking.
-**/
-class ccPointPickingGenericInterface : public ccOverlayDialog
+ccOverlayDialog::ccOverlayDialog(QWidget* parent/*=0*/)
+	: QDialog(parent)
+	, m_associatedWin(0)
+	, m_processing(false)
 {
-    Q_OBJECT
+}
 
-public:
+ccOverlayDialog::~ccOverlayDialog()
+{
+	onLinkedWindowDeletion();
+}
 
-	//! Default constructor
-	ccPointPickingGenericInterface(QWidget* parent=0) : ccOverlayDialog(parent) {}
-	//! Destructor
-	virtual ~ccPointPickingGenericInterface() {};
+bool ccOverlayDialog::linkWith(ccGLWindow* win)
+{
+    if (m_processing)
+    {
+        ccConsole::Warning("[ccOverlayDialog] Can't change associated window while running/displayed!");
+        return false;
+    }
 
-    //inherited from ccOverlayDialog
-    virtual bool linkWith(ccGLWindow* win);
-	virtual bool start();
-	virtual void stop(bool state);
+	if (m_associatedWin)
+	{
+		//same dialog? nothing to do
+		if (m_associatedWin == win)
+			return false;
+		
+		//otherwise, we automatically detach it
+		disconnect(m_associatedWin, SIGNAL(destroyed(QObject*)), this, SLOT(onLinkedWindowDeletion(QObject*)));
+		m_associatedWin = 0;
+	}
 
-protected slots:
+	m_associatedWin = win;
+	if (m_associatedWin)
+		connect(m_associatedWin, SIGNAL(destroyed(QObject*)), this, SLOT(onLinkedWindowDeletion(QObject*)));
 
-    //! Slot to handle directly a picked point (OpenGL based picking)
-    virtual void handlePickedPoint(int cloudID, unsigned pointIdx, int x, int y);
+	return true;
+}
 
-protected:
+void ccOverlayDialog::onLinkedWindowDeletion(QObject* object/*=0*/)
+{
+	if (m_processing)
+		stop(false);
 
-    //! Generic method to process picked points
-    /** \param P picked point coordinates
-        \param cloud picked point cloud
-        \param pointIndex point index in cloud
-    **/
-    virtual void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y)=0;
+	linkWith(0);
+}
 
-};
+bool ccOverlayDialog::start()
+{
+	if (m_processing)
+		return false;
 
-#endif
+	m_processing = true;
+
+	//auto-show
+	show();
+
+	return true;
+}
+
+void ccOverlayDialog::stop(bool accepted)
+{
+	m_processing = false;
+
+	//auto-hide
+	hide();
+
+	linkWith(0);
+
+	emit processFinished(accepted);
+}

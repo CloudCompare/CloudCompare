@@ -52,6 +52,7 @@
 #include <QtGui>
 #include <QWheelEvent>
 #include <QElapsedTimer>
+#include <QSettings>
 
 //System
 #include <math.h>
@@ -68,41 +69,41 @@
 static int s_GlWindowNumber = 0;
 
 ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shareWidget /*=0*/)
-: QGLWidget(format,parent,shareWidget)
-, m_uniqueID(++s_GlWindowNumber) //GL window unique ID
-, m_initialized(false)
-, m_lastMousePos(-1,-1)
-, m_lastMouseOrientation(1,0,0)
-, m_currentMouseOrientation(1,0,0)
-, m_glWidth(0)
-, m_glHeight(0)
-, m_captureMode(false)
-, m_lodActivated(false)
-, m_shouldBeRefreshed(false)
-, m_cursorMoved(false)
-, m_unclosable(false)
-, m_interactionMode(TRANSFORM_CAMERA)
-, m_pickingMode(NO_PICKING)
-, m_captureModeZoomFactor(1.0f)
-, m_pivotPointBackup(0.0f)
-, m_validProjectionMatrix(false)
-, m_validModelviewMatrix(false)
-, m_messageDisplayTime_sec(0)
-, m_lastClickTime_ticks(0)
-, m_sunLightEnabled(true)
-, m_customLightEnabled(false)
-, m_embeddedIconsEnabled(false)
-, m_hotZoneActivated(false)
-, m_activeShader(0)
-, m_shadersEnabled(false)
-, m_fbo(0)
-, m_alwaysUseFBO(false)
-, m_updateFBO(true)
-, m_activeGLFilter(0)
-, m_glFiltersEnabled(false)
-, m_winDBRoot(0)
-, m_globalDBRoot(0) //external DB
-, m_font(font())
+	: QGLWidget(format,parent,shareWidget)
+	, m_uniqueID(++s_GlWindowNumber) //GL window unique ID
+	, m_initialized(false)
+	, m_lastMousePos(-1,-1)
+	, m_lastMouseOrientation(1,0,0)
+	, m_currentMouseOrientation(1,0,0)
+	, m_glWidth(0)
+	, m_glHeight(0)
+	, m_captureMode(false)
+	, m_lodActivated(false)
+	, m_shouldBeRefreshed(false)
+	, m_cursorMoved(false)
+	, m_unclosable(false)
+	, m_interactionMode(TRANSFORM_CAMERA)
+	, m_pickingMode(NO_PICKING)
+	, m_captureModeZoomFactor(1.0f)
+	, m_pivotPointBackup(0.0f)
+	, m_validProjectionMatrix(false)
+	, m_validModelviewMatrix(false)
+	, m_messageDisplayTime_sec(0)
+	, m_lastClickTime_ticks(0)
+	, m_sunLightEnabled(true)
+	, m_customLightEnabled(false)
+	, m_embeddedIconsEnabled(false)
+	, m_hotZoneActivated(false)
+	, m_activeShader(0)
+	, m_shadersEnabled(false)
+	, m_fbo(0)
+	, m_alwaysUseFBO(false)
+	, m_updateFBO(true)
+	, m_activeGLFilter(0)
+	, m_glFiltersEnabled(false)
+	, m_winDBRoot(0)
+	, m_globalDBRoot(0) //external DB
+	, m_font(font())
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -145,6 +146,25 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 
 	//Embedded icons (point size, etc.)
 	enableEmbeddedIcons(true);
+
+	//auto-load last perspective settings
+	{
+		QSettings settings;
+		settings.beginGroup("ccGLWindow");
+
+		//write parameters
+		bool perspectiveView = settings.value("perspectiveView", false).toBool();
+		bool objectCenteredPerspective = settings.value("objectCenteredPerspective", true).toBool();
+
+		settings.endGroup();
+
+		if (!perspectiveView)
+			ccLog::Print("[ccGLWindow] Persective is off by default");
+		else
+			ccLog::Print(QString("[ccGLWindow] Persective is on by default (%1)").arg(objectCenteredPerspective ? "object-centered" : "viewer-centered"));
+
+		setPerspectiveState(perspectiveView, objectCenteredPerspective);
+	}
 }
 
 ccGLWindow::~ccGLWindow()
@@ -2014,9 +2034,9 @@ void ccGLWindow::toggleSunLight()
 
 void ccGLWindow::glEnableCustomLight()
 {
-	glLightfv(GL_LIGHT0,GL_DIFFUSE,ccGui::Parameters().lightDiffuseColor);
-	glLightfv(GL_LIGHT0,GL_AMBIENT,ccGui::Parameters().lightAmbientColor);
-	glLightfv(GL_LIGHT0,GL_SPECULAR,ccGui::Parameters().lightSpecularColor);
+	glLightfv(GL_LIGHT1,GL_DIFFUSE,ccGui::Parameters().lightDiffuseColor);
+	glLightfv(GL_LIGHT1,GL_AMBIENT,ccGui::Parameters().lightAmbientColor);
+	glLightfv(GL_LIGHT1,GL_SPECULAR,ccGui::Parameters().lightSpecularColor);
 	glLightfv(GL_LIGHT1,GL_POSITION,m_customLightPos);
 	glLightModelf(GL_LIGHT_MODEL_TWO_SIDE,GL_TRUE);
 	glEnable(GL_LIGHT1);
@@ -2093,6 +2113,18 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredPerspective)
 		m_params.aspectRatio = 1.0;
 
 		displayNewMessage("Perspective OFF");
+	}
+
+	//auto-save last perspective settings
+	{
+		QSettings settings;
+		settings.beginGroup("ccGLWindow");
+
+		//write parameters
+		settings.setValue("perspectiveView", m_params.perspectiveView);
+		settings.setValue("objectCenteredPerspective", m_params.objectCenteredPerspective);
+
+		settings.endGroup();
 	}
 
 	invalidateViewport();

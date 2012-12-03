@@ -101,3 +101,10 @@ void ccOverlayDialog::stop(bool accepted)
 
 	emit processFinished(accepted);
 }
+
+void ccOverlayDialog::reject()
+{
+	QDialog::reject();
+
+	stop(false);
+}

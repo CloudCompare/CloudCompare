@@ -60,6 +60,9 @@ public:
     **/
 	virtual void stop(bool accepted);
 
+	//reimplemented from QDialog
+	virtual void reject();
+
 signals:
 
     //! Signal emitted when process is finished

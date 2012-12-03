@@ -5816,6 +5816,9 @@ void MainWindow::saveFile()
 				defaultFileName = parts[0];
 		}
 
+		if (!QFileInfo(defaultFileName).suffix().isEmpty()) //we remove extension
+			defaultFileName = QFileInfo(defaultFileName).baseName();
+
 		dir += defaultFileName;
 	}
 

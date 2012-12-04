@@ -187,7 +187,12 @@ void ccGraphicalSegmentationTool::stop(bool accepted)
     if (!m_associatedWin) //job already done
         return;
 
-    m_associatedWin->displayNewMessage("Segmentation [OFF]");
+	m_associatedWin->displayNewMessage("Segmentation [OFF]",
+										ccGLWindow::UPPER_CENTER_MESSAGE,
+										false,
+										2,
+										ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+
 	m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
     m_associatedWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
     m_associatedWin->setUnclosable(false);
@@ -528,16 +533,23 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
             m_polyVertices->clear();
         }
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
-        m_associatedWin->displayNewMessage("Segmentation [PAUSED] - Unpause to segment",3600);
+        m_associatedWin->displayNewMessage("Segmentation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+        m_associatedWin->displayNewMessage("Unpause to segment",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
     }
     else
     {
 		m_state = STARTED;
 		m_associatedWin->setInteractionMode(ccGLWindow::SEGMENT_ENTITY);
 		if (m_rectangularSelection)
-			m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection) - Right click: set opposite corners",3600);
+		{
+			m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Right click: set opposite corners",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+		}
 		else
-			m_associatedWin->displayNewMessage("Segmentation [ON] (polygonal selection) - Right click: add contour points / Left click: close",3600);
+		{
+			m_associatedWin->displayNewMessage("Segmentation [ON] (polygonal selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+			m_associatedWin->displayNewMessage("Right click: add contour points / Left click: close",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+		}
     }
 
 	//update mini-GUI
@@ -563,7 +575,9 @@ void ccGraphicalSegmentationTool::doSetPolylineSelection()
 		pauseSegmentationMode(false);
 	}
 
-	m_associatedWin->displayNewMessage("Segmentation [ON] (polygonal selection) - Right click: add contour points / Left click: close",3600);
+	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
+	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->displayNewMessage("Right click: set opposite corners",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 }
 
 void ccGraphicalSegmentationTool::doSetRectangularSelection()
@@ -583,7 +597,9 @@ void ccGraphicalSegmentationTool::doSetRectangularSelection()
 		pauseSegmentationMode(false);
 	}
 
-	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection) - Right click: set opposite corners",3600);
+	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
+	m_associatedWin->displayNewMessage("Segmentation [ON] (rectangular selection)",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+	m_associatedWin->displayNewMessage("Right click: set opposite corners",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
 }
 
 void ccGraphicalSegmentationTool::apply()

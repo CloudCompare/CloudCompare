@@ -80,6 +80,22 @@ public:
 							SEGMENT_ENTITY,
 	};
 
+	//! Default message positions on screen
+	enum MessagePosition {  LOWER_LEFT_MESSAGE,
+							UPPER_CENTER_MESSAGE,
+							SCREEN_CENTER_MESSAGE,
+	};
+
+	//! Message type
+	enum MessageType {  CUSTOM_MESSAGE,
+						SCREEN_SIZE_MESSAGE,
+						PERSPECTIVE_STATE_MESSAGE,
+						SUN_LIGHT_STATE_MESSAGE,
+						CUSTOM_LIGHT_STATE_MESSAGE,
+						MANUAL_TRANSFORMATION_MESSAGE,
+						MANUAL_SEGMENTATION_MESSAGE,
+	};
+
 	//! Default constructor
     ccGLWindow(QWidget *parent = 0, const QGLFormat& format=QGLFormat::defaultFormat(), QGLWidget* shareWidget = 0);
 	//! Default destructor
@@ -105,16 +121,18 @@ public:
 	virtual const ccViewportParameters& getViewportParameters() const { return m_params; }
 
     //! Displays a status message in the bottom-left corner
-    /** Warning this message will be overwritten by any other call to this method.
+    /** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
+		\param message message (if message is empty and append is 'false', all messages will be cleared)
+		\param pos message position on screen
+		\param append whether to append the message or to replace existing one(s) (only messages of the same type are impacted)
+		\param displayMaxDelay_sec minimum display duration
+		\param type message type (if not custom, only one message of this type at a time is accepted)
     **/
-	virtual void displayNewMessage(const QString& message, int displayMaxDelay_sec=2); //2 secondes par defaut
-
-    //! Displays a status message in the center
-    /** Warning: this message won't be erased until a new call to this method
-        is done (without any argument for simple erasion, or with an other
-        message).
-    **/
-	virtual void displayCenterMessage(const QString& centerMessage = QString());
+	virtual void displayNewMessage(const QString& message,
+									MessagePosition pos,
+									bool append=false,
+									int displayMaxDelay_sec=2,
+									MessageType type=CUSTOM_MESSAGE);
 
     virtual void setZoom(float value);
     virtual void setPivotPoint(float x, float y, float z);
@@ -422,11 +440,21 @@ protected:
 	float m_captureModeZoomFactor;
 
     //! Temporary Message to display in the lower-left corner
-    QString m_messageToDisplayLowerLeft;
-    //! Permanent message to display in the center
-    QString m_messageToDisplayCenter;
-	//! Message display end time (sec)
-	qint64 m_messageDisplayTime_sec;
+	struct MessageToDisplay
+	{
+		//! Message
+		QString message;
+		//! Message end time (sec)
+		qint64 messageValidity_sec;
+		//! Message position on screen
+		MessagePosition position;
+		//! Message type
+		MessageType type;
+	};
+
+	//! List of messages to display
+	std::list<MessageToDisplay> m_messagesToDisplay;
+
 	//! Last click time (msec)
 	qint64 m_lastClickTime_ticks;
 

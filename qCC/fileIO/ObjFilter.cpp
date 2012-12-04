@@ -277,7 +277,6 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	//vertices
 	ccPointCloud* vertices = new ccPointCloud("vertices");
 	int pointsRead = 0;
-	int maxPoints = 0;
 
 	//materials
 	ccMaterialSet* materials = 0;
@@ -290,13 +289,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	TextureCoordsContainer* texCoords = 0;
 	bool hasTexCoords = false;
 	int texCoordsRead = 0;
-	int maxTexCoords = 0;
 	int maxTexCoordIndex = -1;
 
 	//normals
 	NormsIndexesTableType* normals = 0;
 	int normsRead = 0;
-	int maxNorms = 0;
 	bool normalsPerFacetGlobal = false;
 	bool normalsPerFacet = false;
 	int maxTriNormIndex = -1;
@@ -375,10 +372,10 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 		{
 			if (tokens.front() == "v")
 			{
-				if (pointsRead >= maxPoints)
+				//reserve more memory if necessary
+				if (vertices->size() == vertices->capacity())
 				{
-					maxPoints += MAX_NUMBER_OF_ELEMENTS_PER_CHUNK;
-					if (!vertices->reserve(maxPoints))
+					if (!vertices->reserve(vertices->capacity()+MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
 					{
 						objWarnings[NOT_ENOUGH_MEMORY]=true;
 						error=true;
@@ -428,16 +425,14 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			}
 			else if (tokens.front() == "vt") //vt = vertex texture
 			{
-				if (texCoordsRead==maxTexCoords)
+				if (!texCoords)
 				{
-					if (!texCoords)
-					{
-						texCoords = new TextureCoordsContainer();
-						texCoords->link();
-					}
-
-					maxTexCoords += MAX_NUMBER_OF_ELEMENTS_PER_CHUNK;
-					if (!texCoords->reserve(maxTexCoords))
+					texCoords = new TextureCoordsContainer();
+					texCoords->link();
+				}
+				if (texCoords->currentSize() == texCoords->capacity())
+				{
+					if (!texCoords->reserve(texCoords->capacity()+MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
 					{
 						objWarnings[NOT_ENOUGH_MEMORY]=true;
 						error=true;
@@ -462,16 +457,14 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			}
 			else if (tokens.front() == "vn") //vn = vertex normal --> in fact it can also be a facet normal!!!
 			{
-				if (normsRead == maxNorms)
+				if (!normals)
 				{
-					if (!normals)
-					{
-						normals = new NormsIndexesTableType;
-						normals->link();
-					}
-
-					maxNorms += MAX_NUMBER_OF_ELEMENTS_PER_CHUNK;
-					if (!normals->reserve(maxNorms))
+					normals = new NormsIndexesTableType;
+					normals->link();
+				}
+				if (normals->currentSize() == normals->capacity())
+				{
+					if (!normals->reserve(normals->capacity()+MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
 					{
 						objWarnings[NOT_ENOUGH_MEMORY]=true;
 						error=true;
@@ -843,16 +836,16 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			ccConsole::Print("[ObjFilter::Load] %i tex. coords, %i normals",texCoordsRead,normsRead);
 
 		//do some cleaning
-		if (pointsRead<maxPoints)
-			vertices->resize(pointsRead);
-		if (normsRead<maxNorms)
-			normals->resize(normsRead);
-		if (texCoordsRead<maxTexCoords)
-			texCoords->resize(texCoordsRead);
+		if (vertices->size()<vertices->capacity())
+			vertices->resize(vertices->size());
+		if (normals->currentSize()<normals->capacity())
+			normals->resize(normals->currentSize());
+		if (texCoords->currentSize()<texCoords->capacity())
+			texCoords->resize(texCoords->currentSize());
 
 		//if we have at least one mesh
 		ccGenericMesh* baseMesh = 0;
-		assert(!tri); //last mesh should have been save or discared properly then set to 0!
+		assert(!tri); //last mesh should have been saved or discared properly then set to 0!
 		if (!meshes.empty())
 		{
 			if (maxVertexIndex>=pointsRead

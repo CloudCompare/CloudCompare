@@ -75,7 +75,7 @@ public:
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N);
 	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[]);
 	virtual bool getColorFromTexture(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture);
-	
+	virtual void setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable = true);
 
 	//inherited methods (GenericIndexedMesh)
 	virtual void forEach(genericTriangleAction& anAction);
@@ -219,6 +219,9 @@ public:
 		\return true if ok, false if there's not enough memory
 	**/
 	bool reservePerTriangleTexCoordIndexes();
+
+	//! Remove per-triangle tex coords indexes
+	void removePerTriangleTexCoordIndexes();
 
 	//! Adds a triplet of tex coords indexes for next triangle
 	/** Make sure per-triangle tex coords indexes array is allocated

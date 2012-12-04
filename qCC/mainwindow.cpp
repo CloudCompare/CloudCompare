@@ -4458,7 +4458,7 @@ void MainWindow::doPickRotationCenter()
 {
 	if (s_pickingWindow)
 	{
-		s_pickingWindow->displayNewMessage("Rotation center picking aborted");
+		s_pickingWindow->displayNewMessage("Rotation center picking aborted",ccGLWindow::LOWER_LEFT_MESSAGE);
 		s_pickingWindow->redraw();
 		cancelPickRotationCenter();
 		return;
@@ -4505,7 +4505,7 @@ void MainWindow::doPickRotationCenter()
 
 	connect(win, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
 	win->setPickingMode(ccGLWindow::POINT_PICKING);
-	win->displayNewMessage("Pick a point to be used as rotation center (click on icon again to cancel)",3600);
+	win->displayNewMessage("Pick a point to be used as rotation center (click on icon again to cancel)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
 	win->redraw();
 	s_pickingWindow = win;
 
@@ -4527,7 +4527,7 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 			if (P)
 			{
 				unsigned precision = ccGui::Parameters().displayedNumPrecision;
-				s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision));
+				s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
 				s_pickingWindow->setPivotPoint(P->x,P->y,P->z);
 				s_pickingWindow->setScreenPan(0,0);
 				s_pickingWindow->redraw();

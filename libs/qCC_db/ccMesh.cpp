@@ -1061,7 +1061,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (col3)
 					glColor3ubv(col3);
 				if (Tx3)
-					glTexCoord3fv(Tx3);
+					glTexCoord2fv(Tx3);
 				glVertex3fv(m_associatedCloud->getPoint(tsi->i3)->u);
 
 				if (showWired)
@@ -1398,6 +1398,14 @@ bool ccMesh::hasTriNormals() const
 /************    PER-TRIANGLE TEX COORDS    **************/
 /*********************************************************/
 
+void ccMesh::setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable/*=true*/)
+{
+	ccGenericMesh::setTexCoordinatesTable(texCoordsTable,autoReleaseOldTable);
+
+	if (!m_texCoords)
+		removePerTriangleTexCoordIndexes(); //auto-remove per-triangle indexes
+}
+
 bool ccMesh::reservePerTriangleTexCoordIndexes()
 {
 	assert(!m_texCoordIndexes); //try to avoid doing this twice!
@@ -1410,6 +1418,15 @@ bool ccMesh::reservePerTriangleTexCoordIndexes()
 	assert(m_triIndexes && m_triIndexes->isAllocated());
 
 	return m_texCoordIndexes->reserve(m_triIndexes->capacity());
+}
+
+void ccMesh::removePerTriangleTexCoordIndexes()
+{
+	triangleTexCoordIndexesSet* texCoordIndexes = m_texCoordIndexes;
+	m_texCoordIndexes = 0;
+
+	if (texCoordIndexes)
+		texCoordIndexes->release();
 }
 
 void ccMesh::addTriangleTexCoordIndexes(int i1, int i2, int i3)

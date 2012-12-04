@@ -88,7 +88,6 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	, m_pivotPointBackup(0.0f)
 	, m_validProjectionMatrix(false)
 	, m_validModelviewMatrix(false)
-	, m_messageDisplayTime_sec(0)
 	, m_lastClickTime_ticks(0)
 	, m_sunLightEnabled(true)
 	, m_customLightEnabled(false)
@@ -151,11 +150,11 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	{
 		QSettings settings;
 		settings.beginGroup("ccGLWindow");
-
-		//write parameters
+		//load parameters
 		bool perspectiveView = settings.value("perspectiveView", false).toBool();
 		bool objectCenteredPerspective = settings.value("objectCenteredPerspective", true).toBool();
-
+		m_sunLightEnabled = settings.value("sunLightEnabled", true).toBool();
+		m_customLightEnabled = settings.value("customLightEnabled", false).toBool();
 		settings.endGroup();
 
 		if (!perspectiveView)
@@ -163,7 +162,12 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 		else
 			ccLog::Print(QString("[ccGLWindow] Persective is on by default (%1)").arg(objectCenteredPerspective ? "object-centered" : "viewer-centered"));
 
+		//apply saved parameters
 		setPerspectiveState(perspectiveView, objectCenteredPerspective);
+		if (m_customLightEnabled)
+			displayNewMessage("Warning: custom light is ON",ccGLWindow::LOWER_LEFT_MESSAGE,false,2,CUSTOM_LIGHT_STATE_MESSAGE);
+		if (!m_sunLightEnabled)
+			displayNewMessage("Warning: sun light is OFF",ccGLWindow::LOWER_LEFT_MESSAGE,false,2,SUN_LIGHT_STATE_MESSAGE);
 	}
 }
 
@@ -257,10 +261,11 @@ void ccGLWindow::initializeGL()
 	glDisable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	m_initialized = true;
-	displayNewMessage("Initialized ...");
-
 	ccGLUtils::CatchGLError("ccGLWindow::initializeGL");
+
+	m_initialized = true;
+
+	ccLog::Print("[ccGLWindow] 3D view initialized");
 }
 
 static bool s_resizeGLInitSuccess=true;
@@ -291,7 +296,11 @@ void ccGLWindow::resizeGL(int w, int h)
 	if (m_activeGLFilter)
 		s_resizeGLInitSuccess &= initGLFilter(m_glWidth,m_glHeight);
 
-	displayNewMessage(QString("New size = %1 * %2 (px)").arg(w).arg(h));
+	displayNewMessage(QString("New size = %1 * %2 (px)").arg(w).arg(h),
+						ccGLWindow::LOWER_LEFT_MESSAGE,
+						false,
+						2,
+						SCREEN_SIZE_MESSAGE);
 
 	s_resizeGLInitSuccess &= !ccGLUtils::CatchGLError("ccGLWindow::resizeGL");
 }
@@ -310,7 +319,7 @@ void ccGLWindow::testFrameRate()
 {
 	if (s_frameRateTestInProgress)
 	{
-		displayNewMessage("Framerate test already in progress!");
+		ccLog::Error("Framerate test already in progress!");
 		return;
 	}
 	s_frameRateTestInProgress = true;
@@ -321,7 +330,10 @@ void ccGLWindow::testFrameRate()
 	//s_frameRateTimer.setParent(this);
 	connect(&s_frameRateTimer, SIGNAL(timeout()), this, SLOT(redraw()), Qt::QueuedConnection);
 
-	displayNewMessage("Framerate test in progress ...",3600);
+	displayNewMessage("[Framerate test in progress]",
+						ccGLWindow::UPPER_CENTER_MESSAGE,
+						true,
+						3600);
 
 	//let's start
 	s_frameRateCurrentFrame = 0;
@@ -344,15 +356,16 @@ void ccGLWindow::stopFrameRateTest()
 	m_params.baseViewMat = s_frameRateBackupMat;
 	m_validModelviewMatrix = false;
 
+	displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear message in the upper center area
 	if (s_frameRateElapsedTime_ms>0)
 	{
 		QString message = QString("Framerate: %1 f/s").arg((double)s_frameRateCurrentFrame*1.0e3/(double)s_frameRateElapsedTime_ms,0,'f',3);
-		displayNewMessage(message);
+		displayNewMessage(message,ccGLWindow::LOWER_LEFT_MESSAGE,true);
 		ccConsole::Print(message);
 	}
 	else
 	{
-		displayNewMessage("An error occured during framerate test!");
+		ccLog::Error("An error occured during framerate test!");
 	}
 
 	redraw();
@@ -462,26 +475,59 @@ void ccGLWindow::paintGL()
 			//if fbo --> override color
 			drawScale(m_fbo && m_activeGLFilter ? ccColor::black : textCol);
 
-		//current message (if valid)
-		if (ccTimer::Sec()<m_messageDisplayTime_sec)
+		//current messages (if valid)
+		if (!m_messagesToDisplay.empty())
 		{
+			qint64 currentTime_sec = ccTimer::Sec();
+
 			//if fbo --> override color
 			//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
 			//glColor3ubv(m_fbo && m_activeGLFilter ? ccColor::black : textCol);
 			const unsigned char* col = (m_fbo && m_activeGLFilter ? ccColor::black : textCol);
 			glColor3f((float)col[0]/(float)MAX_COLOR_COMP,(float)col[1]/(float)MAX_COLOR_COMP,(float)col[2]/(float)MAX_COLOR_COMP);
-			renderText(10, m_glHeight-20, m_messageToDisplayLowerLeft,m_font);
-		}
-		if (!m_messageToDisplayCenter.isEmpty())
-		{
-			QFont newFont(m_font);
-			newFont.setPointSize(12);
-			QRect rect = QFontMetrics(newFont).boundingRect(m_messageToDisplayCenter);
-			//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-			//glColor3ubv(m_fbo && m_activeGLFilter ? ccColor::black : textCol);
-			const unsigned char* col = (m_fbo && m_activeGLFilter ? ccColor::black : textCol);
-			glColor3f((float)col[0]/(float)MAX_COLOR_COMP,(float)col[1]/(float)MAX_COLOR_COMP,(float)col[2]/(float)MAX_COLOR_COMP);
-			renderText((m_glWidth-rect.width())/2, (m_glHeight-rect.height())/2, m_messageToDisplayCenter,newFont);
+
+			int ll_currentHeight = m_glHeight-10; //lower left
+			int uc_currentHeight = 10; //upper center
+
+			std::list<MessageToDisplay>::iterator it = m_messagesToDisplay.begin();
+			while (it != m_messagesToDisplay.end())
+			{
+				//no more valid? we delete the message
+				if (it->messageValidity_sec < currentTime_sec)
+				{
+					it = m_messagesToDisplay.erase(it);
+				}
+				else
+				{
+					switch(it->position)
+					{
+					case LOWER_LEFT_MESSAGE:
+						{
+							renderText(10, ll_currentHeight, it->message,m_font);
+							int messageHeight = QFontMetrics(m_font).height();
+							ll_currentHeight -= (messageHeight*5)/4; //add a 25% margin
+						}
+						break;
+					case UPPER_CENTER_MESSAGE:
+						{
+							QRect rect = QFontMetrics(m_font).boundingRect(it->message);
+							renderText((m_glWidth-rect.width())/2, uc_currentHeight+rect.height(), it->message,m_font);
+							uc_currentHeight += (rect.height()*5)/4; //add a 25% margin
+						}
+						break;
+					case SCREEN_CENTER_MESSAGE:
+						{
+							QFont newFont(m_font);
+							newFont.setPointSize(12);
+							QRect rect = QFontMetrics(newFont).boundingRect(it->message);
+							//only one message supported in the screen center (for the moment ;)
+							renderText((m_glWidth-rect.width())/2, (m_glHeight-rect.height())/2, it->message,newFont);
+						}
+						break;
+					}
+					++it;
+				}
+			}
 		}
 
 		if (m_hotZoneActivated)
@@ -500,6 +546,7 @@ void ccGLWindow::paintGL()
 			newFont.setPointSize(12);
 			QFontMetrics newMetrics(newFont);
 
+			glPushAttrib(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_BLEND);
 
 			//label
@@ -542,6 +589,7 @@ void ccGLWindow::paintGL()
 			xStart += c_iconSize;
 
 			glDisable(GL_BLEND);
+			glPopAttrib();
 		}
 	}
 
@@ -653,7 +701,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	if (m_customLightEnabled)
 	{
 		glEnableCustomLight();
-		if (!m_captureMode && !m_params.perspectiveView)
+		if (!m_captureMode/* && !m_params.perspectiveView*/)
 			//we display it as a litle 3D star
 			displayCustomLight();
 	}
@@ -1972,15 +2020,66 @@ void ccGLWindow::processHits(GLint hits, int& entID, int& subCompID)
 	}
 }
 
-void ccGLWindow::displayNewMessage(const QString& message, int displayMaxDelay_sec)
+void ccGLWindow::displayNewMessage(const QString& message,
+								   MessagePosition pos,
+								   bool append/*=false*/,
+								   int displayMaxDelay_sec/*=2*/,
+								   MessageType type/*=CUSTOM_MESSAGE*/)
 {
-	m_messageDisplayTime_sec = ccTimer::Sec()+(qint64)displayMaxDelay_sec;
-	m_messageToDisplayLowerLeft = message;
-}
+	if (message.isEmpty())
+	{
+		if (!append)
+		{
+			std::list<MessageToDisplay>::iterator it = m_messagesToDisplay.begin();
+			while (it != m_messagesToDisplay.end())
+			{
+				//same position? we remove the message
+				if (it->position == pos)
+					it = m_messagesToDisplay.erase(it);
+			}
+		}
+		else
+		{
+			ccLog::Warning("[ccGLWindow::displayNewMessage] Appending an empty message has no effect!"); 
+		}
+		return;
+	}
 
-void ccGLWindow::displayCenterMessage(const QString& centerMessage /*= QString()*/)
-{
-	m_messageToDisplayCenter = centerMessage;
+	//shall we replace the equivalent message(if any)?
+	if (!append)
+	{
+		//only if type is not 'custom'
+		if (type != CUSTOM_MESSAGE)
+		{
+			for (std::list<MessageToDisplay>::iterator it = m_messagesToDisplay.begin(); it != m_messagesToDisplay.end();)
+			{
+				//same type? we remove it
+				if (it->type == type)
+					it = m_messagesToDisplay.erase(it);
+				else
+					++it;
+			}
+		}
+		else
+		{
+			ccLog::Warning("[ccGLWindow::displayNewMessage] Append is forced for custom messages!");
+		}
+	}
+	else
+	{
+		if (pos == SCREEN_CENTER_MESSAGE)
+		{
+			ccLog::Warning("[ccGLWindow::displayNewMessage] Append is not supported for center screen messages!"); 
+			append = false;
+		}
+	}
+
+	MessageToDisplay mess;
+	mess.message = message;
+	mess.messageValidity_sec = ccTimer::Sec()+(qint64)displayMaxDelay_sec;
+	mess.position = pos;
+	mess.type = type;
+	m_messagesToDisplay.push_back(mess);
 }
 
 void ccGLWindow::setPointSize(float size)
@@ -2023,8 +2122,17 @@ void ccGLWindow::glDisableSunLight()
 void ccGLWindow::setSunLight(bool state)
 {
 	m_sunLightEnabled=state;
-	displayNewMessage(state ? "Sun light ON" : "Sun light OFF");
+	displayNewMessage(state ? "Sun light ON" : "Sun light OFF",
+						ccGLWindow::LOWER_LEFT_MESSAGE,
+						false,
+						2,
+						SUN_LIGHT_STATE_MESSAGE);
 	redraw();
+
+	//save parameter
+	{
+		QSettings().setValue("ccGLWindow/sunLightEnabled", m_sunLightEnabled);
+	}
 }
 
 void ccGLWindow::toggleSunLight()
@@ -2050,9 +2158,19 @@ void ccGLWindow::glDisableCustomLight()
 void ccGLWindow::setCustomLight(bool state)
 {
 	m_customLightEnabled=state;
-	displayNewMessage(state ? "Custom light ON" : "Custom light OFF");
+	displayNewMessage(state ? "Custom light ON" : "Custom light OFF",
+						ccGLWindow::LOWER_LEFT_MESSAGE,
+						false,
+						2,
+						CUSTOM_LIGHT_STATE_MESSAGE);
+
 	invalidateViewport();
 	redraw();
+
+	//save parameter
+	{
+		QSettings().setValue("ccGLWindow/customLightEnabled", m_customLightEnabled);
+	}
 }
 
 void ccGLWindow::toggleCustomLight()
@@ -2097,12 +2215,20 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredPerspective)
 			emit pivotPointChanged(m_params.pivotPoint);
 
 			//centered perspective
-			displayNewMessage("Centered perspective ON");
+			displayNewMessage("Centered perspective ON",
+								ccGLWindow::LOWER_LEFT_MESSAGE,
+								false,
+								2,
+								PERSPECTIVE_STATE_MESSAGE);
 		}
 		else
 		{
 			//viewer based perspective
-			displayNewMessage("Viewer-based perspective ON");
+			displayNewMessage("Viewer-based perspective ON",
+								ccGLWindow::LOWER_LEFT_MESSAGE,
+								false,
+								2,
+								PERSPECTIVE_STATE_MESSAGE);
 			setZoom(1.0);
 		}
 	}
@@ -2112,18 +2238,20 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredPerspective)
 		emit pivotPointChanged(m_params.pivotPoint);
 		m_params.aspectRatio = 1.0;
 
-		displayNewMessage("Perspective OFF");
+		displayNewMessage("Perspective OFF",
+							ccGLWindow::LOWER_LEFT_MESSAGE,
+							false,
+							2,
+							PERSPECTIVE_STATE_MESSAGE);
 	}
 
 	//auto-save last perspective settings
 	{
 		QSettings settings;
 		settings.beginGroup("ccGLWindow");
-
 		//write parameters
 		settings.setValue("perspectiveView", m_params.perspectiveView);
 		settings.setValue("objectCenteredPerspective", m_params.objectCenteredPerspective);
-
 		settings.endGroup();
 	}
 
@@ -2182,7 +2310,11 @@ void ccGLWindow::applyImageViewport(ccCalibratedImage* theImage)
 
 	setPerspectiveState(true,false);
 
-	displayNewMessage("Viewport applied (viewer based perspective ON)");
+	displayNewMessage("Viewport applied (viewer-based perspective ON)",
+						ccGLWindow::LOWER_LEFT_MESSAGE,
+						false,
+						2,
+						PERSPECTIVE_STATE_MESSAGE);
 
 	redraw();
 }

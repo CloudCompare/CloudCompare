@@ -51,11 +51,6 @@ void ChunkedPointCloud::clear()
 	invalidateBoundingBox();
 }
 
-unsigned ChunkedPointCloud::size() const
-{
-	return m_points->currentSize();
-}
-
 void ChunkedPointCloud::forEach(genericPointAction& anAction)
 {
 	unsigned i,n = size();

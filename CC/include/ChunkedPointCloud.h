@@ -57,7 +57,7 @@ public:
 		virtual ~ChunkedPointCloud();
 
 		//**** inherited form GenericCloud ****//
-		virtual unsigned size() const;
+		inline virtual unsigned size() const { return m_points->currentSize(); }
 		virtual void forEach(genericPointAction& anAction);
 		virtual void getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[]);
 		virtual void placeIteratorAtBegining();
@@ -228,6 +228,9 @@ public:
 
 		//! Deletes all scalar fields associated to this cloud
 		virtual void deleteAllScalarFields();
+
+		//! Returns cloud capacity (i.e. reserved size)
+		inline virtual unsigned capacity() const { return m_points->capacity(); }
 
 protected:
 

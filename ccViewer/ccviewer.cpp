@@ -227,14 +227,12 @@ void ccViewer::selectEntity(int uniqueID)
 bool ccViewer::checkForLoadedEntities()
 {
     bool loadedEntities = true;
-    if (!m_glWindow->getSceneDB())
+	m_glWindow->displayNewMessage(QString(),ccGLWindow::SCREEN_CENTER_MESSAGE); //clear (any) message in the middle area
+
+	if (!m_glWindow->getSceneDB())
     {
-        m_glWindow->displayCenterMessage("Drag & drop files on the 3D window to load them!");
+		m_glWindow->displayNewMessage("Drag & drop files on the 3D window to load them!",ccGLWindow::SCREEN_CENTER_MESSAGE,true,3600);
         loadedEntities = false;
-    }
-    else
-    {
-        m_glWindow->displayCenterMessage();
     }
 
     if (ccGui::Parameters().displayCross != loadedEntities)

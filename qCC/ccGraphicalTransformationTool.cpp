@@ -153,7 +153,8 @@ bool ccGraphicalTransformationTool::start()
 	m_associatedWin->setUnclosable(true);
 	connect(m_associatedWin, SIGNAL(rotation(const ccGLMatrix&)),	this, SLOT(glRotate(const ccGLMatrix&)));
 	connect(m_associatedWin, SIGNAL(translation(const CCVector3&)),	this, SLOT(glTranslate(const CCVector3&)));
-	m_associatedWin->displayNewMessage("[Rotation/Translation mode]",3600);
+	m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
+	m_associatedWin->displayNewMessage("[Rotation/Translation mode]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 	m_associatedWin->updateGL();
 
 	return ccOverlayDialog::start();
@@ -169,7 +170,7 @@ void ccGraphicalTransformationTool::stop(bool state)
 		m_associatedWin->setUnclosable(false);
 		disconnect(m_associatedWin, SIGNAL(rotation(const ccGLMatrix&)),	this, SLOT(glRotate(const ccGLMatrix&)));
 		disconnect(m_associatedWin, SIGNAL(translation(const CCVector3&)),	this, SLOT(glTranslate(const CCVector3&)));
-		m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]");
+		m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]",ccGLWindow::UPPER_CENTER_MESSAGE,false,2,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
 		m_associatedWin->updateGL();
 	}
 

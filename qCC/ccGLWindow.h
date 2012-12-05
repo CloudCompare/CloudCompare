@@ -445,7 +445,7 @@ protected:
 		//! Message
 		QString message;
 		//! Message end time (sec)
-		qint64 messageValidity_sec;
+		int messageValidity_sec;
 		//! Message position on screen
 		MessagePosition position;
 		//! Message type
@@ -456,7 +456,7 @@ protected:
 	std::list<MessageToDisplay> m_messagesToDisplay;
 
 	//! Last click time (msec)
-	qint64 m_lastClickTime_ticks;
+	int m_lastClickTime_ticks;
 
 	//! Sun light position
 	/** Relative to screen.

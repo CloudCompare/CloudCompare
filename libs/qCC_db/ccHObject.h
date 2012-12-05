@@ -160,12 +160,12 @@ public:
     //! Returns last modification time
     /** \return last modification time
     **/
-    qint64 getLastModificationTime() const;
+    int getLastModificationTime() const;
 
     //! Returns last modification time (recursive)
     /** \return last modification time
     **/
-    qint64 getLastModificationTime_recursive() const;
+    int getLastModificationTime_recursive() const;
 
     //! Updates modification time
     void updateModificationTime();
@@ -227,8 +227,8 @@ protected:
     //! Object's children
     Container m_children;
 
-    //! Last modification time
-    qint64 m_lastModificationTime;
+    //! Last modification time (ms)
+    int m_lastModificationTime_ms;
 };
 
 #endif

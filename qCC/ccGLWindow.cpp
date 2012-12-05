@@ -312,7 +312,7 @@ static bool s_frameRateTestInProgress = false;
 static ccGLMatrix s_frameRateBackupMat;
 static QTimer s_frameRateTimer;
 static QElapsedTimer s_frameRateElapsedTimer;
-static qint64 s_frameRateElapsedTime_ms = -1; //i.e. not initialized
+static int s_frameRateElapsedTime_ms = -1; //i.e. not initialized
 static unsigned s_frameRateCurrentFrame = 0;
 
 void ccGLWindow::testFrameRate()
@@ -478,7 +478,8 @@ void ccGLWindow::paintGL()
 		//current messages (if valid)
 		if (!m_messagesToDisplay.empty())
 		{
-			qint64 currentTime_sec = ccTimer::Sec();
+			int currentTime_sec = ccTimer::Sec();
+			//ccLog::Print(QString("[paintGL] Current time: %1 s.").arg(currentTime_sec));
 
 			//if fbo --> override color
 			//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
@@ -2076,10 +2077,12 @@ void ccGLWindow::displayNewMessage(const QString& message,
 
 	MessageToDisplay mess;
 	mess.message = message;
-	mess.messageValidity_sec = ccTimer::Sec()+(qint64)displayMaxDelay_sec;
+	mess.messageValidity_sec = ccTimer::Sec()+displayMaxDelay_sec;
 	mess.position = pos;
 	mess.type = type;
 	m_messagesToDisplay.push_back(mess);
+
+	//ccLog::Print(QString("[displayNewMessage] New message valid until %1 s.").arg(mess.messageValidity_sec));
 }
 
 void ccGLWindow::setPointSize(float size)

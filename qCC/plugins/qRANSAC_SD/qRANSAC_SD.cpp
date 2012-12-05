@@ -48,7 +48,6 @@
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
-#include <ccTimer.h>
 #include <ccPlane.h>
 #include <ccSphere.h>
 #include <ccCylinder.h>

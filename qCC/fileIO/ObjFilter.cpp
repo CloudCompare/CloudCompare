@@ -838,9 +838,9 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 		//do some cleaning
 		if (vertices->size()<vertices->capacity())
 			vertices->resize(vertices->size());
-		if (normals->currentSize()<normals->capacity())
+		if (normals && normals->currentSize()<normals->capacity())
 			normals->resize(normals->currentSize());
-		if (texCoords->currentSize()<texCoords->capacity())
+		if (texCoords && texCoords->currentSize()<texCoords->capacity())
 			texCoords->resize(texCoords->currentSize());
 
 		//if we have at least one mesh

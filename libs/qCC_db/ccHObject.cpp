@@ -62,7 +62,7 @@ ccHObject::ccHObject(QString name/*=QString()*/)
 	: ccObject(name)
 	, ccDrawableObject()
 	, m_parent(0)
-	, m_lastModificationTime(0)
+	, m_lastModificationTime_ms(0)
 {
     setVisible(false);
     lockVisibility(true);
@@ -540,33 +540,33 @@ void ccHObject::removeAllChildren()
     }
 }
 
-qint64 ccHObject::getLastModificationTime() const
+int ccHObject::getLastModificationTime() const
 {
-    return m_lastModificationTime;
+    return m_lastModificationTime_ms;
 }
 
-qint64 ccHObject::getLastModificationTime_recursive() const
+int ccHObject::getLastModificationTime_recursive() const
 {
-    qint64 t = getLastModificationTime();
+    int t = getLastModificationTime();
 
     for (Container::const_iterator it = m_children.begin();it!=m_children.end();++it)
 	{
-		qint64 child_t = (*it)->getLastModificationTime_recursive();
+		int child_t = (*it)->getLastModificationTime_recursive();
 		t = std::max(t,child_t);
 	}
 
     return t;
 }
 
-static qint64 s_lastModificationTime = 0;
+static int s_lastModificationTime_ms = 0;
 void ccHObject::updateModificationTime()
 {
-	m_lastModificationTime = ccTimer::Msec();
+	m_lastModificationTime_ms = ccTimer::Msec();
 	//to be sure that the clock is increasing, whatever its precision!
-	if (m_lastModificationTime <= s_lastModificationTime)
-		m_lastModificationTime = s_lastModificationTime+1;
+	if (m_lastModificationTime_ms <= s_lastModificationTime_ms)
+		m_lastModificationTime_ms = s_lastModificationTime_ms+1;
 	
-	s_lastModificationTime = m_lastModificationTime;
+	s_lastModificationTime_ms = m_lastModificationTime_ms;
 }
 
 bool ccHObject::isSerializable() const

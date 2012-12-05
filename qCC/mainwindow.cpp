@@ -55,7 +55,6 @@
 #include <ccImage.h>
 #include <cc2DLabel.h>
 #include <cc2DViewportObject.h>
-#include <ccTimer.h>
 
 //qCC includes
 #include "ccHeightGridGeneration.h"

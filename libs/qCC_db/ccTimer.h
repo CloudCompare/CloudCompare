@@ -49,9 +49,9 @@ public:
     static void Init();
 
     //! Returns number of seconds since timer was initialized
-    static qint64 Sec();
+    static int Sec();
     //! Returns number of milli-seconds since timer was initialized
-    static qint64 Msec();
+    static int Msec();
 
 protected:
 

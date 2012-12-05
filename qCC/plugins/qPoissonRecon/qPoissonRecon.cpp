@@ -37,7 +37,6 @@
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccMesh.h>
-#include <ccTimer.h>
 
 //System
 #include <algorithm>

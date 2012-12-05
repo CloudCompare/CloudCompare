@@ -25,31 +25,31 @@
 #include "ccTimer.h"
 
 //Qt
-#include <QElapsedTimer>
+#include <QTime>
 
 //System
 #include <assert.h>
 
 //unique instance
-static QElapsedTimer* s_eTimer = 0;
+static QTime* s_eTimer = 0;
 
 void ccTimer::Init()
 {
     if (!s_eTimer)
 	{
-        s_eTimer = new QElapsedTimer();
+        s_eTimer = new QTime();
 		s_eTimer->start();
 	}
 }
 
-qint64 ccTimer::Sec()
+int ccTimer::Sec()
 {
 	assert(s_eTimer && s_eTimer->isValid());
-	return (s_eTimer->msecsSinceReference()+s_eTimer->elapsed())/1000; //elapsed = ms precision
+	return (s_eTimer ? s_eTimer->elapsed()/1000 : 0); //QTime::elapsed = ms precision
 }
 
-qint64 ccTimer::Msec()
+int ccTimer::Msec()
 {
 	assert(s_eTimer && s_eTimer->isValid());
-	return s_eTimer->msecsSinceReference()+s_eTimer->elapsed(); //elapsed = ms precision
+	return (s_eTimer ? s_eTimer->elapsed() : 0); //QTime::elapsed = ms precision
 }

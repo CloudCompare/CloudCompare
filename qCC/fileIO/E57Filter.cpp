@@ -47,7 +47,6 @@
 #include <QApplication>
 #include <QString>
 #include <QMap>
-#include <QElapsedTimer>
 #include <QUuid>
 #include <QBuffer>
 
@@ -678,10 +677,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const char* filename)
 	// Create creationDateTime structure
 	/// Path name: "/creationDateTime
 	e57::StructureNode creationDateTime = e57::StructureNode(imf);
-	QElapsedTimer timer;
-	timer.start();
-	qint64 time = timer.msecsSinceReference();
-	creationDateTime.set("dateTimeValue", e57::FloatNode(imf, (double)time));
+	creationDateTime.set("dateTimeValue", e57::FloatNode(imf, 0.0));
 	creationDateTime.set("isAtomicClockReferenced", e57::IntegerNode(imf,0));
 	root.set("creationDateTime", creationDateTime);
 

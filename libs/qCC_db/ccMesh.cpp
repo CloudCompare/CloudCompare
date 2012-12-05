@@ -366,7 +366,7 @@ void ccMesh::refreshBB()
 	if (!m_associatedCloud)
 		return;
 
-	if (!m_bBox.isValid() || m_lastModificationTime < m_associatedCloud->getLastModificationTime_recursive())
+	if (!m_bBox.isValid() || getLastModificationTime() < m_associatedCloud->getLastModificationTime_recursive())
 	{
 		m_bBox.clear();
 
@@ -605,6 +605,10 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				assert(m_associatedCloud->isA(CC_POINT_CLOUD));
 				rgbColorsTable = static_cast<ccPointCloud*>(m_associatedCloud)->rgbColors();
 			}
+		}
+		else
+		{
+			glColor3fv(context.defaultMat.diffuseFront);
 		}
 
 		if (glParams.showNorms/* || showTriNormals*/)

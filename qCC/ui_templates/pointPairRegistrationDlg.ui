@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>pointPairRegistrationDlg</class>
+ <widget class="QDialog" name="pointPairRegistrationDlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>342</width>
+    <height>307</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Point list picking</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QCheckBox" name="showAlignedCheckBox">
+       <property name="styleSheet">
+        <string notr="true">background-color: yellow;</string>
+       </property>
+       <property name="text">
+        <string>show aligned cloud</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="pickAlignToolButton">
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/Comp/images/comp/pointPicking.png</normaloff>:/CC/Comp/images/comp/pointPicking.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="typeAlignToolButton">
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/Other/images/other/pencil.png</normaloff>:/CC/Other/images/other/pencil.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="alignedPointsTableWidget">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="showDropIndicator" stdset="0">
+      <bool>false</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::NoSelection</enum>
+     </property>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>18</number>
+     </attribute>
+     <row>
+      <property name="text">
+       <string>1</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>2</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>3</string>
+      </property>
+     </row>
+     <column>
+      <property name="text">
+       <string>X</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Y</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Z</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QCheckBox" name="showReferenceCheckBox">
+       <property name="styleSheet">
+        <string notr="true">background-color: red; color: white;</string>
+       </property>
+       <property name="text">
+        <string>show reference cloud</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="pickRefToolButton">
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/Comp/images/comp/pointPicking.png</normaloff>:/CC/Comp/images/comp/pointPicking.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="typeRefToolButton">
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/Other/images/other/pencil.png</normaloff>:/CC/Other/images/other/pencil.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="refPointsTableWidget">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
+     <property name="showDropIndicator" stdset="0">
+      <bool>false</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::NoSelection</enum>
+     </property>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>18</number>
+     </attribute>
+     <row>
+      <property name="text">
+       <string>1</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>2</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>3</string>
+      </property>
+     </row>
+     <column>
+      <property name="text">
+       <string>X</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Y</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Z</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>marker size</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSpinBox" name="markerSizeSpinBox">
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>10</number>
+       </property>
+       <property name="value">
+        <number>4</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="autoZoomCheckBox">
+       <property name="text">
+        <string>auto-zoom</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="alignToolButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>align</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="validToolButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="statusTip">
+        <string>Convert list to new cloud (and close dialog)</string>
+       </property>
+       <property name="whatsThis">
+        <string>Convert list to new cloud (and close dialog)</string>
+       </property>
+       <property name="text">
+        <string>to cloud</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/Comp/images/comp/validate.png</normaloff>:/CC/Comp/images/comp/validate.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="cancelToolButton">
+       <property name="toolTip">
+        <string>Close dialog (list will be lost)</string>
+       </property>
+       <property name="statusTip">
+        <string>Close dialog (list will be lost)</string>
+       </property>
+       <property name="text">
+        <string>stop</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/Comp/images/comp/cancel.png</normaloff>:/CC/Comp/images/comp/cancel.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../icones.qrc"/>
+ </resources>
+ <connections>
+  <connection>
+   <sender>showAlignedCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pickAlignToolButton</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>66</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>140</x>
+     <y>20</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>showReferenceCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>pickRefToolButton</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>72</x>
+     <y>152</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>153</x>
+     <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

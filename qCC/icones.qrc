@@ -16,6 +16,7 @@
     <file>images/comp/validate.png</file>
   </qresource>
   <qresource prefix="/CC/Other">
+    <file>images/other/pencil.png</file>
     <file>images/other/cc.png</file>
     <file>images/other/panier.png</file>
     <file>images/other/revert.png</file>

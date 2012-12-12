@@ -158,6 +158,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	pdlg.setInfo(buffer);
 	pdlg.start();
 
+	//liblas::Point point(boost::shared_ptr<liblas::Header>(new liblas::Header(writer->GetHeader())));
 	liblas::Point point(&writer->GetHeader());
 	
 	for (unsigned i=0; i<numberOfPoints; i++)
@@ -172,7 +173,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 		if (hasColor)
 		{
 			const colorType* rgb = theCloud->getPointColor(i);
-			point.SetColor(liblas::Color(rgb[0],rgb[1],rgb[2]));
+			point.SetColor(liblas::Color(rgb[0]<<8,rgb[1]<<8,rgb[2]<<8)); //DGM: LAS colors are stored on 16 bits!
 		}
 
 		if (classifSF)
@@ -394,7 +395,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 			liblas::Color col = p.GetColor();
 			for (unsigned c=0;c<3;++c)
 				if (hasRGBColor[c])
-					rgb[c]=col[c];
+					rgb[c]=(col[c]>>8); //DGM: LAS colors are stored on 16 bits!
 			loadedCloud->addRGBColor(rgb);
 		}
 

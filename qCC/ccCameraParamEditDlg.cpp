@@ -205,7 +205,7 @@ void ccCameraParamEditDlg::processPickedPoint(int cloudUniqueID, unsigned pointI
 		obj = db->find(cloudUniqueID);
 	if (obj && obj->isKindOf(CC_POINT_CLOUD))
 	{
-		ccPointCloud* cloud = static_cast<ccPointCloud*>(obj);
+		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(obj);
 		const CCVector3* P = cloud->getPoint(pointIndex);
 
 		if (P)

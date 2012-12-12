@@ -30,10 +30,10 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="pickAlignToolButton">
+      <widget class="QToolButton" name="unstackAlignToolButton">
        <property name="icon">
         <iconset resource="../icones.qrc">
-         <normaloff>:/CC/Comp/images/comp/pointPicking.png</normaloff>:/CC/Comp/images/comp/pointPicking.png</iconset>
+         <normaloff>:/CC/Other/images/other/unstack.png</normaloff>:/CC/Other/images/other/unstack.png</iconset>
        </property>
       </widget>
      </item>
@@ -122,10 +122,10 @@
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="pickRefToolButton">
+      <widget class="QToolButton" name="unstackRefToolButton">
        <property name="icon">
         <iconset resource="../icones.qrc">
-         <normaloff>:/CC/Comp/images/comp/pointPicking.png</normaloff>:/CC/Comp/images/comp/pointPicking.png</iconset>
+         <normaloff>:/CC/Other/images/other/unstack.png</normaloff>:/CC/Other/images/other/unstack.png</iconset>
        </property>
       </widget>
      </item>
@@ -201,29 +201,9 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>marker size</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QSpinBox" name="markerSizeSpinBox">
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>10</number>
-       </property>
-       <property name="value">
-        <number>4</number>
-       </property>
-      </widget>
-     </item>
-     <item>
       <widget class="QCheckBox" name="autoZoomCheckBox">
        <property name="text">
-        <string>auto-zoom</string>
+        <string>auto update zoom</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -305,25 +285,9 @@
  </resources>
  <connections>
   <connection>
-   <sender>showAlignedCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>pickAlignToolButton</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>66</x>
-     <y>20</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>140</x>
-     <y>20</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>showReferenceCheckBox</sender>
    <signal>toggled(bool)</signal>
-   <receiver>pickRefToolButton</receiver>
+   <receiver>unstackRefToolButton</receiver>
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
@@ -333,6 +297,22 @@
     <hint type="destinationlabel">
      <x>153</x>
      <y>152</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>showAlignedCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>unstackAlignToolButton</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>66</x>
+     <y>20</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>140</x>
+     <y>20</y>
     </hint>
    </hints>
   </connection>

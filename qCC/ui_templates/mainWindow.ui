@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>964</width>
-     <height>18</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -305,6 +305,7 @@
       <string>Registration</string>
      </property>
      <addaction name="actionRegister"/>
+     <addaction name="actionPointPairsAlign"/>
      <addaction name="actionAlign"/>
     </widget>
     <widget class="QMenu" name="menuOther">
@@ -1618,7 +1619,7 @@
      <normaloff>:/CC/Menu/images/menu/cc_register4pcsIcon.png</normaloff>:/CC/Menu/images/menu/cc_register4pcsIcon.png</iconset>
    </property>
    <property name="text">
-    <string>Align</string>
+    <string>Align (auto) [research]</string>
    </property>
    <property name="toolTip">
     <string>Roughly register two points clouds</string>
@@ -1757,7 +1758,7 @@
   </action>
   <action name="actionMeshBestFittingQuadric">
    <property name="text">
-    <string>Best fitting quadric (research)</string>
+    <string>Best fitting quadric [research]</string>
    </property>
   </action>
   <action name="actionSNETest">
@@ -1921,6 +1922,15 @@
    </property>
    <property name="shortcut">
     <string>Shift+Down</string>
+   </property>
+  </action>
+  <action name="actionPointPairsAlign">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Menu/images/menu/cc_register4pcsIcon.png</normaloff>:/CC/Menu/images/menu/cc_register4pcsIcon.png</iconset>
+   </property>
+   <property name="text">
+    <string>Align (with point pairs)</string>
    </property>
   </action>
  </widget>

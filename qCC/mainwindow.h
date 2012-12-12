@@ -60,8 +60,10 @@ class ccPluginInterface;
 class ccPointPropertiesDlg;
 class ccCameraParamEditDlg;
 class ccPointListPickingDlg;
+class ccPointPairRegistrationDlg;
 class ccDrawableObject;
 class ccOverlayDialog;
+class QMdiSubWindow;
 
 //class MainWindow 
 
@@ -141,6 +143,14 @@ public:
 
     static bool ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget* parent = 0, void** additionalParameters = 0);
     
+	//! Returns MDI area subwindow corresponding to a given 3D view
+	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
+
+public slots:
+
+    //! Creates a new 3D GL sub-window
+    ccGLWindow* new3DView();
+
 protected slots:
 
     //! Displays 'about' dialog
@@ -153,9 +163,6 @@ protected slots:
     void loadFile();
     //! Displays file save dialog
     void saveFile();
-
-    //! Creates a new 3D GL sub-window
-    ccGLWindow* new3DView();
 
     //! Clones currently selected entities
     void clone();
@@ -280,6 +287,7 @@ protected slots:
     void doActionHeightGridGeneration();
     void doComputeBestFitBB();
 
+
     void doActionEditCamera();
 	void doActionSaveViewportAsCamera();
 
@@ -305,6 +313,10 @@ protected slots:
     //Point list picking mechanism
     void activatePointListPickingMode();
     void deactivatePointListPickingMode(bool);
+
+	//Point-pair registration mechanism
+	void activateRegisterPointPairTool();
+    void deactivateRegisterPointPairTool(bool);
 
     //Shaders & plugins
     void doActionLoadShader();
@@ -442,6 +454,8 @@ protected:
     ccPointPropertiesDlg* m_ppDlg;
     //! Point list picking
     ccPointListPickingDlg* m_plpDlg;
+    //! Point-pair registration
+    ccPointPairRegistrationDlg* m_pprDlg;
 
     /*** plugins ***/
     QString m_pluginsPath;

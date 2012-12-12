@@ -110,6 +110,7 @@
 #include "ccCurvatureDlg.h"
 #include "ccApplyTransformationDlg.h"
 #include "ccCoordinatesShiftManager.h"
+#include "ccPointPairRegistrationDlg.h"
 #include <ui_aboutDlg.h>
 
 //Qt Includes
@@ -148,6 +149,7 @@ MainWindow::MainWindow()
     , m_compDlg(0)
     , m_ppDlg(0)
     , m_plpDlg(0)
+	, m_pprDlg(0)
     , m_pluginsGroup(0)
 {
     //Dialog "auto-construction"
@@ -216,6 +218,7 @@ MainWindow::~MainWindow()
     m_compDlg=0;
     m_ppDlg = 0;
     m_plpDlg = 0;
+	m_pprDlg = 0;
     m_pluginsGroup = 0;
 
 	//release all 'overlay' dialogs
@@ -534,8 +537,9 @@ void MainWindow::connectActions()
     connect(actionUnroll,                       SIGNAL(triggered()),    this,       SLOT(doActionUnroll()));
     connect(actionHeightGridGeneration,         SIGNAL(triggered()),    this,       SLOT(doActionHeightGridGeneration()));
     //"Tools > Registration" menu
-    connect(actionAlign,                        SIGNAL(triggered()),    this,       SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
     connect(actionRegister,                     SIGNAL(triggered()),    this,       SLOT(doActionRegister()));
+    connect(actionPointPairsAlign,				SIGNAL(triggered()),    this,       SLOT(activateRegisterPointPairTool()));
+    connect(actionAlign,                        SIGNAL(triggered()),    this,       SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
     //"Tools > Distances" menu
     connect(actionCloudCloudDist,               SIGNAL(triggered()),    this,       SLOT(doActionCloudCloudDist()));
     connect(actionCloudMeshDist,                SIGNAL(triggered()),    this,       SLOT(doActionCloudMeshDist()));
@@ -3811,6 +3815,17 @@ ccGLWindow *MainWindow::getActiveGLWindow()
     return 0;
 }
 
+QMdiSubWindow* MainWindow::getMDISubWindow(ccGLWindow* win)
+{
+	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
+	for (int i=0;i<subWindowList.size();++i)
+		if (static_cast<ccGLWindow*>(subWindowList[i]->widget()) == win)
+			return subWindowList[i];
+
+	//not found!
+	return 0;
+}
+
 ccGLWindow* MainWindow::new3DView()
 {
 	assert(m_ccRoot && m_mdiArea);
@@ -3823,29 +3838,29 @@ ccGLWindow* MainWindow::new3DView()
 
     QGLFormat format;
     format.setSwapInterval(0);
-    ccGLWindow *child = new ccGLWindow(this,format,otherWin); //We share OpenGL contexts between windows!
-    child->setMinimumSize(400,300);
-    child->resize(500,400);
+    ccGLWindow *view3D = new ccGLWindow(this,format,otherWin); //We share OpenGL contexts between windows!
+    view3D->setMinimumSize(400,300);
+    view3D->resize(500,400);
 
-    m_mdiArea->addSubWindow(child);
+    QMdiSubWindow* subWindow = m_mdiArea->addSubWindow(view3D);
 
-    connect(child,      SIGNAL(entitySelectionChanged(int)),		m_ccRoot,	SLOT(selectEntity(int)));
-    connect(child,      SIGNAL(zoomChanged(float)),					this,       SLOT(updateWindowZoomChange(float)));
-    connect(child,      SIGNAL(panChanged(float,float)),			this,       SLOT(updateWindowPanChange(float,float)));
-    connect(child,      SIGNAL(viewMatRotated(const ccGLMatrix&)),	this,       SLOT(updateWindowOnViewMatRotation(const ccGLMatrix&)));
-    connect(child,      SIGNAL(destroyed(QObject*)),				this,       SLOT(prepareWindowDeletion(QObject*)));
-    connect(child,      SIGNAL(filesDropped(const QStringList&)),	this,       SLOT(addToDBAuto(const QStringList&)));
-    connect(child,      SIGNAL(newLabel(ccHObject*)),				this,       SLOT(handleNewEntity(ccHObject*)));
+    connect(view3D,	SIGNAL(entitySelectionChanged(int)),		m_ccRoot,	SLOT(selectEntity(int)));
+    connect(view3D,	SIGNAL(zoomChanged(float)),					this,       SLOT(updateWindowZoomChange(float)));
+    connect(view3D,	SIGNAL(panChanged(float,float)),			this,       SLOT(updateWindowPanChange(float,float)));
+    connect(view3D,	SIGNAL(viewMatRotated(const ccGLMatrix&)),	this,       SLOT(updateWindowOnViewMatRotation(const ccGLMatrix&)));
+    connect(view3D,	SIGNAL(destroyed(QObject*)),				this,       SLOT(prepareWindowDeletion(QObject*)));
+    connect(view3D,	SIGNAL(filesDropped(const QStringList&)),	this,       SLOT(addToDBAuto(const QStringList&)));
+    connect(view3D,	SIGNAL(newLabel(ccHObject*)),				this,       SLOT(handleNewEntity(ccHObject*)));
 
-	child->setSceneDB(m_ccRoot->getRootEntity());
-    child->setAttribute(Qt::WA_DeleteOnClose);
+	view3D->setSceneDB(m_ccRoot->getRootEntity());
+    view3D->setAttribute(Qt::WA_DeleteOnClose);
     m_ccRoot->updatePropertiesView();
 
     QMainWindow::statusBar()->showMessage(QString("New 3D View"), 2000);
 
-    child->showMaximized();
+    view3D->showMaximized();
 
-	return child;
+	return view3D;
 }
 
 void MainWindow::prepareWindowDeletion(QObject* glWindow)
@@ -4009,6 +4024,87 @@ void MainWindow::freezeUI(bool state)
     m_uiFrozen = state;
 }
 
+void MainWindow::activateRegisterPointPairTool()
+{
+    unsigned selNum=m_selectedEntities.size();
+    if (selNum==0 || selNum>2)
+    {
+        ccConsole::Error("Select one or two entities (point cloud or mesh)!");
+        return;
+    }
+
+	bool lockedVertices1=false;
+	ccGenericPointCloud* cloud1 = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0],&lockedVertices1);
+	bool lockedVertices2=false;
+	ccGenericPointCloud* cloud2 = (m_selectedEntities[1] ? ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1],&lockedVertices2) : 0);
+    if (!cloud1 && !cloud2)
+    {
+        ccConsole::Error("Select at least one point cloud!");
+        return;
+    }
+	if (lockedVertices1 || lockedVertices2)
+	{
+		DisplayLockedVerticesWarning();
+        //ccConsole::Error("At least one vertex set is locked (you should select the 'vertices' entity directly!)");
+        return;
+	}
+
+	ccGenericPointCloud* aligned = cloud1;
+	ccGenericPointCloud* reference = 0;
+
+	//if we have 2 clouds, we must ask the user which one is the 'aligned' one and which one is the 'reference' one
+	if (cloud2)
+	{
+		ccOrderChoiceDlg dlg(cloud1, "Aligned", cloud2, "Reference", this);
+		if (!dlg.exec())
+			return;
+
+		aligned = static_cast<ccGenericPointCloud*>(dlg.getFirstEntity());
+		reference = static_cast<ccGenericPointCloud*>(dlg.getSecondEntity());
+	}
+
+	//we disable all windows
+    disableAllBut(0);
+
+	if (!m_pprDlg)
+    {
+        m_pprDlg = new ccPointPairRegistrationDlg(this);
+        connect(m_pprDlg, SIGNAL(processFinished(bool)), this, SLOT(deactivateRegisterPointPairTool(bool)));
+        registerMDIDialog(m_pprDlg,Qt::TopRightCorner);
+    }
+
+	if (!m_pprDlg->init(aligned,reference))
+		deactivateRegisterPointPairTool(false);
+
+    freezeUI(true);
+
+    if (!m_pprDlg->start())
+        deactivateRegisterPointPairTool(false);
+    else
+        updateMDIDialogsPlacement();
+}
+
+void MainWindow::deactivateRegisterPointPairTool(bool state)
+{
+	if (m_pprDlg)
+		m_pprDlg->clear();
+
+    //we enable all GL windows
+    enableAll();
+
+	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();
+	if (!subWindowList.isEmpty())
+		subWindowList[0]->showMaximized();
+
+	freezeUI(false);
+
+    updateUI();
+
+	//ccGLWindow* win = getActiveGLWindow();
+	//if (win)
+	//	win->redraw();
+}
+
 void MainWindow::activateSegmentationMode()
 {
     ccGLWindow* win = getActiveGLWindow();
@@ -4137,7 +4233,6 @@ void MainWindow::deactivateSegmentationMode(bool state)
     if (win)
 		win->redraw();
 }
-
 
 void MainWindow::activatePointListPickingMode()
 {

@@ -45,9 +45,6 @@ class GenericIndexedCloud;
 class ScalarField;
 
 //! Common point cloud registration algorithms
-/** This set of methods shouldn't be called directly. See ICPRegistrationTools
-    or FPCSRegistrationTools instead.
-**/
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 class CC_DLL_API RegistrationTools : public CCToolbox
@@ -56,7 +53,8 @@ class RegistrationTools : public CCToolbox
 #endif
 {
 protected:
-	//! Registration procedure
+
+	//! ICP Registration procedure
 	/** Consists in matrix-based computing to determine the best quaternion (a couple qR|qT)
 		to bring the cloud P closer to the reference cloud X (one step). Refer to the ICP
 		algorithm theory for more details about this procedure.
@@ -72,6 +70,55 @@ protected:
 										PointProjectionTools::Transformation& trans,
 										ScalarField* weightsP=0,
 										ScalarField* weightsX=0);
+
+};
+
+//! Horn point cloud registration algorithm (Horn).
+#ifdef CC_USE_AS_DLL
+class CC_DLL_API HornRegistrationTools : public RegistrationTools
+#else
+class HornRegistrationTools : public RegistrationTools
+#endif
+{
+public:
+
+	//! A scaled geometrical transformation (scale + rotation + translation)
+	/** P' = s.R.P + T
+	**/
+	struct ScaledTransformation : public PointProjectionTools::Transformation
+	{
+		//! Scale
+		PointCoordinateType s;
+
+		//! Default constructor
+		ScaledTransformation() : s((PointCoordinateType)1.0) {}
+	};
+
+	//! Returns "absolute orientation" (scale + transformation) between two set of (unordered) points
+	/** Warning: both clouds must have the same size (and at least 3 points)
+		Output transformation is from the left (L) to the right (R) coordinate system
+		\param lCloud left cloud {Pl}
+		\param rCloud right cloud {Pr}
+		\param trans resulting transformation: Pr = s.R.Pl + T
+		\parma fixedScale force scale parameter to 1.0
+		\return success
+	**/
+	static bool FindAbsoluteOrientation(GenericCloud* lCloud,
+										GenericCloud* rCloud,
+										ScaledTransformation& trans,
+										bool fixedScale = false);
+
+	//! Computes RMS between two clouds given a transformation and a scale
+	/** Warning: both clouds must have the same size (and at least 3 points)
+		RMS = Sqrt ( Sum( square_norm( Pr - s*R*Pl+T ) ) / count )
+		\param lCloud left cloud {Pl}
+		\param rCloud right cloud {Pr}
+		\param trans transformation: Pr = s.R.Pl + T
+		\return RMS (or -1.0 if an error occured)
+	**/
+	static double ComputeRMS(GenericCloud* lCloud,
+								GenericCloud* rCloud,
+								const ScaledTransformation& trans);
 
 };
 

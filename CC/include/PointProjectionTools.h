@@ -56,6 +56,8 @@ class PointProjectionTools : public CCToolbox
 public:
 
 	//! A geometrical transformation (rotation + translation)
+	/** P' = R.P + T
+	**/
 	struct Transformation
 	{
 	    //! Rotation

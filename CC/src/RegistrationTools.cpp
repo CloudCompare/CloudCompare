@@ -423,6 +423,154 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 	return result;
 }
 
+bool HornRegistrationTools::FindAbsoluteOrientation(GenericCloud* lCloud,
+													GenericCloud* rCloud,
+													ScaledTransformation& trans,
+													bool fixedScale/*=false*/)
+{
+    //resulting transformation (R is invalid on initialization and T is (0,0,0))
+    trans.R.invalidate();
+    trans.T = CCVector3(0,0,0);
+	trans.s = (PointCoordinateType)1.0;
+
+	assert(rCloud && lCloud);
+	if (!rCloud || !lCloud || rCloud->size() != lCloud->size() || rCloud->size()<3)
+		return false;
+	unsigned count = rCloud->size();
+	assert(count>2);
+
+	CCVector3 Gr = GeometricalAnalysisTools::computeGravityCenter(rCloud);
+	CCVector3 Gl = GeometricalAnalysisTools::computeGravityCenter(lCloud);
+
+	//Cross covariance matrix
+	SquareMatrixd Sigma_rl = GeometricalAnalysisTools::computeCrossCovarianceMatrix(rCloud,lCloud,Gr.u,Gl.u);
+	if (!Sigma_rl.isValid())
+		return false;
+
+    double Sxx = Sigma_rl.getValue(0,0);
+	double Sxy = Sigma_rl.getValue(0,1);
+	double Sxz = Sigma_rl.getValue(0,2);
+	double Syx = Sigma_rl.getValue(1,0);
+    double Syy = Sigma_rl.getValue(1,1);
+	double Syz = Sigma_rl.getValue(1,2);
+	double Szx = Sigma_rl.getValue(2,0);
+    double Szy = Sigma_rl.getValue(2,1);
+    double Szz = Sigma_rl.getValue(2,2);
+
+	SquareMatrixd N(4);
+	N.setValue(0,0,Sxx+Syy+Szz);
+	N.setValue(0,1,Syz-Szy);
+	N.setValue(0,2,Szx-Sxz);
+	N.setValue(0,3,Sxy-Syx);
+
+	N.setValue(1,0,Syz-Szy);
+	N.setValue(1,1,Sxx-Syy-Szz);
+	N.setValue(1,2,Sxy+Syx);
+	N.setValue(1,3,Szx+Sxz);
+
+	N.setValue(2,0,Szx-Sxz);
+	N.setValue(2,1,Sxy+Syx);
+	N.setValue(2,2,-Sxx+Syy-Szz);
+	N.setValue(2,3,Syz+Szy);
+
+	N.setValue(3,0,Sxy-Syx);
+	N.setValue(3,1,Szx+Sxz);
+	N.setValue(3,2,Syz+Szy);
+	N.setValue(3,3,-Sxx-Syy+Szz);
+
+    //we compute its eigenvalues and eigenvectors
+	SquareMatrixd eig = N.computeJacobianEigenValuesAndVectors();
+	if (!eig.isValid())
+        return false;
+
+	//we get the eigenvector associated to the biggest eigenvalue
+    double maxEigenVec[4];
+	eig.getMaxEigenValueAndVector(maxEigenVec);
+
+	//normalize eigenvector
+	double norm = maxEigenVec[0]*maxEigenVec[0]
+					+ maxEigenVec[1]*maxEigenVec[1]
+					+ maxEigenVec[2]*maxEigenVec[2]
+					+ maxEigenVec[3]*maxEigenVec[3];
+	if (norm < ZERO_TOLERANCE)
+		return false;
+
+	norm = sqrt(norm);
+	maxEigenVec[0] /= norm;
+	maxEigenVec[1] /= norm;
+	maxEigenVec[2] /= norm;
+	maxEigenVec[3] /= norm;
+
+    //these eigenvalue and eigenvector correspond to a quaternion --> we get the corresponding matrix
+	trans.R.initFromQuaternion(maxEigenVec);
+
+	//determine best scale?
+	if (!fixedScale)
+	{
+		//we determine scale with the symmetrical form as proposed by Horn
+		double lNorm2Sum = 0.0;
+		{		
+			lCloud->placeIteratorAtBegining();
+			for (unsigned i=0;i<count;i++)
+			{
+				CCVector3 Pi = *lCloud->getNextPoint()-Gl;
+				lNorm2Sum += Pi.dot(Pi);
+			}
+		}
+
+		if (lNorm2Sum >= ZERO_TOLERANCE)
+		{
+			double rNorm2Sum = 0.0;
+			{
+				rCloud->placeIteratorAtBegining();
+				for (unsigned i=0;i<count;i++)
+				{
+					CCVector3 Pi = *rCloud->getNextPoint()-Gr;
+					rNorm2Sum += Pi.dot(Pi);
+				}
+			}
+
+			//resulting scale
+			trans.s = (PointCoordinateType)sqrt(rNorm2Sum/lNorm2Sum);
+		}
+		//else
+		//{
+		//	//shouldn't happen!
+		//}
+	}
+
+    //and we deduce the translation
+	trans.T = Gr - (trans.R*Gl)*trans.s;
+
+	return true;
+}
+
+double HornRegistrationTools::ComputeRMS(GenericCloud* lCloud,
+										 GenericCloud* rCloud,
+										 const ScaledTransformation& trans)
+{
+	assert(rCloud && lCloud);
+	if (!rCloud || !lCloud || rCloud->size() != lCloud->size() || rCloud->size()<3)
+		return false;
+
+	double rms = 0.0;
+
+	rCloud->placeIteratorAtBegining();
+	lCloud->placeIteratorAtBegining();
+	unsigned count = rCloud->size();
+			
+	for (unsigned i=0;i<count;i++)
+	{
+		const CCVector3* Ri = rCloud->getNextPoint();
+		const CCVector3* Li = lCloud->getNextPoint();
+		CCVector3 Lit = (trans.R.isValid() ? trans.R * (*Li) : (*Li))*trans.s + trans.T;
+
+		rms += (*Ri-Lit).norm2();
+	}
+
+	return sqrt(rms/(double)count);
+}
+
 bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 											  GenericCloud* X,
 											  PointProjectionTools::Transformation& trans,

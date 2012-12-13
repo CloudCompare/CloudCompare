@@ -32,6 +32,7 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 	connect(unstackRefToolButton,	SIGNAL(clicked()),		this,	SLOT(unstackRef()));
 
 	connect(alignToolButton,		SIGNAL(clicked()),      this,   SLOT(align()));
+	connect(resetToolButton,		SIGNAL(clicked()),      this,   SLOT(reset()));
 
 	connect(validToolButton,		SIGNAL(clicked()),      this,   SLOT(apply()));
     connect(cancelToolButton,		SIGNAL(clicked()),      this,   SLOT(cancel()));
@@ -111,7 +112,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 		m_associatedWin->addToOwnDB(m_addedPoints);
 
 		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)",ccGLWindow::LOWER_LEFT_MESSAGE,false,3600);
-		m_associatedWin->displayNewMessage("Pick equivalent points on both clouds (same order!)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
+		m_associatedWin->displayNewMessage("Pick equivalent points on both clouds (at least 3 pairs)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
 	}
 
 	return true;
@@ -425,6 +426,7 @@ void ccPointPairRegistrationDlg::unstackRef()
 		label=0;
 	}
 	m_reference.labels.pop_back();
+	m_refPoints.pop_back();
 
 	onPointCountChanged();
 }
@@ -463,22 +465,133 @@ void ccPointPairRegistrationDlg::showReferenceCloud(bool state)
 	}
 }
 
-void ccPointPairRegistrationDlg::apply()
+bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::HornRegistrationTools::ScaledTransformation& trans, double& rms)
 {
-	align();
-	
-	if (m_aligned.cloud)
-		m_aligned.cloud->applyGLTransformation_recursive();
+	assert(m_aligned.cloud);
+	if (!m_aligned.cloud)
+		return false;
 
-	stop(true);
+	if (m_alignPoints.size() != m_refPoints.size() || m_refPoints.size() < 2)
+	{
+		assert(false);
+		ccLog::Error("Need at least 3 points for each cloud (and the same number of points in both clouds)!");
+		return false;
+	}
+	unsigned count = m_refPoints.size();
+
+	ccPointCloud refCloud,alignCloud;
+	if (!refCloud.reserve(count) || !alignCloud.reserve(count))
+	{
+		ccLog::Error("Not enough memory!");
+		return false;
+	}
+
+	//populate clouds
+	for (unsigned i=0;i<count;++i)
+	{
+		refCloud.addPoint(m_refPoints[i]);
+		alignCloud.addPoint(m_alignPoints[i]);
+	}
+
+	//fixed scale?
+	bool fixedScale = fixedScalecheckBox->isChecked();
+
+	//call Horn registration method
+	if (!CCLib::HornRegistrationTools::FindAbsoluteOrientation(&alignCloud, &refCloud, trans, fixedScale))
+	{
+		ccLog::Error("Registration failed! (points are aligned?)");
+		return false;
+	}
+
+	rms = CCLib::HornRegistrationTools::ComputeRMS(&alignCloud, &refCloud, trans);
+
+	return true;
 }
 
 void ccPointPairRegistrationDlg::align()
 {
-	//TODO
+	CCLib::HornRegistrationTools::ScaledTransformation trans;
+	double rms;
+	if (callHornRegistration(trans,rms))
+	{
+		if (rms >= 0)
+			ccLog::Print(QString("[ccPointPairRegistrationDlg] Current RMS: %1").arg(rms));
+
+		//fixed scale?
+		bool fixedScale = fixedScalecheckBox->isChecked();
+
+		//apply (scaled) transformation...
+		if (!fixedScale)
+		{
+			ccLog::Print(QString("[ccPointPairRegistrationDlg] Scale: %1").arg(trans.s));
+			if (trans.R.isValid())
+				trans.R.scale(trans.s);
+		}
+		ccGLMatrix transMat(trans.R,trans.T);
+		//...virtually
+		m_aligned.cloud->setGLTransformation(transMat);
+
+		if (m_associatedWin)
+		{
+			if (autoZoomCheckBox->isChecked())
+				m_associatedWin->zoomGlobal();
+			m_associatedWin->redraw();
+		}
+
+		resetToolButton->setEnabled(true);
+	}
+}
+
+void ccPointPairRegistrationDlg::reset()
+{
+	if (!m_aligned.cloud)
+		return;
+
+	m_aligned.cloud->enableGLTransformation(false);
+
+	if (m_associatedWin)
+	{
+		if (autoZoomCheckBox->isChecked())
+			m_associatedWin->zoomGlobal();
+		m_associatedWin->redraw();
+	}
+
+	resetToolButton->setEnabled(false);
+}
+
+void ccPointPairRegistrationDlg::apply()
+{
+	CCLib::HornRegistrationTools::ScaledTransformation trans;
+	double rms;
+	if (callHornRegistration(trans,rms))
+	{
+		if (rms >= 0)
+			ccLog::Print(QString("[ccPointPairRegistrationDlg] Current RMS: %1").arg(rms));
+
+		//fixed scale?
+		bool fixedScale = fixedScalecheckBox->isChecked();
+
+		//apply (scaled) transformation...
+		if (!fixedScale && trans.R.isValid())
+			trans.R.scale(trans.s);
+		ccGLMatrix transMat(trans.R,trans.T);
+		//...acutally
+		m_aligned.cloud->applyGLTransformation_recursive();
+
+		ccLog::Print("[PointPairRegistration] Applied matrix:");
+		const float* mat = transMat.data();
+		ccLog::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+		if (!fixedScale && trans.s != 1.0)
+			ccLog::Print(QString("[PointPairRegistration] Warning: scale = %1 (already integrated in above matrix!)").arg(trans.s));
+	}
+
+	stop(true);
 }
 
 void ccPointPairRegistrationDlg::cancel()
 {
+	if (m_aligned.cloud)
+		m_aligned.cloud->enableGLTransformation(false);
+
 	stop(false);
 }

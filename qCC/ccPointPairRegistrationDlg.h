@@ -9,6 +9,7 @@
 
 //CCLib
 #include <CCGeom.h>
+#include <RegistrationTools.h>
 
 class ccGenericPointCloud;
 class ccGenericGLDisplay;
@@ -62,12 +63,16 @@ protected slots:
 	void processPickedPoint(int, unsigned, int, int);
 	void apply();
 	void align();
+	void reset();
 	void cancel();
 
 protected:
 
 	//! Enables (or not) buttons depending on the number of points in both lists
 	void onPointCountChanged();
+
+	//! Calls Horn registration (CCLib::HornRegistrationTools)
+	bool callHornRegistration(CCLib::HornRegistrationTools::ScaledTransformation& trans, double& rms);
 
 	//! Original cloud context
 	struct cloudContext

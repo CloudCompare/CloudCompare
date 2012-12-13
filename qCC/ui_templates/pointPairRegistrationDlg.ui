@@ -211,6 +211,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QCheckBox" name="fixedScalecheckBox">
+       <property name="text">
+        <string>fixed scale</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -236,6 +243,16 @@
        </property>
        <property name="text">
         <string>align</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="resetToolButton">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="text">
+        <string>reset</string>
        </property>
       </widget>
      </item>

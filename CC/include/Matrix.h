@@ -460,7 +460,7 @@ namespace CCLib
 
 		//! Creates a rotation matrix from a quaternion (float version)
 		/** Shortcut to double version of initFromQuaternion)
-			\param q quaternion (4 float values)
+			\param q normalized quaternion (4 float values)
 			\return a 3x3 rotation matrix
 		**/
 		void initFromQuaternion(const float q[])
@@ -474,10 +474,9 @@ namespace CCLib
 		}
 
 		//! Creates a rotation matrix from a quaternion (double version)
-		/** Creates a new matrix (must be deleted when useless).
-			Quaternion is composed of 4 values: an angle (cos(alpha/2))
+		/** Quaternion is composed of 4 values: an angle (cos(alpha/2))
 			and an axis (sin(alpha/2)*unit vector).
-			\param q quaternion (4 double values)
+			\param q normalized quaternion (4 double values)
 			\return a 3x3 rotation matrix
 		**/
 		void initFromQuaternion(const double q[])

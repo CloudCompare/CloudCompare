@@ -55,21 +55,26 @@ class RegistrationTools : public CCToolbox
 protected:
 
 	//! ICP Registration procedure
-	/** Consists in matrix-based computing to determine the best quaternion (a couple qR|qT)
-		to bring the cloud P closer to the reference cloud X (one step). Refer to the ICP
+	/** Determines the best quaternion (a couple qR|qT) to bring the cloud
+		P closer to the reference cloud X (one step). Refer to the ICP
 		algorithm theory for more details about this procedure.
+
+			X = s.R.P + T (with s=1 by default)
+
 		\param P the cloud to register
 		\param X the reference cloud
 		\param trans the resulting transformation
 		\param weightsP weights for the registered points (optional)
 		\param weightsX weights for the reference points (optional)
+		\param scale scale between P and X (s)
 		\return success
 	**/
 	static bool RegistrationProcedure(GenericCloud* P,
 										GenericCloud* X,
 										PointProjectionTools::Transformation& trans,
 										ScalarField* weightsP=0,
-										ScalarField* weightsX=0);
+										ScalarField* weightsX=0,
+										PointCoordinateType scale = 1.0f);
 
 };
 

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>342</width>
+    <width>359</width>
     <height>307</height>
    </rect>
   </property>
@@ -214,6 +214,9 @@
       <widget class="QCheckBox" name="fixedScalecheckBox">
        <property name="text">
         <string>fixed scale</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
        </property>
       </widget>
      </item>

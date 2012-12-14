@@ -16,8 +16,9 @@
 ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 	: ccOverlayDialog(parent)
 	, m_aligned(0)
+	, m_alignedPoints("aligned points")
 	, m_reference(0)
-	, m_addedPoints(0)
+	, m_refPoints("reference points")
 {
 	setupUi(this);
     setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
@@ -36,6 +37,12 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 
 	connect(validToolButton,		SIGNAL(clicked()),      this,   SLOT(apply()));
     connect(cancelToolButton,		SIGNAL(clicked()),      this,   SLOT(cancel()));
+
+	m_alignedPoints.setEnabled(true);
+	m_alignedPoints.setVisible(false);
+
+	m_refPoints.setEnabled(true);
+	m_refPoints.setVisible(false);
 }
 
 ccPointPairRegistrationDlg::cloudContext::cloudContext(ccGenericPointCloud* entity)
@@ -53,6 +60,8 @@ void ccPointPairRegistrationDlg::cloudContext::restore()
 		return;
 
 	cloud->setDisplay(originalDisplay);
+	if (originalDisplay)
+		originalDisplay->redraw();
 	cloud->setVisible(wasVisible);
 	cloud->setEnabled(wasEnabled);
 	cloud->setSelected(wasSelected);
@@ -68,8 +77,12 @@ void ccPointPairRegistrationDlg::clear()
 	while (refPointsTableWidget->rowCount()!=0)
 		refPointsTableWidget->removeRow(refPointsTableWidget->rowCount()-1);
 
-	m_alignPoints.clear();
+	m_alignedPoints.removeAllChildren();
+	m_alignedPoints.clear();
+	m_aligned.cloud = 0;
+	m_refPoints.removeAllChildren();
 	m_refPoints.clear();
+	m_reference.cloud = 0;
 }
 
 bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
@@ -80,18 +93,16 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 		if (oldWin != win)
 			disconnect(oldWin, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedPoint(int, unsigned, int, int)));
 
-		if (m_addedPoints)
-			oldWin->removeFromOwnDB(m_addedPoints);
+		oldWin->removeFromOwnDB(&m_alignedPoints);
+		m_alignedPoints.setDisplay(0);
+		oldWin->removeFromOwnDB(&m_refPoints);
+		m_refPoints.setDisplay(0);
 
 		oldWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 	}
 
 	if (!ccOverlayDialog::linkWith(win))
 		return false;
-
-	if (m_addedPoints)
-		delete m_addedPoints;
-	m_addedPoints=0;
 
 	m_aligned.restore();
 	m_reference.restore();
@@ -108,8 +119,8 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 		m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
 		connect(m_associatedWin, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedPoint(int, unsigned, int, int)));
 
-		m_addedPoints = new ccPointCloud("added points");
-		m_associatedWin->addToOwnDB(m_addedPoints);
+		m_associatedWin->addToOwnDB(&m_alignedPoints);
+		m_associatedWin->addToOwnDB(&m_refPoints);
 
 		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)",ccGLWindow::LOWER_LEFT_MESSAGE,false,3600);
 		m_associatedWin->displayNewMessage("Pick equivalent points on both clouds (at least 3 pairs)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
@@ -171,6 +182,12 @@ bool ccPointPairRegistrationDlg::init(ccGenericPointCloud* aligned, ccGenericPoi
 
 	m_aligned = cloudContext(aligned);
 	m_reference = cloudContext(reference);
+
+	if (aligned->getDisplay())
+	{
+		const ccViewportParameters& vParams = aligned->getDisplay()->getViewportParameters();
+		m_associatedWin->setViewportParameters(vParams);
+	}
 
 	//add aligned cloud to display
 	if (aligned)
@@ -282,19 +299,19 @@ void ccPointPairRegistrationDlg::processPickedPoint(int cloudUniqueID, unsigned 
 
 void ccPointPairRegistrationDlg::onPointCountChanged()
 {
-	bool canAlign = (m_alignPoints.size()==m_refPoints.size() && m_refPoints.size()>2); //we need at least 3 points
+	bool canAlign = (m_alignedPoints.size()==m_refPoints.size() && m_refPoints.size()>2); //we need at least 3 points
 	alignToolButton->setEnabled(canAlign);
 	validToolButton->setEnabled(canAlign);
 
-	unstackAlignToolButton->setEnabled(!m_alignPoints.empty());
-	unstackRefToolButton->setEnabled(!m_refPoints.empty());
+	unstackAlignToolButton->setEnabled(m_alignedPoints.size()!=0);
+	unstackRefToolButton->setEnabled(m_refPoints.size()!=0);
 }
 
 bool ccPointPairRegistrationDlg::addAlignedPoint(const CCVector3& P, ccGenericPointCloud* cloud/*=0*/, unsigned pointIndex/*=0*/)
 {
-	for (unsigned i=0;i<m_alignPoints.size();++i)
+	for (unsigned i=0;i<m_alignedPoints.size();++i)
 	{
-		if ((m_alignPoints[i]-P).norm() < ZERO_TOLERANCE)
+		if ((*m_alignedPoints.getPoint(i)-P).norm() < ZERO_TOLERANCE)
 		{
 			ccLog::Error("Point already picked or too close to an already inserted one!");
 			return false;
@@ -302,7 +319,16 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(const CCVector3& P, ccGenericPo
 	}
 
 	//add point to 'align' set
-	m_alignPoints.push_back(P);
+	unsigned newPointIndex = m_alignedPoints.size();
+	if (newPointIndex==m_alignedPoints.capacity())
+	{
+		if (!m_alignedPoints.reserve(newPointIndex+1))
+		{
+			ccLog::Error("Not enough memory?!");
+			return false;
+		}
+	}
+	m_alignedPoints.addPoint(P);
 	
 	//add corresponding row in table
 	int rowIndex = alignedPointsTableWidget->rowCount();
@@ -316,26 +342,18 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(const CCVector3& P, ccGenericPo
 		alignedPointsTableWidget->setVerticalHeaderItem(rowIndex,new QTableWidgetItem(pointName));
 	}
 
-	//add a fake point to 'm_addedPoints' if point is manually added
-	if (!cloud)
-	{
-		cloud = m_addedPoints;
-		pointIndex = m_addedPoints->size();
-		m_addedPoints->reserve(pointIndex+1);
-		m_addedPoints->addPoint(P);
-	}
-
 	//add a label!
 	cc2DLabel* label = new cc2DLabel();
-	label->addPoint(cloud,pointIndex);
+	label->addPoint(&m_alignedPoints,newPointIndex);
 	label->setName(pointName);
 	label->setVisible(true);
 	label->setDisplayedIn2D(false);
 	label->setDisplayedIn3D(true);
-	m_aligned.labels.push_back(label);
+	label->setDisplay(m_associatedWin);
+	m_alignedPoints.addChild(label);
 
 	if (m_associatedWin)
-		m_associatedWin->addToOwnDB(label);
+		m_associatedWin->redraw();
 
 	onPointCountChanged();
 
@@ -346,7 +364,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(const CCVector3& P, ccGeneric
 {
 	for (unsigned i=0;i<m_refPoints.size();++i)
 	{
-		if ((m_refPoints[i]-P).norm() < ZERO_TOLERANCE)
+		if ((*m_refPoints.getPoint(i)-P).norm() < ZERO_TOLERANCE)
 		{
 			ccLog::Error("Point already picked or too close to an already inserted one!");
 			return false;
@@ -354,7 +372,16 @@ bool ccPointPairRegistrationDlg::addReferencePoint(const CCVector3& P, ccGeneric
 	}
 
 	//add point to 'reference' set
-	m_refPoints.push_back(P);
+	unsigned newPointIndex = m_refPoints.size();
+	if (newPointIndex==m_refPoints.capacity())
+	{
+		if (!m_refPoints.reserve(newPointIndex+1))
+		{
+			ccLog::Error("Not enough memory?!");
+			return false;
+		}
+	}
+	m_refPoints.addPoint(P);
 	
 	//add corresponding row in table
 	int rowIndex = refPointsTableWidget->rowCount();
@@ -368,26 +395,18 @@ bool ccPointPairRegistrationDlg::addReferencePoint(const CCVector3& P, ccGeneric
 		refPointsTableWidget->setVerticalHeaderItem(rowIndex,new QTableWidgetItem(pointName));
 	}
 
-	//add a fake point to 'm_addedPoints' if point is manually added
-	if (!cloud)
-	{
-		cloud = m_addedPoints;
-		pointIndex = m_addedPoints->size();
-		m_addedPoints->reserve(pointIndex+1);
-		m_addedPoints->addPoint(P);
-	}
-
 	//add a label!
 	cc2DLabel* label = new cc2DLabel();
-	label->addPoint(cloud,pointIndex);
+	label->addPoint(&m_refPoints,newPointIndex);
 	label->setName(pointName);
 	label->setVisible(true);
 	label->setDisplayedIn2D(false);
 	label->setDisplayedIn3D(true);
-	m_reference.labels.push_back(label);
+	label->setDisplay(m_associatedWin);
+	m_refPoints.addChild(label);
 
 	if (m_associatedWin)
-		m_associatedWin->addToOwnDB(label);
+		m_associatedWin->redraw();
 
 	onPointCountChanged();
 
@@ -396,37 +415,42 @@ bool ccPointPairRegistrationDlg::addReferencePoint(const CCVector3& P, ccGeneric
 
 void ccPointPairRegistrationDlg::unstackAligned()
 {
+	unsigned pointCount = m_alignedPoints.size();
+	if (pointCount==0) //nothing to do
+		return;
+
+	assert(alignedPointsTableWidget->rowCount()>0);
+	alignedPointsTableWidget->removeRow(alignedPointsTableWidget->rowCount()-1);
+
+	//remove label
+	assert(m_alignedPoints.getChildrenNumber() == pointCount);
+	m_alignedPoints.removeChild(pointCount-1);
+	//remove point
+	m_alignedPoints.resize(pointCount-1);
+
+	if (m_associatedWin)
+		m_associatedWin->redraw();
+
+	onPointCountChanged();
 }
 
 void ccPointPairRegistrationDlg::unstackRef()
 {
-	if (m_refPoints.empty()) //nothing to do
+	unsigned pointCount = m_refPoints.size();
+	if (pointCount==0) //nothing to do
 		return;
 
 	assert(refPointsTableWidget->rowCount()>0);
 	refPointsTableWidget->removeRow(refPointsTableWidget->rowCount()-1);
 
 	//remove label
-	assert(!m_reference.labels.empty());
-	cc2DLabel* label = m_reference.labels.back();
-	if (label)
-	{
-		if (m_associatedWin)
-		{
-			m_associatedWin->removeFromOwnDB(label);
-			m_associatedWin->redraw();
-		}
-		//remove added point as well?
-		//if (label->getPoint(0).cloud == m_addedPoints)
-		//{
-		//	//not so easy (we can leave it ;)
-		//}
+	assert(m_refPoints.getChildrenNumber() == pointCount);
+	m_refPoints.removeChild(pointCount-1);
+	//remove point
+	m_refPoints.resize(pointCount-1);
 
-		delete label;
-		label=0;
-	}
-	m_reference.labels.pop_back();
-	m_refPoints.pop_back();
+	if (m_associatedWin)
+		m_associatedWin->redraw();
 
 	onPointCountChanged();
 }
@@ -437,8 +461,7 @@ void ccPointPairRegistrationDlg::showAlignedCloud(bool state)
 		return;
 
 	m_aligned.cloud->setVisible(state);
-	for (unsigned i=0;i<m_aligned.labels.size();++i)
-		m_aligned.labels[i]->setVisible(state);
+	m_alignedPoints.setEnabled(state);
 
 	if (m_associatedWin)
 	{
@@ -454,8 +477,7 @@ void ccPointPairRegistrationDlg::showReferenceCloud(bool state)
 		return;
 
 	m_reference.cloud->setVisible(state);
-	for (unsigned i=0;i<m_reference.labels.size();++i)
-		m_reference.labels[i]->setVisible(state);
+	m_refPoints.setEnabled(state);
 
 	if (m_associatedWin)
 	{
@@ -471,7 +493,7 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::HornRegistrationToo
 	if (!m_aligned.cloud)
 		return false;
 
-	if (m_alignPoints.size() != m_refPoints.size() || m_refPoints.size() < 2)
+	if (m_alignedPoints.size() != m_refPoints.size() || m_refPoints.size() < 2)
 	{
 		assert(false);
 		ccLog::Error("Need at least 3 points for each cloud (and the same number of points in both clouds)!");
@@ -479,31 +501,17 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::HornRegistrationToo
 	}
 	unsigned count = m_refPoints.size();
 
-	ccPointCloud refCloud,alignCloud;
-	if (!refCloud.reserve(count) || !alignCloud.reserve(count))
-	{
-		ccLog::Error("Not enough memory!");
-		return false;
-	}
-
-	//populate clouds
-	for (unsigned i=0;i<count;++i)
-	{
-		refCloud.addPoint(m_refPoints[i]);
-		alignCloud.addPoint(m_alignPoints[i]);
-	}
-
 	//fixed scale?
 	bool fixedScale = fixedScalecheckBox->isChecked();
 
 	//call Horn registration method
-	if (!CCLib::HornRegistrationTools::FindAbsoluteOrientation(&alignCloud, &refCloud, trans, fixedScale))
+	if (!CCLib::HornRegistrationTools::FindAbsoluteOrientation(&m_alignedPoints, &m_refPoints, trans, fixedScale))
 	{
 		ccLog::Error("Registration failed! (points are aligned?)");
 		return false;
 	}
 
-	rms = CCLib::HornRegistrationTools::ComputeRMS(&alignCloud, &refCloud, trans);
+	rms = CCLib::HornRegistrationTools::ComputeRMS(&m_alignedPoints, &m_refPoints, trans);
 
 	return true;
 }
@@ -530,6 +538,7 @@ void ccPointPairRegistrationDlg::align()
 		ccGLMatrix transMat(trans.R,trans.T);
 		//...virtually
 		m_aligned.cloud->setGLTransformation(transMat);
+		m_alignedPoints.setGLTransformation(transMat);
 
 		if (m_associatedWin)
 		{
@@ -548,6 +557,7 @@ void ccPointPairRegistrationDlg::reset()
 		return;
 
 	m_aligned.cloud->enableGLTransformation(false);
+	m_alignedPoints.enableGLTransformation(false);
 
 	if (m_associatedWin)
 	{
@@ -577,6 +587,7 @@ void ccPointPairRegistrationDlg::apply()
 		ccGLMatrix transMat(trans.R,trans.T);
 		//...acutally
 		m_aligned.cloud->applyGLTransformation_recursive();
+		m_alignedPoints.setGLTransformation(transMat);
 
 		ccLog::Print("[PointPairRegistration] Applied matrix:");
 		const float* mat = transMat.data();

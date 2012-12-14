@@ -304,9 +304,9 @@
      <property name="title">
       <string>Registration</string>
      </property>
-     <addaction name="actionRegister"/>
      <addaction name="actionPointPairsAlign"/>
      <addaction name="actionAlign"/>
+     <addaction name="actionRegister"/>
     </widget>
     <widget class="QMenu" name="menuOther">
      <property name="title">
@@ -535,8 +535,8 @@
    <addaction name="actionFuse"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
+   <addaction name="actionPointPairsAlign"/>
    <addaction name="actionRegister"/>
-   <addaction name="actionAlign"/>
    <addaction name="actionSubsample"/>
    <addaction name="actionSamplePoints"/>
    <addaction name="actionCloudCloudDist"/>
@@ -904,13 +904,13 @@
      <normaloff>:/CC/Menu/images/menu/cc_registerIcon.png</normaloff>:/CC/Menu/images/menu/cc_registerIcon.png</iconset>
    </property>
    <property name="text">
-    <string>Register</string>
+    <string>Fine registration (ICP)</string>
    </property>
    <property name="toolTip">
-    <string>Register entities</string>
+    <string>Finely registers already (roughly) aligned entities (clouds or meshes)</string>
    </property>
    <property name="statusTip">
-    <string>Register entities</string>
+    <string>Finely registers already (roughly) aligned entities (clouds or meshes)</string>
    </property>
   </action>
   <action name="actionCloudCloudDist">
@@ -1614,18 +1614,14 @@
    </property>
   </action>
   <action name="actionAlign">
-   <property name="icon">
-    <iconset resource="../icones.qrc">
-     <normaloff>:/CC/Menu/images/menu/cc_register4pcsIcon.png</normaloff>:/CC/Menu/images/menu/cc_register4pcsIcon.png</iconset>
-   </property>
    <property name="text">
     <string>Align (auto) [research]</string>
    </property>
    <property name="toolTip">
-    <string>Roughly register two points clouds</string>
+    <string>Tries to automatically register (roughly) two points clouds</string>
    </property>
    <property name="statusTip">
-    <string>Roughly register two points clouds</string>
+    <string>Tries to automatically register (roughly) two points clouds</string>
    </property>
   </action>
   <action name="actionSubsample">
@@ -1930,7 +1926,13 @@
      <normaloff>:/CC/Menu/images/menu/cc_register4pcsIcon.png</normaloff>:/CC/Menu/images/menu/cc_register4pcsIcon.png</iconset>
    </property>
    <property name="text">
-    <string>Align (with point pairs)</string>
+    <string>Align (point pairs picking)</string>
+   </property>
+   <property name="toolTip">
+    <string>Aligns two clouds by picking (at least 3) equivalent point pairs</string>
+   </property>
+   <property name="statusTip">
+    <string>Aligns two clouds by picking (at least 3) equivalent point pairs</string>
    </property>
   </action>
  </widget>

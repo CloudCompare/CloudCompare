@@ -439,74 +439,12 @@ bool HornRegistrationTools::FindAbsoluteOrientation(GenericCloud* lCloud,
 	unsigned count = rCloud->size();
 	assert(count>2);
 
-	CCVector3 Gr = GeometricalAnalysisTools::computeGravityCenter(rCloud);
-	CCVector3 Gl = GeometricalAnalysisTools::computeGravityCenter(lCloud);
-
-	//Cross covariance matrix
-	SquareMatrixd Sigma_rl = GeometricalAnalysisTools::computeCrossCovarianceMatrix(rCloud,lCloud,Gr.u,Gl.u);
-	if (!Sigma_rl.isValid())
-		return false;
-
-    double Sxx = Sigma_rl.getValue(0,0);
-	double Sxy = Sigma_rl.getValue(0,1);
-	double Sxz = Sigma_rl.getValue(0,2);
-	double Syx = Sigma_rl.getValue(1,0);
-    double Syy = Sigma_rl.getValue(1,1);
-	double Syz = Sigma_rl.getValue(1,2);
-	double Szx = Sigma_rl.getValue(2,0);
-    double Szy = Sigma_rl.getValue(2,1);
-    double Szz = Sigma_rl.getValue(2,2);
-
-	SquareMatrixd N(4);
-	N.setValue(0,0,Sxx+Syy+Szz);
-	N.setValue(0,1,Syz-Szy);
-	N.setValue(0,2,Szx-Sxz);
-	N.setValue(0,3,Sxy-Syx);
-
-	N.setValue(1,0,Syz-Szy);
-	N.setValue(1,1,Sxx-Syy-Szz);
-	N.setValue(1,2,Sxy+Syx);
-	N.setValue(1,3,Szx+Sxz);
-
-	N.setValue(2,0,Szx-Sxz);
-	N.setValue(2,1,Sxy+Syx);
-	N.setValue(2,2,-Sxx+Syy-Szz);
-	N.setValue(2,3,Syz+Szy);
-
-	N.setValue(3,0,Sxy-Syx);
-	N.setValue(3,1,Szx+Sxz);
-	N.setValue(3,2,Syz+Szy);
-	N.setValue(3,3,-Sxx-Syy+Szz);
-
-    //we compute its eigenvalues and eigenvectors
-	SquareMatrixd eig = N.computeJacobianEigenValuesAndVectors();
-	if (!eig.isValid())
-        return false;
-
-	//we get the eigenvector associated to the biggest eigenvalue
-    double maxEigenVec[4];
-	eig.getMaxEigenValueAndVector(maxEigenVec);
-
-	//normalize eigenvector
-	double norm = maxEigenVec[0]*maxEigenVec[0]
-					+ maxEigenVec[1]*maxEigenVec[1]
-					+ maxEigenVec[2]*maxEigenVec[2]
-					+ maxEigenVec[3]*maxEigenVec[3];
-	if (norm < ZERO_TOLERANCE)
-		return false;
-
-	norm = sqrt(norm);
-	maxEigenVec[0] /= norm;
-	maxEigenVec[1] /= norm;
-	maxEigenVec[2] /= norm;
-	maxEigenVec[3] /= norm;
-
-    //these eigenvalue and eigenvector correspond to a quaternion --> we get the corresponding matrix
-	trans.R.initFromQuaternion(maxEigenVec);
-
 	//determine best scale?
 	if (!fixedScale)
 	{
+		CCVector3 Gr = GeometricalAnalysisTools::computeGravityCenter(rCloud);
+		CCVector3 Gl = GeometricalAnalysisTools::computeGravityCenter(lCloud);
+
 		//we determine scale with the symmetrical form as proposed by Horn
 		double lNorm2Sum = 0.0;
 		{		
@@ -539,10 +477,7 @@ bool HornRegistrationTools::FindAbsoluteOrientation(GenericCloud* lCloud,
 		//}
 	}
 
-    //and we deduce the translation
-	trans.T = Gr - (trans.R*Gl)*trans.s;
-
-	return true;
+	return RegistrationProcedure(lCloud,rCloud,trans,0,0,trans.s);
 }
 
 double HornRegistrationTools::ComputeRMS(GenericCloud* lCloud,
@@ -575,7 +510,8 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 											  GenericCloud* X,
 											  PointProjectionTools::Transformation& trans,
 											  ScalarField* weightsP/*=0*/,
-											  ScalarField* weightsX/*=0*/)
+											  ScalarField* weightsX/*=0*/,
+											  PointCoordinateType scale/*=1.0f*/)
 {
     //resulting transformation (R is invalid on initialization and T is (0,0,0))
     trans.R.invalidate();
@@ -591,11 +527,12 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 	CCVector3 Gp = GeometricalAnalysisTools::computeGravityCenter(P);
 	CCVector3 Gx = GeometricalAnalysisTools::computeGravityCenter(X);
 
-	//if the cloud is equivalent to a single point (it's the case when the
-	//two clouds are very far away from each other) we try to get the two clouds closer
+	//if the cloud is equivalent to a single point (for instance
+	//it's the case when the two clouds are very far away from 
+	//each other in the ICP process) we try to get the two clouds closer
 	if (fabs(dx)+fabs(dy)+fabs(dz) < ZERO_TOLERANCE)
 	{
-	    trans.T = Gx - Gp;
+	    trans.T = Gx - Gp*scale;
         return true;
 	}
 
@@ -652,7 +589,7 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 	trans.R.initFromQuaternion(qR);
 
     //and we deduce the translation
-	trans.T = Gx - trans.R*Gp;
+	trans.T = Gx - (trans.R*Gp)*scale;
 
 	return true;
 }

@@ -4,6 +4,10 @@
 //Local
 #include <ccOverlayDialog.h>
 
+//qCC_db
+#include <ccPointCloud.h>
+
+
 //Qt generated dialog
 #include <ui_pointPairRegistrationDlg.h>
 
@@ -13,7 +17,6 @@
 
 class ccGenericPointCloud;
 class ccGenericGLDisplay;
-class ccPointCloud;
 class ccGLWindow;
 class cc2DLabel;
 
@@ -85,7 +88,6 @@ protected:
 
 		ccGenericPointCloud* cloud;
 		ccGenericGLDisplay* originalDisplay;
-		std::vector<cc2DLabel*> labels;
 		bool wasVisible;
 		bool wasEnabled;
 		bool wasSelected;
@@ -95,19 +97,16 @@ protected:
 	cloudContext m_aligned;
 
 	//! Aligned points set
-	std::vector<CCVector3> m_alignPoints;
+	ccPointCloud m_alignedPoints;
 	
 	//! Reference entity (if any)
 	cloudContext m_reference;
 
 	//! Reference points set
-	std::vector<CCVector3> m_refPoints;
+	ccPointCloud m_refPoints;
 
 	//! Dedicated window
 	ccGLWindow* m_win;
-
-	//! Points manually addded (for display purposes)
-	ccPointCloud* m_addedPoints;
 
 };
 

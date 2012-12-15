@@ -122,7 +122,8 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 		m_associatedWin->addToOwnDB(&m_alignedPoints);
 		m_associatedWin->addToOwnDB(&m_refPoints);
 
-		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)",ccGLWindow::LOWER_LEFT_MESSAGE,false,3600);
+		m_associatedWin->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE);
+		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
 		m_associatedWin->displayNewMessage("Pick equivalent points on both clouds (at least 3 pairs)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
 	}
 

@@ -2542,9 +2542,11 @@ void MainWindow::doActionRegister()
         ccGLMatrix transMat(transform.R,transform.T);
 
 //#ifdef _DEBUG
+		forceConsoleDisplay();
 		ccConsole::Print("[Register] Resulting matrix:");
 		const float* mat = transMat.data();
 		ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 		//for (int i=0;i<4;++i)
 		//{
 		//	ccConsole::Print("(%6.12f\t%6.12f\t%6.12f\t%6.12f)",mat[0],mat[4],mat[8],mat[12]);
@@ -2695,9 +2697,12 @@ void MainWindow::doAction4pcsRegister()
     {
 		//output resulting transformation matrix
 		ccGLMatrix transMat(transform.R,transform.T);
+
+		forceConsoleDisplay();
 		ccConsole::Print("[Align] Resulting matrix:");
 		const float* mat = transMat.data();
 		ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 
 		if (data->isA(CC_POINT_CLOUD))
             newDataCloud = static_cast<ccPointCloud*>(data)->clone();
@@ -3722,7 +3727,12 @@ void MainWindow::doActionSynchronize()
         ccGLMatrix glTrans;
         glTrans += T;
 
-        ccConsole::Print("[Synchronize] Translation: (%f,%f,%f)",T.x,T.y,T.z);
+        //ccConsole::Print("[Synchronize] Translation: (%f,%f,%f)",T.x,T.y,T.z);
+		forceConsoleDisplay();
+		ccConsole::Print(QString("[Synchronize] Transformation matrix (%1 --> %2):").arg(ent->getName()).arg(selectedEntities[0]->getName()));
+		const float* mat = glTrans.data();
+		ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 
 		//we temporariliy detach entity, as it may undergo
 		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation

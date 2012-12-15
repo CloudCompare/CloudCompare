@@ -4,6 +4,7 @@ v2.4 ??/??/2102
 - Introducing a new registration/transformation method: "Align (point pairs picking)"
 	* to align clouds by interactively picking 'equivalent' points in both clouds (3 pairs at least)
 	* replaces the old "Align (auto)" research tool in the main toolbar (same icon)
+	* more information on the wiki: http://www.danielgm.net/cc/doc/wiki/index.php5?title=Alignment_and_Registration
 - Perspective mode and lights activation states are automatically saved and restored (on the creation of a new 3D view or when CC restarts)
 - Overlay dialogs (manual segmentation and transformation, point picking, etc.) don't prevent CC from being closed anymore
 - 'Height grid generation' tool now gives more choice for the management of empty cells

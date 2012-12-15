@@ -124,7 +124,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 
 		m_associatedWin->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE);
 		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
-		m_associatedWin->displayNewMessage("Pick equivalent points on both clouds (at least 3 pairs)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
+		m_associatedWin->displayNewMessage("Pick equivalent points on both clouds (at least 3 pairs - mind the order)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
 	}
 
 	return true;
@@ -524,7 +524,10 @@ void ccPointPairRegistrationDlg::align()
 	if (callHornRegistration(trans,rms))
 	{
 		if (rms >= 0)
+		{
 			ccLog::Print(QString("[ccPointPairRegistrationDlg] Current RMS: %1").arg(rms));
+			m_associatedWin->displayNewMessage(QString("RMS: %1").arg(rms),ccGLWindow::LOWER_LEFT_MESSAGE);
+		}
 
 		//fixed scale?
 		bool fixedScale = fixedScalecheckBox->isChecked();

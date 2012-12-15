@@ -4562,6 +4562,7 @@ void MainWindow::doPickRotationCenter()
 {
 	if (s_pickingWindow)
 	{
+		s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE); //clear previous messages
 		s_pickingWindow->displayNewMessage("Rotation center picking aborted",ccGLWindow::LOWER_LEFT_MESSAGE);
 		s_pickingWindow->redraw();
 		cancelPickRotationCenter();
@@ -6290,6 +6291,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     //bool exactlyTwoSF = (selInfo.sfCount==2);
 
     actionRegister->setEnabled(exactlyTwoEntities);
+	actionPointPairsAlign->setEnabled(exactlyTwoEntities);
     actionAlign->setEnabled(exactlyTwoEntities); //Aurelien BEY le 13/11/2008
     actionSubsample->setEnabled(exactlyOneCloud); //Aurelien BEY le 4/12/2008
     actionCloudCloudDist->setEnabled(exactlyTwoClouds);

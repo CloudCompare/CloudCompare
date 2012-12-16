@@ -260,6 +260,7 @@ protected slots:
     void doActionDeleteScalarField();
     void doActionSmoothMeshSF();
     void doActionEnhanceMeshSF();
+	void doActionAddConstantSF();
     void doActionScalarFieldArithmetic();
     void doActionClearColor();
     void doActionResolveNormalsDirection();

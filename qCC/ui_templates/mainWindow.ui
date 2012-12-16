@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>964</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -132,13 +132,16 @@
      <addaction name="actionGaussianFilter"/>
      <addaction name="actionBilateralFilter"/>
      <addaction name="actionFilterByValue"/>
-     <addaction name="actionScalarFieldArithmetic"/>
      <addaction name="actionMultiplySF"/>
      <addaction name="actionConvertToRGB"/>
      <addaction name="actionRenameSF"/>
      <addaction name="separator"/>
+     <addaction name="actionAddConstantSF"/>
+     <addaction name="actionScalarFieldArithmetic"/>
+     <addaction name="separator"/>
      <addaction name="actionDeleteScalarField"/>
      <addaction name="actionDeleteAllSF"/>
+     <addaction name="separator"/>
     </widget>
     <widget class="QMenu" name="menuColors">
      <property name="title">
@@ -566,6 +569,7 @@
    <addaction name="actionSFGradient"/>
    <addaction name="actionGaussianFilter"/>
    <addaction name="actionDeleteScalarField"/>
+   <addaction name="actionAddConstantSF"/>
    <addaction name="actionScalarFieldArithmetic"/>
   </widget>
   <widget class="QToolBar" name="toolBarPluginTools">
@@ -1084,19 +1088,19 @@
   <action name="actionScalarFieldArithmetic">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/Menu/images/menu/cc_diffIcon.png</normaloff>:/CC/Menu/images/menu/cc_diffIcon.png</iconset>
+     <normaloff>:/CC/Menu/images/menu/cc_sfArithmetic.png</normaloff>:/CC/Menu/images/menu/cc_sfArithmetic.png</iconset>
    </property>
    <property name="text">
     <string>Arithmetic</string>
    </property>
    <property name="iconText">
-    <string>S.F. Diff.</string>
+    <string>SF arithmetic</string>
    </property>
    <property name="toolTip">
-    <string>Diference between two scalar fields</string>
+    <string>Add, substract, multiply or divide two scalar fields</string>
    </property>
    <property name="statusTip">
-    <string>Diference between two scalar fields</string>
+    <string>Add, substract, multiply or divide two scalar fields</string>
    </property>
   </action>
   <action name="actionColorize">
@@ -1933,6 +1937,16 @@
    </property>
    <property name="statusTip">
     <string>Aligns two clouds by picking (at least 3) equivalent point pairs</string>
+   </property>
+  </action>
+  <action name="actionAddConstantSF">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Menu/images/menu/cc_addConstSF.png</normaloff>
+     <normalon>:/CC/Menu/images/menu/cc_addConstSF.png</normalon>:/CC/Menu/images/menu/cc_addConstSF.png</iconset>
+   </property>
+   <property name="text">
+    <string>Add constant SF</string>
    </property>
   </action>
  </widget>

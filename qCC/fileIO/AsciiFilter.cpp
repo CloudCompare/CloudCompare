@@ -27,6 +27,7 @@
 //Qt
 #include <QFile>
 #include <QFileInfo>
+#include <QTextStream>
 
 //CClib
 #include <ScalarField.h>
@@ -85,9 +86,13 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 		}
 	}
 
-    FILE* theFile = fopen(filename,"wt");
-    if (!theFile)
+	//hack: if the extension is 'pts', the color will be saved after the SFs
+	bool swapColorAndSFs = (QFileInfo(filename).suffix().toUpper() == "PTS");
+
+    QFile file(filename);
+	if (!file.open(QFile::WriteOnly | QFile::Truncate))
         return CC_FERR_WRITING;
+	QTextStream stream(&file);
 
     ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
 
@@ -103,63 +108,66 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 	}
     bool writeSF = (theScalarFields.size()!=0);
 
-    //avancement du chargement
+	if (swapColorAndSFs && writeColors && writeSF)
+		ccLog::Warning("[AsciiFilter::saveToFile] PTS extension detected: color components will be saved after the scalar field(s)");
+
+	//avancement du chargement
     ccProgressDialog pdlg(true);
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
     pdlg.setMethodTitle(qPrintable(QString("Saving cloud [%1]").arg(cloud->getName())));
     pdlg.setInfo(qPrintable(QString("Number of points: %1").arg(numberOfPoints)));
     pdlg.start();
 
+	//shift on load
 	const double* shift = cloud->getOriginalShift();
+	double shiftNorm = (shift ? shift[0]*shift[0]+shift[1]*shift[1]+shift[2]*shift[2] : 0.0);
+	//default precision (6 for floats, 10 for doubles)
+	const int s_coordPrecision = 2+(shiftNorm > 0 ? sizeof(double) : sizeof(PointCoordinateType));
+	const int s_sfPrecision = 2+sizeof(DistanceType); 
+	const int s_nPrecision = 2+sizeof(PointCoordinateType);
+
+	QString line,color;
 
     for (unsigned i=0;i<numberOfPoints;++i)
     {
+		//write current point coordinates
         const CCVector3* P = cloud->getPoint(i);
-        if (fprintf(theFile,"%f %f %f",-shift[0]+(double)P->x
-										,-shift[1]+(double)P->y
-										,-shift[2]+(double)P->z) < 0)
-        {
-			fclose(theFile);
-            return CC_FERR_WRITING;
-        }
+		line = QString("%1 %2 %3").arg(-shift[0]+(double)P->x,0,'f',s_coordPrecision).arg(-shift[1]+(double)P->y,0,'f',s_coordPrecision).arg(-shift[2]+(double)P->z,0,'f',s_coordPrecision);
 
-        if (writeColors)
+		if (writeColors)
         {
+			//add rgb color (if not a .pts file)
             const colorType* col = cloud->getPointColor(i);
-            if (fprintf(theFile," %i %i %i",col[0],col[1],col[2]) < 0)
-            {
-				fclose(theFile);
-                return CC_FERR_WRITING;
-            }
+			color = QString(" %1 %2 %3").arg(col[0]).arg(col[1]).arg(col[2]);
+
+			if (!swapColorAndSFs)
+				line += color;
         }
 
         if (writeSF)
         {
+			//add each associated SF values
 			for (std::vector<CCLib::ScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
-				if (fprintf(theFile," %f",(*it)->getValue(i)) < 0)
-				{
-					fclose(theFile);
-					return CC_FERR_WRITING;
-				}
+				line.append(QString(" %1").arg((*it)->getValue(i),0,'f',s_sfPrecision));
         }
+
+        if (writeColors && swapColorAndSFs)
+			line += color;
 
         if (writeNorms)
         {
-            const PointCoordinateType* _normalVec = cloud->getPointNormal(i);
-            if (fprintf(theFile," %f %f %f",*(_normalVec),*(_normalVec+1),*(_normalVec+2)) < 0)
-            {
-				fclose(theFile);
-                return CC_FERR_WRITING;
-            }
+			//add normal vector
+            const PointCoordinateType* N = cloud->getPointNormal(i);
+			line.append(QString("%1 %2 %3").arg(N[0],0,'f',s_nPrecision).arg(N[1],0,'f',s_nPrecision).arg(N[2],0,'f',s_nPrecision));
         }
 
-        fprintf(theFile,"\n");
+		stream << line << "\n";
+		//if (stream.status() != QTextStream::Ok)
+		//	return CC_FERR_WRITING;
 
 		if (!nprogress.oneStep())
-			break;
+			return CC_FERR_CANCELED_BY_USER;
     }
-
-    fclose(theFile);
 
     return CC_FERR_NO_ERROR;
 }

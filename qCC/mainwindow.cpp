@@ -514,6 +514,7 @@ void MainWindow::connectActions()
     connect(actionGaussianFilter,               SIGNAL(triggered()),    this,       SLOT(doActionSFGaussianFilter()));
     connect(actionBilateralFilter,              SIGNAL(triggered()),    this,       SLOT(doActionSFBilateralFilter()));
     connect(actionFilterByValue,                SIGNAL(triggered()),    this,       SLOT(doActionFilterByValue()));
+	connect(actionAddConstantSF,				SIGNAL(triggered()),    this,       SLOT(doActionAddConstantSF()));
     connect(actionScalarFieldArithmetic,        SIGNAL(triggered()),    this,       SLOT(doActionScalarFieldArithmetic()));
     connect(actionMultiplySF,                   SIGNAL(triggered()),    this,       SLOT(doActionMultiplySF()));
     connect(actionConvertToRGB,                 SIGNAL(triggered()),    this,       SLOT(doActionSFConvertToRGB()));
@@ -4800,7 +4801,82 @@ void MainWindow::clone()
     updateUI();
 }
 
+static double s_constantSFValue = 0.0;
+void MainWindow::doActionAddConstantSF()
+{
+    unsigned selNum = m_selectedEntities.size();
+    if (selNum!=1)
+    {
+		if (selNum>1)
+			ccConsole::Error("Select only one point cloud or mesh!");
+        return;
+    }
 
+	ccHObject* ent = m_selectedEntities[0];
+
+	bool lockedVertices;
+	ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+
+	//for "real" point clouds only
+	if (!cloud)
+		return;
+	if (lockedVertices)
+	{
+		//see ccPropertiesTreeDelegate::fillWithMesh
+		if (!ent->isA(CC_MESH_GROUP) && !ent->isAncestorOf(cloud))
+		{
+			DisplayLockedVerticesWarning();
+			return;
+		}
+	}
+
+	QString defaultName = "Constant";
+	unsigned trys = 0;
+	while (cloud->getScalarFieldIndexByName(qPrintable(defaultName))>=0 || trys>99)
+		defaultName = QString("Constant #%1").arg(++trys);
+
+	//ask for a name
+	bool ok;
+	QString sfName = QInputDialog::getText(this,"New SF name", "SF name (must be unique)", QLineEdit::Normal, defaultName, &ok);
+	if (!ok)
+		return;
+	if (sfName.isNull())
+	{
+		ccLog::Error("Invalid name");
+		return;
+	}
+	if (cloud->getScalarFieldIndexByName(qPrintable(sfName))>=0)
+	{
+		ccLog::Error("Name already exists!");
+		return;
+	}
+
+	double sfValue = QInputDialog::getDouble(this,"SF value", "value", s_constantSFValue, -2147483647, 2147483647, 6, &ok);
+	if (!ok)
+		return;
+
+	int pos = cloud->addScalarField(qPrintable(sfName),false);
+	if (pos<0)
+	{
+		ccLog::Error("An error occured! (see console)");
+		return;
+	}
+	
+	CCLib::ScalarField* sf = cloud->getScalarField(pos);
+	assert(sf);
+	if (sf)
+	{
+		sf->fill(sfValue);
+		sf->computeMinAndMax();
+		cloud->setCurrentDisplayedScalarField(pos);
+		cloud->showSF(true);
+		updateUI();
+		if (cloud->getDisplay())
+			cloud->getDisplay()->redraw();
+	}
+
+	ccLog::Print(QString("New scalar field added to %1 (constant value: %2 - not strictly positive by default)").arg(cloud->getName()).arg(sfValue));
+}
 
 void MainWindow::doActionScalarFieldArithmetic()
 {
@@ -6278,7 +6354,9 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionLabelConnectedComponents->setEnabled(atLeastOneCloud);
     actionUnroll->setEnabled(exactlyOneEntity);
     actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);        //&& scalarField
-    actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);                 //&& scalarField
+	actionAddConstantSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
+
+	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);                 //&& scalarField
     actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);       //&& scalarField
 	
 	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount>0);

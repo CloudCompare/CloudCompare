@@ -2196,7 +2196,10 @@ int ccPointCloud::addScalarField(const char* uniqueName, bool isStrictlyPositive
 {
     //we don't accept two SF with the same name!
     if (getScalarFieldIndexByName(uniqueName)>=0)
+	{
+		ccLog::Warning("[ccPointCloud::addScalarField] Names already exists!");
         return -1;
+	}
 
 	//Nouveau champ scalaire
     ccScalarField* sf = new ccScalarField(uniqueName,isStrictlyPositive);
@@ -2204,6 +2207,7 @@ int ccPointCloud::addScalarField(const char* uniqueName, bool isStrictlyPositive
 		if (!sf->reserve(size()))
 		{
 			sf->release();
+			ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
 			return -1;
 		}
 

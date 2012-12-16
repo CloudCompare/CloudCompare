@@ -26,6 +26,8 @@
     <file>images/other/minus.png</file>
   </qresource>
   <qresource prefix="/CC/Menu">
+    <file>images/menu/cc_sfArithmetic.png</file>
+    <file>images/menu/cc_addConstSF.png</file>
     <file>images/menu/cc_pickCenter.png</file>
     <file>images/menu/camera.png</file>
     <file>images/menu/cc_logo_v2_qt.png</file>
@@ -42,7 +44,6 @@
     <file>images/menu/cc_compareCMIcon.png</file>
     <file>images/menu/cc_computeStatIcon.png</file>
     <file>images/menu/cc_deleteSFIcon.png</file>
-    <file>images/menu/cc_diffIcon.png</file>
     <file>images/menu/cc_filterByValueIcon.png</file>
     <file>images/menu/cc_fuseIcon.png</file>
     <file>images/menu/cc_gaussianFilterIcon.png</file>

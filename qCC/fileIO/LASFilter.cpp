@@ -283,7 +283,6 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 	unsigned char colorCompBitDec = 0;
 	colorType rgb[3]={0,0,0};
 
-	char k=0; //current part index
 	ccPointCloud* loadedCloud=0;
 	
 	ccScalarField* classifSF=0;
@@ -394,6 +393,16 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 					if (loadedCloud->size() < loadedCloud->capacity())
 						loadedCloud->resize(loadedCloud->size());
 
+					QString chunkName("unnamed - Cloud");
+					unsigned n = container.getChildrenNumber();
+					if (n!=0) //if we have more than one cloud, we append an index
+					{
+						if (n==1)  //we must also update the first one!
+							container.getChild(0)->setName(chunkName+QString(" #1"));
+						chunkName += QString(" #%1").arg(n+1);
+					}
+					loadedCloud->setName(chunkName);
+
 					container.addChild(loadedCloud);
 					loadedCloud=0;
 				}
@@ -424,7 +433,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 			//otherwise, we must create a new cloud
 			fileChunkPos = pointsRead;
 			fileChunkSize = ccMin(nbOfPoints-pointsRead,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
-			loadedCloud = new ccPointCloud(QString("unnamed - Cloud #%1").arg(k++));
+			loadedCloud = new ccPointCloud();
 			if (!loadedCloud->reserveThePointsTable(fileChunkSize))
 			{
 				ccLog::Warning("[LASFilter::loadFile] Not enough memory!");

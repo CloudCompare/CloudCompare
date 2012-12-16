@@ -215,79 +215,64 @@ void ccDBRoot::removeElement(ccHObject* anObject)
     updatePropertiesView();
 }
 
-//! Structure for ordering ccHObjects by their tree 'depth'
-struct ccOrderedHObject
-{
-    int order;
-    ccHObject* obj;
-	
-	//! Default constructor
-	ccOrderedHObject() : order(0), obj(0) {}
-
-	//! Constructor from an object
-	ccOrderedHObject(ccHObject* _obj, int _order) : order(_order), obj(_obj) {}
-
-	//! Ordering operator
-    bool operator()(const ccOrderedHObject& a, const ccOrderedHObject& b) const
-    {
-        return a.order < b.order;
-    }
-};
-
 void ccDBRoot::deleteSelectedEntities()
 {
     QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
-    int i,selCount = selectedIndexes.size();
-
-    if (selCount == 0)
+    if (selectedIndexes.size() < 1)
         return;
+    unsigned selCount = (unsigned)selectedIndexes.size();
 
     hidePropertiesView();
 
-    std::vector<ccOrderedHObject> toBeDeleted;
-    ccOrderedHObject orderedObj;
-
-    //We can't delete a parent before its child!
-    //Therefore we have to sort the selected items in
-    //decreasing "depth", to be sure that we delete them
-    //in the proper order.
-    for (i=0;i<selCount;++i)
+	//we remove all objects that are children of other deleted ones!
+	//(otherwise we may delete the parent before the child!)
+    std::vector<ccHObject*> toBeDeleted;
+    for (unsigned i=0;i<selCount;++i)
     {
-        orderedObj.obj = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-        ccHObject* parent = orderedObj.obj->getParent();
+        ccHObject* obj = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
         //we don't take care of parentless objects (i.e. the tree root)
-		bool canBeDeleted = parent && !orderedObj.obj->isLocked();
-		
-		//special check: vertices
-		if (canBeDeleted && orderedObj.obj->isKindOf(CC_POINT_CLOUD) /*&& parent*/)
-			if (parent->isKindOf(CC_MESH))
-				if (static_cast<ccGenericMesh*>(parent)->getAssociatedCloud() == orderedObj.obj)
-					canBeDeleted = false;
+		if (!obj->getParent() || obj->isLocked())
+		{
+			ccConsole::Warning(QString("Object '%1' can't be deleted this way (locked)").arg(obj->getName()));
+			continue;
+		}
 
-		if (canBeDeleted)
-        {
-            //we compute the object "depth"
-            orderedObj.order = 0;
-            while ((parent = parent->getParent()))
-                ++orderedObj.order;
+		//we don't take objects that are siblings of others
+		bool isSiblingOfAnotherOne = false;
+		for (unsigned j=0;j<selCount;++j)
+		{
+			if (i != j)
+			{
+				ccHObject* otherObj = static_cast<ccHObject*>(selectedIndexes[j].internalPointer());
+				if (otherObj->isAncestorOf(obj))
+				{
+					isSiblingOfAnotherOne = true;
+					break;
+				}
+			}
+		}
 
-            toBeDeleted.push_back(orderedObj);
-        }
-        else
-        {
-			ccConsole::Error(QString("Object '%1' can't be deleted this way!").arg(orderedObj.obj->getName()));
-        }
-    }
+		if (!isSiblingOfAnotherOne)
+		{
+			//last check: mesh vertices
+			if (obj->isKindOf(CC_POINT_CLOUD) && obj->getParent()->isKindOf(CC_MESH))
+				if (static_cast<ccGenericMesh*>(obj->getParent())->getAssociatedCloud() == obj)
+				{
+					ccConsole::Warning("Mesh vertices can't be deleted without their parent mesh!");
+					continue;
+				}
+
+			toBeDeleted.push_back(obj);
+		}
+	}
 
     qism->clear();
 
-	//inverse order in fact as we are going to process them from the end
-    std::sort(toBeDeleted.begin(),toBeDeleted.end(),ccOrderedHObject());
-
 	while (!toBeDeleted.empty())
 	{
-		ccHObject* anObject = toBeDeleted.back().obj;
+		ccHObject* anObject = toBeDeleted.back();
+		assert(anObject);
 		toBeDeleted.pop_back();
 
 		anObject->prepareDisplayForRefresh_recursive();
@@ -307,9 +292,9 @@ void ccDBRoot::deleteSelectedEntities()
 					for (unsigned j=1;j<label->size();++j) //the first point is always the parent cloud!
 						if (label->getPoint(j).cloud == anObject)
 						{
-							ccLog::Warning(QString("Label '%1' will be deleted as it is dependent on '%2'").arg(label->getName()).arg(anObject->getName()));
+							ccLog::Warning(QString("Label '%1' has been deleted as it is dependent on '%2'").arg(label->getName()).arg(anObject->getName()));
 							label->clear();
-							toBeDeleted.push_back(ccOrderedHObject(label,0));
+							toBeDeleted.push_back(label);
 						}
 				}
 			}

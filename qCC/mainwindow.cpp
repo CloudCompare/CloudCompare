@@ -4175,10 +4175,44 @@ void MainWindow::deactivateSegmentationMode(bool state)
 			
             if (anObject->isKindOf(CC_POINT_CLOUD) || anObject->isKindOf(CC_MESH))
 			{
-				ccHObject* parent=0;
+				//Special case: labels (do this before temporarily removing 'anObject' from DB!)
+				bool lockedVertices;
+				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(anObject,&lockedVertices);
+				if (cloud)
+				{
+					assert(!lockedVertices);
+					ccHObject::Container labels;
+					if (m_ccRoot)
+						m_ccRoot->getRootEntity()->filterChildren(labels,true,CC_2D_LABEL);
+					for (ccHObject::Container::iterator it=labels.begin(); it!=labels.end(); ++it)
+					{
+						//we must check all dependent labels and remove them!!!
+						//TODO: couldn't we be more clever and update the label instead?
+						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
+						bool removeLabel = false;
+						for (unsigned i=0;i<label->size();++i)
+							if (label->getPoint(i).cloud == anObject)
+							{
+								removeLabel = true;
+								break;
+							}
+
+						if (removeLabel && label->getParent())
+						{
+							ccLog::Warning(QString("[Segmentation] Label %1 is dependent on cloud %2 and will be removed").arg(label->getName()).arg(cloud->getName()));
+							ccHObject* labelParent = label->getParent();
+							ccHObject* labelParentParent = 0;
+							removeObjectTemporarilyFromDBTree(labelParent,labelParentParent);
+							labelParent->removeChild(label);
+							label=0;
+							putObjectBackIntoDBTree(labelParent,labelParentParent);
+						}
+					}
+				}
 
 				//we temporariliy detach entity, as it may undergo
 				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection(true)
+				ccHObject* parent=0;
 				removeObjectTemporarilyFromDBTree(anObject,parent);
 
 				ccHObject* segmentationResult = 0;

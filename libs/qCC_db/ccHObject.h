@@ -68,7 +68,7 @@ public:
     //! Returns parent object
     /** \return parent object (NULL if no parent)
     **/
-    ccHObject* getParent() const;
+	inline ccHObject* getParent() const { return m_parent; }
 
     /*** children management ***/
 
@@ -82,13 +82,13 @@ public:
     //! Returns the number of children
     /** \return children number
     **/
-    unsigned getChildrenNumber() const;
+	inline unsigned getChildrenNumber() const { return m_children.size(); }
 
     //! Returns the ith child
     /** \param childPos child position
         \return child object (or NULL if wrong position)
     **/
-    ccHObject* getChild(unsigned childPos) const;
+	inline ccHObject* getChild(unsigned childPos) const { return (childPos < m_children.size() ? m_children[childPos] : 0); }
 
 	//! Finds an entity in this object hierarchy
 	/** \param uniqueID child unique ID
@@ -129,9 +129,9 @@ public:
 	void transferChildren(ccHObject& newParent, bool forceFatherDependent = false);
 
     //! Shortcut: returns first child
-    ccHObject* getFirstChild() const;
+	ccHObject* getFirstChild() const { return (m_children.empty() ? 0 : m_children.front()); }
     //! Shortcut: returns last child
-    ccHObject* getLastChild() const;
+	ccHObject* getLastChild() const { return (m_children.empty() ? 0 : m_children.back()); }
 
     //! Returns true if the current object is an ancestor of the specified one
     bool isAncestorOf(const ccHObject *anObject) const;
@@ -160,7 +160,7 @@ public:
     //! Returns last modification time
     /** \return last modification time
     **/
-    int getLastModificationTime() const;
+	inline int getLastModificationTime() const { return m_lastModificationTime_ms; }
 
     //! Returns last modification time (recursive)
     /** \return last modification time
@@ -198,16 +198,16 @@ public:
 protected:
 
     //! Sets parent object
-    virtual void setParent(ccHObject* anObject);
+	virtual inline void setParent(ccHObject* anObject) { m_parent = anObject; }
 
     //! Draws the entity only (not its children)
-    virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) { /*does nothing by default*/ };
 
     //! Applies a GL transformation to the entity
     /** this = rotMat*(this-rotCenter)+(rotCenter+trans)
         \param trans a ccGLMatrix structure
     **/
-    virtual void applyGLTransformation(const ccGLMatrix& trans);
+    virtual void applyGLTransformation(const ccGLMatrix& trans) { /*does nothing by default*/ };
 
 	//! Save own object data
 	/** Called by 'toFile' (recursive scheme)

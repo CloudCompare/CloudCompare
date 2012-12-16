@@ -301,7 +301,7 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			//3rd point
 			ccGenericPointCloud* cloud3 = m_points[2].cloud;
 			const unsigned& pointIndex3 = m_points[2].index;
-			const CCVector3* P3 = cloud2->getPointPersistentPtr(pointIndex3);
+			const CCVector3* P3 = cloud3->getPointPersistentPtr(pointIndex3);
 
 			//area
 			CCVector3 P1P2 = *P2-*P1;

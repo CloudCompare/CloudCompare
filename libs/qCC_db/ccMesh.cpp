@@ -1809,3 +1809,351 @@ bool ccMesh::getColorFromTexture(unsigned triIndex, const CCVector3& P, colorTyp
 
 	return true;
 }
+
+static const unsigned s_defaultSubdivideGrowRate = 50;
+static QMap<__int64,unsigned> s_alreadyCreatedVertices; //map to store already created edges middle points
+
+static __int64 GenerateKey(unsigned edgeIndex1, unsigned edgeIndex2)
+{
+	if (edgeIndex1>edgeIndex2)
+		std::swap(edgeIndex1,edgeIndex2);
+
+	return ((((__int64)edgeIndex1)<<32) | (__int64)edgeIndex2);
+}
+
+bool ccMesh::pushSubdivide(PointCoordinateType maxArea, unsigned indexA, unsigned indexB, unsigned indexC)
+{
+	if (maxArea<=ZERO_TOLERANCE)
+	{
+		ccLog::Error("[ccMesh::pushSubdivide] Invalid input argument!");
+		return false;
+	}
+
+	if (!getAssociatedCloud() || !getAssociatedCloud()->isA(CC_POINT_CLOUD))
+	{
+		ccLog::Error("[ccMesh::pushSubdivide] Vertices set must be a true point cloud!");
+		return false;
+	}
+	ccPointCloud* vertices = static_cast<ccPointCloud*>(getAssociatedCloud());
+	assert(vertices);
+	const CCVector3* A(vertices->getPoint(indexA));
+	const CCVector3* B(vertices->getPoint(indexB));
+	const CCVector3* C(vertices->getPoint(indexC));
+
+	//do we need to sudivide this triangle?
+	PointCoordinateType area = ((*B-*A)*(*C-*A)).norm()/(PointCoordinateType)2.0;
+	if (area > maxArea)
+	{
+		//we will add 3 new vertices, so we must be sure to have enough memory
+		if (vertices->size()+2 >= vertices->capacity())
+		{
+			assert(s_defaultSubdivideGrowRate>2);
+			if (!vertices->reserve(vertices->size()+s_defaultSubdivideGrowRate))
+			{
+				ccLog::Error("[ccMesh::pushSubdivide] Not enough memory!");
+				return false;
+			}
+		}
+		
+		//add new vertices
+		unsigned indexG1 = 0;
+		{
+			__int64 key = GenerateKey(indexA,indexB);
+			QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
+			if (it == s_alreadyCreatedVertices.end())
+			{
+				//generate new vertex
+				indexG1 = vertices->size();
+				CCVector3 G1 = (*A+*B)/(PointCoordinateType)2.0;
+				vertices->addPoint(G1.u);
+				//and add it to the map
+				s_alreadyCreatedVertices.insert(key,indexG1);
+			}
+			else
+			{
+				indexG1 = it.value();
+			}
+		}
+		unsigned indexG2 = 0;
+		{
+			__int64 key = GenerateKey(indexB,indexC);
+			QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
+			if (it == s_alreadyCreatedVertices.end())
+			{
+				//generate new vertex
+				indexG2 = vertices->size();
+				CCVector3 G2 = (*B+*C)/(PointCoordinateType)2.0;
+				vertices->addPoint(G2.u);
+				//and add it to the map
+				s_alreadyCreatedVertices.insert(key,indexG2);
+			}
+			else
+			{
+				indexG2 = it.value();
+			}
+		}
+		unsigned indexG3 = vertices->size();
+		{
+			__int64 key = GenerateKey(indexC,indexA);
+			QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
+			if (it == s_alreadyCreatedVertices.end())
+			{
+				//generate new vertex
+				indexG3 = vertices->size();
+				CCVector3 G3 = (*C+*A)/(PointCoordinateType)2.0;
+				vertices->addPoint(G3.u);
+				//and add it to the map
+				s_alreadyCreatedVertices.insert(key,indexG3);
+			}
+			else
+			{
+				indexG3 = it.value();
+			}
+		}
+
+		//add new triangles
+		if (!pushSubdivide(maxArea, indexA, indexG1, indexG3))
+			return false;
+		if (!pushSubdivide(maxArea, indexB, indexG2, indexG1))
+			return false;
+		if (!pushSubdivide(maxArea, indexC, indexG3, indexG2))
+			return false;
+		if (!pushSubdivide(maxArea, indexG1, indexG2, indexG3))
+			return false;
+	}
+	else
+	{
+		//we will add one triangle, so we must be sure to have enough memory
+		if (size() == maxSize())
+		{
+			if (!reserve(size()+3*s_defaultSubdivideGrowRate))
+			{
+				ccLog::Error("[ccMesh::pushSubdivide] Not enough memory!");
+				return false;
+			}
+		}
+
+		//we keep this triangle as is
+		addTriangle(indexA,indexB,indexC);
+	}
+
+	return true;
+}
+
+ccMesh* ccMesh::subdivide(float maxArea) const
+{
+	if (maxArea<=ZERO_TOLERANCE)
+	{
+		ccLog::Error("[ccMesh::subdivide] Invalid input argument!");
+		return 0;
+	}
+
+	unsigned triCount = size();
+	ccGenericPointCloud* vertices = getAssociatedCloud();
+	unsigned vertCount = (vertices ? vertices->size() : 0);
+	if (!vertices || vertCount*triCount==0)
+	{
+		ccLog::Error("[ccMesh::subdivide] Invalid mesh: no face or no vertex!");
+		return 0;
+	}
+
+	ccPointCloud* resultVertices = 0;
+	if (vertices->isA(CC_POINT_CLOUD))
+		resultVertices = static_cast<ccPointCloud*>(vertices)->clone();
+	else
+		resultVertices = new ccPointCloud(vertices);
+	if (!resultVertices)
+	{
+		ccLog::Error("[ccMesh::subdivide] Not enough memory!");
+		return 0;
+	}
+
+	ccMesh* resultMesh = new ccMesh(resultVertices);
+	resultMesh->addChild(resultVertices);
+	
+	if (!resultMesh->reserve(triCount))
+	{
+		ccLog::Error("[ccMesh::subdivide] Not enough memory!");
+		delete resultMesh;
+		return 0;
+	}
+
+	s_alreadyCreatedVertices.clear();
+
+	try
+	{		
+		for (unsigned i=0;i<triCount;++i)
+		{
+			const unsigned* tri = m_triIndexes->getValue(i);
+			if (!resultMesh->pushSubdivide(maxArea,tri[0],tri[1],tri[2]))
+			{
+				ccLog::Error("[ccMesh::subdivide] Not enough memory!");
+				delete resultMesh;
+				return 0;
+			}
+		}
+	}
+	catch(...)
+	{
+		ccLog::Error("[ccMesh::subdivide] An error occured!");
+		delete resultMesh;
+		return 0;
+	}
+
+	//we must also 'fix' the triangles that share (at least) an edge with a subdivide triangle!
+	try
+	{
+		unsigned newTriCount = resultMesh->size();
+		for (unsigned i=0;i<newTriCount;++i)
+		{
+			unsigned* _face = resultMesh->m_triIndexes->getValue(i); //warning: array might change at each call to reallocate!
+			unsigned indexA = _face[0];
+			unsigned indexB = _face[1];
+			unsigned indexC = _face[2];
+
+			//test all edges
+			int indexG1 = -1;
+			{
+				QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexA,indexB));
+				if (it != s_alreadyCreatedVertices.end())
+					indexG1 = (int)it.value();
+			}
+			int indexG2 = -1;
+			{
+				QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexB,indexC));
+				if (it != s_alreadyCreatedVertices.end())
+					indexG2 = (int)it.value();
+			}
+			int indexG3 = -1;
+			{
+				QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexC,indexA));
+				if (it != s_alreadyCreatedVertices.end())
+					indexG3 = (int)it.value();
+			}
+
+			//at least one edge is 'wrong'
+			unsigned brokenEdges = (indexG1<0 ? 0:1)
+								 + (indexG2<0 ? 0:1)
+								 + (indexG3<0 ? 0:1);
+
+			if (brokenEdges == 1)
+			{
+				int indexG = indexG1;
+				unsigned char i1 = 2; //relative index facing the broken edge
+				if (indexG2>=0)
+				{
+					indexG = indexG2;
+					i1 = 0;
+				}
+				else if (indexG3>=0)
+				{
+					indexG = indexG3;
+					i1 = 1;
+				}
+				assert(indexG>=0);
+				assert(i1<3);
+
+				unsigned indexes[3] = { indexA, indexB, indexC };
+
+				//replace current triangle by one half
+				_face[0] = indexes[i1];
+				_face[1] = indexG;
+				_face[2] = indexes[(i1+2)%3];
+				//and add the other half (we can use pushSubdivide as the area should alredy be ok!)
+				if (!resultMesh->pushSubdivide(maxArea,indexes[i1],indexes[(i1+1)%3],indexG))
+				{
+					ccLog::Error("[ccMesh::subdivide] Not enough memory!");
+					delete resultMesh;
+					return 0;
+				}
+			}
+			else if (brokenEdges == 2)
+			{
+				if (indexG1<0) //broken edges: BC and CA
+				{
+					//replace current triangle by the 'pointy' part
+					_face[0] = indexC;
+					_face[1] = indexG3;
+					_face[2] = indexG2;
+					//split the remaining 'trapezoid' in 2
+					if (!resultMesh->pushSubdivide(maxArea, indexA, indexG2, indexG3) ||
+						!resultMesh->pushSubdivide(maxArea, indexA, indexB, indexG2))
+					{
+						ccLog::Error("[ccMesh::subdivide] Not enough memory!");
+						delete resultMesh;
+						return 0;
+					}
+				}
+				else if (indexG2<0) //broken edges: AB and CA
+				{
+					//replace current triangle by the 'pointy' part
+					_face[0] = indexA;
+					_face[1] = indexG1;
+					_face[2] = indexG3;
+					//split the remaining 'trapezoid' in 2
+					if (!resultMesh->pushSubdivide(maxArea, indexB, indexG3, indexG1) ||
+						!resultMesh->pushSubdivide(maxArea, indexB, indexC, indexG3))
+					{
+						ccLog::Error("[ccMesh::subdivide] Not enough memory!");
+						delete resultMesh;
+						return 0;
+					}
+				}
+				else /*if (indexG3<0)*/ //broken edges: AB and BC
+				{
+					//replace current triangle by the 'pointy' part
+					_face[0] = indexB;
+					_face[1] = indexG2;
+					_face[2] = indexG1;
+					//split the remaining 'trapezoid' in 2
+					if (!resultMesh->pushSubdivide(maxArea, indexC, indexG1, indexG2) ||
+						!resultMesh->pushSubdivide(maxArea, indexC, indexA, indexG1))
+					{
+						ccLog::Error("[ccMesh::subdivide] Not enough memory!");
+						delete resultMesh;
+						return 0;
+					}
+				}
+			}
+			else if (brokenEdges == 3) //works just as a standard subdivision in fact!
+			{
+				//replace current triangle by one quarter
+				_face[0] = indexA;
+				_face[1] = indexG1;
+				_face[2] = indexG3;
+				//and add the other 3 quarters (we can use pushSubdivide as the area should alredy be ok!)
+				if (!resultMesh->pushSubdivide(maxArea, indexB, indexG2, indexG1) ||
+					!resultMesh->pushSubdivide(maxArea, indexC, indexG3, indexG2) ||
+					!resultMesh->pushSubdivide(maxArea, indexG1, indexG2, indexG3))
+				{
+					ccLog::Error("[ccMesh::subdivide] Not enough memory!");
+					delete resultMesh;
+					return 0;
+				}
+			}
+		}
+	}
+	catch(...)
+	{
+		ccLog::Error("[ccMesh::subdivide] An error occured!");
+		delete resultMesh;
+		return 0;
+	}
+
+	s_alreadyCreatedVertices.clear();
+
+	if (resultMesh->size() < resultMesh->maxSize())
+		resultMesh->resize(resultMesh->size());
+	if (resultVertices->size()<resultVertices->capacity())
+		resultVertices->resize(resultVertices->size());
+
+	//we import from the original mesh... what we can
+	if (hasNormals())
+	{
+		resultMesh->computeNormals();
+		resultMesh->showNormals(normalsShown());
+	}
+	resultMesh->setVisible(isVisible());
+
+	return resultMesh;
+}

@@ -249,6 +249,11 @@ public:
 	//! Returns whether polygon stippling is enabled or not
 	bool stipplingEnabled() const {return m_stippling;}
 
+	//! Subdivides mesh (so as to ensure that all triangles are falls below 'maxArea')
+	/** \return subdivided mesh (if successfull)
+	**/
+	ccMesh* subdivide(float maxArea) const;
+
 protected:
 
     //inherited from ccHObject
@@ -257,6 +262,9 @@ protected:
     //inherited from ccGenericMesh
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+
+	//! Used internally by 'subdivide'
+	bool pushSubdivide(PointCoordinateType maxArea, unsigned indexA, unsigned indexB, unsigned indexC);
 
 	//! Container of per-triangle vertices indexes (3)
 	typedef GenericChunkedArray<3,unsigned> triangleIndexesContainer;

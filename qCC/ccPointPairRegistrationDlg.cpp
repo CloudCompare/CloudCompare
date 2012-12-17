@@ -1,7 +1,7 @@
 #include <ccPointPairRegistrationDlg.h>
 
 //Local
-#include <MainWindow.h>
+#include <mainwindow.h>
 #include <ccGLWindow.h>
 #include <ccAskThreeDoubleValuesDlg.h>
 

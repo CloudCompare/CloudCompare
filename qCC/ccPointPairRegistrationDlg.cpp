@@ -11,7 +11,7 @@
 #include <ccPointCloud.h>
 
 //Qt
-#include <QMdiSubWindow.h>
+#include <QMdiSubWindow>
 
 ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 	: ccOverlayDialog(parent)

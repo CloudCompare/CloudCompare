@@ -1311,7 +1311,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 			if (!textureFileName.isEmpty())
 			{
 				QString textureFilePath = QFileInfo(filename).absolutePath()+QString('/')+textureFileName;
-				QImage texture = QImage(textureFilePath);
+				QImage texture = QImage(textureFilePath).mirrored();
 				if (!texture.isNull())
 				{
 					if (mesh->reservePerTriangleTexCoordIndexes() && mesh->reservePerTriangleMtlIndexes())

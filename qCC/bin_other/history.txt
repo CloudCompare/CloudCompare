@@ -3,6 +3,8 @@
 v2.4 ??/??/2013
 - Mesh subdivision method
 - 3D slicer
+- Bug fixes:
+	* ply associated texture file should be vertically inverted (at least when the files come from PhotoScan?)
 
 v2.4 12/16/2012	
 - Introducing a new alignment/registration method: "Align (point pairs picking)"

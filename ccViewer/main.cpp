@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 	ccConsole::Init(0,&w);
 
 	//files to open are passed as argument
-	if (argc>0)
+	if (argc>1)
     {
 		//any argument is assumed to be a filename --> we try to load it
 		QStringList filenames;

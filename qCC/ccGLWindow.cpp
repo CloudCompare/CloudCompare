@@ -2037,6 +2037,8 @@ void ccGLWindow::displayNewMessage(const QString& message,
 				//same position? we remove the message
 				if (it->position == pos)
 					it = m_messagesToDisplay.erase(it);
+				else
+					++it;
 			}
 		}
 		else

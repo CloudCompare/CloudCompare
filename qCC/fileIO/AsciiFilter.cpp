@@ -141,7 +141,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 			color = QString(" %1 %2 %3").arg(col[0]).arg(col[1]).arg(col[2]);
 
 			if (!swapColorAndSFs)
-				line += color;
+				line.append(color);
         }
 
         if (writeSF)
@@ -152,13 +152,13 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
         }
 
         if (writeColors && swapColorAndSFs)
-			line += color;
+			line.append(color);
 
         if (writeNorms)
         {
 			//add normal vector
             const PointCoordinateType* N = cloud->getPointNormal(i);
-			line.append(QString("%1 %2 %3").arg(N[0],0,'f',s_nPrecision).arg(N[1],0,'f',s_nPrecision).arg(N[2],0,'f',s_nPrecision));
+			line.append(QString(" %1 %2 %3").arg(N[0],0,'f',s_nPrecision).arg(N[1],0,'f',s_nPrecision).arg(N[2],0,'f',s_nPrecision));
         }
 
 		stream << line << "\n";

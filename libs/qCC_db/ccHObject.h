@@ -139,11 +139,39 @@ public:
     //Inherited from ccDrawableObject
     virtual ccBBox getBB(bool relative=true, bool withGLfeatures=false, const ccGenericGLDisplay* window=NULL);
     virtual void draw(CC_DRAW_CONTEXT& context);
-    virtual void prepareDisplayForRefresh_recursive();
-    virtual void setDisplay_recursive(ccGenericGLDisplay* win);
-	virtual void setSelected_recursive(bool state);
-    virtual void removeFromDisplay_recursive(ccGenericGLDisplay* win);
-    virtual void refreshDisplay_recursive();
+
+	/*** RECURSIVE CALL SCRIPTS ***/
+	
+	//0 parameter
+	#define recursive_call0(baseName,recursiveName) \
+	inline virtual void recursiveName() \
+	{ \
+		baseName(); \
+		for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it) \
+			(*it)->recursiveName(); \
+	} \
+
+	//1 parameter
+	#define recursive_call1(baseName,param1Type,recursiveName) \
+	inline virtual void recursiveName(param1Type p) \
+	{ \
+		baseName(p); \
+		for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it) \
+			(*it)->recursiveName(p); \
+	} \
+
+	/*****************************/
+
+	//recursive equivalents of some of ccDrawableObject methods
+	recursive_call1(setSelected,bool,setSelected_recursive);
+	recursive_call1(setDisplay,ccGenericGLDisplay*,setDisplay_recursive);
+	recursive_call1(removeFromDisplay,ccGenericGLDisplay*,removeFromDisplay_recursive);
+	recursive_call0(prepareDisplayForRefresh,prepareDisplayForRefresh_recursive);
+	recursive_call0(refreshDisplay,refreshDisplay_recursive);
+	recursive_call0(toggleVisibility,toggleVisibility_recursive);
+	recursive_call0(toggleColors,toggleColors_recursive);
+	recursive_call0(toggleNormals,toggleNormals_recursive);
+	recursive_call0(toggleSF,toggleSF_recursive);
 
     //! Applies the active OpenGL transformation to the entity (recursive)
     /** The input ccGLMatrix should be left to 0, unless you want to apply

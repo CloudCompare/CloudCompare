@@ -181,6 +181,8 @@ public:
     virtual bool isVisible() const;
     //! Sets entity visibility
     virtual void setVisible(bool state);
+	//! Toggles visibility
+	virtual void toggleVisibility();
 
     //! Returns whether visibilty is locked or not
     virtual bool isVisiblityLocked() const;
@@ -226,6 +228,8 @@ public:
     virtual bool colorsShown() const;
     //! Sets colors visibility
     virtual void showColors(bool state);
+	//! Toggles colors
+	virtual void toggleColors();
 
     //! Returns whether normals are enabled or not
     virtual bool hasNormals() const;
@@ -233,6 +237,8 @@ public:
     virtual bool normalsShown() const;
     //! Sets normals visibility
     virtual void showNormals(bool state);
+	//! Toggles normals
+	virtual void toggleNormals();
 
     /*** scalar fields ***/
 
@@ -248,7 +254,10 @@ public:
     //! Sets active scalarfield visibility
     virtual void showSF(bool state);
 
-    //! Returns whether active scalar field is visible
+	//! Toggles SF
+	virtual void toggleSF();
+
+	//! Returns whether active scalar field is visible
     virtual bool sfShown() const;
 
     //! Returns whether colors are currently overriden by a temporary (unique) color

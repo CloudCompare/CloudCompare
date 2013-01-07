@@ -399,46 +399,46 @@ void ccHObject::applyGLTransformation_recursive(ccGLMatrix* trans/*=NULL*/)
 		razGLTransformation();
 }
 
-void ccHObject::setDisplay_recursive(ccGenericGLDisplay* win)
-{
-	setDisplay(win);
-
-	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-		(*it)->setDisplay_recursive(win);
-}
-
-void ccHObject::setSelected_recursive(bool state)
-{
-	setSelected(state);
-
-	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-		(*it)->setSelected_recursive(state);
-}
-
-
-void ccHObject::removeFromDisplay_recursive(ccGenericGLDisplay* win)
-{
-	removeFromDisplay(win);
-
-	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-		(*it)->removeFromDisplay_recursive(win);
-}
-
-void ccHObject::refreshDisplay_recursive()
-{
-	refreshDisplay();
-
-	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-		(*it)->refreshDisplay_recursive();
-}
-
-void ccHObject::prepareDisplayForRefresh_recursive()
-{
-	prepareDisplayForRefresh();
-
-	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-		(*it)->prepareDisplayForRefresh_recursive();
-}
+//void ccHObject::setDisplay_recursive(ccGenericGLDisplay* win)
+//{
+//	setDisplay(win);
+//
+//	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
+//		(*it)->setDisplay_recursive(win);
+//}
+//
+//void ccHObject::setSelected_recursive(bool state)
+//{
+//	setSelected(state);
+//
+//	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
+//		(*it)->setSelected_recursive(state);
+//}
+//
+//
+//void ccHObject::removeFromDisplay_recursive(ccGenericGLDisplay* win)
+//{
+//	removeFromDisplay(win);
+//
+//	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
+//		(*it)->removeFromDisplay_recursive(win);
+//}
+//
+//void ccHObject::refreshDisplay_recursive()
+//{
+//	refreshDisplay();
+//
+//	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
+//		(*it)->refreshDisplay_recursive();
+//}
+//
+//void ccHObject::prepareDisplayForRefresh_recursive()
+//{
+//	prepareDisplayForRefresh();
+//
+//	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
+//		(*it)->prepareDisplayForRefresh_recursive();
+//}
 
 void ccHObject::removeChild(const ccHObject* anObject)
 {

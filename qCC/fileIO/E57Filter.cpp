@@ -2090,13 +2090,16 @@ CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bo
 			ccHObject* scan = LoadScan(scanNode,scanGUID);
 			if (scan)
 			{
-				QString name("Scan");
-				e57::ustring nodeName = scanNode.elementName();
-				if (nodeName.c_str() != 0 && nodeName.c_str()[0]!=0)
-					name += QString(nodeName.c_str());
-				else
-					name += QString::number(i);
-				scan->setName(name);
+				if (scan->getName().isEmpty())
+				{
+					QString name("Scan");
+					e57::ustring nodeName = scanNode.elementName();
+					if (nodeName.c_str() != 0 && nodeName.c_str()[0]!=0)
+						name += QString(nodeName.c_str());
+					else
+						name += QString::number(i);
+					scan->setName(name);
+				}
 				container.addChild(scan);
 
 				//we also add the scan to the GUID/object map

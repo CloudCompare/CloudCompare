@@ -79,6 +79,11 @@ void ccDrawableObject::setVisible(bool state)
     visible = state;
 }
 
+void ccDrawableObject::toggleVisibility()
+{
+	setVisible(!isVisible());
+}
+
 bool ccDrawableObject::isVisiblityLocked() const
 {
     return lockedVisibility;
@@ -180,6 +185,11 @@ void ccDrawableObject::showColors(bool state)
     colorsDisplayed = state;
 }
 
+void ccDrawableObject::toggleColors()
+{
+	showColors(!colorsShown());
+}
+
 bool ccDrawableObject::colorsShown() const
 {
     return colorsDisplayed;
@@ -193,6 +203,11 @@ bool ccDrawableObject::hasColors() const
 void ccDrawableObject::showNormals(bool state)
 {
     normalsDisplayed = state;
+}
+
+void ccDrawableObject::toggleNormals()
+{
+	showNormals(!normalsShown());
 }
 
 bool ccDrawableObject::normalsShown() const
@@ -218,6 +233,11 @@ bool ccDrawableObject::hasDisplayedScalarField() const
 void ccDrawableObject::showSF(bool state)
 {
     sfDisplayed = state;
+}
+
+void ccDrawableObject::toggleSF()
+{
+	showSF(!sfShown());
 }
 
 bool ccDrawableObject::sfShown() const

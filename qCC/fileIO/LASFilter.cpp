@@ -29,19 +29,23 @@
 #include <ccCommon.h>
 #include "../ccCoordinatesShiftManager.h"
 
-//Liblas
-#include <liblas/point.hpp>
-#include <liblas/reader.hpp>
-#include <liblas/writer.hpp>
-#include <fstream>  // std::ifstream
-#include <iostream> // std::cout
-
 //CCLib
 #include <CCMiscTools.h>
 
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
+
+//Liblas
+#include <liblas/point.hpp>
+#include <liblas/reader.hpp>
+#include <liblas/writer.hpp>
+#include <liblas/factory.hpp>	// liblas::ReaderFactory
+#include <fstream>				// std::ifstream
+#include <iostream>				// std::cout
+
+//Qt
+#include<QFileInfo>
 
 CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 {
@@ -124,6 +128,13 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	try
 	{
 		liblas::Header header;
+
+		//LAZ support based on extension!
+		if (QFileInfo(filename).suffix().toUpper() == "LAZ") 
+		{
+			header.SetCompressed(true);
+		}
+
 		//header.SetDataFormatId(liblas::ePointFormat3);
 		ccBBox bBox = theCloud->getBB();
 		if (bBox.isValid())
@@ -209,8 +220,8 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	try
 	{
-		reader = new liblas::Reader(ifs);
-
+		reader = new liblas::Reader(liblas::ReaderFactory().CreateWithStream(ifs));	//using factory for automatic and transparent
+																					//handling of compressed/uncompressed files
 		liblas::Header const& header = reader->GetHeader();
 
 #ifdef _DEBUG

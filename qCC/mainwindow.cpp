@@ -4695,9 +4695,9 @@ void MainWindow::toggleSelectedEntitiesNormals()
     unsigned i,selNum=m_selectedEntities.size();
     for (i=0; i<selNum; ++i)
     {
-		if (m_selectedEntities[i]->hasNormals())
+		//if (m_selectedEntities[i]->hasNormals())
 		{
-			m_selectedEntities[i]->showNormals(!m_selectedEntities[i]->normalsShown());
+			m_selectedEntities[i]->toggleNormals_recursive();
 			m_selectedEntities[i]->prepareDisplayForRefresh_recursive();
 		}
     }
@@ -4710,9 +4710,9 @@ void MainWindow::toggleSelectedEntitiesColors()
     unsigned i,selNum=m_selectedEntities.size();
     for (i=0; i<selNum; ++i)
     {
-		if (m_selectedEntities[i]->hasColors())
+		//if (m_selectedEntities[i]->hasColors())
 		{
-			m_selectedEntities[i]->showColors(!m_selectedEntities[i]->colorsShown());
+			m_selectedEntities[i]->toggleColors_recursive();
 			m_selectedEntities[i]->prepareDisplayForRefresh_recursive();
 		}
     }
@@ -4725,9 +4725,9 @@ void MainWindow::toggleSelectedEntitiesSF()
     unsigned i,selNum=m_selectedEntities.size();
     for (i=0; i<selNum; ++i)
     {
-		if (m_selectedEntities[i]->hasScalarFields())
+		//if (m_selectedEntities[i]->hasScalarFields())
 		{
-			m_selectedEntities[i]->showSF(!m_selectedEntities[i]->sfShown());
+			m_selectedEntities[i]->toggleSF_recursive();
 			m_selectedEntities[i]->prepareDisplayForRefresh_recursive();
 		}
     }
@@ -4740,7 +4740,7 @@ void MainWindow::toggleSelectedEntitiesVisibility()
     unsigned i,selNum=m_selectedEntities.size();
     for (i=0; i<selNum; ++i)
     {
-        m_selectedEntities[i]->setVisible(!m_selectedEntities[i]->isVisible());
+        m_selectedEntities[i]->toggleVisibility_recursive();
         m_selectedEntities[i]->prepareDisplayForRefresh_recursive();
     }
 

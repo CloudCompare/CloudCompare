@@ -101,6 +101,8 @@ CC_FILE_TYPES FileIOFilter::StringToFileFormat(const char* ext)
 #ifdef CC_LAS_SUPPORT
 	else if (strcmp(ext,"LAS")==0)
 		fType=LAS;
+	else if (strcmp(ext,"LAZ")==0)
+		fType=LAS; //DGM: LAZ extension is handled by LASFilter
 #endif
 #ifdef CC_E57_SUPPORT
 	else if (strcmp(ext,"E57")==0)

@@ -3,8 +3,14 @@
 v2.4 ??/??/2013
 - Mesh subdivision method
 - 3D slicer
+
+v2.4 01/07/2013
+- LAZ files support (with laszip - thanks to Ingo Maindorfer)
+- Toggle shortcuts ('N' for normals, 'C' for colors, 'S' for active scalar field and 'V' for visibility) are now applied recursively to any kind of object
+	(even a group for instane)
 - Bug fixes:
 	* ply associated texture file should be vertically inverted (at least when the files come from PhotoScan?)
+	* e57 scan names were ignored
 
 v2.4 12/16/2012	
 - Introducing a new alignment/registration method: "Align (point pairs picking)"

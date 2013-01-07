@@ -114,7 +114,7 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
             "X3D mesh file (*.x3d)",
 #endif
 #ifdef CC_LAS_SUPPORT
-            "LAS lidar point cloud (*.las)",
+            "LAS lidar point cloud (*.las *.laz)",
 #endif
 #ifdef CC_ULT_SUPPORT
             "ULT/ULD Ultrasonix Localizer data (*.ult)",

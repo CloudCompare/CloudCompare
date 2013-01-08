@@ -156,7 +156,7 @@ ccGenericMesh* ccMesh::clone(ccGenericPointCloud* vertices/*=0*/)
 		{
 			//we create a temporary entity with used vertices only
 			CCLib::ReferenceCloud* rc = new CCLib::ReferenceCloud(m_associatedCloud);
-			if (!rc->reserve(realVertCount))
+			if (rc->reserve(realVertCount))
 			{
 				for (i=0;i<vertNum;++i)
 					if (usedVerts[i]!=vertNum)
@@ -164,6 +164,12 @@ ccGenericMesh* ccMesh::clone(ccGenericPointCloud* vertices/*=0*/)
 
 				//and the associated vertices set
 				newVertices = new ccPointCloud(rc,m_associatedCloud);
+				if (newVertices->size() < rc->size())
+				{
+					//not enough memory!
+					delete newVertices;
+					newVertices=0;
+				}
 			}
 
 			delete rc;

@@ -15,6 +15,7 @@ v2.4 01/08/2013
 	* e57 scan names were ignored on import
 	* a selection composed of parents and (some of their) siblings would produce a corrupted BIN file on export
 	* in some cases users could freely segment mesh vertices causing a crash
+	* in some cases mesh cloning would fail for no (good) reason (bad test)
 
 v2.4 12/16/2012	
 - Introducing a new alignment/registration method: "Align (point pairs picking)"

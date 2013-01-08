@@ -273,7 +273,7 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccGenericPointCloud
 
     if (!reserveThePointsTable(n))
     {
-        //ccConsole::Error("[ccPointCloud::extract] Internal error: failed to create new point cloud! Not enough memory?");
+        ccLog::Error("[ccPointCloud::Clone] Failed to create new point cloud! (not enough memory)");
         return;
     }
 
@@ -306,7 +306,7 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccGenericPointCloud
         }
         else
         {
-            //ccConsole::Warning("[ccPointCloud] Failed to import colors!");
+            ccLog::Warning("[ccPointCloud::clone] Failed to import colors! (not enough memory)");
         }
     }
 
@@ -325,7 +325,7 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccGenericPointCloud
         }
         else
         {
-            //ccConsole::Warning("[ccPointCloud] Failed to import normals!");
+            ccLog::Warning("[ccPointCloud::clone] Failed to import normals! (not enough memory)");
         }
     }
 
@@ -360,7 +360,7 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccGenericPointCloud
             else //in we don't have enough memory, we cancel SF creation
             {
                 deleteScalarField(sfIdx);
-                //ccConsole::Warning("[ccPointCloud] Failed to import SF!");
+				ccLog::Warning(QString("[ccPointCloud::clone] Failed to import SF '%1'! (not enough memory)").arg(currentScalarField->getName()));
             }
         }
     }

@@ -2,15 +2,19 @@
 
 v2.4 ??/??/2013
 - Mesh subdivision method
+- 3DConnexion devices (3D mouses) support
 - 3D slicer
 
-v2.4 01/07/2013
+v2.4 01/08/2013
 - LAZ files support (with laszip - thanks to Ingo Maindorfer)
 - Toggle shortcuts ('N' for normals, 'C' for colors, 'S' for active scalar field and 'V' for visibility) are now applied recursively to any kind of object
 	(even a group for instane)
 - Bug fixes:
+	* a space character was missing when exportin a cloud with normals in ASCII format!
 	* ply associated texture file should be vertically inverted (at least when the files come from PhotoScan?)
-	* e57 scan names were ignored
+	* e57 scan names were ignored on import
+	* a selection composed of parents and (some of their) siblings would produce a corrupted BIN file on export
+	* in some cases users could freely segment mesh vertices causing a crash
 
 v2.4 12/16/2012	
 - Introducing a new alignment/registration method: "Align (point pairs picking)"

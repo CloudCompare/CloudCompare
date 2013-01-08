@@ -1243,7 +1243,8 @@ void ccDBRoot::showContextMenu(const QPoint& pnt)
 					if (item->isKindOf(CC_POINT_CLOUD) || item->isKindOf(CC_MESH))
 					{
 						toggleOtherProperties = true;
-						break;
+						if (hasMoreThan2Children)
+							break; //no need to get more information!
 					}
 				}
 			}

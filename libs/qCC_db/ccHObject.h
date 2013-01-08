@@ -259,4 +259,29 @@ protected:
     int m_lastModificationTime_ms;
 };
 
+/*** Helpers ***/
+
+//! standard ccHObject container (for children, etc.)
+static void RemoveSiblings(const ccHObject::Container& origin, ccHObject::Container& dest)
+{
+	unsigned count = origin.size();
+	for (unsigned i=0;i<count;++i)
+	{
+		//we don't take objects that are siblings of others
+		bool isSiblingOfAnotherOne = false;
+		for (unsigned j=0;j<count;++j)
+		{
+			if (i != j && origin[j]->isAncestorOf(origin[i]))
+			{
+				isSiblingOfAnotherOne = true;
+				break;
+			}
+		}
+
+		if (!isSiblingOfAnotherOne)
+			dest.push_back(origin[i]);
+	}
+}
+
+
 #endif

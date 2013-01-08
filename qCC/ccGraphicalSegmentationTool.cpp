@@ -240,6 +240,12 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 	if (anObject->isKindOf(CC_POINT_CLOUD))
 	{
 		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(anObject);
+		//detect vertices
+		if (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH) && static_cast<ccGenericMesh*>(cloud->getParent())->getAssociatedCloud() == cloud)
+		{
+			ccConsole::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its parent mesh instead!").arg(anObject->getName()));
+			return false;
+		}
 		cloud->razVisibilityArray();
 		m_toSegment.push_back(cloud);
 

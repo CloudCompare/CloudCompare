@@ -4692,14 +4692,12 @@ void MainWindow::cancelPickRotationCenter()
 
 void MainWindow::toggleSelectedEntitiesNormals()
 {
-    unsigned i,selNum=m_selectedEntities.size();
-    for (i=0; i<selNum; ++i)
+	ccHObject::Container baseEntities;
+	RemoveSiblings(m_selectedEntities,baseEntities);
+    for (unsigned i=0; i<baseEntities.size(); ++i)
     {
-		//if (m_selectedEntities[i]->hasNormals())
-		{
-			m_selectedEntities[i]->toggleNormals_recursive();
-			m_selectedEntities[i]->prepareDisplayForRefresh_recursive();
-		}
+		baseEntities[i]->toggleNormals_recursive();
+		baseEntities[i]->prepareDisplayForRefresh_recursive();
     }
 
     refreshAll();
@@ -4707,14 +4705,12 @@ void MainWindow::toggleSelectedEntitiesNormals()
 
 void MainWindow::toggleSelectedEntitiesColors()
 {
-    unsigned i,selNum=m_selectedEntities.size();
-    for (i=0; i<selNum; ++i)
+	ccHObject::Container baseEntities;
+	RemoveSiblings(m_selectedEntities,baseEntities);
+    for (unsigned i=0; i<baseEntities.size(); ++i)
     {
-		//if (m_selectedEntities[i]->hasColors())
-		{
-			m_selectedEntities[i]->toggleColors_recursive();
-			m_selectedEntities[i]->prepareDisplayForRefresh_recursive();
-		}
+		baseEntities[i]->toggleColors_recursive();
+		baseEntities[i]->prepareDisplayForRefresh_recursive();
     }
 
     refreshAll();
@@ -4722,14 +4718,12 @@ void MainWindow::toggleSelectedEntitiesColors()
 
 void MainWindow::toggleSelectedEntitiesSF()
 {
-    unsigned i,selNum=m_selectedEntities.size();
-    for (i=0; i<selNum; ++i)
+	ccHObject::Container baseEntities;
+	RemoveSiblings(m_selectedEntities,baseEntities);
+    for (unsigned i=0; i<baseEntities.size(); ++i)
     {
-		//if (m_selectedEntities[i]->hasScalarFields())
-		{
-			m_selectedEntities[i]->toggleSF_recursive();
-			m_selectedEntities[i]->prepareDisplayForRefresh_recursive();
-		}
+		baseEntities[i]->toggleSF_recursive();
+		baseEntities[i]->prepareDisplayForRefresh_recursive();
     }
 
     refreshAll();
@@ -4737,11 +4731,12 @@ void MainWindow::toggleSelectedEntitiesSF()
 
 void MainWindow::toggleSelectedEntitiesVisibility()
 {
-    unsigned i,selNum=m_selectedEntities.size();
-    for (i=0; i<selNum; ++i)
+	ccHObject::Container baseEntities;
+	RemoveSiblings(m_selectedEntities,baseEntities);
+    for (unsigned i=0; i<baseEntities.size(); ++i)
     {
-        m_selectedEntities[i]->toggleVisibility_recursive();
-        m_selectedEntities[i]->prepareDisplayForRefresh_recursive();
+        baseEntities[i]->toggleVisibility_recursive();
+        baseEntities[i]->prepareDisplayForRefresh_recursive();
     }
 
     refreshAll();
@@ -6062,11 +6057,13 @@ void MainWindow::saveFile()
 			result = FileIOFilter::SaveToFile(m_selectedEntities[0],qPrintable(selectedFilename),BIN);
 		else
 		{
-			ccHObject tempContainer;
-			for (unsigned i=0;i<selNum;++i)
-				if (!tempContainer.find(m_selectedEntities[i]->getUniqueID()))
-					tempContainer.addChild(m_selectedEntities[i],false);
-			result = FileIOFilter::SaveToFile(&tempContainer,qPrintable(selectedFilename),BIN);
+			ccHObject::Container tempContainer;
+			RemoveSiblings(m_selectedEntities,tempContainer);
+
+			ccHObject root;
+			for (unsigned i=0;i<tempContainer.size();++i)
+					root.addChild(tempContainer[i],false);
+			result = FileIOFilter::SaveToFile(&root,qPrintable(selectedFilename),BIN);
 		}
 
 		currentCloudSaveDlgFilter = BIN;

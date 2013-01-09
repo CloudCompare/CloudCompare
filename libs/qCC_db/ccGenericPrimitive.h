@@ -108,6 +108,12 @@ protected:
 	**/
 	void applyTransformationToVertices();
 
+	//! Finished 'clone' job (vertices color, etc.)
+	/** \param primitive primitive to 'pimp'
+		\return pimped primitive
+	**/
+	ccGenericPrimitive* finishCloneJob(ccGenericPrimitive* primitive) const;
+
 	//! Returns vertices
 	ccPointCloud* vertices();
 

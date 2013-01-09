@@ -1965,7 +1965,7 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 
 	ccPointCloud* resultVertices = 0;
 	if (vertices->isA(CC_POINT_CLOUD))
-		resultVertices = static_cast<ccPointCloud*>(vertices)->clone();
+		resultVertices = static_cast<ccPointCloud*>(vertices)->cloneThis();
 	else
 		resultVertices = new ccPointCloud(vertices);
 	if (!resultVertices)

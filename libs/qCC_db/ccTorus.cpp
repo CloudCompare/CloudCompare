@@ -57,7 +57,7 @@ ccTorus::ccTorus(QString name/*=QString("Torus")*/)
 
 ccGenericPrimitive* ccTorus::clone() const
 {
-	return new ccTorus(m_insideRadius,m_outsideRadius,m_angle_rad,m_rectSection,m_rectSectionHeight,&m_transformation,getName(),m_drawPrecision);
+	return finishCloneJob(new ccTorus(m_insideRadius,m_outsideRadius,m_angle_rad,m_rectSection,m_rectSectionHeight,&m_transformation,getName(),m_drawPrecision));
 }
 
 bool ccTorus::buildUp()

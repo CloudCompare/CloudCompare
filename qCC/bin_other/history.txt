@@ -5,10 +5,15 @@ v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
 
-v2.4 01/08/2013
+v2.4 01/??/2013
 - LAZ files support (with laszip - thanks to Ingo Maindorfer)
-- Toggle shortcuts ('N' for normals, 'C' for colors, 'S' for active scalar field and 'V' for visibility) are now applied recursively to any kind of object
-	(even a group for instane)
+- New shortcut: 'Z' to zoom and center camera on selected entities (magnifier icon)
+- Toggle shortcuts are now applied RECURSIVELY to any kind of object (even a group for instance)
+	(reminder: 'N' for normals, 'C' for colors, 'S' for active scalar field and 'V' for visibility)
+- Enhancements:
+	* primitives don't loose their attributes (colors, SF, etc.) when cloned
+		(they still loose them if precision is changed however...)
+	* CC will only display one global progress bar when loading E57 files with many scans (>10)
 - Bug fixes:
 	* a space character was missing when exportin a cloud with normals in ASCII format!
 	* ply associated texture file should be vertically inverted (at least when the files come from PhotoScan?)
@@ -16,6 +21,7 @@ v2.4 01/08/2013
 	* a selection composed of parents and (some of their) siblings would produce a corrupted BIN file on export
 	* in some cases users could freely segment mesh vertices causing a crash
 	* in some cases mesh cloning would fail for no (good) reason (bad test)
+	* when loading primitives from a BIN V2 file, a supplementary (empty) 'vertices' cloud was created
 
 v2.4 12/16/2012	
 - Introducing a new alignment/registration method: "Align (point pairs picking)"

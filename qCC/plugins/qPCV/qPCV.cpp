@@ -105,7 +105,7 @@ int qPCVPlugin::doAction(ccHObject::Container& selectedEntities,
 			{
 				//we keep only clouds with normals
 				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(clouds[i]);
-				if (cloud->hasNormals())
+				if (cloud && cloud->hasNormals())
 				{
 					cloudsWithNormals.push_back(cloud);
 					QString cloudTitle = QString("%1 - %2 points").arg(cloud->getName()).arg(cloud->size());

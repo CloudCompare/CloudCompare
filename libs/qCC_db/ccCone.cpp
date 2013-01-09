@@ -57,7 +57,7 @@ ccCone::ccCone(QString name/*="Cylinder"*/)
 
 ccGenericPrimitive* ccCone::clone() const
 {
-	return new ccCone(m_bottomRadius,m_topRadius,m_height,m_xOff,m_yOff,&m_transformation,getName(),m_drawPrecision);
+	return finishCloneJob(new ccCone(m_bottomRadius,m_topRadius,m_height,m_xOff,m_yOff,&m_transformation,getName(),m_drawPrecision));
 }
 
 bool ccCone::buildUp()

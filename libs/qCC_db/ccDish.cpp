@@ -53,7 +53,7 @@ ccDish::ccDish(QString name/*="Sphere"*/)
 
 ccGenericPrimitive* ccDish::clone() const
 {
-	return new ccDish(m_baseRadius,m_height,m_secondRadius,&m_transformation,getName(),m_drawPrecision);
+	return finishCloneJob(new ccDish(m_baseRadius,m_height,m_secondRadius,&m_transformation,getName(),m_drawPrecision));
 }
 
 bool ccDish::buildUp()

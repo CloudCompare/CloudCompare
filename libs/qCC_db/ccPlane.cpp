@@ -73,7 +73,7 @@ ccPlane::ccPlane(QString name /*=QString("Plane")*/)
 
 ccGenericPrimitive* ccPlane::clone() const
 {
-	return new ccPlane(m_xWidth,m_yWidth,&m_transformation,getName());
+	return finishCloneJob(new ccPlane(m_xWidth,m_yWidth,&m_transformation,getName()));
 }
 
 bool ccPlane::toFile_MeOnly(QFile& out) const

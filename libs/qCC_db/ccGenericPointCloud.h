@@ -73,9 +73,10 @@ public:
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree and
 		the points visibility information.
+		\param destCloud destination cloud can be provided here (must be of the exact same type as the cloned cloud!)
 		\return a copy of this entity
 	**/
-	virtual ccGenericPointCloud* clone()=0;
+	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = 0)=0;
 
 
 	/***************************************************

@@ -1313,7 +1313,7 @@ static bool s_alwaysDisplayLoadDialog = true;
 static bool s_coordinatesShiftEnabled = false;
 static double s_coordinatesShift[3] = {0,0,0};
 
-ccHObject* LoadScan(e57::Node& node, QString& guidStr)
+ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=true*/)
 {
 	if (node.type() != e57::E57_STRUCTURE)
 	{
@@ -1606,13 +1606,17 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr)
 	//Read the point data
 	e57::CompressedVectorReader dataReader = points.reader(dbufs);
 
-	//progress bar
+	//local progress bar
 	ccProgressDialog pdlg(true);
-	CCLib::NormalizedProgress nprogress(&pdlg,(unsigned)ceil((double)pointCount/(double)nSize));
-	pdlg.setMethodTitle("Read E57 file");
-	pdlg.setInfo(qPrintable(QString("Scan #%1 - %2 points").arg(s_absoluteScanIndex).arg(pointCount)));
-	pdlg.start();
-	QApplication::processEvents();
+	CCLib::NormalizedProgress* nprogress=0;
+	if (showProgressBar)
+	{
+		nprogress = new CCLib::NormalizedProgress(&pdlg,pointCount/nSize);
+		pdlg.setMethodTitle("Read E57 file");
+		pdlg.setInfo(qPrintable(QString("Scan #%1 - %2 points").arg(s_absoluteScanIndex).arg(pointCount)));
+		pdlg.start();
+		QApplication::processEvents();
+	}
 
 	unsigned size = 0;
 	boost::int64_t realCount = 0;
@@ -1739,7 +1743,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr)
 			realCount++;
 		}
 		
-		if (!nprogress.oneStep())
+		if (nprogress && !nprogress->oneStep())
 		{
 			QApplication::processEvents();
 			s_cancelRequestedByUser=true;
@@ -1747,16 +1751,23 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr)
 		}
 	}
 
+	if (nprogress)
+	{
+		delete nprogress;
+		nprogress=0;
+	}
+
 	dataReader.close();
 
 	if (realCount==0)
 	{
-		ccLog::Warning(QString("[E57] No valid point in scan '%s'!").arg(scanNode.elementName().c_str()));
+		ccLog::Warning(QString("[E57] No valid point in scan '%1'!").arg(scanNode.elementName().c_str()));
 		delete cloud;
 		return 0;
 	}
 	else if (realCount < pointCount)
 	{
+		ccLog::Warning(QString("[E57] We read less points than expected for scan '%1'! (%2/%3)").arg(scanNode.elementName().c_str()).arg(realCount).arg(pointCount));
 		cloud->resize(realCount);
 	}
 
@@ -2079,6 +2090,19 @@ CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bo
 		e57::VectorNode data3D(n);
 
 		unsigned scanCount = (unsigned)data3D.childCount();
+
+		//global progress bar
+		ccProgressDialog pdlg(true);
+		CCLib::NormalizedProgress* nprogress=0;
+		if (scanCount>10)
+		{
+			//Too many scans, will display a global progress bar
+			nprogress = new CCLib::NormalizedProgress(&pdlg,scanCount);
+			pdlg.setMethodTitle("Read E57 file");
+			pdlg.setInfo(qPrintable(QString("Scans: %1").arg(scanCount)));
+			pdlg.start();
+			QApplication::processEvents();
+		}
 		//static states
 		s_absoluteScanIndex = 0;
 		s_cancelRequestedByUser = false;
@@ -2087,7 +2111,7 @@ CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bo
 		{
 			e57::Node scanNode = data3D.get(i);
 			QString scanGUID;
-			ccHObject* scan = LoadScan(scanNode,scanGUID);
+			ccHObject* scan = LoadScan(scanNode,scanGUID,nprogress==0);
 			if (scan)
 			{
 				if (scan->getName().isEmpty())
@@ -2106,9 +2130,17 @@ CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bo
 				if (!scanGUID.isEmpty())
 					scans.insert(scanGUID,scan);
 			}
-			if (s_cancelRequestedByUser)
+			if ((nprogress && !nprogress->oneStep()) || s_cancelRequestedByUser)
 				break;
 			++s_absoluteScanIndex;
+		}
+
+		if (nprogress)
+		{
+			pdlg.stop();
+			QApplication::processEvents();
+			delete nprogress;
+			nprogress=0;
 		}
 
 		//set global max intensity (saturation) for proper display
@@ -2137,53 +2169,55 @@ CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bo
 		e57::VectorNode images2D(n);
 
 		unsigned imageCount = (unsigned)images2D.childCount();
-
-		//progress bar
-		ccProgressDialog pdlg(true);
-		CCLib::NormalizedProgress nprogress(&pdlg,imageCount);
-		pdlg.setMethodTitle("Read E57 file");
-		pdlg.setInfo(qPrintable(QString("Images: %1").arg(imageCount)));
-		pdlg.start();
-		QApplication::processEvents();
-
-		for (unsigned i=0;i<imageCount;++i)
+		if (imageCount)
 		{
-			e57::Node imageNode = images2D.get(i);
-			QString associatedData3DGuid;
-			ccHObject* image = LoadImage(imageNode,associatedData3DGuid);
-			if (image)
+			//progress bar
+			ccProgressDialog pdlg(true);
+			CCLib::NormalizedProgress nprogress(&pdlg,imageCount);
+			pdlg.setMethodTitle("Read E57 file");
+			pdlg.setInfo(qPrintable(QString("Images: %1").arg(imageCount)));
+			pdlg.start();
+			QApplication::processEvents();
+
+			for (unsigned i=0;i<imageCount;++i)
 			{
-				//no name?
-				if (image->getName().isEmpty())
+				e57::Node imageNode = images2D.get(i);
+				QString associatedData3DGuid;
+				ccHObject* image = LoadImage(imageNode,associatedData3DGuid);
+				if (image)
 				{
-					QString name("Image");
-					e57::ustring nodeName = imageNode.elementName();
-					if (nodeName.c_str() != 0 && nodeName.c_str()[0]!=0)
-						name += QString(nodeName.c_str());
+					//no name?
+					if (image->getName().isEmpty())
+					{
+						QString name("Image");
+						e57::ustring nodeName = imageNode.elementName();
+						if (nodeName.c_str() != 0 && nodeName.c_str()[0]!=0)
+							name += QString(nodeName.c_str());
+						else
+							name += QString::number(i);
+						image->setName(name);
+					}
+					image->setEnabled(false); //not displayed by default
+
+					//existing link to a loaded scan?
+					ccHObject* parentScan = 0;
+					if (!associatedData3DGuid.isEmpty())
+					{
+						if (scans.contains(associatedData3DGuid))
+							parentScan = scans.value(associatedData3DGuid);
+					}
+
+					if (parentScan)
+						parentScan->addChild(image);
 					else
-						name += QString::number(i);
-					image->setName(name);
+						container.addChild(image);
 				}
-				image->setEnabled(false); //not displayed by default
 
-				//existing link to a loaded scan?
-				ccHObject* parentScan = 0;
-				if (!associatedData3DGuid.isEmpty())
+				if (!nprogress.oneStep())
 				{
-					if (scans.contains(associatedData3DGuid))
-						parentScan = scans.value(associatedData3DGuid);
+					s_cancelRequestedByUser = true;
+					break;
 				}
-
-				if (parentScan)
-					parentScan->addChild(image);
-				else
-					container.addChild(image);
-			}
-
-			if (!nprogress.oneStep())
-			{
-				s_cancelRequestedByUser = true;
-				break;
 			}
 		}
 	}

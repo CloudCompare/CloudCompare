@@ -45,7 +45,7 @@ ccSphere::ccSphere(QString name/*=QString("Sphere")*/)
 
 ccGenericPrimitive* ccSphere::clone() const
 {
-	return new ccSphere(m_radius,&m_transformation,getName(),m_drawPrecision);
+	return finishCloneJob(new ccSphere(m_radius,&m_transformation,getName(),m_drawPrecision));
 }
 
 bool ccSphere::buildUp()

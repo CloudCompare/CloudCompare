@@ -62,6 +62,9 @@ public:
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_CYLINDER; }
 
+	//inherited from ccGenericPrimitive
+	virtual ccGenericPrimitive* clone() const;
+
 protected:
     
 };

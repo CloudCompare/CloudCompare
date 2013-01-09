@@ -1328,10 +1328,13 @@
     <string>ZoomCenter</string>
    </property>
    <property name="toolTip">
-    <string>Zoom and center on selected entities</string>
+    <string>Zoom and center on selected entities (Z)</string>
    </property>
    <property name="statusTip">
-    <string>Zoom and center on selected entities</string>
+    <string>Zoom and center on selected entities (Z)</string>
+   </property>
+   <property name="shortcut">
+    <string>Z</string>
    </property>
   </action>
   <action name="actionSetViewTop">

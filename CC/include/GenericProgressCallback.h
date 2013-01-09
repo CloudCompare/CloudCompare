@@ -111,7 +111,7 @@ public:
 		, gp(progress_cb)
 	{
 		assert(progress_cb);
-		scale(totalSteps,finalSteps);
+		scale(totalSteps,finalSteps==100 && totalSteps<500 ? totalSteps : finalSteps);
 	}
 
 	//! Scales inner parameters so that 'totalSteps' calls to the 'oneStep' method correspond to 'finalSteps' percents

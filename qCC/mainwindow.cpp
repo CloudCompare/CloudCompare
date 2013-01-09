@@ -2706,7 +2706,7 @@ void MainWindow::doAction4pcsRegister()
 		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 
 		if (data->isA(CC_POINT_CLOUD))
-            newDataCloud = static_cast<ccPointCloud*>(data)->clone();
+            newDataCloud = static_cast<ccPointCloud*>(data)->cloneThis();
         else
             newDataCloud = new ccPointCloud(data);
         if (data->getParent())
@@ -4301,7 +4301,7 @@ void MainWindow::activatePointListPickingMode()
 
 	if (!pc->isVisible() || !pc->isEnabled())
 	{
-        ccConsole::Error("Entity must be visible!");
+        ccConsole::Error("Points must be visible!");
         return;
 	}
 

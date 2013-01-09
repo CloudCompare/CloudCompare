@@ -74,7 +74,7 @@ ccBox::ccBox(QString name/*=QString("Box")*/)
 
 ccGenericPrimitive* ccBox::clone() const
 {
-	return new ccBox(m_dims,&m_transformation,getName());
+	return finishCloneJob(new ccBox(m_dims,&m_transformation,getName()));
 }
 
 bool ccBox::toFile_MeOnly(QFile& out) const

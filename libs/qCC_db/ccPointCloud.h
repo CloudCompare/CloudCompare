@@ -129,16 +129,19 @@ public:
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree and
 		the points visibility information.
+		\param destCloud destination cloud can be provided here
 		\return a copy of this entity
 	**/
-	virtual ccPointCloud* clone();
+	virtual ccPointCloud* cloneThis(ccPointCloud* destCloud = 0);
+
+	//inherited from ccGenericPointCloud
+	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = 0);
 
     //! Fuses another 3D entity with this one
 	/** All the main features of the given entity are added, except from the octree and
         the points visibility information. Those features are deleted on this cloud.
     **/
 	const ccPointCloud& operator +=(ccPointCloud*);
-
 
 	/***************************************************
 				Features deletion/clearing
@@ -464,6 +467,9 @@ public:
 	NormsIndexesTableType* normals() const {return m_normals;}
 
 protected:
+
+	//! Appends a cloud to this one
+	const ccPointCloud& append(ccPointCloud* cloud, unsigned pointCountBefore);
 
     //inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);

@@ -152,6 +152,12 @@ bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion)
 	if (!ccMesh::fromFile_MeOnly(in, dataVersion))
 		return false;
 
+	//HACK: first, we have to remove any 'wrongly' associated vertices cloud!
+	//(this is in fact the default one - automatically created on construction)
+	//while the true vertices come as a child (at least it should;)
+	if (getChildrenNumber() && getChild(0)->isKindOf(CC_POINT_CLOUD) && getChild(0) != m_associatedCloud)
+		removeChild(0);
+
 	//Transformation matrix backup (dataVersion>=21)
 	if (!m_transformation.fromFile(in, dataVersion))
 		return false;
@@ -218,10 +224,13 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 	//clear per triangle normals
 	removePerTriangleNormalIndexes();
 	if (m_triNormals)
-	{
-		removeChild(m_triNormals);
-		assert(!m_triNormals);
-	}
+		m_triNormals->clear();
+	//DGM: if we do this we'll have issues with the DB tree depending on where when we call this method!
+	//{
+	//	removeChild(m_triNormals);
+	//	setTriNormsTable(0);
+	//	assert(!m_triNormals);
+	//}
 
 	/*** init necessary structures ***/
 
@@ -263,4 +272,32 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 	}
 
 	return true;
+}
+
+ccGenericPrimitive* ccGenericPrimitive::finishCloneJob(ccGenericPrimitive* primitive) const
+{
+	if (primitive)
+	{
+		//'clone' vertices (everything but the points that are already here)
+		if (primitive->m_associatedCloud && m_associatedCloud && m_associatedCloud->size() == primitive->m_associatedCloud->size())
+		{
+			primitive->m_associatedCloud = m_associatedCloud->clone(primitive->m_associatedCloud);
+			primitive->m_associatedCloud->setName(m_associatedCloud->getName());
+		}
+
+		primitive->showNormals(normalsShown());
+		primitive->showColors(colorsShown());
+		primitive->showSF(sfShown());
+		//primitive->showMaterials(materialsShown());
+		//primitive->setName(getName()+QString(".clone"));
+		primitive->setVisible(isVisible());
+		primitive->setEnabled(isEnabled());
+	}
+	else
+	{
+		//if the calling primitive provide a null pointer, it means that the cloned version creation failed!
+		ccLog::Warning("[ccGenericPrimitive::clone] Not enough memory!");
+	}
+
+	return primitive;
 }

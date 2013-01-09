@@ -58,7 +58,7 @@ ccExtru::ccExtru(QString name/*="Plane"*/)
 
 ccGenericPrimitive* ccExtru::clone() const
 {
-	return new ccExtru(m_profile,m_height,&m_transformation,getName());
+	return finishCloneJob(new ccExtru(m_profile,m_height,&m_transformation,getName()));
 }
 
 bool ccExtru::buildUp()

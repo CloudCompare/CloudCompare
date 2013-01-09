@@ -37,3 +37,8 @@ ccCylinder::ccCylinder(QString name/*=QString("Cylinder")*/)
 	: ccCone(name)
 {
 }
+
+ccGenericPrimitive* ccCylinder::clone() const
+{
+	return finishCloneJob(new ccCylinder(m_bottomRadius,m_height,&m_transformation,getName(),m_drawPrecision));
+}

@@ -398,12 +398,31 @@ void ccPointCloud::clear()
     updateModificationTime();
 }
 
-ccPointCloud* ccPointCloud::clone()
+ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/)
 {
-    ccPointCloud* result = new ccPointCloud();
+	if (destCloud)
+	{
+		if (destCloud->isA(CC_POINT_CLOUD))
+		{
+			return cloneThis(static_cast<ccPointCloud*>(destCloud));
+		}
+		else
+		{
+			ccLog::Error("[ccPointCloud::clone] Invalid destination cloud provided! Not a ccPointCloud...");
+			return 0;
+		}
+	}
+
+	return cloneThis();
+}
+
+ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/)
+{
+    ccPointCloud* result = destCloud ? destCloud : new ccPointCloud();
+	
 	result->setVisible(isVisible());
 
-    *result += this;
+    result->append(this,0); //there was (virtually) no point before
 
     result->showColors(colorsShown());
     result->showSF(sfShown());
@@ -423,33 +442,37 @@ ccPointCloud* ccPointCloud::clone()
 
 const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 {
-    unsigned existingPoints = size();
-    unsigned addedPoints = addedCloud->size();
-
     if (isLocked())
     {
 		ccLog::Error("[ccPointCloud::fusion] Cloud is locked");
         return *this;
     }
 
-    if (!reserve(existingPoints+addedPoints))
-    {
-        ccLog::Error("[ccPointCloud::fusion] Not enough memory!");
-        return *this;
-    }
+	return append(addedCloud,size());
+}
 
-    //we remove structures that are not compatible with fusion process
-    if (addedPoints!=0)
+const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned pointCountBefore)
+{
+	assert(addedCloud);
+
+    unsigned addedPoints = addedCloud->size();
+
+    if (!reserve(pointCountBefore+addedPoints))
     {
-        deleteOctree();
-        unallocateVisibilityArray();
+        ccLog::Error("[ccPointCloud::append] Not enough memory!");
+        return *this;
     }
 
 	//fuse display parameters
 	setVisible(isVisible() || addedCloud->isVisible());
 
 	//3D points (already reserved)
+	if (pointCountBefore+addedPoints < size()) //in some cases points have already been copied! (ok it's tricky)
 	{
+		//we remove structures that are not compatible with fusion process
+        deleteOctree();
+        unallocateVisibilityArray();
+
 		for (unsigned i=0;i<addedPoints;i++)
 			addPoint(*addedCloud->getPoint(i));
 	}
@@ -478,7 +501,7 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 				//we try to resrve a new array
                 if (reserveTheRGBTable())
 				{
-					for (unsigned i=0;i<existingPoints;i++)
+					for (unsigned i=0;i<pointCountBefore;i++)
 						addRGBColor(ccColor::white);
 				}
 				else
@@ -488,8 +511,8 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 				}
             }
 
-			//we import colors
-			if (hasColors())
+			//we import colors (if necessary)
+			if (hasColors() && m_rgbColors->currentSize() == pointCountBefore)
 				for (unsigned i=0;i<addedPoints;i++)
 					addRGBColor(addedCloud->m_rgbColors->getValue(i));
         }
@@ -516,7 +539,7 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 				//we try to resrve a new array
                 if (reserveTheNormsTable())
 				{
-					for (unsigned i=0;i<existingPoints;i++)
+					for (unsigned i=0;i<pointCountBefore;i++)
 						addNorm(0);
 				}
 				else
@@ -526,14 +549,14 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 				}
             }
 
-			//we import normals
-			if (hasNormals())
+			//we import normals (if necessary)
+			if (hasNormals() && m_normals->currentSize() == pointCountBefore)
                 for (unsigned i=0;i<addedPoints;i++)
                     addNormIndex(addedCloud->m_normals->getValue(i));
         }
     }
 
-	//distances (resized)
+	//scalar fields (resized)
 	unsigned sfCount = getNumberOfScalarFields();
     unsigned newSFCount = addedCloud->getNumberOfScalarFields();
     if (sfCount!=0 || newSFCount!=0)
@@ -551,10 +574,11 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
                 if (sfIdx>=0) //yes
                 {
                     CCLib::ScalarField* sameSF = getScalarField(sfIdx);
-					assert(sameSF && sameSF->capacity()>=existingPoints+addedPoints);
-                    //we fill it with new values (it should have been already 'reserved'
-                    for (unsigned i=0; i<addedPoints; i++)
-                        sameSF->addElement(sf->getValue(i));
+					assert(sameSF && sameSF->capacity()>=pointCountBefore+addedPoints);
+                    //we fill it with new values (it should have been already 'reserved' (if necessary)
+					if (sameSF->currentSize() == pointCountBefore)
+						for (unsigned i=0; i<addedPoints; i++)
+							sameSF->addElement(sf->getValue(i));
                     sameSF->computeMinAndMax();
 
 					//flag this SF as 'updated'
@@ -567,11 +591,11 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 					ccScalarField* newSF = new ccScalarField(sf->getName(),sfPositive);
 					//we fill the begining with NaN (as there is no equivalent in the current cloud)
 					DistanceType NaN = (sfPositive ? HIDDEN_VALUE : OUT_VALUE);
-					if (newSF->resize(existingPoints+addedPoints,true,NaN))
+					if (newSF->resize(pointCountBefore+addedPoints,true,NaN))
 					{
 						//we copy the new values
 						for (unsigned i=0; i<addedPoints; i++)
-							newSF->setValue(existingPoints+i,sf->getValue(i));
+							newSF->setValue(pointCountBefore+i,sf->getValue(i));
 						newSF->computeMinAndMax();
 						
 						//add scalar field to this cloud
@@ -596,10 +620,13 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 				CCLib::ScalarField* sf = getScalarField(j);
 				assert(sf);
 
-				//we fill the end with NaN (as there is no equivalent in the added cloud)
-				DistanceType NaN = (sf->isPositive() ? HIDDEN_VALUE : OUT_VALUE);
-                for (unsigned i=0; i<addedPoints; i++)
-                    sf->addElement(NaN);
+				if (sf->currentSize() == pointCountBefore)
+				{
+					//we fill the end with NaN (as there is no equivalent in the added cloud)
+					DistanceType NaN = (sf->isPositive() ? HIDDEN_VALUE : OUT_VALUE);
+					for (unsigned i=0; i<addedPoints; i++)
+						sf->addElement(NaN);
+				}
             }
 		}
 
@@ -654,7 +681,7 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 			{
 				//change mesh vertices
 				if (cloneMesh->getAssociatedCloud() == this)
-					cloneMesh->shiftTriangleIndexes(existingPoints);
+					cloneMesh->shiftTriangleIndexes(pointCountBefore);
 				addChild(cloneMesh,true);
 			}
 			else
@@ -680,7 +707,7 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 			{
 				const cc2DLabel::PickedPoint& P = label->getPoint(j);
 				if (P.cloud == addedCloud)
-					newLabel->addPoint(this,existingPoints+P.index);
+					newLabel->addPoint(this,pointCountBefore+P.index);
 				else
 					newLabel->addPoint(P.cloud,P.index);
 			}

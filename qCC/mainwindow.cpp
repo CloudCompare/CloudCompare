@@ -111,6 +111,7 @@
 #include "ccApplyTransformationDlg.h"
 #include "ccCoordinatesShiftManager.h"
 #include "ccPointPairRegistrationDlg.h"
+#include "ccExportCoordToSFDlg.h"
 #include <ui_aboutDlg.h>
 
 //Qt Includes
@@ -470,6 +471,12 @@ void MainWindow::connectActions()
     assert(m_ccRoot);
     assert(m_mdiArea);
 
+	//Actions/menus disabled by default (for test purpose only!)
+#ifndef _DEBUG
+	actionSNETest->setVisible(false);
+	menuBoundingBox->setVisible(false);
+#endif
+
     /*** MAIN MENU ***/
 
     //"File" menu
@@ -537,6 +544,7 @@ void MainWindow::connectActions()
     //"Tools > Projection" menu
     connect(actionUnroll,                       SIGNAL(triggered()),    this,       SLOT(doActionUnroll()));
     connect(actionHeightGridGeneration,         SIGNAL(triggered()),    this,       SLOT(doActionHeightGridGeneration()));
+	connect(actionExportCoordToSF,				SIGNAL(triggered()),    this,       SLOT(doActionExportCoordToSF()));
     //"Tools > Registration" menu
     connect(actionRegister,                     SIGNAL(triggered()),    this,       SLOT(doActionRegister()));
     connect(actionPointPairsAlign,				SIGNAL(triggered()),    this,       SLOT(activateRegisterPointPairTool()));
@@ -1038,22 +1046,46 @@ void MainWindow::doActionClearProperty(int prop)
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
+
+		//specific case: clear normals on a mesh
+		if (prop == 1 && ent->isKindOf(CC_MESH))
+		{
+			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+			if (mesh->hasTriNormals())
+			{
+				mesh->showNormals(false);
+				ccHObject* parent=0;
+				removeObjectTemporarilyFromDBTree(mesh,parent);
+				mesh->clearTriNormals();
+				putObjectBackIntoDBTree(mesh,parent);
+				ent->prepareDisplayForRefresh();
+				continue;
+			}
+			else if (mesh->hasNormals()) //per-vertex normals?
+			{
+				if (mesh->getParent()
+					&& mesh->getParent()->isKindOf(CC_MESH)
+					&& static_cast<ccGenericMesh*>(mesh->getParent())->getAssociatedCloud() == mesh->getAssociatedCloud())
+				{
+					ccLog::Warning("[doActionClearNormals] Can't remove per-vertex normals on a sub mesh!");
+				}
+				else //mesh is alone, we can freely remove normals
+				{
+					if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_POINT_CLOUD))
+					{
+						mesh->showNormals(false);
+						static_cast<ccPointCloud*>(mesh->getAssociatedCloud())->unallocateNorms();
+						mesh->prepareDisplayForRefresh();
+						continue;
+					}
+				}
+			}
+		}
+
 		bool lockedVertices;
         ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
 		{
-			//specific case: clear normals on a mesh with per-triangle normals
-			if (prop == 1 && ent->isKindOf(CC_MESH))
-			{
-				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
-				if (mesh->hasTriNormals())
-				{
-					mesh->setTriNormsTable(0);
-					ent->prepareDisplayForRefresh();
-					continue;
-				}
-			}
-
 			DisplayLockedVerticesWarning();
 			continue;
 		}
@@ -3135,6 +3167,69 @@ void MainWindow::doActionLabelConnectedComponents()
     }
 
     refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionExportCoordToSF()
+{
+	ccExportCoordToSFDlg ectsDlg(this);
+
+	if (!ectsDlg.exec())
+		return;
+
+	bool exportDim[3] = {ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ()};
+	QString defaultSFName[3] = {"coordX", "coordY", "coordZ"};
+	
+	if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
+		return;
+
+	//for each selected cloud (or vertices set)
+	unsigned selNum = m_selectedEntities.size();
+	for (unsigned i=0;i<selNum;++i)
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[i]);
+		if (cloud && cloud->isA(CC_POINT_CLOUD))
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+			unsigned ptsCount = pc->size();
+
+			//test each dimension
+			for (unsigned d=0;d<3;++d)
+			{
+				if (exportDim[d])
+				{
+					int sfIndex = pc->getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
+					if (sfIndex<0)
+					{
+						sfIndex = pc->addScalarField(qPrintable(defaultSFName[d]),false);
+						if (sfIndex<0)
+						{
+							ccLog::Error("Not enough memory!");
+							i=selNum;
+							break;
+						}
+					}
+
+					CCLib::ScalarField* sf = pc->getScalarField(sfIndex);
+					sf->resize(ptsCount);
+					assert(sf && sf->currentSize() >= ptsCount);
+					if (sf)
+					{
+						sf->setPositive(false); //in case of...
+						for (unsigned k=0;k<ptsCount;++k)
+							sf->setValue(k,pc->getPoint(k)->u[d]);
+						sf->computeMinAndMax();
+						pc->setCurrentDisplayedScalarField(sfIndex);
+						m_selectedEntities[i]->showSF(true);
+						m_selectedEntities[i]->refreshDisplay_recursive();
+					}
+				}
+			}
+		}
+
+	}
+
+	refreshAll();
 	updateUI();
 }
 

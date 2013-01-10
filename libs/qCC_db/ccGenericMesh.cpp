@@ -96,79 +96,81 @@ bool ccGenericMesh::computeNormals()
 {
     if (!m_associatedCloud || !m_associatedCloud->isA(CC_POINT_CLOUD)) //TODO
         return false;
-	unsigned i,n=m_associatedCloud->size();
-	if (n<3)
+	
+	unsigned triCount = size();
+	if (triCount==0)
+	{
+		ccLog::Error("[ccGenericMesh::computeNormals] Empty mesh!");
         return false;
+	}
+	unsigned vertCount=m_associatedCloud->size();
+	if (vertCount<3)
+	{
+		ccLog::Error("[ccGenericMesh::computeNormals] Not enough vertices! (<3)");
+        return false;
+	}
 
     ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
 
-	//we instantiate a temporary structure to store each vertex normal
+	//we instantiate a temporary structure to store each vertex normal (uncompressed)
 	NormsTableType* theNorms = new NormsTableType;
-	theNorms->link();
-	if (!theNorms->reserve(n))
+	if (!theNorms->reserve(vertCount))
 	{
 		theNorms->release();
 		return false;
 	}
     theNorms->fill(0);
 
-    //normales existantes
+    //allocate compressed normals array on vertices cloud
     bool normalsWereAllocated = cloud->hasNormals();
-    if (!normalsWereAllocated)
-    {
-        if (!cloud->resizeTheNormsTable())
-            return false;
-    }
-
-	PointCoordinateType* _theNorms;
-	CCLib::TriangleSummitsIndexes* tsi = NULL;
-	const CCVector3 *A,*B,*C;
-	PointCoordinateType u[3],v[3],no[3];
-
-	//pour chaque triangle
-	placeIteratorAtBegining();
-	unsigned triNum = size();
-	for (i=0;i<triNum;++i)
+    if (!normalsWereAllocated && !cloud->resizeTheNormsTable())
 	{
-		tsi = getNextTriangleIndexes();
-
-		assert(tsi->i1<n && tsi->i2<n && tsi->i3<n);
-		A = cloud->getPoint(tsi->i1);
-		B = cloud->getPoint(tsi->i2);
-		C = cloud->getPoint(tsi->i3);
-
-		//calcul de 2 vecteurs de la face ayant un point commun
-		CCVector3::vsubstract(B->u,A->u,u);
-		CCVector3::vsubstract(C->u,A->u,v);
-
-		//calcule de la normale (par produit vectoriel)
-		CCVector3::vcross(u,v,no);
-		CCVector3::vnormalize(no);
-
-		//on rajoute cette normale "à chaque sommet" (la moyenne se fera d'elle même)
-		_theNorms = theNorms->getValue(tsi->i1);
-		CCVector3::vadd(_theNorms,no,_theNorms);
-		_theNorms = theNorms->getValue(tsi->i2);
-		CCVector3::vadd(_theNorms,no,_theNorms);
-		_theNorms = theNorms->getValue(tsi->i3);
-		CCVector3::vadd(_theNorms,no,_theNorms);
+		theNorms->release();
+		return false;
 	}
 
-	//pour chaque point
-	theNorms->placeIteratorAtBegining();
-	for (i=0;i<n;i++)
+	//for each triangle
+	placeIteratorAtBegining();
 	{
-		_theNorms = theNorms->getCurrentValue();
-		CCVector3::vnormalize(_theNorms);
-        cloud->setPointNormal(i,_theNorms);
-        theNorms->forwardIterator();
+		for (unsigned i=0;i<triCount;++i)
+		{
+			CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
+
+			assert(tsi->i1<vertCount && tsi->i2<vertCount && tsi->i3<vertCount);
+			const CCVector3 *A = cloud->getPoint(tsi->i1);
+			const CCVector3 *B = cloud->getPoint(tsi->i2);
+			const CCVector3 *C = cloud->getPoint(tsi->i3);
+
+			//compute face normal (right hand rule)
+			CCVector3 N = (*B-*A).cross(*C-*A);
+			//N.normalize(); //DGM: no normalization = weighting by surface!
+
+			//we add this normal to all triangle vertices
+			PointCoordinateType* N1 = theNorms->getValue(tsi->i1);
+			CCVector3::vadd(N1,N.u,N1);
+			PointCoordinateType* N2 = theNorms->getValue(tsi->i2);
+			CCVector3::vadd(N2,N.u,N2);
+			PointCoordinateType* N3 = theNorms->getValue(tsi->i3);
+			CCVector3::vadd(N3,N.u,N3);
+		}
+	}
+
+	//for each vertex
+	{
+		for (unsigned i=0;i<vertCount;i++)
+		{
+			PointCoordinateType* N = theNorms->getValue(i);
+			CCVector3::vnormalize(N);
+			cloud->setPointNormal(i,N);
+			theNorms->forwardIterator();
+		}
 	}
 
     showNormals(true);
 	if (!normalsWereAllocated)
         cloud->showNormals(true);
 
-	theNorms->clear();
+	//theNorms->clear();
 	theNorms->release();
 	theNorms=0;
 

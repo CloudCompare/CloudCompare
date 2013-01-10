@@ -25,10 +25,8 @@
 #define CC_OBJ_FILTER_HEADER
 
 #include "FileIOFilter.h"
-#include "ccMesh.h"
 
-//Qt
-#include <QString>
+class ccGenericMesh;
 
 //! Wavefront meshes file I/O filter
 class ObjFilter : public FileIOFilter
@@ -42,7 +40,7 @@ public:
 protected:
 
 	//! Custom save method
-	CC_FILE_ERROR saveToFile(ccHObject* entity, FILE *theFile, unsigned basePointNumber=0);
+	CC_FILE_ERROR saveToFile(ccGenericMesh* mesh, FILE *theFile);
 };
 
 #endif

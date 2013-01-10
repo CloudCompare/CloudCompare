@@ -51,6 +51,7 @@ public:
 	virtual void showTriNorms(bool state);
 	virtual bool triNormsShown() const;
 	virtual bool hasTriNormals() const;
+	virtual void clearTriNormals();
     virtual void showMaterials(bool state);
 	virtual bool materialsShown() const;
 	virtual bool hasMaterials() const;

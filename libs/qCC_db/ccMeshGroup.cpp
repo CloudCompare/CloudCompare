@@ -105,6 +105,28 @@ bool ccMeshGroup::hasTriNormals() const
 	CC_MESH_RECURSIVE_TEST(hasTriNormals);
 }
 
+void ccMeshGroup::clearTriNormals()
+{
+    CC_MESH_RECURSIVE_CALL(clearTriNormals());
+
+	int childIndex = -1;
+	if (m_triNormals)
+		childIndex = m_triNormals->getChildIndex(m_triNormals);
+	else
+	{
+		//we still have to look for it as a child (old way of doing this :( )
+		for (unsigned i=0;i<getChildrenNumber();++i)
+			if (getChild(i)->isA(CC_NORMAL_INDEXES_ARRAY))
+			{
+				childIndex = (int)i;
+				break;
+			}
+	}
+
+	if (childIndex>=0)
+		removeChild(childIndex);
+}
+
 bool ccMeshGroup::hasMaterials() const
 {
 	CC_MESH_RECURSIVE_TEST(hasMaterials);

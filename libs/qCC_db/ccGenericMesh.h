@@ -154,6 +154,13 @@ public:
 	//! Returns per-triangle normals array
 	virtual NormsIndexesTableType* getTriNormsTable() const {return m_triNormals;}
 
+	//! Removes per-triangle normals
+	virtual void clearTriNormals()=0;
+
+	/*********************************************************/
+	/*********  PER-TRIANGLE TEXTURE COORDINATES  ************/
+	/*********************************************************/
+
 	//! Sets per-triangle texture coordinates array (may be shared)
 	virtual void setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable = true);
 

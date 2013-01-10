@@ -5,23 +5,28 @@ v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
 
-v2.4 01/??/2013
+v2.4 01/10/2013
 - LAZ files support (with laszip - thanks to Ingo Maindorfer)
+- New tool: export clouds coordinates (X, Y or Z) as scalar fields
+	* you'll find it in 'Tools > Projection > Export coordinate(s) to scalar field(s)'
+	* very useful to display heights with a color scale or to segment out points depending on their height
 - New shortcut: 'Z' to zoom and center camera on selected entities (magnifier icon)
 - Toggle shortcuts are now applied RECURSIVELY to any kind of object (even a group for instance)
 	(reminder: 'N' for normals, 'C' for colors, 'S' for active scalar field and 'V' for visibility)
 - Enhancements:
 	* primitives don't loose their attributes (colors, SF, etc.) when cloned
-		(they still loose them if precision is changed however...)
+		(they still loose them if display precision is changed however...)
 	* CC will only display one global progress bar when loading E57 files with many scans (>10)
 - Bug fixes:
-	* a space character was missing when exportin a cloud with normals in ASCII format!
-	* ply associated texture file should be vertically inverted (at least when the files come from PhotoScan?)
+	* a space character was missing when exporting a cloud with normals in ASCII format!
+	* texture files associated to PLY files should be vertically inverted (at least when the files come from PhotoScan?)
 	* e57 scan names were ignored on import
+	* OBJ (sub)meshes names were ignored on import
 	* a selection composed of parents and (some of their) siblings would produce a corrupted BIN file on export
 	* in some cases users could freely segment mesh vertices causing a crash
-	* in some cases mesh cloning would fail for no (good) reason (bad test)
+	* in some cases mesh cloning would fail for no (good) reason
 	* when loading primitives from a BIN V2 file, a supplementary (empty) 'vertices' cloud was created
+	* mesh groups normals are now correctly handled (they can be safely deleted, exported, etc.)
 
 v2.4 12/16/2012	
 - Introducing a new alignment/registration method: "Align (point pairs picking)"

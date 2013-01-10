@@ -29,7 +29,6 @@
 #include <QFileInfo>
 #include <QStringList>
 #include <QString>
-#include <QImage>
 
 //qCC_db
 #include <ccMesh.h>
@@ -42,50 +41,39 @@
 
 #include "../ccConsole.h"
 
-//! Space char. ASCII code
-#ifndef SPACE_ASCII_CODE
-#define SPACE_ASCII_CODE 32
-#endif
-//! Tab char. ASCII code
-#ifndef TAB_ASCII_CODE
-#define TAB_ASCII_CODE 9
-#endif
-//! Return char. ASCII code
-#ifndef ENTER_ASCII_CODE
-#define ENTER_ASCII_CODE 10
-#endif
-
 CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
 {
-	FILE* theFile = fopen(filename,"wb");
-
-	if (!theFile)
-		return CC_FERR_WRITING;
-
-	CC_FILE_ERROR result = saveToFile(entity, theFile);
-
-	fclose(theFile);
-
-	return result;
-}
-
-CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned basePointNumber/*=0*/)
-{
-	if (!theFile || !entity)
+	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
 
 	if (!entity->isKindOf(CC_MESH))
 		return CC_FERR_BAD_ENTITY_TYPE;
 
 	ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
-	unsigned numberOfTriangles = mesh->size();
-	if (numberOfTriangles==0)
+	if (mesh->size()==0)
 	{
-		ccConsole::Warning(QString("No facet in mesh %1 !").arg(mesh->getName()));
+		ccConsole::Warning(QString("[ObjFilter] No facet in mesh '%1'!").arg(mesh->getName()));
 		return CC_FERR_NO_ERROR;
 	}
 
-	//avancement de la sauvegarde
+	//try to open file for saving
+	FILE* theFile = fopen(filename,"wb");
+	if (!theFile)
+		return CC_FERR_WRITING;
+
+	CC_FILE_ERROR result = saveToFile(mesh, theFile);
+
+	fclose(theFile);
+
+	return result;
+}
+
+CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile)
+{
+	assert(theFile && mesh && mesh->size()!=0);
+	unsigned numberOfTriangles = mesh->size();
+	
+	//progress
 	ccProgressDialog pdlg(true);
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfTriangles);
 	pdlg.setMethodTitle(qPrintable(QString("Saving mesh [%1]").arg(mesh->getName())));
@@ -99,8 +87,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned b
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 	unsigned nbPoints = vertices->size();
 	const double* shift = vertices->getOriginalShift();
-	unsigned i=0;
-	for (i=0;i<nbPoints;++i)
+	for (unsigned i=0;i<nbPoints;++i)
 	{
 		const CCVector3* P = vertices->getPoint(i);
 		if (fprintf(theFile,"v %f %f %f\n",-shift[0]+(double)P->x,
@@ -109,13 +96,13 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned b
 			return CC_FERR_WRITING;
 	}
 
-	//vertices normals
+	//per-triangle normals
 	bool withTriNormals = mesh->hasTriNormals();
 	if (withTriNormals)
 	{
 		NormsIndexesTableType* normsTable = mesh->getTriNormsTable();
 		assert(normsTable);
-		for (i=0;i<normsTable->currentSize();++i)
+		for (unsigned i=0;i<normsTable->currentSize();++i)
 		{
 			const PointCoordinateType* _normalVec = ccNormalVectors::GetNormal(normsTable->getValue(i));
 			if (fprintf(theFile,"vn %f %f %f\n",_normalVec[0],_normalVec[1],_normalVec[2]) < 0)
@@ -127,7 +114,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned b
 	bool withVertNormals = vertices->hasNormals();
 	if (!withTriNormals && withVertNormals)
 	{
-		for (i=0;i<nbPoints;++i)
+		for (unsigned i=0;i<nbPoints;++i)
 		{
 			const PointCoordinateType* _normalVec = vertices->getPointNormal(i);
 			if (fprintf(theFile,"vn %f %f %f\n",_normalVec[0],_normalVec[1],_normalVec[2]) < 0)
@@ -141,7 +128,6 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned b
 	subMeshes.push_back(mesh);
 
 	//mesh or sub-meshes
-	CCLib::TriangleSummitsIndexes* tsi = NULL;
 	while (!subMeshes.empty())
 	{
 		ccGenericMesh* subMesh = subMeshes.back();
@@ -149,7 +135,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned b
 
 		if (subMesh->isA(CC_MESH_GROUP))
 		{
-			for (i=0;i<subMesh->getChildrenNumber();++i)
+			for (unsigned i=0;i<subMesh->getChildrenNumber();++i)
 			{
 				ccHObject* child = subMesh->getChild(i);
 				if (child->isKindOf(CC_MESH))
@@ -165,13 +151,13 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, FILE *theFile, unsigned b
 			unsigned triNum = st->size();
 			st->placeIteratorAtBegining();
 
-			for (i=0;i<triNum;++i)
+			for (unsigned i=0;i<triNum;++i)
 			{
-				tsi = st->getNextTriangleIndexes();
+				const CCLib::TriangleSummitsIndexes* tsi = st->getNextTriangleIndexes();
 				//for per-triangle normals
-				unsigned i1 = (basePointNumber+1)+tsi->i1;
-				unsigned i2 = (basePointNumber+1)+tsi->i2;
-				unsigned i3 = (basePointNumber+1)+tsi->i3;
+				unsigned i1 = 1+tsi->i1;
+				unsigned i2 = 1+tsi->i2;
+				unsigned i3 = 1+tsi->i3;
 				if (withNormals)
 				{
 					if (fprintf(theFile,"f %i//%i %i//%i %i//%i\n",i1,i1,i2,i2,i3,i3) < 0)
@@ -497,7 +483,9 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				saveCurrentGroup = true;
 				createNewGroup = true;
 				//we get the object name
-				QString objectName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "default");
+				objectName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "default");
+				for (unsigned i=2;i<tokens.size();++i) //multiple parts?
+					objectName.append(QString(" ")+tokens[i]);
 			}
 			else if (tokens.front().startsWith('f')) //new facet
 			{
@@ -876,7 +864,10 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					for (unsigned i=0;i<meshCount;++i)
 						triGroup->addChild(meshes[i]);
 					if (normals && normalsPerFacetGlobal)
+					{
+						triGroup->setTriNormsTable(normals);
 						triGroup->showTriNorms(true);
+					}
 					baseMesh = triGroup;
 				}
 

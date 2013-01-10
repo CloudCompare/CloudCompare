@@ -1404,6 +1404,19 @@ bool ccMesh::hasTriNormals() const
 	return m_triNormals && m_triNormals->isAllocated() && m_triNormalIndexes && (m_triNormalIndexes->currentSize() == m_triIndexes->currentSize());
 }
 
+void ccMesh::clearTriNormals()
+{
+	if (m_triNormals)
+	{
+		int childIndex = m_triNormals->getChildIndex(m_triNormals);
+		setTriNormsTable(0);
+		if (childIndex>=0)
+			removeChild(childIndex);
+	}
+
+	removePerTriangleNormalIndexes();
+}
+
 /*********************************************************/
 /************    PER-TRIANGLE TEX COORDS    **************/
 /*********************************************************/

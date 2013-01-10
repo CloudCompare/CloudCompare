@@ -72,6 +72,7 @@ public:
 	virtual bool hasTriNormals() const;
 	virtual void showTriNorms(bool state) {m_triNormsShown=state;}
 	virtual bool triNormsShown() const {return m_triNormsShown;}
+	virtual void clearTriNormals();
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N);
 	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[]);
 	virtual bool getColorFromTexture(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture);

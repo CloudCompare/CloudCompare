@@ -286,6 +286,7 @@ protected slots:
     void doActionShowDepthBuffer();
     void doActionExportDepthBuffer();
     void doActionHeightGridGeneration();
+	void doActionExportCoordToSF();
     void doComputeBestFitBB();
 
 

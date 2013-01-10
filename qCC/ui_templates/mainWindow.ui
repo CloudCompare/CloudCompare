@@ -287,6 +287,7 @@
      </property>
      <addaction name="actionUnroll"/>
      <addaction name="actionHeightGridGeneration"/>
+     <addaction name="actionExportCoordToSF"/>
     </widget>
     <widget class="QMenu" name="menuStatistics">
      <property name="title">
@@ -1695,7 +1696,7 @@
   </action>
   <action name="actionComputeBestFitBB">
    <property name="text">
-    <string>Fit principal components</string>
+    <string>P.C.A. fit [research]</string>
    </property>
    <property name="toolTip">
     <string>Makes BB fit principal components (rotates entity!)</string>
@@ -1950,6 +1951,14 @@
    </property>
    <property name="text">
     <string>Add constant SF</string>
+   </property>
+  </action>
+  <action name="actionExportCoordToSF">
+   <property name="text">
+    <string>Export coordinate(s) to scalar field(s)</string>
+   </property>
+   <property name="toolTip">
+    <string>Export X, Y and/or Z coordinates to scalar field(s)</string>
    </property>
   </action>
  </widget>

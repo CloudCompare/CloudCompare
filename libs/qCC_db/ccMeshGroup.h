@@ -46,7 +46,7 @@ public:
     //inherited methods (ccGenericMesh)
 	virtual void showWired(bool state);
 	virtual ccGenericMesh* createNewMeshFromSelection(bool removeSelectedVertices=false, CCLib::ReferenceCloud* selection=NULL, ccGenericPointCloud* vertices=NULL);
-	virtual ccGenericMesh* clone(ccGenericPointCloud* vertices=0);
+	virtual ccGenericMesh* clone(ccGenericPointCloud* vertices = 0, ccMaterialSet* clonedMaterials = 0, NormsIndexesTableType* clonedNormsTable = 0, TextureCoordsContainer* cloneTexCoords =0);
     virtual void refreshBB();
 	virtual void showTriNorms(bool state);
 	virtual bool triNormsShown() const;

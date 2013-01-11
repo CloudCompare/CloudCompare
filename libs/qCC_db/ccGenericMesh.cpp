@@ -31,7 +31,7 @@
 
 #include <assert.h>
 
-ccGenericMesh::ccGenericMesh(ccGenericPointCloud* associatedCloud, const char* name/*=0*/)
+ccGenericMesh::ccGenericMesh(ccGenericPointCloud* associatedCloud, QString name/*=QString()*/)
 	: GenericIndexedMesh()
 	, ccHObject(name)
 	, m_showWired(false)

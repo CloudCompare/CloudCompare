@@ -106,7 +106,10 @@ ccMesh::~ccMesh()
 		m_triNormalIndexes->release();
 }
 
-ccGenericMesh* ccMesh::clone(ccGenericPointCloud* vertices/*=0*/)
+ccGenericMesh* ccMesh::clone(ccGenericPointCloud* vertices/*=0*/,
+							 ccMaterialSet* clonedMaterials/*=0*/,
+							 NormsIndexesTableType* clonedNormsTable/*=0*/,
+							 TextureCoordsContainer* cloneTexCoords/*=0*/)
 {
 	assert(m_associatedCloud);
 
@@ -223,39 +226,66 @@ ccGenericMesh* ccMesh::clone(ccGenericPointCloud* vertices/*=0*/)
 	}
 
 	//triangle normals
-	if (m_triNormals)
+	if (m_triNormals && m_triNormalIndexes)
 	{
-		cloneMesh->setTriNormsTable(m_triNormals);
-		//DGM FIXME
-		//cloneMesh->addChild(m_triNormals,true);
-	}
-
-	if (m_triNormalIndexes)
-	{
+		//1st: try to allocate per-triangle normals indexes
 		if (cloneMesh->reservePerTriangleNormalIndexes())
 		{
-			for (i=0;i<triNum;++i)
+			//2nd: clone the main array if not already done
+			if (!clonedNormsTable)
 			{
-				const int* inds = m_triNormalIndexes->getValue(i);
-				cloneMesh->addTriangleNormalIndexes(inds[0],inds[1],inds[2]);
+				clonedNormsTable = m_triNormals->clone(); //TODO: keep only what's necessary!
+				if (clonedNormsTable)
+					cloneMesh->addChild(clonedNormsTable);
+				else
+				{
+					ccLog::Warning("[ccMesh::clone] Not enough memory: failed to clone per-triangle normals!");
+					cloneMesh->removePerTriangleNormalIndexes(); //don't need this anymore!
+				}
+			}
+
+			//if we have both the main array and per-triangle normals indexes, we can finish the job
+			if (cloneMesh)
+			{
+				cloneMesh->setTriNormsTable(clonedNormsTable);
+				assert(cloneMesh->m_triNormalIndexes);
+				m_triNormalIndexes->copy(*cloneMesh->m_triNormalIndexes); //should be ok as array is already reserved!
 			}
 		}
 		else
 		{
-			ccLog::Warning("[ccMesh::clone] Not enough memory: failed to clone per-triangle normals!");
+			ccLog::Warning("[ccMesh::clone] Not enough memory: failed to clone per-triangle normal indexes!");
 		}
 	}
 
 	//materials
-	if (m_materials)
-		cloneMesh->setMaterialSet(m_materials);
-
-	if (m_triMtlIndexes)
+	if (m_materials && m_triMtlIndexes)
 	{
+		//1st: try to allocate per-triangle materials indexes
 		if (cloneMesh->reservePerTriangleMtlIndexes())
 		{
-			for (i=0;i<triNum;++i)
-				cloneMesh->addTriangleMtlIndex(m_triMtlIndexes->getValue(i));
+			//2nd: clone the main array if not already done
+			if (!clonedMaterials)
+			{
+				clonedMaterials = getMaterialSet()->clone(); //TODO: keep only what's necessary!
+				if (clonedMaterials)
+				{
+					cloneMesh->addChild(clonedMaterials);
+				}
+				else
+				{
+					ccLog::Warning("[ccMesh::clone] Not enough memory: failed to clone materials set!");
+					cloneMesh->removePerTriangleMtlIndexes(); //don't need this anymore!
+				}
+			}
+
+			//if we have both the main array and per-triangle materials indexes, we can finish the job
+			if (clonedMaterials)
+			{
+				cloneMesh->setMaterialSet(clonedMaterials);
+				assert(cloneMesh->m_triMtlIndexes);
+				m_triMtlIndexes->copy(*cloneMesh->m_triMtlIndexes); //should be ok as array is already reserved!
+			}
 		}
 		else
 		{
@@ -264,17 +294,30 @@ ccGenericMesh* ccMesh::clone(ccGenericPointCloud* vertices/*=0*/)
 	}
 
 	//texture coordinates
-	if (m_texCoords)
-		cloneMesh->setTexCoordinatesTable(m_texCoords);
-
-	if (m_texCoordIndexes)
+	if (m_texCoords && m_texCoordIndexes)
 	{
+		//1st: try to allocate per-triangle texture info
 		if (cloneMesh->reservePerTriangleTexCoordIndexes())
 		{
-			for (i=0;i<triNum;++i)
+			//2nd: clone the main array if not already done
+			if (!cloneTexCoords)
 			{
-				const int* inds = m_texCoordIndexes->getValue(i);
-				cloneMesh->addTriangleTexCoordIndexes(inds[0],inds[1],inds[2]);
+				cloneTexCoords = m_texCoords->clone(); //TODO: keep only what's necessary!
+				if (cloneTexCoords)
+					cloneMesh->addChild(cloneTexCoords);
+				else
+				{
+					ccLog::Warning("[ccMesh::clone] Not enough memory: failed to clone texture coordinates!");
+					cloneMesh->removePerTriangleTexCoordIndexes(); //don't need this anymore!
+				}
+			}
+
+			//if we have both the main array and per-triangle texture info, we can finish the job
+			if (cloneTexCoords)
+			{
+				cloneMesh->setTexCoordinatesTable(cloneTexCoords);
+				assert(cloneMesh->m_texCoordIndexes);
+				m_texCoordIndexes->copy(*cloneMesh->m_texCoordIndexes); //should be ok as array is already reserved!
 			}
 		}
 		else
@@ -1492,6 +1535,13 @@ bool ccMesh::reservePerTriangleMtlIndexes()
 	assert(m_triIndexes && m_triIndexes->isAllocated());
 
 	return m_triMtlIndexes->reserve(m_triIndexes->capacity());
+}
+
+void ccMesh::removePerTriangleMtlIndexes()
+{
+	if (m_triMtlIndexes)
+		m_triMtlIndexes->release();
+	m_triMtlIndexes=0;
 }
 
 void ccMesh::addTriangleMtlIndex(int mtlIndex)

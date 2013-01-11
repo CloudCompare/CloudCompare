@@ -52,7 +52,7 @@ public:
     /** \param associatedCloud the vertices cloud
         \param name object name
     **/
-    ccGenericMesh(ccGenericPointCloud* associatedCloud, const char* name=0);
+    ccGenericMesh(ccGenericPointCloud* associatedCloud, QString name=QString());
 
 	//! Default destructor
 	virtual ~ccGenericMesh();
@@ -119,9 +119,15 @@ public:
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree
         \param vertices vertices set to use (will be automatically - AND OPTIMALLY - cloned if 0)
+		\param clonedMaterials for internal use
+		\param clonedNormsTable for internal use
+		\param cloneTexCoords for internal use
 		\return a copy of this entity
 	**/
-	virtual ccGenericMesh* clone(ccGenericPointCloud* vertices=0) = 0;
+	virtual ccGenericMesh* clone(ccGenericPointCloud* vertices = 0,
+									ccMaterialSet* clonedMaterials = 0,
+									NormsIndexesTableType* clonedNormsTable = 0,
+									TextureCoordsContainer* cloneTexCoords =0) = 0;
 
     //! Forces bounding-box update
     virtual void refreshBB()=0;

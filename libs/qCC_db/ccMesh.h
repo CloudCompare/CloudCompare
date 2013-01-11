@@ -64,7 +64,7 @@ public:
 
 	//inherited methods (ccGenericMesh)
 	virtual ccGenericMesh* createNewMeshFromSelection(bool removeSelectedVertices=false, CCLib::ReferenceCloud* selection=NULL, ccGenericPointCloud* vertices=NULL);
-	virtual ccGenericMesh* clone(ccGenericPointCloud* vertices=0);
+	virtual ccGenericMesh* clone(ccGenericPointCloud* vertices = 0, ccMaterialSet* clonedMaterials = 0, NormsIndexesTableType* clonedNormsTable = 0, TextureCoordsContainer* cloneTexCoords =0);
     virtual void refreshBB();
 	virtual bool hasMaterials() const;
 	virtual void showMaterials(bool state) {m_materialsShown = state;}
@@ -193,13 +193,16 @@ public:
 	**/
 	bool reservePerTriangleMtlIndexes();
 
+	//! Removes any per-triangle material indexes
+	void removePerTriangleMtlIndexes();
+
 	//! Adds triangle material index for next triangle
 	/** Cf. ccMesh::reservePerTriangleMtlIndexes.
 		\param mtlIndex triangle material index
 	**/
 	void addTriangleMtlIndex(int mtlIndex);
 
-	//! Sets triangle material indexs
+	//! Sets triangle material indexes
 	/** Cf. ccMesh::reservePerTriangleMtlIndexes.
 		\param triangleIndex triangle index
 		\param mtlIndex triangle material index

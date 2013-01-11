@@ -35,7 +35,7 @@
 //System
 #include <assert.h>
 
-ccMaterialSet::ccMaterialSet(const char* name/*=0*/)
+ccMaterialSet::ccMaterialSet(QString name/*=QString()*/)
 	: std::vector<ccMaterial>()
 	, CCShareable()
 	, ccHObject(name)
@@ -250,15 +250,39 @@ const ccGenericGLDisplay* ccMaterialSet::getAssociatedDisplay()
 	return m_display;
 }
 
-void ccMaterialSet::clone(ccMaterialSet& dest) const
+bool ccMaterialSet::append(const ccMaterialSet& source)
 {
-	dest.reserve(size());
-	ccMaterialSet::const_iterator it = begin();
-	for (;it!=end();++it)
+	try
 	{
-		dest.push_back(*it);
-		dest.back().texture.detach();
+		reserve(size()+source.size());
 	}
+	catch(.../*const std::bad_alloc&*/) //out of memory
+	{
+		ccLog::Warning("[ccMaterialSet::append] Not enough memory");
+		return false;
+	}
+	
+	for (ccMaterialSet::const_iterator it = source.begin(); it!=source.end(); ++it)
+	{
+		push_back(*it);
+		back().texture.detach();
+	}
+
+	return true;
+}
+
+
+ccMaterialSet* ccMaterialSet::clone() const
+{
+	ccMaterialSet* cloneSet = new ccMaterialSet(getName());
+	if (!cloneSet->append(*this))
+	{
+		ccLog::Warning("[ccMaterialSet::clone] Not enough memory");
+		cloneSet->release();
+		cloneSet=0;
+	}
+
+	return cloneSet;
 }
 
 bool ccMaterialSet::toFile_MeOnly(QFile& out) const

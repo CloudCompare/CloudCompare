@@ -151,6 +151,16 @@ public:
 			(*it)->recursiveName(); \
 	} \
 
+	//0 parameter (with exception: mesh groups already have a recursive behavior for some methods!)
+	#define recursive_call0_ex(baseName,recursiveName) \
+	inline virtual void recursiveName() \
+	{ \
+		baseName(); \
+		if (getClassID() != CC_MESH_GROUP) \
+			for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it) \
+				(*it)->recursiveName(); \
+	} \
+
 	//1 parameter
 	#define recursive_call1(baseName,param1Type,recursiveName) \
 	inline virtual void recursiveName(param1Type p) \
@@ -168,10 +178,10 @@ public:
 	recursive_call1(removeFromDisplay,ccGenericGLDisplay*,removeFromDisplay_recursive);
 	recursive_call0(prepareDisplayForRefresh,prepareDisplayForRefresh_recursive);
 	recursive_call0(refreshDisplay,refreshDisplay_recursive);
-	recursive_call0(toggleVisibility,toggleVisibility_recursive);
-	recursive_call0(toggleColors,toggleColors_recursive);
-	recursive_call0(toggleNormals,toggleNormals_recursive);
-	recursive_call0(toggleSF,toggleSF_recursive);
+	recursive_call0_ex(toggleVisibility,toggleVisibility_recursive);
+	recursive_call0_ex(toggleColors,toggleColors_recursive);
+	recursive_call0_ex(toggleNormals,toggleNormals_recursive);
+	recursive_call0_ex(toggleSF,toggleSF_recursive);
 
     //! Applies the active OpenGL transformation to the entity (recursive)
     /** The input ccGLMatrix should be left to 0, unless you want to apply

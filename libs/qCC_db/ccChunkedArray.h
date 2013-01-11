@@ -37,11 +37,24 @@ template <int N, class ScalarType> class ccChunkedArray : public GenericChunkedA
 public:
 
 	//! Default constructor
-	ccChunkedArray(const char* name=0)
+	ccChunkedArray(QString name=QString())
 		: GenericChunkedArray<N,ScalarType>()
 		, ccHObject(name)
 	{
 		setFlagState(CC_LOCKED,true);
+	}
+
+	//! Duplicates array
+	virtual ccChunkedArray<N,ScalarType>* clone()
+	{
+		ccChunkedArray<N,ScalarType>* cloneArray = new ccChunkedArray<N,ScalarType>(getName());
+		if (!copy(*cloneArray))
+		{
+			ccLog::Error("[ccChunkedArray::clone] Failed to clone array (not enough memory?)");
+			cloneArray->release();
+			cloneArray=0;
+		}
+		return cloneArray;
 	}
 
 	//inherited from ccHObject

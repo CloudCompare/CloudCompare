@@ -45,7 +45,7 @@ class ccMaterialSet : public std::vector<ccMaterial>, public CCShareable, public
 public:
 
 	//! Default constructor
-	ccMaterialSet(const char* name=0);
+	ccMaterialSet(QString name=QString());
 
 	//inherited from ccHObject
     virtual CC_CLASS_ENUM getClassID() const {return CC_MATERIAL_SET;}
@@ -72,8 +72,11 @@ public:
 	//! Returns associated display
 	const ccGenericGLDisplay* getAssociatedDisplay();
 
-	//! Clones materials only
-	void clone(ccMaterialSet& dest) const;
+	//! Clones materials set
+	ccMaterialSet* clone() const;
+
+	//! Appends materials from another set
+	bool append(const ccMaterialSet& source);
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }

@@ -24,6 +24,11 @@
 
 #include "ccMeshGroup.h"
 
+//Local
+#include "ccMaterialSet.h"
+#include "ccGenericPointCloud.h"
+#include "ccMesh.h"
+
 //Qt
 #include <QString>
 
@@ -32,9 +37,6 @@
 
 //system
 #include <assert.h>
-
-#include "ccGenericPointCloud.h"
-#include "ccMesh.h"
 
 #define CC_MESH_RECURSIVE_CALL(method) for (unsigned i=0;i<m_children.size();++i){if (m_children[i]->isKindOf(CC_MESH)) static_cast<ccGenericMesh*>(m_children[i])->method;}
 #define CC_MESH_RECURSIVE_TEST(method) for (unsigned i=0;i<m_children.size();++i) {if (m_children[i]->isKindOf(CC_MESH)) {if (static_cast<ccGenericMesh*>(m_children[i])->method()) return true;}} return false;
@@ -492,7 +494,10 @@ ccGenericMesh* ccMeshGroup::createNewMeshFromSelection(bool removeSelectedVertic
 	return mg;
 }
 
-ccGenericMesh* ccMeshGroup::clone(ccGenericPointCloud* vertices/*=0*/)
+ccGenericMesh* ccMeshGroup::clone(ccGenericPointCloud* vertices/*=0*/,
+								  ccMaterialSet* clonedMaterials/*=0*/,
+								  NormsIndexesTableType* clonedNormsTable/*=0*/,
+								  TextureCoordsContainer* cloneTexCoords/*=0*/)
 {
     assert(m_associatedCloud);
 
@@ -502,10 +507,35 @@ ccGenericMesh* ccMeshGroup::clone(ccGenericPointCloud* vertices/*=0*/)
         newVertices = m_associatedCloud->clone();
         if (!newVertices)
         {
-            //ccConsole::Error("[ccGenericMesh::clone] Failed to clone vertices! (not enough memory?)");
+            ccLog::Error("[ccGenericMesh::clone] Failed to clone vertices! (not enough memory?)");
             return 0;
         }
     }
+
+	//materials
+	assert(!clonedMaterials);
+	if (getMaterialSet())
+	{
+		clonedMaterials = getMaterialSet()->clone();
+		if (!clonedMaterials)
+			ccLog::Error("[ccMeshGroup::clone] Failed to clone materials set!");
+	}
+	//normals
+	assert(!clonedNormsTable);
+	if (getTriNormsTable())
+	{
+		clonedNormsTable=getTriNormsTable()->clone();
+		if (!clonedNormsTable)
+			ccLog::Error("[ccMeshGroup::clone] Failed to clone (per-triangle) normals!");
+	}
+	//texture coordinates
+	assert(!cloneTexCoords);
+	if (getTexCoordinatesTable())
+	{
+		cloneTexCoords=getTexCoordinatesTable()->clone();
+		if (!cloneTexCoords)
+			ccLog::Error("[ccMeshGroup::clone] Failed to clone texture coordinates!");
+	}
 
     //new mesh group
     ccMeshGroup* mg = new ccMeshGroup(newVertices);
@@ -515,7 +545,7 @@ ccGenericMesh* ccMeshGroup::clone(ccGenericPointCloud* vertices/*=0*/)
         if (m_children[i]->isKindOf(CC_MESH))
         {
             ccGenericMesh* childTri = static_cast<ccGenericMesh*>(m_children[i]);
-            ccGenericMesh* newTri = childTri->clone(newVertices);
+            ccGenericMesh* newTri = childTri->clone(newVertices,clonedMaterials,clonedNormsTable,cloneTexCoords);
             if (newTri)
                 mg->addChild(newTri);
         }
@@ -532,6 +562,21 @@ ccGenericMesh* ccMeshGroup::clone(ccGenericPointCloud* vertices/*=0*/)
             //newVertices->setLocked(true);
         }
 
+		if (clonedMaterials)
+		{
+			mg->setMaterialSet(clonedMaterials);
+			mg->addChild(clonedMaterials);
+		}
+		if (clonedNormsTable)
+		{
+			mg->setTriNormsTable(clonedNormsTable);
+			mg->addChild(clonedNormsTable);
+		}
+		if (cloneTexCoords)
+		{
+			mg->setTexCoordinatesTable(cloneTexCoords);
+			mg->addChild(cloneTexCoords);
+		}
 		mg->showColors(colorsShown());
 		mg->showNormals(normalsShown());
 		mg->showSF(sfShown());

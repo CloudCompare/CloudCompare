@@ -493,8 +493,9 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				if (tokens.size() < 4)
 				{
 					objWarnings[INVALID_LINE]=true;
-					error=true;
-					break;
+					continue;
+					//error=true;
+					//break;
 				}
 
 				if (!tri)
@@ -743,9 +744,17 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				totalFacesRead+=facesRead;
 				if (hasMaterial || hasTexCoords)
 				{
-					assert(materials);
-					tri->setMaterialSet(materials);
-					tri->showMaterials(true);
+					if (materials)
+					{
+						tri->setMaterialSet(materials);
+						tri->showMaterials(true);
+					}
+					else if (!materialsLoadFailed)
+					{
+						ccLog::Warning("[OBJ] Some texture coordinates are defined in file, but no material set is referenced!");
+						if (hasTexCoords)
+							tri->removePerTriangleTexCoordIndexes();
+					}
 				}
 				if (hasTexCoords)
 				{

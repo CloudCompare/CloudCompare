@@ -649,7 +649,7 @@ void MainWindow::doActionSetColor(bool colorize)
         ccHObject* ent = m_selectedEntities[i];
 		bool lockedVertices;
         ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		if (lockedVertices)
+		if (lockedVertices && !ent->isA(CC_MESH_GROUP))
 		{
 			DisplayLockedVerticesWarning();
 			continue;
@@ -796,7 +796,7 @@ void MainWindow::doActionComputeOctree()
 
         if (cloud)
         {
-			//we temporariliy detach entity, as it may undergo
+			//we temporarily detach entity, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
 			ccHObject* parent=0;
 			removeObjectTemporarilyFromDBTree(cloud,parent);
@@ -903,7 +903,7 @@ void MainWindow::doActionApplyTransformation()
 			continue;
 		}
 
-		//we temporariliy detach entity, as it may undergo
+		//we temporarily detach entity, as it may undergo
 		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyRigidTransformation
 		ccHObject* parent=0;
 		removeObjectTemporarilyFromDBTree(ent,parent);
@@ -916,15 +916,19 @@ void MainWindow::doActionApplyTransformation()
     refreshAll();
 }
 
+static double s_lastMultFactorX = 1.0;
+static double s_lastMultFactorY = 1.0;
+static double s_lastMultFactorZ = 1.0;
 void MainWindow::doActionMultiply()
 {
-    ccAskThreeDoubleValuesDlg dlg("fx","fy","fz",-1e6,1e6,1.0,1.0,1.0,6,"Scaling",this);
+    ccAskThreeDoubleValuesDlg dlg("fx","fy","fz",-1.0e6,1.0e6,s_lastMultFactorX,s_lastMultFactorY,s_lastMultFactorZ,6,"Scaling",this);
     if (!dlg.exec())
         return;
 
-    PointCoordinateType fx = (PointCoordinateType)dlg.doubleSpinBox1->value();
-    PointCoordinateType fy = (PointCoordinateType)dlg.doubleSpinBox2->value();
-    PointCoordinateType fz = (PointCoordinateType)dlg.doubleSpinBox3->value();
+	//save values for next time
+	s_lastMultFactorX = dlg.doubleSpinBox1->value();
+	s_lastMultFactorY = dlg.doubleSpinBox2->value();
+	s_lastMultFactorZ = dlg.doubleSpinBox3->value();
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
@@ -942,13 +946,24 @@ void MainWindow::doActionMultiply()
 
         if (cloud && cloud->isA(CC_POINT_CLOUD)) //TODO
         {
-			//we temporariliy detach entity, as it may undergo
+			//we temporarily detach entity, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::multiply
 			ccHObject* parent=0;
 			removeObjectTemporarilyFromDBTree(cloud,parent);
-            static_cast<ccPointCloud*>(cloud)->multiply(fx,fy,fz);
+            static_cast<ccPointCloud*>(cloud)->multiply((PointCoordinateType)s_lastMultFactorX,
+														(PointCoordinateType)s_lastMultFactorY,
+														(PointCoordinateType)s_lastMultFactorZ);
 			putObjectBackIntoDBTree(cloud,parent);
             cloud->prepareDisplayForRefresh_recursive();
+
+			//don't forget shift on load!
+			const double* shift = cloud->getOriginalShift();
+			if (shift)
+			{
+				cloud->setOriginalShift(shift[0]*s_lastMultFactorX,
+										shift[1]*s_lastMultFactorY,
+										shift[2]*s_lastMultFactorZ);
+			}
         }
     }
 
@@ -1004,7 +1019,7 @@ void MainWindow::doComputeBestFitBB()
                     cloud->setGLTransformation(trans);
                     trans.invert();
 
-					//we temporariliy detach entity, as it may undergo
+					//we temporarily detach entity, as it may undergo
 					//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
 					ccHObject* parent=0;
 					removeObjectTemporarilyFromDBTree(cloud,parent);
@@ -2333,7 +2348,7 @@ void MainWindow::doActionFuse()
                 if (!firstCloud)
 				{
                     firstCloud=pc;
-					//we temporariliy detach the first cloud, as it may undergo
+					//we temporarily detach the first cloud, as it may undergo
 					//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
 					removeObjectTemporarilyFromDBTree(firstCloud,firstCloudParent);
 				}
@@ -2632,7 +2647,7 @@ void MainWindow::doActionRegister()
         //if we managed to get a point cloud to move!
         if (pc)
         {
-			//we temporariliy detach cloud, as it may undergo
+			//we temporarily detach cloud, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
 			ccHObject* parent=0;
 			removeObjectTemporarilyFromDBTree(pc,parent);
@@ -3830,7 +3845,7 @@ void MainWindow::doActionSynchronize()
 		ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
 		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 
-		//we temporariliy detach entity, as it may undergo
+		//we temporarily detach entity, as it may undergo
 		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
 		ccHObject* parent=0;
 		removeObjectTemporarilyFromDBTree(ent,parent);
@@ -4275,7 +4290,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(anObject,&lockedVertices);
 				if (cloud)
 				{
-					assert(!lockedVertices);
+					//assert(!lockedVertices); //in some cases we accept to segment meshes with locked vertices!
 					ccHObject::Container labels;
 					if (m_ccRoot)
 						m_ccRoot->getRootEntity()->filterChildren(labels,true,CC_2D_LABEL);
@@ -4305,7 +4320,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					}
 				}
 
-				//we temporariliy detach entity, as it may undergo
+				//we temporarily detach entity, as it may undergo
 				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection(true)
 				ccHObject* parent=0;
 				removeObjectTemporarilyFromDBTree(anObject,parent);

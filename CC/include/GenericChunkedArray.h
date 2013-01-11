@@ -447,6 +447,24 @@ public:
 	//! Returns the begining of a given chunk (pointer)
 	inline ScalarType* chunkStartPtr(unsigned index) const {assert(index < m_theChunks.size()); return m_theChunks[index];}
 
+	//! Copy array data to another one
+	/** \param dest destination array (will be resize if necessary)
+		\return success
+	**/
+	bool copy(GenericChunkedArray<N,ScalarType>& dest) const
+	{
+		if (!dest.resize(capacity()))
+			return false;
+		//copy content
+		assert(dest.m_theChunks.size() == m_theChunks.size());
+		for (unsigned i=0;i<m_theChunks.size();++i)
+		{
+			assert(dest.m_perChunkCount[i] == m_perChunkCount[i]);
+			memcpy(dest.m_theChunks[i],m_theChunks[i],m_perChunkCount[i]*sizeof(ScalarType)*N);
+		}
+		return true;
+	}
+
 protected:
 
 	//! GenericChunkedArray default destructor
@@ -882,6 +900,24 @@ public:
 
 	//! Returns the begining of a given chunk (pointer)
 	inline ScalarType* chunkStartPtr(unsigned index) const {assert(index < m_theChunks.size()); return m_theChunks[index];}
+
+	//! Copy array data to another one
+	/** \param dest destination array (will be resize if necessary)
+		\return success
+	**/
+	bool copy(GenericChunkedArray<1,ScalarType>& dest) const
+	{
+		if (!dest.resize(capacity()))
+			return false;
+		//copy content
+		assert(dest.m_theChunks.size() == m_theChunks.size());
+		for (unsigned i=0;i<m_theChunks.size();++i)
+		{
+			assert(dest.m_perChunkCount[i] == m_perChunkCount[i]);
+			memcpy(dest.m_theChunks[i],m_theChunks[i],m_perChunkCount[i]*sizeof(ScalarType));
+		}
+		return true;
+	}
 
 protected:
 

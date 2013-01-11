@@ -42,6 +42,20 @@ public:
 
 	//inherited from ccChunkedArray/ccHObject
     virtual CC_CLASS_ENUM getClassID() const {return CC_NORMAL_INDEXES_ARRAY;};
+
+	//! Duplicates array (overloaded from ccChunkedArray::clone
+	virtual NormsIndexesTableType* clone()
+	{
+		NormsIndexesTableType* cloneArray = new NormsIndexesTableType();
+		if (!copy(*cloneArray))
+		{
+			ccLog::Error("[NormsIndexesTableType::clone] Failed to clone array (not enough memory?)");
+			cloneArray->release();
+			return 0;
+		}
+		cloneArray->setName(getName());
+		return cloneArray;
+	}
 };
 
 //! Array of (uncompressed) 3D normals (Nx,Ny,Nz)
@@ -53,6 +67,20 @@ public:
 
 	//inherited from ccChunkedArray/ccHObject
     virtual CC_CLASS_ENUM getClassID() const {return CC_NORMALS_ARRAY;};
+
+	//! Duplicates array (overloaded from ccChunkedArray::clone
+	virtual NormsTableType* clone()
+	{
+		NormsTableType* cloneArray = new NormsTableType();
+		if (!copy(*cloneArray))
+		{
+			ccLog::Error("[NormsTableType::clone] Failed to clone array (not enough memory?)");
+			cloneArray->release();
+			return 0;
+		}
+		cloneArray->setName(getName());
+		return cloneArray;
+	}
 };
 
 //! Array of RGB colors for each point
@@ -64,6 +92,20 @@ public:
 
 	//inherited from ccChunkedArray/ccHObject
     virtual CC_CLASS_ENUM getClassID() const {return CC_RGB_COLOR_ARRAY;};
+
+	//! Duplicates array (overloaded from ccChunkedArray::clone
+	virtual ColorsTableType* clone()
+	{
+		ColorsTableType* cloneArray = new ColorsTableType();
+		if (!copy(*cloneArray))
+		{
+			ccLog::Error("[ColorsTableType::clone] Failed to clone array (not enough memory?)");
+			cloneArray->release();
+			return 0;
+		}
+		cloneArray->setName(getName());
+		return cloneArray;
+	}
 };
 
 //! Array of 2D texture coordinates
@@ -75,6 +117,20 @@ public:
 
 	//inherited from ccChunkedArray/ccHObject
     virtual CC_CLASS_ENUM getClassID() const {return CC_TEX_COORDS_ARRAY;};
+
+	//! Duplicates array (overloaded from ccChunkedArray::clone
+	virtual TextureCoordsContainer* clone()
+	{
+		TextureCoordsContainer* cloneArray = new TextureCoordsContainer();
+		if (!copy(*cloneArray))
+		{
+			ccLog::Error("[TextureCoordsContainer::clone] Failed to clone array (not enough memory?)");
+			cloneArray->release();
+			return 0;
+		}
+		cloneArray->setName(getName());
+		return cloneArray;
+	}
 };
 
 

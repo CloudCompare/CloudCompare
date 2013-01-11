@@ -111,22 +111,17 @@ void ccMeshGroup::clearTriNormals()
 {
     CC_MESH_RECURSIVE_CALL(clearTriNormals());
 
-	int childIndex = -1;
-	if (m_triNormals)
-		childIndex = m_triNormals->getChildIndex(m_triNormals);
-	else
-	{
-		//we still have to look for it as a child (old way of doing this :( )
-		for (unsigned i=0;i<getChildrenNumber();++i)
-			if (getChild(i)->isA(CC_NORMAL_INDEXES_ARRAY))
-			{
-				childIndex = (int)i;
-				break;
-			}
-	}
+	setTriNormsTable(0);
 
-	if (childIndex>=0)
-		removeChild(childIndex);
+	//due to an old bug on mesh groups we have to look for 'm_triNormals' as a child)
+	for (unsigned i=0;i<getChildrenNumber();++i)
+	{
+		if (getChild(i)->isA(CC_NORMAL_INDEXES_ARRAY))
+		{
+			removeChild((int)i);
+			break;
+		}
+	}
 }
 
 bool ccMeshGroup::hasMaterials() const

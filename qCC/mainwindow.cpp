@@ -1057,10 +1057,13 @@ void MainWindow::doActionDeleteAllSF()
 
 void MainWindow::doActionClearProperty(int prop)
 {
-    unsigned i,selNum = m_selectedEntities.size();
+	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
+	ccHObject::Container selectedEntities = m_selectedEntities;
+
+    unsigned i,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
-        ccHObject* ent = m_selectedEntities[i];
+        ccHObject* ent = selectedEntities[i];
 
 		//specific case: clear normals on a mesh
 		if (prop == 1 && ent->isKindOf(CC_MESH))

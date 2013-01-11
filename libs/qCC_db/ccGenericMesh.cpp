@@ -303,7 +303,13 @@ void ccGenericMesh::setTriNormsTable(NormsIndexesTableType* triNormsTable, bool 
 		return;
 
 	if (m_triNormals && autoReleaseOldTable)
+	{
+		int childIndex = getChildIndex(m_triNormals);
 		m_triNormals->release();
+		m_triNormals=0;
+		if (childIndex>=0)
+			removeChild(childIndex);
+	}
 
 	m_triNormals = triNormsTable;
 	if (m_triNormals)
@@ -316,7 +322,13 @@ void ccGenericMesh::setTexCoordinatesTable(TextureCoordsContainer* texCoordsTabl
 		return;
 
 	if (m_texCoords && autoReleaseOldTable)
+	{
+		int childIndex = getChildIndex(m_texCoords);
 		m_texCoords->release();
+		m_texCoords=0;
+		if (childIndex>=0)
+			removeChild(childIndex);
+	}
 
 	m_texCoords = texCoordsTable;
 	if (m_texCoords)
@@ -329,7 +341,13 @@ void ccGenericMesh::setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseO
 		return;
 
 	if (m_materials && autoReleaseOldMaterialSet)
+	{
+		int childIndex = getChildIndex(m_materials);
 		m_materials->release();
+		m_materials=0;
+		if (childIndex>=0)
+			removeChild(childIndex);
+	}
 
 	m_materials = materialSet;
 	if (m_materials)

@@ -161,7 +161,7 @@ public:
 	virtual NormsIndexesTableType* getTriNormsTable() const {return m_triNormals;}
 
 	//! Removes per-triangle normals
-	virtual void clearTriNormals()=0;
+	virtual void clearTriNormals() { setTriNormsTable(0); }
 
 	/*********************************************************/
 	/*********  PER-TRIANGLE TEXTURE COORDINATES  ************/

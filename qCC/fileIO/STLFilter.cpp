@@ -153,7 +153,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 	QStringList tokens;
 
 	//buffer
-	char currentLine[MAX_ASCII_FILE_LINE_LENGTH];
+	//char currentLine[MAX_ASCII_FILE_LINE_LENGTH];
 
 	while (true)
 	{

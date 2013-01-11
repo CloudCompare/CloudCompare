@@ -533,7 +533,7 @@ void MainWindow::connectActions()
     //"Edit" menu
     connect(actionPointListPicking,             SIGNAL(triggered()),    this,       SLOT(activatePointListPickingMode()));
     connect(actionPointPicking,                 SIGNAL(triggered()),    this,       SLOT(activatePointsPropertiesMode()));
-    connect(actionClone,                        SIGNAL(triggered()),    this,       SLOT(clone()));
+    connect(actionClone,                        SIGNAL(triggered()),    this,       SLOT(doActionClone()));
     connect(actionFuse,                         SIGNAL(triggered()),    this,       SLOT(doActionFuse()));
     connect(actionApplyTransformation,			SIGNAL(triggered()),    this,       SLOT(doActionApplyTransformation()));
     connect(actionMultiply,                     SIGNAL(triggered()),    this,       SLOT(doActionMultiply()));
@@ -4870,7 +4870,7 @@ void MainWindow::showSelectedEntitiesHistogram()
     }
 }
 
-void MainWindow::clone()
+void MainWindow::doActionClone()
 {
 	ccHObject::Container selectedEntities = m_selectedEntities;
     unsigned i,selNum=selectedEntities.size();
@@ -6090,7 +6090,7 @@ void MainWindow::saveFile()
 		{
 			if (images.getChildrenNumber()>1)
 			{
-				ccConsole::Warning("Only BIN format is able to store multiple images at once");
+				ccConsole::Warning("[MainWindow::saveFile] Only BIN format is able to store multiple images at once");
 			}
 			else
 			{
@@ -6139,7 +6139,7 @@ void MainWindow::saveFile()
 	//ignored items
     if (hasOther)
 	{
-		ccConsole::Warning("Warning, the following selected entites won't be saved:");
+		ccConsole::Warning("[MainWindow::saveFile] The following selected entites won't be saved:");
 		for (unsigned i=0;i<other.getChildrenNumber();++i)
 			ccConsole::Warning(QString("\t- %1s").arg(other.getChild(i)->getName()));
 	}
@@ -6155,10 +6155,18 @@ void MainWindow::saveFile()
 			ccHObject::Container tempContainer;
 			RemoveSiblings(m_selectedEntities,tempContainer);
 
-			ccHObject root;
-			for (unsigned i=0;i<tempContainer.size();++i)
+			if (tempContainer.size())
+			{
+				ccHObject root;
+				for (unsigned i=0;i<tempContainer.size();++i)
 					root.addChild(tempContainer[i],false);
-			result = FileIOFilter::SaveToFile(&root,qPrintable(selectedFilename),BIN);
+				result = FileIOFilter::SaveToFile(&root,qPrintable(selectedFilename),BIN);
+			}
+			else
+			{
+				ccLog::Warning("[MainWindow::saveFile] No selected entity could be saved!");
+				result = CC_FERR_NO_SAVE;
+			}
 		}
 
 		currentCloudSaveDlgFilter = BIN;
@@ -6169,7 +6177,7 @@ void MainWindow::saveFile()
 		if (hasSerializable)
 		{
 			if (!hasOther)
-				ccConsole::Warning("Warning, the following selected entites won't be saved:"); //display this warning only if not already done
+				ccConsole::Warning("[MainWindow::saveFile] The following selected entites won't be saved:"); //display this warning only if not already done
 			for (unsigned i=0;i<otherSerializable.getChildrenNumber();++i)
 				ccConsole::Warning(QString("\t- %1").arg(otherSerializable.getChild(i)->getName()));
 		}

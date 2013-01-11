@@ -82,7 +82,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 		}
 		else
 		{
-        return CC_FERR_BAD_ARGUMENT;
+			return CC_FERR_BAD_ARGUMENT;
 		}
 	}
 

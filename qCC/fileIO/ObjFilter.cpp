@@ -484,7 +484,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				createNewGroup = true;
 				//we get the object name
 				objectName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "default");
-				for (unsigned i=2;i<tokens.size();++i) //multiple parts?
+				for (int i=2;i<tokens.size();++i) //multiple parts?
 					objectName.append(QString(" ")+tokens[i]);
 			}
 			else if (tokens.front().startsWith('f')) //new facet

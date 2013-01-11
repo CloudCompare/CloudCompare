@@ -467,7 +467,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	setVisible(isVisible() || addedCloud->isVisible());
 
 	//3D points (already reserved)
-	if (pointCountBefore+addedPoints < size()) //in some cases points have already been copied! (ok it's tricky)
+	if (size() == pointCountBefore) //in some cases points have already been copied! (ok it's tricky)
 	{
 		//we remove structures that are not compatible with fusion process
         deleteOctree();

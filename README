@@ -2,7 +2,6 @@ CloudCompare V2.4
 
 Homepage: http://www.danielgm.net/cc/
 
-
 == Introduction ==
 
 CloudCompare is a 3D point cloud (and triangular mesh) processing software.
@@ -27,3 +26,10 @@ Basically, you have to:
 (mainly to support particular file formats, or for some plugins)
 - launch CMake (from the trunk root)
 - enjoy!
+
+
+== Supporting the project ==
+If you want to help us, you can now make donatins via pledgie:
+http://pledgie.com/campaigns/19052
+
+Thanks!

@@ -36,6 +36,7 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccNormalVectors.h>
+#include <ccOctree.h>
 
 #include "../ccConsole.h"
 
@@ -117,670 +118,720 @@ CC_FILE_ERROR STLFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile)
 	return CC_FERR_NO_ERROR;
 }
 
+const double c_defaultSearchRadius = sqrt(ZERO_TOLERANCE);
+bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+{
+	GenericChunkedArray<1,int>* equivalentIndexes = (GenericChunkedArray<1,int>*)additionalParameters[0];
+
+	//we look for points very near to the others (only if not yet tagged!)
+	
+	//structure for nearest neighbors search
+	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
+	nNSS.level								= cell.level;
+	nNSS.truncatedCellCode					= cell.truncatedCode;
+	nNSS.prepare(c_defaultSearchRadius,cell.parentOctree->getCellSize(nNSS.level));
+	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
+	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
+	//*/
+
+	unsigned n = cell.points->size(); //number of points in the current cell
+	
+	//we already know some of the neighbours: the points in the current cell!
+	try
+	{
+		nNSS.pointsInNeighbourhood.resize(n);
+	}
+	catch (.../*const std::bad_alloc&*/) //out of memory
+	{
+		return false;
+	}
+
+	//init structure with cell points
+	{
+		CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+		for (unsigned i=0;i<n;++i,++it)
+		{
+			it->point = cell.points->getPointPersistentPtr(i);
+			it->pointIndex = cell.points->getPointGlobalIndex(i);
+		}
+		nNSS.alreadyVisitedNeighbourhoodSize = 1;
+	}
+
+	//for each point in the cell
+	for (unsigned i=0;i<n;++i)
+	{
+		int thisIndex = (int)cell.points->getPointGlobalIndex(i);
+		if (equivalentIndexes->getValue(thisIndex)<0) //has no equivalent yet 
+		{
+			cell.points->getPoint(i,nNSS.queryPoint);
+
+			//look for neighbors in a (very small) sphere
+			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,c_defaultSearchRadius,false);
+
+			//if there are some very close points
+			if (k>1)
+			{
+				for (unsigned j=0;j<k;++j)
+				{
+					//all the other points are equivalent to the query point
+					const unsigned& otherIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
+					if (otherIndex != thisIndex)
+						equivalentIndexes->setValue(otherIndex,thisIndex);
+				}
+			}
+
+			//and the query point is always root
+			equivalentIndexes->setValue(thisIndex,thisIndex);
+		}
+	}
+
+	return true;
+}
+
 CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
 	ccConsole::Print("[STLFilter::Load] %s",filename);
 
 	//ouverture du fichier
-	FILE *fp = fopen(filename, "rt");
-	if (!fp)
+	QFile fp(filename);
+	if (!fp.open(QIODevice::ReadOnly))
 		return CC_FERR_READING;
 
-	//current vertex shift
-	double Pshift[3]={0.0,0.0,0.0};
-
-	//current mesh
-	ccMesh* tri = 0;
-	unsigned facesRead = 0;
+	//ASCII OR BINARY?
+	QString name("mesh");
+	bool ascii = true;
+	{
+		//buffer
+		char header[80]={0};
+		qint64 sz = fp.read(header,80);
+		if (sz<80)
+		{
+			//either ASCII or BINARY STL FILES are always > 80 bytes
+			return sz == 0 ? CC_FERR_READING : CC_FERR_MALFORMED_FILE;
+		}
+		//normally, binary files shouldn't start by 'solid'
+		if (!QString(header).trimmed().toUpper().startsWith("SOLID"))
+			ascii = false;
+		else //... but sadly some BINARY files does start by SOLID?!!!! (wtf)
+		{
+			//go back to the begining of the file
+			fp.seek(0);
+			char line[MAX_ASCII_FILE_LINE_LENGTH];
+			//skip first line
+			fp.readLine(line,MAX_ASCII_FILE_LINE_LENGTH); //should be ok as we already have read some data
+			//we look if the second line (if any) starts by 'facet'
+			if (fp.readLine(line,MAX_ASCII_FILE_LINE_LENGTH) < 0)
+				ascii = false;
+			else
+				if (!QString(line).trimmed().toUpper().startsWith("FACET"))
+					ascii = false;
+		}
+		//go back to the begining of the file
+		fp.seek(0);
+	}
+	ccLog::Print("[STL] Detected format: %s",ascii ? "ASCII" : "BINARY");
 
 	//vertices
 	ccPointCloud* vertices = new ccPointCloud("vertices");
-	unsigned pointsRead = 0;
+	//mesh
+	ccMesh* mesh = new ccMesh(vertices);
+	mesh->setName(name);
+	//add normals
+	mesh->setTriNormsTable(new NormsIndexesTableType());
 
-	//normals
-	NormsIndexesTableType* normals = 0;
-	int normsRead = 0;
+	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
+	if (ascii)
+		error = loadASCIIFile(fp,mesh,vertices,alwaysDisplayLoadDialog,coordinatesShiftEnabled,coordinatesShift);
+	else
+		error = loadBinaryFile(fp,mesh,vertices,alwaysDisplayLoadDialog,coordinatesShiftEnabled,coordinatesShift);
+
+	if (error != CC_FERR_NO_ERROR)
+	{
+		delete vertices;
+		delete mesh;
+		return CC_FERR_MALFORMED_FILE;
+	}
+
+	unsigned vertCount = vertices->size();
+	unsigned faceCount = mesh->size();
+	ccConsole::Print("[STLFilter::Load] %i points, %i face(s)",vertCount,faceCount);
+
+	//remove duplicated vertices
+	{
+		GenericChunkedArray<1,int>* equivalentIndexes = new GenericChunkedArray<1,int>;
+		const int razValue = -1;
+		if (equivalentIndexes->resize(vertCount,true,razValue))
+		{
+			ccOctree* octree = vertices->computeOctree();
+			if (octree)
+			{
+				ccProgressDialog progressDlg(true);
+				void* additionalParameters[1] = {(void*)equivalentIndexes};
+				unsigned result = octree->executeFunctionForAllCellsAtLevel(ccOctree::MAX_OCTREE_LEVEL,tagDuplicatedVertices,additionalParameters,&progressDlg,"Tag duplicated vertices");
+				vertices->deleteOctree();
+				octree=0;
+
+				if (result>0)
+				{
+					unsigned remainingCount = 0;
+					for (unsigned i=0;i<vertCount;++i)
+					{
+						int eqIndex = equivalentIndexes->getValue(i);
+						assert(eqIndex >= 0);
+						if (eqIndex==(int)i) //root point
+						{
+							int newIndex = (int)(vertCount+remainingCount); //We replace the root index by its 'new' index (+ vertCount, to differentiate it later)
+							equivalentIndexes->setValue(i,newIndex);
+							++remainingCount;
+						}
+					}
+
+					ccPointCloud* newVertices = new ccPointCloud("vertices");
+					if (newVertices->reserve(remainingCount))
+					{
+						//copy root points in a new cloud
+						{
+							for (unsigned i=0;i<vertCount;++i)
+							{
+								int eqIndex = equivalentIndexes->getValue(i);
+								if (eqIndex>=(int)vertCount) //root point
+									newVertices->addPoint(*vertices->getPoint(i));
+								else
+									equivalentIndexes->setValue(i,equivalentIndexes->getValue(eqIndex)); //and update the other indexes
+							}
+						}
+
+						//update face indexes
+						{
+							for (unsigned i=0;i<faceCount;++i)
+							{
+								CCLib::TriangleSummitsIndexes* tri = mesh->getTriangleIndexes(i);
+								tri->i1 = (unsigned)equivalentIndexes->getValue(tri->i1)-vertCount;
+								tri->i2 = (unsigned)equivalentIndexes->getValue(tri->i2)-vertCount;
+								tri->i3 = (unsigned)equivalentIndexes->getValue(tri->i3)-vertCount;
+							}
+						}
+						
+						mesh->setAssociatedCloud(newVertices);
+						delete vertices;
+						vertices = newVertices;
+						vertCount = vertices->size();
+	
+						ccConsole::Print("[STLFilter::Load] Remaining vertices after auto-removal of duplicate ones: %i",vertCount);
+					}
+					else
+					{
+						ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
+					}
+				}
+				else
+				{
+					ccLog::Warning("[STL] Duplicated vertices removal algorithm failed?!");
+				}
+			}
+			else
+			{
+				ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
+			}
+		}
+		else
+		{
+			ccLog::Warning("[STL] Not enough memory: couldn't removed duplicated vertices!");
+		}
+
+		if (equivalentIndexes)
+			equivalentIndexes->release();
+		equivalentIndexes=0;
+	}
+
+	NormsIndexesTableType* normals = mesh->getTriNormsTable();
+	if (normals)
+	{
+		normals->link();
+		mesh->addChild(normals);
+		mesh->showNormals(true);
+	}
+	else
+	{
+		if (mesh->computeNormals())
+			mesh->showNormals(true);
+		else
+			ccLog::Warning("[STL] Failed to compute per-vertex normals...");
+	}
+	vertices->setEnabled(false);
+	vertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
+	mesh->addChild(vertices);
+
+	container.addChild(mesh);
+
+	return CC_FERR_NO_ERROR;
+}
+
+CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
+									ccMesh* mesh,
+									ccPointCloud* vertices,
+									bool alwaysDisplayLoadDialog,
+									bool* coordinatesShiftEnabled/*=0*/,
+									double* coordinatesShift/*=0*/)
+{
+	assert(fp.isOpen() && mesh && vertices);
+
+	//buffer
+	char currentLine[MAX_ASCII_FILE_LINE_LENGTH];
+
+	//1st line: 'solid name'
+	QString name("mesh");
+	{
+		if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) < 0)
+		{
+			return CC_FERR_READING;
+		}
+		QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
+		if (tokens.empty() || tokens[0].toUpper() != "SOLID")
+		{
+			ccLog::Error("[STL] File should begin by 'solid [name]'!");
+			return CC_FERR_MALFORMED_FILE;
+		}
+		//Extract name
+		if (tokens.size()>1)
+		{
+			tokens.removeAt(0);
+			name = tokens.join(" ");
+		}
+	}
+	mesh->setName(name);
 
 	//progress dialog
-	ccProgressDialog progressDlg(false);
-	progressDlg.setMethodTitle("Loading STL file");
+	ccProgressDialog progressDlg(true);
+	progressDlg.setMethodTitle("Loading ASCII STL file");
 	progressDlg.setInfo("Loading in progress...");
 	progressDlg.setRange(0,0);
 	progressDlg.show();
 	QApplication::processEvents();
 
-	int lineCount=0;
-	QStringList tokens;
+	//current vertex shift
+	double Pshift[3]={0.0,0.0,0.0};
 
-	//buffer
-	//char currentLine[MAX_ASCII_FILE_LINE_LENGTH];
+	unsigned pointCount = 0;
+	unsigned faceCount = 0;
+	bool normalWarningAlreadyDisplayed = true;
+	NormsIndexesTableType* normals = mesh->getTriNormsTable();
 
+	unsigned lineCount=1;
 	while (true)
 	{
-		////if we don't need to rescan last line
-		//if (!restart)
-		//{
-		//	scanLine = (fgets (currentLine , MAX_ASCII_FILE_LINE_LENGTH , fp) > 0);
+		CCVector3 N;
+		bool normalIsOk=false;
 
-		//	//no more line in file?
-		//	if (!scanLine)
-		//	{
-		//		//we save current group and that's it!
-		//		saveCurrentGroup = true;
-		//		stop = true;
-		//		tokens.clear();
-		//	}
-		//	else
-		//	{
-		//		if ((++lineCount % 4096) == 0)
-		//			progressDlg.update(lineCount>>12);
+		//1st line of a 'facet': "facet normal ni nj nk" / or 'endsolid' (i.e. end of file)
+		{
+			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) < 0)
+				break;
+			++lineCount;
 
-		//		tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
+			QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
+			if (tokens.empty() || tokens[0].toUpper() != "FACET")
+			{
+				if (tokens[0].toUpper() != "ENDSOLID")
+				{
+					ccLog::Error("[STL] Error on line #%i: line should start by 'facet'!",lineCount);
+					return CC_FERR_MALFORMED_FILE;
+				}
+				break;
+			}
 
-		//		//skip comments & empty lines
-		//		if( tokens.empty() || tokens.front().startsWith('/',Qt::CaseInsensitive) || tokens.front().startsWith('#',Qt::CaseInsensitive) )
-		//			continue;
-		//	}
-		//}
-		//else
-		//{
-		//	restart = false;
-		//}
+			if (normals && tokens.size()>=5)
+			{
+				//let's try to read normal
+				if (tokens[1].toUpper() == "NORMAL")
+				{
+					N.x = tokens[2].toDouble(&normalIsOk);
+					if (normalIsOk)
+					{
+						N.y = tokens[3].toDouble(&normalIsOk);
+						if (normalIsOk)
+							N.z = tokens[4].toDouble(&normalIsOk);
+					}
+					if (!normalIsOk && !normalWarningAlreadyDisplayed)
+					{
+						ccLog::Warning("[STL] Error on line #%i: failed to read 'normal' values!",lineCount);
+						normalWarningAlreadyDisplayed=true;
+					}
+				}
+				else if (!normalWarningAlreadyDisplayed)
+				{
+					ccLog::Warning("[STL] Error on line #%i: expecting 'normal' after 'facet'!",lineCount);
+					normalWarningAlreadyDisplayed=true;
+				}
+			}
+			else if (tokens.size() > 1 && !normalWarningAlreadyDisplayed)
+			{
+				ccLog::Warning("[STL] Error on line #%i: incomplete 'normal' description!",lineCount);
+				normalWarningAlreadyDisplayed=true;
+			}
+		}
 
-		////standard line scan
-		//if (scanLine)
-		//{
-		//	if (tokens.front() == "v")
-		//	{
-		//		//reserve more memory if necessary
-		//		if (vertices->size() == vertices->capacity())
-		//		{
-		//			if (!vertices->reserve(vertices->capacity()+MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
-		//			{
-		//				objWarnings[NOT_ENOUGH_MEMORY]=true;
-		//				error=true;
-		//				break;
-		//			}
-		//		}
+		//2nd line: 'outer loop'
+		{
+			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) <= 0 || !QString(currentLine).trimmed().toUpper().startsWith("OUTER LOOP"))
+			{
+				ccLog::Error("[STL] Error: expecting 'outer loop' on line #%i",lineCount+1);
+				return CC_FERR_MALFORMED_FILE;
+			}
+			++lineCount;
+		}
 
-		//		//malformed line?
-		//		if (tokens.size() < 4)
-		//		{
-		//			objWarnings[INVALID_LINE]=true;
-		//			error=true;
-		//			break;
-		//		}
+		//3rd to 5th lines: 'vertex vix viy viz'
+		unsigned vertIndexes[3];
+		unsigned pointCountBefore = pointCount;
+		for (unsigned i=0;i<3;++i)
+		{
+			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) <= 0 || !QString(currentLine).trimmed().toUpper().startsWith("VERTEX"))
+			{
+				ccLog::Error("[STL] Error: expecting a line starting by 'vertex' on line #%i",lineCount+1);
+				return CC_FERR_MALFORMED_FILE;
+			}
+			++lineCount;
 
-		//		double Pd[3] = { tokens[1].toDouble(), tokens[2].toDouble(), tokens[3].toDouble() };
+			QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
+			if (tokens.size()<4)
+			{
+				ccLog::Error("[STL] Error on line #%i: incomplete 'vertex' description!",lineCount);
+				return CC_FERR_MALFORMED_FILE;
+			}
 
-		//		//first point: check for 'big' coordinates
-		//		if (pointsRead==0)
-		//		{
-		//			bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-		//			if (shiftAlreadyEnabled)
-		//				memcpy(Pshift,coordinatesShift,sizeof(double)*3);
-		//			bool applyAll=false;
-		//			if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
-		//			{
-		//				vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-		//				ccConsole::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+			//read vertex
+			double Pd[3];
+			{
+				bool vertexIsOk=false;
+				Pd[0] = tokens[1].toDouble(&vertexIsOk);
+				if (vertexIsOk)
+				{
+					Pd[1] = tokens[2].toDouble(&vertexIsOk);
+					if (vertexIsOk)
+						Pd[2] = tokens[3].toDouble(&vertexIsOk);
+				}
+				if (!vertexIsOk)
+				{
+					ccLog::Error("[STL] Error on line #%i: failed to read 'vertex' coordinates!",lineCount);
+					return CC_FERR_MALFORMED_FILE;
+				}
+			}
 
-		//				//we save coordinates shift information
-		//				if (applyAll && coordinatesShiftEnabled && coordinatesShift)
-		//				{
-		//					*coordinatesShiftEnabled = true;
-		//					coordinatesShift[0] = Pshift[0];
-		//					coordinatesShift[1] = Pshift[1];
-		//					coordinatesShift[2] = Pshift[2];
-		//				}
-		//			}
-		//		}
+			//first point: check for 'big' coordinates
+			if (pointCount==0)
+			{
+				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
+				if (shiftAlreadyEnabled)
+					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+				bool applyAll=false;
+				if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				{
+					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
+					ccConsole::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
 
-		//		CCVector3 P((PointCoordinateType)(Pd[0]+Pshift[0]),
-		//			(PointCoordinateType)(Pd[1]+Pshift[1]),
-		//			(PointCoordinateType)(Pd[2]+Pshift[2]));
+					//we save coordinates shift information
+					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
+					{
+						*coordinatesShiftEnabled = true;
+						coordinatesShift[0] = Pshift[0];
+						coordinatesShift[1] = Pshift[1];
+						coordinatesShift[2] = Pshift[2];
+					}
+				}
+			}
 
-		//		vertices->addPoint(P);
-		//		++pointsRead;
-		//	}
-		//	else if (tokens.front() == "vt") //vt = vertex texture
-		//	{
-		//		if (!texCoords)
-		//		{
-		//			texCoords = new TextureCoordsContainer();
-		//			texCoords->link();
-		//		}
-		//		if (texCoords->currentSize() == texCoords->capacity())
-		//		{
-		//			if (!texCoords->reserve(texCoords->capacity()+MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
-		//			{
-		//				objWarnings[NOT_ENOUGH_MEMORY]=true;
-		//				error=true;
-		//				break;
-		//			}
-		//		}
+			CCVector3 P((PointCoordinateType)(Pd[0]+Pshift[0]),
+						(PointCoordinateType)(Pd[1]+Pshift[1]),
+						(PointCoordinateType)(Pd[2]+Pshift[2]));
 
-		//		//malformed line?
-		//		if (tokens.size() < 3)
-		//		{
-		//			objWarnings[INVALID_LINE]=true;
-		//			error=true;
-		//			break;
-		//		}
+			//look for existing vertices at the same place! (STL format is so dumb...)
+			{
+				//int equivalentIndex = -1;
+				//if (pointCount>2)
+				//{
+				//	//brute force!
+				//	for (int j=(int)pointCountBefore-1; j>=0; j--)
+				//	{
+				//		const CCVector3* Pj = vertices->getPoint(j);
+				//		if (Pj->x == P.x &&
+				//			Pj->y == P.y &&
+				//			Pj->z == P.z)
+				//		{
+				//			equivalentIndex = j;
+				//			break;
+				//		}
+				//	}
+				//}
 
-		//		T[0] = tokens[1].toDouble();
-		//		T[1] = tokens[2].toDouble();
+				////new point ?
+				//if (equivalentIndex < 0)
+				{
+					//cloud is already full?
+					if (vertices->capacity() == pointCount && !vertices->reserve(pointCount+1000))
+						return CC_FERR_NOT_ENOUGH_MEMORY;
 
-		//		texCoords->addElement(T);
-		//		++texCoordsRead;
-		//		//*/
-		//	}
-		//	else if (tokens.front() == "vn") //vn = vertex normal --> in fact it can also be a facet normal!!!
-		//	{
-		//		if (!normals)
-		//		{
-		//			normals = new NormsIndexesTableType;
-		//			normals->link();
-		//		}
-		//		if (normals->currentSize() == normals->capacity())
-		//		{
-		//			if (!normals->reserve(normals->capacity()+MAX_NUMBER_OF_ELEMENTS_PER_CHUNK))
-		//			{
-		//				objWarnings[NOT_ENOUGH_MEMORY]=true;
-		//				error=true;
-		//				break;
-		//			}
-		//		}
+					//insert new point
+					vertIndexes[i] = pointCount++;
+					vertices->addPoint(P);
+				}
+				//else
+				//{
+				//	vertIndexes[i] = (unsigned)equivalentIndex;
+				//}
+			}
+		}
 
-		//		//malformed line?
-		//		if (tokens.size() < 4)
-		//		{
-		//			objWarnings[INVALID_LINE]=true;
-		//			error=true;
-		//			break;
-		//		}
+		//we have successfully read the 3 vertices
+		//let's add a new triangle
+		{
+			//mesh is full?
+			if (mesh->maxSize() == faceCount)
+			{
+				if(!mesh->reserve(faceCount+1000))
+					return CC_FERR_NOT_ENOUGH_MEMORY;
 
-		//		N.x = (PointCoordinateType)tokens[1].toDouble();
-		//		N.y = (PointCoordinateType)tokens[2].toDouble();
-		//		N.z = (PointCoordinateType)tokens[3].toDouble();
+				if (normals)
+				{
+					bool success = normals->reserve(mesh->maxSize());
+					if (success && faceCount==0) //specific case: allocate per triangle normal indexes the first time!
+						success = mesh->reservePerTriangleNormalIndexes();
 
-		//		if (fabs(N.norm2() - 1.0)<0.05)
-		//			objWarnings[INVALID_NORMALS]=true;
-		//		normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
+					if (!success)
+					{
+						ccLog::Warning("[STL] Not enough memory: can't store normals!");
+						mesh->removePerTriangleNormalIndexes();
+						mesh->setTriNormsTable(0);
+						normals=0;
+					}
+				}
+			}
 
-		//		normals->addElement(nIndex); //we don't know yet if it's per-vertex or per-triangle normal...
-		//		++normsRead;
-		//		//*/
-		//	}
-		//	else if (tokens.front() == "g") //new group
-		//	{
-		//		saveCurrentGroup = true;
-		//		createNewGroup = true;
-		//		//we get the object name
-		//		QString objectName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "default");
-		//	}
-		//	else if (tokens.front().startsWith('f')) //new facet
-		//	{
-		//		//malformed line?
-		//		if (tokens.size() < 4)
-		//		{
-		//			objWarnings[INVALID_LINE]=true;
-		//			error=true;
-		//			break;
-		//		}
+			mesh->addTriangle(vertIndexes[0],vertIndexes[1],vertIndexes[2]);
+			++faceCount;
+		}
 
-		//		if (!tri)
-		//		{
-		//			restart = true;
-		//			createNewGroup = true;
-		//			//we reset the object name
-		//			objectName = "default";
-		//		}
-		//		else
-		//		{
-		//			//we reset current facet 'state'
-		//			currentFace.clear(); //current face element
+		//and a new normal?
+		if (normals)
+		{
+			int index = -1;
+			if (normalIsOk)
+			{
+				//compress normal
+				index = (int)normals->currentSize();
+				normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
+				normals->addElement(nIndex);
+			}
+			mesh->addTriangleNormalIndexes(index,index,index);
+		}
 
-		//			for (int i=1; i<tokens.size(); ++i)
-		//			{
-		//				//new summit
-		//				facetElement fe; //(0,0,0) by default
-		//				QStringList vertexTokens = tokens[i].split('/');
-		//				if (vertexTokens.size()==0 || vertexTokens[0].isEmpty())
-		//				{
-		//					objWarnings[INVALID_LINE]=true;
-		//					error=true;
-		//				}
-		//				else
-		//				{
-		//					fe.vIndex = vertexTokens[0].toInt();
-		//					if (vertexTokens.size()>1 && !vertexTokens[1].isEmpty())
-		//						fe.tcIndex = vertexTokens[1].toInt();
-		//					if (vertexTokens.size()>2 && !vertexTokens[2].isEmpty())
-		//						fe.nIndex = vertexTokens[2].toInt();
-		//				}
+		//6th line: 'endloop'
+		{
+			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) <= 0 || !QString(currentLine).trimmed().toUpper().startsWith("ENDLOOP"))
+			{
+				ccLog::Error("[STL] Error: expecting 'endnloop' on line #%i",lineCount+1);
+				return CC_FERR_MALFORMED_FILE;
+			}
+			++lineCount;
+		}
 
-		//				currentFace.push_back(fe);
-		//			}
+		//7th and last line: 'endfacet'
+		{
+			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) <= 0 || !QString(currentLine).trimmed().toUpper().startsWith("ENDFACET"))
+			{
+				ccLog::Error("[STL] Error: expecting 'endfacet' on line #%i",lineCount+1);
+				return CC_FERR_MALFORMED_FILE;
+			}
+			++lineCount;
+		}
 
-		//			if (error)
-		//				break;
-
-		//			unsigned vCount = currentFace.size();
-		//			if (vCount<3)
-		//			{
-		//				ccConsole::Error("Malformed file: face on line %1 has less than 3 vertices!",lineCount);
-		//				error=true;
-		//				break;
-		//			}
-
-		//			//first vertex
-		//			std::vector<facetElement>::iterator A = currentFace.begin();
-
-		//			//the very first vertex tells us about the whole sequence
-		//			if (facesRead == 0)
-		//			{
-		//				//we have a tex. coord index as second vertex element!
-		//				if (A->tcIndex != 0 && !materialsLoadFailed)
-		//				{
-		//					if (!tri->reservePerTriangleTexCoordIndexes())
-		//					{
-		//						objWarnings[NOT_ENOUGH_MEMORY]=true;
-		//						error=true;
-		//						break;
-		//					}
-		//					hasTexCoords = true;
-		//				}
-
-		//				//we have a normal index as third vertex element!
-		//				if (A->nIndex != 0)
-		//				{
-		//					//so the normals are 'per-facet'
-		//					normalsPerFacet = true;
-		//					if (!tri->reservePerTriangleNormalIndexes())
-		//					{
-		//						objWarnings[NOT_ENOUGH_MEMORY]=true;
-		//						error=true;
-		//						break;
-		//					}
-		//				}
-		//			}
-
-		//			//we process all vertices accordingly
-		//			std::vector<facetElement>::iterator it = currentFace.begin();
-		//			for (;it!=currentFace.end();++it)
-		//			{
-		//				if (!it->updatePointIndex(pointsRead))
-		//				{
-		//					objWarnings[INVALID_INDEX]=true;
-		//					error=true;
-		//					break;
-		//				}
-		//				if (it->vIndex > maxVertexIndex)
-		//					maxVertexIndex = it->vIndex;
-
-		//				//should we have a tex. coord index as second vertex element?
-		//				if (hasTexCoords)
-		//				{
-		//					if (!it->updateTexCoordIndex(texCoordsRead))
-		//					{
-		//						objWarnings[INVALID_INDEX]=true;
-		//						error=true;
-		//						break;
-		//					}
-		//					if (it->tcIndex>maxTexCoordIndex)
-		//						maxTexCoordIndex = it->tcIndex;
-		//				}
-
-		//				//should we have a normal index as third vertex element?
-		//				if (normalsPerFacet)
-		//				{
-		//					if (!it->updateNormalIndex(normsRead))
-		//					{
-		//						objWarnings[INVALID_INDEX]=true;
-		//						error=true;
-		//						break;
-		//					}
-		//					if (it->nIndex>maxTriNormIndex)
-		//						maxTriNormIndex = it->nIndex;
-		//				}
-		//			}
-
-		//			//don't forget material (common for all vertices)
-		//			if (currentMaterialDefined && !materialsLoadFailed)
-		//			{
-		//				if (!hasMaterial)
-		//				{
-		//					//We hope it's the first facet!!!
-		//					assert(facesRead == 0);
-		//					if (!tri->reservePerTriangleMtlIndexes())
-		//					{
-		//						objWarnings[NOT_ENOUGH_MEMORY]=true;
-		//						error=true;
-		//						break;
-		//					}
-		//					hasMaterial = true;
-		//				}
-		//			}
-
-		//			if (error)
-		//				break;
-
-		//			//Now, let's tesselate the whole polygon
-		//			//yeah, we do very ulgy tesselation here!
-		//			std::vector<facetElement>::const_iterator B = A+1;
-		//			std::vector<facetElement>::const_iterator C = B+1;
-		//			for (;C != currentFace.end();++B,++C)
-		//			{
-		//				//need more space?
-		//				if (facesRead==maxFaces)
-		//				{
-		//					maxFaces+=128;
-		//					if (!tri->reserve(maxFaces))
-		//					{
-		//						objWarnings[NOT_ENOUGH_MEMORY]=true;
-		//						error=true;
-		//						break;
-		//					}
-		//				}
-
-		//				tri->addTriangle(A->vIndex, B->vIndex, C->vIndex);
-		//				++facesRead;
-
-		//				if (hasMaterial)
-		//					tri->addTriangleMtlIndex(currentMaterial);
-
-		//				if (hasTexCoords)
-		//					tri->addTriangleTexCoordIndexes(A->tcIndex, B->tcIndex, C->tcIndex);
-
-		//				if (normalsPerFacet)
-		//					tri->addTriangleNormalIndexes(A->nIndex, B->nIndex, C->nIndex);
-		//			}
-		//		}
-		//	}
-		//	else if (tokens.front() == "usemtl") // material (see MTL file)
-		//	{
-		//		if (materials) //otherwise we have failed to load MTL file!!!
-		//		{
-		//			//DGM: in case there's space characters in the material name, we must read it again from the original line buffer
-		//			//QString mtlName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "");
-		//			QString mtlName = QString(currentLine+7).trimmed();
-		//			currentMaterial = (!mtlName.isEmpty() ? materials->findMaterial(mtlName) : -1);
-		//			currentMaterialDefined = true;
-		//		}
-		//	}
-		//	else if (tokens.front() == "mtllib") // MTL file
-		//	{
-		//		//malformed line?
-		//		if (tokens.size() < 2 || tokens[1].isEmpty())
-		//		{
-		//			objWarnings[INVALID_LINE]=true;
-		//		}
-		//		else
-		//		{
-		//			//we build the whole MTL filename + path
-		//			//DGM: in case there's space characters in the filename, we must read it again from the original line buffer
-		//			//QString mtlFilename = tokens[1];
-		//			QString mtlFilename = QString(currentLine+7).trimmed();
-		//			ccConsole::Print(QString("[STLFilter::Load] Material file: ")+mtlFilename);
-		//			QString mtlPath = QFileInfo(filename).canonicalPath();
-		//			//we try to load it
-		//			if (!materials)
-		//			{
-		//				materials = new ccMaterialSet("materials");
-		//				materials->link();
-		//			}
-
-		//			unsigned oldSize = materials->size();
-		//			QStringList errors;
-		//			if (ccMaterialSet::ParseMTL(mtlPath,mtlFilename,*materials,errors))
-		//			{
-		//				ccConsole::Print("[STLFilter::Load] %i materials loaded",materials->size()-oldSize);
-		//			}
-		//			else
-		//			{
-		//				ccConsole::Error(QString("[STLFilter::Load] Failed to load material file! (should be in '%1')").arg(mtlPath+'/'+QString(mtlFilename)));
-		//				materialsLoadFailed = true;
-		//			}
-
-		//			if (!errors.empty())
-		//			{
-		//				for (int i=0; i<errors.size(); ++i)
-		//					ccConsole::Warning(QString("[STLFilter::Load::MTL parser] ")+errors[i]);
-		//			}
-		//			if (materials->empty())
-		//			{
-		//				materials->release();
-		//				materials=0;
-		//				materialsLoadFailed = true;
-		//			}
-		//		}
-		//	}
-		//	//else if (tokens.front() == "s") // shading group
-		//	//{
-		//	//	//ignored!
-		//	//}
-		//}
-
-		//if (error)
-		//	break;
-
-		////save the actual group? (if any)
-		//if (stop || saveCurrentGroup || (tri && createNewGroup))
-		//{
-		//	//something to save?
-		//	if (saveCurrentGroup && facesRead>0)
-		//	{
-		//		tri->resize(facesRead);
-		//		totalFacesRead+=facesRead;
-		//		if (hasMaterial || hasTexCoords)
-		//		{
-		//			assert(materials);
-		//			tri->setMaterialSet(materials);
-		//			tri->showMaterials(true);
-		//		}
-		//		if (hasTexCoords)
-		//		{
-		//			assert(texCoords);
-		//			tri->setTexCoordinatesTable(texCoords);
-		//		}
-		//		if (normals && normalsPerFacet) //'per-facet' normals
-		//		{
-		//			normalsPerFacetGlobal = true;
-		//			tri->setTriNormsTable(normals);
-		//			tri->showTriNorms(true);
-		//		}
-
-		//		//we add an intermediary group to encapsulate all the sub-meshes
-		//		meshes.push_back(tri);
-		//	}
-		//	else if (tri)//empty or discarded mesh ?!
-		//	{
-		//		if (facesRead==0)
-		//			objWarnings[EMPTY_GROUP]=true;
-		//		if (!saveCurrentGroup) //if we are here, it means that saving for this group has not been requested --> we discard it!
-		//			objWarnings[DISCARED_GROUP]=true;
-		//		delete tri;
-		//		tri=0;
-		//	}
-
-		//	tri=0;
-		//	maxFaces=facesRead=0;
-		//	hasTexCoords=false;
-		//	hasMaterial=false;
-		//	normalsPerFacet=false;
-
-		//	//job done
-		//	saveCurrentGroup=false;
-		//}
-
-		////create a new group?
-		//if (createNewGroup)
-		//{
-		//	assert(!tri);
-
-		//	tri = new ccMesh(vertices);
-		//	tri->setName(objectName);
-
-		//	//we always reserve some triangles
-		//	maxFaces=128;
-		//	//WARNING: don't set this value too high on Windows XP,
-		//	//as you will really chunk the memory if you have a lot
-		//	//of small meshes!
-		//	if (!tri->reserve(maxFaces))
-		//	{
-		//		objWarnings[NOT_ENOUGH_MEMORY]=true;
-		//		error=true;
-		//		break;
-		//	}
-
-		//	//job done
-		//	createNewGroup = false;
-		//}
+		//progress
+		if ((faceCount % 1024) == 0)
+		{
+			if (progressDlg.isCancelRequested())
+				break;
+			progressDlg.update(faceCount>>10);
+		}
 	}
 
-	fclose(fp);
-
-	////1st check
-	//if (!error && pointsRead == 0)
-	//{
-	//	//of course if there's no vertex, that's the end of the story ...
-	//	ccConsole::Warning("[STLFilter::Load] Malformed file: no vertex in file!");
-	//	error = true;
-	//}
-
-	//if (!error)
-	//{
-	//	ccConsole::Print("[STLFilter::Load] %i points, %i faces",pointsRead,totalFacesRead);
-	//	if (texCoordsRead>0 || normsRead>0)
-	//		ccConsole::Print("[STLFilter::Load] %i tex. coords, %i normals",texCoordsRead,normsRead);
-
-	//	//do some cleaning
-	//	if (vertices->size()<vertices->capacity())
-	//		vertices->resize(vertices->size());
-	//	if (normals && normals->currentSize()<normals->capacity())
-	//		normals->resize(normals->currentSize());
-	//	if (texCoords && texCoords->currentSize()<texCoords->capacity())
-	//		texCoords->resize(texCoords->currentSize());
-
-	//	//if we have at least one mesh
-	//	ccGenericMesh* baseMesh = 0;
-	//	assert(!tri); //last mesh should have been saved or discared properly then set to 0!
-	//	if (!meshes.empty())
-	//	{
-	//		if (maxVertexIndex>=pointsRead
-	//			|| maxTexCoordIndex>=texCoordsRead
-	//			|| maxTriNormIndex>=normsRead)
-	//		{
-	//			//hum, we've got a problem here
-	//			ccConsole::Warning("[STLFilter::Load] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)",maxVertexIndex,maxTexCoordIndex,maxTriNormIndex);
-	//			while (!meshes.empty())
-	//			{
-	//				delete meshes.back();
-	//				meshes.pop_back();
-	//			}
-	//		}
-	//		else
-	//		{
-	//			unsigned meshCount = meshes.size();
-	//			ccConsole::Print("[STLFilter::Load] %i mesh(es) loaded", meshCount);
-	//			if (meshCount == 1) //don't need to keep a group for a unique mesh!
-	//			{
-	//				tri = meshes.front();
-	//				baseMesh = tri;
-	//				baseMesh->getAssociatedCloud()->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
-	//			}
-	//			else
-	//			{
-	//				ccMeshGroup* triGroup = new ccMeshGroup(vertices);
-	//				for (unsigned i=0;i<meshCount;++i)
-	//					triGroup->addChild(meshes[i]);
-	//				if (normals && normalsPerFacetGlobal)
-	//					triGroup->showTriNorms(true);
-	//				baseMesh = triGroup;
-	//			}
-
-	//			assert(baseMesh);
-	//			baseMesh->addChild(vertices);
-	//			if (materials)
-	//				baseMesh->addChild(materials,true);
-	//			if (normals && normalsPerFacetGlobal)
-	//				baseMesh->addChild(normals,true);
-	//			if (texCoords)
-	//				baseMesh->addChild(texCoords,true);
-
-	//			vertices->setEnabled(false);
-	//			vertices->setLocked(true); //by default vertices are locked (in case they are shared by mutliple sub-meshes).
-
-	//			//normals: if the obj file doesn't provide any, should we compute them?
-	//			if (!normals)
-	//			{
-	//				if (!materials) //yes if no material is available!
-	//				{
-	//					ccConsole::Print("[STLFilter::Load] Mesh has no normal! We will compute them automatically");
-	//					baseMesh->computeNormals();
-	//					baseMesh->showNormals(true);
-	//				}
-	//				else
-	//				{
-	//					ccConsole::Warning("[STLFilter::Load] Mesh has no normal! CloudCompare can try to compute them (select base entity, then \"Edit > Normals > Compute\")");
-	//				}
-	//			}
-
-	//			container.addChild(baseMesh);
-	//		}
-	//	}
-
-	//	if (!baseMesh)
-	//	{
-	//		//no (valid) mesh!
-	//		container.addChild(vertices);
-	//	}
-
-	//	//special case: normals held by cloud!
-	//	if (normals && !normalsPerFacetGlobal)
-	//	{
-	//		if (normsRead == pointsRead) //must be 'per-vertex' normals
-	//		{
-	//			vertices->setNormsTable(normals);
-	//			if (baseMesh)
-	//				baseMesh->showNormals(true);
-	//		}
-	//		else
-	//		{
-	//			ccConsole::Warning("File contains normals which seem to be neither per-vertex nor per-face!!! We had to ignore them...");
-	//		}
-	//	}
-	//}
-
-	//if (error)
-	//{
-	//	if (tri)
-	//		delete tri;
-	//	if (vertices)
-	//		delete vertices;
-	//}
-
-	////release shared structures
-	//if (normals)
-	//{
-	//	normals->release();
-	//	normals=0;
-	//}
-
-	//if (texCoords)
-	//{
-	//	texCoords->release();
-	//	texCoords=0;
-	//}
-
-	//if (materials)
-	//{
-	//	materials->release();
-	//	materials=0;
-	//}
+	if (normalWarningAlreadyDisplayed)
+		ccLog::Warning("[STL] Failed to read some 'normal' values!");
 
 	progressDlg.stop();
 
+	//do some cleaning
+	if (vertices->size() < vertices->capacity())
+		vertices->resize(vertices->size());
+	if (mesh->size() < mesh->maxSize())
+		mesh->resize(mesh->size());
+	if (normals && normals->currentSize() < normals->capacity())
+		normals->resize(normals->capacity());
+
 	return CC_FERR_NO_ERROR;
 }
+
+CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
+									ccMesh* mesh,
+									ccPointCloud* vertices,
+									bool alwaysDisplayLoadDialog,
+									bool* coordinatesShiftEnabled/*=0*/,
+									double* coordinatesShift/*=0*/)
+{
+	assert(fp.isOpen() && mesh && vertices);
+
+	unsigned pointCount = 0;
+	unsigned faceCount = 0;
+
+	//UINT8[80] – Header (we skip it)
+	fp.seek(80);
+	mesh->setName("Mesh"); //hard to guess solid name with binary files!
+
+	//UINT32 – Number of triangles
+	{
+		__int32 tmpInt32;
+		if (fp.read((char*)&tmpInt32,4)<4)
+			return CC_FERR_READING;
+		faceCount = tmpInt32;
+	}
+
+	if (!mesh->reserve(faceCount))
+		return CC_FERR_NOT_ENOUGH_MEMORY;
+	NormsIndexesTableType* normals = mesh->getTriNormsTable();
+	if (normals && (!normals->reserve(faceCount) || !mesh->reservePerTriangleNormalIndexes()))
+	{
+		ccLog::Warning("[STL] Not enough memory: can't store normals!");
+		mesh->removePerTriangleNormalIndexes();
+		mesh->setTriNormsTable(0);
+	}
+
+	//progress dialog
+	ccProgressDialog progressDlg(true);
+	CCLib::NormalizedProgress nProgress(&progressDlg,faceCount);
+	progressDlg.setMethodTitle("Loading binary STL file");
+	progressDlg.setInfo(qPrintable(QString("Loading %1 faces").arg(faceCount)));
+	progressDlg.start();
+	QApplication::processEvents();
+
+	//current vertex shift
+	double Pshift[3]={0.0,0.0,0.0};
+
+	for (unsigned f=0;f<faceCount;++f)
+	{
+		//REAL32[3] – Normal vector
+		assert(sizeof(float)==4);
+		CCVector3 N;
+		if (fp.read((char*)N.u,12)<12)
+			return CC_FERR_READING;
+
+		//3 vertices
+		unsigned vertIndexes[3];
+		unsigned pointCountBefore=pointCount;
+		for (unsigned i=0;i<3;++i)
+		{
+			//REAL32[3] – Vertex 1,2 & 3
+			float Pf[3];
+			if (fp.read((char*)Pf,12)<0)
+				return CC_FERR_READING;
+
+			//first point: check for 'big' coordinates
+			double Pd[3]={Pf[0],Pf[1],Pf[2]};
+			if (pointCount==0)
+			{
+				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
+				if (shiftAlreadyEnabled)
+					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+				bool applyAll=false;
+				if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				{
+					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
+					ccConsole::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+
+					//we save coordinates shift information
+					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
+					{
+						*coordinatesShiftEnabled = true;
+						coordinatesShift[0] = Pshift[0];
+						coordinatesShift[1] = Pshift[1];
+						coordinatesShift[2] = Pshift[2];
+					}
+				}
+			}
+
+			CCVector3 P((PointCoordinateType)(Pd[0]+Pshift[0]),
+						(PointCoordinateType)(Pd[1]+Pshift[1]),
+						(PointCoordinateType)(Pd[2]+Pshift[2]));
+
+			//look for existing vertices at the same place! (STL format is so dumb...)
+			{
+				//int equivalentIndex = -1;
+				//if (pointCount>2)
+				//{
+				//	//brute force!
+				//	for (int j=(int)pointCountBefore-1; j>=0; j--)
+				//	{
+				//		const CCVector3* Pj = vertices->getPoint(j);
+				//		if (Pj->x == P.x &&
+				//			Pj->y == P.y &&
+				//			Pj->z == P.z)
+				//		{
+				//			equivalentIndex = j;
+				//			break;
+				//		}
+				//	}
+				//}
+
+				////new point ?
+				//if (equivalentIndex < 0)
+				{
+					//cloud is already full?
+					if (vertices->capacity() == pointCount && !vertices->reserve(pointCount+1000))
+						return CC_FERR_NOT_ENOUGH_MEMORY;
+
+					//insert new point
+					vertIndexes[i] = pointCount++;
+					vertices->addPoint(P);
+				}
+				//else
+				//{
+				//	vertIndexes[i] = (unsigned)equivalentIndex;
+				//}
+			}
+		}
+
+		//UINT16 – Attribute byte count (not used)
+		{
+			char a[2];
+			if (fp.read(a,2)<0)
+				return CC_FERR_READING;
+		}
+
+		//we have successfully read the 3 vertices
+		//let's add a new triangle
+		{
+			mesh->addTriangle(vertIndexes[0],vertIndexes[1],vertIndexes[2]);
+		}
+
+		//and a new normal?
+		if (normals)
+		{
+			//compress normal
+			int index = (int)normals->currentSize();
+			normsType nIndex = ccNormalVectors::GetNormIndex(N.u);
+			normals->addElement(nIndex);
+			mesh->addTriangleNormalIndexes(index,index,index);
+		}
+
+		//progress
+		if (!nProgress.oneStep())
+			break;
+	}
+
+	progressDlg.stop();
+
+	//do some cleaning
+	if (vertices->size() < vertices->capacity())
+		vertices->resize(vertices->size());
+
+	return CC_FERR_NO_ERROR;
+}
+

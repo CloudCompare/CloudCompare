@@ -26,7 +26,12 @@
 
 #include "FileIOFilter.h"
 
+//QT
+#include <QFile>
+
 class ccGenericMesh;
+class ccMesh;
+class ccPointCloud;
 
 //! StereoLithography file I/O filter
 /** See http://www.ennex.com/~fabbers/StL.asp
@@ -43,6 +48,22 @@ protected:
 
 	//! Custom save method
 	CC_FILE_ERROR saveToFile(ccGenericMesh* mesh, FILE *theFile);
+
+	//! Custom load method for ASCII files
+	CC_FILE_ERROR loadASCIIFile(QFile& fp,
+								ccMesh* mesh,
+								ccPointCloud* vertices,
+								bool alwaysDisplayLoadDialog,
+								bool* coordinatesShiftEnabled=0,
+								double* coordinatesShift=0);
+
+	//! Custom load method for binary files
+	CC_FILE_ERROR loadBinaryFile(QFile& fp,
+								ccMesh* mesh,
+								ccPointCloud* vertices,
+								bool alwaysDisplayLoadDialog,
+								bool* coordinatesShiftEnabled=0,
+								double* coordinatesShift=0);
 };
 
 #endif //CC_STL_FILTER_HEADER

@@ -5898,6 +5898,8 @@ void MainWindow::loadFile()
     filters.append("\n");
     filters.append(CC_FILE_TYPE_FILTERS[VTK]);
     filters.append("\n");
+    filters.append(CC_FILE_TYPE_FILTERS[STL]);
+    filters.append("\n");
 #ifdef CC_X3D_SUPPORT
     filters.append(CC_FILE_TYPE_FILTERS[X3D]);
     filters.append("\n");
@@ -6095,6 +6097,8 @@ void MainWindow::saveFile()
 				filters.append(CC_FILE_TYPE_FILTERS[PLY]);
 				filters.append("\n");
 				filters.append(CC_FILE_TYPE_FILTERS[VTK]);
+				filters.append("\n");
+				filters.append(CC_FILE_TYPE_FILTERS[STL]);
 				filters.append("\n");
 		#ifdef CC_X3D_SUPPORT
 				filters.append(CC_FILE_TYPE_FILTERS[X3D]);

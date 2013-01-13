@@ -469,6 +469,7 @@ ccGenericMesh* ccMeshGroup::createNewMeshFromSelection(bool removeSelectedVertic
             mg->setDisplay_recursive(getDisplay());
             mg->showColors(colorsShown());
             mg->showNormals(normalsShown());
+			mg->showMaterials(materialsShown());
             mg->showSF(sfShown());
             newVertices->setEnabled(false);
             //newVertices->setLocked(true);

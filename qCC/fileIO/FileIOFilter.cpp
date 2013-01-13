@@ -37,6 +37,7 @@
 #include "PovFilter.h"
 #include "BundlerFilter.h"
 #include "VTKFilter.h"
+#include "STLFilter.h"
 #include "LASFilter.h"
 #include "E57Filter.h"
 #include "UltFilter.h"
@@ -92,6 +93,8 @@ CC_FILE_TYPES FileIOFilter::StringToFileFormat(const char* ext)
 		fType=BUNDLER;
 	else if (strcmp(ext,"VTK")==0)
 		fType=VTK;
+	else if (strcmp(ext,"STL")==0)
+		fType=STL;
 #ifdef CC_X3D_SUPPORT
 	else if (strcmp(ext,"X3D")==0)
 		fType=X3D;
@@ -194,6 +197,9 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 		break;
 	case VTK:
 		fio = (FileIOFilter*)(new VTKFilter());
+		break;
+	case STL:
+		fio = (FileIOFilter*)(new STLFilter());
 		break;
 #ifdef CC_X3D_SUPPORT
     case X3D:
@@ -304,6 +310,9 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename
         break;
 	case VTK:
 		fio = (FileIOFilter*)(new VTKFilter());
+		break;
+	case STL:
+		fio = (FileIOFilter*)(new STLFilter());
 		break;
 #ifdef CC_X3D_SUPPORT
     case X3D:

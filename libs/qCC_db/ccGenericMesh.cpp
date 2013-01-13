@@ -46,8 +46,7 @@ ccGenericMesh::ccGenericMesh(ccGenericPointCloud* associatedCloud, QString name/
 
 ccGenericMesh::~ccGenericMesh()
 {
-	if (m_triNormals)
-		m_triNormals->release();
+	clearTriNormals();
 	setMaterialSet(0);
 	setTexCoordinatesTable(0);
 }

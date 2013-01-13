@@ -5,8 +5,9 @@ v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
 
-v2.4 01/10/2013
+v2.4 01/13/2013
 - LAZ files support (with laszip - thanks to Ingo Maindorfer)
+- STL files support (certainly the ugliest mesh file format ever created, but definitely a largely used one...)
 - New tool: export clouds coordinates (X, Y or Z) as scalar fields
 	* you'll find it in 'Tools > Projection > Export coordinate(s) to scalar field(s)'
 	* very useful to display heights with a color scale or to segment out points depending on their height

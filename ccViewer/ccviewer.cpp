@@ -42,7 +42,7 @@
 #include <assert.h>
 
 //! Current version
-const double CC_VIEWER_VERSION = 1.22;
+const double CC_VIEWER_VERSION = 1.23;
 
 //Camera parameters dialog
 ccCameraParamEditDlg* s_cpeDlg = 0;

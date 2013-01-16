@@ -167,7 +167,7 @@ public:
 
 	//****** memory allocators ******//
 
-	//! Reserves memory for the database
+	//! Reserves memory for the array elements
 	/** This method tries to reserve some memory to store elements
 		that will be inserted later (see GenericChunkedArray::addElement).
 		If the new number of elements is smaller than the actual one,
@@ -215,10 +215,10 @@ public:
 		return true;
 	}
 
-	//! Resizes the database
-	/** The database is resized with the specified size. If the new size
+	//! Resizes the array
+	/** The array is resized with the specified size. If the new size
 		is smaller, the overflooding elements will be deleted. If its greater,
-		the database is filled with blank values (warning, the GenericChunkedArray::addElement
+		the array is filled with blank values (warning, the GenericChunkedArray::addElement
 		method will insert values after the new ones, use the GenericChunkedArray::setValue
 		method instead).
 		\param newNumberOfElements the new number of n-uplets
@@ -228,25 +228,25 @@ public:
 	**/
 	bool resize(unsigned newNumberOfElements, bool initNewElements=false, const ScalarType* valueForNewElements=0)
 	{
-		//s'il faut mettre la taille à zéro, ça revient à faire un clear !
+		//if the new size is 0, we can simply clear the array!
 		if (newNumberOfElements==0)
 		{
 			clear();
 		}
-		//sinon, s'il faut agrandir la place de stockage, alors ça revient à faire un "reserve"
+		//otherwise if we need to enlarge the array we must 'reserve' some memory
 		else if (newNumberOfElements>m_maxCount)
 		{
 			if (!reserve(newNumberOfElements))
 				return false;
-			//et si besoin on initialise les nouveaux elements
+			//eventually we can fill it with a custom value
 			if (initNewElements)
 			{
-				//m_maxCount a normalement été mis à jour par reserve() !
+				//m_maxCount should be up-to-date after a call to 'reserve'
 				for (unsigned i=m_count;i<m_maxCount;++i)
 					setValue(i,valueForNewElements);
 			}
 		}
-		else //dernier cas, on doit réduire la taille de un ou plusieurs chunks
+		else //last case: we have to reduce the array size
 		{
 			while (m_maxCount > newNumberOfElements)
 			{
@@ -254,28 +254,28 @@ public:
 				if (m_perChunkCount.empty())
 					return true;
 
-				//nombre d'elements à supprimer
+				//number of elements to remove
 				unsigned spaceToFree = m_maxCount-newNumberOfElements;
-				//nombre d'elements dans le dernier chunk
+				//number of elements in this chunk
 				unsigned numberOfElementsForThisChunk = m_perChunkCount.back();
 
-				//si il y a plus d'elements à supprimer que d'elements dans le dernier chunk
+				//if there's more elements to remove than elements in this chunk
 				if (spaceToFree>=numberOfElementsForThisChunk)
 				{
-					//on supprime le chunk
+					//simply remove the chunk
 					m_maxCount -= numberOfElementsForThisChunk;
 					delete m_theChunks.back();
 					m_theChunks.pop_back();
 					m_perChunkCount.pop_back();
 				}
-				//sinon
+				//otherwise
 				else
 				{
-					//on réalloue la mémoire prise par le chunk
+					//we resize the chunk
 					numberOfElementsForThisChunk -= spaceToFree;
 					assert(numberOfElementsForThisChunk>0);
 					void* newTable = realloc(m_theChunks.back(),numberOfElementsForThisChunk*N*sizeof(ScalarType));
-					//si la réallocation échoue
+					//if 'realloc' failed?!
 					if (!newTable)
 						return false;
 					m_theChunks.back() = (ScalarType*)newTable;
@@ -329,7 +329,7 @@ public:
 	**/
 	inline ScalarType* getCurrentValue() {return getValue(m_iterator);}
 
-	//! Adds a new element to the database
+	//! Adds a new element to the array
 	/** Warning: the memory should have been previously reserved (see
 		GenericChunkedArray::reserve).
 		\param newElement the element to insert
@@ -344,13 +344,13 @@ public:
 	/** \param index the index of the element to return
 		\return a pointer to the ith element
 	**/
-	inline ScalarType* getValue(unsigned index) const {assert(index<m_maxCount);return m_theChunks[index >> CHUNK_INDEX_BIT_DEC]+((index & ELEMENT_INDEX_BIT_MASK)*N);}
+	inline ScalarType* getValue(unsigned index) const {assert(index<m_maxCount); return m_theChunks[index >> CHUNK_INDEX_BIT_DEC]+((index & ELEMENT_INDEX_BIT_MASK)*N);}
 
 	//! Sets the value of the ith element
 	/** \param index the index of the element to update
 		\param value the new value for the element
 	**/
-	inline void setValue(unsigned index, const ScalarType* value) {assert(index<m_maxCount);memcpy(getValue(index),value,N*sizeof(ScalarType));}
+	inline void setValue(unsigned index, const ScalarType* value) {assert(index<m_maxCount); memcpy(getValue(index),value,N*sizeof(ScalarType));}
 
 	//! Returns the element with the minimum value stored in the array
 	/** The computeMinAndMax method must be called prior to this one
@@ -616,7 +616,7 @@ public:
 
 	//****** memory allocators ******//
 
-	//! Reserves memory for the database
+	//! Reserves memory for the array
 	/** This method tries to reserve some memory to store elements
 		that will be inserted later (see GenericChunkedArray::addElement).
 		If the new number of elements is smaller than the actual one,
@@ -664,10 +664,10 @@ public:
 		return true;
 	}
 
-	//! Resizes the database
-	/** The database is resized with the specified size. If the new size
+	//! Resizes the array
+	/** The array is resized with the specified size. If the new size
 		is smaller, the overflooding elements will be deleted. If its greater,
-		the database is filled with blank values (warning, the GenericChunkedArray::addElement
+		the array is filled with blank values (warning, the GenericChunkedArray::addElement
 		method will insert values after the new ones, use the GenericChunkedArray::setValue
 		method instead).
 		\param newNumberOfElements the new number of n-uplets
@@ -677,25 +677,25 @@ public:
 	**/
 	bool resize(unsigned newNumberOfElements, bool initNewElements=false, const ScalarType& valueForNewElements=0)
 	{
-		//s'il faut mettre la taille à zéro, ça revient à faire un clear !
+		//if the new size is 0, we can simply clear the array!
 		if (newNumberOfElements==0)
 		{
 			clear();
 		}
-		//sinon, s'il faut agrandir la place de stockage, alors ça revient à faire un "reserve"
+		//otherwise if we need to enlarge the array we must 'reserve' some memory
 		else if (newNumberOfElements>m_maxCount)
 		{
 			if (!reserve(newNumberOfElements))
 				return false;
-			//et si besoin on initialise les nouveaux elements
+			//eventually we can fill it with a custom value
 			if (initNewElements)
 			{
-				//m_maxCount a normalement été mis à jour par reserve() !
+				//m_maxCount should be up-to-date after a call to 'reserve'
 				for (unsigned i=m_count;i<m_maxCount;++i)
 					setValue(i,valueForNewElements);
 			}
 		}
-		else //dernier cas, on doit réduire la taille de un ou plusieurs chunks
+		else //last case: we have to reduce the array size
 		{
 			while (m_maxCount > newNumberOfElements)
 			{
@@ -703,28 +703,28 @@ public:
 				if (m_perChunkCount.empty())
 					return true;
 
-				//nombre d'elements à supprimer
+				//number of elements to remove
 				unsigned spaceToFree = m_maxCount-newNumberOfElements;
-				//nombre d'elements dans le dernier chunk
+				//number of elements in this chunk
 				unsigned numberOfElementsForThisChunk = m_perChunkCount.back();
 
-				//si il y a plus d'elements à supprimer que d'elements dans le dernier chunk
+				//if there's more elements to remove than elements in this chunk
 				if (spaceToFree>=numberOfElementsForThisChunk)
 				{
-					//on supprime le chunk
+					//simply remove the chunk
 					m_maxCount -= numberOfElementsForThisChunk;
 					delete m_theChunks.back();
 					m_theChunks.pop_back();
 					m_perChunkCount.pop_back();
 				}
-				//sinon
+				//otherwise
 				else
 				{
-					//on réalloue la mémoire prise par le chunk
+					//we resize the chunk
 					numberOfElementsForThisChunk -= spaceToFree;
 					assert(numberOfElementsForThisChunk>0);
 					void* newTable = realloc(m_theChunks.back(),numberOfElementsForThisChunk*sizeof(ScalarType));
-					//si la réallocation échoue
+					//if 'realloc' failed?!
 					if (!newTable)
 						return false;
 					m_theChunks.back() = (ScalarType*)newTable;
@@ -790,7 +790,7 @@ public:
 	**/
 	inline ScalarType* getCurrentValuePtr() {return &(*this)[m_iterator];}
 
-	//! Adds a new element to the database
+	//! Adds a new element to the array
 	/** Warning: the memory should have been previously reserved (see
 		GenericChunkedArray::reserve).
 		\param newElement the element to insert

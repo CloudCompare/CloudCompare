@@ -48,7 +48,7 @@ public:
 	virtual ccChunkedArray<N,ScalarType>* clone()
 	{
 		ccChunkedArray<N,ScalarType>* cloneArray = new ccChunkedArray<N,ScalarType>(getName());
-		if (!copy(*cloneArray))
+		if (!this->copy(*cloneArray))
 		{
 			ccLog::Error("[ccChunkedArray::clone] Failed to clone array (not enough memory?)");
 			cloneArray->release();

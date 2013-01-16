@@ -682,13 +682,13 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	unsigned pointCount = 0;
 	unsigned faceCount = 0;
 
-	//UINT8[80] – Header (we skip it)
+	//UINT8[80] Header (we skip it)
 	fp.seek(80);
 	mesh->setName("Mesh"); //hard to guess solid name with binary files!
 
-	//UINT32 – Number of triangles
+	//UINT32 Number of triangles
 	{
-		__int32 tmpInt32;
+		unsigned tmpInt32;
 		if (fp.read((char*)&tmpInt32,4)<4)
 			return CC_FERR_READING;
 		faceCount = tmpInt32;
@@ -717,7 +717,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 
 	for (unsigned f=0;f<faceCount;++f)
 	{
-		//REAL32[3] – Normal vector
+		//REAL32[3] Normal vector
 		assert(sizeof(float)==4);
 		CCVector3 N;
 		if (fp.read((char*)N.u,12)<12)
@@ -728,7 +728,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 		unsigned pointCountBefore=pointCount;
 		for (unsigned i=0;i<3;++i)
 		{
-			//REAL32[3] – Vertex 1,2 & 3
+			//REAL32[3] Vertex 1,2 & 3
 			float Pf[3];
 			if (fp.read((char*)Pf,12)<0)
 				return CC_FERR_READING;
@@ -798,7 +798,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 			}
 		}
 
-		//UINT16 – Attribute byte count (not used)
+		//UINT16 Attribute byte count (not used)
 		{
 			char a[2];
 			if (fp.read(a,2)<0)

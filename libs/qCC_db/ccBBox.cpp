@@ -273,3 +273,26 @@ const ccBBox& ccBBox::operator *= (const ccGLMatrix& mat)
 
     return *this;
 }
+
+PointCoordinateType ccBBox::minDistTo(const ccBBox& box) const
+{
+    if (valid && box.isValid())
+    {
+		CCVector3 d(0,0,0);
+
+		for (unsigned char dim=0; dim<3; ++dim)
+		{
+			//if the boxes overlap in one dimension, the distance is zero (in this dimension)
+			if (box.bbMin.u[dim] > bbMax.u[dim])
+				d.u[dim] = box.bbMin.u[dim] - bbMax.u[dim];
+			else if (box.bbMax.u[dim] < bbMin.u[dim])
+				d.x = bbMin.u[dim] - box.bbMax.u[dim];
+		}
+
+		return d.norm();
+    }
+    else
+    {
+		return (PointCoordinateType)-1.0;
+    }
+}

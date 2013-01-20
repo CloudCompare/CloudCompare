@@ -501,7 +501,7 @@ QModelIndex ccDBRoot::index(ccHObject* object)
     ccHObject* parent = object->getParent();
     if (!parent)
     {
-        ccConsole::Error("An error occured while inserting element in DB tree: object with no parent!");
+        ccConsole::Error(QString("An error while creating DB tree index: object '%1' has no parent!").arg(object->getName()));
         return QModelIndex();
     }
 

@@ -5,6 +5,10 @@ v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
 
+v2.4 01/20/2013
+- 'Set color' and 'Colorize' can now be applied to groups
+
+
 v2.4 01/13/2013
 - LAZ files support (with laszip - thanks to Ingo Maindorfer)
 - STL files support (certainly the ugliest mesh file format ever created, but definitely a largely used one...)

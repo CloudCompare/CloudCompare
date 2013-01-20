@@ -105,6 +105,11 @@ public:
     //! Returns whether bounding box is valid or not
     bool isValid() const;
 
+	//! Computes min gap (absolute distance) between this bounding-box and another one
+	/** \return min gap (>=0) or -1 if at least one of the box is not valid
+	**/
+	PointCoordinateType minDistTo(const ccBBox& box) const;
+
 protected:
 
     //! Lower min. corner

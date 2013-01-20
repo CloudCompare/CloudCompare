@@ -643,30 +643,40 @@ void MainWindow::doActionSetColor(bool colorize)
     if (!newCol.isValid())
         return;
 
-    unsigned i,selNum = m_selectedEntities.size();
-    for (i=0;i<selNum;++i)
-    {
-        ccHObject* ent = m_selectedEntities[i];
-		bool lockedVertices;
-        ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		if (lockedVertices && !ent->isA(CC_MESH_GROUP))
+	ccHObject::Container selectedEntities = m_selectedEntities;
+	while (!selectedEntities.empty())
+	{
+        ccHObject* ent = selectedEntities.back();
+		selectedEntities.pop_back();
+		if (ent->isA(CC_HIERARCHY_OBJECT))
 		{
-			DisplayLockedVerticesWarning();
-			continue;
+			//automatically parse a group's children set
+			for (unsigned i=0;i<ent->getChildrenNumber();++i)
+				selectedEntities.push_back(ent->getChild(i));
 		}
+		else
+		{
+			bool lockedVertices;
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+			if (lockedVertices && !ent->isA(CC_MESH_GROUP))
+			{
+				DisplayLockedVerticesWarning();
+				continue;
+			}
 
-        if (cloud && cloud->isA(CC_POINT_CLOUD)) // TODO
-        {
-            if (colorize)
-                static_cast<ccPointCloud*>(cloud)->colorize(newCol.redF(), newCol.greenF(), newCol.blueF());
-            else
-                static_cast<ccPointCloud*>(cloud)->setRGBColor(newCol.red(), newCol.green(), newCol.blue());
-            ent->showColors(true);
-            ent->prepareDisplayForRefresh();
+			if (cloud && cloud->isA(CC_POINT_CLOUD)) // TODO
+			{
+				if (colorize)
+					static_cast<ccPointCloud*>(cloud)->colorize(newCol.redF(), newCol.greenF(), newCol.blueF());
+				else
+					static_cast<ccPointCloud*>(cloud)->setRGBColor(newCol.red(), newCol.green(), newCol.blue());
+				ent->showColors(true);
+				ent->prepareDisplayForRefresh();
 
-            if (ent->getParent() && ent->getParent()->isKindOf(CC_MESH))
-                ent->getParent()->showColors(true);
-        }
+				if (ent->getParent() && ent->getParent()->isKindOf(CC_MESH))
+					ent->getParent()->showColors(true);
+			}
+		}
     }
 
     refreshAll();
@@ -6458,7 +6468,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionComputeOctree->setEnabled(atLeastOneCloud);
     actionComputeNormals->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionSetColorGradient->setEnabled(atLeastOneCloud || atLeastOneMesh);
-    actionSetUniqueColor->setEnabled(atLeastOneCloud || atLeastOneMesh);
+    actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
+    actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
     actionComputeMeshAA->setEnabled(atLeastOneCloud);
     actionComputeMeshLS->setEnabled(atLeastOneCloud);
     //actionComputeQuadric3D->setEnabled(atLeastOneCloud);
@@ -6492,7 +6503,6 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionClearNormals->setEnabled(atLeastOneNormal);               //&& hasNormals
     actionInvertNormals->setEnabled(atLeastOneNormal);              //&& hasNormals
     actionConvertNormalToHSV->setEnabled(atLeastOneNormal);         //&& hasNormals
-    actionColorize->setEnabled(atLeastOneCloud || atLeastOneMesh);  //&& colored
     actionClearColor->setEnabled(atLeastOneColor);                  //&& colored
 
 

@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>964</width>
-     <height>18</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -189,6 +189,7 @@
      <addaction name="separator"/>
      <addaction name="actionSamplePoints"/>
      <addaction name="actionSmoothMesh_Laplacian"/>
+     <addaction name="actionSubdivideMesh"/>
      <addaction name="actionMeasureMeshSurface"/>
      <addaction name="separator"/>
      <addaction name="menuMeshScalarField"/>
@@ -1959,6 +1960,11 @@
    </property>
    <property name="toolTip">
     <string>Export X, Y and/or Z coordinates to scalar field(s)</string>
+   </property>
+  </action>
+  <action name="actionSubdivideMesh">
+   <property name="text">
+    <string>Subdivide</string>
    </property>
   </action>
  </widget>

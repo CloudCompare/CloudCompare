@@ -271,6 +271,7 @@ protected slots:
     void doActionComputeQuadric3D();
     void doActionMeasureMeshSurface();
     void doActionSmoothMeshLaplacian();
+	void doActionSubdivideMesh();
     void doActionComputeCPS();
     void doActionDeleteAllSF();
     void doActionMultiplySF();

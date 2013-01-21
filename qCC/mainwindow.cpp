@@ -504,6 +504,7 @@ void MainWindow::connectActions()
 	connect(actionMeshBestFittingQuadric,		SIGNAL(triggered()),    this,       SLOT(doActionComputeQuadric3D()));
     connect(actionSamplePoints,                 SIGNAL(triggered()),    this,       SLOT(doActionSamplePoints()));
     connect(actionSmoothMesh_Laplacian,         SIGNAL(triggered()),    this,       SLOT(doActionSmoothMeshLaplacian()));
+	connect(actionSubdivideMesh,				SIGNAL(triggered()),    this,       SLOT(doActionSubdivideMesh()));
     connect(actionMeasureMeshSurface,           SIGNAL(triggered()),    this,       SLOT(doActionMeasureMeshSurface()));
     //"Edit > Mesh > Scalar Field" menu
     connect(actionSmoothMeshSF,                 SIGNAL(triggered()),    this,       SLOT(doActionSmoothMeshSF()));
@@ -1167,10 +1168,13 @@ void MainWindow::doActionMeasureMeshSurface()
         ccHObject* ent = m_selectedEntities[i];
         if (ent->isKindOf(CC_MESH))
         {
-            double S = CCLib::MeshSamplingTools::computeMeshArea(static_cast<ccGenericMesh*>(ent));
+			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+            double S = CCLib::MeshSamplingTools::computeMeshArea(mesh);
             //we force the console to display itself
             forceConsoleDisplay();
             ccConsole::Print(QString("[Mesh Surface Measurer] Mesh %1: S=%2 (square units)").arg(ent->getName()).arg(S));
+			if (mesh->size())
+				ccConsole::Print(QString("[Mesh Surface Measurer] Mean triangle surface: %1 (square units)").arg(S/double(mesh->size())));
         }
     }
 }
@@ -2258,6 +2262,60 @@ void MainWindow::doMeshSFAction(ccGenericMesh::MESH_SCALAR_FIELD_PROCESS process
     }
 
     refreshAll();
+}
+
+static float s_subdivideMaxArea = 1.0f;
+void MainWindow::doActionSubdivideMesh()
+{
+	bool ok;
+	s_subdivideMaxArea = QInputDialog::getDouble(this, "Subdivide mesh", "Max area per triangle:", s_subdivideMaxArea, 1e-6, 1e6, 6, &ok);
+	if (!ok)
+		return;
+
+	//ccProgressDialog pDlg(true,this);
+
+    unsigned i,selNum = m_selectedEntities.size();
+    for (i=0;i<selNum;++i)
+    {
+        ccHObject* ent = m_selectedEntities[i];
+        if (ent->isKindOf(CC_MESH))
+        {
+			//single mesh?
+			if (ent->isA(CC_MESH))
+			{
+				ccMesh* mesh = static_cast<ccMesh*>(ent);
+
+				ccMesh* subdividedMesh = 0;
+				try
+				{
+					subdividedMesh = mesh->subdivide(s_subdivideMaxArea);
+				}
+				catch(...)
+				{
+					ccLog::Error(QString("[Subdivide] An error occured while trying to subdivide mesh '%1' (not enough memory?)").arg(mesh->getName()));
+				}
+
+				if (subdividedMesh)
+				{
+					subdividedMesh->setName(QString("%1.subdivided(S<%2)").arg(mesh->getName()).arg(s_subdivideMaxArea));
+					mesh->setEnabled(false);
+					mesh->refreshDisplay_recursive();
+					addToDB(subdividedMesh, true, 0, true, false);
+				}
+				else
+				{
+					ccConsole::Warning(QString("[Subdivide] Failed to subdivide mesh '%1' (not enough memory?)").arg(mesh->getName()));
+				}
+			}
+			else
+			{
+				ccLog::Warning("[Subdivide] Works only on single meshes!");
+			}
+		}
+    }
+
+    refreshAll();
+	updateUI();
 }
 
 static unsigned s_laplacianSmooth_nbIter = 20;

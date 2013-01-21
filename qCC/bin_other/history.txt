@@ -1,13 +1,15 @@
 *** CloudCompare versions history ***
 
 v2.4 ??/??/2013
-- Mesh subdivision method
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
 
-v2.4 01/20/2013
+v2.4 01/21/2013
+- New tool: 'Edit > Mesh > Subdivide' (recursive subdivision)
+	* interpolates mesh original colors (if any)
+	* only works with single meshes for the moment (not with mesh groups)
+	(+ 'Edit > Mesh > Measure surface' now also outputs the mean triangle surface)
 - 'Set color' and 'Colorize' can now be applied to groups
-
 
 v2.4 01/13/2013
 - LAZ files support (with laszip - thanks to Ingo Maindorfer)

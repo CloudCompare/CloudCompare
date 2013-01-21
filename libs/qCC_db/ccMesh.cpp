@@ -1719,39 +1719,43 @@ bool ccMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3
 	if (!hasNormals())
 		return false;
 
-	//intepolation weights
 	const unsigned* tri = m_triIndexes->getValue(triIndex);
-	const CCVector3 *A = m_associatedCloud->getPointPersistentPtr(tri[0]);
-	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(tri[1]);
-	const CCVector3 *C = m_associatedCloud->getPointPersistentPtr(tri[2]);
 
+	return interpolateNormals(tri[0],tri[1],tri[2],P,N, hasTriNormals() ? m_triNormalIndexes->getValue(triIndex) : 0);
+}
+
+bool ccMesh::interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3& N, const int* triNormIndexes/*=0*/)
+{
+	const CCVector3 *A = m_associatedCloud->getPointPersistentPtr(i1);
+	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(i2);
+	const CCVector3 *C = m_associatedCloud->getPointPersistentPtr(i3);
+
+	//intepolation weights
 	PointCoordinateType d1 = ((P-*B).cross(*C-*B)).norm()/*/2.0*/;
 	PointCoordinateType d2 = ((P-*C).cross(*A-*C)).norm()/*/2.0*/;
 	PointCoordinateType d3 = ((P-*A).cross(*B-*A)).norm()/*/2.0*/;
 
 	CCVector3 N1,N2,N3;
-	if (hasTriNormals()) //per-triangle normals
+	if (triNormIndexes) //per-triangle normals
 	{
-		const int* normIndexes = m_triNormalIndexes->getValue(triIndex);
-		assert(normIndexes);
-		if (normIndexes[0]>=0)
-			N1 = ccNormalVectors::GetNormal(m_triNormals->getValue(normIndexes[0]));
+		if (triNormIndexes[0]>=0)
+			N1 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[0]));
 		else
 			d1 = 0;
-		if (normIndexes[1]>=0)
-			N2 = ccNormalVectors::GetNormal(m_triNormals->getValue(normIndexes[1]));
+		if (triNormIndexes[1]>=0)
+			N2 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[1]));
 		else
 			d2 = 0;
-		if (normIndexes[2]>=0)
-			N3 = ccNormalVectors::GetNormal(m_triNormals->getValue(normIndexes[2]));
+		if (triNormIndexes[2]>=0)
+			N3 = ccNormalVectors::GetNormal(m_triNormals->getValue(triNormIndexes[2]));
 		else
 			d3 = 0;
 	}
 	else //per-vertex normals
 	{
-		N1 = CCVector3(m_associatedCloud->getPointNormal(tri[0]));
-		N2 = CCVector3(m_associatedCloud->getPointNormal(tri[1]));
-		N3 = CCVector3(m_associatedCloud->getPointNormal(tri[2]));
+		N1 = CCVector3(m_associatedCloud->getPointNormal(i1));
+		N2 = CCVector3(m_associatedCloud->getPointNormal(i2));
+		N3 = CCVector3(m_associatedCloud->getPointNormal(i3));
 	}
 
 	N = N1*d1+N2*d2+N3*d3;
@@ -1768,12 +1772,18 @@ bool ccMesh::interpolateColors(unsigned triIndex, const CCVector3& P, colorType 
 	if (!hasColors())
 		return false;
 
-	//intepolation weights
 	const unsigned* tri = m_triIndexes->getValue(triIndex);
-	const CCVector3 *A = m_associatedCloud->getPointPersistentPtr(tri[0]);
-	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(tri[1]);
-	const CCVector3 *C = m_associatedCloud->getPointPersistentPtr(tri[2]);
 
+	return interpolateColors(tri[0],tri[1],tri[2],P,rgb);
+}
+
+bool ccMesh::interpolateColors(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, colorType rgb[])
+{
+	const CCVector3 *A = m_associatedCloud->getPointPersistentPtr(i1);
+	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(i2);
+	const CCVector3 *C = m_associatedCloud->getPointPersistentPtr(i3);
+
+	//intepolation weights
 	PointCoordinateType d1 = ((P-*B).cross(*C-*B)).norm()/*/2.0*/;
 	PointCoordinateType d2 = ((P-*C).cross(*A-*C)).norm()/*/2.0*/;
 	PointCoordinateType d3 = ((P-*A).cross(*B-*A)).norm()/*/2.0*/;
@@ -1783,9 +1793,9 @@ bool ccMesh::interpolateColors(unsigned triIndex, const CCVector3& P, colorType 
 	d2/=dsum;
 	d3/=dsum;
 
-	const colorType* C1 = m_associatedCloud->getPointColor(tri[0]);
-	const colorType* C2 = m_associatedCloud->getPointColor(tri[0]);
-	const colorType* C3 = m_associatedCloud->getPointColor(tri[0]);
+	const colorType* C1 = m_associatedCloud->getPointColor(i1);
+	const colorType* C2 = m_associatedCloud->getPointColor(i2);
+	const colorType* C3 = m_associatedCloud->getPointColor(i3);
 
 	rgb[0] = (colorType)floor((float)C1[0]*d1+(float)C2[0]*d2+(float)C3[0]*d3);
 	rgb[1] = (colorType)floor((float)C1[1]*d1+(float)C2[1]*d2+(float)C3[1]*d3);
@@ -1866,7 +1876,9 @@ bool ccMesh::getColorFromTexture(unsigned triIndex, const CCVector3& P, colorTyp
 	return true;
 }
 
+//we use as many static variables as we can to limit the size of the heap used by each recursion...
 static const unsigned s_defaultSubdivideGrowRate = 50;
+static float s_maxSubdivideArea = 1;
 static QMap<__int64,unsigned> s_alreadyCreatedVertices; //map to store already created edges middle points
 
 static __int64 GenerateKey(unsigned edgeIndex1, unsigned edgeIndex2)
@@ -1877,9 +1889,9 @@ static __int64 GenerateKey(unsigned edgeIndex1, unsigned edgeIndex2)
 	return ((((__int64)edgeIndex1)<<32) | (__int64)edgeIndex2);
 }
 
-bool ccMesh::pushSubdivide(PointCoordinateType maxArea, unsigned indexA, unsigned indexB, unsigned indexC)
+bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC)
 {
-	if (maxArea<=ZERO_TOLERANCE)
+	if (s_maxSubdivideArea/*maxArea*/<=ZERO_TOLERANCE)
 	{
 		ccLog::Error("[ccMesh::pushSubdivide] Invalid input argument!");
 		return false;
@@ -1892,13 +1904,13 @@ bool ccMesh::pushSubdivide(PointCoordinateType maxArea, unsigned indexA, unsigne
 	}
 	ccPointCloud* vertices = static_cast<ccPointCloud*>(getAssociatedCloud());
 	assert(vertices);
-	const CCVector3* A(vertices->getPoint(indexA));
-	const CCVector3* B(vertices->getPoint(indexB));
-	const CCVector3* C(vertices->getPoint(indexC));
+	const CCVector3* A = vertices->getPoint(indexA);
+	const CCVector3* B = vertices->getPoint(indexB);
+	const CCVector3* C = vertices->getPoint(indexC);
 
 	//do we need to sudivide this triangle?
 	PointCoordinateType area = ((*B-*A)*(*C-*A)).norm()/(PointCoordinateType)2.0;
-	if (area > maxArea)
+	if (area > s_maxSubdivideArea/*maxArea*/)
 	{
 		//we will add 3 new vertices, so we must be sure to have enough memory
 		if (vertices->size()+2 >= vertices->capacity())
@@ -1909,6 +1921,10 @@ bool ccMesh::pushSubdivide(PointCoordinateType maxArea, unsigned indexA, unsigne
 				ccLog::Error("[ccMesh::pushSubdivide] Not enough memory!");
 				return false;
 			}
+			//We have to update pointers as they may have been wrangled by the 'reserve' call
+			A = vertices->getPoint(indexA);
+			B = vertices->getPoint(indexB);
+			C = vertices->getPoint(indexC);
 		}
 		
 		//add new vertices
@@ -1922,6 +1938,21 @@ bool ccMesh::pushSubdivide(PointCoordinateType maxArea, unsigned indexA, unsigne
 				indexG1 = vertices->size();
 				CCVector3 G1 = (*A+*B)/(PointCoordinateType)2.0;
 				vertices->addPoint(G1.u);
+				//interpolate other features?
+				/*if (vertices->hasNormals())
+				{
+					//vertices->reserveTheNormsTable();
+					CCVector3 N(0.0,0.0,1.0);
+					interpolateNormals(indexA,indexB,indexC,G1,N);
+					vertices->addNorm(N.u);
+				}
+				//*/
+				if (vertices->hasColors())
+				{
+					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					interpolateColors(indexA,indexB,indexC,G1,C);
+					vertices->addRGBColor(C);
+				}
 				//and add it to the map
 				s_alreadyCreatedVertices.insert(key,indexG1);
 			}
@@ -1940,6 +1971,21 @@ bool ccMesh::pushSubdivide(PointCoordinateType maxArea, unsigned indexA, unsigne
 				indexG2 = vertices->size();
 				CCVector3 G2 = (*B+*C)/(PointCoordinateType)2.0;
 				vertices->addPoint(G2.u);
+				//interpolate other features?
+				/*if (vertices->hasNormals())
+				{
+					//vertices->reserveTheNormsTable();
+					CCVector3 N(0.0,0.0,1.0);
+					interpolateNormals(indexA,indexB,indexC,G2,N);
+					vertices->addNorm(N.u);
+				}
+				//*/
+				if (vertices->hasColors())
+				{
+					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					interpolateColors(indexA,indexB,indexC,G2,C);
+					vertices->addRGBColor(C);
+				}
 				//and add it to the map
 				s_alreadyCreatedVertices.insert(key,indexG2);
 			}
@@ -1958,6 +2004,21 @@ bool ccMesh::pushSubdivide(PointCoordinateType maxArea, unsigned indexA, unsigne
 				indexG3 = vertices->size();
 				CCVector3 G3 = (*C+*A)/(PointCoordinateType)2.0;
 				vertices->addPoint(G3.u);
+				//interpolate other features?
+				/*if (vertices->hasNormals())
+				{
+					//vertices->reserveTheNormsTable();
+					CCVector3 N(0.0,0.0,1.0);
+					interpolateNormals(indexA,indexB,indexC,G3,N);
+					vertices->addNorm(N.u);
+				}
+				//*/
+				if (vertices->hasColors())
+				{
+					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					interpolateColors(indexA,indexB,indexC,G3,C);
+					vertices->addRGBColor(C);
+				}
 				//and add it to the map
 				s_alreadyCreatedVertices.insert(key,indexG3);
 			}
@@ -1968,13 +2029,13 @@ bool ccMesh::pushSubdivide(PointCoordinateType maxArea, unsigned indexA, unsigne
 		}
 
 		//add new triangles
-		if (!pushSubdivide(maxArea, indexA, indexG1, indexG3))
+		if (!pushSubdivide(/*maxArea, */indexA, indexG1, indexG3))
 			return false;
-		if (!pushSubdivide(maxArea, indexB, indexG2, indexG1))
+		if (!pushSubdivide(/*maxArea, */indexB, indexG2, indexG1))
 			return false;
-		if (!pushSubdivide(maxArea, indexC, indexG3, indexG2))
+		if (!pushSubdivide(/*maxArea, */indexC, indexG3, indexG2))
 			return false;
-		if (!pushSubdivide(maxArea, indexG1, indexG2, indexG3))
+		if (!pushSubdivide(/*maxArea, */indexG1, indexG2, indexG3))
 			return false;
 	}
 	else
@@ -2003,6 +2064,7 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 		ccLog::Error("[ccMesh::subdivide] Invalid input argument!");
 		return 0;
 	}
+	s_maxSubdivideArea = maxArea;
 
 	unsigned triCount = size();
 	ccGenericPointCloud* vertices = getAssociatedCloud();
@@ -2041,7 +2103,7 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 		for (unsigned i=0;i<triCount;++i)
 		{
 			const unsigned* tri = m_triIndexes->getValue(i);
-			if (!resultMesh->pushSubdivide(maxArea,tri[0],tri[1],tri[2]))
+			if (!resultMesh->pushSubdivide(/*maxArea,*/tri[0],tri[1],tri[2]))
 			{
 				ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 				delete resultMesh;
@@ -2056,7 +2118,7 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 		return 0;
 	}
 
-	//we must also 'fix' the triangles that share (at least) an edge with a subdivide triangle!
+	//we must also 'fix' the triangles that share (at least) an edge with a subdivided triangle!
 	try
 	{
 		unsigned newTriCount = resultMesh->size();
@@ -2116,7 +2178,7 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 				_face[1] = indexG;
 				_face[2] = indexes[(i1+2)%3];
 				//and add the other half (we can use pushSubdivide as the area should alredy be ok!)
-				if (!resultMesh->pushSubdivide(maxArea,indexes[i1],indexes[(i1+1)%3],indexG))
+				if (!resultMesh->pushSubdivide(/*maxArea,*/indexes[i1],indexes[(i1+1)%3],indexG))
 				{
 					ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 					delete resultMesh;
@@ -2132,8 +2194,8 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 					_face[1] = indexG3;
 					_face[2] = indexG2;
 					//split the remaining 'trapezoid' in 2
-					if (!resultMesh->pushSubdivide(maxArea, indexA, indexG2, indexG3) ||
-						!resultMesh->pushSubdivide(maxArea, indexA, indexB, indexG2))
+					if (!resultMesh->pushSubdivide(/*maxArea, */indexA, indexG2, indexG3) ||
+						!resultMesh->pushSubdivide(/*maxArea, */indexA, indexB, indexG2))
 					{
 						ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 						delete resultMesh;
@@ -2147,8 +2209,8 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 					_face[1] = indexG1;
 					_face[2] = indexG3;
 					//split the remaining 'trapezoid' in 2
-					if (!resultMesh->pushSubdivide(maxArea, indexB, indexG3, indexG1) ||
-						!resultMesh->pushSubdivide(maxArea, indexB, indexC, indexG3))
+					if (!resultMesh->pushSubdivide(/*maxArea, */indexB, indexG3, indexG1) ||
+						!resultMesh->pushSubdivide(/*maxArea, */indexB, indexC, indexG3))
 					{
 						ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 						delete resultMesh;
@@ -2162,8 +2224,8 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 					_face[1] = indexG2;
 					_face[2] = indexG1;
 					//split the remaining 'trapezoid' in 2
-					if (!resultMesh->pushSubdivide(maxArea, indexC, indexG1, indexG2) ||
-						!resultMesh->pushSubdivide(maxArea, indexC, indexA, indexG1))
+					if (!resultMesh->pushSubdivide(/*maxArea, */indexC, indexG1, indexG2) ||
+						!resultMesh->pushSubdivide(/*maxArea, */indexC, indexA, indexG1))
 					{
 						ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 						delete resultMesh;
@@ -2178,9 +2240,9 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 				_face[1] = indexG1;
 				_face[2] = indexG3;
 				//and add the other 3 quarters (we can use pushSubdivide as the area should alredy be ok!)
-				if (!resultMesh->pushSubdivide(maxArea, indexB, indexG2, indexG1) ||
-					!resultMesh->pushSubdivide(maxArea, indexC, indexG3, indexG2) ||
-					!resultMesh->pushSubdivide(maxArea, indexG1, indexG2, indexG3))
+				if (!resultMesh->pushSubdivide(/*maxArea, */indexB, indexG2, indexG1) ||
+					!resultMesh->pushSubdivide(/*maxArea, */indexC, indexG3, indexG2) ||
+					!resultMesh->pushSubdivide(/*maxArea, */indexG1, indexG2, indexG3))
 				{
 					ccLog::Error("[ccMesh::subdivide] Not enough memory!");
 					delete resultMesh;
@@ -2206,8 +2268,13 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 	//we import from the original mesh... what we can
 	if (hasNormals())
 	{
-		resultMesh->computeNormals();
+		if (hasNormals()) //normals interpolation doesn't work well...
+			resultMesh->computeNormals();
 		resultMesh->showNormals(normalsShown());
+	}
+	if (hasColors())
+	{
+		resultMesh->showColors(colorsShown());
 	}
 	resultMesh->setVisible(isVisible());
 

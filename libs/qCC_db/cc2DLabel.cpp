@@ -221,6 +221,20 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion)
 	return true;
 }
 
+//return angle between two vectors (in degrees)
+//warning: vectors will be normalized by default
+double GetAngle_deg(CCVector3& AB, CCVector3& AC)
+{
+	AB.normalize();
+	AC.normalize();
+	double dotprod = AB.dot(AC);
+	if (dotprod<=-1.0)
+		return 180.0;
+	else if (dotprod>1.0)
+		return 0.0;
+	return 180.0*acos(dotprod)/M_PI;
+}
+
 QStringList cc2DLabel::getLabelContent(int precision)
 {
 	QStringList body;
@@ -312,11 +326,11 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			body << areaStr;
 
 			//coordinates
-			QString coordStr1 = QString("P#%0: (%1;%2;%3)").arg(pointIndex1).arg(P1->x,0,'f',precision).arg(P1->y,0,'f',precision).arg(P1->z,0,'f',precision);
+			QString coordStr1 = QString("A#%0: (%1;%2;%3)").arg(pointIndex1).arg(P1->x,0,'f',precision).arg(P1->y,0,'f',precision).arg(P1->z,0,'f',precision);
 			body << coordStr1;
-			QString coordStr2 = QString("P#%0: (%1;%2;%3)").arg(pointIndex2).arg(P2->x,0,'f',precision).arg(P2->y,0,'f',precision).arg(P2->z,0,'f',precision);
+			QString coordStr2 = QString("B#%0: (%1;%2;%3)").arg(pointIndex2).arg(P2->x,0,'f',precision).arg(P2->y,0,'f',precision).arg(P2->z,0,'f',precision);
 			body << coordStr2;
-			QString coordStr3 = QString("P#%0: (%1;%2;%3)").arg(pointIndex3).arg(P3->x,0,'f',precision).arg(P3->y,0,'f',precision).arg(P3->z,0,'f',precision);
+			QString coordStr3 = QString("C#%0: (%1;%2;%3)").arg(pointIndex3).arg(P3->x,0,'f',precision).arg(P3->y,0,'f',precision).arg(P3->z,0,'f',precision);
 			body << coordStr3;
 
 			//normal
@@ -325,19 +339,11 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			body << normStr;
 
 			//angle
-			P1P2.normalize();
-			P1P3.normalize();
-			double d = P1P2.dot(P1P3);
-			if (d<=-1.0)
-				d = 180.0;
-			else if (d>1.0)
-				d = 0.0;
-			else
-			{
-				d = acos(d);
-				d = 180.0*d/M_PI;
-			}
-			QString angleStr = QString("Angle (P#%0->P#%1->P#%2): %3 degrees").arg(pointIndex2).arg(pointIndex1).arg(pointIndex3).arg(d,0,'f',precision);
+			CCVector3 P2P3 = *P3-*P2;
+			double angleAtP1 = GetAngle_deg(P1P2,P1P3);
+			double angleAtP2 = GetAngle_deg(P2P3,-P1P2);
+			double angleAtP3 = GetAngle_deg(-P1P3,-P2P3); //should be equal to 180-a1-a2!
+			QString angleStr = QString("Angles: A=%1 - B=%3 - C=%5 deg.").arg(angleAtP1,0,'f',precision).arg(angleAtP2,0,'f',precision).arg(angleAtP3,0,'f',precision);
 			body << angleStr;
 		}
 		break;

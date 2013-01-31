@@ -3,6 +3,10 @@
 v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
+- "Point list picking" tool now automatically pastes last picked point in clipboard
+	* string format: " CC_POINT_#i(x,y,z) " (where i is the index in the current list)
+- "Point picking" tool:
+	* When picking 3 successive points ('triplet' mode), the 3 corresponding angles are displayed
 
 v2.4 01/21/2013
 - New tool: 'Edit > Mesh > Subdivide' (recursive subdivision)

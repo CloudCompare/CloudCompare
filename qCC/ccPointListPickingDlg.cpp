@@ -28,6 +28,8 @@
 #include <QSettings>
 #include <QFileDialog>
 #include <QMenu>
+#include <QClipboard>
+#include <QApplication>
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -415,6 +417,16 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 	m_orderedLabelsContainer->addChild(newLabel,true);
 
 	m_toBeAdded->addChild(newLabel,false);
+
+	//automatically send the new point coordinates to the clipboard
+	QClipboard* clipboard = QApplication::clipboard();
+	if (clipboard)
+	{
+		const CCVector3* P = cloud->getPoint(pointIndex);
+		int precision = ccGui::Parameters().displayedNumPrecision;
+		int indexInList = startIndexSpinBox->value()+(int)m_orderedLabelsContainer->getChildrenNumber()-1;
+		clipboard->setText(QString("CC_POINT_#%0(%1;%2;%3)").arg(indexInList).arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision));
+	}
 
 	updateList();
 

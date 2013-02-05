@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>350</width>
-    <height>151</height>
+    <width>360</width>
+    <height>591</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -60,6 +60,53 @@
     </layout>
    </item>
    <item>
+    <widget class="QLabel" name="view2D">
+     <property name="minimumSize">
+      <size>
+       <width>320</width>
+       <height>200</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>320</width>
+       <height>200</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Real time color view</string>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="viewDepth">
+     <property name="minimumSize">
+      <size>
+       <width>320</width>
+       <height>200</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>320</width>
+       <height>200</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Real time depth view</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QLabel" name="label_3">
@@ -94,14 +141,38 @@
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="grabRGBCheckBox">
+    <widget class="QCheckBox" name="meanFilterCheckBox">
      <property name="text">
-      <string>Grab RGB info</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
+      <string>mean filter (depth only)</string>
      </property>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QCheckBox" name="grabRGBCheckBox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Grab RGB info</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="grabPushButton">
+       <property name="text">
+        <string>GRAB</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

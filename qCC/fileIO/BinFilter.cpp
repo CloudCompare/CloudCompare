@@ -68,7 +68,7 @@ int BinFilter::ReadEntityHeader(QFile& in, unsigned &numberOfPoints, HeaderFlags
 		return -1;
 
 	header.flags.fromByte((unsigned char)flag);
-	assert(header.bit1 == true); //should always be 0!
+	//assert(header.bit1 == true); //should always be 0!
 
 	return 0;
 }

@@ -34,24 +34,34 @@
 	Proc. of Visualization 2003, October 19-24, Seattle, USA.
 	http://vcg.sourceforge.net/index.php/ShadeVis
 **/
-class qPCVPlugin : public QObject, public ccStdPluginInterface
+class qPCV : public QObject, public ccStdPluginInterface
 {
     Q_OBJECT
     Q_INTERFACES(ccStdPluginInterface)
 
 public:
 
-    //inherited from ccPluginInterface
-    void getDescription(ccPluginDescription& desc);
-    QIcon getIcon() const;
+	//! Default constructor
+	qPCV(QObject* parent=0);
+
+	//inherited from ccPluginInterface
+	virtual QString getName() const { return "qPCV"; }
+	virtual QString getDescription() const { return "PCV (Ambient Occlusion inspired from ShadeVis, Tarini et al.)"; }
+	virtual QIcon getIcon() const;
 
     //inherited from ccStdPluginInterface
-	bool onNewSelection(const ccHObject::Container& selectedEntities);
-    int doAction(ccHObject::Container& selectedEntities,
-                unsigned& uiModificationFlags,
-                ccProgressDialog* progressCb=NULL,
-                QWidget* parent=NULL);
-    QString getErrorMessage(int errorCode/*, LANGUAGE lang*/);
+	void onNewSelection(const ccHObject::Container& selectedEntities);
+    virtual void getActions(QActionGroup& group);
+
+protected slots:
+
+	//! Slot called when associated ation is triggered
+	void doAction();
+
+protected:
+
+	//! Associated action
+	QAction* m_action;
 };
 
 #endif

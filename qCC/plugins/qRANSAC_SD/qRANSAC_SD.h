@@ -35,24 +35,34 @@
 	and Reinhard Klein, in Computer Graphics Forum (June 2007), 26:2(214-226)
 	http://cg.cs.uni-bonn.de/en/publications/paper-details/schnabel-2007-efficient/
 **/
-class qRansacSDPlugin : public QObject, public ccStdPluginInterface
+class qRansacSD : public QObject, public ccStdPluginInterface
 {
     Q_OBJECT
     Q_INTERFACES(ccStdPluginInterface)
 
 public:
 
+	//! Default constructor
+	qRansacSD(QObject* parent=0);
+
     //inherited from ccPluginInterface
-    void getDescription(ccPluginDescription& desc);
-    QIcon getIcon() const;
+	virtual QString getName() const { return "RansacSD"; }
+	virtual QString getDescription() const { return "Efficient RANSAC for Point-Cloud Shape Detection (Schnabel et al 2007)"; }
+	virtual QIcon getIcon() const;
 
     //inherited from ccStdPluginInterface
-	bool onNewSelection(const ccHObject::Container& selectedEntities);
-    int doAction(ccHObject::Container& selectedEntities,
-                unsigned& uiModificationFlags,
-                ccProgressDialog* progressCb=NULL,
-                QWidget* parent=NULL);
-    QString getErrorMessage(int errorCode/*, LANGUAGE lang*/);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
+    virtual void getActions(QActionGroup& group);
+
+protected slots:
+
+	//! Slot called when associated ation is triggered
+	void doAction();
+
+protected:
+
+	//! Associated action
+	QAction* m_action;
 };
 
 #endif

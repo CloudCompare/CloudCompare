@@ -109,11 +109,8 @@ void ccPluginDlg::populateTreeWidget(QObject *plugin, const QString &text)
         ccPluginInterface *ccPlugin = qobject_cast<ccPluginInterface*>(plugin);
         if (ccPlugin)
         {
-            ccPluginDescription desc;
-            ccPlugin->getDescription(desc);
             QStringList features;
-            features+=QString("name: %1").arg(desc.name);
-            features+=QString("version: %1").arg(desc.version);
+			features+=QString("name: %1").arg(ccPlugin->getName());
             addItems(pluginItem, "CloudCompare Plugin", features);
         }
     }

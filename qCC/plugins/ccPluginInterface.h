@@ -25,6 +25,8 @@
 #ifndef CC_PLUGIN_INTERFACE_HEADER
 #define CC_PLUGIN_INTERFACE_HEADER
 
+//Qt
+#include <QString>
 #include <QIcon>
 
 //! Plugin type
@@ -32,25 +34,8 @@ enum  CC_PLUGIN_TYPE {  CC_STD_PLUGIN               = 0,
                         CC_GL_FILTER_PLUGIN         = 1,
 };
 
-//! Plugin description structure
-struct ccPluginDescription
-{
-    ccPluginDescription()
-    {
-        name[0]=0;
-        menuName[0]=0;
-        version=0;
-        hasAnIcon=false;
-    }
-
-    char name[256];
-    char menuName[64];
-    int version;
-    bool hasAnIcon;
-};
-
 //! Standard CC plugin interface
-/** Version 1.1
+/** Version 2.0
 **/
 class ccPluginInterface
 {
@@ -60,19 +45,22 @@ public:
     virtual ~ccPluginInterface() {}
 
 	//! Returns plugin type (standard or OpenGL filter)
-    virtual CC_PLUGIN_TYPE getType()=0;
+    virtual CC_PLUGIN_TYPE getType() const = 0;
 
-    //! Returns a short description of the plugin
-    /** \param desc output description structure
-    **/
-    virtual void getDescription(ccPluginDescription& desc)=0;
+	//! Returns (short) name (for menu entry, etc.)
+    virtual QString getName() const = 0;
 
-    //! Returns icon (if available)
-    virtual QIcon getIcon() const=0;
+	//! Returns long name/description (for tooltip, etc.)
+    virtual QString getDescription() const = 0;
+
+	//! Returns icon
+	/** Should be reimplemented if necessary
+	**/
+	virtual QIcon getIcon() const { return QIcon(); }
 };
 
 Q_DECLARE_INTERFACE(ccPluginInterface,
-                    "edf.rd.CloudCompare.ccPluginInterface/1.1")
+                    "edf.rd.CloudCompare.ccPluginInterface/2.0")
 
 
 #endif

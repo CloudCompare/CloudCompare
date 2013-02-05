@@ -151,7 +151,7 @@ MainWindow::MainWindow()
     , m_ppDlg(0)
     , m_plpDlg(0)
 	, m_pprDlg(0)
-    , m_pluginsGroup(0)
+	, m_glFilterActions(this)
 {
     //Dialog "auto-construction"
     setupUi(this);
@@ -220,7 +220,6 @@ MainWindow::~MainWindow()
     m_ppDlg = 0;
     m_plpDlg = 0;
 	m_pprDlg = 0;
-    m_pluginsGroup = 0;
 
 	//release all 'overlay' dialogs
 	while (!m_mdiDialogs.empty())
@@ -233,47 +232,42 @@ MainWindow::~MainWindow()
     //m_mdiDialogs.clear();
     m_mdiArea->closeAllSubWindows();
 
-    /*//QT takes care of all siblings!
-    if (m_pluginsGroup)
-        delete m_pluginsGroup;
-    m_pluginsGroup=0;
-    //*/
-
 	if (ccRoot)
 		delete ccRoot;
 }
 
 ccPluginInterface* MainWindow::getValidPlugin(QObject* plugin)
 {
-    //standard plugin?
-    ccStdPluginInterface* ccStdPlugin = qobject_cast<ccStdPluginInterface*>(plugin);
-    if (ccStdPlugin)
-        return static_cast<ccPluginInterface*>(ccStdPlugin);
+	if (plugin)
+	{
+		//standard plugin?
+		ccStdPluginInterface* ccStdPlugin = qobject_cast<ccStdPluginInterface*>(plugin);
+		if (ccStdPlugin)
+			return static_cast<ccPluginInterface*>(ccStdPlugin);
 
-    ccGLFilterPluginInterface* ccGLPlugin = qobject_cast<ccGLFilterPluginInterface*>(plugin);
-    if (ccGLPlugin)
-        return static_cast<ccPluginInterface*>(ccGLPlugin);
+		ccGLFilterPluginInterface* ccGLPlugin = qobject_cast<ccGLFilterPluginInterface*>(plugin);
+		if (ccGLPlugin)
+			return static_cast<ccPluginInterface*>(ccGLPlugin);
+	}
 
     return 0;
 }
 
 void MainWindow::loadPlugins()
 {
+	menuPlugins->setEnabled(false);
+	menuShadersAndFilters->setEnabled(false);
+	toolBarPluginTools->setVisible(false);
+	toolBarGLFilters->setVisible(false);
+
+	//"static" plugins
     foreach (QObject *plugin, QPluginLoader::staticInstances())
-		addPluginToPluginGroup(plugin);
+		dispatchPlugin(plugin);
 
     ccConsole::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
-    m_pluginsPath = QCoreApplication::applicationDirPath();
 
-    // TODO DGM: I wanted to get automatically the debug versions of plugins, but QT throws an error
-    // while loading these debug plugins ('can't mix release and debug versions') ! I didn't manage
-    // to sort this out yet ... However, it would be a more convenient/proper way to work ...
-    //#ifdef _DEBUG
-    //    m_pluginsPath += QString("../plugins/debug");
-    //#else
-    //Now release plugins are in bin/plugins
-    m_pluginsPath += QString("/plugins");
-    //#endif
+    //plugins are in bin/plugins
+    m_pluginsPath = QCoreApplication::applicationDirPath()+QString("/plugins");
 
     ccConsole::Print(QString("Plugins lookup dir.: %1").arg(m_pluginsPath));
 
@@ -289,11 +283,11 @@ void MainWindow::loadPlugins()
     foreach (QString filename, pluginsDir.entryList(filters))
     {
         QPluginLoader loader(pluginsDir.absoluteFilePath(filename));
-        QObject *plugin = loader.instance();
+        QObject* plugin = loader.instance();
         if (plugin)
         {
             ccConsole::Print(QString("Found new plugin! ('%1')").arg(filename));
-            if (addPluginToPluginGroup(plugin))
+            if (dispatchPlugin(plugin))
             {
                 m_pluginFileNames += filename;
             }
@@ -308,93 +302,101 @@ void MainWindow::loadPlugins()
         }
     }
 
-    if (!m_pluginsGroup || m_pluginsGroup->actions().isEmpty())
-    {
-        //menuPlugins->setEnabled(false);
-        //actionDisplayPluginTools->setEnabled(false);
-        toolBarPluginTools->setVisible(false);
-        return;
+	if (toolBarPluginTools->isEnabled())
+	{
+		actionDisplayPluginTools->setEnabled(true);
+		actionDisplayPluginTools->setChecked(true);
     }
-
-    //first we add all "GL Filters plugins" to plugins toolbar
-    int count=0;
-    foreach (QAction *action, m_pluginsGroup->actions())
-    {
-        ccPluginInterface *ccPlugin = getValidPlugin(action->parent());
-        if (ccPlugin && ccPlugin->getType() == CC_GL_FILTER_PLUGIN)
-        {
-            toolBarPluginTools->addAction(action);
-            ++count;
-        }
-    }
-
-    if (count)
-    {
-        toolBarPluginTools->addAction(actionNoFilter);
-        QAction* separator = new QAction(this);
-        separator->setSeparator(true);
-        toolBarPluginTools->addAction(separator);
-    }
-
-    //then, all the others!
-    foreach (QAction *action, m_pluginsGroup->actions())
-    {
-        bool hasPlugin = false;
-        ccPluginInterface *ccPlugin = getValidPlugin(action->parent());
-        if (ccPlugin && ccPlugin->getType() != CC_GL_FILTER_PLUGIN)
-        {
-            toolBarPluginTools->addAction(action);
-            hasPlugin=true;
-        }
-
-        if (hasPlugin)
-        {
-            toolBarPluginTools->setEnabled(true);
-            actionDisplayPluginTools->setEnabled(true);
-            actionDisplayPluginTools->setChecked(true);
-        }
-    }
-
-    //menuPlugins->setEnabled(true);
-    //actionDisplayPluginTools->setEnabled(true);
 }
 
-bool MainWindow::addPluginToPluginGroup(QObject *plugin)
+bool MainWindow::dispatchPlugin(QObject *plugin)
 {
     ccPluginInterface* ccPlugin = getValidPlugin(plugin);
     if (!ccPlugin)
         return false;
-
-    if (!m_pluginsGroup)
-        m_pluginsGroup = new QActionGroup(this);
-
-    ccPluginDescription desc;
-    ccPlugin->getDescription(desc);
-
-    ccConsole::Print("Plugin name: [%s]",desc.name);
 	plugin->setParent(this);
-    QAction *action = new QAction(desc.menuName, plugin);
-    connect(action, SIGNAL(triggered()), this, SLOT(doPluginAction()));
 
-    //action settings
-    if (desc.hasAnIcon)
-        action->setIcon(ccPlugin->getIcon());
-    action->setToolTip(desc.name);
+	QString pluginName = ccPlugin->getName();
+	if (pluginName.isEmpty())
+	{
+		ccLog::Warning("Plugin has an invalid (empty) name!");
+		return false;
+	}
+    ccConsole::Print("Plugin name: [%s]",pluginName);
 
-    switch (ccPlugin->getType())
-    {
-    case CC_STD_PLUGIN:
-        menuPlugins->addAction(action);
-        menuPlugins->setEnabled(true);
-		static_cast<ccStdPluginInterface*>(ccPlugin)->setMainAppInterface(this);
-        break;
-    case CC_GL_FILTER_PLUGIN:
-        menuShadersAndFilters->addAction(action);
-        break;
-    }
+	QMenu* destMenu=0;
+	QToolBar* destToolBar=0;
+	QActionGroup actions(this);
 
-    //toolBarPluginTools->addAction(action);
-    m_pluginsGroup->addAction(action);
+	switch(ccPlugin->getType())
+	{
+	
+	case CC_STD_PLUGIN: //standard plugin
+		{
+			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(ccPlugin);
+			stdPlugin->setMainAppInterface(this);
+
+			stdPlugin->getActions(actions);
+			if (actions.actions().size()>1) //more than one action? We create it's own menu and toolbar
+			{
+				destMenu = (menuPlugins ? menuPlugins->addMenu(pluginName) : 0);
+				if (destMenu)
+					destMenu->setIcon(stdPlugin->getIcon());
+				destToolBar = addToolBar(pluginName+QString(" toolbar"));
+			}
+			else //default destination
+			{
+				destMenu = menuPlugins;
+				destToolBar = toolBarPluginTools;
+			}
+
+			//add to std. plugins list
+			m_stdPlugins.push_back(stdPlugin);
+		}
+		break;
+
+	case CC_GL_FILTER_PLUGIN:  //GL filter
+		{
+			destMenu = menuShadersAndFilters;
+			destToolBar = toolBarGLFilters;
+
+			//(auto)create action
+			QAction* action = new QAction(pluginName,this);
+			action->setToolTip(ccPlugin->getDescription());
+			action->setIcon(ccPlugin->getIcon());
+			//connect default signal
+			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
+			m_glFilterActions.addAction(action);
+			actions.addAction(action);
+
+			//add to GL filter (actions) list
+			m_glFilterActions.addAction(action);
+		}
+		break;
+
+	default:
+		assert(false);
+		ccLog::Print("Unhandled plugin type!");
+		return false;
+	}
+
+	//add actions
+	foreach(QAction* action,actions.actions())
+	{
+		//add to menu (if any)
+		if (destMenu)
+		{
+			destMenu->addAction(action);
+			destMenu->setEnabled(true);
+		}
+		//add to toolbar
+		if (destToolBar)
+		{
+			destToolBar->addAction(action);
+			destToolBar->setVisible(true);
+			destToolBar->setEnabled(true);
+		}
+	}
 
     return true;
 }
@@ -405,65 +407,38 @@ void MainWindow::aboutPlugins()
     ccpDlg.exec();
 }
 
-void MainWindow::doPluginAction()
+void MainWindow::doEnableGLFilter()
 {
+	ccGLWindow* win = getActiveGLWindow();
+	if (!win)
+	{
+		ccLog::Warning("[GL filter] No active 3D view!");
+		return;
+	}
+
     QAction *action = qobject_cast<QAction*>(sender());
-    ccPluginInterface *ccPlugin = getValidPlugin(action->parent());
+    ccPluginInterface *ccPlugin = getValidPlugin(action ? action->parent() : 0);
     if (!ccPlugin)
         return;
 
-    CC_PLUGIN_TYPE type = ccPlugin->getType();
-    if (type==CC_STD_PLUGIN)
-    {
-        ccStdPluginInterface *ccStdPlugin = static_cast<ccStdPluginInterface*>(ccPlugin);
+    if (ccPlugin->getType() != CC_GL_FILTER_PLUGIN)
+		return;
 
-        unsigned uiModificationFlags=0;
-        ccProgressDialog pDlg(true,this);
-        //pDlg.stop();
-
-		ccHObject::Container selection = m_selectedEntities;
-		int errorCode = ccStdPlugin->doAction(selection,uiModificationFlags,&pDlg,this);
-        if (errorCode==1)
-        {
-            //if the plugin has produced new entities
-			for (ccHObject::Container::const_iterator it=selection.begin();it!=selection.end();++it)
-				//for each output entities, we check if it exists in the original selection
-				if (std::find(m_selectedEntities.begin(),m_selectedEntities.end(),*it) == m_selectedEntities.end())
-					addToDB(*it);
-
-            if ((uiModificationFlags & CC_PLUGIN_REFRESH_GL_WINDOWS) == CC_PLUGIN_REFRESH_GL_WINDOWS)
-                refreshAll();
-            if ((uiModificationFlags & CC_PLUGIN_REFRESH_ENTITY_BROWSER) == CC_PLUGIN_REFRESH_ENTITY_BROWSER)
-                updateUI();
-            if ((uiModificationFlags & CC_PLUGIN_EXPAND_DB_TREE) == CC_PLUGIN_EXPAND_DB_TREE)
-                expandDBTreeWithSelection(selection);
-        }
-        else if (errorCode!=0)
-        {
-			QString errMessage = ccStdPlugin->getErrorMessage(errorCode);
-			ccConsole::Error(errMessage.isEmpty() ? QString("Unknown error") : errMessage);
-        }
-    }
-    else if (type==CC_GL_FILTER_PLUGIN)
-    {
-        ccGLWindow* win = getActiveGLWindow();
-        if (win)
-        {
-            ccGlFilter* filter = static_cast<ccGLFilterPluginInterface*>(ccPlugin)->getFilter();
-            if (filter)
-            {
-                if (win->areGLFiltersEnabled())
-                {
-                    win->setGlFilter(filter);
-                    ccConsole::Print("Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter");
-                }
-                else
-                    ccConsole::Error("GL filters not supported!");
-            }
-            else
-                ccConsole::Error("Can't load GL filter (an error occured)!");
-        }
-    }
+	ccGlFilter* filter = static_cast<ccGLFilterPluginInterface*>(ccPlugin)->getFilter();
+	if (filter)
+	{
+		if (win->areGLFiltersEnabled())
+		{
+			win->setGlFilter(filter);
+			ccConsole::Print("Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter");
+		}
+		else
+			ccConsole::Error("GL filters not supported!");
+	}
+	else
+	{
+		ccConsole::Error("Can't load GL filter (an error occured)!");
+	}
 }
 
 void MainWindow::connectActions()
@@ -4199,6 +4174,8 @@ void MainWindow::freezeUI(bool state)
     toolBarMainTools->setDisabled(state);
     toolBarSFTools->setDisabled(state);
     toolBarPluginTools->setDisabled(state);
+	toolBarGLFilters->setDisabled(state);
+
     //toolBarView->setDisabled(state);
     DockableDBTree->setDisabled(state);
     menubar->setDisabled(state);
@@ -6365,15 +6342,8 @@ void MainWindow::updateMenus()
     actionToggleViewerBasedPerspective->setEnabled(hasMdiChild);
 
     //plugins
-    if (m_pluginsGroup)
-    {
-        foreach (QAction* act, m_pluginsGroup->actions())
-        {
-            ccPluginInterface *ccPlugin = getValidPlugin(act->parent());
-            if (ccPlugin && ccPlugin->getType() == CC_GL_FILTER_PLUGIN)
-                act->setEnabled(hasMdiChild);
-        }
-    }
+	foreach (QAction* act, m_glFilterActions.actions())
+		act->setEnabled(hasMdiChild);
 }
 
 void MainWindow::update3DViewsMenu()
@@ -6431,8 +6401,6 @@ void MainWindow::refreshAll()
     QList<QMdiSubWindow*> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
         static_cast<ccGLWindow*>(windows.at(i)->widget())->refresh();
-
-    //updateUI();
 }
 
 void MainWindow::updateUI()
@@ -6607,16 +6575,9 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionFuse->setEnabled(atLeastTwoEntities);
     actionSynchronize->setEnabled(atLeastTwoEntities);
 
-    //plugins
-    if (m_pluginsGroup)
-    {
-        foreach (QAction* act, m_pluginsGroup->actions())
-        {
-            ccPluginInterface *ccPlugin = getValidPlugin(act->parent());
-            if (ccPlugin && ccPlugin->getType() == CC_STD_PLUGIN)
-                act->setEnabled(static_cast<ccStdPluginInterface*>(ccPlugin)->onNewSelection(m_selectedEntities));
-        }
-    }
+    //standard plugins
+	foreach (ccStdPluginInterface* plugin, m_stdPlugins)
+		plugin->onNewSelection(m_selectedEntities);
 }
 
 void MainWindow::updateWindowZoomChange(float zoomFactor)
@@ -6676,7 +6637,7 @@ void MainWindow::updateWindowOnViewMatRotation(const ccGLMatrix& rotMat)
     }
 }
 
-void MainWindow::dispToConsole(const char* message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)
+void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)
 {
 	switch(level)
 	{

@@ -44,17 +44,31 @@
 #include "Windows.h"
 #endif
 
-void qPoissonReconPlugin::getDescription(ccPluginDescription& desc)
+qPoissonRecon::qPoissonRecon(QObject* parent/*=0*/)
+	: QObject(parent)
+	, m_action(0)
 {
-    strcpy(desc.name,"3D Mesh Poisson Reconstruction Plugin (Kazhdan et al.)");
-    strcpy(desc.menuName,"PoissonReconstruction");
-    desc.hasAnIcon=true;
-    desc.version=1;
 }
 
-bool qPoissonReconPlugin::onNewSelection(const ccHObject::Container& selectedEntities)
+void qPoissonRecon::onNewSelection(const ccHObject::Container& selectedEntities)
 {
-	return (selectedEntities.size()==1 && selectedEntities[0]->isA(CC_POINT_CLOUD));
+	if (m_action)
+		m_action->setEnabled(selectedEntities.size()==1 && selectedEntities[0]->isA(CC_POINT_CLOUD));
+}
+
+void qPoissonRecon::getActions(QActionGroup& group)
+{
+	//default action
+	if (!m_action)
+	{
+		m_action = new QAction(getName(),this);
+		m_action->setToolTip(getDescription());
+		m_action->setIcon(getIcon());
+		//connect signal
+		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+	}
+
+	group.addAction(m_action);
 }
 
 static bool s_result = false;
@@ -76,25 +90,40 @@ void doReconstruct()
 	s_result = PoissonReconLib::reconstruct(s_count, s_points, s_normals, *s_mesh, s_depth, s_info);
 }
 
-int qPoissonReconPlugin::doAction(ccHObject::Container& selectedEntities,
-								  unsigned& uiModificationFlags,
-								  ccProgressDialog* progressCb/*=NULL*/,
-								  QWidget* parent/*=NULL*/)
+void qPoissonRecon::doAction()
 {
+	assert(m_app);
+	if (!m_app)
+	{
+		m_app->dispToConsole("[qPoissonRecon] Internal error: no associated app. interface!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
+
 	//we need one point cloud
     unsigned selNum = selectedEntities.size();
     if (selNum!=1)
-        return -1;
+	{
+		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	//a real point cloud
     ccHObject* ent = selectedEntities[0];
 	if (!ent->isA(CC_POINT_CLOUD))
-		return -1;
+	{
+		m_app->dispToConsole("Select a cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	//with normals!
     ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
 	if (!pc->hasNormals())
-		return -2;
+	{
+		m_app->dispToConsole("Cloud must have normals!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	bool ok;
 	#if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))
@@ -104,18 +133,23 @@ int qPoissonReconPlugin::doAction(ccHObject::Container& selectedEntities,
 	#endif
 
 	if (!ok)
-		return 1;
+		return;
 
 	 //TODO: faster, lighter
 	unsigned i,count = pc->size();
 	float* points = new float[count*3];
 	if (!points)
-		return -3;
+	{
+		m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
 	float* normals = new float[count*3];
 	if (!normals)
 	{
 		delete[] points;
-		return -3;
+		m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
 	}
 
 	float* _points = points;
@@ -139,13 +173,14 @@ int qPoissonReconPlugin::doAction(ccHObject::Container& selectedEntities,
 	PoissonReconLib::PoissonReconResultInfo info;
 	bool result = false;
 
-	if (progressCb)
+	//progress dialog
+	ccProgressDialog progressCb(false,m_app->getMainWindow());
 	{
-		progressCb->setCancelButton(0);
-		progressCb->setRange(0,0);
-		progressCb->setInfo("Operation in progress");
-		progressCb->setMethodTitle("Poisson Reconstruction");
-		progressCb->start();
+		progressCb.setCancelButton(0);
+		progressCb.setRange(0,0);
+		progressCb.setInfo("Operation in progress");
+		progressCb.setMethodTitle("Poisson Reconstruction");
+		progressCb.start();
 		//QApplication::processEvents();
 
 		//run in a separate thread
@@ -166,9 +201,9 @@ int qPoissonReconPlugin::doAction(ccHObject::Container& selectedEntities,
 			sleep(500);
 			#endif
 
-			progressCb->update(++progress);
+			progressCb.update(++progress);
 			//Qtconcurrent::run can't be canceled!
-			/*if (progressCb->isCancelRequested())
+			/*if (progressCb.isCancelRequested())
 			{
 				future.cancel();
 				future.waitForFinished();
@@ -180,13 +215,13 @@ int qPoissonReconPlugin::doAction(ccHObject::Container& selectedEntities,
 
 		result = s_result;
 
-		progressCb->stop();
+		progressCb.stop();
 		QApplication::processEvents();
 	}
-	else
-	{
-		result = PoissonReconLib::reconstruct(count, points, normals, mesh, depth, &info);
-	}
+	//else
+	//{
+	//	result = PoissonReconLib::reconstruct(count, points, normals, mesh, depth, &info);
+	//}
 
 	delete[] points;
 	points=0;
@@ -194,7 +229,10 @@ int qPoissonReconPlugin::doAction(ccHObject::Container& selectedEntities,
 	normals=0;
 
 	if (!result || mesh.polygonCount() < 1)
-		return -4;
+	{
+		m_app->dispToConsole("Reconstruction failed!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	unsigned nic         = (unsigned)mesh.inCorePoints.size();
 	unsigned noc         = (unsigned)mesh.outOfCorePointCount();
@@ -263,35 +301,17 @@ int qPoissonReconPlugin::doAction(ccHObject::Container& selectedEntities,
 	newMesh->computeNormals();
 
 	//output mesh
-	selectedEntities.push_back(newMesh);
+	m_app->addToDB(newMesh);
 
 	//currently selected entities parameters may have changed!
-    uiModificationFlags |= CC_PLUGIN_REFRESH_ENTITY_BROWSER;
+	m_app->updateUI();
     //currently selected entities appearance may have changed!
-    uiModificationFlags |= CC_PLUGIN_REFRESH_GL_WINDOWS;
-
-    return 1;
+	m_app->refreshAll();
 }
 
-QString qPoissonReconPlugin::getErrorMessage(int errorCode/*, LANGUAGE lang*/)
-{
-    switch(errorCode)
-    {
-    case -1:
-        return QString("Select only one cloud!");
-    case -2:
-        return QString("Cloud must have normals!");
-    case -3:
-        return QString("Not enough memory!");
-    case -4:
-        return QString("Reconstruction failed!");
-    }
-    return QString("Undefined error!");
-}
-
-QIcon qPoissonReconPlugin::getIcon() const
+QIcon qPoissonRecon::getIcon() const
 {
     return QIcon(QString::fromUtf8(":/CC/plugin/qPoissonRecon/qPoissonRecon.png"));
 }
 
-Q_EXPORT_PLUGIN2(qPoissonReconPlugin,qPoissonReconPlugin);
+Q_EXPORT_PLUGIN2(qPoissonRecon,qPoissonRecon);

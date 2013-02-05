@@ -708,11 +708,8 @@ void ccNormalVectors::ConvertNormalToHSV(const CCVector3& N, double& H, double& 
 	V = 1.0;
 }
 
-void ccNormalVectors::ConvertNormalToRGB(const CCVector3& N, colorType& R, colorType& G, colorType& B)
+void ccNormalVectors::ConvertHSVToRGB(double H, double S, double V, colorType& R, colorType& G, colorType& B)
 {
-	double H,S,V;
-	ConvertNormalToHSV(N,H,S,V);
-
 	int hi = ((int)floor(H/60.0))%6;
 	double f = H/60.0-(double)hi;
 	double l = V*(1-S);
@@ -746,4 +743,11 @@ void ccNormalVectors::ConvertNormalToRGB(const CCVector3& N, colorType& R, color
 	R = (colorType)(r*(double)MAX_COLOR_COMP);
 	G = (colorType)(g*(double)MAX_COLOR_COMP);
 	B = (colorType)(b*(double)MAX_COLOR_COMP);
+}
+
+void ccNormalVectors::ConvertNormalToRGB(const CCVector3& N, colorType& R, colorType& G, colorType& B)
+{
+	double H,S,V;
+	ConvertNormalToHSV(N,H,S,V);
+	ConvertHSVToRGB(H,S,V,R,G,B);
 }

@@ -27,6 +27,7 @@
 
 //Qt
 #include <QWidget>
+#include <QActionGroup>
 
 //qCC_db
 #include <ccHObject.h>
@@ -42,21 +43,25 @@ class ccProgressDialog;
 #define CC_PLUGIN_EXPAND_DB_TREE				0x00000004
 
 //! Standard CC plugin interface
-/** Version 1.3
+/** Version 1.4
+	The plugin is now responsible for its own actions
+	(QAction ;) and the associated ccMainAppInterface
+	interface should give it access to everything it
+	needs.
 **/
 class ccStdPluginInterface : public ccPluginInterface
 {
 public:
 
 	//inherited from ccPluginInterface
-    virtual CC_PLUGIN_TYPE getType() { return CC_STD_PLUGIN; }
+    virtual CC_PLUGIN_TYPE getType() const { return CC_STD_PLUGIN; }
 
 	//! Sets application entry point
 	/** Called just after plugin creation by qCC
 	**/
 	void setMainAppInterface(ccMainAppInterface* app) { m_app=app; }
 
-    //! Applies plugin action to the currently selected entities
+    //! Default plugin action
     /** The 'selectedEntities' vector can be used to output new entities.
 		When the method successfully returns (code=1), CloudCompare will
 		check for any entity appended to the end of 'selectedEntities' and will
@@ -67,17 +72,19 @@ public:
         \param parent calling widget (for proper UI integration)
         \return error code (see ccPluginInterface::getErrorMessage)
     **/
-    virtual int doAction(ccHObject::Container& selectedEntities,
-                            unsigned& uiModificationFlags,
-                            ccProgressDialog* progressCb=NULL,
-                            QWidget* parent=NULL)=0;
+    //virtual int doAction(ccHObject::Container& selectedEntities,
+    //                        unsigned& uiModificationFlags,
+    //                        ccProgressDialog* progressCb=NULL,
+				//			QWidget* parent=NULL) { return 1; }
+
+    //! Returns action(s)
+    virtual void getActions(QActionGroup& group) = 0;
 
 	//! This method is called by the main application whenever the entity selection changes
-	/** Does nothing and returns true by default. Should be re-implemented by the plugin if necessary.
+	/** Does nothing by default. Should be re-implemented by the plugin if necessary.
         \param selectedEntities currently selected entities
-        \return whether the plugin menu entry and toolbar icon should be enabled or not
 	**/
-	virtual bool onNewSelection(const ccHObject::Container& selectedEntities) { return true; }
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities) { /*ignored by default*/ }
 
     //! Returns custom error messages
     /** If ccPluginInterface::doAction returns an error code different
@@ -86,7 +93,7 @@ public:
         \param errorCode custom error code (as returned by doAction)
         \return corresponding error message
     **/
-    virtual QString getErrorMessage(int errorCode/*, LANGUAGE lang*/)=0;
+    //virtual QString getErrorMessage(int errorCode/*, LANGUAGE lang*/)=0;
 
 protected:
 
@@ -94,6 +101,6 @@ protected:
 	ccMainAppInterface* m_app;
 };
 
-Q_DECLARE_INTERFACE(ccStdPluginInterface,"edf.rd.CloudCompare.ccStdPluginInterface/1.3")
+Q_DECLARE_INTERFACE(ccStdPluginInterface,"edf.rd.CloudCompare.ccStdPluginInterface/1.4")
 
 #endif

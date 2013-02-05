@@ -26,14 +26,6 @@
 #include "qEDL.h"
 #include "ccEDLFilter.h"
 
-void qEDL::getDescription(ccPluginDescription& desc)
-{
-    strcpy(desc.name,"Eye-dome Lighting Filter Plugin");
-    strcpy(desc.menuName,"E.D.L.");
-    desc.hasAnIcon=true;
-    desc.version=1;
-}
-
 QIcon qEDL::getIcon() const
 {
     return QIcon(QString::fromUtf8(":/CC/plugin/qEDL/cc_edl.png"));

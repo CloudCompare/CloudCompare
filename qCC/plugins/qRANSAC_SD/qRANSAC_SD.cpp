@@ -55,17 +55,31 @@
 //CCLib
 #include <ScalarField.h>
 
-void qRansacSDPlugin::getDescription(ccPluginDescription& desc)
+qRansacSD::qRansacSD(QObject* parent/*=0*/)
+	: QObject(parent)
+	, m_action(0)
 {
-    strcpy(desc.name,"Efficient RANSAC for Point-Cloud Shape Detection (Schnabel et al 2007)");
-    strcpy(desc.menuName,"RansacSD");
-    desc.hasAnIcon=true;
-    desc.version=1;
 }
 
-bool qRansacSDPlugin::onNewSelection(const ccHObject::Container& selectedEntities)
+void qRansacSD::onNewSelection(const ccHObject::Container& selectedEntities)
 {
-    return (selectedEntities.size()==1 && selectedEntities[0]->isA(CC_POINT_CLOUD));
+	if (m_action)
+		m_action->setEnabled(selectedEntities.size()==1 && selectedEntities[0]->isA(CC_POINT_CLOUD));
+}
+
+void qRansacSD::getActions(QActionGroup& group)
+{
+	//default action
+	if (!m_action)
+	{
+		m_action = new QAction(getName(),this);
+		m_action->setToolTip(getDescription());
+		m_action->setIcon(getIcon());
+		//connect signal
+		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+	}
+
+	group.addAction(m_action);
 }
 
 static MiscLib::Vector< std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > >* s_shapes; // stores the detected shapes
@@ -80,19 +94,31 @@ void doDetection()
 	s_remainingPoints = s_detector->Detect(*s_cloud, 0, s_cloud->size(), s_shapes);
 }
 
-int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
-                        unsigned& uiModificationFlags,
-                        ccProgressDialog* progressCb/*=NULL*/,
-                        QWidget* parent/*=NULL*/)
+void qRansacSD::doAction()
 {
-    unsigned selNum = selectedEntities.size();
+	assert(m_app);
+	if (!m_app)
+	{
+		m_app->dispToConsole("[qRansacSD] Internal error: no associated app. interface!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
+
+	unsigned selNum = selectedEntities.size();
     if (selNum!=1)
-        return -1;
+	{
+		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
     ccHObject* ent = selectedEntities[0];
 	assert(ent);
 	if (!ent || !ent->isA(CC_POINT_CLOUD))
-		return -2;
+	{
+		m_app->dispToConsole("Select a real point cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
     ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
 
@@ -147,12 +173,12 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
     //ransacOptions.m_minSupport = 500; // this is the minimal numer of points required for a primitive
     //ransacOptions.m_probability = .001f; // this is the "probability" with which a primitive is overlooked
 
-	ccRansacSDDlg rsdDlg(parent);
+	ccRansacSDDlg rsdDlg(m_app->getMainWindow());
 	rsdDlg.epsilonDoubleSpinBox->setValue(ransacOptions.m_epsilon);
 	rsdDlg.bitmapEpsilonDoubleSpinBox->setValue(ransacOptions.m_bitmapEpsilon);
 
 	if (!rsdDlg.exec())
-		return 0;
+		return;
 
 	//import parameters from dialog
 	{
@@ -163,20 +189,16 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 		ransacOptions.m_probability = rsdDlg.probaDoubleSpinBox->value();
 	}
 
-	if (progressCb)
-	{
-		progressCb->setCancelButton(0);
-		progressCb->setRange(0,0);
-	}
+	//progress dialog
+	ccProgressDialog progressCb(false,m_app->getMainWindow());
+	progressCb.setRange(0,0);
 
 	if (!hasNorms)
 	{
-		if (progressCb)
-		{
-			progressCb->setInfo("Computing normals (please wait)");
-			progressCb->start();
-			QApplication::processEvents();
-		}
+		progressCb.setInfo("Computing normals (please wait)");
+		progressCb.start();
+		QApplication::processEvents();
+
 		cloud.calcNormals(.01f * cloud.getScale());
 
 		if (pc->reserveTheNormsTable())
@@ -190,11 +212,12 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 			pc->showNormals(true);
 			
 			//currently selected entities appearance may have changed!
-			uiModificationFlags |= CC_PLUGIN_REFRESH_GL_WINDOWS;
+			pc->prepareDisplayForRefresh_recursive();
 		}
 		else
 		{
-			return -4;
+			m_app->dispToConsole("Not enough memory to compute normals!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
 		}
 	}
 
@@ -219,11 +242,10 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 	// the points of shape i are found in the range
 	// [ pc.size() - \sum_{j=0..i} shapes[j].second, pc.size() - \sum_{j=0..i-1} shapes[j].second )
 
-	if (progressCb)
 	{
-		progressCb->setInfo("Operation in progress");
-		progressCb->setMethodTitle("Ransac Shape Detection");
-		progressCb->start();
+		progressCb.setInfo("Operation in progress");
+		progressCb.setMethodTitle("Ransac Shape Detection");
+		progressCb.start();
 
 		//run in a separate thread
 		s_detector = &detector;
@@ -239,9 +261,9 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 #else
 			sleep(500);
 #endif
-			progressCb->update(++progress);
+			progressCb.update(++progress);
 			//Qtconcurrent::run can't be canceled!
-			/*if (progressCb->isCancelRequested())
+			/*if (progressCb.isCancelRequested())
 			{
 				future.cancel();
 				future.waitForFinished();
@@ -253,13 +275,13 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 
 		remaining = s_remainingPoints;
 
-		progressCb->stop();
+		progressCb.stop();
 		QApplication::processEvents();
 	}
-	else
-	{
-		remaining = detector.Detect(cloud, 0, cloud.size(), &shapes);
-	}
+	//else
+	//{
+	//	remaining = detector.Detect(cloud, 0, cloud.size(), &shapes);
+	//}
 
 #ifdef _DEBUG
 	FILE* fp = fopen("RANS_SD_trace.txt","wt");
@@ -301,7 +323,10 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 #endif
 
 	if (remaining == count)
-        return -5;
+	{
+		m_app->dispToConsole("Segmentation failed...",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        return;
+	}
 
 	if (shapes.size() != 0)
 	{
@@ -314,7 +339,10 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 
 			//too many points?!
 			if (shapePointsCount > count)
-				return -3;
+			{
+				m_app->dispToConsole("Inconsistent result!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				return;
+			}
 
 			std::string desc;
 			shape->Description(&desc);
@@ -490,51 +518,20 @@ int qRansacSDPlugin::doAction(ccHObject::Container& selectedEntities,
 		group->setDisplay_recursive(pc->getDisplay());
 		group->prepareDisplayForRefresh_recursive();
 		group->setVisible(true);
-		selectedEntities.push_back(group);
+		m_app->addToDB(group);
 		
 		pc->setEnabled(false);
 	}
 
     //currently selected entities parameters may have changed!
-    uiModificationFlags |= CC_PLUGIN_REFRESH_ENTITY_BROWSER;
+	m_app->updateUI();
 	//currently selected entities appearance may have changed!
-	uiModificationFlags |= CC_PLUGIN_REFRESH_GL_WINDOWS;
-    //new items have appeared below currently selected entity
-	uiModificationFlags |= CC_PLUGIN_EXPAND_DB_TREE;
-
-    return 1;
+	m_app->refreshAll();
 }
 
-QString qRansacSDPlugin::getErrorMessage(int errorCode/*, LANGUAGE lang*/)
-{
-    QString errorMsg;
-    switch(errorCode)
-    {
-        case -1:
-            errorMsg=QString("Select only one cloud!");
-            break;
-        case -2:
-            errorMsg=QString("Select a real point cloud!");
-            break;
-        case -3:
-            errorMsg=QString("Inconsistent result!");
-            break;
-        case -4:
-            errorMsg=QString("Not enough memory to compute normals!");
-            break;
-        case -5:
-            errorMsg=QString("Segmentation failed...");
-            break;
-        default:
-            errorMsg=QString("Undefined error!");
-            break;
-    }
-    return errorMsg;
-}
-
-QIcon qRansacSDPlugin::getIcon() const
+QIcon qRansacSD::getIcon() const
 {
     return QIcon(QString::fromUtf8(":/CC/plugin/qRANSAC_SD/qRANSAC_SD.png"));
 }
 
-Q_EXPORT_PLUGIN2(qRansacSDPlugin,qRansacSDPlugin);
+Q_EXPORT_PLUGIN2(qRansacSD,qRansacSD);

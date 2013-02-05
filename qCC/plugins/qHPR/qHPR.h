@@ -33,6 +33,8 @@
 
 #include "../ccStdPluginInterface.h"
 
+class QAction;
+
 //! Wrapper to the "Hidden Point Removal" algorithm for approximating points visibility in an N dimensional point cloud, as seen from a given viewpoint
 /** "Direct Visibility of Point Sets", Sagi Katz, Ayellet Tal, and Ronen Basri. 
 	SIGGRAPH 2007
@@ -45,23 +47,30 @@ class qHPR : public QObject, public ccStdPluginInterface
 
 public:
 
+	//! Default constructor
+	qHPR(QObject* parent=0);
+
     //inherited from ccPluginInterface
-    void getDescription(ccPluginDescription& desc);
-    QIcon getIcon() const;
+	virtual QString getName() const { return "H.P.R."; }
+	virtual QString getDescription() const { return "Hidden Point Removal (Katz et al.)"; }
+	virtual QIcon getIcon() const;
 
     //inherited from ccStdPluginInterface
-	bool onNewSelection(const ccHObject::Container& selectedEntities);
-    int doAction(ccHObject::Container& selectedEntities,
-                unsigned& uiModificationFlags,
-                ccProgressDialog* progressCb=NULL,
-                QWidget* parent=NULL);
-    QString getErrorMessage(int errorCode/*, LANGUAGE lang*/);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
+    virtual void getActions(QActionGroup& group);
+
+protected slots:
+
+	//! Slot called when associated ation is triggered
+	void doAction();
 
 protected:
 
 	//! Katz et al. algorithm
 	CCLib::ReferenceCloud* removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, float viewPoint[], float fParam);
 
+	//! Associated action
+	QAction* m_action;
 };
 
 #endif

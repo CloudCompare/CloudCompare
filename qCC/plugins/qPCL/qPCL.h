@@ -43,16 +43,13 @@ public:
 	virtual ~qPCL();
 
 	//inherited from ccPluginInterface
-	void getDescription(ccPluginDescription& desc);
+	virtual QString getName() const { return "qPCL"; }
+	virtual QString getDescription() const { return "PCL bridge"; }
 	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface
-	bool onNewSelection(const ccHObject::Container& selectedEntities);
-	int doAction(ccHObject::Container& selectedEntities,
-		unsigned& uiModificationFlags,
-		ccProgressDialog* progressCb=NULL,
-		QWidget* parent=NULL);
-	QString getErrorMessage(int errorCode/*, LANGUAGE lang*/);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
+    virtual void getActions(QActionGroup& group);
 
 	//! Adds a filter
 	int addFilter(BaseFilter* filter);

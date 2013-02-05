@@ -27,14 +27,6 @@
 #include "qSSAO.h"
 #include "ccSSAOFilter.h"
 
-void qSSAO::getDescription(ccPluginDescription& desc)
-{
-    strcpy(desc.name,"Screen Space Ambient Occlusion Filter Plugin");
-    strcpy(desc.menuName,"S.S.A.O.");
-    desc.hasAnIcon=true;
-    desc.version=1;
-}
-
 QIcon qSSAO::getIcon() const
 {
     return QIcon(QString::fromUtf8(":/CC/plugin/qSSAO/cc_ssao.png"));

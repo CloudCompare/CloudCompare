@@ -35,24 +35,35 @@
 	Symposium on Geometry Processing (June 2006), pages 61--70
 	http://www.cs.jhu.edu/~misha/Code/PoissonRecon/
 **/
-class qPoissonReconPlugin : public QObject, public ccStdPluginInterface
+class qPoissonRecon : public QObject, public ccStdPluginInterface
 {
     Q_OBJECT
     Q_INTERFACES(ccStdPluginInterface)
 
 public:
 
-    //inherited from ccPluginInterface
-    void getDescription(ccPluginDescription& desc);
-    QIcon getIcon() const;
+	//! Default constructor
+	qPoissonRecon(QObject* parent=0);
+
+	//inherited from ccPluginInterface
+	virtual QString getName() const { return "PoissonReconstruction"; }
+	virtual QString getDescription() const { return "3D Mesh Poisson Reconstruction (Kazhdan et al.)"; }
+	virtual QIcon getIcon() const;
 
     //inherited from ccStdPluginInterface
-	bool onNewSelection(const ccHObject::Container& selectedEntities);
-    int doAction(ccHObject::Container& selectedEntities,
-                unsigned& uiModificationFlags,
-                ccProgressDialog* progressCb=NULL,
-                QWidget* parent=NULL);
-    QString getErrorMessage(int errorCode/*, LANGUAGE lang*/);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
+    virtual void getActions(QActionGroup& group);
+
+protected slots:
+
+	//! Slot called when associated ation is triggered
+	void doAction();
+
+protected:
+
+	//! Associated action
+	QAction* m_action;
+
 };
 
 #endif

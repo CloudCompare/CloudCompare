@@ -48,15 +48,6 @@ qPCL::~qPCL()
 	}
 }
 
-void qPCL::getDescription(ccPluginDescription& desc)
-{
-	strcpy(desc.name,"Load PCL menu and toolbar");
-	strcpy(desc.menuName,"qPCL");
-	desc.hasAnIcon=true;
-	desc.version=1;
-}
-
-
 void qPCL::handleNewEntity(ccHObject* entity)
 {
 	assert(entity && m_app);
@@ -73,34 +64,14 @@ void qPCL::handleEntityChange(ccHObject* entity)
 
 void qPCL::handleErrorMessage(QString message)
 {
-	assert(m_app);
-	m_app->dispToConsole(qPrintable(message),ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+	if (m_app)
+		m_app->dispToConsole(message,ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 }
 
-int qPCL::doAction(ccHObject::Container& selectedEntities,
-	unsigned& uiModificationFlags,
-	ccProgressDialog* progressCb/*=NULL*/,
-	QWidget* parent/*=NULL*/)
+void qPCL::getActions(QActionGroup& group)
 {
-	//check if toolbar has been created, if not create it
-	if (!m_toolbar)
+	if (m_filters.empty())
 	{
-
-		//create toolbars etc
-		assert(m_app);
-		QMainWindow* win = m_app->getMainWindow();
-		if (win)
-		{
-			m_toolbar = win->addToolBar("PCL Tools");
-			m_menu = win->menuBar()->addMenu("PCL");
-		}
-		else
-			m_toolbar = new QToolBar("PCL Tools");
-
-
-
-
-
 		//ADD FILTERS
 		addFilter( new LoadPCD() );
 		addFilter( new SavePCD() );
@@ -108,23 +79,10 @@ int qPCL::doAction(ccHObject::Container& selectedEntities,
 		addFilter( new StatisticalOutliersRemover() );
 		addFilter( new MLSSmoothingUpsampling() );
 		//  addFilter( new ComputeSPINImages() );
-
-
-
-	}
-	else
-	{
-		//nothing, perhaps we could add an About info when pressing pcl button, also as action into the menu
 	}
 
-	if (m_toolbar)
-		m_toolbar->show();
-
-
-	onNewSelection(selectedEntities);
-
-
-	return 1;
+	for (std::vector<BaseFilter*>::const_iterator it = m_filters.begin(); it != m_filters.end(); ++it)
+		group.addAction((*it)->getAction());
 }
 
 int qPCL::addFilter(BaseFilter* filter)
@@ -140,12 +98,6 @@ int qPCL::addFilter(BaseFilter* filter)
 	if (std::find(m_filters.begin(),m_filters.end(),filter) != m_filters.end())
 		return 0;
 
-	//Add action to toolbar and menu
-	if (m_toolbar)
-		m_toolbar->addAction(action);
-	if (m_menu)
-		m_menu->addAction(action);
-
 	m_filters.push_back(filter);
 
 	//connect signals
@@ -157,20 +109,10 @@ int qPCL::addFilter(BaseFilter* filter)
 }
 
 
-bool qPCL::onNewSelection(const ccHObject::Container& selectedEntities)
+void qPCL::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	for (unsigned i=0;i<m_filters.size();++i)
 		m_filters[i]->updateSelectedEntities(selectedEntities);
-
-
-	return true;
-}
-
-//This is provided for compatibility with qCC, not used
-//DGM: well... you should ;)
-QString qPCL::getErrorMessage(int errorCode/*, LANGUAGE lang*/)
-{
-	return QString("Undefined error!");
 }
 
 QIcon qPCL::getIcon() const

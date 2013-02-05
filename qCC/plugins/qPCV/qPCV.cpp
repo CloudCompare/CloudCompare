@@ -42,27 +42,49 @@
 #include <ccCommon.h>
 #include <ccDBRoot.h>
 
-void qPCVPlugin::getDescription(ccPluginDescription& desc)
+qPCV::qPCV(QObject* parent/*=0*/)
+	: QObject(parent)
+	, m_action(0)
 {
-    strcpy(desc.name,"PCV Plugin (Ambient Occlusion inspired from ShadeVis, Tarini et al.)");
-    strcpy(desc.menuName,"ShadeVis");
-    desc.hasAnIcon=true;
-    desc.version=1;
 }
 
-bool qPCVPlugin::onNewSelection(const ccHObject::Container& selectedEntities)
+void qPCV::onNewSelection(const ccHObject::Container& selectedEntities)
 {
-    return (selectedEntities.size()==1);
+    if (m_action)
+		m_action->setEnabled(selectedEntities.size()==1);
 }
 
-int qPCVPlugin::doAction(ccHObject::Container& selectedEntities,
-                         unsigned& uiModificationFlags,
-                         ccProgressDialog* progressCb/*=NULL*/,
-                         QWidget* parent/*=NULL*/)
+void qPCV::getActions(QActionGroup& group)
 {
-    unsigned selNum = selectedEntities.size();
+	//default action
+	if (!m_action)
+	{
+		m_action = new QAction(getName(),this);
+		m_action->setToolTip(getDescription());
+		m_action->setIcon(getIcon());
+		//connect signal
+		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+	}
+
+	group.addAction(m_action);
+}
+
+void qPCV::doAction()
+{
+	assert(m_app);
+	if (!m_app)
+	{
+		m_app->dispToConsole("[qPCV] Internal error: no associated app. interface!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
+	unsigned selNum = selectedEntities.size();
     if (selNum!=1)
-        return -1;
+	{
+		m_app->dispToConsole("Select only one cloud or one mesh!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        return;
+	}
 
     ccHObject* ent = selectedEntities[0];
 
@@ -79,14 +101,18 @@ int qPCVPlugin::doAction(ccHObject::Container& selectedEntities,
     }
     else
     {
-        return -2;
-    }
+		m_app->dispToConsole("Select a point cloud or a mesh!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
     if (!cloud->isA(CC_POINT_CLOUD)) //TODO
-        return-3;
+	{
+		m_app->dispToConsole("Select a real point cloud (or a mesh associated to a real point cloud)!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        return;
+	}
     ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-    ccPcvDlg dlg(parent);
+	ccPcvDlg dlg(m_app->getMainWindow());
     
 	//for meshes only
 	if (!mesh)
@@ -94,7 +120,7 @@ int qPCVPlugin::doAction(ccHObject::Container& selectedEntities,
 	
 	//for using clouds normals as rays
 	std::vector<ccGenericPointCloud*> cloudsWithNormals;
-	if (m_app && m_app->dbRoot())
+	if (m_app->dbRoot())
 	{
 		ccHObject* root = m_app->dbRoot();
 		if (root)
@@ -121,14 +147,17 @@ int qPCVPlugin::doAction(ccHObject::Container& selectedEntities,
 		dlg.useCloudRadioButton->setEnabled(false);
 
 	if (!dlg.exec())
-        return 0;
+        return;
 
     //on récupère le champ PCV s'il existe déjà, et on le créé sinon
     int sfIdx = pc->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
     if (sfIdx<0)
         sfIdx=pc->addScalarField(CC_PCV_FIELD_LABEL_NAME,true);
     if (sfIdx<0)
-        return -4;
+	{
+		m_app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field ! Try to free some memory ...",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        return;
+	}
 
 	pc->setCurrentScalarField(sfIdx);
 
@@ -137,7 +166,10 @@ int qPCVPlugin::doAction(ccHObject::Container& selectedEntities,
     bool meshIsClosed = (mesh ? dlg.closedMeshCheckBox->checkState()==Qt::Checked : false);
     bool mode360 = !dlg.mode180CheckBox->isChecked();
 
-    //PCV type ShadeVis
+	//progress dialog
+	ccProgressDialog progressCb(true,m_app->getMainWindow());
+
+	//PCV type ShadeVis
 	bool success = false;
 	if (!cloudsWithNormals.empty() && dlg.useCloudRadioButton->isChecked())
 	{
@@ -150,18 +182,19 @@ int qPCVPlugin::doAction(ccHObject::Container& selectedEntities,
 		for (unsigned i=0;i<count;++i)
 			rays[i]=CCVector3(pc->getPointNormal(i));
 
-		success = PCV::Launch(rays,cloud,mesh,meshIsClosed,res,res,progressCb);
+		success = PCV::Launch(rays,cloud,mesh,meshIsClosed,res,res,&progressCb);
 	}
 	else
 	{
 		//Version with rays sampled on a sphere
-		success = (PCV::Launch(raysNumber,cloud,mesh,meshIsClosed,mode360,res,res,progressCb)>0);
+		success = (PCV::Launch(raysNumber,cloud,mesh,meshIsClosed,mode360,res,res,&progressCb)>0);
 	}
     
 	if (!success)
     {
         pc->deleteScalarField(sfIdx);
-        return -255;
+		m_app->dispToConsole("En error occured during the PCV field computation!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        return;
     }
     else
     {
@@ -176,40 +209,14 @@ int qPCVPlugin::doAction(ccHObject::Container& selectedEntities,
     }
 
     //currently selected entities parameters may have changed!
-    uiModificationFlags |= CC_PLUGIN_REFRESH_ENTITY_BROWSER;
+	m_app->updateUI();
     //currently selected entities appearance may have changed!
-    uiModificationFlags |= CC_PLUGIN_REFRESH_GL_WINDOWS;
-
-    return 1;
+	m_app->refreshAll();
 }
 
-QString qPCVPlugin::getErrorMessage(int errorCode/*, LANGUAGE lang*/)
-{
-    QString errorMsg;
-    switch(errorCode)
-    {
-    case -1:
-        errorMsg=QString("Select only one cloud!");
-        break;
-    case -2:
-        errorMsg=QString("Select a point cloud or a mesh!");
-        break;
-    case -3:
-        errorMsg=QString("Select a real point cloud (or a mesh associated to a real point cloud)!");
-        break;
-    case -4:
-        errorMsg=QString("Couldn't allocate a new scalar field for computing PCV field ! Try to free some memory ...");
-        break;
-    default:
-        errorMsg=QString("Undefined error!");
-        break;
-    }
-    return errorMsg;
-}
-
-QIcon qPCVPlugin::getIcon() const
+QIcon qPCV::getIcon() const
 {
     return QIcon(QString::fromUtf8(":/CC/plugin/qPCV/cc_ShadeVisIcon.png"));
 }
 
-Q_EXPORT_PLUGIN2(qPCVPlugin,qPCVPlugin);
+Q_EXPORT_PLUGIN2(qPCV,qPCV);

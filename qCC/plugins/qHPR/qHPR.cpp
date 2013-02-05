@@ -22,7 +22,9 @@
 //**************************************************************************
 //
 
+//Qt
 #include <QtGui>
+#include <QElapsedTimer>
 
 #include "qHPR.h"
 #include "ccHprDlg.h"
@@ -39,26 +41,37 @@
 #include <CloudSamplingTools.h>
 #include <ReferenceCloud.h>
 
-//Qt
-#include <QElapsedTimer>
-
 //Qhull
 extern "C"
 {
 #include <qhull_a.h>
 }
 
-void qHPR::getDescription(ccPluginDescription& desc)
+qHPR::qHPR(QObject* parent/*=0*/)
+	: QObject(parent)
+	, m_action(0)
 {
-    strcpy(desc.name,"HPR Plugin (Hidden Point Removal, Katz et al.)");
-    strcpy(desc.menuName,"H.P.R.");
-    desc.hasAnIcon=true;
-    desc.version=1;
 }
 
-bool qHPR::onNewSelection(const ccHObject::Container& selectedEntities)
+void qHPR::getActions(QActionGroup& group)
 {
-    return (selectedEntities.size()==1);
+	//default action
+	if (!m_action)
+	{
+		m_action = new QAction(getName(),this);
+		m_action->setToolTip(getDescription());
+		m_action->setIcon(getIcon());
+		//connect signal
+		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+	}
+
+	group.addAction(m_action);
+}
+
+void qHPR::onNewSelection(const ccHObject::Container& selectedEntities)
+{
+	if (m_action)
+		m_action->setEnabled(selectedEntities.size()==1);
 }
 
 CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, float viewPoint[], float fParam)
@@ -77,6 +90,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	{
 		if (!newCloud->reserve(nbPoints)) //well, we never know ;)
 		{
+			//not enough memory!
 			delete newCloud;
 			return 0;
 		}
@@ -90,6 +104,12 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	coordT Cz = viewPoint[2];
 
 	float* radius = new float[nbPoints];
+	if (!radius)
+	{
+		//not enough memory!
+		delete newCloud;
+		return 0;
+	}
 	float r,maxRadius = 0.0;
 
 	//table of points
@@ -118,7 +138,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		fprintf(fp,"%f %f %f %f\n",x,y,z,r);
 #endif
 	}
-	//on rajoute le point de vue (Cf. HPR)
+	//we add the view point (Cf. HPR)
 	*(_pt_array++)=0.0;
 	*(_pt_array++)=0.0;
 	*(_pt_array++)=0.0;
@@ -168,7 +188,8 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		setT *vertices;
 
 		int j, i = 0;
-		FORALLfacets {
+		FORALLfacets
+		{
 			/*if (!facet->simplicial)
 				error("convhulln: non-simplicial facet"); // should never happen with QJ
 				*/
@@ -198,23 +219,17 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	qh_memfreeshort (&curlong, &totlong);
 	//free short memory and memory allocator
 
-	if (curlong || totlong)
-	{
-		printf("convhulln: did not free %d bytes of long memory (%d pieces)",totlong, curlong);
-	}
+	//if (curlong || totlong)
+	//{
+	//	printf("convhulln: did not free %d bytes of long memory (%d pieces)",totlong, curlong);
+	//}
 
 	unsigned cvxHullSize = 0;
 	for (i=0;i<nbPoints;++i)
 		if (pointBelongsToCvxHull[i]>0)
 			++cvxHullSize;
 
-	if (cvxHullSize==0)
-	{
-		delete newCloud;
-		return 0;
-	}
-
-	if (newCloud->reserve(cvxHullSize))
+	if (cvxHullSize!=0 && newCloud->reserve(cvxHullSize))
 	{
 		for (i=0;i<nbPoints;++i)
 			if (pointBelongsToCvxHull[i]>0)
@@ -226,55 +241,83 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		newCloud=0;
 	}
 
-	delete[] radius;
+	if (radius)
+		delete[] radius;
 	//delete[] pointBelongsToCvxHull;
 
 	return newCloud;
 }
 
-int qHPR::doAction(ccHObject::Container& selectedEntities,
-                            unsigned& uiModificationFlags,
-                            ccProgressDialog* progressCb/*=NULL*/,
-                            QWidget* parent/*=NULL*/)
+void qHPR::doAction()
 {
-    unsigned selNum = selectedEntities.size();
+	assert(m_app);
+	if (!m_app)
+	{
+		m_app->dispToConsole("[qHPR] Internal error: no associated app. interface!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
+	unsigned selNum = selectedEntities.size();
     if (selNum!=1)
-        return -1;
+	{
+		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
     ccHObject* ent = selectedEntities[0];
     if (!ent->isA(CC_POINT_CLOUD))
-        return -2;
+	{
+		m_app->dispToConsole("Select a point cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
     ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
 
-	ccGLWindow* win = (m_app ? m_app->getActiveGLWindow() : 0);
+	ccGLWindow* win = m_app->getActiveGLWindow();
     if (!win)
-        return -3;
+	{
+		m_app->dispToConsole("No active window!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	bool centered;
     if (!win->getPerspectiveState(centered))
-        return -4;
+	{
+		m_app->dispToConsole("Perspective mode only!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        return;
+	}
 
-    ccHprDlg dlg(parent);
+	QWidget* parent = m_app->getMainWindow();
+	ccHprDlg dlg(parent);
     if (!dlg.exec())
-        return 0;
+        return;
 
     unsigned char octreeLevel = (unsigned char)dlg.octreeLevelSpinBox->value();
+
+	//progress dialog
+	ccProgressDialog progressCb(false,parent);
 
     ccOctree* theOctree = cloud->getOctree();
     if (!theOctree)
     {
-        theOctree = cloud->computeOctree(progressCb);
+        theOctree = cloud->computeOctree(&progressCb);
     }
     if (!theOctree)
-        return -5;
+	{
+		m_app->dispToConsole("Couldn't compute octree!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+        return;
+	}
 
-    CCLib::ReferenceCloud* theCellCenters = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(cloud,octreeLevel,CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,progressCb,theOctree);
+    CCLib::ReferenceCloud* theCellCenters = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(cloud,octreeLevel,CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,&progressCb,theOctree);
 
     if (!theCellCenters)
-        return -6;
+	{
+		m_app->dispToConsole("Error while simplifying point cloud with octree!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	if (m_app)
-		m_app->dispToConsole(qPrintable(QString("[HPR] Resampling: %1 points").arg(theCellCenters->size())));
+		m_app->dispToConsole(QString("[HPR] Resampling: %1 points").arg(theCellCenters->size()));
 
     CCLib::DgmOctree::cellIndexesContainer vec;
     theOctree->getCellIndexes(octreeLevel,vec);
@@ -287,7 +330,7 @@ int qHPR::doAction(ccHObject::Container& selectedEntities,
 	eTimer.start();
     CCLib::ReferenceCloud* rc = removeHiddenPoints(theCellCenters,viewPoint.u,3.5);
 	if (m_app)
-		m_app->dispToConsole(qPrintable(QString("[HPR] Time: %1 s").arg(eTimer.elapsed()/1.0e3)));
+		m_app->dispToConsole(QString("[HPR] Time: %1 s").arg(eTimer.elapsed()/1.0e3));
 
     delete theCellCenters;
 
@@ -295,7 +338,10 @@ int qHPR::doAction(ccHObject::Container& selectedEntities,
     {
 		if (!cloud->isVisibilityTableInstantiated())
 			if (!cloud->razVisibilityArray())
-				return -7;
+			{
+				m_app->dispToConsole("Visibility array allocation failed! (Not enough memory?)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				return;
+			}
 
 		ccPointCloud::VisibilityTableType* vt = cloud->getTheVisibilityArray();
 		assert(vt);
@@ -318,49 +364,14 @@ int qHPR::doAction(ccHObject::Container& selectedEntities,
         }
 
 		if (m_app)
-			m_app->dispToConsole(qPrintable(QString("[HPR] Visible points: %1").arg(totalNbOfPoints)));
+			m_app->dispToConsole(QString("[HPR] Visible points: %1").arg(totalNbOfPoints));
         cloud->redrawDisplay();
 
         delete rc;
     }
 
     //currently selected entities appearance may have changed!
-    uiModificationFlags |= CC_PLUGIN_REFRESH_GL_WINDOWS;
-
-    return 1;
-}
-
-QString qHPR::getErrorMessage(int errorCode/*, LANGUAGE lang*/)
-{
-    QString errorMsg;
-    switch(-errorCode)
-    {
-        case 1:
-            errorMsg=QString("Select only one cloud!");
-            break;
-        case 2:
-            errorMsg=QString("Select a point cloud!");
-            break;
-        case 3:
-            errorMsg=QString("No active window!");
-            break;
-        case 4:
-            errorMsg=QString("Perspective mode only!");
-            break;
-        case 5:
-            errorMsg=QString("Couldn't compute octree!");
-            break;
-        case 6:
-            errorMsg=QString("Error while simplifying point cloud with octree!");
-            break;
-        case 7:
-            errorMsg=QString("Visibility array allocation failed! (Not enough memory?)");
-            break;
-        default:
-            errorMsg=QString("Undefined error!");
-            break;
-    }
-    return errorMsg;
+	m_app->refreshAll();
 }
 
 QIcon qHPR::getIcon() const

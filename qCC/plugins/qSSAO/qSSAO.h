@@ -37,8 +37,9 @@ class qSSAO : public QObject, public ccGLFilterPluginInterface
 public:
 
     //inherited from ccPluginInterface
-    void getDescription(ccPluginDescription& desc);
-    QIcon getIcon() const;
+	virtual QString getName() const { return "S.S.A.O."; }
+	virtual QString getDescription() const { return "Screen Space Ambient Occlusion GL filter"; }
+	virtual QIcon getIcon() const;
 
     //inherited from ccGLFilterPluginInterface
     ccGlFilter* getFilter();

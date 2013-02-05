@@ -30,6 +30,7 @@
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccGLMatrix.h>
+#include <ccNormalVectors.h>
 
 //dialog
 #include "ccKinectDlg.h"
@@ -40,44 +41,74 @@
 //Libfreenect
 #include <libfreenect.h>
 
-void qKinect::getDescription(ccPluginDescription& desc)
+qKinect::qKinect(QObject* parent/*=0*/)
+	: QObject(parent)
+	, ccStdPluginInterface()
+	, m_kDlg(0)
+	, m_timer(0)
+	, m_action(0)
 {
-    strcpy(desc.name,"Kinect 3D stream capture (with libfreenect)");
-    strcpy(desc.menuName,"qKinect");
-    desc.hasAnIcon=true;
-    desc.version=1;
 }
 
-bool qKinect::onNewSelection(const ccHObject::Container& selectedEntities)
+qKinect::~qKinect()
 {
-    return true;
+	if (m_kDlg)
+		delete m_kDlg;
 }
 
-uint16_t *depth_mid = 0;
-unsigned wDepth = 0;
-unsigned hDepth = 0;
-unsigned got_depth = 0;
+QIcon qKinect::getIcon() const
+{
+	return QIcon(QString::fromUtf8(":/CC/plugin/qKinect/libfreenect_small.png"));
+}
+
+void qKinect::getActions(QActionGroup& group)
+{
+	//default action
+	if (!m_action)
+	{
+		m_action = new QAction(getName(),this);
+		m_action->setToolTip(getDescription());
+		m_action->setIcon(getIcon());
+		//connect signal
+		connect(m_action, SIGNAL(triggered()), this, SLOT(doStartGrabbing()));
+	}
+
+	group.addAction(m_action);
+}
+
+//void qKinect::onNewSelection(const ccHObject::Container& selectedEntities)
+//{
+//	if (m_action)
+//		m_action->setEnabled(true);
+//}
+
+static uint16_t *s_depth_data = 0;
+static unsigned s_wDepth = 0;
+static unsigned s_hDepth = 0;
+static unsigned s_depth_count = 0;
+static unsigned s_max_depth_count = 0;
 void depth_cb(freenect_device *dev, void *v_depth, uint32_t timestamp)
 {
-    if (depth_mid && got_depth==0)
+    if (s_depth_data && s_depth_count<s_max_depth_count)
     {
         uint16_t *depth = (uint16_t*)v_depth;
-        memcpy(depth_mid,depth,sizeof(uint16_t)*wDepth*hDepth);
-        ++got_depth;
+		unsigned mapSize = s_wDepth*s_hDepth;
+        memcpy(s_depth_data + s_depth_count*mapSize, depth, mapSize*sizeof(uint16_t));
+        ++s_depth_count;
     }
 }
 
-uint8_t *rgb_mid = 0;
-unsigned wRgb = 0;
-unsigned hRgb = 0;
-unsigned got_rgb = 0;
+static uint8_t *s_last_rgb_data = 0;
+static unsigned s_wRgb = 0;
+static unsigned s_hRgb = 0;
+static unsigned s_rgb_count = 0; //max=1
 void rgb_cb(freenect_device *dev, void *rgb, uint32_t timestamp)
 {
-    if (rgb_mid && got_rgb==0)
+    if (s_last_rgb_data && s_rgb_count==0)
     {
         uint8_t *rgbMap = (uint8_t*)rgb;
-        memcpy(rgb_mid,rgbMap,sizeof(uint8_t)*wRgb*hRgb*3);
-        ++got_rgb;
+        memcpy(s_last_rgb_data,rgbMap,sizeof(uint8_t)*s_wRgb*s_hRgb*3);
+        ++s_rgb_count;
     }
 }
 
@@ -107,67 +138,93 @@ bool getResolution(freenect_resolution& resolution, unsigned& w, unsigned &h)
 }
 
 
-int qKinect::doAction(ccHObject::Container& selectedEntities,
-                            unsigned& uiModificationFlags,
-                            ccProgressDialog* progressCb/*=NULL*/,
-                            QWidget* parent/*=NULL*/)
-{
-    freenect_context* f_ctx=0;
-	if (freenect_init(&f_ctx, NULL) < 0)
-		return -1;
+//FIXME: should be qKinect class' arguments!
+static freenect_context* f_ctx=0;
+static freenect_device* f_dev=0;
+static unsigned s_grabIndex = 0;
 
-    freenect_device *f_dev=0;
+void qKinect::doStartGrabbing()
+{
+	assert(m_app);
+	if (!m_app)
+	{
+		m_app->dispToConsole("[qKinect] Internal error: no associated app. interface!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+
+	f_ctx=0;
+    f_dev=0;
+	s_grabIndex=0;
+
+	if (m_kDlg)
+		delete m_kDlg;
+	m_kDlg=0;
+
+	s_max_depth_count = 0;
+	if (s_depth_data)
+		delete[] s_depth_data;
+	s_depth_count = 0;
+	s_depth_data = 0;
+	s_wDepth = s_hDepth = 0;
+
+	if (s_last_rgb_data)
+		delete[] s_last_rgb_data;
+	s_last_rgb_data = 0;
+	s_rgb_count = 0;
+	s_wRgb = s_hRgb = 0;
+
+	if (freenect_init(&f_ctx, NULL) < 0)
+	{
+		m_app->dispToConsole("[qKinect] Failed to initialize kinect driver!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	freenect_set_log_level(f_ctx, FREENECT_LOG_DEBUG);
 
-	int nr_devices = freenect_num_devices (f_ctx);
-    if (m_app)
-        m_app->dispToConsole(qPrintable(QString("[qKinect] Number of devices found: %1").arg(nr_devices)));
+	int nr_devices = freenect_num_devices(f_ctx);
+	m_app->dispToConsole(qPrintable(QString("[qKinect] Number of devices found: %1").arg(nr_devices)));
 
 	if (nr_devices < 1)
-		return -2;
+		return;
 
 	if (freenect_open_device(f_ctx, &f_dev, 0) < 0)
-		return -3;
+	{
+		m_app->dispToConsole("[qKinect] Failed to initialize kinect device!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
 
 	//test: try to init high resolution mode
 	//freenect_frame_mode upDepthMode = freenect_find_depth_mode(FREENECT_RESOLUTION_HIGH, FREENECT_DEPTH_11BIT);
 	//int success = freenect_set_depth_mode(f_dev,upDepthMode);
 
 	/*** Depth information ***/
-
-	depth_mid = 0;
-	got_depth = 0;
-	wDepth = hDepth = 0;
-
 	freenect_frame_mode depthMode = freenect_get_current_depth_mode(f_dev);
 	if (!depthMode.depth_format == FREENECT_DEPTH_11BIT)
 	{
 		depthMode = freenect_find_depth_mode(depthMode.resolution, FREENECT_DEPTH_11BIT);
 		if (freenect_set_depth_mode(f_dev,depthMode)<0)
-			return -4;
+		{
+			m_app->dispToConsole("[qKinect] Failed to initialiaze depth mode!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
 	}
-	if (!getResolution(depthMode.resolution,wDepth,hDepth))
-		return -4; //invalid mode
-    if (m_app)
-		m_app->dispToConsole(qPrintable(QString("[qKinect] Depth resolution: %1 x %2").arg(wDepth).arg(hDepth)));
+	if (!getResolution(depthMode.resolution,s_wDepth,s_hDepth))
+	{
+		m_app->dispToConsole("[qKinect] Failed to read depth resolution!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	m_app->dispToConsole(qPrintable(QString("[qKinect] Depth resolution: %1 x %2").arg(s_wDepth).arg(s_hDepth)));
 
-	ccKinectDlg kDlg(parent);
-	kDlg.addMode(QString("%1 x %2").arg(wDepth).arg(hDepth));
-	if (!kDlg.exec())
-		return 0;
-
-	depth_mid = new uint16_t[wDepth*hDepth];
-	if (!depth_mid)
-		return -5; //not enough memory
+	s_depth_data = new uint16_t[s_wDepth*s_hDepth];
+	if (!s_depth_data)
+	{
+		m_app->dispToConsole("[qKinect] Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		return;
+	}
+	s_max_depth_count = 1;
 
 	/*** RGB information ***/
-
-	rgb_mid = 0;
-	got_rgb = 0;
-	wRgb = hRgb = 0;
-	bool grabRGB = kDlg.grabRGBInfo();
-	if (grabRGB)
+	bool grabRGB = true;
 	{
 		freenect_frame_mode rgbMode = freenect_get_current_video_mode(f_dev);
 		if (!rgbMode.video_format == FREENECT_VIDEO_RGB || depthMode.resolution != rgbMode.resolution)
@@ -175,8 +232,7 @@ int qKinect::doAction(ccHObject::Container& selectedEntities,
 			rgbMode = freenect_find_video_mode(depthMode.resolution, FREENECT_VIDEO_RGB);
 			if (freenect_set_video_mode(f_dev,rgbMode)<0)
 			{
-				if (m_app)
-					m_app->dispToConsole("[qKinect] Can't find a video mode compatible with depth mode?!");
+				m_app->dispToConsole("[qKinect] Can't find a video mode compatible with current depth mode?!");
 				grabRGB = false;
 			}
 		}
@@ -184,19 +240,17 @@ int qKinect::doAction(ccHObject::Container& selectedEntities,
 		//still want to/can grab RGB info?
 		if (grabRGB)
 		{
-			getResolution(rgbMode.resolution,wRgb,hRgb);
+			getResolution(rgbMode.resolution,s_wRgb,s_hRgb);
 
-			rgb_mid = new uint8_t[wRgb*hRgb*3];
-			if (!rgb_mid) //not enough memory for RGB
+			s_last_rgb_data = new uint8_t[s_wRgb*s_hRgb*3];
+			if (!s_last_rgb_data) //not enough memory for RGB
 			{
-				if (m_app)
-					m_app->dispToConsole("[qKinect] Not enough memory to grab RGB info!");
+				m_app->dispToConsole("[qKinect] Not enough memory to grab RGB info!");
 				grabRGB = false;
 			}
 			else
 			{
-				if (m_app)
-					m_app->dispToConsole(qPrintable(QString("[qKinect] RGB resolution: %1 x %2").arg(wRgb).arg(hRgb)));
+				m_app->dispToConsole(qPrintable(QString("[qKinect] RGB resolution: %1 x %2").arg(s_wRgb).arg(s_hRgb)));
 			}
 		}
 	}
@@ -207,87 +261,158 @@ int qKinect::doAction(ccHObject::Container& selectedEntities,
 	freenect_set_depth_callback(f_dev, depth_cb);
 	freenect_set_video_callback(f_dev, rgb_cb);
 	if (grabRGB)
-		freenect_set_video_buffer(f_dev, rgb_mid);
+		freenect_set_video_buffer(f_dev, s_last_rgb_data);
 
 	freenect_start_depth(f_dev);
-	if (rgb_mid)
+	if (s_last_rgb_data)
 		freenect_start_video(f_dev);
 
-	unsigned char framesAvgCount = kDlg.getFrameAveragingCount();
-	unsigned char* counters = 0;
-	double* avgDepth = 0;
+	m_kDlg = new ccKinectDlg(m_app->getMainWindow());
+	if (grabRGB)
+		m_kDlg->addMode(QString("%1 x %2").arg(s_wDepth).arg(s_hDepth));
+	else
+		m_kDlg->grabRGBCheckBox->setChecked(false);
+	m_kDlg->grabRGBCheckBox->setEnabled(grabRGB);
+	m_kDlg->grabPushButton->setEnabled(true);
+
+	connect(m_kDlg->grabPushButton, SIGNAL(clicked()), this, SLOT(grabCloud()));
+	connect(m_kDlg, SIGNAL(finished(int)), this, SLOT(dialogClosed(int)));
+
+	//m_kDlg->setModal(false);
+	//m_kDlg->setWindowModality(Qt::NonModal);
+	m_kDlg->show();
+
+	if (!m_timer)
+	{
+		m_timer = new QTimer(this);
+		connect(m_timer, SIGNAL(timeout()), this, SLOT(updateRTView()));
+	}
+	m_timer->start(0);
+}
+
+void qKinect::updateRTView()
+{
+	if (!m_kDlg)
+		return;
+
+	s_depth_count = 0;
+	s_rgb_count = 0;
+
+	freenect_process_events(f_ctx);
+
+	if (s_last_rgb_data && s_rgb_count)
+	{
+		QPixmap pixmap = QPixmap::fromImage(QImage(s_last_rgb_data,s_wDepth,s_hDepth,QImage::Format_RGB888));
+		m_kDlg->view2D->setPixmap(pixmap);
+	}
+
+	if (s_depth_data && s_depth_count)
+	{
+		QImage image(s_wDepth,s_hDepth,QImage::Format_RGB888);
+
+		//convert depth array to image
+        const uint16_t* _depth = s_depth_data;
+		unsigned char* _bits = image.bits();
+		for (unsigned i=0;i<s_hDepth*s_wDepth;++i,++_depth,_bits+=3)
+		{
+			if (*_depth < FREENECT_DEPTH_RAW_NO_VALUE)
+			{
+				//see http://openkinect.org/wiki/Imaging_Information
+				float z = 12.36f * tanf((float)(*_depth) / 2842.5f + 1.1863f) - 3.7f;
+				//HSV --> V=1, S=1, H = cycling
+				ccNormalVectors::ConvertHSVToRGB((abs((int)z*10))%360,1.0,1.0,_bits[0],_bits[1],_bits[2]);
+			}
+			else
+			{
+				_bits[0]=_bits[1]=_bits[2]=0;
+			}
+		}
+
+		m_kDlg->viewDepth->setPixmap(QPixmap::fromImage(image));
+	}
+}
+
+void qKinect::grabCloud()
+{
+	assert(f_ctx && f_dev);
+	assert(m_kDlg);
+
+	if (m_timer)
+	{
+		m_timer->stop();
+		QApplication::processEvents();
+	}
+
+	bool grabRGB = m_kDlg->grabRGBInfo();
+	unsigned char framesAvgCount = m_kDlg->getFrameAveragingCount();
+
+	uint16_t* old_depth_data = s_depth_data;
+	const unsigned mapSize = s_wDepth*s_hDepth;
+	
 	if (framesAvgCount>1)
 	{
-		counters = new unsigned char[wDepth*hDepth];
-		avgDepth = new double[wDepth*hDepth];
-		if (!counters || !avgDepth)
+		uint16_t* depth_frames = new uint16_t[mapSize*framesAvgCount];
+		if (!depth_frames)
 		{
-			if (m_app)
-				m_app->dispToConsole("[qKinect] Not enough memory to compute frame averaging!");
+			m_app->dispToConsole("[qKinect] Not enough memory to compute frame averaging!");
 			framesAvgCount=1;
 		}
 		else
 		{
-			memset(counters,0,sizeof(unsigned char)*wDepth*hDepth);
-			memset(avgDepth,0,sizeof(double)*wDepth*hDepth);
+			s_depth_data = depth_frames;
 		}
 	}
 
+	//Flush buffers
+	s_max_depth_count = 0;
+	s_depth_count = 1;
+	s_rgb_count = 1;
+	freenect_process_events(f_ctx);
+
+	//Start
 	QElapsedTimer eTimer;
 	eTimer.start();
 
-	unsigned char framesCount = 0;
-	while (got_depth==0 || (grabRGB && got_rgb==0))
+	s_rgb_count = 0;
+	s_depth_count = 0;
+	s_max_depth_count = framesAvgCount;
+
+	while (s_depth_count<framesAvgCount || (grabRGB && s_rgb_count==0))
 	{
 	    freenect_process_events(f_ctx);
 
-		if (got_depth == 1 && framesAvgCount>1)
-		{
-			//copy pixels
-			const uint16_t *_depth = depth_mid;
-			double* _avgDepth = avgDepth;
-			unsigned char* _counters = counters;
-			for (unsigned j = 0; j < hDepth; ++j)
-			{
-				for (unsigned i = 0; i < wDepth; ++i,++_depth,++_avgDepth,++_counters)
-				{
-					if (*_depth < FREENECT_DEPTH_RAW_NO_VALUE)
-					{
-						*_avgDepth += (double)*_depth;
-						++(*_counters);
-					}
-				}
-			}
-			
-			if (++framesCount<framesAvgCount)
-				got_depth = 0;
-		}
-
-		if( framesCount == 0 && eTimer.elapsed() > 5000 ) //timeout 5s.
+		if(s_depth_count == 0 && eTimer.elapsed() > 5000 ) //timeout 5s. without any  data
             break;
 	}
 
-	freenect_stop_depth(f_dev);
-	if (grabRGB)
-		freenect_stop_video(f_dev);
-	freenect_set_led(f_dev,LED_BLINK_GREEN);
-	freenect_close_device(f_dev);
-	freenect_shutdown(f_ctx);
-
-	//finish frame averaging
-	if (framesAvgCount>1)
+	//success?
+	if (s_depth_count)
 	{
-		unsigned char minFrames = (framesAvgCount>>1); //a pixel must be visible in at least half the frames!
-		uint16_t *_depth = depth_mid;
-		const double* _avgDepth = avgDepth;
-		const unsigned char* _counters = counters;
-		for (unsigned j = 0; j < hDepth; ++j)
+		const unsigned mapSize = s_hDepth*s_wDepth;
+		
+		//first, pocess frame averaging (if any)
+		if (s_depth_count>1)
 		{
-			for (unsigned i = 0; i < wDepth; ++i,++_depth,++_avgDepth,++_counters)
+			const unsigned char minFrameCount = (framesAvgCount>>1); //a pixel must be visible in at least half the frames!
+			uint16_t *_depth = s_depth_data;
+			for (unsigned i = 0; i < mapSize; ++i,++_depth)
 			{
-				if (*_counters >= minFrames)
+				//sum all equivalent pixels
+				unsigned pixCount = 0;
+				double pixSum = 0.0;
+				const uint16_t* kDepth = s_depth_data + i;
+				for (unsigned k=0;k<s_depth_count;++k,kDepth+=mapSize)
 				{
-					*_depth = (uint16_t)(*_avgDepth/(double)*_counters);
+					if (*kDepth < FREENECT_DEPTH_RAW_NO_VALUE)
+					{
+						pixSum += (double)s_depth_data[k*mapSize + i];
+						++pixCount;
+					}
+				}
+
+				if (pixCount>=minFrameCount)
+				{
+					*_depth = (uint16_t)(pixSum/(double)pixCount);
 				}
 				else
 				{
@@ -295,13 +420,7 @@ int qKinect::doAction(ccHObject::Container& selectedEntities,
 				}
 			}
 		}
-	}
 
-	int result = 1;
-
-	//capture
-    if (got_depth)
-    {
         /*** Depth calibration info ***/
 
         //see http://openkinect.org/wiki/Imaging_Information
@@ -336,35 +455,73 @@ int qKinect::doAction(ccHObject::Container& selectedEntities,
         depth2rgb.transpose();
 
         ccPointCloud* depthMap = new ccPointCloud();
-        if (depthMap->reserve(wDepth*hDepth))
+		bool hasRGB = s_rgb_count && s_last_rgb_data && m_kDlg->grabRGBCheckBox->isChecked();
+        if (depthMap->reserve(mapSize))
 		{
-			if (got_rgb)
+			if (hasRGB)
 			{
-				depthMap->reserveTheRGBTable();
-				depthMap->showColors(true);
+				if (depthMap->reserveTheRGBTable())
+					depthMap->showColors(true);
+				else
+				{
+					m_app->dispToConsole("[qKinect] Not enough memory to grab colors!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+					hasRGB=false;
+				}
 			}
 
-			const uint16_t *depth = depth_mid;
+			const uint16_t *depth = s_depth_data;
 			const uint8_t* col = 0;
 			const uint8_t white[3]={255,255,255};
 			CCVector3 P,Q;
 
-			for (unsigned j = 0; j < hDepth; ++j)
+			bool meanFilter = m_kDlg->meanFilterCheckBox->isChecked();
+
+			for (unsigned j = 0; j < s_hDepth; ++j)
 			{
 				//P.y = (PointCoordinateType)j;
-				for (unsigned i = 0; i < wDepth; ++i,++depth)
+				for (unsigned i = 0; i < s_wDepth; ++i,++depth)
 				{
-					if (*depth < FREENECT_DEPTH_RAW_NO_VALUE)
+					uint16_t d = *depth;
+
+					//mean filter
+					if (meanFilter)
+					{
+						double sum=0.0;
+						unsigned count=0;
+						for (int k=-1;k<=1;++k)
+						{
+							int ii = (int)i+k;
+							if (ii>=0 && ii<(int)s_wDepth)
+								for (int l=-1;l<=1;++l)
+								{
+									int jj = (int)j+l;
+									if (jj>=0 && jj<(int)s_hDepth)
+									{
+										const uint16_t& dd = s_depth_data[jj*s_wDepth+ii];
+										if (dd < FREENECT_DEPTH_RAW_NO_VALUE)
+										{
+											sum += (double)s_depth_data[jj*s_wDepth+ii];
+											++count;
+										}
+									}
+								}
+						}
+
+						if (count>1)
+							d = (uint16_t)(sum/(double)count);
+					}
+
+					if (d < FREENECT_DEPTH_RAW_NO_VALUE)
 					{
 						//see http://openkinect.org/wiki/Imaging_Information
-						P.z = 12.36f * tanf((float)*depth / 2842.5f + 1.1863f) - 3.7f;
+						P.z = 12.36f * tanf((float)d / 2842.5f + 1.1863f) - 3.7f;
 						//see http://nicolas.burrus.name/index.php/Research/KinectCalibration
 						P.x = ((float)i - cx) * (P.z + minDistance) / fx;
 						P.y = ((float)j - cy) * (P.z + minDistance) / fy ;
 
-						if (got_rgb)
+						if (hasRGB)
 						{
-							assert(rgb_mid);
+							assert(s_last_rgb_data);
 
 							Q = depth2rgb * P;
 
@@ -372,9 +529,9 @@ int qKinect::doAction(ccHObject::Container& selectedEntities,
 							Q.y = (Q.y * fy_rgb / Q.z) + cy_rgb;
 							int i_rgb = (int)Q.x;
 							int j_rgb = (int)Q.y;
-							if (i_rgb>=0 && i_rgb<(int)wDepth && j_rgb>=0 && j_rgb<(int)hDepth)
+							if (i_rgb>=0 && i_rgb<(int)s_wDepth && j_rgb>=0 && j_rgb<(int)s_hDepth)
 							{
-								col = rgb_mid+(i_rgb+j_rgb*wRgb)*3;
+								col = s_last_rgb_data+(i_rgb+j_rgb*s_wRgb)*3;
 							}
 							else
 							{
@@ -392,83 +549,70 @@ int qKinect::doAction(ccHObject::Container& selectedEntities,
 				}
 			}
 
-			//if (m_app)
-			//    m_app->dispToConsole(QString("Cloud captured: %1 points").arg(depthMap->size()));
+			//m_app->dispToConsole(QString("Cloud captured: %1 points").arg(depthMap->size()));
 
 			depthMap->resize(depthMap->size());
-			depthMap->setName(qPrintable(kDlg.getCloudName()));
-			selectedEntities.push_back(depthMap);
+			QString cloudName = m_kDlg->getCloudName() + QString::number(++s_grabIndex);
+			depthMap->setName(qPrintable(cloudName));
+			//selectedEntities.push_back(depthMap);
+			m_app->addToDB(depthMap);
+			m_app->refreshAll();
 		}
 		else
 		{
 			//not enough memory
 			delete depthMap;
 			depthMap=0;
-			result = -5;
+			//result = -5;
 		}
     }
 	else
 	{
 		//no data!
-		result = -6;
+		//result = -6;
 	}
 
-	if (depth_mid)
-		delete[] depth_mid;
-    depth_mid=0;
+	//restore 'old' buffer
+	s_max_depth_count = 1;
+	if (old_depth_data != s_depth_data)
+	{
+		delete[] s_depth_data;
+		s_depth_data = old_depth_data;
+	}
 
-	if (rgb_mid)
-		delete[] rgb_mid;
-    rgb_mid=0;
-
-	if (counters)
-		delete[] counters;
-	counters = 0;
-
-	if (avgDepth)
-		delete[] avgDepth;
-	avgDepth = 0;
-
-    //currently selected entities appearance may have changed!
-    uiModificationFlags |= CC_PLUGIN_REFRESH_GL_WINDOWS;
-    //*/
-
-    return result;
+	if (m_timer)
+		m_timer->start(0);
 }
 
-QString qKinect::getErrorMessage(int errorCode/*, LANGUAGE lang*/)
+void qKinect::dialogClosed(int result)
 {
-    QString errorMsg;
-    switch(errorCode)
-    {
-        case -1:
-            errorMsg=QString("Failed to init driver!");
-            break;
-        case -2:
-            errorMsg=QString("No device found");
-            break;
-        case -3:
-            errorMsg=QString("Could not open device");
-            break;
-        case -4:
-            errorMsg=QString("Unsupported depth/video mode");
-            break;
-        case -5:
-            errorMsg=QString("Not enough memory");
-            break;
-        case -6:
-            errorMsg=QString("No data!");
-            break;
-        default:
-            errorMsg=QString("Undefined error!");
-            break;
-    }
-    return errorMsg;
-}
+	assert(f_ctx && f_dev);
+	assert(m_kDlg);
 
-QIcon qKinect::getIcon() const
-{
-    return QIcon(QString::fromUtf8(":/CC/plugin/qKinect/libfreenect_small.png"));
+	if (result != 0)
+		grabCloud();
+
+	if (m_timer)
+		m_timer->stop();
+
+	freenect_stop_depth(f_dev);
+	if (s_last_rgb_data)
+		freenect_stop_video(f_dev);
+	freenect_set_led(f_dev,LED_BLINK_GREEN);
+	freenect_close_device(f_dev);
+	freenect_shutdown(f_ctx);
+
+	s_max_depth_count=0;
+	if (s_depth_data)
+		delete[] s_depth_data;
+    s_depth_data=0;
+	s_depth_count=0;
+
+	s_rgb_count=1;
+	if (s_last_rgb_data)
+		delete[] s_last_rgb_data;
+    s_last_rgb_data=0;
+	s_rgb_count=0;
 }
 
 Q_EXPORT_PLUGIN2(qKinect,qKinect);

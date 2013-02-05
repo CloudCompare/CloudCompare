@@ -30,18 +30,18 @@
 #include <ccGlFilter.h>
 
 //! GL Filter plugin interface
-/** Version 1.0
+/** Version 1.1
 **/
 class ccGLFilterPluginInterface : public ccPluginInterface
 {
 public:
-    virtual CC_PLUGIN_TYPE getType() {return CC_GL_FILTER_PLUGIN;}
+    virtual CC_PLUGIN_TYPE getType() const { return CC_GL_FILTER_PLUGIN; }
 
     //! Returns a GL filter object
     virtual ccGlFilter* getFilter()=0;
 };
 
 Q_DECLARE_INTERFACE(ccGLFilterPluginInterface,
-                    "edf.rd.CloudCompare.ccGLFilterPluginInterface/1.0")
+                    "edf.rd.CloudCompare.ccGLFilterPluginInterface/1.1")
 
 #endif

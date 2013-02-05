@@ -33,6 +33,7 @@
 #include <QString>
 #include <QDialog>
 #include <QDir>
+#include <QActionGroup>
 
 //CCLib
 #include <PointProjectionTools.h>
@@ -50,13 +51,13 @@
 class QMdiArea;
 class QSignalMapper;
 class QAction;
-class QActionGroup;
 class ccGLWindow;
 class ccHObject;
 class ccComparisonDlg;
 class ccGraphicalSegmentationTool;
 class ccGraphicalTransformationTool;
 class ccPluginInterface;
+class ccStdPluginInterface;
 class ccPointPropertiesDlg;
 class ccCameraParamEditDlg;
 class ccPointListPickingDlg;
@@ -123,10 +124,11 @@ public:
 	//inherited from ccMainAppInterface
     virtual void addToDB(ccHObject* obj, bool autoExpandDBTree=true, const char* statusMessage=NULL, bool addToDisplay=true, bool updateZoom=true, ccGLWindow* winDest=0, bool* coordinatesTransEnabled = 0, double* coordinatesShift = 0, double* coordinatesScale = 0);
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete=true);
-    virtual void dispToConsole(const char* message, ConsoleMessageLevel level=STD_CONSOLE_MESSAGE);
+    virtual void dispToConsole(QString message, ConsoleMessageLevel level=STD_CONSOLE_MESSAGE);
 	virtual void forceConsoleDisplay();
 	virtual ccHObject* dbRoot();
 	virtual QMainWindow* getMainWindow() {return this;}
+	virtual const ccHObject::Container& getSelectedEntities() const { return m_selectedEntities; }
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
@@ -294,7 +296,7 @@ protected slots:
     void doActionEditCamera();
 	void doActionSaveViewportAsCamera();
 
-    void doPluginAction();
+    void doEnableGLFilter();
 
     //Graphical transformation
     void activateTranslateRotateMode();
@@ -359,7 +361,7 @@ protected:
     //void keyPressEvent(QKeyEvent* event);
 
     void loadPlugins();
-    bool addPluginToPluginGroup(QObject* plugin);
+    bool dispatchPlugin(QObject* plugin);
     ccPluginInterface* getValidPlugin(QObject* plugin);
 
     //! Makes the window including an entity zoom on it (helper)
@@ -463,7 +465,8 @@ protected:
     /*** plugins ***/
     QString m_pluginsPath;
     QStringList m_pluginFileNames;
-    QActionGroup* m_pluginsGroup;
+	QList<ccStdPluginInterface*> m_stdPlugins;
+    QActionGroup m_glFilterActions;
 
 };
 

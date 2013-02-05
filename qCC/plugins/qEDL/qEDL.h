@@ -36,8 +36,9 @@ class qEDL : public QObject, public ccGLFilterPluginInterface
 public:
 
     //inherited from ccPluginInterface
-    void getDescription(ccPluginDescription& desc);
-    QIcon getIcon() const;
+	virtual QString getName() const { return "E.D.L."; }
+	virtual QString getDescription() const { return "Eye-dome Lighting GL filter"; }
+	virtual QIcon getIcon() const;
 
     //inherited from ccGLFilterPluginInterface
     ccGlFilter* getFilter();

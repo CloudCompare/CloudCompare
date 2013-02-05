@@ -28,14 +28,6 @@
 #include "qBlur.h"
 #include <ccBilateralFilter.h>
 
-void qBlur::getDescription(ccPluginDescription& desc)
-{
-    strcpy(desc.name,"Bilateral smooth filter Plugin");
-    strcpy(desc.menuName,"Blur");
-    desc.hasAnIcon=false;
-    desc.version=1;
-}
-
 QIcon qBlur::getIcon() const
 {
     return QIcon();

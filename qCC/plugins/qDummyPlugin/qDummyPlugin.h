@@ -30,11 +30,18 @@
 #include "../ccStdPluginInterface.h"
 
 //! Dummy qCC plugin
-/** Replace the 'qDummyPlugin' name by you own plugin class name
+/** Replace the 'qDummyPlugin' string by your own plugin class name
     and then check 'qDummyPlugin.cpp' for more directions (you
-    have to fill in the blank methods (especially the 'doAction'
-    method). Of course, in this header file, you may add you own
-    attributes and methods.
+    have to fill-in the blank methods. The most important one is the
+	'getActions' method.  This method should return all actions
+	(QAction objects). CloudCompare will automatically add them to an
+	icon in the plugin toolbar and to an entry in the plugin menu
+	(if your plugin returns several actions, CC will create a dedicated
+	toolbar and sub-menu). 
+	You are responsible to connect these actions to custom slots of your
+	plugin.
+	Look at the ccStdPluginInterface::m_app attribute to get access to
+	most of CC components (database, 3D views, console, etc.).
 **/
 class qDummyPlugin : public QObject, public ccStdPluginInterface
 {
@@ -43,17 +50,31 @@ class qDummyPlugin : public QObject, public ccStdPluginInterface
 
 public:
 
+	//! Default constructor
+	qDummyPlugin(QObject* parent=0);
+
     //inherited from ccPluginInterface
-    void getDescription(ccPluginDescription& desc);
-    QIcon getIcon() const;
+	virtual QString getName() const { return "qDummyPlugin"; }
+	virtual QString getDescription() const { return "Dummy plugin (add description here)"; }
+    virtual QIcon getIcon() const;
 
     //inherited from ccStdPluginInterface
-	bool onNewSelection(const ccHObject::Container& selectedEntities);
-    int doAction(ccHObject::Container& selectedEntities,
-                unsigned& uiModificationFlags,
-                ccProgressDialog* progressCb=NULL,
-                QWidget* parent=NULL);
-    QString getErrorMessage(int errorCode/*, LANGUAGE lang*/);
+	void onNewSelection(const ccHObject::Container& selectedEntities);
+    virtual void getActions(QActionGroup& group);
+
+protected slots:
+
+	/*** ADD YOUR CUSTOM ACTIONS' SLOTS HERE ***/
+	void doAction();
+
+protected:
+
+	//! Default action
+	/** You can add as many actions as you want in a plugin.
+		All actions will correspond to an icon in the dedicated
+		toolbar and an entry in the plugin menu.
+	**/
+	QAction* m_action;
 };
 
 #endif

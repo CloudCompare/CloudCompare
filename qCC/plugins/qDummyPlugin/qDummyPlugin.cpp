@@ -27,83 +27,73 @@
 //First: replace all occurences of 'qDummyPlugin' by your own plugin class name in this file!
 #include "qDummyPlugin.h"
 
-//This method should return your plugin description
-void qDummyPlugin::getDescription(ccPluginDescription& desc)
+//Default constructor: should mainly be used to initialize
+//actions (pointers) and other members
+qDummyPlugin::qDummyPlugin(QObject* parent/*=0*/)
+	: QObject(parent)
+	, m_action(0)
 {
-    //Your plugin name
-    strcpy(desc.name,"Dummy Plugin");
-    //A short description of your plugin action
-    strcpy(desc.menuName,"Dummy Action");
-    //Tells whether your plugin provides its own icon (see 'getIcon' below)
-    //Otherwise, a default plugin icon is displayed
-    desc.hasAnIcon=false;
-    //Your plugin version
-    desc.version=1;
 }
 
-//This method should returns whether the plugin should be enabled or not,
-//regarding the currently selected entities ('selectedEntities').
+//This method should enable or disable each plugin action
+//depending on the currently selected entities ('selectedEntities').
 //For example: if none of the selected entities is a cloud, and your
-//plugin deals only with clouds -> return false;
-bool qDummyPlugin::onNewSelection(const ccHObject::Container& selectedEntities)
+//plugin deals only with clouds, call 'm_action->setEnabled(false)'
+void qDummyPlugin::onNewSelection(const ccHObject::Container& selectedEntities)
 {
-    return true;
+	//if (m_action)
+	//	m_action->setEnabled(!selectedEntities.empty());
 }
 
-//This is where all the action takes place. This method is called when
-//the user clicks on the plugin icon. To do this, you can use any of the
-//currently selected entities (selectedEntities). The second parameters let
-//you request for UI modifications (at the end of the process - such as a
-//refresh of the 3D windows, or the objects browser, etc. - see the top part
-//of 'ccStdPluginInterface.h'). Eventually, provided as input are a progress
-//bar (progressCb) that you can freely init, display and update during the
-//process, and the parent widget (if you wish to display a dialog relatively
-//to it, etc.). It should be theoretically qCC main window.
-int qDummyPlugin::doAction(ccHObject::Container& selectedEntities,
-                            unsigned& uiModificationFlags,
-                            ccProgressDialog* progressCb,
-                            QWidget* parent)
+//This method returns all 'actions' of your plugin.
+//It will be called only once, when plugin is loaded.
+void qDummyPlugin::getActions(QActionGroup& group)
 {
-    //by default, no modification is necessary (update these flags if necessary)
-    uiModificationFlags=0;
+	//default action (if it has not been already created, it's the moment to do it)
+	if (!m_action)
+	{
+		//here we use the default plugin name, description and icon,
+		//but each action can have its own!
+		m_action = new QAction(getName(),this);
+		m_action->setToolTip(getDescription());
+		m_action->setIcon(getIcon());
+		//connect appropraite signal
+		connect(m_action, SIGNAL(triggered()), this, SLOT(doAction()));
+	}
 
-    /*** HERE STARTS THE MAIN PLUGIN ACTION ***/
+	group.addAction(m_action);
+}
+
+//This is an example of an action's slot called when the corresponding action
+//is triggered (i.e. the corresponding icon or menu entry is clicked in CC
+//main's interface). You can access to most of CC components (database,
+//3D views, console, etc.) via the 'm_app' attribute (ccMainAppInterface
+//object).
+void qDummyPlugin::doAction()
+{
+	//m_app should have already been initialized by CC when plugin is loaded!
+	//(--> pure internal check)
+	assert(m_app);
+	if (!m_app)
+		return;
+
+    /*** HERE STARTS THE ACTION ***/
 
     //put your code here
     //--> you may want to start by asking parameters (with a custom dialog, etc.)
-    //and then do your stuffs...
 
-    /*** HERE ENDS THE MAIN PLUGIN ACTION ***/
+	//This is how you can output messages
+	m_app->dispToConsole("[qDummyPlugin] Hello world!",ccMainAppInterface::STD_CONSOLE_MESSAGE); //a standard message is displayed in the console
+	m_app->dispToConsole("[qDummyPlugin] Warning: dummy plugin shouldn't be used as is!",ccMainAppInterface::WRN_CONSOLE_MESSAGE); //a warning message is displayed in the console
+	m_app->dispToConsole("Dummy plugin shouldn't be used as is!",ccMainAppInterface::ERR_CONSOLE_MESSAGE); //an error message is displayed in the console AND an error box will pop-up!
 
-    //default return code: '1' = success
-    return 1;
-    //otherwise, define you own return codes (<0 or >1) and put the corresponding
-    //error messages in 'getErrorMessage' (see below)
+    /*** HERE ENDS THE ACTION ***/
+
 }
 
-//This method should returns your custom error messages (they will be
-//displayed in the main qCC interface). This lets you manage your own
-//error codes in 'doAction' (apart from '0' and '1' which are reserved).
-QString qDummyPlugin::getErrorMessage(int errorCode/*, LANGUAGE lang*/)
-{
-    QString errorMsg;
-    switch(errorCode)
-    {
-        //Example
-        /*case 2:
-            errorMsg=QString("Input cloud is too small!");
-            break;
-        **/
-        default:
-            errorMsg=QString("Undefined error!");
-            break;
-    }
-    return errorMsg;
-}
-
-//This method should return the plugin icon (it will be displayed
-//in the plugin toolbar) if you have declared that your plugin
-//provides its own icon in the 'getDescription' method (see above).
+//This method should return the plugin icon (it will be used mainly
+//if your plugin as several actions in which case CC will create a
+//dedicated sub-menu entry with this icon.
 QIcon qDummyPlugin::getIcon() const
 {
     return QIcon();

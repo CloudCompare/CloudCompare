@@ -61,22 +61,6 @@ public:
 	**/
 	void setMainAppInterface(ccMainAppInterface* app) { m_app=app; }
 
-    //! Default plugin action
-    /** The 'selectedEntities' vector can be used to output new entities.
-		When the method successfully returns (code=1), CloudCompare will
-		check for any entity appended to the end of 'selectedEntities' and will
-		add it to the main tree DB.
-        \param selectedEntities entities selected by the user before calling the plugin
-        \param uiModificationFlags flags to specify standard UI modification requests (output)
-        \param progressCb a progress dialog (provided by the main GUI)
-        \param parent calling widget (for proper UI integration)
-        \return error code (see ccPluginInterface::getErrorMessage)
-    **/
-    //virtual int doAction(ccHObject::Container& selectedEntities,
-    //                        unsigned& uiModificationFlags,
-    //                        ccProgressDialog* progressCb=NULL,
-				//			QWidget* parent=NULL) { return 1; }
-
     //! Returns action(s)
     virtual void getActions(QActionGroup& group) = 0;
 
@@ -85,15 +69,6 @@ public:
         \param selectedEntities currently selected entities
 	**/
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) { /*ignored by default*/ }
-
-    //! Returns custom error messages
-    /** If ccPluginInterface::doAction returns an error code different
-        from 0 (action cancelled by user) or 1 (ok), the plugin might be
-        asked to return an error message corresponding to this error code.
-        \param errorCode custom error code (as returned by doAction)
-        \return corresponding error message
-    **/
-    //virtual QString getErrorMessage(int errorCode/*, LANGUAGE lang*/)=0;
 
 protected:
 

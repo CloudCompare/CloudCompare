@@ -252,10 +252,7 @@ void qHPR::doAction()
 {
 	assert(m_app);
 	if (!m_app)
-	{
-		m_app->dispToConsole("[qHPR] Internal error: no associated app. interface!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
-	}
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	unsigned selNum = selectedEntities.size();

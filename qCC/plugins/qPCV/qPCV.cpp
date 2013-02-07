@@ -73,10 +73,7 @@ void qPCV::doAction()
 {
 	assert(m_app);
 	if (!m_app)
-	{
-		m_app->dispToConsole("[qPCV] Internal error: no associated app. interface!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
-	}
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	unsigned selNum = selectedEntities.size();

@@ -147,10 +147,7 @@ void qKinect::doStartGrabbing()
 {
 	assert(m_app);
 	if (!m_app)
-	{
-		m_app->dispToConsole("[qKinect] Internal error: no associated app. interface!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
-	}
 
 	f_ctx=0;
     f_dev=0;

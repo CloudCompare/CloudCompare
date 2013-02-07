@@ -96,7 +96,10 @@ void qDummyPlugin::doAction()
 //dedicated sub-menu entry with this icon.
 QIcon qDummyPlugin::getIcon() const
 {
-    return QIcon();
+	//open qDummyPlugin.qrc (text file), update the "prefix" and the
+	//icon(s) filename(s). Then save it with the right name (yourPlugin.qrc).
+	//(eventually, remove the original qDummyPlugin.qrc file!)
+    return QIcon(":/CC/plugin/qDummyPlugin/icon.png");
 }
 
 //Don't forget to replace 'qDummyPlugin' by your own plugin class name here also!

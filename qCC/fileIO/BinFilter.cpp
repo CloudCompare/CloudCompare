@@ -41,17 +41,6 @@
 
 #include <assert.h>
 
-// Current BIN file version
-/** Versions:
-- 'original' version (file starts by the number of clouds - no header)
-* V1.0 = prior to 05/04/2012 = old version
-- 'new' evolutive version, starts by 4 bytes ("CCB2")
-* V2.0 - 05/04/2012 - upgrade to serialized version
-* V2.1 - 07/02/2012 - points & 2D labels upgraded
-* V2.2 - 11/26/2012 - object name is now a QString
-**/
-static unsigned s_currentBinVersion = 22; //2.2
-
 int BinFilter::ReadEntityHeader(QFile& in, unsigned &numberOfPoints, HeaderFlags& header)
 {
 	assert(in.isOpen());
@@ -82,13 +71,17 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 	if (!out.open(QIODevice::WriteOnly))
 		return CC_FERR_WRITING;
 
+	//About BIN versions:
+	//- 'original' version (file starts by the number of clouds - no header)
+	//- 'new' evolutive version, starts by 4 bytes ("CCB2") + save the current ccObject version
+
 	//header
 	char firstBytes[5] = "CCB2";
 	if (out.write(firstBytes,4)<0)
 		return CC_FERR_WRITING;
 
-	//version
-	uint32_t binVersion = (uint32_t)s_currentBinVersion;
+	// Current BIN file version
+	uint32_t binVersion = (uint32_t)s_currentObjVersion;
 	if (out.write((char*)&binVersion,4)<0)
 		return CC_FERR_WRITING;
 

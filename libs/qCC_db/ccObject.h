@@ -105,6 +105,15 @@ enum CC_CLASS_ENUM {
 	CC_2D_VIEWPORT_LABEL	=	CC_2D_VIEWPORT_OBJECT | CC_LABEL_BIT,
 };
 
+// Current ccObject's version
+/** Versions:
+* V1.0 = prior to 05/04/2012 = old version
+* V2.0 - 05/04/2012 - upgrade to serialized version with version tracking
+* V2.1 - 07/02/2012 - points & 2D labels upgraded
+* V2.2 - 11/26/2012 - object name is now a QString
+* V2.3 - 02/07/2013 - attribute 'm_selectionBehavior' added to ccHObject class
+**/
+static unsigned s_currentObjVersion = 23; //2.3
 
 //! Generic "CloudCompare Object" template
 #ifdef QCC_DB_USE_AS_DLL

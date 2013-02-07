@@ -233,6 +233,24 @@ public:
 	**/
 	virtual bool isShareable() const { return false; }
 
+	//! Behavior when selected
+	enum SelectionBehavior { SELECTION_AA_BBOX,
+							 SELECTION_CUSTOM,
+							 SELECTION_IGNORED };
+
+	//! Sets selection behavior (when displayed)
+	void setSelectionBehavior(SelectionBehavior mode) { m_selectionBehavior = mode; }
+
+	//! Returns selection behavior
+	SelectionBehavior getSelectionBehavior() const { return m_selectionBehavior; }
+
+	//! Draw custom selection mode
+	/** This method is called when selection behavior is set to
+		SELECTION_CUSTOM (see setSelectionBehavior).
+		Should be re-implemented if possible (draws BBox by default).
+	**/
+	virtual void drawCustomSelection(CC_DRAW_CONTEXT& context);
+
 protected:
 
     //! Sets parent object
@@ -267,6 +285,9 @@ protected:
 
     //! Last modification time (ms)
     int m_lastModificationTime_ms;
+
+	//! Selection behavior
+	SelectionBehavior m_selectionBehavior;
 };
 
 /*** Helpers ***/

@@ -7,6 +7,8 @@ v2.4 ??/??/2013
 	* string format: " CC_POINT_#i(x,y,z) " (where i is the index in the current list)
 - "Point picking" tool:
 	* When picking 3 successive points ('triplet' mode), the 3 corresponding angles are displayed
+- Bug fix:
+	* in the 'Point list picking' tool, when exporting a list of picked points THEN cancelling the picking process, CC will crash
 
 v2.4 01/21/2013
 - New tool: 'Edit > Mesh > Subdivide' (recursive subdivision)

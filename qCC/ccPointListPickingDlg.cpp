@@ -144,12 +144,14 @@ void ccPointListPickingDlg::cancelAndExit()
 	{
 		//Restore previous state
 		for (unsigned i=0;i<m_toBeAdded->getChildrenNumber();++i)
-			m_orderedLabelsContainer->removeChild(m_toBeAdded->getChild(i));
+			MainWindow::TheInstance()->db()->removeElement(m_toBeAdded->getChild(i));
+			//m_orderedLabelsContainer->removeChild(m_toBeAdded->getChild(i));
 		for (unsigned j=0;j<m_toBeDeleted->getChildrenNumber();++j)
 			m_toBeDeleted->getChild(j)->setVisible(true);
 		if (m_orderedLabelsContainer->getChildrenNumber() == 0)
 		{
-			m_associatedCloud->removeChild(m_orderedLabelsContainer);
+			MainWindow::TheInstance()->db()->removeElement(m_orderedLabelsContainer);
+			//m_associatedCloud->removeChild(m_orderedLabelsContainer);
 			m_orderedLabelsContainer=0;
 		}
 	}
@@ -242,7 +244,11 @@ void ccPointListPickingDlg::removeLastEntry()
 	}
 	else
 	{
-		m_associatedCloud->removeChild(lastVisibleLabel);
+		if (m_orderedLabelsContainer)
+			//m_orderedLabelsContainer->removeChild(lastVisibleLabel);
+			MainWindow::TheInstance()->db()->removeElement(lastVisibleLabel);
+		else
+			m_associatedCloud->removeChild(lastVisibleLabel);
 	}
 
 	updateList();

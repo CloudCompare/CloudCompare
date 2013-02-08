@@ -54,7 +54,7 @@ class ccHObjectCaster
         //! converts current object to 'equivalent' ccPointCloud
         /** Waring: if a mesh is passed, this method returns its vertices.
 			\param obj ccHObject to dynamically cast to a ccPointCloud object
-			\param the caller can be warned if the returned cloud corresponds to locked vertices
+			\param isLockedVertices the caller can be warned if the returned cloud corresponds to locked vertices
         **/
         static ccPointCloud* ToPointCloud(ccHObject* obj, bool* isLockedVertices = 0);
 

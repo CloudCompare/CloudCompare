@@ -95,7 +95,7 @@ public:
     static ccGLWindow* GetGLWindow(const QString& title);
 
     //! Returns all GL sub-windows
-    /** \param input/output vector to store all sub-windows
+    /** \param[in,out] glWindows vector to store all sub-windows
     **/
     static void GetGLWindows(std::vector<ccGLWindow*>& glWindows);
 

@@ -34,7 +34,7 @@ namespace CCLib
 //! A class to perform a conjugate gradient optimization
 /**	Inspired from the "Numerical Recipes".
 	Template parameter 'N' is the dimension of the linear system.
-	Lets "A*Xn=b" be the system to optimize (at iteration #n).
+	Lets "A*Xn=b" be the system to optimize (at iteration n).
 	First the user must init the A matrix (N*N) and b vector (N*1).
 	Then the solver is initialized with X0 (see initConjugateGradient).
 	And the conjugate gradient is iterated with iterConjugateGradient.

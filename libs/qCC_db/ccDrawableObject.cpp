@@ -109,6 +109,14 @@ void ccDrawableObject::drawBB(const colorType col[])
     getBB(true,false,currentDisplay).draw(col);
 }
 
+ccBBox ccDrawableObject::getFitBB(ccGLMatrix& trans)
+{
+	//Default behavior: returns axis aligned bounding box!
+	trans.toIdentity();
+	return getBB(true,false,currentDisplay);
+
+}
+
 void ccDrawableObject::redrawDisplay()
 {
     if (currentDisplay)

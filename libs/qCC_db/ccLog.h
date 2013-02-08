@@ -124,7 +124,7 @@ protected:
     //! Generic message display method
     /** To be implemented by child class.
 		WARNING: MUST BE THREAD SAFE!
-		\param text message
+		\param message message
         \param level message severity
     **/
 	void virtual displayMessage(const QString& message, MessageLevel level)=0;

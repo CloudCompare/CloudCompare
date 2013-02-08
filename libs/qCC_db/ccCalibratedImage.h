@@ -54,7 +54,8 @@ public:
     virtual CC_CLASS_ENUM getClassID() const {return CC_CALIBRATED_IMAGE;};
 
 	//! Sets camera focal (in pixels)
-	/** \param deduceFOV automatically deduce f.o.v. from focal value and image height
+	/** \param focal_pix focal expressed in pixels
+		\param deduceFOV automatically deduce f.o.v. from focal value and image height
 	**/
 	void setFocal(float focal_pix, bool deduceFOV = true);
 
@@ -154,8 +155,9 @@ public:
 		\param b {b0, b1, b2} triplets for all images (size: 3*N)
 		\param c {c0(=1), c1, c2} triplets for all images (size: 3*N)
 		\param maxSize output image(s) max dimension
-		\param result [out] resulting images (is successful)
-		\param relativePos [out] relative position (relatively to first image)
+		\param outputDir output directory for resulting images (is successful)
+		\param[out] orthoRectifiedImages resulting images (is successful)
+		\param[out] relativePos relative positions (relatively to first image)
 		\return true if successful
 	**/
 	static bool OrthoRectifyAsImages(std::vector<ccCalibratedImage*> images, 

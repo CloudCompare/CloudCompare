@@ -61,8 +61,8 @@ public:
 
 	//! Generates the rotation matrix that transforms a vector in another given one
 	/** WARNING: an OpenGL context must be active!
-		\param source the original UNIT vector
-		\param dest the resulting UNIT vector
+		\param sourceVec the original UNIT vector
+		\param destVec the resulting UNIT vector
 		\return 'OpenGL' style 4x4 matrix
 	**/
 	static ccGLMatrix GenerateGLRotationMatrixFromVectors(const float* sourceVec, const float* destVec);
@@ -70,7 +70,7 @@ public:
 	//! Generates the rotation matrix corresponding to an axis (vector) and an angle
 	/** WARNING: an OpenGL context must be active!
 		\param axis the rotation axis (as a vector)
-		\param angle the rotation angle (in degrees)
+		\param angle_deg the rotation angle (in degrees)
 		\return 'OpenGL' style 4x4 matrix
 	**/
 	static ccGLMatrix GenerateGLRotationMatrixFromAxisAndAngle(const float* axis, float angle_deg);

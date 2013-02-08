@@ -46,9 +46,9 @@ public:
 	/** Torus is defined in the XY plane by default
 		\param insideRadius inside radius
 		\param outsideRadius outside radius
-		\param height section height (if rectangular torus)
-		\param angle subtended angle (in radians)
-		\param yOff displacement of axes along Y-axis (Snout mode)
+		\param angle_rad subtended angle (in radians)
+		\param rectangularSection whether section is rectangular or round
+		\param rectSectionHeight section height (if rectangular torus)
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 		\param precision drawing precision (main loop angular step = 360/(4*precision), circular section angular step = 360/precision)

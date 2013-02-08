@@ -114,7 +114,6 @@ public:
 		\param qGravityCenter if available, the gravity center of Q
 		\param weightsP weights for the points of P (optional)
 		\param weightsQ weights for the points of Q (optional)
-		\param 
 		\return weighted cross covariance matrix
 	**/
 	static SquareMatrixd computeWeightedCrossCovarianceMatrix(GenericCloud* P,

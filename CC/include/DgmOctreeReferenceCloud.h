@@ -53,7 +53,7 @@ public:
 	/** \param associatedSet associated NeighboursSet
 		\param count number of values to use (0 = all)
 	**/
-	DgmOctreeReferenceCloud(DgmOctree::NeighboursSet* associatedSet, unsigned size=0);
+	DgmOctreeReferenceCloud(DgmOctree::NeighboursSet* associatedSet, unsigned count=0);
 
 	//! Destructor.
 	virtual ~DgmOctreeReferenceCloud();

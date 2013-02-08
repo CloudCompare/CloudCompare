@@ -336,29 +336,42 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
     }
 
     //Bounding-box
-    ccBBox box = _obj->getBB();
+	ccBBox box;
+	bool fitBBox = false;
+	if (_obj->getSelectionBehavior() == ccHObject::SELECTION_FIT_BBOX)
+	{
+		ccGLMatrix trans;
+		box = _obj->getFitBB(trans);
+		box += CCVector3(trans.getTranslation());
+		fitBBox = true;
+	}
+	else
+	{
+		box = _obj->getBB();
+	}
+
 	if (box.isValid())
 	{
-    //Box dimensions
+		//Box dimensions
 		m_model->setRowCount(++curRow+1);
-    item = new QStandardItem("Box dimensions");
-	item->setFlags(Qt::ItemIsEnabled);
+		item = new QStandardItem(fitBBox ? "Local box dimensions" : "Box dimensions");
+		item->setFlags(Qt::ItemIsEnabled);
 		m_model->setItem(curRow,0,item);
 
-	CCVector3 bboxDiag = box.getDiagVec();
-    item = new QStandardItem(QString("X: %0\nY: %1\nZ: %2").arg(bboxDiag.x).arg(bboxDiag.y).arg(bboxDiag.z));
-	item->setFlags(Qt::ItemIsEnabled);
+		CCVector3 bboxDiag = box.getDiagVec();
+		item = new QStandardItem(QString("X: %0\nY: %1\nZ: %2").arg(bboxDiag.x).arg(bboxDiag.y).arg(bboxDiag.z));
+		item->setFlags(Qt::ItemIsEnabled);
 		m_model->setItem(curRow,1,item);
 
-    //Box center
+		//Box center
 		m_model->setRowCount(++curRow+1);
-    item = new QStandardItem("Box center");
-	item->setFlags(Qt::ItemIsEnabled);
+		item = new QStandardItem("Box center");
+		item->setFlags(Qt::ItemIsEnabled);
 		m_model->setItem(curRow,0,item);
 
-    CCVector3 bboxCenter = box.getCenter();
-    item = new QStandardItem(QString("X: %0\nY: %1\nZ: %2").arg(bboxCenter.x).arg(bboxCenter.y).arg(bboxCenter.z));
-    item->setFlags(Qt::ItemIsEnabled);
+		CCVector3 bboxCenter = box.getCenter();
+		item = new QStandardItem(QString("X: %0\nY: %1\nZ: %2").arg(bboxCenter.x).arg(bboxCenter.y).arg(bboxCenter.z));
+		item->setFlags(Qt::ItemIsEnabled);
 		m_model->setItem(curRow,1,item);
 	}
 

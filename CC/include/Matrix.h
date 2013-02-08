@@ -75,7 +75,7 @@ namespace CCLib
 		/** The matrix dimension is automatically set to 4.
 			It can be forced to 3 (size_3 = true). In this
 			case, only the rotation part will be 'imported'.
-			\param M16 a table of 16 floats (OpenGL float transformation matrix)
+			\param M16f a table of 16 floats (OpenGL float transformation matrix)
 			\param rotationOnly consider only the roation part (3x3 matrix)
 		**/
 		MatrixTpl(const float M16f[], bool rotationOnly = false)
@@ -93,7 +93,7 @@ namespace CCLib
 		/** The matrix dimension is automatically set to 4.
 			It can be forced to 3 (size_3 = true). In this
 			case, only the rotation part will be 'imported'.
-			\param M16 a table of 16 floats (OpenGL double transformation matrix)
+			\param M16d a table of 16 floats (OpenGL double transformation matrix)
 			\param rotationOnly consider only the roation part (3x3 matrix)
 		**/
 		MatrixTpl(const double M16d[], bool rotationOnly = false)

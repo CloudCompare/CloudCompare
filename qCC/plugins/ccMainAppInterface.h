@@ -84,7 +84,7 @@ public:
 
     //! Prints a message to console
     /** \param message message
-        \param warning whether the message is a warning or not
+        \param level message level (standard, warning, error)
     **/
     virtual void dispToConsole(QString message, ConsoleMessageLevel level=STD_CONSOLE_MESSAGE)=0;
 

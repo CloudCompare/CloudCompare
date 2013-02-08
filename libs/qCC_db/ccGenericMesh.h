@@ -182,6 +182,7 @@ public:
 	//! Laplacian smoothing
 	/** \param nbIteration smoothing iterations
 		\param factor smoothing 'force'
+		\param progressCb progress dialog callback
 	**/
 	bool laplacianSmooth(unsigned nbIteration=100, float factor=0.01, CCLib::GenericProgressCallback* progressCb=0);
 

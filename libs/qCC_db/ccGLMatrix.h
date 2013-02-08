@@ -122,22 +122,22 @@ public:
 	void clearTranslation();
 
 	//! Inits transformation from a rotation axis, an angle (in radians) and a translation
-	void initFromParameters(PointCoordinateType alpha, const CCVector3& axis3D, const CCVector3& t3D);
+	void initFromParameters(float alpha, const CCVector3& axis3D, const CCVector3& t3D);
 
 	//! Inits transformation from 3 rotation angles (in radians), and a translation
-	void initFromParameters(PointCoordinateType phi, PointCoordinateType theta, PointCoordinateType psi, const CCVector3& t3D);
+	void initFromParameters(float phi, float theta, float psi, const CCVector3& t3D);
 
 	//! Gets transformation equivalent parameters
 	/** Extracts parameters from transformation: a rotation axis,
 		an angle (in radians) and a translation.
 	**/
-	void getParameters(PointCoordinateType& alpha, CCVector3& axis3D, CCVector3& t3D) const;
+	void getParameters(float& alpha, CCVector3& axis3D, CCVector3& t3D) const;
 
 	//! Gets transformation equivalent parameters
 	/** Extracts parameters from transformation: 3 rotation angles (in radians),
 		and a translation.
 	**/
-	void getParameters(PointCoordinateType &phi, PointCoordinateType &theta, PointCoordinateType &psi, CCVector3& t3D) const;
+	void getParameters(float &phi, float &theta, float &psi, CCVector3& t3D) const;
 
 	//! Returns a pointer to internal data
 	inline float* data() { return m_mat; }

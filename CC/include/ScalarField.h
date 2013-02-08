@@ -75,7 +75,7 @@ public:
 
 	//! Sets whether scalar field is positive or not
 	/** Warning: 'computeMinAndMax' should be called afterwards.
-		\bool state positive state
+		\param state whether values are only positive or not
 	**/
 	inline void setPositive(bool state) { m_onlyPositiveValues = state; }
 

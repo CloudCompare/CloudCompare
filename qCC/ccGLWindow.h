@@ -235,10 +235,10 @@ signals:
     void entitySelectionChanged(int uniqueID);
 
     //! Signal emitted in point picking mode to declare picking of a given point
-    /** \param cloudID cloud unique ID
+    /** \param cloudUniqueID cloud unique ID
         \param pointIndex point index in cloud
-		\parm x mouse cursor x position
-		\parm y mouse cursor y position
+		\param x mouse cursor x position
+		\param y mouse cursor y position
     **/
     void pointPicked(int cloudUniqueID, unsigned pointIndex, int x, int y);
 

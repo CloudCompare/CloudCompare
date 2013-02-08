@@ -328,12 +328,6 @@ CCVector3 ccHObject::getCenter()
 	return box.getCenter();
 }
 
-void ccHObject::drawCustomSelection(CC_DRAW_CONTEXT& context)
-{
-	//Default behavior: draw bounding box (i.e. just as standard selection mode!)
-	drawBB(context.bbDefaultCol);
-}
-
 void ccHObject::draw(CC_DRAW_CONTEXT& context)
 {
 	if (!isEnabled())
@@ -376,8 +370,19 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 		case SELECTION_AA_BBOX:
 			drawBB(context.bbDefaultCol);
 			break;
-		case SELECTION_CUSTOM:
-			drawCustomSelection(context);
+		case SELECTION_FIT_BBOX:
+			{
+				ccGLMatrix trans;
+				ccBBox box = getFitBB(trans);
+				if (box.isValid())
+				{
+					glMatrixMode(GL_MODELVIEW);
+					glPushMatrix();
+					glMultMatrixf(trans.data());
+					box.draw(context.bbDefaultCol);
+					glPopMatrix();
+				}
+			}
 			break;
 		case SELECTION_IGNORED:
 			break;

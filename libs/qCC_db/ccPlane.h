@@ -65,6 +65,9 @@ public:
 	//inherited from ccGenericPrimitive
 	virtual ccGenericPrimitive* clone() const;
 
+	//inherited from ccDrawableObject
+	virtual ccBBox getFitBB(ccGLMatrix& trans);
+
 protected:
     
     //inherited from ccGenericPrimitive

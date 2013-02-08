@@ -111,7 +111,7 @@ public:
 	//! Helper: loads a GenericChunkedArray structure from file
 	/** \param chunkArray GenericChunkedArray structure to load
 		\param in input file (must be already opened)
-		\param data version current data version
+		\param dataVersion version current data version
 		\return success
 	**/
 	template <int N, class ScalarType> static bool GenericArrayFromFile(GenericChunkedArray<N,ScalarType>& chunkArray, QFile& in, short dataVersion) 

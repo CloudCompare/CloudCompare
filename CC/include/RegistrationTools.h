@@ -105,7 +105,7 @@ public:
 		\param lCloud left cloud {Pl}
 		\param rCloud right cloud {Pr}
 		\param trans resulting transformation: Pr = s.R.Pl + T
-		\parma fixedScale force scale parameter to 1.0
+		\param fixedScale force scale parameter to 1.0
 		\return success
 	**/
 	static bool FindAbsoluteOrientation(GenericCloud* lCloud,

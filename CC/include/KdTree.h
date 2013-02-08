@@ -233,12 +233,11 @@ protected:
 
 
     //! Recursive function which store every point lying to a given distance from the query point
-    /**!
-        \param queryPoint the query point coordinates
+    /** \param queryPoint the query point coordinates
         \param distance the wished distance from the query point
         \param tolerance tolerance for resulting points : p is in resulting array if ||p-queryPoint||<=tolerance
         \param cell current cell to explore (used for recursion)
-        \param array [out] output of the algorithm. Resulting points indexes in associatedCloud are stored in this array
+        \param[out] localArray output of the algorithm. Resulting points indexes in associatedCloud are stored in this array
     **/
     void DistanceScanTree(const PointCoordinateType *queryPoint, 
 							DistanceType distance, 

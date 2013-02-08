@@ -235,21 +235,18 @@ public:
 
 	//! Behavior when selected
 	enum SelectionBehavior { SELECTION_AA_BBOX,
-							 SELECTION_CUSTOM,
+							 SELECTION_FIT_BBOX,
 							 SELECTION_IGNORED };
 
 	//! Sets selection behavior (when displayed)
+	/** WARNING: SELECTION_FIT_BBOX relies on the
+		'ccDrawableObject::getFitBB' method (which
+		is not supported by all entities).
+	**/
 	void setSelectionBehavior(SelectionBehavior mode) { m_selectionBehavior = mode; }
 
 	//! Returns selection behavior
 	SelectionBehavior getSelectionBehavior() const { return m_selectionBehavior; }
-
-	//! Draw custom selection mode
-	/** This method is called when selection behavior is set to
-		SELECTION_CUSTOM (see setSelectionBehavior).
-		Should be re-implemented if possible (draws BBox by default).
-	**/
-	virtual void drawCustomSelection(CC_DRAW_CONTEXT& context);
 
 protected:
 

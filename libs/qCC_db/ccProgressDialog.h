@@ -59,6 +59,7 @@ public:
 		process: it depends only on the client algorithm implementation.
 		\param cancelButton activates or deactivates the cancel button
 		\param parent parent widget
+		\param flags window flags
 	**/
 	ccProgressDialog(bool cancelButton = false,
 						QWidget *parent = 0,

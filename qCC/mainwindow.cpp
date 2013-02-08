@@ -5256,6 +5256,7 @@ void MainWindow::doComputePlaneOrientation()
 				pPlane->setDisplay(cloud->getDisplay());
 				pPlane->setVisible(true);
 				pPlane->enableStippling(true);
+				pPlane->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);
 				cloud->prepareDisplayForRefresh_recursive();
 				addToDB(pPlane);
 			}

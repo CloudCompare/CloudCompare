@@ -99,9 +99,9 @@ public:
 	/**	Virtual method to request the 3 summits of a triangle with a
 		specific index.
 		\param triangleIndex index of the requested triangle (between 0 and the mesh size-1)
-		\return A the first requested summit
-		\return B the second requested summit
-		\return C the third requested summit
+		\param A the first requested summit
+		\param B the second requested summit
+		\param C the third requested summit
 	**/
 	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)=0;
 

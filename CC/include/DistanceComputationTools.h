@@ -141,6 +141,7 @@ public:
 		HIDDEN_VALUE (-1) or to an approximated distance (strictly bigger than the true distance!).
 		\param comparedCloud the compared cloud (the distances will be computed on these points)
 		\param referenceCloud the reference cloud (the distances will be computed relatively to these points)
+		\param params distance computation parameters
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param compOctree the pre-computed octree of the compared cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)
 		\param refOctree the pre-computed octree of the reference cloud (warning: both octrees must have the same cubical bounding-box - it is automatically computed if 0)

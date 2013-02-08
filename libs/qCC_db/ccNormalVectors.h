@@ -95,9 +95,9 @@ public:
                                     CCLib::DgmOctree* _theOctree=0);
 
 	//! Converts a normal vector to geological 'strike & dip' parameters (N[dip]°E - [strike]°SE)
-	/** \param N [in] normal (should be normalized!)
-		\param srike [out] strike
-		\param dip [out] dip
+	/** \param[in] N normal (should be normalized!)
+		\param[out] strike strike
+		\param[out] dip dip
 	**/
 	static void ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike, double& dip);
 

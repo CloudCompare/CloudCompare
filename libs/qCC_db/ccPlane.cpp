@@ -22,13 +22,15 @@
 //**************************************************************************
 //
 
+#include <ccIncludeGL.h>
+
 #include "ccPlane.h"
 
 //qCC_db
 #include "ccPointCloud.h"
 #include "ccNormalVectors.h"
 
-ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const ccGLMatrix* transMat /*= 0*/, QString name/*=QString("Plane")*/)
+ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const ccGLMatrix* transMat/*=0*/, QString name/*=QString("Plane")*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_xWidth(xWidth)
 	, m_yWidth(yWidth)
@@ -100,4 +102,10 @@ bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion)
 	inStream >> m_yWidth;
 
 	return true;
+}
+
+ccBBox ccPlane::getFitBB(ccGLMatrix& trans)
+{
+	trans = m_transformation;
+	return ccBBox(CCVector3(-m_xWidth*0.5f,-m_yWidth*0.5f, 0),CCVector3(m_xWidth*0.5f,m_yWidth*0.5f, 0));
 }

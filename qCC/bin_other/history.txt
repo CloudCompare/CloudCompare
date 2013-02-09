@@ -3,12 +3,25 @@
 v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
-- "Point list picking" tool now automatically pastes last picked point in clipboard
-	* string format: " CC_POINT_#i(x,y,z) " (where i is the index in the current list)
-- "Point picking" tool:
-	* When picking 3 successive points ('triplet' mode), the 3 corresponding angles are displayed
+- Point picking mechanism enhanced:
+	- point marker is now a (selectable) 3D sphere
+	- point marker default size is customizable via display options dialog
+	- "Point list picking" tool
+		* automatically pastes last picked point in clipboard
+		* string format: " CC_POINT_#i(x,y,z) " (where i is the index in the current list)
+	- "Point picking" tool:
+		* when picking 3 successive points ('triplet' mode), the 3 corresponding angles are displayed
+- New entry in the DB tree context menu: "Toggle materials/textures"
+- New options for display:
+	* point marker size (see above)
+	* histogram bacground color
+	* label color
+- Limits for auto-decimation are now:
+	* 10M. points for a cloud
+	* 2.5M. faces for a mesh
 - Bug fix:
 	* in the 'Point list picking' tool, when exporting a list of picked points THEN cancelling the picking process, CC will crash
+	* SF scale is now renderded by the 'Render to file' tool
 
 v2.4 01/21/2013
 - New tool: 'Edit > Mesh > Subdivide' (recursive subdivision)

@@ -1006,7 +1006,7 @@ void ccGLWindow::drawGradientBackground()
 	int h = (m_glHeight>>1)+1;
 
 	const unsigned char* bkgCol = ccGui::Parameters().backgroundCol;
-	const unsigned char* forCol = ccGui::Parameters().pointsDefaultCol;
+	const unsigned char* forCol = ccGui::Parameters().textDefaultCol;
 
 	//Gradient "texture" drawing
 	glBegin(GL_QUADS);
@@ -1303,9 +1303,10 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	context.sfColorScaleToDisplay = 0;
 
 	//point picking
-	context.pickedPointsSize = guiParams.pickedPointsSize;
-	context.pickedPointsStartIndex = guiParams.pickedPointsStartIndex;
-	context.pickedPointsTextShift = 5.0 / computeTotalZoom();
+	float totalZoom = computeTotalZoom();
+	totalZoom = std::max<float>(ZERO_TOLERANCE,totalZoom);
+	context.pickedPointsRadius = (float)guiParams.pickedPointsSize / totalZoom ;
+	context.pickedPointsTextShift = 5.0 / totalZoom; //5 pixels shift
 
 	//text display
 	context.dispNumberPrecision = guiParams.displayedNumPrecision;
@@ -1323,6 +1324,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	//default colors
 	memcpy(context.pointsDefaultCol,guiParams.pointsDefaultCol,sizeof(unsigned char)*3);
 	memcpy(context.textDefaultCol,guiParams.textDefaultCol,sizeof(unsigned char)*3);
+	memcpy(context.labelDefaultCol,guiParams.labelCol,sizeof(unsigned char)*3);
 	memcpy(context.bbDefaultCol,guiParams.bbDefaultCol,sizeof(unsigned char)*3);
 
 	//default font size
@@ -2001,7 +2003,7 @@ void ccGLWindow::processHits(GLint hits, int& entID, int& subCompID)
 	for (int i=0;i<hits;++i)
 	{
 		const GLuint& n = _selectBuf[0]; //number of names on stack: should be 1 (CC_DRAW_NAMES mode) or 2 (CC_DRAW_POINT_NAMES mode)!
-		if (n>0) //strangely, we get sometimes empty sets?!
+		if (n) //strangely, we get sometimes empty sets?!
 		{
 			assert(n==1 || n==2);
 			const GLuint& minDepth = _selectBuf[1];//(GLfloat)_selectBuf[1]/(GLfloat)0xffffffff;
@@ -2527,7 +2529,11 @@ bool ccGLWindow::renderToFile(const char* filename, float zoomFactor/*=1.0*/, bo
 
 			fbo->start();
 
-			//add color ramp!
+			//we draw 2D entities (mainly for the color ramp!)
+			if (m_globalDBRoot)
+				m_globalDBRoot->draw(context);
+
+			//current displayed scalar field color ramp (if any)
 			ccRenderingTools::DrawColorRamp(context);
 
 			//read from fbo

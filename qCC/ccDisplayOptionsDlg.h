@@ -65,6 +65,8 @@ protected slots:
     void changeBBColor();
     void changeTextColor();
     void changeBackgroundColor();
+	void changeHistBackgroundColor();
+	void changeLabelColor();
     void changeBackgroundGradient();
     void changeMeshDecimation();
     void changeCloudDecimation();
@@ -76,6 +78,7 @@ protected slots:
 	void changeDefaultFontSize(int);
 	void changeNumberPrecision(int);
 	void changeLabelsTransparency(int);
+	void changeLabelsMarkerSize(int);
 
     void doAccept();
     void doReject();
@@ -96,6 +99,8 @@ protected:
     QColor pointsDefaultCol;
     QColor textDefaultCol;
     QColor backgroundCol;
+    QColor histBackgroundCol;
+    QColor labelCol;
     QColor bbDefaultCol;
 
     //! Current parameters

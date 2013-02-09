@@ -43,7 +43,7 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/) : QGLWidget(parent)
 	setWindowTitle("CloudCompare Histogram");
 	setWindowIcon(QIcon(QString::fromUtf8(":/CC/Old/images/old_cc/cc_histogramIcon.gif")));
 
-    setFocusPolicy(Qt::StrongFocus);
+	setFocusPolicy(Qt::StrongFocus);
 
 	viewInitialized = false;
 	strcpy(infoStr,"NO INFO");
@@ -68,8 +68,8 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/) : QGLWidget(parent)
 	destroyCurveValues = false;
 	verticalIndicatorPositionPercent = 0;
 
-    setMinimumSize(400,300);
-    resize(400,375);
+	setMinimumSize(400,300);
+	resize(400,375);
 
 	//font for text rendering
 	m_renderingFont.setFamily(QString::fromUtf8("Arial"));
@@ -80,16 +80,16 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/) : QGLWidget(parent)
 void ccHistogramWindow::clear()
 {
 	if (destroyHistoValues && histoValues)
-        delete[] histoValues;
+		delete[] histoValues;
 
 	if (destroyCurveValues && curveValues)
-        delete[] curveValues;
+		delete[] curveValues;
 }
 
 void ccHistogramWindow::closeEvent(QCloseEvent *event)
 {
-    clear();
-    event->accept();
+	clear();
+	event->accept();
 }
 
 void ccHistogramWindow::setNumberOfClasses(unsigned n)  //n should be a mutliple of 4
@@ -102,7 +102,7 @@ void ccHistogramWindow::setNumberOfClasses(unsigned n)  //n should be a mutliple
 	if (histoValuesShouldBeRecomputed)
 	{
 		if (histoValues)
-            delete[] histoValues;
+			delete[] histoValues;
 		histoValues = new unsigned[numberOfClasses];
 		memset(histoValues,0,sizeof(unsigned)*numberOfClasses);
 		computeHistoValues();
@@ -129,7 +129,7 @@ void drawBox(int xButton,int yButton,int buttonSize)
 //structure for recursive display of labels
 struct hlabel
 {
-    int leftXpos; 			/**< left label center pos **/
+	int leftXpos; 			/**< left label center pos **/
 	int leftXmax; 			/**< left label 'ROI' max **/
 	double leftVal; 		/**< left label value **/
 
@@ -148,7 +148,8 @@ void ccHistogramWindow::paintGL()
 
 	makeCurrent();
 
-	glClearColor(0.2f,0.0f,0.2f,0.0f);
+	const unsigned char* bkgCol = ccGui::Parameters().histBackgroundCol;
+	glClearColor((float)bkgCol[0]/255.0f,(float)bkgCol[1]/255.0f,(float)bkgCol[2]/255.0f,1.0f);
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	int w = width();
@@ -164,8 +165,9 @@ void ccHistogramWindow::paintGL()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	//default color: white
-	glColor3ubv(ccColor::white);
+	//default color: text color
+	const unsigned char* textCol = ccGui::Parameters().textDefaultCol;
+	glColor3ubv(textCol);
 
 	//margins, etc.
 	const int c_outerMargin = 10;
@@ -207,7 +209,7 @@ void ccHistogramWindow::paintGL()
 
 	//top-left corner
 	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-	glColor3f(1.0f,1.0f,1.0f);
+	glColor3f((float)textCol[0]/255.0,(float)textCol[1]/255.0,(float)textCol[2]/255.0);
 	renderText(c_outerMargin, c_outerMargin+c_strHeight-c_strDescent, strMetrics.elidedText(QString("%0 [%1 classes]").arg(infoStr).arg(numberOfClasses),Qt::ElideRight,xMinusButton-c_outerMargin), m_renderingFont);
 
 	//custom labels
@@ -217,7 +219,7 @@ void ccHistogramWindow::paintGL()
 
 	//can't go any further without data!
 	if (!histoValues)
-        return;
+		return;
 
 	//update horizontal & vertical axes position so that their labels can be properly displayed
 	int maxYLabelWidth = strMetrics.width(QString::number(maxHistoVal));
@@ -238,7 +240,7 @@ void ccHistogramWindow::paintGL()
 		return;
 
 	//draw both axes
-	glColor3ubv(ccColor::white);
+	glColor3ubv(textCol);
 	glBegin(GL_LINES);
 	//vertical
 	glVertex2f(roi[0],roi[1]);
@@ -251,13 +253,13 @@ void ccHistogramWindow::paintGL()
 	//horizontal labels
 	{
 		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-		glColor3f(1.0f,1.0f,1.0f);
+		glColor3f((float)textCol[0]/255.0,(float)textCol[1]/255.0,(float)textCol[2]/255.0);
 
 		//draw first value tick & label
-			glBegin(GL_LINES);
+		glBegin(GL_LINES);
 		glVertex2f(roi[0],roi[1]-c_ticksSize);
 		glVertex2f(roi[0],roi[1]);
-			glEnd();
+		glEnd();
 		renderText(roi[0]-firstXLabelWidth/2, h-c_outerMargin, firstlabel, m_renderingFont);
 
 		//draw last value tick & label
@@ -323,7 +325,7 @@ void ccHistogramWindow::paintGL()
 
 						nextLevelLabels.push_back(leftLabel);
 						nextLevelLabels.push_back(rightLabel);
-	}
+					}
 					else
 					{
 						//not enough space for current label! we stop here
@@ -332,9 +334,9 @@ void ccHistogramWindow::paintGL()
 				}
 
 				if (proceedWithNextLevel)
-	{
+				{
 					//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-					glColor3f(1.0f,1.0f,1.0f);
+					glColor3f((float)textCol[0]/255.0,(float)textCol[1]/255.0,(float)textCol[2]/255.0);
 
 					//we only display labels if 'proceedWithNextLevel' is true
 					while (!strToDisplay.empty())
@@ -355,7 +357,7 @@ void ccHistogramWindow::paintGL()
 	//vertical labels
 	{
 		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-		glColor3f(1.0f,1.0f,1.0f);
+		glColor3f((float)textCol[0]/255.0,(float)textCol[1]/255.0,(float)textCol[2]/255.0);
 
 		const unsigned n=4;
 		for (int i=0;i<=n;++i)
@@ -424,8 +426,8 @@ void ccHistogramWindow::paintGL()
 		float x=(float)(roi[0]+1);
 		float y=(float)(roi[1]+1);
 
-		//white by default
-		glColor3ubv(ccColor::white);
+		//same as text color by default
+		glColor3ubv(textCol);
 
 		glBegin(GL_LINE_STRIP);
 		for (unsigned i=0;i<numberOfCurvePoints;++i)
@@ -456,7 +458,7 @@ void ccHistogramWindow::paintGL()
 		QString valueStr = QString("bin %0").arg(bin);
 
 		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-		glColor3f(1.0f,0.0f,0.0f);
+		glColor3f((float)textCol[0]/255.0,(float)textCol[1]/255.0,(float)textCol[2]/255.0);
 		renderText(leftSide ? x-strMetrics.width(valueStr)-c_innerMargin : x+c_innerMargin, h-y, valueStr, m_renderingFont);
 		y -= (c_strHeight+c_innerMargin);
 		if (theValues)
@@ -506,7 +508,7 @@ void ccHistogramWindow::setValues(ccScalarField* values)
 
 void ccHistogramWindow::setHistoValues(unsigned* _histoValues, unsigned _numberOfClasses)
 {
-    assert(_histoValues);
+	assert(_histoValues);
 
 	histoValues = _histoValues;
 	numberOfClassesCanBeChanged = false;
@@ -531,7 +533,7 @@ void ccHistogramWindow::setCurveValues(double* _curveValues, unsigned _numberOfC
 void ccHistogramWindow::computeHistoValues()
 {
 	if (!histoValues || !theValues)
-        return;
+		return;
 
 	//Console::print("Recalcul des valeurs de l'histogramme (%i classes) !\n",numberOfClasses);
 
@@ -558,7 +560,7 @@ void ccHistogramWindow::computeHistoValues()
 		//cas particulier
 		else if (val==maxVal)
 		{
-            ++histoValues[numberOfClasses-1];
+			++histoValues[numberOfClasses-1];
 		}
 	}
 }
@@ -566,69 +568,69 @@ void ccHistogramWindow::computeHistoValues()
 unsigned ccHistogramWindow::getMaxHistoVal()
 {
 	if (!histoValues)
-        return 0;
+		return 0;
 
 	unsigned i,maxHistoVal = 0;
 	for (i=0;i<numberOfClasses;++i)
-        maxHistoVal=ccMax(maxHistoVal,histoValues[i]);
+		maxHistoVal=ccMax(maxHistoVal,histoValues[i]);
 
 	return maxHistoVal;
 }
 
 void ccHistogramWindow::histoValuesShouldBeDestroyed(bool value)
 {
-    destroyHistoValues = value;
+	destroyHistoValues = value;
 }
 
 void ccHistogramWindow::curveValuesShouldBeDestroyed(bool value)
 {
-    destroyCurveValues = value;
+	destroyCurveValues = value;
 }
 
 void ccHistogramWindow::mousePressEvent(QMouseEvent *event)
 {
-    mouseMoveEvent(event);
+	mouseMoveEvent(event);
 }
 
 void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 {
 	bool actionDetected = false;
-    if (event->buttons() & Qt::LeftButton)
-    {
-        int x=event->x();
-        int y=height()-event->y();
+	if (event->buttons() & Qt::LeftButton)
+	{
+		int x=event->x();
+		int y=height()-event->y();
 
-        if (numberOfClassesCanBeChanged)
-        {
-            //est-ce que l'utilisateur appuie sur le bouton "-"
-            if (numberOfClasses>4)
-            {
-                if ((y>=yMinusButton-buttonSize)&&(y<=yMinusButton))
-                {
-                    if ((x>=xMinusButton)&&(x<=xMinusButton+buttonSize))
-                    {
-                        setNumberOfClasses(numberOfClasses-4);
-                        actionDetected = true;
-                    }
-                }
-            }
+		if (numberOfClassesCanBeChanged)
+		{
+			//est-ce que l'utilisateur appuie sur le bouton "-"
+			if (numberOfClasses>4)
+			{
+				if ((y>=yMinusButton-buttonSize)&&(y<=yMinusButton))
+				{
+					if ((x>=xMinusButton)&&(x<=xMinusButton+buttonSize))
+					{
+						setNumberOfClasses(numberOfClasses-4);
+						actionDetected = true;
+					}
+				}
+			}
 
-            //est-ce que l'utilisateur appuie sur le bouton "+"
-            if (!actionDetected)
-                if ((y>=yPlusButton-buttonSize)&&(y<=yPlusButton))
-                {
-                    if ((x>=xPlusButton)&&(x<=xPlusButton+buttonSize))
-                    {
-                        setNumberOfClasses(numberOfClasses+4);
-                        actionDetected = true;
-                    }
-                }
-        }
+			//est-ce que l'utilisateur appuie sur le bouton "+"
+			if (!actionDetected)
+				if ((y>=yPlusButton-buttonSize)&&(y<=yPlusButton))
+				{
+					if ((x>=xPlusButton)&&(x<=xPlusButton+buttonSize))
+					{
+						setNumberOfClasses(numberOfClasses+4);
+						actionDetected = true;
+					}
+				}
+		}
 
-        //est-ce que l'utilisateur clique ailleurs sur l'histogramme
-        if (!actionDetected)
-        {
-            if ((x>roi[0])&&(x<=roi[2])&&(y>roi[1])&&(y<=roi[3]))
+		//est-ce que l'utilisateur clique ailleurs sur l'histogramme
+		if (!actionDetected)
+		{
+			if ((x>roi[0])&&(x<=roi[2])&&(y>roi[1])&&(y<=roi[3]))
 			{
 				drawVerticalIndicator = true;
 				if (roi[2]>roi[0])
@@ -642,33 +644,33 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 				}
 				actionDetected = true;
 			}
-        }
-    }
-    else event->ignore();
+		}
+	}
+	else event->ignore();
 
-    if (actionDetected)
-        updateGL();
+	if (actionDetected)
+		updateGL();
 }
 
 void ccHistogramWindow::wheelEvent(QWheelEvent* event)
 {
-    if (!numberOfClassesCanBeChanged)
-    {
-        event->ignore();
-        return;
-    }
+	if (!numberOfClassesCanBeChanged)
+	{
+		event->ignore();
+		return;
+	}
 
-    if (event->delta()<0)
-    {
-        if (numberOfClasses>4)
-        {
-            setNumberOfClasses(numberOfClasses-4);
-            updateGL();
-        }
-    }
-    else //if (event->delta()>0)
-    {
-        setNumberOfClasses(numberOfClasses+4);
-        updateGL();
-    }
+	if (event->delta()<0)
+	{
+		if (numberOfClasses>4)
+		{
+			setNumberOfClasses(numberOfClasses-4);
+			updateGL();
+		}
+	}
+	else //if (event->delta()>0)
+	{
+		setNumberOfClasses(numberOfClasses+4);
+		updateGL();
+	}
 }

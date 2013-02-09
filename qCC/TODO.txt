@@ -10,10 +10,11 @@ Issues:
 
 *** Requests ***
 
-- export/open PTG files
-- export/open SHP files (--> GDAL)
-- export geotiff (--> GDAL)
-- add "expand" and "collapse" options on the DB tree elements
+- export/open:
+	* POD files (Pointools)
+	* FARO and LEICA file formats
+	* SHP files (--> GDAL)
+	* geotiff files (--> GDAL)
 
 In french (because I'm lazy today):
 - uniformiser l'échelle de plusieurs entités
@@ -23,6 +24,18 @@ In french (because I'm lazy today):
 - calcul basé sur un nuage sous-échantillonné
 
 *** And from the forum topic 'recent requests' ***
+
+Various:
+[*] Per-cloud point size
+[*] Per-point size based on SF values
+[*] Primitive factory
+[*] Select ASCII files output precision
+[*] flythrough mode
+
+From Jean-Francois H.: 
+[*] possibility of changing color background of histogram (typically white), and eventually export it as image.
+[*] the "display scale" is quite hard to find for newbies. Maybe add it in the menus?
+[*] add a "Toggle Material/Texture" when right clicking in the tree structure for meshes!
 
 From Konrad W.:
 [*] Something like the plane shader from point tools where the depth is coloured with the Hue channel

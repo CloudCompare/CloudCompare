@@ -28,6 +28,10 @@
 #include "cc2DLabel.h"
 #include "ccBasicTypes.h"
 #include "ccGenericPointCloud.h"
+#include "ccSphere.h"
+
+//Qt
+#include <QSharedPointer>
 
 //System
 #include <assert.h>
@@ -390,6 +394,9 @@ void cc2DLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 		drawMeOnly2D(context);
 }
 
+//unit point marker
+static QSharedPointer<ccSphere> c_unitPointMarker(0);
+
 void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 {
 	assert(!m_points.empty());
@@ -397,8 +404,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 	//standard case: list names pushing
 	bool pushName = MACRO_DrawNames(context);
 	if (pushName)
-		//glPushName(getUniqueID());
-		return;
+		glPushName(getUniqueID());
 
     const float c_sizeFactor = 4.0f;
     bool loop=false;
@@ -447,25 +453,40 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 
     case 1:
 		{
-			//point size
-			glPushAttrib(GL_POINT_BIT);
-			float size=1.0;
-			glGetFloatv(GL_POINT_SIZE,&size);
-			glPointSize(c_sizeFactor/*(float)context.pickedPointsSize*/*size);
-
-			//draw selected points
-			glColor3ubv(ccColor::red);
-			glBegin(GL_POINTS);
-			for (unsigned i=0; i<count; i++)
+			//display point marker as spheres
 			{
-				const CCVector3* P = m_points[i].cloud->getPoint(m_points[i].index);
-				glVertex3fv(P->u);
+				if (!c_unitPointMarker)
+				{
+					c_unitPointMarker = QSharedPointer<ccSphere>(new ccSphere(1.0f,0,"PointMarker",12));
+					c_unitPointMarker->showColors(true);
+					c_unitPointMarker->setVisible(true);
+					c_unitPointMarker->setEnabled(true);
+				}
+			
+				//build-up point maker own 'context'
+				bool pushName = MACRO_DrawNames(context);
+				CC_DRAW_CONTEXT markerContext = context;
+				markerContext.flags &= (~CC_DRAW_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+				markerContext._win = 0;
+
+				if (isSelected() && !pushName)
+					c_unitPointMarker->setColor(ccColor::red);
+				else
+					c_unitPointMarker->setColor(ccColor::magenta);
+
+				for (unsigned i=0; i<count; i++)
+				{
+					glMatrixMode(GL_MODELVIEW);
+					glPushMatrix();
+					const CCVector3* P = m_points[i].cloud->getPoint(m_points[i].index);
+					glTranslatef(P->x,P->y,P->z);
+					glScalef(context.pickedPointsRadius,context.pickedPointsRadius,context.pickedPointsRadius);
+					c_unitPointMarker->draw(markerContext);
+					glPopMatrix();
+				}
 			}
-			glEnd();
 
-			glPopAttrib();
-
-			if (m_dispIn3D)
+			if (m_dispIn3D && !pushName) //no need to display label in point picking mode
 			{
 				QFont font(context._win->getTextDisplayFont());
 				//font.setPointSize(font.pointSize()+2);
@@ -485,8 +506,8 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		}
     }
 
-	//if (pushName)
-	//	glPopName();
+	if (pushName)
+		glPopName();
 }
 
 //display parameters
@@ -534,11 +555,9 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		GLdouble zp;
 		gluProject(arrowDest.x,arrowDest.y,arrowDest.z,MM,MP,VP,&arrowDestX,&arrowDestY,&zp);
 
-		/*** label rectangle ***/
+		/*** label border ***/
 		bodyFont = context._win->getTextDisplayFont();
 		titleFont = QFont(context._win->getTextDisplayFont());
-		//int pointSize = titleFont.pointSize();
-		//titleFont.setPointSize(pointSize+2);
 		titleFont.setBold(true);
 		QFontMetrics titleFontMetrics(titleFont);
 		QFontMetrics bodyFontMetrics(bodyFont);
@@ -599,14 +618,14 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	bool highlighted = (!pushName && isSelected());
 	//default background color
 	colorType defaultBkgColor[4];
-	memcpy(defaultBkgColor,ccColor::yellow,sizeof(colorType)*3);
+	memcpy(defaultBkgColor,context.labelDefaultCol,sizeof(colorType)*3);
 	defaultBkgColor[3]=(colorType)((float)context.labelsTransparency*(float)MAX_COLOR_COMP/100.0f);
 	//default border color (mustn't be totally transparent!)
 	colorType defaultBorderColor[4];
 	if (highlighted)
 		memcpy(defaultBorderColor,ccColor::red,sizeof(colorType)*3);
 	else
-		memcpy(defaultBorderColor,ccColor::yellow,sizeof(colorType)*3);
+		memcpy(defaultBorderColor,context.labelDefaultCol,sizeof(colorType)*3);
 	defaultBorderColor[3]=(colorType)((float)(50+context.labelsTransparency/2)*(float)MAX_COLOR_COMP/100.0f);
 
 	glPushAttrib(GL_COLOR_BUFFER_BIT);

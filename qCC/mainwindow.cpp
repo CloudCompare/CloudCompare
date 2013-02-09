@@ -322,11 +322,7 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 		ccLog::Warning("Plugin has an invalid (empty) name!");
 		return false;
 	}
-    ccConsole::Print("Plugin name: [%s]",pluginName);
-
-	QMenu* destMenu=0;
-	QToolBar* destToolBar=0;
-	QActionGroup actions(this);
+    ccConsole::Print("Plugin name: [%s]",qPrintable(pluginName));
 
 	switch(ccPlugin->getType())
 	{
@@ -336,6 +332,10 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(ccPlugin);
 			stdPlugin->setMainAppInterface(this);
 
+			QMenu* destMenu=0;
+			QToolBar* destToolBar=0;
+
+			QActionGroup actions(this);
 			stdPlugin->getActions(actions);
 			if (actions.actions().size()>1) //more than one action? We create it's own menu and toolbar
 			{
@@ -350,6 +350,24 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 				destToolBar = toolBarPluginTools;
 			}
 
+			//add actions
+			foreach(QAction* action,actions.actions())
+			{
+				//add to menu (if any)
+				if (destMenu)
+				{
+					destMenu->addAction(action);
+					destMenu->setEnabled(true);
+				}
+				//add to toolbar
+				if (destToolBar)
+				{
+					destToolBar->addAction(action);
+					destToolBar->setVisible(true);
+					destToolBar->setEnabled(true);
+				}
+			}
+
 			//add to std. plugins list
 			m_stdPlugins.push_back(stdPlugin);
 		}
@@ -357,20 +375,22 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 
 	case CC_GL_FILTER_PLUGIN:  //GL filter
 		{
-			destMenu = menuShadersAndFilters;
-			destToolBar = toolBarGLFilters;
-
 			//(auto)create action
-			QAction* action = new QAction(pluginName,this);
+			QAction* action = new QAction(pluginName,plugin);
 			action->setToolTip(ccPlugin->getDescription());
 			action->setIcon(ccPlugin->getIcon());
 			//connect default signal
 			connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
-			m_glFilterActions.addAction(action);
-			actions.addAction(action);
+
+			menuShadersAndFilters->addAction(action);
+			menuShadersAndFilters->setEnabled(true);
+			toolBarGLFilters->addAction(action);
+			toolBarGLFilters->setVisible(true);
+			toolBarGLFilters->setEnabled(true);
 
 			//add to GL filter (actions) list
 			m_glFilterActions.addAction(action);
+
 		}
 		break;
 
@@ -378,24 +398,6 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 		assert(false);
 		ccLog::Print("Unhandled plugin type!");
 		return false;
-	}
-
-	//add actions
-	foreach(QAction* action,actions.actions())
-	{
-		//add to menu (if any)
-		if (destMenu)
-		{
-			destMenu->addAction(action);
-			destMenu->setEnabled(true);
-		}
-		//add to toolbar
-		if (destToolBar)
-		{
-			destToolBar->addAction(action);
-			destToolBar->setVisible(true);
-			destToolBar->setEnabled(true);
-		}
 	}
 
     return true;
@@ -4470,6 +4472,9 @@ void MainWindow::activatePointListPickingMode()
 
         registerMDIDialog(m_plpDlg,Qt::TopRightCorner);
     }
+
+	//DGM: we must update marke size spin box value (as it may have changed by the user with the "display dialog")
+	m_plpDlg->markerSizeSpinBox->setValue(ccGui::Parameters().pickedPointsSize);
 
     m_plpDlg->linkWith(win);
 	m_plpDlg->linkWithCloud(pc);

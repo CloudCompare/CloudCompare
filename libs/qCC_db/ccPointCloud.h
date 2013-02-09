@@ -48,7 +48,7 @@ class ccScalarField;
 const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 128000000;
 
 //! Max number of displayed point (per entity) in "low detail" display
-const unsigned MAX_LOD_POINTS_NUMBER = 1000000;
+const unsigned MAX_LOD_POINTS_NUMBER = 10000000;
 
 //! A 3D cloud and its associated features (color, normals, scalar fields, etc.)
 /** A point cloud can have multiple features:

@@ -78,6 +78,8 @@ void ccGui::ParamStruct::reset()
     memcpy(pointsDefaultCol,    ccColor::defaultColor,			c_ubColorArraySize);
     memcpy(textDefaultCol,      ccColor::defaultColor,			c_ubColorArraySize);
     memcpy(backgroundCol,       ccColor::defaultBkgColor,		c_ubColorArraySize);
+    memcpy(histBackgroundCol,	ccColor::defaultHistBkgColor,	c_ubColorArraySize);
+    memcpy(labelCol,			ccColor::defaultLabelColor,		c_ubColorArraySize);
     memcpy(bbDefaultCol,        ccColor::yellow,				c_ubColorArraySize);
 
     drawBackgroundGradient      = true;
@@ -86,7 +88,6 @@ void ccGui::ParamStruct::reset()
     displayCross                = true;
 
 	pickedPointsSize = 4;
-	pickedPointsStartIndex = 1;
 
 	colorScaleAlwaysSymmetrical	= true;
 	colorScaleAlwaysShowZero	= true;
@@ -108,6 +109,8 @@ ccGui::ParamStruct& ccGui::ParamStruct::operator =(const ccGui::ParamStruct& par
     memcpy(pointsDefaultCol,    params.pointsDefaultCol,    c_ubColorArraySize);
     memcpy(textDefaultCol,      params.textDefaultCol,      c_ubColorArraySize);
     memcpy(backgroundCol,       params.backgroundCol,       c_ubColorArraySize);
+    memcpy(histBackgroundCol,	params.histBackgroundCol,	c_ubColorArraySize);
+    memcpy(labelCol,			params.labelCol,			c_ubColorArraySize);
     memcpy(bbDefaultCol,        params.bbDefaultCol,        c_ubColorArraySize);
 
     drawBackgroundGradient      = params.drawBackgroundGradient;
@@ -115,7 +118,6 @@ ccGui::ParamStruct& ccGui::ParamStruct::operator =(const ccGui::ParamStruct& par
     decimateCloudOnMove         = params.decimateCloudOnMove;
     displayCross                = params.displayCross;
 	pickedPointsSize			= params.pickedPointsSize;
-	pickedPointsStartIndex		= params.pickedPointsStartIndex;
 	colorScaleAlwaysSymmetrical	= params.colorScaleAlwaysSymmetrical;
 	colorScaleAlwaysShowZero	= params.colorScaleAlwaysShowZero;
 	colorScaleSquareSize		= params.colorScaleSquareSize;
@@ -141,6 +143,8 @@ void ccGui::ParamStruct::fromPersistentSettings()
     memcpy(pointsDefaultCol,    settings.value("pointsDefaultColor",    QByteArray((const char*)ccColor::defaultColor,          c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
     memcpy(textDefaultCol,      settings.value("textDefaultColor",      QByteArray((const char*)ccColor::defaultColor,          c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
     memcpy(backgroundCol,       settings.value("backgroundColor",       QByteArray((const char*)ccColor::defaultBkgColor,       c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
+    memcpy(histBackgroundCol,	settings.value("histBackgroundColor",	QByteArray((const char*)ccColor::defaultHistBkgColor,   c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
+    memcpy(labelCol,			settings.value("labelColor",			QByteArray((const char*)ccColor::defaultLabelColor,     c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
     memcpy(bbDefaultCol,        settings.value("bbDefaultColor",        QByteArray((const char*)ccColor::yellow,                c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
 
     drawBackgroundGradient  = settings.value("backgroundGradient", true).toBool();
@@ -149,7 +153,6 @@ void ccGui::ParamStruct::fromPersistentSettings()
     displayCross            = settings.value("crossDisplayed", true).toBool();
 
 	pickedPointsSize		= (unsigned)settings.value("pickedPointsSize", 4).toInt();
-	pickedPointsStartIndex	= (unsigned)settings.value("pickedPointsStartIndex", 1).toInt();
 
     colorScaleAlwaysSymmetrical	= settings.value("colorScaleAlwaysSymmetrical", true).toBool();
     colorScaleAlwaysShowZero	= settings.value("colorScaleAlwaysShowZero", true).toBool();
@@ -176,13 +179,14 @@ void ccGui::ParamStruct::toPersistentSettings()
     settings.setValue("pointsDefaultColor",QByteArray((const char*)pointsDefaultCol,c_ubColorArraySize));
     settings.setValue("textDefaultColor",QByteArray((const char*)textDefaultCol,c_ubColorArraySize));
     settings.setValue("backgroundColor",QByteArray((const char*)backgroundCol,c_ubColorArraySize));
+    settings.setValue("histBackgroundColor",QByteArray((const char*)histBackgroundCol,c_ubColorArraySize));
+    settings.setValue("labelColor",QByteArray((const char*)labelCol,c_ubColorArraySize));
     settings.setValue("bbDefaultColor",QByteArray((const char*)bbDefaultCol,c_ubColorArraySize));
     settings.setValue("backgroundGradient",drawBackgroundGradient);
     settings.setValue("meshDecimation",decimateMeshOnMove);
     settings.setValue("cloudDecimation",decimateCloudOnMove);
     settings.setValue("crossDisplayed",displayCross);
 	settings.setValue("pickedPointsSize", pickedPointsSize);
-	settings.setValue("pickedPointsStartIndex", pickedPointsStartIndex);
 	settings.setValue("colorScaleAlwaysSymmetrical", colorScaleAlwaysSymmetrical);
     settings.setValue("colorScaleAlwaysShowZero", colorScaleAlwaysShowZero);
 	settings.setValue("colorScaleSquareSize", colorScaleSquareSize);

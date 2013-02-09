@@ -60,6 +60,10 @@ public:
         unsigned char pointsDefaultCol[3];
         //! Background color
         unsigned char backgroundCol[3];
+		//! Histogram background color
+		unsigned char histBackgroundCol[3];
+		//! Labels color
+		unsigned char labelCol[3];
         //! Bounding-boxes color
         unsigned char bbDefaultCol[3];
         //! Use background gradient
@@ -73,8 +77,6 @@ public:
 
 		//! Picked points size
 		unsigned pickedPointsSize;
-		//! Picked points start index (for label display)
-		unsigned pickedPointsStartIndex;
 
 		//! Color scale option: always show '0'
 		bool colorScaleAlwaysShowZero;

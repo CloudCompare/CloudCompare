@@ -26,7 +26,7 @@
 #define CC_MESH_HEADER
 
 //! Max number of displayed triangles (per entity) in "low detail" display
-const unsigned MAX_LOD_FACES_NUMBER = 250000;
+const unsigned MAX_LOD_FACES_NUMBER = 2500000;
 
 //CCLib
 #include <SimpleTriangle.h>

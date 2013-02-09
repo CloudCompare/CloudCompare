@@ -79,6 +79,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_toggleSelectedEntitiesVisibility = new QAction("Toggle visibility",this);
 	m_toggleSelectedEntitiesColor = new QAction("Toggle color",this);
 	m_toggleSelectedEntitiesNormals = new QAction("Toggle normals",this);
+	m_toggleSelectedEntitiesMat = new QAction("Toggle materials/textures",this);
 	m_toggleSelectedEntitiesSF = new QAction("Toggle SF",this);
 	m_addEmptyGroup = new QAction("Add empty group",this);
 
@@ -96,9 +97,9 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_toggleSelectedEntitiesVisibility,	SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesVisibility()));
 	connect(m_toggleSelectedEntitiesColor,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesColor()));
 	connect(m_toggleSelectedEntitiesNormals,	SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesNormals()));
+	connect(m_toggleSelectedEntitiesMat,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesMat()));
 	connect(m_toggleSelectedEntitiesSF,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesSF()));
 	connect(m_addEmptyGroup,					SIGNAL(triggered()),								this, SLOT(addEmptyGroup()));
-	
 
     //other DB tree signals/slots connection
     connect(m_dbTreeWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(changeSelection(const QItemSelection&, const QItemSelection&)));
@@ -1139,6 +1140,11 @@ void ccDBRoot::toggleSelectedEntitiesSF()
 	toggleSelectedEntitiesProperty(4);
 }
 
+void ccDBRoot::toggleSelectedEntitiesMat()
+{
+	toggleSelectedEntitiesProperty(5);
+}
+
 void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 {
 	if (prop>4)
@@ -1178,6 +1184,13 @@ void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 			break;
 		case 4: //SF
 			item->showSF(!item->sfShown());
+			break;
+		case 5: //Materials/textures
+			if (item->isKindOf(CC_MESH))
+			{
+				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(item);
+				mesh->showMaterials(!mesh->materialsShown());
+			}
 			break;
 		}
 		item->prepareDisplayForRefresh();
@@ -1226,6 +1239,7 @@ void ccDBRoot::showContextMenu(const QPoint& pnt)
 		{
 			bool toggleVisibility=false;
 			bool toggleOtherProperties=false;
+			bool toggleMaterials=false;
 			bool hasMoreThan2Children=false;
 			bool leafObject=false;
 			for (i=0;i<selCount;++i)
@@ -1240,11 +1254,14 @@ void ccDBRoot::showContextMenu(const QPoint& pnt)
 				if (!item->isA(CC_HIERARCHY_OBJECT))
 				{
 					toggleVisibility = true;
-					if (item->isKindOf(CC_POINT_CLOUD) || item->isKindOf(CC_MESH))
+					if (item->isKindOf(CC_POINT_CLOUD))
 					{
 						toggleOtherProperties = true;
-						if (hasMoreThan2Children)
-							break; //no need to get more information!
+					}
+					else if (item->isKindOf(CC_MESH))
+					{
+						toggleMaterials = true;
+						toggleOtherProperties = true;
 					}
 				}
 			}
@@ -1257,6 +1274,10 @@ void ccDBRoot::showContextMenu(const QPoint& pnt)
 				menu.addAction(m_toggleSelectedEntitiesColor);
 				menu.addAction(m_toggleSelectedEntitiesNormals);
 				menu.addAction(m_toggleSelectedEntitiesSF);
+			}
+			if (toggleMaterials)
+			{
+				menu.addAction(m_toggleSelectedEntitiesMat);
 			}
 			menu.addSeparator();
 			menu.addAction(m_deleteSelectedEntities);

@@ -43,7 +43,9 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
     connect(meshFrontColorButton, SIGNAL(clicked()), this, SLOT(changeMeshFrontDiffuseColor()));
     connect(bbColorButton, SIGNAL(clicked()), this, SLOT(changeBBColor()));
     connect(bkgColorButton, SIGNAL(clicked()), this, SLOT(changeBackgroundColor()));
-    connect(gradientBox, SIGNAL(clicked()), this, SLOT(changeBackgroundGradient()));
+    connect(histBkgColorButton, SIGNAL(clicked()), this, SLOT(changeHistBackgroundColor()));
+    connect(labelsColorButton, SIGNAL(clicked()), this, SLOT(changeLabelColor()));
+    connect(enableGradientCheckBox, SIGNAL(clicked()), this, SLOT(changeBackgroundGradient()));
     connect(pointsColorButton, SIGNAL(clicked()), this, SLOT(changePointsColor()));
     connect(textColorButton, SIGNAL(clicked()), this, SLOT(changeTextColor()));
     connect(decimateMeshBox, SIGNAL(clicked()), this, SLOT(changeMeshDecimation()));
@@ -57,6 +59,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 	connect(defaultFontSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeDefaultFontSize(int)));
 	connect(numberPrecisionSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeNumberPrecision(int)));
 	connect(labelsTransparencySpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeLabelsTransparency(int)));
+	connect(labelMarkerSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeLabelsMarkerSize(int)));
 	
     connect(okButton, SIGNAL(clicked()), this, SLOT(doAccept()));
     connect(applyButton, SIGNAL(clicked()), this, SLOT(apply()));
@@ -104,7 +107,15 @@ void ccDisplayOptionsDlg::refresh()
     backgroundCol.setRgb(bgc[0],bgc[1],bgc[2]);
     SetButtonColor(bkgColorButton,backgroundCol);
 
-    const unsigned char* pdc = parameters.pointsDefaultCol;
+	const unsigned char* hbgc = parameters.histBackgroundCol;
+    histBackgroundCol.setRgb(hbgc[0],hbgc[1],hbgc[2]);
+    SetButtonColor(histBkgColorButton,histBackgroundCol);
+
+	const unsigned char* lblc = parameters.labelCol;
+    labelCol.setRgb(lblc[0],lblc[1],lblc[2]);
+    SetButtonColor(labelsColorButton,labelCol);
+
+	const unsigned char* pdc = parameters.pointsDefaultCol;
     pointsDefaultCol.setRgb(pdc[0],pdc[1],pdc[2]);
     SetButtonColor(pointsColorButton,pointsDefaultCol);
 
@@ -112,7 +123,7 @@ void ccDisplayOptionsDlg::refresh()
     textDefaultCol.setRgb(tdc[0],tdc[1],tdc[2]);
     SetButtonColor(textColorButton,textDefaultCol);
 
-    gradientBox->setChecked(parameters.drawBackgroundGradient);
+    enableGradientCheckBox->setChecked(parameters.drawBackgroundGradient);
     decimateMeshBox->setChecked(parameters.decimateMeshOnMove);
     decimateCloudBox->setChecked(parameters.decimateCloudOnMove);
     showCrossCheckBox->setChecked(parameters.displayCross);
@@ -124,6 +135,7 @@ void ccDisplayOptionsDlg::refresh()
 	defaultFontSizeSpinBox->setValue(parameters.defaultFontSize);
 	numberPrecisionSpinBox->setValue(parameters.displayedNumPrecision);
 	labelsTransparencySpinBox->setValue(parameters.labelsTransparency);
+	labelMarkerSizeSpinBox->setValue(parameters.pickedPointsSize);
 
 	update();
 }
@@ -294,9 +306,39 @@ void ccDisplayOptionsDlg::changeBackgroundColor()
 	update();
 }
 
+void ccDisplayOptionsDlg::changeHistBackgroundColor()
+{
+    QColor newCol = QColorDialog::getColor(histBackgroundCol, this);
+    if (!newCol.isValid())
+		return;
+
+	histBackgroundCol = newCol;
+	SetButtonColor(histBkgColorButton,histBackgroundCol);
+
+	unsigned char rgb[3]={histBackgroundCol.red(),histBackgroundCol.green(),histBackgroundCol.blue()};
+	memcpy(parameters.histBackgroundCol,rgb,sizeof(unsigned char)*3);
+
+	update();
+}
+
+void ccDisplayOptionsDlg::changeLabelColor()
+{
+    QColor newCol = QColorDialog::getColor(labelCol, this);
+    if (!newCol.isValid())
+		return;
+
+	labelCol = newCol;
+	SetButtonColor(labelsColorButton,labelCol);
+
+	unsigned char rgb[3]={labelCol.red(),labelCol.green(),labelCol.blue()};
+	memcpy(parameters.labelCol,rgb,sizeof(unsigned char)*3);
+
+	update();
+}
+
 void ccDisplayOptionsDlg::changeBackgroundGradient()
 {
-    parameters.drawBackgroundGradient = gradientBox->isChecked();
+    parameters.drawBackgroundGradient = enableGradientCheckBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeMeshDecimation()
@@ -350,6 +392,14 @@ void ccDisplayOptionsDlg::changeLabelsTransparency(int val)
 	if (val<0 || val>100)
 		return;
 	parameters.labelsTransparency = (unsigned)val;
+}
+
+void ccDisplayOptionsDlg::changeLabelsMarkerSize(int val)
+{
+	if (val<=0)
+		return;
+	
+	parameters.pickedPointsSize = (unsigned)val;
 }
 
 void ccDisplayOptionsDlg::doReject()

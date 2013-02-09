@@ -71,8 +71,10 @@ namespace ccColor
     static const float defaultMeshBackDiff[4]   =   {0.32f,1.0f,1.0f,1.0f};
 
     // Default foreground color
-    static const colorType defaultColor[3]      =   {MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
-    static const colorType defaultBkgColor[3]   =   {10,102,151};
+    static const colorType defaultColor[3]			=   {MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+    static const colorType defaultBkgColor[3]		=   {10,102,151};
+    static const colorType defaultHistBkgColor[3]	=   {51,0,51};
+    static const colorType defaultLabelColor[3]		=   {255,255,0};
 };
 
 #endif

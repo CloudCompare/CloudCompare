@@ -45,6 +45,8 @@
 //system
 #include <assert.h>
 
+static unsigned s_pickedPointsStartIndex = 0;
+
 ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	: ccPointPickingGenericInterface(parent)
 	, Ui::PointListPickingDlg()
@@ -66,9 +68,7 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 
 	tableWidget->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
-	const ccGui::ParamStruct& guiParams = ccGui::Parameters();
-	markerSizeSpinBox->setValue(guiParams.pickedPointsSize);
-	startIndexSpinBox->setValue(guiParams.pickedPointsStartIndex);
+	startIndexSpinBox->setValue(s_pickedPointsStartIndex);
 
 	connect(cancelToolButton,       SIGNAL(clicked()),          this,				SLOT(cancelAndExit()));
 	connect(revertToolButton,       SIGNAL(clicked()),          this,				SLOT(removeLastEntry()));
@@ -259,12 +259,9 @@ void ccPointListPickingDlg::removeLastEntry()
 
 void ccPointListPickingDlg::startIndexChanged(int value)
 {
-	ccGui::ParamStruct guiParams = ccGui::Parameters();
-
-	if (guiParams.pickedPointsStartIndex != (unsigned)value)
+	if (value != s_pickedPointsStartIndex)
 	{
-		guiParams.pickedPointsStartIndex = (unsigned)value;
-		ccGui::Set(guiParams);
+		s_pickedPointsStartIndex = (unsigned)value;
 
 		updateList();
 		if (m_associatedWin)

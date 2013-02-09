@@ -83,6 +83,7 @@ struct glDrawContext
 	float defaultMeshBackDiff[4];
 	unsigned char pointsDefaultCol[3];
 	unsigned char textDefaultCol[3];
+	unsigned char labelDefaultCol[3];
 	unsigned char bbDefaultCol[3];
 
 	//decimation options
@@ -95,8 +96,7 @@ struct glDrawContext
     char colorRampTitle[256];
 
 	//picked points
-	unsigned pickedPointsSize;
-	unsigned pickedPointsStartIndex;
+	float pickedPointsRadius;
 	float pickedPointsTextShift;
 
 	//for displaying text
@@ -122,8 +122,7 @@ struct glDrawContext
     , decimateMeshOnMove(true)
     , sfColorScaleToDisplay(0)
     , greyForNanScalarValues(true)
-	, pickedPointsSize(4)
-	, pickedPointsStartIndex(0)
+	, pickedPointsRadius(4)
 	, pickedPointsTextShift(0.0)
 	, dispNumberPrecision(6)
 	, labelsTransparency(100)

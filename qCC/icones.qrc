@@ -18,7 +18,6 @@
   <qresource prefix="/CC/Other">
     <file>images/other/unstack.png</file>
     <file>images/other/pencil.png</file>
-    <file>images/other/cc.png</file>
     <file>images/other/panier.png</file>
     <file>images/other/revert.png</file>
     <file>images/other/Euler_angles.png</file>
@@ -50,7 +49,6 @@
     <file>images/menu/cc_globalZoom.png</file>
     <file>images/menu/cc_gradientIcon.png</file>
     <file>images/menu/cc_histogramIcon.png</file>
-    <file>images/menu/cc_main.png</file>
     <file>images/menu/cc_moveIcon.png</file>
     <file>images/menu/cc_register4pcsIcon.png</file>
     <file>images/menu/cc_registerIcon.png</file>
@@ -66,6 +64,14 @@
     <file>images/menu/trashSmall.png</file>
     <file>images/menu/zoomin.png</file>
     <file>images/menu/cc_bilateralFilterIcon.png</file>
+  </qresource>
+  <qresource prefix="/CC/Icons">
+    <file>images/icon/cc_viewer_icon_16.png</file>
+    <file>images/icon/cc_viewer_icon_32.png</file>
+    <file>images/icon/cc_viewer_icon_64.png</file>
+    <file>images/icon/cc_icon_16.png</file>
+    <file>images/icon/cc_icon_32.png</file>
+    <file>images/icon/cc_icon_64.png</file>
   </qresource>
   <qresource prefix="/CC/Tree">
     <file>images/viewportSymbol.png</file>

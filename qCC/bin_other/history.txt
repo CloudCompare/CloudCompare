@@ -19,6 +19,7 @@ v2.4 ??/??/2013
 - Limits for auto-decimation are now:
 	* 10M. points for a cloud
 	* 2.5M. faces for a mesh
+- New icons for CloudCompare and ccViewer
 - Bug fix:
 	* in the 'Point list picking' tool, when exporting a list of picked points THEN cancelling the picking process, CC will crash
 	* SF scale is now renderded by the 'Render to file' tool

@@ -61,7 +61,7 @@ qt4_add_resources( generated_qrc_list ${qrc_list} )
 
 # App icon with MSVC
 if( MSVC )
-	set( rc_list images/icon/qCC.rc )
+	set( rc_list images/icon/cc_icon.rc )
 endif()
 
 if( MSVC )

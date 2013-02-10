@@ -33,7 +33,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../icones.qrc">
-    <normaloff>:/CC/Menu/images/menu/cc_main.png</normaloff>:/CC/Menu/images/menu/cc_main.png</iconset>
+    <normaloff>:/CC/Icons/images/icon/cc_icon_16.png</normaloff>:/CC/Icons/images/icon/cc_icon_16.png</iconset>
   </property>
   <property name="autoFillBackground">
    <bool>true</bool>

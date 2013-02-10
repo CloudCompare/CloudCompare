@@ -33,9 +33,7 @@ Various:
 [*] flythrough mode
 
 From Jean-Francois H.: 
-[*] possibility of changing color background of histogram (typically white), and eventually export it as image.
-[*] the "display scale" is quite hard to find for newbies. Maybe add it in the menus?
-[*] add a "Toggle Material/Texture" when right clicking in the tree structure for meshes!
+[*] possibility of exporting histogram as image.
 
 From Konrad W.:
 [*] Something like the plane shader from point tools where the depth is coloured with the Hue channel

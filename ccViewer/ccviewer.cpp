@@ -560,7 +560,7 @@ void ccViewer::doActionAbout()
 
 	Ui::AboutDialog ui;
 	ui.setupUi(&aboutDialog);
-	ui.textEdit->append(QString("Version: %1").arg(CC_VIEWER_VERSION,0,'f',2));
+	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(CC_VIEWER_VERSION,0,'f',2));
 
 	aboutDialog.exec();
 }

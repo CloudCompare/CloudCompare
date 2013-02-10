@@ -4148,7 +4148,7 @@ void MainWindow::about()
 
 	Ui::AboutDialog ui;
 	ui.setupUi(aboutDialog);
-    ui.textEdit->append(QString("Version: %1").arg(ccCommon::GetCCVersion()));
+	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(ccCommon::GetCCVersion()));
 
 	aboutDialog->exec();
 }

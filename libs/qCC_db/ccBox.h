@@ -64,6 +64,9 @@ public:
 	//inherited from ccGenericPrimitive
 	virtual ccGenericPrimitive* clone() const;
 
+	//! Returns box dimensions
+	const CCVector3& getDimensions() const { return m_dims; }
+
 protected:
 
     //inherited from ccGenericPrimitive

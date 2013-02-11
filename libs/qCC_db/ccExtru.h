@@ -70,6 +70,12 @@ public:
 	//inherited from ccGenericPrimitive
 	virtual ccGenericPrimitive* clone() const;
 
+	//! Returns extrusion thickness
+	const PointCoordinateType getThickness() const { return m_height; }
+
+	//! Returns profile
+	const std::vector<CCVector2>& getProfile() const { return m_profile; }
+
 protected:
     
     //inherited from ccGenericPrimitive

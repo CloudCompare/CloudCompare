@@ -68,6 +68,12 @@ public:
 	//inherited from ccDrawableObject
 	virtual ccBBox getFitBB(ccGLMatrix& trans);
 
+	//! Returns 'X' width
+	PointCoordinateType getXWidth() const { return m_xWidth; }
+
+	//! Returns 'Y' width
+	PointCoordinateType getYWidth() const { return m_yWidth; }
+
 protected:
     
     //inherited from ccGenericPrimitive

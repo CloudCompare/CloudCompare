@@ -65,6 +65,9 @@ public:
 	virtual bool hasDrawingPrecision() const { return true; }
 	virtual ccGenericPrimitive* clone() const;
 
+	//! Returns radius
+	PointCoordinateType getRadius() const { return m_radius; }
+
 protected:
     
     //inherited from ccGenericPrimitive

@@ -2817,6 +2817,10 @@ void MainWindow::doAction4pcsRegister()
         data->setEnabled(false);
         data->prepareDisplayForRefresh_recursive();
     }
+	else
+	{
+		ccConsole::Warning("[Align] Registration failed!");
+	}
 
     delete subModel;
     delete subData;
@@ -5790,6 +5794,17 @@ void MainWindow::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
 		m_ccRoot->removeElement(obj);
 }
 
+void MainWindow::setSelectedInDB(ccHObject* obj, bool selected)
+{
+	if (obj && m_ccRoot)
+	{
+		if (selected)
+			m_ccRoot->selectEntity(obj);
+		else
+			m_ccRoot->unselectEntity(obj);
+	}
+}
+
 void MainWindow::addToDB(ccHObject* obj,
 						 bool autoExpandDBTree/*=true*/,
 						 const char* statusMessage/*=0*/,
@@ -6748,7 +6763,7 @@ ccDBRoot* MainWindow::db()
 	return m_ccRoot;
 }
 
-ccHObject* MainWindow::dbRoot()
+ccHObject* MainWindow::dbRootObject()
 {
 	return (m_ccRoot ? m_ccRoot->getRootEntity() : 0);
 }

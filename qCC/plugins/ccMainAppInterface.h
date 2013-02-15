@@ -66,12 +66,18 @@ public:
 						double* coordinatesShift = 0,
 						double* coordinatesScale = 0)=0;
 
-    //! Removes an entity from main db
+    //! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.
 		\param obj entity
 		\param autoDelete automatically deletes object
 	**/
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete=true)=0;
+
+	//! Selects or unselects an entity (in db tree)
+	/** \param obj entity
+		\param selected whether entity should be selected or not
+	**/
+	virtual void setSelectedInDB(ccHObject* obj, bool selected)=0;
 
 	//! Returns currently selected entities ("read only")
 	virtual const ccHObject::Container& getSelectedEntities() const=0;
@@ -92,7 +98,7 @@ public:
 	virtual void forceConsoleDisplay()=0;
 
 	//! Returns DB root (as a ccHObject)
-	virtual ccHObject* dbRoot()=0;
+	virtual ccHObject* dbRootObject()=0;
 
     //! Forces redraw of all GL windows
     virtual void redrawAll()=0;

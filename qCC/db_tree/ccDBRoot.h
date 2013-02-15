@@ -126,6 +126,9 @@ public:
 	**/
     void selectEntity(ccHObject* obj);
 
+	//! Unselects a given entity
+    void unselectEntity(ccHObject* obj);
+
     //inherited from QAbstractItemModel
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QModelIndex index(int row, int column, const QModelIndex &parentIndex = QModelIndex()) const;

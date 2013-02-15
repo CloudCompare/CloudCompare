@@ -601,6 +601,20 @@ void ccDBRoot::selectEntity(int uniqueID)
 	selectEntity(obj);
 }
 
+void ccDBRoot::unselectEntity(ccHObject* obj)
+{
+	if (obj && obj->isSelected())
+	{
+		QModelIndex objIndex = index(obj);
+		if (objIndex.isValid())
+		{
+			QItemSelectionModel* selectionModel = m_dbTreeWidget->selectionModel();
+			assert(selectionModel);
+			selectionModel->select(objIndex,QItemSelectionModel::Deselect);
+		}
+	}
+}
+
 void ccDBRoot::selectEntity(ccHObject* obj)
 {
     bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
@@ -609,11 +623,11 @@ void ccDBRoot::selectEntity(ccHObject* obj)
 	assert(selectionModel);
 
 	//valid object? then we will try to select (or toggle) it
-        if (obj)
-        {
-            QModelIndex selectedIndex = index(obj);
-            if (selectedIndex.isValid())
-            {
+	if (obj)
+	{
+		QModelIndex selectedIndex = index(obj);
+		if (selectedIndex.isValid())
+		{
 			//if CTRL is pushed
 			if (ctrlPushed)
 			{
@@ -638,14 +652,16 @@ void ccDBRoot::selectEntity(ccHObject* obj)
 				selectionModel->select(selectedIndex,QItemSelectionModel::ClearAndSelect);
 			}
 
-                //hack: auto-scroll to selected element
+			//hack: auto-scroll to selected element
 			if (obj->isSelected() && !ctrlPushed)
-                    m_dbTreeWidget->scrollTo(selectedIndex);
-            }
-        }
+				m_dbTreeWidget->scrollTo(selectedIndex);
+		}
+	}
 	//otherwise we clear current selection (if CTRL is not pushed)
 	else if (!ctrlPushed)
+	{
 		selectionModel->clear();
+	}
 }
 
 ccHObject* ccDBRoot::find(int uniqueID) const

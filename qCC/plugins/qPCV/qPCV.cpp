@@ -117,26 +117,23 @@ void qPCV::doAction()
 	
 	//for using clouds normals as rays
 	std::vector<ccGenericPointCloud*> cloudsWithNormals;
-	if (m_app->dbRoot())
+	ccHObject* root = m_app->dbRootObject();
+	if (root)
 	{
-		ccHObject* root = m_app->dbRoot();
-		if (root)
+		ccHObject::Container clouds;
+		root->filterChildren(clouds,true,CC_POINT_CLOUD);
+		for (unsigned i=0;i<clouds.size();++i)
 		{
-			ccHObject::Container clouds;
-			root->filterChildren(clouds,true,CC_POINT_CLOUD);
-			for (unsigned i=0;i<clouds.size();++i)
+			//we keep only clouds with normals
+			ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(clouds[i]);
+			if (cloud && cloud->hasNormals())
 			{
-				//we keep only clouds with normals
-				ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(clouds[i]);
-				if (cloud && cloud->hasNormals())
-				{
-					cloudsWithNormals.push_back(cloud);
-					QString cloudTitle = QString("%1 - %2 points").arg(cloud->getName()).arg(cloud->size());
-					if (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH))
-						cloudTitle.append(QString(" (%1)").arg(cloud->getParent()->getName()));
+				cloudsWithNormals.push_back(cloud);
+				QString cloudTitle = QString("%1 - %2 points").arg(cloud->getName()).arg(cloud->size());
+				if (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH))
+					cloudTitle.append(QString(" (%1)").arg(cloud->getParent()->getName()));
 
-					dlg.cloudsComboBox->addItem(cloudTitle);
-				}
+				dlg.cloudsComboBox->addItem(cloudTitle);
 			}
 		}
 	}

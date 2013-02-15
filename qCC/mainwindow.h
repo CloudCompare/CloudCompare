@@ -124,9 +124,10 @@ public:
 	//inherited from ccMainAppInterface
     virtual void addToDB(ccHObject* obj, bool autoExpandDBTree=true, const char* statusMessage=NULL, bool addToDisplay=true, bool updateZoom=true, ccGLWindow* winDest=0, bool* coordinatesTransEnabled = 0, double* coordinatesShift = 0, double* coordinatesScale = 0);
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete=true);
+	virtual void setSelectedInDB(ccHObject* obj, bool selected);
     virtual void dispToConsole(QString message, ConsoleMessageLevel level=STD_CONSOLE_MESSAGE);
 	virtual void forceConsoleDisplay();
-	virtual ccHObject* dbRoot();
+	virtual ccHObject* dbRootObject();
 	virtual QMainWindow* getMainWindow() {return this;}
 	virtual const ccHObject::Container& getSelectedEntities() const { return m_selectedEntities; }
 

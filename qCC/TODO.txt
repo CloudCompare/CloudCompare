@@ -31,6 +31,7 @@ Various:
 [*] Primitive factory
 [*] Select ASCII files output precision
 [*] flythrough mode
+[*] Height grid generation: option for creating an additional scalar field with the number of points of the original cloud that were in the projected pixel
 
 From Jean-Francois H.: 
 [*] possibility of exporting histogram as image.

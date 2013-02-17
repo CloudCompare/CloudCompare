@@ -93,7 +93,7 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 
 	/*** Main illumination loop ***/
 
-	CCLib::NormalizedProgress* nProgress;
+	CCLib::NormalizedProgress* nProgress = NULL;
 	if (progressCb)
 	{
 		nProgress = new CCLib::NormalizedProgress(progressCb,numberOfRays);

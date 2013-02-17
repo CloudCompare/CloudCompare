@@ -260,6 +260,7 @@ PlyFile *ply_open_for_writing(
 	
 	fp = fopen (name, "wb");
 	if (fp == NULL) {
+		free (name);
 		return (NULL);
 	}
 	
@@ -271,6 +272,8 @@ PlyFile *ply_open_for_writing(
 	
 	/* say what PLY file version number we're writing */
 	*version = plyfile->version;
+	
+	free (name);
 	
 	/* return pointer to the file descriptor */
 	return (plyfile);
@@ -1873,6 +1876,7 @@ Read an element from a binary file.
 	  if (result == NULL) {
 		  *nwords = 0;
 		  *orig_line = NULL;
+		  free (words);
 		  return (NULL);
 	  }
 	  /* convert line-feed and tabs into spaces */

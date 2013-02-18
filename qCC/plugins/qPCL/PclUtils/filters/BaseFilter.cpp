@@ -284,10 +284,10 @@ ccPointCloud* BaseFilter::getSelectedEntityAsCCPointCloud()
 
 void BaseFilter::getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& entities)
 {
-	if (!m_app || !m_app->dbRoot())
+	if (!m_app || !m_app->dbRootObject())
 		return;
 
-	m_app->dbRoot()->filterChildren(entities,true,type);
+	m_app->dbRootObject()->filterChildren(entities,true,type);
 }
 
 int BaseFilter::hasSelectedScalarField(std::string field_name)

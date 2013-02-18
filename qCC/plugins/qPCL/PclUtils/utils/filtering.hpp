@@ -193,8 +193,11 @@ int compute_normals(const typename pcl::PointCloud<PointInT>::Ptr incloud,
 template <typename PointInT, typename PointOutT>
 int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 			   const MLSParameters &params,
-			   typename pcl::PointCloud<PointOutT>::Ptr &outcloud,
-			   pcl::PointIndicesPtr &mapping_ids)
+			   typename pcl::PointCloud<PointOutT>::Ptr &outcloud
+#ifdef LP_PCL_PATCH_ENABLED
+			   , pcl::PointIndicesPtr &mapping_ids
+#endif
+			   )
 {
 
 	typename pcl::search::KdTree<PointInT>::Ptr tree (new pcl::search::KdTree<PointInT>);
@@ -260,7 +263,9 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 
 	smoother.process(*outcloud);
 
+#ifdef LP_PCL_PATCH_ENABLED
     mapping_ids = smoother.getCorrespondingIndices();
+#endif
 
 	return 1;
 }

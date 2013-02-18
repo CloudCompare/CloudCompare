@@ -46,28 +46,30 @@ int MLSSmoothingUpsampling::compute()
 	if (!cloud)
 		return -1;
 
-	const char* current_sf_name = cloud->getCurrentDisplayedScalarField()->getName();
-
 	//get xyz in sensor_msgs format
 	cc2smReader converter;
 	converter.setInputCloud(cloud);
-
-	//take out the current scalar field
-	sensor_msgs::PointCloud2  sm_field;
-	sm_field = converter.getFloatScalarField(current_sf_name);
-	//change its name
-
-	std::string new_name = "scalar";
-	sm_field.fields[0].name = new_name.c_str();
-
 
 	//take out the xyz info
 	sensor_msgs::PointCloud2  sm_xyz = converter.getXYZ();
 	sensor_msgs::PointCloud2  sm_cloud;
 
-	//put everithing together
-	pcl::concatenateFields(sm_xyz, sm_field, sm_cloud);
+	//take out the current scalar field (if any)
+	if (cloud->getCurrentDisplayedScalarField())
+	{
+		const char* current_sf_name = cloud->getCurrentDisplayedScalarField()->getName();
 
+		sensor_msgs::PointCloud2 sm_field = converter.getFloatScalarField(current_sf_name);
+		//change its name
+		std::string new_name = "scalar";
+		sm_field.fields[0].name = new_name.c_str();
+		//put everithing together
+		pcl::concatenateFields(sm_xyz, sm_field, sm_cloud);
+	}
+	else
+	{
+		sm_cloud = sm_xyz;
+	}
 
 	//get as pcl point cloud
 	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
@@ -77,8 +79,12 @@ int MLSSmoothingUpsampling::compute()
 	//create storage for outcloud
 	pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);
 
+#ifdef LP_PCL_PATCH_ENABLED
 	pcl::PointIndicesPtr mapping_indices;
 	smooth_mls<pcl::PointXYZ, pcl::PointNormal> (pcl_cloud, *m_parameters, normals, mapping_indices);
+#else
+	smooth_mls<pcl::PointXYZ, pcl::PointNormal> (pcl_cloud, *m_parameters, normals);
+#endif
 
 	sensor_msgs::PointCloud2::Ptr sm_normals (new sensor_msgs::PointCloud2);
 	pcl::toROSMsg(*normals, *sm_normals);
@@ -92,8 +98,10 @@ int MLSSmoothingUpsampling::compute()
 	reader.getAsCC(new_cloud);
 	new_cloud->setName(cloud->getName()+QString("_smoothed")); //original name + suffix
 
+#ifdef LP_PCL_PATCH_ENABLED
 	//copy the original scalar fields here
 	copyScalarFields(cloud, new_cloud, mapping_indices, true);
+#endif
 
 	if (cloud->getParent())
 		cloud->getParent()->addChild(new_cloud);

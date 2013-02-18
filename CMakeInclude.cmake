@@ -9,6 +9,7 @@ else()
 	set( SHARED_LIB_TYPE LIBRARY )
 endif()
 
+# Find mocable files (simply look for Q_OBJECT in all files!)
 function( find_mocable_files __out_var_name )   # + input list
     set( local_list )
     foreach( one_file ${ARGN} )

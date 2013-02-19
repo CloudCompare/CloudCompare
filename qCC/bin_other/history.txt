@@ -24,6 +24,7 @@ v2.4 ??/??/2013
 	* in the 'Point list picking' tool, when exporting a list of picked points THEN cancelling the picking process, CC will crash
 	* SF scale is now renderded by the 'Render to file' tool
 	* qPCL's MLS tool would crash if the input cloud has no displayed scalar field! (+ dependency to Luca's PCL patch is now optional)
+	* 'shift on load' informtation is now preserved when sampling points on a mesh (and during several other operations)
 
 v2.4 01/21/2013
 - New tool: 'Edit > Mesh > Subdivide' (recursive subdivision)

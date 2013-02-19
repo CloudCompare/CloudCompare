@@ -852,10 +852,14 @@ void MainWindow::doActionResampleWithOctree()
 				CCLib::CloudSamplingTools::CELL_GRAVITY_CENTER,
 				&pDlg,
 				octree);
+
 			if (result)
 			{
 				ccConsole::Print("[ResampleWithOctree] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
 				ccPointCloud* newCloud = new ccPointCloud(result);
+				const double* shift = cloud->getOriginalShift();
+				if (shift)
+					newCloud->setOriginalShift(shift[0],shift[1],shift[2]);
 				addToDB(newCloud, true, 0, false, false);
 				newCloud->setDisplay(cloud->getDisplay());
 				newCloud->prepareDisplayForRefresh();
@@ -1685,6 +1689,13 @@ void MainWindow::doActionSamplePoints()
                 cloud->setName(mesh->getName()+QString(".sampled"));
                 cloud->setDisplay(mesh->getDisplay());
                 cloud->prepareDisplayForRefresh();
+				//copy 'shift on load' information
+				if (mesh->getAssociatedCloud())
+				{
+					const double* shift = mesh->getAssociatedCloud()->getOriginalShift();
+					if (shift)
+						cloud->setOriginalShift(shift[0],shift[1],shift[2]);
+				}
                 addToDB(cloud,true,0,false,false);
             }
 
@@ -2803,7 +2814,13 @@ void MainWindow::doAction4pcsRegister()
 		if (data->isA(CC_POINT_CLOUD))
             newDataCloud = static_cast<ccPointCloud*>(data)->cloneThis();
         else
+		{
             newDataCloud = new ccPointCloud(data);
+			const double* shift = data->getOriginalShift();
+			if (shift)
+				newDataCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+		}
+
         if (data->getParent())
             data->getParent()->addChild(newDataCloud);
         newDataCloud->setName(data->getName()+QString(".registered"));
@@ -2856,6 +2873,9 @@ void MainWindow::doActionSubsample()
     ccPointCloud *newPointCloud = new ccPointCloud(sampledCloud,pointCloud);
     newPointCloud->setName(pointCloud->getName()+QString(".subsampled"));
     newPointCloud->setDisplay(pointCloud->getDisplay());
+	const double* shift = pointCloud->getOriginalShift();
+	if (shift)
+		newPointCloud->setOriginalShift(shift[0],shift[1],shift[2]);
     newPointCloud->prepareDisplayForRefresh();
     if (pointCloud->getParent())
         pointCloud->getParent()->addChild(newPointCloud);
@@ -3175,6 +3195,9 @@ void MainWindow::doActionLabelConnectedComponents()
                     //we create a new group to store all CCs
                     ccHObject* ccGroup = new ccHObject(cloud->getName()+QString(" [CCs]"));
 
+					//'shift on load' information
+					const double* shift = pc->getOriginalShift();
+
                     int nCC = 0;
                     //for every CCs
                     while (!theSegmentedLists.empty())
@@ -3199,6 +3222,8 @@ void MainWindow::doActionLabelConnectedComponents()
 									newList->showSF(false);
 								}
 
+								if (shift)
+									newList->setOriginalShift(shift[0],shift[1],shift[2]);
 								newList->setVisible(true);
 								newList->setName(QString("CC#%1").arg(nCC));
 
@@ -3340,7 +3365,12 @@ void MainWindow::doActionHeightGridGeneration()
     //let's rock
     ccPointCloud* outputGrid = 0;
     if (generateCloud)
+	{
         outputGrid = new ccPointCloud();
+		const double* shift = cloud->getOriginalShift();
+		if (shift)
+			outputGrid->setOriginalShift(shift[0],shift[1],shift[2]);
+	}
 
     ccHeightGridGeneration::Compute(cloud,
                                     gridStep,
@@ -3425,6 +3455,12 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
                     cloud->setVisible(false);
                     cloud->addChild(mesh);
                     cloud->prepareDisplayForRefresh();
+					if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud() != cloud)
+					{
+						const double* shift = cloud->getOriginalShift();
+						if (shift)
+							mesh->getAssociatedCloud()->setOriginalShift(shift[0],shift[1],shift[2]);
+					}
                     addToDB(mesh,true,0,false,false);
 					if (i==0)
 						m_ccRoot->selectEntity(mesh); //auto-select first element
@@ -3523,6 +3559,9 @@ void MainWindow::doActionComputeQuadric3D()
 				float stepY = spanY/(float)(nStepY-1);
 
                 ccPointCloud* vertices = new ccPointCloud();
+				const double* shift = cloud->getOriginalShift();
+				if (shift)
+					vertices->setOriginalShift(shift[0],shift[1],shift[2]);
 				vertices->setName("vertices");
                 vertices->reserve(nStepX*nStepY);
 
@@ -3690,7 +3729,11 @@ void MainWindow::doActionComputeCPS()
         else
             newCloud = new ccPointCloud(&CPSet);
 
-        newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName()).arg(compCloud->getName()));
+		const double* shift = srcCloud->getOriginalShift();
+		if (shift)
+			newCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+
+		newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName()).arg(compCloud->getName()));
         addToDB(newCloud, true, 0, false, false);
         newCloud->setDisplay(compCloud->getDisplay());
         newCloud->prepareDisplayForRefresh();
@@ -4148,26 +4191,25 @@ void MainWindow::toggleFullScreen(bool state)
 
 void MainWindow::about()
 {
-	QDialog* aboutDialog = new QDialog(this);
+	QDialog aboutDialog(this);
 
 	Ui::AboutDialog ui;
-	ui.setupUi(aboutDialog);
+	ui.setupUi(&aboutDialog);
 	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(ccCommon::GetCCVersion()));
 
-	aboutDialog->exec();
+	aboutDialog.exec();
 }
 
 void MainWindow::help()
 {
-    //QMessageBox::about(this, QString("Help"),QString("Under construction ;)"));
-    QFile doc ("user_guide_CloudCompare.pdf");
+	QFile doc(QApplication::applicationDirPath()+QString("/user_guide_CloudCompare.pdf"));
     if (!doc.open(QIODevice::ReadOnly))
-        QMessageBox::warning(this,  QString("User guide not found"),
-                             QString("Goto http://www.danielgm.net/cc/doc/qCC") );
+	{
+        QMessageBox::warning(this,  QString("User guide not found"), QString("Goto http://www.danielgm.net/cc/doc/qCC") );
+	}
     else
     {
         QString program = "AcroRd32.exe";
-        //QString program = "C:\\Program Files\\Adobe\\Acrobat 7.0\\Reader\\AcroRd32.exe";
         QStringList arguments;
         arguments << "user_guide_CloudCompare.pdf";
         QProcess *myProcess = new QProcess();
@@ -4618,8 +4660,6 @@ void MainWindow::deactivateTranslateRotateMode(bool state)
 
 void MainWindow::testFrameRate()
 {
-    /*ccGLWindow *win = new ccGLWindow(0);
-    win->show();*/
     ccGLWindow* win = getActiveGLWindow();
     if (win)
         win->testFrameRate();
@@ -4709,7 +4749,7 @@ void MainWindow::doActionEditCamera()
     if (!m_cpeDlg)
     {
         m_cpeDlg = new ccCameraParamEditDlg(qWin);
-                //m_cpeDlg->makeFrameless(); //this does not work on linux
+		//m_cpeDlg->makeFrameless(); //does not work on linux
         m_cpeDlg->linkWith(qWin);
         connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), m_cpeDlg, SLOT(linkWith(QMdiSubWindow*)));
 
@@ -5846,17 +5886,28 @@ void MainWindow::addToDB(ccHObject* obj,
 				mat.data()[14] = (float)Pshift[2];
 				mat.data()[0] = mat.data()[5] = mat.data()[10] = scale;
 				obj->applyGLTransformation_recursive(&mat);
-				ccConsole::Warning(QString("Entity '%1' will be recentered: translation=(%2,%3,%4)").arg(obj->getName()).arg(Pshift[0],0,'f',2).arg(Pshift[1],0,'f',2).arg(Pshift[2],0,'f',2));
+				ccConsole::Warning(QString("Entity '%1' will be translated: (%2,%3,%4)").arg(obj->getName()).arg(Pshift[0],0,'f',2).arg(Pshift[1],0,'f',2).arg(Pshift[2],0,'f',2));
 				if (scale != 1.0)
-					ccConsole::Warning(QString("Entity '%1' will be rescaled: scale=%2").arg(obj->getName().arg(scale)));
+					ccConsole::Warning(QString("Entity '%1' will be rescaled: X%2").arg(obj->getName().arg(scale)));
 
-				//update 'original shift' for clouds
-				if (obj->isKindOf(CC_POINT_CLOUD))
+				//update 'original shift' for ALL clouds
+				ccHObject::Container children;
+				children.push_back(obj);
+				while (!children.empty())
 				{
-					ccGenericPointCloud* pc = static_cast<ccGenericPointCloud*>(obj);
-					const double* oShift = pc->getOriginalShift();
-					assert(oShift);
-					pc->setOriginalShift(Pshift[0]+oShift[0],Pshift[1]+oShift[1],Pshift[2]+oShift[2]);
+					ccHObject* child = children.back();
+					children.pop_back();
+
+					if (child->isKindOf(CC_POINT_CLOUD))
+					{
+						ccGenericPointCloud* pc = static_cast<ccGenericPointCloud*>(child);
+						const double* oShift = pc->getOriginalShift();
+						assert(oShift);
+						pc->setOriginalShift(Pshift[0]+oShift[0],Pshift[1]+oShift[1],Pshift[2]+oShift[2]);
+					}
+
+					for (unsigned i=0;i<child->getChildrenNumber();++i)
+						children.push_back(child->getChild(i));
 				}
 
 				//we save coordinates shift information

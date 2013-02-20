@@ -3,6 +3,8 @@
 v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
+- The 'Align with point pairs' tool can now be used with only one cloud selecte	
+	(in which case reference points must be manually added with the 'pencil' icon)
 - Point picking mechanism enhanced:
 	- point marker is now a (selectable) 3D sphere
 	- point marker default size is customizable via display options dialog

@@ -4253,10 +4253,10 @@ void MainWindow::activateRegisterPointPairTool()
 	bool lockedVertices1=false;
 	ccGenericPointCloud* cloud1 = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0],&lockedVertices1);
 	bool lockedVertices2=false;
-	ccGenericPointCloud* cloud2 = (m_selectedEntities[1] ? ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1],&lockedVertices2) : 0);
-    if (!cloud1 && !cloud2)
+	ccGenericPointCloud* cloud2 = (m_selectedEntities.size()>1 ? ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1],&lockedVertices2) : 0);
+    if (!cloud1 || (m_selectedEntities.size()>1 && !cloud2))
     {
-        ccConsole::Error("Select at least one point cloud!");
+        ccConsole::Error("Select point clouds or meshes only!");
         return;
     }
 	if (lockedVertices1 || lockedVertices2)
@@ -4317,9 +4317,9 @@ void MainWindow::deactivateRegisterPointPairTool(bool state)
 
     updateUI();
 
-	//ccGLWindow* win = getActiveGLWindow();
-	//if (win)
-	//	win->redraw();
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+		win->zoomGlobal();
 }
 
 void MainWindow::activateSegmentationMode()
@@ -6633,7 +6633,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     //bool exactlyTwoSF = (selInfo.sfCount==2);
 
     actionRegister->setEnabled(exactlyTwoEntities);
-	actionPointPairsAlign->setEnabled(exactlyTwoEntities);
+	actionPointPairsAlign->setEnabled(exactlyOneEntity || exactlyTwoEntities);
     actionAlign->setEnabled(exactlyTwoEntities); //Aurelien BEY le 13/11/2008
     actionSubsample->setEnabled(exactlyOneCloud); //Aurelien BEY le 4/12/2008
     actionCloudCloudDist->setEnabled(exactlyTwoClouds);

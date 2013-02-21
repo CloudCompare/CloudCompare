@@ -555,7 +555,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 					mntSamples=0;
 					generateColoredDTM=false;
 				}
-				memset(mntColors,0,sizeof(int)*4*count);
+				else
+				{
+					memset(mntColors,0,sizeof(int)*4*count);
+				}
 			}
 		}
 	}

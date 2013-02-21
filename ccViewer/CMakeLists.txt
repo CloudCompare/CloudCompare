@@ -24,8 +24,9 @@ include_directories( ${XIOT_INCLUDE_DIR} )
 
 project( ccViewer )
 
-set( SAMPLE_PROJECT_VERSION_MAJOR 1 )
-set( SAMPLE_PROJECT_VERSION_MINOR 14 )
+set( VERSION_MAJOR 1 )
+set( VERSION_MINOR 23 )
+set( VERSION_PATCH 0 )
 
 set( QCC_HEADERS ../qCC/ccConsole.h ../qCC/ccGLUtils.h ../qCC/ccGLWindow.h ../qCC/ccGuiParameters.h ../qCC/ccOverlayDialog.h ../qCC/ccRenderingTools.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccShiftAndScaleCloudDlg.h ../qCC/fileIO/*.h )
 set( QCC_SOURCES ../qCC/ccConsole.cpp ../qCC/ccGLUtils.cpp ../qCC/ccGLWindow.cpp ../qCC/ccGuiParameters.cpp ../qCC/ccOverlayDialog.cpp ../qCC/ccRenderingTools.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccShiftAndScaleCloudDlg.cpp ../qCC/fileIO/*.cpp ../qCC/fileIO/*.c )
@@ -56,9 +57,23 @@ if( MSVC )
 	set( rc_list images/icon/cc_viewer_icon.rc )
 endif()
 
+# App icon and version info for Mac OS X
+if( APPLE )
+  set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns ) 
+  set_source_files_properties( images/icon/cc_viewer_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
+  set( rc_list images/icon/cc_viewer_icon.icns )
+  
+  set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}" )
+  set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+  set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+  set( MACOSX_BUNDLE_COPYRIGHT "(C) EDF R&amp;D / TELECOM ParisTech (ENST-TSI)" )
+endif()
+
 if( MSVC )
 	#to get rid of the (system) console
 	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
+elseif( APPLE )
+	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
 else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list})
 endif()
@@ -110,3 +125,30 @@ endif()
 foreach( filename ${auxFiles} )
 	install_ext( FILES ${filename} ${ccViewer_dest_release} ${ccViewer_dest_debug} )
 endforeach()
+
+# Put together our App bundle on Mac OS X
+if( APPLE )
+   set( RESOURCES_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${PROJECT_NAME}.app/Contents/Resources )
+   
+   # install imageformat plugins
+   set( PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${PROJECT_NAME}.app/Contents/Plugins )
+   
+   foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
+      set ( PLUGIN_NAME lib${imagePlugin}${CMAKE_SHARED_LIBRARY_SUFFIX} )
+      install( FILES ${QT_PLUGINS_DIR}/imageformats/${PLUGIN_NAME} DESTINATION ${PLUGIN_DIR}/imageformats COMPONENT Runtime )
+      set ( QT_PLUGINS ${QT_PLUGINS} ${PLUGIN_DIR}/imageformats/${PLUGIN_NAME} )
+   endforeach()
+   
+   # install qt.conf
+   install( CODE "
+      file( WRITE ${RESOURCES_DIR}/qt.conf \"[Paths]\nPlugins = Plugins\" )
+      " COMPONENT Runtime )
+   
+   set( DIRS ${EXTERNAL_LIBS_LIBRARIES} ${CMAKE_INSTALL_PREFIX}/lib )
+   
+   # call fixup_bundles to change paths using otools
+   install( CODE "
+      include( BundleUtilities )
+      fixup_bundle( ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${PROJECT_NAME}.app \"${QT_PLUGINS}\" \"${DIRS}\" COMPONENT Runtime ) 
+      ")
+endif( APPLE )

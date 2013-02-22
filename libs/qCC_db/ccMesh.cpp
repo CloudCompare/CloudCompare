@@ -646,7 +646,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			if (isColorOverriden())
 			{
-				glColor3ubv(tempColor);
+				glColor3ubv(m_tempColor);
 				glParams.showColors = false;
 			}
 			else

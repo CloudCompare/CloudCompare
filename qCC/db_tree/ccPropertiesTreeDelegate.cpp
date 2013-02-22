@@ -91,7 +91,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
     {
         switch (item->data().toInt())
         {
-        case OBJECT_DISPLAY:
+        case OBJECT_CURRENT_DISPLAY:
         case OBJECT_CURRENT_SCALAR_FIELD:
         case OBJECT_CURRENT_COLOR_RAMP:
         case OBJECT_OCTREE_TYPE:
@@ -287,7 +287,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
         item = new QStandardItem("");
         item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
         item->setCheckState(_obj->colorsShown() ? Qt::Checked : Qt::Unchecked);
-        item->setData(OBJECT_COLORS);
+        item->setData(OBJECT_COLORS_SHOWN);
         m_model->setItem(curRow,1,item);
     }
 
@@ -302,7 +302,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
         item = new QStandardItem("");
         item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
         item->setCheckState(_obj->normalsShown() ? Qt::Checked : Qt::Unchecked);
-        item->setData(OBJECT_NORMALS);
+        item->setData(OBJECT_NORMALS_SHOWN);
         m_model->setItem(curRow,1,item);
     }
 
@@ -318,11 +318,25 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
         item = new QStandardItem("");
         item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
         item->setCheckState(_obj->sfShown() ? Qt::Checked : Qt::Unchecked);
-        item->setData(OBJECT_SCALAR_FIELD);
+        item->setData(OBJECT_SCALAR_FIELD_SHOWN);
         m_model->setItem(curRow,1,item);
     }
 
-    //display window
+    //name in 3D
+    {
+        m_model->setRowCount(++curRow+1);
+        item = new QStandardItem("Show name (in 3D)");
+        item->setFlags(Qt::ItemIsEnabled);
+        m_model->setItem(curRow,0,item);
+
+        item = new QStandardItem("");
+        item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+		item->setCheckState(_obj->nameShownIn3D() ? Qt::Checked : Qt::Unchecked);
+        item->setData(OBJECT_NAME_IN_3D);
+        m_model->setItem(curRow,1,item);
+    }
+
+	//display window
     if (!_obj->isLocked())
     {
         m_model->setRowCount(++curRow+1);
@@ -332,7 +346,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 
         item = new QStandardItem();
         item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
-        item->setData(OBJECT_DISPLAY);
+        item->setData(OBJECT_CURRENT_DISPLAY);
         m_model->setItem(curRow,1,item);
         m_view->openPersistentEditor(m_model->index(curRow,1));
     }
@@ -547,7 +561,7 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
         item = new QStandardItem("");
         item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
         item->setCheckState(cloud->sfColorScaleShown() ? Qt::Checked : Qt::Unchecked);
-        item->setData(OBJECT_SCALAR_SCALE);
+        item->setData(OBJECT_SF_SHOW_SCALE);
         m_model->setItem(curRow,1,item);
     }
 }
@@ -1050,7 +1064,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
     switch (item->data().toInt())
     {
-    case OBJECT_DISPLAY:
+    case OBJECT_CURRENT_DISPLAY:
     {
         QComboBox *comboBox = new QComboBox(parent);
 
@@ -1294,7 +1308,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 
     switch (item->data().toInt())
     {
-    case OBJECT_DISPLAY:
+    case OBJECT_CURRENT_DISPLAY:
     {
         QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
         if (!comboBox)
@@ -1469,11 +1483,11 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		m_currentObject->setVisible(item->checkState() == Qt::Checked);
 		redraw=true;
 		break;
-	case OBJECT_COLORS:
+	case OBJECT_COLORS_SHOWN:
 		m_currentObject->showColors(item->checkState() == Qt::Checked);
 		redraw=true;
 		break;
-	case OBJECT_NORMALS:
+	case OBJECT_NORMALS_SHOWN:
 		m_currentObject->showNormals(item->checkState() == Qt::Checked);
 		redraw=true;
 		break;
@@ -1485,7 +1499,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		}
 		redraw=true;
 		break;
-	case OBJECT_SCALAR_FIELD:
+	case OBJECT_SCALAR_FIELD_SHOWN:
 		m_currentObject->showSF(item->checkState() == Qt::Checked);
 		redraw=true;
 		break;
@@ -1497,7 +1511,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		}
 		redraw=true;
 		break;
-	case OBJECT_SCALAR_SCALE:
+	case OBJECT_SF_SHOW_SCALE:
 		{
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 			assert(cloud);
@@ -1527,6 +1541,10 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(label);
 			label->setDisplayedIn3D(item->checkState() == Qt::Checked);
 		}
+		redraw=true;
+		break;
+	case OBJECT_NAME_IN_3D:
+		m_currentObject->showNameIn3D(item->checkState() == Qt::Checked);
 		redraw=true;
 		break;
 	}

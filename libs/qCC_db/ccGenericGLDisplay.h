@@ -121,6 +121,15 @@ public:
 	//! Returns font
 	virtual const QFont& getTextDisplayFont() = 0;
 
+	//! Text alignment
+	enum TextAlign { ALIGN_HLEFT	= 1,
+					 ALIGN_HMIDDLE	= 2,
+					 ALIGN_HRIGHT	= 4,
+					 ALIGN_VTOP		= 8,
+					 ALIGN_VMIDDLE	= 16,
+					 ALIGN_VBOTTOM	= 32,
+					 ALIGN_DEFAULT	= 1 | 8};
+
     //! Displays a string at a given 2D position
     /** This method should be called solely during 2D pass rendering.
 		The coordinates are expressed relatively to the current viewport (y=0 at the top!).
@@ -128,10 +137,11 @@ public:
         \param x horizontal position of string origin
         \param y vertical position of string origin
 		\param alignRight whether to align text to the right or not
+		\param bkgAlpha background transparency (0 by default)
 		\param rgbColor text color (optional)
-        \param font font (optional)
+        \param font optional font (otherwise default one will be used)
 	**/
-    virtual void displayText(QString text, int x, int y, bool alignRight=false, const unsigned char* rgbColor=0, const QFont& font=QFont()) = 0;
+    virtual void displayText(QString text, int x, int y, unsigned char align= ALIGN_DEFAULT, unsigned char bkgAlpha=0, const unsigned char* rgbColor=0, const QFont* font=0) = 0;
 
 	//! Displays a string at a given 3D position
     /** This method should be called solely during 3D pass rendering

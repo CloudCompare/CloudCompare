@@ -301,6 +301,10 @@ bool ccGenericPointCloud::toFile_MeOnly(QFile& out) const
 			return false;
 	}
 
+	//'point size' (dataVersion>=24)
+	if (out.write((const char*)&m_pointSize,1)<0)
+		return WriteError();
+
 	return true;
 }
 
@@ -332,6 +336,17 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion)
 			unallocateVisibilityArray();
 			return false;
 		}
+	}
+
+	//'point size' (dataVersion>=24)
+	if (dataVersion >= 24)
+	{
+		if (in.read((char*)&m_pointSize,1)<0)
+			return WriteError();
+	}
+	else
+	{
+		m_pointSize = 0; //= follows default setting
 	}
 
 	return true;

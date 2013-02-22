@@ -353,7 +353,7 @@ void ccGenericMesh::setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseO
 		m_materials->link();
 
 	//update display (for textures!)
-	setDisplay(currentDisplay);
+	setDisplay(m_currentDisplay);
 }
 
 void ccGenericMesh::applyGLTransformation(const ccGLMatrix& trans)

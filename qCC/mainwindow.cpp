@@ -179,6 +179,7 @@ MainWindow::MainWindow()
 	connect(actionToggleNormals,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesNormals()));		//'N': toggles selected items normals visibility
 	connect(actionToggleColors,		SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesColors()));		//'C': toggles selected items colors visibility
 	connect(actionToggleSF,			SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesSF()));			//'S': toggles selected items SF visibility
+	connect(actionToggleShowName,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntities3DName()));		//'D': toggles selected items '3D name' visibility
 
     connectActions();
 
@@ -4930,6 +4931,19 @@ void MainWindow::toggleSelectedEntitiesSF()
     for (unsigned i=0; i<baseEntities.size(); ++i)
     {
 		baseEntities[i]->toggleSF_recursive();
+		baseEntities[i]->prepareDisplayForRefresh_recursive();
+    }
+
+    refreshAll();
+}
+
+void MainWindow::toggleSelectedEntities3DName()
+{
+	ccHObject::Container baseEntities;
+	RemoveSiblings(m_selectedEntities,baseEntities);
+    for (unsigned i=0; i<baseEntities.size(); ++i)
+    {
+		baseEntities[i]->toggleShowName_recursive();
 		baseEntities[i]->prepareDisplayForRefresh_recursive();
     }
 

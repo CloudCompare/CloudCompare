@@ -16,7 +16,12 @@ v2.4 ??/??/2013
 	- "Point picking" tool:
 		* when picking 3 successive points ('triplet' mode), the 3 corresponding angles are displayed
 - New entry in the DB tree context menu: "Toggle materials/textures"
-- New options for display:
+- New option "Show 3D name" for 3D entities:
+	* display the name of the entity in the 3D view (in the middle of its bounding-box by default)
+	* can be (recursively) toggled with 'Edit > Toggle > 3D name' (shortcut: D)
+	* with the dedicated checkbox in the properties dialog of each entity
+	* with a right click on the entity entry in the DB tree	
+- New display options (display dialog):
 	* point marker size (see above)
 	* histogram background color
 	* label color

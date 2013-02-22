@@ -268,6 +268,19 @@ public:
 	//! Returns whether active scalar field is visible
     virtual bool sfShown() const;
 
+    /*** Name display in 3D ***/
+
+	//! Sets whether name should be displayed in 3D
+	virtual void showNameIn3D(bool state);
+
+	//! Returns whether name is displayed in 3D or not
+	virtual bool nameShownIn3D() const;
+
+	//! Toggles name in 3D
+	virtual void toggleShowName();
+
+	/*** temporary color ***/
+
     //! Returns whether colors are currently overriden by a temporary (unique) color
     /** See ccDrawableObject::setTempColor.
     **/
@@ -276,7 +289,7 @@ public:
     //! Returns current temporary (unique) color
     virtual const colorType* getTempColor() const;
 
-    //! Sets current temporary (unique)
+	//! Sets current temporary (unique)
     /** \param col rgb color
 		\param autoActivate auto activates temporary color
     **/
@@ -284,6 +297,8 @@ public:
 
 	//! Set temporary color activation state
 	virtual void enableTempColor(bool state);
+
+	/*** associated display management ***/
 
     //! Unlinks entity from a GL display (only if it belongs to it of course)
     virtual void removeFromDisplay(const ccGenericGLDisplay* win);
@@ -309,7 +324,9 @@ public:
     **/
     virtual void refreshDisplay();
 
-    //! Associates entity with a GL transformation (rotation + translation)
+    /*** Transformation matrix management (for display only) ***/
+
+	//! Associates entity with a GL transformation (rotation + translation)
     /** WARNING: FOR DISPLAY PURPOSE ONLY (i.e. should only be temporary)
 		If the associated GL transformation is enabled (see
         ccDrawableObject::enableGLTransformation), it will
@@ -328,7 +345,7 @@ public:
     virtual void enableGLTransformation(bool state);
 
 	//! Returns whether a GL transformation is enabled or not
-	virtual bool isGLTransEnabled() const { return glTransEnabled; }
+	virtual bool isGLTransEnabled() const;
 
     //! Retuns associated GL transformation
     /** See ccDrawableObject::setGLTransformation.
@@ -361,39 +378,42 @@ protected:
     //! Specifies whether the object is visible or not
     /** Note: this does not influence the children visibility
     **/
-    bool visible;
+    bool m_visible;
 
     //! Specifies whether the object is selected or not
-    bool selected;
+    bool m_selected;
 
     //! Specifies whether the visibility can be changed by user or not
-    bool lockedVisibility;
+    bool m_lockedVisibility;
 
     /*** OpenGL display parameters ***/
 
     //! Specifies whether colors should be displayed
-    bool colorsDisplayed;
+    bool m_colorsDisplayed;
     //! Specifies whether normals should be displayed
-    bool normalsDisplayed;
+    bool m_normalsDisplayed;
     //! Specifies whether scalar field should be displayed
-    bool sfDisplayed;
+    bool m_sfDisplayed;
 
     //! Temporary (unique) color
-    colorType tempColor[3];
+    colorType m_tempColor[3];
     //! Temporary (unique) color activation state
-	bool colorIsOverriden;
+	bool m_colorIsOverriden;
 
     //! Current GL transformation
     /** See ccDrawableObject::setGLTransformation.
     **/
-    ccGLMatrix glTrans;
+    ccGLMatrix m_glTrans;
     //! Current GL transformation activation state
     /** See ccDrawableObject::setGLTransformation.
     **/
-    bool glTransEnabled;
+    bool m_glTransEnabled;
+
+	//! Whether name is displayed in 3D or not
+	bool m_showNameIn3D;
 
     //! Currently associated GL display
-    ccGenericGLDisplay* currentDisplay;
+    ccGenericGLDisplay* m_currentDisplay;
 };
 
 #endif

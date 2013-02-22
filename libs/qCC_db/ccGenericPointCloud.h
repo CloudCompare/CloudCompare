@@ -225,7 +225,7 @@ public:
 	/** 0 means that the cloud will use current OpenGL value
 		(see glPointSize).
 	**/
-	unsigned getPointSize() const { return m_pointSize; }
+	unsigned char getPointSize() const { return m_pointSize; }
 
 protected:
 
@@ -243,7 +243,7 @@ protected:
 	double m_originalShift[3];
 
 	//! Point size (won't be applied if 0)
-	unsigned m_pointSize;
+	unsigned char m_pointSize;
 
 };
 

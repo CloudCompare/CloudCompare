@@ -165,6 +165,7 @@ protected slots:
 	void toggleSelectedEntitiesNormals();
 	void toggleSelectedEntitiesSF();
 	void toggleSelectedEntitiesMat();
+	void toggleSelectedEntities3DName();
 	void addEmptyGroup();
 
 signals:
@@ -182,7 +183,8 @@ protected:
 			2 - normal
 			3 - color
 			4 - SF
-			4 - materials/textures
+			5 - materials/textures
+			6 - 3D name
 	**/
 	void toggleSelectedEntitiesProperty(unsigned prop);
 
@@ -233,6 +235,8 @@ protected:
 	QAction* m_toggleSelectedEntitiesMat;
 	//! Context menu action: hide/show selected entities SF
 	QAction* m_toggleSelectedEntitiesSF;
+	//! Context menu action: hide/show selected entities 3D name
+	QAction* m_toggleSelectedEntities3DName;	
 	//! Context menu action: add empty group
 	QAction* m_addEmptyGroup;
 

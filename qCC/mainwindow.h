@@ -224,6 +224,7 @@ protected slots:
     void toggleSelectedEntitiesNormals();
     void toggleSelectedEntitiesColors();
     void toggleSelectedEntitiesSF();
+    void toggleSelectedEntities3DName();
 
     void doActionRenderToFile();
 

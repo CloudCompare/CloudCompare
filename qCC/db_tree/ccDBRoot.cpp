@@ -81,6 +81,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_toggleSelectedEntitiesNormals = new QAction("Toggle normals",this);
 	m_toggleSelectedEntitiesMat = new QAction("Toggle materials/textures",this);
 	m_toggleSelectedEntitiesSF = new QAction("Toggle SF",this);
+	m_toggleSelectedEntities3DName = new QAction("Toggle 3D name",this);
 	m_addEmptyGroup = new QAction("Add empty group",this);
 
 	m_contextMenuPos = QPoint(-1,-1);
@@ -99,6 +100,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_toggleSelectedEntitiesNormals,	SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesNormals()));
 	connect(m_toggleSelectedEntitiesMat,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesMat()));
 	connect(m_toggleSelectedEntitiesSF,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesSF()));
+	connect(m_toggleSelectedEntities3DName,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities3DName()));
 	connect(m_addEmptyGroup,					SIGNAL(triggered()),								this, SLOT(addEmptyGroup()));
 
     //other DB tree signals/slots connection
@@ -441,9 +443,11 @@ bool ccDBRoot::setData(const QModelIndex &index, const QVariant &value, int role
 			{
 				item->setName(value.toString());
 
-				//particular case: labels name is their title!
-				if (item->isKindOf(CC_2D_LABEL))
-					if (item->isVisible() && item->isEnabled() && item->getDisplay())
+				//particular cases:
+				// - labels name is their title (so we update them)
+				// - name might be displayed in 3D
+				if (item->nameShownIn3D() || item->isKindOf(CC_2D_LABEL))
+					if (item->isEnabled() && item->isVisible() && item->getDisplay())
 						item->getDisplay()->redraw();
 
 				reflectObjectPropChange(item);
@@ -1195,9 +1199,14 @@ void ccDBRoot::toggleSelectedEntitiesMat()
 	toggleSelectedEntitiesProperty(5);
 }
 
+void ccDBRoot::toggleSelectedEntities3DName()
+{
+	toggleSelectedEntitiesProperty(6);
+}
+
 void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 {
-	if (prop>4)
+	if (prop>6)
 	{
 		ccConsole::Warning("[ccDBRoot::toggleSelectedEntitiesProperty] Internal error: invalid 'prop' value");
 		return;
@@ -1241,6 +1250,9 @@ void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(item);
 				mesh->showMaterials(!mesh->materialsShown());
 			}
+			break;
+		case 6: //3D name
+			item->showNameIn3D(!item->nameShownIn3D());
 			break;
 		}
 		item->prepareDisplayForRefresh();
@@ -1329,6 +1341,7 @@ void ccDBRoot::showContextMenu(const QPoint& pnt)
 			{
 				menu.addAction(m_toggleSelectedEntitiesMat);
 			}
+			menu.addAction(m_toggleSelectedEntities3DName);
 			menu.addSeparator();
 			menu.addAction(m_deleteSelectedEntities);
 			if (hasMoreThan2Children)

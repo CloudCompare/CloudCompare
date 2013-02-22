@@ -47,14 +47,14 @@ double ccGBLSensor::getGraphicScale()
 
 void ccGBLSensor::updateGraphicRepresentation()
 {
-    glTrans.toIdentity();
+    m_glTrans.toIdentity();
 
     //rotation matrix
     if (rotation)
-        glTrans = ccGLMatrix(*rotation,CCVector3(),sensorCenter); //rotation center = sensor center
+        m_glTrans = ccGLMatrix(*rotation,CCVector3(),sensorCenter); //rotation center = sensor center
 
     //translation = sensor center
-    glTrans += sensorCenter;
+    m_glTrans += sensorCenter;
 }
 
 void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)

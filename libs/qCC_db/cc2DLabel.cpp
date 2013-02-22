@@ -492,7 +492,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				//font.setPointSize(font.pointSize()+2);
 				font.setBold(true);
 
-				//draw their name (at least) and optionaly their coordinates
+				//draw their name
 				glPushAttrib(GL_DEPTH_BUFFER_BIT);
 				glDisable(GL_DEPTH_TEST);
 				for (unsigned j=0; j<count; j++)
@@ -756,7 +756,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 		const colorType* defaultTextColor = (context.labelsTransparency<40 ? context.textDefaultCol : ccColor::darkBlue);
 
-		context._win->displayText(title,xStart+xStartRel,yStart+yStartRel,false,defaultTextColor,titleFont);
+		context._win->displayText(title,xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor,&titleFont);
 		yStartRel -= c_margin;
 
 		if (!body.empty())
@@ -773,7 +773,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 			for (int i=0;i<body.size();++i)
 			{
 				yStartRel -= strHeight;
-				context._win->displayText(body[i],xStart+xStartRel,yStart+yStartRel,false,defaultTextColor,bodyFont);
+				context._win->displayText(body[i],xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor,&bodyFont);
 			}
 		}
 	}

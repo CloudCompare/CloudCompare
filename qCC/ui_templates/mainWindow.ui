@@ -225,6 +225,7 @@
      <addaction name="actionToggleNormals"/>
      <addaction name="actionToggleColors"/>
      <addaction name="actionToggleSF"/>
+     <addaction name="actionToggleShowName"/>
     </widget>
     <addaction name="menuColors"/>
     <addaction name="menuNormals"/>
@@ -1984,6 +1985,17 @@
   <action name="actionSubdivideMesh">
    <property name="text">
     <string>Subdivide</string>
+   </property>
+  </action>
+  <action name="actionToggleShowName">
+   <property name="text">
+    <string>3D name</string>
+   </property>
+   <property name="shortcut">
+    <string>D</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
  </widget>

@@ -1449,7 +1449,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
         if (glParams.showColors && isColorOverriden())
         {
-            glColor3ubv(tempColor);
+            glColor3ubv(m_tempColor);
             glParams.showColors=false;
         }
 		else
@@ -1738,17 +1738,17 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		else //special case: point names pushing (for picking) --> no need for colors, normals, etc.
 		{
+			glPushName(0);
             if (isVisibilityTableInstantiated())
             {
                 for (unsigned j=0;j<numberOfPoints;j+=decimStep)
                 {
                     if (m_visibilityArray->getValue(j)>0)
                     {
-                        glPushName(j);
+						glLoadName(j);
                         glBegin(GL_POINTS);
                         glVertex3fv(m_points->getValue(j));
                         glEnd();
-                        glPopName();
                     }
                 }
             }
@@ -1759,11 +1759,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					col = getPointDistanceColor(j);
 					if (col)
 					{
-                        glPushName(j);
+						glLoadName(j);
                         glBegin(GL_POINTS);
                         glVertex3fv(m_points->getValue(j));
                         glEnd();
-                        glPopName();
 					}
 				}
 			}
@@ -1771,15 +1770,15 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 				{
-					glPushName(j);
+					glLoadName(j);
 					glBegin(GL_POINTS);
 					glVertex3fv(m_points->getValue(j));
 					glEnd();
-					glPopName();
 				}
 			}
 
 			//glEnd();
+			glPopName();
 		}
 
         /*** END DISPLAY ***/

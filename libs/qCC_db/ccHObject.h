@@ -182,6 +182,7 @@ public:
 	recursive_call0_ex(toggleColors,toggleColors_recursive);
 	recursive_call0_ex(toggleNormals,toggleNormals_recursive);
 	recursive_call0_ex(toggleSF,toggleSF_recursive);
+	recursive_call0_ex(toggleShowName,toggleShowName_recursive);
 
     //! Applies the active OpenGL transformation to the entity (recursive)
     /** The input ccGLMatrix should be left to 0, unless you want to apply
@@ -273,6 +274,11 @@ protected:
 		To be overloaded (but still called;) by subclass.
 	**/
 	virtual bool fromFile_MeOnly(QFile& out, short dataVersion);
+
+	//! Draws the entity name in 3D
+	/** Names is displayed at the center of the bounding box by default.
+	**/
+	virtual void drawNameIn3D(CC_DRAW_CONTEXT& context);
 
     //! Object's parent
     ccHObject* m_parent;

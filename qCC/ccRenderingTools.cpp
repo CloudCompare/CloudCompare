@@ -468,11 +468,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	ccGLWindow* win = (ccGLWindow*)context._win;
 	assert(win);
 
-	QFont font = win->font();
-	font.setPointSize(ccGui::Parameters().defaultFontSize);
-
 	if (theScaleElements[0].textDisplayed)
-		win->displayText(QString::number(theScaleElements[0].value, logScale ? 'E' : 'f', ccGui::Parameters().displayedNumPrecision), halfW+x-5, y+halfH, true, 0, font);
+		win->displayText(QString::number(theScaleElements[0].value, logScale ? 'E' : 'f', ccGui::Parameters().displayedNumPrecision), halfW+x-5, y+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VMIDDLE);
 
 	const colorType* lineColor = ccColor::white;
 	//clear background?
@@ -612,15 +609,16 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		if (theScaleElements[i+1].textDisplayed)
 		{
 			DistanceType dispValue = theScaleElements[i+1].value;
-			win->displayText(QString::number(dispValue,logScale ? 'E' : 'f',ccGui::Parameters().displayedNumPrecision), halfW+x-5, y+halfH, true, 0, font);
+			win->displayText(QString::number(dispValue,logScale ? 'E' : 'f',ccGui::Parameters().displayedNumPrecision), halfW+x-5, y+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VMIDDLE);
 		}
 	}
 
 	//Scale title
 	if (context.colorRampTitle[0]!=0)
 	{
-		QString sfTitle = QString("[")+QString(context.colorRampTitle)+QString("]");
-		win->displayText(sfTitle, context.glW-cubeSize/2, (y+cubeSize)+halfH, true, 0, font);
+		//QString sfTitle = QString("[%1]").arg(context.colorRampTitle);
+		QString sfTitle(context.colorRampTitle);
+		win->displayText(sfTitle, context.glW-cubeSize/2, (y+cubeSize)+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VTOP);
 	}
 
 }

@@ -2709,29 +2709,62 @@ void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, cons
 	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 }
 
-void ccGLWindow::displayText(QString text, int x, int y, bool alignRight/*=false*/, const unsigned char* rgbColor/*=0*/, const QFont& font/*=QFont()*/)
+void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=ALIGN_HLEFT | ALIGN_VTOP*/, unsigned char bkgAlpha/*=0*/, const unsigned char* rgbColor/*=0*/, const QFont* font/*=0*/)
 {
 	makeCurrent();
 
 	int x2 = x;
 	int y2 = m_glHeight-1-y;
 
-	if (m_captureModeZoomFactor != 1.0f)
-	{
-		x2 = (int)(m_captureModeZoomFactor * (float)x2);
-		y2 = (int)(m_captureModeZoomFactor * (float)y2);
-	}
-
-	if (alignRight)
-	{
-		QFontMetrics fm(font);
-		x2 -= fm.width(text);
-		y2 += fm.height()/2;
-	}
+	//FIXME: doesn't work!
+	//if (m_captureModeZoomFactor != 1.0f)
+	//{
+	//	x2 = (int)(m_captureModeZoomFactor * (float)x2);
+	//	y2 = (int)(m_captureModeZoomFactor * (float)y2);
+	//}
 
 	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
 	const unsigned char* col = (rgbColor ? rgbColor : ccGui::Parameters().textDefaultCol);
-	//glColor3ubv(col);
+
+	QFont textFont = (font ? *font : m_font);
+
+	bool drawBackground = true;
+	if (align != (ALIGN_HLEFT | ALIGN_VTOP) || bkgAlpha != 0)
+	{
+		QFontMetrics fm(textFont);
+		QRect rect = fm.boundingRect(text);
+
+		//text alignment
+		if (align & ALIGN_HMIDDLE)
+			x2 -= rect.width()/2;
+		else if (align & ALIGN_HRIGHT)
+			x2 -= rect.width();
+		if (align & ALIGN_VMIDDLE)
+			y2 += rect.height()/2;
+		else if (align & ALIGN_VBOTTOM)
+			y2 += rect.height();
+
+		//background is not totally transparent
+		if (bkgAlpha != 0)
+		{
+			//inverted color with a bit of transparency
+			glPushAttrib(GL_COLOR_BUFFER_BIT);
+			glEnable(GL_BLEND);
+			glColor4f(1.0f-(float)col[0]/(float)MAX_COLOR_COMP,1.0f-(float)col[1]/(float)MAX_COLOR_COMP,1.0f-(float)col[2]/(float)MAX_COLOR_COMP,(float)bkgAlpha/(float)100);
+			int margin = rect.height()/2;
+			int xB = x2 - m_glWidth/2;
+			int yB = m_glHeight/2 - y2;
+
+			glBegin(GL_POLYGON);
+			glVertex2d(xB - margin, yB - margin);
+			glVertex2d(xB - margin, yB + rect.height() + margin/2);
+			glVertex2d(xB + rect.width() + margin, yB + rect.height() + margin/2); 
+			glVertex2d(xB + rect.width() + margin, yB - margin); 
+			glEnd();
+			glPopAttrib();
+		}
+	}
+
 	glColor3f((float)col[0]/(float)MAX_COLOR_COMP,(float)col[1]/(float)MAX_COLOR_COMP,(float)col[2]/(float)MAX_COLOR_COMP);
-	renderText(x2, y2, text, font);
+	renderText(x2, y2, text, textFont);
 }

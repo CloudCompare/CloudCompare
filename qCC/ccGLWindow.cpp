@@ -533,15 +533,13 @@ void ccGLWindow::paintGL()
 
 		if (m_hotZoneActivated)
 		{
-			QPixmap plusPix(":/CC/Other/images/other/plus.png");
-			QPixmap minusPix(":/CC/Other/images/other/minus.png");
-			GLuint plusTex = bindTexture(plusPix);
-			GLuint minusTex = bindTexture(minusPix);
-
 			//display parameters
-			const int c_iconSize = 16;
-			const int c_margin = 16;
-			const int c_alphaChannel = 200;
+			static const QPixmap c_psi_plusPix(":/CC/Other/images/other/plus.png");
+			static const QPixmap c_psi_minusPix(":/CC/Other/images/other/minus.png");
+			static const char c_psi_title[] = "Default point size";
+			static const int c_psi_margin = 16;
+			static const int c_psi_iconSize = 16;
+			static const unsigned char c_psi_alphaChannel = 200;
 
 			QFont newFont(m_font);
 			newFont.setPointSize(12);
@@ -551,43 +549,43 @@ void ccGLWindow::paintGL()
 			glEnable(GL_BLEND);
 
 			//label
-			//QFontMetrics::width("Point size");
-			QString label("Point size");
+			//QFontMetrics::width(c_psi_title);
+			QString label(c_psi_title);
 			QRect rect = QFontMetrics(newFont).boundingRect(label);
 			//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-			//glColor4ub(133,193,39,c_alphaChannel);
-			glColor4f(0.52f,0.76f,0.15f,(float)c_alphaChannel/(float)MAX_COLOR_COMP);
-			renderText(c_margin,(c_margin+c_iconSize/2)+(rect.height()/2)*2/3,label,newFont); // --> 2/3 to compensate the effect of the upper case letter (P)
+			//glColor4ub(133,193,39,c_psi_alphaChannel);
+			glColor4f(0.52f,0.76f,0.15f,(float)c_psi_alphaChannel/(float)MAX_COLOR_COMP);
+			renderText(c_psi_margin,(c_psi_margin+c_psi_iconSize/2)+(rect.height()/2)*2/3,label,newFont); // --> 2/3 to compensate the effect of the upper case letter (P)
 
 			//icons
 			int halfW = (m_glWidth>>1);
 			int halfH = (m_glHeight>>1);
 
-			int xStart = c_margin+rect.width()+c_margin;
-			int yStart = c_margin;
+			int xStart = c_psi_margin+rect.width()+c_psi_margin;
+			int yStart = c_psi_margin;
 
 			//"minus"
-			ccGLUtils::DisplayTexture2DPosition(minusTex,-halfW+xStart,halfH-(yStart+c_iconSize),c_iconSize,c_iconSize,c_alphaChannel);
+			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_minusPix),-halfW+xStart,halfH-(yStart+c_psi_iconSize),c_psi_iconSize,c_psi_iconSize,c_psi_alphaChannel);
 			m_hotZoneMinusIconROI[0]=xStart;
 			m_hotZoneMinusIconROI[1]=yStart;
-			m_hotZoneMinusIconROI[2]=xStart+c_iconSize;
-			m_hotZoneMinusIconROI[3]=yStart+c_iconSize;
-			xStart += c_iconSize;
+			m_hotZoneMinusIconROI[2]=xStart+c_psi_iconSize;
+			m_hotZoneMinusIconROI[3]=yStart+c_psi_iconSize;
+			xStart += c_psi_iconSize;
 
 			//separator
-			glColor4ub(133,193,39,c_alphaChannel);
+			glColor4ub(133,193,39,c_psi_alphaChannel);
 			glBegin(GL_POINTS);
-			glVertex2i(-halfW+xStart+c_margin/2,halfH-(yStart+c_iconSize/2));
+			glVertex2i(-halfW+xStart+c_psi_margin/2,halfH-(yStart+c_psi_iconSize/2));
 			glEnd();
-			xStart += c_margin;
+			xStart += c_psi_margin;
 
 			//"plus"
-			ccGLUtils::DisplayTexture2DPosition(plusTex,-halfW+xStart,halfH-(yStart+c_iconSize),c_iconSize,c_iconSize,c_alphaChannel);
+			ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_plusPix),-halfW+xStart,halfH-(yStart+c_psi_iconSize),c_psi_iconSize,c_psi_iconSize,c_psi_alphaChannel);
 			m_hotZonePlusIconROI[0]=xStart;
 			m_hotZonePlusIconROI[1]=m_hotZoneMinusIconROI[1];
-			m_hotZonePlusIconROI[2]=xStart+c_iconSize;
+			m_hotZonePlusIconROI[2]=xStart+c_psi_iconSize;
 			m_hotZonePlusIconROI[3]=m_hotZoneMinusIconROI[3];
-			xStart += c_iconSize;
+			xStart += c_psi_iconSize;
 
 			glDisable(GL_BLEND);
 			glPopAttrib();

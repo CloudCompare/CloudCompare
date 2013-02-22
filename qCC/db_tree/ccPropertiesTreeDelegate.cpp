@@ -63,6 +63,7 @@
 
 // Default 'None' string
 const QString c_noDisplayString = QString("None");
+const QString c_defaultPointSizeString = QString("Default");
 
 ccPropertiesTreeDelegate::ccPropertiesTreeDelegate(QStandardItemModel* model,
 												   QAbstractItemView* view,
@@ -95,6 +96,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
         case OBJECT_CURRENT_COLOR_RAMP:
         case OBJECT_OCTREE_TYPE:
         case OBJECT_COLOR_RAMP_STEPS:
+        case OBJECT_CLOUD_POINT_SIZE:
             return QSize(50,18);
         }
     }
@@ -384,28 +386,45 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
     addSeparator("Cloud");
 
     int curRow = m_model->rowCount();
-    QStandardItem* item = NULL;
 
     //number of points
-    m_model->setRowCount(curRow+1);
-    item = new QStandardItem("Points");
-    item->setFlags(Qt::ItemIsEnabled);
-    m_model->setItem(curRow,0,item);
+	{
+		m_model->setRowCount(curRow+1);
+		QStandardItem* item = new QStandardItem("Points");
+		item->setFlags(Qt::ItemIsEnabled);
+		m_model->setItem(curRow,0,item);
 
-    item = new QStandardItem(QLocale(QLocale::English).toString(_obj->size()));
-    item->setFlags(Qt::ItemIsEnabled);
-    m_model->setItem(curRow,1,item);
+		item = new QStandardItem(QLocale(QLocale::English).toString(_obj->size()));
+		item->setFlags(Qt::ItemIsEnabled);
+		m_model->setItem(curRow,1,item);
+	}
 
     //shift
-    m_model->setRowCount(++curRow+1);
-    item = new QStandardItem("Global shift");
-    item->setFlags(Qt::ItemIsEnabled);
-    m_model->setItem(curRow,0,item);
+	{
+		m_model->setRowCount(++curRow+1);
+		QStandardItem* item = new QStandardItem("Global shift");
+		item->setFlags(Qt::ItemIsEnabled);
+		m_model->setItem(curRow,0,item);
 
-    const double* shift = _obj->getOriginalShift();
-    item = new QStandardItem(QString("(%1;%2;%3)").arg(shift[0],0,'f',2).arg(shift[1],0,'f',2).arg(shift[2],0,'f',2));
-    item->setFlags(Qt::ItemIsEnabled);
-    m_model->setItem(curRow,1,item);
+		const double* shift = _obj->getOriginalShift();
+		item = new QStandardItem(QString("(%1;%2;%3)").arg(shift[0],0,'f',2).arg(shift[1],0,'f',2).arg(shift[2],0,'f',2));
+		item->setFlags(Qt::ItemIsEnabled);
+		m_model->setItem(curRow,1,item);
+	}
+
+	//custom point size
+	{
+		m_model->setRowCount(++curRow+1);
+		QStandardItem* item = new QStandardItem("Point size");
+		item->setFlags(Qt::ItemIsEnabled);
+		m_model->setItem(curRow,0,item);
+
+		item = new QStandardItem();
+		item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
+		item->setData(OBJECT_CLOUD_POINT_SIZE);
+		m_model->setItem(curRow,1,item);
+		m_view->openPersistentEditor(m_model->index(curRow,1));
+	}
 
 	fillSFWithPointCloud(_obj);
 }
@@ -1195,6 +1214,19 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
         return spinBox;
     }
+    case OBJECT_CLOUD_POINT_SIZE:
+    {
+        QComboBox *comboBox = new QComboBox(parent);
+
+        comboBox->addItem(c_defaultPointSizeString); //size = 0
+        for (unsigned i=1;i<=10;++i)
+            comboBox->addItem(QString::number(i));
+
+        connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(cloudPointSizeChanged(int)));
+
+		comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+        return comboBox;
+    }
     default:
         return QItemDelegate::createEditor(parent, option, index);
     }
@@ -1268,10 +1300,8 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
         if (!comboBox)
             return;
 
-        int pos = -1;
         ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
-        if (win)
-            pos = comboBox->findText(win->windowTitle());
+        int pos = (win ? pos = comboBox->findText(win->windowTitle()) : 0);
 
         comboBox->setCurrentIndex(ccMax(pos,0)); //0 = "NONE"
         break;
@@ -1404,6 +1434,17 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
         ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_currentObject);
         assert(sensor);
         spinBox->setValue(sensor->getGraphicScale());
+        break;
+    }
+    case OBJECT_CLOUD_POINT_SIZE:
+    {
+        QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
+        if (!comboBox)
+            return;
+
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+        assert(cloud);
+        comboBox->setCurrentIndex(cloud->getPointSize());
         break;
     }
     default:
@@ -1688,6 +1729,19 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
     sensor->setGraphicScale(val);
 
     if (sensor->isVisible() && sensor->isEnabled())
+        emit ccObjectAppearanceChanged(m_currentObject);
+}
+
+void ccPropertiesTreeDelegate::cloudPointSizeChanged(int size)
+{
+    if (!m_currentObject)
+        return;
+
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
+    assert(cloud);
+	cloud->setPointSize(size);
+
+    if (cloud->isVisible() && cloud->isEnabled())
         emit ccObjectAppearanceChanged(m_currentObject);
 }
 

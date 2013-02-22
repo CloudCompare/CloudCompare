@@ -1475,18 +1475,15 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
         const colorType* col = 0;
         const PointCoordinateType* N = 0;
         unsigned decimStep;
-        //unsigned decimedNumberOfPoints;
 
         // L.O.D.
 		unsigned numberOfPoints=size();
         if (numberOfPoints>MAX_LOD_POINTS_NUMBER && context.decimateCloudOnMove &&  MACRO_LODActivated(context))
         {
             decimStep = int(ceil(float(numberOfPoints) / float(MAX_LOD_POINTS_NUMBER)));
-            //decimedNumberOfPoints = int(floor(float(numberOfPoints) / float(decimStep)));
         }
         else
         {
-            //decimedNumberOfPoints = numberOfPoints;
             decimStep = 1;
         }
 
@@ -1495,6 +1492,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
         //standard case: list names pushing
         if (pushName)
             glPushName(getUniqueID());
+
+		//custom point size?
+		glPushAttrib(GL_POINT_BIT);
+		if (m_pointSize != 0)
+			glPointSize((GLfloat)m_pointSize);
 
 		if (!pushPointNames) //standard "full" display
 		{
@@ -1694,7 +1696,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				/*** Fast way to display simple clouds ***/
 				//My old buggy ATI card wasn't supporting "glDrawArrays" with too many points...
 				//DGM: well, it's very old now, why bother?! And we use chunked arrays now
-				//if (false)
+				//if (ATI)
 				{
 					glEnableClientState(GL_VERTEX_ARRAY);
 					if (glParams.showColors)
@@ -1782,7 +1784,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
         /*** END DISPLAY ***/
 
-        if (colorMaterial)
+		glPopAttrib(); //GL_POINT_BIT
+
+		if (colorMaterial)
             glDisable(GL_COLOR_MATERIAL);
 
         //we can now switch the light off

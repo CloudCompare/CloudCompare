@@ -72,6 +72,7 @@ enum CC_PROPERTY_ROLE { OBJECT_NAME                     =   1,
 						OBJECT_LABEL_DISP_2D			=	22,
 						OBJECT_LABEL_DISP_3D			=	23,
                         OBJECT_PRIMITIVE_PRECISION      =   24,
+						OBJECT_CLOUD_POINT_SIZE			=	25,
 };
 
 //! GUI properties list dialog element
@@ -121,6 +122,7 @@ protected slots:
     void redrawObjectSF();
     void objectDisplayChanged(const QString &newDisplayTitle);
     void sensorScaleChanged(double val);
+	void cloudPointSizeChanged(int size);
 
 protected:
 

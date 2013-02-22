@@ -3,7 +3,9 @@
 v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
-- The 'Align with point pairs' tool can now be used with only one cloud selecte	
+- Points size can now be independently set for each cloud
+	* see the 'Point size' combo-box in the cloud's properties
+- The 'Align with point pairs' tool can now be used with only one cloud selected	
 	(in which case reference points must be manually added with the 'pencil' icon)
 - Point picking mechanism enhanced:
 	- point marker is now a (selectable) 3D sphere
@@ -16,7 +18,7 @@ v2.4 ??/??/2013
 - New entry in the DB tree context menu: "Toggle materials/textures"
 - New options for display:
 	* point marker size (see above)
-	* histogram bacground color
+	* histogram background color
 	* label color
 - Limits for auto-decimation are now:
 	* 10M. points for a cloud
@@ -24,9 +26,12 @@ v2.4 ??/??/2013
 - New icons for CloudCompare and ccViewer
 - Bug fix:
 	* in the 'Point list picking' tool, when exporting a list of picked points THEN cancelling the picking process, CC will crash
-	* SF scale is now renderded by the 'Render to file' tool
+	* SF scale is now rendered by the 'Render to file' tool
 	* qPCL's MLS tool would crash if the input cloud has no displayed scalar field! (+ dependency to Luca's PCL patch is now optional)
-	* 'shift on load' informtation is now preserved when sampling points on a mesh (and during several other operations)
+	* 'shift on load' information is now preserved when sampling points on a mesh (and during several other operations)
+	* a group of labels could be freely displaced, eventually leading to a crash (under some circumstances) if the destination is not
+		one of the label's associated clouds. On the contrary, labels can now be regrouped and displaced as long as they stay below one
+		of their associated clouds.
 
 v2.4 01/21/2013
 - New tool: 'Edit > Mesh > Subdivide' (recursive subdivision)
@@ -122,7 +127,7 @@ v2.4 10/31/2012
 	* potential crash when using the research option 'enable furthest points removal' during registration (ICP)
 - PLY files saved by CloudCompare have (once again) field names "compatible" with MeshLab.
 	The 'vertex_indices' field has changed to 'vertex_indexes' in the last versions of CC ... and this make Meshlab crash...
-	(I've already ranted about that before: the PLY format doesn't impose any particular field name and it's the responsiblity
+	(I've already ranted about that before: the PLY format doesn't impose any particular field name and it's the responsibility
 	of the loader to handle that... Paraview do this wonderfully for instance ;)
 
 v2.4 09/22/2012
@@ -152,7 +157,7 @@ v2.4 07/28/2012
 	* for the moment, only the scalar fields names are used by the ASCII importer 
 - Bugs fixed:
 	* 2D Viewport objects can now be dragged and dropped, and can be loaded properly from BIN files
-	* centered perspective mode could behave strangely when zooming in close to objets with large coordinates
+	* centered perspective mode could behave strangely when zooming in close to objects with large coordinates
 	* render to file based on FBO (frame buffer object) with a zoom different than 1 was done without depth component!
 	* distance computation timing displayed in Console was in microseconds instead of seconds!
 
@@ -161,7 +166,7 @@ v2.4 07/18/2012
 - Bilateral gaussian filter for scalar fields added (Thanks Luca)
 - Ranges computation from a sensor added (Thanks Luca)
 - Scattering angles computation from a sensor added (Thanks Luca)
-- Loaded mesh vertices that are not shared by mutliple sub-meshes are not 'locked' by default anymore
+- Loaded mesh vertices that are not shared by multiple sub-meshes are not 'locked' by default anymore
 - No more system console on Windows
 - Bugs fixed:
 	* under certain circumstances, when two clouds with different scalar fields were fused, 
@@ -173,7 +178,7 @@ v2.4 07/18/2012
 
 v2.4 07/03/2012
 - LAS file import now handles intensity and classification fields
-- The 2D part of labels is no longer displayed in 2D in the 'Point list picking' tool (to mimick the old version)
+- The 2D part of labels is no longer displayed in 2D in the 'Point list picking' tool (to mimic the old version)
 - New type of label: rectangular area labels can be defined on screen to annotate a particular zone
 	(they can be created with the Point Picking tool - don't forget to "save" the label once created)
 - Test in progress: weighted ICP with associated scalar field(s) values
@@ -199,7 +204,7 @@ v2.4 06/24/2012
 	* 32/64 bits compatible
 - Point picking now spawns labels
 	* labels can simply be created anytime by holding the SHIFT key and clicking on a 3D point
-	* labels are independant objects that can be moved on screen, hidden, saved (BIN V2), etc.
+	* labels are independent objects that can be moved on screen, hidden, saved (BIN V2), etc.
 	* labels can be collapsed with a right click
 	* point list picking and point/segment/triplet picking dialogs have been updated accordingly
 - ccViewer upgraded:
@@ -212,7 +217,7 @@ v2.4 06/24/2012
 - New method: conversion from cloud normals to HSV colors (Edit > Normals > Convert to HSV)
 - Scalar fields boundaries can now be set by user (check the 'release boundaries' checkbox in the scalar field properties and manually set the desired values in the min and max 'displayed' values spinboxes)
 - Distance computation tool can now split the result along each dimension (X,Y and Z) in the case of cloud-cloud distance
-	(very usefull to get only the vertical displacement for instance)
+	(very useful to get only the vertical displacement for instance)
 - DB tree elements now have a context menu (right click) to enable/disable standard features (visibility, color, normals, scalar field) or delete the selected element(s), etc.
 - Entities in the DB tree can now be moved manually (with drag & drop) or sorted alphabetically (via the context menu)
 - New (empty) groups can be added in the DB tree (via the context menu)
@@ -226,13 +231,13 @@ v2.4 06/24/2012
   * ortho-rectification as images (on disk) is now available through command line arguments (see wiki: http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine)
 - Multiple clouds can now be automatically saved in multiple ASCII files
 	* select several clouds then 'Save' them as ASCII files
-	* enter a base name with an extension (hint: any occurence of the string 'cloudname' will be replaced by each cloud name)
+	* enter a base name with an extension (hint: any occurrence of the string 'cloudname' will be replaced by each cloud name)
 	* CC will generate one file per cloud, with an automatic suffix ('basename_000001.asc', etc.)
 
 v2.4 04/24/2012
 - Bug fix: crash when displaying the histogram after computing statistical parameters
 - Bug fix: once loaded, a VTK mesh couldn't be manually transformed and its vertices didn't appear in the DB tree
-- Bug fix: when computing distances bewteen two clouds with a 'maximum distance' threshold fixed, this maximum distance value was assigned to points with zero distance!
+- Bug fix: when computing distances between two clouds with a 'maximum distance' threshold fixed, this maximum distance value was assigned to points with zero distance!
 - Bug fix: when saving PLY files with scalar fields having spaces characters in their name, reloading was not possible (hack: even for binary PLY files, the header is in ASCII mode and can manually be edited --> replace all spaces in the SF name by underscores)
 - Bug fix: when checking/unchecking an item in the DB tree, its properties were displayed even if the item was not selected
 - Snavely's Bundler file import tool can now generate 2D orthorectified images (directly saved alongside original images)
@@ -247,14 +252,14 @@ v2.4 01/04/2012
 - PLY files saved by CloudCompare now use 'properties' names compatible with MeshLab (to cope with the lack of flexibility of this - however great - tool ;)
 - All scalar fields associated to a cloud are now saved in PLY files (with their name as property name + prefix 'SCALAR_')
 - Bug in Delaunay 2D triangulation on least square best fitting plane fixed.
-- Crash during OBJ files loading fixed (the crash occured when the file was refering to materials but no material file was declared)
+- Crash during OBJ files loading fixed (the crash occurred when the file was referring to materials but no material file was declared)
 - The Windows release has been compiled with Visual Studio 2008. You may have to install Visual C++ 2008 Redistributable Package (x86) to launch CloudCompare.
 - Project can/should now be compiled with CMake (www.cmake.org). See http://www.danielgm.net/cc/doc/wiki/index.php5?title=Compilation_CMake
 
 v2.3 02/14/2012
 - Noah Snavely's Bundler import filter is now able to use an alternative cloud (or mesh) as keypoints source.
 	If it's a mesh, it can also be used as DTM for generating colored pseudo-DTM vertices
-- Transformation matrix is now properly ouput in console (either after registration process, or after interactive editing).
+- Transformation matrix is now properly output in console (either after registration process, or after interactive editing).
 	This transformation can be copied & pasted in the new 'Edit > Apply transformation' dialog that replaces 'Edit > Translate'.
 - A bug in connected components extraction with octree has been fixed (in rare cases, the process could make CC crash)
 
@@ -289,14 +294,14 @@ v2.3 12/11/2011
 - scalar field colors can now be displayed with a logarithmic scale
 - precision of color scale displayed values can now be setup with the 'display options' dialog
 - bug corrected in ASCII file loading wizard when skipping lines
-- various display artefacts or minor bugs removed
+- various display artifacts or minor bugs removed
 
 v2.3 11/22/2011
-- A bug in CCLib (ReferenceCloud) has been corrected. It may have inpacted ICP registration for clouds below 20000 points.
+- A bug in CCLib (ReferenceCloud) has been corrected. It may have impacted ICP registration for clouds below 20000 points.
 - the code has been cleaned-up with 'cppcheck' (http://cppcheck.sourceforge.net/ - great tool!)
 - the multi-core octree-based computations mechanism is back! (seems that it has mistakenly been disabled a while ago... hum hum)
 - ASCII file loading changed: from now on, only one cloud can be loaded at a time, but the fields order doesn't matter any more
-(a scalar field can be set before points coordinates, etc.) and loading is also slighlty faster.
+(a scalar field can be set before points coordinates, etc.) and loading is also slightly faster.
 - if available, FBO (Frame Buffer Object) is systematically used to store the last displayed 3D scene. This allows very fast redraw
 of the 3D view when viewpoint and cloud properties are not changed (i.e. during interactive graphical segmentation, or anytime the
 application window needs to be redrawn when requested by the OS or Qt - when a menu overlaps the 3D view, or the window is moved, etc.).
@@ -316,8 +321,8 @@ V2.3 09/18/2011
 V2.3 09/04/2011
 - Color scale improvements:
 	- user can set multiple settings (square size, font size, whether to always display '0' or not)
-	- user can now choose now for signed scalar fields whether saturation is absolue (former default) or signed (new default)
-- Scalar field(s) name(s) aer now editable (Edit > Scalar Field > Rename)
+	- user can now choose now for signed scalar fields whether saturation is absolute (former default) or signed (new default)
+- Scalar field(s) name(s) are now editable (Edit > Scalar Field > Rename)
 - Scalar field(s) name(s) are now saved in BIN files
 
 v2.3 07/07/2011

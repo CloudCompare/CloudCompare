@@ -817,10 +817,11 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 	assert(item);
 	if (item)
 	{
-		if (item->isA(CC_HIERARCHY_OBJECT) ||
-			item->isKindOf(CC_POINT_CLOUD) ||
-			item->isKindOf(CC_MESH)        ||
-			item->isKindOf(CC_IMAGE)       ||
+		if (item->isA(CC_HIERARCHY_OBJECT)	||
+			item->isKindOf(CC_POINT_CLOUD)	||
+			item->isKindOf(CC_MESH)			||
+			item->isKindOf(CC_IMAGE)		||
+			item->isKindOf(CC_2D_LABEL)		||
 			item->isKindOf(CC_PRIMITIVE))
 		{
 			defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
@@ -925,7 +926,6 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 					ccConsole::Error("Outside meshes can't be added to mesh groups!");
 					return false;
 				}
-
 			}
 			else if (/*item->isKindOf(CC_PRIMITIVE) || */item->isKindOf(CC_IMAGE))
 			{
@@ -933,6 +933,40 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 				{
 					ccConsole::Error("This kind of entity can't leave their parent!");
 					return false;
+				}
+			}
+			else if (oldParent != newParent)
+			{
+				//a label or a group of labels can't be moved to another cloud!
+				ccHObject::Container labels;
+				if (item->isA(CC_2D_LABEL))
+					labels.push_back(item);
+				else
+					item->filterChildren(labels,true,CC_2D_LABEL);
+
+				//for all labels in the sub-tree
+				for (ccHObject::Container::const_iterator it = labels.begin(); it != labels.end(); ++it)
+				{
+					cc2DLabel* label = static_cast<cc2DLabel*>(*it);
+					bool canMove = false;
+					for (unsigned j=0;j<label->size();++j)
+					{
+						assert(label->getPoint(j).cloud);
+						//3 options to allow moving a label:
+						if (item->isAncestorOf(label->getPoint(j).cloud) //label's cloud is inside sub-tree
+							|| newParent == label->getPoint(j).cloud //destination is label's cloud
+							|| label->getPoint(j).cloud->isAncestorOf(newParent)) //destination is below label's cloud
+						{
+							canMove = true;
+							break;
+						}
+					}
+
+					if (!canMove)
+					{
+						ccConsole::Error("Labels (or group of) can't leave their parent!");
+						return false;
+					}
 				}
 			}
 		}

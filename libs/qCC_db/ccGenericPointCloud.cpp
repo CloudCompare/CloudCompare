@@ -35,6 +35,7 @@
 ccGenericPointCloud::ccGenericPointCloud(QString name)
 	: ccHObject(name)
 	, m_visibilityArray(0)
+	, m_pointSize(0)
 {
     setVisible(true);
     lockVisibility(false);

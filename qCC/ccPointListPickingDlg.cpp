@@ -46,6 +46,7 @@
 #include <assert.h>
 
 static unsigned s_pickedPointsStartIndex = 0;
+static const char s_pickedPointContainerName[] = "Picked points list";
 
 ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	: ccPointPickingGenericInterface(parent)
@@ -116,15 +117,14 @@ void ccPointListPickingDlg::linkWithCloud(ccPointCloud* cloud)
 	{
 		//find default container
 		m_orderedLabelsContainer = 0;
-		for (unsigned i=0;i<m_associatedCloud->getChildrenNumber();++i)
-		{
-			ccHObject* child = m_associatedCloud->getChild(i);
-			if (child->isA(CC_HIERARCHY_OBJECT) && child->getName() == "Picked points list")
+		ccHObject::Container groups;
+		m_associatedCloud->filterChildren(groups,true,CC_HIERARCHY_OBJECT);
+		for (ccHObject::Container::const_iterator it = groups.begin(); it != groups.end(); ++it)
+			if ((*it)->getName() == s_pickedPointContainerName)
 			{
-				m_orderedLabelsContainer = child;
+				m_orderedLabelsContainer = *it;
 				break;
 			}
-		}
 
 		std::vector<cc2DLabel*> previousPickedPoints;
 		unsigned count = getPickedPoints(previousPickedPoints);
@@ -413,12 +413,13 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 	//add default container if necessary
 	if (!m_orderedLabelsContainer)
 	{
-		m_orderedLabelsContainer = new ccHObject("Picked points list");
+		m_orderedLabelsContainer = new ccHObject(s_pickedPointContainerName);
 		m_associatedCloud->addChild(m_orderedLabelsContainer,true);
+		MainWindow::TheInstance()->addToDB(m_orderedLabelsContainer,true,0,true,false);
 	}
 	assert(m_orderedLabelsContainer);
 	m_orderedLabelsContainer->addChild(newLabel,true);
-
+	MainWindow::TheInstance()->addToDB(newLabel,true,0,true,false);
 	m_toBeAdded->addChild(newLabel,false);
 
 	//automatically send the new point coordinates to the clipboard

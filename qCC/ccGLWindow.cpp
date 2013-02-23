@@ -1049,11 +1049,14 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 	//we choose the value closest to equivalentWidth with the right granularity
 	equivalentWidth = floor(std::max(equivalentWidth/granularity,1.0f))*granularity;
 
+	QFontMetrics fm(m_font);
+
 	//we deduce the scale drawing width
 	float scaleW = equivalentWidth*totalZoom;
 	float dW = 2*CC_DISPLAYED_TRIHEDRON_AXES_LENGTH+20.0;
+	float dH = std::max<float>((float)fm.height()*1.25,CC_DISPLAYED_TRIHEDRON_AXES_LENGTH+5.0);
 	float w = float(m_glWidth)*0.5-dW;
-	float h = float(m_glHeight)*0.5-10.0-QFontMetrics(m_font).height();
+	float h = float(m_glHeight)*0.5-dH;
 
 	//scale OpenGL drawing
 	glColor3ubv(color);
@@ -1069,7 +1072,7 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 	QString text = QString::number(equivalentWidth);
 	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
 	glColor3f((float)color[0]/(float)MAX_COLOR_COMP,(float)color[1]/(float)MAX_COLOR_COMP,(float)color[2]/(float)MAX_COLOR_COMP);
-	renderText(m_glWidth-int(scaleW*0.5+dW)-QFontMetrics(m_font).width(text)/2, m_glHeight-10, text, m_font);
+	renderText(m_glWidth-int(scaleW*0.5+dW)-fm.width(text)/2, m_glHeight-dH/2+fm.height()/3, text, m_font);
 }
 
 void ccGLWindow::drawAxis()
@@ -2728,10 +2731,12 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 
 	QFont textFont = (font ? *font : m_font);
 
+	QFontMetrics fm(textFont);
+	int margin = fm.height()/4;
+
 	bool drawBackground = true;
 	if (align != (ALIGN_HLEFT | ALIGN_VTOP) || bkgAlpha != 0)
 	{
-		QFontMetrics fm(textFont);
 		QRect rect = fm.boundingRect(text);
 
 		//text alignment
@@ -2751,9 +2756,9 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 			glPushAttrib(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_BLEND);
 			glColor4f(1.0f-(float)col[0]/(float)MAX_COLOR_COMP,1.0f-(float)col[1]/(float)MAX_COLOR_COMP,1.0f-(float)col[2]/(float)MAX_COLOR_COMP,(float)bkgAlpha/(float)100);
-			int margin = rect.height()/2;
 			int xB = x2 - m_glWidth/2;
 			int yB = m_glHeight/2 - y2;
+			yB += margin/2; //empirical compensation
 
 			glBegin(GL_POLYGON);
 			glVertex2d(xB - margin, yB - margin);
@@ -2766,5 +2771,6 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 	}
 
 	glColor3f((float)col[0]/(float)MAX_COLOR_COMP,(float)col[1]/(float)MAX_COLOR_COMP,(float)col[2]/(float)MAX_COLOR_COMP);
+	y2 -= margin; //empirical compensation
 	renderText(x2, y2, text, textFont);
 }

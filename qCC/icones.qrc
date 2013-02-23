@@ -106,4 +106,13 @@
     <file>images/types/y_coordinate.png</file>
     <file>images/types/z_coordinate.png</file>
   </qresource>
+  <qresource prefix="/CC/Primitives">
+    <file>images/primitives/box.gif</file>
+    <file>images/primitives/plane.gif</file>
+    <file>images/primitives/cone.gif</file>
+    <file>images/primitives/cylinder.gif</file>
+    <file>images/primitives/dish.gif</file>
+    <file>images/primitives/sphere.gif</file>
+    <file>images/primitives/torus.gif</file>
+  </qresource>
 </RCC>

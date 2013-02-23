@@ -112,6 +112,7 @@
 #include "ccCoordinatesShiftManager.h"
 #include "ccPointPairRegistrationDlg.h"
 #include "ccExportCoordToSFDlg.h"
+#include "ccPrimitiveFactoryDlg.h"
 #include <ui_aboutDlg.h>
 
 //Qt Includes
@@ -151,6 +152,7 @@ MainWindow::MainWindow()
     , m_ppDlg(0)
     , m_plpDlg(0)
 	, m_pprDlg(0)
+	, m_pfDlg(0)
 	, m_glFilterActions(this)
 {
     //Dialog "auto-construction"
@@ -221,6 +223,7 @@ MainWindow::~MainWindow()
     m_ppDlg = 0;
     m_plpDlg = 0;
 	m_pprDlg = 0;
+	m_pfDlg = 0;
 
 	//release all 'overlay' dialogs
 	while (!m_mdiDialogs.empty())
@@ -545,6 +548,8 @@ void MainWindow::connectActions()
     connect(actionRoughness,                    SIGNAL(triggered()),    this,       SLOT(doComputeRoughness()));
     connect(actionSNETest,						SIGNAL(triggered()),    this,       SLOT(doSphericalNeighbourhoodExtractionTest()));
     connect(actionPlaneOrientation,				SIGNAL(triggered()),    this,       SLOT(doComputePlaneOrientation()));
+	//"Tools"
+	connect(actionPrimitiveFactory,				SIGNAL(triggered()),    this,       SLOT(doShowPrimitiveFactory()));
 
     //"Display" menu
     connect(actionFullScreen,                   SIGNAL(toggled(bool)),  this,       SLOT(toggleFullScreen(bool)));
@@ -5330,6 +5335,16 @@ void MainWindow::doComputePlaneOrientation()
 
 	refreshAll();
 	updateUI();
+}
+
+void MainWindow::doShowPrimitiveFactory()
+{
+	if (!m_pfDlg)
+		m_pfDlg = new ccPrimitiveFactoryDlg(this);
+
+	m_pfDlg->setModal(false);
+	m_pfDlg->setWindowModality(Qt::NonModal);
+	m_pfDlg->show();
 }
 
 void MainWindow::doComputeDensity()

@@ -180,3 +180,30 @@ bool ccSphere::fromFile_MeOnly(QFile& in, short dataVersion)
 
 	return true;
 }
+
+void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
+{
+	if (!context._win)
+		return;
+
+	//we display it in the 2D layer in fact!
+    ccBBox bBox = getBB(true,false,m_currentDisplay);
+	if (bBox.isValid())
+	{
+		const double* MM = context._win->getModelViewMatd(); //viewMat
+		const double* MP = context._win->getProjectionMatd(); //projMat
+		int VP[4];
+		context._win->getViewportArray(VP);
+
+		GLdouble xp,yp,zp;
+		CCVector3 C = bBox.getCenter();
+		gluProject(C.x,C.y,C.z,MM,MP,VP,&xp,&yp,&zp);
+
+		//we want to display this name next to the sphere, and not above it!
+		const ccViewportParameters& params = context._win->getViewportParameters();
+		int dPix = (int)ceil(params.globalZoom * params.zoom * m_radius);
+
+		int bkgBorder = QFontMetrics(context._win->getTextDisplayFont()).height()/4+4;
+		context._win->displayText(getName(),(int)xp+dPix+bkgBorder,(int)yp,ccGenericGLDisplay::ALIGN_HLEFT | ccGenericGLDisplay::ALIGN_VMIDDLE,75);
+	}
+}

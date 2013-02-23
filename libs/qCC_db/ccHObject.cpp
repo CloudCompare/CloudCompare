@@ -339,8 +339,6 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 	{
 		const double* MM = context._win->getModelViewMatd(); //viewMat
 		const double* MP = context._win->getProjectionMatd(); //projMat
-		//const float half_w = (float)m_associatedWin->width() * 0.5f;
-		//const float half_h = (float)m_associatedWin->height() * 0.5f;
 		int VP[4];
 		context._win->getViewportArray(VP);
 

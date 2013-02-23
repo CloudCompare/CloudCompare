@@ -75,6 +75,9 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
 	virtual bool buildUp();
 
+	//inherited from ccHObject
+	virtual void drawNameIn3D(CC_DRAW_CONTEXT& context);
+
 	//! Radius
 	PointCoordinateType m_radius;
 };

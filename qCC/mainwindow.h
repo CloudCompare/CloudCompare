@@ -62,6 +62,7 @@ class ccPointPropertiesDlg;
 class ccCameraParamEditDlg;
 class ccPointListPickingDlg;
 class ccPointPairRegistrationDlg;
+class ccPrimitiveFactoryDlg;
 class ccDrawableObject;
 class ccOverlayDialog;
 class QMdiSubWindow;
@@ -245,6 +246,7 @@ protected slots:
     void doComputeRoughness();
 	void doSphericalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
 	void doComputePlaneOrientation();
+	void doShowPrimitiveFactory();
 
     void doActionComputeNormals();
     void doActionInvertNormals();
@@ -463,6 +465,8 @@ protected:
     ccPointListPickingDlg* m_plpDlg;
     //! Point-pair registration
     ccPointPairRegistrationDlg* m_pprDlg;
+	//! Primitive factory dialog
+	ccPrimitiveFactoryDlg* m_pfDlg;
 
     /*** plugins ***/
     QString m_pluginsPath;

@@ -17,6 +17,9 @@ v2.4 ??/??/2013
 		* when picking 3 successive points ('triplet' mode), the 3 corresponding angles are displayed
 - 'Height grid generation' tool upgraded:
 	* the number of points per cell can now be saved as a scalar field ('save per-cell count as SF' checkbox)
+- New tool: 'primitive factory'
+	* let you create custom primitives (plane, box, sphere, cylinder, cone, torus or dish)
+	* accessible via the 'Tools > Primitive factory' menu entry or a dedicated icon in the main toolbar
 - New entry in the DB tree context menu: "Toggle materials/textures"
 - New option "Show 3D name" for 3D entities:
 	* display the name of the entity in the 3D view (in the middle of its bounding-box by default)

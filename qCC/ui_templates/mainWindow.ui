@@ -52,7 +52,6 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
-    <addaction name="separator"/>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
     <addaction name="separator"/>
@@ -330,6 +329,7 @@
     <addaction name="menuStatistics"/>
     <addaction name="menuSegmentation"/>
     <addaction name="menuOther"/>
+    <addaction name="actionPrimitiveFactory"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -549,6 +549,7 @@
    <addaction name="actionCloudMeshDist"/>
    <addaction name="actionStatisticalTest"/>
    <addaction name="actionLabelConnectedComponents"/>
+   <addaction name="actionPrimitiveFactory"/>
    <addaction name="separator"/>
    <addaction name="actionSegment"/>
    <addaction name="actionTranslateRotate"/>
@@ -1996,6 +1997,15 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionPrimitiveFactory">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/Tree/images/miscGeomSymbol.png</normaloff>:/CC/Tree/images/miscGeomSymbol.png</iconset>
+   </property>
+   <property name="text">
+    <string>Primitive factory</string>
    </property>
   </action>
  </widget>

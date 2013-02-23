@@ -246,13 +246,35 @@
     </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="generateCloudCheckBox">
-     <property name="text">
-      <string>generate grid as a point cloud</string>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="checked">
-      <bool>true</bool>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
      </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QCheckBox" name="generateCloudCheckBox">
+        <property name="text">
+         <string>generate grid as a point cloud</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="generateCountSFcheckBox">
+        <property name="text">
+         <string>save per-cell count as SF</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>
@@ -350,6 +372,22 @@
     <hint type="destinationlabel">
      <x>296</x>
      <y>102</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>generateCloudCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>generateCountSFcheckBox</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>103</x>
+     <y>180</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>296</x>
+     <y>180</y>
     </hint>
    </hints>
   </connection>

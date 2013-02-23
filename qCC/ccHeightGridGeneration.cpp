@@ -70,6 +70,7 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
                                      bool generateImage /*= true*/,
                                      bool generateASCII /*= false*/,
                                      ccPointCloud* cloudGrid/*=0*/,
+									 bool generateCountSF/*=false*/,
                                      CCLib::GenericProgressCallback* progressCb/*=0*/)
 {
     if (progressCb)
@@ -528,24 +529,47 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 			{
 				ccConsole::Print("[ccHeightGridGeneration] Saving the height grid as a cloud...");
 
-				int sfIdx = -1;
-				CCLib::ScalarField* sf = 0;
-
+				//per-point height SF
+				CCLib::ScalarField* heightSF = 0;
+				int heightSFIdx = -1;
+				{
 #ifdef _DEBUG
-				//the input point cloud should be empty!
-				sfIdx = cloudGrid->getScalarFieldIndexByName(CC_HEIGHT_GRID_FIELD_NAME);
-				assert(sfIdx<0);
+					//the input point cloud should be empty!
+					heightSFIdx = cloudGrid->getScalarFieldIndexByName(CC_HEIGHT_GRID_FIELD_NAME);
+					assert(heightSFIdx<0);
 #endif
-				sfIdx = cloudGrid->addScalarField(CC_HEIGHT_GRID_FIELD_NAME, minHeight >= 0.0);
-				if (sfIdx<0)
-				{
-					ccConsole::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing height grid values! Try to free some memory ...");
+					heightSFIdx = cloudGrid->addScalarField(CC_HEIGHT_GRID_FIELD_NAME, minHeight >= 0.0);
+					if (heightSFIdx<0)
+					{
+						ccConsole::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing height grid values! Try to free some memory ...");
+					}
+					else
+					{
+						heightSF = cloudGrid->getScalarField(heightSFIdx);
+						assert(heightSF);
+					}
 				}
-				else
+
+				//shall we save per-cell population as well?
+				CCLib::ScalarField* countSF = 0;
+				int countSFIdx = -1;
+				if (generateCountSF)
 				{
-					cloudGrid->setCurrentInScalarField(sfIdx);
-					sf = cloudGrid->getCurrentInScalarField();
-					assert(sf);
+#ifdef _DEBUG
+					//the input point cloud should be empty!
+					countSFIdx = cloudGrid->getScalarFieldIndexByName("Per-cell population");
+					assert(countSFIdx<0);
+#endif
+					countSFIdx = cloudGrid->addScalarField("Per-cell population",true);
+					if (countSFIdx<0)
+					{
+						ccConsole::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing per-cell population count! Try to free some memory ...");
+					}
+					else
+					{
+						countSF = cloudGrid->getScalarField(countSFIdx);
+						assert(countSF);
+					}
 				}
 
 				unsigned pointsCount = (fillEmptyCells != LEAVE_EMPTY ? grid_size_X*grid_size_Y : nonEmptyCells);
@@ -565,19 +589,29 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 							{
 								P.u[Z] = aCell->height;
 								cloudGrid->addPoint(P);
+								++n;
 
 								//if a SF is available, we set the point height as its associated scalar
-								if (sf)
-									cloudGrid->setPointScalarValue(n++,aCell->height);
+								if (heightSF)
+									heightSF->addElement(aCell->height);
+								//per-cell population SF
+								if (countSF)
+								{
+									DistanceType pop = aCell->nbPoints;
+									countSF->addElement(pop);
+								}
 							}
 							else if (fillEmptyCells != LEAVE_EMPTY) //empty cell
 							{
 								P.u[Z] = empty_cell_height;
 								cloudGrid->addPoint(P);
+								++n;
 
 								//if a SF is available, we set the point height as the default one
-								if (sf)
-									cloudGrid->setPointScalarValue(n++,empty_cell_height);
+								if (heightSF)
+									heightSF->addElement(empty_cell_height);
+								if (countSF)
+									countSF->addElement(HIDDEN_VALUE);
 							}
 	                        
 							P.u[X] += grid_step;
@@ -586,12 +620,18 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 						P.u[Y] += grid_step;
 					}
 
-					if (sf)
+					if (heightSF)
 					{
-						sf->computeMinAndMax();
-						cloudGrid->setCurrentDisplayedScalarField(sfIdx);
-						cloudGrid->showSF(true);
+						heightSF->computeMinAndMax();
+						cloudGrid->setCurrentDisplayedScalarField(heightSFIdx);
 					}
+					if (countSF)
+					{
+						countSF->computeMinAndMax();
+						if (!heightSF)
+							cloudGrid->setCurrentDisplayedScalarField(countSFIdx);
+					}
+					cloudGrid->showSF(heightSF || countSF);
 
 					//former scalar fields
 					for (unsigned k=0;k<gridScalarFields.size(); ++k)

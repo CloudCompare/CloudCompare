@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>NormalComputationDlg</class>
  <widget class="QDialog" name="NormalComputationDlg">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>250</width>
+    <height>125</height>
+   </rect>
+  </property>
   <property name="minimumSize">
    <size>
     <width>250</width>
@@ -126,6 +134,16 @@
        <item>
         <property name="text">
          <string>-Z</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>+Barycenter</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>- Barycenter</string>
         </property>
        </item>
       </widget>

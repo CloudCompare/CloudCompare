@@ -3347,6 +3347,7 @@ void MainWindow::doActionHeightGridGeneration()
         return;
 
     bool generateCloud = dlg.generateCloud();
+	bool generateCountSF = dlg.generateCountSF();
     bool generateImage = dlg.generateImage();
     bool generateASCII = dlg.generateASCII();
 
@@ -3383,6 +3384,7 @@ void MainWindow::doActionHeightGridGeneration()
                                     generateImage,
                                     generateASCII,
                                     outputGrid,
+									generateCountSF,
                                     &pDlg);
 
     //a cloud was demanded as output?

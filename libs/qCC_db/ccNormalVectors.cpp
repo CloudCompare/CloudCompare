@@ -247,10 +247,19 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 	}
 
     //prefered orientation
-	bool hasPreferedOrientation = (preferedOrientation>=0 && preferedOrientation<6);
+	bool hasPreferedOrientation = (preferedOrientation>=0 && preferedOrientation<8);
 	CCVector3 orientation(0.0,0.0,0.0);
+	CCVector3 barycenter;
 	if (hasPreferedOrientation)
-        orientation.u[preferedOrientation>>1]=((preferedOrientation & 1) == 0 ? 1.0 : -1.0); //odd number --> inverse direction
+	{
+		if (preferedOrientation<6) //6 and 7 = +/-barycenter
+			orientation.u[preferedOrientation>>1]=((preferedOrientation & 1) == 0 ? 1.0 : -1.0); //odd number --> inverse direction
+		else
+		{
+			barycenter = CCLib::GeometricalAnalysisTools::computeGravityCenter(theCloud);
+			ccLog::Print(QString("[ccNormalVectors::ComputeCloudNormals] Barycenter: (%1,%2,%3)").arg(barycenter.x).arg(barycenter.y).arg(barycenter.z));
+		}
+	}
 
 	//we 'compress' each normal (and we check its orientation if necessary)
 	theNormsCodes.fill(0);
@@ -261,8 +270,19 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 
 		//we check sign if necessary
 		if (hasPreferedOrientation)
-            if (CCVector3::vdot(N,orientation.u) < 0)
-                CCVector3::vmultiply<PointCoordinateType>(N,-1.0);
+		{
+			if (preferedOrientation == 6)
+			{
+				orientation = *(theCloud->getPoint(i))-barycenter;
+			}
+			else if (preferedOrientation == 7)
+			{
+				orientation = barycenter-*(theCloud->getPoint(i));
+			}
+
+			if (CCVector3::vdot(N,orientation.u) < 0)
+				CCVector3::vmultiply<PointCoordinateType>(N,-1.0);
+		}
 
 		normsType nCode = (normsType)Quant_quantize_normal(N,NORMALS_QUANTIZE_LEVEL);
 		theNormsCodes.setValue(i,nCode);

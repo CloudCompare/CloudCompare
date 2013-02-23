@@ -55,6 +55,11 @@ bool ccHeightGridGenerationDlg::generateCloud() const
     return generateCloudCheckBox->isChecked();
 }
 
+bool ccHeightGridGenerationDlg::generateCountSF() const
+{
+    return generateCloud() && generateCountSFcheckBox->isChecked();
+}
+
 bool ccHeightGridGenerationDlg::generateImage() const
 {
     return generateImageCheckBox->isChecked();
@@ -163,6 +168,7 @@ void ccHeightGridGenerationDlg::loadSettings()
     bool genCloud       = settings.value("GenerateCloud",generateCloudCheckBox->isChecked()).toBool();
     bool genImage       = settings.value("GenerateImage",generateImageCheckBox->isChecked()).toBool();
     bool genASCII       = settings.value("GenerateASCII",generateASCIICheckBox->isChecked()).toBool();
+    bool genCountSF		= settings.value("GenerateCountSF",generateCountSFcheckBox->isChecked()).toBool();
     settings.endGroup();
 
     gridStep->setValue(step);
@@ -175,6 +181,7 @@ void ccHeightGridGenerationDlg::loadSettings()
 	dimensionComboBox->setCurrentIndex(projDim);
 	interpolateSFCheckBox->setChecked(sfProj);
 	scalarFieldProjection->setCurrentIndex(sfProjStrategy);
+	generateCountSFcheckBox->setChecked(genCountSF);
 
     toggleFillEmptyCells(false);
 }
@@ -193,6 +200,7 @@ void ccHeightGridGenerationDlg::saveSettings()
     settings.setValue("GenerateCloud",generateCloudCheckBox->isChecked());
     settings.setValue("GenerateImage",generateImageCheckBox->isChecked());
     settings.setValue("GenerateASCII",generateASCIICheckBox->isChecked());
+    settings.setValue("GenerateCountSF",generateCountSFcheckBox->isChecked());
     settings.endGroup();
 
     accept();

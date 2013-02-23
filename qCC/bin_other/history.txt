@@ -15,6 +15,8 @@ v2.4 ??/??/2013
 		* string format: " CC_POINT_#i(x,y,z) " (where i is the index in the current list)
 	- "Point picking" tool:
 		* when picking 3 successive points ('triplet' mode), the 3 corresponding angles are displayed
+- 'Height grid generation' tool upgraded:
+	* the number of points per cell can now be saved as a scalar field ('save per-cell count as SF' checkbox)
 - New entry in the DB tree context menu: "Toggle materials/textures"
 - New option "Show 3D name" for 3D entities:
 	* display the name of the entity in the 3D view (in the middle of its bounding-box by default)
@@ -25,6 +27,8 @@ v2.4 ??/??/2013
 	* point marker size (see above)
 	* histogram background color
 	* label color
+- New option for computing normals (CC's way, not qPCL's)
+	* +/-barycenter: normals are oriented by pointing outwards or towards the barycenter 
 - Limits for auto-decimation are now:
 	* 10M. points for a cloud
 	* 2.5M. faces for a mesh

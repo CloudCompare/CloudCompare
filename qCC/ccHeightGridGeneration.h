@@ -64,6 +64,7 @@ public:
                         bool generateImage = true,
                         bool generateASCII = false,
                         ccPointCloud* cloudGrid=0,
+						bool generateCountSF = false,
                         CCLib::GenericProgressCallback* progressCb=0);
 };
 

@@ -82,7 +82,7 @@ public:
         \param theNormsCodes array in which the normals indexes are stored
         \param method which kind of model to use for the computation (LS = plane, HF = quadratic Height Function, TRI = triangulation)
 		\param radius local neighbourhood radius (not necessary for TRI)
-        \param preferedOrientation specifies a prefered orientation for normals (-1: no prefered orientation, 0:X, 1:-X, 2:Y, 3:-Y, 4:Z, 5: -Z)
+        \param preferedOrientation specifies a prefered orientation for normals (-1: no prefered orientation, 0:X, 1:-X, 2:Y, 3:-Y, 4:Z, 5: -Z, 6:+Barycenter, 7:-Barycenter)
         \param progressCb progress bar
         \param _theOctree octree associated with theCloud.
     **/

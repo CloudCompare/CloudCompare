@@ -45,6 +45,9 @@ class ccHeightGridGenerationDlg : public QDialog, public Ui::HeightGridGeneratio
         //! Returns whether grid should be generated as a cloud
         bool generateCloud() const;
 
+        //! Returns whether a SF with per-cell count should be generated (only if a cloud is generated!)
+        bool generateCountSF() const;
+
         //! Returns whether grid should be generated as an image
         bool generateImage() const;
 

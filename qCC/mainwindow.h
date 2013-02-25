@@ -150,6 +150,18 @@ public:
 	//! Returns MDI area subwindow corresponding to a given 3D view
 	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
 
+	//! Removes object temporarily from DB tree
+	/** This method must be called before any modification to the db tree
+		WARNING: may change 'selectedEntities' container!
+	**/
+	void removeObjectTemporarilyFromDBTree(ccHObject* obj, ccHObject* &parent);
+
+	//! Adds back object to DB tree
+	/** This method should be called once modifications to the db tree are finished
+		(see removeObjectTemporarilyFromDBTree).
+	**/
+	void putObjectBackIntoDBTree(ccHObject* obj, ccHObject* parent);
+
 public slots:
 
     //! Creates a new 3D GL sub-window
@@ -343,18 +355,6 @@ protected:
     /** List is updated in place.
     **/
     static void RemoveSiblingsFromCCObjectList(ccHObject::Container& ccObjects);
-
-	//! Removes object temporarily from DB tree
-	/** This method must be called before any modification to the db tree
-		WARNING: may change 'selectedEntities' container!
-	**/
-	void removeObjectTemporarilyFromDBTree(ccHObject* obj, ccHObject* &parent);
-
-	//! Adds back object to DB tree
-	/** This method should be called once modifications to the db tree are finished
-		(see removeObjectTemporarilyFromDBTree).
-	**/
-	void putObjectBackIntoDBTree(ccHObject* obj, ccHObject* parent);
 
 	//! Returns a default first guess for algorithms kernel size
 	static PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities);

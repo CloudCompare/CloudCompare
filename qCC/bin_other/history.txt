@@ -44,6 +44,7 @@ v2.4 ??/??/2013
 	* a group of labels could be freely displaced, eventually leading to a crash (under some circumstances) if the destination is not
 		one of the label's associated clouds. On the contrary, labels can now be regrouped and displaced as long as they stay below one
 		of their associated clouds.
+	* applying an interactive transformation to an entity with an octree could make CC crash (octree was deleted but not removed from DB tree)
 
 v2.4 01/21/2013
 - New tool: 'Edit > Mesh > Subdivide' (recursive subdivision)

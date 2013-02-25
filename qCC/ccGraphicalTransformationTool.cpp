@@ -231,9 +231,13 @@ void ccGraphicalTransformationTool::apply()
 
 	for (unsigned i=0; i<m_toTransform->getChildrenNumber();++i)
 	{
-		ccHObject* child = m_toTransform->getChild(i);
-		child->applyGLTransformation_recursive();
-		child->prepareDisplayForRefresh_recursive();
+		ccHObject* toTransform = m_toTransform->getChild(i);
+		ccHObject* parent = 0;
+		//DGM: warning, applyGLTransformation may delete associated octree!
+		MainWindow::TheInstance()->removeObjectTemporarilyFromDBTree(toTransform,parent);
+		toTransform->applyGLTransformation_recursive();
+		toTransform->prepareDisplayForRefresh_recursive();
+		MainWindow::TheInstance()->putObjectBackIntoDBTree(toTransform,parent);
 	}
 
 	stop(true);

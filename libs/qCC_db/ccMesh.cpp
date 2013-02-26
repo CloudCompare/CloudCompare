@@ -593,6 +593,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (pushName)
 			glPushName(getUniqueID());
 
+		//special case: triangls names pushing (for picking)
+		bool pushTriangleNames = MACRO_DrawTriangleNames(context); 
+
 		//vertices visibility
 		const ccGenericPointCloud::VisibilityTableType* visibilityArray = m_associatedCloud->getTheVisibilityArray();
 		bool visFiltering = (visibilityArray ? visibilityArray->isAllocated() : false);
@@ -685,7 +688,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glEnable(GL_POLYGON_STIPPLE);
 		}
 
-		if (!visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || greyForNanScalarValues))
+		if (!pushTriangleNames && !visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || greyForNanScalarValues))
 		{
 			#define OPTIM_MEM_CPY //use optimized mem. transfers
 			#ifdef OPTIM_MEM_CPY
@@ -969,10 +972,17 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glEnable(GL_TEXTURE_2D);
 			}
 
-			glBegin(lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP : GL_TRIANGLES);
+			if (!pushTriangleNames)
+				glBegin(lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP : GL_TRIANGLES);
 
 			for (n=0;n<triNum;++n)
 			{
+				if (pushTriangleNames)
+				{
+					glPushName(n);
+					glBegin(lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP : GL_TRIANGLES);
+				}
+
 				//current triangle vertices
 				const CCLib::TriangleSummitsIndexes* tsi = (CCLib::TriangleSummitsIndexes*)m_triIndexes->getCurrentValue();
 				m_triIndexes->forwardIterator();
@@ -1122,9 +1132,17 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glEnd();
 					glBegin(GL_LINE_LOOP);
 				}
-			}
-			glEnd();
 
+				if (pushTriangleNames)
+				{
+					glEnd();
+					glPopName();
+				}
+			}
+
+			if (!pushTriangleNames)
+				glEnd();
+			
 			if (showTextures)
 			{
 #ifdef TEST_TEXTURED_BUNDLER_IMPORT

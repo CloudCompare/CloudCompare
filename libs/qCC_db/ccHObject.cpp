@@ -358,8 +358,18 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	bool draw3D = MACRO_Draw3D(context);
 	bool drawInThisContext = (!m_visible && !m_selected ? false : m_currentDisplay == context._win);
 
-	//no need to display anything but clouds in "point picking mode"
-	drawInThisContext &= (!MACRO_DrawPointNames(context) || isKindOf(CC_POINT_CLOUD));
+	//no need to display anything but clouds and meshes in "point picking mode"
+	bool DrawMesh = false;
+	if (MACRO_DrawTriangleNames(context) && isKindOf(CC_MESH))
+	{
+		ccGenericMesh *mesh = static_cast<ccGenericMesh*>(this);
+		ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
+		DrawMesh = (cloud == NULL || !cloud->isEnabled());
+	}
+	drawInThisContext &= (
+		                 (!MACRO_DrawPointNames(context) || isKindOf(CC_POINT_CLOUD)) || 
+		                 (!MACRO_DrawTriangleNames(context) || DrawMesh)
+						 );
 
 	//apply 3D 'temporary' transformation (for display only)
 	if (draw3D && m_glTransEnabled)

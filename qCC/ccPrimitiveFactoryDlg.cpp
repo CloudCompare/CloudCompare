@@ -25,7 +25,7 @@
 #include "ccPrimitiveFactoryDlg.h"
 
 //qCC
-#include <MainWindow.h>
+#include <mainwindow.h>
 
 //qCC_db
 #include <ccGenericPrimitive.h>

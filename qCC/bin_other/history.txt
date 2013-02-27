@@ -45,6 +45,7 @@ v2.4 ??/??/2013
 		one of the label's associated clouds. On the contrary, labels can now be regrouped and displaced as long as they stay below one
 		of their associated clouds.
 	* applying an interactive transformation to an entity with an octree could make CC crash (octree was deleted but not removed from DB tree)
+	* CC would refuse to open an OBJ file declaring using a material while not defining texture coordinates
 
 v2.4 01/21/2013
 - New tool: 'Edit > Mesh > Subdivide' (recursive subdivision)

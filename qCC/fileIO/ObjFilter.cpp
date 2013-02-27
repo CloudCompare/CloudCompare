@@ -216,9 +216,10 @@ struct facetElement
 	//! Updates tex coord index to a global index starting from 0!
 	bool updateTexCoordIndex(int maxIndex)
 	{
-		if (tcIndex == 0 || -tcIndex>maxIndex)
+		//if tcIndex == 0 (shit happens) then we return '-1' (which is not so bad)
+		if (/*tcIndex == 0 || */-tcIndex>maxIndex)
 			return false;
-		tcIndex = (tcIndex>0 ? tcIndex-1 : maxIndex+tcIndex);
+		tcIndex = (tcIndex>=0 ? tcIndex-1 : maxIndex+tcIndex);
 		return true;
 	}
 
@@ -589,7 +590,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 							maxVertexIndex = it->vIndex;
 
 						//should we have a tex. coord index as second vertex element?
-						if (hasTexCoords)
+						if (hasTexCoords && currentMaterialDefined)
 						{
 							if (!it->updateTexCoordIndex(texCoordsRead))
 							{
@@ -636,7 +637,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						break;
 
 					//Now, let's tesselate the whole polygon
-					//yeah, we do very ulgy tesselation here!
+					//FIXME: yeah, we do very ulgy tesselation here!
 					std::vector<facetElement>::const_iterator B = A+1;
 					std::vector<facetElement>::const_iterator C = B+1;
 					for (;C != currentFace.end();++B,++C)
@@ -671,9 +672,9 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			{
 				if (materials) //otherwise we have failed to load MTL file!!!
 				{
+					QString mtlName = QString(currentLine+7).trimmed();
 					//DGM: in case there's space characters in the material name, we must read it again from the original line buffer
 					//QString mtlName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "");
-					QString mtlName = QString(currentLine+7).trimmed();
 					currentMaterial = (!mtlName.isEmpty() ? materials->findMaterial(mtlName) : -1);
 					currentMaterialDefined = true;
 				}

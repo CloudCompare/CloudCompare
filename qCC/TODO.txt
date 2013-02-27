@@ -26,10 +26,12 @@ In french (because I'm lazy today):
 *** And from the forum topic 'recent requests' ***
 
 Various:
+[*] Add materials to the 'Toggle (recursive)' menu
 [*] Per-point size based on SF values
 [*] Primitive factory
 [*] Select ASCII files output precision
 [*] flythrough mode
+[*] command line options to specify ccViewer window size & position + 'always stay on top'
 
 From Jean-Francois H.: 
 [*] possibility of exporting histogram as image.

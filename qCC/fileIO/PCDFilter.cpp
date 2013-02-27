@@ -208,132 +208,6 @@ PCDFilter::readFileHeader(const char * filename, PCDHeader &header)
 CC_FILE_ERROR
 PCDFilter::saveToFile(ccHObject* entity, const char* filename)
 {
-    //    assert(entity && filename);
-
-    //    if (!entity->isKindOf(CC_POINT_CLOUD))
-    //	{
-    //		if (entity->isA(CC_HIERARCHY_OBJECT)) //multiple clouds?
-    //		{
-    //			QFileInfo fi(filename);
-    //			QString extension = fi.suffix();
-    //			QString baseName = fi.completeBaseName();
-    //			QString path = fi.path();
-
-    //			unsigned i,count=entity->getChildrenNumber();
-    //			unsigned counter=0;
-    //			for (i=0;i<count;++i)
-    //			{
-    //				ccHObject* child = entity->getChild(i);
-    //				if (child->isKindOf(CC_POINT_CLOUD))
-    //				{
-    //					QString subFilename = path+QString("/");
-    //					subFilename += QString(baseName).replace("cloudname",child->getName(),Qt::CaseInsensitive);
-    //					subFilename += QString("_%1").arg(counter++,6,10,QChar('0'));
-    //					if (!extension.isEmpty())
-    //						subFilename += QString(".")+extension;
-    //					CC_FILE_ERROR result = saveToFile(entity->getChild(i),qPrintable(subFilename));
-    //					if (result != CC_FERR_NO_ERROR)
-    //						return result;
-    //					else
-    //						ccLog::Print(QString("[AsciiFilter::saveToFile] Cloud '%1' saved in: %2").arg(child->getName()).arg(subFilename));
-    //				}
-    //				else
-    //				{
-    //					ccLog::Warning(QString("[AsciiFilter::saveToFile] Entity '%1' can't be saved this way!").arg(child->getName()));
-    //				}
-    //			}
-
-    //			return CC_FERR_NO_ERROR;
-    //		}
-    //		else
-    //		{
-    //			return CC_FERR_BAD_ARGUMENT;
-    //		}
-    //	}
-
-    //	//hack: if the extension is 'pts', the color will be saved after the SFs
-    //	bool swapColorAndSFs = (QFileInfo(filename).suffix().toUpper() == "PTS");
-
-    //    QFile file(filename);
-    //	if (!file.open(QFile::WriteOnly | QFile::Truncate))
-    //        return CC_FERR_WRITING;
-    //	QTextStream stream(&file);
-
-    //    ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
-
-    //    unsigned numberOfPoints = cloud->size();
-    //    bool writeColors = cloud->hasColors();
-    //    bool writeNorms = cloud->hasNormals();
-    //	std::vector<CCLib::ScalarField*> theScalarFields;
-    //    if (cloud->isKindOf(CC_POINT_CLOUD))
-    //	{
-    //		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
-    //		for (unsigned i=0;i<ccCloud->getNumberOfScalarFields();++i)
-    //			theScalarFields.push_back(ccCloud->getScalarField(i));
-    //	}
-    //    bool writeSF = (theScalarFields.size()!=0);
-
-    //	if (swapColorAndSFs && writeColors && writeSF)
-    //		ccLog::Warning("[AsciiFilter::saveToFile] PTS extension detected: color components will be saved after the scalar field(s)");
-
-    //	//avancement du chargement
-    //    ccProgressDialog pdlg(true);
-    //	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
-    //    pdlg.setMethodTitle(qPrintable(QString("Saving cloud [%1]").arg(cloud->getName())));
-    //    pdlg.setInfo(qPrintable(QString("Number of points: %1").arg(numberOfPoints)));
-    //    pdlg.start();
-
-    //	//shift on load
-    //	const double* shift = cloud->getOriginalShift();
-    //	double shiftNorm = (shift ? shift[0]*shift[0]+shift[1]*shift[1]+shift[2]*shift[2] : 0.0);
-    //	//default precision (6 for floats, 10 for doubles)
-    //	const int s_coordPrecision = 2+(shiftNorm > 0 ? sizeof(double) : sizeof(PointCoordinateType));
-    //	const int s_sfPrecision = 2+sizeof(DistanceType);
-    //	const int s_nPrecision = 2+sizeof(PointCoordinateType);
-
-    //	QString line,color;
-
-    //    for (unsigned i=0;i<numberOfPoints;++i)
-    //    {
-    //		//write current point coordinates
-    //        const CCVector3* P = cloud->getPoint(i);
-    //		line = QString("%1 %2 %3").arg(-shift[0]+(double)P->x,0,'f',s_coordPrecision).arg(-shift[1]+(double)P->y,0,'f',s_coordPrecision).arg(-shift[2]+(double)P->z,0,'f',s_coordPrecision);
-
-    //		if (writeColors)
-    //        {
-    //			//add rgb color (if not a .pts file)
-    //            const colorType* col = cloud->getPointColor(i);
-    //			color = QString(" %1 %2 %3").arg(col[0]).arg(col[1]).arg(col[2]);
-
-    //			if (!swapColorAndSFs)
-    //				line.append(color);
-    //        }
-
-    //        if (writeSF)
-    //        {
-    //			//add each associated SF values
-    //			for (std::vector<CCLib::ScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
-    //				line.append(QString(" %1").arg((*it)->getValue(i),0,'f',s_sfPrecision));
-    //        }
-
-    //        if (writeColors && swapColorAndSFs)
-    //			line.append(color);
-
-    //        if (writeNorms)
-    //        {
-    //			//add normal vector
-    //            const PointCoordinateType* N = cloud->getPointNormal(i);
-    //			line.append(QString(" %1 %2 %3").arg(N[0],0,'f',s_nPrecision).arg(N[1],0,'f',s_nPrecision).arg(N[2],0,'f',s_nPrecision));
-    //        }
-
-    //		stream << line << "\n";
-    //		//if (stream.status() != QTextStream::Ok)
-    //		//	return CC_FERR_WRITING;
-
-    //		if (!nprogress.oneStep())
-    //			return CC_FERR_CANCELED_BY_USER;
-    //    }
-
     return CC_FERR_NO_ERROR;
 }
 
@@ -459,10 +333,7 @@ PCDFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDispl
     PCDHeader header;
     readFileHeader(filename, header);
 
-
 //    std::cout << header << std::endl;
-
-
     if (header.data == "binary")
     {
         loadFileBinaryMemMap(filename, container, header);
@@ -604,6 +475,7 @@ PCDFilter::loadFileBinaryMemMap(const char* filename, ccHObject& container, PCDH
         fs.close ();
         return CC_FERR_READING;
     }
+    fs.close();
 
     InputMemoryFile mem_file(filename);
 
@@ -705,7 +577,7 @@ PCDFilter::loadFileBinaryMemMap(const char* filename, ccHObject& container, PCDH
     readNormalsMemMap(mem_file, header, *cloud);
 
     container.addChild(cloud);
-    fs.close();
+
 
     return CC_FERR_NO_ERROR;
 }

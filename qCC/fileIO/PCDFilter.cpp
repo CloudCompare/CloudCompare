@@ -451,7 +451,6 @@ CC_FILE_ERROR
 PCDFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
 
-    std::cout << "called" << std::endl;
     //we get the size of the file to open
     QFile file(filename);
     if (!file.exists())
@@ -461,7 +460,7 @@ PCDFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDispl
     readFileHeader(filename, header);
 
 
-    std::cout << header << std::endl;
+//    std::cout << header << std::endl;
 
 
     if (header.data == "binary")
@@ -607,7 +606,6 @@ PCDFilter::loadFileBinaryMemMap(const char* filename, ccHObject& container, PCDH
     }
 
     InputMemoryFile mem_file(filename);
-    std::cout << "size: " << mem_file.size() << std::endl;
 
     //point step
     size_t point_step = 0;
@@ -619,9 +617,6 @@ PCDFilter::loadFileBinaryMemMap(const char* filename, ccHObject& container, PCDH
     //n_points
     size_t n_points  = header.height * header.width;
 
-    std::cout << "Data point step " << point_step << std::endl;
-    std::cout << "N points " << n_points << std::endl;
-
     ccPointCloud * cloud = new ccPointCloud;
     cloud->reserve(n_points);
 
@@ -632,9 +627,6 @@ PCDFilter::loadFileBinaryMemMap(const char* filename, ccHObject& container, PCDH
     if ((x_pos < 0 ) || (y_pos < 0) || (z_pos < 0))
         return CC_FERR_MALFORMED_FILE;
 
-    std::cout << x_pos << " " << y_pos << std::endl;
-
-    std::cout << header << std::endl;
     //should be all the same size normally, but...
     int x_size = getSizeOfField("x", header);
     int y_size = getSizeOfField("y", header);
@@ -699,8 +691,6 @@ PCDFilter::loadFileBinaryMemMap(const char* filename, ccHObject& container, PCDH
                 this_field_name = ss.str();
             }
             field->setName(this_field_name.c_str());
-
-            std::cout << "loaded field " << this_field_name.c_str() << " component: " << j << std::endl;
 
             field->computeMinAndMax();
 

@@ -75,14 +75,14 @@ public:
 
 protected:
 
-	//! The associated point cloud
-	GenericIndexedCloud* theAssociatedCloud;
+	//! Associated point cloud
+	GenericIndexedCloud* m_associatedCloud;
 
-	//! The triangle summits indexes
-	int *theTrianglesIndexes;
+	//! Triangle vertex indexes
+	int* m_triIndexes;
 
-	//! Iterator on the list of triangle summits indexes
-	int* globalIterator;
+	//! Iterator on the list of triangle vertex indexes
+	int* m_globalIterator;
 
 	//! End position of global iterator
 	int* globalIteratorEnd;

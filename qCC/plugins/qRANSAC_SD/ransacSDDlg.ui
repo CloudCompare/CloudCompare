@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>280</width>
-    <height>181</height>
+    <width>360</width>
+    <height>225</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,217 @@
    <iconset resource="qRANSAC_SD.qrc">
     <normaloff>:/CC/plugin/qRANSAC_SD/qRANSAC_SD.png</normaloff>:/CC/plugin/qRANSAC_SD/qRANSAC_SD.png</iconset>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
-   <item>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Primitives</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QCheckBox" name="planeCheckBox">
+        <property name="text">
+         <string>Plane</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="sphereCheckBox">
+        <property name="text">
+         <string>Sphere</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="cylinderCheckBox">
+        <property name="text">
+         <string>Cylinder</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="coneCheckBox">
+        <property name="text">
+         <string>Cone</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="torusCheckBox">
+        <property name="text">
+         <string>Torus</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Advanced parameters</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>epsilon</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="epsilonDoubleSpinBox">
+          <property name="toolTip">
+           <string>Distance threshold (internally the distance threshold is taken as 3*epsilon!)</string>
+          </property>
+          <property name="statusTip">
+           <string>Distance threshold (internally the distance threshold is taken as 3*epsilon!)</string>
+          </property>
+          <property name="whatsThis">
+           <string>Distance threshold (internally the distance threshold is taken as 3*epsilon!)</string>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <double>1000000000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.010000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>bitmap epsilon</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="bitmapEpsilonDoubleSpinBox">
+          <property name="toolTip">
+           <string>Bitmap resolution</string>
+          </property>
+          <property name="statusTip">
+           <string>Bitmap resolution</string>
+          </property>
+          <property name="whatsThis">
+           <string>Bitmap resolution</string>
+          </property>
+          <property name="decimals">
+           <number>3</number>
+          </property>
+          <property name="maximum">
+           <double>1000000000.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.010000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.020000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_4">
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>normal threshold</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="normThreshDoubleSpinBox">
+          <property name="toolTip">
+           <string>This is the cos of the maximal normal deviation</string>
+          </property>
+          <property name="statusTip">
+           <string>This is the cos of the maximal normal deviation</string>
+          </property>
+          <property name="whatsThis">
+           <string>This is the cos of the maximal normal deviation</string>
+          </property>
+          <property name="maximum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.050000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.900000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <item>
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>probability</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="probaDoubleSpinBox">
+          <property name="toolTip">
+           <string>This is the &quot;probability&quot; with which a primitive is overlooked</string>
+          </property>
+          <property name="statusTip">
+           <string>This is the &quot;probability&quot; with which a primitive is overlooked</string>
+          </property>
+          <property name="whatsThis">
+           <string>This is the &quot;probability&quot; with which a primitive is overlooked</string>
+          </property>
+          <property name="decimals">
+           <number>6</number>
+          </property>
+          <property name="maximum">
+           <double>1.000000000000000</double>
+          </property>
+          <property name="singleStep">
+           <double>0.001000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.001000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <widget class="QLabel" name="label">
@@ -54,148 +263,7 @@
      </item>
     </layout>
    </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>epsilon</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="epsilonDoubleSpinBox">
-       <property name="toolTip">
-        <string>Distance threshold (internally the distance threshold is taken as 3*epsilon!)</string>
-       </property>
-       <property name="statusTip">
-        <string>Distance threshold (internally the distance threshold is taken as 3*epsilon!)</string>
-       </property>
-       <property name="whatsThis">
-        <string>Distance threshold (internally the distance threshold is taken as 3*epsilon!)</string>
-       </property>
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="maximum">
-        <double>1000000000.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.010000000000000</double>
-       </property>
-       <property name="value">
-        <double>0.010000000000000</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>bitmap epsilon</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="bitmapEpsilonDoubleSpinBox">
-       <property name="toolTip">
-        <string>Bitmap resolution</string>
-       </property>
-       <property name="statusTip">
-        <string>Bitmap resolution</string>
-       </property>
-       <property name="whatsThis">
-        <string>Bitmap resolution</string>
-       </property>
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="maximum">
-        <double>1000000000.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.010000000000000</double>
-       </property>
-       <property name="value">
-        <double>0.020000000000000</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>normal threshold</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="normThreshDoubleSpinBox">
-       <property name="toolTip">
-        <string>This is the cos of the maximal normal deviation</string>
-       </property>
-       <property name="statusTip">
-        <string>This is the cos of the maximal normal deviation</string>
-       </property>
-       <property name="whatsThis">
-        <string>This is the cos of the maximal normal deviation</string>
-       </property>
-       <property name="maximum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.050000000000000</double>
-       </property>
-       <property name="value">
-        <double>0.900000000000000</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_5">
-     <item>
-      <widget class="QLabel" name="label_5">
-       <property name="text">
-        <string>probability</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="probaDoubleSpinBox">
-       <property name="toolTip">
-        <string>This is the &quot;probability&quot; with which a primitive is overlooked</string>
-       </property>
-       <property name="statusTip">
-        <string>This is the &quot;probability&quot; with which a primitive is overlooked</string>
-       </property>
-       <property name="whatsThis">
-        <string>This is the &quot;probability&quot; with which a primitive is overlooked</string>
-       </property>
-       <property name="decimals">
-        <number>6</number>
-       </property>
-       <property name="maximum">
-        <double>1.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.001000000000000</double>
-       </property>
-       <property name="value">
-        <double>0.001000000000000</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
+   <item row="3" column="1">
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -204,6 +272,19 @@
       <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
+   </item>
+   <item row="2" column="1">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

@@ -78,10 +78,10 @@ protected slots:
     //! Cancels (no transformation is applied)
     void cancel();
 
-    //! applies translation (graphically) to selected entities
+    //! Applies translation (graphically) to selected entities
     void glTranslate(const CCVector3&);
 
-    //! applies rotation (graphically) to selected entities
+    //! Applies rotation (graphically) to selected entities
     void glRotate(const ccGLMatrix&);
 
 protected:

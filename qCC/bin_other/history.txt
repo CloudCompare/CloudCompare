@@ -15,17 +15,22 @@ v2.4 ??/??/2013
 		* string format: " CC_POINT_#i(x,y,z) " (where i is the index in the current list)
 	- "Point picking" tool:
 		* when picking 3 successive points ('triplet' mode), the 3 corresponding angles are displayed
-- 'Height grid generation' tool upgraded:
-	* the number of points per cell can now be saved as a scalar field ('save per-cell count as SF' checkbox)
 - New tool: 'primitive factory'
 	* let you create custom primitives (plane, box, sphere, cylinder, cone, torus or dish)
 	* accessible via the 'Tools > Primitive factory' menu entry or a dedicated icon in the main toolbar
-- New entry in the DB tree context menu: "Toggle materials/textures"
+- 'Height grid generation' tool enhanced:
+	* the number of points per cell can now be saved as a scalar field ('save per-cell count as SF' checkbox)
+- 'Ransac Shape Detection' plugin (qRansac_SD) enhanced:
+	* proper handling of cone and torus primitives (display in 3D, etc.)
+	* the expected primitive types can now be selected (with checkboxes)
+- Manual transformation tool enhanced:
+	* user can constrain rotation around a given axis and translation along custom dimension(s)
 - New option "Show 3D name" for 3D entities:
 	* display the name of the entity in the 3D view (in the middle of its bounding-box by default)
 	* can be (recursively) toggled with 'Edit > Toggle > 3D name' (shortcut: D)
 	* with the dedicated checkbox in the properties dialog of each entity
 	* with a right click on the entity entry in the DB tree	
+- New entry in the DB tree context menu: "Toggle materials/textures"
 - New display options (display dialog):
 	* point marker size (see above)
 	* histogram background color

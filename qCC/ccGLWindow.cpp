@@ -1450,20 +1450,19 @@ void tbPointToVector(int x, int y, int width, int height, CCVector3& v)
 	v.x = float(2.0 * std::max(std::min(x,width-1),-width+1) - width) / (float)width;
 	v.y = float(height - 2.0 * std::max(std::min(y,height-1),-height+1)) / (float)height;
 
-	double d = v.x*v.x + v.y*v.y;
+	double d2 = v.x*v.x + v.y*v.y;
 
 	//projection sur la sphère centrée au centre de la fenêtre
-	if (d > 1.0)
+	if (d2 > 1.0)
 	{
-		PointCoordinateType a = (PointCoordinateType)(1.0 / sqrt(d));
-
-		v.x *= a;
-		v.y *= a;
-		v.z = (PointCoordinateType)0.0;
+		double d = sqrt(d2);
+		v.x /= d;
+		v.y /= d;
+		v.z = 0;
 	}
 	else
 	{
-		v.z = (PointCoordinateType)(sqrt(1.0 - d));
+		v.z = (PointCoordinateType)(sqrt(1.0-d2));
 	}
 }
 

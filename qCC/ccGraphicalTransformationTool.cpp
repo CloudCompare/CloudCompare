@@ -30,6 +30,7 @@
 #include "ccGLWindow.h"
 #include "ccConsole.h"
 #include "mainwindow.h"
+#include "ccGLUtils.h"
 
 ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -37,7 +38,8 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 	, m_toTransform(0)
 {
 	setupUi(this);
-	setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);
+
+	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
 	connect(okButton,       SIGNAL(clicked()), this, SLOT(apply()));
 	connect(razButton,      SIGNAL(clicked()), this, SLOT(reset()));
@@ -177,16 +179,82 @@ void ccGraphicalTransformationTool::stop(bool state)
 	ccOverlayDialog::stop(state);
 }
 
-void ccGraphicalTransformationTool::glTranslate(const CCVector3& t)
+void ccGraphicalTransformationTool::glTranslate(const CCVector3& realT)
 {
-	m_translation += t;
+	CCVector3 t(realT.x * (TxCheckBox->isChecked() ? 1.0 : 0.0),
+				realT.y * (TyCheckBox->isChecked() ? 1.0 : 0.0),
+				realT.z * (TzCheckBox->isChecked() ? 1.0 : 0.0));
 
-	updateAllGLTransformations();
+	if (t.norm2() != 0)
+	{
+		m_translation += t;
+		updateAllGLTransformations();
+	}
 }
 
 void ccGraphicalTransformationTool::glRotate(const ccGLMatrix& rotMat)
 {
-	m_rotation = rotMat * m_rotation;
+	switch(rotComboBox->currentIndex())
+	{
+	case 0: //XYZ
+		m_rotation = rotMat * m_rotation;
+		break;
+	case 1: //X
+		{
+			//we use a specific Euler angles convention here
+			const float* mat = rotMat.data();
+			if (mat[8] >= 1.0)
+			{
+				//simpler/faster to ignore this (very) specific case!
+				return;
+			}
+			float phi = -asin(mat[8]);
+			float cos_phi = cos(phi);
+			float theta = atan2(mat[9]/cos_phi,mat[10]/cos_phi);
+
+			ccGLMatrix newRotMat;
+			newRotMat.toIdentity();
+			newRotMat.data()[5]=newRotMat.data()[10]=cos(theta);
+			newRotMat.data()[6]=newRotMat.data()[9]=sin(theta);
+			newRotMat.data()[9]*=-1.0;
+			m_rotation = newRotMat * m_rotation;
+
+		}
+		break;
+	case 2: //Y
+		{
+			//we use a specific Euler angles convetion here
+			const float* mat = rotMat.data();
+			if (mat[6] >= 1.0)
+			{
+				//simpler/faster to ignore this (very) specific case!
+				return;
+			}
+			float theta = asin(mat[6]);
+			float cos_theta = cos(theta);
+			float phi = atan2(-mat[2]/cos_theta,mat[10]/cos_theta);
+
+			ccGLMatrix newRotMat;
+			newRotMat.toIdentity();
+			newRotMat.data()[0]=newRotMat.data()[10]=cos(phi);
+			newRotMat.data()[2]=newRotMat.data()[8]=sin(phi);
+			newRotMat.data()[2]*=-1.0;
+			m_rotation = newRotMat * m_rotation;
+		}
+		break;
+	case 3: //Z
+		{
+			//we can use the standard Euler angles convention here
+			float phi,theta,psi;
+			CCVector3 T;
+			rotMat.getParameters(phi,theta,psi,T);
+			assert(T.norm2()==0);
+			ccGLMatrix newRotMat;
+			newRotMat.initFromParameters(phi,0,0,T);
+			m_rotation = newRotMat * m_rotation;
+		}
+		break;
+	}
 
 	updateAllGLTransformations();
 }

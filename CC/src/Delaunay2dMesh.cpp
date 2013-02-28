@@ -34,9 +34,9 @@
 using namespace CCLib;
 
 Delaunay2dMesh::Delaunay2dMesh()
-	: theAssociatedCloud(0)
-	, theTrianglesIndexes(0)
-	, globalIterator(0)
+	: m_associatedCloud(0)
+	, m_triIndexes(0)
+	, m_globalIterator(0)
 	, globalIteratorEnd(0)
 	, numberOfTriangles(0)
 	, cloudIsOwnedByMesh(false)
@@ -47,20 +47,20 @@ Delaunay2dMesh::~Delaunay2dMesh()
 {
 	linkMeshWith(0);
 
-	if (theTrianglesIndexes)
-        delete[] theTrianglesIndexes;
+	if (m_triIndexes)
+        delete[] m_triIndexes;
 }
 
 void Delaunay2dMesh::linkMeshWith(GenericIndexedCloud* aCloud, bool passOwnership)
 {
-	if (theAssociatedCloud == aCloud)
+	if (m_associatedCloud == aCloud)
 		return;
 
 	//previous cloud?
-	if (theAssociatedCloud && cloudIsOwnedByMesh)
-		delete theAssociatedCloud;
+	if (m_associatedCloud && cloudIsOwnedByMesh)
+		delete m_associatedCloud;
 
-	theAssociatedCloud = aCloud;
+	m_associatedCloud = aCloud;
 	cloudIsOwnedByMesh = passOwnership;
 }
 
@@ -71,10 +71,10 @@ bool Delaunay2dMesh::build(CC2DPointsConainer &the2dPoints)
 
 	//reset
 	numberOfTriangles=0;
-	if (theTrianglesIndexes)
+	if (m_triIndexes)
 	{
-		delete[] theTrianglesIndexes;
-		theTrianglesIndexes = 0;
+		delete[] m_triIndexes;
+		m_triIndexes = 0;
 	}
 
 	//we use the external library 'Triangle'
@@ -90,25 +90,23 @@ bool Delaunay2dMesh::build(CC2DPointsConainer &the2dPoints)
 	}
 	catch (...) 
 	{
-		//cerr << "Exception indéfinie." << endl; 
 		return false;
 	} 
-	//Console::print("Nombre de triangles : %i\n",in.numberoftriangles);
 
 	numberOfTriangles = in.numberoftriangles;
 	if (numberOfTriangles>0)
-		theTrianglesIndexes	= (int*)in.trianglelist;
+		m_triIndexes = (int*)in.trianglelist;
 
-	int minIndex = theTrianglesIndexes[0];
-	int maxIndex = theTrianglesIndexes[0];
+	int minIndex = m_triIndexes[0];
+	int maxIndex = m_triIndexes[0];
 	for (unsigned i=1;i<numberOfTriangles;++i)
 	{
-		if (minIndex > theTrianglesIndexes[i])
-			minIndex = theTrianglesIndexes[i];
-		else if (maxIndex < theTrianglesIndexes[i])
-			maxIndex = theTrianglesIndexes[i];
+		if (minIndex > m_triIndexes[i])
+			minIndex = m_triIndexes[i];
+		else if (maxIndex < m_triIndexes[i])
+			maxIndex = m_triIndexes[i];
 	}
-	globalIteratorEnd = theTrianglesIndexes+3*numberOfTriangles;
+	globalIteratorEnd = m_triIndexes+3*numberOfTriangles;
 
 	return true;
 }
@@ -121,68 +119,68 @@ void Delaunay2dMesh::forEach(genericTriangleAction& anAction)
 
 void Delaunay2dMesh::placeIteratorAtBegining()
 {
-	globalIterator = theTrianglesIndexes;
+	m_globalIterator = m_triIndexes;
 }
 
 GenericTriangle* Delaunay2dMesh::_getNextTriangle()
 {
-	if (globalIterator>=globalIteratorEnd)
+	if (m_globalIterator>=globalIteratorEnd)
         return 0;
 
-	theAssociatedCloud->getPoint(*globalIterator++,dumpTriangle.A);
-	theAssociatedCloud->getPoint(*globalIterator++,dumpTriangle.B);
-	theAssociatedCloud->getPoint(*globalIterator++,dumpTriangle.C);
+	m_associatedCloud->getPoint(*m_globalIterator++,dumpTriangle.A);
+	m_associatedCloud->getPoint(*m_globalIterator++,dumpTriangle.B);
+	m_associatedCloud->getPoint(*m_globalIterator++,dumpTriangle.C);
 
 	return &dumpTriangle; //temporary!
 }
 
 TriangleSummitsIndexes* Delaunay2dMesh::getNextTriangleIndexes()
 {
-	if (globalIterator>=globalIteratorEnd)
+	if (m_globalIterator>=globalIteratorEnd)
         return 0;
 
-	dumpTriangleIndexes.i1 = globalIterator[0];
-	dumpTriangleIndexes.i2 = globalIterator[1];
-	dumpTriangleIndexes.i3 = globalIterator[2];
+	dumpTriangleIndexes.i1 = m_globalIterator[0];
+	dumpTriangleIndexes.i2 = m_globalIterator[1];
+	dumpTriangleIndexes.i3 = m_globalIterator[2];
 
-	globalIterator+=3;
+	m_globalIterator+=3;
 
 	return &dumpTriangleIndexes;
 }
 
 GenericTriangle* Delaunay2dMesh::_getTriangle(unsigned triangleIndex)
 {
-	assert(theAssociatedCloud && triangleIndex<numberOfTriangles);
+	assert(m_associatedCloud && triangleIndex<numberOfTriangles);
 
-	const int* tri = theTrianglesIndexes + 3*triangleIndex;
-	theAssociatedCloud->getPoint(*tri++,dumpTriangle.A);
-	theAssociatedCloud->getPoint(*tri++,dumpTriangle.B);
-	theAssociatedCloud->getPoint(*tri++,dumpTriangle.C);
+	const int* tri = m_triIndexes + 3*triangleIndex;
+	m_associatedCloud->getPoint(*tri++,dumpTriangle.A);
+	m_associatedCloud->getPoint(*tri++,dumpTriangle.B);
+	m_associatedCloud->getPoint(*tri++,dumpTriangle.C);
 
 	return (GenericTriangle*)&dumpTriangle;
 }
 
 void Delaunay2dMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
 {
-	assert(theAssociatedCloud && triangleIndex<numberOfTriangles);
+	assert(m_associatedCloud && triangleIndex<numberOfTriangles);
 
-	const int* tri = theTrianglesIndexes + 3*triangleIndex;
-	theAssociatedCloud->getPoint(*tri++,A);
-	theAssociatedCloud->getPoint(*tri++,B);
-	theAssociatedCloud->getPoint(*tri++,C);
+	const int* tri = m_triIndexes + 3*triangleIndex;
+	m_associatedCloud->getPoint(*tri++,A);
+	m_associatedCloud->getPoint(*tri++,B);
+	m_associatedCloud->getPoint(*tri++,C);
 }
 
 TriangleSummitsIndexes* Delaunay2dMesh::getTriangleIndexes(unsigned triangleIndex)
 {
-	assert(theAssociatedCloud && triangleIndex<numberOfTriangles);
+	assert(m_associatedCloud && triangleIndex<numberOfTriangles);
 
-	return (TriangleSummitsIndexes*)(theTrianglesIndexes + 3*triangleIndex);
+	return (TriangleSummitsIndexes*)(m_triIndexes + 3*triangleIndex);
 }
 
 void Delaunay2dMesh::getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[])
 {
-	if (theAssociatedCloud)
-		theAssociatedCloud->getBoundingBox(Mins,Maxs);
+	if (m_associatedCloud)
+		m_associatedCloud->getBoundingBox(Mins,Maxs);
 	else
 	{
 		Mins[0]=Maxs[0]=0.0;

@@ -37,6 +37,8 @@
 #include "Windows.h"
 #endif
 
+#include <unistd.h>
+
 BaseFilter::BaseFilter(FilterDescription desc)
 	: m_action(0)
 	, m_desc(desc)
@@ -177,7 +179,7 @@ int BaseFilter::start()
 #if defined(_WIN32) || defined(WIN32)
 		::Sleep(500);
 #else
-        sleep(1.0);
+        usleep(1.0);
 #endif
 		progressCb->update(++progress);
 	}

@@ -30,7 +30,6 @@
 #include "../ccGLWindow.h"
 #include "../mainwindow.h"
 #include "../ccGuiParameters.h"
-#include <QPushButton>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -57,6 +56,7 @@
 #include <QCheckBox>
 #include <QLocale>
 #include <QPushButton>
+#include <QScrollBar>
 
 //System
 #include <assert.h>
@@ -1564,14 +1564,26 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
     }
 }
 
+void ccPropertiesTreeDelegate::updateModel()
+{
+	//save current scroll position
+	int scrollPos = (m_view && m_view->verticalScrollBar() ? m_view->verticalScrollBar()->value() : 0);
+
+	//re-fill model
+	fillModel(m_currentObject);
+	
+	//go back to original position
+	if (scrollPos>0)
+		m_view->verticalScrollBar()->setSliderPosition(scrollPos);
+}
+
 void ccPropertiesTreeDelegate::scalarFieldChanged(int pos)
 {
     if (!m_currentObject)
         return;
 
     ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
-    assert(cloud);
-    if (cloud->getCurrentDisplayedScalarFieldIndex()+1 != pos)
+    if (cloud && cloud->getCurrentDisplayedScalarFieldIndex()+1 != pos)
     {
         cloud->setCurrentDisplayedScalarField(pos-1);
 		cloud->showSF(pos>0);
@@ -1579,7 +1591,7 @@ void ccPropertiesTreeDelegate::scalarFieldChanged(int pos)
             emit ccObjectAppearanceChanged(m_currentObject);
 
         //we must reset the properties display!
-        fillModel(m_currentObject);
+        updateModel();
     }
 }
 
@@ -1591,9 +1603,7 @@ void ccPropertiesTreeDelegate::scalarFieldTypeChanged(bool positive)
     ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
     assert(cloud);
 	ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
-	if (!sf)
-		return;
-    if (sf->isPositive() != positive)
+    if (sf && sf->isPositive() != positive)
     {
 		sf->setPositive(positive);
 		sf->computeMinAndMax();
@@ -1601,7 +1611,7 @@ void ccPropertiesTreeDelegate::scalarFieldTypeChanged(bool positive)
             emit ccObjectAppearanceChanged(m_currentObject);
 
         //we must reset the properties display!
-        fillModel(m_currentObject);
+        updateModel();
     }
 }
 
@@ -1688,8 +1698,8 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
     if (primitive->isVisible() && primitive->isEnabled())
         emit ccObjectAppearanceChanged(m_currentObject);
 
-	//update delegate!
-	fillModel(primitive);
+	//we must reset the properties display!
+	updateModel();
 }
 
 

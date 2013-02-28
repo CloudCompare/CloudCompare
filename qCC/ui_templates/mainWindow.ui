@@ -131,7 +131,6 @@
      <addaction name="actionGaussianFilter"/>
      <addaction name="actionBilateralFilter"/>
      <addaction name="actionFilterByValue"/>
-     <addaction name="actionMultiplySF"/>
      <addaction name="actionConvertToRGB"/>
      <addaction name="actionRenameSF"/>
      <addaction name="separator"/>

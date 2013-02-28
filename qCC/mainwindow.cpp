@@ -458,6 +458,11 @@ void MainWindow::connectActions()
 	menuBoundingBox->setVisible(false);
 #endif
 
+	//TODO... but not ready yet ;)
+	actionLoadShader->setVisible(false);
+	actionKMeans->setVisible(false);
+	actionFrontPropagation->setVisible(false);
+
     /*** MAIN MENU ***/
 
     //"File" menu
@@ -505,7 +510,6 @@ void MainWindow::connectActions()
     connect(actionFilterByValue,                SIGNAL(triggered()),    this,       SLOT(doActionFilterByValue()));
 	connect(actionAddConstantSF,				SIGNAL(triggered()),    this,       SLOT(doActionAddConstantSF()));
     connect(actionScalarFieldArithmetic,        SIGNAL(triggered()),    this,       SLOT(doActionScalarFieldArithmetic()));
-    connect(actionMultiplySF,                   SIGNAL(triggered()),    this,       SLOT(doActionMultiplySF()));
     connect(actionConvertToRGB,                 SIGNAL(triggered()),    this,       SLOT(doActionSFConvertToRGB()));
 	connect(actionRenameSF,						SIGNAL(triggered()),    this,       SLOT(doActionRenameSF()));
     connect(actionDeleteScalarField,            SIGNAL(triggered()),    this,       SLOT(doActionDeleteScalarField()));
@@ -3448,6 +3452,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
         if (ent->isKindOf(CC_POINT_CLOUD))
         {
             ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
+			bool hadNormals = cloud->hasNormals();
 
             CCLib::GenericIndexedMesh* dummyMesh = CCLib::PointProjectionTools::computeTriangulation(cloud,type);
 
@@ -3458,6 +3463,15 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
                 {
                     mesh->setName(cloud->getName()+QString(".mesh"));
                     mesh->setDisplay(cloud->getDisplay());
+					if (hadNormals && ent->isA(CC_POINT_CLOUD))
+					{
+						//if the cloud already had normals, they might not be concordant with the mesh!
+						if (QMessageBox::question(this,"Keep old normals?","Cloud already had normals. Do you want to update them (yes) or keep the old ones (no)?",QMessageBox::Yes,QMessageBox::No) != QMessageBox::No)
+						{
+							static_cast<ccPointCloud*>(ent)->unallocateNorms();
+							mesh->computeNormals();
+						}
+					}
 					if (cloud->hasColors() && !cloud->hasNormals())
 						mesh->showNormals(false);
                     cloud->setVisible(false);
@@ -3753,7 +3767,6 @@ void MainWindow::doActionComputeCPS()
     refreshAll();
 }
 
-//#include "NewKdTree.h"
 void MainWindow::doActionComputeNormals()
 {
     if (m_selectedEntities.empty())
@@ -3801,12 +3814,6 @@ void MainWindow::doActionComputeNormals()
 		{
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
 
-			//DGM TEST: TO REMOVE
-			//CCLib::NewKdTree test;
-			//test.build(cloud);
-
-			//continue;
-
 			ccProgressDialog pDlg(true,this);
 
 			if (!cloud->getOctree())
@@ -3836,8 +3843,10 @@ void MainWindow::doActionComputeNormals()
 				}
 			}
 			else
+			{
 				//we hide normals during process
 				cloud->showNormals(false);
+			}
 
 			for (unsigned j=0; j<normsIndexes->currentSize(); j++)
 				cloud->setPointNormalIndex(j, normsIndexes->getValue(j));
@@ -5088,7 +5097,7 @@ void MainWindow::doActionAddConstantSF()
 	}
 
 	QString defaultName = "Constant";
-	unsigned trys = 0;
+	unsigned trys = 1;
 	while (cloud->getScalarFieldIndexByName(qPrintable(defaultName))>=0 || trys>99)
 		defaultName = QString("Constant #%1").arg(++trys);
 
@@ -6757,11 +6766,6 @@ void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_
 }
 
 void MainWindow::doActionLoadShader() //TODO
-{
-    ccConsole::Error("Not yet implemented! Sorry ...");
-}
-
-void MainWindow::doActionMultiplySF()  //TODO
 {
     ccConsole::Error("Not yet implemented! Sorry ...");
 }

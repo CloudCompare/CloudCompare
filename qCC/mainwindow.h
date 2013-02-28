@@ -292,7 +292,6 @@ protected slots:
 	void doActionSubdivideMesh();
     void doActionComputeCPS();
     void doActionDeleteAllSF();
-    void doActionMultiplySF();
     void doActionKMeans();
     void doActionFrontPropagation();
     void doActionMultiply();

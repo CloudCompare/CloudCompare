@@ -281,10 +281,10 @@ void ccDBRoot::deleteSelectedEntities()
 		anObject->prepareDisplayForRefresh_recursive();
 
 		//DGM FIXME: what a burden... we should find something simpler (shared pointers?)
-		//specific case: if the entity is a cloud, we must look for 2-points
-		//or 3-points labels that may have a dependence to it
 		if (anObject->isKindOf(CC_POINT_CLOUD))
 		{
+			//specific case: if the entity is a cloud, we must look for 2-points
+			//or 3-points labels that may have a dependence to it
 			ccHObject::Container allLabels;
 			if (m_treeRoot->filterChildren(allLabels,true,CC_2D_LABEL) != 0)
 			{
@@ -301,6 +301,14 @@ void ccDBRoot::deleteSelectedEntities()
 						}
 				}
 			}
+		}
+
+		if (anObject->isKindOf(CC_MESH))
+		{
+			//specific case: the object is a mesh and its parent is its vertices!
+			//(can happen if a Delaunay mesh is computed directly in CC)
+			if (anObject->getParent() && anObject->getParent() == static_cast<ccGenericMesh*>(anObject)->getAssociatedCloud())
+				anObject->getParent()->setVisible(true);
 		}
 
         ccHObject* parent = anObject->getParent();
@@ -678,6 +686,7 @@ void ccDBRoot::showPropertiesView(ccHObject* obj)
     m_ccPropDelegate->fillModel(obj);
 
     m_propertiesTreeWidget->setEnabled(true);
+	m_propertiesTreeWidget->setColumnWidth(0,115);
 }
 
 void ccDBRoot::hidePropertiesView()

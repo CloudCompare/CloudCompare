@@ -26,7 +26,9 @@
 //System
 #include <iostream>
 
+#if !defined(_WIN32) && !defined(WIN32)
 #include <unistd.h>
+#endif
 
 class Test:  public QObject
 {

@@ -1,39 +1,56 @@
-Methods not yet implemented/linked with CCLib (in mainwindow.cpp):
-void MainWindow::doActionMultiplySF
-void MainWindow::doActionKMeans
-void MainWindow::doActionFrontPropagation
-void MainWindow::doActionLoadShader
+/****************************************/
+/********* CC (HOLLY) TODO LIST *********/
+/****************************************/
 
-Issues:
-- when a mesh is deleted, its parent cloud (if it has one) stays hidden
-- when a mesh is deleted, its parent cloud (if it has one) keeps its normals. When we compute a new mesh, we keep the old normals, which are not necessarily in the good direction
+Methods not yet migrated back to V2:
+- void MainWindow::doActionKMeans
+- void MainWindow::doActionFrontPropagation
+- void MainWindow::doActionLoadShader
 
-*** Requests ***
-
-- export/open:
-	* POD files (Pointools)
-	* FARO and LEICA file formats
-	* SHP files (--> GDAL)
-	* geotiff files (--> GDAL)
-
-In french (because I'm lazy today):
-- uniformiser l'échelle de plusieurs entités
-- détection automatique de la première ligne (header) des fichiers TXT (X Y Z, etc.)
-- calcul de distance selon une direction (cylindre)
-- distances signées entre nuages
-- calcul basé sur un nuage sous-échantillonné
+File I/O:
+- PDF 3D
+- X3D files (integration with 'xiot' in... standbye)
+- POD files (Pointools)
+- FARO and LEICA file formats
+- SHP files (--> GDAL)
+- geotiff files (--> GDAL)
 
 *** And from the forum topic 'recent requests' ***
 
+Big ones:
+[*] 3D space mouse management
+[*] Cross section tool
+[*] flythrough mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
+
 Various:
 [*] Add materials to the 'Toggle (recursive)' menu
-[*] Per-point size based on SF values
-[*] Select ASCII files output precision
-[*] flythrough mode
-[*] command line options to specify ccViewer window size & position + 'always stay on top'
+[*] Per-point size based on SF values (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=507)
+[*] Select ASCII files output precision (http://www.danielgm.net/cc/forum/viewtopic.php?f=10&t=509&p=1245#p1245)
+[*] Command line options to specify ccViewer window size & position + 'always stay on top'
+[*] Displaying ortho-rectified images as high-res textures (instead of point clouds!)
+[*] Use PDAL instead of libLAS (http://www.danielgm.net/cc/forum/viewtopic.php?f=15&t=437&p=1014#p1014)
+[*] Run the PCV plugin on more than one file at a time (or batch process)
+
+From Dimitri L.:
+[*] Auto-detect header format in ASCII files (in any) 
+[*] Compute distances in a given direction (cylinder)
+[*] Compute signed distances between clouds
+[*] Being able to apply various methods based on a sub-sampled cloud
+[*] Vector fields (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=201&p=614#p614)
+
+From Thomas D.:
+[*] Uniformize color-scales of mutliple clouds
+[*] Show/hide points based on their normal (http://www.danielgm.net/cc/forum/viewtopic.php?f=9&t=168&p=488#p488)
+
+From AdrienA:
+[*] Radiance scaling shader
+
+From Chartzell:
+[*] A limit box- Being able to hide portions of the clouds you are working on can make the registration process much quicker and easier. With a customizable limit box you can look at just a small cross section of the clouds to get a good view of how well they fit together and what adjustments need to be made. Ideally, you would be able to push and pull on the various sides of the box to change it's dimensions.
+[*] Ability to do fly around animations and export them to some type of video format? Something where you could set various viewpoints and and have the camera fly between each point. Google SketchUp has a great example of this function. (see 'flythrough mode' above)
 
 From Jean-Francois H.: 
-[*] possibility of exporting histogram as image.
+[*] Exporting histogram as image
 
 From Konrad W.:
 [*] Something like the plane shader from point tools where the depth is coloured with the Hue channel

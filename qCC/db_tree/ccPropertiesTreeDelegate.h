@@ -144,6 +144,9 @@ protected:
 	void fillWithShareable(CCShareable*);
 	template<int N, class ScalarType> void fillWithChunkedArray(ccChunkedArray<N,ScalarType>*);
 
+	//! Updates the current model (assuming object is the same)
+	void updateModel();
+
     ccHObject* m_currentObject;
     QStandardItemModel* m_model;
     QAbstractItemView* m_view;

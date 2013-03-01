@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef ERROR_FUNCTION_HEADER
 #define ERROR_FUNCTION_HEADER
@@ -35,7 +28,7 @@ namespace CCLib
 	but don't ask for more than 15 figures (assuming usual 52 bit mantissa
 	in a double). Example: 1E-12 <--> calculate 12 significant figures
 **/
-static const double erfRelativeError= 1E-12;
+static const double c_erfRelativeError = 1e-12;
 
 //! A class to compute the Error function (erf)
 /** See for example http://mathworld.wolfram.com/Erf.html.
@@ -77,4 +70,4 @@ public:
 
 }
 
-#endif
+#endif //ERROR_FUNCTION_HEADER

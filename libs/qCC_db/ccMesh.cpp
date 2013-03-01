@@ -14,14 +14,8 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2247                                                              $
-//$LastChangedDate:: 2012-10-04 23:34:01 +0200 (jeu., 04 oct. 2012)        $
-//**************************************************************************
-//
 
+//Always first
 #include "ccIncludeGL.h"
 
 #include "ccMesh.h"
@@ -41,6 +35,7 @@
 #include <QGLFormat>
 
 //System
+#include <string.h>
 #include <assert.h>
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices)
@@ -589,11 +584,11 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		int decimStep = (lodEnabled ? (int)ceil((float)triNum*3 / (float)MAX_LOD_FACES_NUMBER) : 1);
 
 		//GL name push
-		bool pushName = MACRO_DrawNames(context);
+		bool pushName = MACRO_DrawEntityNames(context);
 		if (pushName)
 			glPushName(getUniqueID());
 
-		//special case: triangls names pushing (for picking)
+		//special case: triangle names pushing (for picking)
 		bool pushTriangleNames = MACRO_DrawTriangleNames(context); 
 
 		//vertices visibility
@@ -972,17 +967,14 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glEnable(GL_TEXTURE_2D);
 			}
 
-			if (!pushTriangleNames)
-				glBegin(lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP : GL_TRIANGLES);
+			if (pushTriangleNames)
+				glPushName(0);
+
+			GLenum triangleDisplayType = lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP : GL_TRIANGLES;
+			glBegin(triangleDisplayType);
 
 			for (n=0;n<triNum;++n)
 			{
-				if (pushTriangleNames)
-				{
-					glPushName(n);
-					glBegin(lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP : GL_TRIANGLES);
-				}
-
 				//current triangle vertices
 				const CCLib::TriangleSummitsIndexes* tsi = (CCLib::TriangleSummitsIndexes*)m_triIndexes->getCurrentValue();
 				m_triIndexes->forwardIterator();
@@ -1083,7 +1075,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 						//if we don't have any current material, we apply default one
 						(newMatlIndex>=0 ? (*m_materials)[newMatlIndex] : context.defaultMat).applyGL(glParams.showNorms/* || showTriNormals*/,false);
-						glBegin(GL_TRIANGLES);
+						glBegin(triangleDisplayType);
 						lasMtlIndex=newMatlIndex;
 					}
 
@@ -1098,6 +1090,18 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						Tx2 = (txInd[1]>=0 ? m_texCoords->getValue(txInd[1]) : 0);
 						Tx3 = (txInd[2]>=0 ? m_texCoords->getValue(txInd[2]) : 0);
 					}
+				}
+
+				if (pushTriangleNames)
+				{
+					glEnd();
+					glLoadName(n);
+					glBegin(triangleDisplayType);
+				}
+				else if (showWired)
+				{
+					glEnd();
+					glBegin(triangleDisplayType);
 				}
 
 				//vertex 1
@@ -1126,22 +1130,12 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (Tx3)
 					glTexCoord2fv(Tx3);
 				glVertex3fv(m_associatedCloud->getPoint(tsi->i3)->u);
-
-				if (showWired)
-				{
-					glEnd();
-					glBegin(GL_LINE_LOOP);
-				}
-
-				if (pushTriangleNames)
-				{
-					glEnd();
-					glPopName();
-				}
 			}
 
-			if (!pushTriangleNames)
-				glEnd();
+			glEnd();
+
+			if (pushTriangleNames)
+				glPopName();
 			
 			if (showTextures)
 			{

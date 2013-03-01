@@ -22,13 +22,16 @@
 //**************************************************************************
 //
 
+#include "ccGuiParameters.h"
+
 //Qt
 #include <QSettings>
 
 //qCC_db
 #include <ccBasicTypes.h>
 
-#include "ccGuiParameters.h"
+//System
+#include <string.h>
 
 //! Static unique instance of ccGui
 static ccGui* s_gui = 0;

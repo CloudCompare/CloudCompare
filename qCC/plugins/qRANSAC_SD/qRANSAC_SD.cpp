@@ -111,7 +111,7 @@ void qRansacSD::doAction()
 		return;
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	unsigned selNum = selectedEntities.size();
+	size_t selNum = selectedEntities.size();
     if (selNum!=1)
 	{
 		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -129,7 +129,7 @@ void qRansacSD::doAction()
     ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
 
 	//input cloud
-	unsigned count = pc->size();
+	size_t count = (size_t)pc->size();
 	bool hasNorms = pc->hasNormals();
     PointCoordinateType bbMin[3],bbMax[3];
     pc->getBoundingBox(bbMin,bbMax);
@@ -152,7 +152,7 @@ void qRansacSD::doAction()
 		Pt.normal[0] = 0.0;
 		Pt.normal[1] = 0.0;
 		Pt.normal[2] = 0.0;
-		for (unsigned i=0;i<count;++i)
+		for (unsigned i=0;i<(unsigned)count;++i)
 		{
 			const CCVector3* P = pc->getPoint(i);
 			Pt.pos[0] = P->x;
@@ -208,7 +208,7 @@ void qRansacSD::doAction()
 
 		//consistency check
 		{
-			unsigned primCount = 0;
+			unsigned char primCount = 0;
 			for (unsigned char k=0;k<5;++k)
 				primCount += (unsigned)s_primEnabled[k];
 			if (primCount==0)
@@ -249,7 +249,7 @@ void qRansacSD::doAction()
 
 		if (pc->reserveTheNormsTable())
 		{
-			for (unsigned i=0;i<count;++i)
+			for (size_t i=0;i<count;++i)
 			{
 				CCVector3 N(cloud[i].normal);
 				N.normalize();
@@ -378,7 +378,7 @@ void qRansacSD::doAction()
 		for (MiscLib::Vector<DetectedShape>::const_iterator it = shapes.begin(); it != shapes.end(); ++it)
 		{
 			const PrimitiveShape* shape = it->first;
-			unsigned shapePointsCount = it->second;
+			size_t shapePointsCount = it->second;
 
 			//too many points?!
 			if (shapePointsCount > count)
@@ -394,7 +394,7 @@ void qRansacSD::doAction()
 			ccPointCloud* pcShape = new ccPointCloud(desc.c_str());
 
 			//we fill cloud with sub-part points
-			if (!pcShape->reserve(shapePointsCount))
+			if (!pcShape->reserve((unsigned)shapePointsCount))
 			{
 				m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 				delete pcShape;
@@ -402,7 +402,7 @@ void qRansacSD::doAction()
 			}			
 			bool saveNormals = pcShape->reserveTheNormsTable();
 
-			for (unsigned j=0;j<shapePointsCount;++j)
+			for (size_t j=0;j<shapePointsCount;++j)
 			{
 				pcShape->addPoint(CCVector3(cloud[count-1-j].pos));
 				if (saveNormals)
@@ -433,7 +433,7 @@ void qRansacSD::doAction()
 
 				//we look for real plane extents
 				float minX,maxX,minY,maxY;
-				for (unsigned j=0;j<shapePointsCount;++j)
+				for (size_t j=0;j<shapePointsCount;++j)
 				{
 					std::pair<float,float> param;
 					plane->Parameters(cloud[count-1-j].pos,&param);
@@ -529,7 +529,7 @@ void qRansacSD::doAction()
 				//compute max height
 				CCVector3 maxP(CC.getValue());
 				float maxHeight = 0;
-				for (unsigned j=0;j<shapePointsCount;++j)
+				for (size_t j=0;j<shapePointsCount;++j)
 				{
 					float h = cone->Internal().Height(cloud[count-1-j].pos);
 					if (h>maxHeight)

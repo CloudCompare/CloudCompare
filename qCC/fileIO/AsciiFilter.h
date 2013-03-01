@@ -27,11 +27,6 @@
 #include "FileIOFilter.h"
 #include "AsciiOpenDlg.h"
 
-#if !defined(_WIN32) && !defined(WIN32)
-#include <stdint.h>
-#define __int64 int64_t
-#endif
-
 //! ASCII point cloud I/O filter
 class AsciiFilter : public FileIOFilter
 {
@@ -50,7 +45,7 @@ protected:
 													const AsciiOpenDlg::Sequence& openSequence,
                                                     char separator,
                                                     unsigned approximateNumberOfLines,
-                                                    __int64 fileSize,
+                                                    qint64 fileSize,
                                                     unsigned skipLines=0,
 													bool alwaysDisplayLoadDialog=true,
 													bool* coordinatesShiftEnabled=0,

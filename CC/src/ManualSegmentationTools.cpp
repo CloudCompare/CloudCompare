@@ -14,16 +14,10 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "ManualSegmentationTools.h"
 
+//local
 #include "Matrix.h"
 #include "CCTypes.h"
 #include "GenericProgressCallback.h"
@@ -33,6 +27,8 @@
 #include "SimpleMesh.h"
 #include "Polyline.h"
 
+//system
+#include <string.h>
 #include <assert.h>
 
 using namespace CCLib;
@@ -195,7 +191,6 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 	{
 		bool triangleIsOnTheRightSide = true;
 
-		//printf("Triangle #%i",i);
 		const TriangleSummitsIndexes* tsi = theMesh->getNextTriangleIndexes(); //DGM: getNextTriangleIndexes is faster for mesh groups!
 
 		//VERSION : ON GARDE LE TRIANGLE UNIQUEMENT SI SES 3 SOMMETS SONT A L'INTERIEUR
@@ -228,10 +223,8 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 			}
 			++count;
 
-			//printf("(IN) -> (%i,%i,%i)\n",newVertexIndexes[0],newVertexIndexes[1],newVertexIndexes[2]);
 			newTri->addTriangle(indexShift+newVertexIndexes[0],indexShift+newVertexIndexes[1],indexShift+newVertexIndexes[2]);
 		}
-		//else printf("(OUT)\n");
 
 		if (nprogress)
 		{

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2219                                                              $
-//$LastChangedDate:: 2012-07-20 18:03:24 +0200 (ven., 20 juil. 2012)       $
-//**************************************************************************
-//
 
 #include "ccCalibratedImage.h"
 #include "ccPointCloud.h"
@@ -29,6 +22,7 @@
 //#define USE_LEVMAR
 #endif
 
+//CCLib
 #ifdef USE_LEVMAR
 #include <levmar.h>
 #else
@@ -41,6 +35,9 @@
 #include <QColor>
 #include <QFile>
 #include <QTextStream>
+
+//system
+#include <string.h>
 
 ccCalibratedImage::ccCalibratedImage()
 	: ccImage()
@@ -235,7 +232,7 @@ bool ccCalibratedImage::computeOrthoRectificationParams(CCLib::GenericIndexedClo
 	if (!keypoints3D)
 		return false;
 
-	unsigned count = keypointsImage.size();
+	unsigned count = (unsigned)keypointsImage.size();
 	if (count<4)
 		return false;
 
@@ -564,7 +561,7 @@ bool ccCalibratedImage::OrthoRectifyAsImages(std::vector<ccCalibratedImage*> ima
 											std::vector<ccImage*>* result/*=0*/,
 											std::vector<std::pair<double,double> >* relativePos/*=0*/)
 {
-	unsigned count = images.size();
+	unsigned count = (unsigned)images.size();
 	if (count==0)
 		return false;
 

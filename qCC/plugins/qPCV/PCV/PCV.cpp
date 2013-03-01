@@ -28,6 +28,9 @@
 //CCLib
 #include <CCMiscTools.h>
 
+//System
+#include <string.h>
+
 using namespace CCLib;
 
 int PCV::Launch(unsigned numberOfRays,
@@ -41,7 +44,7 @@ int PCV::Launch(unsigned numberOfRays,
 {
 	//generates light directions
 	unsigned lightDirs = numberOfRays*(mode360 ? 1 : 2);
-	float *rays = CCMiscTools::sampleSphere(lightDirs);
+	float *rays = CCMiscTools::SampleSphere(lightDirs);
 	if (!rays) //an error occured?
 		return -2;
 
@@ -83,7 +86,7 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 	//vertices/points
 	unsigned numberOfPoints = vertices->size();
 	//rays
-	unsigned numberOfRays = rays.size();
+	unsigned numberOfRays = (unsigned)rays.size();
 
 	//for each vertex we keep count of the number of light directions for which it is "illuminated"
 	int* vertexAccum = new int[numberOfPoints];

@@ -1317,7 +1317,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
         ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
         int pos = (win ? pos = comboBox->findText(win->windowTitle()) : 0);
 
-        comboBox->setCurrentIndex(ccMax(pos,0)); //0 = "NONE"
+        comboBox->setCurrentIndex(std::max(pos,0)); //0 = "NONE"
         break;
     }
     case OBJECT_CURRENT_SCALAR_FIELD:

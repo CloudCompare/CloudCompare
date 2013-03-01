@@ -27,9 +27,11 @@
 #include <ccGBLSensor.h>
 #include <ccPointCloud.h>
 
-//CCLib
-#include <CCMiscTools.h>
+//Qt
+#include <QFileInfo>
+#include <QString>
 
+//system
 #include <assert.h>
 
 CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const char* filename)
@@ -50,36 +52,25 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const char* file
     }
 
     //multiple filenames handling
-    int ppos = CCLib::CCMiscTools::findCharLastOccurence('.',filename);
-    char fName[1024];
-    strcpy(fName,filename);
+	QString baseName = QFileInfo(filename).baseName();
+	baseName.append("_");
+	QString extension = QFileInfo(filename).suffix();
+	if (!extension.isNull())
+		extension.prepend("_");
 
-    unsigned i=0,nSens=sensors.size();
     CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-    while (result == CC_FERR_NO_ERROR && i<nSens)
+    size_t sensorCount=sensors.size();
+	for (size_t i=0;i<sensorCount && result==CC_FERR_NO_ERROR;++i)
     {
         //more than one sensor? we must generate auto filename
-        if (nSens>1)
-        {
-            if (ppos>=0)
-            {
-                char fbody[256];
-                strncpy(fbody,filename,ppos);
-                fbody[ppos]=0;
-                sprintf(fName,"%s_%i.%s",fbody,i,filename+ppos+1);
-            }
-            else
-            {
-                sprintf(fName,"%s_%i",filename,i);
-            }
-        }
+		QString thisFilename = (sensorCount < 2 ? filename : baseName + QString::number(i) + extension);
 
         //opening file
-        FILE* fp = fopen(fName,"wt");
+        FILE* fp = fopen(qPrintable(thisFilename),"wt");
         if (!fp)
         {
-            ccConsole::Error("[ccGBLSensor::saveASCII] Can't open file '%s' for writing!",fName);
+            ccConsole::Error(QString("[ccGBLSensor::saveASCII] Can't open file '%1' for writing!").arg(thisFilename));
             result=CC_FERR_WRITING;
         }
         else
@@ -88,8 +79,6 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const char* file
             result = saveToOpenedFile(fp,sensor);
 			fclose(fp);
         }
-
-        ++i;
     }
 
     return result;
@@ -112,10 +101,12 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 
     fprintf(fp,"// CLOUDCOMPARE DEPTH MAP\n");
     fprintf(fp,"// Associated cloud: %s\n",qPrintable(cloud->getName()));
-    fprintf(fp,"// dPhi   = %f [ %f : %f ]\n",sensor->getDeltaPhi(),
+    fprintf(fp,"// dPhi   = %f [ %f : %f ]\n",
+			sensor->getDeltaPhi(),
             sensor->getPhiMin(),
             sensor->getPhiMax());
-    fprintf(fp,"// dTheta = %f [ %f : %f ]\n",sensor->getDeltaTheta(),
+    fprintf(fp,"// dTheta = %f [ %f : %f ]\n",
+			sensor->getDeltaTheta(),
             sensor->getThetaMin(),
             sensor->getThetaMax());
     fprintf(fp,"// pMax   = %f\n",sensor->getSensorRange());
@@ -186,9 +177,9 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
     uchar* _theColors = theColors;
     DistanceType* _zBuff = db.zBuff;
 
-    int j,k;
-    for (j=0;j<db.h_buff;++j)
-        for (k=0;k<db.l_buff;++k)
+    for (int j=0;j<db.h_buff;++j)
+	{
+        for (int k=0;k<db.l_buff;++k)
         {
             //grid index and depth
             fprintf(fp,"%f %f %f",float(k),float(j),*_zBuff++);
@@ -209,6 +200,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 
             fprintf(fp,"\n");
         }
+	}
 
     if (theNorms)
         delete[] theNorms;

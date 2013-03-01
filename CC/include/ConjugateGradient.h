@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CONJUGATE_GRADIENT_HEADER
 #define CONJUGATE_GRADIENT_HEADER
@@ -148,4 +141,4 @@ protected:
 
 }
 
-#endif
+#endif //CONJUGATE_GRADIENT_HEADER

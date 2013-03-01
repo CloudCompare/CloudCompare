@@ -14,17 +14,8 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2257                                                              $
-//$LastChangedDate:: 2012-10-11 23:48:15 +0200 (jeu., 11 oct. 2012)        $
-//**************************************************************************
-//
-#include "MAFilter.h"
 
-//CCLib
-#include <CCMiscTools.h>
+#include "MAFilter.h"
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -32,6 +23,11 @@
 #include <ccMeshGroup.h>
 #include <ccProgressDialog.h>
 
+//Qt
+#include <QFileInfo>
+
+//System
+#include <string.h>
 #include <assert.h>
 
 struct edge
@@ -71,9 +67,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
     }
 
     //we extract the (short) filename from the whole path
-	int slashPos = CCLib::CCMiscTools::findCharLastOccurence('/',filename)+1;
-	char smallFileName[512];
-	strcpy(smallFileName,filename+slashPos);
+	QString baseFilename = QFileInfo(filename).fileName();
 
     //the mesh to save
     ccGenericMesh* theMesh = static_cast<ccGenericMesh*>(meshes[0]);
@@ -122,7 +116,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	//header
 	if (fprintf(fp,"//Maya ASCII 7.0 scene\n") < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
-	if (fprintf(fp,"//Name: %s\n",smallFileName) < 0)
+	if (fprintf(fp,"//Name: %s\n",qPrintable(baseFilename)) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 	if (fprintf(fp,"//Last modified: Sat, Mai 10, 2008 00:00:00 PM\n") < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
@@ -463,7 +457,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 		{fclose(fp);return CC_FERR_WRITING;}
 
 	//fin du fichier
-	if (fprintf(fp,"//End of %s\n",smallFileName) < 0)
+	if (fprintf(fp,"//End of %s\n",qPrintable(baseFilename)) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
 	fclose(fp);

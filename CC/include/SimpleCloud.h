@@ -14,16 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef PURE_CLOUD_HEADER
-#define PURE_CLOUD_HEADER
+#ifndef SIMPLE_CLOUD_HEADER
+#define SIMPLE_CLOUD_HEADER
 
 #include "GenericIndexedCloudPersist.h"
 #include "GenericChunkedArray.h"
@@ -129,4 +122,4 @@ protected:
 
 }
 
-#endif
+#endif //SIMPLE_CLOUD_HEADER

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "ccMaterialSet.h"
 
@@ -33,6 +26,7 @@
 #include <QString>
 
 //System
+#include <string.h>
 #include <assert.h>
 
 ccMaterialSet::ccMaterialSet(QString name/*=QString()*/)

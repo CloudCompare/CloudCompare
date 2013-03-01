@@ -14,17 +14,12 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2219                                                              $
-//$LastChangedDate:: 2012-07-20 18:03:24 +0200 (ven., 20 juil. 2012)       $
-//**************************************************************************
-//
+
+//Always first
+#include "ccIncludeGL.h"
 
 #include "ccImage.h"
 
-#include "ccIncludeGL.h"
 #include "ccGenericGLDisplay.h"
 
 //Qt

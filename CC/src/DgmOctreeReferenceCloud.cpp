@@ -14,16 +14,10 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "DgmOctreeReferenceCloud.h"
 
+//system
 #include <string.h>
 #include <assert.h>
 
@@ -33,11 +27,9 @@ DgmOctreeReferenceCloud::DgmOctreeReferenceCloud(DgmOctree::NeighboursSet* assoc
 	: m_globalIterator(0)
 	, m_validBB(false)
 	, m_set(associatedSet)
-	, m_size(size)
+	, m_size(size == 0 && associatedSet ? (unsigned)associatedSet->size() : size)
 {
 	assert(associatedSet);
-	if (!m_size)
-		m_size = associatedSet->size();
 }
 
 DgmOctreeReferenceCloud::~DgmOctreeReferenceCloud()

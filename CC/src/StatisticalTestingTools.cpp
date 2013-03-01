@@ -14,16 +14,10 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "StatisticalTestingTools.h"
 
+//local
 #include "ReferenceCloud.h"
 #include "DgmOctreeReferenceCloud.h"
 #include "GenericCloud.h"
@@ -31,19 +25,19 @@
 #include "GenericDistribution.h"
 #include "DgmOctree.h"
 #include "GenericProgressCallback.h"
-
-// Chi2 computation stuff
 #include "Chi2Helper.h"
 
+//system
+#include <string.h>
 #include <assert.h>
 
 using namespace CCLib;
 
 //! Max computable Chi2 distance
-#define CHI2_MAX 1e7
+static double CHI2_MAX = 1e7;
 
 //! Min computable Chi2 distance
-#define CHI2_MIN 1e-6
+static double CHI2_MIN = 1e-6;
 
 //calcul de la "distance" du Chi2 entre un échantillon Yk et une distribution "distrib"
 //On peut fournir un tableau (histogramme) déja alloué (dumpHisto) pour aller plus vite
@@ -454,7 +448,6 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 		{
 			//theoretical Chi2 fractile
 			maxChi2 = computeChi2Fractile(pTrust, numberOfChi2Classes-1);
-			//printf("MaxChi2 (%i ddl / p=%1.5f) = %f\n",numberOfChi2Classes-1,pTrust,maxChi2);
 			maxChi2 = sqrt(maxChi2); //on travaille avec les racines carrées des distances du Chi2
 		}
 	}

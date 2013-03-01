@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2213                                                              $
-//$LastChangedDate:: 2012-07-18 19:39:09 +0200 (mer., 18 juil. 2012)       $
-//**************************************************************************
-//
 
 #include "ccMeshGroup.h"
 
@@ -36,6 +29,7 @@
 #include <ManualSegmentationTools.h>
 
 //system
+#include <string.h>
 #include <assert.h>
 
 #define CC_MESH_RECURSIVE_CALL(method) for (unsigned i=0;i<m_children.size();++i){if (m_children[i]->isKindOf(CC_MESH)) static_cast<ccGenericMesh*>(m_children[i])->method;}

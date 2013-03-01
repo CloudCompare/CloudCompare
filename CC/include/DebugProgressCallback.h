@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef DEBUG_PROGRESS_CALLBACK_HEADER
 #define DEBUG_PROGRESS_CALLBACK_HEADER
@@ -73,4 +66,4 @@ protected:
 
 }
 
-#endif
+#endif //DEBUG_PROGRESS_CALLBACK_HEADER

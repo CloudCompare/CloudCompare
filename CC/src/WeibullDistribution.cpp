@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about unsafe methods
@@ -28,10 +21,13 @@
 #endif
 
 #include "WeibullDistribution.h"
+
+//local
 #include "GenericCloud.h"
 #include "CCConst.h"
 #include "ScalarFieldTools.h"
 
+//system
 #include <math.h>
 #include <string.h>
 #include <assert.h>
@@ -191,7 +187,6 @@ bool WeibullDistribution::computeParameters(const GenericCloud* Yk, bool include
 	if (maxValue<=valueShift)
 		return false;
 
-	//printf("maxValue = %f\n",maxValue);
 	DistanceType inverseMaxValue = 1.0f/(maxValue-valueShift);
 
 	a = findGRoot(Yk,inverseMaxValue);
@@ -355,7 +350,6 @@ DistanceType WeibullDistribution::computeG(const GenericCloud* Yk, DistanceType 
 		counter += zeroValues;
 	}
 
-	//printf("p=%f q=%f s=%f\n",p,q,s);
 	if (counter==0)
 		return 1.0; //une valeur positive va faire échouer la fonction "computeG"
 
@@ -374,9 +368,7 @@ DistanceType WeibullDistribution::findGRoot(const GenericCloud* Yk, DistanceType
 	{
 		aMin *= 0.1f;
 		vMin = computeG(Yk,aMin,inverseMaxValue);
-		//printf("*** aMin = %f / vMin = %f\n",aMin,vMin);
 	}
-	//printf("aMin = %f / vMin = %f\n",aMin,vMin);
 
 	if (fabs(vMin)<1e-7)
 		return aMin;
@@ -388,31 +380,23 @@ DistanceType WeibullDistribution::findGRoot(const GenericCloud* Yk, DistanceType
 	{
 		aMax *= 2.0; //puisqu'on calcule des x^a, ça devient vite énorme !!!!
 		vMax = computeG(Yk,aMax,inverseMaxValue);
-		//printf("*** aMax = %f / vMax = %f\n",aMax,vMax);
 	}
-	//printf("aMax = %f / vMax = %f\n",aMax,vMax);
 
 	if (fabs(vMax)<1e-7)
 		return aMax;
 	else if (vMax<0.0)
 		return -1.0; //problème
 
-	//system("PAUSE");
-	//printf("aMin = %f - aMax = %f\n vMin = %f - vMax = %f\n",aMin,aMax,vMin,vMax);
-
 	//dichotomie pour trouver r tq computeG(r)<1e-7
 	DistanceType old_v;
 	while (fabs(v)>1e-5)
 	{
 		r = (aMin+aMax)*0.5f;
-		//printf("r=%f\n",r);
 		old_v=v;
 		v = computeG(Yk,r,inverseMaxValue);
 
 		if (fabs(old_v-v)<1e-7)
 			return r;
-
-		//printf("v=%f [%f:%f]\n",v,aMin,aMax);
 
 		if (v<0.0)
 			aMin = r;
@@ -511,7 +495,6 @@ bool WeibullDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 	for (unsigned i=1;i<numberOfClasses;++i)
 	{
 		chi2ClassesPositions[i-1] = b * (DistanceType)pow(-log(1.0-currentArea),invA);
-		//printf("Classe %i/%i : %f\n",i-1,numberOfClasses,chi2ClassesPositions.back());
 		currentArea += areaPerClass;
 	}
 

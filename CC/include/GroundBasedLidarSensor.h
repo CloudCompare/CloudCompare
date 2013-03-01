@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef GROUND_LIDAR_HEADER
 #define GROUND_LIDAR_HEADER
@@ -336,4 +329,4 @@ protected :
 
 }
 
-#endif
+#endif //GROUND_LIDAR_HEADER

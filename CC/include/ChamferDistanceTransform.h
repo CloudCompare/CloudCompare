@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CHAMFER_DISTANCE_TRANSFORM_HEADER
 #define CHAMFER_DISTANCE_TRANSFORM_HEADER
@@ -140,4 +133,4 @@ protected:
 
 }
 
-#endif
+#endif //CHAMFER_DISTANCE_TRANSFORM_HEADER

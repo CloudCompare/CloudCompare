@@ -34,7 +34,6 @@
 
 //CCLib
 #include <ScalarField.h>
-#include <CCMiscTools.h>
 
 //qCC_db
 #include <ccPointCloud.h>

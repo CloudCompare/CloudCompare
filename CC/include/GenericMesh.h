@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef GENERIC_MESH_HEADER
 #define GENERIC_MESH_HEADER
@@ -85,4 +78,4 @@ public:
 
 }
 
-#endif
+#endif //GENERIC_MESH_HEADER

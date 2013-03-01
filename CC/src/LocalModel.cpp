@@ -14,21 +14,17 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "LocalModel.h"
 
+//local
 #include "GenericTriangle.h"
 #include "GenericMesh.h"
 #include "GenericIndexedMesh.h"
 #include "DistanceComputationTools.h"
 
+//system
+#include <string.h>
 #include <math.h>
 
 using namespace CCLib;

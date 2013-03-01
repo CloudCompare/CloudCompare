@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef FAST_MARCHING_HEADER
 #define FAST_MARCHING_HEADER
@@ -32,6 +25,8 @@
 #endif
 
 #include "CCConst.h"
+
+//system
 #include <vector>
 
 namespace CCLib
@@ -232,4 +227,4 @@ protected:
 
 }
 
-#endif
+#endif //FAST_MARCHING_HEADER

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef DGM_OCTREE_REFERENCE_CLOUD_HEADER
 #define DGM_OCTREE_REFERENCE_CLOUD_HEADER
@@ -111,4 +104,4 @@ protected:
 
 }
 
-#endif
+#endif //DGM_OCTREE_REFERENCE_CLOUD_HEADER

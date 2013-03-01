@@ -1,6 +1,3 @@
-#ifndef GENERIC_CHUNKED_ARRAY
-#define GENERIC_CHUNKED_ARRAY
-
 //##########################################################################
 //#                                                                        #
 //#                               CCLIB                                    #
@@ -17,13 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
+
+#ifndef GENERIC_CHUNKED_ARRAY_HEADER
+#define GENERIC_CHUNKED_ARRAY_HEADER
 
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about template class exportation
@@ -38,6 +31,7 @@ static const unsigned ELEMENT_INDEX_BIT_MASK = MAX_NUMBER_OF_ELEMENTS_PER_CHUNK-
 
 #include "CCShareable.h"
 
+//system
 #include <stdlib.h>
 #include <string.h>
 #include <vector>
@@ -90,8 +84,8 @@ public:
 	{
 		return sizeof(GenericChunkedArray) 
 				+ N*capacity()*sizeof(ScalarType)
-				+ m_theChunks.capacity()*sizeof(ScalarType*)
-				+ m_perChunkCount.capacity()*sizeof(unsigned);
+				+ (unsigned)m_theChunks.capacity()*sizeof(ScalarType*)
+				+ (unsigned)m_perChunkCount.capacity()*sizeof(unsigned);
 	}
 
 	//! Clears the array
@@ -439,13 +433,13 @@ public:
 	}
 
 	//! Returns the number of chunks
-	inline unsigned chunksCount() const {return m_theChunks.size();}
+	inline unsigned chunksCount() const { return (unsigned)m_theChunks.size(); }
 
 	//! Returns the number of points in a given chunk
-	inline unsigned chunkSize(unsigned index) const {assert(index < m_theChunks.size()); return m_perChunkCount[index];}
+	inline unsigned chunkSize(unsigned index) const { assert(index < m_theChunks.size()); return m_perChunkCount[index]; }
 
 	//! Returns the begining of a given chunk (pointer)
-	inline ScalarType* chunkStartPtr(unsigned index) const {assert(index < m_theChunks.size()); return m_theChunks[index];}
+	inline ScalarType* chunkStartPtr(unsigned index) const { assert(index < m_theChunks.size()); return m_theChunks[index]; }
 
 	//! Copy array data to another one
 	/** \param dest destination array (will be resize if necessary)
@@ -542,8 +536,8 @@ public:
 	{
 		return sizeof(GenericChunkedArray) 
 				+ capacity()*sizeof(ScalarType)
-				+ m_theChunks.capacity()*sizeof(ScalarType*)
-				+ m_perChunkCount.capacity()*sizeof(unsigned);
+				+ (unsigned)m_theChunks.capacity()*sizeof(ScalarType*)
+				+ (unsigned)m_perChunkCount.capacity()*sizeof(unsigned);
 	}
 	//! Clears the array
 	/** \param releaseMemory whether memory should be released or not (for quicker "refill")
@@ -893,13 +887,13 @@ public:
 	}
 
 	//! Returns the number of chunks
-	inline unsigned chunksCount() const {return m_theChunks.size();}
+	inline unsigned chunksCount() const { return (unsigned)m_theChunks.size(); }
 
 	//! Returns the number of points in a given chunk
-	inline unsigned chunkSize(unsigned index) const {assert(index < m_theChunks.size()); return m_perChunkCount[index];}
+	inline unsigned chunkSize(unsigned index) const { assert(index < m_theChunks.size()); return m_perChunkCount[index]; }
 
 	//! Returns the begining of a given chunk (pointer)
-	inline ScalarType* chunkStartPtr(unsigned index) const {assert(index < m_theChunks.size()); return m_theChunks[index];}
+	inline ScalarType* chunkStartPtr(unsigned index) const { assert(index < m_theChunks.size()); return m_theChunks[index]; }
 
 	//! Copy array data to another one
 	/** \param dest destination array (will be resize if necessary)
@@ -952,4 +946,4 @@ protected:
 	unsigned m_iterator;
 };
 
-#endif
+#endif //GENERIC_CHUNKED_ARRAY_HEADER

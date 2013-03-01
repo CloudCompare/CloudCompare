@@ -76,7 +76,7 @@ void qPCV::doAction()
 		return;
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	unsigned selNum = selectedEntities.size();
+	size_t selNum = selectedEntities.size();
     if (selNum!=1)
 	{
 		m_app->dispToConsole("Select only one cloud or one mesh!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -122,7 +122,7 @@ void qPCV::doAction()
 	{
 		ccHObject::Container clouds;
 		root->filterChildren(clouds,true,CC_POINT_CLOUD);
-		for (unsigned i=0;i<clouds.size();++i)
+		for (size_t i=0;i<clouds.size();++i)
 		{
 			//we keep only clouds with normals
 			ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(clouds[i]);

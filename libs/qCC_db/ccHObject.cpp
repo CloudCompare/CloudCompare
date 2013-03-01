@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2266                                                              $
-//$LastChangedDate:: 2012-10-15 00:07:12 +0200 (lun., 15 oct. 2012)        $
-//**************************************************************************
-//
 
 #include "ccHObject.h"
 
@@ -193,8 +186,7 @@ ccHObject* ccHObject::find(int uniqueID)
 
 unsigned ccHObject::filterChildren(Container& filteredChildren, bool recursive/*=false*/, CC_CLASS_ENUM filter /*= CC_OBJECT*/) const
 {
-	Container::const_iterator it = m_children.begin();
-	for (;it!=m_children.end();++it)
+	for (Container::const_iterator it = m_children.begin(); it!=m_children.end(); ++it)
 	{
 		if ((*it)->isKindOf(filter))
 			//warning: we have to handle unicity as a sibling may be in the same container as its parent!
@@ -204,7 +196,8 @@ unsigned ccHObject::filterChildren(Container& filteredChildren, bool recursive/*
 		if (recursive)
 			(*it)->filterChildren(filteredChildren, true, filter);
 	}
-	return filteredChildren.size();
+
+	return (unsigned)filteredChildren.size();
 }
 
 int ccHObject::getChildIndex(const ccHObject* aChild) const
@@ -355,21 +348,15 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	if (!isEnabled())
 		return;
 
+	//are we currently drawing objects in 2D or 3D?
 	bool draw3D = MACRO_Draw3D(context);
-	bool drawInThisContext = (!m_visible && !m_selected ? false : m_currentDisplay == context._win);
+	
+	//the entity must be either visible and selected, and of course it should be displayed in this context
+	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context._win);
 
-	//no need to display anything but clouds and meshes in "point picking mode"
-	bool DrawMesh = false;
-	if (MACRO_DrawTriangleNames(context) && isKindOf(CC_MESH))
-	{
-		ccGenericMesh *mesh = static_cast<ccGenericMesh*>(this);
-		ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
-		DrawMesh = (cloud == NULL || !cloud->isEnabled());
-	}
-	drawInThisContext &= (
-		                 (!MACRO_DrawPointNames(context) || isKindOf(CC_POINT_CLOUD)) || 
-		                 (!MACRO_DrawTriangleNames(context) || DrawMesh)
-						 );
+	//no need to display anything but clouds and meshes in "element picking mode"
+	drawInThisContext &= (( !MACRO_DrawPointNames(context) || isKindOf(CC_POINT_CLOUD) ) || 
+		                  ( !MACRO_DrawTriangleNames(context) || isKindOf(CC_MESH) ));
 
 	//apply 3D 'temporary' transformation (for display only)
 	if (draw3D && m_glTransEnabled)
@@ -382,10 +369,12 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	//draw entity
 	if (m_visible && drawInThisContext)
 	{
-		if ((!m_selected || !MACRO_SkipSelected(context)) &&
-			(m_selected || !MACRO_SkipUnselected(context)))
+		if (( !m_selected || !MACRO_SkipSelected(context) ) &&
+			( m_selected || !MACRO_SkipUnselected(context) ))
 		{
+			//apply default color (in case of)
 			glColor3ubv(context.pointsDefaultCol);
+
 			drawMeOnly(context);
 
 			//draw name in 3D (we display it in the 2D foreground layer in fact!)

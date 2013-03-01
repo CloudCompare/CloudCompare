@@ -14,19 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_CONST_HEADER
 #define CC_CONST_HEADER
 
 #include "CCTypes.h"
 
+//system
 #include <math.h>
 
 //! Max float value
@@ -82,6 +76,10 @@ const unsigned CC_LOCAL_MODEL_MIN_SIZE[] = {	1,				/**< for single point model (
 #define M_PI_2 1.57079632679489661923
 #endif
 
+#ifndef SQRT_3
+#define SQRT_3 1.7320508075688772935274463415059
+#endif
+
 //! Conversion factor from radians to degrees
 #ifndef CC_RAD_TO_DEG
 #define CC_RAD_TO_DEG 180.0/M_PI
@@ -97,4 +95,4 @@ const unsigned CC_LOCAL_MODEL_MIN_SIZE[] = {	1,				/**< for single point model (
 #define ZERO_TOLERANCE 1e-8
 #endif
 
-#endif
+#endif //CC_CONST_HEADER

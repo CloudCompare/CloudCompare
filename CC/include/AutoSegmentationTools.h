@@ -14,16 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef AUTO_SEGMENTATION_TOOLS
-#define AUTO_SEGMENTATION_TOOLS
+#ifndef AUTO_SEGMENTATION_TOOLS_HEADER
+#define AUTO_SEGMENTATION_TOOLS_HEADER
 
 #include "CCToolbox.h"
 #include "ReferenceCloud.h"
@@ -112,4 +105,4 @@ public:
 
 }
 
-#endif
+#endif //AUTO_SEGMENTATION_TOOLS_HEADER

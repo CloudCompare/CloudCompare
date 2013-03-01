@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef POINT_PROJECTION_TOOLS_HEADER
 #define POINT_PROJECTION_TOOLS_HEADER
@@ -115,4 +108,4 @@ public:
 
 }
 
-#endif
+#endif //POINT_PROJECTION_TOOLS_HEADER

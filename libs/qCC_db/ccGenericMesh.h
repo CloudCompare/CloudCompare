@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_GENERIC_MESH_HEADER
 #define CC_GENERIC_MESH_HEADER
@@ -238,4 +231,4 @@ protected:
 	ccMaterialSet* m_materials;
 };
 
-#endif
+#endif //CC_GENERIC_MESH_HEADER

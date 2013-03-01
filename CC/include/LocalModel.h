@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef LOCAL_MODEL_HEADER
 #define LOCAL_MODEL_HEADER
@@ -99,4 +92,4 @@ protected:
 
 }
 
-#endif
+#endif //LOCAL_MODEL_HEADER

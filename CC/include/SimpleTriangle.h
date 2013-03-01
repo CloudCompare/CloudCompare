@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef SIMPLE_TRIANGLE_HEADER
 #define SIMPLE_TRIANGLE_HEADER
@@ -123,4 +116,4 @@ public:
 };
 
 }
-#endif
+#endif //SIMPLE_TRIANGLE_HEADER

@@ -14,18 +14,17 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2265                                                              $
-//$LastChangedDate:: 2012-10-13 22:22:51 +0200 (sam., 13 oct. 2012)        $
-//**************************************************************************
-//
 
+//Always first
 #include "ccIncludeGL.h"
 
 #include "ccPolyline.h"
+
+//Local
 #include "ccPointCloud.h"
+
+//System
+#include <string.h>
 
 ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 	: Polyline(associatedCloud)

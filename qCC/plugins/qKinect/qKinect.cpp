@@ -25,7 +25,6 @@
 #include <QtGui>
 
 #include "qKinect.h"
-//#include "ccHprDlg.h"
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -40,6 +39,9 @@
 
 //Libfreenect
 #include <libfreenect.h>
+
+//System
+#include <string.h>
 
 qKinect::qKinect(QObject* parent/*=0*/)
 	: QObject(parent)

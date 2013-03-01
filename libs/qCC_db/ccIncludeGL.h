@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_INCLUDE_GL_HEADER
 #define CC_INCLUDE_GL_HEADER
@@ -46,4 +39,4 @@
 #define GL_INVALID_TEXTURE_ID 0xffffffff
 #endif
 
-#endif
+#endif //CC_INCLUDE_GL_HEADER

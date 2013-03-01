@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_LOG_HEADER
 #define CC_LOG_HEADER
@@ -131,4 +124,4 @@ protected:
 
 };
 
-#endif
+#endif //CC_LOG_HEADER

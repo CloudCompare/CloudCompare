@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1777                                                              $
-//$LastChangedDate:: 2011-02-01 17:40:43 +0100 (mar., 01 févr. 2011)      $
-//**************************************************************************
-//
 
 #ifndef CC_DB_SCALAR_FIELD_HEADER
 #define CC_DB_SCALAR_FIELD_HEADER
@@ -180,4 +173,4 @@ protected:
 	bool m_autoBoundaries;
 };
 
-#endif
+#endif //CC_DB_SCALAR_FIELD_HEADER

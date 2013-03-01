@@ -14,16 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef CHUNKED_POINT_CLOUD
-#define CHUNKED_POINT_CLOUD
+#ifndef CHUNKED_POINT_CLOUD_HEADER
+#define CHUNKED_POINT_CLOUD_HEADER
 
 #include "GenericChunkedArray.h"
 #include "GenericIndexedCloudPersist.h"
@@ -126,7 +119,7 @@ public:
 		//! Returns the number of associated (and active) scalar fields
 		/** \return the number of active scalar fields
 		**/
-		inline virtual unsigned getNumberOfScalarFields() const {return m_scalarFields.size();};
+		inline virtual unsigned getNumberOfScalarFields() const {return (unsigned)m_scalarFields.size();};
 
 		//! Returns a pointer to a specific scalar field
 		/** \param index a scalar field index
@@ -272,4 +265,4 @@ protected:
 
 }
 
-#endif
+#endif //CHUNKED_POINT_CLOUD_HEADER

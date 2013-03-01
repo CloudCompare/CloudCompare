@@ -14,18 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef MANUAL_SEGMENTATION_TOOLS_HEADER
 #define MANUAL_SEGMENTATION_TOOLS_HEADER
 
 #include "CCToolbox.h"
+#include "CCTypes.h"
+#include "CCGeom.h"
 
 namespace CCLib
 {
@@ -100,4 +95,4 @@ public:
 
 }
 
-#endif
+#endif //MANUAL_SEGMENTATION_TOOLS_HEADER

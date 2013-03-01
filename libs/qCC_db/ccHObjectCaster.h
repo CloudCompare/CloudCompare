@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2251                                                              $
-//$LastChangedDate:: 2012-10-08 23:56:41 +0200 (lun., 08 oct. 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_HIERARCHY_OBJECT_CASTER_HEADER
 #define CC_HIERARCHY_OBJECT_CASTER_HEADER
@@ -101,4 +94,4 @@ class ccHObjectCaster
 		
 };
 
-#endif
+#endif //CC_HIERARCHY_OBJECT_CASTER_HEADER

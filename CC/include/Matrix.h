@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef MATRIX_HEADER
 #define MATRIX_HEADER
@@ -31,8 +24,13 @@
 #pragma warning( disable: 4530 )
 #endif
 
+//local
+#include "CCGeom.h"
+
+//system
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 #include <algorithm>
 
 #define ROTATE(a,i,j,k,l) g=a[i][j];h=a[k][l];a[i][j]=g-s*(h+g*tau);a[k][l]=h+s*(g-h*tau);
@@ -920,6 +918,6 @@ namespace CCLib
 	//! Double square matrix type
 	typedef MatrixTpl<double> SquareMatrixd;
 
-} //namespace
+} //namespace CCLib
 
-#endif
+#endif //MATRIX_HEADER

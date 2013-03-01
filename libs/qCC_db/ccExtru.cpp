@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1856                                                              $
-//$LastChangedDate:: 2011-05-21 21:34:24 +0200 (sam., 21 mai 2011)         $
-//**************************************************************************
-//
 
 #include "ccExtru.h"
 
@@ -35,6 +28,9 @@
 #include <SimpleCloud.h>
 #include <Polyline.h>
 #include <ManualSegmentationTools.h>
+
+//system
+#include <string.h>
 
 ccExtru::ccExtru(const std::vector<CCVector2>& profile,
 				 PointCoordinateType height,
@@ -63,7 +59,7 @@ ccGenericPrimitive* ccExtru::clone() const
 
 bool ccExtru::buildUp()
 {
-	unsigned count = m_profile.size();
+	unsigned count = (unsigned)m_profile.size();
 	if (count<3)
 		return false;
 
@@ -72,7 +68,7 @@ bool ccExtru::buildUp()
 	triangulateio in;
 	memset(&in,0,sizeof(triangulateio));
 
-	in.numberofpoints = m_profile.size();
+	in.numberofpoints = (int)m_profile.size();
 	in.pointlist = (REAL*)(&m_profile[0]);
 
 	//DGM: we check that last vertex is different from the first one!
@@ -94,7 +90,6 @@ bool ccExtru::buildUp()
 		ccLog::Error("[ccPlane::buildUp] Profile triangulation failed");
 		return false;
 	}
-	//Console::print("Nombre de triangles : %i\n",in.numberoftriangles);
 
 	unsigned numberOfTriangles = in.numberoftriangles;
 	int* triIndexes = (int*)in.trianglelist;

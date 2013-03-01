@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef GENERIC_CLOUD_HEADER
 #define GENERIC_CLOUD_HEADER
@@ -120,4 +113,4 @@ public:
 
 }
 
-#endif
+#endif //GENERIC_CLOUD_HEADER

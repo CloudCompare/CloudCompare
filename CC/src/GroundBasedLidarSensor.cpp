@@ -14,20 +14,16 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "GroundBasedLidarSensor.h"
 
+//local
 #include "GenericIndexedCloud.h"
 #include "SimpleCloud.h"
-#include "CCMiscTools.h"
 #include "CCGeom.h"
+
+//system
+#include <string.h>
 
 using namespace CCLib;
 
@@ -133,7 +129,7 @@ SimpleCloud* GroundBasedLidarSensor::project(GenericCloud* theCloud, int& errorC
         if (i==0)
             maxDist = dist;
         else
-            maxDist = ccMax(maxDist,dist);
+            maxDist = std::max(maxDist,dist);
     }
 
     if (getParameters)
@@ -154,7 +150,7 @@ SimpleCloud* GroundBasedLidarSensor::project(GenericCloud* theCloud, int& errorC
     dB.l_buff = int(ceil((thetaMax-thetaMin)*dt));
     dB.h_buff = int(ceil((phiMax-phiMin)*dp));
 
-    int mSize = ccMax(dB.l_buff,dB.h_buff);
+    int mSize = std::max(dB.l_buff,dB.h_buff);
     if (mSize>2048) //too big
     {
         errorCode = -2;
@@ -170,7 +166,6 @@ SimpleCloud* GroundBasedLidarSensor::project(GenericCloud* theCloud, int& errorC
 
     unsigned zBuffSize = dB.l_buff*dB.h_buff;
 
-    //printf("Z-Buffer : [%i * %i] (%i octets)\n",dB.l_buff,dB.h_buff,zBuffSize*sizeof(DistanceType));
     if (dB.zBuff)
         delete[] dB.zBuff;
     dB.zBuff = new DistanceType[zBuffSize];
@@ -194,7 +189,7 @@ SimpleCloud* GroundBasedLidarSensor::project(GenericCloud* theCloud, int& errorC
         y = int(floor((P->y-phiMin)*dp));
 
         _zBuffTemp = dB.zBuff + (y*dB.l_buff+x);
-        *_zBuffTemp = ccMax(*_zBuffTemp,dist);
+        *_zBuffTemp = std::max(*_zBuffTemp,dist);
     }
 
     //fillZBufferHoles();

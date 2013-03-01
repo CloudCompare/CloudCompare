@@ -14,21 +14,15 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef CCLIB_NEIGHBOURHOOD_HEADER
-#define CCLIB_NEIGHBOURHOOD_HEADER
+#ifndef CC_NEIGHBOURHOOD_HEADER
+#define CC_NEIGHBOURHOOD_HEADER
 
 #include "GenericIndexedCloudPersist.h"
 #include "Matrix.h"
 #include "CCGeom.h"
 
+//system
 #include <vector>
 
 namespace CCLib
@@ -218,4 +212,4 @@ class Neighbourhood
 
 }
 
-#endif
+#endif //CC_NEIGHBOURHOOD_HEADER

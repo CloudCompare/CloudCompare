@@ -25,11 +25,24 @@
 #ifndef DGM_OCTREE_HEADER
 #define DGM_OCTREE_HEADER
 
+//local
+#include "GenericOctree.h"
+#include "CCTypes.h"
+#include "CCConst.h"
+
+//system
+#include <vector>
+#include <assert.h>
+#include <string.h>
+
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about template class exportation
 #pragma warning( disable: 4251 )
 #pragma warning( disable: 4530 )
 #endif
+
+//enabled 64 bits code octree (can go up to level 21, but take 50% more memory)
+//#define OCTREE_CODES_64_BITS
 
 //enables methods related to Sankaranarayanan et al. nearest neighbors search algorithm
 //-> deprecated, as it doesn't prove to be faster than actual implementation
@@ -40,28 +53,14 @@
 #define ENABLE_MT_OCTREE
 #endif
 
-#include "GenericOctree.h"
-#include "CCMiscTools.h"
-#include "CCTypes.h"
-#include "CCConst.h"
-
-#include <vector>
-#include <assert.h>
-#include <string.h>
-
-#ifndef SQRT_3
-#define SQRT_3 1.7320508075688772935274463415059
-#endif
-
 //DGM: tests in progress
 //#define TEST_CELLS_FOR_SPHERICAL_NN
 
 namespace CCLib
 {
 
-class GenericProgressCallback;
 class ReferenceCloud;
-
+class GenericProgressCallback;
 class GenericIndexedCloudPersist;
 
 /*** MACROS ***/
@@ -101,17 +100,26 @@ public:
 
 	//Max octree subdivision level
 	//Number of bits used to code cells position: 3*MAX_OCTREE_LEVEL
-	#ifdef OCTREE_CODES_64_BITS
+#ifdef OCTREE_CODES_64_BITS
 	static const int MAX_OCTREE_LEVEL = 21;
-	#else
+#else
 	static const int MAX_OCTREE_LEVEL = 10;
-	#endif
+#endif
+
+	//! Type of the code of an octree cell
+	/** Warning: 3 bits per level are required.
+	**/
+#ifdef OCTREE_CODES_64_BITS
+	typedef unsigned __int64 OctreeCellCodeType; //max 21 levels (but twice more memory!)
+#else
+	typedef unsigned OctreeCellCodeType; //max 10 levels
+#endif
 
 	//! Max octree length at last level of subdivision (number of cells)
 	static const int MAX_OCTREE_LENGTH = OCTREE_LENGTH(MAX_OCTREE_LEVEL)-1;
 
 	//! Invalid cell code
-	static const OctreeCellCodeType INVALID_CELL_CODE = (((OctreeCellCodeType)1)<<(3*MAX_OCTREE_LEVEL+1));
+	static const OctreeCellCodeType INVALID_CELL_CODE = (~(OctreeCellCodeType)0);
 
 	//! Octree cell codes container
 	typedef std::vector<OctreeCellCodeType> cellCodesContainer;
@@ -1160,4 +1168,4 @@ protected:
 
 }
 
-#endif
+#endif //DGM_OCTREE_HEADER

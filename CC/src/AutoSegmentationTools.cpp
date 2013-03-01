@@ -14,17 +14,11 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "GenericChunkedArray.h"
 #include "AutoSegmentationTools.h"
 
+//local
 #include "GenericIndexedCloudPersist.h"
 #include "GenericProgressCallback.h"
 #include "ReferenceCloud.h"
@@ -32,8 +26,8 @@
 #include "FastMarchingForPropagation.h"
 #include "ScalarFieldTools.h"
 #include "ScalarField.h"
-#include "CCMiscTools.h"
 
+//system
 #include <assert.h>
 
 using namespace CCLib;
@@ -153,7 +147,6 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	{
 		uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION);
 		float cellSize = theOctree->getCellSize(level);
-		//printf("[Propagate] Gaussian Filter level : %i (cellSize=%f)\n",level,cellSize);
         ScalarFieldTools::applyScalarFieldGaussianFilter(cellSize*0.33f,theCloud,signedSF,-1,progressCb,theOctree);
 	}
 
@@ -172,7 +165,6 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 
 	if (result<0)
 	{
-		//printf("[AutoSegmentationTools] Something went wrong during initialization ...\n");
 		if (!_theOctree)
             delete theOctree;
 		delete fm;
@@ -231,16 +223,14 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 		}
 
 		//on lance la propagation à partir du point de distance maximale
-		//printf("Start propagation from point #%i (dist=%f)\n",maxDistIndex,maxDist);
-		//printf("d=%f et g=%f\n",*theDists->getValue(maxDistIndex),startPoint->getDist());
 		//propagateFromPoint(aList,_GradientNorms,maxDistIndex,octreeLevel,_gui);
 
 		int pos[3];
 		theOctree->getTheCellPosWhichIncludesThePoint(&startPoint,pos,octreeLevel);
 		//clipping (important !)
-		pos[0] = ccMin(octreeLength,pos[0]);
-		pos[1] = ccMin(octreeLength,pos[1]);
-		pos[2] = ccMin(octreeLength,pos[2]);
+		pos[0] = std::min(octreeLength,pos[0]);
+		pos[1] = std::min(octreeLength,pos[1]);
+		pos[2] = std::min(octreeLength,pos[2]);
 		fm->setSeedCell(pos);
 		++seedPoints;
 
@@ -251,8 +241,6 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 		{
 			//on la termine (i.e. on extrait les points correspondant)
 			ReferenceCloud* newCloud = fm->extractPropagatedPoints();
-
-			//printf("%i points extraits\n",Yk->size());
 
 			//si la liste convient
 			//on la rajoute au groupe des listes segmentées
@@ -283,7 +271,6 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 
 	if (!_theOctree)
 		delete theOctree;
-	//printf("Traitement termine : %i zones segmentees\n",numberOfSegmentedLists);
 
 	return true;
 }

@@ -14,15 +14,14 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2278                                                              $
-//$LastChangedDate:: 2012-10-18 15:42:19 +0200 (jeu., 18 oct. 2012)        $
-//**************************************************************************
-//
+
 #include "PlyFilter.h"
+
+//Local
+#include "PlyOpenDlg.h"
 #include "../ccCoordinatesShiftManager.h"
+#include "../ccConsole.h"
+
 
 //Qt
 #include <QProgressDialog>
@@ -31,7 +30,6 @@
 
 //CCLib
 #include <ScalarField.h>
-#include <CCMiscTools.h>
 
 //qCC_db
 #include <ccMesh.h>
@@ -39,9 +37,8 @@
 #include <ccMaterial.h>
 #include <ccMaterialSet.h>
 
-#include "PlyOpenDlg.h"
-#include "../ccConsole.h"
-
+//System
+#include <string.h>
 #include <assert.h>
 
 using namespace CCLib;
@@ -624,7 +621,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
             for (i=0;i<lastElement.properties.size();++i)
             {
                 plyProperty& prop = lastElement.properties[i];
-                prop.elemIndex = meshElements.size();
+                prop.elemIndex = (int)meshElements.size();
 
                 //we only keep track of lists (we can't handle per triangle scalars)
                 if (prop.type == 16)
@@ -645,7 +642,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
             for (i=0;i<lastElement.properties.size();++i)
             {
                 plyProperty& prop = lastElement.properties[i];
-                prop.elemIndex = pointElements.size();
+                prop.elemIndex = (int)pointElements.size();
                 stdProperties.push_back(prop);
             }
             pointElements.push_back(lastElement);
@@ -978,7 +975,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		plyProperty& pp = stdProperties[nyIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, normal_cb, cloud, flags);
 
-		numberOfNormals = ccMax(numberOfNormals, (unsigned)pointElements[pp.elemIndex].elementInstances);
+		numberOfNormals = std::max(numberOfNormals, (unsigned)pointElements[pp.elemIndex].elementInstances);
 	}
 
     //NORMALS (Z)
@@ -991,7 +988,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		plyProperty& pp = stdProperties[nzIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, normal_cb, cloud, flags);
 
-		numberOfNormals = ccMax(numberOfNormals, (unsigned)pointElements[pp.elemIndex].elementInstances);
+		numberOfNormals = std::max(numberOfNormals, (unsigned)pointElements[pp.elemIndex].elementInstances);
 	}
 
     //We check that the number of normals corresponds to the number of points
@@ -1042,7 +1039,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		plyProperty& pp = stdProperties[gIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, rgb_cb, cloud, flags);
 
-		numberOfColors = ccMax(numberOfColors, (unsigned)pointElements[pp.elemIndex].elementInstances);
+		numberOfColors = std::max(numberOfColors, (unsigned)pointElements[pp.elemIndex].elementInstances);
 	}
 
 	if (bIndex>0)
@@ -1054,7 +1051,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		plyProperty& pp = stdProperties[bIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, rgb_cb, cloud, flags);
 
-		numberOfColors = ccMax(numberOfColors, (unsigned)pointElements[pp.elemIndex].elementInstances);
+		numberOfColors = std::max(numberOfColors, (unsigned)pointElements[pp.elemIndex].elementInstances);
 	}
 
 	/* Intensity (I) */

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "ccIncludeGL.h"
 
@@ -32,6 +25,9 @@
 
 //Qt
 #include <QDataStream>
+
+//system
+#include <string.h>
 
 cc2DViewportLabel::cc2DViewportLabel(const char* name/*=0*/)
 	: cc2DViewportObject(name ? name : "")

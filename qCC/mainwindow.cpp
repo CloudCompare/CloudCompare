@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2275                                                              $
-//$LastChangedDate:: 2012-10-17 23:30:43 +0200 (mer., 17 oct. 2012)        $
-//**************************************************************************
-//
 
 #include "mainwindow.h"
 
@@ -130,6 +123,7 @@
 #include <QInputDialog>
 
 //System
+#include <string.h>
 #include <math.h>
 #include <assert.h>
 
@@ -688,7 +682,7 @@ void MainWindow::doActionSetColorGradient()
                          dlg.s_secondColor.blue()
                         };
 
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
@@ -717,7 +711,7 @@ void MainWindow::doActionSetColorGradient()
 
 void MainWindow::doActionInvertNormals()
 {
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
@@ -746,7 +740,7 @@ void MainWindow::doActionInvertNormals()
 
 void MainWindow::doActionConvertNormalsToHSV()
 {
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
@@ -781,7 +775,7 @@ void MainWindow::doActionComputeOctree()
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum = selectedEntities.size();
+    size_t i,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccGenericPointCloud* cloud = 0;
@@ -830,7 +824,7 @@ void MainWindow::doActionResampleWithOctree()
     unsigned aimedPoints = (unsigned)dlg.getValue();
 
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum = selectedEntities.size();
+    size_t i,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccPointCloud* cloud = 0;
@@ -891,7 +885,7 @@ void MainWindow::doActionApplyTransformation()
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum = selectedEntities.size();
+    size_t i,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -934,7 +928,7 @@ void MainWindow::doActionMultiply()
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum = selectedEntities.size();
+    size_t i,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -983,7 +977,7 @@ void MainWindow::doComputeBestFitBB()
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
-	unsigned i,j,selNum = selectedEntities.size();
+	size_t i,j,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -1006,7 +1000,7 @@ void MainWindow::doComputeBestFitBB()
                     for (j=0;j<3;++j)
                     {
 						double u[3];
-                        eig.getEigenValueAndVector(j,u);
+                        eig.getEigenValueAndVector((unsigned)j,u);
                         CCVector3 v(u[0],u[1],u[2]);
                         v.normalize();
                         rotMat[j*4] = v.x;
@@ -1062,7 +1056,7 @@ void MainWindow::doActionClearProperty(int prop)
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
 
-    unsigned i,selNum = selectedEntities.size();
+    size_t i,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -1153,7 +1147,7 @@ void MainWindow::doActionClearProperty(int prop)
 
 void MainWindow::doActionMeasureMeshSurface()
 {
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
@@ -1365,7 +1359,7 @@ void MainWindow::doActionProjectSensor()
 
     //We create the corresponding sensor for each input cloud (in a perfect world, there should be only one ;)
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum = selectedEntities.size();
+    size_t i,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -1404,12 +1398,14 @@ void MainWindow::doActionProjectSensor()
                 ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
                 if (win)
                 {
-                    ccBBox box = cloud->getBB();
                     sensor->setDisplay(win);
                     sensor->setVisible(true);
+                    ccBBox box = cloud->getBB();
                     win->updateConstellationCenterAndZoom(&box);
                 }
                 delete projectedPoints;
+
+				addToDB(sensor,true,0,false,false);
             }
             else
             {
@@ -1500,7 +1496,7 @@ void MainWindow::doActionShowDepthBuffer()
     if (m_selectedEntities.empty())
         return;
 
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
@@ -1575,6 +1571,8 @@ void MainWindow::doActionExportDepthBuffer()
 
         if (result!=CC_FERR_NO_ERROR)
             FileIOFilter::DisplayErrorMessage(result,"saving depth buffer",fileNames.at(0));
+		else
+			ccLog::Print(QString("[doActionExportDepthBuffer] File '%1' successfully exported").arg(fileNames.at(0)));
 
         if (multEntities)
             delete toSave;
@@ -1720,7 +1718,7 @@ void MainWindow::doActionSamplePoints()
 void MainWindow::doActionFilterByValue()
 {
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum = selectedEntities.size();
+    size_t i,selNum = selectedEntities.size();
 
     typedef std::pair<ccHObject*,ccPointCloud*> entityAndVerticesType;
     std::vector<entityAndVerticesType> toFilter;
@@ -1854,7 +1852,7 @@ void MainWindow::doActionSFConvertToRGB()
     else if (answer == 2) //cancel
         return;
 
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccGenericPointCloud* cloud = 0;
@@ -1903,7 +1901,7 @@ void MainWindow::doActionShowActiveSFNext()
 
 void MainWindow::doApplyActiveSFAction(int action)
 {
-    unsigned selNum = m_selectedEntities.size();
+    size_t selNum = m_selectedEntities.size();
     if (selNum!=1)
     {
 		if (selNum>1)
@@ -1964,7 +1962,7 @@ void MainWindow::doApplyActiveSFAction(int action)
 
 void MainWindow::doActionRenameSF()
 {
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
@@ -1995,7 +1993,7 @@ PointCoordinateType MainWindow::GetDefaultCloudKernelSize(const ccHObject::Conta
 {
 	PointCoordinateType sigma = -1.0;
 
-	unsigned i,selNum = entities.size();
+	size_t i,selNum = entities.size();
 	//computation of a first sigma guess
 	for (i=0;i<selNum;++i)
 	{
@@ -2017,7 +2015,7 @@ PointCoordinateType MainWindow::GetDefaultCloudKernelSize(const ccHObject::Conta
 
 void MainWindow::doActionSFGaussianFilter()
 {
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     if (selNum==0)
         return;
 
@@ -2113,7 +2111,7 @@ void MainWindow::doActionSFGaussianFilter()
 
 void MainWindow::doActionSFBilateralFilter()
 {
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     if (selNum==0)
         return;
 
@@ -2229,7 +2227,7 @@ void MainWindow::doMeshSFAction(ccGenericMesh::MESH_SCALAR_FIELD_PROCESS process
 {
     ccProgressDialog pDlg(false,this);
 
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
@@ -2272,7 +2270,7 @@ void MainWindow::doActionSubdivideMesh()
 
 	//ccProgressDialog pDlg(true,this);
 
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
@@ -2330,7 +2328,7 @@ void MainWindow::doActionSmoothMeshLaplacian()
 
 	ccProgressDialog pDlg(true,this);
 
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
@@ -2356,14 +2354,14 @@ void MainWindow::doActionSmoothMeshLaplacian()
 void MainWindow::RemoveSiblingsFromCCObjectList(ccHObject::Container& ccObjects)
 {
     ccHObject::Container keptObjects;
-    unsigned count=ccObjects.size();
+    size_t count=ccObjects.size();
     keptObjects.reserve(count);
 
-    for (unsigned i=0;i<count;++i)
+    for (size_t i=0;i<count;++i)
     {
         ccHObject* obj = ccObjects[i];
         assert(obj);
-        for (unsigned j=0;j<count;++j)
+        for (size_t j=0;j<count;++j)
         {
             if (i!=j)
             {
@@ -2397,7 +2395,7 @@ void MainWindow::doActionFuse()
 	//we will remove the useless clouds later
 	ccHObject::Container toBeRemoved;
 
-    unsigned i,selNum = _selectedEntities.size();
+    size_t i,selNum = _selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = _selectedEntities[i];
@@ -2959,7 +2957,7 @@ void MainWindow::doActionStatisticalTest()
         break;
     }
 
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
@@ -3053,7 +3051,7 @@ void MainWindow::doActionComputeStatParams()
     }
     assert(distrib);
 
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = m_selectedEntities[i];
@@ -3138,7 +3136,7 @@ void MainWindow::doActionLabelConnectedComponents()
     ccProgressDialog pDlg(false,this);
 
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum = selectedEntities.size();
+    size_t i,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -3286,8 +3284,8 @@ void MainWindow::doActionExportCoordToSF()
 		return;
 
 	//for each selected cloud (or vertices set)
-	unsigned selNum = m_selectedEntities.size();
-	for (unsigned i=0;i<selNum;++i)
+	size_t selNum = m_selectedEntities.size();
+	for (size_t i=0;i<selNum;++i)
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[i]);
 		if (cloud && cloud->isA(CC_POINT_CLOUD))
@@ -3337,7 +3335,7 @@ void MainWindow::doActionExportCoordToSF()
 
 void MainWindow::doActionHeightGridGeneration()
 {
-    unsigned selNum = m_selectedEntities.size();
+    size_t selNum = m_selectedEntities.size();
     if (selNum!=1)
     {
         ccConsole::Error("Select only one point cloud!");
@@ -3445,7 +3443,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 	QApplication::processEvents();
 
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum = selectedEntities.size();
+    size_t i,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -3506,7 +3504,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 void MainWindow::doActionComputeQuadric3D()
 {
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum = selectedEntities.size();
+    size_t i,selNum = selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -3695,7 +3693,7 @@ void MainWindow::doActionComputeQuadric3D()
 
 void MainWindow::doActionComputeCPS()
 {
-    unsigned selNum=m_selectedEntities.size();
+    size_t selNum = m_selectedEntities.size();
     if (selNum!=2)
     {
         ccConsole::Error("Select 2 point clouds!");
@@ -3775,7 +3773,7 @@ void MainWindow::doActionComputeNormals()
         return;
     }
 
-    unsigned i,count=m_selectedEntities.size();
+    size_t i,count = m_selectedEntities.size();
 	float defaultRadius = 0.0;
 	bool onlyMeshes = true;
 	for (i=0;i<count;++i)
@@ -3925,7 +3923,7 @@ void MainWindow::doActionResolveNormalsDirection()
 
 void MainWindow::doActionSynchronize()
 {
-    unsigned i,selNum = m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
 
     //we need at least 2 entities
     if (selNum<2)
@@ -4260,7 +4258,7 @@ void MainWindow::freezeUI(bool state)
 
 void MainWindow::activateRegisterPointPairTool()
 {
-    unsigned selNum=m_selectedEntities.size();
+    size_t selNum = m_selectedEntities.size();
     if (selNum==0 || selNum>2)
     {
         ccConsole::Error("Select one or two entities (point cloud or mesh)!");
@@ -4345,7 +4343,7 @@ void MainWindow::activateSegmentationMode()
     if (!win)
         return;
 
-    unsigned i,selNum=m_selectedEntities.size();
+    size_t i,selNum = m_selectedEntities.size();
     if (selNum==0)
         return;
 
@@ -4615,7 +4613,7 @@ void MainWindow::deactivatePointsPropertiesMode(bool state)
 
 void MainWindow::activateTranslateRotateMode()
 {
-    unsigned i,selNum=m_selectedEntities.size();
+    size_t i,selNum=m_selectedEntities.size();
     if (selNum==0)
         return;
 
@@ -4798,7 +4796,7 @@ void MainWindow::zoomOnSelectedEntities()
         return;
 
     ccHObject* tempGroup = new ccHObject("TempGroup");
-    unsigned i,selNum=m_selectedEntities.size();
+    size_t i,selNum=m_selectedEntities.size();
     for (i=0; i<selNum; ++i)
     {
         if (m_selectedEntities[i]->getDisplay()==win)
@@ -4981,7 +4979,7 @@ void MainWindow::toggleSelectedEntitiesVisibility()
 
 void MainWindow::showSelectedEntitiesHistogram()
 {
-    unsigned selNum=m_selectedEntities.size();
+    size_t selNum = m_selectedEntities.size();
     for (unsigned i=0; i<selNum; ++i)
     {
         ccGenericPointCloud* gc = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[i]);
@@ -5004,7 +5002,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 				ccHistogramWindow* win = hDlg->window();
                 win->setInfoStr(qPrintable(QString("[%1] (%2 pts) - %3").arg(cloudName).arg(numberOfPoints).arg(sf->getName())));
                 win->setValues(sf);
-                win->setNumberOfClasses(ccMin(int(sqrt(double(numberOfPoints))),128));
+                win->setNumberOfClasses(std::min(int(sqrt(double(numberOfPoints))),128));
                 win->histoValuesShouldBeDestroyed(false);
                 hDlg->show();
             }
@@ -5015,7 +5013,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 void MainWindow::doActionClone()
 {
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum=selectedEntities.size();
+    size_t i,selNum=selectedEntities.size();
 
 	ccHObject* lastClone=0;
     for (i=0;i<selNum;++i)
@@ -5070,7 +5068,7 @@ void MainWindow::doActionClone()
 static double s_constantSFValue = 0.0;
 void MainWindow::doActionAddConstantSF()
 {
-    unsigned selNum = m_selectedEntities.size();
+    size_t selNum = m_selectedEntities.size();
     if (selNum!=1)
     {
 		if (selNum>1)
@@ -5275,7 +5273,7 @@ void MainWindow::doActionScalarFieldArithmetic()
 void MainWindow::doComputePlaneOrientation()
 {
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    unsigned i,selNum=selectedEntities.size();
+    size_t i,selNum=selectedEntities.size();
     if (selNum<1)
         return;
 
@@ -5398,7 +5396,7 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 
 bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget *parent/*=0*/, void** additionalParameters/*=0*/)
 {
-    unsigned i,selNum=entities.size();
+    size_t i,selNum=entities.size();
     if (selNum<1)
         return false;
 
@@ -5647,9 +5645,9 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 						unsigned randIndex = ((unsigned)((float)rand()*(float)count/(float)RAND_MAX))%count;
 						CCLib::DgmOctree::NeighboursSet neighbours;
 						octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),roughnessKernelSize,neighbours);
-						unsigned neihgboursCount=neighbours.size();
+						size_t neihgboursCount=neighbours.size();
 						extractedPoints += (double)neihgboursCount;
-						for (unsigned k=0;k<neihgboursCount;++k)
+						for (size_t k=0;k<neihgboursCount;++k)
 							cloud->setPointScalarValue(neighbours[k].pointIndex,sqrt(neighbours[k].squareDist));
 					}
 					ccConsole::Print("[CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST] Mean extraction time = %3.3f ms (radius = %f, mean(neighbours)=%3.1f)",subTimer.elapsed(),roughnessKernelSize,extractedPoints/1000.0);
@@ -5692,7 +5690,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 
 void MainWindow::doActionCloudCloudDist()
 {
-    unsigned selNum=m_selectedEntities.size();
+    size_t selNum = m_selectedEntities.size();
     if (selNum!=2)
     {
         ccConsole::Error("Select 2 point clouds!");
@@ -5726,7 +5724,7 @@ void MainWindow::doActionCloudCloudDist()
 
 void MainWindow::doActionCloudMeshDist()
 {
-    unsigned selNum=m_selectedEntities.size();
+    size_t selNum = m_selectedEntities.size();
     if (selNum!=2)
     {
         ccConsole::Error("Select 2 entities!");
@@ -6128,7 +6126,7 @@ void MainWindow::loadFile()
 
 void MainWindow::saveFile()
 {
-    unsigned selNum=m_selectedEntities.size();
+    size_t selNum = m_selectedEntities.size();
     if (selNum==0)
         return;
 
@@ -6541,7 +6539,7 @@ void MainWindow::expandDBTreeWithSelection(ccHObject::Container& selection)
 	if (!m_ccRoot)
 		return;
 
-    unsigned i,selNum = selection.size();
+    size_t i,selNum = selection.size();
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = selection[i];

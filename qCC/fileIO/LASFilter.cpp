@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1631                                                              $
-//$LastChangedDate:: 2010-08-25 07:21:40 +0200 (mer., 25 août 2010)       $
-//**************************************************************************
-//
+
 #ifdef CC_LAS_SUPPORT
 
 #include "LASFilter.h"
@@ -28,9 +22,6 @@
 //qCC
 #include <ccCommon.h>
 #include "../ccCoordinatesShiftManager.h"
-
-//CCLib
-#include <CCMiscTools.h>
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -41,11 +32,14 @@
 #include <liblas/reader.hpp>
 #include <liblas/writer.hpp>
 #include <liblas/factory.hpp>	// liblas::ReaderFactory
-#include <fstream>				// std::ifstream
-#include <iostream>				// std::cout
 
 //Qt
 #include<QFileInfo>
+
+//System
+#include <string.h>
+#include <fstream>				// std::ifstream
+#include <iostream>				// std::cout
 
 CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 {
@@ -443,7 +437,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 
 			//otherwise, we must create a new cloud
 			fileChunkPos = pointsRead;
-			fileChunkSize = ccMin(nbOfPoints-pointsRead,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+			fileChunkSize = std::min(nbOfPoints-pointsRead,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 			loadedCloud = new ccPointCloud();
 			if (!loadedCloud->reserveThePointsTable(fileChunkSize))
 			{

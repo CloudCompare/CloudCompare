@@ -14,16 +14,10 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "ScalarFieldTools.h"
 
+//local
 #include "GenericCloud.h"
 #include "GenericIndexedCloudPersist.h"
 #include "ReferenceCloud.h"
@@ -31,6 +25,8 @@
 #include "GenericChunkedArray.h"
 #include "ScalarField.h"
 
+//system
+#include <string.h>
 #include <assert.h>
 
 using namespace CCLib;
@@ -433,10 +429,7 @@ void ScalarFieldTools::multiplyScalarFields(GenericIndexedCloud* firstCloud, Gen
 
 	unsigned n1 = firstCloud->size();
 	if ((n1 != secondCloud->size())||(n1==0))
-	{
-		//printf("[ScalarFieldTools::multiplyScalarFields] Clouds must have the same size !\n");
 		return;
-	}
 
 	DistanceType V1,V2;
 	unsigned i=0;
@@ -583,13 +576,10 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
 
 	float initialCMD=0.0,classMovingDist=0.0;
 
-	//printf("[Kmeans] Calcul des K-Means avec K=%i\n",K);
 	while (meansHaveMoved)
 	{
 		meansHaveMoved = false;
 		++iteration;
-
-		//printf("[Kmeans] Iteration %i\n",iteration);
 
 		_belongings = belongings;
 
@@ -655,7 +645,6 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
 		{
 			newMean = (theKNums[j]>0 ? theKSums[j]/(DistanceType)theKNums[j] : theKMeans[j]);
 
-			//printf("[Kmeans] mean #%i = %f (%i pts, delta=%f)\n",j,newMean,theKNums[j],newMean-theKMeans[j]);
 			if (theOldKNums[j] != theKNums[j])
                 meansHaveMoved=true;
 
@@ -720,8 +709,6 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
 		kmcc[j].mean = theKMeans[j];
 		kmcc[j].minValue = mins[j];
 		kmcc[j].maxValue = maxs[j];
-
-		//printf("[KMeans] cluster #%i : [%f,%f] (%i points)\n",j,mins[j],maxs[j],theKNums[j]);
 	}
 
 	if (progressCb)

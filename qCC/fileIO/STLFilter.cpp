@@ -14,15 +14,10 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2276                                                              $
-//$LastChangedDate:: 2012-10-18 14:58:26 +0200 (jeu., 18 oct. 2012)        $
-//**************************************************************************
-//
+
 #include "STLFilter.h"
 #include "../ccCoordinatesShiftManager.h"
+#include "../ccConsole.h"
 
 //Qt
 #include <QApplication>
@@ -38,7 +33,8 @@
 #include <ccNormalVectors.h>
 #include <ccOctree.h>
 
-#include "../ccConsole.h"
+//System
+#include <string.h>
 
 CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const char* filename)
 {

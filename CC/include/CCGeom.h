@@ -14,18 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_GEOM_HEADER
 #define CC_GEOM_HEADER
 
 #include "CCTypes.h"
+
+//system
 #include <math.h>
 
 //! 3D Vector
@@ -47,55 +42,55 @@ public:
 		PointCoordinateType u[3];
 	};
 
-    //! Default constructor
-    /** Inits vector to (0,0,0).
-    **/
+	//! Default constructor
+	/** Inits vector to (0,0,0).
+	**/
 	inline CCVector3(PointCoordinateType s=0.) :x(s),y(s),z(s) {}
 	//! Constructor from a triplet of coordinates
-    /** Inits vector to (x,y,z).
-    **/
+	/** Inits vector to (x,y,z).
+	**/
 	inline CCVector3(PointCoordinateType _x, PointCoordinateType _y, PointCoordinateType _z) :x(_x),y(_y),z(_z) {}
 	//! Constructor from an array of 3 elements
 	inline CCVector3(const PointCoordinateType p[]) :x(p[0]),y(p[1]),z(p[2]) {}
 	//! Copy constructor
 	inline CCVector3(const CCVector3& v) :x(v.x),y(v.y),z(v.z) {}
 
-    //! Dot product
-    inline PointCoordinateType dot(const CCVector3& v) const {return (x*v.x)+(y*v.y)+(z*v.z);}
-    //! Cross product
-    inline CCVector3 cross(const CCVector3 &v) const {return CCVector3((y*v.z)-(z*v.y), (z*v.x)-(x*v.z), (x*v.y)-(y*v.x));}
-    //! Returns vector square norm
-    inline PointCoordinateType norm2() const {return (x*x)+(y*y)+(z*z);}
-    //! Returns vector norm
-    inline PointCoordinateType norm() const {return sqrt(norm2());}
-    //! Sets vector norm to unity
-    inline void normalize() {PointCoordinateType n = norm2(); if (n>0.0f) *this /= sqrt(n);}
+	//! Dot product
+	inline PointCoordinateType dot(const CCVector3& v) const {return (x*v.x)+(y*v.y)+(z*v.z);}
+	//! Cross product
+	inline CCVector3 cross(const CCVector3 &v) const {return CCVector3((y*v.z)-(z*v.y), (z*v.x)-(x*v.z), (x*v.y)-(y*v.x));}
+	//! Returns vector square norm
+	inline PointCoordinateType norm2() const {return (x*x)+(y*y)+(z*z);}
+	//! Returns vector norm
+	inline PointCoordinateType norm() const {return sqrt(norm2());}
+	//! Sets vector norm to unity
+	inline void normalize() {PointCoordinateType n = norm2(); if (n>0.0f) *this /= sqrt(n);}
 	//! Returns a normalized vector which is orthogonal to this one
-    inline CCVector3 orthogonal() const {CCVector3 ort; vorthogonal(u, ort.u); return ort;}
+	inline CCVector3 orthogonal() const {CCVector3 ort; vorthogonal(u, ort.u); return ort;}
 
-    //! Inverse operator
-    inline CCVector3& operator - () {x=-x; y=-y; z=-z; return *this;}
-    //! In-place addition operator
+	//! Inverse operator
+	inline CCVector3& operator - () {x=-x; y=-y; z=-z; return *this;}
+	//! In-place addition operator
 	inline CCVector3& operator += (const CCVector3& v) {x+=v.x; y+=v.y; z+=v.z; return *this;}
-    //! In-place substraction operator
+	//! In-place substraction operator
 	inline CCVector3& operator -= (const CCVector3& v) {x-=v.x; y-=v.y; z-=v.z; return *this;}
-    //! In-place multiplication (by a scalar) operator
+	//! In-place multiplication (by a scalar) operator
 	inline CCVector3& operator *= (PointCoordinateType v) {x*=v; y*=v; z*=v; return *this;}
-    //! In-place division (by a scalar) operator
+	//! In-place division (by a scalar) operator
 	inline CCVector3& operator /= (PointCoordinateType v) {x/=v; y/=v; z/=v; return *this;}
-    //! Addition operator
+	//! Addition operator
 	inline CCVector3 operator + (const CCVector3& v) const {return CCVector3(x+v.x, y+v.y, z+v.z);}
-    //! Substraction operator
+	//! Substraction operator
 	inline CCVector3 operator - (const CCVector3& v) const {return CCVector3(x-v.x, y-v.y, z-v.z);}
-    //! Multiplication operator
+	//! Multiplication operator
 	inline CCVector3 operator * (PointCoordinateType s) const {return CCVector3(x*s, y*s, z*s);}
-    //! Division operator
+	//! Division operator
 	inline CCVector3 operator / (PointCoordinateType s) const {return CCVector3(x/s, y/s, z/s);}
-    //! Cross product operator
+	//! Cross product operator
 	inline CCVector3 operator * (const CCVector3& v) const {return cross(v);}
 	//! Copy operator
 	inline CCVector3& operator = (const CCVector3 &v) {x=v.x; y=v.y; z=v.z; return *this;}
-    //! Dot product operator
+	//! Dot product operator
 	inline PointCoordinateType operator && (const CCVector3 &v) const {return dot(v);}
 	//! Direct coordinate access
 	inline PointCoordinateType& operator [] (unsigned i) {return u[i];}
@@ -159,43 +154,43 @@ public:
 		PointCoordinateType u[2];
 	};
 
-    //! Default constructor
-    /** Inits vector to (0,0).
-        \param s default init value for both coordinates
-    **/
+	//! Default constructor
+	/** Inits vector to (0,0).
+	\param s default init value for both coordinates
+	**/
 	inline CCVector2(PointCoordinateType s=0.0) : x(s), y(s) {}
 
 	//! Constructor from a couple of coordinates
-    /** Inits vector to (x,y).
-        \param _x x coordinate
-        \param _y y coordinate
-    **/
+	/** Inits vector to (x,y).
+	\param _x x coordinate
+	\param _y y coordinate
+	**/
 	inline CCVector2(PointCoordinateType _x, PointCoordinateType _y) : x(_x), y(_y) {}
 
 	//! Returns vector square norm
-    inline PointCoordinateType norm2() const {return (x*x)+(y*y);}
-    //! Returns vector norm
-    inline PointCoordinateType norm() const {return sqrt(norm2());}
-    //! Sets vector norm to unity
-    inline void normalize() {PointCoordinateType n = norm2(); if (n>0.0f) *this /= sqrt(n);}
+	inline PointCoordinateType norm2() const {return (x*x)+(y*y);}
+	//! Returns vector norm
+	inline PointCoordinateType norm() const {return sqrt(norm2());}
+	//! Sets vector norm to unity
+	inline void normalize() {PointCoordinateType n = norm2(); if (n>0.0f) *this /= sqrt(n);}
 
-    //! Inverse operator
-    inline CCVector2& operator - () {x=-x; y=-y; return *this;}
-    //! In-place addition operator
+	//! Inverse operator
+	inline CCVector2& operator - () {x=-x; y=-y; return *this;}
+	//! In-place addition operator
 	inline CCVector2& operator += (const CCVector2& v) {x+=v.x; y+=v.y; return *this;}
-    //! In-place substraction operator
+	//! In-place substraction operator
 	inline CCVector2& operator -= (const CCVector2& v) {x-=v.x; y-=v.y; return *this;}
-    //! In-place multiplication (by a scalar) operator
+	//! In-place multiplication (by a scalar) operator
 	inline CCVector2& operator *= (PointCoordinateType v) {x*=v; y*=v; return *this;}
-    //! In-place division (by a scalar) operator
+	//! In-place division (by a scalar) operator
 	inline CCVector2& operator /= (PointCoordinateType v) {x/=v; y/=v; return *this;}
-    //! Addition operator
+	//! Addition operator
 	inline CCVector2 operator + (const CCVector2& v) const {return CCVector2(x+v.x, y+v.y);}
-    //! Substraction operator
+	//! Substraction operator
 	inline CCVector2 operator - (const CCVector2& v) const {return CCVector2(x-v.x, y-v.y);}
-    //! Multiplication operator
+	//! Multiplication operator
 	inline CCVector2 operator * (PointCoordinateType s) const {return CCVector2(x*s, y*s);}
-    //! Division operator
+	//! Division operator
 	inline CCVector2 operator / (PointCoordinateType s) const {return CCVector2(x/s, y/s);}
 	//! Copy operator
 	inline CCVector2& operator = (const CCVector2 &v) {x=v.x; y=v.y; return *this;}
@@ -207,4 +202,4 @@ public:
 	friend CCVector2 operator * (PointCoordinateType s, const CCVector2 &v);
 };
 
-#endif
+#endif //CC_GEOM_HEADER

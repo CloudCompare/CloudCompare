@@ -14,18 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "SimpleMesh.h"
 
+//local
 #include "GenericIndexedCloud.h"
 
+//system
 #include <assert.h>
 
 using namespace CCLib;

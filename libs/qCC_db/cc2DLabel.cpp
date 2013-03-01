@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "ccIncludeGL.h"
 
@@ -34,6 +27,7 @@
 #include <QSharedPointer>
 
 //System
+#include <string.h>
 #include <assert.h>
 
 cc2DLabel::cc2DLabel(QString name/*=QString()*/)
@@ -53,7 +47,7 @@ QString cc2DLabel::getName() const
 {
 	QString processedName = m_name;
 
-	unsigned count = m_points.size();
+	size_t count = m_points.size();
 	if (count>0)
 	{
 		processedName.replace(QString("pt_0_idx"),QString::number(m_points[0].index));
@@ -402,14 +396,14 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 	assert(!m_points.empty());
 
 	//standard case: list names pushing
-	bool pushName = MACRO_DrawNames(context);
+	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
 		glPushName(getUniqueID());
 
     const float c_sizeFactor = 4.0f;
     bool loop=false;
 
-	unsigned count = m_points.size();
+	size_t count = m_points.size();
     switch (count)
     {
     case 3:
@@ -464,9 +458,9 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				}
 			
 				//build-up point maker own 'context'
-				bool pushName = MACRO_DrawNames(context);
+				bool pushName = MACRO_DrawEntityNames(context);
 				CC_DRAW_CONTEXT markerContext = context;
-				markerContext.flags &= (~CC_DRAW_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+				markerContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
 				markerContext._win = 0;
 
 				if (isSelected() && !pushName)
@@ -523,7 +517,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	assert(!m_points.empty());
 
 	//standard case: list names pushing
-	bool pushName = MACRO_DrawNames(context);
+	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
 		glPushName(getUniqueID());
 

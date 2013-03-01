@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2219                                                              $
-//$LastChangedDate:: 2012-07-20 18:03:24 +0200 (ven., 20 juil. 2012)       $
-//**************************************************************************
-//
 
 #ifndef CC_CALIBRATED_IMAGE_HEADER
 #define CC_CALIBRATED_IMAGE_HEADER
@@ -207,4 +200,4 @@ protected:
 
 };
 
-#endif
+#endif //CC_CALIBRATED_IMAGE_HEADER

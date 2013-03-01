@@ -14,35 +14,22 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_TYPES_HEADER
 #define CC_TYPES_HEADER
 
+//system
 #include <stdio.h>
 
+//'uchar' shortcut
 #ifndef uchar
 typedef unsigned char uchar;
 #endif
 
-//! Type of a ND point coordinate
+//! Type of the coordinates of a (N-D) point
 typedef float PointCoordinateType;
-
-//! Type of an octree cell code (need 3 bits per level)
-//#define OCTREE_CODES_64_BITS
-#ifdef OCTREE_CODES_64_BITS
-typedef unsigned __int64 OctreeCellCodeType; //max 21 levels (but twice more memory!)
-#else
-typedef unsigned OctreeCellCodeType; //max 10 levels
-#endif
 
 //! Type of a distance value (or more generally of any scalar value)
 typedef float DistanceType;
 
-#endif
+#endif //CC_TYPES_HEADER

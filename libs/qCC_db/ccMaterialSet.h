@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_MATERIAL_SET_HEADER
 #define CC_MATERIAL_SET_HEADER
@@ -95,4 +88,4 @@ protected:
 
 };
 
-#endif
+#endif //CC_MATERIAL_SET_HEADER

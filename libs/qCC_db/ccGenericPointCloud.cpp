@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2225                                                              $
-//$LastChangedDate:: 2012-07-25 23:26:33 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
 
 #include "ccGenericPointCloud.h"
 
@@ -91,7 +84,7 @@ CC_VISIBILITY_TYPE ccGenericPointCloud::testVisibility(const CCVector3& P)
         if (m_children[i]->isKindOf(CC_SENSOR))
         {
             nvt = static_cast<ccSensor*>(m_children[i])->checkVisibility(P);
-            vt = ccMin(vt,nvt);
+            vt = std::min(vt,nvt);
         }
         ++i;
     }

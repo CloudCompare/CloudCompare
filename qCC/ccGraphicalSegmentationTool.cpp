@@ -277,7 +277,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 
 unsigned ccGraphicalSegmentationTool::getNumberOfValidEntities()
 {
-    return m_toSegment.size();
+    return (unsigned)m_toSegment.size();
 }
 
 ccHObject* ccGraphicalSegmentationTool::getEntity(unsigned pos)

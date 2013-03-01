@@ -14,17 +14,14 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "ChunkedPointCloud.h"
+
+//local
 #include "ScalarField.h"
 
+//system
+#include <string.h>
 #include <assert.h>
 
 using namespace CCLib;
@@ -360,7 +357,6 @@ void ChunkedPointCloud::swapPoints(unsigned firstIndex, unsigned secondIndex)
 
 	m_points->swap(firstIndex,secondIndex);
 
-    unsigned i,sfCount=m_scalarFields.size();
-	for (i=0;i<sfCount;++i)
+	for (size_t i=0; i<m_scalarFields.size(); ++i)
         m_scalarFields[i]->swap(firstIndex,secondIndex);
 }

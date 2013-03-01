@@ -14,18 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #include "ccBBox.h"
 #include "ccIncludeGL.h"
-
-#include <CCMiscTools.h>
 
 ccBBox::ccBBox()
 {
@@ -138,12 +129,12 @@ ccBBox ccBBox::operator + (const ccBBox& aBBox) const
 
     ccBBox tempBox;
 
-    tempBox.bbMin.x = ccMin(bbMin.x, aBBox.bbMin.x);
-    tempBox.bbMin.y = ccMin(bbMin.y, aBBox.bbMin.y);
-    tempBox.bbMin.z = ccMin(bbMin.z, aBBox.bbMin.z);
-    tempBox.bbMax.x = ccMax(bbMax.x, aBBox.bbMax.x);
-    tempBox.bbMax.y = ccMax(bbMax.y, aBBox.bbMax.y);
-    tempBox.bbMax.z = ccMax(bbMax.z, aBBox.bbMax.z);
+    tempBox.bbMin.x = std::min(bbMin.x, aBBox.bbMin.x);
+    tempBox.bbMin.y = std::min(bbMin.y, aBBox.bbMin.y);
+    tempBox.bbMin.z = std::min(bbMin.z, aBBox.bbMin.z);
+    tempBox.bbMax.x = std::max(bbMax.x, aBBox.bbMax.x);
+    tempBox.bbMax.y = std::max(bbMax.y, aBBox.bbMax.y);
+    tempBox.bbMax.z = std::max(bbMax.z, aBBox.bbMax.z);
 
     return tempBox;
 }
@@ -156,12 +147,12 @@ const ccBBox& ccBBox::operator += (const ccBBox& aBBox)
     }
     else if (aBBox.isValid())
     {
-        bbMin.x = ccMin(bbMin.x, aBBox.bbMin.x);
-        bbMin.y = ccMin(bbMin.y, aBBox.bbMin.y);
-        bbMin.z = ccMin(bbMin.z, aBBox.bbMin.z);
-        bbMax.x = ccMax(bbMax.x, aBBox.bbMax.x);
-        bbMax.y = ccMax(bbMax.y, aBBox.bbMax.y);
-        bbMax.z = ccMax(bbMax.z, aBBox.bbMax.z);
+        bbMin.x = std::min(bbMin.x, aBBox.bbMin.x);
+        bbMin.y = std::min(bbMin.y, aBBox.bbMin.y);
+        bbMin.z = std::min(bbMin.z, aBBox.bbMin.z);
+        bbMax.x = std::max(bbMax.x, aBBox.bbMax.x);
+        bbMax.y = std::max(bbMax.y, aBBox.bbMax.y);
+        bbMax.z = std::max(bbMax.z, aBBox.bbMax.z);
     }
 
     return *this;

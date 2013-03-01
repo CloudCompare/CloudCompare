@@ -14,20 +14,14 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "ChamferDistanceTransform.h"
 
+//local
 #include "GenericProgressCallback.h"
-#include "CCMiscTools.h"
 
-//System
+//system
+#include <algorithm>
 #include <string.h>
 #include <assert.h>
 
@@ -181,7 +175,7 @@ ChamferDistanceTransform::GridElement ChamferDistanceTransform::propagateDistanc
 				GridElement minVal = _grid[voisDec[0]]+(GridElement)neighbours[0][3];
 
 				for (uchar v=1;v<14;++v)
-					minVal = ccMin(minVal,_grid[voisDec[v]]+(GridElement)neighbours[v][3]);
+					minVal = std::min<GridElement>(minVal,_grid[voisDec[v]]+(GridElement)neighbours[v][3]);
 
 				*_grid = minVal;
 

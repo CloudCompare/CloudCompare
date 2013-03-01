@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about unsafe methods
@@ -29,6 +22,7 @@
 
 #include "DebugProgressCallback.h"
 
+//system
 #include <stdio.h>
 #include <string.h>
 

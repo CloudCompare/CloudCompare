@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef WEIBULL_DISTRIBUTION_HEADER
 #define WEIBULL_DISTRIBUTION_HEADER
@@ -129,4 +122,4 @@ protected:
 
 }
 
-#endif
+#endif //WEIBULL_DISTRIBUTION_HEADER

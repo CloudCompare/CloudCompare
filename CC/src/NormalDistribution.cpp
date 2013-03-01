@@ -14,19 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about unsafe methods
 #pragma warning( disable: 4996 )
 #endif
 
+//local
 #include "NormalDistribution.h"
 #include "GenericCloud.h"
 #include "ErrorFunction.h"
@@ -34,9 +28,10 @@
 #include "DistanceComputationTools.h"
 #include "ScalarFieldTools.h"
 
+//system
 #include <math.h>
-#include <assert.h>
 #include <string.h>
+#include <assert.h>
 
 using namespace CCLib;
 
@@ -143,7 +138,7 @@ bool NormalDistribution::computeParameters(const distancesContainer& values, boo
 {
 	parametersDefined = false;
 
-	unsigned i,n=values.size();
+	size_t i,n=values.size();
 	if (n==0)
         return false;
 

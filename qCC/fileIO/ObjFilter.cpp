@@ -14,15 +14,10 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2276                                                              $
-//$LastChangedDate:: 2012-10-18 14:58:26 +0200 (jeu., 18 oct. 2012)        $
-//**************************************************************************
-//
+
 #include "ObjFilter.h"
 #include "../ccCoordinatesShiftManager.h"
+#include "../ccConsole.h"
 
 //Qt
 #include <QApplication>
@@ -39,7 +34,8 @@
 #include <ccNormalVectors.h>
 #include <ccMaterialSet.h>
 
-#include "../ccConsole.h"
+//System
+#include <string.h>
 
 CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
 {
@@ -536,8 +532,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					if (error)
 						break;
 
-					unsigned vCount = currentFace.size();
-					if (vCount<3)
+					if (currentFace.size()<3)
 					{
 						ccConsole::Error("Malformed file: face on line %1 has less than 3 vertices!",lineCount);
 						error=true;
@@ -701,7 +696,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						materials->link();
 					}
 
-					unsigned oldSize = materials->size();
+					size_t oldSize = materials->size();
 					QStringList errors;
 					if (ccMaterialSet::ParseMTL(mtlPath,mtlFilename,*materials,errors))
 					{
@@ -860,7 +855,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			}
 			else
 			{
-				unsigned meshCount = meshes.size();
+				size_t meshCount = meshes.size();
 				ccConsole::Print("[ObjFilter::Load] %i mesh(es) loaded", meshCount);
 				if (meshCount == 1) //don't need to keep a group for a unique mesh!
 				{
@@ -871,7 +866,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				else
 				{
 					ccMeshGroup* triGroup = new ccMeshGroup(vertices);
-					for (unsigned i=0;i<meshCount;++i)
+					for (size_t i=0;i<meshCount;++i)
 						triGroup->addChild(meshes[i]);
 					if (normals && normalsPerFacetGlobal)
 					{

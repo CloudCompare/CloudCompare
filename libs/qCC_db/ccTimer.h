@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_TIMER_HEADER
 #define CC_TIMER_HEADER
@@ -57,4 +50,4 @@ protected:
 
 };
 
-#endif
+#endif //CC_TIMER_HEADER

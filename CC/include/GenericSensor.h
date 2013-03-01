@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef GENERIC_SENSOR_HEADER
 #define GENERIC_SENSOR_HEADER
@@ -68,4 +61,4 @@ public:
 
 }
 
-#endif
+#endif //GENERIC_SENSOR_HEADER

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef REGISTRATION_TOOLS_HEADER
 #define REGISTRATION_TOOLS_HEADER
@@ -34,6 +27,8 @@
 #include "CCToolbox.h"
 #include "PointProjectionTools.h"
 #include "KdTree.h"
+
+//system
 #include <vector>
 
 namespace CCLib
@@ -231,9 +226,6 @@ protected:
         unsigned getIndex(unsigned i) {if(i==0) return a; if(i==1) return b; if(i==2) return c; if(i==3) return d; return 0;}
     };
 
-    //! A pair of indexes
-    typedef struct{unsigned  a, b;} IndexPair;
-
     //! Randomly finds a 4 points base in a cloud
     /** \param cloud the point cloud in which we want to find a base
 		\param overlap estimation of the overlap rate
@@ -313,4 +305,4 @@ protected:
 
 }
 
-#endif
+#endif //REGISTRATION_TOOLS_HEADER

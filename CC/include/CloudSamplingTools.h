@@ -14,16 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef CLOUD_SAMPLING_TOOLS
-#define CLOUD_SAMPLING_TOOLS
+#ifndef CLOUD_SAMPLING_TOOLS_HEADER
+#define CLOUD_SAMPLING_TOOLS_HEADER
 
 #include "CCToolbox.h"
 #include "DgmOctree.h"
@@ -183,4 +176,4 @@ protected:
 
 }
 
-#endif
+#endif //CLOUD_SAMPLING_TOOLS_HEADER

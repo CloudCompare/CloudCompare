@@ -288,8 +288,8 @@ void ccDBRoot::deleteSelectedEntities()
 			ccHObject::Container allLabels;
 			if (m_treeRoot->filterChildren(allLabels,true,CC_2D_LABEL) != 0)
 			{
-				unsigned labelCount = allLabels.size();
-				for (unsigned i=0;i<allLabels.size();++i)
+				size_t labelCount = allLabels.size();
+				for (size_t i=0;i<allLabels.size();++i)
 				{
 					cc2DLabel* label = static_cast<cc2DLabel*>(allLabels[i]);
 					for (unsigned j=1;j<label->size();++j) //the first point is always the parent cloud!

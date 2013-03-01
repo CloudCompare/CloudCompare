@@ -14,22 +14,18 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "Delaunay2dMesh.h"
 
+//local
 #include "GenericIndexedCloud.h"
 
 //Triangle Lib
 #include <triangle.h>
 
+//system
 #include <assert.h>
+#include <string.h>
 
 using namespace CCLib;
 
@@ -81,7 +77,7 @@ bool Delaunay2dMesh::build(CC2DPointsConainer &the2dPoints)
 	triangulateio in;
 	memset(&in,0,sizeof(triangulateio));
 
-	in.numberofpoints = the2dPoints.size();
+	in.numberofpoints = (int)the2dPoints.size();
 	in.pointlist = (REAL*)(&the2dPoints[0]);
 
 	try 

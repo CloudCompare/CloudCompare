@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_POLYLINE_HEADER
 #define CC_POLYLINE_HEADER
@@ -69,4 +62,4 @@ class Polyline : public ReferenceCloud
 
 }
 
-#endif
+#endif //CC_POLYLINE_HEADER

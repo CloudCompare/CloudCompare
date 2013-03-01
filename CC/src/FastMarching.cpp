@@ -14,18 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "FastMarching.h"
 
+//local
 #include "DgmOctree.h"
 
+//system
 #include <assert.h>
 #include <string.h>
 
@@ -96,8 +91,6 @@ int FastMarching::initGrid()
 									neighboursPosShift[i*3+1]*int(decY)+
 									neighboursPosShift[i*3+2]*int(decZ);
 
-		//printf("shift (%i,%i,%i) -> %i\n",neighboursPosShift[i*3],neighboursPosShift[i*3+1],neighboursPosShift[i*3+2],neighboursIndexShift[i]);
-
 		neighboursDistance[i] = sqrt(float(neighboursPosShift[i*3]*neighboursPosShift[i*3]+
 									neighboursPosShift[i*3+1]*neighboursPosShift[i*3+1]+
 									neighboursPosShift[i*3+2]*neighboursPosShift[i*3+2]))*cellSize;
@@ -131,15 +124,9 @@ void FastMarching::setSeedCell(int pos[])
 	assert(index<gridSize);
 
 	Cell* aCell = theGrid[index];
+	assert(aCell);
 
-	if (!aCell)
-	{
-		//printf("cell(%i,%i,%i) --> %i\n",pos[0],pos[1],pos[2],index);
-		//printf("Warning ! No Cell defined at position (%i,%i,%i)\n",pos[0],pos[1],pos[2]);
-		return;
-	}
-
-	if (aCell->state != Cell::ACTIVE_CELL)
+	if (aCell && aCell->state != Cell::ACTIVE_CELL)
 	{
 		//on rajoute la cellule au groupe "ACTIVES"
 		aCell->state = Cell::ACTIVE_CELL;

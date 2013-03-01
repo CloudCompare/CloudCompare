@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2266                                                              $
-//$LastChangedDate:: 2012-10-15 00:07:12 +0200 (lun., 15 oct. 2012)        $
-//**************************************************************************
-//
+
 #include "AsciiFilter.h"
 #include "../ccCoordinatesShiftManager.h"
 
@@ -31,7 +25,6 @@
 
 //CClib
 #include <ScalarField.h>
-#include <CCMiscTools.h>
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -39,6 +32,8 @@
 #include <ccProgressDialog.h>
 #include <ccLog.h>
 
+//System
+#include <string.h>
 #include <assert.h>
 
 CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
@@ -179,8 +174,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(const char* filename, ccHObject& container, 
 	if (!file.exists())
         return CC_FERR_READING;
 
-	__int64 fileSize = file.size();
-		
+	qint64 fileSize = file.size();
     if (fileSize == 0)
         return CC_FERR_NO_LOAD;
 
@@ -278,16 +272,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
                                        int& maxIndex,
 									   unsigned step=1)
 {
-    unsigned seqSize = openSequence.size();
-
-	char name[256];
-	if (step==1)
-		strcpy(name,"unnamed - Cloud");
-	else
-		sprintf(name,"unnamed - Cloud (part %i)",step);
-
-	ccPointCloud* cloud = new ccPointCloud(name);
-
+	ccPointCloud* cloud = new ccPointCloud(step==1 ? QString("unnamed - Cloud") : QString("unnamed - Cloud (part %1)").arg(step));
 	if (!cloud || !cloud->reserveThePointsTable(numberOfPoints))
 	{
 		if (cloud)
@@ -298,8 +283,8 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
     cloudAttributesDescriptor cloudDesc;
 	cloudDesc.cloud = cloud;
 
-    unsigned i;
-    for (i=0;i<seqSize;++i)
+    size_t seqSize = openSequence.size();
+    for (int i=0;i<(int)seqSize;++i)
     {
 		switch (openSequence[i].type)
 		{
@@ -442,14 +427,14 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
                                                             const AsciiOpenDlg::Sequence& openSequence,
                                                             char separator,
                                                             unsigned approximateNumberOfLines,
-                                                            __int64 fileSize,
+                                                            qint64 fileSize,
                                                             unsigned skipLines/*=0*/,
 															bool alwaysDisplayLoadDialog/*=true*/,
 															bool* coordinatesShiftEnabled/*=0*/,
 															double* coordinatesShift/*=0*/)
 {
     //we may have to "slice" clouds on opening if they are too big!
-    unsigned cloudChunkSize = ccMin(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD,approximateNumberOfLines);
+    unsigned cloudChunkSize = std::min(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD,approximateNumberOfLines);
     unsigned cloudChunkPos = 0;
     unsigned chunkRank = 1;
     unsigned i;
@@ -462,21 +447,21 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
         return CC_FERR_NOT_ENOUGH_MEMORY;
 
     //we re-open the file (ASCII mode)
-    FILE* fp = fopen(filename, "rt");
-    if (!fp)
-    {
+
+	QFile file(filename);
+	if (!file.open(QFile::ReadOnly))
+	{
         //we clear already initialized data
         clearStructure(cloudDesc);
         return CC_FERR_READING;
-    }
+	}
 
 	//we skip lines as defined on input
     char currentLine[MAX_ASCII_FILE_LINE_LENGTH];
     for (i=0;i<skipLines;++i)
 	{
-        if (!fgets(currentLine, MAX_ASCII_FILE_LINE_LENGTH, fp))
+		if (file.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH)<0)
 		{
-			fclose(fp);
 			//we clear already initialized data
 			clearStructure(cloudDesc);
 			return CC_FERR_READING;
@@ -485,14 +470,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 
     //progress indicator
     ccProgressDialog pdlg(true);
-	char buffer[256];
-    sprintf(buffer,"Open ASCII file [%s]",filename);
-    pdlg.setMethodTitle(buffer);
-    float percent = 0.0;
-    unsigned palier = unsigned(float(approximateNumberOfLines) * 0.01); //1% of total
-    unsigned lineCounter = 0;
-    sprintf(buffer,"Approximate number of points: %i",approximateNumberOfLines);
-    pdlg.setInfo(buffer);
+	CCLib::NormalizedProgress nprogress(&pdlg,approximateNumberOfLines);
+    pdlg.setMethodTitle(qPrintable(QString("Open ASCII file [%1]").arg(filename)));
+    pdlg.setInfo(qPrintable(QString("Approximate number of points: %1").arg(approximateNumberOfLines)));
     pdlg.start();
 
     //buffers
@@ -506,9 +486,11 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
     unsigned linesRead = 0;
     unsigned pointsRead = 0;
 
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+
     //main process
 	unsigned nextLimit = cloudChunkPos+cloudChunkSize;
-    while (fgets(currentLine, MAX_ASCII_FILE_LINE_LENGTH, fp))
+    while (file.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH)>0)
     {
         ++linesRead;
 
@@ -528,14 +510,14 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
             ccConsole::PrintDebug("[ASCII] Point %i -> end of chunk (%i points)",pointsRead,cloudChunkSize);
 
         	//we re-evaluate the average line size
-        	double averageLineSize = double(CCLib::CCMiscTools::ftell64(fp))/double(pointsRead+skipLines);
-        	unsigned newNbOfLinesApproximation = (unsigned)(double(fileSize)/averageLineSize)-skipLines;
+        	double averageLineSize = (double)file.pos()/(double)(pointsRead+skipLines);
+        	unsigned newNbOfLinesApproximation = (unsigned)((double)fileSize/averageLineSize)-skipLines;
 
         	//if approximation is smaller than actual one, we add 2% by default
         	if (newNbOfLinesApproximation<=pointsRead)
         	{
         		newNbOfLinesApproximation = unsigned(ceil(float(pointsRead)*1.02));
-        		newNbOfLinesApproximation = ccMax(cloudChunkSize+1,newNbOfLinesApproximation);
+        		newNbOfLinesApproximation = std::max(cloudChunkSize+1,newNbOfLinesApproximation);
         	}
 
             ccConsole::PrintDebug("[ASCII] New approximate nb of lines: %i",newNbOfLinesApproximation);
@@ -545,7 +527,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
         	{
                 ccConsole::PrintDebug("[ASCII] We choose to enlarge existing clouds");
 
-        		cloudChunkSize = ccMin(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD,newNbOfLinesApproximation-cloudChunkPos);
+        		cloudChunkSize = std::min(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD,newNbOfLinesApproximation-cloudChunkPos);
        			if (!cloudDesc.cloud->reserve(cloudChunkSize))
         		{
         			ccConsole::Error("Not enough memory! Process stopped ...");
@@ -572,7 +554,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 
         		//and create new one
         		cloudChunkPos = pointsRead;
-        		cloudChunkSize = ccMin(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD,newNbOfLinesApproximation-cloudChunkPos);
+        		cloudChunkSize = std::min(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD,newNbOfLinesApproximation-cloudChunkPos);
         		cloudDesc = prepareCloud(openSequence, cloudChunkSize, maxPartIndex, ++chunkRank);
         		if (!cloudDesc.cloud)
         		{
@@ -583,13 +565,12 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
         	}
 
         	//on met à jour les informations sur la progression
-        	percent = floor(float(pointsRead)*100.0/float(newNbOfLinesApproximation));
-        	pdlg.update(percent);
-        	lineCounter = 0;
-        	palier = unsigned(float(newNbOfLinesApproximation-pointsRead) / (100.0-percent));
-        	char buffer[256];
-        	sprintf(buffer,"Approximate number of points: %i",newNbOfLinesApproximation);
-        	pdlg.setInfo(buffer);
+			//TODO
+        	//percent = floor(float(pointsRead)*100.0/float(newNbOfLinesApproximation));
+        	//pdlg.update(percent);
+        	//lineCounter = 0;
+        	//palier = unsigned(float(newNbOfLinesApproximation-pointsRead) / (100.0-percent));
+			pdlg.setInfo(qPrintable(QString("Approximate number of points: %1").arg(newNbOfLinesApproximation)));
         	approximateNumberOfLines = newNbOfLinesApproximation;
 
 			nextLimit = cloudChunkPos+cloudChunkSize;
@@ -679,36 +660,32 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 		}
 
         ++pointsRead;
-        if (++lineCounter >= palier)
+		if (!nprogress.oneStep())
         {
             //cancel requested
-            if (pdlg.isCancelRequested())
-                break;
-
-            lineCounter=0;
-            percent += 1.0;
-            pdlg.update(percent);
+			result = CC_FERR_CANCELED_BY_USER;
+			break;
         }
     }
 
-    fclose(fp);
+    file.close();
 
-    //if we have overestimated the number of points/lines
-    if (pointsRead < approximateNumberOfLines)
-    {
-   		if (!cloudDesc.cloud->resize(pointsRead-cloudChunkPos))
-    		ccConsole::Warning("Memory reallocation failed ... some memory may have been wasted ...");
+	if (cloudDesc.cloud)
+	{
+		if (cloudDesc.cloud->size() < cloudDesc.cloud->capacity())
+   			cloudDesc.cloud->resize(cloudDesc.cloud->size());
+
+		//add cloud to output
+		if (!cloudDesc.scalarFields.empty())
+		{
+			for (unsigned j=0;j<cloudDesc.scalarFields.size();++j)
+				cloudDesc.scalarFields[j]->computeMinAndMax();
+			cloudDesc.cloud->setCurrentDisplayedScalarField(0);
+			cloudDesc.cloud->showSF(true);
+		}
+
+		container.addChild(cloudDesc.cloud,true);
     }
 
-	//add cloud to output
-	if (!cloudDesc.scalarFields.empty())
-	{
-		for (unsigned j=0;j<cloudDesc.scalarFields.size();++j)
-			cloudDesc.scalarFields[j]->computeMinAndMax();
-		cloudDesc.cloud->setCurrentDisplayedScalarField(0);
-		cloudDesc.cloud->showSF(true);
-	}
-	container.addChild(cloudDesc.cloud,true);
-
-    return CC_FERR_NO_ERROR;
+    return result;
 }

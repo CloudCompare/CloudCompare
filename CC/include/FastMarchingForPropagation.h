@@ -14,19 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef FAST_MARCHING_PROP_HEADER
 #define FAST_MARCHING_PROP_HEADER
 
+//local
 #include "FastMarching.h"
-#include "CCTypes.h"
+#include "DgmOctree.h"
 
 namespace CCLib
 {
@@ -137,10 +131,10 @@ protected:
         //! The local front acceleration
         float f;
         //! the code of the equivalent cell in the octree
-        OctreeCellCodeType cellCode;
+        DgmOctree::OctreeCellCodeType cellCode;
     };
 };
 
 }
 
-#endif
+#endif //FAST_MARCHING_PROP_HEADER

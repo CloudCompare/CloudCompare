@@ -18,6 +18,10 @@
 //#                                                                          #
 //############################################################################
 
+#ifndef CHI2_HELPER_HEADER
+#define CHI2_HELPER_HEADER
+
+//system
 #include <math.h>
 
 //! Package of methods to compute Chi2 related stuff
@@ -79,9 +83,8 @@ public:
         return z > 0.0 ? ((x + 1.0) * 0.5) : ((1.0 - x) * 0.5);
     }
 
-	#ifndef MAX_A_VALUE
-	#define MAX_A_VALUE 50.0 //valeur au delà de laquelle exp(MAX_A_VALUE) diverge
-	#endif
+	//! Value above which exp(EXP_MAX_A_VALUE) diverges
+	static inline double EXP_MAX_A_VALUE() { return 50.0; }
 
 	//! Probability of chi-square value
     /** Adapted from:
@@ -114,7 +117,7 @@ public:
         if (df > 2) {
             x = 0.5 * (df - 1.0);
             double z = (even ? 1.0 : 0.5);
-            if (a > MAX_A_VALUE)
+            if (a > EXP_MAX_A_VALUE())
 			{
                 double e = (even ? 0.0 : LOG_SQRT_PI);
                 double c = log(a);
@@ -174,3 +177,5 @@ public:
     }
 
 };
+
+#endif //CHI2_HELPER_HEADER

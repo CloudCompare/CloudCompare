@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2265                                                              $
-//$LastChangedDate:: 2012-10-13 22:22:51 +0200 (sam., 13 oct. 2012)        $
-//**************************************************************************
-//
+
 #include "ccPointCloud.h"
 
 //CCLib
@@ -1423,7 +1417,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
     if (MACRO_Draw3D(context))
     {
         //standard case: list names pushing
-        bool pushName = MACRO_DrawNames(context);
+        bool pushName = MACRO_DrawEntityNames(context);
 		//special case: point names pushing (for picking)
         bool pushPointNames = MACRO_DrawPointNames(context);
 

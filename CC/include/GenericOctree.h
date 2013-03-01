@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef GENERIC_OCTREE_HEADER
 #define GENERIC_OCTREE_HEADER
@@ -50,4 +43,4 @@ public:
 
 }
 
-#endif
+#endif //GENERIC_OCTREE_HEADER

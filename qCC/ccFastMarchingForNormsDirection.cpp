@@ -259,7 +259,7 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 	}
 
 	//Eq. quadratique selon X
-	double Tmin = ccMin(Txm,Txp);
+	double Tmin = std::min(Txm,Txp);
 	if (Tij>Tmin)
 	{
 		A += 1.0;
@@ -268,7 +268,7 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 	}
 
 	//Eq. quadratique selon Y
-	Tmin = ccMin(Tym,Typ);
+	Tmin = std::min(Tym,Typ);
 	if (Tij>Tmin)
 	{
 		A += 1.0;
@@ -277,7 +277,7 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 	}
 
 	//Eq. quadratique selon Z
-	Tmin = ccMin(Tzm,Tzp);
+	Tmin = std::min(Tzm,Tzp);
 	if (Tij>Tmin)
 	{
 		A += 1.0;
@@ -353,7 +353,7 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 		}
 
 		//si le vote penche plutôt pour l'autre sens
-		if (ccMax(negative,positive)>0.7)
+		if (std::max(negative,positive)>0.7)
 		{
 			if (negative>positive)
 			{
@@ -385,7 +385,7 @@ void ccFastMarchingForNormsDirection::initLastT()
 	for (unsigned i=0; i<activeCells.size(); i++)
 	{
 		aCell = theGrid[activeCells[i]];
-		lastT=ccMax(lastT,aCell->T);
+		lastT=std::max(lastT,aCell->T);
 	}
 }
 
@@ -673,9 +673,9 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 		int pos[3];
 		theOctree->getTheCellPosWhichIncludesThePoint(thePoint,pos,octreeLevel);
 		//clipping (important !)
-		pos[0] = ccMin(octreeLength,pos[0]);
-		pos[1] = ccMin(octreeLength,pos[1]);
-		pos[2] = ccMin(octreeLength,pos[2]);
+		pos[0] = std::min(octreeLength,pos[0]);
+		pos[1] = std::min(octreeLength,pos[1]);
+		pos[2] = std::min(octreeLength,pos[2]);
 		fm->setSeedCell(pos);
 
 		int result = fm->propagate();

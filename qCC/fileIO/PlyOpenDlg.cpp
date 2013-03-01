@@ -14,17 +14,14 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1992                                                              $
-//$LastChangedDate:: 2012-01-18 12:17:49 +0100 (mer., 18 janv. 2012)       $
-//**************************************************************************
-//
+
 #include "PlyOpenDlg.h"
 
+//Qt
 #include <QMessageBox>
 
+//System
+#include <string.h>
 #include <assert.h>
 
 PlyOpenDlg::PlyOpenDlg(QWidget* parent) : QDialog(parent), Ui::PlyOpenDlg()

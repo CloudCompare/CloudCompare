@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1918                                                              $
-//$LastChangedDate:: 2011-10-16 18:18:05 +0200 (dim., 16 oct. 2011)        $
-//**************************************************************************
-//
 
 #ifndef CC_ADVANCED_TYPES_HEADER
 #define CC_ADVANCED_TYPES_HEADER
@@ -133,5 +126,4 @@ public:
 	}
 };
 
-
-#endif
+#endif //CC_ADVANCED_TYPES_HEADER

@@ -24,7 +24,6 @@
 #include "PovFilter.h"
 
 //CCLib
-#include <CCMiscTools.h>
 #include <SimpleCloud.h>
 
 //qCC_db
@@ -79,9 +78,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
         ccConsole::Warning("Assuming all sensors are equivalent...");
 
     //we extract the body of the filename (without extension)
-    int pointPos = CCLib::CCMiscTools::findCharLastOccurence('.',filename);
-    if (pointPos<0)
-        pointPos = strlen(filename);
+	QString fullBaseName = QFileInfo(filename).completeBaseName();
 
     //main file (.POV)
     FILE* mainFile = fopen(filename,"wt");
@@ -114,43 +111,11 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
         return CC_FERR_WRITING;
     };
 
-    //the files corresponding to the different points of view
-    char baseFileName[1024];
-    memcpy(baseFileName,filename,pointPos);
-    baseFileName[pointPos]=0;
-
     for (i=0;i<clouds.size();++i)
     {
-        char suffix[256];
-        char baseNameCpy[256];
-        strcpy(baseNameCpy,baseFileName);
-        sprintf(suffix,"_%i.bin",i);
-        strcat(baseNameCpy,suffix);
-        /*FILE* f = fopen(baseNameCpy,"wt");
+		QString thisFilename = fullBaseName + QString("_%1.bin").arg(i);
 
-        if (!f)
-        {
-        	char buffer[1024];
-        	ccConsole::Error("Couldn't create file (%s)!",baseNameCpy);
-        	return CC_FERR_WRITING;
-        }
-        //*/
-
-        //avancement du chargement
-        /*char title[256];
-        sprintf(title,"Saving list #%i POVs",aList->getListID());
-        ProgressWindow* pwin = new ProgressWindow(title,true);
-        float percent = 0.0;
-        unsigned palier = unsigned(float(numberOfPoints) * 0.01); //1% du total
-        unsigned n = 0;
-        char buffer[256];
-        sprintf(buffer,"Number of points = %i\nNumber of POV = %i",numberOfPoints,maxNumberOfScans);
-        pwin->setMessage(buffer);
-        scanIndexType theCurrentScanIndex=0;
-        CCVector3* P;
-        //*/
-
-        CC_FILE_ERROR error = FileIOFilter::SaveToFile(clouds[i],baseNameCpy,BIN);
+        CC_FILE_ERROR error = FileIOFilter::SaveToFile(clouds[i],qPrintable(thisFilename),BIN);
         if (error != CC_FERR_NO_ERROR)
         {
             fclose(mainFile);
@@ -160,14 +125,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
         ccGBLSensor* gls = sensors[i];
 
         //il faut écrire le nom du fichier relatif et non absolu !
-        int p = CCLib::CCMiscTools::findCharLastOccurence('/',baseNameCpy);
-        int slashPos = ccMax(0,p);
-        p = CCLib::CCMiscTools::length(baseNameCpy)-slashPos-1;
-        int size = ccMax(0,p);
-        char povFileName[1024];
-        memcpy(povFileName,baseNameCpy+slashPos+1,size);
-        povFileName[size]=0;
-        int result = fprintf(mainFile,"\n#POV %i\nF %s\nT ASC\n",i,povFileName);
+		int result = fprintf(mainFile,"\n#POV %i\nF %s\nT ASC\n",i,qPrintable(QFileInfo(thisFilename).fileName()));
 
         if (result>0)
         {

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_GENERIC_GL_DISPLAY
 #define CC_GENERIC_GL_DISPLAY
@@ -171,4 +164,4 @@ public:
 	virtual const ccViewportParameters& getViewportParameters() const = 0;
 };
 
-#endif
+#endif //CC_GENERIC_GL_DISPLAY

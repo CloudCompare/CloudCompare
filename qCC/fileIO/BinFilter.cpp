@@ -29,7 +29,6 @@
 
 //CCLib
 #include <ScalarField.h>
-#include <CCMiscTools.h>
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -467,7 +466,7 @@ CC_FILE_ERROR BinFilter::loadFileV1(QFile& in, ccHObject& container, unsigned nb
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 
 		unsigned fileChunkPos = 0;
-		unsigned fileChunkSize = ccMin(nbOfPoints,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+		unsigned fileChunkSize = std::min(nbOfPoints,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 
 		loadedCloud->reserveThePointsTable(fileChunkSize);
 		if (header.colors)
@@ -503,7 +502,7 @@ CC_FILE_ERROR BinFilter::loadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 				container.addChild(loadedCloud);
 				fileChunkPos = lineReaded;
-				fileChunkSize = ccMin(nbOfPoints-lineReaded,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+				fileChunkSize = std::min(nbOfPoints-lineReaded,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 				char partName[64];
 				++parts;
 				sprintf(partName,"%s.part_%i",cloudName,parts);

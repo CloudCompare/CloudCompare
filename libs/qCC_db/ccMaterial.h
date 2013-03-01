@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_MATERIAL_HEADER
 #define CC_MATERIAL_HEADER
@@ -76,4 +69,4 @@ struct ccMaterial
 	void applyGL(bool lightEnabled, bool skipDiffuse) const;
 };
 
-#endif
+#endif //CC_MATERIAL_HEADER

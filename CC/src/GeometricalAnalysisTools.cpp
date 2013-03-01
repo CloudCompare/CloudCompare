@@ -14,16 +14,10 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "GeometricalAnalysisTools.h"
 
+//local
 #include "GenericIndexedCloudPersist.h"
 #include "Neighbourhood.h"
 #include "ReferenceCloud.h"
@@ -33,6 +27,7 @@
 #include "DgmOctreeReferenceCloud.h"
 #include "ScalarField.h"
 
+//system
 #include <assert.h>
 
 using namespace CCLib;
@@ -148,7 +143,7 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(const DgmOctree::octr
 
 		//look for neighbors in a sphere
 		k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
-		//k = ccMin(k,16);
+		//k = std::min(k,16);
 
 #ifndef COMPUTE_CURVATURE_2
 		if (k>5)

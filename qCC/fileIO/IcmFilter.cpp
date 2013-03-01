@@ -23,10 +23,6 @@
 //
 #include "IcmFilter.h"
 
-//CCLib
-#include <CCMiscTools.h>
-#include <CCConst.h>
-
 //qCC_db
 #include <ccCalibratedImage.h>
 

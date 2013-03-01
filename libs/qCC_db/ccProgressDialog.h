@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2280                                                              $
-//$LastChangedDate:: 2012-10-19 00:12:14 +0200 (ven., 19 oct. 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_PROGRESS_DIALOG_HEADER
 #define CC_PROGRESS_DIALOG_HEADER
@@ -100,4 +93,4 @@ protected:
 	QTimer m_timer;
 };
 
-#endif
+#endif //CC_PROGRESS_DIALOG_HEADER

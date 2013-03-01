@@ -14,14 +14,8 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1856                                                              $
-//$LastChangedDate:: 2011-05-21 21:34:24 +0200 (sam., 21 mai 2011)         $
-//**************************************************************************
-//
 
+//Always first
 #include "ccIncludeGL.h"
 
 #include "ccGenericPrimitive.h"

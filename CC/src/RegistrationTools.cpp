@@ -14,16 +14,10 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "RegistrationTools.h"
 
+//local
 #include "Matrix.h"
 #include "GenericProgressCallback.h"
 #include "GenericCloud.h"
@@ -40,6 +34,7 @@
 #include "KdTree.h"
 #include "SimpleCloud.h"
 
+//system
 #include <time.h>
 #include <algorithm>
 #include <assert.h>
@@ -614,7 +609,7 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
     KDTree *dataTree, *modelTree;
     CCVector3 min, max, diff;
 
-    /*DGM: KDTree::BuildFromCloud call reset right away!
+    /*DGM: KDTree::buildFromCloud call reset right away!
     if (progressCb)
     {
         progressCb->reset();
@@ -638,13 +633,13 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
 
     //Buil the associated KDtrees
     dataTree = new KDTree();
-    if (!dataTree->BuildFromCloud(dataCloud, progressCb))
+    if (!dataTree->buildFromCloud(dataCloud, progressCb))
     {
         delete dataTree;
         return false;
     }
     modelTree = new KDTree();
-    if (!modelTree->BuildFromCloud(modelCloud, progressCb))
+    if (!modelTree->buildFromCloud(modelCloud, progressCb))
     {
         delete dataTree;
         delete modelTree;
@@ -757,7 +752,7 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
         //Apply rigid transform to each point
         Q = dataToModel.R * Q + dataToModel.T;
         //Check if there is a point in the model cloud that is close enough to q
-        if(modelTree->FindPointBelowDistance(Q.u, delta))
+        if(modelTree->findPointBelowDistance(Q.u, delta))
             score++;
     }
 
@@ -889,179 +884,184 @@ bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
     return false;
 }
 
+//pair of indexes
+typedef std::pair<unsigned,unsigned> IndexPair;
 
-int FPCSRegistrationTools::FindCongruentBases(
-        KDTree* tree,
-        float delta,
-        const CCVector3* base[4],
-        std::vector<Base>& results)
+int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
+												float delta,
+												const CCVector3* base[4],
+												std::vector<Base>& results)
 {
-    unsigned i, j, a, b;
-    float r1, r2, d1, d2;
-    CCVector3 e, r, s, u, v;
-    const CCVector3 *p0, *p1, *p2, *p3, *q0, *q1;
-    std::vector<unsigned> pointsIndexes;
-    SimpleCloud tmpCloud1, tmpCloud2;
-    Base quad;
-    GenericIndexedCloud *cloud;
-    std::vector<IndexPair> match, pairs1, pairs2;
-    IndexPair idxPair;
-
     //Compute reference base invariants (r1, r2)
-    p0 = base[0];
-    p1 = base[1];
-    p2 = base[2];
-    p3 = base[3];
-    e = *p1-*p0;
-    d1 = e.norm();
-    e = *p3-*p2;
-    d2 = e.norm();
-    if(!LinesIntersections(*p0, *p1, *p2, *p3, e, r1, r2))
-        return 0;
+    float r1, r2, d1, d2;
+	{
+		const CCVector3* p0 = base[0];
+		const CCVector3* p1 = base[1];
+		const CCVector3* p2 = base[2];
+		const CCVector3* p3 = base[3];
 
-    //Find all pairs which are d1-appart and d2-appart
-    cloud = tree->GetAssociatedCloud();
-	unsigned count = cloud->size();
-    pointsIndexes.reserve(count);
-	if (pointsIndexes.capacity() < count) //not enough memory
-		return -1;
+		d1 = (*p1-*p0).norm();
+		d2 = (*p3-*p2).norm();
 
-	pointsIndexes.clear();
-    for(i=0; i<count; i++)
-    {
-        q0 = cloud->getPoint(i);
-        idxPair.a = i;
-        //Extract all points from the cloud which are d1-appart (up to delta) from q0
-        tree->FindPointsLyingToDistance(q0->u, d1, delta, pointsIndexes);
-        for(j=0; j<pointsIndexes.size(); j++)
-        {
-            //As ||pi-pj|| = ||pj-pi||,  we only take care of pairs that verify i<j
-            if(pointsIndexes[j]>i)
-            {
-                idxPair.b = pointsIndexes[j];
-                pairs1.push_back(idxPair);
-            }
-        }
-        pointsIndexes.clear();
-        //Extract all points from the cloud which are d2-appart (up to delta) from q0
-        tree->FindPointsLyingToDistance(q0->u, d2, delta, pointsIndexes);
-        for(j=0; j<pointsIndexes.size(); j++)
-        {
-            if(pointsIndexes[j]>i)
-            {
-                idxPair.b = pointsIndexes[j];
-                pairs2.push_back(idxPair);
-            }
-        }
-        pointsIndexes.clear();
-    }
+		CCVector3 inter;
+		if(!LinesIntersections(*p0, *p1, *p2, *p3, inter, r1, r2))
+			return 0;
+	}
+
+	GenericIndexedCloud* cloud = tree->getAssociatedCloud();
+
+	//Find all pairs which are d1-appart and d2-appart
+    std::vector<IndexPair> pairs1, pairs2;
+	{
+		unsigned count = (unsigned)cloud->size();
+		std::vector<unsigned> pointsIndexes;
+		try
+		{
+			pointsIndexes.reserve(count);
+		}
+		catch(...)
+		{
+			//not enough memory
+			return -1;
+		}
+
+		for (unsigned i=0; i<count; i++)
+		{
+			const CCVector3 *q0 = cloud->getPoint(i);
+			IndexPair idxPair;
+			idxPair.first = i;
+			//Extract all points from the cloud which are d1-appart (up to delta) from q0
+			pointsIndexes.clear();
+			tree->findPointsLyingToDistance(q0->u, d1, delta, pointsIndexes);
+			{
+				for(size_t j=0; j<pointsIndexes.size(); j++)
+				{
+					//As ||pi-pj|| = ||pj-pi||,  we only take care of pairs that verify i<j
+					if(pointsIndexes[j]>i)
+					{
+						idxPair.second = pointsIndexes[j];
+						pairs1.push_back(idxPair);
+					}
+				}
+			}
+			//Extract all points from the cloud which are d2-appart (up to delta) from q0
+			pointsIndexes.clear();
+			tree->findPointsLyingToDistance(q0->u, d2, delta, pointsIndexes);
+			{
+				for(size_t j=0; j<pointsIndexes.size(); j++)
+				{
+					if(pointsIndexes[j]>i)
+					{
+						idxPair.second = pointsIndexes[j];
+						pairs2.push_back(idxPair);
+					}
+				}
+			}
+		}
+	}
 
     //Select among the pairs the ones that can be congruent to the base "base"
-	count = pairs1.size();
-    if (!tmpCloud1.reserve(count*2)) //not enough memory
-		return -2;
-    for(i=0; i<count; i++)
-    {
-        //generate the two intermediate points from r1 in pairs1[i]
-        q0 = cloud->getPoint(pairs1[i].a);
-        q1 = cloud->getPoint(pairs1[i].b);
-        e.x = q0->x+r1*(q1->x-q0->x);
-        e.y = q0->y+r1*(q1->y-q0->y);
-        e.z = q0->z+r1*(q1->z-q0->z);
-        tmpCloud1.addPoint(e);
-        e.x = q1->x+r1*(q0->x-q1->x);
-        e.y = q1->y+r1*(q0->y-q1->y);
-        e.z = q1->z+r1*(q0->z-q1->z);
-        tmpCloud1.addPoint(e);
-    }
-
-	count = pairs2.size();
-    if (!tmpCloud2.reserve(count*2)) //not enough memory
-		return -3;
-    for(i=0; i<count; i++)
-    {
-        //generate the two intermediate points from r2 in pairs2[i]
-        q0 = cloud->getPoint(pairs2[i].a);
-        q1 = cloud->getPoint(pairs2[i].b);
-        e.x = q0->x+r2*(q1->x-q0->x);
-        e.y = q0->y+r2*(q1->y-q0->y);
-        e.z = q0->z+r2*(q1->z-q0->z);
-        tmpCloud2.addPoint(e);
-        e.x = q1->x+r2*(q0->x-q1->x);
-        e.y = q1->y+r2*(q0->y-q1->y);
-        e.z = q1->z+r2*(q0->z-q1->z);
-        tmpCloud2.addPoint(e);
-    }
-
-    //build kdtree for nearest neighbour fast research
-    KDTree *intermediatesTree = new KDTree();
-    if (!intermediatesTree->BuildFromCloud(&tmpCloud1))
-    {
-        delete intermediatesTree;
-        return -4;
-    }
-
-    //Find matching (up to delta) intermediate points in tmpCloud1 and tmpCloud2
-	count = tmpCloud2.size();
-    match.reserve(count);
-	if (match.capacity() < count)  //not enough memory
+	std::vector<IndexPair> match;
 	{
-		delete intermediatesTree;
-		return -5;
+		SimpleCloud tmpCloud1,tmpCloud2;
+		{
+			unsigned count = (unsigned)pairs1.size();
+			if (!tmpCloud1.reserve(count*2)) //not enough memory
+				return -2;
+			for(unsigned i=0; i<count; i++)
+			{
+				//generate the two intermediate points from r1 in pairs1[i]
+				const CCVector3 *q0 = cloud->getPoint(pairs1[i].first);
+				const CCVector3 *q1 = cloud->getPoint(pairs1[i].second);
+				CCVector3 P1 = *q0 + r1*(*q1-*q0);
+				tmpCloud1.addPoint(P1);
+				CCVector3 P2 = *q1 + r1*(*q0-*q1);
+				tmpCloud1.addPoint(P2);
+			}
+		}
+	
+		{
+			unsigned count = (unsigned)pairs2.size();
+			if (!tmpCloud2.reserve(count*2)) //not enough memory
+				return -3;
+			for(unsigned i=0; i<count; i++)
+			{
+				//generate the two intermediate points from r2 in pairs2[i]
+				const CCVector3 *q0 = cloud->getPoint(pairs2[i].first);
+				const CCVector3 *q1 = cloud->getPoint(pairs2[i].second);
+				CCVector3 P1 = *q0 + r2*(*q1-*q0);
+				tmpCloud2.addPoint(P1);
+				CCVector3 P2 = *q1 + r2*(*q0-*q1);
+				tmpCloud2.addPoint(P2);
+			}
+		}
+
+		//build kdtree for nearest neighbour fast research
+		KDTree intermediateTree;
+		if (!intermediateTree.buildFromCloud(&tmpCloud1))
+			return -4;
+
+		//Find matching (up to delta) intermediate points in tmpCloud1 and tmpCloud2
+		{
+			unsigned count = (unsigned)tmpCloud2.size();
+			match.reserve(count);
+			if (match.capacity() < count)  //not enough memory
+				return -5;
+		
+			for(unsigned i=0; i<count; i++)
+			{
+				const CCVector3 *q0 = tmpCloud2.getPoint(i);
+				unsigned a;
+				if(intermediateTree.findNearestNeighbour(q0->u, a, delta))
+				{
+					IndexPair idxPair;
+					idxPair.first = i;
+					idxPair.second = a;
+					match.push_back(idxPair);
+				}
+			}
+		}
 	}
-    for(i=0; i<count; i++)
-    {
-        q0 = tmpCloud2.getPoint(i);
-        if(intermediatesTree->FindNearestNeighbour(q0->u, a, delta))
-        {
-            idxPair.a = i;
-            idxPair.b = a;
-            match.push_back(idxPair);
-        }
-    }
 
     //Find bases from matching intermediate points indexes
-    results.clear();
-	count = match.size();
-    if(count>0)
-    {
-        results.reserve(count);
-		if (results.capacity() < count)  //not enough memory
+	{
+		results.clear();
+		size_t count = match.size();
+		if(count>0)
 		{
-			delete intermediatesTree;
-			return -6;
+			results.reserve(count);
+			if (results.capacity() < count)  //not enough memory
+				return -6;
+			for(size_t i=0; i<count; i++)
+			{
+				Base quad;
+				unsigned b = match[i].second / 2;
+				if((match[i].second % 2) == 0)
+				{
+					quad.a = pairs1[b].first;
+					quad.b = pairs1[b].second;
+				}
+				else
+				{
+					quad.a = pairs1[b].second;
+					quad.b = pairs1[b].first;
+				}
+            
+				unsigned a = match[i].first / 2;
+				if((match[i].first % 2) == 0)
+				{
+					quad.c = pairs2[a].first;
+					quad.d = pairs2[a].second;
+				}
+				else
+				{
+					quad.c = pairs2[a].second;
+					quad.d = pairs2[a].first;
+				}
+				results.push_back(quad);
+			}
 		}
-        for(i=0; i<count; i++)
-        {
-            a = match[i].a / 2;
-            b = match[i].b / 2;
-            if((match[i].b%2) == 0)
-            {
-                quad.a = pairs1[b].a;
-                quad.b = pairs1[b].b;
-            }
-            else
-            {
-                quad.a = pairs1[b].b;
-                quad.b = pairs1[b].a;
-            }
-            if((match[i].a%2) == 0)
-            {
-                quad.c = pairs2[a].a;
-                quad.d = pairs2[a].b;
-            }
-            else
-            {
-                quad.c = pairs2[a].b;
-                quad.d = pairs2[a].a;
-            }
-            results.push_back(quad);
-        }
-    }
-
-    delete intermediatesTree;
-    tmpCloud1.clear();
-    tmpCloud2.clear();
+	}
 
     return (int)results.size();
 }
@@ -1125,8 +1125,8 @@ bool FPCSRegistrationTools::FilterCandidates(
     std::vector<PointProjectionTools::Transformation> tarray;
     SimpleCloud referenceBaseCloud, dataBaseCloud;
 
-	unsigned candidatesCount = candidates.size();
-    if(candidates.size() == 0)
+	unsigned candidatesCount = (unsigned)candidates.size();
+    if(candidatesCount == 0)
         return false;
 
     bool filter = (nbMaxCandidates>0 && candidatesCount>nbMaxCandidates);
@@ -1150,10 +1150,17 @@ bool FPCSRegistrationTools::FilterCandidates(
         referenceBaseCloud.addPoint(*p[j]);
     }
 
-    scores.reserve(candidatesCount);
-    sortedscores.reserve(candidatesCount);
-    tarray.reserve(candidatesCount);
-    transforms.reserve(candidatesCount);
+	try
+	{
+		scores.reserve(candidatesCount);
+		sortedscores.reserve(candidatesCount);
+		tarray.reserve(candidatesCount);
+		transforms.reserve(candidatesCount);
+	}
+	catch (.../*const std::bad_alloc&*/) //out of memory
+	{
+		return false;
+	}
 
 	//enough memory?
 	if (scores.capacity() < candidatesCount 

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1735                                                              $
-//$LastChangedDate:: 2010-12-02 17:11:39 +0100 (jeu., 02 déc. 2010)       $
-//**************************************************************************
-//
 
 #ifndef CC_GROUND_LIDAR_SENSOR_HEADER
 #define CC_GROUND_LIDAR_SENSOR_HEADER
@@ -74,4 +67,4 @@ protected:
     ccBBox bBox;
 };
 
-#endif
+#endif //CC_GROUND_LIDAR_SENSOR_HEADER

@@ -14,19 +14,15 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "CCMiscTools.h"
+
+//local
 #include "CCConst.h"
 
-#include <string.h>
+//system
 #include <algorithm>
+#include <string.h>
 
 /*** MACROS FOR TRIBOXOVERLAP ***/
 
@@ -49,118 +45,9 @@
 
 using namespace CCLib;
 
-//********** strings (char*) handling *****************//
-
-unsigned CCMiscTools::fileLinesCount(const char* filename)
-{
-    FILE* pFile = fopen (filename , "rt");
-    if (!pFile)
-        return 0;
-
-    char line[1024];
-    unsigned count=0;
-    while (fgets (line , 1024 , pFile)!=0)
-        //we don't count empty lines!
-        if (line[0]>0)
-            ++count;
-
-    fclose(pFile);
-
-    return count;
-}
-
-int CCMiscTools::countSpaces(const char* string, int stringSize)
-{
-    const char* p = string;
-    bool lastCharWasASpaceChar = false;
-    int nb = 0;
-
-    for (int i=0; i<stringSize; i++,p++)
-    {
-        //Console::print("char=%i\n",*p);
-        if (*p == 0) //fin de la chaine extraite par la fonction fgets
-        {
-            if (lastCharWasASpaceChar)
-                --nb;
-            return nb;
-        }
-        else if (*p == SPACE_ASCII_CODE ||
-                 *p == TAB_ASCII_CODE ||
-                 *p == ENTER_ASCII_CODE)
-        {
-            if (i>0 && !lastCharWasASpaceChar)
-                ++nb;
-            lastCharWasASpaceChar = true;
-        }
-        else
-            lastCharWasASpaceChar = false;
-    }
-
-    if (lastCharWasASpaceChar)
-        --nb;
-
-    return nb;
-}
-
-int CCMiscTools::countChar(char theChar, const char* string, int stringSize)
-{
-    const char* p = string;
-    bool lastCharWasTheChar = false;
-    int nb = 0;
-
-    for (int i=0; i<stringSize; i++,p++)
-    {
-        if (*p == 0) //fin de la chaine extraite par la fonction fgets
-        {
-            return nb;
-        }
-        else if (*p == theChar)
-        {
-            if (!lastCharWasTheChar)
-                ++nb;
-            lastCharWasTheChar = true;
-        }
-        else
-            lastCharWasTheChar = false;
-    }
-
-    return nb;
-}
-
-int CCMiscTools::findCharLastOccurence(char theChar, const char* string)
-{
-    int pos = -1;
-    int i=0;
-    while (string[i]!=0)
-    {
-        if (string[i]==theChar) pos=i;
-        ++i;
-    }
-
-    return pos;
-}
-
-int CCMiscTools::length(const char* string)
-{
-    int i=0;
-    while (string[i]!=0) ++i;
-    return i;
-}
-
-void CCMiscTools::upperCase(char* string)
-{
-    int i=0;
-    while (string[i]>0)
-    {
-        if (string[i]>96 && string[i]<123)
-            string[i]-=32;
-        ++i;
-    }
-}
-
 /******** Geometry *********/
 
-void CCMiscTools::makeMinAndMaxCubical(CCVector3& dimMin, CCVector3& dimMax, double enlargeFactor/*=0.01*/)
+void CCMiscTools::MakeMinAndMaxCubical(CCVector3& dimMin, CCVector3& dimMax, double enlargeFactor/*=0.01*/)
 {
     CCVector3 dd=dimMax-dimMin;
 	CCVector3 md=dimMax+dimMin;
@@ -177,7 +64,7 @@ void CCMiscTools::makeMinAndMaxCubical(CCVector3& dimMin, CCVector3& dimMax, dou
 	dimMax = dimMin+dd;
 }
 
-void CCMiscTools::enlargeBox(CCVector3& dimMin, CCVector3& dimMax, double coef)
+void CCMiscTools::EnlargeBox(CCVector3& dimMin, CCVector3& dimMax, double coef)
 {
     CCVector3 dd=dimMax-dimMin;
 	CCVector3 md=dimMax+dimMin;
@@ -214,7 +101,7 @@ bool planeBoxOverlap(PointCoordinateType normal[3], PointCoordinateType vert[3],
     return false;
 }
 
-bool CCMiscTools::triBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateType boxhalfsize, const CCVector3* triverts[3])
+bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateType boxhalfsize, const CCVector3* triverts[3])
 {
     /*    use separating axis theorem to test overlap between triangle and box */
     /*    need to test for overlap in these directions: */
@@ -344,7 +231,7 @@ bool CCMiscTools::triBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
     return true;   /* box and triangle overlaps */
 }
 
-void CCMiscTools::computeBaseVectors(const PointCoordinateType *aPlane, PointCoordinateType* u, PointCoordinateType* v, PointCoordinateType* n)
+void CCMiscTools::ComputeBaseVectors(const PointCoordinateType *aPlane, PointCoordinateType* u, PointCoordinateType* v, PointCoordinateType* n)
 {
     //on créé un vecteur appartenant au plan (et donc orthogonal à "a")
     //c'est le premier de la base
@@ -377,7 +264,7 @@ int gcd(int num1, int num2)
 }
 
 //TRANSCRIPTED BY DGM FROM MATLAB FUNCTION "partsphere.m" (Paul Leopardi, 2003-10-13, for UNSW School of Mathematics)
-float* CCMiscTools::sampleSphere(unsigned N)
+float* CCMiscTools::SampleSphere(unsigned N)
 {
     if (N <= 0)
 		return 0;
@@ -484,36 +371,4 @@ float* CCMiscTools::sampleSphere(unsigned N)
     delete[] offset;
 
     return dirs;
-}
-
-//Gestion de l'ecriture/lecture en 64 bits (pour les fichiers de plus de 2 Go)
-//marche pas sous visual 2003 !
-//extern "C" int __cdecl _fseeki64(FILE *, __int64, int);
-//extern "C" __int64 __cdecl _ftelli64(FILE *);
-
-int CCMiscTools::fseek64(FILE *f, __int64 depl, int pos)
-{
-#if defined(_MSC_VER) && _MSC_VER > 1350
-    return _fseeki64(f,depl,pos);
-#else
-#if defined(__MINGW32__)
-    return fseeko64(f,depl,pos);
-    //int fseeko64(FILE *stream, off64_t offset, int whence);
-#else
-    return fseek(f,depl,pos);
-#endif
-#endif
-}
-
-__int64 CCMiscTools::ftell64(FILE *f)
-{
-#if defined(_MSC_VER) && _MSC_VER > 1350
-    return _ftelli64(f);
-#else
-#if defined(__MINGW32__)
-    return ftello64(f);
-    //off64_t ftello64(FILE *stream);
-#endif
-#endif
-    return ftell(f);
 }

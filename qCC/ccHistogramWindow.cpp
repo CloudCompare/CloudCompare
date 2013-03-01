@@ -32,9 +32,6 @@
 #include <QCloseEvent>
 #include <QIcon>
 
-//CCLib
-#include <CCMiscTools.h>
-
 //System
 #include <assert.h>
 
@@ -375,8 +372,8 @@ void ccHistogramWindow::paintGL()
 	}
 
 	//vertical scaling
-	double maxDisplayedHistoVal = (double)ccMax(maxHistoVal,1);
-	float yScale = (float)dy/(float)ccMax(maxCurveValue,maxDisplayedHistoVal);
+	double maxDisplayedHistoVal = (double)std::max<unsigned>(maxHistoVal,1);
+	float yScale = (float)dy/(float)std::max(maxCurveValue,maxDisplayedHistoVal);
 	unsigned cumul=0;
 
 	//the histogram itself
@@ -527,7 +524,7 @@ void ccHistogramWindow::setCurveValues(double* _curveValues, unsigned _numberOfC
 	//on recherche la hauteur maximale de la courbe
 	maxCurveValue = 0.0;
 	for (unsigned i=0;i<_numberOfCurvePoints;++i)
-		maxCurveValue = ccMax(maxCurveValue,curveValues[i]);
+		maxCurveValue = std::max(maxCurveValue,curveValues[i]);
 }
 
 void ccHistogramWindow::computeHistoValues()
@@ -572,7 +569,7 @@ unsigned ccHistogramWindow::getMaxHistoVal()
 
 	unsigned i,maxHistoVal = 0;
 	for (i=0;i<numberOfClasses;++i)
-		maxHistoVal=ccMax(maxHistoVal,histoValues[i]);
+		maxHistoVal=std::max(maxHistoVal,histoValues[i]);
 
 	return maxHistoVal;
 }

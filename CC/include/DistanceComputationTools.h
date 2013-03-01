@@ -14,16 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef DISTANCE_COMPUTATION_TOOLS
-#define DISTANCE_COMPUTATION_TOOLS
+#ifndef DISTANCE_COMPUTATION_TOOLS_HEADER
+#define DISTANCE_COMPUTATION_TOOLS_HEADER
 
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about template class exportation
@@ -34,8 +27,6 @@
 #include "CCToolbox.h"
 #include "CCConst.h"
 #include "DgmOctree.h"
-
-#include <vector>
 
 namespace CCLib
 {
@@ -360,4 +351,4 @@ protected:
 
 }
 
-#endif
+#endif //DISTANCE_COMPUTATION_TOOLS_HEADER

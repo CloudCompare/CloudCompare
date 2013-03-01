@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
+
 #ifndef CC_COORDINATES_SHIFT_MANAGER_HEADER
 #define CC_COORDINATES_SHIFT_MANAGER_HEADER
 
@@ -29,6 +23,9 @@
 
 //CCLib
 #include <CCGeom.h>
+
+//System
+#include <string.h>
 
 // Max acceptable coordinate value
 #define MAX_COORDINATE_ABS_VALUE ((PointCoordinateType)1.0e6)

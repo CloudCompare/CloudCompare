@@ -14,16 +14,10 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "PointProjectionTools.h"
 
+//local
 #include "SimpleCloud.h"
 #include "Delaunay2dMesh.h"
 #include "GenericIndexedMesh.h"
@@ -31,11 +25,16 @@
 #include "Neighbourhood.h"
 #include "SimpleMesh.h"
 
+//system
 #include <assert.h>
 
 using namespace CCLib;
 
-SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* theCloud, PointCoordinateType radius, unsigned char dim, CCVector3* center, GenericProgressCallback* progressCb)
+SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* theCloud,
+															PointCoordinateType radius,
+															unsigned char dim,
+															CCVector3* center,
+															GenericProgressCallback* progressCb)
 {
 	if (!theCloud)
 		return 0;

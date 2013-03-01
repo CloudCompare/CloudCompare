@@ -14,16 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef GEOMETRICAL_ANALYSIS_TOOLS
-#define GEOMETRICAL_ANALYSIS_TOOLS
+#ifndef GEOMETRICAL_ANALYSIS_TOOLS_HEADER
+#define GEOMETRICAL_ANALYSIS_TOOLS_HEADER
 
 #include "CCToolbox.h"
 #include "Neighbourhood.h"
@@ -154,4 +147,4 @@ protected:
 
 }
 
-#endif
+#endif //GEOMETRICAL_ANALYSIS_TOOLS_HEADER

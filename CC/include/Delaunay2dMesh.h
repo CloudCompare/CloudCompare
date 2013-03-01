@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef DELAUNAY2D_MESH_HEADER
 #define DELAUNAY2D_MESH_HEADER
@@ -103,4 +96,4 @@ protected:
 
 }
 
-#endif
+#endif //DELAUNAY2D_MESH_HEADER

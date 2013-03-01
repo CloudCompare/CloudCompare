@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef SIMPLE_MESH_HEADER
 #define SIMPLE_MESH_HEADER
@@ -121,4 +114,4 @@ protected:
 
 }
 
-#endif
+#endif //SIMPLE_MESH_HEADER

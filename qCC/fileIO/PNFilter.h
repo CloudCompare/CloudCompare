@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
+
 #ifndef CC_PN_FILTER_HEADER
 #define CC_PN_FILTER_HEADER
 
@@ -37,4 +31,4 @@ public:
 
 };
 
-#endif
+#endif //CC_PN_FILTER_HEADER

@@ -26,9 +26,9 @@
 #define CC_FAST_MARCHING_DIRECTION_HEADER
 
 //CCLib
-#include <CCTypes.h>
 #include <FastMarching.h>
 #include <GenericProgressCallback.h>
+#include <DgmOctree.h>
 
 //qCC_db
 #include <ccAdvancedTypes.h>
@@ -104,7 +104,7 @@ protected:
         //! The local front acceleration
         PointCoordinateType N[3];
         //! the code of the equivalent cell in the octree
-        OctreeCellCodeType cellCode;
+        CCLib::DgmOctree::OctreeCellCodeType cellCode;
         //Temp value
         DistanceType v;
         //marker

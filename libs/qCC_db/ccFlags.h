@@ -14,16 +14,12 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_FLAGS_HEADER
 #define CC_FLAGS_HEADER
+
+//System
+#include <string.h>
 
 //! Flags
 class ccFlags
@@ -65,4 +61,4 @@ public:
 	bool table[8];
 };
 
-#endif
+#endif //CC_FLAGS_HEADER

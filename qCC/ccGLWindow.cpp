@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2228                                                              $
-//$LastChangedDate:: 2012-07-27 17:38:19 +0200 (ven., 27 juil. 2012)       $
-//**************************************************************************
-//
 
 //CCLib
 #include <CCConst.h>
@@ -56,6 +49,7 @@
 #include <QSettings>
 
 //System
+#include <string.h>
 #include <math.h>
 #include <algorithm>
 
@@ -1306,7 +1300,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 
 	//point picking
 	float totalZoom = computeTotalZoom();
-	totalZoom = std::max<float>(ZERO_TOLERANCE,totalZoom);
+	totalZoom = std::max((float)ZERO_TOLERANCE,totalZoom);
 	context.pickedPointsRadius = (float)guiParams.pickedPointsSize / totalZoom ;
 	context.pickedPointsTextShift = 5.0 / totalZoom; //5 pixels shift
 
@@ -1854,18 +1848,21 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 	{
 	case ENTITY_PICKING:
 	case LABELS_PICKING:
-		pickingFlags |= CC_DRAW_NAMES;
+		pickingFlags |= CC_DRAW_ENTITY_NAMES;
 		break;
 	case POINT_PICKING:
+		pickingFlags |= CC_DRAW_ENTITY_NAMES;
+		pickingFlags |= CC_DRAW_POINT_NAMES;
+		break;
+	case TRIANGLE_PICKING:
+		pickingFlags |= CC_DRAW_ENTITY_NAMES;
+		pickingFlags |= CC_DRAW_TRI_NAMES;
+		break;
 	case AUTO_POINT_PICKING:
-		pickingFlags |= CC_DRAW_NAMES;
+		pickingFlags |= CC_DRAW_ENTITY_NAMES;
 		pickingFlags |= CC_DRAW_POINT_NAMES;
 		pickingFlags |= CC_DRAW_TRI_NAMES;
 		break;
-	case TRIANGLE_PICKING:
-		pickingFlags |= CC_DRAW_NAMES;
-		pickingFlags |= CC_DRAW_TRI_NAMES;
-	case NO_PICKING:
 	default:
 		return -1;
 	}
@@ -1948,8 +1945,8 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 		return -1;
 	}
 
-	int selectedID=-1,detailID=-1;
-	processHits(hits,selectedID,detailID);
+	int selectedID=-1,subID=-1;
+	processHits(hits,selectedID,subID);
 
 	//standard "entity" picking
 	if (pickingMode == ENTITY_PICKING)
@@ -1957,50 +1954,57 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 		emit entitySelectionChanged(selectedID);
 		m_updateFBO=true;
 	}
-
 	//"3D point" picking
 	else if (pickingMode == POINT_PICKING)
 	{
-		if (selectedID>=0 && detailID>=0)
+		if (selectedID>=0 && subID>=0)
 		{
-			emit pointPicked(selectedID,(unsigned)detailID,cursorX,cursorY);
+			emit pointPicked(selectedID,(unsigned)subID,cursorX,cursorY);
 			//TODO: m_updateFBO=true;?
 		}
 	}
 	else if (pickingMode == AUTO_POINT_PICKING)
 	{
-		if (m_globalDBRoot && selectedID>=0 && detailID>=0)
+		if (m_globalDBRoot && selectedID>=0 && subID>=0)
 		{
-			//auto spawn the corresponding label
 			ccHObject* obj = m_globalDBRoot->find(selectedID);
-			if (obj && obj->isKindOf(CC_POINT_CLOUD))
+			if (obj)
 			{
-				cc2DLabel* label = new cc2DLabel();
-				label->addPoint(static_cast<ccGenericPointCloud*>(obj),detailID);
-				label->setVisible(true);
-				label->setDisplay(obj->getDisplay());
-				label->setPosition((float)(cursorX+20)/(float)width(),(float)(cursorY+20)/(float)height());
-				obj->addChild(label,true);
-				emit newLabel(static_cast<ccHObject*>(label));
-				QApplication::processEvents();
-				redraw();
-			}
-			if (obj && obj->isKindOf(CC_MESH))
-			{
-				cc2DLabel* label = new cc2DLabel();
-				ccGenericMesh *mesh = static_cast<ccGenericMesh*>(obj);
-				ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
-				assert(cloud);
-				CCLib::TriangleSummitsIndexes *summitsIndexes = mesh->getTriangleIndexes(detailID);
-				for (__int8 i = 0; i < 3; i++)
-					label->addPoint(cloud,summitsIndexes->i[i]);
-				label->setVisible(true);
-				label->setDisplay(cloud->getDisplay());
-				label->setPosition((float)(cursorX+20)/(float)width(),(float)(cursorY+20)/(float)height());
-				cloud->addChild(label,true);
-				emit newLabel(static_cast<ccHObject*>(label));
-				QApplication::processEvents();
-				redraw();
+				//auto spawn the right label
+				cc2DLabel* label = 0;
+				if (obj->isKindOf(CC_POINT_CLOUD))
+				{
+					label = new cc2DLabel();
+					label->addPoint(static_cast<ccGenericPointCloud*>(obj),subID);
+					obj->addChild(label,true);
+				}
+				else if (obj->isKindOf(CC_MESH))
+				{
+					label = new cc2DLabel();
+					ccGenericMesh *mesh = static_cast<ccGenericMesh*>(obj);
+					ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
+					assert(cloud);
+					CCLib::TriangleSummitsIndexes *summitsIndexes = mesh->getTriangleIndexes(subID);
+					label->addPoint(cloud,summitsIndexes->i1);
+					label->addPoint(cloud,summitsIndexes->i2);
+					label->addPoint(cloud,summitsIndexes->i3);
+					cloud->addChild(label,true);
+					if (!cloud->isEnabled())
+					{
+						cloud->setVisible(false);
+						cloud->setEnabled(true);
+					}
+				}
+
+				if (label)
+				{
+					label->setVisible(true);
+					label->setDisplay(obj->getDisplay());
+					label->setPosition((float)(cursorX+20)/(float)width(),(float)(cursorY+20)/(float)height());
+					emit newLabel(static_cast<ccHObject*>(label));
+					QApplication::processEvents();
+					redraw();
+				}
 			}
 		}
 	}
@@ -2011,8 +2015,8 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 
 void ccGLWindow::processHits(GLint hits, int& entID, int& subCompID)
 {
-	entID = -1;		//-1 means "nothing selected"
-	subCompID = -1; //-1 means "nothing selected"
+	//-1 means "nothing selected"
+	subCompID = entID = -1;
 
 	if (hits<1)
 		return;
@@ -2021,20 +2025,18 @@ void ccGLWindow::processHits(GLint hits, int& entID, int& subCompID)
 	const GLuint* _selectBuf = m_pickingBuffer;
 	for (int i=0;i<hits;++i)
 	{
-		const GLuint& n = _selectBuf[0]; //number of names on stack: should be 1 (CC_DRAW_NAMES mode) or 2 (CC_DRAW_POINT_NAMES mode)!
-		if (n) //strangely, we get sometimes empty sets?!
+		const GLuint& n = _selectBuf[0]; //number of names on stack
+		if (n) //strangely, we get empty sets sometimes?!
 		{
-			assert(n==1 || n==2);
+			assert(n==1 || n==2); //n should be esqual to 1 (CC_DRAW_ENTITY_NAMES mode) or 2 (CC_DRAW_POINT_NAMES/CC_DRAW_TRIANGLES_NAMES modes)!
 			const GLuint& minDepth = _selectBuf[1];//(GLfloat)_selectBuf[1]/(GLfloat)0xffffffff;
 			//const GLuint& maxDepth = _selectBuf[2];
 
-			//if there is multiple hits, we keep only the nearest
+			//if there are multiple hits, we keep only the nearest
 			if (i == 0 || minDepth < minMinDepth)
 			{
 				entID = _selectBuf[3];
-				subCompID = -1;
-				if (n>1)
-					subCompID = _selectBuf[4];
+				subCompID = (n>1 ? _selectBuf[4] : -1);
 				minMinDepth = minDepth;
 			}
 		}

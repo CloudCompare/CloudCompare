@@ -14,16 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef DISTRIBUTION_HEADER
-#define DISTRIBUTION_HEADER
+#ifndef GENERIC_DISTRIBUTION_HEADER
+#define GENERIC_DISTRIBUTION_HEADER
 
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about template class exportation
@@ -32,6 +25,8 @@
 #endif
 
 #include "CCTypes.h"
+
+//system
 #include <vector>
 
 namespace CCLib
@@ -134,4 +129,4 @@ protected:
 
 }
 
-#endif
+#endif //GENERIC_DISTRIBUTION_HEADER

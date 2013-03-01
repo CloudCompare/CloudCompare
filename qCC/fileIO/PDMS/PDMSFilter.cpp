@@ -153,7 +153,7 @@ CC_FILE_ERROR PDMSFilter::loadFile(const char* filename, ccHObject& container, b
 				case PDMS_EXTRU:
 					{
 						PdmsTools::PdmsObjects::Extrusion* pdmsExtru = static_cast<PdmsTools::PdmsObjects::Extrusion*>(currentPair.first);
-						unsigned count = pdmsExtru->loop->loop.size();
+						size_t count = pdmsExtru->loop->loop.size();
 						if (count)
 						{
 							std::vector<CCVector2> profile;

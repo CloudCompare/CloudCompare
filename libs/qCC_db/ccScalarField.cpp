@@ -14,16 +14,10 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1786                                                              $
-//$LastChangedDate:: 2011-02-10 17:37:59 +0100 (jeu., 10 févr. 2011)      $
-//**************************************************************************
-//
 
 #include "ccScalarField.h"
 
+//CCLib
 #include <CCConst.h>
 
 using namespace CCLib;

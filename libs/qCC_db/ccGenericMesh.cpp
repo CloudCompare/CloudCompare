@@ -14,21 +14,16 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
 
 #include "ccGenericMesh.h"
 
+//local
 #include "ccGenericPointCloud.h"
 #include "ccPointCloud.h"
 #include "ccNormalVectors.h"
 #include "ccMaterialSet.h"
 
+//system
 #include <assert.h>
 
 ccGenericMesh::ccGenericMesh(ccGenericPointCloud* associatedCloud, QString name/*=QString()*/)

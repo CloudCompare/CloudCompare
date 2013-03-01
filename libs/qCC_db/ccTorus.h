@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1854                                                              $
-//$LastChangedDate:: 2011-05-13 23:56:42 +0200 (ven., 13 mai 2011)         $
-//**************************************************************************
-//
 
 #ifndef CC_TORUS_PRIMITIVE_HEADER
 #define CC_TORUS_PRIMITIVE_HEADER
@@ -97,4 +90,4 @@ protected:
 	double m_angle_rad;
 };
 
-#endif
+#endif //CC_TORUS_PRIMITIVE_HEADER

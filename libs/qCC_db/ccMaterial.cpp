@@ -14,19 +14,16 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
+//Always first
 #include "ccIncludeGL.h"
 
 //Local
 #include "ccMaterial.h"
 #include "ccBasicTypes.h"
+
+//System
+#include <string.h>
 
 ccMaterial::ccMaterial(QString _name)
 	: name(_name)

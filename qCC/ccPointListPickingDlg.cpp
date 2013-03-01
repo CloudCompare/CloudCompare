@@ -106,7 +106,7 @@ unsigned ccPointListPickingDlg::getPickedPoints(std::vector<cc2DLabel*>& pickedP
 		}
 	}
 
-	return pickedPoints.size();
+	return (unsigned)pickedPoints.size();
 }
 
 void ccPointListPickingDlg::linkWithCloud(ccPointCloud* cloud)

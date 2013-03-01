@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1959                                                              $
-//$LastChangedDate:: 2011-12-04 22:21:14 +0100 (dim., 04 déc. 2011)       $
-//**************************************************************************
-//
 
 #ifndef CC_OCTREE_HEADER
 #define CC_OCTREE_HEADER
@@ -29,6 +22,7 @@
 #include <DgmOctree.h>
 #include <ReferenceCloud.h>
 
+//Local
 #include "ccHObject.h"
 
 class ccGenericPointCloud;
@@ -137,4 +131,4 @@ protected:
 
 };
 
-#endif
+#endif //CC_OCTREE_HEADER

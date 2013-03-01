@@ -14,13 +14,11 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
+
+#include "AsciiOpenDlg.h"
+#include "FileIOFilter.h"
+
+//Qt
 #include <QMessageBox>
 #include <QTableWidget>
 #include <QTableWidgetItem>
@@ -31,13 +29,10 @@
 #include <QToolButton>
 #include <QPushButton>
 
+//system
+#include <string.h>
 #include <stdio.h>
 #include <assert.h>
-
-#include <CCMiscTools.h>
-
-#include "AsciiOpenDlg.h"
-#include "FileIOFilter.h"
 
 AsciiOpenDlg::AsciiOpenDlg(QString filename, QWidget* parent)
 	: QDialog(parent)
@@ -264,7 +259,7 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 		tableWidget->removeRow(i);
 
     int columnWidth = (tableWidget->width()*9) / (columnsCount*10);
-    columnWidth = ccMax(columnWidth,80);
+    columnWidth = std::max(columnWidth,80);
 
 	//Icons
 	const QIcon xIcon(QString::fromUtf8(":/CC/Types/images/types/x_coordinate.png"));

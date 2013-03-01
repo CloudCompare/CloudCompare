@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef GENERIC_INDEXED_MESH_HEADER
 #define GENERIC_INDEXED_MESH_HEADER
@@ -118,4 +111,4 @@ protected:
 
 }
 
-#endif
+#endif //GENERIC_INDEXED_MESH_HEADER

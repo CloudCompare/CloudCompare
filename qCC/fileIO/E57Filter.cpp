@@ -726,7 +726,8 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const char* filename)
 	{
 		//Save images
 		s_absoluteImageIndex = 0;
-		for (unsigned i=0;i<scans.size();++i)
+		size_t scanCount = scans.size();
+		for (size_t i=0;i<scanCount;++i)
 		{
 			ccPointCloud* cloud = scans[i];
 			ccHObject::Container images;
@@ -752,7 +753,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const char* filename)
 					if (!nprogress.oneStep())
 					{
 						s_cancelRequestedByUser = true;
-						i = scans.size();
+						i = scanCount; //double break!
 						result = CC_FERR_CANCELED_BY_USER;
 						break;
 					}

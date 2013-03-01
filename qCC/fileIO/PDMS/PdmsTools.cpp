@@ -1,6 +1,7 @@
 #include "PdmsTools.h"
 
 //System
+#include <string.h>
 #include <iostream>
 #include <stdlib.h>
 
@@ -1260,7 +1261,7 @@ bool GroupElement::scan(Token t, std::vector<GenericItem*> &items)
     std::list<DesignElement*>::iterator eit;
 
     GenericItem::scan(t, items);
-	unsigned size = items.size();
+	size_t size = items.size();
 	for(eit=elements.begin(); eit!=elements.end(); eit++)
 		(*eit)->scan(t, items);
 	for(hit=subhierarchy.begin(); hit!=subhierarchy.end(); hit++)

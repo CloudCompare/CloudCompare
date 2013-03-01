@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef NORMAL_DISTRIBUTION_HEADER
 #define NORMAL_DISTRIBUTION_HEADER
@@ -135,4 +128,4 @@ protected:
 
 }
 
-#endif
+#endif //NORMAL_DISTRIBUTION_HEADER

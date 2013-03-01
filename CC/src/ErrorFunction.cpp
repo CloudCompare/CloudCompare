@@ -14,17 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
+
 #include "ErrorFunction.h"
 
+//local
 #include "CCConst.h"
 
+//system
 #include <math.h>
 
 using namespace CCLib;
@@ -58,7 +54,7 @@ double ErrorFunction::erf(double x)
 		sum+= term/(2*j+1);
 		++j;
 	}
-	while (fabs(term/sum) > erfRelativeError);
+	while (fabs(term/sum) > c_erfRelativeError);
 
 	return two_sqrtpi*sum;
 }
@@ -96,7 +92,7 @@ double ErrorFunction::erfc(double x)
 		q1= q2;
 		q2= b/d;
 	}
-	while (fabs(q1-q2)/q2 > erfRelativeError);
+	while (fabs(q1-q2)/q2 > c_erfRelativeError);
 
 	return one_sqrtpi*exp(-x*x)*q2;
 }

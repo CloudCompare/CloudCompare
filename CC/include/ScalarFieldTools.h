@@ -14,16 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef SCALAR_FIELD_TOOLS
-#define SCALAR_FIELD_TOOLS
+#ifndef SCALAR_FIELD_TOOLS_HEADER
+#define SCALAR_FIELD_TOOLS_HEADER
 
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about template class exportation
@@ -33,6 +26,7 @@
 #include "CCToolbox.h"
 #include "DgmOctree.h"
 
+//system
 #include <vector>
 
 namespace CCLib
@@ -227,4 +221,4 @@ protected:
 
 }
 
-#endif
+#endif //SCALAR_FIELD_TOOLS_HEADER

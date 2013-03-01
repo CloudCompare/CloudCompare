@@ -14,16 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef MESH_SAMPLING_TOOLS
-#define MESH_SAMPLING_TOOLS
+#ifndef MESH_SAMPLING_TOOLS_HEADER
+#define MESH_SAMPLING_TOOLS_HEADER
 
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about template class exportation
@@ -119,4 +112,4 @@ protected:
 
 }
 
-#endif
+#endif //MESH_SAMPLING_TOOLS_HEADER

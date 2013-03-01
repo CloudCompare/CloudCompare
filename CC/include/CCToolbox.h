@@ -14,32 +14,16 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_TOOLBOX_HEADER
 #define CC_TOOLBOX_HEADER
-
-#ifdef _MSC_VER
-//To get rid of the really annoying warnings about unsafe methods
-#pragma warning( disable: 4996 )
-#endif
-
-#include "CCGeom.h"
 
 namespace CCLib
 {
 
 //! Empty class - for classification purpose only
-
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
-
 class CC_DLL_API CCToolbox
 #else
 class CCToolbox
@@ -47,6 +31,6 @@ class CCToolbox
 {
 };
 
-}
+} //namespace CCLib
 
-#endif
+#endif //CC_TOOLBOX_HEADER

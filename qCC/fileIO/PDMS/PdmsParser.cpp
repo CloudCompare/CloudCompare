@@ -1,6 +1,7 @@
 #include "PdmsParser.h"
 
 //system
+#include <string.h>
 #include <iostream>
 #include <cstdlib>
 
@@ -194,12 +195,8 @@ void PdmsLexer::parseCurrentToken()
 
 PointCoordinateType PdmsLexer::valueFromBuffer()
 {
-    int index;
-    size_t length;
-    PointCoordinateType value;
-
-    index = strlen(tokenBuffer);
-    length = 0;
+    size_t index = strlen(tokenBuffer);
+    size_t length = 0;
     while(index>0) //go back until we meet a number symbol
     {
         if((tokenBuffer[index-1]>='0' && tokenBuffer[index-1]<='9') || tokenBuffer[index-1]=='.')
@@ -217,12 +214,12 @@ PointCoordinateType PdmsLexer::valueFromBuffer()
 
     //Replace comma
     length = strlen(tokenBuffer);
-    for(index=0; index<(int)length; index++)
+    for(index=0; index<length; index++)
         if(tokenBuffer[index]==',')
             tokenBuffer[index]='.';
 
-    //take value(s)
-    value = (PointCoordinateType)atof(tokenBuffer);
+	//convert value
+	PointCoordinateType value = (PointCoordinateType)atof(tokenBuffer);
 
     return value;
 }
@@ -245,7 +242,7 @@ bool PdmsLexer::moveForward()
 
 void PdmsLexer::pushIntoDictionnary(const char *str, Token token, int minSize)
 {
-    int n = strlen(str);
+    int n = (int)strlen(str);
     if(minSize==0 || minSize>n)
         minSize=n;
     for(; minSize<=n; minSize++)

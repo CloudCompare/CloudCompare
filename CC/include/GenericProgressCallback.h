@@ -14,17 +14,11 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef GENERIC_PROGRESS_CALLBACK_HEADER
 #define GENERIC_PROGRESS_CALLBACK_HEADER
 
+//system
 #include <assert.h>
 #include <math.h>
 
@@ -166,4 +160,4 @@ protected:
 
 }
 
-#endif
+#endif //GENERIC_PROGRESS_CALLBACK_HEADER

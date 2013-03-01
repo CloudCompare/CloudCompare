@@ -150,8 +150,8 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 			//look for clouds inside loaded DB
 			ccHObject::Container clouds;
 			db->filterChildren(clouds,false,CC_POINT_CLOUD);
-			unsigned count = clouds.size();
-			for (unsigned i=0;i<count;++i)
+			size_t count = clouds.size();
+			for (size_t i=0;i<count;++i)
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[0]);
 				pc->setFlagState(CC_FATHER_DEPENDANT,false);

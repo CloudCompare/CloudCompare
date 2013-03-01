@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef REFERENCE_CLOUD_HEADER
 #define REFERENCE_CLOUD_HEADER
@@ -194,4 +187,4 @@ protected:
 
 }
 
-#endif
+#endif //REFERENCE_CLOUD_HEADER

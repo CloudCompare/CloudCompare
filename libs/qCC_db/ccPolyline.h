@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2265                                                              $
-//$LastChangedDate:: 2012-10-13 22:22:51 +0200 (sam., 13 oct. 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_GL_POLYLINE_HEADER
 #define CC_GL_POLYLINE_HEADER
@@ -100,4 +93,4 @@ protected:
 	bool m_foreground;
 };
 
-#endif
+#endif //CC_GL_POLYLINE_HEADER

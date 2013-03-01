@@ -14,22 +14,16 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #include "ccGLMatrix.h"
 
-//System
-#include <assert.h>
-#include <math.h>
-
 //CCLib
 #include <CCConst.h>
+
+//System
+#include <math.h>
+#include <string.h>
+#include <assert.h>
 
 //Matrix element shortcuts in (line,column) order
 #define R11 m_mat[0]

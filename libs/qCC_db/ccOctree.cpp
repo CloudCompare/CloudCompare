@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1992                                                              $
-//$LastChangedDate:: 2012-01-18 12:17:49 +0100 (mer., 18 janv. 2012)       $
-//**************************************************************************
-//
 
 #include "ccOctree.h"
 
@@ -122,7 +115,7 @@ void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
 
     if (MACRO_Draw3D(context))
     {
-        bool pushName = MACRO_DrawNames(context);
+        bool pushName = MACRO_DrawEntityNames(context);
 
         if (pushName)
             glPushName(getUniqueID());

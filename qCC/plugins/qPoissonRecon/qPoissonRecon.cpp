@@ -99,7 +99,7 @@ void qPoissonRecon::doAction()
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 
 	//we need one point cloud
-    unsigned selNum = selectedEntities.size();
+    size_t selNum = selectedEntities.size();
     if (selNum!=1)
 	{
 		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);

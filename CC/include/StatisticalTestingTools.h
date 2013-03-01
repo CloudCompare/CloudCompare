@@ -14,26 +14,19 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
-#ifndef STATISTICAL_TESTING_TOOLS
-#define STATISTICAL_TESTING_TOOLS
+#ifndef STATISTICAL_TESTING_TOOLS_HEADER
+#define STATISTICAL_TESTING_TOOLS_HEADER
 
 #include "CCConst.h"
 #include "CCToolbox.h"
 #include "DgmOctree.h"
 
 //! Statistical distributions
-enum CC_STATISTICAL_DISTRIBUTION {GAUSS				=		0,		/**< Gauss/Normal distribution: (mu, sigma) **/
-									WEIBULL			=		1		/**< Weibull distribution (a,b) **/
+enum CC_STATISTICAL_DISTRIBUTION {  GAUSS		=	0,		/**< Gauss/Normal distribution: (mu, sigma) **/
+									WEIBULL		=	1		/**< Weibull distribution (a,b) **/
 };
-const char CC_STATISTICAL_DISTRIBUTION_TITLES[2][18] = {"Gauss","Weibull"};
+const char CC_STATISTICAL_DISTRIBUTION_TITLES[2][12] = {"Gauss","Weibull"};
 
 namespace CCLib
 {
@@ -170,4 +163,4 @@ protected:
 
 }
 
-#endif
+#endif //STATISTICAL_TESTING_TOOLS_HEADER

@@ -14,20 +14,13 @@
 //#               COPYRIGHT: Daniel Girardeau-Montaut                      #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2257                                                              $
-//$LastChangedDate:: 2012-10-11 23:48:15 +0200 (jeu., 11 oct. 2012)        $
-//**************************************************************************
-//
+
+#include "qHPR.h"
+#include "ccHprDlg.h"
 
 //Qt
 #include <QtGui>
 #include <QElapsedTimer>
-
-#include "qHPR.h"
-#include "ccHprDlg.h"
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -40,6 +33,9 @@
 //CCLib
 #include <CloudSamplingTools.h>
 #include <ReferenceCloud.h>
+
+//System
+#include <string.h>
 
 //Qhull
 extern "C"
@@ -255,7 +251,7 @@ void qHPR::doAction()
 		return;
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
-	unsigned selNum = selectedEntities.size();
+	size_t selNum = selectedEntities.size();
     if (selNum!=1)
 	{
 		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);

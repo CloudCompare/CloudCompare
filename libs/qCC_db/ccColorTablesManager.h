@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #ifndef COLOR_TABLES_MANAGER_HEADER
 #define COLOR_TABLES_MANAGER_HEADER
@@ -106,4 +99,4 @@ protected:
 
 };
 
-#endif
+#endif //COLOR_TABLES_MANAGER_HEADER

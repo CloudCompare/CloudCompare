@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
+
 #include "VTKFilter.h"
 #include "../ccCoordinatesShiftManager.h"
 
@@ -34,6 +28,9 @@
 //Qt
 #include <QFile>
 #include <QTextStream>
+
+//System
+#include <string.h>
 
 CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 {

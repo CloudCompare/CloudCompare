@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef MATH_TOOLS_HEADER
 #define MATH_TOOLS_HEADER
@@ -38,4 +31,4 @@ class MathTools
 
 }
 
-#endif
+#endif //MATH_TOOLS_HEADER

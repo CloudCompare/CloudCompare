@@ -14,29 +14,24 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "FastMarchingForPropagation.h"
 
+//local
 #include "GenericIndexedCloudPersist.h"
 #include "DgmOctree.h"
 #include "ReferenceCloud.h"
 #include "DistanceComputationTools.h"
 
+//system
+#include <string.h>
 #include <assert.h>
 
 using namespace CCLib;
 
 FastMarchingForPropagation::FastMarchingForPropagation()
-//: FastMarching()
+	: FastMarching()
 {
-	//pour la segmentation
 	lastT = 0.0; //dernière valeur d'arrivée
 	detectionThreshold = FM_INF; //saut relatif de la valeur d'arrivée qui arrête la propagation (ici, "désactivé")
 	jumpCoef = 0.0; //resistance à l'avancement du front, en fonction de Cell->f (ici, pas de resistance)
@@ -64,9 +59,8 @@ int FastMarchingForPropagation::init(GenericCloud* aList, DgmOctree* _theOctree,
 
 	int result = initGrid();
 
-	if (result<0) return result;
-
-	//printf("cellSize=%f\n",cellSize);
+	if (result<0)
+		return result;
 
 	//on remplit la grille
 	DgmOctree::cellCodesContainer cellCodes;
@@ -92,8 +86,6 @@ int FastMarchingForPropagation::init(GenericCloud* aList, DgmOctree* _theOctree,
 
 		//Yk->clear(); //inutile
 
-		//printf("code %i -> cell(%i,%i,%i) --> %i\n",cellCodes.back(),cellPos[0],cellPos[1],cellPos[2],gridPos);
-
 		theGrid[gridPos] = (Cell*)aCell;
 
 		cellCodes.pop_back();
@@ -107,10 +99,7 @@ int FastMarchingForPropagation::init(GenericCloud* aList, DgmOctree* _theOctree,
 int FastMarchingForPropagation::step()
 {
 	if (!initialized)
-	{
-		//printf("Not yet initialized !");
 		return -1;
-	}
 
 	unsigned minTCellIndex = getNearestTrialCell();
 
@@ -119,8 +108,6 @@ int FastMarchingForPropagation::step()
 		//fl_alert("No more trial cells !");
 		return 0;
 	}
-
-	//printf("minTCellIndex=%i\n",minTCellIndex);
 
 	Cell* minTCell =  theGrid[minTCellIndex];
 	assert(minTCell != 0);
@@ -138,9 +125,6 @@ int FastMarchingForPropagation::step()
 		//on rajoute cette cellule au groupe des cellules "ACTIVE"
 		minTCell->state = Cell::ACTIVE_CELL;
 		activeCells.push_back(minTCellIndex);
-
-		//printf("Cell %i added to ACTIVE\n",minTCellIndex);
-		//fprintf(fp,"%f %f %f\n",((PropagationCell*)minTCell)->f,minTCell->T,(minTCell->T-lastT)/cellSize);
 
 		lastT = minTCell->T;
 
@@ -212,7 +196,7 @@ float FastMarchingForPropagation::computeT(unsigned index)
 	//si (Gij-Gxm < 0) ça doit aller plus vite, i.e. exp(jumpCoef*ANS)>1.0, donc jumpCoef>0
 
 	//Eq. quadratique selon X
-	double Tmin = ccMin(Txm,Txp);
+	double Tmin = std::min(Txm,Txp);
 	if (Tij>Tmin)
 	{
 		A += 1.0;
@@ -221,7 +205,7 @@ float FastMarchingForPropagation::computeT(unsigned index)
 	}
 
 	//Eq. quadratique selon Y
-	Tmin = ccMin(Tym,Typ);
+	Tmin = std::min(Tym,Typ);
 	if (Tij>Tmin)
 	{
 		A += 1.0;
@@ -230,7 +214,7 @@ float FastMarchingForPropagation::computeT(unsigned index)
 	}
 
 	//Eq. quadratique selon Z
-	Tmin = ccMin(Tzm,Tzp);
+	Tmin = std::min(Tzm,Tzp);
 	if (Tij>Tmin)
 	{
 		A += 1.0;
@@ -267,10 +251,7 @@ float FastMarchingForPropagation::computeT(unsigned index)
 
 		assert( Tij<FM_INF );
 		if(Tij>=FM_INF)
-		{
-			//printf("Error in computeT(...): !( Tij<INF )");
 			return (float)FM_INF;
-		}
 
 		//assert( Tij<10000 );
 		return (float)Tij;
@@ -294,16 +275,14 @@ void FastMarchingForPropagation::initLastT()
 	for (unsigned i=0; i<activeCells.size(); i++)
 	{
 		aCell = theGrid[activeCells[i]];
-		lastT=ccMax(lastT,aCell->T);
+		lastT=std::max(lastT,aCell->T);
 	}
 }
 
 int FastMarchingForPropagation::propagate()
 {
 	int iteration = 0;
-	int result=1;
-
-	//fp = fopen("trace_time.txt","wt");
+	int result = 1;
 
 	//initialisation de la liste des "TRIAL" cells
 	initTrialCells();
@@ -314,14 +293,8 @@ int FastMarchingForPropagation::propagate()
 	{
 		result = step();
 
-		//printf("%i\n",iteration);
-
 		++iteration;
 	}
-
-	//fclose(fp);
-
-	//if (result<0) printf("[FastMarchingForPropagation::propagate] fin (probleme)");
 
 	return result;
 }

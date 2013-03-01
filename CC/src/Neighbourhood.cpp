@@ -14,26 +14,21 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "Neighbourhood.h"
 
+//local
 #include "GenericIndexedMesh.h"
 #include "GenericIndexedCloudPersist.h"
 #include "Matrix.h"
 #include "Delaunay2dMesh.h"
 #include "ConjugateGradient.h"
 #include "DistanceComputationTools.h"
-#include "CCMiscTools.h"
 #include "ChunkedPointCloud.h"
 #include "SimpleMesh.h"
+#include "CCMiscTools.h"
 
+//system
 #include <assert.h>
 
 using namespace CCLib;
@@ -505,7 +500,7 @@ bool Neighbourhood::projectPointsOnPlane(const PointCoordinateType* thePlaneEqua
     //we construct the plane local frame
 	CCVector3 u(1.0,0.0,0.0),v(0.0,1.0,0.0);
 	if (thePlaneEquation[0]!=0.0 || thePlaneEquation[1]!=0.0)
-		CCMiscTools::computeBaseVectors(thePlaneEquation,u.u,v.u);
+		CCMiscTools::ComputeBaseVectors(thePlaneEquation,u.u,v.u);
 
 	//we get centroid
 	const CCVector3* G = getGravityCenter();

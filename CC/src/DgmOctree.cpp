@@ -14,28 +14,24 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "DgmOctree.h"
 
+//local
 #include "ReferenceCloud.h"
 #include "GenericProgressCallback.h"
 #include "GenericIndexedCloudPersist.h"
+#include "CCMiscTools.h"
 
+//system
 #include <algorithm>
+#include <string.h>
 #include <assert.h>
 
 //DGM: tests in progress
 //#define COMPUTE_NN_SEARCH_STATISTICS
 //#define ADAPTATIVE_BINARY_SEARCH
 //#define OCTREE_TREE_TEST
-
 
 #ifdef OCTREE_TREE_TEST
 
@@ -342,8 +338,8 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 		//begin 'recursion'
 		uchar currentLevel = 0;
 		uchar currentBitDec = GET_BIT_SHIFT(currentLevel);
-		OctreeCellCodeType currentCode = 0xFFFFFFFF;
-		OctreeCellCodeType currentTruncatedCode = 0xFFFFFFFF;
+		OctreeCellCodeType currentCode = INVALID_CELL_CODE;
+		OctreeCellCodeType currentTruncatedCode = INVALID_CELL_CODE;
 		std::vector<octreeTreeCell*> cellStack;
 		octreeTreeCellLeaf* currentLeafCell = 0;
 		cellStack.push_back(root);
@@ -433,7 +429,7 @@ void DgmOctree::updateMinAndMaxTables()
 	m_dimMin=m_pointsMin;
 	m_dimMax=m_pointsMax;
 
-    CCMiscTools::makeMinAndMaxCubical(m_dimMin,m_dimMax);
+    CCMiscTools::MakeMinAndMaxCubical(m_dimMin,m_dimMax);
 }
 
 void DgmOctree::updateCellSizeTable()
@@ -445,8 +441,8 @@ void DgmOctree::updateCellSizeTable()
     for (dim=0; dim<3; ++dim)
     {
         dd = m_dimMax[dim]-m_dimMin[dim];
-        ll = ccMax(m_pointsMin[dim]-m_dimMin[dim],0.0f);
-        lr = ccMax(m_dimMax[dim]-m_pointsMax[dim],(PointCoordinateType)ZERO_TOLERANCE); //to make sure that ceil(lr/dd)>0 below!
+        ll = std::max(m_pointsMin[dim]-m_dimMin[dim],0.0f);
+        lr = std::max(m_dimMax[dim]-m_pointsMax[dim],(PointCoordinateType)ZERO_TOLERANCE); //to make sure that ceil(lr/dd)>0 below!
 
 		for (k=0; k<=MAX_OCTREE_LEVEL; k++)
         {
@@ -488,7 +484,7 @@ void DgmOctree::computeCellsStatistics(uchar level)
 	if (level == 0)
 	{
 		m_cellCount[level] = 1;
-		m_maxCellPopulation[level] = m_thePointsAndTheirCellCodes.size();
+		m_maxCellPopulation[level] = (unsigned)m_thePointsAndTheirCellCodes.size();
 		m_averageCellPopulation[level] = (double)m_thePointsAndTheirCellCodes.size();
 		m_stdDevCellPopulation[level] = 0.0;
 		return;
@@ -540,7 +536,7 @@ void DgmOctree::computeCellsStatistics(uchar level)
 	m_stdDevCellPopulation[level] = sqrt(sum2 - m_averageCellPopulation[level]*m_averageCellPopulation[level])/(double)counter;
 }
 
-OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const int pos[], uchar level) const
+DgmOctree::OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const int pos[], uchar level) const
 {
     assert(pos[0]>=0 && pos[1]>=0 && pos[2]>=0);
 
@@ -563,7 +559,7 @@ OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const int pos[], uchar l
 }
 
 #ifndef OCTREE_CODES_64_BITS
-OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const short pos[], uchar level) const
+DgmOctree::OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const short pos[], uchar level) const
 {
     assert(pos[0]>=0 && pos[1]>=0 && pos[2]>=0);
 
@@ -586,10 +582,10 @@ OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const short pos[], uchar
 }
 #endif
 
-inline OctreeCellCodeType generateTruncatedCellCodeForDim(int pos, unsigned char level)
+inline DgmOctree::OctreeCellCodeType generateTruncatedCellCodeForDim(int pos, unsigned char level)
 {
     assert(pos>=0);
-    OctreeCellCodeType code=0;
+    DgmOctree::OctreeCellCodeType code=0;
     int bitMask=1;
     for (unsigned char k=0; k<level; k++)
     {
@@ -935,7 +931,7 @@ unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
 
     //nnFound can be superior to maxNumberOfNeighbors
     //so we only keep the 'maxNumberOfNeighbors' firsts
-    nnFound = ccMin(nnFound,maxNumberOfNeighbors);
+    nnFound = std::min(nnFound,maxNumberOfNeighbors);
 
     for (unsigned j=0; j<nnFound; ++j)
         Yk->addPointIndex(nNSS.pointsInNeighbourhood[j].pointIndex);
@@ -1829,7 +1825,7 @@ DistanceType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighbours
 
                 if (distToBorder>0)
                 {
-                    visitedCellDistance = ccMax(distToBorder,visitedCellDistance);
+                    visitedCellDistance = std::max(distToBorder,visitedCellDistance);
                     diagonalDistance += distToBorder*distToBorder;
                 }
 
@@ -1839,7 +1835,7 @@ DistanceType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighbours
 
             //the nearest octree cell
             diagonalDistance = (int)ceil(sqrt((float)diagonalDistance));
-            elligibleCellDistance = ccMax(diagonalDistance,1);
+            elligibleCellDistance = std::max(diagonalDistance,1);
 
             if (nNSS.maxSearchSquareDist >= 0.0)
             {
@@ -1876,7 +1872,7 @@ DistanceType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighbours
         {
             //what would be the correct neighbourhood size to be sure of it?
             int newElligibleCellDistance = (int)ceil((sqrt(minSquareDist)-minDistToBorder)/DistanceType(cs));
-            elligibleCellDistance = ccMax(newElligibleCellDistance,elligibleCellDistance);
+            elligibleCellDistance = std::max(newElligibleCellDistance,elligibleCellDistance);
         }
 
         //we get the (new) cells around the current neighbourhood
@@ -1910,7 +1906,7 @@ DistanceType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighbours
                 ++p;
             }
         }
-        alreadyProcessedCells = nNSS.minimalCellsSetToVisit.size();
+        alreadyProcessedCells = (unsigned)nNSS.minimalCellsSetToVisit.size();
 
         //equivalent spherical neighbourhood radius (as we are actually looking to 'square' neighbourhoods,
         //we must check that the nearest points inside such neighbourhoods are indeed near enough to fall
@@ -2017,7 +2013,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
 
                 if (distToBorder>0)
                 {
-                    visitedCellDistance = ccMax(distToBorder,visitedCellDistance);
+                    visitedCellDistance = std::max(distToBorder,visitedCellDistance);
                     diagonalDistance += distToBorder*distToBorder;
                 }
 
@@ -2027,7 +2023,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
 
             //the nearest octree cell
             diagonalDistance = (int)ceil(sqrt((float)diagonalDistance));
-            elligibleCellDistance = ccMax(diagonalDistance,1);
+            elligibleCellDistance = std::max(diagonalDistance,1);
 
             if (nNSS.maxSearchSquareDist >= 0.0)
             {
@@ -2064,7 +2060,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
         {
             //what would be the correct neighbourhood size to be sure of it?
             int newElligibleCellDistance = (int)ceil((sqrt(minSquareDist)-minDistToBorder)/DistanceType(cs));
-            elligibleCellDistance = ccMax(newElligibleCellDistance,elligibleCellDistance);
+            elligibleCellDistance = std::max(newElligibleCellDistance,elligibleCellDistance);
         }
 
         //we get the (new) points lying in the added area
@@ -2081,7 +2077,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
         NeighboursSet::iterator q;
         for (q = nNSS.pointsInNeighbourhood.begin()+alreadyProcessedPoints; q != nNSS.pointsInNeighbourhood.end(); ++q)
             q->squareDist = (*q->point - nNSS.queryPoint).norm2();
-        alreadyProcessedPoints = nNSS.pointsInNeighbourhood.size();
+        alreadyProcessedPoints = (unsigned)nNSS.pointsInNeighbourhood.size();
 
         //equivalent spherical neighbourhood radius (as we are actually looking to 'square' neighbourhoods,
         //we must check that the nearest points inside such neighbourhoods are indeed near enough to fall
@@ -2400,8 +2396,8 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 		uchar currentBitDec = bitDec;
 		bool skipCell=false;
 		bool toGrab=false;
-		OctreeCellCodeType currentCode = 0xFFFFFFFF;
-		OctreeCellCodeType currentTruncatedCode = 0xFFFFFFFF;
+		OctreeCellCodeType currentCode = INVALID_CELL_CODE;
+		OctreeCellCodeType currentTruncatedCode = INVALID_CELL_CODE;
 		//current cell corners
 		CCVector3 cellCorners[MAX_OCTREE_LEVEL+1];
 		cellCorners[level]=bbMin;
@@ -2678,12 +2674,12 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 		}
 	}
 
-#else
+#else //TEST_CELLS_FOR_SPHERICAL_NN
 
 	//point by point scan
     NeighboursSet::iterator p = nNSS.pointsInNeighbourhood.begin();
-    unsigned k = nNSS.pointsInNeighbourhood.size();
-    for (unsigned i=0; i<k; ++i,++p)
+    size_t k = nNSS.pointsInNeighbourhood.size();
+    for (size_t i=0; i<k; ++i,++p)
     {
         p->squareDist = (*p->point - nNSS.queryPoint).norm2();
         //if the distance is inferior to the sphere radius...
@@ -2700,8 +2696,7 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
         }
     }
 
-#endif
-
+#endif //!TEST_CELLS_FOR_SPHERICAL_NN
 
     //eventually (if requested) we sort the elligible points
     if (sortValues && numberOfElligiblePoints>0)
@@ -2963,9 +2958,6 @@ uchar DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* theOtherO
     {
         diff(i,m_thePointsAndTheirCellCodes,theOtherOctree->m_thePointsAndTheirCellCodes,diffA,diffB,cellsA,cellsB);
 
-        //printf("DiffA[%i] = %i/%i cells\n",i,diffA,cellsA);
-        //printf("DiffB[%i] = %i/%i cells\n",i,diffB,cellsB);
-
         //we use a linear model for prediction
         estimatedTime[i] = (float)((double(ptsA)*double(ptsB)/double(cellsB)) * 0.001 + double(diffA));
 
@@ -3048,7 +3040,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
         return -1;
 
     int k,indexMin[3],indexMax[3],deltaIndex[3],pos[3];
-    unsigned i,numberOfCells = cellCodes.size();
+    unsigned i,numberOfCells = (unsigned)cellCodes.size();
 
     //ON CHERCHE LES LIMITES EFFECTIVES PAR RAPPORT AUX CODES !
     //EN EFFET L'OCTREE CONTRAINT SEMBLE TOUT FAIRE FOIRER SINON
@@ -3107,9 +3099,6 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
     for (k=0; k<3; k++)
         deltaIndex[k] = indexMax[k] - indexMin[k] + 1;
 
-    //Console::print("Limites (%i,%i,%i)-->(%i,%i,%i) [%i,%i,%i]\n",indexMin[0],indexMin[1],indexMin[2],indexMax[0],indexMax[1],indexMax[2],deltaIndex[0],deltaIndex[1],deltaIndex[2]);
-    //printf("Tri des cellules (%i cells) ...\n",numberOfCells);
-
     //on trie donc les cellules suivant leur tranche et on garde la synchro avec les codes
     //tri des cellules en fonction de leur indice absolu
     std::sort(ccCells.begin(),ccCells.end(),indexAndCode::indexComp); //ascending index code order
@@ -3119,7 +3108,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
     int step = deltaIndex[dim];
 
     //instrumentation pour la recherche des 4 ou 8 voisins en 2D (donc en 3D --> 6 ou 26 voisins)
-    uchar n,p,numberOfNeighbours,numberOfOldNeighbours;
+    uchar numberOfNeighbours,numberOfOldNeighbours;
     int neighboursDec[4],oldNeighboursDec[9]; //on leur donne la taille maximale possible, pour simplifier le code
     std::vector<int> neighboursVal,neighboursMin;
 
@@ -3219,8 +3208,6 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
     //on parcours chaque tranche
     for (k = indexMin[dim]; k < indexMin[dim]+step; k++)
     {
-        //printf("Tranche %i/%i\n",k,step);
-
         //on initialise la tranche "courante"
         memset(slice,0,sizeof(int)*sliceSize);
 
@@ -3232,30 +3219,32 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
             cellIndex = (iind-indexMin[dim1]+1) + (jind-indexMin[dim2]+1)*(di+2);
             ++_ccCells;
 
-            //printf("Cellule index %i (%i,%i,%i)\n",cellIndex,iind,jind,k);
-
             //on regarde si la cellule a des voisins
             //dans la tranche
             _slice = slice + cellIndex;
-            for (n=0; n<numberOfNeighbours; n++)
-            {
-                assert(cellIndex+neighboursDec[n]<sliceSize);
-                val = _slice[neighboursDec[n]];
-                if (val>1)
-                    neighboursVal.push_back(val);
-            }
+			{
+				for (uchar n=0; n<numberOfNeighbours; n++)
+				{
+					assert(cellIndex+neighboursDec[n]<sliceSize);
+					val = _slice[neighboursDec[n]];
+					if (val>1)
+						neighboursVal.push_back(val);
+				}
+			}
 
             //et dans la tranche precedente
             _oldSlice = oldSlice + cellIndex;
-            for (n=0; n<numberOfOldNeighbours; n++)
-            {
-                assert(cellIndex+oldNeighboursDec[n]<sliceSize);
-                val = _oldSlice[oldNeighboursDec[n]];
-                if (val>1)
-                    neighboursVal.push_back(val);
-            }
+			{
+				for (uchar n=0; n<numberOfOldNeighbours; n++)
+				{
+					assert(cellIndex+oldNeighboursDec[n]<sliceSize);
+					val = _oldSlice[oldNeighboursDec[n]];
+					if (val>1)
+						neighboursVal.push_back(val);
+				}
+			}
 
-            p=neighboursVal.size();
+            uchar p = (uchar)neighboursVal.size();
             //Console::print("Nombre de voisins = %i\n",p);
 
             //pas de voisins ?
@@ -3277,59 +3266,55 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
                 //s'ils ne sont pas tous pareils
                 if (val != neighboursVal.back())
                 {
-                    //Console::print("Voisins [");
-                    //for (n=0;n<p;n++)	(n+1 < p ? Console::print("%i,",neighboursVal.at(n)) : Console::print("%i]\n",neighboursVal.at(n)));
-
                     int oldVal = 0;
                     neighboursMin.clear();
                     //on cherche pour chaque "branche" la CC d'indice minimum
                     //donc pour chaque voisin ...
-                    for (n=0; n<p; n++)
-                    {
-                        // ... on part de son indice de CC
-                        index = neighboursVal[n];
-                        //s'il n'est pas egal a celui du voisin d'avant
-                        if (index != oldVal)
-                        {
-                            //on met a jour la notion "d'avant"
-                            assert(index<(int)numberOfCells+2);
-                            oldVal = index;
+					{
+						for (uchar n=0; n<p; n++)
+						{
+							// ... on part de son indice de CC
+							index = neighboursVal[n];
+							//s'il n'est pas egal a celui du voisin d'avant
+							if (index != oldVal)
+							{
+								//on met a jour la notion "d'avant"
+								assert(index<(int)numberOfCells+2);
+								oldVal = index;
 
-                            //on cherche a quoi il est vraiment equivalent
-                            while (equivalentLabels[index] > 1)
-                            {
-                                index = equivalentLabels[index];
-                                assert(index<(int)numberOfCells+2);
-                            }
+								//on cherche a quoi il est vraiment equivalent
+								while (equivalentLabels[index] > 1)
+								{
+									index = equivalentLabels[index];
+									assert(index<(int)numberOfCells+2);
+								}
 
-                            neighboursMin.push_back(index);
-                        }
-                    }
+								neighboursMin.push_back(index);
+							}
+						}
+					}
 
                     //on prend la plus petite des "fins de branches"
                     std::sort(neighboursMin.begin(),neighboursMin.end());
                     val = neighboursMin[0];
 
-                    //Console::print("Minimas [");
-                    //for (n=0;n<neighboursMin.size();n++)
-                    //	(n+1 < neighboursMin.size() ? Console::print("%i,",neighboursMin.at(n)) : Console::print("%i]\n",neighboursMin.at(n)));
-                    //Console::print("Le plus petit = %i\n",val);
-
                     //on met a jour la table d'equivalence ...
                     oldVal = val;
                     //pour toutes les autres fins de branches
-                    for (n=1; n<neighboursMin.size(); n++)
-                    {
-                        index = neighboursMin[n];
-                        assert(index<(int)numberOfCells+2);
-                        //si on ne vient pas de la traiter
-                        if (index != oldVal)
-                        {
-                            //on met a jour son equivalence avec le nouveau minimum trouve
-                            equivalentLabels[index] = val;
-                            oldVal = index;
-                        }
-                    }
+					{
+						for (uchar n=1; n<neighboursMin.size(); n++)
+						{
+							index = neighboursMin[n];
+							assert(index<(int)numberOfCells+2);
+							//si on ne vient pas de la traiter
+							if (index != oldVal)
+							{
+								//on met a jour son equivalence avec le nouveau minimum trouve
+								equivalentLabels[index] = val;
+								oldVal = index;
+							}
+						}
+					}
                 }
 
                 *_slice = val;
@@ -3535,12 +3520,12 @@ void DgmOctree::prepareCellForNNSearch(OctreeCellCodeType truncatedCellCode, int
         nextDepthMinimumMinDist = depth*depth;
 
         //recherche des cellules voisine (profondeur depth > 0)
-        a = ccMin(a0,depth);
-        b = ccMin(b0,depth);
-        c = ccMin(c0,depth);
-        d = ccMin(d0,depth);
-        e = ccMin(e0,depth);
-        f = ccMin(f0,depth);
+        a = std::min(a0,depth);
+        b = std::min(b0,depth);
+        c = std::min(c0,depth);
+        d = std::min(d0,depth);
+        e = std::min(e0,depth);
+        f = std::min(f0,depth);
 
         v0=cellPos[0]-a;
         for (i=-a; i<=b; i++)
@@ -4209,7 +4194,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 
 struct octreeCellDesc
 {
-	OctreeCellCodeType truncatedCode;
+	DgmOctree::OctreeCellCodeType truncatedCode;
 	unsigned i1,i2;
 	uchar level;
 };
@@ -4324,9 +4309,9 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
         if (functionTitle)
             progressCb->setMethodTitle(functionTitle);
         char buffer[512];
-	sprintf(buffer,"Octree level %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %d",level,cells.size(),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
+		sprintf(buffer,"Octree level %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %d",level,cells.size(),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
         progressCb->setInfo(buffer);
-		s_normProgressCb_MT = new NormalizedProgress(progressCb,cells.size());
+		s_normProgressCb_MT = new NormalizedProgress(progressCb,(unsigned)cells.size());
         progressCb->start();
     }
 
@@ -4370,7 +4355,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
 	if (!s_cellFunc_MT_success)
 		cells.clear();
 
-    return cells.size();
+    return (unsigned)cells.size();
 }
 
 #define ENABLE_DOWN_TOP_TRAVERSAL_MT
@@ -4597,7 +4582,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
         progressCb->setInfo(buffer);
 		if (s_normProgressCb_MT)
 			delete s_normProgressCb_MT;
-		s_normProgressCb_MT = new NormalizedProgress(progressCb,cells.size());
+		s_normProgressCb_MT = new NormalizedProgress(progressCb,(unsigned)cells.size());
         progressCb->start();
     }
 
@@ -4641,7 +4626,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
 	if (!s_cellFunc_MT_success)
 		cells.clear();
 
-    return cells.size();
+    return (unsigned)cells.size();
 }
 
 #endif

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
 
 #ifndef CC_DRAWABLE_OBECJT_HEADER
 #define CC_DRAWABLE_OBECJT_HEADER
@@ -72,7 +65,7 @@ struct vboStruct
 //! Display context
 struct glDrawContext
 {
-    unsigned short flags;       //drawing options (see below)
+    uint16_t flags;       //drawing options (see below)
     int glW;                    //GL screen width
     int glH;                    //GL screen height
     ccGenericGLDisplay* _win;   //GL window ref.
@@ -134,26 +127,28 @@ struct glDrawContext
 };
 typedef glDrawContext CC_DRAW_CONTEXT;
 
-// Drawing flags
-#define CC_DRAW_2D                              0x00000001
-#define CC_DRAW_3D                              0x00000002
-#define CC_DRAW_FOREGROUND                      0x00000004
-#define CC_LIGHT_ENABLED                        0x00000008
-#define CC_SKIP_UNSELECTED                      0x00000010
-#define CC_SKIP_SELECTED                        0x00000020
-#define CC_SKIP_ALL                             0x00000030
-#define CC_DRAW_NAMES                           0x00000040
-#define CC_DRAW_POINT_NAMES                     0x00000080
-#define CC_DRAW_TRI_NAMES						0x00000100
-#define CC_LOD_ACTIVATED                        0x00000200
-#define CC_VIRTUAL_TRANS_ENABLED                0x00000400
+// Drawing flags (type: short)
+#define CC_DRAW_2D                              0x0001
+#define CC_DRAW_3D                              0x0002
+#define CC_DRAW_FOREGROUND                      0x0004
+#define CC_LIGHT_ENABLED                        0x0008
+#define CC_SKIP_UNSELECTED                      0x0010
+#define CC_SKIP_SELECTED                        0x0020
+#define CC_SKIP_ALL                             0x0030		// = CC_SKIP_UNSELECTED | CC_SKIP_SELECTED
+#define CC_DRAW_ENTITY_NAMES                    0x0040
+#define CC_DRAW_POINT_NAMES                     0x0080
+#define CC_DRAW_TRI_NAMES						0x0100
+#define CC_DRAW_ANY_NAMES						0x01C0		// = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES
+#define CC_LOD_ACTIVATED                        0x0200
+#define CC_VIRTUAL_TRANS_ENABLED                0x0400
 
 // Drawing flags testing macros (see ccDrawableObject)
 #define MACRO_Draw2D(context) (context.flags & CC_DRAW_2D)
 #define MACRO_Draw3D(context) (context.flags & CC_DRAW_3D)
 #define MACRO_DrawPointNames(context) (context.flags & CC_DRAW_POINT_NAMES)
 #define MACRO_DrawTriangleNames(context) (context.flags & CC_DRAW_TRI_NAMES)
-#define MACRO_DrawNames(context) (context.flags & CC_DRAW_NAMES)
+#define MACRO_DrawEntityNames(context) (context.flags & CC_DRAW_ENTITY_NAMES)
+#define MACRO_DrawNames(context) (context.flags & CC_DRAW_ANY_NAMES)
 #define MACRO_SkipUnselected(context) (context.flags & CC_SKIP_UNSELECTED)
 #define MACRO_SkipSelected(context) (context.flags & CC_SKIP_SELECTED)
 #define MACRO_LightIsEnabled(context) (context.flags & CC_LIGHT_ENABLED)
@@ -416,4 +411,4 @@ protected:
     ccGenericGLDisplay* m_currentDisplay;
 };
 
-#endif
+#endif //CC_DRAWABLE_OBECJT_HEADER

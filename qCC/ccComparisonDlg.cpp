@@ -31,6 +31,7 @@
 #include <DistanceComputationTools.h>
 #include <MeshSamplingTools.h>
 #include <ScalarField.h>
+#include <DgmOctree.h>
 
 //qCC_db
 #include <ccHObject.h>
@@ -460,7 +461,7 @@ int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(DistanceType
 	{
 		//Structures utiles pour le parcours de la structure octree
 		uchar bitDec = GET_BIT_SHIFT(level);
-		OctreeCellCodeType truncatedCode,tempCode = 0xFFFFFFFF;
+		CCLib::DgmOctree::OctreeCellCodeType truncatedCode, tempCode = 0xFFFFFFFF;
 		int numberOfPointsInCell=0;
 		unsigned index=0;
 		DistanceType cellDist=-1.0;

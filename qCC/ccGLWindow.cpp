@@ -41,6 +41,7 @@
 #include <ccCalibratedImage.h>
 #include <cc2DLabel.h>
 #include <ccGenericPointCloud.h>
+#include <ccGenericMesh.h>
 #include <ccTimer.h>
 
 //CCFbo
@@ -1859,6 +1860,7 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 	case AUTO_POINT_PICKING:
 		pickingFlags |= CC_DRAW_NAMES;
 		pickingFlags |= CC_DRAW_POINT_NAMES;
+		pickingFlags |= CC_DRAW_TRI_NAMES;
 		break;
 	case TRIANGLE_PICKING:
 		pickingFlags |= CC_DRAW_NAMES;
@@ -1946,8 +1948,8 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 		return -1;
 	}
 
-	int selectedID=-1,pointID=-1;
-	processHits(hits,selectedID,pointID);
+	int selectedID=-1,detailID=-1;
+	processHits(hits,selectedID,detailID);
 
 	//standard "entity" picking
 	if (pickingMode == ENTITY_PICKING)
@@ -1959,26 +1961,43 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 	//"3D point" picking
 	else if (pickingMode == POINT_PICKING)
 	{
-		if (selectedID>=0 && pointID>=0)
+		if (selectedID>=0 && detailID>=0)
 		{
-			emit pointPicked(selectedID,(unsigned)pointID,cursorX,cursorY);
+			emit pointPicked(selectedID,(unsigned)detailID,cursorX,cursorY);
 			//TODO: m_updateFBO=true;?
 		}
 	}
 	else if (pickingMode == AUTO_POINT_PICKING)
 	{
-		if (m_globalDBRoot && selectedID>=0 && pointID>=0)
+		if (m_globalDBRoot && selectedID>=0 && detailID>=0)
 		{
 			//auto spawn the corresponding label
 			ccHObject* obj = m_globalDBRoot->find(selectedID);
 			if (obj && obj->isKindOf(CC_POINT_CLOUD))
 			{
 				cc2DLabel* label = new cc2DLabel();
-				label->addPoint(static_cast<ccGenericPointCloud*>(obj),pointID);
+				label->addPoint(static_cast<ccGenericPointCloud*>(obj),detailID);
 				label->setVisible(true);
 				label->setDisplay(obj->getDisplay());
 				label->setPosition((float)(cursorX+20)/(float)width(),(float)(cursorY+20)/(float)height());
 				obj->addChild(label,true);
+				emit newLabel(static_cast<ccHObject*>(label));
+				QApplication::processEvents();
+				redraw();
+			}
+			if (obj && obj->isKindOf(CC_MESH))
+			{
+				cc2DLabel* label = new cc2DLabel();
+				ccGenericMesh *mesh = static_cast<ccGenericMesh*>(obj);
+				ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
+				assert(cloud);
+				CCLib::TriangleSummitsIndexes *summitsIndexes = mesh->getTriangleIndexes(detailID);
+				for (__int8 i = 0; i < 3; i++)
+					label->addPoint(cloud,summitsIndexes->i[i]);
+				label->setVisible(true);
+				label->setDisplay(cloud->getDisplay());
+				label->setPosition((float)(cursorX+20)/(float)width(),(float)(cursorY+20)/(float)height());
+				cloud->addChild(label,true);
 				emit newLabel(static_cast<ccHObject*>(label));
 				QApplication::processEvents();
 				redraw();
@@ -2013,6 +2032,7 @@ void ccGLWindow::processHits(GLint hits, int& entID, int& subCompID)
 			if (i == 0 || minDepth < minMinDepth)
 			{
 				entID = _selectBuf[3];
+				subCompID = -1;
 				if (n>1)
 					subCompID = _selectBuf[4];
 				minMinDepth = minDepth;

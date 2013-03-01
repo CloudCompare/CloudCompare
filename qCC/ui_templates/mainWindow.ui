@@ -220,9 +220,10 @@
       <string>Toggle (recursive)</string>
      </property>
      <addaction name="actionToggleVisibility"/>
-     <addaction name="actionToggleNormals"/>
      <addaction name="actionToggleColors"/>
+     <addaction name="actionToggleNormals"/>
      <addaction name="actionToggleSF"/>
+     <addaction name="actionToggleMaterials"/>
      <addaction name="actionToggleShowName"/>
     </widget>
     <addaction name="menuColors"/>
@@ -2005,6 +2006,17 @@
    </property>
    <property name="text">
     <string>Primitive factory</string>
+   </property>
+  </action>
+  <action name="actionToggleMaterials">
+   <property name="text">
+    <string>Materials/textures</string>
+   </property>
+   <property name="shortcut">
+    <string>M</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
  </widget>

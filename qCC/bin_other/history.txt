@@ -10,6 +10,7 @@ v2.4 ??/??/2013
 - Point picking mechanism enhanced:
 	- point marker is now a (selectable) 3D sphere
 	- point marker default size is customizable via display options dialog
+	- mesh triangles can now be picked (early version: creates a 3-points label)
 	- "Point list picking" tool
 		* automatically pastes last picked point in clipboard
 		* string format: " CC_POINT_#i(x,y,z) " (where i is the index in the current list)
@@ -30,7 +31,7 @@ v2.4 ??/??/2013
 	* can be (recursively) toggled with 'Edit > Toggle > 3D name' (shortcut: D)
 	* with the dedicated checkbox in the properties dialog of each entity
 	* with a right click on the entity entry in the DB tree	
-- New entry in the DB tree context menu: "Toggle materials/textures"
+- "Toggle materials/textures" entry added to the DB tree context menu (and in the 'Edit > Toggle' sub-menu)
 - New display options (display dialog):
 	* point marker size (see above)
 	* histogram background color

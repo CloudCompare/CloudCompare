@@ -231,7 +231,7 @@ public:
     virtual bool colorsShown() const;
     //! Sets colors visibility
     virtual void showColors(bool state);
-	//! Toggles colors
+	//! Toggles colors display state
 	virtual void toggleColors();
 
     //! Returns whether normals are enabled or not
@@ -240,7 +240,7 @@ public:
     virtual bool normalsShown() const;
     //! Sets normals visibility
     virtual void showNormals(bool state);
-	//! Toggles normals
+	//! Toggles normals display state
 	virtual void toggleNormals();
 
     /*** scalar fields ***/
@@ -257,11 +257,16 @@ public:
     //! Sets active scalarfield visibility
     virtual void showSF(bool state);
 
-	//! Toggles SF
+	//! Toggles SF display state
 	virtual void toggleSF();
 
 	//! Returns whether active scalar field is visible
     virtual bool sfShown() const;
+
+	/*** Mesh materials ***/
+
+	//! Toggles material display state
+	virtual void toggleMaterials() {}; //does nothing by default!
 
     /*** Name display in 3D ***/
 
@@ -271,7 +276,7 @@ public:
 	//! Returns whether name is displayed in 3D or not
 	virtual bool nameShownIn3D() const;
 
-	//! Toggles name in 3D
+	//! Toggles name in 3D display state
 	virtual void toggleShowName();
 
 	/*** temporary color ***/

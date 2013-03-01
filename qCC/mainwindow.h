@@ -238,6 +238,7 @@ protected slots:
     void toggleSelectedEntitiesColors();
     void toggleSelectedEntitiesSF();
     void toggleSelectedEntities3DName();
+	void toggleSelectedEntitiesMaterials();
 
     void doActionRenderToFile();
 
@@ -379,6 +380,17 @@ protected:
     **/
     void doActionClearProperty(int prop);
 
+	//! Toggles selected entities properties
+    /** - prop=0 : VISIBILITY
+		- prop=1 : COLOR
+        - prop=2 : NORMALS
+        - prop=3 : SCALAR FIELD
+        - prop=4 : MATERIAL/TEXTURE
+		- prop=5 : NAME (IN 3D)
+        \param prop property id
+    **/
+	void toggleSelectedEntitiesProp(int prop);
+
     //! Active SF action fork
     /** - action=0 : toggle SF color scale
         - action=1 : activate previous SF
@@ -400,13 +412,14 @@ protected:
     //! Connects all QT actions to slots
     void connectActions();
 
-    //Menu
+    //! Enables menu entires based on the current selection
     void enableUIItems(dbTreeSelectionInfo& selInfo);
 
 	//! Expands DB tree for selected items
 	void expandDBTreeWithSelection(ccHObject::Container& selection);
 
-    //DB & DB Tree
+
+	//DB & DB Tree
     ccDBRoot* m_ccRoot;
 
 	//! Currently selected entities;

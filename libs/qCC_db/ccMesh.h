@@ -90,6 +90,7 @@ public:
 
 	//inherited methods (ccDrawableObject)
 	virtual void setDisplay(ccGenericGLDisplay* win);
+	virtual void toggleMaterials() {showMaterials(!materialsShown());}
 
 	//! Returns max capacity
 	virtual unsigned maxSize() const;

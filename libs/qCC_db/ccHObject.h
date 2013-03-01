@@ -176,6 +176,7 @@ public:
 	recursive_call0_ex(toggleNormals,toggleNormals_recursive);
 	recursive_call0_ex(toggleSF,toggleSF_recursive);
 	recursive_call0_ex(toggleShowName,toggleShowName_recursive);
+	recursive_call0_ex(toggleMaterials,toggleMaterials_recursive);
 
     //! Applies the active OpenGL transformation to the entity (recursive)
     /** The input ccGLMatrix should be left to 0, unless you want to apply

@@ -62,6 +62,7 @@ public:
     virtual void showSF(bool state);
     virtual void setTempColor(const colorType* col, bool autoActivate = true);
     virtual void enableTempColor(bool state);
+	virtual void toggleMaterials();
 
 	//inherited methods (GenericIndexedMesh)
 	virtual unsigned size() const;

@@ -96,6 +96,11 @@ bool ccMeshGroup::materialsShown() const
 	CC_MESH_RECURSIVE_TEST(materialsShown);
 }
 
+void ccMeshGroup::toggleMaterials()
+{
+    CC_MESH_RECURSIVE_CALL(toggleMaterials());
+}
+
 bool ccMeshGroup::hasTriNormals() const
 {
 	CC_MESH_RECURSIVE_TEST(hasTriNormals);

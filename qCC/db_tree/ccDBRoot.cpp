@@ -1242,26 +1242,22 @@ void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 			item->setEnabled(!item->isEnabled());
 			break;
 		case 1: //visibility
-			item->setVisible(!item->isVisible());
+			item->toggleVisibility();
 			break;
 		case 2: //color
-			item->showColors(!item->colorsShown());
+			item->toggleColors();
 			break;
 		case 3: //normal
-			item->showNormals(!item->normalsShown());
+			item->toggleNormals();
 			break;
 		case 4: //SF
-			item->showSF(!item->sfShown());
+			item->toggleSF();
 			break;
 		case 5: //Materials/textures
-			if (item->isKindOf(CC_MESH))
-			{
-				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(item);
-				mesh->showMaterials(!mesh->materialsShown());
-			}
+			item->toggleMaterials();
 			break;
 		case 6: //3D name
-			item->showNameIn3D(!item->nameShownIn3D());
+			item->toggleShowName();
 			break;
 		}
 		item->prepareDisplayForRefresh();

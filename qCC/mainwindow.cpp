@@ -176,6 +176,7 @@ MainWindow::MainWindow()
 	connect(actionToggleColors,		SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesColors()));		//'C': toggles selected items colors visibility
 	connect(actionToggleSF,			SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesSF()));			//'S': toggles selected items SF visibility
 	connect(actionToggleShowName,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntities3DName()));		//'D': toggles selected items '3D name' visibility
+	connect(actionToggleMaterials,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesMaterials()));	//'M': toggles selected items materials/textures visibility
 
     connectActions();
 
@@ -4912,69 +4913,71 @@ void MainWindow::cancelPickRotationCenter()
 	freezeUI(false);
 }
 
-void MainWindow::toggleSelectedEntitiesNormals()
+void MainWindow::toggleSelectedEntitiesVisibility()
 {
-	ccHObject::Container baseEntities;
-	RemoveSiblings(m_selectedEntities,baseEntities);
-    for (unsigned i=0; i<baseEntities.size(); ++i)
-    {
-		baseEntities[i]->toggleNormals_recursive();
-		baseEntities[i]->prepareDisplayForRefresh_recursive();
-    }
-
-    refreshAll();
+	toggleSelectedEntitiesProp(0);
 }
 
 void MainWindow::toggleSelectedEntitiesColors()
 {
-	ccHObject::Container baseEntities;
-	RemoveSiblings(m_selectedEntities,baseEntities);
-    for (unsigned i=0; i<baseEntities.size(); ++i)
-    {
-		baseEntities[i]->toggleColors_recursive();
-		baseEntities[i]->prepareDisplayForRefresh_recursive();
-    }
+	toggleSelectedEntitiesProp(1);
+}
 
-    refreshAll();
+void MainWindow::toggleSelectedEntitiesNormals()
+{
+	toggleSelectedEntitiesProp(2);
 }
 
 void MainWindow::toggleSelectedEntitiesSF()
 {
-	ccHObject::Container baseEntities;
-	RemoveSiblings(m_selectedEntities,baseEntities);
-    for (unsigned i=0; i<baseEntities.size(); ++i)
-    {
-		baseEntities[i]->toggleSF_recursive();
-		baseEntities[i]->prepareDisplayForRefresh_recursive();
-    }
+	toggleSelectedEntitiesProp(3);
+}
 
-    refreshAll();
+void MainWindow::toggleSelectedEntitiesMaterials()
+{
+	toggleSelectedEntitiesProp(4);
 }
 
 void MainWindow::toggleSelectedEntities3DName()
 {
-	ccHObject::Container baseEntities;
-	RemoveSiblings(m_selectedEntities,baseEntities);
-    for (unsigned i=0; i<baseEntities.size(); ++i)
-    {
-		baseEntities[i]->toggleShowName_recursive();
-		baseEntities[i]->prepareDisplayForRefresh_recursive();
-    }
-
-    refreshAll();
+	toggleSelectedEntitiesProp(5);
 }
 
-void MainWindow::toggleSelectedEntitiesVisibility()
+void MainWindow::toggleSelectedEntitiesProp(int prop)
 {
 	ccHObject::Container baseEntities;
 	RemoveSiblings(m_selectedEntities,baseEntities);
     for (unsigned i=0; i<baseEntities.size(); ++i)
     {
-        baseEntities[i]->toggleVisibility_recursive();
+		switch(prop)
+		{
+		case 0: //visibility
+			baseEntities[i]->toggleVisibility_recursive();
+			break;
+		case 1: //colors
+			baseEntities[i]->toggleColors_recursive();
+			break;
+		case 2: //normals
+			baseEntities[i]->toggleNormals_recursive();
+			break;
+		case 3: //sf
+			baseEntities[i]->toggleSF_recursive();
+			break;
+		case 4: //material/texture
+			baseEntities[i]->toggleMaterials_recursive();
+			break;
+		case 5: //name in 3D
+			baseEntities[i]->toggleShowName_recursive();
+			break;
+		default:
+			assert(false);
+		}
         baseEntities[i]->prepareDisplayForRefresh_recursive();
     }
 
     refreshAll();
+    if (m_ccRoot)
+        m_ccRoot->updatePropertiesView();
 }
 
 void MainWindow::showSelectedEntitiesHistogram()

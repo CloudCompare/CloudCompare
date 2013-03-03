@@ -3,6 +3,8 @@
 v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
+
+v2.4 03/03/2013
 - Points size can now be independently set for each cloud
 	* see the 'Point size' combo-box in the cloud's properties
 - The 'Align with point pairs' tool can now be used with only one cloud selected	
@@ -41,6 +43,9 @@ v2.4 ??/??/2013
 - Limits for auto-decimation are now:
 	* 10M. points for a cloud
 	* 2.5M. faces for a mesh
+- New command lines for ccViewer:
+	* '-top' to make the window 'alawys on top'
+	* '-win [X] [Y] [W] [H]' to set the position (X,Y) and size (W,H) of the window
 - New icons for CloudCompare and ccViewer
 - Bug fix:
 	* in the 'Point list picking' tool, when exporting a list of picked points THEN cancelling the picking process, CC will crash

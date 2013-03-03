@@ -63,11 +63,52 @@ int main(int argc, char *argv[])
 	//files to open are passed as argument
 	if (argc>1)
     {
-		//any argument is assumed to be a filename --> we try to load it
+		//parse arguments
 		QStringList filenames;
-        for (int i=1;i<argc;++i)
-			filenames << QString(argv[i]);
-		w.addToDB(filenames);
+		int i=1;
+		while (i<argc)
+		{
+			QString argument = QString(argv[i++]).toUpper();
+
+			//Argument '-WIN X Y W H' (to set window size and position)
+			if (argument.toUpper() == "-WIN")
+			{
+				bool ok=true;
+				if (i+3<argc)
+				{
+					bool converionOk;
+					int x = QString(argv[i]).toInt(&converionOk); ok &= converionOk;
+					int y = QString(argv[i+1]).toInt(&converionOk); ok &= converionOk;
+					int width = QString(argv[i+2]).toInt(&converionOk); ok &= converionOk;
+					int height = QString(argv[i+3]).toInt(&converionOk); ok &= converionOk;
+					i+=4;
+
+					if (ok)
+					{
+						//change window position and size
+						w.move(x,y);
+						w.resize(width,height);
+					}
+				}
+				if (!ok)
+				{
+					ccLog::Warning("Invalid arguments! 4 integer values are expected after '-win' (X Y W H)");
+					break;
+				}
+			}
+			else if (argument == "-TOP")
+			{
+				w.setWindowFlags(w.windowFlags() | Qt::CustomizeWindowHint | Qt::WindowStaysOnTopHint);
+				w.show();
+			}
+			else //any other argument is assumed to be a filename (that will we try to load)
+			{
+				filenames << argument;
+			}
+		}
+
+		if (!filenames.empty())
+			w.addToDB(filenames);
     }
 
     w.checkForLoadedEntities();

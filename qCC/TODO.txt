@@ -23,12 +23,10 @@ Big ones:
 [*] flythrough mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
 
 Various:
-[*] Add materials to the 'Toggle (recursive)' menu
 [*] Per-point size based on SF values (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=507)
 [*] Select ASCII files output precision (http://www.danielgm.net/cc/forum/viewtopic.php?f=10&t=509&p=1245#p1245)
 [*] Add a header to the begining of an ASCII file (column names)
-[*] Command line options to specify ccViewer window size & position + 'always stay on top'
-[*] Displaying ortho-rectified images as high-res textures (instead of point clouds!)
+[*] Display ortho-rectified images as high-res textures (instead of point clouds!)
 [*] Use PDAL instead of libLAS (http://www.danielgm.net/cc/forum/viewtopic.php?f=15&t=437&p=1014#p1014)
 [*] Run the PCV plugin on more than one file at a time (or batch process)
 [*] Command line mode could be extended (more methods, etc.)

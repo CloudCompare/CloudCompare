@@ -56,3 +56,7 @@ if( ${OPTION_BUILD_CCVIEWER} )
 	add_subdirectory( ccViewer )
 endif()
 
+# copy some Mac stuff to build directory
+if ( APPLE )
+   file(COPY Mac DESTINATION .)
+endif()

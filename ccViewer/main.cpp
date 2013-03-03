@@ -21,6 +21,10 @@
 #include <QtGui/QApplication>
 #include <QMessageBox>
 
+#ifdef Q_OS_MAC
+#include <QFileOpenEvent>
+#endif
+ 
 //qCC
 #include <ccConsole.h>
 
@@ -33,9 +37,53 @@
 
 #include "ccviewer.h"
 
+
+class ccApplication : public QApplication
+{
+   public:
+      ccApplication( int &argc, char **argv ) :
+         QApplication( argc, argv )
+      {
+         setOrganizationName("CCCorp");
+         setApplicationName("CloudCompareViewer");
+#ifdef Q_OS_MAC
+         // Mac OS X apps don't show icons in menus
+         setAttribute( Qt::AA_DontShowIconsInMenus );
+#endif
+      }
+
+#ifdef Q_OS_MAC
+      void  setViewer( ccViewer *inViewer ) { mViewer = inViewer; }
+            
+   protected:
+      bool  event( QEvent *inEvent )
+      {
+         switch ( inEvent->type() )
+         {
+            case QEvent::FileOpen:
+            {
+               if ( mViewer == NULL )
+                  return false;
+               
+               QStringList fileName( static_cast<QFileOpenEvent *>(inEvent)->file() );
+            
+               mViewer->addToDB( fileName );
+               return true;
+            }
+               
+            default:
+               return QApplication::event( inEvent );
+         }
+      }
+   
+   private:
+      ccViewer *mViewer;
+#endif
+};
+
 int main(int argc, char *argv[])
 {
-	QApplication a(argc, argv);
+	ccApplication a(argc, argv);
 
 	//OpenGL?
     if (!QGLFormat::hasOpenGL())
@@ -44,10 +92,6 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
-	//Global settings 'header'
-    QCoreApplication::setOrganizationName("CCCorp");
-    QCoreApplication::setApplicationName("CloudCompareViewer");
-
     //common data initialization
 	ccObject::ResetUniqueIDCounter();
     ccTimer::Init();
@@ -55,6 +99,9 @@ int main(int argc, char *argv[])
 	ccColorTablesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
 	ccViewer w/*(0,Qt::Window|Qt::CustomizeWindowHint)*/;
+#ifdef Q_OS_MAC
+   a.setViewer( &w );
+#endif
 	w.show();
 
 	//init console
@@ -110,6 +157,11 @@ int main(int argc, char *argv[])
 		if (!filenames.empty())
 			w.addToDB(filenames);
     }
+
+#ifdef Q_OS_MAC   
+   // process events to load any files on the command line
+   QCoreApplication::processEvents();
+#endif
 
     w.checkForLoadedEntities();
 

@@ -1891,14 +1891,14 @@ bool ccMesh::getColorFromTexture(unsigned triIndex, const CCVector3& P, colorTyp
 //we use as many static variables as we can to limit the size of the heap used by each recursion...
 static const unsigned s_defaultSubdivideGrowRate = 50;
 static float s_maxSubdivideArea = 1;
-static QMap<__int64,unsigned> s_alreadyCreatedVertices; //map to store already created edges middle points
+static QMap<qint64,unsigned> s_alreadyCreatedVertices; //map to store already created edges middle points
 
-static __int64 GenerateKey(unsigned edgeIndex1, unsigned edgeIndex2)
+static qint64 GenerateKey(unsigned edgeIndex1, unsigned edgeIndex2)
 {
 	if (edgeIndex1>edgeIndex2)
 		std::swap(edgeIndex1,edgeIndex2);
 
-	return ((((__int64)edgeIndex1)<<32) | (__int64)edgeIndex2);
+	return ((((qint64)edgeIndex1)<<32) | (qint64)edgeIndex2);
 }
 
 bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC)
@@ -1942,8 +1942,8 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		//add new vertices
 		unsigned indexG1 = 0;
 		{
-			__int64 key = GenerateKey(indexA,indexB);
-			QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
+			qint64 key = GenerateKey(indexA,indexB);
+			QMap<qint64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
 			if (it == s_alreadyCreatedVertices.end())
 			{
 				//generate new vertex
@@ -1975,8 +1975,8 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		}
 		unsigned indexG2 = 0;
 		{
-			__int64 key = GenerateKey(indexB,indexC);
-			QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
+			qint64 key = GenerateKey(indexB,indexC);
+			QMap<qint64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
 			if (it == s_alreadyCreatedVertices.end())
 			{
 				//generate new vertex
@@ -2008,8 +2008,8 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		}
 		unsigned indexG3 = vertices->size();
 		{
-			__int64 key = GenerateKey(indexC,indexA);
-			QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
+			qint64 key = GenerateKey(indexC,indexA);
+			QMap<qint64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(key);
 			if (it == s_alreadyCreatedVertices.end())
 			{
 				//generate new vertex
@@ -2144,19 +2144,19 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 			//test all edges
 			int indexG1 = -1;
 			{
-				QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexA,indexB));
+				QMap<qint64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexA,indexB));
 				if (it != s_alreadyCreatedVertices.end())
 					indexG1 = (int)it.value();
 			}
 			int indexG2 = -1;
 			{
-				QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexB,indexC));
+				QMap<qint64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexB,indexC));
 				if (it != s_alreadyCreatedVertices.end())
 					indexG2 = (int)it.value();
 			}
 			int indexG3 = -1;
 			{
-				QMap<__int64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexC,indexA));
+				QMap<qint64,unsigned>::const_iterator it = s_alreadyCreatedVertices.find(GenerateKey(indexC,indexA));
 				if (it != s_alreadyCreatedVertices.end())
 					indexG3 = (int)it.value();
 			}

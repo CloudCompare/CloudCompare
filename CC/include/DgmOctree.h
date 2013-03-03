@@ -110,7 +110,7 @@ public:
 	/** Warning: 3 bits per level are required.
 	**/
 #ifdef OCTREE_CODES_64_BITS
-	typedef unsigned __int64 OctreeCellCodeType; //max 21 levels (but twice more memory!)
+	typedef unsigned qint64 OctreeCellCodeType; //max 21 levels (but twice more memory!)
 #else
 	typedef unsigned OctreeCellCodeType; //max 10 levels
 #endif

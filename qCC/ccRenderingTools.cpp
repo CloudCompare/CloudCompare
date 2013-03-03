@@ -208,8 +208,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 
 			if (logScale)
 			{
-				DistanceType endValueLog = log10(std::max(ZERO_TOLERANCE,fabs(endValue)));
-				DistanceType startValueLog = log10(std::max(ZERO_TOLERANCE,fabs(startValue)));
+				DistanceType endValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(endValue)));
+				DistanceType startValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(startValue)));
 				intervale = (endValueLog-startValueLog)/(DistanceType)numberOfCubes;
 				firstValue = startValueLog;
 			}
@@ -306,8 +306,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 
 				if (logScale)
 				{
-					DistanceType endValueLog = log10(std::max(ZERO_TOLERANCE,fabs(-endValue)));
-					DistanceType startValueLog = log10(std::max(ZERO_TOLERANCE,fabs(-startValue)));
+					DistanceType endValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(-endValue)));
+					DistanceType startValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(-startValue)));
 					intervale = -(endValueLog-startValueLog)/(DistanceType)numberOfCubes;
 					firstValue = startValueLog;
 				}
@@ -376,8 +376,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 
 				if (logScale)
 				{
-					DistanceType endValueLog = log10(std::max(ZERO_TOLERANCE,fabs(maxSaturation)));
-					DistanceType startValueLog = log10(std::max(ZERO_TOLERANCE,fabs(minSaturation)));
+					DistanceType endValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(maxSaturation)));
+					DistanceType startValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(minSaturation)));
 					intervale = (endValueLog-startValueLog)/(DistanceType)numberOfCubes;
 					firstValue = startValueLog;
 				}

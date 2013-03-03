@@ -534,7 +534,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
 	if (m_associatedCloud->size()<CC_LOCAL_MODEL_MIN_SIZE[TRI])
 	{
 		//can't compute LSF plane with less than 3 points!
-		return false;
+		return 0;
 	}
 
 	//on calcule le meilleur plan interpolant le nuage selectionné

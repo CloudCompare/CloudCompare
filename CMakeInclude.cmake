@@ -131,3 +131,28 @@ else()
 	set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG ${CC_DEFAULT_PREPROCESSORS_DEBUG} )
 endif()
 endfunction()
+
+if( APPLE )
+   function( get_support_libs )  # 1 argument - return var
+      # get a list of support libs based on configuration
+      #  we need this to install them properly when we are bundling the app
+      list( APPEND SUPPORT_LIB_NAMES libCC_DLL )
+      list( APPEND SUPPORT_LIB_NAMES libQCC_DB_DLL )
+
+      if( ${OPTION_USE_XIOT} )
+         list( APPEND SUPPORT_LIB_NAMES libxiot )
+         list( APPEND SUPPORT_LIB_NAMES libxerces-c )
+         list( APPEND SUPPORT_LIB_NAMES libopenFI )
+      endif()
+
+      foreach( supportLib ${SUPPORT_LIB_NAMES} )
+         set( LIB_NAME ${CMAKE_INSTALL_PREFIX}/lib/${supportLib}${CMAKE_SHARED_LIBRARY_SUFFIX} )
+      
+         # resolve any symbolic links
+         get_filename_component( _resolvedFile ${LIB_NAME} REALPATH )
+         list( APPEND SUPPORT_LIBS ${_resolvedFile} )
+      endforeach()
+   
+      set( ${ARGV0} ${SUPPORT_LIBS} PARENT_SCOPE )
+   endfunction()
+endif()

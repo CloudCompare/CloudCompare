@@ -2502,7 +2502,8 @@ bool ccGLWindow::renderToFile(const char* filename, float zoomFactor/*=1.0*/, bo
 
 			if (m_activeGLFilter && !filter)
 			{
-				QString shadersPath = QApplication::applicationDirPath() + QString("/shaders");
+				QString shadersPath = ccGLWindow::getShadersPath();
+
 				if (!m_activeGLFilter->init(Wp,Hp,qPrintable(shadersPath)))
 				{
 					ccConsole::Error("[GL Filter] GL filter can't be used during rendering (not enough memory)!");
@@ -2702,7 +2703,8 @@ bool ccGLWindow::initGLFilter(int w, int h)
 	ccGlFilter* _filter = m_activeGLFilter;
 	m_activeGLFilter=0;
 
-	QString shadersPath = QApplication::applicationDirPath() + QString("/shaders");
+	QString shadersPath = ccGLWindow::getShadersPath();
+
 	//ccConsole::Print(QString("Shaders path: %1").arg(shadersPath));
 
 	if (!_filter->init(w,h,qPrintable(shadersPath)))
@@ -2795,3 +2797,16 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 	y2 -= margin; //empirical compensation
 	renderText(x2, y2, text, textFont);
 }
+
+QString  ccGLWindow::getShadersPath()
+{
+#if defined(Q_OS_MAC)
+   // shaders are in the bundle
+   QString  path = QCoreApplication::applicationDirPath();
+   path.remove( "MacOS" );
+   return path + "Shaders";
+#else
+   return QApplication::applicationDirPath() + "/shaders";
+#endif
+}
+

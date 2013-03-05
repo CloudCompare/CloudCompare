@@ -30,6 +30,10 @@
 #include <QPixmap>
 #include <QMessageBox>
 
+#ifdef Q_OS_MAC
+#include <QFileOpenEvent>
+#endif
+
 //qCC_db
 #include <ccTimer.h>
 #include <ccObject.h>
@@ -44,14 +48,48 @@
 //system
 #include <time.h>
 
+
+class qccApplication : public QApplication
+{
+   public:
+      qccApplication( int &argc, char **argv ) :
+         QApplication( argc, argv )
+      {
+         setOrganizationName("CCCorp");
+         setApplicationName("CloudCompare");
+#ifdef Q_OS_MAC         
+         // Mac OS X apps don't show icons in menus
+         setAttribute( Qt::AA_DontShowIconsInMenus );
+#endif
+      }
+
+#ifdef Q_OS_MAC            
+   protected:
+      bool  event( QEvent *inEvent )
+      {
+         switch ( inEvent->type() )
+         {
+            case QEvent::FileOpen:
+            {
+               if ( MainWindow::TheInstance() == NULL )
+                  return false;
+                           
+               MainWindow::AddToDB( static_cast<QFileOpenEvent *>(inEvent)->file() );
+               return true;
+            }
+               
+            default:
+               return QApplication::event( inEvent );
+         }
+      }
+#endif
+};
+
+
 int main(int argc, char **argv)
 {
 	//QT initialisation
-    QApplication app(argc, argv);
-
-	//Global settings 'header'
-    QCoreApplication::setOrganizationName("CCCorp");
-    QCoreApplication::setApplicationName("CloudCompare");
+    qccApplication app(argc, argv);
 
     //Command line mode?
     bool commandLine = (argc>1 && argv[1][0]=='-');

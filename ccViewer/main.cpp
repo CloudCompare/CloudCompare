@@ -47,6 +47,8 @@ class ccApplication : public QApplication
          setOrganizationName("CCCorp");
          setApplicationName("CloudCompareViewer");
 #ifdef Q_OS_MAC
+         mViewer = NULL;
+         
          // Mac OS X apps don't show icons in menus
          setAttribute( Qt::AA_DontShowIconsInMenus );
 #endif

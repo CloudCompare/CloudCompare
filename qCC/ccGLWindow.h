@@ -509,6 +509,9 @@ protected:
 
 	//! Default font
 	QFont m_font;
+   
+private:
+   static QString  getShadersPath();
 };
 
 #endif

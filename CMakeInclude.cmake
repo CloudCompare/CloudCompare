@@ -64,8 +64,8 @@ endif()
 endfunction()
 
 # Export Qt imageformats DLLs to specified destinations
-function( install_Qt_ImageFormats ) # 2 arguments: ARGV0 = release destination / ARGV1 = debug destination
-if( WIN32 )
+function( install_Qt_ImageFormats )
+if( WIN32 ) # 2 arguments: ARGV0 = release destination / ARGV1 = debug destination
 if( NOT ${ARGC} EQUAL 2 )
 	message( SEND_ERROR "function install_Qt_ImageFormats: invalid number of arguments! (need release and debug destinations)" )
 else()
@@ -78,6 +78,14 @@ foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
 	endif()
 endforeach()
 endif()
+elseif( APPLE )    # 2 arguments: ARGV0 = bundle's plugin dir (destination) / ARGV1 = list of plugins to pass to fixup_bundle
+   # install imageformat plugins
+   foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
+      set( PLUGIN_NAME lib${imagePlugin}${CMAKE_SHARED_LIBRARY_SUFFIX} )
+      install( FILES ${QT_PLUGINS_DIR}/imageformats/${PLUGIN_NAME} DESTINATION ${ARGV0}/imageformats COMPONENT Runtime )
+      list( APPEND QT_PLUGINS ${ARGV0}/imageformats/${PLUGIN_NAME} )
+   endforeach()
+   set( ${ARGV1} ${QT_PLUGINS} PARENT_SCOPE )
 endif()
 endfunction()
 

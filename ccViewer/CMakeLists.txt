@@ -13,7 +13,7 @@ include_directories( ${CC_FBO_SOURCE_DIR}/include )
 include_directories( ${CC_DLL_SOURCE_DIR}/include )
 include_directories( ${QCC_DB_DLL_SOURCE_DIR} )
 if( MSVC )
-include_directories( ${QCC_DB_DLL_SOURCE_DIR}/msvc )
+   include_directories( ${QCC_DB_DLL_SOURCE_DIR}/msvc )
 endif()
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -115,32 +115,24 @@ foreach( filename ${auxFiles} )
 endforeach()
 
 # Put together our App bundle on Mac OS X
-
-# App icon and version info for Mac OS X
 if( APPLE )
+   set( MAC_APP_NAME ${PROJECT_NAME}.app )
+   set( MAC_BUNDLE_RESOURCES_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Resources )
+   set( MAC_BUNDLE_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Plugins )
+   set( MAC_BUNDLE_LIB_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Libs )
+
    set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns ) 
    set_source_files_properties( images/icon/cc_viewer_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
-   set( rc_list images/icon/cc_viewer_icon.icns )
 
-   set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/../Mac/InfoViewer.plist )
+   set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/../Mac/ccViewer.plist )
 
    set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}" )
    set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
    set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 
-   set( RESOURCES_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${PROJECT_NAME}.app/Contents/Resources )
-   set( PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${PROJECT_NAME}.app/Contents/Plugins )
-
-   # install imageformat plugins
-   foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
-      set ( PLUGIN_NAME lib${imagePlugin}${CMAKE_SHARED_LIBRARY_SUFFIX} )
-      install( FILES ${QT_PLUGINS_DIR}/imageformats/${PLUGIN_NAME} DESTINATION ${PLUGIN_DIR}/imageformats COMPONENT Runtime )
-      list ( APPEND QT_PLUGINS ${PLUGIN_DIR}/imageformats/${PLUGIN_NAME} )
-   endforeach()
-
    # install qt.conf
    install( CODE "
-      file( WRITE ${RESOURCES_DIR}/qt.conf \"[Paths]\nPlugins = Plugins\" )
+      file( WRITE ${MAC_BUNDLE_RESOURCES_DIR}/qt.conf \"\" )
       " COMPONENT Runtime )
 
    set( DIRS ${EXTERNAL_LIBS_LIBRARIES} ${CMAKE_INSTALL_PREFIX}/lib )
@@ -148,6 +140,6 @@ if( APPLE )
    # call fixup_bundles to change paths using otools
    install( CODE "
       include( BundleUtilities )
-      fixup_bundle( ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${PROJECT_NAME}.app \"${QT_PLUGINS}\" \"${DIRS}\" COMPONENT Runtime ) 
+      fixup_bundle( ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME} \"\" \"${DIRS}\" COMPONENT Runtime ) 
       ")
 endif( APPLE )

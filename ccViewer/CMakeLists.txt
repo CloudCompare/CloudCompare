@@ -117,29 +117,18 @@ endforeach()
 # Put together our App bundle on Mac OS X
 if( APPLE )
    set( MAC_APP_NAME ${PROJECT_NAME}.app )
+   set( MAC_BUNDLE_MACOS_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/MacOS )
    set( MAC_BUNDLE_RESOURCES_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Resources )
    set( MAC_BUNDLE_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Plugins )
    set( MAC_BUNDLE_LIB_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Libs )
 
-   set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns ) 
+   set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/ccViewer.plist )
    set_source_files_properties( images/icon/cc_viewer_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
 
-   set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/../Mac/ccViewer.plist )
-
+   set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns ) 
    set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}" )
    set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
    set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 
-   # install qt.conf
-   install( CODE "
-      file( WRITE ${MAC_BUNDLE_RESOURCES_DIR}/qt.conf \"\" )
-      " COMPONENT Runtime )
-
-   set( DIRS ${EXTERNAL_LIBS_LIBRARIES} ${CMAKE_INSTALL_PREFIX}/lib )
-
-   # call fixup_bundles to change paths using otools
-   install( CODE "
-      include( BundleUtilities )
-      fixup_bundle( ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME} \"\" \"${DIRS}\" COMPONENT Runtime ) 
-      ")
+   add_subdirectory( Mac )
 endif( APPLE )

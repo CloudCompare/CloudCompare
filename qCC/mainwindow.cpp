@@ -265,17 +265,25 @@ void MainWindow::loadPlugins()
 
     ccConsole::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
 
+#if defined(Q_OS_MAC)
+    // plugins are in the bundle
+    QString  path = QCoreApplication::applicationDirPath();
+    path.remove( "MacOS" );
+    m_pluginsPath = path + "Plugins/ccPlugins";
+#else
     //plugins are in bin/plugins
     m_pluginsPath = QCoreApplication::applicationDirPath()+QString("/plugins");
+#endif
 
     ccConsole::Print(QString("Plugins lookup dir.: %1").arg(m_pluginsPath));
 
     QStringList filters;
 #if defined(Q_OS_WIN)
     filters << "*.dll";
-#endif
-#if defined(Q_OS_LINUX)
+#elif defined(Q_OS_LINUX)
     filters << "*.so";
+#elif defined(Q_OS_MAC)
+    filters << "*.dylib";
 #endif
     QDir pluginsDir(m_pluginsPath);
     pluginsDir.setNameFilters(filters);

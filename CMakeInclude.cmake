@@ -64,8 +64,8 @@ endif()
 endfunction()
 
 # Export Qt imageformats DLLs to specified destinations
-function( install_Qt_ImageFormats ) # 2 arguments: ARGV0 = release destination / ARGV1 = debug destination
-if( WIN32 )
+function( install_Qt_ImageFormats )
+if( WIN32 ) # 2 arguments: ARGV0 = release destination / ARGV1 = debug destination
 if( NOT ${ARGC} EQUAL 2 )
 	message( SEND_ERROR "function install_Qt_ImageFormats: invalid number of arguments! (need release and debug destinations)" )
 else()
@@ -78,6 +78,14 @@ foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
 	endif()
 endforeach()
 endif()
+elseif( APPLE )    # 2 arguments: ARGV0 = bundle's plugin dir (destination) / ARGV1 = list of plugins to pass to fixup_bundle
+   # install imageformat plugins
+   foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
+      set( PLUGIN_NAME lib${imagePlugin}${CMAKE_SHARED_LIBRARY_SUFFIX} )
+      install( FILES ${QT_PLUGINS_DIR}/imageformats/${PLUGIN_NAME} DESTINATION ${ARGV0}/imageformats COMPONENT Runtime )
+      list( APPEND QT_PLUGINS ${ARGV0}/imageformats/${PLUGIN_NAME} )
+   endforeach()
+   set( ${ARGV1} ${QT_PLUGINS} PARENT_SCOPE )
 endif()
 endfunction()
 
@@ -123,3 +131,28 @@ else()
 	set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG ${CC_DEFAULT_PREPROCESSORS_DEBUG} )
 endif()
 endfunction()
+
+if( APPLE )
+   function( get_support_libs )  # 1 argument - return var
+      # get a list of support libs based on configuration
+      #  we need this to install them properly when we are bundling the app
+      list( APPEND SUPPORT_LIB_NAMES libCC_DLL )
+      list( APPEND SUPPORT_LIB_NAMES libQCC_DB_DLL )
+
+      if( ${OPTION_USE_XIOT} )
+         list( APPEND SUPPORT_LIB_NAMES libxiot )
+         list( APPEND SUPPORT_LIB_NAMES libxerces-c )
+         list( APPEND SUPPORT_LIB_NAMES libopenFI )
+      endif()
+
+      foreach( supportLib ${SUPPORT_LIB_NAMES} )
+         set( LIB_NAME ${CMAKE_INSTALL_PREFIX}/lib/${supportLib}${CMAKE_SHARED_LIBRARY_SUFFIX} )
+      
+         # resolve any symbolic links
+         get_filename_component( _resolvedFile ${LIB_NAME} REALPATH )
+         list( APPEND SUPPORT_LIBS ${_resolvedFile} )
+      endforeach()
+   
+      set( ${ARGV0} ${SUPPORT_LIBS} PARENT_SCOPE )
+   endfunction()
+endif()

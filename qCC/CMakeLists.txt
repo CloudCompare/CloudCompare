@@ -8,6 +8,16 @@ else()
 	set( qCC_dest_debug qCC_debug )
 endif()
 
+if( APPLE )
+   set( MAC_APP_NAME ${PROJECT_NAME}.app )
+   set( MAC_BUNDLE_MACOS_DIR ${CMAKE_INSTALL_PREFIX}/${qCC_dest_release}/${MAC_APP_NAME}/Contents/MacOS )
+   set( MAC_BUNDLE_RESOURCES_DIR ${CMAKE_INSTALL_PREFIX}/${qCC_dest_release}/${MAC_APP_NAME}/Contents/Resources )
+   set( MAC_BUNDLE_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${qCC_dest_release}/${MAC_APP_NAME}/Contents/Plugins )
+   set( MAC_BUNDLE_SHADERS_DIR ${CMAKE_INSTALL_PREFIX}/${qCC_dest_release}/${MAC_APP_NAME}/Contents/Shaders )
+   
+   set( CC_PLUGINS CACHE INTERNAL "cc plugin list" )
+endif()
+
 # Load plugins
 add_subdirectory( plugins )
 
@@ -16,7 +26,7 @@ include_directories( ${CC_FBO_SOURCE_DIR}/include )
 include_directories( ${CC_DLL_SOURCE_DIR}/include )
 include_directories( ${QCC_DB_DLL_SOURCE_DIR} )
 if( MSVC )
-include_directories( ${QCC_DB_DLL_SOURCE_DIR}/msvc )
+   include_directories( ${QCC_DB_DLL_SOURCE_DIR}/msvc )
 endif()
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
@@ -28,10 +38,13 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${LIBLAS_INCLUDE_DIR} )
 include_directories( ${XIOT_INCLUDE_DIR} )
 
-project( qCC )
+if ( !APPLE )
+   project( qCC )
+endif()
 
-set( SAMPLE_PROJECT_VERSION_MAJOR 2 )
-set( SAMPLE_PROJECT_VERSION_MINOR 4 )
+set( VERSION_MAJOR 2 )
+set( VERSION_MINOR 4 )
+set( VERSION_PATCH 0 )
 
 # TODO: use qxt as a standalone library!
 set( QXT_HEADERS ../libs/qxt/qxtspanslider.h ../libs/qxt/qxtspanslider_p.h )
@@ -67,6 +80,8 @@ endif()
 if( MSVC )
 	#to get rid of the (system) console
 	add_executable( ${PROJECT_NAME} WIN32 ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${resource_list} ${txt_list} )
+elseif( APPLE )
+	add_executable( ${PROJECT_NAME} MACOSX_BUNDLE ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${resource_list} ${txt_list} )
 else()
 	add_executable( ${PROJECT_NAME} ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list} ${rc_list} ${resource_list} ${txt_list} )
 endif()
@@ -115,11 +130,17 @@ if( WIN32 )
 endif()
 
 # install program
-install_ext( TARGETS qCC ${qCC_dest_release} ${qCC_dest_debug} )
+install_ext( TARGETS ${PROJECT_NAME} ${qCC_dest_release} ${qCC_dest_debug} )
 
 # Export 'bilateral' shader files to all install destinations
-install_ext( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.frag ${qCC_dest_release}/shaders ${qCC_dest_debug}/shaders )
-install_ext( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.vert ${qCC_dest_release}/shaders ${qCC_dest_debug}/shaders )
+if( APPLE )
+   install( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.frag DESTINATION ${MAC_BUNDLE_SHADERS_DIR} )
+   install( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.vert DESTINATION ${MAC_BUNDLE_SHADERS_DIR} )
+else()
+   install_ext( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.frag ${qCC_dest_release}/shaders ${qCC_dest_debug}/shaders )
+   install_ext( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.vert ${qCC_dest_release}/shaders ${qCC_dest_debug}/shaders )
+endif()
+
 
 # Auxiliary files
 set( auxFiles bin_other/history.txt bin_other/license.txt )
@@ -137,3 +158,16 @@ endif()
 foreach( filename ${auxFiles} )
 	install_ext( FILES ${filename} ${qCC_dest_release} ${qCC_dest_debug} )
 endforeach()
+
+# in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
+if( APPLE )
+   set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/CloudCompare.plist )
+   set_source_files_properties( images/icon/cc_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )   
+
+   set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 
+   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}" )
+   set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+   set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
+
+   add_subdirectory( Mac )
+endif()

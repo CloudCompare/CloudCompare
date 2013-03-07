@@ -97,6 +97,11 @@ namespace CCLib
 	//! Internal structure used by DistanceComputationTools::computePointCloud2MeshDistance
 	struct OctreeAndMeshIntersection
 	{
+	private:
+	   enum {
+	      FILL_INDICES_SIZE = 3
+	   };
+	   
 	public:
 
 		//! Octree structure
@@ -106,9 +111,9 @@ namespace CCLib
 		//! Distance transform
 		ChamferDistanceTransform* distanceTransform;
 		//! Grid occupancy of mesh (minimum indexes)
-		int minFillIndexes[3];
+		int minFillIndexes[FILL_INDICES_SIZE];
 		//! Grid occupancy of mesh (maximum indexes)
-		int maxFillIndexes[3];
+		int maxFillIndexes[FILL_INDICES_SIZE];
 
 		//! Array of facesInCellPtr structures
 		facesInCellPtr **tab;
@@ -129,6 +134,11 @@ namespace CCLib
 			, sliceSize(0)
 			, sliceNumber(0)
 		{
+		   for ( int i = 0; i < FILL_INDICES_SIZE; ++i )
+		   {
+		      minFillIndexes[i] = 0;
+		      maxFillIndexes[i] = 0;
+		   }
 		}
 
 		//! Destructor

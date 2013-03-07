@@ -408,7 +408,7 @@ namespace PdmsTools
                 Loop *loop;
                 float height;
 
-				Extrusion() : loop(0) {}
+				Extrusion() : loop(0), height(0.0f) {}
                 virtual ~Extrusion() {if(loop) delete loop;}
 
 				//reimplemented from GenericItem

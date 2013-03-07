@@ -69,7 +69,10 @@ class PCVContext
 		int GLAccumPixel(int* pixelsSeen);
 
 	private:
-
+	   enum {
+	      VIEW_MAT_SIZE = 16
+	   };
+	   
 		void glInit();
 		void drawEntity();
 		void associateToEntity(CCLib::GenericCloud* aCloud, CCLib::GenericMesh* aMesh=NULL);
@@ -94,7 +97,7 @@ class PCVContext
 		unsigned m_height;
 
 		//! Current model view matrix
-		float m_viewMat[16];
+		float m_viewMat[VIEW_MAT_SIZE];
 
 		//! Depth buffer
 		float* m_snapZ;

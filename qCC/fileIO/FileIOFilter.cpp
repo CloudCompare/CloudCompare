@@ -355,13 +355,11 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename
         return CC_FERR_WRONG_FILE_TYPE;
 
     //if the file name has no extension, we had a default one!
-    QString  completeFileName( filename );
-    if ( !completeFileName.contains( '.' ) )
-    {
-        completeFileName += QString( ".%1" ).arg( CC_FILE_TYPE_DEFAULT_EXTENSION[fType] );
-    }
+    QString completeFileName(filename);
+	if (QFileInfo(filename).suffix().isEmpty())
+        completeFileName += QString(".%1").arg(CC_FILE_TYPE_DEFAULT_EXTENSION[fType]);
 
-    CC_FILE_ERROR result = fio->saveToFile(entities, completeFileName.toLatin1().data());
+    CC_FILE_ERROR result = fio->saveToFile(entities, qPrintable(completeFileName));
 
     delete fio;
     fio=0;

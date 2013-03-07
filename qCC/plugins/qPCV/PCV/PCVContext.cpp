@@ -50,7 +50,12 @@ PCVContext::PCVContext()
 	, m_height(0)
 	, m_snapZ(0)
 	, m_snapC(0)
+	, m_meshIsClosed(false)
 {
+   for ( int i = 0; i < VIEW_MAT_SIZE; ++i )
+   {
+      m_viewMat[i] = 0.0f;
+   }
 }
 
 PCVContext::~PCVContext()

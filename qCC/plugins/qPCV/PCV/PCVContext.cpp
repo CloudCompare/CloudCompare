@@ -14,18 +14,14 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "PCVContext.h"
 
 //CCLib
 #include <CCMiscTools.h>
+
+//Qt
+#include <QGLPixelBuffer>
 
 //OpenGL
 #ifdef __APPLE__
@@ -39,7 +35,9 @@
 
 using namespace CCLib;
 
+#ifndef ZTWIST
 #define ZTWIST 1e-3f
+#endif
 
 PCVContext::PCVContext()
 	: m_vertices(0)
@@ -52,10 +50,7 @@ PCVContext::PCVContext()
 	, m_snapC(0)
 	, m_meshIsClosed(false)
 {
-   for ( int i = 0; i < VIEW_MAT_SIZE; ++i )
-   {
-      m_viewMat[i] = 0.0f;
-   }
+	memset(m_viewMat, 0, sizeof(float)*OPENGL_MATRIX_SIZE);
 }
 
 PCVContext::~PCVContext()
@@ -85,7 +80,7 @@ bool PCVContext::init(unsigned W,
 		return false;
 
 	unsigned size = W*H;
-	m_snapZ=new float[size];
+	m_snapZ = new float[size];
 	if (!m_snapZ)
 	{
 		delete m_pixBuffer;
@@ -97,12 +92,12 @@ bool PCVContext::init(unsigned W,
 	if (!m_meshIsClosed)
 	{
 		//buffer for color
-		m_snapC=new uchar[4*size];
+		m_snapC = new uchar[4*size];
 		if (!m_snapC)
 		{
 			delete m_pixBuffer;
 			m_pixBuffer=0;
-			delete m_snapZ;
+			delete[] m_snapZ;
 			m_snapZ=0;
 			return false;
 		}
@@ -290,19 +285,19 @@ int PCVContext::GLAccumPixel(int* pixelsSeen)
 		glColorMask(GL_TRUE,GL_TRUE,GL_TRUE,GL_TRUE);
 
 	glDepthRange(0,1.0f-2.0f*ZTWIST);
-	double MM[16];
+	double MM[OPENGL_MATRIX_SIZE];
 	glGetDoublev(GL_MODELVIEW_MATRIX,MM);
-	double MP[16];
+	double MP[OPENGL_MATRIX_SIZE];
 	glGetDoublev(GL_PROJECTION_MATRIX,MP);
 	int VP[4];
 	glGetIntegerv(GL_VIEWPORT,VP);
 
-	int cnt=0;
+	int cnt = 0;
 	int sx4 = (m_width<<2);
 
 	unsigned nVert = m_vertices->size();
 	m_vertices->placeIteratorAtBegining();
-	for(unsigned i=0;i<nVert;++i)
+	for (unsigned i=0;i<nVert;++i)
 	{
 		const CCVector3* P = m_vertices->getNextPoint();
 

@@ -25,6 +25,9 @@
 #include <CCGeom.h>
 #include <Matrix.h>
 
+//! Model view matrix size (OpenGL)
+static const unsigned OPENGL_MATRIX_SIZE = 16;
+
 //Matrix element shortcuts in (line,column) order
 #define CC_MAT_R11 m_mat[0]
 #define CC_MAT_R21 m_mat[1]
@@ -277,7 +280,7 @@ public:
 protected:
 
 	//! Internal 4x4 GL-style matrix data
-	float m_mat[16];
+	float m_mat[OPENGL_MATRIX_SIZE];
 };
 
 #endif //CC_GL_MATRIX_HEADER

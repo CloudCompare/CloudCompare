@@ -14,13 +14,6 @@
 //#               COPYRIGHT: Daniel Girardeau-Montaut                      #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_POISSON_RECON_LIB_WRAPPER
 #define CC_POISSON_RECON_LIB_WRAPPER

@@ -408,11 +408,11 @@ protected:
     CCVector3 m_currentMouseOrientation;
 
 	//! Complete visualization matrix (GL style - double version)
-	double m_viewMatd[16];
+	double m_viewMatd[OPENGL_MATRIX_SIZE];
 	//! Whether the model veiw matrix is valid (or need to be recomputed)
     bool m_validModelviewMatrix;
 	//! Projection matrix (GL style - double version)
-	double m_projMatd[16];
+	double m_projMatd[OPENGL_MATRIX_SIZE];
 	//! Whether the projection matrix is valid (or need to be recomputed)
     bool m_validProjectionMatrix;
 

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1693                                                              $
-//$LastChangedDate:: 2010-10-22 17:57:39 +0200 (ven., 22 oct. 2010)        $
-//**************************************************************************
-//
 
 #include "ccFrameBufferObject.h"
 #include "ccShader.h"

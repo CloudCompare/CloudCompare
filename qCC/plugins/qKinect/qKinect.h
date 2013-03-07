@@ -14,13 +14,6 @@
 //#               COPYRIGHT: Daniel Girardeau-Montaut                      #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1743                                                              $
-//$LastChangedDate:: 2010-12-03 16:51:30 +0100 (ven., 03 déc. 2010)       $
-//**************************************************************************
-//
 
 #ifndef Q_KINECT_PLUGIN_HEADER
 #define Q_KINECT_PLUGIN_HEADER

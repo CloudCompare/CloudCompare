@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1696                                                              $
-//$LastChangedDate:: 2010-10-26 17:34:10 +0200 (mar., 26 oct. 2010)        $
-//**************************************************************************
-//
 
 #ifndef CC_SHADER_HEADER
 #define CC_SHADER_HEADER

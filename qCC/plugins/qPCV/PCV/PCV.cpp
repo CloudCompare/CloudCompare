@@ -14,19 +14,15 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "PCV.h"
 #include "PCVContext.h"
 
 //CCLib
 #include <CCMiscTools.h>
+
+//Qt
+#include <QString>
 
 //System
 #include <string.h>

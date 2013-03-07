@@ -68,14 +68,17 @@ const unsigned CC_LOCAL_MODEL_MIN_SIZE[] = {	1,				/**< for single point model (
 												6,				/**< for Quadratic 'height' function **/
 };
 
+//! Pi
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
 
+//! Pi/2
 #ifndef M_PI_2
 #define M_PI_2 1.57079632679489661923
 #endif
 
+//! Square root of 3
 #ifndef SQRT_3
 #define SQRT_3 1.7320508075688772935274463415059
 #endif

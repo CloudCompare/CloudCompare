@@ -127,9 +127,9 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	//matrices
 	m_params.baseViewMat.toIdentity();
 	//m_viewMat.toZero();
-	memset(m_viewMatd,	0, sizeof(double)*16);
+	memset(m_viewMatd,	0, sizeof(double)*OPENGL_MATRIX_SIZE);
 	//m_projMat.toZero();
-	memset(m_projMatd,	0, sizeof(double)*16);
+	memset(m_projMatd,	0, sizeof(double)*OPENGL_MATRIX_SIZE);
 
 	//default modes
 	setPickingMode(ENTITY_PICKING);
@@ -1915,7 +1915,7 @@ int ccGLWindow::startPicking(int cursorX, int cursorY, PICKING_MODE pickingMode)
 		//Warning we must reset properly the projection matrix
 		setStandardOrthoCenter();
 		glMatrixMode(GL_PROJECTION);
-		double orthoProjMatd[16];
+		double orthoProjMatd[OPENGL_MATRIX_SIZE];
 		glGetDoublev(GL_PROJECTION_MATRIX, orthoProjMatd);
 		glLoadIdentity();
 		gluPickMatrix((float)cursorX,(float)(viewport[3]-cursorY),5,5,viewport);

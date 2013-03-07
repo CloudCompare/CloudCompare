@@ -14,13 +14,6 @@
 //#               COPYRIGHT: Daniel Girardeau-Montaut                      #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1631                                                              $
-//$LastChangedDate:: 2010-08-25 07:21:40 +0200 (mer., 25 août 2010)       $
-//**************************************************************************
-//
 
 #ifndef Q_RANSAC_SD_PLUGIN_HEADER
 #define Q_RANSAC_SD_PLUGIN_HEADER

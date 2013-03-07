@@ -53,12 +53,12 @@ ccGLMatrix::ccGLMatrix()
 
 ccGLMatrix::ccGLMatrix(const float* mat16)
 {
-    memcpy(m_mat, mat16, sizeof(float)*16);
+    memcpy(m_mat, mat16, sizeof(float)*OPENGL_MATRIX_SIZE);
 }
 
 ccGLMatrix::ccGLMatrix(const ccGLMatrix& mat)
 {
-	memcpy(m_mat, mat.m_mat, sizeof(float)*16);
+	memcpy(m_mat, mat.m_mat, sizeof(float)*OPENGL_MATRIX_SIZE);
 }
 
 ccGLMatrix::ccGLMatrix(const CCVector3& X, const CCVector3& Y, const CCVector3& Z, const CCVector3& T)
@@ -112,12 +112,12 @@ ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, const C
 
 void ccGLMatrix::toZero()
 {
-	memset(m_mat,0,16*sizeof(float));
+	memset(m_mat,0,OPENGL_MATRIX_SIZE*sizeof(float));
 }
 
 void ccGLMatrix::toIdentity()
 {
-	memset(m_mat,0,16*sizeof(float));
+	memset(m_mat,0,OPENGL_MATRIX_SIZE*sizeof(float));
 	R11=R22=R33=R44=1.0;
 }
 
@@ -409,7 +409,7 @@ ccGLMatrix ccGLMatrix::Interpolate(float coef, const ccGLMatrix& glMat1, const c
 
 void ccGLMatrix::scale(float coef)
 {
-	for (int i=0;i<16;++i)
+	for (unsigned i=0;i<OPENGL_MATRIX_SIZE;++i)
 		m_mat[i] *= coef;
 }
 
@@ -521,7 +521,7 @@ bool ccGLMatrix::toFile(QFile& out) const
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
 	//data (dataVersion>=20)
-	if (out.write((const char*)m_mat,sizeof(float)*16)<0)
+	if (out.write((const char*)m_mat,sizeof(float)*OPENGL_MATRIX_SIZE)<0)
 		return WriteError();
 
 	return true;
@@ -535,7 +535,7 @@ bool ccGLMatrix::fromFile(QFile& in, short dataVersion)
 		return CorruptError();
 
 	//data (dataVersion>=20)
-	if (in.read((char*)m_mat,sizeof(float)*16)<0)
+	if (in.read((char*)m_mat,sizeof(float)*OPENGL_MATRIX_SIZE)<0)
 		return ReadError();
 
 	return true;

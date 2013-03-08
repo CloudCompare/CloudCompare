@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>178</width>
-    <height>125</height>
+    <width>231</width>
+    <height>168</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -18,14 +18,14 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>178</width>
-    <height>125</height>
+    <width>231</width>
+    <height>168</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
-    <width>178</width>
-    <height>125</height>
+    <width>231</width>
+    <height>168</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -46,6 +46,12 @@
      </item>
      <item>
       <widget class="QSpinBox" name="octreeLevelSpinBox">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>25</height>
+        </size>
+       </property>
        <property name="minimum">
         <number>1</number>
        </property>
@@ -73,6 +79,12 @@
      </item>
      <item>
       <widget class="QSpinBox" name="minPtsSpinBox">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>25</height>
+        </size>
+       </property>
        <property name="minimum">
         <number>1</number>
        </property>

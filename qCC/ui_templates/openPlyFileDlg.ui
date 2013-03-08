@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>270</width>
-    <height>440</height>
+    <width>294</width>
+    <height>520</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -109,6 +109,15 @@
    </item>
    <item>
     <layout class="QFormLayout" name="formLayout">
+     <property name="topMargin">
+      <number>4</number>
+     </property>
+     <property name="rightMargin">
+      <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>4</number>
+     </property>
      <item row="0" column="0">
       <widget class="QLabel" name="label_4">
        <property name="text">
@@ -252,8 +261,6 @@
     </widget>
    </item>
   </layout>
-  <zorder>buttonBox</zorder>
-  <zorder>label_16</zorder>
  </widget>
  <resources/>
  <connections>

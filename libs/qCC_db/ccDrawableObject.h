@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_DRAWABLE_OBECJT_HEADER
-#define CC_DRAWABLE_OBECJT_HEADER
+#ifndef CC_DRAWABLE_OBJECT_HEADER
+#define CC_DRAWABLE_OBJECT_HEADER
 
 #include <ccIncludeGL.h>
 
@@ -416,4 +416,4 @@ protected:
     ccGenericGLDisplay* m_currentDisplay;
 };
 
-#endif //CC_DRAWABLE_OBECJT_HEADER
+#endif //CC_DRAWABLE_OBJECT_HEADER

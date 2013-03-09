@@ -700,7 +700,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 			displayCustomLight();
 	}
 
-	//we activate current shader (if activated)
+	//we activate the current shader (if any)
 	if (m_activeShader)
 		m_activeShader->start();
 
@@ -1784,8 +1784,8 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				if (!hotZoneClick && m_pickingMode != NO_PICKING)
 				{
 					PICKING_MODE pickingMode = m_pickingMode;
-					if (pickingMode == ENTITY_PICKING && QApplication::keyboardModifiers() & Qt::ShiftModifier)
-						pickingMode = AUTO_POINT_PICKING;
+					if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
+						pickingMode = AUTO_POINT_PICKING; //shift+click = point picking
 
 					startPicking(event->x(),event->y(),pickingMode);
 

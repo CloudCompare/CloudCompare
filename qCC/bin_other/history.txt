@@ -23,9 +23,12 @@ v2.4 03/03/2013
 	* accessible via the 'Tools > Primitive factory' menu entry or a dedicated icon in the main toolbar
 - 'Height grid generation' tool enhanced:
 	* the number of points per cell can now be saved as a scalar field ('save per-cell count as SF' checkbox)
-- 'Ransac Shape Detection' plugin (qRansac_SD) enhanced:
+- qRansacSD ('Ransac Shape Detection') plugin enhanced:
 	* proper handling of cone and torus primitives (display in 3D, etc.)
 	* the expected primitive types can now be selected (with checkboxes)
+- qKinect plugin enhanced:
+	* continuous display of video/3D flow
+	* multiple acquisitions are now possible without closing the dialog each time
 - Manual transformation tool enhanced:
 	* user can constrain rotation around a given axis and translation along custom dimension(s)
 - New option "Show 3D name" for 3D entities:

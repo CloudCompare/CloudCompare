@@ -15,8 +15,10 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccBBox.h"
+//Always first
 #include "ccIncludeGL.h"
+
+#include "ccBBox.h"
 
 ccBBox::ccBBox()
 {

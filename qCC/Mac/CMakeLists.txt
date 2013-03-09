@@ -18,6 +18,6 @@ if( APPLE )
    # call fixup_bundles to change paths using otools
    install( CODE "
       include( BundleUtilities )
-      fixup_bundle( ${CMAKE_INSTALL_PREFIX}/${qCC_dest_release}/${MAC_APP_NAME} \"${PLUGINS}\" \"${DIRS}\" COMPONENT Runtime ) 
+      fixup_bundle( ${CMAKE_INSTALL_PREFIX}/${CloudCompare_dest_release}/${MAC_APP_NAME} \"${PLUGINS}\" \"${DIRS}\" COMPONENT Runtime ) 
       ")
 endif( APPLE )

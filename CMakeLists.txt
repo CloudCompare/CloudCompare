@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project( CloudCompare )
+project( CloudCompareProjects )
 
 # Default debug suffix for libraries
 set( CMAKE_DEBUG_POSTFIX d )
@@ -19,7 +19,7 @@ endif()
 
 # Default install folders
 # (_debug suffix is automatically added for debug configurations)
-set( INSTALL_DESTINATIONS qCC )
+set( INSTALL_DESTINATIONS CloudCompare )
 
 # CCViewer
 OPTION( OPTION_BUILD_CCVIEWER "Check to compile CCViewer project" ON )

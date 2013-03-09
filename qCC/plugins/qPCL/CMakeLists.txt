@@ -37,12 +37,12 @@ file( GLOB pcl_debug_dlls ${PCL_DIR}/bin/*${PCL_DEBUG_SUFFIX}.dll  )
 	
 #release DLLs
 foreach( filename ${pcl_release_dlls} )
-	install_ext( FILES ${filename} ${qCC_dest_release} )
+	install_ext( FILES ${filename} ${CloudCompare_dest_release} )
 endforeach()
 
 #debug DLLs
 foreach( filename ${pcl_debug_dlls} )
-	install_ext( FILES ${filename} 0 ${qCC_dest_debug} )
+	install_ext( FILES ${filename} 0 ${CloudCompare_dest_debug} )
 endforeach()
 
 endif()

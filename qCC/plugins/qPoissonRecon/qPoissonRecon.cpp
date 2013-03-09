@@ -35,7 +35,10 @@
 #include <algorithm>
 #if defined(_WIN32) || defined(WIN32)
 #include "Windows.h"
+#else
+#include <time.h>
 #endif
+
 
 qPoissonRecon::qPoissonRecon(QObject* parent/*=0*/)
 	: QObject(parent)
@@ -185,10 +188,11 @@ void qPoissonRecon::doAction()
 		unsigned progress = 0;
 		while (!future.isFinished())
 		{
-		    #if defined(_WIN32) || defined(WIN32)
+			#if defined(_WIN32) || defined(WIN32)
 			::Sleep(500);
 			#else
-			sleep(500);
+			struct timespec waiter = {0, 500000000L};
+			nanosleep(&waiter, NULL);
 			#endif
 
 			progressCb.update(++progress);

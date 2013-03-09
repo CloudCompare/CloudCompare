@@ -23,7 +23,7 @@
 
 #include "../ccStdPluginInterface.h"
 
-//! Wrapper to the "Poisson Surface Reconstruction (Version 2)" algorithm
+//! Wrapper to the "Poisson Surface Reconstruction (Version 3)" algorithm
 /** "Poisson Surface Reconstruction", M. Kazhdan, M. Bolitho, and H. Hoppe
 	Symposium on Geometry Processing (June 2006), pages 61--70
 	http://www.cs.jhu.edu/~misha/Code/PoissonRecon/

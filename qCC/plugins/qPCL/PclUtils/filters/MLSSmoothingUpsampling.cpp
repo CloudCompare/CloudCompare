@@ -14,7 +14,7 @@
 //#               COPYRIGHT: Luca Penasa                                   #
 //#                                                                        #
 //##########################################################################
-//
+
 #include "MLSSmoothingUpsampling.h"
 #include "dialogs/MLSDialog.h"
 #include "filtering.h"
@@ -22,6 +22,9 @@
 #include "cc2sm.h"
 #include "sm2cc.h"
 #include "my_point_types.h"
+
+//qCC
+#include <ccMainAppInterface.h>
 
 MLSSmoothingUpsampling::MLSSmoothingUpsampling()
 	: BaseFilter(FilterDescription("MLS smoothing", "Smooth using MLS, optionally upsample", "Smooth the cloud using Moving Least Sqares algorithm, estimate normals and optionally upsample", ":/toolbar/PclUtils/icons/mls_smoothing.png", true))
@@ -51,8 +54,8 @@ int MLSSmoothingUpsampling::compute()
 	converter.setInputCloud(cloud);
 
 	//take out the xyz info
-	sensor_msgs::PointCloud2  sm_xyz = converter.getXYZ();
-	sensor_msgs::PointCloud2  sm_cloud;
+	sensor_msgs::PointCloud2 sm_xyz = converter.getXYZ();
+	sensor_msgs::PointCloud2 sm_cloud;
 
 	//take out the current scalar field (if any)
 	if (cloud->getCurrentDisplayedScalarField())
@@ -73,12 +76,10 @@ int MLSSmoothingUpsampling::compute()
 
 	//get as pcl point cloud
 	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
-
 	pcl::fromROSMsg(sm_cloud, *pcl_cloud);
 
 	//create storage for outcloud
 	pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);
-
 #ifdef LP_PCL_PATCH_ENABLED
 	pcl::PointIndicesPtr mapping_indices;
 	smooth_mls<pcl::PointXYZ, pcl::PointNormal> (pcl_cloud, *m_parameters, normals, mapping_indices);
@@ -89,24 +90,28 @@ int MLSSmoothingUpsampling::compute()
 	sensor_msgs::PointCloud2::Ptr sm_normals (new sensor_msgs::PointCloud2);
 	pcl::toROSMsg(*normals, *sm_normals);
 
-	sm2ccReader reader;
-	reader.setInputCloud(sm_normals);
+	ccPointCloud* new_cloud = sm2ccConverter(sm_normals).getCCloud();
+	if (!new_cloud)
+	{
+		//conversion failed (not enough memory?)
+		return -1;
+	}
 
-	ccPointCloud * new_cloud = new ccPointCloud;
-
-	reader.setInputCloud(sm_normals);
-	reader.getAsCC(new_cloud);
 	new_cloud->setName(cloud->getName()+QString("_smoothed")); //original name + suffix
+	new_cloud->setDisplay(cloud->getDisplay());
 
 #ifdef LP_PCL_PATCH_ENABLED
 	//copy the original scalar fields here
 	copyScalarFields(cloud, new_cloud, mapping_indices, true);
 #endif
 
+    //disable original cloud
+    cloud->setEnabled(false);
 	if (cloud->getParent())
 		cloud->getParent()->addChild(new_cloud);
 
 	emit newEntity(new_cloud);
+
 	return 1;
 }
 

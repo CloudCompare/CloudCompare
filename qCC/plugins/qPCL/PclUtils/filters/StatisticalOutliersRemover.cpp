@@ -36,7 +36,6 @@ StatisticalOutliersRemover::StatisticalOutliersRemover()
 
 int StatisticalOutliersRemover::compute()
 {
-
     //get selected as pointcloud
     ccPointCloud * cloud = this->getSelectedEntityAsCCPointCloud();
     sensor_msgs::PointCloud2::Ptr  tmp_cloud (new sensor_msgs::PointCloud2);
@@ -50,25 +49,22 @@ int StatisticalOutliersRemover::compute()
     removeOutliersStatistical(tmp_cloud, m_k, m_std, outcloud);
 
     //get back outcloud as a ccPointCloud
-    sm2ccReader converterBack = sm2ccReader();
-    converterBack.setInputCloud(outcloud);
-    ccPointCloud * final_cloud = new ccPointCloud;
-
-    if(!converterBack.getAsCC(final_cloud))
-        return 0;
+	ccPointCloud* final_cloud = sm2ccConverter(outcloud).getCCloud();
+    if(!final_cloud)
+        return -1;
 
     //create a suitable name for the entity
     final_cloud->setName(QString("%1_k%2_std%3").arg(cloud->getName()).arg(m_k).arg(m_std));
+	final_cloud->setDisplay(cloud->getDisplay());
 
-    ccHObject* cloud_container = new ccHObject();
-    QString container_name = "Statistical Outlier Remover Output";
-    cloud_container->setName(qPrintable(container_name));
-    cloud_container->addChild(final_cloud);
-
-    //also disable original cloud
+    //disable original cloud
     cloud->setEnabled(false);
-    emit newEntity(cloud_container);
-    return 1;
+	if (cloud->getParent())
+		cloud->getParent()->addChild(final_cloud);
+
+	emit newEntity(cloud);
+
+	return 1;
 }
 
 

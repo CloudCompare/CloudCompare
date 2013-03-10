@@ -94,7 +94,7 @@ int NormalEstimation::compute()
     //get xyz in sensor_msgs format
     cc2smReader converter;
     converter.setInputCloud(cloud);
-    sensor_msgs::PointCloud2  sm_cloud = converter.getXYZ();
+    sensor_msgs::PointCloud2 sm_cloud = converter.getXYZ();
 
     //get as pcl point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
@@ -110,14 +110,9 @@ int NormalEstimation::compute()
     sensor_msgs::PointCloud2::Ptr sm_normals (new sensor_msgs::PointCloud2);
     pcl::toROSMsg(*normals, *sm_normals);
 
-    sm2ccReader reader;
-    reader.setInputCloud(sm_normals);
-
-
-    reader.addNormals(cloud);
-    reader.addFloatField(cloud, "curvature", m_overwrite_curvature);
-
-    cloud->showNormals(true);
+	sm2ccConverter converter2(sm_normals);
+    converter2.addNormals(cloud);
+    converter2.addScalarField(cloud, "curvature", m_overwrite_curvature);
 
     emit entityHasChanged(cloud);
 

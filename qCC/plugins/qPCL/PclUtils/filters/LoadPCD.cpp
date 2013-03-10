@@ -11,18 +11,18 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#               COPYRIGHT: Luca Penasa                                   #
+//#                        COPYRIGHT: Luca Penasa                          #
 //#                                                                        #
 //##########################################################################
 //
+
 #include "LoadPCD.h"
 
-#include <strings_utils.h>
+//utils
 #include <sm2cc.h>
 
 //qCC_db
-//#include <ccProgressDialog.h>
-//#include <ccConsole.cpp> //NOTE: CANNOT UNDERSTAND WHY I NEED TO INCLUDE IMPLEMENTATION //-->DGM: because you can't use it directly in a library/plugin!
+#include <ccPointCloud.h>
 
 //Qt
 #include <QApplication>
@@ -49,86 +49,55 @@ int LoadPCD::checkSelected()
 
 int LoadPCD::openDialog()
 {
-    QSettings settings;
-    settings.beginGroup("PclUtils/LoadPCD");
-    QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
+	QSettings settings;
+	settings.beginGroup("PclUtils/LoadPCD");
+	QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
 
-    //file choosing dialog
-        //We store the result directly in 'm_filenames' as it is simpler.
-        //Thus we also bypass getParametersFromDialog, but we avoid keeping
-        //the QFileDialog as a member...
-    m_filenames = QFileDialog::getOpenFileNames(0,
-                                                                                                tr("Open PCD file(s)"),
-                                                                                                currentPath,
-                                                                                                "PCD file (*.pcd)");
+	//file choosing dialog
+	//We store the result directly in 'm_filenames' as it is simpler.
+	//Thus we also bypass getParametersFromDialog, but we avoid keeping
+	//the QFileDialog as a member...
+	m_filenames = QFileDialog::getOpenFileNames(0,
+		tr("Open PCD file(s)"),
+		currentPath,
+		"PCD file (*.pcd)");
 
-        if (m_filenames.isEmpty())
-        return 0;
+	if (m_filenames.isEmpty())
+		return 0;
 
 	//save file loading location
 	currentPath = QFileInfo(m_filenames[0]).absolutePath();
-    settings.setValue("currentPath",currentPath);
-    settings.endGroup();
+	settings.setValue("currentPath",currentPath);
+	settings.endGroup();
 
-        return 1;
+	return 1;
 }
 
 int LoadPCD::compute()
 {
 	//for each selected filename
-	for (int k = 0; k<m_filenames.size(); ++k)
+	for (int k = 0; k < m_filenames.size(); ++k)
 	{
 		QString filename = m_filenames[k];
 
-		sensor_msgs::PointCloud2 * pcd_sensor_cloud = new sensor_msgs::PointCloud2;
+		sensor_msgs::PointCloud2 * pcd_sensor_cloud = loadSensorMessage(filename);
 
-        pcd_sensor_cloud = loadSensorMessage(filename);
-
-
-		QString cloud_name = getChildName(filename);
-
-		sm2ccReader* converter = new sm2ccReader();
 		boost::shared_ptr<sensor_msgs::PointCloud2> cloud_ptr = boost::make_shared<sensor_msgs::PointCloud2>(*pcd_sensor_cloud);
-		ccPointCloud* out_cloud = new ccPointCloud;
-		converter->setInputCloud(cloud_ptr);
-		int good = converter->getAsCC(out_cloud);
-		delete converter;
-		if (good != 1)
-		{
-			delete out_cloud;
-			return -31;
-		}
-
-
+		ccPointCloud* out_cloud = sm2ccConverter(cloud_ptr).getCCloud();
 		if (!out_cloud)
-		{
-			//DGM: use the standard plugin mechanism! (see below)
-			//ccConsole::Error("ERROR Converting PCD to CC, no xyz field found?");
-			delete out_cloud;
 			return -31;
-		}
 
-		out_cloud->setName(qPrintable(cloud_name));
+		QString cloud_name = QFileInfo(filename).baseName();
+		out_cloud->setName(cloud_name);
 
-//		ccScalarField * ids = new ccScalarField;
-//		ids->reserve(out_cloud->size());
-//		ids->setName("IDS");
-//		//add numbering at points for debug porpouse
-//		for (int i = 0; i < out_cloud->size(); ++i)
-//		  {
-//		    ids->setValue(i, i);
-//		  }
-//		//ids->computeMeanAndVariance();
-//		ids->computeMinAndMax();
-//		out_cloud->addScalarField(ids);
+		QFileInfo fi(filename);
+		QString containerName = QString("%1 (%2)").arg(fi.fileName()).arg(fi.absolutePath());
 
-		ccHObject* cloud_container = new ccHObject();
-		QString container_name = getParentName(filename);
-		cloud_container->setName(qPrintable(container_name));
-		cloud_container->addChild(out_cloud);
+		ccHObject* cloudContainer = new ccHObject(containerName);
+		assert(out_cloud);
+		cloudContainer->addChild(out_cloud);
 
-		//m_q_parent->addToDB(cloud_container);
-		emit newEntity(cloud_container);
+		emit newEntity(cloudContainer);
 	}
 
 	return 1;
@@ -141,7 +110,7 @@ QString LoadPCD::getErrorMessage(int errorCode)
 		//THESE CASES CAN BE USED TO OVERRIDE OR ADD FILTER-SPECIFIC ERRORS CODES
 		//ALSO IN DERIVED CLASSES DEFAULT MUST BE ""
 	case -31:
-		return QString("ERROR Converting PCD to CC, no xyz field found?");
+		return QString("An error occured while converting PCD to CC cloud!");
 	case -21:
 		return QString("No filename given, please select a pcd file.");
 	}

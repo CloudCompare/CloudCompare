@@ -217,13 +217,10 @@ int ExtractSIFT::compute()
 		return -53;
 	}
 
-	sm2ccReader converter2;
-	converter2.setInputCloud(out_cloud_sm);
-
-	ccPointCloud* out_cloud_cc = new ccPointCloud;
-	if (converter2.getAsCC(out_cloud_cc) != 1)
+	ccPointCloud* out_cloud_cc = sm2ccConverter(out_cloud_sm).getCCloud();
+	if (!out_cloud_cc)
 	{
-		delete out_cloud_cc;
+		//conversion failed (not enough memory?)
 		return -1;
 	}
 
@@ -237,9 +234,6 @@ int ExtractSIFT::compute()
 	out_cloud_cc->setDisplay(cloud->getDisplay());
 	if (cloud->getParent())
 		cloud->getParent()->addChild(out_cloud_cc);
-
-	//cloud->getParent()->updateModificationTime();
-	//m_q_parent->dbTreeView->updateGeometry();
 
 	emit newEntity(out_cloud_cc);
 

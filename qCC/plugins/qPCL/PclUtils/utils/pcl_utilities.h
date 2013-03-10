@@ -11,7 +11,7 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#               COPYRIGHT: Luca Penasa                                   #
+//#                        COPYRIGHT: Luca Penasa                          #
 //#                                                                        #
 //##########################################################################
 //
@@ -26,16 +26,12 @@
 
 sensor_msgs::PointCloud2 mergeVectorOfClouds(const std::vector<sensor_msgs::PointCloud2> &clouds);
 
-/** \brief Utility function that load a given PCD file in a sensor_msgs PointCloud2
- * \param[in] filename
- * \return a pointer to a sensor_msgs cloud
- * \note it was written with the output as return type given some problems launching this inside
- * a thread.
- *
- */
+//! Utility function that load a given PCD file in a sensor_msgs PointCloud2
+/** \param[in] filename
+	\return a pointer to a sensor_msgs cloud
+	\note it was written with the output as return type given some problems launching this inside
+	a thread.
+**/
 sensor_msgs::PointCloud2* loadSensorMessage(const QString &filename);
-
-
-
 
 #endif // PCL_UTILITIES_H

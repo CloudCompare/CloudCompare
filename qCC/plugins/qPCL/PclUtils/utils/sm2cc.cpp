@@ -18,334 +18,264 @@
 #include "sm2cc.h"
 #include "my_point_types.h"
 
+//qCC_db
+#include <ccPointCloud.h>
+
 //PCL
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <sensor_msgs/PointField.h>
 
+//system
+#include <assert.h>
+
 using ::sensor_msgs::PointField;
 
-sm2ccReader::sm2ccReader()
+sm2ccConverter::sm2ccConverter(sensor_msgs::PointCloud2::Ptr sm_cloud)
+	: m_sm_cloud(sm_cloud)
 {
-
+	assert(sm_cloud);
 }
 
-int sm2ccReader::checkIfFieldExist(std::string field_name)
+ccPointCloud* sm2ccConverter::getCCloud()
 {
-	return (pcl::getFieldIndex(*m_sm_cloud, field_name) != -1);
-}
-
-void sm2ccReader::updateFieldList()
-{
-	std::vector<std::string> field_list;
-	int n_fields = m_sm_cloud->fields.size();
-	field_list.resize(n_fields);
-	for (int d = 0; d < n_fields; ++d)
+	if (!m_sm_cloud)
 	{
-		std::string name = m_sm_cloud->fields[d].name;
-		field_list[d] = name;
+		assert(false);
+		return 0;
 	}
-	std::sort(field_list.begin(), field_list.end());
-
-	//remove fields as "_" -> used by PCL for padding
-	for (unsigned i = 0; i < field_list.size(); ++i)
-	{
-		std::vector<std::string>::iterator it = std::remove(field_list.begin(), field_list.end(), "_");
-		field_list.erase( it, field_list.end());
-
-	}
-	m_field_list = field_list;
-
-}
-
-int sm2ccReader::getAsCC(ccPointCloud * cloud)
-{
-	//resize
-	unsigned int npoints = getNumberOfPoints();
-
-	cloud->reserveThePointsTable(npoints);
-	//update the field-list
-	updateFieldList();
-	//copy the list for this method
-	std::vector<std::string> fields = m_field_list;
+	
+	//get the fields list
+	std::list<std::string> fields;
+	for (std::vector< ::sensor_msgs::PointField >::const_iterator it = m_sm_cloud->fields.begin(); it != m_sm_cloud->fields.end(); ++it)
+		if (it->name != "_") //PCL padding fields
+			fields.push_back(it->name);
 
 	//begin with checks and conversions
 	//be sure we have x, y, and z fields
+	if (!existField("x") || !existField("y") || !existField("z"))
+		return 0;
 
+	//create cloud
+	ccPointCloud* cloud = new ccPointCloud();
 
-    bool got_xyz = hasXYZ();
-        if (!got_xyz)
-        {
-                return -1;
-        }
-        else
-    {
-
-
-
-		addXYZ(cloud);
-
-		//remove x,y,z fields from the vector of field names
-		eraseString(fields, "x");
-		eraseString(fields, "y");
-		eraseString(fields, "z");
+	//push points inside
+	if (!addXYZ(cloud))
+	{
+		delete cloud;
+		return 0;
 	}
 
-	//do we have normals?
-	bool got_normal_xyz = hasNormals();
-	if (got_normal_xyz)
-	{
+	//remove x,y,z fields from the vector of field names
+	eraseString(fields, "x");
+	eraseString(fields, "y");
+	eraseString(fields, "z");
 
+	//do we have normals?
+	if (existField("normal_x") || existField("normal_y") || existField("normal_z"))
+	{
 		addNormals(cloud);
-		//remove the fields
+		
+		//remove the corresponding fields
 		eraseString(fields, "normal_x");
 		eraseString(fields, "normal_y");
 		eraseString(fields, "normal_z");
-
 	}
 
 	//The same for colors
-	bool got_rgb = hasRGB();
-	if (got_rgb)
+	if (existField("rgb"))
 	{
-
 		addRGB(cloud);
-		//remove the fields
+		
+		//remove the corresponding field
 		eraseString(fields, "rgb");
-
-
 	}
 
-	//All the field remaining will be stored as float scalars
-	//They must be loaded using addIntField or addFloatField depending on the type
-	for (unsigned i = 0; i < fields.size(); ++i)
+	//All the remaining fields will be stored as scalar fields
+	for (std::list<std::string>::const_iterator name = fields.begin(); name != fields.end(); ++name)
 	{
-		std::string name = fields[i];
-
-		//get the field
-		PointField field = m_sm_cloud->fields.at(pcl::getFieldIndex(*m_sm_cloud, name));
-
-		//check if int or float
-		if ((field.datatype == PointField::FLOAT32) || (field.datatype == PointField::FLOAT64))
-		  {
-		    addFloatField(cloud, name);
-		  }
-		else if ((field.datatype == PointField::INT8) || (field.datatype == PointField::INT16) || (field.datatype == PointField::INT32))
-		  {
-		    addIntField(cloud, name);
-		  }
-
-
-
-
+		addScalarField(cloud, *name);
 	}
 
-	//DGM: handle scalar fields display parameters
-	if (cloud->hasScalarFields())
-	{
-		cloud->setCurrentDisplayedScalarField(0);
-		cloud->showSF(true);
-	}
-
-
-	return 1;
+	return cloud;
 }
 
-
-int sm2ccReader::addXYZ(ccPointCloud *cloud)
+bool sm2ccConverter::addXYZ(ccPointCloud *cloud)
 {
-	cloud->reserveThePointsTable(getNumberOfPoints());
+	assert(m_sm_cloud && cloud);
+	if (!m_sm_cloud || !cloud)
+		return false;
+
+	size_t pointCount = getNumberOfPoints();
+
+	if (!cloud->reserveThePointsTable((unsigned)pointCount))
+		return false;
+
 	//add xyz to the given cloud taking xyz infos from the sm cloud
 	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud (new pcl::PointCloud<pcl::PointXYZ>);
 	pcl::fromROSMsg(*m_sm_cloud, *pcl_cloud);
 
 	//loop
-	CCVector3 P; //= {0.0,0.0,0.0};
-	for (int i = 0; i < getNumberOfPoints(); ++i)
+	for (size_t i = 0; i < pointCount; ++i)
 	{
-		P[0] = pcl_cloud->at(i).x;
-		P[1] = pcl_cloud->at(i).y;
-		P[2] = pcl_cloud->at(i).z;
+		CCVector3 P(pcl_cloud->at(i).x,
+					pcl_cloud->at(i).y,
+					pcl_cloud->at(i).z);
 
 		cloud->addPoint(P);
 	}
-	return 1;
-
+	
+	return true;
 }
 
-
-
-int sm2ccReader::addNormals(ccPointCloud *cloud)
+bool sm2ccConverter::addNormals(ccPointCloud *cloud)
 {
+	assert(m_sm_cloud && cloud);
+	if (!m_sm_cloud || !cloud)
+		return false;
+
 	pcl::PointCloud<OnlyNormals>::Ptr pcl_cloud_normals (new pcl::PointCloud<OnlyNormals>);
 	pcl::fromROSMsg(*m_sm_cloud, *pcl_cloud_normals);
 
-	if (cloud->hasNormals() == 0)
-		cloud->resizeTheNormsTable();
+	if (!cloud->reserveTheNormsTable())
+		return false;
 
+	size_t pointCount = getNumberOfPoints();
 
 	//loop
-	float N[] = {0.0,0.0,0.0};
-	for (int i = 0; i < getNumberOfPoints(); ++i)
+	for (size_t i = 0; i < pointCount; ++i)
 	{
-		N[0] = pcl_cloud_normals->at(i).normal_x;
-		N[1] = pcl_cloud_normals->at(i).normal_y;
-		N[2] = pcl_cloud_normals->at(i).normal_z;
+		PointCoordinateType N[3] = {(PointCoordinateType)pcl_cloud_normals->at(i).normal_x,
+									(PointCoordinateType)pcl_cloud_normals->at(i).normal_y,
+									(PointCoordinateType)pcl_cloud_normals->at(i).normal_z};
 
-
-		cloud->addNormAtIndex(N, i);
+		cloud->addNorm(N);
 	}
+
 	cloud->showNormals(true);
-	return 1;
+	
+	return true;
 }
 
-int sm2ccReader::addRGB(ccPointCloud * cloud)
+bool sm2ccConverter::addRGB(ccPointCloud * cloud)
 {
+	assert(m_sm_cloud && cloud);
+	if (!m_sm_cloud || !cloud)
+		return false;
+
 	pcl::PointCloud<OnlyRGB>::Ptr pcl_cloud_rgb (new pcl::PointCloud<OnlyRGB>);
 	pcl::fromROSMsg(*m_sm_cloud, *pcl_cloud_rgb);
 
-	cloud->reserveTheRGBTable();
+	if (!cloud->reserveTheRGBTable())
+		return false;
 
-	colorType C[3]={0,0,0};
-	for (int i = 0; i < getNumberOfPoints(); ++i)
+	size_t pointCount = getNumberOfPoints();
+
+	//loop
+	for (size_t i = 0; i < pointCount; ++i)
 	{
-		C[0] = pcl_cloud_rgb->points[i].r;
-		C[1] = pcl_cloud_rgb->points[i].g;
-		C[2] = pcl_cloud_rgb->points[i].b;
-
+		colorType C[3] = {	(colorType)pcl_cloud_rgb->points[i].r,
+							(colorType)pcl_cloud_rgb->points[i].g,
+							(colorType)pcl_cloud_rgb->points[i].b};
 		cloud->addRGBColor(C);
 	}
 
 	cloud->showColors(true);
-	return 1;
+
+	return true;
 }
 
-int sm2ccReader::addFloatField(ccPointCloud * cloud, const std::string name, bool overwrite_if_exist)
+bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& name, bool overwrite_if_exist/*=true*/)
 {
-        //if this field yet exists simply delete it
-        int id = cloud->getScalarFieldIndexByName(name.c_str());
-        if ((id >= 0) && (overwrite_if_exist == true))
-                cloud->deleteScalarField(id); //delete
+	assert(m_sm_cloud && cloud);
+	if (!m_sm_cloud || !cloud)
+		return false;
 
-        if ((id >= 0) && (overwrite_if_exist == false))
-            return 1;
+	//get the field
+	PointField field = m_sm_cloud->fields.at(pcl::getFieldIndex(*m_sm_cloud, name));
 
-
-        pcl::PointCloud<FloatScalar>::Ptr pcl_scalar (new pcl::PointCloud<FloatScalar>);
-
-        int field_index = pcl::getFieldIndex(*m_sm_cloud, name);
-
-        //temporary change the name of the given field to something else -> S5c4laR should be a pretty uncommon name,
-        m_sm_cloud->fields[field_index].name = std::string("S5c4laR");
-
-        //now load
-        pcl::fromROSMsg(*m_sm_cloud, *pcl_scalar);
-
-
-	ccScalarField* cc_scalar_field = new ccScalarField(name.c_str());
-	cc_scalar_field->reserve(getNumberOfPoints());
-
-
-	float scalar = 0.0;
-	for (int i = 0; i < getNumberOfPoints(); ++i)
+	//if this field already exist, simply delete it
+	int id = cloud->getScalarFieldIndexByName(name.c_str());
+	if (id >= 0)
 	{
-	  scalar = pcl_scalar->points[i].S5c4laR;
-	  cc_scalar_field->setValue(i, scalar);
+		if (overwrite_if_exist)
+			cloud->deleteScalarField(id);
+		else
+			return false;
 	}
 
+	size_t pointCount = getNumberOfPoints();
+
+	//create new scalar field
+	ccScalarField* cc_scalar_field = new ccScalarField(name.c_str());
+	if (!cc_scalar_field->reserve((unsigned)pointCount))
+	{
+		cc_scalar_field->release();
+		return false;
+	}
+
+	//get PCL field
+	PointField pclField = m_sm_cloud->fields.at(pcl::getFieldIndex(*m_sm_cloud, name));
+
+	//check if int or float
+	bool floatField = (pclField.datatype == PointField::FLOAT32 || pclField.datatype == PointField::FLOAT64);
+
+	//temporary change the name of the given field to something else -> S5c4laR should be a pretty uncommon name,
+	int field_index = pcl::getFieldIndex(*m_sm_cloud, name);
+	m_sm_cloud->fields[field_index].name = std::string("S5c4laR");
+
+	if (floatField)
+	{
+		pcl::PointCloud<FloatScalar>::Ptr pcl_scalar(new pcl::PointCloud<FloatScalar>);
+		pcl::fromROSMsg(*m_sm_cloud, *pcl_scalar);
+
+		for (size_t i = 0; i < pointCount; ++i)
+		{
+			DistanceType scalar = (DistanceType)pcl_scalar->points[i].S5c4laR;
+			cc_scalar_field->addElement(scalar);
+		}
+	}
+	else
+	{
+		pcl::PointCloud<IntScalar>::Ptr pcl_scalar(new pcl::PointCloud<IntScalar>);
+		pcl::fromROSMsg(*m_sm_cloud, *pcl_scalar);
+
+		for (size_t i = 0; i < pointCount; ++i)
+		{
+			DistanceType scalar = (DistanceType)pcl_scalar->points[i].S5c4laR;
+			cc_scalar_field->addElement(scalar);
+		}
+	}
 
 	cc_scalar_field->computeMinAndMax();
-
 	cloud->addScalarField(cc_scalar_field);
+	cloud->setCurrentDisplayedScalarField(0);
+	cloud->showSF(true);
 
 	//restore old name for the scalar field
 	m_sm_cloud->fields[field_index].name = name;
 
-	return 1;
+	return true;
 }
 
-
-int sm2ccReader::addIntField(ccPointCloud * cloud, const std::string name, bool overwrite_if_exist)
+size_t sm2ccConverter::getNumberOfPoints()
 {
-
-        //if this field yet exists simply delete it
-        int id = cloud->getScalarFieldIndexByName(name.c_str());
-        if ((id >= 0) && (overwrite_if_exist == true))
-                cloud->deleteScalarField(id); //delete
-
-	if ((id >= 0) && (overwrite_if_exist == false))
-		return 1;
-
-
-        pcl::PointCloud<IntScalar>::Ptr pcl_scalar (new pcl::PointCloud<IntScalar>);
-
-        int field_index = pcl::getFieldIndex(*m_sm_cloud, name);
-
-        //temporary change the name of the given field to something else -> S5c4laR should be a pretty uncommon name,
-        m_sm_cloud->fields[field_index].name = std::string("S5c4laR");
-
-
-        //now load
-        pcl::fromROSMsg(*m_sm_cloud, *pcl_scalar);
-
-
-
-	ccScalarField* cc_scalar_field = new ccScalarField(name.c_str());
-	cc_scalar_field->reserve(getNumberOfPoints());
-
-
-	float scalar = 0.0;
-	for (int i = 0; i < getNumberOfPoints(); ++i)
-	{
-	  scalar = pcl_scalar->points[i].S5c4laR;
-	  cc_scalar_field->setValue(i, scalar);
-	}
-
-
-	cc_scalar_field->computeMinAndMax();
-
-	cloud->addScalarField(cc_scalar_field);
-
-	//restore old name for the scalar field
-	m_sm_cloud->fields[field_index].name = name;
-
-	return 1;
+	return (size_t) (m_sm_cloud->width * m_sm_cloud->height);
 }
 
-int sm2ccReader::getNumberOfPoints()
+bool sm2ccConverter::existField(std::string name) const
 {
-    return (int) (m_sm_cloud->width * m_sm_cloud->height);
+	if (m_sm_cloud)
+		for (std::vector< ::sensor_msgs::PointField >::const_iterator it = m_sm_cloud->fields.begin(); it != m_sm_cloud->fields.end(); ++it)
+			if (it->name == name)
+				return true;
+
+	return false;
 }
 
-bool sm2ccReader::existField(std::string name) const
+void sm2ccConverter::eraseString(std::list<std::string> &fields, std::string name)
 {
-        return std::binary_search(m_field_list.begin(), m_field_list.end(), name);
-}
-
-bool sm2ccReader::hasNormals() const
-{
-	bool got_normal_x = existField("normal_x");
-	bool got_normal_y = existField("normal_y");
-	bool got_normal_z = existField("normal_z");
-	return (got_normal_x && got_normal_y && got_normal_z);
-}
-
-bool sm2ccReader::hasXYZ() const
-{
-	bool got_x = existField("x");
-	bool got_y = existField("y");
-	bool got_z = existField("z");
-	return (got_x && got_y && got_z);
-}
-
-bool sm2ccReader::hasRGB() const
-{
-	return existField("rgb");
-}
-
-void sm2ccReader::eraseString(std::vector<std::string> &fields, std::string name)
-{
-	fields.erase(std::remove(fields.begin(), fields.end(), name), fields.end());
+	fields.remove(name);
 }
 
 std::vector<std::string> getFieldList(const sensor_msgs::PointCloud2 &cloud)

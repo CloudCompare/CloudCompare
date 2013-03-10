@@ -22,7 +22,6 @@
 #include <ccProgressDialog.h>
 #include <ccHObjectCaster.h>
 
-//#include <mainwindow.h>
 //qCC
 #include <ccMainAppInterface.h>
 

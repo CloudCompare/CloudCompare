@@ -41,6 +41,7 @@
 #include "LASFilter.h"
 #include "E57Filter.h"
 #include "UltFilter.h"
+#include "PCDFilter.h"
 //MESHES
 #include "X3DFilter.h"
 #include "ObjFilter.h"
@@ -95,6 +96,8 @@ CC_FILE_TYPES FileIOFilter::StringToFileFormat(const char* ext)
 		fType=VTK;
 	else if (strcmp(ext,"STL")==0)
 		fType=STL;
+    else if (strcmp(ext,"PCD")==0)
+        fType=PCD;
 #ifdef CC_X3D_SUPPORT
 	else if (strcmp(ext,"X3D")==0)
 		fType=X3D;
@@ -201,6 +204,9 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 	case STL:
 		fio = (FileIOFilter*)(new STLFilter());
 		break;
+    case PCD:
+        fio = (FileIOFilter*)(new PCDFilter());
+        break;
 #ifdef CC_X3D_SUPPORT
     case X3D:
 		fio = (FileIOFilter*)(new X3DFilter());
@@ -314,6 +320,9 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename
 	case STL:
 		fio = (FileIOFilter*)(new STLFilter());
 		break;
+    case PCD:
+        fio = (FileIOFilter*)(new PCDFilter());
+        break;
 #ifdef CC_X3D_SUPPORT
     case X3D:
         fio = (FileIOFilter*)(new X3DFilter());

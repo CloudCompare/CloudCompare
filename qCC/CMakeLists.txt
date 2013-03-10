@@ -1,5 +1,12 @@
 cmake_minimum_required(VERSION 2.8)
 
+project( CloudCompare )
+
+set( VERSION_MAJOR 2 )
+set( VERSION_MINOR 4 )
+set( VERSION_PATCH 0 )
+
+
 if ( UNIX )
 	set( CloudCompare_dest_release bin ) #default destination: /usr/bin
 	set( CloudCompare_dest_debug bin/debug )
@@ -37,12 +44,6 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qxt )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 include_directories( ${LIBLAS_INCLUDE_DIR} )
 include_directories( ${XIOT_INCLUDE_DIR} )
-
-project( CloudCompare )
-
-set( VERSION_MAJOR 2 )
-set( VERSION_MINOR 4 )
-set( VERSION_PATCH 0 )
 
 # TODO: use qxt as a standalone library!
 set( QXT_HEADERS ../libs/qxt/qxtspanslider.h ../libs/qxt/qxtspanslider_p.h )

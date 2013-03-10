@@ -95,9 +95,9 @@ public:
 	//! Default constructor
 	/** \param progress_cb associated GenericProgressCallback
 		\param totalSteps total number of steps
-		\param finalSteps equivalent percentage
+		\param totalPercentage equivalent percentage
 	**/
-	NormalizedProgress(GenericProgressCallback* progress_cb, unsigned totalSteps, unsigned finalSteps=100)
+	NormalizedProgress(GenericProgressCallback* progress_cb, unsigned totalSteps, unsigned totalPercentage=100)
 		: percent(0.0)
 		, percentAdd(1.0)
 		, step(1)
@@ -105,33 +105,44 @@ public:
 		, gp(progress_cb)
 	{
 		assert(progress_cb);
-		scale(totalSteps,finalSteps==100 && totalSteps<500 ? totalSteps : finalSteps);
+		scale(totalSteps, totalPercentage==100 && totalSteps<500 ? totalSteps : totalPercentage);
 	}
 
-	//! Scales inner parameters so that 'totalSteps' calls to the 'oneStep' method correspond to 'finalSteps' percents
-	void scale(unsigned totalSteps, unsigned finalSteps=100)
+	//! Scales inner parameters so that 'totalSteps' calls of the 'oneStep' method correspond to 'totalPercentage' percents
+	void scale(unsigned totalSteps, unsigned totalPercentage=100, bool updateCurrentProgress=false)
 	{
-		counter=0;
-        if (totalSteps>finalSteps)
-            step = unsigned(ceil((float)totalSteps/(float)finalSteps));
+		if (totalSteps*totalPercentage==0)
+		{
+			assert(false);
+			return;
+		}
+
+        if (totalSteps>totalPercentage)
+            step = unsigned(ceil((float)totalSteps/(float)totalPercentage));
         else
-            percentAdd = (float)finalSteps/(float)totalSteps;
+            percentAdd = (float)totalPercentage/(float)totalSteps;
+
+		if (updateCurrentProgress)
+		{
+			percent = (float)counter*(float)totalPercentage/(float)totalSteps;
+			gp->update(percent);
+		}
+		counter = 0;
 	}
 
 	//! Resets progress state
 	void reset()
 	{
-		percent=0.0;
-		counter=0;
+		percent = 0.0;
+		counter = 0;
 		gp->update(0.0);
 	}
 
 	//! Increments total progress value
 	inline bool oneStep()
 	{
-		if (++counter == step)
+		if (((++counter) % step)==0)
 		{
-			counter = 0;
 			percent += percentAdd;
 			gp->update(percent);
 		}

@@ -209,6 +209,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(const char* filename, ccHObject& container, 
 struct cloudAttributesDescriptor
 {
     ccPointCloud* cloud;
+	static const unsigned c_attribCount = 12;
     union
     {
         struct{
@@ -221,9 +222,11 @@ struct cloudAttributesDescriptor
             int redIndex;
             int greenIndex;
             int blueIndex;
+            int iRgbaIndex;
+            int fRgbaIndex;
             int greyIndex;
         };
-        int indexes[10];
+        int indexes[c_attribCount];
     };
 	std::vector<int> scalarIndexes;
 	std::vector<CCLib::ScalarField*> scalarFields;
@@ -238,7 +241,7 @@ struct cloudAttributesDescriptor
     void reset()
     {
         cloud=NULL;
-        for (int i=0;i<10;++i)
+        for (int i=0;i<c_attribCount;++i)
             indexes[i]=-1;
         hasNorms=false;
         hasRGBColors=false;
@@ -249,7 +252,7 @@ struct cloudAttributesDescriptor
     void updateMaxIndex(int& maxIndex)
     {
 		unsigned i;
-        for (i=0;i<10;++i)
+        for (i=0;i<c_attribCount;++i)
             if (indexes[i]>maxIndex)
                 maxIndex=indexes[i];
         for (i=0;i<scalarIndexes.size();++i)
@@ -393,6 +396,22 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 			if (cloud->reserveTheRGBTable())
 			{
 				cloudDesc.blueIndex = i;
+				cloudDesc.hasRGBColors=true;
+				cloud->showColors(true);
+			}
+			else
+			{
+				ccConsole::Warning("Failed to allocate memory for colors! (skipped)");
+			}
+			break;
+		case ASCII_OPEN_DLG_RGB32i:
+		case ASCII_OPEN_DLG_RGB32f:
+			if (cloud->reserveTheRGBTable())
+			{
+				if (openSequence[i].type == ASCII_OPEN_DLG_RGB32i)
+					cloudDesc.iRgbaIndex = i;
+				else
+					cloudDesc.fRgbaIndex = i;
 				cloudDesc.hasRGBColors=true;
 				cloud->showColors(true);
 			}
@@ -565,11 +584,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
         	}
 
         	//on met à jour les informations sur la progression
-			//TODO
-        	//percent = floor(float(pointsRead)*100.0/float(newNbOfLinesApproximation));
-        	//pdlg.update(percent);
-        	//lineCounter = 0;
-        	//palier = unsigned(float(newNbOfLinesApproximation-pointsRead) / (100.0-percent));
+			nprogress.scale(newNbOfLinesApproximation,100,true);
 			pdlg.setInfo(qPrintable(QString("Approximate number of points: %1").arg(newNbOfLinesApproximation)));
         	approximateNumberOfLines = newNbOfLinesApproximation;
 
@@ -635,12 +650,31 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 		//Colors
 		if (cloudDesc.hasRGBColors)
 		{
-			if (cloudDesc.redIndex>=0)
-				col[0]=(colorType)parts[cloudDesc.redIndex].toInt();
-			if (cloudDesc.greenIndex>=0)
-				col[1]=(colorType)parts[cloudDesc.greenIndex].toInt();
-			if (cloudDesc.blueIndex>=0)
-				col[2]=(colorType)parts[cloudDesc.blueIndex].toInt();
+			if (cloudDesc.iRgbaIndex>=0)
+			{
+				const uint32_t rgb = parts[cloudDesc.iRgbaIndex].toInt();
+				col[0] = ((rgb >> 16)	& 0x0000ff);
+				col[1] = ((rgb >> 8)	& 0x0000ff);
+				col[2] = ((rgb)			& 0x0000ff);
+
+			}
+			else if (cloudDesc.fRgbaIndex>=0)
+			{
+				const float rgbf = parts[cloudDesc.fRgbaIndex].toFloat();
+				const uint32_t rgb = (uint32_t)(*((uint32_t*)&rgbf));
+				col[0] = ((rgb >> 16)	& 0x0000ff);
+				col[1] = ((rgb >> 8)	& 0x0000ff);
+				col[2] = ((rgb)			& 0x0000ff);
+			}
+			else
+			{
+				if (cloudDesc.redIndex>=0)
+					col[0]=(colorType)parts[cloudDesc.redIndex].toInt();
+				if (cloudDesc.greenIndex>=0)
+					col[1]=(colorType)parts[cloudDesc.greenIndex].toInt();
+				if (cloudDesc.blueIndex>=0)
+					col[2]=(colorType)parts[cloudDesc.blueIndex].toInt();
+			}
 			cloudDesc.cloud->addRGBColor(col);
 		}
 		else if (cloudDesc.greyIndex>=0)

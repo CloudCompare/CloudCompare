@@ -14,570 +14,474 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: lpenasa                                                        $
-//$Rev:: 2266                                                              $
-//$LastChangedDate:: 2012-10-15 00:07:12 +0200 (lun., 15 oct. 2012)        $
-//**************************************************************************
-//
+
 #include "PCDFilter.h"
+
+//Local
+#include "AsciiFilter.h"
 
 //qCC_db
 #include <ccPointCloud.h>
 
-#include <iostream>
-#include <fstream>
-#include <sstream>
+//Qt
+#include <QFile>
+#include <QTextStream>
 
-//for uint fixed-sized types
-#include <stdint.h>
+//system
+#include <assert.h>
+#include <stdint.h> //for uint fixed-sized types
 
-
-std::ostream& operator<<(std::ostream& s, const PCDFilter::PCDHeader & v)
+CC_FILE_ERROR PCDFilter::saveToFile(ccHObject* entity, const char* filename)
 {
+	ccConsole::Error("Not available yet!");
 
-    s << "version: ";
-    s << "  " << v.version << std::endl;
-
-    s << "number of fields: ";
-    s << "  " << v.fields.size() << std::endl;
-
-    s << "fields:";
-    for (int i = 0; i < v.fields.size(); ++i)
-    {
-        s << "  " << v.fields[i] ;
-    }
-    s << std::endl;
-    s << "sizes: ";
-
-    for (int i = 0; i < v.size.size(); ++i)
-    {
-        s << "  " << v.size[i] ;
-    }
-    s << std::endl;
-    s << "count: ";
-    for (int i = 0; i < v.count.size(); ++i)
-    {
-        s << "  " << v.count[i] ;
-    }
-    s << std::endl;
-    s << "width: ";
-    s << "  " << v.width << std::endl;
-    s << "height: ";
-    s << "  " << v.height << std::endl;
-    s << "viewpoint: ";
-    for (int i = 0; i < v.viewpoint.size(); ++i)
-    {
-        s << "  " << v.viewpoint[i] ;
-    }
-    s << std::endl;
-
-    s << "points: ";
-    s << "  " << v.points << std::endl;
-    s << "data: ";
-    s << "  " << v.data << std::endl;
-    s << "data begins at: ";
-    s << "  " << v.data_position << std::endl;
-    return (s);
+	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR
-PCDFilter::readFileHeader(const char * filename, PCDHeader &header)
+CC_FILE_ERROR PCDFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
-    std::ifstream fs;
-    fs.open (filename, std::ios::binary);
-    if (!fs.is_open () || fs.fail ())
-    {
-        fs.close ();
-        return CC_FERR_READING;
-    }
+	//read header
+	PCDHeader header;
+	{
+		CC_FILE_ERROR result = readFileHeader(filename, header);
+		if (result != CC_FERR_NO_ERROR)
+			return result;
+	}
 
-    // Seek at the given offset
-    //fs.seekg (offset, std::ios::beg);
+	if (header.data == "ascii")
+	{
+		//we can read it as a standard ASCII file!
+		AsciiOpenDlg::Sequence openSequence;
+		unsigned index=0;
+		for (std::vector<QString>::const_iterator it = header.fields.begin(); it != header.fields.end(); ++it,++index)
+		{
+			AsciiOpenDlg::SequenceItem si;
+			si.header = *it;
+			if (*it == "x")
+				si.type = ASCII_OPEN_DLG_X;
+			else if (*it == "y")
+				si.type = ASCII_OPEN_DLG_Y;
+			else if (*it == "z")
+				si.type = ASCII_OPEN_DLG_Z;
+			else if (*it == "normal_x")
+				si.type = ASCII_OPEN_DLG_NX;
+			else if (*it == "normal_y")
+				si.type = ASCII_OPEN_DLG_NY;
+			else if (*it == "normal_z")
+				si.type = ASCII_OPEN_DLG_NZ;
+			else if (*it == "rgb")
+			{
+				if (header.size[index] == 4)
+					si.type = (header.type[index] == "F" ? ASCII_OPEN_DLG_RGB32f : ASCII_OPEN_DLG_RGB32i);
+				else
+				{
+					ccLog::Warning("[PCDFilter] RGB fields other than 32 bits are not handled!");
+				}
+			}
+			else if (*it != "_") //paddig fields
+				si.type = ASCII_OPEN_DLG_Scalar;
+			else
+				si.type = ASCII_OPEN_DLG_None; //skip it
 
-    std::string line;
+			openSequence.push_back(si);
+		}
+		
+		qint64 fileSize = QFile(filename).size();
+		return AsciiFilter().loadCloudFromFormatedAsciiFile(filename,
+			container,
+			openSequence,
+			' ',
+			10, //will be evaluated again
+			fileSize,
+			(unsigned)header.lineCount,
+			false,
+			coordinatesShiftEnabled,
+			coordinatesShift);
+	}
+	else if (header.data != "binary")
+	{
+		ccLog::Error(QString("[PCDFilter] '%1' PCD files not handled! Try to use the qPCL plugin instead").arg(header.data));
+		return CC_FERR_WRONG_FILE_TYPE;
+	}
 
-
-    for (size_t i = 0; i < 11 ; ++i) //read 11 lines
-    {
-        std::getline(fs, line);
-        QString qline = line.c_str();
-
-        //split the line
-        QRegExp rx("(\\ |\\t|\\r)");
-        QStringList wlist = qline.split(rx);
-
-        int n_fields;
-
-        if (wlist.at(0) == "#" )
-            continue;
-
-        if (wlist.at(0) == "VERSION")
-        {
-            header.version = wlist.at(1).toStdString();
-            continue;
-        }
-
-        if  (wlist.at(0) == "FIELDS")
-        {
-            header.fields.clear();
-            for (size_t i = 1; i < wlist.size(); ++i )
-            {
-                header.fields.push_back(wlist.at(i).toStdString());
-            }
-
-            n_fields = wlist.size() - 1;
-            continue;
-        }
-
-        if (wlist.at(0) == "SIZE")
-        {
-            header.size.clear();
-            header.size.resize(wlist.size() - 1);
-            for (size_t i = 1; i < wlist.size(); ++i )
-            {
-                size_t val = wlist.at(i).toInt();
-                header.size[i-1] = val;
-            }
-            continue;
-        }
-
-        // Get the field types
-        if (wlist.at(0) == "TYPE")
-        {
-            header.type.clear();
-            for (size_t i = 1; i < wlist.size(); ++i )
-            {
-                header.type.push_back(wlist.at(i).toInt());
-            }
-            continue;
-        }
-
-        // Get the field counts
-        if (wlist.at(0) == "COUNT")
-        {
-            header.count.clear();
-            for (size_t i = 1; i < wlist.size(); ++i )
-            {
-                header.count.push_back(wlist.at(i).toInt());
-            }
-        }
-
-        if (wlist.at(0) == "WIDTH")
-        {
-            header.width = wlist.at(1).toInt();
-            continue;
-        }
-
-        if (wlist.at(0) == "HEIGHT")
-        {
-            header.height = wlist.at(1).toInt();
-            continue;
-        }
-
-        if (wlist.at (0) == "VIEWPOINT")
-        {
-            header.viewpoint.clear();
-            for (size_t i = 1; i < wlist.size(); ++i )
-            {
-                header.viewpoint.push_back(wlist.at(i).toFloat());
-            }
-            continue;
-        }
-
-        if (wlist.at (0) == "POINTS")
-        {
-            header.points = wlist.at(1).toInt();
-            continue;
-        }
-
-        if (wlist.at (0) == "DATA")
-        {
-            header.data = wlist.at(1).toStdString();
-            header.data_position = static_cast<int> (fs.tellg ());
-            continue;
-        }
-    }
-
-
-    return CC_FERR_NO_ERROR;
+	return LoadFileBinaryMemMap(filename, container, header);
 }
 
-
-CC_FILE_ERROR
-PCDFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR PCDFilter::readFileHeader(const char* filename, PCDHeader &header)
 {
-    return CC_FERR_NO_ERROR;
+	//we get the size of the file to open
+	QFile file(filename);
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+		return CC_FERR_READING;
+	QTextStream inFile(&file);
+
+	header.data_position = 0;
+	header.lineCount = 0;
+
+	while (true) //read 11 lines
+	{
+		QString nextline = inFile.readLine();
+		if (nextline.isEmpty())
+			break;
+
+		//split the line
+		QStringList wlist = nextline.split(QRegExp("(\\ |\\t|\\r)"));
+		assert(wlist.size()>0);
+
+		if (wlist.at(0) == "VERSION")
+		{
+			header.version = wlist.at(1);
+		}		
+		else if  (wlist.at(0) == "FIELDS")
+		{
+			header.fields.clear();
+			for (int i = 1; i < wlist.size(); ++i )
+			{
+				header.fields.push_back(wlist.at(i));
+			}
+		}
+		else if (wlist.at(0) == "SIZE")
+		{
+			header.size.clear();
+			for (int i = 1; i < wlist.size(); ++i )
+			{
+				size_t val = wlist.at(i).toInt();
+				header.size.push_back(val);
+			}
+		}
+		else if (wlist.at(0) == "TYPE") // Get the field types
+		{
+			header.type.clear();
+			for (int i = 1; i < wlist.size(); ++i )
+			{
+				header.type.push_back(wlist.at(i));
+			}
+		}
+		else if (wlist.at(0) == "COUNT") // Get the field counts
+		{
+			header.count.clear();
+			for (int i = 1; i < wlist.size(); ++i )
+			{
+				header.count.push_back(wlist.at(i).toInt());
+			}
+		}
+		else if (wlist.at(0) == "WIDTH")
+		{
+			header.width = wlist.at(1).toInt();
+		}
+		else if (wlist.at(0) == "HEIGHT")
+		{
+			header.height = wlist.at(1).toInt();
+		}
+		else if (wlist.at (0) == "VIEWPOINT")
+		{
+			header.viewpoint.clear();
+			for (int i = 1; i < wlist.size(); ++i )
+			{
+				header.viewpoint.push_back(wlist.at(i).toFloat());
+			}
+		}
+		else if (wlist.at (0) == "POINTS")
+		{
+			header.points = wlist.at(1).toInt();
+		}
+		else if (wlist.at (0) == "DATA")
+		{
+			header.data = wlist.at(1);
+			header.data_position = inFile.pos();
+		}
+		else if (wlist.at(0) != "#" ) //end of header
+		{
+			break;
+		}
+		++header.lineCount;
+	}
+
+	if (header.data_position == 0)
+		return CC_FERR_MALFORMED_FILE;
+
+	//update point stride
+	header.pointStride = 0;
+	{
+		for (size_t i = 0; i < header.size.size(); ++i)
+			header.pointStride += header.size[i] * header.count[i];
+	}
+
+	return CC_FERR_NO_ERROR;
 }
 
-int
-PCDFilter::getIDOfField(const std::string fieldname, const PCDHeader header)
+int PCDFilter::GetIDOfField(const QString& fieldName, const PCDHeader& header)
 {
+	for (int i = 0; i < header.fields.size(); ++i)
+		if (header.fields.at(i) == fieldName)
+			return i;
 
-    for (int i = 0; i < header.fields.size(); ++i)
-    {
-        if (header.fields.at(i) == fieldname)
-        {
-            return i;
-            break;
-        }
-    }
-    return -1;
+	return -1;
 }
 
-int
-PCDFilter::getSizeOfField(const std::string fieldname, const PCDHeader header)
+size_t PCDFilter::GetSizeOfField(int fieldID, const PCDHeader& header)
 {
-    int id = getIDOfField(fieldname, header);
-    if (id == -1)
-        return -1;
-    else
-        return header.size.at(id) * header.count.at(id);
+	return (fieldID>=0 ? header.size[fieldID] * header.count[fieldID] : 0);
 }
 
-int
-PCDFilter::getOffsetOfField(const std::string fieldname, const PCDHeader header)
+size_t PCDFilter::GetOffsetOfField(int fieldID, const PCDHeader& header)
 {
-    int field_position = getIDOfField(fieldname, header);
+	//compute offset
+	if (fieldID == -1)
+	{
+		assert(false);
+		return 0;
+	}
 
-    //compute offset
-    if (field_position == -1)
-        return -1;
+	size_t offset = 0;
+	for (int i = 0; i < fieldID; ++i) //fieldID equals the field position
+		offset += header.size[i] * header.count[i];
 
-    int offset = 0;
-    for (int i = 0; i < field_position; ++i)
-    {
-        offset += header.size.at(i) * header.count.at(i);
-    }
-
-
-
-    return offset;
+	return offset;
 }
 
-int
-PCDFilter::readScalarFieldMemMap(const std::string fieldname, const InputMemoryFile & mem_file, const PCDHeader header, ccScalarField &field , const int count)
+int PCDFilter::ReadScalarFieldMemMap(const QString& fieldName,
+	const InputMemoryFile& mem_file,
+	const PCDHeader& header,
+	ccScalarField &field,
+	size_t count)
 {
+	int fieldID = GetIDOfField(fieldName, header);
+	if (fieldID<0)
+		return -1;
+	size_t offset = GetOffsetOfField(fieldID, header);
+	size_t full_field_size = GetSizeOfField(fieldID, header);
+	size_t field_element_size = header.size[fieldID];
+	size_t multiplicity = header.count[fieldID];
 
+	if (count > multiplicity)
+		return 0;
 
-    int fieldID = getIDOfField(fieldname, header);
-    size_t offset = getOffsetOfField(fieldname, header);
-    size_t full_field_size = getSizeOfField(fieldname, header);
-    size_t field_element_size = header.size.at(fieldID);
-    size_t multiplicity = header.count.at(fieldID);
+	size_t pointCount = header.height * header.width;
+	if (!field.reserve((unsigned)pointCount))
+	{
+		ccLog::Error("[PCDFilter] Not enough memory!");
+		return -1;
+	}
 
-    size_t point_step = 0;
-    for (int i = 0; i < header.size.size(); ++i)
-    {
-        point_step += header.size[i] * header.count[i];
-    }
+	size_t const_offset =  offset + count*field_element_size;
 
-    if (count > multiplicity)
-        return -1;
+	for (int i = 0;  i < pointCount; ++i)
+	{
+		char buffer[8]; //maximum element size
+		memcpy(buffer, mem_file.data() + header.data_position + i*header.pointStride + const_offset, field_element_size);
 
-    size_t n_points = header.height * header.width;
-    field.reserve(n_points);
+		switch(field_element_size)
+		{
+		case 1: //char
+			field.addElement( static_cast<float> ( *((char*)buffer)) );
+			break;
+		case 2: //short
+			field.addElement( static_cast<float> ( *((short*)buffer)) );
+			break;
+		case 4: //float
+			field.addElement(  *((float*)buffer) );
+			break;
+		case 8: //double
+			field.addElement( static_cast<float> ( *((double*) buffer)) );
+			break;
+		}
+	}
 
-    size_t const_offset =  offset + count*field_element_size;
+	field.computeMinAndMax();
+	if (multiplicity == 1)
+		field.setName(qPrintable(fieldName));
+	else
+		field.setName(qPrintable(fieldName+QString("_%1").arg(count)));
 
-    void * value = malloc(field_element_size);
-
-
-    for (int i = 0;  i < n_points; ++i)
-    {
-
-        memcpy(value, mem_file.data() + header.data_position + i*point_step + const_offset, field_element_size);
-
-        if (field_element_size == 1) //char
-            field.addElement( static_cast<float> ( *((char*) value)) );
-
-        else if (field_element_size == 2) //short
-            field.addElement( static_cast<float> ( *((short*) value)) );
-
-        else if (field_element_size == 4) //float
-            field.addElement(  *((float*) value) ) ;
-
-        else if (field_element_size == 8) //double
-            field.addElement( static_cast<float> ( *((double*) value)) );
-
-    }
-
-    field.computeMinAndMax();
-    if (multiplicity == 1)
-        field.setName(fieldname.c_str());
-
-    else
-    {
-        std::stringstream newname;
-        newname << fieldname << "_" << count;
-
-        field.setName(newname.str().c_str());
-    }
-
-
-
-
-    return 1;
+	return 1;
 }
 
-CC_FILE_ERROR
-PCDFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+int PCDFilter::ReadRGBMemMap(const InputMemoryFile & mem_file, const PCDHeader &header, ccPointCloud &cloud)
 {
+	int rgb_id = GetIDOfField("rgb", header);
+	if (rgb_id < 0)
+		return 0;
 
-    //we get the size of the file to open
-    QFile file(filename);
-    if (!file.exists())
-        return CC_FERR_READING;
+	size_t rgb_offset = GetOffsetOfField(rgb_id, header);
+	size_t pointCount = header.width * header.height;
 
-    PCDHeader header;
-    readFileHeader(filename, header);
+	if (!cloud.reserveTheRGBTable())
+	{
+		ccLog::Warning("[PCDFilter] Not enough memory: failed to read RGB info!");
+		return -1;
+	}
 
-//    std::cout << header << std::endl;
-    if (header.data == "binary")
-    {
-        loadFileBinaryMemMap(filename, container, header);
-    }
-    else if (header.data == "binary_compressed")
-    {
-        return CC_FERR_MALFORMED_FILE;
-    }
-    else if (header.data == "ascii")
-    {
-        return CC_FERR_MALFORMED_FILE;
-    }
+	for (size_t i =0; i < pointCount; ++i) //for each point of the cloud
+	{
+		uint32_t rgb = *(const uint32_t*)(mem_file.data() + header.data_position + i*header.pointStride + rgb_offset);
 
-    return CC_FERR_NO_ERROR;
+		//unpack colors
+		uint8_t r = ((rgb >> 16)	& 0x0000ff);
+		uint8_t g = ((rgb >> 8)		& 0x0000ff);
+		uint8_t b = ((rgb)			& 0x0000ff);
+
+		cloud.addRGBColor(r,g,b);
+	}
+	cloud.showColors(true);
+
+	return 1;
 }
 
-
-
-
-
-int
-PCDFilter::readRGBMemMap(const InputMemoryFile & mem_file, const PCDHeader &header, ccPointCloud &cloud)
+int PCDFilter::ReadNormalsMemMap(const InputMemoryFile & mem_file, const PCDHeader &header, ccPointCloud &cloud)
 {
-    int rgb_id = getIDOfField("rgb", header);
-    if (rgb_id < 0)
-        return -1;
+	int normal_x = GetIDOfField("normal_x", header);
+	int normal_y = GetIDOfField("normal_y", header);
+	int normal_z = GetIDOfField("normal_z", header);
 
-    //point step
-    size_t point_step = 0;
-    for (int i = 0; i < header.size.size(); ++i)
-    {
-        point_step += header.size[i] * header.count[i];
-    }
+	if (normal_x < 0 || normal_y < 0 || normal_z < 0)
+		return 0;
 
-    size_t rgb_offset = getOffsetOfField("rgb", header);
+	size_t pointCount = header.width * header.height;
+	assert(pointCount == cloud.capacity()); //cloud should already have been initialized
 
-    size_t n_points = header.width * header.height;
+	if (!cloud.reserveTheNormsTable())
+	{
+		ccLog::Error("[PCDFilter] Not enough memory: failed to read normals info!");
+		return -1;
+	}
 
-    cloud.reserveTheRGBTable();
-    //    colorType color[3];
-    uint32_t rgb;
-    uint8_t r,g,b;
+	size_t offsets[3] = {	GetOffsetOfField(normal_x, header),
+							GetOffsetOfField(normal_y, header),
+							GetOffsetOfField(normal_z, header)};
 
-    for (size_t i =0; i < n_points; ++i) //for each point of the cloud
-    {
-        memcpy(&rgb, mem_file.data() + header.data_position + point_step * i + rgb_offset, sizeof(uint32_t));
+	size_t sizes[3] = {	GetSizeOfField(normal_x, header),
+						GetSizeOfField(normal_y, header),
+						GetSizeOfField(normal_z, header)};
 
-        //unpack colors
-        r = (rgb >> 16) & 0x0000ff;
-        g = (rgb >> 8)  & 0x0000ff;
-        b = (rgb)     & 0x0000ff;
+	//for each point of the cloud
+	for (size_t i=0; i < pointCount; ++i)
+	{
+		//unpack normals
+		PointCoordinateType N[3];
+		for (unsigned char j=0; j<3; ++j)
+		{
+			const char* tmp = mem_file.data() + header.data_position + i*header.pointStride + offsets[j];
+			if (sizes[j] == 4) //is a float
+				N[j] = (PointCoordinateType)(*((float*)tmp));
+			else if (sizes[j] == 8) //is double
+				N[j] = (PointCoordinateType)(*((double*)tmp));
+		}
 
-        cloud.addRGBColor(r,g,b);
-    }
+		cloud.addNorm(N);
+	}
+	cloud.showNormals(true);
 
-    return 1;
-
-
-
+	return 1;
 }
 
-int
-PCDFilter::readNormalsMemMap(const InputMemoryFile & mem_file, const PCDHeader &header, ccPointCloud &cloud)
+CC_FILE_ERROR PCDFilter::LoadFileBinaryMemMap(const char* filename, ccHObject& container, const PCDHeader &header)
 {
-    int normal_x = getIDOfField("normal_x", header);
-    int normal_y = getIDOfField("normal_y", header);
-    int normal_z = getIDOfField("normal_z", header);
+	//Should be ok if we are here (header has already been successfully read)
+	//if (!QFile(filename).exists())
+	//	return CC_FERR_READING;
 
-    if ((normal_x < 0)|| (normal_x < 0)||(normal_x < 0))
-        return -1;
+	int x = GetIDOfField("x", header);
+	int y = GetIDOfField("y", header);
+	int z = GetIDOfField("z", header);
 
-    //point step
-    size_t point_step = 0;
-    for (int i = 0; i < header.size.size(); ++i)
-    {
-        point_step += header.size[i] * header.count[i];
-    }
+	if (x < 0 || y < 0 || z < 0)
+		return CC_FERR_MALFORMED_FILE;
 
-    size_t x_offset = getOffsetOfField("normal_x", header);
-    size_t y_offset = getOffsetOfField("normal_y", header);
-    size_t z_offset = getOffsetOfField("normal_z", header);
+	//load file in memory
+	InputMemoryFile mem_file(filename);
 
-    size_t x_size = getSizeOfField("normal_x", header);
-    size_t y_size = getSizeOfField("normal_y", header);
-    size_t z_size = getSizeOfField("normal_z", header);
+	//allocate point cloud
+	size_t pointCount = header.height * header.width;
+	ccPointCloud * cloud = new ccPointCloud;
+	if (!cloud->reserve((unsigned)pointCount))
+	{
+		ccLog::Error("[PCDFilter] Not enough memory!");
+		return CC_FERR_NOT_ENOUGH_MEMORY;
+	}
 
-    size_t n_points = header.width * header.height;
+	size_t offsets[3] = {	GetOffsetOfField(x, header),
+							GetOffsetOfField(y, header),
+							GetOffsetOfField(z, header)};
 
-    cloud.reserveTheNormsTable();
+	size_t sizes[3] = {	GetSizeOfField(x, header),
+						GetSizeOfField(y, header),
+						GetSizeOfField(z, header)};
 
-    float n_x=0.0, n_y=0.0, n_z = 0.0;
+	bool floatType[3] = {	header.type[x] == "F",
+							header.type[y] == "F",
+							header.type[z] == "F"};
 
-    void *x_tmp = malloc(x_size);
-    void *y_tmp = malloc(y_size);
-    void *z_tmp = malloc(z_size);
+	//read points
+	{
+		for (int i = 0; i < pointCount; ++i)
+		{
+			const char* buffer = mem_file.data() + header.data_position + i*header.pointStride;
+			CCVector3 point;
+			for (unsigned char j=0; j<3; ++j)
+			{
+				if (floatType[j])
+				{
+					if (sizes[j] == 4)
+						point.u[j] = (PointCoordinateType)(*((float*)(buffer+offsets[j])));
+					else if (sizes[j] == 8)
+						point.u[j] = (PointCoordinateType)(*((double*)(buffer+offsets[j])));
+				}
+				else
+				{
+					if (sizes[j] == 4)
+						point.u[j] = (PointCoordinateType)(*((int32_t*)(buffer+offsets[j])));
+					else if (sizes[j] == 8)
+						point.u[j] = (PointCoordinateType)(*((int64_t*)(buffer+offsets[j])));
+				}
+			}
 
-    for (size_t i =0; i < n_points; ++i) //for each point of the cloud
-    {
-        memcpy(x_tmp, mem_file.data() + header.data_position + point_step * i + x_offset, x_size);
-        memcpy(y_tmp, mem_file.data() + header.data_position + point_step * i + y_offset, y_size);
-        memcpy(z_tmp, mem_file.data() + header.data_position + point_step * i + z_offset, z_size);
+			cloud->addPoint(point);
+		}
+	}
 
+	//READ ALL FIELDS THAT ARE NOT RGB DATA OR NORMALS AS SCALAR FIELDS
+	{
+		for (size_t i = 0; i < header.fields.size(); ++i)
+		{
+			QString this_field_name = header.fields[i];
 
-        //unpack normals
-        if (x_size == 4) //is a float
-            n_x = *(float *) x_tmp;
+			if (this_field_name == "_" //paddig fields
+				|| this_field_name == "x" || this_field_name == "y" || this_field_name == "z"
+				|| this_field_name == "normal_x" || this_field_name == "normal_y" || this_field_name == "normal_z"
+				|| this_field_name == "rgb")
+				continue;
 
-        else if (x_size == 8) //is double
-            n_x = static_cast<float>(*(double *) x_tmp);
+			size_t field_count = header.count[i];
+			for (size_t j = 0; j < field_count; ++j)
+			{
+				ccScalarField* field = new ccScalarField();
 
-        if (y_size == 4) //is a float
-            n_y = *(float *) y_tmp;
+				if (ReadScalarFieldMemMap(this_field_name, mem_file, header, *field, j) < 0)
+				{
+					field->release();
+					ccLog::Warning(QString("[PCDFilter] Failed to read scalar field %1!").arg(j));
+					continue;
+				}
 
-        else if (y_size == 8) //is double
-            n_y = static_cast<float>(*(double *) y_tmp);
+				if (field_count != 1)
+					this_field_name.append(QString("_%1").arg(j));
 
-        if (z_size == 4) //is a float
-            n_z = *(float *) z_tmp;
+				field->setName(qPrintable(this_field_name));
+				field->computeMinAndMax();
 
-        else if (z_size == 8) //is double
-            n_z = static_cast<float>(*(double *) z_tmp);
+				cloud->addScalarField(field);
+				cloud->showSF(true);
+			}
+		}
+	}
 
-        cloud.addNorm(n_x, n_y, n_z);
-    }
+	//NOW ALSO READ RGB DATA (readRGB automatically check if the field exists, if not it simply does nothing)
+	ReadRGBMemMap(mem_file, header, *cloud);
+	//same for normals
+	ReadNormalsMemMap(mem_file, header, *cloud);
 
-    return 1;
+	container.addChild(cloud);
 
-
-
-}
-
-CC_FILE_ERROR
-PCDFilter::loadFileBinaryMemMap(const char* filename, ccHObject& container, PCDHeader &header)
-{
-    std::ifstream fs;
-    fs.open (filename, std::ios::binary);
-    if (!fs.is_open () || fs.fail ())
-    {
-        fs.close ();
-        return CC_FERR_READING;
-    }
-    fs.close();
-
-    InputMemoryFile mem_file(filename);
-
-    //point step
-    size_t point_step = 0;
-    for (int i = 0; i < header.size.size(); ++i)
-    {
-        point_step += header.size[i] * header.count[i];
-    }
-
-    //n_points
-    size_t n_points  = header.height * header.width;
-
-    ccPointCloud * cloud = new ccPointCloud;
-    cloud->reserve(n_points);
-
-    int x_pos = getOffsetOfField("x", header);
-    int y_pos = getOffsetOfField("y", header);
-    int z_pos = getOffsetOfField("z", header);
-
-    if ((x_pos < 0 ) || (y_pos < 0) || (z_pos < 0))
-        return CC_FERR_MALFORMED_FILE;
-
-    //should be all the same size normally, but...
-    int x_size = getSizeOfField("x", header);
-    int y_size = getSizeOfField("y", header);
-    int z_size = getSizeOfField("z", header);
-
-    //try to print something from file
-    CCVector3 point;
-
-    //what I am going to do there probably is SHIT!! Be aware!
-    //PLEASE CHECK HOW I AM CASTING TYPES IN THE FOR BELOW
-    void * x = malloc( x_size);
-    void * y = malloc( y_size);
-    void * z = malloc( z_size);
-
-    //READ GEOMETRY
-    for (int i = 0; i < n_points; ++i)
-    {
-        memcpy(x, mem_file.data() + header.data_position + i*point_step + x_pos, x_size);
-        memcpy(y, mem_file.data() + header.data_position + i*point_step + y_pos, y_size);
-        memcpy(z, mem_file.data() + header.data_position + i*point_step + z_pos, z_size);
-
-        //in the case someone save xyz as int this will be a problem ...
-
-        if (x_size == 4)
-            point[0] = *(float * ) x;
-        else if (x_size == 8)
-            point[0] = static_cast<float>(*(double * ) x);
-
-        if (y_size == 4)
-            point[1] = *(float * ) y;
-        else if (y_size == 8)
-            point[1] = static_cast<float>(*(double * ) y);
-
-        if (z_size == 4)
-            point[2] = *(float * ) z;
-        else if (z_size == 8)
-            point[2] = static_cast<float>(*(double * ) z);
-
-
-        cloud->addPoint(point);
-    }
-
-    //READ ALL FIELDS THAT ARE NOT RGB DATA OR NORMALS
-    for (int i = 0; i < header.fields.size(); ++i)
-    {
-        std::string this_field_name = header.fields.at(i);
-
-        if ((this_field_name == "_") || (this_field_name == "x") || (this_field_name == "y") || (this_field_name == "z")
-                || (this_field_name == "normal_x") || (this_field_name == "normal_y") || (this_field_name == "normal_z") ||(this_field_name == "rgb"))
-            continue;
-
-        int field_count = header.count.at(i);
-        for (int j = 0; j < field_count; ++j)
-        {
-            ccScalarField  * field = new ccScalarField;
-
-            readScalarFieldMemMap(this_field_name, mem_file, header, *field, j);
-
-            if (field_count != 1)
-            {   std::stringstream ss;
-                ss << this_field_name << "_" << j;
-                this_field_name = ss.str();
-            }
-            field->setName(this_field_name.c_str());
-
-            field->computeMinAndMax();
-
-            cloud->addScalarField(field);
-        }
-    }
-
-    //NOW ALSO READ RGB DATA (readRGB automatically check if the field exists, if not it simply dos nothing)
-    readRGBMemMap(mem_file, header, *cloud);
-
-    //same for normals
-    readNormalsMemMap(mem_file, header, *cloud);
-
-    container.addChild(cloud);
-
-
-    return CC_FERR_NO_ERROR;
+	return CC_FERR_NO_ERROR;
 }

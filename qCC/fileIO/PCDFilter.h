@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: lpenasa                                                        $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
+
 #ifndef CC_PCD_FILTER_HEADER
 #define CC_PCD_FILTER_HEADER
 
@@ -36,44 +30,47 @@ class PCDFilter : public FileIOFilter
 {
 public:
 
-    struct PCDHeader
-    {
-        std::string version; //0.7
-        std::vector<std::string> fields; // x y z corrected_int Scalar_field
-        std::vector<size_t> size;// 4 4 4 4 4
-        std::vector<char> type;// F F F F F
-        std::vector<size_t> count;// 1 1 1 1 1 multiplicity of each field
-        size_t width;// 4318440
-        size_t height; //1
-        std::vector<float> viewpoint;// 0 0 0 1 0 0 0
-        size_t points;// 4318440
-        std::string data;// binary_compressed
-        unsigned int data_position;
-
-    };
-
-
-    //inherited from FileIOFilter
-    virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, double* coordinatesShift = 0);
+	//inherited from FileIOFilter
+	virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, double* coordinatesShift = 0);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename);
 
 protected:
-    CC_FILE_ERROR loadFileBinaryMemMap(const char* filename, ccHObject& container, PCDHeader &header);
 
-    int readScalarFieldMemMap(const std::string fieldname, const InputMemoryFile & mem_file, const PCDHeader header, ccScalarField &field , const int count = 0);
+	//! (Binary) PCD file header
+	struct PCDHeader
+	{
+		QString version; //0.7
+		std::vector<QString> fields; // x y z corrected_int Scalar_field
+		std::vector<size_t> size;// 4 4 4 4 4
+		std::vector<QString> type;// F F F F F
+		std::vector<size_t> count;// 1 1 1 1 1 multiplicity of each field
+		size_t width;// 4318440
+		size_t height; //1
+		std::vector<float> viewpoint;// 0 0 0 1 0 0 0
+		size_t points;// 4318440
+		QString data;// binary_compressed
+		qint64 data_position;
+		size_t pointStride;
+		size_t lineCount;
+	};
 
-    int readRGBMemMap(const InputMemoryFile & mem_file, const PCDHeader &header, ccPointCloud &cloud);
+	CC_FILE_ERROR LoadFileBinaryMemMap(const char* filename, ccHObject& container, const PCDHeader& header);
 
-    int readNormalsMemMap(const InputMemoryFile & mem_file, const PCDHeader &header, ccPointCloud &cloud);
+	static int ReadScalarFieldMemMap(const QString& fieldname, const InputMemoryFile& mem_file, const PCDHeader& header, ccScalarField& field, size_t count = 0);
 
-    //// HELPERS FOR ACCESSING HEADER INFOS
-    CC_FILE_ERROR readFileHeader(const char * filename, PCDHeader &header);
+	static int ReadRGBMemMap(const InputMemoryFile& mem_file, const PCDHeader& header, ccPointCloud& cloud);
 
-    int getIDOfField(const std::string fieldname, const PCDHeader header);
+	static int ReadNormalsMemMap(const InputMemoryFile& mem_file, const PCDHeader& header, ccPointCloud& cloud);
 
-    int getSizeOfField(const std::string fieldname, const PCDHeader header);
+	/*** HELPERS FOR ACCESSING HEADER INFOS ***/
 
-    int getOffsetOfField(const std::string fieldname, const PCDHeader header);
+	CC_FILE_ERROR readFileHeader(const char* filename, PCDHeader& header);
+
+	static int GetIDOfField(const QString& fieldName, const PCDFilter::PCDHeader& header);
+
+	static size_t GetSizeOfField(int fieldID, const PCDFilter::PCDHeader& header);
+
+	static size_t GetOffsetOfField(int fieldID, const PCDFilter::PCDHeader& header);
 };
 
 #endif

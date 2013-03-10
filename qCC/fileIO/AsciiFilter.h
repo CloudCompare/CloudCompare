@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
+
 #ifndef CC_ASCII_FILTER_HEADER
 #define CC_ASCII_FILTER_HEADER
 
@@ -36,10 +30,6 @@ public:
     virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, double* coordinatesShift = 0);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename);
 
-protected:
-
-	CC_FILE_ERROR saveFile(ccHObject* entity, FILE *theFile);
-
 	CC_FILE_ERROR loadCloudFromFormatedAsciiFile(const char* filename,
                                                     ccHObject& container,
 													const AsciiOpenDlg::Sequence& openSequence,
@@ -50,6 +40,10 @@ protected:
 													bool alwaysDisplayLoadDialog=true,
 													bool* coordinatesShiftEnabled=0,
 													double* coordinatesShift=0);
+protected:
+
+	CC_FILE_ERROR saveFile(ccHObject* entity, FILE *theFile);
+
 };
 
 #endif

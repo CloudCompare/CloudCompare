@@ -296,6 +296,8 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 			columnHeader->setItemIcon(ASCII_OPEN_DLG_Grey,GreyIcon);
 			columnHeader->setItemIcon(ASCII_OPEN_DLG_Scalar,ScalarIcon);
 			columnHeader->setItemIcon(ASCII_OPEN_DLG_Positive_Scalar,PositiveScalarIcon);
+			columnHeader->setItemIcon(ASCII_OPEN_DLG_RGB32i,RGBIcon);
+			columnHeader->setItemIcon(ASCII_OPEN_DLG_RGB32f,RGBIcon);
 
 			connect(columnHeader, SIGNAL(currentIndexChanged(int)), this, SLOT(columnsTypeHasChanged(int)));
 		}

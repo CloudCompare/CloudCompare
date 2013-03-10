@@ -33,6 +33,7 @@ Various:
 [*] Add 'GL filter' plugins support to ccViewer
 
 From Dimitri L.:
+[*] Let the user enter grid parameters in the 'Heght grid projection' tool + remember last parameters
 [*] Auto-detect header format in ASCII files (in any) 
 [*] Compute distances in a given direction (cylinder)
 [*] Compute signed distances between clouds

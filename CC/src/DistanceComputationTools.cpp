@@ -299,7 +299,7 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 	unsigned nA = comparedCloud->size();
 	unsigned nB = referenceCloud->size();
 
-	if (nA*nB==0)
+	if (nA==0 || nB==0)
         return false;
 
 	//we compute the bounding box of BOTH clouds
@@ -308,11 +308,12 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 	referenceCloud->getBoundingBox(minsB.u,maxsB.u);
 
 	CCVector3 maxD,minD,minPoints,maxPoints;
-	uchar k;
-	for (k=0;k<3;k++)
 	{
-		maxPoints.u[k] = maxD.u[k] = std::max(maxsA.u[k],maxsB.u[k]);
-		minPoints.u[k] = minD.u[k] = std::min(minsA.u[k],minsB.u[k]);
+		for (uchar k=0;k<3;k++)
+		{
+			maxPoints.u[k] = maxD.u[k] = std::max(maxsA.u[k],maxsB.u[k]);
+			minPoints.u[k] = minD.u[k] = std::min(minsA.u[k],minsB.u[k]);
+		}
 	}
 
 	//we make this bounding-box cubical (+1% growth)
@@ -323,7 +324,7 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 	if (comparedOctree)
 	{
 		needToRecalculateOctreeA = false;
-		for (k=0;k<3;k++)
+		for (uchar k=0;k<3;k++)
 			if ((maxD.u[k]!=comparedOctree->getOctreeMaxs().u[k])||(minD.u[k]!=comparedOctree->getOctreeMins().u[k]))
 			{
 				needToRecalculateOctreeA = true;
@@ -350,7 +351,7 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 	if (referenceOctree)
 	{
 		needToRecalculateOctreeB = false;
-		for (k=0;k<3;k++)
+		for (uchar k=0;k<3;k++)
 			if ((maxD.u[k]!=referenceOctree->getOctreeMins().u[k])||(minD.u[k]!=referenceOctree->getOctreeMaxs().u[k]))
 			{
 				needToRecalculateOctreeB = true;
@@ -376,7 +377,7 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 
 	//we check that both octrees are ok
 	assert(comparedOctree && referenceOctree);
-	return (comparedOctree->getNumberOfProjectedPoints()*referenceOctree->getNumberOfProjectedPoints()>0);
+	return (comparedOctree->getNumberOfProjectedPoints() != 0 && referenceOctree->getNumberOfProjectedPoints() != 0);
 }
 
 //Description of expected 'additionalParameters'

@@ -4,7 +4,7 @@ v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
 
-v2.4 03/03/2013
+v2.4 03/10/2013
 - Points size can now be independently set for each cloud
 	* see the 'Point size' combo-box in the cloud's properties
 - The 'Align with point pairs' tool can now be used with only one cloud selected	
@@ -19,7 +19,7 @@ v2.4 03/03/2013
 	- "Point picking" tool:
 		* when picking 3 successive points ('triplet' mode), the 3 corresponding angles are displayed
 - New tool: 'primitive factory'
-	* let you create custom primitives (plane, box, sphere, cylinder, cone, torus or dish)
+	* lets you create custom primitives (plane, box, sphere, cylinder, cone, torus or dish)
 	* accessible via the 'Tools > Primitive factory' menu entry or a dedicated icon in the main toolbar
 - 'Height grid generation' tool enhanced:
 	* the number of points per cell can now be saved as a scalar field ('save per-cell count as SF' checkbox)
@@ -50,7 +50,9 @@ v2.4 03/03/2013
 	* '-top' to make the window 'alawys on top'
 	* '-win [X] [Y] [W] [H]' to set the position (X,Y) and size (W,H) of the window
 - New icons for CloudCompare and ccViewer
-- Bug fix:
+- PCL (Point Cloud Library) 'PCD' files can now be opened without the qPCL plugin
+	* only works with ascii and uncompressed binary versions for the moment
+- Bug fixes:
 	* in the 'Point list picking' tool, when exporting a list of picked points THEN cancelling the picking process, CC will crash
 	* SF scale is now rendered by the 'Render to file' tool
 	* qPCL's MLS tool would crash if the input cloud has no displayed scalar field! (+ dependency to Luca's PCL patch is now optional)

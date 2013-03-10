@@ -74,7 +74,7 @@ if( APPLE )
    install( TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${MAC_BUNDLE_PLUGIN_DIR}/ccPlugins COMPONENT Runtime )
    set( CC_PLUGINS ${CC_PLUGINS} ${MAC_BUNDLE_PLUGIN_DIR}/ccPlugins/lib${PROJECT_NAME}${CMAKE_SHARED_LIBRARY_SUFFIX} CACHE INTERNAL "cc plugin list" )
 else()
-   install_shared( ${PROJECT_NAME} ${qCC_dest_release}/plugins ${CloudCompare_dest_debug}/plugins )
+   install_shared( ${PROJECT_NAME} ${CloudCompare_dest_release}/plugins ${CloudCompare_dest_debug}/plugins )
 endif()
 
 if( CC_SHADER_FOLDER )

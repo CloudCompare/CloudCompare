@@ -16,20 +16,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2279                                                              $
-//$LastChangedDate:: 2012-10-18 21:54:33 +0200 (jeu., 18 oct. 2012)        $
-//**************************************************************************
-//
 
 #include "ccCommon.h"
 
 #include <QString>
 
 #define CC_VER_NUM  2.4
-#define CC_VER_DATE "03/07/2013"
+#define CC_VER_DATE "03/10/2013"
 
 //! Returns current version as string
 const char* ccCommon::GetCCVersion()

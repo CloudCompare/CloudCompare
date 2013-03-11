@@ -24,7 +24,9 @@
 #include <QDialog>
 
 //PCL
+#ifndef Q_MOC_RUN
 #include <pcl/surface/mls.h>
+#endif
 
 class MLSDialog : public QDialog, public Ui::MLSDialog
 {

@@ -5,7 +5,7 @@
 #define MyAppVersion "2.4"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.danielgm.net/cc/"
-#define MyAppExeName "qCC.exe"
+#define MyAppExeName "CloudCompare.exe"
 #define MyVCRedistPath "C:\dev\vc_redist"
 #define MyCCPath "C:\dev\CloudCompare_git\build\msvc2010_64bits_official\bin\CloudCompare"
 #define MyOutputDir "C:\dev\CloudCompare_git\build\msvc2010_64bits_official\bin"

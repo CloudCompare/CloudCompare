@@ -19,7 +19,7 @@
 
 #include "InputMemoryFile.h"
 
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -31,7 +31,7 @@
 InputMemoryFile::InputMemoryFile(const char *pathname)
 	: data_(0)
 	, size_(0)
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
 	, file_handle_(-1)
 {
 	file_handle_ = ::open(pathname, O_RDONLY);
@@ -64,7 +64,7 @@ InputMemoryFile::InputMemoryFile(const char *pathname)
 
 InputMemoryFile::~InputMemoryFile()
 {
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
 	::munmap(const_cast<char*>(data_), size_);
 	::close(file_handle_);
 #elif defined(_WIN32)

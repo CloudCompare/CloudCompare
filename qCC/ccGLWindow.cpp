@@ -879,7 +879,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	if (maxD == 0)
 		m_params.globalZoom = 1.0f;
 	else
-		m_params.globalZoom = float(std::max(m_glWidth,m_glHeight))/maxD;
+		m_params.globalZoom = float(std::min(m_glWidth,m_glHeight))/maxD;
 
 	//pivot point
 	CCVector3 c = zoomedBox.getCenter();

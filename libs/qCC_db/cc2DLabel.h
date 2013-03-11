@@ -47,6 +47,9 @@ public:
     virtual CC_CLASS_ENUM getClassID() const {return CC_2D_LABEL;};
 	virtual bool isSerializable() const { return true; }
 
+	//! Returns 'raw' name (no replacement of default keywords)
+	QString getRawName() const { return m_name; }
+
 	//! Adds a point to label
 	/** Adding a point to a label will automatcillay make it 'mute'.
 		1 point  = 'point' label (point position, normal, color, etc.)

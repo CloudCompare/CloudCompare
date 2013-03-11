@@ -339,7 +339,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 			{
 				assert(correctedPickedPoints.size() == label->size());
 				bool visible = label->isVisible();
-				QString originalName(label->getName());
+				QString originalName(label->getRawName());
 				label->clear();
 				for (unsigned i=0;i<correctedPickedPoints.size();++i)
 					label->addPoint(correctedPickedPoints[i].cloud,correctedPickedPoints[i].index);

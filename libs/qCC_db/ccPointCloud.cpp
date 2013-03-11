@@ -245,6 +245,9 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccPointCloud* sourc
     const double* shift = source->getOriginalShift();
     setOriginalShift(shift[0],shift[1],shift[2]);
 
+	//custom point size
+	setPointSize(source->getPointSize());
+
 	setName(source->getName()+QString(".extract"));
 }
 
@@ -362,6 +365,9 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccGenericPointCloud
     //original center
     const double* shift = source->getOriginalShift();
     setOriginalShift(shift[0],shift[1],shift[2]);
+
+	//custom point size
+	setPointSize(source->getPointSize());
 
 	setName(source->getName()+QString(".extract"));
 }

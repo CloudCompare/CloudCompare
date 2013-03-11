@@ -19,7 +19,7 @@
      <item>
       <widget class="QCheckBox" name="showAlignedCheckBox">
        <property name="styleSheet">
-        <string notr="true">background-color: yellow;</string>
+        <string notr="true">background-color: red; color: white;</string>
        </property>
        <property name="text">
         <string>show aligned cloud</string>
@@ -111,7 +111,7 @@
      <item>
       <widget class="QCheckBox" name="showReferenceCheckBox">
        <property name="styleSheet">
-        <string notr="true">background-color: red; color: white;</string>
+        <string notr="true">background-color: yellow;</string>
        </property>
        <property name="text">
         <string>show reference cloud</string>

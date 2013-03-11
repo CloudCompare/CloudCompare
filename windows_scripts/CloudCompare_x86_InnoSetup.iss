@@ -7,7 +7,7 @@
 #define MyAppURL "http://www.danielgm.net/cc/"
 #define MyAppExeName "qCC.exe"
 #define MyVCRedistPath "C:\dev\vc_redist"
-#define MyCCPath "C:\dev\CloudCompare_git\build\msvc2008_32bits_official\bin\qCC"
+#define MyCCPath "C:\dev\CloudCompare_git\build\msvc2008_32bits_official\bin\CloudCompare"
 #define MyOutputDir "C:\dev\CloudCompare_git\build\msvc2008_32bits_official\bin"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
 
@@ -40,7 +40,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked; OnlyBelowVersion: 0,6.1
 
 [Files]
-Source: "{#MyCCPath}\qCC.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyCCPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 Source: "{#MyVCRedistPath}\vcredist_x86.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit; 

@@ -41,6 +41,7 @@ From Dimitri L.:
 [*] Vector fields (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=201&p=614#p614)
 
 From Thomas D.:
+[*] Splatting (http://idav.ucdavis.edu/~okreylos/ResDev/LiDAR/index.html)
 [*] Uniformize color-scales of mutliple clouds
 [*] Show/hide points based on their normal (http://www.danielgm.net/cc/forum/viewtopic.php?f=9&t=168&p=488#p488)
 

@@ -3,6 +3,8 @@
 v2.4 ??/??/2013
 - 3DConnexion devices (3D mouses) support
 - 3D slicer
+- bug fix:
+	* BIN files saved with labels would make CC crash when re-opened!
 
 v2.4 03/10/2013
 - Points size can now be independently set for each cloud

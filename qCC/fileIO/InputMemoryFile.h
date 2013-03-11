@@ -45,7 +45,7 @@ private:
 
 	const char* data_;
 	size_t size_;
-#if defined(__unix__)
+#if defined(__unix__) || defined(__APPLE__)
 	int file_handle_;
 #elif defined(_WIN32)
 	typedef void* HANDLE;

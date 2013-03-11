@@ -146,5 +146,8 @@ void MLSSmoothingUpsampling::getParametersFromDialog()
 
 template int smooth_mls<pcl::PointXYZ, pcl::PointNormal>(const pcl::PointCloud<pcl::PointXYZ>::Ptr &incloud,
 	const MLSParameters &params,
-	pcl::PointCloud<pcl::PointNormal>::Ptr &outcloud,
-	pcl::PointIndicesPtr &used_ids);
+	pcl::PointCloud<pcl::PointNormal>::Ptr &outcloud
+#ifdef LP_PCL_PATCH_ENABLED
+  ,	pcl::PointIndicesPtr &used_ids
+#endif
+  );

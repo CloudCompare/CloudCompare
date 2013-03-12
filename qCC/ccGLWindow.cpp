@@ -53,12 +53,17 @@
 #include <math.h>
 #include <algorithm>
 
-#define CC_GL_MAX_ZOOM_RATIO 1.0e6f
-#define CC_GL_MIN_ZOOM_RATIO 1.0e-6f
+const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
+const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
-#define CC_DISPLAYED_TRIHEDRON_AXES_LENGTH 25.0f
-#define CC_DISPLAYED_CUSTOM_LIGHT_LENGTH 10.0f
-#define CC_DISPLAYED_CENTER_CROSS_LENGTH 10.0f
+const float CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
+const float CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0f;
+const float CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
+
+const int CC_HOT_ZONE_WIDTH = 225;
+const int CC_HOT_ZONE_HEIGHT = 100;
+
+const int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
 
 //Unique GL window ID
 static int s_GlWindowNumber = 0;
@@ -1570,7 +1575,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	{
 		if (m_embeddedIconsEnabled)
 		{
-			if (x < 200 && y < 100)
+			if (x < CC_HOT_ZONE_WIDTH && y < CC_HOT_ZONE_HEIGHT)
 			{
 				if (!m_hotZoneActivated)
 				{
@@ -1733,8 +1738,8 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 		}
 		else
 		{
-			//picking = click < 1/5 s.
-			if (ccTimer::Msec()-m_lastClickTime_ticks < 200)
+			//picking?
+			if (ccTimer::Msec()-m_lastClickTime_ticks < CC_MAX_PICKING_CLICK_DURATION_MS)
 			{
 				int x = event->x();
 				int y = event->y();

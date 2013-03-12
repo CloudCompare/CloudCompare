@@ -31,6 +31,7 @@ Various:
 [*] Run the PCV plugin on more than one file at a time (or batch process)
 [*] Command line mode could be extended (more methods, etc.)
 [*] Add 'GL filter' plugins support to ccViewer
+[*] Choose between ASCII and BINARY format when exporting PLY files
 
 From Dimitri L.:
 [*] Let the user enter grid parameters in the 'Heght grid projection' tool + remember last parameters

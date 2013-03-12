@@ -16,8 +16,8 @@ endif()
 
 project( CC_DLL )
 
-set( SAMPLE_PROJECT_VERSION_MAJOR 1 )
-set( SAMPLE_PROJECT_VERSION_MINOR 0 )
+set( VERSION_MAJOR 1 )
+set( VERSION_MINOR 0 )
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
 include_directories( ${triangle_SOURCE_DIR} )

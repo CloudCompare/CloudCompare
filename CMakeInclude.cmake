@@ -144,6 +144,11 @@ if( APPLE )
          list( APPEND SUPPORT_LIB_NAMES libxerces-c )
          list( APPEND SUPPORT_LIB_NAMES libopenFI )
       endif()
+      
+      if( ${OPTION_USE_LIBLAS} )
+         list( APPEND SUPPORT_LIB_NAMES liblas )
+         list( APPEND SUPPORT_LIB_NAMES liblaszip )
+      endif()
 
       foreach( supportLib ${SUPPORT_LIB_NAMES} )
          set( LIB_NAME ${CMAKE_INSTALL_PREFIX}/lib/${supportLib}${CMAKE_SHARED_LIBRARY_SUFFIX} )

@@ -11,6 +11,10 @@ if( APPLE )
 
    set( DIRS ${EXTERNAL_LIBS_LIBRARIES} )
 
+   if( ${OPTION_USE_LIBLAS} )
+      set( DIRS ${DIRS} ${Boost_LIBRARY_DIRS} )
+   endif()
+
    # call fixup_bundles to change paths using otools
    install( CODE "
       include( BundleUtilities )

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2208                                                              $
-//$LastChangedDate:: 2012-07-17 12:26:31 +0200 (mar., 17 juil. 2012)       $
-//**************************************************************************
-//
 
 #ifndef CC_GL_WINDOW_HEADER
 #define CC_GL_WINDOW_HEADER

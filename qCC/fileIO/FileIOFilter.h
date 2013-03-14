@@ -65,9 +65,6 @@ enum CC_FILE_TYPES {UNKNOWN_FILE		,		/**< unknown type */
 #ifdef CC_LAS_SUPPORT
 					LAS         		,		/**< LAS lidar point cloud (binary) */
 #endif
-#ifdef CC_ULT_SUPPORT
-					ULT         		,		/**< Ultrasonix localizer buffer (binary) */
-#endif
 #ifdef CC_E57_SUPPORT
 					E57         		,		/**< ASTM E2807-11 E57 file */
 #endif
@@ -86,9 +83,6 @@ const CC_FILE_TYPES CC_FILE_TYPES_ENUMS[] = {UNKNOWN_FILE, SOI, ASCII, BIN,
 #endif
 #ifdef CC_LAS_SUPPORT
 												,LAS
-#endif
-#ifdef CC_ULT_SUPPORT
-												,ULT
 #endif
 #ifdef CC_E57_SUPPORT
 												,E57
@@ -121,9 +115,6 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
 #ifdef CC_LAS_SUPPORT
             "LAS lidar point cloud (*.las *.laz)",
 #endif
-#ifdef CC_ULT_SUPPORT
-            "ULT/ULD Ultrasonix Localizer data (*.ult)",
-#endif
 #ifdef CC_E57_SUPPORT
             "E57 ASTM E2807-11 files (*.e57)",
 #endif
@@ -154,9 +145,6 @@ const char CC_FILE_TYPE_DEFAULT_EXTENSION[][8] = {
 #endif
 #ifdef CC_LAS_SUPPORT
             "las",
-#endif
-#ifdef CC_ULT_SUPPORT
-			"ult",
 #endif
 #ifdef CC_E57_SUPPORT
 			"e57",

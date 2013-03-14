@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2257                                                              $
-//$LastChangedDate:: 2012-10-11 23:48:15 +0200 (jeu., 11 oct. 2012)        $
-//**************************************************************************
-//
+
 #include "FileIOFilter.h"
 
 //Qt
@@ -40,7 +34,6 @@
 #include "STLFilter.h"
 #include "LASFilter.h"
 #include "E57Filter.h"
-#include "UltFilter.h"
 #include "PCDFilter.h"
 //MESHES
 #include "X3DFilter.h"
@@ -117,10 +110,6 @@ CC_FILE_TYPES FileIOFilter::StringToFileFormat(const char* ext)
 #ifdef CC_PDMS_SUPPORT
 	else if (strcmp(ext,"PDMS")==0 || strcmp(ext,"PDMSMAC")==0)
 		fType=PDMS;
-#endif
-#ifdef CC_ULT_SUPPORT
-	else if (strcmp(ext,"ULT")==0)
-		fType=ULT;
 #endif
 	return fType;
 }
@@ -225,11 +214,6 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 #ifdef CC_LAS_SUPPORT
 	case LAS:
 		fio = (FileIOFilter*)(new LASFilter());
-		break;
-#endif
-#ifdef CC_ULT_SUPPORT
-	case ULT:
-		fio = (FileIOFilter*)(new UltFilter());
 		break;
 #endif
     case MA:
@@ -341,11 +325,6 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename
 #ifdef CC_LAS_SUPPORT
     case LAS:
         fio = (FileIOFilter*)(new LASFilter());
-        break;
-#endif
-#ifdef CC_ULT_SUPPORT
-    case ULT:
-        fio = (FileIOFilter*)(new UltFilter());
         break;
 #endif
 	case POV:

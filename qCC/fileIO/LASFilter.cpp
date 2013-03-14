@@ -95,10 +95,10 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 				//we check that it's only integer values!
 				unsigned i,count=classifSF->currentSize();
 				classifSF->placeIteratorAtBegining();
-				DistanceType integerPart;
+				double integerPart = 0.0;
 				for (i=0;i<count;++i)
 				{
-					if (modf(classifSF->getCurrentValue(),&integerPart) != 0)
+					if (modf(classifSF->getCurrentValue(),&integerPart) != 0.0)
 					{
 						ccConsole::Warning("[LASFilter] Found a 'classification' scalar field, but its values are not pure integers...");
 						classifSF = 0;

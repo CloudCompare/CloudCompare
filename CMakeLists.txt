@@ -45,6 +45,8 @@ include( LiblasSupport.cmake )
 include( XIOTSupport.cmake )
 # E57 support
 include( E57Support.cmake )
+# 3DXWARE (3dConnexion devices) support
+include( 3DXSupport.cmake )
 # PDMS support
 OPTION( OPTION_SUPPORT_MAC_PDMS_FORMAT "Build with .mac PDMS format" OFF )
 

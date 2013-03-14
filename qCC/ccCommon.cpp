@@ -22,7 +22,7 @@
 #include <QString>
 
 #define CC_VER_NUM  2.4
-#define CC_VER_DATE "03/10/2013"
+#define CC_VER_DATE "03/14/2013"
 
 //! Returns current version as string
 const char* ccCommon::GetCCVersion()

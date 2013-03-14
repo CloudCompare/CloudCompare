@@ -108,6 +108,11 @@
 #include "ccPrimitiveFactoryDlg.h"
 #include <ui_aboutDlg.h>
 
+//3D mouse handler
+#ifdef CC_3DXWARE_SUPPORT
+#include "devices/3dConnexion/Mouse3DInput.h"
+#endif
+
 //Qt Includes
 #include <QtGui>
 #include <QMdiArea>
@@ -148,6 +153,7 @@ MainWindow::MainWindow()
 	, m_pprDlg(0)
 	, m_pfDlg(0)
 	, m_glFilterActions(this)
+	, m_3dMouseInput(0)
 {
     //Dialog "auto-construction"
     setupUi(this);
@@ -182,6 +188,8 @@ MainWindow::MainWindow()
 
     loadPlugins();
 
+	setup3DMouse();
+
     new3DView();
 
     freezeUI(false);
@@ -197,6 +205,8 @@ MainWindow::MainWindow()
 
 MainWindow::~MainWindow()
 {
+	release3DMouse();
+
 	assert(m_ccRoot && m_mdiArea && m_windowMapper);
     m_ccRoot->disconnect();
     m_mdiArea->disconnect();
@@ -448,6 +458,93 @@ void MainWindow::doEnableGLFilter()
 	{
 		ccConsole::Error("Can't load GL filter (an error occured)!");
 	}
+}
+
+void MainWindow::release3DMouse()
+{
+#ifdef CC_3DXWARE_SUPPORT
+	if (m_3dMouseInput)
+	{
+		QObject::disconnect(m_3dMouseInput, SIGNAL(sigMove3d(std::vector<float>&)), this, SLOT(on3DMouseMove(std::vector<float>&)));
+		delete m_3dMouseInput;
+		m_3dMouseInput=0;
+	}
+#endif
+}
+
+void MainWindow::setup3DMouse()
+{
+#ifdef CC_3DXWARE_SUPPORT
+	if (m_3dMouseInput)
+		release3DMouse();
+
+	if (Mouse3DInput::Is3dmouseAttached())
+	{
+		ccLog::Warning("[3D Mouse] Device has been detected!");
+		m_3dMouseInput = new Mouse3DInput(this);
+		QObject::connect(m_3dMouseInput, SIGNAL(sigMove3d(std::vector<float>&)), this, SLOT(on3DMouseMove(std::vector<float>&)));
+	}
+	else
+	{
+		ccLog::Warning("[3D Mouse] No device found");
+	}
+#endif
+}
+
+void MainWindow::on3DMouseMove(std::vector<float>& vec)
+{
+#ifdef CC_3DXWARE_SUPPORT
+
+	//no active device?
+	if (!m_3dMouseInput)
+		return;
+
+    ccGLWindow* win = getActiveGLWindow();
+	//no active window?
+	if (!win)
+		return;
+
+	//ccLog::PrintDebug(QString("[3D mouse] %1 %2 %3 %4 %5 %6").arg(vec[0]).arg(vec[1]).arg(vec[2]).arg(vec[3]).arg(vec[4]).arg(vec[5]));
+
+	const Mouse3DParameters& params = m_3dMouseInput->getMouseParams();
+
+	// "Object" moving mode
+	if (params.navigationMode() == Mouse3DParameters::ObjectMode)
+	{
+		if (fabs(vec[0])>ZERO_TOLERANCE)
+			win->updateZoom(1.0f + vec[0]);
+
+		win->redraw();
+	}
+	// "Camera" moving mode
+	else if (params.navigationMode() == Mouse3DParameters::ObjectMode)
+	{
+	}
+	else
+	{
+		QString modeName;
+		switch (params.navigationMode())
+		{
+		case Mouse3DParameters::FlyMode:
+			modeName = "Fly";
+			break;
+		case Mouse3DParameters::WalkMode:
+			modeName = "Walk";
+			break;
+		case Mouse3DParameters::HelicopterMode:
+			modeName = "Helicopter";
+			break;
+		default:
+			assert(false);
+			modeName = "unknown";
+			break;
+		}
+		ccLog::Warning("[3D mouse] The '%1' mode is not yet supported!");
+		return;
+	}
+
+	//win->rotateViewMat(
+#endif
 }
 
 void MainWindow::connectActions()
@@ -6080,10 +6177,6 @@ void MainWindow::loadFile()
     filters.append(CC_FILE_TYPE_FILTERS[E57]);
     filters.append("\n");
 #endif
-#ifdef CC_ULT_SUPPORT
-    filters.append(CC_FILE_TYPE_FILTERS[ULT]);
-    filters.append("\n");
-#endif
 #ifdef CC_PDMS_SUPPORT
     filters.append(CC_FILE_TYPE_FILTERS[PDMS]);
     filters.append("\n");
@@ -6237,10 +6330,6 @@ void MainWindow::saveFile()
 				filters.append("\n");
 	#ifdef CC_LAS_SUPPORT
 				filters.append(CC_FILE_TYPE_FILTERS[LAS]);
-				filters.append("\n");
-	#endif
-	#ifdef CC_ULT_SUPPORT
-				filters.append(CC_FILE_TYPE_FILTERS[ULT]); //Trick: here we will save an ULD file instead ;)
 				filters.append("\n");
 	#endif
 				filters.append(CC_FILE_TYPE_FILTERS[PN]);

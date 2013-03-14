@@ -15,13 +15,6 @@ else()
     include( ${QT_USE_FILE} )
 endif()
 
-#hack: we don't want to include Qt debug libs!
-#foreach (qt_lib ${QT_LIBRARIES})
-#	string( REPLACE d4 4 qt_lib_corrected ${qt_lib})
-#	list(APPEND QT_LIBRARIES_NEW ${qt_lib_corrected})
-#endforeach()
-#set(QT_LIBRARIES ${QT_LIBRARIES_NEW})
-
 # ------------------------------------------------------------------------------
 # OpenGL
 # ------------------------------------------------------------------------------

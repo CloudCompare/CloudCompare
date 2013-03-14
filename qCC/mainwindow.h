@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2275                                                              $
-//$LastChangedDate:: 2012-10-17 23:30:43 +0200 (mer., 17 oct. 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_MAIN_WINDOW_HEADER
 #define CC_MAIN_WINDOW_HEADER
@@ -66,8 +59,7 @@ class ccPrimitiveFactoryDlg;
 class ccDrawableObject;
 class ccOverlayDialog;
 class QMdiSubWindow;
-
-//class MainWindow 
+class Mouse3DInput;
 
 //! Main window
 class MainWindow : public QMainWindow, public ccMainAppInterface, public Ui::MainWindow
@@ -349,6 +341,9 @@ protected slots:
 	void doActionShowActiveSFPrevious();
 	void doActionShowActiveSFNext();
 
+	//3D mouse
+	void on3DMouseMove(std::vector<float>&);
+
 protected:
 
     //! Removes from a list all elements that are sibling of others
@@ -417,7 +412,12 @@ protected:
 
 	//! Expands DB tree for selected items
 	void expandDBTreeWithSelection(ccHObject::Container& selection);
+	
+	//! Setups 3D mouse (if any)
+	void setup3DMouse();
 
+	//! Releases any connected 3D mouse (if any)
+	void release3DMouse();
 
 	//DB & DB Tree
     ccDBRoot* m_ccRoot;
@@ -427,6 +427,9 @@ protected:
 
     //! UI frozen state (see freezeUI)
     bool m_uiFrozen;
+
+	//! 3D mouse handler
+	Mouse3DInput* m_3dMouseInput;
 
     /******************************/
     /***        MDI AREA        ***/

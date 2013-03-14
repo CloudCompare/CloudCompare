@@ -9,7 +9,7 @@ if( ${OPTION_USE_LIBE57} )
 	#find_package( E57RefImpl )
 
 	# LibE57
-	set( LIBE57_INSTALL_DIR "" CACHE PATH "ilbE57 install directory (CMake INSTALL output)" )
+	set( LIBE57_INSTALL_DIR "" CACHE PATH "libE57 install directory (CMake INSTALL output)" )
 
 	if( NOT LIBE57_INSTALL_DIR )
 		message( SEND_ERROR "No LibE57 install dir specified (LIBE57_INSTALL_DIR)" )
@@ -26,8 +26,7 @@ if( ${OPTION_USE_LIBE57} )
 	endif()
 	
 	# Find Xerces
-
-	# libE57 private Xerces find module
+	# we use libE57 own Xerces find module
 	set( CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/contrib/cmake/Modules/" )
 
 	set( Xerces_USE_STATIC_LIBS ON )
@@ -35,23 +34,35 @@ if( ${OPTION_USE_LIBE57} )
 	if ( NOT Xerces_FOUND )
 		set( XERCES_ROOT CACHE PATH "Location of the Xerces library" )
 		message( FATAL_ERROR "Unable to find Xerces library. Please make XERCES_ROOT point to the root of Xerces directory." )
+	else()
+		include_directories( ${Xerces_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
 	endif()
 
 endif()
 
-# Export LIBE57 Dlls to specified destinations
+# link project with LIBE57 libraries
 function( target_link_LIBE57 ) # 1 argument: ARGV0 = project name
 
-# if ( E57RefImpl_SCANLIB_LIBRARIES ) # with 'find_package'
-# 	target_link_libraries( ${ARGV0} ${E57RefImpl_SCANLIB_LIBRARIES} )
-if( LIBE57_INSTALL_DIR ) # manual version
-	target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/E57RefImpl-d.lib optimized ${LIBE57_INSTALL_DIR}/lib/E57RefImpl.lib )
-	
-	include_directories( ${Xerces_INCLUDE_DIR} ${Boost_INCLUDE_DIR} )
-	target_link_libraries( ${ARGV0} debug ${Xerces_LIBRARY_DEBUG} optimized ${Xerces_LIBRARY_RELEASE} ${Boost_LIBRARIES} )
-	#link_directories( ${Boost_LIBRARY_DIRS} )
+if( ${OPTION_USE_LIBE57} )
+	# with 'find_package'
+	# if ( E57RefImpl_SCANLIB_LIBRARIES )
+	# 	target_link_libraries( ${ARGV0} ${E57RefImpl_SCANLIB_LIBRARIES} )
+	# endif()
 
-	set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_E57_SUPPORT XERCES_STATIC_LIBRARY )
+	# manual version
+	if( LIBE57_INSTALL_DIR )
+		#libE57
+		target_link_libraries( ${ARGV0} debug ${LIBE57_INSTALL_DIR}/lib/E57RefImpl-d.lib optimized ${LIBE57_INSTALL_DIR}/lib/E57RefImpl.lib )
+		#Xerces
+		target_link_libraries( ${ARGV0} debug ${Xerces_LIBRARY_DEBUG} optimized ${Xerces_LIBRARY_RELEASE} ${Boost_LIBRARIES} )
+		#Boost
+		#link_directories( ${Boost_LIBRARY_DIRS} )
+
+		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_E57_SUPPORT XERCES_STATIC_LIBRARY )
+	else()
+		message( SEND_ERROR "No LibE57 install dir specified (LIBE57_INSTALL_DIR)" )
+	endif()
 endif()
+
 endfunction()
 

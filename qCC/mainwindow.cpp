@@ -505,6 +505,8 @@ void MainWindow::on3DMouseKeyDown(int key)
 	if (!m_3dMouseInput)
 		return;
 
+#ifdef CC_3DXWARE_SUPPORT
+
 	switch(key)
 	{
 	case Mouse3DInput::V3DK_MENU:
@@ -562,6 +564,8 @@ void MainWindow::on3DMouseKeyDown(int key)
 		//TODO
 		break;
 	}
+
+#endif
 }
 
 void MainWindow::on3DMouseMove(std::vector<float>& vec)

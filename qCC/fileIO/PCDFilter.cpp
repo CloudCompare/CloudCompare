@@ -212,7 +212,7 @@ CC_FILE_ERROR PCDFilter::readFileHeader(const char* filename, PCDHeader &header)
 
 int PCDFilter::GetIDOfField(const QString& fieldName, const PCDHeader& header)
 {
-	for (int i = 0; i < header.fields.size(); ++i)
+	for (size_t i = 0; i < header.fields.size(); ++i)
 		if (header.fields.at(i) == fieldName)
 			return i;
 
@@ -266,7 +266,7 @@ int PCDFilter::ReadScalarFieldMemMap(const QString& fieldName,
 
 	size_t const_offset =  offset + count*field_element_size;
 
-	for (int i = 0;  i < pointCount; ++i)
+	for (size_t i = 0;  i < pointCount; ++i)
 	{
 		char buffer[8]; //maximum element size
 		memcpy(buffer, mem_file.data() + header.data_position + i*header.pointStride + const_offset, field_element_size);
@@ -414,7 +414,7 @@ CC_FILE_ERROR PCDFilter::LoadFileBinaryMemMap(const char* filename, ccHObject& c
 
 	//read points
 	{
-		for (int i = 0; i < pointCount; ++i)
+		for (size_t i = 0; i < pointCount; ++i)
 		{
 			const char* buffer = mem_file.data() + header.data_position + i*header.pointStride;
 			CCVector3 point;

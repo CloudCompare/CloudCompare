@@ -591,13 +591,13 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 	//mouse parameters
 	const Mouse3DParameters& params = m_3dMouseInput->getMouseParams();
 	//view parameters
-	bool userBasedPerspective = win->userPerspectiveEnabled();
+	bool viewerBasedPerspective = win->viewerPerspectiveEnabled();
 
 	//get default navigation mode
 	Mouse3DParameters::NavigationMode navigationMode = params.navigationMode();
 
-	//User based perspective IS camera mode
-	if (userBasedPerspective)
+	//Viewer based perspective IS camera mode
+	if (viewerBasedPerspective)
 		navigationMode = Mouse3DParameters::CameraMode;
 
 	// "Object" moving mode

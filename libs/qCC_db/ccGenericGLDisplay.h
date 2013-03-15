@@ -69,9 +69,11 @@ public:
 
 	//! Perspective view state
 	bool perspectiveView;
-	//! Whether perspective view is centered on displayed scene (true) or on the user (false)
-	bool objectCenteredPerspective;
-	//! Rotation pivot point (ortho. mode only) or camera center (perspective mode)
+	//! Whether view is centered on displayed scene (true) or on the user eye (false)
+	/** Always true for ortho. mode.
+	**/
+	bool objectCenteredView;
+	//! Rotation pivot point (object-centered view) or camera center (eye view)
 	CCVector3 pivotPoint;
 	//! Camera F.O.V. (field of view - for perspective mode only)
 	float fov;

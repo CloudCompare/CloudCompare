@@ -23,7 +23,7 @@ ccViewportParameters::ccViewportParameters()
 	, defaultPointSize(1)
 	, defaultLineWidth(1)
 	, perspectiveView(false)
-	, objectCenteredPerspective(true)
+	, objectCenteredView(true)
 	, pivotPoint(0.0f)
 	, fov(50.0f)
 	, aspectRatio(1.0f)
@@ -40,7 +40,7 @@ ccViewportParameters::ccViewportParameters(const ccViewportParameters& params)
 	, defaultPointSize(params.defaultPointSize)
 	, defaultLineWidth(params.defaultLineWidth)
 	, perspectiveView(params.perspectiveView)
-	, objectCenteredPerspective(params.objectCenteredPerspective)
+	, objectCenteredView(params.objectCenteredView)
 	, pivotPoint(params.pivotPoint)
 	, fov(params.fov)
 	, aspectRatio(params.aspectRatio)
@@ -62,7 +62,7 @@ bool ccViewportParameters::toFile(QFile& out) const
     outStream << defaultPointSize;
     outStream << defaultLineWidth;
 	outStream << perspectiveView;
-	outStream << objectCenteredPerspective;
+	outStream << objectCenteredView;
 	outStream << pivotPoint.x;
 	outStream << pivotPoint.y;
 	outStream << pivotPoint.z;
@@ -87,7 +87,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion)
     inStream >> defaultPointSize;
     inStream >> defaultLineWidth;
 	inStream >> perspectiveView;
-	inStream >> objectCenteredPerspective;
+	inStream >> objectCenteredView;
 	inStream >> pivotPoint.x;
 	inStream >> pivotPoint.y;
 	inStream >> pivotPoint.z;

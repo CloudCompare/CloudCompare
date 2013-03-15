@@ -96,7 +96,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//general parameters
 	if (params.perspectiveView != m_params.perspectiveView
-		|| params.objectCenteredPerspective != m_params.objectCenteredPerspective
+		|| params.objectCenteredView != m_params.objectCenteredView
 		//|| (params.pivotPoint - m_params.pivotPoint).norm() > ZERO_TOLERANCE
 		|| params.aspectRatio != m_params.aspectRatio
 		|| params.fov != m_params.fov)

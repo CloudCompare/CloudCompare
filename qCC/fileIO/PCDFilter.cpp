@@ -214,7 +214,7 @@ int PCDFilter::GetIDOfField(const QString& fieldName, const PCDHeader& header)
 {
 	for (size_t i = 0; i < header.fields.size(); ++i)
 		if (header.fields.at(i) == fieldName)
-			return i;
+			return (int)i;
 
 	return -1;
 }

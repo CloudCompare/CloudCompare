@@ -103,7 +103,6 @@ public:
     //inherited from ccGenericGLDisplay
     virtual void toBeRefreshed();
     virtual void refresh();
-    //virtual void redraw();
     virtual void invalidateViewport();
     virtual unsigned getTexture(const QImage& image);
     virtual void releaseTexture(unsigned texID);
@@ -127,6 +126,19 @@ public:
 									int displayMaxDelay_sec=2,
 									MessageType type=CUSTOM_MESSAGE);
 
+	//! Activates sun light
+	virtual void setSunLight(bool state);
+	//! Toggles sun light
+    virtual void toggleSunLight();
+	//! Returns whether sun light is enabled or not
+	virtual bool sunLightEnabled() const {return m_sunLightEnabled;}
+	//! Activates custom light
+    virtual void setCustomLight(bool state);
+	//! Toggles custom light
+    virtual void toggleCustomLight();
+	//! Returns whether custom light is enabled or not
+	virtual bool customLightEnabled() const {return m_customLightEnabled;}
+
 	//! Sets current zoom
 	/** Warning: has no effect in viewer-centered perspective mode
 	**/
@@ -144,42 +156,72 @@ public:
 	**/
     virtual void setPivotPoint(const CCVector3& P);
 
-	//! Displaces camera (viewer-perspective only)
+	//! Displaces camera (viewer-perspective mode only)
 	/** (dx,dy,dz) is given in object world, along the current camera viewing directions.
 	**/
 	virtual void moveCamera(float dx, float dy, float dz);
 
-	virtual void setSunLight(bool state);
-    virtual void toggleSunLight();
-	virtual bool sunLightEnabled() const {return m_sunLightEnabled;}
-    virtual void setCustomLight(bool state);
-    virtual void toggleCustomLight();
-	virtual bool customLightEnabled() const {return m_customLightEnabled;}
+    //! Returns camera position (perspective mode only)
+	/** if current perspective is 'object based', this method takes
+		current zoom into account (i.e. the camera is virtually
+		displaced 'backward' from the pivot point so that the object
+		is seen at the right scale). Otherwise no computation
+		is done and the current camera position is returned as is.
+	**/
+    virtual CCVector3 computeCameraPos() const;
 
-    virtual void setPerspectiveState(bool state, bool objectCenteredPerspective);
+	//! Set perspective state/mode
+	/** Persepctive mode can be:
+		- object-centered (moving the mouse make the object rotate)
+		- viewer-centered (moving the mouse make the camera move)
+		\param state whether perspective mode is enabled or not
+		\param objectCenteredView whether view is object- or viewer-centered (forced to true in ortho. mode)
+	**/
+    virtual void setPerspectiveState(bool state, bool objectCenteredView);
+
+	//! Toggles perspective mode
+	/** If perspective is activated, the user must specify if it should be
+		object or viewer based (see setPerspectiveState)
+	**/
     virtual void togglePerspective(bool objectCentered);
-    virtual bool getPerspectiveState(bool& objectCentered) const;
-	//shortcuts
-    virtual bool objectPerspectiveEnabled() const;
-    virtual bool userPerspectiveEnabled() const;
-
-    //external camera control
-    virtual void rotateViewMat(const ccGLMatrix& rotMat);
 	
-	virtual void setScreenPan(float tx, float ty);
-    virtual void updateScreenPan(float dx, float dy); //dx and dy are added to actual screen pan!
+	//! Returns perspective mode
+    virtual bool getPerspectiveState(bool& objectCentered) const;
+	
+	//! Shortcut: returns whether object-based perspective mode is enabled
+    virtual bool objectPerspectiveEnabled() const;
+	//! Shortcut: returns whether viewer-based perspective mode is enabled
+    virtual bool viewerPerspectiveEnabled() const;
 
+	//! Sets the current screen pan (in pixels)
+	virtual void setScreenPan(float tx, float ty);
+	//! Shifts the current screen pan (in pixels)
+    virtual void updateScreenPan(float dx, float dy);
+
+	//! Center and zoom on a given bounding box
+	/** If no bounding box is defined, the current displayed 'scene graph'
+		bounding box is taken.
+	**/
     virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = 0);
 
+    //! Rotates the current view matrix
+    virtual void rotateViewMat(const ccGLMatrix& rotMat);
+
+	//! Returns the base view matrix
     virtual const ccGLMatrix& getBaseModelViewMat();
+	//! Sets the base view matrix
     virtual const void setBaseModelViewMat(ccGLMatrix& mat);
+	//! Returns the current view matrix as a double array
     virtual const double* getModelViewMatd();
+	//! Returns the current projection matrix as a double array
     virtual const double* getProjectionMatd();
+	//! Returns the current viewport (OpenGL int[4] array)
     virtual void getViewportArray(int vp[/*4*/]);
 
+	//! Sets camera to a predefined view (top, bottom, etc.)
     virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw=true);
 
-	//! Set interaction mode
+	//! Sets current interaction mode
 	virtual void setInteractionMode(INTERACTION_MODE mode);
 
 	//! Sets current picking mode
@@ -194,16 +236,18 @@ public:
     virtual void getContext(CC_DRAW_CONTEXT& context);
 
     //! Sets point size
-    /** \param size point size (between 1 and 10)
+    /** \param size point size (typically between 1 and 10)
     **/
     virtual void setPointSize(float size);
 
     //! Sets line width
-    /** \param width width (between 1 and 10)
+    /** \param width lines width (typically between 1 and 10)
     **/
     virtual void setLineWidth(float width);
 
+	//! Returns current font size
     virtual int getFontPointSize() const;
+	//! Sets current font size
     virtual void setFontPointSize(int pixelSize);
 
 	//! Returns window own DB (2D objects only)
@@ -216,13 +260,18 @@ public:
 	//! Sets viewport parameters (all at once)
 	virtual void setViewportParameters(const ccViewportParameters& params);
 
-    virtual void applyImageViewport(ccCalibratedImage* theImage);
+	//! Applies the same camera parameters as a given calibrated image
+    virtual void applyImageViewport(ccCalibratedImage* image);
+	
+	//! Sets current camera f.o.v. (field of view)
+	/** FOV is only used in perspective mode.
+	**/
     virtual void setFov(float fov);
 
+	//! Invalidate current visualization state
+	/** Forces view matrix update and 3D/FBO display.
+	**/
     virtual void invalidateVisualization();
-
-    //! Returns camera position (taking zoom into account if centered perspective is 'on')
-    virtual CCVector3 computeCameraPos() const;
 
     virtual bool renderToFile(const char* filename, float zoomFactor=1.0, bool dontScaleFeatures=false);
 
@@ -345,7 +394,7 @@ protected:
     void setStandardOrthoCenter();
     void setStandardOrthoCorner();
 
-    //Lights controls
+    //Lights controls (OpenGL scripts)
     void glEnableSunLight();
     void glDisableSunLight();
     void glEnableCustomLight();
@@ -359,8 +408,8 @@ protected:
 	virtual void dragEnterEvent(QDragEnterEvent* event);
 	virtual void dropEvent(QDropEvent* event);
 
-    //! Returns viewing direction (according to base view matrix)
-    CCVector3 getBaseViewMatDir() const;
+    //! Returns current viewing direction (according to base view matrix)
+    CCVector3 getCurrentViewDir() const;
 
     //! Starts OpenGL picking process
 	/** \param cursorX cursor x position
@@ -412,6 +461,7 @@ protected:
 
     //! Default font size
     int m_defaultFontPixelSize;
+
 	//! Pivot point backup
 	//CCVector3 m_pivotPointBackup;
 
@@ -526,7 +576,9 @@ protected:
 	QFont m_font;
    
 private:
-   static QString  getShadersPath();
+
+	//! Returns shaders path
+	static QString getShadersPath();
 };
 
 #endif

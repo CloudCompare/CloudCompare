@@ -34,4 +34,9 @@ endif()
 
 endfunction()
 
+else()
+
+function( target_link_3DXWARE ) # dummy function does nothing
+endfunction()
+
 endif()

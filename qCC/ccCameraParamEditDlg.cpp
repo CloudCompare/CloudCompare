@@ -140,9 +140,9 @@ void ccCameraParamEditDlg::translationChanged(double)
         return;
 
 	m_associatedWin->blockSignals(true);
-    m_associatedWin->setPivotPoint(txDoubleSpinBox->value(),
-                                 tyDoubleSpinBox->value(),
-                                 tzDoubleSpinBox->value());
+    m_associatedWin->setPivotPoint(CCVector3(txDoubleSpinBox->value(),
+												tyDoubleSpinBox->value(),
+													tzDoubleSpinBox->value()));
 	m_associatedWin->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -210,7 +210,7 @@ void ccCameraParamEditDlg::processPickedPoint(int cloudUniqueID, unsigned pointI
 
 		if (P)
 		{
-			m_associatedWin->setPivotPoint(P->x,P->y,P->z);
+			m_associatedWin->setPivotPoint(*P);
 			m_associatedWin->redraw();
 		}
 	}

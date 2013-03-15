@@ -47,57 +47,66 @@ enum e3dconnexion_pid
 	eSpacePilotPRO				= 0xc629
 };
 
-enum e3dmouse_virtual_key
+static const Mouse3DInput::VirtualKey SpaceExplorerKeys[] =
 {
-	V3DK_INVALID				= 0,
-	V3DK_MENU					= 1,
-	V3DK_FIT,
-	V3DK_TOP, V3DK_LEFT, V3DK_RIGHT, V3DK_FRONT, V3DK_BOTTOM, V3DK_BACK,
-	V3DK_CW, V3DK_CCW,
-	V3DK_ISO1, V3DK_ISO2,
-	V3DK_1, V3DK_2, V3DK_3, V3DK_4, V3DK_5, V3DK_6, V3DK_7, V3DK_8, V3DK_9, V3DK_10,
-	V3DK_ESC, V3DK_ALT, V3DK_SHIFT, V3DK_CTRL,
-	V3DK_ROTATE, V3DK_PANZOOM, V3DK_DOMINANT,
-	V3DK_PLUS, V3DK_MINUS
+	Mouse3DInput::V3DK_INVALID, // there is no button 0
+	Mouse3DInput::V3DK_1,
+	Mouse3DInput::V3DK_2,
+	Mouse3DInput::V3DK_TOP,
+	Mouse3DInput::V3DK_LEFT,
+	Mouse3DInput::V3DK_RIGHT,
+	Mouse3DInput::V3DK_FRONT,
+	Mouse3DInput::V3DK_ESC,
+	Mouse3DInput::V3DK_ALT,
+	Mouse3DInput::V3DK_SHIFT,
+	Mouse3DInput::V3DK_CTRL,
+	Mouse3DInput::V3DK_FIT,
+	Mouse3DInput::V3DK_MENU,
+	Mouse3DInput::V3DK_PLUS,
+	Mouse3DInput::V3DK_MINUS,
+	Mouse3DInput::V3DK_ROTATE
 };
 
-static const e3dmouse_virtual_key SpaceExplorerKeys[] =
+static const Mouse3DInput::VirtualKey SpacePilotKeys[] =
 {
-	V3DK_INVALID, // there is no button 0
-	V3DK_1, V3DK_2,
-	V3DK_TOP, V3DK_LEFT, V3DK_RIGHT, V3DK_FRONT,
-	V3DK_ESC, V3DK_ALT, V3DK_SHIFT, V3DK_CTRL,
-	V3DK_FIT, V3DK_MENU,
-	V3DK_PLUS, V3DK_MINUS,
-	V3DK_ROTATE
-};
-
-static const e3dmouse_virtual_key SpacePilotKeys[] =
-{
-	V3DK_INVALID,
-	V3DK_1, V3DK_2, V3DK_3, V3DK_4, V3DK_5, V3DK_6,
-	V3DK_TOP, V3DK_LEFT, V3DK_RIGHT, V3DK_FRONT,
-	V3DK_ESC, V3DK_ALT, V3DK_SHIFT, V3DK_CTRL,
-	V3DK_FIT, V3DK_MENU,
-	V3DK_PLUS, V3DK_MINUS,
-	V3DK_DOMINANT, V3DK_ROTATE,
+	Mouse3DInput::V3DK_INVALID,
+	Mouse3DInput::V3DK_1,
+	Mouse3DInput::V3DK_2,
+	Mouse3DInput::V3DK_3,
+	Mouse3DInput::V3DK_4,
+	Mouse3DInput::V3DK_5,
+	Mouse3DInput::V3DK_6,
+	Mouse3DInput::V3DK_TOP,
+	Mouse3DInput::V3DK_LEFT,
+	Mouse3DInput::V3DK_RIGHT,
+	Mouse3DInput::V3DK_FRONT,
+	Mouse3DInput::V3DK_ESC,
+	Mouse3DInput::V3DK_ALT,
+	Mouse3DInput::V3DK_SHIFT,
+	Mouse3DInput::V3DK_CTRL,
+	Mouse3DInput::V3DK_FIT,
+	Mouse3DInput::V3DK_MENU,
+	Mouse3DInput::V3DK_PLUS,
+	Mouse3DInput::V3DK_MINUS,
+	Mouse3DInput::V3DK_DOMINANT,
+	Mouse3DInput::V3DK_ROTATE
 };
 
 struct tag_VirtualKeys
 {
 	e3dconnexion_pid pid;
 	size_t nKeys;
-	e3dmouse_virtual_key *vkeys;
+	Mouse3DInput::VirtualKey *vkeys;
 };
 
 static const tag_VirtualKeys Mouse3DVirtualKeys[] =
 {
 	eSpacePilot ,
 	sizeof(SpacePilotKeys)/sizeof(SpacePilotKeys[0]), 
-	const_cast<e3dmouse_virtual_key *>(SpacePilotKeys),
+	const_cast<Mouse3DInput::VirtualKey*>(SpacePilotKeys),
 	eSpaceExplorer,
 	sizeof(SpaceExplorerKeys)/sizeof(SpaceExplorerKeys[0]),
-	const_cast<e3dmouse_virtual_key *>(SpaceExplorerKeys)
+	const_cast<Mouse3DInput::VirtualKey*>(SpaceExplorerKeys)
 };
 
 //! Converts a hid device keycode (button identifier) of a pre-2009 3Dconnexion USB device to the standard 3d mouse virtual key definition
@@ -115,7 +124,7 @@ static unsigned short HidToVirtualKey(unsigned long pid, unsigned short hidKeyCo
 			if (hidKeyCode < Mouse3DVirtualKeys[i].nKeys)
 				virtualkey = Mouse3DVirtualKeys[i].vkeys[hidKeyCode];
 			else
-				virtualkey = V3DK_INVALID;
+				virtualkey = Mouse3DInput::V3DK_INVALID;
 			break;
 		}
 	}
@@ -123,6 +132,7 @@ static unsigned short HidToVirtualKey(unsigned long pid, unsigned short hidKeyCo
 	return virtualkey;
 }
 
+//unique instance
 static Mouse3DInput* s_mouseInputInstance = 0;
 
 bool Mouse3DInput::RawInputEventFilter(void* msg, long* result)
@@ -149,9 +159,12 @@ bool Mouse3DInput::RawInputEventFilter(void* msg, long* result)
 
 Mouse3DInput::Mouse3DInput(QWidget* widget)
 	: QObject(widget)
-	, m_last3dmouseInputTime(0)
+	, m_lastInputTime(0)
 {
 	initializeRawInput(widget->winId());
+
+	//load parameters from persistent settings
+	m_mouseParams.fromPersistentSettings();
 
 	//register current instance
 	assert(s_mouseInputInstance == 0);
@@ -164,7 +177,11 @@ Mouse3DInput::~Mouse3DInput()
 {
 	//unregister current instance
 	if (s_mouseInputInstance == this)
+	{
+		//save current parameters to persistent settings
+		m_mouseParams.toPersistentSettings();
 		s_mouseInputInstance = 0;
+	}
 }
 
 void Mouse3DInput::move3d(HANDLE device, std::vector<float>& motionData)
@@ -195,13 +212,12 @@ static PRAWINPUTDEVICE GetDevicesToRegister(unsigned int& numDevices)
 		{0x01, 0x08, 0x00, 0x00} // Usage Page = 0x01 Generic Desktop Page, Usage Id= 0x08 Multi-axis Controller
 	};
 
-	//DGM FIXME: is it 1 or 4?!
 	numDevices = sizeof(s_rawInputDevices) / sizeof(s_rawInputDevices[0]);
 
 	return s_rawInputDevices;
 }
 
-bool Mouse3DInput::Is3dmouseAttached()
+bool Mouse3DInput::DeviceAvailable()
 {
 	unsigned int numDevicesOfInterest = 0;
 	PRAWINPUTDEVICE devicesToRegister = GetDevicesToRegister(numDevicesOfInterest);
@@ -337,14 +353,14 @@ void Mouse3DInput::on3dmouseInput()
 	DWORD dwNow = ::GetTickCount();           // Current time;
 	DWORD dwElapsedTime;                      // Elapsed time since we were last here
 
-	if (0 == m_last3dmouseInputTime)
+	if (0 == m_lastInputTime)
 	{
 		dwElapsedTime = 10;                    // System timer resolution
 	}
 	else 
 	{
-		dwElapsedTime = dwNow - m_last3dmouseInputTime;
-		if (m_last3dmouseInputTime > dwNow)
+		dwElapsedTime = dwNow - m_lastInputTime;
+		if (m_lastInputTime > dwNow)
 		{
 			dwElapsedTime = ~dwElapsedTime+1;
 		}
@@ -361,7 +377,7 @@ void Mouse3DInput::on3dmouseInput()
 	}
 
 	// Take a look at the users preferred speed setting and adjust the sensitivity accordingly
-	Mouse3DParameters::SpeedMode speedSetting = m_3dMouseParams.speedMode();
+	Mouse3DParameters::SpeedMode speedSetting = m_mouseParams.speedMode();
 	// See "Programming for the 3D Mouse", Section 6.1.3
 	float speed = 0.25f;
 	switch(speedSetting)
@@ -417,7 +433,7 @@ void Mouse3DInput::on3dmouseInput()
 		// Pan Zoom filter
 		{
 			// See "Programming for the 3D Mouse", Section 6.1.2
-			if (!m_3dMouseParams.panZoomEnabled())
+			if (!m_mouseParams.panZoomEnabled())
 			{
 				// Pan zoom is switched off so set the translation vector values to zero
 				motionData[0] =  motionData[1] =  motionData[2] = 0.0f;
@@ -432,7 +448,7 @@ void Mouse3DInput::on3dmouseInput()
 		// Rotate filter
 		{
 			// See "Programming for the 3D Mouse", Section 6.1.1
-			if (!m_3dMouseParams.rotationEnabled())
+			if (!m_mouseParams.rotationEnabled())
 			{
 				// Rotate is switched off so set the rotation vector values to zero
 				motionData[3] =  motionData[4] =  motionData[5] = 0.0f;
@@ -480,7 +496,7 @@ void Mouse3DInput::on3dmouseInput()
 		iterator = m_device2Data.find(hNextDevice);
 	}
 
-	m_last3dmouseInputTime = !m_device2Data.empty() ? dwNow : 0;
+	m_lastInputTime = !m_device2Data.empty() ? dwNow : 0;
 }
 
 void Mouse3DInput::onRawInput(UINT nInputCode, HRAWINPUT hRawInput)
@@ -632,4 +648,29 @@ bool Mouse3DInput::translateRawInputData(UINT nInputCode, PRAWINPUT pRawInput)
 	}
 
 	return false;
+}
+
+void Mouse3DInput::GetQuaternion(const std::vector<float>& vec, float* q)
+{
+	assert(vec.size() == 6);
+	assert(q);
+
+	//build quaternion
+	const float& pitch	= vec[3]/2.0f;
+	const float& yaw	= -vec[5]/2.0f;
+	const float& roll	= vec[4]/2.0f;
+
+	float s1 = sin(roll);
+	float s2 = sin(yaw);
+	float s3 = sin(pitch);
+	float s2_x_s1 = s2 * s1;
+	float c1 = cos(roll);
+	float c2 = cos(yaw);
+	float c3 = cos(pitch);
+	float c2_x_c1 = c2 * c1;
+	
+	q[0] = c3 * c2_x_c1  +  s3 * s2_x_s1;
+	q[1] = s3 * c2_x_c1  -  c3 * s2_x_s1;
+	q[2] = c3 * s2 * c1  +  s3 * c2 * s1;
+	q[3] = c3 * c2 * s1  -  s3 * s2 * c1;
 }

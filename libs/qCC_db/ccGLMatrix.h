@@ -104,6 +104,12 @@ public:
 	**/
 	static ccGLMatrix FromToRotation(const CCVector3& from, const CCVector3& to);
 
+	//! Converts a quaternion to a rotation matrix
+	/** \param q quaternion (4 values: w,x,y,z)
+		\return corresponding rotation matrix
+	**/
+	static ccGLMatrix FromQuaternion(const float q[]);
+
 	//! Clears matrix
 	/** Matrix is set to 0.
 	**/

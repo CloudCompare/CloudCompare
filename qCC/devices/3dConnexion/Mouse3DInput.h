@@ -18,7 +18,7 @@
 #ifndef MOUSE_3D_INPUT_HEADER
 #define MOUSE_3D_INPUT_HEADER
 
-/** This file is inspired from the Qt wrapper for 3dConnexion devices graciously shared by Dabid Dibben:
+/** This file is inspired from the Qt wrapper for 3dConnexion devices graciously shared by Dabid Dibben
 	http://www.codegardening.com/2011/02/using-3dconnexion-mouse-with-qt.html
 **/
 
@@ -69,12 +69,27 @@ public:
 	~Mouse3DInput();
 
 	//! Returns whether a 3D mouse has been detected or not
-	static bool Is3dmouseAttached();
+	static bool DeviceAvailable();
 
 	//! Returns current mouse parameters
-	Mouse3DParameters& getMouseParams() { return m_3dMouseParams; }
+	Mouse3DParameters& getMouseParams() { return m_mouseParams; }
 	//! Returns current mouse parameters (const version)
-	const Mouse3DParameters& getMouseParams() const  { return m_3dMouseParams; }
+	const Mouse3DParameters& getMouseParams() const  { return m_mouseParams; }
+
+	//! Default key codes
+	enum VirtualKey
+	{
+		V3DK_INVALID				= 0,
+		V3DK_MENU					= 1,
+		V3DK_FIT,
+		V3DK_TOP, V3DK_LEFT, V3DK_RIGHT, V3DK_FRONT, V3DK_BOTTOM, V3DK_BACK,
+		V3DK_CW, V3DK_CCW,
+		V3DK_ISO1, V3DK_ISO2,
+		V3DK_1, V3DK_2, V3DK_3, V3DK_4, V3DK_5, V3DK_6, V3DK_7, V3DK_8, V3DK_9, V3DK_10,
+		V3DK_ESC, V3DK_ALT, V3DK_SHIFT, V3DK_CTRL,
+		V3DK_ROTATE, V3DK_PANZOOM, V3DK_DOMINANT,
+		V3DK_PLUS, V3DK_MINUS
+	};
 
 	//! Called with the processed motion data when a 3D mouse event is received
 	/** The default implementation emits a sigMove3d signal with the motion data
@@ -91,6 +106,11 @@ public:
 	**/
 	virtual void on3dmouseKeyUp(HANDLE device, int virtualKeyCode);
 
+	//! Converts 'rotation' part of motion data to a (more standard) quaternion
+	/** q = (w,x,y,z)
+	**/
+	static void GetQuaternion(const std::vector<float>& motionData, float* q);
+
 signals:
 
 	void sigMove3d(std::vector<float>& motionData);
@@ -104,6 +124,7 @@ protected:
 	**/
 	bool initializeRawInput(HWND hwndTarget);
 
+	//! Custom 'WM_INPUT' event filter
 	static bool RawInputEventFilter(void* msg, long* result);
 
 	//! Called when new raw input data is available
@@ -115,6 +136,7 @@ protected:
 	**/
 	UINT getRawInputBuffer(PRAWINPUT pData, PUINT pcbSize, UINT cbSizeHeader);
 	
+	//! Extracts 3D mouse specific data from raw input
 	bool translateRawInputData(UINT nInputCode, PRAWINPUT pRawInput);
 	
 	//! Processes the raw input device data
@@ -151,10 +173,10 @@ protected:
 	std::map< HANDLE, unsigned long > m_device2Keystate;
 
 	//! 3D Mouse parameters
-	Mouse3DParameters m_3dMouseParams;
+	Mouse3DParameters m_mouseParams;
 
 	//! Used to calculate distance traveled since last event
-	DWORD m_last3dmouseInputTime;
+	DWORD m_lastInputTime;
 
 };
 

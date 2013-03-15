@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2275                                                              $
-//$LastChangedDate:: 2012-10-17 23:30:43 +0200 (mer., 17 oct. 2012)        $
-//**************************************************************************
-//
 
 #include "ccDBRoot.h"
 
@@ -1287,14 +1280,14 @@ void ccDBRoot::addEmptyGroup()
 	addElement(newGroup);
 }
 
-void ccDBRoot::showContextMenu(const QPoint& pnt)
+void ccDBRoot::showContextMenu(const QPoint& menuPos)
 {
-	m_contextMenuPos = pnt;
+	m_contextMenuPos = menuPos;
 
 	//build custom context menu
 	QMenu menu;
 
-	QModelIndex index = m_dbTreeWidget->indexAt(pnt);
+	QModelIndex index = m_dbTreeWidget->indexAt(menuPos);
 	if (index.isValid())
 	{
 		QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
@@ -1373,7 +1366,7 @@ void ccDBRoot::showContextMenu(const QPoint& pnt)
 		menu.addAction(m_addEmptyGroup);
 	}
 
-	menu.exec(m_dbTreeWidget->mapToGlobal(pnt));
+	menu.exec(m_dbTreeWidget->mapToGlobal(menuPos));
 }
 
 QItemSelectionModel::SelectionFlags ccCustomQTreeView::selectionCommand(const QModelIndex& index, const QEvent* event/*=0*/) const

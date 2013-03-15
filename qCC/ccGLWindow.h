@@ -127,11 +127,29 @@ public:
 									int displayMaxDelay_sec=2,
 									MessageType type=CUSTOM_MESSAGE);
 
+	//! Sets current zoom
+	/** Warning: has no effect in viewer-centered perspective mode
+	**/
     virtual void setZoom(float value);
-    virtual void setPivotPoint(float x, float y, float z);
-    //virtual void setCameraPos(float x, float y, float z);
 
-    virtual void setSunLight(bool state);
+	//! Updates current zoom
+	/** Warning: has no effect in viewer-centered perspective mode
+	**/
+    virtual void updateZoom(float zoomFactor);
+
+	//! Sets pivot point
+	/** Pivot point is:
+		- the rotation center (in ortho and object-centered perspective mode)
+		- the camera center (in viewer-centered perspective mode)
+	**/
+    virtual void setPivotPoint(const CCVector3& P);
+
+	//! Displaces camera (viewer-perspective only)
+	/** (dx,dy,dz) is given in object world, along the current camera viewing directions.
+	**/
+	virtual void moveCamera(float dx, float dy, float dz);
+
+	virtual void setSunLight(bool state);
     virtual void toggleSunLight();
 	virtual bool sunLightEnabled() const {return m_sunLightEnabled;}
     virtual void setCustomLight(bool state);
@@ -141,12 +159,16 @@ public:
     virtual void setPerspectiveState(bool state, bool objectCenteredPerspective);
     virtual void togglePerspective(bool objectCentered);
     virtual bool getPerspectiveState(bool& objectCentered) const;
+	//shortcuts
+    virtual bool objectPerspectiveEnabled() const;
+    virtual bool userPerspectiveEnabled() const;
 
     //external camera control
     virtual void rotateViewMat(const ccGLMatrix& rotMat);
-    virtual void updateZoom(float zoomFactor);
+	
 	virtual void setScreenPan(float tx, float ty);
     virtual void updateScreenPan(float dx, float dy); //dx and dy are added to actual screen pan!
+
     virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = 0);
 
     virtual const ccGLMatrix& getBaseModelViewMat();
@@ -391,7 +413,7 @@ protected:
     //! Default font size
     int m_defaultFontPixelSize;
 	//! Pivot point backup
-	CCVector3 m_pivotPointBackup;
+	//CCVector3 m_pivotPointBackup;
 
     //! Last mouse position
     QPoint m_lastMousePos;

@@ -55,16 +55,7 @@ public:
 	};
 
 	//! Default constructor
-	Mouse3DParameters()
-		: m_speedMode(LowSpeed)
-		, m_panZoomEnabled(true)
-		, m_rotationEnabled(true)
-		, m_navigationMode(ObjectMode)
-		, m_pivotMode(AutoPivot)
-		, m_pivotVisibility(ShowPivot)
-		, m_horizonLocked(true)
-	{
-	}
+	Mouse3DParameters();
 
 	virtual inline bool panZoomEnabled() const { return m_panZoomEnabled; }
 	virtual inline void enablePanZoom(bool state) { m_panZoomEnabled = state; }
@@ -86,6 +77,11 @@ public:
 
 	virtual inline bool horizonLocked() const { return m_horizonLocked; }
 	virtual inline void lockHorizon(bool state) { m_horizonLocked = state; }
+
+	//! Saves parameters to persistent settings
+	void fromPersistentSettings();
+	//! Laods parameters from persistent settings
+	void toPersistentSettings();
 
 protected:
 

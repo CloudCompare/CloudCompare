@@ -540,3 +540,45 @@ bool ccGLMatrix::fromFile(QFile& in, short dataVersion)
 
 	return true;
 }
+
+ccGLMatrix ccGLMatrix::FromQuaternion(const float q[])
+{
+	assert(q);
+
+	ccGLMatrix rotMat;
+	float* mat = rotMat.data();
+
+	//diagonal
+	{
+		float q00 = q[0]*q[0];
+		float q11 = q[1]*q[1];
+		float q22 = q[2]*q[2];
+		float q33 = q[3]*q[3];
+		mat[0]	= q00 + q11 - q22 - q33;
+		mat[5]	= q00 - q11 + q22 - q33;
+		mat[10]	= q00 - q11 - q22 + q33;
+		mat[15]	= 1.0f;
+	}
+
+	//non-diagonal elements
+	{
+		float q03 = q[0]*q[3];
+		float q13 = q[1]*q[3];
+		float q23 = q[2]*q[3];
+		float q02 = q[0]*q[2];
+		float q12 = q[1]*q[2];
+		float q01 = q[0]*q[1];
+
+
+		mat[1]	= 2.0f*(q12+q03);
+		mat[2]	= 2.0f*(q13-q02);
+
+		mat[4]	= 2.0f*(q12-q03);
+		mat[6]	= 2.0f*(q23+q01);
+
+		mat[8]	= 2.0f*(q13+q02);
+		mat[9]	= 2.0f*(q23-q01);
+	}
+
+	return rotMat;
+}

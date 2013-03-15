@@ -15,39 +15,46 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_APPLY_TRANSFORMATION_DLG_HEADER
-#define CC_APPLY_TRANSFORMATION_DLG_HEADER
+#ifndef CC_MOUSE_3D_CONTEXT_MENU_HEADER
+#define CC_MOUSE_3D_CONTEXT_MENU_HEADER
 
-#include <ui_applyTransformationDlg.h>
+//Qt
+#include <QMenu>
 
-//qCC_db
-#include <ccGLMatrix.h>
+class QAction;
+class Mouse3DParameters;
 
-//! Dialog to input a 4x4 matrix
-class ccApplyTransformationDlg : public QDialog, public Ui::ApplyTransformationDialog
+//! 3D mouse context menu
+class ccMouse3DContextMenu : public QMenu
 {
 	Q_OBJECT
 
 public:
 
 	//! Default constructor
-	ccApplyTransformationDlg(QWidget* parent=0);
-
-	//! Returns input matrix
-	ccGLMatrix getTransformation() const;
+	ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* parent=0);
 
 protected slots:
 
-	//! Check matrix validity and 'accept' dialog if ok
-	void checkMatrixValidityAndAccept();
+	void rotateCheckBoxToggled(bool);
+	void panZoomCheckBoxToggled(bool);
+	void speedModeChanged(bool);
 
 protected:
 
-	//! Check matrix validity
-	/** \return true if input matrix is valid (false otherwise)
-	**/
-	bool checkMatrixValidity() const;
+	//! Number of speed control actions
+	static const int SPEED_ACTION_COUNT = 5;
+
+	//! Speed control actions (from slowest to fastest)
+	QAction* m_speedActions[SPEED_ACTION_COUNT];
+
+	// checkboxes
+	QAction* m_rotateCheckbox;
+	QAction* m_panZoomCheckbox;
+
+	//! Associated parameters
+	Mouse3DParameters* m_params;
 
 };
 
-#endif
+#endif //CC_MOUSE_3D_CONTEXT_MENU_HEADER

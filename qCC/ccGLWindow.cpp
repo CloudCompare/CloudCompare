@@ -85,7 +85,7 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	, m_interactionMode(TRANSFORM_CAMERA)
 	, m_pickingMode(NO_PICKING)
 	, m_captureModeZoomFactor(1.0f)
-	, m_pivotPointBackup(0.0f)
+	//, m_pivotPointBackup(0.0f)
 	, m_validProjectionMatrix(false)
 	, m_validModelviewMatrix(false)
 	, m_lastClickTime_ticks(0)
@@ -114,7 +114,7 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	setFontPointSize(10);
 
 	//screen panning
-	m_params.screenPan[0]=m_params.screenPan[1]=0;
+	m_params.screenPan[0] = m_params.screenPan[1] = 0;
 
 	//lights
 	m_sunLightEnabled = true;
@@ -140,7 +140,7 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	setPickingMode(ENTITY_PICKING);
 	setInteractionMode(TRANSFORM_CAMERA);
 
-	//Drag & drop handling
+	//drag & drop handling
 	setAcceptDrops(true);
 
 	//Embedded icons (point size, etc.)
@@ -150,11 +150,13 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	{
 		QSettings settings;
 		settings.beginGroup("ccGLWindow");
+		
 		//load parameters
-		bool perspectiveView = settings.value("perspectiveView", false).toBool();
-		bool objectCenteredPerspective = settings.value("objectCenteredPerspective", true).toBool();
-		m_sunLightEnabled = settings.value("sunLightEnabled", true).toBool();
-		m_customLightEnabled = settings.value("customLightEnabled", false).toBool();
+		bool perspectiveView			= settings.value("perspectiveView",				false).toBool();
+		bool objectCenteredPerspective	= settings.value("objectCenteredPerspective",	true).toBool();
+		m_sunLightEnabled				= settings.value("sunLightEnabled",				true).toBool();
+		m_customLightEnabled			= settings.value("customLightEnabled",			false).toBool();
+		
 		settings.endGroup();
 
 		if (!perspectiveView)
@@ -404,7 +406,7 @@ void ccGLWindow::paintGL()
 			//we process GL filter
 			GLuint depthTex = m_fbo->getDepthTexture();
 			GLuint colorTex = m_fbo->getColorTexture(0);
-			m_activeGLFilter->shade(depthTex, colorTex, (m_params.perspectiveView && !m_params.objectCenteredPerspective ? 1.0 : m_params.zoom));
+			m_activeGLFilter->shade(depthTex, colorTex, (userPerspectiveEnabled() ? 1.0 : m_params.zoom)); //DGM FIXME
 
 			ccGLUtils::CatchGLError("ccGLWindow::paintGL/glFilter shade");
 
@@ -815,6 +817,16 @@ float ccGLWindow::computeTotalZoom() const
 	return m_params.zoom*m_params.globalZoom;
 }
 
+bool ccGLWindow::objectPerspectiveEnabled() const
+{
+	return m_params.perspectiveView && m_params.objectCenteredPerspective;
+}
+
+bool ccGLWindow::userPerspectiveEnabled() const
+{
+	return m_params.perspectiveView && !m_params.objectCenteredPerspective;
+}
+
 bool ccGLWindow::getPerspectiveState(bool& objectCentered) const
 {
 	objectCentered = m_params.objectCenteredPerspective;
@@ -859,7 +871,7 @@ void ccGLWindow::zoomGlobal()
 
 void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 {
-	m_params.screenPan[0] = m_params.screenPan[1] = 0;
+	setScreenPan(0,0);
 	setZoom(1.0);
 
 	ccBBox zoomedBox;
@@ -877,21 +889,22 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	if (!zoomedBox.isValid())
 		return;
 
-	//calcul du zoom 1:1
-	//on récupère la diagonale de la bounding box de toutes les listes affichées
+	//we get the bounding-box diagonal length
 	float maxD = zoomedBox.getDiagNorm();
 
-	if (maxD == 0)
-		m_params.globalZoom = 1.0f;
-	else
-		m_params.globalZoom = float(std::min(m_glWidth,m_glHeight))/maxD;
+	//we compute the 'total fit' zoom
+	m_params.globalZoom = (maxD > ZERO_TOLERANCE ? static_cast<float>(std::min(m_glWidth,m_glHeight))/maxD : 1.0f);
 
-	//pivot point
-	CCVector3 c = zoomedBox.getCenter();
-	setPivotPoint(c.x,c.y,c.z);
-
-	if (m_params.perspectiveView)
-		setPerspectiveState(true, m_params.objectCenteredPerspective);
+	//we set the pivot point on the box center
+	CCVector3 P = zoomedBox.getCenter();
+	if (userPerspectiveEnabled())
+	{
+		//we must go backward so as to see the object!
+		assert(m_params.fov > ZERO_TOLERANCE);
+		float d = maxD / tan(m_params.fov*CC_DEG_TO_RAD);
+		P += getBaseViewMatDir() * d;
+	}
+	setPivotPoint(P);
 
 	invalidateViewport();
 	invalidateVisualization();
@@ -964,27 +977,38 @@ void ccGLWindow::setZoom(float value)
 
 	if (m_params.zoom != value)
 	{
+		m_params.zoom = value;
 		invalidateViewport();
 		invalidateVisualization();
-		m_params.zoom = value;
 	}
 }
 
-void ccGLWindow::setPivotPoint(float x, float y, float z)
+void ccGLWindow::moveCamera(float dx, float dy, float dz)
 {
-	m_params.pivotPoint = CCVector3(x,y,z);
-	emit pivotPointChanged(m_params.pivotPoint);
-	m_pivotPointBackup = m_params.pivotPoint;
+	//curent X, Y and Z viewing directions (in global world coordinates)
+	CCVector3 X,Y,Z;
+	{
+		const float* M = m_params.baseViewMat.data();
+		X = CCVector3(M[0],M[4],M[8]);
+		Y = CCVector3(M[1],M[5],M[9]);
+		Z = CCVector3(M[2],M[6],M[10]);
+	}
 
-	if (!m_params.perspectiveView)
-	{
-		invalidateViewport();
-		invalidateVisualization();
-	}
-	else
-	{
-		setPerspectiveState(true, m_params.objectCenteredPerspective);
-	}
+	CCVector3 newPivot = m_params.pivotPoint + X*dx + Y*dy + Z*dz;
+
+	setPivotPoint(newPivot);
+}
+
+void ccGLWindow::setPivotPoint(const CCVector3& P)
+{
+	m_params.pivotPoint = P;
+	emit pivotPointChanged(m_params.pivotPoint);
+
+	//we backup the pivot point
+	//m_pivotPointBackup = m_params.pivotPoint;
+
+	invalidateViewport();
+	invalidateVisualization();
 }
 
 void ccGLWindow::setSceneDB(ccHObject* root)
@@ -1120,8 +1144,8 @@ void ccGLWindow::recalcProjectionMatrix()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	float maxD = 1.0;
-	CCVector3 center(0.0);
+	float maxD = 1.0f;
+	CCVector3 center(0.0f);
 
 	//compute center of viewed objects constellation
 	if (m_globalDBRoot)
@@ -1130,7 +1154,7 @@ void ccGLWindow::recalcProjectionMatrix()
 		ccBBox box = m_globalDBRoot->getBB(true, true, this);
 		//get bbox center
 		center = box.getCenter();
-		//get bbox diagonal length
+		//get half bbox diagonal length
 		maxD = box.getDiagNorm()*0.5;
 	}
 
@@ -1200,9 +1224,9 @@ void ccGLWindow::recalcModelViewMatrix()
 		if (ar<1.0)
 			glScalef(ar,ar,1.0);
 
-		//on applique le panning
+		//we apply screen panning
 		if (m_params.objectCenteredPerspective)
-			glTranslatef(-float(m_params.screenPan[0]), -float(m_params.screenPan[1]), 0);
+			glTranslatef(-m_params.screenPan[0], -m_params.screenPan[1], 0.0f);
 
 		//rotation
 		glMultMatrixf(m_params.baseViewMat.data());
@@ -1217,8 +1241,8 @@ void ccGLWindow::recalcModelViewMatrix()
 		float totalZoom = computeTotalZoom();
 		glScalef(totalZoom,totalZoom,totalZoom);
 
-		//on applique le panning
-		glTranslatef(-m_params.screenPan[0], -m_params.screenPan[1], 0);
+		//we apply screen panning
+		glTranslatef(-m_params.screenPan[0], -m_params.screenPan[1], 0.0f);
 
 		//rotation
 		glMultMatrixf(m_params.baseViewMat.data());
@@ -1611,9 +1635,9 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 #endif
 		)
 	{
-		if (!m_params.perspectiveView || m_params.objectCenteredPerspective)
+		bool movingMode = (m_interactionMode == TRANSFORM_ENTITY) || ((QApplication::keyboardModifiers () & Qt::ControlModifier) && m_customLightEnabled);
+		if (!userPerspectiveEnabled())
 		{
-			bool movingMode = (m_interactionMode == TRANSFORM_ENTITY) || ((QApplication::keyboardModifiers () & Qt::ControlModifier) && m_customLightEnabled);
 			if (movingMode)
 			{
 				//displacement vector projected on screen
@@ -1636,7 +1660,6 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			}
 			else
 			{
-
 				float ddx = -float(dx)/m_params.zoom;
 				float ddy = float(dy)/m_params.zoom;
 
@@ -1644,6 +1667,13 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 				//feedback
 				emit panChanged(ddx,ddy);
+			}
+		}
+		else //user-perspective view
+		{
+			if (!movingMode)
+			{
+				moveCamera((float)dx/m_params.globalZoom,-(float)dy/m_params.globalZoom,0.0f);
 			}
 		}
 	}
@@ -1826,13 +1856,21 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 		return;
 	}
 
-	float defaultLength = (m_params.perspectiveView && !m_params.objectCenteredPerspective ? 240.0f : 120.0f);
-	float zoomFactor = pow(1.1f,float(event->delta())/defaultLength);
+	//in user-centered perspective, wheel event corresponds to 'walking'
+	if (userPerspectiveEnabled())
+	{
+		moveCamera(0.0f,0.0f,-(float)event->delta()/(10.0*m_params.globalZoom));
+	}
+	else
+	{
+		static const float c_defaultZoomLength = 120.0f;
+		float zoomFactor = pow(1.1f,(float)event->delta()/c_defaultZoomLength);
 
-	updateZoom(zoomFactor);
-
-	//Feedback
-	emit zoomChanged(zoomFactor);
+		updateZoom(zoomFactor);
+		
+		//feedback
+		emit zoomChanged(zoomFactor);
+	}
 
 	redraw();
 }
@@ -2238,15 +2276,20 @@ void ccGLWindow::togglePerspective(bool objectCentered)
 
 void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredPerspective)
 {
-	m_params.perspectiveView=state;
-
-	if (m_params.perspectiveView)
+	//if we change the point of view (user/object), we restore the precedent pivot
+	//if ((objectCenteredPerspective != m_params.objectCenteredPerspective) || (!objectCenteredPerspective && state && !m_params.perspectiveView))
+	//{
+	//	m_params.pivotPoint = m_pivotPointBackup;
+	//	emit pivotPointChanged(m_params.pivotPoint);
+	//}
+	
+	if (state)
 	{
+		m_params.perspectiveView = true;
 		m_params.objectCenteredPerspective = objectCenteredPerspective;
+
 		if (m_params.objectCenteredPerspective)
 		{
-			m_params.pivotPoint = m_pivotPointBackup;
-			emit pivotPointChanged(m_params.pivotPoint);
 
 			//centered perspective
 			displayNewMessage("Centered perspective ON",
@@ -2268,8 +2311,8 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredPerspective)
 	}
 	else
 	{
-		m_params.pivotPoint = m_pivotPointBackup;
-		emit pivotPointChanged(m_params.pivotPoint);
+		m_params.perspectiveView = false;
+		m_params.objectCenteredPerspective = false;
 		m_params.aspectRatio = 1.0;
 
 		displayNewMessage("Perspective OFF",
@@ -2295,14 +2338,17 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredPerspective)
 
 void ccGLWindow::setFov(float fov)
 {
-	if (m_params.fov == fov)
-		return;
-
-	//update param
-	m_params.fov = fov;
-	//and camera state (if perspective view is 'on')
-	if (m_params.perspectiveView)
-		setPerspectiveState(true, m_params.objectCenteredPerspective);
+	if (m_params.fov != fov)
+	{
+		//update param
+		m_params.fov = fov;
+		//and camera state (if perspective view is 'on')
+		if (m_params.perspectiveView)
+		{
+			invalidateViewport();
+			invalidateVisualization();
+		}
+	}
 }
 
 void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
@@ -2324,31 +2370,27 @@ void ccGLWindow::applyImageViewport(ccCalibratedImage* theImage)
 	if (!theImage)
 		return;
 
+	//viewer-based perspective by default
+	setPerspectiveState(true,false);
+
 	//field of view (= OpenGL 'fovy' in radians)
 	setFov(theImage->getFov());
 
-	const ccGLMatrix& trans = theImage->getCameraMatrix();
-
-	//"centre" de la caméra
-	//m_pivotPointBackup = m_params.pivotPoint;
-	m_params.pivotPoint = CCVector3(trans.inverse().getTranslation());
-	emit pivotPointChanged(m_params.pivotPoint);
+	//set the image camera center as pivot (in fact OpenGL camera center)
+	ccGLMatrix trans = theImage->getCameraMatrix();
+	CCVector3 C(trans.inverse().getTranslation());
+	setPivotPoint(C);
 
 	//aspect ratio
 	m_params.aspectRatio = float(theImage->getW())/float(theImage->getH());
 
-	//on déduit la matrice de rotation à partir du vecteur orientation et de l'angle
-	setView(CC_TOP_VIEW,false);
-	m_params.baseViewMat=trans;
-	memset(m_params.baseViewMat.getTranslation(),0,sizeof(float)*3);
+	//apply orientation matrix
+	memset(trans.getTranslation(),0,sizeof(float)*3);
+	setBaseModelViewMat(trans);
+	//setView(CC_TOP_VIEW,false);
+	//m_params.baseViewMat = trans;
 
-	setPerspectiveState(true,false);
-
-	displayNewMessage("Viewport applied (viewer-based perspective ON)",
-						ccGLWindow::LOWER_LEFT_MESSAGE,
-						false,
-						2,
-						PERSPECTIVE_STATE_MESSAGE);
+	ccLog::Print("[ccGLWindow] Viewport applied");
 
 	redraw();
 }
@@ -2358,7 +2400,7 @@ CCVector3 ccGLWindow::computeCameraPos() const
 	if (m_params.objectCenteredPerspective)
 	{
 		//we handle zoom in object-centered perspective mode by moving the camera along the viewing axis
-		float globalZoomEquivalentDist = (std::min(m_glWidth,m_glHeight))/(tan(m_params.fov*CC_DEG_TO_RAD)*m_params.globalZoom);
+		float globalZoomEquivalentDist = (std::min(m_glWidth,m_glHeight))/(tan(m_params.fov*CC_DEG_TO_RAD)*m_params.globalZoom); //DGM FIXME
 
 		return m_params.pivotPoint + getBaseViewMatDir()*(globalZoomEquivalentDist/m_params.zoom);
 	}
@@ -2387,18 +2429,8 @@ void ccGLWindow::rotateViewMat(const ccGLMatrix& rotMat)
 
 void ccGLWindow::updateZoom(float zoomFactor)
 {
-	//viewer based perspective
-	if (m_params.perspectiveView && !m_params.objectCenteredPerspective)
-	{
-		float globalZoomEquivalentDist = std::min(m_glWidth,m_glHeight)/(tan(m_params.fov*CC_DEG_TO_RAD)*m_params.globalZoom);
-		m_params.pivotPoint += getBaseViewMatDir()*(globalZoomEquivalentDist*(1.0-zoomFactor));
-
-		emit pivotPointChanged(m_params.pivotPoint);
-
-		invalidateViewport();
-		invalidateVisualization();
-	}
-	else
+	//no 'zoom' in viewer based perspective
+	if (!userPerspectiveEnabled())
 	{
 		if (zoomFactor>0.0 && zoomFactor!=1.0)
 			setZoom(m_params.zoom*zoomFactor);
@@ -2544,7 +2576,7 @@ bool ccGLWindow::renderToFile(const char* filename, float zoomFactor/*=1.0*/, bo
 				//we process GL filter
 				GLuint depthTex = fbo->getDepthTexture();
 				GLuint colorTex = fbo->getColorTexture(0);
-				filter->shade(depthTex, colorTex, zoomFactor*(m_params.perspectiveView ? 1.0 : m_params.zoom));
+				filter->shade(depthTex, colorTex, zoomFactor*(m_params.perspectiveView ? 1.0 : m_params.zoom)); //DGM FIXME
 
 				ccGLUtils::CatchGLError("ccGLWindow::renderToFile/glFilter shade");
 

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1916                                                              $
-//$LastChangedDate:: 2011-10-14 18:46:32 +0200 (ven., 14 oct. 2011)        $
-//**************************************************************************
-//
 
 #ifndef CC_GRAPHICAL_TRANSFORMATION_TOOLS_HEADER
 #define CC_GRAPHICAL_TRANSFORMATION_TOOLS_HEADER

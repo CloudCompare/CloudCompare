@@ -36,21 +36,38 @@ public:
 
 protected slots:
 
-	void rotateCheckBoxToggled(bool);
-	void panZoomCheckBoxToggled(bool);
-	void speedModeChanged(bool);
+	void rotationModeToggled(bool);
+	void panZoomModeToggled(bool);
+	void lockHorizonToggled(bool);
+	void speedModeChanged();
+	void objectModeTriggered();
+	void cameraModeTriggered();
 
 protected:
 
 	//! Number of speed control actions
 	static const int SPEED_ACTION_COUNT = 5;
 
+	//! Rotation mode checkable action
+	QAction* m_rotationMode;
+	QAction* m_panZoomMode;
+
 	//! Speed control actions (from slowest to fastest)
 	QAction* m_speedActions[SPEED_ACTION_COUNT];
 
-	// checkboxes
-	QAction* m_rotateCheckbox;
-	QAction* m_panZoomCheckbox;
+	// Rotation center actions
+	QAction* m_autoRotationCenter;
+	QAction* m_selectedItemAsRotationCenter;
+	QAction* m_alwaysShowRotationCenter;
+	QAction* m_showRotationCenterOnMotion;
+	QAction* m_alwaysHideRotationCenter;
+
+	// Nabigation modes
+	QAction* m_objectMode;
+	QAction* m_cameraMode;
+
+	//! Lock horizon
+	QAction* m_lockHorizon;
 
 	//! Associated parameters
 	Mouse3DParameters* m_params;

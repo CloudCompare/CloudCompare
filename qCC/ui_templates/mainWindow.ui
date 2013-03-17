@@ -52,8 +52,16 @@
     <property name="title">
      <string>&amp;File</string>
     </property>
+    <widget class="QMenu" name="menu3DMouse">
+     <property name="title">
+      <string>3D mouse</string>
+     </property>
+     <addaction name="actionEnable3DMouse"/>
+    </widget>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
+    <addaction name="separator"/>
+    <addaction name="menu3DMouse"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -2017,6 +2025,14 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionEnable3DMouse">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enable</string>
    </property>
   </action>
  </widget>

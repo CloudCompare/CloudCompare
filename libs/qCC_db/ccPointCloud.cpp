@@ -1426,6 +1426,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
         bool pushName = MACRO_DrawEntityNames(context);
 		//special case: point names pushing (for picking)
         bool pushPointNames = MACRO_DrawPointNames(context);
+		pushName |= pushPointNames;
 
 		//we get display parameters
         glDrawParams glParams;

@@ -63,25 +63,25 @@ ccGLMatrix::ccGLMatrix(const ccGLMatrix& mat)
 
 ccGLMatrix::ccGLMatrix(const CCVector3& X, const CCVector3& Y, const CCVector3& Z, const CCVector3& T)
 {
-	m_mat[0] = X[0];
-	m_mat[1] = X[1];
-	m_mat[2] = X[2];
-	m_mat[3] = 0.0;
+	R11 = X[0];
+	R21 = X[1];
+	R31 = X[2];
+	R41 = 0.0f;
 
-	m_mat[4] = Y[0];
-	m_mat[5] = Y[1];
-	m_mat[6] = Y[2];
-	m_mat[7] = 0.0;
+	R12 = Y[0];
+	R22 = Y[1];
+	R32 = Y[2];
+	R42 = 0.0f;
 
-	m_mat[8] = Z[0];
-	m_mat[9] = Z[1];
-	m_mat[10] = Z[2];
-	m_mat[11] = 0.0;
+	R13 = Z[0];
+	R23 = Z[1];
+	R33 = Z[2];
+	R43 = 0.0f;
 
-	m_mat[12] = T[0];
-	m_mat[13] = T[1];
-	m_mat[14] = T[2];
-	m_mat[15] = 1.0;
+	R14 = T[0];
+	R24 = T[1];
+	R34 = T[2];
+	R44 = 1.0f;
 }
 
 ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T)
@@ -569,7 +569,6 @@ ccGLMatrix ccGLMatrix::FromQuaternion(const float q[])
 		float q12 = q[1]*q[2];
 		float q01 = q[0]*q[1];
 
-
 		mat[1]	= 2.0f*(q12+q03);
 		mat[2]	= 2.0f*(q13-q02);
 
@@ -581,4 +580,82 @@ ccGLMatrix ccGLMatrix::FromQuaternion(const float q[])
 	}
 
 	return rotMat;
+}
+
+#define R11 m_mat[0]
+#define R21 m_mat[1]
+#define R31 m_mat[2]
+#define R41 m_mat[3]
+
+#define R12 m_mat[4]
+#define R22 m_mat[5]
+#define R32 m_mat[6]
+#define R42 m_mat[7]
+
+#define R13 m_mat[8]
+#define R23 m_mat[9]
+#define R33 m_mat[10]
+#define R43 m_mat[11]
+
+
+ccGLMatrix ccGLMatrix::xRotation() const
+{
+	ccGLMatrix newRotMat;
+	newRotMat.toIdentity();
+
+	//we use a specific Euler angles convention here
+	if (R13 >= 1.0f)
+	{
+		//simpler/faster to ignore this (very) specific case!
+		return newRotMat;
+	}
+	float phi = -asin(R13);
+	float cos_phi = cos(phi);
+	float theta = atan2(R23/cos_phi,R33/cos_phi);
+
+	newRotMat.R22 = newRotMat.R33 = cos(theta);
+	newRotMat.R32 = newRotMat.R23 = sin(theta);
+	newRotMat.R23 *= -1.0f;
+
+	newRotMat.setTranslation(getTranslation());
+
+	return newRotMat;
+}
+
+ccGLMatrix ccGLMatrix::yRotation() const
+{
+	ccGLMatrix newRotMat;
+	newRotMat.toIdentity();
+
+	//we use a specific Euler angles convention here
+	if (R32 >= 1.0f)
+	{
+		//simpler/faster to ignore this (very) specific case!
+		return newRotMat;
+	}
+	float theta = asin(R32);
+	float cos_theta = cos(theta);
+	float phi = atan2(-R31/cos_theta,R33/cos_theta);
+
+	newRotMat.R11 = newRotMat.R33 = cos(phi);
+	newRotMat.R31 = newRotMat.R13 = sin(phi);
+	newRotMat.R31 *= -1.0f;
+
+	newRotMat.setTranslation(getTranslation());
+
+	return newRotMat;
+}
+
+ccGLMatrix ccGLMatrix::zRotation() const
+{
+	//we can use the standard Euler angles convention here
+	float phi,theta,psi;
+	CCVector3 T;
+	getParameters(phi,theta,psi,T);
+	assert(T.norm2()==0);
+
+	ccGLMatrix newRotMat;
+	newRotMat.initFromParameters(phi,0,0,T);
+
+	return newRotMat;
 }

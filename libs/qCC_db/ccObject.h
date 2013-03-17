@@ -107,8 +107,9 @@ enum CC_CLASS_ENUM {
 * V2.2 - 11/26/2012 - object name is now a QString
 * V2.3 - 02/07/2013 - attribute 'm_selectionBehavior' added to ccHObject class
 * v2.4 - 02/22/2013 - per-cloud point size + whether name is displayed in 3D or not
+* v2.5 - 03/16/2013 - ccViewportParameters structure modified
 **/
-static unsigned s_currentObjVersion = 24; //2.4
+static unsigned s_currentObjVersion = 25; //2.5
 
 //! Generic "CloudCompare Object" template
 #ifdef QCC_DB_USE_AS_DLL

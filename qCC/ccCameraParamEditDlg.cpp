@@ -162,7 +162,7 @@ void ccCameraParamEditDlg::pushCurrentMatrix()
     if (!m_associatedWin)
         return;
 
-    ccGLMatrix mat = m_associatedWin->getBaseModelViewMat();
+    ccGLMatrix mat = m_associatedWin->getBaseViewMat();
 
     std::pair<PushedMatricesMapType::iterator,bool> ret;
     ret = pushedMatrices.insert(PushedMatricesMapElement(m_associatedWin,mat));
@@ -180,7 +180,7 @@ void ccCameraParamEditDlg::revertToPushedMatrix()
 
     initWithMatrix(it->second);
     m_associatedWin->blockSignals(true);
-    m_associatedWin->setBaseModelViewMat(it->second);
+    m_associatedWin->setBaseViewMat(it->second);
     m_associatedWin->blockSignals(false);
     m_associatedWin->redraw();
 }
@@ -230,7 +230,7 @@ void ccCameraParamEditDlg::setView(CC_VIEW_ORIENTATION orientation)
     ccGLMatrix mat = ccGLUtils::GenerateViewMat(orientation) * (it->second);
     initWithMatrix(mat);
     m_associatedWin->blockSignals(true);
-    m_associatedWin->setBaseModelViewMat(mat);
+    m_associatedWin->setBaseViewMat(mat);
     m_associatedWin->blockSignals(false);
     m_associatedWin->redraw();
 }
@@ -291,14 +291,12 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 
 	if (oldWin)
 	{
-        disconnect(oldWin, SIGNAL(baseViewMatChanged(const ccGLMatrix&)), this, SLOT(initWithMatrix(const ccGLMatrix&)));
-        disconnect(oldWin, SIGNAL(pivotPointChanged(const CCVector3&)), this, SLOT(updatePivotPoint(const CCVector3&)));
-        disconnect(oldWin, SIGNAL(destroyed(QObject*)), this, SLOT(hide()));
+		this->disconnect(oldWin);
 	}
 
     if (m_associatedWin)
     {
-        initWithMatrix(m_associatedWin->getBaseModelViewMat());
+        initWithMatrix(m_associatedWin->getBaseViewMat());
         connect(m_associatedWin, SIGNAL(baseViewMatChanged(const ccGLMatrix&)), this, SLOT(initWithMatrix(const ccGLMatrix&)));
         connect(m_associatedWin, SIGNAL(pivotPointChanged(const CCVector3&)), this, SLOT(updatePivotPoint(const CCVector3&)));
         connect(m_associatedWin, SIGNAL(destroyed(QObject*)), this, SLOT(hide()));
@@ -322,7 +320,7 @@ void ccCameraParamEditDlg::reflectParamChange()
 
     ccGLMatrix mat = getMatrix();
     m_associatedWin->blockSignals(true);
-    m_associatedWin->setBaseModelViewMat(mat);
+    m_associatedWin->setBaseViewMat(mat);
     m_associatedWin->blockSignals(false);
     m_associatedWin->redraw();
 }

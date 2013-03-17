@@ -189,7 +189,7 @@ MainWindow::MainWindow()
 
     loadPlugins();
 
-	setup3DMouse();
+	setup3DMouse(true);
 
     new3DView();
 
@@ -473,25 +473,39 @@ void MainWindow::release3DMouse()
 #endif
 }
 
-void MainWindow::setup3DMouse()
+void MainWindow::setup3DMouse(bool state)
 {
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_3dMouseInput)
 		release3DMouse();
 
-	if (Mouse3DInput::DeviceAvailable())
+	if (state)
 	{
-		ccLog::Warning("[3D Mouse] Device has been detected!");
-		m_3dMouseInput = new Mouse3DInput(this);
-		QObject::connect(m_3dMouseInput, SIGNAL(sigMove3d(std::vector<float>&)), this, SLOT(on3DMouseMove(std::vector<float>&)));
-		QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyDown(int)), this, SLOT(on3DMouseKeyDown(int)));
-		QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyUp(int)), this, SLOT(on3DMouseKeyUp(int)));
+		if (Mouse3DInput::DeviceAvailable())
+		{
+			ccLog::Warning("[3D Mouse] Device has been detected!");
+			m_3dMouseInput = new Mouse3DInput(this);
+			QObject::connect(m_3dMouseInput, SIGNAL(sigMove3d(std::vector<float>&)), this, SLOT(on3DMouseMove(std::vector<float>&)));
+			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyDown(int)), this, SLOT(on3DMouseKeyDown(int)));
+			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyUp(int)), this, SLOT(on3DMouseKeyUp(int)));
+		}
+		else
+		{
+			ccLog::Print("[3D Mouse] No device found");
+			state = false;
+		}
 	}
 	else
 	{
-		ccLog::Warning("[3D Mouse] No device found");
+		ccLog::Warning("[3D Mouse] Device has been disabled");
 	}
+#else
+	state = false;
 #endif
+
+	actionEnable3DMouse->blockSignals(true);
+	actionEnable3DMouse->setChecked(state);
+	actionEnable3DMouse->blockSignals(false);
 }
 
 void MainWindow::on3DMouseKeyUp(int)
@@ -518,7 +532,10 @@ void MainWindow::on3DMouseKeyDown(int key)
 		}
 		break;
 	case Mouse3DInput::V3DK_FIT:
-		zoomOnSelectedEntities();
+		if (m_selectedEntities.empty())
+			setGlobalZoom();
+		else
+			zoomOnSelectedEntities();
 		break;
 	case Mouse3DInput::V3DK_TOP:
 		setTopView();
@@ -572,11 +589,6 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 {
 #ifdef CC_3DXWARE_SUPPORT
 
-	// default panning speed (in pix/rad?!)
-	static const float c_defaultPanSpeed = 200.0f;
-	// default zoom speed (in rad^-1?!)
-	static const float c_defaultZoomSpeed = 0.5f;
-
 	//no active device?
 	if (!m_3dMouseInput)
 		return;
@@ -587,103 +599,88 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 		return;
 
 	//ccLog::PrintDebug(QString("[3D mouse] %1 %2 %3 %4 %5 %6").arg(vec[0]).arg(vec[1]).arg(vec[2]).arg(vec[3]).arg(vec[4]).arg(vec[5]));
+	static const float c_3dMouseDegToPix = 0.1f;
 
 	//mouse parameters
 	const Mouse3DParameters& params = m_3dMouseInput->getMouseParams();
 	//view parameters
-	bool viewerBasedPerspective = win->viewerPerspectiveEnabled();
+	bool objectBased = true;
+	bool perspectiveView = win->getPerspectiveState(objectBased);
+	bool viewerBasedPerspective = perspectiveView && !objectBased;
 
-	//get default navigation mode
-	Mouse3DParameters::NavigationMode navigationMode = params.navigationMode();
-
-	//Viewer based perspective IS camera mode
-	if (viewerBasedPerspective)
-		navigationMode = Mouse3DParameters::CameraMode;
-
-	// "Object" moving mode
-	if (navigationMode == Mouse3DParameters::ObjectMode)
+	//Viewer based perspective IS 'camera mode'
+	Mouse3DParameters::NavigationMode navigationMode = viewerBasedPerspective ? Mouse3DParameters::CameraMode : Mouse3DParameters::ObjectMode;
+	if (params.navigationMode() != navigationMode)
 	{
-		if (params.panZoomEnabled())
-		{
-			//Zoom: object moves closer/away
-			if (abs(vec[1])>ZERO_TOLERANCE)
-			{
-				win->updateZoom(1.0f + vec[1]*c_defaultZoomSpeed);
-			}
-
-			//Panning: object moves right/left and/or up/down
-			if (abs(vec[0])>ZERO_TOLERANCE || abs(vec[2])>ZERO_TOLERANCE)
-				win->updateScreenPan(-vec[0]*c_defaultPanSpeed,vec[2]*c_defaultPanSpeed);
-		}
-
-		if (params.rotationEnabled())
-		{
-			if (abs(vec[3])>ZERO_TOLERANCE
-				|| abs(vec[4])>ZERO_TOLERANCE
-				|| abs(vec[5])>ZERO_TOLERANCE)
-			{
-				//get corresponding quaternion
-				float q[4];
-				Mouse3DInput::GetQuaternion(vec,q);
-				ccGLMatrix rotMat = ccGLMatrix::FromQuaternion(q);
-				win->rotateViewMat(rotMat);
-			}
-		}
-
-		win->updateGL(); //does the work 'only if necessary'
+		m_3dMouseInput->getMouseParams().setNavigationMode(navigationMode);
+		ccLog::Warning("[3D mouse] Navigation mode has been changed to fit current viewing mode");
 	}
-	// "Camera" moving mode
-	else if (navigationMode == Mouse3DParameters::CameraMode)
+
+	//{
+	//	QString modeName;
+	//	switch (navigationMode)
+	//	{
+	//	case Mouse3DParameters::FlyMode:
+	//		modeName = "Fly";
+	//		break;
+	//	case Mouse3DParameters::WalkMode:
+	//		modeName = "Walk";
+	//		break;
+	//	case Mouse3DParameters::HelicopterMode:
+	//		modeName = "Helicopter";
+	//		break;
+	//	default:
+	//		assert(false);
+	//		modeName = "unknown";
+	//		break;
+	//	}
+	//	ccLog::Warning("[3D mouse] The '%1' mode is not yet supported!");
+	//	return;
+	//}
+
+	if (params.panZoomEnabled())
 	{
-		if (params.panZoomEnabled())
+		//Zoom: object moves closer/away (only for ortho. mode)
+		if (!perspectiveView && abs(vec[1])>ZERO_TOLERANCE)
 		{
-			//Zoom & Panning: camera moves backward/forward + right/left + up/down
-			if (abs(vec[0])>ZERO_TOLERANCE || abs(vec[1])>ZERO_TOLERANCE || abs(vec[2])>ZERO_TOLERANCE)
-			{
-				const ccViewportParameters& viewParams = win->getViewportParameters();
-				float scale = c_defaultZoomSpeed*(float)std::min(win->width(),win->height())/viewParams.globalZoom;
-				win->moveCamera(vec[0]*scale,-vec[2]*scale,vec[1]*scale);
-			}
+			// default zoom speed (in rad^-1?!)
+			static const float c_objectModedefaultZoomSpeed = 0.2f;
+			win->updateZoom(1.0f + vec[1]*c_objectModedefaultZoomSpeed);
+			vec[1] = 0.0f;
 		}
-
-		if (params.rotationEnabled())
+		
+		//Zoom & Panning: camera moves right/left + up/down + backward/forward (only for perspective mode)
+		if (abs(vec[0])>ZERO_TOLERANCE || abs(vec[2])>ZERO_TOLERANCE || abs(vec[1])>ZERO_TOLERANCE )
 		{
-			if (abs(vec[3])>ZERO_TOLERANCE
-				|| abs(vec[4])>ZERO_TOLERANCE
-				|| abs(vec[5])>ZERO_TOLERANCE)
-			{
-				//get corresponding quaternion
-				float q[4];
-				Mouse3DInput::GetQuaternion(vec,q);
-				ccGLMatrix rotMat = ccGLMatrix::FromQuaternion(q);
-				win->rotateViewMat(rotMat.inverse());
-			}
+			const ccViewportParameters& viewParams = win->getViewportParameters();
+			float scale = c_3dMouseDegToPix * (float)std::min(win->width(),win->height()) * viewParams.pixelSize;
+			if (objectBased)
+				scale = -scale;
+			win->moveCamera(vec[0]*scale,-vec[2]*scale,vec[1]*scale);
 		}
-
-		win->updateGL(); //does the work 'only if necessary'
 	}
-	else
+
+	if (params.rotationEnabled())
 	{
-		QString modeName;
-		switch (navigationMode)
+		if (abs(vec[3])>ZERO_TOLERANCE
+			|| abs(vec[4])>ZERO_TOLERANCE
+			|| abs(vec[5])>ZERO_TOLERANCE)
 		{
-		case Mouse3DParameters::FlyMode:
-			modeName = "Fly";
-			break;
-		case Mouse3DParameters::WalkMode:
-			modeName = "Walk";
-			break;
-		case Mouse3DParameters::HelicopterMode:
-			modeName = "Helicopter";
-			break;
-		default:
-			assert(false);
-			modeName = "unknown";
-			break;
+			//get corresponding quaternion
+			float q[4];
+			Mouse3DInput::GetQuaternion(vec,q);
+			ccGLMatrix rotMat = ccGLMatrix::FromQuaternion(q);
+
+			//horizon locked?
+			if (params.horizonLocked())
+				rotMat = rotMat.yRotation();
+
+			win->rotateBaseViewMat(objectBased ? rotMat : rotMat.inverse());
 		}
-		ccLog::Warning("[3D mouse] The '%1' mode is not yet supported!");
-		return;
 	}
+
+	win->updateGL(); //does the work 'only if necessary'
+
 #endif
 }
 
@@ -708,6 +705,7 @@ void MainWindow::connectActions()
     //"File" menu
     connect(actionOpen,                         SIGNAL(triggered()),    this,       SLOT(loadFile()));
     connect(actionSave,                         SIGNAL(triggered()),    this,       SLOT(saveFile()));
+	connect(actionEnable3DMouse,				SIGNAL(toggled(bool)),	this,		SLOT(setup3DMouse(bool)));
     connect(actionQuit,                         SIGNAL(triggered()),    this,       SLOT(close()));
 
     //"Edit > Colors" menu
@@ -4322,9 +4320,12 @@ ccGLWindow* MainWindow::new3DView()
     QMdiSubWindow* subWindow = m_mdiArea->addSubWindow(view3D);
 
     connect(view3D,	SIGNAL(entitySelectionChanged(int)),		m_ccRoot,	SLOT(selectEntity(int)));
-    connect(view3D,	SIGNAL(zoomChanged(float)),					this,       SLOT(updateWindowZoomChange(float)));
-    connect(view3D,	SIGNAL(panChanged(float,float)),			this,       SLOT(updateWindowPanChange(float,float)));
-    connect(view3D,	SIGNAL(viewMatRotated(const ccGLMatrix&)),	this,       SLOT(updateWindowOnViewMatRotation(const ccGLMatrix&)));
+
+	//'echo' mode
+    connect(view3D,	SIGNAL(mouseWheelRotated(float)),			this,       SLOT(echoMouseWheelRotate(float)));
+    connect(view3D,	SIGNAL(cameraDisplaced(float,float)),		this,       SLOT(echoCameraDisplaced(float,float)));
+    connect(view3D,	SIGNAL(viewMatRotated(const ccGLMatrix&)),	this,       SLOT(echoBaseViewMatRotation(const ccGLMatrix&)));
+
     connect(view3D,	SIGNAL(destroyed(QObject*)),				this,       SLOT(prepareWindowDeletion(QObject*)));
     connect(view3D,	SIGNAL(filesDropped(const QStringList&)),	this,       SLOT(addToDBAuto(const QStringList&)));
     connect(view3D,	SIGNAL(newLabel(ccHObject*)),				this,       SLOT(handleNewEntity(ccHObject*)));
@@ -5135,9 +5136,10 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 			if (P)
 			{
 				unsigned precision = ccGui::Parameters().displayedNumPrecision;
+				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear precedent message
 				s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
 				s_pickingWindow->setPivotPoint(*P);
-				s_pickingWindow->setScreenPan(0,0);
+				//s_pickingWindow->setScreenPan(0,0);
 				s_pickingWindow->redraw();
 			}
 		}
@@ -6932,31 +6934,35 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 		plugin->onNewSelection(m_selectedEntities);
 }
 
-void MainWindow::updateWindowZoomChange(float zoomFactor)
+void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
 {
     if (checkBoxCameraLink->checkState() != Qt::Checked)
         return;
 
-    ccGLWindow* sendingWindow = static_cast<ccGLWindow*>(sender());
+    ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
+	if (!sendingWindow)
+		return;
 
     QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
     {
         ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
-        if (child != sendingWindow)
+		if (child != sendingWindow)
         {
-            child->updateZoom(zoomFactor);
+			child->onWheelEvent(wheelDelta_deg);
             child->redraw();
         }
     }
 }
 
-void MainWindow::updateWindowPanChange(float ddx, float ddy)
+void MainWindow::echoCameraDisplaced(float ddx, float ddy)
 {
     if (checkBoxCameraLink->checkState() != Qt::Checked)
         return;
 
-    ccGLWindow* sendingWindow = static_cast<ccGLWindow*>(sender());
+    ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
+	if (!sendingWindow)
+		return;
 
     QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
@@ -6964,18 +6970,20 @@ void MainWindow::updateWindowPanChange(float ddx, float ddy)
         ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
         if (child != sendingWindow)
         {
-            child->updateScreenPan(ddx,ddy);
+			child->moveCamera(ddx,ddy,0.0f);
             child->redraw();
         }
     }
 }
 
-void MainWindow::updateWindowOnViewMatRotation(const ccGLMatrix& rotMat)
+void MainWindow::echoBaseViewMatRotation(const ccGLMatrix& rotMat)
 {
     if (checkBoxCameraLink->checkState() != Qt::Checked)
         return;
 
-    ccGLWindow* sendingWindow = static_cast<ccGLWindow*>(sender());
+    ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
+	if (!sendingWindow)
+		return;
 
     QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
     for (int i = 0; i < windows.size(); ++i)
@@ -6983,7 +6991,7 @@ void MainWindow::updateWindowOnViewMatRotation(const ccGLMatrix& rotMat)
         ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
         if (child != sendingWindow)
         {
-            child->rotateViewMat(rotMat);
+            child->rotateBaseViewMat(rotMat);
             child->redraw();
         }
     }
@@ -7134,7 +7142,7 @@ void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, ccHObject* parent)
 
 void doTestPrimitives()
 {
-	//PRIMITIVES TEST - TODO FIXME
+	//PRIMITIVES TEST
 	addToDB(new ccBox(CCVector3(10,20,30)));
 	addToDB(new ccCone(10,20,30));
 	addToDB(new ccCylinder(20,30));

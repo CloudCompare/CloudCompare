@@ -49,18 +49,18 @@ public:
 	virtual bool toFile(QFile& out) const;
 	virtual bool fromFile(QFile& in, short dataVersion);
 
-    //! Global zoom '1:1'(ortho. mode only)
-	/** Equals the scaling value that make the diagonal of the
-		total bounding-box (= all displayed entities) fit
-		inside the biggest screen dimension, i.e. max(w,h).
+    //! Current pixel size (in 'current unit'/pixel)
+	/** This scale is valid eveywhere in ortho. mode 
+		or at the focal distance in perspective mode.
+		Warning: doesn't take current zoom into account!
 	**/
-	float globalZoom;
+	float pixelSize;
 
 	//! Current zoom
     float zoom;
 
-	//! Base visualization matrix (rotation only - GL style)
-	ccGLMatrix baseViewMat;
+	//! Visualization matrix (rotation only)
+	ccGLMatrix viewMat;
 
 	//! Point size
 	float defaultPointSize;
@@ -73,14 +73,17 @@ public:
 	/** Always true for ortho. mode.
 	**/
 	bool objectCenteredView;
-	//! Rotation pivot point (object-centered view) or camera center (eye view)
+	
+	//! Rotation pivot point (for object-centered view modes)
 	CCVector3 pivotPoint;
+	
+	//! Camera center (for perspective mode)
+	CCVector3 cameraCenter;
+
 	//! Camera F.O.V. (field of view - for perspective mode only)
 	float fov;
 	//! Camera aspect ratio (for perspective mode only)
 	float aspectRatio;
-    //! Screen panning (post-zoom shifting)
-	float screenPan[2];
 };
 
 //! Generic interface for GL displays

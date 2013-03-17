@@ -17,47 +17,48 @@
 
 #include "ccGenericGLDisplay.h"
 
+//CCLib
+#include <CCConst.h>
+
 ccViewportParameters::ccViewportParameters()
-	: globalZoom(1.0f)
+	: pixelSize(1.0f)
 	, zoom(1.0f)
 	, defaultPointSize(1)
 	, defaultLineWidth(1)
 	, perspectiveView(false)
 	, objectCenteredView(true)
 	, pivotPoint(0.0f)
+	, cameraCenter(0.0f)
 	, fov(50.0f)
 	, aspectRatio(1.0f)
-
 {
-	screenPan[0] = screenPan[1] = 0.0f;
-	baseViewMat.toIdentity();
+	viewMat.toIdentity();
 }
 
 ccViewportParameters::ccViewportParameters(const ccViewportParameters& params)
-	: globalZoom(params.globalZoom)
+	: pixelSize(params.pixelSize)
 	, zoom(params.zoom)
-	, baseViewMat(params.baseViewMat)
+	, viewMat(params.viewMat)
 	, defaultPointSize(params.defaultPointSize)
 	, defaultLineWidth(params.defaultLineWidth)
 	, perspectiveView(params.perspectiveView)
 	, objectCenteredView(params.objectCenteredView)
 	, pivotPoint(params.pivotPoint)
+	, cameraCenter(params.cameraCenter)
 	, fov(params.fov)
 	, aspectRatio(params.aspectRatio)
 {
-	screenPan[0] = params.screenPan[0];
-	screenPan[1] = params.screenPan[1];
 }
 
 bool ccViewportParameters::toFile(QFile& out) const
 {
 	//base modelview matrix (dataVersion>=20)
-	if (!baseViewMat.toFile(out))
+	if (!viewMat.toFile(out))
 		return false;
 
 	//other parameters (dataVersion>=20)
 	QDataStream outStream(&out);
-	outStream << globalZoom;
+	outStream << pixelSize;
     outStream << zoom;
     outStream << defaultPointSize;
     outStream << defaultLineWidth;
@@ -66,10 +67,11 @@ bool ccViewportParameters::toFile(QFile& out) const
 	outStream << pivotPoint.x;
 	outStream << pivotPoint.y;
 	outStream << pivotPoint.z;
+	outStream << cameraCenter.x;
+	outStream << cameraCenter.y;
+	outStream << cameraCenter.z;
 	outStream << fov;
 	outStream << aspectRatio;
-	outStream << screenPan[0];
-	outStream << screenPan[1];
 
 	return true;
 }
@@ -77,12 +79,15 @@ bool ccViewportParameters::toFile(QFile& out) const
 bool ccViewportParameters::fromFile(QFile& in, short dataVersion)
 {
 	//base modelview matrix (dataVersion>=20)
-	if (!baseViewMat.fromFile(in,dataVersion))
+	if (!viewMat.fromFile(in,dataVersion))
 		return false;
 
 	//other parameters (dataVersion>=20)
 	QDataStream inStream(&in);
-	inStream >> globalZoom;
+	inStream >> pixelSize;
+	//before version 25, we were saving the inverse of 'pixelSize' ('globalZoom')
+	if (dataVersion < 25)
+		pixelSize = (pixelSize> ZERO_TOLERANCE ? 1.0/pixelSize : 1.0);
     inStream >> zoom;
     inStream >> defaultPointSize;
     inStream >> defaultLineWidth;
@@ -91,10 +96,31 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion)
 	inStream >> pivotPoint.x;
 	inStream >> pivotPoint.y;
 	inStream >> pivotPoint.z;
+	if (dataVersion >= 25) //we now save the camera center as a separate point!
+	{
+		inStream >> cameraCenter.x;
+		inStream >> cameraCenter.y;
+		inStream >> cameraCenter.z;
+	}
+	else
+	{
+		//FIXME: doesn't work in object-centered perspective!
+		cameraCenter = pivotPoint;
+	}
 	inStream >> fov;
 	inStream >> aspectRatio;
-	inStream >> screenPan[0];
-	inStream >> screenPan[1];
+	if (dataVersion < 25) //screenPan has been replaced by cameraCenter(x,y) in object centered mode!
+	{
+		float screenPan[2];
+		inStream >> screenPan[0];
+		inStream >> screenPan[1];
+
+		if (objectCenteredView)
+		{
+			cameraCenter.x = screenPan[0];
+			cameraCenter.y = screenPan[1];
+		}
+	}
 
 	return true;
 }

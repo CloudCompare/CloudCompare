@@ -195,7 +195,7 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 
 		//we want to display this name next to the sphere, and not above it!
 		const ccViewportParameters& params = context._win->getViewportParameters();
-		int dPix = (int)ceil(params.globalZoom * params.zoom * m_radius);
+		int dPix = (int)ceil(params.zoom * m_radius/params.pixelSize);
 
 		int bkgBorder = QFontMetrics(context._win->getTextDisplayFont()).height()/4+4;
 		context._win->displayText(getName(),(int)xp+dPix+bkgBorder,(int)yp,ccGenericGLDisplay::ALIGN_HLEFT | ccGenericGLDisplay::ALIGN_VMIDDLE,75);

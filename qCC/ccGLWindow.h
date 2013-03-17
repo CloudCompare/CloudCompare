@@ -89,6 +89,12 @@ public:
 						MANUAL_SEGMENTATION_MESSAGE,
 	};
 
+	//! Pivot symbol visibility
+	enum PivotVisibility {  PIVOT_HIDE,
+							PIVOT_SHOW_ON_MOVE,
+							PIVOT_ALWAYS_SHOW,
+	};
+
 	//! Default constructor
     ccGLWindow(QWidget *parent = 0, const QGLFormat& format=QGLFormat::defaultFormat(), QGLWidget* shareWidget = 0);
 	//! Default destructor
@@ -149,26 +155,26 @@ public:
 	**/
     virtual void updateZoom(float zoomFactor);
 
+	//! Sets pivot visibility
+	virtual void setPivotVisibility(PivotVisibility vis);
+
+	//! Returns pivot visibility
+	virtual PivotVisibility getPivotVisibility() const;
+
 	//! Sets pivot point
-	/** Pivot point is:
-		- the rotation center (in ortho and object-centered perspective mode)
-		- the camera center (in viewer-centered perspective mode)
-	**/
     virtual void setPivotPoint(const CCVector3& P);
 
-	//! Displaces camera (viewer-perspective mode only)
-	/** (dx,dy,dz) is given in object world, along the current camera viewing directions.
+	//! Sets camera position
+    virtual void setCameraPos(const CCVector3& P);
+
+	//! Displaces camera
+	/** Values are given in objects world along the current camera
+		viewing directions (we use the right hand rule):
+		* X: horizontal axis (right)
+		* Y: vertical axis (up)
+		* Z: depth axis (pointing out of the screen)
 	**/
 	virtual void moveCamera(float dx, float dy, float dz);
-
-    //! Returns camera position (perspective mode only)
-	/** if current perspective is 'object based', this method takes
-		current zoom into account (i.e. the camera is virtually
-		displaced 'backward' from the pivot point so that the object
-		is seen at the right scale). Otherwise no computation
-		is done and the current camera position is returned as is.
-	**/
-    virtual CCVector3 computeCameraPos() const;
 
 	//! Set perspective state/mode
 	/** Persepctive mode can be:
@@ -193,27 +199,41 @@ public:
 	//! Shortcut: returns whether viewer-based perspective mode is enabled
     virtual bool viewerPerspectiveEnabled() const;
 
-	//! Sets the current screen pan (in pixels)
-	virtual void setScreenPan(float tx, float ty);
-	//! Shifts the current screen pan (in pixels)
-    virtual void updateScreenPan(float dx, float dy);
-
 	//! Center and zoom on a given bounding box
 	/** If no bounding box is defined, the current displayed 'scene graph'
 		bounding box is taken.
 	**/
     virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = 0);
 
-    //! Rotates the current view matrix
-    virtual void rotateViewMat(const ccGLMatrix& rotMat);
+    //! Rotates the base view matrix
+	/** Warning: 'base view' marix is either:
+		- the rotation around the object in object-centered mode
+		- the rotation around the camera center in viewer-centered mode
+		(see setPerspectiveState).
+	**/
+    virtual void rotateBaseViewMat(const ccGLMatrix& rotMat);
 
 	//! Returns the base view matrix
-    virtual const ccGLMatrix& getBaseModelViewMat();
+	/** Warning: 'base view' marix is either:
+		- the rotation around the object in object-centered mode
+		- the rotation around the camera center in viewer-centered mode
+		(see setPerspectiveState).
+	**/
+    virtual const ccGLMatrix& getBaseViewMat();
+	
 	//! Sets the base view matrix
-    virtual const void setBaseModelViewMat(ccGLMatrix& mat);
-	//! Returns the current view matrix as a double array
+	/** Warning: 'base view' marix is either:
+		- the rotation around the object in object-centered mode
+		- the rotation around the camera center in viewer-centered mode
+		(see setPerspectiveState).
+	**/
+    virtual const void setBaseViewMat(ccGLMatrix& mat);
+
+	//! Returns the current (OpenGL) view matrix as a double array
+	/** Warning: different from 'view' matrix returned by getBaseViewMat.
+	**/
     virtual const double* getModelViewMatd();
-	//! Returns the current projection matrix as a double array
+	//! Returns the current (OpenGL) projection matrix as a double array
     virtual const double* getProjectionMatd();
 	//! Returns the current viewport (OpenGL int[4] array)
     virtual void getViewportArray(int vp[/*4*/]);
@@ -281,10 +301,13 @@ public:
     virtual bool areShadersEnabled() const;
     virtual bool areGLFiltersEnabled() const;
 
-    virtual float computeTotalZoom() const;
-
 	//! Enables "embedded icons"
 	virtual void enableEmbeddedIcons(bool state);
+
+	//! Returns the actual pixel size on screen (taking zoom or perspective parameters into account)
+	/** In perspective mode, this value is approximate.
+	**/
+	virtual float computeActualPixelSize() const;
 
 public slots:
     void zoomGlobal();
@@ -292,6 +315,9 @@ public slots:
 
 	//inherited from ccGenericGLDisplay
     virtual void redraw();
+
+	//called when recieving muse wheel is rotated
+	void onWheelEvent(float wheelDelta_deg);
 
 signals:
 
@@ -306,20 +332,24 @@ signals:
     **/
     void pointPicked(int cloudUniqueID, unsigned pointIndex, int x, int y);
 
-	//! Signal emitted when the window base view matrix is changed
-    void viewMatRotated(const ccGLMatrix& rotMat);
+	/*** Camera link mode (interactive modifications of the view/camera are echoed to other windows) ***/
 
-	//! Signal emitted when the window base view matrix is changed
-    void baseViewMatChanged(const ccGLMatrix& newBaseViewMat);
+	//! Signal emitted when the window 'model view' matrix is interactively changed
+    void viewMatRotated(const ccGLMatrix& rotMat);
+	//! Signal emitted when the camera is interactively displaced
+    void cameraDisplaced(float ddx, float ddy);
+	//! Signal emitted when the mouse wheel is rotated
+    void mouseWheelRotated(float wheelDelta_deg);
+
+
+	//! Signal emitted when the window 'base view' matrix is changed
+    void baseViewMatChanged(const ccGLMatrix& newViewMat);
 
 	//! Signal emitted when the pivot point is changed
 	void pivotPointChanged(const CCVector3&);
 
-	//! Signal emitted when the window view is zoomed
-    void zoomChanged(float zoomFactor);
-
-    //! Signal emitted when the window view is panned
-    void panChanged(float ddx, float ddy);
+	//! Signal emitted when the camera position is changed
+	void cameraPosChanged(const CCVector3&);
 
     //! Signal emitted when the selected object is translated by the user
     void translation(const CCVector3& t);
@@ -399,7 +429,10 @@ protected:
     void glDisableSunLight();
     void glEnableCustomLight();
     void glDisableCustomLight();
-    void displayCustomLight();
+    void drawCustomLight();
+
+	//! Draws pivot point symbol in 3D
+	void drawPivot();
 
 	//! Stops frame rate test
 	void stopFrameRateTest();
@@ -408,7 +441,10 @@ protected:
 	virtual void dragEnterEvent(QDragEnterEvent* event);
 	virtual void dropEvent(QDropEvent* event);
 
-    //! Returns current viewing direction (according to base view matrix)
+    //! Returns current viewing direction
+	/** This is the direction normal to the screen
+		(pointing 'inside') in world base.
+	**/
     CCVector3 getCurrentViewDir() const;
 
     //! Starts OpenGL picking process
@@ -447,6 +483,9 @@ protected:
 	//! Releases active GL filter
     void removeGLFilter();
 
+	//! Returns the zoom value equivalent to the current camera position (perspective only)
+	float computePerspectiveZoom() const;
+
 	//! GL names picking buffer
     GLuint m_pickingBuffer[CC_PICKING_BUFFER_SIZE];
 
@@ -456,14 +495,17 @@ protected:
 	//! Initialization state
     bool m_initialized;
 
+	//! Trihedron GL list
+	GLuint m_trihedronGLList;
+
+	//! Pivot center GL list
+	GLuint m_pivotGLList;
+
 	//! Viewport parameters (zoom, etc.)
 	ccViewportParameters m_params;
 
     //! Default font size
     int m_defaultFontPixelSize;
-
-	//! Pivot point backup
-	//CCVector3 m_pivotPointBackup;
 
     //! Last mouse position
     QPoint m_lastMousePos;
@@ -575,6 +617,9 @@ protected:
 	//! Default font
 	QFont m_font;
    
+	//! Pivot symbol visibility
+	PivotVisibility m_pivotVisibility;
+
 private:
 
 	//! Returns shaders path

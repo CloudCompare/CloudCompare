@@ -585,11 +585,13 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//GL name push
 		bool pushName = MACRO_DrawEntityNames(context);
-		if (pushName)
-			glPushName(getUniqueID());
 
 		//special case: triangle names pushing (for picking)
-		bool pushTriangleNames = MACRO_DrawTriangleNames(context); 
+		bool pushTriangleNames = MACRO_DrawTriangleNames(context);
+		pushName |= pushTriangleNames;
+
+		if (pushName)
+			glPushName(getUniqueID());
 
 		//vertices visibility
 		const ccGenericPointCloud::VisibilityTableType* visibilityArray = m_associatedCloud->getTheVisibilityArray();

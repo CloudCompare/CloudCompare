@@ -70,7 +70,7 @@ void qHPR::onNewSelection(const ccHObject::Container& selectedEntities)
 		m_action->setEnabled(selectedEntities.size()==1);
 }
 
-CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, float viewPoint[], float fParam)
+CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, const float viewPoint[], float fParam)
 {
 	assert(theCloud);
 
@@ -315,7 +315,14 @@ void qHPR::doAction()
     CCLib::DgmOctree::cellIndexesContainer vec;
     theOctree->getCellIndexes(octreeLevel,vec);
 
-	CCVector3 viewPoint = win->computeCameraPos();
+	const ccViewportParameters& params =  win->getViewportParameters();
+	CCVector3 viewPoint = params.cameraCenter;
+	if (params.objectCenteredView)
+	{
+		CCVector3 PC = params.cameraCenter - params.pivotPoint;
+		params.viewMat.transposed().apply(PC); //inverse rotation
+		viewPoint = params.pivotPoint + PC;
+	}
 
     //HPR
 

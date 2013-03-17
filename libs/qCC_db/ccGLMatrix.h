@@ -110,6 +110,13 @@ public:
 	**/
 	static ccGLMatrix FromQuaternion(const float q[]);
 
+	//! Returns the rotation component around X only
+	ccGLMatrix xRotation() const;
+	//! Returns the rotation component around Y only
+	ccGLMatrix yRotation() const;
+	//! Returns the rotation component around Z only
+	ccGLMatrix zRotation() const;
+
 	//! Clears matrix
 	/** Matrix is set to 0.
 	**/
@@ -151,7 +158,7 @@ public:
 	/** Translation corresponds to the begining of the
 		third column of the matrix.
 	**/
-	inline  float* getTranslation() { return m_mat+12; }
+	inline float* getTranslation() { return m_mat+12; }
 
 	//! Retruns a const pointer to internal translation
 	/** Translation corresponds to the begining of the

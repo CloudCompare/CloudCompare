@@ -17,6 +17,10 @@
 
 #include "ccMouse3DContextMenu.h"
 
+//local
+#include "mainwindow.h"
+#include "ccGLWindow.h"
+
 #ifdef CC_3DXWARE_SUPPORT
 //3DxWare
 #include "devices/3dConnexion/Mouse3DParameters.h"
@@ -27,8 +31,16 @@
 
 ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* parent/*=0*/)
 	: QMenu(parent)
-	, m_rotateCheckbox(0)
-	, m_panZoomCheckbox(0)
+	, m_rotationMode(0)
+	, m_panZoomMode(0)
+	, m_autoRotationCenter(0)
+	, m_selectedItemAsRotationCenter(0)
+	, m_alwaysShowRotationCenter(0)
+	, m_showRotationCenterOnMotion(0)
+	, m_alwaysHideRotationCenter(0)
+	, m_objectMode(0)
+	, m_cameraMode(0)
+	, m_lockHorizon(0)
 	, m_params(params)
 {
 	assert(m_params);
@@ -43,17 +55,21 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* p
 #ifdef CC_3DXWARE_SUPPORT
 	assert(Mouse3DParameters::HighestSpeed+1 == SPEED_ACTION_COUNT);
 
-	/*** menu actions ***/
-
-	m_rotateCheckbox = new QAction("Rotate",this);
-	m_rotateCheckbox->setCheckable(true);
-	m_rotateCheckbox->setChecked(m_params->rotationEnabled());
-	connect(m_rotateCheckbox, SIGNAL(toggled(bool)), this, SLOT(rotateCheckBoxToggled(bool)));
-
-	m_panZoomCheckbox = new QAction("Pan Zoom",this);
-	m_panZoomCheckbox->setCheckable(true);
-	m_panZoomCheckbox->setChecked(m_params->panZoomEnabled());
-	connect(m_panZoomCheckbox, SIGNAL(toggled(bool)), this, SLOT(panZoomCheckBoxToggled(bool)));
+	//'Rotate' mode 
+	{
+		m_rotationMode = new QAction("Rotate",this);
+		m_rotationMode->setCheckable(true);
+		m_rotationMode->setChecked(m_params->rotationEnabled());
+		connect(m_rotationMode, SIGNAL(toggled(bool)), this, SLOT(rotationModeToggled(bool)));
+	}
+	
+	//'Pan/Zoom' mode 
+	{
+		m_panZoomMode = new QAction("Pan Zoom",this);
+		m_panZoomMode->setCheckable(true);
+		m_panZoomMode->setChecked(m_params->panZoomEnabled());
+		connect(m_panZoomMode, SIGNAL(toggled(bool)), this, SLOT(panZoomModeToggled(bool)));
+	}
 
 	//speed actions
 	{
@@ -65,24 +81,93 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* p
 			m_speedActions[i] = new QAction(squareSeq,this);
 			m_speedActions[i]->setCheckable(true);
 			m_speedActions[i]->setChecked(i == static_cast<int>(m_params->speedMode()));
-			connect(m_speedActions[i], SIGNAL(toggled(bool)), this, SLOT(speedModeChanged(bool)));
+			connect(m_speedActions[i], SIGNAL(triggered()), this, SLOT(speedModeChanged()));
 		}
 	}
 
+	//rotation center actions
+	{
+		m_autoRotationCenter			= new QAction("Auto",this);
+		m_selectedItemAsRotationCenter = new QAction("Use Selected Item",this);
+
+		m_autoRotationCenter->setEnabled(false); //FIXME: not yet enabled on CloudCompare!
+		//FIXME: as long as the user can't really chose...
+		//m_autoRotationCenter->setCheckable(true);
+		m_selectedItemAsRotationCenter->setCheckable(true);
+		m_selectedItemAsRotationCenter->setChecked(true);
+
+		m_alwaysShowRotationCenter		= new QAction("Always Show",this);
+		m_showRotationCenterOnMotion	= new QAction("Show on Motion",this);
+		m_alwaysHideRotationCenter		= new QAction("Hide",this);
+
+		//FIXME: as long as the user can't really chose...
+		m_alwaysShowRotationCenter->setEnabled(false); //FiXME: not yet enabled on CloudCompare!
+		m_showRotationCenterOnMotion->setEnabled(false); //FiXME: not yet enabled on CloudCompare!
+		//FIXME: as long as the user can't really chose...
+		//m_alwaysShowRotationCenter->setCheckable(true);
+		//m_showRotationCenterOnMotion->setCheckable(true);
+		m_alwaysHideRotationCenter->setCheckable(true);
+		m_alwaysHideRotationCenter->setChecked(true);
+	}
+
+	//object mode
+	{
+		m_objectMode = new QAction("Object Mode",this);
+		m_objectMode->setCheckable(true);
+		m_objectMode->setChecked(m_params->navigationMode() == Mouse3DParameters::ObjectMode);
+		connect(m_objectMode, SIGNAL(triggered()), this, SLOT(objectModeTriggered()));
+	}
+	//camera mode
+	{
+		m_cameraMode = new QAction("Camera Mode",this);
+		m_cameraMode->setCheckable(true);
+		m_cameraMode->setChecked(m_params->navigationMode() == Mouse3DParameters::CameraMode);
+		connect(m_cameraMode, SIGNAL(triggered()), this, SLOT(cameraModeTriggered()));
+	}
+	
+	//lock horizon
+	{
+		m_lockHorizon = new QAction("Lock Horizon",this);
+		m_lockHorizon->setCheckable(true);
+		m_lockHorizon->setChecked(m_params->horizonLocked());
+		connect(m_lockHorizon, SIGNAL(toggled(bool)), this, SLOT(lockHorizonToggled(bool)));
+	}
+
 	//build up menu
-	addAction(m_rotateCheckbox);
-	addAction(m_panZoomCheckbox);
+	addAction(m_rotationMode);
+	addAction(m_panZoomMode);
 	addSeparator();
+	/*--------------------------------------------*/
 	QMenu* speedMenu = new QMenu("Speed");
-	for (int i=0; i<SPEED_ACTION_COUNT; ++i)
-		speedMenu->addAction(m_speedActions[i]);
+	{
+		for (int i=0; i<SPEED_ACTION_COUNT; ++i)
+			speedMenu->addAction(m_speedActions[i]);
+	}
 	addMenu(speedMenu);
 	addSeparator();
+	/*--------------------------------------------*/
+	addAction(m_objectMode);
+	addAction(m_cameraMode);
+	addSeparator();
+	/*--------------------------------------------*/
+	QMenu* rotationCenterMenu = new QMenu("Rotation Center");
+	{
+		rotationCenterMenu->addAction(m_autoRotationCenter);
+		rotationCenterMenu->addAction(m_selectedItemAsRotationCenter);
+		addSeparator();
+		rotationCenterMenu->addAction(m_alwaysShowRotationCenter);
+		rotationCenterMenu->addAction(m_showRotationCenterOnMotion);
+		rotationCenterMenu->addAction(m_alwaysHideRotationCenter);
+	}
+	addMenu(rotationCenterMenu);
+	addSeparator();
+	/*--------------------------------------------*/
+	addAction(m_lockHorizon);
 
 #endif
 }
 
-void ccMouse3DContextMenu::rotateCheckBoxToggled(bool state)
+void ccMouse3DContextMenu::rotationModeToggled(bool state)
 {
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_params)
@@ -90,7 +175,7 @@ void ccMouse3DContextMenu::rotateCheckBoxToggled(bool state)
 #endif
 }
 
-void ccMouse3DContextMenu::panZoomCheckBoxToggled(bool state)
+void ccMouse3DContextMenu::panZoomModeToggled(bool state)
 {
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_params)
@@ -98,12 +183,54 @@ void ccMouse3DContextMenu::panZoomCheckBoxToggled(bool state)
 #endif
 }
 
-void ccMouse3DContextMenu::speedModeChanged(bool state)
+void ccMouse3DContextMenu::objectModeTriggered()
+{
+#ifdef CC_3DXWARE_SUPPORT
+	ccGLWindow* win = MainWindow::GetActiveGLWindow();
+	if (win)
+	{
+		bool objectCentered = true;
+		bool perspective = win->getPerspectiveState(objectCentered);
+		if (!objectCentered) //force object-based mode!
+			win->setPerspectiveState(perspective,true);
+	}
+
+	if (m_params)
+		m_params->setNavigationMode(Mouse3DParameters::ObjectMode);
+#endif
+}
+
+void ccMouse3DContextMenu::cameraModeTriggered()
+{
+#ifdef CC_3DXWARE_SUPPORT
+	ccGLWindow* win = MainWindow::GetActiveGLWindow();
+	if (win)
+	{
+		bool objectCentered = true;
+		/*bool perspective = */win->getPerspectiveState(objectCentered);
+		if (objectCentered) //force viewer-based perspective!
+			win->setPerspectiveState(true,false);
+	}
+
+	if (m_params)
+		m_params->setNavigationMode(Mouse3DParameters::CameraMode);
+#endif
+}
+
+void ccMouse3DContextMenu::lockHorizonToggled(bool state)
+{
+#ifdef CC_3DXWARE_SUPPORT
+	if (m_params)
+		m_params->lockHorizon(state);
+#endif
+}
+
+void ccMouse3DContextMenu::speedModeChanged()
 {
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_params)
 	{
-		//look for the given action than emitted the signal
+		//look for the given action that emitted the signal
 		const QObject* sender = QObject::sender();
 		int actionIndex = 0;
 		for (actionIndex=0; actionIndex<SPEED_ACTION_COUNT; ++actionIndex)

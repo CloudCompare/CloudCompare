@@ -27,7 +27,7 @@ Mouse3DParameters::Mouse3DParameters()
 	, m_navigationMode(ObjectMode)
 	, m_pivotMode(AutoPivot)
 	, m_pivotVisibility(ShowPivot)
-	, m_horizonLocked(true)
+	, m_horizonLocked(false)
 {
 }
 
@@ -61,7 +61,7 @@ void Mouse3DParameters::fromPersistentSettings()
 
 	m_panZoomEnabled	= settings.value(c_ps_panZoomEnabled,	true).toBool();
 	m_rotationEnabled	= settings.value(c_ps_rotationEnabled,	true).toBool();
-	m_horizonLocked		= settings.value(c_ps_horizonLocked,	true).toBool();
+	m_horizonLocked		= settings.value(c_ps_horizonLocked,	false).toBool();
 }
 
 void Mouse3DParameters::toPersistentSettings()

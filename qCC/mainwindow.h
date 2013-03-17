@@ -222,10 +222,12 @@ protected slots:
     void update3DViewsMenu();
     void updateMenus();
     void updateUIWithSelection();
-    void updateWindowZoomChange(float zoomFactor);
-    void updateWindowPanChange(float ddx, float ddy);
-    void updateWindowOnViewMatRotation(const ccGLMatrix& rotMat);
-    void toggleSelectedEntitiesVisibility();
+
+	void echoMouseWheelRotate(float);
+    void echoCameraDisplaced(float ddx, float ddy);
+    void echoBaseViewMatRotation(const ccGLMatrix& rotMat);
+
+	void toggleSelectedEntitiesVisibility();
     void toggleSelectedEntitiesNormals();
     void toggleSelectedEntitiesColors();
     void toggleSelectedEntitiesSF();
@@ -346,6 +348,9 @@ protected slots:
 	void on3DMouseKeyUp(int);
 	void on3DMouseKeyDown(int);
 
+	//! Setups 3D mouse (if any)
+	void setup3DMouse(bool);
+
 protected:
 
     //! Removes from a list all elements that are sibling of others
@@ -415,9 +420,6 @@ protected:
 	//! Expands DB tree for selected items
 	void expandDBTreeWithSelection(ccHObject::Container& selection);
 	
-	//! Setups 3D mouse (if any)
-	void setup3DMouse();
-
 	//! Releases any connected 3D mouse (if any)
 	void release3DMouse();
 

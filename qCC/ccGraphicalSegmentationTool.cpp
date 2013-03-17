@@ -147,7 +147,6 @@ bool ccGraphicalSegmentationTool::start()
 
     //the user must not close this window!
     m_associatedWin->setUnclosable(true);
-    //m_associatedWin->setPerspectiveState(false,false);
     m_associatedWin->addToOwnDB(m_segmentationPoly);
     m_associatedWin->setPickingMode(ccGLWindow::NO_PICKING);
     pauseSegmentationMode(false);

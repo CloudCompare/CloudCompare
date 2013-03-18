@@ -60,7 +60,7 @@ const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
 //Vaious overlay elements dimensions
 const float CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
-const float CC_DISPLAYED_PIVOT_RADIUS = 25.0f;
+const float CC_DISPLAYED_PIVOT_RADIUS = 50.0f;
 const float CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0f;
 const float CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
 
@@ -2389,7 +2389,7 @@ void ccGLWindow::drawPivot()
 
 		//draw a small sphere
 		{
-			ccSphere sphere(0.2f);
+			ccSphere sphere(5.0f/CC_DISPLAYED_PIVOT_RADIUS);
 			sphere.setColor(ccColor::yellow);
 			sphere.showColors(true);
 			sphere.setVisible(true);
@@ -2412,10 +2412,24 @@ void ccGLWindow::drawPivot()
 		//pivot symbol: 3 circles
 		glColor3f(1.0f,0.0f,0.0f);
 		glDrawUnitCircle(0);
+		glBegin(GL_LINES);
+		glVertex3f(-1.0f,0.0f,0.0f);
+		glVertex3f( 1.0f,0.0f,0.0f);
+		glEnd();
+
 		glColor3f(0.0f,1.0f,0.0f);
 		glDrawUnitCircle(1);
+		glBegin(GL_LINES);
+		glVertex3f(0.0f,-1.0f,0.0f);
+		glVertex3f(0.0f, 1.0f,0.0f);
+		glEnd();
+
 		glColor3f(0.0f,0.7f,1.0f);
 		glDrawUnitCircle(2);
+		glBegin(GL_LINES);
+		glVertex3f(0.0f,0.0f,-1.0f);
+		glVertex3f(0.0f,0.0f, 1.0f);
+		glEnd();
 
 		glPopAttrib();
 

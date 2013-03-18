@@ -19,21 +19,23 @@
 
 #include "ccCommon.h"
 
-#include <QString>
-
 #define CC_VER_NUM  2.4
-#define CC_VER_DATE "03/14/2013"
+#define CC_VER_DATE "03/18/2013"
 
 //! Returns current version as string
-const char* ccCommon::GetCCVersion()
+QString ccCommon::GetCCVersion()
 {
-#if !defined(_WIN32) && !defined(WIN32)
-    return qPrintable(QString::number(CC_VER_NUM)+QString(".Qt/Linux - %2").arg(CC_VER_DATE));
+#if defined(_W64) || defined(__x86_64__) || defined(__ppc64__)
+	QString format = "64 bits";
 #else
-#ifdef _MSC_VER
-    return qPrintable(QString::number(CC_VER_NUM)+QString(".Qt/MSVC - %2").arg(CC_VER_DATE));
-#else
-    return qPrintable(QString::number(CC_VER_NUM)+QString(".Qt/MinGW - %2").arg(CC_VER_DATE));
+	QString format = "32 bits";
 #endif
+
+#if defined(_WIN32) || defined(WIN32)
+    return QString::number(CC_VER_NUM)+QString(".Qt/Windows/%1 - %2").arg(format).arg(CC_VER_DATE);
+#elif defined(__APPLE__)
+    return QString::number(CC_VER_NUM)+QString(".Qt/Mac OS/%1 - %2").arg(format).arg(CC_VER_DATE);
+#else
+    return QString::number(CC_VER_NUM)+QString(".Qt/Linux/%1 - %2").arg(format).arg(CC_VER_DATE);
 #endif
 };

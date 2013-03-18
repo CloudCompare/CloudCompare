@@ -15,6 +15,7 @@ v2.4 03/17/2013
 	* 3D pivot point symbol added (can be 'always visible', 'only when moving' or 'hidden')
 - bug fix:
 	* BIN files saved with labels would make CC crash when re-opened!
+	* Closing the 'About' dialog would make CC crash!
 
 v2.4 03/10/2013
 - Points size can now be independently set for each cloud

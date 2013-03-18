@@ -40,13 +40,16 @@
 #define CC_SCAN_RETURN_INDEX_FIELD_NAME "Return index"
 #define CC_LAS_CLASSIFICATION_FIELD_NAME "LAS classification"
 
+//Qt
+#include <QString>
+
 //! Common parameters and other stuff
 class ccCommon
 {
     public:
 
         //! Returns current software version
-        static const char* GetCCVersion();
+        static QString GetCCVersion();
 };
 
 #endif

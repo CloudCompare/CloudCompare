@@ -4453,13 +4453,23 @@ void MainWindow::toggleFullScreen(bool state)
 
 void MainWindow::about()
 {
-	QDialog aboutDialog(this);
+	QDialog* aboutDialog = new QDialog(this);
 
 	Ui::AboutDialog ui;
-	ui.setupUi(&aboutDialog);
-	ui.textEdit->setHtml(ui.textEdit->toHtml().arg(ccCommon::GetCCVersion()));
+	ui.setupUi(aboutDialog);
 
-	aboutDialog.exec();
+	QString ccVer = ccCommon::GetCCVersion();
+	QString htmlText = ui.textEdit->toHtml();
+	QString enrichedHtmlText = htmlText.arg(ccVer);
+	//ccLog::PrintDebug(htmlText);
+	//ccLog::PrintDebug(ccVer);
+	//ccLog::PrintDebug(enrichedHtmlText);
+
+	ui.textEdit->setHtml(enrichedHtmlText);
+
+	aboutDialog->exec();
+
+	//delete aboutDialog; //Qt will take care of it? Anyway CC crash if we try to delete it now!
 }
 
 void MainWindow::help()

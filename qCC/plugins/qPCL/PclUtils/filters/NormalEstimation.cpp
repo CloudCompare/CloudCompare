@@ -88,8 +88,12 @@ int NormalEstimation::compute()
 {
     //pointer to selected cloud
     ccPointCloud* cloud = getSelectedEntityAsCCPointCloud();
-        if (!cloud)
-                return -1;
+     if (!cloud)
+         return -1;
+
+     //if we have normals delete them!
+     if (cloud->hasNormals())
+         cloud->unallocateNorms();
 
     //get xyz in sensor_msgs format
     cc2smReader converter;

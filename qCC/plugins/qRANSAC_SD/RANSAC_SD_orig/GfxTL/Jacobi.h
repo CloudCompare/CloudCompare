@@ -5,6 +5,7 @@
 #include <GfxTL/MathHelper.h>
 #include <GfxTL/Array.h>
 #include <memory>
+#include <unistd.h>
 
 namespace GfxTL
 {

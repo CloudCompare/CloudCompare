@@ -32,7 +32,7 @@ namespace GfxTL
 			void ComputeSplit(const BuildInformationT &bi, CellType *cell)
 			{ 
 				DiffScalarType *diff = new DiffScalarType[BaseType::m_dim];
-				Sub(bi.BBox()[1], bi.BBox()[0], &diff);
+				this->Sub(bi.BBox()[1], bi.BBox()[0], &diff);
 				unsigned int axis = 0;
 				DiffScalarType length = diff[0];
 				for(unsigned int j = 1; j < BaseType::m_dim; ++j)

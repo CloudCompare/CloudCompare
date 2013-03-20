@@ -36,12 +36,12 @@ struct RebuildAACubeTreeStrategy
 			{
 				for(unsigned int i = 0; i < CellType::NChildren; ++i)
 				{
-					if(ExistChild(*BaseType::Root(), i))
+					if(this->ExistChild(*BaseType::Root(), i))
 						delete &((*BaseType::Root())[i]);
 					BaseType::Root()->Child(i, NULL);
 				}
 			}
-			if(IsLeaf(*BaseType::Root()))
+			if(this->IsLeaf(*BaseType::Root()))
 				return 0;
 			typename BaseType::HandleType cur = BaseType::BeginHandle();
 			size_t maxDepth = 0;
@@ -53,7 +53,7 @@ struct RebuildAACubeTreeStrategy
 			}
 			for(unsigned int i = 0; i < CellType::NChildren; ++i)
 			{
-				if(!ExistChild(*BaseType::Root(), i))
+				if(!this->ExistChild(*BaseType::Root(), i))
 					continue;
 				PointType cmin, cmax;
 				for(unsigned int j = 0; j < BaseType::m_dim; ++j)
@@ -83,7 +83,7 @@ struct RebuildAACubeTreeStrategy
 			const PointType &max, typename BaseType::HandleType *cur)
 		{
 			CellType &cell = parent[childIdx];
-			if(IsLeaf(cell))
+			if(this->IsLeaf(cell))
 			{
 				typename BaseType::HandleType h = *cur;
 				if(h >= BaseType::EndHandle())
@@ -94,7 +94,7 @@ struct RebuildAACubeTreeStrategy
 				size_t s = cell.Size();
 				for(size_t i = 0; i < s && h < BaseType::EndHandle(); ++i, ++h)
 				{
-					size_t dref = Dereference(h);
+					size_t dref = this->Dereference(h);
 					bool inside = true;
 					for(unsigned int j = 0; j < BaseType::m_dim; ++j)
 					{
@@ -119,7 +119,7 @@ struct RebuildAACubeTreeStrategy
 				size_t maxDepth = 0;
 				for(unsigned int i = 0; i < CellType::NChildren; ++i)
 				{
-					if(!ExistChild(cell, i))
+					if(!this->ExistChild(cell, i))
 						continue;
 					PointType cmin, cmax;
 					for(unsigned int j = 0; j < BaseType::m_dim; ++j)
@@ -157,7 +157,7 @@ struct RebuildAACubeTreeStrategy
 					// make cell a leaf
 					for(unsigned int i = 0; i < CellType::NChildren; ++i)
 					{
-						if(!ExistChild(cell, i))
+						if(!this->ExistChild(cell, i))
 							continue;
 						delete &(cell[i]);
 						cell.Child(i, NULL);

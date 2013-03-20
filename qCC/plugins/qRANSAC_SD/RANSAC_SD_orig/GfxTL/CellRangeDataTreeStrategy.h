@@ -194,13 +194,13 @@ namespace GfxTL
 				HandleType k = range.second - 1;
 				while(1)
 				{
-					while(j <= k && split(at(Dereference(j))))
+					while(j <= k && split(this->at(this->Dereference(j))))
 						++j;
-					while(j < k && !split(at(Dereference(k))))
+					while(j < k && !split(this->at(this->Dereference(k))))
 						--k;
 					if(j < k)
 					{
-						SwapHandles(k, j);
+						this->SwapHandles(k, j);
 						++j;
 						--k;
 					}

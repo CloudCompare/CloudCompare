@@ -67,10 +67,10 @@ namespace GfxTL
 					new typename ScalarTypeDeferer< value_type >::ScalarType[BaseType::m_dim];
 				// init the values (box of zero volume)
 				typename BaseType::HandleType i = bi->Range().first;
-				BaseType::AssignAsAABoxMin(at(Dereference(i)), &bi->m_bbox[0]);
-				BaseType::AssignAsAABoxMax(at(Dereference(i)), &bi->m_bbox[1]);
+				BaseType::AssignAsAABoxMin(this->at(this->Dereference(i)), &bi->m_bbox[0]);
+				BaseType::AssignAsAABoxMax(this->at(this->Dereference(i)), &bi->m_bbox[1]);
 				for(++i; i != bi->Range().second; ++i)
-					BaseType::IncludeInAABox(at(Dereference(i)), bi->BBox());
+					BaseType::IncludeInAABox(this->at(this->Dereference(i)), bi->BBox());
 			}
 
 			template< class BuildInformationT >
@@ -95,10 +95,10 @@ namespace GfxTL
 					return;
 				}
 				typename BaseType::HandleType i = bi->Range().first;
-				BaseType::AssignAsAABoxMin(at(Dereference(i)), &bi->m_bbox[0]);
-				BaseType::AssignAsAABoxMax(at(Dereference(i)), &bi->m_bbox[1]);
+				BaseType::AssignAsAABoxMin(this->at(this->Dereference(i)), &bi->m_bbox[0]);
+				BaseType::AssignAsAABoxMax(this->at(this->Dereference(i)), &bi->m_bbox[1]);
 				for(++i; i != bi->Range().second; ++i)
-					BaseType::IncludeInAABox(at(Dereference(i)), bi->BBox());
+					BaseType::IncludeInAABox(this->at(this->Dereference(i)), bi->BBox());
 			}
 		};		
 	};

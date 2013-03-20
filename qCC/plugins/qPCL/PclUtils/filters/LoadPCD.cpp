@@ -43,7 +43,8 @@ LoadPCD::LoadPCD()
     : BaseFilter(FilterDescription("LoadPCD",
                                    "Load PCD FIle",
                                    "Load a PCD File",
-                                   ":/toolbar/PclUtils/icons/load.png"))
+                                   ":/toolbar/PclUtils/icons/load.png",
+                                   true))
 {
 }
 
@@ -53,7 +54,7 @@ int LoadPCD::checkSelected()
 	return 1;
 }
 
-int LoadPCD::openInputDialog()
+int LoadPCD::openDialog()
 {
 	QSettings settings;
 	settings.beginGroup("PclUtils/LoadPCD");

@@ -1,4 +1,5 @@
 #include "Candidate.h"
+#include "unistd.h"
 
 Candidate::Candidate()
 : m_subset(0)

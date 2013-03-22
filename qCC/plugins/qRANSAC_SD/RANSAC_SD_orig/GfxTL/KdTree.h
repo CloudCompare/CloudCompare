@@ -260,7 +260,7 @@ namespace GfxTL
 					else
 						BaseType::LeaveGlobalBuildInformation(*p.first, p.second);
 					while(p.second.CreateChild() < CellType::NChildren &&
-						!ExistChild(*p.first, p.second.CreateChild()))
+						!this->ExistChild(*p.first, p.second.CreateChild()))
 						++p.second.CreateChild();
 					if(p.second.CreateChild() == CellType::NChildren)
 					{

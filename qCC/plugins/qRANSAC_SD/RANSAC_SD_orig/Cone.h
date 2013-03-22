@@ -10,6 +10,7 @@
 #include <ostream>
 #include <istream>
 #include <stdio.h>
+#include <unistd.h>
 #include <MiscLib/NoShrinkVector.h>
 #include "LevMarLSWeight.h"
 #include "LevMarFitting.h"

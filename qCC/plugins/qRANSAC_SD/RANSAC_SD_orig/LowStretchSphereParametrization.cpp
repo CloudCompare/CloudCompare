@@ -1,5 +1,6 @@
 #include "LowStretchSphereParametrization.h"
 #include "Bitmap.h"
+#include <unistd.h>
 
 LowStretchSphereParametrization::LowStretchSphereParametrization(
 	const Sphere &sphere)

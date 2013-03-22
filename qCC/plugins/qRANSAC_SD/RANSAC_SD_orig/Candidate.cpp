@@ -1,5 +1,8 @@
 #include "Candidate.h"
-#include "unistd.h"
+
+#if !defined(_WIN32) && !defined(WIN32)
+#include <unistd.h>
+#endif
 
 Candidate::Candidate()
 : m_subset(0)

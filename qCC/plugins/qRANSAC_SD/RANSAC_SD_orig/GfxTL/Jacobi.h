@@ -5,8 +5,9 @@
 #include <GfxTL/MathHelper.h>
 #include <GfxTL/Array.h>
 #include <memory>
+#if !defined(_WIN32) && !defined(WIN32)
 #include <unistd.h>
-
+#endif
 namespace GfxTL
 {
 	//Computes all eigenvalues and eigenvectors of a real symmetric matrix a[1..n][1..n]. On

@@ -1,6 +1,9 @@
 #include "LowStretchTorusParametrization.h"
 #include "Bitmap.h"
-#include "unistd.h"
+
+#if !defined(_WIN32) && !defined(WIN32)
+#include <unistd.h>
+#endif
 
 LowStretchTorusParametrization::LowStretchTorusParametrization(
 	const Torus &torus)

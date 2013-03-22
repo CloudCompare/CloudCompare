@@ -10,7 +10,9 @@
 #include <ostream>
 #include <istream>
 #include <stdio.h>
+#if !defined(_WIN32) && !defined(WIN32)
 #include <unistd.h>
+#endif
 #include <MiscLib/NoShrinkVector.h>
 #include "LevMarLSWeight.h"
 #include "LevMarFitting.h"

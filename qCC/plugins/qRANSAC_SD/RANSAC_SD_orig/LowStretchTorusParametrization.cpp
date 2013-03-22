@@ -1,5 +1,6 @@
 #include "LowStretchTorusParametrization.h"
 #include "Bitmap.h"
+#include "unistd.h"
 
 LowStretchTorusParametrization::LowStretchTorusParametrization(
 	const Torus &torus)

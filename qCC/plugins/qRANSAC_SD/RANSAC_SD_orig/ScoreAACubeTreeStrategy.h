@@ -47,7 +47,7 @@ struct ScoreAACubeTreeStrategy
 			typedef	typename BaseType::template 
 				CellCenterTraversalInformation< tibT > TraversalInformation;
 			TraversalInformation ti;
-			InitRootTraversalInformation(*BaseType::Root(), &ti);
+			this->InitRootTraversalInformation(*BaseType::Root(), &ti);
 			Score(*BaseType::Root(), ti, shape, /*maxCellSize,*/ score);
 		}
 
@@ -72,7 +72,7 @@ struct ScoreAACubeTreeStrategy
 		void Score(const CellType &cell, const TraversalInformationT &ti,
 			const ShapeT &shape, /*size_t maxCellSize,*/ ScoreT *score) const
 		{
-			if(/*cell.Size() <= maxCellSize ||*/ IsLeaf(cell))
+			if(/*cell.Size() <= maxCellSize ||*/ this->IsLeaf(cell))
 			{
 				//score->UpperBound() += cell.GlobalSize();
 				//score->SampledPoints() += cell.Size();
@@ -87,16 +87,16 @@ struct ScoreAACubeTreeStrategy
 				//{
 					for(typename BaseType::HandleType h = cell.Range().first;
 						h != cell.Range().second; ++h)
-						(*score)(shape, *this, Dereference(h));
+						(*score)(shape, *this, this->Dereference(h));
 				//}
 				return;
 			}
 			for(unsigned int i = 0; i < CellType::NChildren; ++i)
 			{
-				if(!ExistChild(cell, i))
+				if(!this->ExistChild(cell, i))
 					continue;
 				TraversalInformationT cti;
-				InitTraversalInformation(cell, ti, i, &cti);
+				this->InitTraversalInformation(cell, ti, i, &cti);
 				//typename BaseType::CellCenterType center;
 				//CellCenter(cell[i], cti, &center);
 				ScalarType dist = shape.Distance(*((const Vec3f *)&cell[i].Center()/*center*/));

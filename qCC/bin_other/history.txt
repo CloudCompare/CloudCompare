@@ -12,7 +12,13 @@ v2.4 03/17/2013
 	* transitions between perspective modes are smoother
 	* custom light appears and can be intearctively moved (with CTRL+right click) in all modes
 	* interactive transformation can be performed in all modes
-	* 3D pivot point symbol added (can be 'always visible', 'only when moving' or 'hidden')
+	* 3D rotation center symbol added (can be 'always visible', 'only when moving' or 'hidden')
+	* default views (top, bottom, left, etc.) are more 'natural'
+	* new default views added (front and back 'isometric' views)
+- New pop-menus added to the 'View' toolbar:
+	* selection of the current rotation center visibility (see above)
+	* selection of the current view mode (orthographic, object-based and viewer-based perspective)
+- Default specular color for light is now darker (so that meshes are less 'shiny' by dfault)
 - bug fix:
 	* BIN files saved with labels would make CC crash when re-opened!
 

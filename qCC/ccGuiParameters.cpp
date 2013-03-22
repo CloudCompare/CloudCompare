@@ -73,7 +73,7 @@ ccGui::ParamStruct::ParamStruct()
 void ccGui::ParamStruct::reset()
 {
     memcpy(lightAmbientColor,   ccColor::night,				    c_fColorArraySize);
-    memcpy(lightSpecularColor,  ccColor::middle,				c_fColorArraySize);
+    memcpy(lightSpecularColor,  ccColor::darker,				c_fColorArraySize);
     memcpy(lightDiffuseColor,   ccColor::lighter,				c_fColorArraySize);
     memcpy(meshFrontDiff,       ccColor::defaultMeshFrontDiff,	c_fColorArraySize);
     memcpy(meshBackDiff,        ccColor::defaultMeshBackDiff,	c_fColorArraySize);

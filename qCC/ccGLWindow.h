@@ -161,6 +161,13 @@ public:
 	//! Returns pivot visibility
 	virtual PivotVisibility getPivotVisibility() const;
 
+	//! Shows or hide the pivot symbol
+	/** Warnings:
+		- not to be mistaken with setPivotVisibility
+		- only taken into account if pivot visibility is set to PIVOT_SHOW_ON_MOVE
+	**/
+	virtual void showPivotSymbol(bool state);
+
 	//! Sets pivot point
     virtual void setPivotPoint(const CCVector3& P);
 
@@ -619,6 +626,9 @@ protected:
    
 	//! Pivot symbol visibility
 	PivotVisibility m_pivotVisibility;
+
+	//! Whether pivot symbol should be shown or not
+	bool m_pivotSymbolShown;
 
 private:
 

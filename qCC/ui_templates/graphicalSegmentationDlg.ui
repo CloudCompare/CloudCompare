@@ -36,7 +36,7 @@
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
-       <normaloff>:/CC/Comp/images/comp/pause.png</normaloff>:/CC/Comp/images/comp/pause.png</iconset>
+       <normaloff>:/CC/images/smallPause.png</normaloff>:/CC/images/smallPause.png</iconset>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -56,7 +56,7 @@
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
-       <normaloff>:/CC/Comp/images/comp/polygonSelect.png</normaloff>:/CC/Comp/images/comp/polygonSelect.png</iconset>
+       <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
      </property>
      <property name="popupMode">
       <enum>QToolButton::MenuButtonPopup</enum>
@@ -76,7 +76,7 @@
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
-       <normaloff>:/CC/Comp/images/comp/segmentIn.png</normaloff>:/CC/Comp/images/comp/segmentIn.png</iconset>
+       <normaloff>:/CC/images/smallSegmentIn.png</normaloff>:/CC/images/smallSegmentIn.png</iconset>
      </property>
     </widget>
    </item>
@@ -93,7 +93,7 @@
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
-       <normaloff>:/CC/Comp/images/comp/segmentOut.png</normaloff>:/CC/Comp/images/comp/segmentOut.png</iconset>
+       <normaloff>:/CC/images/smallSegmentOut.png</normaloff>:/CC/images/smallSegmentOut.png</iconset>
      </property>
     </widget>
    </item>
@@ -113,7 +113,7 @@
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
-       <normaloff>:/CC/Comp/images/comp/raz.png</normaloff>:/CC/Comp/images/comp/raz.png</iconset>
+       <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
      </property>
     </widget>
    </item>
@@ -130,7 +130,7 @@
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
-       <normaloff>:/CC/Comp/images/comp/validate.png</normaloff>:/CC/Comp/images/comp/validate.png</iconset>
+       <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
      </property>
     </widget>
    </item>
@@ -144,7 +144,7 @@
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
-       <normaloff>:/CC/Comp/images/comp/trash.png</normaloff>:/CC/Comp/images/comp/trash.png</iconset>
+       <normaloff>:/CC/images/smallTrash.png</normaloff>:/CC/images/smallTrash.png</iconset>
      </property>
     </widget>
    </item>
@@ -161,7 +161,7 @@
      </property>
      <property name="icon">
       <iconset resource="../icones.qrc">
-       <normaloff>:/CC/Comp/images/comp/cancel.png</normaloff>:/CC/Comp/images/comp/cancel.png</iconset>
+       <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
      </property>
     </widget>
    </item>
@@ -169,7 +169,7 @@
   <action name="actionSetRectangularSelection">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/Comp/images/comp/rectangleSelect.png</normaloff>:/CC/Comp/images/comp/rectangleSelect.png</iconset>
+     <normaloff>:/CC/images/smallRectangleSelect.png</normaloff>:/CC/images/smallRectangleSelect.png</iconset>
    </property>
    <property name="text">
     <string>Rectangular selection</string>
@@ -181,7 +181,7 @@
   <action name="actionSetPolylineSelection">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/Comp/images/comp/polygonSelect.png</normaloff>:/CC/Comp/images/comp/polygonSelect.png</iconset>
+     <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
    </property>
    <property name="text">
     <string>Polygonal selection</string>

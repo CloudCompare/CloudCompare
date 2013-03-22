@@ -42,6 +42,7 @@ protected slots:
 	void speedModeChanged();
 	void objectModeTriggered();
 	void cameraModeTriggered();
+	void rotationCenterVisibilityChanged();
 
 protected:
 

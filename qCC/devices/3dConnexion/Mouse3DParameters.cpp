@@ -20,15 +20,41 @@
 //Qt
 #include <QSettings>
 
+//system
+#include <assert.h>
+
 Mouse3DParameters::Mouse3DParameters()
 	: m_speedMode(LowestSpeed)
 	, m_panZoomEnabled(true)
 	, m_rotationEnabled(true)
-	, m_navigationMode(ObjectMode)
-	, m_pivotMode(AutoPivot)
-	, m_pivotVisibility(ShowPivot)
+	//, m_navigationMode(ObjectMode)
+	//, m_pivotMode(AutoPivot)
+	//, m_pivotVisibility(ShowPivot)
 	, m_horizonLocked(false)
 {
+}
+
+QString Mouse3DParameters::GetName(NavigationMode mode)
+{
+	QString modeName;
+	switch (mode)
+	{
+	case Mouse3DParameters::ObjectMode:
+		return "Object";
+	case Mouse3DParameters::CameraMode:
+		return "Camera";
+	case Mouse3DParameters::FlyMode:
+		return "Fly";
+	case Mouse3DParameters::WalkMode:
+		return "Walk";
+	case Mouse3DParameters::HelicopterMode:
+		return "Helicopter";
+	default:
+		assert(false);
+		break;
+	}
+
+	return "unknown";
 }
 
 /*** Persistent settings ***/
@@ -55,9 +81,9 @@ void Mouse3DParameters::fromPersistentSettings()
 	int pivotVisiblity	= settings.value(c_ps_pivotVisiblity,	(int)ShowPivot).toInt();
 
 	m_speedMode			= static_cast<SpeedMode>(speedMode);
-	m_navigationMode	= static_cast<NavigationMode>(navigationMode);
-	m_pivotMode			= static_cast<PivotMode>(pivotMode);
-	m_pivotVisibility	= static_cast<PivotVisibility>(pivotVisiblity);
+	//m_navigationMode	= static_cast<NavigationMode>(navigationMode);
+	//m_pivotMode			= static_cast<PivotMode>(pivotMode);
+	//m_pivotVisibility	= static_cast<PivotVisibility>(pivotVisiblity);
 
 	m_panZoomEnabled	= settings.value(c_ps_panZoomEnabled,	true).toBool();
 	m_rotationEnabled	= settings.value(c_ps_rotationEnabled,	true).toBool();
@@ -70,9 +96,9 @@ void Mouse3DParameters::toPersistentSettings()
     settings.beginGroup(c_ps_groupName);
 
 	settings.setValue(c_ps_speedMode,		(int)m_speedMode);
-	settings.setValue(c_ps_navigationMode,	(int)m_navigationMode);
-	settings.setValue(c_ps_pivotMode,		(int)m_pivotMode);
-	settings.setValue(c_ps_pivotVisiblity,	(int)m_pivotVisibility);
+	//settings.setValue(c_ps_navigationMode,	(int)m_navigationMode);
+	//settings.setValue(c_ps_pivotMode,		(int)m_pivotMode);
+	//settings.setValue(c_ps_pivotVisiblity,	(int)m_pivotVisibility);
 
 	settings.setValue(c_ps_panZoomEnabled,	m_panZoomEnabled);
 	settings.setValue(c_ps_rotationEnabled,	m_rotationEnabled);

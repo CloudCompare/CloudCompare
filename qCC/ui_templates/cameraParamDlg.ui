@@ -204,7 +204,7 @@
         <string/>
        </property>
        <property name="pixmap">
-        <pixmap resource="../icones.qrc">:/CC/Other/images/other/Euler_angles.png</pixmap>
+        <pixmap resource="../icones.qrc">:/CC/images/imEulerAngles.png</pixmap>
        </property>
        <property name="scaledContents">
         <bool>true</bool>
@@ -251,7 +251,7 @@
        </property>
        <property name="icon">
         <iconset resource="../icones.qrc">
-         <normaloff>:/CC/Other/images/other/panier.png</normaloff>:/CC/Other/images/other/panier.png</iconset>
+         <normaloff>:/CC/images/smallBasket.png</normaloff>:/CC/images/smallBasket.png</iconset>
        </property>
       </widget>
      </item>
@@ -277,7 +277,7 @@
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
-            <normaloff>:/CC/Other/images/other/revert.png</normaloff>:/CC/Other/images/other/revert.png</iconset>
+            <normaloff>:/CC/images/smallRevert.png</normaloff>:/CC/images/smallRevert.png</iconset>
           </property>
          </widget>
         </item>
@@ -294,7 +294,7 @@
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
-            <normaloff>:/CC/Menu/images/menu/cc_ViewZpos.png</normaloff>:/CC/Menu/images/menu/cc_ViewZpos.png</iconset>
+            <normaloff>:/CC/images/ccViewZpos.png</normaloff>:/CC/images/ccViewZpos.png</iconset>
           </property>
          </widget>
         </item>
@@ -311,7 +311,7 @@
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
-            <normaloff>:/CC/Menu/images/menu/cc_ViewZneg.png</normaloff>:/CC/Menu/images/menu/cc_ViewZneg.png</iconset>
+            <normaloff>:/CC/images/ccViewZneg.png</normaloff>:/CC/images/ccViewZneg.png</iconset>
           </property>
          </widget>
         </item>
@@ -328,7 +328,7 @@
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
-            <normaloff>:/CC/Menu/images/menu/cc_ViewXpos.png</normaloff>:/CC/Menu/images/menu/cc_ViewXpos.png</iconset>
+            <normaloff>:/CC/images/ccViewXpos.png</normaloff>:/CC/images/ccViewXpos.png</iconset>
           </property>
          </widget>
         </item>
@@ -345,7 +345,7 @@
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
-            <normaloff>:/CC/Menu/images/menu/cc_ViewXneg.png</normaloff>:/CC/Menu/images/menu/cc_ViewXneg.png</iconset>
+            <normaloff>:/CC/images/ccViewXneg.png</normaloff>:/CC/images/ccViewXneg.png</iconset>
           </property>
          </widget>
         </item>
@@ -362,7 +362,7 @@
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
-            <normaloff>:/CC/Menu/images/menu/cc_ViewYpos.png</normaloff>:/CC/Menu/images/menu/cc_ViewYpos.png</iconset>
+            <normaloff>:/CC/images/ccViewYpos.png</normaloff>:/CC/images/ccViewYpos.png</iconset>
           </property>
          </widget>
         </item>
@@ -379,7 +379,7 @@
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
-            <normaloff>:/CC/Menu/images/menu/cc_ViewYneg.png</normaloff>:/CC/Menu/images/menu/cc_ViewYneg.png</iconset>
+            <normaloff>:/CC/images/ccViewYneg.png</normaloff>:/CC/images/ccViewYneg.png</iconset>
           </property>
          </widget>
         </item>
@@ -450,7 +450,7 @@
            </property>
            <property name="icon">
             <iconset resource="../icones.qrc">
-             <normaloff>:/CC/Comp/images/comp/pointPicking.png</normaloff>:/CC/Comp/images/comp/pointPicking.png</iconset>
+             <normaloff>:/CC/images/ccPointPicking.png</normaloff>:/CC/images/ccPointPicking.png</iconset>
            </property>
           </widget>
          </item>

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2174                                                              $
-//$LastChangedDate:: 2012-06-25 19:03:20 +0200 (lun., 25 juin 2012)        $
-//**************************************************************************
-//
 
 #include "ccHistogramWindow.h"
 #include "ccGuiParameters.h"
@@ -38,8 +31,6 @@
 ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/) : QGLWidget(parent)
 {
 	setWindowTitle("CloudCompare Histogram");
-	setWindowIcon(QIcon(QString::fromUtf8(":/CC/Old/images/old_cc/cc_histogramIcon.gif")));
-
 	setFocusPolicy(Qt::StrongFocus);
 
 	viewInitialized = false;

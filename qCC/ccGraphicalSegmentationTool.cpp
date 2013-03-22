@@ -568,9 +568,7 @@ void ccGraphicalSegmentationTool::doSetPolylineSelection()
 	if (!m_rectangularSelection)
 		return;
 
-	QIcon icon(QString::fromUtf8(":/CC/Comp/images/comp/polygonSelect.png"));
-	//QIcon icon;
-	//icon.addFile(QString::fromUtf8(":/CC/Comp/images/comp/polygonSelect.png"), QSize(), QIcon::Normal, QIcon::Off);
+	QIcon icon(QString::fromUtf8(":/CC/images/ccPolygonSelect.png"));
 	selectionModelButton->setIcon(icon);
 
 	m_rectangularSelection=false;
@@ -590,9 +588,7 @@ void ccGraphicalSegmentationTool::doSetRectangularSelection()
 	if (m_rectangularSelection)
 		return;
 
-	QIcon icon(QString::fromUtf8(":/CC/Comp/images/comp/rectangleSelect.png"));
-	//QIcon icon;
-	//icon.addFile(QString::fromUtf8(":/CC/Comp/images/comp/rectangleSelect.png"), QSize(), QIcon::Normal, QIcon::Off);
+	QIcon icon(QString::fromUtf8(":/CC/images/ccRectangleSelect.png"));
 	selectionModelButton->setIcon(icon);
 
 	m_rectangularSelection=true;

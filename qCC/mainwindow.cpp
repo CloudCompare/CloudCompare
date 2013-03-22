@@ -155,9 +155,46 @@ MainWindow::MainWindow()
 	, m_pfDlg(0)
 	, m_glFilterActions(this)
 	, m_3dMouseInput(0)
+	, m_viewModePopupButton(0)
+	, m_pivotVisibilityPopupButton(0)
 {
     //Dialog "auto-construction"
     setupUi(this);
+
+	//advaned widgets not handled by QDesigner
+	{
+		//view mode pop-up menu
+		{
+			QMenu* menu = new QMenu();
+			menu->addAction(actionSetOrthoView);
+			menu->addAction(actionSetCenteredPerspectiveView);
+			menu->addAction(actionSetViewerPerspectiveView);
+
+			m_viewModePopupButton = new QToolButton();
+			m_viewModePopupButton->setMenu(menu);
+			m_viewModePopupButton->setPopupMode(QToolButton::InstantPopup);
+			m_viewModePopupButton->setToolTip("Set current view mode");
+			m_viewModePopupButton->setStatusTip(m_viewModePopupButton->toolTip());
+			toolBarView->insertWidget(actionZoomAndCenter,m_viewModePopupButton);
+			m_viewModePopupButton->setEnabled(false);
+		}
+
+		//pivot center pop-up menu
+		{
+			QMenu* menu = new QMenu();
+			menu->addAction(actionSetPivotAlwaysOn);
+			menu->addAction(actionSetPivotRotationOnly);
+			menu->addAction(actionSetPivotOff);
+
+			m_pivotVisibilityPopupButton = new QToolButton();
+			m_pivotVisibilityPopupButton->setMenu(menu);
+			m_pivotVisibilityPopupButton->setPopupMode(QToolButton::InstantPopup);
+			m_pivotVisibilityPopupButton->setToolTip("Set pivot visibility");
+			m_pivotVisibilityPopupButton->setStatusTip(m_pivotVisibilityPopupButton->toolTip());
+			toolBarView->insertWidget(actionZoomAndCenter,m_pivotVisibilityPopupButton);
+			m_pivotVisibilityPopupButton->setEnabled(false);
+		}
+	}
 
     //tabifyDockWidget(DockableDBTree,DockableProperties);
 
@@ -172,6 +209,7 @@ MainWindow::MainWindow()
     m_mdiArea = new QMdiArea(this);
     setCentralWidget(m_mdiArea);
     connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(updateMenus()));
+    connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), this, SLOT(on3DViewActivated(QMdiSubWindow*)));
 
     //Window Mapper
     m_windowMapper = new QSignalMapper(this);
@@ -189,7 +227,11 @@ MainWindow::MainWindow()
 
     loadPlugins();
 
-	setup3DMouse(true);
+#ifdef CC_3DXWARE_SUPPORT
+	enable3DMouse(true,true);
+#else
+	actionEnable3DMouse->setEnabled(false);
+#endif
 
     new3DView();
 
@@ -475,6 +517,11 @@ void MainWindow::release3DMouse()
 
 void MainWindow::setup3DMouse(bool state)
 {
+	enable3DMouse(state,false);
+}
+
+void MainWindow::enable3DMouse(bool state, bool silent)
+{
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_3dMouseInput)
 		release3DMouse();
@@ -491,7 +538,10 @@ void MainWindow::setup3DMouse(bool state)
 		}
 		else
 		{
-			ccLog::Print("[3D Mouse] No device found");
+			if (silent)
+				ccLog::Print("[3D Mouse] No device found");
+			else
+				ccLog::Error("[3D Mouse] No device found");
 			state = false;
 		}
 	}
@@ -526,9 +576,24 @@ void MainWindow::on3DMouseKeyDown(int key)
 	case Mouse3DInput::V3DK_MENU:
 		if (!s_3dMouseContextMenuAlreadyShown)
 		{
-			s_3dMouseContextMenuAlreadyShown = true;
-			ccMouse3DContextMenu(&m_3dMouseInput->getMouseParams(),this).exec(QCursor::pos());
-			s_3dMouseContextMenuAlreadyShown = false;
+				s_3dMouseContextMenuAlreadyShown = true;
+
+				//is there a currently active window?
+				ccGLWindow* activeWin = getActiveGLWindow();
+				if (activeWin)
+				{
+					ccMouse3DContextMenu(&m_3dMouseInput->getMouseParams(),this).exec(QCursor::pos());
+					//in case of...
+					updateViewModePopUpMenu(activeWin);
+					updatePivotVisibilityPopUpMenu(activeWin);
+				}
+				else
+				{
+					ccLog::Error("No active 3D view! Select a 3D view first...");
+					return;
+				}
+
+				s_3dMouseContextMenuAlreadyShown = false;
 		}
 		break;
 	case Mouse3DInput::V3DK_FIT:
@@ -566,8 +631,10 @@ void MainWindow::on3DMouseKeyDown(int key)
 		ccLog::Warning("[3D mouse] clock-wise buttons not handled");
 		break;
 	case Mouse3DInput::V3DK_ISO1:
+		setIsoView1();
+		break;
 	case Mouse3DInput::V3DK_ISO2:
-		ccLog::Warning("[3D mouse] Iso buttons not handled");
+		setIsoView2();
 		break;
 	case Mouse3DInput::V3DK_ESC:
 	case Mouse3DInput::V3DK_ALT:
@@ -587,6 +654,8 @@ void MainWindow::on3DMouseKeyDown(int key)
 
 void MainWindow::on3DMouseMove(std::vector<float>& vec)
 {
+	//ccLog::PrintDebug(QString("[3D mouse] %1 %2 %3 %4 %5 %6").arg(vec[0]).arg(vec[1]).arg(vec[2]).arg(vec[3]).arg(vec[4]).arg(vec[5]));
+
 #ifdef CC_3DXWARE_SUPPORT
 
 	//no active device?
@@ -598,47 +667,28 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 	if (!win)
 		return;
 
-	//ccLog::PrintDebug(QString("[3D mouse] %1 %2 %3 %4 %5 %6").arg(vec[0]).arg(vec[1]).arg(vec[2]).arg(vec[3]).arg(vec[4]).arg(vec[5]));
-	static const float c_3dMouseDegToPix = 0.1f;
-
 	//mouse parameters
 	const Mouse3DParameters& params = m_3dMouseInput->getMouseParams();
+	bool panZoom = params.panZoomEnabled();
+	bool rotate = params.rotationEnabled();
+	if (!panZoom && !rotate)
+		return;
+
 	//view parameters
-	bool objectBased = true;
-	bool perspectiveView = win->getPerspectiveState(objectBased);
-	bool viewerBasedPerspective = perspectiveView && !objectBased;
+	bool objectMode = true;
+	bool perspectiveView = win->getPerspectiveState(objectMode);
 
 	//Viewer based perspective IS 'camera mode'
-	Mouse3DParameters::NavigationMode navigationMode = viewerBasedPerspective ? Mouse3DParameters::CameraMode : Mouse3DParameters::ObjectMode;
-	if (params.navigationMode() != navigationMode)
 	{
-		m_3dMouseInput->getMouseParams().setNavigationMode(navigationMode);
-		ccLog::Warning("[3D mouse] Navigation mode has been changed to fit current viewing mode");
+		//Mouse3DParameters::NavigationMode navigationMode = objectMode ? Mouse3DParameters::ObjectMode : Mouse3DParameters::CameraMode;
+		//if (params.navigationMode() != navigationMode)
+		//{
+		//	m_3dMouseInput->getMouseParams().setNavigationMode(navigationMode);
+		//	ccLog::Warning("[3D mouse] Navigation mode has been changed to fit current viewing mode");
+		//}
 	}
 
-	//{
-	//	QString modeName;
-	//	switch (navigationMode)
-	//	{
-	//	case Mouse3DParameters::FlyMode:
-	//		modeName = "Fly";
-	//		break;
-	//	case Mouse3DParameters::WalkMode:
-	//		modeName = "Walk";
-	//		break;
-	//	case Mouse3DParameters::HelicopterMode:
-	//		modeName = "Helicopter";
-	//		break;
-	//	default:
-	//		assert(false);
-	//		modeName = "unknown";
-	//		break;
-	//	}
-	//	ccLog::Warning("[3D mouse] The '%1' mode is not yet supported!");
-	//	return;
-	//}
-
-	if (params.panZoomEnabled())
+	if (panZoom)
 	{
 		//Zoom: object moves closer/away (only for ortho. mode)
 		if (!perspectiveView && abs(vec[1])>ZERO_TOLERANCE)
@@ -650,17 +700,18 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 		}
 		
 		//Zoom & Panning: camera moves right/left + up/down + backward/forward (only for perspective mode)
-		if (abs(vec[0])>ZERO_TOLERANCE || abs(vec[2])>ZERO_TOLERANCE || abs(vec[1])>ZERO_TOLERANCE )
+		if (abs(vec[0])>ZERO_TOLERANCE || abs(vec[1])>ZERO_TOLERANCE || abs(vec[2])>ZERO_TOLERANCE)
 		{
 			const ccViewportParameters& viewParams = win->getViewportParameters();
+			static const float c_3dMouseDegToPix = 0.1f; //magic number (empirical ;)
 			float scale = c_3dMouseDegToPix * (float)std::min(win->width(),win->height()) * viewParams.pixelSize;
-			if (objectBased)
+			if (objectMode)
 				scale = -scale;
 			win->moveCamera(vec[0]*scale,-vec[2]*scale,vec[1]*scale);
 		}
 	}
 
-	if (params.rotationEnabled())
+	if (rotate)
 	{
 		if (abs(vec[3])>ZERO_TOLERANCE
 			|| abs(vec[4])>ZERO_TOLERANCE
@@ -675,11 +726,16 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 			if (params.horizonLocked())
 				rotMat = rotMat.yRotation();
 
-			win->rotateBaseViewMat(objectBased ? rotMat : rotMat.inverse());
+			win->rotateBaseViewMat(objectMode ? rotMat : rotMat.inverse());
+			win->showPivotSymbol(true);
+		}
+		else
+		{
+			win->showPivotSymbol(false);
 		}
 	}
 
-	win->updateGL(); //does the work 'only if necessary'
+	win->redraw();
 
 #endif
 }
@@ -727,7 +783,7 @@ void MainWindow::connectActions()
     connect(actionComputeMeshLS,                SIGNAL(triggered()),    this,       SLOT(doActionComputeMeshLS()));
 	connect(actionMeshBestFittingQuadric,		SIGNAL(triggered()),    this,       SLOT(doActionComputeQuadric3D()));
     connect(actionSamplePoints,                 SIGNAL(triggered()),    this,       SLOT(doActionSamplePoints()));
-    connect(actionSmoothMesh_Laplacian,         SIGNAL(triggered()),    this,       SLOT(doActionSmoothMeshLaplacian()));
+    connect(actionSmoothMeshLaplacian,			SIGNAL(triggered()),    this,       SLOT(doActionSmoothMeshLaplacian()));
 	connect(actionSubdivideMesh,				SIGNAL(triggered()),    this,       SLOT(doActionSubdivideMesh()));
     connect(actionMeasureMeshSurface,           SIGNAL(triggered()),    this,       SLOT(doActionMeasureMeshSurface()));
     //"Edit > Mesh > Scalar Field" menu
@@ -838,12 +894,20 @@ void MainWindow::connectActions()
     connect(actionGlobalZoom,                   SIGNAL(triggered()),    this,       SLOT(setGlobalZoom()));
     connect(actionPickRotationCenter,           SIGNAL(triggered()),    this,       SLOT(doPickRotationCenter()));
     connect(actionZoomAndCenter,                SIGNAL(triggered()),    this,       SLOT(zoomOnSelectedEntities()));
+	connect(actionSetPivotAlwaysOn,				SIGNAL(triggered()),    this,       SLOT(setPivotAlwaysOn()));
+	connect(actionSetPivotRotationOnly,			SIGNAL(triggered()),    this,       SLOT(setPivotRotationOnly()));
+	connect(actionSetPivotOff,					SIGNAL(triggered()),    this,       SLOT(setPivotOff()));
+	connect(actionSetOrthoView,					SIGNAL(triggered()),    this,       SLOT(setOrthoView()));
+	connect(actionSetCenteredPerspectiveView,	SIGNAL(triggered()),    this,       SLOT(setCenteredPerspectiveView()));
+	connect(actionSetViewerPerspectiveView,		SIGNAL(triggered()),    this,       SLOT(setViewerPerspectiveView()));
     connect(actionSetViewTop,                   SIGNAL(triggered()),    this,       SLOT(setTopView()));
     connect(actionSetViewBottom,				SIGNAL(triggered()),    this,       SLOT(setBottomView()));
     connect(actionSetViewFront,                 SIGNAL(triggered()),    this,       SLOT(setFrontView()));
     connect(actionSetViewBack,                  SIGNAL(triggered()),    this,       SLOT(setBackView()));
     connect(actionSetViewLeft,					SIGNAL(triggered()),    this,       SLOT(setLeftView()));
     connect(actionSetViewRight,		            SIGNAL(triggered()),    this,       SLOT(setRightView()));
+    connect(actionSetViewIso1,		            SIGNAL(triggered()),    this,       SLOT(setIsoView1()));
+    connect(actionSetViewIso2,		            SIGNAL(triggered()),    this,       SLOT(setIsoView2()));
 
     //"Main tools" toolbar
     connect(actionTranslateRotate,              SIGNAL(triggered()),    this,       SLOT(activateTranslateRotateMode()));
@@ -4969,6 +5033,20 @@ void MainWindow::setRightView()
         win->setView(CC_RIGHT_VIEW);
 }
 
+void MainWindow::setIsoView1()
+{
+    ccGLWindow* win = getActiveGLWindow();
+    if (win)
+        win->setView(CC_ISO_VIEW_1);
+}
+
+void MainWindow::setIsoView2()
+{
+    ccGLWindow* win = getActiveGLWindow();
+    if (win)
+        win->setView(CC_ISO_VIEW_2);
+}
+
 void MainWindow::setGlobalZoom()
 {
     ccGLWindow* win = getActiveGLWindow();
@@ -5059,6 +5137,90 @@ void MainWindow::zoomOnSelectedEntities()
     delete tempGroup;
 
     refreshAll();
+}
+
+void MainWindow::setPivotAlwaysOn()
+{
+    ccGLWindow* win = getActiveGLWindow();
+    if (win)
+    {
+		win->setPivotVisibility(ccGLWindow::PIVOT_ALWAYS_SHOW);
+        win->redraw();
+
+		//update pop-up menu 'top' icon
+		if (m_pivotVisibilityPopupButton)
+			m_pivotVisibilityPopupButton->setIcon(actionSetPivotAlwaysOn->icon());
+    }
+}
+
+void MainWindow::setPivotRotationOnly()
+{
+    ccGLWindow* win = getActiveGLWindow();
+    if (win)
+    {
+		win->setPivotVisibility(ccGLWindow::PIVOT_SHOW_ON_MOVE);
+        win->redraw();
+
+		//update pop-up menu 'top' icon
+		if (m_pivotVisibilityPopupButton)
+			m_pivotVisibilityPopupButton->setIcon(actionSetPivotRotationOnly->icon());
+    }
+}
+
+void MainWindow::setPivotOff()
+{
+    ccGLWindow* win = getActiveGLWindow();
+    if (win)
+    {
+		win->setPivotVisibility(ccGLWindow::PIVOT_HIDE);
+        win->redraw();
+
+		//update pop-up menu 'top' icon
+		if (m_pivotVisibilityPopupButton)
+			m_pivotVisibilityPopupButton->setIcon(actionSetPivotOff->icon());
+    }
+}
+
+void MainWindow::setOrthoView()
+{
+    ccGLWindow* win = getActiveGLWindow();
+    if (win)
+    {
+        win->setPerspectiveState(false,true);
+        win->redraw();
+
+		//update pop-up menu 'top' icon
+		if (m_viewModePopupButton)
+			m_viewModePopupButton->setIcon(actionSetOrthoView->icon());
+    }
+}
+
+void MainWindow::setCenteredPerspectiveView()
+{
+    ccGLWindow* win = getActiveGLWindow();
+    if (win)
+    {
+        win->setPerspectiveState(true,true);
+        win->redraw();
+
+		//update pop-up menu 'top' icon
+		if (m_viewModePopupButton)
+			m_viewModePopupButton->setIcon(actionSetCenteredPerspectiveView->icon());
+    }
+}
+
+void MainWindow::setViewerPerspectiveView()
+{
+    ccGLWindow* win = getActiveGLWindow();
+    if (win)
+    {
+        win->setPerspectiveState(true,false);
+        win->redraw();
+
+		//update pop-up menu 'top' icon
+		if (m_viewModePopupButton)
+			m_viewModePopupButton->setIcon(actionSetViewerPerspectiveView->icon());
+    }
 }
 
 static ccGLWindow* s_pickingWindow = 0;
@@ -6080,6 +6242,7 @@ void MainWindow::toggleActiveWindowCenteredPerspective()
     {
         win->togglePerspective(true);
         win->redraw();
+		updateViewModePopUpMenu(win);
     }
 }
 
@@ -6090,6 +6253,7 @@ void MainWindow::toggleActiveWindowViewerBasedPerspective()
     {
         win->togglePerspective(false);
         win->redraw();
+		updateViewModePopUpMenu(win);
     }
 }
 
@@ -6645,6 +6809,94 @@ void MainWindow::saveFile()
     settings.endGroup();
 }
 
+void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
+{
+	ccGLWindow* win = mdiWin ? static_cast<ccGLWindow*>(mdiWin->widget()) : 0;
+	if (win)
+	{
+		updateViewModePopUpMenu(win);
+		updatePivotVisibilityPopUpMenu(win);
+
+
+	}
+	else
+	{
+		if (m_viewModePopupButton)
+		{
+		}
+	}
+}
+
+void MainWindow::updateViewModePopUpMenu(ccGLWindow* win)
+{
+	if (!m_viewModePopupButton)
+		return;
+
+	//update the view mode pop-up 'top' icon
+	if (win)
+	{
+		bool objectCentered = true;
+		bool perspectiveEnabled = win->getPerspectiveState(objectCentered);
+
+		QAction* currentModeAction = 0;
+		if (!perspectiveEnabled)
+			currentModeAction = actionSetOrthoView;
+		else if (objectCentered)
+			currentModeAction = actionSetCenteredPerspectiveView;
+		else
+			currentModeAction = actionSetViewerPerspectiveView;
+
+		assert(currentModeAction);
+		m_viewModePopupButton->setIcon(currentModeAction->icon());
+		m_viewModePopupButton->setEnabled(true);
+	}
+	else
+	{
+		m_viewModePopupButton->setIcon(QIcon());
+		m_viewModePopupButton->setEnabled(false);
+	}
+}
+
+void MainWindow::updatePivotVisibilityPopUpMenu(ccGLWindow* win)
+{
+	if (!m_pivotVisibilityPopupButton)
+		return;
+
+	//update the pivot visibility pop-up 'top' icon
+	if (win)
+	{
+		QAction* visibilityAction = 0;
+		switch(win->getPivotVisibility())
+		{
+		case ccGLWindow::PIVOT_HIDE:
+			visibilityAction = actionSetPivotOff;
+			break;
+		case ccGLWindow::PIVOT_SHOW_ON_MOVE:
+			visibilityAction = actionSetPivotRotationOnly;
+			break;
+		case ccGLWindow::PIVOT_ALWAYS_SHOW:
+			visibilityAction = actionSetPivotAlwaysOn;
+			break;
+		default:
+			assert(false);
+		}
+
+		if (visibilityAction)
+			m_pivotVisibilityPopupButton->setIcon(visibilityAction->icon());
+
+		//pivot is not available in viewer-based perspective!
+		bool objectCentered = true;
+		win->getPerspectiveState(objectCentered);
+		m_pivotVisibilityPopupButton->setEnabled(objectCentered);
+	}
+	else
+	{
+		m_pivotVisibilityPopupButton->setIcon(QIcon());
+		m_pivotVisibilityPopupButton->setEnabled(false);
+	}
+}
+
+
 void MainWindow::updateMenus()
 {
     ccGLWindow* win = getActiveGLWindow();
@@ -6673,15 +6925,6 @@ void MainWindow::updateMenus()
 
     //View Menu
     toolBarView->setEnabled(hasMdiChild);
-    /*actionSetViewTop->setEnabled(hasMdiChild);
-    actionViewBottom->setEnabled(hasMdiChild);
-    actionSetViewFront->setEnabled(hasMdiChild);
-    actionSetViewBack->setEnabled(hasMdiChild);
-    actionSetViewLeftSide->setEnabled(hasMdiChild);
-    actionSetViewRightSide->setEnabled(hasMdiChild);
-    actionGlobalZoom->setEnabled(hasMdiChild);
-    actionZoomAndCenter->setEnabled(hasMdiChild);
-    //*/
 
     //oher actions
     actionSegment->setEnabled(hasMdiChild && hasSelectedEntities);
@@ -6873,7 +7116,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
     actionSamplePoints->setEnabled(atLeastOneMesh);				//&& hasMesh
     actionMeasureMeshSurface->setEnabled(atLeastOneMesh);		//&& hasMesh
-	actionSmoothMesh_Laplacian->setEnabled(atLeastOneMesh);		//&& hasMesh
+	actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);		//&& hasMesh
 
     //menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);         //&& scalarField
     actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);            //&& scalarField

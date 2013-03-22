@@ -15,12 +15,12 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef MOUSE_3D_INPUT_HEADER
-#define MOUSE_3D_INPUT_HEADER
-
-/** This file is inspired from the Qt wrapper for 3dConnexion devices graciously shared by Dabid Dibben
+/** This file is inspired from the Qt wrapper for 3dConnexion devices graciously shared by Dabid Dibben:
 	http://www.codegardening.com/2011/02/using-3dconnexion-mouse-with-qt.html
 **/
+
+#ifndef MOUSE_3D_INPUT_HEADER
+#define MOUSE_3D_INPUT_HEADER
 
 #include "Mouse3DParameters.h"
 

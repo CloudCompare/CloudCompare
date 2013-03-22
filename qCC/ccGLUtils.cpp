@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #include "ccGLUtils.h"
 #include "ccConsole.h"
@@ -214,35 +207,51 @@ ccGLMatrix ccGLUtils::GenerateGLRotationMatrixFromAxisAndAngle(const float* axis
 
 ccGLMatrix ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
 {
-    float U[3],V[3];
-    U[0] = U[1] = U[2] = 0.0;
-    V[0] = V[1] = V[2] = 0.0;
+	GLdouble eye[3] = {0.0, 0.0, 0.0};
+	GLdouble top[3] = {0.0, 0.0, 0.0};
 
+	//we look at (0,0,0) by default
     switch (orientation)
     {
-    case CC_TOP_VIEW: //pXY
-        U[2] = 1.0;
-        V[1] = 1.0;
+    case CC_TOP_VIEW:
+        eye[2] = 1.0;
+        top[1] = 1.0;
         break;
-    case CC_BOTTOM_VIEW: //mXY
-        U[2] = -1.0;
-        V[1] = 1.0;
+    case CC_BOTTOM_VIEW:
+        eye[2] = -1.0;
+        top[1] = -1.0;
         break;
-    case CC_FRONT_VIEW: //pXZ
-        U[1] = -1.0;
-        V[2] = 1.0;
+    case CC_FRONT_VIEW:
+        eye[1] = -1.0;
+        top[2] = 1.0;
         break;
-    case CC_BACK_VIEW: //mXZ
-        U[1] = 1.0;
-        V[2] = 1.0;
+    case CC_BACK_VIEW:
+        eye[1] = 1.0;
+        top[2] = 1.0;
         break;
-    case CC_LEFT_VIEW: //pYZ
-        U[0] = 1.0;
-        V[2] = 1.0;
+    case CC_LEFT_VIEW:
+        eye[0] = -1.0;
+        top[2] = 1.0;
         break;
-    case CC_RIGHT_VIEW: //mYZ
-        U[0] = -1.0;
-        V[2] = 1.0;
+    case CC_RIGHT_VIEW:
+        eye[0] = 1.0;
+        top[2] = 1.0;
+        break;
+    case CC_ISO_VIEW_1:
+        eye[0] = -1.0;
+        eye[1] = -1.0;
+        eye[2] = 1.0;
+		top[0] = 1.0;
+		top[1] = 1.0;
+        top[2] = 1.0;
+        break;
+    case CC_ISO_VIEW_2:
+        eye[0] = 1.0;
+        eye[1] = 1.0;
+        eye[2] = 1.0;
+        top[0] = -1.0;
+        top[1] = -1.0;
+        top[2] = 1.0;
         break;
     }
 
@@ -251,7 +260,7 @@ ccGLMatrix ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
     glLoadIdentity();
-    gluLookAt(U[0],U[1],U[2],0.0,0.0,0.0,V[0],V[1],V[2]);
+    gluLookAt(eye[0],eye[1],eye[2],0.0,0.0,0.0,top[0],top[1],top[2]);
     glGetFloatv(GL_MODELVIEW_MATRIX, result.data());
     result.data()[14] = 0.0; //annoying value (?!)
     glPopMatrix();

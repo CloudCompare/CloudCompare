@@ -33,7 +33,7 @@
       <widget class="QToolButton" name="unstackAlignToolButton">
        <property name="icon">
         <iconset resource="../icones.qrc">
-         <normaloff>:/CC/Other/images/other/unstack.png</normaloff>:/CC/Other/images/other/unstack.png</iconset>
+         <normaloff>:/CC/images/ccUnstack.png</normaloff>:/CC/images/ccUnstack.png</iconset>
        </property>
       </widget>
      </item>
@@ -41,7 +41,7 @@
       <widget class="QToolButton" name="typeAlignToolButton">
        <property name="icon">
         <iconset resource="../icones.qrc">
-         <normaloff>:/CC/Other/images/other/pencil.png</normaloff>:/CC/Other/images/other/pencil.png</iconset>
+         <normaloff>:/CC/images/ccPencil.png</normaloff>:/CC/images/ccPencil.png</iconset>
        </property>
       </widget>
      </item>
@@ -125,7 +125,7 @@
       <widget class="QToolButton" name="unstackRefToolButton">
        <property name="icon">
         <iconset resource="../icones.qrc">
-         <normaloff>:/CC/Other/images/other/unstack.png</normaloff>:/CC/Other/images/other/unstack.png</iconset>
+         <normaloff>:/CC/images/ccUnstack.png</normaloff>:/CC/images/ccUnstack.png</iconset>
        </property>
       </widget>
      </item>
@@ -133,7 +133,7 @@
       <widget class="QToolButton" name="typeRefToolButton">
        <property name="icon">
         <iconset resource="../icones.qrc">
-         <normaloff>:/CC/Other/images/other/pencil.png</normaloff>:/CC/Other/images/other/pencil.png</iconset>
+         <normaloff>:/CC/images/ccPencil.png</normaloff>:/CC/images/ccPencil.png</iconset>
        </property>
       </widget>
      </item>
@@ -275,7 +275,7 @@
        </property>
        <property name="icon">
         <iconset resource="../icones.qrc">
-         <normaloff>:/CC/Comp/images/comp/validate.png</normaloff>:/CC/Comp/images/comp/validate.png</iconset>
+         <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
        </property>
       </widget>
      </item>
@@ -292,7 +292,7 @@
        </property>
        <property name="icon">
         <iconset resource="../icones.qrc">
-         <normaloff>:/CC/Comp/images/comp/cancel.png</normaloff>:/CC/Comp/images/comp/cancel.png</iconset>
+         <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
        </property>
       </widget>
      </item>

@@ -107,7 +107,7 @@ int main(int argc, char **argv)
 
         //splash screen
         start_time = clock();
-        QPixmap pixmap(QString::fromUtf8(":/CC/Menu/images/menu/cc_logo_v2_qt.png"));
+        QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
         splash = new QSplashScreen(pixmap,Qt::WindowStaysOnTopHint);
         splash->show();
         QApplication::processEvents();

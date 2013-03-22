@@ -54,11 +54,11 @@ namespace ccColor
 
     // Predefined materials
     static const float bright[4]			    =	{1.0f,1.0f,1.0f,1.0f};
-    static const float lighter[4]			    =	{0.78f,0.78f,0.78f,1.0f};
-    static const float light[4]				    =	{0.65f,0.65f,0.65f,1.0f};
+    static const float lighter[4]			    =	{0.83f,0.83f,0.83f,1.0f};
+    static const float light[4]				    =	{0.66f,0.66f,0.66f,1.0f};
     static const float middle[4]			    =	{0.5f,0.5f,0.5f,1.0f};
-    static const float dark[4]				    =	{0.35f,0.35f,0.35f,1.0f};
-    static const float darker[4]			    =	{0.12f,0.12f,0.12f,1.0f};
+    static const float dark[4]				    =	{0.34f,0.34f,0.34f,1.0f};
+    static const float darker[4]			    =	{0.17f,0.17f,0.17f,1.0f};
     static const float night[4]				    =	{0.0F,0.0F,0.0F,1.0F};
     static const float defaultMeshFrontDiff[4]  =   {0.0f,1.0f,0.32f,1.0f};
     static const float defaultMeshBackDiff[4]   =   {0.32f,1.0f,1.0f,1.0f};

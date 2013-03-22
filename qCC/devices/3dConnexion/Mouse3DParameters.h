@@ -15,12 +15,15 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef MOUSE_3D_PARAMETERS_HEADER
-#define MOUSE_3D_PARAMETERS_HEADER
-
 /** This file is inspired from the Qt wrapper for 3dConnexion devices graciously shared by Dabid Dibben:
 	http://www.codegardening.com/2011/02/using-3dconnexion-mouse-with-qt.html
 **/
+
+#ifndef MOUSE_3D_PARAMETERS_HEADER
+#define MOUSE_3D_PARAMETERS_HEADER
+
+//Qt
+#include <QString>
 
 //! Parameters for the 3D mouse based on the SDK from 3Dconnexion
 class Mouse3DParameters
@@ -66,33 +69,44 @@ public:
 	virtual inline SpeedMode speedMode() const { return m_speedMode; }
 	virtual inline void setSpeedMode(SpeedMode mode) { m_speedMode = mode; }
 
-	virtual inline NavigationMode navigationMode() const { return m_navigationMode; }
-	virtual inline void setNavigationMode(NavigationMode mode) { m_navigationMode = mode; }
-
-	virtual inline PivotMode pivotMode() const { return m_pivotMode; }
-	virtual inline void setPivotMode(PivotMode mode) {  if (m_pivotMode != ManualPivot || mode != AutoPivotOverride) m_pivotMode = mode; }
-	
-	virtual inline PivotVisibility pivotVisibility() const { return m_pivotVisibility; }
-	virtual inline void setPivotVisibility(PivotVisibility visibility) { m_pivotVisibility = visibility; }
-
 	virtual inline bool horizonLocked() const { return m_horizonLocked; }
 	virtual inline void lockHorizon(bool state) { m_horizonLocked = state; }
+
+	//This feature is set separately for each 3D view
+	//virtual inline NavigationMode navigationMode() const { return m_navigationMode; }
+	//virtual inline void setNavigationMode(NavigationMode mode) { m_navigationMode = mode; }
+
+	//This feature is not handled yet
+	//virtual inline PivotMode pivotMode() const { return m_pivotMode; }
+	//virtual inline void setPivotMode(PivotMode mode) {  if (m_pivotMode != ManualPivot || mode != AutoPivotOverride) m_pivotMode = mode; }
+
+	//This feature is set separately for each 3D view
+	//virtual inline PivotVisibility pivotVisibility() const { return m_pivotVisibility; }
+	//virtual inline void setPivotVisibility(PivotVisibility visibility) { m_pivotVisibility = visibility; }
 
 	//! Saves parameters to persistent settings
 	void fromPersistentSettings();
 	//! Laods parameters from persistent settings
 	void toPersistentSettings();
 
+	//! Helper: returns corresponding navigation mode name
+	static QString GetName(NavigationMode mode);
+
 protected:
 
 	SpeedMode		m_speedMode;
 	bool			m_panZoomEnabled;
 	bool			m_rotationEnabled;
-
-	NavigationMode	m_navigationMode;
-	PivotMode		m_pivotMode;
-	PivotVisibility	m_pivotVisibility;
 	bool			m_horizonLocked;
+
+	//This feature is set separately for each 3D view
+	//NavigationMode	m_navigationMode;
+
+	//This feature is not handled yet
+	//PivotMode		m_pivotMode;
+
+	//This feature is set separately for each 3D view
+	//PivotVisibility	m_pivotVisibility;
 
 };
 

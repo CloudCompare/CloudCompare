@@ -94,7 +94,7 @@
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
-            <normaloff>:/CC/Menu/images/menu/cc_histogramIcon.png</normaloff>:/CC/Menu/images/menu/cc_histogramIcon.png</iconset>
+            <normaloff>:/CC/images/ccHistogram.png</normaloff>:/CC/images/ccHistogram.png</iconset>
           </property>
          </widget>
         </item>

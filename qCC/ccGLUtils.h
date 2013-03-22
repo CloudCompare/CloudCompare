@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_GL_UTILS
 #define CC_GL_UTILS
@@ -30,12 +23,14 @@
 #include <ccGLMatrix.h>
 
 //! View orientation
-enum CC_VIEW_ORIENTATION {  CC_TOP_VIEW,
-                            CC_BOTTOM_VIEW,
-                            CC_FRONT_VIEW,
-                            CC_BACK_VIEW,
-                            CC_LEFT_VIEW,
-                            CC_RIGHT_VIEW,
+enum CC_VIEW_ORIENTATION {  CC_TOP_VIEW,	/**< Top view (eye: +Z) **/
+                            CC_BOTTOM_VIEW,	/**< Bottom view **/
+                            CC_FRONT_VIEW,	/**< Front view **/
+                            CC_BACK_VIEW,	/**< Back view **/
+                            CC_LEFT_VIEW,	/**< Left view **/
+                            CC_RIGHT_VIEW,	/**< Right view **/
+                            CC_ISO_VIEW_1,	/**< Isometric view 1: front, right and top **/
+                            CC_ISO_VIEW_2,	/**< Isometric view 2: back, left and top **/
 };
 
 class ccGLUtils

@@ -122,6 +122,7 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	, m_globalDBRoot(0) //external DB
 	, m_font(font())
 	, m_pivotVisibility(PIVOT_SHOW_ON_MOVE)
+	, m_pivotSymbolShown(false)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -558,8 +559,8 @@ void ccGLWindow::paintGL()
 		if (m_hotZoneActivated)
 		{
 			//display parameters
-			static const QPixmap c_psi_plusPix(":/CC/Other/images/other/plus.png");
-			static const QPixmap c_psi_minusPix(":/CC/Other/images/other/minus.png");
+			static const QPixmap c_psi_plusPix(":/CC/images/ccPlus.png");
+			static const QPixmap c_psi_minusPix(":/CC/images/ccMinus.png");
 			static const char c_psi_title[] = "Default point size";
 			static const int c_psi_margin = 16;
 			static const int c_psi_iconSize = 16;
@@ -1025,6 +1026,12 @@ void ccGLWindow::setCameraPos(const CCVector3& P)
 
 void ccGLWindow::moveCamera(float dx, float dy, float dz)
 {
+	if (dx != 0 || dy != 0) //camera movement? (dz doesn't count as ot only corresponds to a zoom)
+	{
+		//feedback for echo mode
+		emit cameraDisplaced(dx,dy);
+	}
+
 	//curent X, Y and Z viewing directions
 	//correspond to the 'model view' matrix
 	//lines.
@@ -1207,12 +1214,16 @@ void ccGLWindow::recalcProjectionMatrix()
 		}
 	}
 
-	//distance between camera and pivot point
-	float CP = (m_params.cameraCenter-m_params.pivotPoint).norm();
-	//distance between pivot point and DB farthest point
-	float MP = (bbCenter-m_params.pivotPoint).norm() + bbHalfDiag;
+	//virtual pivot point (i.e. to handle viewer-based mode smoothly)
+	CCVector3 pivotPoint = (m_params.objectCenteredView ? m_params.pivotPoint : bbCenter);
 
-	//pivot symbol shoud always be visible
+	//distance between camera and pivot point
+	float CP = (m_params.cameraCenter-pivotPoint).norm();
+	//distance between pivot point and DB farthest point
+	float MP = (bbCenter-pivotPoint).norm() + bbHalfDiag;
+
+	//pivot symbol shoud always be (potentially) visible in object-based mode
+	if (!m_params.objectCenteredView)
 	{
 		float pivotSymbolScale = CC_DISPLAYED_PIVOT_RADIUS * computeActualPixelSize();
 		MP = std::max<float>(MP,pivotSymbolScale);
@@ -1221,21 +1232,24 @@ void ccGLWindow::recalcProjectionMatrix()
 	if (m_customLightEnabled)
 	{
 		//distance from custom light to pivot point
-		float d = CCVector3::vdistance(m_params.pivotPoint.u,m_customLightPos);
+		float d = CCVector3::vdistance(pivotPoint.u,m_customLightPos);
 		MP = std::max<float>(MP,d);
 	}
 
 	if (m_params.perspectiveView)
 	{
 		//we deduce zNear et zFar
-		//DGM: we clip zNear just after 0 (not too close,
-		//otherwise it can cause a very strange behavior
-		//when looking at objects with large coordinates)
-		float zNear = std::max(CP-MP,MP*1e-3f);
-		float zFar = std::max(CP+MP,1.0f);
+		//DGM: by default we clip zNear just after 0 (not too close,
+		//otherwise it can cause a very strange behavior when looking
+		//at objects with large coordinates)
+		double zNear = static_cast<double>(MP)*1e-3;
+		if (m_params.objectCenteredView)
+			zNear = std::max<double>(CP-MP,zNear);
+
+		double zFar = std::max<double>(CP+MP,1.0);
 
 		//and aspect ratio
-		float ar = static_cast<float>(m_glWidth)/static_cast<float>(m_glHeight);
+		double ar = static_cast<double>(m_glWidth)/static_cast<double>(m_glHeight);
 
 		gluPerspective(m_params.fov,ar,zNear,zFar);
 	}
@@ -1724,10 +1738,8 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			float pixSize = computeActualPixelSize();// (m_params.perspectiveView ? 1.0f : m_params.zoom);
 			float ddx = (float)(-sign*dx)*pixSize/*m_params.pixelSize/zoom*/;
 			float ddy = (float)(sign*dy)*pixSize/*m_params.pixelSize/zoom*/;
-			moveCamera(ddx,ddy,0.0f);
 
-			//feedback for echo mode
-			emit cameraDisplaced(ddx,ddy);
+			moveCamera(ddx,ddy,0.0f);
 		}
 	}
 	else if (event->buttons() & Qt::LeftButton) //rotation
@@ -1756,6 +1768,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			{
 				rotateBaseViewMat(rotMat);
 
+				showPivotSymbol(true);
 				QApplication::changeOverrideCursor(QCursor(Qt::ClosedHandCursor));
 
 				//feedback for 'echo' mode
@@ -1780,8 +1793,20 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 		return;
 	}
 
+	bool cursorHasMoved = m_cursorMoved;
+	bool acceptEvent = false;
+	bool shouldRedraw = false;
+
+	//reset to default state
+	m_cursorMoved = false;
 	m_lodActivated = false;
 	QApplication::restoreOverrideCursor();
+
+	if (m_pivotSymbolShown)
+	{
+		shouldRedraw = (m_pivotVisibility == PIVOT_SHOW_ON_MOVE);
+		showPivotSymbol(false);
+	}
 
 #ifndef __APPLE__
 	if (event->button() == Qt::RightButton)
@@ -1790,7 +1815,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	  if ((event->button() == Qt::RightButton) || (QApplication::keyboardModifiers () & Qt::MetaModifier))
 #endif
 	{
-		if (!m_cursorMoved)
+		if (!cursorHasMoved)
 		{
 			//specific case: interaction with label(s)
 			updateActiveLabelsList(event->x(),event->y(),false);
@@ -1800,24 +1825,23 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				m_activeLabels.clear();
 				if (label->acceptClick(event->x(),height()-1-event->y(),Qt::RightButton))
 				{
-					event->accept();
-					redraw();
-					return;
+					acceptEvent = true;
+					shouldRedraw = true;
 				}
 			}
 		}
 		else
 		{
-			redraw();
-			event->accept();
+			acceptEvent = true;
+			shouldRedraw = true;
 		}
 	}
 	else if (event->button() == Qt::LeftButton)
 	{
-		if (m_cursorMoved)
+		if (cursorHasMoved)
 		{
-			redraw();
-			event->accept();
+			shouldRedraw = true;
+			acceptEvent = true;
 		}
 		else
 		{
@@ -1831,13 +1855,13 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				//DGM TODO: to activate when labels will take left clicks into account!
 				/*if (!m_activeLabels.empty())
 				{
-				for (std::vector<cc2DLabel*>::iterator it=m_activeLabels.begin(); it!=m_activeLabels.end(); ++it)
-				if ((*it)->acceptClick(x,y,Qt::LeftButton))
-				{
-				event->accept();
-				redraw();
-				return;
-				}
+					for (std::vector<cc2DLabel*>::iterator it=m_activeLabels.begin(); it!=m_activeLabels.end(); ++it)
+					if ((*it)->acceptClick(x,y,Qt::LeftButton))
+					{
+						event->accept();
+						redraw();
+						return;
+					}
 				}
 				//*/
 
@@ -1866,7 +1890,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 						}
 					}
 
-					event->accept();
+					acceptEvent = true;
 				}
 
 				if (!hotZoneClick && m_pickingMode != NO_PICKING)
@@ -1879,26 +1903,21 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 
 					emit leftButtonClicked(event->x(), event->y());
 
-					event->accept();
+					acceptEvent = true;
 				}
-				else
-				{
-					event->ignore();
-				}
-			}
-			else
-			{
-				event->ignore();
 			}
 		}
+
 		m_activeLabels.clear();
 	}
-	else
-	{
-		event->ignore();
-	}
 
-	m_cursorMoved = false;
+	if (acceptEvent)
+		event->accept();
+	else
+		event->ignore();
+
+	if (shouldRedraw)
+		redraw();
 }
 
 void ccGLWindow::wheelEvent(QWheelEvent* event)
@@ -2363,13 +2382,18 @@ ccGLWindow::PivotVisibility ccGLWindow::getPivotVisibility() const
 	return m_pivotVisibility;
 }
 
+void ccGLWindow::showPivotSymbol(bool state)
+{
+	m_pivotSymbolShown = state;
+}
+
 void ccGLWindow::drawPivot()
 {
 	if (!m_params.objectCenteredView)
 		return;
 
 	if (m_pivotVisibility == PIVOT_HIDE ||
-		m_pivotVisibility== PIVOT_SHOW_ON_MOVE && !m_lodActivated)
+		m_pivotVisibility == PIVOT_SHOW_ON_MOVE && !m_pivotSymbolShown)
 		return;
 
 	glMatrixMode(GL_MODELVIEW);

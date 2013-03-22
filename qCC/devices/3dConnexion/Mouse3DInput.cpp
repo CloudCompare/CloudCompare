@@ -15,6 +15,10 @@
 //#                                                                        #
 //##########################################################################
 
+/** This file is inspired from the Qt wrapper for 3dConnexion devices graciously shared by Dabid Dibben:
+	http://www.codegardening.com/2011/02/using-3dconnexion-mouse-with-qt.html
+**/
+
 #include "Mouse3DInput.h"
 
 //Qt

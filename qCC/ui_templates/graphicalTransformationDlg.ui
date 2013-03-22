@@ -64,7 +64,7 @@
         </property>
         <property name="icon">
          <iconset resource="../icones.qrc">
-          <normaloff>:/CC/Comp/images/comp/raz.png</normaloff>:/CC/Comp/images/comp/raz.png</iconset>
+          <normaloff>:/CC/images/smallReset.png</normaloff>:/CC/images/smallReset.png</iconset>
         </property>
        </widget>
       </item>
@@ -81,7 +81,7 @@
         </property>
         <property name="icon">
          <iconset resource="../icones.qrc">
-          <normaloff>:/CC/Comp/images/comp/validate.png</normaloff>:/CC/Comp/images/comp/validate.png</iconset>
+          <normaloff>:/CC/images/smallValidate.png</normaloff>:/CC/images/smallValidate.png</iconset>
         </property>
        </widget>
       </item>
@@ -98,7 +98,7 @@
         </property>
         <property name="icon">
          <iconset resource="../icones.qrc">
-          <normaloff>:/CC/Comp/images/comp/cancel.png</normaloff>:/CC/Comp/images/comp/cancel.png</iconset>
+          <normaloff>:/CC/images/smallCancel.png</normaloff>:/CC/images/smallCancel.png</iconset>
         </property>
        </widget>
       </item>

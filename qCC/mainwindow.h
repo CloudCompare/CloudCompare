@@ -194,12 +194,20 @@ protected slots:
     virtual void setBackView();
     virtual void setLeftView();
     virtual void setRightView();
+	virtual void setIsoView1();
+	virtual void setIsoView2();
     virtual void toggleActiveWindowCenteredPerspective();
     virtual void toggleActiveWindowCustomLight();
     virtual void toggleActiveWindowSunLight();
     virtual void toggleActiveWindowViewerBasedPerspective();
     virtual void zoomOnSelectedEntities();
-	
+	virtual void setPivotAlwaysOn();
+	virtual void setPivotRotationOnly();
+	virtual void setPivotOff();
+	virtual void setOrthoView();
+	virtual void setCenteredPerspectiveView();
+	virtual void setViewerPerspectiveView();
+
 	// For rotation center picking
 	virtual void doPickRotationCenter();
 	virtual void cancelPickRotationCenter();
@@ -221,6 +229,7 @@ protected slots:
     void toggleFullScreen(bool state);
     void update3DViewsMenu();
     void updateMenus();
+	void on3DViewActivated(QMdiSubWindow*);
     void updateUIWithSelection();
 
 	void echoMouseWheelRotate(float);
@@ -423,6 +432,18 @@ protected:
 	//! Releases any connected 3D mouse (if any)
 	void release3DMouse();
 
+	//! Trys to enable (or disable) a 3D mouse device
+	/** \param state whether to enable or disable the device
+		\param silent whether to issue an error message in case of failure
+	**/
+	void enable3DMouse(bool state, bool silent);
+
+	//! Updates the view mode pop-menu based for a given window (or an absence of!)
+	virtual void updateViewModePopUpMenu(ccGLWindow* win);
+
+	//! Updates the pivot visibility pop-menu based for a given window (or an absence of!)
+	virtual void updatePivotVisibilityPopUpMenu(ccGLWindow* win);
+
 	//DB & DB Tree
     ccDBRoot* m_ccRoot;
 
@@ -434,6 +455,12 @@ protected:
 
 	//! 3D mouse handler
 	Mouse3DInput* m_3dMouseInput;
+
+	//! View mode pop-up menu button
+	QToolButton* m_viewModePopupButton;
+
+	//! Pivot visibility pop-up menu button
+	QToolButton* m_pivotVisibilityPopupButton;
 
     /******************************/
     /***        MDI AREA        ***/

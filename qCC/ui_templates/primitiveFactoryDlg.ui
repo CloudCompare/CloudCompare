@@ -22,7 +22,7 @@
      <widget class="QWidget" name="planeTab">
       <attribute name="icon">
        <iconset resource="../icones.qrc">
-        <normaloff>:/CC/Primitives/images/primitives/plane.gif</normaloff>:/CC/Primitives/images/primitives/plane.gif</iconset>
+        <normaloff>:/CC/images/primPlane.gif</normaloff>:/CC/images/primPlane.gif</iconset>
       </attribute>
       <attribute name="title">
        <string>Plane</string>
@@ -109,7 +109,7 @@
      <widget class="QWidget" name="boxTab">
       <attribute name="icon">
        <iconset resource="../icones.qrc">
-        <normaloff>:/CC/Primitives/images/primitives/box.gif</normaloff>:/CC/Primitives/images/primitives/box.gif</iconset>
+        <normaloff>:/CC/images/primBox.gif</normaloff>:/CC/images/primBox.gif</iconset>
       </attribute>
       <attribute name="title">
        <string>Box</string>
@@ -219,7 +219,7 @@
      <widget class="QWidget" name="sphereTab">
       <attribute name="icon">
        <iconset resource="../icones.qrc">
-        <normaloff>:/CC/Primitives/images/primitives/sphere.gif</normaloff>:/CC/Primitives/images/primitives/sphere.gif</iconset>
+        <normaloff>:/CC/images/primSphere.gif</normaloff>:/CC/images/primSphere.gif</iconset>
       </attribute>
       <attribute name="title">
        <string>Sphere</string>
@@ -283,7 +283,7 @@
      <widget class="QWidget" name="cylTab">
       <attribute name="icon">
        <iconset resource="../icones.qrc">
-        <normaloff>:/CC/Primitives/images/primitives/cylinder.gif</normaloff>:/CC/Primitives/images/primitives/cylinder.gif</iconset>
+        <normaloff>:/CC/images/primCylinder.gif</normaloff>:/CC/images/primCylinder.gif</iconset>
       </attribute>
       <attribute name="title">
        <string>Cylinder</string>
@@ -370,7 +370,7 @@
      <widget class="QWidget" name="coneTab">
       <attribute name="icon">
        <iconset resource="../icones.qrc">
-        <normaloff>:/CC/Primitives/images/primitives/cone.gif</normaloff>:/CC/Primitives/images/primitives/cone.gif</iconset>
+        <normaloff>:/CC/images/primCone.gif</normaloff>:/CC/images/primCone.gif</iconset>
       </attribute>
       <attribute name="title">
        <string>Cone</string>
@@ -557,7 +557,7 @@
      <widget class="QWidget" name="torusTab">
       <attribute name="icon">
        <iconset resource="../icones.qrc">
-        <normaloff>:/CC/Primitives/images/primitives/torus.gif</normaloff>:/CC/Primitives/images/primitives/torus.gif</iconset>
+        <normaloff>:/CC/images/primTorus.gif</normaloff>:/CC/images/primTorus.gif</iconset>
       </attribute>
       <attribute name="title">
        <string>Torus</string>
@@ -709,7 +709,7 @@
      <widget class="QWidget" name="dishTab">
       <attribute name="icon">
        <iconset resource="../icones.qrc">
-        <normaloff>:/CC/Primitives/images/primitives/dish.gif</normaloff>:/CC/Primitives/images/primitives/dish.gif</iconset>
+        <normaloff>:/CC/images/primDish.gif</normaloff>:/CC/images/primDish.gif</iconset>
       </attribute>
       <attribute name="title">
        <string>Dish</string>

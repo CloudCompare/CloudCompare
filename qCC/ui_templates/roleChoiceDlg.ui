@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>RoleChoiceDialog</class>
- <widget class="QDialog" name="RoleChoiceDialog" >
-  <property name="geometry" >
+ <widget class="QDialog" name="RoleChoiceDialog">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,44 +10,41 @@
     <height>102</height>
    </rect>
   </property>
-  <property name="minimumSize" >
+  <property name="minimumSize">
    <size>
     <width>0</width>
     <height>102</height>
    </size>
   </property>
-  <property name="maximumSize" >
+  <property name="maximumSize">
    <size>
     <width>16777215</width>
     <height>102</height>
    </size>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Choose role</string>
   </property>
-  <layout class="QVBoxLayout" >
+  <layout class="QVBoxLayout">
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
-      <widget class="QToolButton" name="firstColorButton" >
-       <property name="enabled" >
+      <widget class="QToolButton" name="firstColorButton">
+       <property name="enabled">
         <bool>false</bool>
-       </property>
-       <property name="text" >
-        <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="firstlabel" >
-       <property name="text" >
+      <widget class="QLabel" name="firstlabel">
+       <property name="text">
         <string>Compared</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="firstLineEdit" >
-       <property name="readOnly" >
+      <widget class="QLineEdit" name="firstLineEdit">
+       <property name="readOnly">
         <bool>true</bool>
        </property>
       </widget>
@@ -54,27 +52,24 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
-      <widget class="QToolButton" name="secondColorButton" >
-       <property name="enabled" >
+      <widget class="QToolButton" name="secondColorButton">
+       <property name="enabled">
         <bool>false</bool>
-       </property>
-       <property name="text" >
-        <string/>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="secondlabel" >
-       <property name="text" >
+      <widget class="QLabel" name="secondlabel">
+       <property name="text">
         <string>Reference</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="secondLineEdit" >
-       <property name="readOnly" >
+      <widget class="QLineEdit" name="secondLineEdit">
+       <property name="readOnly">
         <bool>true</bool>
        </property>
       </widget>
@@ -82,13 +77,13 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" >
+    <layout class="QHBoxLayout">
      <item>
       <spacer>
-       <property name="orientation" >
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -97,19 +92,19 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="swapButton" >
-       <property name="text" >
+      <widget class="QPushButton" name="swapButton">
+       <property name="text">
         <string>Swap</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QDialogButtonBox" name="buttonBox" >
-       <property name="orientation" >
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="standardButtons" >
-        <set>QDialogButtonBox::Cancel|QDialogButtonBox::NoButton|QDialogButtonBox::Ok</set>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
        </property>
       </widget>
      </item>
@@ -125,11 +120,11 @@
    <receiver>RoleChoiceDialog</receiver>
    <slot>accept()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>248</x>
      <y>254</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>157</x>
      <y>274</y>
     </hint>
@@ -141,11 +136,11 @@
    <receiver>RoleChoiceDialog</receiver>
    <slot>reject()</slot>
    <hints>
-    <hint type="sourcelabel" >
+    <hint type="sourcelabel">
      <x>316</x>
      <y>260</y>
     </hint>
-    <hint type="destinationlabel" >
+    <hint type="destinationlabel">
      <x>286</x>
      <y>274</y>
     </hint>

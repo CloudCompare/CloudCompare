@@ -262,14 +262,14 @@ void AsciiOpenDlg::updateTable(const QString &separator)
     columnWidth = std::max(columnWidth,80);
 
 	//Icons
-	const QIcon xIcon(QString::fromUtf8(":/CC/Types/images/types/x_coordinate.png"));
-	const QIcon yIcon(QString::fromUtf8(":/CC/Types/images/types/y_coordinate.png"));
-	const QIcon zIcon(QString::fromUtf8(":/CC/Types/images/types/z_coordinate.png"));
-	const QIcon NormIcon(QString::fromUtf8(":/CC/Types/images/types/normal.png"));
-	const QIcon RGBIcon(QString::fromUtf8(":/CC/Types/images/types/rgb_color.png"));
-	const QIcon GreyIcon(QString::fromUtf8(":/CC/Types/images/types/gray_color.png"));
-	const QIcon ScalarIcon(QString::fromUtf8(":/CC/Types/images/types/scalar_field.png"));
-	const QIcon PositiveScalarIcon(QString::fromUtf8(":/CC/Types/images/types/positive_scalar_field.png"));
+	const QIcon xIcon				(QString::fromUtf8(":/CC/images/typeXCoordinate.png"));
+	const QIcon yIcon				(QString::fromUtf8(":/CC/images/typeYCoordinate.png"));
+	const QIcon zIcon				(QString::fromUtf8(":/CC/images/typeZCoordinate.png"));
+	const QIcon NormIcon			(QString::fromUtf8(":/CC/images/typeNormal.png"));
+	const QIcon RGBIcon				(QString::fromUtf8(":/CC/images/typeRgbCcolor.png"));
+	const QIcon GreyIcon			(QString::fromUtf8(":/CC/images/typeGrayColor.png"));
+	const QIcon ScalarIcon			(QString::fromUtf8(":/CC/images/typeSF.png"));
+	const QIcon PositiveScalarIcon	(QString::fromUtf8(":/CC/images/typePositiveSF.png"));
 
 	unsigned assignedXYZ = 0;
 	unsigned assignedNorm = 0;

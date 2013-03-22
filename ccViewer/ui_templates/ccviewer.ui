@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>884</width>
-    <height>556</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -83,7 +83,7 @@ QStatusBar
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>884</width>
+     <width>800</width>
      <height>21</height>
     </rect>
    </property>
@@ -162,8 +162,8 @@ QStatusBar
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actionDisplayParameters">
    <property name="icon">
-    <iconset>
-     <normaloff>:/CC/Menu/images/menu/cc_lightParamsIcon.png</normaloff>:/CC/Menu/images/menu/cc_lightParamsIcon.png</iconset>
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccLightParams.png</normaloff>:/CC/images/ccLightParams.png</iconset>
    </property>
    <property name="text">
     <string>Display parameters</string>
@@ -240,7 +240,7 @@ QStatusBar
   <action name="actionEditCamera">
    <property name="icon">
     <iconset resource="../../qCC/icones.qrc">
-     <normaloff>:/CC/Menu/images/menu/camera.png</normaloff>:/CC/Menu/images/menu/camera.png</iconset>
+     <normaloff>:/CC/images/ccCamera.png</normaloff>:/CC/images/ccCamera.png</iconset>
    </property>
    <property name="text">
     <string>Camera parameters</string>
@@ -296,7 +296,7 @@ QStatusBar
   <action name="actionSetViewFront">
    <property name="icon">
     <iconset resource="../../qCC/icones.qrc">
-     <normaloff>:/CC/Menu/images/menu/cc_ViewYpos.png</normaloff>:/CC/Menu/images/menu/cc_ViewYpos.png</iconset>
+     <normaloff>:/CC/images/ccViewYpos.png</normaloff>:/CC/images/ccViewYpos.png</iconset>
    </property>
    <property name="text">
     <string>Front</string>
@@ -311,7 +311,7 @@ QStatusBar
   <action name="actionSetViewBack">
    <property name="icon">
     <iconset resource="../../qCC/icones.qrc">
-     <normaloff>:/CC/Menu/images/menu/cc_ViewYneg.png</normaloff>:/CC/Menu/images/menu/cc_ViewYneg.png</iconset>
+     <normaloff>:/CC/images/ccViewYneg.png</normaloff>:/CC/images/ccViewYneg.png</iconset>
    </property>
    <property name="text">
     <string>Back</string>
@@ -326,7 +326,7 @@ QStatusBar
   <action name="actionSetViewLeft">
    <property name="icon">
     <iconset resource="../../qCC/icones.qrc">
-     <normaloff>:/CC/Menu/images/menu/cc_ViewXpos.png</normaloff>:/CC/Menu/images/menu/cc_ViewXpos.png</iconset>
+     <normaloff>:/CC/images/ccViewXpos.png</normaloff>:/CC/images/ccViewXpos.png</iconset>
    </property>
    <property name="text">
     <string>Left</string>
@@ -341,7 +341,7 @@ QStatusBar
   <action name="actionSetViewRight">
    <property name="icon">
     <iconset resource="../../qCC/icones.qrc">
-     <normaloff>:/CC/Menu/images/menu/cc_ViewXneg.png</normaloff>:/CC/Menu/images/menu/cc_ViewXneg.png</iconset>
+     <normaloff>:/CC/images/ccViewXneg.png</normaloff>:/CC/images/ccViewXneg.png</iconset>
    </property>
    <property name="text">
     <string>Right</string>
@@ -356,7 +356,7 @@ QStatusBar
   <action name="actionSetViewTop">
    <property name="icon">
     <iconset resource="../../qCC/icones.qrc">
-     <normaloff>:/CC/Menu/images/menu/cc_ViewZpos.png</normaloff>:/CC/Menu/images/menu/cc_ViewZpos.png</iconset>
+     <normaloff>:/CC/images/ccViewZpos.png</normaloff>:/CC/images/ccViewZpos.png</iconset>
    </property>
    <property name="text">
     <string>Top</string>
@@ -371,7 +371,7 @@ QStatusBar
   <action name="actionSetViewBottom">
    <property name="icon">
     <iconset resource="../../qCC/icones.qrc">
-     <normaloff>:/CC/Menu/images/menu/cc_ViewZneg.png</normaloff>:/CC/Menu/images/menu/cc_ViewZneg.png</iconset>
+     <normaloff>:/CC/images/ccViewZneg.png</normaloff>:/CC/images/ccViewZneg.png</iconset>
    </property>
    <property name="text">
     <string>Bottom</string>
@@ -442,6 +442,10 @@ QStatusBar
    </property>
   </action>
   <action name="actionDelete">
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccDelete.png</normaloff>:/CC/images/ccDelete.png</iconset>
+   </property>
    <property name="text">
     <string>Delete</string>
    </property>

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2127                                                              $
-//$LastChangedDate:: 2012-05-11 11:35:03 +0200 (ven., 11 mai 2012)         $
-//**************************************************************************
-//
 
 #ifndef CC_HISTOGRAM_WINDOW_HEADER
 #define CC_HISTOGRAM_WINDOW_HEADER

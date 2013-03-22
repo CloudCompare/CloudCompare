@@ -597,10 +597,12 @@ void MainWindow::on3DMouseKeyDown(int key)
 		}
 		break;
 	case Mouse3DInput::V3DK_FIT:
-		if (m_selectedEntities.empty())
-			setGlobalZoom();
-		else
-			zoomOnSelectedEntities();
+		{
+			if (m_selectedEntities.empty())
+				setGlobalZoom();
+			else
+				zoomOnSelectedEntities();
+		}
 		break;
 	case Mouse3DInput::V3DK_TOP:
 		setTopView();
@@ -626,23 +628,25 @@ void MainWindow::on3DMouseKeyDown(int key)
 	case Mouse3DInput::V3DK_PANZOOM:
 		m_3dMouseInput->getMouseParams().enablePanZoom(!m_3dMouseInput->getMouseParams().panZoomEnabled());
 		break;
-	case Mouse3DInput::V3DK_CW:
-	case Mouse3DInput::V3DK_CCW:
-		ccLog::Warning("[3D mouse] clock-wise buttons not handled");
-		break;
 	case Mouse3DInput::V3DK_ISO1:
 		setIsoView1();
 		break;
 	case Mouse3DInput::V3DK_ISO2:
 		setIsoView2();
 		break;
+	case Mouse3DInput::V3DK_PLUS:
+		m_3dMouseInput->getMouseParams().accelerate();
+		break;
+	case Mouse3DInput::V3DK_MINUS:
+		m_3dMouseInput->getMouseParams().slowDown();
+		break;
+	case Mouse3DInput::V3DK_CW:
+	case Mouse3DInput::V3DK_CCW:
 	case Mouse3DInput::V3DK_ESC:
 	case Mouse3DInput::V3DK_ALT:
 	case Mouse3DInput::V3DK_SHIFT:
 	case Mouse3DInput::V3DK_CTRL:
 	case Mouse3DInput::V3DK_DOMINANT:
-	case Mouse3DInput::V3DK_PLUS:
-	case Mouse3DInput::V3DK_MINUS:
 	default:
 		ccLog::Warning("[3D mouse] This button is not handled (yet)");
 		//TODO
@@ -705,6 +709,12 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 			const ccViewportParameters& viewParams = win->getViewportParameters();
 			static const float c_3dMouseDegToPix = 0.1f; //magic number (empirical ;)
 			float scale = c_3dMouseDegToPix * (float)std::min(win->width(),win->height()) * viewParams.pixelSize;
+			if (perspectiveView)
+			{
+				float tanFOV = tan(viewParams.fov*CC_DEG_TO_RAD*0.5f);
+				vec[0] /= tanFOV;
+				vec[2] /= tanFOV;
+			}
 			if (objectMode)
 				scale = -scale;
 			win->moveCamera(vec[0]*scale,-vec[2]*scale,vec[1]*scale);

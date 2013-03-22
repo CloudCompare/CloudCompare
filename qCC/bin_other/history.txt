@@ -15,6 +15,7 @@ v2.4 03/17/2013
 	* 3D rotation center symbol added (can be 'always visible', 'only when moving' or 'hidden')
 	* default views (top, bottom, left, etc.) are more 'natural'
 	* new default views added (front and back 'isometric' views)
+	* default FOV (field of view) is now 30° for perspective mode
 - New pop-menus added to the 'View' toolbar:
 	* selection of the current rotation center visibility (see above)
 	* selection of the current view mode (orthographic, object-based and viewer-based perspective)

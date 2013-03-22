@@ -29,7 +29,7 @@ ccViewportParameters::ccViewportParameters()
 	, objectCenteredView(true)
 	, pivotPoint(0.0f)
 	, cameraCenter(0.0f)
-	, fov(50.0f)
+	, fov(30.0f)
 	, aspectRatio(1.0f)
 {
 	viewMat.toIdentity();

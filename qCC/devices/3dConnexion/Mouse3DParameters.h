@@ -86,8 +86,13 @@ public:
 
 	//! Saves parameters to persistent settings
 	void fromPersistentSettings();
-	//! Laods parameters from persistent settings
+	//! Loads parameters from persistent settings
 	void toPersistentSettings();
+
+	//! Accelerates (set next speed mode - if any)
+	void accelerate();
+	//! Slows down (set preceding speed mode - if any)
+	void slowDown();
 
 	//! Helper: returns corresponding navigation mode name
 	static QString GetName(NavigationMode mode);

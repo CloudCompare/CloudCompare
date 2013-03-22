@@ -60,7 +60,7 @@ const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
 //Vaious overlay elements dimensions
 const float CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
-const float CC_DISPLAYED_PIVOT_RADIUS = 50.0f;
+const float CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8f; //percentage of the smallest screen dimension
 const float CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0f;
 const float CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
 
@@ -319,6 +319,13 @@ void ccGLWindow::resizeGL(int w, int h)
 		s_resizeGLInitSuccess &= initFBO(m_glWidth,m_glHeight);
 	if (m_activeGLFilter)
 		s_resizeGLInitSuccess &= initGLFilter(m_glWidth,m_glHeight);
+
+	//pivot symbol is dependent on the screen size!
+	if (m_pivotGLList != GL_INVALID_LIST_ID)
+	{
+		glDeleteLists(m_pivotGLList,1);
+		m_pivotGLList = GL_INVALID_LIST_ID;
+	}
 
 	displayNewMessage(QString("New size = %1 * %2 (px)").arg(w).arg(h),
 						ccGLWindow::LOWER_LEFT_MESSAGE,
@@ -1223,9 +1230,11 @@ void ccGLWindow::recalcProjectionMatrix()
 	float MP = (bbCenter-pivotPoint).norm() + bbHalfDiag;
 
 	//pivot symbol shoud always be (potentially) visible in object-based mode
-	if (!m_params.objectCenteredView)
+	if (m_pivotSymbolShown && m_params.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
+	//if (m_params.objectCenteredView)
 	{
-		float pivotSymbolScale = CC_DISPLAYED_PIVOT_RADIUS * computeActualPixelSize();
+		float pivotActualRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * (float)std::min(m_glWidth,m_glHeight) * 0.5f;
+		float pivotSymbolScale = pivotActualRadius * computeActualPixelSize();
 		MP = std::max<float>(MP,pivotSymbolScale);
 	}
 	
@@ -2352,7 +2361,7 @@ void ccGLWindow::drawCustomLight()
 }
 
 //draw a unit circle in a given plane (0=YZ, 1 = XZ, 2=XY) 
-void glDrawUnitCircle(unsigned char dim, int steps = 32)
+void glDrawUnitCircle(unsigned char dim, int steps = 64)
 {
 	float thetaStep = static_cast<float>(2.0*M_PI/(double)steps);
 	float theta = 0.0f;
@@ -2384,6 +2393,12 @@ ccGLWindow::PivotVisibility ccGLWindow::getPivotVisibility() const
 
 void ccGLWindow::showPivotSymbol(bool state)
 {
+	//is the pivot really going to be drawn?
+	if (state && !m_pivotSymbolShown && m_params.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
+	{
+		invalidateViewport();
+	}
+
 	m_pivotSymbolShown = state;
 }
 
@@ -2402,10 +2417,9 @@ void ccGLWindow::drawPivot()
 	//place origin on pivot point
 	glTranslatef(m_params.pivotPoint.x, m_params.pivotPoint.y, m_params.pivotPoint.z);
 
-	//constant scale
-	float scale = CC_DISPLAYED_PIVOT_RADIUS * computeActualPixelSize();
-	glScalef(scale,scale,scale);
-	
+	//compute actual symbol radius
+	float symbolRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * (float)std::min(m_glWidth,m_glHeight) * 0.5f;
+
 	if (m_pivotGLList == GL_INVALID_LIST_ID)
 	{
 		m_pivotGLList = glGenLists(1);
@@ -2413,7 +2427,7 @@ void ccGLWindow::drawPivot()
 
 		//draw a small sphere
 		{
-			ccSphere sphere(5.0f/CC_DISPLAYED_PIVOT_RADIUS);
+			ccSphere sphere(10.0f/symbolRadius);
 			sphere.setColor(ccColor::yellow);
 			sphere.showColors(true);
 			sphere.setVisible(true);
@@ -2432,23 +2446,27 @@ void ccGLWindow::drawPivot()
 		//draw 3 circles
 		glPushAttrib(GL_LINE_BIT);
 		glEnable(GL_LINE_SMOOTH);
+		glPushAttrib(GL_COLOR_BUFFER_BIT);
+		glEnable(GL_BLEND);
+		const float c_alpha = 0.6f;
+		glLineWidth(2.0f);
 
 		//pivot symbol: 3 circles
-		glColor3f(1.0f,0.0f,0.0f);
+		glColor4f(1.0f,0.0f,0.0f,c_alpha);
 		glDrawUnitCircle(0);
 		glBegin(GL_LINES);
 		glVertex3f(-1.0f,0.0f,0.0f);
 		glVertex3f( 1.0f,0.0f,0.0f);
 		glEnd();
 
-		glColor3f(0.0f,1.0f,0.0f);
+		glColor4f(0.0f,1.0f,0.0f,c_alpha);
 		glDrawUnitCircle(1);
 		glBegin(GL_LINES);
 		glVertex3f(0.0f,-1.0f,0.0f);
 		glVertex3f(0.0f, 1.0f,0.0f);
 		glEnd();
 
-		glColor3f(0.0f,0.7f,1.0f);
+		glColor4f(0.0f,0.7f,1.0f,c_alpha);
 		glDrawUnitCircle(2);
 		glBegin(GL_LINES);
 		glVertex3f(0.0f,0.0f,-1.0f);
@@ -2456,9 +2474,15 @@ void ccGLWindow::drawPivot()
 		glEnd();
 
 		glPopAttrib();
+		glPopAttrib();
 
 		glEndList();
 	}
+
+	//constant scale
+	float scale = symbolRadius * computeActualPixelSize();
+	glScalef(scale,scale,scale);
+	
 	glCallList(m_pivotGLList);
 
 	glPopMatrix();
@@ -2671,7 +2695,14 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 {
 	makeCurrent();
 
+	bool wasViewerBased = !m_params.objectCenteredView;
+	if (wasViewerBased)
+		setPerspectiveState(m_params.perspectiveView,true);
+
 	m_params.viewMat = ccGLUtils::GenerateViewMat(orientation);
+
+	if (wasViewerBased)
+		setPerspectiveState(m_params.perspectiveView,false);
 
 	invalidateVisualization();
 

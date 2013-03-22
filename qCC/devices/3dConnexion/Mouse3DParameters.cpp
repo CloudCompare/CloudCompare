@@ -104,3 +104,47 @@ void Mouse3DParameters::toPersistentSettings()
 	settings.setValue(c_ps_rotationEnabled,	m_rotationEnabled);
 	settings.setValue(c_ps_horizonLocked,	m_horizonLocked);
 }
+
+void Mouse3DParameters::accelerate()
+{
+	switch(m_speedMode)
+	{
+	case LowestSpeed:
+		setSpeedMode(Mouse3DParameters::LowSpeed);
+		break;
+	case LowSpeed:
+		setSpeedMode(Mouse3DParameters::MidSpeed);
+		break;
+	case MidSpeed:
+		setSpeedMode(Mouse3DParameters::HighSpeed);
+		break;
+	case HighSpeed:
+		setSpeedMode(Mouse3DParameters::HighestSpeed);
+		break;
+	case HighestSpeed:
+		//can't accelerate any more!
+		break;
+	}
+}
+
+void Mouse3DParameters::slowDown()
+{
+	switch(m_speedMode)
+	{
+	case LowestSpeed:
+		//can't slow down any more
+		break;
+	case LowSpeed:
+		setSpeedMode(Mouse3DParameters::LowestSpeed);
+		break;
+	case MidSpeed:
+		setSpeedMode(Mouse3DParameters::LowSpeed);
+		break;
+	case HighSpeed:
+		setSpeedMode(Mouse3DParameters::MidSpeed);
+		break;
+	case HighestSpeed:
+		setSpeedMode(Mouse3DParameters::HighSpeed);
+		break;
+	}
+}

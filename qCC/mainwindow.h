@@ -43,6 +43,7 @@
 
 class QMdiArea;
 class QSignalMapper;
+class QToolButton;
 class QAction;
 class ccGLWindow;
 class ccHObject;

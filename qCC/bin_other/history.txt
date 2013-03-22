@@ -21,6 +21,7 @@ v2.4 03/17/2013
 - Default specular color for light is now darker (so that meshes are less 'shiny' by dfault)
 - bug fix:
 	* BIN files saved with labels would make CC crash when re-opened!
+	* Closing the 'About' dialog would make CC crash!
 
 v2.4 03/10/2013
 - Points size can now be independently set for each cloud

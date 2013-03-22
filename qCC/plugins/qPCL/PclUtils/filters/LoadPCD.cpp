@@ -36,8 +36,15 @@
 //System
 #include <iostream>
 
+//pcl
+#include <pcl/filters/passthrough.h>
+
 LoadPCD::LoadPCD()
-	: BaseFilter(FilterDescription("LoadPCD", "Load PCD FIle", "Load a PCD File", ":/toolbar/PclUtils/icons/load.png", true))
+    : BaseFilter(FilterDescription("LoadPCD",
+                                   "Load PCD FIle",
+                                   "Load a PCD File",
+                                   ":/toolbar/PclUtils/icons/load.png",
+                                   true))
 {
 }
 
@@ -80,10 +87,23 @@ int LoadPCD::compute()
 	{
 		QString filename = m_filenames[k];
 
-		sensor_msgs::PointCloud2 * pcd_sensor_cloud = loadSensorMessage(filename);
+        sensor_msgs::PointCloud2 * pcd_sensor_cloud_in = loadSensorMessage(filename);
+        boost::shared_ptr<sensor_msgs::PointCloud2> cloud_ptr_in = boost::make_shared<sensor_msgs::PointCloud2>(*pcd_sensor_cloud_in);
+        sensor_msgs::PointCloud2::Ptr  cloud_ptr (new sensor_msgs::PointCloud2);
 
-		boost::shared_ptr<sensor_msgs::PointCloud2> cloud_ptr = boost::make_shared<sensor_msgs::PointCloud2>(*pcd_sensor_cloud);
-		ccPointCloud* out_cloud = sm2ccConverter(cloud_ptr).getCCloud();
+        if (pcd_sensor_cloud_in->is_dense == false) //data may contain nans. Remove them
+        {
+            //now we need to remove nans
+            pcl::PassThrough<sensor_msgs::PointCloud2> passFilter;
+            passFilter.setInputCloud(cloud_ptr_in);
+            passFilter.filter(*cloud_ptr);
+        }
+        else
+            cloud_ptr = cloud_ptr_in;
+
+
+
+        ccPointCloud* out_cloud = sm2ccConverter(cloud_ptr).getCCloud();
 		if (!out_cloud)
 			return -31;
 

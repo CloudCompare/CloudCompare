@@ -105,7 +105,7 @@ public:
 		, gp(progress_cb)
 	{
 		assert(progress_cb);
-		scale(totalSteps, totalPercentage==100 && totalSteps<500 ? totalSteps : totalPercentage);
+		scale(totalSteps, totalPercentage);
 	}
 
 	//! Scales inner parameters so that 'totalSteps' calls of the 'oneStep' method correspond to 'totalPercentage' percents
@@ -117,10 +117,17 @@ public:
 			return;
 		}
 
-        if (totalSteps>totalPercentage)
-            step = unsigned(ceil((float)totalSteps/(float)totalPercentage));
+        if (totalSteps >= 2*totalPercentage)
+		{
+            step = static_cast<unsigned>(ceil(static_cast<float>(totalSteps)/static_cast<float>(totalPercentage)));
+			assert(step!=0);
+            percentAdd = static_cast<float>(totalPercentage)/static_cast<float>(step);
+		}
         else
+		{
+			step = 1;
             percentAdd = (float)totalPercentage/(float)totalSteps;
+		}
 
 		if (updateCurrentProgress)
 		{

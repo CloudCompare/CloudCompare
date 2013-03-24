@@ -2590,6 +2590,8 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 
 	setCameraPos(m_params.pivotPoint + PC);
 
+	emit perspectiveStateChanged();
+
 	//auto-save last perspective settings
 	{
 		QSettings settings;

@@ -348,6 +348,8 @@ signals:
 	//! Signal emitted when the mouse wheel is rotated
     void mouseWheelRotated(float wheelDelta_deg);
 
+	//! Signal emitted when the perspective state changes (see setPerspectiveState)
+	void perspectiveStateChanged();
 
 	//! Signal emitted when the window 'base view' matrix is changed
     void baseViewMatChanged(const ccGLMatrix& newViewMat);

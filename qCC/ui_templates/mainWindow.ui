@@ -1403,10 +1403,10 @@
     <string>Top View</string>
    </property>
    <property name="toolTip">
-    <string>Set top View</string>
+    <string>Set top view</string>
    </property>
    <property name="statusTip">
-    <string>Set top View</string>
+    <string>Set top view</string>
    </property>
    <property name="shortcut">
     <string>8</string>
@@ -1424,10 +1424,10 @@
     <string>Front View</string>
    </property>
    <property name="toolTip">
-    <string>Set front View</string>
+    <string>Set front view</string>
    </property>
    <property name="statusTip">
-    <string>Set front View</string>
+    <string>Set front view</string>
    </property>
    <property name="shortcut">
     <string>5</string>
@@ -1445,10 +1445,10 @@
     <string>Back View</string>
    </property>
    <property name="toolTip">
-    <string>Set back View</string>
+    <string>Set back view</string>
    </property>
    <property name="statusTip">
-    <string>Set back View</string>
+    <string>Set back view</string>
    </property>
    <property name="shortcut">
     <string>0</string>
@@ -2211,6 +2211,10 @@
    </property>
   </action>
   <action name="actionSetViewIso1">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccViewIso1.png</normaloff>:/CC/images/ccViewIso1.png</iconset>
+   </property>
    <property name="text">
     <string>Iso 1</string>
    </property>
@@ -2228,6 +2232,10 @@
    </property>
   </action>
   <action name="actionSetViewIso2">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccViewIso2.png</normaloff>:/CC/images/ccViewIso2.png</iconset>
+   </property>
    <property name="text">
     <string>Iso 2</string>
    </property>

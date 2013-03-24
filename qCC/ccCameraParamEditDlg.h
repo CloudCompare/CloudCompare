@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_CAMERA_PARAM_EDIT_DLG_HEADER
 #define CC_CAMERA_PARAM_EDIT_DLG_HEADER
@@ -74,12 +67,20 @@ public slots:
 	//! Updates dialog values with pivot point
 	void updatePivotPoint(const CCVector3& P);
 
+	//! Updates dialog values with camera center
+	void updateCameraCenter(const CCVector3& P);
+
+	//! Updates current view mode
+	void updateViewMode();
+
     void setFrontView();
     void setBottomView();
     void setTopView();
     void setBackView();
     void setLeftView();
     void setRightView();
+	void setIso1View();
+	void setIso2View();
 
     void iThetaValueChanged(int);
     void iPsiValueChanged(int);
@@ -89,7 +90,8 @@ public slots:
     void dPsiValueChanged(double);
     void dPhiValueChanged(double);
 
-    void translationChanged(double);
+    void pivotChanged();
+	void cameraCenterChanged();
     void fovChanged(double);
 
 	void pickPointAsPivot();

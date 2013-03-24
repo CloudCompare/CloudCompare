@@ -6,14 +6,38 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>581</height>
+    <width>316</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Camera parameters</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Current mode:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="currentModeLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>parallel projection</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item>
     <layout class="QGridLayout" name="gridLayout">
      <item row="0" column="0">
@@ -289,9 +313,6 @@
           <property name="statusTip">
            <string>Set 'up' view</string>
           </property>
-          <property name="text">
-           <string>...</string>
-          </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
             <normaloff>:/CC/images/ccViewZpos.png</normaloff>:/CC/images/ccViewZpos.png</iconset>
@@ -305,9 +326,6 @@
           </property>
           <property name="statusTip">
            <string>Set 'down' view</string>
-          </property>
-          <property name="text">
-           <string>...</string>
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
@@ -323,9 +341,6 @@
           <property name="statusTip">
            <string>Set 'left' view</string>
           </property>
-          <property name="text">
-           <string>...</string>
-          </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
             <normaloff>:/CC/images/ccViewXpos.png</normaloff>:/CC/images/ccViewXpos.png</iconset>
@@ -339,9 +354,6 @@
           </property>
           <property name="statusTip">
            <string>Set 'right' view</string>
-          </property>
-          <property name="text">
-           <string>...</string>
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
@@ -357,9 +369,6 @@
           <property name="statusTip">
            <string>Set 'front' view</string>
           </property>
-          <property name="text">
-           <string>...</string>
-          </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
             <normaloff>:/CC/images/ccViewYpos.png</normaloff>:/CC/images/ccViewYpos.png</iconset>
@@ -374,12 +383,37 @@
           <property name="statusTip">
            <string>Set 'back' view</string>
           </property>
-          <property name="text">
-           <string>...</string>
-          </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
             <normaloff>:/CC/images/ccViewYneg.png</normaloff>:/CC/images/ccViewYneg.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="viewIso1ToolButton">
+          <property name="toolTip">
+           <string>Set 'front' isometric view</string>
+          </property>
+          <property name="statusTip">
+           <string>Set 'front' isometric view</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../icones.qrc">
+            <normaloff>:/CC/images/ccViewIso1.png</normaloff>:/CC/images/ccViewIso1.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="viewIso2ToolButton">
+          <property name="toolTip">
+           <string>Set 'back' isometric view</string>
+          </property>
+          <property name="statusTip">
+           <string>Set 'back' isometric view</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../icones.qrc">
+            <normaloff>:/CC/images/ccViewIso2.png</normaloff>:/CC/images/ccViewIso2.png</iconset>
           </property>
          </widget>
         </item>
@@ -409,28 +443,31 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="spacing">
+        <number>0</number>
+       </property>
        <item>
-        <spacer name="verticalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_12">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <spacer name="horizontalSpacer_7">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
          <item>
           <widget class="QLabel" name="label_9">
            <property name="text">
-            <string>Rotation center</string>
+            <string>Rotation Center</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -438,7 +475,7 @@
           </widget>
          </item>
          <item>
-          <widget class="QToolButton" name="centerPointPickingToolButton">
+          <widget class="QToolButton" name="pivotPickingToolButton">
            <property name="toolTip">
             <string>Pick point as pivot</string>
            </property>
@@ -454,20 +491,65 @@
            </property>
           </widget>
          </item>
+         <item>
+          <spacer name="horizontalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
+        <widget class="QFrame" name="rotationCenterFrame">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <item>
+           <widget class="QDoubleSpinBox" name="rcxDoubleSpinBox">
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>-999999999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="rcyDoubleSpinBox">
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>-999999999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="rczDoubleSpinBox">
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>-999999999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </item>
@@ -479,65 +561,93 @@
       </widget>
      </item>
      <item>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_5">
-         <property name="text">
-          <string>Cy</string>
-         </property>
-        </widget>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <property name="spacing">
+        <number>0</number>
+       </property>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <spacer name="horizontalSpacer_9">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_13">
+           <property name="text">
+            <string>Eye position</string>
+           </property>
+           <property name="alignment">
+            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Cx</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Cz</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QDoubleSpinBox" name="tzDoubleSpinBox">
-         <property name="decimals">
-          <number>6</number>
-         </property>
-         <property name="minimum">
-          <double>-999999999.000000000000000</double>
-         </property>
-         <property name="maximum">
-          <double>999999999.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QDoubleSpinBox" name="tyDoubleSpinBox">
-         <property name="decimals">
-          <number>6</number>
-         </property>
-         <property name="minimum">
-          <double>-999999999.000000000000000</double>
-         </property>
-         <property name="maximum">
-          <double>999999999.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QDoubleSpinBox" name="txDoubleSpinBox">
-         <property name="decimals">
-          <number>6</number>
-         </property>
-         <property name="minimum">
-          <double>-999999999.000000000000000</double>
-         </property>
-         <property name="maximum">
-          <double>999999999.000000000000000</double>
-         </property>
+       <item>
+        <widget class="QFrame" name="eyePositionFrame">
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <widget class="QDoubleSpinBox" name="exDoubleSpinBox">
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>-999999999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="eyDoubleSpinBox">
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>-999999999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QDoubleSpinBox" name="ezDoubleSpinBox">
+            <property name="decimals">
+             <number>6</number>
+            </property>
+            <property name="minimum">
+             <double>-999999999.000000000000000</double>
+            </property>
+            <property name="maximum">
+             <double>999999999.000000000000000</double>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </widget>
        </item>
       </layout>

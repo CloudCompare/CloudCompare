@@ -14,23 +14,19 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2177                                                              $
-//$LastChangedDate:: 2012-06-27 14:29:46 +0200 (mer., 27 juin 2012)        $
-//**************************************************************************
-//
 
 #include "ccCameraParamEditDlg.h"
 
+//Local
+#include "ccGLUtils.h"
+#include "ccPointCloud.h"
+
+//Qt
 #include <QDoubleValidator>
 #include <QMdiSubWindow>
 
+//CCLib
 #include <CCConst.h>
-
-#include "ccGLUtils.h"
-#include "ccPointCloud.h"
 
 ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -38,40 +34,38 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent)
 {
     setupUi(this);
 
-    /*QDoubleValidator* validator = new QDoubleValidator(this);
-    txLineEdit->setValidator(validator);
-    tyLineEdit->setValidator(validator);
-    tzLineEdit->setValidator(validator);
-    //*/
-    /*connect(txLineEdit,     SIGNAL(editingFinished()),  this,   SLOT(reflectParamChange()));
-    connect(tyLineEdit,     SIGNAL(editingFinished()),  this,   SLOT(reflectParamChange()));
-    connect(tzLineEdit,     SIGNAL(editingFinished()),  this,   SLOT(reflectParamChange()));
-    //*/
+    connect(phiSlider,				SIGNAL(valueChanged(int)),		this,   SLOT(iPhiValueChanged(int)));
+    connect(thetaSlider,			SIGNAL(valueChanged(int)),		this,   SLOT(iThetaValueChanged(int)));
+    connect(psiSlider,				SIGNAL(valueChanged(int)),		this,   SLOT(iPsiValueChanged(int)));
+    connect(phiSpinBox,				SIGNAL(valueChanged(double)),	this,   SLOT(dPhiValueChanged(double)));
+    connect(thetaSpinBox,			SIGNAL(valueChanged(double)),	this,   SLOT(dThetaValueChanged(double)));
+    connect(psiSpinBox,				SIGNAL(valueChanged(double)),	this,   SLOT(dPsiValueChanged(double)));
 
-    connect(phiSlider,      SIGNAL(valueChanged(int)),  this,   SLOT(iPhiValueChanged(int)));
-    connect(thetaSlider,    SIGNAL(valueChanged(int)),  this,   SLOT(iThetaValueChanged(int)));
-    connect(psiSlider,      SIGNAL(valueChanged(int)),  this,   SLOT(iPsiValueChanged(int)));
-    connect(phiSpinBox,     SIGNAL(valueChanged(double)),  this,   SLOT(dPhiValueChanged(double)));
-    connect(thetaSpinBox,   SIGNAL(valueChanged(double)),  this,   SLOT(dThetaValueChanged(double)));
-    connect(psiSpinBox,     SIGNAL(valueChanged(double)),  this,   SLOT(dPsiValueChanged(double)));
+	//rotation center
+    connect(rcxDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(pivotChanged()));
+    connect(rcyDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(pivotChanged()));
+    connect(rczDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(pivotChanged()));
 
-    connect(txDoubleSpinBox,     SIGNAL(valueChanged(double)),  this,   SLOT(translationChanged(double)));
-    connect(tyDoubleSpinBox,     SIGNAL(valueChanged(double)),  this,   SLOT(translationChanged(double)));
-    connect(tzDoubleSpinBox,     SIGNAL(valueChanged(double)),  this,   SLOT(translationChanged(double)));
+	//camera center
+    connect(exDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(cameraCenterChanged()));
+    connect(eyDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(cameraCenterChanged()));
+    connect(ezDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(cameraCenterChanged()));
 
-    connect(fovDoubleSpinBox,     SIGNAL(valueChanged(double)),  this,   SLOT(fovChanged(double)));
+    connect(fovDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(fovChanged(double)));
 
-    connect(viewUpToolButton,       SIGNAL(clicked()),    this,       SLOT(setTopView()));
-    connect(viewDownToolButton,     SIGNAL(clicked()),    this,       SLOT(setBottomView()));
-    connect(viewFrontToolButton,    SIGNAL(clicked()),    this,       SLOT(setFrontView()));
-    connect(viewBackToolButton,     SIGNAL(clicked()),    this,       SLOT(setBackView()));
-    connect(viewLeftToolButton,     SIGNAL(clicked()),    this,       SLOT(setLeftView()));
-    connect(viewRightToolButton,    SIGNAL(clicked()),    this,       SLOT(setRightView()));
+    connect(viewUpToolButton,		SIGNAL(clicked()),				this,	SLOT(setTopView()));
+    connect(viewDownToolButton,		SIGNAL(clicked()),				this,	SLOT(setBottomView()));
+    connect(viewFrontToolButton,	SIGNAL(clicked()),				this,	SLOT(setFrontView()));
+    connect(viewBackToolButton,		SIGNAL(clicked()),				this,	SLOT(setBackView()));
+    connect(viewLeftToolButton,		SIGNAL(clicked()),				this,	SLOT(setLeftView()));
+    connect(viewRightToolButton,	SIGNAL(clicked()),				this,	SLOT(setRightView()));
+    connect(viewIso1ToolButton,		SIGNAL(clicked()),				this,	SLOT(setIso1View()));
+    connect(viewIso2ToolButton,		SIGNAL(clicked()),				this,	SLOT(setIso2View()));
 
-    connect(pushMatrixToolButton,   SIGNAL(clicked()),    this,       SLOT(pushCurrentMatrix()));
-    connect(revertMatrixToolButton, SIGNAL(clicked()),    this,       SLOT(revertToPushedMatrix()));
+    connect(pushMatrixToolButton,	SIGNAL(clicked()),				this,	SLOT(pushCurrentMatrix()));
+    connect(revertMatrixToolButton,	SIGNAL(clicked()),				this,	SLOT(revertToPushedMatrix()));
 
-	connect(centerPointPickingToolButton, SIGNAL(clicked()),    this,       SLOT(pickPointAsPivot()));
+	connect(pivotPickingToolButton,	SIGNAL(clicked()),				this,	SLOT(pickPointAsPivot()));
 }
 
 ccCameraParamEditDlg::~ccCameraParamEditDlg()
@@ -134,15 +128,29 @@ void ccCameraParamEditDlg::dPhiValueChanged(double val)
     reflectParamChange();
 }
 
-void ccCameraParamEditDlg::translationChanged(double)
+void ccCameraParamEditDlg::cameraCenterChanged()
 {
     if (!m_associatedWin)
         return;
 
 	m_associatedWin->blockSignals(true);
-    m_associatedWin->setPivotPoint(CCVector3(txDoubleSpinBox->value(),
-												tyDoubleSpinBox->value(),
-													tzDoubleSpinBox->value()));
+    m_associatedWin->setCameraPos( CCVector3(exDoubleSpinBox->value(),
+												eyDoubleSpinBox->value(),
+												ezDoubleSpinBox->value()));
+	m_associatedWin->blockSignals(false);
+
+	m_associatedWin->redraw();
+}
+
+void ccCameraParamEditDlg::pivotChanged()
+{
+    if (!m_associatedWin)
+        return;
+
+	m_associatedWin->blockSignals(true);
+    m_associatedWin->setPivotPoint(CCVector3(rcxDoubleSpinBox->value(),
+												rcyDoubleSpinBox->value(),
+													rczDoubleSpinBox->value()));
 	m_associatedWin->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -265,6 +273,16 @@ void ccCameraParamEditDlg::setRightView()
     setView(CC_RIGHT_VIEW);
 }
 
+void ccCameraParamEditDlg::setIso1View()
+{
+    setView(CC_ISO_VIEW_1);
+}
+
+void ccCameraParamEditDlg::setIso2View()
+{
+    setView(CC_ISO_VIEW_2);
+}
+
 bool ccCameraParamEditDlg::start()
 {
 	ccOverlayDialog::start();
@@ -297,9 +315,12 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
     if (m_associatedWin)
     {
         initWithMatrix(m_associatedWin->getBaseViewMat());
-        connect(m_associatedWin, SIGNAL(baseViewMatChanged(const ccGLMatrix&)), this, SLOT(initWithMatrix(const ccGLMatrix&)));
-        connect(m_associatedWin, SIGNAL(pivotPointChanged(const CCVector3&)), this, SLOT(updatePivotPoint(const CCVector3&)));
-        connect(m_associatedWin, SIGNAL(destroyed(QObject*)), this, SLOT(hide()));
+        connect(m_associatedWin,	SIGNAL(baseViewMatChanged(const ccGLMatrix&)),	this,	SLOT(initWithMatrix(const ccGLMatrix&)));
+        connect(m_associatedWin,	SIGNAL(cameraPosChanged(const CCVector3&)),		this,	SLOT(updateCameraCenter(const CCVector3&)));
+        connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3&)),	this,	SLOT(updatePivotPoint(const CCVector3&)));
+        connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3&)),	this,	SLOT(updatePivotPoint(const CCVector3&)));
+        connect(m_associatedWin,	SIGNAL(perspectiveStateChanged()),				this,	SLOT(updateViewMode()));
+        connect(m_associatedWin,	SIGNAL(destroyed(QObject*)),					this,	SLOT(hide()));
 
         PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
         buttonsFrame->setEnabled(it != pushedMatrices.end());
@@ -325,6 +346,25 @@ void ccCameraParamEditDlg::reflectParamChange()
     m_associatedWin->redraw();
 }
 
+void ccCameraParamEditDlg::updateViewMode()
+{
+	if (m_associatedWin)
+	{
+		bool objectBased = true;
+		bool perspective = m_associatedWin->getPerspectiveState(objectBased);
+
+		if (!perspective)
+			currentModeLabel->setText("parallel projection");
+		else
+			currentModeLabel->setText(QString(objectBased ? "Object" : "Viewer")+QString("-based perspective"));
+
+		rotationCenterFrame->setEnabled(objectBased);
+		pivotPickingToolButton->setEnabled(objectBased);
+		eyePositionFrame->setEnabled(perspective);
+	}
+
+}
+
 void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrix& mat)
 {
     PointCoordinateType phi=0.0,theta=0.0,psi=0.0;
@@ -338,14 +378,32 @@ void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrix& mat)
     phiSpinBox->setValue(CC_RAD_TO_DEG*phi);
     psiSpinBox->setValue(CC_RAD_TO_DEG*psi);
     thetaSpinBox->setValue(CC_RAD_TO_DEG*theta);
-    //txLineEdit->setText(QString::number(trans.x));
-    //tyLineEdit->setText(QString::number(trans.y));
-    //tzLineEdit->setText(QString::number(trans.z));
 
 	m_associatedWin = win;
 
 	if (m_associatedWin)
+	{
 		updatePivotPoint(win->getViewportParameters().pivotPoint);
+		updateCameraCenter(win->getViewportParameters().cameraCenter);
+	}
+}
+
+void ccCameraParamEditDlg::updateCameraCenter(const CCVector3& P)
+{
+	if (!m_associatedWin)
+		return;
+
+    //to prevent retro-action!
+    ccGLWindow* win = m_associatedWin;
+    m_associatedWin = 0;
+
+	exDoubleSpinBox->setValue(P.x);
+	eyDoubleSpinBox->setValue(P.y);
+	ezDoubleSpinBox->setValue(P.z);
+	
+	fovDoubleSpinBox->setValue(win->getViewportParameters().fov);
+
+	m_associatedWin = win;
 }
 
 void ccCameraParamEditDlg::updatePivotPoint(const CCVector3& P)
@@ -357,9 +415,10 @@ void ccCameraParamEditDlg::updatePivotPoint(const CCVector3& P)
     ccGLWindow* win = m_associatedWin;
     m_associatedWin = 0;
 
-	txDoubleSpinBox->setValue(P.x);
-	tyDoubleSpinBox->setValue(P.y);
-	tzDoubleSpinBox->setValue(P.z);
+	rcxDoubleSpinBox->setValue(P.x);
+	rcyDoubleSpinBox->setValue(P.y);
+	rczDoubleSpinBox->setValue(P.z);
+	
 	fovDoubleSpinBox->setValue(win->getViewportParameters().fov);
 
 	m_associatedWin = win;
@@ -373,9 +432,6 @@ ccGLMatrix ccCameraParamEditDlg::getMatrix()
     phi     = CC_DEG_TO_RAD * (PointCoordinateType)phiSpinBox->value();
     psi     = CC_DEG_TO_RAD * (PointCoordinateType)psiSpinBox->value();
     theta   = CC_DEG_TO_RAD * (PointCoordinateType)thetaSpinBox->value();
-    //trans.x = txLineEdit->text().toDouble();
-    //trans.y = tyLineEdit->text().toDouble();
-    //trans.z = tzLineEdit->text().toDouble();
 
     ccGLMatrix mat;
     mat.initFromParameters(phi,theta,psi,trans);

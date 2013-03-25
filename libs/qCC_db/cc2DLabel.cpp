@@ -108,7 +108,7 @@ bool cc2DLabel::addPoint(ccGenericPointCloud* cloud, unsigned pointIndex)
 		break;
 	case 2:
 		if (m_points[0].cloud == cloud)
-			setName("Vector #pt_0_idx - #pt_0_idx");
+			setName("Vector #pt_0_idx - #pt_1_idx");
 		else
 			setName("Vector #pt_0_idx(@pt_0_cloud_id) - #pt_1_idx@(@pt_1_cloud_id)");
 		break;

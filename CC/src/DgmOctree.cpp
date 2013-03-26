@@ -952,7 +952,7 @@ void DgmOctree::getCellDistanceFromBorders(const int* cellPos,
 	*_cellDists++ = cellPos[1]-fillIndexes[1];
     *_cellDists++ = fillIndexes[4]-cellPos[1];
 	*_cellDists++ = cellPos[2]-fillIndexes[2];
-    *_cellDists++ = fillIndexes[4]-cellPos[2];
+    *_cellDists++ = fillIndexes[5]-cellPos[2];
 }
 
 bool DgmOctree::getCellDistanceFromBorders(const int* cellPos,
@@ -984,26 +984,6 @@ bool DgmOctree::getCellDistanceFromBorders(const int* cellPos,
 
 	return true;
 }
-
-/*bool DgmOctree::getCellDistanceFromBorders(const int* cellPos,
-											uchar level,
-											int neighbourhoodLength,
-											int* cellDists) const
-{
-	getCellDistanceFromBorders(cellPos,level,cellDists);
-
-	int* _cellDists = cellDists;
-	for (unsigned dim=0; dim<6; ++dim, ++_cellDists)
-    {
-		if (*_cellDists > neighbourhoodLength)
-			*_cellDists = neighbourhoodLength;
-		else if (*_cellDists < -neighbourhoodLength)
-			return false;
-	}
-
-	return true;
-}
-//*/
 
 void DgmOctree::getNeighborCellsAround(const int cellPos[],
 										cellIndexesContainer &neighborCellsIndexes,

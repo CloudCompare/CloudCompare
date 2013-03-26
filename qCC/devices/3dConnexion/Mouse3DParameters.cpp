@@ -31,6 +31,7 @@ Mouse3DParameters::Mouse3DParameters()
 	//, m_pivotMode(AutoPivot)
 	//, m_pivotVisibility(ShowPivot)
 	, m_horizonLocked(false)
+	, m_dominantMode(false)
 {
 }
 

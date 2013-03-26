@@ -92,7 +92,7 @@
 #include "ccAlignDlg.h" //Aurelien BEY
 #include "ccRegistrationDlg.h" //Aurelien BEY
 #include "ccSubsamplingDlg.h" //Aurelien BEY
-#include "ccRenderToFileDlg.h" //DGM
+#include "ccRenderToFileDlg.h"
 #include "ccPointPropertiesDlg.h" //Aurelien BEY
 #include "ccPointListPickingDlg.h"
 #include "ccNormalComputationDlg.h"
@@ -640,13 +640,31 @@ void MainWindow::on3DMouseKeyDown(int key)
 	case Mouse3DInput::V3DK_MINUS:
 		m_3dMouseInput->getMouseParams().slowDown();
 		break;
+	case Mouse3DInput::V3DK_DOMINANT:
+		m_3dMouseInput->getMouseParams().toggleDominantMode();
+		break;
 	case Mouse3DInput::V3DK_CW:
 	case Mouse3DInput::V3DK_CCW:
+		{
+			ccGLWindow* activeWin = getActiveGLWindow();
+			if (activeWin)
+			{
+				CCVector3 axis(0.0f,0.0f,-1.0f);
+				CCVector3 trans(0.0f);
+				ccGLMatrix mat;
+				float angle = (float)(M_PI/2.0);
+				if (key == Mouse3DInput::V3DK_CCW)
+					angle = -angle;
+				mat.initFromParameters(angle,axis,trans);
+				activeWin->rotateBaseViewMat(mat);
+				activeWin->redraw();
+			}
+		}
+		break;
 	case Mouse3DInput::V3DK_ESC:
 	case Mouse3DInput::V3DK_ALT:
 	case Mouse3DInput::V3DK_SHIFT:
 	case Mouse3DInput::V3DK_CTRL:
-	case Mouse3DInput::V3DK_DOMINANT:
 	default:
 		ccLog::Warning("[3D mouse] This button is not handled (yet)");
 		//TODO
@@ -692,14 +710,23 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 		//}
 	}
 
+	//dominant mode: dominant mode is intended to limit movement to a single direction
+	if (params.dominantModeEnabled())
+	{
+		unsigned dominantDim = 0;
+		for (unsigned i=1; i<6; ++i)
+			if (abs(vec[i]) > abs(vec[dominantDim]))
+				dominantDim = i;
+		for (unsigned i=0; i<6; ++i)
+			if (i != dominantDim)
+				vec[i] = 0.0;
+	}
 	if (panZoom)
 	{
 		//Zoom: object moves closer/away (only for ortho. mode)
 		if (!perspectiveView && abs(vec[1])>ZERO_TOLERANCE)
 		{
-			// default zoom speed (in rad^-1?!)
-			static const float c_objectModedefaultZoomSpeed = 0.2f;
-			win->updateZoom(1.0f + vec[1]*c_objectModedefaultZoomSpeed);
+			win->updateZoom(1.0f + vec[1]);
 			vec[1] = 0.0f;
 		}
 		
@@ -707,14 +734,20 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 		if (abs(vec[0])>ZERO_TOLERANCE || abs(vec[1])>ZERO_TOLERANCE || abs(vec[2])>ZERO_TOLERANCE)
 		{
 			const ccViewportParameters& viewParams = win->getViewportParameters();
-			static const float c_3dMouseDegToPix = 0.1f; //magic number (empirical ;)
-			float scale = c_3dMouseDegToPix * (float)std::min(win->width(),win->height()) * viewParams.pixelSize;
+
+			float scale = (float)std::min(win->width(),win->height()) * viewParams.pixelSize;
 			if (perspectiveView)
 			{
-				float tanFOV = tan(viewParams.fov*CC_DEG_TO_RAD*0.5f);
-				vec[0] /= tanFOV;
-				vec[2] /= tanFOV;
+				float tanFOV = tan(viewParams.fov*CC_DEG_TO_RAD/**0.5f*/);
+				vec[0] *= tanFOV;
+				vec[2] *= tanFOV;
+				scale /= win->computePerspectiveZoom();
 			}
+			else
+			{
+				scale /= win->getViewportParameters().zoom;
+			}
+			
 			if (objectMode)
 				scale = -scale;
 			win->moveCamera(vec[0]*scale,-vec[2]*scale,vec[1]*scale);
@@ -734,7 +767,9 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 
 			//horizon locked?
 			if (params.horizonLocked())
+			{
 				rotMat = rotMat.yRotation();
+			}
 
 			win->rotateBaseViewMat(objectMode ? rotMat : rotMat.inverse());
 			win->showPivotSymbol(true);

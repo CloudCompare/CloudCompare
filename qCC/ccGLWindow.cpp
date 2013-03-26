@@ -1233,10 +1233,11 @@ void ccGLWindow::recalcProjectionMatrix()
 	if (m_pivotSymbolShown && m_params.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
 	//if (m_params.objectCenteredView)
 	{
-		float pivotActualRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * (float)std::min(m_glWidth,m_glHeight) * 0.5f;
+		float pivotActualRadius = (CC_DISPLAYED_PIVOT_RADIUS_PERCENT) * (float)std::min(m_glWidth,m_glHeight) * 0.5f;
 		float pivotSymbolScale = pivotActualRadius * computeActualPixelSize();
 		MP = std::max<float>(MP,pivotSymbolScale);
 	}
+	MP *= 1.01f; //for round-off issues
 	
 	if (m_customLightEnabled)
 	{
@@ -1515,12 +1516,14 @@ void ccGLWindow::releaseTexture(unsigned texID)
 CCVector3 ccGLWindow::getCurrentViewDir() const
 {
 	if (m_params.objectCenteredView)
-		return CCVector3(0,0,-1);
+		return CCVector3(0.0f,0.0f,-1.0f);
 
 	//otherwise view direction is (the opposite of) the 3rd line of the current view matrix
 	const float* M = m_params.viewMat.data();
-	
-	return CCVector3(-M[2],-M[6],-M[10]);
+	CCVector3 axis(-M[2],-M[6],-M[10]);
+	axis.normalize();
+
+	return axis;
 }
 
 void ccGLWindow::setInteractionMode(INTERACTION_MODE mode)

@@ -316,6 +316,9 @@ public:
 	**/
 	virtual float computeActualPixelSize() const;
 
+	//! Returns the zoom value equivalent to the current camera position (perspective only)
+	float computePerspectiveZoom() const;
+
 public slots:
     void zoomGlobal();
     void testFrameRate();
@@ -491,9 +494,6 @@ protected:
     bool initGLFilter(int w, int h);
 	//! Releases active GL filter
     void removeGLFilter();
-
-	//! Returns the zoom value equivalent to the current camera position (perspective only)
-	float computePerspectiveZoom() const;
 
 	//! GL names picking buffer
     GLuint m_pickingBuffer[CC_PICKING_BUFFER_SIZE];

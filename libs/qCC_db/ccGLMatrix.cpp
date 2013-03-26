@@ -208,7 +208,9 @@ void ccGLMatrix::getParameters(float& alpha, CCVector3& axis3D, CCVector3& t3D) 
 			alpha -= (float)M_PI;
 	}
 	else
-		alpha = 0.0;
+	{
+		alpha = 0.0f;
+	}
 
 	axis3D.x = (float)(R32-R23);
 	axis3D.y = (float)(R13-R31);

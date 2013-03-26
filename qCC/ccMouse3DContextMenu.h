@@ -39,6 +39,7 @@ protected slots:
 	void rotationModeToggled(bool);
 	void panZoomModeToggled(bool);
 	void lockHorizonToggled(bool);
+	void dominantModeToggled(bool);
 	void speedModeChanged();
 	void objectModeTriggered();
 	void cameraModeTriggered();
@@ -69,6 +70,8 @@ protected:
 
 	//! Lock horizon
 	QAction* m_lockHorizon;
+	//! Dominant mode
+	QAction* m_dominantMode;
 
 	//! Associated parameters
 	Mouse3DParameters* m_params;

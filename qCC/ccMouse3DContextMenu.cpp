@@ -154,6 +154,14 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* p
 		connect(m_lockHorizon, SIGNAL(toggled(bool)), this, SLOT(lockHorizonToggled(bool)));
 	}
 
+	//dominant mode
+	{
+		m_dominantMode = new QAction("Dominant mode",this);
+		m_dominantMode->setCheckable(true);
+		m_dominantMode->setChecked(m_params->dominantModeEnabled());
+		connect(m_dominantMode, SIGNAL(toggled(bool)), this, SLOT(dominantModeToggled(bool)));
+	}
+
 	/*** build menu up ***/
 
 	addAction(m_rotationMode);
@@ -193,6 +201,7 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* p
 	addSeparator(); //------------------------------
 
 	addAction(m_lockHorizon);
+	addAction(m_dominantMode);
 
 #endif
 }
@@ -252,6 +261,14 @@ void ccMouse3DContextMenu::lockHorizonToggled(bool state)
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_params)
 		m_params->lockHorizon(state);
+#endif
+}
+
+void ccMouse3DContextMenu::dominantModeToggled(bool state)
+{
+#ifdef CC_3DXWARE_SUPPORT
+	if (m_params)
+		m_params->enableDominantMode(state);
 #endif
 }
 

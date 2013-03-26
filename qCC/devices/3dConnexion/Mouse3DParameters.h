@@ -72,6 +72,10 @@ public:
 	virtual inline bool horizonLocked() const { return m_horizonLocked; }
 	virtual inline void lockHorizon(bool state) { m_horizonLocked = state; }
 
+	virtual inline void toggleDominantMode() { m_dominantMode = !m_dominantMode; }
+	virtual inline void enableDominantMode(bool state) { m_dominantMode = state; }
+	virtual inline bool dominantModeEnabled() const { return m_dominantMode; }
+
 	//This feature is set separately for each 3D view
 	//virtual inline NavigationMode navigationMode() const { return m_navigationMode; }
 	//virtual inline void setNavigationMode(NavigationMode mode) { m_navigationMode = mode; }
@@ -103,6 +107,7 @@ protected:
 	bool			m_panZoomEnabled;
 	bool			m_rotationEnabled;
 	bool			m_horizonLocked;
+	bool			m_dominantMode;
 
 	//This feature is set separately for each 3D view
 	//NavigationMode	m_navigationMode;

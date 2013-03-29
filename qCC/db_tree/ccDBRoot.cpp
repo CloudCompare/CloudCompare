@@ -1210,30 +1210,30 @@ void ccDBRoot::gatherRecursiveInformation()
 		QStringList infoStr;
 		QString separator("--------------------------");
 
-		infoStr << QString("Point(s):\t\t%1").arg(info.pointCount);
-		infoStr << QString("Triangle(s):\t\t%1").arg(info.triangleCount);
+		infoStr << QString("Point(s):\t\t%L1").arg(info.pointCount);
+		infoStr << QString("Triangle(s):\t\t%L1").arg(info.triangleCount);
 
 		infoStr << separator;
 		if (info.colorCount)
-			infoStr << QString("Color(s):\t\t%1").arg(info.colorCount);
+			infoStr << QString("Color(s):\t\t%L1").arg(info.colorCount);
 		if (info.normalCount)
-			infoStr << QString("Normal(s):\t\t%1").arg(info.normalCount);
+			infoStr << QString("Normal(s):\t\t%L1").arg(info.normalCount);
 		if (info.scalarFieldCount)
-			infoStr << QString("Scalar field(s):\t\t%1").arg(info.scalarFieldCount);
+			infoStr << QString("Scalar field(s):\t\t%L1").arg(info.scalarFieldCount);
 		if (info.materialCount)
-			infoStr << QString("Material(s):\t\t%1").arg(info.materialCount);
+			infoStr << QString("Material(s):\t\t%L1").arg(info.materialCount);
 
 		infoStr << separator;
-		infoStr << QString("Cloud(s):\t\t%1").arg(info.cloudCount);
-		infoStr << QString("Mesh(es):\t\t%1").arg(info.meshCount);
+		infoStr << QString("Cloud(s):\t\t%L1").arg(info.cloudCount);
+		infoStr << QString("Mesh(es):\t\t%L1").arg(info.meshCount);
 		if (info.octreeCount)
-			infoStr << QString("Octree(s):\t\t%1").arg(info.octreeCount);
+			infoStr << QString("Octree(s):\t\t%L1").arg(info.octreeCount);
 		if (info.imageCount)
-			infoStr << QString("Image(s):\t\t%1").arg(info.imageCount);
+			infoStr << QString("Image(s):\t\t%L1").arg(info.imageCount);
 		if (info.labelCount)
-			infoStr << QString("Label(s):\t\t%1").arg(info.labelCount);
+			infoStr << QString("Label(s):\t\t%L1").arg(info.labelCount);
 		if (info.sensorCount)
-			infoStr << QString("Sensor(s):\t\t%1").arg(info.sensorCount);
+			infoStr << QString("Sensor(s):\t\t%L1").arg(info.sensorCount);
 
 		//display info box
 		QMessageBox::information(MainWindow::TheInstance(),

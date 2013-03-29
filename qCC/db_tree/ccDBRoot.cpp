@@ -69,7 +69,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_dbTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_expandBranch = new QAction("Expand branch",this);
 	m_collapseBranch = new QAction("Collapse branch",this);
-	m_gatherInformation = new QAction("Information (recusrive)",this);
+	m_gatherInformation = new QAction("Information (recursive)",this);
 	m_sortSiblingsType = new QAction("Sort siblings by type",this);
 	m_sortSiblingsAZ = new QAction("Sort siblings by name (A-Z)",this);
 	m_sortSiblingsZA = new QAction("Sort siblings by name (Z-A)",this);
@@ -89,7 +89,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_dbTreeWidget,						SIGNAL(customContextMenuRequested(const QPoint&)),	this, SLOT(showContextMenu(const QPoint&)));
 	connect(m_expandBranch,						SIGNAL(triggered()),								this, SLOT(expandBranch()));
 	connect(m_collapseBranch,					SIGNAL(triggered()),								this, SLOT(collapseBranch()));
-	connect(m_gatherInformation,				SIGNAL(triggered()),								this, SLOT(gatherRecusriveInformation()));
+	connect(m_gatherInformation,				SIGNAL(triggered()),								this, SLOT(gatherRecursiveInformation()));
 	connect(m_sortSiblingsAZ,					SIGNAL(triggered()),								this, SLOT(sortSiblingsAZ()));
 	connect(m_sortSiblingsZA,					SIGNAL(triggered()),								this, SLOT(sortSiblingsZA()));
 	connect(m_sortSiblingsType,					SIGNAL(triggered()),								this, SLOT(sortSiblingsType()));
@@ -1096,7 +1096,7 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 //	}
 //}
 
-void ccDBRoot::gatherRecusriveInformation()
+void ccDBRoot::gatherRecursiveInformation()
 {
     QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
@@ -1106,19 +1106,21 @@ void ccDBRoot::gatherRecusriveInformation()
 
 	struct GlobalInfo
 	{
-		size_t pointCount;
-		size_t triangleCount;
-		size_t colorCount;
-		size_t normalCount;
-		size_t materialCount;
-		size_t scalarFieldCount;
+		//properties
+		unsigned pointCount;
+		unsigned triangleCount;
+		unsigned colorCount;
+		unsigned normalCount;
+		unsigned materialCount;
+		unsigned scalarFieldCount;
 
-		size_t cloudCount;
-		size_t meshCount;
-		size_t octreeCount;
-		size_t imageCount;
-		size_t sensorCount;
-		size_t labelCount;
+		//entities
+		unsigned cloudCount;
+		unsigned meshCount;
+		unsigned octreeCount;
+		unsigned imageCount;
+		unsigned sensorCount;
+		unsigned labelCount;
 	} info;
 
 	memset(&info,0,sizeof(GlobalInfo));

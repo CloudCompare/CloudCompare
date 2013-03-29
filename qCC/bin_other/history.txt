@@ -15,12 +15,12 @@ v2.4 03/17/2013
 	* 3D rotation center symbol added (can be 'always visible', 'only when moving' or 'hidden')
 	* default views (top, bottom, left, etc.) are more 'natural'
 	* new default views added (front and back 'isometric' views)
-	* default FOV (field of view) is now 30° for perspective mode
+	* default FOV (field of view) is now 30 degrees for perspective mode
 - New pop-menus added to the 'View' toolbar:
 	* selection of the current rotation center visibility (see above)
 	* selection of the current view mode (orthographic, object-based and viewer-based perspective)
-- New context menu entry for the DB tree: 'Information (recusrive)'
-	* recusrively gather various information (number of points, triangles, colors, etc.)
+- New context menu entry for the DB tree: 'Information (recursive)'
+	* recursively gather various information (number of points, triangles, colors, etc.)
 - Default specular color for light is now darker (so that meshes are less 'shiny' by dfault)
 - bug fix:
 	* BIN files saved with labels would make CC crash when re-opened!

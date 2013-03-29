@@ -152,7 +152,7 @@ protected slots:
 
 	void expandBranch();
 	void collapseBranch();
-	void gatherRecusriveInformation();
+	void gatherRecursiveInformation();
 	void sortSiblingsAZ();
 	void sortSiblingsZA();
 	void sortSiblingsType();

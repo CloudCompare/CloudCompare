@@ -69,7 +69,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_dbTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_expandBranch = new QAction("Expand branch",this);
 	m_collapseBranch = new QAction("Collapse branch",this);
-	m_gatherInformation = new QAction("Information (recusrive)",this);
+	m_gatherInformation = new QAction("Information (recursive)",this);
 	m_sortSiblingsType = new QAction("Sort siblings by type",this);
 	m_sortSiblingsAZ = new QAction("Sort siblings by name (A-Z)",this);
 	m_sortSiblingsZA = new QAction("Sort siblings by name (Z-A)",this);
@@ -89,7 +89,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_dbTreeWidget,						SIGNAL(customContextMenuRequested(const QPoint&)),	this, SLOT(showContextMenu(const QPoint&)));
 	connect(m_expandBranch,						SIGNAL(triggered()),								this, SLOT(expandBranch()));
 	connect(m_collapseBranch,					SIGNAL(triggered()),								this, SLOT(collapseBranch()));
-	connect(m_gatherInformation,				SIGNAL(triggered()),								this, SLOT(gatherRecusriveInformation()));
+	connect(m_gatherInformation,				SIGNAL(triggered()),								this, SLOT(gatherRecursiveInformation()));
 	connect(m_sortSiblingsAZ,					SIGNAL(triggered()),								this, SLOT(sortSiblingsAZ()));
 	connect(m_sortSiblingsZA,					SIGNAL(triggered()),								this, SLOT(sortSiblingsZA()));
 	connect(m_sortSiblingsType,					SIGNAL(triggered()),								this, SLOT(sortSiblingsType()));
@@ -1096,7 +1096,7 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 //	}
 //}
 
-void ccDBRoot::gatherRecusriveInformation()
+void ccDBRoot::gatherRecursiveInformation()
 {
     QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
@@ -1208,33 +1208,32 @@ void ccDBRoot::gatherRecusriveInformation()
 	//output information
 	{
 		QStringList infoStr;
-		QLocale locale(QLocale::English);
 		QString separator("--------------------------");
 
-		infoStr << QString("Point(s):\t\t%1").arg(locale.toString(info.pointCount));
-		infoStr << QString("Triangle(s):\t\t%1").arg(locale.toString(info.triangleCount));
+		infoStr << QString("Point(s):\t\t%1").arg(info.pointCount);
+		infoStr << QString("Triangle(s):\t\t%1").arg(info.triangleCount);
 
 		infoStr << separator;
 		if (info.colorCount)
-			infoStr << QString("Color(s):\t\t%1").arg(locale.toString(info.colorCount));
+			infoStr << QString("Color(s):\t\t%1").arg(info.colorCount);
 		if (info.normalCount)
-			infoStr << QString("Normal(s):\t\t%1").arg(locale.toString(info.normalCount));
+			infoStr << QString("Normal(s):\t\t%1").arg(info.normalCount);
 		if (info.scalarFieldCount)
-			infoStr << QString("Scalar field(s):\t\t%1").arg(locale.toString(info.scalarFieldCount));
+			infoStr << QString("Scalar field(s):\t\t%1").arg(info.scalarFieldCount);
 		if (info.materialCount)
-			infoStr << QString("Material(s):\t\t%1").arg(locale.toString(info.materialCount));
+			infoStr << QString("Material(s):\t\t%1").arg(info.materialCount);
 
 		infoStr << separator;
-		infoStr << QString("Cloud(s):\t\t%1").arg(locale.toString(info.cloudCount));
-		infoStr << QString("Mesh(es):\t\t%1").arg(locale.toString(info.meshCount));
+		infoStr << QString("Cloud(s):\t\t%1").arg(info.cloudCount);
+		infoStr << QString("Mesh(es):\t\t%1").arg(info.meshCount);
 		if (info.octreeCount)
-			infoStr << QString("Octree(s):\t\t%1").arg(locale.toString(info.octreeCount));
+			infoStr << QString("Octree(s):\t\t%1").arg(info.octreeCount);
 		if (info.imageCount)
-			infoStr << QString("Image(s):\t\t%1").arg(locale.toString(info.imageCount));
+			infoStr << QString("Image(s):\t\t%1").arg(info.imageCount);
 		if (info.labelCount)
-			infoStr << QString("Label(s):\t\t%1").arg(locale.toString(info.labelCount));
+			infoStr << QString("Label(s):\t\t%1").arg(info.labelCount);
 		if (info.sensorCount)
-			infoStr << QString("Sensor(s):\t\t%1").arg(locale.toString(info.sensorCount));
+			infoStr << QString("Sensor(s):\t\t%1").arg(info.sensorCount);
 
 		//display info box
 		QMessageBox::information(MainWindow::TheInstance(),

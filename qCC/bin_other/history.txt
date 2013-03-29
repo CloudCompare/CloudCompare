@@ -19,6 +19,8 @@ v2.4 03/17/2013
 - New pop-menus added to the 'View' toolbar:
 	* selection of the current rotation center visibility (see above)
 	* selection of the current view mode (orthographic, object-based and viewer-based perspective)
+- New context menu entry for the DB tree: 'Information (recusrive)'
+	* recusrively gather various information (number of points, triangles, colors, etc.)
 - Default specular color for light is now darker (so that meshes are less 'shiny' by dfault)
 - bug fix:
 	* BIN files saved with labels would make CC crash when re-opened!

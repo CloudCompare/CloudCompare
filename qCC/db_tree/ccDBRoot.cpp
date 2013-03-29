@@ -22,12 +22,17 @@
 #include <QStandardItemModel>
 #include <QHeaderView>
 #include <QMimeData>
+#include <QMessageBox>
 
 //qCC_db
 #include <ccHObject.h>
 #include <ccGenericPointCloud.h>
+#include <ccPointCloud.h>
+#include <ccMesh.h>
+#include <ccMaterialSet.h>
 #include <cc2DLabel.h>
 
+//local
 #include "ccPropertiesTreeDelegate.h"
 #include "../ccConsole.h"
 #include "../mainwindow.h"
@@ -64,6 +69,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_dbTreeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
 	m_expandBranch = new QAction("Expand branch",this);
 	m_collapseBranch = new QAction("Collapse branch",this);
+	m_gatherInformation = new QAction("Information (recusrive)",this);
 	m_sortSiblingsType = new QAction("Sort siblings by type",this);
 	m_sortSiblingsAZ = new QAction("Sort siblings by name (A-Z)",this);
 	m_sortSiblingsZA = new QAction("Sort siblings by name (Z-A)",this);
@@ -83,6 +89,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_dbTreeWidget,						SIGNAL(customContextMenuRequested(const QPoint&)),	this, SLOT(showContextMenu(const QPoint&)));
 	connect(m_expandBranch,						SIGNAL(triggered()),								this, SLOT(expandBranch()));
 	connect(m_collapseBranch,					SIGNAL(triggered()),								this, SLOT(collapseBranch()));
+	connect(m_gatherInformation,				SIGNAL(triggered()),								this, SLOT(gatherRecusriveInformation()));
 	connect(m_sortSiblingsAZ,					SIGNAL(triggered()),								this, SLOT(sortSiblingsAZ()));
 	connect(m_sortSiblingsZA,					SIGNAL(triggered()),								this, SLOT(sortSiblingsZA()));
 	connect(m_sortSiblingsType,					SIGNAL(triggered()),								this, SLOT(sortSiblingsType()));
@@ -1089,6 +1096,153 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 //	}
 //}
 
+void ccDBRoot::gatherRecusriveInformation()
+{
+    QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
+	QModelIndexList selectedIndexes = qism->selectedIndexes();
+    int i,selCount = selectedIndexes.size();
+    if (selCount == 0)
+        return;
+
+	struct GlobalInfo
+	{
+		size_t pointCount;
+		size_t triangleCount;
+		size_t colorCount;
+		size_t normalCount;
+		size_t materialCount;
+		size_t scalarFieldCount;
+
+		size_t cloudCount;
+		size_t meshCount;
+		size_t octreeCount;
+		size_t imageCount;
+		size_t sensorCount;
+		size_t labelCount;
+	} info;
+
+	memset(&info,0,sizeof(GlobalInfo));
+
+	//init the list of entities to process
+	ccHObject::Container toProcess;
+	try
+	{
+		toProcess.resize(selCount);
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Error("Not engough memory!");
+		return;
+	}
+	{
+		for (i=0;i<selCount;++i)
+			toProcess[i] = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
+	}
+
+	ccHObject::Container alreadyProcessed;
+	while (!toProcess.empty())
+	{
+		ccHObject* ent = toProcess.back();
+		toProcess.pop_back();
+
+		//we don't process entities twice!
+		if (std::find(alreadyProcessed.begin(), alreadyProcessed.end(), ent) != alreadyProcessed.end())
+			continue;
+
+		//gather information from current entity
+		if (ent->isA(CC_POINT_CLOUD))
+		{
+			ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
+			info.cloudCount++;
+			
+			unsigned cloudSize = cloud->size();
+			info.pointCount += cloudSize;
+			info.colorCount += (cloud->hasColors() ? cloudSize : 0);
+			info.normalCount += (cloud->hasNormals() ? cloudSize : 0);
+			info.scalarFieldCount += cloud->getNumberOfScalarFields();
+		}
+		else if (ent->isKindOf(CC_MESH))
+		{
+			ccMesh* mesh = static_cast<ccMesh*>(ent);
+
+			if (!ent->isA(CC_MESH_GROUP)) //CC_MESH_GROUPs already return the sum of their children sizes!
+			{
+				info.meshCount++;
+				unsigned meshSize = mesh->size();
+				info.triangleCount += meshSize;
+				info.normalCount += (mesh->hasTriNormals() ? meshSize : 0);
+			}
+			info.materialCount += (mesh->getMaterialSet() ? mesh->getMaterialSet()->size() : 0);
+		}
+		else if (ent->isKindOf(CC_2D_LABEL))
+		{
+			info.labelCount++;
+		}
+		else if (ent->isKindOf(CC_SENSOR))
+		{
+			info.sensorCount++;
+		}
+		else if (ent->isKindOf(CC_POINT_OCTREE))
+		{
+			info.octreeCount++;
+		}
+		else if (ent->isKindOf(CC_IMAGE))
+		{
+			info.imageCount++;
+		}
+
+		//we can add its children to the 'toProcess' list and itself to the 'processed' list 
+		try
+		{
+			for (unsigned i=0;i<ent->getChildrenNumber();++i)
+				toProcess.push_back(ent->getChild(i));
+			alreadyProcessed.push_back(ent);
+		}
+		catch(std::bad_alloc)
+		{
+			ccLog::Error("Not engough memory!");
+			return;
+		}
+	}
+
+	//output information
+	{
+		QStringList infoStr;
+		QLocale locale(QLocale::English);
+		QString separator("--------------------------");
+
+		infoStr << QString("Point(s):\t\t%1").arg(locale.toString(info.pointCount));
+		infoStr << QString("Triangle(s):\t\t%1").arg(locale.toString(info.triangleCount));
+
+		infoStr << separator;
+		if (info.colorCount)
+			infoStr << QString("Color(s):\t\t%1").arg(locale.toString(info.colorCount));
+		if (info.normalCount)
+			infoStr << QString("Normal(s):\t\t%1").arg(locale.toString(info.normalCount));
+		if (info.scalarFieldCount)
+			infoStr << QString("Scalar field(s):\t\t%1").arg(locale.toString(info.scalarFieldCount));
+		if (info.materialCount)
+			infoStr << QString("Material(s):\t\t%1").arg(locale.toString(info.materialCount));
+
+		infoStr << separator;
+		infoStr << QString("Cloud(s):\t\t%1").arg(locale.toString(info.cloudCount));
+		infoStr << QString("Mesh(es):\t\t%1").arg(locale.toString(info.meshCount));
+		if (info.octreeCount)
+			infoStr << QString("Octree(s):\t\t%1").arg(locale.toString(info.octreeCount));
+		if (info.imageCount)
+			infoStr << QString("Image(s):\t\t%1").arg(locale.toString(info.imageCount));
+		if (info.labelCount)
+			infoStr << QString("Label(s):\t\t%1").arg(locale.toString(info.labelCount));
+		if (info.sensorCount)
+			infoStr << QString("Sensor(s):\t\t%1").arg(locale.toString(info.sensorCount));
+
+		//display info box
+		QMessageBox::information(MainWindow::TheInstance(),
+								"Information",
+								infoStr.join("\n"));
+	}
+}
+
 void ccDBRoot::sortSiblingsAZ()
 {
 	sortSelectedEntitiesSiblings(SORT_A2Z);
@@ -1326,6 +1480,8 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 				}
 			}
 
+			menu.addAction(m_gatherInformation);
+			menu.addSeparator();
 			menu.addAction(m_toggleSelectedEntities);
 			if (toggleVisibility)
 				menu.addAction(m_toggleSelectedEntitiesVisibility);

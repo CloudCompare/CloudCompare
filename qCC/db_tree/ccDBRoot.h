@@ -152,6 +152,7 @@ protected slots:
 
 	void expandBranch();
 	void collapseBranch();
+	void gatherRecusriveInformation();
 	void sortSiblingsAZ();
 	void sortSiblingsZA();
 	void sortSiblingsType();
@@ -211,6 +212,8 @@ protected:
 	QAction* m_expandBranch;
 	//! Context menu action: collapse tree branch
 	QAction* m_collapseBranch;
+	//! Context menu action: gather (recursive) information on selected entities
+	QAction* m_gatherInformation;
 	//! Context menu action: sort siblings in alphabetical order
 	QAction* m_sortSiblingsAZ;
 	//! Context menu action: sort siblings in reverse alphabetical order

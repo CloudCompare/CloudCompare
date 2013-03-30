@@ -31,9 +31,9 @@
 #include <ccGenericMesh.h>
 #include <ccProgressDialog.h>
 
-//qCC
-#include <ccCommon.h>
-#include <ccDBRoot.h>
+#ifndef CC_PCV_FIELD_LABEL_NAME
+#define CC_PCV_FIELD_LABEL_NAME "Illuminance (PCV)"
+#endif
 
 qPCV::qPCV(QObject* parent/*=0*/)
 	: QObject(parent)
@@ -136,9 +136,10 @@ void qPCV::doAction()
 	if (!dlg.exec())
         return;
 
-    //on récupère le champ PCV s'il existe déjà, et on le créé sinon
+    //we get the PCV field if it already exists
     int sfIdx = pc->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
     if (sfIdx<0)
+		//otherwise we creat it
         sfIdx=pc->addScalarField(CC_PCV_FIELD_LABEL_NAME,true);
     if (sfIdx<0)
 	{

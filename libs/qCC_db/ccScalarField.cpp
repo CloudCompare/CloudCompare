@@ -63,7 +63,7 @@ DistanceType ccScalarField::normalize(DistanceType d) const
 				return 0.5f;
 			if (-d>=m_maxSaturation)
 				return 0.0f;
-			if(!m_logScale)
+			if (!m_logScale)
 				return 0.5f+(d+m_minSaturation)*m_normalizeCoef*0.5f;
 			return 0.5f+(-log10(std::max(-d,(DistanceType)ZERO_TOLERANCE))+m_minSaturationLog)*m_normalizeCoef*0.5f;
 		}
@@ -73,7 +73,7 @@ DistanceType ccScalarField::normalize(DistanceType d) const
 				return 0.5f;
 			if (d>=m_maxSaturation)
 				return 1.0f;
-			if(!m_logScale)
+			if (!m_logScale)
 				return 0.5f+(d-m_minSaturation)*m_normalizeCoef*0.5f;
 			return 0.5f+(log10(std::max(d,(DistanceType)ZERO_TOLERANCE))-m_minSaturationLog)*m_normalizeCoef*0.5f;
 		}

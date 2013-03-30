@@ -116,6 +116,7 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	, m_fbo(0)
 	, m_alwaysUseFBO(false)
 	, m_updateFBO(true)
+	, m_colorRampShader(0)
 	, m_activeGLFilter(0)
 	, m_glFiltersEnabled(false)
 	, m_winDBRoot(0)
@@ -208,19 +209,14 @@ ccGLWindow::~ccGLWindow()
 	if (m_activeGLFilter)
 		delete m_activeGLFilter;
 
+	if (m_colorRampShader)
+		delete m_colorRampShader;
+
 	if (m_activeShader)
 		delete m_activeShader;
 
 	if (m_fbo)
 		delete m_fbo;
-
-	if (m_vbo.enabled)
-	{
-		makeCurrent();
-		glDeleteBuffersARB(1, &m_vbo.idVert);
-		glDeleteBuffersARB(1, &m_vbo.idInd);
-	}
-	m_vbo.clear();
 }
 
 void ccGLWindow::initializeGL()
@@ -248,13 +244,13 @@ void ccGLWindow::initializeGL()
 	invalidateVisualization();
 
 	//we initialize GLEW
-	ccGLUtils::InitGLEW();
+	InitGLEW();
 
 	//OpenGL version
 	ccConsole::Print("[3D View %i] GL version: %s",m_uniqueID,glGetString(GL_VERSION));
 
 	//GL extensions test
-	m_shadersEnabled  = ccGLUtils::CheckShadersAvailability();
+	m_shadersEnabled = CheckShadersAvailability();
 	if (!m_shadersEnabled)
 	{
 		//if no shader, no GL filter!
@@ -264,7 +260,7 @@ void ccGLWindow::initializeGL()
 	{
 		ccConsole::Print("[3D View %i] Shaders available",m_uniqueID);
 
-		m_glFiltersEnabled = ccGLUtils::CheckFBOAvailability();
+		m_glFiltersEnabled = CheckFBOAvailability();
 		if (m_glFiltersEnabled)
 		{
 			ccConsole::Print("[3D View %i] GL filters available",m_uniqueID);
@@ -274,21 +270,40 @@ void ccGLWindow::initializeGL()
 		{
 			ccConsole::Warning("[3D View %i] GL filters unavailable (FBO not supported)",m_uniqueID);
 		}
-	}
 
-	//we don't use it yet
-	m_vbo.init();
-	/*m_vbo.enabled = ccGLUtils::CheckVBOAvailability();
-	if (m_vbo.enabled)
-	{
-	glGenBuffersARB(1, &m_vbo.idVert);
-	glGenBuffersARB(1, &m_vbo.idInd);
+		//color ramp shader
+		if (!m_colorRampShader)
+		{
+			GLint maxBytes=0;
+			glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
+			GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
+			if (maxComponents<glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE)
+			{
+				ccConsole::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader!",m_uniqueID);
+			}
+			else
+			{
+				ccShader* colorRampShader = new ccShader();
+				QString shadersPath = ccGLWindow::getShadersPath();
+				if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag"))))
+				{
+					ccConsole::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
+				}
+				else
+				{
+					ccConsole::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
+					m_colorRampShader = colorRampShader;
+				}
+			}
+		}
 	}
-	//*/
 
 	//transparency off by default
 	glDisable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+	//no global ambiant
+	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ccColor::night);
 
 	ccGLUtils::CatchGLError("ccGLWindow::initializeGL");
 
@@ -740,6 +755,10 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	//we activate the current shader (if any)
 	if (m_activeShader)
 		m_activeShader->start();
+	
+	//color ramp shader for fast dynamic color ramp lookup-up
+	if (m_colorRampShader)
+		context.colorRampShader = m_colorRampShader;
 
 	//we draw 3D entities
 	if (m_globalDBRoot)
@@ -756,7 +775,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	//for connected items
 	emit drawing3D();
 
-	//we disable shader
+	//we disable shader (if any)
 	if (m_activeShader)
 		m_activeShader->stop();
 
@@ -1436,9 +1455,6 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 
 	//default font size
 	setFontPointSize(guiParams.defaultFontSize);
-
-	//VBO
-	context.vbo = m_vbo;
 }
 
 void ccGLWindow::toBeRefreshed()
@@ -3087,7 +3103,7 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 	renderText(x2, y2, text, textFont);
 }
 
-QString  ccGLWindow::getShadersPath()
+QString ccGLWindow::getShadersPath()
 {
 #if defined(Q_OS_MAC)
    // shaders are in the bundle
@@ -3097,5 +3113,61 @@ QString  ccGLWindow::getShadersPath()
 #else
    return QApplication::applicationDirPath() + "/shaders";
 #endif
+}
+
+//*********** OPENGL EXTENSIONS ***********//
+
+//! Loads all available OpenGL extensions
+bool ccGLWindow::InitGLEW()
+{
+    #ifdef USE_GLEW
+    // GLEW initialization
+    GLenum code = glewInit();
+    if(code != GLEW_OK)
+    {
+        ccLog::Error("Error while initializing OpenGL extensions! (see console)");
+        ccLog::Warning("GLEW error: %s",glewGetErrorString(code));
+        return false;
+    }
+
+    ccLog::Print("GLEW: initialized!");
+    return true;
+    #else
+    return false;
+    #endif
+}
+
+bool ccGLWindow::CheckExtension(const char *extName)
+{
+    #ifdef USE_GLEW
+    return glewIsSupported(extName);
+    #else
+    return false;
+    #endif
+}
+
+bool ccGLWindow::CheckShadersAvailability()
+{
+    bool bARBShadingLanguage       = CheckExtension("GL_ARB_shading_language_100");
+    bool bARBShaderObjects         = CheckExtension("GL_ARB_shader_objects");
+    bool bARBVertexShader          = CheckExtension("GL_ARB_vertex_shader");
+    bool bARBFragmentShader        = CheckExtension("GL_ARB_fragment_shader");
+
+    bool bShadersSupported = bARBShadingLanguage &&
+                             bARBShaderObjects &&
+                             bARBVertexShader &&
+                             bARBFragmentShader;
+
+    return bShadersSupported;
+}
+
+bool ccGLWindow::CheckFBOAvailability()
+{
+    return CheckExtension("GL_EXT_framebuffer_object");
+}
+
+bool ccGLWindow::CheckVBOAvailability()
+{
+    return CheckExtension("GL_ARB_vertex_buffer_object");
 }
 

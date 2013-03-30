@@ -20,32 +20,6 @@
 //system
 #include <string.h>
 
-/***********************/
-/*      vboStruct      */
-/***********************/
-
-vboStruct::vboStruct()
-	: enabled(false)
-	, idVert(0)
-	, idInd(0)
-	, buffer(0)
-{
-}
-
-void vboStruct::clear()
-{
-	if (buffer)
-		delete[] buffer;
-}
-
-void vboStruct::init()
-{
-	if (buffer)
-		delete[] buffer;
-	//vertices & features table
-	buffer = new unsigned char[3*maxSize()*elemSize()];
-}
-
 /******************************/
 /*      ccDrawableObject      */
 /******************************/

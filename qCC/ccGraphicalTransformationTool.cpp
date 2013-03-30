@@ -17,13 +17,13 @@
 
 #include "ccGraphicalTransformationTool.h"
 
-#include <Matrix.h>
-
-#include <ccHObject.h>
 #include "ccGLWindow.h"
 #include "ccConsole.h"
 #include "mainwindow.h"
-#include "ccGLUtils.h"
+
+//qCC_db
+#include <ccHObject.h>
+#include <ccGLUtils.h>
 
 ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 	: ccOverlayDialog(parent)

@@ -15,6 +15,9 @@
 //#                                                                        #
 //##########################################################################
 
+//Always first
+#include "ccIncludeGL.h"
+
 #include "ccPointCloud.h"
 
 //CCLib
@@ -22,7 +25,6 @@
 #include <GeometricalAnalysisTools.h>
 #include <ReferenceCloud.h>
 
-#include "ccIncludeGL.h"
 #include "ccNormalVectors.h"
 #include "ccColorTablesManager.h"
 #include "ccOctree.h"
@@ -31,6 +33,10 @@
 #include "ccMeshGroup.h"
 #include "ccImage.h"
 #include "cc2DLabel.h"
+#include "ccGLUtils.h"
+
+//ccFBO
+#include <ccShader.h>
 
 //system
 #include <assert.h>
@@ -1413,7 +1419,15 @@ void ccPointCloud::getDrawingParameters(glDrawParams& params) const
 
 //Vertex indexes for OpenGL "arrays" drawing
 static PointCoordinateType s_normBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
-static colorType s_rgbBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
+static colorType s_rgbBuffer3ub[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
+static float s_rgbBuffer3f[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
+static float s_colormapf[glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE];
+
+//default material for clouds (with normals)
+#define DEFAULT_CLOUD_AMBIANT_COLOR		ccColor::bright
+#define DEFAULT_CLOUD_SPECULAR_COLOR	ccColor::bright
+#define DEFAULT_CLOUD_DIFFUSE_COLOR		ccColor::bright //will be associated to colors if any
+#define DEFAULT_CLOUD_EMISSION_COLOR	ccColor::night
 
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
@@ -1464,28 +1478,28 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
         {
             //DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version is sometimes 1.0!
             glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
-            glMaterialfv(GL_FRONT_AND_BACK,GL_AMBIENT,ccColor::darker);
-            glMaterialfv(GL_FRONT_AND_BACK,GL_SPECULAR,ccColor::lighter);
-            glMaterialfv(GL_FRONT_AND_BACK,GL_DIFFUSE,ccColor::bright);
-            glMaterialfv(GL_FRONT_AND_BACK,GL_EMISSION,ccColor::darker);
-            glMaterialf(GL_FRONT_AND_BACK,GL_SHININESS,50.0);
+            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,	  DEFAULT_CLOUD_AMBIANT_COLOR  );
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  DEFAULT_CLOUD_SPECULAR_COLOR );
+            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,   DEFAULT_CLOUD_DIFFUSE_COLOR  );
+			glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  DEFAULT_CLOUD_EMISSION_COLOR );
+            glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 50.0f);
             glEnable(GL_LIGHTING);
+
+			if (glParams.showSF)
+			{
+				//we must get rid of lights 'color' if a scalar field is displayed!
+				glPushAttrib(GL_LIGHTING_BIT);
+				ccGLUtils::MakeLightsNeutral();
+			}
 			compressedNormals = ccNormalVectors::GetUniqueInstance();
         }
 
-        const colorType* col = 0;
-        const PointCoordinateType* N = 0;
-        unsigned decimStep;
-
         // L.O.D.
-		unsigned numberOfPoints=size();
+		unsigned numberOfPoints = size();
+        unsigned decimStep = 1;
         if (numberOfPoints>MAX_LOD_POINTS_NUMBER && context.decimateCloudOnMove &&  MACRO_LODActivated(context))
         {
             decimStep = int(ceil(float(numberOfPoints) / float(MAX_LOD_POINTS_NUMBER)));
-        }
-        else
-        {
-            decimStep = 1;
         }
 
         /*** DISPLAY ***/
@@ -1517,7 +1531,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							DistanceType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
 							//we force display of points hidden because of of their scalar field value
 							//to be sure that the user don't miss them (during manual segmentation for instance)
-							col = (normalizedDist>=0.0 ? colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp()) : ccColor::lightGrey);
+							const colorType* col = (normalizedDist>=0.0 ? colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp()) : ccColor::lightGrey);
 
 							glColor3ubv(col);
 							if (glParams.showNorms)
@@ -1544,20 +1558,126 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else if (glParams.showSF)
 			{
-				bool hiddenPoints = !m_greyForNanScalarValues;
-				if (hiddenPoints)
+				//we will need these parameters to scale values between 0 and 1
+				const DistanceType sfMin = m_currentDisplayedScalarField->getMin();
+				const DistanceType sfMax = m_currentDisplayedScalarField->getMax();
+				const DistanceType sfRampStart = sfMin;
+				const DistanceType sfRampRange = sfMax-sfMin;
+
+				DistanceType sfMinDisp = m_currentDisplayedScalarField->getMinDisplayed();
+				DistanceType sfMaxDisp = m_currentDisplayedScalarField->getMaxDisplayed();
+				DistanceType sfMinSat = m_currentDisplayedScalarField->getMinSaturation();
+				DistanceType sfMaxSat = m_currentDisplayedScalarField->getMaxSaturation();
+
+				//the fact that NaN values SHOULD be hidden, doesn't mean that we ACTUALLY hide points...
+				bool hiddenPoints = (!m_greyForNanScalarValues && ( sfMaxDisp <= sfMax || sfMinDisp >= sfMin));
+
+				//color ramp shader initialization
+				ccShader* colorRampShader = context.colorRampShader;
+				if (colorRampShader)
 				{
-					//the fact that NaN values SHOULD be hidden, doesn't mean that we actually HIDE points...
-					hiddenPoints &= ( m_currentDisplayedScalarField->getMaxDisplayed()<=m_currentDisplayedScalarField->getMax()
-									|| m_currentDisplayedScalarField->getMinDisplayed()>=m_currentDisplayedScalarField->getMin());
+					//max available space for frament's shader uniforms
+					GLint maxBytes=0;
+					glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
+					GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
+					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
+					assert(steps!=0);
+
+					if (steps > glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < (GLint)steps)
+					{
+						ccLog::WarningDebug("Color ramp steps exceed shader limits!");
+						colorRampShader = 0;
+					}
+					else
+					{
+						colorRampShader->start();
+						if (m_currentDisplayedScalarField->isPositive())
+						{
+							sfMinDisp = std::max<DistanceType>(0,sfMinDisp);
+						}
+						else
+						{
+							sfMaxDisp = std::min<DistanceType>(sfMaxDisp,BIG_VALUE);
+						}
+						if (m_currentDisplayedScalarField->absoluteSaturation())
+						{
+							DistanceType maxAbsSat = std::max(abs(sfMinSat),abs(sfMaxSat));
+							sfMinSat = -maxAbsSat;
+							sfMaxSat =  maxAbsSat;
+						}
+
+						DistanceType sfMinSatRel = (sfMinSat-sfRampStart)/sfRampRange; //doesn't need to be between 0 and 1!
+						DistanceType sfMaxSatRel = (sfMaxSat-sfRampStart)/sfRampRange; //doesn't need to be between 0 and 1!
+						colorRampShader->setUniform1f("minSaturation",sfMinSatRel);
+						colorRampShader->setUniform1f("maxSaturation",sfMaxSatRel);
+						colorRampShader->setUniform1i("colormapSize",(int)steps);
+						{
+							//set 'grayed' points color as a float-packed value
+							int rgb = (ccColor::lightGrey[0] << 16) | (ccColor::lightGrey[1] << 8) | ccColor::lightGrey[2];
+							float packedColorGray = (float)((double)rgb/(double)(1<<24));
+							colorRampShader->setUniform1f("colorGray",packedColorGray);
+						}
+						
+						//send colormap to shader
+						float* _colormapf = s_colormapf;
+						for (unsigned i=0; i<steps; ++i)
+						{
+							const colorType* col = ccColorTablesManager::GetUniqueInstance()->getColor((float)i/(float)(steps-1),steps,m_currentDisplayedScalarField->getColorRamp());
+							//set ramp colors as float-packed values
+							int rgb = (col[0] << 16) | (col[1] << 8) | col[2];
+							float packedValue = (float)((double)rgb/(double)(1<<24));
+							*_colormapf++ = packedValue;
+						}
+						colorRampShader->setTabUniform1fv("colormap",steps,s_colormapf);
+
+						if (glParams.showNorms)
+						{
+							//we must get rid of lights material (other than ambiant) for the red and green fields
+							glPushAttrib(GL_LIGHTING_BIT);
+
+							//we use the ambiant light to pass the scalar value (and 'grayed' marker) without any
+							//modification from the GPU pipeline, even if normals are enabled!
+							glDisable(GL_COLOR_MATERIAL);
+							glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+							glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT);
+							glEnable(GL_COLOR_MATERIAL);
+
+							GLint maxLightCount;
+							glGetIntegerv(GL_MAX_LIGHTS,&maxLightCount);
+							for (int i=0;i<maxLightCount;++i)
+							{
+								if (glIsEnabled(GL_LIGHT0+i))
+								{
+									float diffuse[4],ambiant[4],specular[4];
+
+									glGetLightfv(GL_LIGHT0+i,GL_AMBIENT,ambiant);
+									glGetLightfv(GL_LIGHT0+i,GL_DIFFUSE,diffuse);
+									glGetLightfv(GL_LIGHT0+i,GL_SPECULAR,specular);
+
+									ambiant[0]  = ambiant[1]  = 1.0f;
+									diffuse[0]  = diffuse[1]  = 0.0f;
+									specular[0] = specular[1] = 0.0f;
+
+									glLightfv(GL_LIGHT0+i,GL_DIFFUSE,diffuse);
+									glLightfv(GL_LIGHT0+i,GL_AMBIENT,ambiant);
+									glLightfv(GL_LIGHT0+i,GL_SPECULAR,specular);
+								}
+							}
+						}
+					}
 				}
 
-				//Continuous scalar field, without hidden points or normals (fastest case)
+				//if all points should be displayed (fastest case)
 				if (!hiddenPoints)
 				{
 					glEnableClientState(GL_VERTEX_ARRAY);
 					glEnableClientState(GL_COLOR_ARRAY);
-					glColorPointer(3,GL_UNSIGNED_BYTE,0,s_rgbBuffer);
+
+					if (colorRampShader)
+						glColorPointer(3,GL_FLOAT,0,s_rgbBuffer3f);
+					else
+						glColorPointer(3,GL_UNSIGNED_BYTE,0,s_rgbBuffer3ub);
+
 					if (glParams.showNorms)
 					{
 						glNormalPointer(GL_FLOAT,0,s_normBuffer);
@@ -1570,16 +1690,31 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						unsigned chunkSize = m_points->chunkSize(k);
 
 						//Scalar field colors
-						colorType* _sfColors = s_rgbBuffer;
 						DistanceType* _sf = m_currentDisplayedScalarField->chunkStartPtr(k);
-						for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep)
+						if (colorRampShader)
 						{
-							//we need to convert scalar value to color into a temporary structure
-							DistanceType normalizedDist = m_currentDisplayedScalarField->normalize(*_sf);
-							col = (normalizedDist>=0.0 ? colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp()) : ccColor::lightGrey);
-							*_sfColors++=*col++;
-							*_sfColors++=*col++;
-							*_sfColors++=*col++;
+							float* _sfColors = s_rgbBuffer3f;
+							for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep,_sfColors+=3)
+							{
+								//we simply set scalar value as red color component
+								bool grayed = (*_sf < sfMinDisp || *_sf > sfMaxDisp);
+								_sfColors[0] = (*_sf-sfRampStart)/sfRampRange;	//normalized sf value
+								_sfColors[1] = grayed ? 0.0f : 1.0f;			//flag: whether point is grayed out or not
+								_sfColors[2] = 1.0f;							//reference value (to cope get the true lighting value)
+							}
+						}
+						else
+						{
+							colorType* _sfColors = s_rgbBuffer3ub;
+							for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep)
+							{
+								//we need to convert scalar value to color into a temporary structure
+								DistanceType normalizedDist = m_currentDisplayedScalarField->normalize(*_sf);
+								const colorType* col = (normalizedDist>=0.0 ? colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp()) : ccColor::lightGrey);
+								*_sfColors++=*col++;
+								*_sfColors++=*col++;
+								*_sfColors++=*col++;
+							}
 						}
 
 						//normals
@@ -1589,7 +1724,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							const normsType* _normalsIndexes = m_normals->chunkStartPtr(k);
 							for (unsigned j=0;j<chunkSize;j+=decimStep,_normalsIndexes+=decimStep)
 							{
-							    N = compressedNormals->getNormal(*_normalsIndexes);
+							    const PointCoordinateType* N = compressedNormals->getNormal(*_normalsIndexes);
                                 *(_normals)++ = *(N)++;
                                 *(_normals)++ = *(N)++;
                                 *(_normals)++ = *(N)++;
@@ -1603,53 +1738,87 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						glDrawArrays(GL_POINTS,0,chunkSize);
 					}
 
-					glDisableClientState(GL_VERTEX_ARRAY);
-					glDisableClientState(GL_COLOR_ARRAY);
 					if (glParams.showNorms)
 						glDisableClientState(GL_NORMAL_ARRAY);
+
+					glDisableClientState(GL_VERTEX_ARRAY);
+					glDisableClientState(GL_COLOR_ARRAY);
 				}
 				else //potentially hidden points
 				{
 					glBegin(GL_POINTS);
 
-					if (glParams.showNorms)
+					if (glParams.showNorms) //with normals (slowest case!)
 					{
-						for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+						if (colorRampShader)
 						{
-							//col = getPointDistanceColor(j);
-							assert(j<m_currentDisplayedScalarField->currentSize());
-							DistanceType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
-							if (normalizedDist>=0.0)
-								col = colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp());
-							else
-								col = (m_greyForNanScalarValues ? ccColor::lightGrey : 0);
-							if (col)
+							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 							{
-								glColor3ubv(col);
-								glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
-								glVertex3fv(m_points->getValue(j));
+								assert(j<m_currentDisplayedScalarField->currentSize());
+								const DistanceType sf = m_currentDisplayedScalarField->getValue(j);
+								if (sf >= sfMinDisp && sf <= sfMaxDisp)
+								{
+									glColor3f((sf-sfRampStart)/sfRampRange,1.0f,1.0f);
+									glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
+									glVertex3fv(m_points->getValue(j));
+								}
+							}
+						}
+						else
+						{
+							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+							{
+								assert(j<m_currentDisplayedScalarField->currentSize());
+								DistanceType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
+								if (normalizedDist>=0.0)
+								{
+									const colorType* col = colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp());
+									glColor3ubv(col);
+									glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
+									glVertex3fv(m_points->getValue(j));
+								}
 							}
 						}
 					}
 					else //potentially hidden points without normals (a bit faster)
 					{
-						for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+						if (colorRampShader)
 						{
-							//col = getPointDistanceColor(j);
-							assert(j<m_currentDisplayedScalarField->currentSize());
-							DistanceType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
-							if (normalizedDist>=0.0)
-								col = colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp());
-							else
-								col = (m_greyForNanScalarValues ? ccColor::lightGrey : 0);
-							if (col)
+							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 							{
-								glColor3ubv(col);
-								glVertex3fv(m_points->getValue(j));
+								assert(j<m_currentDisplayedScalarField->currentSize());
+								const DistanceType sf = m_currentDisplayedScalarField->getValue(j);
+								if (sf >= sfMinDisp && sf <= sfMaxDisp)
+								{
+									glColor3f((sf-sfRampStart)/sfRampRange,1.0f,1.0f);
+									glVertex3fv(m_points->getValue(j));
+								}
+							}
+						}
+						else
+						{
+							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+							{
+								assert(j<m_currentDisplayedScalarField->currentSize());
+								DistanceType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
+								if (normalizedDist>=0.0)
+								{
+									const colorType* col = colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp());
+									glColor3ubv(col);
+									glVertex3fv(m_points->getValue(j));
+								}
 							}
 						}
 					}
 					glEnd();
+				}
+				
+				if (colorRampShader)
+				{
+					colorRampShader->stop();
+
+					if (glParams.showNorms)
+						glPopAttrib(); //GL_LIGHTING_BIT
 				}
 			}
 			else if (glParams.showNorms)
@@ -1670,7 +1839,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					const normsType* _normalsIndexes = m_normals->chunkStartPtr(k);
 					for (unsigned j=0;j<chunkSize;j+=decimStep,_normalsIndexes+=decimStep)
 					{
-					    N = compressedNormals->getNormal(*_normalsIndexes);
+					    const PointCoordinateType* N = compressedNormals->getNormal(*_normalsIndexes);
 					    *(_normals)++ = *(N)++;
                         *(_normals)++ = *(N)++;
                         *(_normals)++ = *(N)++;
@@ -1757,7 +1926,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 				{
-					col = getPointDistanceColor(j);
+					const colorType* col = getPointDistanceColor(j);
 					if (col)
 					{
 						glLoadName(j);
@@ -1792,7 +1961,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
         //we can now switch the light off
         if (glParams.showNorms)
         {
-            glDisable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
+			if (glParams.showSF)
+				glPopAttrib(); //GL_LIGHTING_BIT
+
+			glDisable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
             glDisable(GL_LIGHTING);
         }
 
@@ -1992,7 +2164,6 @@ void ccPointCloud::setColorWithDistances(bool mixWithExistingColor)
     if (!m_currentDisplayedScalarField)
         return;
 
-    const colorType* col = NULL;
     DistanceType normalizedDist;
 
     if (!mixWithExistingColor || !hasColors())
@@ -2003,27 +2174,25 @@ void ccPointCloud::setColorWithDistances(bool mixWithExistingColor)
 		unsigned i,count=size();
         for (i=0;i<count;i++)
         {
-            col = getPointDistanceColor(i);
+            const colorType* col = getPointDistanceColor(i);
             m_rgbColors->setValue(i,(col ? col : ccColor::black));
         }
     }
     else
     {
 
-        float colorCoef = 1.0/float(MAX_COLOR_COMP);
+        float colorCoef = 1.0f/float(MAX_COLOR_COMP);
         colorType* _theColors;
 
         m_rgbColors->placeIteratorAtBegining();
-		unsigned i,count=size();
-        for (i=0;i<count;i++)
+		unsigned count=size();
+        for (unsigned i=0;i<count;i++)
         {
             normalizedDist = m_currentDisplayedScalarField->normalize(m_currentDisplayedScalarField->getValue(i));
+			const colorType* col = 0;
             if (normalizedDist < 0.0)
             {
-                if (m_greyForNanScalarValues)
-                    col = ccColor::lightGrey;
-                else
-                    col = ccColor::black;
+				col = m_greyForNanScalarValues ? ccColor::lightGrey : ccColor::black;
             }
             else
             {

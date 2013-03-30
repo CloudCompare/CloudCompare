@@ -4422,7 +4422,7 @@ ccGLWindow* MainWindow::new3DView()
 
     QGLFormat format;
     format.setSwapInterval(0);
-    ccGLWindow *view3D = new ccGLWindow(this,format,otherWin); //We share OpenGL contexts between windows!
+	ccGLWindow *view3D = new ccGLWindow(this,format,otherWin); //We share OpenGL contexts between windows!
     view3D->setMinimumSize(400,300);
     view3D->resize(500,400);
 

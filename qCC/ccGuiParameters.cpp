@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #include "ccGuiParameters.h"
 
@@ -72,9 +65,9 @@ ccGui::ParamStruct::ParamStruct()
 
 void ccGui::ParamStruct::reset()
 {
-    memcpy(lightAmbientColor,   ccColor::night,				    c_fColorArraySize);
+    memcpy(lightAmbientColor,   ccColor::darkest,			    c_fColorArraySize);
     memcpy(lightSpecularColor,  ccColor::darker,				c_fColorArraySize);
-    memcpy(lightDiffuseColor,   ccColor::lighter,				c_fColorArraySize);
+    memcpy(lightDiffuseColor,   ccColor::bright,				c_fColorArraySize);
     memcpy(meshFrontDiff,       ccColor::defaultMeshFrontDiff,	c_fColorArraySize);
     memcpy(meshBackDiff,        ccColor::defaultMeshBackDiff,	c_fColorArraySize);
     memcpy(meshSpecular,        ccColor::middle,				c_fColorArraySize);
@@ -137,18 +130,18 @@ void ccGui::ParamStruct::fromPersistentSettings()
     QSettings settings;
     settings.beginGroup("OpenGL");
 
-    memcpy(lightAmbientColor,   settings.value("lightAmbientColor",     QByteArray((const char*)ccColor::night,                 c_fColorArraySize)).toByteArray().data(), c_fColorArraySize);
-    memcpy(lightSpecularColor,  settings.value("lightSpecularColor",    QByteArray((const char*)ccColor::middle,                c_fColorArraySize)).toByteArray().data(), c_fColorArraySize);
-    memcpy(lightDiffuseColor,   settings.value("lightDiffuseColor",     QByteArray((const char*)ccColor::lighter,               c_fColorArraySize)).toByteArray().data(), c_fColorArraySize);
-    memcpy(meshFrontDiff,       settings.value("meshFrontDiff",         QByteArray((const char*)ccColor::defaultMeshFrontDiff,  c_fColorArraySize)).toByteArray().data(), c_fColorArraySize);
-    memcpy(meshBackDiff,        settings.value("meshBackDiff",          QByteArray((const char*)ccColor::defaultMeshBackDiff,   c_fColorArraySize)).toByteArray().data(), c_fColorArraySize);
-    memcpy(meshSpecular,        settings.value("meshSpecular",          QByteArray((const char*)ccColor::middle,				c_fColorArraySize)).toByteArray().data(), c_fColorArraySize);
-    memcpy(pointsDefaultCol,    settings.value("pointsDefaultColor",    QByteArray((const char*)ccColor::defaultColor,          c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-    memcpy(textDefaultCol,      settings.value("textDefaultColor",      QByteArray((const char*)ccColor::defaultColor,          c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-    memcpy(backgroundCol,       settings.value("backgroundColor",       QByteArray((const char*)ccColor::defaultBkgColor,       c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-    memcpy(histBackgroundCol,	settings.value("histBackgroundColor",	QByteArray((const char*)ccColor::defaultHistBkgColor,   c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-    memcpy(labelCol,			settings.value("labelColor",			QByteArray((const char*)ccColor::defaultLabelColor,     c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
-    memcpy(bbDefaultCol,        settings.value("bbDefaultColor",        QByteArray((const char*)ccColor::yellow,                c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
+    memcpy(lightAmbientColor,   settings.value("lightAmbientColor",     QByteArray((const char*)ccColor::darkest,				c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
+    memcpy(lightSpecularColor,  settings.value("lightSpecularColor",    QByteArray((const char*)ccColor::darker,				c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
+    memcpy(lightDiffuseColor,   settings.value("lightDiffuseColor",     QByteArray((const char*)ccColor::bright,				c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
+    memcpy(meshFrontDiff,       settings.value("meshFrontDiff",         QByteArray((const char*)ccColor::defaultMeshFrontDiff,	c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
+    memcpy(meshBackDiff,        settings.value("meshBackDiff",          QByteArray((const char*)ccColor::defaultMeshBackDiff,	c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
+    memcpy(meshSpecular,        settings.value("meshSpecular",          QByteArray((const char*)ccColor::middle,				c_fColorArraySize )).toByteArray().data(), c_fColorArraySize);
+    memcpy(pointsDefaultCol,    settings.value("pointsDefaultColor",    QByteArray((const char*)ccColor::defaultColor,			c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
+    memcpy(textDefaultCol,      settings.value("textDefaultColor",      QByteArray((const char*)ccColor::defaultColor,			c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
+    memcpy(backgroundCol,       settings.value("backgroundColor",       QByteArray((const char*)ccColor::defaultBkgColor,		c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
+    memcpy(histBackgroundCol,	settings.value("histBackgroundColor",	QByteArray((const char*)ccColor::defaultHistBkgColor,	c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
+    memcpy(labelCol,			settings.value("labelColor",			QByteArray((const char*)ccColor::defaultLabelColor,		c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
+    memcpy(bbDefaultCol,        settings.value("bbDefaultColor",        QByteArray((const char*)ccColor::yellow,				c_ubColorArraySize)).toByteArray().data(), c_ubColorArraySize);
 
     drawBackgroundGradient  = settings.value("backgroundGradient", true).toBool();
     decimateMeshOnMove      = settings.value("meshDecimation", true).toBool();

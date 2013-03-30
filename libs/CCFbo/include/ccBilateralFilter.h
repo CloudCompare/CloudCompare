@@ -35,13 +35,13 @@
 class ccShader;
 class ccFrameBufferObject;
 
-#define	BILATERAL_FILTER_SIZE	16
-
 class ccBilateralFilter : public ccGlFilter
 {
 public:
 
+    //! Default constructor
 	ccBilateralFilter();
+    //! Destructor
     virtual ~ccBilateralFilter();
 
     void reset();
@@ -51,9 +51,10 @@ public:
 	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0);
 	virtual GLuint getTexture();
 
-	void setSizeSigmaSpatial(int size, float sigma);
-	void setSigmaDepth(float sigma);
-	void setParameters(int spatial_size, float spatial_sigma, float depth_sigma);
+	//! Max kernel size
+	static const unsigned KERNEL_MAX_SIZE = 15;
+
+	void setParameters(int spatialSize, float spatialSigma, float depthSigma);
 
 	void useExistingViewport(bool state);
 
@@ -61,19 +62,19 @@ protected:
 
 	void updateDampingTable();
 
-	int w;
-	int	h;
+	int m_width;
+	int	m_height;
 
-	ccFrameBufferObject*	fbo;
-	ccShader*		        shader;
+	ccFrameBufferObject* m_fbo;
+	ccShader* m_shader;
 
-	int		filter_spatial_size;
-	float	filter_spatial_sigma;
-	float	filter_depth_sigma;
+	int m_filterSpatialSize;
+	float m_filterSpatialSigma;
+	float m_filterDepthSigma;
 
-	float dampingPixelDist[225];
+	float m_dampingPixelDist[KERNEL_MAX_SIZE*KERNEL_MAX_SIZE];
 
-	bool    useCurrentViewport;
+	bool m_useCurrentViewport;
 };
 
 #endif

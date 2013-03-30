@@ -24,7 +24,10 @@ class ccShader
 {
 public:
 
+	//! Default constructor
     ccShader();
+
+	//! Destructor
     virtual ~ccShader();
 
     //! Creates program from two shader files with same base filename

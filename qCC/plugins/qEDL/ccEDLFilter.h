@@ -80,8 +80,8 @@ public:
 
 private:
 
-	int	w;
-	int	h;
+	int	m_screenWidth;
+	int	m_screenHeight;
 
 	ccFrameBufferObject*	fbo_edl0;
 	ccFrameBufferObject*	fbo_edl1;
@@ -96,31 +96,44 @@ private:
 	float	d1;
 	float	d2;
 	int		nneighbours;
-	float*	neighbours;
+	float	neighbours[8*4];
 	float	F;
 	float	power;
 
 	float	mix0;
 	float	mix1;
 	float	mix2;
-	bool	filter0_enabled;
-	bool	filter1_enabled;
-	bool	filter2_enabled;
 	bool	absorb;
 
+	//! Bilateral filter and ist parameters
+	struct BilateralFilter
+	{
+		ccBilateralFilter* filter;
+		int size;
+		float sigma;
+		float sigmaZ;
+		bool enabled;
+
+		BilateralFilter()
+			: filter(0)
+			, size(0)
+			, sigma(0.0f)
+			, sigmaZ(0.0f)
+			, enabled(false)
+		{
+		}
+
+		~BilateralFilter()
+		{
+			if (filter)
+				delete filter;
+		}
+	};
+
 	//	Bilateral filtering
-	ccBilateralFilter*	filter_bilateral_0;
-	ccBilateralFilter*	filter_bilateral_1;
-	ccBilateralFilter*	filter_bilateral_2;
-	int		G_size_bilateral0;
-	float	G_sigma_bilateral0;
-	float	G_sigma_bilateral_z0;
-	int		G_size_bilateral1;
-	float	G_sigma_bilateral1;
-	float	G_sigma_bilateral_z1;
-	int		G_size_bilateral2;
-	float	G_sigma_bilateral2;
-	float	G_sigma_bilateral_z2;
+	BilateralFilter m_bilateralFilter0;
+	BilateralFilter m_bilateralFilter1;
+	BilateralFilter m_bilateralFilter2;
 
 	//	FOCUS EN PROFONDEUR
 	float	depth_focus;

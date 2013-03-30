@@ -37,7 +37,7 @@ include( CMakeExternalLibs.cmake )
 # Libs requested by both qCC & ccViewer
 add_subdirectory( libs/Glew )
 add_subdirectory( libs/CCFbo )
-add_subdirectory( libs/qCC_db )
+add_subdirectory( libs/qCC_db ) # must always be included after CCFbo (dependency)
 
 # liblas support
 include( LiblasSupport.cmake )

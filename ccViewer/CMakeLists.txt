@@ -25,7 +25,7 @@ include_directories( ${XIOT_INCLUDE_DIR} )
 project( ccViewer )
 
 set( VERSION_MAJOR 1 )
-set( VERSION_MINOR 24 )
+set( VERSION_MINOR 25 )
 set( VERSION_PATCH 0 )
 
 set( QCC_HEADERS ../qCC/ccConsole.h ../qCC/ccGLUtils.h ../qCC/ccGLWindow.h ../qCC/ccGuiParameters.h ../qCC/ccOverlayDialog.h ../qCC/ccRenderingTools.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccShiftAndScaleCloudDlg.h ../qCC/fileIO/*.h )
@@ -121,6 +121,7 @@ if( APPLE )
    set( MAC_BUNDLE_RESOURCES_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Resources )
    set( MAC_BUNDLE_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Plugins )
    set( MAC_BUNDLE_LIB_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Libs )
+   set( MAC_BUNDLE_SHADERS_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Shaders )
 
    set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/ccViewer.plist )
    set_source_files_properties( images/icon/cc_viewer_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
@@ -132,3 +133,10 @@ if( APPLE )
 
    add_subdirectory( Mac )
 endif( APPLE )
+
+# Export common shader files to all install destinations
+if( APPLE )
+   install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION ${MAC_BUNDLE_SHADERS_DIR}/ColorRamp )
+else()
+   install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${ccViewer_dest_release}/shaders/ColorRamp ${ccViewer_dest_debug}/shaders/ColorRamp )
+endif()

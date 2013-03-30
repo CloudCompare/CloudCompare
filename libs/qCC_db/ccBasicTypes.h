@@ -59,6 +59,7 @@ namespace ccColor
     static const float middle[4]			    =	{0.5f,0.5f,0.5f,1.0f};
     static const float dark[4]				    =	{0.34f,0.34f,0.34f,1.0f};
     static const float darker[4]			    =	{0.17f,0.17f,0.17f,1.0f};
+    static const float darkest[4]			    =	{0.08f,0.08f,0.08f,1.0f};
     static const float night[4]				    =	{0.0F,0.0F,0.0F,1.0F};
     static const float defaultMeshFrontDiff[4]  =   {0.0f,1.0f,0.32f,1.0f};
     static const float defaultMeshBackDiff[4]   =   {0.32f,1.0f,1.0f,1.0f};

@@ -26,10 +26,10 @@
 #include <ccGLMatrix.h>
 #include <ccDrawableObject.h>
 #include <ccGenericGLDisplay.h>
+#include <ccGLUtils.h>
 
 //qCC
 #include "ccCommon.h"
-#include "ccGLUtils.h"
 
 //Qt
 #include <QFont>
@@ -495,6 +495,25 @@ protected:
 	//! Releases active GL filter
     void removeGLFilter();
 
+	/***************************************************
+                    OpenGL Extensions
+	***************************************************/
+
+    //! Loads all available OpenGL extensions
+    static bool InitGLEW();
+
+    //! Checks for availability of a given OpenGL extension
+    static bool CheckExtension(const char *extName);
+
+    //! Shortcut: checks Shaders support
+    static bool CheckShadersAvailability();
+
+    //! Shortcut: checks FBO support
+    static bool CheckFBOAvailability();
+
+	//! Shortcut: checks VBO support
+    static bool CheckVBOAvailability();
+
 	//! GL names picking buffer
     GLuint m_pickingBuffer[CC_PICKING_BUFFER_SIZE];
 
@@ -609,6 +628,9 @@ protected:
 	//! Whether FBO should be updated (or simply displayed as a texture = faster!)
 	bool m_updateFBO;
 
+	// Color ramp shader
+	ccShader* m_colorRampShader;
+
     //! Active GL filter
     ccGlFilter* m_activeGLFilter;
 	//! Whether GL filters are enabled or not
@@ -619,9 +641,6 @@ protected:
 
     //! CC main DB
     ccHObject* m_globalDBRoot;
-
-	//! Associated VBO (vertex buffer object)
-	vboStruct m_vbo;
 
 	//! Default font
 	QFont m_font;

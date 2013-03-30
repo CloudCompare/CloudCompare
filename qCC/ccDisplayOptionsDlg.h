@@ -14,17 +14,11 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1802                                                              $
-//$LastChangedDate:: 2011-02-15 23:32:56 +0100 (mar., 15 févr. 2011)      $
-//**************************************************************************
-//
 
 #ifndef CC_DISPLAY_OPTIONS_DIALOG_HEADER
 #define CC_DISPLAY_OPTIONS_DIALOG_HEADER
 
+//Qt
 #include <QColor>
 
 #include <ui_displayOptionsDlg.h>

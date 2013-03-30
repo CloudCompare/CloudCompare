@@ -18,15 +18,17 @@
 #include "ccCameraParamEditDlg.h"
 
 //Local
-#include "ccGLUtils.h"
 #include "ccPointCloud.h"
+
+//qCC_db
+#include <ccGLUtils.h>
+
+//CCLib
+#include <CCConst.h>
 
 //Qt
 #include <QDoubleValidator>
 #include <QMdiSubWindow>
-
-//CCLib
-#include <CCConst.h>
 
 ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent)
 	: ccOverlayDialog(parent)

@@ -27,6 +27,8 @@
 #include "ccScalarField.h"
 #include "ccMaterial.h"
 
+class ccShader;
+
 //! Display parameters of a 3D entity
 struct glDrawParams
 {
@@ -36,30 +38,6 @@ struct glDrawParams
 	bool showColors;
 	//! Display normals
 	bool showNorms;
-};
-
-//! Vertex buffer object
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-struct QCC_DB_DLL_API vboStruct
-#else
-struct vboStruct
-#endif
-{
-	bool enabled;
-	unsigned idVert;
-	unsigned idInd;
-	unsigned char* buffer;
-
-	inline unsigned maxSize() const {return MAX_NUMBER_OF_ELEMENTS_PER_CHUNK;}
-	inline unsigned xyzShift() const {return 0;}
-	inline unsigned normShift() const {return 12;}
-	inline unsigned rgbShift() const {return 24;}
-	inline unsigned elemSize() const {return 32;}	//NVidia indicates that a multiple of 32 bytes is better
-                                                    //and we must put there: 3 floats (coordinates) + 3 floats (normals) + 3 bytes (RGB) = 12+12+3=27 bytes;
-	vboStruct();
-	void clear();
-	void init();
 };
 
 //! Display context
@@ -87,6 +65,10 @@ struct glDrawContext
 	ccScalarField* sfColorScaleToDisplay;
     bool greyForNanScalarValues;
     char colorRampTitle[256];
+	
+	//shader for fast dynamic color ramp lookup
+	static const unsigned MAX_SHADER_COLOR_RAMP_SIZE = 256;
+	ccShader* colorRampShader;
 
 	//picked points
 	float pickedPointsRadius;
@@ -97,9 +79,6 @@ struct glDrawContext
 
 	//for displaying labels
 	unsigned labelsTransparency;
-
-	//VBO
-	vboStruct vbo;
 
 	//transparency
 	GLenum sourceBlend;
@@ -115,6 +94,7 @@ struct glDrawContext
     , decimateMeshOnMove(true)
     , sfColorScaleToDisplay(0)
     , greyForNanScalarValues(true)
+	, colorRampShader(0)
 	, pickedPointsRadius(4)
 	, pickedPointsTextShift(0.0)
 	, dispNumberPrecision(6)

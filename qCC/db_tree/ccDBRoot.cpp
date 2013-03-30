@@ -1174,7 +1174,7 @@ void ccDBRoot::gatherRecursiveInformation()
 				info.triangleCount += meshSize;
 				info.normalCount += (mesh->hasTriNormals() ? meshSize : 0);
 			}
-			info.materialCount += (mesh->getMaterialSet() ? mesh->getMaterialSet()->size() : 0);
+			info.materialCount += (mesh->getMaterialSet() ? (unsigned)mesh->getMaterialSet()->size() : 0);
 		}
 		else if (ent->isKindOf(CC_2D_LABEL))
 		{

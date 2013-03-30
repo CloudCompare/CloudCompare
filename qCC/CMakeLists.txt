@@ -136,15 +136,16 @@ endif()
 # install program
 install_ext( TARGETS ${PROJECT_NAME} ${CloudCompare_dest_release} ${CloudCompare_dest_debug} )
 
-# Export 'bilateral' shader files to all install destinations
+# Export common shader files to all install destinations
 if( APPLE )
    install( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.frag DESTINATION ${MAC_BUNDLE_SHADERS_DIR} )
    install( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.vert DESTINATION ${MAC_BUNDLE_SHADERS_DIR} )
+   install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION ${MAC_BUNDLE_SHADERS_DIR}/ColorRamp )
 else()
    install_ext( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.frag ${CloudCompare_dest_release}/shaders ${CloudCompare_dest_debug}/shaders )
    install_ext( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.vert ${CloudCompare_dest_release}/shaders ${CloudCompare_dest_debug}/shaders )
+   install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${CloudCompare_dest_release}/shaders/ColorRamp ${CloudCompare_dest_debug}/shaders/ColorRamp )
 endif()
-
 
 # Auxiliary files
 set( auxFiles bin_other/history.txt bin_other/license.txt )

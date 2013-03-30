@@ -905,7 +905,7 @@ void ccPointCloud::showSFColorsScale(bool state)
 
 bool ccPointCloud::sfColorScaleShown() const
 {
-    return m_sfColorScaleDisplayed;
+    return m_sfColorScaleDisplayed && sfShown();
 }
 
 bool ccPointCloud::areNanScalarValuesInGrey() const

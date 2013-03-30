@@ -4,6 +4,8 @@ v2.4 ??/??/2013
 - 3D slicer
 
 v2.4 03/17/2013
+- Dynamic color lookup for displaying scalar fields greatly accelerated thanks
+	to a dedicated shader (will be activated by default if GPU supports it)
 - 3D mouses (3dConnexion devices) are now supported:
 	* OBJECT mode corresponds to ortho. and object-centered perspective
 	* CAMERA mode corresponds to viewer-centered perspective
@@ -21,10 +23,11 @@ v2.4 03/17/2013
 	* selection of the current view mode (orthographic, object-based and viewer-based perspective)
 - New context menu entry for the DB tree: 'Information (recursive)'
 	* recursively gather various information (number of points, triangles, colors, etc.)
-- Default specular color for light is now darker (so that meshes are less 'shiny' by dfault)
+- Default materials and lights have been updated
 - bug fix:
 	* BIN files saved with labels would make CC crash when re-opened!
 	* Closing the 'About' dialog would make CC crash!
+	* ccViewer no longer display the colorbar if the scalar field is hidden!
 
 v2.4 03/10/2013
 - Points size can now be independently set for each cloud

@@ -136,7 +136,7 @@ endif( APPLE )
 
 # Export common shader files to all install destinations
 if( APPLE )
-   install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION ${MAC_BUNDLE_SHADERS_DIR}/ColorRamp )
+   install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag DESTINATION ${MAC_BUNDLE_SHADERS_DIR}/ColorRamp )
 else()
-   install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${ccViewer_dest_release}/shaders/ColorRamp ${ccViewer_dest_debug}/shaders/ColorRamp )
+   install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${ccViewer_dest_release}/shaders/ColorRamp ${ccViewer_dest_debug}/shaders/ColorRamp )
 endif()

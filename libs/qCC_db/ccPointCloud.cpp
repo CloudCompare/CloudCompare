@@ -2101,7 +2101,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 
         	for (i=0;i<count;++i)
         		if (!m_visibilityArray->getValue(i))
-        			invrc->addPointIndex(i);
+        			invrc->addPointIndex(i); //can't fail see above
 
         	//REVOIR --> on pourrait le faire pour chaque sous-mesh non ?
         	CCLib::GenericIndexedMesh* newTri = CCLib::ManualSegmentationTools::segmentMesh(theMeshes,invrc,true,NULL,this);

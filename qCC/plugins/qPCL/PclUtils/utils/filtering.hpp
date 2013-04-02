@@ -203,8 +203,6 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 	typename pcl::search::KdTree<PointInT>::Ptr tree (new pcl::search::KdTree<PointInT>);
 
 
-	int n_points = incloud->size();
-
 	//create the smoothing object
 	pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
 

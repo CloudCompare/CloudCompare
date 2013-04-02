@@ -3112,16 +3112,8 @@ void MainWindow::doActionRegister()
 //Aurelien BEY le 13/11/2008 : ajout de la fonction permettant de traiter la fonctionnalité de recalage grossier
 void MainWindow::doAction4pcsRegister()
 {
-    if (QMessageBox::warning(this,"Work in progress","This method is still under development: are you sure you want to use it? (a crash may likely happen)",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+    if (QMessageBox::warning(this, "Work in progress", "This method is still under development: are you sure you want to use it? (a crash may likely happen)",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
         return;
-
-    float delta, overlap;
-    unsigned nbTries, nbMaxCandidates;
-    ccProgressDialog pDlg(true,this);
-    CCVector3 min, max;
-    ccGenericPointCloud *model, *data;
-    CCLib::PointProjectionTools::Transformation transform;
-    CCLib::ReferenceCloud *subModel, *subData;
 
     if (m_selectedEntities.size() != 2)
     {
@@ -3136,11 +3128,10 @@ void MainWindow::doAction4pcsRegister()
         return;
     }
 
-    model = static_cast<ccGenericPointCloud*>(m_selectedEntities[0]);
-    data = static_cast<ccGenericPointCloud*>(m_selectedEntities[1]);
+    ccGenericPointCloud *model = static_cast<ccGenericPointCloud*>(m_selectedEntities[0]);
+    ccGenericPointCloud *data = static_cast<ccGenericPointCloud*>(m_selectedEntities[1]);
 
     ccAlignDlg aDlg(model, data);
-
     if (!aDlg.exec())
         return;
 
@@ -3148,32 +3139,31 @@ void MainWindow::doAction4pcsRegister()
     data = aDlg.getDataObject();
 
     //Take the correct number of points among the clouds
-    subModel = aDlg.getSampledModel();
-    subData = aDlg.getSampledData();
+    CCLib::ReferenceCloud *subModel = aDlg.getSampledModel();
+    CCLib::ReferenceCloud *subData = aDlg.getSampledData();
 
-    delta = aDlg.getDelta();
-    overlap = aDlg.getOverlap();
-    nbTries = aDlg.getNbTries();
+    unsigned nbMaxCandidates = aDlg.isNumberOfCandidatesLimited() ? aDlg.getMaxNumberOfCandidates() : 0;
 
-    nbMaxCandidates = 0;
-    if (aDlg.isNumberOfCandidatesLimited())
-        nbMaxCandidates = aDlg.getMaxNumberOfCandidates();
+    ccProgressDialog pDlg(true,this);
 
-    ccPointCloud *newDataCloud=0;
-
-    if (CCLib::FPCSRegistrationTools::RegisterClouds(subModel, subData, transform, delta, delta/2, overlap, nbTries, 5000, &pDlg, nbMaxCandidates))
+    CCLib::PointProjectionTools::Transformation transform;
+    if (CCLib::FPCSRegistrationTools::RegisterClouds(subModel, subData, transform, aDlg.getDelta(), aDlg.getDelta()/2, aDlg.getOverlap(), aDlg.getNbTries(), 5000, &pDlg, nbMaxCandidates))
     {
 		//output resulting transformation matrix
-		ccGLMatrix transMat(transform.R,transform.T);
+		{
+			ccGLMatrix transMat(transform.R,transform.T);
+			forceConsoleDisplay();
+			ccConsole::Print("[Align] Resulting matrix:");
+			const float* mat = transMat.data();
+			ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+			ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
+		}
 
-		forceConsoleDisplay();
-		ccConsole::Print("[Align] Resulting matrix:");
-		const float* mat = transMat.data();
-		ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
-		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
-
+		ccPointCloud *newDataCloud=0;
 		if (data->isA(CC_POINT_CLOUD))
+		{
             newDataCloud = static_cast<ccPointCloud*>(data)->cloneThis();
+		}
         else
 		{
             newDataCloud = new ccPointCloud(data);
@@ -3186,7 +3176,6 @@ void MainWindow::doAction4pcsRegister()
             data->getParent()->addChild(newDataCloud);
         newDataCloud->setName(data->getName()+QString(".registered"));
         newDataCloud->applyTransformation(transform);
-        newDataCloud->getBoundingBox(min.u, max.u);
         newDataCloud->setDisplay(data->getDisplay());
         newDataCloud->prepareDisplayForRefresh();
         zoomOn(newDataCloud);
@@ -3200,8 +3189,10 @@ void MainWindow::doAction4pcsRegister()
 		ccConsole::Warning("[Align] Registration failed!");
 	}
 
-    delete subModel;
-    delete subData;
+	if (subModel)
+		delete subModel;
+	if (subData)
+		delete subData;
 
     refreshAll();
 }

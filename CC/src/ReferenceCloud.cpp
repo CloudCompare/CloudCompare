@@ -120,15 +120,16 @@ const CCVector3* ReferenceCloud::getCurrentPointCoordinates() const
 	return m_theAssociatedCloud->getPointPersistentPtr(m_theIndexes->getValue(m_globalIterator));
 }
 
-void ReferenceCloud::addPointIndex(unsigned globalIndex)
+bool ReferenceCloud::addPointIndex(unsigned globalIndex)
 {
-	if (m_theIndexes->capacity()==m_theIndexes->currentSize())
-		if (!m_theIndexes->reserve(m_theIndexes->capacity()+std::max((unsigned)1,m_theIndexes->capacity()/2))) //not enough memory --> +50%
-			//DGM TODO: we should warn the caller!
-			return;
+	if (m_theIndexes->capacity() == m_theIndexes->currentSize())
+		if (!m_theIndexes->reserve(m_theIndexes->capacity() + std::max<unsigned>(1,m_theIndexes->capacity()/2))) //not enough space --> +50%
+			return false;
 
 	m_theIndexes->addElement(globalIndex);
-	m_validBB=false;
+	m_validBB = false;
+
+	return true;
 }
 
 bool ReferenceCloud::addPointIndex(unsigned firstIndex, unsigned lastIndex)
@@ -142,10 +143,10 @@ bool ReferenceCloud::addPointIndex(unsigned firstIndex, unsigned lastIndex)
 	unsigned range = lastIndex-firstIndex; //lastIndex is excluded
     unsigned pos = size();
 
-	if (size()<pos+range)
-		if (!m_theIndexes->resize(pos+range))
-			return false;
-	for (unsigned i=0;i<range;++i,++firstIndex)
+	if (size()<pos+range && !m_theIndexes->resize(pos+range))
+		return false;
+	
+	for (unsigned i=0; i<range; ++i,++firstIndex)
 		m_theIndexes->setValue(pos++,firstIndex);
 
 	return true;

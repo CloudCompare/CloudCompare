@@ -37,28 +37,32 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 {
     assert(poly && aCloud);
 
-	CCLib::SquareMatrix* trans=0;
-	CCVector3 P,T(0.0,0.0,0.0);
-	CCVector2 P2D;
-
-	if (viewMat)
-		trans = new CCLib::SquareMatrix(viewMat);
+	CCLib::SquareMatrix* trans = (viewMat ? new CCLib::SquareMatrix(viewMat) : 0);
 
 	ReferenceCloud* Y = new ReferenceCloud(aCloud);
 
 	//we check for each point if it falls inside the polyline
-	unsigned i,count=aCloud->size();
-	for (i=0;i<count;++i)
+	unsigned count = aCloud->size();
+	for (unsigned i=0; i<count; ++i)
 	{
+		CCVector3 P;
 		aCloud->getPoint(i,P);
 
 		//we project the point in screen space first if necessary
-		if (viewMat)
+		if (trans)
 			trans->apply(P.u);
 
 		bool pointInside = isPointInsidePoly(CCVector2(P.x,P.y),poly);
-		if ((keepInside && pointInside) || !(keepInside || pointInside))
-                Y->addPointIndex(i);
+		if ((keepInside && pointInside) || (!keepInside && !pointInside))
+		{
+			if (!Y->addPointIndex(i))
+			{
+				//not engouh memory
+				delete Y;
+				Y=0;
+				break;
+			}
+		}
 	}
 
 	if (trans)
@@ -67,22 +71,22 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 	return Y;
 }
 
-//Polyline objects are considered as 2D polylines !
+//Polyline objects are considered as 2D polylines!
 bool ManualSegmentationTools::isPointInsidePoly(const CCVector2& P, const Polyline* poly)
 {
 	//nombre de sommets
-	unsigned verices=poly->size();
-	if (verices<2)
+	unsigned vertCount = poly->size();
+	if (vertCount<2)
 		return false;
 
 	bool inside = false;
 
 	CCVector3 A;
 	poly->getPoint(0,A);
-	for (unsigned i=1;i<=verices;++i)
+	for (unsigned i=1; i<=vertCount; ++i)
 	{
 		CCVector3 B;
-		poly->getPoint(i%verices,B);
+		poly->getPoint(i%vertCount,B);
 
 		//Point Inclusion in Polygon Test (inspired from W. Randolph Franklin - WRF)
 		if (((B.y<=P.y) && (P.y<A.y)) ||
@@ -92,7 +96,6 @@ bool ManualSegmentationTools::isPointInsidePoly(const CCVector2& P, const Polyli
 			PointCoordinateType t = (P.x-B.x)*ABy-(A.x-B.x)*(P.y-B.y);
 			if (ABy<0)
 				t=-t;
-
 			if (t<0)
 				inside = !inside;
 		}
@@ -106,21 +109,29 @@ bool ManualSegmentationTools::isPointInsidePoly(const CCVector2& P, const Polyli
 
 ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCloud, DistanceType minDist, DistanceType maxDist)
 {
-	if(!aCloud)
+	if (!aCloud)
+	{
+		assert(false);
 		return 0;
+	}
 
 	ReferenceCloud* Y = new ReferenceCloud(aCloud);
 
-	DistanceType dist;
-
 	//for each point
-	aCloud->placeIteratorAtBegining();
-	for (unsigned i=0;i<aCloud->size();++i)
+	for (unsigned i=0; i<aCloud->size(); ++i)
 	{
-		dist = aCloud->getPointScalarValue(i);
+		const DistanceType dist = aCloud->getPointScalarValue(i);
 		//we test if its assocaited scalar value falls inside the specified intervale
-		if (dist>=minDist && dist<=maxDist)
-			Y->addPointIndex(i);
+		if (dist >= minDist && dist <= maxDist)
+		{
+			if (!Y->addPointIndex(i))
+			{
+				//not engouh memory
+				delete Y;
+				Y=0;
+				break;
+			}
+		}
 	}
 
 	return Y;
@@ -128,128 +139,124 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 
 GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* theMesh, ReferenceCloud* pointIndexes, bool pointsWillBeInside, GenericProgressCallback* progressCb, GenericIndexedCloud* destCloud, unsigned indexShift)
 {
-	if (!theMesh)
+	if (!theMesh || !pointIndexes || !pointIndexes->getAssociatedCloud())
 		return 0;
 
-	unsigned i;
-
-	//par défaut, on tente une segmentation rapide (qui prend plus de mémoire)
+	//by default we try a fast process (but with a higher memory consumption)
 	unsigned numberOfPoints = pointIndexes->getAssociatedCloud()->size();
 	unsigned numberOfIndexes = pointIndexes->size();
 
-	//on commence par mettre un marqueur de selection pour chaque point en prevoyant au passage son futur indice dans la liste réduite
-	unsigned* newPointIndexes = new unsigned[numberOfPoints];
-	if (!newPointIndexes)
-		return 0; //not enough memory
-
-	memset(newPointIndexes,0,numberOfPoints*sizeof(unsigned));
-	pointIndexes->placeIteratorAtBegining();
-	for (i=0;i<numberOfIndexes;++i)
+	//we determine for each point if it is used in the output mesh or not
+	//(and we compute its new index by the way: 0 means that the point is not used, otherwise its index will be newPointIndexes-1)
+	std::vector<unsigned> newPointIndexes;
 	{
-		//0 voudra dire que le point n'est pas retenu, sinon son indice est égal à newPointIndexes-1
-		assert(pointIndexes->getCurrentPointGlobalIndex()<numberOfPoints);
-		newPointIndexes[pointIndexes->getCurrentPointGlobalIndex()]=i+1;
-		pointIndexes->forwardIterator();
+		try
+		{
+			newPointIndexes.resize(numberOfPoints,0);
+		}
+		catch (std::bad_alloc)
+		{
+			return 0; //not enough memory
+		}
+
+		for (unsigned i=0; i<numberOfIndexes; ++i)
+		{
+			assert(pointIndexes->getPointGlobalIndex(i) < numberOfPoints);
+			newPointIndexes[pointIndexes->getPointGlobalIndex(i)]=i+1;
+		}
 	}
 
-	//il faut une étape supplémentaire si on a en entrée les points "en dehors"
-	//(une sorte de négatif du tableau qu'on vient de construire en somme !)
+	//negative array for the case where input points are "outside"
 	if (!pointsWillBeInside)
 	{
-		unsigned newIndice = 0;
-		unsigned* _newPointIndexes = newPointIndexes;
-		for (i=0;i<numberOfPoints;++i)
+		unsigned newIndex = 0;
+		for (unsigned i=0;i<numberOfPoints;++i)
+			newPointIndexes[i] = (newPointIndexes[i] == 0 ? ++newIndex : 0);
+	}
+
+	//create resulting mesh
+	SimpleMesh* newMesh = 0;
+	{
+		unsigned numberOfTriangles = theMesh->size();
+
+		//progress notification
+		NormalizedProgress* nprogress = 0;
+		if (progressCb)
 		{
-			//negatif
-			*_newPointIndexes = (*_newPointIndexes == 0 ? ++newIndice : 0);
-			++_newPointIndexes;
+			progressCb->reset();
+			progressCb->setMethodTitle("Extract mesh");
+			char buffer[256];
+			sprintf(buffer,"New vertex number: %i",numberOfIndexes);
+			nprogress = new NormalizedProgress(progressCb,numberOfTriangles);
+			progressCb->setInfo(buffer);
+			progressCb->start();
 		}
-	}
-	//on va pouvoir maintenant tester beaucoup plus vite la présence ou non des sommets de chaque triangle du "bon côté"
 
-	unsigned numberOfTriangles = theMesh->size();
+		newMesh = new SimpleMesh(destCloud ? destCloud : pointIndexes->getAssociatedCloud());
+		unsigned count=0;
 
-	//progress notification
-	NormalizedProgress* nprogress = 0;
-	if (progressCb)
-	{
-		progressCb->reset();
-		progressCb->setMethodTitle("Extract mesh");
-		char buffer[256];
-		sprintf(buffer,"New vertex number: %i",numberOfIndexes);
-		nprogress = new NormalizedProgress(progressCb,numberOfTriangles);
-		progressCb->setInfo(buffer);
-		progressCb->start();
-	}
-
-	SimpleMesh* newTri = new SimpleMesh(destCloud ? destCloud : pointIndexes->getAssociatedCloud());
-	unsigned count=0,maxNumberOfTriangles=0;
-	int newVertexIndexes[3];
-
-	theMesh->placeIteratorAtBegining();
-	for (i=0;i<numberOfTriangles;++i)
-	{
-		bool triangleIsOnTheRightSide = true;
-
-		const TriangleSummitsIndexes* tsi = theMesh->getNextTriangleIndexes(); //DGM: getNextTriangleIndexes is faster for mesh groups!
-
-		//VERSION : ON GARDE LE TRIANGLE UNIQUEMENT SI SES 3 SOMMETS SONT A L'INTERIEUR
-		for (uchar j=0;j<3;++j)
+		theMesh->placeIteratorAtBegining();
+		for (unsigned i=0;i<numberOfTriangles;++i)
 		{
-			const unsigned& currentVertexFlag = newPointIndexes[tsi->i[j]];
+			bool triangleIsOnTheRightSide = true;
 
-			//si c'est un point qui ne restera pas, on doit supprimer le triangle
-			if (currentVertexFlag==0)
+			const TriangleSummitsIndexes* tsi = theMesh->getNextTriangleIndexes(); //DGM: getNextTriangleIndexes is faster for mesh groups!
+			int newVertexIndexes[3];
+
+			//VERSION: WE KEEP THE TRIANGLE ONLY IF ITS 3 VERTICES ARE INSIDE
+			for (uchar j=0;j<3;++j)
 			{
-				triangleIsOnTheRightSide = false;
+				const unsigned& currentVertexFlag = newPointIndexes[tsi->i[j]];
+
+				//if the vertex is rejected, we discard this triangle
+				if (currentVertexFlag==0)
+				{
+					triangleIsOnTheRightSide = false;
+					break;
+				}
+				newVertexIndexes[j]=currentVertexFlag-1;
+			}
+
+			//if we keep the triangle
+			if (triangleIsOnTheRightSide)
+			{
+				if (count == newMesh->size() && !newMesh->reserve(newMesh->size()+1000)) //auto expand mesh size
+				{
+					//stop process
+					delete newMesh;
+					newMesh = 0;
+					break;
+				}
+				++count;
+
+				newMesh->addTriangle(indexShift + newVertexIndexes[0],
+									indexShift + newVertexIndexes[1],
+									indexShift + newVertexIndexes[2]);
+			}
+
+			if (nprogress && !nprogress->oneStep())
+			{
+				//cancel process
 				break;
 			}
-			newVertexIndexes[j]=currentVertexFlag-1;
-		}
-
-		//le triangle est du "bon" côté
-		if (triangleIsOnTheRightSide)
-		{
-			if (count==maxNumberOfTriangles)
-			{
-				maxNumberOfTriangles+=1000;
-				if (!newTri->reserve(maxNumberOfTriangles))
-				{
-					delete newTri;
-					if (newPointIndexes)
-						delete[] newPointIndexes;
-					return 0;
-				}
-			}
-			++count;
-
-			newTri->addTriangle(indexShift+newVertexIndexes[0],indexShift+newVertexIndexes[1],indexShift+newVertexIndexes[2]);
 		}
 
 		if (nprogress)
+			delete nprogress;
+
+		if (newMesh)
 		{
-			if (!nprogress->oneStep())
-				break;
+			if (newMesh->size()==0)
+			{
+				delete newMesh;
+				newMesh=0;
+			}
+			else if (count < newMesh->size())
+			{
+				newMesh->resize(count); //should always be ok as count<maxNumberOfTriangles
+			}
 		}
 	}
 
-	if (progressCb)
-	{
-		delete nprogress;
-		progressCb->stop();
-	}
-
-	if (newPointIndexes)
-		delete[] newPointIndexes;
-	newPointIndexes=0;
-
-	if (newTri->size()==0)
-	{
-		delete newTri;
-		newTri=0;
-	}
-	else if (count<maxNumberOfTriangles)
-		newTri->resize(count); //should always be ok as count<maxNumberOfTriangles
-
-	return newTri;
+	return newMesh;
 }

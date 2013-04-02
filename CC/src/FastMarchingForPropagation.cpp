@@ -321,7 +321,7 @@ ReferenceCloud* FastMarchingForPropagation::extractPropagatedPoints()
 		Yk->placeIteratorAtBegining();
 		for (unsigned k=0;k<Yk->size();++k)
 		{
-			Zk->addPointIndex(Yk->getCurrentPointGlobalIndex());
+			Zk->addPointIndex(Yk->getCurrentPointGlobalIndex()); //can't fail (see above)
 			//raz de la norme du gradient du point, pour qu'il ne soit plus pris en compte par la suite !
 			Yk->setCurrentPointScalarValue(SEGMENTED_VALUE);
 			Yk->forwardIterator();

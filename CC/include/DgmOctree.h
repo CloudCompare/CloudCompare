@@ -348,7 +348,7 @@ public:
 	/** Index could be the index of a point, in which case the code
 		would correspond to the octree cell where the point lies.
 	**/
-	struct indexAndCode
+	struct IndexAndCode
 	{
         //! index
 		unsigned theIndex;
@@ -356,50 +356,50 @@ public:
 		OctreeCellCodeType theCode;
 
 		//! Default constructor
-		indexAndCode()
+		IndexAndCode()
 			: theIndex(0)
 			, theCode(0)
 		{
 		}
 
 		//! Constructor from an index and a code
-		indexAndCode(unsigned index, OctreeCellCodeType code)
+		IndexAndCode(unsigned index, OctreeCellCodeType code)
 			: theIndex(index)
 			, theCode(code)
 		{
 		}
 
 		//! Copy constructor
-		indexAndCode(const indexAndCode& ic)
+		IndexAndCode(const IndexAndCode& ic)
 			: theIndex(ic.theIndex)
 			, theCode(ic.theCode)
 		{
 		}
 
 		//! Code-based comparison operator
-		/** \param a first indexAndCode structure
-			\param b second indexAndCode structure
+		/** \param a first IndexAndCode structure
+			\param b second IndexAndCode structure
 			\return whether the code of 'a' is smaller than the code of 'b'
 		**/
-		static bool codeComp(const indexAndCode& a, const indexAndCode& b) throw()
+		static bool codeComp(const IndexAndCode& a, const IndexAndCode& b) throw()
 		{
 			return a.theCode < b.theCode;
 		}
 
 		//! Index-based comparison operator
-		/** \param a first indexAndCode structure
-			\param b second indexAndCode structure
+		/** \param a first IndexAndCode structure
+			\param b second IndexAndCode structure
 			\return whether the index of 'a' is smaller than the index of 'b'
 		**/
-		static bool indexComp(const indexAndCode& a, const indexAndCode& b) throw()
+		static bool indexComp(const IndexAndCode& a, const IndexAndCode& b) throw()
 		{
 			return a.theIndex < b.theIndex;
 		}
 
 	};
 
-	//! Container of 'indexAndCode' structures
-	typedef std::vector<indexAndCode> cellsContainer;
+	//! Container of 'IndexAndCode' structures
+	typedef std::vector<IndexAndCode> cellsContainer;
 
     //! Octree cell descriptor
 	struct octreeCell

@@ -81,16 +81,15 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 
 	CCLib::ReferenceCloud* newCloud = new CCLib::ReferenceCloud(theCloud);
 
-	//less than 4 points ? no need for calculation, we return the whole cloud
+	//less than 4 points? no need for calculation, we return the whole cloud
 	if (nbPoints<4)
 	{
-		if (!newCloud->reserve(nbPoints)) //well, we never know ;)
+		if (!newCloud->addPointIndex(0,nbPoints)) //well, we never know ;)
 		{
 			//not enough memory!
 			delete newCloud;
 			return 0;
 		}
-		newCloud->addPointIndex(0,nbPoints);
 		return newCloud;
 	}
 
@@ -229,7 +228,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	{
 		for (i=0;i<nbPoints;++i)
 			if (pointBelongsToCvxHull[i]>0)
-				newCloud->addPointIndex(i);
+				newCloud->addPointIndex(i); //can't fail, see above
 	}
 	else //not enough memory
 	{

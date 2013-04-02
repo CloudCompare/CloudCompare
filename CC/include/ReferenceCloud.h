@@ -97,12 +97,14 @@ public:
 
 	//! Point global index insertion mechanism
 	/** \param globalIndex a point global index
+		\return false if not enough memory
 	**/
-	virtual void addPointIndex(unsigned globalIndex);
+	virtual bool addPointIndex(unsigned globalIndex);
 
 	//! Point global index insertion mechanism (range)
 	/** \param firstIndex first point global index of range
 		\param lastIndex last point global index of range (excluded)
+		\return false if not enough memory
 	**/
 	virtual bool addPointIndex(unsigned firstIndex, unsigned lastIndex);
 

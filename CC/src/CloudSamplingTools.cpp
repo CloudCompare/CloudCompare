@@ -39,7 +39,8 @@ GenericIndexedCloud* CloudSamplingTools::resampleCloudWithOctree(GenericIndexedC
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1) return 0;
+		if (theOctree->build(progressCb) < 1)
+			return 0;
 	}
 
 	//on cherche le niveau qui donne le nombre de points le plus proche de la consigne
@@ -47,7 +48,8 @@ GenericIndexedCloud* CloudSamplingTools::resampleCloudWithOctree(GenericIndexedC
 
 	GenericIndexedCloud* sampledList = resampleCloudWithOctreeAtLevel(theCloud,bestLevel,resamplingMethod,progressCb,theOctree);
 
-	if (!_theOctree) delete theOctree;
+	if (!_theOctree)
+		delete theOctree;
 
 	return sampledList;
 }
@@ -60,7 +62,7 @@ SimpleCloud* CloudSamplingTools::resampleCloudWithOctreeAtLevel(GenericIndexedCl
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1)
+		if (theOctree->build(progressCb) < 1)
 		{
 			delete theOctree;
 			return 0;
@@ -113,7 +115,8 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudWithOctree(GenericIndexedCloud
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1) return 0;
+		if (theOctree->build(progressCb) < 1)
+			return 0;
 	}
 
 	//on cherche le niveau qui donne le nombre de points le plus proche de la consigne
@@ -121,7 +124,8 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudWithOctree(GenericIndexedCloud
 
 	ReferenceCloud* subsampledCloud = subsampleCloudWithOctreeAtLevel(theCloud,bestLevel,subsamplingMethod,progressCb,theOctree);
 
-	if (!_theOctree) delete theOctree;
+	if (!_theOctree)
+		delete theOctree;
 
 	return subsampledCloud;
 }
@@ -134,7 +138,7 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudWithOctreeAtLevel(GenericIndex
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1)
+		if (theOctree->build(progressCb) < 1)
 		{
 			delete theOctree;
 			return 0;
@@ -186,21 +190,22 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 
 	//we put all input points in a ReferenceCloud
 	ReferenceCloud* newCloud = new ReferenceCloud(theCloud);
-	if (!newCloud->reserve(theCloudSize))
+	if (!newCloud->addPointIndex(0,theCloudSize))
 	{
 		delete newCloud;
 		return 0;
 	}
-	newCloud->addPointIndex(0,theCloudSize);
 
 	//we have less points than requested?!
-	if (theCloudSize<=newNumberOfPoints)
+	if (theCloudSize <= newNumberOfPoints)
+	{
 		return newCloud;
+	}
 
-	unsigned pointsToRemove=theCloudSize-newNumberOfPoints;
+	unsigned pointsToRemove = theCloudSize-newNumberOfPoints;
 
 	NormalizedProgress* normProgress=0;
-    if(progressCb)
+    if (progressCb)
     {
         progressCb->setInfo("Random subsampling");
 		normProgress = new NormalizedProgress(progressCb,pointsToRemove);
@@ -208,24 +213,24 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
         progressCb->start();
     }
 
-	//et on en enlève "theCloud.size()-newNumberOfPoints" au hasard (c'est plus rapide)
-	unsigned index,i;
-	unsigned lastPointIndex=theCloudSize-1;
-	for (i=0;i<pointsToRemove;++i)
+	//we randomly remove "theCloud.size() - newNumberOfPoints" points (much simpler)
+	unsigned lastPointIndex = theCloudSize-1;
+	for (unsigned i=0; i<pointsToRemove; ++i)
 	{
-		index = unsigned(floor(float(rand())/float(RAND_MAX)*float(lastPointIndex)));
+		unsigned index = (unsigned)floor((float)rand()/(float)RAND_MAX * (float)lastPointIndex);
 		newCloud->swap(index,lastPointIndex);
 		--lastPointIndex;
 
 		if (normProgress && !normProgress->oneStep())
 		{
+			//cancel process
 			delete normProgress;
 			delete newCloud;
 			return 0;
 		}
 	}
 
-	newCloud->resize(newNumberOfPoints);
+	newCloud->resize(newNumberOfPoints); //always smaller, so it should be ok!
 
 	if (normProgress)
 		delete normProgress;
@@ -240,13 +245,6 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 {
 	assert(theCloud);
     unsigned cloudSize = theCloud->size();
-
-    if(progressCb)
-    {
-        progressCb->setInfo("Spatial resampling");
-        progressCb->reset();
-        progressCb->start();
-    }
 
     DgmOctree *_theOctree=theOctree;
 	if (!_theOctree)
@@ -277,73 +275,106 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 		return 0;
 	}
 
-	//Parcourir le nuage pour marquer les points à conserver
-    //L'idée est la suivante : pour chaque point i qui est encore marqué, rechercher les voisins
-    //distants d'au plus <minDistance> puis démarquer chacun de ces points.
+	NormalizedProgress* normProgress=0;
+    if (progressCb)
+    {
+        progressCb->setInfo("Spatial resampling");
+		normProgress = new NormalizedProgress(progressCb,cloudSize);
+        progressCb->reset();
+        progressCb->start();
+    }
+
+	//for each point in the cloud that is still 'marked', we look
+	//for its neighbors and remove their own marks
     DgmOctree::NearestNeighboursSphericalSearchStruct nss;
     nss.level = _theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(minDistance);
+	
 	markers->placeIteratorAtBegining();
-    for(unsigned i=0; i<cloudSize; i++, markers->forwardIterator())
+    for (unsigned i=0; i<cloudSize; i++, markers->forwardIterator())
     {
-        if(progressCb)
-            progressCb->update(100.0f*(float)(i+1)/(float)cloudSize);
-		if(!markers->getCurrentValue())
-            continue;
-        theCloud->getPoint(i,nss.queryPoint);
-		bool inbounds=false;
-        _theOctree->getTheCellPosWhichIncludesThePoint(&nss.queryPoint, nss.cellPos, nss.level, inbounds);
-		nss.truncatedCellCode = (inbounds ? _theOctree->generateTruncatedCellCode(nss.cellPos, nss.level) : DgmOctree::INVALID_CELL_CODE);
-        _theOctree->computeCellCenter(nss.cellPos, nss.level, nss.cellCenter);
-
-        //points in same cell
-        ReferenceCloud* Y = _theOctree->getPointsInCell(nss.truncatedCellCode, nss.level, true);
-        unsigned j,count = Y->size();
-
-		try
+		//progress indicator
+		if (normProgress && !normProgress->oneStep())
 		{
-			nss.pointsInNeighbourhood.resize(count);
-		}
-		catch (.../*const std::bad_alloc&*/) //out of memory
-		{
+			//cancel process
 			delete sampledCloud;
-			sampledCloud=0;
+			sampledCloud = 0;
 			break;
 		}
 
-		DgmOctree::NeighboursSet::iterator it = nss.pointsInNeighbourhood.begin();
-		unsigned realCount=0;
-        for (j=0; j<count; ++j)
-        {
-			unsigned index = Y->getPointGlobalIndex(j);
-			if (index != i && markers->getValue(index)) //no need to add the point itself and those already flagged off
-			{
-				it->point = Y->getPointPersistentPtr(j);
-				it->pointIndex = index;
-				++it;
-				++realCount;
-			}
-        }
-        nss.pointsInNeighbourhood.resize(realCount); //should be ok as realCount<=count
+		//no mark? we skip this point
+		if (!markers->getCurrentValue())
+            continue;
 
-		//for each of them, we look for its neighbors
-        nss.alreadyVisitedNeighbourhoodSize = 1;
+		//init neighbor search structure
+		theCloud->getPoint(i,nss.queryPoint);
+		bool inbounds = false;
+		_theOctree->getTheCellPosWhichIncludesThePoint(&nss.queryPoint, nss.cellPos, nss.level, inbounds);
+		nss.truncatedCellCode = (inbounds ? _theOctree->generateTruncatedCellCode(nss.cellPos, nss.level) : DgmOctree::INVALID_CELL_CODE);
+		_theOctree->computeCellCenter(nss.cellPos, nss.level, nss.cellCenter);
+
+        //add the points that lie in the same cell (faster)
+		{
+			ReferenceCloud* Y = _theOctree->getPointsInCell(nss.truncatedCellCode, nss.level, true);
+			unsigned count = Y->size();
+			try
+			{
+				nss.pointsInNeighbourhood.resize(count);
+			}
+			catch (std::bad_alloc) //out of memory
+			{
+				//stop process
+				delete sampledCloud;
+				sampledCloud = 0;
+				break;
+			}
+
+			unsigned realCount = 0;
+			DgmOctree::NeighboursSet::iterator it = nss.pointsInNeighbourhood.begin();
+			for (unsigned j=0; j<count; ++j)
+			{
+				unsigned index = Y->getPointGlobalIndex(j);
+				if (index != i && markers->getValue(index)) //no need to add the point itself and those already flagged off
+				{
+					it->point = Y->getPointPersistentPtr(j);
+					it->pointIndex = index;
+					++it;
+					++realCount;
+				}
+			}
+			nss.pointsInNeighbourhood.resize(realCount); //should be ok as realCount<=count
+			nss.alreadyVisitedNeighbourhoodSize = 1;
+		}
+
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN
 		nss.pointsInSphericalNeighbourhood.clear();
 #endif
 		nss.prepare(minDistance,_theOctree->getCellSize(nss.level));
-        unsigned nbNeighbors = _theOctree->findNeighborsInASphereStartingFromCell(nss, minDistance, false);
-		it = nss.pointsInNeighbourhood.begin();
-        for (j=0; j<nbNeighbors; ++j,++it)
-            if (it->pointIndex != i)
-                markers->setValue(it->pointIndex,false);
+        
+		//look for neighbors and 'de-mark' them
+		{
+			unsigned nbNeighbors = _theOctree->findNeighborsInASphereStartingFromCell(nss, minDistance, false);
+			DgmOctree::NeighboursSet::iterator it = nss.pointsInNeighbourhood.begin();
+			for (unsigned j=0; j<nbNeighbors; ++j, ++it)
+				if (it->pointIndex != i)
+					markers->setValue(it->pointIndex,false);
+		}
 
-        //A ce stade , le point i est forcément le seul point marqué dans un rayon de <minDistance>
-        //Il se trouve donc forcément dans le nuage final (puisqu'il ne pourra être démarqué par un autre point)
-        sampledCloud->addPointIndex(i);
+        //At this stage, the ith point is the only one marked in a radius of <minDistance>.
+        //Therefore it will necessarily be in the final cloud!
+        if (!sampledCloud->addPointIndex(i))	//not enough memory
+		{
+			//stop process
+			delete sampledCloud;
+			sampledCloud = 0;
+			break;
+		}
     }
 
-    if(progressCb)
-        progressCb->stop();
+    if(normProgress)
+	{
+		delete normProgress;
+		normProgress = 0;
+	}
 
 	if (!theOctree)
 		delete _theOctree;
@@ -352,8 +383,6 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 
     return sampledCloud;
 }
-//Fin de l'ajout Aurelien BEY
-
 
 bool CloudSamplingTools::resampleCellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
 {
@@ -407,7 +436,5 @@ bool CloudSamplingTools::subsampleCellAtLevel(const DgmOctree::octreeCell& cell,
         }
     }
 
-    cloud->addPointIndex(cell.points->getPointGlobalIndex(selectedPointIndex));
-
-	return true;
+	return cloud->addPointIndex(cell.points->getPointGlobalIndex(selectedPointIndex));
 }

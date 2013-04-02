@@ -103,14 +103,6 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(CCLib::GenericProgressC
 		break;
 	case RANDOM:
 		sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(m_pointCloud, (unsigned)(samplingValue->value()), progressCb);
-		//DGM: WTF?
-		/*if(sampledCloud == NULL)
-		{
-		sampledCloud = new CCLib::ReferenceCloud(m_pointCloud);
-		sampledCloud->reserve(m_pointCloud->size());
-		sampledCloud->addPointIndex(0,m_pointCloud->size());
-		}
-		//*/
 		break;
 	}
 

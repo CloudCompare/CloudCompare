@@ -118,11 +118,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 		{
 			//create a 'fake' reference cloud with all points
 			dataCloud = new ReferenceCloud(_dataCloud);
-			if (dataCloud->reserve(_dataCloud->size()))
-			{
-				dataCloud->addPointIndex(0,_dataCloud->size());
-			}
-			else //not enough memory
+			if (!dataCloud->addPointIndex(0,_dataCloud->size())) //not enough memory
 			{
 				delete dataCloud;
 				dataCloud=0;
@@ -254,8 +250,8 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 						unsigned index = dataCloud->getPointGlobalIndex(i);
 						if (dataCloud->getAssociatedCloud()->getPointScalarValue(index)<maxDist)
 						{
-							c->addPointIndex(index);
-							newCPSet->addPointIndex(CPSet->getPointGlobalIndex(i));
+							c->addPointIndex(index); //can't fail, see above
+							newCPSet->addPointIndex(CPSet->getPointGlobalIndex(i)); //can't fail, see above
 							if (newdataWeights)
 								newdataWeights->addElement(_dataWeights->getValue(index));
 							++realSize;
@@ -323,14 +319,15 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 					delete rotatedDataCloud;
 				rotatedDataCloud = newDataCloud;
 				delete dataCloud;
+
 				dataCloud = new ReferenceCloud(rotatedDataCloud);
-				if (!dataCloud->reserve(rotatedDataCloud->size()))
+				if (!dataCloud->addPointIndex(0,rotatedDataCloud->size()))
 				{
 					//not enough  memory
+					delete dataCloud;
 					result = ICP_ERROR_REGISTRATION_STEP;
 					break;
 				}
-				dataCloud->addPointIndex(0,rotatedDataCloud->size());
 			}
 			else
 			{

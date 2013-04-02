@@ -32,12 +32,12 @@
 
 using namespace CCLib;
 
-//marque les composantes connexes
 int AutoSegmentationTools::labelConnectedComponents(GenericIndexedCloudPersist* theCloud, uchar level, bool sixConnexity, GenericProgressCallback* progressCb, DgmOctree* _theOctree)
 {
 	if (!theCloud)
 		return -1;
 
+	//compute octree if none was provided
 	DgmOctree* theOctree = _theOctree;
 	if (!theOctree)
 	{
@@ -49,45 +49,53 @@ int AutoSegmentationTools::labelConnectedComponents(GenericIndexedCloudPersist* 
 		}
 	}
 
-	//on initialise les distances pour recevoir les labels des CCs
+	//we use the default scalar field to store components labels
 	theCloud->enableScalarField();
 
 	int result = theOctree->extractCCs(level,sixConnexity,progressCb);
 
+	//remove octree if it was not provided as input
 	if (!_theOctree)
 		delete theOctree;
 
 	return result;
 }
 
-//extrait les composantes connexes d'un nuage
-//--> version avec des ReferenceCloud (uniquement des références vers les points)
-//pour permettre une récupération au niveau de l'application cliente
-//des couleurs, normales, etc.
 bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersist* theCloud, ReferenceCloudContainer& cc)
 {
-	if (!theCloud)
-		return false;
-	unsigned numberOfPoints = theCloud->size();
-	if (numberOfPoints<1)
+	unsigned numberOfPoints = (theCloud ? theCloud->size() : 0);
+	if (numberOfPoints == 0)
 		return false;
 
-	//on admet que "labelConnectedComponents" a bien déjà été appelé
-	//les labels des CCs sont alors stockées dans le champ scalaire "courant"
+	//components should have already been labeled and labels should have been stored in the active scalar field!
+	if (!theCloud->isScalarFieldEnabled())
+		return false;
+
 	cc.clear();
 
-	//theCloud->placeIteratorAtBegining();
 	for (unsigned i=0;i<numberOfPoints;++i)
 	{
-		int ccLabel=(int)theCloud->getPointScalarValue(i)-1; //les labels commencent à 1 !
+		int ccLabel = (int)theCloud->getPointScalarValue(i)-1; //labels stat from 1!
 
-		//on remplit le vecteur de "CCs" vides jusqu'à arriver au bon numéro de CC
-		//on s'occupera en théorie des autres plus tard
-		while (ccLabel>=(int)cc.size())
-			cc.push_back(new ReferenceCloud(theCloud));
+		//we fill the CCs vector with empty components until we reach the current label
+		//(they will be "filled" later)
+		try
+		{
+			while (ccLabel >= (int)cc.size())
+				cc.push_back(new ReferenceCloud(theCloud));
+		}
+		catch(std::bad_alloc)
+		{
+			//not enough memory
+			return false;
+		}
 
-		//on rajoute le point à la CC courante
-		cc[ccLabel]->addPointIndex(i);
+		//add the point to the current component
+		if (!cc[ccLabel]->addPointIndex(i))
+		{
+			//not enough memory
+			return false;
+		}
 	}
 
 	return true;
@@ -103,13 +111,11 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
                                                                 bool applyGaussianFilter,
                                                                 float alpha)
 {
-	if (!theCloud)
-        return false;
-	unsigned numberOfPoints = theCloud->size();
-	if (numberOfPoints<1)
+	unsigned numberOfPoints = (theCloud ? theCloud->size() : 0);
+	if (numberOfPoints == 0)
         return false;
 
-	//on calcule l'octree
+	//compute octree if none was provided
 	DgmOctree* theOctree = _theOctree;
 	if (!theOctree)
 	{
@@ -122,21 +128,22 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	}
 
 	ScalarField* theDists = new ScalarField("distances",true);
-	if (!theDists->reserve(numberOfPoints))
 	{
-		if (!_theOctree)
-			delete theOctree;
-		return false;
+		DistanceType d = theCloud->getPointScalarValue(0);
+		if (!theDists->resize(numberOfPoints,true,d))
+		{
+			if (!_theOctree)
+				delete theOctree;
+			return false;
+
+		}
 	}
-	theCloud->placeIteratorAtBegining();
-	unsigned k=0;
-	DistanceType d = theCloud->getPointScalarValue(k);
-	for (;k<numberOfPoints;++k)
-        theDists->addElement(d);
 
 	//on calcule le gradient (va écraser le champ des distances)
-	if (ScalarFieldTools::computeScalarFieldGradient(theCloud,signedSF,true,true,progressCb,theOctree)<0)
+	if (ScalarFieldTools::computeScalarFieldGradient(theCloud,signedSF,true,true,progressCb,theOctree) < 0)
 	{
+		if (theDists)
+			theDists->release();
 		if (!_theOctree)
 			delete theOctree;
 		return false;
@@ -167,6 +174,8 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	{
 		if (!_theOctree)
             delete theOctree;
+		if (theDists)
+			theDists->release();
 		delete fm;
 		return false;
 	}

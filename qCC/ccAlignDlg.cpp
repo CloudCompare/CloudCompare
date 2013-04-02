@@ -119,27 +119,44 @@ unsigned ccAlignDlg::getMaxNumberOfCandidates()
 
 CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 {
-    CCLib::ReferenceCloud *sampledCloud;
+    CCLib::ReferenceCloud* sampledCloud=0;
 
-    sampledCloud = NULL;
-    switch(getSamplingMethod())
+    switch (getSamplingMethod())
     {
         case SPACE:
-            sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(modelObject, modelSamplingRate->value());
+			{
+				sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(modelObject, modelSamplingRate->value());
+			}
             break;
         case OCTREE:
-            if(modelObject->getOctree())
-                sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(modelObject, (uchar)modelSamplingRate->value(),
-                    CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER, NULL, (CCLib::DgmOctree*)modelObject->getOctree());
+            if (modelObject->getOctree())
+			{
+                sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(modelObject,
+																							(uchar)modelSamplingRate->value(),
+																							CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
+																							NULL,
+																							(CCLib::DgmOctree*)modelObject->getOctree());
+			}
+			else
+			{
+				ccLog::Error("[ccAlignDlg::getSampledModel] Failed to get/compute model octree!");
+			}
             break;
         case RANDOM:
-            sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(modelObject, (unsigned)(modelSamplingRate->value()));
-            if(sampledCloud != NULL)
-                break;
+			{
+				sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(modelObject, (unsigned)(modelSamplingRate->value()));
+			}
+			break;
         default:
-            sampledCloud = new CCLib::ReferenceCloud(modelObject);
-            sampledCloud->reserve(modelObject->size());
-			sampledCloud->addPointIndex(0,modelObject->size());
+			{
+				sampledCloud = new CCLib::ReferenceCloud(modelObject);
+				if (!sampledCloud->addPointIndex(0,modelObject->size()))
+				{
+					delete sampledCloud;
+					sampledCloud=0;
+					ccLog::Error("[ccAlignDlg::getSampledModel] Not enough memory!");
+				}
+			}
             break;
     }
 
@@ -148,29 +165,47 @@ CCLib::ReferenceCloud *ccAlignDlg::getSampledModel()
 
 CCLib::ReferenceCloud *ccAlignDlg::getSampledData()
 {
-    CCLib::ReferenceCloud *sampledCloud;
+    CCLib::ReferenceCloud* sampledCloud=0;
 
-    sampledCloud = NULL;
-    switch(getSamplingMethod())
+    switch (getSamplingMethod())
     {
         case SPACE:
-            sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(dataObject, dataSamplingRate->value());
+			{
+				sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(dataObject, dataSamplingRate->value());
+			}
             break;
         case OCTREE:
-            if(dataObject->getOctree())
-                sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(dataObject, (uchar)dataSamplingRate->value(),
-                    CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER, NULL, (CCLib::DgmOctree*)dataObject->getOctree());
+            if (dataObject->getOctree())
+			{
+                sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(dataObject,
+																							(uchar)dataSamplingRate->value(),
+																							CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
+																							NULL,
+																							(CCLib::DgmOctree*)dataObject->getOctree());
+			}
+			else
+			{
+				ccLog::Error("[ccAlignDlg::getSampledData] Failed to get/compute data octree!");
+			}
             break;
         case RANDOM:
-            sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(dataObject, (unsigned)(dataSamplingRate->value()));
-            if(sampledCloud != NULL)
-                break;
+			{
+				sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(dataObject, (unsigned)(dataSamplingRate->value()));
+			}
+			break;
         default:
-            sampledCloud = new CCLib::ReferenceCloud(dataObject);
-            sampledCloud->reserve(dataObject->size());
-			sampledCloud->addPointIndex(0,dataObject->size());
+			{
+				sampledCloud = new CCLib::ReferenceCloud(dataObject);
+				if (!sampledCloud->addPointIndex(0,dataObject->size()))
+				{
+					delete sampledCloud;
+					sampledCloud=0;
+					ccLog::Error("[ccAlignDlg::getSampledData] Not enough memory!");
+				}
+			}
             break;
     }
+
     return sampledCloud;
 }
 
@@ -202,10 +237,9 @@ void ccAlignDlg::swapModelAndData()
 
 void ccAlignDlg::modelSliderReleased()
 {
-    float rate;
-    rate = (float)modelSample->sliderPosition()/(float)modelSample->maximum();
-    if(getSamplingMethod() == SPACE)
-        rate = 1.-rate;
+    float rate = (float)modelSample->sliderPosition()/(float)modelSample->maximum();
+    if( getSamplingMethod() == SPACE)
+        rate = 1.0f-rate;
     rate *= modelSamplingRate->maximum();
     modelSamplingRate->setValue(rate);
     modelSamplingRateChanged(rate);
@@ -213,10 +247,9 @@ void ccAlignDlg::modelSliderReleased()
 
 void ccAlignDlg::dataSliderReleased()
 {
-    float rate;
-    rate = (float)dataSample->sliderPosition()/(float)dataSample->maximum();
-    if(getSamplingMethod() == SPACE)
-        rate = 1.-rate;
+    float rate = (float)dataSample->sliderPosition()/(float)dataSample->maximum();
+    if (getSamplingMethod() == SPACE)
+        rate = 1.0f-rate;
     rate *= dataSamplingRate->maximum();
     dataSamplingRate->setValue(rate);
     dataSamplingRateChanged(rate);
@@ -224,38 +257,46 @@ void ccAlignDlg::dataSliderReleased()
 
 void ccAlignDlg::modelSamplingRateChanged(double value)
 {
-    char text[256];
-    unsigned remaining;
-    CCLib::ReferenceCloud *tmpCloud;
-    CC_SAMPLING_METHOD method;
-    float rate;
+    char text[256] = "An error occured";
 
-    method = getSamplingMethod();
-    rate = (float)modelSamplingRate->value()/(float)modelSamplingRate->maximum();
+    CC_SAMPLING_METHOD method = getSamplingMethod();
+    float rate = (float)modelSamplingRate->value()/(float)modelSamplingRate->maximum();
     if(method == SPACE)
-        rate = 1.-rate;
+        rate = 1.0f-rate;
     modelSample->setSliderPosition((unsigned)((float)modelSample->maximum()*rate));
 
     switch(method)
     {
         case SPACE:
-            tmpCloud = getSampledModel();
-            remaining = tmpCloud->size();
-            sprintf(text, "distance units (%d remaining points)", remaining);
-            delete tmpCloud;
+			{
+				CCLib::ReferenceCloud* tmpCloud = getSampledModel(); //DGM FIXME: wow! you generate a spatially sampled cloud just to display its size?!
+				if (tmpCloud)
+				{
+					sprintf(text, "distance units (%d remaining points)", tmpCloud->size());
+					delete tmpCloud;
+				}
+			}
             break;
         case RANDOM:
-            sprintf(text, "remaining points (%.1f%%)", rate*100.);
+			{
+				sprintf(text, "remaining points (%.1f%%)", rate*100.);
+			}
             break;
         case OCTREE:
-            tmpCloud = getSampledModel();
-            remaining = tmpCloud->size();
-            sprintf(text, "%d remaining points", remaining);
-            delete tmpCloud;
+			{
+				CCLib::ReferenceCloud* tmpCloud = getSampledModel();  //DGM FIXME: wow! you generate a spatially sampled cloud just to display its size?!
+				if (tmpCloud)
+				{
+					sprintf(text, "%d remaining points", tmpCloud->size());
+					delete tmpCloud;
+				}
+			}
             break;
         default:
-            remaining = (unsigned)((float)modelObject->size()*rate);
-            sprintf(text, "%% (%d remaining points)", remaining);
+			{
+				unsigned remaining = (unsigned)(rate * (float)modelObject->size());
+				sprintf(text, "%% (%d remaining points)", remaining);
+			}
             break;
     }
     modelRemaining->setText(text);
@@ -263,38 +304,46 @@ void ccAlignDlg::modelSamplingRateChanged(double value)
 
 void ccAlignDlg::dataSamplingRateChanged(double value)
 {
-    char text[256];
-    unsigned remaining;
-    CCLib::ReferenceCloud *tmpCloud;
-    CC_SAMPLING_METHOD method;
-    float rate;
+    char text[256] = "An error occured";
 
-    method = getSamplingMethod();
-    rate = (float)dataSamplingRate->value()/(float)dataSamplingRate->maximum();
+    CC_SAMPLING_METHOD method = getSamplingMethod();
+    float rate = (float)dataSamplingRate->value()/(float)dataSamplingRate->maximum();
     if(method == SPACE)
-        rate = 1-rate;
+        rate = 1.0f-rate;
     dataSample->setSliderPosition((unsigned)((float)dataSample->maximum()*rate));
 
     switch(method)
     {
         case SPACE:
-            tmpCloud = getSampledData();
-            remaining = tmpCloud->size();
-            sprintf(text, "distance units (%d remaining points)", remaining);
-            delete tmpCloud;
+			{
+				CCLib::ReferenceCloud* tmpCloud = getSampledData(); //DGM FIXME: wow! you generate a spatially sampled cloud just to display its size?!
+				if (tmpCloud)
+				{
+					sprintf(text, "distance units (%d remaining points)", tmpCloud->size());
+					delete tmpCloud;
+				}
+			}
             break;
         case RANDOM:
-            sprintf(text, "remaining points (%.1f%%)", rate*100.);
+			{
+				sprintf(text, "remaining points (%.1f%%)", rate*100.);
+			}
             break;
         case OCTREE:
-            tmpCloud = getSampledData();
-            remaining = tmpCloud->size();
-            sprintf(text, "%d remaining points", remaining);
-            delete tmpCloud;
+			{
+				CCLib::ReferenceCloud* tmpCloud = getSampledData();  //DGM FIXME: wow! you generate a spatially sampled cloud just to display its size?!
+				if (tmpCloud)
+				{
+					sprintf(text, "%d remaining points", tmpCloud->size());
+					delete tmpCloud;
+				}
+			}
             break;
         default:
-            remaining = (unsigned)((float)dataObject->size()*rate);
-            sprintf(text, "%% (%d remaining points)", remaining);
+			{
+				unsigned remaining = (unsigned)(rate * (float)dataObject->size());
+				sprintf(text, "%% (%d remaining points)", remaining);
+			}
             break;
     }
     dataRemaining->setText(text);

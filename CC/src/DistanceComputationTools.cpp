@@ -1439,7 +1439,7 @@ static std::vector<QBitArray*> s_bitArrayPool_MT;
 static bool s_useBitArrays_MT = true;
 static QMutex s_currentBitMaskMutex;
 
-void cloudMeshDistCellFunc_MT(const DgmOctree::indexAndCode& desc)
+void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 {
 	//skip cell if process is aborted/has failed
 	if (!s_cellFunc_MT_success)

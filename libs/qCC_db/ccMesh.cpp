@@ -158,7 +158,7 @@ ccGenericMesh* ccMesh::clone(ccGenericPointCloud* vertices/*=0*/,
 			{
 				for (i=0;i<vertNum;++i)
 					if (usedVerts[i]!=vertNum)
-						rc->addPointIndex(i);
+						rc->addPointIndex(i); //can't fail, see above
 
 				//and the associated vertices set
 				newVertices = new ccPointCloud(rc,m_associatedCloud);
@@ -1173,184 +1173,320 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 	ccGenericPointCloud::VisibilityTableType* visibilityArray = m_associatedCloud->getTheVisibilityArray();
 	if (!visibilityArray || !visibilityArray->isAllocated())
 	{
-		//ccConsole::Error(QString("[Mesh %1] Visibility table not instantiated!").arg(getName()));
+		ccLog::Error(QString("[Mesh %1] Internal error: visibility table not instantiated!").arg(getName()));
 		return NULL;
 	}
 
 	ccMesh* newTri = NULL;
+	ccGenericPointCloud* newVertices = NULL;
 
-	/*ccHObject* parent = getParent();
-	if (parent!=NULL && parent->isKindOf(CC_MESH) && static_cast<ccGenericMesh*>(parent)->getAssociatedCloud()==m_associatedCloud)
+	//if vertices were provided as input, we use them (otherwise we - try to - create them)
+	if (vertices)
 	{
-	newTri = new ccMesh(m_associatedCloud);
-
-	unsigned i,maxTri=0,currentTri=0,triNum=m_triIndexes->currentSize();
-	CCLib::TriangleSummitsIndexes* tsi = NULL;
-	m_triIndexes->placeIteratorAtBegining();
-	for (i=0;i<triNum;++i)
-	{
-	tsi = (CCLib::TriangleSummitsIndexes*)m_triIndexes->getCurrentValue();
-	m_triIndexes->forwardIterator();
-
-	if (bool(visibilityArray->getValue(tsi->i1)>0) &&
-	bool(visibilityArray->getValue(tsi->i2)>0) &&
-	bool(visibilityArray->getValue(tsi->i3)>0))
-	{
-	if (currentTri==maxTri)
-	{
-	maxTri+=1000;
-	if (!newTri->reserve(maxTri))
-	{
-	delete newTri;
-	//ccConsole::Error("Not enough memory");
-	return NULL;
-	}
-	}
-
-	newTri->addTriangle(tsi->i1,tsi->i2,tsi->i3);
-	++currentTri;
-	}
-	}
-
-	if (currentTri==0)
-	{
-	delete newTri;
-	newTri = NULL;
+		newVertices = vertices;
 	}
 	else
 	{
-	newTri->resize(currentTri);
-	newTri->showColors(colorsShown());
-	newTri->showNormals(normalsShown());
-	newTri->showSF(sfShown());
+		newVertices = m_associatedCloud->createNewCloudFromVisibilitySelection(false);
+		if (!newVertices)
+		{
+			ccLog::Error(QString("[Mesh %1] Failed to create sub-mesh vertices! (not enough memory?)").arg(getName()));
+			return NULL;
+		}
 	}
-	}
-	else*/
+	assert(newVertices);
+
+	//create a 'reference' cloud if none was provided
+	CCLib::ReferenceCloud* rc = 0;
+	if (selection)
 	{
-		ccGenericPointCloud* newVertices = NULL;
+		assert(selection->getAssociatedCloud() == static_cast<CCLib::GenericIndexedCloud*>(m_associatedCloud));
+		rc = selection;
+	}
+	else
+	{
+		//we create a temporary entity with the invisible vertices only
+		rc = new CCLib::ReferenceCloud(m_associatedCloud);
 
-		if (vertices)
-			newVertices = vertices;
-		else
-		{
-			newVertices = m_associatedCloud->createNewCloudFromVisibilitySelection(false);
-			if (!newVertices)
-				return NULL;
-		}
-		assert(newVertices);
-
-		CCLib::ReferenceCloud* rc = 0;
-		if (selection)
-		{
-			assert(selection->getAssociatedCloud()==static_cast<CCLib::GenericIndexedCloud*>(m_associatedCloud));
-			rc = selection;
-		}
-		else
-		{
-			//we create a temporary entity with the invisible vertices only
-			rc = new CCLib::ReferenceCloud(m_associatedCloud);
-
-			for (unsigned i=0;i<m_associatedCloud->size();++i)
-				if (visibilityArray->getValue(i))
-					rc->addPointIndex(i);
-		}
-
-		//we create a new mesh with
-		CCLib::GenericIndexedMesh* result = CCLib::ManualSegmentationTools::segmentMesh(this,rc,true,NULL,newVertices);
-		if (!selection)
-		{
-			delete rc;
-			rc=0;
-		}
-
-		if (result)
-		{
-			newTri = new ccMesh(result,newVertices);
-			if (!newTri)
-			{
-				if (!vertices)
-					delete newVertices;
-				newVertices = NULL;
-				//ccConsole::Error("An error occured: not enough memory ?");
-			}
-			else
-			{
-				newTri->setName(getName()+QString(".part"));
-
-				//shall we add any advanced features?
-				bool addFeatures = false;
-				if (m_triNormalIndexes)
-					addFeatures |= newTri->reservePerTriangleNormalIndexes();
-				if (m_triMtlIndexes)
-					addFeatures |= newTri->reservePerTriangleMtlIndexes();
-				if (m_texCoordIndexes)
-					addFeatures |= newTri->reservePerTriangleTexCoordIndexes();
-
-				if (addFeatures)
+		for (unsigned i=0;i<m_associatedCloud->size();++i)
+			if (visibilityArray->getValue(i))
+				if (!rc->addPointIndex(i))
 				{
-					if (m_triNormals)
-					{
-						newTri->setTriNormsTable(m_triNormals);
-						//DGM FIXME
-						//newTri->addChild(m_triNormals,true);
-					}
-					if (m_materials)
-					{
-						newTri->setMaterialSet(m_materials);
-						//DGM FIXME
-						//newTri->addChild(m_materials,true);
-					}
-					if (m_texCoords)
-					{
-						newTri->setTexCoordinatesTable(m_texCoords);
-						//DGM FIXME
-						//newTri->addChild(m_texCoords,true);
-					}
+					ccLog::Error("[ccMesh::createNewMeshFromSelection] Not enough memory!");
+					delete rc;
+					return 0;
+				}
+	}
 
-					unsigned triNum=m_triIndexes->currentSize();
-					m_triIndexes->placeIteratorAtBegining();
-					for (unsigned i=0;i<triNum;++i)
-					{
-						const CCLib::TriangleSummitsIndexes* tsi = (CCLib::TriangleSummitsIndexes*)m_triIndexes->getCurrentValue();
-						m_triIndexes->forwardIterator();
+	//we create a new mesh with
+	CCLib::GenericIndexedMesh* result = CCLib::ManualSegmentationTools::segmentMesh(this,rc,true,NULL,newVertices);
+	if (!selection)
+	{
+		//don't use this anymore
+		delete rc;
+		rc=0;
+	}
 
-						if (bool(visibilityArray->getValue(tsi->i1)>0) &&
-							bool(visibilityArray->getValue(tsi->i2)>0) &&
-							bool(visibilityArray->getValue(tsi->i3)>0))
+	if (result)
+	{
+		newTri = new ccMesh(result,newVertices);
+		if (!newTri)
+		{
+			if (!vertices)
+				delete newVertices;
+			newVertices = NULL;
+			ccLog::Error("An error occured: not enough memory?");
+		}
+		else
+		{
+			newTri->setName(getName()+QString(".part"));
+
+			//shall we add any advanced features?
+			bool addFeatures = false;
+			if (m_triNormals && m_triNormalIndexes)
+				addFeatures |= newTri->reservePerTriangleNormalIndexes();
+			if (m_materials && m_triMtlIndexes)
+				addFeatures |= newTri->reservePerTriangleMtlIndexes();
+			if (m_texCoords && m_texCoordIndexes)
+				addFeatures |= newTri->reservePerTriangleTexCoordIndexes();
+
+			if (addFeatures)
+			{
+				//temporary structure for normal indexes mapping
+				std::vector<int> newNormIndexes;
+				NormsIndexesTableType* newTriNormals = 0;
+				if (m_triNormals && m_triNormalIndexes)
+				{
+					assert(m_triNormalIndexes->currentSize()==m_triIndexes->currentSize());
+					//create new 'minimal' subset
+					newTriNormals = new NormsIndexesTableType();
+					newTriNormals->link();
+					try
+					{
+						newNormIndexes.resize(m_triNormals->currentSize(),-1);
+					}
+					catch(std::bad_alloc)
+					{
+						ccLog::Warning("Failed to create new normals subset! (not enough memory)");
+						newTri->removePerTriangleNormalIndexes();
+						newTriNormals->release();
+						newTriNormals = 0;
+					}
+				}
+
+				//temporary structure for texture indexes mapping
+				std::vector<int> newTexIndexes;
+				TextureCoordsContainer* newTriTexIndexes = 0;
+				if (m_texCoords && m_texCoordIndexes)
+				{
+					assert(m_texCoordIndexes->currentSize()==m_triIndexes->currentSize());
+					//create new 'minimal' subset
+					newTriTexIndexes = new TextureCoordsContainer();
+					newTriTexIndexes->link();
+					try
+					{
+						newTexIndexes.resize(m_texCoords->currentSize(),-1);
+					}
+					catch(std::bad_alloc)
+					{
+						ccLog::Warning("Failed to create new texture indexes subset! (not enough memory)");
+						newTri->removePerTriangleTexCoordIndexes();
+						newTriTexIndexes->release();
+						newTriTexIndexes = 0;
+					}
+				}
+
+				//temporary structure for material indexes mapping
+				std::vector<int> newMatIndexes;
+				ccMaterialSet* newMaterials = 0;
+				if (m_materials && m_triMtlIndexes)
+				{
+					assert(m_triMtlIndexes->currentSize()==m_triIndexes->currentSize());
+					//create new 'minimal' subset
+					newMaterials = new ccMaterialSet(m_materials->getName()+QString(".subset"));
+					newMaterials->link();
+					try
+					{
+						newMatIndexes.resize(m_materials->size(),-1);
+					}
+					catch(std::bad_alloc)
+					{
+						ccLog::Warning("Failed to create new material subset! (not enough memory)");
+						newTri->removePerTriangleMtlIndexes();
+						newMaterials->release();
+						newMaterials = 0;
+						if (newTriTexIndexes) //we can release texture coordinates as well (as they depend on materials!)
 						{
-							if (m_triNormalIndexes)
-							{
-								const int* inds = m_triNormalIndexes->getValue(i);
-								newTri->addTriangleNormalIndexes(inds[0],inds[1],inds[2]);
-							}
-							if (m_triMtlIndexes)
-							{
-								newTri->addTriangleMtlIndex(m_triMtlIndexes->getValue(i));
-							}
-							if (m_texCoordIndexes)
-							{
-								const int* inds = m_texCoordIndexes->getValue(i);
-								newTri->addTriangleTexCoordIndexes(inds[0],inds[1],inds[2]);
-							}
+							newTri->removePerTriangleTexCoordIndexes();
+							newTriTexIndexes->release();
+							newTriTexIndexes = 0;
+							newTexIndexes.clear();
 						}
 					}
 				}
 
-				if (!vertices)
+				unsigned triNum=m_triIndexes->currentSize();
+				m_triIndexes->placeIteratorAtBegining();
+				for (unsigned i=0;i<triNum;++i)
 				{
-					newTri->addChild(newVertices);
-					newTri->setDisplay_recursive(getDisplay());
-					newTri->showColors(colorsShown());
-					newTri->showNormals(normalsShown());
-					newTri->showMaterials(materialsShown());
-					newTri->showSF(sfShown());
-					newVertices->setEnabled(false);
+					const CCLib::TriangleSummitsIndexes* tsi = (CCLib::TriangleSummitsIndexes*)m_triIndexes->getCurrentValue();
+					m_triIndexes->forwardIterator();
+
+					if (bool(visibilityArray->getValue(tsi->i1)>0) &&
+						bool(visibilityArray->getValue(tsi->i2)>0) &&
+						bool(visibilityArray->getValue(tsi->i3)>0))
+					{
+						//import per-triangle normals?
+						if (newTriNormals)
+						{
+							assert(m_triNormalIndexes);
+
+							//current triangle (compressed) normal indexes
+							const int* triNormIndexes = m_triNormalIndexes->getValue(i);
+
+							//for each triangle of this mesh, try to determine if its normals are already in use
+							//(otherwise add them to the new container and increase its index)
+							for (unsigned j=0;j<3;++j)
+							{
+								if (triNormIndexes[j] >=0 && newNormIndexes[triNormIndexes[j]] < 0)
+								{
+									if (newTriNormals->currentSize() == newTriNormals->capacity() 
+										&& !newTriNormals->reserve(newTriNormals->currentSize()+1000)) //auto expand
+									{
+										ccLog::Warning("Failed to create new normals subset! (not enough memory)");
+										newTri->removePerTriangleNormalIndexes();
+										newTriNormals->release();
+										newTriNormals = 0;
+										break;
+									}
+
+									//import old normal to new subset (create new index)
+									newNormIndexes[triNormIndexes[j]] = (int)newTriNormals->currentSize(); //new element index = new size - 1 = old size!
+									newTriNormals->addElement(m_triNormals->getValue(triNormIndexes[j]));
+								}
+							}
+
+							if (newTriNormals) //structure still exists?
+							{
+								newTri->addTriangleNormalIndexes(triNormIndexes[0] < 0 ? -1 : newNormIndexes[triNormIndexes[0]],
+									triNormIndexes[1] < 0 ? -1 : newNormIndexes[triNormIndexes[1]],
+									triNormIndexes[2] < 0 ? -1 : newNormIndexes[triNormIndexes[2]]);
+							}
+						}
+
+						//import texture coordinates?
+						if (newTriTexIndexes)
+						{
+							assert(m_texCoordIndexes);
+
+							//current triangle texture coordinates indexes
+							const int* triTexIndexes = m_texCoordIndexes->getValue(i);
+
+							//for each triangle of this mesh, try to determine if its textures coordinates are already in use
+							//(otherwise add them to the new container and increase its index)
+							for (unsigned j=0;j<3;++j)
+							{
+								if (triTexIndexes[j] >=0 && newTexIndexes[triTexIndexes[j]] < 0)
+								{
+									if (newTriTexIndexes->currentSize() == newTriTexIndexes->capacity() 
+										&& !newTriTexIndexes->reserve(newTriTexIndexes->currentSize()+500)) //auto expand
+									{
+										ccLog::Error("Failed to create new texture coordinates subset! (not enough memory)");
+										newTri->removePerTriangleTexCoordIndexes();
+										newTriTexIndexes->release();
+										newTriTexIndexes = 0;
+										break;
+									}
+									//import old texture coordinate to new subset (create new index)
+									newTexIndexes[triTexIndexes[j]] = (int)newTriTexIndexes->currentSize(); //new element index = new size - 1 = old size!
+									newTriTexIndexes->addElement(m_texCoords->getValue(triTexIndexes[j]));
+								}
+							}
+
+							if (newTriTexIndexes) //structure still exists?
+							{
+								newTri->addTriangleTexCoordIndexes(triTexIndexes[0] < 0 ? -1 : newTexIndexes[triTexIndexes[0]],
+									triTexIndexes[1] < 0 ? -1 : newTexIndexes[triTexIndexes[1]],
+									triTexIndexes[2] < 0 ? -1 : newTexIndexes[triTexIndexes[2]]);
+							}
+						}
+
+						//import materials?
+						if (newMaterials)
+						{
+							assert(m_triMtlIndexes);
+
+							//current triangle material index
+							const int triMatIndex = m_triMtlIndexes->getValue(i);
+
+							//for each triangle of this mesh, try to determine if its material is already in use
+							//(otherwise add it to the new container and increase its index)
+							if (triMatIndex >=0 && newMatIndexes[triMatIndex] < 0)
+							{
+								//import old material to new subset (create new index)
+								newMatIndexes[triMatIndex] = (int)newMaterials->size(); //new element index = new size - 1 = old size!
+								try
+								{
+									newMaterials->push_back(m_materials->at(triMatIndex));
+								}
+								catch(std::bad_alloc)
+								{
+									ccLog::Warning("Failed to create new materials subset! (not enough memory)");
+									newTri->removePerTriangleMtlIndexes();
+									newMaterials->release();
+									newMaterials = 0;
+								}
+							}
+
+							if (newMaterials) //structure still exists?
+							{
+								newTri->addTriangleMtlIndex(triMatIndex < 0 ? -1 : newMatIndexes[triMatIndex]);
+							}
+						}
+
+					}
+				}
+
+				if (newTriNormals)
+				{
+					newTriNormals->resize(newTriNormals->currentSize()); //smaller so it should always be ok!
+					newTri->setTriNormsTable(newTriNormals);
+					newTri->addChild(newTriNormals,true);
+					newTriNormals->release();
+					newTriNormals=0;
+				}
+
+				if (newTriTexIndexes)
+				{
+					newTri->setTexCoordinatesTable(newTriTexIndexes);
+					newTri->addChild(newTriTexIndexes,true);
+					newTriTexIndexes->release();
+					newTriTexIndexes=0;
+				}
+
+				if (newMaterials)
+				{
+					newTri->setMaterialSet(newMaterials);
+					newTri->addChild(newMaterials,true);
+					newMaterials->release();
+					newMaterials=0;
 				}
 			}
 
-			delete result;
-			result=0;
+			if (!vertices)
+			{
+				newTri->addChild(newVertices);
+				newTri->setDisplay_recursive(getDisplay());
+				newTri->showColors(colorsShown());
+				newTri->showNormals(normalsShown());
+				newTri->showMaterials(materialsShown());
+				newTri->showSF(sfShown());
+				newVertices->setEnabled(false);
+			}
 		}
+
+		delete result;
+		result=0;
 	}
 
 	//shall we remove the selected vertices from this mesh ?

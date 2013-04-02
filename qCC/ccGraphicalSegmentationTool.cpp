@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2257                                                              $
-//$LastChangedDate:: 2012-10-11 23:48:15 +0200 (jeu., 11 oct. 2012)        $
-//**************************************************************************
-//
 
 #include "ccGraphicalSegmentationTool.h"
 
@@ -314,9 +307,12 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 
 		if (sz!=4)
 		{
-			m_segmentationPoly->reserve(4);
-			for (unsigned i=0;i<4;++i)
-				m_segmentationPoly->addPointIndex(i);
+			m_segmentationPoly->clear();
+			if (!m_segmentationPoly->addPointIndex(0,4))
+			{
+				ccLog::Error("Out of memory!");
+				return;
+			}
 			m_segmentationPoly->setClosingState(true);
 		}
 	}
@@ -355,32 +351,43 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 	//start new polyline?
 	if (((m_state & RUNNING) == 0) || sz==0 || ctrlKeyPressed)
 	{
-		//reset polyline
-		m_segmentationPoly->clear();
-		m_polyVertices->clear();
 		//reset state
 		m_state = (ctrlKeyPressed ? RECTANGLE : POLYLINE);
 		m_state |= (STARTED | RUNNING);
+		//reset polyline
+		m_polyVertices->clear();
+		if (!m_polyVertices->reserve(2))
+		{
+			ccLog::Error("Out of memory!");
+			return;
+		}
 		//we add the same point twice (the last point will be used for display only)
-		m_polyVertices->reserve(2);
 		m_polyVertices->addPoint(P);
 		m_polyVertices->addPoint(P);
-		m_segmentationPoly->addPointIndex(0);
-		m_segmentationPoly->addPointIndex(1);
+		m_segmentationPoly->clear();
+		if (!m_segmentationPoly->addPointIndex(0,2))
+		{
+			ccLog::Error("Out of memory!");
+			return;
+		}
 	}
 	else //next points in "polyline mode" only
 	{
 		//we were already in 'polyline' mode?
 		if (m_state & POLYLINE)
 		{
-			m_polyVertices->reserve(sz+4);
+			if (!m_polyVertices->reserve(sz+4))
+			{
+				ccLog::Error("Out of memory!");
+				return;
+			}
 
 			//we replace last point by the current one
 			CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(sz));
 			*lastP = P;
 			//and add a new (equivalent) one
 			m_polyVertices->addPoint(P);
-			m_segmentationPoly->addPointIndex(sz);
+			m_segmentationPoly->addPointIndex(sz); //can't fail, see above
 			m_segmentationPoly->setClosingState(true);
 		}
 		else //we must change mode
@@ -436,7 +443,7 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	else
 	{
 		//remove last point!
-		m_segmentationPoly->resize(sz-1);
+		m_segmentationPoly->resize(sz-1); //can't fail --> smaller
 		m_segmentationPoly->setClosingState(true);
 	}
 
@@ -483,10 +490,6 @@ void ccGraphicalSegmentationTool::segment(bool inside)
 	int VP[4];
 	m_associatedWin->getViewportArray(VP);
 
-	CCVector3 P;
-	CCVector2 P2D;
-	bool pointInside;
-
     //for each selected entity
     for (ccHObject::Container::iterator p=m_toSegment.begin();p!=m_toSegment.end();++p)
     {
@@ -501,16 +504,18 @@ void ccGraphicalSegmentationTool::segment(bool inside)
         //we project each point and we check if it falls inside the segmentation polyline
         for (i=0;i<cloudSize;++i)
         {
+			CCVector3 P;
 			cloud->getPoint(i,P);
 
 			GLdouble xp,yp,zp;
 			gluProject(P.x,P.y,P.z,MM,MP,VP,&xp,&yp,&zp);
+			CCVector2 P2D;
 			P2D.x = xp - half_w;
 			P2D.y = yp - half_h;
 
-			pointInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D,m_segmentationPoly);
+			bool pointInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D,m_segmentationPoly);
 
-            if ((inside && !pointInside)||(!inside && pointInside))
+            if (inside != pointInside)
 				vis->setValue(i,0); //hiddenValue=0
         }
     }

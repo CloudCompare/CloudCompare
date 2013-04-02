@@ -210,7 +210,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
     unsigned n = m_theAssociatedCloud->size();
 
     //we check the maximum number of elements that we can store in the octree vector
-    //unsigned maxNumberOfElements = (unsigned)floor((double)m_thePointsAndTheirCellCodes.max_size()/(double)sizeof(indexAndCode));
+    //unsigned maxNumberOfElements = (unsigned)floor((double)m_thePointsAndTheirCellCodes.max_size()/(double)sizeof(IndexAndCode));
     //if (maxNumberOfElements<n) //not enough (contiguous) memory!
     //    return -1;
 
@@ -300,7 +300,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 		progressCb->setInfo("Sorting cells...");
 
     //on trie les paires "point-cellule" en fonction du code
-	std::sort(m_thePointsAndTheirCellCodes.begin(),m_thePointsAndTheirCellCodes.end(),indexAndCode::codeComp); //ascending cell code order
+	std::sort(m_thePointsAndTheirCellCodes.begin(),m_thePointsAndTheirCellCodes.end(),IndexAndCode::codeComp); //ascending cell code order
 
     //update the pre-computed 'number of cells per level of subidivision' array
     updateCellCountTable();
@@ -434,27 +434,27 @@ void DgmOctree::updateMinAndMaxTables()
 
 void DgmOctree::updateCellSizeTable()
 {
-    int k,dim;
-    PointCoordinateType dd,ll,lr;
-
-    //maj des dimensions des cellules pour les differents niveaux
-    for (dim=0; dim<3; ++dim)
+    //update the cell dimension for each subidivision level
+    for (int dim=0; dim<3; ++dim)
     {
-        dd = m_dimMax[dim]-m_dimMin[dim];
-        ll = std::max(m_pointsMin[dim]-m_dimMin[dim],0.0f);
-        lr = std::max(m_dimMax[dim]-m_pointsMax[dim],(PointCoordinateType)ZERO_TOLERANCE); //to make sure that ceil(lr/dd)>0 below!
+        PointCoordinateType dd = m_dimMax[dim]-m_dimMin[dim];
+        PointCoordinateType ll = std::max(m_pointsMin[dim]-m_dimMin[dim],0.0f);
+        PointCoordinateType lr = std::max(m_dimMax[dim]-m_pointsMax[dim],(PointCoordinateType)ZERO_TOLERANCE); //to make sure that ceil(lr/dd)>0 (see below)
 
-		for (k=0; k<=MAX_OCTREE_LEVEL; k++)
+		for (int k=0; k<=MAX_OCTREE_LEVEL; k++)
         {
             if (dim==0)
                 m_cellSize[k]=dd;
-            m_fillIndexes[k*6+dim] = (int)floor(ll/dd); //nombre de cellules vides a "gauche"
-            m_fillIndexes[k*6+3+dim] = (1<<k)-(int)ceil(lr/dd); //nombre de cellules vides a "droite"
-			assert(m_fillIndexes[k*6+3+dim]>=m_fillIndexes[k*6+dim]);
-            dd *= 0.5;
+
+            m_fillIndexes[k*6+dim] = (int)floor(ll/dd);			//number of empty cells on the 'left'
+            m_fillIndexes[k*6+3+dim] = (1<<k)-(int)ceil(lr/dd);	//number of empty cells on the 'rigth'
+			
+			assert(m_fillIndexes[k*6+3+dim] >= m_fillIndexes[k*6+dim]);
+
+			dd *= 0.5;
         }
 		if (dim==0)
-			m_cellSize[MAX_OCTREE_LEVEL+1]=m_cellSize[MAX_OCTREE_LEVEL]*(PointCoordinateType)0.5; //usefull for some algorithms
+			m_cellSize[MAX_OCTREE_LEVEL+1] = m_cellSize[MAX_OCTREE_LEVEL] * (PointCoordinateType)0.5; //usefull for some algorithms
     }
 }
 
@@ -896,7 +896,7 @@ unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
 {
 	assert(queryPoint);
     NearestNeighboursSearchStruct nNSS;
-    nNSS.queryPoint = *queryPoint;
+    nNSS.queryPoint											= *queryPoint;
     nNSS.level												= level;
     nNSS.minNumberOfNeighbors								= maxNumberOfNeighbors;
     nNSS.alreadyVisitedNeighbourhoodSize					= 0;
@@ -935,6 +935,7 @@ unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
 
     for (unsigned j=0; j<nnFound; ++j)
         Yk->addPointIndex(nNSS.pointsInNeighbourhood[j].pointIndex);
+
     maxSquareDist = nNSS.pointsInNeighbourhood.back().squareDist;
 
     return nnFound;
@@ -2705,7 +2706,7 @@ void DgmOctree::getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool tr
         OctreeCellCodeType currentCode = (p->theCode >> bitDec);
 
         if (predCode != currentCode)
-            vec.push_back(indexAndCode(i,truncatedCodes ? currentCode : p->theCode));
+            vec.push_back(IndexAndCode(i,truncatedCodes ? currentCode : p->theCode));
 
         predCode = currentCode;
     }
@@ -2795,7 +2796,7 @@ ReferenceCloud* DgmOctree::getPointsInCellsWithSortedCellCodes(cellCodesContaine
             break;
 
         //now we skip current codes to catch the search one!
-        while ((ind_p < m_numberOfProjectedPoints)&&(currentCode <= toExtractCode))
+        while ((ind_p < m_numberOfProjectedPoints) && (currentCode <= toExtractCode))
         {
             if (currentCode == toExtractCode)
                 m_dumpCloud->addPointIndex(p->theIndex);
@@ -3016,119 +3017,125 @@ int DgmOctree::extractCCs(uchar level, bool sixConnexity, GenericProgressCallbac
 
 int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool sixConnexity, GenericProgressCallback* progressCb) const
 {
-    if (cellCodes.empty()) //No cells !
+    size_t numberOfCells = cellCodes.size();
+	if (numberOfCells == 0) //no cells!
         return -1;
 
-    int k,indexMin[3],indexMax[3],deltaIndex[3],pos[3];
-    unsigned i,numberOfCells = (unsigned)cellCodes.size();
-
-    //ON CHERCHE LES LIMITES EFFECTIVES PAR RAPPORT AUX CODES !
-    //EN EFFET L'OCTREE CONTRAINT SEMBLE TOUT FAIRE FOIRER SINON
-    std::vector<indexAndCode> ccCells;
+	//filled octree cells
+	std::vector<IndexAndCode> ccCells;
 	try
 	{
 		ccCells.resize(numberOfCells);
 	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
+	catch (std::bad_alloc)
 	{
-		return -2; //not enough memory
+		//not enough memory
+		return -2;
 	}
 
-    //on trie suivant une dimension pour optimiser un peu la memoire necessaire
-    //Rq DGM --> Malheureusement, il faudrait prendre la dimension la plus "large", mais on ne la connait pas ici
-    uchar dim = 2;
-    uchar dim1 = (dim < 2 ? dim+1 : 0);
-    uchar dim2 = (dim > 0 ? dim-1 : 2);
-    //Console::print("dim=%i (dim1=%i,dim2=%i)\n",dim,dim1,dim2);
+    //we compute the position of each cell (grid coordinates)
+    int indexMin[3],indexMax[3];
+	{
+		//binary shift for cell code truncation
+		uchar bitDec = GET_BIT_SHIFT(level);
 
-    //binary shift for cell code truncation
-    uchar bitDec = GET_BIT_SHIFT(level);
+		for (size_t i=0; i<numberOfCells; i++)
+		{
+			ccCells[i].theCode = (cellCodes[i] >> bitDec);
 
-    //on transforme touts les codes de cellules en coordonnes dans la boite ou l'octree est projete
-    for (i=0; i<numberOfCells; i++)
-    {
-        ccCells[i].theCode = (cellCodes[i] >> bitDec);
-        getCellPos(ccCells[i].theCode,level,pos,true);
+			int pos[3];
+			getCellPos(ccCells[i].theCode,level,pos,true);
 
-        //on cherche les dimensions min/max selon les 3 dimensions
-        //(si la fonction etait appliquee a tout l'octree on pourrait
-        //choper directement les minFillIndexes et maxFillIndexes de l'octree
-        //mais malheureusement ce n'est pas forcement le cas ...).
-        if (i==0)
-        {
-            indexMin[0]=indexMax[0]=pos[0];
-            indexMin[1]=indexMax[1]=pos[1];
-            indexMin[2]=indexMax[2]=pos[2];
-        }
-        else
-        {
-            for (k=0; k<3; k++)
-            {
-                if (pos[k] < indexMin[k])
-                    indexMin[k] = pos[k];
-                else if (pos[k] > indexMax[k])
-                    indexMax[k] = pos[k];
-            }
-        }
+			//we look for the actual min and max dimensions of the input cells set
+			//(which may not be the whole set of octree cells!)
+			if (i != 0)
+			{
+				for (unsigned char k=0; k<3; k++)
+				{
+					if (pos[k] < indexMin[k])
+						indexMin[k] = pos[k];
+					else if (pos[k] > indexMax[k])
+						indexMax[k] = pos[k];
+				}
+			}
+			else
+			{
+				indexMin[0] = indexMax[0] = pos[0];
+				indexMin[1] = indexMax[1] = pos[1];
+				indexMin[2] = indexMax[2] = pos[2];
+			}
 
-        //Important !!! il faudra aussi que les cellules soient triees tranches par tranches et au sein d'une tranche !
-        ccCells[i].theIndex = unsigned(pos[dim1]) + (unsigned(pos[dim2]) << level) + (unsigned(pos[dim]) << (2*level));
-    }
+			//Warning: the cells will have to be sorted inside a slice afterwards!
+			ccCells[i].theIndex = (	static_cast<unsigned>(pos[0])				)
+								+ (	static_cast<unsigned>(pos[1]) << level		)
+								+ (	static_cast<unsigned>(pos[2]) << (2*level)	);
+		}
+	}
 
-    //on calcule la largeur reelle de la grille 3D selon les 3 dimensions
-    for (k=0; k<3; k++)
-        deltaIndex[k] = indexMax[k] - indexMin[k] + 1;
+    //we deduce the size of the grid that totally include input cells
+    int gridSize[3];
+	{
+		for (unsigned char k=0; k<3; k++)
+		{
+			gridSize[k] = indexMax[k] - indexMin[k] + 1;
+		}
+	}
 
-    //on trie donc les cellules suivant leur tranche et on garde la synchro avec les codes
-    //tri des cellules en fonction de leur indice absolu
-    std::sort(ccCells.begin(),ccCells.end(),indexAndCode::indexComp); //ascending index code order
+    //we sort the cells
+    std::sort(ccCells.begin(),ccCells.end(),IndexAndCode::indexComp); //ascending index code order
 
-    int di = deltaIndex[dim1];
-    int dj = deltaIndex[dim2];
-    int step = deltaIndex[dim];
+    const int& di = gridSize[0];
+    const int& dj = gridSize[1];
+    const int& step = gridSize[2];
 
     //instrumentation pour la recherche des 4 ou 8 voisins en 2D (donc en 3D --> 6 ou 26 voisins)
-    uchar numberOfNeighbours,numberOfOldNeighbours;
-    int neighboursDec[4],oldNeighboursDec[9]; //on leur donne la taille maximale possible, pour simplifier le code
-    std::vector<int> neighboursVal,neighboursMin;
+    uchar neighborsInCurrentSlice=0, neighborsInPrecedingSlice=0;
+    int currentSliceNeighborsShifts[4], precedingSliceNeighborsShifts[9]; //maximum size to simplify code...
 
-    if (sixConnexity) //6-connexity
+	if (sixConnexity) //6-connexity
     {
-        numberOfNeighbours = 2;
-        neighboursDec[0] = -(di+2);
-        neighboursDec[1] = -1;
+        neighborsInCurrentSlice = 2;
+        currentSliceNeighborsShifts[0] = -(di+2);
+        currentSliceNeighborsShifts[1] = -1;
 
-        numberOfOldNeighbours = 1;
-        oldNeighboursDec[0] = 0;
-
-        neighboursVal.reserve(3); //la moitie de 6, ca tombe bien ;)
-        neighboursMin.reserve(3);
+        neighborsInPrecedingSlice = 1;
+        precedingSliceNeighborsShifts[0] = 0;
     }
     else //26-connexity
     {
-        numberOfNeighbours = 4;
-        neighboursDec[0] = -1-(di+2);
-        neighboursDec[1] = -(di+2);
-        neighboursDec[2] = 1-(di+2);
-        neighboursDec[3] = -1;
+        neighborsInCurrentSlice = 4;
+        currentSliceNeighborsShifts[0] = -1-(di+2);
+        currentSliceNeighborsShifts[1] = -(di+2);
+        currentSliceNeighborsShifts[2] = 1-(di+2);
+        currentSliceNeighborsShifts[3] = -1;
 
-        numberOfOldNeighbours = 9;
-        oldNeighboursDec[0] = -1-(di+2);
-        oldNeighboursDec[1] = -(di+2);
-        oldNeighboursDec[2] = 1-(di+2);
-        oldNeighboursDec[3] = -1;
-        oldNeighboursDec[4] = 0;
-        oldNeighboursDec[5] = 1;
-        oldNeighboursDec[6] = -1+(di+2);
-        oldNeighboursDec[7] = (di+2);
-        oldNeighboursDec[8] = 1+(di+2);
-
-        neighboursVal.reserve(13); //la moitie de 6, ca tombe bien ;)
-        neighboursMin.reserve(13);
+        neighborsInPrecedingSlice = 9;
+        precedingSliceNeighborsShifts[0] = -1-(di+2);
+        precedingSliceNeighborsShifts[1] = -(di+2);
+        precedingSliceNeighborsShifts[2] = 1-(di+2);
+        precedingSliceNeighborsShifts[3] = -1;
+        precedingSliceNeighborsShifts[4] = 0;
+        precedingSliceNeighborsShifts[5] = 1;
+        precedingSliceNeighborsShifts[6] = -1+(di+2);
+        precedingSliceNeighborsShifts[7] = (di+2);
+        precedingSliceNeighborsShifts[8] = 1+(di+2);
     }
 
-    //intialisation des tranches de l'octree
-    int sliceSize = (di+2)*(dj+2); //on detoure la tranche pour eviter les effets de bords
+	//shared structures (to avoid repeated allocations)
+    std::vector<int> neighboursVal, neighboursMin;
+	try
+	{
+		neighboursVal.reserve(neighborsInCurrentSlice+neighborsInPrecedingSlice);
+		neighboursMin.reserve(neighborsInCurrentSlice+neighborsInPrecedingSlice);
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return -2;
+	}
+
+    //temporary virtual 'slices'
+    int sliceSize = (di+2)*(dj+2); //add a margin to avoid "boundary effects"
     int *slice = new int[sliceSize];
     if (!slice) //Not enough memory
         return -2;
@@ -3139,11 +3146,8 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
         delete[] slice;
         return -2;
     }
-    int *_slice,*_oldSlice;
 
-    //instrumentation pour le labelling
-    unsigned currentLabel = 1;
-    //table d'equivalence entre un label et un autre
+    //equivalence table between 'on the fly' labels
     int* equivalentLabels = new int[numberOfCells+2];
     if (!equivalentLabels) //Not enough memory
     {
@@ -3153,18 +3157,18 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
     }
     memset(equivalentLabels,0,sizeof(int)*(numberOfCells+2));
 
-    //table de lien entre un index de cellule et son label
-    int* cellsToIndex = new int[numberOfCells];
-    if (!cellsToIndex) //Not enough memory
+    //equivalence between a cell index and its label
+    int* cellIndexToLabel = new int[numberOfCells];
+    if (!cellIndexToLabel) //Not enough memory
     {
         delete[] slice;
         delete[] oldSlice;
         delete[] equivalentLabels;
         return -2;
     }
-    memset(cellsToIndex,0,sizeof(int)*numberOfCells);
+    memset(cellIndexToLabel,0,sizeof(int)*numberOfCells);
 
-    //POUR L'AVANCEMENT
+    //progress notification
 	NormalizedProgress* nprogress = 0;
     if (progressCb)
     {
@@ -3172,149 +3176,148 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 		nprogress = new NormalizedProgress(progressCb,step);
         progressCb->setMethodTitle("Components Labeling");
         char buffer[256];
-		sprintf(buffer,"Box: [%i*%i*%i]",deltaIndex[0],deltaIndex[1],deltaIndex[2]);
+		sprintf(buffer,"Box: [%i*%i*%i]",gridSize[0],gridSize[1],gridSize[2]);
         progressCb->setInfo(buffer);
         progressCb->start();
     }
 
-    //intialisation de la slice "precedente" a zero
+    //preceding slice is empty by default
     memset(oldSlice,0,sizeof(int)*sliceSize);
 
-    unsigned counter = 0;
-    int val,cellIndex,index;
-    unsigned gridCoordMask = (1 << level)-1;
-    std::vector<indexAndCode>::const_iterator _ccCells = ccCells.begin();
+    //current label
+    size_t currentLabel = 1;
 
     //on parcours chaque tranche
-    for (k = indexMin[dim]; k < indexMin[dim]+step; k++)
-    {
-        //on initialise la tranche "courante"
-        memset(slice,0,sizeof(int)*sliceSize);
+	{
+		unsigned counter = 0;
+		const unsigned gridCoordMask = (1 << level)-1;
+		std::vector<IndexAndCode>::const_iterator _ccCells = ccCells.begin();
 
-        //pour chaque cellule de la tranche
-        while (counter<numberOfCells && (int)(_ccCells->theIndex >> (level<<1)) == k)
-        {
-            int iind = int(_ccCells->theIndex & gridCoordMask);
-            int jind = int((_ccCells->theIndex >> level) & gridCoordMask);
-            cellIndex = (iind-indexMin[dim1]+1) + (jind-indexMin[dim2]+1)*(di+2);
-            ++_ccCells;
+		for (int k = indexMin[2]; k < indexMin[2]+step; k++)
+		{
+			//on initialise la tranche "courante"
+			memset(slice,0,sizeof(int)*sliceSize);
 
-            //on regarde si la cellule a des voisins
-            //dans la tranche
-            _slice = slice + cellIndex;
+			//pour chaque cellule de la tranche
+			while (counter<numberOfCells && (int)(_ccCells->theIndex >> (level<<1)) == k)
 			{
-				for (uchar n=0; n<numberOfNeighbours; n++)
+				int iind = int(_ccCells->theIndex & gridCoordMask);
+				int jind = int((_ccCells->theIndex >> level) & gridCoordMask);
+				int cellIndex = (iind-indexMin[0]+1) + (jind-indexMin[1]+1)*(di+2);
+				++_ccCells;
+
+				//on regarde si la cellule a des voisins
+				//dans la tranche
+				int* _slice = slice + cellIndex;
 				{
-					assert(cellIndex+neighboursDec[n]<sliceSize);
-					val = _slice[neighboursDec[n]];
-					if (val>1)
-						neighboursVal.push_back(val);
-				}
-			}
-
-            //et dans la tranche precedente
-            _oldSlice = oldSlice + cellIndex;
-			{
-				for (uchar n=0; n<numberOfOldNeighbours; n++)
-				{
-					assert(cellIndex+oldNeighboursDec[n]<sliceSize);
-					val = _oldSlice[oldNeighboursDec[n]];
-					if (val>1)
-						neighboursVal.push_back(val);
-				}
-			}
-
-            uchar p = (uchar)neighboursVal.size();
-            //Console::print("Nombre de voisins = %i\n",p);
-
-            //pas de voisins ?
-            if (p==0)
-                *_slice = (int)(++currentLabel); //on cree un nouvel index
-            //un voisin ?
-            else if (p==1)
-            {
-                *_slice = neighboursVal.back(); //on recupere son index
-                neighboursVal.pop_back(); //on vide le vecteur
-            }
-            //plusieurs voisins ?
-            else
-            {
-                //on recupere le plus petit index de CC
-                std::sort(neighboursVal.begin(),neighboursVal.end());
-                val = neighboursVal[0];
-
-                //s'ils ne sont pas tous pareils
-                if (val != neighboursVal.back())
-                {
-                    int oldVal = 0;
-                    neighboursMin.clear();
-                    //on cherche pour chaque "branche" la CC d'indice minimum
-                    //donc pour chaque voisin ...
+					for (uchar n=0; n<neighborsInCurrentSlice; n++)
 					{
-						for (uchar n=0; n<p; n++)
-						{
-							// ... on part de son indice de CC
-							index = neighboursVal[n];
-							//s'il n'est pas egal a celui du voisin d'avant
-							if (index != oldVal)
-							{
-								//on met a jour la notion "d'avant"
-								assert(index<(int)numberOfCells+2);
-								oldVal = index;
+						assert(cellIndex+currentSliceNeighborsShifts[n]<sliceSize);
+						const int& neighborLabel = _slice[currentSliceNeighborsShifts[n]];
+						if (neighborLabel>1)
+							neighboursVal.push_back(neighborLabel);
+					}
+				}
 
-								//on cherche a quoi il est vraiment equivalent
-								while (equivalentLabels[index] > 1)
+				//et dans la tranche precedente
+				int* _oldSlice = oldSlice + cellIndex;
+				{
+					for (uchar n=0; n<neighborsInPrecedingSlice; n++)
+					{
+						assert(cellIndex+precedingSliceNeighborsShifts[n]<sliceSize);
+						const int& neighborLabel = _oldSlice[precedingSliceNeighborsShifts[n]];
+						if (neighborLabel>1)
+							neighboursVal.push_back(neighborLabel);
+					}
+				}
+
+				//number of neighbors for current cell
+				uchar p = (uchar)neighboursVal.size();
+
+				if (p==0) //no neighbor
+				{
+					*_slice = (int)(++currentLabel); //we create a new label
+				}
+				else if (p==1) //1 neighbor
+				{
+					*_slice = neighboursVal.back(); //we'll use its label
+					neighboursVal.pop_back();
+				}
+				else //more than 1 neighbor?
+				{
+					//we get the smallest label
+					std::sort(neighboursVal.begin(),neighboursVal.end());
+					int smallestLabel = neighboursVal[0];
+
+					//s'ils ne sont pas tous pareils
+					if (smallestLabel != neighboursVal.back())
+					{
+						int lastLabel = 0;
+						neighboursMin.clear();
+						//we get the smallest equivalent label for each neighbor's branch
+						{
+							for (uchar n=0; n<p; n++)
+							{
+								// ... on part de son indice de CC
+								int label = neighboursVal[n];
+								//s'il n'est pas egal a celui du voisin d'avant
+								if (label != lastLabel)
 								{
-									index = equivalentLabels[index];
-									assert(index<(int)numberOfCells+2);
+									//on met a jour la notion "d'avant"
+									assert(label<(int)numberOfCells+2);
+									lastLabel = label;
+
+									//on cherche a quoi il est vraiment equivalent
+									while (equivalentLabels[label] > 1)
+									{
+										label = equivalentLabels[label];
+										assert(label<(int)numberOfCells+2);
+									}
+
+									neighboursMin.push_back(label);
 								}
-
-								neighboursMin.push_back(index);
 							}
 						}
-					}
 
-                    //on prend la plus petite des "fins de branches"
-                    std::sort(neighboursMin.begin(),neighboursMin.end());
-                    val = neighboursMin[0];
+						//get the smallest one
+						std::sort(neighboursMin.begin(),neighboursMin.end());
+						smallestLabel = neighboursMin[0];
 
-                    //on met a jour la table d'equivalence ...
-                    oldVal = val;
-                    //pour toutes les autres fins de branches
-					{
-						for (uchar n=1; n<neighboursMin.size(); n++)
+						//update the equivalence table by the way
+						//for all other branches
+						lastLabel = smallestLabel;
 						{
-							index = neighboursMin[n];
-							assert(index<(int)numberOfCells+2);
-							//si on ne vient pas de la traiter
-							if (index != oldVal)
+							for (uchar n=1; n<neighboursMin.size(); n++)
 							{
-								//on met a jour son equivalence avec le nouveau minimum trouve
-								equivalentLabels[index] = val;
-								oldVal = index;
+								int label = neighboursMin[n];
+								assert(label<(int)numberOfCells+2);
+								//we don't process it if it's the same label as the precedent neighbor
+								if (label != lastLabel)
+								{
+									equivalentLabels[label] = smallestLabel;
+									lastLabel = label;
+								}
 							}
 						}
 					}
-                }
 
-                *_slice = val;
+					//update current cell label
+					*_slice = smallestLabel;
+					neighboursVal.clear();
+				}
 
-                //on vide le vecteur
-                neighboursVal.clear();
-            }
+				cellIndexToLabel[counter++] = *_slice;
+			}
 
-            //Console::print("on assigne %i\n",*_slice);
-            cellsToIndex[counter++] = *_slice;
-        }
+			if (counter==numberOfCells)
+				break;
 
-        if (counter==numberOfCells)
-			break;
+			std::swap(slice,oldSlice);
 
-        std::swap(slice,oldSlice);
-
-        if (nprogress)
-			nprogress->oneStep();
-    }
+			if (nprogress)
+				nprogress->oneStep();
+		}
+	}
 
     //on libere un peu la memoire
     delete[] slice;
@@ -3330,97 +3333,106 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 
     if (currentLabel<2) //No CC found !!!
     {
-        delete[] cellsToIndex;
+        delete[] cellIndexToLabel;
         delete[] equivalentLabels;
         return -3;
     }
 
-    //compression de la table d'equivalence
+    //path compression (http://en.wikipedia.org/wiki/Union_find)
     assert(currentLabel<numberOfCells+2);
-    for (i=2; i<=currentLabel; i++)
-    {
-        index = equivalentLabels[i];
-        assert(index<(int)numberOfCells+2);
-        while (equivalentLabels[index] > 1) //il faut donc que equivalentLabels[0]==0 !!!
-        {
-            index = equivalentLabels[index];
-            assert(index<(int)numberOfCells+2);
-        }
-        equivalentLabels[i] = index;
-    }
+	{
+		for (size_t i=2; i<=currentLabel; i++)
+		{
+			int label = equivalentLabels[i];
+			assert(label<(int)numberOfCells+2);
+			while (equivalentLabels[label] > 1) //il faut donc que equivalentLabels[0]==0 !!!
+			{
+				label = equivalentLabels[label];
+				assert(label<(int)numberOfCells+2);
+			}
+			equivalentLabels[i] = label;
+		}
+	}
 
-    //on met a jour les index des cellules avec les "fins de branche"
-    for (i=0; i<numberOfCells; i++)
-    {
-        index = cellsToIndex[i];
-        assert(index<(int)numberOfCells+2);
-        if (equivalentLabels[index]>1)
-			cellsToIndex[i] = equivalentLabels[index];
-    }
+    //update leafs
+	{
+		for (size_t i=0; i<numberOfCells; i++)
+		{
+			int label = cellIndexToLabel[i];
+			assert(label<(int)numberOfCells+2);
+			if (equivalentLabels[label]>1)
+				cellIndexToLabel[i] = equivalentLabels[label];
+		}
+	}
 
-    //on peut maintenant reutiliser "equivalentLabels" pour deduire le nombre exact de CC a creer
-    memset(equivalentLabels,0,(numberOfCells+2)*sizeof(int)); //normalement sa taille est numberOfCells+2
+    //hack: we use "equivalentLabels" to count how many components will have to be created
+	int numberOfComponents = 0;
+	{
+		memset(equivalentLabels,0,(numberOfCells+2)*sizeof(int));
 
-    for (i=0; i<numberOfCells; i++)
-    {
-        assert(cellsToIndex[i]>1 && cellsToIndex[i]<(int)numberOfCells+2);
-        equivalentLabels[cellsToIndex[i]]=1;
-    }
+		for (size_t i=0; i<numberOfCells; i++)
+		{
+			assert(cellIndexToLabel[i]>1 && cellIndexToLabel[i]<(int)numberOfCells+2);
+			equivalentLabels[cellIndexToLabel[i]]=1;
+		}
 
-    //on cree des nouveaux indexes correspondant a chaque CC (et qui se suivent !)
-    int numberOfCC = 0;
-    for (i=2; i<numberOfCells+2; i++)
-        if (equivalentLabels[i]==1)
-            equivalentLabels[i]=++numberOfCC; //dans ce cas, les codes commenceront a 1 !
-
+		//we create (following) indexes for each components
+		for (size_t i=2; i<numberOfCells+2; i++)
+			if (equivalentLabels[i]==1)
+				equivalentLabels[i]=++numberOfComponents; //labels start at '1'
+	}
     assert(equivalentLabels[0]==0);
     assert(equivalentLabels[1]==0);
 
-    //tableau de vecteur contenant les codes de cellules formant la CC courante
-    cellCodesContainer ccCodes;
-
-    if (progressCb)
-    {
-        progressCb->reset();
-		nprogress = new NormalizedProgress(progressCb,numberOfCells);
-        char buffer[256];
-        sprintf(buffer,"Components: %i",numberOfCC);
-        progressCb->setMethodTitle("Connected Components Extraction");
-        progressCb->setInfo(buffer);
-        progressCb->start();
-    }
-
-    //pour chaque CC, on va "tagger" ses points avec son indice de CC
-    for (i=0; i<numberOfCells; i++)
-    {
-        assert(cellsToIndex[i]<(int)numberOfCells+2);
-        index = equivalentLabels[cellsToIndex[i]];
-        assert(index>0);
-        ReferenceCloud* Y = getPointsInCell(ccCells[i].theCode,level,true);
-        DistanceType d=DistanceType(index);
-
-        Y->placeIteratorAtBegining();
-        for (unsigned j=0; j<Y->size(); ++j)
-        {
-            Y->setCurrentPointScalarValue(d);
-            Y->forwardIterator();
-        }
-
-        if (nprogress)
-			nprogress->oneStep();
-    }
-
-    if (progressCb)
+    //we flag each component's points with its label
 	{
-		progressCb->stop();
-		if (nprogress)
-			delete nprogress;
-		nprogress=0;
+		if (progressCb)
+		{
+			progressCb->reset();
+			nprogress = new NormalizedProgress(progressCb,numberOfCells);
+			char buffer[256];
+			sprintf(buffer,"Components: %i",numberOfComponents);
+			progressCb->setMethodTitle("Connected Components Extraction");
+			progressCb->setInfo(buffer);
+			progressCb->start();
+		}
+
+		for (size_t i=0; i<numberOfCells; i++)
+		{
+			assert(cellIndexToLabel[i]<(int)numberOfCells+2);
+
+			const int& label = equivalentLabels[cellIndexToLabel[i]];
+			assert(label>0);
+			ReferenceCloud* Y = getPointsInCell(ccCells[i].theCode,level,true);
+			assert(Y);
+			if (Y)
+			{
+				Y->placeIteratorAtBegining();
+				DistanceType d = static_cast<DistanceType>(label);
+				for (unsigned j=0; j<Y->size(); ++j)
+				{
+					Y->setCurrentPointScalarValue(d);
+					Y->forwardIterator();
+				}
+			}
+
+			if (nprogress)
+				nprogress->oneStep();
+		}
+
+		if (progressCb)
+		{
+			progressCb->stop();
+			if (nprogress)
+				delete nprogress;
+			nprogress=0;
+		}
 	}
 
-    delete[] cellsToIndex;
-    delete[] equivalentLabels;
-    //ccCells.clear();
+	if (cellIndexToLabel)
+		delete[] cellIndexToLabel;
+	if (equivalentLabels)
+		delete[] equivalentLabels;
 
     return 0;
 }
@@ -3765,13 +3777,9 @@ void DgmOctree::getNNPointsAmong(NeighboursSet &thePoints, CCVector3* queryPoint
         std::partial_sort(thePoints.begin(),thePoints.begin()+numberOfNeighbours,thePoints.end(),PointDescriptor());
     }
 
-    int i=0;
-    p=thePoints.begin();
-    for (; i<numberOfNeighbours; ++i)
-    {
+    p = thePoints.begin();
+    for (int i=0; i<numberOfNeighbours; ++i, ++p)
         Zk->addPointIndex(p->theIndex);
-        ++p;
-    }
 }
 #endif
 
@@ -3821,7 +3829,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
 
 	//init with first cell
     cell.truncatedCode = (p->theCode >> bitDec);
-	cell.points->addPointIndex(p->theIndex);
+	cell.points->addPointIndex(p->theIndex); //can't fail (see above)
 	++p;
 
 	//number of cells for this level
@@ -3868,15 +3876,15 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
             cell.points->clear(false);
 			cell.truncatedCode = nextCode;
 
-            if (progressCb)
-				if (!nprogress->oneStep())
-				{
-					result = false;
-					break;
-				}
+			if (nprogress && !nprogress->oneStep())
+			{
+				//process canceled by user
+				result = false;
+				break;
+			}
         }
 
-        cell.points->addPointIndex(p->theIndex);
+        cell.points->addPointIndex(p->theIndex); //can't fail (see above)
     }
 
     //don't forget last cell!
@@ -3898,11 +3906,10 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
 	}
 #endif
 
-    if (progressCb)
+    if (nprogress)
 	{
-        progressCb->stop();
 		delete nprogress;
-		nprogress=0;
+		nprogress = 0;
 	}
 
 	//if something went wrong, we return 0
@@ -4210,7 +4217,7 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 	cell->truncatedCode = desc.truncatedCode;
 	if (cell->points->reserve(desc.i2-desc.i1+1))
 	{
-		for (unsigned i=desc.i1;i<=desc.i2;++i)
+		for (unsigned i=desc.i1; i<=desc.i2; ++i)
 			cell->points->addPointIndex(pointsAndCodes[i].theIndex);
 
 		s_cellFunc_MT_success &= (*s_func_MT)(*cell,s_userParams_MT);

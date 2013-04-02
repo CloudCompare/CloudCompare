@@ -136,19 +136,31 @@ ccGenericPointCloud::VisibilityTableType* ccGenericPointCloud::getTheVisibilityA
 
 CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints()
 {
-    if (!m_visibilityArray || m_visibilityArray->currentSize()<size())
-        return 0;
-
-	unsigned i,count = size();
+	unsigned count = size();
 	assert(count == m_visibilityArray->currentSize());
+
+    if (!m_visibilityArray || m_visibilityArray->currentSize() != count)
+        return 0;
 
     //we create an entity with the 'visible' vertices only
     CCLib::ReferenceCloud* rc = new CCLib::ReferenceCloud(this);
 
-    for (i=0;i<count;++i)
-        if (m_visibilityArray->getValue(i) > 0)
-            rc->addPointIndex(i);
+    for (unsigned i=0; i<count; ++i)
+	{
+        if (m_visibilityArray->getValue(i) != 0)
+		{
+            if (!rc->addPointIndex(i))
+			{
+				//not enough memory
+				ccLog::Error("[ccGenericPointCloud::getTheVisiblePoints] Not enough memory!");
+				delete rc;
+				rc=0;
+				break;
+			}
+		}
+	}
 
+	rc->resize(rc->size());
     return rc;
 }
 

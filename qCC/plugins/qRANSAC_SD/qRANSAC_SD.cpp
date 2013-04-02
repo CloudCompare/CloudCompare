@@ -349,7 +349,7 @@ void qRansacSD::doAction()
         for (unsigned i=0;i<shapes.size();++i)
         {
             PrimitiveShape* shape = shapes[i].first;
-            unsigned shapePointsCount = shapes[i].second;
+            size_t shapePointsCount = shapes[i].second;
 
             std::string desc;
             shape->Description(&desc);

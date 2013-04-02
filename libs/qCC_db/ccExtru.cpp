@@ -113,7 +113,12 @@ bool ccExtru::buildUp()
 				polyCloud.addPoint(CCVector3(m_profile[i].x,m_profile[i].y,0));
 		}
 		CCLib::Polyline poly(&polyCloud);
-		poly.addPointIndex(0,count);
+		if (!poly.addPointIndex(0,count))
+		{
+			delete[] triIndexes;
+			ccLog::Error("[ccPlane::buildUp] Not enough memory");
+			return false;
+		}
 		poly.setClosingState(true);
 
 		//test each triangle center

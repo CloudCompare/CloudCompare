@@ -77,7 +77,7 @@ class Neighbourhood
 		GenericIndexedCloudPersist* associatedCloud() const {return m_associatedCloud;}
 
 		//inherited from ReferenceCloud
-		/*virtual void addPointIndex(unsigned globalIndex);
+		/*virtual bool addPointIndex(unsigned globalIndex);
 		virtual bool addPointIndex(unsigned firstIndex, unsigned lastIndex);
 		virtual void setPointIndex(unsigned localIndex, unsigned globalIndex);
         virtual bool resize(unsigned n);

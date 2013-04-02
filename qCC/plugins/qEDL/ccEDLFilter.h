@@ -36,10 +36,11 @@
 #ifndef	CC_EDL_FILTER_HEADER
 #define	CC_EDL_FILTER_HEADER
 
+//ccFBO
 #include <ccGlFilter.h>
+#include <ccBilateralFilter.h>
 
 class ccShader;
-class ccBilateralFilter;
 class ccFrameBufferObject;
 
 //!	EyeDome Lighting

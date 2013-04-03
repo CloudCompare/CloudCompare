@@ -26,6 +26,7 @@
 
 //system
 #include <assert.h>
+#include <math.h>
 
 #define LOGITECH_VENDOR_ID 0x46d
 #define _CONSTANT_INPUT_PERIOD 0

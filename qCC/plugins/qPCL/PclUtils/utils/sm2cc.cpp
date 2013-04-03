@@ -231,7 +231,7 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 
 		for (size_t i = 0; i < pointCount; ++i)
 		{
-			DistanceType scalar = (DistanceType)pcl_scalar->points[i].S5c4laR;
+			ScalarType scalar = (ScalarType)pcl_scalar->points[i].S5c4laR;
 			cc_scalar_field->addElement(scalar);
 		}
 	}
@@ -242,7 +242,7 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 
 		for (size_t i = 0; i < pointCount; ++i)
 		{
-			DistanceType scalar = (DistanceType)pcl_scalar->points[i].S5c4laR;
+			ScalarType scalar = (ScalarType)pcl_scalar->points[i].S5c4laR;
 			cc_scalar_field->addElement(scalar);
 		}
 	}

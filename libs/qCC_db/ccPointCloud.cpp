@@ -1700,7 +1700,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep,_sfColors+=3)
 							{
 								//we simply set scalar value as red color component
-								bool valid = (*_sf >= sfMinDisp && *_sf > sfMaxDisp); //NaN values are rejected
+								bool valid = (*_sf >= sfMinDisp && *_sf <= sfMaxDisp); //NaN values are rejected
 								_sfColors[0] = (*_sf-sfRampStart)/sfRampRange;	//normalized sf value
 								_sfColors[1] = valid ? 1.0f : 0.0f;				//flag: whether point is grayed out or not
 								_sfColors[2] = 1.0f;							//reference value (to cope get the true lighting value)

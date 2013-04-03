@@ -329,7 +329,7 @@ void ccComparisonDlg::computeApproxResults()
         ccConsole::Print("[ComputeApproxDistances] Time: %3.2f s.",elapsedTime_ms/1.0e3);
 
         //affichage des infos sur le champ scalaire approx.
-        DistanceType mean,variance;
+        ScalarType mean,variance;
         sf->computeMinAndMax();
         sf->computeMeanAndVariance(mean,&variance);
         //précision
@@ -413,7 +413,7 @@ void ccComparisonDlg::computeApproxResults()
     preciseGroupBox->setEnabled(true);
 }
 
-int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(DistanceType maxSearchDist)
+int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(ScalarType maxSearchDist)
 {
     if (!isValid())
         return -1;
@@ -423,7 +423,7 @@ int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(DistanceType
 	memset(timings,0,sizeof(double)*CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 	//La taille de cellule au niveau où a été calculé la distance approx.
-	//DistanceType baseCS = compOctree->getCellSize(DEFAULT_OCTREE_LEVEL);
+	//ScalarType baseCS = compOctree->getCellSize(DEFAULT_OCTREE_LEVEL);
 
 	//Pour le cas où la référence est un maillage
 	double meshSurface = 1.0;
@@ -464,13 +464,13 @@ int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(DistanceType
 		CCLib::DgmOctree::OctreeCellCodeType truncatedCode, tempCode = 0xFFFFFFFF;
 		int numberOfPointsInCell=0;
 		unsigned index=0;
-		DistanceType cellDist=-1.0;
+		ScalarType cellDist=-1.0;
 
 		//on calcule un facteur de correction qui va nous donner à partir de la distance
 		//approximative une approximation (réelle) de la taille du voisinage nécessaire
 		//à inspecter au niveau courant
-		DistanceType cellSize = compOctree->getCellSize(level);
-		DistanceType levelCorrection = 1.0/cellSize;
+		ScalarType cellSize = compOctree->getCellSize(level);
+		ScalarType levelCorrection = 1.0/cellSize;
 
 		//densité du nuage de réference (en points/cellule) s'il existe
 		double refListDensity=1.0;
@@ -600,7 +600,7 @@ void ccComparisonDlg::compute()
     assert(sf);
 
     //max search distance
-    DistanceType maxSearchDist = (maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
+    ScalarType maxSearchDist = (maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
 	//multi-thread
 	bool enableMT = multiThreadedCheckBox->isChecked();
 
@@ -668,7 +668,7 @@ void ccComparisonDlg::compute()
         ccConsole::Print("[ComputeDistances] Time: %3.2f s.",elapsedTime_ms/1.0e3);
 
         //affichage des infos sur le champ scalaire
-        DistanceType mean,variance;
+        ScalarType mean,variance;
         sf->computeMinAndMax();
         sf->computeMeanAndVariance(mean,&variance);
         ccConsole::Print("[ComputeDistances] Mean distance = %f / std deviation = %f",mean,sqrt(variance));

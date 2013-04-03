@@ -249,7 +249,7 @@ static int vertex_cb(p_ply_argument argument)
 	double val = ply_get_argument_value(argument);
 
 	// This looks like it should always be true, 
-	// but it's false if x is a NaN.
+	// but it's false if x is NaN.
     if (val == val)
 	{
 		s_Point[flags & POS_MASK] = val;
@@ -396,25 +396,13 @@ static int grey_cb(p_ply_argument argument)
 }
 
 static unsigned s_scalarCount=0;
-static bool s_negSF=false;
 static int scalar_cb(p_ply_argument argument)
 {
 	ccPointCloud* cloud;
 	ply_get_argument_user_data(argument, (void**)(&cloud), NULL);
 
-	DistanceType scal = DistanceType(ply_get_argument_value(argument));
+	ScalarType scal = ScalarType(ply_get_argument_value(argument));
 	cloud->getCurrentInScalarField()->setValue(s_scalarCount++,scal);
-
-    //if there are negative values, we test if they are particular values (HIDDEN_VALUE, etc.)
-    //or not particular (in which case we have a non strictly positive SF)
-    if (scal<0.0 && !s_negSF)
-    {
-        //we must test if the value is a particular one
-		if (scal != HIDDEN_VALUE &&
-            scal != OUT_VALUE &&
-            scal != SEGMENTED_VALUE)
-            s_negSF = true;
-    }
 
     if ((s_scalarCount % PROCESS_EVENTS_FREQ) == 0)
         QCoreApplication::processEvents();
@@ -1239,7 +1227,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	CCLib::ScalarField* sf = cloud->getCurrentInScalarField();
     if (sf)
     {
-        sf->setPositive(!s_negSF);
+        sf->setPositiveAuto();
         sf->computeMinAndMax();
 		int sfIdx = cloud->getCurrentInScalarFieldIndex();
         cloud->setCurrentDisplayedScalarField(sfIdx);

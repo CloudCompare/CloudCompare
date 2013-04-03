@@ -75,7 +75,7 @@ public:
 	virtual ~GroundBasedLidarSensor();
 
     //inherited from GenericSensor
-	virtual CC_SENSOR_TYPE getType() {return GROUND_BASED_LIDAR;}
+	virtual CC_SENSOR_TYPE getType() const { return GROUND_BASED_LIDAR; }
 
 	//! Sets the lateral angular scanning limits
 	/** \param minV min latitude
@@ -162,12 +162,12 @@ public:
 	//! Returns the sensor max. range
 	/** \return the sensor max. range
 	**/
-	DistanceType getSensorRange();
+	ScalarType getSensorRange();
 
 	//! Sets the sensor max. range
 	/** \param range max. range of the sensor
 	**/
-	void setSensorRange(DistanceType range);
+	void setSensorRange(ScalarType range);
 
 	//! Returns the sensor optical center
 	/** \return the sensor optical center (as a 3-size array)
@@ -183,13 +183,13 @@ public:
 	/** The uncertainty is used to handle numerical inaccuracies
 		\return the Z-buffer uncertainty distance
 	**/
-	DistanceType getUncertainty();
+	ScalarType getUncertainty();
 
 	//! Sets the Z-buffer uncertainty distance
 	/** The uncertainty is used to handle numerical inaccuracies
 		\param u the Z-buffer uncertainty distance
 	**/
-	void setUncertainty(DistanceType u);
+	void setUncertainty(ScalarType u);
 
 
 	//! Returns the sensor attitude (as a rotation matrix)
@@ -256,9 +256,9 @@ public:
 	uchar* projectColors(GenericCloud* aCloud, GenericChunkedArray<3,uchar>& theColors);
 
 	//! Determines a point "visibility"
-	/** \param aPoint the point to test
+	/** \param P the point to test
 	**/
-	virtual CC_VISIBILITY_TYPE checkVisibility(const CCVector3& aPoint);
+	virtual uchar checkVisibility(const CCVector3& P);
 
 	//! Sensor "depth map"
 	/** Contains an array of depth values (along each scanned direction) and its dimensions.
@@ -268,7 +268,7 @@ public:
 	struct DepthBuffer
 	{
 	    //! Z-Buffer
-		DistanceType* zBuff;
+		ScalarType* zBuff;
 		//! Buffer width
 		int l_buff;
 		//! Buffer height
@@ -291,7 +291,7 @@ protected :
 		\param destPoint the projected point - (theta,phi) or (phi,theta) - will be stored here
 		\param dist the distance between the sensor optical center and the source point will be stored here
 	**/
-	void projectPoint(const CCVector3& sourcePoint, CCVector2& destPoint, DistanceType &dist);
+	void projectPoint(const CCVector3& sourcePoint, CCVector2& destPoint, ScalarType &dist);
 
 	//! Base distance (distance form emitter to receptor)
 	PointCoordinateType base;
@@ -320,11 +320,11 @@ protected :
 	CC_SENSOR_ROTATION_ORDER rotationOrder;
 
 	//! Sensor max range
-	DistanceType sensorRange;
+	ScalarType sensorRange;
 	//! Associated Z-buffer
 	DepthBuffer dB;
 	//! Z-buffer uncertainty
-	DistanceType uncertainty;
+	ScalarType uncertainty;
 };
 
 }

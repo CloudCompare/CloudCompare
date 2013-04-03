@@ -24,7 +24,7 @@ namespace CCLib
 {
 
 //! Scalar values container
-typedef std::vector<DistanceType> distancesContainer;
+typedef std::vector<ScalarType> distancesContainer;
 
 //! The Normal/Gaussian statistical distribution
 /** Implements the GenericDistribution interface.
@@ -49,13 +49,13 @@ public:
 		\param _mu the normal distribution mean
 		\param _sigma2 the normal distribution variance
 	**/
-	NormalDistribution(DistanceType _mu, DistanceType _sigma2);
+	NormalDistribution(ScalarType _mu, ScalarType _sigma2);
 
 	//inherited methods (see GenericDistribution)
 	virtual bool computeParameters(const GenericCloud* Yk, bool includeNegValues);
-	virtual double computeP(DistanceType x) const;
-	virtual double computePfromZero(DistanceType x) const;
-	virtual double computeP(DistanceType x1, DistanceType x2) const;
+	virtual double computeP(ScalarType x) const;
+	virtual double computePfromZero(ScalarType x) const;
+	virtual double computeP(ScalarType x1, ScalarType x2) const;
 	virtual double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, bool includeNegValues, int* histo=0);
 	virtual void getTextualDescription(char* buffer) const;
 	virtual bool isValid() const {return parametersDefined;};
@@ -65,20 +65,20 @@ public:
 		\param _sigma2 a field to transmit the distribution variance
 		return the parameters validity
 	**/
-	bool getParameters(DistanceType &_mu, DistanceType &_sigma2) const;
+	bool getParameters(ScalarType &_mu, ScalarType &_sigma2) const;
 
 	//! Sets the distribution parameters
 	/** \param _mu the distribution mean
 		\param _sigma2 the distribution variance
 		return the parameters validity
 	**/
-	bool setParameters(DistanceType _mu, DistanceType _sigma2);
+	bool setParameters(ScalarType _mu, ScalarType _sigma2);
 
 	//! Returns the distribution mean
-	inline DistanceType getMu() const {return mu;};
+	inline ScalarType getMu() const {return mu;};
 
 	//! Returns the distribution variance
-	inline DistanceType getSigma2() const {return sigma2;};
+	inline ScalarType getSigma2() const {return sigma2;};
 
 	//! Computes the distribution parameters from an array of scalar values
 	/** Specific method to compute the parameters directly from an array
@@ -114,16 +114,16 @@ protected:
 	bool parametersDefined;
 
 	//! Mean
-	DistanceType mu;
+	ScalarType mu;
 	//! Variance
-	DistanceType sigma2;
+	ScalarType sigma2;
 	//! exponential quotient
-	DistanceType qFactor;
+	ScalarType qFactor;
 	//! Normalization factor
 	double normFactor;
 
 	//! Structure used during the Chi2 distance computation
-	std::vector<DistanceType> Pi;
+	std::vector<ScalarType> Pi;
 };
 
 }

@@ -100,18 +100,18 @@ class Neighbourhood
 		**/
 		bool projectPointsOnPlane(const PointCoordinateType* thePlaneEquation, 
 									CC2DPointsConainer &the2DPoints, 
-									DistanceType &error, 
+									ScalarType &error, 
 									bool distanceNeeded=false);
 
 		//! Computes point set curvature with height function
 		/** \return curvature value (warning: unsigned value!) or HIDDEN_VALUE if computation failed.
 		**/
-		DistanceType computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType);
+		ScalarType computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType);
 
 		//! Computes point set curvature with 3D Quadric (WORK IN PROGRESS)
-		/** \return curvature value (warning: signed value!) or BIG_VALUE if computation failed.
+		/** \return curvature (signed) value or NAN_VALUE if computation failed.
         **/
-		DistanceType computeCurvature2(unsigned neighbourIndex, CC_CURVATURE_TYPE cType);
+		ScalarType computeCurvature2(unsigned neighbourIndex, CC_CURVATURE_TYPE cType);
 
 		/**** GETTERS ****/
 

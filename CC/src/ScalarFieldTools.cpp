@@ -31,20 +31,19 @@
 
 using namespace CCLib;
 
-void ScalarFieldTools::razDistsToHiddenValue(const CCVector3& aPoint, DistanceType& aScalarValue)
+void ScalarFieldTools::razDistsToHiddenValue(const CCVector3& P, ScalarType& scalarValue)
 {
-	aScalarValue=HIDDEN_VALUE;
+	scalarValue = HIDDEN_VALUE;
 }
 
-void ScalarFieldTools::razDistsToBigValue(const CCVector3& aPoint, DistanceType& aScalarValue)
+void ScalarFieldTools::razDistsToNaNValue(const CCVector3& P, ScalarType& scalarValue)
 {
-	aScalarValue=BIG_VALUE;
+	scalarValue = NAN_VALUE;
 }
 
-//mise à zéro des distances
-void ScalarFieldTools::razDistsToZero(const CCVector3& aPoint, DistanceType& aScalarValue)
+void ScalarFieldTools::razDistsToZero(const CCVector3& P, ScalarType& scalarValue)
 {
-	aScalarValue=0.0;
+	scalarValue = 0;
 }
 
 int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* theCloud, bool signedSF, bool euclidianDistances, bool sameInAndOutScalarField, GenericProgressCallback* progressCb, DgmOctree* theCloudOctree)
@@ -167,18 +166,15 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	unsigned counter;
-	CCVector3 u,v;
-	PointCoordinateType norm2;
-	DistanceType d1,d2,gN;
 	const GenericIndexedCloudPersist* cloud = cell.points->getAssociatedCloud();
 
 	for (i=0;i<n;++i)
 	{
-		gN = HIDDEN_VALUE;
+		ScalarType gN = HIDDEN_VALUE;
 
-		d1 = cell.points->getPointScalarValue(i);
-        if (d1>=0.0 || (signedSF && d1<BIG_VALUE))
+		ScalarType d1 = cell.points->getPointScalarValue(i);
+
+        if (ScalarField::ValidValue(d1,signedSF))
 		{
 			 cell.points->getPoint(i,nNSS.queryPoint);
 
@@ -188,32 +184,35 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
             //if more than one neighbour (the query point itself)
 			if (k>1)
 			{
-				v.x=v.y=v.z=0.0;
-				counter=0;
+				double sum[3]={0.0,0.0,0.0};
+				unsigned counter=0;
 
 				//j=1 because the first point is the query point itself --> contribution = 0
 				for (j=1;j<(unsigned)k;++j)
 				{
-					d2 = cloud->getPointScalarValue(nNSS.pointsInNeighbourhood[j].pointIndex);
-					if (d2>=0.0 || (signedSF && d2<BIG_VALUE))
+					ScalarType d2 = cloud->getPointScalarValue(nNSS.pointsInNeighbourhood[j].pointIndex);
+					if (ScalarField::ValidValue(d2,signedSF))
 					{
-						u = *nNSS.pointsInNeighbourhood[j].point - nNSS.queryPoint;
-						norm2 = u.norm2();
+						CCVector3 u = *nNSS.pointsInNeighbourhood[j].point - nNSS.queryPoint;
+						PointCoordinateType norm2 = u.norm2();
 
-						if (norm2>ZERO_TOLERANCE)
+						if (norm2 > ZERO_TOLERANCE)
 						{
                             d2 -= d1;
 							if (!euclidianDistances || d2*d2 < 1.01*norm2) //warning: here 'd2'=d2-d1
 							{
-								v += u * (d2/norm2); //warning: here 'd2'=d2-d1
+								d2 /= norm2; //warning: here 'd2'=d2-d1
+								sum[0] += (double)(u.x * d2); //warning: and here 'd2'=(d2-d1)/norm2 ;)
+								sum[1] += (double)(u.y * d2);
+								sum[2] += (double)(u.z * d2);
 								++counter;
 							}
 						}
 					}
 				}
 
-				if (counter>0)
-					gN = v.norm()/(PointCoordinateType)counter;
+				if (counter != 0)
+					gN = (ScalarType)(sqrt(sum[0]*sum[0]*+sum[1]*sum[1]+sum[2]*sum[2])/(double)counter);
 			}
 		}
 
@@ -362,31 +361,30 @@ bool ScalarFieldTools::computeCellGaussianFilter(const DgmOctree::octreeCell& ce
             for (unsigned j=0;j<k;++j,++it)
             {
                 double weight = exp(-(it->squareDist)/sigma2); //PDF: -exp(-(x-mu)^2/(2*sigma^2))
-                DistanceType val = cloud->getPointScalarValue(it->pointIndex);
+                ScalarType val = cloud->getPointScalarValue(it->pointIndex);
                 //scalar value must be valid
-                if (val>=0.0 || (signedSF && val < BIG_VALUE))
+				if (ScalarField::ValidValue(val,signedSF))
                 {
                     meanValue += (double)val * weight;
                     wSum += weight;
                 }
             }
 
-			DistanceType newValue;
-            if (wSum>0.0)
-                newValue = (DistanceType)(meanValue / wSum);
+			ScalarType newValue = 0;
+            if (wSum > 0.0)
+                newValue = (ScalarType)(meanValue / wSum);
             else
-                newValue = (DistanceType)(signedSF ? BIG_VALUE : HIDDEN_VALUE);
+                newValue = (signedSF ? HIDDEN_VALUE : NAN_VALUE);
 
             cell.points->setPointScalarValue(i,newValue);
         }
     }
-
     //Bilateral Filtering using the second sigma parameters on values (when given)
     else
     {
         for (unsigned i=0;i<n;++i) //for each point in cell
         {
-            DistanceType queryValue = cell.points->getPointScalarValue(i); //scalar of the query point
+            ScalarType queryValue = cell.points->getPointScalarValue(i); //scalar of the query point
 
             //we get the points inside a spherical neighbourhood (radius: '3*sigma')
             cell.points->getPoint(i,nNSS.queryPoint);
@@ -398,26 +396,25 @@ bool ScalarFieldTools::computeCellGaussianFilter(const DgmOctree::octreeCell& ce
             double wSum = 0.0;
             for (unsigned j=0;j<k;++j,++it)
             {
-                DistanceType val = cloud->getPointScalarValue(it->pointIndex);
-				DistanceType dSF = queryValue - val;
+                ScalarType val = cloud->getPointScalarValue(it->pointIndex);
+				ScalarType dSF = queryValue - val;
                 double weight = exp(-(it->squareDist)/sigma2) * exp(-(dSF*dSF)/sigmaSF2);
                 //scalar value must be valid
-                if (val>=0.0 || (signedSF && val < BIG_VALUE))
+				if (ScalarField::ValidValue(val,signedSF))
                 {
                     meanValue += (double)val * weight;
                     wSum += weight;
                 }
             }
 
-			DistanceType newValue;
-            if (wSum>0.0)
-                newValue = (DistanceType)(meanValue / wSum);
+			ScalarType newValue = 0;
+            if (wSum > 0.0)
+                newValue = (ScalarType)(meanValue / wSum);
             else
-                newValue = (DistanceType)(signedSF ? BIG_VALUE : HIDDEN_VALUE);
+                newValue = (signedSF ? HIDDEN_VALUE : NAN_VALUE);
 
             cell.points->setPointScalarValue(i,newValue);
         }
-
     }
 
 	return true;
@@ -431,7 +428,7 @@ void ScalarFieldTools::multiplyScalarFields(GenericIndexedCloud* firstCloud, Gen
 	if ((n1 != secondCloud->size())||(n1==0))
 		return;
 
-	DistanceType V1,V2;
+	ScalarType V1,V2;
 	unsigned i=0;
 	for (;i<n1;++i)
 	{
@@ -441,7 +438,7 @@ void ScalarFieldTools::multiplyScalarFields(GenericIndexedCloud* firstCloud, Gen
 	}
 }
 
-void ScalarFieldTools::computeScalarFieldExtremas(const GenericCloud* theCloud, DistanceType& minV, DistanceType& maxV, bool includeNegValues)
+void ScalarFieldTools::computeScalarFieldExtremas(const GenericCloud* theCloud, ScalarType& minV, ScalarType& maxV, bool includeNegValues)
 {
     assert(theCloud);
 
@@ -450,7 +447,7 @@ void ScalarFieldTools::computeScalarFieldExtremas(const GenericCloud* theCloud, 
         return;
 
 	//recherce des extremas
-	DistanceType V;
+	ScalarType V;
 	minV = maxV = 0.0;
 
 	bool firstValue=true;
@@ -480,7 +477,7 @@ unsigned ScalarFieldTools::countScalarFieldPositiveValues(const GenericCloud* th
 {
     assert(theCloud);
 
-	DistanceType V;
+	ScalarType V;
 	unsigned count = 0;
 	unsigned i,n = theCloud->size();
 
@@ -517,16 +514,16 @@ void ScalarFieldTools::computeScalarFieldHistogram(const GenericCloud* theCloud,
 	}
 
 	//on calcule les extremas
-	DistanceType minV,maxV;
+	ScalarType minV,maxV;
 	computeScalarFieldExtremas(theCloud,minV,maxV,includeNegValues);
 
 	//on en déduit le pas de l'historgramme
-	DistanceType invStep = (maxV>minV ? (DistanceType)numberOfClasses / (maxV-minV) : 0.0f);
+	ScalarType invStep = (maxV>minV ? (ScalarType)numberOfClasses / (maxV-minV) : 0.0f);
 
 	//projection des valeurs dans l'histo
 	for (unsigned i=0;i<theCloud->size();++i)
 	{
-		DistanceType V = theCloud->getPointScalarValue(i);
+		ScalarType V = theCloud->getPointScalarValue(i);
 
 		if (includeNegValues || V >= 0.0)
 		{
@@ -548,27 +545,27 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
         return false;
 
 	//on a besoin de mémoire ici !
-	DistanceType* theKMeans = new DistanceType[n]; //le centre des K clusters
+	ScalarType* theKMeans = new ScalarType[n]; //le centre des K clusters
 	uchar* belongings = new uchar[n]; //l'appartenance d'un point à un cluster
 	uchar* _belongings = 0;
-	DistanceType* minDistsToMean = new DistanceType[n];  //les distances au centre de cluster le plus proche
+	ScalarType* minDistsToMean = new ScalarType[n];  //les distances au centre de cluster le plus proche
 
-	DistanceType* theKSums = new DistanceType[K]; //le cumuls de distance des k clusters
+	ScalarType* theKSums = new ScalarType[K]; //le cumuls de distance des k clusters
 	unsigned* theKNums = new unsigned[K]; //le nombre de point par cluster
 	unsigned* theOldKNums = new unsigned[K]; //le nombre de point par cluster (ancien)
 
 	//on récupère les extremas
-	DistanceType V,minV,maxV;
+	ScalarType V,minV,maxV;
 	computeScalarFieldExtremas(theCloud, minV, maxV,includeNegValues);
 
 	//initialisation des K-means
-	DistanceType delta = maxV - minV;
-	DistanceType step = delta / DistanceType(K);
+	ScalarType delta = maxV - minV;
+	ScalarType step = delta / ScalarType(K);
 
 	unsigned i;
 	uchar j;
 	for (j=0;j<K;++j)
-        theKMeans[j] = minV + DistanceType(j)*step;
+        theKMeans[j] = minV + ScalarType(j)*step;
 
 	//on lance l'iterration
 	bool meansHaveMoved = true;
@@ -584,8 +581,8 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
 		_belongings = belongings;
 
 		uchar minK;
-		DistanceType distToMean,newMean;
-		DistanceType *_minDistToMean = minDistsToMean;
+		ScalarType distToMean,newMean;
+		ScalarType *_minDistToMean = minDistsToMean;
 
 		//pour chaque point
 		//Console::print("[Kmeans] Calcul des distances ...\n");
@@ -624,7 +621,7 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
 		_minDistToMean = minDistsToMean;
 		_belongings = belongings;
 
-		memset(theKSums,0,sizeof(DistanceType)*K);
+		memset(theKSums,0,sizeof(ScalarType)*K);
 		memcpy(theOldKNums,theKNums,sizeof(unsigned)*K);
 		memset(theKNums,0,sizeof(unsigned)*K);
 
@@ -643,7 +640,7 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
 		classMovingDist = 0.0;
 		for (j=0;j<K;++j)
 		{
-			newMean = (theKNums[j]>0 ? theKSums[j]/(DistanceType)theKNums[j] : theKMeans[j]);
+			newMean = (theKNums[j]>0 ? theKSums[j]/(ScalarType)theKNums[j] : theKMeans[j]);
 
 			if (theOldKNums[j] != theKNums[j])
                 meansHaveMoved=true;
@@ -673,8 +670,8 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
 	}
 
 	//on met à jour les distances pour refléter la segmentation
-	DistanceType* mins = new DistanceType[K];
-	DistanceType* maxs = new DistanceType[K];
+	ScalarType* mins = new ScalarType[K];
+	ScalarType* maxs = new ScalarType[K];
 
 	for (j=0;j<K;++j)
 	{

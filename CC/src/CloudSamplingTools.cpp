@@ -422,7 +422,7 @@ bool CloudSamplingTools::subsampleCellAtLevel(const DgmOctree::octreeCell& cell,
 		PointCoordinateType center[3];
 		cell.parentOctree->computeCellCenter(cell.truncatedCode,cell.level,center,true);
 
-		DistanceType dist,minDist;
+		ScalarType dist,minDist;
 		minDist = CCVector3::vdistance2(cell.points->getPoint(0)->u,center);
 
 		for (unsigned i=1;i<pointsCount;++i)

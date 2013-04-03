@@ -48,30 +48,30 @@ public:
 	/*** Scalar values display handling ***/
 
 	//! Returns the minimum displayed value
-	inline DistanceType getMinDisplayed() const {return m_minDisplayed;}
+	inline ScalarType getMinDisplayed() const {return m_minDisplayed;}
 	//! Returns the maximum displayed value
-	inline DistanceType getMaxDisplayed() const {return m_maxDisplayed;}
+	inline ScalarType getMaxDisplayed() const {return m_maxDisplayed;}
 	//! Returns the minimum value to start color gradient
-	inline DistanceType getMinSaturation() const {return m_minSaturation;}
+	inline ScalarType getMinSaturation() const {return m_minSaturation;}
 	//! Returns the maximum value to end color gradient
-	inline DistanceType getMaxSaturation() const {return m_maxSaturation;}
+	inline ScalarType getMaxSaturation() const {return m_maxSaturation;}
 
 	//! Sets the minimum displayed value
-	void setMinDisplayed(DistanceType dist);
+	void setMinDisplayed(ScalarType dist);
 	//! Sets the maximum displayed value
-	void setMaxDisplayed(DistanceType dist);
+	void setMaxDisplayed(ScalarType dist);
 	//! Sets the minimum value at which to start color gradient
-	void setMinSaturation(DistanceType dist);
+	void setMinSaturation(ScalarType dist);
 	//! Sets the maximum value at which to end color gradient
-	void setMaxSaturation(DistanceType dist);
+	void setMaxSaturation(ScalarType dist);
 
 	//! Normalizes a scalar value between 0 and 1
 	/** This method relies on the values of MinDisplayed, MinSaturation, MaxSaturation
 		and MaxDisplayed.
-		\param d a scalar value
+		\param val a scalar value
 		\return a number between 0 and 1 if inside [MinDisplayed:MaxDisplayed] or -1 otherwise
 	**/
-	DistanceType normalize(DistanceType d) const;
+	ScalarType normalize(ScalarType val) const;
 
 	//! Returns a normalized value (see ScalarField::normalize)
 	/** This method relies on the values of MinDisplayed, MinSaturation, MaxSaturation
@@ -79,7 +79,7 @@ public:
 		\param index scalar value index
 		\return a number between 0 and 1 if inside [MinDisplayed:MaxDisplayed] or -1 otherwise
 	**/
-	inline DistanceType getNormalizedValue(unsigned index) const {return normalize(getValue(index));}
+	inline ScalarType getNormalizedValue(unsigned index) const {return normalize(getValue(index));}
 
 	//! Sets whether min and max saturation values are absolute or not
 	/** For signed SF only.
@@ -108,7 +108,7 @@ public:
 	//! Sets the boundaries
 	/** Automatically switches scalar field to 'autoUpdateBoundaries' mode.
 	**/
-	void setBoundaries(DistanceType minValue, DistanceType maxValue);
+	void setBoundaries(ScalarType minValue, ScalarType maxValue);
 
 	//inherited
 	virtual void computeMinAndMax();
@@ -141,20 +141,20 @@ protected:
 	void updateNormalizeCoef();
 
 	//! Minimum displayed value
-	DistanceType m_minDisplayed;
+	ScalarType m_minDisplayed;
 	//! Maximum displayed value
-	DistanceType m_maxDisplayed;
+	ScalarType m_maxDisplayed;
 	//! Minimum saturation value (for color mapping)
-	DistanceType m_minSaturation;
+	ScalarType m_minSaturation;
 	//! Maximum saturation value (for color mapping)
-	DistanceType m_maxSaturation;
+	ScalarType m_maxSaturation;
 	//! Minimum saturation value (for log scale color mapping)
-	DistanceType m_minSaturationLog;
+	ScalarType m_minSaturationLog;
 	//! Maximum saturation value (for log scale color mapping)
-	DistanceType m_maxSaturationLog;
+	ScalarType m_maxSaturationLog;
 
 	//! Normalisation coef.
-	DistanceType m_normalizeCoef;
+	ScalarType m_normalizeCoef;
 
 	//! Flag whether min and max saturation values are absolute or not
 	/** For signed SF only.

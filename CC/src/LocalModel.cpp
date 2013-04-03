@@ -103,7 +103,7 @@ LocalModel::~LocalModel()
 		delete[] hf;
 }
 
-DistanceType LocalModel::computeDistanceFromModelToPoint(const CCVector3* aPoint)
+ScalarType LocalModel::computeDistanceFromModelToPoint(const CCVector3* aPoint)
 {
     switch(mtype)
     {
@@ -114,7 +114,7 @@ DistanceType LocalModel::computeDistanceFromModelToPoint(const CCVector3* aPoint
             delaunayTri->placeIteratorAtBegining();
             //on s'est assuré à la création de delaunayTri qu'il avait au moins un triangle !
             GenericTriangle* tri = delaunayTri->_getNextTriangle();
-            DistanceType dist2,minDist2 = DistanceComputationTools::computePoint2TriangleDistance(aPoint,tri,false);
+            ScalarType dist2,minDist2 = DistanceComputationTools::computePoint2TriangleDistance(aPoint,tri,false);
 
 			unsigned numberOfTriangles = delaunayTri->size();
             for (unsigned i=1;i<numberOfTriangles;++i)
@@ -134,7 +134,7 @@ DistanceType LocalModel::computeDistanceFromModelToPoint(const CCVector3* aPoint
             //HF : h0+h1.x+h2.y+h3.x^2+h4.x.y+h5.y^2
             PointCoordinateType z2 = hf[0]+hf[1]*P.x+hf[2]*P.y+hf[3]*P.x*P.x+hf[4]*P.x*P.y+hf[5]*P.y*P.y;
 
-            return (DistanceType)fabs(P.z-z2);
+            return (ScalarType)fabs(P.z-z2);
         }
         case NO_MODEL:
 			//model computation failed?

@@ -132,6 +132,7 @@
 #include <string.h>
 #include <math.h>
 #include <assert.h>
+#include <cfloat>
 
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance = 0;
@@ -1270,7 +1271,7 @@ static double s_lastMultFactorY = 1.0;
 static double s_lastMultFactorZ = 1.0;
 void MainWindow::doActionMultiply()
 {
-    ccAskThreeDoubleValuesDlg dlg("fx","fy","fz",-1.0e6,1.0e6,s_lastMultFactorX,s_lastMultFactorY,s_lastMultFactorZ,6,"Scaling",this);
+    ccAskThreeDoubleValuesDlg dlg("fx","fy","fz",-1.0e6,1.0e6,s_lastMultFactorX,s_lastMultFactorY,s_lastMultFactorZ,8,"Scaling",this);
     if (!dlg.exec())
         return;
 
@@ -2128,12 +2129,12 @@ void MainWindow::doActionFilterByValue()
         }
     }
 
-    ccAskTwoDoubleValuesDlg dlg("Min","Max",(negativeSF ? -DOUBLE_MAX : 0.0),DOUBLE_MAX,minVald,maxVald,6,"Filter by scalar value",this);
+    ccAskTwoDoubleValuesDlg dlg("Min","Max",(negativeSF ? -DBL_MAX : 0.0),DBL_MAX,minVald,maxVald,8,"Filter by scalar value",this);
     if (!dlg.exec())
         return;
 
-    DistanceType minVal = (DistanceType)dlg.doubleSpinBox1->value();
-    DistanceType maxVal = (DistanceType)dlg.doubleSpinBox2->value();
+    ScalarType minVal = (ScalarType)dlg.doubleSpinBox1->value();
+    ScalarType maxVal = (ScalarType)dlg.doubleSpinBox2->value();
 
     ccHObject* firstResult = 0;
     for (i=0;i<toFilter.size();++i)
@@ -2379,7 +2380,7 @@ void MainWindow::doActionSFGaussianFilter()
 		return;
 	}
 
-	ccAskOneDoubleValueDlg dlg("Sigma", 1e-6, DOUBLE_MAX, sigma, 6, 0, this);
+	ccAskOneDoubleValueDlg dlg("Sigma", DBL_MIN, DBL_MAX, sigma, 8, 0, this);
     dlg.dValueSpinBox->setStatusTip("3*sigma = 98% attenuation");
     if (!dlg.exec())
         return;
@@ -2479,11 +2480,11 @@ void MainWindow::doActionSFBilateralFilter()
     //and its displayed scalar field
     ccPointCloud* pc_test = ccHObjectCaster::ToPointCloud(m_selectedEntities[0]);
     CCLib::ScalarField* sf_test = pc_test->getCurrentDisplayedScalarField();
-    DistanceType range = sf_test->getMax() - sf_test->getMin();
-    DistanceType scalarFieldSigma = range / 4.0f; // using 1/4 of total range
+    ScalarType range = sf_test->getMax() - sf_test->getMin();
+    ScalarType scalarFieldSigma = range / 4.0f; // using 1/4 of total range
 
 
-    ccAskTwoDoubleValuesDlg dlg("Spatial sigma", "Scalar sigma", 1e-6, DOUBLE_MAX, sigma, scalarFieldSigma , 6, 0, this);
+    ccAskTwoDoubleValuesDlg dlg("Spatial sigma", "Scalar sigma", DBL_MIN, DBL_MAX, sigma, scalarFieldSigma , 8, 0, this);
     dlg.doubleSpinBox1->setStatusTip("3*sigma = 98% attenuation");
     dlg.doubleSpinBox2->setStatusTip("Scalar field's sigma controls how much the filter behaves as a Gaussian Filter\n sigma at +inf uses the whole range of scalars ");
     if (!dlg.exec())
@@ -2617,7 +2618,7 @@ static float s_subdivideMaxArea = 1.0f;
 void MainWindow::doActionSubdivideMesh()
 {
 	bool ok;
-	s_subdivideMaxArea = QInputDialog::getDouble(this, "Subdivide mesh", "Max area per triangle:", s_subdivideMaxArea, 1e-6, 1e6, 6, &ok);
+	s_subdivideMaxArea = QInputDialog::getDouble(this, "Subdivide mesh", "Max area per triangle:", s_subdivideMaxArea, 1e-6, 1e6, 8, &ok);
 	if (!ok)
 		return;
 
@@ -4002,9 +4003,9 @@ void MainWindow::doActionComputeQuadric3D()
                             Pc = P-Gc;
 
 #ifdef USE_QUADRIC_3D
-                            DistanceType dist = (DistanceType)(a*Pc.x*Pc.x + b*Pc.y*Pc.y + c*Pc.z*Pc.z + e*Pc.x*Pc.y + f*Pc.y*Pc.z + g*Pc.x*Pc.z + l*Pc.x + m*Pc.y + n*Pc.z + d);
+                            ScalarType dist = (ScalarType)(a*Pc.x*Pc.x + b*Pc.y*Pc.y + c*Pc.z*Pc.z + e*Pc.x*Pc.y + f*Pc.y*Pc.z + g*Pc.x*Pc.z + l*Pc.x + m*Pc.y + n*Pc.z + d);
 #else
-                            DistanceType dist = Pc.u[hfZ] - (a+b*Pc.u[hfX]+c*Pc.u[hfY]+d*Pc.u[hfX]*Pc.u[hfX]+e*Pc.u[hfX]*Pc.u[hfY]+f*Pc.u[hfY]*Pc.u[hfY]);
+                            ScalarType dist = Pc.u[hfZ] - (a+b*Pc.u[hfX]+c*Pc.u[hfY]+d*Pc.u[hfX]*Pc.u[hfX]+e*Pc.u[hfX]*Pc.u[hfY]+f*Pc.u[hfY]*Pc.u[hfY]);
 #endif
                             newCloud->setPointScalarValue(count++,dist);
                             //fprintf(fp,"%f %f %f %f\n",Pc.x,Pc.y,Pc.z,dist);
@@ -5573,7 +5574,7 @@ void MainWindow::doActionAddConstantSF()
 		return;
 	}
 
-	double sfValue = QInputDialog::getDouble(this,"SF value", "value", s_constantSFValue, -2147483647, 2147483647, 6, &ok);
+	double sfValue = QInputDialog::getDouble(this,"SF value", "value", s_constantSFValue, -DBL_MIN, DBL_MAX, 8, &ok);
 	if (!ok)
 		return;
 
@@ -5677,26 +5678,27 @@ void MainWindow::doActionScalarFieldArithmetic()
     }
     CCLib::ScalarField* sfDest = cloud->getScalarField(sfIdx);
 
-	unsigned i,valCount = sf1->currentSize();
-    sfDest->resize(valCount);
-    assert(valCount == sf2->currentSize() && valCount == sfDest->currentSize());
-    DistanceType val1,val2,val;
-    DistanceType hiddenVal = (sfDestPositive ? HIDDEN_VALUE : BIG_VALUE);
+	unsigned valCount = sf1->currentSize();
+    if (!sfDest->resize(valCount))
+	{
+		ccConsole::Error("Not enough memory!");
+		sfDest->release();
+		return;
+	}
 
-    for (i=0;i<valCount;++i)
+    assert(valCount == sf2->currentSize() && valCount == sfDest->currentSize());
+
+    for (unsigned i=0; i<valCount; ++i)
     {
-        //we must handle visibility for positive scalar fields!
-        val1 = sf1->getValue(i);
-        if (sf1Positive && val1<0)
-            val = hiddenVal;
-        else
+        const ScalarType& val1 = sf1->getValue(i);
+
+        //we must handle 'invalid' values
+		if (sf1->validValue(val1))
         {
-            //we must handle visibility for positive scalar fields!
-            val2 = sf2->getValue(i);
-            if (sf2Positive && val2<0)
-                val = hiddenVal;
-            else
+            const ScalarType& val2 = sf2->getValue(i);
+            if (sf2->validValue(val2))
             {
+				ScalarType val = 0;
                 switch (op)
                 {
                 case ccScalarFieldArithmeticDlg::PLUS:
@@ -5713,9 +5715,15 @@ void MainWindow::doActionScalarFieldArithmetic()
                     break;
                 }
             }
+			else
+			{
+				sfDest->flagValueAsInvalid(i);
+			}
         }
-
-        sfDest->setValue(i,val);
+		else
+		{
+			sfDest->flagValueAsInvalid(i);
+		}
     }
 
     sfDest->computeMinAndMax();
@@ -5949,7 +5957,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 						ccConsole::Error("No elligible point cloud in selection!");
 						return false;
 					}
-					ccAskOneDoubleValueDlg dlg("Kernel size", 1e-6, DOUBLE_MAX, roughnessKernelSize, 6, 0, 0);
+					ccAskOneDoubleValueDlg dlg("Kernel size", DBL_MIN, DBL_MAX, roughnessKernelSize, 8, 0, 0);
 					if (!dlg.exec())
 						return false;
 					roughnessKernelSize = (float)dlg.dValueSpinBox->value();

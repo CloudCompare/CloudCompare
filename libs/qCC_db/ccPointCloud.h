@@ -267,8 +267,8 @@ public:
     //inherited from ccGenericPointCloud
 	virtual bool isDisplayedSFPositive();
 	virtual const colorType* getPointDistanceColor(unsigned pointIndex) const;
-	virtual const colorType* getDistanceColor(DistanceType d) const;
-	virtual DistanceType getPointDisplayedDistance(unsigned pointIndex) const;
+	virtual const colorType* getDistanceColor(ScalarType d) const;
+	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const;
 	virtual const colorType* getPointColor(unsigned pointIndex) const;
 	virtual const normsType getPointNormalIndex(unsigned pointIndex) const;
 	virtual const PointCoordinateType* getPointNormal(unsigned pointIndex) const;
@@ -410,14 +410,14 @@ public:
         \param maxVal maximum value (above, points are excluded)
         \return resulting cloud (remaining points)
     **/
-    ccPointCloud* filterPointsByScalarValue(DistanceType minVal, DistanceType maxVal);
+    ccPointCloud* filterPointsByScalarValue(ScalarType minVal, ScalarType maxVal);
 
     //! Hides points whose scalar values falls into an interval
     /** Values are taken from the current OUTPUT scalar field.
         \param minVal minimum value (below, points are hidden)
         \param maxVal maximum value (above, points are hidden)
     **/
-    void hidePointsByScalarValue(DistanceType minVal, DistanceType maxVal);
+    void hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal);
 
 	//! Unrolls the cloud and its normals on a cylinder
 	/** This method is redundant with the "developCloudOnCylinder" method of CCLib,

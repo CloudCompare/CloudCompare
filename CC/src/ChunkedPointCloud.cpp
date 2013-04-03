@@ -62,7 +62,7 @@ void ChunkedPointCloud::forEach(genericPointAction& anAction)
 	//sinon
 	else
 	{
-		DistanceType dummyDist = 0.0;
+		ScalarType dummyDist = 0.0;
 		for (i=0;i<n;++i)
 			anAction(*(CCVector3*)m_points->getValue(i),dummyDist);
 	}
@@ -218,29 +218,23 @@ bool ChunkedPointCloud::enableScalarField()
 	return currentInScalarFieldArray->resize(m_points->capacity());
 }
 
-void ChunkedPointCloud::setPointScalarValue(unsigned pointIndex, DistanceType value)
+void ChunkedPointCloud::setPointScalarValue(unsigned pointIndex, ScalarType value)
 {
 	assert(m_currentInScalarFieldIndex>=0 && m_currentInScalarFieldIndex<(int)m_scalarFields.size());
-    //slow version
-//    ScalarField* currentInScalarFieldArray = getCurrentInScalarField();
-//    if (currentInScalarFieldArray)
-//        currentInScalarFieldArray->setValue(pointIndex,&value);
+	//slow version
+	//ScalarField* currentInScalarFieldArray = getCurrentInScalarField();
+	//if (currentInScalarFieldArray)
+	//	currentInScalarFieldArray->setValue(pointIndex,value);
 
     //fast version
     m_scalarFields[m_currentInScalarFieldIndex]->setValue(pointIndex,value);
 }
 
-DistanceType ChunkedPointCloud::getPointScalarValue(unsigned pointIndex) const
+ScalarType ChunkedPointCloud::getPointScalarValue(unsigned pointIndex) const
 {
 	assert(m_currentOutScalarFieldIndex>=0 && m_currentOutScalarFieldIndex<(int)m_scalarFields.size());
-    //slow version
-//    ScalarField* currentOutScalarFieldArray = getCurrentOutScalarField();
-//    if (currentOutScalarFieldArray)
-//        return *currentOutScalarFieldArray->getValue(pointIndex);
-//    return BIG_VALUE;
 
-    //fast version
-    return m_scalarFields[m_currentOutScalarFieldIndex]->getValue(pointIndex);
+	return m_scalarFields[m_currentOutScalarFieldIndex]->getValue(pointIndex);
 }
 
 ScalarField* ChunkedPointCloud::getScalarField(int index) const

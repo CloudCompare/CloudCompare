@@ -27,12 +27,20 @@
 using namespace CCLib;
 
 FastMarching::FastMarching()
+	: initialized(false)
+	, dx(0)
+	, dy(0)
+	, dz(0)
+	, decY(0)
+	, decZ(0)
+	, indexDec(0)
+	, gridSize(0)
+	, theGrid(0)
+	, m_octree(0)
+	, m_gridLevel(0)
+	, m_cellSize(1.0f)
 {
-	theGrid =		0;
-	theOctree =		0;
-	initialized =	false;
-	gridSize =		0;
-	activeCells.clear();
+	memset(m_minFillIndexes,0,sizeof(int)*3);
 }
 
 FastMarching::~FastMarching()
@@ -44,7 +52,8 @@ FastMarching::~FastMarching()
 			Cell** _theGrid = theGrid;
 			for (unsigned i=0;i<gridSize;++i)
 			{
-				if (*_theGrid) delete (*_theGrid);
+				if (*_theGrid)
+					delete (*_theGrid);
 				++_theGrid;
 			}
 		}
@@ -67,25 +76,31 @@ float FastMarching::getTime(int pos[], bool absoluteCoordinates)
 	return theGrid[index]->T;
 }
 
-int FastMarching::initGrid()
+int FastMarching::initGrid(DgmOctree* octree, uchar gridLevel)
 {
-	if (!theOctree) return -2;
+	if (!octree || gridLevel>DgmOctree::MAX_OCTREE_LEVEL)
+		return -2;
 
-	minFillIndexes = theOctree->getMinFillIndexes(gridLevel);
-	maxFillIndexes = theOctree->getMaxFillIndexes(gridLevel);
+	const int* minFillIndexes = octree->getMinFillIndexes(gridLevel);
+	const int* maxFillIndexes = octree->getMaxFillIndexes(gridLevel);
+
+	m_octree = octree;
+	m_gridLevel = gridLevel;
+	m_cellSize = octree->getCellSize(gridLevel);
+	m_minFillIndexes[0] = minFillIndexes[0];
+	m_minFillIndexes[1] = minFillIndexes[1];
+	m_minFillIndexes[2] = minFillIndexes[2];
 
 	dx = maxFillIndexes[0]-minFillIndexes[0]+1;
 	dy = maxFillIndexes[1]-minFillIndexes[1]+1;
 	dz = maxFillIndexes[2]-minFillIndexes[2]+1;
-
-	cellSize = theOctree->getCellSize(gridLevel);
 
 	decY = dx+2;
 	decZ = decY*(dy+2);
 	gridSize = decZ*(dz+2);
 	indexDec = 1+decY+decZ;
 
-	for (int i=0;i<CC_FM_NUMBER_OF_NEIGHBOURS;++i)
+	for (unsigned i=0; i<CC_FM_NUMBER_OF_NEIGHBOURS; ++i)
 	{
 		neighboursIndexShift[i] = neighboursPosShift[i*3]+
 									neighboursPosShift[i*3+1]*int(decY)+
@@ -93,7 +108,7 @@ int FastMarching::initGrid()
 
 		neighboursDistance[i] = sqrt(float(neighboursPosShift[i*3]*neighboursPosShift[i*3]+
 									neighboursPosShift[i*3+1]*neighboursPosShift[i*3+1]+
-									neighboursPosShift[i*3+2]*neighboursPosShift[i*3+2]))*cellSize;
+									neighboursPosShift[i*3+2]*neighboursPosShift[i*3+2]))*m_cellSize;
 	}
 
 	activeCells.clear();
@@ -163,8 +178,6 @@ void FastMarching::initTrialCells()
 					nCell->T = neighboursDistance[i]*computeTCoefApprox(aCell,nCell);
 
 					addTrialCell(nIndex,nCell->T);
-
-					//Console::print("Cell %i added to TRIAL\n",nIndex);
 				}
 			}
 		}

@@ -115,7 +115,7 @@ public:
         It may even be 0 if the value shouldn't be displayed.
         WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
     **/
-	virtual const colorType* getDistanceColor(DistanceType d) const=0;
+	virtual const colorType* getDistanceColor(ScalarType d) const=0;
 
     //! Returns color corresponding to a given point associated scalar value
     /** The returned value depends on the current scalar field display parameters.
@@ -128,7 +128,7 @@ public:
     /** The returned value is taken from the current displayed scalar field
         WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
     **/
-	virtual DistanceType getPointDisplayedDistance(unsigned pointIndex) const=0;
+	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const=0;
 
     //! Returns color corresponding to a given point
     /** WARNING: color array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
@@ -151,6 +151,8 @@ public:
 	***************************************************/
 
 	//! Array of "visibility" information for each point
+	/** See <CCConst.h>
+	**/
 	typedef GenericChunkedArray<1,uchar> VisibilityTableType;
 
     //! Returns associated visiblity array
@@ -170,13 +172,12 @@ public:
 	//! Erases the points visibility information
 	virtual void unallocateVisibilityArray();
 
-
 	/***************************************************
                     Other methods
 	***************************************************/
 
     //Inherited from GenericCloud
-	virtual CC_VISIBILITY_TYPE testVisibility(const CCVector3& P);
+	virtual uchar testVisibility(const CCVector3& P);
 
     //Inherited from ccHObject
     virtual ccBBox getMyOwnBB();
@@ -226,11 +227,11 @@ protected:
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
 
-	//! Visibility array
-	/** If this array is allocated, values set to 0 indicates that
-        the corresponding points are not visible/selected.
+	//! Per-point visibility table
+	/** If this table is allocated, only values set to POINT_VISIBLE
+		will be considered as visible/selected.
     **/
-	VisibilityTableType* m_visibilityArray;
+	VisibilityTableType* m_pointsVisibility;
 
 	//! Original shift (information backup)
 	double m_originalShift[3];

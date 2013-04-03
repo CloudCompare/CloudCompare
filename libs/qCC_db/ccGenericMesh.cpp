@@ -190,7 +190,7 @@ bool ccGenericMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 	unsigned nPts = m_associatedCloud->size();
 
 	//instantiate memory for per-vertex mean SF
-	DistanceType* meanSF = new DistanceType[nPts];
+	ScalarType* meanSF = new ScalarType[nPts];
 	if (!meanSF)
 	{
 		//Not enough memory!
@@ -233,7 +233,7 @@ bool ccGenericMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 	}
 
 	for (i=0;i<nPts;++i)
-		meanSF[i] /= (DistanceType)count[i];
+		meanSF[i] /= (ScalarType)count[i];
 
 	switch (process)
 	{
@@ -249,7 +249,7 @@ bool ccGenericMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 			//Enhance = old value + (old value - mean value)
 			for (i=0;i<nPts;++i)
 			{
-				DistanceType v = 2.0f*m_associatedCloud->getPointScalarValue(i) - meanSF[i];
+				ScalarType v = 2.0f*m_associatedCloud->getPointScalarValue(i) - meanSF[i];
 				m_associatedCloud->setPointScalarValue(i,v > 0.0f ? v : 0.0f);
 			}
 		}
@@ -275,7 +275,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
             //we just want to display the current SF scale if the vertices cloud is hidden
             //(otherwise, it will take the SF display in charge)
-            if (!cloud->sfColorScaleShown() || (cloud->isEnabled() && cloud->isVisible()))
+            if (cloud->isEnabled() && cloud->isVisible() && cloud->sfColorScaleShown())
                 return;
 
             //we must also check that the parent is not a mesh itself with the same vertices! (in

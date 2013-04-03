@@ -119,12 +119,12 @@ WeibullDistribution::WeibullDistribution()
 	setParameters(0.0,0.0,0.0);
 }
 
-WeibullDistribution::WeibullDistribution(DistanceType _a, DistanceType _b, DistanceType _valueShift)
+WeibullDistribution::WeibullDistribution(ScalarType _a, ScalarType _b, ScalarType _valueShift)
 {
 	setParameters(_a,_b,_valueShift);
 }
 
-bool WeibullDistribution::getParameters(DistanceType &_a, DistanceType &_b) const
+bool WeibullDistribution::getParameters(ScalarType &_a, ScalarType &_b) const
 {
 	_a = a;
 	_b = b;
@@ -132,7 +132,7 @@ bool WeibullDistribution::getParameters(DistanceType &_a, DistanceType &_b) cons
 	return parametersDefined;
 }
 
-bool WeibullDistribution::getOtherParameters(DistanceType &_mu, DistanceType &_sigma2) const
+bool WeibullDistribution::getOtherParameters(ScalarType &_mu, ScalarType &_sigma2) const
 {
 	_mu = mu;
 	_sigma2 = sigma2;
@@ -140,7 +140,7 @@ bool WeibullDistribution::getOtherParameters(DistanceType &_mu, DistanceType &_s
 	return parametersDefined;
 }
 
-bool WeibullDistribution::setParameters(DistanceType _a, DistanceType _b, DistanceType _valueShift)
+bool WeibullDistribution::setParameters(ScalarType _a, ScalarType _b, ScalarType _valueShift)
 {
 	valueShift = _valueShift;
 	a = _a;
@@ -152,8 +152,8 @@ bool WeibullDistribution::setParameters(DistanceType _a, DistanceType _b, Distan
 	if (a>0.0 && b>=0.0)
 	{
 		//moyenne et écart type
-		mu = (DistanceType)((double)b * gamma_cc(1.0+1.0/a));
-		sigma2 =(DistanceType)((double)(b*b) * gamma_cc(1.0+2.0/a) - (double)(mu*mu));
+		mu = (ScalarType)((double)b * gamma_cc(1.0+1.0/a));
+		sigma2 =(ScalarType)((double)(b*b) * gamma_cc(1.0+2.0/a) - (double)(mu*mu));
 
 		parametersDefined=true;
 	}
@@ -175,19 +175,19 @@ bool WeibullDistribution::computeParameters(const GenericCloud* Yk, bool include
 		return false;
 
 	//on cherche la valeur maximale du champ scalaire pour éviter les overflows
-	DistanceType maxValue=0.0;
+	ScalarType maxValue=0.0;
 	ScalarFieldTools::computeScalarFieldExtremas(Yk, valueShift, maxValue, includeNegValues);
 
 	/*if (!includeNegValues)
 	valueShift = 0.0;
 	else
 	//*/
-	valueShift -= (DistanceType)ZERO_TOLERANCE;
+	valueShift -= (ScalarType)ZERO_TOLERANCE;
 
 	if (maxValue<=valueShift)
 		return false;
 
-	DistanceType inverseMaxValue = 1.0f/(maxValue-valueShift);
+	ScalarType inverseMaxValue = 1.0f/(maxValue-valueShift);
 
 	a = findGRoot(Yk,inverseMaxValue);
 
@@ -196,7 +196,7 @@ bool WeibullDistribution::computeParameters(const GenericCloud* Yk, bool include
 
 	//on peut calculer b
 	b=0.0;
-	DistanceType v;
+	ScalarType v;
 	int i,counter = 0;
 	for (i=0;i<n;++i)
 	{
@@ -211,12 +211,12 @@ bool WeibullDistribution::computeParameters(const GenericCloud* Yk, bool include
 	if (counter==0)
 		return false;
 
-	b = (maxValue-valueShift)*pow(b/DistanceType(counter),DistanceType(1.0/a));
+	b = (maxValue-valueShift)*pow(b/ScalarType(counter),ScalarType(1.0/a));
 
 	return setParameters(a,b,valueShift);
 }
 
-double WeibullDistribution::computeP(DistanceType _x) const
+double WeibullDistribution::computeP(ScalarType _x) const
 {
 	double x = (double)((_x-valueShift)/b);
 	if (x<0.0)
@@ -226,18 +226,18 @@ double WeibullDistribution::computeP(DistanceType _x) const
 	return (double)(a/b)*xp*exp(-xp*x);
 }
 
-double WeibullDistribution::computePfromZero(DistanceType x) const
+double WeibullDistribution::computePfromZero(ScalarType x) const
 {
 	return (x<=valueShift ? 0.0 : 1.0-exp(-pow((double)((x-valueShift)/b),(double)a)));
 }
 
-double WeibullDistribution::computeP(DistanceType x1, DistanceType x2) const
+double WeibullDistribution::computeP(ScalarType x1, ScalarType x2) const
 {
 	if (x1 < valueShift)
 		x1 = valueShift;
 	if (x2 < valueShift)
 		return 0.0;
-	//pi = computeP(minV+(DistanceType(k)+0.5)*step)*step;
+	//pi = computeP(minV+(ScalarType(k)+0.5)*step)*step;
 	//... on va plutôt prendre en compte l'échantillonnage et intégrer :
 	return exp(-pow((double)((x1-valueShift)/b),(double)a))-exp(-pow((double)((x2-valueShift)/b),(double)a));
 }
@@ -255,7 +255,7 @@ void WeibullDistribution::getTextualDescription(char* buffer) const
 	}
 }
 
-DistanceType WeibullDistribution::computeG(const GenericCloud* Yk, DistanceType r) const
+ScalarType WeibullDistribution::computeG(const GenericCloud* Yk, ScalarType r) const
 {
 	int n = Yk->size();
 
@@ -291,10 +291,10 @@ DistanceType WeibullDistribution::computeG(const GenericCloud* Yk, DistanceType 
 
 	if (zeroValues)
 	{
-		ln_v = (DistanceType)zeroValues * log(ZERO_TOLERANCE);
-		v_a = pow((DistanceType)ZERO_TOLERANCE,r);
+		ln_v = (ScalarType)zeroValues * log(ZERO_TOLERANCE);
+		v_a = pow((ScalarType)ZERO_TOLERANCE,r);
 		s += ln_v;
-		q += v_a * (DistanceType)zeroValues;
+		q += v_a * (ScalarType)zeroValues;
 		p += ln_v * v_a;
 		counter += zeroValues;
 	}
@@ -302,10 +302,10 @@ DistanceType WeibullDistribution::computeG(const GenericCloud* Yk, DistanceType 
 	if (counter==0)
 		return 1.0; //une valeur positive va faire échouer la fonction "computeG"
 
-	return (DistanceType)((double)r * (p/q - s/(double)counter) - 1.0);
+	return (ScalarType)((double)r * (p/q - s/(double)counter) - 1.0);
 }
 
-DistanceType WeibullDistribution::computeG(const GenericCloud* Yk, DistanceType r, DistanceType inverseVmax) const
+ScalarType WeibullDistribution::computeG(const GenericCloud* Yk, ScalarType r, ScalarType inverseVmax) const
 {
 	int n = Yk->size();
 
@@ -345,7 +345,7 @@ DistanceType WeibullDistribution::computeG(const GenericCloud* Yk, DistanceType 
 		ln_v = (double)zeroValues * log(ZERO_TOLERANCE);
 		v_a = pow((double)inverseVmax * ZERO_TOLERANCE,(double)r);
 		s += ln_v;
-		q += v_a * (DistanceType)zeroValues;
+		q += v_a * (ScalarType)zeroValues;
 		p += ln_v * v_a;
 		counter += zeroValues;
 	}
@@ -353,13 +353,13 @@ DistanceType WeibullDistribution::computeG(const GenericCloud* Yk, DistanceType 
 	if (counter==0)
 		return 1.0; //une valeur positive va faire échouer la fonction "computeG"
 
-	return (DistanceType)((double)r * (p/q - s/(double)counter) - 1.0);
+	return (ScalarType)((double)r * (p/q - s/(double)counter) - 1.0);
 }
 
-DistanceType WeibullDistribution::findGRoot(const GenericCloud* Yk, DistanceType inverseMaxValue) const
+ScalarType WeibullDistribution::findGRoot(const GenericCloud* Yk, ScalarType inverseMaxValue) const
 {
-	DistanceType r=-1.0;
-	DistanceType v,vMin,vMax,aMin,aMax;
+	ScalarType r=-1.0;
+	ScalarType v,vMin,vMax,aMin,aMax;
 	aMin = aMax = 1.0;
 	vMin = vMax = v = computeG(Yk,aMin,inverseMaxValue);
 
@@ -388,7 +388,7 @@ DistanceType WeibullDistribution::findGRoot(const GenericCloud* Yk, DistanceType
 		return -1.0; //problème
 
 	//dichotomie pour trouver r tq computeG(r)<1e-7
-	DistanceType old_v;
+	ScalarType old_v;
 	while (fabs(v)>1e-5)
 	{
 		r = (aMin+aMax)*0.5f;
@@ -440,7 +440,7 @@ double WeibullDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned num
 
 	//calcul de l'histogramme
 	unsigned j;
-	DistanceType V;
+	ScalarType V;
 	for (i=0;i<n;++i)
 	{
 		V = Yk->getPointScalarValue(i);
@@ -455,11 +455,11 @@ double WeibullDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned num
 	}
 
 	//calcul de la distance du Chi2
-	DistanceType nPi = (DistanceType)numberOfElements/(DistanceType)numberOfClasses;
-	DistanceType tempValue,dk = 0.0;
+	ScalarType nPi = (ScalarType)numberOfElements/(ScalarType)numberOfClasses;
+	ScalarType tempValue,dk = 0.0;
 	for (i=0;i<numberOfClasses;++i)
 	{
-		tempValue = (DistanceType)_histo[i] - nPi;
+		tempValue = (ScalarType)_histo[i] - nPi;
 		dk += tempValue*tempValue;
 	}
 	dk /= nPi;
@@ -494,7 +494,7 @@ bool WeibullDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 
 	for (unsigned i=1;i<numberOfClasses;++i)
 	{
-		chi2ClassesPositions[i-1] = b * (DistanceType)pow(-log(1.0-currentArea),invA);
+		chi2ClassesPositions[i-1] = b * (ScalarType)pow(-log(1.0-currentArea),invA);
 		currentArea += areaPerClass;
 	}
 

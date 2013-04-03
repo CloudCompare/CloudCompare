@@ -35,7 +35,7 @@ namespace CCLib
 class DgmOctree;
 
 // Macro: cell position [i,j,k] to table (3D grid) index
-#define FM_pos2index(pos) unsigned(pos[0]-minFillIndexes[0])+unsigned(pos[1]-minFillIndexes[1])*decY+unsigned(pos[2]-minFillIndexes[2])*decZ+indexDec
+#define FM_pos2index(pos) unsigned(pos[0]-m_minFillIndexes[0])+unsigned(pos[1]-m_minFillIndexes[1])*decY+unsigned(pos[2]-m_minFillIndexes[2])*decZ+indexDec
 
 //! Direct neighbouring cells positions (6-connexity)
 const int neighboursPosShift[] = {0,-1,0,
@@ -75,9 +75,6 @@ const int neighbours3DPosShift[] = {
 								1,1,0,
 								1,1,1};
 #define CC_FM_NUMBER_OF_3D_NEIGHBOURS 26
-
-// Infinite arrival time value (for grid initialization)
-#define FM_INF FLOAT_MAX
 
 //! Fast Marching algorithm (front propagation)
 /** Implementation of the Fast Marching algorithm [Sethian 1996].
@@ -130,20 +127,27 @@ protected:
     public:
 
         //! Possible states of a Fast Marching grid cell
-        enum CC_FM_CELL_STATE {EMPTY_CELL=0,FAR_CELL=1,TRIAL_CELL=2,ACTIVE_CELL=3};
+        enum CC_FM_CELL_STATE {	EMPTY_CELL	= 0,
+								FAR_CELL	= 1,
+								TRIAL_CELL	= 2,
+								ACTIVE_CELL	= 3 };
 
         //! Cell state
         CC_FM_CELL_STATE state;
 
         //! Front arrival time
         float T;
+
+		//! Returns infinite time value
+		inline static float T_INF() { return FLT_MAX; }
     };
 
-	//! Intializes the grid
-	/** Reserves memory for the grid
+	//! Intializes the grid as a snapshot of the octree at a given subdivision level
+	/** \param input octree
+		\param gridLevel subdivision level
 		\return a negative value if a problem occured
 	**/
-	virtual int initGrid();
+	virtual int initGrid(DgmOctree* octree, uchar gridLevel);
 
 	//! Computes the front arrival time at a given cell
 	/** the cell is represented by its index in the cell list
@@ -160,7 +164,8 @@ protected:
 	virtual float computeTCoefApprox(Cell* currentCell, Cell* neighbourCell)=0;
 
 	//! Propagates the front (one step)
-	/** \return a negative value if a problem occured **/
+	/** \return a negative value if a problem occured
+	**/
 	virtual int step()=0;
 
 	//! Initializes the TRIAL cells list
@@ -207,16 +212,15 @@ protected:
 	unsigned gridSize;
 	//! Grid used to process Fast Marching
 	Cell** theGrid;
-	//! Grid occupancy (min indexes)
-	const int *minFillIndexes;
-	//! Grid occupancy (min indexes)
-    const int *maxFillIndexes;
-	//! Equivalent octree subdivision level
-	uchar gridLevel;
-	//! Octree cell size at equivalent subdivision level
-	float cellSize;
+
 	//! Associated octree
-	DgmOctree* theOctree;
+	DgmOctree* m_octree;
+	//! Equivalent octree subdivision level
+	uchar m_gridLevel;
+	//! Octree cell size at equivalent subdivision level
+	float m_cellSize;
+	//! Octree min fill indexes at 'm_gridLevel'
+	int m_minFillIndexes[3];
 
 	//! Neighbours coordinates shifts in grid
 	int neighboursIndexShift[CC_FM_NUMBER_OF_NEIGHBOURS];

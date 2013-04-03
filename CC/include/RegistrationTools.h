@@ -260,7 +260,7 @@ protected:
     **/
     static unsigned ComputeRegistrationScore(KDTree *modelTree,
                                                     GenericIndexedCloud *dataCloud,
-                                                    DistanceType delta,
+                                                    ScalarType delta,
                                                     PointProjectionTools::Transformation& dataToModel);
 
     //! Find the 3D pseudo intersection between two lines

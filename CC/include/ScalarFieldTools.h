@@ -44,11 +44,11 @@ const int NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION = 14;
 struct KMeanClass
 {
 	//! K-mean class mean value
-	DistanceType mean;
+	ScalarType mean;
 	//! K-mean class minimum value
-	DistanceType minValue;
+	ScalarType minValue;
 	//! K-mean class maximum value
-	DistanceType maxValue;
+	ScalarType maxValue;
 };
 
 //! Severeal scalar field treatment algorithms (gradient, classification, etc.)
@@ -138,8 +138,8 @@ public:
 		\param includeNegValues specifies whether negative values should be included in computation
 	**/
 	static void computeScalarFieldExtremas(const GenericCloud* theCloud, 
-											DistanceType& minV, 
-											DistanceType& maxV, 
+											ScalarType& minV, 
+											ScalarType& maxV, 
 											bool includeNegValues);
 
 	//! Count the number of positive values in a scalar field
@@ -166,26 +166,26 @@ public:
 	//! Sets the distance value associated to a point to the default "HIDDEN" value (-1)
 	/** Generic function that can be used with the GenericCloud::foreach() method.
         Warning: only valid for strictly positive scalar fields.
-		\param aPoint a 3D point
-		\param aScalarValue its associated scalar value
+		\param P a 3D point
+		\param scalarValue its associated scalar value
 	**/
-	static void razDistsToHiddenValue(const CCVector3& aPoint, DistanceType& aScalarValue);
+	static void razDistsToHiddenValue(const CCVector3& P, ScalarType& scalarValue);
 
-	//! Sets the distance value associated to a point to the biggest acceptable value (BIG_VALUE)
+	//! Sets the distance value associated to a point
 	/** Generic function that can be used with the GenericCloud::foreach() method.
         This method is meant to be used with non strictly positive scalar fields.
-        Prefer razDistsToOutValue otherwise.
-		\param aPoint a 3D point
-		\param aScalarValue its associated scalar value
+        Prefer razDistsToHiddenValue otherwise.
+		\param P a 3D point
+		\param scalarValue its associated scalar value
 	**/
-	static void razDistsToBigValue(const CCVector3& aPoint, DistanceType& aScalarValue);
+	static void razDistsToNaNValue(const CCVector3& P, ScalarType& scalarValue);
 
 	//! Sets the distance value associated to a point to zero
 	/** Generic function that can be used with the GenericCloud::foreach() method.
-		\param aPoint a 3D point
-		\param aScalarValue its associated scalar value
+		\param P a 3D point
+		\param scalarValue its associated scalar value
 	**/
-	static void razDistsToZero(const CCVector3 &aPoint, DistanceType& aScalarValue);
+	static void razDistsToZero(const CCVector3 &P, ScalarType& scalarValue);
 
 protected:
 
@@ -197,7 +197,7 @@ protected:
 		- (GenericCloud*) the point cloud
 		- (bool*) specifies if the scalar values are euclidian distances
 		- (float*) radius
-		- (std::vector<DistanceType>*) the gradient norms container
+		- (std::vector<ScalarType>*) the gradient norms container
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
 	**/
@@ -211,7 +211,7 @@ protected:
 		See ScalarFieldTools::applyScalarFieldGaussianFilter.
 		Method parameters (defined in "additionalParameters") are :
 		- (float*) sigma
-		- (std::vector<DistanceType>*) the smoothed values
+		- (std::vector<ScalarType>*) the smoothed values
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
 	**/

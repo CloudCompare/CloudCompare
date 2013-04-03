@@ -47,13 +47,13 @@ public:
 		the octree considered at a given level of subdivision. The local
 		front acceleration in each cell is deduced from the scalar values
 		associated to the points lying in the octree cell (mean value).
-		\param aList the point cloud
+		\param theCloud the point cloud
 		\param theOctree the associated octree
 		\param gridLevel the level of subdivision
 		\param constantAcceleration specifies if the acceleration is constant or shoul be computed from the cell points scalar values
 		\return a negative value if something went wrong
 	**/
-	int init(GenericCloud* aList, DgmOctree* theOctree, uchar gridLevel, bool constantAcceleration=false);
+	int init(GenericCloud* theCloud, DgmOctree* theOctree, uchar gridLevel, bool constantAcceleration=false);
 
 	/** Finalizes an iteration process
         Resets the different lists and the grid. This method should be
@@ -103,6 +103,16 @@ public:
 
 protected:
 
+    //! A Fast Marching grid cell for surfacical propagation
+    class PropagationCell : public Cell
+    {
+    public:
+        //! Local front acceleration
+        float f;
+        //! Equivalent cell code in the octree
+        DgmOctree::OctreeCellCodeType cellCode;
+    };
+
 	//inherited methods (see FastMarching)
 	virtual float computeT(unsigned index);
 	virtual float computeTCoefApprox(Cell* currentCell, Cell* neighbourCell);
@@ -124,15 +134,6 @@ protected:
 	//! Latest front arrival time of the ACTIVE cells
 	float lastT;
 
-    //! A Fast Marching grid cell for surfacical propagation
-    class PropagationCell : public Cell
-    {
-    public:
-        //! The local front acceleration
-        float f;
-        //! the code of the equivalent cell in the octree
-        DgmOctree::OctreeCellCodeType cellCode;
-    };
 };
 
 }

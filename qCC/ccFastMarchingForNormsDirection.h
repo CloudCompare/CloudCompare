@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_FAST_MARCHING_DIRECTION_HEADER
 #define CC_FAST_MARCHING_DIRECTION_HEADER
@@ -106,7 +99,7 @@ protected:
         //! the code of the equivalent cell in the octree
         CCLib::DgmOctree::OctreeCellCodeType cellCode;
         //Temp value
-        DistanceType v;
+        ScalarType v;
         //marker
         bool treated;
     };
@@ -126,7 +119,7 @@ protected:
 	//! TRIAL cells list
 	std::vector<unsigned> trialCells;
 
-	// Usefull variables
+	//! Last arrival time
 	float lastT;
 };
 

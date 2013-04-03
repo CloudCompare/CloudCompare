@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef DGM_OCTREE_HEADER
 #define DGM_OCTREE_HEADER
@@ -138,7 +131,7 @@ public:
 		//! Point index
 		unsigned pointIndex;
 		//! Point associated distance value
-		DistanceType squareDist;
+		ScalarType squareDist;
 
 		//! Default constructor
 		PointDescriptor()
@@ -157,7 +150,7 @@ public:
 		}
 
 		//! Constructor with point, its index and square distance
-		PointDescriptor(const CCVector3* P, unsigned index, DistanceType d2)
+		PointDescriptor(const CCVector3* P, unsigned index, ScalarType d2)
 			: point(P)
 			, pointIndex(index)
 			, squareDist(d2)
@@ -250,7 +243,7 @@ public:
 			hasn't find any neighbour (acceleration). To disable this behavior,
 			set the maxSearchSquareDist to -1).
 		**/
-		DistanceType maxSearchSquareDist;
+		ScalarType maxSearchSquareDist;
 
 		/*** Information to set to 0 before search ***/
 
@@ -338,7 +331,7 @@ public:
 			, ready(false)
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN
 			, maxInD2(0.0)
-			, minOutD2(FLOAT_MAX)
+			, minOutD2(FLT_MAX)
 #endif
 		{
 		}
@@ -605,8 +598,8 @@ public:
 							  ReferenceCloud* Yk,
 							  unsigned maxNumberOfNeighbors,
 							  uchar level,
-							  DistanceType &maxSquareDist,
-							  DistanceType maxSearchDist=-1.0) const;
+							  ScalarType &maxSquareDist,
+							  ScalarType maxSearchDist=-1.0) const;
 
 	//! Advanced form of the nearest neighbour search algorithm (unique neighbour)
 	/** This version is optimized for a unique nearest-neighbour search.
@@ -617,7 +610,7 @@ public:
 		\param getOnlyPointsWithPositiveDist select only nearest neighbours with positive distances
 		\return the square distance between the query point and its nearest neighbour (or -1 if none was found)
 	**/
-	DistanceType findTheNearestNeighborStartingFromCell(NearestNeighboursSearchStruct &nNSS,
+	ScalarType findTheNearestNeighborStartingFromCell(NearestNeighboursSearchStruct &nNSS,
 												bool getOnlyPointsWithPositiveDist) const;
 
 	//! Advanced form of the nearest neighbours search algorithm (multiple neighbours)
@@ -788,8 +781,9 @@ public:
 		to the indexes of the first points of each cell.
 		\param level the level of subdivision
 		\param vec the list of indexes
+		\return false if an error occured (e.g. not enough memory)
 	**/
-	void getCellIndexes(uchar level, cellIndexesContainer& vec) const;
+	bool getCellIndexes(uchar level, cellIndexesContainer& vec) const;
 
 	//! Returns the list of indexes and codes corresponding to the octree cells for a given level of subdivision
 	/** Only the non empty cells are represented in the octree structure.

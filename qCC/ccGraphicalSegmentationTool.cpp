@@ -197,8 +197,7 @@ void ccGraphicalSegmentationTool::reset()
 {
     if (m_somethingHasChanged)
     {
-        ccHObject::Container::iterator p;
-        for (p=m_toSegment.begin();p!=m_toSegment.end();++p)
+        for (ccHObject::Container::iterator p=m_toSegment.begin(); p!=m_toSegment.end(); ++p)
         {
             if ((*p)->isKindOf(CC_POINT_CLOUD))
                 static_cast<ccGenericPointCloud*>(*p)->razVisibilityArray();
@@ -464,7 +463,7 @@ void ccGraphicalSegmentationTool::segmentOut()
     segment(false);
 }
 
-void ccGraphicalSegmentationTool::segment(bool inside)
+void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 {
     if (!m_associatedWin)
         return;
@@ -496,27 +495,25 @@ void ccGraphicalSegmentationTool::segment(bool inside)
         ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(*p);
         assert(cloud);
 
-        ccGenericPointCloud::VisibilityTableType* vis = cloud->getTheVisibilityArray();
-		assert(vis);
+        ccGenericPointCloud::VisibilityTableType* visibilityArray = cloud->getTheVisibilityArray();
+		assert(visibilityArray);
 
-        unsigned i,cloudSize = cloud->size();
+        unsigned cloudSize = cloud->size();
 
         //we project each point and we check if it falls inside the segmentation polyline
-        for (i=0;i<cloudSize;++i)
+        for (unsigned i=0; i<cloudSize; ++i)
         {
 			CCVector3 P;
 			cloud->getPoint(i,P);
 
 			GLdouble xp,yp,zp;
 			gluProject(P.x,P.y,P.z,MM,MP,VP,&xp,&yp,&zp);
-			CCVector2 P2D;
-			P2D.x = xp - half_w;
-			P2D.y = yp - half_h;
 
+			CCVector2 P2D(xp-half_w,yp-half_h);
 			bool pointInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D,m_segmentationPoly);
 
-            if (inside != pointInside)
-				vis->setValue(i,0); //hiddenValue=0
+			visibilityArray->setValue(i, keepPointsInside != pointInside ? POINT_HIDDEN : POINT_VISIBLE );
+
         }
     }
 

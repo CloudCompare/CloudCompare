@@ -54,7 +54,7 @@ double StatisticalTestingTools::computeChi2Dist(const GenericDistribution* distr
 		return -1.0;
 
 	//on va calculer la fonction de repartition
-	DistanceType V, minV=0.0, maxV=0.0;
+	ScalarType V, minV=0.0, maxV=0.0;
 	unsigned i,numberOfElements=0;
 	bool firstValue=true;
 	for (i=0;i<n;++i)
@@ -95,11 +95,11 @@ double StatisticalTestingTools::computeChi2Dist(const GenericDistribution* distr
                 minV -= 0.05f*(maxV-minV);
     }
 
-	DistanceType dV = maxV-minV;
-	DistanceType step = dV/(DistanceType)numberOfClasses;
+	ScalarType dV = maxV-minV;
+	ScalarType step = dV/(ScalarType)numberOfClasses;
 	if (step < ZERO_TOLERANCE)
         return -1.0;
-	DistanceType coef = 1.0f/step;
+	ScalarType coef = 1.0f/step;
 
 	unsigned* count = (dumpHisto ? dumpHisto : new unsigned[numberOfClasses]);
 	memset(count,0,sizeof(unsigned)*numberOfClasses);
@@ -120,7 +120,7 @@ double StatisticalTestingTools::computeChi2Dist(const GenericDistribution* distr
 
 	//on calcule enfin la "distance au carré" du Chi2
 	double npi,temp,D2 = 0.0;
-	DistanceType x1,x2=minV;
+	ScalarType x1,x2=minV;
 	double p1,p2=distrib->computePfromZero(x2);
 
 	for (unsigned k=0;k<numberOfClasses;++k)
@@ -145,7 +145,7 @@ double StatisticalTestingTools::computeChi2Dist(const GenericDistribution* distr
 		}
 		else
 		{
-			temp = (double)((DistanceType)count[k] - npi);
+			temp = (double)((ScalarType)count[k] - npi);
 			D2 += temp*(temp/(double)npi);
 
 			if (D2 > CHI2_MAX)
@@ -176,7 +176,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(const GenericDistribut
         return -1.0;
 
 	//on va calculer la fonction de repartition
-	DistanceType V,minV=0.0,maxV=0.0;
+	ScalarType V,minV=0.0,maxV=0.0;
 	unsigned i,numberOfElements=0;
 
 	//on cherche les valeurs min et max
@@ -217,11 +217,11 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(const GenericDistribut
 	if (numberOfClasses<2)
         return -2.0; //pas assez de points/classes
 
-	DistanceType dV = maxV-minV;
-    DistanceType step = dV/(DistanceType)numberOfClasses;
+	ScalarType dV = maxV-minV;
+    ScalarType step = dV/(ScalarType)numberOfClasses;
 	if (step < ZERO_TOLERANCE)
         return -1.0;
-	DistanceType coef = 1.0f/step;
+	ScalarType coef = 1.0f/step;
 
 	//le tableau de stockage de l'histogramme peut avoir été passé en argument de la fonction
 	unsigned* count = (dumpHisto ? dumpHisto : new unsigned[numberOfClasses]);
@@ -249,7 +249,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(const GenericDistribut
 	Chi2Element *currentCE = root;
 
 	//on calcule enfin la "distance au carré" du Chi2
-	DistanceType x1,x2=minV;
+	ScalarType x1,x2=minV;
 	double p1,p2=distrib->computePfromZero(x2);
 
 	for (unsigned k=0;k<numberOfClasses;++k)
@@ -504,7 +504,7 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 	for (i=0;i<n;++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
-		DistanceType D = cell.points->getPointScalarValue(i);
+		ScalarType D = cell.points->getPointScalarValue(i);
 
 		if (D>=0.0)
 		{
@@ -517,9 +517,9 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,k);
 
 			//VERSION "SYMPA" (test grossier)
-			D = (DistanceType)computeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,includeNegValues,dumpHisto);
+			D = (ScalarType)computeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,includeNegValues,dumpHisto);
 			//VERSION "SEVERE" (test ultra-precis)
-			//D = (DistanceType)statModel->computeChi2Dist(theDistances,&Z,numberOfChi2Classes,dumpHisto);
+			//D = (ScalarType)statModel->computeChi2Dist(theDistances,&Z,numberOfChi2Classes,dumpHisto);
 
 			if (D>=0.0)
 				D = sqrt(D);

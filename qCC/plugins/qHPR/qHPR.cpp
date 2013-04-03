@@ -272,101 +272,110 @@ void qHPR::doAction()
 		return;
 	}
 
-	bool centered;
-    if (!win->getPerspectiveState(centered))
+	//display parameters
+	const ccViewportParameters& params =  win->getViewportParameters();
+	if (!params.perspectiveView)
 	{
 		m_app->dispToConsole("Perspective mode only!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
         return;
 	}
 
-	QWidget* parent = m_app->getMainWindow();
-	ccHprDlg dlg(parent);
+	ccHprDlg dlg(m_app->getMainWindow());
     if (!dlg.exec())
         return;
 
-    unsigned char octreeLevel = (unsigned char)dlg.octreeLevelSpinBox->value();
-
 	//progress dialog
-	ccProgressDialog progressCb(false,parent);
+	ccProgressDialog progressCb(false,m_app->getMainWindow());
 
+	//unique parameter: the octree subdivision level
+	int octreeLevel = dlg.octreeLevelSpinBox->value();
+	assert(octreeLevel>=0 && octreeLevel<=255);
+
+	//compute octree if cloud hasn't any
     ccOctree* theOctree = cloud->getOctree();
     if (!theOctree)
-    {
         theOctree = cloud->computeOctree(&progressCb);
-    }
-    if (!theOctree)
+
+	if (!theOctree)
 	{
 		m_app->dispToConsole("Couldn't compute octree!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
         return;
 	}
 
-    CCLib::ReferenceCloud* theCellCenters = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(cloud,octreeLevel,CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,&progressCb,theOctree);
-
-    if (!theCellCenters)
-	{
-		m_app->dispToConsole("Error while simplifying point cloud with octree!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	if (m_app)
-		m_app->dispToConsole(QString("[HPR] Resampling: %1 points").arg(theCellCenters->size()));
-
-    CCLib::DgmOctree::cellIndexesContainer vec;
-    theOctree->getCellIndexes(octreeLevel,vec);
-
-	const ccViewportParameters& params =  win->getViewportParameters();
 	CCVector3 viewPoint = params.cameraCenter;
 	if (params.objectCenteredView)
 	{
 		CCVector3 PC = params.cameraCenter - params.pivotPoint;
-		params.viewMat.transposed().apply(PC); //inverse rotation
+		params.viewMat.inverse().apply(PC);
 		viewPoint = params.pivotPoint + PC;
 	}
 
     //HPR
+	CCLib::ReferenceCloud* visibleCells = 0;
+	{
+		QElapsedTimer eTimer;
+		eTimer.start();
 
-	QElapsedTimer eTimer;
-	eTimer.start();
-    CCLib::ReferenceCloud* rc = removeHiddenPoints(theCellCenters,viewPoint.u,3.5);
-	if (m_app)
-		m_app->dispToConsole(QString("[HPR] Time: %1 s").arg(eTimer.elapsed()/1.0e3));
+		CCLib::ReferenceCloud* theCellCenters = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(cloud,(uchar)octreeLevel,CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,&progressCb,theOctree);
+		if (!theCellCenters)
+		{
+			m_app->dispToConsole("Error while simplifying point cloud with octree!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
 
-    delete theCellCenters;
+		visibleCells = removeHiddenPoints(theCellCenters,viewPoint.u,3.5);
+	
+		m_app->dispToConsole(QString("[HPR] Cells: %1 - Time: %2 s").arg(theCellCenters->size()).arg(eTimer.elapsed()/1.0e3));
 
-    if (rc)
+		delete theCellCenters;
+		theCellCenters = 0;
+	}
+
+    if (visibleCells)
     {
-		if (!cloud->isVisibilityTableInstantiated())
-			if (!cloud->razVisibilityArray())
-			{
-				m_app->dispToConsole("Visibility array allocation failed! (Not enough memory?)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-				return;
-			}
+		if (!cloud->isVisibilityTableInstantiated() && !cloud->razVisibilityArray())
+		{
+			m_app->dispToConsole("Visibility array allocation failed! (Not enough memory?)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
 
-		ccPointCloud::VisibilityTableType* vt = cloud->getTheVisibilityArray();
-		assert(vt);
-        uchar visible = 1;
-        vt->fill(0);
+		ccPointCloud::VisibilityTableType* pointsVisibility = cloud->getTheVisibilityArray();
 
-        unsigned totalNbOfPoints = 0;
+		assert(pointsVisibility);
+		pointsVisibility->fill(POINT_HIDDEN);
+
+        unsigned visiblePointCount = 0;
+		unsigned visibleCellsCount = visibleCells->size();
+
+		CCLib::DgmOctree::cellIndexesContainer cellIndexes;
+		if (!theOctree->getCellIndexes((uchar)octreeLevel,cellIndexes))
+		{
+			m_app->dispToConsole("Couldn't fetch the list of octree cell indexes! (Not enough memory?)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			return;
+		}
 
 		CCLib::ReferenceCloud Yk(theOctree->associatedCloud());
 
-        for (unsigned i=0;i<rc->size();++i)
+        for (unsigned i=0; i<visibleCellsCount; ++i)
         {
-            unsigned index = rc->getPointGlobalIndex(i);
-            theOctree->getPointsInCellByCellIndex(&Yk,vec[index],octreeLevel);
+			//cell index
+            unsigned index = visibleCells->getPointGlobalIndex(i);
+            
+			//points in this cell...
+			theOctree->getPointsInCellByCellIndex(&Yk,cellIndexes[index],(uchar)octreeLevel);
+			//...are all visible
 			unsigned count = Yk.size();
             for (unsigned j=0;j<count;++j)
-                vt->setValue(Yk.getPointGlobalIndex(j),visible);
+                pointsVisibility->setValue(Yk.getPointGlobalIndex(j),POINT_VISIBLE);
 
-            totalNbOfPoints += count;
+            visiblePointCount += count;
         }
 
-		if (m_app)
-			m_app->dispToConsole(QString("[HPR] Visible points: %1").arg(totalNbOfPoints));
+		m_app->dispToConsole(QString("[HPR] Visible points: %1").arg(visiblePointCount));
         cloud->redrawDisplay();
 
-        delete rc;
+        delete visibleCells;
+		visibleCells=0;
     }
 
     //currently selected entities appearance may have changed!

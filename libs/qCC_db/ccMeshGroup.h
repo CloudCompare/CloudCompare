@@ -54,6 +54,7 @@ public:
 
 	//inherited methods (ccHObject)
     virtual void addChild(ccHObject* anObject, bool dependant = true);
+	virtual bool isDisplayed() const;
 
 	//inherited methods (ccDrawableObject)
     virtual void setVisible(bool state);

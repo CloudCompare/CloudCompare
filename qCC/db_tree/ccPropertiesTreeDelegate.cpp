@@ -998,7 +998,7 @@ void ccPropertiesTreeDelegate::fillWithShareable(CCShareable* _obj)
 	m_model->setItem(curRow,1,item);
 }
 
-template<int N, class ScalarType> void ccPropertiesTreeDelegate::fillWithChunkedArray(ccChunkedArray<N,ScalarType>* _obj)
+template<int N, class ElementType> void ccPropertiesTreeDelegate::fillWithChunkedArray(ccChunkedArray<N,ElementType>* _obj)
 {
     assert(_obj && m_model);
 
@@ -1142,7 +1142,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		//sfd->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Maximum);
 		//parent->setSizePolicy(QSizePolicy::Minimum,QSizePolicy::Maximum);
 
-        connect(sfd, SIGNAL(entitySFHasChanged()), this, SLOT(redrawObjectSF()));
+        connect(sfd, SIGNAL(entitySFHasChanged()), this, SLOT(updateDisplay()));
 
 		sfd->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
         return sfd;
@@ -1543,18 +1543,37 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	}
 
     if (redraw)
-    {
-        //DGM: point clouds may be mesh vertices which are generally hidden,
-        //while the mesh depends on their parameters
-        if (m_currentObject->isEnabled() ||
-                (m_currentObject->isKindOf(CC_POINT_CLOUD) && m_currentObject->getParent() && m_currentObject->getParent()->isKindOf(CC_MESH)))
-        {
-            if (m_currentObject->isGroup())
-                emit ccObjectAndChildrenAppearanceChanged(m_currentObject);
-            else
-                emit ccObjectAppearanceChanged(m_currentObject);
-        }
-    }
+		updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::updateDisplay()
+{
+	ccHObject* object = m_currentObject;
+	if (!object)
+		return;
+
+	bool objectIsDisplayed = object->isDisplayed();
+	if (!objectIsDisplayed)
+	{
+		//DGM: point clouds may be mesh vertices of meshes which may depend on several of their parameters
+		if (object->isKindOf(CC_POINT_CLOUD))
+		{
+			ccHObject* parent = object->getParent();
+			if (parent && parent->isKindOf(CC_MESH) && parent->isDisplayed()) //specific case: vertices
+			{
+				object = parent;
+				objectIsDisplayed = true;
+			}
+		}
+	}
+
+	if (objectIsDisplayed)
+	{
+		if (object->isGroup())
+			emit ccObjectAndChildrenAppearanceChanged(m_currentObject);
+		else
+			emit ccObjectAppearanceChanged(m_currentObject);
+	}
 }
 
 void ccPropertiesTreeDelegate::updateModel()
@@ -1580,10 +1599,9 @@ void ccPropertiesTreeDelegate::scalarFieldChanged(int pos)
     {
         cloud->setCurrentDisplayedScalarField(pos-1);
 		cloud->showSF(pos>0);
-        if (cloud->isEnabled() || (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH)))
-            emit ccObjectAppearanceChanged(m_currentObject);
 
-        //we must reset the properties display!
+		updateDisplay();
+        //we must also reset the properties display!
         updateModel();
     }
 }
@@ -1600,10 +1618,8 @@ void ccPropertiesTreeDelegate::scalarFieldTypeChanged(bool positive)
     {
 		sf->setPositive(positive);
 		sf->computeMinAndMax();
-        if (cloud->isEnabled() || (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH)))
-            emit ccObjectAppearanceChanged(m_currentObject);
-
-        //we must reset the properties display!
+		updateDisplay();
+        //we must also reset the properties display!
         updateModel();
     }
 }
@@ -1617,15 +1633,10 @@ void ccPropertiesTreeDelegate::colorRampChanged(int pos)
     assert(cloud);
 
 	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
-	if (sf)
+	if (sf && (int)sf->getColorRamp() != pos)
 	{
-		if (int(sf->getColorRamp()) != pos)
-		{
-			sf->setColorRamp(COLOR_RAMPS_ENUMS[pos]);
-
-			if (cloud->isEnabled() || (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH)))
-				emit ccObjectAppearanceChanged(m_currentObject);
-		}
+		sf->setColorRamp(COLOR_RAMPS_ENUMS[pos]);
+		updateDisplay();
 	}
 }
 
@@ -1640,9 +1651,7 @@ void ccPropertiesTreeDelegate::colorRampStepsChanged(int pos)
 	if (sf)
 	{
 		sf->setColorRampSteps(pos);
-
-		if (cloud->isEnabled() || (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH)))
-			emit ccObjectAppearanceChanged(m_currentObject);
+		updateDisplay();
 	}
 }
 
@@ -1655,9 +1664,7 @@ void ccPropertiesTreeDelegate::octreeDisplayTypeChanged(int pos)
     assert(octree);
 
     octree->setDisplayType(OCTREE_DISPLAY_TYPE_ENUMS[pos]);
-
-    if (octree->isVisible() && octree->isEnabled())
-        emit ccObjectAppearanceChanged(m_currentObject);
+	updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::octreeDisplayedLevelChanged(int val)
@@ -1667,10 +1674,9 @@ void ccPropertiesTreeDelegate::octreeDisplayedLevelChanged(int val)
 
     ccOctree* octree = ccHObjectCaster::ToOctree(m_currentObject);
     assert(octree);
-    octree->setDisplayedLevel(val);
 
-    if (octree->isVisible() && octree->isEnabled())
-        emit ccObjectAppearanceChanged(m_currentObject);
+	octree->setDisplayedLevel(val);
+	updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
@@ -1688,10 +1694,8 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
     primitive->setDrawingPrecision(val);
 	primitive->setVisible(wasVisible);
 
-    if (primitive->isVisible() && primitive->isEnabled())
-        emit ccObjectAppearanceChanged(m_currentObject);
-
-	//we must reset the properties display!
+	updateDisplay();
+	//we must also reset the properties display!
 	updateModel();
 }
 
@@ -1703,8 +1707,7 @@ void ccPropertiesTreeDelegate::imageAlphaChanged(int val)
         return;
     image->setAlpha(float(val)/255.0);
 
-    if (image->isVisible() && image->isEnabled())
-        emit ccObjectAppearanceChanged(m_currentObject);
+	updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::applyImageViewport()
@@ -1747,10 +1750,9 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 
     ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_currentObject);
     assert(sensor);
-    sensor->setGraphicScale(val);
 
-    if (sensor->isVisible() && sensor->isEnabled())
-        emit ccObjectAppearanceChanged(m_currentObject);
+	sensor->setGraphicScale(val);
+	updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::cloudPointSizeChanged(int size)
@@ -1760,19 +1762,9 @@ void ccPropertiesTreeDelegate::cloudPointSizeChanged(int size)
 
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_currentObject);
     assert(cloud);
+
 	cloud->setPointSize(size);
-
-    if (cloud->isVisible() && cloud->isEnabled())
-        emit ccObjectAppearanceChanged(m_currentObject);
-}
-
-void ccPropertiesTreeDelegate::redrawObjectSF()
-{
-    if (!m_currentObject)
-        return;
-
-    if (m_currentObject->isEnabled() || (m_currentObject->getParent() && m_currentObject->getParent()->isKindOf(CC_MESH)))
-        emit ccObjectAppearanceChanged(m_currentObject);
+	updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTitle)

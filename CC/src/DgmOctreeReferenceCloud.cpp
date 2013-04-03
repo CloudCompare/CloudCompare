@@ -64,13 +64,13 @@ const CCVector3* DgmOctreeReferenceCloud::getNextPoint()
 	return (m_globalIterator < size() ? m_set->at(m_globalIterator++).point : 0);
 }
 
-void DgmOctreeReferenceCloud::setPointScalarValue(unsigned pointIndex, DistanceType value)
+void DgmOctreeReferenceCloud::setPointScalarValue(unsigned pointIndex, ScalarType value)
 {
 	assert(pointIndex < size());
 	m_set->at(pointIndex).squareDist = value;
 }
 
-DistanceType DgmOctreeReferenceCloud::getPointScalarValue(unsigned pointIndex) const
+ScalarType DgmOctreeReferenceCloud::getPointScalarValue(unsigned pointIndex) const
 {
 	assert(pointIndex < size());
 	return m_set->at(pointIndex).squareDist;

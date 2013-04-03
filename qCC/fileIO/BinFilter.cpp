@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2257                                                              $
-//$LastChangedDate:: 2012-10-11 23:48:15 +0200 (jeu., 11 oct. 2012)        $
-//**************************************************************************
-//
+
 #include "BinFilter.h"
 
 //Qt
@@ -80,7 +74,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 		return CC_FERR_WRITING;
 
 	// Current BIN file version
-	uint32_t binVersion = (uint32_t)s_currentObjVersion;
+	uint32_t binVersion = (uint32_t)s_currentDBVersion;
 	if (out.write((char*)&binVersion,4)<0)
 		return CC_FERR_WRITING;
 
@@ -482,27 +476,20 @@ CC_FILE_ERROR BinFilter::loadFileV1(QFile& in, ccHObject& container, unsigned nb
 		if (header.scalarField)
 			loadedCloud->enableScalarField();
 
-		CCVector3 P;
-		unsigned char C[3];
-		double D;
-
-		//does the associated scalar field is negative?
-		bool negSF = false;
-
-		unsigned lineReaded=0;
+		unsigned lineRead=0;
 		int parts = 0;
 
 		//lecture du fichier
 		for (unsigned i=0;i<nbOfPoints;++i)
 		{
-			if (lineReaded == fileChunkPos+fileChunkSize)
+			if (lineRead == fileChunkPos+fileChunkSize)
 			{
 				if (header.scalarField)
 					loadedCloud->getCurrentInScalarField()->computeMinAndMax();
 
 				container.addChild(loadedCloud);
-				fileChunkPos = lineReaded;
-				fileChunkSize = std::min(nbOfPoints-lineReaded,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
+				fileChunkPos = lineRead;
+				fileChunkSize = std::min(nbOfPoints-lineRead,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 				char partName[64];
 				++parts;
 				sprintf(partName,"%s.part_%i",cloudName,parts);
@@ -523,6 +510,7 @@ CC_FILE_ERROR BinFilter::loadFileV1(QFile& in, ccHObject& container, unsigned nb
 					loadedCloud->enableScalarField();
 			}
 
+			CCVector3 P;
 			if (in.read((char*)P.u,sizeof(float)*3)<0)
 			{
 				//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity point !\n",k);
@@ -532,6 +520,7 @@ CC_FILE_ERROR BinFilter::loadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 			if (header.colors)
 			{
+				unsigned char C[3];
 				if (in.read((char*)C,sizeof(colorType)*3)<0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity colors !\n",k);
@@ -542,36 +531,28 @@ CC_FILE_ERROR BinFilter::loadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 			if (header.normals)
 			{
-				if (in.read((char*)P.u,sizeof(float)*3)<0)
+				CCVector3 N;
+				if (in.read((char*)N.u,sizeof(float)*3)<0)
 				{
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity norms !\n",k);
 					return CC_FERR_READING;
 				}
-				loadedCloud->addNorm(P.u);
+				loadedCloud->addNorm(N.u);
 			}
 
 			if (header.scalarField)
 			{
+				double D;
 				if (in.read((char*)&D,sizeof(double))<0)
 				{
-					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity distance !\n",k);
+					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity distance!\n",k);
 					return CC_FERR_READING;
 				}
-				DistanceType d = (DistanceType)D;
-				//if there are negative values, we test if they are particular values (HIDDEN_VALUE, etc.)
-				//or not particular (in which case we have a non strictly positive SF)
-				if (d<0.0 && !negSF)
-				{
-					//we must test if the value is a particular one
-					if (d != HIDDEN_VALUE &&
-						d != OUT_VALUE &&
-						d != SEGMENTED_VALUE)
-						negSF = true;
-				}
+				ScalarType d = (ScalarType)D;
 				loadedCloud->setPointScalarValue(i,d);
 			}
 
-			lineReaded++;
+			lineRead++;
 
 			if (!nprogress.oneStep())
 			{
@@ -586,7 +567,7 @@ CC_FILE_ERROR BinFilter::loadFileV1(QFile& in, ccHObject& container, unsigned nb
 			CCLib::ScalarField* sf = loadedCloud->getCurrentInScalarField();
 			assert(sf);
 			sf->setName(sfName);
-			sf->setPositive(!negSF);
+			sf->setPositiveAuto();
 			sf->computeMinAndMax();
 
 			loadedCloud->setCurrentDisplayedScalarField(loadedCloud->getCurrentInScalarFieldIndex());

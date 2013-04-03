@@ -99,7 +99,7 @@ public:
 		\param alpha the gaussian filter kernel size (needed only if a gaussian filtering pass is required)
 		\return success
 	**/
-	static bool frontPropagationBasedSegmentation(GenericIndexedCloudPersist* theCloud, bool signedSF, DistanceType minSeedDist, uchar octreeLevel, ReferenceCloudContainer& theSegmentedLists, CCLib::GenericProgressCallback* progressCb=0, CCLib::DgmOctree* _theOctree=0, bool applyGaussianFilter=false, float alpha=2.0);
+	static bool frontPropagationBasedSegmentation(GenericIndexedCloudPersist* theCloud, bool signedSF, ScalarType minSeedDist, uchar octreeLevel, ReferenceCloudContainer& theSegmentedLists, CCLib::GenericProgressCallback* progressCb=0, CCLib::DgmOctree* _theOctree=0, bool applyGaussianFilter=false, float alpha=2.0);
 
 };
 

@@ -40,12 +40,12 @@ NormalDistribution::NormalDistribution()
 	parametersDefined = false;
 }
 
-NormalDistribution::NormalDistribution(DistanceType _mu, DistanceType _sigma2)
+NormalDistribution::NormalDistribution(ScalarType _mu, ScalarType _sigma2)
 {
 	setParameters(_mu,_sigma2);
 }
 
-bool NormalDistribution::getParameters(DistanceType &_mu, DistanceType &_sigma2) const
+bool NormalDistribution::getParameters(ScalarType &_mu, ScalarType &_sigma2) const
 {
 	_mu = mu;
 	_sigma2 = sigma2;
@@ -53,7 +53,7 @@ bool NormalDistribution::getParameters(DistanceType &_mu, DistanceType &_sigma2)
 	return parametersDefined;
 }
 
-bool NormalDistribution::setParameters(DistanceType _mu, DistanceType _sigma2)
+bool NormalDistribution::setParameters(ScalarType _mu, ScalarType _sigma2)
 {
 	mu = _mu;
 	sigma2 = _sigma2;
@@ -78,18 +78,18 @@ bool NormalDistribution::setParameters(DistanceType _mu, DistanceType _sigma2)
 	return parametersDefined;
 }
 
-double NormalDistribution::computeP(DistanceType x) const
+double NormalDistribution::computeP(ScalarType x) const
 {
-	DistanceType p = (x-mu);
+	ScalarType p = (x-mu);
 	return exp(-double(p*p*qFactor))*normFactor;
 }
 
-double NormalDistribution::computeP(DistanceType x1, DistanceType x2) const
+double NormalDistribution::computeP(ScalarType x1, ScalarType x2) const
 {
 	return 0.5*(ErrorFunction::erf(double(x2-mu)/sqrt(double(2.0*sigma2)))-ErrorFunction::erf(double(x1-mu)/sqrt(double(2.0*sigma2))));
 }
 
-double NormalDistribution::computePfromZero(DistanceType x) const
+double NormalDistribution::computePfromZero(ScalarType x) const
 {
 	return 0.5*(ErrorFunction::erf(double(x-mu)/sqrt(2.0*double(sigma2)))+1.0);
 }
@@ -131,7 +131,7 @@ bool NormalDistribution::computeParameters(const GenericCloud* Yk, bool includeN
 
     mean /= (double)counter;
     stddev2 = fabs(stddev2/(double)counter - mean*mean);
-    return setParameters((DistanceType)mean,(DistanceType)stddev2);
+    return setParameters((ScalarType)mean,(ScalarType)stddev2);
 }
 
 bool NormalDistribution::computeParameters(const distancesContainer& values, bool includeNegValues)
@@ -162,7 +162,7 @@ bool NormalDistribution::computeParameters(const distancesContainer& values, boo
 
     mean /= (double)counter;
     stddev2 = fabs(stddev2/(double)counter - mean*mean);
-    return setParameters((DistanceType)mean,(DistanceType)stddev2);
+    return setParameters((ScalarType)mean,(ScalarType)stddev2);
 }
 
 bool NormalDistribution::computeRobustParameters(const distancesContainer& values, double nSigma, bool includeNegValues)
@@ -173,7 +173,7 @@ bool NormalDistribution::computeRobustParameters(const distancesContainer& value
 	unsigned k,counter=0;
 	double stddev = sqrt(sigma2)*nSigma;
 	double mean=0.0,stddev2=0.0;
-	DistanceType val;
+	ScalarType val;
 	for (k=0;k<values.size();++k)
 	{
 	    val = values[k];
@@ -190,7 +190,7 @@ bool NormalDistribution::computeRobustParameters(const distancesContainer& value
 
     mean /= (double)counter;
     stddev2 = fabs(stddev2/(double)counter - mean*mean);
-    return setParameters((DistanceType)mean,(DistanceType)stddev2);
+    return setParameters((ScalarType)mean,(ScalarType)stddev2);
 }
 
 double NormalDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, bool includeNegValues, int* histo)
@@ -227,7 +227,7 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned numb
 
 	//calcul de l'histogramme
 	unsigned j;
-	DistanceType V;
+	ScalarType V;
 	for (i=0;i<n;++i)
 	{
 		V = Yk->getPointScalarValue(i);
@@ -242,11 +242,11 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned numb
 	}
 
 	//calcul de la distance du Chi2
-	DistanceType nPi,tempValue,dk = 0.0;
+	ScalarType nPi,tempValue,dk = 0.0;
 	for (i=0;i<numberOfClasses;++i)
 	{
-		nPi = Pi[i]*(DistanceType)numberOfElements;
-		tempValue = (DistanceType)_histo[i]-nPi;
+		nPi = Pi[i]*(ScalarType)numberOfElements;
+		tempValue = (ScalarType)_histo[i]-nPi;
 		dk += tempValue*tempValue/nPi;
 	}
 
@@ -275,20 +275,20 @@ bool NormalDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 	//cas général
 	else //numberOfClasses>2
 	{
-		DistanceType x,y,oldy,sigma = sqrt(sigma2);
+		ScalarType x,y,oldy,sigma = sqrt(sigma2);
 		//une première classe entre -inf et mu-2.sigma
 		x = mu-2.0f*sigma;
-		y = (DistanceType)computePfromZero(x);
+		y = (ScalarType)computePfromZero(x);
 		Pi.push_back(y);
 		chi2ClassesPositions.push_back(x);
 
 		//une serie de numberOfClasses-2 classes comprises entre mu-2.sigma et mu+2.sigma
-		DistanceType pas = 4.0f*sigma/(DistanceType)(numberOfClasses-2);
+		ScalarType pas = 4.0f*sigma/(ScalarType)(numberOfClasses-2);
 		for (unsigned i=0;i<numberOfClasses-2;++i)
 		{
 			x = x+pas;
 			oldy = y;
-			y = (DistanceType)computePfromZero(x);
+			y = (ScalarType)computePfromZero(x);
 			Pi.push_back(y-oldy);
 			chi2ClassesPositions.push_back(x);
 		}

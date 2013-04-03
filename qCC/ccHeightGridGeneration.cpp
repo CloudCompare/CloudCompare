@@ -156,7 +156,7 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 			if (gridScalarFields[i])
 			{
 				//init grid (DGM: not necessary)
-				//DistanceType emptyValue = pc->getScalarField(i)->isPositive() ? HIDDEN_VALUE : BIG_VALUE;
+				//ScalarType emptyValue = pc->getScalarField(i)->NaN();
 				//double* _grid = gridScalarFields[i];
 				//for (unsigned j=0;j<grid_total_size;++j)
 				//	*_grid++ = emptyValue;
@@ -228,14 +228,12 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 				{
 					CCLib::ScalarField* sf = pc->getScalarField(k);
 					assert(sf);
-					DistanceType sfValue = sf->getValue(n);
-					DistanceType formerValue = gridScalarFields[k][pos];
-					bool formerIsNaN = (sf->isPositive() ? formerValue==HIDDEN_VALUE : formerValue==BIG_VALUE);
+					ScalarType sfValue = sf->getValue(n);
+					ScalarType formerValue = gridScalarFields[k][pos];
 
-					if (pointsInCell && !formerIsNaN)
+					if (pointsInCell && sf->validValue(formerValue))
 					{
-						bool isNaN = (sf->isPositive() ? sfValue==HIDDEN_VALUE : sfValue==BIG_VALUE);
-						if (!isNaN)
+						if (sf->validValue(sfValue))
 						{
 							switch (sfInterpolation)
 							{
@@ -289,11 +287,8 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 						for (unsigned i=0;i<grid_size_X;++i,++cell,++_gridSF)
 						{
 							if (cell->nbPoints)
-							{
-								bool isNaN = (sf->isPositive() ? *_gridSF==HIDDEN_VALUE : *_gridSF==BIG_VALUE);
-								if (!isNaN)
+								if (sf->validValue(*_gridSF)) //valid SF value
 									*_gridSF /= (double)cell->nbPoints;
-							}
 						}
 					}
 				}
@@ -597,7 +592,7 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 								//per-cell population SF
 								if (countSF)
 								{
-									DistanceType pop = aCell->nbPoints;
+									ScalarType pop = aCell->nbPoints;
 									countSF->addElement(pop);
 								}
 							}
@@ -655,7 +650,7 @@ void ccHeightGridGeneration::Compute(ccGenericPointCloud* cloud,
 								CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
 								assert(sf);
 								//set sf values
-								DistanceType emptyCellSFValue = (formerSf->isPositive() ? HIDDEN_VALUE : BIG_VALUE);
+								const ScalarType emptyCellSFValue = formerSf->NaN();
 								for (unsigned j=0; j<grid_size_Y; ++j)
 								{
 									const hgCell* aCell = grid[j];

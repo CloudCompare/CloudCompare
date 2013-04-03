@@ -78,6 +78,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 	bool hasSF = theCloud->hasDisplayedScalarField();
 	if (!hasSF)
         ccConsole::Warning(QString("[PNFilter::save] Cloud '%1' has no displayed scalar field (we will save points with a default scalar value)!").arg(theCloud->getName()));
+
 	float val = (float)HIDDEN_VALUE;
 
 	//progress dialog
@@ -157,7 +158,6 @@ CC_FILE_ERROR PVFilter::loadFile(const char* filename, ccHObject& container, boo
     //number of points read for the current cloud part
 	unsigned pointsRead = 0;
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	bool negSFAreOnlyHiddenVal = true;
 
 	for (unsigned i=0;i<numberOfPoints;i++)
 	{
@@ -170,7 +170,7 @@ CC_FILE_ERROR PVFilter::loadFile(const char* filename, ccHObject& container, boo
 				if (sfIdx>=0)
 				{
 					CCLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
-					sf->setPositive(negSFAreOnlyHiddenVal);
+					sf->setPositiveAuto();
 					sf->computeMinAndMax();
 					loadedCloud->setCurrentDisplayedScalarField(sfIdx);
 					loadedCloud->showSF(true);
@@ -188,7 +188,6 @@ CC_FILE_ERROR PVFilter::loadFile(const char* filename, ccHObject& container, boo
 				loadedCloud=0;
 				break;
 			}
-			negSFAreOnlyHiddenVal = true;
 		}
 
         //we read the 3 coordinates of the point
@@ -210,14 +209,12 @@ CC_FILE_ERROR PVFilter::loadFile(const char* filename, ccHObject& container, boo
         //then the scalar value
 		if (in.read((char*)rBuff,sizeof(float))>=0)
 		{
-		    loadedCloud->setPointScalarValue(pointsRead,(DistanceType)rBuff[0]);
-			if (negSFAreOnlyHiddenVal && rBuff[0]<0 && rBuff[0] != HIDDEN_VALUE)
-				negSFAreOnlyHiddenVal = false;
+		    loadedCloud->setPointScalarValue(pointsRead,(ScalarType)rBuff[0]);
 		}
 		else
 		{
 			//add fake scalar value for consistency then break
-		    loadedCloud->setPointScalarValue(pointsRead,HIDDEN_VALUE);
+		    loadedCloud->setPointScalarValue(pointsRead,0);
 			result = CC_FERR_READING;
 			break;
 		}
@@ -241,7 +238,7 @@ CC_FILE_ERROR PVFilter::loadFile(const char* filename, ccHObject& container, boo
 		if (sfIdx>=0)
 		{
 			CCLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
-			sf->setPositive(negSFAreOnlyHiddenVal);
+			sf->setPositiveAuto();
 			sf->computeMinAndMax();
 			loadedCloud->setCurrentDisplayedScalarField(sfIdx);
 			loadedCloud->showSF(true);

@@ -65,7 +65,7 @@ public:
 		\param maxDist the upper boundary
 		\return a new cloud structure containing the extracted points (references to - no duplication)
 	**/
-	static ReferenceCloud* segment(GenericIndexedCloudPersist* aCloud, DistanceType minDist, DistanceType maxDist);
+	static ReferenceCloud* segment(GenericIndexedCloudPersist* aCloud, ScalarType minDist, ScalarType maxDist);
 
 
 	//! Tests if a point is inside a polyline

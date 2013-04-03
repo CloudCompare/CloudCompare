@@ -113,7 +113,7 @@ protected slots:
     void imageAlphaChanged(int val);
     void applyImageViewport();
 	void applyLabelViewport();
-    void redrawObjectSF();
+    void updateDisplay();
     void objectDisplayChanged(const QString &newDisplayTitle);
     void sensorScaleChanged(double val);
 	void cloudPointSizeChanged(int size);
@@ -135,7 +135,7 @@ protected:
     void fillWithGBLSensor(ccGBLSensor*);
 	void fillWithMaterialSet(ccMaterialSet*);
 	void fillWithShareable(CCShareable*);
-	template<int N, class ScalarType> void fillWithChunkedArray(ccChunkedArray<N,ScalarType>*);
+	template<int N, class ElementType> void fillWithChunkedArray(ccChunkedArray<N,ElementType>*);
 
 	//! Updates the current model (assuming object is the same)
 	void updateModel();

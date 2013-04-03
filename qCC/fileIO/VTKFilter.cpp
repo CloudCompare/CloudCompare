@@ -180,7 +180,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 		{
 			CCLib::ScalarField* sf = pointCloud->getScalarField(i);
 
-			outFile << "SCALARS " << QString(sf->getName()).replace(" ","_") << (sizeof(DistanceType)==4 ? " float" : " double") << " 1" << endl;
+			outFile << "SCALARS " << QString(sf->getName()).replace(" ","_") << (sizeof(ScalarType)==4 ? " float" : " double") << " 1" << endl;
 			outFile << "LOOKUP_TABLE default" << endl;
 
 			for (unsigned j=0;j<ptsCount; ++j)
@@ -191,7 +191,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 	{
 		if (vertices->hasScalarFields())
 		{
-			outFile << "SCALARS ScalarField" << (sizeof(DistanceType)==4 ? " float" : " double") << " 1" << endl;
+			outFile << "SCALARS ScalarField" << (sizeof(ScalarType)==4 ? " float" : " double") << " 1" << endl;
 			outFile << "LOOKUP_TABLE default" << endl;
 
 			for (unsigned j=0;j<ptsCount; ++j)
@@ -569,7 +569,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 					if (sf)
 					{
 						bool ok;
-						DistanceType d = (DistanceType)nextline.toDouble(&ok);
+						ScalarType d = (ScalarType)nextline.toDouble(&ok);
 						sf->addElement(d);
 					}
 				}

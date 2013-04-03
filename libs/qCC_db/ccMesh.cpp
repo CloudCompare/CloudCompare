@@ -594,8 +594,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glPushName(getUniqueID());
 
 		//vertices visibility
-		const ccGenericPointCloud::VisibilityTableType* visibilityArray = m_associatedCloud->getTheVisibilityArray();
-		bool visFiltering = (visibilityArray ? visibilityArray->isAllocated() : false);
+		const ccGenericPointCloud::VisibilityTableType* verticesVisibility = m_associatedCloud->getTheVisibilityArray();
+		bool visFiltering = (verticesVisibility && verticesVisibility->isAllocated());
 
 		//wireframe ? (not compatible with LOD)
 		bool showWired = m_showWired && !lodEnabled;
@@ -756,20 +756,20 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			#ifdef OPTIM_MEM_CPY
 					for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
 					{
-						DistanceType normalizedDist = currentDisplayedScalarField->getNormalizedValue(*_vertIndexes++);
-						col = (normalizedDist>=0.0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
+						ScalarType normalizedDist = currentDisplayedScalarField->getNormalizedValue(*_vertIndexes++);
+						col = (normalizedDist >= 0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
                         *(_rgbColors)++ = *(col)++;
                         *(_rgbColors)++ = *(col)++;
                         *(_rgbColors)++ = *(col)++;
 
 						normalizedDist = currentDisplayedScalarField->getNormalizedValue(*_vertIndexes++);
-						col = (normalizedDist>=0.0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
+						col = (normalizedDist >= 0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
                         *(_rgbColors)++ = *(col)++;
                         *(_rgbColors)++ = *(col)++;
                         *(_rgbColors)++ = *(col)++;
 
 						normalizedDist = currentDisplayedScalarField->getNormalizedValue(*_vertIndexes++);
-						col = (normalizedDist>=0.0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
+						col = (normalizedDist >= 0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
                         *(_rgbColors)++ = *(col)++;
                         *(_rgbColors)++ = *(col)++;
                         *(_rgbColors)++ = *(col)++;
@@ -777,16 +777,16 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			#else
 					for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
 					{
-						DistanceType normalizedDist = currentDisplayedScalarField->getNormalizedValue(_vertIndexes[0]);
-						col = (normalizedDist>=0.0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
+						ScalarType normalizedDist = currentDisplayedScalarField->getNormalizedValue(_vertIndexes[0]);
+						col = (normalizedDist >= 0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
 						memcpy(_rgbColors,col,sizeof(colorType)*3);
 						_rgbColors += 3;
 						normalizedDist = currentDisplayedScalarField->getNormalizedValue(_vertIndexes[1]);
-						col = (normalizedDist>=0.0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
+						col = (normalizedDist >= 0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
 						memcpy(_rgbColors,col,sizeof(colorType)*3);
 						_rgbColors += 3;
 						normalizedDist = currentDisplayedScalarField->getNormalizedValue(_vertIndexes[2]);
-						col = (normalizedDist>=0.0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
+						col = (normalizedDist >= 0 ? colorTable->getColor(normalizedDist,colorRampSteps,colorRamp) : ccColor::lightGrey);
 						memcpy(_rgbColors,col,sizeof(colorType)*3);
 						_rgbColors += 3;
 					}
@@ -987,16 +987,17 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				if (visFiltering)
 				{
-					if ((visibilityArray->getValue(tsi->i1) == 0) ||
-						(visibilityArray->getValue(tsi->i2) == 0) ||
-						(visibilityArray->getValue(tsi->i3) == 0))
+					//we skip the triangle if at least one vertex is hidden
+					if ((verticesVisibility->getValue(tsi->i1) != POINT_VISIBLE) ||
+						(verticesVisibility->getValue(tsi->i2) != POINT_VISIBLE) ||
+						(verticesVisibility->getValue(tsi->i3) != POINT_VISIBLE))
 						continue;
 				}
 
 				if (glParams.showSF)
 				{
-					DistanceType normalizedDist = currentDisplayedScalarField->getNormalizedValue(tsi->i1);
-					if (normalizedDist>=0.0)
+					ScalarType normalizedDist = currentDisplayedScalarField->getNormalizedValue(tsi->i1);
+					if (normalizedDist >= 0)
 						col1 = colorTable->getColor(normalizedDist,colorRampSteps,colorRamp);
 					else
 					{
@@ -1007,7 +1008,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 
 					normalizedDist = currentDisplayedScalarField->getNormalizedValue(tsi->i2);
-					if (normalizedDist>=0.0)
+					if (normalizedDist >= 0)
 						col2 = colorTable->getColor(normalizedDist,colorRampSteps,colorRamp);
 					else
 					{
@@ -1018,7 +1019,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 
 					normalizedDist = currentDisplayedScalarField->getNormalizedValue(tsi->i3);
-					if (normalizedDist>=0.0)
+					if (normalizedDist >= 0)
 						col3 = colorTable->getColor(normalizedDist,colorRampSteps,colorRamp);
 					else
 					{
@@ -1170,14 +1171,14 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 {
 	assert(m_associatedCloud);
 
-	ccGenericPointCloud::VisibilityTableType* visibilityArray = m_associatedCloud->getTheVisibilityArray();
-	if (!visibilityArray || !visibilityArray->isAllocated())
+	ccGenericPointCloud::VisibilityTableType* verticesVisibility = m_associatedCloud->getTheVisibilityArray();
+	if (!verticesVisibility || !verticesVisibility->isAllocated())
 	{
-		ccLog::Error(QString("[Mesh %1] Internal error: visibility table not instantiated!").arg(getName()));
+		ccLog::Error(QString("[Mesh %1] Internal error: vertex visibility table not instantiated!").arg(getName()));
 		return NULL;
 	}
 
-	ccMesh* newTri = NULL;
+	ccMesh* newMesh = NULL;
 	ccGenericPointCloud* newVertices = NULL;
 
 	//if vertices were provided as input, we use them (otherwise we - try to - create them)
@@ -1205,11 +1206,11 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 	}
 	else
 	{
-		//we create a temporary entity with the invisible vertices only
+		//we create a temporary entity with the visible vertices only
 		rc = new CCLib::ReferenceCloud(m_associatedCloud);
 
 		for (unsigned i=0;i<m_associatedCloud->size();++i)
-			if (visibilityArray->getValue(i))
+			if (verticesVisibility->getValue(i) == POINT_VISIBLE)
 				if (!rc->addPointIndex(i))
 				{
 					ccLog::Error("[ccMesh::createNewMeshFromSelection] Not enough memory!");
@@ -1229,8 +1230,8 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 
 	if (result)
 	{
-		newTri = new ccMesh(result,newVertices);
-		if (!newTri)
+		newMesh = new ccMesh(result,newVertices);
+		if (!newMesh)
 		{
 			if (!vertices)
 				delete newVertices;
@@ -1239,16 +1240,16 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 		}
 		else
 		{
-			newTri->setName(getName()+QString(".part"));
+			newMesh->setName(getName()+QString(".part"));
 
 			//shall we add any advanced features?
 			bool addFeatures = false;
 			if (m_triNormals && m_triNormalIndexes)
-				addFeatures |= newTri->reservePerTriangleNormalIndexes();
+				addFeatures |= newMesh->reservePerTriangleNormalIndexes();
 			if (m_materials && m_triMtlIndexes)
-				addFeatures |= newTri->reservePerTriangleMtlIndexes();
+				addFeatures |= newMesh->reservePerTriangleMtlIndexes();
 			if (m_texCoords && m_texCoordIndexes)
-				addFeatures |= newTri->reservePerTriangleTexCoordIndexes();
+				addFeatures |= newMesh->reservePerTriangleTexCoordIndexes();
 
 			if (addFeatures)
 			{
@@ -1268,7 +1269,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 					catch(std::bad_alloc)
 					{
 						ccLog::Warning("Failed to create new normals subset! (not enough memory)");
-						newTri->removePerTriangleNormalIndexes();
+						newMesh->removePerTriangleNormalIndexes();
 						newTriNormals->release();
 						newTriNormals = 0;
 					}
@@ -1290,7 +1291,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 					catch(std::bad_alloc)
 					{
 						ccLog::Warning("Failed to create new texture indexes subset! (not enough memory)");
-						newTri->removePerTriangleTexCoordIndexes();
+						newMesh->removePerTriangleTexCoordIndexes();
 						newTriTexIndexes->release();
 						newTriTexIndexes = 0;
 					}
@@ -1312,12 +1313,12 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 					catch(std::bad_alloc)
 					{
 						ccLog::Warning("Failed to create new material subset! (not enough memory)");
-						newTri->removePerTriangleMtlIndexes();
+						newMesh->removePerTriangleMtlIndexes();
 						newMaterials->release();
 						newMaterials = 0;
 						if (newTriTexIndexes) //we can release texture coordinates as well (as they depend on materials!)
 						{
-							newTri->removePerTriangleTexCoordIndexes();
+							newMesh->removePerTriangleTexCoordIndexes();
 							newTriTexIndexes->release();
 							newTriTexIndexes = 0;
 							newTexIndexes.clear();
@@ -1332,9 +1333,10 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 					const CCLib::TriangleSummitsIndexes* tsi = (CCLib::TriangleSummitsIndexes*)m_triIndexes->getCurrentValue();
 					m_triIndexes->forwardIterator();
 
-					if (bool(visibilityArray->getValue(tsi->i1)>0) &&
-						bool(visibilityArray->getValue(tsi->i2)>0) &&
-						bool(visibilityArray->getValue(tsi->i3)>0))
+					//all vertices must be visible
+					if (verticesVisibility->getValue(tsi->i1) == POINT_VISIBLE &&
+						verticesVisibility->getValue(tsi->i2) == POINT_VISIBLE &&
+						verticesVisibility->getValue(tsi->i3) == POINT_VISIBLE)
 					{
 						//import per-triangle normals?
 						if (newTriNormals)
@@ -1354,7 +1356,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 										&& !newTriNormals->reserve(newTriNormals->currentSize()+1000)) //auto expand
 									{
 										ccLog::Warning("Failed to create new normals subset! (not enough memory)");
-										newTri->removePerTriangleNormalIndexes();
+										newMesh->removePerTriangleNormalIndexes();
 										newTriNormals->release();
 										newTriNormals = 0;
 										break;
@@ -1368,7 +1370,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 
 							if (newTriNormals) //structure still exists?
 							{
-								newTri->addTriangleNormalIndexes(triNormIndexes[0] < 0 ? -1 : newNormIndexes[triNormIndexes[0]],
+								newMesh->addTriangleNormalIndexes(triNormIndexes[0] < 0 ? -1 : newNormIndexes[triNormIndexes[0]],
 									triNormIndexes[1] < 0 ? -1 : newNormIndexes[triNormIndexes[1]],
 									triNormIndexes[2] < 0 ? -1 : newNormIndexes[triNormIndexes[2]]);
 							}
@@ -1392,7 +1394,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 										&& !newTriTexIndexes->reserve(newTriTexIndexes->currentSize()+500)) //auto expand
 									{
 										ccLog::Error("Failed to create new texture coordinates subset! (not enough memory)");
-										newTri->removePerTriangleTexCoordIndexes();
+										newMesh->removePerTriangleTexCoordIndexes();
 										newTriTexIndexes->release();
 										newTriTexIndexes = 0;
 										break;
@@ -1405,7 +1407,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 
 							if (newTriTexIndexes) //structure still exists?
 							{
-								newTri->addTriangleTexCoordIndexes(triTexIndexes[0] < 0 ? -1 : newTexIndexes[triTexIndexes[0]],
+								newMesh->addTriangleTexCoordIndexes(triTexIndexes[0] < 0 ? -1 : newTexIndexes[triTexIndexes[0]],
 									triTexIndexes[1] < 0 ? -1 : newTexIndexes[triTexIndexes[1]],
 									triTexIndexes[2] < 0 ? -1 : newTexIndexes[triTexIndexes[2]]);
 							}
@@ -1432,7 +1434,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 								catch(std::bad_alloc)
 								{
 									ccLog::Warning("Failed to create new materials subset! (not enough memory)");
-									newTri->removePerTriangleMtlIndexes();
+									newMesh->removePerTriangleMtlIndexes();
 									newMaterials->release();
 									newMaterials = 0;
 								}
@@ -1440,7 +1442,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 
 							if (newMaterials) //structure still exists?
 							{
-								newTri->addTriangleMtlIndex(triMatIndex < 0 ? -1 : newMatIndexes[triMatIndex]);
+								newMesh->addTriangleMtlIndex(triMatIndex < 0 ? -1 : newMatIndexes[triMatIndex]);
 							}
 						}
 
@@ -1450,24 +1452,24 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 				if (newTriNormals)
 				{
 					newTriNormals->resize(newTriNormals->currentSize()); //smaller so it should always be ok!
-					newTri->setTriNormsTable(newTriNormals);
-					newTri->addChild(newTriNormals,true);
+					newMesh->setTriNormsTable(newTriNormals);
+					newMesh->addChild(newTriNormals,true);
 					newTriNormals->release();
 					newTriNormals=0;
 				}
 
 				if (newTriTexIndexes)
 				{
-					newTri->setTexCoordinatesTable(newTriTexIndexes);
-					newTri->addChild(newTriTexIndexes,true);
+					newMesh->setTexCoordinatesTable(newTriTexIndexes);
+					newMesh->addChild(newTriTexIndexes,true);
 					newTriTexIndexes->release();
 					newTriTexIndexes=0;
 				}
 
 				if (newMaterials)
 				{
-					newTri->setMaterialSet(newMaterials);
-					newTri->addChild(newMaterials,true);
+					newMesh->setMaterialSet(newMaterials);
+					newMesh->addChild(newMaterials,true);
 					newMaterials->release();
 					newMaterials=0;
 				}
@@ -1475,12 +1477,12 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 
 			if (!vertices)
 			{
-				newTri->addChild(newVertices);
-				newTri->setDisplay_recursive(getDisplay());
-				newTri->showColors(colorsShown());
-				newTri->showNormals(normalsShown());
-				newTri->showMaterials(materialsShown());
-				newTri->showSF(sfShown());
+				newMesh->addChild(newVertices);
+				newMesh->setDisplay_recursive(getDisplay());
+				newMesh->showColors(colorsShown());
+				newMesh->showNormals(normalsShown());
+				newMesh->showMaterials(materialsShown());
+				newMesh->showSF(sfShown());
 				newVertices->setEnabled(false);
 			}
 		}
@@ -1489,7 +1491,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 		result=0;
 	}
 
-	//shall we remove the selected vertices from this mesh ?
+	//shall we remove the selected vertices from this mesh?
 	if (removeSelectedVertices)
 	{
 		//we remove all visible points
@@ -1500,9 +1502,10 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 			const CCLib::TriangleSummitsIndexes* tsi = (CCLib::TriangleSummitsIndexes*)m_triIndexes->getCurrentValue();
 			m_triIndexes->forwardIterator();
 
-			if (bool(visibilityArray->getValue(tsi->i1)==0) ||
-				bool(visibilityArray->getValue(tsi->i2)==0) ||
-				bool(visibilityArray->getValue(tsi->i3)==0))
+			//at least one hidden vertex
+			if (verticesVisibility->getValue(tsi->i1) != POINT_VISIBLE ||
+				verticesVisibility->getValue(tsi->i2) != POINT_VISIBLE ||
+				verticesVisibility->getValue(tsi->i3) != POINT_VISIBLE)
 			{
 				if (i != lastTri)
 				{
@@ -1523,7 +1526,7 @@ ccGenericMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedVertices, C
 		updateModificationTime();
 	}
 
-	return newTri;
+	return newMesh;
 }
 
 void ccMesh::shiftTriangleIndexes(unsigned shift)

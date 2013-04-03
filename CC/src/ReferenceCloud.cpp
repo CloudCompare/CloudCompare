@@ -163,7 +163,7 @@ void ReferenceCloud::forEach(genericPointAction& anAction)
 {
 	assert(m_theAssociatedCloud);
 
-	DistanceType d,d2;
+	ScalarType d,d2;
 	unsigned count=size();
 	for (unsigned i=0;i<count;++i)
 	{

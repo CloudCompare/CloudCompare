@@ -55,8 +55,8 @@ public:
 	virtual const CCVector3* getNextPoint();
 	virtual bool enableScalarField();
 	virtual bool isScalarFieldEnabled() const;
-	virtual void setPointScalarValue(unsigned pointIndex, DistanceType value);
-	virtual DistanceType getPointScalarValue(unsigned pointIndex) const;
+	virtual void setPointScalarValue(unsigned pointIndex, ScalarType value);
+	virtual ScalarType getPointScalarValue(unsigned pointIndex) const;
 
 	//**** inherited form GenericIndexedCloud ****//
 	inline virtual const CCVector3* getPoint(unsigned index) {return getPointPersistentPtr(index);}

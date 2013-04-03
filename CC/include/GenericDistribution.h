@@ -70,13 +70,13 @@ public:
 	/** \param x the variable
 		\return the probabilty
 	**/
-	virtual double computeP(DistanceType x) const = 0;
+	virtual double computeP(ScalarType x) const = 0;
 
 	//! Computes the cumulative probability between 0 and x
 	/** \param x the upper boundary
 		\return the cumulative probabilty
 	**/
-	virtual double computePfromZero(DistanceType x) const = 0;
+	virtual double computePfromZero(ScalarType x) const = 0;
 
 	//! Computes the cumulative probability between x1 and x2
 	/** x1 should be lower than x2
@@ -84,7 +84,7 @@ public:
 		\param x2 the upper boundary
 		\return the cumulative probabilty
 	**/
-	virtual double computeP(DistanceType x1, DistanceType x2) const = 0;
+	virtual double computeP(ScalarType x1, ScalarType x2) const = 0;
 
 	//! Computes the Chi2 distance (related to the Chi2 Test)
 	/** Computes the Chi2 distance from a group of point, accordingly to
@@ -124,7 +124,7 @@ protected:
 	/** Used internally. Stores both limits for each class in a vector
 		(min_class_1, max_class_1, min_class_2, max_class_2, etc.).
 	**/
-	std::vector<DistanceType> chi2ClassesPositions;
+	std::vector<ScalarType> chi2ClassesPositions;
 };
 
 }

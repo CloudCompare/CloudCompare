@@ -17,9 +17,6 @@
 
 #include "ScalarField.h"
 
-//local
-#include "CCConst.h"
-
 //system
 #include <assert.h>
 #include <string.h>
@@ -27,7 +24,7 @@
 using namespace CCLib;
 
 ScalarField::ScalarField(const char* name/*=0*/, bool positive /*=false*/)
-	: GenericChunkedArray<1,DistanceType>()
+	: GenericChunkedArray<1,ScalarType>()
 	, m_onlyPositiveValues(positive)
 {
 	setName(name);
@@ -41,18 +38,18 @@ void ScalarField::setName(const char* name)
 		strcpy(m_name,"Undefined");
 }
 
-void ScalarField::computeMeanAndVariance(DistanceType &mean, DistanceType* variance) const
+void ScalarField::computeMeanAndVariance(ScalarType &mean, ScalarType* variance) const
 {
 	double _mean=0.0, _std2=0.0;
 	unsigned count=0;
 
 	for (unsigned i=0;i<m_maxCount;++i)
 	{
-		const DistanceType& d = getValue(i);
-		if ((m_onlyPositiveValues && d>=0.0) || (!m_onlyPositiveValues && d<BIG_VALUE))
+		const ScalarType& val = getValue(i);
+		if (validValue(val))
 		{
-			_mean += (double)d;
-			_std2 += (double)d * (double)d;
+			_mean += (double)val;
+			_std2 += (double)val * (double)val;
 			++count;
 		}
 	}
@@ -60,19 +57,19 @@ void ScalarField::computeMeanAndVariance(DistanceType &mean, DistanceType* varia
 	if (count)
 	{
 		_mean /= (double)count;
-		mean = (DistanceType)_mean;
+		mean = (ScalarType)_mean;
 
 		if (variance)
 		{
 			_std2 = fabs(_std2/(double)count - _mean*_mean);
-			*variance = (DistanceType)_std2;
+			*variance = (ScalarType)_std2;
 		}
 	}
 	else
 	{
-		mean=0.0;
+		mean = 0;
 		if (variance)
-			*variance=0.0;
+			*variance = 0;
 	}
 }
 
@@ -80,11 +77,11 @@ void ScalarField::computeMinAndMax()
 {
 	if (m_maxCount!=0)
 	{
-		bool minMaxInitialized=false;
+		bool minMaxInitialized = false;
 		for (unsigned i=0;i<m_maxCount;++i)
 		{
-			const DistanceType& val = getValue(i);
-			if ((m_onlyPositiveValues && (val>=0.0))||(!m_onlyPositiveValues && (val<BIG_VALUE)))
+			const ScalarType& val = getValue(i);
+			if (validValue(val))
 			{
 				if (minMaxInitialized)
 				{
@@ -97,13 +94,30 @@ void ScalarField::computeMinAndMax()
 				{
 					//first valid value is used to init min and max
 					m_minVal = m_maxVal = val;
-					minMaxInitialized=true;
+					minMaxInitialized = true;
 				}
 			}
 		}
 	}
 	else //particular case: no value
 	{
-		m_minVal = m_maxVal = 0.0;
+		m_minVal = m_maxVal = 0;
 	}
+}
+
+bool ScalarField::setPositiveAuto()
+{
+	for (unsigned i=0;i<m_maxCount;++i)
+	{
+		const ScalarType& val = getValue(i);
+
+		if (!PositiveSfValue(val))
+		{
+			setPositive(false);
+			return false;
+		}
+	}
+
+	setPositive(true);
+	return true;
 }

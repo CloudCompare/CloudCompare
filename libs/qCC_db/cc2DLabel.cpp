@@ -273,7 +273,7 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			//scalar field
 			if (cloud->hasDisplayedScalarField())
 			{
-				DistanceType D = cloud->getPointScalarValue(pointIndex);
+				ScalarType D = cloud->getPointScalarValue(pointIndex);
 				QString sfStr = QString("Scalar: %1").arg(D,0,'f',precision);
 				body << sfStr;
 			}

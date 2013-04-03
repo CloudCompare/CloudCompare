@@ -181,7 +181,7 @@ protected:
         \param cell the cell from which we want to compute the distance
         \return 0 if the point is inside the cell, the suare of the distance bewteen the two elements if the point is outside
     **/
-    DistanceType pointToCellSquareDistance(const PointCoordinateType *queryPoint, KdCell *cell);
+    ScalarType pointToCellSquareDistance(const PointCoordinateType *queryPoint, KdCell *cell);
 
 
     //! Computes the distance between a point and the outside bounding box of the cell in which it lies.
@@ -189,7 +189,7 @@ protected:
         \param cell the cell containting the query point
         \return the distance between the point and the cell border. If this value is negative, it means that the cell has no border.
     **/
-    DistanceType InsidePointToCellDistance(const PointCoordinateType *queryPoint, KdCell *cell);
+    ScalarType InsidePointToCellDistance(const PointCoordinateType *queryPoint, KdCell *cell);
 
     //! Computes the distances (min & max) between a point and a cell inside bounding box
     /** \param queryPoint the query point coordinates
@@ -197,7 +197,7 @@ protected:
         \param min [out] the minimal distance between the query point and the inside bounding box of cell
         \param max [out] the maximal distance between the query point and the inside bounding box of cell
     **/
-    void pointToCellDistances(const PointCoordinateType *queryPoint, KdCell *cell, DistanceType &min, DistanceType &max);
+    void pointToCellDistances(const PointCoordinateType *queryPoint, KdCell *cell, ScalarType &min, ScalarType &max);
 
 
     //! Checks if there is a point in KdCell that is less than minDist-appart from the query point, starting from cell cell
@@ -206,7 +206,7 @@ protected:
         \param cell kdtree-cell from which to start the research
         \return -1 if there is no nearer point from querypoint. The nearest point index found in cell if there is one that is at most maxdist appart from querypoint
     **/
-    int checkNearerPointInSubTree(const PointCoordinateType *queryPoint, DistanceType& maxSqrDist, KdCell *cell);
+    int checkNearerPointInSubTree(const PointCoordinateType *queryPoint, ScalarType& maxSqrDist, KdCell *cell);
 
 
     //! Checks if there is a point in KdCell that is less than minDist-appart from the query point, starting from cell cell
@@ -216,7 +216,7 @@ protected:
         \param cell kdtree-cell from which to start the research
         \return true if there is a point in the subtree starting at cell that is close enough from the query point
     **/
-    bool checkDistantPointInSubTree(const PointCoordinateType *queryPoint, DistanceType &maxSqrDist, KdCell *cell);
+    bool checkDistantPointInSubTree(const PointCoordinateType *queryPoint, ScalarType &maxSqrDist, KdCell *cell);
 
 
     //! Recursive function which store every point lying to a given distance from the query point
@@ -227,8 +227,8 @@ protected:
         \param[out] localArray output of the algorithm. Resulting points m_indexes in associatedCloud are stored in this array
     **/
     void distanceScanTree(const PointCoordinateType *queryPoint, 
-							DistanceType distance, 
-							DistanceType tolerance, 
+							ScalarType distance, 
+							ScalarType tolerance, 
 							KdCell *cell, 
 							std::vector<unsigned> &localArray);
 

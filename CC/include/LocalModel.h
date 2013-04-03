@@ -54,10 +54,10 @@ public:
 	PointCoordinateType getSquareSize() const {return squareModelSize;};
 
 	//! Compute the distance between a 3D point and this model
-	/** \param aPoint the query point
+	/** \param P the query point
 		\return the (unsigned) distance (or HIDDEN_VALUE if computation failed)
 	**/
-	DistanceType computeDistanceFromModelToPoint(const CCVector3* aPoint);
+	ScalarType computeDistanceFromModelToPoint(const CCVector3* P);
 
 protected:
 

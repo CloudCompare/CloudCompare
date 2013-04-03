@@ -47,16 +47,17 @@ public:
 	/** Should be re-implemented by any sub-class.
         \return the sensor type
 	**/
-	virtual CC_SENSOR_TYPE getType() {return UNKNOWN_SENSOR;}
+	virtual CC_SENSOR_TYPE getType() const { return UNKNOWN_SENSOR; }
 
 	//! Returns the "visibility type" of a point
-	/** Point's "visibility type" is described in Daniel Girardeau-Montaut's PhD manuscript
-		(Chapter 2, section 2-3-3). In fact it can be anything, knowing that a point that is
-		not VIEWED, won't be compared during a point-to-cloud distance computation.
-		\param aPoint a 3D point
-		\return the visibility type of the point
+	/** Precise definition of point's visibility can be found in Daniel Girardeau-Montaut's
+		PhD manuscript (Chapter 2, section 2-3-3). In fact it can be anything, assuming that
+		a point that is not POINT_VISIBLE won't be compared during a point-to-cloud distance
+		computation process.
+		\param P a 3D point
+		\return the visibility of the point
 	**/
-	virtual CC_VISIBILITY_TYPE checkVisibility(const CCVector3& aPoint)=0;
+	virtual uchar checkVisibility(const CCVector3& P) = 0;
 };
 
 }

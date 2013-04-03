@@ -472,7 +472,7 @@ bool Neighbourhood::compute3DQuadric()
 	return true;
 }
 
-bool Neighbourhood::projectPointsOnPlane(const PointCoordinateType* thePlaneEquation, CC2DPointsConainer &the2DPoints, DistanceType &error, bool distanceNeeded)
+bool Neighbourhood::projectPointsOnPlane(const PointCoordinateType* thePlaneEquation, CC2DPointsConainer &the2DPoints, ScalarType &error, bool distanceNeeded)
 {
 	assert(thePlaneEquation);
 
@@ -543,7 +543,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
         return 0;
 
 	//on projette les points sur le meilleur plan approximant
-	DistanceType error=0.0;
+	ScalarType error=0.0;
 	GenericIndexedMesh* mesh=0;
 	std::vector<CCVector2> the2DPoints;
 
@@ -666,21 +666,14 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 	return quadMesh;
 }
 
-DistanceType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType)
+ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType)
 {
 	//we get 2D1/2 quadric parameters
 	const PointCoordinateType* H = getHeightFunction();
 	if (!H)
-        //return BIG_VALUE;
         return HIDDEN_VALUE;
 
-	/*PointCoordinateType* lsq = (PointCoordinateType*)getGeometricalElement(LSQ_PLANE);
-	if (!lsq)
-        return BIG_VALUE;
-    float sign = (lsq[theHeightFunctionDirections[2]]>0.0 ? 1.0 : -1.0);
-    //*/
-
-	//we get centroid
+	//compute centroid
 	const CCVector3* G = getGravityCenter();
 
     //we compute curvature at the input neighbour position + we recenter it by the way
@@ -718,11 +711,10 @@ DistanceType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATU
             }
     }
 
-	//return BIG_VALUE;
 	return HIDDEN_VALUE;
 }
 
-DistanceType Neighbourhood::computeCurvature2(unsigned neighbourIndex, CC_CURVATURE_TYPE cType)
+ScalarType Neighbourhood::computeCurvature2(unsigned neighbourIndex, CC_CURVATURE_TYPE cType)
 {
 	//we get 3D quadric parameters
 	const double* Q = get3DQuadric();
@@ -846,7 +838,7 @@ DistanceType Neighbourhood::computeCurvature2(unsigned neighbourIndex, CC_CURVAT
     //Gaussian curvature K = det(A)/det(B)
     if (cType==GAUSSIAN_CURV)
     {
-        DistanceType K = (DistanceType)(A.computeDet() / B.computeDet());
+        ScalarType K = (ScalarType)(A.computeDet() / B.computeDet());
         if (K<-1.0)
             K=-1.0;
         else if (K>1.0)
@@ -857,14 +849,14 @@ DistanceType Neighbourhood::computeCurvature2(unsigned neighbourIndex, CC_CURVAT
 
     SquareMatrixd Binv = B.inv();
     if (!Binv.isValid())
-        return BIG_VALUE;
+        return NAN_VALUE;
 
     SquareMatrixd C = B.inv() * A;
 
     //Mean curvature H = 1/2 trace(B^-1 * A)
     if (cType==MEAN_CURV)
     {
-        DistanceType H = (DistanceType)(0.5*C.trace());
+        ScalarType H = (ScalarType)(0.5*C.trace());
         if (H<-1.0)
             H=-1.0;
         else if (H>1.0)
@@ -876,7 +868,7 @@ DistanceType Neighbourhood::computeCurvature2(unsigned neighbourIndex, CC_CURVAT
     //principal curvatures are the eigenvalues k1 and k2 of B^-1 * A
     /*SquareMatrixd eig = C.computeJacobianEigenValuesAndVectors();
 	if (!eig.isValid())
-		return BIG_VALUE;
+		return NAN_VALUE;
 
     const double k1 = eig.getEigenValueAndVector(0);
     const double k2 = eig.getEigenValueAndVector(1);
@@ -901,6 +893,6 @@ DistanceType Neighbourhood::computeCurvature2(unsigned neighbourIndex, CC_CURVAT
     }
     //*/
 
-    return BIG_VALUE;
+    return NAN_VALUE;
 }
 

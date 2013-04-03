@@ -40,10 +40,10 @@ ccScalarField::ccScalarField(const char* name/*=0*/, bool positive /*=false*/)
 	setColorRampSteps(DEFAULT_COLOR_RAMP_SIZE < 256 ? DEFAULT_COLOR_RAMP_SIZE : 256);
 }
 
-DistanceType ccScalarField::normalize(DistanceType d) const
+ScalarType ccScalarField::normalize(ScalarType d) const
 {
-	if (d<m_minDisplayed || d>m_maxDisplayed)
-		return HIDDEN_VALUE;
+	if (d != d || d<m_minDisplayed || d>m_maxDisplayed) //handle NaN values!
+		return -1.0;
 
 	if (m_onlyPositiveValues || !m_absSaturation)
 	{
@@ -51,9 +51,9 @@ DistanceType ccScalarField::normalize(DistanceType d) const
             return 0.0f;
 		if (d>=m_maxSaturation)
             return 1.0f;
-		if(!m_logScale)
+		if (!m_logScale)
 			return (d-m_minSaturation)*m_normalizeCoef;
-		return (log10(std::max(d,(DistanceType)ZERO_TOLERANCE))-m_minSaturationLog)*m_normalizeCoef;
+		return (log10(std::max(d,(ScalarType)ZERO_TOLERANCE))-m_minSaturationLog)*m_normalizeCoef;
 	}
 	else
 	{
@@ -65,7 +65,7 @@ DistanceType ccScalarField::normalize(DistanceType d) const
 				return 0.0f;
 			if (!m_logScale)
 				return 0.5f+(d+m_minSaturation)*m_normalizeCoef*0.5f;
-			return 0.5f+(-log10(std::max(-d,(DistanceType)ZERO_TOLERANCE))+m_minSaturationLog)*m_normalizeCoef*0.5f;
+			return 0.5f+(-log10(std::max(-d,(ScalarType)ZERO_TOLERANCE))+m_minSaturationLog)*m_normalizeCoef*0.5f;
 		}
 		else
 		{
@@ -75,7 +75,7 @@ DistanceType ccScalarField::normalize(DistanceType d) const
 				return 1.0f;
 			if (!m_logScale)
 				return 0.5f+(d-m_minSaturation)*m_normalizeCoef*0.5f;
-			return 0.5f+(log10(std::max(d,(DistanceType)ZERO_TOLERANCE))-m_minSaturationLog)*m_normalizeCoef*0.5f;
+			return 0.5f+(log10(std::max(d,(ScalarType)ZERO_TOLERANCE))-m_minSaturationLog)*m_normalizeCoef*0.5f;
 		}
 	}
 }
@@ -103,7 +103,7 @@ void ccScalarField::computeMinAndMax()
 
 	if (m_absSaturation)
 	{
-		m_minSaturation = (m_onlyPositiveValues ? std::min(fabs(m_minDisplayed),fabs(m_maxDisplayed)) : 0.0f);
+		m_minSaturation = (m_onlyPositiveValues ? std::min(fabs(m_minDisplayed),fabs(m_maxDisplayed)) : 0);
 		m_maxSaturation = std::max(fabs(m_minDisplayed),fabs(m_maxDisplayed));
 	}
 	else
@@ -116,8 +116,8 @@ void ccScalarField::computeMinAndMax()
 
 	if (m_logScale || m_onlyPositiveValues)
 	{
-		m_minSaturationLog = log10(std::max(m_minSaturation,(DistanceType)ZERO_TOLERANCE));
-		m_maxSaturationLog = log10(std::max(m_maxSaturation,(DistanceType)ZERO_TOLERANCE));
+		m_minSaturationLog = log10(std::max(m_minSaturation,(ScalarType)ZERO_TOLERANCE));
+		m_maxSaturationLog = log10(std::max(m_maxSaturation,(ScalarType)ZERO_TOLERANCE));
 	}
 
 	updateNormalizeCoef();
@@ -135,13 +135,13 @@ void ccScalarField::setLogScale(bool state)
 		//we force absolute saturation for not strictly positive SFs
 		if (!m_onlyPositiveValues && !m_absSaturation)
 		{
-			m_minSaturation = (m_onlyPositiveValues ? std::min(fabs(m_minDisplayed),fabs(m_maxDisplayed)) : 0.0f);
+			m_minSaturation = (m_onlyPositiveValues ? std::min(fabs(m_minDisplayed),fabs(m_maxDisplayed)) : 0);
 			m_maxSaturation = std::max(fabs(m_minDisplayed),fabs(m_maxDisplayed));
 			m_absSaturation = true;
 		}
 
-		m_minSaturationLog = log10(std::max(m_minSaturation,(DistanceType)ZERO_TOLERANCE));
-		m_maxSaturationLog = log10(std::max(m_maxSaturation,(DistanceType)ZERO_TOLERANCE));
+		m_minSaturationLog = log10(std::max(m_minSaturation,(ScalarType)ZERO_TOLERANCE));
+		m_maxSaturationLog = log10(std::max(m_maxSaturation,(ScalarType)ZERO_TOLERANCE));
 	}
 
 	updateNormalizeCoef();
@@ -149,46 +149,50 @@ void ccScalarField::setLogScale(bool state)
 
 void ccScalarField::updateNormalizeCoef()
 {
-	if (m_minSaturation>=m_maxSaturation)
-	{
-		m_normalizeCoef = 1.0f;
-		return;
-	}
+	m_normalizeCoef = (ScalarType)1.0;
 
-	if (m_logScale)
-		m_normalizeCoef = 1.0f/(m_maxSaturationLog-m_minSaturationLog);
-	else
-		m_normalizeCoef = 1.0f/(m_maxSaturation-m_minSaturation);
+	if (m_minSaturation < m_maxSaturation)
+	{
+		if (m_logScale)
+		{
+			assert(m_minSaturationLog < m_maxSaturationLog);
+			m_normalizeCoef /= (m_maxSaturationLog-m_minSaturationLog);
+		}
+		else
+		{
+			m_normalizeCoef /= (m_maxSaturation-m_minSaturation);
+		}
+	}
 }
 
-void ccScalarField::setMinDisplayed(DistanceType dist)
+void ccScalarField::setMinDisplayed(ScalarType dist)
 {
 	m_minDisplayed=dist;
 	updateNormalizeCoef();
 }
 
-void ccScalarField::setMaxDisplayed(DistanceType dist)
+void ccScalarField::setMaxDisplayed(ScalarType dist)
 {
 	m_maxDisplayed=dist;
 	updateNormalizeCoef();
 }
 
-void ccScalarField::setMinSaturation(DistanceType dist)
+void ccScalarField::setMinSaturation(ScalarType dist)
 {
 	m_minSaturation=dist;
 
 	if (m_logScale || m_onlyPositiveValues)
-		m_minSaturationLog = log10(std::max(m_minSaturation,(DistanceType)ZERO_TOLERANCE));
+		m_minSaturationLog = log10(std::max(m_minSaturation,(ScalarType)ZERO_TOLERANCE));
 
 	updateNormalizeCoef();
 }
 
-void ccScalarField::setMaxSaturation(DistanceType dist)
+void ccScalarField::setMaxSaturation(ScalarType dist)
 {
 	m_maxSaturation=dist;
 
 	if (m_logScale || m_onlyPositiveValues)
-		m_maxSaturationLog = log10(std::max(m_maxSaturation,(DistanceType)ZERO_TOLERANCE));
+		m_maxSaturationLog = log10(std::max(m_maxSaturation,(ScalarType)ZERO_TOLERANCE));
 
 	updateNormalizeCoef();
 }
@@ -288,26 +292,40 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 	if (!ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion))
 		return false;
 
+	//convert former 'hidden' values for non strictly positive SFs (dataVersion < 26)
+	if (dataVersion < 26 && !m_onlyPositiveValues)
+	{
+		const ScalarType FORMER_BIG_VALUE = (ScalarType)(sqrt(3.4e38f)-1.0f);
+		for (unsigned i=0;i<m_maxCount;++i)
+		{
+			ScalarType val = getValue(i);
+
+			//convert former 'BIG_VALUE' to 'NAN_VALUE'
+			if (val >= FORMER_BIG_VALUE)
+				val = NAN_VALUE;
+		}
+	}
+
 	//displayed values & saturation boundaries (dataVersion>=20)
 	double dValue = 0;
 	if (in.read((char*)&dValue,sizeof(double))<0)
 		return ReadError();
-	m_minDisplayed = (DistanceType)dValue;
+	m_minDisplayed = (ScalarType)dValue;
 	if (in.read((char*)&dValue,sizeof(double))<0)
 		return ReadError();
-	m_maxDisplayed = (DistanceType)dValue;
+	m_maxDisplayed = (ScalarType)dValue;
 	if (in.read((char*)&dValue,sizeof(double))<0)
 		return ReadError();
-	m_minSaturation = (DistanceType)dValue;
+	m_minSaturation = (ScalarType)dValue;
 	if (in.read((char*)&dValue,sizeof(double))<0)
 		return ReadError();
-	m_maxSaturation = (DistanceType)dValue;
+	m_maxSaturation = (ScalarType)dValue;
 	if (in.read((char*)&dValue,sizeof(double))<0)
 		return ReadError();
-	m_minSaturationLog = (DistanceType)dValue;
+	m_minSaturationLog = (ScalarType)dValue;
 	if (in.read((char*)&dValue,sizeof(double))<0)
 		return ReadError();
-	m_maxSaturationLog = (DistanceType)dValue;
+	m_maxSaturationLog = (ScalarType)dValue;
 
 	//'absolute saturation' state (dataVersion>=20)
 	if (in.read((char*)&m_absSaturation,sizeof(bool))<0)
@@ -347,7 +365,7 @@ void ccScalarField::autoUpdateBoundaries(bool state)
 		computeMinAndMax();
 }
 
-void ccScalarField::setBoundaries(DistanceType minValue, DistanceType maxValue)
+void ccScalarField::setBoundaries(ScalarType minValue, ScalarType maxValue)
 {
 	autoUpdateBoundaries(false);
 	setMin(minValue);

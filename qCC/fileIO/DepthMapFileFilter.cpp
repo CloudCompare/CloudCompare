@@ -175,7 +175,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 
     PointCoordinateType* _theNorms = theNorms;
     uchar* _theColors = theColors;
-    DistanceType* _zBuff = db.zBuff;
+    ScalarType* _zBuff = db.zBuff;
 
     for (int j=0;j<db.h_buff;++j)
 	{

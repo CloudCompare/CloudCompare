@@ -25,22 +25,22 @@
 #include <GenericChunkedArray.h>
 
 //! Shareable 'chunked' array that can be properly inserted in the DB tree
-template <int N, class ScalarType> class ccChunkedArray : public GenericChunkedArray<N,ScalarType>, public ccHObject
+template <int N, class ElementType> class ccChunkedArray : public GenericChunkedArray<N,ElementType>, public ccHObject
 {
 public:
 
 	//! Default constructor
 	ccChunkedArray(QString name=QString())
-		: GenericChunkedArray<N,ScalarType>()
+		: GenericChunkedArray<N,ElementType>()
 		, ccHObject(name)
 	{
 		setFlagState(CC_LOCKED,true);
 	}
 
 	//! Duplicates array
-	virtual ccChunkedArray<N,ScalarType>* clone()
+	virtual ccChunkedArray<N,ElementType>* clone()
 	{
-		ccChunkedArray<N,ScalarType>* cloneArray = new ccChunkedArray<N,ScalarType>(getName());
+		ccChunkedArray<N,ElementType>* cloneArray = new ccChunkedArray<N,ElementType>(getName());
 		if (!this->copy(*cloneArray))
 		{
 			ccLog::Error("[ccChunkedArray::clone] Failed to clone array (not enough memory?)");

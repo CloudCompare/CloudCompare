@@ -133,6 +133,12 @@ public:
     virtual ccBBox getBB(bool relative=true, bool withGLfeatures=false, const ccGenericGLDisplay* window=NULL);
     virtual void draw(CC_DRAW_CONTEXT& context);
 
+	//! Returns whether the object is actually displayed (visible) or not
+	virtual bool isDisplayed() const;
+
+	//! Returns whether the object and all its ancestors are enabled
+	virtual bool isBranchEnabled() const;
+
 	/*** RECURSIVE CALL SCRIPTS ***/
 	
 	//0 parameter

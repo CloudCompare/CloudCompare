@@ -51,14 +51,14 @@ protected:
     struct ScaleElement
     {
         //! Starting value
-        DistanceType value;
+        ScalarType value;
         //! Specifies whether the value should be displayed
         bool textDisplayed;
 		//! Specifies whether the cube is condensed or not
 		bool condensed;
 
 		//! Default constructor
-        ScaleElement(DistanceType val, bool dispText = true, bool isCondensed = false)
+        ScaleElement(ScalarType val, bool dispText = true, bool isCondensed = false)
 			: value(val)
 			, textDisplayed(dispText)
 			, condensed(isCondensed)

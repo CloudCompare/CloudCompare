@@ -69,7 +69,7 @@ public:
 		/** Set to -1 to deactivate (default).
 			Not compatible with closest point set determination (see CPSet).
 		**/
-		DistanceType maxSearchDist;
+		ScalarType maxSearchDist;
 
 		//! Whether to use multi-thread or single thread mode
 		/** If maxSearchDist>=0, single thread mode is forced.
@@ -96,7 +96,7 @@ public:
 		/** For local models only (i.e. ignored if localModel = NO_MODEL).
 			Ignored if useSphericalSearchForLocalModel is true.
 		**/
-		DistanceType radiusForLocalModel;
+		ScalarType radiusForLocalModel;
 
 		//! Whether to use an approximation for local model computation
 		/** For local models only (i.e. ignored if localModel = NO_MODEL).
@@ -129,7 +129,7 @@ public:
 		Daniel Girardeau-Montaut's PhD manuscript (Chapter 2, section 2.3). It is the standard way to compare
 		directly two dense (and globally close) point clouds.
 		Warning: the current scalar field  of the compared cloud should be enabled and initialized either to
-		HIDDEN_VALUE (-1) or to an approximated distance (strictly bigger than the true distance!).
+		HIDDEN_VALUE or to an approximated distance (strictly bigger than the actual distance!).
 		\param comparedCloud the compared cloud (the distances will be computed on these points)
 		\param referenceCloud the reference cloud (the distances will be computed relatively to these points)
 		\param params distance computation parameters
@@ -164,7 +164,7 @@ public:
 	static int computePointCloud2MeshDistance(GenericIndexedCloudPersist* pointCloud,
                                                 GenericIndexedMesh* theMesh,
                                                 uchar octreeLevel,
-                                                DistanceType maxSearchDist=-1.0,
+                                                ScalarType maxSearchDist=-1.0,
                                                 bool useDistanceMap=false,
                                                 bool signedDistances=false,
                                                 bool flipNormals=false,
@@ -181,14 +181,14 @@ public:
 		\param signedDist whether to compute the signed or positive (SQUARED) distance
 		\return the distance between the point and the triangle
 	**/
-	static DistanceType computePoint2TriangleDistance(const CCVector3* P, const GenericTriangle* theTriangle, bool signedDist);
+	static ScalarType computePoint2TriangleDistance(const CCVector3* P, const GenericTriangle* theTriangle, bool signedDist);
 
 	//! Computes the distance between a point and a plane
     /** \param P a 3D point
-		\param aPlane a plane (an array of size 4, composed of [a,b,c,d] as in the plane equation ax+by+cz=d)
+		\param plane a plane (an array of size 4, composed of [a,b,c,d] as in the plane equation ax+by+cz=d)
 		\return the distance between the point and the plane (or HIDDEN_VALUE if plane normal (a,b,c) is too small)
 	**/
-	static DistanceType computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* aPlane);
+	static ScalarType computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* plane);
 
 	//! Computes the mean distance of a cloud
 	/** Returns the mean of the positive scalar values associated to each point
@@ -197,7 +197,7 @@ public:
 		\param includeNegValues specifies whether negative values should be included in computation
 		\return the associated scalar field mean value
 	**/
-	static DistanceType computeMeanDist(GenericCloud* theCloud, bool includeNegValues = false);
+	static ScalarType computeMeanDist(GenericCloud* theCloud, bool includeNegValues = false);
 
     //! Computes the mean square distance of a cloud
 	/** Returns the mean of the square of the positive scalar values associated to each point
@@ -206,7 +206,7 @@ public:
 		\param includeNegValues specifies whether negative values should be included in computation
 		\return the associated scalar field mean value
     **/
-	static DistanceType computeMeanSquareDist(GenericCloud* theCloud, bool includeNegValues = false);
+	static ScalarType computeMeanSquareDist(GenericCloud* theCloud, bool includeNegValues = false);
 
 	/*** OTHER METHODS ***/
 
@@ -247,7 +247,7 @@ public:
 		\param thePlaneEquation a plane equation (4 values: ax+by+cz=d)
 		\return the mean distance
 	**/
-	static DistanceType computeCloud2PlaneDistance(GenericCloud* theCloud, const PointCoordinateType* thePlaneEquation);
+	static ScalarType computeCloud2PlaneDistance(GenericCloud* theCloud, const PointCoordinateType* thePlaneEquation);
 
 	//! Computes the Chamfer distances (approximated distances) between two point clouds
 	/** This methods uses a 3D grid to perfrom the Chamfer Distance propagation.
@@ -302,7 +302,7 @@ protected:
                                                                 uchar octreeLevel,
 																bool signedDistances,
 																bool flipTriangleNormals/*=false*/,
-                                                                DistanceType maxSearchDist=-1.0,
+                                                                ScalarType maxSearchDist=-1.0,
                                                                 GenericProgressCallback* progressCb=0);
 
 #ifdef ENABLE_CLOUD2MESH_DIST_MT

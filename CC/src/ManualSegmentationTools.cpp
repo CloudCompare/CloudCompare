@@ -107,7 +107,7 @@ bool ManualSegmentationTools::isPointInsidePoly(const CCVector2& P, const Polyli
 }
 
 
-ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCloud, DistanceType minDist, DistanceType maxDist)
+ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCloud, ScalarType minDist, ScalarType maxDist)
 {
 	if (!aCloud)
 	{
@@ -120,7 +120,7 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 	//for each point
 	for (unsigned i=0; i<aCloud->size(); ++i)
 	{
-		const DistanceType dist = aCloud->getPointScalarValue(i);
+		const ScalarType dist = aCloud->getPointScalarValue(i);
 		//we test if its assocaited scalar value falls inside the specified intervale
 		if (dist >= minDist && dist <= maxDist)
 		{

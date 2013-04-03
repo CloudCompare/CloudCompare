@@ -124,10 +124,10 @@ void sfEditDlg::SetValuesWith(ccScalarField* sf)
 	satValSlider->blockSignals(true);
 
 	//min/max values
-	DistanceType minDist=sf->getMinDisplayed();
-    DistanceType maxDist=sf->getMaxDisplayed();
-    DistanceType minSat=sf->getMinSaturation();
-    DistanceType maxSat=sf->getMaxSaturation();
+	ScalarType minDist=sf->getMinDisplayed();
+    ScalarType maxDist=sf->getMaxDisplayed();
+    ScalarType minSat=sf->getMinSaturation();
+    ScalarType maxSat=sf->getMaxSaturation();
     m_lowBound = sf->getMin();
     m_upBound  = sf->getMax();
 
@@ -151,8 +151,8 @@ void sfEditDlg::SetValuesWith(ccScalarField* sf)
 	double dispUpBound = m_upBound;
 	if (boundariesReleased)
 	{
-		dispUpBound = (double)BIG_VALUE-(double)1;
-		dispLowBound = (isPositive ? 0 : -dispUpBound);
+		dispUpBound = DBL_MAX;
+		dispLowBound = (isPositive ? 0 : -DBL_MAX);
 	}
 
 	/*** spinboxes ***/
@@ -196,7 +196,7 @@ void sfEditDlg::minValSBChanged(double val)
     if (!m_associatedSF)
         return;
 
-    m_associatedSF->setMinDisplayed((DistanceType)val);
+    m_associatedSF->setMinDisplayed((ScalarType)val);
 
 	if (m_associatedSF->areBoundariesAutoUpdated())
 	{
@@ -235,7 +235,7 @@ void sfEditDlg::maxValSBChanged(double val)
     if (!m_associatedSF)
         return;
 
-    m_associatedSF->setMaxDisplayed((DistanceType)val);
+    m_associatedSF->setMaxDisplayed((ScalarType)val);
 
 	if (m_associatedSF->areBoundariesAutoUpdated())
 	{
@@ -277,7 +277,7 @@ void sfEditDlg::minSatSBChanged(double val)
     if (!m_associatedSF)
         return;
 
-	m_associatedSF->setMinSaturation(DistanceType(val));
+	m_associatedSF->setMinSaturation(ScalarType(val));
 
 	maxSatSpinBox->blockSignals(true);
 	maxSatSpinBox->setRange(val,m_associatedSF->absoluteSaturation() ? m_satSpan : m_upBound);
@@ -296,7 +296,7 @@ void sfEditDlg::maxSatSBChanged(double val)
     if (!m_associatedSF)
         return;
 
-	m_associatedSF->setMaxSaturation(DistanceType(val));
+	m_associatedSF->setMaxSaturation(ScalarType(val));
 
 	minSatSpinBox->blockSignals(true);
 	minSatSpinBox->setRange(m_associatedSF->absoluteSaturation() ? 0.0 : m_lowBound,val);
@@ -320,8 +320,8 @@ void sfEditDlg::dispValSLDChanged(int minVal,int maxVal)
 
 	double dMinVal=slider2spin_1(minVal);
 	double dMaxVal=slider2spin_1(maxVal);
-	m_associatedSF->setMinDisplayed(DistanceType(dMinVal));
-	m_associatedSF->setMaxDisplayed(DistanceType(dMaxVal));
+	m_associatedSF->setMinDisplayed(ScalarType(dMinVal));
+	m_associatedSF->setMaxDisplayed(ScalarType(dMaxVal));
 
 	if (m_associatedSF->areBoundariesAutoUpdated())
 	{
@@ -349,8 +349,8 @@ void sfEditDlg::satValSLDChanged(int minVal,int maxVal)
 
 	double dMinVal=slider2spin_2(minVal);
 	double dMaxVal=slider2spin_2(maxVal);
-	m_associatedSF->setMinSaturation(DistanceType(dMinVal));
-	m_associatedSF->setMaxSaturation(DistanceType(dMaxVal));
+	m_associatedSF->setMinSaturation(ScalarType(dMinVal));
+	m_associatedSF->setMaxSaturation(ScalarType(dMaxVal));
 
 	minSatSpinBox->blockSignals(true);
 	maxSatSpinBox->blockSignals(true);

@@ -90,7 +90,7 @@ public:
 		\param out output file (must be already opened)
 		\return success
 	**/
-	template <int N, class ScalarType> static bool GenericArrayToFile(const GenericChunkedArray<N,ScalarType>& chunkArray, QFile& out) 
+	template <int N, class ElementType> static bool GenericArrayToFile(const GenericChunkedArray<N,ElementType>& chunkArray, QFile& out) 
 	{
 		assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
@@ -115,7 +115,7 @@ public:
 			{
 				//DGM: since dataVersion>=22, we make sure to write as much items as declared in 'currentSize'!
 				unsigned toWrite = std::min<unsigned>(count,chunkArray.chunkSize(i));
-				if (out.write((const char*)chunkArray.chunkStartPtr(i),sizeof(ScalarType)*N*toWrite)<0)
+				if (out.write((const char*)chunkArray.chunkStartPtr(i),sizeof(ElementType)*N*toWrite)<0)
 					return ccSerializableObject::WriteError();
 				assert(toWrite<=count);
 				count -= toWrite;
@@ -131,7 +131,7 @@ public:
 		\param dataVersion version current data version
 		\return success
 	**/
-	template <int N, class ScalarType> static bool GenericArrayFromFile(GenericChunkedArray<N,ScalarType>& chunkArray, QFile& in, short dataVersion) 
+	template <int N, class ElementType> static bool GenericArrayFromFile(GenericChunkedArray<N,ElementType>& chunkArray, QFile& in, short dataVersion) 
 	{
 		assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -157,7 +157,7 @@ public:
 		//array data (dataVersion>=20)
 		//--> we read each chunk as a block (faster)
 		for (unsigned i=0;i<chunkArray.chunksCount();++i)
-			if (in.read((char*)chunkArray.chunkStartPtr(i),sizeof(ScalarType)*N*chunkArray.chunkSize(i))<0)
+			if (in.read((char*)chunkArray.chunkStartPtr(i),sizeof(ElementType)*N*chunkArray.chunkSize(i))<0)
 				return ccSerializableObject::ReadError();
 
 		//update array boundaries

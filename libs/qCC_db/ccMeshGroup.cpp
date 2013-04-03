@@ -106,6 +106,11 @@ bool ccMeshGroup::hasTriNormals() const
 	CC_MESH_RECURSIVE_TEST(hasTriNormals);
 }
 
+bool ccMeshGroup::isDisplayed() const
+{
+	CC_MESH_RECURSIVE_TEST(isDisplayed);
+}
+
 void ccMeshGroup::clearTriNormals()
 {
     CC_MESH_RECURSIVE_CALL(clearTriNormals());
@@ -412,6 +417,7 @@ ccGenericMesh* ccMeshGroup::createNewMeshFromSelection(bool removeSelectedVertic
     ccGenericPointCloud* newVertices = NULL;
     if (!vertices)
     {
+		//TODO FIXME: share common materials/normals/texture coordinates!
         newVertices = m_associatedCloud->createNewCloudFromVisibilitySelection(false);
         if (!newVertices)
         {

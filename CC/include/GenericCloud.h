@@ -41,7 +41,7 @@ public:
 		virtual ~GenericCloud() {};
 
 		//! Generic function applied to a point (used by foreach)
-		typedef void genericPointAction(const CCVector3&, DistanceType&);
+		typedef void genericPointAction(const CCVector3&, ScalarType&);
 
 		//! Returns the number of points
 		/**	Virtual method to request the cloud size
@@ -62,23 +62,23 @@ public:
 		**/
 		virtual void getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[]) = 0;
 
-		//! Returns a point VISIBILITY
-		/**	Generic method to request a point VISIBILITY (should be overloaded if this functionality is needed).
+		//! Returns a given point visibility state (relatively to a sensor for instance)
+		/**	Generic method to request a point visibility (should be overloaded if this functionality is required).
 			The point visibility is such as defined in Daniel Girardeau-Montaut's PhD manuscript (see Chapter 2, 
 			section 2-3-3). In this case, a ground based laser sensor model should be used to determine it 
 			(see GenericSensor, and GroundBasedLidarSensor).
-			This method is called before performing any point-to-cloud comparison. If the result is not VIEWED, 
-			then the comparison won't be performed and the scalar field value associated to this point will be 
-			this visibility value.
+			This method is called before performing any point-to-cloud comparison. If the result is not
+			POINT_VISIBLE, then the comparison won't be performed and the scalar field value associated
+			to this point will be this visibility value.
 			\param P the 3D point to test
-			\return visibility (default behavior: VIEWED)
+			\return visibility (default: POINT_VISIBLE)
 		**/
-		virtual CC_VISIBILITY_TYPE testVisibility(const CCVector3& P) const {return VIEWED;};
+		virtual inline uchar testVisibility(const CCVector3& P) const { return POINT_VISIBLE; };
 
 		//! Sets the cloud iterator at the begining
 		/**	Virtual method to handle the cloud global iterator
 		**/
-		virtual void placeIteratorAtBegining()=0;
+		virtual void placeIteratorAtBegining() = 0;
 
 		//! Returns the next point (relatively to the global iterator position)
 		/**	Virtual method to handle the cloud global iterator.
@@ -91,7 +91,7 @@ public:
 			DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT methods).
 			\return pointer on next point (or 0 if no more)
 		**/
-		virtual const CCVector3* getNextPoint()=0;
+		virtual const CCVector3* getNextPoint() = 0;
 
 		//!	Enables the scalar field associated to the cloud
 		/** If the scalar field structure is not yet initialized/allocated,
@@ -99,16 +99,16 @@ public:
 			the structure size should be pre-reserved with the same number of
 			elements as the point cloud.
 		**/
-		virtual bool enableScalarField()=0;
+		virtual bool enableScalarField() = 0;
 
 		//! Returns true if the scalar field is enabled, false otherwise
-		virtual bool isScalarFieldEnabled() const =0;
+		virtual bool isScalarFieldEnabled() const = 0;
 
 		//! Sets the ith point associated scalar value
-		virtual void setPointScalarValue(unsigned pointIndex, DistanceType value)=0;
+		virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) = 0;
 
 		//! Returns the ith point associated scalar value
-		virtual DistanceType getPointScalarValue(unsigned pointIndex) const =0;
+		virtual ScalarType getPointScalarValue(unsigned pointIndex) const = 0;
 };
 
 }

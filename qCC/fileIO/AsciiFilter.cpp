@@ -118,7 +118,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 	double shiftNorm = (shift ? shift[0]*shift[0]+shift[1]*shift[1]+shift[2]*shift[2] : 0.0);
 	//default precision (6 for floats, 10 for doubles)
 	const int s_coordPrecision = 2+(shiftNorm > 0 ? sizeof(double) : sizeof(PointCoordinateType));
-	const int s_sfPrecision = 2+sizeof(DistanceType); 
+	const int s_sfPrecision = 2+sizeof(ScalarType); 
 	const int s_nPrecision = 2+sizeof(PointCoordinateType);
 
 	QString line,color;
@@ -495,7 +495,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
     pdlg.start();
 
     //buffers
-    DistanceType D=0.0;
+    ScalarType D=0.0;
 	double P[3]={0.0,0.0,0.0};
     double Pshift[3]={0.0,0.0,0.0};
     float N[3]={0.0,0.0,0.0};
@@ -688,7 +688,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 		{
 			for (unsigned j=0;j<cloudDesc.scalarIndexes.size();++j)
 			{
-				D=(DistanceType)parts[cloudDesc.scalarIndexes[j]].toDouble();
+				D=(ScalarType)parts[cloudDesc.scalarIndexes[j]].toDouble();
 				cloudDesc.scalarFields[j]->setValue(pointsRead-cloudChunkPos,D);
 			}
 		}

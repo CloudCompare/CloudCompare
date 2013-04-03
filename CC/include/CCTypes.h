@@ -29,7 +29,7 @@ typedef unsigned char uchar;
 //! Type of the coordinates of a (N-D) point
 typedef float PointCoordinateType;
 
-//! Type of a distance value (or more generally of any scalar value)
-typedef float DistanceType;
+//! Type of a single scalar field value
+typedef float ScalarType;
 
 #endif //CC_TYPES_HEADER

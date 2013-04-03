@@ -343,6 +343,22 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 	}
 }
 
+bool ccHObject::isDisplayed() const
+{
+	return isBranchEnabled() && isVisible() && (getDisplay() != 0);
+}
+
+bool ccHObject::isBranchEnabled() const
+{
+	if (!isEnabled())
+		return false;
+	
+	if (m_parent)
+		return m_parent->isBranchEnabled();
+
+	return true;
+}
+
 void ccHObject::draw(CC_DRAW_CONTEXT& context)
 {
 	if (!isEnabled())

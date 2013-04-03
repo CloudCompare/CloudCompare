@@ -32,10 +32,10 @@ public:
 	ccSensor() : CCLib::GenericSensor(), ccHObject("Sensor") {};
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const {return CC_SENSOR;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_SENSOR; };
 
     //inherited from GenericSensor
-    virtual CC_VISIBILITY_TYPE checkVisibility(const CCVector3& aPoint) {return VIEWED;};
+    virtual inline uchar checkVisibility(const CCVector3& P) { return POINT_VISIBLE; };
 };
 
 #endif //CC_SENSOR_HEADER

@@ -374,9 +374,9 @@ void KDTree::updateOutsideBoundingBox(KdCell *cell)
 }
 
 
-DistanceType KDTree::pointToCellSquareDistance(const PointCoordinateType *queryPoint, KdCell *cell)
+ScalarType KDTree::pointToCellSquareDistance(const PointCoordinateType *queryPoint, KdCell *cell)
 {
-    DistanceType dx, dy, dz;
+    ScalarType dx, dy, dz;
 
     //Each d(x)(y)(z) represents the distance to the nearest bounding box plane (if the point is outside)
     if(cell->inbbmin.x<=queryPoint[0] && queryPoint[0]<=cell->inbbmax.x)
@@ -396,9 +396,9 @@ DistanceType KDTree::pointToCellSquareDistance(const PointCoordinateType *queryP
 }
 
 
-void KDTree::pointToCellDistances(const PointCoordinateType *queryPoint, KdCell *cell, DistanceType& min, DistanceType &max)
+void KDTree::pointToCellDistances(const PointCoordinateType *queryPoint, KdCell *cell, ScalarType& min, ScalarType &max)
 {
-    DistanceType dx, dy, dz;
+    ScalarType dx, dy, dz;
 
     min = sqrt(pointToCellSquareDistance(queryPoint, cell));
     dx = std::max(fabs(queryPoint[0]-cell->inbbmin.x), fabs(queryPoint[0]-cell->inbbmax.x));
@@ -408,9 +408,9 @@ void KDTree::pointToCellDistances(const PointCoordinateType *queryPoint, KdCell 
 }
 
 
-DistanceType KDTree::InsidePointToCellDistance(const PointCoordinateType *queryPoint, KdCell *cell)
+ScalarType KDTree::InsidePointToCellDistance(const PointCoordinateType *queryPoint, KdCell *cell)
 {
-    DistanceType dx, dy, dz, max;
+    ScalarType dx, dy, dz, max;
 
     dx = dy = dz = -1;
 
@@ -450,7 +450,7 @@ DistanceType KDTree::InsidePointToCellDistance(const PointCoordinateType *queryP
 }
 
 
-int KDTree::checkNearerPointInSubTree(const PointCoordinateType *queryPoint, DistanceType &maxSqrDist, KdCell *cell)
+int KDTree::checkNearerPointInSubTree(const PointCoordinateType *queryPoint, ScalarType &maxSqrDist, KdCell *cell)
 {
     if(pointToCellSquareDistance(queryPoint, cell)>=maxSqrDist)
         return -1;
@@ -461,7 +461,7 @@ int KDTree::checkNearerPointInSubTree(const PointCoordinateType *queryPoint, Dis
         for(unsigned i=0; i<cell->nbPoints; i++)
         {
             const CCVector3 *p = associatedCloud->getPoint(m_indexes[cell->startingPointIndex+i]);
-            DistanceType dist = CCVector3::vdistance2(p->u, queryPoint);
+            ScalarType dist = CCVector3::vdistance2(p->u, queryPoint);
             if(dist<maxSqrDist)
             {
                 a = m_indexes[cell->startingPointIndex+i];
@@ -480,7 +480,7 @@ int KDTree::checkNearerPointInSubTree(const PointCoordinateType *queryPoint, Dis
 }
 
 
-bool KDTree::checkDistantPointInSubTree(const PointCoordinateType *queryPoint, DistanceType &maxSqrDist, KdCell *cell)
+bool KDTree::checkDistantPointInSubTree(const PointCoordinateType *queryPoint, ScalarType &maxSqrDist, KdCell *cell)
 {
     if(pointToCellSquareDistance(queryPoint, cell)>=maxSqrDist)
         return false;
@@ -490,7 +490,7 @@ bool KDTree::checkDistantPointInSubTree(const PointCoordinateType *queryPoint, D
         for(unsigned i=0; i<cell->nbPoints; i++)
         {
             const CCVector3 *p = associatedCloud->getPoint(m_indexes[cell->startingPointIndex+i]);
-            DistanceType dist = CCVector3::vdistance2(p->u, queryPoint);
+            ScalarType dist = CCVector3::vdistance2(p->u, queryPoint);
             if(dist<maxSqrDist)
                 return true;
         }
@@ -508,12 +508,12 @@ bool KDTree::checkDistantPointInSubTree(const PointCoordinateType *queryPoint, D
 
 void KDTree::distanceScanTree(
     const PointCoordinateType *queryPoint,
-    DistanceType distance,
-    DistanceType tolerance,
+    ScalarType distance,
+    ScalarType tolerance,
     KdCell *cell,
     std::vector<unsigned> &localArray)
 {
-    DistanceType min, max;
+    ScalarType min, max;
 
     pointToCellDistances(queryPoint, cell, min, max);
 
@@ -531,7 +531,7 @@ void KDTree::distanceScanTree(
                 for(unsigned i=0; i<cell->nbPoints; i++)
                 {
                     const CCVector3 *p = associatedCloud->getPoint(m_indexes[i+cell->startingPointIndex]);
-                    DistanceType dist = CCVector3::vdistance(queryPoint, p->u);
+                    ScalarType dist = CCVector3::vdistance(queryPoint, p->u);
                     if((distance-tolerance<=dist) && (dist<=distance+tolerance))
                         localArray.push_back(m_indexes[cell->startingPointIndex+i]);
                 }

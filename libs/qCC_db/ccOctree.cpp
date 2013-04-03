@@ -291,7 +291,7 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell, void**
 
 	if (glParams->showSF)
 	{
-        DistanceType dist = CCLib::DistanceComputationTools::computeMeanDist(cell.points);
+        ScalarType dist = CCLib::DistanceComputationTools::computeMeanDist(cell.points);
 	    const colorType* col = theAssociatedCloud->getDistanceColor(dist);
         glColor3ubv(col ? col : ccColor::lightGrey);
 	}
@@ -334,7 +334,7 @@ bool ccOctree::DrawCellAsAPlainCube(const CCLib::DgmOctree::octreeCell& cell, vo
 
 	if (glParams->showSF)
 	{
-        DistanceType dist = CCLib::DistanceComputationTools::computeMeanDist(cell.points);
+        ScalarType dist = CCLib::DistanceComputationTools::computeMeanDist(cell.points);
 	    const colorType* col = theAssociatedCloud->getDistanceColor(dist);
         glColor3ubv(col ? col : ccColor::lightGrey);
 	}

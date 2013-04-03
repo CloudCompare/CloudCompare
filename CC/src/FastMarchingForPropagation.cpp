@@ -31,10 +31,10 @@ using namespace CCLib;
 
 FastMarchingForPropagation::FastMarchingForPropagation()
 	: FastMarching()
+	, lastT(0.0f)						//dernière valeur d'arrivée
+	, detectionThreshold(Cell::T_INF())	//saut relatif de la valeur d'arrivée qui arrête la propagation (ici, "désactivé")
+	, jumpCoef(0.0f)					//resistance à l'avancement du front, en fonction de Cell->f (ici, pas de resistance)
 {
-	lastT = 0.0; //dernière valeur d'arrivée
-	detectionThreshold = FM_INF; //saut relatif de la valeur d'arrivée qui arrête la propagation (ici, "désactivé")
-	jumpCoef = 0.0; //resistance à l'avancement du front, en fonction de Cell->f (ici, pas de resistance)
 }
 
 bool FastMarchingForPropagation::instantiateGrid(unsigned size)
@@ -51,37 +51,31 @@ bool FastMarchingForPropagation::instantiateGrid(unsigned size)
 	return true;
 }
 
-int FastMarchingForPropagation::init(GenericCloud* aList, DgmOctree* _theOctree, uchar level, bool constantAcceleration)
+int FastMarchingForPropagation::init(GenericCloud* theCloud, DgmOctree* theOctree, uchar level, bool constantAcceleration)
 {
-	//on commence par créer une grille 3D
-	theOctree = _theOctree;
-	gridLevel = level;
-
-	int result = initGrid();
-
+	int result = initGrid(theOctree,level);
 	if (result<0)
 		return result;
 
 	//on remplit la grille
 	DgmOctree::cellCodesContainer cellCodes;
-	theOctree->getCellCodes(gridLevel,cellCodes,true);
-
-	int cellPos[3];
+	theOctree->getCellCodes(level,cellCodes,true);
 
 	while (!cellCodes.empty())
 	{
 		//on transforme le code de cellule en position
-		theOctree->getCellPos(cellCodes.back(),gridLevel,cellPos,true);
+		int cellPos[3];
+		theOctree->getCellPos(cellCodes.back(),level,cellPos,true);
 
 		//on renseigne la grille
 		unsigned gridPos = FM_pos2index(cellPos);
 
 		PropagationCell* aCell = new PropagationCell;
 		aCell->state = Cell::FAR_CELL;
-		aCell->T = FM_INF;
+		aCell->T = Cell::T_INF();
 		aCell->cellCode = cellCodes.back();
 
-		ReferenceCloud* Yk = theOctree->getPointsInCell(cellCodes.back(),gridLevel,true);
+		ReferenceCloud* Yk = theOctree->getPointsInCell(cellCodes.back(),level,true);
 		aCell->f = (constantAcceleration ? 1.0 : DistanceComputationTools::computeMeanDist(Yk),false);
 
 		//Yk->clear(); //inutile
@@ -112,7 +106,7 @@ int FastMarchingForPropagation::step()
 	Cell* minTCell =  theGrid[minTCellIndex];
 	assert(minTCell != 0);
 
-	if (minTCell->T-lastT > detectionThreshold*cellSize)
+	if (minTCell->T-lastT > detectionThreshold*m_cellSize)
 	{
 		//endPropagation();
 		return 0;
@@ -120,7 +114,7 @@ int FastMarchingForPropagation::step()
 
 	assert(minTCell->state != Cell::ACTIVE_CELL);
 
-	if (minTCell->T < FM_INF)
+	if (minTCell->T < Cell::T_INF())
 	{
 		//on rajoute cette cellule au groupe des cellules "ACTIVE"
 		minTCell->state = Cell::ACTIVE_CELL;
@@ -167,35 +161,29 @@ int FastMarchingForPropagation::step()
 
 float FastMarchingForPropagation::computeT(unsigned index)
 {
-	double A, B, C;
+	double Tij = ((PropagationCell*)theGrid[index])->T;
+	double Fij = ((PropagationCell*)theGrid[index])->f; //weight
 
-	A = B = C = 0.0;
-
-	double Tij, Txm, Txp, Tym, Typ, Tzm, Tzp, TijNew;
-
-	Tij = ((PropagationCell*)theGrid[index])->T;
-
-	double Fij = ((PropagationCell*)theGrid[index])->f; //poids
-
-	PropagationCell *nCell;
-
+	PropagationCell *nCell = 0;
 
 	nCell = (PropagationCell*)theGrid[index+neighboursIndexShift[3]];
-	Txm = (nCell ? nCell->T + neighboursDistance[3]*(exp(jumpCoef*(nCell->f-Fij))-1.0): FM_INF);
+	double Txm = (nCell ? nCell->T + neighboursDistance[3]*(exp(jumpCoef*(nCell->f-Fij))-1.0): Cell::T_INF());
 	nCell = (PropagationCell*)theGrid[index+neighboursIndexShift[1]];
-	Txp = (nCell ? nCell->T + neighboursDistance[1]*(exp(jumpCoef*(nCell->f-Fij))-1.0) : FM_INF);
+	double Txp = (nCell ? nCell->T + neighboursDistance[1]*(exp(jumpCoef*(nCell->f-Fij))-1.0) : Cell::T_INF());
 	nCell = (PropagationCell*)theGrid[index+neighboursIndexShift[0]];
-	Tym = (nCell ? nCell->T + neighboursDistance[0]*(exp(jumpCoef*(nCell->f-Fij))-1.0) : FM_INF);
+	double Tym = (nCell ? nCell->T + neighboursDistance[0]*(exp(jumpCoef*(nCell->f-Fij))-1.0) : Cell::T_INF());
 	nCell = (PropagationCell*)theGrid[index+neighboursIndexShift[2]];
-	Typ = (nCell ? nCell->T + neighboursDistance[2]*(exp(jumpCoef*(nCell->f-Fij))-1.0) : FM_INF);
+	double Typ = (nCell ? nCell->T + neighboursDistance[2]*(exp(jumpCoef*(nCell->f-Fij))-1.0) : Cell::T_INF());
 	nCell = (PropagationCell*)theGrid[index+neighboursIndexShift[4]];
-	Tzm = (nCell ? nCell->T + neighboursDistance[4]*(exp(jumpCoef*(nCell->f-Fij))-1.0) : FM_INF);
+	double Tzm = (nCell ? nCell->T + neighboursDistance[4]*(exp(jumpCoef*(nCell->f-Fij))-1.0) : Cell::T_INF());
 	nCell = (PropagationCell*)theGrid[index+neighboursIndexShift[5]];
-	Tzp = (nCell ? nCell->T + neighboursDistance[5]*(exp(jumpCoef*(nCell->f-Fij))-1.0) : FM_INF);
+	double Tzp = (nCell ? nCell->T + neighboursDistance[5]*(exp(jumpCoef*(nCell->f-Fij))-1.0) : Cell::T_INF());
 
-	//si (Gij-Gxm < 0) ça doit aller plus vite, i.e. exp(jumpCoef*ANS)>1.0, donc jumpCoef>0
+	//if (Gij-Gxm < 0) front must propagate faster, i.e. exp(jumpCoef*ANS)>1.0 --> jumpCoef>0
 
-	//Eq. quadratique selon X
+	double A=0.0, B=0.0, C=0.0;
+
+	//Quadratic eq. along X
 	double Tmin = std::min(Txm,Txp);
 	if (Tij>Tmin)
 	{
@@ -204,7 +192,7 @@ float FastMarchingForPropagation::computeT(unsigned index)
 		C += Tmin * Tmin;
 	}
 
-	//Eq. quadratique selon Y
+	//Quadratic eq. along Y
 	Tmin = std::min(Tym,Typ);
 	if (Tij>Tmin)
 	{
@@ -213,7 +201,7 @@ float FastMarchingForPropagation::computeT(unsigned index)
 		C += Tmin * Tmin;
 	}
 
-	//Eq. quadratique selon Z
+	//Quadratic eq. along Z
 	Tmin = std::min(Tzm,Tzp);
 	if (Tij>Tmin)
 	{
@@ -222,48 +210,45 @@ float FastMarchingForPropagation::computeT(unsigned index)
 		C += Tmin * Tmin;
 	}
 
-	C -=  cellSize*cellSize;
+	C -=  m_cellSize*m_cellSize;
 
 	double delta = B*B - 4.0*A*C;
 
 	// cases when the quadratic equation is singular
-	if ((A==0) || (delta < 0.0))
+	if (A==0 || delta < 0.0)
 	{
-		int candidateIndex;
-		float candidateT;
-		Tij=FM_INF;
+		Tij = Cell::T_INF();
 
-		for(int n=0;n<CC_FM_NUMBER_OF_NEIGHBOURS;n++)
+		for(int n=0; n<CC_FM_NUMBER_OF_NEIGHBOURS; n++)
 		{
-			candidateIndex = index + neighboursIndexShift[n];
+			int candidateIndex = index + neighboursIndexShift[n];
 			PropagationCell* cCell = (PropagationCell*)theGrid[candidateIndex];
 			if (cCell)
 			{
 				if( (cCell->state==Cell::TRIAL_CELL) || (cCell->state==Cell::ACTIVE_CELL) )
 				{
-					candidateT = cCell->T + neighboursDistance[n]*exp((cCell->f-(float)Fij)*jumpCoef);
-					//si (Gij-cCell->f > 0) ça doit aller plus vite, donc exp(jumpCoef*ANS)>1.0, donc jumpCoef>0
+					float candidateT = cCell->T + neighboursDistance[n]*exp((cCell->f-(float)Fij)*jumpCoef);
+					//if (Gij-cCell->f > 0) front must propagate faster, i.e. exp(jumpCoef*ANS)>1.0 --> jumpCoef>0
 
-					if(candidateT<Tij) Tij=candidateT;
+					if(candidateT<Tij)
+						Tij=candidateT;
 				}
 			}
 		}
 
-		assert( Tij<FM_INF );
-		if(Tij>=FM_INF)
-			return (float)FM_INF;
+		assert( Tij < Cell::T_INF() );
+		if(Tij >= Cell::T_INF())
+			return Cell::T_INF();
 
 		//assert( Tij<10000 );
 		return (float)Tij;
 	}
 
-	/*
-	* Solve the quadratic equation. Note that the new crossing
-	* must be GREATER than the average of the active neighbors,
-	* since only EARLIER elements are active. Therefore the plus
-	* sign is appropriate.
-	*/
-	TijNew = (-B + sqrt(delta))/(double(2.0*A));
+	//Solve the quadratic equation. Note that the new crossing
+	//must be GREATER than the average of the active neighbors,
+	//since only EARLIER elements are active. Therefore the plus
+	//sign is appropriate.
+	double TijNew = (-B + sqrt(delta))/(2.0*A);
 
 	return (float)TijNew;
 }
@@ -303,14 +288,14 @@ ReferenceCloud* FastMarchingForPropagation::extractPropagatedPoints()
 {
 	if (!initialized)
 		return 0;
+	assert(m_octree);
 
-	ReferenceCloud* Zk = new ReferenceCloud(theOctree->associatedCloud());
+	ReferenceCloud* Zk = new ReferenceCloud(m_octree->associatedCloud());
 
-	unsigned i=0;
-	for (;i<activeCells.size();++i)
+	for (unsigned i=0; i<activeCells.size(); ++i)
 	{
 		PropagationCell* aCell = (PropagationCell*)theGrid[activeCells[i]];
-		ReferenceCloud* Yk = theOctree->getPointsInCell(aCell->cellCode,gridLevel,true);
+		ReferenceCloud* Yk = m_octree->getPointsInCell(aCell->cellCode,m_gridLevel,true);
 
 		if (!Zk->reserve(Yk->size())) //not enough memory
 		{
@@ -323,7 +308,7 @@ ReferenceCloud* FastMarchingForPropagation::extractPropagatedPoints()
 		{
 			Zk->addPointIndex(Yk->getCurrentPointGlobalIndex()); //can't fail (see above)
 			//raz de la norme du gradient du point, pour qu'il ne soit plus pris en compte par la suite !
-			Yk->setCurrentPointScalarValue(SEGMENTED_VALUE);
+			Yk->setCurrentPointScalarValue(HIDDEN_VALUE);
 			Yk->forwardIterator();
 		}
 
@@ -337,11 +322,12 @@ bool FastMarchingForPropagation::setPropagationTimingsAsDistances()
 {
 	if (!initialized)
 		return false;
+	assert(m_octree);
 
 	for (unsigned i=0;i<activeCells.size();++i)
 	{
 		PropagationCell* aCell = (PropagationCell*)theGrid[activeCells[i]];
-		ReferenceCloud* Yk = theOctree->getPointsInCell(aCell->cellCode,gridLevel,true);
+		ReferenceCloud* Yk = m_octree->getPointsInCell(aCell->cellCode,m_gridLevel,true);
 
 		Yk->placeIteratorAtBegining();
 		for (unsigned k=0;k<Yk->size();++k)
@@ -370,16 +356,15 @@ void FastMarchingForPropagation::endPropagation()
 	while (!trialCells.empty())
 	{
 		Cell* aCell = theGrid[trialCells.back()];
-
-		assert(aCell!=0);
+		assert(aCell != 0);
 
 		aCell->state = Cell::FAR_CELL;
-		aCell->T = FM_INF;
+		aCell->T = Cell::T_INF();
 
 		trialCells.pop_back();
 	}
 
-	lastT=0.0;
+	lastT = 0.0f;
 }
 
 

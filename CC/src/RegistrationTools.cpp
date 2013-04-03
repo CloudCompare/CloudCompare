@@ -210,7 +210,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 				N.computeParameters(dataCloud,false);
 				if (N.isValid())
 				{
-					DistanceType mu,sigma2;
+					ScalarType mu,sigma2;
 					N.getParameters(mu,sigma2);
 
 					ReferenceCloud* c = new ReferenceCloud(dataCloud->getAssociatedCloud());
@@ -243,7 +243,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 					}
 
 					//we keep only the points with "not too high" distances
-					DistanceType maxDist = mu+3.0f*sqrt(sigma2);
+					ScalarType maxDist = mu+3.0f*sqrt(sigma2);
 					unsigned realSize=0;
 					for (unsigned i=0;i<n;++i)
 					{
@@ -735,7 +735,7 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
  unsigned FPCSRegistrationTools::ComputeRegistrationScore(
         KDTree *modelTree,
         GenericIndexedCloud *dataCloud,
-        DistanceType delta,
+        ScalarType delta,
         PointProjectionTools::Transformation& dataToModel)
 {
 	CCVector3 Q;

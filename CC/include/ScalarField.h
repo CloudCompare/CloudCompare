@@ -18,6 +18,8 @@
 #ifndef CC_SCALAR_FIELD_HEADER
 #define CC_SCALAR_FIELD_HEADER
 
+//local
+#include "CCConst.h"
 #include "CCTypes.h"
 #include "GenericChunkedArray.h"
 
@@ -29,26 +31,22 @@ namespace CCLib
 	mono-dimensionnal array of scalar values. It has also specific
 	parameters for display purposes.
 
-    There is two kinds of scalar fields :
-    - 'positive' scalar fields ignore all negative values. Those values
-        are considered as non-scalar values (typically corresponding to
-        'hidden' points in a point cloud). They are taken into account
-        while computing min and max values, mean, std. dev., etc.).
-        Some particular negative values are recognized as specific markers
-        (see HIDDEN_VALUE, OUT_VALUE and SEGMENTED_VALUE). This kind of
-        scalar field is used to store positive distances for instance.
-    - standard scalar fields can store any value strictly below BIG_VALUE
-        (which is in this case the unique specific value used to tag non
-        scalar values).
-
+    There are two kinds of scalar fields:
+    - 'positive' scalar fields that ignore all negative values. Those values
+        are considered as invalid values (however HIDDEN_VALUE should be used
+		to represent them by default). They are not taken into account when
+		computing min and max values, etc.
+		This kind of scalar field is typically used to store positive distances.
+    - 'standard' scalar fields can store any value. Invalid values (hidden points)
+		can be represented by NAN_VALUE.
 **/
 
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 
-class CC_DLL_API ScalarField : public GenericChunkedArray<1,DistanceType>
+class CC_DLL_API ScalarField : public GenericChunkedArray<1,ScalarType>
 #else
-class ScalarField : public GenericChunkedArray<1,DistanceType>
+class ScalarField : public GenericChunkedArray<1,ScalarType>
 #endif
 {
 public:
@@ -72,17 +70,40 @@ public:
 	**/
 	inline void setPositive(bool state) { m_onlyPositiveValues = state; }
 
+	//! Auto detects if scalar field is positive or not
+	/** Warning: 'computeMinAndMax' should be called afterwards.
+		\return whether scalar field is only positive or not
+	**/
+	bool setPositiveAuto();
+
 	//! Returns true if negative values are ignored (strictly positive scalar field)
 	inline bool isPositive() const { return m_onlyPositiveValues; }
+
+	//! Returns the specific NaN value for this scalar field
+	inline ScalarType NaN() const { return m_onlyPositiveValues ? HIDDEN_VALUE : NAN_VALUE; };
 
 	//! Computes the mean value (and optionnaly the variance value) of the scalar field
 	/** \param mean a field to store the mean value
 		\param variance if not void, the variance will be computed and stored here
 	**/
-	void computeMeanAndVariance(DistanceType &mean, DistanceType* variance=0) const;
+	void computeMeanAndVariance(ScalarType &mean, ScalarType* variance=0) const;
 
 	//inherited from GenericChunkedArray
 	virtual void computeMinAndMax();
+
+	//! Returns whether a scalar value is valid or not
+	static inline bool ValidValue(ScalarType value, bool positiveSF) { return positiveSF ? value >= 0 : value == value; } //both tests fail with NaN values!
+
+	//! Returns whether a scalar value is valid or not (non static shortcut to ValidValue)
+	inline bool validValue(ScalarType value) const { return ValidValue(value,m_onlyPositiveValues); }
+
+	//! Sets the value as 'invalid' (i.e. HIDDEN_VALUE or NAN_VALUE depending on whether the SF is positive or not)
+	virtual void flagValueAsInvalid(unsigned index) { setValue(index,m_onlyPositiveValues ? HIDDEN_VALUE : NAN_VALUE); }
+
+	//! Helper: returns whether a value is acceptable for a strictly positive scalar field
+	/** Value must be either positive or HIDDEN_VALUE and not NaN.
+	**/
+	static inline bool PositiveSfValue(ScalarType value) { return (value >= 0 || value == HIDDEN_VALUE) && (value != NAN_VALUE); }
 
 protected:
 

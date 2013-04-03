@@ -132,7 +132,7 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 		{
 			//we convert per-vertex accumulators to an 'intensity' scalar field
 			for (unsigned j=0;j<numberOfPoints;++j)
-				vertices->setPointScalarValue(j,(DistanceType)vertexAccum[j]/(DistanceType)numberOfRays);
+				vertices->setPointScalarValue(j,(ScalarType)vertexAccum[j]/(ScalarType)numberOfRays);
 		}
 	}
 	else

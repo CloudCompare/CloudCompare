@@ -99,17 +99,18 @@ enum CC_CLASS_ENUM {
 	CC_CLIPPING_BOX			=	CC_CLIP_BOX_BIT | CC_LEAF_BIT,
 };
 
-// Current ccObject's version
+//! Current database version
 /** Versions:
-* V1.0 = prior to 05/04/2012 = old version
-* V2.0 - 05/04/2012 - upgrade to serialized version with version tracking
-* V2.1 - 07/02/2012 - points & 2D labels upgraded
-* V2.2 - 11/26/2012 - object name is now a QString
-* V2.3 - 02/07/2013 - attribute 'm_selectionBehavior' added to ccHObject class
-* v2.4 - 02/22/2013 - per-cloud point size + whether name is displayed in 3D or not
-* v2.5 - 03/16/2013 - ccViewportParameters structure modified
+	V1.0 = prior to 05/04/2012 = old version
+	V2.0 - 05/04/2012 - upgrade to serialized version with version tracking
+	V2.1 - 07/02/2012 - points & 2D labels upgraded
+	V2.2 - 11/26/2012 - object name is now a QString
+	V2.3 - 02/07/2013 - attribute 'm_selectionBehavior' added to ccHObject class
+	v2.4 - 02/22/2013 - per-cloud point size + whether name is displayed in 3D or not
+	v2.5 - 03/16/2013 - ccViewportParameters structure modified
+	v2.6 - 04/03/2013 - non-strictly positive scalar field 'hidden' values marker is now NaN
 **/
-static unsigned s_currentObjVersion = 25; //2.5
+static unsigned s_currentDBVersion = 26; //2.6
 
 //! Generic "CloudCompare Object" template
 #ifdef QCC_DB_USE_AS_DLL
@@ -174,12 +175,12 @@ public:
     virtual void setLocked(bool state);
 
     //shortcuts
-    inline bool isGroup() const {return (getClassID() & CC_GROUP_BIT)>0;};
-    inline bool isLeaf() const {return (getClassID() & CC_LEAF_BIT)>0;};
-    inline bool isHierarchy() const {return (getClassID() & CC_HIERARCH_BIT)>0;};
+    inline bool isGroup() const { return (getClassID() & CC_GROUP_BIT) != 0; }
+    inline bool isLeaf() const {return (getClassID() & CC_LEAF_BIT) != 0; }
+    inline bool isHierarchy() const { return (getClassID() & CC_HIERARCH_BIT) != 0; }
 
-    inline bool isKindOf(CC_CLASS_ENUM type) const {return (getClassID() & type) == type;};
-    inline bool isA(CC_CLASS_ENUM type) const {return (getClassID() == type);};
+    inline bool isKindOf(CC_CLASS_ENUM type) const { return (getClassID() & type) == type; }
+    inline bool isA(CC_CLASS_ENUM type) const { return (getClassID() == type); }
 
 	//! Resets the object's unique ID counter
 	/** Warning: should be called only once, on program startup.

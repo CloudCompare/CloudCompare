@@ -85,7 +85,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 		if (sfIdx>=0)
 		{
 			classifSF = pc->getScalarField(sfIdx);
-			if (/*classifSF->getMax()>(DistanceType)liblas::Classification::class_table_size ||*/ classifSF->getMin()<0)
+			if (/*classifSF->getMax()>(ScalarType)liblas::Classification::class_table_size ||*/ classifSF->getMin()<0)
 			{
 				ccConsole::Warning("[LASFilter] Found a 'classification' scalar field, but its values outbounds LAS specifications (0-255)...");
 				classifSF = 0;

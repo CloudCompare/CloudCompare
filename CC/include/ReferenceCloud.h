@@ -55,13 +55,13 @@ public:
 	inline virtual unsigned size() const {return m_theIndexes->currentSize();}
 	virtual void forEach(genericPointAction& anAction);
 	virtual void getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[]);
-	inline virtual CC_VISIBILITY_TYPE testVisibility(const CCVector3& P) const {assert(m_theAssociatedCloud); return m_theAssociatedCloud->testVisibility(P);}
+	inline virtual uchar testVisibility(const CCVector3& P) const {assert(m_theAssociatedCloud); return m_theAssociatedCloud->testVisibility(P);}
 	inline virtual void placeIteratorAtBegining() {m_globalIterator=0;}
 	inline virtual const CCVector3* getNextPoint() {assert(m_theAssociatedCloud); return (m_globalIterator < size() ? m_theAssociatedCloud->getPoint(m_theIndexes->getValue(m_globalIterator++)) : 0);}
 	inline virtual bool enableScalarField() {assert(m_theAssociatedCloud); return m_theAssociatedCloud->enableScalarField();}
 	inline virtual bool isScalarFieldEnabled() const {assert(m_theAssociatedCloud); return m_theAssociatedCloud->isScalarFieldEnabled();}
-	inline virtual void setPointScalarValue(unsigned pointIndex, DistanceType value) {assert(m_theAssociatedCloud && pointIndex<size()); m_theAssociatedCloud->setPointScalarValue(m_theIndexes->getValue(pointIndex),value);}
-	inline virtual DistanceType getPointScalarValue(unsigned pointIndex) const {assert(m_theAssociatedCloud && pointIndex<size()); return m_theAssociatedCloud->getPointScalarValue(m_theIndexes->getValue(pointIndex));}
+	inline virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) {assert(m_theAssociatedCloud && pointIndex<size()); m_theAssociatedCloud->setPointScalarValue(m_theIndexes->getValue(pointIndex),value);}
+	inline virtual ScalarType getPointScalarValue(unsigned pointIndex) const {assert(m_theAssociatedCloud && pointIndex<size()); return m_theAssociatedCloud->getPointScalarValue(m_theIndexes->getValue(pointIndex));}
 
 	//**** inherited form GenericIndexedCloud ****//
 	inline virtual const CCVector3* getPoint(unsigned index) {assert(m_theAssociatedCloud && index < size()); return m_theAssociatedCloud->getPoint(m_theIndexes->getValue(index));}
@@ -84,10 +84,10 @@ public:
 	inline virtual unsigned getCurrentPointGlobalIndex() const {assert(m_globalIterator<size()); return m_theIndexes->getValue(m_globalIterator);}
 
     //! Returns the current point associated scalar value
-	inline virtual DistanceType getCurrentPointScalarValue() const {assert(m_theAssociatedCloud && m_globalIterator<size()); return m_theAssociatedCloud->getPointScalarValue(m_theIndexes->getValue(m_globalIterator));}
+	inline virtual ScalarType getCurrentPointScalarValue() const {assert(m_theAssociatedCloud && m_globalIterator<size()); return m_theAssociatedCloud->getPointScalarValue(m_theIndexes->getValue(m_globalIterator));}
 
 	//! Sets the current point associated scalar value
-	inline virtual void setCurrentPointScalarValue(DistanceType value) {assert(m_theAssociatedCloud && m_globalIterator<size()); m_theAssociatedCloud->setPointScalarValue(m_theIndexes->getValue(m_globalIterator),value);}
+	inline virtual void setCurrentPointScalarValue(ScalarType value) {assert(m_theAssociatedCloud && m_globalIterator<size()); m_theAssociatedCloud->setPointScalarValue(m_theIndexes->getValue(m_globalIterator),value);}
 
 	//! Forwards the local element iterator
 	inline virtual void forwardIterator() {++m_globalIterator;};

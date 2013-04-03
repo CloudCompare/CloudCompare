@@ -107,65 +107,66 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(const DgmOctree::octr
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 	//*/
 
-	unsigned i,j,k,n = cell.points->size(); //number of points in the current cell
+	unsigned n = cell.points->size(); //number of points in the current cell
 
 	//we already know some of the neighbours: the points in the current cell!
-	try
 	{
-		nNSS.pointsInNeighbourhood.resize(n);
-	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
-	{
-		return false;
-	}
+		try
+		{
+			nNSS.pointsInNeighbourhood.resize(n);
+		}
+		catch (.../*const std::bad_alloc&*/) //out of memory
+		{
+			return false;
+		}
 
-	DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-	for (i=0;i<n;++i,++it)
-	{
-		it->point = cell.points->getPointPersistentPtr(i);
-		it->pointIndex = cell.points->getPointGlobalIndex(i);
+		DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+		for (unsigned i=0; i<n; ++i,++it)
+		{
+			it->point = cell.points->getPointPersistentPtr(i);
+			it->pointIndex = cell.points->getPointGlobalIndex(i);
+		}
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	unsigned index,indexInNeighbourhood;
-	DistanceType curv;
-
 	//for each point in the cell
-	for (i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
 #ifndef COMPUTE_CURVATURE_2
-		curv = HIDDEN_VALUE;
+		ScalarType curv = HIDDEN_VALUE;
 #else
-        curv = BIG_VALUE;
+        ScalarType curv = NAN_VALUE;
 #endif
 
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		//look for neighbors in a sphere
-		k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
-		//k = std::min(k,16);
+		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
+		//neighborCount = std::min(neighborCount,16);
 
 #ifndef COMPUTE_CURVATURE_2
-		if (k>5)
+		if (neighborCount>5)
 #else
-		if (k>10)
+		if (neighborCount>10)
 #endif
 		{
 		    //current point index
-			index = cell.points->getPointGlobalIndex(i);
+			unsigned index = cell.points->getPointGlobalIndex(i);
 		    //current point index in neighbourhood (to compute curvature at thre right position!)
-            indexInNeighbourhood = 0;
+            unsigned indexInNeighbourhood = 0;
 
-			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,k);
+			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,neighborCount);
 			Neighbourhood Z(&neighboursCloud);
 
 			//look for local index
-			for (j=0;j<k;++j)
+			for (unsigned j=0;j<neighborCount;++j)
+			{
 				if (nNSS.pointsInNeighbourhood[j].pointIndex == index)
 				{
                     indexInNeighbourhood = j;
 					break;
 				}
+			}
 
 #ifndef COMPUTE_CURVATURE_2
 			curv = Z.computeCurvature(indexInNeighbourhood,cType);
@@ -228,7 +229,7 @@ int GeometricalAnalysisTools::computeLocalDensity(GenericIndexedCloudPersist* th
 
 //FONCTION "CELLULAIRE" DE CALCUL DE DENSITE LOCALE
 //PAS DE PARAMETRES ADDITIONNELS
-const DistanceType c_sphereVolumeCoef=(DistanceType)(4.0/3.0*M_PI);
+const ScalarType c_sphereVolumeCoef=(ScalarType)(4.0/3.0*M_PI);
 bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
 {
 	//structures pour la recherche de voisinages SPECIFIQUES
@@ -250,9 +251,9 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(const DgmOctre
 		{
             //DGM: we consider that the point is alone in a sphere of radius R and volume V=(4*pi/3)*R^3
 			//So, the local density is ~1/V!
-            DistanceType R2 = nNSS.pointsInNeighbourhood[1].squareDist; //R2 in fact
-            DistanceType V = R2*sqrt(R2)*c_sphereVolumeCoef; //R^3 * (4*pi/3)
-			cell.points->setPointScalarValue(i,(DistanceType)1.0/std::max(V,(DistanceType)ZERO_TOLERANCE));
+            ScalarType R2 = nNSS.pointsInNeighbourhood[1].squareDist; //R2 in fact
+            ScalarType V = R2*sqrt(R2)*c_sphereVolumeCoef; //R^3 * (4*pi/3)
+			cell.points->setPointScalarValue(i,(ScalarType)1.0/std::max(V,(ScalarType)ZERO_TOLERANCE));
 		}
 		else
 		{
@@ -361,14 +362,14 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 	//for each point in the cell
 	for (i=0;i<n;++i)
 	{
-        DistanceType d = HIDDEN_VALUE;
+        ScalarType d = HIDDEN_VALUE;
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		//look for neighbors in a sphere
-		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
-		if (k>2)
+		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
+		if (neighborCount>2)
 		{
-			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,k);
+			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,neighborCount);
 			Neighbourhood Z(&neighboursCloud);
 
             const PointCoordinateType* lsq = Z.getLSQPlane();
@@ -520,14 +521,11 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 	P->placeIteratorAtBegining();
 	Q->placeIteratorAtBegining();
 
-	bool wpIsPositive = (weightsP ? weightsP->isPositive() : false);
-	bool wqIsPositive = (weightsQ ? weightsQ->isPositive() : false);
-
 	//sums
-	unsigned i,count = P->size();
-	DistanceType wp=(DistanceType)1,wq=(DistanceType)1;
+	unsigned count = P->size();
+	ScalarType wp=(ScalarType)1.0,wq=(ScalarType)1.0;
 	double wSum = 0.0;
-	for (i=0;i<count;i++)
+	for (unsigned i=0;i<count;i++)
 	{
 		CCVector3 Pt = *P->getNextPoint()-Gp;
 		CCVector3 Qt = *Q->getNextPoint()-Gq;
@@ -535,32 +533,16 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 		if (weightsP)
 		{
 			wp = weightsP->getValue(i);
-			if (wpIsPositive)
-			{
-				if (wp<0.0)
-					continue;
-			}
-			else
-			{
-				if (wp == BIG_VALUE)
-					continue;
-			}
+			if (!weightsP->validValue(wp))
+				continue;
 		}
 		if (weightsQ)
 		{
 			wq = weightsQ->getValue(i);
-			if (wqIsPositive)
-			{
-				if (wq<0.0)
-					continue;
-			}
-			else
-			{
-				if (wq == BIG_VALUE)
-					continue;
-			}
+			if (!weightsQ->validValue(wq))
+				continue;
 		}
-		DistanceType wpq = wp*wq;
+		ScalarType wpq = wp*wq;
 		Pt *= wpq;
 		wSum += (double)wpq;
 

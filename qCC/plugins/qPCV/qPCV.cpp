@@ -62,6 +62,13 @@ void qPCV::getActions(QActionGroup& group)
 	group.addAction(m_action);
 }
 
+//persistent settings during a single session
+static bool s_firstLaunch				= true;
+static int s_raysSpinBoxValue			= 256;
+static int s_resSpinBoxValue			= 1024;
+static bool s_mode180CheckBoxState		= true;
+static bool s_closedMeshCheckBoxState	= false;
+
 void qPCV::doAction()
 {
 	assert(m_app);
@@ -103,6 +110,15 @@ void qPCV::doAction()
     ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
 	ccPcvDlg dlg(m_app->getMainWindow());
+
+	//restore previous dialog state
+	if (!s_firstLaunch)
+	{
+		dlg.raysSpinBox->setValue(s_raysSpinBoxValue);
+		dlg.mode180CheckBox->setChecked(s_mode180CheckBoxState);
+		dlg.resSpinBox->setValue(s_resSpinBoxValue);
+		dlg.closedMeshCheckBox->setChecked(s_closedMeshCheckBoxState);
+	}
     
 	//for meshes only
 	if (!mesh)
@@ -136,6 +152,15 @@ void qPCV::doAction()
 	if (!dlg.exec())
         return;
 
+	//save dialog state
+	{
+		s_firstLaunch				= false;
+		s_raysSpinBoxValue			= dlg.raysSpinBox->value();
+		s_mode180CheckBoxState		= dlg.mode180CheckBox->isChecked();
+		s_resSpinBoxValue			= dlg.resSpinBox->value();
+		s_closedMeshCheckBoxState	= dlg.closedMeshCheckBox->isChecked();
+	}
+    
     //we get the PCV field if it already exists
     int sfIdx = pc->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
     if (sfIdx<0)

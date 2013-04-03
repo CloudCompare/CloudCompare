@@ -103,7 +103,7 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 
 bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedCloudPersist* theCloud,
                                                                 bool signedSF,
-                                                                DistanceType minSeedDist,
+                                                                ScalarType minSeedDist,
                                                                 uchar octreeLevel,
                                                                 ReferenceCloudContainer& theSegmentedLists,
                                                                 GenericProgressCallback* progressCb,
@@ -129,7 +129,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 
 	ScalarField* theDists = new ScalarField("distances",true);
 	{
-		DistanceType d = theCloud->getPointScalarValue(0);
+		ScalarType d = theCloud->getPointScalarValue(0);
 		if (!theDists->resize(numberOfPoints,true,d))
 		{
 			if (!_theOctree)
@@ -157,7 +157,6 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
         ScalarFieldTools::applyScalarFieldGaussianFilter(cellSize*0.33f,theCloud,signedSF,-1,progressCb,theOctree);
 	}
 
-	DistanceType maxDist;
 	unsigned seedPoints = 0;
 	unsigned numberOfSegmentedLists = 0;
 
@@ -195,16 +194,17 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 
 	while (true)
 	{
-		maxDist = HIDDEN_VALUE;
+		ScalarType maxDist = HIDDEN_VALUE;
 
 		//on cherche la première distance supérieure ou égale à "minSeedDist"
 		while (begin<numberOfPoints)
 		{
 			const CCVector3 *thePoint = theCloud->getPoint(begin);
-			const DistanceType& theDistance = theDists->getValue(begin);
+			const ScalarType& theDistance = theDists->getValue(begin);
 			++begin;
 
-			if ((theCloud->getPointScalarValue(begin)>=0.0)&&(theDistance >= minSeedDist))
+			//FIXME DGM: what happens if SF is negative?!
+			if (theCloud->getPointScalarValue(begin) >= 0 && theDistance >= minSeedDist)
 			{
 				maxDist = theDistance;
 				startPoint = *thePoint;
@@ -221,7 +221,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 		for (unsigned i=begin;i<numberOfPoints;++i)
 		{
 			const CCVector3 *thePoint = theCloud->getPoint(i);
-			const DistanceType& theDistance = theDists->getValue(i);
+			const ScalarType& theDistance = theDists->getValue(i);
 
 			if ((theCloud->getPointScalarValue(i)>=0.0)&&(theDistance > maxDist))
 			{

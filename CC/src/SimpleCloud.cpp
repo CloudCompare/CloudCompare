@@ -77,7 +77,7 @@ void SimpleCloud::forEach(genericPointAction& anAction)
 	}
 	else //otherwise (we provide a fake zero distance)
 	{
-		DistanceType d=0;
+		ScalarType d=0;
 		for (i=0;i<n;++i)
 			anAction(*(CCVector3*)m_points->getValue(i),d);
 	}
@@ -145,13 +145,13 @@ void SimpleCloud::getPoint(unsigned index, CCVector3& P) const
 	P = *(CCVector3*)m_points->getValue(index);
 }
 
-void SimpleCloud::setPointScalarValue(unsigned pointIndex, DistanceType value)
+void SimpleCloud::setPointScalarValue(unsigned pointIndex, ScalarType value)
 {
 	assert(pointIndex<m_scalarField->currentSize());
 	m_scalarField->setValue(pointIndex,value);
 }
 
-DistanceType SimpleCloud::getPointScalarValue(unsigned pointIndex)  const
+ScalarType SimpleCloud::getPointScalarValue(unsigned pointIndex)  const
 {
 	assert(pointIndex<m_scalarField->currentSize());
 	return m_scalarField->getValue(pointIndex);

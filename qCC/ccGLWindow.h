@@ -34,7 +34,10 @@
 //Qt
 #include <QFont>
 
-//! OpenGL picking buffer size (= max number of entity per 'OpenGL' selection)
+//system
+#include <set>
+
+//! OpenGL picking buffer size (= max hits number per 'OpenGL' selection pass)
 #define CC_PICKING_BUFFER_SIZE 65536
 
 class ccHObject;
@@ -44,11 +47,7 @@ class ccShader;
 class ccGlFilter;
 class ccFrameBufferObject;
 class cc2DLabel;
-class QGLPixelBuffer;
-
-#ifdef CC_USE_DB_ROOT_AS_SCENE_GRAPH
-class ccDBRoot;
-#endif
+class ccPolyline;
 
 //! OpenGL 3D view
 class ccGLWindow : public QGLWidget, public ccGenericGLDisplay
@@ -60,6 +59,7 @@ public:
 	//! Picking mode
 	enum PICKING_MODE { NO_PICKING,
 						ENTITY_PICKING,
+						ENTITY_RECT_PICKING,
 						LABELS_PICKING,
 						POINT_PICKING,
 						TRIANGLE_PICKING,
@@ -333,6 +333,8 @@ signals:
 
 	//! Signal emitted when an entity is selected in the 3D view
     void entitySelectionChanged(int uniqueID);
+	//! Signal emitted when multiple entities are selected in the 3D view
+	void entitiesSelectionChanged(std::set<int> entIDs);
 
     //! Signal emitted in point picking mode to declare picking of a given point
     /** \param cloudUniqueID cloud unique ID
@@ -460,20 +462,15 @@ protected:
     CCVector3 getCurrentViewDir() const;
 
     //! Starts OpenGL picking process
-	/** \param cursorX cursor x position
-		\param cursorY cursor y position
-		\param mode picking mode
+	/** \param mode picking mode
+		\param centerX picking area center X position
+		\param centerY picking area center y position
+		\param width picking area width
+		\param height picking area height
 		\return item ID (if any) or <1 otherwise
 	**/
-    int startPicking(int cursorX, int cursorY, PICKING_MODE mode);
+    int startPicking(PICKING_MODE mode, int centerX, int centerY, int width=5, int height=5);
 	
-	//! Processes hits in selection mode buffer (GL_SELECT)
-	/** \param hits number of hits returned by glRenderMode after 'names' rendering
-		\param[out] entID entity unique ID (or -1 if none found)
-		\param[out] subCompID entity sub-component ID (or -1 if none found)
-	**/
-    void processHits(GLint hits, int& entID, int& subCompID);
-
 	//! Updates currently active labels list (m_activeLabels)
 	/** The labels must be currently displayed in this context
 		AND at least one of them must be under the mouse cursor.
@@ -650,6 +647,9 @@ protected:
 
 	//! Whether pivot symbol should be shown or not
 	bool m_pivotSymbolShown;
+
+	//! Rectangular picking polyline
+	ccPolyline* m_rectPickingPoly;
 
 private:
 

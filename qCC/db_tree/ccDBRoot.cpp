@@ -603,16 +603,6 @@ void ccDBRoot::changeSelection(const QItemSelection & selected, const QItemSelec
     emit selectionChanged();
 }
 
-void ccDBRoot::selectEntity(int uniqueID)
-{
-	ccHObject* obj = 0;
-    //minimum unqiue ID is 1 (0 means 'deselect')
-    if (uniqueID>0)
-        obj = find(uniqueID);
-
-	selectEntity(obj);
-}
-
 void ccDBRoot::unselectEntity(ccHObject* obj)
 {
 	if (obj && obj->isSelected())
@@ -644,18 +634,20 @@ void ccDBRoot::selectEntity(ccHObject* obj)
 			if (ctrlPushed)
 			{
 				//default case: toggle current item selection state
-				QItemSelectionModel::SelectionFlags ctrlSelFlags = QItemSelectionModel::Toggle;
-				//special case: labels can only be merged with labels!
 				if (!obj->isSelected())
 				{
 					QModelIndexList selectedIndexes = selectionModel->selectedIndexes();
 					if (!selectedIndexes.empty())
 					{
+						//special case: labels can only be merged with labels!
 						if (obj->isA(CC_2D_LABEL) != static_cast<ccHObject*>(selectedIndexes[0].internalPointer())->isA(CC_2D_LABEL))
-							ctrlSelFlags = QItemSelectionModel::ClearAndSelect;
+						{
+							ccLog::Warning("[Selection] Labels and other entities can't be mixed! (release the CTRL key to start a new selection)");
+							return;
+						}
 					}
 				}
-				selectionModel->select(selectedIndex,ctrlSelFlags);
+				selectionModel->select(selectedIndex,QItemSelectionModel::Toggle);
 			}
 			else
 			{
@@ -674,6 +666,80 @@ void ccDBRoot::selectEntity(ccHObject* obj)
 	{
 		selectionModel->clear();
 	}
+}
+
+void ccDBRoot::selectEntity(int uniqueID)
+{
+	ccHObject* obj = 0;
+    //minimum unqiue ID is 1 (0 means 'deselect')
+    if (uniqueID>0)
+        obj = find(uniqueID);
+
+	selectEntity(obj);
+}
+
+void ccDBRoot::selectEntities(std::set<int> entIDs)
+{
+	//convert input list of IDs to proper entities
+	ccHObject::Container entities;
+	size_t labelCount = 0;
+	{
+		try
+		{
+			entities.reserve(entIDs.size());
+		}
+		catch(std::bad_alloc)
+		{
+			ccLog::Error("[ccDBRoot::selectEntities] Not enough memory!");
+			return;
+		}
+
+		for (std::set<int>::const_iterator it = entIDs.begin(); it != entIDs.end(); ++it)
+		{
+			ccHObject* obj = find(*it);
+			if (obj)
+			{
+				entities.push_back(obj);
+				if (obj->isA(CC_2D_LABEL))
+					++labelCount;
+			}
+		}
+	}
+
+	//selection model
+	QItemSelectionModel* selectionModel = m_dbTreeWidget->selectionModel();
+	assert(selectionModel);
+
+	bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
+
+	//create new selection structure
+	QItemSelection newSelection;
+	{
+		//shall we keep labels?
+		bool keepLabels = false;
+		{
+			QModelIndexList formerSelectedIndexes = selectionModel->selectedIndexes();
+			if (formerSelectedIndexes.isEmpty() || !ctrlPushed)
+				keepLabels = (labelCount == entities.size()); //yes if they are the only selected entities
+			else if (ctrlPushed)
+				keepLabels = static_cast<ccHObject*>(formerSelectedIndexes[0].internalPointer())->isA(CC_2D_LABEL); //yes if previously selected entities were already labels
+		}
+
+		for (ccHObject::Container::const_iterator it = entities.begin(); it != entities.end(); ++it)
+		{
+			//filter input selection (can't keep both labels and standard entities --> we can't mix them!)
+			bool isLabel = (*it)->isA(CC_2D_LABEL);
+			if (isLabel == keepLabels && (!ctrlPushed || !(*it)->isSelected()))
+			{
+				QModelIndex selectedIndex = index(*it);
+				if (selectedIndex.isValid())
+					newSelection.merge(QItemSelection(selectedIndex,selectedIndex),QItemSelectionModel::Select);
+			}
+		}
+	}
+
+	//default behavior: clear previous selection if CTRL is not pushed
+	selectionModel->select(newSelection,ctrlPushed ? QItemSelectionModel::Select : QItemSelectionModel::ClearAndSelect);
 }
 
 ccHObject* ccDBRoot::find(int uniqueID) const

@@ -4420,7 +4420,8 @@ ccGLWindow* MainWindow::new3DView()
 
     QMdiSubWindow* subWindow = m_mdiArea->addSubWindow(view3D);
 
-    connect(view3D,	SIGNAL(entitySelectionChanged(int)),		m_ccRoot,	SLOT(selectEntity(int)));
+    connect(view3D,	SIGNAL(entitySelectionChanged(int)),				m_ccRoot,	SLOT(selectEntity(int)));
+    connect(view3D,	SIGNAL(entitiesSelectionChanged(std::set<int>)),	m_ccRoot,	SLOT(selectEntities(std::set<int>)));
 
 	//'echo' mode
     connect(view3D,	SIGNAL(mouseWheelRotated(float)),			this,       SLOT(echoMouseWheelRotate(float)));

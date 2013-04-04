@@ -4,8 +4,12 @@ v2.4 ??/??/2013
 - 3D slicer
 
 v2.4 03/17/2013
-- Dynamic color lookup for displaying scalar fields greatly accelerated thanks
-	to a dedicated shader (will be activated by default if GPU supports it)
+- Dynamic color lookup for displaying scalar fields greatly accelerated
+	* a dedicated shader is automatically activated if GPU supports it
+- New selection mechanism:
+	* press ALT + right mouse button to define a rectangular selection area
+		in order to select multiple entities at once
+	* picking speed enhanced
 - 3D mouses (3dConnexion devices) are now supported:
 	* OBJECT mode corresponds to ortho. and object-centered perspective
 	* CAMERA mode corresponds to viewer-centered perspective

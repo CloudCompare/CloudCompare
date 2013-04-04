@@ -583,15 +583,10 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool lodEnabled = (triNum > MAX_LOD_FACES_NUMBER && context.decimateMeshOnMove && MACRO_LODActivated(context));
 		int decimStep = (lodEnabled ? (int)ceil((float)triNum*3 / (float)MAX_LOD_FACES_NUMBER) : 1);
 
-		//GL name push
-		bool pushName = MACRO_DrawEntityNames(context);
-
-		//special case: triangle names pushing (for picking)
-		bool pushTriangleNames = MACRO_DrawTriangleNames(context);
-		pushName |= pushTriangleNames;
-
-		if (pushName)
-			glPushName(getUniqueID());
+		//display parameters
+		glDrawParams glParams;
+		getDrawingParameters(glParams);
+		glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
 
 		//vertices visibility
 		const ccGenericPointCloud::VisibilityTableType* verticesVisibility = m_associatedCloud->getTheVisibilityArray();
@@ -607,19 +602,22 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool applyMaterials = (hasMaterials() && materialsShown());
 		bool showTextures = (hasTextures() && materialsShown() && !lodEnabled);
 
-		//display parameters
-		glDrawParams glParams;
-		getDrawingParameters(glParams);
-		glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
+		//GL name pushing
+		bool pushName = MACRO_DrawEntityNames(context);
+		//special case: triangle names pushing (for picking)
+		bool pushTriangleNames = MACRO_DrawTriangleNames(context);
+		pushName |= pushTriangleNames;
 
-		//materials or color?
-		bool colorMaterial = false;
-		if (glParams.showSF || glParams.showColors)
+		if (pushName)
 		{
+			glPushName(getUniqueID());
+			//minimal display for picking mode!
+			glParams.showNorms = false;
+			glParams.showColors = false;
+			//glParams.showSF --> we keep it only if SF 'NaN' values are hidden
+			showTriNormals = false;
 			applyMaterials = false;
-			colorMaterial = true;
-			glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
-			glEnable(GL_COLOR_MATERIAL);
+			showTextures = false;
 		}
 
 		//in the case we need to display scalar field colors
@@ -633,11 +631,30 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			assert(m_associatedCloud->isA(CC_POINT_CLOUD));
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
+
 			greyForNanScalarValues = cloud->areNanScalarValuesInGrey();
-			currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
-			colorRamp = currentDisplayedScalarField->getColorRamp();
-			colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
-			colorTable = ccColorTablesManager::GetUniqueInstance();
+			if (greyForNanScalarValues && pushName)
+			{
+				//in picking mode, no need to take SF into account if we don't hide any points!
+				glParams.showSF = false;
+			}
+			else
+			{
+				currentDisplayedScalarField = cloud->getCurrentDisplayedScalarField();
+				colorRamp = currentDisplayedScalarField->getColorRamp();
+				colorRampSteps = currentDisplayedScalarField->getColorRampSteps();
+				colorTable = ccColorTablesManager::GetUniqueInstance();
+			}
+		}
+
+		//materials or color?
+		bool colorMaterial = false;
+		if (glParams.showSF || glParams.showColors)
+		{
+			applyMaterials = false;
+			colorMaterial = true;
+			glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
+			glEnable(GL_COLOR_MATERIAL);
 		}
 
 		//in the case we need to display vertex colors
@@ -660,7 +677,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glColor3fv(context.defaultMat.diffuseFront);
 		}
 
-		if (glParams.showNorms/* || showTriNormals*/)
+		if (glParams.showNorms)
 		{
 			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version can fall to 1.0!
 			glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
@@ -697,7 +714,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3,GL_FLOAT,0,s_xyzBuffer);
 
-			if (/*showTriNormals || */glParams.showNorms)
+			if (glParams.showNorms)
 			{
 				glEnableClientState(GL_NORMAL_ARRAY);
 				glNormalPointer(GL_FLOAT,0,s_normBuffer);
@@ -938,7 +955,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			//disable arrays
 			glDisableClientState(GL_VERTEX_ARRAY);
-			if (/*showTriNormals || */glParams.showNorms)
+			if (glParams.showNorms)
 				glDisableClientState(GL_NORMAL_ARRAY);
 			if (glParams.showSF || glParams.showColors)
 				glDisableClientState(GL_COLOR_ARRAY);
@@ -1077,7 +1094,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 
 						//if we don't have any current material, we apply default one
-						(newMatlIndex>=0 ? (*m_materials)[newMatlIndex] : context.defaultMat).applyGL(glParams.showNorms/* || showTriNormals*/,false);
+						(newMatlIndex>=0 ? (*m_materials)[newMatlIndex] : context.defaultMat).applyGL(glParams.showNorms,false);
 						glBegin(triangleDisplayType);
 						lasMtlIndex=newMatlIndex;
 					}
@@ -1156,7 +1173,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (colorMaterial)
 			glDisable(GL_COLOR_MATERIAL);
 
-		if (glParams.showNorms/* || showTriNormals*/)
+		if (glParams.showNorms)
 		{
 			glDisable(GL_LIGHTING);
 			glDisable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));

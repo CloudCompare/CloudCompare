@@ -1436,16 +1436,26 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
     if (MACRO_Draw3D(context))
     {
+		//we get display parameters
+        glDrawParams glParams;
+        getDrawingParameters(glParams);
+        glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
+
         //standard case: list names pushing
         bool pushName = MACRO_DrawEntityNames(context);
 		//special case: point names pushing (for picking)
         bool pushPointNames = MACRO_DrawPointNames(context);
 		pushName |= pushPointNames;
 
-		//we get display parameters
-        glDrawParams glParams;
-        getDrawingParameters(glParams);
-        glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
+		if (pushName)
+		{
+            glPushName(getUniqueID());
+			//minimal display for picking mode!
+			glParams.showNorms = false;
+			glParams.showColors = false;
+			if (m_greyForNanScalarValues)
+				glParams.showSF = false; //--> we keep it only if SF 'NaN' values are hidden
+		}
 
         bool colorMaterial = false;
 		ccColorTablesManager* colorTable = 0;
@@ -1503,10 +1513,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
         }
 
         /*** DISPLAY ***/
-
-        //standard case: list names pushing
-        if (pushName)
-            glPushName(getUniqueID());
 
 		//custom point size?
 		glPushAttrib(GL_POINT_BIT);

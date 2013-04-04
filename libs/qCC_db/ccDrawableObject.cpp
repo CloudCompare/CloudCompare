@@ -263,9 +263,9 @@ void ccDrawableObject::getDrawingParameters(glDrawParams& params) const
 	}
 	else
 	{
-        params.showNorms = hasNormals() &&  normalsShown();
-        //colors are not displayed if scalar field is displayed
+        params.showNorms = hasNormals() && normalsShown();
         params.showSF = hasDisplayedScalarField() && sfShown();
+        //colors are not displayed if scalar field is displayed
         params.showColors = !params.showSF && hasColors() && colorsShown();
 	}
 }

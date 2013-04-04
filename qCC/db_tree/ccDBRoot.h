@@ -31,6 +31,7 @@
 
 //System
 #include <string.h>
+#include <set>
 
 class QStandardItemModel;
 class QAction;
@@ -141,11 +142,19 @@ public:
 public slots:
     void changeSelection(const QItemSelection & selected, const QItemSelection & deselected);
     void reflectObjectPropChange(ccHObject* obj);
-    void selectEntity(int uniqueID); //shortcut
     void redrawCCObject(ccHObject* anObject);
     void redrawCCObjectAndChildren(ccHObject* anObject);
     void updateCCObject(ccHObject* anObject);
     void deleteSelectedEntities();
+
+	//! Shortcut to selectEntity(ccHObject*)
+	void selectEntity(int uniqueID);
+
+	//! Selects multiple entities at once
+	/** If ctrl is pressed by the user at the same time,
+		previous selection will be simply updated accordingly.
+	**/
+    void selectEntities(std::set<int> entIDs);
 
 protected slots:
 	void showContextMenu(const QPoint&);

@@ -403,8 +403,8 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
 		(*it)->draw(context);
 
-	//if the entity is currently selected
-	if (m_selected && draw3D && drawInThisContext)
+	//if the entity is currently selected, we draw its bounding-box
+	if (m_selected && draw3D && drawInThisContext && !MACRO_DrawNames(context))
 	{
 		switch (m_selectionBehavior)
 		{

@@ -938,9 +938,9 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
     item->setFlags(Qt::ItemIsEnabled);
     m_model->setItem(curRow,1,item);
 
-    //SF color scale
+    //Sensor drawing scale
     m_model->setRowCount(++curRow+1);
-    item = new QStandardItem("Display color scale");
+    item = new QStandardItem("Drawing scale");
     item->setFlags(Qt::ItemIsEnabled);
     m_model->setItem(curRow,0,item);
 

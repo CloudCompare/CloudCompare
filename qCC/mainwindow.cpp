@@ -1590,22 +1590,11 @@ void MainWindow::doActionComputeDistancesFromSensor()
     //sensor center
     CCVector3 center = sensor->getCenter();
 
-    if (squared)
-    {
-        for (unsigned i = 0; i < cloud->size(); ++i)
-        {
-            const CCVector3* P = cloud->getPoint(i);
-			distances->setValue(i,(*P-center).norm2());
-        }
-    }
-    else
-    {
-        for (unsigned i = 0; i < cloud->size(); ++i)
-        {
-            const CCVector3* P = cloud->getPoint(i);
-			distances->setValue(i,(*P-center).norm());
-        }
-    }
+	for (unsigned i = 0; i < cloud->size(); ++i)
+	{
+		const CCVector3* P = cloud->getPoint(i);
+		distances->addElement(squared ? (*P-center).norm2() :  (*P-center).norm());
+	}
 
 	distances->computeMinAndMax();
 	cloud->setCurrentDisplayedScalarField(sfIdx);
@@ -1661,40 +1650,40 @@ void MainWindow::doActionComputeScatteringAngles()
 	}
 	CCLib::ScalarField* angles = cloud->getScalarField(sfIdx);
 
-    //Sensor center
-    CCVector3 sensorCenter = sensor->getCenter();
+	//Sensor center
+	CCVector3 sensorCenter = sensor->getCenter();
 
 	//perform computations
-    for (unsigned i = 0; i < cloud->size(); ++i)
-    {
-        //the point position
-        const CCVector3* P = cloud->getPoint(i);
+	for (unsigned i = 0; i < cloud->size(); ++i)
+	{
+		//the point position
+		const CCVector3* P = cloud->getPoint(i);
 
-        //build the ray
-        CCVector3 ray = *P - sensorCenter;
+		//build the ray
+		CCVector3 ray = *P - sensorCenter;
 		ray.normalize();
 
-        //get the current normal
-        CCVector3 normal(cloud->getPointNormal(i));
+		//get the current normal
+		CCVector3 normal(cloud->getPointNormal(i));
 		//normal.normalize(); //should already be the case!
 
-        //compute the angle
-        float cosTheta = ray.dot(normal);
-// 	float theta = acos(abs(cosTheta)); //USING abs in this way make cosTheta to be casted to int!
-					   //one may include cmath and use std::abs for performing abs on floats
-					   //here we use a simpler solution -> check sign
-	
-	if (cosTheta < 0)
-	  cosTheta = -cosTheta;
-	
-	float theta = acos(cosTheta);
-	
+		//compute the angle
+		float cosTheta = ray.dot(normal);
+		// 	float theta = acos(abs(cosTheta)); //USING abs in this way make cosTheta to be casted to int!
+		//one may include cmath and use std::abs for performing abs on floats
+		//here we use a simpler solution -> check sign
+
+		if (cosTheta < 0)
+			cosTheta = -cosTheta;
+
+		float theta = acos(cosTheta);
+
 		if (toDegreeFlag)
 			theta *= (float)(CC_RAD_TO_DEG);
-		angles->setValue(i,theta);
-    }
+		angles->addElement(theta);
+	}
 
-    angles->computeMinAndMax();
+	angles->computeMinAndMax();
 	cloud->setCurrentDisplayedScalarField(sfIdx);
 	cloud->showSF(true);
 
@@ -4127,7 +4116,7 @@ void MainWindow::doActionComputeNormals()
 			if (defaultRadius == 0.0 && m_selectedEntities[i]->isA(CC_POINT_CLOUD))
 			{
 				ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
-				defaultRadius = cloud->getBB().getDiagNorm()*0.005; //diameter=1% of the bounding box diagonal
+				defaultRadius = cloud->getBB().getDiagNorm()*0.02; //diameter=2% of the bounding box diagonal
 			}
 			onlyMeshes = false;
 			break;

@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2257                                                              $
-//$LastChangedDate:: 2012-10-11 23:48:15 +0200 (jeu., 11 oct. 2012)        $
-//**************************************************************************
-//
+
 #include "PovFilter.h"
 
 //CCLib
@@ -37,6 +31,13 @@
 #include <assert.h>
 
 #include "../ccConsole.h"
+
+//Ground based LiDAR sensor mirror and body rotation order
+//Refer to ccGBLSensor::ROTATION_ORDER
+const char CC_SENSOR_ROTATION_ORDER_NAMES[][12] = {
+	"THETA_PHI",		//Rotation: body then mirror
+	"PHI_THETA"			//Rotation: mirror then body
+};
 
 CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
 {
@@ -90,7 +91,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
         fclose(mainFile);
         return CC_FERR_WRITING;
     };
-    if (fprintf(mainFile,"SENSOR_TYPE = %s\n",CCLib::CC_SENSOR_ROTATION_ORDER_NAMES[firstGls->getRotationOrder()])<0)
+    if (fprintf(mainFile,"SENSOR_TYPE = %s\n",CC_SENSOR_ROTATION_ORDER_NAMES[firstGls->getRotationOrder()])<0)
     {
         fclose(mainFile);
         return CC_FERR_WRITING;
@@ -132,12 +133,12 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
             CCVector3 C = gls->getSensorCenter();
             result = fprintf(mainFile,"C %f %f %f\n",C[0],C[1],C[2]);
 
-            CCLib::SquareMatrix* m = gls->getAxisMatrix();
-            if (m && result>0)
-            {
-                result = fprintf(mainFile,"X %f %f %f\n",m->m_values[0][0],m->m_values[1][0],m->m_values[2][0]);
-                result = fprintf(mainFile,"Y %f %f %f\n",m->m_values[0][1],m->m_values[1][1],m->m_values[2][1]);
-                result = fprintf(mainFile,"Z %f %f %f\n",m->m_values[0][2],m->m_values[1][2],m->m_values[2][2]);
+            if (result>0)
+			{
+				const float* mat = gls->getOrientationMatrix().data();
+                result = fprintf(mainFile,"X %f %f %f\n",mat[0],mat[4],mat[8]);
+                result = fprintf(mainFile,"Y %f %f %f\n",mat[1],mat[5],mat[9]);
+                result = fprintf(mainFile,"Z %f %f %f\n",mat[2],mat[6],mat[10]);
             }
 
             if (result>0)
@@ -201,18 +202,18 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
         return CC_FERR_READING;
     }
 
-    CCLib::CC_SENSOR_ROTATION_ORDER rotationOrder;
-    if (strcmp(sensorType,"PHI_THETA")==0)
-        rotationOrder = CCLib::GBL_PHI_THETA;
-    else if (strcmp(sensorType,"THETA_PHI")==0)
-        rotationOrder = CCLib::GBL_THETA_PHI;
+	ccGBLSensor::ROTATION_ORDER rotationOrder;
+    if (strcmp(sensorType,CC_SENSOR_ROTATION_ORDER_NAMES[ccGBLSensor::PHI_THETA])==0)
+        rotationOrder = ccGBLSensor::PHI_THETA;
+    else if (strcmp(sensorType,CC_SENSOR_ROTATION_ORDER_NAMES[ccGBLSensor::THETA_PHI])==0)
+        rotationOrder = ccGBLSensor::THETA_PHI;
     else
     {
         fclose(fp);
         return CC_FERR_READING;
     }
 
-    float base=0.0;
+    float base=0.0f;
     if (fscanf(fp,"SENSOR_BASE = %f\n",&base)<0)
     {
         fclose(fp);
@@ -276,7 +277,8 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                 //ne pas oublier la base du scanner (SOISIC)
                 gls->setSensorBase(base);
 
-                CCLib::SquareMatrix* m = 0;
+                ccGLMatrix rot;
+				rot.toIdentity();
 
                 while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
                 {
@@ -288,19 +290,16 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                         sscanf(line,"C %f %f %f\n",C,C+1,C+2);
                         gls->setSensorCenter(C);
                     }
-                    else if ((line[0]=='X')||(line[0]=='Y')||(line[0]=='Z'))
+                    else if (line[0]=='X' || line[0]=='Y' || line[0]=='Z')
                     {
-                        float X[3];
-                        sscanf(line+2,"%f %f %f\n",X,X+1,X+2);
-                        if (!m)
-                        {
-                            m = new CCLib::SquareMatrix(3);
-                            m->toIdentity();
-                        }
-                        uchar col = uchar(line[0])-88;
-                        m->setValue(0,col,X[0]);
-                        m->setValue(1,col,X[1]);
-                        m->setValue(2,col,X[2]);
+						float V[3];
+                        sscanf(line+2,"%f %f %f\n",V,V+1,V+2);
+
+						uchar col = uchar(line[0])-88;
+						float* mat = rot.data();
+						mat[col+0] = V[0];
+						mat[col+4] = V[1];
+						mat[col+8] = V[2];
                     }
                     else if (line[0]=='A')
                     {
@@ -311,7 +310,7 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                     }
                 }
 
-                if (m) gls->setAxisMatrix(m);
+				gls->setOrientationMatrix(rot);
 
                 int errorCode;
                 ccHObject::Container clouds;

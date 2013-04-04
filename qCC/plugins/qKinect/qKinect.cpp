@@ -23,6 +23,7 @@
 #include <ccPointCloud.h>
 #include <ccGLMatrix.h>
 #include <ccNormalVectors.h>
+#include <ccGBLSensor.h>
 
 //dialog
 #include "ccKinectDlg.h"
@@ -546,6 +547,49 @@ void qKinect::grabCloud()
 			depthMap->resize(depthMap->size());
 			QString cloudName = m_kDlg->getCloudName() + QString::number(++s_grabIndex);
 			depthMap->setName(qPrintable(cloudName));
+			//associate sensor
+			ccGBLSensor* sensor = new ccGBLSensor(ccGBLSensor::THETA_PHI);
+			ccGLMatrix rot;
+			{
+				float* mat = rot.data();
+				mat[0] = 1.0f;
+				mat[1] = 0.0f;
+				mat[2] = 0.0f;
+
+				mat[4] = 0.0f;
+				mat[5] = 0.0f;
+				mat[6] = 1.0f;
+
+				mat[8] = 0.0f;
+				mat[9] = -1.0f;
+				mat[10] = 0.0f;
+
+				mat[15] = 1.0f;
+			}
+			sensor->setOrientationMatrix(rot);
+			sensor->setDeltaPhi(0.0017f);
+			sensor->setDeltaTheta(0.0017f);
+			sensor->setUncertainty(1e-3f);
+			{
+				int errorCode=0;
+				CCLib::SimpleCloud* cloud = sensor->project(depthMap,errorCode,true);
+				if (cloud)
+					delete cloud;
+				cloud=0;
+				if (errorCode == 0)
+				{
+					sensor->setName("Kinect");
+					sensor->setGraphicScale(20.0f);
+					sensor->updateGraphicRepresentation();
+					sensor->setVisible(true);
+					depthMap->addChild(sensor);
+				}
+				else
+				{
+					delete sensor;
+					sensor=0;
+				}
+			}
 			//selectedEntities.push_back(depthMap);
 			m_app->addToDB(depthMap);
 			m_app->refreshAll();
@@ -581,8 +625,8 @@ void qKinect::dialogClosed(int result)
 	assert(f_ctx && f_dev);
 	assert(m_kDlg);
 
-	if (result != 0)
-		grabCloud();
+	//if (result != 0)
+	//	grabCloud();
 
 	if (m_timer)
 		m_timer->stop();

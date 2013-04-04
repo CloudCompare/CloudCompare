@@ -1590,13 +1590,15 @@ void ccGLWindow::enableEmbeddedIcons(bool state)
 void projectPointOnSphere(int x, int y, int width, int height, CCVector3& v)
 {
 	//clipping
-	x = std::max(0,x);
-	x = std::min(width,x);
-	y = std::max(0,y);
-	y = std::min(height,y);
-	//normalized position (relative to the screen center)
-	v.x = (PointCoordinateType)x/(PointCoordinateType)width - 0.5f;
-	v.y = 1.0f - (PointCoordinateType)y/(PointCoordinateType)height;
+	//x = std::max(0,x);
+	//x = std::min(width,x);
+	//y = std::max(0,y);
+	//y = std::min(height,y);
+	////normalized position (relative to the screen center)
+	//v.x = 2.0f * ((PointCoordinateType)x/(PointCoordinateType)width - 0.5f);
+	//v.y = 2.0f * (1.0f - (PointCoordinateType)y/(PointCoordinateType)height);
+	v.x = float(2.0 * std::max(std::min(x,width-1),-width+1) - width) / (float)width;
+	v.y = float(height - 2.0 * std::max(std::min(y,height-1),-height+1)) / (float)height;
 	v.z = 0;
 
 	//square 'radius'

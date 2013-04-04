@@ -18,24 +18,42 @@
 #ifndef CC_SENSOR_HEADER
 #define CC_SENSOR_HEADER
 
-//CCLib
-#include <GenericSensor.h>
-
 #include "ccHObject.h"
 
-//! a GenericSensor class "encapsulated" in a ccHObject class
-class ccSensor : public CCLib::GenericSensor, public ccHObject
+//! Sensor types
+enum CC_SENSOR_TYPE {UNKNOWN_SENSOR,
+						GROUND_BASED_LIDAR,
+						AIRBORNE_LIDAR,
+						PHOTOGRAMMETRY_SENSOR,
+						AIRBORNE_RADAR};
+
+//! A generic sensor interface
+class ccSensor : public ccHObject
 {
 public:
 
 	//! Default constructor
-	ccSensor() : CCLib::GenericSensor(), ccHObject("Sensor") {};
+	ccSensor() : ccHObject("Sensor") {};
 
     //! Returns class ID
     virtual CC_CLASS_ENUM getClassID() const { return CC_SENSOR; };
 
-    //inherited from GenericSensor
-    virtual inline uchar checkVisibility(const CCVector3& P) { return POINT_VISIBLE; };
+	//! Returns the sensor type
+	/** Should be re-implemented by any sub-class.
+        \return the sensor type
+	**/
+	virtual CC_SENSOR_TYPE getType() const { return UNKNOWN_SENSOR; }
+
+	//! Returns the "visibility type" of a point
+	/** Precise definition of point's visibility can be found in Daniel Girardeau-Montaut's
+		PhD manuscript (Chapter 2, section 2-3-3). In fact it can be anything, assuming that
+		a point that is not POINT_VISIBLE won't be compared during a point-to-cloud distance
+		computation process.
+		\param P a 3D point
+		\return the visibility of the point
+	**/
+	virtual uchar checkVisibility(const CCVector3& P) const = 0;
+
 };
 
 #endif //CC_SENSOR_HEADER

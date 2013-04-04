@@ -523,20 +523,12 @@ void ccHistogramWindow::computeHistoValues()
 	if (!histoValues || !theValues)
 		return;
 
-	//Console::print("Recalcul des valeurs de l'histogramme (%i classes) !\n",numberOfClasses);
-
-	double val=0.0;
 	double coef = (maxVal==minVal ? 1.0 : double(numberOfClasses)/(maxVal-minVal));
 
-	//Console::print("min/maxVal=[%f,%f] --> coef=%f\n",minVal,maxVal,coef);
-
 	//on accumule les points dans l'histogramme
-	theValues->placeIteratorAtBegining();
-	unsigned i;
-	for (i=0;i<theValues->currentSize();++i)
+	for (unsigned i=0;i<theValues->currentSize();++i)
 	{
-		val = double(theValues->getCurrentValue());
-		theValues->forwardIterator();
+		double val = (double)theValues->getValue(i);
 
 		//on filtre
 		if (val>=minVal && val<maxVal)

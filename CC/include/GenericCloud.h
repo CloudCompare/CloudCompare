@@ -65,8 +65,7 @@ public:
 		//! Returns a given point visibility state (relatively to a sensor for instance)
 		/**	Generic method to request a point visibility (should be overloaded if this functionality is required).
 			The point visibility is such as defined in Daniel Girardeau-Montaut's PhD manuscript (see Chapter 2, 
-			section 2-3-3). In this case, a ground based laser sensor model should be used to determine it 
-			(see GenericSensor, and GroundBasedLidarSensor).
+			section 2-3-3). In this case, a ground based laser sensor model should be used to determine it.
 			This method is called before performing any point-to-cloud comparison. If the result is not
 			POINT_VISIBLE, then the comparison won't be performed and the scalar field value associated
 			to this point will be this visibility value.

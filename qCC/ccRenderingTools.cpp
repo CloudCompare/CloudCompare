@@ -50,67 +50,55 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 	if (!sensor)
 		return;
 
-	CCLib::GroundBasedLidarSensor::DepthBuffer dB = sensor->getDepthBuffer();
-	if (!dB.zBuff)
+	const ccGBLSensor::DepthBuffer& depthBuffer = sensor->getDepthBuffer();
+	if (!depthBuffer.zBuff)
 		return;
 
-	const colorType* colorTable = ccColorTablesManager::GetUniqueInstance()->getColorTable(BGYR);
-
-	ScalarType *_zBuff = dB.zBuff;
-	ScalarType maxDist = 0.0;
-	ScalarType minDist = 0.0;
-	int x,y;
-	for (x=0;x<dB.h_buff*dB.l_buff;++x)
+	//determine min and max depths
+	ScalarType minDist = 0, maxDist = 0;
 	{
-		if (x==0)
+		const ScalarType *_zBuff = depthBuffer.zBuff;
+		for (int x=0; x<depthBuffer.height*depthBuffer.width; ++x,++_zBuff)
 		{
-			maxDist = minDist = *_zBuff;
+			if (x==0)
+			{
+				maxDist = minDist = *_zBuff;
+			}
+			else if (*_zBuff > 0)
+			{
+				maxDist = std::max(maxDist,*_zBuff);
+				minDist = std::min(minDist,*_zBuff);
+			}
 		}
-		else if (*_zBuff > 0.0)
-		{
-			maxDist = std::max(maxDist,*_zBuff);
-			minDist = std::min(minDist,*_zBuff);
-		}
-		++_zBuff;
 	}
 
-	ScalarType coef = 0.0;
-	if (maxDist-minDist < ZERO_TOLERANCE)
+	QImage bufferImage(depthBuffer.width,depthBuffer.height,QImage::Format_RGB32);
 	{
-		ccConsole::Warning("[ShowDepthBuffer] Flat buffer! (max depth=0)");
-		//return;
-	}
-	else
-	{
-		coef = ScalarType(DEFAULT_COLOR_RAMP_SIZE-1)/(maxDist-minDist);
-	}
+		const colorType* colorTable = ccColorTablesManager::GetUniqueInstance()->getColorTable(BGYR);
+		ScalarType coef = maxDist-minDist < ZERO_TOLERANCE ? 0.0 : (ScalarType)(DEFAULT_COLOR_RAMP_SIZE-1)/(maxDist-minDist);
 
-	QImage bufferImage(dB.l_buff,dB.h_buff,QImage::Format_RGB32);
-
-	_zBuff = dB.zBuff;
-	for (y=0;y<dB.h_buff;++y)
-		for (x=0;x<dB.l_buff;++x)
+		const ScalarType* _zBuff = depthBuffer.zBuff;
+		for (int y=0;y<depthBuffer.height;++y)
 		{
-			const colorType* col = (*_zBuff >= minDist ? colorTable + ((int)((*_zBuff - minDist) * coef))*4 : ccColor::black);
-			bufferImage.setPixel(x,dB.h_buff-1-y,qRgb(col[0],col[1],col[2]));
-			++_zBuff;
+			for (int x=0;x<depthBuffer.width;++x,++_zBuff)
+			{
+				const colorType* col = (*_zBuff >= minDist ? colorTable + ((int)((*_zBuff - minDist) * coef))*4 : ccColor::black);
+				bufferImage.setPixel(x,depthBuffer.height-1-y,qRgb(col[0],col[1],col[2]));
+			}
 		}
+	}
 
-		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(sensor->getParent());
+	QDialog* dlg = new QDialog(parent);
+	dlg->setWindowTitle(QString("%0 depth buffer [%1 x %2]").arg(sensor->getParent()->getName()).arg(depthBuffer.width).arg(depthBuffer.height));
+	dlg->setFixedSize(bufferImage.size());
+	QVBoxLayout* vboxLayout = new QVBoxLayout(dlg);
+	vboxLayout->setContentsMargins(0,0,0,0);
+	QLabel* label = new QLabel(dlg);
+	label->setScaledContents(true);
+	vboxLayout->addWidget(label);
 
-		QDialog* dlg = new QDialog(parent);
-		dlg->setWindowTitle(QString("%0 depth buffer [%1 x %2]").arg(cloud->getName()).arg(dB.l_buff).arg(dB.h_buff));
-		dlg->setMinimumSize(dB.l_buff,dB.h_buff);
-		dlg->setMaximumSize(dB.l_buff,dB.h_buff);
-		QVBoxLayout* vboxLayout = new QVBoxLayout(dlg);
-		vboxLayout->setContentsMargins(0,0,0,0);
-		QLabel* label = new QLabel(dlg);
-		label->setScaledContents(true);
-		vboxLayout->addWidget(label);
-
-		label->setPixmap(QPixmap::fromImage(bufferImage));
-		//dlg->resize(dB.l_buff,dB.h_buff);
-		dlg->show();
+	label->setPixmap(QPixmap::fromImage(bufferImage));
+	dlg->show();
 }
 
 void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)

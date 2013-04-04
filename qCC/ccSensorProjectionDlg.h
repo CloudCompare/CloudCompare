@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1691                                                              $
-//$LastChangedDate:: 2010-10-22 16:52:55 +0200 (ven., 22 oct. 2010)        $
-//**************************************************************************
-//
 
 #ifndef CC_SENSOR_PROJECTION_DIALOG_HEADER
 #define CC_SENSOR_PROJECTION_DIALOG_HEADER
@@ -29,22 +22,17 @@
 
 class ccGBLSensor;
 
+//Ground-based (lidar) sensor parameters dialog
 class ccSensorProjectionDlg : public QDialog, public Ui::SensorProjectDialog
 {
-    Q_OBJECT
+public:
 
-    public:
+	//! Default constructor
+	ccSensorProjectionDlg(QWidget* parent=0);
 
-        ccSensorProjectionDlg(QWidget* parent=0);
+	void initWithGBLSensor(const ccGBLSensor* sensor);
+	void updateGBLSensor(ccGBLSensor* sensor);
 
-        void initWithGBLSensor(ccGBLSensor* sensor);
-        void updateGBLSensor(ccGBLSensor* sensor);
-
-        bool isAxisMatIdentity();
-
-protected slots:
-    void rotationOrderChanged(int index);
-    void axisMatrixStateChanged(int checkState);
 };
 
-#endif
+#endif //CC_SENSOR_PROJECTION_DIALOG_HEADER

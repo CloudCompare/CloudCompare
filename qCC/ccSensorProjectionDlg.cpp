@@ -28,8 +28,9 @@
 
 #include <ccGBLSensor.h>
 
-ccSensorProjectionDlg::ccSensorProjectionDlg(QWidget* parent) :
-        QDialog(parent), Ui::SensorProjectDialog()
+ccSensorProjectionDlg::ccSensorProjectionDlg(QWidget* parent)
+	: QDialog(parent)
+	, Ui::SensorProjectDialog()
 {
     setupUi(this);
 
@@ -46,42 +47,9 @@ ccSensorProjectionDlg::ccSensorProjectionDlg(QWidget* parent) :
     z1rot->setValidator(new QDoubleValidator(this));
     z2rot->setValidator(new QDoubleValidator(this));
     z3rot->setValidator(new QDoubleValidator(this));
-
-    //DGM: not sure that's such a good idea...
-    //connect(rotationOrderComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(rotationOrderChanged(int)));
-
-    connect(axisMatCheckBox, SIGNAL(stateChanged(int)), this, SLOT(axisMatrixStateChanged(int)));
 }
 
-void ccSensorProjectionDlg::rotationOrderChanged(int index)
-{
-    if (index==1)
-    {
-        if (baseSpinBox->value()==0)
-            baseSpinBox->setValue(500.0);
-    }
-}
-
-void ccSensorProjectionDlg::axisMatrixStateChanged(int checkState)
-{
-    bool state = (checkState == Qt::Unchecked);
-    x1rot->setEnabled(state);
-    x2rot->setEnabled(state);
-    x3rot->setEnabled(state);
-    y1rot->setEnabled(state);
-    y2rot->setEnabled(state);
-    y3rot->setEnabled(state);
-    z1rot->setEnabled(state);
-    z2rot->setEnabled(state);
-    z3rot->setEnabled(state);
-}
-
-bool ccSensorProjectionDlg::isAxisMatIdentity()
-{
-    return (axisMatCheckBox->checkState()==Qt::Checked);
-}
-
-void ccSensorProjectionDlg::initWithGBLSensor(ccGBLSensor* sensor)
+void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 {
     if( !sensor)
         return;
@@ -93,9 +61,9 @@ void ccSensorProjectionDlg::initWithGBLSensor(ccGBLSensor* sensor)
     posZEdit->setText(QString("%1").arg(C.z));
 
     //rotation order
-    if (sensor->getRotationOrder() == CCLib::GBL_THETA_PHI)
+    if (sensor->getRotationOrder() == ccGBLSensor::THETA_PHI)
         rotationOrderComboBox->setCurrentIndex(0);
-    else if (sensor->getRotationOrder() == CCLib::GBL_PHI_THETA)
+    else if (sensor->getRotationOrder() == ccGBLSensor::PHI_THETA)
         rotationOrderComboBox->setCurrentIndex(1);
 
     //base
@@ -108,32 +76,18 @@ void ccSensorProjectionDlg::initWithGBLSensor(ccGBLSensor* sensor)
     uncertaintyDoubleSpinBox->setValue(sensor->getUncertainty());
 
     //rotation matrix
-    CCLib::SquareMatrix* A = sensor->getAxisMatrix();
-    if (A)
+	const ccGLMatrix& rot = sensor->getOrientationMatrix();
     {
-        axisMatCheckBox->setCheckState(Qt::Unchecked);
-        x1rot->setText(QString("%1").arg(A->m_values[0][0]));
-        x2rot->setText(QString("%1").arg(A->m_values[1][0]));
-        x3rot->setText(QString("%1").arg(A->m_values[2][0]));
-        y1rot->setText(QString("%1").arg(A->m_values[0][1]));
-        y2rot->setText(QString("%1").arg(A->m_values[1][1]));
-        y3rot->setText(QString("%1").arg(A->m_values[2][1]));
-        z1rot->setText(QString("%1").arg(A->m_values[0][2]));
-        z2rot->setText(QString("%1").arg(A->m_values[1][2]));
-        z3rot->setText(QString("%1").arg(A->m_values[2][2]));
-    }
-    else
-    {
-        axisMatCheckBox->setCheckState(Qt::Checked);
-        x1rot->setText(QString("1.0"));
-        x2rot->setText(QString("0.0"));
-        x3rot->setText(QString("0.0"));
-        y1rot->setText(QString("0.0"));
-        y2rot->setText(QString("1.0"));
-        y3rot->setText(QString("0.0"));
-        z1rot->setText(QString("0.0"));
-        z2rot->setText(QString("0.0"));
-        z3rot->setText(QString("1.0"));
+		const float* mat = rot.data();
+        x1rot->setText(QString::number(mat[0]));
+        x2rot->setText(QString::number(mat[3]));
+        x3rot->setText(QString::number(mat[8]));
+        y1rot->setText(QString::number(mat[1]));
+        y2rot->setText(QString::number(mat[5]));
+        y3rot->setText(QString::number(mat[9]));
+        z1rot->setText(QString::number(mat[2]));
+        z2rot->setText(QString::number(mat[6]));
+        z3rot->setText(QString::number(mat[10]));
     }
 
     //angular steps
@@ -147,9 +101,7 @@ void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
         return;
 
     //rotation order
-    CCLib::CC_SENSOR_ROTATION_ORDER rotOrder =
-        (rotationOrderComboBox->currentIndex() == 0 ?
-         CCLib::GBL_THETA_PHI : CCLib::GBL_PHI_THETA);
+	ccGBLSensor::ROTATION_ORDER rotOrder = (rotationOrderComboBox->currentIndex() == 0 ? ccGBLSensor::THETA_PHI : ccGBLSensor::PHI_THETA);
     sensor->setRotationOrder(rotOrder);
 
     //center
@@ -164,22 +116,21 @@ void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
     //max. range
     sensor->setSensorRange(maxRangeDoubleSpinBox->value());
 
-    //axis matrix
-    CCLib::SquareMatrix* A = 0;
-    if (!isAxisMatIdentity())
+    //orientation matrix
+    ccGLMatrix rot;
     {
-        A = new CCLib::SquareMatrix(3);
-        A->m_values[0][0] = x1rot->text().toDouble();
-        A->m_values[1][0] = x2rot->text().toDouble();
-        A->m_values[2][0] = x3rot->text().toDouble();
-        A->m_values[0][1] = y1rot->text().toDouble();
-        A->m_values[1][1] = y2rot->text().toDouble();
-        A->m_values[2][1] = y3rot->text().toDouble();
-        A->m_values[0][2] = z1rot->text().toDouble();
-        A->m_values[1][2] = z2rot->text().toDouble();
-        A->m_values[2][2] = z3rot->text().toDouble();
+		float* mat = rot.data();
+        mat[0]  = x1rot->text().toDouble();
+        mat[4]  = x2rot->text().toDouble();
+        mat[8]  = x3rot->text().toDouble();
+        mat[1]  = y1rot->text().toDouble();
+        mat[5]  = y2rot->text().toDouble();
+        mat[9]  = y3rot->text().toDouble();
+        mat[2]  = z1rot->text().toDouble();
+        mat[6]  = z2rot->text().toDouble();
+        mat[10] = z3rot->text().toDouble();
     }
-    sensor->setAxisMatrix(A);
+	sensor->setOrientationMatrix(rot);
 
     //angular steps
     sensor->setDeltaPhi(dPhiSpinBox->value());

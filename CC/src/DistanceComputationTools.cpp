@@ -985,9 +985,9 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 	unsigned numberOfTriangles = theMesh->size();
 
 	//structure d'accélération
-	unsigned* treatedTriangle = new unsigned[numberOfTriangles];
-	if (treatedTriangle)
-		memset(treatedTriangle,0,sizeof(unsigned)*numberOfTriangles);
+	unsigned* processTriangles = new unsigned[numberOfTriangles];
+	if (processTriangles)
+		memset(processTriangles,0,sizeof(unsigned)*numberOfTriangles);
 	//sinon, c'est pas grave, on peu faire sans
 
 	//tableau des distances minimales (version "persistente" pour économiser la mémoire)
@@ -1050,8 +1050,8 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 			}
 			catch (.../*const std::bad_alloc&*/) //out of memory
 			{
-				if (treatedTriangle)
-					delete[] treatedTriangle;
+				if (processTriangles)
+					delete[] processTriangles;
 				if (nProgress)
 					delete nProgress;
 				return -1;
@@ -1129,18 +1129,18 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 								//pour chaque triangle intersectant la cellule en cours
 								for (unsigned p=0;p<element->faceCount;++p)
 								{
-									if (treatedTriangle)
+									if (processTriangles)
 									{
 										const unsigned& indexTri = element->faceIndexes[p];
 										//si le triangle n'a pas déja été inséré
-										if (treatedTriangle[indexTri] != cellIndex)
+										if (processTriangles[indexTri] != cellIndex)
 										{
 #ifndef OPTIMIZE_STD_VECTOR_USAGE
 											trianglesToTest.push_back(indexTri);
 #else
 											trianglesToTest[trianglesToTestCount++] = indexTri;
 #endif
-											treatedTriangle[indexTri] = cellIndex;
+											processTriangles[indexTri] = cellIndex;
 										}
 									}
 									else
@@ -1176,18 +1176,18 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 								//pour chaque triangle intersectant la cellule en cours
 								for (unsigned p=0;p<element->faceCount;++p)
 								{
-									if (treatedTriangle)
+									if (processTriangles)
 									{
 										const unsigned& indexTri = element->faceIndexes[p];
 										//si le triangle n'a pas déja été inséré
-										if (treatedTriangle[indexTri] != cellIndex)
+										if (processTriangles[indexTri] != cellIndex)
 										{
 #ifndef OPTIMIZE_STD_VECTOR_USAGE
 											trianglesToTest.push_back(indexTri);
 #else
 											trianglesToTest[trianglesToTestCount++] = indexTri;
 #endif
-											treatedTriangle[indexTri] = cellIndex;
+											processTriangles[indexTri] = cellIndex;
 										}
 									}
 									else
@@ -1219,18 +1219,18 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 								//pour chaque triangle intersectant la cellule en cours
 								for (unsigned p=0;p<element->faceCount;++p)
 								{
-									if (treatedTriangle)
+									if (processTriangles)
 									{
 										const unsigned& indexTri = element->faceIndexes[p];
 										//si le triangle n'a pas déja été inséré
-										if (treatedTriangle[indexTri] != cellIndex)
+										if (processTriangles[indexTri] != cellIndex)
 										{
 #ifndef OPTIMIZE_STD_VECTOR_USAGE
 											trianglesToTest.push_back(indexTri);
 #else
 											trianglesToTest[trianglesToTestCount++] = indexTri;
 #endif
-											treatedTriangle[indexTri] = cellIndex;
+											processTriangles[indexTri] = cellIndex;
 										}
 									}
 									else
@@ -1254,7 +1254,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 
 			//pour chaque triangle potentiellement intersectant
 			//remarque : normalement on n'a pas déja testé ce triangle
-			//pour une distance de voisinage inferieure (grace à treatedTriangle)
+			//pour une distance de voisinage inferieure (grace à processTriangles)
 #ifndef OPTIMIZE_STD_VECTOR_USAGE
 			bool firstComparisonDone = !trianglesToTest.empty();
 #else
@@ -1282,11 +1282,11 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 				{
 					for (unsigned j=0;j<remainingPoints;++j)
 					{
-						//on calcule la distance point/triangle (attention, on travaille avec des distances au carré)
-						ScalarType dPTri = /*normalSign**/computePoint2TriangleDistance(Yk.getCurrentPointCoordinates(),tempTri,true);
+						//on calcule la distance point/triangle
+						ScalarType dPTri = computePoint2TriangleDistance(Yk.getCurrentPointCoordinates(),tempTri,true);
 						//si elle est plus petite que la distance actuelle du point, on remplace
 						ScalarType min_d = Yk.getCurrentPointScalarValue();
-						if (min_d*min_d > dPTri*dPTri)
+						if (abs(min_d) > abs(dPTri) || !ScalarField::ValidValue(min_d,false))
 							Yk.setCurrentPointScalarValue(normalSign*dPTri);
 						Yk.forwardIterator();
 					}
@@ -1299,7 +1299,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 						ScalarType dPTri = computePoint2TriangleDistance(Yk.getCurrentPointCoordinates(),tempTri,false);
 						//si elle est plus petite que la distance actuelle du point, on remplace
 						ScalarType min_d = Yk.getCurrentPointScalarValue();
-						if (min_d < 0 || dPTri<min_d)
+						if (dPTri < min_d || !ScalarField::ValidValue(min_d,true))
 							Yk.setCurrentPointScalarValue(dPTri);
 						Yk.forwardIterator();
 					}
@@ -1327,7 +1327,6 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 						--remainingPoints;
 						minDists[j] = minDists[remainingPoints];
 						//minDists.pop_back();
-
 					}
 					else
 					{
@@ -1351,9 +1350,9 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 		delete nProgress;
 	nProgress=0;
 
-	if (treatedTriangle)
-		delete[] treatedTriangle;
-	treatedTriangle=0;
+	if (processTriangles)
+		delete[] processTriangles;
+	processTriangles=0;
 
 	return 0;
 }
@@ -1373,7 +1372,7 @@ static OctreeAndMeshIntersection* s_theIntersection_MT = 0;
 static bool s_signedDistances_MT = true;
 static ScalarType s_normalSign_MT = 1.0f;
 
-//'treatedTriangle' mechanism (based on bit mask)
+//'processTriangles' mechanism (based on bit mask)
 #include <QtCore/QBitArray>
 static std::vector<QBitArray*> s_bitArrayPool_MT;
 static bool s_useBitArrays_MT = true;

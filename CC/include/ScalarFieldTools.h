@@ -64,6 +64,24 @@ class ScalarFieldTools : public CCToolbox
 {
 public:
 
+	//! Computes the mean value of a scalar field associated to a cloud
+	/** Returns the mean of SF values associated to each point of a cloud
+		Warning: be sure to activate an OUTPUT scalar field on the cloud
+		\param theCloud the point cloud
+		\param positiveSF whether scalar values are 'only positive' or not
+		\return the associated scalar field mean value
+	**/
+	static ScalarType computeMeanScalarValue(GenericCloud* theCloud, bool positiveSF);
+
+	//! Computes the mean square value of a scalar field associated to a cloud
+	/** Returns the mean of squared SF values associated to each point of a cloud
+		Warning: be sure to activate an OUTPUT scalar field on the cloud
+		\param theCloud the point cloud
+		\param positiveSF whether scalar values are 'only positive' or not
+		\return the associated scalar field mean of squares value
+	**/
+	static ScalarType computeMeanSquareScalarValue(GenericCloud* theCloud, bool positiveSF);
+
 	//! Computes the geometrical gradient of a scalar field associated to a point cloud
 	/** See Daniel Girardeau-Montaut's PhD manuscript (Chapter 3, section 3.3.2) for more
 		information. As explained in this section, if the scalar field corresponds to
@@ -142,10 +160,11 @@ public:
 											ScalarType& maxV, 
 											bool includeNegValues);
 
-	//! Count the number of positive values in a scalar field
+	//! Count the number of valid values in a scalar field
 	/** \param theCloud a point cloud, with a scalar field activated
+		\param whether the scalar field is 'positive' or not
 	**/
-	static unsigned countScalarFieldPositiveValues(const GenericCloud* theCloud);
+	static unsigned countScalarFieldValidValues(const GenericCloud* theCloud, bool positiveSF);
 
 	//! Classifies automaticaly a scalar field in K classes with the K-means algorithm
 	/** The initial K classes positions are regularily spaced between the

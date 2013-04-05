@@ -173,14 +173,14 @@ TriangleSummitsIndexes* Delaunay2dMesh::getTriangleIndexes(unsigned triangleInde
 	return (TriangleSummitsIndexes*)(m_triIndexes + 3*triangleIndex);
 }
 
-void Delaunay2dMesh::getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[])
+void Delaunay2dMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
 {
 	if (m_associatedCloud)
-		m_associatedCloud->getBoundingBox(Mins,Maxs);
+		m_associatedCloud->getBoundingBox(bbMin,bbMax);
 	else
 	{
-		Mins[0]=Maxs[0]=0.0;
-		Mins[1]=Maxs[1]=0.0;
-		Mins[2]=Maxs[2]=0.0;
+		bbMin[0] = bbMax[0] = 0;
+		bbMin[1] = bbMax[1] = 0;
+		bbMin[2] = bbMax[2] = 0;
 	}
 }

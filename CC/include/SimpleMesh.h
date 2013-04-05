@@ -58,7 +58,7 @@ public:
 	virtual TriangleSummitsIndexes* getNextTriangleIndexes();
 	virtual TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex);
 	virtual unsigned size() const;
-	virtual void getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[]);
+	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
 	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
 
 	//specific methods

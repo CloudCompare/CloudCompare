@@ -23,101 +23,122 @@
 #include <QDialog>
 #include <QHBoxLayout>
 #include <QFont>
+#include <QString>
 
 //qCC_db
 #include <ccScalarField.h>
 
-//! String with associated 2D position
-struct geoString
-{
-    int x,y;
-    char str[256];
-};
-//! Vector of geoStrings
-typedef std::vector<geoString> stringVector;
-
 //! Histogram widget
 class ccHistogramWindow : public QGLWidget
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
 	//! Default constructor
-    ccHistogramWindow(QWidget *parent = 0);
+	ccHistogramWindow(QWidget *parent = 0);
 
-    void setInfoStr(const char* str);
-    void addStr(int x, int y, const char* str);
-    void clearStr();
+	//! Destructor
+	virtual ~ccHistogramWindow();
 
-    //histogram variables setters and getters
-    void setValues(ccScalarField* values);
-    void setNumberOfClasses(unsigned  n); //n should be a mutliple of 4
-    void setMinVal(double val) {minVal = val;};
-    void setMaxVal(double val) {maxVal = val;};
+	//! Sets first line
+	void setInfoStr(const QString& str);
 
-    void setHistoValues(unsigned* _histoValues, unsigned _numberOfClasses); //by default, the object will eventually delete histoValues !
-    void histoValuesShouldBeDestroyed(bool value);
+	//! Computes histogram from a scalar field
+	/** Number of classes can be freely modified afterwards (if enabled).
+		\param associated scalar field
+		\param initialNumberOfClasses initial number of classes
+		\param numberOfClassesCanBeChanged whether to allow the user to modify the number of classes
+		\return success
+	**/
+	void fromSF(ccScalarField* sf,
+				unsigned initialNumberOfClasses = 0,
+				bool numberOfClassesCanBeChanged = true);
 
-    //overlay curve
-    void setCurveValues(double* _curveValues, unsigned _numberOfCurvePoints); //by default, the object will eventually delete curveValues !
-    void curveValuesShouldBeDestroyed(bool value);
+	//! Creates histogram from a bin array (each bin = number of elements per class)
+	/** Number of classes can't be modified.
+		\param histoValues array of bins (number of points per class)
+		\param numberOfClasses corresponding number of classes
+		\param minVal minimum value
+		\param maxVal maximum value
+		\param giveArrayOwnership whether array ownership is passed to the dialog or not
+		\return success
+	**/
+	void fromBinArray(unsigned* histoValues,
+						unsigned numberOfClasses,
+						double minVal,
+						double maxVal,
+						bool giveArrayOwnership = true);
+
+	//! Sets overlay curve values
+	/** Curve will only appear if the number of points matches the current number of classes)
+		\param curveValues curve points 'Y' coordinates (points will be regularly spread over histogram span)
+		\param numberOfCurvePoints number of points
+		\param giveArrayOwnership whether array ownership is passed to the dialog or not
+	**/
+	void setCurveValues(double* curveValues,
+						unsigned numberOfCurvePoints,
+						bool giveArrayOwnership = true);
 
 protected:
 
-    //mouse events handling
-    void mousePressEvent(QMouseEvent *event);
-    void mouseMoveEvent(QMouseEvent *event);
-    void wheelEvent(QWheelEvent* event);
+	//! Changes the current number of classes
+	/** Warning: n should be a mutliple of 4.
+	**/
+	void setNumberOfClasses(unsigned  n);
 
-    void closeEvent(QCloseEvent *event);
+	//mouse events handling
+	void mousePressEvent(QMouseEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
+	void wheelEvent(QWheelEvent* event);
 
-    //inherited from QGLWidget
-    //void initializeGL();
-    //void resizeGL(int w, int h);
-    void paintGL();
+	void closeEvent(QCloseEvent *event);
 
+	//inherited from QGLWidget
+	//void initializeGL();
+	//void resizeGL(int w, int h);
+	void paintGL();
 
-    unsigned getMaxHistoVal();
+	//! Returns current maximum bin size
+	unsigned getMaxHistoVal();
 
-    //libération de la mémoire
-    void clear();
-    //recalcul des valeurs de l'histogrammes
-    void computeHistoValues();
+	//! Clears internal structures
+	void clear();
 
-    char infoStr[256];
-    bool viewInitialized;
-    bool numberOfClassesCanBeChanged;
-    stringVector toDraw;
+	//! Dynamically computes histogram bins from scalar field
+	bool computeBinArrayFromSF();
 
-    //table and type
-    ccScalarField* theValues;
+	//! 1st line
+	QString m_infoStr;
+	bool m_viewInitialized;
+	bool m_numberOfClassesCanBeChanged;
 
-    //histogram variables
-    unsigned numberOfClasses;
-    double minVal,maxVal;
-    unsigned maxHistoVal;
+	//table and type
+	ccScalarField* m_associatedSF;
 
-    //overlay curve
-    double* curveValues;
-    double maxCurveValue;
-    unsigned numberOfCurvePoints;
-    bool destroyCurveValues;
+	//histogram variables
+	unsigned m_numberOfClasses;
+	unsigned* m_histoValues;
+	bool m_ownHistoValues;
+	double m_minVal;
+	double m_maxVal;
+	unsigned m_maxHistoVal;
 
-    //parametres d'affichage
-    unsigned* histoValues;
-    bool histoValuesShouldBeRecomputed;
-    bool destroyHistoValues;
+	//overlay curve
+	double* m_curveValues;
+	double m_maxCurveValue;
+	unsigned m_numberOfCurvePoints;
+	bool m_ownCurveValues;
 
-    //histogram display area
-    int roi[4];
-    //les boutons "+" et "-"
-    int xMinusButton,yMinusButton,xPlusButton,yPlusButton;
-    int buttonSize;
+	//histogram display area
+	int m_roi[4];
+	//classes number modification buttons ("+" and "-")
+	int m_xMinusButton,m_yMinusButton,m_xPlusButton,m_yPlusButton;
+	int m_buttonSize;
 
-    //vertical indicator
-    bool drawVerticalIndicator;
-    double verticalIndicatorPositionPercent;
+	//vertical indicator
+	bool m_drawVerticalIndicator;
+	double m_verticalIndicatorPositionPercent;
 
 	//rendering font
 	QFont m_renderingFont;
@@ -127,21 +148,23 @@ protected:
 class ccHistogramWindowDlg : public QDialog
 {
 public:
-    //! Default constructor
-    ccHistogramWindowDlg(QWidget* parent = 0) : QDialog(parent)
-    {
-        win = new ccHistogramWindow(this);
+	//! Default constructor
+	ccHistogramWindowDlg(QWidget* parent = 0)
+		: QDialog(parent)
+		, m_win(new ccHistogramWindow(this))
+	{
+		QHBoxLayout* hboxLayout = new QHBoxLayout(this);
+		hboxLayout->addWidget(m_win);
+		hboxLayout->setContentsMargins(0,0,0,0);
+	}
 
-        QHBoxLayout* hboxLayout = new QHBoxLayout(this);
-        hboxLayout->addWidget(win);
-        hboxLayout->setContentsMargins(0,0,0,0);
-    }
-
-    //! Returns encapsulated ccHistogramWindow
-    ccHistogramWindow* window() { return win; };
+	//! Returns encapsulated ccHistogramWindow
+	ccHistogramWindow* window() { return m_win; };
 
 protected:
-    ccHistogramWindow* win;
+
+	//Associated histogram window
+	ccHistogramWindow* m_win;
 };
 
 #endif

@@ -153,7 +153,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 	if (DistanceComputationTools::computeHausdorffDistance(dataCloud,modelCloud,params,progressCb)>=0)
 	{
 		//12/11/2008 - A.BEY: ICP guarantees only the decrease of the squared distances sum (not the distances sum)
-		error = DistanceComputationTools::computeMeanSquareDist(dataCloud);
+		error = ScalarFieldTools::computeMeanSquareScalarValue(dataCloud,true); //we only have positive SF values as we use the Hausdorff distance!
 	}
 	else
 	{
@@ -346,7 +346,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 
 			lastError = error;
             //12/11/2008 - A.BEY: ICP guarantees only the decrease of the squared distances sum (not the distances sum)
-			error = DistanceComputationTools::computeMeanSquareDist(dataCloud);
+			error = ScalarFieldTools::computeMeanSquareScalarValue(dataCloud,true); //we only have positive SF values as we use the Hausdorff distance!
 			finalError = (error>0 ? sqrt(error) : error);
 
 #ifdef _DEBUG

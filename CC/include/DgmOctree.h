@@ -478,10 +478,10 @@ public:
 
 	//! Returns the octree bounding box
 	/**	Method to request the octree bounding box limits
-		\param Mins a 3 elements array to store the lower BB limits (Xmin,Ymin,Zmin)
-		\param Maxs a 3 elements array to store the higher BB limits (Xmax,Ymax,Zmax)
+		\param bbMin lower bounding-box limits (Xmin,Ymin,Zmin)
+		\param bbMax higher bounding-box limits (Xmax,Ymax,Zmax)
 	**/
-	void getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[]) const;
+	void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]) const;
 
 	//! Returns the lowest cell positions in the octree along all dimensions and for a given level of subdivision
 	/** For example, at a level	n, the octree length is 2^n cells along each

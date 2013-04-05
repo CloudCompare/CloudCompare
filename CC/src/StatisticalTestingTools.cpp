@@ -26,129 +26,199 @@
 #include "DgmOctree.h"
 #include "GenericProgressCallback.h"
 #include "Chi2Helper.h"
+#include "ScalarField.h"
 
 //system
 #include <string.h>
 #include <assert.h>
+#include <list>
 
 using namespace CCLib;
 
-//! Max computable Chi2 distance
-static double CHI2_MAX = 1e7;
-
-//! Min computable Chi2 distance
-static double CHI2_MIN = 1e-6;
-
-//calcul de la "distance" du Chi2 entre un échantillon Yk et une distribution "distrib"
-//On peut fournir un tableau (histogramme) déja alloué (dumpHisto) pour aller plus vite
-//Le nombe minimal de classes est 2 (pour éviter que le résultat du test soit nul, et de toutes façons, un test du Chi2 à 0 ddl n'existe pas ;)
-double StatisticalTestingTools::computeChi2Dist(const GenericDistribution* distrib, const GenericCloud* Yk, unsigned numberOfClasses, bool includeNegValues, unsigned* dumpHisto, double* npis)
+//! An element of a double-chained-list structure (used by computeAdaptativeChi2Dist)
+struct Chi2Class
 {
-    assert(distrib && Yk);
-	if (!distrib->isValid())
-		return -1.0;
+	
+	double pi;	/**< Probability Pi **/
+	int n;		/**< Number of elements for the class **/
 
-	unsigned n = Yk->size();
-
-	if (n==0 || numberOfClasses<2)
-		return -1.0;
-
-	//on va calculer la fonction de repartition
-	ScalarType V, minV=0.0, maxV=0.0;
-	unsigned i,numberOfElements=0;
-	bool firstValue=true;
-	for (i=0;i<n;++i)
+	//! Default constructor
+	Chi2Class()
+		: pi(0.0)
+		, n(0)
 	{
-		V = Yk->getPointScalarValue(i);
-		if (includeNegValues || V >= 0.0)
+	}
+
+};
+
+//! An ordered list of Chi2 classes
+typedef std::list<Chi2Class> Chi2ClassList;
+
+double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribution* distrib,
+															const GenericCloud* cloud,
+															unsigned numberOfClasses,
+															unsigned &finalNumberOfClasses,
+															bool includeNegValues,
+															bool forceZeroAsMin,
+															bool noClassCompression/*=false*/,
+															unsigned* histoValues/*=0*/,
+															double* npis/*=0*/)
+{
+    assert(distrib && cloud);
+	unsigned n = cloud->size();
+
+	if (n==0 || !distrib->isValid())
+		return -1.0;
+
+	//compute min and max (valid) values
+	ScalarType minV=0,maxV=0;
+	unsigned numberOfElements=0;
+	{
+		bool firstValidValue=true;
+		for (unsigned i=0; i<n; ++i)
 		{
-		    if (firstValue)
-		    {
-		        minV=maxV=V;
-		        firstValue=false;
-		    }
-		    else
-		    {
-                if (V>maxV)
-                    maxV=V;
-                else if (V<minV)
-                    minV=V;
-		    }
-		    ++numberOfElements;
+			ScalarType V = cloud->getPointScalarValue(i);
+			if (ScalarField::ValidValue(V,!includeNegValues))
+			{
+				if (firstValidValue)
+				{
+					minV = maxV = V;
+					firstValidValue = false;
+				}
+				else
+				{
+					if (V > maxV)
+						maxV = V;
+					else if (V < minV)
+						minV = V;
+				}
+				++numberOfElements;
+			}
 		}
 	}
 
-	if (firstValue)
+	if (numberOfElements == 0)
         return -1.0;
 
-    if (!includeNegValues)
-        minV=0.0; //for only positive values, it's better if the histogram starts at 0!
+    if (!includeNegValues && forceZeroAsMin)
+        minV = 0; //for 'only positive values' scalar fields, it's better if the histogram starts at 0!
 
-	//on s'assure que l'intervale de l'histogramme englobe bien toute la distribution théorique
-    if (maxV>minV)
-    {
-        while (distrib->computeP(maxV) > ZERO_TOLERANCE)
-            maxV += 0.05f*(maxV-minV);
-
-        if (includeNegValues)
-            while (distrib->computeP(minV) > ZERO_TOLERANCE)
-                minV -= 0.05f*(maxV-minV);
-    }
+	//shall we automatically compute the number of classes?
+	if (numberOfClasses==0)
+	{
+        numberOfClasses = (unsigned)ceil(sqrt((double)numberOfElements));
+	}
+	if (numberOfClasses<2)
+	{
+        return -2.0; //not enough points/classes
+	}
 
 	ScalarType dV = maxV-minV;
-	ScalarType step = dV/(ScalarType)numberOfClasses;
+    ScalarType step = dV/(ScalarType)numberOfClasses;
 	if (step < ZERO_TOLERANCE)
         return -1.0;
-	ScalarType coef = 1.0f/step;
 
-	unsigned* count = (dumpHisto ? dumpHisto : new unsigned[numberOfClasses]);
-	memset(count,0,sizeof(unsigned)*numberOfClasses);
-
-	for (i=0;i<n;++i)
+	//try to allocate the histogram values array (if necessary)
+	unsigned* histo = (histoValues ? histoValues : new unsigned[numberOfClasses]);
+	if (!histo)
 	{
-		V = Yk->getPointScalarValue(i);
-		if (includeNegValues || V >= 0.0)
+		//not enough memory
+		return -1.0;
+	}
+	memset(histo,0,sizeof(unsigned)*numberOfClasses);
+
+	//accumulate histogram
+	{
+		for (unsigned i=0;i<n;++i)
 		{
-            int aim = int(floor((V-minV)*coef));
-            //pour éviter les problèmes de bords
-            if (aim>=(int)numberOfClasses)
-                aim=numberOfClasses-1;
-            //accumulation
-            ++count[aim];
+			ScalarType V = cloud->getPointScalarValue(i);
+			if (ScalarField::ValidValue(V,!includeNegValues))
+			{
+				int bin = (int)floor((V-minV)/step);
+				histo[std::min<int>(bin,numberOfClasses-1)]++; //to avoid upper boundary issues
+			}
 		}
 	}
 
-	//on calcule enfin la "distance au carré" du Chi2
-	double npi,temp,D2 = 0.0;
-	ScalarType x1,x2=minV;
-	double p1,p2=distrib->computePfromZero(x2);
-
-	for (unsigned k=0;k<numberOfClasses;++k)
+	//we build up the list of classes
+	Chi2ClassList classes;
 	{
-		x1 = x2;
-		x2 = x1+step;
-		p1 = p2;
-		p2 = distrib->computePfromZero(x2);
-		npi = (p2-p1)*(double)numberOfElements;
-		if (npis)
-            npis[k]=npi;
+		double p1 = distrib->computePfromZero(minV);
+		for (unsigned k=1;k<=numberOfClasses;++k)
+		{
+			double p2 = distrib->computePfromZero(minV+step*(ScalarType)k);
 
-		if (count[k]==0)
-		{
-			D2 += npi;
-		}
-		//pour éviter les overflows !
-		else if (npi < CHI2_MIN)
-		{
-			D2 = CHI2_MAX;
-			break;
-		}
-		else
-		{
-			temp = (double)((ScalarType)count[k] - npi);
-			D2 += temp*(temp/(double)npi);
+			//add the class to the chain
+			Chi2Class currentClass;
+			currentClass.n = histo[k-1];
+			currentClass.pi = p2-p1;
+			if (npis)
+				npis[k-1]= currentClass.pi * (double)numberOfElements;
 
-			if (D2 > CHI2_MAX)
+			try
+			{
+				classes.push_back(currentClass);
+			}
+			catch(std::bad_alloc)
+			{
+				//not enough memory!
+				return -1.0;
+			}
+
+			p1 = p2; //next intervale
+		}
+	}
+
+	//classes compression
+	if (!noClassCompression)
+	{
+		//lowest acceptable value: "K/n" (K=5 generally, but it could be 3 or 1 at the tail!)
+		double minPi = 5.0/(double)numberOfElements;
+
+		while (classes.size()>2)
+		{
+			//we look for the smallest class (smallest "npi")
+			Chi2ClassList::iterator it = classes.begin();
+			Chi2ClassList::iterator minIt = it;
+			for (; it != classes.end(); ++it)
+				if (it->pi < minIt->pi)
+					minIt = it;
+
+			if (minIt->pi >= minPi) //all classes are bigger than the minimum requirement
+				break;
+
+			//otherwise we must fuse the smallest class with its neighbor (to make the classes repartition more equilibrated)
+			Chi2ClassList::iterator smallestIt;
+			{
+				Chi2ClassList::iterator nextIt = minIt; nextIt++;
+				if (minIt == classes.begin())
+				{
+					smallestIt = nextIt;
+				}
+				else
+				{
+					Chi2ClassList::iterator predIt = minIt; predIt--;
+					smallestIt = (nextIt != classes.end() && nextIt->pi < predIt->pi ? nextIt : predIt);
+				}
+			}
+
+			smallestIt->pi += minIt->pi;
+			smallestIt->n += minIt->n;
+
+			//we can remove the current class
+			classes.erase(minIt);
+		}
+	}
+
+	//we compute the Chi2 distance with the remaining classes
+	double D2=0.0;
+	{
+		for (Chi2ClassList::iterator it = classes.begin(); it != classes.end(); ++it)
+		{
+			double npi = it->pi * (double)numberOfElements;
+			double temp = (double)it->n - npi;
+			D2 += temp*(temp/npi);
+			if (D2 >= CHI2_MAX)
 			{
 				D2 = CHI2_MAX;
 				break;
@@ -156,216 +226,10 @@ double StatisticalTestingTools::computeChi2Dist(const GenericDistribution* distr
 		}
 	}
 
-	if (!dumpHisto)
-        delete[] count;
+	if (!histoValues)
+        delete[] histo;
 
-	return D2;
-}
-
-//Version plus correcte au sens de la théorie du Test du Chi2, mais aussi beaucoup plus lente !
-//Elle cherche à imposer que chaque classe ait un n.pi >= 5 (n = nombre total d'éléments, pi = la probabilité de la classe)
-//Il faut par contre gérer le changement local du nombre final de classes (qui change donc le seuil du Chi2)
-double StatisticalTestingTools::computeAdaptativeChi2Dist(const GenericDistribution* distrib, const GenericCloud* Yk, unsigned numberOfClasses, unsigned &finalNumberOfClasses, bool includeNegValues, bool forceZeroAsMin, unsigned* dumpHisto, double* npis)
-{
-    assert(distrib && Yk);
-	if (!distrib->isValid())
-		return -1.0;
-
-	unsigned n = Yk->size();
-	if (n==0)
-        return -1.0;
-
-	//on va calculer la fonction de repartition
-	ScalarType V,minV=0.0,maxV=0.0;
-	unsigned i,numberOfElements=0;
-
-	//on cherche les valeurs min et max
-	bool firstValue=true;
-	for (i=0;i<n;++i)
-	{
-		V = Yk->getPointScalarValue(i);
-		if (includeNegValues || V >= 0.0)
-		{
-		    if (firstValue)
-		    {
-		        minV=maxV=V;
-		        firstValue=false;
-		    }
-		    else
-		    {
-                if (V>maxV)
-                    maxV=V;
-                else if (V<minV)
-                    minV=V;
-		    }
-		    ++numberOfElements;
-		}
-	}
-
-	if (firstValue)
-        return -1.0;
-
-    if (!includeNegValues && forceZeroAsMin)
-        minV=0.0; //for only positive values, it's better if the histogram starts at 0!
-
-	//on s'assure que l'intrevale de l'histogramme englobe bien toute la distribution théorique
-	//while ((distrib->computeP(maxV)>ZERO_TOLERANCE)) maxV *= 1.5;
-
-	//si on doit determiner automatiquement le nombre de classes
-	if (numberOfClasses==0)
-        numberOfClasses=(unsigned)ceil(sqrt((float)numberOfElements));
-	if (numberOfClasses<2)
-        return -2.0; //pas assez de points/classes
-
-	ScalarType dV = maxV-minV;
-    ScalarType step = dV/(ScalarType)numberOfClasses;
-	if (step < ZERO_TOLERANCE)
-        return -1.0;
-	ScalarType coef = 1.0f/step;
-
-	//le tableau de stockage de l'histogramme peut avoir été passé en argument de la fonction
-	unsigned* count = (dumpHisto ? dumpHisto : new unsigned[numberOfClasses]);
-	memset(count,0,sizeof(unsigned)*numberOfClasses);
-
-	//on calcule l'histogramme de "numberOfClasses" classes entre minV et maxV
-	for (i=0;i<n;++i)
-	{
-		V = Yk->getPointScalarValue(i);
-		if (includeNegValues || V>=0.0)
-		{
-			int aim = int(floor((V-minV)*coef)); //la colonne de l'histogramme à accumuler
-			//pour éviter les problèmes de bords
-			if (aim==(int)numberOfClasses)
-                --aim;
-			//accumulation
-			count[aim]++;
-		}
-	}
-
-	//structure de liste chainée qui permettra la compression des clases si besoin
-	Chi2Element* root = new Chi2Element;
-	root->pred = 0;
-	root->next = 0;
-	Chi2Element *currentCE = root;
-
-	//on calcule enfin la "distance au carré" du Chi2
-	ScalarType x1,x2=minV;
-	double p1,p2=distrib->computePfromZero(x2);
-
-	for (unsigned k=0;k<numberOfClasses;++k)
-	{
-		x1 = x2;
-		x2 = x1+step;
-		p1 = p2;
-		p2 = distrib->computePfromZero(x2);
-
-		//on créé le nouvel élement de la liste chainée
-		currentCE->next = new Chi2Element;
-		currentCE->next->pred = currentCE;
-		//on avance d'un cran
-		currentCE = currentCE->next;
-		//on initialise les valeurs du nouvel élément
-		currentCE->next = 0;
-		currentCE->n = count[k];
-		//currentCE->pi = max(p2-p1,0.0);
-		currentCE->pi = p2-p1;
-		if (npis)
-            npis[k]= currentCE->pi * (double)numberOfElements;
-	}
-
-	//COMPRESSION DES CLASSES DE L'HISTOGRAMME
-	//on intialise "root->pi" avec la valeur minimale acceptable "K/n" (K=5 généralement, mais pourrait être 3 ou 1 en queue !)
-	root->pi = 5.0/(double)numberOfElements;
-	Chi2Element* minCE;
-
-	finalNumberOfClasses = numberOfClasses;
-	while (finalNumberOfClasses>2)
-	{
-		//on cherche la plus petite valeur de "npi"
-		currentCE = minCE = root;
-		while (currentCE->next)
-		{
-			currentCE = currentCE->next;
-			if (currentCE->pi < minCE->pi)
-				minCE = currentCE;
-		}
-
-		//on n'a pas bougé, donc il n'y a plus/pas d'amas trop petit
-		if (minCE == root)
-			break;
-
-		//sinon, il faut fusionner la valeur la plus petite avec son voisin (le plus petit pour équilibrer un peu les amas)
-
-		//cas où "pred" existe (du moins est "valabe", i.e. différent de "root")
-		if (minCE->pred != root)
-		{
-			//et "next" existe
-			if (minCE->next)
-			{
-				//il faut fusionner avec "pred"
-				if (minCE->pred->pi < minCE->next->pi)
-				{
-					minCE->pred->pi += minCE->pi;
-					minCE->pred->n += minCE->n;
-					minCE->pred->next = minCE->next;
-					minCE->next->pred = minCE->pred;
-				}
-				else //il faut fusionner avec "next"
-				{
-					minCE->next->pi += minCE->pi;
-					minCE->next->n += minCE->n;
-					minCE->next->pred = minCE->pred;
-					minCE->pred->next = minCE->next;
-				}
-			}
-			//il faut fusionner avec "pred" (sans next)
-			else
-			{
-				minCE->pred->pi += minCE->pi;
-				minCE->pred->n += minCE->n;
-				minCE->pred->next = 0;
-			}
-		}
-		else
-		//il faut fusionner avec "next" (pred == root)
-		{
-			minCE->next->pi += minCE->pi;
-			minCE->next->n += minCE->n;
-			minCE->next->pred = minCE->pred/*root*/;
-			/*root*/minCE->pred->next = minCE->next;
-		}
-
-		delete minCE;
-		finalNumberOfClasses--;
-	}
-
-	//calcul du Chi2 avec les nouvelles classes
-	currentCE = root;
-	double npi,temp,D2=0.0;
-	while (currentCE->next)
-	{
-		currentCE = currentCE->next;
-		delete currentCE->pred;
-		currentCE->pred=0;
-
-		if (D2 < CHI2_MAX)
-		{
-			npi = currentCE->pi * (double)numberOfElements;
-			if (npi < CHI2_MIN)
-			{
-				D2 = CHI2_MAX;
-			}
-			else
-			{
-				temp = (double)currentCE->n - npi;
-				D2 += temp*(temp/npi);
-			}
-		}
-	}
-	delete currentCE;
-
-	if (!dumpHisto)
-        delete[] count;
+	finalNumberOfClasses = (unsigned)classes.size();
 
 	return D2;
 }
@@ -384,9 +248,9 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
                                                               GenericIndexedCloudPersist* theCloud,
                                                               unsigned numberOfNeighbours,
                                                               double pTrust,
-                                                              bool includeNegValues /*= false*/,
-                                                              GenericProgressCallback* progressCb,
-                                                              DgmOctree* _theOctree)
+                                                              bool includeNegValues/*=false*/,
+                                                              GenericProgressCallback* progressCb/*=0*/,
+                                                              DgmOctree* _theOctree/*=0*/)
 {
 	assert(theCloud);
 
@@ -411,9 +275,9 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 
 	unsigned numberOfChi2Classes = (unsigned)sqrt((double)numberOfNeighbours);
 
-	//l'histogramme pour le calcul du Chi2
-	unsigned* dumpHisto = new unsigned[numberOfChi2Classes];
-	if (!dumpHisto)
+	//Chi2 hisogram values
+	unsigned* histoValues = new unsigned[numberOfChi2Classes];
+	if (!histoValues)
 	{
 		if (!_theOctree)
 			delete theOctree;
@@ -425,7 +289,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	additionalParameters[0] = (void*)distrib;
 	additionalParameters[1] = (void*)&numberOfNeighbours;
 	additionalParameters[2]	= (void*)&numberOfChi2Classes;
-	additionalParameters[3]	= (void*)dumpHisto;
+	additionalParameters[3]	= (void*)histoValues;
 	additionalParameters[4]	= (void*)&includeNegValues;
 
 	double maxChi2 = -1.0;
@@ -443,7 +307,6 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 															progressCb,
 															"Statistical Test")>0) //sucess
 	{
-		//no user cancellation?
 		if (!progressCb || !progressCb->isCancelRequested())
 		{
 			//theoretical Chi2 fractile
@@ -452,8 +315,8 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 		}
 	}
 
-	delete[] dumpHisto;
-	dumpHisto=0;
+	delete[] histoValues;
+	histoValues=0;
 
 	if (!_theOctree)
         delete theOctree;
@@ -461,18 +324,17 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	return maxChi2;
 }
 
-//FONCTION "CELLULAIRE" DE CALCUL DE LA DISTANCE DU CHI2
 bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
 {
 	//variables additionnelles
 	GenericDistribution* statModel		= (GenericDistribution*)additionalParameters[0];
 	unsigned numberOfNeighbours         = *(unsigned*)additionalParameters[1];
 	unsigned numberOfChi2Classes		= *(unsigned*)additionalParameters[2];
-	unsigned* dumpHisto					= (unsigned*)additionalParameters[3];
+	unsigned* histoValues				= (unsigned*)additionalParameters[3];
 	bool includeNegValues               = *(bool*)additionalParameters[4];
 
-	//nombre de points dans la cellule courante
-	unsigned i,j,n = cell.points->size();
+	//number of points in the current cell
+	unsigned n = cell.points->size();
 
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level												= cell.level;
@@ -481,32 +343,32 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
-	//on connait déjà les points de la première cellule
-	//(c'est la cellule qu'on est en train de traiter !)
-	try
+	//we already know the points of the first cell (this is the one we are currently processing!)
 	{
-		nNSS.pointsInNeighbourhood.resize(n);
-	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
-	{
-		return false;
+		try
+		{
+			nNSS.pointsInNeighbourhood.resize(n);
+		}
+		catch (std::bad_alloc) //out of memory
+		{
+			return false;
+		}
+
+		DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+		for (unsigned j=0;j<n;++j,++it)
+		{
+			it->point = cell.points->getPointPersistentPtr(j);
+			it->pointIndex = cell.points->getPointGlobalIndex(j);
+		}
+		nNSS.alreadyVisitedNeighbourhoodSize = 1;
 	}
 
-	DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-	for (j=0;j<n;++j,++it)
-	{
-		it->point = cell.points->getPointPersistentPtr(j);
-		it->pointIndex = cell.points->getPointGlobalIndex(j);
-	}
-	nNSS.alreadyVisitedNeighbourhoodSize = 1;
-
-	//VERSION "STANDARD"
-	for (i=0;i<n;++i)
+	for (unsigned i=0;i<n;++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 		ScalarType D = cell.points->getPointScalarValue(i);
 
-		if (D>=0.0)
+		if (ScalarField::ValidValue(D,!includeNegValues))
 		{
 			//nNSS.theNearestPoints.clear();
 
@@ -516,16 +378,19 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 
 			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,k);
 
+			unsigned finalNumberOfChi2Classes=0;
 			//VERSION "SYMPA" (test grossier)
-			D = (ScalarType)computeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,includeNegValues,dumpHisto);
+			double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,includeNegValues,true,true,histoValues);
 			//VERSION "SEVERE" (test ultra-precis)
-			//D = (ScalarType)statModel->computeChi2Dist(theDistances,&Z,numberOfChi2Classes,dumpHisto);
+			//double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,includeNegValues,true,false,histoValues);
 
-			if (D>=0.0)
-				D = sqrt(D);
+			if (Chi2Dist >= 0.0)
+				D = (ScalarType)sqrt(Chi2Dist);
+			else
+				D = includeNegValues ? NAN_VALUE : HIDDEN_VALUE;
 		}
 
-		//Version champ scalaire "IN" et "OUT" différents
+		//We assume that "IN" and "OUT" scalar fields are different!
 		cell.points->setPointScalarValue(i,D);
 	}
 

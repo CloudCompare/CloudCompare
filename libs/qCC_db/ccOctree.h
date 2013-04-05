@@ -70,15 +70,15 @@ public:
 	void translateBoundingBox(const CCVector3& T);
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const {return CC_POINT_OCTREE;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_POINT_OCTREE; }
 
-	int getDisplayedLevel();
+	int getDisplayedLevel() const { return m_displayedLevel; }
 	void setDisplayedLevel(int level);
 
-	CC_OCTREE_DISPLAY_TYPE getDisplayType();
+	CC_OCTREE_DISPLAY_TYPE getDisplayType() const { return m_displayType; }
 	void setDisplayType(CC_OCTREE_DISPLAY_TYPE type);
 
-	//inherited
+	//inherited from DgmOctree
 	virtual void clear();
 
     //Inherited from ccHObject
@@ -95,28 +95,21 @@ public:
                                 bool updateOctreeGLDisplay=true);
 
 	static void ComputeAverageColor(CCLib::ReferenceCloud* subset,
-                                    ccGenericPointCloud* sourceList,
+                                    ccGenericPointCloud* sourceCloud,
                                     colorType meanCol[]);
 
 	static void ComputeAverageNorm(CCLib::ReferenceCloud* subset,
-                                    ccGenericPointCloud* cloud,
+                                    ccGenericPointCloud* sourceCloud,
                                     float norm[]);
 
 	static void ComputeRobustAverageNorm(CCLib::ReferenceCloud* subset,
-                                            ccGenericPointCloud* cloud,
+                                            ccGenericPointCloud* sourceCloud,
                                             PointCoordinateType norm[]);
 
 protected:
 
     //Inherited from ccHObject
     void drawMeOnly(CC_DRAW_CONTEXT& context);
-
-    CC_OCTREE_DISPLAY_TYPE displayType;
-    bool shouldBeRefreshed;
-    int displayedLevel;
-    int glID;
-
-    ccGenericPointCloud* _associatedCloud;
 
 	/*** RENDERING METHODS ***/
 
@@ -126,8 +119,14 @@ protected:
 	static bool DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
                                     void** additionalParameters);
 
-	static bool DrawCellAsAPlainCube(const CCLib::DgmOctree::octreeCell& cell,
+	static bool DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
                                         void** additionalParameters);
+
+    ccGenericPointCloud* m_associatedCloud;
+    CC_OCTREE_DISPLAY_TYPE m_displayType;
+    int m_displayedLevel;
+    int m_glListID;
+    bool m_shouldBeRefreshed;
 
 };
 

@@ -428,12 +428,12 @@ void ccMesh::refreshBB()
 	}
 }
 
-void ccMesh::getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[])
+void ccMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
 {
 	refreshBB();
 
-	memcpy(Mins,m_bBox.minCorner().u,3*sizeof(PointCoordinateType));
-	memcpy(Maxs,m_bBox.maxCorner().u,3*sizeof(PointCoordinateType));
+	memcpy(bbMin, m_bBox.minCorner().u, 3*sizeof(PointCoordinateType));
+	memcpy(bbMax, m_bBox.maxCorner().u, 3*sizeof(PointCoordinateType));
 }
 
 ccBBox ccMesh::getMyOwnBB()

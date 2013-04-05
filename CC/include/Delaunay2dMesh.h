@@ -58,7 +58,7 @@ public:
 	//inherited methods (see GenericMesh)
 	virtual unsigned size() const {return numberOfTriangles;};
 	virtual void forEach(genericTriangleAction& anAction);
-	virtual void getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[]);
+	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
 	virtual void placeIteratorAtBegining();
 	virtual GenericTriangle* _getNextTriangle();
 	virtual GenericTriangle* _getTriangle(unsigned triangleIndex);

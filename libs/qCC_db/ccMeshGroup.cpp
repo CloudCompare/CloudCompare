@@ -395,15 +395,15 @@ CCLib::TriangleSummitsIndexes* ccMeshGroup::getTriangleIndexes(unsigned triangle
     return getTriangleIndexes_recursive(triangleIndex);
 }
 
-void ccMeshGroup::getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[])
+void ccMeshGroup::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
 {
     ccBBox bb = getBB();
 
-    memcpy(Mins,bb.minCorner().u,3*sizeof(PointCoordinateType));
-    memcpy(Maxs,bb.maxCorner().u,3*sizeof(PointCoordinateType));
+    memcpy(bbMin, bb.minCorner().u, 3*sizeof(PointCoordinateType));
+    memcpy(bbMax, bb.maxCorner().u, 3*sizeof(PointCoordinateType));
 }
 
-void ccMeshGroup::addChild(ccHObject* anObject, bool dependant/* = true*/)
+void ccMeshGroup::addChild(ccHObject* anObject, bool dependant/*=true*/)
 {
     assert(anObject->isKindOf(CC_MESH) ? static_cast<ccGenericMesh*>(anObject)->getAssociatedCloud()==m_associatedCloud : true);
 

@@ -473,19 +473,18 @@ void ScalarFieldTools::computeScalarFieldExtremas(const GenericCloud* theCloud, 
 	}
 }
 
-unsigned ScalarFieldTools::countScalarFieldPositiveValues(const GenericCloud* theCloud)
+unsigned ScalarFieldTools::countScalarFieldValidValues(const GenericCloud* theCloud, bool positiveSF)
 {
     assert(theCloud);
 
-	ScalarType V;
 	unsigned count = 0;
-	unsigned i,n = theCloud->size();
+	unsigned n = theCloud->size();
 
-	for (i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
-		V = theCloud->getPointScalarValue(i);
-		if (V>=0.0)
-		 ++count;
+		ScalarType V = theCloud->getPointScalarValue(i);
+		if (ScalarField::ValidValue(V,positiveSF))
+			++count;
 	}
 
 	return count;
@@ -721,4 +720,40 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
 	delete[] theOldKNums;
 
 	return true;
+}
+
+ScalarType ScalarFieldTools::computeMeanScalarValue(GenericCloud* theCloud, bool positiveSF)
+{
+	double meanValue = 0.0;
+	unsigned count=0;
+
+	for (unsigned i=0; i<theCloud->size(); ++i)
+	{
+		ScalarType V = theCloud->getPointScalarValue(i);
+		if (ScalarField::ValidValue(V,positiveSF))
+		{
+			meanValue += (double)V;
+			++count;
+		}
+	}
+
+	return (count ? (ScalarType)(meanValue/(double)count) : 0);
+}
+
+ScalarType ScalarFieldTools::computeMeanSquareScalarValue(GenericCloud* theCloud, bool positiveSF)
+{
+	double meanValue = 0.0;
+	unsigned count=0;
+
+	for (unsigned i=0; i<theCloud->size(); ++i)
+	{
+		ScalarType V = theCloud->getPointScalarValue(i);
+		if (ScalarField::ValidValue(V,positiveSF))
+		{
+			meanValue += (double)V*(double)V;
+			++count;
+		}
+	}
+
+	return (count ? (ScalarType)(meanValue/(double)count) : 0);
 }

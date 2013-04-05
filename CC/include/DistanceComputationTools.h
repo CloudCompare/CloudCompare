@@ -190,24 +190,6 @@ public:
 	**/
 	static ScalarType computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* plane);
 
-	//! Computes the mean distance of a cloud
-	/** Returns the mean of the positive scalar values associated to each point
-		Warning: be sure to activate an OUTPUT scalar field on the input cloud
-		\param theCloud the point cloud
-		\param includeNegValues specifies whether negative values should be included in computation
-		\return the associated scalar field mean value
-	**/
-	static ScalarType computeMeanDist(GenericCloud* theCloud, bool includeNegValues = false);
-
-    //! Computes the mean square distance of a cloud
-	/** Returns the mean of the square of the positive scalar values associated to each point
-		Warning: be sure to activate an OUTPUT scalar field on the input cloud
-		\param theCloud the point cloud
-		\param includeNegValues specifies whether negative values should be included in computation
-		\return the associated scalar field mean value
-    **/
-	static ScalarType computeMeanSquareDist(GenericCloud* theCloud, bool includeNegValues = false);
-
 	/*** OTHER METHODS ***/
 
 	//! Computes a the geodesic distances over a point cloud "surface", starting from a seed point

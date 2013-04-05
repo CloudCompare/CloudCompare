@@ -34,6 +34,13 @@ class ccPlane;
 				ccGenericPointCloud
 ***************************************************/
 
+//default material for clouds (with normals)
+#define CC_DEFAULT_CLOUD_AMBIENT_COLOR		ccColor::bright
+#define CC_DEFAULT_CLOUD_SPECULAR_COLOR		ccColor::bright
+#define CC_DEFAULT_CLOUD_DIFFUSE_COLOR		ccColor::bright
+#define CC_DEFAULT_CLOUD_EMISSION_COLOR		ccColor::night
+#define CC_DEFAULT_CLOUD_SHININESS			50.0f
+
 //! A 3D cloud interface with associated features (color, normals, octree, etc.)
 /** A generic point cloud can have multiples features:
 	- colors (RGB)

@@ -27,6 +27,7 @@
 #include "CCConst.h"
 #include "DistanceComputationTools.h"
 #include "ScalarFieldTools.h"
+#include "ScalarField.h"
 
 //system
 #include <math.h>
@@ -36,123 +37,84 @@
 using namespace CCLib;
 
 NormalDistribution::NormalDistribution()
+	: GenericDistribution()
+	, m_mu(0)
+	, m_sigma2(0)
+	, m_qFactor(0)
+	, m_normFactor(0)
 {
-	parametersDefined = false;
 }
 
-NormalDistribution::NormalDistribution(ScalarType _mu, ScalarType _sigma2)
+NormalDistribution::NormalDistribution(ScalarType mu, ScalarType sigma2)
 {
-	setParameters(_mu,_sigma2);
+	setParameters(mu,sigma2);
 }
 
-bool NormalDistribution::getParameters(ScalarType &_mu, ScalarType &_sigma2) const
+bool NormalDistribution::getParameters(ScalarType &mu, ScalarType &sigma2) const
 {
-	_mu = mu;
-	_sigma2 = sigma2;
+	mu = m_mu;
+	sigma2 = m_sigma2;
 
-	return parametersDefined;
+	return isValid();
 }
 
-bool NormalDistribution::setParameters(ScalarType _mu, ScalarType _sigma2)
+bool NormalDistribution::setParameters(ScalarType mu, ScalarType sigma2)
 {
-	mu = _mu;
-	sigma2 = _sigma2;
+	m_mu = mu;
+	m_sigma2 = sigma2;
 
-	//pour le test du Chi2
-	chi2ClassesPositions.clear();
-	Pi.clear();
+	//update Chi2 data
+	m_chi2ClassesPositions.clear();
+	m_Pi.clear();
 
-	if (sigma2>0.0)
+	if (m_sigma2 > ZERO_TOLERANCE)
 	{
-		parametersDefined=true;
-		qFactor=1.0f/(2.0f*sigma2);
-		normFactor=1.0/sqrt(2.0*M_PI*(double)sigma2);
+		setValid(true);
+		m_qFactor = 1.0/(2.0*(double)m_sigma2);
+		m_normFactor = 1.0/sqrt(2.0*M_PI*(double)m_sigma2);
 	}
 	else
 	{
-		parametersDefined=false;
-		qFactor=1.0;
-		normFactor=1.0;
+		setValid(false);
+		m_qFactor = 1.0;
+		m_normFactor = 1.0;
 	}
 
-	return parametersDefined;
+	return isValid();
 }
 
 double NormalDistribution::computeP(ScalarType x) const
 {
-	ScalarType p = (x-mu);
-	return exp(-double(p*p*qFactor))*normFactor;
+	double p = (double)(x-m_mu);
+	return exp(-p*p*m_qFactor)*m_normFactor;
 }
 
 double NormalDistribution::computeP(ScalarType x1, ScalarType x2) const
 {
-	return 0.5*(ErrorFunction::erf(double(x2-mu)/sqrt(double(2.0*sigma2)))-ErrorFunction::erf(double(x1-mu)/sqrt(double(2.0*sigma2))));
+	return 0.5 * ( ErrorFunction::erf((double)(x2-m_mu)/sqrt(2.0*(double)m_sigma2))
+				 - ErrorFunction::erf((double)(x1-m_mu)/sqrt(2.0*(double)m_sigma2)) );
 }
 
 double NormalDistribution::computePfromZero(ScalarType x) const
 {
-	return 0.5*(ErrorFunction::erf(double(x-mu)/sqrt(2.0*double(sigma2)))+1.0);
+	return 0.5* ( ErrorFunction::erf((double)(x-m_mu)/sqrt(2.0*(double)m_sigma2)) + 1.0 );
 }
 
-void NormalDistribution::getTextualDescription(char* buffer) const
+bool NormalDistribution::computeParameters(const GenericCloud* cloud, bool includeNegValues)
 {
-    assert(buffer);
+	setValid(false);
 
-	if (parametersDefined)
-		sprintf(buffer,"Normal [mean=%5.3f,sigma=%3.5f]",mu,sqrt(sigma2));
-	else
-		sprintf(buffer,"Undefined Normal Distribution");
-}
-
-bool NormalDistribution::computeParameters(const GenericCloud* Yk, bool includeNegValues)
-{
-	parametersDefined = false;
-
-	int i,n = Yk->size();
-	if (n==0)
-		return false;
-
-	double val, mean=0.0, stddev2=0.0;
-	int counter=0;
-
-	for (i=0;i<n;++i)
-	{
-		val = (double)Yk->getPointScalarValue(i);
-		if (includeNegValues || val>=0.0)
-		{
-			mean += val;
-			stddev2 += val*val;
-			++counter;
-		}
-	}
-
-	if (counter==0)
-        return false;
-
-    mean /= (double)counter;
-    stddev2 = fabs(stddev2/(double)counter - mean*mean);
-    return setParameters((ScalarType)mean,(ScalarType)stddev2);
-}
-
-bool NormalDistribution::computeParameters(const distancesContainer& values, bool includeNegValues)
-{
-	parametersDefined = false;
-
-	size_t i,n=values.size();
-	if (n==0)
-        return false;
-
-	//compute mean and std. dev.
-	double val, mean=0.0, stddev2=0.0;
+	double mean=0.0, stddev2=0.0;
 	unsigned counter=0;
 
-	for (i=0;i<n;++i)
+	unsigned n = cloud->size();
+	for (unsigned i=0; i<n; ++i)
 	{
-		val = (double)values[i];
-		if (includeNegValues || val>=0.0)
+		ScalarType V = cloud->getPointScalarValue(i);
+		if (ScalarField::ValidValue(V,!includeNegValues))
 		{
-			mean += val;
-			stddev2 += val*val;
+			mean += (double)V;
+			stddev2 += (double)V*(double)V;
 			++counter;
 		}
 	}
@@ -162,47 +124,75 @@ bool NormalDistribution::computeParameters(const distancesContainer& values, boo
 
     mean /= (double)counter;
     stddev2 = fabs(stddev2/(double)counter - mean*mean);
+
     return setParameters((ScalarType)mean,(ScalarType)stddev2);
 }
 
-bool NormalDistribution::computeRobustParameters(const distancesContainer& values, double nSigma, bool includeNegValues)
+bool NormalDistribution::computeParameters(const ScalarContainer& values, bool includeNegValues)
+{
+	setValid(false);
+
+	//compute mean and std. dev.
+	double mean=0.0, stddev2=0.0;
+	unsigned counter=0;
+
+	for (ScalarContainer::const_iterator it = values.begin(); it != values.end(); ++it)
+	{
+		if (ScalarField::ValidValue(*it,!includeNegValues))
+		{
+			mean += (double)(*it);
+			stddev2 += (double)(*it)*(double)(*it);
+			++counter;
+		}
+	}
+
+	if (counter==0)
+        return false;
+
+    mean /= (double)counter;
+    stddev2 = fabs(stddev2/(double)counter - mean*mean);
+
+    return setParameters((ScalarType)mean,(ScalarType)stddev2);
+}
+
+bool NormalDistribution::computeRobustParameters(const ScalarContainer& values, double nSigma, bool includeNegValues)
 {
 	if (!computeParameters(values,includeNegValues))
         return false;
 
-	unsigned k,counter=0;
-	double stddev = sqrt(sigma2)*nSigma;
+	//max std. deviation
+	const double maxStddev = sqrt((double)m_sigma2)*nSigma;
+
+	unsigned counter=0;
 	double mean=0.0,stddev2=0.0;
-	ScalarType val;
-	for (k=0;k<values.size();++k)
+
+	for (ScalarContainer::const_iterator it = values.begin(); it != values.end(); ++it)
 	{
-	    val = values[k];
-		if (fabs(val-mu)<stddev)
+		if ((double)fabs(*it-m_mu) < maxStddev)
 		{
+			mean += (double)(*it);
+			stddev2 += (double)(*it)*(double)(*it);
 			++counter;
-			mean += (double)val;
-			stddev2 += (double)val*val;
 		}
 	}
 
-	if (counter==0)
+	if (counter == 0)
         return false;
 
     mean /= (double)counter;
     stddev2 = fabs(stddev2/(double)counter - mean*mean);
+
     return setParameters((ScalarType)mean,(ScalarType)stddev2);
 }
 
-double NormalDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, bool includeNegValues, int* histo)
+double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, bool includeNegValues, int* histo)
 {
-	assert(Yk);
+	assert(cloud);
 
-	unsigned i,n = Yk->size();
+	unsigned n = cloud->size();
 
     //we must refine the real number of elements
-    unsigned numberOfElements = n;
-	if (!includeNegValues)
-        numberOfElements = ScalarFieldTools::countScalarFieldPositiveValues(Yk);
+	unsigned numberOfElements = ScalarFieldTools::countScalarFieldValidValues(cloud,!includeNegValues);
 
     if (numberOfElements==0)
         return -1.0;
@@ -215,7 +205,7 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned numb
 	if (!setChi2ClassesPositions(numberOfClasses))
         return -1.0;
 
-	assert(Pi.size() == numberOfClasses);
+	assert(m_Pi.size() == numberOfClasses);
 
     int* _histo = histo;
 	if (!_histo)
@@ -226,15 +216,14 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned numb
 	memset(_histo,0,numberOfClasses*sizeof(int));
 
 	//calcul de l'histogramme
-	unsigned j;
-	ScalarType V;
-	for (i=0;i<n;++i)
+	for (unsigned i=0;i<n;++i)
 	{
-		V = Yk->getPointScalarValue(i);
-		if (includeNegValues || V>=0.0)
+		ScalarType V = cloud->getPointScalarValue(i);
+		if (ScalarField::ValidValue(V,!includeNegValues))
 		{
-            for (j=0;j<numberOfClasses-1;++j)
-                if (V<chi2ClassesPositions[j])
+			unsigned j=0;
+            for (;j<numberOfClasses-1;++j)
+                if (V < m_chi2ClassesPositions[j])
                     break;
 
             ++_histo[j];
@@ -242,12 +231,14 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned numb
 	}
 
 	//calcul de la distance du Chi2
-	ScalarType nPi,tempValue,dk = 0.0;
-	for (i=0;i<numberOfClasses;++i)
+	double dk = 0.0;
 	{
-		nPi = Pi[i]*(ScalarType)numberOfElements;
-		tempValue = (ScalarType)_histo[i]-nPi;
-		dk += tempValue*tempValue/nPi;
+		for (unsigned i=0;i<numberOfClasses;++i)
+		{
+			double nPi = (double)m_Pi[i]*(double)numberOfElements;
+			double tempValue = (double)_histo[i]-nPi;
+			dk += tempValue*tempValue/nPi;
+		}
 	}
 
 	if (_histo && !histo)
@@ -259,44 +250,54 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned numb
 
 bool NormalDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 {
-	chi2ClassesPositions.clear();
-	Pi.clear();
+	m_chi2ClassesPositions.clear();
+	m_Pi.clear();
 
-	if (!parametersDefined || numberOfClasses<2)
+	if (!isValid() || numberOfClasses<2)
         return false;
 
-	//cas très simple
+	try
+	{
+		m_Pi.reserve(numberOfClasses);
+		m_chi2ClassesPositions.reserve(numberOfClasses-1);
+	}
+	catch(std::bad_alloc)
+	{
+		//not engouh memory
+		return false;
+	}
+
+	//simplest case
 	if (numberOfClasses==2)
 	{
-		Pi.push_back(0.5);
-		chi2ClassesPositions.push_back(mu);
-		Pi.push_back(0.5);
+		m_Pi.push_back(0.5);
+		m_chi2ClassesPositions.push_back(m_mu);
+		m_Pi.push_back(0.5);
 	}
-	//cas général
-	else //numberOfClasses>2
+	else //general case: numberOfClasses>2
 	{
-		ScalarType x,y,oldy,sigma = sqrt(sigma2);
-		//une première classe entre -inf et mu-2.sigma
-		x = mu-2.0f*sigma;
-		y = (ScalarType)computePfromZero(x);
-		Pi.push_back(y);
-		chi2ClassesPositions.push_back(x);
+		ScalarType sigma = sqrt(m_sigma2);
+		//1st class between -inf and mu-2.sigma
+		ScalarType x = m_mu-2.0f*sigma;
+		ScalarType y = (ScalarType)computePfromZero(x);
+		m_Pi.push_back(y);
+		m_chi2ClassesPositions.push_back(x);
 
-		//une serie de numberOfClasses-2 classes comprises entre mu-2.sigma et mu+2.sigma
+		//numberOfClasses-2 classes between mu-2.sigma and mu+2.sigma
 		ScalarType pas = 4.0f*sigma/(ScalarType)(numberOfClasses-2);
 		for (unsigned i=0;i<numberOfClasses-2;++i)
 		{
 			x = x+pas;
-			oldy = y;
+			ScalarType oldy = y;
 			y = (ScalarType)computePfromZero(x);
-			Pi.push_back(y-oldy);
-			chi2ClassesPositions.push_back(x);
+			m_Pi.push_back(y-oldy);
+			m_chi2ClassesPositions.push_back(x);
 		}
 
-		//une dernière classe entre et mu+2.sigma et inf
-		//x = mu+2.0*sigma;
+		//last class between mu+2.sigma and +inf
+		//x = m_mu+2.0*sigma;
 		y = 1.0f-y;
-		Pi.push_back(y);
+		m_Pi.push_back(y);
 	}
 
 	return true;

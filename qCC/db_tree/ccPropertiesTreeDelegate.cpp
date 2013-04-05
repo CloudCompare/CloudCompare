@@ -1473,8 +1473,18 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		emit ccObjectPropertiesChanged(m_currentObject);
 		break;
 	case OBJECT_VISIBILITY:
-		m_currentObject->setVisible(item->checkState() == Qt::Checked);
-		redraw=true;
+		{
+			bool objectWasDisplayed = m_currentObject->isDisplayed();
+			m_currentObject->setVisible(item->checkState() == Qt::Checked);
+			bool objectIsDisplayed = m_currentObject->isDisplayed();
+			if (objectWasDisplayed != objectIsDisplayed)
+			{
+				if (m_currentObject->isGroup())
+					emit ccObjectAndChildrenAppearanceChanged(m_currentObject);
+				else
+					emit ccObjectAppearanceChanged(m_currentObject);
+			}
+		}
 		break;
 	case OBJECT_COLORS_SHOWN:
 		m_currentObject->showColors(item->checkState() == Qt::Checked);

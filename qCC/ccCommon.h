@@ -19,6 +19,7 @@
 #define CC_COMMON_HEADER
 
 //STANDARD SCALAR FIELD NAMES
+#define CC_DEFAULT_SF_NAME "Unknown"
 #define CC_CLOUD2CLOUD_DISTANCES_DEFAULT_SF_NAME "C2C distances"
 #define CC_TEMP_CHAMFER_DISTANCES_DEFAULT_SF_NAME "Temp. Chamfer distances"
 #define CC_TEMP_DISTANCES_DEFAULT_SF_NAME "Temp. distances"
@@ -38,6 +39,10 @@
 #define CC_SCAN_INTENSITY_FIELD_NAME "Intensity"
 #define CC_SCAN_RETURN_INDEX_FIELD_NAME "Return index"
 #define CC_LAS_CLASSIFICATION_FIELD_NAME "LAS classification"
+#define CC_DEFAULT_RAD_SCATTERING_ANGLES_SF_NAME "Scattering angles (rad)"
+#define CC_DEFAULT_DEG_SCATTERING_ANGLES_SF_NAME "Scattering angles (deg)"
+#define CC_DEFAULT_RANGES_SF_NAME "Ranges"
+#define CC_DEFAULT_SQUARED_RANGES_SF_NAME "Ranges (squared)"
 
 //Qt
 #include <QString>

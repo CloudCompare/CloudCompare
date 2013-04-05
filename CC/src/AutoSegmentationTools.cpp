@@ -166,7 +166,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	fm->setJumpCoef(50.0);
 	fm->setDetectionThreshold(alpha);
 
-	int result = fm->init(theCloud,theOctree,octreeLevel);
+	int result = fm->init(theCloud,theOctree,octreeLevel,!signedSF);
 	int octreeLength = OCTREE_LENGTH(octreeLevel)-1;
 
 	if (result<0)

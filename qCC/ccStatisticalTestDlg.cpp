@@ -14,22 +14,16 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1595                                                              $
-//$LastChangedDate:: 2010-07-02 18:04:17 +0200 (ven., 02 juil. 2010)       $
-//**************************************************************************
-//
 
 #include "ccStatisticalTestDlg.h"
 
-ccStatisticalTestDlg::ccStatisticalTestDlg(const char* p1Label,
-                                           const char* p2Label,
-                                           const char* p3Label/*=0*/,
-                                           const char* windowTitle/*=0*/,
+ccStatisticalTestDlg::ccStatisticalTestDlg(QString p1Label,
+                                           QString p2Label,
+                                           QString p3Label/*=QString()*/,
+                                           QString windowTitle/*=QString()*/,
                                            QWidget* parent/*=0*/)
-        : QDialog(parent), Ui::StatisticalTestDialog()
+	: QDialog(parent)
+	, Ui::StatisticalTestDialog()
 {
     setupUi(this);
 
@@ -37,7 +31,7 @@ ccStatisticalTestDlg::ccStatisticalTestDlg(const char* p1Label,
 
     param1Label->setText(p1Label);
     param2Label->setText(p2Label);
-    if (p3Label)
+    if (!p3Label.isNull())
         param3Label->setText(p3Label);
     else
     {
@@ -47,31 +41,31 @@ ccStatisticalTestDlg::ccStatisticalTestDlg(const char* p1Label,
 
     neighborsSpinBox->setValue(16);
 
-    if (windowTitle)
+	if (!windowTitle.isNull())
         setWindowTitle(windowTitle);
 }
 
-double ccStatisticalTestDlg::getParam1()
+double ccStatisticalTestDlg::getParam1() const
 {
     return param1SpinBox->value();
 }
 
-double ccStatisticalTestDlg::getParam2()
+double ccStatisticalTestDlg::getParam2() const
 {
     return param2SpinBox->value();
 }
 
-double ccStatisticalTestDlg::getParam3()
+double ccStatisticalTestDlg::getParam3() const
 {
     return param3SpinBox->value();
 }
 
-int ccStatisticalTestDlg::getNeighborsNumber()
+int ccStatisticalTestDlg::getNeighborsNumber() const
 {
     return neighborsSpinBox->value();
 }
 
-double ccStatisticalTestDlg::getProba()
+double ccStatisticalTestDlg::getProba() const
 {
     return probaSpinBox->value();
 }

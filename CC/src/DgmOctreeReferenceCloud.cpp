@@ -121,13 +121,13 @@ void DgmOctreeReferenceCloud::computeBB()
 	m_validBB=true;
 }
 
-void DgmOctreeReferenceCloud::getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[])
+void DgmOctreeReferenceCloud::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
 {
 	if (!m_validBB)
 		computeBB();
 
-	memcpy(Mins,m_bbMins,sizeof(PointCoordinateType)*3);
-	memcpy(Maxs,m_bbMaxs,sizeof(PointCoordinateType)*3);
+	memcpy(bbMin, m_bbMins, sizeof(PointCoordinateType)*3);
+	memcpy(bbMax, m_bbMaxs, sizeof(PointCoordinateType)*3);
 }
 
 void DgmOctreeReferenceCloud::placeIteratorAtBegining()

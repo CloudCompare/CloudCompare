@@ -1423,12 +1423,6 @@ static colorType s_rgbBuffer3ub[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
 static float s_rgbBuffer3f[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
 static float s_colormapf[glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE];
 
-//default material for clouds (with normals)
-#define DEFAULT_CLOUD_AMBIANT_COLOR		ccColor::bright
-#define DEFAULT_CLOUD_SPECULAR_COLOR	ccColor::bright
-#define DEFAULT_CLOUD_DIFFUSE_COLOR		ccColor::bright //will be associated to colors if any
-#define DEFAULT_CLOUD_EMISSION_COLOR	ccColor::night
-
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
     if (!m_points->isAllocated())
@@ -1488,11 +1482,11 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
         {
             //DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version is sometimes 1.0!
             glEnable((QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_1_2 ? GL_RESCALE_NORMAL : GL_NORMALIZE));
-            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,	  DEFAULT_CLOUD_AMBIANT_COLOR  );
-            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  DEFAULT_CLOUD_SPECULAR_COLOR );
-            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,   DEFAULT_CLOUD_DIFFUSE_COLOR  );
-			glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  DEFAULT_CLOUD_EMISSION_COLOR );
-            glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, 50.0f);
+            glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT,	  CC_DEFAULT_CLOUD_AMBIENT_COLOR  );
+            glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR,  CC_DEFAULT_CLOUD_SPECULAR_COLOR );
+            glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE,   CC_DEFAULT_CLOUD_DIFFUSE_COLOR  );
+			glMaterialfv(GL_FRONT_AND_BACK, GL_EMISSION,  CC_DEFAULT_CLOUD_EMISSION_COLOR );
+            glMaterialf (GL_FRONT_AND_BACK, GL_SHININESS, CC_DEFAULT_CLOUD_SHININESS);
             glEnable(GL_LIGHTING);
 
 			if (glParams.showSF)

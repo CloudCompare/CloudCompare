@@ -79,6 +79,7 @@ static const char c_ps_perspectiveView[]	= "perspectiveView";
 static const char c_ps_objectMode[]			= "objectCenteredView";
 static const char c_ps_sunLight[]			= "sunLightEnabled";
 static const char c_ps_customLight[]		= "customLightEnabled";
+static const char c_ps_pivotVisibility[]	= "pivotVisibility";
 
 //Unique GL window ID
 static int s_GlWindowNumber = 0;
@@ -167,17 +168,33 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 		settings.beginGroup(c_ps_groupName);
 		
 		//load parameters
-		bool perspectiveView	= settings.value(c_ps_perspectiveView,	false	).toBool();
-		bool objectCenteredView	= settings.value(c_ps_objectMode,		true	).toBool();
-		m_sunLightEnabled		= settings.value(c_ps_sunLight,			true	).toBool();
-		m_customLightEnabled	= settings.value(c_ps_customLight,		false	).toBool();
+		bool perspectiveView	= settings.value(c_ps_perspectiveView,	false				).toBool();
+		bool objectCenteredView	= settings.value(c_ps_objectMode,		true				).toBool();
+		m_sunLightEnabled		= settings.value(c_ps_sunLight,			true				).toBool();
+		m_customLightEnabled	= settings.value(c_ps_customLight,		false				).toBool();
+		int pivotVisibility		= settings.value(c_ps_pivotVisibility,	PIVOT_SHOW_ON_MOVE	).toInt();
 		
 		settings.endGroup();
 
+		//perspective
 		if (!perspectiveView)
 			ccLog::Print("[ccGLWindow] Persective is off by default");
 		else
 			ccLog::Print(QString("[ccGLWindow] Persective is on by default (%1)").arg(objectCenteredView ? "object-centered" : "viewer-centered"));
+
+		//pivot visibility
+		switch(pivotVisibility)
+		{
+		case PIVOT_HIDE:
+			setPivotVisibility(PIVOT_HIDE);
+			break;
+		case PIVOT_SHOW_ON_MOVE:
+			setPivotVisibility(PIVOT_SHOW_ON_MOVE);
+			break;
+		case PIVOT_ALWAYS_SHOW:
+			setPivotVisibility(PIVOT_ALWAYS_SHOW);
+			break;
+		}
 
 		//apply saved parameters
 		setPerspectiveState(perspectiveView, objectCenteredView);
@@ -1624,6 +1641,9 @@ void ccGLWindow::updateActiveLabelsList(int x, int y, bool extendToSelectedLabel
 	if (!m_globalDBRoot && !m_winDBRoot)
 		return;
 
+	if (m_interactionMode == TRANSFORM_ENTITY) //labels are ignored in 'Interactive Transformation' mode
+		return;
+
 	int labelID = startPicking(LABELS_PICKING,x,y);
 	if (labelID<1)
 		return;
@@ -2023,7 +2043,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 					acceptEvent = true;
 				}
 
-				if (!hotZoneClick && m_pickingMode != NO_PICKING)
+				if (!hotZoneClick && m_pickingMode != NO_PICKING && m_interactionMode != TRANSFORM_ENTITY)
 				{
 					PICKING_MODE pickingMode = m_pickingMode;
 					if (pickingMode == ENTITY_PICKING && (QApplication::keyboardModifiers() & Qt::ShiftModifier))
@@ -2090,12 +2110,12 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	if (!m_globalDBRoot && !m_winDBRoot)
 		return -1;
 
+	assert(m_interactionMode != TRANSFORM_ENTITY);
+
 	//setup rendering context
 	CC_DRAW_CONTEXT context;
 	getContext(context);
 	unsigned short pickingFlags = CC_DRAW_FOREGROUND;
-	if (m_interactionMode == TRANSFORM_ENTITY)		
-		pickingFlags |= CC_VIRTUAL_TRANS_ENABLED;
 
 	switch(pickingMode)
 	{
@@ -2511,6 +2531,14 @@ void glDrawUnitCircle(unsigned char dim, int steps = 64)
 void ccGLWindow::setPivotVisibility(PivotVisibility vis)
 {
 	m_pivotVisibility = vis;
+	
+	//auto-save last pivot visibility settings
+	{
+		QSettings settings;
+		settings.beginGroup(c_ps_groupName);
+		settings.setValue(c_ps_pivotVisibility,	vis);
+		settings.endGroup();
+	}
 }
 
 ccGLWindow::PivotVisibility ccGLWindow::getPivotVisibility() const

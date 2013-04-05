@@ -254,45 +254,6 @@ int DistanceComputationTools::computeHausdorffDistance(GenericIndexedCloudPersis
 	return result;
 }
 
-ScalarType DistanceComputationTools::computeMeanDist(GenericCloud* theCloud, bool includeNegValues /*= false*/)
-{
-	theCloud->placeIteratorAtBegining();
-	double meanDist = 0.0;
-	unsigned i,count=0;
-
-	for (i=0;i<theCloud->size();++i)
-	{
-		ScalarType V = theCloud->getPointScalarValue(i);
-		if (includeNegValues || V>=0.0)
-		{
-			meanDist += (double)V;
-			++count;
-		}
-	}
-
-	return (count>0 ? (ScalarType)(meanDist/(double)count) : 0.0f);
-}
-
-ScalarType DistanceComputationTools::computeMeanSquareDist(GenericCloud* theCloud, bool includeNegValues /*= false*/)
-{
-	theCloud->placeIteratorAtBegining();
-	double meanDist = 0.0;
-	ScalarType V;
-	unsigned i,count=0;
-
-	for (i=0;i<theCloud->size();++i)
-	{
-		V = theCloud->getPointScalarValue(i);
-		if (includeNegValues || V>=0.0)
-		{
-			meanDist += (double)(V*V);
-			++count;
-		}
-	}
-
-	return (ScalarType)(count>0 ? (ScalarType)(meanDist/(double)count) : 0.0f);
-}
-
 bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* comparedCloud, GenericIndexedCloudPersist* referenceCloud, DgmOctree* &comparedOctree, DgmOctree* &referenceOctree, GenericProgressCallback* progressCb)
 {
     assert(comparedCloud && referenceCloud);

@@ -14,29 +14,28 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1691                                                              $
-//$LastChangedDate:: 2010-10-22 16:52:55 +0200 (ven., 22 oct. 2010)        $
-//**************************************************************************
-//
 
 #ifndef CC_PICK_ONE_ELEMENT_DLG_HEADER
 #define CC_PICK_ONE_ELEMENT_DLG_HEADER
 
 #include <ui_pickOneElementDlg.h>
 
+//! Minimal dialog to pick one element in a list (combox box)
 class ccPickOneElementDlg : public QDialog, public Ui::PickOneElementDialog
 {
 public:
-    ccPickOneElementDlg(const char* label,
-                            const char* windowTitle=0,
-                                QWidget* parent=0);
 
-    void addElement(const char* elementName);
+	//! Default constructor
+    ccPickOneElementDlg(QString label,
+						QString windowTitle=QString(),
+						QWidget* parent=0);
+
+	//! Add an element to the combo box
+    void addElement(QString elementName);
+	//! Sets the combo box default index
     void setDefaultIndex(int index);
+	//! Returns the combo box current index (after completion)
     int getSelectedIndex();
 };
 
-#endif
+#endif //CC_PICK_ONE_ELEMENT_DLG_HEADER

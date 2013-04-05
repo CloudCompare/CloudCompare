@@ -26,6 +26,7 @@
 #include "GenericCloud.h"
 #include "CCConst.h"
 #include "ScalarFieldTools.h"
+#include "ScalarField.h"
 
 //system
 #include <math.h>
@@ -129,7 +130,7 @@ bool WeibullDistribution::getParameters(ScalarType &_a, ScalarType &_b) const
 	_a = a;
 	_b = b;
 
-	return parametersDefined;
+	return isValid();
 }
 
 bool WeibullDistribution::getOtherParameters(ScalarType &_mu, ScalarType &_sigma2) const
@@ -137,7 +138,7 @@ bool WeibullDistribution::getOtherParameters(ScalarType &_mu, ScalarType &_sigma
 	_mu = mu;
 	_sigma2 = sigma2;
 
-	return parametersDefined;
+	return isValid();
 }
 
 bool WeibullDistribution::setParameters(ScalarType _a, ScalarType _b, ScalarType _valueShift)
@@ -155,33 +156,29 @@ bool WeibullDistribution::setParameters(ScalarType _a, ScalarType _b, ScalarType
 		mu = (ScalarType)((double)b * gamma_cc(1.0+1.0/a));
 		sigma2 =(ScalarType)((double)(b*b) * gamma_cc(1.0+2.0/a) - (double)(mu*mu));
 
-		parametersDefined=true;
+		setValid(true);
 	}
 	else
 	{
 		mu=sigma2=0.0;
-		parametersDefined=false;
+		setValid(false);
 	}
 
-	return parametersDefined;
+	return isValid();
 };
 
-bool WeibullDistribution::computeParameters(const GenericCloud* Yk, bool includeNegValues)
+bool WeibullDistribution::computeParameters(const GenericCloud* cloud, bool includeNegValues)
 {
-	parametersDefined = false;
+	setValid(false);
 
-	int n = Yk->size();
+	int n = cloud->size();
 	if (n == 0)
 		return false;
 
 	//on cherche la valeur maximale du champ scalaire pour éviter les overflows
 	ScalarType maxValue=0.0;
-	ScalarFieldTools::computeScalarFieldExtremas(Yk, valueShift, maxValue, includeNegValues);
+	ScalarFieldTools::computeScalarFieldExtremas(cloud, valueShift, maxValue, includeNegValues);
 
-	/*if (!includeNegValues)
-	valueShift = 0.0;
-	else
-	//*/
 	valueShift -= (ScalarType)ZERO_TOLERANCE;
 
 	if (maxValue<=valueShift)
@@ -189,7 +186,7 @@ bool WeibullDistribution::computeParameters(const GenericCloud* Yk, bool include
 
 	ScalarType inverseMaxValue = 1.0f/(maxValue-valueShift);
 
-	a = findGRoot(Yk,inverseMaxValue);
+	a = findGRoot(cloud,inverseMaxValue);
 
 	if (a<0.0)
 		return false;
@@ -200,7 +197,7 @@ bool WeibullDistribution::computeParameters(const GenericCloud* Yk, bool include
 	int i,counter = 0;
 	for (i=0;i<n;++i)
 	{
-		v = Yk->getPointScalarValue(i)-valueShift;
+		v = cloud->getPointScalarValue(i)-valueShift;
 		if (v>=0.0)
 		{
 			b += pow(v*inverseMaxValue,a);
@@ -242,22 +239,9 @@ double WeibullDistribution::computeP(ScalarType x1, ScalarType x2) const
 	return exp(-pow((double)((x1-valueShift)/b),(double)a))-exp(-pow((double)((x2-valueShift)/b),(double)a));
 }
 
-void WeibullDistribution::getTextualDescription(char* buffer) const
+ScalarType WeibullDistribution::computeG(const GenericCloud* cloud, ScalarType r) const
 {
-	if (!parametersDefined)
-		sprintf(buffer,"Undefined Weibull distribution");
-	else
-	{
-		if (valueShift != 0.0)
-			sprintf(buffer,"WeibullDistribution [a=%2.4f,b=%5.4f,shfit=%5.4f]",a,b,valueShift);
-		else
-			sprintf(buffer,"WeibullDistribution [a=%2.4f,b=%5.4f]",a,b);
-	}
-}
-
-ScalarType WeibullDistribution::computeG(const GenericCloud* Yk, ScalarType r) const
-{
-	int n = Yk->size();
+	int n = cloud->size();
 
 	//a & n sould be > 0.0 !
 	if (r<=0.0 || n==0)
@@ -268,7 +252,7 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* Yk, ScalarType r) c
 
 	for (i=0;i<n;++i)
 	{
-		v = Yk->getPointScalarValue(i)-valueShift;
+		v = cloud->getPointScalarValue(i)-valueShift;
 		if (v >= 0) //ici il ne faut pas prendre en compte les valeurs négatives (= points cachés/filtrés)
 		{
 			if (v > ZERO_TOLERANCE)
@@ -305,9 +289,9 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* Yk, ScalarType r) c
 	return (ScalarType)((double)r * (p/q - s/(double)counter) - 1.0);
 }
 
-ScalarType WeibullDistribution::computeG(const GenericCloud* Yk, ScalarType r, ScalarType inverseVmax) const
+ScalarType WeibullDistribution::computeG(const GenericCloud* cloud, ScalarType r, ScalarType inverseVmax) const
 {
-	int n = Yk->size();
+	int n = cloud->size();
 
 	//r & n sould be > 0.0 !
 	if (r<=0.0 || n==0)
@@ -318,7 +302,7 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* Yk, ScalarType r, S
 
 	for (i=0;i<n;++i)
 	{
-		v = Yk->getPointScalarValue(i)-valueShift;
+		v = cloud->getPointScalarValue(i)-valueShift;
 		if (v>=0.0)
 		{
 			if (v > ZERO_TOLERANCE)
@@ -356,18 +340,18 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* Yk, ScalarType r, S
 	return (ScalarType)((double)r * (p/q - s/(double)counter) - 1.0);
 }
 
-ScalarType WeibullDistribution::findGRoot(const GenericCloud* Yk, ScalarType inverseMaxValue) const
+ScalarType WeibullDistribution::findGRoot(const GenericCloud* cloud, ScalarType inverseMaxValue) const
 {
 	ScalarType r=-1.0;
 	ScalarType v,vMin,vMax,aMin,aMax;
 	aMin = aMax = 1.0;
-	vMin = vMax = v = computeG(Yk,aMin,inverseMaxValue);
+	vMin = vMax = v = computeG(cloud,aMin,inverseMaxValue);
 
 	//on cherche une borne minimale pour la dichotomie telle que computeG(aMin)<0.0
 	while (vMin>0.0 && aMin>1e-7)
 	{
 		aMin *= 0.1f;
-		vMin = computeG(Yk,aMin,inverseMaxValue);
+		vMin = computeG(cloud,aMin,inverseMaxValue);
 	}
 
 	if (fabs(vMin)<1e-7)
@@ -379,7 +363,7 @@ ScalarType WeibullDistribution::findGRoot(const GenericCloud* Yk, ScalarType inv
 	while (vMax<0.0 && aMax<1000.0)
 	{
 		aMax *= 2.0; //puisqu'on calcule des x^a, ça devient vite énorme !!!!
-		vMax = computeG(Yk,aMax,inverseMaxValue);
+		vMax = computeG(cloud,aMax,inverseMaxValue);
 	}
 
 	if (fabs(vMax)<1e-7)
@@ -393,7 +377,7 @@ ScalarType WeibullDistribution::findGRoot(const GenericCloud* Yk, ScalarType inv
 	{
 		r = (aMin+aMax)*0.5f;
 		old_v=v;
-		v = computeG(Yk,r,inverseMaxValue);
+		v = computeG(cloud,r,inverseMaxValue);
 
 		if (fabs(old_v-v)<1e-7)
 			return r;
@@ -407,16 +391,14 @@ ScalarType WeibullDistribution::findGRoot(const GenericCloud* Yk, ScalarType inv
 	return r; //shouldn't be here !
 }
 
-double WeibullDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, bool includeNegValues, int* histo)
+double WeibullDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, bool includeNegValues, int* histo)
 {
-	assert(Yk);
+	assert(cloud);
 
-	unsigned i,n = Yk->size();
+	unsigned n = cloud->size();
 
 	//we must refine the real number of elements
-	unsigned numberOfElements = n;
-	if (!includeNegValues)
-		numberOfElements = ScalarFieldTools::countScalarFieldPositiveValues(Yk);
+	unsigned numberOfElements = ScalarFieldTools::countScalarFieldValidValues(cloud,!includeNegValues);
 
 	if (numberOfElements==0)
 		return -1.0;
@@ -439,15 +421,14 @@ double WeibullDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned num
 	memset(_histo,0,numberOfClasses*sizeof(int));
 
 	//calcul de l'histogramme
-	unsigned j;
-	ScalarType V;
-	for (i=0;i<n;++i)
+	for (unsigned i=0;i<n;++i)
 	{
-		V = Yk->getPointScalarValue(i);
-		if (includeNegValues || V>=0.0)
+		ScalarType V = cloud->getPointScalarValue(i);
+		if (ScalarField::ValidValue(V,!includeNegValues))
 		{
-			for (j=0;j<numberOfClasses-1;++j)
-				if (V<chi2ClassesPositions[j])
+			unsigned j=0;
+			for (;j<numberOfClasses-1;++j)
+				if (V < chi2ClassesPositions[j])
 					break;
 
 			++_histo[j];
@@ -455,14 +436,16 @@ double WeibullDistribution::computeChi2Dist(const GenericCloud* Yk, unsigned num
 	}
 
 	//calcul de la distance du Chi2
-	ScalarType nPi = (ScalarType)numberOfElements/(ScalarType)numberOfClasses;
-	ScalarType tempValue,dk = 0.0;
-	for (i=0;i<numberOfClasses;++i)
+	double dk = 0;
 	{
-		tempValue = (ScalarType)_histo[i] - nPi;
-		dk += tempValue*tempValue;
+		double nPi = (double)numberOfElements/(double)numberOfClasses;
+		for (unsigned i=0;i<numberOfClasses;++i)
+		{
+			double tempValue = (double)_histo[i] - nPi;
+			dk += tempValue*tempValue;
+		}
+		dk /= nPi;
 	}
-	dk /= nPi;
 
 	if (_histo && !histo)
 		delete[] _histo;
@@ -475,22 +458,23 @@ bool WeibullDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 {
 	chi2ClassesPositions.clear();
 
-	if (!parametersDefined || numberOfClasses<2)
+	if (!isValid() || numberOfClasses<2)
 		return false;
 
 	try
 	{
 		chi2ClassesPositions.resize(numberOfClasses-1);
 	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
+	catch(std::bad_alloc)
 	{
+		//not engouh memory
 		return false;
 	}
 
-	//on créé "numberOfClasses" classes equiprobables (elles auront des nPi>=sqrt(n) quoi qu'il arrive (avec n>=4, c bien)
+	//we create "numberOfClasses" equiprobable classes (for all of themn nPi>=sqrt(n) if n>=4)
 	double areaPerClass = 1.0/(double)numberOfClasses;
 	double currentArea = areaPerClass;
-	double invA = 1.0f/(double)a;
+	double invA = 1.0/(double)a;
 
 	for (unsigned i=1;i<numberOfClasses;++i)
 	{
@@ -499,4 +483,12 @@ bool WeibullDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 	}
 
 	return true;
+}
+
+void WeibullDistribution::setValueShift(ScalarType vs)
+{
+	if (vs != valueShift)
+		setValid(false);
+	
+	valueShift = vs;
 }

@@ -23,9 +23,6 @@
 namespace CCLib
 {
 
-//! Scalar values container
-typedef std::vector<ScalarType> distancesContainer;
-
 //! The Normal/Gaussian statistical distribution
 /** Implements the GenericDistribution interface.
 **/
@@ -52,13 +49,12 @@ public:
 	NormalDistribution(ScalarType _mu, ScalarType _sigma2);
 
 	//inherited methods (see GenericDistribution)
-	virtual bool computeParameters(const GenericCloud* Yk, bool includeNegValues);
+	virtual bool computeParameters(const GenericCloud* cloud, bool includeNegValues);
 	virtual double computeP(ScalarType x) const;
 	virtual double computePfromZero(ScalarType x) const;
 	virtual double computeP(ScalarType x1, ScalarType x2) const;
 	virtual double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, bool includeNegValues, int* histo=0);
-	virtual void getTextualDescription(char* buffer) const;
-	virtual bool isValid() const {return parametersDefined;};
+	virtual const char* getName() const { return "Gauss"; }
 
 	//! Returns the distribution parameters
 	/** \param _mu a field to transmit the distribution mean
@@ -75,10 +71,13 @@ public:
 	bool setParameters(ScalarType _mu, ScalarType _sigma2);
 
 	//! Returns the distribution mean
-	inline ScalarType getMu() const {return mu;};
+	inline ScalarType getMu() const { return m_mu; }
 
 	//! Returns the distribution variance
-	inline ScalarType getSigma2() const {return sigma2;};
+	inline ScalarType getSigma2() const { return m_sigma2; }
+
+	//! Scalar values container
+	typedef std::vector<ScalarType> ScalarContainer;
 
 	//! Computes the distribution parameters from an array of scalar values
 	/** Specific method to compute the parameters directly from an array
@@ -87,7 +86,7 @@ public:
 		\param includeNegValues specifies whether negative values should be included in computation
 		\return the validity of the computed parameters
 	**/
-	bool computeParameters(const distancesContainer& values, bool includeNegValues);
+	bool computeParameters(const ScalarContainer& values, bool includeNegValues);
 
 	//! Computes robust parameters for the distribution from an array of scalar values
 	/** Specific method to compute the parameters directly from an array
@@ -99,7 +98,7 @@ public:
 		\param includeNegValues specifies whether negative values should be included in computation
 		\return the validity of the computed parameters
 	**/
-	bool computeRobustParameters(const distancesContainer& values, double nSigma, bool includeNegValues);
+	bool computeRobustParameters(const ScalarContainer& values, double nSigma, bool includeNegValues);
 
 protected:
 
@@ -110,20 +109,23 @@ protected:
 	**/
 	virtual bool setChi2ClassesPositions(unsigned numberOfClasses);
 
-	//! Parameters validity
-	bool parametersDefined;
-
 	//! Mean
-	ScalarType mu;
+	ScalarType m_mu;
 	//! Variance
-	ScalarType sigma2;
-	//! exponential quotient
-	ScalarType qFactor;
+	ScalarType m_sigma2;
+	//! Exponential quotient
+	double m_qFactor;
 	//! Normalization factor
-	double normFactor;
+	double m_normFactor;
+
+	//! Chi2 classes limits
+	/** Used internally. Stores both limits for each class in a vector
+		(min_class_1, max_class_1, min_class_2, max_class_2, etc.).
+	**/
+	std::vector<ScalarType> m_chi2ClassesPositions;
 
 	//! Structure used during the Chi2 distance computation
-	std::vector<ScalarType> Pi;
+	std::vector<ScalarType> m_Pi;
 };
 
 }

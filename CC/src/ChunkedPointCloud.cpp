@@ -50,25 +50,24 @@ void ChunkedPointCloud::clear()
 
 void ChunkedPointCloud::forEach(genericPointAction& anAction)
 {
-	unsigned i,n = size();
+	unsigned n = size();
 
-	//si un champ scalaire est actif
+	//if a SF is already activated
 	ScalarField* currentOutScalarFieldArray = getCurrentOutScalarField();
 	if (currentOutScalarFieldArray)
 	{
-		for (i=0;i<n;++i)
+		for (unsigned i=0;i<n;++i)
 			anAction(*(CCVector3*)m_points->getValue(i),(*currentOutScalarFieldArray)[i]);
 	}
-	//sinon
-	else
+	else //otherwise we use a fake SF (DGM FIXME: is it really interesting?!)
 	{
-		ScalarType dummyDist = 0.0;
-		for (i=0;i<n;++i)
+		ScalarType dummyDist = 0;
+		for (unsigned i=0;i<n;++i)
 			anAction(*(CCVector3*)m_points->getValue(i),dummyDist);
 	}
 }
 
-void ChunkedPointCloud::getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[])
+void ChunkedPointCloud::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
 {
 	if (!m_validBB)
 	{
@@ -76,8 +75,8 @@ void ChunkedPointCloud::getBoundingBox(PointCoordinateType Mins[], PointCoordina
 		m_validBB = true;
 	}
 
-	memcpy(Mins,m_points->getMin(),3*sizeof(PointCoordinateType));
-	memcpy(Maxs,m_points->getMax(),3*sizeof(PointCoordinateType));
+	memcpy(bbMin, m_points->getMin(), 3*sizeof(PointCoordinateType));
+	memcpy(bbMax, m_points->getMax(), 3*sizeof(PointCoordinateType));
 }
 
 void ChunkedPointCloud::invalidateBoundingBox()
@@ -197,12 +196,12 @@ bool ChunkedPointCloud::enableScalarField()
 		//(and assign) a scalar field to the cloud, or that we are in a compatibility
 		//mode with old/basic behaviour: a unique SF for everything (input/output)
 
-        //we look for any default scalar field already existing
-		m_currentInScalarFieldIndex = getScalarFieldIndexByName("DefaultScalarField");
+        //we look for any already existing "default" scalar field 
+		m_currentInScalarFieldIndex = getScalarFieldIndexByName("Default");
 		if (m_currentInScalarFieldIndex < 0)
 		{
             //if not, we create it
-            m_currentInScalarFieldIndex = addScalarField("DefaultScalarField",true); //DGM: positive or not by default?!
+            m_currentInScalarFieldIndex = addScalarField("Default",true); //positive by default (as we are mimicking the old behavior)
             if (m_currentInScalarFieldIndex<0) //Something went wrong
                 return false;
 		}
@@ -263,7 +262,7 @@ int ChunkedPointCloud::addScalarField(const char* uniqueName, bool isStrictlyPos
 	{
 		m_scalarFields.push_back(sf);
 	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
+	catch (std::bad_alloc) //out of memory
 	{
 		sf->release();
 		return -1;
@@ -319,12 +318,12 @@ void ChunkedPointCloud::deleteAllScalarFields()
 
 int ChunkedPointCloud::getScalarFieldIndexByName(const char* name) const
 {
-    int i,sfCount=(int)m_scalarFields.size();
-    for (i=0;i<sfCount;++i)
+    size_t sfCount = m_scalarFields.size();
+    for (size_t i=0; i<sfCount; ++i)
     {
         //we don't accept two SF with the same name!
         if (strcmp(m_scalarFields[i]->getName(),name)==0)
-            return i;
+            return (int)i;
     }
 
 	return -1;

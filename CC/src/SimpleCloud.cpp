@@ -83,7 +83,7 @@ void SimpleCloud::forEach(genericPointAction& anAction)
 	}
 }
 
-void SimpleCloud::getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[])
+void SimpleCloud::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
 {
 	if (!m_validBB)
 	{
@@ -91,8 +91,8 @@ void SimpleCloud::getBoundingBox(PointCoordinateType Mins[], PointCoordinateType
 		m_validBB=true;
 	}
 
-	memcpy(Mins,m_points->getMin(),sizeof(PointCoordinateType)*3);
-	memcpy(Maxs,m_points->getMax(),sizeof(PointCoordinateType)*3);
+	memcpy(bbMin, m_points->getMin(), sizeof(PointCoordinateType)*3);
+	memcpy(bbMax, m_points->getMax(), sizeof(PointCoordinateType)*3);
 }
 
 bool SimpleCloud::reserve(unsigned n)

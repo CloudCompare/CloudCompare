@@ -21,7 +21,7 @@
 #include "GenericIndexedCloudPersist.h"
 #include "DgmOctree.h"
 #include "ReferenceCloud.h"
-#include "DistanceComputationTools.h"
+#include "ScalarFieldTools.h"
 
 //system
 #include <string.h>
@@ -51,7 +51,7 @@ bool FastMarchingForPropagation::instantiateGrid(unsigned size)
 	return true;
 }
 
-int FastMarchingForPropagation::init(GenericCloud* theCloud, DgmOctree* theOctree, uchar level, bool constantAcceleration)
+int FastMarchingForPropagation::init(GenericCloud* theCloud, DgmOctree* theOctree, uchar level, bool positiveSF, bool constantAcceleration/*=false*/)
 {
 	int result = initGrid(theOctree,level);
 	if (result<0)
@@ -76,7 +76,7 @@ int FastMarchingForPropagation::init(GenericCloud* theCloud, DgmOctree* theOctre
 		aCell->cellCode = cellCodes.back();
 
 		ReferenceCloud* Yk = theOctree->getPointsInCell(cellCodes.back(),level,true);
-		aCell->f = (constantAcceleration ? 1.0 : DistanceComputationTools::computeMeanDist(Yk),false);
+		aCell->f = (constantAcceleration ? 1.0 : ScalarFieldTools::computeMeanScalarValue(Yk,positiveSF),false);
 
 		//Yk->clear(); //inutile
 

@@ -14,36 +14,27 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1631                                                              $
-//$LastChangedDate:: 2010-08-25 07:21:40 +0200 (mer., 25 août 2010)       $
-//**************************************************************************
-//
 
 #include "ccPickOneElementDlg.h"
 
-ccPickOneElementDlg::ccPickOneElementDlg(const char* label,
-                                            const char* windowTitle/*=0*/,
-                                                QWidget* parent/*=0*/)
-        : QDialog(parent), Ui::PickOneElementDialog()
+ccPickOneElementDlg::ccPickOneElementDlg(QString label,
+                                         QString windowTitle/*=QString()*/,
+										 QWidget* parent/*=0*/)
+	: QDialog(parent)
+	, Ui::PickOneElementDialog()
 {
     setupUi(this);
 
     setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
-    comboLabel->setText(label);
-
-    if (windowTitle)
+	if (!windowTitle.isNull())
         setWindowTitle(windowTitle);
+
+	comboLabel->setText(label);
 }
 
-void ccPickOneElementDlg::addElement(const char* elementName)
+void ccPickOneElementDlg::addElement(QString elementName)
 {
-    if (!elementName)
-        return;
-
     comboBox->addItem(elementName);
 }
 

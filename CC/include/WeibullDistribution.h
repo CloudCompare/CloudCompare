@@ -74,20 +74,18 @@ public:
 	//! Sets the distribution value shift
 	/** \param vs value shift
 	**/
-	void setValueShift(ScalarType vs) {if (vs != valueShift) parametersDefined = false; valueShift=vs;}
+	void setValueShift(ScalarType vs);
 
 	//! Returns the distribution value shift
-	ScalarType getValueShift() const {return valueShift;};
+	inline ScalarType getValueShift() const { return valueShift; }
 
 	//inherited methods (see GenericDistribution)
 	virtual bool computeParameters(const GenericCloud* Yk, bool includeNegValues);
 	virtual double computeP(ScalarType x) const;
 	virtual double computePfromZero(ScalarType x) const;
 	virtual double computeP(ScalarType x1, ScalarType x2) const;
-	virtual double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, bool includeNegValues, int* histo=0);
-	virtual void getTextualDescription(char* buffer) const;
-	virtual bool isValid() const {return parametersDefined;};
-
+	virtual double computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, bool includeNegValues, int* histo=0);
+	virtual const char* getName() const { return "Weibull"; }
 
 protected:
 
@@ -97,6 +95,12 @@ protected:
 		\return success
 	**/
 	virtual bool setChi2ClassesPositions(unsigned numberOfClasses);
+
+	//! Chi2 classes limits
+	/** Used internally. Stores both limits for each class in a vector
+		(min_class_1, max_class_1, min_class_2, max_class_2, etc.).
+	**/
+	std::vector<ScalarType> chi2ClassesPositions;
 
 	//! Parameters validity
 	bool parametersDefined;

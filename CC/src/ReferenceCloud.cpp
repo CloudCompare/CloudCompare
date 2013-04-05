@@ -94,13 +94,13 @@ void ReferenceCloud::computeBB()
 	m_validBB=true;
 }
 
-void ReferenceCloud::getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[])
+void ReferenceCloud::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
 {
 	if (!m_validBB)
 		computeBB();
 
-	memcpy(Mins,m_bbMins,sizeof(PointCoordinateType)*3);
-	memcpy(Maxs,m_bbMaxs,sizeof(PointCoordinateType)*3);
+	memcpy(bbMin, m_bbMins, sizeof(PointCoordinateType)*3);
+	memcpy(bbMax, m_bbMaxs, sizeof(PointCoordinateType)*3);
 }
 
 bool ReferenceCloud::reserve(unsigned n)

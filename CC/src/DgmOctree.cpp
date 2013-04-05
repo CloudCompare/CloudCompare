@@ -598,10 +598,10 @@ inline DgmOctree::OctreeCellCodeType generateTruncatedCellCodeForDim(int pos, un
 }
 
 //renvoie la bounding-box de l'octree (et donc cubique)
-void DgmOctree::getBoundingBox(PointCoordinateType Mins[], PointCoordinateType Maxs[]) const
+void DgmOctree::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]) const
 {
-    memcpy(Mins,m_dimMin.u,sizeof(PointCoordinateType)*3);
-    memcpy(Maxs,m_dimMax.u,sizeof(PointCoordinateType)*3);
+    memcpy(bbMin, m_dimMin.u, sizeof(PointCoordinateType)*3);
+    memcpy(bbMax, m_dimMax.u, sizeof(PointCoordinateType)*3);
 }
 
 //renvoie la position de la cellule de code "code" (en terme de cellules par rapport au niveau "level")

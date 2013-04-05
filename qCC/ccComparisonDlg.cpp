@@ -777,13 +777,12 @@ void ccComparisonDlg::showHisto()
         return;
 
     ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
-    ccHistogramWindow* win = hDlg->window();
-    QString cloudName = compCloud->getName();
-    hDlg->setWindowTitle(QString("[Approximate Distances] %0.%1").arg(cloudName));
-	win->setInfoStr(qPrintable(QString("[%0] (%1 pts) - Approximate Distances").arg(cloudName).arg(compCloud->size())));
-	win->setValues(sf);
-    win->setNumberOfClasses(8);
-	win->histoValuesShouldBeDestroyed(false);
+	hDlg->setWindowTitle(QString("Histogram [%1]").arg(compCloud->getName()));
+	{
+		ccHistogramWindow* histogram = hDlg->window();
+		histogram->setInfoStr(QString("Approximate distances (%1 values)").arg(compCloud->size()));
+		histogram->fromSF(sf,8);
+	}
 	hDlg->resize(400,300);
 	hDlg->show();
 }

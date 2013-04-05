@@ -1573,12 +1573,11 @@ void MainWindow::doActionComputeDistancesFromSensor()
     bool squared = cdDlg.computeSquaredDistances();
 
 	//set up a new scalar field
-	QString defaultRangesSFname(squared ? "Ranges (squared)" : "Ranges");
-	
-	int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(defaultRangesSFname));
+	const char* defaultRangesSFname = squared ? CC_DEFAULT_SQUARED_RANGES_SF_NAME : CC_DEFAULT_RANGES_SF_NAME;
+	int sfIdx = cloud->getScalarFieldIndexByName(defaultRangesSFname);
 	if (sfIdx<0)
 	{
-		sfIdx = cloud->addScalarField(qPrintable(defaultRangesSFname),true);
+		sfIdx = cloud->addScalarField(defaultRangesSFname,true);
 		if (sfIdx<0)
 		{
 			ccConsole::Error("Not enough memory!");
@@ -1610,7 +1609,7 @@ void MainWindow::doActionComputeDistancesFromSensor()
 void MainWindow::doActionComputeScatteringAngles()
 {
     //there should be only one sensor in current selection!
-    if (m_selectedEntities.empty() || m_selectedEntities.size()>1 || !m_selectedEntities[0]->isKindOf(CC_SENSOR))
+    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_SENSOR))
     {
         ccConsole::Error("Select one and only one sensor!");
         return;
@@ -1622,7 +1621,7 @@ void MainWindow::doActionComputeScatteringAngles()
     //sensor must have a parent cloud with normal
     if (!sensor->getParent() || !sensor->getParent()->isKindOf(CC_POINT_CLOUD) || !sensor->getParent()->hasNormals())
     {
-        ccConsole::Error("Sensor must be associated with a point cloud with normals!\nCompute normals before the scattering angles");
+        ccConsole::Error("Sensor must be associated to a point cloud with normals! (compute normals first)");
         return;
     }
 
@@ -1637,11 +1636,11 @@ void MainWindow::doActionComputeScatteringAngles()
     bool toDegreeFlag = cdDlg.anglesInDegrees();
 
     //prepare a new scalar field
-	#define DEFAULT_SCAT_ANGLES_SF_NAME "Scattering angles"
-	int sfIdx = cloud->getScalarFieldIndexByName(DEFAULT_SCAT_ANGLES_SF_NAME);
+	const char* defaultScatAnglesSFname = toDegreeFlag ? CC_DEFAULT_DEG_SCATTERING_ANGLES_SF_NAME : CC_DEFAULT_RAD_SCATTERING_ANGLES_SF_NAME;
+	int sfIdx = cloud->getScalarFieldIndexByName(defaultScatAnglesSFname);
 	if (sfIdx<0)
 	{
-		sfIdx = cloud->addScalarField(DEFAULT_SCAT_ANGLES_SF_NAME,true);
+		sfIdx = cloud->addScalarField(defaultScatAnglesSFname,true);
 		if (sfIdx<0)
 		{
 			ccConsole::Error("Not enough memory!");
@@ -3238,24 +3237,23 @@ void MainWindow::doActionSubsample()
 
 void MainWindow::doActionStatisticalTest()
 {
-    ccPickOneElementDlg pDlg("Distribution",0,this);
+    ccPickOneElementDlg pDlg("Distribution","Choose distribution",this);
     pDlg.addElement("Gauss");
     pDlg.addElement("Weibull");
     pDlg.setDefaultIndex(0);
     if (!pDlg.exec())
         return;
 
-    int dist = pDlg.getSelectedIndex();
-    assert(dist>=0 && dist<3);
+    int distribIndex = pDlg.getSelectedIndex();
 
     ccStatisticalTestDlg* sDlg=0;
-    switch (dist)
+    switch (distribIndex)
     {
-    case 0:
-        sDlg = new ccStatisticalTestDlg("mu","sigma",0,"Chi2-Test (Gauss)",this);
+    case 0: //Gauss
+        sDlg = new ccStatisticalTestDlg("mu","sigma","","Local Statistical Test (Gauss)",this);
         break;
-    case 1:
-        sDlg = new ccStatisticalTestDlg("a","b","shift","Chi2-Test (Weibull)",this);
+    case 1: //Weibull
+        sDlg = new ccStatisticalTestDlg("a","b","shift","Local Statistical Test (Weibull)",this);
         break;
     default:
         ccConsole::Error("Invalid distribution!");
@@ -3268,90 +3266,97 @@ void MainWindow::doActionStatisticalTest()
         return;
     }
 
-    double a=sDlg->getParam1();
-    double b=sDlg->getParam2();
-    double c=sDlg->getParam3();
-    double pChi2=sDlg->getProba();
-    int nn=sDlg->getNeighborsNumber();
-
+	//build up corresponding distribution
     CCLib::GenericDistribution* distrib=0;
-    switch (dist)
-    {
-    case 0:
-    {
-        CCLib::NormalDistribution* N = new CCLib::NormalDistribution();
-        N->setParameters(a,b*b); //on demande à l'utilisateur sigma et il faut initialiser la distribution avec sigma2 !!!
-        distrib = (CCLib::GenericDistribution*)N;
-        break;
-    }
-    case 1:
-        CCLib::WeibullDistribution* W = new CCLib::WeibullDistribution();
-        W->setParameters(a,b,c);
-        distrib = (CCLib::GenericDistribution*)W;
-        break;
-    }
+	{
+		double a = sDlg->getParam1();
+		double b = sDlg->getParam2();
+		double c = sDlg->getParam3();
+
+		switch (distribIndex)
+		{
+		case 0: //Gauss
+		{
+			CCLib::NormalDistribution* N = new CCLib::NormalDistribution();
+			N->setParameters(a,b*b); //warning: we input sigma2 here (not sigma)
+			distrib = static_cast<CCLib::GenericDistribution*>(N);
+			break;
+		}
+		case 1: //Weibull
+			CCLib::WeibullDistribution* W = new CCLib::WeibullDistribution();
+			W->setParameters(a,b,c);
+			distrib = static_cast<CCLib::GenericDistribution*>(W);
+			break;
+		}
+	}
 
     size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
-        ccHObject* ent = m_selectedEntities[i];
-        if (ent->isKindOf(CC_POINT_CLOUD))
+        ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]); //TODO
+        if (pc)
         {
-            ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
-
-            if (cloud && cloud->isA(CC_POINT_CLOUD)) //TODO
+            //we apply method on currently displayed SF
+            ccScalarField* inSF = pc->getCurrentDisplayedScalarField();
+            if (inSF)
             {
-                ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+                assert(inSF->isAllocated());
 
-                //on met en lecture (OUT) le champ scalaire actuellement affiché
-                int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
-                pc->setCurrentOutScalarField(outSfIdx);
+                //force SF as 'OUT' field (in case of)
+				int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
+				pc->setCurrentOutScalarField(outSfIdx);
 
-                //on met en écriture (IN) le champ des distances du Chi2 (s'il existe - on le créé sinon)
-                int sfIdx = pc->getScalarFieldIndexByName(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
-                if (sfIdx<0)
-                    sfIdx=pc->addScalarField(CC_CHI2_DISTANCES_DEFAULT_SF_NAME,true);
-                if (sfIdx<0)
-                {
-                    ccConsole::Error("Couldn't allocate a new scalar field for computing chi2 distances! Try to free some memory ...");
-                    break;
-                }
-                pc->setCurrentInScalarField(sfIdx);
+				//force Chi2 Distances field as 'IN' field (create it by the way if necessary)
+				int chi2SfIdx = pc->getScalarFieldIndexByName(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
+				if (chi2SfIdx<0)
+					chi2SfIdx=pc->addScalarField(CC_CHI2_DISTANCES_DEFAULT_SF_NAME,true);
+				if (chi2SfIdx<0)
+				{
+					ccConsole::Error("Couldn't allocate a new scalar field for computing chi2 distances! Try to free some memory ...");
+					break;
+				}
+				pc->setCurrentInScalarField(chi2SfIdx);
 
-                //ne pas oublier de calculer l'octree si ce n'est pas déjà fait ;)
-                ccOctree* theOctree=pc->getOctree();
-                if (!theOctree)
-                {
+				//compute octree if necessary
+				ccOctree* theOctree=pc->getOctree();
+				if (!theOctree)
+				{
 					ccProgressDialog pDlg(true,this);
-                    theOctree = pc->computeOctree(&pDlg);
-                    if (!theOctree)
-                    {
+					theOctree = pc->computeOctree(&pDlg);
+					if (!theOctree)
+					{
 						ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
-                        break;
-                    }
-                }
+						break;
+					}
+				}
 
-                ccProgressDialog pDlg(true,this);
-                bool signedDists = !pc->getCurrentInScalarField()->isPositive();
+				ccProgressDialog pDlg(true,this);
+
+				bool signedDists = !inSF->isPositive();
+				double pChi2 = sDlg->getProba();
+				int nn = sDlg->getNeighborsNumber();
+
 				QElapsedTimer eTimer;
 				eTimer.start();
-                double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,nn,pChi2,signedDists,&pDlg,theOctree);
+
+				double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,nn,pChi2,signedDists,&pDlg,theOctree);
+				
 				ccConsole::Print("[Chi2 Test] Timing: %3.2f ms.",eTimer.elapsed()/1.0e3);
-                ccConsole::Print("[Chi2 Test] %s test result = %f",CC_STATISTICAL_DISTRIBUTION_TITLES[dist],chi2dist);
+				ccConsole::Print("[Chi2 Test] %s test result = %f",distrib->getName(),chi2dist);
 
-                //on fait en sorte que la limite théorique de la distance du Chi2 apparaisse clairement
-				ccScalarField* sf = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
-                sf->computeMinAndMax();
-                sf->setMinDisplayed(chi2dist);
-                sf->setMinSaturation(chi2dist);
-                sf->setMaxSaturation(chi2dist);
-
-                //et on affiche le champ des distances du Chi2
-                pc->setCurrentDisplayedScalarField(sfIdx);
-				pc->showSF(sfIdx>=0);
-                pc->prepareDisplayForRefresh_recursive();
-            }
-        }
+				//we set the theoretical Chi2 distance limit as the minimumed displayed SF value so that all points below are grayed
+				{
+					ccScalarField* chi2SF = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
+					chi2SF->computeMinAndMax();
+					chi2SF->setMinDisplayed(chi2dist);
+					chi2SF->setMinSaturation(chi2dist);
+					chi2SF->setMaxSaturation(chi2dist);
+					pc->setCurrentDisplayedScalarField(chi2SfIdx);
+					pc->showSF(true);
+					pc->prepareDisplayForRefresh_recursive();
+				}
+			}
+		}
     }
 
     delete distrib;
@@ -3363,89 +3368,117 @@ void MainWindow::doActionStatisticalTest()
 
 void MainWindow::doActionComputeStatParams()
 {
-    ccPickOneElementDlg pDlg("Distribution",0,this);
+    ccPickOneElementDlg pDlg("Distribution","Distribution Fitting",this);
     pDlg.addElement("Gauss");
     pDlg.addElement("Weibull");
     pDlg.setDefaultIndex(0);
     if (!pDlg.exec())
         return;
 
-    int dist = pDlg.getSelectedIndex();
-    assert(dist>=0 && dist<3);
-
     CCLib::GenericDistribution* distrib=0;
-    switch (dist)
-    {
-    case 0:
-        distrib = new CCLib::NormalDistribution();
-        break;
-    case 1:
-        distrib = new CCLib::WeibullDistribution();
-        break;
-    }
+	{
+		switch (pDlg.getSelectedIndex())
+		{
+		case 0: //GAUSS
+			distrib = new CCLib::NormalDistribution();
+			break;
+		case 1: //WEIBULL
+			distrib = new CCLib::WeibullDistribution();
+			break;
+		default:
+			assert(false);
+			return;
+		}
+	}
     assert(distrib);
 
     size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
     {
-        ccHObject* ent = m_selectedEntities[i];
-        ccPointCloud* pc = ccHObjectCaster::ToPointCloud(ent); //TODO
-
+        ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]); //TODO
         if (pc)
         {
-            //la méthode est activée sur le champ scalaire affiché
+            //we apply method on currently displayed SF
             ccScalarField* sf = pc->getCurrentDisplayedScalarField();
             if (sf)
             {
                 assert(sf->isAllocated());
 
-                //on met en lecture (OUT) le champ scalaire actuellement affiché
+                //force SF as 'OUT' field (in case of)
                 int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
+				assert(outSfIdx>=0);
                 pc->setCurrentOutScalarField(outSfIdx);
 
-                double chi2dist = -1.0;
-                unsigned numberOfClasses=0,finalNumberOfClasses=0;
-                double* npis = 0;
-                unsigned* histo = 0;
-				char buffer[256];
-
-                distrib->computeParameters(pc,!sf->isPositive());
-                if (distrib->isValid())
+                if (distrib->computeParameters(pc,!sf->isPositive()))
                 {
-                    distrib->getTextualDescription(buffer);
-                    ccConsole::Print("[Distribution fitting] %s",buffer);
+					QString description;
+
+					unsigned precision = ccGui::Parameters().displayedNumPrecision;
+					switch (pDlg.getSelectedIndex())
+					{
+					case 0: //GAUSS
+						{
+							CCLib::NormalDistribution* normal = static_cast<CCLib::NormalDistribution*>(distrib);
+							description = QString("mean = %1 / std.dev. = %2").arg(normal->getMu(),0,'f',precision).arg(sqrt(normal->getSigma2()),0,'f',precision);
+						}
+						break;
+					case 1: //WEIBULL
+						{
+							CCLib::WeibullDistribution* weibull = static_cast<CCLib::WeibullDistribution*>(distrib);
+							ScalarType a,b;
+							weibull->getParameters(a,b);
+							description = QString("a = %1 / b = %2 / shift = %3").arg(a,0,'f',precision).arg(b,0,'f',precision).arg(weibull->getValueShift(),0,'f',precision);
+						}
+						break;
+					default:
+						assert(false);
+						return;
+					}
+					description.prepend(QString("%1: ").arg(distrib->getName()));
+					ccConsole::Print(QString("[Distribution fitting] %1").arg(description));
 
                     //Auto Chi2
-                    numberOfClasses = (int)ceil(sqrt((double)pc->size()));
-                    histo = new unsigned[numberOfClasses];
-                    npis = new double[numberOfClasses];
+                    unsigned numberOfClasses = (unsigned)ceil(sqrt((double)pc->size()));
+                    unsigned* histo = new unsigned[numberOfClasses];
+                    double* npis = new double[numberOfClasses];
+					{
+						bool signedDists = !sf->isPositive();
+						unsigned finalNumberOfClasses = 0;
+						double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib,pc,0,finalNumberOfClasses,signedDists,false,false,histo,npis);
 
-                    bool signedDists = !sf->isPositive();
-                    chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib,pc,0,finalNumberOfClasses,signedDists,false,histo,npis);
-                }
+						if (chi2dist>=0.0)
+						{
+							ccConsole::Print("[Distribution fitting] %s: Chi2 Distance = %f",distrib->getName(),chi2dist);
+						}
+						else
+						{
+							ccConsole::Warning("[Distribution fitting] Failed to compute Chi2 distance?!");
+							delete[] histo;
+							histo=0;
+							delete[] npis;
+							npis=0;
+						}
+					}
 
-                if (chi2dist>=0.0)
-                {
-                    assert(finalNumberOfClasses<=numberOfClasses);
-
-                    ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
-                    hDlg->setWindowTitle("[Distribution fitting]");
-
-                    ccHistogramWindow* win = hDlg->window();
-                    win->setHistoValues(histo,(unsigned)numberOfClasses);
-					win->setValues(sf);
-                    win->setCurveValues(npis,(unsigned)numberOfClasses);
-                    win->histoValuesShouldBeDestroyed(true);
-                    histo=0;
-                    win->curveValuesShouldBeDestroyed(true);
-                    npis=0;
-                    win->setInfoStr(buffer);
-                    win->setMinVal(sf->getMin());
-                    win->setMaxVal(sf->getMax());
-                    hDlg->show();
-
-                    ccConsole::Print("[Distribution fitting] %s Chi2 Test = %f",CC_STATISTICAL_DISTRIBUTION_TITLES[dist],chi2dist);
-                }
+					ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
+					hDlg->setWindowTitle("[Distribution fitting]");
+					{
+						ccHistogramWindow* histogram = hDlg->window();
+						histogram->setInfoStr(description);
+						if (histo && npis)
+						{
+							histogram->fromBinArray(histo,numberOfClasses,sf->getMin(),sf->getMax(),true);
+							histo=0;
+							histogram->setCurveValues(npis,numberOfClasses,true);
+							npis=0;
+						}
+						else
+						{
+							histogram->fromSF(sf,numberOfClasses);
+						}
+					}
+					hDlg->show();
+				}
                 else
 				{
                     ccConsole::Warning(QString("[Entity: %1]-[SF: %2] Couldn't compute distribution parameters!").arg(pc->getName()).arg(pc->getScalarFieldName(outSfIdx)));
@@ -5428,35 +5461,40 @@ void MainWindow::toggleSelectedEntitiesProp(int prop)
 
 void MainWindow::showSelectedEntitiesHistogram()
 {
-    size_t selNum = m_selectedEntities.size();
-    for (unsigned i=0; i<selNum; ++i)
-    {
-        ccGenericPointCloud* gc = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[i]);
+	size_t selNum = m_selectedEntities.size();
+	for (unsigned i=0; i<selNum; ++i)
+	{
+		ccGenericPointCloud* gc = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[i]);
 
-        //for "real" point clouds only
-        if (gc->isA(CC_POINT_CLOUD))
-        {
-            ccPointCloud* cloud = static_cast<ccPointCloud*>(gc);
-            //on affiche l'histogramme du champ scalaire courant
-            ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
-            if (sf)
-            {
-                ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
+		//for "real" point clouds only
+		if (gc->isA(CC_POINT_CLOUD))
+		{
+			ccPointCloud* cloud = static_cast<ccPointCloud*>(gc);
+			//on affiche l'histogramme du champ scalaire courant
+			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
+			if (sf)
+			{
+				ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
 
-                const QString& cloudName = cloud->getName();
-                hDlg->setWindowTitle(QString("Histogram[%0.%1]").arg(cloudName).arg(sf->getName()));
+				const QString& cloudName = cloud->getName();
+				hDlg->setWindowTitle(QString("Histogram [%1]").arg(cloudName));
 
-                unsigned numberOfPoints = cloud->size();
+				ccHistogramWindow* histogram = hDlg->window();
+				{
+					unsigned numberOfPoints = cloud->size();
+					unsigned numberOfClasses = (unsigned)sqrt((double)numberOfPoints);
+					//we take the 'nearest' multiple of 4
+					numberOfClasses &= (~3);
+					numberOfClasses = std::max<unsigned>(4,numberOfClasses);
+					numberOfClasses = std::min<unsigned>(256,numberOfClasses);
 
-				ccHistogramWindow* win = hDlg->window();
-                win->setInfoStr(qPrintable(QString("[%1] (%2 pts) - %3").arg(cloudName).arg(numberOfPoints).arg(sf->getName())));
-                win->setValues(sf);
-                win->setNumberOfClasses(std::min(int(sqrt(double(numberOfPoints))),128));
-                win->histoValuesShouldBeDestroyed(false);
-                hDlg->show();
-            }
-        }
-    }
+					histogram->setInfoStr(QString("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
+					histogram->fromSF(sf,numberOfClasses);
+				}
+				hDlg->show();
+			}
+		}
+	}
 }
 
 void MainWindow::doActionClone()

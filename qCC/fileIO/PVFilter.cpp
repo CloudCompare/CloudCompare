@@ -79,7 +79,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (!hasSF)
         ccConsole::Warning(QString("[PNFilter::save] Cloud '%1' has no displayed scalar field (we will save points with a default scalar value)!").arg(theCloud->getName()));
 
-	float val = (float)HIDDEN_VALUE;
+	float val = (float)NAN_VALUE;
 
 	//progress dialog
 	ccProgressDialog pdlg(true); //cancel available
@@ -170,7 +170,6 @@ CC_FILE_ERROR PVFilter::loadFile(const char* filename, ccHObject& container, boo
 				if (sfIdx>=0)
 				{
 					CCLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
-					sf->setPositiveAuto();
 					sf->computeMinAndMax();
 					loadedCloud->setCurrentDisplayedScalarField(sfIdx);
 					loadedCloud->showSF(true);
@@ -238,7 +237,6 @@ CC_FILE_ERROR PVFilter::loadFile(const char* filename, ccHObject& container, boo
 		if (sfIdx>=0)
 		{
 			CCLib::ScalarField* sf = loadedCloud->getScalarField(sfIdx);
-			sf->setPositiveAuto();
 			sf->computeMinAndMax();
 			loadedCloud->setCurrentDisplayedScalarField(sfIdx);
 			loadedCloud->showSF(true);

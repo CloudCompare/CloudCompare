@@ -236,7 +236,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(returnIndexSFIndex));
 			assert(sf);
 
-			if (sf->isPositive())
+			assert(sf->getMin() >= 0);
 			{
 				//get min and max index
 				ScalarType minIndex = sf->getMin();
@@ -297,7 +297,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 			for (unsigned i=0;i<intensitySF->currentSize();++i)
 			{
 				ScalarType d = intensitySF->getValue(i);
-				if (!intensitySF->validValue(d))
+				if (!ccScalarField::ValidValue(d))
 				{
 					hasInvalidIntensities = true;
 					break;
@@ -488,7 +488,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 				ScalarType sfVal = intensitySF->getValue(indexShift+i);
 				arrays.intData[i]=(double)sfVal;
 				if (arrays.isInvalidIntData)
-					arrays.isInvalidIntData[i] = intensitySF->validValue(sfVal) ? 0 : 1;
+					arrays.isInvalidIntData[i] = ccScalarField::ValidValue(sfVal) ? 0 : 1;
 			}
 
 			if (hasNormals)
@@ -1507,8 +1507,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	ccScalarField* intensitySF = 0;
 	if(header.pointFields.intensityField)
 	{
-		bool intensitySFIsPositive = (header.intensityLimits.intensityMinimum >= 0);
-		intensitySF = new ccScalarField(CC_SCAN_INTENSITY_FIELD_NAME,intensitySFIsPositive);
+		intensitySF = new ccScalarField(CC_SCAN_INTENSITY_FIELD_NAME);
 		if (!intensitySF->resize(pointCount))
 		{
 			ccLog::Error("[E57] Not enough memory!");
@@ -1583,7 +1582,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	if (header.pointFields.returnIndexField && header.pointFields.returnMaximum>0)
 	{
 		//we store the point return index as a scalar field
-		returnIndexSF = new ccScalarField(CC_SCAN_RETURN_INDEX_FIELD_NAME,true);
+		returnIndexSF = new ccScalarField(CC_SCAN_RETURN_INDEX_FIELD_NAME);
 		if (!returnIndexSF->resize(pointCount))
 		{
 			ccLog::Error("[E57] Not enough memory!");

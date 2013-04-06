@@ -115,7 +115,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	ScalarType maxDisplayed = sf->getMaxDisplayed();
 	ScalarType maxVal = sf->getMax();
 
-	bool strictlyPositive = sf->isPositive() || minVal>=0.0;
+	bool strictlyPositive = minVal >= 0;
 	bool absSaturation = sf->absoluteSaturation();
 	bool logScale = sf->logScale();
 

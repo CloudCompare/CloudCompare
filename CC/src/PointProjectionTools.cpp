@@ -100,7 +100,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCylinder(GenericCloud* theCloud
 	return newList;
 }
 
-//déroule la liste sur un cone dont le centre est "center" et d'angle alpha en degrés
+//deroule la liste sur un cone dont le centre est "center" et d'angle alpha en degres
 SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* theCloud, uchar dim, PointCoordinateType baseRadius, float alpha, const CCVector3& center, GenericProgressCallback* progressCb)
 {
 	if (!theCloud)
@@ -151,7 +151,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* theCloud, uc
 		//projection sur le cone
 		z2 = (P.u[dim]+u*tan_alpha)*q;
 		x2 = z2*tan_alpha;
-		//ordonnée
+		//ordonnee
 		//#define ORTHO_CONIC_PROJECTION
 		#ifdef ORTHO_CONIC_PROJECTION
 		lat = sqrt(x2*x2+z2*z2)*cos_alpha;
@@ -163,7 +163,7 @@ SimpleCloud* PointProjectionTools::developCloudOnCone(GenericCloud* theCloud, uc
 		dX = u-x2;
 		dZ = P.u[dim]-z2;
 		alt = sqrt(dX*dX+dZ*dZ);
-		//on regarde de quel côté de la surface du cone le resultat tombe par p.v.
+		//on regarde de quel cote de la surface du cone le resultat tombe par p.v.
 		if (x2*P.u[dim] - z2*u<0.0)
 			alt=-alt;
 

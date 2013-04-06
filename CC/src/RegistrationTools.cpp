@@ -67,7 +67,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 			ReferenceCloud* subModelCloud = CloudSamplingTools::subsampleCloudRandomly(_modelCloud,samplingLimit);
 			if (subModelCloud && modelWeights)
 			{
-				_modelWeights = new ScalarField("ResampledModelWeights",modelWeights->isPositive());
+				_modelWeights = new ScalarField("ResampledModelWeights");
 				unsigned realCount = subModelCloud->size();
 				if (_modelWeights->reserve(realCount))
 				{
@@ -98,7 +98,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 			dataCloud = CloudSamplingTools::subsampleCloudRandomly(_dataCloud,samplingLimit);
 			if (dataCloud && dataWeights)
 			{
-				_dataWeights = new ScalarField("ResampledDataWeights",dataWeights->isPositive());
+				_dataWeights = new ScalarField("ResampledDataWeights");
 				unsigned realCount = dataCloud->size();
 				if (_dataWeights->reserve(realCount))
 				{
@@ -139,7 +139,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 
 	//Closest Point Set (see ICP algorithm)
 	ReferenceCloud* CPSet = new ReferenceCloud(modelCloud);
-	ScalarField* CPSetWeights = _modelWeights ? new ScalarField("CPSetWeights",_modelWeights->isPositive()) : 0;
+	ScalarField* CPSetWeights = _modelWeights ? new ScalarField("CPSetWeights") : 0;
 
 	//algorithm result
 	CC_ICP_RESULT result = ICP_NOTHING_TO_DO;
@@ -147,13 +147,13 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 	double error = 0.0;
 
     //we compute the initial distance between the two clouds (and the CPSet by the way)
-    dataCloud->forEach(ScalarFieldTools::razDistsToHiddenValue);
+    dataCloud->forEach(ScalarFieldTools::SetScalarValueToNaN);
 	DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
 	params.CPSet = CPSet;
 	if (DistanceComputationTools::computeHausdorffDistance(dataCloud,modelCloud,params,progressCb)>=0)
 	{
 		//12/11/2008 - A.BEY: ICP guarantees only the decrease of the squared distances sum (not the distances sum)
-		error = ScalarFieldTools::computeMeanSquareScalarValue(dataCloud,true); //we only have positive SF values as we use the Hausdorff distance!
+		error = ScalarFieldTools::computeMeanSquareScalarValue(dataCloud); //we only have positive SF values as we use the Hausdorff distance!
 	}
 	else
 	{
@@ -207,7 +207,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 			if (filterOutFarthestPoints)
 			{
 				NormalDistribution N;
-				N.computeParameters(dataCloud,false);
+				N.computeParameters(dataCloud);
 				if (N.isValid())
 				{
 					ScalarType mu,sigma2;
@@ -215,7 +215,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 
 					ReferenceCloud* c = new ReferenceCloud(dataCloud->getAssociatedCloud());
 					ReferenceCloud* newCPSet = new ReferenceCloud(CPSet->getAssociatedCloud()); //we must also update the CPSet!
-					ScalarField* newdataWeights = (_dataWeights ? new ScalarField("ResampledDataWeights",_dataWeights->isPositive()) : 0);
+					ScalarField* newdataWeights = (_dataWeights ? new ScalarField("ResampledDataWeights") : 0);
 				//unsigned realCount = dataCloud->size();
 				//if (_dataWeights->reserve(realCount))
 				//{
@@ -346,7 +346,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 
 			lastError = error;
             //12/11/2008 - A.BEY: ICP guarantees only the decrease of the squared distances sum (not the distances sum)
-			error = ScalarFieldTools::computeMeanSquareScalarValue(dataCloud,true); //we only have positive SF values as we use the Hausdorff distance!
+			error = ScalarFieldTools::computeMeanSquareScalarValue(dataCloud); //we only have positive SF values as we use the Hausdorff distance!
 			finalError = (error>0 ? sqrt(error) : error);
 
 #ifdef _DEBUG

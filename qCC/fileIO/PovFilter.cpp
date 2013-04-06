@@ -125,7 +125,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
 
         ccGBLSensor* gls = sensors[i];
 
-        //il faut écrire le nom du fichier relatif et non absolu !
+        //il faut ecrire le nom du fichier relatif et non absolu !
 		int result = fprintf(mainFile,"\n#POV %i\nF %s\nT ASC\n",i,qPrintable(QFileInfo(thisFilename).fileName()));
 
         if (result>0)

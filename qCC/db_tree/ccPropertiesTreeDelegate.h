@@ -47,7 +47,7 @@ enum CC_PROPERTY_ROLE { OBJECT_NAME						=   1,
                         OBJECT_COLORS_SHOWN				=   4,
                         OBJECT_NORMALS_SHOWN			=   5,
                         OBJECT_SCALAR_FIELD_SHOWN		=   6,
-                        OBJECT_SCALAR_FIELD_POSITIVE	=   7,
+                        //OBJECT_XXXX					=   7,
                         OBJECT_NAN_IN_GREY              =   8,
                         OBJECT_SF_SHOW_SCALE			=   9,
                         OBJECT_OCTREE_LEVEL             =   10,
@@ -104,7 +104,6 @@ signals:
 protected slots:
     void updateItem(QStandardItem* item);
     void scalarFieldChanged(int pos);
-	void scalarFieldTypeChanged(bool positive);
     void colorRampChanged(int pos);
     void octreeDisplayTypeChanged(int pos);
     void octreeDisplayedLevelChanged(int val);

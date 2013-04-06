@@ -265,7 +265,6 @@ public:
     virtual bool hasDisplayedScalarField() const;
 
     //inherited from ccGenericPointCloud
-	virtual bool isDisplayedSFPositive();
 	virtual const colorType* getPointDistanceColor(unsigned pointIndex) const;
 	virtual const colorType* getDistanceColor(ScalarType d) const;
 	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const;
@@ -444,7 +443,7 @@ public:
 	virtual void addColorRampInfo(CC_DRAW_CONTEXT& context);
 
     //inherited from ChunkedPointCloud
-	virtual int addScalarField(const char* uniqueName, bool positive);
+	virtual int addScalarField(const char* uniqueName);
 
 	//! Adds an existing scalar field to this cloud
 	/** Warning: the cloud takes ownership of it!

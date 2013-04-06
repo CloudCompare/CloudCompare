@@ -65,7 +65,11 @@ public:
 		\param _theOctree the cloud octree if it has already be computed
 		\return error code (see DgmOctree::extractCCs)
 	**/
-	static int labelConnectedComponents(GenericIndexedCloudPersist* theCloud, uchar level, bool sixConnexity=false, CCLib::GenericProgressCallback* progressCb=0, CCLib::DgmOctree* _theOctree=0);
+	static int labelConnectedComponents(GenericIndexedCloudPersist* theCloud,
+										uchar level,
+										bool sixConnexity = false,
+										CCLib::GenericProgressCallback* progressCb = 0,
+										CCLib::DgmOctree* _theOctree = 0);
 
 	//! Extracts connected components from a point cloud
 	/** This method shloud only be called after the connected components have been
@@ -89,7 +93,6 @@ public:
 		on a gridded structure (the octree in this case).
 		Warning: be sure to activate an OUTPUT scalar field on the input cloud
 		\param theCloud the point cloud to segment
-		\param signedSF specifies whether the input scalar field is signed or not
 		\param minSeedDist the minimum value associated to the point where to start the propagation from ("security" value)
 		\param octreeLevel the octree level of subdivision where to apply the gridding (the greater it is, the smaller and numerous the segmented parts will be)
 		\param theSegmentedLists the segmented parts (as a list of subsets of points)
@@ -99,7 +102,14 @@ public:
 		\param alpha the gaussian filter kernel size (needed only if a gaussian filtering pass is required)
 		\return success
 	**/
-	static bool frontPropagationBasedSegmentation(GenericIndexedCloudPersist* theCloud, bool signedSF, ScalarType minSeedDist, uchar octreeLevel, ReferenceCloudContainer& theSegmentedLists, CCLib::GenericProgressCallback* progressCb=0, CCLib::DgmOctree* _theOctree=0, bool applyGaussianFilter=false, float alpha=2.0);
+	static bool frontPropagationBasedSegmentation(GenericIndexedCloudPersist* theCloud,
+													ScalarType minSeedDist,
+													uchar octreeLevel,
+													ReferenceCloudContainer& theSegmentedLists,
+													CCLib::GenericProgressCallback* progressCb = 0,
+													CCLib::DgmOctree* _theOctree = 0,
+													bool applyGaussianFilter = false,
+													float alpha = 2.0f);
 
 };
 

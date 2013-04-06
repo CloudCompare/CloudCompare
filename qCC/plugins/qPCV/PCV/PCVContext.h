@@ -51,7 +51,7 @@ class PCVContext
 					CCLib::GenericMesh* mesh=0,
 					bool closedMesh=true);
 
-		//défini la direction de visée
+		//defini la direction de visee
 		void setViewDirection(const float* V);
 
 		//! Increments counter for points viewed in the current display orientation (see setViewDirection)
@@ -74,7 +74,7 @@ class PCVContext
 
 		//zoom courant
 		float m_zoom;
-		//translation vers le centre de l'entitée à afficher
+		//translation vers le centre de l'entitee a afficher
 		CCVector3 m_viewCenter;
 
 		//associated pixel buffer

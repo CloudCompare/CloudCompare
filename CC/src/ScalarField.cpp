@@ -23,9 +23,8 @@
 
 using namespace CCLib;
 
-ScalarField::ScalarField(const char* name/*=0*/, bool positive /*=false*/)
+ScalarField::ScalarField(const char* name/*=0*/)
 	: GenericChunkedArray<1,ScalarType>()
-	, m_onlyPositiveValues(positive)
 {
 	setName(name);
 }
@@ -46,7 +45,7 @@ void ScalarField::computeMeanAndVariance(ScalarType &mean, ScalarType* variance)
 	for (unsigned i=0;i<m_maxCount;++i)
 	{
 		const ScalarType& val = getValue(i);
-		if (validValue(val))
+		if (ValidValue(val))
 		{
 			_mean += (double)val;
 			_std2 += (double)val * (double)val;
@@ -81,7 +80,7 @@ void ScalarField::computeMinAndMax()
 		for (unsigned i=0;i<m_maxCount;++i)
 		{
 			const ScalarType& val = getValue(i);
-			if (validValue(val))
+			if (ValidValue(val))
 			{
 				if (minMaxInitialized)
 				{
@@ -103,21 +102,4 @@ void ScalarField::computeMinAndMax()
 	{
 		m_minVal = m_maxVal = 0;
 	}
-}
-
-bool ScalarField::setPositiveAuto()
-{
-	for (unsigned i=0;i<m_maxCount;++i)
-	{
-		const ScalarType& val = getValue(i);
-
-		if (!PositiveSfValue(val))
-		{
-			setPositive(false);
-			return false;
-		}
-	}
-
-	setPositive(true);
-	return true;
 }

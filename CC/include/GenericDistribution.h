@@ -72,10 +72,9 @@ public:
 		scalar values.
 		Warning: be sure to activate an OUTPUT scalar field on the input cloud
 		\param cloud a point cloud with associated scalar values
-		\param includeNegValues specifies whether negative values should be included in computation
 		\return true (if the computation succeeded) or false (if not)
 	**/
-	virtual bool computeParameters(const GenericCloud* cloud, bool includeNegValues) = 0;
+	virtual bool computeParameters(const GenericCloud* cloud) = 0;
 
 	//! Computes the probability of x
 	/** \param x the variable
@@ -107,11 +106,10 @@ public:
 		Warning: be sure to activate an OUTPUT scalar field on the input cloud
 		\param Yk a group of points
 		\param numberOfClasses the number of classes for the Chi2 Test
-		\param includeNegValues specifies whether negative values should be included in computation
 		\param histo an array to store the values projection result (optionnal)
 		\return the Chi2 distance (or -1.0 if an error occured)
 	**/
-	virtual double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, bool includeNegValues, int* histo=0) = 0;
+	virtual double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, int* histo=0) = 0;
 
 protected:
 

@@ -108,23 +108,26 @@ ScalarType LocalModel::computeDistanceFromModelToPoint(const CCVector3* aPoint)
     switch(mtype)
     {
         case LS:
+		{
             return DistanceComputationTools::computePoint2PlaneDistance(aPoint,lsqPlane);
+		}
         case TRI:
         {
-            delaunayTri->placeIteratorAtBegining();
-            //on s'est assuré à la création de delaunayTri qu'il avait au moins un triangle !
-            GenericTriangle* tri = delaunayTri->_getNextTriangle();
-            ScalarType dist2,minDist2 = DistanceComputationTools::computePoint2TriangleDistance(aPoint,tri,false);
+            ScalarType minDist2 = NAN_VALUE;
+			{
+				unsigned numberOfTriangles = delaunayTri->size();
+				delaunayTri->placeIteratorAtBegining();
+				for (unsigned i=0;i<numberOfTriangles;++i)
+				{
+					GenericTriangle* tri = delaunayTri->_getNextTriangle();
+					ScalarType dist2 = DistanceComputationTools::computePoint2TriangleDistance(aPoint,tri,false);
+					if (dist2 < minDist2 || i==0)
+						minDist2 = dist2;
+				}
+			}
 
-			unsigned numberOfTriangles = delaunayTri->size();
-            for (unsigned i=1;i<numberOfTriangles;++i)
-            {
-                tri = delaunayTri->_getNextTriangle();
-                dist2 = DistanceComputationTools::computePoint2TriangleDistance(aPoint,tri,false);
-                if (dist2 < minDist2)
-                    minDist2 = dist2;
-            }
-
+            //there should be at least one triangle!
+			assert(minDist2==minDist2);
             return sqrt(minDist2);
         }
         case HF:
@@ -132,14 +135,14 @@ ScalarType LocalModel::computeDistanceFromModelToPoint(const CCVector3* aPoint)
 			CCVector3 P = *aPoint - gravityCenter;
 
             //HF : h0+h1.x+h2.y+h3.x^2+h4.x.y+h5.y^2
-            PointCoordinateType z2 = hf[0]+hf[1]*P.x+hf[2]*P.y+hf[3]*P.x*P.x+hf[4]*P.x*P.y+hf[5]*P.y*P.y;
+            PointCoordinateType z2 = hf[0]+hf[1]*P.u[hfX]+hf[2]*P.u[hfY]+hf[3]*P.u[hfX]*P.u[hfX]+hf[4]*P.u[hfX]*P.u[hfY]+hf[5]*P.u[hfY]*P.u[hfY];
 
-            return (ScalarType)fabs(P.z-z2);
+            return (ScalarType)fabs(P.u[hfZ]-z2);
         }
         case NO_MODEL:
 			//model computation failed?
             break;
     }
 
-	return HIDDEN_VALUE;
+	return NAN_VALUE;
 }

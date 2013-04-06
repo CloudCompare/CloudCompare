@@ -1577,7 +1577,7 @@ void MainWindow::doActionComputeDistancesFromSensor()
 	int sfIdx = cloud->getScalarFieldIndexByName(defaultRangesSFname);
 	if (sfIdx<0)
 	{
-		sfIdx = cloud->addScalarField(defaultRangesSFname,true);
+		sfIdx = cloud->addScalarField(defaultRangesSFname);
 		if (sfIdx<0)
 		{
 			ccConsole::Error("Not enough memory!");
@@ -1640,7 +1640,7 @@ void MainWindow::doActionComputeScatteringAngles()
 	int sfIdx = cloud->getScalarFieldIndexByName(defaultScatAnglesSFname);
 	if (sfIdx<0)
 	{
-		sfIdx = cloud->addScalarField(defaultScatAnglesSFname,true);
+		sfIdx = cloud->addScalarField(defaultScatAnglesSFname);
 		if (sfIdx<0)
 		{
 			ccConsole::Error("Not enough memory!");
@@ -2073,7 +2073,7 @@ void MainWindow::doActionFilterByValue()
         if (cloud && cloud->isA(CC_POINT_CLOUD)) // TODO
         {
             ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-            //la méthode est activée sur le champ scalaire affiché
+            //la methode est activee sur le champ scalaire affiche
             CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
             if (sf)
             {
@@ -2086,22 +2086,18 @@ void MainWindow::doActionFilterByValue()
         }
     }
 
-    double minVald=0.0;
-    double maxVald=1.0;
+    double minVald = 0.0;
+    double maxVald = 1.0;
 
     if (toFilter.empty())
         return;
 
     //compute min and max "displayed" scalar values of currently selected
     //entities (the ones with an active scalar field only!)
-    bool negativeSF = false;
     for (i=0;i<toFilter.size();++i)
     {
         ccScalarField* sf = toFilter[i].second->getCurrentDisplayedScalarField();
         assert(sf);
-
-        if (!sf->isPositive())
-            negativeSF = true;
 
         if (i==0)
         {
@@ -2117,7 +2113,7 @@ void MainWindow::doActionFilterByValue()
         }
     }
 
-    ccAskTwoDoubleValuesDlg dlg("Min","Max",(negativeSF ? -DBL_MAX : 0.0),DBL_MAX,minVald,maxVald,8,"Filter by scalar value",this);
+    ccAskTwoDoubleValuesDlg dlg("Min","Max",-DBL_MAX,DBL_MAX,minVald,maxVald,8,"Filter by scalar value",this);
     if (!dlg.exec())
         return;
 
@@ -2132,7 +2128,7 @@ void MainWindow::doActionFilterByValue()
         //CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
         //assert(sf);
 
-        //on met en lecture (OUT) le champ scalaire actuellement affiché
+        //on met en lecture (OUT) le champ scalaire actuellement affiche
         int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
         assert(outSfIdx>=0);
         pc->setCurrentOutScalarField(outSfIdx);
@@ -2385,11 +2381,11 @@ void MainWindow::doActionSFGaussianFilter()
 			continue;
 		}
 
-        //la méthode est activée sur le champ scalaire affiché
+        //la methode est activee sur le champ scalaire affiche
         CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
         if (sf)
         {
-            //on met en lecture (OUT) le champ scalaire actuellement affiché
+            //on met en lecture (OUT) le champ scalaire actuellement affiche
             int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
             assert(outSfIdx>=0);
 
@@ -2400,7 +2396,7 @@ void MainWindow::doActionSFGaussianFilter()
             QString sfName = QString("%1.smooth(%2)").arg(outSF->getName()).arg(sigma);
             int sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
             if (sfIdx<0)
-                sfIdx = pc->addScalarField(qPrintable(sfName),outSF->isPositive()); //output SF has same type as input SF
+                sfIdx = pc->addScalarField(qPrintable(sfName)); //output SF has same type as input SF
             if (sfIdx>=0)
                 pc->setCurrentInScalarField(sfIdx);
             else
@@ -2426,7 +2422,7 @@ void MainWindow::doActionSFGaussianFilter()
                 ccProgressDialog pDlg(true,this);
 				QElapsedTimer eTimer;
 				eTimer.start();
-                CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(sigma,pc,!sf->isPositive(), -1 ,&pDlg, octree);
+                CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(sigma,pc,-1,&pDlg, octree);
 				ccConsole::Print("[GaussianFilter] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
                 pc->setCurrentDisplayedScalarField(sfIdx);
 				pc->showSF(sfIdx>=0);
@@ -2507,7 +2503,7 @@ void MainWindow::doActionSFBilateralFilter()
             QString sfName = QString("%1.bilsmooth(%2,%3)").arg(outSF->getName()).arg(sigma).arg(scalarFieldSigma);
             int sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
             if (sfIdx<0)
-                sfIdx = pc->addScalarField(qPrintable(sfName),outSF->isPositive()); //output SF has same type as input SF
+                sfIdx = pc->addScalarField(qPrintable(sfName)); //output SF has same type as input SF
             if (sfIdx>=0)
                 pc->setCurrentInScalarField(sfIdx);
             else
@@ -2534,7 +2530,7 @@ void MainWindow::doActionSFBilateralFilter()
                 QElapsedTimer eTimer;
                 eTimer.start();
 
-                CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(sigma,pc,!sf->isPositive(), scalarFieldSigma,&pDlg,octree);
+                CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(sigma,pc, scalarFieldSigma,&pDlg,octree);
                 ccConsole::Print("[BilateralFilter] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
                 pc->setCurrentDisplayedScalarField(sfIdx);
                 pc->showSF(sfIdx>=0);
@@ -2582,7 +2578,7 @@ void MainWindow::doMeshSFAction(ccGenericMesh::MESH_SCALAR_FIELD_PROCESS process
             {
                 ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-                //on active le champ scalaire actuellement affiché
+                //on active le champ scalaire actuellement affiche
                 int sfIdx = pc->getCurrentDisplayedScalarFieldIndex();
                 if (sfIdx>=0)
                 {
@@ -2921,7 +2917,7 @@ void MainWindow::doActionRegister()
         oldDataSfIdx = pc->getCurrentInScalarFieldIndex();
         dataSfIdx = pc->getScalarFieldIndexByName("RegistrationDistances");
         if (dataSfIdx<0)
-            dataSfIdx=pc->addScalarField("RegistrationDistances",true);
+            dataSfIdx=pc->addScalarField("RegistrationDistances");
         if (dataSfIdx>=0)
             pc->setCurrentScalarField(dataSfIdx);
         else
@@ -3098,7 +3094,7 @@ void MainWindow::doActionRegister()
 	updateUI();
 }
 
-//Aurelien BEY le 13/11/2008 : ajout de la fonction permettant de traiter la fonctionnalité de recalage grossier
+//Aurelien BEY le 13/11/2008 : ajout de la fonction permettant de traiter la fonctionnalite de recalage grossier
 void MainWindow::doAction4pcsRegister()
 {
     if (QMessageBox::warning(this, "Work in progress", "This method is still under development: are you sure you want to use it? (a crash may likely happen)",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
@@ -3186,7 +3182,7 @@ void MainWindow::doAction4pcsRegister()
     refreshAll();
 }
 
-//Aurelien BEY le 4/12/2008 : ajout de la fonction de sous échantillonage de nuages de points
+//Aurelien BEY le 4/12/2008 : ajout de la fonction de sous echantillonage de nuages de points
 void MainWindow::doActionSubsample()
 {
     if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isA(CC_POINT_CLOUD)) //TODO
@@ -3309,7 +3305,7 @@ void MainWindow::doActionStatisticalTest()
 				//force Chi2 Distances field as 'IN' field (create it by the way if necessary)
 				int chi2SfIdx = pc->getScalarFieldIndexByName(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
 				if (chi2SfIdx<0)
-					chi2SfIdx=pc->addScalarField(CC_CHI2_DISTANCES_DEFAULT_SF_NAME,true);
+					chi2SfIdx=pc->addScalarField(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
 				if (chi2SfIdx<0)
 				{
 					ccConsole::Error("Couldn't allocate a new scalar field for computing chi2 distances! Try to free some memory ...");
@@ -3332,14 +3328,13 @@ void MainWindow::doActionStatisticalTest()
 
 				ccProgressDialog pDlg(true,this);
 
-				bool signedDists = !inSF->isPositive();
 				double pChi2 = sDlg->getProba();
 				int nn = sDlg->getNeighborsNumber();
 
 				QElapsedTimer eTimer;
 				eTimer.start();
 
-				double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,nn,pChi2,signedDists,&pDlg,theOctree);
+				double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,nn,pChi2,&pDlg,theOctree);
 				
 				ccConsole::Print("[Chi2 Test] Timing: %3.2f ms.",eTimer.elapsed()/1.0e3);
 				ccConsole::Print("[Chi2 Test] %s test result = %f",distrib->getName(),chi2dist);
@@ -3409,7 +3404,7 @@ void MainWindow::doActionComputeStatParams()
 				assert(outSfIdx>=0);
                 pc->setCurrentOutScalarField(outSfIdx);
 
-                if (distrib->computeParameters(pc,!sf->isPositive()))
+                if (distrib->computeParameters(pc))
                 {
 					QString description;
 
@@ -3442,9 +3437,8 @@ void MainWindow::doActionComputeStatParams()
                     unsigned* histo = new unsigned[numberOfClasses];
                     double* npis = new double[numberOfClasses];
 					{
-						bool signedDists = !sf->isPositive();
 						unsigned finalNumberOfClasses = 0;
-						double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib,pc,0,finalNumberOfClasses,signedDists,false,false,histo,npis);
+						double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib,pc,0,finalNumberOfClasses,false,false,histo,npis);
 
 						if (chi2dist>=0.0)
 						{
@@ -3532,7 +3526,7 @@ void MainWindow::doActionLabelConnectedComponents()
                 //we create/activate CCs label scalar field
                 int sfIdx = pc->getScalarFieldIndexByName(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
                 if (sfIdx<0)
-                    sfIdx=pc->addScalarField(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME,true);
+                    sfIdx=pc->addScalarField(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
                 if (sfIdx<0)
                 {
                     ccConsole::Error("Couldn't allocate a new scalar field for computing CC labels! Try to free some memory ...");
@@ -3668,7 +3662,7 @@ void MainWindow::doActionExportCoordToSF()
 					int sfIndex = pc->getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
 					if (sfIndex<0)
 					{
-						sfIndex = pc->addScalarField(qPrintable(defaultSFName[d]),false);
+						sfIndex = pc->addScalarField(qPrintable(defaultSFName[d]));
 						if (sfIndex<0)
 						{
 							ccLog::Error("Not enough memory!");
@@ -3682,7 +3676,6 @@ void MainWindow::doActionExportCoordToSF()
 					assert(sf && sf->currentSize() >= ptsCount);
 					if (sf)
 					{
-						sf->setPositive(false); //in case of...
 						for (unsigned k=0;k<ptsCount;++k)
 							sf->setValue(k,pc->getPoint(k)->u[d]);
 						sf->computeMinAndMax();
@@ -3996,7 +3989,7 @@ void MainWindow::doActionComputeQuadric3D()
                 const unsigned steps = 50;
                 ccPointCloud* newCloud = new ccPointCloud();
                 int sfIdx = newCloud->getScalarFieldIndexByName("Dist2Quadric");
-                if (sfIdx<0) sfIdx=newCloud->addScalarField("Dist2Quadric",true);
+                if (sfIdx<0) sfIdx=newCloud->addScalarField("Dist2Quadric");
                 if (sfIdx<0)
                 {
                     ccConsole::Error("Couldn't allocate a new scalar field for computing distances! Try to free some memory ...");
@@ -4089,7 +4082,7 @@ void MainWindow::doActionComputeCPS()
     ccPointCloud* cmpPC = static_cast<ccPointCloud*>(compCloud);
 
     int sfIdx = cmpPC->getScalarFieldIndexByName("tempScalarField");
-    if (sfIdx<0) sfIdx=cmpPC->addScalarField("tempScalarField",true);
+    if (sfIdx<0) sfIdx=cmpPC->addScalarField("tempScalarField");
     if (sfIdx<0)
     {
         ccConsole::Error("Couldn't allocate a new scalar field for computing distances! Try to free some memory ...");
@@ -4097,7 +4090,7 @@ void MainWindow::doActionComputeCPS()
     }
     cmpPC->setCurrentScalarField(sfIdx);
     cmpPC->enableScalarField();
-    cmpPC->forEach(CCLib::ScalarFieldTools::razDistsToHiddenValue);
+	cmpPC->forEach(CCLib::ScalarFieldTools::SetScalarValueToNaN);
 
     CCLib::ReferenceCloud CPSet(srcCloud);
     ccProgressDialog pDlg(true,this);
@@ -5602,11 +5595,11 @@ void MainWindow::doActionAddConstantSF()
 		return;
 	}
 
-	double sfValue = QInputDialog::getDouble(this,"SF value", "value", s_constantSFValue, -DBL_MIN, DBL_MAX, 8, &ok);
+	double sfValue = QInputDialog::getDouble(this,"SF value", "value", s_constantSFValue, -DBL_MAX, DBL_MAX, 8, &ok);
 	if (!ok)
 		return;
 
-	int pos = cloud->addScalarField(qPrintable(sfName),false);
+	int pos = cloud->addScalarField(qPrintable(sfName));
 	if (pos<0)
 	{
 		ccLog::Error("An error occured! (see console)");
@@ -5680,10 +5673,6 @@ void MainWindow::doActionScalarFieldArithmetic()
     }
     QString sfName = QString("(SF#%1").arg(sf1Idx)+opStr+QString("SF#%1)").arg(sf2Idx);
 
-    bool sf1Positive = sf1->isPositive();
-    bool sf2Positive = sf2->isPositive();
-    bool sfDestPositive = (sf2Positive && sf1Positive) && (op!=ccScalarFieldArithmeticDlg::MINUS);
-
 	int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
 	if (sfIdx>=0)
 	{
@@ -5698,7 +5687,7 @@ void MainWindow::doActionScalarFieldArithmetic()
 		cloud->deleteScalarField(sfIdx);
 	}
 
-    sfIdx = cloud->addScalarField(qPrintable(sfName),sfDestPositive);
+    sfIdx = cloud->addScalarField(qPrintable(sfName));
     if (sfIdx<0)
     {
         ccConsole::Error("Failed to create destination scalar field! (not enough memory?)");
@@ -5718,15 +5707,15 @@ void MainWindow::doActionScalarFieldArithmetic()
 
     for (unsigned i=0; i<valCount; ++i)
     {
-        const ScalarType& val1 = sf1->getValue(i);
+		ScalarType val = NAN_VALUE;
 
         //we must handle 'invalid' values
-		if (sf1->validValue(val1))
+		const ScalarType& val1 = sf1->getValue(i);
+		if (ccScalarField::ValidValue(val1))
         {
             const ScalarType& val2 = sf2->getValue(i);
-            if (sf2->validValue(val2))
+            if (ccScalarField::ValidValue(val2))
             {
-				ScalarType val = 0;
                 switch (op)
                 {
                 case ccScalarFieldArithmeticDlg::PLUS:
@@ -5743,15 +5732,9 @@ void MainWindow::doActionScalarFieldArithmetic()
                     break;
                 }
             }
-			else
-			{
-				sfDest->flagValueAsInvalid(i);
-			}
         }
-		else
-		{
-			sfDest->flagValueAsInvalid(i);
-		}
+
+		sfDest->setValue(i,val);
     }
 
     sfDest->computeMinAndMax();
@@ -5895,7 +5878,6 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
         return false;
 
     //generic parameters
-    bool sfPositive = false;
     QString sfName;
 
     //curvature parameters
@@ -5904,7 +5886,6 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 
     //computeScalarFieldGradient parameters
     bool euclidian=false;
-    bool inputSFisPositive=false;
 
     //computeRoughness parameters
     float roughnessKernelSize = 1.0;
@@ -5914,7 +5895,6 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
         case CCLIB_ALGO_DENSITY:
 			{
 				sfName = CC_LOCAL_DENSITY_FIELD_NAME;
-				sfPositive = true;
 			}
 			break;
         
@@ -5949,7 +5929,6 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				else //if (curvType == CCLib::Neighbourhood::GAUSSIAN_CURV)
 					sfName = QString(CC_GAUSSIAN_CURVATURE_FIELD_NAME);
 				sfName += QString("(%1)").arg(curvKernelSize);
-				sfPositive = true;
 			}
             break;
 
@@ -5965,7 +5944,6 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				{
 					euclidian = QMessageBox::question(0,"Gradient","Is the scalar field composed of (euclidian) distances ?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes;
 				}
-				sfPositive = true;
 			}
             break;
 
@@ -5991,7 +5969,6 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 					roughnessKernelSize = (float)dlg.dValueSpinBox->value();
 				}
 				
-				sfPositive = true;
 				sfName = QString(CC_ROUGHNESS_FIELD_NAME)+QString("(%1)").arg(roughnessKernelSize);
             }
             break;
@@ -6022,7 +5999,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                     if (cloud->isA(CC_POINT_CLOUD))
                     {
                         ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-                        //on met en lecture (OUT) le champ scalaire actuellement affiché
+                        //on met en lecture (OUT) le champ scalaire actuellement affiche
                         int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
                         if (outSfIdx<0)
                         {
@@ -6030,11 +6007,9 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                         }
                         else
                         {
-                            inputSFisPositive = pc->getCurrentDisplayedScalarField()->isPositive();
                             pc->setCurrentOutScalarField(outSfIdx);
                             sfName = QString("%1(%2)").arg(CC_GRADIENT_NORMS_FIELD_NAME).arg(pc->getScalarFieldName(outSfIdx));
                         }
-
                     }
                     else //if (!cloud->hasDisplayedScalarField()) //TODO: displayed but not necessarily set as OUTPUT!
                     {
@@ -6059,7 +6034,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 
                 sfIdx = pc->getScalarFieldIndexByName(qPrintable(sfName));
                 if (sfIdx<0)
-                    sfIdx = pc->addScalarField(qPrintable(sfName),sfPositive);
+                    sfIdx = pc->addScalarField(qPrintable(sfName));
                 if (sfIdx>=0)
                     pc->setCurrentInScalarField(sfIdx);
                 else
@@ -6099,7 +6074,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                                                                                 octree);
                     break;
                 case CCLIB_ALGO_SF_GRADIENT:
-                    result = CCLib::ScalarFieldTools::computeScalarFieldGradient(cloud,!inputSFisPositive,euclidian,false,&pDlg,octree);
+                    result = CCLib::ScalarFieldTools::computeScalarFieldGradient(cloud,euclidian,false,&pDlg,octree);
 
                     if (result == 0)
                     {

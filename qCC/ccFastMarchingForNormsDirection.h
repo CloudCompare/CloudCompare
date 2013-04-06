@@ -72,7 +72,7 @@ public:
 	**/
 	void endPropagation();
 
-	//! updates a list of point flags, indicating the points alreay treated
+	//! updates a list of point flags, indicating the points alreay processed
 	/** \return the number of resolved points **/
 	int updateResolvedTable(ccGenericPointCloud* theCloud,
                             GenericChunkedArray<1,uchar> &resolved,
@@ -95,13 +95,13 @@ protected:
     {
     public:
         //! The local front acceleration
-        PointCoordinateType N[3];
+        CCVector3 N;
         //! the code of the equivalent cell in the octree
         CCLib::DgmOctree::OctreeCellCodeType cellCode;
         //Temp value
         ScalarType v;
         //marker
-        bool treated;
+        bool processed;
     };
 
 	//inherited methods (see FastMarchingAlgorithm)

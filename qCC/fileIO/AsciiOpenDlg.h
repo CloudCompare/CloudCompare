@@ -41,12 +41,11 @@ enum CC_ASCII_OPEN_DLG_TYPES { ASCII_OPEN_DLG_None              = 0,
                                 ASCII_OPEN_DLG_B                = 9,
                                 ASCII_OPEN_DLG_Grey             = 10,
                                 ASCII_OPEN_DLG_Scalar           = 11,
-                                ASCII_OPEN_DLG_Positive_Scalar  = 12,
-								ASCII_OPEN_DLG_RGB32i			= 13, //RGBA as a single 32 bits integer (PCL style)
-								ASCII_OPEN_DLG_RGB32f			= 14, //RGBA as a single 32 bits float (PCL style)
+								ASCII_OPEN_DLG_RGB32i			= 12, //RGBA as a single 32 bits integer (PCL style)
+								ASCII_OPEN_DLG_RGB32f			= 13, //RGBA as a single 32 bits float (PCL style)
 };
 
-const unsigned ASCII_OPEN_DLG_TYPES_NUMBER = 15;
+const unsigned ASCII_OPEN_DLG_TYPES_NUMBER = 14;
 const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_NUMBER][24] = {"Ignore",
                                                                             "coord. X",
                                                                             "coord. Y",
@@ -59,7 +58,6 @@ const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_NUMBER][24] = {"Ignor
                                                                             "Blue",
                                                                             "Grey",
                                                                             "Scalar",
-                                                                            "Scalar>0",
                                                                             "RGBAi",
                                                                             "RGBAf",
                                                                             };

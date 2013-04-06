@@ -171,7 +171,7 @@ void ccSubsamplingDlg::changeSamplingMethod(int index)
 
     oldSliderPos = slider->sliderPosition();
 
-    //Reste à changer les textes d'aide
+    //Reste a changer les textes d'aide
     switch(index)
     {
         case OCTREE:

@@ -100,7 +100,7 @@ double NormalDistribution::computePfromZero(ScalarType x) const
 	return 0.5* ( ErrorFunction::erf((double)(x-m_mu)/sqrt(2.0*(double)m_sigma2)) + 1.0 );
 }
 
-bool NormalDistribution::computeParameters(const GenericCloud* cloud, bool includeNegValues)
+bool NormalDistribution::computeParameters(const GenericCloud* cloud)
 {
 	setValid(false);
 
@@ -111,7 +111,7 @@ bool NormalDistribution::computeParameters(const GenericCloud* cloud, bool inclu
 	for (unsigned i=0; i<n; ++i)
 	{
 		ScalarType V = cloud->getPointScalarValue(i);
-		if (ScalarField::ValidValue(V,!includeNegValues))
+		if (ScalarField::ValidValue(V))
 		{
 			mean += (double)V;
 			stddev2 += (double)V*(double)V;
@@ -128,7 +128,7 @@ bool NormalDistribution::computeParameters(const GenericCloud* cloud, bool inclu
     return setParameters((ScalarType)mean,(ScalarType)stddev2);
 }
 
-bool NormalDistribution::computeParameters(const ScalarContainer& values, bool includeNegValues)
+bool NormalDistribution::computeParameters(const ScalarContainer& values)
 {
 	setValid(false);
 
@@ -138,7 +138,7 @@ bool NormalDistribution::computeParameters(const ScalarContainer& values, bool i
 
 	for (ScalarContainer::const_iterator it = values.begin(); it != values.end(); ++it)
 	{
-		if (ScalarField::ValidValue(*it,!includeNegValues))
+		if (ScalarField::ValidValue(*it))
 		{
 			mean += (double)(*it);
 			stddev2 += (double)(*it)*(double)(*it);
@@ -155,9 +155,9 @@ bool NormalDistribution::computeParameters(const ScalarContainer& values, bool i
     return setParameters((ScalarType)mean,(ScalarType)stddev2);
 }
 
-bool NormalDistribution::computeRobustParameters(const ScalarContainer& values, double nSigma, bool includeNegValues)
+bool NormalDistribution::computeRobustParameters(const ScalarContainer& values, double nSigma)
 {
-	if (!computeParameters(values,includeNegValues))
+	if (!computeParameters(values))
         return false;
 
 	//max std. deviation
@@ -185,14 +185,14 @@ bool NormalDistribution::computeRobustParameters(const ScalarContainer& values, 
     return setParameters((ScalarType)mean,(ScalarType)stddev2);
 }
 
-double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, bool includeNegValues, int* histo)
+double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, int* histo)
 {
 	assert(cloud);
 
 	unsigned n = cloud->size();
 
     //we must refine the real number of elements
-	unsigned numberOfElements = ScalarFieldTools::countScalarFieldValidValues(cloud,!includeNegValues);
+	unsigned numberOfElements = ScalarFieldTools::countScalarFieldValidValues(cloud);
 
     if (numberOfElements==0)
         return -1.0;
@@ -211,7 +211,7 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned n
 	if (!_histo)
         _histo = new int[numberOfClasses];
 	if (!_histo)
-        return -1.0; //problème d'allocation
+        return -1.0; //probleme d'allocation
 
 	memset(_histo,0,numberOfClasses*sizeof(int));
 
@@ -219,7 +219,7 @@ double NormalDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned n
 	for (unsigned i=0;i<n;++i)
 	{
 		ScalarType V = cloud->getPointScalarValue(i);
-		if (ScalarField::ValidValue(V,!includeNegValues))
+		if (ScalarField::ValidValue(V))
 		{
 			unsigned j=0;
             for (;j<numberOfClasses-1;++j)

@@ -269,7 +269,6 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 	const QIcon RGBIcon				(QString::fromUtf8(":/CC/images/typeRgbCcolor.png"));
 	const QIcon GreyIcon			(QString::fromUtf8(":/CC/images/typeGrayColor.png"));
 	const QIcon ScalarIcon			(QString::fromUtf8(":/CC/images/typeSF.png"));
-	const QIcon PositiveScalarIcon	(QString::fromUtf8(":/CC/images/typePositiveSF.png"));
 
 	unsigned assignedXYZ = 0;
 	unsigned assignedNorm = 0;
@@ -295,7 +294,6 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 			columnHeader->setItemIcon(ASCII_OPEN_DLG_B,RGBIcon);
 			columnHeader->setItemIcon(ASCII_OPEN_DLG_Grey,GreyIcon);
 			columnHeader->setItemIcon(ASCII_OPEN_DLG_Scalar,ScalarIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_Positive_Scalar,PositiveScalarIcon);
 			columnHeader->setItemIcon(ASCII_OPEN_DLG_RGB32i,RGBIcon);
 			columnHeader->setItemIcon(ASCII_OPEN_DLG_RGB32f,RGBIcon);
 

@@ -561,7 +561,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 				if (parts.size()>1 && parts[1].toUpper() != "DEFAULT")
 					ccConsole::Warning(QString("[VTK] Lookup table other than default (%1) not supported!").arg(parts[1]));
 
-				int newSFIndex = vertices->addScalarField(qPrintable(sfName),false);
+				int newSFIndex = vertices->addScalarField(qPrintable(sfName));
 				CCLib::ScalarField* sf = vertices->getScalarField(newSFIndex);
 				for (unsigned i=0;i<ptsCount;++i)
 				{

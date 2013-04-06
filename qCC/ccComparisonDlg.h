@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2239                                                              $
-//$LastChangedDate:: 2012-09-20 00:14:45 +0200 (jeu., 20 sept. 2012)       $
-//**************************************************************************
-//
 
 #ifndef CC_COMPARISON_DIALOG_HEADER
 #define CC_COMPARISON_DIALOG_HEADER
@@ -73,7 +66,7 @@ protected:
 
     bool isValid();
     bool prepareEntitiesForComparison();
-    void computeApproxResults();
+    int computeApproxResults();
     int determineBestOctreeLevelForDistanceComputation(ScalarType maxDist);
     void clean();
     void updateDisplay(bool showSF, bool hideRef);
@@ -91,6 +84,7 @@ protected:
     bool refVisibility;
     bool compSFVisibility;
     QString oldSfName;
+	bool sfCanBeUsedToEstimateBestOctreeLevel;
 };
 
 #endif

@@ -323,7 +323,7 @@ PointCoordinateType* ccGBLSensor::projectNormals(CCLib::GenericCloud* aCloud, Ge
 			int x = (int)floor((Q.x-thetaMin)/deltaTheta);
 			int y = (int)floor((Q.y-phiMin)/deltaPhi);
 
-			//on ajoute la normale transformée
+			//on ajoute la normale transformee
 			PointCoordinateType* newN = theNewNorms+3*(y*m_depthBuffer.width+x);
 			CCVector3::vadd(newN,S.u,newN);
 

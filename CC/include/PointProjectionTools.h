@@ -60,7 +60,7 @@ public:
 	};
 
 	//! Develops a cylinder-shaped point cloud around its main axis
-	/** Generates a "developpée" of a cylinder-shaped point cloud.
+	/** Generates a "developpee" of a cylinder-shaped point cloud.
 		WARNING: this method uses the cloud global iterator
 		\param theCloud the point cloud to be developed
 		\param radius the cylinder radius
@@ -72,7 +72,7 @@ public:
 	static SimpleCloud* developCloudOnCylinder(GenericCloud* theCloud, PointCoordinateType radius, unsigned char dim=2, CCVector3* center=0, GenericProgressCallback* progressCb=0);
 
 	//! Develops a cone-shaped point cloud around its main axis
-	/** Generates a "developpée" of a cone-shaped point cloud.
+	/** Generates a "developpee" of a cone-shaped point cloud.
 		WARNING: this method uses the cloud global iterator
 		\param theCloud the point cloud to be developed
 		\param dim the dimension along which the cone axis is aligned (X=0, Y=1, Z=2)

@@ -109,7 +109,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
 
-		//Création de la liste de points
+		//Creation de la liste de points
 		char name[64];
 		sprintf(name,"unnamed - Scan #%i",k);
 		ccPointCloud* loadedCloud = new ccPointCloud(name);

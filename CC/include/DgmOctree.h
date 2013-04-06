@@ -312,7 +312,7 @@ public:
 		bool ready;
 
 		//! Updates maxD2 and minD2 with search radius and cellSize
-		void prepare(PointCoordinateType radius, PointCoordinateType cellSize)
+		inline void prepare(PointCoordinateType radius, PointCoordinateType cellSize)
 		{
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN
 			PointCoordinateType cellDiag = cellSize * (PointCoordinateType)(SQRT_3/2.0);
@@ -604,29 +604,21 @@ public:
 	//! Advanced form of the nearest neighbour search algorithm (unique neighbour)
 	/** This version is optimized for a unique nearest-neighbour search.
 		See DgmOctree::NearestNeighboursSearchStruct for more details.
-		WARNING: if 'getOnlyPointsWithPositiveDist' is true, be sure to activate an OUTPUT
-		scalar field on the associated cloud - it will be used to test for 'postitive distances'
 		\param nNSS NN search parameters
-		\param getOnlyPointsWithPositiveDist select only nearest neighbours with positive distances
 		\return the square distance between the query point and its nearest neighbour (or -1 if none was found)
 	**/
-	ScalarType findTheNearestNeighborStartingFromCell(NearestNeighboursSearchStruct &nNSS,
-												bool getOnlyPointsWithPositiveDist) const;
+	ScalarType findTheNearestNeighborStartingFromCell(NearestNeighboursSearchStruct &nNSS) const;
 
 	//! Advanced form of the nearest neighbours search algorithm (multiple neighbours)
 	/** This version is optimized for a multiple nearest neighbours search
 		that is applied around several query points included in the same octree
 		cell. See DgmOctree::NearestNeighboursSearchStruct for more details.
-		WARNING: if 'getOnlyPointsWithPositiveDist' is true, be sure to activate an OUTPUT
-		scalar field on the associated cloud - it will be used to test for 'postitive distances'
 		\param nNSS NN search parameters
-		\param bypassFirstCell indicates if the first cell (the one that includes the query point) should be visited or not
-		\param getOnlyPointsWithPositiveDist select only nearest neighbours with positive distances
+		\param getOnlyPointsWithValidScalar wether to ignore points having an invalid associated scalar value
 		\return the number of neighbours found
 	**/
 	unsigned findNearestNeighborsStartingFromCell(NearestNeighboursSearchStruct &nNSS,
-                                                    bool bypassFirstCell=false,
-                                                    bool getOnlyPointsWithPositiveDist=false) const;
+													bool getOnlyPointsWithValidScalar=false) const;
 
 	//! Advanced form of the nearest neighbours search algorithm (in a sphere)
 	/** This version is optimized for a spatially bounded search instead of
@@ -1113,27 +1105,19 @@ protected:
 									uchar level) const;
 
 	//! Gets point in the neighbourhing cells of a specific cell
-	/** WARNING: if 'getOnlyPointsWithPositiveDist' is true, be sure to activate an OUTPUT
-		scalar field on the associated cloud - it will be used to test for 'postitive distances'
-		\param nNSS NN search parameters (from which are used: cellPos, pointsInNeighbourCells and level)
+	/** \param nNSS NN search parameters (from which are used: cellPos, pointsInNeighbourCells and level)
 		\param neighbourhoodLength the new distance (in terms of cells) at which to look for neighbour cells
+		\param getOnlyPointsWithValidScalar wether to ignore points having an invalid associated scalar value
 	**/
 	void getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &nNSS,
-											int neighbourhoodLength) const;
+											int neighbourhoodLength,
+											bool getOnlyPointsWithValidScalar=false) const;
 
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN
 	void getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearchStruct &nNSS,
 												int minNeighbourhoodLength,
 												int maxNeighbourhoodLength) const;
 #endif
-
-	//! Gets point associated to positive scalars in the neighbourhing cells of a specific cell
-	/** Same version as getPointsInNeighbourCellsAround, but only for neighbours with positive scalars.
-		\param nNSS NN search parameters (from which are used: cellPos, pointsInNeighbourCells and level)
-		\param neighbourhoodLength the new distance (in terms of cells) at which to look for neighbour cells
-	**/
-    void getPointsWithPositiveDistanceInNeighbourCellsAround(NearestNeighboursSearchStruct &nNSS,
-															int neighbourhoodLength) const;
 
 	//! Returns the index of a given cell represented by its code
 	/** The index is found thanks to a binary search. The index of an existing cell

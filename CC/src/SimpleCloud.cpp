@@ -29,7 +29,7 @@ SimpleCloud::SimpleCloud()
 	, globalIterator(0)
 	, m_validBB(false)
 {
-	m_scalarField = new ScalarField("Distances",true);
+	m_scalarField = new ScalarField("Default");
 	m_scalarField->link();
 	m_points = new PointsContainer();
 	m_points->link();

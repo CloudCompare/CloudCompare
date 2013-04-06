@@ -183,7 +183,7 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccPointCloud* sourc
             if (sf)
             {
                 //we create a new scalar field with same name & type
-                int sfIdx = addScalarField(sf->getName(),sf->isPositive());
+                int sfIdx = addScalarField(sf->getName());
                 //if success...
                 if (sfIdx>=0)
                 {
@@ -241,7 +241,7 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccPointCloud* sourc
 
     if (importScanners)
     {
-    	//on insère les objets "capteur" (pas de copie ici, la même instance peut-être partagée par plusieurs listes)
+    	//on insere les objets "capteur" (pas de copie ici, la même instance peut-être partagee par plusieurs listes)
     	for (i=1;i<=source->getNumberOfSensors();++i)
     		setSensor(source->_getSensor(i),i);
     }
@@ -335,8 +335,8 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccGenericPointCloud
     //SF
     if (source->hasDisplayedScalarField())
     {
-        //we create a new scalar field with same name & type
-        int sfIdx = addScalarField("Scalar field",source->isDisplayedSFPositive());
+        //we create a new scalar field with same name
+        int sfIdx = addScalarField("Scalar field");
         //if success...
         if (sfIdx>=0)
         {
@@ -593,11 +593,9 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
                 }
                 else //otherwise we create a new SF
                 {
-                    bool sfPositive = sf->isPositive();
-					ccScalarField* newSF = new ccScalarField(sf->getName(),sfPositive);
+					ccScalarField* newSF = new ccScalarField(sf->getName());
 					//we fill the begining with NaN (as there is no equivalent in the current cloud)
-					ScalarType NaN = sf->NaN();
-					if (newSF->resize(pointCountBefore+addedPoints,true,NaN))
+					if (newSF->resize(pointCountBefore+addedPoints,true,NAN_VALUE))
 					{
 						//we copy the new values
 						for (unsigned i=0; i<addedPoints; i++)
@@ -827,8 +825,8 @@ bool ccPointCloud::reserve(unsigned newNumberOfPoints)
     if (newNumberOfPoints<size())
         return false;
 
-    //les éléments sur lesquels ont peu faire des "push" (à savoir : points, couleurs, normales et distances) sont "reservés" uniquement
-    //alors que les autres éléments sont "resizés"
+    //les elements sur lesquels ont peu faire des "push" (a savoir : points, couleurs, normales et distances) sont "reserves" uniquement
+    //alors que les autres elements sont "resizes"
     if (!ChunkedPointCloud::reserve(newNumberOfPoints)) //points (reserve) + champs scalaires (reserve)
     {
         //ccConsole::Error("[ccPointCloud::reserve] Memory reallocation error! (ChunkedPointCloud)");
@@ -939,12 +937,6 @@ const colorType* ccPointCloud::getDistanceColor(ScalarType d) const
         return ccColorTablesManager::GetUniqueInstance()->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp());
 	else
         return (m_greyForNanScalarValues ? ccColor::lightGrey : NULL);
-}
-
-bool ccPointCloud::isDisplayedSFPositive()
-{
-    assert(m_currentDisplayedScalarField);
-	return (m_currentDisplayedScalarField ? m_currentDisplayedScalarField->isPositive() : false);
 }
 
 ScalarType ccPointCloud::getPointDisplayedDistance(unsigned pointIndex) const
@@ -1598,10 +1590,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					else
 					{
 						colorRampShader->start();
-						if (m_currentDisplayedScalarField->isPositive())
-						{
-							sfMinDisp = std::max<ScalarType>(0,sfMinDisp);
-						}
 						if (m_currentDisplayedScalarField->absoluteSaturation())
 						{
 							ScalarType maxAbsSat = std::max(abs(sfMinSat),abs(sfMaxSat));
@@ -2154,9 +2142,9 @@ void ccPointCloud::deleteScalarField(int index)
 
 void ccPointCloud::deleteAllScalarFields()
 {
-    //on appelle la méthode "héritée"
+    //on appelle la methode "heritee"
     ChunkedPointCloud::deleteAllScalarFields();
-    //on m.a.j. le champ affiché
+    //on m.a.j. le champ affiche
     setCurrentDisplayedScalarField(-1);
 	showSF(false);
 }
@@ -2353,7 +2341,7 @@ void ccPointCloud::unrollOnCone(double baseRadius, double alpha, const CCVector3
         dX = u-x2;
         dZ = P2-z2;
         alt = sqrt(dX*dX+dZ*dZ);
-        //on regarde de quel côté de la surface du cone le resultat tombe par p.v.
+        //on regarde de quel cote de la surface du cone le resultat tombe par p.v.
         if (x2*P2 - z2*u<0.0) alt=-alt;
 
         //we project point
@@ -2392,7 +2380,7 @@ void ccPointCloud::unrollOnCone(double baseRadius, double alpha, const CCVector3
 	}
 }
 
-int ccPointCloud::addScalarField(const char* uniqueName, bool isStrictlyPositive)
+int ccPointCloud::addScalarField(const char* uniqueName)
 {
     //we don't accept two SF with the same name!
     if (getScalarFieldIndexByName(uniqueName)>=0)
@@ -2402,7 +2390,7 @@ int ccPointCloud::addScalarField(const char* uniqueName, bool isStrictlyPositive
 	}
 
 	//Nouveau champ scalaire
-    ccScalarField* sf = new ccScalarField(uniqueName,isStrictlyPositive);
+    ccScalarField* sf = new ccScalarField(uniqueName);
 	if (size()>0)
 		if (!sf->reserve(size()))
 		{

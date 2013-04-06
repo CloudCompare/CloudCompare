@@ -184,7 +184,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 			{fclose(fp);return CC_FERR_WRITING;}
 	}
 
-	//écriture des "vertexes"
+	//ecriture des "vertexes"
 	if (fprintf(fp,"\tsetAttr -s %i \".vt[0:%i]\"\n",numberOfVertexes,numberOfVertexes-1) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
@@ -240,18 +240,18 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 				e = e->nextEdge;
 			}
 
-			if (currentEdgeIndex<0) //on créé une nouvelle "edge"
+			if (currentEdgeIndex<0) //on cree une nouvelle "edge"
 			{
 				edge* newEdge = new edge;
 				newEdge->nextEdge = NULL;
 				newEdge->theOtherPoint = b;
 				newEdge->positif = (a==ind[k]);
-				//newEdge->edgeIndex = ++lastEdgeIndexPushed; //non ! On n'écrit pas l'arrête maintenant, donc ce n'est plus vrai
+				//newEdge->edgeIndex = ++lastEdgeIndexPushed; //non ! On n'ecrit pas l'arrête maintenant, donc ce n'est plus vrai
 				newEdge->edgeIndex = 0;
 				++lastEdgeIndexPushed;
 				//currentEdgeIndex = lastEdgeIndexPushed;
 
-				//on doit rajoute le noeud à la fin !!!
+				//on doit rajoute le noeud a la fin !!!
 				if (theEdges[a])
 				{
 					e = theEdges[a];
@@ -326,7 +326,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 		nprogress.oneStep();
 	}
 
-	//on libère la mémoire
+	//on libere la memoire
 	for (i=0;i<numberOfVertexes;++i)
 	{
 		if (theEdges[i])

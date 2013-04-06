@@ -172,7 +172,7 @@ void ccGLUtils::TransposeGLMatrix(const float* A, float* dest)
 ccGLMatrix ccGLUtils::GenerateGLRotationMatrixFromVectors(const float* sourceVec, const float* destVec)
 {
     //we compute scalar prod between the two vectors
-    float ps = CCVector3::vdot(sourceVec,destVec);
+    float ps = Vector3Tpl<float>::vdot(sourceVec,destVec);
 
     //we bound result (in case vecors are not exactly unit)
     if (ps>1.0)

@@ -505,18 +505,6 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
         m_model->setItem(curRow,1,item);
         m_view->openPersistentEditor(m_model->index(curRow,1));
 
-        //Positive state
-		m_model->setRowCount(++curRow+1);
-		item = new QStandardItem("Positive");
-		item->setFlags(Qt::ItemIsEnabled);
-		m_model->setItem(curRow,0,item);
-
-		item = new QStandardItem("");
-        item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsEditable);
-		item->setData(OBJECT_SCALAR_FIELD_POSITIVE);
-		m_model->setItem(curRow,1,item);
-        m_view->openPersistentEditor(m_model->index(curRow,1));
-
         ++curRow;
         addSeparator("SF Scale");
 
@@ -1091,24 +1079,6 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
         return comboBox;
     }
-	case OBJECT_SCALAR_FIELD_POSITIVE:
-	{
-        ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
-        assert(cloud);
-
-        QCheckBox *checkBox = new QCheckBox(parent);
-
-        ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
-        if (sf)
-			checkBox->setChecked(sf->isPositive());
-		else
-			checkBox->setDisabled(true);
-
-        connect(checkBox, SIGNAL(toggled(bool)), this, SLOT(scalarFieldTypeChanged(bool)));
-
-		checkBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-        return checkBox;
-	}
     case OBJECT_CURRENT_COLOR_RAMP:
     {
         QComboBox *comboBox = new QComboBox(parent);
@@ -1326,22 +1296,6 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
         comboBox->setCurrentIndex(pos+1);
         break;
     }
-	case OBJECT_SCALAR_FIELD_POSITIVE:
-	{
-        QCheckBox *checkBox = qobject_cast<QCheckBox*>(editor);
-		if (!checkBox)
-			return;
-
-		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
-        assert(cloud);
-
-        ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
-        if (!sf)
-			return;
-
-		checkBox->setChecked(sf->isPositive());
-		break;
-	}
     case OBJECT_CURRENT_COLOR_RAMP:
     {
         QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
@@ -1610,24 +1564,6 @@ void ccPropertiesTreeDelegate::scalarFieldChanged(int pos)
         cloud->setCurrentDisplayedScalarField(pos-1);
 		cloud->showSF(pos>0);
 
-		updateDisplay();
-        //we must also reset the properties display!
-        updateModel();
-    }
-}
-
-void ccPropertiesTreeDelegate::scalarFieldTypeChanged(bool positive)
-{
-    if (!m_currentObject)
-        return;
-
-    ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
-    assert(cloud);
-	ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
-    if (sf && sf->isPositive() != positive)
-    {
-		sf->setPositive(positive);
-		sf->computeMinAndMax();
 		updateDisplay();
         //we must also reset the properties display!
         updateModel();

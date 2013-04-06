@@ -185,10 +185,10 @@ public:
 
 	//! Computes the distance between a point and a plane
     /** \param P a 3D point
-		\param plane a plane (an array of size 4, composed of [a,b,c,d] as in the plane equation ax+by+cz=d)
-		\return the distance between the point and the plane (or HIDDEN_VALUE if plane normal (a,b,c) is too small)
+		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d'
+		\return the distance between the point and the plane (or NaN if plane normal (a,b,c) is too small)
 	**/
-	static ScalarType computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* plane);
+	static ScalarType computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* planeEquation);
 
 	/*** OTHER METHODS ***/
 
@@ -198,38 +198,37 @@ public:
 		but more memory will be needed. Moreover, for interesting results, the cells size should be
 		not too small in order to avoid creating holes in the approximated surface (the propagation will
 		be stoped).
-		\param theCloud the point cloud
+		\param cloud the point cloud
 		\param seedPointIndex the index of the point from where to start the propagation
 		\param octreeLevel the octree at which to perform the Fast Marching propagation
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return true if the method succeeds
 	**/
-	static bool computeGeodesicDistances(GenericIndexedCloudPersist* theCloud, unsigned seedPointIndex, uchar octreeLevel, GenericProgressCallback* progressCb=0);
+	static bool computeGeodesicDistances(GenericIndexedCloudPersist* cloud, unsigned seedPointIndex, uchar octreeLevel, GenericProgressCallback* progressCb=0);
 
 	//! Computes the differences between two scalar fields associated to equivalent point clouds
 	/** The compared cloud should be smaller or equal to the reference cloud. Its points should be at the same
 		position in place as their equivalents in the other cloud. The algorithm perform a simple difference
 		between the scalar values associated to each couple of equivalent points. The result is stored in a
-		the active scalar field (input) of the comparedCloud. As it is a difference between values that can be
-		positive or not, this scalar field shouldn't be only positive. Moreover, the output scalar field should
+		the active scalar field (input) of the comparedCloud. Moreover, the output scalar field should
 		be different from the input scalar field !
 		Warning: be sure to activate an OUTPUT scalar field on both input clouds
 		\param comparedCloud the compared cloud
 		\param referenceCloud the reference cloud
-		\param comparedSFisPositive specifies if the compared cloud scalar field (output) is strictly positive or not
-		\param referenceSFisPositive specifies if the reference cloud scalar field (output) is strictly positive or not
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 	**/
-	static int diff(GenericIndexedCloudPersist* comparedCloud, GenericIndexedCloudPersist* referenceCloud, bool comparedSFisPositive, bool referenceSFisPositive, GenericProgressCallback* progressCb=0);
+	static int diff(GenericIndexedCloudPersist* comparedCloud,
+					GenericIndexedCloudPersist* referenceCloud,
+					GenericProgressCallback* progressCb=0);
 
 	//! Computes the mean distance between a cloud and a plane
 	/** Sums the distances between each point of the cloud and the plane, then computes the mean value.
 		WARNING: this method uses the cloud global iterator
-		\param theCloud a point cloud
-		\param thePlaneEquation a plane equation (4 values: ax+by+cz=d)
-		\return the mean distance
+		\param cloud a point cloud
+		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d'
+		\return the mean distance (or NaN if an error occured)
 	**/
-	static ScalarType computeCloud2PlaneDistance(GenericCloud* theCloud, const PointCoordinateType* thePlaneEquation);
+	static ScalarType computeCloud2PlaneDistance(GenericCloud* cloud, const PointCoordinateType* planeEquation);
 
 	//! Computes the Chamfer distances (approximated distances) between two point clouds
 	/** This methods uses a 3D grid to perfrom the Chamfer Distance propagation.

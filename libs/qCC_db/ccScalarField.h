@@ -41,9 +41,8 @@ public:
 
 	//! Default constructor
 	/** \param name scalar field name
-        \param positive specifies whether negative values should be ignored
     **/
-	ccScalarField(const char* name = 0, bool positive = false);
+	ccScalarField(const char* name = 0);
 
 	/*** Scalar values display handling ***/
 

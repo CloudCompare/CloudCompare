@@ -50,11 +50,13 @@ public:
 		\param theCloud the point cloud
 		\param theOctree the associated octree
 		\param gridLevel the level of subdivision
-		\param positiveSF whether scalar field values are 'only positive'
 		\param constantAcceleration specifies if the acceleration is constant or shoul be computed from the cell points scalar values
 		\return a negative value if something went wrong
 	**/
-	int init(GenericCloud* theCloud, DgmOctree* theOctree, uchar gridLevel, bool positiveSF, bool constantAcceleration=false);
+	int init(GenericCloud* theCloud,
+				DgmOctree* theOctree,
+				uchar gridLevel,
+				bool constantAcceleration=false);
 
 	/** Finalizes an iteration process
         Resets the different lists and the grid. This method should be

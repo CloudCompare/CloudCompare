@@ -139,10 +139,10 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 
 	if (octreeDisplayType==WIRE)
 	{
-		//cet affichage demande trop de mémoire pour le stocker sous forme de liste OpenGL
-		//donc on doit le générer dynamiquement
+		//cet affichage demande trop de memoire pour le stocker sous forme de liste OpenGL
+		//donc on doit le generer dynamiquement
 		
-		glDisable(GL_LIGHTING); //au cas où la lumière soit allumée
+		glDisable(GL_LIGHTING); //au cas où la lumiere soit allumee
 		glColor3ubv(ccColor::green);
 		theOctree->executeFunctionForAllCellsAtLevel(level,&DrawCellAsABox,NULL);
 	}
@@ -171,8 +171,6 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 
 		if (updateOctreeGLDisplay || octreeGLListID<0)
 		{
-			bool sfPositive = theAssociatedCloud->isDisplayedSFPositive();
-
 			if (octreeGLListID<0)
 				octreeGLListID = glGenLists(1);
 			else if (glIsList(octreeGLListID))
@@ -181,9 +179,8 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 
 			if (octreeDisplayType == MEAN_POINTS)
 			{
-				void* additionalParameters[3] = {	(void*)&glParams,
+				void* additionalParameters[2] = {	(void*)&glParams,
 													(void*)theAssociatedCloud,
-													(void*)&sfPositive
 				};
 
 				glBegin(GL_POINTS);
@@ -211,9 +208,8 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 				context.flags = CC_DRAW_3D | CC_DRAW_FOREGROUND| CC_LIGHT_ENABLED;
 				context._win = 0;
 
-				void* additionalParameters[5] = {	(void*)&glParams,
+				void* additionalParameters[4] = {	(void*)&glParams,
 													(void*)theAssociatedCloud,
-													(void*)&sfPositive,
 													(void*)&box,
 													(void*)&context
 				};
@@ -278,11 +274,10 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell, void**
 	//variables additionnelles
 	glDrawParams* glParams						= (glDrawParams*)additionalParameters[0];
 	ccGenericPointCloud* theAssociatedCloud		= (ccGenericPointCloud*)additionalParameters[1];
-	bool sfPositive								= *(bool*)additionalParameters[2];
 
 	if (glParams->showSF)
 	{
-		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points,sfPositive);
+		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
 		const colorType* col = theAssociatedCloud->getDistanceColor(dist);
 		glColor3ubv(col ? col : ccColor::lightGrey);
 	}
@@ -312,16 +307,15 @@ bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell, vo
 	//variables additionnelles
 	glDrawParams* glParams						= (glDrawParams*)additionalParameters[0];
 	ccGenericPointCloud* theAssociatedCloud	    = (ccGenericPointCloud*)additionalParameters[1];
-	bool sfPositive								= *(bool*)additionalParameters[2];
-	ccGenericPrimitive*	primitive				= (ccGenericPrimitive*)additionalParameters[3];
-	CC_DRAW_CONTEXT* context					= (CC_DRAW_CONTEXT*)additionalParameters[4];
+	ccGenericPrimitive*	primitive				= (ccGenericPrimitive*)additionalParameters[2];
+	CC_DRAW_CONTEXT* context					= (CC_DRAW_CONTEXT*)additionalParameters[3];
 
 	GLfloat cellCenter[3];
 	cell.parentOctree->computeCellCenter(cell.truncatedCode,cell.level,cellCenter,true);
 
 	if (glParams->showSF)
 	{
-		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points,sfPositive);
+		ScalarType dist = CCLib::ScalarFieldTools::computeMeanScalarValue(cell.points);
 		const colorType* col = theAssociatedCloud->getDistanceColor(dist);
 		primitive->setColor(col);
 	}
@@ -422,8 +416,8 @@ void ccOctree::ComputeRobustAverageNorm(CCLib::ReferenceCloud* subset, ccGeneric
 	for (unsigned i=0;i<n;++i)
 	{
 		const PointCoordinateType* N = sourceCloud->getPointNormal(subset->getPointGlobalIndex(0));
-		//calcul du produit scalaire entre la ième normale et la normale du plan aux moindres carrés
-		//(pour savoir de quel côté pointe la normale)
+		//calcul du produit scalaire entre la ieme normale et la normale du plan aux moindres carres
+		//(pour savoir de quel cote pointe la normale)
 		float ps = CCVector3::vdot(N,Nplane.u);
 		if (ps < 0)
 		{

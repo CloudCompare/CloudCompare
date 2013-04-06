@@ -114,9 +114,9 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
     fprintf(fp,"// H      = %i\n",db.height);
     fprintf(fp,"/////////////////////////\n");
 
-    //an array of projected normals (same size à depth map)
+    //an array of projected normals (same size a depth map)
     PointCoordinateType* theNorms = NULL;
-    //an array of projected colors (same size à depth map)
+    //an array of projected colors (same size a depth map)
     uchar* theColors = NULL;
 
     //if the sensor is associated to a "ccPointCloud", we may also extract

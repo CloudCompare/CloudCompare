@@ -201,8 +201,8 @@ bool ChunkedPointCloud::enableScalarField()
 		if (m_currentInScalarFieldIndex < 0)
 		{
             //if not, we create it
-            m_currentInScalarFieldIndex = addScalarField("Default",true); //positive by default (as we are mimicking the old behavior)
-            if (m_currentInScalarFieldIndex<0) //Something went wrong
+            m_currentInScalarFieldIndex = addScalarField("Default");
+            if (m_currentInScalarFieldIndex < 0) //Something went wrong
                 return false;
 		}
 
@@ -246,21 +246,22 @@ const char* ChunkedPointCloud::getScalarFieldName(int index) const
     return (index>=0 && index<(int)m_scalarFields.size() ? m_scalarFields[index]->getName() : 0);
 }
 
-int ChunkedPointCloud::addScalarField(const char* uniqueName, bool isStrictlyPositive)
+int ChunkedPointCloud::addScalarField(const char* uniqueName)
 {
     //we don't accept two SF with the same name!
     if (getScalarFieldIndexByName(uniqueName)>=0)
         return -1;
 
 	//create requested scalar field
-    ScalarField* sf = new ScalarField(uniqueName,isStrictlyPositive);
+    ScalarField* sf = new ScalarField(uniqueName);
 	if (!sf)
 		return -1;
 
-	//we don't want 'm_scalarFields' to grow by 50% each time! (default behavior of std::vector::push_back)
 	try
 	{
-		m_scalarFields.push_back(sf);
+		//we don't want 'm_scalarFields' to grow by 50% each time! (default behavior of std::vector::push_back)
+		m_scalarFields.resize(m_scalarFields.size()+1);
+		m_scalarFields.back() = sf;
 	}
 	catch (std::bad_alloc) //out of memory
 	{
@@ -275,17 +276,14 @@ int ChunkedPointCloud::addScalarField(const char* uniqueName, bool isStrictlyPos
 
 void ChunkedPointCloud::deleteScalarField(int index)
 {
-	if (index<0 || m_scalarFields.empty())
-        return;
-
     int sfCount = (int)m_scalarFields.size();
-    if (index>=sfCount) //sfCount>0
+    if (index<0 || index>=sfCount)
         return;
 
     //we update SF roles if they point to the deleted scalar field
-    if (index==m_currentInScalarFieldIndex)
+    if (index == m_currentInScalarFieldIndex)
         m_currentInScalarFieldIndex = -1;
-    if (index==m_currentOutScalarFieldIndex)
+    if (index == m_currentOutScalarFieldIndex)
         m_currentOutScalarFieldIndex = -1;
 
     //if the deleted SF is not the last one, we swap it with the last element
@@ -294,13 +292,13 @@ void ChunkedPointCloud::deleteScalarField(int index)
     {
         std::swap(m_scalarFields[index],m_scalarFields[lastIndex]);
         //don't forget to update SF roles also if they point to the last element
-        if (lastIndex==m_currentInScalarFieldIndex)
+        if (lastIndex == m_currentInScalarFieldIndex)
             m_currentInScalarFieldIndex = index;
-        if (lastIndex==m_currentOutScalarFieldIndex)
+        if (lastIndex == m_currentOutScalarFieldIndex)
             m_currentOutScalarFieldIndex = index;
     }
 
-    //so we can always delete the last element (and the vector stays consistent)
+    //we can always delete the last element (and the vector stays consistent)
 	m_scalarFields.back()->release();
     m_scalarFields.pop_back();
 }

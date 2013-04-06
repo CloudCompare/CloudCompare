@@ -31,9 +31,9 @@ using namespace CCLib;
 
 FastMarchingForPropagation::FastMarchingForPropagation()
 	: FastMarching()
-	, lastT(0.0f)						//dernière valeur d'arrivée
-	, detectionThreshold(Cell::T_INF())	//saut relatif de la valeur d'arrivée qui arrête la propagation (ici, "désactivé")
-	, jumpCoef(0.0f)					//resistance à l'avancement du front, en fonction de Cell->f (ici, pas de resistance)
+	, lastT(0.0f)						//derniere valeur d'arrivee
+	, detectionThreshold(Cell::T_INF())	//saut relatif de la valeur d'arrivee qui arrête la propagation (ici, "desactive")
+	, jumpCoef(0.0f)					//resistance a l'avancement du front, en fonction de Cell->f (ici, pas de resistance)
 {
 }
 
@@ -51,7 +51,10 @@ bool FastMarchingForPropagation::instantiateGrid(unsigned size)
 	return true;
 }
 
-int FastMarchingForPropagation::init(GenericCloud* theCloud, DgmOctree* theOctree, uchar level, bool positiveSF, bool constantAcceleration/*=false*/)
+int FastMarchingForPropagation::init(GenericCloud* theCloud,
+										DgmOctree* theOctree,
+										uchar level,
+										bool constantAcceleration/*=false*/)
 {
 	int result = initGrid(theOctree,level);
 	if (result<0)
@@ -76,7 +79,7 @@ int FastMarchingForPropagation::init(GenericCloud* theCloud, DgmOctree* theOctre
 		aCell->cellCode = cellCodes.back();
 
 		ReferenceCloud* Yk = theOctree->getPointsInCell(cellCodes.back(),level,true);
-		aCell->f = (constantAcceleration ? 1.0 : ScalarFieldTools::computeMeanScalarValue(Yk,positiveSF),false);
+		aCell->f = (constantAcceleration ? 1.0f : ScalarFieldTools::computeMeanScalarValue(Yk),false);
 
 		//Yk->clear(); //inutile
 
@@ -131,7 +134,7 @@ int FastMarchingForPropagation::step()
 			//pointeur vers la cellule voisine
 			nCell = theGrid[nIndex];
 
-			//si elle est définie
+			//si elle est definie
 			if (nCell)
 			{
 				//et si elle n'est pas encore dans un groupe, on la rajoute
@@ -308,7 +311,7 @@ ReferenceCloud* FastMarchingForPropagation::extractPropagatedPoints()
 		{
 			Zk->addPointIndex(Yk->getCurrentPointGlobalIndex()); //can't fail (see above)
 			//raz de la norme du gradient du point, pour qu'il ne soit plus pris en compte par la suite !
-			Yk->setCurrentPointScalarValue(HIDDEN_VALUE);
+			Yk->setCurrentPointScalarValue(NAN_VALUE);
 			Yk->forwardIterator();
 		}
 
@@ -368,18 +371,18 @@ void FastMarchingForPropagation::endPropagation()
 }
 
 
-//rajouter un élément à la structure "untidy priority queue"
+//rajouter un element a la structure "untidy priority queue"
 void FastMarchingForPropagation::addTrialCell(unsigned index, float T)
 {
 	trialCells.push_back(index);
 }
 
-//récupérer le premier élément de la structure "untidy priority queue"
-unsigned FastMarchingForPropagation::getNearestTrialCell() //renvoie 0 si problème
+//recuperer le premier element de la structure "untidy priority queue"
+unsigned FastMarchingForPropagation::getNearestTrialCell() //renvoie 0 si probleme
 {
 	if (trialCells.empty()) return 0;
 
-	//on trouve la cellule de "TRIAL" qui à le T minimum
+	//on trouve la cellule de "TRIAL" qui a le T minimum
 	std::vector<unsigned>::const_iterator p = trialCells.begin();
 
 	int i=0,k=0;
@@ -402,7 +405,7 @@ unsigned FastMarchingForPropagation::getNearestTrialCell() //renvoie 0 si problè
 		++i;
 	}
 
-	//on l'enlève de la liste
+	//on l'enleve de la liste
 	trialCells[k]=trialCells[trialCells.size()-1];
 	trialCells.pop_back();
 
@@ -432,7 +435,7 @@ void FastMarchingForPropagation::findPeaks()
 									neighbours3DPosShift[n*3+2]*int(decZ);
 	}
 
-	//on fait bien attention à ne pas initialiser les cellules sur les bords
+	//on fait bien attention a ne pas initialiser les cellules sur les bords
 	int pos[3];
 	unsigned index;
 	for (k=0;k<dz;++k)

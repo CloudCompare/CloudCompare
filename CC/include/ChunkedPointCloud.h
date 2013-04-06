@@ -197,10 +197,9 @@ public:
                 with the same number of values as the number of point in this cloud
 
             \param uniqueName scalar field name (must be unique)
-            \param positive specifies whether the scalar field is only composed of positive values or not
 			\return index of this new scalar field (or -1 if a scalar field with the same name already exist!)
 		**/
-		virtual int addScalarField(const char* uniqueName, bool positive);
+		virtual int addScalarField(const char* uniqueName);
 
 		//! Renames a specific scalar field
 		/** Warning: name must not be already given to another SF!

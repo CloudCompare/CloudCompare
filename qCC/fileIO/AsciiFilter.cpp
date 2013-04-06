@@ -339,10 +339,8 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 			}
 			break;
 		case ASCII_OPEN_DLG_Scalar:
-		case ASCII_OPEN_DLG_Positive_Scalar:
 			{
 				int sfIndex = cloud->getNumberOfScalarFields()+1;
-				bool isPositive = (openSequence[i].type==ASCII_OPEN_DLG_Positive_Scalar);
 				QString sfName = openSequence[i].header;
 				if (sfName.isEmpty())
 				{
@@ -353,7 +351,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 					//	sfName += QString(" (positive)");
 				}
 
-				ccScalarField* sf = new ccScalarField(qPrintable(sfName),isPositive);
+				ccScalarField* sf = new ccScalarField(qPrintable(sfName));
 				sf->link();
 				int sfIdx = cloud->addScalarField(sf);
 				if (sfIdx>=0)
@@ -583,7 +581,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 				cloudDesc.cloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
         	}
 
-        	//on met à jour les informations sur la progression
+        	//on met a jour les informations sur la progression
 			nprogress.scale(newNbOfLinesApproximation,100,true);
 			pdlg.setInfo(qPrintable(QString("Approximate number of points: %1").arg(newNbOfLinesApproximation)));
         	approximateNumberOfLines = newNbOfLinesApproximation;

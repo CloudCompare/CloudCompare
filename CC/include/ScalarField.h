@@ -23,9 +23,6 @@
 #include "CCTypes.h"
 #include "GenericChunkedArray.h"
 
-//system
-#include <cmath>
-
 namespace CCLib
 {
 
@@ -34,14 +31,7 @@ namespace CCLib
 	mono-dimensionnal array of scalar values. It has also specific
 	parameters for display purposes.
 
-    There are two kinds of scalar fields:
-    - 'positive' scalar fields that ignore all negative values. Those values
-        are considered as invalid values (however HIDDEN_VALUE should be used
-		to represent them by default). They are not taken into account when
-		computing min and max values, etc.
-		This kind of scalar field is typically used to store positive distances.
-    - 'standard' scalar fields can store any value. Invalid values (hidden points)
-		can be represented by NAN_VALUE.
+	Invalid values can be represented by NAN_VALUE.
 **/
 
 #ifdef CC_USE_AS_DLL
@@ -57,9 +47,8 @@ public:
 	//! Default constructor
 	/** [SHAREABLE] Call 'link' when associating this structure to an object.
 		\param name scalar field name
-        \param positive specifies whether negative values should be ignored
     **/
-	ScalarField(const char* name = 0, bool positive = false);
+	ScalarField(const char* name = 0);
 
 	//! Sets scalar field name
     void setName(const char* name);
@@ -67,23 +56,8 @@ public:
 	//! Returns scalar field name
 	inline const char* getName() const { return m_name; }
 
-	//! Sets whether scalar field is positive or not
-	/** Warning: 'computeMinAndMax' should be called afterwards.
-		\param state whether values are only positive or not
-	**/
-	inline void setPositive(bool state) { m_onlyPositiveValues = state; }
-
-	//! Auto detects if scalar field is positive or not
-	/** Warning: 'computeMinAndMax' should be called afterwards.
-		\return whether scalar field is only positive or not
-	**/
-	bool setPositiveAuto();
-
-	//! Returns true if negative values are ignored (strictly positive scalar field)
-	inline bool isPositive() const { return m_onlyPositiveValues; }
-
-	//! Returns the specific NaN value for this scalar field
-	inline ScalarType NaN() const { return m_onlyPositiveValues ? HIDDEN_VALUE : NAN_VALUE; };
+	//! Returns the specific NaN value
+	static inline ScalarType NaN() { return NAN_VALUE; };
 
 	//! Computes the mean value (and optionnaly the variance value) of the scalar field
 	/** \param mean a field to store the mean value
@@ -95,18 +69,10 @@ public:
 	virtual void computeMinAndMax();
 
 	//! Returns whether a scalar value is valid or not
-	static inline bool ValidValue(ScalarType value, bool positiveSF) { return positiveSF ? value >= 0 : std::isfinite(value); }
+	static inline bool ValidValue(ScalarType value) { return value == value; } //'value == value' fails for NaN values
 
-	//! Returns whether a scalar value is valid or not (non static shortcut to ValidValue)
-	inline bool validValue(ScalarType value) const { return ValidValue(value,m_onlyPositiveValues); }
-
-	//! Sets the value as 'invalid' (i.e. HIDDEN_VALUE or NAN_VALUE depending on whether the SF is positive or not)
-	virtual void flagValueAsInvalid(unsigned index) { setValue(index,m_onlyPositiveValues ? HIDDEN_VALUE : NAN_VALUE); }
-
-	//! Helper: returns whether a value is acceptable for a strictly positive scalar field
-	/** Value must be either positive or HIDDEN_VALUE and not NaN.
-	**/
-	static inline bool PositiveSfValue(ScalarType value) { return (value >= 0 || value == HIDDEN_VALUE) && (value != NAN_VALUE); }
+	//! Sets the value as 'invalid' (i.e. NAN_VALUE)
+	virtual void flagValueAsInvalid(unsigned index) { setValue(index,NaN()); }
 
 protected:
 
@@ -117,9 +83,6 @@ protected:
 
 	//! Scalar field name
 	char m_name[256];
-
-	//! If true, only positive values are considered
-	bool m_onlyPositiveValues;
 };
 
 }

@@ -1156,7 +1156,7 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 {
 	assert(!m_params.perspectiveView); //a scale is only valid in ortho. mode!
 
-	float scaleMaxW = float(m_glWidth)*0.25; //25% de l'écran
+	float scaleMaxW = float(m_glWidth)*0.25; //25% de l'ecran
 	if (m_params.zoom < CC_GL_MIN_ZOOM_RATIO)
 	{
 		assert(false);

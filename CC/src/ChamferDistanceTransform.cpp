@@ -153,7 +153,7 @@ ChamferDistanceTransform::GridElement ChamferDistanceTransform::propagateDistanc
 {
 	assert(m_grid);
 
-	GridElement* _grid = m_grid+DG_pos2index(iStart,jStart,kStart); //on commence avec une tranche de décalage
+	GridElement* _grid = m_grid+DG_pos2index(iStart,jStart,kStart); //on commence avec une tranche de decalage
 
 	//accelerating structure
 	int voisDec[14];

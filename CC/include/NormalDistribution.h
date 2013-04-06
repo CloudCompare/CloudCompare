@@ -49,11 +49,11 @@ public:
 	NormalDistribution(ScalarType _mu, ScalarType _sigma2);
 
 	//inherited methods (see GenericDistribution)
-	virtual bool computeParameters(const GenericCloud* cloud, bool includeNegValues);
+	virtual bool computeParameters(const GenericCloud* cloud);
 	virtual double computeP(ScalarType x) const;
 	virtual double computePfromZero(ScalarType x) const;
 	virtual double computeP(ScalarType x1, ScalarType x2) const;
-	virtual double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, bool includeNegValues, int* histo=0);
+	virtual double computeChi2Dist(const GenericCloud* Yk, unsigned numberOfClasses, int* histo=0);
 	virtual const char* getName() const { return "Gauss"; }
 
 	//! Returns the distribution parameters
@@ -83,10 +83,9 @@ public:
 	/** Specific method to compute the parameters directly from an array
 		(vector) of scalar values, without associated points.
 		\param values the scalar values
-		\param includeNegValues specifies whether negative values should be included in computation
 		\return the validity of the computed parameters
 	**/
-	bool computeParameters(const ScalarContainer& values, bool includeNegValues);
+	bool computeParameters(const ScalarContainer& values);
 
 	//! Computes robust parameters for the distribution from an array of scalar values
 	/** Specific method to compute the parameters directly from an array
@@ -95,10 +94,9 @@ public:
 		variance) are kept to make a second and more robust evaluation of the parameters.
 		\param values the scalar values
 		\param nSigma the values filtering interval size ([mu -nSigma * stddev : mu + nSigma * stddev])
-		\param includeNegValues specifies whether negative values should be included in computation
 		\return the validity of the computed parameters
 	**/
-	bool computeRobustParameters(const ScalarContainer& values, double nSigma, bool includeNegValues);
+	bool computeRobustParameters(const ScalarContainer& values, double nSigma);
 
 protected:
 

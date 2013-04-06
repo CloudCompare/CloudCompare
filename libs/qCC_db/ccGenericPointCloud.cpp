@@ -182,7 +182,7 @@ ccBBox ccGenericPointCloud::getMyOwnBB()
     return emptyBox;
 }
 
-ccPlane* ccGenericPointCloud::fitPlane(double* rms /*= 0*/)
+ccPlane* ccGenericPointCloud::fitPlane(double* rms/*= 0*/)
 {
 	//number of points
 	unsigned count = size();
@@ -200,7 +200,7 @@ ccPlane* ccGenericPointCloud::fitPlane(double* rms /*= 0*/)
 		//ccConsole::Warning(QString("[ccPointCloud::fitPlane] Failed to compute plane/normal for cloud '%1'").arg(getName()));
 		return 0;
 	}
-	eig.sortEigenValuesAndVectors();
+	eig.sortEigenValuesAndVectors(); //from the biggest to the smallest eigen value
 
 	//plane equation
 	PointCoordinateType theLSQPlane[4];
@@ -225,25 +225,27 @@ ccPlane* ccGenericPointCloud::fitPlane(double* rms /*= 0*/)
 	//least-square fitting RMS
 	if (rms)
 	{
-		placeIteratorAtBegining();
-		*rms = 0.0;
+		double sum2 = 0.0;
+		unsigned realCount = 0;
 		for (unsigned k=0;k<count;++k)
 		{
-			double d = (double)CCLib::DistanceComputationTools::computePoint2PlaneDistance(getNextPoint(),theLSQPlane);
-			*rms += d*d;
+			double d = (double)CCLib::DistanceComputationTools::computePoint2PlaneDistance(getPoint(k),theLSQPlane);
+			if (ccScalarField::ValidValue(d)) //not NaN
+			{
+				sum2 += d*d;
+				++realCount;
+			}
 		}
-		*rms = sqrt(*rms)/(double)count;
+		*rms = (realCount != 0 ? sqrt(sum2)/(double)realCount : -1.0);
 	}
 
-	//we has a plane primitive to the cloud
+	//we add a plane primitive to the cloud
 	eig.getEigenValueAndVector(0,vec); //main direction
-	CCVector3 X(vec[0],vec[1],vec[2]); //plane normal
-	//eig.getEigenValueAndVector(1,vec); //intermediate direction
-	//CCVector3 Y(vec[0],vec[1],vec[2]); //plane normal
+	CCVector3 X(vec[0],vec[1],vec[2]);
 	CCVector3 Y = N * X;
 
 	//we eventually check for plane extents
-	PointCoordinateType minX=0.0,maxX=0.0,minY=0.0,maxY=0.0;
+	PointCoordinateType minX=0,maxX=0,minY=0,maxY=0;
 	placeIteratorAtBegining();
 	for (unsigned k=0;k<count;++k)
 	{

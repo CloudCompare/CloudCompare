@@ -189,7 +189,7 @@ protected:
 	//! Returns the TRIAL cell with the smallest front arrival time
 	/** \return the index of the "first" TRIAL cell
 	**/
-	virtual unsigned getNearestTrialCell()=0; //renvoie 0 si problème
+	virtual unsigned getNearestTrialCell()=0; //renvoie 0 si probleme
 
 	//! ACTIVE cells list
 	std::vector<unsigned> activeCells;

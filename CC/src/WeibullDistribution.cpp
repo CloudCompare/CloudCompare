@@ -152,7 +152,7 @@ bool WeibullDistribution::setParameters(ScalarType _a, ScalarType _b, ScalarType
 
 	if (a>0.0 && b>=0.0)
 	{
-		//moyenne et écart type
+		//moyenne et ecart type
 		mu = (ScalarType)((double)b * gamma_cc(1.0+1.0/a));
 		sigma2 =(ScalarType)((double)(b*b) * gamma_cc(1.0+2.0/a) - (double)(mu*mu));
 
@@ -167,7 +167,7 @@ bool WeibullDistribution::setParameters(ScalarType _a, ScalarType _b, ScalarType
 	return isValid();
 };
 
-bool WeibullDistribution::computeParameters(const GenericCloud* cloud, bool includeNegValues)
+bool WeibullDistribution::computeParameters(const GenericCloud* cloud)
 {
 	setValid(false);
 
@@ -175,9 +175,9 @@ bool WeibullDistribution::computeParameters(const GenericCloud* cloud, bool incl
 	if (n == 0)
 		return false;
 
-	//on cherche la valeur maximale du champ scalaire pour éviter les overflows
+	//on cherche la valeur maximale du champ scalaire pour eviter les overflows
 	ScalarType maxValue=0.0;
-	ScalarFieldTools::computeScalarFieldExtremas(cloud, valueShift, maxValue, includeNegValues);
+	ScalarFieldTools::computeScalarFieldExtremas(cloud, valueShift, maxValue);
 
 	valueShift -= (ScalarType)ZERO_TOLERANCE;
 
@@ -235,7 +235,7 @@ double WeibullDistribution::computeP(ScalarType x1, ScalarType x2) const
 	if (x2 < valueShift)
 		return 0.0;
 	//pi = computeP(minV+(ScalarType(k)+0.5)*step)*step;
-	//... on va plutôt prendre en compte l'échantillonnage et intégrer :
+	//... on va plutot prendre en compte l'echantillonnage et integrer :
 	return exp(-pow((double)((x1-valueShift)/b),(double)a))-exp(-pow((double)((x2-valueShift)/b),(double)a));
 }
 
@@ -245,7 +245,7 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* cloud, ScalarType r
 
 	//a & n sould be > 0.0 !
 	if (r<=0.0 || n==0)
-		return 1.0; //une valeur positive va faire échouer la fonction "computeG"
+		return 1.0; //une valeur positive va faire echouer la fonction "computeG"
 
 	double p=0.0,q=0.0,s=0.0,v,ln_v,v_a;
 	int i,counter=0,zeroValues=0;
@@ -253,7 +253,7 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* cloud, ScalarType r
 	for (i=0;i<n;++i)
 	{
 		v = cloud->getPointScalarValue(i)-valueShift;
-		if (v >= 0) //ici il ne faut pas prendre en compte les valeurs négatives (= points cachés/filtrés)
+		if (v >= 0) //ici il ne faut pas prendre en compte les valeurs negatives (= points caches/filtres)
 		{
 			if (v > ZERO_TOLERANCE)
 			{
@@ -284,7 +284,7 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* cloud, ScalarType r
 	}
 
 	if (counter==0)
-		return 1.0; //une valeur positive va faire échouer la fonction "computeG"
+		return 1.0; //une valeur positive va faire echouer la fonction "computeG"
 
 	return (ScalarType)((double)r * (p/q - s/(double)counter) - 1.0);
 }
@@ -295,7 +295,7 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* cloud, ScalarType r
 
 	//r & n sould be > 0.0 !
 	if (r<=0.0 || n==0)
-		return 1.0; //une valeur positive va faire échouer la fonction "computeG"
+		return 1.0; //une valeur positive va faire echouer la fonction "computeG"
 
 	double p=0.0,q=0.0,s=0.0,v,ln_v,v_a;
 	int i,counter=0,zeroValues=0;
@@ -335,7 +335,7 @@ ScalarType WeibullDistribution::computeG(const GenericCloud* cloud, ScalarType r
 	}
 
 	if (counter==0)
-		return 1.0; //une valeur positive va faire échouer la fonction "computeG"
+		return 1.0; //une valeur positive va faire echouer la fonction "computeG"
 
 	return (ScalarType)((double)r * (p/q - s/(double)counter) - 1.0);
 }
@@ -357,19 +357,19 @@ ScalarType WeibullDistribution::findGRoot(const GenericCloud* cloud, ScalarType 
 	if (fabs(vMin)<1e-7)
 		return aMin;
 	else if (vMin>0.0)
-		return -1.0; //problème
+		return -1.0; //probleme
 
 	//on cherche une borne maximale pour la dichotomie telle que computeG(aMax)>0.0
 	while (vMax<0.0 && aMax<1000.0)
 	{
-		aMax *= 2.0; //puisqu'on calcule des x^a, ça devient vite énorme !!!!
+		aMax *= 2.0; //puisqu'on calcule des x^a, ça devient vite enorme !!!!
 		vMax = computeG(cloud,aMax,inverseMaxValue);
 	}
 
 	if (fabs(vMax)<1e-7)
 		return aMax;
 	else if (vMax<0.0)
-		return -1.0; //problème
+		return -1.0; //probleme
 
 	//dichotomie pour trouver r tq computeG(r)<1e-7
 	ScalarType old_v;
@@ -391,14 +391,14 @@ ScalarType WeibullDistribution::findGRoot(const GenericCloud* cloud, ScalarType 
 	return r; //shouldn't be here !
 }
 
-double WeibullDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, bool includeNegValues, int* histo)
+double WeibullDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned numberOfClasses, int* histo)
 {
 	assert(cloud);
 
 	unsigned n = cloud->size();
 
 	//we must refine the real number of elements
-	unsigned numberOfElements = ScalarFieldTools::countScalarFieldValidValues(cloud,!includeNegValues);
+	unsigned numberOfElements = ScalarFieldTools::countScalarFieldValidValues(cloud);
 
 	if (numberOfElements==0)
 		return -1.0;
@@ -417,14 +417,14 @@ double WeibullDistribution::computeChi2Dist(const GenericCloud* cloud, unsigned 
 	if (!_histo)
 		_histo = new int[numberOfClasses];
 	if (!_histo)
-		return -1.0; //problème d'allocation
+		return -1.0; //probleme d'allocation
 	memset(_histo,0,numberOfClasses*sizeof(int));
 
 	//calcul de l'histogramme
 	for (unsigned i=0;i<n;++i)
 	{
 		ScalarType V = cloud->getPointScalarValue(i);
-		if (ScalarField::ValidValue(V,!includeNegValues))
+		if (ScalarField::ValidValue(V))
 		{
 			unsigned j=0;
 			for (;j<numberOfClasses-1;++j)

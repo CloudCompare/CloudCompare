@@ -168,7 +168,7 @@ void FastMarching::initTrialCells()
 			//pointeur vers la cellule voisine
 			nCell = theGrid[nIndex];
 
-			//si elle est définie
+			//si elle est definie
 			if (nCell)
 			{
 				//et si elle n'est pas encore dans un groupe

@@ -114,9 +114,6 @@ public:
                     Features getters
 	***************************************************/
 
-	//! Returns whether the currently displayed SF is 'positive' or 'standard'
-	virtual bool isDisplayedSFPositive()=0;
-
     //! Returns color corresponding to a given scalar value
     /** The returned value depends on the current scalar field display parameters.
         It may even be 0 if the value shouldn't be displayed.

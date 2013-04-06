@@ -393,7 +393,7 @@ void ccAlignDlg::changeSamplingMethod(int index)
     unsigned oldSliderPos;
     CCVector3 min, max;
 
-    //Reste à changer les textes d'aide
+    //Reste a changer les textes d'aide
     switch(index)
     {
         case SPACE:

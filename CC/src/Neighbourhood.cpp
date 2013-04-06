@@ -230,7 +230,7 @@ bool Neighbourhood::computeHeightFunction()
 	assert(G);
 
 	//get the best projection axis
-	uchar idx_X=0,idx_Y=1,idx_Z=2;
+	uchar idx_X=0/*x*/,idx_Y=1/*y*/,idx_Z=2/*z*/; //default configuration: z is the "normal" direction, we use (x,y) as the base plane
 	PointCoordinateType nxx = lsq[0]*lsq[0];
 	PointCoordinateType nyy = lsq[1]*lsq[1];
 	PointCoordinateType nzz = lsq[2]*lsq[2];
@@ -239,26 +239,16 @@ bool Neighbourhood::computeHeightFunction()
 		if (nxx > nzz)
 		{
 			//as x is the "normal" direction, we use (y,z) as the base plane
-			idx_X=1; idx_Y=2; idx_Z=0;
+			idx_X=1/*y*/; idx_Y=2/*z*/; idx_Z=0/*x*/;
 		}
-		//else
-		//{
-		//	//as z is the "normal" direction, we use (x,y) as the base plane
-		//	idx_X=0; idx_Y=1; idx_Z=2;
-		//}
 	}
 	else
 	{
 	    if (nyy > nzz)
 		{
 			//as y is the "normal" direction, we use (z,x) as the base plane
-			idx_X=2; idx_Y=0; idx_Z=1;
+			idx_X=2/*z*/; idx_Y=0/*x*/; idx_Z=1/*y*/;
 		}
-		//else
-		//{
-		//	//as z is the "normal" direction, we use (x,y) as the base plane
-		//	idx_X=0; idx_Y=1; idx_Z=2;
-		//}
     }
 
 	//compute the A matrix and b vector
@@ -482,7 +472,7 @@ bool Neighbourhood::projectPointsOnPlane(const PointCoordinateType* thePlaneEqua
 	if (distanceNeeded)
 	{
 		error = DistanceComputationTools::computeCloud2PlaneDistance(m_associatedCloud,thePlaneEquation);
-		if (error<0.0)
+		if (error < 0.0)
             return false;
 	}
 
@@ -537,7 +527,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
 		return 0;
 	}
 
-	//on calcule le meilleur plan interpolant le nuage selectionné
+	//on calcule le meilleur plan interpolant le nuage selectionne
 	const PointCoordinateType* lsq = getLSQPlane();
 	if (!lsq)
         return 0;
@@ -559,7 +549,7 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
 			return 0;
 		}
 
-		//si on veut qu'il fasse référence au nuage lié  (c.a.d. le nuage "complet")
+		//si on veut qu'il fasse reference au nuage lie  (c.a.d. le nuage "complet")
 		if (duplicateVertices)
 		{
 			ChunkedPointCloud* cloud = new ChunkedPointCloud();
@@ -671,7 +661,7 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 	//we get 2D1/2 quadric parameters
 	const PointCoordinateType* H = getHeightFunction();
 	if (!H)
-        return HIDDEN_VALUE;
+        return NAN_VALUE;
 
 	//compute centroid
 	const CCVector3* G = getGravityCenter();
@@ -709,9 +699,11 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
                 //to sign the curvature, we need a normal!
                 return fabs(((1.0f+fx2)*fyy - 2.0f*fx*fy*fxy + (1.0f+fy2)*fxx)/(2.0f*pow(1.0f+fx2+fy2,1.5f)));
             }
+		default:
+			assert(false);
     }
 
-	return HIDDEN_VALUE;
+	return NAN_VALUE;
 }
 
 ScalarType Neighbourhood::computeCurvature2(unsigned neighbourIndex, CC_CURVATURE_TYPE cType)
@@ -719,7 +711,7 @@ ScalarType Neighbourhood::computeCurvature2(unsigned neighbourIndex, CC_CURVATUR
 	//we get 3D quadric parameters
 	const double* Q = get3DQuadric();
 	if (!Q)
-        return HIDDEN_VALUE;
+        return NAN_VALUE;
 
 	//we get centroid (should have already been computed during Quadric computation)
 	const CCVector3* Gc = getGravityCenter();

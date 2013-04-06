@@ -22,8 +22,8 @@
 
 using namespace CCLib;
 
-ccScalarField::ccScalarField(const char* name/*=0*/, bool positive /*=false*/)
-	: ScalarField(name,positive)
+ccScalarField::ccScalarField(const char* name/*=0*/)
+	: ScalarField(name)
     , m_minDisplayed(0)
     , m_maxDisplayed(0)
     , m_minSaturation(0)
@@ -42,10 +42,10 @@ ccScalarField::ccScalarField(const char* name/*=0*/, bool positive /*=false*/)
 
 ScalarType ccScalarField::normalize(ScalarType d) const
 {
-	if (d != d || d<m_minDisplayed || d>m_maxDisplayed) //handle NaN values!
+	if (!ValidValue(d) || d<m_minDisplayed || d>m_maxDisplayed) //handle NaN values!
 		return -1.0;
 
-	if (m_onlyPositiveValues || !m_absSaturation)
+	if (m_minVal >=0 || !m_absSaturation)
 	{
 		if (d<=m_minSaturation)
             return 0.0f;
@@ -98,12 +98,12 @@ void ccScalarField::computeMinAndMax()
 	m_maxDisplayed = m_maxVal;
 
 	//if log scale, we force absolute saturation for not strictly positive SFs!
-	if (m_logScale && !m_onlyPositiveValues)
+	if (m_logScale && m_minVal < 0)
 		m_absSaturation = true;
 
 	if (m_absSaturation)
 	{
-		m_minSaturation = (m_onlyPositiveValues ? std::min(fabs(m_minDisplayed),fabs(m_maxDisplayed)) : 0);
+		m_minSaturation = (m_minVal < 0 ? std::min(fabs(m_minDisplayed),fabs(m_maxDisplayed)) : 0);
 		m_maxSaturation = std::max(fabs(m_minDisplayed),fabs(m_maxDisplayed));
 	}
 	else
@@ -111,10 +111,10 @@ void ccScalarField::computeMinAndMax()
 		m_minSaturation = m_minDisplayed;
 		m_maxSaturation = m_maxDisplayed;
 
-		assert(m_onlyPositiveValues || !m_logScale);
+		assert(m_minVal >= 0 || !m_logScale);
 	}
 
-	if (m_logScale || m_onlyPositiveValues)
+	if (m_logScale || m_minVal >= 0)
 	{
 		m_minSaturationLog = log10(std::max(m_minSaturation,(ScalarType)ZERO_TOLERANCE));
 		m_maxSaturationLog = log10(std::max(m_maxSaturation,(ScalarType)ZERO_TOLERANCE));
@@ -133,9 +133,9 @@ void ccScalarField::setLogScale(bool state)
 	if (m_logScale)
 	{
 		//we force absolute saturation for not strictly positive SFs
-		if (!m_onlyPositiveValues && !m_absSaturation)
+		if (m_minVal < 0 && !m_absSaturation)
 		{
-			m_minSaturation = (m_onlyPositiveValues ? std::min(fabs(m_minDisplayed),fabs(m_maxDisplayed)) : 0);
+			m_minSaturation = (m_minVal >= 0 ? std::min(fabs(m_minDisplayed),fabs(m_maxDisplayed)) : 0);
 			m_maxSaturation = std::max(fabs(m_minDisplayed),fabs(m_maxDisplayed));
 			m_absSaturation = true;
 		}
@@ -181,7 +181,7 @@ void ccScalarField::setMinSaturation(ScalarType dist)
 {
 	m_minSaturation=dist;
 
-	if (m_logScale || m_onlyPositiveValues)
+	if (m_logScale || m_minVal >= 0)
 		m_minSaturationLog = log10(std::max(m_minSaturation,(ScalarType)ZERO_TOLERANCE));
 
 	updateNormalizeCoef();
@@ -191,7 +191,7 @@ void ccScalarField::setMaxSaturation(ScalarType dist)
 {
 	m_maxSaturation=dist;
 
-	if (m_logScale || m_onlyPositiveValues)
+	if (m_logScale || m_minVal >= 0)
 		m_maxSaturationLog = log10(std::max(m_maxSaturation,(ScalarType)ZERO_TOLERANCE));
 
 	updateNormalizeCoef();
@@ -218,10 +218,6 @@ bool ccScalarField::toFile(QFile& out) const
 
 	//name (dataVersion>=20)
 	if (out.write(m_name,256)<0)
-		return WriteError();
-
-	//'strictly positive' state (dataVersion>=20)
-	if (out.write((const char*)&m_onlyPositiveValues,sizeof(bool))<0)
 		return WriteError();
 
 	//data (dataVersion>=20)
@@ -284,24 +280,29 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 	if (in.read(m_name,256)<0)
 		return ReadError();
 
-	//'strictly positive' state (dataVersion>=20)
-	if (in.read((char*)&m_onlyPositiveValues,sizeof(bool))<0)
-		return ReadError();
+	//'strictly positive' state (20 <= dataVersion < 26)
+	bool onlyPositiveValues = false;
+	if (dataVersion < 26)
+	{
+		if (in.read((char*)&onlyPositiveValues,sizeof(bool))<0)
+			return ReadError();
+	}
 
 	//data (dataVersion>=20)
 	if (!ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion))
 		return false;
 
-	//convert former 'hidden' values for non strictly positive SFs (dataVersion < 26)
-	if (dataVersion < 26 && !m_onlyPositiveValues)
+	//convert former 'hidden/NaN' values for non strictly positive SFs (dataVersion < 26)
+	if (dataVersion < 26)
 	{
 		const ScalarType FORMER_BIG_VALUE = (ScalarType)(sqrt(3.4e38f)-1.0f);
+		const ScalarType FORMER_HIDDEN_VALUE = (ScalarType)-1.0;
+
 		for (unsigned i=0;i<m_maxCount;++i)
 		{
 			ScalarType val = getValue(i);
-
-			//convert former 'BIG_VALUE' to 'NAN_VALUE'
-			if (val >= FORMER_BIG_VALUE)
+			//convert former 'HIDDEN_VALUE' and 'BIG_VALUE' to 'NAN_VALUE'
+			if (onlyPositiveValues && val < 0.0 || !onlyPositiveValues && val >= FORMER_BIG_VALUE)
 				val = NAN_VALUE;
 		}
 	}
@@ -361,6 +362,7 @@ void ccScalarField::autoUpdateBoundaries(bool state)
 {
 	bool updateBoundaries = (!m_autoBoundaries && state);
 	m_autoBoundaries = state;
+
 	if (updateBoundaries)
 		computeMinAndMax();
 }

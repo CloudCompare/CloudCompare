@@ -93,9 +93,9 @@ bool planeBoxOverlap(PointCoordinateType normal[3], PointCoordinateType vert[3],
         }
     }
 
-    if (CCVector3::vdot(normal,vmin)>0)
+    if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmin)>0)
         return false;
-    if (CCVector3::vdot(normal,vmax)>=0)
+    if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmax)>=0)
         return true;
 
     return false;
@@ -224,7 +224,8 @@ bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
 			/*vmax*/e1[2]=-boxhalfsize - v0[2];
 		}
 
-		if (CCVector3::vdot(/*normal*/e2,/*vmin*/e0)>0 || CCVector3::vdot(/*normal*/e2,/*vmax*/e1)<0)
+		if (	Vector3Tpl<PointCoordinateType>::vdot(/*normal*/e2,/*vmin*/e0)>0
+			||	Vector3Tpl<PointCoordinateType>::vdot(/*normal*/e2,/*vmax*/e1)<0)
 			return false;
 	}
 
@@ -233,13 +234,13 @@ bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
 
 void CCMiscTools::ComputeBaseVectors(const PointCoordinateType *aPlane, PointCoordinateType* u, PointCoordinateType* v, PointCoordinateType* n)
 {
-    //on créé un vecteur appartenant au plan (et donc orthogonal à "a")
+    //on cree un vecteur appartenant au plan (et donc orthogonal a "a")
     //c'est le premier de la base
     u[0] = -aPlane[1];
     u[1] = aPlane[0];
     u[2] = 0.0;
 
-    //on déduit le deuxième vecteur de la base par produit vectoriel
+    //on deduit le deuxieme vecteur de la base par produit vectoriel
     CCVector3::vcross(aPlane,u,v);
 
     //on normalise u et v

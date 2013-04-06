@@ -108,7 +108,7 @@ enum CC_CLASS_ENUM {
 	V2.3 - 02/07/2013 - attribute 'm_selectionBehavior' added to ccHObject class
 	v2.4 - 02/22/2013 - per-cloud point size + whether name is displayed in 3D or not
 	v2.5 - 03/16/2013 - ccViewportParameters structure modified
-	v2.6 - 04/03/2013 - non-strictly positive scalar field 'hidden' values marker is now NaN
+	v2.6 - 04/03/2013 - strictly positive scalar field removed and 'hidden' values marker is now NaN
 **/
 static unsigned s_currentDBVersion = 26; //2.6
 

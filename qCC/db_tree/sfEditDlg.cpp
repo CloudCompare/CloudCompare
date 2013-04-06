@@ -96,12 +96,9 @@ void sfEditDlg::SetValuesWith(ccScalarField* sf)
     assert(sf);
     m_associatedSF = sf;
 
-    bool isPositive = sf->isPositive();
 	bool absSaturation = sf->absoluteSaturation();
 	bool logScale = sf->logScale();
 	bool boundariesReleased = !sf->areBoundariesAutoUpdated();
-
-	absSatCheckBox->setVisible(!isPositive);
 
 	absSatCheckBox->blockSignals(true);
 	absSatCheckBox->setChecked(absSaturation);
@@ -152,7 +149,7 @@ void sfEditDlg::SetValuesWith(ccScalarField* sf)
 	if (boundariesReleased)
 	{
 		dispUpBound = DBL_MAX;
-		dispLowBound = (isPositive ? 0 : -DBL_MAX);
+		dispLowBound = -DBL_MAX;
 	}
 
 	/*** spinboxes ***/

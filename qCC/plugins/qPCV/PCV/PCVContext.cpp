@@ -180,7 +180,7 @@ void PCVContext::setViewDirection(const float* V)
     glLoadIdentity();
 
 	float U[3]={0.0,0.0,1.0};
-	if (1.0f-fabs(CCVector3::vdot(V,U))<1e-4f)
+	if (1.0f-fabs(Vector3Tpl<float>::vdot(V,U))<1e-4f)
 	{
 		U[1]=1.0;
 		U[2]=0.0;

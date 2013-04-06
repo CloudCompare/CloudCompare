@@ -58,7 +58,6 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 															const GenericCloud* cloud,
 															unsigned numberOfClasses,
 															unsigned &finalNumberOfClasses,
-															bool includeNegValues,
 															bool forceZeroAsMin,
 															bool noClassCompression/*=false*/,
 															unsigned* histoValues/*=0*/,
@@ -78,7 +77,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		for (unsigned i=0; i<n; ++i)
 		{
 			ScalarType V = cloud->getPointScalarValue(i);
-			if (ScalarField::ValidValue(V,!includeNegValues))
+			if (ScalarField::ValidValue(V))
 			{
 				if (firstValidValue)
 				{
@@ -100,8 +99,8 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	if (numberOfElements == 0)
         return -1.0;
 
-    if (!includeNegValues && forceZeroAsMin)
-        minV = 0; //for 'only positive values' scalar fields, it's better if the histogram starts at 0!
+    if (forceZeroAsMin)
+        minV = 0; //in the case of 'only positive values' scalar fields, it's better if the histogram starts at 0!
 
 	//shall we automatically compute the number of classes?
 	if (numberOfClasses==0)
@@ -132,7 +131,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		for (unsigned i=0;i<n;++i)
 		{
 			ScalarType V = cloud->getPointScalarValue(i);
-			if (ScalarField::ValidValue(V,!includeNegValues))
+			if (ScalarField::ValidValue(V))
 			{
 				int bin = (int)floor((V-minV)/step);
 				histo[std::min<int>(bin,numberOfClasses-1)]++; //to avoid upper boundary issues
@@ -248,7 +247,6 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
                                                               GenericIndexedCloudPersist* theCloud,
                                                               unsigned numberOfNeighbours,
                                                               double pTrust,
-                                                              bool includeNegValues/*=false*/,
                                                               GenericProgressCallback* progressCb/*=0*/,
                                                               DgmOctree* _theOctree/*=0*/)
 {
@@ -285,12 +283,10 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	}
 
 	//additionnal parameters for local process
-	void* additionalParameters[5];
-	additionalParameters[0] = (void*)distrib;
-	additionalParameters[1] = (void*)&numberOfNeighbours;
-	additionalParameters[2]	= (void*)&numberOfChi2Classes;
-	additionalParameters[3]	= (void*)histoValues;
-	additionalParameters[4]	= (void*)&includeNegValues;
+	void* additionalParameters[4] = {	(void*)distrib,
+										(void*)&numberOfNeighbours,
+										(void*)&numberOfChi2Classes,
+										(void*)histoValues };
 
 	double maxChi2 = -1.0;
 
@@ -311,7 +307,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 		{
 			//theoretical Chi2 fractile
 			maxChi2 = computeChi2Fractile(pTrust, numberOfChi2Classes-1);
-			maxChi2 = sqrt(maxChi2); //on travaille avec les racines carrées des distances du Chi2
+			maxChi2 = sqrt(maxChi2); //on travaille avec les racines carrees des distances du Chi2
 		}
 	}
 
@@ -331,7 +327,6 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 	unsigned numberOfNeighbours         = *(unsigned*)additionalParameters[1];
 	unsigned numberOfChi2Classes		= *(unsigned*)additionalParameters[2];
 	unsigned* histoValues				= (unsigned*)additionalParameters[3];
-	bool includeNegValues               = *(bool*)additionalParameters[4];
 
 	//number of points in the current cell
 	unsigned n = cell.points->size();
@@ -368,11 +363,11 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 		cell.points->getPoint(i,nNSS.queryPoint);
 		ScalarType D = cell.points->getPointScalarValue(i);
 
-		if (ScalarField::ValidValue(D,!includeNegValues))
+		if (ScalarField::ValidValue(D))
 		{
 			//nNSS.theNearestPoints.clear();
 
-			unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS,false,true);
+			unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS,true);
 			if (k>numberOfNeighbours)
 				k=numberOfNeighbours;
 
@@ -380,14 +375,11 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 
 			unsigned finalNumberOfChi2Classes=0;
 			//VERSION "SYMPA" (test grossier)
-			double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,includeNegValues,true,true,histoValues);
+			double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,true,true,histoValues);
 			//VERSION "SEVERE" (test ultra-precis)
-			//double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,includeNegValues,true,false,histoValues);
+			//double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,true,false,histoValues);
 
-			if (Chi2Dist >= 0.0)
-				D = (ScalarType)sqrt(Chi2Dist);
-			else
-				D = includeNegValues ? NAN_VALUE : HIDDEN_VALUE;
+			D = (Chi2Dist >= 0.0 ? (ScalarType)sqrt(Chi2Dist) : NAN_VALUE);
 		}
 
 		//We assume that "IN" and "OUT" scalar fields are different!

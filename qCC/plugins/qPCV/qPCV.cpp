@@ -165,7 +165,7 @@ void qPCV::doAction()
     int sfIdx = pc->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
     if (sfIdx<0)
 		//otherwise we creat it
-        sfIdx=pc->addScalarField(CC_PCV_FIELD_LABEL_NAME,true);
+        sfIdx=pc->addScalarField(CC_PCV_FIELD_LABEL_NAME);
     if (sfIdx<0)
 	{
 		m_app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field ! Try to free some memory ...",ccMainAppInterface::ERR_CONSOLE_MESSAGE);

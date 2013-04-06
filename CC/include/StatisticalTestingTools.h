@@ -58,8 +58,7 @@ public:
 		\param cloud a subset of points (associated to scalar values)
 		\param numberOfClasses initial number of classes for the empirical distribution (0 for automatic determination, >1 otherwise)
 		\param finalNumberOfClasses final number of classes of the empirical distribution
-		\param includeNegValues specifies whether negative values should be included in computation
-		\param forceZeroAsMin whether min boudnary should be forced to zero (only valid if includeNegValues is false)
+		\param forceZeroAsMin whether min boundary should be forced to zero (only SF is strictly positive!)
 		\param noClassCompression prevent the algorithm from performing classes compression (faster but less accurate)
 		\param[out] histoValues [optional] histogram array (its size should be equal to the initial number of classes)
 		\param[out] npis [optional] array containing the theoretical probabilities for each class (its size should be equal to the initial number of classes)
@@ -69,7 +68,6 @@ public:
 											const GenericCloud* cloud,
 											unsigned numberOfClasses,
 											unsigned &finalNumberOfClasses,
-											bool includeNegValues,
 											bool forceZeroAsMin,
 											bool noClassCompression = false,
 											unsigned* histoValues = 0,
@@ -110,7 +108,6 @@ public:
 		\param theCloud the point cloud to classify
 		\param numberOfNeighbours the neighbourhood size for the local analysis
 		\param pTrust the Chi2 Test confidence probability
-		\param includeNegValues specifies whether negative values should be included in computation
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param _theOctree the cloud octree if it has already be computed
 		\return the distance threshold for filtering (or -1 if someting went wrong during the process)
@@ -119,7 +116,6 @@ public:
                                                 GenericIndexedCloudPersist* theCloud,
                                                 unsigned numberOfNeighbours,
                                                 double pTrust,
-                                                bool includeNegValues = false,
                                                 GenericProgressCallback* progressCb=0,
                                                 DgmOctree* _theOctree=0);
 

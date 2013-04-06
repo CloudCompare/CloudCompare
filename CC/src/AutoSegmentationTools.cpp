@@ -102,7 +102,6 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 }
 
 bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedCloudPersist* theCloud,
-                                                                bool signedSF,
                                                                 ScalarType minSeedDist,
                                                                 uchar octreeLevel,
                                                                 ReferenceCloudContainer& theSegmentedLists,
@@ -127,34 +126,20 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 		}
 	}
 
-	ScalarField* theDists = new ScalarField("distances",true);
+	//on calcule le gradient (va ecraser le champ des distances)
+	if (ScalarFieldTools::computeScalarFieldGradient(theCloud,true,true,progressCb,theOctree) < 0)
 	{
-		ScalarType d = theCloud->getPointScalarValue(0);
-		if (!theDists->resize(numberOfPoints,true,d))
-		{
-			if (!_theOctree)
-				delete theOctree;
-			return false;
-
-		}
-	}
-
-	//on calcule le gradient (va écraser le champ des distances)
-	if (ScalarFieldTools::computeScalarFieldGradient(theCloud,signedSF,true,true,progressCb,theOctree) < 0)
-	{
-		if (theDists)
-			theDists->release();
 		if (!_theOctree)
 			delete theOctree;
 		return false;
 	}
 
-	//et on lisse le résultat
+	//et on lisse le resultat
 	if (applyGaussianFilter)
 	{
 		uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION);
 		float cellSize = theOctree->getCellSize(level);
-        ScalarFieldTools::applyScalarFieldGaussianFilter(cellSize*0.33f,theCloud,signedSF,-1,progressCb,theOctree);
+        ScalarFieldTools::applyScalarFieldGaussianFilter(cellSize*0.33f,theCloud,-1,progressCb,theOctree);
 	}
 
 	unsigned seedPoints = 0;
@@ -166,15 +151,13 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	fm->setJumpCoef(50.0);
 	fm->setDetectionThreshold(alpha);
 
-	int result = fm->init(theCloud,theOctree,octreeLevel,!signedSF);
+	int result = fm->init(theCloud,theOctree,octreeLevel);
 	int octreeLength = OCTREE_LENGTH(octreeLevel)-1;
 
 	if (result<0)
 	{
 		if (!_theOctree)
             delete theOctree;
-		if (theDists)
-			theDists->release();
 		delete fm;
 		return false;
 	}
@@ -189,14 +172,26 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 		progressCb->start();
 	}
 
-	unsigned maxDistIndex=0,begin = 0;
+	ScalarField* theDists = new ScalarField("distances");
+	{
+		ScalarType d = theCloud->getPointScalarValue(0);
+		if (!theDists->resize(numberOfPoints,true,d))
+		{
+			if (!_theOctree)
+				delete theOctree;
+			return false;
+
+		}
+	}
+
+	unsigned maxDistIndex = 0, begin = 0;
 	CCVector3 startPoint;
 
 	while (true)
 	{
-		ScalarType maxDist = HIDDEN_VALUE;
+		ScalarType maxDist = NAN_VALUE;
 
-		//on cherche la première distance supérieure ou égale à "minSeedDist"
+		//on cherche la premiere distance superieure ou egale a "minSeedDist"
 		while (begin<numberOfPoints)
 		{
 			const CCVector3 *thePoint = theCloud->getPoint(begin);
@@ -231,7 +226,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 			}
 		}
 
-		//on lance la propagation à partir du point de distance maximale
+		//on lance la propagation a partir du point de distance maximale
 		//propagateFromPoint(aList,_GradientNorms,maxDistIndex,octreeLevel,_gui);
 
 		int pos[3];
@@ -245,14 +240,14 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 
 		int result = fm->propagate();
 
-		//si la propagation s'est bien passée
+		//si la propagation s'est bien passee
 		if (result>=0)
 		{
 			//on la termine (i.e. on extrait les points correspondant)
 			ReferenceCloud* newCloud = fm->extractPropagatedPoints();
 
 			//si la liste convient
-			//on la rajoute au groupe des listes segmentées
+			//on la rajoute au groupe des listes segmentees
 			theSegmentedLists.push_back(newCloud);
 			++numberOfSegmentedLists;
 

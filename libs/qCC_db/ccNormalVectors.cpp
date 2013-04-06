@@ -156,7 +156,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 		}
 	}
 
-	//on reserve la mémoire pour stocker les normales
+	//on reserve la memoire pour stocker les normales
 	if (!theNormsCodes.isAllocated() || theNormsCodes.currentSize()<n)
 		if (!theNormsCodes.resize(n))
 		{
@@ -274,7 +274,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 			}
 
 			if (CCVector3::vdot(N,orientation.u) < 0)
-				CCVector3::vmultiply<PointCoordinateType>(N,-1.0);
+				CCVector3::vmultiply(N,-1.0);
 		}
 
 		normsType nCode = (normsType)Quant_quantize_normal(N,NORMALS_QUANTIZE_LEVEL);
@@ -309,7 +309,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
-	//on connait déjà les points de la première cellule
+	//on connait deja les points de la premiere cellule
 	//(c'est la cellule qu'on est en train de traiter !)
     nNSS.pointsInNeighbourhood.resize(n);
 	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
@@ -384,7 +384,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
-	//on connait déjà les points de la première cellule
+	//on connait deja les points de la premiere cellule
 	//(c'est la cellule qu'on est en train de traiter !)
     nNSS.pointsInNeighbourhood.resize(n);
 	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
@@ -439,7 +439,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
-	//on connait déjà les points de la première cellule
+	//on connait deja les points de la premiere cellule
 	//(c'est la cellule qu'on est en train de traiter !)
     nNSS.pointsInNeighbourhood.resize(n);
 	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
@@ -454,7 +454,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
-		unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS,false);
+		unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS);
 		if (k>NUMBER_OF_POINTS_FOR_NORM_WITH_TRI)
 		{
 			if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI*3)
@@ -475,7 +475,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 				theMesh->placeIteratorAtBegining();
 				for (j=0;j<faceCount;++j)
 				{
-					//on récupère le jième triangle
+					//on recupere le jieme triangle
 #ifndef ENABLE_MT_OCTREE
 					const CCLib::TriangleSummitsIndexes* tsi = theMesh->getNextTriangleIndexes();
 #else
@@ -484,7 +484,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 					//on cherche si le point courant est un sommet de ce triangle
 					int k=-1;
 					if (tsi->i1==0)
-						k=0; //le point courant est censé être en 0 !
+						k=0; //le point courant est cense être en 0 !
 					else if (tsi->i2==0)
 						k=1;
 					else if (tsi->i3==0)

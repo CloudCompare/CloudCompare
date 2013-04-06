@@ -121,7 +121,7 @@
          </sizepolicy>
         </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="generalParamsTab">
          <attribute name="title">
@@ -167,7 +167,7 @@
                <double>1000000000.000000000000000</double>
               </property>
               <property name="value">
-               <double>0.000000000000000</double>
+               <double>1.000000000000000</double>
               </property>
              </widget>
             </item>
@@ -521,6 +521,22 @@
     <hint type="destinationlabel">
      <x>246</x>
      <y>429</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>maxDistCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>split3DCheckBox</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>100</x>
+     <y>405</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>240</x>
+     <y>459</y>
     </hint>
    </hints>
   </connection>

@@ -1227,7 +1227,6 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	CCLib::ScalarField* sf = cloud->getCurrentInScalarField();
     if (sf)
     {
-        sf->setPositiveAuto();
         sf->computeMinAndMax();
 		int sfIdx = cloud->getCurrentInScalarFieldIndex();
         cloud->setCurrentDisplayedScalarField(sfIdx);

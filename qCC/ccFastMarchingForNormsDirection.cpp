@@ -71,14 +71,14 @@ int ccFastMarchingForNormsDirection::init(ccGenericPointCloud* aList,
 		DirectionCell* aCell = new DirectionCell;
 		aCell->state = CCLib::FastMarching::Cell::FAR_CELL;
 		aCell->T = Cell::T_INF();
-		aCell->treated = false;
+		aCell->processed = false;
 		aCell->v = 0;
 		aCell->cellCode = cellCodes.back();
 
 		CCLib::ReferenceCloud* Yk = theOctree->getPointsInCell(cellCodes.back(),level,true);
 		if (Yk)
 		{
-			ccOctree::ComputeRobustAverageNorm(Yk,aList,aCell->N);
+			ccOctree::ComputeRobustAverageNorm(Yk,aList,aCell->N.u);
 			//Yk->clear(); //inutile
 			theGrid[gridPos] = (CCLib::FastMarching::Cell*)aCell;
 		}
@@ -125,7 +125,7 @@ int ccFastMarchingForNormsDirection::step()
 			//pointeur vers la cellule voisine
 			nCell = theGrid[nIndex];
 
-			//si elle est définie
+			//si elle est definie
 			if (nCell)
 			{
 				//et si elle n'est pas encore dans un groupe, on la rajoute
@@ -156,79 +156,92 @@ int ccFastMarchingForNormsDirection::step()
 float ccFastMarchingForNormsDirection::computeT(unsigned index)
 {
 	DirectionCell* theCell = (DirectionCell*)theGrid[index];
-	double Tij = theCell->T;
-	PointCoordinateType* N = theCell->N;
-	float ps,ps_seuil=0.25,directionAgreements[6];
-	memset(directionAgreements,0,sizeof(float)*6);
 
-	double Txm=Cell::T_INF(), Txp=Cell::T_INF(), Tym=Cell::T_INF(), Typ=Cell::T_INF(), Tzm=Cell::T_INF(), Tzp=Cell::T_INF();
-	DirectionCell *nCell = 0;
+	CCVector3& N = theCell->N;
 
-	nCell = (DirectionCell*)theGrid[index+neighboursIndexShift[1]];
+	const PointCoordinateType c_dotProdThreshold = (PointCoordinateType)0.25;
+	PointCoordinateType directionAgreements[6] = {0,0,0,0,0,0};
+	
+	//arrival time of the 6 neighbors
+	double	Txm=Cell::T_INF(),
+			Txp=Cell::T_INF(),
+			Tym=Cell::T_INF(),
+			Typ=Cell::T_INF(),
+			Tzm=Cell::T_INF(),
+			Tzp=Cell::T_INF();
+
+	DirectionCell* nCell = (DirectionCell*)theGrid[index+neighboursIndexShift[1]];
 	if (nCell)
 	{
 		Txp = nCell->T + neighboursDistance[1];
-		if (nCell->treated)
-            directionAgreements[1] = CCVector3::vdot(((DirectionCell*)nCell)->N,N)*nCell->v;
-		if (nCell->treated)
+		if (nCell->processed)
+            directionAgreements[1] = ((DirectionCell*)nCell)->N.dot(N)*nCell->v;
+		if (nCell->processed)
 		{
-			ps = CCVector3::vdot(((DirectionCell*)nCell)->N,N);
-			if (fabs(ps)>=ps_seuil)
-                directionAgreements[1]=ps*nCell->v;
+			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+			if (fabs(ps) >= c_dotProdThreshold)
+                directionAgreements[1] = ps*nCell->v;
 		}
 	}
 	nCell = (DirectionCell*)theGrid[index+neighboursIndexShift[3]];
 	if (nCell)
 	{
 		Txm = nCell->T + neighboursDistance[3];
-		if (nCell->treated)
+		if (nCell->processed)
 		{
-			ps = CCVector3::vdot(((DirectionCell*)nCell)->N,N);
-			if (fabs(ps)>=ps_seuil) directionAgreements[3]=ps*nCell->v;
+			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+			if (fabs(ps) >= c_dotProdThreshold)
+				directionAgreements[3] = ps*nCell->v;
 		}
 	}
 	nCell = (DirectionCell*)theGrid[index+neighboursIndexShift[0]];
 	if (nCell)
 	{
 		Tym = nCell->T + neighboursDistance[0];
-		if (nCell->treated)
+		if (nCell->processed)
 		{
-			ps = CCVector3::vdot(((DirectionCell*)nCell)->N,N);
-			if (fabs(ps)>=ps_seuil) directionAgreements[0]=ps*nCell->v;
+			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+			if (fabs(ps) >= c_dotProdThreshold)
+				directionAgreements[0] = ps*nCell->v;
 		}
 	}
 	nCell = (DirectionCell*)theGrid[index+neighboursIndexShift[2]];
 	if (nCell)
 	{
 		Typ = nCell->T + neighboursDistance[2];
-		if (nCell->treated)
+		if (nCell->processed)
 		{
-			ps = CCVector3::vdot(((DirectionCell*)nCell)->N,N);
-			if (fabs(ps)>=ps_seuil) directionAgreements[2]=ps*nCell->v;
+			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+			if (fabs(ps) >= c_dotProdThreshold)
+				directionAgreements[2] = ps*nCell->v;
 		}
 	}
 	nCell = (DirectionCell*)theGrid[index+neighboursIndexShift[4]];
 	if (nCell)
 	{
 		Tzm = nCell->T + neighboursDistance[4];
-		if (nCell->treated)
+		if (nCell->processed)
 		{
-			ps = CCVector3::vdot(((DirectionCell*)nCell)->N,N);
-			if (fabs(ps)>=ps_seuil) directionAgreements[4]=ps*nCell->v;
+			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+			if (fabs(ps) >= c_dotProdThreshold)
+				directionAgreements[4] = ps*nCell->v;
 		}
 	}
 	nCell = (DirectionCell*)theGrid[index+neighboursIndexShift[5]];
 	if (nCell)
 	{
 		Tzp = nCell->T + neighboursDistance[5];
-		if (nCell->treated)
+		if (nCell->processed)
 		{
-			ps = CCVector3::vdot(((DirectionCell*)nCell)->N,N);
-			if (fabs(ps)>=ps_seuil) directionAgreements[5]=ps*nCell->v;
+			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+			if (fabs(ps) >= c_dotProdThreshold)
+				directionAgreements[5] = ps*nCell->v;
 		}
 	}
 
 	double A=0.0, B=0.0, C=0.0;
+
+	double Tij = theCell->T;
 
 	//Quadratic eq. along X
 	double Tmin = std::min(Txm,Txp);
@@ -275,8 +288,8 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 				if( (cCell->state==CCLib::FastMarching::Cell::TRIAL_CELL) || (cCell->state==CCLib::FastMarching::Cell::ACTIVE_CELL) )
 				{
 					float candidateT = cCell->T + neighboursDistance[n];
-					if(candidateT<Tij)
-						Tij=candidateT;
+					if(candidateT < Tij)
+						Tij = candidateT;
 				}
 			}
 		}
@@ -302,9 +315,9 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 		Tij = (-B + sqrt(delta))/(double(2.0*A));
 	}
 
-	if (!theCell->treated)
+	if (!theCell->processed)
 	{
-		//on dépouille le vote
+		//on depouille le vote
 		uchar i=0,j=0;
 		float positive=0.0,negative=0.0;
 		for (uchar k=0;k<6;++k)
@@ -323,21 +336,19 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 			}
 		}
 
-		//si le vote penche plutôt pour l'autre sens
+		//si le vote penche plutot pour l'autre sens
 		if (std::max(negative,positive)>0.7)
 		{
 			if (negative>positive)
 			{
-				N[0]=-N[0];
-				N[1]=-N[1];
-				N[2]=-N[2];
+				N *= -1.0;
 				theCell->v = float(i)/float(i+j);
-				theCell->treated = true;
+				theCell->processed = true;
 			}
 			else //if (positive>0.0)
 			{
 				theCell->v = float(j)/float(i+j);
-				theCell->treated = true;
+				theCell->processed = true;
 			}
 		}
 		else return Cell::T_INF();
@@ -403,7 +414,7 @@ int ccFastMarchingForNormsDirection::updateResolvedTable(ccGenericPointCloud* th
 			resolved.setValue(index,1); //resolvedValue=1
 
 			const normsType& norm = theNorms->getValue(index);
-			if (CCVector3::vdot(ccNormalVectors::GetNormal(norm),aCell->N)<0.0)
+			if (CCVector3::vdot(ccNormalVectors::GetNormal(norm),aCell->N.u)<0.0)
 			{
 				PointCoordinateType newN[3];
 				const PointCoordinateType* N = ccNormalVectors::GetNormal(norm);
@@ -454,18 +465,18 @@ void ccFastMarchingForNormsDirection::endPropagation()
 }
 
 
-//rajouter un élément à la structure "untidy priority queue"
+//rajouter un element a la structure "untidy priority queue"
 void ccFastMarchingForNormsDirection::addTrialCell(unsigned index, float T)
 {
 	trialCells.push_back(index);
 }
 
-//récupérer le premier élément de la structure "untidy priority queue"
-unsigned ccFastMarchingForNormsDirection::getNearestTrialCell() //renvoie 0 si problème
+//recuperer le premier element de la structure "untidy priority queue"
+unsigned ccFastMarchingForNormsDirection::getNearestTrialCell() //renvoie 0 si probleme
 {
 	if (trialCells.empty()) return 0;
 
-	//on trouve la cellule de "TRIAL" qui à le T minimum
+	//on trouve la cellule de "TRIAL" qui a le T minimum
 	std::vector<unsigned>::const_iterator p = trialCells.begin();
 
 	int i=0,k=0;
@@ -488,7 +499,7 @@ unsigned ccFastMarchingForNormsDirection::getNearestTrialCell() //renvoie 0 si p
 		++i;
 	}
 
-	//on l'enlève de la liste
+	//on l'enleve de la liste
 	trialCells[k]=trialCells[trialCells.size()-1];
 	trialCells.pop_back();
 
@@ -514,7 +525,7 @@ void ccFastMarchingForNormsDirection::initTrialCells()
 			//pointeur vers la cellule voisine
 			nCell = (DirectionCell*)theGrid[nIndex];
 
-			//si elle est définie
+			//si elle est definie
 			if (nCell)
 			{
 				//et si elle n'est pas encore dans un groupe
@@ -524,15 +535,12 @@ void ccFastMarchingForNormsDirection::initTrialCells()
 					nCell->T = neighboursDistance[i]*computeTCoefApprox(aCell,nCell);
 
 					//on doit s'occuper de leur normales !!!
-					float ps = CCVector3::vdot(aCell->N,nCell->N);
-					if (ps<0.0)
-					{
-						nCell->N[0]=-nCell->N[0];
-						nCell->N[1]=-nCell->N[1];
-						nCell->N[2]=-nCell->N[2];
-					}
-					nCell->v = 1.0;
-					nCell->treated = true;
+					PointCoordinateType ps = aCell->N.dot(nCell->N);
+					if (ps < 0)
+						nCell->N *= (PointCoordinateType)-1.0;
+
+					nCell->v = (ScalarType)1.0;
+					nCell->processed = true;
 
 					addTrialCell(nIndex,nCell->T);
 
@@ -567,11 +575,11 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 		}
 	}
 
-	//temporaire
+	//temporary SF
 	int oldSfIdx = theCloud->getCurrentInScalarFieldIndex();
 	int sfIdx = theCloud->getScalarFieldIndexByName("FM_Propagation");
 	if (sfIdx<0)
-		sfIdx=theCloud->addScalarField("FM_Propagation",true);
+		sfIdx=theCloud->addScalarField("FM_Propagation");
 	if (sfIdx>=0)
 		theCloud->setCurrentScalarField(sfIdx);
 	else
@@ -583,7 +591,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 	}
 	theCloud->enableScalarField();
 
-	//vecteur indiquant si le point a été traité
+	//vecteur indiquant si le point a ete traite
 	GenericChunkedArray<1,uchar>* resolved = new GenericChunkedArray<1,uchar>();
 	resolved->resize(numberOfPoints,true,0); //defaultResolvedValue=0
 
@@ -617,7 +625,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 
 	while (true)
 	{
-		//on cherche un point non encore traité
+		//on cherche un point non encore traite
 		resolved->placeIteratorAtBegining();
 		for (i=0;i<numberOfPoints;++i)
 		{
@@ -626,11 +634,11 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 			resolved->forwardIterator();
 		}
 
-		//si tous les points ont été traités, on peut arréter !
+		//si tous les points ont ete traites, on peut arreter !
 		if (i==numberOfPoints)
 			break;
 
-		//on lance la propagation à partir du point trouvé
+		//on lance la propagation a partir du point trouve
 		const CCVector3 *thePoint = theCloud->getPoint(i);
 
 		int pos[3];
@@ -643,7 +651,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 
 		int result = fm->propagate();
 
-		//si la propagation s'est bien passée
+		//si la propagation s'est bien passee
 		if (result>=0)
 		{
 			int count = fm->updateResolvedTable(theCloud,*resolved,theNorms);

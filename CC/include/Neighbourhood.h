@@ -104,7 +104,7 @@ class Neighbourhood
 									bool distanceNeeded=false);
 
 		//! Computes point set curvature with height function
-		/** \return curvature value (warning: unsigned value!) or HIDDEN_VALUE if computation failed.
+		/** \return curvature value (warning: unsigned value!) or NAN_VALUE if computation failed.
 		**/
 		ScalarType computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType);
 

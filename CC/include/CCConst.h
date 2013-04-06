@@ -56,8 +56,8 @@
 #endif
 
 //! Particular scalar values
-const ScalarType HIDDEN_VALUE					=	(ScalarType)-1.0f;								/**< 'NaN' scalar value for strictly positive scalar fields **/
-const ScalarType NAN_VALUE					=	FLT_MAX;	/**< 'NaN' scalar value for NON strictly positive scalar fields. Warning: handle with care!**/
+const ScalarType HIDDEN_VALUE					=	(ScalarType)-1.0;				/**< 'NaN' scalar value for strictly positive scalar fields **/
+const ScalarType NAN_VALUE					=	std::numeric_limits<ScalarType>::quiet_NaN();	/**< 'NaN' scalar value for NON strictly positive scalar fields. Warning: handle with care!**/
 
 // Point visibility states
 // By default visibility is expressed relatively to the sensor point of view.

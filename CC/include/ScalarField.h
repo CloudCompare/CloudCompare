@@ -23,6 +23,9 @@
 #include "CCTypes.h"
 #include "GenericChunkedArray.h"
 
+//system
+#include <cmath>
+
 namespace CCLib
 {
 
@@ -92,7 +95,7 @@ public:
 	virtual void computeMinAndMax();
 
 	//! Returns whether a scalar value is valid or not
-	static inline bool ValidValue(ScalarType value, bool positiveSF) { return positiveSF ? value >= 0 : value == value; } //both tests fail with NaN values!
+	static inline bool ValidValue(ScalarType value, bool positiveSF) { return positiveSF ? value >= 0 : std::isfinite(value); }
 
 	//! Returns whether a scalar value is valid or not (non static shortcut to ValidValue)
 	inline bool validValue(ScalarType value) const { return ValidValue(value,m_onlyPositiveValues); }

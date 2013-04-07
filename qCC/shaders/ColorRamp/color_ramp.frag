@@ -26,7 +26,7 @@ void main(void)
 		else if (gl_Color[0] >= maxSaturation)
 			rampPosi = 255;
 		else
-			rampPosi = int((gl_Color[0]-minSaturation)/(maxSaturation-minSaturation)*colormapSize);
+			rampPosi = int((gl_Color[0]-minSaturation)/(maxSaturation-minSaturation)*float(colormapSize));
 		
 		//unpack the corresponding color
 		unpackedValues = fract(unpackedValues * colormap[rampPosi]);

@@ -99,8 +99,6 @@ public:
 	inline Type& operator [] (unsigned i) { return u[i]; }
 	//! Direct coordinate access (const)
 	inline const Type& operator [] (unsigned i) const { return u[i]; }
-	//! Multiplication by a scalar (front) operator
-	friend Vector3Tpl operator * (Type s, const Vector3Tpl &v);
 
 	static inline void vdivide(const Type p[], Type s, Type r[]) {r[0]=p[0]/s; r[1]=p[1]/s; r[2]=p[2]/s;}
 	static inline void vdivide(Type p[], Type s) {p[0]/=s; p[1]/=s; p[2]/=s;}

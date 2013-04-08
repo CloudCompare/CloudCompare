@@ -293,25 +293,34 @@ void ccGLWindow::initializeGL()
 		//color ramp shader
 		if (!m_colorRampShader)
 		{
-			GLint maxBytes=0;
-			glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
-			GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
-			if (maxComponents<glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE)
+			const char* vendorName = (const char*)glGetString(GL_VENDOR);
+			ccConsole::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
+			if (!vendorName || QString(vendorName).toUpper().startsWith("ATI"))
 			{
-				ccConsole::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader!",m_uniqueID);
+				ccConsole::Warning("[3D View %i] Color ramp shader not yet supported by %s cards!",m_uniqueID,vendorName);
 			}
 			else
 			{
-				ccShader* colorRampShader = new ccShader();
-				QString shadersPath = ccGLWindow::getShadersPath();
-				if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag"))))
+				GLint maxBytes=0;
+				glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
+				GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
+				if (maxComponents<glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE)
 				{
-					ccConsole::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
+					ccConsole::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader!",m_uniqueID);
 				}
 				else
 				{
-					ccConsole::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
-					m_colorRampShader = colorRampShader;
+					ccShader* colorRampShader = new ccShader();
+					QString shadersPath = ccGLWindow::getShadersPath();
+					if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag"))))
+					{
+						ccConsole::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
+					}
+					else
+					{
+						ccConsole::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
+						m_colorRampShader = colorRampShader;
+					}
 				}
 			}
 		}

@@ -645,6 +645,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 
 		if (!mesh->hasNormals())
 			mesh->computeNormals();
+		mesh->showNormals(true);
 		if (vertices->hasScalarFields())
 		{
 			vertices->setCurrentDisplayedScalarField(0);

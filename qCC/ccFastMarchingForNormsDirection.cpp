@@ -117,13 +117,11 @@ int ccFastMarchingForNormsDirection::step()
 		lastT = minTCell->T;
 
 		//on doit rajouter ses voisines au groupe TRIAL
-		unsigned nIndex;
-		CCLib::FastMarching::Cell* nCell;
 		for (int i=0;i<CC_FM_NUMBER_OF_NEIGHBOURS;++i)
 		{
-			nIndex = minTCellIndex + neighboursIndexShift[i];
+         unsigned nIndex = minTCellIndex + neighboursIndexShift[i];
 			//pointeur vers la cellule voisine
-			nCell = theGrid[nIndex];
+         CCLib::FastMarching::Cell* nCell = theGrid[nIndex];
 
 			//si elle est definie
 			if (nCell)
@@ -175,10 +173,10 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 	{
 		Txp = nCell->T + neighboursDistance[1];
 		if (nCell->processed)
-            directionAgreements[1] = ((DirectionCell*)nCell)->N.dot(N)*nCell->v;
+            directionAgreements[1] = nCell->N.dot(N)*nCell->v;
 		if (nCell->processed)
 		{
-			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+         PointCoordinateType ps = nCell->N.dot(N);
 			if (fabs(ps) >= c_dotProdThreshold)
                 directionAgreements[1] = ps*nCell->v;
 		}
@@ -189,7 +187,7 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 		Txm = nCell->T + neighboursDistance[3];
 		if (nCell->processed)
 		{
-			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+         PointCoordinateType ps = nCell->N.dot(N);
 			if (fabs(ps) >= c_dotProdThreshold)
 				directionAgreements[3] = ps*nCell->v;
 		}
@@ -200,7 +198,7 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 		Tym = nCell->T + neighboursDistance[0];
 		if (nCell->processed)
 		{
-			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+         PointCoordinateType ps = nCell->N.dot(N);
 			if (fabs(ps) >= c_dotProdThreshold)
 				directionAgreements[0] = ps*nCell->v;
 		}
@@ -211,7 +209,7 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 		Typ = nCell->T + neighboursDistance[2];
 		if (nCell->processed)
 		{
-			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+         PointCoordinateType ps = nCell->N.dot(N);
 			if (fabs(ps) >= c_dotProdThreshold)
 				directionAgreements[2] = ps*nCell->v;
 		}
@@ -222,7 +220,7 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 		Tzm = nCell->T + neighboursDistance[4];
 		if (nCell->processed)
 		{
-			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+         PointCoordinateType ps = nCell->N.dot(N);
 			if (fabs(ps) >= c_dotProdThreshold)
 				directionAgreements[4] = ps*nCell->v;
 		}
@@ -233,7 +231,7 @@ float ccFastMarchingForNormsDirection::computeT(unsigned index)
 		Tzp = nCell->T + neighboursDistance[5];
 		if (nCell->processed)
 		{
-			PointCoordinateType ps = ((DirectionCell*)nCell)->N.dot(N);
+         PointCoordinateType ps = nCell->N.dot(N);
 			if (fabs(ps) >= c_dotProdThreshold)
 				directionAgreements[5] = ps*nCell->v;
 		}

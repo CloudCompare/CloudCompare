@@ -255,8 +255,6 @@ void ccHistogramWindow::paintGL()
 
 	int w = width();
 	int h = height();
-	float wHalf = (float)w*0.5f;
-	float hHalf = (float)h*0.5f;
 
 	//we always reinit the OpenGL context (simpler, safer)
 	glViewport(0,0,width(),height());

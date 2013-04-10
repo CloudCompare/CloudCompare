@@ -155,65 +155,65 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 	switch (fType)
 	{
 	case BIN:
-		fio = (FileIOFilter*)(new BinFilter());
+      fio = new BinFilter();
 		break;
 	case OBJ:
-		fio = (FileIOFilter*)(new ObjFilter());
+      fio = new ObjFilter();
 		break;
 	case PLY:
-		fio = (FileIOFilter*)(new PlyFilter());
+      fio = new PlyFilter();
 		break;
 	case ICM:
-		fio = (FileIOFilter*)(new IcmFilter());
+      fio = new IcmFilter();
 		break;
 	case ASCII:
-		fio = (FileIOFilter*)(new AsciiFilter());
+      fio = new AsciiFilter();
 		break;
 	case SOI:
-		fio = (FileIOFilter*)(new SoiFilter());
+      fio = new SoiFilter();
 		break;
 	case PN:
-		fio = (FileIOFilter*)(new PNFilter());
+      fio = new PNFilter();
 		break;
 	case PV:
-		fio = (FileIOFilter*)(new PVFilter());
+      fio = new PVFilter();
 		break;
     case DM_ASCII:
-        fio = (FileIOFilter*)(new DepthMapFileFilter());
+        fio = new DepthMapFileFilter();
         break;
 	case POV:
-		fio = (FileIOFilter*)(new PovFilter());
+      fio = new PovFilter();
 		break;
 	case BUNDLER:
-		fio = (FileIOFilter*)(new BundlerFilter());
+      fio = new BundlerFilter();
 		break;
 	case VTK:
-		fio = (FileIOFilter*)(new VTKFilter());
+      fio = new VTKFilter();
 		break;
 	case STL:
-		fio = (FileIOFilter*)(new STLFilter());
+      fio = new STLFilter();
 		break;
     case PCD:
-        fio = (FileIOFilter*)(new PCDFilter());
+        fio = new PCDFilter();
         break;
 #ifdef CC_X3D_SUPPORT
     case X3D:
-		fio = (FileIOFilter*)(new X3DFilter());
+      fio = new X3DFilter();
 		break;
 #endif
 #ifdef CC_E57_SUPPORT
     case E57:
-		fio = (FileIOFilter*)(new E57Filter());
+      fio = new E57Filter();
 		break;
 #endif
 #ifdef CC_PDMS_SUPPORT
     case PDMS:
-		fio = (FileIOFilter*)(new PDMSFilter());
+      fio = new PDMSFilter();
 		break;
 #endif
 #ifdef CC_LAS_SUPPORT
 	case LAS:
-		fio = (FileIOFilter*)(new LASFilter());
+      fio = new LASFilter();
 		break;
 #endif
     case MA:
@@ -275,61 +275,61 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename
 	switch (fType)
 	{
 	case BIN:
-		fio = (FileIOFilter*)(new BinFilter());
+      fio = new BinFilter();
 		break;
 	case ASCII:
-		fio = (FileIOFilter*)(new AsciiFilter());
+      fio = new AsciiFilter();
 		break;
 	case OBJ:
-		fio = (FileIOFilter*)(new ObjFilter());
+      fio = new ObjFilter();
 		break;
 	case PLY:
-		fio = (FileIOFilter*)(new PlyFilter());
+      fio = new PlyFilter();
 		break;
 	case PN:
-		fio = (FileIOFilter*)(new PNFilter());
+      fio = new PNFilter();
 		break;
 	case PV:
-		fio = (FileIOFilter*)(new PVFilter());
+      fio = new PVFilter();
 		break;
 	case MA:
-		fio = (FileIOFilter*)(new MAFilter());
+      fio = new MAFilter();
 		break;
     case DM_ASCII:
-        fio = (FileIOFilter*)(new DepthMapFileFilter());
+        fio = new DepthMapFileFilter();
         break;
 	case VTK:
-		fio = (FileIOFilter*)(new VTKFilter());
+      fio = new VTKFilter();
 		break;
 	case STL:
-		fio = (FileIOFilter*)(new STLFilter());
+      fio = new STLFilter();
 		break;
     case PCD:
-        fio = (FileIOFilter*)(new PCDFilter());
+        fio = new PCDFilter();
         break;
 #ifdef CC_X3D_SUPPORT
     case X3D:
-        fio = (FileIOFilter*)(new X3DFilter());
+        fio = new X3DFilter();
         break;
 #endif
 #ifdef CC_E57_SUPPORT
     case E57:
-        fio = (FileIOFilter*)(new E57Filter());
+        fio = new E57Filter();
         break;
 #endif
 #ifdef CC_PDMS_SUPPORT
     case PDMS:
-		fio = (FileIOFilter*)(new PDMSFilter());
+      fio = new PDMSFilter();
 		break;
 #endif
 #ifdef CC_LAS_SUPPORT
     case LAS:
-        fio = (FileIOFilter*)(new LASFilter());
+        fio = new LASFilter();
         break;
 #endif
 	case POV:
         //TODO
-		//fio = (FileIOFilter*)(new PovFilter());
+      //fio = new PovFilter();
 		break;
     case SOI:
     case ICM:

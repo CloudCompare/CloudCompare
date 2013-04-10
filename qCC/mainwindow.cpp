@@ -6589,7 +6589,7 @@ void MainWindow::loadFile()
 
 	//save last loading location
     settings.setValue("currentPath",currentPath);
-    settings.setValue("selectedFilter",(int)fType);
+    settings.setValue("selectedFilter",currentOpenDlgFilter);
     settings.endGroup();
 }
 

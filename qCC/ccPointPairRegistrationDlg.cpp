@@ -500,7 +500,6 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::HornRegistrationToo
 		ccLog::Error("Need at least 3 points for each cloud (and the same number of points in both clouds)!");
 		return false;
 	}
-	unsigned count = m_refPoints.size();
 
 	//fixed scale?
 	bool fixedScale = fixedScalecheckBox->isChecked();

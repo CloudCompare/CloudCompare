@@ -480,7 +480,6 @@ CC_FILE_ERROR BinFilter::loadFileV1(QFile& in, ccHObject& container, unsigned nb
 		int parts = 0;
 
 		const ScalarType FORMER_HIDDEN_POINTS = (ScalarType)-1.0;
-		bool hasOnlyHiddenValues = true;
 
 		//lecture du fichier
 		for (unsigned i=0;i<nbOfPoints;++i)
@@ -553,9 +552,6 @@ CC_FILE_ERROR BinFilter::loadFileV1(QFile& in, ccHObject& container, unsigned nb
 				}
 				ScalarType d = (ScalarType)D;
 				loadedCloud->setPointScalarValue(i,d);
-
-				if (d<0 && d != FORMER_HIDDEN_POINTS)
-					hasOnlyHiddenValues = false;
 			}
 
 			lineRead++;

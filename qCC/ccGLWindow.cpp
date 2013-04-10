@@ -3207,7 +3207,6 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 	QFontMetrics fm(textFont);
 	int margin = fm.height()/4;
 
-	bool drawBackground = true;
 	if (align != (ALIGN_HLEFT | ALIGN_VTOP) || bkgAlpha != 0)
 	{
 		QRect rect = fm.boundingRect(text);

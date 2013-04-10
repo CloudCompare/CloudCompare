@@ -99,7 +99,6 @@ CC_FILE_ERROR PDMSFilter::loadFile(const char* filename, ccHObject& container, b
 			{
 				//Convert PDMS GenericItem to the corresponding ccHObject
 				ccMesh* primitive = 0;
-				ccHObject* otherObject = 0;
 				QString unsupportedPrimitiveStr;
 				switch(currentPair.first->getType())
 				{

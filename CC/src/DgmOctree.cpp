@@ -344,7 +344,6 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 		std::vector<octreeTreeCell*> cellStack;
 		octreeTreeCellLeaf* currentLeafCell = 0;
 		cellStack.push_back(root);
-		bool leafCell = false;
 
 		cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin();
 		for (; p != m_thePointsAndTheirCellCodes.end(); ++p)
@@ -2490,8 +2489,8 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 		}
 		//else cell is totally outside
 		{
-			unsigned count = ((c+1) != nNSS.cellsInNeighbourhood.end() ? (c+1)->index : nNSS.pointsInSphericalNeighbourhood.size()) - c->index;
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
+         unsigned count = ((c+1) != nNSS.cellsInNeighbourhood.end() ? (c+1)->index : nNSS.pointsInSphericalNeighbourhood.size()) - c->index;
 			s_skippedPoints += (double)count;
 #endif
 		}

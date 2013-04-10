@@ -653,7 +653,6 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 				{
 					//for ortho-rectification log
 					ORImageInfo info;
-					bool firstImage = (OR_pixelSize<0);
 					double corners[8];
 					ccImage* orthoImage = image->orthoRectifyAsImage(_keypointsCloud,
 																		keypointsImage,

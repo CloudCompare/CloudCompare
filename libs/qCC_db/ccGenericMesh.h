@@ -134,6 +134,11 @@ public:
 	//! Sets whether textures/material should be displayed or not
 	virtual bool materialsShown() const=0;
 
+	//! Converts materials to vertex colors
+	/** Warning: this method will overwrite colors (if any)
+	**/
+	virtual bool convertMaterialsToVertexColors();
+
 	/*********************************************************/
 	/**************    PER-TRIANGLE NORMALS    ***************/
 	/*********************************************************/
@@ -165,6 +170,9 @@ public:
 
 	//! Returns per-triangle texture coordinates array
 	virtual TextureCoordsContainer* getTexCoordinatesTable() const {return m_texCoords;}
+
+	//! Returns per-triangle texture coordinates (pointer to)
+	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const = 0;
 
 	//! Sets associated material set (may be shared)
 	virtual void setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseOldMaterialSet = true);
@@ -198,14 +206,23 @@ public:
 	**/
 	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[]) = 0;
 
-	//! Get RGB color fom a given triangle texture
+	//! Returns RGB color fom a given triangle material/texture
 	/** \param triIndex triangle index
 		\param P point where to grab color (should be inside the triangle!)
 		\param[out] rgb texel color
-		\param interpolateColorIfNoTexture whether to get color from the RGB field if no texture is associated to the given triangles
+		\param interpolateColorIfNoTexture whether to return the color interpolated from the RGB field if no texture/material is associated to the given triangles
 		\return success
 	**/
-	virtual bool getColorFromTexture(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture) = 0;
+	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture) = 0;
+
+	//! Returns RGB color of a vertex fom a given triangle material/texture
+	/** \param triIndex triangle index
+		\param vertIndex vertex index inside triangle (i.e. 0, 1 or 2!)
+		\param[out] rgb texel color
+		\param returnColorIfNoTexture whether to return the color from the vertex RGB field if no texture/material is associated to the given triangle
+		\return success
+	**/
+	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, colorType rgb[], bool returnColorIfNoTexture) = 0;
 
 protected:
 

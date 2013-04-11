@@ -713,3 +713,45 @@ bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion)
 
 	return true;
 }
+
+bool ccGenericMesh::convertMaterialsToVertexColors()
+{
+	if (!hasMaterials())
+	{
+		ccLog::Warning("[ccGenericMesh::convertMaterialsToVertexColors] Mesh has no material!");
+		return false;
+	}
+
+	if (!m_associatedCloud->isA(CC_POINT_CLOUD))
+	{
+		ccLog::Warning("[ccGenericMesh::convertMaterialsToVertexColors] Need a true point cloud as vertices!");
+		return false;
+	}
+
+	ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
+	if (!cloud->resizeTheRGBTable(true))
+	{
+		ccLog::Warning("[ccGenericMesh::convertMaterialsToVertexColors] Failed to resize vertices color table! (not enough memory?)");
+		return false;
+	}
+
+	//now scan all faces and get the vertex color each time
+	unsigned faceCount = size();
+
+	placeIteratorAtBegining();
+	for (unsigned i=0; i<faceCount; ++i)
+	{
+		const CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
+		for (unsigned char j=0; j<3; ++j)
+		{
+			colorType rgb[3];
+			if (getVertexColorFromMaterial(i,j,rgb,true))
+			{
+				//FIXME: could we be smarter? (we process each point several times! And we assume the color is always the same...)
+				cloud->setPointColor(tsi->i[j],rgb);
+			}
+		}
+	}
+
+	return true;
+}

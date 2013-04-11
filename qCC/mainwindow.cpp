@@ -828,6 +828,7 @@ void MainWindow::connectActions()
     connect(actionComputeMeshAA,                SIGNAL(triggered()),    this,       SLOT(doActionComputeMeshAA()));
     connect(actionComputeMeshLS,                SIGNAL(triggered()),    this,       SLOT(doActionComputeMeshLS()));
 	connect(actionMeshBestFittingQuadric,		SIGNAL(triggered()),    this,       SLOT(doActionComputeQuadric3D()));
+	connect(actionConvertTextureToColor,		SIGNAL(triggered()),    this,       SLOT(doActionConvertTextureToColor()));
     connect(actionSamplePoints,                 SIGNAL(triggered()),    this,       SLOT(doActionSamplePoints()));
     connect(actionSmoothMeshLaplacian,			SIGNAL(triggered()),    this,       SLOT(doActionSmoothMeshLaplacian()));
 	connect(actionSubdivideMesh,				SIGNAL(triggered()),    this,       SLOT(doActionSubdivideMesh()));
@@ -1322,12 +1323,14 @@ void MainWindow::doActionMultiply()
 
 void MainWindow::doComputeBestFitBB()
 {
-    QMessageBox msgBox(QMessageBox::Warning, "This method is for test purpose only","Cloud(s) are going to be rotated while still displayed in their previous position! Proceed?");
-    msgBox.addButton(new QPushButton("yes"), QMessageBox::YesRole);
-    msgBox.addButton(new QPushButton("no"), QMessageBox::NoRole);
-
-    if (msgBox.exec() != 0)
+    if (QMessageBox::warning(	this,
+								"This method is for test purpose only",
+								"Cloud(s) are going to be rotated while still displayed in their previous position! Proceed?",
+								QMessageBox::Yes | QMessageBox::No,
+								QMessageBox::No ) != QMessageBox::Yes)
+	{
         return;
+	}
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
@@ -1921,6 +1924,56 @@ void MainWindow::doActionExportDepthBuffer()
     }
 }
 
+void MainWindow::doActionConvertTextureToColor()
+{
+	ccHObject::Container selectedEntities = m_selectedEntities;
+
+	for (unsigned i=0;i<selectedEntities.size();++i)
+    {
+        ccHObject* ent = selectedEntities[i];
+        if (ent->isKindOf(CC_MESH))
+        {
+            ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+			assert(mesh);
+
+			if (!mesh->hasMaterials())
+			{
+				ccLog::Warning(QString("[doActionConvertTextureToColor] Mesh '%1' has no material/texture!").arg(mesh->getName()));
+				continue;
+			}
+			else
+			{
+				if (QMessageBox::warning(	this,
+											"Mesh already has colors",
+											QString("Mesh '%1' already has colors! Overwrite them?").arg(mesh->getName()),
+											QMessageBox::Yes | QMessageBox::No,
+											QMessageBox::No ) != QMessageBox::Yes)
+				{
+					continue;
+				}
+			
+
+								//colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+								//mesh->getColorFromMaterial(triIndex,*P,C,withRGB);
+								//cloud->addRGBColor(C);
+				if (mesh->convertMaterialsToVertexColors())
+				{
+					mesh->showColors(true);
+					mesh->showMaterials(false);
+					mesh->prepareDisplayForRefresh_recursive();
+				}
+				else
+				{
+					ccLog::Warning(QString("[doActionConvertTextureToColor] Failed to convert texture on mesh '%1'!").arg(mesh->getName()));
+				}
+			}
+		}
+	}
+
+    refreshAll();
+	updateUI();
+}
+
 void MainWindow::doActionSamplePoints()
 {
     ccPtsSamplingDlg dlg(this);
@@ -2001,7 +2054,7 @@ void MainWindow::doActionSamplePoints()
 								const CCVector3* P = cloud->getPoint(i);
 
 								colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
-								mesh->getColorFromTexture(triIndex,*P,C,withRGB);
+								mesh->getColorFromMaterial(triIndex,*P,C,withRGB);
 								cloud->addRGBColor(C);
 							}
 
@@ -2178,17 +2231,17 @@ void MainWindow::doActionSFConvertToRGB()
 {
     //we first ask the user if the SF colors should be mixed with existing colors
     bool mixWithExistingColors=false;
-
-    QMessageBox msgBox(QMessageBox::Warning, "Scalar Field to RGB", "Mix with existing colors (if relevant)?");
-    msgBox.addButton(new QPushButton("yes"), QMessageBox::YesRole);
-    msgBox.addButton(new QPushButton("no"), QMessageBox::NoRole);
-    msgBox.addButton(QMessageBox::Cancel);
-
-    int answer = msgBox.exec();
-    if (answer == 0)
-        mixWithExistingColors=true;
-    else if (answer == 2) //cancel
-        return;
+	{
+		QMessageBox::StandardButton answer = QMessageBox::warning(	this,
+																	"Scalar Field to RGB",
+																	"Mix with existing colors (if relevant)?",
+																	QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+																	QMessageBox::Yes );
+		if (answer == QMessageBox::Yes)
+			mixWithExistingColors = true;
+		else if (answer == QMessageBox::Cancel)
+			return;
+	}
 
     size_t i,selNum = m_selectedEntities.size();
     for (i=0;i<selNum;++i)
@@ -3097,7 +3150,10 @@ void MainWindow::doActionRegister()
 //Aurelien BEY le 13/11/2008 : ajout de la fonction permettant de traiter la fonctionnalite de recalage grossier
 void MainWindow::doAction4pcsRegister()
 {
-    if (QMessageBox::warning(this, "Work in progress", "This method is still under development: are you sure you want to use it? (a crash may likely happen)",QMessageBox::Yes,QMessageBox::No) == QMessageBox::No)
+    if (QMessageBox::warning(	this,
+								"Work in progress",
+								"This method is still under development: are you sure you want to use it? (a crash may likely happen)",
+								QMessageBox::Yes,QMessageBox::No) == QMessageBox::No )
         return;
 
     if (m_selectedEntities.size() != 2)
@@ -3824,7 +3880,10 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 					if (hadNormals && ent->isA(CC_POINT_CLOUD))
 					{
 						//if the cloud already had normals, they might not be concordant with the mesh!
-						if (QMessageBox::question(this,"Keep old normals?","Cloud already had normals. Do you want to update them (yes) or keep the old ones (no)?",QMessageBox::Yes,QMessageBox::No) != QMessageBox::No)
+						if (QMessageBox::question(	this,
+													"Keep old normals?",
+													"Cloud already had normals. Do you want to update them (yes) or keep the old ones (no)?",
+													QMessageBox::Yes,QMessageBox::No ) != QMessageBox::No)
 						{
 							static_cast<ccPointCloud*>(ent)->unallocateNorms();
 							mesh->computeNormals();
@@ -4481,7 +4540,10 @@ void MainWindow::closeEvent(QCloseEvent *event)
     //else
     {
 		if (m_ccRoot && m_ccRoot->getRootEntity()->getChildrenNumber()==0
-			|| QMessageBox::question(this,"Quit","Are you sure you want to quit?",QMessageBox::Ok,QMessageBox::Cancel)!=QMessageBox::Cancel)
+			|| QMessageBox::question(	this,
+										"Quit",
+										"Are you sure you want to quit?",
+										QMessageBox::Ok,QMessageBox::Cancel ) != QMessageBox::Cancel)
 		{
             event->accept();
         }
@@ -4594,7 +4656,9 @@ void MainWindow::help()
 	QFile doc(QApplication::applicationDirPath()+QString("/user_guide_CloudCompare.pdf"));
     if (!doc.open(QIODevice::ReadOnly))
 	{
-        QMessageBox::warning(this,  QString("User guide not found"), QString("Goto http://www.danielgm.net/cc/doc/qCC") );
+        QMessageBox::warning(	this, 
+								QString("User guide not found"),
+								QString("Goto http://www.danielgm.net/cc/doc/qCC") );
 	}
     else
     {
@@ -5681,9 +5745,16 @@ void MainWindow::doActionScalarFieldArithmetic()
 			ccConsole::Error(QString("Resulting scalar field will have the same name\nas one of the operand (%1)! Rename it first...").arg(sfName));
 			return;
 		}
-		QMessageBox msgBox(QMessageBox::Warning, "Same scalar field name", "Resulting scalar field already exists! Overwrite it?", QMessageBox::Ok | QMessageBox::Cancel);
-		if (msgBox.exec() != 0)
+
+		if (QMessageBox::warning(	this,
+									"Same scalar field name",
+									"Resulting scalar field already exists! Overwrite it?",
+									QMessageBox::Ok | QMessageBox::Cancel,
+									QMessageBox::Ok ) != QMessageBox::Ok)
+		{
 			return;
+		}
+
 		cloud->deleteScalarField(sfIdx);
 	}
 
@@ -5942,7 +6013,11 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				}
 				else //ask the user!
 				{
-					euclidian = QMessageBox::question(0,"Gradient","Is the scalar field composed of (euclidian) distances ?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes;
+					euclidian = ( QMessageBox::question(parent,
+														"Gradient",
+														"Is the scalar field composed of (euclidian) distances?",
+														QMessageBox::Yes | QMessageBox::No,
+														QMessageBox::No ) == QMessageBox::Yes );
 				}
 			}
             break;

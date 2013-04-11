@@ -276,6 +276,7 @@ protected slots:
     void doActionSubsample(); //Aurelien BEY le 4/12/2008
     void doActionStatisticalTest();
     void doActionSamplePoints();
+    void doActionConvertTextureToColor();
     void doActionLabelConnectedComponents();
     void doActionComputeStatParams();
     void doActionFilterByValue();

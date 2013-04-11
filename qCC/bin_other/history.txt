@@ -23,6 +23,10 @@ v2.4 03/17/2013
 	* default views (top, bottom, left, etc.) are more 'natural'
 	* new default views added (front and back 'isometric' views)
 	* default FOV (field of view) is now 30 degrees for perspective mode
+- New method:
+	* Edit > Mesh > Export materials/textures to RGB
+- Improvements:
+	* CC can now handle textures/materials when saving PLY files
 - New pop-menus added to the 'View' toolbar:
 	* selection of the current rotation center visibility (see above)
 	* selection of the current view mode (orthographic, object-based and viewer-based perspective)

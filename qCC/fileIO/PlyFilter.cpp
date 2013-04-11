@@ -27,6 +27,7 @@
 #include <QProgressDialog>
 #include <QImage>
 #include <QFileInfo>
+#include <QMessageBox>
 
 //CCLib
 #include <ScalarField.h>
@@ -68,7 +69,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
     if (!vertices)
         return CC_FERR_BAD_ENTITY_TYPE;
 
-        p_ply ply = ply_create(filename, storageType, NULL, 0, NULL);
+	p_ply ply = ply_create(filename, storageType, NULL, 0, NULL);
 	if (!ply)
         return CC_FERR_NOT_ENOUGH_MEMORY;
 
@@ -89,10 +90,63 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 	}
 	else result=0;
 
+	const ccMaterial* material = 0;
+	if (mesh && mesh->hasMaterials())
+	{
+		//look for textures/materials in case there's no color
+		if (!mesh->hasColors())
+		{
+			const ccMaterialSet* materials = mesh->getMaterialSet();
+			assert(materials);
+			if (materials->size() == 1)
+			{
+				material = &materials->front();
+			}
+			else //multiple materials
+			{
+				assert(materials->size()>0);
+
+				//we ask the user if he wants to convert them as an RGB field
+				if (QMessageBox::question(	0,
+											"Multiple textures/materials",
+											"PLY files can't handle multiple textures/materials! Do you want to convert them to RGB colors?",
+											QMessageBox::Yes | QMessageBox::No,
+											QMessageBox::No ) == QMessageBox::Yes)
+				{
+					if (!mesh->convertMaterialsToVertexColors())
+					{
+						ccLog::Error("Conversion failed! (not enough memory?)");
+					}
+				}
+			}
+		}
+		else
+		{
+			ccLog::Warning("[PLY] PLY files can't handle materials/textures! RGB field will be saved instead");
+			ccLog::Warning("[PLY] Note: you can convert materials/textures to RGB if necessary (see 'Edit > Mesh')");
+		}
+	}
+
+	bool hasUniqueColor = false;
+	colorType uniqueColor[3]={0,0,0};
+	if (material)
+	{
+		//Material without texture?
+		if (material->texture.isNull())
+		{
+			uniqueColor[0] = (colorType)(material->diffuseFront[0]*MAX_COLOR_COMP);
+			uniqueColor[1] = (colorType)(material->diffuseFront[1]*MAX_COLOR_COMP);
+			uniqueColor[2] = (colorType)(material->diffuseFront[2]*MAX_COLOR_COMP);
+			hasUniqueColor = hasUniqueColor = true;
+			material = 0; //we can forget it!
+		}
+	}
+
 	//RGB colors
 	bool hasColors = vertices->hasColors();
 	if (hasColors)
 	{
+		hasColors = true;
 		//if (ply_add_element(ply, "color", vertCount))
 		//{
 			result=ply_add_scalar_property(ply, "red", PLY_UCHAR);
@@ -154,7 +208,28 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 		{
 			//DGM: don't change the field name (vertex_indices) as Meshlab
 			//only support this one! (grrrrrrrrr)
-			result=ply_add_list_property(ply, "vertex_indices", PLY_UCHAR,PLY_INT);
+			result = ply_add_list_property(ply, "vertex_indices", PLY_UCHAR, PLY_INT);
+
+			//texture & texture coordinates?
+			if (material)
+			{
+				assert(!material->texture.isNull() && mesh->getTexCoordinatesTable());
+				//try to save the texture!
+				const QString defaultTextureName("cc_ply_texture.png");
+				QString textureFilePath = QFileInfo(filename).absolutePath()+QString('/')+defaultTextureName;
+				if (!material->texture.save(textureFilePath))
+				{
+					ccLog::Error("Failed to save texture!");
+					material = 0;
+				}
+				else
+				{
+					//save texture filename as a comment!
+					result=ply_add_comment(ply,qPrintable(QString("TEXTUREFILE %1").arg(defaultTextureName)));
+					//DGM FIXME: is this the right name?
+					result = ply_add_list_property(ply, "tex_coords", PLY_UCHAR, PLY_FLOAT);
+				}
+			}
 		}
 		else result=0;
 	}
@@ -171,7 +246,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 	}
 
 	//save the point cloud (=vertices)
-	for (unsigned i=0;i<vertCount;++i)
+	for (unsigned i=0; i<vertCount; ++i)
 	{
 		const CCVector3* P=vertices->getPoint(i);
 		ply_write(ply, double(P->x)-shift[0]);
@@ -184,6 +259,12 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 			ply_write(ply, double(col[0]));
 			ply_write(ply, double(col[1]));
 			ply_write(ply, double(col[2]));
+		}
+		else if (hasUniqueColor)
+		{
+			ply_write(ply, double(uniqueColor[0]));
+			ply_write(ply, double(uniqueColor[1]));
+			ply_write(ply, double(uniqueColor[2]));
 		}
 
 		if (hasNormals)
@@ -212,6 +293,19 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 			ply_write(ply,double(tsi->i1));
 			ply_write(ply,double(tsi->i2));
 			ply_write(ply,double(tsi->i3));
+
+			if (material) //texture coordinates
+			{
+				ply_write(ply,double(6));
+				float *tx1=0,*tx2=0,*tx3=0;
+				mesh->getTriangleTexCoordinates(i,tx1,tx2,tx3);
+				ply_write(ply,tx1 ? (double)tx1[0] : -1.0);
+				ply_write(ply,tx1 ? (double)tx1[1] : -1.0);
+				ply_write(ply,tx2 ? (double)tx2[0] : -1.0);
+				ply_write(ply,tx2 ? (double)tx2[1] : -1.0);
+				ply_write(ply,tx3 ? (double)tx3[0] : -1.0);
+				ply_write(ply,tx3 ? (double)tx3[1] : -1.0);
+			}
 		}
 	}
 
@@ -1298,7 +1392,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 				{
 					if (mesh->reservePerTriangleTexCoordIndexes() && mesh->reservePerTriangleMtlIndexes())
 					{
-						ccConsole::Print(QString("[PLY][Texture] Successuflly loaded texture '%1' (%2x%3 pixels)").arg(textureFileName).arg(texture.width()).arg(texture.height()));
+						ccConsole::Print(QString("[PLY][Texture] Successfully loaded texture '%1' (%2x%3 pixels)").arg(textureFileName).arg(texture.width()).arg(texture.height()));
 						//materials
 						ccMaterialSet* materials = new ccMaterialSet("materials");
 						ccMaterial material(textureFileName);

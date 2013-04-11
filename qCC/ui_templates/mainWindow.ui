@@ -197,6 +197,7 @@
      <addaction name="actionComputeMeshLS"/>
      <addaction name="actionMeshBestFittingQuadric"/>
      <addaction name="separator"/>
+     <addaction name="actionConvertTextureToColor"/>
      <addaction name="actionSamplePoints"/>
      <addaction name="actionSmoothMeshLaplacian"/>
      <addaction name="actionSubdivideMesh"/>
@@ -2250,6 +2251,15 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionConvertTextureToColor">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/typeRgbCcolor.png</normaloff>:/CC/images/typeRgbCcolor.png</iconset>
+   </property>
+   <property name="text">
+    <string>Convert texture/material to RGB</string>
    </property>
   </action>
  </widget>

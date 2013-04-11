@@ -1629,6 +1629,21 @@ void ccMesh::setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool
 		removePerTriangleTexCoordIndexes(); //auto-remove per-triangle indexes
 }
 
+void ccMesh::getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const
+{
+	if (m_texCoords && m_texCoordIndexes)
+	{
+		const int* txInd = m_texCoordIndexes->getValue(triIndex);
+		tx1 = (txInd[0]>=0 ? m_texCoords->getValue(txInd[0]) : 0);
+		tx2 = (txInd[1]>=0 ? m_texCoords->getValue(txInd[1]) : 0);
+		tx3 = (txInd[2]>=0 ? m_texCoords->getValue(txInd[2]) : 0);
+	}
+	else
+	{
+		tx1 = tx2 = tx3;
+	}
+}
+
 bool ccMesh::reservePerTriangleTexCoordIndexes()
 {
 	assert(!m_texCoordIndexes); //try to avoid doing this twice!
@@ -1974,7 +1989,82 @@ bool ccMesh::interpolateColors(unsigned i1, unsigned i2, unsigned i3, const CCVe
 	return true;
 }
 
-bool ccMesh::getColorFromTexture(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture)
+bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, colorType rgb[], bool returnColorIfNoTexture)
+{
+	assert(triIndex < size());
+	
+	assert(vertIndex < 3);
+	if (vertIndex > 2)
+	{
+		ccLog::Error("[ccMesh::getVertexColorFromMaterial] Internal error: invalid vertex index!");
+		return false;
+	}
+
+	int matIndex = -1;
+
+	if (hasMaterials())
+	{
+		assert(m_materials);
+		matIndex = m_triMtlIndexes->getValue(triIndex);
+		assert(matIndex < (int)m_materials->size());
+	}
+
+	const unsigned* tri = m_triIndexes->getValue(triIndex);
+	assert(tri);
+
+	//do we need to change material?
+	bool foundMaterial = false;
+	if (matIndex >= 0)
+	{
+		const ccMaterial& material = (*m_materials)[matIndex];
+		if (material.texture.isNull())
+		{
+			rgb[0] = (colorType)(material.diffuseFront[0]*MAX_COLOR_COMP);
+			rgb[1] = (colorType)(material.diffuseFront[1]*MAX_COLOR_COMP);
+			rgb[2] = (colorType)(material.diffuseFront[2]*MAX_COLOR_COMP);
+			
+			foundMaterial = true;
+		}
+		else
+		{
+			assert(m_texCoords && m_texCoordIndexes);
+			const int* txInd = m_texCoordIndexes->getValue(triIndex);
+			const float* Tx = (txInd[vertIndex]>=0 ? m_texCoords->getValue(txInd[vertIndex]) : 0);
+			if (Tx)
+			{
+				if (Tx[0] >= 0 && Tx[0] <= 1.0f && Tx[1] >= 0 && Tx[1] <= 1.0f)
+				{
+					//get color from texture image
+					int xPix = std::min((int)floor(Tx[0]*(float)material.texture.width()),material.texture.width()-1);
+					int yPix = std::min((int)floor(Tx[1]*(float)material.texture.height()),material.texture.height()-1);
+
+					QRgb pixel = material.texture.pixel(xPix,yPix);
+
+					rgb[0] = qRed(pixel);
+					rgb[1] = qGreen(pixel);
+					rgb[2] = qBlue(pixel);
+
+					foundMaterial = true;
+				}
+			}
+		}
+	}
+		
+	if (!foundMaterial && returnColorIfNoTexture && hasColors())
+	{
+		const colorType* col = m_associatedCloud->getPointColor(tri[vertIndex]);
+
+		rgb[0] = col[0];
+		rgb[1] = col[1];
+		rgb[2] = col[2];
+		
+		foundMaterial = true;
+	}
+
+	return foundMaterial;
+}
+
+bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture)
 {
 	assert(triIndex<size());
 
@@ -2011,7 +2101,7 @@ bool ccMesh::getColorFromTexture(unsigned triIndex, const CCVector3& P, colorTyp
 	const float* Tx2 = (txInd[1]>=0 ? m_texCoords->getValue(txInd[1]) : 0);
 	const float* Tx3 = (txInd[2]>=0 ? m_texCoords->getValue(txInd[2]) : 0);
 
-	//intepolation weights
+	//interpolation weights
 	const unsigned* tri = m_triIndexes->getValue(triIndex);
 	const CCVector3 *A = m_associatedCloud->getPointPersistentPtr(tri[0]);
 	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(tri[1]);
@@ -2036,12 +2126,17 @@ bool ccMesh::getColorFromTexture(unsigned triIndex, const CCVector3& P, colorTyp
 		return false;
 	}
 
-	QRgb pixel = material.texture.pixel(std::min((int)floor(x*float(material.texture.width())),material.texture.width()-1),
-					std::min((int)floor(y*float(material.texture.height())),material.texture.height()-1));
+	//get color from texture image
+	{
+		int xPix = std::min((int)floor(x*(float)material.texture.width()),material.texture.width()-1);
+		int yPix = std::min((int)floor(y*(float)material.texture.height()),material.texture.height()-1);
 
-	rgb[0] = qRed(pixel);
-	rgb[1] = qGreen(pixel);
-	rgb[2] = qBlue(pixel);
+		QRgb pixel = material.texture.pixel(xPix,yPix);
+
+		rgb[0] = qRed(pixel);
+		rgb[1] = qGreen(pixel);
+		rgb[2] = qBlue(pixel);
+	}
 
 	return true;
 }

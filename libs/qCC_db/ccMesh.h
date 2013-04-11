@@ -67,8 +67,10 @@ public:
 	virtual bool triNormsShown() const {return m_triNormsShown;}
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N);
 	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[]);
-	virtual bool getColorFromTexture(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture);
+	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture);
+	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, colorType rgb[], bool returnColorIfNoTexture);
 	virtual void setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable = true);
+	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const;
 
 	//inherited methods (GenericIndexedMesh)
 	virtual void forEach(genericTriangleAction& anAction);

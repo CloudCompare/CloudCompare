@@ -32,8 +32,8 @@
 #include <string.h>
 #include <assert.h>
 
-#define CC_MESH_RECURSIVE_CALL(method) for (unsigned i=0;i<m_children.size();++i){if (m_children[i]->isKindOf(CC_MESH)) static_cast<ccGenericMesh*>(m_children[i])->method;}
-#define CC_MESH_RECURSIVE_TEST(method) for (unsigned i=0;i<m_children.size();++i) {if (m_children[i]->isKindOf(CC_MESH)) {if (static_cast<ccGenericMesh*>(m_children[i])->method()) return true;}} return false;
+#define CC_MESH_RECURSIVE_CALL(method) for (size_t i=0; i<m_children.size(); ++i){if (m_children[i]->isKindOf(CC_MESH)) static_cast<ccGenericMesh*>(m_children[i])->method;}
+#define CC_MESH_RECURSIVE_TEST(method) for (size_t i=0; i<m_children.size(); ++i) {if (m_children[i]->isKindOf(CC_MESH)) {if (static_cast<ccGenericMesh*>(m_children[i])->method()) return true;}} return false;
 
 ccMeshGroup::ccMeshGroup(ccGenericPointCloud* vertices)
     : ccGenericMesh(vertices, "Mesh Group")
@@ -233,7 +233,7 @@ CCLib::TriangleSummitsIndexes* ccMeshGroup::getNextTriangleIndexes()
 static CCLib::GenericTriangle* s_triangle; //to avoid heap overflow
 CCLib::GenericTriangle* ccMeshGroup::_getTriangle_recursive(unsigned& index)
 {
-    for (unsigned i=0;i<m_children.size();++i)
+    for (size_t i=0; i<m_children.size(); ++i)
     {
         if (m_children[i]->isKindOf(CC_MESH))
         {
@@ -259,7 +259,7 @@ CCLib::GenericTriangle* ccMeshGroup::_getTriangle_recursive(unsigned& index)
 
 bool ccMeshGroup::getTriangleSummits_recursive(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
 {
-    for (unsigned i=0;i<m_children.size();++i)
+    for (size_t i=0; i<m_children.size(); ++i)
     {
         if (m_children[i]->isKindOf(CC_MESH))
         {
@@ -293,7 +293,7 @@ bool ccMeshGroup::getTriangleSummits_recursive(unsigned triangleIndex, CCVector3
 static CCLib::TriangleSummitsIndexes* s_triSummits; //to avoid heap overflow
 CCLib::TriangleSummitsIndexes* ccMeshGroup::getTriangleIndexes_recursive(unsigned& triangleIndex)
 {
-    for (unsigned i=0;i<m_children.size();++i)
+    for (size_t i=0; i<m_children.size(); ++i)
     {
         if (m_children[i]->isKindOf(CC_MESH))
         {
@@ -319,16 +319,16 @@ CCLib::TriangleSummitsIndexes* ccMeshGroup::getTriangleIndexes_recursive(unsigne
 
 bool ccMeshGroup::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N)
 {
-    for (unsigned i=0;i<m_children.size();++i)
+    for (size_t i=0; i<m_children.size(); ++i)
     {
         if (m_children[i]->isKindOf(CC_MESH))
         {
 			ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(m_children[i]);
 			unsigned triCount = subMesh->size();
-			if (triIndex<triCount)
+			if (triIndex < triCount)
 				return subMesh->interpolateNormals(triIndex,P,N);
 			else
-				triIndex-=triCount;
+				triIndex -= triCount;
 		}
 	}
 
@@ -339,16 +339,16 @@ bool ccMeshGroup::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVe
 
 bool ccMeshGroup::interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[])
 {
-    for (unsigned i=0;i<m_children.size();++i)
+    for (size_t i=0; i<m_children.size(); ++i)
     {
         if (m_children[i]->isKindOf(CC_MESH))
         {
 			ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(m_children[i]);
 			unsigned triCount = subMesh->size();
-			if (triIndex<triCount)
+			if (triIndex < triCount)
 				return subMesh->interpolateColors(triIndex,P,rgb);
 			else
-				triIndex-=triCount;
+				triIndex -= triCount;
 		}
 	}
 
@@ -357,24 +357,68 @@ bool ccMeshGroup::interpolateColors(unsigned triIndex, const CCVector3& P, color
 	return false;
 }
 
-bool ccMeshGroup::getColorFromTexture(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture)
+bool ccMeshGroup::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture)
 {
-    for (unsigned i=0;i<m_children.size();++i)
+    for (size_t i=0; i<m_children.size(); ++i)
     {
         if (m_children[i]->isKindOf(CC_MESH))
         {
 			ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(m_children[i]);
 			unsigned triCount = subMesh->size();
-			if (triIndex<triCount)
-				return subMesh->getColorFromTexture(triIndex,P,rgb,interpolateColorIfNoTexture);
+			if (triIndex < triCount)
+				return subMesh->getColorFromMaterial(triIndex,P,rgb,interpolateColorIfNoTexture);
 			else
-				triIndex-=triCount;
+				triIndex -= triCount;
 		}
 	}
 
 	//shouldn't happen
 	assert(false);
 	return false;
+}
+
+bool ccMeshGroup::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, colorType rgb[], bool returnColorIfNoTexture)
+{
+    for (size_t i=0; i<m_children.size(); ++i)
+    {
+        if (m_children[i]->isKindOf(CC_MESH))
+        {
+			ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(m_children[i]);
+			unsigned triCount = subMesh->size();
+			if (triIndex < triCount)
+				return subMesh->getVertexColorFromMaterial(triIndex,vertIndex,rgb,returnColorIfNoTexture);
+			else
+				triIndex -= triCount;
+		}
+	}
+
+	//shouldn't happen
+	assert(false);
+	return false;
+}
+
+void ccMeshGroup::getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const
+{
+    for (size_t i=0; i<m_children.size(); ++i)
+    {
+        if (m_children[i]->isKindOf(CC_MESH))
+        {
+			ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(m_children[i]);
+			unsigned triCount = subMesh->size();
+			if (triIndex < triCount)
+			{
+				subMesh->getTriangleTexCoordinates(triIndex,tx1,tx2,tx3);
+				return;
+			}
+			else
+			{
+				triIndex -= triCount;
+			}
+		}
+	}
+
+	//shouldn't happen
+	assert(false);
 }
 
 //FIXME!
@@ -448,7 +492,7 @@ ccGenericMesh* ccMeshGroup::createNewMeshFromSelection(bool removeSelectedVertic
     //new mesh group
     ccMeshGroup* mg = new ccMeshGroup(newVertices);
 
-    for (unsigned i=0;i<m_children.size();++i)
+    for (size_t i=0; i<m_children.size(); ++i)
     {
         if (m_children[i]->isKindOf(CC_MESH))
         {
@@ -541,7 +585,7 @@ ccGenericMesh* ccMeshGroup::clone(ccGenericPointCloud* vertices/*=0*/,
     //new mesh group
     ccMeshGroup* mg = new ccMeshGroup(newVertices);
 
-    for (unsigned i=0;i<m_children.size();++i)
+    for (size_t i=0; i<m_children.size(); ++i)
     {
         if (m_children[i]->isKindOf(CC_MESH))
         {
@@ -601,7 +645,7 @@ ccGenericMesh* ccMeshGroup::clone(ccGenericPointCloud* vertices/*=0*/,
 
 void ccMeshGroup::refreshBB()
 {
-    for (unsigned i=0;i<m_children.size();++i)
+    for (size_t i=0; i<m_children.size(); ++i)
         if (m_children[i]->isKindOf(CC_MESH))
             static_cast<ccGenericMesh*>(m_children[i])->refreshBB();
 }

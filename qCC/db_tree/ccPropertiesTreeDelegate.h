@@ -105,10 +105,11 @@ protected slots:
     void updateItem(QStandardItem* item);
     void scalarFieldChanged(int pos);
     void colorRampChanged(int pos);
+    void colorRampStepsChanged(int val);
+    void spawnColorRampEditor();
     void octreeDisplayTypeChanged(int pos);
     void octreeDisplayedLevelChanged(int val);
 	void primitivePrecisionChanged(int val);
-    void colorRampStepsChanged(int val);
     void imageAlphaChanged(int val);
     void applyImageViewport();
 	void applyLabelViewport();

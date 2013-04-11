@@ -23,6 +23,7 @@
 #include "../ccGLWindow.h"
 #include "../mainwindow.h"
 #include "../ccGuiParameters.h"
+#include "../ccColorScaleEditorDlg.h"
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -50,6 +51,8 @@
 #include <QLocale>
 #include <QPushButton>
 #include <QScrollBar>
+#include <QHBoxLayout>
+#include <QToolButton.h>
 
 //System
 #include <assert.h>
@@ -1081,15 +1084,26 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
     }
     case OBJECT_CURRENT_COLOR_RAMP:
     {
-        QComboBox *comboBox = new QComboBox(parent);
+		QFrame* frame = new QFrame(parent);
+		frame->setLayout(new QHBoxLayout());
 
-        for (int i=0;i<COLOR_RAMPS_NUMBER;++i)
-            comboBox->addItem(COLOR_RAMPS_TITLES[i]);
+		//combox box
+		{
+			QComboBox *comboBox = new QComboBox();
+			for (int i=0;i<COLOR_RAMPS_NUMBER;++i)
+				comboBox->addItem(COLOR_RAMPS_TITLES[i]);
+			frame->layout()->addWidget(comboBox);
+			connect(comboBox, SIGNAL(activated(int)), this, SLOT(colorRampChanged(int)));
+		}
+		//advanced tool button
+		{
+			QToolButton *button = new QToolButton();
+			frame->layout()->addWidget(button);
+			connect(button, SIGNAL(clicked()), this, SLOT(spawnColorRampEditor()));
+		}
 
-        connect(comboBox, SIGNAL(activated(int)), this, SLOT(colorRampChanged(int)));
-
-		comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-        return comboBox;
+		frame->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+        return frame;
     }
     case OBJECT_COLOR_RAMP_STEPS:
     {
@@ -1568,6 +1582,26 @@ void ccPropertiesTreeDelegate::scalarFieldChanged(int pos)
         //we must also reset the properties display!
         updateModel();
     }
+}
+
+void ccPropertiesTreeDelegate::spawnColorRampEditor()
+{
+    if (!m_currentObject)
+        return;
+
+    ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
+    assert(cloud);
+
+	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
+	if (sf)
+	{
+		QDialog* editorDialog = new QDialog(static_cast<ccGLWindow*>(cloud->getDisplay()));
+		editorDialog->setLayout(new QHBoxLayout());
+		ccColorScaleEditorWidget* editorWidget = new ccColorScaleEditorWidget();
+		editorDialog->layout()->addWidget(editorWidget);
+		editorDialog->exec();
+		//updateDisplay();
+	}
 }
 
 void ccPropertiesTreeDelegate::colorRampChanged(int pos)

@@ -316,8 +316,8 @@ int X3DXIOTNodeHandler::startIndexedFaceSet(const X3DAttributes &attr)
 	}
 
 	//Normals (per vertex)
-	normIndex = attr.getAttributeIndex(ID::normalPerVertex);
-	bool perVertexNormals=(normIndex != -1 ? attr.getSFBool(normIndex) : true);
+//	normIndex = attr.getAttributeIndex(ID::normalPerVertex);
+//	bool perVertexNormals=(normIndex != -1 ? attr.getSFBool(normIndex) : true);
 	//DGM: in fact we don't care
 
 	assert(m_currentLeaf);

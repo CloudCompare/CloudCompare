@@ -250,7 +250,6 @@ int PCDFilter::ReadScalarFieldMemMap(const QString& fieldName,
 	if (fieldID<0)
 		return -1;
 	size_t offset = GetOffsetOfField(fieldID, header);
-	size_t full_field_size = GetSizeOfField(fieldID, header);
 	size_t field_element_size = header.size[fieldID];
 	size_t multiplicity = header.count[fieldID];
 
@@ -381,9 +380,9 @@ CC_FILE_ERROR PCDFilter::LoadFileBinaryMemMap(const char* filename, ccHObject& c
 	//if (!QFile(filename).exists())
 	//	return CC_FERR_READING;
 
-	int x = GetIDOfField("x", header);
-	int y = GetIDOfField("y", header);
-	int z = GetIDOfField("z", header);
+	const int x = GetIDOfField("x", header);
+	const int y = GetIDOfField("y", header);
+	const int z = GetIDOfField("z", header);
 
 	if (x < 0 || y < 0 || z < 0)
 		return CC_FERR_MALFORMED_FILE;
@@ -400,15 +399,15 @@ CC_FILE_ERROR PCDFilter::LoadFileBinaryMemMap(const char* filename, ccHObject& c
 		return CC_FERR_NOT_ENOUGH_MEMORY;
 	}
 
-	size_t offsets[3] = {	GetOffsetOfField(x, header),
+	const size_t offsets[3] = {	GetOffsetOfField(x, header),
 							GetOffsetOfField(y, header),
 							GetOffsetOfField(z, header)};
 
-	size_t sizes[3] = {	GetSizeOfField(x, header),
+	const size_t sizes[3] = {	GetSizeOfField(x, header),
 						GetSizeOfField(y, header),
 						GetSizeOfField(z, header)};
 
-	bool floatType[3] = {	header.type[x] == "F",
+	const bool floatType[3] = {	header.type[x] == "F",
 							header.type[y] == "F",
 							header.type[z] == "F"};
 

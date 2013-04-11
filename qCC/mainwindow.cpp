@@ -4433,7 +4433,7 @@ ccGLWindow* MainWindow::new3DView()
     view3D->setMinimumSize(400,300);
     view3D->resize(500,400);
 
-    QMdiSubWindow* subWindow = m_mdiArea->addSubWindow(view3D);
+    m_mdiArea->addSubWindow(view3D);
 
     connect(view3D,	SIGNAL(entitySelectionChanged(int)),				m_ccRoot,	SLOT(selectEntity(int)));
     connect(view3D,	SIGNAL(entitiesSelectionChanged(std::set<int>)),	m_ccRoot,	SLOT(selectEntities(std::set<int>)));
@@ -4464,7 +4464,7 @@ void MainWindow::prepareWindowDeletion(QObject* glWindow)
         return;
 
     //we assume only ccGLWindow can be connected to this slot!
-    ccGLWindow* win = (ccGLWindow*)glWindow;
+    ccGLWindow* win = qobject_cast<ccGLWindow*>(glWindow);
 
     m_ccRoot->hidePropertiesView();
     m_ccRoot->getRootEntity()->removeFromDisplay_recursive(win);
@@ -6456,7 +6456,7 @@ void MainWindow::addToDB(ccHObject* obj,
 
 void MainWindow::addToDBAuto(const QStringList& filenames)
 {
-	ccGLWindow* win = (ccGLWindow*)QObject::sender();
+	ccGLWindow* win = qobject_cast<ccGLWindow*>(QObject::sender());
 
 	addToDB(filenames, UNKNOWN_FILE, win);
 }
@@ -7029,7 +7029,7 @@ void MainWindow::update3DViewsMenu()
             QString text = QString("&%1 %2").arg(i + 1).arg(child->windowTitle());
             QAction *action  = menu3DViews->addAction(text);
             action->setCheckable(true);
-            action ->setChecked(child == (QWidget*)getActiveGLWindow());
+            action ->setChecked(child == getActiveGLWindow());
             connect(action, SIGNAL(triggered()), m_windowMapper, SLOT(map()));
             m_windowMapper->setMapping(action, windows.at(i));
         }

@@ -41,6 +41,7 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* p
 	, m_objectMode(0)
 	, m_cameraMode(0)
 	, m_lockHorizon(0)
+	, m_dominantMode(0)
 	, m_params(params)
 {
 	assert(m_params);

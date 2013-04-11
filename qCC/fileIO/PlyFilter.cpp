@@ -1082,12 +1082,10 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	/* SCALAR FIELD (SF) */
 
-	unsigned numberOfScalars=0;
-
 	if (sfIndex>0)
 	{
 		plyProperty& pp = stdProperties[sfIndex-1];
-        numberOfScalars = pointElements[pp.elemIndex].elementInstances;
+		unsigned numberOfScalars = pointElements[pp.elemIndex].elementInstances;
 
 		//does the number of scalars matches the number of points?
 		if (numberOfPoints != numberOfScalars)

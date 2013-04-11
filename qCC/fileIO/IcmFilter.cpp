@@ -100,7 +100,6 @@ CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bo
 	container.addChild(entities);
 
 	//chargement des images
-	char imagesDescriptorFileName[MAX_ASCII_FILE_LINE_LENGTH];
 	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 	{
 		ccConsole::Error("[IcmFilter::loadModelFromIcmFile] Read error (IMAGES_DESCRIPTOR)! No image loaded");
@@ -114,6 +113,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bo
 			fclose(fp);
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
+		char imagesDescriptorFileName[MAX_ASCII_FILE_LINE_LENGTH];
 		sscanf(line,"IMAGES_DESCRIPTOR=%s",imagesDescriptorFileName);
 		int n = loadCalibratedImages(entities,path,imagesDescriptorFileName);
 		ccConsole::Print("[IcmFilter::loadModelFromIcmFile] %i image(s) loaded ...",n);

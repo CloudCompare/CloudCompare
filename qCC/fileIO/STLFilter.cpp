@@ -80,7 +80,6 @@ CC_FILE_ERROR STLFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile)
 
 	//vertices
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
-	unsigned nbPoints = vertices->size();
 	const double* shift = vertices->getOriginalShift();
 
 	mesh->placeIteratorAtBegining();
@@ -479,7 +478,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 
 		//3rd to 5th lines: 'vertex vix viy viz'
 		unsigned vertIndexes[3];
-		unsigned pointCountBefore = pointCount;
+//		unsigned pointCountBefore = pointCount;
 		for (unsigned i=0;i<3;++i)
 		{
 			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) <= 0 || !QString(currentLine).trimmed().toUpper().startsWith("VERTEX"))
@@ -721,7 +720,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 
 		//3 vertices
 		unsigned vertIndexes[3];
-		unsigned pointCountBefore=pointCount;
+//		unsigned pointCountBefore=pointCount;
 		for (unsigned i=0;i<3;++i)
 		{
 			//REAL32[3] Vertex 1,2 & 3

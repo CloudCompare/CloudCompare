@@ -18,9 +18,13 @@
 #ifndef CHUNKED_POINT_CLOUD_HEADER
 #define CHUNKED_POINT_CLOUD_HEADER
 
+//Local
 #include "GenericChunkedArray.h"
 #include "GenericIndexedCloudPersist.h"
 #include "PointProjectionTools.h"
+
+//System
+#include <assert.h>
 
 namespace CCLib
 {
@@ -61,11 +65,11 @@ public:
 		virtual ScalarType getPointScalarValue(unsigned pointIndex) const;
 
 		//**** inherited form GenericIndexedCloud ****//
-		inline virtual const CCVector3* getPoint(unsigned index)  {return getPointPersistentPtr(index);}
-		virtual void getPoint(unsigned index, CCVector3& P) const;
+		inline virtual const CCVector3* getPoint(unsigned index)  { return point(index); }
+		inline virtual void getPoint(unsigned index, CCVector3& P) const { P = *point(index); }
 
 		//**** inherited form GenericIndexedCloudPersist ****//
-		virtual const CCVector3* getPointPersistentPtr(unsigned index);
+		inline virtual const CCVector3* getPointPersistentPtr(unsigned index) { return point(index); }
 
 		//**** other methods ****//
 
@@ -119,7 +123,7 @@ public:
 		//! Returns the number of associated (and active) scalar fields
 		/** \return the number of active scalar fields
 		**/
-		inline virtual unsigned getNumberOfScalarFields() const {return (unsigned)m_scalarFields.size();};
+		inline virtual unsigned getNumberOfScalarFields() const { return (unsigned)m_scalarFields.size(); }
 
 		//! Returns a pointer to a specific scalar field
 		/** \param index a scalar field index
@@ -139,29 +143,26 @@ public:
 		**/
 		virtual int getScalarFieldIndexByName(const char* name) const;
 
-		//DGM 08/18/2010: deprecated
-		//ScalarFieldType getScalarFieldType(int index) const;
-
 		//! Returns the scalar field currently associated to the cloud input
 		/** See ChunkedPointCloud::setPointScalarValue.
 			\return a pointer to the currently defined INPUT scalar field (or 0 if none)
 		**/
-		inline virtual ScalarField* getCurrentInScalarField() const {return getScalarField(m_currentInScalarFieldIndex);};
+		inline virtual ScalarField* getCurrentInScalarField() const { return getScalarField(m_currentInScalarFieldIndex); }
 
 		//! Returns the scalar field currently associated to the cloud output
 		/** See ChunkedPointCloud::getPointScalarValue.
 			\return a pointer to the currently defined OUTPUT scalar field (or 0 if none)
 		**/
-		inline virtual ScalarField* getCurrentOutScalarField() const {return getScalarField(m_currentOutScalarFieldIndex);};
+		inline virtual ScalarField* getCurrentOutScalarField() const { return getScalarField(m_currentOutScalarFieldIndex); }
 
 		//! Sets the INPUT scalar field
 		/** This scalar field will be used by the ChunkedPointCloud::setPointScalarValue method.
 			\param index a scalar field index (or -1 if none)
 		**/
-		inline virtual void setCurrentInScalarField(int index) {m_currentInScalarFieldIndex=index;};
+		inline virtual void setCurrentInScalarField(int index) { m_currentInScalarFieldIndex=index; }
 
         //! Returns current INPUT scalar field index (or -1 if none)
-		inline virtual int getCurrentInScalarFieldIndex() {return m_currentInScalarFieldIndex;};
+		inline virtual int getCurrentInScalarFieldIndex() { return m_currentInScalarFieldIndex; }
 
 		//! Sets the OUTPUT scalar field
 		/** This scalar field will be used by the ChunkedPointCloud::getPointScalarValue method.
@@ -172,19 +173,12 @@ public:
         //! Returns current OUTPUT scalar field index (or -1 if none)
 		inline virtual int getCurrentOutScalarFieldIndex() {return m_currentOutScalarFieldIndex;};
 
-//		//! Returns the index of the scalar field currently associated to the cloud
-//        /** INPUT scalar field is returned by default.
-//            See ChunkedPointCloud::getCurrentInScalarField.
-//			\return an index (or -1 if no input scalar field has been defined - see setCurrentScalarField or setCurrentInScalarField)
-//		**/
-//		inline virtual int getCurrentScalarFieldIndex() const {return m_currentInScalarFieldIndex;};
-
 		//! Sets both the INPUT & OUTPUT scalar field
 		/** This scalar field will be used by both ChunkedPointCloud::getPointScalarValue
 			and ChunkedPointCloud::setPointScalarValue methods.
 			\param index a scalar field index
 		**/
-		inline virtual void setCurrentScalarField(int index) {setCurrentInScalarField(index);setCurrentOutScalarField(index);};
+		inline virtual void setCurrentScalarField(int index) { setCurrentInScalarField(index);setCurrentOutScalarField(index); }
 
 		//! Creates a new scalar field and registers it
 		/** Warning: this method does not reserve the memory for the scalar values.
@@ -234,14 +228,14 @@ protected:
 			\param index point index
 			\return pointer on point stored data
 		**/
-		inline virtual CCVector3* point(unsigned index) {return (CCVector3*)m_points->getValue(index);};
+		inline virtual CCVector3* point(unsigned index) { assert(index < size()); return (CCVector3*)m_points->getValue(index); }
 
 		//! Returns const access to a given point
 		/** WARNING: index must be valid
 			\param index point index
 			\return pointer on point stored data
 		**/
-		inline virtual const CCVector3* point(unsigned index) const {return (CCVector3*)m_points->getValue(index);};
+		inline virtual const CCVector3* point(unsigned index) const { assert(index < size()); return (CCVector3*)m_points->getValue(index); }
 
 		//! 3D Points database
 		GenericChunkedArray<3,PointCoordinateType>* m_points;

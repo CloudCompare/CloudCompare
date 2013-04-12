@@ -74,15 +74,16 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 
 	QImage bufferImage(depthBuffer.width,depthBuffer.height,QImage::Format_RGB32);
 	{
-		const colorType* colorTable = ccColorTablesManager::GetUniqueInstance()->getColorTable(BGYR);
-		ScalarType coef = maxDist-minDist < ZERO_TOLERANCE ? 0.0 : (ScalarType)(DEFAULT_COLOR_RAMP_SIZE-1)/(maxDist-minDist);
+		ccColorScale::Shared colorScale = ccColorScalesManager::GetDefaultScale();
+		assert(colorScale);
+		ScalarType coef = maxDist-minDist < ZERO_TOLERANCE ? 0.0 : (ScalarType)(ccColorScale::MAX_STEPS-1)/(maxDist-minDist);
 
 		const ScalarType* _zBuff = depthBuffer.zBuff;
 		for (int y=0;y<depthBuffer.height;++y)
 		{
 			for (int x=0;x<depthBuffer.width;++x,++_zBuff)
 			{
-				const colorType* col = (*_zBuff >= minDist ? colorTable + ((int)((*_zBuff - minDist) * coef))*4 : ccColor::black);
+				const colorType* col = (*_zBuff >= minDist ? colorScale->getColorByIndex(static_cast<unsigned>((*_zBuff-minDist)*coef)) : ccColor::black);
 				bufferImage.setPixel(x,depthBuffer.height-1-y,qRgb(col[0],col[1],col[2]));
 			}
 		}
@@ -104,7 +105,6 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 {
 	const ccScalarField* sf = context.sfColorScaleToDisplay;
-
 	if (!sf)
 		return;
 
@@ -119,19 +119,23 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	bool absSaturation = sf->absoluteSaturation();
 	bool logScale = sf->logScale();
 
-	int cubeSize = ccGui::Parameters().colorScaleSquareSize;
-	int spaceBetweenElements = 4;
-	int i;
+	const int c_cubeSize = ccGui::Parameters().colorScaleSquareSize;
+	const int c_defaultSpace = 4;
 
 	//this vector stores the values that will be "represented" by the scale
 	//they will be automatically displayed in a regular "pace"
 	std::vector<ScaleElement> theScaleElements;
 	std::vector<ScalarType> theCubeEquivalentDist; //to deduce its color!
 
-	int maxNumberOfCubes = int(floor(float(context.glH-120)/float(cubeSize+2*spaceBetweenElements)));
+	int maxNumberOfCubes = (int)(floor((float)(context.glH-120)/(float)(c_cubeSize+2*c_defaultSpace)));
 
-	int colorRampSteps = context.sfColorScaleToDisplay->getColorRampSteps();
-	CC_COLOR_RAMPS colorRampType = context.sfColorScaleToDisplay->getColorRamp();
+	ccColorScale::Shared colorScale = context.sfColorScaleToDisplay->getColorScale();
+	if (!colorScale)
+	{
+		assert(false);
+		return;
+	}
+	unsigned colorRampSteps = context.sfColorScaleToDisplay->getColorRampSteps();
 
 	//first we fill the two vectors below with scale "values"
 	if (strictlyPositive || !absSaturation) //only positive values
@@ -151,7 +155,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 			return;
 
 		//number of cubes available for ramp display
-		int numberOfCubes = std::min(maxNumberOfCubes-addedCubes,colorRampSteps);
+		int numberOfCubes = std::min<int>(maxNumberOfCubes-addedCubes,colorRampSteps);
 
 		ScalarType startValue = minVal; //we want it to be the same color as 'minVal' even if we start at '0'
 		if (dispZero)
@@ -211,7 +215,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 			{
 				if (logScale)
 				{
-					for (i=0;i<numberOfCubes;++i)
+					for (int i=0;i<numberOfCubes;++i)
 					{
 						ScalarType logVal = firstValue+intervale*0.5;
 						theCubeEquivalentDist.push_back(exp(logVal*log(10.0)));
@@ -221,7 +225,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 				}
 				else
 				{
-					for (i=0;i<numberOfCubes;++i)
+					for (int i=0;i<numberOfCubes;++i)
 					{
 						theCubeEquivalentDist.push_back(firstValue+intervale*0.5);
 						firstValue += intervale;
@@ -268,7 +272,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 				return;
 
 			//number of cubes available for ramp display
-			int numberOfCubes = std::min((maxNumberOfCubes-addedCubes)/2,colorRampSteps);
+			int numberOfCubes = std::min<int>((maxNumberOfCubes-addedCubes)/2,colorRampSteps);
 
 			//1st section: -maxDisp
 			ScalarType startValue = -maxDisp;
@@ -309,7 +313,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 				{
 					if (logScale)
 					{
-						for (i=0;i<numberOfCubes-1;++i)
+						for (int i=0;i<numberOfCubes-1;++i)
 						{
 							ScalarType logVal = firstValue-intervale*0.5;
 							theCubeEquivalentDist.push_back(-exp(logVal*log(10.0)));
@@ -322,7 +326,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 					}
 					else
 					{
-						for (i=0;i<numberOfCubes-1;++i)
+						for (int i=0;i<numberOfCubes-1;++i)
 						{
 							theCubeEquivalentDist.push_back(firstValue + intervale*0.5);
 							firstValue += intervale;
@@ -379,7 +383,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 				{
 					if (logScale)
 					{
-						for (i=0;i<numberOfCubes-1;++i)
+						for (int i=0;i<numberOfCubes-1;++i)
 						{
 							ScalarType logVal = firstValue+intervale*0.5;
 							theCubeEquivalentDist.push_back(exp(logVal*log(10.0)));
@@ -392,7 +396,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 					}
 					else
 					{
-						for (i=0;i<numberOfCubes-1;++i)
+						for (int i=0;i<numberOfCubes-1;++i)
 						{
 							theCubeEquivalentDist.push_back(firstValue + intervale*0.5);
 							firstValue += intervale;
@@ -431,9 +435,9 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	//scale height
 	unsigned n = (unsigned)theScaleElements.size();
 	//assert(theCubeEquivalentDist.size()+(dispZero ? 1 : 0)==n);
-	int scaleHeight = (cubeSize+2*spaceBetweenElements)*n;
+	int scaleHeight = (c_cubeSize+2*c_defaultSpace)*n;
 
-	const int xShift = cubeSize+20;
+	const int xShift = c_cubeSize+20;
 	const int yShift = -40;
 
 	//centered orthoprojective view (-halfW,-halfH,halfW,halfH)
@@ -449,7 +453,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	//first horizontal delimiter
 	glBegin(GL_LINES);
 	glVertex2i(x,y);
-	glVertex2i(x+cubeSize,y);
+	glVertex2i(x+c_cubeSize,y);
 	glEnd();
 
 	ccGLWindow* win = (ccGLWindow*)context._win;
@@ -463,20 +467,20 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	if (ccGui::Parameters().backgroundCol[0] + ccGui::Parameters().backgroundCol[1] + ccGui::Parameters().backgroundCol[2] > 3*128)
 		lineColor = ccColor::black;
 
-	const colorType* col;
-	for (i=0;i+1<(int)n;++i)
+	for (int i=0;i+1<(int)n;++i)
 	{
-		y += spaceBetweenElements;
+		y += c_defaultSpace;
 
 		//a colored cube
 		//d = 0.5*(theScaleElements[i].value + theScaleElements[i+1].value);
 		ScalarType d = theCubeEquivalentDist[i];
 
 		ScalarType normalizedDist = sf->normalize(d);
-		if (normalizedDist<0.0)
-			col = (context.greyForNanScalarValues ? ccColor::lightGrey : 0);
+		const colorType* col = 0;
+		if (normalizedDist >= 0)
+			col = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
 		else
-			col = ccColorTablesManager::GetUniqueInstance()->getColor(normalizedDist,colorRampSteps,colorRampType);
+			col = (context.greyForNanScalarValues ? ccColor::lightGrey : 0);
 
 		if (i==0 && theScaleElements[i].condensed)
 		{
@@ -484,18 +488,18 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 
 			glBegin(GL_LINE_LOOP);
 			glColor3ubv(lineColor);
-			glVertex2i(x,y+cubeSize);
-			glVertex2i(x+cubeSize,y+cubeSize);
-			glVertex2i(x+cubeSize/2,y);
+			glVertex2i(x,y+c_cubeSize);
+			glVertex2i(x+c_cubeSize,y+c_cubeSize);
+			glVertex2i(x+c_cubeSize/2,y);
 			glEnd();
 
 			if (col)
 			{
 				glBegin(GL_POLYGON);
 				glColor3ubv(col);
-				glVertex2i(x,y+cubeSize);
-				glVertex2i(x+cubeSize,y+cubeSize);
-				glVertex2i(x+cubeSize/2,y);
+				glVertex2i(x,y+c_cubeSize);
+				glVertex2i(x+c_cubeSize,y+c_cubeSize);
+				glVertex2i(x+c_cubeSize/2,y);
 				glEnd();
 			}
 		}
@@ -506,8 +510,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 			glBegin(GL_LINE_LOOP);
 			glColor3ubv(lineColor);
 			glVertex2i(x,y);
-			glVertex2i(x+cubeSize,y);
-			glVertex2i(x+cubeSize/2,y+cubeSize);
+			glVertex2i(x+c_cubeSize,y);
+			glVertex2i(x+c_cubeSize/2,y+c_cubeSize);
 			glEnd();
 
 			if (col)
@@ -515,8 +519,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 				glBegin(GL_POLYGON);
 				glColor3ubv(col);
 				glVertex2i(x,y+1);
-				glVertex2i(x+cubeSize,y+1);
-				glVertex2i(x+cubeSize/2,y+cubeSize);
+				glVertex2i(x+c_cubeSize,y+1);
+				glVertex2i(x+c_cubeSize/2,y+c_cubeSize);
 				glEnd();
 			}
 		}
@@ -530,23 +534,23 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 					glBegin(GL_POLYGON);
 					glColor3ubv(col);
 					glVertex2i(x,y);
-					glVertex2i(x+cubeSize,y);
-					glVertex2i(x+cubeSize,y+cubeSize);
-					glVertex2i(x,y+cubeSize);
+					glVertex2i(x+c_cubeSize,y);
+					glVertex2i(x+c_cubeSize,y+c_cubeSize);
+					glVertex2i(x,y+c_cubeSize);
 					glEnd();
 				}
 
 				glBegin(GL_LINE_LOOP);
 				glColor3ubv(lineColor);
 				glVertex2i(x,y);
-				glVertex2i(x+cubeSize,y);
-				glVertex2i(x+cubeSize,y+cubeSize);
-				glVertex2i(x,y+cubeSize);
+				glVertex2i(x+c_cubeSize,y);
+				glVertex2i(x+c_cubeSize,y+c_cubeSize);
+				glVertex2i(x,y+c_cubeSize);
 				glEnd();
 			}
 			else
 			{
-				float third = (float)cubeSize *0.8/3.0f;
+				float third = (float)c_cubeSize *0.8/3.0f;
 				//slashed box
 				if (col)
 				{
@@ -555,15 +559,15 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 					glBegin(GL_POLYGON);
 					glVertex2i(x,y);
 					glVertex2f(x,(float)y+third);
-					glVertex2f(x+cubeSize,(float)y+2.0f*third);
-					glVertex2i(x+cubeSize,y);
+					glVertex2f(x+c_cubeSize,(float)y+2.0f*third);
+					glVertex2i(x+c_cubeSize,y);
 					glEnd();
 
 					glBegin(GL_POLYGON);
-					glVertex2i(x,y+cubeSize);
-					glVertex2i(x+cubeSize,y+cubeSize);
-					glVertex2f(x+cubeSize,(float)(y+cubeSize)-third);
-					glVertex2f(x,(float)(y+cubeSize)-2.0*third);
+					glVertex2i(x,y+c_cubeSize);
+					glVertex2i(x+c_cubeSize,y+c_cubeSize);
+					glVertex2f(x+c_cubeSize,(float)(y+c_cubeSize)-third);
+					glVertex2f(x,(float)(y+c_cubeSize)-2.0*third);
 					glEnd();
 				}
 
@@ -571,26 +575,26 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 				glBegin(GL_LINE_LOOP);
 				glVertex2i(x,y);
 				glVertex2f(x,(float)y+third);
-				glVertex2f(x+cubeSize,(float)y+2.0f*third);
-				glVertex2i(x+cubeSize,y);
+				glVertex2f(x+c_cubeSize,(float)y+2.0f*third);
+				glVertex2i(x+c_cubeSize,y);
 				glEnd();
 
 				glBegin(GL_LINE_LOOP);
-				glVertex2i(x,y+cubeSize);
-				glVertex2i(x+cubeSize,y+cubeSize);
-				glVertex2f(x+cubeSize,(float)(y+cubeSize)-third);
-				glVertex2f(x,(float)(y+cubeSize)-2.0*third);
+				glVertex2i(x,y+c_cubeSize);
+				glVertex2i(x+c_cubeSize,y+c_cubeSize);
+				glVertex2f(x+c_cubeSize,(float)(y+c_cubeSize)-third);
+				glVertex2f(x,(float)(y+c_cubeSize)-2.0*third);
 				glEnd();
 			}
 		}
 
-		y += cubeSize+spaceBetweenElements;
+		y += c_cubeSize+c_defaultSpace;
 
 		//separator
 		glColor3ubv(lineColor);
 		glBegin(GL_LINES);
 		glVertex2i(x,y);
-		glVertex2i(x+cubeSize,y);
+		glVertex2i(x+c_cubeSize,y);
 		glEnd();
 
 		if (theScaleElements[i+1].textDisplayed)
@@ -605,7 +609,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	{
 		//QString sfTitle = QString("[%1]").arg(context.colorRampTitle);
 		QString sfTitle(context.colorRampTitle);
-		win->displayText(sfTitle, context.glW-cubeSize/2, (y+cubeSize)+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VTOP);
+		win->displayText(sfTitle, context.glW-c_cubeSize/2, (y+c_cubeSize)+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VTOP);
 	}
 
 }

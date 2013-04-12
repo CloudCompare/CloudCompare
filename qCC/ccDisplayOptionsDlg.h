@@ -18,12 +18,13 @@
 #ifndef CC_DISPLAY_OPTIONS_DIALOG_HEADER
 #define CC_DISPLAY_OPTIONS_DIALOG_HEADER
 
+//Local
+#include "ccGuiParameters.h"
+
 //Qt
 #include <QColor>
 
 #include <ui_displayOptionsDlg.h>
-
-#include "ccGuiParameters.h"
 
 //! Dialog to setup display settings
 class ccDisplayOptionsDlg : public QDialog, public Ui::DisplayOptionsDlg
@@ -38,12 +39,12 @@ public:
     //! Sets a button background color
     /** Support Windows XP style particularity.
     **/
-    static void SetButtonColor(QAbstractButton* button, QColor &col);
+    static void SetButtonColor(QAbstractButton* button, const QColor &col);
 
     //! Sets a button text color
     /** Support Windows XP style particularity.
     **/
-    static void SetButtonTextColor(QAbstractButton* button, QColor &col);
+    static void SetButtonTextColor(QAbstractButton* button, const QColor &col);
 
 signals:
     void aspectHasChanged();

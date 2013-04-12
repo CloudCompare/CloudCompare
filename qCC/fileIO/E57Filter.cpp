@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
+
 #include "E57Filter.h"
 
 #ifdef CC_E57_SUPPORT
@@ -1767,7 +1761,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	{
 		intensitySF->computeMinAndMax();
 		intensitySF->setBoundaries(0,1);
-		intensitySF->setColorRamp(GREY);
+		intensitySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
 		cloud->setCurrentDisplayedScalarField(cloud->getScalarFieldIndexByName(intensitySF->getName()));
 		cloud->showSF(true);
 	}

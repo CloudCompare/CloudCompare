@@ -31,7 +31,7 @@
 #include <ccTimer.h>
 #include <ccObject.h>
 #include <ccNormalVectors.h>
-#include <ccColorTablesManager.h>
+#include <ccColorScalesManager.h>
 
 #include "mainwindow.h"
 #include "ccConsole.h"
@@ -110,7 +110,7 @@ int main(int argc, char **argv)
 	ccObject::ResetUniqueIDCounter();
     ccTimer::Init();
 	ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
-	ccColorTablesManager::GetUniqueInstance(); //force pre-computed color tables initialization
+	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
     int result = 0;
 
@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 
     ccGui::ReleaseInstance();
 	ccNormalVectors::ReleaseUniqueInstance();
-    ccColorTablesManager::ReleaseUniqueInstance();
+    ccColorScalesManager::ReleaseUniqueInstance();
 	ccConsole::ReleaseInstance();
 
 #ifdef CC_TRACK_ALIVE_SHARED_OBJECTS

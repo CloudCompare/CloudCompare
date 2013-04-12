@@ -18,11 +18,11 @@ File I/O:
 *** And from the forum topic 'recent requests' ***
 
 Big ones:
-[*] 3D space mouse management
 [*] Cross section tool
 [*] flythrough mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
 
 Various:
+[*] save materials in OBJ I/O filter 
 [*] Per-point size based on SF values (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=507)
 [*] Select ASCII files output precision (http://www.danielgm.net/cc/forum/viewtopic.php?f=10&t=509&p=1245#p1245)
 [*] Add a header to the begining of an ASCII file (column names)

@@ -215,7 +215,7 @@ void qPCV::doAction()
         pc->setCurrentDisplayedScalarField(sfIdx);
         ccScalarField* sf = static_cast<ccScalarField*>(pc->getScalarField(sfIdx));
         if (sf)
-            sf->setColorRamp(GREY);
+			sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
         ent->showSF(true);
         ent->showNormals(false);
         ent->prepareDisplayForRefresh_recursive();

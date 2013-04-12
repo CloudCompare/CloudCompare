@@ -26,7 +26,7 @@
 #include <ReferenceCloud.h>
 
 #include "ccNormalVectors.h"
-#include "ccColorTablesManager.h"
+#include "ccColorScalesManager.h"
 #include "ccOctree.h"
 #include "ccGenericMesh.h"
 #include "ccMesh.h"
@@ -201,7 +201,7 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccPointCloud* sourc
                         currentScalarField->computeMinAndMax();
 						//same color ramp parameters
 						currentScalarField->setColorRampSteps(sf->getColorRampSteps());
-						currentScalarField->setColorRamp(sf->getColorRamp());
+						currentScalarField->setColorScale(sf->getColorScale());
                     }
                     else
                     {
@@ -754,6 +754,7 @@ bool ccPointCloud::reserveThePointsTable(unsigned newNumberOfPoints)
 
 bool ccPointCloud::reserveTheRGBTable()
 {
+	assert(m_points);
     if (!m_points->isAllocated())
     {
         ccLog::Error("[ccPointCloud::reserveTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
@@ -762,14 +763,25 @@ bool ccPointCloud::reserveTheRGBTable()
 
 	if (!m_rgbColors)
 	{
-		m_rgbColors = new ColorsTableType;
+		m_rgbColors = new ColorsTableType();
 		m_rgbColors->link();
 	}
-	return m_rgbColors->reserve(m_points->capacity());
+
+	if (!m_rgbColors->reserve(m_points->capacity()))
+	{
+		m_rgbColors->release();
+		m_rgbColors = 0;
+		
+		ccLog::Error("[ccPointCloud::reserveTheRGBTable] Not enough memory!");
+		return false;
+	}
+
+	return true;
 }
 
-bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite)
+bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite/*=false*/)
 {
+	assert(m_points);
     if (!m_points->isAllocated())
     {
         ccLog::Error("[ccPointCloud::resizeTheRGBTable] Internal error: properties (re)allocation before points allocation is forbidden!");
@@ -778,15 +790,25 @@ bool ccPointCloud::resizeTheRGBTable(bool fillWithWhite)
 
 	if (!m_rgbColors)
 	{
-		m_rgbColors = new ColorsTableType;
+		m_rgbColors = new ColorsTableType();
 		m_rgbColors->link();
 	}
 
-	return m_rgbColors->resize(m_points->currentSize(),fillWithWhite,fillWithWhite ? ccColor::white : 0);
+	if (!m_rgbColors->resize(m_points->currentSize(), fillWithWhite, fillWithWhite ? ccColor::white : 0))
+	{
+		m_rgbColors->release();
+		m_rgbColors = 0;
+		
+		ccLog::Error("[ccPointCloud::resizeTheRGBTable] Not enough memory!");
+		return false;
+	}
+
+	return true;
 }
 
 bool ccPointCloud::reserveTheNormsTable()
 {
+	assert(m_points);
     if (!m_points->isAllocated())
     {
         ccLog::Error("[ccPointCloud::reserveTheNormsTable] Internal error: properties (re)allocation before points allocation is forbidden!");
@@ -795,11 +817,20 @@ bool ccPointCloud::reserveTheNormsTable()
 
 	if (!m_normals)
 	{
-		m_normals = new NormsIndexesTableType;
+		m_normals = new NormsIndexesTableType();
 		m_normals->link();
 	}
 
-    return m_normals->reserve(m_points->capacity());
+    if (!m_normals->reserve(m_points->capacity()))
+	{
+		m_normals->release();
+		m_normals = 0;
+		
+		ccLog::Error("[ccPointCloud::reserveTheNormsTable] Not enough memory!");
+		return false;
+	}
+
+	return true;
 }
 
 bool ccPointCloud::resizeTheNormsTable()
@@ -812,43 +843,45 @@ bool ccPointCloud::resizeTheNormsTable()
 
 	if (!m_normals)
 	{
-		m_normals = new NormsIndexesTableType;
+		m_normals = new NormsIndexesTableType();
 		m_normals->link();
 	}
 
-    return m_normals->resize(m_points->currentSize(),true,0);
+    if (!m_normals->resize(m_points->currentSize(),true,0))
+	{
+		m_normals->release();
+		m_normals = 0;
+		
+		ccLog::Error("[ccPointCloud::resizeTheNormsTable] Not enough memory!");
+		return false;
+	}
+
+	return true;
 }
 
 bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 {
-    //le reserve n'est possible que pour agrandir le tableau (utiliser resize sinon)
-    if (newNumberOfPoints<size())
+    //reserve works only to enlarge the cloud
+    if (newNumberOfPoints < size())
         return false;
 
-    //les elements sur lesquels ont peu faire des "push" (a savoir : points, couleurs, normales et distances) sont "reserves" uniquement
-    //alors que les autres elements sont "resizes"
-    if (!ChunkedPointCloud::reserve(newNumberOfPoints)) //points (reserve) + champs scalaires (reserve)
+	//call parent method first (for points + scalar fields)
+    if (!ChunkedPointCloud::reserve(newNumberOfPoints))
     {
-        //ccConsole::Error("[ccPointCloud::reserve] Memory reallocation error! (ChunkedPointCloud)");
+        ccLog::Error("[ccPointCloud::reserve] Not enough memory!");
         return false;
     }
 
-    if (hasColors()) //colors (reserve)
+    if (hasColors() && !reserveTheRGBTable()) //colors
     {
-        if (!reserveTheRGBTable())
-        {
-            //ccConsole::Error("[ccPointCloud::reserve] Memory reallocation error! (colors)");
-            return false;
-        }
+        ccLog::Error("[ccPointCloud::reserve] Not enough memory!");
+        return false;
     }
 
-    if (hasNormals()) //normals (reserve)
+    if (hasNormals() && !reserveTheNormsTable()) //normals
     {
-        if (!reserveTheNormsTable())
-        {
-            //ccConsole::Error("[ccPointCloud::reserve] Memory reallocation error! (Normals)");
-            return false;
-        }
+        ccLog::Error("[ccPointCloud::reserve] Not enough memory!");
+        return false;
     }
 
     return true;
@@ -856,10 +889,12 @@ bool ccPointCloud::reserve(unsigned newNumberOfPoints)
 
 bool ccPointCloud::resize(unsigned newNumberOfPoints)
 {
-    if (newNumberOfPoints<size() && isLocked())
+	//can't reduce the size if the cloud is locked!
+    if (newNumberOfPoints < size() && isLocked())
         return false;
 
-    if (!ChunkedPointCloud::resize(newNumberOfPoints)) //points + champs scalaires
+	//call parent method first (for points + scalar fields)
+    if (!ChunkedPointCloud::resize(newNumberOfPoints))
     {
 		ccLog::Error("[ccPointCloud::resize] Not enough memory!");
         return false;
@@ -867,31 +902,17 @@ bool ccPointCloud::resize(unsigned newNumberOfPoints)
 
     updateModificationTime();
 
-    if (hasColors()) //colors (resize)
+    if (hasColors() && !resizeTheRGBTable(false)) //colors
     {
-        if (!resizeTheRGBTable(false))
-        {
-			ccLog::Error("[ccPointCloud::resize] Not enough memory!");
-            return false;
-        }
+		ccLog::Error("[ccPointCloud::resize] Not enough memory!");
+		return false;
     }
 
-    if (hasNormals()) //normals (resize)
+    if (hasNormals() && !resizeTheNormsTable()) //normals
     {
-        if (!resizeTheNormsTable())
-        {
-			ccLog::Error("[ccPointCloud::resize] Not enough memory!");
-            return false;
-        }
+		ccLog::Error("[ccPointCloud::resize] Not enough memory!");
+		return false;
     }
-
-	//update scalar fields
-	for (unsigned i=0;i<getNumberOfScalarFields();++i)
-	{
-		CCLib::ScalarField* sf = getScalarField(i);
-		if (sf)
-			sf->computeMinAndMax();
-	}
 
     return true;
 }
@@ -918,23 +939,23 @@ void ccPointCloud::setGreyForNanScalarValues(bool state)
 
 const colorType* ccPointCloud::getPointDistanceColor(unsigned pointIndex) const
 {
-    assert(m_currentDisplayedScalarField);
+    assert(m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale());
     assert(pointIndex<m_currentDisplayedScalarField->currentSize());
 
     ScalarType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(pointIndex);
     if (normalizedDist >= 0)
-		return ccColorTablesManager::GetUniqueInstance()->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp());
+		return m_currentDisplayedScalarField->getColorScale()->getColorByRelativePos(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps());
     else
         return (m_greyForNanScalarValues ? ccColor::lightGrey : 0);
 }
 
 const colorType* ccPointCloud::getDistanceColor(ScalarType d) const
 {
-    assert(m_currentDisplayedScalarField);
+    assert(m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale());
 
     ScalarType normalizedDist = m_currentDisplayedScalarField->normalize(d);
     if (normalizedDist >= 0)
-        return ccColorTablesManager::GetUniqueInstance()->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp());
+        return m_currentDisplayedScalarField->getColorScale()->getColorByRelativePos(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps());
 	else
         return (m_greyForNanScalarValues ? ccColor::lightGrey : NULL);
 }
@@ -1108,117 +1129,95 @@ void ccPointCloud::setNormsTable(NormsIndexesTableType* norms)
 		m_normals->link();
 }
 
-void ccPointCloud::colorize(float r, float g, float b)
+bool ccPointCloud::colorize(float r, float g, float b)
 {
-    if (hasColors())
+	assert(r >= 0.0f && r <= 1.0f);
+	assert(g >= 0.0f && g <= 1.0f);
+	assert(b >= 0.0f && b <= 1.0f);
+
+	if (hasColors())
     {
-        colorType* p;
         m_rgbColors->placeIteratorAtBegining();
 		for (unsigned i=0;i<m_rgbColors->currentSize();i++)
         {
-            p = m_rgbColors->getCurrentValue();
-            *p = colorType(float(*p) * r);
-            p++;
-            *p = colorType(float(*p) * g);
-            p++;
-            *p = colorType(float(*p) * b);
+            colorType* p = m_rgbColors->getCurrentValue();
+			{
+				p[0] = static_cast<colorType>(static_cast<float>(p[0]) * r);
+				p[1] = static_cast<colorType>(static_cast<float>(p[1]) * g);
+				p[2] = static_cast<colorType>(static_cast<float>(p[2]) * b);
+			}
             m_rgbColors->forwardIterator();
         }
-
     }
     else
     {
-        colorType RGB[3];
-        RGB[0] = colorType(float(MAX_COLOR_COMP)*r);
-        RGB[1] = colorType(float(MAX_COLOR_COMP)*g);
-        RGB[2] = colorType(float(MAX_COLOR_COMP)*b);
-		resizeTheRGBTable(false);
+		if (!resizeTheRGBTable(false))
+			return false;
+
+		colorType RGB[3] = {	static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * r) ,
+								static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * g) ,
+								static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * b) };
         m_rgbColors->fill(RGB);
-    }
+	}
+	
+	return true;
 }
 
-void ccPointCloud::colorizeWithDefaultRamp(unsigned char heightDim)
+bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Shared colorScale)
 {
-    if (heightDim > 2) //X=0, Y=1, Z=2
-        return;
+    if (!colorScale || heightDim > 2) //X=0, Y=1, Z=2
+	{
+		ccLog::Error("[ccPointCloud::colorizeWithDefaultRamp] Invalid paramter!");
+        return false;
+	}
 
+	//allocate colors if necessary
     if (!hasColors())
-        resizeTheRGBTable(false);
+        if (!resizeTheRGBTable(false))
+			return false;
 
     enableTempColor(false);
 
-    PointCoordinateType Mins[3],Maxs[3];
-    getBoundingBox(Mins,Maxs);
-    PointCoordinateType dMin = Mins[heightDim];
-    PointCoordinateType heightCoef = Maxs[heightDim]-dMin;
+    PointCoordinateType bbMin[3],bbMax[3];
+    getBoundingBox(bbMin,bbMax);
+	const PointCoordinateType& dMin = bbMin[heightDim];
+	PointCoordinateType height = bbMax[heightDim]-dMin;
+    
+	if (abs(height) < ZERO_TOLERANCE) //flat cloud!
+	{
+		return setRGBColor(colorScale->getColorByIndex(0));
+	}
 
-    if (heightCoef != 0.0)
-        heightCoef = 1.0/heightCoef;
+	unsigned count = size();
+	for (unsigned i=0; i<count; i++)
+	{
+		const CCVector3* Q = getPoint(i);
+		double realtivePos = (double)(Q->u[heightDim]-dMin) / (double)height;
 
-    float colorIndex;
-
-    placeIteratorAtBegining();
-    unsigned i,count=size();
-    for (i=0;i<count;i++)
-    {
-        const CCVector3* Q=getNextPoint();
-        colorIndex = float((Q->u[heightDim]-dMin)*heightCoef);
-
-        m_rgbColors->setValue(i,ccColorTablesManager::GetUniqueInstance()->getColor(colorIndex,DEFAULT_COLOR_RAMP));
-    }
+		m_rgbColors->setValue(i,colorScale->getColorByRelativePos(realtivePos));
+	}
+	
+	return true;
 }
 
-void ccPointCloud::colorizeByHeight(unsigned char heightDim, const colorType* minColor, const colorType* maxColor)
-{
-    if (heightDim > 2)
-        return;
-
-    if (!hasColors())
-        resizeTheRGBTable(false);
-
-    enableTempColor(false);
-
-    PointCoordinateType Mins[3],Maxs[3];
-    getBoundingBox(Mins,Maxs);
-    PointCoordinateType dMin = Mins[heightDim];
-    PointCoordinateType heightCoef = Maxs[heightDim]-dMin;
-    PointCoordinateType colorCoef;
-
-    if (heightCoef != 0.0)
-        heightCoef = 1.0/heightCoef;
-
-    colorType p[3];
-    float dColor[3];
-    dColor[0]=float(maxColor[0]-minColor[0]);
-    dColor[1]=float(maxColor[1]-minColor[1]);
-    dColor[2]=float(maxColor[2]-minColor[2]);
-
-    placeIteratorAtBegining();
-    unsigned i,count=size();
-    for (i=0;i<count;i++)
-    {
-        const CCVector3* Q=getNextPoint();
-        colorCoef = (Q->u[heightDim]-dMin)*heightCoef;
-
-        p[0] = minColor[0]+colorType(dColor[0]*colorCoef);
-        p[1] = minColor[1]+colorType(dColor[1]*colorCoef);
-        p[2] = minColor[2]+colorType(dColor[2]*colorCoef);
-        m_rgbColors->setValue(i,p);
-    }
-}
-
-void ccPointCloud::setRGBColor(colorType r, colorType g, colorType b)
+bool ccPointCloud::setRGBColor(colorType r, colorType g, colorType b)
 {
     colorType c[3] = {r,g,b};
-    setRGBColor(c);
+    return setRGBColor(c);
 }
 
-void ccPointCloud::setRGBColor(const colorType* col)
+bool ccPointCloud::setRGBColor(const colorType* col)
 {
     enableTempColor(false);
-    if (!hasColors())
-		reserveTheRGBTable();
-    m_rgbColors->fill(col);
+    
+	//allocate colors if necessary
+	if (!hasColors())
+		if (!reserveTheRGBTable())
+			return false;
+    
+	m_rgbColors->fill(col);
+
+	return true;
 }
 
 CCVector3 ccPointCloud::computeGravityCenter()
@@ -1307,10 +1306,10 @@ void ccPointCloud::translate(const CCVector3& T)
     updateModificationTime();
 
     //--> instead, we update BBox directly!
-    PointCoordinateType* Mins = m_points->getMin();
-    PointCoordinateType* Maxs = m_points->getMax();
-    CCVector3::vadd(Mins,T.u,Mins);
-    CCVector3::vadd(Maxs,T.u,Maxs);
+    PointCoordinateType* bbMin = m_points->getMin();
+    PointCoordinateType* bbMax = m_points->getMax();
+    CCVector3::vadd(bbMin,T.u,bbMin);
+    CCVector3::vadd(bbMax,T.u,bbMax);
 
     //same thing for the octree
     ccOctree* oct = getOctree();
@@ -1333,20 +1332,20 @@ void ccPointCloud::multiply(PointCoordinateType fx, PointCoordinateType fy, Poin
 
     //refreshBB();
     //--> instead, we update BBox directly!
-    PointCoordinateType* Mins = m_points->getMin();
-    PointCoordinateType* Maxs = m_points->getMax();
-    Mins[0] *= fx;
-    Maxs[0] *= fx;
+    PointCoordinateType* bbMin = m_points->getMin();
+    PointCoordinateType* bbMax = m_points->getMax();
+    bbMin[0] *= fx;
+    bbMax[0] *= fx;
     if (fx<0.0)
-        std::swap(Mins[0],Maxs[0]);
-    Mins[1] *= fy;
-    Maxs[1] *= fy;
+        std::swap(bbMin[0],bbMax[0]);
+    bbMin[1] *= fy;
+    bbMax[1] *= fy;
     if (fy<0.0)
-        std::swap(Mins[1],Maxs[1]);
-    Mins[2] *= fz;
-    Maxs[2] *= fz;
+        std::swap(bbMin[1],bbMax[1]);
+    bbMin[2] *= fz;
+    bbMax[2] *= fz;
     if (fz<0.0)
-        std::swap(Mins[2],Maxs[2]);
+        std::swap(bbMin[2],bbMax[2]);
 
     ccOctree* oct = getOctree();
     if (oct)
@@ -1444,8 +1443,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
         bool colorMaterial = false;
-		ccColorTablesManager* colorTable = 0;
-        if (glParams.showSF || glParams.showColors)
+		unsigned colorRampSteps = 0;
+		ccColorScale::Shared colorScale(0);
+
+		if (glParams.showSF || glParams.showColors)
         {
             glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
             glEnable(GL_COLOR_MATERIAL);
@@ -1454,7 +1455,13 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (glParams.showSF)
 			{
 				assert(m_currentDisplayedScalarField);
-				colorTable = ccColorTablesManager::GetUniqueInstance();
+				colorScale = m_currentDisplayedScalarField->getColorScale();
+				colorRampSteps = m_currentDisplayedScalarField->getColorRampSteps();
+
+				assert(colorScale);
+				//get default color ramp if cloud has no scale associated?!
+				if (!colorScale)
+					colorScale = ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR);
 			}
         }
 
@@ -1515,6 +1522,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//Scalar field?
 				if (glParams.showSF)
 				{
+					assert(colorScale);
 					for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 					{
 						if (m_pointsVisibility->getValue(j) == POINT_VISIBLE)
@@ -1523,7 +1531,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							//we force display of points hidden because of of their scalar field value
 							//to be sure that the user don't miss them (during manual segmentation for instance)
 							ScalarType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
-							const colorType* col = (normalizedDist >= 0 ? colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp()) : ccColor::lightGrey);
+							const colorType* col = (normalizedDist >= 0 ? colorScale->getColorByRelativePos(normalizedDist,colorRampSteps) : ccColor::lightGrey);
 
 							glColor3ubv(col);
 							if (glParams.showNorms)
@@ -1579,7 +1587,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					GLint maxBytes=0;
 					glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
 					GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
-					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
+					unsigned steps = colorRampSteps;
 					assert(steps!=0);
 
 					if (steps > glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < (GLint)steps)
@@ -1589,6 +1597,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 					else
 					{
+						assert(colorScale);
+						
 						colorRampShader->start();
 						if (m_currentDisplayedScalarField->absoluteSaturation())
 						{
@@ -1613,7 +1623,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						float* _colormapf = s_colormapf;
 						for (unsigned i=0; i<steps; ++i)
 						{
-							const colorType* col = ccColorTablesManager::GetUniqueInstance()->getColor((float)i/(float)(steps-1),steps,m_currentDisplayedScalarField->getColorRamp());
+							const colorType* col = colorScale->getColorByRelativePos((double)i/(double)(steps-1),steps);
 							//set ramp colors as float-packed values
 							int rgb = (col[0] << 16) | (col[1] << 8) | col[2];
 							float packedValue = (float)((double)rgb/(double)(1<<24));
@@ -1696,12 +1706,13 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
+							assert(colorScale);
 							colorType* _sfColors = s_rgbBuffer3ub;
 							for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep)
 							{
 								//we need to convert scalar value to color into a temporary structure
 								ScalarType normalizedDist = m_currentDisplayedScalarField->normalize(*_sf);
-								const colorType* col = (normalizedDist >= 0 ? colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp()) : ccColor::lightGrey);
+								const colorType* col = (normalizedDist >= 0 ? colorScale->getColorByRelativePos(normalizedDist,colorRampSteps) : ccColor::lightGrey);
 								*_sfColors++ = *col++;
 								*_sfColors++ = *col++;
 								*_sfColors++ = *col++;
@@ -1757,13 +1768,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
+							assert(colorScale);
 							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 							{
 								assert(j<m_currentDisplayedScalarField->currentSize());
 								ScalarType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
 								if (normalizedDist >= 0)
 								{
-									const colorType* col = colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp());
+									const colorType* col = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
 									glColor3ubv(col);
 									glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
 									glVertex3fv(m_points->getValue(j));
@@ -1788,13 +1800,14 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
+							assert(colorScale);
 							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 							{
 								assert(j<m_currentDisplayedScalarField->currentSize());
 								ScalarType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
 								if (normalizedDist >= 0)
 								{
-									const colorType* col = colorTable->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp());
+									const colorType* col = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
 									glColor3ubv(col);
 									glVertex3fv(m_points->getValue(j));
 								}
@@ -2142,60 +2155,54 @@ void ccPointCloud::deleteScalarField(int index)
 
 void ccPointCloud::deleteAllScalarFields()
 {
-    //on appelle la methode "heritee"
+    //the father does all the work
     ChunkedPointCloud::deleteAllScalarFields();
-    //on m.a.j. le champ affiche
+    
+	//update the currently displayed SF
     setCurrentDisplayedScalarField(-1);
 	showSF(false);
 }
 
-void ccPointCloud::setColorWithDistances(bool mixWithExistingColor)
+bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*=false*/)
 {
-    if (!m_currentDisplayedScalarField)
-        return;
+    if (!m_currentDisplayedScalarField || !m_currentDisplayedScalarField->getColorScale())
+	{
+		ccLog::Warning("[ccPointCloud::setColorWithCurrentScalarField] No active scalar field or color scale!");
+        return false;
+	}
+
+	unsigned count = size();
 
     if (!mixWithExistingColor || !hasColors())
     {
         if (!hasColors())
-			resizeTheRGBTable(false);
+			if (!resizeTheRGBTable(false))
+				return false;
 
-		unsigned i,count=size();
-        for (i=0;i<count;i++)
+        for (unsigned i=0; i<count; i++)
         {
             const colorType* col = getPointDistanceColor(i);
-            m_rgbColors->setValue(i,(col ? col : ccColor::black));
+            m_rgbColors->setValue(i,col ? col : ccColor::black);
         }
     }
     else
     {
-
-        float colorCoef = 1.0f/float(MAX_COLOR_COMP);
-        colorType* _theColors;
-
         m_rgbColors->placeIteratorAtBegining();
-		unsigned count=size();
-        for (unsigned i=0;i<count;i++)
+        for (unsigned i=0; i<count; i++)
         {
-            ScalarType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(i);
-			const colorType* col = 0;
-            if (normalizedDist >= 0)
-            {
-				col = ccColorTablesManager::GetUniqueInstance()->getColor(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps(),m_currentDisplayedScalarField->getColorRamp());
-            }
-            else
-            {
-				col = m_greyForNanScalarValues ? ccColor::lightGrey : ccColor::black;
-            }
-
-            _theColors = m_rgbColors->getCurrentValue();
-            *_theColors = colorType(float(*_theColors)*float(col[0])*colorCoef);
-            ++_theColors;
-            *_theColors = colorType(float(*_theColors)*float(col[1])*colorCoef);
-            ++_theColors;
-            *_theColors = colorType(float(*_theColors)*float(col[2])*colorCoef);
-            m_rgbColors->forwardIterator();
+            const colorType* col = getPointDistanceColor(i);
+			if (col)
+			{
+				colorType* _color = m_rgbColors->getCurrentValue();
+				_color[0] = static_cast<colorType>(static_cast<float>(_color[0])*static_cast<float>(col[0])/static_cast<float>(MAX_COLOR_COMP));
+				_color[1] = static_cast<colorType>(static_cast<float>(_color[1])*static_cast<float>(col[1])/static_cast<float>(MAX_COLOR_COMP));
+				_color[2] = static_cast<colorType>(static_cast<float>(_color[2])*static_cast<float>(col[2])/static_cast<float>(MAX_COLOR_COMP));
+			}
+			m_rgbColors->forwardIterator();
         }
     }
+
+	return true;
 }
 
 void ccPointCloud::unrollOnCylinder(double radius, CCVector3* center, int dim, CCLib::GenericProgressCallback* progressCb)
@@ -2228,9 +2235,9 @@ void ccPointCloud::unrollOnCylinder(double radius, CCVector3* center, int dim, C
 	CCVector3 C;
     if (!center)
     {
-        PointCoordinateType Mins[3],Maxs[3];
-        getBoundingBox(Mins,Maxs);
-		C=(CCVector3(Mins)+CCVector3(Maxs))*0.5;
+        PointCoordinateType bbMin[3],bbMax[3];
+        getBoundingBox(bbMin,bbMax);
+		C=(CCVector3(bbMin)+CCVector3(bbMax))*0.5;
         center = &C;
     }
 

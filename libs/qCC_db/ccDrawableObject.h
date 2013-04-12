@@ -22,7 +22,7 @@
 
 #include "ccGLMatrix.h"
 #include "ccGenericGLDisplay.h"
-#include "ccColorTablesManager.h"
+#include "ccColorScalesManager.h"
 #include "ccBBox.h"
 #include "ccScalarField.h"
 #include "ccMaterial.h"

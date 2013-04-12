@@ -61,6 +61,38 @@
 const QString c_noDisplayString = QString("None");
 const QString c_defaultPointSizeString = QString("Default");
 
+//! Advanced editor for color scales
+class QColorScaleSelector : public QFrame
+{
+public:
+
+	QColorScaleSelector(QWidget* parent)
+		: QFrame(parent)
+		, m_comboBox(new QComboBox())
+		, m_button(new QToolButton())
+	{
+		setLayout(new QHBoxLayout());
+		layout()->setContentsMargins(0,0,0,0);
+		setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
+
+		//combox box
+		if (m_comboBox)
+		{
+			layout()->addWidget(m_comboBox);
+		}
+		
+		//tool button
+		if (m_button)
+		{
+			m_button->setIcon(QIcon(QString::fromUtf8(":/CC/images/ccGear.png")));
+			layout()->addWidget(m_button);
+		}
+	}
+
+	QComboBox* m_comboBox;
+	QToolButton* m_button;
+};
+
 ccPropertiesTreeDelegate::ccPropertiesTreeDelegate(QStandardItemModel* model,
 												   QAbstractItemView* view,
 												   QObject *parent)
@@ -89,11 +121,12 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
         {
         case OBJECT_CURRENT_DISPLAY:
         case OBJECT_CURRENT_SCALAR_FIELD:
-        case OBJECT_CURRENT_COLOR_RAMP:
         case OBJECT_OCTREE_TYPE:
         case OBJECT_COLOR_RAMP_STEPS:
         case OBJECT_CLOUD_POINT_SIZE:
             return QSize(50,18);
+        case OBJECT_CURRENT_COLOR_RAMP:
+            return QSize(70,22);
         }
     }
 
@@ -1084,31 +1117,29 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
     }
     case OBJECT_CURRENT_COLOR_RAMP:
     {
-		QFrame* frame = new QFrame(parent);
-		frame->setLayout(new QHBoxLayout());
+		QColorScaleSelector* selector = new QColorScaleSelector(parent);
 
-		//combox box
+		//fill combox box
 		{
-			QComboBox *comboBox = new QComboBox();
-			for (int i=0;i<COLOR_RAMPS_NUMBER;++i)
-				comboBox->addItem(COLOR_RAMPS_TITLES[i]);
-			frame->layout()->addWidget(comboBox);
-			connect(comboBox, SIGNAL(activated(int)), this, SLOT(colorRampChanged(int)));
+			//add all available color scales
+			ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
+			assert(csManager);
+			for (ccColorScalesManager::ScalesMap::const_iterator it = csManager->map().begin(); it != csManager->map().end(); ++it)
+				selector->m_comboBox->addItem((*it)->getName(),(*it)->getUuid());
+			connect(selector->m_comboBox, SIGNAL(activated(int)), this, SLOT(colorScaleChanged(int)));
 		}
 		//advanced tool button
 		{
-			QToolButton *button = new QToolButton();
-			frame->layout()->addWidget(button);
-			connect(button, SIGNAL(clicked()), this, SLOT(spawnColorRampEditor()));
+			connect(selector->m_button, SIGNAL(clicked()), this, SLOT(spawnColorRampEditor()));
 		}
 
-		frame->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
-        return frame;
+		selector->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+        return selector;
     }
     case OBJECT_COLOR_RAMP_STEPS:
     {
         QSpinBox *spinBox = new QSpinBox(parent);
-        spinBox->setRange(2,DEFAULT_COLOR_RAMP_SIZE);
+		spinBox->setRange(ccColorScale::MIN_STEPS,ccColorScale::MAX_STEPS);
         spinBox->setSingleStep(8);
 
         connect(spinBox, SIGNAL(valueChanged(int)), this, SLOT(colorRampStepsChanged(int)));
@@ -1312,9 +1343,10 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
     }
     case OBJECT_CURRENT_COLOR_RAMP:
     {
-        QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
-        if (!comboBox)
+        QFrame *selectorFrame = qobject_cast<QFrame*>(editor);
+        if (!selectorFrame)
             return;
+		QColorScaleSelector* selector = static_cast<QColorScaleSelector*>(selectorFrame);
 
         ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
         assert(cloud);
@@ -1322,8 +1354,11 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
         ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
         if (sf)
 		{
-			int pos = int(sf->getColorRamp());
-			comboBox->setCurrentIndex(pos);
+			int pos = -1;
+			//search right index by UUID
+			if (sf->getColorScale())
+				pos = selector->m_comboBox->findData(sf->getColorScale()->getUuid());
+			selector->m_comboBox->setCurrentIndex(pos);
 		}
         break;
     }
@@ -1591,31 +1626,50 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 
     ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
     assert(cloud);
-
 	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
 	if (sf)
 	{
-		QDialog* editorDialog = new QDialog(static_cast<ccGLWindow*>(cloud->getDisplay()));
-		editorDialog->setLayout(new QHBoxLayout());
-		ccColorScaleEditorWidget* editorWidget = new ccColorScaleEditorWidget();
-		editorDialog->layout()->addWidget(editorWidget);
-		editorDialog->exec();
-		//updateDisplay();
+		ccColorScaleEditorDialog* editorDialog = new ccColorScaleEditorDialog(sf->getColorScale(),static_cast<ccGLWindow*>(cloud->getDisplay()));
+		editorDialog->setAssociatedScalarField(sf);
+		if (editorDialog->exec() && editorDialog->getActiveScale())
+		{
+			sf->setColorScale(editorDialog->getActiveScale());
+			updateDisplay();
+		}
 	}
 }
 
-void ccPropertiesTreeDelegate::colorRampChanged(int pos)
+void ccPropertiesTreeDelegate::colorScaleChanged(int pos)
 {
     if (!m_currentObject)
         return;
+
+	if (pos < 0)
+	{
+		assert(false);
+		return;
+	}
+
+	QComboBox* comboBox = dynamic_cast<QComboBox*>(QObject::sender());
+	if (!comboBox)
+		return;
+
+	QString UUID = comboBox->itemData(pos).toString();
+	ccColorScale::Shared colorScale = ccColorScalesManager::GetUniqueInstance()->getScale(UUID);
+
+	if (!colorScale)
+	{
+		ccLog::Error("Internal error: color scale doesn't seem to exist anymore!");
+		return;
+	}
 
     ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
     assert(cloud);
 
 	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
-	if (sf && (int)sf->getColorRamp() != pos)
+	if (sf && sf->getColorScale() != colorScale)
 	{
-		sf->setColorRamp(COLOR_RAMPS_ENUMS[pos]);
+		sf->setColorScale(colorScale);
 		updateDisplay();
 	}
 }

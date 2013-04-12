@@ -23,7 +23,7 @@
 
 //qCC_db
 #include "ccSerializableObject.h"
-#include "ccColorTablesManager.h"
+#include "ccColorScale.h"
 
 //! A scalar field associated to display-related parameters
 /** Extends the CCLib::ScalarField object.
@@ -47,13 +47,13 @@ public:
 	/*** Scalar values display handling ***/
 
 	//! Returns the minimum displayed value
-	inline ScalarType getMinDisplayed() const {return m_minDisplayed;}
+	inline ScalarType getMinDisplayed() const { return m_minDisplayed; }
 	//! Returns the maximum displayed value
-	inline ScalarType getMaxDisplayed() const {return m_maxDisplayed;}
+	inline ScalarType getMaxDisplayed() const { return m_maxDisplayed; }
 	//! Returns the minimum value to start color gradient
-	inline ScalarType getMinSaturation() const {return m_minSaturation;}
+	inline ScalarType getMinSaturation() const { return m_minSaturation; }
 	//! Returns the maximum value to end color gradient
-	inline ScalarType getMaxSaturation() const {return m_maxSaturation;}
+	inline ScalarType getMaxSaturation() const { return m_maxSaturation; }
 
 	//! Sets the minimum displayed value
 	void setMinDisplayed(ScalarType dist);
@@ -78,7 +78,7 @@ public:
 		\param index scalar value index
 		\return a number between 0 and 1 if inside [MinDisplayed:MaxDisplayed] or -1 otherwise
 	**/
-	inline ScalarType getNormalizedValue(unsigned index) const {return normalize(getValue(index));}
+	inline ScalarType getNormalizedValue(unsigned index) const { return normalize(getValue(index)); }
 
 	//! Sets whether min and max saturation values are absolute or not
 	/** For signed SF only.
@@ -88,13 +88,13 @@ public:
 	//! Returns whether min and max saturation values are absolute or not
 	/** For signed SF only.
 	**/
-	inline bool absoluteSaturation() const {return m_absSaturation;};
+	inline bool absoluteSaturation() const { return m_absSaturation; }
 
 	//! Sets whether scale is logarithmic or not
 	void setLogScale(bool state);
 
 	//! Returns whether scalar field is logarithmic or not
-	inline bool logScale() const {return m_logScale;};
+	inline bool logScale() const { return m_logScale; }
 
 	//! Sets whether to automatically update boundaries (when scalar field may have changed) or keep user defined ones
 	/** Automatically calls 'computeMinAndMax' if toggled to false.
@@ -112,16 +112,16 @@ public:
 	//inherited
 	virtual void computeMinAndMax();
 
-	//! Returns associated color ramp
-	inline CC_COLOR_RAMPS getColorRamp() const {return m_activeColorRamp;};
+	//! Returns associated color scale
+	inline const ccColorScale::Shared& getColorScale() const { return m_colorScale; }
 
-	//! Sets associated color ramp
-	virtual void setColorRamp(CC_COLOR_RAMPS cr);
+	//! Sets associated color scale
+	inline void setColorScale(ccColorScale::Shared scale) { m_colorScale = scale; }
 
 	//! Returns number of color ramp steps
-	inline unsigned getColorRampSteps() const {return m_colorRampSteps;}
+	inline unsigned getColorRampSteps() const { return m_colorRampSteps; }
 
-	//! Sets number of color ramp steps
+	//! Sets number of color ramp steps used for display
     void setColorRampSteps(unsigned steps);
 
 	//inherited from ccSerializableObject
@@ -164,8 +164,8 @@ protected:
 	bool m_logScale;
 
 	//! Active color ramp
-	CC_COLOR_RAMPS m_activeColorRamp;
-	//! Active color ramp steps
+	ccColorScale::Shared m_colorScale;
+	//! Number of color ramps steps used for display
 	unsigned m_colorRampSteps;
 
 	//! Whether to automatically update boundaries (when scalar field may have changed) or keep user defined ones

@@ -19,7 +19,7 @@
 #include "ccGuiParameters.h"
 
 //qCC_db
-#include <ccColorTablesManager.h>
+#include <ccColorScalesManager.h>
 
 //Qt
 #include <QCloseEvent>
@@ -479,29 +479,32 @@ void ccHistogramWindow::paintGL()
 		float y=(float)(m_roi[1]+1);
 		float barWidth = (float)dx/(float)m_numberOfClasses;
 
-		for (int i=0;i<(int)m_numberOfClasses;++i)
+		ccColorScale::Shared colorScale = (m_associatedSF && m_associatedSF->getColorScale() ? m_associatedSF->getColorScale() : ccColorScalesManager::GetDefaultScale());
+		assert(colorScale);
+		for (unsigned i=0; i<m_numberOfClasses; ++i)
 		{
-			const unsigned& val=m_histoValues[i];
+			if ((double)i / (double)m_numberOfClasses < m_verticalIndicatorPositionPercent)
+				cumul += m_histoValues[i];
 
-			if ((double)i/(double)m_numberOfClasses < m_verticalIndicatorPositionPercent)
-				cumul += val;
+			//we take the 'normalized' value at the middle of the class
+			double normVal = ((double)i + 0.5) / (double)m_numberOfClasses;
 
 			if (m_associatedSF)
 			{
-				double dist = (m_maxVal-m_minVal) * (double)i / (double)m_numberOfClasses;
-				float nCol = m_associatedSF->normalize(m_minVal+dist);
-				if (nCol < 0)
-					glColor3ubv(ccColor::lightGrey);
+				//Equivalent SF value
+				double scalarVal = m_minVal+(m_maxVal-m_minVal)*normVal;
+				ScalarType normalizedScalarVal = m_associatedSF->normalize(scalarVal);
+				if (normalizedScalarVal >= 0)
+					glColor3ubv(colorScale->getColorByRelativePos(normalizedScalarVal,m_associatedSF->getColorRampSteps()));
 				else
-					glColor3ubv(ccColorTablesManager::GetUniqueInstance()->getColor(nCol,m_associatedSF->getColorRamp()));
+					glColor3ubv(ccColor::lightGrey);
 			}
 			else
 			{
-				unsigned colIndex = (unsigned)((float)i*(float)DEFAULT_COLOR_RAMP_SIZE/(float)m_numberOfClasses);
-				glColor3ubv(ccColorTablesManager::GetUniqueInstance()->getColor(colIndex,BGYR)); //default color ramp
+				glColor3ubv(colorScale->getColorByRelativePos(normVal));
 			}
 
-			float barHeight=(float)val*(float)yScale;
+			float barHeight = (float)m_histoValues[i] * (float)yScale;
 			glBegin(GL_QUADS);
 			glVertex2f(x,y);
 			glVertex2f(x+barWidth,y);

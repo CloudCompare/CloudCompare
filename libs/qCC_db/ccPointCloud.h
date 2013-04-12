@@ -236,14 +236,19 @@ public:
 	**/
 	virtual void setCurrentDisplayedScalarField(int index);
 
-	virtual void deleteScalarField(int index); //redefinition
-	virtual void deleteAllScalarFields();  //redefinition
+	//inherited from ChunkedPointCloud
+	virtual void deleteScalarField(int index);
+	virtual void deleteAllScalarFields();
 
-	void setColorWithDistances(bool mixWithExistingColor);
+	//! Returns whether NaN scalar values should be displayed (in grey) or not
 	bool areNanScalarValuesInGrey() const;
+	//! Sets whether NaN scalar values should be displayed (in grey) or not
 	void setGreyForNanScalarValues(bool state);
-    void showSFColorsScale(bool state);
+    
+	//! Returns whether color scale should be displayed or not
     bool sfColorScaleShown() const;
+	//! Sets whether color scale should be displayed or not
+	void showSFColorsScale(bool state);
 
 
 	/***************************************************
@@ -351,41 +356,39 @@ public:
         \param r red component
         \param g green component
         \param b blue component
+		\return success
     **/
-	void colorize(float r, float g, float b);
+	bool colorize(float r, float g, float b);
 
 	//! Assigns color to points proportionnaly to their 'height'
-	/** Height is the coordinate along the specified dimension
-        (heightDim). Color array is automatically allocated if
-        necessary. The default color ramp is used.
+	/** Height is defined wrt to the specified dimension (heightDim).
+		Color array is automatically allocated if necessary.
         \param heightDim ramp dimension (0->X, 1->Y, 2->Z)
+		\param colorScale color scale to use
+		\return success
     **/
-	void colorizeWithDefaultRamp(unsigned char heightDim);
+	bool setRGBColorByHeight(unsigned char heightDim, ccColorScale::Shared colorScale);
 
-	//! Assigns color to points proportionnaly to their 'height'
-	/** Height is the coordinate along the specified dimension
-        (heightDim: 0->X, 1->Y, 2->Z). Color array is automatically
-        allocated if necessary. Linear color ramp is specified
-        by starting and ending color.
-        \param heightDim ramp dimension (0->X, 1->Y, 2->Z)
-        \param minColor ramp starting RGB color (size: 3)
-        \param maxColor ramp ending RGB color (size: 3)
-    **/
-	void colorizeByHeight(unsigned char heightDim, const colorType* minColor, const colorType* maxColor);
-
+	//! Sets RGB colors with current scalar field (values & parameters)
+	/** \return success
+	**/
+	bool setRGBColorWithCurrentScalarField(bool mixWithExistingColor = false);
+	
 	//! Set a unique color for the whole cloud (shortcut)
 	/** Color array is automatically allocated if necessary.
         \param r red component
         \param g green component
         \param b blue component
+		\return success
     **/
-	void setRGBColor(colorType r, colorType g, colorType b);
+	bool setRGBColor(colorType r, colorType g, colorType b);
 
 	//! Set a unique color for the whole cloud
 	/** Color array is automatically allocated if necessary.
         \param col RGB color (size: 3)
+		\return success
 	**/
-	void setRGBColor(const colorType* col);
+	bool setRGBColor(const colorType* col);
 
     //! Inverts normals (if any)
 	void invertNormals();

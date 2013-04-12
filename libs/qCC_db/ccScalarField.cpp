@@ -17,6 +17,9 @@
 
 #include "ccScalarField.h"
 
+//Local
+#include "ccColorScalesManager.h"
+
 //CCLib
 #include <CCConst.h>
 
@@ -33,11 +36,12 @@ ccScalarField::ccScalarField(const char* name/*=0*/)
     , m_normalizeCoef(0)
 	, m_absSaturation(false)
 	, m_logScale(false)
-	, m_activeColorRamp(DEFAULT_COLOR_RAMP)
+	, m_colorScale(0)
 	, m_colorRampSteps(256)
 	, m_autoBoundaries(true)
 {
-	setColorRampSteps(DEFAULT_COLOR_RAMP_SIZE < 256 ? DEFAULT_COLOR_RAMP_SIZE : 256);
+	setColorRampSteps(ccColorScale::DEFAULT_STEPS);
+	setColorScale(ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR));
 }
 
 ScalarType ccScalarField::normalize(ScalarType d) const
@@ -197,17 +201,12 @@ void ccScalarField::setMaxSaturation(ScalarType dist)
 	updateNormalizeCoef();
 }
 
-void ccScalarField::setColorRamp(CC_COLOR_RAMPS cr)
-{
-    m_activeColorRamp = cr;
-}
-
 void ccScalarField::setColorRampSteps(unsigned steps)
 {
-    if (steps > (unsigned)DEFAULT_COLOR_RAMP_SIZE)
-        m_colorRampSteps = (unsigned)DEFAULT_COLOR_RAMP_SIZE;
-    else if (steps < 2)
-        m_colorRampSteps = 2;
+	if (steps > ccColorScale::MAX_STEPS)
+		m_colorRampSteps = ccColorScale::MAX_STEPS;
+	else if (steps < ccColorScale::MIN_STEPS)
+        m_colorRampSteps = ccColorScale::MIN_STEPS;
     else
         m_colorRampSteps = steps;
 }
@@ -256,12 +255,18 @@ bool ccScalarField::toFile(QFile& out) const
 	if (out.write((const char*)&m_autoBoundaries,sizeof(bool))<0)
 		return WriteError();
 
-	//active color ramp (dataVersion>=20)
-	uint32_t activeColorRamp = (uint32_t)m_activeColorRamp;
-	if (out.write((const char*)&activeColorRamp,4)<0)
-		return WriteError();
+	//color scale (dataVersion>=27)
+	{
+		bool hasColorScale = (m_colorScale != 0);
+		if (out.write((const char*)&hasColorScale,sizeof(bool))<0)
+			return WriteError();
 
-	//active color ramp steps (dataVersion>=20)
+		if (m_colorScale)
+			if (!m_colorScale->toFile(out))
+				return WriteError();
+	}
+
+	//color ramp steps (dataVersion>=20)
 	uint32_t colorRampSteps = (uint32_t)m_colorRampSteps;
 	if (out.write((const char*)&colorRampSteps,4)<0)
 		return WriteError();
@@ -340,17 +345,86 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 	if (in.read((char*)&m_autoBoundaries,sizeof(bool))<0)
 		return ReadError();
 
-	//active color ramp (dataVersion>=20)
-	uint32_t activeColorRamp = 0;
-	if (in.read((char*)&activeColorRamp,4)<0)
-		return ReadError();
-	m_activeColorRamp = (CC_COLOR_RAMPS)activeColorRamp;
+	//color scale
+	{
+		ccColorScalesManager* colorScalesManager = ccColorScalesManager::GetUniqueInstance();
+		if (!colorScalesManager)
+		{
+			ccLog::Warning("[ccScalarField::fromFile] Failed to access color scales manager?!");
+			assert(false);
+		}
 
-	//active color ramp steps (dataVersion>=20)
-	uint32_t colorRampSteps = 0;
-	if (in.read((char*)&colorRampSteps,4)<0)
-		return ReadError();
-	m_colorRampSteps = (unsigned)colorRampSteps;
+		//old versions
+		if (dataVersion<27)
+		{
+			uint32_t activeColorScale = 0;
+			if (in.read((char*)&activeColorScale,4)<0)
+				return ReadError();
+
+			//Retrieve equivalent default scale
+			ccColorScalesManager::DEFAULT_SCALE activeColorScaleType = ccColorScalesManager::BGYR;
+			switch(activeColorScale)
+			{
+			case ccColorScalesManager::BGYR:
+				activeColorScaleType = ccColorScalesManager::BGYR;
+				break;
+			case ccColorScalesManager::GREY:
+				activeColorScaleType = ccColorScalesManager::GREY;
+				break;
+			case ccColorScalesManager::BWR:
+				activeColorScaleType = ccColorScalesManager::BWR;
+				break;
+			case ccColorScalesManager::RY:
+				activeColorScaleType = ccColorScalesManager::RY;
+				break;
+			case ccColorScalesManager::RW:
+				activeColorScaleType = ccColorScalesManager::RW;
+				break;
+			default:
+				ccLog::Warning("[ccScalarField::fromFile] Color scale is no more supported!");
+				break;
+			}
+			m_colorScale = ccColorScalesManager::GetDefaultScale(activeColorScaleType);
+		}
+		else //(dataVersion>=27)
+		{
+			bool hasColorScale = false;
+			if (in.read((char*)&hasColorScale,sizeof(bool))<0)
+				return ReadError();
+
+			if (hasColorScale)
+			{
+				ccColorScale::Shared colorScale = ccColorScale::Shared(new ccColorScale());
+				if (!colorScale->fromFile(in,dataVersion))
+					return ReadError();
+				m_colorScale = colorScale;
+
+				if (colorScalesManager)
+				{
+					ccColorScale::Shared existingColorScale = colorScalesManager->getScale(colorScale->getUuid());
+					if (!existingColorScale)
+					{
+						colorScalesManager->addScale(colorScale);
+					}
+					else //same UUID?
+					{
+						//FIXME: we should look if the color scale is exactly the same!
+						m_colorScale = existingColorScale;
+					}
+				}
+			}
+		}
+
+		//A scalar fiels must have a color scale!
+		if (!m_colorScale)
+			m_colorScale = ccColorScalesManager::GetDefaultScale();
+
+		//color ramp steps (dataVersion>=20)
+		uint32_t colorRampSteps = 0;
+		if (in.read((char*)&colorRampSteps,4)<0)
+			return ReadError();
+		setColorRampSteps((unsigned)colorRampSteps);
+	}
 
 	//Normalisation coef.
 	updateNormalizeCoef();

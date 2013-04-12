@@ -109,8 +109,9 @@ enum CC_CLASS_ENUM {
 	v2.4 - 02/22/2013 - per-cloud point size + whether name is displayed in 3D or not
 	v2.5 - 03/16/2013 - ccViewportParameters structure modified
 	v2.6 - 04/03/2013 - strictly positive scalar field removed and 'hidden' values marker is now NaN
+	v2.7 - 04/12/2013 - Customizable color scales
 **/
-static unsigned s_currentDBVersion = 26; //2.6
+static unsigned s_currentDBVersion = 27; //2.7
 
 //! Generic "CloudCompare Object" template
 #ifdef QCC_DB_USE_AS_DLL

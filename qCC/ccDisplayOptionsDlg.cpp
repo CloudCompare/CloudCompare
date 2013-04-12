@@ -27,40 +27,40 @@
 
 ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui::DisplayOptionsDlg()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
-    connect(ambientColorButton, SIGNAL(clicked()), this, SLOT(changeLightAmbientColor()));
-    connect(diffuseColorButton, SIGNAL(clicked()), this, SLOT(changeLightDiffuseColor()));
-    connect(specularColorButton, SIGNAL(clicked()), this, SLOT(changeLightSpecularColor()));
-    connect(meshBackColorButton, SIGNAL(clicked()), this, SLOT(changeMeshBackDiffuseColor()));
-    connect(meshSpecularColorButton, SIGNAL(clicked()), this, SLOT(changeMeshSpecularColor()));
-    connect(meshFrontColorButton, SIGNAL(clicked()), this, SLOT(changeMeshFrontDiffuseColor()));
-    connect(bbColorButton, SIGNAL(clicked()), this, SLOT(changeBBColor()));
-    connect(bkgColorButton, SIGNAL(clicked()), this, SLOT(changeBackgroundColor()));
-    connect(histBkgColorButton, SIGNAL(clicked()), this, SLOT(changeHistBackgroundColor()));
-    connect(labelsColorButton, SIGNAL(clicked()), this, SLOT(changeLabelColor()));
-    connect(enableGradientCheckBox, SIGNAL(clicked()), this, SLOT(changeBackgroundGradient()));
-    connect(pointsColorButton, SIGNAL(clicked()), this, SLOT(changePointsColor()));
-    connect(textColorButton, SIGNAL(clicked()), this, SLOT(changeTextColor()));
-    connect(decimateMeshBox, SIGNAL(clicked()), this, SLOT(changeMeshDecimation()));
-    connect(decimateCloudBox, SIGNAL(clicked()), this, SLOT(changeCloudDecimation()));
-    connect(showCrossCheckBox, SIGNAL(clicked()), this, SLOT(changeCrossDisplayed()));
+	connect(ambientColorButton, SIGNAL(clicked()), this, SLOT(changeLightAmbientColor()));
+	connect(diffuseColorButton, SIGNAL(clicked()), this, SLOT(changeLightDiffuseColor()));
+	connect(specularColorButton, SIGNAL(clicked()), this, SLOT(changeLightSpecularColor()));
+	connect(meshBackColorButton, SIGNAL(clicked()), this, SLOT(changeMeshBackDiffuseColor()));
+	connect(meshSpecularColorButton, SIGNAL(clicked()), this, SLOT(changeMeshSpecularColor()));
+	connect(meshFrontColorButton, SIGNAL(clicked()), this, SLOT(changeMeshFrontDiffuseColor()));
+	connect(bbColorButton, SIGNAL(clicked()), this, SLOT(changeBBColor()));
+	connect(bkgColorButton, SIGNAL(clicked()), this, SLOT(changeBackgroundColor()));
+	connect(histBkgColorButton, SIGNAL(clicked()), this, SLOT(changeHistBackgroundColor()));
+	connect(labelsColorButton, SIGNAL(clicked()), this, SLOT(changeLabelColor()));
+	connect(enableGradientCheckBox, SIGNAL(clicked()), this, SLOT(changeBackgroundGradient()));
+	connect(pointsColorButton, SIGNAL(clicked()), this, SLOT(changePointsColor()));
+	connect(textColorButton, SIGNAL(clicked()), this, SLOT(changeTextColor()));
+	connect(decimateMeshBox, SIGNAL(clicked()), this, SLOT(changeMeshDecimation()));
+	connect(decimateCloudBox, SIGNAL(clicked()), this, SLOT(changeCloudDecimation()));
+	connect(showCrossCheckBox, SIGNAL(clicked()), this, SLOT(changeCrossDisplayed()));
 
 	connect(colorScaleAlwaysShowZeroCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleAlwaysZero()));
 	connect(colorScaleAlwaysSymmetricalCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleAlwaysSym()));
 	connect(colorScaleSquareSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeColorScaleSquareSize(int)));
-	
+
 	connect(defaultFontSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeDefaultFontSize(int)));
 	connect(numberPrecisionSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeNumberPrecision(int)));
 	connect(labelsTransparencySpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeLabelsTransparency(int)));
 	connect(labelMarkerSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeLabelsMarkerSize(int)));
-	
-    connect(okButton, SIGNAL(clicked()), this, SLOT(doAccept()));
-    connect(applyButton, SIGNAL(clicked()), this, SLOT(apply()));
-    connect(resetButton, SIGNAL(clicked()), this, SLOT(reset()));
-    connect(cancelButton, SIGNAL(clicked()), this, SLOT(doReject()));
+
+	connect(okButton, SIGNAL(clicked()), this, SLOT(doAccept()));
+	connect(applyButton, SIGNAL(clicked()), this, SLOT(apply()));
+	connect(resetButton, SIGNAL(clicked()), this, SLOT(reset()));
+	connect(cancelButton, SIGNAL(clicked()), this, SLOT(doReject()));
 
 	oldParameters = parameters = ccGui::Parameters();
 
@@ -71,63 +71,63 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 
 void ccDisplayOptionsDlg::refresh()
 {
-    const float* ac = parameters.lightAmbientColor;
-    lightAmbientColor.setRgbF(ac[0],ac[1],ac[2],ac[3]);
-    SetButtonColor(ambientColorButton,lightAmbientColor);
+	const float* ac = parameters.lightAmbientColor;
+	lightAmbientColor.setRgbF(ac[0],ac[1],ac[2],ac[3]);
+	SetButtonColor(ambientColorButton,lightAmbientColor);
 
-    const float* dc = parameters.lightDiffuseColor;
-    lightDiffuseColor.setRgbF(dc[0],dc[1],dc[2],dc[3]);
-    SetButtonColor(diffuseColorButton,lightDiffuseColor);
+	const float* dc = parameters.lightDiffuseColor;
+	lightDiffuseColor.setRgbF(dc[0],dc[1],dc[2],dc[3]);
+	SetButtonColor(diffuseColorButton,lightDiffuseColor);
 
-    const float* sc = parameters.lightSpecularColor;
-    lightSpecularColor.setRgbF(sc[0],sc[1],sc[2],sc[3]);
-    SetButtonColor(specularColorButton,lightSpecularColor);
+	const float* sc = parameters.lightSpecularColor;
+	lightSpecularColor.setRgbF(sc[0],sc[1],sc[2],sc[3]);
+	SetButtonColor(specularColorButton,lightSpecularColor);
 
-    const float* mbc = parameters.meshBackDiff;
-    meshBackDiff.setRgbF(mbc[0],mbc[1],mbc[2],mbc[3]);
-    SetButtonColor(meshBackColorButton,meshBackDiff);
+	const float* mbc = parameters.meshBackDiff;
+	meshBackDiff.setRgbF(mbc[0],mbc[1],mbc[2],mbc[3]);
+	SetButtonColor(meshBackColorButton,meshBackDiff);
 
-    const float* mspec = parameters.meshSpecular;
-    meshSpecularColor.setRgbF(mspec[0],mspec[1],mspec[2],mspec[3]);
-    SetButtonColor(meshSpecularColorButton,meshSpecularColor);
+	const float* mspec = parameters.meshSpecular;
+	meshSpecularColor.setRgbF(mspec[0],mspec[1],mspec[2],mspec[3]);
+	SetButtonColor(meshSpecularColorButton,meshSpecularColor);
 
-    const float* mfc = parameters.meshFrontDiff;
-    meshFrontDiff.setRgbF(mfc[0],mfc[1],mfc[2],mfc[3]);
-    SetButtonColor(meshFrontColorButton,meshFrontDiff);
+	const float* mfc = parameters.meshFrontDiff;
+	meshFrontDiff.setRgbF(mfc[0],mfc[1],mfc[2],mfc[3]);
+	SetButtonColor(meshFrontColorButton,meshFrontDiff);
 
-    const unsigned char* bbc = parameters.bbDefaultCol;
-    bbDefaultCol.setRgb(bbc[0],bbc[1],bbc[2]);
-    SetButtonColor(bbColorButton,bbDefaultCol);
+	const unsigned char* bbc = parameters.bbDefaultCol;
+	bbDefaultCol.setRgb(bbc[0],bbc[1],bbc[2]);
+	SetButtonColor(bbColorButton,bbDefaultCol);
 
-    const unsigned char* bgc = parameters.backgroundCol;
-    backgroundCol.setRgb(bgc[0],bgc[1],bgc[2]);
-    SetButtonColor(bkgColorButton,backgroundCol);
+	const unsigned char* bgc = parameters.backgroundCol;
+	backgroundCol.setRgb(bgc[0],bgc[1],bgc[2]);
+	SetButtonColor(bkgColorButton,backgroundCol);
 
 	const unsigned char* hbgc = parameters.histBackgroundCol;
-    histBackgroundCol.setRgb(hbgc[0],hbgc[1],hbgc[2]);
-    SetButtonColor(histBkgColorButton,histBackgroundCol);
+	histBackgroundCol.setRgb(hbgc[0],hbgc[1],hbgc[2]);
+	SetButtonColor(histBkgColorButton,histBackgroundCol);
 
 	const unsigned char* lblc = parameters.labelCol;
-    labelCol.setRgb(lblc[0],lblc[1],lblc[2]);
-    SetButtonColor(labelsColorButton,labelCol);
+	labelCol.setRgb(lblc[0],lblc[1],lblc[2]);
+	SetButtonColor(labelsColorButton,labelCol);
 
 	const unsigned char* pdc = parameters.pointsDefaultCol;
-    pointsDefaultCol.setRgb(pdc[0],pdc[1],pdc[2]);
-    SetButtonColor(pointsColorButton,pointsDefaultCol);
+	pointsDefaultCol.setRgb(pdc[0],pdc[1],pdc[2]);
+	SetButtonColor(pointsColorButton,pointsDefaultCol);
 
-    const unsigned char* tdc = parameters.textDefaultCol;
-    textDefaultCol.setRgb(tdc[0],tdc[1],tdc[2]);
-    SetButtonColor(textColorButton,textDefaultCol);
+	const unsigned char* tdc = parameters.textDefaultCol;
+	textDefaultCol.setRgb(tdc[0],tdc[1],tdc[2]);
+	SetButtonColor(textColorButton,textDefaultCol);
 
-    enableGradientCheckBox->setChecked(parameters.drawBackgroundGradient);
-    decimateMeshBox->setChecked(parameters.decimateMeshOnMove);
-    decimateCloudBox->setChecked(parameters.decimateCloudOnMove);
-    showCrossCheckBox->setChecked(parameters.displayCross);
+	enableGradientCheckBox->setChecked(parameters.drawBackgroundGradient);
+	decimateMeshBox->setChecked(parameters.decimateMeshOnMove);
+	decimateCloudBox->setChecked(parameters.decimateCloudOnMove);
+	showCrossCheckBox->setChecked(parameters.displayCross);
 
 	colorScaleAlwaysShowZeroCheckBox->setChecked(parameters.colorScaleAlwaysShowZero);
 	colorScaleAlwaysSymmetricalCheckBox->setChecked(parameters.colorScaleAlwaysSymmetrical);
 	colorScaleSquareSizeSpinBox->setValue(parameters.colorScaleSquareSize);
-	
+
 	defaultFontSizeSpinBox->setValue(parameters.defaultFontSize);
 	numberPrecisionSpinBox->setValue(parameters.displayedNumPrecision);
 	labelsTransparencySpinBox->setValue(parameters.labelsTransparency);
@@ -136,30 +136,30 @@ void ccDisplayOptionsDlg::refresh()
 	update();
 }
 
-void ccDisplayOptionsDlg::SetButtonColor(QAbstractButton* button, QColor &col)
+void ccDisplayOptionsDlg::SetButtonColor(QAbstractButton* button, const QColor &col)
 {
-    assert(button);
+	assert(button);
 	button->setStyleSheet(QString("* { background-color: rgb(%1,%2,%3) }").arg(col.red()).arg(col.green()).arg(col.blue()));
 }
 
-void ccDisplayOptionsDlg::SetButtonTextColor(QAbstractButton* button, QColor &col)
+void ccDisplayOptionsDlg::SetButtonTextColor(QAbstractButton* button, const QColor &col)
 {
-    assert(button);
+	assert(button);
 
-    QPalette pal = button->palette();
-    pal.setColor(QPalette::ButtonText, col);
-    button->setPalette(pal);
+	QPalette pal = button->palette();
+	pal.setColor(QPalette::ButtonText, col);
+	button->setPalette(pal);
 
-    #ifdef _WIN32
-    button->setStyle(new QWindowsStyle());
+#ifdef _WIN32
+	button->setStyle(new QWindowsStyle());
 	button->update();
-    #endif
+#endif
 }
 
 void ccDisplayOptionsDlg::changeLightDiffuseColor()
 {
-    QColor newCol = QColorDialog::getColor(lightDiffuseColor, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(lightDiffuseColor, this);
+	if (!newCol.isValid())
 		return;
 
 	lightDiffuseColor = newCol;
@@ -171,8 +171,8 @@ void ccDisplayOptionsDlg::changeLightDiffuseColor()
 
 void ccDisplayOptionsDlg::changeLightAmbientColor()
 {
-    QColor newCol = QColorDialog::getColor(lightAmbientColor, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(lightAmbientColor, this);
+	if (!newCol.isValid())
 		return;
 
 	lightAmbientColor = newCol;
@@ -186,8 +186,8 @@ void ccDisplayOptionsDlg::changeLightAmbientColor()
 
 void ccDisplayOptionsDlg::changeLightSpecularColor()
 {
-    QColor newCol = QColorDialog::getColor(lightSpecularColor, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(lightSpecularColor, this);
+	if (!newCol.isValid())
 		return;
 
 	lightSpecularColor = newCol;
@@ -201,8 +201,8 @@ void ccDisplayOptionsDlg::changeLightSpecularColor()
 
 void ccDisplayOptionsDlg::changeMeshFrontDiffuseColor()
 {
-    QColor newCol = QColorDialog::getColor(meshFrontDiff, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(meshFrontDiff, this);
+	if (!newCol.isValid())
 		return;
 
 	meshFrontDiff = newCol;
@@ -216,8 +216,8 @@ void ccDisplayOptionsDlg::changeMeshFrontDiffuseColor()
 
 void ccDisplayOptionsDlg::changeMeshBackDiffuseColor()
 {
-    QColor newCol = QColorDialog::getColor(meshBackDiff, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(meshBackDiff, this);
+	if (!newCol.isValid())
 		return;
 
 	meshBackDiff = newCol;
@@ -231,8 +231,8 @@ void ccDisplayOptionsDlg::changeMeshBackDiffuseColor()
 
 void ccDisplayOptionsDlg::changeMeshSpecularColor()
 {
-    QColor newCol = QColorDialog::getColor(meshSpecularColor, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(meshSpecularColor, this);
+	if (!newCol.isValid())
 		return;
 
 	meshSpecularColor = newCol;
@@ -246,8 +246,8 @@ void ccDisplayOptionsDlg::changeMeshSpecularColor()
 
 void ccDisplayOptionsDlg::changePointsColor()
 {
-    QColor newCol = QColorDialog::getColor(pointsDefaultCol, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(pointsDefaultCol, this);
+	if (!newCol.isValid())
 		return;
 
 	pointsDefaultCol = newCol;
@@ -261,8 +261,8 @@ void ccDisplayOptionsDlg::changePointsColor()
 
 void ccDisplayOptionsDlg::changeBBColor()
 {
-    QColor newCol = QColorDialog::getColor(bbDefaultCol, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(bbDefaultCol, this);
+	if (!newCol.isValid())
 		return;
 
 	bbDefaultCol = newCol;
@@ -276,21 +276,21 @@ void ccDisplayOptionsDlg::changeBBColor()
 
 void ccDisplayOptionsDlg::changeTextColor()
 {
-    QColor newCol = QColorDialog::getColor(textDefaultCol, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(textDefaultCol, this);
+	if (!newCol.isValid())
 		return;
 
 	textDefaultCol = newCol;
 	SetButtonColor(textColorButton,textDefaultCol);
 
 	unsigned char rgb[3]={textDefaultCol.red(),textDefaultCol.green(),textDefaultCol.blue()};
-    memcpy(parameters.textDefaultCol,rgb,sizeof(unsigned char)*3);
+	memcpy(parameters.textDefaultCol,rgb,sizeof(unsigned char)*3);
 }
 
 void ccDisplayOptionsDlg::changeBackgroundColor()
 {
-    QColor newCol = QColorDialog::getColor(backgroundCol, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(backgroundCol, this);
+	if (!newCol.isValid())
 		return;
 
 	backgroundCol = newCol;
@@ -304,8 +304,8 @@ void ccDisplayOptionsDlg::changeBackgroundColor()
 
 void ccDisplayOptionsDlg::changeHistBackgroundColor()
 {
-    QColor newCol = QColorDialog::getColor(histBackgroundCol, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(histBackgroundCol, this);
+	if (!newCol.isValid())
 		return;
 
 	histBackgroundCol = newCol;
@@ -319,8 +319,8 @@ void ccDisplayOptionsDlg::changeHistBackgroundColor()
 
 void ccDisplayOptionsDlg::changeLabelColor()
 {
-    QColor newCol = QColorDialog::getColor(labelCol, this);
-    if (!newCol.isValid())
+	QColor newCol = QColorDialog::getColor(labelCol, this);
+	if (!newCol.isValid())
 		return;
 
 	labelCol = newCol;
@@ -334,32 +334,32 @@ void ccDisplayOptionsDlg::changeLabelColor()
 
 void ccDisplayOptionsDlg::changeBackgroundGradient()
 {
-    parameters.drawBackgroundGradient = enableGradientCheckBox->isChecked();
+	parameters.drawBackgroundGradient = enableGradientCheckBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeMeshDecimation()
 {
-    parameters.decimateMeshOnMove = decimateMeshBox->isChecked();
+	parameters.decimateMeshOnMove = decimateMeshBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeCloudDecimation()
 {
-    parameters.decimateCloudOnMove = decimateCloudBox->isChecked();
+	parameters.decimateCloudOnMove = decimateCloudBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeCrossDisplayed()
 {
-    parameters.displayCross = showCrossCheckBox->isChecked();
+	parameters.displayCross = showCrossCheckBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeColorScaleAlwaysZero()
 {
-    parameters.colorScaleAlwaysShowZero = colorScaleAlwaysShowZeroCheckBox->isChecked();
+	parameters.colorScaleAlwaysShowZero = colorScaleAlwaysShowZeroCheckBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeColorScaleAlwaysSym()
 {
-    parameters.colorScaleAlwaysSymmetrical = colorScaleAlwaysSymmetricalCheckBox->isChecked();
+	parameters.colorScaleAlwaysSymmetrical = colorScaleAlwaysSymmetricalCheckBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeColorScaleSquareSize(int val)
@@ -394,30 +394,30 @@ void ccDisplayOptionsDlg::changeLabelsMarkerSize(int val)
 {
 	if (val<=0)
 		return;
-	
+
 	parameters.pickedPointsSize = (unsigned)val;
 }
 
 void ccDisplayOptionsDlg::doReject()
 {
-    ccGui::Set(oldParameters);
+	ccGui::Set(oldParameters);
 
-    emit aspectHasChanged();
+	emit aspectHasChanged();
 
-    reject();
+	reject();
 }
 
 void ccDisplayOptionsDlg::reset()
 {
-    parameters.reset();
-    refresh();
+	parameters.reset();
+	refresh();
 }
 
 void ccDisplayOptionsDlg::apply()
 {
-    ccGui::Set(parameters);
+	ccGui::Set(parameters);
 
-    emit aspectHasChanged();
+	emit aspectHasChanged();
 }
 
 void ccDisplayOptionsDlg::doAccept()

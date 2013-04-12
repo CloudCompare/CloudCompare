@@ -14,32 +14,30 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1691                                                              $
-//$LastChangedDate:: 2010-10-22 16:52:55 +0200 (ven., 22 oct. 2010)        $
-//**************************************************************************
-//
 
 #ifndef CC_TWO_COLORS_CHOICE_DLG_HEADER
 #define CC_TWO_COLORS_CHOICE_DLG_HEADER
 
+//Qt
 #include <QColor>
 
 #include <ui_twoColorsDlg.h>
 
+//! Dialog to define a simple color ramp (2 colors) and a dimension
 class ccTwoColorsDlg : public QDialog, public Ui::TwoColorChoiceDialog
 {
     Q_OBJECT
 
 public:
+
+	//! Default constructor
     ccTwoColorsDlg(QWidget* parent);
 
     static QColor s_firstColor;
     static QColor s_secondColor;
 
 protected slots:
+
     void changeFirstColor();
     void changeSecondColor();
 };

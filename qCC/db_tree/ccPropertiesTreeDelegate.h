@@ -104,7 +104,7 @@ signals:
 protected slots:
     void updateItem(QStandardItem* item);
     void scalarFieldChanged(int pos);
-    void colorRampChanged(int pos);
+    void colorScaleChanged(int pos);
     void colorRampStepsChanged(int val);
     void spawnColorRampEditor();
     void octreeDisplayTypeChanged(int pos);

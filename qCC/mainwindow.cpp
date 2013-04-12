@@ -48,6 +48,8 @@
 #include <ccImage.h>
 #include <cc2DLabel.h>
 #include <cc2DViewportObject.h>
+#include <ccColorScale.h>
+#include <ccColorScalesManager.h>
 
 //qCC includes
 #include "ccHeightGridGeneration.h"
@@ -1027,20 +1029,26 @@ void MainWindow::doActionSetColorGradient()
         return;
 
     unsigned char dim = (unsigned char)dlg.directionComboBox->currentIndex();
-    bool defaultRamp = (dlg.defaultRampCheckBox->checkState()==Qt::Checked);
-    colorType col1[3] = {dlg.s_firstColor.red(),
-                         dlg.s_firstColor.green(),
-                         dlg.s_firstColor.blue()
-                        };
-    colorType col2[3] = {dlg.s_secondColor.red(),
-                         dlg.s_secondColor.green(),
-                         dlg.s_secondColor.blue()
-                        };
+    bool useDefaultRamp = (dlg.defaultRampCheckBox->checkState() == Qt::Checked);
 
-    size_t i,selNum = m_selectedEntities.size();
-    for (i=0;i<selNum;++i)
+	ccColorScale::Shared colorScale(0);
+	if (useDefaultRamp)
+	{
+		colorScale = ccColorScalesManager::GetDefaultScale();
+	}
+	else
+	{
+		colorScale = ccColorScale::Shared(new ccColorScale("Temp scale",QString(),true));
+		colorScale->insert(ccColorScaleElement(0.0,dlg.s_firstColor),false);
+		colorScale->insert(ccColorScaleElement(1.0,dlg.s_secondColor),true);
+	}
+	assert(colorScale);
+
+    size_t selNum = m_selectedEntities.size();
+    for (size_t i=0; i<selNum; ++i)
     {
         ccHObject* ent = m_selectedEntities[i];
+		
 		bool lockedVertices;
         ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
@@ -1051,12 +1059,11 @@ void MainWindow::doActionSetColorGradient()
 
         if (cloud && cloud->isA(CC_POINT_CLOUD)) // TODO
         {
-            if (defaultRamp)
-                static_cast<ccPointCloud*>(cloud)->colorizeWithDefaultRamp(dim);
-            else
-                static_cast<ccPointCloud*>(cloud)->colorizeByHeight(dim, col1, col2);
-            ent->showColors(true);
-            ent->prepareDisplayForRefresh();
+			if (static_cast<ccPointCloud*>(cloud)->setRGBColorByHeight(dim, colorScale))
+			{
+				ent->showColors(true);
+				ent->prepareDisplayForRefresh();
+			}
         }
     }
 
@@ -2262,9 +2269,11 @@ void MainWindow::doActionSFConvertToRGB()
             //if there is no displayed SF --> nothing to do!
             if (pc->getCurrentDisplayedScalarField())
             {
-                pc->setColorWithDistances(mixWithExistingColors);
-                ent->showColors(true);
-                ent->showSF(false);
+				if (pc->setRGBColorWithCurrentScalarField(mixWithExistingColors))
+				{
+					ent->showColors(true);
+					ent->showSF(false);
+				}
             }
 
             cloud->prepareDisplayForRefresh_recursive();

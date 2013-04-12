@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/ccGear.png</file>
     <file>images/ccCenteredPerspective32.png</file>
     <file>images/ccOrthoMode32.png</file>
     <file>images/ccViewerBasedPerspective32.png</file>

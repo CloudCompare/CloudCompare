@@ -86,23 +86,12 @@ void ChunkedPointCloud::invalidateBoundingBox()
 
 void ChunkedPointCloud::placeIteratorAtBegining()
 {
-	m_currentPointIndex=0;
+	m_currentPointIndex = 0;
 }
 
 const CCVector3* ChunkedPointCloud::getNextPoint()
 {
 	return (m_currentPointIndex < m_points->currentSize() ? point(m_currentPointIndex++) : 0);
-}
-
-const CCVector3* ChunkedPointCloud::getPointPersistentPtr(unsigned index)
-{
-	return point(index);
-}
-
-void ChunkedPointCloud::getPoint(unsigned index, CCVector3& P) const
-{
-	assert(index < size());
-	P=*point(index);
 }
 
 bool ChunkedPointCloud::resize(unsigned newNumberOfPoints)
@@ -114,16 +103,21 @@ bool ChunkedPointCloud::resize(unsigned newNumberOfPoints)
         return false;
 
 	//then the scalarfields
-	for (unsigned i=0;i<m_scalarFields.size();++i)
+	for (size_t i=0; i<m_scalarFields.size(); ++i)
 	{
-		//if something fails, we restore everything!
 		if (!m_scalarFields[i]->resize(newNumberOfPoints))
         {
-			for (unsigned j=0;j<i;++j)
+			//if something fails, we restore the previous size for already processed SFs!
+			for (size_t j=0; j<i; ++j)
+			{
                 m_scalarFields[j]->resize(oldNumberOfPoints);
-            m_points->resize(oldNumberOfPoints);
+				m_scalarFields[j]->computeMinAndMax();
+			}
+			//we can assume that newNumberOfPoints > oldNumberOfPoints, so it should always be ok
+			m_points->resize(oldNumberOfPoints);
 			return false;
         }
+		m_scalarFields[i]->computeMinAndMax();
 	}
 
 	return true;

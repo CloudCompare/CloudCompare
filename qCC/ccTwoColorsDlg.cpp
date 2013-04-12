@@ -14,19 +14,14 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1874                                                              $
-//$LastChangedDate:: 2011-08-28 23:39:04 +0200 (dim., 28 août 2011)       $
-//**************************************************************************
-//
 
 #include "ccTwoColorsDlg.h"
 
-#include <QColorDialog>
-
+//Local
 #include "ccDisplayOptionsDlg.h"
+
+//Qt
+#include <QColorDialog>
 
 QColor ccTwoColorsDlg::s_firstColor(Qt::black);
 QColor ccTwoColorsDlg::s_secondColor(Qt::white);

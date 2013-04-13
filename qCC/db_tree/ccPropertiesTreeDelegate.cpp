@@ -52,7 +52,7 @@
 #include <QPushButton>
 #include <QScrollBar>
 #include <QHBoxLayout>
-#include <QToolButton.h>
+#include <QToolButton>
 
 //System
 #include <assert.h>

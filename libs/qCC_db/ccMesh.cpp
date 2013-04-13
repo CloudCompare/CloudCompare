@@ -631,7 +631,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			assert(m_associatedCloud->isA(CC_POINT_CLOUD));
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
 
-			greyForNanScalarValues = cloud->areNanScalarValuesInGrey();
+			greyForNanScalarValues = (cloud->getCurrentDisplayedScalarField() && cloud->getCurrentDisplayedScalarField()->areNaNValuesShownInGrey());
 			if (greyForNanScalarValues && pushName)
 			{
 				//in picking mode, no need to take SF into account if we don't hide any points!

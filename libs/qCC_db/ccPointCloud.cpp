@@ -386,7 +386,6 @@ ccPointCloud::~ccPointCloud()
 void ccPointCloud::init()
 {
     showSFColorsScale(false);
-    setGreyForNanScalarValues(true);
     setCurrentDisplayedScalarField(-1);
 	showSF(false);
 }
@@ -927,16 +926,6 @@ bool ccPointCloud::sfColorScaleShown() const
     return m_sfColorScaleDisplayed && sfShown();
 }
 
-bool ccPointCloud::areNanScalarValuesInGrey() const
-{
-    return m_greyForNanScalarValues;
-}
-
-void ccPointCloud::setGreyForNanScalarValues(bool state)
-{
-    m_greyForNanScalarValues = state;
-}
-
 const colorType* ccPointCloud::getPointDistanceColor(unsigned pointIndex) const
 {
     assert(m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale());
@@ -946,7 +935,7 @@ const colorType* ccPointCloud::getPointDistanceColor(unsigned pointIndex) const
     if (normalizedDist >= 0)
 		return m_currentDisplayedScalarField->getColorScale()->getColorByRelativePos(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps());
     else
-        return (m_greyForNanScalarValues ? ccColor::lightGrey : 0);
+		return (m_currentDisplayedScalarField->areNaNValuesShownInGrey() ? ccColor::lightGrey : 0);
 }
 
 const colorType* ccPointCloud::getDistanceColor(ScalarType d) const
@@ -957,7 +946,7 @@ const colorType* ccPointCloud::getDistanceColor(ScalarType d) const
     if (normalizedDist >= 0)
         return m_currentDisplayedScalarField->getColorScale()->getColorByRelativePos(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps());
 	else
-        return (m_greyForNanScalarValues ? ccColor::lightGrey : NULL);
+		return (m_currentDisplayedScalarField->areNaNValuesShownInGrey() ? ccColor::lightGrey : NULL);
 }
 
 ScalarType ccPointCloud::getPointDisplayedDistance(unsigned pointIndex) const
@@ -1438,7 +1427,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
-			if (m_greyForNanScalarValues)
+			if (m_currentDisplayedScalarField && m_currentDisplayedScalarField->areNaNValuesShownInGrey())
 				glParams.showSF = false; //--> we keep it only if SF 'NaN' values are hidden
 		}
 
@@ -1570,7 +1559,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				ScalarType sfMaxSat = m_currentDisplayedScalarField->getMaxSaturation();
 
 				//the fact that NaN values SHOULD be hidden, doesn't mean that we ACTUALLY hide points...
-				bool hiddenPoints = (!m_greyForNanScalarValues && ( sfMaxDisp <= sfMax || sfMinDisp >= sfMin));
+				bool hiddenPoints = (	!m_currentDisplayedScalarField->areNaNValuesShownInGrey()
+										&& ( sfMaxDisp <= sfMax || sfMinDisp >= sfMin) );
 
 				//color ramp shader initialization
 				ccShader* colorRampShader = context.colorRampShader;
@@ -1995,10 +1985,6 @@ void ccPointCloud::addColorRampInfo(CC_DRAW_CONTEXT& context)
         return;
 
     context.sfColorScaleToDisplay = static_cast<ccScalarField*>(getScalarField(sfIdx));
-    context.greyForNanScalarValues = m_greyForNanScalarValues;
-
-    const char* sfName = getScalarFieldName(sfIdx);
-    strcpy(context.colorRampTitle,sfName);
 }
 
 ccPointCloud* ccPointCloud::filterPointsByScalarValue(ScalarType minVal, ScalarType maxVal)
@@ -2483,9 +2469,10 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 				return false;
 		}
 
-		//'show NaN values in grey' state (dataVersion>=20)
-		if (out.write((const char*)&m_greyForNanScalarValues,sizeof(bool))<0)
-			return WriteError();
+		//'show NaN values in grey' state (27>dataVersion>=20)
+		//if (out.write((const char*)&m_greyForNanScalarValues,sizeof(bool))<0)
+		//	return WriteError();
+		
 		//'show current sf color scale' state (dataVersion>=20)
 		if (out.write((const char*)&m_sfColorScaleDisplayed,sizeof(bool))<0)
 			return WriteError();
@@ -2579,9 +2566,20 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion)
 			addScalarField(sf);
 		}
 
-		//'show NaN values in grey' state (dataVersion>=20)
-		if (in.read((char*)&m_greyForNanScalarValues,sizeof(bool))<0)
-			return ReadError();
+		if (dataVersion < 27)
+		{
+			//'show NaN values in grey' state (27>dataVersion>=20)
+			bool greyForNanScalarValues = true;
+			if (in.read((char*)&greyForNanScalarValues,sizeof(bool))<0)
+				return ReadError();
+
+			//update all scalar fields accordingly (old way)
+			for (unsigned i=0; i<getNumberOfScalarFields(); ++i)
+			{
+				static_cast<ccScalarField*>(getScalarField(i))->showNaNValuesInGrey(greyForNanScalarValues);
+			}
+		}
+
 		//'show current sf color scale' state (dataVersion>=20)
 		if (in.read((char*)&m_sfColorScaleDisplayed,sizeof(bool))<0)
 			return ReadError();

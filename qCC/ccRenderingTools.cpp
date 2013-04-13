@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
 
 #include "ccRenderingTools.h"
 #include "ccGuiParameters.h"
@@ -480,7 +473,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		if (normalizedDist >= 0)
 			col = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
 		else
-			col = (context.greyForNanScalarValues ? ccColor::lightGrey : 0);
+			col = (sf->areNaNValuesShownInGrey()  ? ccColor::lightGrey : 0);
 
 		if (i==0 && theScaleElements[i].condensed)
 		{
@@ -605,10 +598,11 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	}
 
 	//Scale title
-	if (context.colorRampTitle[0]!=0)
+	const char* sfName = context.sfColorScaleToDisplay->getName();
+	if (sfName)
 	{
-		//QString sfTitle = QString("[%1]").arg(context.colorRampTitle);
-		QString sfTitle(context.colorRampTitle);
+		//QString sfTitle = QString("[%1]").arg(sfName);
+		QString sfTitle(sfName);
 		win->displayText(sfTitle, context.glW-c_cubeSize/2, (y+c_cubeSize)+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VTOP);
 	}
 

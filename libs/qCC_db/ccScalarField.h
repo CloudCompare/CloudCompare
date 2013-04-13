@@ -80,6 +80,12 @@ public:
 	**/
 	inline ScalarType getNormalizedValue(unsigned index) const { return normalize(getValue(index)); }
 
+	//! Sets whether NaN values should be displayed in grey or hidden
+	inline void showNaNValuesInGrey(bool state) { m_showNaNValuesInGrey = state; }
+
+	//! Returns whether NaN values are displayed in grey or hidden
+	inline bool areNaNValuesShownInGrey() const { return m_showNaNValuesInGrey; }
+
 	//! Sets whether min and max saturation values are absolute or not
 	/** For signed SF only.
 	**/
@@ -154,6 +160,9 @@ protected:
 
 	//! Normalisation coef.
 	ScalarType m_normalizeCoef;
+
+	// Whether NaN values are shown in grey or are hidden
+	bool m_showNaNValuesInGrey;
 
 	//! Flag whether min and max saturation values are absolute or not
 	/** For signed SF only.

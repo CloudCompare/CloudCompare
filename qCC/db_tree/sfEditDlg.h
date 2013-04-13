@@ -14,19 +14,11 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_SF_EDIT_DIALOG_HEADER
 #define CC_SF_EDIT_DIALOG_HEADER
 
 #include <QWidget>
-//#include <QxtSpanSlider.h>
 
 #include <ui_sfEditDlg.h>
 
@@ -40,7 +32,7 @@ class sfEditDlg : public QWidget, public Ui::SFEditDlg
 public:
     sfEditDlg(QWidget* parent);
 
-    void SetValuesWith(ccScalarField* sf);
+    void fillDialogWith(ccScalarField* sf);
 
 public slots:
     void minValSBChanged(double val);
@@ -51,13 +43,14 @@ public slots:
 	void dispValSLDChanged(int,int);
 	void satValSLDChanged(int,int);
 
-	void absSatChanged(int);
-	void logScaleChanged(int);
-	void boundariesLockChanged(int);
+	void absSatChanged(bool);
+	void logScaleChanged(bool);
+	void boundariesLockChanged(bool);
+	void nanInGrayChanged(bool);
 
 signals:
-    void entitySFHasChanged();
 
+    void entitySFHasChanged();
 
 protected:
 
@@ -74,4 +67,4 @@ protected:
     double slider2spin_2(int val);
 };
 
-#endif
+#endif //CC_SF_EDIT_DIALOG_HEADER

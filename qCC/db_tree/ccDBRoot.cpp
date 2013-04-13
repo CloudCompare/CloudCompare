@@ -41,6 +41,9 @@
 #include <assert.h>
 #include <algorithm>
 
+//Minimum width of the left column of the properties tree view
+static const int c_propViewLeftColumnWidth = 115;
+
 ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWidget, QObject* parent) : QAbstractItemModel(parent)
 {
     m_treeRoot = new ccHObject("DB Tree");
@@ -118,6 +121,8 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
     m_ccPropDelegate = new ccPropertiesTreeDelegate(m_propertiesModel, m_propertiesTreeWidget);
     m_propertiesTreeWidget->setItemDelegate(m_ccPropDelegate);
     m_propertiesTreeWidget->setModel(m_propertiesModel);
+	m_propertiesTreeWidget->header()->setResizeMode(QHeaderView::Interactive);
+	m_propertiesTreeWidget->header()->setStretchLastSection(true);
     m_propertiesTreeWidget->setEnabled(false);
 
     //Properties tree signals/slots connection
@@ -752,7 +757,7 @@ void ccDBRoot::showPropertiesView(ccHObject* obj)
     m_ccPropDelegate->fillModel(obj);
 
     m_propertiesTreeWidget->setEnabled(true);
-	m_propertiesTreeWidget->setColumnWidth(0,115);
+	m_propertiesTreeWidget->setColumnWidth(0,c_propViewLeftColumnWidth);
 }
 
 void ccDBRoot::hidePropertiesView()

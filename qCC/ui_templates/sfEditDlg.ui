@@ -6,15 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>300</width>
-    <height>164</height>
+    <width>243</width>
+    <height>160</height>
    </rect>
   </property>
-  <property name="minimumSize">
-   <size>
-    <width>240</width>
-    <height>0</height>
-   </size>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="focusPolicy">
    <enum>Qt::StrongFocus</enum>
@@ -22,11 +22,14 @@
   <property name="windowTitle">
    <string>SF Values</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_4">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <property name="margin">
+    <number>6</number>
+   </property>
    <item>
     <widget class="QFrame" name="frame">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+      <sizepolicy hsizetype="Expanding" vsizetype="Maximum">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -151,50 +154,47 @@
        </widget>
       </item>
       <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
+       <layout class="QFormLayout" name="formLayout">
+        <item row="0" column="0">
          <widget class="QCheckBox" name="absSatCheckBox">
           <property name="text">
            <string>absolute saturation</string>
           </property>
          </widget>
         </item>
-        <item>
+        <item row="0" column="1">
          <widget class="QCheckBox" name="logScaleCheckBox">
           <property name="text">
            <string>log scale</string>
           </property>
          </widget>
         </item>
-        <item>
-         <spacer name="horizontalSpacer">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+        <item row="1" column="0">
+         <widget class="QCheckBox" name="releaseBoundariesCheckBox">
+          <property name="toolTip">
+           <string>Release boundaries (let the user defines them)</string>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
+          <property name="text">
+           <string>release boundaries</string>
           </property>
-         </spacer>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QCheckBox" name="nanInGreyCheckBox">
+          <property name="text">
+           <string>show NaN in grey</string>
+          </property>
+         </widget>
         </item>
        </layout>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="releaseBoundariesCheckBox">
-        <property name="toolTip">
-         <string>Release boundaries (let the user defines them)</string>
-        </property>
-        <property name="text">
-         <string>release boundaries</string>
-        </property>
-       </widget>
       </item>
      </layout>
     </widget>
    </item>
   </layout>
+  <zorder>frame</zorder>
+  <zorder>releaseBoundariesCheckBox</zorder>
+  <zorder>releaseBoundariesCheckBox</zorder>
  </widget>
  <customwidgets>
   <customwidget>

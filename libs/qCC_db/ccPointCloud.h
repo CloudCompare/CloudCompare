@@ -240,11 +240,6 @@ public:
 	virtual void deleteScalarField(int index);
 	virtual void deleteAllScalarFields();
 
-	//! Returns whether NaN scalar values should be displayed (in grey) or not
-	bool areNanScalarValuesInGrey() const;
-	//! Sets whether NaN scalar values should be displayed (in grey) or not
-	void setGreyForNanScalarValues(bool state);
-    
 	//! Returns whether color scale should be displayed or not
     bool sfColorScaleShown() const;
 	//! Sets whether color scale should be displayed or not
@@ -481,8 +476,6 @@ protected:
 	//! Normals (compressed)
 	NormsIndexesTableType* m_normals;
 
-    //! Specifies whether filtered out scalar values should be displayed (in gey) or not displayed at all
-    bool m_greyForNanScalarValues;
 	//! Specifies whether current scalar field color scale should be displayed or not
     bool m_sfColorScaleDisplayed;
 

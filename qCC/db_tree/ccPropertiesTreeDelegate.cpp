@@ -88,7 +88,7 @@ public:
 			layout()->addWidget(m_button);
 		}
 	}
-
+	
 	QComboBox* m_comboBox;
 	QToolButton* m_button;
 };
@@ -96,7 +96,7 @@ public:
 ccPropertiesTreeDelegate::ccPropertiesTreeDelegate(QStandardItemModel* model,
 												   QAbstractItemView* view,
 												   QObject *parent)
-		: QItemDelegate(parent)
+		: QStyledItemDelegate(parent)
 		, m_model(model)
 		, m_view(view)
 		, m_currentObject(0)
@@ -127,17 +127,19 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
             return QSize(50,18);
         case OBJECT_CURRENT_COLOR_RAMP:
             return QSize(70,22);
+		case OBJECT_CLOUD_SF_EDITOR:
+            return QSize(250,160);
         }
     }
 
-    return QItemDelegate::sizeHint(option,index);
+    return QStyledItemDelegate::sizeHint(option,index);
 }
 //*/
 
 void ccPropertiesTreeDelegate::unbind()
 {
     if (m_model)
-        disconnect(m_model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(updateItem(QStandardItem*)));
+		m_model->disconnect(this);
 }
 
 ccHObject* ccPropertiesTreeDelegate::getCurrentObject()
@@ -154,9 +156,12 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 
     m_currentObject = hObject;
 
+	//save current scroll position
+	int scrollPos = (m_view && m_view->verticalScrollBar() ? m_view->verticalScrollBar()->value() : 0);
+
 	if (m_model)
 	{
-		m_model->clear();
+		m_model->removeRows(0,m_model->rowCount()-1);
 		m_model->setColumnCount(2);
 		m_model->setHeaderData(0, Qt::Horizontal, "Property");
 		m_model->setHeaderData(1, Qt::Horizontal, "State/Value");
@@ -164,7 +169,7 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 
     if (m_currentObject->isHierarchy())
 		if (!m_currentObject->isA(CC_2D_VIEWPORT_LABEL)) //don't need to display this kind of info for viewport labels!
-        fillWithHObject(m_currentObject);
+			fillWithHObject(m_currentObject);
 
     if (m_currentObject->isKindOf(CC_POINT_CLOUD))
     {
@@ -221,6 +226,10 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
         fillWithChunkedArray(static_cast<ColorsTableType*>(m_currentObject));
     }
 	
+	//go back to original position
+	if (scrollPos>0)
+		m_view->verticalScrollBar()->setSliderPosition(scrollPos);
+
 	if (m_model)
 		connect(m_model, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(updateItem(QStandardItem*)));
 }
@@ -501,7 +510,7 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
         item->setFlags(Qt::ItemIsEnabled);
         m_model->setItem(curRow,1,item);
 
-        //fields combo
+        //fields list combo
         m_model->setRowCount(++curRow+1);
         item = new QStandardItem("Current");
         item->setFlags(Qt::ItemIsEnabled);
@@ -513,13 +522,17 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
         m_model->setItem(curRow,1,item);
         m_view->openPersistentEditor(m_model->index(curRow,1));
 
+		//no need to go any further if no SF is currently active
 		CCLib::ScalarField* sf = cloud->getCurrentDisplayedScalarField();
         if (!sf)
 			return;
 
-        //color-ramp combo
+        ++curRow;
+        addSeparator("Color Scale");
+
+        //color scale selection combo box
         m_model->setRowCount(++curRow+1);
-        item = new QStandardItem("Color ramp");
+        item = new QStandardItem("Current");
         item->setFlags(Qt::ItemIsEnabled);
         m_model->setItem(curRow,0,item);
 
@@ -529,9 +542,9 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
         m_model->setItem(curRow,1,item);
         m_view->openPersistentEditor(m_model->index(curRow,1));
 
-        //color-ramp steps
+        //color scale steps
         m_model->setRowCount(++curRow+1);
-        item = new QStandardItem("Color ramp steps");
+        item = new QStandardItem("Steps");
         item->setFlags(Qt::ItemIsEnabled);
         m_model->setItem(curRow,0,item);
 
@@ -541,10 +554,22 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
         m_model->setItem(curRow,1,item);
         m_view->openPersistentEditor(m_model->index(curRow,1));
 
-        ++curRow;
-        addSeparator("SF Scale");
+        //scale
+        m_model->setRowCount(++curRow+1);
+        item = new QStandardItem("Visible");
+        item->setFlags(Qt::ItemIsEnabled);
+        m_model->setItem(curRow,0,item);
 
-        //sliders (warning: 2 columns)
+        item = new QStandardItem("");
+        item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+        item->setCheckState(cloud->sfColorScaleShown() ? Qt::Checked : Qt::Unchecked);
+        item->setData(OBJECT_SF_SHOW_SCALE);
+        m_model->setItem(curRow,1,item);
+
+        ++curRow;
+        addSeparator("SF display params");
+
+		//SF edit dialog (warning: 2 columns)
         m_model->setRowCount(++curRow+1);
         item = new QStandardItem();
         item->setFlags(Qt::ItemIsEnabled);
@@ -556,30 +581,6 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
         //item->setSizeHint(QSize(240,116));
         m_model->setItem(curRow,0,item);
         m_view->openPersistentEditor(m_model->index(curRow,0));
-
-        //NaN distances in gray
-        m_model->setRowCount(++curRow+1);
-        item = new QStandardItem("NaN in grey");
-        item->setFlags(Qt::ItemIsEnabled);
-        m_model->setItem(curRow,0,item);
-
-        item = new QStandardItem("");
-        item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
-        item->setCheckState(cloud->areNanScalarValuesInGrey() ? Qt::Checked : Qt::Unchecked);
-        item->setData(OBJECT_NAN_IN_GREY);
-        m_model->setItem(curRow,1,item);
-
-        //scale
-        m_model->setRowCount(++curRow+1);
-        item = new QStandardItem("Display color scale");
-        item->setFlags(Qt::ItemIsEnabled);
-        m_model->setItem(curRow,0,item);
-
-        item = new QStandardItem("");
-        item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
-        item->setCheckState(cloud->sfColorScaleShown() ? Qt::Checked : Qt::Unchecked);
-        item->setData(OBJECT_SF_SHOW_SCALE);
-        m_model->setItem(curRow,1,item);
     }
 }
 
@@ -1120,15 +1121,21 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		QColorScaleSelector* selector = new QColorScaleSelector(parent);
 
 		//fill combox box
+		if (selector->m_comboBox)
 		{
+			selector->m_comboBox->blockSignals(true);
+			selector->m_comboBox->clear();
 			//add all available color scales
 			ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
 			assert(csManager);
 			for (ccColorScalesManager::ScalesMap::const_iterator it = csManager->map().begin(); it != csManager->map().end(); ++it)
 				selector->m_comboBox->addItem((*it)->getName(),(*it)->getUuid());
+			selector->m_comboBox->blockSignals(false);
+
 			connect(selector->m_comboBox, SIGNAL(activated(int)), this, SLOT(colorScaleChanged(int)));
 		}
 		//advanced tool button
+		if (selector->m_button)
 		{
 			connect(selector->m_button, SIGNAL(clicked()), this, SLOT(spawnColorRampEditor()));
 		}
@@ -1250,43 +1257,15 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
         return comboBox;
     }
     default:
-        return QItemDelegate::createEditor(parent, option, index);
+        return QStyledItemDelegate::createEditor(parent, option, index);
     }
 
     return NULL;
 }
 
-//bool ccPropertiesTreeDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index)
-//{
-//	if (event->type() == QEvent::Resize)
-//	{
-//		if (!m_model || !m_currentObject)
-//			return false;
-//		
-//		assert(m_model == model);
-//
-//		QStandardItem* item = m_model->itemFromIndex(index);
-//
-//		if (!item || !item->data().isValid() || (item->column()==0 && item->data().toInt()!=OBJECT_CLOUD_SF_EDITOR))
-//			return false;
-//
-//		switch (item->data().toInt())
-//		{
-//		case OBJECT_CLOUD_SF_EDITOR:
-//			//sfEditDlg *sfd = qobject_cast<sfEditDlg*>(editor);
-//			//if (!sfd)
-//			//	return;
-//			event->accept();
-//			return true;
-//		}
-//	}
-//
-//	return false;
-//}
-
 void ccPropertiesTreeDelegate::updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-	QItemDelegate::updateEditorGeometry(editor, option, index);
+	QStyledItemDelegate::updateEditorGeometry(editor, option, index);
 
     if (!m_model || !editor)
         return;
@@ -1387,7 +1366,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 
         ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
         if (sf)
-            sfd->SetValuesWith(sf);
+			sfd->fillDialogWith(sf);
         break;
     }
     case OBJECT_OCTREE_TYPE:
@@ -1458,7 +1437,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
         break;
     }
     default:
-        QItemDelegate::setEditorData(editor, index);
+        QStyledItemDelegate::setEditorData(editor, index);
         break;
     }
 }
@@ -1507,14 +1486,6 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		break;
 	case OBJECT_SCALAR_FIELD_SHOWN:
 		m_currentObject->showSF(item->checkState() == Qt::Checked);
-		redraw=true;
-		break;
-	case OBJECT_NAN_IN_GREY:
-		{
-			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
-			assert(cloud);
-			cloud->setGreyForNanScalarValues(item->checkState() == Qt::Checked);
-		}
 		redraw=true;
 		break;
 	case OBJECT_SF_SHOW_SCALE:
@@ -1592,14 +1563,14 @@ void ccPropertiesTreeDelegate::updateDisplay()
 void ccPropertiesTreeDelegate::updateModel()
 {
 	//save current scroll position
-	int scrollPos = (m_view && m_view->verticalScrollBar() ? m_view->verticalScrollBar()->value() : 0);
+	//int scrollPos = (m_view && m_view->verticalScrollBar() ? m_view->verticalScrollBar()->value() : 0);
 
 	//re-fill model
 	fillModel(m_currentObject);
 	
 	//go back to original position
-	if (scrollPos>0)
-		m_view->verticalScrollBar()->setSliderPosition(scrollPos);
+	//if (scrollPos>0)
+	//	m_view->verticalScrollBar()->setSliderPosition(scrollPos);
 }
 
 void ccPropertiesTreeDelegate::scalarFieldChanged(int pos)
@@ -1626,15 +1597,20 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 
     ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
     assert(cloud);
-	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
+	ccScalarField* sf = (cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : 0);
 	if (sf)
 	{
 		ccColorScaleEditorDialog* editorDialog = new ccColorScaleEditorDialog(sf->getColorScale(),static_cast<ccGLWindow*>(cloud->getDisplay()));
 		editorDialog->setAssociatedScalarField(sf);
-		if (editorDialog->exec() && editorDialog->getActiveScale())
+		if (editorDialog->exec())
 		{
-			sf->setColorScale(editorDialog->getActiveScale());
-			updateDisplay();
+			if (editorDialog->getActiveScale())
+			{
+				sf->setColorScale(editorDialog->getActiveScale());
+				updateDisplay();
+			}
+
+			updateModel();
 		}
 	}
 }
@@ -1663,10 +1639,10 @@ void ccPropertiesTreeDelegate::colorScaleChanged(int pos)
 		return;
 	}
 
+	//get current SF
     ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
     assert(cloud);
-
-	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField());
+	ccScalarField* sf = cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : 0;
 	if (sf && sf->getColorScale() != colorScale)
 	{
 		sf->setColorScale(colorScale);
@@ -1752,10 +1728,8 @@ void ccPropertiesTreeDelegate::applyImageViewport()
     ccCalibratedImage* image = ccHObjectCaster::ToCalibratedImage(m_currentObject);
     assert(image);
 
-    //ccGLWindow* win = (image->getParent() ? image->getParent()->getDisplay() : 0);
     ccGLWindow* win = static_cast<ccGLWindow*>(image->getDisplay());
     if (!win)
-        //win = GetActiveGLWindow();
         return;
 
     win->applyImageViewport(image);

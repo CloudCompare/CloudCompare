@@ -22,7 +22,7 @@
 #include <ccChunkedArray.h>
 
 //Qt
-#include  <QItemDelegate>
+#include <QStyledItemDelegate>
 
 class ccHObject;
 class ccGenericPointCloud;
@@ -48,7 +48,7 @@ enum CC_PROPERTY_ROLE { OBJECT_NAME						=   1,
                         OBJECT_NORMALS_SHOWN			=   5,
                         OBJECT_SCALAR_FIELD_SHOWN		=   6,
                         //OBJECT_XXXX					=   7,
-                        OBJECT_NAN_IN_GREY              =   8,
+                        //OBJECT_XXXX					=   8,
                         OBJECT_SF_SHOW_SCALE			=   9,
                         OBJECT_OCTREE_LEVEL             =   10,
                         OBJECT_OCTREE_TYPE              =   11,
@@ -70,7 +70,7 @@ enum CC_PROPERTY_ROLE { OBJECT_NAME						=   1,
 };
 
 //! GUI properties list dialog element
-class ccPropertiesTreeDelegate : public QItemDelegate
+class ccPropertiesTreeDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 
@@ -82,7 +82,7 @@ public:
     //! Default destructor
     virtual ~ccPropertiesTreeDelegate();
 
-    //inherited from QItemDelegate
+    //inherited from QStyledItemDelegate
     virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index ) const;
     virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 	//virtual bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);

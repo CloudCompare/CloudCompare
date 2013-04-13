@@ -353,16 +353,10 @@
    <addaction name="menuHelp"/>
   </widget>
   <widget class="QDockWidget" name="DockableDBTree">
-   <property name="sizePolicy">
-    <sizepolicy hsizetype="Preferred" vsizetype="Ignored">
-     <horstretch>0</horstretch>
-     <verstretch>0</verstretch>
-    </sizepolicy>
-   </property>
    <property name="minimumSize">
     <size>
-     <width>150</width>
-     <height>159</height>
+     <width>100</width>
+     <height>100</height>
     </size>
    </property>
    <property name="floating">
@@ -609,6 +603,12 @@
    </attribute>
   </widget>
   <widget class="QDockWidget" name="DockableProperties">
+   <property name="minimumSize">
+    <size>
+     <width>100</width>
+     <height>100</height>
+    </size>
+   </property>
    <property name="floating">
     <bool>false</bool>
    </property>

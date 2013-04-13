@@ -63,8 +63,6 @@ struct glDrawContext
 
 	//information on displayed color scale
 	ccScalarField* sfColorScaleToDisplay;
-    bool greyForNanScalarValues;
-    char colorRampTitle[256];
 	
 	//shader for fast dynamic color ramp lookup
 	static const unsigned MAX_SHADER_COLOR_RAMP_SIZE = 256;
@@ -93,7 +91,6 @@ struct glDrawContext
     , decimateCloudOnMove(true)
     , decimateMeshOnMove(true)
     , sfColorScaleToDisplay(0)
-    , greyForNanScalarValues(true)
 	, colorRampShader(0)
 	, pickedPointsRadius(4)
 	, pickedPointsTextShift(0.0)
@@ -101,9 +98,7 @@ struct glDrawContext
 	, labelsTransparency(100)
 	, sourceBlend(GL_SRC_ALPHA)
 	, destBlend(GL_ONE_MINUS_SRC_ALPHA)
-    {
-        colorRampTitle[0]=0;
-    }
+    {}
 };
 typedef glDrawContext CC_DRAW_CONTEXT;
 

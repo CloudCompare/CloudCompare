@@ -34,6 +34,7 @@ ccScalarField::ccScalarField(const char* name/*=0*/)
     , m_minSaturationLog(0)
     , m_maxSaturationLog(0)
     , m_normalizeCoef(0)
+	, m_showNaNValuesInGrey(true)
 	, m_absSaturation(false)
 	, m_logScale(false)
 	, m_colorScale(0)
@@ -271,6 +272,10 @@ bool ccScalarField::toFile(QFile& out) const
 	if (out.write((const char*)&colorRampSteps,4)<0)
 		return WriteError();
 
+	//'NaN values in grey' state (dataVersion>=27)
+	if (out.write((const char*)&m_showNaNValuesInGrey,sizeof(bool))<0)
+		return WriteError();
+
 	return true;
 }
 
@@ -394,7 +399,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 
 			if (hasColorScale)
 			{
-				ccColorScale::Shared colorScale = ccColorScale::Shared(new ccColorScale());
+				ccColorScale::Shared colorScale = ccColorScale::Shared(new ccColorScale("temp"));
 				if (!colorScale->fromFile(in,dataVersion))
 					return ReadError();
 				m_colorScale = colorScale;
@@ -424,6 +429,13 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 		if (in.read((char*)&colorRampSteps,4)<0)
 			return ReadError();
 		setColorRampSteps((unsigned)colorRampSteps);
+	}
+
+	if (dataVersion >= 27)
+	{
+		//'NaN values in grey' state (dataVersion>=27)
+		if (in.read((char*)&m_showNaNValuesInGrey,sizeof(bool))<0)
+			return ReadError();
 	}
 
 	//Normalisation coef.

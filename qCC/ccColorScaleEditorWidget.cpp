@@ -629,7 +629,10 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 	{
 		int pos = m_sliders->indexOf(slider);
 		if (pos >= 0)
+		{
 			m_slidersWidget->select(pos);
+			onSliderModified(pos);
+		}
 	}
 
 	update();
@@ -678,16 +681,15 @@ void ccColorScaleEditorWidget::importColorScale(ccColorScale::Shared scale)
 	update();
 }
 
-ccColorScale::Shared ccColorScaleEditorWidget::exportColorScale() const
+void ccColorScaleEditorWidget::exportColorScale(ccColorScale::Shared& destScale) const
 {
-	ccColorScale::Shared scale(new ccColorScale("unknwon"));
-	
+	if (!destScale)
+		return;
+
 	for (int i=0; i<m_sliders->size(); ++i)
-		scale->insert(*m_sliders->at(i),false);
+		destScale->insert(*m_sliders->at(i),false);
 
-	scale->update();
-
-	return scale;
+	destScale->update();
 }
 
 void ccColorScaleEditorWidget::showLabels(bool state)

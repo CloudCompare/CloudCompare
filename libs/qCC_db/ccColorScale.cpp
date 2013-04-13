@@ -66,11 +66,24 @@ void ccColorScale::insert(const ccColorScaleElement& step, bool autoUpdate/*=tru
 		update();
 }
 
+void ccColorScale::clear()
+{
+	if (m_locked)
+	{
+		ccLog::Warning(QString("[ccColorScale::clear] Scale '%1' is locked!").arg(m_name));
+		return;
+	}
+
+	m_steps.clear();
+
+	m_updated = false;
+}
+
 void ccColorScale::remove(int index, bool autoUpdate/*=true*/)
 {
 	if (m_locked)
 	{
-		ccLog::Warning(QString("[ccColorScale::insert] Scale '%1' is locked!").arg(m_name));
+		ccLog::Warning(QString("[ccColorScale::remove] Scale '%1' is locked!").arg(m_name));
 		return;
 	}
 

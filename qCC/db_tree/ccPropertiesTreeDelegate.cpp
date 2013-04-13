@@ -1610,6 +1610,9 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 				updateDisplay();
 			}
 
+			//save current scale manager state to persistent settings
+			ccColorScalesManager::GetUniqueInstance()->toPersistentSettings();
+
 			updateModel();
 		}
 	}

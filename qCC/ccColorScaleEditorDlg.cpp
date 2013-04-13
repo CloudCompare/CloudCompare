@@ -332,25 +332,14 @@ void ccColorScaleEditorDialog::changeSelectedStepValue(double value)
 
 void ccColorScaleEditorDialog::copyCurrentScale()
 {
-	ccColorScale::Shared scale = m_scaleWidget->exportColorScale();
-	if (!scale)
+	if (!m_colorScale)
 	{
-		ccLog::Error("Failed to export current color scale!");
+		assert(false);
 		return;
 	}
-
-	if (m_colorScale)
-	{
-		scale->setName(m_colorScale->getName()+QString("_copy"));
-		scale->generateNewUuid();
-		scale->setRelative(m_colorScale->isRelative());
-	}
-	else
-	{
-		scale->setName("unknown");
-		scale->generateNewUuid();
-		scale->setRelative(scaleModeComboBox->currentIndex() == 0 ? true : false);
-	}
+	
+	ccColorScale::Shared scale(new ccColorScale(m_colorScale->getName()+QString("_copy"),QString(),m_colorScale->isRelative()));
+	m_scaleWidget->exportColorScale(scale);
 
 	ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
 	assert(csManager);
@@ -370,26 +359,9 @@ void ccColorScaleEditorDialog::saveCurrentScale()
 		return;
 	}
 
-	ccColorScale::Shared scale = m_scaleWidget->exportColorScale();
-	if (!scale)
-	{
-		ccLog::Error("Failed to export current color scale!");
-		return;
-	}
+	m_scaleWidget->exportColorScale(m_colorScale);
 
-	scale->setName(m_colorScale->getName());
-	scale->setUuid(m_colorScale->getUuid());
-	scale->setRelative(m_colorScale->isRelative());
-
-	ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
-	assert(csManager);
-	if (csManager)
-	{
-		csManager->removeScale(m_colorScale->getUuid());
-		csManager->addScale(scale);
-		m_colorScale  = scale; //should be transparent for the rest of the dialog
-		setModified(false);
-	}
+	setModified(false);
 }
 
 void ccColorScaleEditorDialog::renameCurrentScale()

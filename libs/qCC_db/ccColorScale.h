@@ -151,6 +151,12 @@ public:
 	**/
 	void remove(int index, bool autoUpdate = true);
 
+	//! Removes all steps
+	/** There must be at least 2 steps for the scale to be valid!
+		Scale must not be locked.
+	**/
+	void clear();
+
 	//! Updates internal representation
 	void update();
 

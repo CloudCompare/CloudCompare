@@ -81,6 +81,11 @@ public:
 	//! Access to the internal map (const)
 	const ScalesMap& map() const { return m_scales; }
 
+	//! Loads custom color scales from persistent settings
+	void fromPersistentSettings();
+
+	//! Save custom color scales to persistent settings
+	void toPersistentSettings() const;
 
 protected:
 

@@ -253,7 +253,7 @@ public:
 	void deleteStep(int index);
 
     //! Exports the current color scale
-    ccColorScale::Shared exportColorScale() const;
+    void exportColorScale(ccColorScale::Shared& destScale) const;
 
     //! Imports the current color scale
     void importColorScale(ccColorScale::Shared scale);

@@ -32,8 +32,8 @@ ccColorScale::ccColorScale(QString name, QString uuid/*=QString()*/, bool relati
 	: m_name(name)
 	, m_uuid(uuid)
 	, m_updated(false)
-	, m_locked(false)
 	, m_relative(relative)
+	, m_locked(false)
 	, m_minValue(0.0)
 	, m_range(1.0)
 {

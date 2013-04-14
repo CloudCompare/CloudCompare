@@ -31,9 +31,6 @@ class GenericIndexedCloudPersist;
 class GenericDistribution;
 class GenericProgressCallback;
 
-//! Max computable Chi2 distance
-static double CHI2_MAX = 1e7;
-
 //! Statistical testing algorithms (Chi2 distance computation, statistic filtering, etc.)
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"

@@ -99,8 +99,8 @@ public:
 	**/
 	NormalizedProgress(GenericProgressCallback* callback, unsigned totalSteps, unsigned totalPercentage=100)
 		: percent(0.0f)
-		, percentAdd(1.0f)
 		, step(1)
+      , percentAdd(1.0f)
 		, counter(0)
 		, progressCallback(callback)
 	{

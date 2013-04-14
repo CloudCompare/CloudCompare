@@ -567,7 +567,9 @@ void MainWindow::on3DMouseKeyUp(int)
 	//nothing right now
 }
 
+#ifdef CC_3DXWARE_SUPPORT
 static bool s_3dMouseContextMenuAlreadyShown = false; //DGM: to prevent multiple instances at once
+#endif
 void MainWindow::on3DMouseKeyDown(int key)
 {
 	if (!m_3dMouseInput)

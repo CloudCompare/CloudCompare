@@ -296,7 +296,7 @@ protected:
 /*** Helpers ***/
 
 //! standard ccHObject container (for children, etc.)
-static void RemoveSiblings(const ccHObject::Container& origin, ccHObject::Container& dest)
+inline void RemoveSiblings(const ccHObject::Container& origin, ccHObject::Container& dest)
 {
 	size_t count = origin.size();
 	for (size_t i=0;i<count;++i)

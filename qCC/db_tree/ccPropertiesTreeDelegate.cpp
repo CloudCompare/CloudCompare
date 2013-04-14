@@ -97,9 +97,9 @@ ccPropertiesTreeDelegate::ccPropertiesTreeDelegate(QStandardItemModel* model,
 												   QAbstractItemView* view,
 												   QObject *parent)
 		: QStyledItemDelegate(parent)
+		, m_currentObject(0)
 		, m_model(model)
 		, m_view(view)
-		, m_currentObject(0)
 {
 	assert(m_model && m_view);
 }
@@ -1297,7 +1297,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
             return;
 
         ccGLWindow* win = static_cast<ccGLWindow*>(m_currentObject->getDisplay());
-        int pos = (win ? pos = comboBox->findText(win->windowTitle()) : 0);
+        int pos = (win ? comboBox->findText(win->windowTitle()) : 0);
 
         comboBox->setCurrentIndex(std::max(pos,0)); //0 = "NONE"
         break;

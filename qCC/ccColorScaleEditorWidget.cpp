@@ -613,9 +613,9 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 
 	//look first if this position corresponds to an already existing slider
 	double maxDist = 2.0*value/(double)m_colorBarWidget->length();
-	for (int i=01; i<m_sliders->size(); ++i)
+	for (int i=0; i<m_sliders->size(); ++i)
 	{
-		if (abs(m_sliders->at(i)->getValue() - value) < maxDist)
+		if (fabs(m_sliders->at(i)->getValue() - value) < maxDist)
 		{
 			m_slidersWidget->select(i);
 			return;

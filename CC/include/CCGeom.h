@@ -26,7 +26,8 @@
 #include "CCTypes.h"
 
 //system
-#include <math.h>
+#include <math.h> //for sqrt
+#include <stdlib.h> //for abs
 
 //! 3D Vector (templated version)
 template <class Type> class Vector3Tpl

@@ -32,9 +32,9 @@ ccTorus::ccTorus(PointCoordinateType insideRadius,
 	: ccGenericPrimitive(name,transMat)
 	, m_insideRadius(abs(insideRadius))
 	, m_outsideRadius(abs(outsideRadius))
-	, m_angle_rad(abs(angle_rad))
 	, m_rectSection(rectangularSection)
 	, m_rectSectionHeight(abs(rectSectionHeight))
+	, m_angle_rad(abs(angle_rad))
 {
 	setDrawingPrecision(std::max<unsigned>(precision,4)); //automatically calls buildUp + 	applyTransformationToVertices
 }

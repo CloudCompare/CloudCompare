@@ -25,6 +25,20 @@
 #include <assert.h>
 #include <stdint.h>
 
+/** Versions:
+   V1.0 = prior to 05/04/2012 = old version
+   V2.0 - 05/04/2012 - upgrade to serialized version with version tracking
+   V2.1 - 07/02/2012 - points & 2D labels upgraded
+   V2.2 - 11/26/2012 - object name is now a QString
+   V2.3 - 02/07/2013 - attribute 'm_selectionBehavior' added to ccHObject class
+   v2.4 - 02/22/2013 - per-cloud point size + whether name is displayed in 3D or not
+   v2.5 - 03/16/2013 - ccViewportParameters structure modified
+   v2.6 - 04/03/2013 - strictly positive scalar field removed and 'hidden' values marker is now NaN
+   v2.7 - 04/12/2013 - Customizable color scales
+**/
+const unsigned s_currentDBVersion = 27; //2.7
+
+
 void ccObject::ResetUniqueIDCounter()
 {
     QSettings settings;

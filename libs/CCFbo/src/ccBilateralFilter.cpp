@@ -30,8 +30,8 @@ ccBilateralFilter::ccBilateralFilter()
 	: ccGlFilter("Bilateral smooth")
 	, m_width(0)
 	, m_height(0)
-	, m_shader(0)
 	, m_fbo(0)
+	, m_shader(0)
 	, m_useCurrentViewport(false)
 {
 	memset(m_dampingPixelDist, 0, KERNEL_MAX_SIZE*KERNEL_MAX_SIZE); //will be updated right away by 'setParameters'

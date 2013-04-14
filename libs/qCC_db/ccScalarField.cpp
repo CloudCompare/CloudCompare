@@ -309,7 +309,6 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 	if (dataVersion < 26)
 	{
 		const ScalarType FORMER_BIG_VALUE = (ScalarType)(sqrt(3.4e38f)-1.0f);
-		const ScalarType FORMER_HIDDEN_VALUE = (ScalarType)-1.0;
 
 		for (unsigned i=0;i<m_maxCount;++i)
 		{

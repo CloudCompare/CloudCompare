@@ -42,9 +42,6 @@
  *** Globals ***
  ***************/
 
-//buffer for formated string generation
-static char s_buffer[4096];
-
 //unique console instance
 static ccConsole* s_console = 0;
 

@@ -35,6 +35,9 @@
 
 using namespace CCLib;
 
+//! Max computable Chi2 distance
+static double CHI2_MAX = 1e7;
+
 //! An element of a double-chained-list structure (used by computeAdaptativeChi2Dist)
 struct Chi2Class
 {

@@ -31,9 +31,9 @@ using namespace CCLib;
 
 FastMarchingForPropagation::FastMarchingForPropagation()
 	: FastMarching()
-	, lastT(0.0f)						//derniere valeur d'arrivee
-	, detectionThreshold(Cell::T_INF())	//saut relatif de la valeur d'arrivee qui arrête la propagation (ici, "desactive")
 	, jumpCoef(0.0f)					//resistance a l'avancement du front, en fonction de Cell->f (ici, pas de resistance)
+	, detectionThreshold(Cell::T_INF())	//saut relatif de la valeur d'arrivee qui arrete la propagation (ici, "desactive")
+	, lastT(0.0f)						//derniere valeur d'arrivee
 {
 }
 

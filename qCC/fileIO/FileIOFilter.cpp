@@ -218,6 +218,7 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 #endif
     case MA:
     case UNKNOWN_FILE:
+    case FILE_TYPES_COUNT:
         //nothing to do
 		break;
 	}
@@ -335,6 +336,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename
     case ICM:
     case BUNDLER:
     case UNKNOWN_FILE:
+    case FILE_TYPES_COUNT:
         //nothing to do
 		break;
 	}

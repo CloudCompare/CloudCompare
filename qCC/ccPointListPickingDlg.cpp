@@ -52,10 +52,10 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	: ccPointPickingGenericInterface(parent)
 	, Ui::PointListPickingDlg()
 	, m_associatedCloud(0)
+	, m_lastPreviousID(0)
 	, m_orderedLabelsContainer(0)
 	, m_toBeDeleted(0)
 	, m_toBeAdded(0)
-	, m_lastPreviousID(0)
 {
 	setupUi(this);
 	setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);

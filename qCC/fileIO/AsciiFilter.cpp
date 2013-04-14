@@ -241,7 +241,7 @@ struct cloudAttributesDescriptor
     void reset()
     {
         cloud=NULL;
-        for (int i=0;i<c_attribCount;++i)
+        for (unsigned int i=0;i<c_attribCount;++i)
             indexes[i]=-1;
         hasNorms=false;
         hasRGBColors=false;

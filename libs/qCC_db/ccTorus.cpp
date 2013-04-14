@@ -43,9 +43,9 @@ ccTorus::ccTorus(QString name/*=QString("Torus")*/)
 	: ccGenericPrimitive(name)
 	, m_insideRadius(0)
 	, m_outsideRadius(0)
-	, m_angle_rad(0)
 	, m_rectSection(false)
 	, m_rectSectionHeight(0)
+   , m_angle_rad(0)
 {
 }
 

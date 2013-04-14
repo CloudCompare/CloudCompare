@@ -87,24 +87,24 @@ static int s_GlWindowNumber = 0;
 ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shareWidget /*=0*/)
 	: QGLWidget(format,parent,shareWidget)
 	, m_uniqueID(++s_GlWindowNumber) //GL window unique ID
+	, m_initialized(false)
 	, m_trihedronGLList(GL_INVALID_LIST_ID)
 	, m_pivotGLList(GL_INVALID_LIST_ID)
-	, m_initialized(false)
 	, m_lastMousePos(-1,-1)
 	, m_lastMouseOrientation(1,0,0)
 	, m_currentMouseOrientation(1,0,0)
+	, m_validModelviewMatrix(false)
+	, m_validProjectionMatrix(false)
 	, m_glWidth(0)
 	, m_glHeight(0)
-	, m_captureMode(false)
 	, m_lodActivated(false)
 	, m_shouldBeRefreshed(false)
 	, m_cursorMoved(false)
 	, m_unclosable(false)
 	, m_interactionMode(TRANSFORM_CAMERA)
 	, m_pickingMode(NO_PICKING)
+	, m_captureMode(false)
 	, m_captureModeZoomFactor(1.0f)
-	, m_validProjectionMatrix(false)
-	, m_validModelviewMatrix(false)
 	, m_lastClickTime_ticks(0)
 	, m_sunLightEnabled(true)
 	, m_customLightEnabled(false)
@@ -1616,6 +1616,10 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	case POINT_PICKING:
 		setCursor(QCursor(Qt::PointingHandCursor));
 		break;
+	case ENTITY_RECT_PICKING:
+	case LABELS_PICKING:
+	case AUTO_POINT_PICKING:
+	   break;
 	}
 
 	m_pickingMode = mode;

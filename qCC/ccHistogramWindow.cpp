@@ -453,7 +453,7 @@ void ccHistogramWindow::paintGL()
 		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
 		glColor3f((float)textCol[0]/255.0f,(float)textCol[1]/255.0f,(float)textCol[2]/255.0f);
 
-		const unsigned n=4;
+      const int n=4;
 		for (int i=0;i<=n;++i)
 		{
 			int y = m_roi[1] + (dy*i)/n;

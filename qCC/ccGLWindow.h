@@ -532,9 +532,6 @@ protected:
 	//! Viewport parameters (zoom, etc.)
 	ccViewportParameters m_params;
 
-    //! Default font size
-    int m_defaultFontPixelSize;
-
     //! Last mouse position
     QPoint m_lastMousePos;
     //! Last mouse orientation

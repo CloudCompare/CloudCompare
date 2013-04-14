@@ -504,8 +504,7 @@ ccImage* ccCalibratedImage::orthoRectifyAsImage(CCLib::GenericIndexedCloud* keyp
 	if (orthoImage.isNull()) //not enough memory!
 		return 0;
 
-	QColor color;
-	int blackValue = color.black();
+   const QRgb blackValue = QColor( Qt::black ).rgb();
 
 	for (unsigned i=0;i<w;++i)
 	{

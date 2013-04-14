@@ -54,12 +54,12 @@ ccComparisonDlg::ccComparisonDlg(ccHObject* compEntity, ccHObject* refEntity, CC
 	, Ui::ComparisonDialog()
 	, compEnt(compEntity)
 	, refEnt(refEntity)
-	, compType(cpType)
-	, compCloud(0)
 	, compOctree(0)
+	, refOctree(0)
+	, compCloud(0)
 	, refCloud(0)
 	, refMesh(0)
-	, refOctree(0)
+	, compType(cpType)
 	, sfCanBeUsedToEstimateBestOctreeLevel(false)
 {
 

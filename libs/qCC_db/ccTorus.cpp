@@ -30,11 +30,11 @@ ccTorus::ccTorus(PointCoordinateType insideRadius,
 				 QString name/*=QString("Torus")*/,
 				 unsigned precision/*=24*/)
 	: ccGenericPrimitive(name,transMat)
-	, m_insideRadius(abs(insideRadius))
-	, m_outsideRadius(abs(outsideRadius))
+	, m_insideRadius(fabs(insideRadius))
+	, m_outsideRadius(fabs(outsideRadius))
 	, m_rectSection(rectangularSection)
-	, m_rectSectionHeight(abs(rectSectionHeight))
-	, m_angle_rad(abs(angle_rad))
+	, m_rectSectionHeight(fabs(rectSectionHeight))
+	, m_angle_rad(fabs(angle_rad))
 {
 	setDrawingPrecision(std::max<unsigned>(precision,4)); //automatically calls buildUp + 	applyTransformationToVertices
 }

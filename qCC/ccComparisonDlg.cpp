@@ -746,9 +746,9 @@ void ccComparisonDlg::compute()
 					const CCVector3* Q = compCloud->getPoint(i);
 					CCVector3 D = *Q-*P;
 
-					sfDims[0]->setValue(i,split3DSigned ? D.x : abs(D.x));
-					sfDims[1]->setValue(i,split3DSigned ? D.y : abs(D.y));
-					sfDims[2]->setValue(i,split3DSigned ? D.z : abs(D.z));
+					sfDims[0]->setValue(i,split3DSigned ? D.x : fabs(D.x));
+					sfDims[1]->setValue(i,split3DSigned ? D.y : fabs(D.y));
+					sfDims[2]->setValue(i,split3DSigned ? D.z : fabs(D.z));
 				}
 
 				for (i=0;i<3;++i)

@@ -26,8 +26,7 @@
 #include "CCTypes.h"
 
 //system
-#include <math.h> //for sqrt
-#include <stdlib.h> //for abs
+#include <math.h> //for sqrt, fabs
 
 //! 3D Vector (templated version)
 template <class Type> class Vector3Tpl
@@ -122,11 +121,11 @@ public:
 
 	static inline void vorthogonal(const Type p[], Type q[])
 	{
-		if (abs(p[0]) <= abs(p[1]) && abs(p[0]) <= abs(p[2]))
+		if (fabs(p[0]) <= fabs(p[1]) && fabs(p[0]) <= fabs(p[2]))
 		{
 			q[0]=0; q[1]=p[2]; q[2]=-p[1];
 		}
-		else if (abs(p[1]) <= abs(p[0]) && abs(p[1]) <= abs(p[2]))
+		else if (fabs(p[1]) <= fabs(p[0]) && fabs(p[1]) <= fabs(p[2]))
 		{
 			q[0]=-p[2]; q[1]=0; q[2]=p[0];
 		}

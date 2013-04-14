@@ -88,7 +88,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 	//test base view matrix
 	for (unsigned i=0;i<12;++i)
-		if (abs(params.viewMat.data()[i] - m_params.viewMat.data()[i]) > ZERO_TOLERANCE)
+		if (fabs(params.viewMat.data()[i] - m_params.viewMat.data()[i]) > ZERO_TOLERANCE)
 			return;
 
 	if (m_params.perspectiveView)

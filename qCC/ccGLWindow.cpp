@@ -2003,8 +2003,8 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 
 				int pickX = (int)(A->x+C->x)/2;
 				int pickY = (int)(A->y+C->y)/2;
-				int pickW = (int)abs(C->x-A->x);
-				int pickH = (int)abs(C->y-A->y);
+				int pickW = (int)fabs(C->x-A->x);
+				int pickH = (int)fabs(C->y-A->y);
 
 				removeFromOwnDB(m_rectPickingPoly);
 				m_rectPickingPoly=0;

@@ -36,8 +36,12 @@
    v2.6 - 04/03/2013 - strictly positive scalar field removed and 'hidden' values marker is now NaN
    v2.7 - 04/12/2013 - Customizable color scales
 **/
-const unsigned s_currentDBVersion = 27; //2.7
+const unsigned c_currentDBVersion = 27; //2.7
 
+unsigned ccObject::GetCurrentDBVersion()
+{
+	return c_currentDBVersion;
+}
 
 void ccObject::ResetUniqueIDCounter()
 {

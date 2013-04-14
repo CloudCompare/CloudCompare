@@ -721,7 +721,7 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 	{
 		unsigned dominantDim = 0;
 		for (unsigned i=1; i<6; ++i)
-			if (abs(vec[i]) > abs(vec[dominantDim]))
+			if (fabs(vec[i]) > fabs(vec[dominantDim]))
 				dominantDim = i;
 		for (unsigned i=0; i<6; ++i)
 			if (i != dominantDim)
@@ -730,14 +730,14 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 	if (panZoom)
 	{
 		//Zoom: object moves closer/away (only for ortho. mode)
-		if (!perspectiveView && abs(vec[1])>ZERO_TOLERANCE)
+		if (!perspectiveView && fabs(vec[1])>ZERO_TOLERANCE)
 		{
 			win->updateZoom(1.0f + vec[1]);
 			vec[1] = 0.0f;
 		}
 		
 		//Zoom & Panning: camera moves right/left + up/down + backward/forward (only for perspective mode)
-		if (abs(vec[0])>ZERO_TOLERANCE || abs(vec[1])>ZERO_TOLERANCE || abs(vec[2])>ZERO_TOLERANCE)
+		if (fabs(vec[0])>ZERO_TOLERANCE || fabs(vec[1])>ZERO_TOLERANCE || fabs(vec[2])>ZERO_TOLERANCE)
 		{
 			const ccViewportParameters& viewParams = win->getViewportParameters();
 
@@ -762,9 +762,9 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 
 	if (rotate)
 	{
-		if (abs(vec[3])>ZERO_TOLERANCE
-			|| abs(vec[4])>ZERO_TOLERANCE
-			|| abs(vec[5])>ZERO_TOLERANCE)
+		if (fabs(vec[3])>ZERO_TOLERANCE
+			|| fabs(vec[4])>ZERO_TOLERANCE
+			|| fabs(vec[5])>ZERO_TOLERANCE)
 		{
 			//get corresponding quaternion
 			float q[4];
@@ -1682,7 +1682,7 @@ void MainWindow::doActionComputeScatteringAngles()
 
 		//compute the angle
 		float cosTheta = ray.dot(normal);
-		// 	float theta = acos(abs(cosTheta)); //USING abs in this way make cosTheta to be casted to int!
+		// 	float theta = acos(fabs(cosTheta)); //USING abs in this way make cosTheta to be casted to int!
 		//one may include cmath and use std::abs for performing abs on floats
 		//here we use a simpler solution -> check sign
 

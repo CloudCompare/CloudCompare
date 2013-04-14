@@ -1172,7 +1172,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	const PointCoordinateType& dMin = bbMin[heightDim];
 	PointCoordinateType height = bbMax[heightDim]-dMin;
     
-	if (abs(height) < ZERO_TOLERANCE) //flat cloud!
+	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
 	{
 		return setRGBColor(colorScale->getColorByIndex(0));
 	}
@@ -1592,7 +1592,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						colorRampShader->start();
 						if (m_currentDisplayedScalarField->absoluteSaturation())
 						{
-							ScalarType maxAbsSat = std::max(abs(sfMinSat),abs(sfMaxSat));
+							ScalarType maxAbsSat = std::max(fabs(sfMinSat),fabs(sfMaxSat));
 							sfMinSat = -maxAbsSat;
 							sfMaxSat =  maxAbsSat;
 						}

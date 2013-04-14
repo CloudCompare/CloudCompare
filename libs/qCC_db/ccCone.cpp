@@ -30,11 +30,11 @@ ccCone::ccCone(PointCoordinateType bottomRadius,
 				QString name/*="Cylinder"*/,
 				unsigned precision/*=24*/)
 	: ccGenericPrimitive(name,transMat)
-	, m_bottomRadius(abs(bottomRadius))
-	, m_topRadius(abs(topRadius))
+	, m_bottomRadius(fabs(bottomRadius))
+	, m_topRadius(fabs(topRadius))
 	, m_xOff(xOff)
 	, m_yOff(yOff)
-	, m_height(abs(height))
+	, m_height(fabs(height))
 {
 	setDrawingPrecision(std::max<unsigned>(precision,4)); //automatically calls buildUp & applyTransformationToVertices
 }

@@ -99,9 +99,6 @@ enum CC_CLASS_ENUM {
 	CC_CLIPPING_BOX			=	CC_CLIP_BOX_BIT | CC_LEAF_BIT,
 };
 
-//! Current database version
-extern const unsigned s_currentDBVersion;
-
 //! Generic "CloudCompare Object" template
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"
@@ -116,6 +113,9 @@ public:
     /** \param name object name (optional)
     **/
     ccObject(QString name = QString());
+
+	//! Returns current database version
+	static unsigned GetCurrentDBVersion();
 
     //! Returns class ID
     virtual CC_CLASS_ENUM getClassID() const = 0;

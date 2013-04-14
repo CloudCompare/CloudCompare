@@ -74,7 +74,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 		return CC_FERR_WRITING;
 
 	// Current BIN file version
-	uint32_t binVersion = (uint32_t)s_currentDBVersion;
+	uint32_t binVersion = (uint32_t)ccObject::GetCurrentDBVersion();
 	if (out.write((char*)&binVersion,4)<0)
 		return CC_FERR_WRITING;
 

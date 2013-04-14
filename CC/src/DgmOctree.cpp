@@ -3577,7 +3577,6 @@ void DgmOctree::getNNPointsAmong(NeighboursSet &thePoints, CCVector3* queryPoint
         ScalarType qd = (thePoints[numberOfNeighbours-1].point - *queryPoint).norm();
 
         int j,k=numberOfNeighbours;
-        CCVector3 Pdiff;
 
         //on s'occupe d'abord des anciens k voisins (on calcule juste leur distance)
         p=thePoints.begin();
@@ -3591,7 +3590,7 @@ void DgmOctree::getNNPointsAmong(NeighboursSet &thePoints, CCVector3* queryPoint
         while(p!=thePoints.end())
         {
             //on calcule la difference entre les points du voisinage et le nouveau point requete
-            Pdiff = p->point - *queryPoint;
+            CCVector3 Pdiff = p->point - *queryPoint;
             //s'ils tombent dans la BBbox de demi largeur qd et centree sur le nouveau point requete
             if ((fabs(Pdiff.x)<=qd) && (fabs(Pdiff.y)<=qd) && (fabs(Pdiff.z)<=qd))
             {

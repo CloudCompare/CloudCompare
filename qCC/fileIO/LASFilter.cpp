@@ -347,7 +347,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
                   if (intensitySF)
                   {
                      intensitySF->computeMinAndMax();
-                     intensitySF->setColorScale(GREY);
+                     intensitySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
                      int sfIndex = loadedCloud->addScalarField(intensitySF);
                      if (!loadedCloud->hasDisplayedScalarField())
                      {

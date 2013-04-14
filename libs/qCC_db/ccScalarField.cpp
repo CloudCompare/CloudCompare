@@ -108,15 +108,18 @@ void ccScalarField::computeMinAndMax()
 
 	if (m_absSaturation)
 	{
-		m_minSaturation = (m_minVal < 0 ? std::min(fabs(m_minDisplayed),fabs(m_maxDisplayed)) : 0);
-		m_maxSaturation = std::max(fabs(m_minDisplayed),fabs(m_maxDisplayed));
+		if (m_maxDisplayed < 0)
+			m_minSaturation = -m_maxDisplayed;
+		else
+			m_minSaturation = std::max<ScalarType>(m_minDisplayed,0);
+		m_maxSaturation = std::max<ScalarType>(fabs(m_minDisplayed),fabs(m_maxDisplayed));
 	}
 	else
 	{
+		assert(m_minVal >= 0 || !m_logScale);
+
 		m_minSaturation = m_minDisplayed;
 		m_maxSaturation = m_maxDisplayed;
-
-		assert(m_minVal >= 0 || !m_logScale);
 	}
 
 	if (m_logScale || m_minVal >= 0)

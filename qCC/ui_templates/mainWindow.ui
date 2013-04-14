@@ -149,6 +149,8 @@
      <addaction name="actionAddConstantSF"/>
      <addaction name="actionScalarFieldArithmetic"/>
      <addaction name="separator"/>
+     <addaction name="actionOpenColorScalesManager"/>
+     <addaction name="separator"/>
      <addaction name="actionDeleteScalarField"/>
      <addaction name="actionDeleteAllSF"/>
      <addaction name="separator"/>
@@ -355,8 +357,8 @@
   <widget class="QDockWidget" name="DockableDBTree">
    <property name="minimumSize">
     <size>
-     <width>100</width>
-     <height>100</height>
+     <width>109</width>
+     <height>147</height>
     </size>
    </property>
    <property name="floating">
@@ -606,7 +608,7 @@
    <property name="minimumSize">
     <size>
      <width>100</width>
-     <height>100</height>
+     <height>111</height>
     </size>
    </property>
    <property name="floating">
@@ -2260,6 +2262,24 @@
    </property>
    <property name="text">
     <string>Convert texture/material to RGB</string>
+   </property>
+  </action>
+  <action name="actionOpenColorScalesManager">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/typeSF.png</normaloff>:/CC/images/typeSF.png</iconset>
+   </property>
+   <property name="text">
+    <string>Color Scales Manager</string>
+   </property>
+   <property name="toolTip">
+    <string>Open Color Scales Manager dialog</string>
+   </property>
+   <property name="shortcut">
+    <string>M</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
  </widget>

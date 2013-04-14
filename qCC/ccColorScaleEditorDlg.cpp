@@ -48,8 +48,6 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScale::Shared currentS
 	colorScaleEditorFrame->layout()->setContentsMargins(0,0,0,0);
 	colorScaleEditorFrame->layout()->addWidget(m_scaleWidget);
 
-	valueDoubleSpinBox->setRange(-DBL_MAX,DBL_MAX);
-
 	//main combo box
 	connect(rampComboBox, SIGNAL(activated(int)), this, SLOT(colorScaleChanged(int)));
 
@@ -199,6 +197,10 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 	bool isRelative = !m_colorScale || m_colorScale->isRelative();
 	scaleModeComboBox->setCurrentIndex(isRelative ? 0 : 1);
 	valueDoubleSpinBox->setSuffix(isRelative ? QString(" %") : QString());
+	if (isRelative)
+		valueDoubleSpinBox->setRange(0.0,100.0); //between 0 and 100%
+	else
+		valueDoubleSpinBox->setRange(-DBL_MAX,DBL_MAX);
 
 	m_scaleWidget->importColorScale(m_colorScale);
 

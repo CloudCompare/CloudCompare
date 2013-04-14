@@ -23,7 +23,7 @@
 #include "ccGuiParameters.h"
 #include "ccConsole.h"
 #include "ccRenderingTools.h"
- 
+
 //qCC_db
 #include <ccHObject.h>
 #include <ccBBox.h>
@@ -295,34 +295,49 @@ void ccGLWindow::initializeGL()
 		{
 			const char* vendorName = (const char*)glGetString(GL_VENDOR);
 			ccConsole::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
-			if (!vendorName || QString(vendorName).toUpper().startsWith("ATI"))
+
+			//we will update global parameters
+			ccGui::ParamStruct params = ccGui::Parameters();
+
+			GLint maxBytes=0;
+			glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
+			GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
+			//
+			if (maxComponents<glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE)
 			{
-				ccConsole::Warning("[3D View %i] Color ramp shader not yet supported by %s cards!",m_uniqueID,vendorName);
+				ccConsole::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader!",m_uniqueID);
+				params.colorScaleShaderSupported = false;
 			}
 			else
 			{
-				GLint maxBytes=0;
-				glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
-				GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
-				if (maxComponents<glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE)
+				ccShader* colorRampShader = new ccShader();
+				QString shadersPath = ccGLWindow::getShadersPath();
+				if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag"))))
 				{
-					ccConsole::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader!",m_uniqueID);
+					ccConsole::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
+					params.colorScaleShaderSupported = false;
 				}
 				else
 				{
-					ccShader* colorRampShader = new ccShader();
-					QString shadersPath = ccGLWindow::getShadersPath();
-					if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag"))))
+					ccConsole::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
+					m_colorRampShader = colorRampShader;
+					params.colorScaleShaderSupported = true;
+
+					//if global parameter is not yet defined
+					if (!ccGui::Parameters().isInPersistentSettings("colorScaleUseShader"))
 					{
-						ccConsole::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
-					}
-					else
-					{
-						ccConsole::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
-						m_colorRampShader = colorRampShader;
+						bool shouldUseShader = true;
+						if (!vendorName || QString(vendorName).toUpper().startsWith("ATI"))
+						{
+							ccConsole::Warning("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
+							shouldUseShader = false;
+						}
+						params.colorScaleUseShader = shouldUseShader;
 					}
 				}
 			}
+
+			ccGui::Set(params);
 		}
 	}
 
@@ -788,7 +803,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 		m_activeShader->start();
 	
 	//color ramp shader for fast dynamic color ramp lookup-up
-	if (m_colorRampShader)
+	if (m_colorRampShader && ccGui::Parameters().colorScaleUseShader)
 		context.colorRampShader = m_colorRampShader;
 
 	//we draw 3D entities

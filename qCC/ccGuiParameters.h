@@ -18,6 +18,9 @@
 #ifndef GUI_PARAMETERS_HEADER
 #define GUI_PARAMETERS_HEADER
 
+//Qt
+#include <QString>
+
 /***************************************************
 				GUI parameters
 ***************************************************/
@@ -77,6 +80,10 @@ public:
 		/** This only applies to signed scalar fields.
 		**/
 		bool colorScaleAlwaysSymmetrical;
+		//! Whether to use shader for color scale display (if available) or not
+		bool colorScaleUseShader;
+		//! Whether shader for color scale display is available or not
+		bool colorScaleShaderSupported;
 		//! Color scale square size
 		unsigned colorScaleSquareSize;
 		
@@ -100,7 +107,12 @@ public:
         void fromPersistentSettings();
 
         //! Saves to persistent DB
-        void toPersistentSettings();
+        void toPersistentSettings() const;
+
+		//! Returns whether a given parameter is already defined in persistent settings or not
+		/** \param paramName the corresponding attribute name
+		**/
+		bool isInPersistentSettings(QString paramName) const;
     };
 
 	//! Returns the stored values of each parameter.

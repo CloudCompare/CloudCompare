@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>423</width>
+    <width>422</width>
     <height>420</height>
    </rect>
   </property>
@@ -27,7 +27,7 @@
    <item>
     <widget class="QToolBox" name="toolBox">
      <property name="currentIndex">
-      <number>3</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="pageColorAndMatOptions">
       <property name="geometry">
@@ -35,7 +35,7 @@
         <x>0</x>
         <y>0</y>
         <width>405</width>
-        <height>263</height>
+        <height>246</height>
        </rect>
       </property>
       <attribute name="label">
@@ -347,7 +347,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>405</width>
+        <width>404</width>
         <height>263</height>
        </rect>
       </property>
@@ -375,6 +375,13 @@
          </property>
          <property name="checked">
           <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="useColorScaleShaderCheckBox">
+         <property name="text">
+          <string>Enable shader for faster display (ATI cards: use at your own risk ;)</string>
          </property>
         </widget>
        </item>
@@ -438,7 +445,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>405</width>
+        <width>404</width>
         <height>263</height>
        </rect>
       </property>
@@ -555,7 +562,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>405</width>
+        <width>404</width>
         <height>263</height>
        </rect>
       </property>

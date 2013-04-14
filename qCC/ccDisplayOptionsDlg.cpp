@@ -50,6 +50,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 
 	connect(colorScaleAlwaysShowZeroCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleAlwaysZero()));
 	connect(colorScaleAlwaysSymmetricalCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleAlwaysSym()));
+	connect(useColorScaleShaderCheckBox, SIGNAL(clicked()), this, SLOT(changeUseColorScaleShader()));
 	connect(colorScaleSquareSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeColorScaleSquareSize(int)));
 
 	connect(defaultFontSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeDefaultFontSize(int)));
@@ -126,6 +127,8 @@ void ccDisplayOptionsDlg::refresh()
 
 	colorScaleAlwaysShowZeroCheckBox->setChecked(parameters.colorScaleAlwaysShowZero);
 	colorScaleAlwaysSymmetricalCheckBox->setChecked(parameters.colorScaleAlwaysSymmetrical);
+	useColorScaleShaderCheckBox->setChecked(parameters.colorScaleUseShader);
+	useColorScaleShaderCheckBox->setEnabled(parameters.colorScaleShaderSupported);
 	colorScaleSquareSizeSpinBox->setValue(parameters.colorScaleSquareSize);
 
 	defaultFontSizeSpinBox->setValue(parameters.defaultFontSize);
@@ -360,6 +363,11 @@ void ccDisplayOptionsDlg::changeColorScaleAlwaysZero()
 void ccDisplayOptionsDlg::changeColorScaleAlwaysSym()
 {
 	parameters.colorScaleAlwaysSymmetrical = colorScaleAlwaysSymmetricalCheckBox->isChecked();
+}
+
+void ccDisplayOptionsDlg::changeUseColorScaleShader()
+{
+	parameters.colorScaleUseShader = useColorScaleShaderCheckBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeColorScaleSquareSize(int val)

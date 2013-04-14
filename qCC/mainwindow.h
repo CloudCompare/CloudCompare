@@ -256,6 +256,7 @@ protected slots:
     void doActionSFBilateralFilter();
     void doActionSFConvertToRGB();
 	void doActionRenameSF();
+	void doActionOpenColorScalesManager();
 
 	void doComputeDensity();
     void doComputeCurvature();

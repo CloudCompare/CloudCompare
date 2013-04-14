@@ -87,6 +87,8 @@ void ccGui::ParamStruct::reset()
 
 	colorScaleAlwaysSymmetrical	= true;
 	colorScaleAlwaysShowZero	= true;
+	colorScaleUseShader			= false;
+	colorScaleShaderSupported	= false;
 	colorScaleSquareSize		= 20;
 	
 	defaultFontSize				= 10;
@@ -116,6 +118,8 @@ ccGui::ParamStruct& ccGui::ParamStruct::operator =(const ccGui::ParamStruct& par
 	pickedPointsSize			= params.pickedPointsSize;
 	colorScaleAlwaysSymmetrical	= params.colorScaleAlwaysSymmetrical;
 	colorScaleAlwaysShowZero	= params.colorScaleAlwaysShowZero;
+	colorScaleUseShader			= params.colorScaleUseShader;
+	colorScaleShaderSupported	= params.colorScaleShaderSupported;
 	colorScaleSquareSize		= params.colorScaleSquareSize;
 	defaultFontSize				= params.defaultFontSize;
 	displayedNumPrecision		= params.displayedNumPrecision;
@@ -152,6 +156,8 @@ void ccGui::ParamStruct::fromPersistentSettings()
 
     colorScaleAlwaysSymmetrical	= settings.value("colorScaleAlwaysSymmetrical", true).toBool();
     colorScaleAlwaysShowZero	= settings.value("colorScaleAlwaysShowZero", true).toBool();
+	colorScaleUseShader			= settings.value("colorScaleUseShader", false).toBool();
+	//colorScaleShaderSupported	= not saved
 	colorScaleSquareSize		= (unsigned)settings.value("colorScaleSquareSize", 20).toInt();
 	
 	defaultFontSize				= (unsigned)settings.value("defaultFontSize", 10).toInt();
@@ -161,7 +167,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
     settings.endGroup();
 }
 
-void ccGui::ParamStruct::toPersistentSettings()
+void ccGui::ParamStruct::toPersistentSettings() const
 {
     QSettings settings;
     settings.beginGroup("OpenGL");
@@ -185,11 +191,19 @@ void ccGui::ParamStruct::toPersistentSettings()
 	settings.setValue("pickedPointsSize", pickedPointsSize);
 	settings.setValue("colorScaleAlwaysSymmetrical", colorScaleAlwaysSymmetrical);
     settings.setValue("colorScaleAlwaysShowZero", colorScaleAlwaysShowZero);
+    settings.setValue("colorScaleUseShader", colorScaleUseShader);
+    //settings.setValue("colorScaleShaderSupported", not saved);
 	settings.setValue("colorScaleSquareSize", colorScaleSquareSize);
 	settings.setValue("defaultFontSize", defaultFontSize);
 	settings.setValue("displayedNumPrecision", displayedNumPrecision);
 	settings.setValue("labelsTransparency", labelsTransparency);
 
-
     settings.endGroup();
+}
+
+bool ccGui::ParamStruct::isInPersistentSettings(QString paramName) const
+{
+    QSettings settings;
+    settings.beginGroup("OpenGL");
+	return settings.contains(paramName);
 }

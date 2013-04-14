@@ -68,6 +68,7 @@ protected slots:
     void changeCrossDisplayed();
 	void changeColorScaleAlwaysZero();
 	void changeColorScaleAlwaysSym();
+	void changeUseColorScaleShader();
 	void changeColorScaleSquareSize(int);
 	
 	void changeDefaultFontSize(int);

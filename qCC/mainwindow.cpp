@@ -109,6 +109,7 @@
 #include "ccExportCoordToSFDlg.h"
 #include "ccPrimitiveFactoryDlg.h"
 #include "ccMouse3DContextMenu.h"
+#include "ccColorScaleEditorDlg.h"
 #include <ui_aboutDlg.h>
 
 //3D mouse handler
@@ -855,6 +856,7 @@ void MainWindow::connectActions()
     connect(actionScalarFieldArithmetic,        SIGNAL(triggered()),    this,       SLOT(doActionScalarFieldArithmetic()));
     connect(actionConvertToRGB,                 SIGNAL(triggered()),    this,       SLOT(doActionSFConvertToRGB()));
 	connect(actionRenameSF,						SIGNAL(triggered()),    this,       SLOT(doActionRenameSF()));
+	connect(actionOpenColorScalesManager,		SIGNAL(triggered()),    this,       SLOT(doActionOpenColorScalesManager()));
     connect(actionDeleteScalarField,            SIGNAL(triggered()),    this,       SLOT(doActionDeleteScalarField()));
     connect(actionDeleteAllSF,                  SIGNAL(triggered()),    this,       SLOT(doActionDeleteAllSF()));
     //"Edit > Bounding-box" menu
@@ -2387,6 +2389,15 @@ void MainWindow::doActionRenameSF()
     }
 
 	updateUI();
+}
+
+void MainWindow::doActionOpenColorScalesManager()
+{
+	ccColorScaleEditorDialog cseDlg(ccColorScale::Shared(0), this);
+	cseDlg.exec();
+
+	updateUI();
+
 }
 
 PointCoordinateType MainWindow::GetDefaultCloudKernelSize(const ccHObject::Container& entities)

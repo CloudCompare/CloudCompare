@@ -574,11 +574,6 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
         item = new QStandardItem();
         item->setFlags(Qt::ItemIsEnabled);
         item->setData(OBJECT_CLOUD_SF_EDITOR);
-        //QSize sz = item->sizeHint();
-        //DGM: with last QT versions, vertical size of item is ignored!
-        //--> new widgets are displayed on top of this one ... so we must
-        //setup its size manually
-        //item->setSizeHint(QSize(240,116));
         m_model->setItem(curRow,0,item);
         m_view->openPersistentEditor(m_model->index(curRow,0));
     }
@@ -1562,15 +1557,8 @@ void ccPropertiesTreeDelegate::updateDisplay()
 
 void ccPropertiesTreeDelegate::updateModel()
 {
-	//save current scroll position
-	//int scrollPos = (m_view && m_view->verticalScrollBar() ? m_view->verticalScrollBar()->value() : 0);
-
-	//re-fill model
+	//simply re-fill model!
 	fillModel(m_currentObject);
-	
-	//go back to original position
-	//if (scrollPos>0)
-	//	m_view->verticalScrollBar()->setSliderPosition(scrollPos);
 }
 
 void ccPropertiesTreeDelegate::scalarFieldChanged(int pos)

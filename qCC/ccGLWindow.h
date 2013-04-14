@@ -319,6 +319,9 @@ public:
 	//! Returns the zoom value equivalent to the current camera position (perspective only)
 	float computePerspectiveZoom() const;
 
+	//! Returns whether the ColorRamp shader is supported or not
+	bool hasColorRampShader() const { return m_colorRampShader != 0; }
+
 public slots:
     void zoomGlobal();
     void testFrameRate();

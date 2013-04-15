@@ -163,15 +163,15 @@ void ccSSAOFilter::sampleSphere()
     rk_sobol_randomshift(&s, NULL);
 
     //	draw in sphere
-    int	n_in_sphere = 0;
+    unsigned int	n_in_sphere = 0;
     float* _ssao_neighbours = ssao_neighbours;
-    double px,py,pz;
+
     while (n_in_sphere<SSAO_MAX_N)
     {
         rk_sobol_double(&s, x);
-        px = x[0]*2.0-1.0;
-        py = x[1]*2.0-1.0;
-        pz = x[2]*2.0-1.0;
+        double px = x[0]*2.0-1.0;
+        double py = x[1]*2.0-1.0;
+        double pz = x[2]*2.0-1.0;
         if ( px*px+py*py+pz*pz < 1.0 )
         {
             *_ssao_neighbours++ =	(float)px;

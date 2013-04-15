@@ -137,7 +137,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 			uniqueColor[0] = (colorType)(material->diffuseFront[0]*MAX_COLOR_COMP);
 			uniqueColor[1] = (colorType)(material->diffuseFront[1]*MAX_COLOR_COMP);
 			uniqueColor[2] = (colorType)(material->diffuseFront[2]*MAX_COLOR_COMP);
-			hasUniqueColor = hasUniqueColor = true;
+         hasUniqueColor = true;
 			material = 0; //we can forget it!
 		}
 	}

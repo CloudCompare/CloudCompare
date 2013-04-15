@@ -149,6 +149,9 @@ void DisplayLockedVerticesWarning()
 MainWindow::MainWindow()
 	: m_ccRoot(0)
 	, m_uiFrozen(false)
+	, m_3dMouseInput(0)
+	, m_viewModePopupButton(0)
+	, m_pivotVisibilityPopupButton(0)
     , m_cpeDlg(0)
     , m_gsTool(0)
     , m_transTool(0)
@@ -158,9 +161,6 @@ MainWindow::MainWindow()
 	, m_pprDlg(0)
 	, m_pfDlg(0)
 	, m_glFilterActions(this)
-	, m_3dMouseInput(0)
-	, m_viewModePopupButton(0)
-	, m_pivotVisibilityPopupButton(0)
 {
     //Dialog "auto-construction"
     setupUi(this);
@@ -5975,7 +5975,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 
     //curvature parameters
 	double curvKernelSize = -1.0;
-	CCLib::Neighbourhood::CC_CURVATURE_TYPE curvType;
+	CCLib::Neighbourhood::CC_CURVATURE_TYPE curvType = CCLib::Neighbourhood::GAUSSIAN_CURV;
 
     //computeScalarFieldGradient parameters
     bool euclidian=false;

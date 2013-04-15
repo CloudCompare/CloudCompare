@@ -729,7 +729,9 @@ void ccNormalVectors::ConvertHSVToRGB(double H, double S, double V, colorType& R
 	double m = V*(1-f*S);
 	double n = V*(1-(1-f)*S);
 
-	double r,g,b;
+	double r = 0.0;
+	double g = 0.0;
+	double b = 0.0;
 
 	switch(hi)
 	{

@@ -33,7 +33,7 @@ class ColorScaleElementSlider : public QWidget, public ccColorScaleElement
 public:
 
     //! Default constructor
-    ColorScaleElementSlider(double value = 0.0, QColor color = Qt::black, QWidget* parent = 0, Qt::Orientation orientation = Qt::Horizontal);
+    ColorScaleElementSlider(double relativePos = 0.0, QColor color = Qt::black, QWidget* parent = 0, Qt::Orientation orientation = Qt::Horizontal);
 
 	//! Sets selection state
 	void setSelected(bool state) { m_selected = state; }
@@ -44,7 +44,7 @@ public:
 	//! Comparison operator between two (pointers on) color scale elements
     static bool IsSmaller(const ColorScaleElementSlider* e1, const ColorScaleElementSlider* e2)
 	{
-		return e1->getValue() < e2->getValue();
+		return e1->getRelativePos() < e2->getRelativePos();
 	}
 
 protected:
@@ -109,6 +109,9 @@ public:
 	//! Returns useful length
 	int length() const { return (m_orientation == Qt::Horizontal ? contentsRect().width() : contentsRect().height())-2*m_margin; }
 
+	//! Sets associated sliders set
+	virtual void setSliders(SharedColorScaleElementSliders sliders) { m_sliders = sliders; update(); }
+
 	//! Returns orientation
 	Qt::Orientation getOrientation() const { return m_orientation; }
 	//! Returns margin
@@ -161,12 +164,14 @@ public:
     SlidersWidget(SharedColorScaleElementSliders sliders, QWidget* parent = 0, Qt::Orientation orientation = Qt::Horizontal);
 
 	//! Manually selects a slider
-	void select(int index);
+	void select(int index, bool silent=false);
 
 	//! Adds a new slider widget
-	/** \return created slider (pointer on)
+	/** \param relativePos slider position (relatively to scale boundaries [0.0,1.0])
+		\param color slider color
+		\return created slider (pointer on)
 	**/
-	ColorScaleElementSlider* addNewSlider(double relativePos, double value, QColor color);
+	ColorScaleElementSlider* addNewSlider(double relativePos, QColor color);
 
 	//! Updates slider position
 	void updateSliderPos(int index);
@@ -236,16 +241,19 @@ public:
 	inline int getStepCount() const { return (m_sliders ? m_sliders->size() : 0); }
 
 	//! Returns a given slider (pointer on)
-	const ColorScaleElementSlider* getStep(int index) { return m_sliders ? m_sliders->at(index) : 0; }
+	inline const ColorScaleElementSlider* getStep(int index) { return m_sliders ? m_sliders->at(index) : 0; }
 
 	//! Sets a given slider color
 	void setStepColor(int index, QColor color);
 
-	//! Sets a given slider value
-	void setStepValue(int index, double value);
+	//! Sets a given slider relative position
+	void setStepRelativePosition(int index, double relativePos);
 
 	//! Returns currently selected step index
-	int getSelectedStepIndex() const { return m_sliders ? m_sliders->selected() : 0; }
+	inline int getSelectedStepIndex() const { return m_sliders ? m_sliders->selected() : -1; }
+
+	//! Sets currently selected step index
+	void setSelectedStepIndex(int index, bool silent=false);
 
 	//! Deletes a given step
 	/** Warning: first and last steps shouldn't be deleted!
@@ -266,6 +274,9 @@ public:
 
 	//! Sets the labels precision
 	void setLabelPrecision(int precision);
+
+	//inherited from ColorScaleEditorBaseWidget
+	virtual void setSliders(SharedColorScaleElementSliders sliders);
 
 signals:
 

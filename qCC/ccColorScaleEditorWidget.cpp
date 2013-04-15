@@ -37,9 +37,9 @@ static const int DEFAULT_TEXT_MARGIN = 2;
 /*** ColorScaleElementSlider ***/
 /*******************************/
 
-ColorScaleElementSlider::ColorScaleElementSlider(double value/*=0.0*/, QColor color/*=Qt::black*/, QWidget* parent/*=0*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
+ColorScaleElementSlider::ColorScaleElementSlider(double relativePos/*=0.0*/, QColor color/*=Qt::black*/, QWidget* parent/*=0*/, Qt::Orientation orientation/*=Qt::Horizontal*/)
 	: QWidget(parent)
-	, ccColorScaleElement(value,color)
+	, ccColorScaleElement(relativePos,color)
 	, m_selected(false)
 	, m_orientation(orientation)
 {
@@ -192,26 +192,21 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 		else
 			contentRect.adjust(0,m_margin,-1,-m_margin);
 
-		double minVal = m_sliders->front()->getValue();
-		double maxVal = m_sliders->back()->getValue();
-		double range  = maxVal-minVal;
-		if (range == 0.0)
-			range = 1.0;
+		assert(m_sliders->front()->getRelativePos() == 0.0 && m_sliders->back()->getRelativePos() == 1.0);
 
 		//color gradient
 		{
 			QLinearGradient gradient;
 			if (m_orientation == Qt::Horizontal)
-				gradient = QLinearGradient(0, 0, contentRect.width(), 0);
+				gradient = QLinearGradient(contentRect.left(), 0, contentRect.right(), 0);
 			else
-				gradient = QLinearGradient(0, 0, 0, contentRect.height());
+				gradient = QLinearGradient(0, contentRect.bottom(), 0, contentRect.top());
 
 			//fill gradient with sliders
 			{
 				for (int i=0; i<m_sliders->size(); i++)
 				{
-					double relativePos = (m_sliders->at(i)->getValue()-minVal)/range;
-					gradient.setColorAt(relativePos, m_sliders->at(i)->getColor());
+					gradient.setColorAt(m_sliders->at(i)->getRelativePos(), m_sliders->at(i)->getColor());
 				}
 			}
 
@@ -226,7 +221,7 @@ void ColorBarWidget::paintEvent(QPaintEvent* e)
 
 			for (int i=0; i<m_sliders->size(); i++)
 			{
-				double relativePos = (m_sliders->at(i)->getValue()-minVal)/range;
+				double relativePos = m_sliders->at(i)->getRelativePos();
 				if (m_orientation == Qt::Horizontal)
 				{
 					int pos = contentRect.left() + (int)(relativePos * (double)contentRect.width());
@@ -268,7 +263,7 @@ SlidersWidget::SlidersWidget(SharedColorScaleElementSliders sliders, QWidget* pa
 	}
 }
 
-void SlidersWidget::select(int index)
+void SlidersWidget::select(int index, bool silent/*=false*/)
 {
 	assert(m_sliders);
 
@@ -286,14 +281,15 @@ void SlidersWidget::select(int index)
 	if (index >= 0)
 		m_sliders->at(index)->setSelected(true);
 
-	emit sliderSelected(index);
+	if (!silent)
+		emit sliderSelected(index);
 }
 
-ColorScaleElementSlider* SlidersWidget::addNewSlider(double relativePos, double value, QColor color)
+ColorScaleElementSlider* SlidersWidget::addNewSlider(double relativePos, QColor color)
 {
 	select(-1); //be sure to deselect any selected slider before modifying the global set contents!
 
-	ColorScaleElementSlider* slider = new ColorScaleElementSlider(value, color, this, m_orientation);
+	ColorScaleElementSlider* slider = new ColorScaleElementSlider(relativePos, color, this, m_orientation);
 
 	m_sliders->addSlider(slider);
 	
@@ -324,18 +320,12 @@ void SlidersWidget::updateAllSlidersPos()
 	if (!m_sliders || m_sliders->size() < 2)
 		return;
 
-	double minVal = m_sliders->front()->getValue();
-	double maxVal = m_sliders->back()->getValue();
-	double range  = maxVal-minVal;
-	if (range == 0.0)
-		range = 1.0;
-
 	int rectLength = length();
 
 	for (ColorScaleElementSliders::iterator it = m_sliders->begin(); it != m_sliders->end(); ++it)
 	{
 		ColorScaleElementSlider* slider = *it;
-		int pos = (int)((slider->getValue() - minVal)/range * (double)rectLength);
+		int pos = (int)(slider->getRelativePos() * (double)rectLength);
 
 		if (m_orientation == Qt::Horizontal)
 		{
@@ -357,11 +347,7 @@ void SlidersWidget::updateSliderPos(int index)
 
 	ColorScaleElementSlider* slider = m_sliders->at(index);
 
-	double minVal = m_sliders->front()->getValue();
-	double maxVal = m_sliders->back()->getValue();
-	double range  = maxVal-minVal;
-
-	int pos = (range == 0 ? (int)((slider->getValue() - minVal)/range * (double)length()) : 0);
+	int pos = static_cast<int>(slider->getRelativePos() * (double)length());
 
 	if (m_orientation == Qt::Horizontal)
 	{
@@ -417,8 +403,7 @@ void SlidersWidget::mouseMoveEvent(QMouseEvent* e)
 			else
 				slider->move(0,pos - slider->height()/2);
 
-			double newVal = m_sliders->front()->getValue() + relativePos*(m_sliders->back()->getValue()-m_sliders->front()->getValue());
-			slider->setValue(newVal);
+			slider->setRelativePos(relativePos);
 
 			m_sliders->sort();
 
@@ -501,8 +486,9 @@ void SliderLabelWidget::paintEvent(QPaintEvent* e)
 			{
 				int pos = m_sliders->at(i)->pos().x();
 				
-				double val = m_sliders->at(i)->getValue();
-				QString label = QString::number(val, 'f', m_precision);
+				double val = m_sliders->at(i)->getRelativePos();
+				QString label = QString("%1 %").arg(val*100.0, 0, 'f', std::max(m_precision-2,0)); //display as a percentage
+				
 				int labelWidth = fm.width(label);
 				if (pos+labelWidth > width())
 					pos -= (labelWidth - m_sliders->at(i)->width());
@@ -514,8 +500,8 @@ void SliderLabelWidget::paintEvent(QPaintEvent* e)
 		{
 			//adjust width if necessary
 			{
-				QString firstLabel = QString::number(m_sliders->first()->getValue(), 'f', m_precision);
-				QString lastLabel = QString::number(m_sliders->last()->getValue(), 'f', m_precision);
+				QString firstLabel = QString::number(m_sliders->first()->getRelativePos(), 'f', m_precision);
+				QString lastLabel = QString::number(m_sliders->last()->getRelativePos(), 'f', m_precision);
 				int labelWidth = std::max(fm.width(firstLabel),fm.width(lastLabel))+2*DEFAULT_TEXT_MARGIN;
 				setMinimumSize(labelWidth,0);
 			}
@@ -524,8 +510,8 @@ void SliderLabelWidget::paintEvent(QPaintEvent* e)
 			{
 				int pos = m_sliders->at(i)->pos().y();
 
-				double val = m_sliders->at(i)->getValue();
-				QString label = QString::number(val, 'f', m_precision);
+				double val = m_sliders->at(i)->getRelativePos();
+				QString label = QString("%1 %").arg(val*100.0, 0, 'f', std::max(m_precision-2,0)); //display as a percentage
 				
 				painter.drawText(DEFAULT_TEXT_MARGIN, pos + m_sliders->at(i)->height(), label);
 			}
@@ -569,8 +555,8 @@ ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=0*/, Qt::Or
 		layout()->addWidget(m_slidersWidget);
 
 		//add default min and max elements
-		m_slidersWidget->addNewSlider(0.0,0.0,Qt::blue);
-		m_slidersWidget->addNewSlider(1.0,1.0,Qt::red);
+		m_slidersWidget->addNewSlider(0.0,Qt::blue);
+		m_slidersWidget->addNewSlider(1.0,Qt::red);
 
 		connect(m_slidersWidget, SIGNAL(sliderModified(int)), this, SLOT(onSliderModified(int)));
 		connect(m_slidersWidget, SIGNAL(sliderSelected(int)), this, SLOT(onSliderSelected(int)));
@@ -590,7 +576,7 @@ ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=0*/, Qt::Or
 			m_labelsWidget->setFixedWidth(12); //FIXME: add const
 		}
 		layout()->addWidget(m_labelsWidget);
-		//m_labelsWidget->setVisible(true);
+		m_labelsWidget->setVisible(false); //hidden by default
 	}
 }
 
@@ -607,15 +593,11 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 	if (!m_sliders)
 		return;
 
-	double minVal = m_sliders->front()->getValue();
-	double maxVal = m_sliders->back()->getValue();
-	double value = minVal + relativePos*(maxVal-minVal);
-
 	//look first if this position corresponds to an already existing slider
-	double maxDist = 2.0*value/(double)m_colorBarWidget->length();
+	const double maxDist = (double)DEFAULT_SLIDER_SYMBOL_SIZE/(double)m_colorBarWidget->length();
 	for (int i=0; i<m_sliders->size(); ++i)
 	{
-		if (fabs(m_sliders->at(i)->getValue() - value) < maxDist)
+		if (fabs(m_sliders->at(i)->getRelativePos() - relativePos) < maxDist)
 		{
 			m_slidersWidget->select(i);
 			return;
@@ -623,7 +605,7 @@ void ccColorScaleEditorWidget::onPointClicked(double relativePos)
 	}
 
 	//TODO: we should add it with the corresponding color!
-	ColorScaleElementSlider* slider = m_slidersWidget->addNewSlider(relativePos, value, Qt::white);
+	ColorScaleElementSlider* slider = m_slidersWidget->addNewSlider(relativePos, Qt::white);
 
 	if (slider)
 	{
@@ -656,6 +638,21 @@ void ccColorScaleEditorWidget::onSliderModified(int sliderIndex)
 	emit stepModified(sliderIndex);
 }
 
+void ccColorScaleEditorWidget::setSliders(SharedColorScaleElementSliders sliders)
+{
+	if (m_sliders)
+	{
+		//onSliderSelected(-1);
+		//release all previously defined sliders
+		m_sliders->clear();
+	}
+
+	for (int i=0; i<sliders->size(); ++i)
+		m_slidersWidget->addNewSlider(sliders->at(i)->getRelativePos(),sliders->at(i)->getColor());
+
+	update();
+}
+
 void ccColorScaleEditorWidget::onSliderSelected(int sliderIndex)
 {
 	if (m_slidersWidget)
@@ -670,11 +667,12 @@ void ccColorScaleEditorWidget::importColorScale(ccColorScale::Shared scale)
 
 	if (scale)
 	{
+		assert(scale->stepCount() >= 2);
 		for (int i=0; i<scale->stepCount(); ++i)
 		{
-			double value = scale->step(i).getValue();
+			double relativePos = scale->step(i).getRelativePos();
 			const QColor& color = scale->step(i).getColor();
-			m_slidersWidget->addNewSlider(scale->getRelativePosition(value),value,color);
+			m_slidersWidget->addNewSlider(relativePos,color);
 		}
 	}
 
@@ -685,6 +683,8 @@ void ccColorScaleEditorWidget::exportColorScale(ccColorScale::Shared& destScale)
 {
 	if (!destScale)
 		return;
+
+	destScale->clear();
 
 	for (int i=0; i<m_sliders->size(); ++i)
 		destScale->insert(*m_sliders->at(i),false);
@@ -733,6 +733,12 @@ void ccColorScaleEditorWidget::deleteStep(int index)
 	}
 }
 
+void ccColorScaleEditorWidget::setSelectedStepIndex(int index, bool silent/*=false*/)
+{
+	if (m_slidersWidget)
+		m_slidersWidget->select(index,silent);
+}
+
 void ccColorScaleEditorWidget::setStepColor(int index, QColor color)
 {
 	if (index < 0)
@@ -742,12 +748,12 @@ void ccColorScaleEditorWidget::setStepColor(int index, QColor color)
 	onSliderModified(index);
 }
 
-void ccColorScaleEditorWidget::setStepValue(int index, double value)
+void ccColorScaleEditorWidget::setStepRelativePosition(int index, double relativePos)
 {
 	if (index < 0)
 		return;
 
-	m_sliders->at(index)->setValue(value);
+	m_sliders->at(index)->setRelativePos(relativePos);
 
 	if (m_slidersWidget)
 	{

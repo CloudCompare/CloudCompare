@@ -32,12 +32,14 @@ static ccColorScalesManager* s_uniqueInstance = 0;
 
 /*** Persistent settings ***/
 
-static const char c_csm_groupName[]		= "ccColorScalesManager";
-static const char c_csm_relative[]		= "relative";
-static const char c_csm_scaleName[]		= "scaleName";
-static const char c_csm_stepsList[]		= "steps";
-static const char c_csm_stepValue[]		= "value";
-static const char c_csm_stepColor[]		= "color";
+static const char c_csm_groupName[]				= "ccColorScalesManager";
+static const char c_csm_relative[]				= "relative";
+static const char c_csm_minVal[]				= "minVal";
+static const char c_csm_maxVal[]				= "maxVal";
+static const char c_csm_scaleName[]				= "scaleName";
+static const char c_csm_stepsList[]				= "steps";
+static const char c_csm_stepRelativePos[]		= "value";
+static const char c_csm_stepColor[]				= "color";
 
 ccColorScalesManager* ccColorScalesManager::GetUniqueInstance()
 {
@@ -93,16 +95,22 @@ void ccColorScalesManager::fromPersistentSettings()
 		QString name = settings.value(c_csm_scaleName,"unknown").toString();
 		bool relative = settings.value(c_csm_relative,true).toBool();
 
-		ccColorScale::Shared scale(new ccColorScale(name,scales[j],relative));
+		ccColorScale::Shared scale(new ccColorScale(name,scales[j]));
+		if (!relative)
+		{
+			double minVal = settings.value(c_csm_minVal,0.0).toDouble();
+			double maxVal = settings.value(c_csm_maxVal,1.0).toDouble();
+			scale->setAbsolute(minVal,maxVal);
+		}
 		
 		int size = settings.beginReadArray(c_csm_stepsList);
 		for (int i=0; i<size;++i)
 		{
 			settings.setArrayIndex(i);
-			double value = settings.value(c_csm_stepValue, 0.0).toDouble();
+			double relativePos = settings.value(c_csm_stepRelativePos, 0.0).toDouble();
 			QRgb rgb = static_cast<QRgb>(settings.value(c_csm_stepColor, 0).toInt());
 			QColor color = QColor::fromRgb(rgb);
-			scale->insert(ccColorScaleElement(value,color),false);
+			scale->insert(ccColorScaleElement(relativePos,color),false);
 		}
 		settings.endArray();
 
@@ -132,12 +140,19 @@ void ccColorScalesManager::toPersistentSettings() const
 
 			settings.setValue(c_csm_scaleName,(*it)->getName());
 			settings.setValue(c_csm_relative,(*it)->isRelative());
+			if (!(*it)->isRelative())
+			{
+				double minVal,maxVal;
+				(*it)->getAbsoluteBoundaries(minVal,maxVal);
+				settings.setValue(c_csm_minVal,minVal);
+				settings.setValue(c_csm_maxVal,maxVal);
+			}
 
 			settings.beginWriteArray(c_csm_stepsList);
 			for (int i=0; i<(*it)->stepCount();++i)
 			{
 				 settings.setArrayIndex(i);
-				 settings.setValue(c_csm_stepValue, (*it)->step(i).getValue());
+				 settings.setValue(c_csm_stepRelativePos, (*it)->step(i).getRelativePos());
 				 int rgb = static_cast<int>((*it)->step(i).getColor().rgb());
 				 settings.setValue(c_csm_stepColor, rgb);
 			}
@@ -208,7 +223,7 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALE scaleType)
 		return ccColorScale::Shared(0);
 	}
 
-	ccColorScale::Shared scale(new ccColorScale(name, QString::number(scaleType), true)); //all pre-defined scales are relative
+	ccColorScale::Shared scale(new ccColorScale(name, QString::number(scaleType)));
 
 	switch (scaleType)
 	{

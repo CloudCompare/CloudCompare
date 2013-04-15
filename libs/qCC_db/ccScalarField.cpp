@@ -401,7 +401,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 
 			if (hasColorScale)
 			{
-				ccColorScale::Shared colorScale = ccColorScale::Shared(new ccColorScale("temp"));
+				ccColorScale::Shared colorScale = ccColorScale::Create("temp");
 				if (!colorScale->fromFile(in,dataVersion))
 					return ReadError();
 				m_colorScale = colorScale;
@@ -462,4 +462,18 @@ void ccScalarField::setBoundaries(ScalarType minValue, ScalarType maxValue)
 	setMax(maxValue);
 
 	computeMinAndMax();
+}
+
+void ccScalarField::setColorScale(ccColorScale::Shared scale)
+{
+	m_colorScale = scale;
+
+	//absolute scale?
+	if (m_colorScale && !m_colorScale->isRelative())
+	{
+		//We disable 'auto update boundaries' mode and set them accordingly
+		double minValue,maxValue;
+		m_colorScale->getAbsoluteBoundaries(minValue,maxValue);
+		setBoundaries(minValue,maxValue);
+	}
 }

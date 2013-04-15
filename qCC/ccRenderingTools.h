@@ -38,26 +38,6 @@ public:
     **/
 	static void DrawColorRamp(const CC_DRAW_CONTEXT& context);
 
-protected:
-
-    //! Graphical scale atomical element
-    struct ScaleElement
-    {
-        //! Starting value
-        ScalarType value;
-        //! Specifies whether the value should be displayed
-        bool textDisplayed;
-		//! Specifies whether the cube is condensed or not
-		bool condensed;
-
-		//! Default constructor
-        ScaleElement(ScalarType val, bool dispText = true, bool isCondensed = false)
-			: value(val)
-			, textDisplayed(dispText)
-			, condensed(isCondensed)
-        {
-        }
-    };
 };
 
 #endif //CC_RENDERING_TOOLS_HEADER

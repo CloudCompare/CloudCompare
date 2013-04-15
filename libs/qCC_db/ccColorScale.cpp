@@ -23,19 +23,19 @@
 //Local
 #include "ccLog.h"
 
-ccColorScale::Shared ccColorScale::Create(QString name, bool relative/*=true*/)
+ccColorScale::Shared ccColorScale::Create(QString name)
 {
-	return ccColorScale::Shared(new ccColorScale(name,  QString(), relative));
+	return ccColorScale::Shared(new ccColorScale(name));
 }
 
-ccColorScale::ccColorScale(QString name, QString uuid/*=QString()*/, bool relative/*=true*/)
+ccColorScale::ccColorScale(QString name, QString uuid/*=QString()*/)
 	: m_name(name)
 	, m_uuid(uuid)
 	, m_updated(false)
-	, m_relative(relative)
+	, m_relative(true)
 	, m_locked(false)
-	, m_minValue(0.0)
-	, m_range(1.0)
+	, m_absoluteMinValue(0.0)
+	, m_absoluteRange(1.0)
 {
 	if (m_uuid.isNull())
 		generateNewUuid();
@@ -62,7 +62,7 @@ void ccColorScale::insert(const ccColorScaleElement& step, bool autoUpdate/*=tru
 
 	m_updated = false;
 
-	if (autoUpdate)
+	if (autoUpdate && m_steps.size() >= (int)MIN_STEPS)
 		update();
 }
 
@@ -88,7 +88,6 @@ void ccColorScale::remove(int index, bool autoUpdate/*=true*/)
 	}
 
 	m_steps.removeAt(index);
-
 	m_updated = false;
 
 	if (autoUpdate)
@@ -106,21 +105,27 @@ void ccColorScale::update()
 	{
 		sort();
 
+		unsigned stepCount = static_cast<unsigned>(m_steps.size());
+		assert(stepCount>=2);
+		assert(m_steps.front().getRelativePos() == 0.0);
+		assert(m_steps.back().getRelativePos() == 1.0);
+		if (m_steps.front().getRelativePos() != 0.0 || m_steps.back().getRelativePos() != 1.0)
+		{
+			//invalid scale: paint it black ;)
+			memset(m_rgbaScale,0,sizeof(colorType)*4*MAX_STEPS);
+			ccLog::Warning(QString("[ccColorScale] Scale '%1' is invalid! (boundaries are not [0.0-1.0]").arg(getName()));
+			return;
+		}
+		
 		colorType* _scale = m_rgbaScale;
-
-		m_minValue = m_steps.front().getValue();
-		double maxValue = m_steps.back().getValue();
-		assert(maxValue >= m_minValue); //we've just sorted the list!
-		m_range = maxValue-m_minValue;
-		unsigned stepCount = (unsigned)m_steps.size();
 
 		unsigned j = 0; //current intervale
 		for (unsigned i=0; i<MAX_STEPS; ++i)
 		{
-			double value = m_minValue + m_range * (double)i/(double)(MAX_STEPS-1);
+			double relativePos = (double)i/(double)(MAX_STEPS-1);
 
 			//forward to the right intervale
-			while (j+2 < stepCount && m_steps[j+1].getValue() < value)
+			while (j+2 < stepCount && m_steps[j+1].getRelativePos() < relativePos)
 				++j;
 
 			// linear interpolation
@@ -131,7 +136,8 @@ void ccColorScale::update()
 									m_steps[j+1].getColor().greenF(),
 									m_steps[j+1].getColor().blueF() );
 
-			double alpha = (value - m_steps[j].getValue())/(m_steps[j+1].getValue() - m_steps[j].getValue());
+			//interpolation coef
+			double alpha = (relativePos - m_steps[j].getRelativePos())/(m_steps[j+1].getRelativePos() - m_steps[j].getRelativePos());
 
 			CCVector3d interpCol = colBefore + (colNext-colBefore) * alpha;
 
@@ -141,13 +147,11 @@ void ccColorScale::update()
 			*_scale++ = MAX_COLOR_COMP; //do not dream: no transparency ;)
 		}
 
-		//as 'm_range' is used for division, we make sure it is not left to 0!
-		m_range = std::max(m_range, 1e-12);
-
 		m_updated = true;
 	}
-	else //invalid scale: black!
+	else //invalid scale: paint it black ;)
 	{
+		ccLog::Warning(QString("[ccColorScale] Scale '%1' is invalid! (not enough elements)").arg(getName()));
 		memset(m_rgbaScale,0,sizeof(colorType)*4*MAX_STEPS);
 	}
 }
@@ -166,6 +170,13 @@ bool ccColorScale::toFile(QFile& out) const
 	if (out.write((const char*)&m_relative,sizeof(bool))<0)
 		return WriteError();
 
+	//Absolute min value (dataVersion>=27)
+	if (out.write((const char*)&m_absoluteMinValue,sizeof(double))<0)
+		return WriteError();
+	//Absolute range (dataVersion>=27)
+	if (out.write((const char*)&m_absoluteRange,sizeof(double))<0)
+		return WriteError();
+
 	//locked state (dataVersion>=27)
 	if (out.write((const char*)&m_locked,sizeof(bool))<0)
 		return WriteError();
@@ -180,7 +191,7 @@ bool ccColorScale::toFile(QFile& out) const
 		//write each step
 		for (uint32_t i=0; i<stepCount; ++i)
 		{
-			outStream << m_steps[i].getValue();
+			outStream << m_steps[i].getRelativePos();
 			outStream << m_steps[i].getColor();
 		}
 	}
@@ -205,6 +216,13 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion)
 	if (in.read((char*)&m_relative,sizeof(bool))<0)
 		return ReadError();
 
+	//Absolute min value (dataVersion>=27)
+	if (in.read((char*)&m_absoluteMinValue,sizeof(double))<0)
+		return ReadError();
+	//Absolute range (dataVersion>=27)
+	if (in.read((char*)&m_absoluteRange,sizeof(double))<0)
+		return ReadError();
+
 	//locked state (dataVersion>=27)
 	if (in.read((char*)&m_locked,sizeof(bool))<0)
 		return ReadError();
@@ -217,18 +235,38 @@ bool ccColorScale::fromFile(QFile& in, short dataVersion)
 			return ReadError();
 
 		//read each step
+		m_steps.clear();
 		for (uint32_t i=0; i<stepCount; ++i)
 		{
-			double value = 0.0;
+			double relativePos = 0.0;
 			QColor color(Qt::white);
-			inStream >> value;
+			inStream >> relativePos;
 			inStream >> color;
 
-			m_steps.push_back(ccColorScaleElement(value,color));
+			m_steps.push_back(ccColorScaleElement(relativePos,color));
 		}
 
 		update();
 	}
 
 	return true;
+}
+
+void ccColorScale::setAbsolute(double minVal, double maxVal)
+{
+	assert(maxVal >= minVal);
+
+	m_relative = false;
+
+	m_absoluteMinValue = minVal;
+	m_absoluteRange = maxVal - minVal;
+
+	//as 'm_absoluteRange' is used for division, we make sure it is not left to 0!
+	m_absoluteRange = std::max(m_absoluteRange, 1e-12);
+}
+
+void ccColorScale::getAbsoluteBoundaries(double& minVal, double& maxVal) const
+{
+	minVal = m_absoluteMinValue;
+	maxVal = m_absoluteMinValue + m_absoluteRange;
 }

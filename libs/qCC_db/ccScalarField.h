@@ -111,7 +111,7 @@ public:
 	inline bool areBoundariesAutoUpdated() const { return m_autoBoundaries; }
 
 	//! Sets the boundaries
-	/** Automatically switches scalar field to 'autoUpdateBoundaries' mode.
+	/** Automatically disables 'autoUpdateBoundaries' mode.
 	**/
 	void setBoundaries(ScalarType minValue, ScalarType maxValue);
 
@@ -122,7 +122,7 @@ public:
 	inline const ccColorScale::Shared& getColorScale() const { return m_colorScale; }
 
 	//! Sets associated color scale
-	inline void setColorScale(ccColorScale::Shared scale) { m_colorScale = scale; }
+	void setColorScale(ccColorScale::Shared scale);
 
 	//! Returns number of color ramp steps
 	inline unsigned getColorRampSteps() const { return m_colorRampSteps; }

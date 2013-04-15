@@ -41,6 +41,8 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScale::Shared currentS
 	, m_scaleWidget(new ccColorScaleEditorWidget(this,Qt::Horizontal))
 	, m_associatedSF(0)
 	, m_modified(false)
+	, m_minAbsoluteVal(0.0)
+	, m_maxAbsoluteVal(1.0)
 {
     setupUi(this);
 
@@ -57,6 +59,7 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScale::Shared currentS
 	connect(deleteToolButton,		SIGNAL(clicked()),				this,	SLOT(deleteCurrentScale()));
 	connect(copyToolButton,			SIGNAL(clicked()),				this,	SLOT(copyCurrentScale()));
 	connect(newToolButton,			SIGNAL(clicked()),				this,	SLOT(createNewScale()));
+	connect(scaleModeComboBox,		SIGNAL(activated(int)),			this,	SLOT(relativeModeChanged(int)));
 
 	//scale widget
 	connect(m_scaleWidget,			SIGNAL(stepSelected(int)),		this,	SLOT(onStepSelected(int)));
@@ -70,10 +73,6 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScale::Shared currentS
 	//close button
 	connect(closePushButton,		SIGNAL(clicked()),				this,	SLOT(onClose()));
 
-	//TODO FIXME
-	scaleModeComboBox->setEnabled(false);
-
-
 	//populate main combox box with all known scales
 	updateMainComboBox();
 
@@ -85,6 +84,16 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScale::Shared currentS
 
 ccColorScaleEditorDialog::~ccColorScaleEditorDialog()
 {
+}
+
+void ccColorScaleEditorDialog::setAssociatedScalarField(ccScalarField* sf)
+{
+	m_associatedSF = sf;
+	if (sf)
+	{
+		m_minAbsoluteVal = sf->getMinDisplayed();
+		m_maxAbsoluteVal = sf->getMaxDisplayed();
+	}
 }
 
 void ccColorScaleEditorDialog::updateMainComboBox()
@@ -125,6 +134,11 @@ void ccColorScaleEditorDialog::colorScaleChanged(int pos)
 	setActiveScale(colorScale);
 }
 
+void ccColorScaleEditorDialog::relativeModeChanged(int value)
+{
+	setScaleModeToRelative(value == 0 ? true : false);
+}
+
 void ccColorScaleEditorDialog::setModified(bool state)
 {
 	m_modified = state;
@@ -137,7 +151,11 @@ bool ccColorScaleEditorDialog::canChangeCurrentScale()
 		return true;
 	
 	///ask the user if we should save the current scale?
-	QMessageBox::StandardButton button = QMessageBox::warning(this,"Current scale has been modified", "Do you want to save modifications?", QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel, QMessageBox::Cancel);
+	QMessageBox::StandardButton button = QMessageBox::warning(this,
+																"Current scale has been modified",
+																"Do you want to save modifications?",
+																QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+																QMessageBox::Cancel);
 	if (button == QMessageBox::Yes)
 	{
 		saveCurrentScale();
@@ -149,9 +167,14 @@ bool ccColorScaleEditorDialog::canChangeCurrentScale()
 	return true;
 }
 
+bool ccColorScaleEditorDialog::isRelativeMode() const
+{
+	return (scaleModeComboBox->currentIndex() == 0 ? true : false);
+}
+
 void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 {
-	//we are gonna change the current scale while it has been modified
+	//the user wants to change the current scale while the it has been modified (and potentially not saved)
 	if (m_colorScale != currentScale)
 	{
 		if (!canChangeCurrentScale())
@@ -188,23 +211,52 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 	}
 
 	//setup dialog components
-	bool isLocked = !m_colorScale || m_colorScale->isLocked();
-	colorScaleParametersFrame->setEnabled(!isLocked);
-	lockWarningLabel->setVisible(isLocked);
-	selectedSliderGroupBox->setEnabled(!isLocked);
-	m_scaleWidget->setEnabled(!isLocked);
+	{
+		//locked state
+		bool isLocked = !m_colorScale || m_colorScale->isLocked();
+		colorScaleParametersFrame->setEnabled(!isLocked);
+		lockWarningLabel->setVisible(isLocked);
+		selectedSliderGroupBox->setEnabled(!isLocked);
+		m_scaleWidget->setEnabled(!isLocked);
 
-	bool isRelative = !m_colorScale || m_colorScale->isRelative();
-	scaleModeComboBox->setCurrentIndex(isRelative ? 0 : 1);
-	valueDoubleSpinBox->setSuffix(isRelative ? QString(" %") : QString());
-	if (isRelative)
-		valueDoubleSpinBox->setRange(0.0,100.0); //between 0 and 100%
-	else
-		valueDoubleSpinBox->setRange(-DBL_MAX,DBL_MAX);
+		//absolute or relative mode
+		if (m_colorScale)
+		{
+			bool isRelative = m_colorScale->isRelative();
+			if (!isRelative)
+			{
+				//update min and max absolute values
+				m_colorScale->getAbsoluteBoundaries(m_minAbsoluteVal,m_maxAbsoluteVal);
+			}
+			setScaleModeToRelative(isRelative);
+		}
+		else
+		{
+			//shouldn't be accessible anyway....
+			assert(isLocked == true);
+			setScaleModeToRelative(false);
+		}
+	}
 
 	m_scaleWidget->importColorScale(m_colorScale);
 
 	onStepSelected(-1);
+}
+
+void ccColorScaleEditorDialog::setScaleModeToRelative(bool isRelative)
+{
+	scaleModeComboBox->setCurrentIndex(isRelative ? 0 : 1);
+	valueDoubleSpinBox->setSuffix(isRelative ? QString(" %") : QString());
+	valueDoubleSpinBox->blockSignals(true);
+	if (isRelative)
+		valueDoubleSpinBox->setRange(0.0,100.0); //between 0 and 100%
+	else
+		valueDoubleSpinBox->setRange(-DBL_MAX,DBL_MAX);
+	valueDoubleSpinBox->blockSignals(false);
+
+	//update selected slider frame
+	int selectedIndex = (m_scaleWidget ? m_scaleWidget->getSelectedStepIndex() : -1);
+	onStepModified(selectedIndex);
 }
 
 void ccColorScaleEditorDialog::onStepSelected(int index)
@@ -231,7 +283,7 @@ void ccColorScaleEditorDialog::onStepSelected(int index)
 
 void ccColorScaleEditorDialog::onStepModified(int index)
 {
-	if (index < 0)
+	if (index < 0 || index >= m_scaleWidget->getStepCount())
 		return;
 
 	const ColorScaleElementSlider* slider = m_scaleWidget->getStep(index);
@@ -240,16 +292,16 @@ void ccColorScaleEditorDialog::onStepModified(int index)
     ccDisplayOptionsDlg::SetButtonColor(colorToolButton,slider->getColor());
 	if (m_colorScale)
 	{
-		if (m_colorScale->isRelative())
+		const double relativePos = slider->getRelativePos();
+		if (isRelativeMode())
 		{
-			double relativePos = slider->getValue();
 			valueDoubleSpinBox->blockSignals(true);
 			valueDoubleSpinBox->setValue(relativePos*100.0);
 			valueDoubleSpinBox->blockSignals(false);
 			if (m_associatedSF)
 			{
 				//compute corresponding scalar value for associated SF
-				double actualValue = m_associatedSF->getMinSaturation() + relativePos * (m_associatedSF->getMaxSaturation() - m_associatedSF->getMinSaturation());
+				double actualValue = m_associatedSF->getMinDisplayed() + relativePos * (m_associatedSF->getMaxDisplayed() - m_associatedSF->getMinDisplayed());
 				valueLabel->setText(QString("(%1)").arg(actualValue));
 				valueLabel->setVisible(true);
 			}
@@ -258,29 +310,22 @@ void ccColorScaleEditorDialog::onStepModified(int index)
 				valueLabel->setVisible(false);
 			}
 
+			//can't change min and max boundaries in 'relative' mode!
 			valueDoubleSpinBox->setEnabled(index > 0 && index < m_scaleWidget->getStepCount()-1);
 		}
 		else
 		{
-			double absoluteValue = slider->getValue();
+			//compute corresponding 'absolute' value from current dialog boundaries
+			double absoluteValue = m_minAbsoluteVal + relativePos * (m_maxAbsoluteVal - m_minAbsoluteVal);
+			
 			valueDoubleSpinBox->blockSignals(true);
 			valueDoubleSpinBox->setValue(absoluteValue);
 			valueDoubleSpinBox->blockSignals(false);
-
-			if (m_scaleWidget->getStepCount()>1)
-			{
-				double minVal = m_scaleWidget->getStep(0)->getValue();
-				double maxVal = m_scaleWidget->getStep(m_scaleWidget->getStepCount()-1)->getValue();
-				double relativePos = (absoluteValue-minVal)/(maxVal-minVal);
-				valueLabel->setText(QString("(%1 %%)").arg(relativePos*100.0));
-				valueLabel->setVisible(true);
-			}
-			else
-			{
-				valueLabel->setVisible(false);
-			}
-
 			valueDoubleSpinBox->setEnabled(true);
+
+			//display corresponding relative position as well
+			valueLabel->setText(QString("(%1 %)").arg(relativePos*100.0));
+			valueLabel->setVisible(true);
 		}
 
 		setModified(true);
@@ -291,7 +336,7 @@ void ccColorScaleEditorDialog::onStepModified(int index)
 void ccColorScaleEditorDialog::deletecSelectedStep()
 {
 	int selectedIndex = m_scaleWidget->getSelectedStepIndex();
-	if (selectedIndex >= 1 && selectedIndex+1 < m_scaleWidget->getStepCount()) //don't delete the first and last steps!
+	if (selectedIndex >= 1 && selectedIndex+1 < m_scaleWidget->getStepCount()) //never delete the first and last steps!
 	{
 		m_scaleWidget->deleteStep(selectedIndex);
 		setModified(true);
@@ -317,6 +362,9 @@ void ccColorScaleEditorDialog::changeSelectedStepColor()
 
 void ccColorScaleEditorDialog::changeSelectedStepValue(double value)
 {
+	if (!m_scaleWidget)
+		return;
+
 	int selectedIndex = m_scaleWidget->getSelectedStepIndex();
 	if (selectedIndex<0)
 		return;
@@ -324,12 +372,58 @@ void ccColorScaleEditorDialog::changeSelectedStepValue(double value)
 	const ColorScaleElementSlider* slider = m_scaleWidget->getStep(selectedIndex);
 	assert(slider);
 
-	bool isRelative = !m_colorScale || m_colorScale->isRelative();
-	if (isRelative)
-		value /= 100.0;
+	bool relativeMode = isRelativeMode();
+	if (relativeMode)
+	{
+		assert(selectedIndex != 0 && selectedIndex+1 < m_scaleWidget->getStepCount());
 
-	//eventually onStepModified will be called (and thus m_modified will be updated)
-	m_scaleWidget->setStepValue(selectedIndex,value);
+		value /= 100.0; //from percentage to relative position
+		assert(value >= 0.0 && value <= 1.0);
+
+		//eventually onStepModified will be called (and thus m_modified will be updated)
+		m_scaleWidget->setStepRelativePosition(selectedIndex,value);
+	}
+	else //absolute scale mode
+	{
+		//we build up the new list based on absolute values
+		SharedColorScaleElementSliders newSliders(new ColorScaleElementSliders());
+		{
+			for (int i=0;i<m_scaleWidget->getStepCount();++i)
+			{
+				const ColorScaleElementSlider* slider = m_scaleWidget->getStep(i);
+				double absolutePos = (i == selectedIndex ? value : m_minAbsoluteVal + slider->getRelativePos() * (m_maxAbsoluteVal - m_minAbsoluteVal));
+				newSliders->push_back(new ColorScaleElementSlider(absolutePos,slider->getColor()));
+			}
+		}
+
+		//update min and max boundaries
+		{
+			newSliders->sort();
+			m_minAbsoluteVal = newSliders->front()->getRelativePos(); //absolute in fact!
+			m_maxAbsoluteVal = newSliders->back()->getRelativePos(); //absolute in fact!
+		}
+
+		//convert absolute pos to relative ones
+		int newSelectedIndex = -1;
+		{
+			double range = std::max(m_maxAbsoluteVal-m_minAbsoluteVal,1e-12);
+			for (int i=0;i<newSliders->size();++i)
+			{
+				double absoluteVal = newSliders->at(i)->getRelativePos();
+				if (absoluteVal == value)
+					newSelectedIndex = i;
+				double relativePos = (absoluteVal-m_minAbsoluteVal)/range;
+				newSliders->at(i)->setRelativePos(relativePos);
+			}
+		}
+
+		//update the whole scale with new sliders
+		m_scaleWidget->setSliders(newSliders);
+
+		m_scaleWidget->setSelectedStepIndex(newSelectedIndex,true);
+
+		setModified(true);
+	}
 }
 
 void ccColorScaleEditorDialog::copyCurrentScale()
@@ -340,7 +434,13 @@ void ccColorScaleEditorDialog::copyCurrentScale()
 		return;
 	}
 	
-	ccColorScale::Shared scale(new ccColorScale(m_colorScale->getName()+QString("_copy"),QString(),m_colorScale->isRelative()));
+	ccColorScale::Shared scale = ccColorScale::Create(m_colorScale->getName()+QString("_copy"));
+	if (!m_colorScale->isRelative())
+	{
+		double minVal,maxVal;
+		m_colorScale->getAbsoluteBoundaries(minVal,maxVal);
+		scale->setAbsolute(minVal,maxVal);
+	}
 	m_scaleWidget->exportColorScale(scale);
 
 	ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
@@ -362,6 +462,11 @@ void ccColorScaleEditorDialog::saveCurrentScale()
 	}
 
 	m_scaleWidget->exportColorScale(m_colorScale);
+	bool relativeMode = isRelativeMode();
+	if (relativeMode)
+		m_colorScale->setRelative();
+	else
+		m_colorScale->setAbsolute(m_minAbsoluteVal,m_maxAbsoluteVal);
 
 	setModified(false);
 }
@@ -408,20 +513,32 @@ void ccColorScaleEditorDialog::deleteCurrentScale()
 	ccColorScale::Shared colorScaleToDelete = m_colorScale;
 	setModified(false); //cancel any modification
 
-	//change it by the default one
-	setActiveScale(ccColorScalesManager::GetDefaultScale());
+	int currentIndex = rampComboBox->currentIndex();
+	if (currentIndex == 0)
+		currentIndex = 1;
+	else if (currentIndex > 0)
+		--currentIndex;
 
 	ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
 	assert(csManager);
+
 	if (csManager)
+	{
+		//activate the neighbor scale in the list
+		ccColorScale::Shared nextScale = csManager->getScale(rampComboBox->itemData(currentIndex).toString());
+		setActiveScale(nextScale);
+
 		csManager->removeScale(colorScaleToDelete->getUuid());
+	}
 
 	updateMainComboBox();
 }
 
 void ccColorScaleEditorDialog::createNewScale()
 {
-	ccColorScale::Shared scale(new ccColorScale("New scale"));
+	ccColorScale::Shared scale = ccColorScale::Create("New scale");
+
+	//add default min and max steps
 	scale->insert(ccColorScaleElement(0.0,Qt::blue),false);
 	scale->insert(ccColorScaleElement(1.0,Qt::red),true);
 

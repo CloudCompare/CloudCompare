@@ -95,20 +95,39 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 	dlg->show();
 }
 
+//! Graphical scale atomical element
+struct ScaleElement
+{
+	//! Starting value
+	double value;
+	//! Specifies whether the value should be displayed
+	bool textDisplayed;
+	//! Specifies whether the cube is condensed or not
+	bool condensed;
+
+	//! Default constructor
+	ScaleElement(double val, bool dispText = true, bool isCondensed = false)
+		: value(val)
+		, textDisplayed(dispText)
+		, condensed(isCondensed)
+	{
+	}
+};
+
 void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 {
 	const ccScalarField* sf = context.sfColorScaleToDisplay;
 	if (!sf)
 		return;
 
-	ScalarType minVal = sf->getMin();
-	ScalarType minDisplayed = sf->getMinDisplayed();
-	ScalarType minSaturation = sf->getMinSaturation();
-	ScalarType maxSaturation = sf->getMaxSaturation();
-	ScalarType maxDisplayed = sf->getMaxDisplayed();
-	ScalarType maxVal = sf->getMax();
+	double minVal = sf->getMin();
+	double minDisplayed = sf->getMinDisplayed();
+	double minSaturation = sf->getMinSaturation();
+	double maxSaturation = sf->getMaxSaturation();
+	double maxDisplayed = sf->getMaxDisplayed();
+	double maxVal = sf->getMax();
 
-	bool strictlyPositive = minVal >= 0;
+	bool strictlyPositive = (minVal >= 0);
 	bool absSaturation = sf->absoluteSaturation();
 	bool logScale = sf->logScale();
 
@@ -118,7 +137,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	//this vector stores the values that will be "represented" by the scale
 	//they will be automatically displayed in a regular "pace"
 	std::vector<ScaleElement> theScaleElements;
-	std::vector<ScalarType> theCubeEquivalentDist; //to deduce its color!
+	std::vector<double> theCubeEquivalentDist; //to deduce its color!
 
 	int maxNumberOfCubes = (int)(floor((float)(context.glH-120)/(float)(c_cubeSize+2*c_defaultSpace)));
 
@@ -150,7 +169,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		//number of cubes available for ramp display
 		int numberOfCubes = std::min<int>(maxNumberOfCubes-addedCubes,colorRampSteps);
 
-		ScalarType startValue = minVal; //we want it to be the same color as 'minVal' even if we start at '0'
+		double startValue = minVal; //we want it to be the same color as 'minVal' even if we start at '0'
 		if (dispZero)
 			theScaleElements.push_back(ScaleElement(0.0,true,true));
 
@@ -187,15 +206,15 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		//the actual color ramp
 		if (numberOfCubes>0 && minSaturation<maxSaturation && minDisplayed<maxDisplayed)
 		{
-			ScalarType endValue = (dispMaxSat ? maxSaturation : maxDisplayed);
-			ScalarType intervale = (endValue-startValue)/(ScalarType)numberOfCubes;
-			ScalarType firstValue = startValue;
+			double endValue = (dispMaxSat ? maxSaturation : maxDisplayed);
+			double intervale = (endValue-startValue)/(double)numberOfCubes;
+			double firstValue = startValue;
 
 			if (logScale)
 			{
-				ScalarType endValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(endValue)));
-				ScalarType startValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(startValue)));
-				intervale = (endValueLog-startValueLog)/(ScalarType)numberOfCubes;
+				double endValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(endValue)));
+				double startValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(startValue)));
+				intervale = (endValueLog-startValueLog)/(double)numberOfCubes;
 				firstValue = startValueLog;
 			}
 
@@ -210,19 +229,21 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 				{
 					for (int i=0;i<numberOfCubes;++i)
 					{
-						ScalarType logVal = firstValue+intervale*0.5;
+						double val = firstValue+intervale*static_cast<double>(i);
+						double logVal = val+intervale*0.5;
 						theCubeEquivalentDist.push_back(exp(logVal*log(10.0)));
-						firstValue += intervale;
-						theScaleElements.push_back(ScaleElement(exp(firstValue*log(10.0)),true,false));
+
+						theScaleElements.push_back(ScaleElement(exp((val+intervale)*log(10.0)),true,false));
 					}
 				}
 				else
 				{
 					for (int i=0;i<numberOfCubes;++i)
 					{
-						theCubeEquivalentDist.push_back(firstValue+intervale*0.5);
-						firstValue += intervale;
-						theScaleElements.push_back(ScaleElement(firstValue,true,false));
+						double val = firstValue+intervale*static_cast<double>(i);
+
+						theCubeEquivalentDist.push_back(val+intervale*0.5);
+						theScaleElements.push_back(ScaleElement(val+intervale,true,false));
 					}
 				}
 			}
@@ -251,7 +272,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		if (symmetry)
 		{
 			//we display the color ramp between -maxDisp and +maxDisp
-			ScalarType maxDisp = std::max(-minVal,maxVal);
+			double maxDisp = std::max(-minVal,maxVal);
 
 			bool dispZero = true;
 			bool dispMinSat = (minSaturation>0.0);
@@ -268,7 +289,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 			int numberOfCubes = std::min<int>((maxNumberOfCubes-addedCubes)/2,colorRampSteps);
 
 			//1st section: -maxDisp
-			ScalarType startValue = -maxDisp;
+			double startValue = -maxDisp;
 			if (dispMaxVal)
 				theScaleElements.push_back(ScaleElement(-maxDisp,true,dispMaxSat));
 
@@ -285,15 +306,15 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 			//3rd section: the real color ramp (negative part)
 			if (numberOfCubes>1)
 			{
-				ScalarType endValue = (dispMinSat ? -minSaturation : 0.0);
-				ScalarType intervale = (endValue-startValue)/(ScalarType)numberOfCubes;
-				ScalarType firstValue = startValue;
+				double endValue = (dispMinSat ? -minSaturation : 0.0);
+				double intervale = (endValue-startValue)/(double)numberOfCubes;
+				double firstValue = startValue;
 
 				if (logScale)
 				{
-					ScalarType endValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(-endValue)));
-					ScalarType startValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(-startValue)));
-					intervale = -(endValueLog-startValueLog)/(ScalarType)numberOfCubes;
+					double endValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(-endValue)));
+					double startValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(-startValue)));
+					intervale = -(endValueLog-startValueLog)/(double)numberOfCubes;
 					firstValue = startValueLog;
 				}
 
@@ -308,7 +329,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 					{
 						for (int i=0;i<numberOfCubes-1;++i)
 						{
-							ScalarType logVal = firstValue-intervale*0.5;
+							double logVal = firstValue-intervale*0.5;
 							theCubeEquivalentDist.push_back(-exp(logVal*log(10.0)));
 							firstValue -= intervale;
 							//if (i==0 && firstValue>maxVal) //specific case: all values in the tail
@@ -356,14 +377,14 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 			//7th section: the real color ramp (positive part)
 			if (numberOfCubes>1)
 			{
-				ScalarType intervale = (maxSaturation-minSaturation)/(ScalarType)numberOfCubes;
-				ScalarType firstValue = minSaturation;
+				double intervale = (maxSaturation-minSaturation)/(double)numberOfCubes;
+				double firstValue = minSaturation;
 
 				if (logScale)
 				{
-					ScalarType endValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(maxSaturation)));
-					ScalarType startValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(minSaturation)));
-					intervale = (endValueLog-startValueLog)/(ScalarType)numberOfCubes;
+					double endValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(maxSaturation)));
+					double startValueLog = log10(std::max<double>(ZERO_TOLERANCE,fabs(minSaturation)));
+					intervale = (endValueLog-startValueLog)/(double)numberOfCubes;
 					firstValue = startValueLog;
 				}
 
@@ -378,7 +399,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 					{
 						for (int i=0;i<numberOfCubes-1;++i)
 						{
-							ScalarType logVal = firstValue+intervale*0.5;
+							double logVal = firstValue+intervale*0.5;
 							theCubeEquivalentDist.push_back(exp(logVal*log(10.0)));
 							firstValue += intervale;
 							//if (i+2==numberOfCubes && firstValue<minVal) //specific case: all values in the head
@@ -466,9 +487,9 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 
 		//a colored cube
 		//d = 0.5*(theScaleElements[i].value + theScaleElements[i+1].value);
-		ScalarType d = theCubeEquivalentDist[i];
+		double d = theCubeEquivalentDist[i];
 
-		ScalarType normalizedDist = sf->normalize(d);
+		double normalizedDist = sf->normalize(d);
 		const colorType* col = 0;
 		if (normalizedDist >= 0)
 			col = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
@@ -592,7 +613,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 
 		if (theScaleElements[i+1].textDisplayed)
 		{
-			ScalarType dispValue = theScaleElements[i+1].value;
+			double dispValue = theScaleElements[i+1].value;
 			win->displayText(QString::number(dispValue,logScale ? 'E' : 'f',ccGui::Parameters().displayedNumPrecision), halfW+x-5, y+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VMIDDLE);
 		}
 	}

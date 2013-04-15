@@ -257,7 +257,7 @@ void ccAlignDlg::dataSliderReleased()
 
 void ccAlignDlg::modelSamplingRateChanged(double value)
 {
-    char text[256] = "An error occured";
+    QString message("An error occured");
 
     CC_SAMPLING_METHOD method = getSamplingMethod();
     float rate = (float)modelSamplingRate->value()/(float)modelSamplingRate->maximum();
@@ -272,14 +272,14 @@ void ccAlignDlg::modelSamplingRateChanged(double value)
 				CCLib::ReferenceCloud* tmpCloud = getSampledModel(); //DGM FIXME: wow! you generate a spatially sampled cloud just to display its size?!
 				if (tmpCloud)
 				{
-					sprintf(text, "distance units (%d remaining points)", tmpCloud->size());
+					message = QString("distance units (%1 remaining points)").arg(tmpCloud->size());
 					delete tmpCloud;
 				}
 			}
             break;
         case RANDOM:
 			{
-				sprintf(text, "remaining points (%.1f%%)", rate*100.);
+				message = QString("remaining points (%1%)").arg(rate*100.0f,0,'f',1);
 			}
             break;
         case OCTREE:
@@ -287,7 +287,7 @@ void ccAlignDlg::modelSamplingRateChanged(double value)
 				CCLib::ReferenceCloud* tmpCloud = getSampledModel();  //DGM FIXME: wow! you generate a spatially sampled cloud just to display its size?!
 				if (tmpCloud)
 				{
-					sprintf(text, "%d remaining points", tmpCloud->size());
+					message = QString("%1 remaining points").arg(tmpCloud->size());
 					delete tmpCloud;
 				}
 			}
@@ -295,16 +295,16 @@ void ccAlignDlg::modelSamplingRateChanged(double value)
         default:
 			{
 				unsigned remaining = (unsigned)(rate * (float)modelObject->size());
-				sprintf(text, "%% (%d remaining points)", remaining);
+				message = QString("%1 remaining points").arg(remaining);
 			}
             break;
     }
-    modelRemaining->setText(text);
+    modelRemaining->setText(message);
 }
 
 void ccAlignDlg::dataSamplingRateChanged(double value)
 {
-    char text[256] = "An error occured";
+    QString message("An error occured");
 
     CC_SAMPLING_METHOD method = getSamplingMethod();
     float rate = (float)dataSamplingRate->value()/(float)dataSamplingRate->maximum();
@@ -319,14 +319,14 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 				CCLib::ReferenceCloud* tmpCloud = getSampledData(); //DGM FIXME: wow! you generate a spatially sampled cloud just to display its size?!
 				if (tmpCloud)
 				{
-					sprintf(text, "distance units (%d remaining points)", tmpCloud->size());
+					message = QString("distance units (%1 remaining points)").arg(tmpCloud->size());
 					delete tmpCloud;
 				}
 			}
             break;
         case RANDOM:
 			{
-				sprintf(text, "remaining points (%.1f%%)", rate*100.);
+				message = QString("remaining points (%1%)").arg(rate*100.0f,0,'f',1);
 			}
             break;
         case OCTREE:
@@ -334,7 +334,7 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 				CCLib::ReferenceCloud* tmpCloud = getSampledData();  //DGM FIXME: wow! you generate a spatially sampled cloud just to display its size?!
 				if (tmpCloud)
 				{
-					sprintf(text, "%d remaining points", tmpCloud->size());
+					message = QString("%1 remaining points").arg(tmpCloud->size());
 					delete tmpCloud;
 				}
 			}
@@ -342,11 +342,11 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
         default:
 			{
 				unsigned remaining = (unsigned)(rate * (float)dataObject->size());
-				sprintf(text, "%% (%d remaining points)", remaining);
+				message = QString("%1 remaining points").arg(remaining);
 			}
             break;
     }
-    dataRemaining->setText(text);
+    dataRemaining->setText(message);
 }
 
 void ccAlignDlg::estimateDelta()

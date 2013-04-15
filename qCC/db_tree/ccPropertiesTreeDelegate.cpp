@@ -1638,6 +1638,7 @@ void ccPropertiesTreeDelegate::colorScaleChanged(int pos)
 	{
 		sf->setColorScale(colorScale);
 		updateDisplay();
+		updateModel();
 	}
 }
 

@@ -45,7 +45,7 @@ public:
 	virtual ~ccColorScaleEditorDialog();
 
 	//! Sets associated scalar field (optional)
-	void setAssociatedScalarField(ccScalarField* sf) { m_associatedSF = sf; }
+	void setAssociatedScalarField(ccScalarField* sf);
 
 	//! Sets active scale
 	void setActiveScale(ccColorScale::Shared currentScale);
@@ -56,6 +56,7 @@ public:
 protected slots:
 
     void colorScaleChanged(int);
+	void relativeModeChanged(int);
 
 	void onStepSelected(int);
 
@@ -84,10 +85,22 @@ protected:
 	//! Sets modification flag state
 	void setModified(bool state);
 
-	// If the current scale has been modified, ask the user what to do
+	//! If the current scale has been modified, ask the user what to do
 	/** \param return whether user allows change
 	**/
 	bool canChangeCurrentScale();
+
+	//! Returns whether current edited scale is 'relative' (true) or 'absolute' (false)
+	/** Warning: may not be the same state as the current scale (m_colorScale)
+		If current modifications have not been saved yet!
+	**/
+	bool isRelativeMode() const;
+
+	//! Sets current mode for active scale between 'relative' (true) or 'absolute' (false)
+	/** Warning: may not be the same state as the current scale (m_colorScale)
+		If current modifications have not been saved yet!
+	**/
+	void setScaleModeToRelative(bool isRelative);
 
 	//! Current active color scale
 	ccColorScale::Shared m_colorScale;
@@ -100,6 +113,11 @@ protected:
 
 	//! Modification flag
 	bool m_modified;
+
+	//! Current min boundary for absolute scales
+	double m_minAbsoluteVal;
+	//! Current max boundary for absolute scales
+	double m_maxAbsoluteVal;
 };
 
 #endif //CC_COLOR_SCALE_EDITOR_DLG_HEADER

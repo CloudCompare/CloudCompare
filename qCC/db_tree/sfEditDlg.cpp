@@ -27,9 +27,10 @@
 #include <math.h>
 #include <assert.h>
 
-#define SLIDERS_STEPS 1000
+//! Default steps per slider
+const int SLIDERS_STEPS = 1000;
 
-sfEditDlg::sfEditDlg(QWidget* parent)
+sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
 	: QWidget(parent)
 	, Ui::SFEditDlg()
 	, m_associatedSF(0)
@@ -87,8 +88,13 @@ double sfEditDlg::slider2spin_2(int val)
 
 void sfEditDlg::fillDialogWith(ccScalarField* sf)
 {
-	assert(sf);
 	m_associatedSF = sf;
+	if (!sf)
+	{
+		assert(false);
+		setEnabled(false);
+		return;
+	}
 
 	bool absSaturation = sf->absoluteSaturation();
 	bool logScale = sf->logScale();
@@ -106,6 +112,7 @@ void sfEditDlg::fillDialogWith(ccScalarField* sf)
 
 	releaseBoundariesCheckBox->blockSignals(true);
 	releaseBoundariesCheckBox->setChecked(boundariesReleased);
+	releaseBoundariesCheckBox->setEnabled(sf->getColorScale() && sf->getColorScale()->isRelative()); //can't play with this if scale is 'absolute'!
 	releaseBoundariesCheckBox->blockSignals(false);
 
 	nanInGreyCheckBox->blockSignals(true);
@@ -143,12 +150,23 @@ void sfEditDlg::fillDialogWith(ccScalarField* sf)
 	dispValSlider->setSpan((int)floor(spin2slider_1(minDist)),(int)ceil(spin2slider_1(maxDist)));
 	satValSlider->setSpan(((int)floor(spin2slider_2(minSat))),(int)ceil(spin2slider_2(maxSat)));
 
+	minValSpinBox->setEnabled(true);
+	maxValSpinBox->setEnabled(true);
+
 	double dispLowBound = m_lowBound;
 	double dispUpBound = m_upBound;
 	if (boundariesReleased)
 	{
-		dispUpBound = DBL_MAX;
-		dispLowBound = -DBL_MAX;
+		if (!sf->getColorScale() || sf->getColorScale()->isRelative())
+		{
+			dispUpBound = DBL_MAX;
+			dispLowBound = -DBL_MAX;
+		}
+		else
+		{
+			minValSpinBox->setEnabled(false);
+			maxValSpinBox->setEnabled(false);
+		}
 	}
 
 	/*** spinboxes ***/
@@ -202,7 +220,7 @@ void sfEditDlg::minValSBChanged(double val)
 	}
 	else
 	{
-		//'val' can be anything! If it
+		//'val' can be anything!
 		if (val<m_associatedSF->getMin())
 		{
 			m_associatedSF->setBoundaries(val,m_associatedSF->getMax());
@@ -259,8 +277,8 @@ void sfEditDlg::maxValSBChanged(double val)
 
 	dispValSlider->blockSignals(true);
 	int pos = (int)ceil(spin2slider_1(val));
-	if (pos>SLIDERS_STEPS)
-		pos=SLIDERS_STEPS;
+	if (pos > SLIDERS_STEPS)
+		pos = SLIDERS_STEPS;
 	dispValSlider->setUpperPosition(pos);
 	dispValSlider->blockSignals(false);
 	QApplication::processEvents();
@@ -300,8 +318,8 @@ void sfEditDlg::maxSatSBChanged(double val)
 
 	satValSlider->blockSignals(true);
 	int pos = (int)ceil(spin2slider_2(val));
-	if (pos>SLIDERS_STEPS)
-		pos=SLIDERS_STEPS;
+	if (pos > SLIDERS_STEPS)
+		pos = SLIDERS_STEPS;
 	satValSlider->setUpperPosition(pos);
 	satValSlider->blockSignals(false);
 	QApplication::processEvents();
@@ -404,7 +422,7 @@ void sfEditDlg::boundariesLockChanged(bool state)
 	if (!m_associatedSF)
 		return;
 
-	if (m_associatedSF->areBoundariesAutoUpdated() != state)
+	if (m_associatedSF->areBoundariesAutoUpdated() == state)
 	{
 		//we change the 'auto update' state
 		m_associatedSF->autoUpdateBoundaries(!state);

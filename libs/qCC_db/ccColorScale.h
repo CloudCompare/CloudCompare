@@ -37,15 +37,19 @@ class ccColorScaleElement
 public:
 	
 	//! Default constructor
-	ccColorScaleElement() : m_value(0.0), m_color(Qt::black) {}
+	ccColorScaleElement() : m_relativePos(0.0), m_color(Qt::black) {}
 
-	//! Constructor from a value and a color
-	ccColorScaleElement(double value, QColor color) : m_value(value), m_color(color) {}
+	//! Constructor from a (relative) position and a color
+	ccColorScaleElement(double relativePos, QColor color) : m_relativePos(relativePos), m_color(color) {}
 
-    //! Sets associated value
-	inline void setValue(double val) { m_value = val; }
-    //! Returns associated value
-	inline double getValue() const { return m_value; }
+    //! Sets associated value (relative to scale boundaries)
+	/** \param pos relative position (always between 0.0 and 1.0!)
+	**/
+	inline void setRelativePos(double pos) { m_relativePos = pos; }
+    //! Returns step position (relative to scale boundaries)
+	/** \return relative position (always between 0.0 and 1.0!)
+	**/
+	inline double getRelativePos() const { return m_relativePos; }
 
     //! Sets color
 	inline void setColor(QColor color) { m_color = color; }
@@ -55,19 +59,29 @@ public:
 	//! Comparison operator between two color scale elements
 	inline static bool IsSmaller(const ccColorScaleElement& e1, const ccColorScaleElement& e2)
 	{
-		return e1.getValue() < e2.getValue();
+		return e1.getRelativePos() < e2.getRelativePos();
 	}
 
 protected:
 	
-	//! Associated value
-	double m_value;
+	//! Step (relative) position
+	/** Must always be between 0.0 and 1.0!
+	**/
+	double m_relativePos;
 	//! Color
 	QColor m_color;
 };
 
 //! Color scale
-/** Internally, colors are always stored in the RGBA  format (to improve access speed... at least on Windows ;)
+/** A color scale is defined by several 'steps' corresponding to given colors.
+	The color between each step is linearly interpolated. A vald color scale
+	must have at least 2 steps, one at relative position 0.0 (scale start) and
+	one at relative position 1.0 (scale end). Steps can't be defined outside
+	this intervale.
+
+	For faster access, a array of interpolated colors is maintained internally.
+	Be sure that the 'refresh' method has been called after any modification(s)
+	of the scale steps (position or color).
 **/
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"
@@ -82,14 +96,18 @@ public:
 	typedef QSharedPointer<ccColorScale> Shared;
 
 	//! Creates a new color scale (with auto-generated unique id)
-	ccColorScale::Shared Create(QString name, bool relative = true); 
+	/** Warning: color scale is relative by default.
+	**/
+	static ccColorScale::Shared Create(QString name); 
 
 	//! Default constructor
 	/** \param name scale name
 		\param uuid UUID (automatically generated if none is provided)
-		\param relative whether scale is relative or not (can be changed afterwards)
+		Scale are 'relative' by default (can be changed afterwards, see setAbsolute).
+		On construction they already have the two extreme steps defined (at position
+		0.0 and 1.0).
 	**/
-	ccColorScale(QString name, QString uuid = QString(), bool relative = true);
+	ccColorScale(QString name, QString uuid = QString());
 
 	//! Destructor
 	virtual ~ccColorScale();
@@ -118,27 +136,35 @@ public:
 	//! Returns whether scale is relative or absoute
 	/** Relative means that internal 'values' are percentage.
 	**/
-	bool isRelative() const { return m_relative; }
+	inline bool isRelative() const { return m_relative; }
 
-	//! Sets whether scale is relative or absoute
-	void setRelative(bool state) { m_relative = state; }
+	//! Sets scale as relative
+	inline void setRelative() { m_relative = true; }
+
+	//! Sets scale as absolute
+	void setAbsolute(double minVal, double maxVal);
+
+	//! Get absolute scale boundaries
+	/** Warning: only valid with absolute scales!
+	**/
+	void getAbsoluteBoundaries(double& minVal, double& maxVal) const;
 
 	//! Returns whether scale is locked or not
-	bool isLocked() const { return m_locked; }
+	inline bool isLocked() const { return m_locked; }
 
 	//! Sets whether scale is locked or not
-	void setLocked(bool state) { m_locked = state; }
+	inline void setLocked(bool state) { m_locked = state; }
 
 	//! Returns the current number of steps
-	/** There must be at least 2 steps for the scale to be valid!
+	/** A valid scale should always have at least 2 steps!
 	**/
-	int stepCount() const { return m_steps.size(); }
+	inline int stepCount() const { return m_steps.size(); }
 
 	//! Access to a given step
-	ccColorScaleElement& step(int index) { return m_steps[index]; }
+	inline ccColorScaleElement& step(int index) { return m_steps[index]; }
 
 	//! Access to a given step (const)
-	const ccColorScaleElement& step(int index) const { return m_steps[index]; }
+	inline const ccColorScaleElement& step(int index) const { return m_steps[index]; }
 
 	//! Adds a step
 	/** Scale must not be locked.
@@ -146,32 +172,38 @@ public:
 	void insert(const ccColorScaleElement& step, bool autoUpdate = true);
 
 	//! Deletes a given step
-	/** There must be at least 2 steps for the scale to be valid!
+	/** The first and last index shouldn't be deleted!
 		Scale must not be locked.
 	**/
 	void remove(int index, bool autoUpdate = true);
 
-	//! Removes all steps
-	/** There must be at least 2 steps for the scale to be valid!
+	//! Clears all steps
+	/** There should be at least 2 steps for the scale to be valid!
 		Scale must not be locked.
 	**/
 	void clear();
 
 	//! Updates internal representation
+	/** Must be called at least once after any modification
+		(before using this scale).
+	**/
 	void update();
 
-	//! Returns relative position of a given value (wrt to scale min and max)
+	//! Returns relative position of a given value (wrt to scale absolute min and max)
+	/** Warning: only valid with absolute scales! Use 'getColorByRelativePos' otherwise.
+	**/
 	inline double getRelativePosition(double value) const
 	{
-		assert(m_updated);
-		return (value - m_minValue)/m_range;
+		assert(m_updated && !m_relative);
+		return (value - m_absoluteMinValue)/m_absoluteRange;
 	}
 
 	//! Returns color by value
-	/** Warning: check first that scale is relative or not! (see ccColorScale::isRelative)
+	/** Warning: only valid with absolute scales!
 	**/
 	inline const colorType* getColorByValue(double value) const
 	{
+		assert(m_updated && !m_relative);
 		double relativePos = getRelativePosition(value);
 		return (relativePos >= 0.0 && relativePos <= 1.0 ? getColorByRelativePos(relativePos) : 0);
 	}
@@ -236,11 +268,17 @@ protected:
 	//! Whether scale is locked or not
 	bool m_locked;
 
-	//! Min value (for faster access)
-	double m_minValue;
+	//! 'Absolute' minimum value
+	/** Only used if scale is 'absolute' (i.e. not relative).
+		'Absolute' should not be taken in its mathematical meaning!
+	**/
+	double m_absoluteMinValue;
 
-	//! Range (for faster access)
-	double m_range;
+	//! 'Absolute' range
+	/** Only used if scale is 'absolute' (i.e. not relative).
+		'Absolute' should not be taken in its mathematical meaning!
+	**/
+	double m_absoluteRange;
 
 };
 

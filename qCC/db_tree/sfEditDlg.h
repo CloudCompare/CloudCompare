@@ -30,11 +30,14 @@ class sfEditDlg : public QWidget, public Ui::SFEditDlg
     Q_OBJECT
 
 public:
-    sfEditDlg(QWidget* parent);
+
+	//! Default constructor
+    sfEditDlg(QWidget* parent=0);
 
     void fillDialogWith(ccScalarField* sf);
 
 public slots:
+
     void minValSBChanged(double val);
     void maxValSBChanged(double val);
     void minSatSBChanged(double val);
@@ -54,17 +57,17 @@ signals:
 
 protected:
 
-    ccScalarField* m_associatedSF;
+    double spin2slider_1(double val);
+    double spin2slider_2(double val);
+    double slider2spin_1(int val);
+    double slider2spin_2(int val);
+
+	ccScalarField* m_associatedSF;
 
     double m_step1,m_step2;
     double m_coef1,m_coef2;
     double m_lowBound,m_upBound;
     double m_satSpan;
-
-    double spin2slider_1(double val);
-    double spin2slider_2(double val);
-    double slider2spin_1(int val);
-    double slider2spin_2(int val);
 };
 
 #endif //CC_SF_EDIT_DIALOG_HEADER

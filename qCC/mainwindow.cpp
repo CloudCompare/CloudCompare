@@ -1042,7 +1042,7 @@ void MainWindow::doActionSetColorGradient()
 	}
 	else
 	{
-		colorScale = ccColorScale::Shared(new ccColorScale("Temp scale",QString(),true));
+		colorScale = ccColorScale::Create("Temp scale");
 		colorScale->insert(ccColorScaleElement(0.0,dlg.s_firstColor),false);
 		colorScale->insert(ccColorScaleElement(1.0,dlg.s_secondColor),true);
 	}

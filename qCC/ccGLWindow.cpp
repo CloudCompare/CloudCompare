@@ -1546,7 +1546,7 @@ unsigned ccGLWindow::getTexture(const QImage& image)
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE,&maxTexSize);
 	int cacheLimit = context()->textureCacheLimit()*1024;
 
-	if (image.width() <= maxTexSize && image.height() <= maxTexSize && cacheLimit > image.width()*image.height()*4)
+	if (image.width() <= maxTexSize && image.height() <= maxTexSize && cacheLimit >= image.width()*image.height()*4)
 	{
 		return bindTexture(image,GL_TEXTURE_2D,GL_RGBA,QGLContext::NoBindOption);
 	}

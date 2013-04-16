@@ -4,23 +4,24 @@ v2.4 ??/??/2013
 - 3D slicer
 
 v2.4 04/16/2013
+- 3D mouses (3dConnexion devices) are now supported:
+	* OBJECT mode corresponds to ortho. and object-centered perspective
+	* CAMERA mode corresponds to viewer-centered perspective
+	* can be enabled/disabled via the 'File > 3D mouse' menu
 - Dynamic color lookup for displaying scalar fields greatly accelerated
 	* a dedicated shader is automatically activated if GPU supports it
+	* speed-up of scalar fields display ~ 300%!
 - Introducing the "Color Scale Manager":
 	* edit, copy and create custom color scales
 	* accessible via a button next to the 'current scale' combo-box in the properties view
 		or via the 'Edit > Scalar Field > Color Scale Manager' menu entry
 	* custom scalar scales are saved along with the entity (in BIN format)
 		and are automatically imported when loading the file (on another computer typically)
-- No more distinction between (antiquated) 'positive'scalar fields and the standard ones
-- New selection mechanism:
-	* press ALT + right mouse button to define a rectangular selection area
-		in order to select multiple entities at once
+- No more distinction between (antiquated) 'positive' scalar fields and the standard ones
+- New entity picking mechanism:
+	* press ALT + left mouse button to define a rectangular selection area to select multiple
+		entities at once
 	* picking speed enhanced
-- 3D mouses (3dConnexion devices) are now supported:
-	* OBJECT mode corresponds to ortho. and object-centered perspective
-	* CAMERA mode corresponds to viewer-centered perspective
-	* can be enabled/disabled via the 'File > 3D mouse' menu
 - 3D camera management enhanced:
 	* transitions between perspective modes are smoother
 	* custom light appears and can be intearctively moved (with CTRL+right click) in all modes
@@ -30,20 +31,20 @@ v2.4 04/16/2013
 	* new default views added (front and back 'isometric' views)
 	* default FOV (field of view) is now 30 degrees for perspective mode
 - New method:
-	* Edit > Mesh > Export materials/textures to RGB
-- Improvements:
-	* CC can now handle textures/materials when saving PLY files
+	* Edit > Mesh > Export materials/textures to RGB (per-vertex color)
 - New pop-menus added to the 'View' toolbar:
 	* selection of the current rotation center visibility (see above)
 	* selection of the current view mode (orthographic, object-based and viewer-based perspective)
 - New context menu entry for the DB tree: 'Information (recursive)'
 	* recursively gather various information (number of points, triangles, colors, etc.)
 - STL files can now be saved in both BINARY and ASCII formats
+- PLY files can now save texture coordinates (and the texture in a separated file) if only one
+	texture is associated to the mesh (otherwise CC will suggest to convert materials/textures to RGB)
 - Default materials and lights have been updated
-- bug fix:
+- Bug fixes:
 	* BIN files saved with labels would make CC crash when re-opened!
 	* Closing the 'About' dialog would make CC crash!
-	* ccViewer no longer display the colorbar if the scalar field is hidden!
+	* ccViewer no longer displays the colorbar if the scalar field is hidden!
 	* The cloud/cloud distance with the 'Height Function' model refinement was giving weird results!
 
 v2.4 03/10/2013

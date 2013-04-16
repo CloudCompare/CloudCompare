@@ -3,9 +3,15 @@
 v2.4 ??/??/2013
 - 3D slicer
 
-v2.4 03/17/2013
+v2.4 04/16/2013
 - Dynamic color lookup for displaying scalar fields greatly accelerated
 	* a dedicated shader is automatically activated if GPU supports it
+- Introducing the "Color Scale Manager":
+	* edit, copy and create custom color scales
+	* accessible via a button next to the 'current scale' combo-box in the properties view
+		or via the 'Edit > Scalar Field > Color Scale Manager' menu entry
+	* custom scalar scales are saved along with the entity (in BIN format)
+		and are automatically imported when loading the file (on another computer typically)
 - No more distinction between (antiquated) 'positive'scalar fields and the standard ones
 - New selection mechanism:
 	* press ALT + right mouse button to define a rectangular selection area
@@ -32,6 +38,7 @@ v2.4 03/17/2013
 	* selection of the current view mode (orthographic, object-based and viewer-based perspective)
 - New context menu entry for the DB tree: 'Information (recursive)'
 	* recursively gather various information (number of points, triangles, colors, etc.)
+- STL files can now be saved in both BINARY and ASCII formats
 - Default materials and lights have been updated
 - bug fix:
 	* BIN files saved with labels would make CC crash when re-opened!

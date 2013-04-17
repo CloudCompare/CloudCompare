@@ -264,7 +264,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 					//save texture filename as a comment!
 					result=ply_add_comment(ply,qPrintable(QString("TEXTUREFILE %1").arg(defaultTextureName)));
 					//DGM FIXME: is this the right name?
-					result = ply_add_list_property(ply, "tex_coords", PLY_UCHAR, PLY_FLOAT);
+					result = ply_add_list_property(ply, "texcoord", PLY_UCHAR, PLY_FLOAT); //'texcoord' to mimick Photoscan
 				}
 			}
 		}

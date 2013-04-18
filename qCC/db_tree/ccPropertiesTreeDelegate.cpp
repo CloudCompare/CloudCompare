@@ -161,7 +161,7 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 
 	if (m_model)
 	{
-		m_model->removeRows(0,m_model->rowCount()-1);
+		m_model->removeRows(0,m_model->rowCount());
 		m_model->setColumnCount(2);
 		m_model->setHeaderData(0, Qt::Horizontal, "Property");
 		m_model->setHeaderData(1, Qt::Horizontal, "State/Value");

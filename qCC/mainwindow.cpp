@@ -2165,15 +2165,15 @@ void MainWindow::doActionFilterByValue()
 
         if (i==0)
         {
-            minVald=(double)sf->getMinDisplayed();
-            maxVald=(double)sf->getMaxDisplayed();
+			minVald = (double)sf->displayRange().start();
+            maxVald = (double)sf->displayRange().stop();
         }
         else
         {
-            if (minVald>(double)sf->getMinDisplayed())
-                minVald=(double)sf->getMinDisplayed();
-            if (maxVald<(double)sf->getMaxDisplayed())
-                maxVald=(double)sf->getMaxDisplayed();
+            if (minVald > (double)sf->displayRange().start())
+                minVald = (double)sf->displayRange().start();
+            if (maxVald < (double)sf->displayRange().stop())
+                maxVald = (double)sf->displayRange().stop();
         }
     }
 
@@ -3422,8 +3422,9 @@ void MainWindow::doActionStatisticalTest()
 					ccScalarField* chi2SF = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
 					chi2SF->computeMinAndMax();
 					chi2SF->setMinDisplayed(chi2dist);
-					chi2SF->setMinSaturation(chi2dist);
-					chi2SF->setMaxSaturation(chi2dist);
+					chi2SF->setSymmetricalScale(false);
+					chi2SF->setSaturationStart(chi2dist);
+					chi2SF->setSaturationStop(chi2dist);
 					pc->setCurrentDisplayedScalarField(chi2SfIdx);
 					pc->showSF(true);
 					pc->prepareDisplayForRefresh_recursive();
@@ -5705,7 +5706,7 @@ void MainWindow::doActionAddConstantSF()
 			cloud->getDisplay()->redraw();
 	}
 
-	ccLog::Print(QString("New scalar field added to %1 (constant value: %2 - not strictly positive by default)").arg(cloud->getName()).arg(sfValue));
+	ccLog::Print(QString("New scalar field added to %1 (constant value: %2)").arg(cloud->getName()).arg(sfValue));
 }
 
 void MainWindow::doActionScalarFieldArithmetic()

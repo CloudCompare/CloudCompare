@@ -265,8 +265,8 @@ public:
     virtual bool hasDisplayedScalarField() const;
 
     //inherited from ccGenericPointCloud
-	virtual const colorType* getPointDistanceColor(unsigned pointIndex) const;
-	virtual const colorType* getDistanceColor(ScalarType d) const;
+	virtual const colorType* getPointScalarValueColor(unsigned pointIndex) const;
+	virtual const colorType* geScalarValueColor(ScalarType d) const;
 	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const;
 	virtual const colorType* getPointColor(unsigned pointIndex) const;
 	virtual const normsType getPointNormalIndex(unsigned pointIndex) const;

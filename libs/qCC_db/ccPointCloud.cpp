@@ -926,27 +926,18 @@ bool ccPointCloud::sfColorScaleShown() const
     return m_sfColorScaleDisplayed && sfShown();
 }
 
-const colorType* ccPointCloud::getPointDistanceColor(unsigned pointIndex) const
+const colorType* ccPointCloud::getPointScalarValueColor(unsigned pointIndex) const
 {
     assert(m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale());
-    assert(pointIndex<m_currentDisplayedScalarField->currentSize());
 
-    ScalarType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(pointIndex);
-    if (normalizedDist >= 0)
-		return m_currentDisplayedScalarField->getColorScale()->getColorByRelativePos(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps());
-    else
-		return (m_currentDisplayedScalarField->areNaNValuesShownInGrey() ? ccColor::lightGrey : 0);
+	return m_currentDisplayedScalarField->getValueColor(pointIndex);
 }
 
-const colorType* ccPointCloud::getDistanceColor(ScalarType d) const
+const colorType* ccPointCloud::geScalarValueColor(ScalarType d) const
 {
     assert(m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale());
 
-    ScalarType normalizedDist = m_currentDisplayedScalarField->normalize(d);
-    if (normalizedDist >= 0)
-        return m_currentDisplayedScalarField->getColorScale()->getColorByRelativePos(normalizedDist,m_currentDisplayedScalarField->getColorRampSteps());
-	else
-		return (m_currentDisplayedScalarField->areNaNValuesShownInGrey() ? ccColor::lightGrey : NULL);
+	return m_currentDisplayedScalarField->getColor(d);
 }
 
 ScalarType ccPointCloud::getPointDisplayedDistance(unsigned pointIndex) const
@@ -1403,6 +1394,27 @@ static colorType s_rgbBuffer3ub[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
 static float s_rgbBuffer3f[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
 static float s_colormapf[glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE];
 
+//helpers (for ColorRamp shader)
+
+inline float GetNormalizedValue(const ScalarType& sfVal, const ccScalarField::Range& displayRange)
+{
+	 return static_cast<float>((sfVal-displayRange.start())/displayRange.range());
+}
+
+inline float GetSymmetricalNormalizedValue(const ScalarType& sfVal, const ccScalarField::Range& saturationRange)
+{
+	//normalized sf value
+	ScalarType relativeValue = 0;
+	if (fabs(sfVal) > saturationRange.start()) //we avoid the 'flat' SF case by the way
+	{
+		if (sfVal < 0)
+			relativeValue = (sfVal+saturationRange.start())/saturationRange.max();
+		else
+			relativeValue = (sfVal-saturationRange.start())/saturationRange.max();
+	}
+	return (1.0f+static_cast<float>(relativeValue))/2.0f;	//normalized sf value
+}
+
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
     if (!m_points->isAllocated())
@@ -1517,11 +1529,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						if (m_pointsVisibility->getValue(j) == POINT_VISIBLE)
 						{
 							assert(j<m_currentDisplayedScalarField->currentSize());
-							//we force display of points hidden because of of their scalar field value
+							//we force display of points hidden because of their scalar field value
 							//to be sure that the user don't miss them (during manual segmentation for instance)
-							ScalarType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
-							const colorType* col = (normalizedDist >= 0 ? colorScale->getColorByRelativePos(normalizedDist,colorRampSteps) : ccColor::lightGrey);
-
+							const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
+							assert(col);
 							glColor3ubv(col);
 							if (glParams.showNorms)
 								glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
@@ -1547,25 +1558,18 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else if (glParams.showSF)
 			{
-				//we will need these parameters to scale values between 0 and 1
-				const ScalarType sfMin = m_currentDisplayedScalarField->getMin();
-				const ScalarType sfMax = m_currentDisplayedScalarField->getMax();
-				const ScalarType sfRampStart = sfMin;
-				const ScalarType sfRampRange = sfMax-sfMin;
-
-				ScalarType sfMinDisp = m_currentDisplayedScalarField->getMinDisplayed();
-				ScalarType sfMaxDisp = m_currentDisplayedScalarField->getMaxDisplayed();
-				ScalarType sfMinSat = m_currentDisplayedScalarField->getMinSaturation();
-				ScalarType sfMaxSat = m_currentDisplayedScalarField->getMaxSaturation();
+				const ccScalarField::Range& sfDisplayRange = m_currentDisplayedScalarField->displayRange();
+				const ccScalarField::Range& sfSaturationRange = m_currentDisplayedScalarField->saturationRange();
 
 				//the fact that NaN values SHOULD be hidden, doesn't mean that we ACTUALLY hide points...
 				bool hiddenPoints = (	!m_currentDisplayedScalarField->areNaNValuesShownInGrey()
-										&& ( sfMaxDisp <= sfMax || sfMinDisp >= sfMin) );
+										&& ( sfDisplayRange.stop() <= sfDisplayRange.max() || sfDisplayRange.start() >= sfDisplayRange.min()) );
 
 				//color ramp shader initialization
 				ccShader* colorRampShader = context.colorRampShader;
 
-				if (m_currentDisplayedScalarField->logScale())
+				if (m_currentDisplayedScalarField->logScale()
+					|| !colorScale->isRelative())
 				{
 					//FIXME: shader doesn't support log scale yet!
 					colorRampShader = 0;
@@ -1590,15 +1594,21 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(colorScale);
 						
 						colorRampShader->start();
-						if (m_currentDisplayedScalarField->absoluteSaturation())
-						{
-							ScalarType maxAbsSat = std::max(fabs(sfMinSat),fabs(sfMaxSat));
-							sfMinSat = -maxAbsSat;
-							sfMaxSat =  maxAbsSat;
-						}
 
-						ScalarType sfMinSatRel = (sfMinSat-sfRampStart)/sfRampRange; //doesn't need to be between 0 and 1!
-						ScalarType sfMaxSatRel = (sfMaxSat-sfRampStart)/sfRampRange; //doesn't need to be between 0 and 1!
+						float sfMinSatRel = 0.0f;
+						float sfMaxSatRel = 1.0f;
+						if (!m_currentDisplayedScalarField->symmetricalScale())
+						{
+							sfMinSatRel = GetNormalizedValue(sfSaturationRange.start(),sfDisplayRange);	//doesn't need to be between 0 and 1!
+							sfMaxSatRel = GetNormalizedValue(sfSaturationRange.stop(),sfDisplayRange);	//doesn't need to be between 0 and 1!
+						}
+						else
+						{
+							//we can only handle 'maximum' saturation
+							sfMinSatRel = GetSymmetricalNormalizedValue(-sfSaturationRange.stop(),sfSaturationRange);
+							sfMaxSatRel = GetSymmetricalNormalizedValue(sfSaturationRange.stop(),sfSaturationRange);
+							//we'll have to handle the 'minimum' saturation manually!
+						}
 						colorRampShader->setUniform1f("minSaturation",sfMinSatRel);
 						colorRampShader->setUniform1f("maxSaturation",sfMaxSatRel);
 						colorRampShader->setUniform1i("colormapSize",(int)steps);
@@ -1685,13 +1695,26 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						if (colorRampShader)
 						{
 							float* _sfColors = s_rgbBuffer3f;
-							for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep,_sfColors+=3)
+							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								//we simply set scalar value as red color component
-								bool valid = (*_sf >= sfMinDisp && *_sf <= sfMaxDisp); //NaN values are rejected
-								_sfColors[0] = (*_sf-sfRampStart)/sfRampRange;	//normalized sf value
-								_sfColors[1] = valid ? 1.0f : 0.0f;				//flag: whether point is grayed out or not
-								_sfColors[2] = 1.0f;							//reference value (to cope get the true lighting value)
+								for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep,_sfColors+=3)
+								{
+									bool valid = sfDisplayRange.isInRange(*_sf);							//NaN values are also rejected!
+									_sfColors[0] = GetNormalizedValue(*_sf,sfDisplayRange);					//normalized sf value
+									_sfColors[1] = valid ? 1.0f : 0.0f;										//flag: whether point is grayed out or not
+									_sfColors[2] = 1.0f;													//reference value (to get the true lighting value)
+								}
+							}
+							else //symmetrical scale
+							{
+								//we must handle the values between -minSat et +minSat 'manually'
+								for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep,_sfColors+=3)
+								{
+									bool valid = sfDisplayRange.isInRange(*_sf);							//NaN values are also rejected!
+									_sfColors[0] = GetSymmetricalNormalizedValue(*_sf,sfSaturationRange);	//normalized sf value
+									_sfColors[1] = valid ? 1.0f : 0.0f;										//flag: whether point is grayed out or not
+									_sfColors[2] = 1.0f;													//reference value (to get the true lighting value)
+								}
 							}
 						}
 						else
@@ -1701,8 +1724,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep)
 							{
 								//we need to convert scalar value to color into a temporary structure
-								ScalarType normalizedDist = m_currentDisplayedScalarField->normalize(*_sf);
-								const colorType* col = (normalizedDist >= 0 ? colorScale->getColorByRelativePos(normalizedDist,colorRampSteps) : ccColor::lightGrey);
+								const colorType* col = m_currentDisplayedScalarField->getColor(*_sf);
+								assert(col);
 								*_sfColors++ = *col++;
 								*_sfColors++ = *col++;
 								*_sfColors++ = *col++;
@@ -1744,15 +1767,32 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						if (colorRampShader)
 						{
-							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								assert(j<m_currentDisplayedScalarField->currentSize());
-								const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
-								if (sf >= sfMinDisp && sf <= sfMaxDisp) //NaN values are rejected
+								for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 								{
-									glColor3f((sf-sfRampStart)/sfRampRange,1.0f,1.0f);
-									glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
-									glVertex3fv(m_points->getValue(j));
+									assert(j<m_currentDisplayedScalarField->currentSize());
+									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
+									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
+									{
+										glColor3f(GetNormalizedValue(sf,sfDisplayRange),1.0f,1.0f);
+										glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
+										glVertex3fv(m_points->getValue(j));
+									}
+								}
+							}
+							else
+							{
+								for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+								{
+									assert(j<m_currentDisplayedScalarField->currentSize());
+									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
+									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
+									{
+										glColor3f(GetSymmetricalNormalizedValue(sf,sfSaturationRange),1.0f,1.0f);
+										glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
+										glVertex3fv(m_points->getValue(j));
+									}
 								}
 							}
 						}
@@ -1762,10 +1802,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 							{
 								assert(j<m_currentDisplayedScalarField->currentSize());
-								ScalarType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
-								if (normalizedDist >= 0)
+								const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
+								if (col)
 								{
-									const colorType* col = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
 									glColor3ubv(col);
 									glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
 									glVertex3fv(m_points->getValue(j));
@@ -1777,14 +1816,30 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						if (colorRampShader)
 						{
-							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								assert(j<m_currentDisplayedScalarField->currentSize());
-								const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
-								if (sf >= sfMinDisp && sf <= sfMaxDisp) //NaN values are rejected
+								for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 								{
-									glColor3f((sf-sfRampStart)/sfRampRange,1.0f,1.0f);
-									glVertex3fv(m_points->getValue(j));
+									assert(j<m_currentDisplayedScalarField->currentSize());
+									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
+									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
+									{
+										glColor3f(GetNormalizedValue(sf,sfDisplayRange),1.0f,1.0f);
+										glVertex3fv(m_points->getValue(j));
+									}
+								}
+							}
+							else
+							{
+								for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+								{
+									assert(j<m_currentDisplayedScalarField->currentSize());
+									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
+									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
+									{
+										glColor3f(GetSymmetricalNormalizedValue(sf,sfSaturationRange),1.0f,1.0f);
+										glVertex3fv(m_points->getValue(j));
+									}
 								}
 							}
 						}
@@ -1794,10 +1849,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 							{
 								assert(j<m_currentDisplayedScalarField->currentSize());
-								ScalarType normalizedDist = m_currentDisplayedScalarField->getNormalizedValue(j);
-								if (normalizedDist >= 0)
+								const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
+								if (col)
 								{
-									const colorType* col = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
 									glColor3ubv(col);
 									glVertex3fv(m_points->getValue(j));
 								}
@@ -1920,7 +1974,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 				{
-					const colorType* col = getPointDistanceColor(j);
+					const colorType* col = getPointScalarValueColor(j);
 					if (col)
 					{
 						glLoadName(j);
@@ -2167,7 +2221,7 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
 
         for (unsigned i=0; i<count; i++)
         {
-            const colorType* col = getPointDistanceColor(i);
+            const colorType* col = getPointScalarValueColor(i);
             m_rgbColors->setValue(i,col ? col : ccColor::black);
         }
     }
@@ -2176,7 +2230,7 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
         m_rgbColors->placeIteratorAtBegining();
         for (unsigned i=0; i<count; i++)
         {
-            const colorType* col = getPointDistanceColor(i);
+            const colorType* col = getPointScalarValueColor(i);
 			if (col)
 			{
 				colorType* _color = m_rgbColors->getCurrentValue();

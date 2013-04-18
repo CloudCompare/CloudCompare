@@ -1,4 +1,4 @@
-// Color Ramp Shader (CloudCompare - 03/29/2013)
+// Color Ramp Shader (CloudCompare - 04/18/2013)
 
 uniform float minSaturation;		//minimum saturation value (between 0 and 1)
 uniform float maxSaturation;		//maximum saturation value (between 0 and 1)
@@ -17,7 +17,7 @@ void main(void)
 	
 	vec3 unpackedValues = vec3(1.0, 256.0, 65536.0);
 	
-	if (gl_Color[1] == 1.0)
+	if (gl_Color[1] > 0.99) //0.99 to cope with round-off issues (in perspective mode for instance)
 	{
 		//determine position in current colormap
 		int rampPosi = 0;

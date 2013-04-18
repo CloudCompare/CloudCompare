@@ -1760,8 +1760,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	if (intensitySF)
 	{
 		intensitySF->computeMinAndMax();
-		intensitySF->setBoundaries(0,1);
-		intensitySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
+		intensitySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::ABS_NORM_GREY));
 		cloud->setCurrentDisplayedScalarField(cloud->getScalarFieldIndexByName(intensitySF->getName()));
 		cloud->showSF(true);
 	}
@@ -2136,8 +2135,8 @@ CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bo
 				ccScalarField* sf = pc->getCurrentDisplayedScalarField();
 				if (sf)
 				{
-					sf->setMinSaturation(s_minIntensity);
-					sf->setMaxSaturation(s_maxIntensity);
+					sf->setSaturationStart(s_minIntensity);
+					sf->setSaturationStop(s_maxIntensity);
 				}
 			}
 		}

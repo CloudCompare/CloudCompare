@@ -41,11 +41,12 @@ public:
 	static void ReleaseUniqueInstance();
 
 	//! Pre-defined color scales (all relative - i.e. expand to actual SF)
-	enum DEFAULT_SCALE	{	BGYR	=	0,		/**< Blue-Green-Yellow-Red ramp (default for distances display) */
-							GREY	=	1,		/**< Grey ramp (default for Global Illumination) */
-							BWR		=	2,		/**< Blue-White-Red ramp (for signed SF)*/
-							RY		=	3,		/**< Red-Yellow ramp */
-							RW		=	4,		/**< Red-White ramp */
+	enum DEFAULT_SCALE	{	BGYR			=	0,		/**< Blue-Green-Yellow-Red ramp (default for distances display) */
+							GREY			=	1,		/**< Grey ramp (default for Global Illumination) */
+							BWR				=	2,		/**< Blue-White-Red ramp (for signed SF)*/
+							RY				=	3,		/**< Red-Yellow ramp */
+							RW				=	4,		/**< Red-White ramp */
+							ABS_NORM_GREY	=	5,		/**< Absolute normalized grey ramp (intensities between 0 and 1) */
 	};
 
 	//! Returns a pre-defined color scale UUID

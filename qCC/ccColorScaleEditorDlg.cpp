@@ -91,8 +91,8 @@ void ccColorScaleEditorDialog::setAssociatedScalarField(ccScalarField* sf)
 	m_associatedSF = sf;
 	if (sf)
 	{
-		m_minAbsoluteVal = sf->getMinDisplayed();
-		m_maxAbsoluteVal = sf->getMaxDisplayed();
+		m_minAbsoluteVal = sf->getMin();
+		m_maxAbsoluteVal = sf->getMax();
 	}
 }
 
@@ -301,7 +301,7 @@ void ccColorScaleEditorDialog::onStepModified(int index)
 			if (m_associatedSF)
 			{
 				//compute corresponding scalar value for associated SF
-				double actualValue = m_associatedSF->getMinDisplayed() + relativePos * (m_associatedSF->getMaxDisplayed() - m_associatedSF->getMinDisplayed());
+				double actualValue = m_associatedSF->getMin() + relativePos * (m_associatedSF->getMax() - m_associatedSF->getMin());
 				valueLabel->setText(QString("(%1)").arg(actualValue));
 				valueLabel->setVisible(true);
 			}

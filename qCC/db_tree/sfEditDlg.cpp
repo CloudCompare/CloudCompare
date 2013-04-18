@@ -34,13 +34,6 @@ sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
 	: QWidget(parent)
 	, Ui::SFEditDlg()
 	, m_associatedSF(0)
-	, m_step1(0)
-	, m_step2(0)
-	, m_coef1(0)
-	, m_coef2(0)
-	, m_lowBound(0)
-	, m_upBound(0)
-	, m_satSpan(0)
 {
 	setupUi(this);
 
@@ -54,36 +47,40 @@ sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
 	connect(maxValSpinBox, SIGNAL(valueChanged(double)), this, SLOT(maxValSBChanged(double)));
 	connect(minSatSpinBox, SIGNAL(valueChanged(double)), this, SLOT(minSatSBChanged(double)));
 	connect(maxSatSpinBox, SIGNAL(valueChanged(double)), this, SLOT(maxSatSBChanged(double)));
-	connect(dispValSlider, SIGNAL(spanChanged(int,int)), this, SLOT(dispValSLDChanged(int,int)));
-	connect(satValSlider,  SIGNAL(spanChanged(int,int)), this, SLOT(satValSLDChanged(int,int)));
+	connect(dispValSlider, SIGNAL(spanChanged(int,int)), this, SLOT(dispValSliderChanged(int,int)));
+	connect(satValSlider,  SIGNAL(spanChanged(int,int)), this, SLOT(satValSliderChanged(int,int)));
 
 	//checkboxes
-	connect(absSatCheckBox,				SIGNAL(toggled(bool)), this, SLOT(absSatChanged(bool)));
-	connect(logScaleCheckBox,			SIGNAL(toggled(bool)), this, SLOT(logScaleChanged(bool)));
-	connect(releaseBoundariesCheckBox,	SIGNAL(toggled(bool)), this, SLOT(boundariesLockChanged(bool)));
 	connect(nanInGreyCheckBox,			SIGNAL(toggled(bool)), this, SLOT(nanInGrayChanged(bool)));
+	connect(alwaysShow0CheckBox,		SIGNAL(toggled(bool)), this, SLOT(alwaysShow0Changed(bool)));
+	connect(symmetricalScaleCheckBox,	SIGNAL(toggled(bool)), this, SLOT(symmetricalScaleChanged(bool)));
+	connect(logScaleCheckBox,			SIGNAL(toggled(bool)), this, SLOT(logScaleChanged(bool)));
 
 	show();
 }
 
-double sfEditDlg::spin2slider_1(double val)
+double sfEditDlg::dispSpin2slider(double val) const
 {
-	return (val-m_lowBound)*m_coef1;
+	assert(m_associatedSF && m_associatedSF->displayRange().maxRange() != 0);
+	return ((val - m_associatedSF->displayRange().min()) / m_associatedSF->displayRange().maxRange()) * (double)SLIDERS_STEPS;
 }
 
-double sfEditDlg::spin2slider_2(double val)
+double sfEditDlg::satSpin2slider(double val) const
 {
-	return m_associatedSF->absoluteSaturation() ? val*m_coef2 : (val-m_lowBound)*m_coef2;
+	assert(m_associatedSF && m_associatedSF->saturationRange().maxRange() != 0);
+	return ((val - m_associatedSF->saturationRange().min()) / m_associatedSF->saturationRange().maxRange()) * (double)SLIDERS_STEPS;
 }
 
-double sfEditDlg::slider2spin_1(int val)
+double sfEditDlg::dispSlider2spin(int pos) const
 {
-	return (double)val/(double)SLIDERS_STEPS*(m_upBound-m_lowBound)+m_lowBound;
+	assert(m_associatedSF);
+	return m_associatedSF->displayRange().min() + (double)pos/(double)SLIDERS_STEPS * m_associatedSF->displayRange().maxRange();
 }
 
-double sfEditDlg::slider2spin_2(int val)
+double sfEditDlg::satSlider2spin(int pos) const
 {
-	return m_associatedSF->absoluteSaturation() ? (double)val/(double)SLIDERS_STEPS*m_satSpan : slider2spin_1(val);
+	assert(m_associatedSF);
+	return m_associatedSF->saturationRange().min() + (double)pos/(double)SLIDERS_STEPS * m_associatedSF->saturationRange().maxRange();
 }
 
 void sfEditDlg::fillDialogWith(ccScalarField* sf)
@@ -96,113 +93,111 @@ void sfEditDlg::fillDialogWith(ccScalarField* sf)
 		return;
 	}
 
-	bool absSaturation = sf->absoluteSaturation();
-	bool logScale = sf->logScale();
-	bool boundariesReleased = !sf->areBoundariesAutoUpdated();
-	bool nanValuesInGrey = sf->areNaNValuesShownInGrey();
-
-	absSatCheckBox->blockSignals(true);
-	absSatCheckBox->setChecked(absSaturation);
-	absSatCheckBox->setEnabled(!logScale);
-	absSatCheckBox->blockSignals(false);
-
-	logScaleCheckBox->blockSignals(true);
-	logScaleCheckBox->setChecked(logScale);
-	logScaleCheckBox->blockSignals(false);
-
-	releaseBoundariesCheckBox->blockSignals(true);
-	releaseBoundariesCheckBox->setChecked(boundariesReleased);
-	releaseBoundariesCheckBox->setEnabled(sf->getColorScale() && sf->getColorScale()->isRelative()); //can't play with this if scale is 'absolute'!
-	releaseBoundariesCheckBox->blockSignals(false);
-
-	nanInGreyCheckBox->blockSignals(true);
-	nanInGreyCheckBox->setChecked(nanValuesInGrey);
-	nanInGreyCheckBox->blockSignals(false);
-
-	minValSpinBox->blockSignals(true);
-	minSatSpinBox->blockSignals(true);
-	maxSatSpinBox->blockSignals(true);
-	maxValSpinBox->blockSignals(true);
-	dispValSlider->blockSignals(true);
-	satValSlider->blockSignals(true);
-
-	//min/max values
-	ScalarType minDist=sf->getMinDisplayed();
-	ScalarType maxDist=sf->getMaxDisplayed();
-	ScalarType minSat=sf->getMinSaturation();
-	ScalarType maxSat=sf->getMaxSaturation();
-	m_lowBound = sf->getMin();
-	m_upBound  = sf->getMax();
-
-	//in 'released' mode, min and max displayed values can be outbounds
-	m_lowBound = std::min(m_lowBound,(double)minDist);
-	m_upBound = std::max(m_upBound,(double)maxDist);
-
-	m_step1 = (m_upBound-m_lowBound)*1e-6;
-	m_coef1 = (m_upBound>m_lowBound ? (double)SLIDERS_STEPS/(m_upBound-m_lowBound) : 0.0);
-
-	//saturation values
-	m_satSpan = (absSaturation ? std::max(fabs(m_lowBound),fabs(m_upBound)) : m_upBound-m_lowBound);
-	m_step2 = m_satSpan * 1e-6;
-	m_coef2 = (m_satSpan>0 ? (double)SLIDERS_STEPS/m_satSpan : 0.0);
-
-	/*** sliders ***/
-	dispValSlider->setSpan((int)floor(spin2slider_1(minDist)),(int)ceil(spin2slider_1(maxDist)));
-	satValSlider->setSpan(((int)floor(spin2slider_2(minSat))),(int)ceil(spin2slider_2(maxSat)));
-
-	minValSpinBox->setEnabled(true);
-	maxValSpinBox->setEnabled(true);
-
-	double dispLowBound = m_lowBound;
-	double dispUpBound = m_upBound;
-	if (boundariesReleased)
+	//options (checkboxes)
 	{
-		if (!sf->getColorScale() || sf->getColorScale()->isRelative())
+		bool nanValuesInGrey = sf->areNaNValuesShownInGrey();
+		bool alwaysShowZero = sf->isZeroAlwaysShown();
+		bool symmetricalScale = sf->symmetricalScale();
+		bool logScale = sf->logScale();
+
+		nanInGreyCheckBox->blockSignals(true);
+		nanInGreyCheckBox->setChecked(nanValuesInGrey);
+		nanInGreyCheckBox->blockSignals(false);
+
+		alwaysShow0CheckBox->blockSignals(true);
+		alwaysShow0CheckBox->setChecked(alwaysShowZero);
+		alwaysShow0CheckBox->blockSignals(false);
+
+		symmetricalScaleCheckBox->blockSignals(true);
+		symmetricalScaleCheckBox->setChecked(symmetricalScale);
+		symmetricalScaleCheckBox->setEnabled(!logScale);
+		symmetricalScaleCheckBox->blockSignals(false);
+
+		logScaleCheckBox->blockSignals(true);
+		logScaleCheckBox->setChecked(logScale);
+		logScaleCheckBox->blockSignals(false);
+
+		if (logScale)
+			satLabel->setText("log sat.");
+		else if (symmetricalScale)
+			satLabel->setText("abs. sat.");
+		else
+			satLabel->setText("saturation");
+
+	}
+
+	//displayed and saturation values
+	{
+		const ccScalarField::Range& displayRange = sf->displayRange();
+		const ccScalarField::Range& saturationRange = sf->saturationRange();
+
+		//special case: no need to actiate this widget for flat scalar field
+		//(worse, divisions by zero may occur!)
+		bool flatSF = (displayRange.maxRange() == 0);
+		slidersFrame->setEnabled(!flatSF);
+
+		minValSpinBox->blockSignals(true);
+		minSatSpinBox->blockSignals(true);
+		maxSatSpinBox->blockSignals(true);
+		maxValSpinBox->blockSignals(true);
+		dispValSlider->blockSignals(true);
+		satValSlider->blockSignals(true);
+
+		/*** sliders ***/
+		if (!flatSF)
 		{
-			dispUpBound = DBL_MAX;
-			dispLowBound = -DBL_MAX;
+			dispValSlider->setSpan((int)floor(dispSpin2slider(displayRange.start())),(int)ceil(dispSpin2slider(displayRange.stop())));
+			satValSlider->setSpan(((int)floor(satSpin2slider(saturationRange.start()))),(int)ceil(satSpin2slider(saturationRange.stop())));
 		}
 		else
 		{
-			minValSpinBox->setEnabled(false);
-			maxValSpinBox->setEnabled(false);
+			dispValSlider->setSpan(0,SLIDERS_STEPS);
+			satValSlider->setSpan(0,SLIDERS_STEPS);
 		}
+
+		minValSpinBox->setEnabled(true);
+		maxValSpinBox->setEnabled(true);
+
+		/*** spinboxes ***/
+
+		if (!flatSF)
+		{
+			//Minimum displayed value
+			minValSpinBox->setRange(displayRange.min(),displayRange.stop());
+			minValSpinBox->setSingleStep(displayRange.maxRange()/(double)SLIDERS_STEPS);
+			minValSpinBox->setValue(displayRange.start());
+
+			//Minimum color saturation value
+			minSatSpinBox->setRange(saturationRange.min(),saturationRange.stop());
+			minSatSpinBox->setSingleStep(saturationRange.maxRange()/(double)SLIDERS_STEPS);
+			minSatSpinBox->setValue(saturationRange.start());
+
+			// Maximum color saturation value slider
+			maxSatSpinBox->setRange(saturationRange.start(),saturationRange.max());
+			maxSatSpinBox->setSingleStep(saturationRange.maxRange()/(double)SLIDERS_STEPS);
+			maxSatSpinBox->setValue(saturationRange.stop());
+
+			// Maximum displayed value slider
+			maxValSpinBox->setRange(displayRange.start(),displayRange.max());
+			maxValSpinBox->setSingleStep(displayRange.maxRange()/(double)SLIDERS_STEPS);
+			maxValSpinBox->setValue(displayRange.stop());
+		}
+		else
+		{
+			double uniqueVal = displayRange.min();
+			minValSpinBox->setRange(uniqueVal,uniqueVal);
+			minSatSpinBox->setRange(uniqueVal,uniqueVal);
+			maxSatSpinBox->setRange(uniqueVal,uniqueVal);
+			maxValSpinBox->setRange(uniqueVal,uniqueVal);
+		}
+
+		minValSpinBox->blockSignals(false);
+		minSatSpinBox->blockSignals(false);
+		maxSatSpinBox->blockSignals(false);
+		maxValSpinBox->blockSignals(false);
+		dispValSlider->blockSignals(false);
+		satValSlider->blockSignals(false);
 	}
-
-	/*** spinboxes ***/
-
-	//Minimum displayed value
-	minValSpinBox->setRange(dispLowBound,dispUpBound);
-	minValSpinBox->setSingleStep(m_step1);
-	minValSpinBox->setValue(minDist);
-
-	//Minimum color saturation value
-	if (absSaturation)
-		minSatSpinBox->setRange(0,m_satSpan);
-	else
-		minSatSpinBox->setRange(m_lowBound,m_upBound);
-	minSatSpinBox->setSingleStep(m_step2);
-	minSatSpinBox->setValue(minSat);
-
-	// Maximum color saturation value slider
-	if (absSaturation)
-		maxSatSpinBox->setRange(0,m_satSpan);
-	else
-		maxSatSpinBox->setRange(m_lowBound,m_upBound);
-	maxSatSpinBox->setSingleStep(m_step2);
-	maxSatSpinBox->setValue(maxSat);
-
-	// Maximum displayed value slider
-	maxValSpinBox->setRange(dispLowBound,dispUpBound);
-	maxValSpinBox->setSingleStep(m_step1);
-	maxValSpinBox->setValue(maxDist);
-
-	minValSpinBox->blockSignals(false);
-	minSatSpinBox->blockSignals(false);
-	maxSatSpinBox->blockSignals(false);
-	maxValSpinBox->blockSignals(false);
-	dispValSlider->blockSignals(false);
-	satValSlider->blockSignals(false);
 }
 
 void sfEditDlg::minValSBChanged(double val)
@@ -212,32 +207,12 @@ void sfEditDlg::minValSBChanged(double val)
 
 	m_associatedSF->setMinDisplayed((ScalarType)val);
 
-	if (m_associatedSF->areBoundariesAutoUpdated())
-	{
-		maxValSpinBox->blockSignals(true);
-		maxValSpinBox->setRange(val,m_upBound);
-		maxValSpinBox->blockSignals(false);
-	}
-	else
-	{
-		//'val' can be anything!
-		if (val<m_associatedSF->getMin())
-		{
-			m_associatedSF->setBoundaries(val,m_associatedSF->getMax());
-			fillDialogWith(m_associatedSF);
-		}
-		else if (val>m_associatedSF->getMax())
-		{
-			m_associatedSF->setBoundaries(val,val);
-			maxValSpinBox->blockSignals(true);
-			maxValSpinBox->setValue(val);
-			maxValSpinBox->blockSignals(false);
-			fillDialogWith(m_associatedSF);
-		}
-	}
+	maxValSpinBox->blockSignals(true);
+	maxValSpinBox->setRange(m_associatedSF->displayRange().start(),m_associatedSF->displayRange().max());
+	maxValSpinBox->blockSignals(false);
 
 	dispValSlider->blockSignals(true);
-	dispValSlider->setLowerValue((int)floor(spin2slider_1(val)));
+	dispValSlider->setLowerValue((int)floor(dispSpin2slider(m_associatedSF->displayRange().start())));
 	dispValSlider->blockSignals(false);
 	QApplication::processEvents();
 
@@ -251,32 +226,12 @@ void sfEditDlg::maxValSBChanged(double val)
 
 	m_associatedSF->setMaxDisplayed((ScalarType)val);
 
-	if (m_associatedSF->areBoundariesAutoUpdated())
-	{
-		minValSpinBox->blockSignals(true);
-		minValSpinBox->setRange(m_lowBound,val);
-		minValSpinBox->blockSignals(false);
-	}
-	else
-	{
-		//'val' can be anything!
-		if (val<m_associatedSF->getMin())
-		{
-			m_associatedSF->setBoundaries(val,val);
-			minValSpinBox->blockSignals(true);
-			minValSpinBox->setValue(val);
-			minValSpinBox->blockSignals(false);
-			fillDialogWith(m_associatedSF);
-		}
-		else if (val>m_associatedSF->getMax())
-		{
-			m_associatedSF->setBoundaries(m_associatedSF->getMin(),val);
-			fillDialogWith(m_associatedSF);
-		}
-	}
+	minValSpinBox->blockSignals(true);
+	minValSpinBox->setRange(m_associatedSF->displayRange().min(),m_associatedSF->displayRange().stop());
+	minValSpinBox->blockSignals(false);
 
 	dispValSlider->blockSignals(true);
-	int pos = (int)ceil(spin2slider_1(val));
+	int pos = (int)ceil(dispSpin2slider(m_associatedSF->displayRange().stop()));
 	if (pos > SLIDERS_STEPS)
 		pos = SLIDERS_STEPS;
 	dispValSlider->setUpperPosition(pos);
@@ -291,14 +246,14 @@ void sfEditDlg::minSatSBChanged(double val)
 	if (!m_associatedSF)
 		return;
 
-	m_associatedSF->setMinSaturation(ScalarType(val));
+	m_associatedSF->setSaturationStart((ScalarType)val);
 
 	maxSatSpinBox->blockSignals(true);
-	maxSatSpinBox->setRange(val,m_associatedSF->absoluteSaturation() ? m_satSpan : m_upBound);
+	maxSatSpinBox->setRange(m_associatedSF->saturationRange().start(), m_associatedSF->saturationRange().max());
 	maxSatSpinBox->blockSignals(false);
 
 	satValSlider->blockSignals(true);
-	satValSlider->setLowerPosition((int)floor(spin2slider_2(val)));
+	satValSlider->setLowerPosition((int)floor(satSpin2slider(m_associatedSF->saturationRange().start())));
 	satValSlider->blockSignals(false);
 	QApplication::processEvents();
 
@@ -310,14 +265,14 @@ void sfEditDlg::maxSatSBChanged(double val)
 	if (!m_associatedSF)
 		return;
 
-	m_associatedSF->setMaxSaturation(ScalarType(val));
+	m_associatedSF->setSaturationStop((ScalarType)val);
 
 	minSatSpinBox->blockSignals(true);
-	minSatSpinBox->setRange(m_associatedSF->absoluteSaturation() ? 0.0 : m_lowBound,val);
+	minSatSpinBox->setRange(m_associatedSF->saturationRange().min(), m_associatedSF->saturationRange().stop());
 	minSatSpinBox->blockSignals(false);
 
 	satValSlider->blockSignals(true);
-	int pos = (int)ceil(spin2slider_2(val));
+	int pos = (int)ceil(satSpin2slider(m_associatedSF->saturationRange().stop()));
 	if (pos > SLIDERS_STEPS)
 		pos = SLIDERS_STEPS;
 	satValSlider->setUpperPosition(pos);
@@ -327,52 +282,51 @@ void sfEditDlg::maxSatSBChanged(double val)
 	emit entitySFHasChanged();
 }
 
-void sfEditDlg::dispValSLDChanged(int minVal,int maxVal)
+void sfEditDlg::dispValSliderChanged(int minPos,int maxPos)
 {
 	if (!m_associatedSF)
 		return;
 
-	double dMinVal=slider2spin_1(minVal);
-	double dMaxVal=slider2spin_1(maxVal);
-	m_associatedSF->setMinDisplayed(ScalarType(dMinVal));
-	m_associatedSF->setMaxDisplayed(ScalarType(dMaxVal));
+	double minDispVal = dispSlider2spin(minPos);
+	double maxDispVal = dispSlider2spin(maxPos);
 
-	if (m_associatedSF->areBoundariesAutoUpdated())
-	{
-		minValSpinBox->blockSignals(true);
-		maxValSpinBox->blockSignals(true);
+	m_associatedSF->setMinDisplayed((ScalarType)minDispVal);
+	m_associatedSF->setMaxDisplayed((ScalarType)maxDispVal);
 
-		minValSpinBox->setRange(m_lowBound,dMaxVal);
-		minValSpinBox->setValue(dMinVal);
-		maxValSpinBox->setRange(dMinVal,m_upBound);
-		maxValSpinBox->setValue(dMaxVal);
+	minValSpinBox->blockSignals(true);
+	maxValSpinBox->blockSignals(true);
 
-		minValSpinBox->blockSignals(false);
-		maxValSpinBox->blockSignals(false);
-	}
+	minValSpinBox->setRange(m_associatedSF->displayRange().min(),m_associatedSF->displayRange().stop());
+	minValSpinBox->setValue(m_associatedSF->displayRange().start());
+	maxValSpinBox->setRange(m_associatedSF->displayRange().start(),m_associatedSF->displayRange().max());
+	maxValSpinBox->setValue(m_associatedSF->displayRange().stop());
+
+	minValSpinBox->blockSignals(false);
+	maxValSpinBox->blockSignals(false);
 
 	QApplication::processEvents();
 
 	emit entitySFHasChanged();
 }
 
-void sfEditDlg::satValSLDChanged(int minVal,int maxVal)
+void sfEditDlg::satValSliderChanged(int minPos,int maxPos)
 {
 	if (!m_associatedSF)
 		return;
 
-	double dMinVal=slider2spin_2(minVal);
-	double dMaxVal=slider2spin_2(maxVal);
-	m_associatedSF->setMinSaturation(ScalarType(dMinVal));
-	m_associatedSF->setMaxSaturation(ScalarType(dMaxVal));
+	double minSatVal = satSlider2spin(minPos);
+	double maxSatVal = satSlider2spin(maxPos);
+
+	m_associatedSF->setSaturationStart((ScalarType)minSatVal);
+	m_associatedSF->setSaturationStop((ScalarType)maxSatVal);
 
 	minSatSpinBox->blockSignals(true);
 	maxSatSpinBox->blockSignals(true);
 
-	minSatSpinBox->setRange(m_associatedSF->absoluteSaturation() ? 0.0 : m_lowBound,dMaxVal);
-	minSatSpinBox->setValue(dMinVal);
-	maxSatSpinBox->setRange(dMinVal,m_associatedSF->absoluteSaturation() ? m_satSpan : m_upBound);
-	maxSatSpinBox->setValue(dMaxVal);
+	minSatSpinBox->setRange(m_associatedSF->saturationRange().min(),m_associatedSF->saturationRange().stop());
+	minSatSpinBox->setValue(m_associatedSF->saturationRange().start());
+	maxSatSpinBox->setRange(m_associatedSF->saturationRange().start(),m_associatedSF->saturationRange().max());
+	maxSatSpinBox->setValue(m_associatedSF->saturationRange().stop());
 
 	minSatSpinBox->blockSignals(false);
 	maxSatSpinBox->blockSignals(false);
@@ -382,15 +336,39 @@ void sfEditDlg::satValSLDChanged(int minVal,int maxVal)
 	emit entitySFHasChanged();
 }
 
-void sfEditDlg::absSatChanged(bool state)
+void sfEditDlg::nanInGrayChanged(bool state)
 {
 	if (!m_associatedSF)
 		return;
 
-	if (m_associatedSF->absoluteSaturation() != state)
+	if (m_associatedSF->areNaNValuesShownInGrey() != state)
 	{
-		m_associatedSF->setAbsoluteSaturation(state);
-		fillDialogWith(m_associatedSF);
+		m_associatedSF->showNaNValuesInGrey(state);
+		emit entitySFHasChanged();
+	}
+}
+
+void sfEditDlg::alwaysShow0Changed(bool state)
+{
+	if (!m_associatedSF)
+		return;
+
+	if (m_associatedSF->isZeroAlwaysShown() != state)
+	{
+		m_associatedSF->alwaysShowZero(state);
+		emit entitySFHasChanged();
+	}
+}
+
+void sfEditDlg::symmetricalScaleChanged(bool state)
+{
+	if (!m_associatedSF)
+		return;
+
+	if (m_associatedSF->symmetricalScale() != state)
+	{
+		m_associatedSF->setSymmetricalScale(state);
+		fillDialogWith(m_associatedSF); //the saturation sliders may need to be updated!
 		emit entitySFHasChanged();
 	}
 }
@@ -402,44 +380,9 @@ void sfEditDlg::logScaleChanged(bool state)
 
 	if (m_associatedSF->logScale() != state)
 	{
-		//we force absoute saturation
-		if (state)
-		{
-			absSatCheckBox->blockSignals(true);
-			absSatCheckBox->setChecked(true);
-			absSatCheckBox->blockSignals(false);
-		}
-		absSatCheckBox->setEnabled(!state);
-
 		m_associatedSF->setLogScale(state);
-		fillDialogWith(m_associatedSF);
+		fillDialogWith(m_associatedSF);  //the saturation sliders + the symmetrical scale checkbox may need to be updated!
 		emit entitySFHasChanged();
 	}
 }
 
-void sfEditDlg::boundariesLockChanged(bool state)
-{
-	if (!m_associatedSF)
-		return;
-
-	if (m_associatedSF->areBoundariesAutoUpdated() == state)
-	{
-		//we change the 'auto update' state
-		m_associatedSF->autoUpdateBoundaries(!state);
-		fillDialogWith(m_associatedSF);
-		emit entitySFHasChanged();
-	}
-}
-
-void sfEditDlg::nanInGrayChanged(bool state)
-{
-	if (!m_associatedSF)
-		return;
-
-	if (m_associatedSF->areNaNValuesShownInGrey() != state)
-	{
-		m_associatedSF->showNaNValuesInGrey(state);
-		fillDialogWith(m_associatedSF);
-		emit entitySFHasChanged();
-	}
-}

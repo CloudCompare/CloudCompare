@@ -121,14 +121,14 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		return;
 
 	double minVal = sf->getMin();
-	double minDisplayed = sf->getMinDisplayed();
-	double minSaturation = sf->getMinSaturation();
-	double maxSaturation = sf->getMaxSaturation();
-	double maxDisplayed = sf->getMaxDisplayed();
+	double minDisplayed = sf->displayRange().start();
+	double minSaturation = sf->saturationRange().start();
+	double maxSaturation = sf->saturationRange().stop();
+	double maxDisplayed = sf->displayRange().stop();
 	double maxVal = sf->getMax();
 
 	bool strictlyPositive = (minVal >= 0);
-	bool absSaturation = sf->absoluteSaturation();
+	bool symmetricalScale = sf->symmetricalScale();
 	bool logScale = sf->logScale();
 
 	const int c_cubeSize = ccGui::Parameters().colorScaleSquareSize;
@@ -150,7 +150,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	unsigned colorRampSteps = context.sfColorScaleToDisplay->getColorRampSteps();
 
 	//first we fill the two vectors below with scale "values"
-	if (strictlyPositive || !absSaturation) //only positive values
+	if (strictlyPositive || !symmetricalScale) //only positive values
 	{
 		bool dispZero = ccGui::Parameters().colorScaleAlwaysShowZero && minDisplayed>0.0 && strictlyPositive;
 		bool dispMinVal = false;//(minVal<minDisplayed);
@@ -489,12 +489,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		//d = 0.5*(theScaleElements[i].value + theScaleElements[i+1].value);
 		double d = theCubeEquivalentDist[i];
 
-		double normalizedDist = sf->normalize(d);
-		const colorType* col = 0;
-		if (normalizedDist >= 0)
-			col = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
-		else
-			col = (sf->areNaNValuesShownInGrey()  ? ccColor::lightGrey : 0);
+		const colorType* col = sf->getColor(d);
 
 		if (i==0 && theScaleElements[i].condensed)
 		{

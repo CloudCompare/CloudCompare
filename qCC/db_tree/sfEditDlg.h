@@ -34,6 +34,7 @@ public:
 	//! Default constructor
     sfEditDlg(QWidget* parent=0);
 
+	//! Updates dialog with a given scalar field
     void fillDialogWith(ccScalarField* sf);
 
 public slots:
@@ -43,31 +44,29 @@ public slots:
     void minSatSBChanged(double val);
     void maxSatSBChanged(double val);
 
-	void dispValSLDChanged(int,int);
-	void satValSLDChanged(int,int);
+	void dispValSliderChanged(int,int);
+	void satValSliderChanged(int,int);
 
-	void absSatChanged(bool);
-	void logScaleChanged(bool);
-	void boundariesLockChanged(bool);
 	void nanInGrayChanged(bool);
+	void alwaysShow0Changed(bool);
+	void symmetricalScaleChanged(bool);
+	void logScaleChanged(bool);
 
 signals:
 
+	//! Signal emitted when the SF display parameters have changed
     void entitySFHasChanged();
 
 protected:
 
-    double spin2slider_1(double val);
-    double spin2slider_2(double val);
-    double slider2spin_1(int val);
-    double slider2spin_2(int val);
+	//conversionb between sliders (integer) and checkbox (double) values
+    double dispSpin2slider(double val) const;
+    double satSpin2slider(double val) const;
+    double dispSlider2spin(int pos) const;
+    double satSlider2spin(int pos) const;
 
+	//! Associated scalar field
 	ccScalarField* m_associatedSF;
-
-    double m_step1,m_step2;
-    double m_coef1,m_coef2;
-    double m_lowBound,m_upBound;
-    double m_satSpan;
 };
 
 #endif //CC_SF_EDIT_DIALOG_HEADER

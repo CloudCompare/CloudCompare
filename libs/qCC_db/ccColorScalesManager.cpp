@@ -72,6 +72,7 @@ ccColorScalesManager::ccColorScalesManager()
 		addScale(Create(BWR));
 		addScale(Create(RY));
 		addScale(Create(RW));
+		addScale(Create(ABS_NORM_GREY));
 	}
 }
 
@@ -218,6 +219,9 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALE scaleType)
 	case RW:
 		name = "Red>White";
 		break;
+	case ABS_NORM_GREY:
+		name = "Intensity [0-1]";
+		break;
 	default:
 		ccLog::Error(QString("Unhandled pre-defined scale (%1)").arg(scaleType));
 		return ccColorScale::Shared(0);
@@ -249,6 +253,11 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALE scaleType)
 	case RW:
 		scale->insert(ccColorScaleElement(0.0,Qt::red),false);
 		scale->insert(ccColorScaleElement(1.0,Qt::white),false);
+		break;
+	case ABS_NORM_GREY:
+		scale->insert(ccColorScaleElement(0.0,Qt::black),false);
+		scale->insert(ccColorScaleElement(1.0,Qt::white),false);
+		scale->setAbsolute(0.0,1.0);
 		break;
 	default:
 		assert(false);

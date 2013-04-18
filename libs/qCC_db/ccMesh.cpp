@@ -777,20 +777,17 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 #ifdef OPTIM_MEM_CPY
 					for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
 					{
-						ScalarType normalizedDist = currentDisplayedScalarField->getNormalizedValue(*_vertIndexes++);
-						col = (normalizedDist >= 0 ? colorScale->getColorByRelativePos(normalizedDist,colorRampSteps) : ccColor::lightGrey);
+						col = currentDisplayedScalarField->getValueColor(*_vertIndexes++);
 						*(_rgbColors)++ = *(col)++;
 						*(_rgbColors)++ = *(col)++;
 						*(_rgbColors)++ = *(col)++;
 
-						normalizedDist = currentDisplayedScalarField->getNormalizedValue(*_vertIndexes++);
-						col = (normalizedDist >= 0 ? colorScale->getColorByRelativePos(normalizedDist,colorRampSteps) : ccColor::lightGrey);
+						col = currentDisplayedScalarField->getValueColor(*_vertIndexes++);
 						*(_rgbColors)++ = *(col)++;
 						*(_rgbColors)++ = *(col)++;
 						*(_rgbColors)++ = *(col)++;
 
-						normalizedDist = currentDisplayedScalarField->getNormalizedValue(*_vertIndexes++);
-						col = (normalizedDist >= 0 ? colorScale->getColorByRelativePos(normalizedDist,colorRampSteps) : ccColor::lightGrey);
+						col = currentDisplayedScalarField->getValueColor(*_vertIndexes++);
 						*(_rgbColors)++ = *(col)++;
 						*(_rgbColors)++ = *(col)++;
 						*(_rgbColors)++ = *(col)++;
@@ -798,16 +795,13 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 #else
 					for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
 					{
-						ScalarType normalizedDist = currentDisplayedScalarField->getNormalizedValue(_vertIndexes[0]);
-						col = (normalizedDist >= 0 ? colorScale->getColorByRelativePos(normalizedDist,colorRampSteps) : ccColor::lightGrey);
+						col = currentDisplayedScalarField->getValueColor(_vertIndexes[0]);
 						memcpy(_rgbColors,col,sizeof(colorType)*3);
 						_rgbColors += 3;
-						normalizedDist = currentDisplayedScalarField->getNormalizedValue(_vertIndexes[1]);
-						col = (normalizedDist >= 0 ? colorScale->getColorByRelativePos(normalizedDist,colorRampSteps) : ccColor::lightGrey);
+						col = currentDisplayedScalarField->getValueColor(_vertIndexes[1]);
 						memcpy(_rgbColors,col,sizeof(colorType)*3);
 						_rgbColors += 3;
-						normalizedDist = currentDisplayedScalarField->getNormalizedValue(_vertIndexes[2]);
-						col = (normalizedDist >= 0 ? colorScale->getColorByRelativePos(normalizedDist,colorRampSteps) : ccColor::lightGrey);
+						col = currentDisplayedScalarField->getValueColor(_vertIndexes[2]);
 						memcpy(_rgbColors,col,sizeof(colorType)*3);
 						_rgbColors += 3;
 					}
@@ -1018,38 +1012,15 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showSF)
 				{
 					assert(colorScale);
-					ScalarType normalizedDist = currentDisplayedScalarField->getNormalizedValue(tsi->i1);
-					if (normalizedDist >= 0)
-						col1 = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
-					else
-					{
-						if (greyForNanScalarValues)
-							col1 = ccColor::lightGrey;
-						else
-							continue;
-					}
-
-					normalizedDist = currentDisplayedScalarField->getNormalizedValue(tsi->i2);
-					if (normalizedDist >= 0)
-						col2 = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
-					else
-					{
-						if (greyForNanScalarValues)
-							col2 = ccColor::lightGrey;
-						else
-							continue;
-					}
-
-					normalizedDist = currentDisplayedScalarField->getNormalizedValue(tsi->i3);
-					if (normalizedDist >= 0)
-						col3 = colorScale->getColorByRelativePos(normalizedDist,colorRampSteps);
-					else
-					{
-						if (greyForNanScalarValues)
-							col3 = ccColor::lightGrey;
-						else
-							continue;
-					}
+					col1 = currentDisplayedScalarField->getValueColor(tsi->i1);
+					if (!col1)
+						continue;
+					col2 = currentDisplayedScalarField->getValueColor(tsi->i2);
+					if (!col2)
+						continue;
+					col3 = currentDisplayedScalarField->getValueColor(tsi->i3);
+					if (!col3)
+						continue;
 				}
 				else if (glParams.showColors)
 				{

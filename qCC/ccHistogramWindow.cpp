@@ -492,12 +492,9 @@ void ccHistogramWindow::paintGL()
 			if (m_associatedSF)
 			{
 				//Equivalent SF value
-				double scalarVal = m_minVal+(m_maxVal-m_minVal)*normVal;
-				ScalarType normalizedScalarVal = m_associatedSF->normalize(scalarVal);
-				if (normalizedScalarVal >= 0)
-					glColor3ubv(colorScale->getColorByRelativePos(normalizedScalarVal,m_associatedSF->getColorRampSteps()));
-				else
-					glColor3ubv(ccColor::lightGrey);
+				double scalarVal = m_minVal + (m_maxVal-m_minVal)*normVal;
+				const colorType* col = m_associatedSF->getColor(scalarVal);
+				glColor3ubv(col ? col : ccColor::lightGrey);
 			}
 			else
 			{

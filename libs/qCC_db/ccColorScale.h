@@ -201,31 +201,44 @@ public:
 	//! Returns color by value
 	/** Warning: only valid with absolute scales!
 	**/
-	inline const colorType* getColorByValue(double value) const
+	inline const colorType* getColorByValue(double value, const colorType* outOfRangeColor = 0) const
 	{
 		assert(m_updated && !m_relative);
 		double relativePos = getRelativePosition(value);
-		return (relativePos >= 0.0 && relativePos <= 1.0 ? getColorByRelativePos(relativePos) : 0);
+		return (relativePos >= 0.0 && relativePos <= 1.0 ? getColorByRelativePos(relativePos) : outOfRangeColor);
 	}
 
 	//! Returns color by relative position in scale
-	/** \param relativePos relative position (must be between 0 and 1!)
+	/** \param relativePos relative position (should be in [0;1])
+		\param default color to return if relativePos if out of [0;1]
 	**/
-	inline const colorType* getColorByRelativePos(double relativePos) const
+	inline const colorType* getColorByRelativePos(double relativePos, const colorType* outOfRangeColor = 0) const
 	{
-		assert(m_updated && relativePos >= 0.0 && relativePos <= 1.0);
-		return getColorByIndex((unsigned)(relativePos * (double)(MAX_STEPS-1)));
+		assert(m_updated);
+		if (relativePos >= 0.0 && relativePos <= 1.0)
+			return getColorByIndex((unsigned)(relativePos * (double)(MAX_STEPS-1)));
+		else
+			return outOfRangeColor;
 	}
 
 	//! Returns color by relative position in scale with a given 'resolution'
 	/** \param relativePos relative position (must be between 0 and 1!)
 		\param steps desired resolution (must be greater than 1 and smaller than MAX_STEPS)
+		\param default color to return if relativePos if out of [0;1]
 	**/
-	inline const colorType* getColorByRelativePos(double relativePos, unsigned steps) const
+	inline const colorType* getColorByRelativePos(double relativePos, unsigned steps, const colorType* outOfRangeColor = 0) const
 	{
-		//quantized (16 bits) version --> much faster than floor!
-		unsigned index = ((unsigned)((relativePos*(double)(steps-1)+0.5)*65536.0))>>16;
-		return getColorByIndex((index*(MAX_STEPS-1)) / (steps-1));
+		assert(m_updated);
+		if (relativePos >= 0.0 && relativePos <= 1.0)
+		{
+			//quantized (16 bits) version --> much faster than floor!
+			unsigned index = ((unsigned)((relativePos*(double)(steps-1)+0.5)*65536.0))>>16;
+			return getColorByIndex((index*(MAX_STEPS-1)) / (steps-1));
+		}
+		else
+		{
+			return outOfRangeColor;
+		}
 	}
 
 	//! Returns color by index

@@ -41,7 +41,7 @@ ccScalarField::ccScalarField(const char* name/*=0*/)
 ScalarType ccScalarField::normalize(ScalarType d) const
 {
 	if (/*!ValidValue(d) || */!m_displayRange.isInRange(d)) //NaN values are also rejected by 'isInRange'!
-		return -1.0;
+		return (ScalarType)-1.0;
 
 	//most probable path first!
 	if (!m_logScale)
@@ -52,7 +52,7 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 				return 0;
 			else if (d >= m_saturationRange.stop())
 				return (ScalarType)1.0;
-			return (d - m_saturationRange.start()) * m_saturationRange.range();
+			return (d - m_saturationRange.start()) / m_saturationRange.range();
 		}
 		else //symmetric scale
 		{
@@ -63,13 +63,13 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 			{
 				if (d >= m_saturationRange.stop())
 					return (ScalarType)1.0;
-				return (1 + (d - m_saturationRange.start()) * m_saturationRange.range()) / 2;
+				return ((ScalarType)1.0 + (d - m_saturationRange.start()) / m_saturationRange.range()) / (ScalarType)2.0;
 			}
 			else
 			{
 				if (d <= -m_saturationRange.stop())
 					return (ScalarType)0.0;
-				return (1 + (d + m_saturationRange.start()) * m_saturationRange.range()) / 2;
+				return ((ScalarType)1.0 + (d + m_saturationRange.start()) / m_saturationRange.range()) / (ScalarType)2.0;
 			}
 		}
 	}
@@ -85,7 +85,24 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 
 	//can't get here normally!
 	assert(false);
-	return -1.0;
+	return (ScalarType)-1.0;
+}
+
+void ccScalarField::setColorScale(ccColorScale::Shared scale)
+{
+	if (m_colorScale != scale)
+	{
+		bool wasAbsolute = (m_colorScale && !m_colorScale->isRelative());
+		bool isAbsolute = (scale && !scale->isRelative());
+
+		m_colorScale = scale;
+
+		if (isAbsolute)
+			m_symmetricalScale = false;
+
+		if (isAbsolute || wasAbsolute != isAbsolute)
+			updateSaturationBounds();
+	}
 }
 
 void ccScalarField::setSymmetricalScale(bool state)
@@ -120,30 +137,46 @@ void ccScalarField::computeMinAndMax()
 
 void ccScalarField::updateSaturationBounds()
 {
-	if (m_symmetricalScale)
+	if (!m_colorScale || m_colorScale->isRelative()) //Relative scale (default)
 	{
-		if (m_minVal < 0)
+		ScalarType minAbsVal = ( m_maxVal < 0 ? std::min(-m_maxVal,-m_minVal) : std::max<ScalarType>(m_minVal,0) );
+		ScalarType maxAbsVal = std::max(fabs(m_minVal),fabs(m_maxVal));
+
+		if (m_symmetricalScale)
 		{
-			m_saturationRange.setBounds(-m_maxVal,-m_minVal);
+			m_saturationRange.setBounds(minAbsVal,maxAbsVal);
 		}
 		else
 		{
-			m_saturationRange.setBounds(std::max<ScalarType>(m_minVal,0),
-											std::max<ScalarType>(fabs(m_minVal),fabs(m_maxVal)));
+			m_saturationRange.setBounds(m_minVal,m_maxVal);
+		}
+
+		//log scale (we always update it even if m_logScale is not enabled!)
+		//if (m_logScale)
+		{
+			ScalarType minSatLog = log10(std::max(minAbsVal,(ScalarType)ZERO_TOLERANCE));
+			ScalarType maxSatLog = log10(std::max(maxAbsVal,(ScalarType)ZERO_TOLERANCE));
+			m_logSaturationRange.setBounds(minSatLog,maxSatLog);
 		}
 	}
-	else
+	else //absolute scale
 	{
-		m_saturationRange.setBounds(m_minVal,m_maxVal);
-	}
+		//DGM: same formulas as for the 'relative scale' case but we use the boundaries
+		//defined by the scale itself instead of the current SF boundaries...
+		double minVal=0, maxVal=0;
+		m_colorScale->getAbsoluteBoundaries(minVal,maxVal);
 
-	//log scale (we always update it even if m_logScale is not enabled!)
-	{
-		ScalarType minAbsVal = std::min(fabs(m_minVal),fabs(m_maxVal));
-		ScalarType maxAbsVal = std::max(fabs(m_minVal),fabs(m_maxVal));
-		ScalarType minSatLog = log10(std::max(minAbsVal,(ScalarType)ZERO_TOLERANCE));
-		ScalarType maxSatLog = log10(std::max(maxAbsVal,(ScalarType)ZERO_TOLERANCE));
-		m_logSaturationRange.setBounds(minSatLog,maxSatLog);
+		m_saturationRange.setBounds(minVal,maxVal);
+
+		//log scale (we always update it even if m_logScale is not enabled!)
+		//if (m_logScale)
+		{
+			ScalarType minAbsVal = ( maxVal < 0 ? std::min(-maxVal,-minVal) : std::max<ScalarType>(minVal,0) );
+			ScalarType maxAbsVal = (ScalarType)std::max(fabs(minVal),fabs(maxVal));
+			ScalarType minSatLog = log10(std::max(minAbsVal,(ScalarType)ZERO_TOLERANCE));
+			ScalarType maxSatLog = log10(std::max(maxAbsVal,(ScalarType)ZERO_TOLERANCE));
+			m_logSaturationRange.setBounds(minSatLog,maxSatLog);
+		}
 	}
 }
 
@@ -440,9 +473,4 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 	m_logSaturationRange.setStop((ScalarType)maxLogSaturation);
 
 	return true;
-}
-
-void ccScalarField::setColorScale(ccColorScale::Shared scale)
-{
-	m_colorScale = scale;
 }

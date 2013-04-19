@@ -96,7 +96,7 @@ public:
 	protected:
 
 		//! Updates actual range
-		inline void updateRange() { m_range = std::max(m_max-m_min,(ScalarType)ZERO_TOLERANCE); }
+		inline void updateRange() { m_range = std::max(m_stop-m_start,(ScalarType)ZERO_TOLERANCE); }
 
 		ScalarType m_min;		/**< Minimum value **/
 		ScalarType m_start;		/**< Current start value (in [min,max]) **/
@@ -138,14 +138,7 @@ public:
 	inline const colorType* getColor(ScalarType value) const
 	{
 		assert(m_colorScale);
-		if (m_colorScale->isRelative())
-		{
-			return m_colorScale->getColorByRelativePos(normalize(value), m_colorRampSteps, m_showNaNValuesInGrey ? ccColor::lightGrey : 0);
-		}
-		else //absolute scale
-		{
-			return m_colorScale->getColorByValue(value, m_showNaNValuesInGrey ? ccColor::lightGrey : 0);
-		}
+		return m_colorScale->getColorByRelativePos(normalize(value), m_colorRampSteps, m_showNaNValuesInGrey ? ccColor::lightGrey : 0);
 	}
 
 	//! Shortcut to getColor

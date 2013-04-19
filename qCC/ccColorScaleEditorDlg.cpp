@@ -89,10 +89,10 @@ ccColorScaleEditorDialog::~ccColorScaleEditorDialog()
 void ccColorScaleEditorDialog::setAssociatedScalarField(ccScalarField* sf)
 {
 	m_associatedSF = sf;
-	if (sf)
+	if (m_associatedSF && !m_colorScale || m_colorScale->isRelative()) //we only update those values if the current scale is not absolute!
 	{
-		m_minAbsoluteVal = sf->getMin();
-		m_maxAbsoluteVal = sf->getMax();
+		m_minAbsoluteVal = m_associatedSF->getMin();
+		m_maxAbsoluteVal = m_associatedSF->getMax();
 	}
 }
 
@@ -149,6 +149,12 @@ bool ccColorScaleEditorDialog::canChangeCurrentScale()
 {
 	if (!m_colorScale || !m_modified)
 		return true;
+
+	if (m_colorScale->isLocked())
+	{
+		assert(false);
+		return true;
+	}
 	
 	///ask the user if we should save the current scale?
 	QMessageBox::StandardButton button = QMessageBox::warning(this,
@@ -225,7 +231,7 @@ void ccColorScaleEditorDialog::setActiveScale(ccColorScale::Shared currentScale)
 			bool isRelative = m_colorScale->isRelative();
 			if (!isRelative)
 			{
-				//update min and max absolute values
+				//absolute color scales defines their own boundaries
 				m_colorScale->getAbsoluteBoundaries(m_minAbsoluteVal,m_maxAbsoluteVal);
 			}
 			setScaleModeToRelative(isRelative);

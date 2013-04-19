@@ -1568,8 +1568,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//color ramp shader initialization
 				ccShader* colorRampShader = context.colorRampShader;
 
-				if (m_currentDisplayedScalarField->logScale()
-					|| !colorScale->isRelative())
+				if (m_currentDisplayedScalarField->logScale())
 				{
 					//FIXME: shader doesn't support log scale yet!
 					colorRampShader = 0;

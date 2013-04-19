@@ -99,6 +99,7 @@ void sfEditDlg::fillDialogWith(ccScalarField* sf)
 		bool alwaysShowZero = sf->isZeroAlwaysShown();
 		bool symmetricalScale = sf->symmetricalScale();
 		bool logScale = sf->logScale();
+		bool absoluteScale = sf->getColorScale() && !sf->getColorScale()->isRelative();
 
 		nanInGreyCheckBox->blockSignals(true);
 		nanInGreyCheckBox->setChecked(nanValuesInGrey);
@@ -110,7 +111,7 @@ void sfEditDlg::fillDialogWith(ccScalarField* sf)
 
 		symmetricalScaleCheckBox->blockSignals(true);
 		symmetricalScaleCheckBox->setChecked(symmetricalScale);
-		symmetricalScaleCheckBox->setEnabled(!logScale);
+		symmetricalScaleCheckBox->setEnabled(!absoluteScale && !logScale);
 		symmetricalScaleCheckBox->blockSignals(false);
 
 		logScaleCheckBox->blockSignals(true);

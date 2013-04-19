@@ -375,18 +375,22 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 		//we were already in 'polyline' mode?
 		if (m_state & POLYLINE)
 		{
-			if (!m_polyVertices->reserve(sz+4))
+			if (!m_polyVertices->reserve(sz+1))
 			{
 				ccLog::Error("Out of memory!");
 				return;
 			}
 
 			//we replace last point by the current one
-			CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(sz));
+			CCVector3* lastP = const_cast<CCVector3*>(m_polyVertices->getPointPersistentPtr(sz-1));
 			*lastP = P;
 			//and add a new (equivalent) one
 			m_polyVertices->addPoint(P);
-			m_segmentationPoly->addPointIndex(sz); //can't fail, see above
+			if (!m_segmentationPoly->addPointIndex(sz))
+			{
+				ccLog::Error("Out of memory!");
+				return;
+			}
 			m_segmentationPoly->setClosingState(true);
 		}
 		else //we must change mode

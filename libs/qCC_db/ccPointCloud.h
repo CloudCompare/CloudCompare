@@ -78,17 +78,7 @@ public:
 		\param selection a ReferenceCloud (pointing to source)
 		\param source a ccPointCloud (reference)
     **/
-	ccPointCloud(CCLib::ReferenceCloud* selection, ccPointCloud* source);
-
-    //! Creates a new point cloud object from a ReferenceCloud
-	/** The real cloud must be explicitly known (and of type ccGenericPointCloud here).
-        It must be passed as a second argument. It will allow the importation of
-		points but also other properties such as colors, normals, etc. However, only
-		the active scalar field can be imported
-		\param selection a ReferenceCloud (pointing to source)
-		\param source a ccGenericPointCloud (reference)
-    **/
-	ccPointCloud(CCLib::ReferenceCloud* selection, ccGenericPointCloud* source);
+	ccPointCloud(const CCLib::ReferenceCloud* selection, const ccPointCloud* source);
 
     //! Creates a new point cloud object from a GenericIndexedCloud
 	/** "GenericIndexedCloud" is an extension of GenericCloud (from CCLib)

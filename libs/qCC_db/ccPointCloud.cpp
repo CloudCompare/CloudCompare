@@ -99,15 +99,15 @@ ccPointCloud::ccPointCloud(const CCLib::GenericIndexedCloud* cloud)
 	}
 
 	//import points
-	CCVector3 P;
     for (unsigned i=0; i<n; i++)
 	{
+		CCVector3 P;
 		cloud->getPoint(i,P);
         addPoint(P);
 	}
 }
 
-ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccPointCloud* source)
+ccPointCloud::ccPointCloud(const CCLib::ReferenceCloud* selection, const ccPointCloud* source)
 	: ChunkedPointCloud()
 	, ccGenericPointCloud(source ? source->getName() : QString())
 	, m_rgbColors(0)
@@ -116,107 +116,124 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccPointCloud* sourc
 	, m_currentDisplayedScalarFieldIndex(-1)
 {
     assert(source);
-    assert(selection->getAssociatedCloud()==static_cast<GenericIndexedCloud*>(source));
+	if (!source)
+	{
+        ccLog::Warning("[ccPointCloud::copy] Internal error: invalid 'source' cloud!");
+		return;
+	}
+    assert(selection->getAssociatedCloud()==static_cast<const GenericIndexedCloud*>(source));
 
     init();
 
-    unsigned i,n = selection->size();
+    unsigned n = selection->size();
     if (n==0)
         return;
 
     if (!reserveThePointsTable(n))
     {
-        //ccConsole::Error("[ccPointCloud::extract] Internal error: failed to create new point cloud! Not enough memory?");
+        ccLog::Warning("[ccPointCloud::copy] Not enough memory!");
         return;
     }
 
-    //Ajout des points
-    selection->placeIteratorAtBegining();
-    for (i=0; i<n; i++)
-    {
-        addPoint(*selection->getCurrentPointCoordinates());
-        selection->forwardIterator();
-    }
+    //import points
+	{
+		for (unsigned i=0; i<n; i++)
+			addPoint(*source->getPointPersistentPtr(selection->getPointGlobalIndex(i)));
+	}
 
-    /*** Source settings heritage ***/
-
-    //Visibility
+    //visibility
     setVisible(source->isVisible());
 
-    //Colors
+    //RGB colors
     if (source->hasColors())
+	{
         if (reserveTheRGBTable())
         {
-            ColorsTableType* _theColors = source->m_rgbColors;
-            selection->placeIteratorAtBegining();
-            for (i=0; i<n; i++)
-            {
-                addRGBColor(_theColors->getValue(selection->getCurrentPointGlobalIndex()));
-                selection->forwardIterator();
-            }
-
+            for (unsigned i=0; i<n; i++)
+				addRGBColor(source->getPointColor(selection->getPointGlobalIndex(i)));
             showColors(source->colorsShown());
         }
+		else
+		{
+			ccLog::Warning("[ccPointCloud::copy] Not enough memory to copy RGB colors!");
+		}
+	}
 
-    //Normals
+    //normals
     if (source->hasNormals())
+	{
         if (reserveTheNormsTable())
         {
-            NormsIndexesTableType* _theNorms = source->m_normals;
-            selection->placeIteratorAtBegining();
-            for (i=0; i<n; i++)
-            {
-                addNormIndex(_theNorms->getValue(selection->getCurrentPointGlobalIndex()));
-                selection->forwardIterator();
-            }
+            for (unsigned i=0; i<n; i++)
+				addNormIndex(source->getPointNormalIndex(selection->getPointGlobalIndex(i)));
             showNormals(source->normalsShown());
         }
+		else
+		{
+			ccLog::Warning("[ccPointCloud::copy] Not enough memory to copy normals!");
+		}
+	}
 
-    //SF
-    int nSF = source->getNumberOfScalarFields();
-    if (nSF>0)
+    //scalar fields
+    unsigned sfCount = source->getNumberOfScalarFields();
+    if (sfCount != 0)
     {
-        int j=0,k=0;
-        while (k<nSF)
+        for (unsigned k=0; k<sfCount; ++k)
         {
-			ccScalarField* sf = static_cast<ccScalarField*>(source->getScalarField(j));
+			ccScalarField* sf = static_cast<ccScalarField*>(source->getScalarField(k));
+			assert(sf);
             if (sf)
             {
-                //we create a new scalar field with same name & type
+                //we create a new scalar field with same name
                 int sfIdx = addScalarField(sf->getName());
-                //if success...
-                if (sfIdx>=0)
+                if (sfIdx>=0) //success
                 {
-                    //we copy data to new SF
                     ccScalarField* currentScalarField = static_cast<ccScalarField*>(getScalarField(sfIdx));
                     assert(currentScalarField);
                     if (currentScalarField->resize(n))
                     {
-						selection->placeIteratorAtBegining();
-                        for (i=0; i<n; i++)
-						{
-							currentScalarField->setValue(i,sf->getValue(selection->getCurrentPointGlobalIndex()));
-							selection->forwardIterator();
-						}
-                        currentScalarField->computeMinAndMax();
-						//same color ramp parameters
+						//we copy data to new SF
+						for (unsigned i=0; i<n; i++)
+							currentScalarField->setValue(i,sf->getValue(selection->getPointGlobalIndex(i)));
+
+						currentScalarField->computeMinAndMax();
+						//copy color ramp parameters
 						currentScalarField->setColorRampSteps(sf->getColorRampSteps());
 						currentScalarField->setColorScale(sf->getColorScale());
+						currentScalarField->showNaNValuesInGrey(sf->areNaNValuesShownInGrey());
+						currentScalarField->setLogScale(sf->logScale());
+						currentScalarField->setSymmetricalScale(sf->symmetricalScale());
+						currentScalarField->alwaysShowZero(sf->isZeroAlwaysShown());
+						currentScalarField->setMinDisplayed(sf->displayRange().start());
+						currentScalarField->setMaxDisplayed(sf->displayRange().stop());
+						currentScalarField->setSaturationStart(sf->saturationRange().start());
+						currentScalarField->setSaturationStop(sf->saturationRange().stop());
                     }
                     else
                     {
-                        //in we don't have enough memory, we cancel SF creation
+                        //if we don't have enough memory, we cancel SF creation
                         deleteScalarField(sfIdx);
+						ccLog::Warning(QString("[ccPointCloud::copy] Not enough memory to copy scalar field '%1'!").arg(sf->getName()));
                     }
                 }
-                ++k;
             }
-            ++j;
         }
-        //we display the same scalar field as the source
-        setCurrentDisplayedScalarField(source->getCurrentDisplayedScalarFieldIndex());
-        //and same visibility
-        showSF(source->sfShown());
+        
+		unsigned copiedSFCount = getNumberOfScalarFields();
+		if (copiedSFCount)
+		{
+			//we display the same scalar field as the source (if we managed to copy it!)
+			if (source->getCurrentDisplayedScalarField())
+			{
+				int sfIdx = getScalarFieldIndexByName(source->getCurrentDisplayedScalarField()->getName());
+				if (sfIdx)
+					setCurrentDisplayedScalarField(sfIdx);
+				else
+					setCurrentDisplayedScalarField((int)copiedSFCount-1);
+			}
+			//copy visibility
+			showSF(source->sfShown());
+		}
     }
 
     //Meshes //TODO
@@ -246,127 +263,6 @@ ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccPointCloud* sourc
     		setSensor(source->_getSensor(i),i);
     }
     */
-
-    //original center
-    const double* shift = source->getOriginalShift();
-    setOriginalShift(shift[0],shift[1],shift[2]);
-
-	//custom point size
-	setPointSize(source->getPointSize());
-
-	setName(source->getName()+QString(".extract"));
-}
-
-ccPointCloud::ccPointCloud(CCLib::ReferenceCloud* selection, ccGenericPointCloud* source)
-	: ChunkedPointCloud()
-	, ccGenericPointCloud(source ? source->getName() : QString())
-	, m_rgbColors(0)
-	, m_normals(0)
-	, m_currentDisplayedScalarField(0)
-	, m_currentDisplayedScalarFieldIndex(-1)
-{
-    assert(source);
-    assert(selection->getAssociatedCloud()==source);
-
-    init();
-
-    unsigned i,n = selection->size();
-    if (n==0)
-        return;
-
-    if (!reserveThePointsTable(n))
-    {
-        ccLog::Error("[ccPointCloud::Clone] Failed to create new point cloud! (not enough memory)");
-        return;
-    }
-
-    //Ajout des points
-    selection->placeIteratorAtBegining();
-    for (i=0; i<n; i++)
-    {
-        addPoint(*selection->getCurrentPointCoordinates());
-        selection->forwardIterator();
-    }
-
-    /*** Source settings heritage ***/
-
-    //Visibility
-    setVisible(source->isVisible());
-
-    //Colors
-    if (source->hasColors())
-    {
-        if (reserveTheRGBTable())
-        {
-            selection->placeIteratorAtBegining();
-            for (i=0; i<n; i++)
-            {
-                addRGBColor(source->getPointColor(selection->getCurrentPointGlobalIndex()));
-                selection->forwardIterator();
-            }
-
-            showColors(source->colorsShown());
-        }
-        else
-        {
-            ccLog::Warning("[ccPointCloud::clone] Failed to import colors! (not enough memory)");
-        }
-    }
-
-    //Normals
-    if (source->hasNormals())
-    {
-        if (reserveTheNormsTable())
-        {
-            selection->placeIteratorAtBegining();
-            for (i=0; i<n; i++)
-            {
-                addNormIndex(source->getPointNormalIndex(selection->getCurrentPointGlobalIndex()));
-                selection->forwardIterator();
-            }
-            showNormals(source->normalsShown());
-        }
-        else
-        {
-            ccLog::Warning("[ccPointCloud::clone] Failed to import normals! (not enough memory)");
-        }
-    }
-
-    //SF
-    if (source->hasDisplayedScalarField())
-    {
-        //we create a new scalar field with same name
-        int sfIdx = addScalarField("Scalar field");
-        //if success...
-        if (sfIdx>=0)
-        {
-            //we copy data to new SF
-            CCLib::ScalarField* currentScalarField = getScalarField(sfIdx);
-            assert(currentScalarField);
-            if (currentScalarField->reserve(n))
-            {
-                selection->placeIteratorAtBegining();
-                for (i=0; i<n; i++)
-                {
-					ScalarType d = source->getPointDisplayedDistance(selection->getCurrentPointGlobalIndex());
-                    currentScalarField->addElement(d);
-                    selection->forwardIterator();
-                }
-                currentScalarField->computeMinAndMax();
-
-                //we display the same scalar field as the source
-                setCurrentDisplayedScalarField(sfIdx);
-
-                //and same display mode
-                showSF(source->sfShown());
-            }
-            else //in we don't have enough memory, we cancel SF creation
-            {
-                deleteScalarField(sfIdx);
-				ccLog::Warning(QString("[ccPointCloud::clone] Failed to import SF '%1'! (not enough memory)").arg(currentScalarField->getName()));
-            }
-        }
-    }
 
     //original center
     const double* shift = source->getOriginalShift();
@@ -1006,7 +902,7 @@ bool ccPointCloud::hasScalarFields() const
 
 bool ccPointCloud::hasDisplayedScalarField() const
 {
-    return m_currentDisplayedScalarField;
+	return m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale();
 }
 
 /*bool ccPointCloud::isScalarFieldEnabled() const
@@ -1427,6 +1323,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
         getDrawingParameters(glParams);
         glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
 
+		//can't display a SF without... a SF... and an active color scale!
+		assert(!glParams.showSF || (m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale()));
+
         //standard case: list names pushing
         bool pushName = MACRO_DrawEntityNames(context);
 		//special case: point names pushing (for picking)
@@ -1439,31 +1338,17 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
-			if (m_currentDisplayedScalarField && m_currentDisplayedScalarField->areNaNValuesShownInGrey())
-				glParams.showSF = false; //--> we keep it only if SF 'NaN' values are hidden
+			if (glParams.showSF && m_currentDisplayedScalarField->areNaNValuesShownInGrey())
+				glParams.showSF = false; //--> we keep it only if SF 'NaN' values are potentially hidden
 		}
 
-        bool colorMaterial = false;
-		unsigned colorRampSteps = 0;
-		ccColorScale::Shared colorScale(0);
+        bool colorMaterialEnabled = false;
 
 		if (glParams.showSF || glParams.showColors)
         {
             glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
             glEnable(GL_COLOR_MATERIAL);
-            colorMaterial=true;
-
-			if (glParams.showSF)
-			{
-				assert(m_currentDisplayedScalarField);
-				colorScale = m_currentDisplayedScalarField->getColorScale();
-				colorRampSteps = m_currentDisplayedScalarField->getColorRampSteps();
-
-				assert(colorScale);
-				//get default color ramp if cloud has no scale associated?!
-				if (!colorScale)
-					colorScale = ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR);
-			}
+            colorMaterialEnabled = true;
         }
 
         if (glParams.showColors && isColorOverriden())
@@ -1515,49 +1400,41 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (!pushPointNames) //standard "full" display
 		{
-			//if some points are hidden, we can't use display arrays :(
+			//if some points are hidden (= visibility table instantiated), we can't use display arrays :(
 			if (isVisibilityTableInstantiated())
 			{
 				glBegin(GL_POINTS);
 
-				//Scalar field?
-				if (glParams.showSF)
+				for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 				{
-					assert(colorScale);
-					for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+					//we must test each point visibility
+					if (m_pointsVisibility->getValue(j) == POINT_VISIBLE)
 					{
-						if (m_pointsVisibility->getValue(j) == POINT_VISIBLE)
+						assert(j<m_currentDisplayedScalarField->currentSize());
+						if (glParams.showSF)
 						{
-							assert(j<m_currentDisplayedScalarField->currentSize());
+							const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
 							//we force display of points hidden because of their scalar field value
 							//to be sure that the user don't miss them (during manual segmentation for instance)
-							const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
-							assert(col);
-							glColor3ubv(col);
-							if (glParams.showNorms)
-								glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
-							glVertex3fv(m_points->getValue(j));
+							glColor3ubv(col ? col : ccColor::lightGrey);
 						}
-					}
-				}
-				else
-				{
-					for (unsigned j=0;j<numberOfPoints;j+=decimStep)
-					{
-						if (m_pointsVisibility->getValue(j) == POINT_VISIBLE)
+						else if (glParams.showColors)
 						{
-							if (glParams.showColors)
-								glColor3ubv(m_rgbColors->getValue(j));
-							if (glParams.showNorms)
-								glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
-							glVertex3fv(m_points->getValue(j));
+							glColor3ubv(m_rgbColors->getValue(j));
 						}
+						if (glParams.showNorms)
+						{
+							glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
+						}
+						glVertex3fv(m_points->getValue(j));
 					}
 				}
+
 				glEnd();
 			}
-			else if (glParams.showSF)
+			else if (glParams.showSF) //no visibility table enabled + scalar field
 			{
+				assert(m_currentDisplayedScalarField);
 				const ccScalarField::Range& sfDisplayRange = m_currentDisplayedScalarField->displayRange();
 				const ccScalarField::Range& sfSaturationRange = m_currentDisplayedScalarField->saturationRange();
 
@@ -1580,7 +1457,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					GLint maxBytes=0;
 					glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
 					GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
-					unsigned steps = colorRampSteps;
+					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
 					assert(steps!=0);
 
 					if (steps > glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < (GLint)steps)
@@ -1590,8 +1467,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 					else
 					{
-						assert(colorScale);
-						
 						colorRampShader->start();
 
 						float sfMinSatRel = 0.0f;
@@ -1620,6 +1495,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						
 						//send colormap to shader
 						float* _colormapf = s_colormapf;
+						ccColorScale::Shared colorScale = m_currentDisplayedScalarField->getColorScale();
+						assert(colorScale);
 						for (unsigned i=0; i<steps; ++i)
 						{
 							const colorType* col = colorScale->getColorByRelativePos((double)i/(double)(steps-1),steps);
@@ -1718,7 +1595,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
-							assert(colorScale);
 							colorType* _sfColors = s_rgbBuffer3ub;
 							for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep)
 							{
@@ -1797,7 +1673,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
-							assert(colorScale);
 							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 							{
 								assert(j<m_currentDisplayedScalarField->currentSize());
@@ -1844,7 +1719,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
-							assert(colorScale);
 							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
 							{
 								assert(j<m_currentDisplayedScalarField->currentSize());
@@ -1868,7 +1742,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						glPopAttrib(); //GL_LIGHTING_BIT
 				}
 			}
-			else if (glParams.showNorms)
+			else if (glParams.showNorms) //no visibility table enabled, no scalar field + normals
 			{
 				glNormalPointer(GL_FLOAT,0,s_normBuffer);
 				glEnableClientState(GL_VERTEX_ARRAY);
@@ -1908,7 +1782,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showColors)
 					glDisableClientState(GL_COLOR_ARRAY);
 			}
-			else
+			else //no visibility table enabled, no scalar field, no normals
 			{
 				/*** Fast way to display simple clouds ***/
 				//My old buggy ATI card wasn't supporting "glDrawArrays" with too many points...
@@ -1956,6 +1830,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		else //special case: point names pushing (for picking) --> no need for colors, normals, etc.
 		{
 			glPushName(0);
+			//however we must look for hidden points!
             if (isVisibilityTableInstantiated())
             {
                 for (unsigned j=0;j<numberOfPoints;j+=decimStep)
@@ -1969,28 +1844,42 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
                     }
                 }
             }
-			else if (glParams.showSF)
-			{
-				for (unsigned j=0;j<numberOfPoints;j+=decimStep)
-				{
-					const colorType* col = getPointScalarValueColor(j);
-					if (col)
-					{
-						glLoadName(j);
-                        glBegin(GL_POINTS);
-                        glVertex3fv(m_points->getValue(j));
-                        glEnd();
-					}
-				}
-			}
 			else
 			{
-				for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+				//the fact that NaN values SHOULD be hidden, doesn't mean that we ACTUALLY hide points...
+				bool hiddenPoints = false;
+				if (glParams.showSF)
 				{
-					glLoadName(j);
-					glBegin(GL_POINTS);
-					glVertex3fv(m_points->getValue(j));
-					glEnd();
+					assert(m_currentDisplayedScalarField);
+					if (!m_currentDisplayedScalarField->areNaNValuesShownInGrey() && m_currentDisplayedScalarField->getColorScale())
+					{
+						const ccScalarField::Range& sfDisplayRange = m_currentDisplayedScalarField->displayRange();
+						hiddenPoints = (sfDisplayRange.stop() <= sfDisplayRange.max() || sfDisplayRange.start() >= sfDisplayRange.min());
+					}
+				}
+				if (hiddenPoints)
+				{
+					for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+					{
+						const colorType* col = getPointScalarValueColor(j);
+						if (col)
+						{
+							glLoadName(j);
+							glBegin(GL_POINTS);
+							glVertex3fv(m_points->getValue(j));
+							glEnd();
+						}
+					}
+				}
+				else
+				{
+					for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+					{
+						glLoadName(j);
+						glBegin(GL_POINTS);
+						glVertex3fv(m_points->getValue(j));
+						glEnd();
+					}
 				}
 			}
 
@@ -2002,7 +1891,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		glPopAttrib(); //GL_POINT_BIT
 
-		if (colorMaterial)
+		if (colorMaterialEnabled)
             glDisable(GL_COLOR_MATERIAL);
 
         //we can now switch the light off
@@ -2087,40 +1976,36 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
         return 0;
     }
 
-    //we create a temporary entity with the visible points only
-    CCLib::ReferenceCloud* rc = getTheVisiblePoints();
+	//we create a new cloud with the "visible" points
+	ccPointCloud* result = 0;
+	{
+		//we create a temporary entity with the visible points only
+		CCLib::ReferenceCloud* rc = getTheVisiblePoints();
+		if (!rc)
+		{
+			ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occured during selection!");
+			return 0;
+		}
+		assert(rc->size() != 0);
 
-    //nothing to do!
-    if (!rc || rc->size()==0)
-    {
-        ccLog::Error("[ccPointCloud::createNewCloudFromVisibilitySelection] No points in selection!");
-        if (rc)
-			delete rc;
-        return 0;
-    }
+		//convert selection to cloud
+		result = new ccPointCloud(rc,this);
 
-    //we create a new cloud with the "visible" points
-    ccPointCloud* result = new ccPointCloud(rc,this);
+		//don't need this one anymore
+		delete rc;
+		rc=0;
+	}
+	assert(result);
 
-	//don't need this one anymore
-    delete rc;
-	rc=0;
-
-    if (!result)
-    {
-        //ccConsole::Error("An error occured: not enough memory ?");
-        return NULL;
-    }
-
-    result->setName(getName()+QString(".part"));
+    result->setName(getName()+QString(".segmented"));
 
     //shall the visible points be erased from this cloud?
     if (removeSelectedPoints && !isLocked())
     {
         //we remove all visible points
         unsigned lastPoint = 0;
-		unsigned i,count=size();
-        for (i=0;i<count;++i)
+		unsigned count = size();
+        for (unsigned i=0; i<count; ++i)
         {
             if (m_pointsVisibility->getValue(i) != POINT_VISIBLE)
             {

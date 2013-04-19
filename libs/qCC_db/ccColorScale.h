@@ -232,7 +232,7 @@ public:
 		if (relativePos >= 0.0 && relativePos <= 1.0)
 		{
 			//quantized (16 bits) version --> much faster than floor!
-			unsigned index = ((unsigned)((relativePos*(double)(steps-1)+0.5)*65536.0))>>16;
+			unsigned index = ((unsigned)((relativePos*(double)steps)*65535.0))>>16;
 			return getColorByIndex((index*(MAX_STEPS-1)) / (steps-1));
 		}
 		else

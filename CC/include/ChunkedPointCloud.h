@@ -73,6 +73,11 @@ public:
 
 		//**** other methods ****//
 
+		//! Const version of getPoint
+		inline virtual const CCVector3* getPoint(unsigned index) const { return point(index); }
+		//! Const version of getPointPersistentPtr
+		inline virtual const CCVector3* getPointPersistentPtr(unsigned index) const { return point(index); }
+
 		//! Applies a rigid transformation to the cloud
 		/** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
 			\param trans transformation (rotation matrix + translation vector)

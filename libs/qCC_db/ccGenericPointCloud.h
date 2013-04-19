@@ -163,7 +163,7 @@ public:
 	virtual VisibilityTableType* getTheVisibilityArray();
 
     //! Returns a ReferenceCloud equivalent to the visiblity array
-	virtual CCLib::ReferenceCloud* getTheVisiblePoints();
+	virtual CCLib::ReferenceCloud* getTheVisiblePoints() const;
 
 	//! Returns whether the visiblity array is allocated or not
     virtual bool isVisibilityTableInstantiated() const;

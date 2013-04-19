@@ -25,6 +25,9 @@
 
 using namespace CCLib;
 
+//! Default number of classes for associated histogram
+const unsigned MAX_HISTOGRAM_SIZE = 256;
+
 ccScalarField::ccScalarField(const char* name/*=0*/)
 	: ScalarField(name)
 	, m_showNaNValuesInGrey(true)
@@ -131,6 +134,55 @@ void ccScalarField::computeMinAndMax()
 	ScalarField::computeMinAndMax();
 
 	m_displayRange.setBounds(m_minVal,m_maxVal);
+
+	//update histogram
+	{
+		if (m_displayRange.maxRange() == 0 || currentSize() == 0)
+		{
+			//can't build histogram of a flat field
+			m_histogram.clear();
+		}
+		else
+		{
+			unsigned count = currentSize();
+			unsigned numberOfClasses = (unsigned)ceil(sqrt((double)count));
+			numberOfClasses = std::max<unsigned>(std::min<unsigned>(numberOfClasses,MAX_HISTOGRAM_SIZE),4);
+
+			//reserve memory
+			try
+			{
+				m_histogram.resize(numberOfClasses,0);
+			}
+			catch(std::bad_alloc)
+			{
+				ccLog::Warning("[ccScalarField::computeMinAndMax] Failed to update associated histogram!");
+				m_histogram.clear();
+			}
+
+			if (!m_histogram.empty())
+			{
+				for (unsigned i=0; i<count; ++i)
+				{
+					const ScalarType& val = getValue(i);
+
+					unsigned bin = static_cast<unsigned>(floor((val-m_displayRange.min())*(ScalarType)numberOfClasses/m_displayRange.maxRange()));
+					if (bin == numberOfClasses)
+						--bin;
+					++m_histogram[bin];
+				}
+			}
+		}
+
+		//update 'maxValue'
+		{
+			m_histogram.maxValue = 0;
+			for (size_t i=0; i<m_histogram.size(); ++i)
+			{
+				if (m_histogram[i] > m_histogram.maxValue)
+					m_histogram.maxValue = m_histogram[i];
+			}
+		}
+	}
 
 	updateSaturationBounds();
 }

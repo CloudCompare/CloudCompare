@@ -51,7 +51,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 	connect(colorScaleAlwaysShowZeroCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleAlwaysZero()));
 	connect(colorScaleAlwaysSymmetricalCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleAlwaysSym()));
 	connect(useColorScaleShaderCheckBox, SIGNAL(clicked()), this, SLOT(changeUseColorScaleShader()));
-	connect(colorScaleSquareSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeColorScaleSquareSize(int)));
+	connect(colorRampWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeColorScaleRampWidth(int)));
 
 	connect(defaultFontSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeDefaultFontSize(int)));
 	connect(numberPrecisionSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeNumberPrecision(int)));
@@ -129,7 +129,7 @@ void ccDisplayOptionsDlg::refresh()
 	colorScaleAlwaysSymmetricalCheckBox->setChecked(parameters.colorScaleAlwaysSymmetrical);
 	useColorScaleShaderCheckBox->setChecked(parameters.colorScaleUseShader);
 	useColorScaleShaderCheckBox->setEnabled(parameters.colorScaleShaderSupported);
-	colorScaleSquareSizeSpinBox->setValue(parameters.colorScaleSquareSize);
+	colorRampWidthSpinBox->setValue(parameters.colorScaleRampWidth);
 
 	defaultFontSizeSpinBox->setValue(parameters.defaultFontSize);
 	numberPrecisionSpinBox->setValue(parameters.displayedNumPrecision);
@@ -370,11 +370,11 @@ void ccDisplayOptionsDlg::changeUseColorScaleShader()
 	parameters.colorScaleUseShader = useColorScaleShaderCheckBox->isChecked();
 }
 
-void ccDisplayOptionsDlg::changeColorScaleSquareSize(int val)
+void ccDisplayOptionsDlg::changeColorScaleRampWidth(int val)
 {
-	if (val<0)
+	if (val<2)
 		return;
-	parameters.colorScaleSquareSize = (unsigned)val;
+	parameters.colorScaleRampWidth = (unsigned)val;
 }
 
 void ccDisplayOptionsDlg::changeDefaultFontSize(int val)

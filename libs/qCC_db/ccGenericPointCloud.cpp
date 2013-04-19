@@ -140,7 +140,7 @@ ccGenericPointCloud::VisibilityTableType* ccGenericPointCloud::getTheVisibilityA
     return m_pointsVisibility;
 }
 
-CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints()
+CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints() const
 {
 	unsigned count = size();
 	assert(count == m_pointsVisibility->currentSize());
@@ -148,25 +148,35 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints()
     if (!m_pointsVisibility || m_pointsVisibility->currentSize() != count)
         return 0;
 
-    //we create an entity with the 'visible' vertices only
-    CCLib::ReferenceCloud* rc = new CCLib::ReferenceCloud(this);
-
-    for (unsigned i=0; i<count; ++i)
+	//count the number of points to copy
+	unsigned pointCount = 0;
 	{
-        if (m_pointsVisibility->getValue(i) == POINT_VISIBLE)
-		{
-            if (!rc->addPointIndex(i))
-			{
-				//not enough memory
-				ccLog::Error("[ccGenericPointCloud::getTheVisiblePoints] Not enough memory!");
-				delete rc;
-				rc=0;
-				break;
-			}
-		}
+		for (unsigned i=0; i<count; ++i)
+			if (m_pointsVisibility->getValue(i) == POINT_VISIBLE)
+				++pointCount;
 	}
 
-	rc->resize(rc->size());
+	if (pointCount == 0)
+	{
+		ccLog::Error("[ccGenericPointCloud::getTheVisiblePoints] No point in selection!");
+		return 0;
+	}
+
+    //we create an entity with the 'visible' vertices only
+    CCLib::ReferenceCloud* rc = new CCLib::ReferenceCloud(const_cast<ccGenericPointCloud*>(this));
+	if (rc->reserve(pointCount))
+	{
+		for (unsigned i=0; i<count; ++i)
+			if (m_pointsVisibility->getValue(i) == POINT_VISIBLE)
+				rc->addPointIndex(i); //can't fail (see above)
+	}
+	else
+	{
+		delete rc;
+		rc=0;
+		ccLog::Error("[ccGenericPointCloud::getTheVisiblePoints] Not enough memory!");
+	}
+
     return rc;
 }
 

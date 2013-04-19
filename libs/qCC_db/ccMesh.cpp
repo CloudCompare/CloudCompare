@@ -161,7 +161,8 @@ ccGenericMesh* ccMesh::clone(ccGenericPointCloud* vertices/*=0*/,
 						rc->addPointIndex(i); //can't fail, see above
 
 				//and the associated vertices set
-				newVertices = new ccPointCloud(rc,m_associatedCloud);
+				assert(m_associatedCloud->isA(CC_POINT_CLOUD));
+				newVertices = new ccPointCloud(rc,static_cast<ccPointCloud*>(m_associatedCloud));
 				if (newVertices->size() < rc->size())
 				{
 					//not enough memory!

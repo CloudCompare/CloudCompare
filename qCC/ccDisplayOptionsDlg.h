@@ -69,7 +69,7 @@ protected slots:
 	void changeColorScaleAlwaysZero();
 	void changeColorScaleAlwaysSym();
 	void changeUseColorScaleShader();
-	void changeColorScaleSquareSize(int);
+	void changeColorScaleRampWidth(int);
 	
 	void changeDefaultFontSize(int);
 	void changeNumberPrecision(int);

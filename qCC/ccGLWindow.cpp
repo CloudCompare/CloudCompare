@@ -3262,7 +3262,10 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 	}
 
 	glColor3f((float)col[0]/(float)MAX_COLOR_COMP,(float)col[1]/(float)MAX_COLOR_COMP,(float)col[2]/(float)MAX_COLOR_COMP);
-	y2 -= margin; //empirical compensation
+	if (align & ALIGN_VBOTTOM)
+		y2 -= margin; //empirical compensation
+	else if (align & ALIGN_VMIDDLE)
+		y2 -= margin/2; //empirical compensation
 	renderText(x2, y2, text, textFont);
 }
 

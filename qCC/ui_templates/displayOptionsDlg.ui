@@ -390,23 +390,23 @@
          <item>
           <widget class="QLabel" name="label_10">
            <property name="text">
-            <string>Square size</string>
+            <string>Ramp width</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QSpinBox" name="colorScaleSquareSizeSpinBox">
+          <widget class="QSpinBox" name="colorRampWidthSpinBox">
            <property name="suffix">
             <string> pixels</string>
            </property>
            <property name="minimum">
-            <number>2</number>
+            <number>10</number>
            </property>
            <property name="maximum">
             <number>200</number>
            </property>
            <property name="value">
-            <number>20</number>
+            <number>50</number>
            </property>
           </widget>
          </item>

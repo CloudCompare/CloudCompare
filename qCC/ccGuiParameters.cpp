@@ -89,7 +89,7 @@ void ccGui::ParamStruct::reset()
 	colorScaleAlwaysShowZero	= true;
 	colorScaleUseShader			= false;
 	colorScaleShaderSupported	= false;
-	colorScaleSquareSize		= 20;
+	colorScaleRampWidth			= 50;
 	
 	defaultFontSize				= 10;
 	displayedNumPrecision		= 6;
@@ -120,7 +120,7 @@ ccGui::ParamStruct& ccGui::ParamStruct::operator =(const ccGui::ParamStruct& par
 	colorScaleAlwaysShowZero	= params.colorScaleAlwaysShowZero;
 	colorScaleUseShader			= params.colorScaleUseShader;
 	colorScaleShaderSupported	= params.colorScaleShaderSupported;
-	colorScaleSquareSize		= params.colorScaleSquareSize;
+	colorScaleRampWidth			= params.colorScaleRampWidth;
 	defaultFontSize				= params.defaultFontSize;
 	displayedNumPrecision		= params.displayedNumPrecision;
 	labelsTransparency			= params.labelsTransparency;
@@ -158,7 +158,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
     colorScaleAlwaysShowZero	= settings.value("colorScaleAlwaysShowZero", true).toBool();
 	colorScaleUseShader			= settings.value("colorScaleUseShader", false).toBool();
 	//colorScaleShaderSupported	= not saved
-	colorScaleSquareSize		= (unsigned)settings.value("colorScaleSquareSize", 20).toInt();
+	colorScaleRampWidth			= (unsigned)settings.value("colorScaleRampWidth", 50).toInt();
 	
 	defaultFontSize				= (unsigned)settings.value("defaultFontSize", 10).toInt();
 	displayedNumPrecision		= (unsigned)settings.value("displayedNumPrecision", 6).toInt();
@@ -193,7 +193,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
     settings.setValue("colorScaleAlwaysShowZero", colorScaleAlwaysShowZero);
     settings.setValue("colorScaleUseShader", colorScaleUseShader);
     //settings.setValue("colorScaleShaderSupported", not saved);
-	settings.setValue("colorScaleSquareSize", colorScaleSquareSize);
+	settings.setValue("colorScaleRampWidth", colorScaleRampWidth);
 	settings.setValue("defaultFontSize", defaultFontSize);
 	settings.setValue("displayedNumPrecision", displayedNumPrecision);
 	settings.setValue("labelsTransparency", labelsTransparency);

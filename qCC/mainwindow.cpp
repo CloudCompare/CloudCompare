@@ -4846,20 +4846,20 @@ void MainWindow::deactivateSegmentationMode(bool state)
     //shall we apply segmentation?
     if (state)
     {
-        ccHObject* firstResult=0;
+        ccHObject* firstResult = 0;
 
-        unsigned i,n = m_gsTool->getNumberOfValidEntities();
+        unsigned n = m_gsTool->getNumberOfValidEntities();
 		deleteHiddenPoints = m_gsTool->deleteHiddenPoints();
 
-        for (i=0;i<n;++i)
+        for (unsigned i=0;i<n;++i)
         {
-            ccHObject* anObject = m_gsTool->getEntity(i);
+            ccHObject* entity = m_gsTool->getEntity(i);
 			
-            if (anObject->isKindOf(CC_POINT_CLOUD) || anObject->isKindOf(CC_MESH))
+            if (entity->isKindOf(CC_POINT_CLOUD) || entity->isKindOf(CC_MESH))
 			{
-				//Special case: labels (do this before temporarily removing 'anObject' from DB!)
+				//Special case: labels (do this before temporarily removing 'entity' from DB!)
 				bool lockedVertices;
-				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(anObject,&lockedVertices);
+				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(entity,&lockedVertices);
 				if (cloud)
 				{
 					//assert(!lockedVertices); //in some cases we accept to segment meshes with locked vertices!
@@ -4873,7 +4873,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
 						bool removeLabel = false;
 						for (unsigned i=0;i<label->size();++i)
-							if (label->getPoint(i).cloud == anObject)
+							if (label->getPoint(i).cloud == entity)
 							{
 								removeLabel = true;
 								break;
@@ -4893,31 +4893,34 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				}
 
 				//we temporarily detach entity, as it may undergo
-				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection(true)
+				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
 				ccHObject* parent=0;
-				removeObjectTemporarilyFromDBTree(anObject,parent);
+				removeObjectTemporarilyFromDBTree(entity,parent);
 
 				ccHObject* segmentationResult = 0;
-				if (anObject->isKindOf(CC_POINT_CLOUD))
+				if (entity->isKindOf(CC_POINT_CLOUD))
 				{
-					segmentationResult = static_cast<ccGenericPointCloud*>(anObject)->createNewCloudFromVisibilitySelection(true);
+					segmentationResult = static_cast<ccGenericPointCloud*>(entity)->createNewCloudFromVisibilitySelection(true);
 				}
-				else if (anObject->isKindOf(CC_MESH))
+				else if (entity->isKindOf(CC_MESH))
 				{
-					segmentationResult = static_cast<ccGenericMesh*>(anObject)->createNewMeshFromSelection(true);
+					segmentationResult = static_cast<ccGenericMesh*>(entity)->createNewMeshFromSelection(true);
 				}
 
 				if (!deleteHiddenPoints) //no need to put it back if we delete it afterwards!
-					putObjectBackIntoDBTree(anObject,parent);
+				{
+					entity->setName(entity->getName()+QString(".remaining"));
+					putObjectBackIntoDBTree(entity,parent);
+				}
 				else
 				{
 					//keep original name(s)
-					segmentationResult->setName(anObject->getName());
-					if (anObject->isKindOf(CC_MESH) && segmentationResult->isKindOf(CC_MESH))
-						static_cast<ccGenericMesh*>(segmentationResult)->getAssociatedCloud()->setName(static_cast<ccGenericMesh*>(anObject)->getAssociatedCloud()->getName());
+					segmentationResult->setName(entity->getName());
+					if (entity->isKindOf(CC_MESH) && segmentationResult->isKindOf(CC_MESH))
+						static_cast<ccGenericMesh*>(segmentationResult)->getAssociatedCloud()->setName(static_cast<ccGenericMesh*>(entity)->getAssociatedCloud()->getName());
 
-					delete anObject;
-					anObject=0;
+					delete entity;
+					entity=0;
 				}
 
 				if (segmentationResult)

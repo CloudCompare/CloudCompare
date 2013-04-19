@@ -170,15 +170,12 @@ bool ccHistogramWindow::computeBinArrayFromSF()
 		double val = (double)m_associatedSF->getValue(i);
 
 		//we ignore values outside of [m_minVal,m_maxVal]
-		if (val >= m_minVal && val < m_maxVal)
+		if (val >= m_minVal && val <= m_maxVal)
 		{
 			unsigned bin = (unsigned)floor((val-m_minVal)*scale);
-			assert(bin<m_numberOfClasses);
+			if (bin == m_numberOfClasses)
+				--bin;
 			++m_histoValues[bin];
-		}
-		else if (val==m_maxVal)
-		{
-			++m_histoValues[m_numberOfClasses-1];
 		}
 	}
 

@@ -84,8 +84,8 @@ public:
 		bool colorScaleUseShader;
 		//! Whether shader for color scale display is available or not
 		bool colorScaleShaderSupported;
-		//! Color scale square size
-		unsigned colorScaleSquareSize;
+		//! Color scale ramp width (for display)
+		unsigned colorScaleRampWidth;
 		
 		//! Default displayed font size
 		unsigned defaultFontSize;

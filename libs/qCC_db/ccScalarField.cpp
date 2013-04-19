@@ -78,7 +78,7 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 	}
 	else //log scale
 	{
-		ScalarType dLog = log10(std::max(fabs(d),(ScalarType)ZERO_TOLERANCE));
+        ScalarType dLog = log10(std::max( (ScalarType) fabs(d),(ScalarType)ZERO_TOLERANCE));
 		if (dLog <= m_logSaturationRange.start())
 			return 0;
 		else if (dLog >= m_logSaturationRange.stop())

@@ -107,6 +107,7 @@ void sfEditDlg::fillDialogWith(ccScalarField* sf)
 
 		alwaysShow0CheckBox->blockSignals(true);
 		alwaysShow0CheckBox->setChecked(alwaysShowZero);
+		alwaysShow0CheckBox->setEnabled(!logScale);
 		alwaysShow0CheckBox->blockSignals(false);
 
 		symmetricalScaleCheckBox->blockSignals(true);

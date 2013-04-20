@@ -85,8 +85,7 @@ void ccGui::ParamStruct::reset()
 
 	pickedPointsSize = 4;
 
-	colorScaleAlwaysSymmetrical	= true;
-	colorScaleAlwaysShowZero	= true;
+	colorScaleShowHistogram		= true;
 	colorScaleUseShader			= false;
 	colorScaleShaderSupported	= false;
 	colorScaleRampWidth			= 50;
@@ -116,8 +115,7 @@ ccGui::ParamStruct& ccGui::ParamStruct::operator =(const ccGui::ParamStruct& par
     decimateCloudOnMove         = params.decimateCloudOnMove;
     displayCross                = params.displayCross;
 	pickedPointsSize			= params.pickedPointsSize;
-	colorScaleAlwaysSymmetrical	= params.colorScaleAlwaysSymmetrical;
-	colorScaleAlwaysShowZero	= params.colorScaleAlwaysShowZero;
+	colorScaleShowHistogram		= params.colorScaleShowHistogram;
 	colorScaleUseShader			= params.colorScaleUseShader;
 	colorScaleShaderSupported	= params.colorScaleShaderSupported;
 	colorScaleRampWidth			= params.colorScaleRampWidth;
@@ -154,8 +152,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
 
 	pickedPointsSize		= (unsigned)settings.value("pickedPointsSize", 4).toInt();
 
-    colorScaleAlwaysSymmetrical	= settings.value("colorScaleAlwaysSymmetrical", true).toBool();
-    colorScaleAlwaysShowZero	= settings.value("colorScaleAlwaysShowZero", true).toBool();
+    colorScaleShowHistogram		= settings.value("colorScaleShowHistogram", true).toBool();
 	colorScaleUseShader			= settings.value("colorScaleUseShader", false).toBool();
 	//colorScaleShaderSupported	= not saved
 	colorScaleRampWidth			= (unsigned)settings.value("colorScaleRampWidth", 50).toInt();
@@ -189,8 +186,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
     settings.setValue("cloudDecimation",decimateCloudOnMove);
     settings.setValue("crossDisplayed",displayCross);
 	settings.setValue("pickedPointsSize", pickedPointsSize);
-	settings.setValue("colorScaleAlwaysSymmetrical", colorScaleAlwaysSymmetrical);
-    settings.setValue("colorScaleAlwaysShowZero", colorScaleAlwaysShowZero);
+    settings.setValue("colorScaleShowHistogram", colorScaleShowHistogram);
     settings.setValue("colorScaleUseShader", colorScaleUseShader);
     //settings.setValue("colorScaleShaderSupported", not saved);
 	settings.setValue("colorScaleRampWidth", colorScaleRampWidth);

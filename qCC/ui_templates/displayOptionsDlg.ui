@@ -27,7 +27,7 @@
    <item>
     <widget class="QToolBox" name="toolBox">
      <property name="currentIndex">
-      <number>1</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="pageColorAndMatOptions">
       <property name="geometry">
@@ -356,22 +356,9 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_7">
        <item>
-        <widget class="QCheckBox" name="colorScaleAlwaysShowZeroCheckBox">
+        <widget class="QCheckBox" name="colorScaleShowHistogramCheckBox">
          <property name="text">
-          <string>Always show 0</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="colorScaleAlwaysSymmetricalCheckBox">
-         <property name="enabled">
-          <bool>false</bool>
-         </property>
-         <property name="text">
-          <string>Always symmetrical (for signed scalar fields only)</string>
+          <string>Show histogram next to color ramp</string>
          </property>
          <property name="checked">
           <bool>true</bool>

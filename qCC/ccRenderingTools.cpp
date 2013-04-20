@@ -118,13 +118,13 @@ struct ScaleElement
 //structure for recursive display of labels
 struct vlabel
 {
-	int yPos; 			/**< label center pos **/
-	int yMin; 			/**< label 'ROI' min **/
-	int yMax; 			/**< label 'ROI' max **/
-	ScalarType val; 	/**< label value **/
+	int yPos; 		/**< label center pos **/
+	int yMin; 		/**< label 'ROI' min **/
+	int yMax; 		/**< label 'ROI' max **/
+	double val; 	/**< label value **/
 
 	//default constructor
-	vlabel(int y, int y1, int y2, ScalarType v) : yPos(y), yMin(y1), yMax(y2),val(v) { assert(y2>=y1); }
+	vlabel(int y, int y1, int y2, double v) : yPos(y), yMin(y1), yMax(y2),val(v) { assert(y2>=y1); }
 };
 
 //! A set of 'vlabel' structures
@@ -156,7 +156,16 @@ static vlabelPair GetVLabelsAround(int y, vlabelSet& set)
 }
 
 //! For log scale inversion
-const ScalarType c_log10 = log((ScalarType)10.0);
+const double c_log10 = log(10.0);
+
+//! Convert standard range to log scale
+void ConvertToLogScale(ScalarType& dispMin, ScalarType& dispMax)
+{
+	ScalarType absDispMin = ( dispMax < 0 ? std::min(-dispMax,-dispMin) : std::max<ScalarType>(dispMin,0) );
+	ScalarType absDispMax = std::max(fabs(dispMin),fabs(dispMax));
+	dispMin = log10(std::max(absDispMin,(ScalarType)ZERO_TOLERANCE));
+	dispMax = log10(std::max(absDispMax,(ScalarType)ZERO_TOLERANCE));
+}
 
 void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 {
@@ -174,7 +183,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	bool logScale = sf->logScale();
 	
 	//set of particular values
-	std::set<ScalarType> keyValues;
+	//DGM: we work with doubles for maximum accuracy
+	std::set<double> keyValues;
 	if (!logScale)
 	{
 		keyValues.insert(sf->displayRange().min());
@@ -185,30 +195,61 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		keyValues.insert(sf->saturationRange().start());
 		keyValues.insert(sf->saturationRange().stop());
 		keyValues.insert(sf->saturationRange().max());
+
+		if (sf->isZeroAlwaysShown())
+			keyValues.insert(0.0);
 	}
 	else
 	{
-		keyValues.insert(fabs(sf->displayRange().min()));
-		keyValues.insert(fabs(sf->displayRange().start()));
-		keyValues.insert(fabs(sf->displayRange().stop()));
-		keyValues.insert(fabs(sf->displayRange().max()));
-		keyValues.insert(exp(sf->saturationRange().min()*c_log10));
-		keyValues.insert(exp(sf->saturationRange().start()*c_log10));
-		keyValues.insert(exp(sf->saturationRange().stop()*c_log10));
-		keyValues.insert(exp(sf->saturationRange().max()*c_log10));
+		ScalarType minDisp = sf->displayRange().min();
+		ScalarType maxDisp = sf->displayRange().max();
+		ConvertToLogScale(minDisp,maxDisp);
+		keyValues.insert(minDisp);
+		keyValues.insert(maxDisp);
+
+		ScalarType startDisp = sf->displayRange().start();
+		ScalarType stopDisp = sf->displayRange().stop();
+		ConvertToLogScale(startDisp,stopDisp);
+		keyValues.insert(startDisp);
+		keyValues.insert(stopDisp);
+
+		keyValues.insert(sf->saturationRange().min());
+		keyValues.insert(sf->saturationRange().start());
+		keyValues.insert(sf->saturationRange().stop());
+		keyValues.insert(sf->saturationRange().max());
 	}
-	if (sf->isZeroAlwaysShown())
-		keyValues.insert((ScalarType)0);
+
+	//Internally, the elements in a set are already sorted
+	//std::sort(keyValues.begin(),keyValues.end());
 
 	if (!sf->areNaNValuesShownInGrey())
 	{
 		//remove 'hidden' values
-		for (std::set<ScalarType>::iterator it = keyValues.begin(); it != keyValues.end(); )
+		if (!logScale)
 		{
-			if (!sf->displayRange().isInRange(*it))
-				it = keyValues.erase(it);
-			else
-				++it;
+			for (std::set<double>::iterator it = keyValues.begin(); it != keyValues.end(); )
+			{
+				if (!sf->displayRange().isInRange(static_cast<ScalarType>(*it)))
+					it = keyValues.erase(it);
+				else
+					++it;
+			}
+		}
+		else
+		{
+			//convert actual display range to log scale
+			//(we can't do the opposite, otherwise we get accuracy/round-off issues!)
+			ScalarType dispMin = sf->displayRange().start();
+			ScalarType dispMax = sf->displayRange().stop();
+			ConvertToLogScale(dispMin,dispMax);
+
+			for (std::set<double>::iterator it = keyValues.begin(); it != keyValues.end(); )
+			{
+				if (*it >= dispMin && *it <= dispMax)
+					++it;
+				else
+					it = keyValues.erase(it);
+			}
 		}
 	}
 
@@ -216,7 +257,11 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	QFontMetrics strMetrics(win->font());
 
 	//default color: text color
-	const unsigned char* textCol = ccGui::Parameters().textDefaultCol;
+	const unsigned char* textColor = ccGui::Parameters().textDefaultCol;
+
+	//histogram?
+	const::ccScalarField::Histogram histogram = sf->getHistogram();
+	bool showHistogram = (ccGui::Parameters().colorScaleShowHistogram && !logScale && histogram.maxValue != 0 && histogram.size() > 1);
 
 	//display area
 	const int strHeight = strMetrics.height();
@@ -228,24 +273,21 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	int halfH = (context.glH>>1);
 
 	//top-right corner of the scale ramp
-	const int xShift = 20;
+	const int xShift = 20 + (showHistogram ? scaleWidth/2 : 0);
 	const int yShift = halfH-scaleMaxHeight/2;
 
 	glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_LINE_SMOOTH);
 	glDisable(GL_DEPTH_TEST);
 	
-	//Internally, the elements in a set are always sorted
-	//std::sort(keyValues.begin(),keyValues.end());
-
-	std::vector<ScalarType> sortedKeyValues(keyValues.begin(),keyValues.end());
-	ScalarType maxRange = sortedKeyValues.back()-sortedKeyValues.front();
+	std::vector<double> sortedKeyValues(keyValues.begin(),keyValues.end());
+	double maxRange = sortedKeyValues.back()-sortedKeyValues.front();
 
 	//const colorType* lineColor = ccColor::white;
 	////clear background?
 	//if (ccGui::Parameters().backgroundCol[0] + ccGui::Parameters().backgroundCol[1] + ccGui::Parameters().backgroundCol[2] > 3*128)
 	//	lineColor = ccColor::black;
-	const colorType* lineColor = textCol;
+	const colorType* lineColor = textColor;
 
 	//display color ramp
 	{
@@ -255,76 +297,47 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 
 		if (keyValues.size() > 1)
 		{
-			glLineWidth(1.0);
+			int histoStart = x+scaleWidth+std::min(std::max(scaleWidth/8,3),15);
+
+			glLineWidth(1.0f);
 			glBegin(GL_LINES);
 			for (int j=0; j<scaleMaxHeight; ++j)
 			{
-				ScalarType value = sortedKeyValues.front() + ((ScalarType)j * maxRange) / (ScalarType)scaleMaxHeight;
-				const colorType* col = sf->getColor(value);
+				double value = sortedKeyValues.front() + ((double)j * maxRange) / (double)scaleMaxHeight;
+				if (logScale)
+					value = exp(value*c_log10);
+				const colorType* col = sf->getColor(static_cast<ScalarType>(value));
 				glColor3ubv(col ? col : ccColor::lightGrey);
+
 				glVertex2i(x,y+j);
 				glVertex2i(x+scaleWidth,y+j);
+				
+				if (showHistogram)
+				{
+					double bind = (value-(double)sf->displayRange().min())*(double)(histogram.size()-1)/(double)sf->displayRange().maxRange();
+					size_t bin = static_cast<size_t>(floor(bind));
+					
+					double hVal = (double)histogram[bin];
+					if (bin+1 < histogram.size())
+					{
+						//linear interpolation
+						double alpha = bind-(double)bin;
+						hVal = (1.0-alpha) * hVal + alpha * (double)histogram[bin+1];
+					}
+
+					int xSpan = std::max(static_cast<int>(hVal / (double)histogram.maxValue * (double)(scaleWidth/2)),1);
+					glVertex2i(histoStart,y+j);
+					glVertex2i(histoStart+xSpan,y+j);
+				}
 			}
 			glEnd();
-
-			//show histogram
-			const::ccScalarField::Histogram histogram = sf->getHistogram();
-			if (histogram.maxValue != 0 && histogram.size() > 1)
-			{
-				//inverted mode //DGM: strangely, very ugly!
-				//glPushAttrib(GL_COLOR_BUFFER_BIT);
-				//glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_COLOR);
-				//glEnable(GL_BLEND);
-				glLineWidth((GLfloat)(1+scaleWidth/20));
-				glColor3ubv(lineColor);
-				
-				glBegin(GL_LINE_STRIP);
-
-				//we get the first and last vertex from the histogram
-				//so as to be sure of having at least 2 points!
-				{
-					ScalarType value = sortedKeyValues.front();
-					size_t bin = static_cast<size_t>(floor((value-sf->displayRange().min())*(ScalarType)histogram.size()/sf->displayRange().maxRange()));
-					if (bin == histogram.size())
-						--bin;
-					int yh = y;
-					int xh = x + scaleWidth/8 + static_cast<int>((double)histogram[bin]/(double)histogram.maxValue*0.75*(double)scaleWidth);
-					glVertex2i(xh,yh);
-				}
-
-				//then we project the histogram points in the color ramp
-				//and we keep only those totally included
-				for (size_t i=0; i<histogram.size(); ++i)
-				{
-					ScalarType value = sf->displayRange().min() + ((ScalarType)i * sf->displayRange().maxRange()) / (ScalarType)(histogram.size()-1);
-					ScalarType relativePos = (value-sortedKeyValues.front()) / maxRange;
-					int yScale = static_cast<int>(relativePos * (ScalarType)(scaleMaxHeight-1));
-					if (yScale>0 && yScale+1<scaleMaxHeight)
-					{
-						int yh = y + yScale;
-						int xh = x + scaleWidth/8 + static_cast<int>((double)histogram[i]/(double)histogram.maxValue*0.75*(double)scaleWidth);
-						glVertex2i(xh,yh);
-					}
-				}
-
-				//we get the first and last vertex from the histogram
-				{
-					ScalarType value = sortedKeyValues.back();
-					size_t bin = static_cast<size_t>(floor((value-sf->displayRange().min())*(ScalarType)histogram.size()/sf->displayRange().maxRange()));
-					if (bin == histogram.size())
-						--bin;
-					int yh = y + scaleMaxHeight-1;
-					int xh = x + scaleWidth/8 + static_cast<int>((double)histogram[bin]/(double)histogram.maxValue*0.75*(double)scaleWidth);
-					glVertex2i(xh,yh);
-				}
-				glEnd();
-				//glPopAttrib();
-			}
 		}
 		else
 		{
-			//if there's a unique scalar value (visible), we only draw a square!
-			ScalarType value = sortedKeyValues.front();
+			//if there's a unique (visible) scalar value, we only draw a square!
+			double value = sortedKeyValues.front();
+			if (logScale)
+				value = exp(value*c_log10);
 			const colorType* col = sf->getColor(value);
 			glColor3ubv(col ? col : ccColor::lightGrey);
 			glBegin(GL_POLYGON);
@@ -348,8 +361,75 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 
 	//display labels
 	{
+		//list of labels to draw
+		vlabelSet drawnLabels;
+
+		//add first label
+		drawnLabels.push_back(vlabel(0,0,strHeight,sortedKeyValues.front()));
+
+		if (keyValues.size() > 1)
+		{
+			//add last label
+			drawnLabels.push_back(vlabel(scaleMaxHeight,scaleMaxHeight-strHeight,scaleMaxHeight,sortedKeyValues.back()));
+		}
+
+		//we try to display the other keyPoints (if any)
+		if (keyValues.size() > 2)
+		{
+			assert(maxRange > 0.0);
+			const int minGap = strHeight;
+			for (size_t i=1; i<keyValues.size()-1; ++i)
+			{
+				int yScale = static_cast<int>((sortedKeyValues[i]-sortedKeyValues[0]) * (double)scaleMaxHeight / maxRange);
+				vlabelPair nLabels = GetVLabelsAround(yScale,drawnLabels);
+
+				assert(nLabels.first != drawnLabels.end() && nLabels.second != drawnLabels.end());
+				if (	(nLabels.first == drawnLabels.end() || nLabels.first->yMax <= yScale - minGap)
+					&&	(nLabels.second == drawnLabels.end() || nLabels.second->yMin >= yScale + minGap))
+				{
+					//insert it at the right place (so as to keep a sorted list!)
+					drawnLabels.insert(nLabels.second,vlabel(yScale,yScale-strHeight/2,yScale+strHeight/2,sortedKeyValues[i]));
+				}
+			}
+		}
+
+		//now we recursively display labels where we have some rool left
+		if (drawnLabels.size() > 1)
+		{
+			const int minGap = strHeight*2;
+
+			size_t drawnLabelsBefore = 0; //just to init the loop
+			size_t drawnLabelsAfter = drawnLabels.size(); 
+
+			//proceed until no more label can be inserted
+			while (drawnLabelsAfter > drawnLabelsBefore)
+			{
+				drawnLabelsBefore = drawnLabelsAfter;
+
+				vlabelSet::iterator it1 = drawnLabels.begin();
+				vlabelSet::iterator it2 = it1; it2++;
+				for (; it2 != drawnLabels.end(); ++it2)
+				{
+					if (it1->yMax + 2*minGap < it2->yMin)
+					{
+						//insert label
+						double val = (it1->val + it2->val)/2.0;
+						int yScale = static_cast<int>((val-sortedKeyValues[0]) * (double)scaleMaxHeight / maxRange);
+
+						//insert it at the right place (so as to keep a sorted list!)
+						drawnLabels.insert(it2,vlabel(yScale,yScale-strHeight/2,yScale+strHeight/2,val));
+					}
+					it1 = it2;
+				}
+
+				drawnLabelsAfter = drawnLabels.size();
+			}
+		}
+
+		//display labels
+
 		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-		glColor3f((float)textCol[0]/255.0f,(float)textCol[1]/255.0f,(float)textCol[2]/255.0f);
+		glColor3f((float)textColor[0]/255.0f,(float)textColor[1]/255.0f,(float)textColor[2]/255.0f);
 
 		//Scalar field name
 		const char* sfName = sf->getName();
@@ -357,6 +437,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		{
 			//QString sfTitle = QString("[%1]").arg(sfName);
 			QString sfTitle(sfName);
+			if (logScale)
+				sfTitle += QString("[Log scale]");
 			//we leave some (vertical) space for the top-most label!
 			win->displayText(sfTitle, context.glW-xShift, context.glH-yShift+strMetrics.height(), ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VTOP);
 		}
@@ -372,96 +454,30 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		const int x = context.glW-xShift-scaleWidth-2*tickSize-1;
 		const int y = context.glH-yShift-scaleMaxHeight;
 		//for ticks
-		const int x_ = halfW-xShift-scaleWidth-tickSize-1;
-		const int y_ = halfH-yShift-scaleMaxHeight;
+		const int xTick = halfW-xShift-scaleWidth-tickSize-1;
+		const int yTick = halfH-yShift-scaleMaxHeight;
 
-		//draw first value tick & label
-		win->displayText(QString::number(sortedKeyValues.front(),format,precision), x, y, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VTOP);
-		glBegin(GL_LINES);
-		glVertex2f(x_,y_);
-		glVertex2f(x_+tickSize,y_);
-		glEnd();
-
-		if (keyValues.size() > 1)
+		for (vlabelSet::iterator it = drawnLabels.begin(); it != drawnLabels.end(); ++it)
 		{
-			//draw last value tick & label
-			win->displayText(QString::number(sortedKeyValues.back(),format,precision), x, y+scaleMaxHeight, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VBOTTOM);
+			vlabelSet::iterator itNext = it; itNext++;
+			//position
+			unsigned char align = ccGLWindow::ALIGN_HRIGHT;
+			if (it == drawnLabels.begin())
+				align |= ccGLWindow::ALIGN_VTOP;
+			else if (itNext == drawnLabels.end())
+				align |= ccGLWindow::ALIGN_VBOTTOM;
+			else
+				align |= ccGLWindow::ALIGN_VMIDDLE;
+
+			double value = it->val;
+			if (logScale)
+				value = exp(value*c_log10);
+
+			win->displayText(QString::number(value,format,precision), x, y+it->yPos, align);
 			glBegin(GL_LINES);
-			glVertex2f(x_,y_+scaleMaxHeight);
-			glVertex2f(x_+tickSize,y_+scaleMaxHeight);
+			glVertex2f(xTick,yTick+it->yPos);
+			glVertex2f(xTick+tickSize,yTick+it->yPos);
 			glEnd();
-
-			vlabelSet drawnLabels;
-			//add first label
-			drawnLabels.push_back(vlabel(y,y,y+strHeight,sortedKeyValues.front()));
-			//add last label
-			drawnLabels.push_back(vlabel(y+scaleMaxHeight,y+scaleMaxHeight-strHeight,y+scaleMaxHeight,sortedKeyValues.back()));
-
-			//we try to display the other keyPoints (if any)
-			if (keyValues.size() > 2)
-			{
-				const int minGap = strHeight;
-				for (size_t i=1; i<keyValues.size()-1; ++i)
-				{
-					assert(maxRange > 0);
-					int yScale = static_cast<int>((sortedKeyValues[i]-sortedKeyValues[0]) * (ScalarType)scaleMaxHeight / maxRange);
-					int yPos = y+yScale;
-					vlabelPair nLabels = GetVLabelsAround(yPos,drawnLabels);
-
-					assert(nLabels.first != drawnLabels.end() && nLabels.second != drawnLabels.end());
-					if (	(nLabels.first == drawnLabels.end() || nLabels.first->yMax <= yPos - minGap)
-						&&	(nLabels.second == drawnLabels.end() || nLabels.second->yMin >= yPos + minGap))
-					{
-						//we've got enough space!
-						win->displayText(QString::number(sortedKeyValues[i],format,precision), x, yPos, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VMIDDLE);
-						glBegin(GL_LINES);
-						glVertex2f(x_,y_+yScale);
-						glVertex2f(x_+tickSize,y_+yScale);
-						glEnd();
-
-						//insert it at the right place (so as to keep a sorted list!)
-						drawnLabels.insert(nLabels.second,vlabel(yPos,yPos-strHeight/2,yPos+strHeight/2,sortedKeyValues[i]));
-					}
-				}
-			}
-
-			//now we recursively display labels where we have some rool left
-			if (drawnLabels.size()>1)
-			{
-				size_t drawnLabelsBefore = 0; //just to init the loop
-				size_t drawnLabelsAfter = drawnLabels.size(); 
-				const int minGap = strHeight*2;
-
-				while (drawnLabelsAfter > drawnLabelsBefore)
-				{
-					drawnLabelsBefore = drawnLabelsAfter;
-
-					vlabelSet::iterator it1 = drawnLabels.begin();
-					vlabelSet::iterator it2 = it1; it2++;
-					for (; it2 != drawnLabels.end(); ++it2)
-					{
-						if (it1->yMax + 2*minGap < it2->yMin)
-						{
-							//insert label
-							ScalarType val = (it1->val + it2->val)/2.0;
-							int yScale = static_cast<int>((val-sortedKeyValues[0]) * (ScalarType)scaleMaxHeight / maxRange);
-							int yPos = y+yScale;
-
-							win->displayText(QString::number(val,format,precision), x, yPos, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VMIDDLE);
-							glBegin(GL_LINES);
-							glVertex2f(x_,y_+yScale);
-							glVertex2f(x_+tickSize,y_+yScale);
-							glEnd();
-
-							//insert it at the right place (so as to keep a sorted list!)
-							drawnLabels.insert(it2,vlabel(yPos,yPos-strHeight/2,yPos+strHeight/2,val));
-						}
-						it1 = it2;
-					}
-
-					drawnLabelsAfter = drawnLabels.size();
-				}
-			}
 		}
 	}
 
@@ -501,7 +517,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	//first we fill the two vectors below with scale "values"
 	if (strictlyPositive || !symmetricalScale) //only positive values
 	{
-		bool dispZero = ccGui::Parameters().colorScaleAlwaysShowZero && minDisplayed>0.0 && strictlyPositive;
+		bool dispZero = minDisplayed>0.0 && strictlyPositive;
 		bool dispMinVal = false;//(minVal<minDisplayed);
 		bool dispMinDispVal = true;
 		bool dispMinSat = (minSaturation>minDisplayed && minSaturation<maxSaturation);

@@ -66,9 +66,8 @@ protected slots:
     void changeMeshDecimation();
     void changeCloudDecimation();
     void changeCrossDisplayed();
-	void changeColorScaleAlwaysZero();
-	void changeColorScaleAlwaysSym();
-	void changeUseColorScaleShader();
+	void changeColorScaleShowHistogram();
+	void changeColorScaleUseShader();
 	void changeColorScaleRampWidth(int);
 	
 	void changeDefaultFontSize(int);

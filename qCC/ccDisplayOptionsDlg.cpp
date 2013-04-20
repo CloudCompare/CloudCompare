@@ -48,9 +48,8 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 	connect(decimateCloudBox, SIGNAL(clicked()), this, SLOT(changeCloudDecimation()));
 	connect(showCrossCheckBox, SIGNAL(clicked()), this, SLOT(changeCrossDisplayed()));
 
-	connect(colorScaleAlwaysShowZeroCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleAlwaysZero()));
-	connect(colorScaleAlwaysSymmetricalCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleAlwaysSym()));
-	connect(useColorScaleShaderCheckBox, SIGNAL(clicked()), this, SLOT(changeUseColorScaleShader()));
+	connect(colorScaleShowHistogramCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleShowHistogram()));
+	connect(useColorScaleShaderCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleUseShader()));
 	connect(colorRampWidthSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeColorScaleRampWidth(int)));
 
 	connect(defaultFontSizeSpinBox, SIGNAL(valueChanged(int)), this, SLOT(changeDefaultFontSize(int)));
@@ -125,8 +124,7 @@ void ccDisplayOptionsDlg::refresh()
 	decimateCloudBox->setChecked(parameters.decimateCloudOnMove);
 	showCrossCheckBox->setChecked(parameters.displayCross);
 
-	colorScaleAlwaysShowZeroCheckBox->setChecked(parameters.colorScaleAlwaysShowZero);
-	colorScaleAlwaysSymmetricalCheckBox->setChecked(parameters.colorScaleAlwaysSymmetrical);
+	colorScaleShowHistogramCheckBox->setChecked(parameters.colorScaleShowHistogram);
 	useColorScaleShaderCheckBox->setChecked(parameters.colorScaleUseShader);
 	useColorScaleShaderCheckBox->setEnabled(parameters.colorScaleShaderSupported);
 	colorRampWidthSpinBox->setValue(parameters.colorScaleRampWidth);
@@ -355,17 +353,12 @@ void ccDisplayOptionsDlg::changeCrossDisplayed()
 	parameters.displayCross = showCrossCheckBox->isChecked();
 }
 
-void ccDisplayOptionsDlg::changeColorScaleAlwaysZero()
+void ccDisplayOptionsDlg::changeColorScaleShowHistogram()
 {
-	parameters.colorScaleAlwaysShowZero = colorScaleAlwaysShowZeroCheckBox->isChecked();
+	parameters.colorScaleShowHistogram = colorScaleShowHistogramCheckBox->isChecked();
 }
 
-void ccDisplayOptionsDlg::changeColorScaleAlwaysSym()
-{
-	parameters.colorScaleAlwaysSymmetrical = colorScaleAlwaysSymmetricalCheckBox->isChecked();
-}
-
-void ccDisplayOptionsDlg::changeUseColorScaleShader()
+void ccDisplayOptionsDlg::changeColorScaleUseShader()
 {
 	parameters.colorScaleUseShader = useColorScaleShaderCheckBox->isChecked();
 }

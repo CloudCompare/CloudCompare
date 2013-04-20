@@ -74,12 +74,8 @@ public:
 		//! Picked points size
 		unsigned pickedPointsSize;
 
-		//! Color scale option: always show '0'
-		bool colorScaleAlwaysShowZero;
-		//! Color scale option: always symmetrical
-		/** This only applies to signed scalar fields.
-		**/
-		bool colorScaleAlwaysSymmetrical;
+		//! Color scale option: show histogram next to color ramp
+		bool colorScaleShowHistogram;
 		//! Whether to use shader for color scale display (if available) or not
 		bool colorScaleUseShader;
 		//! Whether shader for color scale display is available or not

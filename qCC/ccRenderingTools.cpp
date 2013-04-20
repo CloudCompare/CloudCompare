@@ -230,11 +230,17 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 			for (std::set<double>::iterator it = keyValues.begin(); it != keyValues.end(); )
 			{
 				if (!sf->displayRange().isInRange(static_cast<ScalarType>(*it)))
-					it = keyValues.erase(it);
+            {
+               std::set<double>::iterator toDelete = it;
+               ++it;
+               keyValues.erase(toDelete);
+            }
 				else
+            {
 					++it;
 			}
 		}
+      }
 		else
 		{
 			//convert actual display range to log scale
@@ -246,9 +252,15 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 			for (std::set<double>::iterator it = keyValues.begin(); it != keyValues.end(); )
 			{
 				if (*it >= dispMin && *it <= dispMax)
+            {
 					++it;
+            }
 				else
-					it = keyValues.erase(it);
+            {
+               std::set<double>::iterator toDelete = it;
+               ++it;
+               keyValues.erase(toDelete);
+            }
 			}
 		}
 	}

@@ -181,6 +181,8 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		return;
 
 	bool logScale = sf->logScale();
+	bool symmetricalScale = sf->symmetricalScale();
+	bool alwaysShowZero = sf->isZeroAlwaysShown();
 	
 	//set of particular values
 	//DGM: we work with doubles for maximum accuracy
@@ -196,7 +198,10 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		keyValues.insert(sf->saturationRange().stop());
 		keyValues.insert(sf->saturationRange().max());
 
-		if (sf->isZeroAlwaysShown())
+		if (symmetricalScale)
+			keyValues.insert(-sf->saturationRange().max());
+
+		if (alwaysShowZero)
 			keyValues.insert(0.0);
 	}
 	else
@@ -229,16 +234,16 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		{
 			for (std::set<double>::iterator it = keyValues.begin(); it != keyValues.end(); )
 			{
-				if (!sf->displayRange().isInRange(static_cast<ScalarType>(*it)))
-            {
-               std::set<double>::iterator toDelete = it;
-               ++it;
-               keyValues.erase(toDelete);
-            }
-				else
-            {
+				if (!sf->displayRange().isInRange(static_cast<ScalarType>(*it)) && (!alwaysShowZero || *it != 0)) //we keep zero if the user has explicitely asked for it!
+				{
+					std::set<double>::iterator toDelete = it;
 					++it;
-			}
+					keyValues.erase(toDelete);
+				}
+				else
+				{
+					++it;
+				}
 		}
       }
 		else
@@ -252,15 +257,15 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 			for (std::set<double>::iterator it = keyValues.begin(); it != keyValues.end(); )
 			{
 				if (*it >= dispMin && *it <= dispMax)
-            {
+				{
 					++it;
-            }
+				}
 				else
-            {
-               std::set<double>::iterator toDelete = it;
-               ++it;
-               keyValues.erase(toDelete);
-            }
+				{
+					std::set<double>::iterator toDelete = it;
+					++it;
+					keyValues.erase(toDelete);
+				}
 			}
 		}
 	}
@@ -327,14 +332,18 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 				if (showHistogram)
 				{
 					double bind = (value-(double)sf->displayRange().min())*(double)(histogram.size()-1)/(double)sf->displayRange().maxRange();
-					size_t bin = static_cast<size_t>(floor(bind));
+					int bin = static_cast<int>(floor(bind));
 					
-					double hVal = (double)histogram[bin];
-					if (bin+1 < histogram.size())
+					double hVal = 0.0;
+					if (bin >= 0 && bin < histogram.size()) //in symmetrical case we can get values outside of the real SF range
 					{
-						//linear interpolation
-						double alpha = bind-(double)bin;
-						hVal = (1.0-alpha) * hVal + alpha * (double)histogram[bin+1];
+						hVal = (double)histogram[bin];
+						if (bin+1 < histogram.size())
+						{
+							//linear interpolation
+							double alpha = bind-(double)bin;
+							hVal = (1.0-alpha) * hVal + alpha * (double)histogram[bin+1];
+						}
 					}
 
 					int xSpan = std::max(static_cast<int>(hVal / (double)histogram.maxValue * (double)(scaleWidth/2)),1);

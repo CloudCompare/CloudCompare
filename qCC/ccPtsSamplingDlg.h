@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1691                                                              $
-//$LastChangedDate:: 2010-10-22 16:52:55 +0200 (ven., 22 oct. 2010)        $
-//**************************************************************************
-//
 
 #ifndef CC_POINTS_SAMPLING_DLG_HEADER
 #define CC_POINTS_SAMPLING_DLG_HEADER
@@ -39,6 +32,9 @@ public:
     bool useDensity() const;
     double getDensityValue() const;
     unsigned getPointsNumber() const;
+
+	void setPointsNumber(int count);
+	void setDensityValue(double density);
 };
 
-#endif
+#endif //CC_POINTS_SAMPLING_DLG_HEADER

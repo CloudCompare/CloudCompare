@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #ifndef CC_PRIMITIVE_FACTORY_DLG_HEADER
 #define CC_PRIMITIVE_FACTORY_DLG_HEADER

@@ -46,6 +46,10 @@ v2.4 04/16/2013
 	* Closing the 'About' dialog would make CC crash!
 	* ccViewer no longer displays the colorbar if the scalar field is hidden!
 	* The cloud/cloud distance with the 'Height Function' model refinement was giving weird results!
+	* The cones produced with the Primitive Factory were upside down
+	* The following methods were broken:
+		- Edit > Normals > Resolve direction
+		- Tools > Projection > Unroll (on cone)
 
 v2.4 03/10/2013
 - Points size can now be independently set for each cloud

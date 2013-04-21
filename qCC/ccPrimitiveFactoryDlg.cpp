@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
 
 #include "ccPrimitiveFactoryDlg.h"
 
@@ -93,8 +86,8 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 		//Cone
 		case 4:
 			{
-				primitive = new ccCone( coneTopRadiusDoubleSpinBox->value(),
-										coneBottomRadiusDoubleSpinBox->value(),
+				primitive = new ccCone( coneBottomRadiusDoubleSpinBox->value(),
+										coneTopRadiusDoubleSpinBox->value(),
 										coneHeightDoubleSpinBox->value(),
 										snoutGroupBox->isChecked() ? coneXOffsetDoubleSpinBox->value() : 0,
 										snoutGroupBox->isChecked() ? coneYOffsetDoubleSpinBox->value() : 0);

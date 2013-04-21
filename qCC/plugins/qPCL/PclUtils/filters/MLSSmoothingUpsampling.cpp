@@ -103,6 +103,8 @@ int MLSSmoothingUpsampling::compute()
 #ifdef LP_PCL_PATCH_ENABLED
 	//copy the original scalar fields here
 	copyScalarFields(cloud, new_cloud, mapping_indices, true);
+	//copy the original colors here
+	copyRGBColors(cloud, new_cloud, mapping_indices, true);
 #endif
 
     //disable original cloud

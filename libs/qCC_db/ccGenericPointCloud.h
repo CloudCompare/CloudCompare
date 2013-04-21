@@ -142,7 +142,7 @@ public:
     //! Returns compressed normal corresponding to a given point
     /** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
     **/
-	virtual const normsType getPointNormalIndex(unsigned pointIndex) const=0;
+	virtual const normsType& getPointNormalIndex(unsigned pointIndex) const=0;
 
     //! Returns normal corresponding to a given point
     /** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)

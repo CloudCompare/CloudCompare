@@ -32,7 +32,9 @@ ccStatisticalTestDlg::ccStatisticalTestDlg(QString p1Label,
     param1Label->setText(p1Label);
     param2Label->setText(p2Label);
     if (!p3Label.isNull())
+	{
         param3Label->setText(p3Label);
+	}
     else
     {
         param3Label->setVisible(false);

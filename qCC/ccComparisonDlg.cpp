@@ -736,9 +736,9 @@ void ccComparisonDlg::compute()
 				sfDims[i]->link();
 			}
 
-			if (sfDims[0]->reserve(count) &&
-				sfDims[1]->reserve(count) &&
-				sfDims[2]->reserve(count))
+			if (sfDims[0]->resize(count) &&
+				sfDims[1]->resize(count) &&
+				sfDims[2]->resize(count))
 			{
 				for (i=0;i<count;++i)
 				{

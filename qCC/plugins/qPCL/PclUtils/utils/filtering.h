@@ -18,13 +18,10 @@
 #ifndef qPCL_FILTERING_H
 #define qPCL_FILTERING_H
 
-
-
 //PCL
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
 #include <pcl/surface/mls.h>
-
 
 //qCC
 #include <ccPointCloud.h>
@@ -121,9 +118,7 @@ template <typename PointInT, typename PointOutT> int
 #endif
 	);
 
-int
-	removeOutliersStatistical(const sensor_msgs::PointCloud2ConstPtr incloud, const int &k, const float &nStds, sensor_msgs::PointCloud2Ptr outcloud);
-
+int removeOutliersStatistical(const sensor_msgs::PointCloud2ConstPtr incloud, const int &k, const float &nStds, sensor_msgs::PointCloud2Ptr outcloud);
 
 //! Make a forced copy of all scalar fields from one cloud to another
 /** \note This algorithm simply copy the scalar fields from a cloud
@@ -133,9 +128,14 @@ int
 *  \param in2outMapping indices of the input cloud for each point in the output
 *  \param overwrite you can chose to not overwrite existing fields
 **/
-void copyScalarFields(const ccPointCloud *inCloud,
-	ccPointCloud *outCloud,
-	pcl::PointIndicesPtr &in2outMapping,
-	bool overwrite);
+void copyScalarFields(	const ccPointCloud *inCloud,
+						ccPointCloud *outCloud,
+						pcl::PointIndicesPtr &in2outMapping,
+						bool overwrite = true);
+
+void copyRGBColors(		const ccPointCloud *inCloud,
+						ccPointCloud *outCloud,
+						pcl::PointIndicesPtr &in2outMapping,
+						bool overwrite = true);
 
 #endif // FILTERING_H

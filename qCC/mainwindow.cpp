@@ -1126,6 +1126,7 @@ void MainWindow::doActionConvertNormalsToHSV()
 				ccCloud->convertNormalToRGB();
 				ccCloud->showColors(true);
 				ccCloud->showNormals(false);
+				ccCloud->showSF(false);
 				ccCloud->prepareDisplayForRefresh_recursive();
 			}
         }
@@ -1985,9 +1986,14 @@ void MainWindow::doActionConvertTextureToColor()
 	updateUI();
 }
 
+static unsigned s_ptsSamplingCount = 1000000;
+static double s_ptsSamplingDensity = 10.0;
 void MainWindow::doActionSamplePoints()
 {
-    ccPtsSamplingDlg dlg(this);
+	ccPtsSamplingDlg dlg(this);
+	//restore last parameters
+	dlg.setPointsNumber(s_ptsSamplingCount);
+	dlg.setDensityValue(s_ptsSamplingDensity);
     if (!dlg.exec())
         return;
 
@@ -1997,6 +2003,9 @@ void MainWindow::doActionSamplePoints()
     bool withRGB = dlg.interpolateRGB();
     bool withTexture = dlg.interpolateTexture();
 	bool useDensity = dlg.useDensity();
+	assert(dlg.getPointsNumber() >= 0);
+	s_ptsSamplingCount = (unsigned)dlg.getPointsNumber();
+	s_ptsSamplingDensity = dlg.getDensityValue();
 
 	bool withFeatures = (withNormals || withRGB || withTexture);
 
@@ -2015,11 +2024,11 @@ void MainWindow::doActionSamplePoints()
 
             if (useDensity)
             {
-				sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(mesh,dlg.getDensityValue(),&pDlg,triIndices);
+				sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(mesh,s_ptsSamplingDensity,&pDlg,triIndices);
             }
             else
             {
-				sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(mesh,dlg.getPointsNumber(),&pDlg,triIndices);
+				sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(mesh,s_ptsSamplingCount,&pDlg,triIndices);
             }
 
             if (sampledCloud)
@@ -3324,7 +3333,7 @@ void MainWindow::doActionStatisticalTest()
     switch (distribIndex)
     {
     case 0: //Gauss
-        sDlg = new ccStatisticalTestDlg("mu","sigma","","Local Statistical Test (Gauss)",this);
+        sDlg = new ccStatisticalTestDlg("mu","sigma",QString(),"Local Statistical Test (Gauss)",this);
         break;
     case 1: //Weibull
         sDlg = new ccStatisticalTestDlg("a","b","shift","Local Statistical Test (Weibull)",this);
@@ -4322,11 +4331,11 @@ void MainWindow::doActionResolveNormalsDirection()
         return;
     }
 
-    unsigned level;
-    ccAskOneIntValueDlg vDlg("Octree level", 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, CCLib::DgmOctree::MAX_OCTREE_LEVEL/2, "Resolve normal directions");
+    ccAskOneIntValueDlg vDlg("Octree level", 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, std::min<int>(7,CCLib::DgmOctree::MAX_OCTREE_LEVEL), "Resolve normal directions");
     if (!vDlg.exec())
         return;
-    level = vDlg.getValue();
+	assert(vDlg.getValue() && vDlg.getValue()<=255);
+    uchar level = (uchar)vDlg.getValue();
 
     for (unsigned i=0; i<m_selectedEntities.size(); i++)
     {
@@ -4337,21 +4346,35 @@ void MainWindow::doActionResolveNormalsDirection()
         ccProgressDialog pDlg(false,this);
 
         if (!cloud->getOctree())
+		{
             if (!cloud->computeOctree((CCLib::GenericProgressCallback*)&pDlg))
             {
                 ccConsole::Error(QString("Could not compute octree for cloud '%1'").arg(cloud->getName()));
                 continue;
             }
+		}
+
+		unsigned pointCount = cloud->size();
 
         NormsIndexesTableType* normsIndexes = new NormsIndexesTableType;
-        normsIndexes->reserve(cloud->size());
-        for (unsigned j=0; j<cloud->size(); j++)
+        if (!normsIndexes->reserve(pointCount))
+		{
+			ccConsole::Error(QString("Not engouh memory! (cloud '%1')").arg(cloud->getName()));
+			continue;
+		}
+
+		//init array with current normals
+        for (unsigned j=0; j<pointCount; j++)
         {
-            normsType index = cloud->getPointNormalIndex(j);
-            normsIndexes->setValue(j, index);
+            const normsType& index = cloud->getPointNormalIndex(j);
+			normsIndexes->addElement(index);
         }
-        ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(cloud, normsIndexes, level, (CCLib::GenericProgressCallback*)&pDlg, cloud->getOctree());
-        for (unsigned j=0; j<normsIndexes->currentSize(); j++)
+        
+		//apply algorithm
+		ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(cloud, normsIndexes, level, (CCLib::GenericProgressCallback*)&pDlg, cloud->getOctree());
+        
+		//compress resulting normals and transfer them to the cloud
+		for (unsigned j=0; j<pointCount; j++)
             cloud->setPointNormalIndex(j, normsIndexes->getValue(j));
 
 		normsIndexes->release();
@@ -4361,6 +4384,7 @@ void MainWindow::doActionResolveNormalsDirection()
     }
 
     refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionSynchronize()
@@ -4446,9 +4470,9 @@ void MainWindow::doActionUnroll()
     double radius = unrollDlg.getRadius();
     double angle = unrollDlg.getAngle();
     unsigned char dim = (unsigned char)unrollDlg.getAxisDimension();
-    CCVector3* pCenter=0;
+    CCVector3* pCenter = 0;
     CCVector3 center;
-    if (!unrollDlg.isAxisPositionAuto())
+    if (mode==1 || !unrollDlg.isAxisPositionAuto())
     {
         center = unrollDlg.getAxisPosition();
         pCenter = &center;
@@ -7275,10 +7299,12 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionSamplePoints->setEnabled(atLeastOneMesh);				//&& hasMesh
     actionMeasureMeshSurface->setEnabled(atLeastOneMesh);		//&& hasMesh
 	actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);		//&& hasMesh
+	actionConvertTextureToColor->setEnabled(atLeastOneMesh);	//&& hasMesh
+	actionSubdivideMesh->setEnabled(atLeastOneMesh);			//&& hasMesh
 
-    //menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);         //&& scalarField
-    actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);            //&& scalarField
-    actionEnhanceMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);           //&& scalarField
+    menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);	//&& scalarField
+    //actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);	//&& scalarField
+    //actionEnhanceMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);	//&& scalarField
 
     actionResolveNormalsDirection->setEnabled(atLeastOneCloud && atLeastOneNormal);    //&& hasNormals
     actionClearNormals->setEnabled(atLeastOneNormal);               //&& hasNormals

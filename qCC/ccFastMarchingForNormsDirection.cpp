@@ -119,9 +119,9 @@ int ccFastMarchingForNormsDirection::step()
 		//on doit rajouter ses voisines au groupe TRIAL
 		for (int i=0;i<CC_FM_NUMBER_OF_NEIGHBOURS;++i)
 		{
-         unsigned nIndex = minTCellIndex + neighboursIndexShift[i];
+			unsigned nIndex = minTCellIndex + neighboursIndexShift[i];
 			//pointeur vers la cellule voisine
-         CCLib::FastMarching::Cell* nCell = theGrid[nIndex];
+			CCLib::FastMarching::Cell* nCell = theGrid[nIndex];
 
 			//si elle est definie
 			if (nCell)
@@ -404,21 +404,16 @@ int ccFastMarchingForNormsDirection::updateResolvedTable(ccGenericPointCloud* th
 		if (!Yk)
 			continue;
 
-		Yk->placeIteratorAtBegining();
-		
-		for (unsigned k=0;k<Yk->size();++k)
+		for (unsigned k=0; k<Yk->size(); ++k)
 		{
-			unsigned index = Yk->getCurrentPointGlobalIndex();
+			unsigned index = Yk->getPointGlobalIndex(k);
 			resolved.setValue(index,1); //resolvedValue=1
 
 			const normsType& norm = theNorms->getValue(index);
 			if (CCVector3::vdot(ccNormalVectors::GetNormal(norm),aCell->N.u)<0.0)
 			{
-				PointCoordinateType newN[3];
 				const PointCoordinateType* N = ccNormalVectors::GetNormal(norm);
-				newN[0]=-N[0];
-				newN[1]=-N[1];
-				newN[2]=-N[2];
+				PointCoordinateType newN[3]= { -N[0], -N[1], -N[2] };
 				theNorms->setValue(index,ccNormalVectors::GetNormIndex(newN));
 			}
 
@@ -427,7 +422,6 @@ int ccFastMarchingForNormsDirection::updateResolvedTable(ccGenericPointCloud* th
 
 			theCloud->setPointScalarValue(index,aCell->T);
 			//theCloud->setPointScalarValue(index,aCell->v);
-			Yk->forwardIterator();
 			++count;
 		}
 	}
@@ -574,7 +568,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 	}
 
 	//temporary SF
-	int oldSfIdx = theCloud->getCurrentInScalarFieldIndex();
+	int oldSfIdx = theCloud->getCurrentDisplayedScalarFieldIndex();
 	int sfIdx = theCloud->getScalarFieldIndexByName("FM_Propagation");
 	if (sfIdx<0)
 		sfIdx=theCloud->addScalarField("FM_Propagation");
@@ -591,7 +585,16 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 
 	//vecteur indiquant si le point a ete traite
 	GenericChunkedArray<1,uchar>* resolved = new GenericChunkedArray<1,uchar>();
-	resolved->resize(numberOfPoints,true,0); //defaultResolvedValue=0
+	if (!resolved->resize(numberOfPoints,true,0)) //defaultResolvedValue=0
+	{
+		ccLog::Warning("[ccFastMarchingForNormsDirection] Not enough memory!");
+		theCloud->deleteScalarField(sfIdx);
+		theCloud->setCurrentScalarField(oldSfIdx);
+		if (!_theOctree)
+			delete theOctree;
+		resolved->release();
+		return -5;
+	}
 
 	//on va faire la propagation avec l'algorithme de Fast Marching
 	ccFastMarchingForNormsDirection* fm = new ccFastMarchingForNormsDirection();
@@ -602,6 +605,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 		ccLog::Error("[ccFastMarchingForNormsDirection] Something went wrong during initialization ...\n");
 		theCloud->deleteScalarField(sfIdx);
 		theCloud->setCurrentScalarField(oldSfIdx);
+		resolved->release();
 		if (!_theOctree)
 			delete theOctree;
 		delete fm;

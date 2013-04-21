@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2222                                                              $
-//$LastChangedDate:: 2012-07-24 18:38:48 +0200 (mar., 24 juil. 2012)       $
-//**************************************************************************
-//
 
 #include "ccPtsSamplingDlg.h"
 
@@ -57,7 +50,17 @@ double ccPtsSamplingDlg::getDensityValue() const
     return dDoubleSpinBox->value();
 }
 
+void ccPtsSamplingDlg::setDensityValue(double density)
+{
+	dDoubleSpinBox->setValue(density);
+}
+
 unsigned ccPtsSamplingDlg::getPointsNumber() const
 {
     return pnSpinBox->value();
+}
+
+void ccPtsSamplingDlg::setPointsNumber(int count)
+{
+	pnSpinBox->setValue(count);
 }

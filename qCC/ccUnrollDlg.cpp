@@ -71,6 +71,7 @@ void ccUnrollDlg::shapeTypeChanged(int index)
         labelAngle->setHidden(true);
         doubleSpinBoxAngle->setHidden(true);
         groupBoxAxisPosition->setTitle("Axis position");
+		radiusLabel->setText("Radius");
         checkBoxAuto->setHidden(false);
         axisAutoStateChanged(checkBoxAuto->checkState());
     }
@@ -78,6 +79,7 @@ void ccUnrollDlg::shapeTypeChanged(int index)
     {
         labelAngle->setHidden(false);
         doubleSpinBoxAngle->setHidden(false);
+		radiusLabel->setText("Projection radius");
         groupBoxAxisPosition->setTitle("Cone apex");
         checkBoxAuto->setHidden(true);
         axisAutoStateChanged(Qt::Unchecked);

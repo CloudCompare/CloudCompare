@@ -259,7 +259,7 @@ public:
 	virtual const colorType* geScalarValueColor(ScalarType d) const;
 	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const;
 	virtual const colorType* getPointColor(unsigned pointIndex) const;
-	virtual const normsType getPointNormalIndex(unsigned pointIndex) const;
+	virtual const normsType& getPointNormalIndex(unsigned pointIndex) const;
 	virtual const PointCoordinateType* getPointNormal(unsigned pointIndex) const;
 	/** WARNING: if removeSelectedPoints is true, any attached octree will be deleted.
 	**/
@@ -414,18 +414,18 @@ public:
 		\param dim dimension along which the cylinder axis is aligned (X=0, Y=1, Z=2)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism
 	**/
-	void unrollOnCylinder(double radius, CCVector3* center=0, int dim=2, CCLib::GenericProgressCallback* progressCb=NULL);
+	void unrollOnCylinder(double radius, CCVector3* center=0, unsigned char dim=2, CCLib::GenericProgressCallback* progressCb=NULL);
 
 	//! Unrolls the cloud and its normals on a cone
 	/** This method is redundant with the "developCloudOnCone" method of CCLib,
 		appart that it can also handle the cloud normals.
 		\param baseRadius unrolling cone base radius
-		\param alpha cone angle (between 0 and 180 degrees)
+		\param alpha_deg cone angle (between 0 and 180 degrees)
 		\param apex cone apex
 		\param dim dimension along which the cone axis is aligned (X=0, Y=1, Z=2)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism
 	**/
-	void unrollOnCone(double baseRadius, double alpha, const CCVector3& apex, int dim=2, CCLib::GenericProgressCallback* progressCb=NULL);
+	void unrollOnCone(double baseRadius, double alpha_deg, const CCVector3& apex, unsigned char dim=2, CCLib::GenericProgressCallback* progressCb=NULL);
 
 	//! Adds associated SF color ramp info to current GL context
 	virtual void addColorRampInfo(CC_DRAW_CONTEXT& context);

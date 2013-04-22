@@ -3433,7 +3433,7 @@ void MainWindow::doActionStatisticalTest()
 					chi2SF->setMinDisplayed(chi2dist);
 					chi2SF->setSymmetricalScale(false);
 					chi2SF->setSaturationStart(chi2dist);
-					chi2SF->setSaturationStop(chi2dist);
+					//chi2SF->setSaturationStop(chi2dist);
 					pc->setCurrentDisplayedScalarField(chi2SfIdx);
 					pc->showSF(true);
 					pc->prepareDisplayForRefresh_recursive();
@@ -3526,7 +3526,7 @@ void MainWindow::doActionComputeStatParams()
                     double* npis = new double[numberOfClasses];
 					{
 						unsigned finalNumberOfClasses = 0;
-						double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib,pc,0,finalNumberOfClasses,false,false,histo,npis);
+						double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib,pc,0,finalNumberOfClasses,false,0,0,histo,npis);
 
 						if (chi2dist>=0.0)
 						{

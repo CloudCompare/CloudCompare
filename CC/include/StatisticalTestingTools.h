@@ -55,8 +55,9 @@ public:
 		\param cloud a subset of points (associated to scalar values)
 		\param numberOfClasses initial number of classes for the empirical distribution (0 for automatic determination, >1 otherwise)
 		\param finalNumberOfClasses final number of classes of the empirical distribution
-		\param forceZeroAsMin whether min boundary should be forced to zero (only SF is strictly positive!)
 		\param noClassCompression prevent the algorithm from performing classes compression (faster but less accurate)
+		\param histoMin [optional] minimum histogram value
+		\param histoMax [optional] maximum histogram value
 		\param[out] histoValues [optional] histogram array (its size should be equal to the initial number of classes)
 		\param[out] npis [optional] array containing the theoretical probabilities for each class (its size should be equal to the initial number of classes)
 		\return the Chi2 distance (or -1.0 if an error occured)
@@ -65,8 +66,9 @@ public:
 											const GenericCloud* cloud,
 											unsigned numberOfClasses,
 											unsigned &finalNumberOfClasses,
-											bool forceZeroAsMin,
 											bool noClassCompression = false,
+											ScalarType* histoMin = 0,
+											ScalarType* histoMax = 0,
 											unsigned* histoValues = 0,
 											double* npis = 0);
 

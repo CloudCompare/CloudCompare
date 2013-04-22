@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1030</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -1005,13 +1005,13 @@
      <normaloff>:/CC/images/ccStatTest.png</normaloff>:/CC/images/ccStatTest.png</iconset>
    </property>
    <property name="text">
-    <string>Statistical test</string>
+    <string>Local Statistical test</string>
    </property>
    <property name="toolTip">
-    <string>Apply a statistical test to classify diffrences</string>
+    <string>Apply a local statistical test to separate noise from true differences</string>
    </property>
    <property name="statusTip">
-    <string>Apply a statistical test to classify diffrences</string>
+    <string>Apply a local statistical test to separate noise from true differences</string>
    </property>
   </action>
   <action name="actionSamplePoints">

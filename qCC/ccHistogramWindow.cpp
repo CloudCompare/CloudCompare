@@ -162,19 +162,25 @@ bool ccHistogramWindow::computeBinArrayFromSF()
 	memset(m_histoValues,0,sizeof(unsigned)*m_numberOfClasses);
 	m_ownHistoValues = true;
 
-	double scale = (m_maxVal==m_minVal ? 1.0 : (double)(m_numberOfClasses-1)/(m_maxVal-m_minVal));
-
-	//on accumule les points dans l'histogramme
-	for (unsigned i=0;i<m_associatedSF->currentSize();++i)
+	double range = m_maxVal-m_minVal;
+	if (range > 0.0)
 	{
-		double val = (double)m_associatedSF->getValue(i);
-
-		//we ignore values outside of [m_minVal,m_maxVal]
-		if (val >= m_minVal && val <= m_maxVal)
+		unsigned count = m_associatedSF->currentSize();
+		for (unsigned i=0; i<count; ++i)
 		{
-			unsigned bin = (unsigned)floor((val-m_minVal)*scale);
-			++m_histoValues[bin];
+			double val = (double)m_associatedSF->getValue(i);
+
+			//we ignore values outside of [m_minVal,m_maxVal]
+			if (val >= m_minVal && val <= m_maxVal)
+			{
+				unsigned bin = (unsigned)floor((val-m_minVal)*(double)m_numberOfClasses/range);
+				++m_histoValues[std::min(bin,m_numberOfClasses-1)];
+			}
 		}
+	}
+	else
+	{
+		m_histoValues[0] = m_associatedSF->currentSize();
 	}
 
 	return true;

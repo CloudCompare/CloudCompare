@@ -41,6 +41,7 @@ v2.4 04/16/2013
 - PLY files can now save texture coordinates (and the texture in a separated file) if only one
 	texture is associated to the mesh (otherwise CC will suggest to convert materials/textures to RGB)
 - Default materials and lights have been updated
+- Local Statistical Test now works on signed scalar fields!
 - Bug fixes:
 	* BIN files saved with labels would make CC crash when re-opened!
 	* Closing the 'About' dialog would make CC crash!
@@ -50,6 +51,7 @@ v2.4 04/16/2013
 	* The following methods were broken:
 		- Edit > Normals > Resolve direction
 		- Tools > Projection > Unroll (on cone)
+		- Tools > Statistics > Local Statistical Test
 
 v2.4 03/10/2013
 - Points size can now be independently set for each cloud

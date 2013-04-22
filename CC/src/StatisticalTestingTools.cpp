@@ -27,6 +27,7 @@
 #include "GenericProgressCallback.h"
 #include "Chi2Helper.h"
 #include "ScalarField.h"
+#include "NormalDistribution.h"
 
 //system
 #include <string.h>
@@ -46,11 +47,9 @@ struct Chi2Class
 	int n;		/**< Number of elements for the class **/
 
 	//! Default constructor
-	Chi2Class()
-		: pi(0.0)
-		, n(0)
-	{
-	}
+	Chi2Class() : pi(0.0) , n(0) {}
+	//! Constructor from parameters
+	Chi2Class(double _pi, int _n) : pi(_pi) , n(_n) {}
 
 };
 
@@ -61,8 +60,9 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 															const GenericCloud* cloud,
 															unsigned numberOfClasses,
 															unsigned &finalNumberOfClasses,
-															bool forceZeroAsMin,
 															bool noClassCompression/*=false*/,
+															ScalarType* histoMin/*=0*/,
+															ScalarType* histoMax/*=0*/,
 															unsigned* histoValues/*=0*/,
 															double* npis/*=0*/)
 {
@@ -102,8 +102,10 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	if (numberOfElements == 0)
         return -1.0;
 
-    if (forceZeroAsMin)
-        minV = 0; //in the case of 'only positive values' scalar fields, it's better if the histogram starts at 0!
+    if (histoMin)
+        minV = *histoMin;
+    if (histoMax)
+        maxV = *histoMax;
 
 	//shall we automatically compute the number of classes?
 	if (numberOfClasses==0)
@@ -115,11 +117,6 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
         return -2.0; //not enough points/classes
 	}
 
-	ScalarType dV = maxV-minV;
-    ScalarType step = dV/(ScalarType)numberOfClasses;
-	if (step < ZERO_TOLERANCE)
-        return -1.0;
-
 	//try to allocate the histogram values array (if necessary)
 	unsigned* histo = (histoValues ? histoValues : new unsigned[numberOfClasses]);
 	if (!histo)
@@ -130,25 +127,60 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	memset(histo,0,sizeof(unsigned)*numberOfClasses);
 
 	//accumulate histogram
+	ScalarType dV = maxV-minV;
+	unsigned histoBefore = 0;
+	unsigned histoAfter = 0;
+	if (dV > ZERO_TOLERANCE)
 	{
 		for (unsigned i=0;i<n;++i)
 		{
 			ScalarType V = cloud->getPointScalarValue(i);
 			if (ScalarField::ValidValue(V))
 			{
-				int bin = (int)floor((V-minV)/step);
-				histo[std::min<int>(bin,numberOfClasses-1)]++; //to avoid upper boundary issues
+				int bin = (int)floor((V-minV)*(ScalarType)numberOfClasses/dV);
+				if (bin < 0)
+				{
+					histoBefore++;
+				}
+				else if (bin >= (int)numberOfClasses)
+				{
+					if (V > maxV)
+						histoAfter++;
+					else
+						histo[numberOfClasses-1]++;
+				}
+				else
+				{
+					histo[bin]++;
+				}
 			}
 		}
+	}
+	else
+	{
+		histo[0] = n;
 	}
 
 	//we build up the list of classes
 	Chi2ClassList classes;
+	//before?
 	{
-		double p1 = distrib->computePfromZero(minV);
-		for (unsigned k=1;k<=numberOfClasses;++k)
+		if (histoBefore)
 		{
-			double p2 = distrib->computePfromZero(minV+step*(ScalarType)k);
+			try
+			{
+				classes.push_back(Chi2Class(1.0e-6,(int)histoBefore));
+			}
+			catch(std::bad_alloc)
+			{
+				//not enough memory!
+				return -1.0;
+			}
+		}
+		double p1 = distrib->computePfromZero(minV);
+		for (unsigned k=1; k<=numberOfClasses; ++k)
+		{
+			double p2 = distrib->computePfromZero(minV + (ScalarType)k * dV / (ScalarType)numberOfClasses);
 
 			//add the class to the chain
 			Chi2Class currentClass;
@@ -168,6 +200,18 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 			}
 
 			p1 = p2; //next intervale
+		}
+		if (histoAfter)
+		{
+			try
+			{
+				classes.push_back(Chi2Class(1.0e-6,(int)histoAfter));
+			}
+			catch(std::bad_alloc)
+			{
+				//not enough memory!
+				return -1.0;
+			}
 		}
 	}
 
@@ -218,9 +262,17 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		for (Chi2ClassList::iterator it = classes.begin(); it != classes.end(); ++it)
 		{
 			double npi = it->pi * (double)numberOfElements;
-			double temp = (double)it->n - npi;
-			D2 += temp*(temp/npi);
-			if (D2 >= CHI2_MAX)
+			if (npi != 0.0)
+			{
+				double temp = (double)it->n - npi;
+				D2 += temp*(temp/npi);
+				if (D2 >= CHI2_MAX)
+				{
+					D2 = CHI2_MAX;
+					break;
+				}
+			}
+			else
 			{
 				D2 = CHI2_MAX;
 				break;
@@ -274,7 +326,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 
 	uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(numberOfNeighbours);
 
-	unsigned numberOfChi2Classes = (unsigned)sqrt((double)numberOfNeighbours);
+	unsigned numberOfChi2Classes = (unsigned)ceil(sqrt((double)numberOfNeighbours));
 
 	//Chi2 hisogram values
 	unsigned* histoValues = new unsigned[numberOfChi2Classes];
@@ -285,11 +337,31 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 		return -3.0;
 	}
 
+	ScalarType* histoMin = 0, customHistoMin = 0;
+	ScalarType* histoMax = 0, customHistoMax = 0;
+	if (strcmp(distrib->getName(),"Gauss")==0)
+	{
+		const NormalDistribution* nDist = static_cast<const NormalDistribution*>(distrib);
+		ScalarType mu=0, sigma2=0;
+		nDist->getParameters(mu, sigma2);
+		customHistoMin = mu - (ScalarType)3.0 * sqrt(sigma2);
+		histoMin = &customHistoMin;
+		customHistoMax = mu + (ScalarType)3.0 * sqrt(sigma2);
+		histoMax = &customHistoMax;
+	}
+	else if (strcmp(distrib->getName(),"Weibull")==0)
+	{
+		customHistoMin = 0;
+		histoMin = &customHistoMin;
+	}
+
 	//additionnal parameters for local process
-	void* additionalParameters[4] = {	(void*)distrib,
+	void* additionalParameters[] = {	(void*)distrib,
 										(void*)&numberOfNeighbours,
 										(void*)&numberOfChi2Classes,
-										(void*)histoValues };
+										(void*)histoValues,
+										(void*)histoMin,
+										(void*)histoMax};
 
 	double maxChi2 = -1.0;
 
@@ -330,6 +402,8 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 	unsigned numberOfNeighbours         = *(unsigned*)additionalParameters[1];
 	unsigned numberOfChi2Classes		= *(unsigned*)additionalParameters[2];
 	unsigned* histoValues				= (unsigned*)additionalParameters[3];
+	ScalarType* histoMin				= (ScalarType*)additionalParameters[4];
+	ScalarType* histoMax				= (ScalarType*)additionalParameters[5];
 
 	//number of points in the current cell
 	unsigned n = cell.points->size();
@@ -361,6 +435,13 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 		nNSS.alreadyVisitedNeighbourhoodSize = 1;
 	}
 
+	ReferenceCloud neighboursCloud(cell.points->getAssociatedCloud());
+	if (!neighboursCloud.reserve(numberOfNeighbours))
+	{
+		//not enough memory!
+		return false;
+	}
+
 	for (unsigned i=0;i<n;++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
@@ -374,13 +455,15 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 			if (k>numberOfNeighbours)
 				k=numberOfNeighbours;
 
-			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,k);
+			neighboursCloud.clear(false);
+			for (unsigned j=0; j<k; ++j)
+				neighboursCloud.addPointIndex(nNSS.pointsInNeighbourhood[j].pointIndex);
 
 			unsigned finalNumberOfChi2Classes=0;
 			//VERSION "SYMPA" (test grossier)
-			double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,true,true,histoValues);
+			double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,true,histoMin,histoMax,histoValues);
 			//VERSION "SEVERE" (test ultra-precis)
-			//double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,true,false,histoValues);
+			//double Chi2Dist = (ScalarType)computeAdaptativeChi2Dist(statModel,&neighboursCloud,numberOfChi2Classes,finalNumberOfChi2Classes,false,histoMin,histoMax,histoValues);
 
 			D = (Chi2Dist >= 0.0 ? (ScalarType)sqrt(Chi2Dist) : NAN_VALUE);
 		}

@@ -335,10 +335,10 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 					int bin = static_cast<int>(floor(bind));
 					
 					double hVal = 0.0;
-					if (bin >= 0 && bin < histogram.size()) //in symmetrical case we can get values outside of the real SF range
+					if (bin >= 0 && bin < (int)histogram.size()) //in symmetrical case we can get values outside of the real SF range
 					{
 						hVal = (double)histogram[bin];
-						if (bin+1 < histogram.size())
+						if (bin+1 < (int)histogram.size())
 						{
 							//linear interpolation
 							double alpha = bind-(double)bin;

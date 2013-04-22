@@ -171,8 +171,8 @@ void ccScalarField::computeMinAndMax()
 					{
 						const ScalarType& val = getValue(i);
 
-						unsigned bin = static_cast<unsigned>(floor((val-m_displayRange.min())*(ScalarType)(numberOfClasses-1)/m_displayRange.maxRange()));
-						++m_histogram[bin];
+						unsigned bin = static_cast<unsigned>(floor((val-m_displayRange.min())*(ScalarType)numberOfClasses/m_displayRange.maxRange()));
+						++m_histogram[std::min(bin,numberOfClasses-1)];
 					}
 				}
 

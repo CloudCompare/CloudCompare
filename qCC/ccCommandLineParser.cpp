@@ -255,7 +255,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 				if (++i==nargs)
 					return Error("Missing parameter: octree level after \"-SS OCTREE\"");
 
-				bool ok;
+				bool ok = false;
 				int octreeLevel = QString(args[i]).toInt(&ok);
 				if (!ok || octreeLevel<1 || octreeLevel>CCLib::DgmOctree::MAX_OCTREE_LEVEL)
 					return Error("Invalid octree level!");

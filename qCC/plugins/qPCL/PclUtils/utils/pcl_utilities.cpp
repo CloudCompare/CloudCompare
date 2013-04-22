@@ -20,40 +20,56 @@
 //PCL
 #include <pcl/io/pcd_io.h>
 
-sensor_msgs::PointCloud2 mergeVectorOfClouds(const std::vector<sensor_msgs::PointCloud2> &clouds)
+sensor_msgs::PointCloud2 mergeVectorOfClouds(std::vector<sensor_msgs::PointCloud2> &clouds)
 {
-	int n_points = clouds[0].height * clouds[0].width;
-	int n_clouds = clouds.size();
+	pcl::uint32_t n_points = clouds[0].height * clouds[0].width;
+	size_t n_clouds = clouds.size();
 
-	//all the indices
-	std::vector<int> indices(n_points);
-	for (int i = 0; i < n_points; ++i)
+	if (clouds.empty())
+		return sensor_msgs::PointCloud2();
+
+	//all the indexes
+	std::vector<int> indexes;
 	{
-		indices.at(i) = i;
+		try
+		{
+			indexes.resize(n_points);
+		}
+		catch(std::bad_alloc)
+		{
+			//not enough memory
+			return sensor_msgs::PointCloud2();
+		}
+
+		for (pcl::uint32_t i = 0; i < n_points; ++i)
+		{
+			indexes[i] = i;
+		}
 	}
-	sensor_msgs::PointCloud2::Ptr sm_cloud (new sensor_msgs::PointCloud2); //out cloud
-	sensor_msgs::PointCloud2::Ptr sm_tmp (new sensor_msgs::PointCloud2); //temporary cloud
-
-	*sm_cloud = clouds[0];
-
+	
 	//now loop on scalar fields and merge them
-	for (int i = 1; i < n_clouds; ++i)
 	{
-
-		pcl::copyPointCloud(*sm_cloud, indices, *sm_tmp);
-		pcl::concatenateFields(*sm_tmp, clouds[i], *sm_cloud);
+		for (size_t i = 1; i < n_clouds; ++i)
+		{
+			sensor_msgs::PointCloud2::Ptr sm_tmp (new sensor_msgs::PointCloud2); //temporary cloud
+			pcl::copyPointCloud(clouds[0], indexes, *sm_tmp);
+			pcl::concatenateFields(*sm_tmp, clouds[i], clouds[0]);
+		}
 	}
 
-	return *sm_cloud;
+	return clouds[0];
 }
 
-sensor_msgs::PointCloud2* loadSensorMessage(const QString &filename)
+sensor_msgs::PointCloud2::Ptr loadSensorMessage(const QString &filename)
 {
-	sensor_msgs::PointCloud2 * out_cloud = new sensor_msgs::PointCloud2 ;
+	sensor_msgs::PointCloud2::Ptr out_cloud(new sensor_msgs::PointCloud2);
 
-	//get filename as std::string
-	std::string filename_std = filename.toStdString();
 	//Load the given file
-	pcl::io::loadPCDFile(filename_std, *out_cloud);
+	if (pcl::io::loadPCDFile(filename.toStdString(), *out_cloud) < 0)
+	{
+		//loading failed
+		out_cloud.reset();
+	}
+
 	return out_cloud;
 }

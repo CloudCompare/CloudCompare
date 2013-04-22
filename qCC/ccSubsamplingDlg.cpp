@@ -177,7 +177,7 @@ void ccSubsamplingDlg::changeSamplingMethod(int index)
         case OCTREE:
             samplingValue->setDecimals(0);
             samplingValue->setMinimum(1);
-            samplingValue->setMaximum(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+            samplingValue->setMaximum((double)CCLib::DgmOctree::MAX_OCTREE_LEVEL);
             samplingValue->setSingleStep(1);
             break;
         case SPACE:

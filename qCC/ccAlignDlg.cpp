@@ -431,8 +431,8 @@ void ccAlignDlg::changeSamplingMethod(int index)
                 dataObject->computeOctree();
             modelSamplingRate->setDecimals(0);
             dataSamplingRate->setDecimals(0);
-            modelSamplingRate->setMaximum((float)CCLib::DgmOctree::MAX_OCTREE_LEVEL);
-            dataSamplingRate->setMaximum((float)CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+            modelSamplingRate->setMaximum((double)CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+            dataSamplingRate->setMaximum((double)CCLib::DgmOctree::MAX_OCTREE_LEVEL);
             modelSamplingRate->setMinimum(1.);
             dataSamplingRate->setMinimum(1.);
             modelSamplingRate->setSingleStep(1.);

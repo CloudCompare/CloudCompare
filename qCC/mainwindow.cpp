@@ -4331,7 +4331,7 @@ void MainWindow::doActionResolveNormalsDirection()
         return;
     }
 
-    ccAskOneIntValueDlg vDlg("Octree level", 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, std::min<int>(7,CCLib::DgmOctree::MAX_OCTREE_LEVEL), "Resolve normal directions");
+    ccAskOneIntValueDlg vDlg("Octree level", 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, 7, "Resolve normal directions");
     if (!vDlg.exec())
         return;
 	assert(vDlg.getValue() && vDlg.getValue()<=255);

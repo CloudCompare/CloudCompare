@@ -24,14 +24,12 @@
 //Qt
 #include <QString>
 
-sensor_msgs::PointCloud2 mergeVectorOfClouds(const std::vector<sensor_msgs::PointCloud2> &clouds);
+sensor_msgs::PointCloud2 mergeVectorOfClouds(std::vector<sensor_msgs::PointCloud2> &clouds);
 
-//! Utility function that load a given PCD file in a sensor_msgs PointCloud2
+//! Utility function that loads a given PCD file in a sensor_msgs PointCloud2
 /** \param[in] filename
-	\return a pointer to a sensor_msgs cloud
-	\note it was written with the output as return type given some problems launching this inside
-	a thread.
+	\return a shared pointer to a sensor_msgs cloud
 **/
-sensor_msgs::PointCloud2* loadSensorMessage(const QString &filename);
+sensor_msgs::PointCloud2::Ptr loadSensorMessage(const QString &filename);
 
 #endif // PCL_UTILITIES_H

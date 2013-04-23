@@ -209,7 +209,7 @@
        <item>
         <widget class="QCheckBox" name="logScaleCheckBox">
          <property name="text">
-          <string>log sale</string>
+          <string>log scale</string>
          </property>
         </widget>
        </item>

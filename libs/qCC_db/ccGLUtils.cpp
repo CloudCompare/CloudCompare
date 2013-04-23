@@ -274,16 +274,21 @@ ccGLMatrix ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
 bool ccGLUtils::CatchGLError(const char* context)
 {
 	GLenum err = glGetError();
+
+	//see http://www.opengl.org/sdk/docs/man/xhtml/glGetError.xml
 	switch(err)
 	{
+	case GL_NO_ERROR:
+		return false;
+		break;
+	case GL_INVALID_ENUM:
+		ccLog::Warning("[%s] OpenGL error: invalid enumerator",context);
+		break;
 	case GL_INVALID_VALUE:
 		ccLog::Warning("[%s] OpenGL error: invalid value",context);
 		break;
 	case GL_INVALID_OPERATION:
 		ccLog::Warning("[%s] OpenGL error: invalid operation",context);
-		break;
-	case GL_INVALID_ENUM:
-		ccLog::Warning("[%s] OpenGL error: invalid enumerator",context);
 		break;
 	case GL_STACK_OVERFLOW:
 		ccLog::Error("[%s] OpenGL error: stack overflow",context);
@@ -294,10 +299,9 @@ bool ccGLUtils::CatchGLError(const char* context)
 	case GL_OUT_OF_MEMORY:
 		ccLog::Error("[%s] OpenGL error: out of memory",context);
 		break;
-	//case NO_ERROR: //DGM: OpenGL@Linux doesn't know this enum!
-	default:
-		//ccLog::Error(stdout,"[%s] No error\n",context);
-		return false;
+	case GL_INVALID_FRAMEBUFFER_OPERATION:
+		ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation",context);
+		break;
 	}
 
 	return true;

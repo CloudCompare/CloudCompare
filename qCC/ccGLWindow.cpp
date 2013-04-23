@@ -35,6 +35,7 @@
 #include <ccSphere.h> //for the pivot symbol
 #include <ccPolyline.h>
 #include <ccPointCloud.h>
+#include <ccColorRampShader.h>
 
 //CCFbo
 #include <ccShader.h>
@@ -299,18 +300,18 @@ void ccGLWindow::initializeGL()
 			//we will update global parameters
 			ccGui::ParamStruct params = ccGui::Parameters();
 
-			GLint maxBytes=0;
+			GLint maxBytes = 0;
 			glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
-			GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
-			//
-			if (maxComponents<glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE)
+
+			const GLint minRequiredBytes = ccColorRampShader::MinRequiredBytes();
+			if (maxBytes < minRequiredBytes)
 			{
-				ccConsole::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader!",m_uniqueID);
+				ccConsole::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)",m_uniqueID,maxBytes,minRequiredBytes);
 				params.colorScaleShaderSupported = false;
 			}
 			else
 			{
-				ccShader* colorRampShader = new ccShader();
+				ccColorRampShader* colorRampShader = new ccColorRampShader();
 				QString shadersPath = ccGLWindow::getShadersPath();
 				if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag"))))
 				{

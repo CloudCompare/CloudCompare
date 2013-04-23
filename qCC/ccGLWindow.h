@@ -44,6 +44,7 @@ class ccHObject;
 class ccBBox;
 class ccCalibratedImage;
 class ccShader;
+class ccColorRampShader;
 class ccGlFilter;
 class ccFrameBufferObject;
 class cc2DLabel;
@@ -626,7 +627,7 @@ protected:
 	bool m_updateFBO;
 
 	// Color ramp shader
-	ccShader* m_colorRampShader;
+	ccColorRampShader* m_colorRampShader;
 
     //! Active GL filter
     ccGlFilter* m_activeGLFilter;

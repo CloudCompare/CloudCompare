@@ -34,9 +34,7 @@
 #include "ccImage.h"
 #include "cc2DLabel.h"
 #include "ccGLUtils.h"
-
-//ccFBO
-#include <ccShader.h>
+#include "ccColorRampShader.h"
 
 //system
 #include <assert.h>
@@ -1288,7 +1286,6 @@ void ccPointCloud::getDrawingParameters(glDrawParams& params) const
 static PointCoordinateType s_normBuffer[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
 static colorType s_rgbBuffer3ub[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
 static float s_rgbBuffer3f[MAX_NUMBER_OF_ELEMENTS_PER_CHUNK*3];
-static float s_colormapf[glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE];
 
 //helpers (for ColorRamp shader)
 
@@ -1443,7 +1440,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					&& ( sfDisplayRange.stop() <= sfDisplayRange.max() || sfDisplayRange.start() >= sfDisplayRange.min()) );
 
 				//color ramp shader initialization
-				ccShader* colorRampShader = context.colorRampShader;
+				ccColorRampShader* colorRampShader = context.colorRampShader;
 
 				if (m_currentDisplayedScalarField->logScale())
 				{
@@ -1460,15 +1457,13 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
 					assert(steps!=0);
 
-					if (steps > glDrawContext::MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < (GLint)steps)
+					if (steps > CC_MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < (GLint)steps)
 					{
 						ccLog::WarningDebug("Color ramp steps exceed shader limits!");
 						colorRampShader = 0;
 					}
 					else
 					{
-						colorRampShader->start();
-
 						float sfMinSatRel = 0.0f;
 						float sfMaxSatRel = 1.0f;
 						if (!m_currentDisplayedScalarField->symmetricalScale())
@@ -1483,31 +1478,19 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							sfMaxSatRel = GetSymmetricalNormalizedValue(sfSaturationRange.stop(),sfSaturationRange);
 							//we'll have to handle the 'minimum' saturation manually!
 						}
-						colorRampShader->setUniform1f("minSaturation",sfMinSatRel);
-						colorRampShader->setUniform1f("maxSaturation",sfMaxSatRel);
-						colorRampShader->setUniform1i("colormapSize",(int)steps);
-						{
-							//set 'grayed' points color as a float-packed value
-							int rgb = (ccColor::lightGrey[0] << 16) | (ccColor::lightGrey[1] << 8) | ccColor::lightGrey[2];
-							float packedColorGray = (float)((double)rgb/(double)(1<<24));
-							colorRampShader->setUniform1f("colorGray",packedColorGray);
-						}
 
-						//send colormap to shader
-						float* _colormapf = s_colormapf;
-						ccColorScale::Shared colorScale = m_currentDisplayedScalarField->getColorScale();
+						const ccColorScale::Shared& colorScale = m_currentDisplayedScalarField->getColorScale();
 						assert(colorScale);
-						for (unsigned i=0; i<steps; ++i)
-						{
-							const colorType* col = colorScale->getColorByRelativePos((double)i/(double)(steps-1),steps);
-							//set ramp colors as float-packed values
-							int rgb = (col[0] << 16) | (col[1] << 8) | col[2];
-							float packedValue = (float)((double)rgb/(double)(1<<24));
-							*_colormapf++ = packedValue;
-						}
-						colorRampShader->setTabUniform1fv("colormap",steps,s_colormapf);
 
-						if (glParams.showNorms)
+						colorRampShader->start();
+						if (!colorRampShader->setup(sfMinSatRel, sfMaxSatRel, steps, colorScale))
+						{
+							//An error occured during shader initialization?
+							ccLog::WarningDebug("Failed to init ColorRamp shader!");
+							colorRampShader->stop();
+							colorRampShader = 0;
+						}
+						else if (glParams.showNorms)
 						{
 							//we must get rid of lights material (other than ambiant) for the red and green fields
 							glPushAttrib(GL_LIGHTING_BIT);

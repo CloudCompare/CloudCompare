@@ -27,7 +27,7 @@
 #include "ccScalarField.h"
 #include "ccMaterial.h"
 
-class ccShader;
+class ccColorRampShader;
 
 //! Display parameters of a 3D entity
 struct glDrawParams
@@ -65,8 +65,7 @@ struct glDrawContext
 	ccScalarField* sfColorScaleToDisplay;
 	
 	//shader for fast dynamic color ramp lookup
-	static const unsigned MAX_SHADER_COLOR_RAMP_SIZE = 256;
-	ccShader* colorRampShader;
+	ccColorRampShader* colorRampShader;
 
 	//picked points
 	float pickedPointsRadius;

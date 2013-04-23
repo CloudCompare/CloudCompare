@@ -19,6 +19,7 @@
 
 //Local
 #include "ccColorScalesManager.h"
+#include "ccColorRampShader.h"
 
 //CCLib
 #include <CCConst.h>
@@ -35,7 +36,7 @@ ccScalarField::ccScalarField(const char* name/*=0*/)
 	, m_logScale(false)
 	, m_alwaysShowZero(false)
 	, m_colorScale(0)
-	, m_colorRampSteps(256)
+	, m_colorRampSteps(0)
 {
 	setColorRampSteps(ccColorScale::DEFAULT_STEPS);
 	setColorScale(ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR));

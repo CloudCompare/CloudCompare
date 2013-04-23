@@ -668,6 +668,10 @@ bool ccHObject::fromFile(QFile& in, short dataVersion)
 				return false;
 			}
 		}
+		else
+		{
+			return CorruptError();
+		}
 	}
 
 	//write current selection behavior (dataVersion>=23)

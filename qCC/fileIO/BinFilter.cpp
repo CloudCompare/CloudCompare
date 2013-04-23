@@ -142,7 +142,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 
 CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
-	//ccConsole::Print("[BinFilter::loadFile] Opening binary file '%s'...\n",filename);
+	ccLog::Print("[BIN] Opening file '%s'...",filename);
 
 	//opening file
 	QFile in(filename);
@@ -171,6 +171,8 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 
 	if (binVersion<20) //should be superior to 2.0!
 		return CC_FERR_MALFORMED_FILE;
+
+	ccLog::Print(QString("[BIN] Version %1.%2").arg(binVersion/10).arg(binVersion%10));
 
 	ccProgressDialog pdlg(true);
 	pdlg.setMethodTitle(qPrintable(QString("Open Bin file (V%1.%2)").arg(binVersion/10).arg(binVersion%10)));
@@ -374,6 +376,8 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 
 CC_FILE_ERROR BinFilter::loadFileV1(QFile& in, ccHObject& container, unsigned nbScansTotal)
 {
+	ccLog::Print("[BIN] Version 1.0");
+
 	if (nbScansTotal>99)
 	{
 		if (QMessageBox::question(0, QString("Oups"), QString("Hum, do you really expect %1 point clouds?").arg(nbScansTotal))==QMessageBox::No)

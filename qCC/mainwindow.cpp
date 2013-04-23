@@ -3430,6 +3430,7 @@ void MainWindow::doActionStatisticalTest()
 				{
 					ccScalarField* chi2SF = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
 					chi2SF->computeMinAndMax();
+					chi2dist *= chi2dist;
 					chi2SF->setMinDisplayed(chi2dist);
 					chi2SF->setSymmetricalScale(false);
 					chi2SF->setSaturationStart(chi2dist);

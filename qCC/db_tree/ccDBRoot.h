@@ -200,7 +200,7 @@ protected:
 	//! Sorts selected entities siblings
 	void sortSelectedEntitiesSiblings(SortRules rule);
 
-	//! Expands or collapses hover item
+	//! Expands or collapses hovered item
 	void expandOrCollapseHoveredBranch(bool expand);
 
 	//! Associated DB root

@@ -7213,9 +7213,8 @@ void MainWindow::expandDBTreeWithSelection(ccHObject::Container& selection)
     for (i=0;i<selNum;++i)
     {
         ccHObject* ent = selection[i];
-		//m_ccRoot->expandElement(ent,false);
-		if (ent->isA(CC_MESH_GROUP))
-			m_ccRoot->expandElement(ent,true);
+		//if (ent->isA(CC_MESH_GROUP)) //DGM: we don't expand mesh groups anymore!
+		//	m_ccRoot->expandElement(ent,true);
 	}
 }
 

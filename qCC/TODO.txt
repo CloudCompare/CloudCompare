@@ -15,7 +15,7 @@ File I/O:
 - SHP files (--> GDAL)
 - geotiff files (--> GDAL)
 
-*** And from the forum topic 'recent requests' ***
+*** And from the forum topic or emails 'recent requests' ***
 
 Big ones:
 [*] Cross section tool
@@ -32,8 +32,19 @@ Various:
 [*] Command line mode could be extended (more methods, etc.)
 [*] Add 'GL filter' plugins support to ccViewer
 [*] Choose between ASCII and BINARY format when exporting PLY files
+[*] Support mesh transparency (and PLY 'alpha' property for instance)
 
-From Dimitri L.:
+From Thomas S. (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=550)
+[*] It would be great if the programm could manage long coordinates for the georeferencing (?!)
+[*] If CloudCompare would support VisualSFM, it would be possible to import the VisualSFM-Project (with the saved camera positions).
+	Then it should be possible to measure the points for the georeferencing in the images itself, instead of the point-cloud, which would be much more accurate.
+
+From Andrew B.
+[*] 'minimise bounding box' or various automated ways to make objects 'stand up' the way they are supposed to or be rigid-transformed on the basis of perceived axial symmetry
+[*] An automatic 'scale to unit size' in cases where compare different sized things is of interest, but size can be discarded or treated separately
+[*] Automation of the above tasks via the command line, along with the ability output of summary stats to command line or text file, command line options for ICP and cloud-cloud distance (for batch work).
+
+From Dimitri L.
 [*] Let the user enter grid parameters in the 'Heght grid projection' tool + remember last parameters
 [*] Auto-detect header format in ASCII files (in any) 
 [*] Compute distances in a given direction (cylinder)
@@ -41,29 +52,29 @@ From Dimitri L.:
 [*] Being able to apply various methods based on a sub-sampled cloud
 [*] Vector fields (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=201&p=614#p614)
 
-From Thomas D.:
+From Thomas D.
 [*] Splatting (http://idav.ucdavis.edu/~okreylos/ResDev/LiDAR/index.html)
 [*] Uniformize color-scales of mutliple clouds
 [*] Show/hide points based on their normal (http://www.danielgm.net/cc/forum/viewtopic.php?f=9&t=168&p=488#p488)
 
-From AdrienA:
+From AdrienA
 [*] Radiance scaling shader
 
-From Chartzell:
+From Chartzell
 [*] A limit box- Being able to hide portions of the clouds you are working on can make the registration process much quicker and easier. With a customizable limit box you can look at just a small cross section of the clouds to get a good view of how well they fit together and what adjustments need to be made. Ideally, you would be able to push and pull on the various sides of the box to change it's dimensions.
 [*] Ability to do fly around animations and export them to some type of video format? Something where you could set various viewpoints and and have the camera fly between each point. Google SketchUp has a great example of this function. (see 'flythrough mode' above)
 
-From Jean-Francois H.: 
+From Jean-Francois H.
 [*] Exporting histogram as image
 
-From Konrad W.:
+From Konrad W.
 [*] Something like the plane shader from point tools where the depth is coloured with the Hue channel
 
-From Rav M.:
+From Rav M.
 [*] Aligning camera (perpendicularly to a face) by chosing 3 points/vertexes or group of points
 [*] Add front and back cutting plane
 [*] move and rotate global coordinate (X,Y,Z) or aligning it like camera and then adding another parts to correct scene in right place.
 
-From Gianluca C.:
+From Gianluca C.
 [*] find a way to transfer the colors from the pointcloud to the Poisson reconstructed surface (qPoissonRecon)
 [*] to overlay an image over the mesh with some common points and "drape" the photo on the surface

@@ -1151,22 +1151,6 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 	}
 }
 
-//void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
-//{
-//	//not initialized?
-//	if (m_contextMenuPos.x()<0 || m_contextMenuPos.y()<0)
-//		return;
-//
-//	QModelIndex index = m_dbTreeWidget->indexAt(m_contextMenuPos);
-//	if (index.isValid())
-//	{
-//		if (expand)
-//			m_dbTreeWidget->expand(index);
-//		else
-//			m_dbTreeWidget->collapse(index);
-//	}
-//}
-
 void ccDBRoot::gatherRecursiveInformation()
 {
     QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();

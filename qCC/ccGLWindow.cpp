@@ -317,6 +317,8 @@ void ccGLWindow::initializeGL()
 				{
 					ccConsole::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
 					params.colorScaleShaderSupported = false;
+					delete colorRampShader;
+					colorRampShader = 0;
 				}
 				else
 				{

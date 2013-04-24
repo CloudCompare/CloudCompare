@@ -40,17 +40,15 @@ static const unsigned CC_MAX_SHADER_COLOR_RAMP_SIZE = 256;
 //! Buffer for converting a color scale to packed values before sending it to shader
 static float s_packedColormapf[CC_MAX_SHADER_COLOR_RAMP_SIZE];
 
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccColorRampShader : public ccShader
-#else
 class ccColorRampShader : public ccShader
-#endif
 {
 public:
 
 	//! Default constructor
-	ccColorRampShader() : ccShader() {};
+	ccColorRampShader() : ccShader() {}
+
+	//! Destructor
+	virtual ~ccColorRampShader() {}
 
 	//! Setups shader
 	/** Shader must have already been stared!

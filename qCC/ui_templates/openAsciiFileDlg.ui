@@ -172,6 +172,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="commentLinesSkippedLabel">
+       <property name="text">
+        <string>+ comment/header lines skipped: 0</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_3">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>

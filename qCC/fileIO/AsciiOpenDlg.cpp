@@ -47,6 +47,7 @@ AsciiOpenDlg::AsciiOpenDlg(QString filename, QWidget* parent)
     setupUi(this);
 
     //spinBoxSkipLines->setValue(0);
+	commentLinesSkippedLabel->hide();
 
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(testBeforeAccept()));
     connect(lineEditSeparator, SIGNAL(textChanged(const QString &)), this, SLOT(updateTable(const QString &)));
@@ -125,24 +126,25 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 	}
 
     //buffer
-	char line[MAX_ASCII_FILE_LINE_LENGTH];      //last read line
+	char line[MAX_ASCII_FILE_LINE_LENGTH];
 
     //we skip first lines (if needed)
-	unsigned i;
-    for (i=0;i<m_skippedLines;++i)
 	{
-        if (fgets(line, MAX_ASCII_FILE_LINE_LENGTH, pFile))
+		for (unsigned i=0;i<m_skippedLines;++i)
 		{
-			//we keep track of the first line
-			if (i==0)
-				m_headerLine = QString(line);
-		}
-		else
-		{
-			fclose(pFile);
-			tableWidget->clear();
-			m_invalidColumns = true;
-            return;
+			if (fgets(line, MAX_ASCII_FILE_LINE_LENGTH, pFile))
+			{
+				//we keep track of the first line
+				if (i==0)
+					m_headerLine = QString(line);
+			}
+			else
+			{
+				fclose(pFile);
+				tableWidget->clear();
+				m_invalidColumns = true;
+				return;
+			}
 		}
 	}
 
@@ -160,6 +162,7 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 	unsigned lineCount = 0;			//number of lines read
 	unsigned totalChars = 0;        //total read characters (for stats)
 	unsigned columnsCount = 0;		//max columns count per line
+	unsigned commentLines = 0;		//number of comments line skipped
 
 	std::vector<bool> valueIsNumber;	//identifies columns with numbers only [mandatory]
 	std::vector<bool> valueIsBelowOne;	//identifies columns with values between -1 and 1 only
@@ -172,66 +175,78 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 		QString str(line);
 
         //we recognize "//" as comment
-		if (line[0]!='/' || line[1]!='/')
+		if (line[0] != '/' || line[1] != '/')
 		{
 			QStringList parts = str.trimmed().split(m_separator,QString::SkipEmptyParts);
-            unsigned partsCount = (unsigned)parts.size();
-            if (partsCount>MAX_COLUMNS)
-                partsCount=MAX_COLUMNS;
+            int partsCount = parts.size();
+            if (partsCount > (int)MAX_COLUMNS)
+                partsCount = (int)MAX_COLUMNS;
 
-            if (lineCount<DISPLAYED_LINES)
+            if (lineCount < DISPLAYED_LINES)
             {
                 //do we need to add one or several new columns?
-                if (partsCount>columnsCount)
-                {
-					//we also extend vectors
-					for (i=columnsCount;i<partsCount;++i)
+				{
+					if (partsCount > (int)columnsCount)
 					{
-						valueIsNumber.push_back(true);
-						valueIsBelowOne.push_back(true);
-						valueIsBelow255.push_back(true);
-						valueIsInteger.push_back(true);
+						//we also extend vectors
+						for (int i=columnsCount; i<partsCount; ++i)
+						{
+							valueIsNumber.push_back(true);
+							valueIsBelowOne.push_back(true);
+							valueIsBelow255.push_back(true);
+							valueIsInteger.push_back(true);
+						}
+
+						tableWidget->setColumnCount(partsCount);
+						columnsCount=partsCount;
 					}
+				}
 
-					tableWidget->setColumnCount(partsCount);
-                    columnsCount=partsCount;
-                }
-
-                //we fill row with extracted parts
-                for (i=0;i<partsCount;++i)
-                {
-                    QTableWidgetItem *newItem = new QTableWidgetItem(parts[i]);
-
-					//test values
-					bool isANumber = false;
-					double value = parts[i].toDouble(&isANumber);
-					if (!isANumber)
+                //we fill the current row with extracted parts
+				{
+					for (int i=0; i<partsCount; ++i)
 					{
-						valueIsNumber[i]	= false;
-						valueIsBelowOne[i]	= false;
-						valueIsInteger[i]	= false;
-						valueIsBelow255[i]	= false;
-						newItem->setBackground(QBrush(QColor(255,160,160)));
-					}
-					else
-					{
-						double intPart, fracPart;
-						fracPart = modf(value,&intPart);
+						QTableWidgetItem *newItem = new QTableWidgetItem(parts[i]);
 
-						valueIsBelowOne[i]	= valueIsBelowOne[i] && (fabs(value)<=1.0);
-						valueIsInteger[i]	= valueIsInteger[i] && (fracPart == 0.0);
-						valueIsBelow255[i]	= valueIsBelow255[i] && (valueIsInteger[i] && (intPart >= 0.0 && value<=255.0));
-					}
+						//test values
+						bool isANumber = false;
+						double value = parts[i].toDouble(&isANumber);
+						if (!isANumber)
+						{
+							valueIsNumber[i]	= false;
+							valueIsBelowOne[i]	= false;
+							valueIsInteger[i]	= false;
+							valueIsBelow255[i]	= false;
+							newItem->setBackground(QBrush(QColor(255,160,160)));
+						}
+						else
+						{
+							double intPart, fracPart;
+							fracPart = modf(value,&intPart);
 
-					tableWidget->setItem(lineCount+1, i, newItem); //+1 for first line shifting
-                }
+							valueIsBelowOne[i]	= valueIsBelowOne[i] && (fabs(value)<=1.0);
+							valueIsInteger[i]	= valueIsInteger[i] && (fracPart == 0.0);
+							valueIsBelow255[i]	= valueIsBelow255[i] && (valueIsInteger[i] && (intPart >= 0.0 && value<=255.0));
+						}
+
+						tableWidget->setItem(lineCount+1, i, newItem); //+1 for first line shifting
+					}
+				}
             }
 
             totalChars += (str.size()+1); //+1 for return char at eol
 
             ++lineCount;
 		}
+		else
+		{
+			++commentLines;
+		}
 	}
+
+	commentLinesSkippedLabel->setVisible(commentLines != 0);
+	if (commentLines)
+		commentLinesSkippedLabel->setText(QString("+ comment/header line(s) skipped: %1").arg(commentLines));
 
 	fclose(pFile);
 	pFile=0;
@@ -249,107 +264,114 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 
     //we add a type selector for each column
 	QStringList propsText;
-	for (i=0; i<ASCII_OPEN_DLG_TYPES_NUMBER; i++)
-        propsText << QString(ASCII_OPEN_DLG_TYPES_NAMES[i]);
+	{
+		for (unsigned i=0; i<ASCII_OPEN_DLG_TYPES_NUMBER; i++)
+			propsText << QString(ASCII_OPEN_DLG_TYPES_NAMES[i]);
+	}
 
 	//remove unnecessary columns
-	while (columnsCount<m_columnsCount)
-		tableWidget->removeColumn(--m_columnsCount);
-	for (i=lineCount+1;i<=DISPLAYED_LINES;++i)
-		tableWidget->removeRow(i);
-
-    int columnWidth = (tableWidget->width()*9) / (columnsCount*10);
-    columnWidth = std::max(columnWidth,80);
-
-	//Icons
-	const QIcon xIcon				(QString::fromUtf8(":/CC/images/typeXCoordinate.png"));
-	const QIcon yIcon				(QString::fromUtf8(":/CC/images/typeYCoordinate.png"));
-	const QIcon zIcon				(QString::fromUtf8(":/CC/images/typeZCoordinate.png"));
-	const QIcon NormIcon			(QString::fromUtf8(":/CC/images/typeNormal.png"));
-	const QIcon RGBIcon				(QString::fromUtf8(":/CC/images/typeRgbCcolor.png"));
-	const QIcon GreyIcon			(QString::fromUtf8(":/CC/images/typeGrayColor.png"));
-	const QIcon ScalarIcon			(QString::fromUtf8(":/CC/images/typeSF.png"));
-
-	unsigned assignedXYZ = 0;
-	unsigned assignedNorm = 0;
-	unsigned assignedRGB = 0;
-	for (i=0;i<columnsCount;i++)
 	{
-		QComboBox* columnHeader = static_cast<QComboBox*>(tableWidget->cellWidget(0,i));
-		QComboBox* _columnHeader = columnHeader;
-		if (!columnHeader)
-		{
-			columnHeader = new QComboBox();
-			columnHeader->addItems(propsText);
-			columnHeader->setMaxVisibleItems(ASCII_OPEN_DLG_TYPES_NUMBER);
-			columnHeader->setCurrentIndex(0);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_X,xIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_Y,yIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_Z,zIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_NX,NormIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_NY,NormIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_NZ,NormIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_R,RGBIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_G,RGBIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_B,RGBIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_Grey,GreyIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_Scalar,ScalarIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_RGB32i,RGBIcon);
-			columnHeader->setItemIcon(ASCII_OPEN_DLG_RGB32f,RGBIcon);
-
-			connect(columnHeader, SIGNAL(currentIndexChanged(int)), this, SLOT(columnsTypeHasChanged(int)));
-		}
-
-		if (valueIsNumber[i])
-		{
-			//first time? let's try to assign each column a type
-			if ((m_invalidColumns || m_columnsCount==0) && columnsCount>1)
-			{
-				columnHeader->blockSignals(true);
-				//by default, we assume that the first columns are always X,Y and Z
-				if (assignedXYZ<3)
-				{
-					//in rare cases, the first column is an index
-					if (assignedXYZ==0 && valueIsInteger[i] && (i+1<columnsCount) && !valueIsInteger[i+1])
-					{
-						//we skip it
-					}
-					else
-					{
-						++assignedXYZ;
-						columnHeader->setCurrentIndex(assignedXYZ);
-					}
-				}
-				else
-				{
-					//looks like RGB?
-					if (valueIsBelow255[i] && assignedRGB<3 && (i+2-assignedRGB < columnsCount)
-						&& (assignedRGB > 0 || (valueIsBelow255[i+1] && valueIsBelow255[i+2]))) //make sure that next values are also ok!
-					{
-						columnHeader->setCurrentIndex(ASCII_OPEN_DLG_R+assignedRGB);
-						++assignedRGB;
-					}
-					else if (valueIsBelowOne[i] && assignedNorm<3 && (i+2-assignedNorm < columnsCount)
-						&& (assignedNorm > 0 || (valueIsBelowOne[i+1] && valueIsBelowOne[i+2]))) //make sure that next values are also ok!
-					{
-						columnHeader->setCurrentIndex(ASCII_OPEN_DLG_NX+assignedNorm);
-						++assignedNorm;
-					}
-					else
-					{
-						//maybe it's a scalar?
-						columnHeader->setCurrentIndex(ASCII_OPEN_DLG_Scalar);
-					}
-				}
-				columnHeader->blockSignals(false);
-			}
-		}
-
-		if (!_columnHeader)
-			tableWidget->setCellWidget(0,i,columnHeader);
-		tableWidget->setColumnWidth(i,columnWidth);
+		while (columnsCount<m_columnsCount)
+			tableWidget->removeColumn(--m_columnsCount);
+		for (unsigned i=lineCount+1;i<=DISPLAYED_LINES;++i)
+			tableWidget->removeRow(i);
 	}
-	m_columnsCount=columnsCount;
+
+	{
+		//Icons
+		const QIcon xIcon				(QString::fromUtf8(":/CC/images/typeXCoordinate.png"));
+		const QIcon yIcon				(QString::fromUtf8(":/CC/images/typeYCoordinate.png"));
+		const QIcon zIcon				(QString::fromUtf8(":/CC/images/typeZCoordinate.png"));
+		const QIcon NormIcon			(QString::fromUtf8(":/CC/images/typeNormal.png"));
+		const QIcon RGBIcon				(QString::fromUtf8(":/CC/images/typeRgbCcolor.png"));
+		const QIcon GreyIcon			(QString::fromUtf8(":/CC/images/typeGrayColor.png"));
+		const QIcon ScalarIcon			(QString::fromUtf8(":/CC/images/typeSF.png"));
+
+		unsigned assignedXYZ = 0;
+		unsigned assignedNorm = 0;
+		unsigned assignedRGB = 0;
+
+		int columnWidth = (tableWidget->width()*9) / (columnsCount*10);
+		columnWidth = std::max(columnWidth,80);
+
+		for (unsigned i=0;i<columnsCount;i++)
+		{
+			QComboBox* columnHeader = static_cast<QComboBox*>(tableWidget->cellWidget(0,i));
+			QComboBox* _columnHeader = columnHeader;
+			if (!columnHeader)
+			{
+				columnHeader = new QComboBox();
+				columnHeader->addItems(propsText);
+				columnHeader->setMaxVisibleItems(ASCII_OPEN_DLG_TYPES_NUMBER);
+				columnHeader->setCurrentIndex(0);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_X,xIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_Y,yIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_Z,zIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_NX,NormIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_NY,NormIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_NZ,NormIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_R,RGBIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_G,RGBIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_B,RGBIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_Grey,GreyIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_Scalar,ScalarIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_RGB32i,RGBIcon);
+				columnHeader->setItemIcon(ASCII_OPEN_DLG_RGB32f,RGBIcon);
+
+				connect(columnHeader, SIGNAL(currentIndexChanged(int)), this, SLOT(columnsTypeHasChanged(int)));
+			}
+
+			if (valueIsNumber[i])
+			{
+				//first time? let's try to assign each column a type
+				if ((m_invalidColumns || m_columnsCount==0) && columnsCount>1)
+				{
+					columnHeader->blockSignals(true);
+					//by default, we assume that the first columns are always X,Y and Z
+					if (assignedXYZ<3)
+					{
+						//in rare cases, the first column is an index
+						if (assignedXYZ==0 && valueIsInteger[i] && (i+1<columnsCount) && !valueIsInteger[i+1])
+						{
+							//we skip it
+						}
+						else
+						{
+							++assignedXYZ;
+							columnHeader->setCurrentIndex(assignedXYZ);
+						}
+					}
+					else
+					{
+						//looks like RGB?
+						if (valueIsBelow255[i] && assignedRGB<3 && (i+2-assignedRGB < columnsCount)
+							&& (assignedRGB > 0 || (valueIsBelow255[i+1] && valueIsBelow255[i+2]))) //make sure that next values are also ok!
+						{
+							columnHeader->setCurrentIndex(ASCII_OPEN_DLG_R+assignedRGB);
+							++assignedRGB;
+						}
+						else if (valueIsBelowOne[i] && assignedNorm<3 && (i+2-assignedNorm < columnsCount)
+							&& (assignedNorm > 0 || (valueIsBelowOne[i+1] && valueIsBelowOne[i+2]))) //make sure that next values are also ok!
+						{
+							columnHeader->setCurrentIndex(ASCII_OPEN_DLG_NX+assignedNorm);
+							++assignedNorm;
+						}
+						else
+						{
+							//maybe it's a scalar?
+							columnHeader->setCurrentIndex(ASCII_OPEN_DLG_Scalar);
+						}
+					}
+					columnHeader->blockSignals(false);
+				}
+			}
+
+			if (!_columnHeader)
+				tableWidget->setCellWidget(0,i,columnHeader);
+			tableWidget->setColumnWidth(i,columnWidth);
+		}
+	}
+	m_columnsCount = columnsCount;
 
 	//can we consider the first ignored line as a header?
 	if (!m_headerLine.isEmpty())
@@ -360,10 +382,12 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 
 	//check for invalid columns
 	m_invalidColumns = false;
-	for (i=0;i<m_columnsCount;i++)
 	{
-		m_invalidColumns |= (!valueIsNumber[i]);
-		//tableWidget->cellWidget(0,i)->setEnabled(valueIsNumber[i]);
+		for (unsigned i=0; i<m_columnsCount; i++)
+		{
+			m_invalidColumns |= (!valueIsNumber[i]);
+			//tableWidget->cellWidget(0,i)->setEnabled(valueIsNumber[i]);
+		}
 	}
 
 	tableWidget->setEnabled(true);
@@ -389,11 +413,11 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 			return false;
 		}
 
-	unsigned char coordIsDefined[3]={counters[ASCII_OPEN_DLG_X]>0
-									, counters[ASCII_OPEN_DLG_Y]>0
-									, counters[ASCII_OPEN_DLG_Z]>0};
+	uchar coordIsDefined[3] = {	counters[ASCII_OPEN_DLG_X]>0,
+								counters[ASCII_OPEN_DLG_Y]>0,
+								counters[ASCII_OPEN_DLG_Z]>0 };
 
-	if (coordIsDefined[0] + coordIsDefined[1] + coordIsDefined[2]<2)
+	if (coordIsDefined[0] + coordIsDefined[1] + coordIsDefined[2] < 2)
 	{
 		errorMessage = "At least 2 vertex coordinates should be defined!";
 		return false;
@@ -528,13 +552,13 @@ void AsciiOpenDlg::shortcutButtonPressed()
 
     uchar newSeparator=0;
     if (shortcutButton==toolButtonShortcutESP)
-        newSeparator=char(32);
+        newSeparator=uchar(32);
     else if (shortcutButton==toolButtonShortcutTAB)
-        newSeparator=char(9);
+        newSeparator=uchar(9);
     else if (shortcutButton==toolButtonShortcutComma)
-        newSeparator=char(44);
+        newSeparator=uchar(44);
     else if (shortcutButton==toolButtonShortcutDotcomma)
-        newSeparator=char(59);
+        newSeparator=uchar(59);
 
     if (newSeparator>0 && getSeparator()!=newSeparator)
         lineEditSeparator->setText(QChar(newSeparator));

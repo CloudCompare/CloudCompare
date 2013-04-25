@@ -24,14 +24,11 @@ Big ones:
 Various:
 [*] save materials in OBJ I/O filter 
 [*] Per-point size based on SF values (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=507)
-[*] Select ASCII files output precision (http://www.danielgm.net/cc/forum/viewtopic.php?f=10&t=509&p=1245#p1245)
-[*] Add a header to the begining of an ASCII file (column names)
 [*] Display ortho-rectified images as high-res textures (instead of point clouds!)
 [*] Use PDAL instead of libLAS (http://www.danielgm.net/cc/forum/viewtopic.php?f=15&t=437&p=1014#p1014)
 [*] Run the PCV plugin on more than one file at a time (or batch process)
 [*] Command line mode could be extended (more methods, etc.)
 [*] Add 'GL filter' plugins support to ccViewer
-[*] Choose between ASCII and BINARY format when exporting PLY files
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
 
 From Thomas S. (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=550)
@@ -54,7 +51,6 @@ From Dimitri L.
 
 From Thomas D.
 [*] Splatting (http://idav.ucdavis.edu/~okreylos/ResDev/LiDAR/index.html)
-[*] Uniformize color-scales of mutliple clouds
 [*] Show/hide points based on their normal (http://www.danielgm.net/cc/forum/viewtopic.php?f=9&t=168&p=488#p488)
 
 From AdrienA

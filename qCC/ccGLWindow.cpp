@@ -1000,6 +1000,12 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	//we get the bounding-box diagonal length
 	float bbDiag = zoomedBox.getDiagNorm();
 
+	if (bbDiag < ZERO_TOLERANCE)
+	{
+		ccLog::Warning("[ccGLWindow] Entity/DB has a null bounding-box! Can't zoom in..."); 
+		return;
+	}
+
 	//we compute the pixel size (in world coordinates)
 	{
 		int minScreenSize = std::min(m_glWidth,m_glHeight);

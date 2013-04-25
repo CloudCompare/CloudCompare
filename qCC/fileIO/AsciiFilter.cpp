@@ -16,12 +16,14 @@
 //##########################################################################
 
 #include "AsciiFilter.h"
+#include "AsciiSaveDlg.h"
 #include "../ccCoordinatesShiftManager.h"
 
 //Qt
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
+#include <QSharedPointer>
 
 //CClib
 #include <ScalarField.h>
@@ -36,9 +38,27 @@
 #include <string.h>
 #include <assert.h>
 
+//! ASCII save dialog ('shared')
+static QSharedPointer<AsciiSaveDlg> s_saveDialog(0);
+
 CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 {
     assert(entity && filename);
+
+	bool releaseDialog = false;
+	if (!s_saveDialog)
+	{
+		s_saveDialog = QSharedPointer<AsciiSaveDlg>(new AsciiSaveDlg());
+
+		if (!s_saveDialog->exec())
+		{
+			s_saveDialog.clear();
+			return CC_FERR_CANCELED_BY_USER;
+		}
+
+		releaseDialog = true;
+	}
+	assert(s_saveDialog);
 
     if (!entity->isKindOf(CC_POINT_CLOUD))
 	{
@@ -49,9 +69,9 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 			QString baseName = fi.completeBaseName();
 			QString path = fi.path();
 
-			unsigned i,count=entity->getChildrenNumber();
-			unsigned counter=0;
-			for (i=0;i<count;++i)
+			unsigned count = entity->getChildrenNumber();
+			unsigned counter = 0;
+			for (unsigned i=0; i<count; ++i)
 			{
 				ccHObject* child = entity->getChild(i);
 				if (child->isKindOf(CC_POINT_CLOUD))
@@ -63,7 +83,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 						subFilename += QString(".")+extension;
 					CC_FILE_ERROR result = saveToFile(entity->getChild(i),qPrintable(subFilename));
 					if (result != CC_FERR_NO_ERROR)
+					{
+						if (releaseDialog)
+							s_saveDialog.clear();
 						return result;
+					}
 					else
 						ccLog::Print(QString("[AsciiFilter::saveToFile] Cloud '%1' saved in: %2").arg(child->getName()).arg(subFilename));
 				}
@@ -73,16 +97,17 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 				}
 			}
 			
+			if (releaseDialog)
+				s_saveDialog.clear();
 			return CC_FERR_NO_ERROR;
 		}
 		else
 		{
+			if (releaseDialog)
+				s_saveDialog.clear();
 			return CC_FERR_BAD_ARGUMENT;
 		}
 	}
-
-	//hack: if the extension is 'pts', the color will be saved after the SFs
-	bool swapColorAndSFs = (QFileInfo(filename).suffix().toUpper() == "PTS");
 
     QFile file(filename);
 	if (!file.open(QFile::WriteOnly | QFile::Truncate))
@@ -98,13 +123,10 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
     if (cloud->isKindOf(CC_POINT_CLOUD))
 	{
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
-		for (unsigned i=0;i<ccCloud->getNumberOfScalarFields();++i)
+		for (unsigned i=0; i<ccCloud->getNumberOfScalarFields(); ++i)
 			theScalarFields.push_back(ccCloud->getScalarField(i));
 	}
     bool writeSF = (theScalarFields.size()!=0);
-
-	if (swapColorAndSFs && writeColors && writeSF)
-		ccLog::Warning("[AsciiFilter::saveToFile] PTS extension detected: color components will be saved after the scalar field(s)");
 
 	//avancement du chargement
     ccProgressDialog pdlg(true);
@@ -115,25 +137,96 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	//shift on load
 	const double* shift = cloud->getOriginalShift();
-	double shiftNorm = (shift ? shift[0]*shift[0]+shift[1]*shift[1]+shift[2]*shift[2] : 0.0);
-	//default precision (6 for floats, 10 for doubles)
-	const int s_coordPrecision = 2+(shiftNorm > 0 ? sizeof(double) : sizeof(PointCoordinateType));
-	const int s_sfPrecision = 2+sizeof(ScalarType); 
+
+	//output precision
+	const int s_coordPrecision = s_saveDialog->coordsPrecision();
+	const int s_sfPrecision = s_saveDialog->sfPrecision(); 
 	const int s_nPrecision = 2+sizeof(PointCoordinateType);
 
-	QString line,color;
+	//other parameters
+	bool saveHeader = s_saveDialog->saveHeader();
+	bool swapColorAndSFs = s_saveDialog->swapColorAndSF();
+	QChar separator(s_saveDialog->getSeparator());
 
+	if (saveHeader)
+	{
+		QString header("//");
+		header.append("X");
+		header.append(separator);
+		header.append("Y");
+		header.append(separator);
+		header.append("Z");
+
+		if (writeColors && !swapColorAndSFs)
+		{
+			header.append(separator);
+			header.append("R");
+			header.append(separator);
+			header.append("G");
+			header.append(separator);
+			header.append("B");
+		}
+
+		if (writeSF)
+		{
+			//add each associated SF name
+			for (std::vector<CCLib::ScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
+			{
+				QString sfName((*it)->getName());
+				sfName.replace(" ","_");
+				header.append(separator);
+				header.append(sfName);
+			}
+		}
+
+		if (writeColors && swapColorAndSFs)
+		{
+			header.append(separator);
+			header.append("R");
+			header.append(separator);
+			header.append("G");
+			header.append(separator);
+			header.append("B");
+		}
+
+        if (writeNorms)
+		{
+			header.append(separator);
+			header.append("Nx");
+			header.append(separator);
+			header.append("Ny");
+			header.append(separator);
+			header.append("Nz");
+		}
+		
+		stream << header << "\n";
+	}
+
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
     for (unsigned i=0;i<numberOfPoints;++i)
     {
+		//line for the current point
+		QString line;
+
 		//write current point coordinates
         const CCVector3* P = cloud->getPoint(i);
-		line = QString("%1 %2 %3").arg(-shift[0]+(double)P->x,0,'f',s_coordPrecision).arg(-shift[1]+(double)P->y,0,'f',s_coordPrecision).arg(-shift[2]+(double)P->z,0,'f',s_coordPrecision);
+		line.append(QString::number(-shift[0]+(double)P->x,'f',s_coordPrecision));
+		line.append(separator);
+		line.append(QString::number(-shift[1]+(double)P->y,'f',s_coordPrecision));
+		line.append(separator);
+		line.append(QString::number(-shift[2]+(double)P->z,'f',s_coordPrecision));
 
+		QString color;
 		if (writeColors)
         {
-			//add rgb color (if not a .pts file)
+			//add rgb color
             const colorType* col = cloud->getPointColor(i);
-			color = QString(" %1 %2 %3").arg(col[0]).arg(col[1]).arg(col[2]);
+			color.append(separator);
+			color.append(QString::number(col[0]));
+			color.append(separator);
+			color.append(QString::number(col[1]));
+			color.append(separator);
+			color.append(QString::number(col[2]));
 
 			if (!swapColorAndSFs)
 				line.append(color);
@@ -143,7 +236,10 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
         {
 			//add each associated SF values
 			for (std::vector<CCLib::ScalarField*>::const_iterator it = theScalarFields.begin(); it != theScalarFields.end(); ++it)
-				line.append(QString(" %1").arg((*it)->getValue(i),0,'f',s_sfPrecision));
+			{
+				line.append(separator);
+				line.append(QString::number((*it)->getValue(i),'f',s_sfPrecision));
+			}
         }
 
         if (writeColors && swapColorAndSFs)
@@ -153,16 +249,25 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
         {
 			//add normal vector
             const PointCoordinateType* N = cloud->getPointNormal(i);
-			line.append(QString(" %1 %2 %3").arg(N[0],0,'f',s_nPrecision).arg(N[1],0,'f',s_nPrecision).arg(N[2],0,'f',s_nPrecision));
+			line.append(separator);
+			line.append(QString::number(N[0],'f',s_nPrecision));
+			line.append(separator);
+			line.append(QString::number(N[1],'f',s_nPrecision));
+			line.append(separator);
+			line.append(QString::number(N[2],'f',s_nPrecision));
         }
 
 		stream << line << "\n";
-		//if (stream.status() != QTextStream::Ok)
-		//	return CC_FERR_WRITING;
 
 		if (!nprogress.oneStep())
-			return CC_FERR_CANCELED_BY_USER;
+		{
+			result = CC_FERR_CANCELED_BY_USER;
+			break;
+		}
     }
+
+	if (releaseDialog)
+		s_saveDialog.clear();
 
     return CC_FERR_NO_ERROR;
 }

@@ -137,6 +137,8 @@ void ccColorScaleEditorDialog::colorScaleChanged(int pos)
 void ccColorScaleEditorDialog::relativeModeChanged(int value)
 {
 	setScaleModeToRelative(value == 0 ? true : false);
+
+	setModified(true);
 }
 
 void ccColorScaleEditorDialog::setModified(bool state)

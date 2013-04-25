@@ -3,14 +3,14 @@
 v2.4 ??/??/2013
 - 3D slicer
 
-v2.4 04/16/2013
+v2.4 04/25/2013
 - 3D mouses (3dConnexion devices) are now supported:
 	* OBJECT mode corresponds to ortho. and object-centered perspective
 	* CAMERA mode corresponds to viewer-centered perspective
 	* can be enabled/disabled via the 'File > 3D mouse' menu
 - Dynamic color lookup for displaying scalar fields greatly accelerated
 	* a dedicated shader is automatically activated if GPU supports it
-	* speed-up of scalar fields display ~ 300%!
+	* speed-up of scalar fields display of up to 300%!
 - Introducing the "Color Scale Manager":
 	* edit, copy and create custom color scales
 	* accessible via a button next to the 'current scale' combo-box in the properties view
@@ -37,11 +37,13 @@ v2.4 04/16/2013
 	* selection of the current view mode (orthographic, object-based and viewer-based perspective)
 - New context menu entry for the DB tree: 'Information (recursive)'
 	* recursively gather various information (number of points, triangles, colors, etc.)
-- STL files can now be saved in both BINARY and ASCII formats
+- Local Statistical Test now works on signed scalar fields!
+- New dialog for saving ASCII files
+	* choose output numerical precisions, separator, order, etc.
+- STL and PLY files can now be saved in both BINARY and ASCII formats
 - PLY files can now save texture coordinates (and the texture in a separated file) if only one
 	texture is associated to the mesh (otherwise CC will suggest to convert materials/textures to RGB)
 - Default materials and lights have been updated
-- Local Statistical Test now works on signed scalar fields!
 - Bug fixes:
 	* BIN files saved with labels would make CC crash when re-opened!
 	* Closing the 'About' dialog would make CC crash!

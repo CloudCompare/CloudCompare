@@ -14,15 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
-#ifndef CC_ASCII_OPEN_DIALOG
-#define CC_ASCII_OPEN_DIALOG
+
+#ifndef CC_ASCII_OPEN_DIALOG_HEADER
+#define CC_ASCII_OPEN_DIALOG_HEADER
 
 #include <algorithm>
 
@@ -143,5 +137,4 @@ protected:
 
 };
 
-#endif
-
+#endif //CC_ASCII_OPEN_DIALOG_HEADER

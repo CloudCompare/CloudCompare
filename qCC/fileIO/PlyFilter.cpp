@@ -22,12 +22,12 @@
 #include "../ccCoordinatesShiftManager.h"
 #include "../ccConsole.h"
 
-
 //Qt
 #include <QProgressDialog>
 #include <QImage>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QPushButton>
 
 //CCLib
 #include <ScalarField.h>
@@ -46,7 +46,13 @@ using namespace CCLib;
 
 CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename)
 {
-	return saveToFile(entity,filename,PLY_DEFAULT);
+	//ask for output format
+	QMessageBox msgBox(QMessageBox::Question,"Choose output format","Save in BINARY or ASCII format?");
+	QPushButton *binaryButton = msgBox.addButton("BINARY", QMessageBox::AcceptRole);
+	QPushButton *asciiButton = msgBox.addButton("ASCII", QMessageBox::AcceptRole);
+	msgBox.exec();
+
+	return saveToFile(entity,filename,msgBox.clickedButton() == asciiButton ? PLY_ASCII : PLY_DEFAULT);
 }
 
 CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_ply_storage_mode storageType)

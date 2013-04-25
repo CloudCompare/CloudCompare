@@ -14,15 +14,9 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1966                                                              $
-//$LastChangedDate:: 2011-12-10 17:24:37 +0100 (sam., 10 dec. 2011)       $
-//**************************************************************************
-//
-#ifndef CC_BUNDLER_IMPORT_DIALOG
-#define CC_BUNDLER_IMPORT_DIALOG
+
+#ifndef CC_BUNDLER_IMPORT_DIALOG_HEADER
+#define CC_BUNDLER_IMPORT_DIALOG_HEADER
 
 #include <algorithm>
 
@@ -89,10 +83,12 @@ protected slots:
 
 protected:
 
-	void saveToPersistentSettings();
+	//! Inits dialog state from persistent settings
 	void initFromPersistentSettings();
+
+	//! Saves dialog state from persistent settings
+	void saveToPersistentSettings();
 
 };
 
-#endif
-
+#endif //CC_BUNDLER_IMPORT_DIALOG_HEADER

@@ -17,7 +17,13 @@ v2.4 04/25/2013
 		or via the 'Edit > Scalar Field > Color Scale Manager' menu entry
 	* custom scalar scales are saved along with the entity (in BIN format)
 		and are automatically imported when loading the file (on another computer typically)
-- No more distinction between (antiquated) 'positive' scalar fields and the standard ones
+	* color scales can be relative (to current scalar fields bounds) or absolute (the user
+		can specify custom bounds and steps, which can be useful to apply the same color ramp
+		to multiple clouds)
+- New Scalar Field Properties dialog
+	* most color ramp parameters are now saved per-scalar field, and not per-cloud anymore
+- New color ramp (with histogram)
+	* color ramp is "smarter"
 - New entity picking mechanism:
 	* press ALT + left mouse button to define a rectangular selection area to select multiple
 		entities at once
@@ -27,17 +33,18 @@ v2.4 04/25/2013
 	* custom light appears and can be intearctively moved (with CTRL+right click) in all modes
 	* interactive transformation can be performed in all modes
 	* 3D rotation center symbol added (can be 'always visible', 'only when moving' or 'hidden')
-	* default views (top, bottom, left, etc.) are more 'natural'
-	* new default views added (front and back 'isometric' views)
+	* default views (top, bottom, left, etc.) are more 'intuitive'
+	* new default views added: front and back 'isometric' views
 	* default FOV (field of view) is now 30 degrees for perspective mode
 - New method:
-	* Edit > Mesh > Export materials/textures to RGB (per-vertex color)
+	* 'Edit > Mesh > Export materials/textures to RGB' (per-vertex color)
 - New pop-menus added to the 'View' toolbar:
 	* selection of the current rotation center visibility (see above)
 	* selection of the current view mode (orthographic, object-based and viewer-based perspective)
 - New context menu entry for the DB tree: 'Information (recursive)'
 	* recursively gather various information (number of points, triangles, colors, etc.)
 - Local Statistical Test now works on signed scalar fields!
+- No more distinction between (antiquated) 'positive' scalar fields and the standard ones
 - New dialog for saving ASCII files
 	* choose output numerical precisions, separator, order, etc.
 - STL and PLY files can now be saved in both BINARY and ASCII formats

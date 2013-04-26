@@ -104,6 +104,26 @@ ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T)
     *this += T;
 }
 
+ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T,const ScalarType& S)
+{
+    toIdentity();
+
+    if (R.size()==3)
+    {
+        //we copy each column
+        float* mat = m_mat;
+        for (unsigned j=0;j<3;++j)
+        {
+            *mat++ = (float)R.m_values[0][j] * S;
+            *mat++ = (float)R.m_values[1][j] * S;
+            *mat++ = (float)R.m_values[2][j] * S;
+            mat++;
+        }
+    }
+
+    *this += T;
+}
+
 ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, const CCVector3& rotCenter)
 {
     *this = ccGLMatrix(R,T);

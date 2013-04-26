@@ -16,7 +16,7 @@
 //##########################################################################
 
 #include "mainwindow.h"
-
+#include <iostream>
 //CCLib Includes
 #include <GenericChunkedArray.h>
 #include <CloudSamplingTools.h>
@@ -3013,14 +3013,16 @@ void MainWindow::doActionRegister()
     }
 
     //parameters
-    CCLib::PointProjectionTools::Transformation transform;
+    CCLib::PointProjectionTools::ScaledTransformation transform;
+
     double minErrorDecrease			= rDlg.getMinErrorDecrease();
     unsigned maxIterationCount		= rDlg.getMaxIterationCount();
 	unsigned randomSamplingLimit	= rDlg.randomSamplingLimit();
     bool removeFarthestPoints		= rDlg.removeFarthestPoints();
     ConvergenceMethod method		= rDlg.getConvergenceMethod();
 	bool useDataSFAsWeights			= rDlg.useDataSFAsWeights();
-	bool useModelSFAsWeights		= rDlg.useModelSFAsWeights();
+    bool useModelSFAsWeights		= rDlg.useModelSFAsWeights();
+    bool useScaleFree               = rDlg.useFreeScaleParameter();
     double finalError				= 0.0;
 
 	CCLib::ScalarField* modelWeights = 0;
@@ -3062,6 +3064,7 @@ void MainWindow::doActionRegister()
              minErrorDecrease,
              maxIterationCount,
              finalError,
+             useScaleFree,
              (CCLib::GenericProgressCallback*)&pDlg,
              removeFarthestPoints,
 			 randomSamplingLimit,
@@ -3076,7 +3079,7 @@ void MainWindow::doActionRegister()
     {
         ccConsole::Print("[Register] Convergence reached (RMS at last step: %f)",finalError);
 
-        ccGLMatrix transMat(transform.R,transform.T);
+        ccGLMatrix transMat(transform.R,transform.T, transform.s);
 
 //#ifdef _DEBUG
 		forceConsoleDisplay();

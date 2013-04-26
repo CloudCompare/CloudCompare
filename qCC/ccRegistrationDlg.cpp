@@ -92,6 +92,11 @@ bool ccRegistrationDlg::useModelSFAsWeights() const
     return checkBoxUseModelSFAsWeights->isChecked();
 }
 
+bool ccRegistrationDlg::useFreeScaleParameter() const
+{
+    return checkBoxFreeScale->isChecked();
+}
+
 bool ccRegistrationDlg::removeFarthestPoints() const
 {
     return pointsRemoval->isChecked();

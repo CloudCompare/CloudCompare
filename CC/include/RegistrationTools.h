@@ -28,6 +28,7 @@
 #include "PointProjectionTools.h"
 #include "KdTree.h"
 
+
 //system
 #include <vector>
 
@@ -61,15 +62,34 @@ protected:
 		\param trans the resulting transformation
 		\param weightsP weights for the registered points (optional)
 		\param weightsX weights for the reference points (optional)
-		\param scale scale between P and X (s)
+        \param scale scale between P and X (s), not estimated!
 		\return success
 	**/
 	static bool RegistrationProcedure(GenericCloud* P,
 										GenericCloud* X,
-										PointProjectionTools::Transformation& trans,
+                                        PointProjectionTools::Transformation& trans,
 										ScalarField* weightsP=0,
 										ScalarField* weightsX=0,
 										PointCoordinateType scale = 1.0f);
+
+    //! ICP Registration procedure with scale estimation integrated
+    /** Determines the best couple qR|qT + scale to bring the cloud
+        P closer to the reference cloud X (one step). Refer jschmidt 2005
+
+        \param P the cloud to register
+        \param X the reference cloud
+        \param trans the resulting transformation
+        \param weightsP weights for the registered points (optional)
+        \param weightsX weights for the reference points (optional)
+        \param scale scale between P and X (s), not estimated!
+        \return success
+    **/
+    static bool RegistrationProcedureWithScale(GenericCloud* P,
+                                               GenericCloud* X,
+                                               PointProjectionTools::ScaledTransformation& trans,
+                                               ScalarField* weightsP=0,
+                                               ScalarField* weightsX=0,
+                                               PointCoordinateType scale = 1.0f);
 
 };
 
@@ -81,18 +101,8 @@ class HornRegistrationTools : public RegistrationTools
 #endif
 {
 public:
+    typedef typename PointProjectionTools::ScaledTransformation ScaledTransformation;
 
-	//! A scaled geometrical transformation (scale + rotation + translation)
-	/** P' = s.R.P + T
-	**/
-	struct ScaledTransformation : public PointProjectionTools::Transformation
-	{
-		//! Scale
-		PointCoordinateType s;
-
-		//! Default constructor
-		ScaledTransformation() : s((PointCoordinateType)1.0) {}
-	};
 
 	//! Returns "absolute orientation" (scale + transformation) between two set of (unordered) points
 	/** Warning: both clouds must have the same size (and at least 3 points)
@@ -169,11 +179,12 @@ public:
 	**/
 	static CC_ICP_RESULT RegisterClouds(GenericIndexedCloudPersist* modelList,
                                         GenericIndexedCloudPersist* dataList,
-                                        PointProjectionTools::Transformation& totalTrans,
+                                        PointProjectionTools::ScaledTransformation& totalTrans,
                                         CC_ICP_CONVERGENCE_TYPE convType,
                                         double minErrorDecrease,
                                         unsigned nbMaxIterations,
                                         double& finalError,
+                                        bool scale_free = true,
                                         GenericProgressCallback* progressCb=0,
                                         bool filterOutFarthestPoints=false,
                                         unsigned samplingLimit=20000,

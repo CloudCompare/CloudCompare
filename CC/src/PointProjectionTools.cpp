@@ -226,6 +226,52 @@ SimpleCloud* PointProjectionTools::applyTransformation(GenericCloud* theCloud, T
 	return transformedCloud;
 }
 
+
+
+SimpleCloud* PointProjectionTools::applyTransformation(GenericCloud* theCloud, ScaledTransformation& trans, GenericProgressCallback* progressCb)
+{
+    assert(theCloud);
+
+    unsigned n = theCloud->size();
+
+    SimpleCloud* transformedCloud = new SimpleCloud();
+    if (!transformedCloud->reserve(n))
+        return 0; //not enough memory
+
+    NormalizedProgress* nprogress = 0;
+    if (progressCb)
+    {
+        progressCb->reset();
+        progressCb->setMethodTitle("ApplyTransformation");
+        nprogress = new NormalizedProgress(progressCb,n);
+        char buffer[256];
+        sprintf(buffer,"Number of points = %i",n);
+        progressCb->setInfo(buffer);
+        progressCb->start();
+    }
+
+    theCloud->placeIteratorAtBegining();
+    const CCVector3* P;
+
+    while ((P = theCloud->getNextPoint()))
+    {
+        //P' = s*R.P+T
+        //TODO we should differentiate the case in which the scale is invalid. eg is 1.0, but is not nice to add a check here!
+        // also the validity of the rotation should be checked before the while for performance
+        CCVector3 newP = trans.s * (trans.R.isValid() ? trans.R * (*P) : (*P)) + trans.T;
+
+        transformedCloud->addPoint(newP);
+
+        if (nprogress && !nprogress->oneStep())
+            break;
+    }
+
+    if (progressCb)
+        progressCb->stop();
+
+    return transformedCloud;
+}
+
 GenericIndexedMesh* PointProjectionTools::computeTriangulation(GenericIndexedCloudPersist* theCloud, CC_TRIANGULATION_TYPES type)
 {
 	if (!theCloud)

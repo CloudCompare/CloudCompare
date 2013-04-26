@@ -94,7 +94,14 @@ public:
 	/** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
 	\param trans transformation (rotation matrix + translation vector)
 	**/
-	virtual void applyTransformation(PointProjectionTools::Transformation& trans);
+    virtual void applyTransformation(PointProjectionTools::Transformation& trans);
+
+
+    //! Applies a linear transformation to the cloud, with scale,rotation and translation
+    /** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
+    \param trans transformation (scale * rotation matrix + translation vector)
+    **/
+    virtual void applyTransformation(PointProjectionTools::ScaledTransformation& trans);
 
 	//! Returns associated scalar field (if any)
 	ScalarField* getScalarField() { return m_scalarField; } 

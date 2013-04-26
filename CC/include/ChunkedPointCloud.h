@@ -23,6 +23,7 @@
 #include "GenericIndexedCloudPersist.h"
 #include "PointProjectionTools.h"
 
+
 //System
 #include <assert.h>
 
@@ -52,6 +53,7 @@ public:
 
 		//! Default destructor
 		virtual ~ChunkedPointCloud();
+
 
 		//**** inherited form GenericCloud ****//
 		inline virtual unsigned size() const { return m_points->currentSize(); }
@@ -83,6 +85,12 @@ public:
 			\param trans transformation (rotation matrix + translation vector)
         **/
 		virtual void applyTransformation(PointProjectionTools::Transformation& trans);
+
+        //! Applies a rigid transformation to the cloud, for the scaled scale
+        /** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
+            \param trans transformation (scale * rotation matrix + translation vector)
+        **/
+        virtual void applyTransformation(PointProjectionTools::ScaledTransformation& trans);
 
 		//! Resizes the point database
 		/** The cloud database is resized with the specified size. If the new size

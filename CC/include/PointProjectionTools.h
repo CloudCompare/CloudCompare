@@ -20,6 +20,8 @@
 
 #include "CCToolbox.h"
 #include "Matrix.h"
+//#include "RegistrationTools.h" //to use
+
 
 //! Triangulation types
 enum CC_TRIANGULATION_TYPES {GENERIC							=		1,		/**< Default triangulation (Delaunay 2D in XY plane) **/
@@ -59,6 +61,18 @@ public:
 		CCVector3 T;
 	};
 
+    //! A scaled geometrical transformation (scale + rotation + translation)
+    /** P' = s.R.P + T
+    **/
+    struct ScaledTransformation : public PointProjectionTools::Transformation
+    {
+        //! Scale
+        PointCoordinateType s;
+
+        //! Default constructor
+        ScaledTransformation() : s((PointCoordinateType)1.0) {}
+    };
+
 	//! Develops a cylinder-shaped point cloud around its main axis
 	/** Generates a "developpee" of a cylinder-shaped point cloud.
 		WARNING: this method uses the cloud global iterator
@@ -91,6 +105,14 @@ public:
 		\return the "transformed" cloud
 	**/
 	static SimpleCloud* applyTransformation(GenericCloud* theCloud, Transformation& trans, GenericProgressCallback* progressCb=0);
+
+    //! Applys a geometrical transformation to a point cloud, specific for transformations with scale
+    /** \param theCloud the point cloud to be "transformed"
+        \param trans the sclaed geometrical transformation
+        \param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
+        \return the "transformed" cloud
+    **/
+    static SimpleCloud* applyTransformation(GenericCloud* theCloud, ScaledTransformation& trans, GenericProgressCallback* progressCb=0);
 
 	//! Computes a 2.5D Delaunay triangulation
 	/** The triangulation can be either computed on the points projected

@@ -43,11 +43,12 @@ using namespace CCLib;
 
 ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(GenericIndexedCloudPersist* _modelCloud,
 																			GenericIndexedCloudPersist* _dataCloud,
-																			PointProjectionTools::Transformation& transform,
+                                                                            PointProjectionTools::ScaledTransformation& transform,
 																			CC_ICP_CONVERGENCE_TYPE convType,
 																			double minErrorDecrease,
 																			unsigned nbMaxIterations,
 																			double& finalError,
+                                                                            bool scale_free,
 																			GenericProgressCallback* progressCb/*=0*/,
 																			bool filterOutFarthestPoints/*=false*/,
 																			unsigned samplingLimit/*=20000*/,
@@ -295,19 +296,32 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 				CPSetWeights->computeMinAndMax();
 			}
 
-            PointProjectionTools::Transformation currentTrans;
-			//if registration procedure fails
-            if (!RegistrationTools::RegistrationProcedure(dataCloud, CPSet, currentTrans, _dataWeights, _modelWeights))
-			{
-				result = ICP_ERROR_REGISTRATION_STEP;
-				break;
-			}
+            PointProjectionTools::ScaledTransformation currentTrans;
+
+            if (scale_free)
+            {
+                //if registration procedure fails
+                if (!RegistrationTools::RegistrationProcedureWithScale(dataCloud, CPSet, currentTrans, _dataWeights, _modelWeights))
+                {
+                    result = ICP_ERROR_REGISTRATION_STEP;
+                    break;
+                }
+            }
+            else
+            {
+                //if registration procedure fails
+                if (!RegistrationTools::RegistrationProcedure(dataCloud, CPSet, currentTrans, _dataWeights, _modelWeights))
+                {
+                    result = ICP_ERROR_REGISTRATION_STEP;
+                    break;
+                }
+            }
 
 			//get rotated data cloud
 			if (!rotatedDataCloud || filterOutFarthestPoints)
 			{
 				//we create a new structure, with rotated points
-				SimpleCloud* newDataCloud = PointProjectionTools::applyTransformation(dataCloud,currentTrans);
+                SimpleCloud* newDataCloud = PointProjectionTools::applyTransformation(dataCloud, currentTrans);
 				if (!newDataCloud)
 				{
 					//not enough memory
@@ -332,7 +346,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 			else
 			{
 				//we simply have to rotate the existing temporary cloud
-				rotatedDataCloud->applyTransformation(currentTrans);
+                rotatedDataCloud->applyTransformation(currentTrans);
 			}
 
 			//compute (new) distances to model
@@ -367,8 +381,18 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
                         transform.R = currentTrans.R * transform.R;
                     else
                         transform.R = currentTrans.R;
+
+
                     transform.T = currentTrans.R * transform.T;
+
+
+
+
 			    }
+                if (scale_free)
+                {
+                    transform.s *= currentTrans.s;
+                }
                 transform.T += currentTrans.T;
             }
 
@@ -512,10 +536,12 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 	PointCoordinateType bbMin[3],bbMax[3];
 	X->getBoundingBox(bbMin,bbMax);
 
+    //BBox dimensions
 	PointCoordinateType dx = bbMax[0]-bbMin[0];
 	PointCoordinateType dy = bbMax[1]-bbMin[1];
 	PointCoordinateType dz = bbMax[2]-bbMin[2];
 
+    //centers of mass
 	CCVector3 Gp = GeometricalAnalysisTools::computeGravityCenter(P);
 	CCVector3 Gx = GeometricalAnalysisTools::computeGravityCenter(X);
 
@@ -528,7 +554,7 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
         return true;
 	}
 
-	//Cross covariance matrix
+    //Cross covariance matrix, eq #24 in Besl ´92 (but with weights)
 	SquareMatrixd Sigma_px = (weightsP || weightsX) ? GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(P,X,Gp.u,Gx.u,weightsP,weightsX) : GeometricalAnalysisTools::computeCrossCovarianceMatrix(P,X,Gp.u,Gx.u);
 	if (!Sigma_px.isValid())
 		return false;
@@ -584,6 +610,130 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 	trans.T = Gx - (trans.R*Gp)*scale;
 
 	return true;
+}
+
+
+bool RegistrationTools::RegistrationProcedureWithScale(GenericCloud* P,
+                                              GenericCloud* X,
+                                              PointProjectionTools::ScaledTransformation& trans,
+                                              ScalarField* weightsP/*=0*/,
+                                              ScalarField* weightsX/*=0*/,
+                                              PointCoordinateType scale/*=1.0f*/)
+{
+    //resulting transformation (R is invalid on initialization and T is (0,0,0))
+    trans.R.invalidate();
+    trans.T = CCVector3(0,0,0);
+    trans.s = 1.0;
+
+    PointCoordinateType bbMin[3],bbMax[3];
+    X->getBoundingBox(bbMin,bbMax);
+
+    //BBox dimensions
+    PointCoordinateType dx = bbMax[0]-bbMin[0];
+    PointCoordinateType dy = bbMax[1]-bbMin[1];
+    PointCoordinateType dz = bbMax[2]-bbMin[2];
+
+    //centers of mass
+    CCVector3 Gp = GeometricalAnalysisTools::computeGravityCenter(P);
+    CCVector3 Gx = GeometricalAnalysisTools::computeGravityCenter(X);
+
+    //if the cloud is equivalent to a single point (for instance
+    //it's the case when the two clouds are very far away from
+    //each other in the ICP process) we try to get the two clouds closer
+    if (fabs(dx)+fabs(dy)+fabs(dz) < ZERO_TOLERANCE)
+    {
+        trans.T = Gx - Gp*scale;
+        return true;
+    }
+
+    //Cross covariance matrix, eq #24 in Besl ´92 (but with weights, if any)
+    SquareMatrixd Sigma_px = (weightsP || weightsX) ? GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(P,X,Gp.u,Gx.u,weightsP,weightsX) : GeometricalAnalysisTools::computeCrossCovarianceMatrix(P,X,Gp.u,Gx.u);
+    if (!Sigma_px.isValid())
+        return false;
+
+    SquareMatrixd Sigma_px_t = Sigma_px; //sigma_px_t is sigma_px transposed!
+    Sigma_px_t.transpose();
+
+    SquareMatrixd Aij = Sigma_px-Sigma_px_t;
+
+    double trace = Sigma_px.trace(); //that is the sum of diagonal elements f sigma_px
+
+    SquareMatrixd traceI3(3); //create the I matrix with eigvals equal to trace
+    traceI3.m_values[0][0]=trace;
+    traceI3.m_values[1][1]=trace;
+    traceI3.m_values[2][2]=trace;
+
+    SquareMatrixd bottomMat = Sigma_px+Sigma_px_t-traceI3;
+
+    //we build up the registration matrix (see ICP algorithm)
+    SquareMatrixd QSigma(4); //#25 in the paper (besl)
+
+    QSigma.m_values[0][0]=trace;
+
+    QSigma.m_values[0][1]=QSigma.m_values[1][0]=Aij.m_values[1][2];
+    QSigma.m_values[0][2]=QSigma.m_values[2][0]=Aij.m_values[2][0];
+    QSigma.m_values[0][3]=QSigma.m_values[3][0]=Aij.m_values[0][1];
+
+    QSigma.m_values[1][1]=bottomMat.m_values[0][0];
+    QSigma.m_values[1][2]=bottomMat.m_values[0][1];
+    QSigma.m_values[1][3]=bottomMat.m_values[0][2];
+
+    QSigma.m_values[2][1]=bottomMat.m_values[1][0];
+    QSigma.m_values[2][2]=bottomMat.m_values[1][1];
+    QSigma.m_values[2][3]=bottomMat.m_values[1][2];
+
+    QSigma.m_values[3][1]=bottomMat.m_values[2][0];
+    QSigma.m_values[3][2]=bottomMat.m_values[2][1];
+    QSigma.m_values[3][3]=bottomMat.m_values[2][2];
+
+    //we compute its eigenvalues and eigenvectors
+    SquareMatrixd eig = QSigma.computeJacobianEigenValuesAndVectors();
+
+    if (!eig.isValid())
+        return false;
+
+    //as Besl says, the best rotation corresponds to the eigenvector associated to the biggest eigenvalue
+    double qR[4];
+    eig.getMaxEigenValueAndVector(qR);
+
+    //these eigenvalue and eigenvector correspond to a quaternion --> we get the corresponding matrix
+    trans.R.initFromQuaternion(qR);
+
+    //NOTE P (a) is the moving cloud, X (b) the reference
+
+    //now deduce the scale, refer to jschmidt 2005 for this
+    std::vector<CCVector3d> b_tilde, a_tilde; //a refers to P (not moving) and a to X (moving)
+                                              //a and b is for following the notation of the jscmhidt paper
+    a_tilde.resize(P->size()); //both have actually same size. Just for being clear
+    b_tilde.resize(X->size());
+
+    X->placeIteratorAtBegining();
+    P->placeIteratorAtBegining();
+
+    //copy in a and b tilded the point from the clouds #7 jschmidt
+    for (int i = 0; i < X->size(); ++i)
+    {
+        a_tilde.at(i) = *(P->getNextPoint()) - Gp;
+        b_tilde.at(i) = trans.R * (*(X->getNextPoint()) - Gx);
+    }
+
+    double acc_1 = 0.0;
+    double acc_2 = 0.0; // two accumulators
+
+    for (int i = 0; i < X->size(); ++i)
+    {
+        acc_1 += b_tilde.at(i).dot( a_tilde.at(i));
+        acc_2 += a_tilde.at(i).dot( a_tilde.at(i));
+    }
+
+    trans.s = acc_1 / acc_2;
+//    std::cout << trans.s << std::endl;
+
+
+    //and we deduce the translation
+    trans.T = Gx - trans.s*(trans.R*Gp)*scale; //#26 in besl paper, modified with the scale as in jschmidt
+
+    return true;
 }
 
 bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,

@@ -185,3 +185,28 @@ void SimpleCloud::applyTransformation(PointProjectionTools::Transformation& tran
         m_validBB = false;
     }
 }
+
+void SimpleCloud::applyTransformation(PointProjectionTools::ScaledTransformation& trans)
+{
+    unsigned i,count=m_points->currentSize();
+    if (fabs(trans.s - 1.0) > ZERO_TOLERANCE)
+    {
+        for (i=0;i<count;++i)
+            *(CCVector3*)m_points->getValue(i) *= trans.s;
+        m_validBB = false;
+    }
+
+    if (trans.R.isValid())
+    {
+        for (i=0;i<count;++i)
+            trans.R.apply(m_points->getValue(i));
+        m_validBB = false;
+    }
+
+    if (trans.T.norm() > ZERO_TOLERANCE)
+    {
+        for (i=0;i<count;++i)
+            *(CCVector3*)m_points->getValue(i) += trans.T;
+        m_validBB = false;
+    }
+}

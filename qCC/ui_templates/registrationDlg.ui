@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>391</height>
+    <height>446</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,16 +26,6 @@
       <string>Role assignation</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QToolButton" name="dataColorButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QLabel" name="label_10">
         <property name="text">
@@ -58,6 +48,16 @@
       </item>
       <item row="1" column="0">
        <widget class="QToolButton" name="modelColorButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QToolButton" name="dataColorButton">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -283,6 +283,13 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="checkBoxFreeScale">
+     <property name="text">
+      <string>Free Scale Parameter</string>
+     </property>
     </widget>
    </item>
    <item>

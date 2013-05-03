@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1030</width>
-     <height>20</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -144,6 +144,7 @@
      <addaction name="actionBilateralFilter"/>
      <addaction name="actionFilterByValue"/>
      <addaction name="actionConvertToRGB"/>
+     <addaction name="actionScalarFieldFromColor"/>
      <addaction name="actionRenameSF"/>
      <addaction name="separator"/>
      <addaction name="actionAddConstantSF"/>
@@ -357,8 +358,8 @@
   <widget class="QDockWidget" name="DockableDBTree">
    <property name="minimumSize">
     <size>
-     <width>109</width>
-     <height>147</height>
+     <width>135</width>
+     <height>155</height>
     </size>
    </property>
    <property name="floating">
@@ -608,7 +609,7 @@
    <property name="minimumSize">
     <size>
      <width>100</width>
-     <height>111</height>
+     <height>116</height>
     </size>
    </property>
    <property name="floating">
@@ -2277,6 +2278,14 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionScalarFieldFromColor">
+   <property name="text">
+    <string>Convert From RGB</string>
+   </property>
+   <property name="toolTip">
+    <string>Convert RGB into Scalar Fields</string>
    </property>
   </action>
  </widget>

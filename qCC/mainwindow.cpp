@@ -100,6 +100,7 @@
 #include "ccNormalComputationDlg.h"
 #include "ccCameraParamEditDlg.h"
 #include "ccScalarFieldArithmeticDlg.h"
+#include "ccScalarFieldFromColorDlg.h"
 #include "ccSensorComputeDistancesDlg.h"
 #include "ccSensorComputeScatteringAnglesDlg.h"
 #include "ccCurvatureDlg.h"
@@ -856,6 +857,7 @@ void MainWindow::connectActions()
     connect(actionFilterByValue,                SIGNAL(triggered()),    this,       SLOT(doActionFilterByValue()));
 	connect(actionAddConstantSF,				SIGNAL(triggered()),    this,       SLOT(doActionAddConstantSF()));
     connect(actionScalarFieldArithmetic,        SIGNAL(triggered()),    this,       SLOT(doActionScalarFieldArithmetic()));
+    connect(actionScalarFieldFromColor,         SIGNAL(triggered()),    this,       SLOT(doActionScalarFieldFromColor()));
     connect(actionConvertToRGB,                 SIGNAL(triggered()),    this,       SLOT(doActionSFConvertToRGB()));
 	connect(actionRenameSF,						SIGNAL(triggered()),    this,       SLOT(doActionRenameSF()));
 	connect(actionOpenColorScalesManager,		SIGNAL(triggered()),    this,       SLOT(doActionOpenColorScalesManager()));
@@ -5737,6 +5739,139 @@ void MainWindow::doActionAddConstantSF()
 	ccLog::Print(QString("New scalar field added to %1 (constant value: %2)").arg(cloud->getName()).arg(sfValue));
 }
 
+void MainWindow::doActionScalarFieldFromColor()
+{
+//    size_t selNum = m_selectedEntities.size();
+//    if (selNum!=1)
+//    {
+//        if (selNum>1)
+//            ccConsole::Error("Select only one point cloud or mesh!");
+//        return;
+//    }
+
+    std::vector<ccPointCloud *> clouds;
+
+    for (size_t i = 0; i < m_selectedEntities.size(); ++i)
+    {
+       ccHObject * ent = m_selectedEntities.at(i);
+       if (ent->isA( CC_POINT_CLOUD ) && ( ent->hasColors() )) //for now only for clouds!
+           clouds.push_back( ccHObjectCaster::ToPointCloud( ent ) );
+    }
+
+    if (clouds.size() == 0)
+        return;
+
+    ccScalarFieldFromColorDlg * dialog = new ccScalarFieldFromColorDlg;
+    if (!dialog->exec())
+        return;
+
+    bool exportR = dialog->getRStatus();
+    bool exportG = dialog->getGStatus();
+    bool exportB = dialog->getBStatus();
+    bool exportComposite = dialog->getCompositeStatus();
+
+    for (size_t i = 0; i < clouds.size(); ++i)
+    {
+        ccPointCloud * cloud = clouds.at(i);
+
+        ccScalarField * R = new ccScalarField;
+        ccScalarField * G = new ccScalarField;
+        ccScalarField * B = new ccScalarField;
+        ccScalarField * C = new ccScalarField;
+
+        if (exportR)
+            R->reserve(cloud->size());
+
+
+        if (exportG)
+            G->reserve(cloud->size());
+
+
+        if (exportB)
+            B->reserve(cloud->size());
+
+
+        if (exportComposite)
+            C->reserve(cloud->size());
+
+
+        for (size_t j = 0; j < cloud->size(); ++j)
+        {
+            const colorType * rgb = cloud->getPointColor(j);
+
+            if (exportR)
+                R->setValue(j, rgb[0]);
+
+            if (exportG)
+                G->setValue(j, rgb[1]);
+
+            if (exportB)
+                B->setValue(j, rgb[2]);
+
+            if (exportComposite)
+                C->setValue(j, (rgb[0] + rgb[1] + rgb[2])/3.0f );
+
+        }
+
+
+        QString defaultRName = "R";
+        QString defaultGName = "G";
+        QString defaultBName = "B";
+        QString defaultCName = "Composite"; //composite
+
+
+        if (exportR)
+        {
+            R->computeMinAndMax();
+            unsigned trys = 1;
+            while (cloud->getScalarFieldIndexByName(qPrintable(defaultRName))>=0 || trys>99)
+                defaultRName = QString("R #%1").arg(++trys);
+            R->setName(qPrintable(defaultRName));
+
+            cloud->addScalarField(R);
+
+        }
+        if (exportG)
+        {
+            G->computeMinAndMax();
+            unsigned trys = 1;
+            while (cloud->getScalarFieldIndexByName(qPrintable(defaultGName))>=0 || trys>99)
+                defaultGName = QString("G #%1").arg(++trys);
+            G->setName(qPrintable(defaultGName));
+
+            cloud->addScalarField(G);
+        }
+        if (exportB)
+        {
+            B->computeMinAndMax();
+            unsigned trys = 1;
+            while (cloud->getScalarFieldIndexByName(qPrintable(defaultBName))>=0 || trys>99)
+                defaultBName = QString("B #%1").arg(++trys);
+            B->setName(qPrintable(defaultBName));
+
+            cloud->addScalarField(B);
+        }
+        if (exportComposite)
+        {
+            C->computeMinAndMax();
+            unsigned trys = 1;
+            while (cloud->getScalarFieldIndexByName(qPrintable(defaultCName))>=0 || trys>99)
+                defaultRName = QString("Composite #%1").arg(++trys);
+            C->setName(qPrintable(defaultCName));
+
+            cloud->addScalarField(C);
+
+        }
+
+        ccLog::Print(QString("New scalar fields added to %1").arg(cloud->getName()));
+
+
+    }
+
+    updateUI();
+
+}
+
 void MainWindow::doActionScalarFieldArithmetic()
 {
     assert(!m_selectedEntities.empty());
@@ -7349,6 +7484,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionCloudMeshDist->setEnabled(exactlyTwoEntities && atLeastOneMesh);      //at least one Mesh!
     actionCPS->setEnabled(exactlyTwoClouds);
     actionScalarFieldArithmetic->setEnabled(exactlyOneEntity && atLeastOneSF);
+    actionScalarFieldFromColor->setEnabled(atLeastOneCloud && atLeastOneColor);
 
     //>1
     bool atLeastTwoEntities = (selInfo.selCount>1);

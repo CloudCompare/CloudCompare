@@ -101,9 +101,9 @@ public:
     unsigned filterChildren(Container& filteredChildren, bool recursive=false, CC_CLASS_ENUM filter = CC_OBJECT) const;
 
     //! Removes a specific child
-    void removeChild(const ccHObject* anObject);
+    void removeChild(const ccHObject* anObject, bool preventAutoDelete = false);
     //! Removes a specific child given its index
-    void removeChild(int pos);
+    void removeChild(int pos, bool preventAutoDelete = false);
     //! Removes all children
     void removeAllChildren();
     //! Returns child index

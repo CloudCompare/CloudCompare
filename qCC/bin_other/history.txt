@@ -2,6 +2,10 @@
 
 v2.4 ??/??/2013
 - 3D slicer
+- "Primitive factory" menu entry moved to the File menu
+	(so as to be accessible even if no entity is selected!)
+- Bug fix: applying the interactive 'rotate/translate' tool to an entity and its parent at the
+	same time would make CC crash
 
 v2.4 04/25/2013
 - 3D mouses (3dConnexion devices) are now supported:

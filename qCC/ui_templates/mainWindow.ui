@@ -64,6 +64,7 @@
     </widget>
     <addaction name="actionOpen"/>
     <addaction name="actionSave"/>
+    <addaction name="actionPrimitiveFactory"/>
     <addaction name="separator"/>
     <addaction name="menu3DMouse"/>
     <addaction name="separator"/>
@@ -344,7 +345,6 @@
     <addaction name="menuStatistics"/>
     <addaction name="menuSegmentation"/>
     <addaction name="menuOther"/>
-    <addaction name="actionPrimitiveFactory"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>

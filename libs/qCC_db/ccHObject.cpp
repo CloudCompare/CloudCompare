@@ -511,23 +511,24 @@ void ccHObject::applyGLTransformation_recursive(ccGLMatrix* trans/*=NULL*/)
 //		(*it)->prepareDisplayForRefresh_recursive();
 //}
 
-void ccHObject::removeChild(const ccHObject* anObject)
+void ccHObject::removeChild(const ccHObject* anObject, bool preventAutoDelete/*=false*/)
 {
 	assert(anObject);
 
 	int pos = getChildIndex(anObject);
 
 	if (pos>=0)
-		removeChild(pos);
+		removeChild(pos,preventAutoDelete);
 }
 
-void ccHObject::removeChild(int pos)
+void ccHObject::removeChild(int pos, bool preventAutoDelete/*=false*/)
 {
 	assert(pos>=0 && unsigned(pos)<m_children.size());
 
 	ccHObject* child = m_children[pos];
-	if (child->getFlagState(CC_FATHER_DEPENDANT))
+	if (child->getFlagState(CC_FATHER_DEPENDANT) && !preventAutoDelete)
 	{
+		//delete object
 		if (child->isShareable())
 			dynamic_cast<CCShareable*>(child)->release();
 		else

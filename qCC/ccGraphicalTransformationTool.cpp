@@ -85,8 +85,8 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 	//eventually, we must check that there is no "parent + sibling" in the selection!
 	//otherwise, the sibling will be rotated twice!
 	assert(m_toTransform);
-	unsigned i,n=m_toTransform->getChildrenNumber();
-	for (i=0; i<n; ++i)
+	unsigned n = m_toTransform->getChildrenNumber();
+	for (unsigned i=0; i<n;)
 	{
 		ccHObject* previous = m_toTransform->getChild(i);
 		if (previous->isAncestorOf(entity))
@@ -97,7 +97,13 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 		//if the inverse is true, then we get rid of the current element!
 		else if (entity->isAncestorOf(previous))
 		{
-			m_toTransform->removeChild(previous);
+			m_toTransform->removeChild(previous,true);
+			--n;
+		}
+		else
+		{
+			//proceed
+			++i;
 		}
 	}
 

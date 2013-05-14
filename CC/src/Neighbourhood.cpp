@@ -63,7 +63,7 @@ const CCVector3* Neighbourhood::getGravityCenter()
 const PointCoordinateType* Neighbourhood::getLSQPlane()
 {
 	if (!(structuresValidity & LSQ_PLANE))
-		computeLeastSquareBestFittingPlan();
+		computeLeastSquareBestFittingPlane();
 	return _theLSQPlane;
 }
 
@@ -175,7 +175,7 @@ CCLib::SquareMatrixd Neighbourhood::computeCovarianceMatrix()
 	return covMat;
 }
 
-bool Neighbourhood::computeLeastSquareBestFittingPlan()
+bool Neighbourhood::computeLeastSquareBestFittingPlane()
 {
 	_theLSQPlane = 0;
 

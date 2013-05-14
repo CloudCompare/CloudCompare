@@ -200,7 +200,7 @@ class Neighbourhood
 		//! Computes the gravity center
 		void computeGravityCenter();
 		//! Computes the least-square best fitting plane
-		bool computeLeastSquareBestFittingPlan();
+		bool computeLeastSquareBestFittingPlane();
 		//! Computes best fitting height function
 		bool computeHeightFunction();
 		//! Computes best fitting 3D quadric function

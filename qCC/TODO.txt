@@ -30,6 +30,7 @@ Various:
 [*] Command line mode could be extended (more methods, etc.)
 [*] Add 'GL filter' plugins support to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
+[*] Add an option to the ASCII export dialog to save the number of points as a 'header' line
 
 From Thomas S. (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=550)
 [*] It would be great if the programm could manage long coordinates for the georeferencing (?!)
@@ -42,6 +43,7 @@ From Andrew B.
 [*] Automation of the above tasks via the command line, along with the ability output of summary stats to command line or text file, command line options for ICP and cloud-cloud distance (for batch work).
 
 From Dimitri L.
+[*] Improvement on the connected component and octree (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=557)
 [*] Let the user enter grid parameters in the 'Heght grid projection' tool + remember last parameters
 [*] Auto-detect header format in ASCII files (in any) 
 [*] Compute distances in a given direction (cylinder)
@@ -74,3 +76,6 @@ From Rav M.
 From Gianluca C.
 [*] find a way to transfer the colors from the pointcloud to the Poisson reconstructed surface (qPoissonRecon)
 [*] to overlay an image over the mesh with some common points and "drape" the photo on the surface
+
+From Patrick B. (in french)
+[*] Des tranches de nuages paramétrables en horizontalité et verticalité (épaisseur, colorisation de la tranche, intervalles paramétrables)

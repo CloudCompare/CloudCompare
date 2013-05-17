@@ -37,6 +37,7 @@
 #define CC_GEODESIC_DISTANCES_FIELD_NAME "Geodesic distances"
 #define CC_HEIGHT_GRID_FIELD_NAME "Height grid values"
 #define CC_SCAN_INTENSITY_FIELD_NAME "Intensity"
+#define CC_SCAN_TIME_FIELD_NAME "Time"
 #define CC_SCAN_RETURN_INDEX_FIELD_NAME "Return index"
 #define CC_LAS_CLASSIFICATION_FIELD_NAME "LAS classification"
 #define CC_DEFAULT_RAD_SCATTERING_ANGLES_SF_NAME "Scattering angles (rad)"

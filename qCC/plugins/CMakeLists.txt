@@ -8,8 +8,10 @@ file(GLOB subdirectories *)
 foreach(dir ${subdirectories})
     if(IS_DIRECTORY ${dir})
 		if (NOT ${dir} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR}/.svn ) #ignore svn subdir!
-			message( STATUS "Auto-add plugin subdir:" ${dir})
-			add_subdirectory (${dir})
+			if (NOT ${dir} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles ) #ignore CMakeFiles subdir
+				message( STATUS "Auto-add plugin subdir:" ${dir})
+				add_subdirectory (${dir})
+			endif()
 		endif()
 	endif()
 endforeach()

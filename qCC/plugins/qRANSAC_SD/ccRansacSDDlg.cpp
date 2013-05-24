@@ -23,7 +23,6 @@ static double s_normalThresh = .9;	// this is the cos of the maximal normal devi
 static int s_minSupport = 500;		// this is the minimal numer of points required for a primitive
 static double s_probability = .01;	// this is the "probability" with which a primitive is overlooked
 
-
 ccRansacSDDlg::ccRansacSDDlg(QWidget* parent) : QDialog(parent), Ui::RansacSDDialog()
 {
     setupUi(this);

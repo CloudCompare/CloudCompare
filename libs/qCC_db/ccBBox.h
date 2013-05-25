@@ -103,6 +103,16 @@ public:
 	**/
 	PointCoordinateType minDistTo(const ccBBox& box) const;
 
+	//! Returns whether a points is inside the box or not
+	/** Warning: box should be valid!
+	**/
+	inline bool inside(const CCVector3& P) const
+	{
+		return (P.x >= bbMin.x && P.x <= bbMax.x &&
+				P.y >= bbMin.y && P.y <= bbMax.y &&
+				P.z >= bbMin.z && P.z <= bbMax.z);
+	}
+
 protected:
 
     //! Lower min. corner

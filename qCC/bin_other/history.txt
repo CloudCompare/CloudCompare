@@ -4,6 +4,8 @@ v2.4 ??/??/2013
 - 3D slicer
 - "Primitive factory" menu entry moved to the File menu
 	(so as to be accessible even if no entity is selected!)
+- 128 million points per cloud limit removed on the 64 bits version
+- Shift information is now kept by qRansacSD plugin (shape detection)
 - Bug fixes:
 	* applying the interactive 'rotate/translate' tool to an entity and its parent at the
 		same time would make CC crash

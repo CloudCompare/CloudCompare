@@ -20,6 +20,7 @@
 
 //Local
 #include "ccHObject.h"
+#include "ccInteractor.h"
 
 //Qt
 #include <QString>
@@ -31,9 +32,9 @@ class ccGenericPointCloud;
 //! 2D label (typically attached to points)
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"
-class QCC_DB_DLL_API cc2DLabel : public ccHObject
+class QCC_DB_DLL_API cc2DLabel : public ccHObject, public ccInteractor
 #else
-class cc2DLabel : public ccHObject
+class cc2DLabel : public ccHObject, public ccInteractor
 #endif
 {
 public:
@@ -65,17 +66,15 @@ public:
 	**/
 	QStringList getLabelContent(int precision);
 
-	//! Process mouse click
-	bool acceptClick(int x, int y, Qt::MouseButton button);
+	//inherited from ccInteractor
+	virtual bool acceptClick(int x, int y, Qt::MouseButton button);
+	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight);
 
 	//! Sets relative position
 	void setPosition(float x, float y);
 
 	//! Returns relative position
 	const float* getPosition() const { return m_screenPos; }
-
-	//! Moves label (percentages)
-	void move(float dx, float dy);
 
 	//! Clears label
 	void clear();

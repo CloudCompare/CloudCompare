@@ -112,9 +112,10 @@ typedef glDrawContext CC_DRAW_CONTEXT;
 #define CC_DRAW_ENTITY_NAMES                    0x0040
 #define CC_DRAW_POINT_NAMES                     0x0080
 #define CC_DRAW_TRI_NAMES						0x0100
-#define CC_DRAW_ANY_NAMES						0x01C0		// = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES
-#define CC_LOD_ACTIVATED                        0x0200
-#define CC_VIRTUAL_TRANS_ENABLED                0x0400
+#define CC_DRAW_FAST_NAMES_ONLY					0x0200
+#define CC_DRAW_ANY_NAMES						0x03C0		// = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES
+#define CC_LOD_ACTIVATED                        0x0400
+#define CC_VIRTUAL_TRANS_ENABLED                0x0800
 
 // Drawing flags testing macros (see ccDrawableObject)
 #define MACRO_Draw2D(context) (context.flags & CC_DRAW_2D)
@@ -123,6 +124,7 @@ typedef glDrawContext CC_DRAW_CONTEXT;
 #define MACRO_DrawTriangleNames(context) (context.flags & CC_DRAW_TRI_NAMES)
 #define MACRO_DrawEntityNames(context) (context.flags & CC_DRAW_ENTITY_NAMES)
 #define MACRO_DrawNames(context) (context.flags & CC_DRAW_ANY_NAMES)
+#define MACRO_DrawFastNamesOnly(context) (context.flags & CC_DRAW_FAST_NAMES_ONLY)
 #define MACRO_SkipUnselected(context) (context.flags & CC_SKIP_UNSELECTED)
 #define MACRO_SkipSelected(context) (context.flags & CC_SKIP_SELECTED)
 #define MACRO_LightIsEnabled(context) (context.flags & CC_LIGHT_ENABLED)

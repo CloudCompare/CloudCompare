@@ -111,7 +111,12 @@ void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
 		bool pushName = MACRO_DrawEntityNames(context);
 
 		if (pushName)
+		{
+			//not fast at all!
+			if (MACRO_DrawFastNamesOnly(context))
+				return;
 			glPushName(getUniqueID());
+		}
 
 		RenderOctreeAs(m_displayType,this,m_displayedLevel,m_associatedCloud,m_glListID,m_shouldBeRefreshed);
 

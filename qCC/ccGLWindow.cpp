@@ -36,6 +36,7 @@
 #include <ccPolyline.h>
 #include <ccPointCloud.h>
 #include <ccColorRampShader.h>
+#include <ccClipBox.h>
 
 //CCFbo
 #include <ccShader.h>
@@ -560,8 +561,8 @@ void ccGLWindow::paintGL()
 			renderText(10, m_glHeight-(float)borderWidth+15,QString("[GL filter] ")+m_activeGLFilter->getName()/*,m_font*/); //we ignore the custom font size
 		}
 
-		//trihedral
-		drawAxis();
+		//trihedron
+		drawTrihedron();
 
 		//scale (only in ortho mode)
 		if (!m_params.perspectiveView)
@@ -1233,7 +1234,7 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 	renderText(m_glWidth-int(scaleW_pix*0.5+dW)-fm.width(text)/2, m_glHeight-dH/2+fm.height()/3, text, m_font);
 }
 
-void ccGLWindow::drawAxis()
+void ccGLWindow::drawTrihedron()
 {
 	float w = static_cast<float>(m_glWidth)*0.5-CC_DISPLAYED_TRIHEDRON_AXES_LENGTH-10.0;
 	float h = static_cast<float>(m_glHeight)*0.5-CC_DISPLAYED_TRIHEDRON_AXES_LENGTH-5.0;
@@ -1252,7 +1253,7 @@ void ccGLWindow::drawAxis()
 		glEnable(GL_LINE_SMOOTH);
 		glEnable(GL_DEPTH_TEST);
 
-		//trihedra OpenGL drawing
+		//trihedron OpenGL drawing
 		glBegin(GL_LINES);
 		glColor3f(1.0f,0.0f,0.0f);
 		glVertex3f(0.0f,0.0f,0.0f);
@@ -1625,9 +1626,7 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	case POINT_PICKING:
 		setCursor(QCursor(Qt::PointingHandCursor));
 		break;
-	case ENTITY_RECT_PICKING:
-	case LABELS_PICKING:
-	case AUTO_POINT_PICKING:
+	default:
 	   break;
 	}
 
@@ -1641,16 +1640,8 @@ void ccGLWindow::enableEmbeddedIcons(bool state)
 	setMouseTracking(state);
 }
 
-void projectPointOnSphere(int x, int y, int width, int height, CCVector3& v)
+static void ProjectPointOnSphere(int x, int y, int width, int height, CCVector3& v)
 {
-	//clipping
-	//x = std::max(0,x);
-	//x = std::min(width,x);
-	//y = std::max(0,y);
-	//y = std::min(height,y);
-	////normalized position (relative to the screen center)
-	//v.x = 2.0f * ((PointCoordinateType)x/(PointCoordinateType)width - 0.5f);
-	//v.y = 2.0f * (1.0f - (PointCoordinateType)y/(PointCoordinateType)height);
 	v.x = float(2.0 * std::max(std::min(x,width-1),-width+1) - width) / (float)width;
 	v.y = float(height - 2.0 * std::max(std::min(y,height-1),-height+1)) / (float)height;
 	v.z = 0;
@@ -1671,9 +1662,9 @@ void projectPointOnSphere(int x, int y, int width, int height, CCVector3& v)
 	}
 }
 
-void ccGLWindow::updateActiveLabelsList(int x, int y, bool extendToSelectedLabels/*=false*/)
+void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels/*=false*/)
 {
-	m_activeLabels.clear();
+	m_activeItems.clear();
 
 	if (!m_globalDBRoot && !m_winDBRoot)
 		return;
@@ -1681,45 +1672,56 @@ void ccGLWindow::updateActiveLabelsList(int x, int y, bool extendToSelectedLabel
 	if (m_interactionMode == TRANSFORM_ENTITY) //labels are ignored in 'Interactive Transformation' mode
 		return;
 
-	int labelID = startPicking(LABELS_PICKING,x,y);
-	if (labelID<1)
+	int subID=-1;
+	int itemID = startPicking(FAST_PICKING,x,y,2,2,&subID);
+	if (itemID<1)
 		return;
 
 	//labels can be in local or global DB
-	ccHObject* labelObj = m_globalDBRoot->find(labelID);
-	if (!labelObj && m_winDBRoot)
-		labelObj = m_winDBRoot->find(labelID);
-	if (labelObj && labelObj->isA(CC_2D_LABEL))
+	ccHObject* pickedObj = m_globalDBRoot->find(itemID);
+	if (!pickedObj && m_winDBRoot)
+		pickedObj = m_winDBRoot->find(itemID);
+	if (pickedObj)
 	{
-		cc2DLabel* label = static_cast<cc2DLabel*>(labelObj);
-		if (!label->isSelected() || !extendToSelectedLabels)
+		if (pickedObj->isA(CC_2D_LABEL))
 		{
-			//select it?
-			//emit entitySelectionChanged(label->getUniqueID());
-			//QApplication::processEvents();
-			m_activeLabels.resize(1);
-			m_activeLabels.back() = label;
-			return;
-		}
-		else
-		{
-			//we get the other selected labels as well!
-			ccHObject::Container labels;
-			if (m_globalDBRoot)
-				m_globalDBRoot->filterChildren(labels,true,CC_2D_LABEL);
-			if (m_winDBRoot)
-				m_winDBRoot->filterChildren(labels,true,CC_2D_LABEL);
+			cc2DLabel* label = static_cast<cc2DLabel*>(pickedObj);
+			if (!label->isSelected() || !extendToSelectedLabels)
+			{
+				//select it?
+				//emit entitySelectionChanged(label->getUniqueID());
+				//QApplication::processEvents();
+				m_activeItems.push_back(label);
+				return;
+			}
+			else
+			{
+				//we get the other selected labels as well!
+				ccHObject::Container labels;
+				if (m_globalDBRoot)
+					m_globalDBRoot->filterChildren(labels,true,CC_2D_LABEL);
+				if (m_winDBRoot)
+					m_winDBRoot->filterChildren(labels,true,CC_2D_LABEL);
 
-			for (ccHObject::Container::iterator it=labels.begin(); it!=labels.end(); ++it)
-				if ((*it)->isVisible())
-				{
-					cc2DLabel* label = static_cast<cc2DLabel*>(*it);
-					if (label->isSelected())
+				for (ccHObject::Container::iterator it=labels.begin(); it!=labels.end(); ++it)
+					if ((*it)->isVisible())
 					{
-						m_activeLabels.resize(m_activeLabels.size()+1);
-						m_activeLabels.back() = label;
+						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
+						if (label->isSelected())
+						{
+							m_activeItems.resize(m_activeItems.size()+1);
+							m_activeItems.back() = label;
+						}
 					}
-				}
+			}
+		}
+		else if (pickedObj->isA(CC_CLIPPING_BOX))
+		{
+			ccClipBox* cbox = static_cast<ccClipBox*>(pickedObj);
+			cbox->setActiveComponent(subID);
+			cbox->setClickedPoint(x,y,width(),height(),m_params.viewMat);
+
+			m_activeItems.push_back(cbox);
 		}
 	}
 }
@@ -1750,16 +1752,16 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 		{
 			m_lastClickTime_ticks = ccTimer::Msec();
 
-			projectPointOnSphere(event->x(), event->y(), width(), height(), m_lastMouseOrientation);
+			ProjectPointOnSphere(event->x(), event->y(), width(), height(), m_lastMouseOrientation);
 			m_lastMousePos = event->pos();
 			m_lodActivated = true;
 
 			QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
 
-			//let's check if the mouse is on a selected label first!
+			//let's check if the mouse is on a selected item first!
 			if (QApplication::keyboardModifiers () == Qt::NoModifier
 				|| QApplication::keyboardModifiers () == Qt::ControlModifier)
-				updateActiveLabelsList(event->x(), event->y(), true);
+				updateActiveItemsList(event->x(), event->y(), true);
 		}
 
 		emit leftButtonClicked(event->x()-width()/2,height()/2-event->y());
@@ -1858,11 +1860,22 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	}
 	else if (event->buttons() & Qt::LeftButton) //rotation
 	{
-		//specific case: move label(s)
-		if (!m_activeLabels.empty())
+		//specific case: move active item(s)
+		if (!m_activeItems.empty())
 		{
-			for (std::vector<cc2DLabel*>::iterator it=m_activeLabels.begin(); it!=m_activeLabels.end(); ++it)
-				(*it)->move((float)dx/(float)width(),(float)dy/(float)height());
+			//displacement vector (in "3D")
+			float pixSize = computeActualPixelSize();
+			CCVector3 u(static_cast<float>(dx)*pixSize, -static_cast<float>(dy)*pixSize, 0);
+			m_params.viewMat.transposed().applyRotation(u);
+
+			for (std::vector<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
+			{
+				if ((*it)->move2D(x,y,dx,dy,width(),height()) || (*it)->move3D(u))
+				{
+					invalidateViewport();
+					//m_updateFBO = true; //already done by invalidateViewport
+				}
+			}
 		}
 		else
 		{
@@ -1915,7 +1928,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			}
 			else //standard rotation around the current pivot
 			{
-				projectPointOnSphere(x, y, width(), height(), m_currentMouseOrientation);
+				ProjectPointOnSphere(x, y, width(), height(), m_currentMouseOrientation);
 
 				ccGLMatrix rotMat = ccGLUtils::GenerateGLRotationMatrixFromVectors(m_lastMouseOrientation.u,m_currentMouseOrientation.u);
 				m_lastMouseOrientation = m_currentMouseOrientation;
@@ -1983,13 +1996,13 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	{
 		if (!cursorHasMoved)
 		{
-			//specific case: interaction with label(s)
-			updateActiveLabelsList(event->x(),event->y(),false);
-			if (!m_activeLabels.empty())
+			//specific case: interaction with item(s)
+			updateActiveItemsList(event->x(),event->y(),false);
+			if (!m_activeItems.empty())
 			{
-				cc2DLabel* label = m_activeLabels[0];
-				m_activeLabels.clear();
-				if (label->acceptClick(event->x(),height()-1-event->y(),Qt::RightButton))
+				ccInteractor* item = m_activeItems.front();
+				m_activeItems.clear();
+				if (item->acceptClick(event->x(),height()-1-event->y(),Qt::RightButton))
 				{
 					acceptEvent = true;
 					toBeRefreshed();
@@ -2038,11 +2051,11 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				int x = event->x();
 				int y = event->y();
 
-				//specific case: interaction with label(s)
-				//DGM TODO: to activate when labels will take left clicks into account!
-				/*if (!m_activeLabels.empty())
+				//specific case: interaction with item(s)
+				//DGM TODO: to activate if some items take left clicks into account!
+				/*if (!m_activeItems.empty())
 				{
-					for (std::vector<cc2DLabel*>::iterator it=m_activeLabels.begin(); it!=m_activeLabels.end(); ++it)
+					for (std::vector<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
 					if ((*it)->acceptClick(x,y,Qt::LeftButton))
 					{
 						event->accept();
@@ -2095,7 +2108,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 			}
 		}
 
-		m_activeLabels.clear();
+		m_activeItems.clear();
 	}
 
 	if (acceptEvent)
@@ -2142,8 +2155,10 @@ void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 	redraw();
 }
 
-int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY, int pickWidth, int pickHeight)
+int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY, int pickWidth, int pickHeight, int* subID/*=0*/)
 {
+	if (subID)
+		*subID = -1;
 	if (!m_globalDBRoot && !m_winDBRoot)
 		return -1;
 
@@ -2158,8 +2173,11 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	{
 	case ENTITY_PICKING:
 	case ENTITY_RECT_PICKING:
-	case LABELS_PICKING:
 		pickingFlags |= CC_DRAW_ENTITY_NAMES;
+		break;
+	case FAST_PICKING:
+		pickingFlags |= CC_DRAW_ENTITY_NAMES;
+		pickingFlags |= CC_DRAW_FAST_NAMES_ONLY;
 		break;
 	case POINT_PICKING:
 		pickingFlags |= CC_DRAW_POINT_NAMES;	//automatically push entity names as well!
@@ -2191,7 +2209,6 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	glGetIntegerv(GL_VIEWPORT,viewport);
 
 	//3D objects picking
-	if (pickingMode != LABELS_PICKING)
 	{
 		context.flags = CC_DRAW_3D | pickingFlags;
 
@@ -2216,7 +2233,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	}
 
 	//2D objects picking
-	if (pickingMode == ENTITY_PICKING || pickingMode == ENTITY_RECT_PICKING || pickingMode == LABELS_PICKING)
+	if (pickingMode == ENTITY_PICKING || pickingMode == ENTITY_RECT_PICKING || pickingMode == FAST_PICKING)
 	{
 		context.flags = CC_DRAW_2D | pickingFlags;
 
@@ -2257,7 +2274,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	}
 
 	//process hits
-	int selectedID=-1,subID=-1;
+	int selectedID=-1,subSelectedID=-1;
 	std::set<int> selectedIDs; //for ENTITY_RECT_PICKING mode only
 	{
 		GLuint minMinDepth = (~0);
@@ -2284,7 +2301,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 					if (selectedID < 0 || minDepth < minMinDepth)
 					{
 						selectedID = currentID;
-						subID = (n>1 ? _selectBuf[4] : -1);
+						subSelectedID = (n>1 ? _selectBuf[4] : -1);
 						minMinDepth = minDepth;
 					}
 				}
@@ -2293,6 +2310,9 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 			_selectBuf += (3+n);
 		}
 	}
+
+	if (subID)
+		*subID = subSelectedID;
 
 	//standard "entity" picking
 	if (pickingMode == ENTITY_PICKING)
@@ -2307,14 +2327,14 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	//"3D point" picking
 	else if (pickingMode == POINT_PICKING)
 	{
-		if (selectedID>=0 && subID>=0)
+		if (selectedID>=0 && subSelectedID>=0)
 		{
-			emit pointPicked(selectedID,(unsigned)subID,centerX,centerY);
+			emit pointPicked(selectedID,(unsigned)subSelectedID,centerX,centerY);
 		}
 	}
 	else if (pickingMode == AUTO_POINT_PICKING)
 	{
-		if (m_globalDBRoot && selectedID>=0 && subID>=0)
+		if (m_globalDBRoot && selectedID>=0 && subSelectedID>=0)
 		{
 			ccHObject* obj = m_globalDBRoot->find(selectedID);
 			if (obj)
@@ -2324,7 +2344,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 				if (obj->isKindOf(CC_POINT_CLOUD))
 				{
 					label = new cc2DLabel();
-					label->addPoint(static_cast<ccGenericPointCloud*>(obj),subID);
+					label->addPoint(static_cast<ccGenericPointCloud*>(obj),subSelectedID);
 					obj->addChild(label,true);
 				}
 				else if (obj->isKindOf(CC_MESH))
@@ -2333,7 +2353,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 					ccGenericMesh *mesh = static_cast<ccGenericMesh*>(obj);
 					ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
 					assert(cloud);
-					CCLib::TriangleSummitsIndexes *summitsIndexes = mesh->getTriangleIndexes(subID);
+					CCLib::TriangleSummitsIndexes *summitsIndexes = mesh->getTriangleIndexes(subSelectedID);
 					label->addPoint(cloud,summitsIndexes->i1);
 					label->addPoint(cloud,summitsIndexes->i2);
 					label->addPoint(cloud,summitsIndexes->i3);

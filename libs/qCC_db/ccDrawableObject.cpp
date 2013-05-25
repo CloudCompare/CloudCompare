@@ -258,7 +258,7 @@ void ccDrawableObject::getDrawingParameters(glDrawParams& params) const
 	if (isColorOverriden())
 	{
 		params.showColors=true;
-		params.showNorms=false;
+		params.showNorms=hasNormals() && normalsShown()/*false*/;
 		params.showSF=false;
 	}
 	else

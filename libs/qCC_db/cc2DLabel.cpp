@@ -76,10 +76,14 @@ void cc2DLabel::setPosition(float x, float y)
 	m_screenPos[1]=y;
 }
 
-void cc2DLabel::move(float dx, float dy)
+bool cc2DLabel::move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight)
 {
-	m_screenPos[0]+=dx;
-	m_screenPos[1]+=dy;
+	assert(screenHeight > 0 && screenWidth > 0);
+	
+	m_screenPos[0] += (float)dx/(float)screenWidth;
+	m_screenPos[1] += (float)dy/(float)screenHeight;
+
+	return true;
 }
 
 void cc2DLabel::clear()
@@ -398,7 +402,12 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 	//standard case: list names pushing
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
+	{
+		//not particularily fast
+		if (MACRO_DrawFastNamesOnly(context))
+			return;
 		glPushName(getUniqueID());
+	}
 
     const float c_sizeFactor = 4.0f;
     bool loop=false;
@@ -458,15 +467,14 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				}
 			
 				//build-up point maker own 'context'
-				bool pushName = MACRO_DrawEntityNames(context);
 				CC_DRAW_CONTEXT markerContext = context;
 				markerContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
 				markerContext._win = 0;
 
 				if (isSelected() && !pushName)
-					c_unitPointMarker->setColor(ccColor::red);
+					c_unitPointMarker->setTempColor(ccColor::red);
 				else
-					c_unitPointMarker->setColor(ccColor::magenta);
+					c_unitPointMarker->setTempColor(ccColor::magenta);
 
 				for (unsigned i=0; i<count; i++)
 				{

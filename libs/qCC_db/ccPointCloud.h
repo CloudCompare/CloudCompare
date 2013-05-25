@@ -38,7 +38,11 @@ class ccScalarField;
 ***************************************************/
 
 //! Max number of points per cloud (point cloud will be chunked above this limit)
+#if defined(_W64) || defined(__x86_64__) || defined(__ppc64__)
+const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = (~0);
+#else
 const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 128000000;
+#endif
 
 //! Max number of displayed point (per entity) in "low detail" display
 const unsigned MAX_LOD_POINTS_NUMBER = 10000000;

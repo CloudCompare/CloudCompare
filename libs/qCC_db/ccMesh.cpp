@@ -611,6 +611,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (pushName)
 		{
+			//not fast at all!
+			if (MACRO_DrawFastNamesOnly(context))
+				return;
 			glPushName(getUniqueID());
 			//minimal display for picking mode!
 			glParams.showNorms = false;

@@ -72,7 +72,7 @@ public:
 	inline Vector3Tpl orthogonal() const { Vector3Tpl ort; vorthogonal(u, ort.u); return ort; }
 
 	//! Inverse operator
-	inline Vector3Tpl& operator - () { x=-x; y=-y; z=-z; return *this; }
+	inline Vector3Tpl operator - () const { Vector3Tpl V(-x,-y,-z); return V; }
 	//! In-place addition operator
 	inline Vector3Tpl& operator += (const Vector3Tpl& v) { x+=v.x; y+=v.y; z+=v.z; return *this; }
 	//! In-place substraction operator

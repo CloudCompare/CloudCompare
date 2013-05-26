@@ -50,6 +50,7 @@ class ccHObject;
 class ccComparisonDlg;
 class ccGraphicalSegmentationTool;
 class ccGraphicalTransformationTool;
+class ccClippingBoxTool;
 class ccPluginInterface;
 class ccStdPluginInterface;
 class ccPointPropertiesDlg;
@@ -320,6 +321,10 @@ protected slots:
 
     void doEnableGLFilter();
 
+	//Clipping box
+	void activateClippingBoxMode();
+	void deactivateClippingBoxMode(bool);
+
     //Graphical transformation
     void activateTranslateRotateMode();
     void deactivateTranslateRotateMode(bool);
@@ -506,6 +511,8 @@ protected:
     ccGraphicalSegmentationTool* m_gsTool;
     //! Graphical transformation dialog
     ccGraphicalTransformationTool* m_transTool;
+	//! Clipping box dialog
+	ccClippingBoxTool* m_clipTool;
     //! Cloud comparison dialog
     ccComparisonDlg* m_compDlg;
     //! Point properties mode dialog

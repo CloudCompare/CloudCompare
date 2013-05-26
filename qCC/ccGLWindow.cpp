@@ -1298,6 +1298,16 @@ void ccGLWindow::recalcProjectionMatrix()
 		ccBBox box = m_globalDBRoot->getBB(true, true, this);
 		if (box.isValid())
 		{
+			//incorporate window own db
+			if (m_winDBRoot)
+			{
+				ccBBox ownBox = m_winDBRoot->getBB(true, true, this);
+				if (ownBox.isValid())
+				{
+					box.add(ownBox.minCorner());
+					box.add(ownBox.maxCorner());
+				}
+			}
 			//get bbox center
 			bbCenter = box.getCenter();
 			//get half bbox diagonal length
@@ -1677,7 +1687,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 	if (itemID<1)
 		return;
 
-	//labels can be in local or global DB
+	//items can be in local or global DB
 	ccHObject* pickedObj = m_globalDBRoot->find(itemID);
 	if (!pickedObj && m_winDBRoot)
 		pickedObj = m_winDBRoot->find(itemID);
@@ -1709,8 +1719,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
 						if (label->isSelected())
 						{
-							m_activeItems.resize(m_activeItems.size()+1);
-							m_activeItems.back() = label;
+							m_activeItems.push_back(label);
 						}
 					}
 			}
@@ -1868,7 +1877,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			CCVector3 u(static_cast<float>(dx)*pixSize, -static_cast<float>(dy)*pixSize, 0);
 			m_params.viewMat.transposed().applyRotation(u);
 
-			for (std::vector<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
+			for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
 			{
 				if ((*it)->move2D(x,y,dx,dy,width(),height()) || (*it)->move3D(u))
 				{
@@ -2055,7 +2064,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 				//DGM TODO: to activate if some items take left clicks into account!
 				/*if (!m_activeItems.empty())
 				{
-					for (std::vector<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
+					for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
 					if ((*it)->acceptClick(x,y,Qt::LeftButton))
 					{
 						event->accept();
@@ -2228,6 +2237,8 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 		//display 3D objects
 		if (m_globalDBRoot)
 			m_globalDBRoot->draw(context);
+		if (m_winDBRoot)
+			m_winDBRoot->draw(context);
 
 		ccGLUtils::CatchGLError("ccGLWindow::startPicking.draw(3D)");
 	}

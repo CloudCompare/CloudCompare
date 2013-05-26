@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1030</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -297,6 +297,7 @@
      <addaction name="actionLabelConnectedComponents"/>
      <addaction name="actionKMeans"/>
      <addaction name="actionFrontPropagation"/>
+     <addaction name="actionCrossSection"/>
     </widget>
     <widget class="QMenu" name="menuProjection">
      <property name="title">
@@ -564,6 +565,7 @@
    <addaction name="separator"/>
    <addaction name="actionSegment"/>
    <addaction name="actionTranslateRotate"/>
+   <addaction name="actionCrossSection"/>
   </widget>
   <widget class="QToolBar" name="toolBarSFTools">
    <property name="windowTitle">
@@ -2277,6 +2279,18 @@
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionCrossSection">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/primPlane.gif</normaloff>:/CC/images/primPlane.gif</iconset>
+   </property>
+   <property name="text">
+    <string>Cross Section</string>
+   </property>
+   <property name="statusTip">
+    <string>Cross Section</string>
    </property>
   </action>
  </widget>

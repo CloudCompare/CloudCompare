@@ -23,18 +23,23 @@
 #include "ccHObject.h"
 #include "ccInteractor.h"
 
+//Qt
+#include <QObject>
+
 //! Clipping box
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccClipBox : public ccHObject, public ccInteractor
+class QCC_DB_DLL_API ccClipBox : public QObject, public ccHObject, public ccInteractor
 #else
-class ccClipBox : public ccHObject, public ccInteractor
+class ccClipBox : public QObject, public ccHObject, public ccInteractor
 #endif
 {
+	Q_OBJECT
+
 public:
 
     //! Default constructor
-    ccClipBox(ccHObject* associatedEntity = 0, QString name = QString("clipping box"));
+    ccClipBox(ccHObject* associatedEntity = 0, QString name = QString("Clipping box"));
     
 	//! Destructor
     virtual ~ccClipBox();
@@ -85,10 +90,27 @@ public:
 	//! Returns current box
 	const ccBBox& getBox() const { return m_box; }
 
+	//! Sets current box
+	void setBox(const ccBBox& box);
+
+	//! Shifts current box
+	void shift(const CCVector3& v);
+
 	//! Updates associated entity 'visibility'
 	/** \param shrink Whether box is shrinking (faster) or not
 	**/
 	void update(bool shrink = false);
+
+	//! Resets box
+	void reset();
+
+	//! Associated entity
+	ccHObject* getAssociatedEntity() const { return m_associatedEntity; }
+
+signals:
+
+	//! Signal sent each time the box is modified
+	void boxModified(const ccBBox* box);
 
 protected:
 

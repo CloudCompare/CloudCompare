@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GRAPHICAL_TRANSFORMATION_TOOLS_HEADER
-#define CC_GRAPHICAL_TRANSFORMATION_TOOLS_HEADER
+#ifndef CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER
+#define CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER
 
 //Local
 #include <ccOverlayDialog.h>
@@ -25,9 +25,6 @@
 
 //qCC_db
 #include <ccGLMatrix.h>
-
-//system
-#include <vector>
 
 class ccGLWindow;
 class ccHObject;
@@ -57,7 +54,7 @@ public:
     **/
 	bool addEntity(ccHObject* anObject);
 
-    //! Returns
+    //! Returns the number of vald entities (see addEntity)
     unsigned getNumberOfValidEntities();
 
 protected slots:
@@ -86,18 +83,18 @@ protected:
     void updateAllGLTransformations();
 
     //! List of entities to be transformed
-    ccHObject*  m_toTransform;
+    ccHObject* m_toTransform;
 
     //! Current rotation
-    ccGLMatrix  m_rotation;
+    ccGLMatrix m_rotation;
 
     //! Current translation
-    CCVector3   m_translation;
+    CCVector3 m_translation;
 
     //! Rotation center
     /** The rotation center is actually the center of gravity of the selected 'entities'
     **/
-    CCVector3   m_rotationCenter;
+    CCVector3 m_rotationCenter;
 };
 
-#endif
+#endif //CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER

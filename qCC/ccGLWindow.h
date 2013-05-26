@@ -36,6 +36,7 @@
 
 //system
 #include <set>
+#include <list>
 
 //! OpenGL picking buffer size (= max hits number per 'OpenGL' selection pass)
 #define CC_PICKING_BUFFER_SIZE 65536
@@ -485,7 +486,7 @@ protected:
 	//! Currently active items
 	/** Active items can be moved with mouse, etc.
 	**/
-	std::vector<ccInteractor*> m_activeItems;
+	std::list<ccInteractor*> m_activeItems;
 
 	//! Inits FBO (frame buffer object)
     bool initFBO(int w, int h);

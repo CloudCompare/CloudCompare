@@ -173,36 +173,52 @@ ccClipBox::~ccClipBox()
 	setAssociatedEntity(0);
 }
 
-void ccClipBox::setAssociatedEntity(ccHObject* associatedEntity)
+void ccClipBox::reset()
 {
-	//release precedent one
-	if (m_associatedEntity)
-	{
-		if (m_associatedEntity->isKindOf(CC_POINT_CLOUD))
-			static_cast<ccGenericPointCloud*>(m_associatedEntity)->unallocateVisibilityArray();
-	}
-
 	m_box.clear();
 	razGLTransformation();
 
-	m_associatedEntity = associatedEntity;
 	if (m_associatedEntity)
 	{
-		m_box = associatedEntity->getBB();
-		if (m_associatedEntity->isKindOf(CC_POINT_CLOUD))
+		m_box = m_associatedEntity->getBB();
+	}
+
+	update();
+
+	//send 'modified' signal
+	emit boxModified(&m_box);
+}
+
+void ccClipBox::setAssociatedEntity(ccHObject* associatedEntity)
+{
+	//release precedent one
+	if (m_associatedEntity && m_associatedEntity->isKindOf(CC_POINT_CLOUD))
+	{
+		static_cast<ccGenericPointCloud*>(m_associatedEntity)->unallocateVisibilityArray();
+	}
+	m_associatedEntity = 0;
+
+	//try to initialize new one
+	if (associatedEntity)
+	{
+		if (!associatedEntity->isKindOf(CC_POINT_CLOUD))
 		{
-			if (!static_cast<ccGenericPointCloud*>(m_associatedEntity)->razVisibilityArray())
-			{
-				ccLog::Error("Not enough memory! Clipping box will be deactivated...");
-				m_box.clear();
-			}
+			ccLog::Error("Unhandled entity! Clipping box will be deactivated...");
 		}
 		else
 		{
-			ccLog::Error("Unhandled entity! Clipping box will be deactivated...");
-			m_box.clear();
+			if (static_cast<ccGenericPointCloud*>(associatedEntity)->razVisibilityArray())
+			{
+				m_associatedEntity = associatedEntity;
+			}
+			else
+			{
+				ccLog::Error("Not enough memory! Clipping box will be deactivated...");
+			}
 		}
 	}
+
+	reset();
 }
 
 void ccClipBox::setActiveComponent(int id)
@@ -369,6 +385,9 @@ bool ccClipBox::move3D(const CCVector3& uInput)
 			assert(false);
 			return false;
 		}
+		
+		//send 'modified' signal
+		emit boxModified(&m_box);
 	}
 	else if (m_activeComponent == SPHERE)
 	{
@@ -450,6 +469,27 @@ bool ccClipBox::move3D(const CCVector3& uInput)
 	update();
 
 	return true;
+}
+
+void ccClipBox::setBox(const ccBBox& box)
+{
+	m_box = box;
+
+	update();
+
+	//send 'modified' signal
+	emit boxModified(&m_box);
+}
+
+void ccClipBox::shift(const CCVector3& v)
+{
+	m_box.minCorner() += v;
+	m_box.maxCorner() += v;
+		
+	update();
+
+	//send 'modified' signal
+	emit boxModified(&m_box);
 }
 
 void ccClipBox::update(bool shrink/*=false*/)
@@ -581,9 +621,9 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 	
 
 		if (pushName)
-		{
 			glPopName();
-			glPopName();
-		}
 	}
+
+	if (pushName)
+		glPopName();
 }

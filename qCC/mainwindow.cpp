@@ -76,6 +76,7 @@
 #include "ccDisplayOptionsDlg.h"
 #include "ccGraphicalSegmentationTool.h"
 #include "ccGraphicalTransformationTool.h"
+#include "ccClippingBoxTool.h"
 #include "ccOrderChoiceDlg.h"
 #include "ccComparisonDlg.h"
 #include "ccTwoColorsDlg.h"
@@ -155,6 +156,7 @@ MainWindow::MainWindow()
     , m_cpeDlg(0)
     , m_gsTool(0)
     , m_transTool(0)
+	, m_clipTool(0)
     , m_compDlg(0)
     , m_ppDlg(0)
     , m_plpDlg(0)
@@ -271,6 +273,7 @@ MainWindow::~MainWindow()
     m_cpeDlg = 0;
     m_gsTool = 0;
     m_transTool = 0;
+	m_clipTool = 0;
     m_compDlg=0;
     m_ppDlg = 0;
     m_plpDlg = 0;
@@ -893,6 +896,7 @@ void MainWindow::connectActions()
     connect(actionLabelConnectedComponents,     SIGNAL(triggered()),    this,       SLOT(doActionLabelConnectedComponents()));
     connect(actionKMeans,                       SIGNAL(triggered()),    this,       SLOT(doActionKMeans()));
     connect(actionFrontPropagation,             SIGNAL(triggered()),    this,       SLOT(doActionFrontPropagation()));
+	connect(actionCrossSection,					SIGNAL(triggered()),	this,		SLOT(activateClippingBoxMode()));
     //"Tools > Other" menu
     connect(actionDensity,                      SIGNAL(triggered()),    this,       SLOT(doComputeDensity()));
     connect(actionCurvature,                    SIGNAL(triggered()),    this,       SLOT(doComputeCurvature()));
@@ -5100,6 +5104,52 @@ void MainWindow::deactivatePointsPropertiesMode(bool state)
     updateUI();
 }
 
+void MainWindow::activateClippingBoxMode()
+{
+    size_t selNum=m_selectedEntities.size();
+    if (selNum==0)
+        return;
+
+    ccGLWindow* win = getActiveGLWindow();
+    if (!win)
+        return;
+
+    if (!m_clipTool)
+        m_clipTool = new ccClippingBoxTool(this);
+	m_clipTool->linkWith(win);
+
+	ccHObject* entity = m_selectedEntities[0];
+	if (!m_clipTool->setAssociatedEntity(entity))
+    {
+        ccConsole::Error("Select a point cloud!");
+        return;
+    }
+
+    if (m_clipTool->start())
+	{
+		connect(m_clipTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateClippingBoxMode(bool)));
+		registerMDIDialog(m_clipTool,Qt::TopRightCorner);
+		freezeUI(true);
+        updateMDIDialogsPlacement();
+		//deactivate all other GL windows
+		disableAllBut(win);
+	}
+	else
+	{
+		ccConsole::Error("Unexpected error!"); //indeed...
+	}
+}
+
+void MainWindow::deactivateClippingBoxMode(bool state)
+{
+    //we reactivate all GL windows
+    enableAll();
+
+    freezeUI(false);
+
+    updateUI();
+}
+
 void MainWindow::activateTranslateRotateMode()
 {
     size_t i,selNum=m_selectedEntities.size();
@@ -7333,6 +7383,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);       //&& scalarField
 	
 	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount>0);
+	actionCrossSection->setEnabled(exactlyOneCloud);
 
 	actionPointListPicking->setEnabled(exactlyOneEntity);
 

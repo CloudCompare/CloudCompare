@@ -1,7 +1,10 @@
 *** CloudCompare versions history ***
 
 v2.4 ??/??/2013
-- 3D slicer
+- New tool: "Cross section"
+	* accessible via 'Tools > Segmentation > Cross Section' or a dedicated icon in the main
+		toolbar (next to the scissors icon)
+	* works only with clouds for the moment
 - "Primitive factory" menu entry moved to the File menu
 	(so as to be accessible even if no entity is selected!)
 - 128 million points per cloud limit removed on the 64 bits version

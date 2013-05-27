@@ -342,9 +342,15 @@ QStringList cc2DLabel::getLabelContent(int precision)
 
 			//angle
 			CCVector3 P2P3 = *P3-*P2;
+
+            //negatives
+            CCVector3 _P1P2 = -P1P2;
+            CCVector3 _P1P3 = -P1P3;
+            CCVector3 _P2P3 = -P2P3;
+
 			double angleAtP1 = GetAngle_deg(P1P2,P1P3);
-			double angleAtP2 = GetAngle_deg(P2P3,-P1P2);
-			double angleAtP3 = GetAngle_deg(-P1P3,-P2P3); //should be equal to 180-a1-a2!
+            double angleAtP2 = GetAngle_deg(P2P3,_P1P2);
+            double angleAtP3 = GetAngle_deg(_P1P3,_P2P3); //should be equal to 180-a1-a2!
 			QString angleStr = QString("Angles: A=%1 - B=%3 - C=%5 deg.").arg(angleAtP1,0,'f',precision).arg(angleAtP2,0,'f',precision).arg(angleAtP3,0,'f',precision);
 			body << angleStr;
 		}

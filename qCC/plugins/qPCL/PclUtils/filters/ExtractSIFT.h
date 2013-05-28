@@ -36,7 +36,7 @@ protected:
 
 	//inherited from BaseFilter
 	virtual int checkSelected();
-	virtual int openDialog();
+    virtual int openInputDialog();
 	virtual void getParametersFromDialog();
 	virtual int checkParameters();
 	virtual QString getErrorMessage(int errorCode);

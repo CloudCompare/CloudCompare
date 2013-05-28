@@ -28,8 +28,7 @@ StatisticalOutliersRemover::StatisticalOutliersRemover()
     : BaseFilter(FilterDescription("Statistical Outliers Remover",
                                    "Remove Outliers Using statistical Approach",
                                    "Remove Outliers out of a given distance from the point, expressed as sigma of mean distances",
-                                   ":/toolbar/PclUtils/icons/sor_outlier_remover.png",
-                                   true)),
+                                   ":/toolbar/PclUtils/icons/sor_outlier_remover.png")),
       m_dialog(0)
 {
 }
@@ -68,7 +67,7 @@ int StatisticalOutliersRemover::compute()
 }
 
 
-int StatisticalOutliersRemover::openDialog()
+int StatisticalOutliersRemover::openInputDialog()
 {
     if (!m_dialog)
     {

@@ -43,7 +43,7 @@ protected:
 
 	//inherited from BaseFilter
     int checkSelected();
-    int openDialog();
+    int openInputDialog();
     int compute();
     QString getErrorMessage(int errorCode);
 

@@ -47,8 +47,7 @@ ExtractSIFT::ExtractSIFT()
 	: BaseFilter(FilterDescription(	"Extract SIFT",
 									"Extract SIFT Keypoints",
 									"Extract SIFT keypoints for clouds with intensity/RGB or any scalar field",
-									":/toolbar/PclUtils/icons/sift.png",
-									true))
+                                    ":/toolbar/PclUtils/icons/sift.png"))
 	, m_dialog(0)
 {
 }
@@ -78,7 +77,7 @@ int ExtractSIFT::checkSelected()
 	return -51;
 }
 
-int ExtractSIFT::openDialog()
+int ExtractSIFT::openInputDialog()
 {
 	//do we have scalar fields?
 	std::vector<std::string> fields = getSelectedAvailableScalarFields();

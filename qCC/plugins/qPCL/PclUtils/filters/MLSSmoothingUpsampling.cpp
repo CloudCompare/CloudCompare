@@ -27,7 +27,10 @@
 #include <ccMainAppInterface.h>
 
 MLSSmoothingUpsampling::MLSSmoothingUpsampling()
-	: BaseFilter(FilterDescription("MLS smoothing", "Smooth using MLS, optionally upsample", "Smooth the cloud using Moving Least Sqares algorithm, estimate normals and optionally upsample", ":/toolbar/PclUtils/icons/mls_smoothing.png", true))
+    : BaseFilter(FilterDescription("MLS smoothing",
+                                   "Smooth using MLS, optionally upsample",
+                                   "Smooth the cloud using Moving Least Sqares algorithm, estimate normals and optionally upsample",
+                                   ":/toolbar/PclUtils/icons/mls_smoothing.png"))
 	, m_dialog(0)
 {
 	m_parameters = new MLSParameters;
@@ -117,7 +120,7 @@ int MLSSmoothingUpsampling::compute()
 	return 1;
 }
 
-int MLSSmoothingUpsampling::openDialog()
+int MLSSmoothingUpsampling::openInputDialog()
 {
 	if (!m_dialog)
 		m_dialog = new MLSDialog();

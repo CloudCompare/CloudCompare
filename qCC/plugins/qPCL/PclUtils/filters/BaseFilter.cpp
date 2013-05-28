@@ -38,8 +38,6 @@
 #include <unistd.h>
 #endif
 
-#include <unistd.h>
-
 BaseFilter::BaseFilter(FilterDescription desc)
 	: m_action(0)
 	, m_desc(desc)

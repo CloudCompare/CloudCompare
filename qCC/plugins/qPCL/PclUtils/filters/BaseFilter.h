@@ -39,22 +39,20 @@ public:
 	QString m_entry_name;
 	QString m_status_tip;
 	QIcon m_icon;
-	bool m_has_dialog;
+
 
 	FilterDescription()
 		: m_filter_name("PCLFilter")
 		, m_entry_name("filter")
 		, m_status_tip("Compute something with PCL")
 		, m_icon(QIcon(QString::fromUtf8(":/toolbar/PclUtils/icons/pcl.png")) )
-		, m_has_dialog(false)
 	{}
 
-	FilterDescription(QString filterName, QString entryName, QString statusTip, QString icon, bool hasDialog)
+    FilterDescription(QString filterName, QString entryName, QString statusTip, QString icon)
 		: m_filter_name(filterName)
 		, m_entry_name(entryName)
 		, m_status_tip(statusTip)
 		, m_icon(QIcon(icon))
-		, m_has_dialog(hasDialog)
 	{}
 
 
@@ -93,8 +91,6 @@ public:
 	**/
 	QString getStatusTip() const;
 
-	//! Returns whether the filter has a dialog
-	bool hasDialog() const;
 
 	//! Returns the name of the filter
 	QString getFilterName() const;
@@ -184,13 +180,21 @@ protected:
 	**/
 	virtual int checkSelected();
 
-	//! Opens the dialog window
+    //! Opens the input dialog window. Where the user can supply parameters for the computation
 	/** Automatically called by performAction.
 		Does nothing by default. Must be overridden if a dialog
 		must be displayed.
 		\return 1 if dialog has been successfully executed, 0 if canceled, negative error code otherwise
 	**/
-	virtual int openDialog() { return 1; }
+    virtual int openInputDialog() { return 1; }
+
+    //! Opens the output dialog window. To be used when the computations have output to be shown in a dedicated dialog (as plots, histograms, etc)
+    /** Automatically called by performAction.
+        Does nothing by default. Must be overridden if a output dialog
+        must be displayed.
+        \return 1 if dialog has been successfully executed, 0 if canceled, negative error code otherwise
+    **/
+    virtual int openOutputDialog() { return 1; }
 
 	//! Collects parameters from the filter dialog (if openDialog is successful)
 	/** Automatically called by performAction.

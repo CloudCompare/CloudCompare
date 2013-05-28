@@ -35,7 +35,7 @@ public:
 protected:
 
         //inherited from BaseFilter
-    virtual int openDialog();
+    virtual int openInputDialog();
 	virtual void getParametersFromDialog();
 
 

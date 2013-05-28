@@ -38,6 +38,8 @@
 #include <unistd.h>
 #endif
 
+#include <unistd.h>
+
 BaseFilter::BaseFilter(FilterDescription desc)
 	: m_action(0)
 	, m_desc(desc)
@@ -86,7 +88,7 @@ int BaseFilter::performAction()
     }
 
     //if dialog is needed open the dialog
-	int dialog_result = openDialog();
+    int dialog_result = openInputDialog();
 	if (dialog_result < 1)
 	{
 		if (dialog_result<0)
@@ -114,6 +116,18 @@ int BaseFilter::performAction()
         throwError(start_status);
         return start_status;
     }
+
+    //if we have an output dialog is time to show it
+    int out_dialog_result = openOutputDialog();
+    if (out_dialog_result < 1)
+    {
+        if (out_dialog_result<0)
+        throwError(out_dialog_result);
+        else
+            out_dialog_result = 1; //the operation is canceled by the user, no need to throw an error!
+        return out_dialog_result; //maybe some filter could ask the user if he wants to ac
+    }
+
 
 	return 1;
 }
@@ -196,11 +210,6 @@ int BaseFilter::start()
     }
 
 	return 1;
-}
-
-bool BaseFilter::hasDialog() const
-{
-	return m_desc.m_has_dialog;
 }
 
 QString BaseFilter::getFilterName() const

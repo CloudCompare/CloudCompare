@@ -27,13 +27,16 @@
 #include <QThread>
 
 testfilter::testfilter()
-: BaseFilter(FilterDescription("Test Filter", "Test Filter", "TEST!", ":/toolbar/PclUtils/icons/pcl.png", false) )
+: BaseFilter(FilterDescription("Test Filter",
+                               "Test Filter",
+                               "TEST!",
+                               ":/toolbar/PclUtils/icons/pcl.png") )
 , m_app()
 {
 	m_thread_pool = QThreadPool::globalInstance();
 }
 
-int testfilter::openDialog()
+int testfilter::openInputDialog()
 {
 	return 1;
 }

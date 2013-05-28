@@ -33,7 +33,10 @@
 
 
 NormalEstimation::NormalEstimation()
-	: BaseFilter(FilterDescription("Estimate Normals", "Estimate Normals and Curvature", "Estimate Normals and Curvature for the selected entity", ":/toolbar/PclUtils/icons/normal_curvature.png", true))
+    : BaseFilter(FilterDescription("Estimate Normals",
+                                   "Estimate Normals and Curvature",
+                                   "Estimate Normals and Curvature for the selected entity",
+                                   ":/toolbar/PclUtils/icons/normal_curvature.png"))
 	, m_dialog(0)
 	, m_radius(0)
 	, m_knn_radius(10)
@@ -49,7 +52,7 @@ NormalEstimation::~NormalEstimation()
 		delete m_dialog;
 }
 
-int NormalEstimation::openDialog()
+int NormalEstimation::openInputDialog()
 {
 	if (!m_dialog)
 	{
@@ -95,10 +98,14 @@ int NormalEstimation::compute()
      if (cloud->hasNormals())
          cloud->unallocateNorms();
 
+        if (cloud->hasNormals())
+            cloud->unallocateNorms();
+
     //get xyz in sensor_msgs format
     cc2smReader converter;
     converter.setInputCloud(cloud);
     sensor_msgs::PointCloud2 sm_cloud = converter.getXYZ();
+
 
     //get as pcl point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);

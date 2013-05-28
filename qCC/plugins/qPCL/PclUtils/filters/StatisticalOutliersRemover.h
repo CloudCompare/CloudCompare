@@ -30,7 +30,7 @@ public:
 
 protected:
     int compute();
-    int openDialog();
+    int openInputDialog();
     void getParametersFromDialog();
     ComputeSPINImages * m_dialog;
     int m_k;

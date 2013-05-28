@@ -32,7 +32,7 @@ public:
 protected:
 
 	//inherited from BaseFilter
-    virtual int openDialog();
+    virtual int openInputDialog();
 
 	QString m_filename;
 };

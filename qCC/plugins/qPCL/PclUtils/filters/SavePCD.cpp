@@ -43,11 +43,14 @@
 
 
 SavePCD::SavePCD()
-	: BaseFilter(FilterDescription("SavePCD", "Save as PCD FIle", "Save selected entitiy as PCD File", ":/toolbar/PclUtils/icons/save.png", true) )
+    : BaseFilter(FilterDescription("SavePCD",
+                                   "Save as PCD FIle",
+                                   "Save selected entitiy as PCD File",
+                                   ":/toolbar/PclUtils/icons/save.png") )
 {
 }
 
-int SavePCD::openDialog()
+int SavePCD::openInputDialog()
 {
     //persistent settings
     QSettings settings;

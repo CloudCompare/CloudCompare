@@ -89,7 +89,7 @@ public:
 protected:
 
 	//inherited from BaseFilter
-    virtual int openDialog();
+    virtual int openInputDialog();
 
     Test* m_app;
     QThreadPool* m_thread_pool;

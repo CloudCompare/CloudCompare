@@ -70,30 +70,45 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 			QString path = fi.path();
 
 			unsigned count = entity->getChildrenNumber();
-			unsigned counter = 0;
-			for (unsigned i=0; i<count; ++i)
+			//we count the number of clouds first
+			unsigned cloudCount = 0;
 			{
-				ccHObject* child = entity->getChild(i);
-				if (child->isKindOf(CC_POINT_CLOUD))
+				for (unsigned i=0; i<count; ++i)
 				{
-					QString subFilename = path+QString("/");
-					subFilename += QString(baseName).replace("cloudname",child->getName(),Qt::CaseInsensitive);
-					subFilename += QString("_%1").arg(counter++,6,10,QChar('0'));
-					if (!extension.isEmpty())
-						subFilename += QString(".")+extension;
-					CC_FILE_ERROR result = saveToFile(entity->getChild(i),qPrintable(subFilename));
-					if (result != CC_FERR_NO_ERROR)
+					ccHObject* child = entity->getChild(i);
+					if (child->isKindOf(CC_POINT_CLOUD))
+						++cloudCount;
+				}
+			}
+			//we can now create the corresponding file(s)
+			{
+				unsigned counter = 0;
+				for (unsigned i=0; i<count; ++i)
+				{
+					ccHObject* child = entity->getChild(i);
+					if (child->isKindOf(CC_POINT_CLOUD))
 					{
-						if (releaseDialog)
-							s_saveDialog.clear();
-						return result;
+						QString subFilename = path+QString("/");
+						subFilename += QString(baseName).replace("cloudname",child->getName(),Qt::CaseInsensitive);
+						counter++;
+						assert(counter<=cloudCount);
+						subFilename += QString("_%1").arg(cloudCount-counter,6,10,QChar('0'));
+						if (!extension.isEmpty())
+							subFilename += QString(".")+extension;
+						CC_FILE_ERROR result = saveToFile(entity->getChild(i),qPrintable(subFilename));
+						if (result != CC_FERR_NO_ERROR)
+						{
+							if (releaseDialog)
+								s_saveDialog.clear();
+							return result;
+						}
+						else
+							ccLog::Print(QString("[AsciiFilter::saveToFile] Cloud '%1' saved in: %2").arg(child->getName()).arg(subFilename));
 					}
 					else
-						ccLog::Print(QString("[AsciiFilter::saveToFile] Cloud '%1' saved in: %2").arg(child->getName()).arg(subFilename));
-				}
-				else
-				{
-					ccLog::Warning(QString("[AsciiFilter::saveToFile] Entity '%1' can't be saved this way!").arg(child->getName()));
+					{
+						ccLog::Warning(QString("[AsciiFilter::saveToFile] Entity '%1' can't be saved this way!").arg(child->getName()));
+					}
 				}
 			}
 			

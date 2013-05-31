@@ -40,9 +40,14 @@ AsciiSaveDlg::~AsciiSaveDlg()
 {
 }
 
-bool AsciiSaveDlg::saveHeader() const
+bool AsciiSaveDlg::saveColumnsNamesHeader() const
 {
-	return headerCheckBox->isChecked();
+	return columnsHeaderCheckBox->isChecked();
+}
+
+bool AsciiSaveDlg::savePointCountHeader() const
+{
+	return pointCountHeaderCheckBox->isChecked();
 }
 
 uchar AsciiSaveDlg::getSeparator() const
@@ -85,14 +90,16 @@ void AsciiSaveDlg::initFromPersistentSettings()
     settings.beginGroup("AsciiSaveDialog");
 
 	//read parameters
-	bool saveHeader			= settings.value("saveHeader", headerCheckBox->isChecked()).toBool();
+	bool saveColHeader		= settings.value("saveHeader", columnsHeaderCheckBox->isChecked()).toBool();
+	bool savePtsHeader		= settings.value("savePtsHeader", pointCountHeaderCheckBox->isChecked()).toBool();
     int coordsPrecision		= settings.value("coordsPrecision", coordsPrecisionSpinBox->value()).toInt();
     int sfPrecision			= settings.value("sfPrecision", sfPrecisionSpinBox->value()).toInt();
     int separatorIndex		= settings.value("separator", separatorComboBox->currentIndex()).toInt();
     int orderIndex			= settings.value("saveOrder", orderComboBox->currentIndex()).toInt();
 
 	//apply parameters
-	headerCheckBox->setChecked(saveHeader);
+	columnsHeaderCheckBox->setChecked(saveColHeader);
+	pointCountHeaderCheckBox->setChecked(savePtsHeader);
 	coordsPrecisionSpinBox->setValue(coordsPrecision);
 	sfPrecisionSpinBox->setValue(sfPrecision);
 	separatorComboBox->setCurrentIndex(separatorIndex);
@@ -107,7 +114,8 @@ void AsciiSaveDlg::acceptAndSaveSettings()
     settings.beginGroup("AsciiSaveDialog");
 
 	//write parameters
-	settings.setValue("saveHeader", headerCheckBox->isChecked());
+	settings.setValue("saveHeader", columnsHeaderCheckBox->isChecked());
+	settings.setValue("savePtsHeader", pointCountHeaderCheckBox->isChecked());
     settings.setValue("coordsPrecision", coordsPrecisionSpinBox->value());
     settings.setValue("sfPrecision", sfPrecisionSpinBox->value());
     settings.setValue("separator", separatorComboBox->currentIndex());

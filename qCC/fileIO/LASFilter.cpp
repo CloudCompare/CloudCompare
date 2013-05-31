@@ -20,8 +20,9 @@
 #include "LASFilter.h"
 
 //qCC
-#include <ccCommon.h>
+#include "../ccCommon.h"
 #include "../ccCoordinatesShiftManager.h"
+#include "LASOpenDlg.h"
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -34,7 +35,7 @@
 #include <liblas/factory.hpp>	// liblas::ReaderFactory
 
 //Qt
-#include<QFileInfo>
+#include <QFileInfo>
 
 //System
 #include <string.h>
@@ -253,6 +254,21 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_ERROR;
 }
 
+//LAS field descriptor
+struct LasField
+{
+	LAS_FIELDS type;
+	ccScalarField* sf;
+	QString sfName;
+	double firstValue;
+	double minValue;
+	double maxValue;
+	double defaultValue;
+
+	LasField() : type(LAS_INVALID), sf(0), firstValue(0.0), defaultValue(0.0), minValue(0.0), maxValue(-1.0) {}
+	LasField(LAS_FIELDS fieldType, QString name, double defaultVal, double min, double max) : type(fieldType), sf(0), sfName(name), firstValue(0.0), defaultValue(defaultVal), minValue(min), maxValue(max) {}
+};
+
 CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
 	//opening file
@@ -272,9 +288,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 		//handling of compressed/uncompressed files
 		liblas::Header const& header = reader->GetHeader();
 
-#ifdef _DEBUG
-		//ccConsole::Print("[LAS FILE] %s - signature: %s",filename,header.GetFileSignature().c_str());
-#endif
+		ccLog::PrintDebug(QString("[LAS FILE] %1 - signature: %2").arg(filename).arg(header.GetFileSignature().c_str()));
 
 		//get fields present in file
 		dimensions = header.GetSchema().GetDimensionNames();
@@ -297,35 +311,25 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 		return CC_FERR_NO_LOAD;
 	}
 
-	liblas::Color rgbColorMask; //(0,0,0) on construction
-	bool hasClassif = false;
-	bool hasIntensity = false;
-	bool hasTime = false;
-	bool hasReturnNumber = false;
-	for (unsigned k=0;k<dimensions.size();++k)
+	//dialog to choose the fields to load
+	LASOpenDlg dlg;
+	dlg.setDimensions(dimensions);
+	if (alwaysDisplayLoadDialog && !dlg.exec())
 	{
-		QString dim = QString(dimensions[k].c_str()).toUpper();
-		bool handled = true;
-		if (dim == "RED")
-			rgbColorMask.SetRed(~0);
-		else if (dim == "BLUE")
-			rgbColorMask.SetBlue(~0);
-		else if (dim == "GREEN")
-			rgbColorMask.SetGreen(~0);
-		else if (dim == "CLASSIFICATION")
-			hasClassif = true;
-		else if (dim == "TIME")
-			hasTime = true;
-		else if (dim == "INTENSITY")
-			hasIntensity = true;
-		else if (dim == "RETURN NUMBER")
-			hasReturnNumber = true;
-		else if (dim != "X" && dim != "Y" && dim != "Z")
-			handled = false;
-
-		ccConsole::Print(QString("[LAS FILE] Found dimension '%1' (%2)").arg(dimensions[k].c_str()).arg(handled ? "handled" : "not handled"));
+		delete reader;
+		ifs.close();
+		return CC_FERR_CANCELED_BY_USER;
 	}
-	bool hasColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
+
+	//RGB color
+	liblas::Color rgbColorMask; //(0,0,0) on construction
+	if (dlg.doLoad(LAS_RED))
+		rgbColorMask.SetRed(~0);
+	if (dlg.doLoad(LAS_GREEN))
+		rgbColorMask.SetGreen(~0);
+	if (dlg.doLoad(LAS_BLUE))
+		rgbColorMask.SetBlue(~0);
+	bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
 
 	//progress dialog
 	ccProgressDialog pdlg(true); //cancel available
@@ -343,18 +347,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 	colorType rgb[3] = {0,0,0};
 
 	ccPointCloud* loadedCloud = 0;
-
-	ccScalarField* classifSF = 0;
-	uint8_t firstClassifValue = 0;
-
-	ccScalarField* timeSF = 0;
-	double firstTime = 0.0;
-
-	ccScalarField* intensitySF = 0;
-	uint16_t firstIntensity = 0;
-
-	ccScalarField* returnNumberSF = 0;
-	uint16_t firstReturnNumber = 0;
+	std::vector<LasField> fieldsToLoad;
 
 	//if the file is too big, we will chunck it in multiple parts
 	unsigned int fileChunkPos = 0;
@@ -373,87 +366,45 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 				{
 					bool thisChunkHasColors = loadedCloud->hasColors();
 					loadedCloud->showColors(thisChunkHasColors);
-					if (hasColor && !thisChunkHasColors)
+					if (loadColor && !thisChunkHasColors)
 						ccLog::Warning("[LAS FILE] Color field was all black! We ignored it...");
 
-					if (hasClassif)
+					while (!fieldsToLoad.empty())
 					{
-						if (classifSF)
+						LasField& field = fieldsToLoad.back();
+						if (field.sf)
 						{
-							classifSF->computeMinAndMax();
-							int cMin = (int)classifSF->getMin();
-							int cMax = (int)classifSF->getMax();
-							classifSF->setColorRampSteps(cMax-cMin);
-							//classifSF->setMinSaturation(cMin);
-							int sfIndex = loadedCloud->addScalarField(classifSF);
-							if (!loadedCloud->hasDisplayedScalarField())
-							{
-								loadedCloud->setCurrentDisplayedScalarField(sfIndex);
-								loadedCloud->showSF(!thisChunkHasColors);
-							}
-						}
-						else
-						{
-							ccLog::Warning(QString("[LAS FILE] All classification values were the same (%1)! We ignored them...").arg(firstClassifValue));
-						}
-					}
+							field.sf->computeMinAndMax();
 
-					if (hasIntensity)
-					{
-						if (intensitySF)
-						{
-							intensitySF->computeMinAndMax();
-							intensitySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
-							int sfIndex = loadedCloud->addScalarField(intensitySF);
-							if (!loadedCloud->hasDisplayedScalarField())
+							if (field.type == LAS_CLASSIFICATION
+								|| field.type == LAS_RETURN_NUMBER
+								|| field.type == LAS_NUMBER_OF_RETURNS)
 							{
-								loadedCloud->setCurrentDisplayedScalarField(sfIndex);
-								loadedCloud->showSF(!thisChunkHasColors);
+								int cMin = (int)field.sf->getMin();
+								int cMax = (int)field.sf->getMax();
+								field.sf->setColorRampSteps(std::min<int>(cMax-cMin+1,256));
+								//classifSF->setMinSaturation(cMin);
 							}
-						}
-						else
-						{
-							ccLog::Warning(QString("[LAS FILE] All intensities were the same (%1)! We ignored them...").arg(firstIntensity));
-						}
-					}
+							else if (field.type == LAS_INTENSITY)
+							{
+								field.sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::GREY));
+							}
 
-					if (hasTime)
-					{
-						if (timeSF)
-						{
-							timeSF->computeMinAndMax();
-							int sfIndex = loadedCloud->addScalarField(timeSF);
+							int sfIndex = loadedCloud->addScalarField(field.sf);
 							if (!loadedCloud->hasDisplayedScalarField())
 							{
 								loadedCloud->setCurrentDisplayedScalarField(sfIndex);
 								loadedCloud->showSF(!thisChunkHasColors);
 							}
+							field.sf->release();
+							field.sf=0;
 						}
 						else
 						{
-							ccLog::Warning(QString("[LAS FILE] All timestamps were the same (%1)! We ignored them...").arg(firstTime));
+							ccLog::Warning(QString("[LAS FILE] All '%1' values were the same (%2)! We ignored them...").arg(LAS_FIELD_NAMES[field.type]).arg(field.firstValue));
 						}
-					}
 
-					if (hasReturnNumber)
-					{
-						if (returnNumberSF)
-						{
-							returnNumberSF->computeMinAndMax();
-							int rMin = (int)returnNumberSF->getMin();
-							int rMax = (int)returnNumberSF->getMax();
-							returnNumberSF->setColorRampSteps(rMax-rMin);
-							int sfIndex = loadedCloud->addScalarField(returnNumberSF);
-							if (!loadedCloud->hasDisplayedScalarField())
-							{
-								loadedCloud->setCurrentDisplayedScalarField(sfIndex);
-								loadedCloud->showSF(!thisChunkHasColors);
-							}
-						}
-						else
-						{
-							ccLog::Warning(QString("[LAS FILE] All return numbers were the same (%1)! We ignored them...").arg(firstReturnNumber));
-						}
+						fieldsToLoad.pop_back();
 					}
 
 					//if we have reserved too much memory
@@ -479,19 +430,6 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 					delete loadedCloud;
 					loadedCloud=0;
 				}
-
-				if (classifSF)
-					classifSF->release();
-				classifSF=0;
-				if (intensitySF)
-					intensitySF->release();
-				intensitySF=0;
-				if (returnNumberSF)
-					returnNumberSF->release();
-				returnNumberSF=0;
-				if (timeSF)
-					timeSF->release();
-				timeSF=0;
 			}
 
 			if (!newPointAvailable)
@@ -512,29 +450,34 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 			loadedCloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
 
 			//DGM: from now on, we only enable scalar fields when we detect a valid value!
-			if (hasClassif)
-			{
-				assert(!classifSF);
-				firstClassifValue = 0;
-			}
-
-			if (hasTime)
-			{
-				assert(!timeSF);
-				firstTime = 0.0;
-			}
-
-			if (hasIntensity)
-			{
-				assert(!intensitySF);
-				firstIntensity=0;
-			}
-
-			if (hasReturnNumber)
-			{
-				assert(!returnNumberSF);
-				firstReturnNumber = 0;
-			}
+			if (dlg.doLoad(LAS_CLASSIFICATION))
+					fieldsToLoad.push_back(LasField(LAS_CLASSIFICATION,CC_LAS_CLASSIFICATION_FIELD_NAME,0,0,255)); //unsigned char: between 0 and 255
+			if (dlg.doLoad(LAS_CLASSIF_VALUE))
+				fieldsToLoad.push_back(LasField(LAS_CLASSIF_VALUE,LAS_FIELD_NAMES[LAS_CLASSIF_VALUE],0,0,31)); //5 bits: between 0 and 31
+			if (dlg.doLoad(LAS_CLASSIF_SYNTHETIC))
+				fieldsToLoad.push_back(LasField(LAS_CLASSIF_SYNTHETIC,LAS_FIELD_NAMES[LAS_CLASSIF_SYNTHETIC],0,0,1)); //1 bit: 0 or 1
+			if (dlg.doLoad(LAS_CLASSIF_KEYPOINT))
+				fieldsToLoad.push_back(LasField(LAS_CLASSIF_KEYPOINT,LAS_FIELD_NAMES[LAS_CLASSIF_KEYPOINT],0,0,1)); //1 bit: 0 or 1
+			if (dlg.doLoad(LAS_CLASSIF_WITHHELD))
+				fieldsToLoad.push_back(LasField(LAS_CLASSIF_WITHHELD,LAS_FIELD_NAMES[LAS_CLASSIF_WITHHELD],0,0,1)); //1 bit: 0 or 1
+			if (dlg.doLoad(LAS_INTENSITY))
+				fieldsToLoad.push_back(LasField(LAS_INTENSITY,CC_SCAN_INTENSITY_FIELD_NAME,0,0,65535)); //16 bits: between 0 and 65536
+			if (dlg.doLoad(LAS_TIME))
+				fieldsToLoad.push_back(LasField(LAS_TIME,CC_SCAN_TIME_FIELD_NAME,0,0,-1.0)); //8 bytes (double)
+			if (dlg.doLoad(LAS_RETURN_NUMBER))
+				fieldsToLoad.push_back(LasField(LAS_RETURN_NUMBER,CC_SCAN_RETURN_INDEX_FIELD_NAME,1,1,7)); //3 bits: between 1 and 7
+			if (dlg.doLoad(LAS_NUMBER_OF_RETURNS))
+				fieldsToLoad.push_back(LasField(LAS_NUMBER_OF_RETURNS,LAS_FIELD_NAMES[LAS_NUMBER_OF_RETURNS],1,1,7)); //3 bits: between 1 and 7
+			if (dlg.doLoad(LAS_SCAN_DIRECTION))
+				fieldsToLoad.push_back(LasField(LAS_SCAN_DIRECTION,LAS_FIELD_NAMES[LAS_SCAN_DIRECTION],0,0,1)); //1 bit: 0 or 1
+			if (dlg.doLoad(LAS_FLIGHT_LINE_EDGE))
+				fieldsToLoad.push_back(LasField(LAS_FLIGHT_LINE_EDGE,LAS_FIELD_NAMES[LAS_FLIGHT_LINE_EDGE],0,0,1)); //1 bit: 0 or 1
+			if (dlg.doLoad(LAS_SCAN_ANGLE_RANK))
+				fieldsToLoad.push_back(LasField(LAS_SCAN_ANGLE_RANK,LAS_FIELD_NAMES[LAS_SCAN_ANGLE_RANK],0,-90,90)); //signed char: between -90 and +90
+			if (dlg.doLoad(LAS_USER_DATA))
+				fieldsToLoad.push_back(LasField(LAS_USER_DATA,LAS_FIELD_NAMES[LAS_USER_DATA],0,0,255)); //unsigned char: between 0 and 255
+			if (dlg.doLoad(LAS_POINT_SOURCE_ID))
+				fieldsToLoad.push_back(LasField(LAS_POINT_SOURCE_ID,LAS_FIELD_NAMES[LAS_POINT_SOURCE_ID],0,0,65535)); //16 bits: between 0 and 65536
 		}
 
 		assert(newPointAvailable);
@@ -543,7 +486,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 		//first point: check for 'big' coordinates
 		if (pointsRead==0)
 		{
-			double P[3]={p.GetX(),p.GetY(),p.GetZ()};
+			double P[3] = {p.GetX(),p.GetY(),p.GetZ()};
 			bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 			if (shiftAlreadyEnabled)
 				memcpy(Pshift,coordinatesShift,sizeof(double)*3);
@@ -568,7 +511,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 		loadedCloud->addPoint(P);
 
 		//color field
-		if (hasColor)
+		if (loadColor)
 		{
 			//Warning: LAS colors are stored on 16 bits!
 			liblas::Color col = p.GetColor();
@@ -592,7 +535,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 					else
 					{
 						ccConsole::Warning("[LAS FILE] Not enough memory: color field will be ignored!");
-						hasColor = false; //no need to retry with the other chunks anyway
+						loadColor = false; //no need to retry with the other chunks anyway
 						pushColor = false;
 					}
 				}
@@ -628,154 +571,102 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 				loadedCloud->addRGBColor(rgb);
 			}
 		}
-
-		if (hasClassif)
+		
+		//additional fields
+		for (std::vector<LasField>::iterator it = fieldsToLoad.begin(); it != fieldsToLoad.end(); ++it)
 		{
-			uint8_t intValue = p.GetClassification().GetClass();
-			if (classifSF)
+			double value = 0.0;
+			switch (it->type)
 			{
-				classifSF->addElement(intValue);
+			case LAS_X:
+			case LAS_Y:
+			case LAS_Z:
+				assert(false);
+				break;
+			case LAS_INTENSITY:
+				value = (double)p.GetIntensity();
+				break;
+			case LAS_RETURN_NUMBER:
+				value = (double)p.GetReturnNumber();
+				break;
+			case LAS_NUMBER_OF_RETURNS:
+				value = (double)p.GetNumberOfReturns();
+				break;
+			case LAS_SCAN_DIRECTION:
+				value = (double)p.GetScanDirection();
+				break;
+			case LAS_FLIGHT_LINE_EDGE:
+				value = (double)p.GetFlightLineEdge();
+				break;
+			case LAS_CLASSIFICATION:
+				value = (double)p.GetClassification().GetClass();
+				break;
+			case LAS_SCAN_ANGLE_RANK:
+				value = (double)p.GetScanAngleRank();
+				break;
+			case LAS_USER_DATA:
+				value = (double)p.GetUserData();
+				break;
+			case LAS_POINT_SOURCE_ID:
+				value = (double)p.GetPointSourceID();
+				break;
+			case LAS_RED:
+			case LAS_GREEN:
+			case LAS_BLUE:
+				assert(false);
+				break;
+			case LAS_TIME:
+				value = p.GetTime();
+				break;
+			case LAS_CLASSIF_VALUE:
+				value = (double)(p.GetClassification().GetClass() & 31); //5 bits
+				break;
+			case LAS_CLASSIF_SYNTHETIC:
+				value = (double)(p.GetClassification().GetClass() & 32); //bit #6
+				break;
+			case LAS_CLASSIF_KEYPOINT:
+				value = (double)(p.GetClassification().GetClass() & 64); //bit #7
+				break;
+			case LAS_CLASSIF_WITHHELD:
+				value = (double)(p.GetClassification().GetClass() & 128); //bit #8
+				break;
+			case LAS_INVALID:
+			default:
+				assert(false);
+				break;
+			}
+
+			if (it->sf)
+			{
+				it->sf->addElement(value);
 			}
 			else
 			{
 				//first point? we track its value
 				if (loadedCloud->size()==1)
 				{
-					firstClassifValue = intValue;
+					it->firstValue = value;
 				}
 				
-				if (intValue != firstClassifValue || firstClassifValue > 1) //0 = Created, never classified, 1 = Unclassified
+				if (value != it->firstValue || it->firstValue != it->defaultValue)
 				{
-					classifSF = new ccScalarField(CC_LAS_CLASSIFICATION_FIELD_NAME);
-					if (classifSF->reserve(fileChunkSize))
+					it->sf = new ccScalarField(qPrintable(it->sfName));
+					if (it->sf->reserve(fileChunkSize))
 					{
-						classifSF->link();
-						//we must set the classification value (firstClassifValue) of all the precedently skipped points
-						for (unsigned i=0;i<loadedCloud->size()-1;++i)
-							classifSF->addElement(firstClassifValue);
-						classifSF->addElement(intValue);
+						it->sf->link();
+						//we must set the value (firstClassifValue) of all the precedently skipped points
+						for (unsigned i=0; i<loadedCloud->size()-1; ++i)
+							it->sf->addElement(it->firstValue);
+						it->sf->addElement(value);
 					}
 					else
 					{
-						ccConsole::Warning("[LAS FILE] Not enough memory: classificaiton field will be ignored!");
-						hasClassif = false; //no need to retry with the other chunks anyway
-						classifSF->release();
-						classifSF=0;
+						ccConsole::Warning(QString("[LAS FILE] Not enough memory: '%1' field will be ignored!").arg(LAS_FIELD_NAMES[it->type]));
+						it->sf->release();
+						it->sf = 0;
 					}
 				}
 			}
-		}
-
-		if (hasTime)
-		{
-			double timeValue = p.GetTime();
-
-			if (timeSF)
-			{
-				timeSF->addElement(timeValue);
-			}
-			else
-			{
-				//first point? we track its value
-				if (loadedCloud->size()==1)
-				{
-					firstTime = timeValue;
-				}
-				else if (timeValue != firstTime)
-				{
-					timeSF = new ccScalarField(CC_SCAN_TIME_FIELD_NAME);
-					if (timeSF->reserve(fileChunkSize))
-					{
-						timeSF->link();
-						//we must set the timestamp value (firstTime) of all the precedently skipped points
-						for (unsigned i=0;i<loadedCloud->size()-1;++i)
-							timeSF->addElement(firstTime);
-						timeSF->addElement(timeValue);
-					}
-					else
-					{
-						ccConsole::Warning("[LAS FILE] Not enough memory: 'time' field will be ignored!");
-						hasTime = false; //no need to retry with the other chunks anyway
-						timeSF->release();
-						timeSF=0;
-					}
-				}
-			}
-		}
-
-		if (hasIntensity)
-		{
-			uint16_t intValue = p.GetIntensity();
-			if (intensitySF)
-			{
-				intensitySF->addElement(intValue);
-			}
-			else
-			{
-				//first point? we track its value
-				if (loadedCloud->size()==1)
-				{
-					firstIntensity = intValue;
-				}
-				
-				if (intValue != firstIntensity || (firstIntensity != 0 && firstIntensity != 65535))
-				{
-					intensitySF = new ccScalarField(CC_SCAN_INTENSITY_FIELD_NAME);
-					if (intensitySF->reserve(fileChunkSize))
-					{
-						intensitySF->link();
-						//we must set the intensity (firstIntensity) of all the precedently skipped points
-						for (unsigned i=0;i<loadedCloud->size()-1;++i)
-							intensitySF->addElement(firstIntensity);
-						intensitySF->addElement(intValue);
-					}
-					else
-					{
-						ccConsole::Warning("[LAS FILE] Not enough memory: intensity field will be ignored!");
-						hasIntensity = false; //no need to retry with the other chunks anyway
-						intensitySF->release();
-						intensitySF=0;
-					}
-				}
-			}
-		}
-
-		if (hasReturnNumber)
-		{
-			uint16_t intValue = p.GetReturnNumber();
-			if (returnNumberSF)
-			{
-				returnNumberSF->addElement(intValue);
-			}
-			else
-			{
-				//first point? we track its value
-				if (loadedCloud->size()==1)
-				{
-					firstReturnNumber = intValue;
-				}
-				
-				if (intValue != firstReturnNumber)
-				{
-					returnNumberSF = new ccScalarField(CC_SCAN_RETURN_INDEX_FIELD_NAME);
-					if (returnNumberSF->reserve(fileChunkSize))
-					{
-						returnNumberSF->link();
-						//we must set the return index (firstReturnNumber) of all the precedently skipped points
-						for (unsigned i=0;i<loadedCloud->size()-1;++i)
-							returnNumberSF->addElement(firstReturnNumber);
-						returnNumberSF->addElement(intValue);
-					}
-					else
-					{
-						ccConsole::Warning("[LAS FILE] Not enough memory: return number field will be ignored!");
-						hasReturnNumber = false; //no need to retry with the other chunks anyway
-						returnNumberSF->release();
-						returnNumberSF=0;
-					}
-				}
-			}
-
 		}
 
 		++pointsRead;

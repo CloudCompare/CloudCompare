@@ -5,6 +5,8 @@ v2.4 ??/??/2013
 	* accessible via 'Tools > Segmentation > Cross Section' or a dedicated icon in the main
 		toolbar (next to the scissors icon)
 	* works only with clouds for the moment
+- New option is ASCII file save dialog:
+	* choice to save the number of points in a dedicated header line
 - "Primitive factory" menu entry moved to the File menu
 	(so as to be accessible even if no entity is selected!)
 - 128 million points per cloud limit removed on the 64 bits version

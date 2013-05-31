@@ -1394,7 +1394,7 @@ void ccGLWindow::recalcModelViewMatrix()
 	if (m_params.perspectiveView) //perspective mode
 	{
 		//for proper aspect ratio handling
-		float ar = float(m_glWidth)/(float(m_glHeight)*m_params.aspectRatio);
+		float ar = (m_glHeight != 0 ? float(m_glWidth)/(float(m_glHeight)*m_params.aspectRatio) : 0.0f);
 		if (ar<1.0)
 			glScalef(ar,ar,1.0);
 	}

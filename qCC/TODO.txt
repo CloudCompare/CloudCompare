@@ -30,7 +30,14 @@ Various:
 [*] Command line mode could be extended (more methods, etc.)
 [*] Add 'GL filter' plugins support to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
-[*] Add an option to the ASCII export dialog to save the number of points as a 'header' line
+
+From Peter A.
+But also most other LAS attributes can be very useful:
+– Number of Returns
+– Scan Direction Flag
+– Edge of Flight Line
+– Scan Angle Rank
+– The Synthetic, Key-point, and Withheld classification flags.
 
 From Thomas S. (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=550)
 [*] It would be great if the programm could manage long coordinates for the georeferencing (?!)

@@ -25,6 +25,7 @@
 
 //qCC_db
 #include <ccGLMatrix.h>
+#include <ccGLUtils.h>
 
 class ccGLWindow;
 class ccHObject;
@@ -77,10 +78,20 @@ protected slots:
 	void shiftZMinus();
 	void shiftZPlus();
 
+    void setFrontView();
+    void setBottomView();
+    void setTopView();
+    void setBackView();
+    void setLeftView();
+    void setRightView();
+
 protected:
 
 	//! Shift box
 	void shiftBox(unsigned char dim, bool minus);
+
+	//! Sets predefined view
+	void setView(CC_VIEW_ORIENTATION orientation);
 
 	//! Clipping box
 	ccClipBox* m_clipBox;

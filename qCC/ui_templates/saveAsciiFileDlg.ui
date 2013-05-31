@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>336</width>
-    <height>170</height>
+    <width>276</width>
+    <height>226</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Save ASCII file</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <layout class="QFormLayout" name="formLayout">
      <item row="0" column="0">
@@ -105,13 +105,26 @@
     </layout>
    </item>
    <item>
-    <widget class="QCheckBox" name="headerCheckBox">
-     <property name="layoutDirection">
-      <enum>Qt::RightToLeft</enum>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Header</string>
      </property>
-     <property name="text">
-      <string>add header</string>
-     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="QCheckBox" name="columnsHeaderCheckBox">
+        <property name="text">
+         <string>columns title</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="pointCountHeaderCheckBox">
+        <property name="text">
+         <string>number of points (separate line)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>

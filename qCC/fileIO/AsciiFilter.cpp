@@ -159,11 +159,12 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 	const int s_nPrecision = 2+sizeof(PointCoordinateType);
 
 	//other parameters
-	bool saveHeader = s_saveDialog->saveHeader();
+	bool saveColumnsHeader = s_saveDialog->saveColumnsNamesHeader();
+	bool savePointCountHeader = s_saveDialog->savePointCountHeader();
 	bool swapColorAndSFs = s_saveDialog->swapColorAndSF();
 	QChar separator(s_saveDialog->getSeparator());
 
-	if (saveHeader)
+	if (saveColumnsHeader)
 	{
 		QString header("//");
 		header.append("X");
@@ -215,6 +216,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 		}
 		
 		stream << header << "\n";
+	}
+
+	if (savePointCountHeader)
+	{
+		stream << QString::number(numberOfPoints) << "\n";
 	}
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;

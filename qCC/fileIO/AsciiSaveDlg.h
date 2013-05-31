@@ -34,8 +34,11 @@ public:
 	//! Destructor
     virtual ~AsciiSaveDlg();
 
-	//! Returns whether a header should be saved
-	bool saveHeader() const;
+	//! Returns whether columns names should be be saved in header
+	bool saveColumnsNamesHeader() const;
+
+	//! Returns whether the number of points should be saved in header
+	bool savePointCountHeader() const;
 
 	//! Returns separator
 	uchar getSeparator() const;

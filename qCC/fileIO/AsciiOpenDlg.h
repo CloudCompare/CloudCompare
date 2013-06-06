@@ -110,6 +110,9 @@ public:
 	//! Returns columns count per line
 	unsigned getColumnsCount() const {return m_columnsCount;}
 
+	//! Returns the max number of points per cloud
+	unsigned getMaxCloudSize() const;
+
 	//! Checks the "opening" sequence as set by the user
 	/** \return validity (+ error message if not)
 	**/

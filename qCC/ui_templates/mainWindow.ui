@@ -250,13 +250,11 @@
     <addaction name="menuScalarFields"/>
     <addaction name="menuBoundingBox"/>
     <addaction name="separator"/>
-    <addaction name="actionPointPicking"/>
-    <addaction name="actionPointListPicking"/>
-    <addaction name="separator"/>
     <addaction name="actionClone"/>
     <addaction name="actionFuse"/>
     <addaction name="actionApplyTransformation"/>
     <addaction name="actionMultiply"/>
+    <addaction name="actionEditGlobalShift"/>
     <addaction name="actionSubsample"/>
     <addaction name="actionSynchronize"/>
     <addaction name="menuToggle"/>
@@ -346,6 +344,9 @@
     <addaction name="menuStatistics"/>
     <addaction name="menuSegmentation"/>
     <addaction name="menuOther"/>
+    <addaction name="separator"/>
+    <addaction name="actionPointPicking"/>
+    <addaction name="actionPointListPicking"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -2291,6 +2292,11 @@
    </property>
    <property name="statusTip">
     <string>Cross Section</string>
+   </property>
+  </action>
+  <action name="actionEditGlobalShift">
+   <property name="text">
+    <string>Edit global shift</string>
    </property>
   </action>
  </widget>

@@ -303,6 +303,7 @@ protected slots:
     void doActionKMeans();
     void doActionFrontPropagation();
     void doActionMultiply();
+	void doActionEditGlobalShift();
     void doActionSynchronize();
     void doActionUnroll();
     void doActionProjectSensor();

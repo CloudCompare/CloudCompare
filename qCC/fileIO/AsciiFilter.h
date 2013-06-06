@@ -36,6 +36,7 @@ public:
                                                     char separator,
                                                     unsigned approximateNumberOfLines,
                                                     qint64 fileSize,
+													unsigned maxCloudSize,
                                                     unsigned skipLines=0,
 													bool alwaysDisplayLoadDialog=true,
 													bool* coordinatesShiftEnabled=0,

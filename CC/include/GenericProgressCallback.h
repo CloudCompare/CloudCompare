@@ -136,7 +136,10 @@ public:
 			percent = (float)counter*(float)totalPercentage/(float)totalSteps;
 			progressCallback->update(percent);
 		}
-		counter = 0;
+		else
+		{
+			counter = 0;
+		}
 	}
 
 	//! Resets progress state

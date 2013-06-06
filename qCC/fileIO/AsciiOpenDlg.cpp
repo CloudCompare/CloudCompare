@@ -18,6 +18,9 @@
 #include "AsciiOpenDlg.h"
 #include "FileIOFilter.h"
 
+//qCC_db
+#include <ccPointCloud.h>
+
 //Qt
 #include <QMessageBox>
 #include <QTableWidget>
@@ -33,6 +36,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+
+//Semi-persistent value for max. cloud size
+static double s_maxCloudSizeDoubleSpinBoxValue = (double)CC_MAX_NUMBER_OF_POINTS_PER_CLOUD/1.0e6;
 
 AsciiOpenDlg::AsciiOpenDlg(QString filename, QWidget* parent)
 	: QDialog(parent)
@@ -60,6 +66,9 @@ AsciiOpenDlg::AsciiOpenDlg(QString filename, QWidget* parent)
     connect(toolButtonShortcutDotcomma, SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
 
     lineEditFileName->setText(m_filename);
+
+	maxCloudSizeDoubleSpinBox->setMaximum((double)CC_MAX_NUMBER_OF_POINTS_PER_CLOUD/1.0e6);
+	maxCloudSizeDoubleSpinBox->setValue(s_maxCloudSizeDoubleSpinBoxValue);
 
 	QList<QChar> separators;
 	separators << QChar(' ');
@@ -435,6 +444,7 @@ void AsciiOpenDlg::testBeforeAccept()
 	}
 	else
 	{
+		s_maxCloudSizeDoubleSpinBoxValue = maxCloudSizeDoubleSpinBox->value();
 		accept();
 	}
 }
@@ -564,3 +574,7 @@ void AsciiOpenDlg::shortcutButtonPressed()
         lineEditSeparator->setText(QChar(newSeparator));
 }
 
+unsigned AsciiOpenDlg::getMaxCloudSize() const
+{
+	return (unsigned)floor(maxCloudSizeDoubleSpinBox->value() * 1.0e6);
+}

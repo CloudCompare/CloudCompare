@@ -78,3 +78,12 @@ From Gianluca C.
 
 From Patrick B. (in french)
 [*] Des tranches de nuages paramétrables en horizontalité et verticalité (épaisseur, colorisation de la tranche, intervalles paramétrables)
+
+From Andrew O.
+[*] add some type of three dimensional eraser. Perhaps being able to select and clear an octree cell may be the place to start (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=191&p=1542#p1542)
+
+From Tim C.
+[*] Translate/Rotate with keys or GUI buttons (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=556&p=1519#p1519)
+
+From Raphael M.
+[*] Add a checkbox on the Color Scale Manager to apply the current scale modifications in real time

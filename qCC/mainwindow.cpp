@@ -815,6 +815,7 @@ void MainWindow::connectActions()
     //"File" menu
     connect(actionOpen,                         SIGNAL(triggered()),    this,       SLOT(loadFile()));
     connect(actionSave,                         SIGNAL(triggered()),    this,       SLOT(saveFile()));
+	connect(actionPrimitiveFactory,				SIGNAL(triggered()),    this,       SLOT(doShowPrimitiveFactory()));
 	connect(actionEnable3DMouse,				SIGNAL(toggled(bool)),	this,		SLOT(setup3DMouse(bool)));
     connect(actionQuit,                         SIGNAL(triggered()),    this,       SLOT(close()));
 
@@ -867,12 +868,11 @@ void MainWindow::connectActions()
     //"Edit > Bounding-box" menu
     connect(actionComputeBestFitBB,             SIGNAL(triggered()),    this,       SLOT(doComputeBestFitBB()));
     //"Edit" menu
-    connect(actionPointListPicking,             SIGNAL(triggered()),    this,       SLOT(activatePointListPickingMode()));
-    connect(actionPointPicking,                 SIGNAL(triggered()),    this,       SLOT(activatePointsPropertiesMode()));
     connect(actionClone,                        SIGNAL(triggered()),    this,       SLOT(doActionClone()));
     connect(actionFuse,                         SIGNAL(triggered()),    this,       SLOT(doActionFuse()));
     connect(actionApplyTransformation,			SIGNAL(triggered()),    this,       SLOT(doActionApplyTransformation()));
     connect(actionMultiply,                     SIGNAL(triggered()),    this,       SLOT(doActionMultiply()));
+    connect(actionEditGlobalShift,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalShift()));
     connect(actionSubsample,                    SIGNAL(triggered()),    this,       SLOT(doActionSubsample())); //Aurelien BEY le 13/11/2008
     connect(actionSynchronize,                  SIGNAL(triggered()),    this,       SLOT(doActionSynchronize()));
     connect(actionDelete,                       SIGNAL(triggered()),    m_ccRoot,	SLOT(deleteSelectedEntities()));
@@ -904,7 +904,8 @@ void MainWindow::connectActions()
     connect(actionSNETest,						SIGNAL(triggered()),    this,       SLOT(doSphericalNeighbourhoodExtractionTest()));
     connect(actionPlaneOrientation,				SIGNAL(triggered()),    this,       SLOT(doComputePlaneOrientation()));
 	//"Tools"
-	connect(actionPrimitiveFactory,				SIGNAL(triggered()),    this,       SLOT(doShowPrimitiveFactory()));
+    connect(actionPointListPicking,             SIGNAL(triggered()),    this,       SLOT(activatePointListPickingMode()));
+    connect(actionPointPicking,                 SIGNAL(triggered()),    this,       SLOT(activatePointsPropertiesMode()));
 
     //"Display" menu
     connect(actionFullScreen,                   SIGNAL(toggled(bool)),  this,       SLOT(toggleFullScreen(bool)));
@@ -1101,8 +1102,8 @@ void MainWindow::doActionInvertNormals()
 				ccCloud->invertNormals();
 				ccCloud->showNormals(true);
 				ccCloud->prepareDisplayForRefresh_recursive();
-        }
-    }
+			}
+		}
     }
 
     refreshAll();
@@ -1335,6 +1336,52 @@ void MainWindow::doActionMultiply()
     }
 
     refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionEditGlobalShift()
+{
+    size_t selNum = m_selectedEntities.size();
+    if (selNum!=1)
+    {
+		if (selNum>1)
+			ccConsole::Error("Select only one point cloud or mesh!");
+        return;
+    }
+	ccHObject* ent = m_selectedEntities[0];
+
+	bool lockedVertices;
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+
+	//for "real" point clouds only
+	if (!cloud)
+		return;
+	if (lockedVertices)
+	{
+		//see ccPropertiesTreeDelegate::fillWithMesh
+		if (!ent->isA(CC_MESH_GROUP) && !ent->isAncestorOf(cloud))
+		{
+			DisplayLockedVerticesWarning();
+			return;
+		}
+	}
+
+	assert(cloud);
+	const double* shift = cloud->getOriginalShift();
+
+	ccAskThreeDoubleValuesDlg dlg("x","y","z",-DBL_MAX,DBL_MAX,shift[0],shift[1],shift[2],2,"Global shift",this);
+    if (!dlg.exec())
+        return;
+
+	double x = dlg.doubleSpinBox1->value();
+	double y = dlg.doubleSpinBox2->value();
+	double z = dlg.doubleSpinBox3->value();
+
+	//apply new shift
+	cloud->setOriginalShift(x,y,z);
+	ccLog::Print("[doActionEditGlobalShift] New shift: (%f, %f, %f)",x,y,z);
+    
+	updateUI();
 }
 
 void MainWindow::doComputeBestFitBB()
@@ -1617,12 +1664,10 @@ void MainWindow::doActionComputeDistancesFromSensor()
 	distances->computeMinAndMax();
 	cloud->setCurrentDisplayedScalarField(sfIdx);
 	cloud->showSF(true);
-
     cloud->prepareDisplayForRefresh_recursive();
-    refreshAll();
 
-	if (m_ccRoot)
-        m_ccRoot->updatePropertiesView();
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionComputeScatteringAngles()
@@ -1704,12 +1749,10 @@ void MainWindow::doActionComputeScatteringAngles()
 	angles->computeMinAndMax();
 	cloud->setCurrentDisplayedScalarField(sfIdx);
 	cloud->showSF(true);
-
 	cloud->prepareDisplayForRefresh_recursive();
-    refreshAll();
 
-	if (m_ccRoot)
-        m_ccRoot->updatePropertiesView();
+	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionProjectSensor()
@@ -2373,8 +2416,7 @@ void MainWindow::doApplyActiveSFAction(int action)
 	}
 
     refreshAll();
-	if (m_ccRoot)
-		m_ccRoot->updatePropertiesView();
+	updateUI();
 }
 
 void MainWindow::doActionRenameSF()
@@ -2531,8 +2573,7 @@ void MainWindow::doActionSFGaussianFilter()
     }
 
     refreshAll();
-	if (m_ccRoot)
-		m_ccRoot->updatePropertiesView();
+	updateUI();
 }
 
 void MainWindow::doActionSFBilateralFilter()
@@ -2635,8 +2676,7 @@ void MainWindow::doActionSFBilateralFilter()
     }
 
     refreshAll();
-    if (m_ccRoot)
-        m_ccRoot->updatePropertiesView();
+	updateUI();
 }
 
 void MainWindow::doActionSmoothMeshSF()
@@ -2684,6 +2724,7 @@ void MainWindow::doMeshSFAction(ccGenericMesh::MESH_SCALAR_FIELD_PROCESS process
     }
 
     refreshAll();
+	updateUI();
 }
 
 static float s_subdivideMaxArea = 1.0f;
@@ -3271,6 +3312,7 @@ void MainWindow::doAction4pcsRegister()
 		delete subData;
 
     refreshAll();
+	updateUI();
 }
 
 //Aurelien BEY le 4/12/2008 : ajout de la fonction de sous echantillonage de nuages de points
@@ -3320,6 +3362,7 @@ void MainWindow::doActionSubsample()
     delete sampledCloud;
 
     refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionStatisticalTest()
@@ -5348,21 +5391,19 @@ void MainWindow::zoomOnSelectedEntities()
     if (!win)
         return;
 
-    ccHObject* tempGroup = new ccHObject("TempGroup");
-    size_t i,selNum=m_selectedEntities.size();
-    for (i=0; i<selNum; ++i)
+    ccHObject tempGroup("TempGroup");
+    size_t selNum = m_selectedEntities.size();
+    for (size_t i=0; i<selNum; ++i)
     {
         if (m_selectedEntities[i]->getDisplay()==win)
-            tempGroup->addChild(m_selectedEntities[i],false);
+            tempGroup.addChild(m_selectedEntities[i],false);
     }
 
-    if (tempGroup->getChildrenNumber()>0)
+    if (tempGroup.getChildrenNumber()>0)
     {
-        ccBBox box = tempGroup->getBB(false, false, win);
+        ccBBox box = tempGroup.getBB(false, false, win);
         win->updateConstellationCenterAndZoom(&box);
     }
-
-    delete tempGroup;
 
     refreshAll();
 }
@@ -5613,8 +5654,7 @@ void MainWindow::toggleSelectedEntitiesProp(int prop)
     }
 
     refreshAll();
-    if (m_ccRoot)
-        m_ccRoot->updatePropertiesView();
+	updateUI();
 }
 
 void MainWindow::showSelectedEntitiesHistogram()
@@ -5912,8 +5952,7 @@ void MainWindow::doActionScalarFieldArithmetic()
     sfDest->computeMinAndMax();
     cloud->setCurrentDisplayedScalarField(sfIdx);
 	cloud->showSF(sfIdx>=0);
-
-    entity->prepareDisplayForRefresh_recursive();
+    cloud->prepareDisplayForRefresh_recursive();
 
     refreshAll();
 	updateUI();
@@ -7378,6 +7417,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionUnroll->setEnabled(exactlyOneEntity);
     actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);        //&& scalarField
 	actionAddConstantSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	actionEditGlobalShift->setEnabled(exactlyOneCloud || exactlyOneMesh);
 
 	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);                 //&& scalarField
     actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);       //&& scalarField

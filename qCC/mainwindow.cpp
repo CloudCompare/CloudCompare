@@ -101,6 +101,7 @@
 #include "ccNormalComputationDlg.h"
 #include "ccCameraParamEditDlg.h"
 #include "ccScalarFieldArithmeticDlg.h"
+#include "ccScalarFieldFromColorDlg.h"
 #include "ccSensorComputeDistancesDlg.h"
 #include "ccSensorComputeScatteringAnglesDlg.h"
 #include "ccCurvatureDlg.h"
@@ -860,6 +861,7 @@ void MainWindow::connectActions()
     connect(actionFilterByValue,                SIGNAL(triggered()),    this,       SLOT(doActionFilterByValue()));
 	connect(actionAddConstantSF,				SIGNAL(triggered()),    this,       SLOT(doActionAddConstantSF()));
     connect(actionScalarFieldArithmetic,        SIGNAL(triggered()),    this,       SLOT(doActionScalarFieldArithmetic()));
+    connect(actionScalarFieldFromColor,         SIGNAL(triggered()),    this,       SLOT(doActionScalarFieldFromColor()));
     connect(actionConvertToRGB,                 SIGNAL(triggered()),    this,       SLOT(doActionSFConvertToRGB()));
 	connect(actionRenameSF,						SIGNAL(triggered()),    this,       SLOT(doActionRenameSF()));
 	connect(actionOpenColorScalesManager,		SIGNAL(triggered()),    this,       SLOT(doActionOpenColorScalesManager()));
@@ -5829,6 +5831,124 @@ void MainWindow::doActionAddConstantSF()
 	ccLog::Print(QString("New scalar field added to %1 (constant value: %2)").arg(cloud->getName()).arg(sfValue));
 }
 
+QString GetFirstAvailableSFName(ccPointCloud* cloud, const QString& baseName)
+{
+	if (!cloud)
+	{
+		assert(false);
+		return QString();
+	}
+
+	QString name = baseName;
+	unsigned trys = 0;
+	while (cloud->getScalarFieldIndexByName(qPrintable(name)) >= 0 || trys > 99)
+		name = QString("%1 #%2").arg(baseName).arg(++trys);
+
+	if (trys > 99)
+		return QString();
+	return name;
+}
+
+void MainWindow::doActionScalarFieldFromColor()
+{
+	//candidates
+    std::set<ccPointCloud*> clouds;
+	{
+		for (size_t i = 0; i < m_selectedEntities.size(); ++i)
+		{
+			ccHObject* ent = m_selectedEntities[i];
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+			if (cloud && ent->hasColors()) //only for clouds (or vertices)
+				clouds.insert( cloud );
+		}
+	}
+
+    if (clouds.empty())
+        return;
+
+    ccScalarFieldFromColorDlg dialog(this);
+    if (!dialog.exec())
+        return;
+
+    bool exportR = dialog.getRStatus();
+    bool exportG = dialog.getGStatus();
+    bool exportB = dialog.getBStatus();
+    bool exportC = dialog.getCompositeStatus();
+
+	for (std::set<ccPointCloud*>::const_iterator it = clouds.begin(); it != clouds.end(); ++it)
+    {
+		ccPointCloud* cloud = *it;
+		
+		std::vector<ccScalarField*> fields(4,0);
+		fields[0] = (exportR ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"R"))) : 0);
+		fields[1] = (exportG ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"G"))) : 0);
+		fields[2] = (exportB ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"B"))) : 0);
+		fields[3] = (exportC ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"Composite"))) : 0);
+
+		//try to instantiate memory for each field
+		{
+			unsigned count = cloud->size();
+			for (size_t i=0; i<fields.size(); ++i)
+			{
+				if (fields[i] && !fields[i]->reserve(count))
+				{
+					ccLog::Warning(QString("[doActionScalarFieldFromColor] Not enough memory to instantiate SF '%1' on cloud '%2'").arg(fields[i]->getName()).arg(cloud->getName()));
+					fields[i]->release();
+					fields[i]=0;
+				}
+			}
+		}
+
+		//export points
+		for (unsigned j=0; j<cloud->size(); ++j)
+		{
+			const colorType* rgb = cloud->getPointColor(j);
+
+			if (fields[0])
+				fields[0]->setValue(j, rgb[0]);
+			if (fields[1])
+				fields[1]->setValue(j, rgb[1]);
+			if (fields[2])
+				fields[2]->setValue(j, rgb[2]);
+			if (fields[3])
+				fields[3]->setValue(j, (ScalarType)(rgb[0] + rgb[1] + rgb[2])/(ScalarType)3.0 );
+		}
+
+		QString fieldsStr;
+		{
+			for (size_t i=0; i<fields.size(); ++i)
+			{
+				if (fields[i])
+				{
+					fields[i]->computeMinAndMax();
+					
+					int sfIdx = cloud->addScalarField(fields[i]);
+					cloud->setCurrentDisplayedScalarField(sfIdx);
+					cloud->showSF(true);
+					cloud->refreshDisplay();
+
+					//mesh vertices?
+					if (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH))
+					{
+						cloud->getParent()->showSF(true);
+						cloud->getParent()->refreshDisplay();
+					}
+					
+					if (!fieldsStr.isEmpty())
+						fieldsStr.append(", ");
+					fieldsStr.append(fields[i]->getName());
+				}
+			}
+		}
+
+		if (!fieldsStr.isEmpty())
+			ccLog::Print(QString("[doActionScalarFieldFromColor] New scalar fields (%1) added to '%2'").arg(fieldsStr).arg(cloud->getName()));
+	}
+
+	refreshAll();
+    updateUI();
+}
+
 void MainWindow::doActionScalarFieldArithmetic()
 {
     assert(!m_selectedEntities.empty());
@@ -7178,8 +7298,8 @@ void MainWindow::updateMenus()
     bool hasSelectedEntities = (m_ccRoot && m_ccRoot->countSelectedEntities()>0);
 
     //General Menu
-    menuEdit->setEnabled(hasSelectedEntities);
-    menuTools->setEnabled(hasSelectedEntities);
+    menuEdit->setEnabled(true/*hasSelectedEntities*/);
+    menuTools->setEnabled(true/*hasSelectedEntities*/);
 
     //3D Views Menu
     actionClose3DView->setEnabled(hasMdiChild);
@@ -7204,7 +7324,7 @@ void MainWindow::updateMenus()
     actionSegment->setEnabled(hasMdiChild && hasSelectedEntities);
     actionTranslateRotate->setEnabled(hasMdiChild && hasSelectedEntities);
 	actionPointPicking->setEnabled(hasMdiChild);
-    actionPointListPicking->setEnabled(hasMdiChild);
+    //actionPointListPicking->setEnabled(hasMdiChild);
     actionTestFrameRate->setEnabled(hasMdiChild);
     actionRenderToFile->setEnabled(hasMdiChild);
     actionToggleSunLight->setEnabled(hasMdiChild);
@@ -7346,14 +7466,15 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     bool atLeastOneGDBSensor = (selInfo.gblSensorCount>0);
     bool activeWindow = (getActiveGLWindow() != 0);
 
-    menuEdit->setEnabled(atLeastOneEntity);
-    menuTools->setEnabled(atLeastOneEntity);
+    //menuEdit->setEnabled(atLeastOneEntity);
+    //menuTools->setEnabled(atLeastOneEntity);
     menuGroundBasedLidar->setEnabled(atLeastOneGDBSensor);
 
     actionZoomAndCenter->setEnabled(atLeastOneEntity && activeWindow);
     actionSave->setEnabled(atLeastOneEntity);
     actionClone->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionDelete->setEnabled(atLeastOneEntity);
+	actionExportCoordToSF->setEnabled(atLeastOneEntity);
     actionSegment->setEnabled(atLeastOneEntity && activeWindow);
     actionTranslateRotate->setEnabled(atLeastOneEntity && activeWindow);
     actionShowDepthBuffer->setEnabled(atLeastOneGDBSensor);
@@ -7426,6 +7547,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	
 	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount>0);
 	actionCrossSection->setEnabled(exactlyOneCloud);
+	actionHeightGridGeneration->setEnabled(exactlyOneCloud);
 
 	actionPointListPicking->setEnabled(exactlyOneEntity);
 
@@ -7442,6 +7564,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionCloudMeshDist->setEnabled(exactlyTwoEntities && atLeastOneMesh);      //at least one Mesh!
     actionCPS->setEnabled(exactlyTwoClouds);
     actionScalarFieldArithmetic->setEnabled(exactlyOneEntity && atLeastOneSF);
+    actionScalarFieldFromColor->setEnabled(atLeastOneCloud && atLeastOneColor);
 
     //>1
     bool atLeastTwoEntities = (selInfo.selCount>1);

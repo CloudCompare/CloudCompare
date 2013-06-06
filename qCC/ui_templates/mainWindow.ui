@@ -163,6 +163,7 @@
      <addaction name="actionSetUniqueColor"/>
      <addaction name="actionColorize"/>
      <addaction name="actionSetColorGradient"/>
+     <addaction name="actionScalarFieldFromColor"/>
      <addaction name="separator"/>
      <addaction name="actionClearColor"/>
     </widget>
@@ -2297,6 +2298,11 @@
   <action name="actionEditGlobalShift">
    <property name="text">
     <string>Edit global shift</string>
+   </property>
+  </action>
+  <action name="actionScalarFieldFromColor">
+   <property name="text">
+    <string>Convert to Scalar field</string>
    </property>
   </action>
  </widget>

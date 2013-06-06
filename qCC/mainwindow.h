@@ -288,6 +288,7 @@ protected slots:
     void doActionEnhanceMeshSF();
 	void doActionAddConstantSF();
     void doActionScalarFieldArithmetic();
+    void doActionScalarFieldFromColor();
     void doActionClearColor();
     void doActionResolveNormalsDirection();
     void doActionClearNormals();

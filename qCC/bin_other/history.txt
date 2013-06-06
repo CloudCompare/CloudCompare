@@ -7,13 +7,15 @@ v2.4 ??/??/2013
 	* works only with clouds for the moment
 - New option for ICP registration (thanks to Luca Penasa once again!):
 	* check "Free scale parameter" to register objects with different scales
+- New tool: "Convert RGB to scalar field"
+	* Edit > Colors
 - New option is ASCII file load/save dialogs:
 	* maximum number of points per cloud on load
 	* option to write the number of points as a dedicated header line on save
 - Menus modifications:
 	* "Primitive factory" menu entry has been moved to the "File" menu
-		(so as to be accessible even if no entity is selected!)
-	* "Point picking and Point list picking menu entires have been moved to the "Tools" menu
+	* "Point picking" and "Point list picking" menu entries have been moved to the "Tools" menu
+	* "Edit" and "Tools" menus are now always enabled even if no entity is selected
 - The (old) limit of 128 million points per cloud has been removed on the 64 bits version
 	(new - theoretical - limit is 2 billions)
 - Global shift information is now kept by qRansacSD plugin (shape detection)

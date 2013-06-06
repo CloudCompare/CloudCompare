@@ -21,6 +21,7 @@ v2.4 ??/??/2013
 	* a warning is issued if the user attempts to save a cloud with SFs having non "official"
 		names
 - New icon for the 'clone' method (thanks to JF Hullo): two sheeps instead of one!
+- 'Stippling' (fake transparency) option has been added to meshes
 - Bug fixes:
 	* applying the interactive 'rotate/translate' tool to an entity and its parent at the
 		same time would make CC crash

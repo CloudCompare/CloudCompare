@@ -693,7 +693,22 @@ void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
     item->setData(OBJECT_MESH_WIRE);
     m_model->setItem(curRow,1,item);
 
-    //we also integrate vertices SF into mesh properties
+    //stippling (ccMesh only)
+	if (_obj->isA(CC_MESH))
+	{
+		m_model->setRowCount(++curRow+1);
+		item = new QStandardItem("stippling");
+		item->setFlags(Qt::ItemIsEnabled);
+		m_model->setItem(curRow,0,item);
+
+		item = new QStandardItem("");
+		item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsUserCheckable);
+		item->setCheckState(static_cast<ccMesh*>(_obj)->stipplingEnabled() ? Qt::Checked : Qt::Unchecked);
+		item->setData(OBJECT_MESH_STIPPLING);
+		m_model->setItem(curRow,1,item);
+	}
+
+	//we also integrate vertices SF into mesh properties
     ccGenericPointCloud* vertices = _obj->getAssociatedCloud();
     if (vertices && (_obj->isA(CC_MESH_GROUP) || !vertices->isLocked() || _obj->isAncestorOf(vertices)))
         fillSFWithPointCloud(vertices);
@@ -1496,6 +1511,14 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(m_currentObject);
 			assert(mesh);
 			mesh->showWired(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
+	case OBJECT_MESH_STIPPLING:
+		{
+			ccMesh* mesh = ccHObjectCaster::ToMesh(m_currentObject);
+			assert(mesh);
+			mesh->enableStippling(item->checkState() == Qt::Checked);
 		}
 		redraw=true;
 		break;

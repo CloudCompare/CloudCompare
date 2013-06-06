@@ -83,6 +83,9 @@ public:
 	//! Constructor from a 3x3 rotation matrix R and a vector T
 	ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T);
 
+    //! Constructor from a 3x3 rotation matrix R, a vector T, a scale S
+    ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, float S);
+
 	//! Constructor from a rotation center G, a 3x3 rotation matrix R and a vector T
 	ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, const CCVector3& rotCenter);
 

@@ -20,6 +20,8 @@
 
 #include "CCToolbox.h"
 #include "Matrix.h"
+//#include "RegistrationTools.h" //to use
+
 
 //! Triangulation types
 enum CC_TRIANGULATION_TYPES {GENERIC							=		1,		/**< Default triangulation (Delaunay 2D in XY plane) **/
@@ -48,8 +50,8 @@ class PointProjectionTools : public CCToolbox
 {
 public:
 
-	//! A geometrical transformation (rotation + translation)
-	/** P' = R.P + T
+    //! A scaled geometrical transformation (scale + rotation + translation)
+    /** P' = s.R.P + T
 	**/
 	struct Transformation
 	{
@@ -57,6 +59,11 @@ public:
 		CCLib::SquareMatrix R;
 		//! Translation
 		CCVector3 T;
+        //! Scale
+        PointCoordinateType s;
+
+		//! Default constructor
+        Transformation() : s((PointCoordinateType)1.0) {}
 	};
 
 	//! Develops a cylinder-shaped point cloud around its main axis

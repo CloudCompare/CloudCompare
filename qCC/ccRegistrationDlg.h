@@ -83,6 +83,11 @@ public:
 	//! Whether to use model displayed SF as weights
 	bool useModelSFAsWeights() const;
 
+    //! Returns whether to free the scale parameter during optimization
+    /** This is useful for co-registration of lidar and photogrammetric clouds
+    **/
+    bool useFreeScaleParameter() const;
+
 protected slots:
     void swapModelAndData();
 

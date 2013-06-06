@@ -92,9 +92,10 @@ public:
 
 	//! Applies a rigid transformation to the cloud
 	/** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
-	\param trans transformation (rotation matrix + translation vector)
+		\param trans transformation (scale * rotation matrix + translation vector)
 	**/
-	virtual void applyTransformation(PointProjectionTools::Transformation& trans);
+    virtual void applyTransformation(PointProjectionTools::Transformation& trans);
+
 
 	//! Returns associated scalar field (if any)
 	ScalarField* getScalarField() { return m_scalarField; } 

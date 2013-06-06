@@ -13,7 +13,7 @@
 
 //CCLib
 #include <CCGeom.h>
-#include <RegistrationTools.h>
+#include <PointProjectionTools.h>
 
 class ccGenericPointCloud;
 class ccGenericGLDisplay;
@@ -75,7 +75,7 @@ protected:
 	void onPointCountChanged();
 
 	//! Calls Horn registration (CCLib::HornRegistrationTools)
-	bool callHornRegistration(CCLib::HornRegistrationTools::ScaledTransformation& trans, double& rms);
+	bool callHornRegistration(CCLib::PointProjectionTools::Transformation& trans, double& rms);
 
 	//! Original cloud context
 	struct cloudContext

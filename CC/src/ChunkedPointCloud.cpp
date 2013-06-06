@@ -147,19 +147,27 @@ void ChunkedPointCloud::addPoint(const CCVector3 &P)
 
 void ChunkedPointCloud::applyTransformation(PointProjectionTools::Transformation& trans)
 {
-	unsigned i,count=size();
+    unsigned count = size();
+
+	//always apply the scale before everything (applying before or after rotation does not changes anything)
+    if (fabs(trans.s - 1.0) > ZERO_TOLERANCE)
+    {
+        for (unsigned i=0; i<count; ++i)
+            *point(i) *= trans.s;
+        m_validBB = false; //invalidate bb
+    }
 
     if (trans.R.isValid())
     {
-		for (i=0;i<count;++i)
-			trans.R.apply(m_points->getValue(i));
+        for (unsigned i=0; i<count; ++i)
+            trans.R.apply(point(i)->u);
         m_validBB = false;
     }
 
-    if (trans.T.norm() > ZERO_TOLERANCE)
+    if (trans.T.norm() > ZERO_TOLERANCE) //T applied only if it makes sense
     {
-		for (i=0;i<count;++i)
-			*point(i) += trans.T;
+        for (unsigned i=0; i<count; ++i)
+            *point(i) += trans.T;
         m_validBB = false;
     }
 }

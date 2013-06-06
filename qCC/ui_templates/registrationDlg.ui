@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>391</height>
+    <height>407</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,16 +26,6 @@
       <string>Role assignation</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QToolButton" name="dataColorButton">
-        <property name="enabled">
-         <bool>false</bool>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
       <item row="0" column="1">
        <widget class="QLabel" name="label_10">
         <property name="text">
@@ -58,6 +48,16 @@
       </item>
       <item row="1" column="0">
        <widget class="QToolButton" name="modelColorButton">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QToolButton" name="dataColorButton">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -123,7 +123,7 @@
       <item>
        <widget class="QGroupBox" name="groupBox_2">
         <property name="title">
-         <string>Stop criterion</string>
+         <string>Parameters (stop criterion and scale)</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
@@ -187,7 +187,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QLineEdit" name="errorMin">
+            <widget class="QLineEdit" name="errorDifferenceLineEdit">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
@@ -209,6 +209,13 @@
             </widget>
            </item>
           </layout>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxFreeScale">
+           <property name="text">
+            <string>Free scale parameter</string>
+           </property>
+          </widget>
          </item>
         </layout>
        </widget>
@@ -284,6 +291,19 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QDialogButtonBox" name="buttonBox">

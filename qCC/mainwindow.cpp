@@ -16,7 +16,7 @@
 //##########################################################################
 
 #include "mainwindow.h"
-
+#include <iostream>
 //CCLib Includes
 #include <GenericChunkedArray.h>
 #include <CloudSamplingTools.h>
@@ -3059,13 +3059,15 @@ void MainWindow::doActionRegister()
 
     //parameters
     CCLib::PointProjectionTools::Transformation transform;
+
     double minErrorDecrease			= rDlg.getMinErrorDecrease();
     unsigned maxIterationCount		= rDlg.getMaxIterationCount();
 	unsigned randomSamplingLimit	= rDlg.randomSamplingLimit();
     bool removeFarthestPoints		= rDlg.removeFarthestPoints();
     ConvergenceMethod method		= rDlg.getConvergenceMethod();
 	bool useDataSFAsWeights			= rDlg.useDataSFAsWeights();
-	bool useModelSFAsWeights		= rDlg.useModelSFAsWeights();
+    bool useModelSFAsWeights		= rDlg.useModelSFAsWeights();
+    bool useScaleFree               = rDlg.useFreeScaleParameter();
     double finalError				= 0.0;
 
 	CCLib::ScalarField* modelWeights = 0;
@@ -3107,6 +3109,7 @@ void MainWindow::doActionRegister()
              minErrorDecrease,
              maxIterationCount,
              finalError,
+             useScaleFree,
              (CCLib::GenericProgressCallback*)&pDlg,
              removeFarthestPoints,
 			 randomSamplingLimit,
@@ -3121,20 +3124,19 @@ void MainWindow::doActionRegister()
     {
         ccConsole::Print("[Register] Convergence reached (RMS at last step: %f)",finalError);
 
-        ccGLMatrix transMat(transform.R,transform.T);
+        ccGLMatrix transMat(transform.R,transform.T, transform.s);
 
-//#ifdef _DEBUG
 		forceConsoleDisplay();
+
+		if (useScaleFree)
+			ccConsole::Print("[Register] Scale: %f",transform.s);
+
 		ccConsole::Print("[Register] Resulting matrix:");
-		const float* mat = transMat.data();
-		ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
-		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
-		//for (int i=0;i<4;++i)
-		//{
-		//	ccConsole::Print("(%6.12f\t%6.12f\t%6.12f\t%6.12f)",mat[0],mat[4],mat[8],mat[12]);
-		//	++mat;
-		//}
-//#endif
+		{
+			const float* mat = transMat.data();
+			ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+			ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
+		}
 
         //cloud to move
         ccGenericPointCloud* pc = 0;

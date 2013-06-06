@@ -28,6 +28,7 @@
 #include "PointProjectionTools.h"
 #include "KdTree.h"
 
+
 //system
 #include <vector>
 
@@ -49,27 +50,34 @@ class RegistrationTools : public CCToolbox
 {
 protected:
 
-	//! ICP Registration procedure
-	/** Determines the best quaternion (a couple qR|qT) to bring the cloud
+	//! Shortcut to PointProjectionTools::ScaledTransformation
+    typedef PointProjectionTools::Transformation ScaledTransformation;
+
+    //! ICP Registration procedure with optional scale estimation
+    /** Determines the best quaternion (a couple qR|qT) and optionally
+		a scale 's' (different from a priori scale Sa) to bring the cloud
 		P closer to the reference cloud X (one step). Refer to the ICP
-		algorithm theory for more details about this procedure.
+		algorithm theory for more details about this procedure, and to
+		jschmidt 2005 for the scale estimation.
 
-			X = s.R.P + T (with s=1 by default)
+			X = Sa.s.R.P + T (with Sa = s = 1 by default)
 
-		\param P the cloud to register
-		\param X the reference cloud
-		\param trans the resulting transformation
-		\param weightsP weights for the registered points (optional)
-		\param weightsX weights for the reference points (optional)
-		\param scale scale between P and X (s)
-		\return success
-	**/
-	static bool RegistrationProcedure(GenericCloud* P,
+        \param P the cloud to register
+        \param X the reference cloud
+        \param trans the resulting transformation
+		\param estimateScale whether to estimate scale (s) as well (see jschmidt 2005)
+        \param weightsP weights for the registered points (optional)
+        \param weightsX weights for the reference points (optional)
+        \param aPrioriScale 'a priori' scale (Sa) between P and X
+        \return success
+    **/
+    static bool RegistrationProcedure(GenericCloud* P,
 										GenericCloud* X,
-										PointProjectionTools::Transformation& trans,
-										ScalarField* weightsP=0,
-										ScalarField* weightsX=0,
-										PointCoordinateType scale = 1.0f);
+										ScaledTransformation& trans,
+										bool estimateScale = false,
+										ScalarField* weightsP = 0,
+										ScalarField* weightsX = 0,
+										PointCoordinateType aPrioriScale = 1.0f);
 
 };
 
@@ -81,18 +89,6 @@ class HornRegistrationTools : public RegistrationTools
 #endif
 {
 public:
-
-	//! A scaled geometrical transformation (scale + rotation + translation)
-	/** P' = s.R.P + T
-	**/
-	struct ScaledTransformation : public PointProjectionTools::Transformation
-	{
-		//! Scale
-		PointCoordinateType s;
-
-		//! Default constructor
-		ScaledTransformation() : s((PointCoordinateType)1.0) {}
-	};
 
 	//! Returns "absolute orientation" (scale + transformation) between two set of (unordered) points
 	/** Warning: both clouds must have the same size (and at least 3 points)
@@ -160,6 +156,7 @@ public:
 		\param minErrorDecrease the minimum (mean square) error decrease between two consecutive steps to continue process (ignored if convType is not MAX_ERROR_CONVERGENCE)
 		\param nbMaxIterations the maximum number of iteration (ignored if convType is not MAX_ITER_CONVERGENCE)
 		\param finalError [output] final error (rms)
+		\param freeScale release the scale during the registration procedure
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param filterOutFarthestPoints if true, the algorithm will automatically ignore farthest points from the reference, for better convergence
 		\param samplingLimit maximum number of points per cloud (they are randomly resampled below this limit otherwise)
@@ -169,16 +166,17 @@ public:
 	**/
 	static CC_ICP_RESULT RegisterClouds(GenericIndexedCloudPersist* modelList,
                                         GenericIndexedCloudPersist* dataList,
-                                        PointProjectionTools::Transformation& totalTrans,
+                                        ScaledTransformation& totalTrans,
                                         CC_ICP_CONVERGENCE_TYPE convType,
                                         double minErrorDecrease,
                                         unsigned nbMaxIterations,
                                         double& finalError,
-                                        GenericProgressCallback* progressCb=0,
-                                        bool filterOutFarthestPoints=false,
-                                        unsigned samplingLimit=20000,
-										ScalarField* modelWeights=0,
-										ScalarField* dataWeights=0);
+                                        bool freeScale = false,
+                                        GenericProgressCallback* progressCb = 0,
+                                        bool filterOutFarthestPoints = false,
+                                        unsigned samplingLimit = 20000,
+										ScalarField* modelWeights = 0,
+										ScalarField* dataWeights = 0);
 };
 
 
@@ -206,7 +204,7 @@ public:
     **/
     static bool RegisterClouds(GenericIndexedCloud* modelCloud,
                                 GenericIndexedCloud* dataCloud,
-                                PointProjectionTools::Transformation& transform,
+                                ScaledTransformation& transform,
                                 float delta,
                                 float beta,
                                 float overlap,
@@ -261,7 +259,7 @@ protected:
     static unsigned ComputeRegistrationScore(KDTree *modelTree,
                                                     GenericIndexedCloud *dataCloud,
                                                     ScalarType delta,
-                                                    PointProjectionTools::Transformation& dataToModel);
+                                                    ScaledTransformation& dataToModel);
 
     //! Find the 3D pseudo intersection between two lines
     /** This function finds the 3D point which is the nearest from the both lines (when this point is unique, i.e. when
@@ -300,7 +298,7 @@ protected:
                                     Base& reference,
                                     std::vector<Base>& candidates,
                                     unsigned nbMaxCandidates,
-                                    std::vector<PointProjectionTools::Transformation>& transforms);
+                                    std::vector<ScaledTransformation>& transforms);
 };
 
 }

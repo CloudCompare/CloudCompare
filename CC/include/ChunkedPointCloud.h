@@ -53,6 +53,7 @@ public:
 		//! Default destructor
 		virtual ~ChunkedPointCloud();
 
+
 		//**** inherited form GenericCloud ****//
 		inline virtual unsigned size() const { return m_points->currentSize(); }
 		virtual void forEach(genericPointAction& anAction);
@@ -78,11 +79,11 @@ public:
 		//! Const version of getPointPersistentPtr
 		inline virtual const CCVector3* getPointPersistentPtr(unsigned index) const { return point(index); }
 
-		//! Applies a rigid transformation to the cloud
-		/** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
-			\param trans transformation (rotation matrix + translation vector)
+        //! Applies a rigid transformation to the cloud, for the scaled scale
+        /** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
+            \param trans transformation (scale * rotation matrix + translation vector)
         **/
-		virtual void applyTransformation(PointProjectionTools::Transformation& trans);
+        virtual void applyTransformation(PointProjectionTools::Transformation& trans);
 
 		//! Resizes the point database
 		/** The cloud database is resized with the specified size. If the new size

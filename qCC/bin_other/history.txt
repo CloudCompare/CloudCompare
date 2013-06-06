@@ -5,6 +5,8 @@ v2.4 ??/??/2013
 	* accessible via 'Tools > Segmentation > Cross Section' or a dedicated icon in the main
 		toolbar (next to the scissors icon)
 	* works only with clouds for the moment
+- New option for ICP registration (thanks to Luca Penasa once again!):
+	* check "Free scale parameter" to register objects with different scales
 - New option is ASCII file load/save dialogs:
 	* maximum number of points per cloud on load
 	* option to write the number of points as a dedicated header line on save

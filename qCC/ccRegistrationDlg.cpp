@@ -35,6 +35,11 @@
 
 #include <assert.h>
 
+//semi-persistent options
+static bool s_freeScaleParameter = false;
+static unsigned s_randomSamplingLimit = 20000;
+static double s_errorDifference = 1.0e-6;
+
 ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget* parent/*=0*/)
     : QDialog(parent), Ui::RegistrationDialog()
 {
@@ -43,7 +48,7 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
     modelEntity = model;
 
     setupUi(this);
-    errorMin->setValidator(new QDoubleValidator(errorMin));
+    errorDifferenceLineEdit->setValidator(new QDoubleValidator(errorDifferenceLineEdit));
     setWindowFlags(Qt::Tool);
 
     setColorsAndLabels();
@@ -52,6 +57,11 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
     QColor qYellow(255,255,0);
     ccDisplayOptionsDlg::SetButtonColor(dataColorButton,qRed);
     ccDisplayOptionsDlg::SetButtonColor(modelColorButton,qYellow);
+
+	//restore semi-persistent settings
+	checkBoxFreeScale->setChecked(s_freeScaleParameter);
+	randomSamplingLimitSpinBox->setValue(s_randomSamplingLimit);
+	errorDifferenceLineEdit->setText(QString::number(s_errorDifference,'e',3));
 
     connect(swapButton, SIGNAL(clicked()), this, SLOT(swapModelAndData()));
 }
@@ -92,6 +102,13 @@ bool ccRegistrationDlg::useModelSFAsWeights() const
     return checkBoxUseModelSFAsWeights->isChecked();
 }
 
+bool ccRegistrationDlg::useFreeScaleParameter() const
+{
+	//we save the parameter by the way ;)
+    s_freeScaleParameter = checkBoxFreeScale->isChecked();
+	return s_freeScaleParameter;
+}
+
 bool ccRegistrationDlg::removeFarthestPoints() const
 {
     return pointsRemoval->isChecked();
@@ -99,7 +116,9 @@ bool ccRegistrationDlg::removeFarthestPoints() const
 
 unsigned ccRegistrationDlg::randomSamplingLimit() const
 {
-	return randomSamplingLimitSpinBox->value();
+	//we save the parameter by the way ;)
+	s_randomSamplingLimit = randomSamplingLimitSpinBox->value();
+	return s_randomSamplingLimit;
 }
 
 unsigned ccRegistrationDlg::getMaxIterationCount() const
@@ -109,9 +128,13 @@ unsigned ccRegistrationDlg::getMaxIterationCount() const
 
 double ccRegistrationDlg::getMinErrorDecrease() const
 {
-    bool ok=true;
-    double val = errorMin->text().toDouble(&ok);
+    bool ok = true;
+    double val = errorDifferenceLineEdit->text().toDouble(&ok);
     assert(ok);
+
+	//we save the parameter by the way ;)
+	if (ok)
+		s_errorDifference = val;
 
     return val;
 }

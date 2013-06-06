@@ -7,10 +7,20 @@ v2.4 ??/??/2013
 	* works only with clouds for the moment
 - New option is ASCII file save dialog:
 	* choice to save the number of points in a dedicated header line
-- "Primitive factory" menu entry moved to the File menu
+- "Primitive factory" menu entry has been moved to the File menu
 	(so as to be accessible even if no entity is selected!)
-- 128 million points per cloud limit removed on the 64 bits version
+- The (old) limit of 128 million points per cloud has been removed on the 64 bits version
 - Shift information is now kept by qRansacSD plugin (shape detection)
+- LAS import/export enhanced:
+	* new dialog to choose the fields to import
+	* all official fields are now properly imported/exported ("Intensity", "Return Number",
+		"Number of Returns", "Scan Direction", "Flightline Edge", "Classification",
+		"Scan Angle Rank", "User Data", "Point Source ID", "Red", "Green", "Blue", "Time")
+	* the 'classification' field can be split into its 'value' and the 3 associated
+		flags ("Synthetic", "Key-point" and "Withheld")
+	* a warning is issued if the user attempts to save a cloud with SFs having non "official"
+		names
+- New icon for the 'clone' method (thanks to JF Hullo): two sheeps instead of one!
 - Bug fixes:
 	* applying the interactive 'rotate/translate' tool to an entity and its parent at the
 		same time would make CC crash

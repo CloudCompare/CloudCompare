@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>242</width>
-    <height>457</height>
+    <height>503</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -138,6 +138,9 @@
              <property name="text">
               <string>Synthetic flag</string>
              </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
@@ -145,12 +148,18 @@
              <property name="text">
               <string>Key-point</string>
              </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
             </widget>
            </item>
            <item>
             <widget class="QCheckBox" name="classifWithheldCheckBox">
              <property name="text">
               <string>Withheld</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -184,12 +193,18 @@
         <property name="text">
          <string>Number of returns</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="scanDirFlagCheckBox">
         <property name="text">
          <string>Scan direction flag</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -198,12 +213,18 @@
         <property name="text">
          <string>Edge of flight line</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="scanAngleRankCheckBox">
         <property name="text">
          <string>Scan angle rank</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -212,6 +233,9 @@
         <property name="text">
          <string>User data</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
       <item>
@@ -219,9 +243,22 @@
         <property name="text">
          <string>Point source ID</string>
         </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="ignoreDefaultFieldsCheckBox">
+     <property name="text">
+      <string>Ignore fields with default values only</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item>

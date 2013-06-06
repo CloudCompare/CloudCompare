@@ -760,11 +760,11 @@ void ccComparisonDlg::compute()
 						compCloud->deleteScalarField(sfExit);
 					compCloud->addScalarField(sfDims[i]);
 				}
-				ccConsole::Warning("[ComputeDistances] Result has been splitted along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
+				ccConsole::Warning("[ComputeDistances] Result has been split along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
 			}
 			else
 			{
-				ccConsole::Error("[ComputeDistances] Not enough memory to generate 3D splitted fields!");
+				ccConsole::Error("[ComputeDistances] Not enough memory to generate 3D split fields!");
 			}
 
 			for (i=0;i<3;++i)

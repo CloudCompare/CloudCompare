@@ -47,6 +47,9 @@
 typedef double colorFieldType;
 //typedef boost::uint16_t colorFieldType;
 
+const char CC_E57_INTENSITY_FIELD_NAME[] = "Intensity";
+const char CC_E57_RETURN_INDEX_FIELD_NAME[] = "Return index";
+
 //Array chunks for reading/writing out information from E57 files
 struct TempArrays
 {
@@ -224,7 +227,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	int minReturnIndex = 0;
 	int maxReturnIndex = 0;
 	{
-		int returnIndexSFIndex = cloud->getScalarFieldIndexByName(CC_SCAN_RETURN_INDEX_FIELD_NAME);
+		int returnIndexSFIndex = cloud->getScalarFieldIndexByName(CC_E57_RETURN_INDEX_FIELD_NAME);
 		if (returnIndexSFIndex>=0)
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(returnIndexSFIndex));
@@ -270,7 +273,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	ccScalarField* intensitySF = 0;
 	bool hasInvalidIntensities = false;
 	{
-		int intensitySFIndex = cloud->getScalarFieldIndexByName(CC_SCAN_INTENSITY_FIELD_NAME);
+		int intensitySFIndex = cloud->getScalarFieldIndexByName(CC_E57_INTENSITY_FIELD_NAME);
 		if (intensitySFIndex<0)
 		{
 			intensitySFIndex = cloud->getCurrentDisplayedScalarFieldIndex();
@@ -1501,7 +1504,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	ccScalarField* intensitySF = 0;
 	if(header.pointFields.intensityField)
 	{
-		intensitySF = new ccScalarField(CC_SCAN_INTENSITY_FIELD_NAME);
+		intensitySF = new ccScalarField(CC_E57_INTENSITY_FIELD_NAME);
 		if (!intensitySF->resize(pointCount))
 		{
 			ccLog::Error("[E57] Not enough memory!");
@@ -1576,7 +1579,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	if (header.pointFields.returnIndexField && header.pointFields.returnMaximum>0)
 	{
 		//we store the point return index as a scalar field
-		returnIndexSF = new ccScalarField(CC_SCAN_RETURN_INDEX_FIELD_NAME);
+		returnIndexSF = new ccScalarField(CC_E57_RETURN_INDEX_FIELD_NAME);
 		if (!returnIndexSF->resize(pointCount))
 		{
 			ccLog::Error("[E57] Not enough memory!");

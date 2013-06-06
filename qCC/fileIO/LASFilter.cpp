@@ -42,6 +42,23 @@
 #include <fstream>				// std::ifstream
 #include <iostream>				// std::cout
 
+//LAS field descriptor
+struct LasField
+{
+	LAS_FIELDS type;
+	ccScalarField* sf;
+	double firstValue;
+	double minValue;
+	double maxValue;
+	double defaultValue;
+
+	LasField() : type(LAS_INVALID), sf(0), firstValue(0.0), defaultValue(0.0), minValue(0.0), maxValue(-1.0) {}
+	LasField(LAS_FIELDS fieldType, double defaultVal, double min, double max) : type(fieldType), sf(0), firstValue(0.0), defaultValue(defaultVal), minValue(min), maxValue(max) {}
+
+	//! Returns officiel field name
+	inline const char* getName() { return (type < LAS_INVALID ? LAS_FIELD_NAMES[type] : 0); }
+};
+
 CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 {
 	if (!entity || !filename)
@@ -78,73 +95,68 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	bool hasColor = theCloud->hasColors();
 
 	//additional fields (as scalar fields)
-	CCLib::ScalarField* classifSF = 0;
-	CCLib::ScalarField* intensitySF = 0;
-	CCLib::ScalarField* timeSF = 0;
-	CCLib::ScalarField* returnNumberSF = 0;
+	std::vector<LasField> fieldsToSave;
 
 	if (theCloud->isA(CC_POINT_CLOUD))
 	{
 		ccPointCloud* pc = static_cast<ccPointCloud*>(theCloud);
 
-		//Classification
+		//Match cloud SFs with official LAS fields
 		{
-			int sfIdx = pc->getScalarFieldIndexByName(CC_LAS_CLASSIFICATION_FIELD_NAME);
-			if (sfIdx>=0)
+			//official LAS fields
+			std::vector<LasField> lasFields;
 			{
-				classifSF = pc->getScalarField(sfIdx);
-				assert(classifSF);
-				if ((int)classifSF->getMin()<0 || (int)classifSF->getMax()>255) //outbounds unsigned char?
+				lasFields.push_back(LasField(LAS_CLASSIFICATION,0,0,255)); //unsigned char: between 0 and 255
+				lasFields.push_back(LasField(LAS_CLASSIF_VALUE,0,0,31)); //5 bits: between 0 and 31
+				lasFields.push_back(LasField(LAS_CLASSIF_SYNTHETIC,0,0,1)); //1 bit: 0 or 1
+				lasFields.push_back(LasField(LAS_CLASSIF_KEYPOINT,0,0,1)); //1 bit: 0 or 1
+				lasFields.push_back(LasField(LAS_CLASSIF_WITHHELD,0,0,1)); //1 bit: 0 or 1
+				lasFields.push_back(LasField(LAS_INTENSITY,0,0,65535)); //16 bits: between 0 and 65536
+				lasFields.push_back(LasField(LAS_TIME,0,0,-1.0)); //8 bytes (double)
+				lasFields.push_back(LasField(LAS_RETURN_NUMBER,1,1,7)); //3 bits: between 1 and 7
+				lasFields.push_back(LasField(LAS_NUMBER_OF_RETURNS,1,1,7)); //3 bits: between 1 and 7
+				lasFields.push_back(LasField(LAS_SCAN_DIRECTION,0,0,1)); //1 bit: 0 or 1
+				lasFields.push_back(LasField(LAS_FLIGHT_LINE_EDGE,0,0,1)); //1 bit: 0 or 1
+				lasFields.push_back(LasField(LAS_SCAN_ANGLE_RANK,0,-90,90)); //signed char: between -90 and +90
+				lasFields.push_back(LasField(LAS_USER_DATA,0,0,255)); //unsigned char: between 0 and 255
+				lasFields.push_back(LasField(LAS_POINT_SOURCE_ID,0,0,65535)); //16 bits: between 0 and 65536
+			}
+
+			//we are going to check now the existing cloud SFs
+			for (unsigned i=0; i<pc->getNumberOfScalarFields(); ++i)
+			{
+				ccScalarField* sf = static_cast<ccScalarField*>(pc->getScalarField(i));
+				//find an equivalent in official LAS fields
+				QString sfName = QString(sf->getName()).toUpper();
+				bool outBounds = false;
+				for (size_t j=0; j<lasFields.size(); ++j)
 				{
-					ccConsole::Warning("[LASFilter] Found a 'Classification' scalar field, but its values outbound LAS specifications (0-255)...");
-					classifSF = 0;
+					//if the name matches
+					if (sfName == QString(lasFields[j].getName()).toUpper())
+					{
+						//check bounds
+						if (sf->getMin() < lasFields[j].minValue || (lasFields[j].maxValue != -1.0 && sf->getMax() > lasFields[j].maxValue)) //outbounds?
+						{
+							ccLog::Warning(QString("[LASFilter] Found a '%1' scalar field, but its values outbound LAS specifications (%2-%3)...").arg(sf->getName()).arg(lasFields[j].minValue).arg(lasFields[j].maxValue));
+							outBounds = true;
+						}
+						else
+						{
+							//we add the SF to the list of saved fields
+							fieldsToSave.push_back(lasFields[j]);
+							fieldsToSave.back().sf = sf;
+						}
+						break;
+					}
+				}
+				
+				//no correspondance was found?
+				if (!outBounds && (fieldsToSave.empty() || fieldsToSave.back().sf != sf))
+				{
+					ccLog::Warning(QString("[LASFilter] Found a '%1' scalar field, but it doesn't match with any of the official LAS fields... we will ignore it!").arg(sf->getName()));
 				}
 			}
 		}
-		//Classification end
-
-		//intensity (as a scalar field)
-		{
-			int sfIdx = pc->getScalarFieldIndexByName(CC_SCAN_INTENSITY_FIELD_NAME);
-			if (sfIdx>=0)
-			{
-				intensitySF = pc->getScalarField(sfIdx);
-				assert(intensitySF);
-				if ((int)intensitySF->getMin()<0 || (int)intensitySF->getMax()>65535) //outbounds unsigned short?
-				{
-					ccConsole::Warning("[LASFilter] Found a 'Intensity' scalar field, but its values outbound LAS specifications (0-65535)...");
-					intensitySF = 0;
-				}
-			}
-		}
-		//Intensity end
-
-		//Time (as a scalar field)
-		{
-			int sfIdx = pc->getScalarFieldIndexByName(CC_SCAN_TIME_FIELD_NAME);
-			if (sfIdx>=0)
-			{
-				timeSF = pc->getScalarField(sfIdx);
-				assert(timeSF);
-			}
-		}
-		//Time end
-
-		//Return number (as a scalar field)
-		{
-			int sfIdx = pc->getScalarFieldIndexByName(CC_SCAN_RETURN_INDEX_FIELD_NAME);
-			if (sfIdx>=0)
-			{
-				returnNumberSF = pc->getScalarField(sfIdx);
-				assert(returnNumberSF);
-				if ((int)returnNumberSF->getMin()<0 || (int)returnNumberSF->getMax()>7) //outbounds 3 bits?
-				{
-					ccConsole::Warning("[LASFilter] Found a 'Return number' scalar field, but its values outbound LAS specifications (0-7)...");
-					returnNumberSF = 0;
-				}
-			}
-		}
-		//Return number end
 	}
 
 	//open binary file for writing
@@ -179,10 +191,26 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 			//int_value = (double_value-offset)/scale
 			header.SetOffset(-shift[0]+(double)bBox.minCorner().x,-shift[1]+(double)bBox.minCorner().y,-shift[2]+(double)bBox.minCorner().z);
 			header.SetScale(1.0e-9*std::max<double>(diag.x,ZERO_TOLERANCE), //result must fit in 32bits?!
-				1.0e-9*std::max<double>(diag.y,ZERO_TOLERANCE),
-				1.0e-9*std::max<double>(diag.z,ZERO_TOLERANCE));
+							1.0e-9*std::max<double>(diag.y,ZERO_TOLERANCE),
+							1.0e-9*std::max<double>(diag.z,ZERO_TOLERANCE));
 		}
 		header.SetPointRecordsCount(numberOfPoints);
+
+		//DGM FIXME: doesn't seem to do anything;)
+		//if (!hasColor) //we must remove the colors dimensions!
+		//{
+		//	liblas::Schema schema = header.GetSchema();
+		//	boost::optional< liblas::Dimension const& > redDim = schema.GetDimension("Red");
+		//	if (redDim)
+		//		schema.RemoveDimension(redDim.get());
+		//	boost::optional< liblas::Dimension const& > greenDim = schema.GetDimension("Green");
+		//	if (greenDim)
+		//		schema.RemoveDimension(greenDim.get());
+		//	boost::optional< liblas::Dimension const& > blueDim = schema.GetDimension("Blue");
+		//	if (blueDim)
+		//		schema.RemoveDimension(blueDim.get());
+		//	header.SetSchema(schema);
+		//}
 		//header.SetDataFormatId(Header::ePointFormat1);
 
 		writer = new liblas::Writer(ofs, header);
@@ -203,6 +231,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	//liblas::Point point(boost::shared_ptr<liblas::Header>(new liblas::Header(writer->GetHeader())));
 	liblas::Point point(&writer->GetHeader());
+	liblas::Classification classif = point.GetClassification();
 
 	for (unsigned i=0; i<numberOfPoints; i++)
 	{
@@ -213,34 +242,86 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 			double z=-shift[2]+(double)P->z;
 			point.SetCoordinates(x, y, z);
 		}
+		
 		if (hasColor)
 		{
 			const colorType* rgb = theCloud->getPointColor(i);
 			point.SetColor(liblas::Color(rgb[0]<<8,rgb[1]<<8,rgb[2]<<8)); //DGM: LAS colors are stored on 16 bits!
 		}
 
-		if (classifSF)
+		//additional fields
+		for (std::vector<LasField>::const_iterator it = fieldsToSave.begin(); it != fieldsToSave.end(); ++it)
 		{
-			liblas::Classification classif;
-			classif.SetClass((boost::uint32_t)classifSF->getValue(i));
-			point.SetClassification(classif);
+			assert(it->sf);
+			switch(it->type)
+			{
+			case LAS_X:
+			case LAS_Y:
+			case LAS_Z:
+				assert(false);
+				break;
+			case LAS_INTENSITY:
+				point.SetIntensity((boost::uint16_t)it->sf->getValue(i));
+				break;
+			case LAS_RETURN_NUMBER:
+				point.SetReturnNumber((boost::uint16_t)it->sf->getValue(i));
+				break;
+			case LAS_NUMBER_OF_RETURNS:
+				point.SetNumberOfReturns((boost::uint16_t)it->sf->getValue(i));
+				break;
+			case LAS_SCAN_DIRECTION:
+				point.SetScanDirection((boost::uint16_t)it->sf->getValue(i));
+				break;
+			case LAS_FLIGHT_LINE_EDGE:
+				point.SetFlightLineEdge((boost::uint16_t)it->sf->getValue(i));
+				break;
+			case LAS_CLASSIFICATION:
+				{
+					boost::uint32_t val = (boost::uint32_t)it->sf->getValue(i);
+					classif.SetClass(val & 31);		//first 5 bits
+					classif.SetSynthetic(val & 32); //6th bit
+					classif.SetKeyPoint(val & 64);	//7th bit
+					classif.SetWithheld(val & 128);	//8th bit
+				}
+				break;
+			case LAS_SCAN_ANGLE_RANK:
+				point.SetScanAngleRank((boost::uint8_t)it->sf->getValue(i));
+				break;
+			case LAS_USER_DATA:
+				point.SetUserData((boost::uint8_t)it->sf->getValue(i));
+				break;
+			case LAS_POINT_SOURCE_ID:
+				point.SetPointSourceID((boost::uint16_t)it->sf->getValue(i));
+				break;
+			case LAS_RED:
+			case LAS_GREEN:
+			case LAS_BLUE:
+				assert(false);
+				break;
+			case LAS_TIME:
+				point.SetTime((double)it->sf->getValue(i));
+				break;
+			case LAS_CLASSIF_VALUE:
+				classif.SetClass((boost::uint32_t)it->sf->getValue(i));
+				break;
+			case LAS_CLASSIF_SYNTHETIC:
+				classif.SetSynthetic((boost::uint32_t)it->sf->getValue(i));
+				break;
+			case LAS_CLASSIF_KEYPOINT:
+				classif.SetKeyPoint((boost::uint32_t)it->sf->getValue(i));
+				break;
+			case LAS_CLASSIF_WITHHELD:
+				classif.SetWithheld((boost::uint32_t)it->sf->getValue(i));
+				break;
+			case LAS_INVALID:
+			default:
+				assert(false);
+				break;
+			}
 		}
 
-		if (intensitySF)
-		{
-			point.SetIntensity((boost::uint16_t)intensitySF->getValue(i));
-		}
-
-		if (timeSF)
-		{
-			point.SetTime((double)timeSF->getValue(i));
-		}
-
-		if (returnNumberSF)
-		{
-			point.SetReturnNumber((boost::uint16_t)returnNumberSF->getValue(i));
-			point.SetNumberOfReturns((boost::uint16_t)returnNumberSF->getMax());
-		}
+		//set classification (it's mandatory anyway ;)
+		point.SetClassification(classif);
 
 		writer->WritePoint(point);
 
@@ -249,25 +330,10 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	}
 
 	delete writer;
-	//ofs.close();
+	ofs.close();
 
 	return CC_FERR_NO_ERROR;
 }
-
-//LAS field descriptor
-struct LasField
-{
-	LAS_FIELDS type;
-	ccScalarField* sf;
-	QString sfName;
-	double firstValue;
-	double minValue;
-	double maxValue;
-	double defaultValue;
-
-	LasField() : type(LAS_INVALID), sf(0), firstValue(0.0), defaultValue(0.0), minValue(0.0), maxValue(-1.0) {}
-	LasField(LAS_FIELDS fieldType, QString name, double defaultVal, double min, double max) : type(fieldType), sf(0), sfName(name), firstValue(0.0), defaultValue(defaultVal), minValue(min), maxValue(max) {}
-};
 
 CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
@@ -320,6 +386,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 		ifs.close();
 		return CC_FERR_CANCELED_BY_USER;
 	}
+	bool ignoreDefaultFields = dlg.ignoreDefaultFieldsCheckBox->isChecked();
 
 	//RGB color
 	liblas::Color rgbColorMask; //(0,0,0) on construction
@@ -451,33 +518,33 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 
 			//DGM: from now on, we only enable scalar fields when we detect a valid value!
 			if (dlg.doLoad(LAS_CLASSIFICATION))
-					fieldsToLoad.push_back(LasField(LAS_CLASSIFICATION,CC_LAS_CLASSIFICATION_FIELD_NAME,0,0,255)); //unsigned char: between 0 and 255
+					fieldsToLoad.push_back(LasField(LAS_CLASSIFICATION,0,0,255)); //unsigned char: between 0 and 255
 			if (dlg.doLoad(LAS_CLASSIF_VALUE))
-				fieldsToLoad.push_back(LasField(LAS_CLASSIF_VALUE,LAS_FIELD_NAMES[LAS_CLASSIF_VALUE],0,0,31)); //5 bits: between 0 and 31
+				fieldsToLoad.push_back(LasField(LAS_CLASSIF_VALUE,0,0,31)); //5 bits: between 0 and 31
 			if (dlg.doLoad(LAS_CLASSIF_SYNTHETIC))
-				fieldsToLoad.push_back(LasField(LAS_CLASSIF_SYNTHETIC,LAS_FIELD_NAMES[LAS_CLASSIF_SYNTHETIC],0,0,1)); //1 bit: 0 or 1
+				fieldsToLoad.push_back(LasField(LAS_CLASSIF_SYNTHETIC,0,0,1)); //1 bit: 0 or 1
 			if (dlg.doLoad(LAS_CLASSIF_KEYPOINT))
-				fieldsToLoad.push_back(LasField(LAS_CLASSIF_KEYPOINT,LAS_FIELD_NAMES[LAS_CLASSIF_KEYPOINT],0,0,1)); //1 bit: 0 or 1
+				fieldsToLoad.push_back(LasField(LAS_CLASSIF_KEYPOINT,0,0,1)); //1 bit: 0 or 1
 			if (dlg.doLoad(LAS_CLASSIF_WITHHELD))
-				fieldsToLoad.push_back(LasField(LAS_CLASSIF_WITHHELD,LAS_FIELD_NAMES[LAS_CLASSIF_WITHHELD],0,0,1)); //1 bit: 0 or 1
+				fieldsToLoad.push_back(LasField(LAS_CLASSIF_WITHHELD,0,0,1)); //1 bit: 0 or 1
 			if (dlg.doLoad(LAS_INTENSITY))
-				fieldsToLoad.push_back(LasField(LAS_INTENSITY,CC_SCAN_INTENSITY_FIELD_NAME,0,0,65535)); //16 bits: between 0 and 65536
+				fieldsToLoad.push_back(LasField(LAS_INTENSITY,0,0,65535)); //16 bits: between 0 and 65536
 			if (dlg.doLoad(LAS_TIME))
-				fieldsToLoad.push_back(LasField(LAS_TIME,CC_SCAN_TIME_FIELD_NAME,0,0,-1.0)); //8 bytes (double)
+				fieldsToLoad.push_back(LasField(LAS_TIME,0,0,-1.0)); //8 bytes (double)
 			if (dlg.doLoad(LAS_RETURN_NUMBER))
-				fieldsToLoad.push_back(LasField(LAS_RETURN_NUMBER,CC_SCAN_RETURN_INDEX_FIELD_NAME,1,1,7)); //3 bits: between 1 and 7
+				fieldsToLoad.push_back(LasField(LAS_RETURN_NUMBER,1,1,7)); //3 bits: between 1 and 7
 			if (dlg.doLoad(LAS_NUMBER_OF_RETURNS))
-				fieldsToLoad.push_back(LasField(LAS_NUMBER_OF_RETURNS,LAS_FIELD_NAMES[LAS_NUMBER_OF_RETURNS],1,1,7)); //3 bits: between 1 and 7
+				fieldsToLoad.push_back(LasField(LAS_NUMBER_OF_RETURNS,1,1,7)); //3 bits: between 1 and 7
 			if (dlg.doLoad(LAS_SCAN_DIRECTION))
-				fieldsToLoad.push_back(LasField(LAS_SCAN_DIRECTION,LAS_FIELD_NAMES[LAS_SCAN_DIRECTION],0,0,1)); //1 bit: 0 or 1
+				fieldsToLoad.push_back(LasField(LAS_SCAN_DIRECTION,0,0,1)); //1 bit: 0 or 1
 			if (dlg.doLoad(LAS_FLIGHT_LINE_EDGE))
-				fieldsToLoad.push_back(LasField(LAS_FLIGHT_LINE_EDGE,LAS_FIELD_NAMES[LAS_FLIGHT_LINE_EDGE],0,0,1)); //1 bit: 0 or 1
+				fieldsToLoad.push_back(LasField(LAS_FLIGHT_LINE_EDGE,0,0,1)); //1 bit: 0 or 1
 			if (dlg.doLoad(LAS_SCAN_ANGLE_RANK))
-				fieldsToLoad.push_back(LasField(LAS_SCAN_ANGLE_RANK,LAS_FIELD_NAMES[LAS_SCAN_ANGLE_RANK],0,-90,90)); //signed char: between -90 and +90
+				fieldsToLoad.push_back(LasField(LAS_SCAN_ANGLE_RANK,0,-90,90)); //signed char: between -90 and +90
 			if (dlg.doLoad(LAS_USER_DATA))
-				fieldsToLoad.push_back(LasField(LAS_USER_DATA,LAS_FIELD_NAMES[LAS_USER_DATA],0,0,255)); //unsigned char: between 0 and 255
+				fieldsToLoad.push_back(LasField(LAS_USER_DATA,0,0,255)); //unsigned char: between 0 and 255
 			if (dlg.doLoad(LAS_POINT_SOURCE_ID))
-				fieldsToLoad.push_back(LasField(LAS_POINT_SOURCE_ID,LAS_FIELD_NAMES[LAS_POINT_SOURCE_ID],0,0,65535)); //16 bits: between 0 and 65536
+				fieldsToLoad.push_back(LasField(LAS_POINT_SOURCE_ID,0,0,65535)); //16 bits: between 0 and 65536
 		}
 
 		assert(newPointAvailable);
@@ -648,9 +715,9 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 					it->firstValue = value;
 				}
 				
-				if (value != it->firstValue || it->firstValue != it->defaultValue)
+				if (!ignoreDefaultFields || value != it->firstValue || it->firstValue != it->defaultValue)
 				{
-					it->sf = new ccScalarField(qPrintable(it->sfName));
+					it->sf = new ccScalarField(qPrintable(it->getName()));
 					if (it->sf->reserve(fileChunkSize))
 					{
 						it->sf->link();

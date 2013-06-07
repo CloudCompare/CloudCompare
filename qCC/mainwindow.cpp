@@ -112,6 +112,7 @@
 #include "ccPrimitiveFactoryDlg.h"
 #include "ccMouse3DContextMenu.h"
 #include "ccColorScaleEditorDlg.h"
+#include "ccComputeOctreeDlg.h"
 #include <ui_aboutDlg.h>
 
 //3D mouse handler
@@ -1145,43 +1146,119 @@ void MainWindow::doActionConvertNormalsToHSV()
 
 void MainWindow::doActionComputeOctree()
 {
-    ccProgressDialog pDlg(true,this);
-
-	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
-	ccHObject::Container selectedEntities = m_selectedEntities;
-    size_t i,selNum = selectedEntities.size();
-    for (i=0;i<selNum;++i)
+	ccBBox bbox;
+	std::set<ccGenericPointCloud*> clouds;
+    size_t selNum = m_selectedEntities.size();
+	PointCoordinateType maxBoxSize = -1.0;
+    for (size_t i=0; i<selNum; ++i)
     {
-        ccGenericPointCloud* cloud = 0;
-        ccHObject* ent = selectedEntities[i];
-        /*if (ent->isKindOf(CC_MESH)) //TODO
-            cloud = static_cast<ccGenericMesh*>(ent)->getAssociatedCloud();
-        else */
-        if (ent->isKindOf(CC_POINT_CLOUD))
-            cloud = static_cast<ccGenericPointCloud*>(ent);
+        ccHObject* ent = m_selectedEntities[i];
 
-        if (cloud)
-        {
-			//we temporarily detach entity, as it may undergo
-			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
-			ccHObject* parent=0;
-			removeObjectTemporarilyFromDBTree(cloud,parent);
-			QElapsedTimer eTimer;
-			eTimer.start();
-            ccOctree* octree = cloud->computeOctree(&pDlg);
-			int elapsedTime_ms = eTimer.elapsed();
-			putObjectBackIntoDBTree(cloud,parent);
-            if (octree)
+		//specific test for locked vertices
+		bool lockedVertices;
+        ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+		if (cloud && lockedVertices)
+		{
+			DisplayLockedVerticesWarning();
+			continue;
+		}
+		clouds.insert(cloud);
+
+		//we look for the biggest box so as to define the "minimum cell size"
+		ccBBox thisBBox = cloud->getBB();
+		if (thisBBox.isValid())
+		{
+			CCVector3 dd = thisBBox.maxCorner()-thisBBox.minCorner();
+			PointCoordinateType maxd = std::max(dd.x,std::max(dd.y,dd.z));
+			if (maxBoxSize < 0.0 || maxd > maxBoxSize)
+				maxBoxSize = maxd;
+		}
+
+		bbox += cloud->getBB();
+	}
+
+	if (clouds.empty() || maxBoxSize < 0.0)
+	{
+		ccLog::Warning("[doActionComputeOctree] No elligible entities in selection!");
+		return;
+	}
+
+	//min(cellSize) = max(dim)/2^N with N = max subidivision level
+	double minCellSize = (double)maxBoxSize/(double)(1 << ccOctree::MAX_OCTREE_LEVEL);
+
+	ccComputeOctreeDlg coDlg(bbox,minCellSize,this);
+	if (!coDlg.exec())
+		return;
+
+    ccProgressDialog pDlg(true,this);
+	
+	//if we must use a custom bounding box, we update 'bbox'
+	if (coDlg.getMode() == ccComputeOctreeDlg::CUSTOM_BBOX)
+		bbox = coDlg.getCustomBBox();
+
+    for (std::set<ccGenericPointCloud*>::iterator it = clouds.begin(); it != clouds.end(); ++it)
+    {
+        ccGenericPointCloud* cloud = *it;
+
+		//we temporarily detach entity, as it may undergo
+		//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
+		ccHObject* parent=0;
+		removeObjectTemporarilyFromDBTree(cloud,parent);
+		
+		//computation
+		QElapsedTimer eTimer;
+		eTimer.start();
+		ccOctree* octree = 0;
+		switch(coDlg.getMode())
+		{
+		case ccComputeOctreeDlg::DEFAULT:
+			octree = cloud->computeOctree(&pDlg);
+			break;
+		case ccComputeOctreeDlg::MIN_CELL_SIZE:
+		case ccComputeOctreeDlg::CUSTOM_BBOX:
 			{
-				ccConsole::Print("[doActionComputeOctree] Timing: %2.3f s",elapsedTime_ms/1.0e3);
-                octree->setVisible(true);
-				octree->prepareDisplayForRefresh();
+				//for a cell-size based custom box, we must update it for each cloud!
+				if (coDlg.getMode() == ccComputeOctreeDlg::MIN_CELL_SIZE)
+				{
+					double cellSize = coDlg.getMinCellSize();
+					PointCoordinateType halfBoxWidth = (PointCoordinateType)(cellSize * (double)(1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
+					CCVector3 C = cloud->getBB().getCenter();
+					bbox = ccBBox(	C-CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth),
+									C+CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth));
+				}
+				cloud->deleteOctree();
+				octree = new ccOctree(cloud);
+				if (octree->build(bbox.minCorner(),bbox.maxCorner(),0,0,&pDlg)>0)
+				{
+					octree->setDisplay(cloud->getDisplay());
+					cloud->addChild(octree);
+				}
+				else
+				{
+					delete octree;
+					octree = 0;
+				}
 			}
-			else
-			{
-				ccConsole::Warning(QString("Octree computation on entity '%1' failed!").arg(ent->getName()));
-			}
-        }
+			break;
+		default:
+			assert(false);
+			return;
+		}
+		int elapsedTime_ms = eTimer.elapsed();
+		
+		//put object back in tree
+		putObjectBackIntoDBTree(cloud,parent);
+		
+		if (octree)
+		{
+			ccConsole::Print("[doActionComputeOctree] Timing: %2.3f s",elapsedTime_ms/1.0e3);
+			octree->setVisible(true);
+			octree->prepareDisplayForRefresh();
+		}
+		else
+		{
+			ccConsole::Warning(QString("Octree computation on cloud '%1' failed!").arg(cloud->getName()));
+		}
     }
 
     refreshAll();
@@ -7487,6 +7564,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionSetColorGradient->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
     actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
+    actionScalarFieldFromColor->setEnabled(atLeastOneEntity && atLeastOneColor);
     actionComputeMeshAA->setEnabled(atLeastOneCloud);
     actionComputeMeshLS->setEnabled(atLeastOneCloud);
     //actionComputeQuadric3D->setEnabled(atLeastOneCloud);
@@ -7564,7 +7642,6 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionCloudMeshDist->setEnabled(exactlyTwoEntities && atLeastOneMesh);      //at least one Mesh!
     actionCPS->setEnabled(exactlyTwoClouds);
     actionScalarFieldArithmetic->setEnabled(exactlyOneEntity && atLeastOneSF);
-    actionScalarFieldFromColor->setEnabled(atLeastOneCloud && atLeastOneColor);
 
     //>1
     bool atLeastTwoEntities = (selInfo.selCount>1);

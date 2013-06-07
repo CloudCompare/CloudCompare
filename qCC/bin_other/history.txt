@@ -7,6 +7,9 @@ v2.4 ??/??/2013
 	* works only with clouds for the moment
 - New option for ICP registration (thanks to Luca Penasa once again!):
 	* check "Free scale parameter" to register objects with different scales
+- New dialog for computing the octree:
+	* the user can specify the cell size at the maximum subdivision level
+	* or define a custom bounding box
 - New tool: "Convert RGB to scalar field"
 	* Edit > Colors
 - New option is ASCII file load/save dialogs:

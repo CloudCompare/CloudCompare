@@ -256,8 +256,6 @@ void ccPropertiesTreeDelegate::appendRow(QStandardItem* leftItem, QStandardItem*
 		//the presistent editor (if any) is always the right one!
 		if (openPersistentEditor)
 			m_view->openPersistentEditor(m_model->index(m_model->rowCount()-1,1));
-
-		ccLog::PrintDebug("Rows = %i",m_model->rowCount());
 	}
 }
 

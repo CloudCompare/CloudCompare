@@ -14,17 +14,8 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1595                                                              $
-//$LastChangedDate:: 2010-07-02 18:04:17 +0200 (ven., 02 juil. 2010)       $
-//**************************************************************************
-//
 
 #include "ccCurvatureDlg.h"
-
-#include <DgmOctree.h>
 
 ccCurvatureDlg::ccCurvatureDlg(QWidget* parent/*=0*/) : QDialog(parent), Ui::CurvatureDialog()
 {
@@ -33,7 +24,7 @@ ccCurvatureDlg::ccCurvatureDlg(QWidget* parent/*=0*/) : QDialog(parent), Ui::Cur
     setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
-double ccCurvatureDlg::getKernelSize()
+double ccCurvatureDlg::getKernelSize() const
 {
     return kernelDoubleSpinBox->value();
 }
@@ -43,7 +34,7 @@ void ccCurvatureDlg::setKernelSize(double size)
     kernelDoubleSpinBox->setValue(size<0.0 ? 0.0 : size);
 }
 
-CCLib::Neighbourhood::CC_CURVATURE_TYPE ccCurvatureDlg::getCurvatureType()
+CCLib::Neighbourhood::CC_CURVATURE_TYPE ccCurvatureDlg::getCurvatureType() const
 {
     switch(curvatureTypeComboBox->currentIndex())
     {

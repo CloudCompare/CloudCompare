@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1595                                                              $
-//$LastChangedDate:: 2010-07-02 18:04:17 +0200 (ven., 02 juil. 2010)       $
-//**************************************************************************
-//
 
 #ifndef CC_CURVATURE_DLG_HEADER
 #define CC_CURVATURE_DLG_HEADER
@@ -39,13 +32,13 @@ public:
     ccCurvatureDlg(QWidget* parent=0);
 
     //! Returns kernel size
-    double getKernelSize();
+    double getKernelSize() const;
 
     //! Sets kernel size
     void setKernelSize(double size);
 
     //! Returns curvature type
-    CCLib::Neighbourhood::CC_CURVATURE_TYPE getCurvatureType();
+    CCLib::Neighbourhood::CC_CURVATURE_TYPE getCurvatureType() const;
 };
 
-#endif
+#endif //CC_CURVATURE_DLG_HEADER

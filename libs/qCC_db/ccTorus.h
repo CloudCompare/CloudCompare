@@ -64,6 +64,7 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TORUS; }
 
 	//inherited from ccGenericPrimitive
+	virtual QString getTypeName() const { return "Torus"; }
 	virtual bool hasDrawingPrecision() const { return true; }
 	virtual ccGenericPrimitive* clone() const;
 

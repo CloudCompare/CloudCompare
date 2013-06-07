@@ -592,7 +592,7 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 		P->placeIteratorAtBegining();
 
 		unsigned count = X->size();
-		assert(P->size() == X);
+		assert(P->size() == count);
 		for (unsigned i=0; i<count; ++i)
 		{
 			//a refers to P (not moving) and b to X (moving)

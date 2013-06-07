@@ -64,6 +64,7 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const { return CC_CONE; }
 
 	//inherited from ccGenericPrimitive
+	virtual QString getTypeName() const { return "Cone"; }
 	virtual bool hasDrawingPrecision() const { return true; }
 	virtual ccGenericPrimitive* clone() const;
 

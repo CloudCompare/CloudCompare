@@ -56,6 +56,7 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const { return CC_PLANE; }
 
 	//inherited from ccGenericPrimitive
+	virtual QString getTypeName() const { return "Plane"; }
 	virtual ccGenericPrimitive* clone() const;
 
 	//inherited from ccDrawableObject

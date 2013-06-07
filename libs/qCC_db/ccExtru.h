@@ -61,6 +61,7 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const { return CC_EXTRU; }
 
 	//inherited from ccGenericPrimitive
+	virtual QString getTypeName() const { return "Extrusion"; }
 	virtual ccGenericPrimitive* clone() const;
 
 	//! Returns extrusion thickness

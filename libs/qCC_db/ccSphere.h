@@ -55,6 +55,7 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const { return CC_SPHERE; }
 
 	//inherited from ccGenericPrimitive
+	virtual QString getTypeName() const { return "Sphere"; }
 	virtual bool hasDrawingPrecision() const { return true; }
 	virtual ccGenericPrimitive* clone() const;
 

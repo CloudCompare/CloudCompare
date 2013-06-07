@@ -56,6 +56,7 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const { return CC_CYLINDER; }
 
 	//inherited from ccGenericPrimitive
+	virtual QString getTypeName() const { return "Cylinder"; }
 	virtual ccGenericPrimitive* clone() const;
 
 protected:

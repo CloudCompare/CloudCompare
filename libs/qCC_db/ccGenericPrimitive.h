@@ -40,6 +40,9 @@ public:
 	**/
 	ccGenericPrimitive(QString name = QString(), const ccGLMatrix* transMat = 0);
 
+	//! Returns type name (sphere, cylinder, etc.)
+	virtual QString getTypeName() const = 0;
+
 	//! Clones primitive
 	virtual ccGenericPrimitive* clone() const = 0;
 

@@ -41,41 +41,43 @@ class QStandardItemModel;
 class QStandardItem;
 class QAbstractItemView;
 
-enum CC_PROPERTY_ROLE { OBJECT_NAME					,
-                        OBJECT_VISIBILITY           ,
-                        OBJECT_CURRENT_DISPLAY		,
-                        OBJECT_COLORS_SHOWN			,
-                        OBJECT_NORMALS_SHOWN		,
-                        OBJECT_SCALAR_FIELD_SHOWN	,
-                        //OBJECT_XXXX				,
-                        //OBJECT_XXXX				,
-                        OBJECT_SF_SHOW_SCALE		,
-                        OBJECT_OCTREE_LEVEL         ,
-                        OBJECT_OCTREE_TYPE          ,
-                        OBJECT_MESH_WIRE            ,
-						OBJECT_MESH_STIPPLING		,
-                        OBJECT_CURRENT_SCALAR_FIELD ,
-                        OBJECT_CURRENT_COLOR_RAMP   ,
-                        OBJECT_IMAGE_ALPHA          ,
-                        OBJECT_APPLY_IMAGE_VIEWPORT ,
-                        OBJECT_CLOUD_SF_EDITOR      ,
-                        OBJECT_SENSOR_DISPLAY_SCALE ,
-                        OBJECT_COLOR_RAMP_STEPS     ,
-						OBJECT_MATERIALS			,
-						OBJECT_APPLY_LABEL_VIEWPORT	,
-						OBJECT_LABEL_DISP_2D		,
-						OBJECT_LABEL_DISP_3D		,
-                        OBJECT_PRIMITIVE_PRECISION  ,
-						OBJECT_CLOUD_POINT_SIZE		,
-						OBJECT_NAME_IN_3D			,
-};
-
 //! GUI properties list dialog element
 class ccPropertiesTreeDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 
 public:
+
+	//! Delegate items roles
+	enum CC_PROPERTY_ROLE { OBJECT_NO_PROPERTY		= 0	,
+							OBJECT_NAME					,
+							OBJECT_VISIBILITY           ,
+							OBJECT_CURRENT_DISPLAY		,
+							OBJECT_COLORS_SHOWN			,
+							OBJECT_NORMALS_SHOWN		,
+							OBJECT_SCALAR_FIELD_SHOWN	,
+							//OBJECT_XXXX				,
+							//OBJECT_XXXX				,
+							OBJECT_SF_SHOW_SCALE		,
+							OBJECT_OCTREE_LEVEL         ,
+							OBJECT_OCTREE_TYPE          ,
+							OBJECT_MESH_WIRE            ,
+							OBJECT_MESH_STIPPLING		,
+							OBJECT_CURRENT_SCALAR_FIELD ,
+							OBJECT_CURRENT_COLOR_RAMP   ,
+							OBJECT_IMAGE_ALPHA          ,
+							OBJECT_APPLY_IMAGE_VIEWPORT ,
+							OBJECT_CLOUD_SF_EDITOR      ,
+							OBJECT_SENSOR_DISPLAY_SCALE ,
+							OBJECT_COLOR_RAMP_STEPS     ,
+							OBJECT_MATERIALS			,
+							OBJECT_APPLY_LABEL_VIEWPORT	,
+							OBJECT_LABEL_DISP_2D		,
+							OBJECT_LABEL_DISP_3D		,
+							OBJECT_PRIMITIVE_PRECISION  ,
+							OBJECT_CLOUD_POINT_SIZE		,
+							OBJECT_NAME_IN_3D			,
+	};
 
     //! Default constructor
     ccPropertiesTreeDelegate(QStandardItemModel* _model, QAbstractItemView* _view, QObject *parent = 0);
@@ -121,7 +123,8 @@ protected slots:
 
 protected:
 
-    void addSeparator(const char* title);
+    void addSeparator(QString title);
+	void appendRow(QStandardItem* leftItem, QStandardItem* rightItem, bool openPersistentEditor = false);
 
     void fillWithHObject(ccHObject*);
     void fillWithPointCloud(ccGenericPointCloud*);

@@ -55,6 +55,7 @@ public:
 	virtual CC_CLASS_ENUM getClassID() const { return CC_BOX; }
 
 	//inherited from ccGenericPrimitive
+	virtual QString getTypeName() const { return "Box"; }
 	virtual ccGenericPrimitive* clone() const;
 
 	//! Returns box dimensions

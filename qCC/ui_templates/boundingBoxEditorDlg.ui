@@ -237,8 +237,6 @@
        </widget>
       </item>
      </layout>
-     <zorder>warningLabel</zorder>
-     <zorder>warningLabel</zorder>
     </widget>
    </item>
    <item>
@@ -264,9 +262,16 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="resetPushButton">
+      <widget class="QPushButton" name="defaultPushButton">
        <property name="text">
-        <string>Reset</string>
+        <string>Default</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="lastPushButton">
+       <property name="text">
+        <string>Last</string>
        </property>
       </widget>
      </item>

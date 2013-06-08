@@ -56,8 +56,10 @@ public slots:
 protected slots:
 
 	void squareModeActivated(bool);
-	void reset();
+	void resetToDefault();
+	void resetToLast();
 	void cancel();
+	void saveBoxAndAccept();
 
 	void updateXWidth(double);
 	void updateYWidth(double);

@@ -28,8 +28,6 @@ class ccBoundingBoxEditorDlg;
 //! Dialog for octree computation
 class ccComputeOctreeDlg : public QDialog, public Ui::ComputeOctreeDialog
 {
-	Q_OBJECT
-
 public:
 
     //! Default constructor
@@ -48,8 +46,6 @@ public:
 
     //! Returns custom bbox
     ccBBox getCustomBBox() const;
-
-protected slots:
 
 protected:
 

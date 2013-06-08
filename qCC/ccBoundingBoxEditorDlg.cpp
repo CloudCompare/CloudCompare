@@ -17,6 +17,9 @@
 
 #include "ccBoundingBoxEditorDlg.h"
 
+//Box state at last dialog execution
+static ccBBox s_lastBBox;
+
 ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 	: QDialog(parent)
 	, Ui::BoundingBoxEditorDialog()
@@ -41,9 +44,10 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 
 	connect(pointTypeComboBox,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(reflectChanges(int)));
 	connect(keepSquareCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(squareModeActivated(bool)));
-	connect(okPushButton,		SIGNAL(clicked()),					this,	SLOT(accept()));
+	connect(okPushButton,		SIGNAL(clicked()),					this,	SLOT(saveBoxAndAccept()));
 	connect(cancelPushButton,	SIGNAL(clicked()),					this,	SLOT(cancel()));
-	connect(resetPushButton,	SIGNAL(clicked()),					this,	SLOT(reset()));
+	connect(defaultPushButton,	SIGNAL(clicked()),					this,	SLOT(resetToDefault()));
+	connect(lastPushButton,		SIGNAL(clicked()),					this,	SLOT(resetToLast()));
 
 	connect(xDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(updateCurrentBBox(double)));	
 	connect(yDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(updateCurrentBBox(double)));	
@@ -53,7 +57,8 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 	connect(dyDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(updateYWidth(double)));	
 	connect(dzDoubleSpinBox,	SIGNAL(valueChanged(double)),		this,	SLOT(updateZWidth(double)));	
 
-	resetPushButton->setVisible(false);
+	defaultPushButton->setVisible(false);
+	lastPushButton->setVisible(s_lastBBox.isValid());
 	checkBaseInclusion();
 }
 
@@ -131,11 +136,12 @@ void ccBoundingBoxEditorDlg::set2DMode(bool state)
 
 void ccBoundingBoxEditorDlg::setBaseBBox(const ccBBox& box)
 {
+	//set new default one
 	m_initBBox = m_baseBBox = box;
 
-	resetPushButton->setVisible(m_baseBBox.isValid());
+	defaultPushButton->setVisible(m_baseBBox.isValid());
 
-	reset();
+	resetToDefault();
 }
 
 void ccBoundingBoxEditorDlg::checkBaseInclusion()
@@ -150,7 +156,7 @@ void ccBoundingBoxEditorDlg::checkBaseInclusion()
 	okPushButton->setEnabled(!exclude);
 }
 
-void ccBoundingBoxEditorDlg::reset()
+void ccBoundingBoxEditorDlg::resetToDefault()
 {
 	m_currentBBox = m_baseBBox;
 	
@@ -160,6 +166,25 @@ void ccBoundingBoxEditorDlg::reset()
 		reflectChanges();
 
 	checkBaseInclusion();
+}
+
+void ccBoundingBoxEditorDlg::resetToLast()
+{
+	m_currentBBox = s_lastBBox;
+	
+	if (keepSquare())
+		squareModeActivated(true); //will call reflectChanges
+	else
+		reflectChanges();
+
+	checkBaseInclusion();
+}
+
+void ccBoundingBoxEditorDlg::saveBoxAndAccept()
+{
+	s_lastBBox = m_currentBBox;
+	
+	accept();
 }
 
 int	ccBoundingBoxEditorDlg::exec()
@@ -300,7 +325,7 @@ void ccBoundingBoxEditorDlg::reflectChanges(int dummy)
 
 		CCVector3 W = m_currentBBox.getDiagVec();
 		//if 'square mode' is on, all width values should be the same!
-		assert(!keepSquare() || W.x == W.y && W.x == W.z);
+		assert(!keepSquare() || fabs(W.x-W.y) < 1.0e-6 && fabs(W.x-W.z) < 1.0e-6);
 		dxDoubleSpinBox->setValue(W.x);
 		dyDoubleSpinBox->setValue(W.y);
 		dzDoubleSpinBox->setValue(W.z);

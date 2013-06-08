@@ -1165,7 +1165,7 @@ void MainWindow::doActionComputeOctree()
 		clouds.insert(cloud);
 
 		//we look for the biggest box so as to define the "minimum cell size"
-		ccBBox thisBBox = cloud->getBB();
+		ccBBox thisBBox = cloud->getMyOwnBB();
 		if (thisBBox.isValid())
 		{
 			CCVector3 dd = thisBBox.maxCorner()-thisBBox.minCorner();
@@ -1252,6 +1252,7 @@ void MainWindow::doActionComputeOctree()
 		if (octree)
 		{
 			ccConsole::Print("[doActionComputeOctree] Timing: %2.3f s",elapsedTime_ms/1.0e3);
+			cloud->setEnabled(true); //for mesh vertices!
 			octree->setVisible(true);
 			octree->prepareDisplayForRefresh();
 		}
@@ -7559,7 +7560,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionResampleWithOctree->setEnabled(atLeastOneCloud);
     actionMultiply->setEnabled(atLeastOneEntity);
     actionApplyTransformation->setEnabled(atLeastOneEntity);
-    actionComputeOctree->setEnabled(atLeastOneCloud);
+    actionComputeOctree->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionComputeNormals->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionSetColorGradient->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!

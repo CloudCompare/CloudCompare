@@ -42,8 +42,6 @@ From Andrew B.
 [*] Automation of the above tasks via the command line, along with the ability output of summary stats to command line or text file, command line options for ICP and cloud-cloud distance (for batch work).
 
 From Dimitri L.
-[*] Improvement on the connected component and octree (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=557)
-[*] Let the user enter grid parameters in the 'Heght grid projection' tool + remember last parameters
 [*] Auto-detect header format in ASCII files (in any) 
 [*] Compute distances in a given direction (cylinder)
 [*] Compute signed distances between clouds

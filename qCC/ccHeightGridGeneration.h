@@ -14,19 +14,18 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2274                                                              $
-//$LastChangedDate:: 2012-10-17 19:17:38 +0200 (mer., 17 oct. 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_HEIGHT_GRID_GENERATION
 #define CC_HEIGHT_GRID_GENERATION
 
-// Includes CClib
+//CClib
 #include <GenericProgressCallback.h>
+
+//Qt
+#include <QSharedPointer>
+
+//qCC_db
+#include <ccBBox.h>
 
 class ccGenericPointCloud;
 class ccPointCloud;
@@ -53,19 +52,20 @@ public:
 	//! Default constructor
 	ccHeightGridGeneration();
 
-    //! Computs height grid
-    static void Compute(ccGenericPointCloud* cloud,
-                        float grid_step,
-						unsigned char proj_dimension,
-                        ProjectionType type_of_projection,
-                        EmptyCellFillOption fillEmptyCells = LEAVE_EMPTY,
-						ProjectionType sfInterpolation = INVALID_PROJECTION_TYPE,
-                        double customEmptyCellsHeight = -1.0,
-                        bool generateImage = true,
-                        bool generateASCII = false,
-                        ccPointCloud* cloudGrid=0,
-						bool generateCountSF = false,
-                        CCLib::GenericProgressCallback* progressCb=0);
+    //! Computes height grid
+    static ccPointCloud* Compute(	ccGenericPointCloud* cloud,
+									PointCoordinateType grid_step,
+									const ccBBox& customBox,
+									unsigned char proj_dimension,
+									ProjectionType type_of_projection,
+									EmptyCellFillOption fillEmptyCells = LEAVE_EMPTY,
+									ProjectionType sfInterpolation = INVALID_PROJECTION_TYPE,
+									double customEmptyCellsHeight = -1.0,
+									bool generateCloud = true,
+									bool generateImage = false,
+									bool generateASCII = false,
+									bool generateCountSF = false,
+									CCLib::GenericProgressCallback* progressCb=0);
 };
 
 #endif

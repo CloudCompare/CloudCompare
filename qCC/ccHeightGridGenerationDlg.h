@@ -14,21 +14,22 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2274                                                              $
-//$LastChangedDate:: 2012-10-17 19:17:38 +0200 (mer., 17 oct. 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_HEIGHT_GRID_GENERATION_DLG_HEADER
 #define CC_HEIGHT_GRID_GENERATION_DLG_HEADER
 
-#include <QString>
 #include <ui_heightGridGenerationDlg.h>
 
+//Local
 #include "ccHeightGridGeneration.h"
+
+//qCC_db
+#include <ccBBox.h>
+
+//Qt
+#include <QString>
+
+class ccBoundingBoxEditorDlg;
 
 //! Height grid generation algorithm dialog
 class ccHeightGridGenerationDlg : public QDialog, public Ui::HeightGridGenerationDialog
@@ -37,7 +38,7 @@ class ccHeightGridGenerationDlg : public QDialog, public Ui::HeightGridGeneratio
 
     public:
         //! Default constructor
-        ccHeightGridGenerationDlg(QWidget* parent=0);
+        ccHeightGridGenerationDlg(const ccBBox& gridBBox, QWidget* parent=0);
 
         //! Returns projection grid step
         double getGridStep() const;
@@ -71,6 +72,9 @@ class ccHeightGridGenerationDlg : public QDialog, public Ui::HeightGridGeneratio
         //! Returns user defined height for empty cells
         double getCustomHeightForEmptyCells() const;
 
+		//! Returns custom bbox
+		ccBBox getCustomBBox() const;
+
     protected slots:
 
         //! Save persistent settings and 'accept' dialog
@@ -82,9 +86,16 @@ class ccHeightGridGenerationDlg : public QDialog, public Ui::HeightGridGeneratio
         //! updates the "fill empty cells" frame state
         void toggleFillEmptyCells(bool);
 
+		//! Show grid box editor
+        void showGridBoxEditor();
+
     protected:
-        //! Load persistent settings
+
+		//! Load persistent settings
         void loadSettings();
+
+		//! Associated dialog
+		ccBoundingBoxEditorDlg* m_bbEditorDlg;
 };
 
-#endif
+#endif //CC_HEIGHT_GRID_GENERATION_DLG_HEADER

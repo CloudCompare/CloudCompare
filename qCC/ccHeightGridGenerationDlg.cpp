@@ -14,23 +14,23 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2274                                                              $
-//$LastChangedDate:: 2012-10-17 19:17:38 +0200 (mer., 17 oct. 2012)        $
-//**************************************************************************
-//
 
 #include "ccHeightGridGenerationDlg.h"
 
+//Local
+#include "ccBoundingBoxEditorDlg.h"
+
+//Qt
 #include <QSettings>
 #include <QPushButton>
 
+//System
 #include <assert.h>
 
-ccHeightGridGenerationDlg::ccHeightGridGenerationDlg(QWidget* parent/*=0*/)
-    : QDialog(parent), Ui::HeightGridGenerationDialog()
+ccHeightGridGenerationDlg::ccHeightGridGenerationDlg(const ccBBox& gridBBox, QWidget* parent/*=0*/)
+    : QDialog(parent)
+	, Ui::HeightGridGenerationDialog()
+	, m_bbEditorDlg(0)
 {
     setupUi(this);
 
@@ -42,7 +42,33 @@ ccHeightGridGenerationDlg::ccHeightGridGenerationDlg(QWidget* parent/*=0*/)
     connect(generateImageCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
     connect(generateASCIICheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
 
-    loadSettings();
+	//custom bbox editor
+	if (gridBBox.isValid())
+	{
+		m_bbEditorDlg = new ccBoundingBoxEditorDlg(this);
+		m_bbEditorDlg->setBaseBBox(gridBBox,false);
+		connect(editGridToolButton, SIGNAL(clicked()), this, SLOT(showGridBoxEditor()));
+	}
+	else
+	{
+		editGridToolButton->setEnabled(false);
+	}
+
+	loadSettings();
+}
+
+void ccHeightGridGenerationDlg::showGridBoxEditor()
+{
+	if (m_bbEditorDlg)
+	{
+		m_bbEditorDlg->set2DMode(true,dimensionComboBox->currentIndex());
+		m_bbEditorDlg->exec();
+	}
+}
+
+ccBBox ccHeightGridGenerationDlg::getCustomBBox() const
+{
+	return (m_bbEditorDlg ? m_bbEditorDlg->getBox() : ccBBox());
 }
 
 double ccHeightGridGenerationDlg::getGridStep() const

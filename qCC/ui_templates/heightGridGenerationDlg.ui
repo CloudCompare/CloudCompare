@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>350</width>
+    <height>410</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -19,169 +19,184 @@
   <property name="sizeGripEnabled">
    <bool>false</bool>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout_3">
    <item>
-    <layout class="QHBoxLayout" name="layout_3">
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>grid step:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="gridStep">
-       <property name="toolTip">
-        <string>size of step of the grid generated (in the same units as the coordinates of the point cloud)</string>
-       </property>
-       <property name="decimals">
-        <number>3</number>
-       </property>
-       <property name="minimum">
-        <double>0.001000000000000</double>
-       </property>
-       <property name="maximum">
-        <double>1000.000000000000000</double>
-       </property>
-       <property name="singleStep">
-        <double>0.001000000000000</double>
-       </property>
-       <property name="value">
-        <double>1.000000000000000</double>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="layout_2">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>type of projection:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="typeOfProjection">
-       <property name="toolTip">
-        <string>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</string>
-       </property>
-       <property name="currentIndex">
-        <number>1</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>minimum height</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>average height</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>maximum height</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>projection direction:</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="dimensionComboBox">
-       <property name="currentIndex">
-        <number>2</number>
-       </property>
-       <item>
-        <property name="text">
-         <string>X</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Y</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>Z</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <widget class="QFrame" name="interpolateSFFrame">
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <property name="margin">
-       <number>0</number>
-      </property>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="title">
+      <string>Grid</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_4">
       <item>
-       <widget class="QCheckBox" name="interpolateSFCheckBox">
+       <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>interpolate scalar field(s)</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
+         <string>step</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="scalarFieldProjection">
+       <widget class="QDoubleSpinBox" name="gridStep">
         <property name="toolTip">
-         <string>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</string>
+         <string>size of step of the grid generated (in the same units as the coordinates of the point cloud)</string>
         </property>
-        <property name="currentIndex">
-         <number>1</number>
+        <property name="decimals">
+         <number>3</number>
         </property>
-        <item>
-         <property name="text">
-          <string>minimum value</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>average value</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>maximum value</string>
-         </property>
-        </item>
+        <property name="minimum">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>1000.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.001000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QToolButton" name="editGridToolButton">
+        <property name="text">
+         <string>Edit grid</string>
+        </property>
        </widget>
       </item>
      </layout>
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="emptyCellsFrame">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Projection</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <property name="margin">
-       <number>0</number>
-      </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <layout class="QHBoxLayout" name="layout_2">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>type</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="typeOfProjection">
+          <property name="toolTip">
+           <string>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</string>
+          </property>
+          <property name="currentIndex">
+           <number>1</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>minimum height</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>average height</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>maximum height</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label_4">
+          <property name="text">
+           <string>direction</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="dimensionComboBox">
+          <property name="currentIndex">
+           <number>2</number>
+          </property>
+          <item>
+           <property name="text">
+            <string>X</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Y</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Z</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QFrame" name="interpolateSFFrame">
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QCheckBox" name="interpolateSFCheckBox">
+           <property name="text">
+            <string>interpolate scalar field(s)</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="scalarFieldProjection">
+           <property name="toolTip">
+            <string>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</string>
+           </property>
+           <property name="currentIndex">
+            <number>1</number>
+           </property>
+           <item>
+            <property name="text">
+             <string>minimum value</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>average value</string>
+            </property>
+           </item>
+           <item>
+            <property name="text">
+             <string>maximum value</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="emptyCellsFrame">
+     <property name="title">
+      <string>Empty cells</string>
+     </property>
+     <layout class="QFormLayout" name="formLayout">
       <item row="0" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>fill empty cells with:</string>
+         <string>Fill with</string>
         </property>
        </widget>
       </item>
@@ -246,58 +261,67 @@
     </widget>
    </item>
    <item>
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Generate</string>
      </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="margin">
-       <number>0</number>
-      </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QCheckBox" name="generateCloudCheckBox">
-        <property name="text">
-         <string>generate grid as a point cloud</string>
+       <widget class="QFrame" name="frame">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
         </property>
-        <property name="checked">
-         <bool>true</bool>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="QCheckBox" name="generateCloudCheckBox">
+           <property name="text">
+            <string>Grid as a point cloud</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="generateCountSFcheckBox">
+           <property name="text">
+            <string>save per-cell count as SF</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="generateImageCheckBox">
+        <property name="toolTip">
+         <string>image is automatically generated in the application directory</string>
+        </property>
+        <property name="text">
+         <string>Grid as an image (height_grid_image.tiff)</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="generateCountSFcheckBox">
+       <widget class="QCheckBox" name="generateASCIICheckBox">
+        <property name="toolTip">
+         <string>file is automatically generated in the application directory</string>
+        </property>
         <property name="text">
-         <string>save per-cell count as SF</string>
+         <string>Grid as a matrix (height_grid_text_file.txt)</string>
+        </property>
+        <property name="checked">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="generateImageCheckBox">
-     <property name="toolTip">
-      <string>image is automatically generated in the application directory</string>
-     </property>
-     <property name="text">
-      <string>generate grid as an image (height_grid_image.tiff)</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QCheckBox" name="generateASCIICheckBox">
-     <property name="toolTip">
-      <string>file is automatically generated in the application directory</string>
-     </property>
-     <property name="text">
-      <string>generate grid as an ASCII file (height_grid_text_file.txt)</string>
-     </property>
-     <property name="checked">
-      <bool>false</bool>
-     </property>
     </widget>
    </item>
    <item>

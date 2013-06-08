@@ -10,6 +10,8 @@ v2.4 ??/??/2013
 - New dialog for computing the octree:
 	* the user can specify the cell size at the maximum subdivision level
 	* or define a custom bounding box
+- "Height grid generation" dialog enhanced:
+	* the user can now define custom grid limits
 - New tool: "Convert RGB to scalar field"
 	* Edit > Colors
 - New option is ASCII file load/save dialogs:

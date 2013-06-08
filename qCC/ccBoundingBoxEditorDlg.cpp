@@ -23,6 +23,7 @@ static ccBBox s_lastBBox;
 ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 	: QDialog(parent)
 	, Ui::BoundingBoxEditorDialog()
+	, m_baseBoxIsMinimal(false)
 {
     setupUi(this);
 
@@ -127,17 +128,30 @@ void ccBoundingBoxEditorDlg::squareModeActivated(bool state)
 	}
 }
 
-void ccBoundingBoxEditorDlg::set2DMode(bool state)
+void ccBoundingBoxEditorDlg::set2DMode(bool state, unsigned char dim)
 {
-	zDoubleSpinBox->setVisible(state);
-	dzDoubleSpinBox->setVisible(state);
-	zLabel->setVisible(state);
+	bool hideX = (state && dim == 0);
+	bool hideY = (state && dim == 1);
+	bool hideZ = (state && dim == 2);
+
+	xDoubleSpinBox->setHidden(hideX);
+	dxDoubleSpinBox->setHidden(hideX);
+	xLabel->setHidden(hideX);
+
+	yDoubleSpinBox->setHidden(hideY);
+	dyDoubleSpinBox->setHidden(hideY);
+	yLabel->setHidden(hideY);
+
+	zDoubleSpinBox->setHidden(hideZ);
+	dzDoubleSpinBox->setHidden(hideZ);
+	zLabel->setHidden(hideZ);
 }
 
-void ccBoundingBoxEditorDlg::setBaseBBox(const ccBBox& box)
+void ccBoundingBoxEditorDlg::setBaseBBox(const ccBBox& box, bool isMinimal/*=true*/)
 {
 	//set new default one
 	m_initBBox = m_baseBBox = box;
+	m_baseBoxIsMinimal = isMinimal;
 
 	defaultPushButton->setVisible(m_baseBBox.isValid());
 
@@ -153,7 +167,7 @@ void ccBoundingBoxEditorDlg::checkBaseInclusion()
 	}
 
 	warningLabel->setVisible(exclude);
-	okPushButton->setEnabled(!exclude);
+	okPushButton->setEnabled(!m_baseBoxIsMinimal || !exclude);
 }
 
 void ccBoundingBoxEditorDlg::resetToDefault()

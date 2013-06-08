@@ -37,7 +37,9 @@ public:
 	ccBBox getBox() const { return m_currentBBox; }
 
     //! Sets (minimal) base box
-    void setBaseBBox(const ccBBox& box);
+	/** \param isMinimal set whether the user must define a bounding-box at least as large as this one
+	**/
+    void setBaseBBox(const ccBBox& box, bool isMinimal = true);
 
 	//! Forces the 'keep square' mode
 	void forceKeepSquare(bool state);
@@ -45,8 +47,8 @@ public:
 	//! Returns whether 'keep square' mode is enabled or not
 	bool keepSquare() const;
 
-	//! Sets 2D mode (Z line will be hidden)
-	void set2DMode(bool state);
+	//! Sets 2D mode ('dim' line will be hidden)
+	void set2DMode(bool state, unsigned char dim);
 
 public slots:
 
@@ -75,8 +77,11 @@ protected:
 	//! Checks if currentBox includes baseBox
 	void checkBaseInclusion();
 
-	//! Minimal box (invalid if none)
+	//! Base box (invalid if none)
 	ccBBox m_baseBBox;
+
+	//! Wether base box is minimal or not
+	bool m_baseBoxIsMinimal;
 
 	//! Current box
 	ccBBox m_currentBBox;

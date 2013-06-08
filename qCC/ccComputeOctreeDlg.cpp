@@ -48,7 +48,7 @@ ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSiz
 	if (baseBBox.isValid())
 	{
 		m_bbEditorDlg = new ccBoundingBoxEditorDlg(this);
-		m_bbEditorDlg->setBaseBBox(baseBBox);
+		m_bbEditorDlg->setBaseBBox(baseBBox,true);
 		m_bbEditorDlg->forceKeepSquare(true);
 		connect(customBBToolButton, SIGNAL(clicked()), m_bbEditorDlg, SLOT(exec()));
 	}

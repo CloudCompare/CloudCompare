@@ -3927,7 +3927,7 @@ void MainWindow::doActionHeightGridGeneration()
         return;
     }
 
-    ccHeightGridGenerationDlg dlg(this);
+	ccHeightGridGenerationDlg dlg(ent->getMyOwnBB(),this);
     if (!dlg.exec())
         return;
 
@@ -3938,69 +3938,70 @@ void MainWindow::doActionHeightGridGeneration()
 
     if (!generateCloud && !generateImage && !generateASCII)
     {
-        ccConsole::Error("Nothing to do! Check 'generate' checkboxes...");
+        ccConsole::Error("Nothing to do?! Mind the 'Generate' checkboxes...");
         return;
     }
 
     //Grid step must be > 0
     double gridStep = dlg.getGridStep();
     assert(gridStep>0);
+	//Custom bundig box
+	ccBBox box = dlg.getCustomBBox();
 
     ccProgressDialog pDlg(true,this);
     ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
 
     //let's rock
-    ccPointCloud* outputGrid = 0;
-    if (generateCloud)
+	ccPointCloud* outputGrid = ccHeightGridGeneration::Compute(
+		cloud,
+		gridStep,
+		box,
+		dlg.getProjectionDimension(),
+		dlg.getTypeOfProjection(),
+		dlg.getFillEmptyCellsStrategy(),
+		dlg.getTypeOfSFInterpolation(),
+		dlg.getCustomHeightForEmptyCells(),
+		generateCloud,
+		generateImage,
+		generateASCII,
+		generateCountSF,
+		&pDlg);
+
+	//a cloud was demanded as output?
+	if (outputGrid)
 	{
-        outputGrid = new ccPointCloud();
-		const double* shift = cloud->getOriginalShift();
-		if (shift)
-			outputGrid->setOriginalShift(shift[0],shift[1],shift[2]);
-	}
+		if (outputGrid->size() != 0)
+		{
+			if (cloud->getParent())
+				cloud->getParent()->addChild(outputGrid);
 
-    ccHeightGridGeneration::Compute(cloud,
-                                    gridStep,
-									dlg.getProjectionDimension(),
-                                    dlg.getTypeOfProjection(),
-                                    dlg.getFillEmptyCellsStrategy(),
-									dlg.getTypeOfSFInterpolation(),
-                                    dlg.getCustomHeightForEmptyCells(),
-                                    generateImage,
-                                    generateASCII,
-                                    outputGrid,
-									generateCountSF,
-                                    &pDlg);
-
-    //a cloud was demanded as output?
-    if (outputGrid)
-    {
-        if (outputGrid->size()>0)
-        {
-            if (cloud->getParent())
-                cloud->getParent()->addChild(outputGrid);
-
-            outputGrid->setName(QString("%1.heightGrid(%2)").arg(cloud->getName()).arg(gridStep,0,'g',3));
-            ccGenericGLDisplay* win = cloud->getDisplay();
-            outputGrid->setDisplay(win);
-            //zoomOn(outputGrid);
-            addToDB(outputGrid, true, 0, true, false);
+			outputGrid->setName(QString("%1.heightGrid(%2)").arg(cloud->getName()).arg(gridStep,0,'g',3));
+			ccGenericGLDisplay* win = cloud->getDisplay();
+			outputGrid->setDisplay(win);
+			//zoomOn(outputGrid);
+			addToDB(outputGrid, true, 0, true, false);
 			if (m_ccRoot)
 				m_ccRoot->selectEntity(outputGrid);
 
-            cloud->prepareDisplayForRefresh_recursive();
-            cloud->setEnabled(false);
-            ccConsole::Warning("Previously selected entity (source) has been hidden!");
+			//don't forget original shift
+			const double* shift = cloud->getOriginalShift();
+			if (shift)
+				outputGrid->setOriginalShift(shift[0],shift[1],shift[2]);
+			cloud->prepareDisplayForRefresh_recursive();
+			cloud->setEnabled(false);
+			ccConsole::Warning("Previously selected entity (source) has been hidden!");
 
-            if (win)
-                win->refresh();
-            updateUI();
-        }
-        else
-        {
-            delete outputGrid;
-        }
-    }
+			if (win)
+				win->refresh();
+			updateUI();
+		}
+		else
+		{
+			ccConsole::Warning("[doActionHeightGridGeneration] Output cloud was empty!");
+			delete outputGrid;
+			outputGrid = 0;
+		}
+	}
 }
 
 void MainWindow::doActionComputeMeshAA()

@@ -229,7 +229,7 @@
          <string notr="true">color: red;</string>
         </property>
         <property name="text">
-         <string>Warning, this box doesn't include the smallest bounding-box!</string>
+         <string>Warning, this box doesn't include the cloud bounding-box!</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

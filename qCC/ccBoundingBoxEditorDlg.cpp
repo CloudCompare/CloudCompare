@@ -16,6 +16,7 @@
 //##########################################################################
 
 #include "ccBoundingBoxEditorDlg.h"
+#include <limits>
 
 //Box state at last dialog execution
 static ccBBox s_lastBBox;
@@ -29,19 +30,19 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 
     setWindowFlags(Qt::Tool);
 
-	xDoubleSpinBox->setMinimum(-DBL_MAX);
-	yDoubleSpinBox->setMinimum(-DBL_MAX);
-	zDoubleSpinBox->setMinimum(-DBL_MAX);
-	xDoubleSpinBox->setMaximum(DBL_MAX);
-	yDoubleSpinBox->setMaximum(DBL_MAX);
-	zDoubleSpinBox->setMaximum(DBL_MAX);
+    xDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
+    yDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
+    zDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
+    xDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
+    yDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
+    zDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
 
 	dxDoubleSpinBox->setMinimum(0.0);
 	dyDoubleSpinBox->setMinimum(0.0);
 	dzDoubleSpinBox->setMinimum(0.0);
-	dxDoubleSpinBox->setMaximum(DBL_MAX);
-	dyDoubleSpinBox->setMaximum(DBL_MAX);
-	dzDoubleSpinBox->setMaximum(DBL_MAX);
+    dxDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
+    dyDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
+    dzDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
 
 	connect(pointTypeComboBox,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(reflectChanges(int)));
 	connect(keepSquareCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(squareModeActivated(bool)));

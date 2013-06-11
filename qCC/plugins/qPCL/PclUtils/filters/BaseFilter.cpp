@@ -38,11 +38,12 @@
 #include <unistd.h>
 #endif
 
-BaseFilter::BaseFilter(FilterDescription desc)
+BaseFilter::BaseFilter(FilterDescription desc, ccPluginInterface * parent_plugin)
 	: m_action(0)
-	, m_desc(desc)
+	, m_desc(desc)    
 {
 	initAction();
+    m_parent_plugin = parent_plugin;
 }
 
 void BaseFilter::initAction()
@@ -297,6 +298,21 @@ void BaseFilter::getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& 
 
 	m_app->dbRootObject()->filterChildren(entities,true,type);
 }
+
+
+void BaseFilter::getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & entities)
+{
+    ccHObject::Container selected = m_selected;
+    for (int i = 0 ; i < selected.size(); ++i)
+    {
+        ccHObject * this_obj = selected.at(i);
+        if (this_obj->isA(CC_POINT_CLOUD))
+        {
+            entities.push_back(this_obj);
+        }
+    }
+}
+
 
 int BaseFilter::hasSelectedScalarField(std::string field_name)
 {

@@ -15,6 +15,7 @@ add_subdirectory(doc)
 #include_directories(filters/dialogs)
 include_directories( ${PclUtils_SOURCE_DIR}/filters )
 include_directories( ${PclUtils_BINARY_DIR} )
+include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../) #the plugin dir
 
 
 

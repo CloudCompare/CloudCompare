@@ -26,6 +26,8 @@
 //qCC_db
 #include <ccHObject.h>
 
+#include <ccPluginInterface.h>
+
 
 class ccPointCloud;
 class QAction;
@@ -70,7 +72,7 @@ public:
 	/** \brief Default constructor
 	* \param[in] desc a FilterDescription structure containing filter infos
 	*/
-    BaseFilter(FilterDescription desc = FilterDescription());
+    BaseFilter(FilterDescription desc = FilterDescription(), ccPluginInterface * parent_plugin = 0);
 
 	/** \brief Get the action associated with the button
 	* used in menu and toolbar creation
@@ -103,6 +105,9 @@ public:
 	//! Returns the icon associated with the button
 	QIcon getIcon() const;
 
+    //! set wether we want to show a progressbar while coputing
+    void setShowProgressBar(bool status) {m_show_progress = status;}
+
 	//! Returns a vector of strings representing the names of the availabe scalar fields
 	/** For the first selected entity.
 	**/
@@ -115,6 +120,9 @@ public:
 
     //! Returns all the objects in db tree of type "type"
     void getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& entities);
+
+    //! get all entities that are slected and that also are cc_point_cloud
+    void getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & entities);
 
 	//! Returns 1 if the first selected entity has RGB info
 	int hasSelectedRGB();
@@ -141,6 +149,9 @@ public:
 
 	//! Sets associated CC application interface (to access DB)
 	void setMainAppInterface(ccMainAppInterface* app) { m_app = app; }
+
+    //! get the associated parent plugin interface
+    ccPluginInterface * getParentPlugin() const {return m_parent_plugin;}
 
 protected slots:
 
@@ -263,6 +274,12 @@ protected:
 
 	//! Associated application interface
 	ccMainAppInterface* m_app;
+
+    //! associated parent plugin of the filter
+    ccPluginInterface * m_parent_plugin;
+
+    //! Do we want to show a progress bar when the filter works?
+    bool m_show_progress;
 
 };
 

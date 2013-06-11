@@ -40,7 +40,8 @@
 
 BaseFilter::BaseFilter(FilterDescription desc, ccPluginInterface * parent_plugin)
 	: m_action(0)
-	, m_desc(desc)    
+    , m_desc(desc)
+    , m_show_progress(true)
 {
 	initAction();
     m_parent_plugin = parent_plugin;
@@ -162,51 +163,79 @@ static void doCompute()
 
 int BaseFilter::start()
 {   
-	//old version
-    //int is_ok = compute();
 
-	//Version with a separate thread (and a progress callback)
-	ccProgressDialog* progressCb = new ccProgressDialog();
-	progressCb->setCancelButton(0);
-	progressCb->setRange(0,0);
-	progressCb->setInfo("Operation in progress");
-	progressCb->setMethodTitle(qPrintable(getFilterName()));
-	progressCb->start();
-	QApplication::processEvents();
-
-	if (s_computing)
-	{
-		throwError(-32);
-		return -1;
-	}
-
-	s_computeStatus = -1;
-	s_filter = this;
-	s_computing = true;
-	unsigned progress = 0;
-
-	QFuture<void> future = QtConcurrent::run(doCompute);
-	while (!future.isFinished())
-	{
-#if defined(_WIN32) || defined(WIN32)
-		::Sleep(500);
-#else
-        usleep(1.0);
-#endif
-		progressCb->update(++progress);
-	}
-	int is_ok = s_computeStatus;
-	s_filter = 0;
-	s_computing = false;
-
-	progressCb->stop();
-	QApplication::processEvents();
-
-    if (is_ok < 0)
+    if (m_show_progress)
     {
-        throwError(is_ok);
-        return -1;
+        ccProgressDialog* progressCb = new ccProgressDialog();
+        progressCb->setCancelButton(0);
+        progressCb->setRange(0,0);
+        progressCb->setInfo("Operation in progress");
+        progressCb->setMethodTitle(qPrintable(getFilterName()));
+        progressCb->start();
+        QApplication::processEvents();
+
+        if (s_computing)
+        {
+            throwError(-32);
+            return -1;
+        }
+
+        s_computeStatus = -1;
+        s_filter = this;
+        s_computing = true;
+        unsigned progress = 0;
+
+        QFuture<void> future = QtConcurrent::run(doCompute);
+        while (!future.isFinished())
+        {
+#if defined(_WIN32) || defined(WIN32)
+            ::Sleep(500);
+#else
+            usleep(1.0);
+#endif
+            progressCb->update(++progress);
+        }
+        int is_ok = s_computeStatus;
+        s_filter = 0;
+        s_computing = false;
+
+        progressCb->stop();
+        QApplication::processEvents();
+        if (is_ok < 0)
+        {
+            throwError(is_ok);
+            return -1;
+        }
+
+
     }
+    else
+    {
+        s_computeStatus = -1;
+        s_filter = this;
+        s_computing = true;
+
+        QFuture<void> future = QtConcurrent::run(doCompute);
+        while (!future.isFinished())
+        {
+#if defined(_WIN32) || defined(WIN32)
+            ::Sleep(500);
+#else
+            usleep(1.0);
+#endif
+        }
+        int is_ok = s_computeStatus;
+        s_filter = 0;
+        s_computing = false;
+
+        if (is_ok < 0)
+        {
+            throwError(is_ok);
+            return -1;
+        }
+    }
+
+
 
 	return 1;
 }

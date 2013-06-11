@@ -5958,7 +5958,7 @@ void MainWindow::doActionScalarFieldFromColor()
     {
 		ccPointCloud* cloud = *it;
 		
-		std::vector<ccScalarField*> fields(4,0);
+        std::vector<ccScalarField*> fields(4);
 		fields[0] = (exportR ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"R"))) : 0);
 		fields[1] = (exportG ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"G"))) : 0);
 		fields[2] = (exportB ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"B"))) : 0);

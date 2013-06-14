@@ -4,6 +4,9 @@ v2.4 ??/??/2013
 - New tool: "Cross section"
 	* accessible via 'Tools > Segmentation > Cross Section' or a dedicated icon in the main
 		toolbar (next to the scissors icon)
+	* manually scale, rotate and translate the clipping box
+	* extract the corresponding selection as a new cloud
+	* extract multiple slices in an automated way
 	* works only with clouds for the moment
 - New option for ICP registration (thanks to Luca Penasa once again!):
 	* check "Free scale parameter" to register objects with different scales

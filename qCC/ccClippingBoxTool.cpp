@@ -236,7 +236,7 @@ void ccClippingBoxTool::exportMultCloud()
 							repeatDlg.zRepeatCheckBox->isChecked() };
 	int indexMins[3] = { 0 , 0, 0 };
 	int indexMaxs[3] = { 0 , 0, 0 };
-	unsigned gridDim[3] = { 0 , 0, 0 };
+	int gridDim[3] = { 0 , 0, 0 };
 	unsigned cellCount = 1;
 	CCVector3 gridOrigin = m_clipBox->getBB().minCorner();
 	CCVector3 cellSize = m_clipBox->getBB().getDiagVec();
@@ -252,12 +252,15 @@ void ccClippingBoxTool::exportMultCloud()
 					return;
 				}
 
-				indexMins[d] = (int)floor((localBox.minCorner().u[d] - gridOrigin.u[d])/(cellSize.u[d]+gap)); //don't forget the user defined gap between 'cells'
-				indexMaxs[d] = (int)ceil((localBox.maxCorner().u[d] - gridOrigin.u[d])/(cellSize.u[d]+gap));
+				PointCoordinateType a = (localBox.minCorner().u[d] - gridOrigin.u[d])/(cellSize.u[d]+gap); //don't forget the user defined gap between 'cells'
+				PointCoordinateType b = (localBox.maxCorner().u[d] - gridOrigin.u[d])/(cellSize.u[d]+gap);
+
+				indexMins[d] = (int)floor(a);
+				indexMaxs[d] = (int)ceil(b)-1;
 				
 				assert(indexMaxs[d] >= indexMins[d]);
-				gridDim[d] = (unsigned)indexMaxs[d] - indexMins[d] + 1;
-				cellCount *= gridDim[d];
+				gridDim[d] = std::max(indexMaxs[d] - indexMins[d] + 1, 1);
+				cellCount *= (unsigned)gridDim[d];
 			}
 		}
 	}
@@ -281,51 +284,59 @@ void ccClippingBoxTool::exportMultCloud()
 		}
 		memset(clouds, 0, sizeof(CCLib::ReferenceCloud*)*cellCount);
 
-		QProgressDialog pDlg(this);
-		pDlg.show();
-		QApplication::processEvents();
-
+		//project points into grid
 		bool error = false;
-		unsigned pointCount = cloud->size(); 
-		for (unsigned i=0; i<pointCount; ++i)
 		{
-			CCVector3 P = *cloud->getPoint(i);
-			localTrans.apply(P);
+			QProgressDialog pDlg(this);
+			pDlg.show();
+			QApplication::processEvents();
 
-			//relative coordinates (between 0 and 1)
-			P -= gridOrigin;
-			P.x /= (cellSize.x+gap);
-			P.y /= (cellSize.y+gap);
-			P.z /= (cellSize.z+gap);
-
-			int xi = (int)P.x;
-			int yi = (int)P.y;
-			int zi = (int)P.z;
-
-			if (gap == 0 ||
-				(	P.x-(PointCoordinateType)xi <= cellSize.x
-				&&	P.y-(PointCoordinateType)yi <= cellSize.y
-				&&	P.z-(PointCoordinateType)zi <= cellSize.z))
+			unsigned pointCount = cloud->size(); 
+			for (unsigned i=0; i<pointCount; ++i)
 			{
-				int cloudIndex = ((zi-indexMins[2]) * (int)gridDim[1] + (yi-indexMins[1])) * (int)gridDim[0] + (xi-indexMins[0]);
-				if (!clouds[cloudIndex])
+				CCVector3 P = *cloud->getPoint(i);
+				localTrans.apply(P);
+
+				//relative coordinates (between 0 and 1)
+				P -= gridOrigin;
+				P.x /= (cellSize.x+gap);
+				P.y /= (cellSize.y+gap);
+				P.z /= (cellSize.z+gap);
+
+				int xi = (int)P.x; if (xi == gridDim[0]) xi--;
+				int yi = (int)P.y; if (yi == gridDim[1]) yi--;
+				int zi = (int)P.z; if (zi == gridDim[2]) zi--;
+
+				if (gap == 0 ||
+					(	P.x-(PointCoordinateType)xi <= cellSize.x
+					&&	P.y-(PointCoordinateType)yi <= cellSize.y
+					&&	P.z-(PointCoordinateType)zi <= cellSize.z))
 				{
-					clouds[cloudIndex] = new CCLib::ReferenceCloud(cloud);
+					int cloudIndex = ((zi-indexMins[2]) * (int)gridDim[1] + (yi-indexMins[1])) * (int)gridDim[0] + (xi-indexMins[0]);
+					if (!clouds[cloudIndex])
+					{
+						clouds[cloudIndex] = new CCLib::ReferenceCloud(cloud);
+					}
+
+					if (!clouds[cloudIndex]->addPointIndex(i))
+					{
+						ccLog::Error("Not enough memory!");
+						error = true;
+						break;
+					}
 				}
 
-				if (!clouds[cloudIndex]->addPointIndex(i))
-				{
-					ccLog::Error("Not enough memory!");
-					error = true;
-					break;
-				}
+				pDlg.setValue((int)floor(100.0f*(float)i/(float)pointCount));
 			}
-
-			pDlg.setValue((int)floor(100.0f*(float)i/(float)pointCount));
 		}
 
 		if (!error)
 		{
+			QProgressDialog pDlg(this);
+			pDlg.show();
+			QApplication::processEvents();
+
+			unsigned currentCloudCount = 0;
 			for (int i=indexMins[0]; i<=indexMaxs[0]; ++i)
 			{
 				for (int j=indexMins[1]; j<=indexMaxs[1]; ++j)
@@ -345,7 +356,12 @@ void ccClippingBoxTool::exportMultCloud()
 									col[0] = colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX));
 									col[1] = colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX));
 									col[2] = colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX));
-									static_cast<ccPointCloud*>(sliceCloud)->setRGBColor(col);
+									if (!static_cast<ccPointCloud*>(sliceCloud)->setRGBColor(col))
+									{
+										ccLog::Error("Not enough memory!");
+										error = true;
+										i = indexMaxs[0]; j = indexMaxs[1]; k = indexMaxs[2];
+									}
 									sliceCloud->showColors(true);
 								}
 
@@ -360,10 +376,18 @@ void ccClippingBoxTool::exportMultCloud()
 								//add slice to group
 								group->addChild(sliceCloud);
 							}
-						}		
+
+							++currentCloudCount;
+							pDlg.setValue((int)floor(100.0f*(float)currentCloudCount/(float)cellCount));
+						}
 					}
 				}
 			}
+		}
+
+		if (error)
+		{
+			group->removeAllChildren();
 		}
 
 		//release memory

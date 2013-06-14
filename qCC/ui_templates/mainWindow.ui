@@ -2286,7 +2286,7 @@
   <action name="actionCrossSection">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/primPlane.gif</normaloff>:/CC/images/primPlane.gif</iconset>
+     <normaloff>:/CC/images/ccClippingBox.png</normaloff>:/CC/images/ccClippingBox.png</iconset>
    </property>
    <property name="text">
     <string>Cross Section</string>

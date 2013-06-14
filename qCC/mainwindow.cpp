@@ -5253,6 +5253,8 @@ void MainWindow::activateClippingBoxMode()
 
     if (m_clipTool->start())
 	{
+		//automatically deselect the entity (to avoid seeing its bounding box ;)
+		m_ccRoot->unselectEntity(entity);
 		connect(m_clipTool, SIGNAL(processFinished(bool)), this, SLOT(deactivateClippingBoxMode(bool)));
 		registerMDIDialog(m_clipTool,Qt::TopRightCorner);
 		freezeUI(true);

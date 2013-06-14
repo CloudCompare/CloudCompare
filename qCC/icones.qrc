@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="/CC">
+    <file>images/ccClippingBox.png</file>
+    <file>images/ccClippingBoxMultExport.png</file>
+    <file>images/ccClippingBoxSingleExport.png</file>
     <file>images/ccGear.png</file>
     <file>images/ccCenteredPerspective32.png</file>
     <file>images/ccOrthoMode32.png</file>

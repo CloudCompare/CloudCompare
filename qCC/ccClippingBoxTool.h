@@ -66,6 +66,7 @@ protected slots:
 	void reset();
 	void closeDialog();
 	void exportCloud();
+	void exportMultCloud();
 
 	void onBoxModified(const ccBBox* box);
 

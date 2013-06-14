@@ -17,14 +17,25 @@
 
 #include "ccClippingBoxTool.h"
 
+//Local
 #include "ccGLWindow.h"
 #include "ccConsole.h"
 #include "mainwindow.h"
+#include "ccClippingBoxRepeatDlg.h"
 
 //qCC_db
 #include <ccHObject.h>
 #include <ccClipBox.h>
 #include <ccGenericPointCloud.h>
+#include <ccPointCloud.h>
+#include <ccProgressDialog.h>
+
+//CCLib
+#include <ReferenceCloud.h>
+
+//Qt
+#include <QProgressDialog>
+#include <QMessageBox>
 
 ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -35,9 +46,10 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
-	connect(exportButton,	SIGNAL(clicked()), this, SLOT(exportCloud()));
-	connect(resetButton,	SIGNAL(clicked()), this, SLOT(reset()));
-	connect(closeButton,	SIGNAL(clicked()), this, SLOT(closeDialog()));
+	connect(exportButton,		SIGNAL(clicked()), this, SLOT(exportCloud()));
+	connect(exportMultButton,	SIGNAL(clicked()), this, SLOT(exportMultCloud()));
+	connect(resetButton,		SIGNAL(clicked()), this, SLOT(reset()));
+	connect(closeButton,		SIGNAL(clicked()), this, SLOT(closeDialog()));
 
 	connect(showInteractorsCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleInteractors(bool)));
 
@@ -153,7 +165,7 @@ bool ccClippingBoxTool::start()
 	m_associatedWin->setUnclosable(true);
 	//m_associatedWin->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear the area
 	//m_associatedWin->displayNewMessage("[Rotation/Translation mode]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-	m_associatedWin->updateGL();
+	m_associatedWin->redraw();
 
 	return ccOverlayDialog::start();
 }
@@ -164,7 +176,7 @@ void ccClippingBoxTool::stop(bool state)
 	{
 		m_associatedWin->setUnclosable(false);
 		//m_associatedWin->displayNewMessage("[Rotation/Translation mode OFF]",ccGLWindow::UPPER_CENTER_MESSAGE,false,2,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-		m_associatedWin->updateGL();
+		m_associatedWin->redraw();
 	}
 
 	ccOverlayDialog::stop(state);
@@ -182,6 +194,263 @@ void ccClippingBoxTool::exportCloud()
 		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(obj)->createNewCloudFromVisibilitySelection(false);
 		MainWindow::TheInstance()->addToDB(cloud);
 	}
+}
+
+void ccClippingBoxTool::exportMultCloud()
+{
+	if (!m_clipBox)
+		return;
+	ccHObject* obj = m_clipBox->getAssociatedEntity();
+	if (!obj || !obj->isA(CC_POINT_CLOUD))
+	{
+		ccLog::Warning("Only works with point clouds!");
+		return;
+	}
+	ccPointCloud* cloud = static_cast<ccPointCloud*>(obj);
+
+	ccClippingBoxRepeatDlg repeatDlg(MainWindow::TheInstance()/*this*/);
+	repeatDlg.randomColorCheckBox->setEnabled(cloud->isA(CC_POINT_CLOUD)); //random colors is only available for real point clouds!
+	
+	if (!repeatDlg.exec())
+		return;
+
+	//compute the cloud bounding box in the local clipping box ref.
+	ccBBox localBox;
+	ccGLMatrix localTrans;
+	if (m_clipBox->isGLTransEnabled())
+		localTrans = m_clipBox->getGLTransformation().inverse();
+	else
+		localTrans.toIdentity();
+	{
+		for (unsigned i=0; i<cloud->size(); ++i)
+		{
+			CCVector3 P = *cloud->getPoint(i);
+			localTrans.apply(P);
+			localBox.add(P);
+		}
+	}
+
+	//compute 'grid' extents in the local clipping box ref.
+	bool processDim[3] = {	repeatDlg.xRepeatCheckBox->isChecked(),
+							repeatDlg.yRepeatCheckBox->isChecked(),
+							repeatDlg.zRepeatCheckBox->isChecked() };
+	int indexMins[3] = { 0 , 0, 0 };
+	int indexMaxs[3] = { 0 , 0, 0 };
+	unsigned gridDim[3] = { 0 , 0, 0 };
+	unsigned cellCount = 1;
+	CCVector3 gridOrigin = m_clipBox->getBB().minCorner();
+	CCVector3 cellSize = m_clipBox->getBB().getDiagVec();
+	PointCoordinateType gap = (PointCoordinateType)repeatDlg.gapDoubleSpinBox->value();
+	{
+		for (unsigned char d=0; d<3; ++d)
+		{
+			if (processDim[d])
+			{
+				if (cellSize.u[d] + gap < ZERO_TOLERANCE)
+				{
+					ccLog::Error("Box size (plus gap) is null! Can't apply repetitive process!");
+					return;
+				}
+
+				indexMins[d] = (int)floor((localBox.minCorner().u[d] - gridOrigin.u[d])/(cellSize.u[d]+gap)); //don't forget the user defined gap between 'cells'
+				indexMaxs[d] = (int)ceil((localBox.maxCorner().u[d] - gridOrigin.u[d])/(cellSize.u[d]+gap));
+				
+				assert(indexMaxs[d] >= indexMins[d]);
+				gridDim[d] = (unsigned)indexMaxs[d] - indexMins[d] + 1;
+				cellCount *= gridDim[d];
+			}
+		}
+	}
+
+	//apply process
+	{
+		bool generateRandomColors = repeatDlg.randomColorCheckBox->isChecked();
+
+		//backup original clipping box
+		ccBBox originalBox = m_clipBox->getBox();
+
+		//group to store all the resulting slices
+		ccHObject* group = new ccHObject(QString("%1.slices").arg(cloud->getName()));
+
+		//grid of potential clouds
+		CCLib::ReferenceCloud** clouds = new CCLib::ReferenceCloud*[cellCount];
+		if (!clouds)
+		{
+			ccLog::Error("Not enough memory!");
+			return;
+		}
+		memset(clouds, 0, sizeof(CCLib::ReferenceCloud*)*cellCount);
+
+		QProgressDialog pDlg(this);
+		pDlg.show();
+		QApplication::processEvents();
+
+		bool error = false;
+		unsigned pointCount = cloud->size(); 
+		for (unsigned i=0; i<pointCount; ++i)
+		{
+			CCVector3 P = *cloud->getPoint(i);
+			localTrans.apply(P);
+
+			//relative coordinates (between 0 and 1)
+			P -= gridOrigin;
+			P.x /= (cellSize.x+gap);
+			P.y /= (cellSize.y+gap);
+			P.z /= (cellSize.z+gap);
+
+			int xi = (int)P.x;
+			int yi = (int)P.y;
+			int zi = (int)P.z;
+
+			if (gap == 0 ||
+				(	P.x-(PointCoordinateType)xi <= cellSize.x
+				&&	P.y-(PointCoordinateType)yi <= cellSize.y
+				&&	P.z-(PointCoordinateType)zi <= cellSize.z))
+			{
+				int cloudIndex = ((zi-indexMins[2]) * (int)gridDim[1] + (yi-indexMins[1])) * (int)gridDim[0] + (xi-indexMins[0]);
+				if (!clouds[cloudIndex])
+				{
+					clouds[cloudIndex] = new CCLib::ReferenceCloud(cloud);
+				}
+
+				if (!clouds[cloudIndex]->addPointIndex(i))
+				{
+					ccLog::Error("Not enough memory!");
+					error = true;
+					break;
+				}
+			}
+
+			pDlg.setValue((int)floor(100.0f*(float)i/(float)pointCount));
+		}
+
+		if (!error)
+		{
+			for (int i=indexMins[0]; i<=indexMaxs[0]; ++i)
+			{
+				for (int j=indexMins[1]; j<=indexMaxs[1]; ++j)
+				{
+					for (int k=indexMins[2]; k<=indexMaxs[2]; ++k)
+					{
+						int cloudIndex = ((k-indexMins[2]) * (int)gridDim[1] + (j-indexMins[1])) * (int)gridDim[0] + (i-indexMins[0]);
+
+						if (clouds[cloudIndex]) //some slices can be empty!
+						{
+							ccPointCloud* sliceCloud = new ccPointCloud(clouds[cloudIndex],cloud);
+							if (sliceCloud)
+							{
+								if (generateRandomColors && cloud->isA(CC_POINT_CLOUD))
+								{
+									colorType col[3];
+									col[0] = colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX));
+									col[1] = colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX));
+									col[2] = colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX));
+									static_cast<ccPointCloud*>(sliceCloud)->setRGBColor(col);
+									sliceCloud->showColors(true);
+								}
+
+								sliceCloud->setEnabled(true);
+								sliceCloud->setVisible(true);
+
+								CCVector3 cellOrigin(gridOrigin.x + (PointCoordinateType)i * (cellSize.x + gap),
+													 gridOrigin.y + (PointCoordinateType)j * (cellSize.y + gap),
+													 gridOrigin.z + (PointCoordinateType)k * (cellSize.z + gap));
+								sliceCloud->setName(QString("slice @ (%1 ; %2 ; %3)").arg(cellOrigin.x).arg(cellOrigin.y).arg(cellOrigin.z));
+
+								//add slice to group
+								group->addChild(sliceCloud);
+							}
+						}		
+					}
+				}
+			}
+		}
+
+		//release memory
+		{
+			for (unsigned i=0; i<cellCount; ++i)
+				if (clouds[i])
+					delete clouds[i];
+			delete[] clouds;
+			clouds = 0;
+		}
+
+		//unsigned currentCell = 0;
+		//for (int i=indexMins[0]; i<=indexMaxs[0]; ++i)
+		//{
+		//	ccBBox cellBox;
+		//	cellBox.minCorner().x = gridOrigin.x + (PointCoordinateType)i * (cellSize.x + gap);
+		//	cellBox.maxCorner().x = cellBox.minCorner().x + cellSize.x;
+		//	for (int j=indexMins[1]; j<=indexMaxs[1]; ++j)
+		//	{
+		//		cellBox.minCorner().y = gridOrigin.y + (PointCoordinateType)j * (cellSize.y + gap);
+		//		cellBox.maxCorner().y = cellBox.minCorner().y + cellSize.y;
+		//		for (int k=indexMins[2]; k<=indexMaxs[2]; ++k, ++currentCell)
+		//		{
+		//			cellBox.minCorner().z = gridOrigin.z + (PointCoordinateType)k * (cellSize.z + gap);
+		//			cellBox.maxCorner().z = cellBox.minCorner().z + cellSize.z;
+
+		//			m_clipBox->setBox(cellBox);
+
+		//			//count the number of visible slices
+		//			unsigned visibleCount = 0;
+		//			{
+		//				ccGenericPointCloud::VisibilityTableType* visArray = cloud->getTheVisibilityArray();
+		//				assert(visArray);
+		//				if (visArray)
+		//				{
+		//					for (unsigned i=0; i<cloud->size(); ++i)
+		//						if (visArray->getValue(i) == POINT_VISIBLE)
+		//							++visibleCount;
+		//				}
+		//			}
+
+		//			if (visibleCount) //some slices can be empty!
+		//			{
+		//				ccGenericPointCloud* sliceCloud = cloud->createNewCloudFromVisibilitySelection(false);
+		//				if (sliceCloud)
+		//				{
+		//					if (generateRandomColors && cloud->isA(CC_POINT_CLOUD))
+		//					{
+		//						colorType col[3];
+		//						col[0] = colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX));
+		//						col[1] = colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX));
+		//						col[2] = colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX));
+		//						static_cast<ccPointCloud*>(sliceCloud)->setRGBColor(col);
+		//						sliceCloud->showColors(true);
+		//					}
+
+		//					sliceCloud->setEnabled(true);
+		//					sliceCloud->setVisible(true);
+		//					sliceCloud->setName(QString("slice @ (%1 ; %2 ; %3)").arg(cellBox.minCorner().x).arg(cellBox.minCorner().y).arg(cellBox.minCorner().z));
+		//					//add slice to group
+		//					group->addChild(sliceCloud);
+		//				}
+		//			}
+
+		//			pDlg.setValue((int)floor(100.0f*(float)currentCell/(float)cellCount));
+		//		}
+		//	}
+		//}
+
+		if (group->getChildrenNumber() == 0)
+		{
+			ccLog::Warning("[ccClippingBoxTool] Repeat process generated no output!");
+			delete group;
+			group = 0;
+		}
+		else
+		{
+			QMessageBox::warning(0, "Process finished", QString("%1 clouds have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(group->getChildrenNumber()));
+			group->setDisplay_recursive(cloud->getDisplay());
+			MainWindow::TheInstance()->addToDB(group);
+		}
+
+		//m_clipBox->setBox(originalBox);
+	}
+
+	if (m_associatedWin)
+		m_associatedWin->redraw();
 }
 
 void ccClippingBoxTool::onBoxModified(const ccBBox* box)

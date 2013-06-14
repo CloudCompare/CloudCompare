@@ -67,7 +67,15 @@
        </property>
        <property name="icon">
         <iconset resource="../icones.qrc">
-         <normaloff>:/CC/images/ccAddConstSF.png</normaloff>:/CC/images/ccAddConstSF.png</iconset>
+         <normaloff>:/CC/images/ccClippingBoxSingleExport.png</normaloff>:/CC/images/ccClippingBoxSingleExport.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="exportMultButton">
+       <property name="icon">
+        <iconset resource="../icones.qrc">
+         <normaloff>:/CC/images/ccClippingBoxMultExport.png</normaloff>:/CC/images/ccClippingBoxMultExport.png</iconset>
        </property>
       </widget>
      </item>

@@ -43,6 +43,7 @@ v2.4 ??/??/2013
 	* applying the interactive 'rotate/translate' tool to an entity and its parent at the
 		same time would make CC crash
 	* "Intensity", "Time" and "Return number" fields are now properly exported with LAS files
+	* "Height Grid Generation" tool accuracy fixed (when dealing with coordinates above 10^5)
 
 v2.4 04/25/2013
 - 3D mouses (3dConnexion devices) are now supported:

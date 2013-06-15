@@ -54,7 +54,7 @@ struct hgCell
 
 //************************************************************************************************************************
 ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
-												PointCoordinateType grid_step,
+												double grid_step,
 												const ccBBox& customBox,
 												unsigned char proj_dimension,
 												ProjectionType projectionType,
@@ -84,7 +84,9 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 	const unsigned char Y  = (X==2 ? 0 : X+1);
 
 	ccBBox box = (customBox.isValid() ? customBox : cloud->getMyOwnBB());
-	CCVector3 boxDiag = box.getDiagVec();
+	CCVector3d boxDiag(	(double)box.maxCorner().x - (double)box.minCorner().x,
+						(double)box.maxCorner().y - (double)box.minCorner().y,
+						(double)box.maxCorner().z - (double)box.minCorner().z );
 	if (boxDiag.u[X] <= 0 || boxDiag.u[Y] <= 0)
 	{
 		ccLog::Error("[ccHeightGridGeneration] Invalid cloud bounding box!");
@@ -102,7 +104,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
     ccLog::Print(QString("\tGrid size: [%1 x %2]").arg(grid_size_X).arg(grid_size_Y));
     ccLog::Print(QString("\tCell count: %1").arg(grid_total_size));
     if (grid_total_size > (1<<24)) //2^24 = 16 Mo
-        ccLog::Warning("[ccHeightGridGeneration] The grid that will be generated is pretty huge (%i millions of cells) and this may take some time...", (double)grid_total_size/1.0e6);
+        ccLog::Warning(QString("[ccHeightGridGeneration] The grid that will be generated is pretty huge (%1 million of cells) and this may take some time...").arg((double)grid_total_size/1.0e6));
 
 	// memory allocation of the height grid
 	bool memError = true;
@@ -158,15 +160,17 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
     {
         const CCVector3* thePoint = cloud->getPoint(n);
 
-		CCVector3 relativePos = *thePoint - box.minCorner();
+		CCVector3d relativePos(	(double)thePoint->x - (double)box.minCorner().x,
+								(double)thePoint->y - (double)box.minCorner().y,
+								(double)thePoint->z - (double)box.minCorner().z );
 
         int i = (int)(relativePos.u[X]/grid_step);
 		int j = (int)(relativePos.u[Y]/grid_step);
 
 		//if we fall exactly on the max corner of the grid box
-		if (i == (int)grid_size_X && relativePos.u[X] == grid_step * (PointCoordinateType)grid_size_X)
+		if (i == (int)grid_size_X && relativePos.u[X] == grid_step * (double)grid_size_X)
 			--i;
-		if (j == (int)grid_size_Y && relativePos.u[Y] == grid_step * (PointCoordinateType)grid_size_Y)
+		if (j == (int)grid_size_Y && relativePos.u[Y] == grid_step * (double)grid_size_Y)
 			--j;
 
 		//we skip points outside the box!
@@ -552,20 +556,22 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 				unsigned pointsCount = (fillEmptyCells != LEAVE_EMPTY ? grid_size_X*grid_size_Y : nonEmptyCells);
 				if (cloudGrid->reserve(pointsCount))
 				{
-					CCVector3 P(0.0);
-					P.u[Y]=box.minCorner().u[Y];
+					CCVector3d P(0.0);
+					double Py = (double)box.minCorner().u[Y];
 	                
 					unsigned n = 0;
 					for (unsigned j=0; j<grid_size_Y; ++j)
 					{
 						const hgCell* aCell = grid[j];
-						P.u[X] = box.minCorner().u[X];
+						double Px = (double)box.minCorner().u[X];
 						for (unsigned i=0; i<grid_size_X; ++i,++aCell)
 						{
 							if (aCell->nbPoints) //non empty cell
 							{
-								P.u[Z] = aCell->height;
-								cloudGrid->addPoint(P);
+								double Pz = (double)aCell->height;
+
+								CCVector3 Pf((PointCoordinateType)Px,(PointCoordinateType)Py,(PointCoordinateType)Pz);
+								cloudGrid->addPoint(Pf);
 								++n;
 
 								//if a SF is available, we set the point height as its associated scalar
@@ -580,7 +586,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 							}
 							else if (fillEmptyCells != LEAVE_EMPTY) //empty cell
 							{
-								P.u[Z] = empty_cell_height;
+								CCVector3 Pf((PointCoordinateType)Px,(PointCoordinateType)Py,empty_cell_height);
 								cloudGrid->addPoint(P);
 								++n;
 
@@ -591,10 +597,10 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 									countSF->addElement(NAN_VALUE);
 							}
 	                        
-							P.u[X] += grid_step;
+							Px += grid_step;
 						}
 
-						P.u[Y] += grid_step;
+						Py += grid_step;
 					}
 
 					if (heightSF)

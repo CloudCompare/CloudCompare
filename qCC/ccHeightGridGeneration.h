@@ -54,7 +54,7 @@ public:
 
     //! Computes height grid
     static ccPointCloud* Compute(	ccGenericPointCloud* cloud,
-									PointCoordinateType grid_step,
+									double grid_step,
 									const ccBBox& customBox,
 									unsigned char proj_dimension,
 									ProjectionType type_of_projection,

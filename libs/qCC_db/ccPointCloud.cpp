@@ -2224,7 +2224,6 @@ void ccPointCloud::unrollOnCone(double baseRadius, double alpha_deg, const CCVec
 		PointCoordinateType radialDist = (u+P2*tan_alpha);
 		PointCoordinateType orthoDist = radialDist * cos_alpha;
 		PointCoordinateType z2 = P2 - orthoDist*sin_alpha;//(P2+u*tan_alpha)*q;
-		PointCoordinateType x2 = z2*tan_alpha;
 
 		//we project point
 		P->u[dim1] = lon*baseRadius;

@@ -600,7 +600,6 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 		componentContext._win = 0;
 
 		//1 if names shall be pushed, 0 otherwise
-		int pushMod = (pushName ? 1 : 0);
 		if (pushName)
 			glPushName(0); //fake ID, will be replaced by the arrows one if any
 

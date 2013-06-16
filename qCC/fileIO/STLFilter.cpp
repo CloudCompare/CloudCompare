@@ -112,7 +112,6 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile)
 	//current vertex shift
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 	assert(vertices);
-	const double* shift = vertices->getOriginalShift();
 
 	mesh->placeIteratorAtBegining();
 	for (unsigned i=0;i<faceCount;++i)

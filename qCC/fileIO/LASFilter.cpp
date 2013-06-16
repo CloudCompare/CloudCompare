@@ -52,8 +52,8 @@ struct LasField
 	double maxValue;
 	double defaultValue;
 
-	LasField() : type(LAS_INVALID), sf(0), firstValue(0.0), defaultValue(0.0), minValue(0.0), maxValue(-1.0) {}
-	LasField(LAS_FIELDS fieldType, double defaultVal, double min, double max) : type(fieldType), sf(0), firstValue(0.0), defaultValue(defaultVal), minValue(min), maxValue(max) {}
+	LasField() : type(LAS_INVALID), sf(0), firstValue(0.0), minValue(0.0), maxValue(-1.0), defaultValue(0.0) {}
+	LasField(LAS_FIELDS fieldType, double defaultVal, double min, double max) : type(fieldType), sf(0), firstValue(0.0), minValue(min), maxValue(max), defaultValue(defaultVal) {}
 
 	//! Returns officiel field name
 	inline const char* getName() { return (type < LAS_INVALID ? LAS_FIELD_NAMES[type] : 0); }

@@ -29,6 +29,7 @@ class ccGenericPointCloud;
 class ccGenericMesh;
 class ccGenericPrimitive;
 class ccOctree;
+class ccKdTree;
 class ccImage;
 class ccCalibratedImage;
 class ccGBLSensor;
@@ -132,6 +133,7 @@ protected:
     void fillWithMesh(ccGenericMesh*);
     void fillWithPrimitive(ccGenericPrimitive*);
     void fillWithPointOctree(ccOctree*);
+	void fillWithPointKdTree(ccKdTree*);
     void fillWithImage(ccImage*);
     void fillWithCalibratedImage(ccCalibratedImage*);
 	void fillWithLabel(cc2DLabel*);

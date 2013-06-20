@@ -125,6 +125,7 @@ ccHObject* ccHObject::New(unsigned objectType, const char* name/*=0*/)
 	case CC_EXTRU:
 		return new ccExtru(name);
 	case CC_POINT_OCTREE:
+	case CC_POINT_KDTREE:
 		//construction this way is not supported (yet)
 		ccLog::ErrorDebug("[ccHObject::New] This object (type %i) can't be constructed this way (yet)!",objectType);
 		break;

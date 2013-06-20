@@ -253,7 +253,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(GenericIndexedClo
 	case GENERIC:
 		{
 			unsigned count = theCloud->size();
-			CC2DPointsConainer the2DPoints;
+			CC2DPointsContainer the2DPoints;
 			try
 			{
 				the2DPoints.resize(count);

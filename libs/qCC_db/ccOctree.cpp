@@ -62,7 +62,7 @@ void ccOctree::setDisplayType(CC_OCTREE_DISPLAY_TYPE type)
 
 void ccOctree::clear()
 {
-	if (m_glListID>=0)
+	if (m_glListID >= 0)
 	{
 		if (glIsList(m_glListID))
 			glDeleteLists(m_glListID,1);

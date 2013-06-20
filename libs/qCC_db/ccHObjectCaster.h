@@ -26,6 +26,7 @@ class ccMesh;
 class ccMeshGroup;
 class ccGenericPrimitive;
 class ccOctree;
+class ccKdTree;
 class ccSensor;
 class ccGBLSensor;
 class ccImage;
@@ -70,6 +71,9 @@ class ccHObjectCaster
 
         //! converts current object to ccOctree (if possible)
         static ccOctree* ToOctree(ccHObject* obj);
+
+		//! converts current object to ccKdTree (if possible)
+        static ccKdTree* ToKdTree(ccHObject* obj);
 
         //! converts current object to ccSensor (if possible)
         static ccSensor* ToSensor(ccHObject* obj);

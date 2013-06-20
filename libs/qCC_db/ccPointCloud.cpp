@@ -28,6 +28,7 @@
 #include "ccNormalVectors.h"
 #include "ccColorScalesManager.h"
 #include "ccOctree.h"
+#include "ccKdTree.h"
 #include "ccGenericMesh.h"
 #include "ccMesh.h"
 #include "ccMeshGroup.h"
@@ -1189,6 +1190,14 @@ void ccPointCloud::translate(const CCVector3& T)
 	ccOctree* oct = getOctree();
 	if (oct)
 		oct->translateBoundingBox(T);
+
+	//and same thing for the Kd-tree(s)!
+	ccHObject::Container kdtrees;
+	filterChildren(kdtrees, false, CC_POINT_KDTREE);
+	{
+		for (size_t i=0; i<kdtrees.size(); ++i)
+			static_cast<ccKdTree*>(kdtrees[i])->translateBoundingBox(T);
+	}
 }
 
 void ccPointCloud::multiply(PointCoordinateType fx, PointCoordinateType fy, PointCoordinateType fz)
@@ -1221,13 +1230,22 @@ void ccPointCloud::multiply(PointCoordinateType fx, PointCoordinateType fy, Poin
 	if (fz<0.0)
 		std::swap(bbMin[2],bbMax[2]);
 
+	//same thing for the octree
 	ccOctree* oct = getOctree();
 	if (oct)
 	{
-		if (fx==fy && fx==fz && fx>0.0 && fy>0.0 && fz>0.0)
+		if (fx==fy && fx==fz && fx>0 && fy>0 && fz>0)
 			oct->multiplyBoundingBox(fx);
 		else
 			deleteOctree();
+	}
+
+	//and same thing for the Kd-tree(s)!
+	ccHObject::Container kdtrees;
+	filterChildren(kdtrees, false, CC_POINT_KDTREE);
+	{
+		for (size_t i=0; i<kdtrees.size(); ++i)
+			static_cast<ccKdTree*>(kdtrees[i])->multiplyBoundingBox(fx);
 	}
 }
 
@@ -2060,6 +2078,9 @@ void ccPointCloud::deleteScalarField(int index)
 	ChunkedPointCloud::deleteScalarField(index);
 
 	//current SF should still be up-to-date!
+	if (m_currentInScalarFieldIndex < 0 && getNumberOfScalarFields() > 0)
+		setCurrentInScalarField((int)getNumberOfScalarFields()-1);
+
 	setCurrentDisplayedScalarField(m_currentInScalarFieldIndex);
 	showSF(m_currentInScalarFieldIndex>=0);
 }
@@ -2272,18 +2293,20 @@ int ccPointCloud::addScalarField(const char* uniqueName)
 
 	//Nouveau champ scalaire
 	ccScalarField* sf = new ccScalarField(uniqueName);
-	if (size()>0)
+	if (size() != 0)
+	{
 		if (!sf->reserve(size()))
 		{
 			sf->release();
 			ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
 			return -1;
 		}
+	}
 
-		m_scalarFields.push_back(sf);
-		sf->link();
+	m_scalarFields.push_back(sf);
+	sf->link();
 
-		return (int)m_scalarFields.size()-1;
+	return (int)m_scalarFields.size()-1;
 }
 
 int ccPointCloud::addScalarField(ccScalarField* sf)

@@ -60,7 +60,7 @@ void Delaunay2dMesh::linkMeshWith(GenericIndexedCloud* aCloud, bool passOwnershi
 	cloudIsOwnedByMesh = passOwnership;
 }
 
-bool Delaunay2dMesh::build(CC2DPointsConainer &the2dPoints)
+bool Delaunay2dMesh::build(CC2DPointsContainer &the2dPoints)
 {
 	if (the2dPoints.empty())
 		return false;

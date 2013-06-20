@@ -271,6 +271,7 @@ protected slots:
     void doActionInvertNormals();
 	void doActionConvertNormalsToHSV();
     void doActionComputeOctree();
+	void doActionComputeKdTree();
     void doActionApplyTransformation();
     void doActionFuse();
     void doActionRegister();

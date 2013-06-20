@@ -41,6 +41,7 @@
 #include <ccMesh.h>
 #include <ccMeshGroup.h>
 #include <ccOctree.h>
+#include <ccKdTree.h>
 #include <ccGBLSensor.h>
 #include <ccNormalVectors.h>
 #include <ccProgressDialog.h>
@@ -838,7 +839,6 @@ void MainWindow::connectActions()
     //"Edit > Mesh" menu
     connect(actionComputeMeshAA,                SIGNAL(triggered()),    this,       SLOT(doActionComputeMeshAA()));
     connect(actionComputeMeshLS,                SIGNAL(triggered()),    this,       SLOT(doActionComputeMeshLS()));
-	connect(actionMeshBestFittingQuadric,		SIGNAL(triggered()),    this,       SLOT(doActionComputeQuadric3D()));
 	connect(actionConvertTextureToColor,		SIGNAL(triggered()),    this,       SLOT(doActionConvertTextureToColor()));
     connect(actionSamplePoints,                 SIGNAL(triggered()),    this,       SLOT(doActionSamplePoints()));
     connect(actionSmoothMeshLaplacian,			SIGNAL(triggered()),    this,       SLOT(doActionSmoothMeshLaplacian()));
@@ -868,8 +868,6 @@ void MainWindow::connectActions()
 	connect(actionOpenColorScalesManager,		SIGNAL(triggered()),    this,       SLOT(doActionOpenColorScalesManager()));
     connect(actionDeleteScalarField,            SIGNAL(triggered()),    this,       SLOT(doActionDeleteScalarField()));
     connect(actionDeleteAllSF,                  SIGNAL(triggered()),    this,       SLOT(doActionDeleteAllSF()));
-    //"Edit > Bounding-box" menu
-    connect(actionComputeBestFitBB,             SIGNAL(triggered()),    this,       SLOT(doComputeBestFitBB()));
     //"Edit" menu
     connect(actionClone,                        SIGNAL(triggered()),    this,       SLOT(doActionClone()));
     connect(actionFuse,                         SIGNAL(triggered()),    this,       SLOT(doActionFuse()));
@@ -887,7 +885,6 @@ void MainWindow::connectActions()
     //"Tools > Registration" menu
     connect(actionRegister,                     SIGNAL(triggered()),    this,       SLOT(doActionRegister()));
     connect(actionPointPairsAlign,				SIGNAL(triggered()),    this,       SLOT(activateRegisterPointPairTool()));
-    connect(actionAlign,                        SIGNAL(triggered()),    this,       SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
     //"Tools > Distances" menu
     connect(actionCloudCloudDist,               SIGNAL(triggered()),    this,       SLOT(doActionCloudCloudDist()));
     connect(actionCloudMeshDist,                SIGNAL(triggered()),    this,       SLOT(doActionCloudMeshDist()));
@@ -909,6 +906,12 @@ void MainWindow::connectActions()
 	//"Tools"
     connect(actionPointListPicking,             SIGNAL(triggered()),    this,       SLOT(activatePointListPickingMode()));
     connect(actionPointPicking,                 SIGNAL(triggered()),    this,       SLOT(activatePointsPropertiesMode()));
+
+	//"Tools > Sand box (research)" menu
+    connect(actionComputeKdTree,                SIGNAL(triggered()),    this,       SLOT(doActionComputeKdTree()));
+	connect(actionMeshBestFittingQuadric,		SIGNAL(triggered()),    this,       SLOT(doActionComputeQuadric3D()));
+    connect(actionComputeBestFitBB,             SIGNAL(triggered()),    this,       SLOT(doComputeBestFitBB()));
+    connect(actionAlign,                        SIGNAL(triggered()),    this,       SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
 
     //"Display" menu
     connect(actionFullScreen,                   SIGNAL(toggled(bool)),  this,       SLOT(toggleFullScreen(bool)));
@@ -1142,6 +1145,69 @@ void MainWindow::doActionConvertNormalsToHSV()
 
     refreshAll();
 	updateUI();
+}
+
+static double s_kdTreeMaxMS = 1.0;
+void MainWindow::doActionComputeKdTree()
+{
+	ccGenericPointCloud* cloud = 0;
+
+	if (m_selectedEntities.size() == 1)
+	{
+		ccHObject* ent = m_selectedEntities.back();
+		bool lockedVertices;
+		cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+		if (lockedVertices)
+		{
+			DisplayLockedVerticesWarning();
+			return;
+		}
+	}
+
+	if (!cloud)
+	{
+		ccLog::Error("Selected one and only one point cloud or mesh!");
+		return;
+	}
+
+	bool ok;
+	s_kdTreeMaxMS = QInputDialog::getDouble(this, "Kd-tree", "Max RMS per leaf cell:", s_kdTreeMaxMS, 1.0e-6, 1.0e6, 6, &ok);
+	if (!ok)
+		return;
+
+    ccProgressDialog pDlg(true,this);
+	
+	//computation
+	QElapsedTimer eTimer;
+	eTimer.start();
+	ccKdTree* kdtree = new ccKdTree(cloud);
+
+	if (kdtree->build(s_kdTreeMaxMS,&pDlg))
+	{
+		int elapsedTime_ms = eTimer.elapsed();
+
+		ccConsole::Print("[doActionComputeKdTree] Timing: %2.3f s",elapsedTime_ms/1.0e3);
+		cloud->setEnabled(true); //for mesh vertices!
+		cloud->addChild(kdtree);
+		kdtree->setDisplay(cloud->getDisplay());
+		kdtree->setVisible(true);
+		kdtree->prepareDisplayForRefresh();
+#ifdef _DEBUG
+		kdtree->convertCellIndexToSF();
+		//kdtree->fuseCells(s_kdTreeMaxMS);
+#endif
+
+		addToDB(kdtree,true,0,false,false);
+		
+		refreshAll();
+		updateUI();
+	}
+	else
+	{
+		ccLog::Error("An error occured!");
+		delete kdtree;
+		kdtree = 0;
+	}
 }
 
 void MainWindow::doActionComputeOctree()
@@ -7578,34 +7644,34 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionRoughness->setEnabled(atLeastOneCloud);
 	actionPlaneOrientation->setEnabled(atLeastOneCloud);
 
-    actionFilterByValue->setEnabled(atLeastOneSF);             //&& scalarField
-    actionConvertToRGB->setEnabled(atLeastOneSF);              //&& scalarField
-	actionRenameSF->setEnabled(atLeastOneSF);                  //&& scalarField
-    actionComputeStatParams->setEnabled(atLeastOneSF);         //&& scalarField
-    actionShowHistogram->setEnabled(atLeastOneSF);             //&& scalarField
-    actionGaussianFilter->setEnabled(atLeastOneSF);            //&& scalarField
-    actionBilateralFilter->setEnabled(atLeastOneSF);           //&& scalarField
-    actionDeleteScalarField->setEnabled(atLeastOneSF);         //&& scalarField
-    actionDeleteAllSF->setEnabled(atLeastOneSF);               //&& scalarField
-    actionMultiplySF->setEnabled(/*TODO: atLeastOneSF*/false); //&& scalarField
-    actionSFGradient->setEnabled(atLeastOneSF);                //&& scalarField
+    actionFilterByValue->setEnabled(atLeastOneSF);
+    actionConvertToRGB->setEnabled(atLeastOneSF);
+	actionRenameSF->setEnabled(atLeastOneSF);
+    actionComputeStatParams->setEnabled(atLeastOneSF);
+    actionShowHistogram->setEnabled(atLeastOneSF);
+    actionGaussianFilter->setEnabled(atLeastOneSF);
+    actionBilateralFilter->setEnabled(atLeastOneSF);
+    actionDeleteScalarField->setEnabled(atLeastOneSF);
+    actionDeleteAllSF->setEnabled(atLeastOneSF);
+    actionMultiplySF->setEnabled(/*TODO: atLeastOneSF*/false);
+    actionSFGradient->setEnabled(atLeastOneSF);
 
-    actionSamplePoints->setEnabled(atLeastOneMesh);				//&& hasMesh
-    actionMeasureMeshSurface->setEnabled(atLeastOneMesh);		//&& hasMesh
-	actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);		//&& hasMesh
-	actionConvertTextureToColor->setEnabled(atLeastOneMesh);	//&& hasMesh
-	actionSubdivideMesh->setEnabled(atLeastOneMesh);			//&& hasMesh
+    actionSamplePoints->setEnabled(atLeastOneMesh);
+    actionMeasureMeshSurface->setEnabled(atLeastOneMesh);
+	actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);
+	actionConvertTextureToColor->setEnabled(atLeastOneMesh);
+	actionSubdivideMesh->setEnabled(atLeastOneMesh);
+	actionMeshBestFittingQuadric->setEnabled(atLeastOneMesh);
 
-    menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);	//&& scalarField
-    //actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);	//&& scalarField
-    //actionEnhanceMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);	//&& scalarField
+    menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);
+    //actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
+    //actionEnhanceMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
 
-    actionResolveNormalsDirection->setEnabled(atLeastOneCloud && atLeastOneNormal);    //&& hasNormals
-    actionClearNormals->setEnabled(atLeastOneNormal);               //&& hasNormals
-    actionInvertNormals->setEnabled(atLeastOneNormal);              //&& hasNormals
-    actionConvertNormalToHSV->setEnabled(atLeastOneNormal);         //&& hasNormals
-    actionClearColor->setEnabled(atLeastOneColor);                  //&& colored
-
+    actionResolveNormalsDirection->setEnabled(atLeastOneCloud && atLeastOneNormal);
+    actionClearNormals->setEnabled(atLeastOneNormal);
+    actionInvertNormals->setEnabled(atLeastOneNormal);
+    actionConvertNormalToHSV->setEnabled(atLeastOneNormal);
+    actionClearColor->setEnabled(atLeastOneColor);
 
     //==1
     bool exactlyOneEntity = (selInfo.selCount==1);
@@ -7620,12 +7686,14 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionProjectSensor->setEnabled(atLeastOneCloud);
     actionLabelConnectedComponents->setEnabled(atLeastOneCloud);
     actionUnroll->setEnabled(exactlyOneEntity);
-    actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);        //&& scalarField
+    actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);
 	actionAddConstantSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionEditGlobalShift->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	actionComputeKdTree->setEnabled(exactlyOneCloud || exactlyOneMesh);
 
-	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);                 //&& scalarField
-    actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);       //&& scalarField
+
+	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
+    actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
 	
 	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount>0);
 	actionCrossSection->setEnabled(exactlyOneCloud);
@@ -7643,7 +7711,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionAlign->setEnabled(exactlyTwoEntities); //Aurelien BEY le 13/11/2008
     actionSubsample->setEnabled(exactlyOneCloud); //Aurelien BEY le 4/12/2008
     actionCloudCloudDist->setEnabled(exactlyTwoClouds);
-    actionCloudMeshDist->setEnabled(exactlyTwoEntities && atLeastOneMesh);      //at least one Mesh!
+    actionCloudMeshDist->setEnabled(exactlyTwoEntities && atLeastOneMesh);
     actionCPS->setEnabled(exactlyTwoClouds);
     actionScalarFieldArithmetic->setEnabled(exactlyOneEntity && atLeastOneSF);
 

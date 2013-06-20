@@ -164,7 +164,7 @@ void ccBoundingBoxEditorDlg::checkBaseInclusion()
 	bool exclude = false;
 	if (m_baseBBox.isValid())
 	{
-		exclude = !m_currentBBox.inside(m_baseBBox.minCorner()) || !m_currentBBox.inside(m_baseBBox.maxCorner());
+		exclude = !m_currentBBox.contains(m_baseBBox.minCorner()) || !m_currentBBox.contains(m_baseBBox.maxCorner());
 	}
 
 	warningLabel->setVisible(exclude);

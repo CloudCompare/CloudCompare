@@ -196,8 +196,11 @@ ccPlane* ccGenericPointCloud::fitPlane(double* rms/*= 0*/)
 {
 	//number of points
 	unsigned count = size();
-	if (count<3)
+	if (count < 3)
+	{
+		ccLog::Warning("[ccGenericPointCloud::fitPlane] Not enough points to fit a plane!");
 		return 0;
+	}
 
 	CCLib::Neighbourhood Yk(this);
 
@@ -223,7 +226,7 @@ ccPlane* ccGenericPointCloud::fitPlane(double* rms/*= 0*/)
 		theLSQPlane[i]=/*sign*/(PointCoordinateType)vec[i];
 	CCVector3 N(theLSQPlane);
 
-	//we also get centroid
+	//we also get the centroid
 	const CCVector3* G = Yk.getGravityCenter();
 	assert(G);
 

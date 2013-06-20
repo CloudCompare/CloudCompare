@@ -31,6 +31,7 @@
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
 #include <ccOctree.h>
+#include <ccKdTree.h>
 #include <ccImage.h>
 #include <cc2DLabel.h>
 #include <cc2DViewportLabel.h>
@@ -189,6 +190,10 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
     else if (m_currentObject->isA(CC_POINT_OCTREE))
     {
         fillWithPointOctree(static_cast<ccOctree*>(m_currentObject));
+    }
+    else if (m_currentObject->isA(CC_POINT_KDTREE))
+    {
+        fillWithPointKdTree(static_cast<ccKdTree*>(m_currentObject));
     }
     else if (m_currentObject->isKindOf(CC_IMAGE))
     {
@@ -509,6 +514,16 @@ void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)
 
 	//total volume of filled cells
 	appendRow( ITEM("Filled volume"), ITEM(QString::number((double)cellCount*pow((double)cellSize,3.0))) );
+}
+
+void ccPropertiesTreeDelegate::fillWithPointKdTree(ccKdTree* _obj)
+{
+    assert(_obj && m_model);
+
+    addSeparator("Kd-tree");
+
+    //max rms
+	appendRow( ITEM("Max RMS"), ITEM(QString::number(_obj->getMaxRMS())) );
 }
 
 void ccPropertiesTreeDelegate::fillWithImage(ccImage* _obj)

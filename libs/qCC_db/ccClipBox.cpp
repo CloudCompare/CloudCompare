@@ -522,7 +522,7 @@ void ccClipBox::update(bool shrink/*=false*/)
 			{
 				CCVector3 P = *cloud->getPoint(i);
 				transMat.apply(P);
-				visTable->setValue(i,m_box.inside(P) ? POINT_VISIBLE : POINT_HIDDEN);
+				visTable->setValue(i,m_box.contains(P) ? POINT_VISIBLE : POINT_HIDDEN);
 			}
 		}
 	}
@@ -533,7 +533,7 @@ void ccClipBox::update(bool shrink/*=false*/)
 			if (!shrink || visTable->getValue(i) == POINT_VISIBLE)
 			{
 				const CCVector3* P = cloud->getPoint(i);
-				visTable->setValue(i,m_box.inside(*P) ? POINT_VISIBLE : POINT_HIDDEN);
+				visTable->setValue(i,m_box.contains(*P) ? POINT_VISIBLE : POINT_HIDDEN);
 			}
 		}
 	}

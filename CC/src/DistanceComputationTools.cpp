@@ -2171,7 +2171,6 @@ ScalarType DistanceComputationTools::computePoint2TriangleDistance(const CCVecto
 	}
 }
 
-//distance from point P(xp,yp,zp) to the plane: a0.x + a1.y + a2.z = a3
 ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* planeEquation)
 {
 	//distance d'un point a un plan : d = fabs(a0*x+a1*y+a2*z-a3)/sqrt(a0^2+a1^2+a2^2)
@@ -2183,30 +2182,33 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 	return (ScalarType)(fabs(CCVector3::vdot(P->u,planeEquation)-planeEquation[3])/sqrt(norm2));
 }
 
-//calcule la distance d'un nuage de point par rapport au plan : a0.x + a1.y + a2.z = a3
-ScalarType DistanceComputationTools::computeCloud2PlaneDistance(GenericCloud* cloud, const PointCoordinateType* planeEquation)
+ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(GenericCloud* cloud, const PointCoordinateType* planeEquation)
 {
     assert(cloud && planeEquation);
 
-	//nombre de points
-	unsigned n = cloud->size();
-	//distance d'un point a un plan : d = fabs(a0*x+a1*y+a2*z-a3) / sqrt(a0\B2+a1\B2+a2\B2) <-- "norm"
-	double norm = CCVector3::vnorm(planeEquation);
+	//point count
+	unsigned count = cloud->size();
+	if (count == 0)
+		return 0.0;
 
-	if (norm == 0.0 || n == 0)
+	//point to plane distance: d = fabs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
+	double norm = CCVector3::vnorm(planeEquation);
+	if (norm == 0.0)
         return NAN_VALUE;
 
-	double dSum = 0.0;
+	double dSumSq = 0.0;
 
 	//calcul des differences
 	cloud->placeIteratorAtBegining();
-	for (unsigned i=0;i<n;++i)
+	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = cloud->getNextPoint();
-		dSum += (double)fabs(CCVector3::vdot(P->u,planeEquation)-planeEquation[3]);
+		double d = static_cast<double>(CCVector3::vdot(P->u,planeEquation)-planeEquation[3]);
+		
+		dSumSq += d*d;
 	}
 
-	return (ScalarType)(dSum/(norm*(double)n));
+	return sqrt(dSumSq/(double)count);
 }
 
 bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersist* cloud, unsigned seedPointIndex, uchar octreeLevel, GenericProgressCallback* progressCb)

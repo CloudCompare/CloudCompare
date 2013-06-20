@@ -38,7 +38,7 @@ const CC_OCTREE_DISPLAY_TYPE OCTREE_DISPLAY_TYPE_ENUMS[OCTREE_DISPLAY_TYPE_NUMBE
 const char COCTREE_DISPLAY_TYPE_TITLES[OCTREE_DISPLAY_TYPE_NUMBERS][18]				=		{"Wire","Points","Plain cubes"};
 
 //! Octree structure
-/** Extends the DgmOctree class (Cf. CCLib).
+/** Extends the CCLib::DgmOctree class.
 **/
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"

@@ -53,7 +53,7 @@ public:
 	/** \param the2dPoints a set of 2D points
 		\return success
 	**/
-	virtual bool build(CC2DPointsConainer &the2dPoints);
+	virtual bool build(CC2DPointsContainer &the2dPoints);
 
 	//inherited methods (see GenericMesh)
 	virtual unsigned size() const {return numberOfTriangles;};

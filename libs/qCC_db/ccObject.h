@@ -54,7 +54,7 @@ enum CC_OBJECT_FLAG {
 #define CC_BOX_BIT						0x00080000		//Box (primitive)
 #define CC_DISH_BIT						0x00100000		//Dish (primitive)
 #define CC_EXTRU_BIT					0x00200000		//Extrusion (primitive)
-//#define CC_FREE_BIT					0x00400000
+#define CC_KDTREE_BIT					0x00400000		//Kd-tree
 //#define CC_FREE_BIT					0x00800000
 #define CC_MATERIAL_BIT					0x01000000		//Material
 #define CC_CLIP_BOX_BIT					0x02000000		//Clipping box
@@ -73,6 +73,7 @@ enum CC_CLASS_ENUM {
     CC_MESH                 =   CC_HIERARCHY_OBJECT | CC_MESH_BIT,
     CC_MESH_GROUP           =   CC_MESH | CC_GROUP_BIT,
     CC_POINT_OCTREE         =   CC_HIERARCHY_OBJECT | CC_OCTREE_BIT | CC_LEAF_BIT,
+    CC_POINT_KDTREE         =   CC_HIERARCHY_OBJECT | CC_KDTREE_BIT | CC_LEAF_BIT,
     CC_POLY_LINE            =   CC_HIERARCHY_OBJECT | CC_POLYLINE_BIT | CC_LEAF_BIT,
     CC_IMAGE				=   CC_HIERARCH_BIT | CC_IMAGE_BIT,
     CC_CALIBRATED_IMAGE		=   CC_IMAGE  | CC_LEAF_BIT,

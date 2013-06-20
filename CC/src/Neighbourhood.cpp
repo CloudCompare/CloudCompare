@@ -462,19 +462,12 @@ bool Neighbourhood::compute3DQuadric()
 	return true;
 }
 
-bool Neighbourhood::projectPointsOnPlane(const PointCoordinateType* thePlaneEquation, CC2DPointsConainer &the2DPoints, ScalarType &error, bool distanceNeeded)
+bool Neighbourhood::projectPointsOnPlane(const PointCoordinateType* thePlaneEquation, CC2DPointsContainer& the2DPoints)
 {
 	assert(thePlaneEquation);
 
 	//user is in charge of clearing this vector (if he wants to call this method several times)
 	//the2DPoints.clear();
-
-	if (distanceNeeded)
-	{
-		error = DistanceComputationTools::computeCloud2PlaneDistance(m_associatedCloud,thePlaneEquation);
-		if (error < 0.0)
-            return false;
-	}
 
 	#ifdef CC_NEIGHBOURHOOD_PRECISION_COMPUTINGS
 	PointCoordinateType bbMin[3],bbMax[3];
@@ -533,11 +526,10 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
         return 0;
 
 	//on projette les points sur le meilleur plan approximant
-	ScalarType error=0.0;
-	GenericIndexedMesh* mesh=0;
+	GenericIndexedMesh* mesh = 0;
 	std::vector<CCVector2> the2DPoints;
 
-	if (projectPointsOnPlane(lsq,the2DPoints,error,false))
+	if (projectPointsOnPlane(lsq,the2DPoints))
 	{
 		Delaunay2dMesh* dm = new Delaunay2dMesh();
 

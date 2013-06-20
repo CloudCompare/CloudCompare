@@ -226,9 +226,9 @@ public:
 		WARNING: this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d'
-		\return the mean distance (or NaN if an error occured)
+		\return the RMS of distances (or NaN if an error occured)
 	**/
-	static ScalarType computeCloud2PlaneDistance(GenericCloud* cloud, const PointCoordinateType* planeEquation);
+	static ScalarType computeCloud2PlaneDistanceRMS(GenericCloud* cloud, const PointCoordinateType* planeEquation);
 
 	//! Computes the Chamfer distances (approximated distances) between two point clouds
 	/** This methods uses a 3D grid to perfrom the Chamfer Distance propagation.

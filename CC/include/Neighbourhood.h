@@ -34,7 +34,7 @@ class GenericIndexedMesh;
 //#define CC_NEIGHBOURHOOD_PRECISION_COMPUTINGS
 
 //! 2D points container
-typedef std::vector<CCVector2> CC2DPointsConainer;
+typedef std::vector<CCVector2> CC2DPointsContainer;
 
 //! A specific point could structure to handle subsets of points, provided with several geometric processings
 /** Typically suited for "nearest neighbours".
@@ -98,10 +98,7 @@ class Neighbourhood
 		//! Projects points on the best least-square plane.
 		/** Projected points are stored in the2DPoints.
 		**/
-		bool projectPointsOnPlane(const PointCoordinateType* thePlaneEquation, 
-									CC2DPointsConainer &the2DPoints, 
-									ScalarType &error, 
-									bool distanceNeeded=false);
+		bool projectPointsOnPlane(const PointCoordinateType* thePlaneEquation, CC2DPointsContainer& the2DPoints);
 
 		//! Computes point set curvature with height function
 		/** \return curvature value (warning: unsigned value!) or NAN_VALUE if computation failed.

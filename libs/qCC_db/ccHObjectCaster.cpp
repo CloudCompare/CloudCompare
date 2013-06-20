@@ -25,6 +25,7 @@
 #include "ccMesh.h"
 #include "ccMeshGroup.h"
 #include "ccOctree.h"
+#include "ccKdTree.h"
 #include "ccImage.h"
 #include "ccCalibratedImage.h"
 #include "ccGBLSensor.h"
@@ -108,6 +109,11 @@ ccGenericPrimitive* ccHObjectCaster::ToPrimitive(ccHObject* obj)
 ccOctree* ccHObjectCaster::ToOctree(ccHObject* obj)
 {
 	return obj && obj->isA(CC_POINT_OCTREE) ? static_cast<ccOctree*>(obj) : 0;
+}
+
+ccKdTree* ccHObjectCaster::ToKdTree(ccHObject* obj)
+{
+	return obj && obj->isA(CC_POINT_KDTREE) ? static_cast<ccKdTree*>(obj) : 0;
 }
 
 ccSensor* ccHObjectCaster::ToSensor(ccHObject* obj)

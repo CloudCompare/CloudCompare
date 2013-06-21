@@ -221,8 +221,17 @@ public:
 					GenericIndexedCloudPersist* referenceCloud,
 					GenericProgressCallback* progressCb=0);
 
-	//! Computes the mean distance between a cloud and a plane
-	/** Sums the distances between each point of the cloud and the plane, then computes the mean value.
+	//! Computes the maximum distance between a point cloud and a plane
+	/** WARNING: this method uses the cloud global iterator
+		\param cloud a point cloud
+		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d'
+		\param percent percentage of lowest values ignored
+		\return the max distance @ 'percent' % between the point and the plane
+	**/
+	static ScalarType ComputeCloud2PlaneRobustMax(GenericCloud* cloud, const PointCoordinateType* planeEquation, float percent);
+
+	//! Computes the Root Mean Square (RMS) distance between a cloud and a plane
+	/** Sums the squared distances between each point of the cloud and the plane, then computes the mean value.
 		WARNING: this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d'

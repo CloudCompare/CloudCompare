@@ -89,16 +89,16 @@ const double* Neighbourhood::get3DQuadric()
 
 void Neighbourhood::computeGravityCenter()
 {
-	assert(m_associatedCloud);
+	//invalidate precedent centroid (if any)
+	structuresValidity &= (~GRAVITY_CENTER);
 	_theGravityCenter = 0;
 
-	unsigned count = m_associatedCloud->size();
+	assert(m_associatedCloud);
+	unsigned count = (m_associatedCloud ? m_associatedCloud->size() : 0);
 	if (!count)
 		return;
 
-	double Xsum=0.0;
-	double Ysum=0.0;
-	double Zsum=0.0;
+	CCVector3d Psum(0.0);
 
 	//sums
 	#ifdef CC_NEIGHBOURHOOD_PRECISION_COMPUTINGS
@@ -115,15 +115,16 @@ void Neighbourhood::computeGravityCenter()
 		Ysum += (double)(P->y-C.y);
 		Zsum += (double)(P->z-C.z);
 		#else
-		Xsum += (double)P->x;
-		Ysum += (double)P->y;
-		Zsum += (double)P->z;
+		Psum.x += (double)P->x;
+		Psum.y += (double)P->y;
+		Psum.z += (double)P->z;
 		#endif
 	}
 
-	theGravityCenter.x = (PointCoordinateType)(Xsum/(double)count);
-	theGravityCenter.y = (PointCoordinateType)(Ysum/(double)count);
-	theGravityCenter.z = (PointCoordinateType)(Zsum/(double)count);
+	Psum /= (double)count;
+	theGravityCenter.x = (PointCoordinateType)Psum.x;
+	theGravityCenter.y = (PointCoordinateType)Psum.y;
+	theGravityCenter.z = (PointCoordinateType)Psum.z;
 
 	#ifdef CC_NEIGHBOURHOOD_PRECISION_COMPUTINGS
 	theGravityCenter += C;
@@ -135,7 +136,8 @@ void Neighbourhood::computeGravityCenter()
 
 CCLib::SquareMatrixd Neighbourhood::computeCovarianceMatrix()
 {
-	unsigned count = m_associatedCloud->size();
+	assert(m_associatedCloud);
+	unsigned count = (m_associatedCloud ? m_associatedCloud->size() : 0);
 	if (!count)
 		return CCLib::SquareMatrixd();
 
@@ -144,12 +146,12 @@ CCLib::SquareMatrixd Neighbourhood::computeCovarianceMatrix()
 	assert(G);
 
     //we build up covariance matrix
-	double mXX=0.0;
-	double mYY=0.0;
-	double mZZ=0.0;
-	double mXY=0.0;
-	double mXZ=0.0;
-	double mYZ=0.0;
+	double mXX = 0.0;
+	double mYY = 0.0;
+	double mZZ = 0.0;
+	double mXY = 0.0;
+	double mXZ = 0.0;
+	double mYZ = 0.0;
 
 	for (unsigned i=0;i<count;++i)
 	{
@@ -175,37 +177,95 @@ CCLib::SquareMatrixd Neighbourhood::computeCovarianceMatrix()
 	return covMat;
 }
 
+PointCoordinateType Neighbourhood::computeLargestRadius()
+{
+	assert(m_associatedCloud);
+	unsigned pointCount = (m_associatedCloud ? m_associatedCloud->size() : 0);
+	if (pointCount < 2)
+		return 0;
+
+	//get the centroid
+	const CCVector3* G = getGravityCenter();
+	if (!G)
+		return NAN_VALUE;
+
+	PointCoordinateType maxSquareDist = 0;
+	for (unsigned i=0; i<pointCount; ++i)
+	{
+		const CCVector3* P = m_associatedCloud->getPoint(i);
+		PointCoordinateType d2 = (*P-*G).norm2();
+		if (d2 > maxSquareDist)
+			maxSquareDist = d2;
+	}
+
+	return sqrt(maxSquareDist);
+}
+
 bool Neighbourhood::computeLeastSquareBestFittingPlane()
 {
+	//invalidate precedent LS plane (if any)
+	structuresValidity &= (~LSQ_PLANE);
 	_theLSQPlane = 0;
 
-	if (m_associatedCloud->size()<CC_LOCAL_MODEL_MIN_SIZE[LS])
+	assert(m_associatedCloud);
+	unsigned pointCount = (m_associatedCloud ? m_associatedCloud->size() : 0);
+
+	//we need at least 3 points to compute a plane
+	assert(CC_LOCAL_MODEL_MIN_SIZE[LS] >= 3);
+	if (pointCount < CC_LOCAL_MODEL_MIN_SIZE[LS])
 	{
-		//can't compute LSF plane with less than 3 points!
+		//not enough points!
 		return false;
 	}
 
-	//we determine plane normal by computing the smallest eigen value of M = 1/n * S[(p-µ)*(p-µ)']
-	CCLib::SquareMatrixd eig = computeCovarianceMatrix().computeJacobianEigenValuesAndVectors();
+	const CCVector3* G = 0;
+	if (pointCount > 3)
+	{
+		//we determine plane normal by computing the smallest eigen value of M = 1/n * S[(p-µ)*(p-µ)']
+		CCLib::SquareMatrixd eig = computeCovarianceMatrix().computeJacobianEigenValuesAndVectors();
 
-    //invalid matrix?
-	if (!eig.isValid())
-		return false;
+		//invalid matrix?
+		if (!eig.isValid())
+			return false;
 
-	//the smallest eigen vector corresponds to the "least square best fitting plane" normal
-	double vec[3];
-	eig.getMinEigenValueAndVector(vec);
-	for (unsigned i=0;i<3;++i)
-        theLSQPlane[i]=(PointCoordinateType)vec[i];
+		//the smallest eigen vector corresponds to the "least square best fitting plane" normal
+		double vec[3];
+		eig.getMinEigenValueAndVector(vec);
+		
+		//make sure the result is a normal vector!
+		Vector3Tpl<double>::vnormalize(vec);
+		
+		theLSQPlane[0] = (PointCoordinateType)vec[0];
+		theLSQPlane[1] = (PointCoordinateType)vec[1];
+		theLSQPlane[2] = (PointCoordinateType)vec[2];
 
-	//we get centroid (should already be up-to-date - see computeCovarianceMatrix)
-	const CCVector3* G = getGravityCenter();
-	assert(G);
+		//get the centroid (should already be up-to-date - see computeCovarianceMatrix)
+		G = getGravityCenter();
+	}
+	else
+	{
+		//we simply compute the normal of the 3 points by cross product!
+		const CCVector3* A = m_associatedCloud->getPoint(0);
+		const CCVector3* B = m_associatedCloud->getPoint(1);
+		const CCVector3* C = m_associatedCloud->getPoint(2);
+		CCVector3 N = (*B-*A).cross(*C-*A);
 
-	//eventually we just have to compute 'constant' coefficient a3
-	//we use the fact that the plane pass through the centroid --> GM.N = 0 (scalar prod)
+		//make sure the result is a normal vector!
+		N.normalize();
+
+		theLSQPlane[0] = N.x;
+		theLSQPlane[1] = N.y;
+		theLSQPlane[2] = N.z;
+
+		//the plane pass through any of the 3 points
+		G = A;
+	}
+
+	//eventually we just have to compute the 'constant' coefficient a3
+	//we use the fact that the plane pass through G --> GM.N = 0 (scalar prod)
 	//i.e. a0*G[0]+a1*G[1]+a2*G[2]=a3
-	theLSQPlane[3] =  G->dot(CCVector3(theLSQPlane));
+	assert(G);
+	theLSQPlane[3] = G->dot(CCVector3(theLSQPlane));
 
 	_theLSQPlane = theLSQPlane;
 	structuresValidity |= LSQ_PLANE;
@@ -215,10 +275,18 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 
 bool Neighbourhood::computeHeightFunction()
 {
-    _theHeightFunction=0;
+	//invalidate precedent quadric (if any)
+	structuresValidity &= (~HEIGHT_FUNCTION);
+	_theHeightFunction = 0;
 
-	const unsigned count = m_associatedCloud->size();
-	if (count<CC_LOCAL_MODEL_MIN_SIZE[HF])
+	assert(m_associatedCloud);
+	if (!m_associatedCloud)
+		return false;
+
+	unsigned count = m_associatedCloud->size();
+	
+	assert(CC_LOCAL_MODEL_MIN_SIZE[HF] >= 5);
+	if (count < CC_LOCAL_MODEL_MIN_SIZE[HF])
 		return false;
 
 	const PointCoordinateType* lsq = getLSQPlane();
@@ -382,7 +450,13 @@ bool Neighbourhood::computeHeightFunction()
 
 bool Neighbourhood::compute3DQuadric()
 {
-    _the3DQuadric = 0;
+	//invalidate precedent quadric (if any)
+	structuresValidity &= (~QUADRIC_3D);
+	_the3DQuadric = 0;
+
+	assert(m_associatedCloud);
+	if (!m_associatedCloud)
+		return false;
 
     //computes a 3D quadric of the form ax2 +by2 +cz2 + 2exy + 2fyz + 2gzx + 2lx + 2my + 2nz + d = 0
     //"THREE-DIMENSIONAL SURFACE CURVATURE ESTIMATION USING QUADRIC SURFACE PATCHES", I. Douros & B. Buxton, University College London
@@ -456,7 +530,7 @@ bool Neighbourhood::compute3DQuadric()
 	for (i=0;i<10;++i)
         the3DQuadric[i]=vec[i];
 
-	_the3DQuadric=the3DQuadric;
+	_the3DQuadric = the3DQuadric;
 	structuresValidity |= QUADRIC_3D;
 
 	return true;
@@ -466,41 +540,34 @@ bool Neighbourhood::projectPointsOnPlane(const PointCoordinateType* thePlaneEqua
 {
 	assert(thePlaneEquation);
 
-	//user is in charge of clearing this vector (if he wants to call this method several times)
+	unsigned count = (m_associatedCloud ? m_associatedCloud->size() : 0);
+	if (!count)
+		return false;
+
+	//the user is in charge of clearing the input vector (if he wants to call this method several times...)
 	//the2DPoints.clear();
-
-	#ifdef CC_NEIGHBOURHOOD_PRECISION_COMPUTINGS
-	PointCoordinateType bbMin[3],bbMax[3];
-	m_associatedCloud->getBoundingBox(bbMin,bbMax);
-	uchar flatdims = 0;
-	if ((bbMax[0]-bbMin[0])<ZERO_TOLERANCE) ++flatdims; //invalid bbox or flat dim!
-	if ((bbMax[1]-bbMin[1])<ZERO_TOLERANCE) ++flatdims; //invalid bbox or flat dim!
-	if ((bbMax[2]-bbMin[2])<ZERO_TOLERANCE) ++flatdims; //invalid bbox or flat dim!
-	if (flatdims>1)
-        return false;
-	#endif
-
-    //we construct the plane local frame
-	CCVector3 u(1.0,0.0,0.0),v(0.0,1.0,0.0);
-	if (thePlaneEquation[0]!=0.0 || thePlaneEquation[1]!=0.0)
-		CCMiscTools::ComputeBaseVectors(thePlaneEquation,u.u,v.u);
 
 	//we get centroid
 	const CCVector3* G = getGravityCenter();
 	assert(G);
 
-	//now we can project points on plane
-	unsigned count=m_associatedCloud->size();
+	//reserve some memory for output
 	try
 	{
 		the2DPoints.resize(count);
 	}
-	catch (.../*const std::bad_alloc&*/) //out of memory
+	catch (std::bad_alloc) //out of memory
 	{
 		return false;
 	}
 
-	for (unsigned i=0;i<count;++i)
+    //we construct the plane local frame
+	CCVector3 u(1.0,0.0,0.0), v(0.0,1.0,0.0);
+	if (thePlaneEquation[0] != 0 || thePlaneEquation[1] != 0)
+		CCMiscTools::ComputeBaseVectors(thePlaneEquation,u.u,v.u);
+
+	//project the points
+	for (unsigned i=0; i<count; ++i)
 	{
 		//we recenter current point
 		CCVector3 P = *m_associatedCloud->getPoint(i) - *G;

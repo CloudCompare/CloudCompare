@@ -30,6 +30,7 @@
 
 //CCLib
 #include <PointProjectionTools.h>
+#include <AutoSegmentationTools.h>
 
 //GUI (generated with Qt Designer)
 #include <ui_mainWindow.h>
@@ -272,6 +273,7 @@ protected slots:
 	void doActionConvertNormalsToHSV();
     void doActionComputeOctree();
 	void doActionComputeKdTree();
+	void doActionFuseKdTreeCells();
     void doActionApplyTransformation();
     void doActionFuse();
     void doActionRegister();
@@ -380,6 +382,12 @@ protected:
 
 	//! Returns a default first guess for algorithms kernel size
 	static PointCoordinateType GetDefaultCloudKernelSize(const ccHObject::Container& entities);
+
+	//! Creates point clouds from multiple 'components'
+	void createComponentsClouds(ccGenericPointCloud* cloud,
+								CCLib::ReferenceCloudContainer& components,
+								unsigned minPointPerComponent,
+								bool randomColors);
 
     void closeEvent(QCloseEvent* event);
     void moveEvent(QMoveEvent* event);

@@ -48,6 +48,9 @@ public:
 	//! Default constructor
 	ReferenceCloud(GenericIndexedCloudPersist* associatedCloud);
 
+	//! Copy constructor
+	ReferenceCloud(const ReferenceCloud& refCloud);
+
 	//! Destructor
 	virtual ~ReferenceCloud();
 
@@ -150,6 +153,13 @@ public:
 
     //! Sets the associated (source) cloud
 	virtual void setAssociatedCloud(GenericIndexedCloudPersist* cloud);
+
+	//! Add another reference cloud
+	/** Warnings:
+		- the clouds must have the same reference cloud!
+		- no verification for duplicates!
+	**/
+	bool add(const ReferenceCloud& cloud);
 
 protected:
 

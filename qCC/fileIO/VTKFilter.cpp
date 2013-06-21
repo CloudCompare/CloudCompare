@@ -563,14 +563,14 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 
 				int newSFIndex = vertices->addScalarField(qPrintable(sfName));
 				CCLib::ScalarField* sf = vertices->getScalarField(newSFIndex);
-				for (unsigned i=0;i<ptsCount;++i)
+				for (unsigned i=0; i<ptsCount; ++i)
 				{
 					nextline = inFile.readLine();
 					if (sf)
 					{
 						bool ok;
 						ScalarType d = (ScalarType)nextline.toDouble(&ok);
-						sf->addElement(d);
+						sf->setValue(i,ok ? d : NAN_VALUE);
 					}
 				}
 				if (sf)

@@ -87,6 +87,7 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 		catch(std::bad_alloc)
 		{
 			//not enough memory
+			cc.clear();
 			return false;
 		}
 
@@ -94,6 +95,7 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 		if (!cc[ccLabel]->addPointIndex(i))
 		{
 			//not enough memory
+			cc.clear();
 			return false;
 		}
 	}

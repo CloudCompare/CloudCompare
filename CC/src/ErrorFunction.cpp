@@ -59,20 +59,18 @@ double ErrorFunction::erf(double x)
 	return two_sqrtpi*sum;
 }
 
+static const double one_sqrtpi = 1.0/sqrt(M_PI);
+
 double ErrorFunction::erfc(double x)
 //erfc(x) = 2/sqrt(pi)*integral(exp(-t^2),t,x,inf)
 // = exp(-x^2)/sqrt(pi) * [1/x+ (1/2)/x+ (2/2)/x+ (3/2)/x+ (4/2)/x+ ...]
 // = 1-erf(x)
 //expression inside [] is a continued fraction so '+' means add to denominator only
 {
-
-	static const double one_sqrtpi= 0.564189583547756287; // 1/sqrt(pi)
-
 	if (fabs(x) < 2.2)
 		return 1.0 - erf(x); //use series when fabs(x) < 2.2
 
-	//if (signbit(x)) //continued fraction only valid for x>0
-	if (x < ZERO_TOLERANCE) //continued fraction only valid for x>0
+	if (x < 1.0e-12) //continued fraction only valid for x>0
 		return 2.0 - erfc(-x);
 
 	double a=1, b=x; //last two convergent numerators

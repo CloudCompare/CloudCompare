@@ -100,7 +100,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 	if (mesh && mesh->hasMaterials())
 	{
 		//look for textures/materials in case there's no color
-		if (!mesh->hasColors())
+		//if (!mesh->hasColors())
 		{
 			const ccMaterialSet* materials = mesh->getMaterialSet();
 			assert(materials);
@@ -127,18 +127,25 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 				}
 				else /*if (materials->size() > 1)*/
 				{
-					if (QMessageBox::question(	0,
-												"Multiple materials, one texture",
-												"This mesh has only one texture but multiple materials. PLY files can only handle one texture.\nShall we drop the materials (yes) or convert all materials and texture to per-vertex RGB colors? (no)",
-												QMessageBox::Yes | QMessageBox::No,
-												QMessageBox::Yes) == QMessageBox::No)
+					if (mesh->hasColors())
 					{
-						//we can forget the texture
-						material = 0;
-						//try to convert materials to RGB
-						if (!mesh->convertMaterialsToVertexColors())
+						ccLog::Error("PLY files can't handle multiple materials/textures!\nOnly the RGB field will be saved.");
+					}
+					else
+					{
+						if (QMessageBox::question(	0,
+													"Multiple materials, one texture",
+													"This mesh has only one texture but multiple materials. PLY files can only handle one texture.\nShall we drop the materials (yes) or convert all materials and texture to per-vertex RGB colors? (no)",
+													QMessageBox::Yes | QMessageBox::No,
+													QMessageBox::Yes) == QMessageBox::No)
 						{
-							ccLog::Error("Conversion failed! (not enough memory?)");
+							//we can forget the texture
+							material = 0;
+							//try to convert materials to RGB
+							if (!mesh->convertMaterialsToVertexColors())
+							{
+								ccLog::Error("Conversion failed! (not enough memory?)");
+							}
 						}
 					}
 				}
@@ -149,25 +156,32 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 				//we can forget the (first) texture (if any)
 				material = 0;
 
-				//we ask the user if he wants to convert them to RGB
-				if (QMessageBox::question(	0,
-											"Multiple textures/materials",
-											"PLY files can't handle multiple textures/materials!\nDo you want to convert them to per-vertex RGB colors?",
-											QMessageBox::Yes | QMessageBox::No,
-											QMessageBox::No ) == QMessageBox::Yes)
+				if (mesh->hasColors())
 				{
-					if (!mesh->convertMaterialsToVertexColors())
+					ccLog::Error("PLY files can't handle multiple materials/textures!\nOnly the RGB field will be saved.");
+				}
+				else
+				{
+					//we ask the user if he wants to convert them to RGB
+					if (QMessageBox::question(	0,
+												"Multiple textures/materials",
+												"PLY files can't handle multiple textures/materials!\nDo you want to convert them to per-vertex RGB colors?",
+												QMessageBox::Yes | QMessageBox::No,
+												QMessageBox::No ) == QMessageBox::Yes)
 					{
-						ccLog::Error("Conversion failed! (not enough memory?)");
+						if (!mesh->convertMaterialsToVertexColors())
+						{
+							ccLog::Error("Conversion failed! (not enough memory?)");
+						}
 					}
 				}
 			}
 		}
-		else
-		{
-			ccLog::Warning("[PLY] PLY files can't handle materials/textures! RGB field will be saved instead");
-			ccLog::Warning("[PLY] Note: you can convert materials/textures to RGB if necessary (see 'Edit > Mesh' menu)");
-		}
+		//else
+		//{
+		//	ccLog::Warning("[PLY] PLY files can't handle materials/textures! RGB field will be saved instead");
+		//	ccLog::Warning("[PLY] Note: you can convert materials/textures to RGB if necessary (see 'Edit > Mesh' menu)");
+		//}
 	}
 
 	bool hasUniqueColor = false;

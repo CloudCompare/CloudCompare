@@ -160,7 +160,7 @@ void SimpleMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType
 //specific methods
 void SimpleMesh::addTriangle(unsigned i1, unsigned i2, unsigned i3)
 {
-	unsigned t[3]={i1,i2,i3};
+	unsigned t[3] = {i1,i2,i3};
 	m_triIndexes->addElement(t);
 
 	bbIsValid = false;

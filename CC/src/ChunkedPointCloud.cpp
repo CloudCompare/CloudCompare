@@ -150,7 +150,7 @@ void ChunkedPointCloud::applyTransformation(PointProjectionTools::Transformation
     unsigned count = size();
 
 	//always apply the scale before everything (applying before or after rotation does not changes anything)
-    if (fabs(trans.s - 1.0) > ZERO_TOLERANCE)
+    if (fabs((double)trans.s - 1.0) > ZERO_TOLERANCE)
     {
         for (unsigned i=0; i<count; ++i)
             *point(i) *= trans.s;
@@ -190,9 +190,9 @@ bool ChunkedPointCloud::isScalarFieldEnabled() const
 
 bool ChunkedPointCloud::enableScalarField()
 {
-    ScalarField* currentInScalarFieldArray = getCurrentInScalarField();
+    ScalarField* currentInScalarField = getCurrentInScalarField();
 
-	if (!currentInScalarFieldArray)
+	if (!currentInScalarField)
 	{
 		//if we get there, it means that either the caller has forgot to create
 		//(and assign) a scalar field to the cloud, or that we are in a compatibility
@@ -208,15 +208,15 @@ bool ChunkedPointCloud::enableScalarField()
                 return false;
 		}
 
-        currentInScalarFieldArray = getCurrentInScalarField();
-        assert(currentInScalarFieldArray);
+        currentInScalarField = getCurrentInScalarField();
+        assert(currentInScalarField);
 	}
 
 	//if there's no output scalar field either, we set this new scalar field as output also
 	if (!getCurrentOutScalarField())
 		m_currentOutScalarFieldIndex = m_currentInScalarFieldIndex;
 
-	return currentInScalarFieldArray->resize(m_points->capacity());
+	return currentInScalarField->resize(m_points->capacity());
 }
 
 void ChunkedPointCloud::setPointScalarValue(unsigned pointIndex, ScalarType value)
@@ -256,21 +256,26 @@ int ChunkedPointCloud::addScalarField(const char* uniqueName)
 
 	//create requested scalar field
     ScalarField* sf = new ScalarField(uniqueName);
-	if (!sf)
+	if (!sf || (size() && !sf->resize(size())))
+	{
+		//Not enough memory!
+		if (sf)
+			sf->release();
 		return -1;
+	}
 
 	try
 	{
 		//we don't want 'm_scalarFields' to grow by 50% each time! (default behavior of std::vector::push_back)
 		m_scalarFields.resize(m_scalarFields.size()+1);
-		m_scalarFields.back() = sf;
 	}
 	catch (std::bad_alloc) //out of memory
 	{
 		sf->release();
 		return -1;
 	}
-
+	
+	m_scalarFields.back() = sf;
 	sf->link();
 
 	return (int)m_scalarFields.size()-1;

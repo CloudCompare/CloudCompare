@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1872                                                              $
-//$LastChangedDate:: 2011-07-07 00:13:58 +0200 (jeu., 07 juil. 2011)       $
-//**************************************************************************
-//
 
 #ifndef CC_ALIGN_DLG_HEADER
 #define CC_ALIGN_DLG_HEADER

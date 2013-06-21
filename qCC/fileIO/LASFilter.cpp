@@ -710,7 +710,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 			else
 			{
 				//first point? we track its value
-				if (loadedCloud->size()==1)
+				if (loadedCloud->size() == 1)
 				{
 					it->firstValue = value;
 				}

@@ -52,7 +52,7 @@
 
 //! Numerical threshold for considering a value as "zero"
 #ifndef ZERO_TOLERANCE
-#define ZERO_TOLERANCE (1e-8)
+#define ZERO_TOLERANCE (1.0e-8)
 #endif
 
 //! NaN scalar value

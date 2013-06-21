@@ -225,7 +225,7 @@ int GeometricalAnalysisTools::computeLocalDensity(GenericIndexedCloudPersist* th
 
 //FONCTION "CELLULAIRE" DE CALCUL DE DENSITE LOCALE
 //PAS DE PARAMETRES ADDITIONNELS
-const ScalarType c_sphereVolumeCoef=(ScalarType)(4.0/3.0*M_PI);
+const double c_sphereVolumeCoef = (4.0/3.0*M_PI);
 bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
 {
 	//structures pour la recherche de voisinages SPECIFIQUES
@@ -247,9 +247,16 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(const DgmOctre
 		{
             //DGM: we consider that the point is alone in a sphere of radius R and volume V=(4*pi/3)*R^3
 			//So, the local density is ~1/V!
-            ScalarType R2 = nNSS.pointsInNeighbourhood[1].squareDist; //R2 in fact
-            ScalarType V = R2*sqrt(R2)*c_sphereVolumeCoef; //R^3 * (4*pi/3)
-			cell.points->setPointScalarValue(i,(ScalarType)1.0/std::max(V,(ScalarType)ZERO_TOLERANCE));
+            double R2 = (double)nNSS.pointsInNeighbourhood[1].squareDist; //R2 in fact
+			if (R2 > ZERO_TOLERANCE)
+			{
+				double V = R2*sqrt(R2)*c_sphereVolumeCoef; //R^3 * (4*pi/3)
+				cell.points->setPointScalarValue(i,(ScalarType)(1.0/V));
+			}
+			else
+			{
+				cell.points->setPointScalarValue(i,NAN_VALUE);
+			}
 		}
 		else
 		{
@@ -354,7 +361,7 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 	//*/
 
 	//for each point in the cell
-	for (unsigned i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
         ScalarType d = NAN_VALUE;
 		cell.points->getPoint(i,nNSS.queryPoint);

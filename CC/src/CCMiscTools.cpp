@@ -238,7 +238,7 @@ void CCMiscTools::ComputeBaseVectors(const PointCoordinateType *aPlane, PointCoo
     //c'est le premier de la base
     u[0] = -aPlane[1];
     u[1] = aPlane[0];
-    u[2] = 0.0;
+    u[2] = 0;
 
     //on deduit le deuxieme vecteur de la base par produit vectoriel
     CCVector3::vcross(aPlane,u,v);
@@ -250,9 +250,9 @@ void CCMiscTools::ComputeBaseVectors(const PointCoordinateType *aPlane, PointCoo
     if (n)
     {
         //et enfin, n, vecteur unitaire normal au plan
-        n[0]=aPlane[0];
-        n[1]=aPlane[1];
-        n[2]=aPlane[2];
+        n[0] = aPlane[0];
+        n[1] = aPlane[1];
+        n[2] = aPlane[2];
         CCVector3::vnormalize(n);
     }
 }

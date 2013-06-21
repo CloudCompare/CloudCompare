@@ -44,8 +44,9 @@ void TrueKdTree::clear()
 	m_root = 0;
 }
 
-//structure used to sort the points along a single dimension
-static std::vector<PointCoordinateType> s_coords;
+//shared structure used to sort the points along a single dimension (see TrueKdTree::split)
+static std::vector<PointCoordinateType> s_sortedCoordsForSplit;
+
 TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 {
 	assert(subset); //subset will always be taken care of by this method
@@ -60,7 +61,9 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		return 0;
 	}
 	
-	ScalarType rms = DistanceComputationTools::computeCloud2PlaneDistanceRMS(subset, planeEquation);
+	assert(fabs(CCVector3(planeEquation).norm2() - 1.0) < 1.0e-6);
+	//ScalarType rms = (count != 3 ? DistanceComputationTools::computeCloud2PlaneDistanceRMS(subset, planeEquation) : 0);
+	ScalarType rms = (count != 3 ? DistanceComputationTools::ComputeCloud2PlaneRobustMax(subset, planeEquation, 0.02f) : 0);
 	
 	//if we have less than 6 points, then the subdivision would produce a subset with less than 3 points
 	//(and we can't fit a plane on less than 3 points!)
@@ -90,19 +93,41 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		splitDim = Z_DIM;
 
 	//find the median by sorting the points coordinates
+	assert(s_sortedCoordsForSplit.size() >= (size_t)count);
 	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = subset->getPoint(i);
-		s_coords[i] = P->u[splitDim];
+		s_sortedCoordsForSplit[i] = P->u[splitDim];
 	}
-	std::sort(s_coords.begin(),s_coords.begin()+count);
+	std::sort(s_sortedCoordsForSplit.begin(),s_sortedCoordsForSplit.begin()+count);
 
 	unsigned splitCount = count>>1;
-	PointCoordinateType splitCoord = s_coords[splitCount]; //count > 3 --> splitCount >= 2
+	assert(splitCount >= 3); //count >= 6 (see above)
+	
+	//we must check that the split value is the 'first one'
+	if (s_sortedCoordsForSplit[2] != s_sortedCoordsForSplit[splitCount])
+	{
+		while (/*splitCount>0 &&*/ s_sortedCoordsForSplit[splitCount-1] == s_sortedCoordsForSplit[splitCount])
+			--splitCount;
+	}
+	else if (s_sortedCoordsForSplit[count-3] != s_sortedCoordsForSplit[splitCount])
+	{
+		while (/*splitCount+1<count &&*/ s_sortedCoordsForSplit[splitCount+1] == s_sortedCoordsForSplit[splitCount])
+			++splitCount;
+	}
+	else //in fact we can't split this cell!
+	{
+		Leaf* leaf = new Leaf(subset);
+		memcpy(leaf->planeEq,planeEquation,sizeof(PointCoordinateType)*4);
+		leaf->rms = rms;
+		return leaf;
+	}
+
+	PointCoordinateType splitCoord = s_sortedCoordsForSplit[splitCount]; //count > 3 --> splitCount >= 2
 
 	ReferenceCloud* leftSubset = new ReferenceCloud(subset->getAssociatedCloud());
 	ReferenceCloud* rightSubset = new ReferenceCloud(subset->getAssociatedCloud());
-	if (!leftSubset->reserve(splitCount) || !rightSubset->reserve(splitCount))
+	if (!leftSubset->reserve(splitCount) || !rightSubset->reserve(count-splitCount))
 	{
 		//not enough memory!
 		delete leftSubset;
@@ -169,7 +194,7 @@ bool TrueKdTree::build(double maxRMS, GenericProgressCallback* progressCb/*=0*/)
 	//structures used to sort the points along the 3 dimensions
 	try
 	{
-		s_coords.resize(count);
+		s_sortedCoordsForSplit.resize(count);
 	}
 	catch(std::bad_alloc)
 	{
@@ -191,45 +216,53 @@ bool TrueKdTree::build(double maxRMS, GenericProgressCallback* progressCb/*=0*/)
 	m_root = split(subset);
 
 	//clear static structure
-	s_coords.clear();
+	s_sortedCoordsForSplit.clear();
 
 	return (m_root != 0);
 }
 
-//Helper for recursive search of all leaves
-static std::vector<TrueKdTree::Leaf*>* s_leaves = 0;
-void GetLeaves(TrueKdTree::BaseNode* node)
+//! Recursive visitor for TrueKdTree::getLeaves
+class GetLeavesVisitor
 {
-	if (!node)
-		return;
+public:
 
-	if (node->isNode())
-	{
-		GetLeaves(static_cast<TrueKdTree::Node*>(node)->leftChild);
-		GetLeaves(static_cast<TrueKdTree::Node*>(node)->rightChild);
-	}
-	else //if (node->isLeaf())
-	{
-		if (s_leaves)
-			s_leaves->push_back(static_cast<TrueKdTree::Leaf*>(node));
-	}
-}
+	GetLeavesVisitor(TrueKdTree::LeafVector& leaves) : m_leaves(&leaves) {}
 
-bool TrueKdTree::getLeaves(std::vector<Leaf*>& leaves) const
+	void visit(TrueKdTree::BaseNode* node)
+	{
+		if (!node)
+			return;
+
+		if (node->isNode())
+		{
+			visit(static_cast<TrueKdTree::Node*>(node)->leftChild);
+			visit(static_cast<TrueKdTree::Node*>(node)->rightChild);
+		}
+		else //if (node->isLeaf())
+		{
+			assert(m_leaves);
+			m_leaves->push_back(static_cast<TrueKdTree::Leaf*>(node));
+		}
+	}
+
+protected:
+	TrueKdTree::LeafVector* m_leaves;
+
+};
+
+bool TrueKdTree::getLeaves(LeafVector& leaves) const
 {
-	s_leaves = &leaves;
-	bool success = true;
+	if (!m_root)
+		return false;
 
 	try
-	{
-		if (m_root)
-			GetLeaves(m_root);
+	{		
+		GetLeavesVisitor(leaves).visit(m_root);
 	}
 	catch(std::bad_alloc)
 	{
-		success = false;
+		return false;
 	}
 
-	s_leaves = 0;
-	return success;
+	return true;
 }

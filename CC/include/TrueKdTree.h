@@ -99,6 +99,9 @@ public:
 		virtual ~Leaf() { if (points) delete points; };
 	};
 
+	//! A vector of leaves
+	typedef std::vector<Leaf*> LeafVector;
+
 	//! Default constructor
 	TrueKdTree(GenericIndexedCloudPersist* cloud);
 
@@ -118,7 +121,7 @@ public:
 	double getMaxRMS() const { return m_maxRMS; }
 
 	//! Returns all leaf nodes
-	bool getLeaves(std::vector<Leaf*>& leaves) const;
+	bool getLeaves(LeafVector& leaves) const;
 
 
 protected:

@@ -328,16 +328,21 @@
      <addaction name="actionCurvature"/>
      <addaction name="actionRoughness"/>
      <addaction name="actionPlaneOrientation"/>
-     <addaction name="actionSNETest"/>
     </widget>
     <widget class="QMenu" name="menuSand_Box">
      <property name="title">
       <string>Sand box (research)</string>
      </property>
      <addaction name="actionComputeKdTree"/>
+     <addaction name="actionFuseKdTreeCells"/>
+     <addaction name="separator"/>
      <addaction name="actionMeshBestFittingQuadric"/>
+     <addaction name="separator"/>
      <addaction name="actionComputeBestFitBB"/>
+     <addaction name="separator"/>
      <addaction name="actionAlign"/>
+     <addaction name="separator"/>
+     <addaction name="actionSNETest"/>
     </widget>
     <addaction name="menuProjection"/>
     <addaction name="menuRegistration"/>
@@ -2315,6 +2320,11 @@
   <action name="actionTest">
    <property name="text">
     <string>test</string>
+   </property>
+  </action>
+  <action name="actionFuseKdTreeCells">
+   <property name="text">
+    <string>Fuse Kd-tree cells</string>
    </property>
   </action>
  </widget>

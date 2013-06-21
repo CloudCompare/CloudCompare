@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2241                                                              $
-//$LastChangedDate:: 2012-09-21 23:22:39 +0200 (ven., 21 sept. 2012)       $
-//**************************************************************************
-//
 
 #include "ccAlignDlg.h"
 #include "mainwindow.h"
@@ -351,36 +344,37 @@ void ccAlignDlg::dataSamplingRateChanged(double value)
 
 void ccAlignDlg::estimateDelta()
 {
-    unsigned i, nb;
-    float meanDensity, meanSqrDensity, dev, value;
     ccProgressDialog pDlg(false,this);
 
     CCLib::ReferenceCloud *sampledData = getSampledData();
-    //we have to work on a copy of the cloud in order to prevent the algorithms from modifying the original cloud.
+    
+	//we have to work on a copy of the cloud in order to prevent the algorithms from modifying the original cloud.
     CCLib::ChunkedPointCloud* cloud = new CCLib::ChunkedPointCloud();
-    cloud->reserve(sampledData->size());
-    for(i=0; i<sampledData->size(); i++)
-        cloud->addPoint(*sampledData->getPoint(i));
-    cloud->enableScalarField();
+	{
+		cloud->reserve(sampledData->size());
+		for(unsigned i=0; i<sampledData->size(); i++)
+			cloud->addPoint(*sampledData->getPoint(i));
+		cloud->enableScalarField();
+	}
 
     CCLib::GeometricalAnalysisTools::computeLocalDensity(cloud, &pDlg);
-    nb = 0;
-    meanDensity = 0.;
-    meanSqrDensity = 0.;
-    for(i=0; i<cloud->size(); i++)
+    unsigned nb = 0;
+    double meanDensity = 0;
+    double meanSqrDensity = 0;
+    for (unsigned i=0; i<cloud->size(); i++)
     {
-        value = cloud->getPointScalarValue(i);
-        if(value > ZERO_TOLERANCE)
+        ScalarType value = cloud->getPointScalarValue(i);
+        if (value == value && value > ZERO_TOLERANCE)
         {
-            value = 1/value;
-            meanDensity += value;
-            meanSqrDensity += value*value;
+            double invValue = 1.0/(double)value;
+            meanDensity += invValue;
+            meanSqrDensity += invValue*invValue;
             nb++;
         }
     }
-    meanDensity /= (float)nb;
-    meanSqrDensity /= (float)nb;
-    dev = meanSqrDensity-(meanDensity*meanDensity);
+    meanDensity /= (double)nb;
+    meanSqrDensity /= (double)nb;
+    double dev = meanSqrDensity-(meanDensity*meanDensity);
 
     delta->setValue(meanDensity+dev);
     delete sampledData;

@@ -2293,14 +2293,11 @@ int ccPointCloud::addScalarField(const char* uniqueName)
 
 	//Nouveau champ scalaire
 	ccScalarField* sf = new ccScalarField(uniqueName);
-	if (size() != 0)
+	if (size() && !sf->resize(size()))
 	{
-		if (!sf->reserve(size()))
-		{
-			sf->release();
-			ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
-			return -1;
-		}
+		sf->release();
+		ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
+		return -1;
 	}
 
 	m_scalarFields.push_back(sf);

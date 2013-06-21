@@ -447,14 +447,19 @@ public:
 	**/
 	bool copy(GenericChunkedArray<N,ElementType>& dest) const
 	{
-		if (!dest.resize(capacity()))
+		unsigned count = currentSize();
+		if (!dest.resize(count))
 			return false;
-		//copy content
-		assert(dest.m_theChunks.size() == m_theChunks.size());
-		for (unsigned i=0;i<m_theChunks.size();++i)
+		
+		//copy content		
+		unsigned copyCount = 0;
+		assert(dest.m_theChunks.size() <= m_theChunks.size());
+		for (unsigned i=0; i<dest.m_theChunks.size(); ++i)
 		{
-			assert(dest.m_perChunkCount[i] == m_perChunkCount[i]);
-			memcpy(dest.m_theChunks[i],m_theChunks[i],m_perChunkCount[i]*sizeof(ElementType)*N);
+			unsigned toCopyCount = std::min<unsigned>(count-copyCount,m_perChunkCount[i]);
+			assert(dest.m_perChunkCount[i] >= toCopyCount);
+			memcpy(dest.m_theChunks[i],m_theChunks[i],toCopyCount*sizeof(ElementType)*N);
+			copyCount += toCopyCount;
 		}
 		return true;
 	}
@@ -896,19 +901,24 @@ public:
 	inline ElementType* chunkStartPtr(unsigned index) const { assert(index < m_theChunks.size()); return m_theChunks[index]; }
 
 	//! Copy array data to another one
-	/** \param dest destination array (will be resize if necessary)
+	/** \param dest destination array (will be resized if necessary)
 		\return success
 	**/
 	bool copy(GenericChunkedArray<1,ElementType>& dest) const
 	{
-		if (!dest.resize(capacity()))
+		unsigned count = currentSize();
+		if (!dest.resize(count))
 			return false;
-		//copy content
-		assert(dest.m_theChunks.size() == m_theChunks.size());
-		for (unsigned i=0;i<m_theChunks.size();++i)
+		
+		//copy content		
+		unsigned copyCount = 0;
+		assert(dest.m_theChunks.size() <= m_theChunks.size());
+		for (unsigned i=0; i<dest.m_theChunks.size(); ++i)
 		{
-			assert(dest.m_perChunkCount[i] == m_perChunkCount[i]);
-			memcpy(dest.m_theChunks[i],m_theChunks[i],m_perChunkCount[i]*sizeof(ElementType));
+			unsigned toCopyCount = std::min<unsigned>(count-copyCount,m_perChunkCount[i]);
+			assert(dest.m_perChunkCount[i] >= toCopyCount);
+			memcpy(dest.m_theChunks[i],m_theChunks[i],toCopyCount*sizeof(ElementType));
+			copyCount += toCopyCount;
 		}
 		return true;
 	}

@@ -181,7 +181,7 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
 				unsigned counter=0;
 
 				//j=1 because the first point is the query point itself --> contribution = 0
-				for (unsigned j=1;j<(unsigned)k;++j)
+				for (int j=1; j<k; ++j)
 				{
 					ScalarType d2 = cloud->getPointScalarValue(nNSS.pointsInNeighbourhood[j].pointIndex);
 					if (ScalarField::ValidValue(d2))
@@ -191,13 +191,13 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
 
 						if (norm2 > ZERO_TOLERANCE)
 						{
-                            d2 -= d1;
-							if (!euclidianDistances || d2*d2 < 1.01*norm2) //warning: here 'd2'=d2-d1
+                            ScalarType dd = d2 - d1;
+							if (!euclidianDistances || dd*dd < 1.01 * norm2)
 							{
-								d2 /= norm2; //warning: here 'd2'=d2-d1
-								sum[0] += (double)(u.x * d2); //warning: and here 'd2'=(d2-d1)/norm2 ;)
-								sum[1] += (double)(u.y * d2);
-								sum[2] += (double)(u.z * d2);
+								dd /= norm2;
+								sum[0] += (double)(u.x * dd); //warning: and here 'dd'=dd/norm2 ;)
+								sum[1] += (double)(u.y * dd);
+								sum[2] += (double)(u.z * dd);
 								++counter;
 							}
 						}

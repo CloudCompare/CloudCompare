@@ -459,7 +459,7 @@ bool HornRegistrationTools::FindAbsoluteOrientation(GenericCloud* lCloud,
 		}
 
 		//resulting scale
-		if (lNorm2Sum >= ZERO_TOLERANCE)
+		if (lNorm2Sum > 0.0)
 		{
 			scale = (PointCoordinateType)sqrt(rNorm2Sum/lNorm2Sum);
 		}
@@ -597,15 +597,15 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 		{
 			//a refers to P (not moving) and b to X (moving)
 			//a and b is for following the notation of the jscmhidt paper (see #7)
-			CCVector3d a_tilde = *(P->getNextPoint()) - Gp;
-			CCVector3d b_tilde = trans.R * (*(X->getNextPoint()) - Gx);
+			CCVector3 a_tilde = *(P->getNextPoint()) - Gp;
+			CCVector3 b_tilde = trans.R * (*(X->getNextPoint()) - Gx);
 
-			acc_1 += b_tilde.dot(a_tilde);
-			acc_2 += a_tilde.dot(a_tilde);
+			acc_1 += (double)b_tilde.dot(a_tilde);
+			acc_2 += (double)a_tilde.dot(a_tilde);
 		}
 
 		//DGM: acc_2 can't be 0 because we already have checked that the bbox is not a single point!
-		assert(acc_2 > ZERO_TOLERANCE);
+		assert(acc_2 > 0.0);
 		trans.s = static_cast<PointCoordinateType>(acc_1 / acc_2);
 	}
 

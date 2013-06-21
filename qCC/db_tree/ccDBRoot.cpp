@@ -875,6 +875,9 @@ int ccDBRoot::getSelectedEntities(ccHObject::Container& selEntities,
                 if (obj->isKindOf(CC_GBL_SENSOR))
                     info->gblSensorCount++;
             }
+
+            if (obj->isKindOf(CC_POINT_KDTREE))
+				info->kdTreeCount++;
         }
     }
 

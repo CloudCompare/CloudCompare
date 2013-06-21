@@ -24,6 +24,9 @@
 //Local
 #include "ccHObject.h"
 
+//System
+#include <set>
+
 class ccGenericPointCloud;
 
 //! KD-tree structure
@@ -75,6 +78,15 @@ public:
 
 	//! Returns the bounding-box of a given cell
 	ccBBox getCellBBox(BaseNode* node) const;
+
+	//! A set of leaves
+	typedef std::set<Leaf*> LeafSet;
+
+	//! Returns the neighbor leaves around a given cell
+	bool getNeighborLeaves(BaseNode* cell, ccKdTree::LeafSet& neighbors, const int* userDataFilter = 0);
+
+	//! Returns associated (generic) point cloud
+	inline ccGenericPointCloud* associatedGenericCloud() const { return m_associatedGenericCloud; }
 
 protected:
 

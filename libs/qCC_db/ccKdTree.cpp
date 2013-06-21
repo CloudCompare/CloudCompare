@@ -26,6 +26,7 @@
 
 //CCLib
 #include <DistanceComputationTools.h>
+#include <Neighbourhood.h>
 
 ccKdTree::ccKdTree(ccGenericPointCloud* aCloud)
 	: CCLib::TrueKdTree(aCloud)
@@ -46,76 +47,101 @@ ccBBox ccKdTree::getDisplayBB()
 	return (m_associatedGenericCloud ? m_associatedGenericCloud->getDisplayBB() : ccBBox());
 }
 
-//recursive helper for ccKdTree::multiplyBoundingBox
-static PointCoordinateType s_multFactor = 0;
-void MultiplyNode(ccKdTree::BaseNode* node)
+//! Recursive visitor for ccKdTree::multiplyBoundingBox
+class MultiplyBoundingBoxVisitor
 {
-	if (node && node->isNode())
+public:
+	
+	MultiplyBoundingBoxVisitor(PointCoordinateType multFactor) : m_multFactor(multFactor) {}
+
+	void visit(ccKdTree::BaseNode* node)
 	{
-		ccKdTree::Node* trueNode = static_cast<ccKdTree::Node*>(node);
-		trueNode->splitValue *= s_multFactor;
-		MultiplyNode(trueNode->leftChild);
-		MultiplyNode(trueNode->rightChild);
+		if (node && node->isNode())
+		{
+			ccKdTree::Node* trueNode = static_cast<ccKdTree::Node*>(node);
+			trueNode->splitValue *= m_multFactor;
+			visit(trueNode->leftChild);
+			visit(trueNode->rightChild);
+		}
 	}
-}
+
+protected:
+	PointCoordinateType m_multFactor;
+};
 
 void ccKdTree::multiplyBoundingBox(const PointCoordinateType multFactor)
 {
-	s_multFactor = multFactor;
-	
 	if (m_root)
-		MultiplyNode(m_root);
+		MultiplyBoundingBoxVisitor(multFactor).visit(m_root);
 }
 
-//recursive helper for ccKdTree::translateBoundingBox
-static CCVector3 s_translation;
-void TranslateNode(ccKdTree::BaseNode* node)
+//! Recursive visitor for ccKdTree::translateBoundingBox
+class TranslateBoundingBoxVisitor
 {
-	if (node && node->isNode())
+public:
+	
+	TranslateBoundingBoxVisitor(const CCVector3& T) : m_translation(T) {}
+
+	void visit(ccKdTree::BaseNode* node)
 	{
-		ccKdTree::Node* trueNode = static_cast<ccKdTree::Node*>(node);
-		trueNode->splitValue += s_translation.u[trueNode->splitDim];
-		TranslateNode(trueNode->leftChild);
-		TranslateNode(trueNode->rightChild);
+		if (node && node->isNode())
+		{
+			ccKdTree::Node* trueNode = static_cast<ccKdTree::Node*>(node);
+			trueNode->splitValue += m_translation.u[trueNode->splitDim];
+			visit(trueNode->leftChild);
+			visit(trueNode->rightChild);
+		}
 	}
-}
+
+protected:
+	CCVector3 m_translation;
+
+};
 
 void ccKdTree::translateBoundingBox(const CCVector3& T)
 {
-	s_translation = T;
-
 	if (m_root)
-		TranslateNode(m_root);
+		TranslateBoundingBoxVisitor(T).visit(m_root);
 }
 
-//recursive helper for ccKdTree::drawMeOnly
-static ccBBox s_drawCellBBox;
-void DrawNode(ccKdTree::BaseNode* node)
+//! Recursive visitor for ccKdTree::drawMeOnly
+class DrawMeOnlyVisitor
 {
-	if (!node)
-		return;
+public:
+	
+	DrawMeOnlyVisitor(const ccBBox& box) : m_drawCellBBox(box) {}
 
-	if (node->isNode())
+	void visit(ccKdTree::BaseNode* node)
 	{
-		ccKdTree::Node* trueNode = static_cast<ccKdTree::Node*>(node);
-		//draw left child
-		PointCoordinateType oldBBPos = s_drawCellBBox.maxCorner().u[trueNode->splitDim];
-		s_drawCellBBox.maxCorner().u[trueNode->splitDim] = trueNode->splitValue;
-		DrawNode(trueNode->leftChild);
-		s_drawCellBBox.maxCorner().u[trueNode->splitDim] = oldBBPos;  //restore old limit
+		if (!node)
+			return;
 
-		//then draw right child
-		oldBBPos = s_drawCellBBox.minCorner().u[trueNode->splitDim];
-		s_drawCellBBox.minCorner().u[trueNode->splitDim] = trueNode->splitValue;
-		DrawNode(trueNode->rightChild);
-		s_drawCellBBox.minCorner().u[trueNode->splitDim] = oldBBPos; //restore old limit
+		if (node->isNode())
+		{
+			ccKdTree::Node* trueNode = static_cast<ccKdTree::Node*>(node);
+			//visit left child
+			PointCoordinateType oldBBPos = m_drawCellBBox.maxCorner().u[trueNode->splitDim];
+			m_drawCellBBox.maxCorner().u[trueNode->splitDim] = trueNode->splitValue;
+			visit(trueNode->leftChild);
+			m_drawCellBBox.maxCorner().u[trueNode->splitDim] = oldBBPos;  //restore old limit
+
+			//then visit right child
+			oldBBPos = m_drawCellBBox.minCorner().u[trueNode->splitDim];
+			m_drawCellBBox.minCorner().u[trueNode->splitDim] = trueNode->splitValue;
+			visit(trueNode->rightChild);
+			m_drawCellBBox.minCorner().u[trueNode->splitDim] = oldBBPos; //restore old limit
+		}
+		else //if (node->isLeaf())
+		{
+			ccKdTree::Leaf* leaf = static_cast<ccKdTree::Leaf*>(node);
+			m_drawCellBBox.draw(ccColor::green);
+		}
 	}
-	else //if (node->isLeaf())
-	{
-		ccKdTree::Leaf* leaf = static_cast<ccKdTree::Leaf*>(node);
-		s_drawCellBBox.draw(ccColor::green);
-	}
-}
+
+protected:
+	ccBBox m_drawCellBBox;
+
+};
 
 void ccKdTree::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
@@ -134,8 +160,7 @@ void ccKdTree::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glPushName(getUniqueID());
 		}
 
-		s_drawCellBBox = m_associatedGenericCloud->getBB();
-		DrawNode(m_root);
+		DrawMeOnlyVisitor(m_associatedGenericCloud->getBB()).visit(m_root);
 
 		if (pushName)
 			glPopName();
@@ -183,122 +208,196 @@ bool ccKdTree::convertCellIndexToSF()
 	return true;
 }
 
-//Helper for ccKdTree::getCellBBox
-static ccBBox s_UpdatedBox;
-void UpdateBBox(ccKdTree::BaseNode* node)
+//! Recursive visitor for ccKdTree::getCellBBox
+class GetCellBBoxVisitor
 {
-	assert(node);
-	if (node && node->parent)
+public:
+	
+	ccBBox m_UpdatedBox;
+
+	GetCellBBoxVisitor()
 	{
-		assert(node->parent->isNode()); //a leaf can't have children!
-		ccKdTree::Node* parent = static_cast<ccKdTree::Node*>(node->parent);
-
-		//we choose the right 'side' of the box that corresponds to the parent's split plane
-		CCVector3& boxCorner = (parent->leftChild == node ? s_UpdatedBox.maxCorner() : s_UpdatedBox.minCorner());
-
-		//if this side has not been setup yet...
-		if (boxCorner.u[parent->splitDim] != boxCorner.u[parent->splitDim]) //NaN
-		{
-			boxCorner.u[parent->splitDim] = parent->splitValue;
-		}
-
-		UpdateBBox(node->parent);
+		//invalidate the initial bounding box
+		m_UpdatedBox.maxCorner() = CCVector3(NAN_VALUE,NAN_VALUE,NAN_VALUE);
+		m_UpdatedBox.minCorner() = CCVector3(NAN_VALUE,NAN_VALUE,NAN_VALUE);
 	}
-}
+	
+	void visit(ccKdTree::BaseNode* node)
+	{
+		assert(node);
+		if (node && node->parent)
+		{
+			assert(node->parent->isNode()); //a leaf can't have children!
+			ccKdTree::Node* parent = static_cast<ccKdTree::Node*>(node->parent);
+
+			//we choose the right 'side' of the box that corresponds to the parent's split plane
+			CCVector3& boxCorner = (parent->leftChild == node ? m_UpdatedBox.maxCorner() : m_UpdatedBox.minCorner());
+
+			//if this side has not been setup yet...
+			if (boxCorner.u[parent->splitDim] != boxCorner.u[parent->splitDim]) //NaN
+				boxCorner.u[parent->splitDim] = parent->splitValue;
+
+			visit(node->parent);
+		}
+	}
+};
 
 ccBBox ccKdTree::getCellBBox(BaseNode* node) const
 {
 	if (!node || !m_associatedCloud)
 		return ccBBox();
 
-	//invalidate current (static) bounding box
-	s_UpdatedBox.maxCorner() = CCVector3(NAN_VALUE,NAN_VALUE,NAN_VALUE);
-	s_UpdatedBox.minCorner() = CCVector3(NAN_VALUE,NAN_VALUE,NAN_VALUE);
-
-	UpdateBBox(node);
+	GetCellBBoxVisitor helper;
+	helper.visit(node);
 
 	//finish the job
+	ccBBox& box = helper.m_UpdatedBox;
 	{
 		CCVector3 bbMin,bbMax;
 		m_associatedCloud->getBoundingBox(bbMin.u,bbMax.u);
 		for (int i=0;i<3;++i)
 		{
-			if (s_UpdatedBox.minCorner().u[i] != s_UpdatedBox.minCorner().u[i]) //still NaN value?
-				s_UpdatedBox.minCorner().u[i] = bbMin.u[i]; //we use the main bb limit
-			if (s_UpdatedBox.maxCorner().u[i] != s_UpdatedBox.maxCorner().u[i]) //still NaN value?
-				s_UpdatedBox.maxCorner().u[i] = bbMax.u[i]; //we use the main bb limit
+			if (box.minCorner().u[i] != box.minCorner().u[i]) //still NaN value?
+				box.minCorner().u[i] = bbMin.u[i]; //we use the main bb limit
+			if (box.maxCorner().u[i] != box.maxCorner().u[i]) //still NaN value?
+				box.maxCorner().u[i] = bbMax.u[i]; //we use the main bb limit
 		}
+		box.setValidity(true);
 	}
 
-	return s_UpdatedBox;
+	return box;
 }
 
-//Helper for ccKdTree::fuseCells
-static ccKdTree::Leaf* s_seedCell = 0;
-static ccBBox s_seedCellBox;
-static ccBBox s_adjacentCellBox;
-static PointCoordinateType s_minAdjacentAngleCos = 0;
-static PointCoordinateType s_maxAdjacentRMS = 0;
-
-void TestAdjacentCells(ccKdTree::BaseNode* node)
+//! Recursive visitor for ccKdTree::getNeighborLeaves
+class GetNeighborLeavesVisitor
 {
-	assert(node);
-	if (node->isNode())
-	{
-		//test bounding box
-		if (	s_adjacentCellBox.contains(s_seedCellBox.minCorner())
-			||	s_adjacentCellBox.contains(s_seedCellBox.maxCorner())
-			||	s_seedCellBox.contains(s_adjacentCellBox.minCorner())
-			||	s_seedCellBox.contains(s_adjacentCellBox.maxCorner()))
-		{
-			ccKdTree::Node* trueNode = static_cast<ccKdTree::Node*>(node);
-			//draw left child
-			PointCoordinateType oldBBPos = s_adjacentCellBox.maxCorner().u[trueNode->splitDim];
-			s_adjacentCellBox.maxCorner().u[trueNode->splitDim] = trueNode->splitValue;
-			TestAdjacentCells(trueNode->leftChild);
-			s_adjacentCellBox.maxCorner().u[trueNode->splitDim] = oldBBPos;  //restore old limit
+public:
 
-			//then draw right child
-			oldBBPos = s_adjacentCellBox.minCorner().u[trueNode->splitDim];
-			s_adjacentCellBox.minCorner().u[trueNode->splitDim] = trueNode->splitValue;
-			TestAdjacentCells(trueNode->rightChild);
-			s_adjacentCellBox.minCorner().u[trueNode->splitDim] = oldBBPos; //restore old limit
-		}
-	}
-	else //if (node->isLeaf())
+	GetNeighborLeavesVisitor(ccKdTree::BaseNode* cell,
+							ccKdTree::LeafSet& neighbors,
+							const ccBBox& cellBox,
+							const ccBBox& treeBox)
+		: m_targetCell(cell)
+		, m_neighbors(&neighbors)
+		, m_targetCellBox(cellBox)
+		, m_currentCellBox(treeBox)
+		, m_userDataFilterEnabled(false)
+		, m_userDataFilterValue(0)
 	{
-		ccKdTree::Leaf* leaf = static_cast<ccKdTree::Leaf*>(node);
-		if (leaf->userData == -1) //we only test cells not fused yet
+	}
+
+	void setUserDataFilter(int value)
+	{
+		m_userDataFilterEnabled = true;
+		m_userDataFilterValue = value;
+	}
+
+	void visit(ccKdTree::BaseNode* node)
+	{
+		assert(node);
+		if (!node || node == m_targetCell)
+			return;
+
+		if (node->isNode())
 		{
 			//test bounding box
-			if (	s_adjacentCellBox.contains(s_seedCellBox.minCorner())
-				||	s_adjacentCellBox.contains(s_seedCellBox.maxCorner())
-				||	s_seedCellBox.contains(s_adjacentCellBox.minCorner())
-				||	s_seedCellBox.contains(s_adjacentCellBox.maxCorner()))
+			if (m_currentCellBox.minDistTo(m_targetCellBox) == 0)
 			{
-				//compare normals
-				if (CCVector3(s_seedCell->planeEq).dot(CCVector3(leaf->planeEq)) >= s_minAdjacentAngleCos)
+				ccKdTree::Node* trueNode = static_cast<ccKdTree::Node*>(node);
+				//visit left child
+				PointCoordinateType oldBBPos = m_currentCellBox.maxCorner().u[trueNode->splitDim];
+				m_currentCellBox.maxCorner().u[trueNode->splitDim] = trueNode->splitValue;
+				visit(trueNode->leftChild);
+				m_currentCellBox.maxCorner().u[trueNode->splitDim] = oldBBPos;  //restore old limit
+
+				//then visit right child
+				oldBBPos = m_currentCellBox.minCorner().u[trueNode->splitDim];
+				m_currentCellBox.minCorner().u[trueNode->splitDim] = trueNode->splitValue;
+				visit(trueNode->rightChild);
+				m_currentCellBox.minCorner().u[trueNode->splitDim] = oldBBPos; //restore old limit
+			}
+		}
+		else //if (node->isLeaf())
+		{
+			ccKdTree::Leaf* leaf = static_cast<ccKdTree::Leaf*>(node);
+			if (m_currentCellBox.minDistTo(m_targetCellBox) == 0)
+			{
+				//the caller can set a filter on the user data value!
+				if (!m_userDataFilterEnabled || m_userDataFilterValue == leaf->userData)
 				{
-					//now we must check that the two clouds can actually be merged
-					ScalarType rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(leaf->points, s_seedCell->planeEq);
-
-					if (rms < s_maxAdjacentRMS)
-					{
-						//we 'merge' them
-						leaf->userData = s_seedCell->userData;
-					}
-
+					assert(m_neighbors);
+					m_neighbors->insert(leaf);
 				}
 			}
 		}
-		s_adjacentCellBox.draw(ccColor::green);
 	}
+
+protected:
+	ccKdTree::BaseNode* m_targetCell;
+	ccBBox m_targetCellBox;
+	ccBBox m_currentCellBox;
+	ccKdTree::LeafSet* m_neighbors;
+	bool m_userDataFilterEnabled;
+	int m_userDataFilterValue;
+
+};
+
+bool ccKdTree::getNeighborLeaves(ccKdTree::BaseNode* cell, ccKdTree::LeafSet& neighbors, const int* userDataFilter/*=0*/)
+{
+	if (!m_root)
+		return false;
+
+	//determine the cell bounding box
+	ccBBox cellBox = getCellBBox(cell);
+	if (!cellBox.isValid())
+		return false;
+
+	try
+	{
+		GetNeighborLeavesVisitor visitor(cell, neighbors, cellBox, getMyOwnBB());
+		if (userDataFilter)
+			visitor.setUserDataFilter(*userDataFilter);
+		visitor.visit(m_root);
+	}
+	catch (std::bad_alloc)
+	{
+		return false;
+	}
+
+	return true;
 }
 
-//Helper for ccKdTree::fuseCells
 static bool AscendingLeafRMSComparison(const ccKdTree::Leaf* a, const ccKdTree::Leaf* b)
 {
 	return a->rms < b->rms;
+}
+static bool DescendingLeafSizeComparison(const ccKdTree::Leaf* a, const ccKdTree::Leaf* b)
+{
+	return a->points->size() > b->points->size();
+}
+
+struct Candidate
+{
+	ccKdTree::Leaf* leaf;
+	ScalarType dist;
+	ScalarType radius;
+	CCVector3 centroid;
+
+	Candidate() : leaf(0), dist(NAN_VALUE), radius(0) {}
+	Candidate(ccKdTree::Leaf* l) : leaf(l), dist(NAN_VALUE), radius(0)
+	{
+		if (leaf && leaf->points)
+		{
+			CCLib::Neighbourhood N(leaf->points);
+			centroid = *N.getGravityCenter();
+			radius = N.computeLargestRadius();
+		}
+	}
+};
+
+static bool CandidateDistAscendingComparison(const Candidate& a, const Candidate& b)
+{
+	return a.dist < b.dist;
 }
 
 bool ccKdTree::fuseCells(double maxRMS)
@@ -313,8 +412,8 @@ bool ccKdTree::fuseCells(double maxRMS)
 
 	ccPointCloud* pc = static_cast<ccPointCloud*>(m_associatedGenericCloud);
 
-	//sort cells based on their initial RMS
-	std::sort(leaves.begin(),leaves.end(),AscendingLeafRMSComparison);
+	//sort cells based on their population size (we start by the biggest ones)
+	std::sort(leaves.begin(),leaves.end(),DescendingLeafSizeComparison);
 
 	//set all 'userData' to -1 (i.e. unfused cells)
 	{
@@ -327,52 +426,226 @@ bool ccKdTree::fuseCells(double maxRMS)
 	}
 
 	//fuse all cells, starting from the ones with the best RMS
+	const int unvisitedNeighborValue = -1;
 	int macroIndex = 1; //starts at 1 (0 is reserved for cells already above the max RMS)
 	{
-		//main parameters
-		s_minAdjacentAngleCos = cos(10.0 * CC_DEG_TO_RAD);
-		s_maxAdjacentRMS = maxRMS;
-		
 		for (size_t i=0; i<leaves.size(); ++i)
 		{
-			if (leaves[i]->userData >= maxRMS)
+			Leaf* currentCell = leaves[i];
+			if (currentCell->rms >= maxRMS)
+				currentCell->userData = 0; //0 = special group for cells already above the user defined threshold!
+
+			//already fused?
+			if (currentCell->userData != -1)
+				continue;
+
+			//we create a new "macro cell" index
+			currentCell->userData = macroIndex++;
+
+			//we init the current set of 'fused' points with the cell's points
+			CCLib::ReferenceCloud* currentPointSet = currentCell->points;
+			//current fused set centroid and radius
+			CCVector3 currentCentroid;
+			PointCoordinateType currentRadius = 0;
 			{
-				leaves[i]->userData = 0; //special group for cells already above the user defined threshold!
+				CCLib::Neighbourhood N(currentPointSet);
+				currentCentroid = *N.getGravityCenter();
+				currentRadius = N.computeLargestRadius();
 			}
 
-			//not already fused?
-			if (leaves[i]->userData == -1)
+			//visited neighbors
+			LeafSet visitedNeighbors;
+			//set of candidates
+			std::list<Candidate> candidates;
+
+			//we are going to iteratively look for neighbor cells that could be fused to this one
+			LeafVector cellsToTest;
+			cellsToTest.push_back(currentCell);
+
+			while (!cellsToTest.empty() || !candidates.empty())
 			{
-				//we create a new "macro cell" index
-				leaves[i]->userData = macroIndex++; 
-			}
+				//get all neighbors around the 'waiting' cell(s)
+				if (!cellsToTest.empty())
+				{
+					LeafSet neighbors;
+					while (!cellsToTest.empty())
+					{
+						if (!getNeighborLeaves(cellsToTest.back(), neighbors, &unvisitedNeighborValue)) //we only consider unvisited cells!
+						{
+							//an error occured
+							return false;
+						}
+						cellsToTest.pop_back();
+					}
 
-			//determine the current cell bounding box
-			ccBBox cellBox = getCellBBox(leaves[i]);
+					//add those (new) neighbors to the 'visitedNeighbors' set and to the candidates set by the way
+					//if they are not yet there
+					for (LeafSet::iterator it=neighbors.begin(); it != neighbors.end(); ++it)
+					{
+						Leaf* neighbor = *it;
+						std::pair<LeafSet::iterator,bool> ret = visitedNeighbors.insert(neighbor);
+						//neighbour not already in the set?
+						if (ret.second)
+						{
+							//we create the corresponding candidate
+							try
+							{
+								candidates.push_back(Candidate(neighbor));
+							}
+							catch (std::bad_alloc)
+							{
+								//not enough memory!
+								ccLog::Warning("[ccKdTree::fuseCells] Not enough memory!");
+								return false;
+							}
+						}
+					}
+				}
 
-			//now check all cells adjacent to this one
-			{
-				s_seedCell = leaves[i];
-				s_seedCellBox = cellBox;
-				s_adjacentCellBox = pc->getBB();
+				//is there remaining candidates?
+				if (!candidates.empty())
+				{
+					//current fused set centroid
+					CCLib::Neighbourhood N(currentPointSet);
+					CCVector3 currentCentroid = *N.getGravityCenter();
+					PointCoordinateType currentRadius = N.computeLargestRadius();
 
-				TestAdjacentCells(m_root);
-			}
+#define TAKE_CLOSEST_FIRST
+#ifdef TAKE_CLOSEST_FIRST
+					//update the set of candidates
+					if (candidates.size() > 1)
+					{
+						for (std::list<Candidate>::iterator it = candidates.begin(); it !=candidates.end(); ++it)
+							it->dist = (it->centroid-currentCentroid).norm2();
+
+						//sort candidates by their distance
+						candidates.sort(CandidateDistAscendingComparison);
+					}
+#endif
+					
+					//we will keep track of the best fused 'couple' at each pass
+					std::list<Candidate>::iterator bestIt = candidates.end();
+					CCLib::ReferenceCloud* bestFused = 0;
+					double bestRMS = -1.0;
+
+					unsigned skipCount = 0;
+					for (std::list<Candidate>::iterator it = candidates.begin(); it != candidates.end(); /*++it*/)
+					{
+						assert(it->leaf && it->leaf->points);
+						assert(currentPointSet->getAssociatedCloud() == it->leaf->points->getAssociatedCloud());
+
+						//compute the minimum distance between the centroid and the 'currentPointSet'
+						PointCoordinateType minDistToMainSet = 0.0;
+						{
+							for (unsigned j=0; j<currentPointSet->size(); ++j)
+							{
+								const CCVector3* P = currentPointSet->getPoint(j);
+								PointCoordinateType d2 = (*P-currentCentroid).norm2();
+								if (d2 > minDistToMainSet || j == 0)
+									minDistToMainSet = d2;
+							}
+							minDistToMainSet = sqrt(minDistToMainSet);
+						}
+						
+						//if the leaf is too far
+						//if (it->dist > (it->radius + minDistToMainSet) * 1.2)
+						//{
+						//	++it;
+						//	++skipCount;
+						//	continue;
+						//}
+
+						//fuse the best fused set with the current candidate
+						CCLib::ReferenceCloud* fused = new CCLib::ReferenceCloud(*currentPointSet);
+						if (!fused->add(*(it->leaf->points)))
+						{
+							//not enough memory!
+							ccLog::Warning("[ccKdTree::fuseCells] Not enough memory!");
+							delete fused;
+							if (currentPointSet != currentCell->points)
+								delete currentPointSet;
+							return false;
+						}
+
+						//fit a plane and estimate resulting RMS
+						double rms = -1.0;
+						const PointCoordinateType* planeEquation = CCLib::Neighbourhood(fused).getLSQPlane();
+						if (planeEquation)
+							//rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(fused, planeEquation);
+							rms = CCLib::DistanceComputationTools::ComputeCloud2PlaneRobustMax(fused, planeEquation, 0.02f);
+
+						if (rms < 0.0 || rms > maxRMS)
+						{
+							//candidate is rejected
+							it = candidates.erase(it);
+						}
+						else
+						{
+							//otherwise we keep track of the best one!
+							if (bestRMS < 0.0 || rms < bestRMS)
+							{
+								bestIt = it;
+								bestRMS = rms;
+								if (bestFused)
+									delete bestFused;
+								bestFused = fused;
+								fused = 0;
+#ifdef TAKE_CLOSEST_FIRST
+								break; //if we have found a good candidate, we stop here (closest first ;)
+#endif
+							}
+							++it;
+						}
+
+						if (fused)
+						{
+							delete fused;
+							fused = 0;
+						}
+					}
+
+					//we have a (best) candidate for this pass?
+					if (bestIt != candidates.end())
+					{
+						assert(bestFused && bestRMS >= 0.0);
+						if (currentPointSet != currentCell->points)
+							delete currentPointSet;
+						currentPointSet = bestFused;
+						{
+							//update infos
+							CCLib::Neighbourhood N(currentPointSet);
+							currentCentroid = *N.getGravityCenter();
+							currentRadius = N.computeLargestRadius();
+						}
+
+						bestIt->leaf->userData = currentCell->userData;
+						//we will test this cell's neighbors as well
+						cellsToTest.push_back(bestIt->leaf);
+
+						//we also remove it from the candidates list
+						candidates.erase(bestIt);
+					}
+
+					if (skipCount == candidates.size() && cellsToTest.empty())
+					{
+						//only far leaves remain...
+						candidates.clear();
+					}
+
+				}
+			
+			} //no more candidates or cells to test
+
+			//end of the fusion process for the current leaf
+			if (currentPointSet != currentCell->points)
+				delete currentPointSet;
+			currentPointSet = 0;
 		}
 	}
 
 	//convert fused indexes to SF
 	{
-		const char c_defaultSFName[] = "Fused Kd-tree indexes";
-		int sfIdx = pc->getScalarFieldIndexByName(c_defaultSFName);
-		if (sfIdx < 0)
-			sfIdx = pc->addScalarField(c_defaultSFName);
-		if (sfIdx < 0)
-		{
-			ccLog::Error("Not enough memory!");
-			return false;
-		}
-		pc->setCurrentScalarField(sfIdx);
+		pc->enableScalarField();
 
 		int unfusedIndexes = macroIndex;
 		for (size_t i=0; i<leaves.size(); ++i)
@@ -380,17 +653,16 @@ bool ccKdTree::fuseCells(double maxRMS)
 			CCLib::ReferenceCloud* subset = leaves[i]->points;
 			if (subset)
 			{
-				int index = leaves[i]->userData;
-				if (index <= 0)
-					index = macroIndex++;
+				ScalarType scalar = (ScalarType)leaves[i]->userData;
+				if (leaves[i]->userData <= 0) //for unfused cells, we create new individual groups
+					//scalar = (ScalarType)(macroIndex++);
+					scalar = NAN_VALUE; //TEST
 				for (unsigned j=0; j<subset->size(); ++j)
-					subset->setPointScalarValue(j,(ScalarType)index);
+					subset->setPointScalarValue(j,scalar);
 			}
 		}
 
-		pc->getScalarField(sfIdx)->computeMinAndMax();
-		pc->setCurrentDisplayedScalarField(sfIdx);
-		pc->showSF(true);
+		//pc->setCurrentDisplayedScalarField(sfIdx);
 	}
 
 	return true;

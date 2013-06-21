@@ -187,17 +187,11 @@ public:
 		inline virtual void setCurrentScalarField(int index) { setCurrentInScalarField(index);setCurrentOutScalarField(index); }
 
 		//! Creates a new scalar field and registers it
-		/** Warning: this method does not reserve the memory for the scalar values.
-            You can do it in several ways:
-            - add scalar fields before calling reserve or resize on the point cloud, THEN
-                call one of these methods
-            - set this scalar field as the current INPUT one (see setCurrentInScalarField)
-                and enable it (with enableScalarField).
-            - get the created scalar field (with getScalarField) and call 'reserve'
-                with the same number of values as the number of point in this cloud
-
+		/** Warnings:
+			- the name must be unique (the method will fail if a SF with the same name already exists)
+			- this method DOES resize the scalar field to match the current cloud size
             \param uniqueName scalar field name (must be unique)
-			\return index of this new scalar field (or -1 if a scalar field with the same name already exist!)
+			\return index of this new scalar field (or -1 if an error occured)
 		**/
 		virtual int addScalarField(const char* uniqueName);
 

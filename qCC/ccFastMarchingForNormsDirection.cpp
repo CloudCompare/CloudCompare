@@ -571,7 +571,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 	int oldSfIdx = theCloud->getCurrentDisplayedScalarFieldIndex();
 	int sfIdx = theCloud->getScalarFieldIndexByName("FM_Propagation");
 	if (sfIdx<0)
-		sfIdx=theCloud->addScalarField("FM_Propagation");
+		sfIdx = theCloud->addScalarField("FM_Propagation");
 	if (sfIdx>=0)
 		theCloud->setCurrentScalarField(sfIdx);
 	else

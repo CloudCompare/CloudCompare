@@ -238,18 +238,7 @@ ccPlane* ccGenericPointCloud::fitPlane(double* rms/*= 0*/)
 	//least-square fitting RMS
 	if (rms)
 	{
-		double sum2 = 0.0;
-		unsigned realCount = 0;
-		for (unsigned k=0;k<count;++k)
-		{
-			double d = (double)CCLib::DistanceComputationTools::computePoint2PlaneDistance(getPoint(k),theLSQPlane);
-			if (ccScalarField::ValidValue(d)) //not NaN
-			{
-				sum2 += d*d;
-				++realCount;
-			}
-		}
-		*rms = (realCount != 0 ? sqrt(sum2)/(double)realCount : -1.0);
+		*rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(this, theLSQPlane);
 	}
 
 	//we add a plane primitive to the cloud

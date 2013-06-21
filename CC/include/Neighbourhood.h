@@ -143,6 +143,9 @@ class Neighbourhood
 		//! Computes the covariance matrix
 		CCLib::SquareMatrixd computeCovarianceMatrix();
 
+		//! Returns the largest radius (i.e. the distance to the farthest point to the centroid)
+		PointCoordinateType computeLargestRadius();
+
 	protected:
 
 		//! Height function parameters accessor

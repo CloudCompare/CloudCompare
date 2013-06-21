@@ -33,6 +33,23 @@ ReferenceCloud::ReferenceCloud(GenericIndexedCloudPersist* associatedCloud)
 	m_theIndexes->link();
 }
 
+ReferenceCloud::ReferenceCloud(const ReferenceCloud& refCloud)
+	: m_theIndexes(0)
+	, m_globalIterator(0)
+	, m_validBB(false)
+	, m_theAssociatedCloud(refCloud.m_theAssociatedCloud)
+{
+	m_theIndexes = new ReferencesContainer();
+	m_theIndexes->link();
+
+	//copy data
+	if (refCloud.m_theIndexes && refCloud.m_theIndexes->currentSize() != 0)
+	{
+		//we don't catch any exception so that the caller of the constructor can do it!
+		refCloud.m_theIndexes->copy(*m_theIndexes);
+	}
+}
+
 ReferenceCloud::~ReferenceCloud()
 {
 	m_theIndexes->release();
@@ -41,7 +58,7 @@ ReferenceCloud::~ReferenceCloud()
 void ReferenceCloud::clear(bool releaseMemory)
 {
 	m_theIndexes->clear(releaseMemory);
-	m_validBB=false;
+	m_validBB = false;
 }
 
 void ReferenceCloud::updateBBWithPoint(const CCVector3* P)
@@ -91,7 +108,7 @@ void ReferenceCloud::computeBB()
 		updateBBWithPoint(P);
 	}
 
-	m_validBB=true;
+	m_validBB = true;
 }
 
 void ReferenceCloud::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
@@ -123,7 +140,7 @@ const CCVector3* ReferenceCloud::getCurrentPointCoordinates() const
 bool ReferenceCloud::addPointIndex(unsigned globalIndex)
 {
 	if (m_theIndexes->capacity() == m_theIndexes->currentSize())
-		if (!m_theIndexes->reserve(m_theIndexes->capacity() + std::max<unsigned>(1,m_theIndexes->capacity()/2))) //not enough space --> +50%
+		if (!m_theIndexes->reserve(m_theIndexes->capacity() + std::min<unsigned>(std::max<unsigned>(1,m_theIndexes->capacity()/2),4096))) //not enough space --> +50% (or 4096)
 			return false;
 
 	m_theIndexes->addElement(globalIndex);
@@ -156,7 +173,7 @@ void ReferenceCloud::setPointIndex(unsigned localIndex, unsigned globalIndex)
 {
 	assert(localIndex<size());
 	m_theIndexes->setValue(localIndex,globalIndex);
-	m_validBB=false;
+	m_validBB = false;
 }
 
 void ReferenceCloud::forEach(genericPointAction& anAction)
@@ -187,6 +204,28 @@ void ReferenceCloud::removePointGlobalIndex(unsigned localIndex)
 
 void ReferenceCloud::setAssociatedCloud(GenericIndexedCloudPersist* cloud)
 {
-	m_theAssociatedCloud=cloud;
-	m_validBB=false;
+	m_theAssociatedCloud = cloud;
+	m_validBB = false;
+}
+
+bool ReferenceCloud::add(const ReferenceCloud& cloud)
+{
+	if (!m_theIndexes || !cloud.m_theAssociatedCloud || m_theAssociatedCloud != cloud.m_theAssociatedCloud)
+		return false;
+
+	unsigned newCount = (cloud.m_theIndexes ? cloud.m_theIndexes->currentSize() : 0);
+	if (newCount == 0)
+		return true;
+
+	//reserve memory
+	unsigned count = m_theIndexes->currentSize();
+	if (!m_theIndexes->resize(count + newCount))
+		return false;
+
+	//copy new indexes (warning: no duplicate check!)
+	for (unsigned i=0; i<newCount; ++i)
+		(*m_theIndexes)[count+i] = (*cloud.m_theIndexes)[i];
+
+	m_validBB = false;
+	return true;
 }

@@ -27,6 +27,10 @@
 //CCLib
 #include <DistanceComputationTools.h>
 #include <Neighbourhood.h>
+#include <GenericProgressCallback.h>
+
+//Qt
+#include <QApplication>
 
 ccKdTree::ccKdTree(ccGenericPointCloud* aCloud)
 	: CCLib::TrueKdTree(aCloud)
@@ -400,7 +404,7 @@ static bool CandidateDistAscendingComparison(const Candidate& a, const Candidate
 	return a.dist < b.dist;
 }
 
-bool ccKdTree::fuseCells(double maxRMS)
+bool ccKdTree::fuseCells(double maxRMS, CCLib::GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!m_associatedGenericCloud || !m_associatedGenericCloud->isA(CC_POINT_CLOUD) || maxRMS < 0.0)
 		return false;
@@ -409,6 +413,17 @@ bool ccKdTree::fuseCells(double maxRMS)
 	std::vector<Leaf*> leaves;
 	if (!getLeaves(leaves) || leaves.empty())
 		return false;
+
+	//progress notification
+	CCLib::NormalizedProgress* nProgress = 0;
+	if (progressCb)
+	{
+		progressCb->reset();
+		progressCb->setMethodTitle("Fuse Kd-tree cells");
+		progressCb->setInfo(qPrintable(QString("cells: %1\nmax RMS: %2").arg(leaves.size()).arg(maxRMS)));
+		nProgress = new CCLib::NormalizedProgress(progressCb,(unsigned)leaves.size());
+		progressCb->start();
+	}
 
 	ccPointCloud* pc = static_cast<ccPointCloud*>(m_associatedGenericCloud);
 
@@ -437,7 +452,11 @@ bool ccKdTree::fuseCells(double maxRMS)
 
 			//already fused?
 			if (currentCell->userData != -1)
+			{
+				if (nProgress && !nProgress->oneStep()) //process canceled by user
+					break;
 				continue;
+			}
 
 			//we create a new "macro cell" index
 			currentCell->userData = macroIndex++;
@@ -446,11 +465,9 @@ bool ccKdTree::fuseCells(double maxRMS)
 			CCLib::ReferenceCloud* currentPointSet = currentCell->points;
 			//current fused set centroid and radius
 			CCVector3 currentCentroid;
-			PointCoordinateType currentRadius = 0;
 			{
 				CCLib::Neighbourhood N(currentPointSet);
 				currentCentroid = *N.getGravityCenter();
-				currentRadius = N.computeLargestRadius();
 			}
 
 			//visited neighbors
@@ -461,6 +478,9 @@ bool ccKdTree::fuseCells(double maxRMS)
 			//we are going to iteratively look for neighbor cells that could be fused to this one
 			LeafVector cellsToTest;
 			cellsToTest.push_back(currentCell);
+
+			if (nProgress && !nProgress->oneStep()) //process canceled by user
+				break;
 
 			while (!cellsToTest.empty() || !candidates.empty())
 			{
@@ -505,12 +525,7 @@ bool ccKdTree::fuseCells(double maxRMS)
 				//is there remaining candidates?
 				if (!candidates.empty())
 				{
-					//current fused set centroid
-					CCLib::Neighbourhood N(currentPointSet);
-					CCVector3 currentCentroid = *N.getGravityCenter();
-					PointCoordinateType currentRadius = N.computeLargestRadius();
-
-#define TAKE_CLOSEST_FIRST
+//#define TAKE_CLOSEST_FIRST
 #ifdef TAKE_CLOSEST_FIRST
 					//update the set of candidates
 					if (candidates.size() > 1)
@@ -534,26 +549,26 @@ bool ccKdTree::fuseCells(double maxRMS)
 						assert(it->leaf && it->leaf->points);
 						assert(currentPointSet->getAssociatedCloud() == it->leaf->points->getAssociatedCloud());
 
-						//compute the minimum distance between the centroid and the 'currentPointSet'
+						//compute the minimum distance between the candidate centroid and the 'currentPointSet'
 						PointCoordinateType minDistToMainSet = 0.0;
 						{
 							for (unsigned j=0; j<currentPointSet->size(); ++j)
 							{
 								const CCVector3* P = currentPointSet->getPoint(j);
-								PointCoordinateType d2 = (*P-currentCentroid).norm2();
-								if (d2 > minDistToMainSet || j == 0)
+								PointCoordinateType d2 = (*P-it->centroid).norm2();
+								if (d2 < minDistToMainSet || j == 0)
 									minDistToMainSet = d2;
 							}
 							minDistToMainSet = sqrt(minDistToMainSet);
 						}
 						
 						//if the leaf is too far
-						//if (it->dist > (it->radius + minDistToMainSet) * 1.2)
-						//{
-						//	++it;
-						//	++skipCount;
-						//	continue;
-						//}
+						if (it->radius < minDistToMainSet * 0.7) // 0,7 ~ sqrt(2)/2
+						{
+							++it;
+							++skipCount;
+							continue;
+						}
 
 						//fuse the best fused set with the current candidate
 						CCLib::ReferenceCloud* fused = new CCLib::ReferenceCloud(*currentPointSet);
@@ -573,6 +588,7 @@ bool ccKdTree::fuseCells(double maxRMS)
 						if (planeEquation)
 							//rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(fused, planeEquation);
 							rms = CCLib::DistanceComputationTools::ComputeCloud2PlaneRobustMax(fused, planeEquation, 0.02f);
+						//double rms = 0.0; //FIXME TEST
 
 						if (rms < 0.0 || rms > maxRMS)
 						{
@@ -614,13 +630,24 @@ bool ccKdTree::fuseCells(double maxRMS)
 						{
 							//update infos
 							CCLib::Neighbourhood N(currentPointSet);
-							currentCentroid = *N.getGravityCenter();
-							currentRadius = N.computeLargestRadius();
+							//currentCentroid = *N.getGravityCenter(); //if we update it, the search will naturally shift along one dimension!
 						}
 
 						bestIt->leaf->userData = currentCell->userData;
+						//bestIt->leaf->userData = macroIndex++; //FIXME TEST
+
 						//we will test this cell's neighbors as well
 						cellsToTest.push_back(bestIt->leaf);
+
+						if (nProgress && !nProgress->oneStep()) //process canceled by user
+						{
+							//permaturate end!
+							candidates.clear();
+							cellsToTest.clear();
+							i = leaves.size();
+							break;
+						}
+						QApplication::processEvents();
 
 						//we also remove it from the candidates list
 						candidates.erase(bestIt);
@@ -655,8 +682,8 @@ bool ccKdTree::fuseCells(double maxRMS)
 			{
 				ScalarType scalar = (ScalarType)leaves[i]->userData;
 				if (leaves[i]->userData <= 0) //for unfused cells, we create new individual groups
-					//scalar = (ScalarType)(macroIndex++);
-					scalar = NAN_VALUE; //TEST
+					scalar = (ScalarType)(macroIndex++);
+					//scalar = NAN_VALUE; //FIXME TEST
 				for (unsigned j=0; j<subset->size(); ++j)
 					subset->setPointScalarValue(j,scalar);
 			}

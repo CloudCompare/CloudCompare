@@ -28,6 +28,7 @@
 #include <set>
 
 class ccGenericPointCloud;
+class CCLib::GenericProgressCallback;
 
 //! KD-tree structure
 /** Extends the CCLib::TrueKdTree class.
@@ -74,7 +75,7 @@ public:
 	//! Fuses cells
 	/** Creates a new scalar fields with the groups indexes.
 	**/
-	bool fuseCells(double maxRMS);
+	bool fuseCells(double maxRMS, CCLib::GenericProgressCallback* progressCb = 0);
 
 	//! Returns the bounding-box of a given cell
 	ccBBox getCellBBox(BaseNode* node) const;

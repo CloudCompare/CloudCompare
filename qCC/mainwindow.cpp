@@ -1189,7 +1189,6 @@ void MainWindow::doActionComputeKdTree()
 		kdtree->prepareDisplayForRefresh();
 #ifdef _DEBUG
 		kdtree->convertCellIndexToSF();
-		//kdtree->fuseCells(5.0*s_kdTreeMaxRMSPerCell);
 #endif
 
 		addToDB(kdtree,true,0,false,false);
@@ -1230,8 +1229,6 @@ void MainWindow::doActionFuseKdTreeCells()
 	if (!ok)
 		return;
 
-    ccProgressDialog pDlg(true,this);
-	
 	//create scalar field to host the fusion result
 	const char c_defaultSFName[] = "Fused Kd-tree indexes";
 	int sfIdx = pc->getScalarFieldIndexByName(c_defaultSFName);
@@ -1247,7 +1244,8 @@ void MainWindow::doActionFuseKdTreeCells()
 	//computation
 	QElapsedTimer eTimer;
 	eTimer.start();
-	if (kdtree->fuseCells(s_kdTreeFusionMaxRMS))
+    ccProgressDialog pDlg(true,this);
+	if (kdtree->fuseCells(s_kdTreeFusionMaxRMS,&pDlg))
 	{
 		pc->setCurrentScalarField(sfIdx); //for AutoSegmentationTools::extractConnectedComponents
 		

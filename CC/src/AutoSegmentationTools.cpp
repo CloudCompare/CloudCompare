@@ -75,28 +75,32 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 
 	for (unsigned i=0;i<numberOfPoints;++i)
 	{
-		int ccLabel = (int)theCloud->getPointScalarValue(i)-1; //labels stat from 1!
+		ScalarType slabel = theCloud->getPointScalarValue(i);
+		if (slabel >= 1.0) //rejects NaN values as well
+		{
+			int ccLabel = (int)theCloud->getPointScalarValue(i)-1; //labels stat from 1!
 
-		//we fill the CCs vector with empty components until we reach the current label
-		//(they will be "filled" later)
-		try
-		{
-			while (ccLabel >= (int)cc.size())
-				cc.push_back(new ReferenceCloud(theCloud));
-		}
-		catch(std::bad_alloc)
-		{
-			//not enough memory
-			cc.clear();
-			return false;
-		}
+			//we fill the CCs vector with empty components until we reach the current label
+			//(they will be "filled" later)
+			try
+			{
+				while (ccLabel >= (int)cc.size())
+					cc.push_back(new ReferenceCloud(theCloud));
+			}
+			catch(std::bad_alloc)
+			{
+				//not enough memory
+				cc.clear();
+				return false;
+			}
 
-		//add the point to the current component
-		if (!cc[ccLabel]->addPointIndex(i))
-		{
-			//not enough memory
-			cc.clear();
-			return false;
+			//add the point to the current component
+			if (!cc[ccLabel]->addPointIndex(i))
+			{
+				//not enough memory
+				cc.clear();
+				return false;
+			}
 		}
 	}
 

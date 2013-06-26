@@ -498,6 +498,11 @@ protected:
 	//! Releases active GL filter
     void removeGLFilter();
 
+	//! Converts a given (mouse) position in pixels to an orientation
+	/** The orientation vector origin is the current pivot point!
+	**/
+	CCVector3 convertMousePositionToOrientation(int x, int y);
+
 	/***************************************************
                     OpenGL Extensions
 	***************************************************/

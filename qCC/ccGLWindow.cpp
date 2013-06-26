@@ -1405,6 +1405,7 @@ void ccGLWindow::recalcModelViewMatrix()
 		glScalef(totalZoom,totalZoom,totalZoom);
 	}
 
+	//apply current camera parameters (see trunk/doc/rendering_pipeline.doc)
 	if (m_params.objectCenteredView)
 	{
 		//place origin on camera center
@@ -1650,26 +1651,75 @@ void ccGLWindow::enableEmbeddedIcons(bool state)
 	setMouseTracking(state);
 }
 
-static void ProjectPointOnSphere(int x, int y, int width, int height, CCVector3& v)
+CCVector3 ccGLWindow::convertMousePositionToOrientation(int x, int y)
 {
-	v.x = float(2.0 * std::max(std::min(x,width-1),-width+1) - width) / (float)width;
-	v.y = float(height - 2.0 * std::max(std::min(y,height-1),-height+1)) / (float)height;
-	v.z = 0;
+	PointCoordinateType xc = static_cast<PointCoordinateType>(width()/2);
+	PointCoordinateType yc = static_cast<PointCoordinateType>(height()/2);
+
+	GLdouble xp,yp;
+	if (m_params.objectCenteredView)
+	{
+		GLdouble zp;
+		
+		//project the current pivot point on screen
+		int VP[4];
+		getViewportArray(VP);
+		gluProject(m_params.pivotPoint.x,m_params.pivotPoint.y,m_params.pivotPoint.z,getModelViewMatd(),getProjectionMatd(),VP,&xp,&yp,&zp);
+
+		//we set the virtual rotation pivot closer to the actual one (but we always stay in the central part of the screen!)
+		xp = std::min<GLdouble>(xp,3*width()/4);
+		xp = std::max<GLdouble>(xp,  width()/4);
+
+		yp = std::min<GLdouble>(yp,3*height()/4);
+		yp = std::max<GLdouble>(yp,  height()/4);
+	}
+	else
+	{
+		xp = static_cast<GLdouble>(xc);
+		yp = static_cast<GLdouble>(yc);
+	}
+
+	//invert y
+	y = height()-1 - y;
+
+	//CCVector3 v(float(2 * std::max<int>(std::min<int>(x,width()-1),-(width()-1)) - width()) / (float)width(),
+	//			float(height() - 2 * std::max<int>(std::min<int>(y,height()-1),-(height()-1))) / (float)height(),
+	//			0.0f);
+	CCVector3 v((PointCoordinateType)x - (PointCoordinateType)xp,
+				(PointCoordinateType)y - (PointCoordinateType)yp,
+				0);
+
+	PointCoordinateType maxWidth = width()-1;
+	if (v.x < -xc)
+		v.x = -xc;
+	else if (v.x > xc)
+		v.x = xc;
+
+	PointCoordinateType maxHeight = height()-1;
+	if (v.y < -yc)
+		v.y = -yc;
+	else if (v.y > yc)
+		v.y = yc;
+
+	v.x /= xc;
+	v.y /= yc;
 
 	//square 'radius'
-	float d2 = v.x*v.x + v.y*v.y;
+	PointCoordinateType d2 = v.x*v.x + v.y*v.y;
 
 	//projection on the unit sphere
 	if (d2 > 1.0f)
 	{
-		float d = sqrt(d2);
+		PointCoordinateType d = sqrt(d2);
 		v.x /= d;
 		v.y /= d;
 	}
 	else
 	{
-		v.z = (PointCoordinateType)sqrt(1.0f-d2);
+		v.z = sqrt((PointCoordinateType)1.0 - d2);
 	}
+
+	return v;
 }
 
 void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels/*=false*/)
@@ -1761,7 +1811,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 		{
 			m_lastClickTime_ticks = ccTimer::Msec();
 
-			ProjectPointOnSphere(event->x(), event->y(), width(), height(), m_lastMouseOrientation);
+			m_lastMouseOrientation = convertMousePositionToOrientation(event->x(), event->y());
 			m_lastMousePos = event->pos();
 			m_lodActivated = true;
 
@@ -1785,7 +1835,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 {
 	if (m_interactionMode == SEGMENT_ENTITY)
 	{
-		if (event->buttons()!=Qt::NoButton || m_alwaysUseFBO) //fast!
+		if (event->buttons() != Qt::NoButton || m_alwaysUseFBO) //fast!
 			emit mouseMoved(event->x()-width()/2,height()/2-event->y(),event->buttons());
 		return;
 	}
@@ -1937,7 +1987,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			}
 			else //standard rotation around the current pivot
 			{
-				ProjectPointOnSphere(x, y, width(), height(), m_currentMouseOrientation);
+				m_currentMouseOrientation = convertMousePositionToOrientation(x, y);
 
 				ccGLMatrix rotMat = ccGLUtils::GenerateGLRotationMatrixFromVectors(m_lastMouseOrientation.u,m_currentMouseOrientation.u);
 				m_lastMouseOrientation = m_currentMouseOrientation;
@@ -1993,7 +2043,7 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	{
 		if (m_pivotVisibility == PIVOT_SHOW_ON_MOVE)
 			toBeRefreshed();
-		showPivotSymbol(false);
+		showPivotSymbol(m_pivotVisibility == PIVOT_ALWAYS_SHOW);
 	}
 
 #ifndef __APPLE__

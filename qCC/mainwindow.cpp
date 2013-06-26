@@ -5732,6 +5732,14 @@ void MainWindow::doPickRotationCenter()
         return;
 	}
 
+	bool objectCentered = true;
+	bool perspectiveEnabled = win->getPerspectiveState(objectCentered);
+	if (perspectiveEnabled && !objectCentered)
+	{
+		ccLog::Error("Perspective mode is viewer-centered: can't use a point as rotation center!");
+		return;
+	}
+
 	//we need at least one cloud
 	//bool atLeastOneCloudVisible = false;
 	//{
@@ -5790,9 +5798,18 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 				unsigned precision = ccGui::Parameters().displayedNumPrecision;
 				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear precedent message
 				s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
-				s_pickingWindow->setPivotPoint(*P);
-				s_pickingWindow->setCameraPos(*P);
-				//s_pickingWindow->setScreenPan(0,0);
+
+				const ccViewportParameters& params = s_pickingWindow->getViewportParameters();
+				if (!params.perspectiveView || params.objectCenteredView)
+				{
+					CCVector3 newPivot = *P;
+					//compute the equivalent camera center
+					CCVector3 dP = params.pivotPoint - newPivot;
+					CCVector3 MdP = dP; params.viewMat.applyRotation(MdP);
+					CCVector3 newCameraPos = params.cameraCenter + MdP - dP;
+					s_pickingWindow->setCameraPos(newCameraPos);
+					s_pickingWindow->setPivotPoint(newPivot);
+				}
 				s_pickingWindow->redraw();
 			}
 		}

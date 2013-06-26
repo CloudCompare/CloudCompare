@@ -142,4 +142,4 @@ protected:
 
 } //namespace CCLib
 
-#endif TRUE_KD_TREE_HEADER
+#endif //TRUE_KD_TREE_HEADER

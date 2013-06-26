@@ -43,7 +43,7 @@
 const int MAX_ASCII_FILE_LINE_LENGTH	=	4096;
 
 //! File types handled by CloudCompare (loading and/or saving)
-enum CC_FILE_TYPES {UNKNOWN_FILE		,		/**< unknown type */
+enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
 					SOI					,		/**< SOI (Mensi Trimble) */
 					ASCII				,		/**< ASC,NEU, XYZ, TXT, PTS, etc. */
 					BIN					,		/**< CloudCompare binary */

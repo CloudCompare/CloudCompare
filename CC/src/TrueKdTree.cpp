@@ -88,7 +88,9 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	}
 
 	//find the largest dimension
-	uint8_t splitDim = (dims.y > dims.x ? Y_DIM : X_DIM);
+	uint8_t splitDim = X_DIM;
+	if (dims.y > dims.x)
+		splitDim = Y_DIM;
 	if (dims.z > dims.u[splitDim])
 		splitDim = Z_DIM;
 

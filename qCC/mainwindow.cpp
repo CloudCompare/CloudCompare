@@ -5791,6 +5791,7 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear precedent message
 				s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
 				s_pickingWindow->setPivotPoint(*P);
+				s_pickingWindow->setCameraPos(*P);
 				//s_pickingWindow->setScreenPan(0,0);
 				s_pickingWindow->redraw();
 			}

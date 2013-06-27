@@ -26,6 +26,7 @@
 #include <ccPointCloud.h>
 #include <ccOctree.h>
 #include <ccProgressDialog.h>
+#include <cc2DViewportObject.h>
 
 //qCC
 #include <ccGLWindow.h>
@@ -300,28 +301,30 @@ void qHPR::doAction()
 
     if (visibleCells)
     {
-		if (!cloud->isVisibilityTableInstantiated() && !cloud->razVisibilityArray())
+		//DGM: we generate a new cloud now, instead of playing with the points visiblity! (too confusing for the user)
+		/*if (!cloud->isVisibilityTableInstantiated() && !cloud->razVisibilityArray())
 		{
 			m_app->dispToConsole("Visibility array allocation failed! (Not enough memory?)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;
 		}
 
 		ccPointCloud::VisibilityTableType* pointsVisibility = cloud->getTheVisibilityArray();
-
 		assert(pointsVisibility);
 		pointsVisibility->fill(POINT_HIDDEN);
+		//*/
 
-        unsigned visiblePointCount = 0;
+		CCLib::ReferenceCloud visiblePoints(theOctree->associatedCloud());
+
+		unsigned visiblePointCount = 0;
 		unsigned visibleCellsCount = visibleCells->size();
 
 		CCLib::DgmOctree::cellIndexesContainer cellIndexes;
 		if (!theOctree->getCellIndexes((uchar)octreeLevel,cellIndexes))
 		{
 			m_app->dispToConsole("Couldn't fetch the list of octree cell indexes! (Not enough memory?)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			delete visibleCells;
 			return;
 		}
-
-		CCLib::ReferenceCloud Yk(theOctree->associatedCloud());
 
         for (unsigned i=0; i<visibleCellsCount; ++i)
         {
@@ -329,20 +332,49 @@ void qHPR::doAction()
             unsigned index = visibleCells->getPointGlobalIndex(i);
             
 			//points in this cell...
+			CCLib::ReferenceCloud Yk(theOctree->associatedCloud());
 			theOctree->getPointsInCellByCellIndex(&Yk,cellIndexes[index],(uchar)octreeLevel);
 			//...are all visible
-			unsigned count = Yk.size();
+			/*unsigned count = Yk.size();
             for (unsigned j=0;j<count;++j)
                 pointsVisibility->setValue(Yk.getPointGlobalIndex(j),POINT_VISIBLE);
-
             visiblePointCount += count;
+			//*/
+			if (!visiblePoints.add(Yk))
+			{
+				m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				delete visibleCells;
+				return;
+			}
         }
-
-		m_app->dispToConsole(QString("[HPR] Visible points: %1").arg(visiblePointCount));
-        cloud->redrawDisplay();
 
         delete visibleCells;
 		visibleCells=0;
+
+		m_app->dispToConsole(QString("[HPR] Visible points: %1").arg(visiblePointCount));
+
+		if (visiblePoints.size() == cloud->size())
+		{
+			m_app->dispToConsole("No points were removed!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		}
+		else
+		{
+			//create cloud from visibility selection
+			ccPointCloud* newCloud = new ccPointCloud(&visiblePoints,cloud);
+			
+			newCloud->setDisplay(newCloud->getDisplay());
+			newCloud->setVisible(true);
+			newCloud->setName(cloud->getName()+QString(".visible_points"));
+			cloud->setVisible(false);
+
+			//add associated viewport object
+			cc2DViewportObject* viewportObject = new cc2DViewportObject(QString("Viewport"));
+			viewportObject->setParameters(params);
+			newCloud->addChild(viewportObject);
+
+			m_app->addToDB(newCloud);
+			newCloud->redrawDisplay();
+		}
     }
 
     //currently selected entities appearance may have changed!

@@ -46,6 +46,8 @@ v2.4 ??/??/2013
 	* when computing local density, if two or more points are overlapping, the result density
 		will be 'NAN' and the point will appear in gray (in order to be hidden or removed easily)
 	* global shift information is now kept by qRansacSD plugin (shape detection)
+	* qHPR (Hidden Point Removal) plugin now generates a new cloud with the visible points only
+		(instead of hacking the points visibility) along with the corresponding viewport
 - Bug fixes:
 	* applying the interactive 'rotate/translate' tool to an entity and its parent at the
 		same time would make CC crash

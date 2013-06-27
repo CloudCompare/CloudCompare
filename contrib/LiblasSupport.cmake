@@ -25,9 +25,9 @@ if( ${OPTION_USE_LIBLAS} )
 
 	# liblas
 	set( LIBLAS_INCLUDE_DIR "" CACHE PATH "LibLAS include directory" )
-	set( LIBLAS_RELEASE_LIBRARY_FILE "" CACHE FILE "LibLAS library file (release mode)" )
+	set( LIBLAS_RELEASE_LIBRARY_FILE "" CACHE FILEPATH "LibLAS library file (release mode)" )
 	if (WIN32)
-		set( LIBLAS_SHARED_LIBRARY_FILE "" CACHE FILE "LibLAS shared library file (dll)" )
+		set( LIBLAS_SHARED_LIBRARY_FILE "" CACHE FILEPATH "LibLAS shared library file (dll)" )
 	endif()
 
 	if ( NOT LIBLAS_INCLUDE_DIR )

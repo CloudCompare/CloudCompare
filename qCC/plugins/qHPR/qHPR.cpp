@@ -78,11 +78,10 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	if (nbPoints == 0)
 		return 0;
 
-	CCLib::ReferenceCloud* visiblePoints = new CCLib::ReferenceCloud(theCloud);
-
 	//less than 4 points? no need for calculation, we return the whole cloud
 	if (nbPoints < 4)
 	{
+		CCLib::ReferenceCloud* visiblePoints = new CCLib::ReferenceCloud(theCloud);
 		if (!visiblePoints->addPointIndex(0,nbPoints)) //well even for less than 4 points we never know ;)
 		{
 			//not enough memory!
@@ -136,21 +135,22 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		}
 	}
 
+	//array to flag points on the convex hull
 	std::vector<bool> pointBelongsToCvxHull;
-	try
-	{
-		pointBelongsToCvxHull.resize(nbPoints+1,false);
-	}
-	catch(std::bad_alloc)
-	{
-		//not enough memory!
-		delete visiblePoints;
-		delete[] pt_array;
-		return false;
-	}
 
-	if (!qh_new_qhull(3,nbPoints+1,pt_array,False,(char*)"qhull QJ s Qci Tcv",0,stderr))
+	if (!qh_new_qhull(3,nbPoints+1,pt_array,False,(char*)"qhull QJ Qci",0,stderr))
 	{
+		try
+		{
+			pointBelongsToCvxHull.resize(nbPoints+1,false);
+		}
+		catch(std::bad_alloc)
+		{
+			//not enough memory!
+			delete[] pt_array;
+			return false;
+		}
+
 		vertexT *vertex = 0,**vertexp = 0;
 		facetT *facet = 0;
 
@@ -177,27 +177,34 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	qh_memfreeshort (&curlong, &totlong);
 	//free short memory and memory allocator
 
-	//compute the number of points belonging to the convex hull
-	unsigned cvxHullSize = 0;
+	if (!pointBelongsToCvxHull.empty())
 	{
-		for (unsigned i=0; i<nbPoints; ++i)
-			if (pointBelongsToCvxHull[i])
-				++cvxHullSize;
+		//compute the number of points belonging to the convex hull
+		unsigned cvxHullSize = 0;
+		{
+			for (unsigned i=0; i<nbPoints; ++i)
+				if (pointBelongsToCvxHull[i])
+					++cvxHullSize;
+		}
+
+		CCLib::ReferenceCloud* visiblePoints = new CCLib::ReferenceCloud(theCloud);
+		if (cvxHullSize!=0 && visiblePoints->reserve(cvxHullSize))
+		{
+			for (unsigned i=0; i<nbPoints; ++i)
+				if (pointBelongsToCvxHull[i])
+					visiblePoints->addPointIndex(i); //can't fail, see above
+
+			return visiblePoints;
+
+		}
+		else //not enough memory
+		{
+			delete visiblePoints;
+			visiblePoints=0;
+		}
 	}
 
-	if (cvxHullSize!=0 && visiblePoints->reserve(cvxHullSize))
-	{
-		for (unsigned i=0; i<nbPoints; ++i)
-			if (pointBelongsToCvxHull[i])
-				visiblePoints->addPointIndex(i); //can't fail, see above
-	}
-	else //not enough memory
-	{
-		delete visiblePoints;
-		visiblePoints=0;
-	}
-
-	return visiblePoints;
+	return 0;
 }
 
 void qHPR::doAction()
@@ -284,6 +291,9 @@ void qHPR::doAction()
 	
 		m_app->dispToConsole(QString("[HPR] Cells: %1 - Time: %2 s").arg(theCellCenters->size()).arg(eTimer.elapsed()/1.0e3));
 
+		//warning: after this, visibleCells can't be used anymore as a
+		//normal cloud (as it's 'associated cloud' has been deleted).
+		//Only its indexes are valid! (they are corresponding to octree cells)
 		delete theCellCenters;
 		theCellCenters = 0;
 	}

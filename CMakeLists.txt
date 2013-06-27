@@ -43,8 +43,6 @@ add_subdirectory( libs/qCC_db ) # must always be included after CCFbo (dependenc
 include( contrib/LiblasSupport.cmake )
 # XIOT support
 include( contrib/XIOTSupport.cmake )
-# qHull support
-include( contrib/QHullSupport.cmake )
 # E57 support
 include( contrib/E57Support.cmake )
 # 3DXWARE (3dConnexion devices) support

@@ -121,7 +121,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
     connect(ui.actionToggleSunLight,				SIGNAL(toggled(bool)),    					this,	SLOT(toggleSunLight(bool)));
     connect(ui.actionToggleCustomLight,				SIGNAL(toggled(bool)),    					this,	SLOT(toggleCustomLight(bool)));
 	//"Options" menu
-	connect(ui.actionGlobalZoom,					SIGNAL(triggered()),						this,	SLOT(setGlobalZoom(bool)));
+	connect(ui.actionGlobalZoom,					SIGNAL(triggered()),						this,	SLOT(setGlobalZoom()));
 	connect(ui.actionFullScreen,					SIGNAL(toggled(bool)),						this,	SLOT(toggleFullScreen(bool)));
 
 	//"Options > Selected" menu

@@ -203,6 +203,7 @@ protected slots:
     virtual void toggleActiveWindowCustomLight();
     virtual void toggleActiveWindowSunLight();
     virtual void toggleActiveWindowViewerBasedPerspective();
+    virtual void setGlobalZoom();
     virtual void zoomOnSelectedEntities();
 	virtual void setPivotAlwaysOn();
 	virtual void setPivotRotationOnly();
@@ -225,7 +226,6 @@ protected slots:
 	void handleNewEntity(ccHObject*);
 
     void setActiveSubWindow(QWidget* window);
-    void setGlobalZoom();
     void setLightsAndMaterials();
     void showSelectedEntitiesHistogram();
     void testFrameRate();

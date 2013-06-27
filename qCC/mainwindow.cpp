@@ -170,7 +170,7 @@ MainWindow::MainWindow()
     //Dialog "auto-construction"
     setupUi(this);
 
-	//advaned widgets not handled by QDesigner
+	//advanced widgets not handled by QDesigner
 	{
 		//view mode pop-up menu
 		{
@@ -576,6 +576,7 @@ void MainWindow::on3DMouseKeyUp(int)
 #ifdef CC_3DXWARE_SUPPORT
 static bool s_3dMouseContextMenuAlreadyShown = false; //DGM: to prevent multiple instances at once
 #endif
+// ANY CHANGE/BUG FIX SHOULD BE REFLECTED TO THE EQUIVALENT METHODS IN QCC "MainWindow.cpp" FILE!
 void MainWindow::on3DMouseKeyDown(int key)
 {
 	if (!m_3dMouseInput)
@@ -594,7 +595,7 @@ void MainWindow::on3DMouseKeyDown(int key)
 				ccGLWindow* activeWin = getActiveGLWindow();
 				if (activeWin)
 				{
-					ccMouse3DContextMenu(&m_3dMouseInput->getMouseParams(),this).exec(QCursor::pos());
+					ccMouse3DContextMenu(&m_3dMouseInput->getMouseParams(),activeWin,this).exec(QCursor::pos());
 					//in case of...
 					updateViewModePopUpMenu(activeWin);
 					updatePivotVisibilityPopUpMenu(activeWin);
@@ -686,6 +687,7 @@ void MainWindow::on3DMouseKeyDown(int key)
 #endif
 }
 
+// ANY CHANGE/BUG FIX SHOULD BE REFLECTED TO THE EQUIVALENT METHODS IN QCC "MainWindow.cpp" FILE!
 void MainWindow::on3DMouseMove(std::vector<float>& vec)
 {
 	//ccLog::PrintDebug(QString("[3D mouse] %1 %2 %3 %4 %5 %6").arg(vec[0]).arg(vec[1]).arg(vec[2]).arg(vec[3]).arg(vec[4]).arg(vec[5]));
@@ -5539,13 +5541,6 @@ void MainWindow::setIsoView2()
         win->setView(CC_ISO_VIEW_2);
 }
 
-void MainWindow::setGlobalZoom()
-{
-    ccGLWindow* win = getActiveGLWindow();
-    if (win)
-        win->zoomGlobal();
-}
-
 void MainWindow::setLightsAndMaterials()
 {
 	ccDisplayOptionsDlg colorsDlg(this);
@@ -5604,6 +5599,13 @@ void MainWindow::doActionSaveViewportAsCamera()
 	viewportObject->setParameters(win->getViewportParameters());
 
 	addToDB(viewportObject,true,0,false,false);
+}
+
+void MainWindow::setGlobalZoom()
+{
+    ccGLWindow* win = getActiveGLWindow();
+    if (win)
+        win->zoomGlobal();
 }
 
 void MainWindow::zoomOnSelectedEntities()

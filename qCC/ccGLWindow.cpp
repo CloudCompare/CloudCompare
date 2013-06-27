@@ -125,6 +125,7 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	, m_font(font())
 	, m_pivotVisibility(PIVOT_SHOW_ON_MOVE)
 	, m_pivotSymbolShown(false)
+	, m_allowRectangularEntityPicking(true)
 	, m_rectPickingPoly(0)
 {
 	//GL window title
@@ -1689,20 +1690,11 @@ CCVector3 ccGLWindow::convertMousePositionToOrientation(int x, int y)
 				(PointCoordinateType)y - (PointCoordinateType)yp,
 				0);
 
-	PointCoordinateType maxWidth = width()-1;
-	if (v.x < -xc)
-		v.x = -xc;
-	else if (v.x > xc)
-		v.x = xc;
+	PointCoordinateType maxWidth = static_cast<PointCoordinateType>(width()-1);
+	v.x = std::max<PointCoordinateType>(std::min<PointCoordinateType>(v.x/xc,1.0),-1.0);
 
-	PointCoordinateType maxHeight = height()-1;
-	if (v.y < -yc)
-		v.y = -yc;
-	else if (v.y > yc)
-		v.y = yc;
-
-	v.x /= xc;
-	v.y /= yc;
+	PointCoordinateType maxHeight = static_cast<PointCoordinateType>(height()-1);
+	v.y = std::max<PointCoordinateType>(std::min<PointCoordinateType>(v.y/yc,1.0),-1.0);
 
 	//square 'radius'
 	PointCoordinateType d2 = v.x*v.x + v.y*v.y;
@@ -1938,8 +1930,9 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		}
 		else
 		{
-			//specific case: rectangular polyline drawing (selection mode)
-			if (   (m_pickingMode == ENTITY_PICKING || m_pickingMode == ENTITY_RECT_PICKING)
+			//specific case: rectangular polyline drawing (for rectangular area selection mode)
+			if (	m_allowRectangularEntityPicking
+				&& (m_pickingMode == ENTITY_PICKING || m_pickingMode == ENTITY_RECT_PICKING)
 				&& (m_rectPickingPoly || (QApplication::keyboardModifiers () & Qt::AltModifier)))
 			{
 				//first time: initialization of the rectangle

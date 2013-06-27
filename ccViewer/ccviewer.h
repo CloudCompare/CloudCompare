@@ -27,8 +27,12 @@
 #include <ui_ccviewer.h>
 //#include <ui_ccviewerAbout.h>
 
+//System
+#include <set>
+
 class ccGLWindow;
 class ccHObject;
+class Mouse3DInput;
 
 //! Application main window
 class ccViewer : public QMainWindow
@@ -68,6 +72,9 @@ protected slots:
 
 	//! Selects entity
 	void selectEntity(int uniqueID);
+	
+	//! Selects multiple entities
+	//void selectEntities(std::set<int> entIDs); //not supported yet!
 
 	//! Delete selected entity
 	void doActionDeleteSelectedEntity();
@@ -75,12 +82,17 @@ protected slots:
     void doActionEditCamera();
     void toggleSunLight(bool);
     void toggleCustomLight(bool);
-    void togglePerspectiveOff(bool);
-    void toggleCenteredPerspective(bool);
-    void toggleViewerBasedPerspective(bool);
 	void toggleFullScreen(bool);
     void doActionAbout();
     void doActionDisplayShortcuts();
+	void setPivotAlwaysOn();
+	void setPivotRotationOnly();
+	void setPivotOff();
+	void setOrthoView();
+	void setCenteredPerspectiveView();
+	void setViewerPerspectiveView();
+    void setGlobalZoom();
+    void zoomOnSelectedEntity();
 
 	//default views
 	void setFrontView();
@@ -89,6 +101,8 @@ protected slots:
     void setBackView();
     void setLeftView();
     void setRightView();
+	void setIsoView1();
+	void setIsoView2();
 
 	//selected entity properties
 	void toggleColorsShown(bool);
@@ -97,19 +111,43 @@ protected slots:
 	void toggleColorbarShown(bool);
 	void changeCurrentScalarField(bool);
 
+	//3D mouse
+	void on3DMouseMove(std::vector<float>&);
+	void on3DMouseKeyUp(int);
+	void on3DMouseKeyDown(int);
+	void setup3DMouse(bool);
+
 protected:
 
 	//! Makes the GL frame background gradient match the OpenGL window one
 	void updateGLFrameGradient();
 
-	//! Sets perspective state (synch. UI by the way)
-	void setPerspective(bool enabled, bool centered);
+	//! Updates perspective UI elements
+	void reflectPerspectiveState();
+
+	//! Updates pivot UI elements
+	void reflectPivotVisibilityState();
+
+	//! Updates lights UI elements
+	void reflectLightsState();
+
+	//! Releases any connected 3D mouse (if any)
+	void release3DMouse();
+
+	//! Trys to enable (or disable) a 3D mouse device
+	/** \param state whether to enable or disable the device
+		\param silent whether to issue an error message in case of failure
+	**/
+	void enable3DMouse(bool state, bool silent);
 
 	//! Associated GL context
 	ccGLWindow* m_glWindow;
 
 	//! Currently selected object
 	ccHObject* m_selectedObject;
+
+	//! 3D mouse handler
+	Mouse3DInput* m_3dMouseInput;
 
 private:
 	//! Associated GUI

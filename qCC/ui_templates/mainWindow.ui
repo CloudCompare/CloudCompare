@@ -87,6 +87,10 @@
      <property name="title">
       <string>Lights</string>
      </property>
+     <property name="icon">
+      <iconset resource="../icones.qrc">
+       <normaloff>:/CC/images/ccSunLight.png</normaloff>:/CC/images/ccSunLight.png</iconset>
+     </property>
      <addaction name="actionToggleSunLight"/>
      <addaction name="actionToggleCustomLight"/>
     </widget>
@@ -742,7 +746,7 @@
    </property>
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccZoomIn.png</normaloff>:/CC/images/ccZoomIn.png</iconset>
+     <normaloff>:/CC/images/ccFullScreen.png</normaloff>:/CC/images/ccFullScreen.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Full screen</string>

@@ -24,7 +24,7 @@
 #ifndef CC_PDMS_FILTER_HEADER
 #define CC_PDMS_FILTER_HEADER
 
-#include "FileIOFilter.h"
+#include "../FileIOFilter.h"
 
 //! PDMS .mac file I/O filter
 class PDMSFilter : public FileIOFilter

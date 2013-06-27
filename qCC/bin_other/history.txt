@@ -37,6 +37,10 @@ v2.4 ??/??/2013
 	* a warning is issued if the user attempts to save a cloud with SFs having non "official"
 		names
 - Stippling (fake transparency) option has been added to meshes
+- ccViewer enhanced:
+	* GUI updated (pivot visibility options added, isometric default views, new icons, etc.)
+	* PDMS format support added
+	* 3D mouse support added
 - Misc. improvements:
 	* new icon for the 'clone' method (thanks to JF Hullo): two sheeps instead of one!
 	* when computing local density, if two or more points are overlapping, the result density
@@ -49,6 +53,7 @@ v2.4 ??/??/2013
 	* "Height Grid Generation" tool accuracy fixed (when dealing with coordinates above 10^5)
 	* Mesh with a single texture AND colors couldn't be saved properly in PLY format (CC would
 		refuse to save the texture)
+	* deleting a child object (e.g. labels) in ccViewer would make it crash!
 
 v2.4 04/25/2013
 - 3D mouses (3dConnexion devices) are now supported:

@@ -22,7 +22,7 @@
 //**************************************************************************
 //
 #include "PDMSFilter.h"
-#include "PDMS/PdmsParser.h"
+#include "PdmsParser.h"
 //#include "../ccCoordinatesShiftManager.h"
 
 //Qt

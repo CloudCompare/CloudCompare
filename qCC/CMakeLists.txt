@@ -6,7 +6,6 @@ set( VERSION_MAJOR 2 )
 set( VERSION_MINOR 4 )
 set( VERSION_PATCH 0 )
 
-
 if ( UNIX )
 	set( CloudCompare_dest_release bin ) #default destination: /usr/bin
 	set( CloudCompare_dest_debug bin/debug )
@@ -54,7 +53,6 @@ file( GLOB source_list *.cpp db_tree/*.cpp fileIO/*.cpp fileIO/*.c ${QXT_SOURCES
 
 # 3DX support (3dConnexion devices)
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
-	#include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/devices/3dConnexion )
 	file( GLOB 3DX_header_list devices/3dConnexion/*.h )
 	file( GLOB 3DX_source_list devices/3dConnexion/*.cpp )
 	list( APPEND header_list ${3DX_header_list} )

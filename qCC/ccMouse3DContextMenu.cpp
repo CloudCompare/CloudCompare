@@ -18,8 +18,7 @@
 #include "ccMouse3DContextMenu.h"
 
 //local
-#include "mainwindow.h"
-#include "ccGLWindow.h"
+#include <ccGLWindow.h>
 
 #ifdef CC_3DXWARE_SUPPORT
 //3DxWare
@@ -29,7 +28,7 @@
 //system
 #include <assert.h>
 
-ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* parent/*=0*/)
+ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, ccGLWindow* win, QWidget* parent/*=0*/)
 	: QMenu(parent)
 	, m_rotationMode(0)
 	, m_panZoomMode(0)
@@ -43,6 +42,7 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* p
 	, m_lockHorizon(0)
 	, m_dominantMode(0)
 	, m_params(params)
+	, m_glWindow(win)
 {
 	assert(m_params);
 	{
@@ -54,9 +54,6 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* p
 		return;
 
 #ifdef CC_3DXWARE_SUPPORT
-
-	//Is there an active 3D view?
-	ccGLWindow* activeWin = MainWindow::GetActiveGLWindow();
 
 	assert(Mouse3DParameters::HighestSpeed+1 == SPEED_ACTION_COUNT);
 
@@ -108,7 +105,7 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* p
 			m_alwaysHideRotationCenter		= new QAction("Hide",this);
 
 			//we deduce the rotation visibility mode from the current display!
-			ccGLWindow::PivotVisibility visibility = (activeWin ? activeWin->getPivotVisibility() : ccGLWindow::PIVOT_HIDE);
+			ccGLWindow::PivotVisibility visibility = (m_glWindow ? m_glWindow->getPivotVisibility() : ccGLWindow::PIVOT_HIDE);
 
 			m_alwaysShowRotationCenter->setCheckable(true);
 			m_alwaysShowRotationCenter->setChecked(visibility == ccGLWindow::PIVOT_ALWAYS_SHOW);
@@ -126,8 +123,8 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* p
 	//we deduce the viewing mode (OBJECT, CAMERA, etc.) from the current display settings!
 	{
 		bool objectMode = true;
-		if (activeWin)
-			activeWin->getPerspectiveState(objectMode);
+		if (m_glWindow)
+			m_glWindow->getPerspectiveState(objectMode);
 
 		//object mode
 		{
@@ -226,13 +223,12 @@ void ccMouse3DContextMenu::panZoomModeToggled(bool state)
 void ccMouse3DContextMenu::objectModeTriggered()
 {
 #ifdef CC_3DXWARE_SUPPORT
-	ccGLWindow* win = MainWindow::GetActiveGLWindow();
-	if (win)
+	if (m_glWindow)
 	{
 		bool objectCentered = true;
-		bool perspective = win->getPerspectiveState(objectCentered);
+		bool perspective = m_glWindow->getPerspectiveState(objectCentered);
 		if (!objectCentered) //force object-based mode!
-			win->setPerspectiveState(perspective,true);
+			m_glWindow->setPerspectiveState(perspective,true);
 	}
 
 	//if (m_params)
@@ -243,13 +239,12 @@ void ccMouse3DContextMenu::objectModeTriggered()
 void ccMouse3DContextMenu::cameraModeTriggered()
 {
 #ifdef CC_3DXWARE_SUPPORT
-	ccGLWindow* win = MainWindow::GetActiveGLWindow();
-	if (win)
+	if (m_glWindow)
 	{
 		bool objectCentered = true;
-		/*bool perspective = */win->getPerspectiveState(objectCentered);
+		/*bool perspective = */m_glWindow->getPerspectiveState(objectCentered);
 		if (objectCentered) //force viewer-based perspective!
-			win->setPerspectiveState(true,false);
+			m_glWindow->setPerspectiveState(true,false);
 	}
 
 	//if (m_params)
@@ -316,12 +311,11 @@ void ccMouse3DContextMenu::rotationCenterVisibilityChanged()
 		return;
 
 	//we also need an actve 3D view!
-	ccGLWindow* win = MainWindow::GetActiveGLWindow();
-	if (!win)
+	if (!m_glWindow)
 		return;
 
 	//let's determine the new visibility based on the sending action 
-	ccGLWindow::PivotVisibility visibility = win->getPivotVisibility();
+	ccGLWindow::PivotVisibility visibility = m_glWindow->getPivotVisibility();
 	if (sender == m_alwaysShowRotationCenter)
 	{
 		visibility = ccGLWindow::PIVOT_ALWAYS_SHOW;
@@ -341,9 +335,9 @@ void ccMouse3DContextMenu::rotationCenterVisibilityChanged()
 	}
 
 	//update visibility... only if necessary!
-	if (win->getPivotVisibility() != visibility)
+	if (m_glWindow->getPivotVisibility() != visibility)
 	{
-		win->setPivotVisibility(visibility);
-		win->redraw();
+		m_glWindow->setPivotVisibility(visibility);
+		m_glWindow->redraw();
 	}
 }

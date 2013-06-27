@@ -324,6 +324,12 @@ public:
 	//! Returns whether the ColorRamp shader is supported or not
 	bool hasColorRampShader() const { return m_colorRampShader != 0; }
 
+	//! Returns whether rectangular picking is allowed or not
+	bool isRectangularPickingAllowed() const { return m_allowRectangularEntityPicking; }
+
+	//! Sets whether rectangular picking is allowed or not
+	void setRectangularPickingAllowed(bool state) { m_allowRectangularEntityPicking = state; }
+
 public slots:
     void zoomGlobal();
     void testFrameRate();
@@ -655,6 +661,9 @@ protected:
 
 	//! Whether pivot symbol should be shown or not
 	bool m_pivotSymbolShown;
+
+	//! Whether rectangular picking is allowed or not
+	bool m_allowRectangularEntityPicking;
 
 	//! Rectangular picking polyline
 	ccPolyline* m_rectPickingPoly;

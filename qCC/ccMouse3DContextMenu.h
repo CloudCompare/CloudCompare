@@ -22,6 +22,7 @@
 #include <QMenu>
 
 class QAction;
+class ccGLWindow;
 class Mouse3DParameters;
 
 //! 3D mouse context menu
@@ -32,7 +33,7 @@ class ccMouse3DContextMenu : public QMenu
 public:
 
 	//! Default constructor
-	ccMouse3DContextMenu(Mouse3DParameters* params, QWidget* parent=0);
+	ccMouse3DContextMenu(Mouse3DParameters* params, ccGLWindow* win, QWidget* parent=0);
 
 protected slots:
 
@@ -75,6 +76,9 @@ protected:
 
 	//! Associated parameters
 	Mouse3DParameters* m_params;
+
+	//! Active GL window
+	ccGLWindow* m_glWindow;
 
 };
 

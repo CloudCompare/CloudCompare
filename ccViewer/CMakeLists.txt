@@ -28,8 +28,8 @@ set( VERSION_MAJOR 1 )
 set( VERSION_MINOR 25 )
 set( VERSION_PATCH 0 )
 
-set( QCC_HEADERS ../qCC/ccConsole.h ../qCC/ccGLUtils.h ../qCC/ccGLWindow.h ../qCC/ccGuiParameters.h ../qCC/ccOverlayDialog.h ../qCC/ccRenderingTools.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccShiftAndScaleCloudDlg.h ../qCC/fileIO/*.h )
-set( QCC_SOURCES ../qCC/ccConsole.cpp ../qCC/ccGLUtils.cpp ../qCC/ccGLWindow.cpp ../qCC/ccGuiParameters.cpp ../qCC/ccOverlayDialog.cpp ../qCC/ccRenderingTools.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccShiftAndScaleCloudDlg.cpp ../qCC/fileIO/*.cpp ../qCC/fileIO/*.c )
+set( QCC_HEADERS ../qCC/ccConsole.h ../qCC/ccGLUtils.h ../qCC/ccGLWindow.h ../qCC/ccGuiParameters.h ../qCC/ccOverlayDialog.h ../qCC/ccRenderingTools.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccShiftAndScaleCloudDlg.h ../qCC/fileIO/*.h ../qCC/ccMouse3DContextMenu.h)
+set( QCC_SOURCES ../qCC/ccConsole.cpp ../qCC/ccGLUtils.cpp ../qCC/ccGLWindow.cpp ../qCC/ccGuiParameters.cpp ../qCC/ccOverlayDialog.cpp ../qCC/ccRenderingTools.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccShiftAndScaleCloudDlg.cpp ../qCC/fileIO/*.cpp ../qCC/fileIO/*.c  ../qCC/ccMouse3DContextMenu.cpp)
 set( QCC_DIALOGS ../qCC/ui_templates/cameraParamDlg.ui ../qCC/ui_templates/displayOptionsDlg.ui ../qCC/ui_templates/shiftAndScaleCloudDlg.ui ../qCC/ui_templates/open*.ui ../qCC/ui_templates/saveAsciiFileDlg.ui )
 
 file( GLOB header_list *.h ${QCC_HEADERS} )
@@ -38,10 +38,18 @@ file( GLOB ui_list ui_templates/*.ui ${QCC_DIALOGS} )
 file( GLOB qrc_list ../qCC/*.qrc )
 file( GLOB rc_list ../qCC/*.rc )
 
+# 3DX support (3dConnexion devices)
+if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
+	file( GLOB 3DX_header_list ../qCC/devices/3dConnexion/*.h )
+	file( GLOB 3DX_source_list ../qCC/devices/3dConnexion/*.cpp )
+	list( APPEND header_list ${3DX_header_list} )
+	list( APPEND source_list ${3DX_source_list} )
+endif()	
+
 # PDMS support
 if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
-	file( GLOB PDMS_header_list fileIO/PDMS/*.h )
-	file( GLOB PDMS_source_list fileIO/PDMS/*.cpp )
+	file( GLOB PDMS_header_list ../qCC/fileIO/PDMS/*.h )
+	file( GLOB PDMS_source_list ../qCC/fileIO/PDMS/*.cpp )
 	list( APPEND header_list ${PDMS_header_list} )
 	list( APPEND source_list ${PDMS_source_list} )
 endif()
@@ -78,6 +86,8 @@ target_link_liblas( ${PROJECT_NAME} ${ccViewer_dest_release} )
 target_link_XIOT( ${PROJECT_NAME} ${ccViewer_dest_release} ${ccViewer_dest_debug} )
 # E57 support
 target_link_LIBE57( ${PROJECT_NAME} )
+# 3dConnexion devices support
+target_link_3DXWARE( ${PROJECT_NAME} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )
@@ -86,6 +96,11 @@ set_default_cc_preproc( ${PROJECT_NAME} )
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_VIEWER USE_GLEW GLEW_STATIC )
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
+endif()
+
+# PDMS support
+if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_PDMS_SUPPORT )
 endif()
 
 # App icon with Code::Blocks/MinGW

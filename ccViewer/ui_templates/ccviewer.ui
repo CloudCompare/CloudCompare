@@ -95,20 +95,32 @@ QStatusBar
      <property name="title">
       <string>Perspective</string>
      </property>
-     <addaction name="actionDisablePerspective"/>
-     <addaction name="actionToggleCenteredPerspective"/>
-     <addaction name="actionToggleViewerBasedPerspective"/>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/ccCenteredPerspective32.png</normaloff>:/CC/images/ccCenteredPerspective32.png</iconset>
+     </property>
+     <addaction name="actionSetOrthoView"/>
+     <addaction name="actionSetCenteredPerspectiveView"/>
+     <addaction name="actionSetViewerPerspectiveView"/>
     </widget>
     <widget class="QMenu" name="menuLights">
      <property name="title">
       <string>Lights</string>
      </property>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/ccSunLight.png</normaloff>:/CC/images/ccSunLight.png</iconset>
+     </property>
      <addaction name="actionToggleSunLight"/>
      <addaction name="actionToggleCustomLight"/>
     </widget>
-    <widget class="QMenu" name="menuStandard_views">
+    <widget class="QMenu" name="menuStandardViews">
      <property name="title">
       <string>Standard views</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/ccViewYpos.png</normaloff>:/CC/images/ccViewYpos.png</iconset>
      </property>
      <addaction name="actionSetViewTop"/>
      <addaction name="actionSetViewFront"/>
@@ -116,6 +128,8 @@ QStatusBar
      <addaction name="actionSetViewBack"/>
      <addaction name="actionSetViewRight"/>
      <addaction name="actionSetViewBottom"/>
+     <addaction name="actionSetViewIso1"/>
+     <addaction name="actionSetViewIso2"/>
     </widget>
     <widget class="QMenu" name="menuSelected">
      <property name="title">
@@ -136,14 +150,40 @@ QStatusBar
      <addaction name="actionShowScalarField"/>
      <addaction name="actionShowColorRamp"/>
      <addaction name="menuSelectSF"/>
+     <addaction name="actionZoomOnSelectedEntity"/>
      <addaction name="actionDelete"/>
+    </widget>
+    <widget class="QMenu" name="menuRotationSymbol">
+     <property name="title">
+      <string>Rotation symbol</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/ccPivotOn.png</normaloff>:/CC/images/ccPivotOn.png</iconset>
+     </property>
+     <addaction name="actionSetPivotAlwaysOn"/>
+     <addaction name="actionSetPivotRotationOnly"/>
+     <addaction name="actionSetPivotOff"/>
+    </widget>
+    <widget class="QMenu" name="menu3DMouse">
+     <property name="title">
+      <string>3D mouse</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../qCC/icones.qrc">
+       <normaloff>:/CC/images/im3DxLogo.png</normaloff>:/CC/images/im3DxLogo.png</iconset>
+     </property>
+     <addaction name="actionEnable3DMouse"/>
     </widget>
     <addaction name="actionDisplayParameters"/>
     <addaction name="actionEditCamera"/>
     <addaction name="separator"/>
-    <addaction name="menuStandard_views"/>
+    <addaction name="menuStandardViews"/>
     <addaction name="menuPerspective"/>
+    <addaction name="menuRotationSymbol"/>
+    <addaction name="menu3DMouse"/>
     <addaction name="menuLights"/>
+    <addaction name="actionGlobalZoom"/>
     <addaction name="actionFullScreen"/>
     <addaction name="separator"/>
     <addaction name="menuSelected"/>
@@ -185,53 +225,15 @@ QStatusBar
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccFullScreen.png</normaloff>:/CC/images/ccFullScreen.png</iconset>
+   </property>
    <property name="text">
     <string>Full screen</string>
    </property>
    <property name="shortcut">
     <string>F11</string>
-   </property>
-   <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
-   </property>
-  </action>
-  <action name="actionToggleCenteredPerspective">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Centered</string>
-   </property>
-   <property name="shortcut">
-    <string>F3</string>
-   </property>
-   <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
-   </property>
-  </action>
-  <action name="actionToggleViewerBasedPerspective">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Viewer-based</string>
-   </property>
-   <property name="shortcut">
-    <string>F4</string>
-   </property>
-   <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
-   </property>
-  </action>
-  <action name="actionDisablePerspective">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
-   <property name="text">
-    <string>Disabled</string>
-   </property>
-   <property name="shortcut">
-    <string>F2</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
@@ -454,6 +456,193 @@ QStatusBar
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionSetOrthoView">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccOrthoMode32.png</normaloff>:/CC/images/ccOrthoMode32.png</iconset>
+   </property>
+   <property name="text">
+    <string>Orthographic projection</string>
+   </property>
+   <property name="toolTip">
+    <string>Set orthographic projection for current 3D View</string>
+   </property>
+   <property name="statusTip">
+    <string>Set orthographic projection for current 3D View</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
+   </property>
+  </action>
+  <action name="actionSetCenteredPerspectiveView">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccCenteredPerspective32.png</normaloff>:/CC/images/ccCenteredPerspective32.png</iconset>
+   </property>
+   <property name="text">
+    <string>Object-centered perspective</string>
+   </property>
+   <property name="toolTip">
+    <string>Set object-centered perspective for current 3D View</string>
+   </property>
+   <property name="statusTip">
+    <string>Set object-centered perspective for current 3D View</string>
+   </property>
+   <property name="shortcut">
+    <string>F3</string>
+   </property>
+  </action>
+  <action name="actionSetViewerPerspectiveView">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccViewerBasedPerspective32.png</normaloff>:/CC/images/ccViewerBasedPerspective32.png</iconset>
+   </property>
+   <property name="text">
+    <string>Viewer-based perspective</string>
+   </property>
+   <property name="toolTip">
+    <string>Set viewer-based perspective for current 3D View</string>
+   </property>
+   <property name="statusTip">
+    <string>Set viewer-based perspectivefor current 3D View</string>
+   </property>
+   <property name="shortcut">
+    <string>F4</string>
+   </property>
+  </action>
+  <action name="actionSetPivotAlwaysOn">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccPivotOn.png</normaloff>:/CC/images/ccPivotOn.png</iconset>
+   </property>
+   <property name="text">
+    <string>Always visible</string>
+   </property>
+   <property name="toolTip">
+    <string>Pivot always visible</string>
+   </property>
+   <property name="statusTip">
+    <string>Pivot always visible</string>
+   </property>
+  </action>
+  <action name="actionSetPivotRotationOnly">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccPivotAuto.png</normaloff>:/CC/images/ccPivotAuto.png</iconset>
+   </property>
+   <property name="text">
+    <string>Rotation only</string>
+   </property>
+   <property name="toolTip">
+    <string>Pivot visible when rotating</string>
+   </property>
+   <property name="statusTip">
+    <string>Pivot visible when rotating</string>
+   </property>
+  </action>
+  <action name="actionSetPivotOff">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccPivotOff.png</normaloff>:/CC/images/ccPivotOff.png</iconset>
+   </property>
+   <property name="text">
+    <string>Never visible</string>
+   </property>
+   <property name="toolTip">
+    <string>Pivot never visible</string>
+   </property>
+   <property name="statusTip">
+    <string>Pivot never visible</string>
+   </property>
+  </action>
+  <action name="actionSetViewIso1">
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccViewIso1.png</normaloff>:/CC/images/ccViewIso1.png</iconset>
+   </property>
+   <property name="text">
+    <string>Iso front</string>
+   </property>
+   <property name="toolTip">
+    <string>Set view to 'front' isometric</string>
+   </property>
+   <property name="statusTip">
+    <string>Set view to 'front' isometric</string>
+   </property>
+   <property name="shortcut">
+    <string>7</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionSetViewIso2">
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccViewIso2.png</normaloff>:/CC/images/ccViewIso2.png</iconset>
+   </property>
+   <property name="text">
+    <string>Iso back</string>
+   </property>
+   <property name="toolTip">
+    <string>Set view to 'back' isometric</string>
+   </property>
+   <property name="statusTip">
+    <string>Set view to 'back' isometric</string>
+   </property>
+   <property name="shortcut">
+    <string>9</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionEnable3DMouse">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Enable</string>
+   </property>
+  </action>
+  <action name="actionZoomOnSelectedEntity">
+   <property name="text">
+    <string>Zoom on</string>
+   </property>
+   <property name="shortcut">
+    <string>Z</string>
+   </property>
+  </action>
+  <action name="actionGlobalZoom">
+   <property name="icon">
+    <iconset resource="../../qCC/icones.qrc">
+     <normaloff>:/CC/images/ccGlobalZoom.png</normaloff>:/CC/images/ccGlobalZoom.png</iconset>
+   </property>
+   <property name="text">
+    <string>Global Zoom</string>
+   </property>
+   <property name="statusTip">
+    <string>Global Zoom</string>
    </property>
   </action>
  </widget>

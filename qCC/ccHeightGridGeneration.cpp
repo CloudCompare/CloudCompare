@@ -624,7 +624,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						if (_sfGrid) //valid SF grid
 						{
 							//the input point cloud should be empty!
-							CCLib::ScalarField* formerSf = pc->getScalarField(k);
+							CCLib::ScalarField* formerSf = pc->getScalarField((int)k);
 							assert(formerSf);
 
 							//we try to create an equivalent SF on the output grid

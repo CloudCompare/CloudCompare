@@ -107,22 +107,32 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	assert(splitCount >= 3); //count >= 6 (see above)
 	
 	//we must check that the split value is the 'first one'
-	if (s_sortedCoordsForSplit[2] != s_sortedCoordsForSplit[splitCount])
+	if (s_sortedCoordsForSplit[splitCount-1] == s_sortedCoordsForSplit[splitCount])
 	{
-		while (/*splitCount>0 &&*/ s_sortedCoordsForSplit[splitCount-1] == s_sortedCoordsForSplit[splitCount])
-			--splitCount;
-	}
-	else if (s_sortedCoordsForSplit[count-3] != s_sortedCoordsForSplit[splitCount])
-	{
-		while (/*splitCount+1<count &&*/ s_sortedCoordsForSplit[splitCount+1] == s_sortedCoordsForSplit[splitCount])
-			++splitCount;
-	}
-	else //in fact we can't split this cell!
-	{
-		Leaf* leaf = new Leaf(subset);
-		memcpy(leaf->planeEq,planeEquation,sizeof(PointCoordinateType)*4);
-		leaf->rms = rms;
-		return leaf;
+		if (s_sortedCoordsForSplit[2] != s_sortedCoordsForSplit[splitCount]) //can we go backward?
+		{
+			while (/*splitCount>0 &&*/ s_sortedCoordsForSplit[splitCount-1] == s_sortedCoordsForSplit[splitCount])
+			{
+				assert(splitCount > 0);
+				--splitCount;
+			}
+		}
+		else if (s_sortedCoordsForSplit[count-3] != s_sortedCoordsForSplit[splitCount]) //can we go forward?
+		{
+			do
+			{
+				++splitCount;
+				assert(splitCount < count);
+			}
+			while (/*splitCount+1<count &&*/ s_sortedCoordsForSplit[splitCount] == s_sortedCoordsForSplit[splitCount-1]);
+		}
+		else //in fact we can't split this cell!
+		{
+			Leaf* leaf = new Leaf(subset);
+			memcpy(leaf->planeEq,planeEquation,sizeof(PointCoordinateType)*4);
+			leaf->rms = rms;
+			return leaf;
+		}
 	}
 
 	PointCoordinateType splitCoord = s_sortedCoordsForSplit[splitCount]; //count > 3 --> splitCount >= 2

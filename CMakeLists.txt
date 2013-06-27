@@ -40,13 +40,15 @@ add_subdirectory( libs/CCFbo )
 add_subdirectory( libs/qCC_db ) # must always be included after CCFbo (dependency)
 
 # liblas support
-include( LiblasSupport.cmake )
+include( contrib/LiblasSupport.cmake )
 # XIOT support
-include( XIOTSupport.cmake )
+include( contrib/XIOTSupport.cmake )
+# qHull support
+include( contrib/QHullSupport.cmake )
 # E57 support
-include( E57Support.cmake )
+include( contrib/E57Support.cmake )
 # 3DXWARE (3dConnexion devices) support
-include( 3DXSupport.cmake )
+include( contrib/3DXSupport.cmake )
 # PDMS support
 OPTION( OPTION_SUPPORT_MAC_PDMS_FORMAT "Build with .mac PDMS format" OFF )
 

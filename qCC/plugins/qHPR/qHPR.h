@@ -60,7 +60,7 @@ protected slots:
 protected:
 
 	//! Katz et al. algorithm
-	CCLib::ReferenceCloud* removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, const float viewPoint[], float fParam);
+	CCLib::ReferenceCloud* removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, const CCVector3& viewPoint, float fParam);
 
 	//! Associated action
 	QAction* m_action;

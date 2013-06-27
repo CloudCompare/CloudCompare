@@ -20,9 +20,12 @@
 
 #include "ui_hprDlg.h"
 
+//! Dialog for the qHPR plugin
 class ccHprDlg : public QDialog, public Ui::HPRDialog
 {
 public:
+
+	//! Default constructor
     ccHprDlg(QWidget* parent=0);
 };
 

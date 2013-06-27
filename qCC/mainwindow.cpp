@@ -1259,7 +1259,6 @@ void MainWindow::doActionFuseKdTreeCells()
 		else
 		{
 			createComponentsClouds(kdtree->associatedGenericCloud(), components, 0, true);
-
 			refreshAll();
 			updateUI();
 		}
@@ -3830,7 +3829,7 @@ void MainWindow::doActionComputeStatParams()
     delete distrib;
 }
 
-void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::ReferenceCloudContainer& components, unsigned minPointPerComponent, bool randomColors)
+void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::ReferenceCloudContainer& components, unsigned minPointsPerComponent, bool randomColors)
 {
 	if (!cloud || components.empty())
 		return;
@@ -3854,7 +3853,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 			components.pop_back();
 
 			//if it has enough points
-			if (compIndexes->size() >= minPointPerComponent)
+			if (compIndexes->size() >= minPointsPerComponent)
 			{
 				//we create a new entity
 				ccPointCloud* compCloud = (pc ? new ccPointCloud(compIndexes,pc) : new ccPointCloud(compIndexes));

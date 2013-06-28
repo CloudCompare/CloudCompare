@@ -338,7 +338,6 @@
       <string>Sand box (research)</string>
      </property>
      <addaction name="actionComputeKdTree"/>
-     <addaction name="actionFuseKdTreeCells"/>
      <addaction name="separator"/>
      <addaction name="actionMeshBestFittingQuadric"/>
      <addaction name="separator"/>
@@ -2324,11 +2323,6 @@
   <action name="actionTest">
    <property name="text">
     <string>test</string>
-   </property>
-  </action>
-  <action name="actionFuseKdTreeCells">
-   <property name="text">
-    <string>Fuse Kd-tree cells</string>
    </property>
   </action>
  </widget>

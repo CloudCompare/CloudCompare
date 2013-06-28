@@ -904,7 +904,6 @@ void MainWindow::connectActions()
 
 	//"Tools > Sand box (research)" menu
     connect(actionComputeKdTree,                SIGNAL(triggered()),    this,       SLOT(doActionComputeKdTree()));
-	connect(actionFuseKdTreeCells,				SIGNAL(triggered()),    this,       SLOT(doActionFuseKdTreeCells()));
 	connect(actionMeshBestFittingQuadric,		SIGNAL(triggered()),    this,       SLOT(doActionComputeQuadric3D()));
     connect(actionComputeBestFitBB,             SIGNAL(triggered()),    this,       SLOT(doComputeBestFitBB()));
     connect(actionAlign,                        SIGNAL(triggered()),    this,       SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
@@ -1144,7 +1143,7 @@ void MainWindow::doActionConvertNormalsToHSV()
 	updateUI();
 }
 
-static double s_kdTreeMaxRMSPerCell = 0.01;
+static double s_kdTreeMaxRMSPerCell = 0.1;
 void MainWindow::doActionComputeKdTree()
 {
 	ccGenericPointCloud* cloud = 0;
@@ -1204,77 +1203,6 @@ void MainWindow::doActionComputeKdTree()
 		delete kdtree;
 		kdtree = 0;
 	}
-}
-
-static double s_kdTreeFusionMaxRMS = 0.1;
-void MainWindow::doActionFuseKdTreeCells()
-{
-	ccKdTree* kdtree = 0;
-	if (m_selectedEntities.size() == 1)
-		kdtree = ccHObjectCaster::ToKdTree(m_selectedEntities.back());
-
-	if (!kdtree)
-	{
-		ccLog::Error("Selected one and only one Kd-tree structure!");
-		return;
-	}
-
-	if (!kdtree->associatedGenericCloud() || !kdtree->associatedGenericCloud()->isA(CC_POINT_CLOUD))
-	{
-		ccLog::Error("Kd-tree is not associated to a point cloud?!");
-		return;
-	}
-	ccPointCloud* pc = static_cast<ccPointCloud*>(kdtree->associatedGenericCloud());
-
-	bool ok;
-	s_kdTreeFusionMaxRMS = QInputDialog::getDouble(this, "Kd-tree fusion", "Max RMS per subset:", s_kdTreeFusionMaxRMS, 1.0e-6, 1.0e6, 6, &ok);
-	if (!ok)
-		return;
-
-	//create scalar field to host the fusion result
-	const char c_defaultSFName[] = "Fused Kd-tree indexes";
-	int sfIdx = pc->getScalarFieldIndexByName(c_defaultSFName);
-	if (sfIdx < 0)
-		sfIdx = pc->addScalarField(c_defaultSFName);
-	if (sfIdx < 0)
-	{
-		ccConsole::Error("Couldn't allocate a new scalar field for computing fusion labels! Try to free some memory ...");
-		return;
-	}
-	pc->setCurrentScalarField(sfIdx);
-	
-	//computation
-	QElapsedTimer eTimer;
-	eTimer.start();
-    ccProgressDialog pDlg(true,this);
-	if (kdtree->fuseCells(s_kdTreeFusionMaxRMS,&pDlg))
-	{
-		pc->setCurrentScalarField(sfIdx); //for AutoSegmentationTools::extractConnectedComponents
-		
-		CCLib::ReferenceCloudContainer components;
-		if (!CCLib::AutoSegmentationTools::extractConnectedComponents(kdtree->associatedCloud(),components))
-		{
-			ccLog::Error("[doActionFuseKdTreeCells] Failed to extract fused components! (not enough memory?)");
-		}
-		else
-		{
-			createComponentsClouds(kdtree->associatedGenericCloud(), components, 0, true);
-			refreshAll();
-			updateUI();
-		}
-	}
-	else
-	{
-		ccLog::Error("An error occured!");
-	}
-
-#ifdef _DEBUG
-	pc->getScalarField(sfIdx)->computeMinAndMax();
-	pc->setCurrentDisplayedScalarField(sfIdx);
-	pc->showSF(true);
-#else
-	pc->deleteScalarField(sfIdx);
-#endif
 }
 
 void MainWindow::doActionComputeOctree()
@@ -7806,7 +7734,6 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionModifySensor->setEnabled(exactlyOneSensor);
     actionComputeDistancesFromSensor->setEnabled(exactlyOneSensor);
     actionComputeScatteringAngles->setEnabled(exactlyOneSensor);
-	actionFuseKdTreeCells->setEnabled(exactlyOneKdTree);
     actionProjectSensor->setEnabled(atLeastOneCloud);
     actionLabelConnectedComponents->setEnabled(atLeastOneCloud);
     actionUnroll->setEnabled(exactlyOneEntity);

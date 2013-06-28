@@ -404,7 +404,7 @@ static bool CandidateDistAscendingComparison(const Candidate& a, const Candidate
 	return a.dist < b.dist;
 }
 
-bool ccKdTree::fuseCells(double maxRMS, CCLib::GenericProgressCallback* progressCb/*=0*/)
+bool ccKdTree::fuseCells(double maxRMS, double maxAngle_deg, double overlapCoef, bool closestFirst/*=true*/, CCLib::GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!m_associatedGenericCloud || !m_associatedGenericCloud->isA(CC_POINT_CLOUD) || maxRMS < 0.0)
 		return false;
@@ -440,6 +440,9 @@ bool ccKdTree::fuseCells(double maxRMS, CCLib::GenericProgressCallback* progress
 		}
 	}
 
+	// max angle between fused 'planes'
+	const double c_minCosNormAngle = cos(maxAngle_deg * CC_DEG_TO_RAD);
+
 	//fuse all cells, starting from the ones with the best RMS
 	const int unvisitedNeighborValue = -1;
 	int macroIndex = 1; //starts at 1 (0 is reserved for cells already above the max RMS)
@@ -469,6 +472,7 @@ bool ccKdTree::fuseCells(double maxRMS, CCLib::GenericProgressCallback* progress
 				CCLib::Neighbourhood N(currentPointSet);
 				currentCentroid = *N.getGravityCenter();
 			}
+			CCVector3 currentNormal(currentCell->planeEq);
 
 			//visited neighbors
 			LeafSet visitedNeighbors;
@@ -525,10 +529,8 @@ bool ccKdTree::fuseCells(double maxRMS, CCLib::GenericProgressCallback* progress
 				//is there remaining candidates?
 				if (!candidates.empty())
 				{
-//#define TAKE_CLOSEST_FIRST
-#ifdef TAKE_CLOSEST_FIRST
 					//update the set of candidates
-					if (candidates.size() > 1)
+					if (closestFirst && candidates.size() > 1)
 					{
 						for (std::list<Candidate>::iterator it = candidates.begin(); it !=candidates.end(); ++it)
 							it->dist = (it->centroid-currentCentroid).norm2();
@@ -536,11 +538,11 @@ bool ccKdTree::fuseCells(double maxRMS, CCLib::GenericProgressCallback* progress
 						//sort candidates by their distance
 						candidates.sort(CandidateDistAscendingComparison);
 					}
-#endif
 					
 					//we will keep track of the best fused 'couple' at each pass
 					std::list<Candidate>::iterator bestIt = candidates.end();
 					CCLib::ReferenceCloud* bestFused = 0;
+					CCVector3 bestNormal(0,0,0);
 					double bestRMS = -1.0;
 
 					unsigned skipCount = 0;
@@ -548,6 +550,15 @@ bool ccKdTree::fuseCells(double maxRMS, CCLib::GenericProgressCallback* progress
 					{
 						assert(it->leaf && it->leaf->points);
 						assert(currentPointSet->getAssociatedCloud() == it->leaf->points->getAssociatedCloud());
+
+						//if the leaf orientation is too different
+						if (fabs(CCVector3(it->leaf->planeEq).dot(currentNormal)) < c_minCosNormAngle)
+						{
+							it = candidates.erase(it);
+							//++it;
+							//++skipCount;
+							continue;
+						}
 
 						//compute the minimum distance between the candidate centroid and the 'currentPointSet'
 						PointCoordinateType minDistToMainSet = 0.0;
@@ -563,7 +574,7 @@ bool ccKdTree::fuseCells(double maxRMS, CCLib::GenericProgressCallback* progress
 						}
 						
 						//if the leaf is too far
-						if (it->radius < minDistToMainSet * 0.7) // 0,7 ~ sqrt(2)/2
+						if (it->radius < minDistToMainSet / overlapCoef)
 						{
 							++it;
 							++skipCount;
@@ -605,10 +616,11 @@ bool ccKdTree::fuseCells(double maxRMS, CCLib::GenericProgressCallback* progress
 								if (bestFused)
 									delete bestFused;
 								bestFused = fused;
+								bestNormal = CCVector3(planeEquation);
 								fused = 0;
-#ifdef TAKE_CLOSEST_FIRST
-								break; //if we have found a good candidate, we stop here (closest first ;)
-#endif
+								
+								if (closestFirst)
+									break; //if we have found a good candidate, we stop here (closest first ;)
 							}
 							++it;
 						}
@@ -631,6 +643,7 @@ bool ccKdTree::fuseCells(double maxRMS, CCLib::GenericProgressCallback* progress
 							//update infos
 							CCLib::Neighbourhood N(currentPointSet);
 							//currentCentroid = *N.getGravityCenter(); //if we update it, the search will naturally shift along one dimension!
+							//currentNormal = bestNormal; //same thing here for normals
 						}
 
 						bestIt->leaf->userData = currentCell->userData;

@@ -74,8 +74,11 @@ public:
 
 	//! Fuses cells
 	/** Creates a new scalar fields with the groups indexes.
+		\param maxRMS max RMS after fusion
+		\param maxAngle_deg maximum angle between two sets to allow fusion (in degrees)
+		\param overlapCoef maximum relative distance between two sets to accept fusion (1 = no distance, < 1 = overlap, > 1 = gap)
 	**/
-	bool fuseCells(double maxRMS, CCLib::GenericProgressCallback* progressCb = 0);
+	bool fuseCells(double maxRMS, double maxAngle_deg, double overlapCoef = 1.0, bool closestFirst = true, CCLib::GenericProgressCallback* progressCb = 0);
 
 	//! Returns the bounding-box of a given cell
 	ccBBox getCellBBox(BaseNode* node) const;

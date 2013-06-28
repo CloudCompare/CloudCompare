@@ -273,7 +273,6 @@ protected slots:
 	void doActionConvertNormalsToHSV();
     void doActionComputeOctree();
 	void doActionComputeKdTree();
-	void doActionFuseKdTreeCells();
     void doActionApplyTransformation();
     void doActionFuse();
     void doActionRegister();

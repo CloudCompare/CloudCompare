@@ -162,8 +162,8 @@ ccGenericMesh* ccMesh::clone(ccGenericPointCloud* vertices/*=0*/,
 
 				//and the associated vertices set
 				assert(m_associatedCloud->isA(CC_POINT_CLOUD));
-				newVertices = new ccPointCloud(rc,static_cast<ccPointCloud*>(m_associatedCloud));
-				if (newVertices->size() < rc->size())
+				newVertices = static_cast<ccPointCloud*>(m_associatedCloud)->partialClone(rc);
+				if (newVertices && newVertices->size() < rc->size())
 				{
 					//not enough memory!
 					delete newVertices;
@@ -2324,7 +2324,7 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 	if (vertices->isA(CC_POINT_CLOUD))
 		resultVertices = static_cast<ccPointCloud*>(vertices)->cloneThis();
 	else
-		resultVertices = new ccPointCloud(vertices);
+		resultVertices = ccPointCloud::From(vertices);
 	if (!resultVertices)
 	{
 		ccLog::Error("[ccMesh::subdivide] Not enough memory!");

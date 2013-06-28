@@ -336,6 +336,8 @@ void ccClippingBoxTool::exportMultCloud()
 			pDlg.show();
 			QApplication::processEvents();
 
+			bool warningsIssued = false;
+
 			unsigned currentCloudCount = 0;
 			for (int i=indexMins[0]; i<=indexMaxs[0]; ++i)
 			{
@@ -347,7 +349,10 @@ void ccClippingBoxTool::exportMultCloud()
 
 						if (clouds[cloudIndex]) //some slices can be empty!
 						{
-							ccPointCloud* sliceCloud = new ccPointCloud(clouds[cloudIndex],cloud);
+							int warnings = 0;
+							ccPointCloud* sliceCloud = cloud->partialClone(clouds[cloudIndex],&warnings);
+							warningsIssued |= (warnings != 0);
+							
 							if (sliceCloud)
 							{
 								if (generateRandomColors && cloud->isA(CC_POINT_CLOUD))
@@ -382,6 +387,11 @@ void ccClippingBoxTool::exportMultCloud()
 						}
 					}
 				}
+			}
+
+			if (warningsIssued)
+			{
+				ccLog::Warning("[ccClippingBoxTool::exportMultCloud] Warnings were issued during the process! Result may be incomplete!");
 			}
 		}
 

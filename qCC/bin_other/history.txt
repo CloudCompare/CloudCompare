@@ -15,6 +15,7 @@ v2.4 ??/??/2013
 	* or define a custom bounding box
 - "Height grid generation" dialog enhanced:
 	* the user can now define custom grid limits
+	* the tool spawns dialogs to let the user specify the ouput files (ascii grid and image)
 - New tool: "Convert RGB to scalar field"
 	* Edit > Colors
 - New option is ASCII file load/save dialogs:

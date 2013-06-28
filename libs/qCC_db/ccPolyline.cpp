@@ -37,7 +37,7 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 }
 
 ccPolyline::ccPolyline(const ccPolyline& poly)
-	: Polyline(static_cast<CCLib::GenericIndexedCloudPersist*>(new ccPointCloud(poly.getAssociatedCloud())))
+	: Polyline(ccPointCloud::From(poly.getAssociatedCloud()))
 	, ccHObject("Polyline")
 {
 	set2DMode(poly.m_mode2D);

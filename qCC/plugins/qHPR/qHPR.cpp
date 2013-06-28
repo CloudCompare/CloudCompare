@@ -360,20 +360,26 @@ void qHPR::doAction()
 		else
 		{
 			//create cloud from visibility selection
-			ccPointCloud* newCloud = new ccPointCloud(&visiblePoints,cloud);
-			
-			newCloud->setDisplay(newCloud->getDisplay());
-			newCloud->setVisible(true);
-			newCloud->setName(cloud->getName()+QString(".visible_points"));
-			cloud->setVisible(false);
+			ccPointCloud* newCloud = cloud->partialClone(&visiblePoints);
+			if (newCloud)
+			{			
+				newCloud->setDisplay(newCloud->getDisplay());
+				newCloud->setVisible(true);
+				newCloud->setName(cloud->getName()+QString(".visible_points"));
+				cloud->setVisible(false);
 
-			//add associated viewport object
-			cc2DViewportObject* viewportObject = new cc2DViewportObject(QString("Viewport"));
-			viewportObject->setParameters(params);
-			newCloud->addChild(viewportObject);
+				//add associated viewport object
+				cc2DViewportObject* viewportObject = new cc2DViewportObject(QString("Viewport"));
+				viewportObject->setParameters(params);
+				newCloud->addChild(viewportObject);
 
-			m_app->addToDB(newCloud);
-			newCloud->redrawDisplay();
+				m_app->addToDB(newCloud);
+				newCloud->redrawDisplay();
+			}
+			else
+			{
+				m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			}
 		}
     }
 

@@ -1410,7 +1410,8 @@ void MainWindow::doActionResampleWithOctree()
 
 	ccHObject::Container selectedEntities = m_selectedEntities;
     size_t i,selNum = selectedEntities.size();
-    for (i=0;i<selNum;++i)
+	bool errors = false;
+    for (i=0; i<selNum; ++i)
     {
         ccPointCloud* cloud = 0;
         ccHObject* ent = selectedEntities[i];
@@ -1445,17 +1446,30 @@ void MainWindow::doActionResampleWithOctree()
 			if (result)
 			{
 				ccConsole::Print("[ResampleWithOctree] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
-				ccPointCloud* newCloud = new ccPointCloud(result);
-				const double* shift = cloud->getOriginalShift();
-				if (shift)
-					newCloud->setOriginalShift(shift[0],shift[1],shift[2]);
-				addToDB(newCloud, true, 0, false, false);
-				newCloud->setDisplay(cloud->getDisplay());
-				newCloud->prepareDisplayForRefresh();
+				ccPointCloud* newCloud = ccPointCloud::From(result);
+
 				delete result;
+				result = 0;
+
+				if (newCloud)
+				{
+					const double* shift = cloud->getOriginalShift();
+					if (shift)
+						newCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+					addToDB(newCloud, true, 0, false, false);
+					newCloud->setDisplay(cloud->getDisplay());
+					newCloud->prepareDisplayForRefresh();
+				}
+				else
+				{
+					errors = true;
+				}
 			}
         }
     }
+
+	if (errors)
+		ccLog::Error("[ResampleWithOctree] Errors occured during the process! Result may be incomplete!");
 
     refreshAll();
 }
@@ -2262,10 +2276,11 @@ void MainWindow::doActionSamplePoints()
 	s_ptsSamplingDensity = dlg.getDensityValue();
 
 	bool withFeatures = (withNormals || withRGB || withTexture);
+	bool errors = false;
 
 	ccHObject::Container selectedEntities = m_selectedEntities;
 
-	for (unsigned i=0;i<selectedEntities.size();++i)
+	for (size_t i=0; i<selectedEntities.size() ;++i)
     {
         ccHObject* ent = selectedEntities[i];
         if (ent->isKindOf(CC_MESH))
@@ -2288,9 +2303,18 @@ void MainWindow::doActionSamplePoints()
             if (sampledCloud)
             {
 				//convert to real point cloud
-                ccPointCloud* cloud = new ccPointCloud(sampledCloud);
-                delete sampledCloud;
+                ccPointCloud* cloud = ccPointCloud::From(sampledCloud);
+
+				delete sampledCloud;
 				sampledCloud=0;
+
+				if (!cloud)
+				{
+					if (triIndices)
+						triIndices->release();
+					errors = true;
+					continue;
+				}
 
 				if (withFeatures && triIndices && triIndices->currentSize() >= cloud->size())
 				{
@@ -2380,6 +2404,9 @@ void MainWindow::doActionSamplePoints()
 				triIndices->release();
         }
     }
+
+	if (errors)
+		ccLog::Error("[doActionSamplePoints] Errors occured during the process! Result may be incomplete!");
 
     refreshAll();
 }
@@ -3492,7 +3519,7 @@ void MainWindow::doAction4pcsRegister()
 		}
         else
 		{
-            newDataCloud = new ccPointCloud(data);
+            newDataCloud = ccPointCloud::From(data);
 			const double* shift = data->getOriginalShift();
 			if (shift)
 				newDataCloud->setOriginalShift(shift[0],shift[1],shift[2]);
@@ -3549,24 +3576,31 @@ void MainWindow::doActionSubsample()
         return;
     }
 
-    ccPointCloud *newPointCloud = new ccPointCloud(sampledCloud,pointCloud);
-    newPointCloud->setName(pointCloud->getName()+QString(".subsampled"));
-    newPointCloud->setDisplay(pointCloud->getDisplay());
-	const double* shift = pointCloud->getOriginalShift();
-	if (shift)
-		newPointCloud->setOriginalShift(shift[0],shift[1],shift[2]);
-    newPointCloud->prepareDisplayForRefresh();
-    if (pointCloud->getParent())
-        pointCloud->getParent()->addChild(newPointCloud);
-    addToDB(newPointCloud, true, 0, false, false);
+	int warnings = 0;
+    ccPointCloud *newPointCloud = pointCloud->partialClone(sampledCloud,&warnings);
+	if (newPointCloud)
+	{
+		newPointCloud->setName(pointCloud->getName()+QString(".subsampled"));
+		newPointCloud->setDisplay(pointCloud->getDisplay());
+		const double* shift = pointCloud->getOriginalShift();
+		if (shift)
+			newPointCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+		newPointCloud->prepareDisplayForRefresh();
+		if (pointCloud->getParent())
+			pointCloud->getParent()->addChild(newPointCloud);
+		newPointCloud->setDisplay(pointCloud->getDisplay());
+		pointCloud->setVisible(false);
+		addToDB(newPointCloud, true, 0, false, false);
 
-    ccGLWindow* win = static_cast<ccGLWindow*>(pointCloud->getDisplay());
-    if (win)
-    {
-        pointCloud->setEnabled(false);
-        newPointCloud->setDisplay(win);
-        win->refresh();
-    }
+		newPointCloud->refreshDisplay();
+
+		if (warnings)
+			ccLog::Error("Not enough memory: colors, normals or scalar fields may be missing!");
+	}
+	else
+	{
+		ccLog::Error("Not enough memory!");
+	}
 
     delete sampledCloud;
 
@@ -3844,8 +3878,6 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 		//'shift on load' information
 		const double* shift = (pc ? pc->getOriginalShift() : 0);
 
-		unsigned nCC = 0;
-		
 		//for each component
 		while (!components.empty())
 		{
@@ -3856,7 +3888,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 			if (compIndexes->size() >= minPointsPerComponent)
 			{
 				//we create a new entity
-				ccPointCloud* compCloud = (pc ? new ccPointCloud(compIndexes,pc) : new ccPointCloud(compIndexes));
+				ccPointCloud* compCloud = (pc ? pc->partialClone(compIndexes) : ccPointCloud::From(compIndexes));
 				if (compCloud)
 				{
 					//shall we colorize it with random color?
@@ -3873,23 +3905,22 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 					if (shift)
 						compCloud->setOriginalShift(shift[0],shift[1],shift[2]);
 					compCloud->setVisible(true);
-					compCloud->setName(QString("CC#%1").arg(nCC));
+					compCloud->setName(QString("CC#%1").arg(ccGroup->getChildrenNumber()));
 
 					//we add new CC to group
 					ccGroup->addChild(compCloud);
 				}
 				else
 				{
-					ccConsole::Warning("[createComponentsClouds] Failed to create component #%i! (not enough memory)",nCC+1);
+					ccConsole::Warning("[createComponentsClouds] Failed to create component #%i! (not enough memory)",ccGroup->getChildrenNumber()+1);
 				}
-				++nCC;
 			}
 
 			delete compIndexes;
 			compIndexes = 0;
 		}
 
-		if (nCC == 0)
+		if (ccGroup->getChildrenNumber() == 0)
 		{
 			delete ccGroup;
 		}
@@ -3898,7 +3929,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 			addToDB(ccGroup,true,0,true,false);
 		}
 
-		ccConsole::Print(QString("[createComponentsClouds] %1 component(s) where created from cloud '%2'").arg(nCC).arg(cloud->getName()));
+		ccConsole::Print(QString("[createComponentsClouds] %1 component(s) where created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
 
 		cloud->prepareDisplayForRefresh();
 		cloud->setEnabled(false);
@@ -4464,13 +4495,14 @@ void MainWindow::doActionComputeCPS()
         //if the source cloud is a "true" cloud, the extracted CPS
         //will also get its attributes
         if (srcCloud->isA(CC_POINT_CLOUD))
-            newCloud = new ccPointCloud(&CPSet,static_cast<ccPointCloud*>(srcCloud));
+			newCloud = static_cast<ccPointCloud*>(srcCloud)->partialClone(&CPSet);
         else
-            newCloud = new ccPointCloud(&CPSet);
-
-		const double* shift = srcCloud->getOriginalShift();
-		if (shift)
-			newCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+		{
+            newCloud = ccPointCloud::From(&CPSet);
+			const double* shift = srcCloud->getOriginalShift();
+			if (shift)
+				newCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+		}
 
 		newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName()).arg(compCloud->getName()));
         addToDB(newCloud, true, 0, false, false);

@@ -208,13 +208,23 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 					Print(QString("\tResult: %1 points").arg(refCloud->size()));
 
 					//save output
-					ccPointCloud result(refCloud,cloud);
+					ccPointCloud* result = cloud->partialClone(refCloud);
 					delete refCloud;
-					refCloud=0;
-					CloudDesc cloudDesc(&result,cloudFilename,m_clouds[i].indexInFile);
-					QString errorStr = Export2BIN(cloudDesc,"RANDOM_SUBSAMPLED");
-					if (!errorStr.isEmpty())
-						return Error(errorStr);
+					refCloud = 0;
+
+					if (result)
+					{
+						CloudDesc cloudDesc(result,cloudFilename,m_clouds[i].indexInFile);
+						QString errorStr = Export2BIN(cloudDesc,"RANDOM_SUBSAMPLED");
+						delete result;
+						result = 0;
+						if (!errorStr.isEmpty())
+							return Error(errorStr);
+					}
+					else
+					{
+						return Error("Not enough memory!");
+					}
 				}
 
 			}
@@ -241,13 +251,25 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 					Print(QString("\tResult: %1 points").arg(refCloud->size()));
 
 					//save output
-					ccPointCloud result(refCloud,cloud);
+					ccPointCloud* result = cloud->partialClone(refCloud);
 					delete refCloud;
-					refCloud=0;
-					CloudDesc cloudDesc(&result,cloudFilename,m_clouds[i].indexInFile);
-					QString errorStr = Export2BIN(cloudDesc,"SPATIAL_SUBSAMPLED");
-					if (!errorStr.isEmpty())
-						return Error(errorStr);
+					refCloud = 0;
+
+					if (result)
+					{
+						CloudDesc cloudDesc(result,cloudFilename,m_clouds[i].indexInFile);
+						QString errorStr = Export2BIN(cloudDesc,"SPATIAL_SUBSAMPLED");
+
+						delete result;
+						result = 0;
+
+						if (!errorStr.isEmpty())
+							return Error(errorStr);
+					}
+					else
+					{
+						return Error("Not enough memory!");
+					}
 				}
 			}
 			else if (method == "OCTREE")
@@ -273,13 +295,25 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 					Print(QString("\tResult: %1 points").arg(refCloud->size()));
 
 					//save output
-					ccPointCloud result(refCloud,cloud);
+					ccPointCloud* result = cloud->partialClone(refCloud);
 					delete refCloud;
-					refCloud=0;
-					CloudDesc cloudDesc(&result,cloudFilename,m_clouds[i].indexInFile);
-					QString errorStr = Export2BIN(cloudDesc,QString("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
-					if (!errorStr.isEmpty())
-						return Error(errorStr);
+					refCloud = 0;
+
+					if (result)
+					{
+						CloudDesc cloudDesc(result,cloudFilename,m_clouds[i].indexInFile);
+						QString errorStr = Export2BIN(cloudDesc,QString("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
+						
+						delete result;
+						result = 0;
+						
+						if (!errorStr.isEmpty())
+							return Error(errorStr);
+					}
+					else
+					{
+						return Error("Not enough memory!");
+					}
 				}
 			}
 			else

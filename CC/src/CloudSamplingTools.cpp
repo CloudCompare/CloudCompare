@@ -46,12 +46,12 @@ GenericIndexedCloud* CloudSamplingTools::resampleCloudWithOctree(GenericIndexedC
 	//on cherche le niveau qui donne le nombre de points le plus proche de la consigne
 	uchar bestLevel=theOctree->findBestLevelForAGivenCellNumber(newNumberOfPoints);
 
-	GenericIndexedCloud* sampledList = resampleCloudWithOctreeAtLevel(theCloud,bestLevel,resamplingMethod,progressCb,theOctree);
+	GenericIndexedCloud* sampledCloud = resampleCloudWithOctreeAtLevel(theCloud,bestLevel,resamplingMethod,progressCb,theOctree);
 
 	if (!_theOctree)
 		delete theOctree;
 
-	return sampledList;
+	return sampledCloud;
 }
 
 SimpleCloud* CloudSamplingTools::resampleCloudWithOctreeAtLevel(GenericIndexedCloudPersist* theCloud, uchar octreeLevel, RESAMPLING_CELL_METHOD resamplingMethod, GenericProgressCallback* progressCb, DgmOctree* _theOctree)

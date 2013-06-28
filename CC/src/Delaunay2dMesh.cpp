@@ -168,7 +168,7 @@ void Delaunay2dMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CC
 
 TriangleSummitsIndexes* Delaunay2dMesh::getTriangleIndexes(unsigned triangleIndex)
 {
-	assert(m_associatedCloud && triangleIndex<numberOfTriangles);
+	assert(triangleIndex < numberOfTriangles);
 
 	return (TriangleSummitsIndexes*)(m_triIndexes + 3*triangleIndex);
 }

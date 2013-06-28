@@ -71,37 +71,7 @@ public:
 		added to this cloud, at least partially).
 		\param name cloud name (optional)
     **/
-    ccPointCloud(QString name = QString());
-
-    //! Creates a new point cloud object from a ReferenceCloud
-	/** "Reference clouds" are a set of indexes referring to a real point cloud.
-        See CClib documentation for more information about ReferenceClouds.
-		The real cloud must be explicitly known (and of type ccPointCloud). It
-		must be passed as a second argument. It will allow the importation of
-		points but also other properties such as colors, normals, etc.
-		\param selection a ReferenceCloud (pointing to source)
-		\param source a ccPointCloud (reference)
-    **/
-	ccPointCloud(const CCLib::ReferenceCloud* selection, const ccPointCloud* source);
-
-    //! Creates a new point cloud object from a GenericIndexedCloud
-	/** "GenericIndexedCloud" is an extension of GenericCloud (from CCLib)
-		which provides a const random accessor to points.
-		See CClib documentation for more information about GenericIndexedCloud.
-		As the GenericIndexedCloud interface is very simple, only points are imported.
-		\param cloud a GenericIndexedCloud structure
-    **/
-	ccPointCloud(const CCLib::GenericIndexedCloud* cloud);
-
-    //! Creates a new point cloud object from a GenericCloud
-	/** "GenericCloud" is a very simple and light interface from CCLib. It is
-        meant to give access to points coordinates of any cloud (on the
-		condition it implements the GenericCloud interface of course).
-		See CClib documentation for more information about GenericClouds.
-		As the GenericCloud interface is very simple, only points are imported.
-		\param cloud a GenericCloud structure
-    **/
-	ccPointCloud(CCLib::GenericCloud* cloud);
+    ccPointCloud(QString name = QString()) throw();
 
 	//! Default destructor
 	virtual ~ccPointCloud();
@@ -113,10 +83,52 @@ public:
 						Clone/Copy
 	***************************************************/
 
+    //! Creates a new point cloud object from a GenericIndexedCloud
+	/** "GenericIndexedCloud" is an extension of GenericCloud (from CCLib)
+		which provides a const random accessor to points.
+		See CClib documentation for more information about GenericIndexedCloud.
+		As the GenericIndexedCloud interface is very simple, only points are imported.
+		Note: throws an 'int' exception in case of error (see CTOR_ERRORS)
+		\param cloud a GenericIndexedCloud structure
+    **/
+	static ccPointCloud* From(const CCLib::GenericIndexedCloud* cloud);
+
+    //! Creates a new point cloud object from a GenericCloud
+	/** "GenericCloud" is a very simple and light interface from CCLib. It is
+        meant to give access to points coordinates of any cloud (on the
+		condition it implements the GenericCloud interface of course).
+		See CClib documentation for more information about GenericClouds.
+		As the GenericCloud interface is very simple, only points are imported.
+		Note: throws an 'int' exception in case of error (see CTOR_ERRORS)
+		\param cloud a GenericCloud structure
+    **/
+	static ccPointCloud* From(CCLib::GenericCloud* cloud);
+
+	//! Warnings for the partialClone method (bit flags)
+	enum CLONE_WARNINGS {	WRN_OUT_OF_MEM_FOR_COLORS		= 1,
+							WRN_OUT_OF_MEM_FOR_NORMALS		= 2,
+							WRN_OUT_OF_MEM_FOR_SFS			= 4
+	};
+
+	//! Creates a new point cloud object from a ReferenceCloud (selection)
+	/** "Reference clouds" are a set of indexes referring to a real point cloud.
+        See CClib documentation for more information about ReferenceClouds.
+		Warning: the ReferenceCloud structure must refer to this cloud. 
+		\param selection a ReferenceCloud structure (pointing to source)
+		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occured during the duplication process
+	**/
+	ccPointCloud* partialClone(const CCLib::ReferenceCloud* selection, int* warnings = 0) const;
+
+	//! Creates a new point cloud object from a GenericIndexedCloud
+	/** Should be prefered to the equivalent constructor.
+		\param cloud a GenericIndexedCloud structure
+	**/
+	ccPointCloud* clone(const CCLib::GenericIndexedCloud* selection);
+
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree and
 		the points visibility information.
-		\param destCloud destination cloud can be provided here
+		\param destCloud [optional] the destination cloud can be provided here
 		\return a copy of this entity
 	**/
 	virtual ccPointCloud* cloneThis(ccPointCloud* destCloud = 0);
@@ -481,7 +493,7 @@ protected:
 private:
 
     //! Inits default parameters
-	void init();
+	void init() throw();
 
 };
 

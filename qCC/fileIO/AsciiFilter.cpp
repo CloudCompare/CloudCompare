@@ -402,13 +402,18 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
                                        int& maxIndex,
 									   unsigned step=1)
 {
-	ccPointCloud* cloud = new ccPointCloud(step==1 ? QString("unnamed - Cloud") : QString("unnamed - Cloud (part %1)").arg(step));
+	ccPointCloud* cloud = new ccPointCloud();
 	if (!cloud || !cloud->reserveThePointsTable(numberOfPoints))
 	{
 		if (cloud)
 			delete cloud;
         return cloudAttributesDescriptor();
 	}
+
+	if (step == 1)
+		cloud->setName("unnamed - Cloud");
+	else
+		cloud->setName(QString("unnamed - Cloud (part %1)").arg(step));
 
     cloudAttributesDescriptor cloudDesc;
 	cloudDesc.cloud = cloud;

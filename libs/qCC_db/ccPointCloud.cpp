@@ -40,7 +40,7 @@
 //system
 #include <assert.h>
 
-ccPointCloud::ccPointCloud(QString name)
+ccPointCloud::ccPointCloud(QString name) throw()
 	: ChunkedPointCloud()
 	, ccGenericPointCloud(name)
 	, m_rgbColors(0)
@@ -290,7 +290,7 @@ ccPointCloud::~ccPointCloud()
 	clear();
 }
 
-void ccPointCloud::init()
+void ccPointCloud::init() throw()
 {
 	showSFColorsScale(false);
 	setCurrentDisplayedScalarField(-1);

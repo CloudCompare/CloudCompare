@@ -1887,7 +1887,7 @@ void MainWindow::doActionComputeScatteringAngles()
 
 		//compute the angle
 		float cosTheta = ray.dot(normal);
-		float theta = acos(std::min(fabs(cosTheta),1.0f));
+        float theta = acos(std::min<double>(fabs(cosTheta),1.0f));
 
 		if (toDegreeFlag)
 			theta *= (float)CC_RAD_TO_DEG;

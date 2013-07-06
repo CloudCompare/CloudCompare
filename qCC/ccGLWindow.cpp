@@ -1690,10 +1690,7 @@ CCVector3 ccGLWindow::convertMousePositionToOrientation(int x, int y)
 				(PointCoordinateType)y - (PointCoordinateType)yp,
 				0);
 
-	PointCoordinateType maxWidth = static_cast<PointCoordinateType>(width()-1);
 	v.x = std::max<PointCoordinateType>(std::min<PointCoordinateType>(v.x/xc,1.0),-1.0);
-
-	PointCoordinateType maxHeight = static_cast<PointCoordinateType>(height()-1);
 	v.y = std::max<PointCoordinateType>(std::min<PointCoordinateType>(v.y/yc,1.0),-1.0);
 
 	//square 'radius'

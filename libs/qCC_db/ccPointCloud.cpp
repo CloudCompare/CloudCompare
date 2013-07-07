@@ -2503,7 +2503,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion)
 			return ReadError();
 
 		//Displayed scalar field index (dataVersion>=20)
-		int32_t displayedScalarFieldIndex = 0;(int32_t)m_currentDisplayedScalarFieldIndex;
+		int32_t displayedScalarFieldIndex = 0;
 		if (in.read((char*)&displayedScalarFieldIndex,4)<0)
 			return ReadError();
 		if (displayedScalarFieldIndex<(int32_t)sfCount)

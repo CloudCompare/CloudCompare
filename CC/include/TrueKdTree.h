@@ -55,7 +55,7 @@ public:
 	struct BaseNode
 	{
 	public:
-		BaseNode(uint8_t nodeType) : type(nodeType), parent(0) {}
+		BaseNode(uint8_t nodeType) : parent(0), type(nodeType) {}
 		virtual ~BaseNode() {}
 
 		bool isNode() const { return type == NODE_TYPE; }

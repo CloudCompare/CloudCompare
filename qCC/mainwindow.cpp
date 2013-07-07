@@ -7615,7 +7615,7 @@ void MainWindow::expandDBTreeWithSelection(ccHObject::Container& selection)
 {
 	if (!m_ccRoot)
 		return;
-
+/*
     size_t i,selNum = selection.size();
     for (i=0;i<selNum;++i)
     {
@@ -7623,6 +7623,7 @@ void MainWindow::expandDBTreeWithSelection(ccHObject::Container& selection)
 		//if (ent->isA(CC_MESH_GROUP)) //DGM: we don't expand mesh groups anymore!
 		//	m_ccRoot->expandElement(ent,true);
 	}
+*/
 }
 
 void MainWindow::enableAll()
@@ -7729,7 +7730,6 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     bool exactlyOneMesh = (selInfo.meshCount==1);
     bool exactlyOneSF = (selInfo.sfCount==1);
     bool exactlyOneSensor = (selInfo.sensorCount==1);
-	bool exactlyOneKdTree = (selInfo.kdTreeCount==1);
 
     actionModifySensor->setEnabled(exactlyOneSensor);
     actionComputeDistancesFromSensor->setEnabled(exactlyOneSensor);

@@ -137,7 +137,6 @@ public:
 		}
 		else //if (node->isLeaf())
 		{
-			ccKdTree::Leaf* leaf = static_cast<ccKdTree::Leaf*>(node);
 			m_drawCellBBox.draw(ccColor::green);
 		}
 	}
@@ -282,9 +281,9 @@ public:
 							const ccBBox& cellBox,
 							const ccBBox& treeBox)
 		: m_targetCell(cell)
-		, m_neighbors(&neighbors)
 		, m_targetCellBox(cellBox)
 		, m_currentCellBox(treeBox)
+		, m_neighbors(&neighbors)
 		, m_userDataFilterEnabled(false)
 		, m_userDataFilterValue(0)
 	{
@@ -687,7 +686,6 @@ bool ccKdTree::fuseCells(double maxRMS, double maxAngle_deg, double overlapCoef,
 	{
 		pc->enableScalarField();
 
-		int unfusedIndexes = macroIndex;
 		for (size_t i=0; i<leaves.size(); ++i)
 		{
 			CCLib::ReferenceCloud* subset = leaves[i]->points;

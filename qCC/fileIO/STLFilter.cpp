@@ -57,7 +57,7 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const char* filename)
 	//ask for output format
 	QMessageBox msgBox(QMessageBox::Question,"Choose output format","Save in BINARY or ASCII format?");
 	QPushButton *binaryButton = msgBox.addButton("BINARY", QMessageBox::AcceptRole);
-	QPushButton *asciiButton = msgBox.addButton("ASCII", QMessageBox::AcceptRole);
+	msgBox.addButton("ASCII", QMessageBox::AcceptRole);
 	msgBox.exec();
 
 	//try to open file for saving

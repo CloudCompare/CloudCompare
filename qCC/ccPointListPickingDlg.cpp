@@ -238,12 +238,20 @@ void ccPointListPickingDlg::removeLastEntry()
 	ccHObject* lastVisibleLabel = labels.back();
 	if (lastVisibleLabel->getUniqueID() <= m_lastPreviousID)
 	{
-		//old label: hide it and add it to the 'to be deleted' list (will be restored if process s cancelled)
+		//old label: hide it and add it to the 'to be deleted' list (will be restored if process is cancelled)
 		lastVisibleLabel->setVisible(false);
 		m_toBeDeleted->addChild(lastVisibleLabel,false);
 	}
 	else
 	{
+		lastVisibleLabel->setFlagState(CC_FATHER_DEPENDANT,false);
+		if (m_toBeAdded && m_toBeAdded->getChildrenNumber() != 0)
+		{
+			unsigned lastIndex = m_toBeAdded->getChildrenNumber()-1;
+			assert(m_toBeAdded->getChild(lastIndex) == lastVisibleLabel);
+			m_toBeAdded->removeChild(lastIndex);
+		}
+
 		if (m_orderedLabelsContainer)
 			//m_orderedLabelsContainer->removeChild(lastVisibleLabel);
 			MainWindow::TheInstance()->db()->removeElement(lastVisibleLabel);

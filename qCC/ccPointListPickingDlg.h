@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2176                                                              $
-//$LastChangedDate:: 2012-06-26 22:39:51 +0200 (mar., 26 juin 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_POINT_PICKING_LIST_DIALOG_HEADER
 #define CC_POINT_PICKING_LIST_DIALOG_HEADER

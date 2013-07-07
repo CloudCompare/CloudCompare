@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2242                                                              $
-//$LastChangedDate:: 2012-09-22 18:54:21 +0200 (sam., 22 sept. 2012)       $
-//**************************************************************************
-//
 
 #include "ccPointPickingGenericInterface.h"
 

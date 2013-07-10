@@ -117,8 +117,8 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion)
 
 		if (objectCenteredView)
 		{
-			cameraCenter.x = screenPan[0];
-			cameraCenter.y = screenPan[1];
+			cameraCenter.x += screenPan[0];
+			cameraCenter.y += screenPan[1];
 		}
 	}
 

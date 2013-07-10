@@ -174,6 +174,7 @@ protected slots:
 	void toggleSelectedEntitiesMat();
 	void toggleSelectedEntities3DName();
 	void addEmptyGroup();
+	void alignCameraWithEntity();
 
 signals:
     void selectionChanged();
@@ -248,6 +249,8 @@ protected:
 	QAction* m_toggleSelectedEntities3DName;	
 	//! Context menu action: add empty group
 	QAction* m_addEmptyGroup;
+	//! Context menu action: use 3-points labels or planes to orient camera
+	QAction* m_alignCameraWithEntity;
 
 	//! Last context menu pos
 	QPoint m_contextMenuPos;

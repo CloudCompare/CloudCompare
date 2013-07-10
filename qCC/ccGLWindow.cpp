@@ -1619,6 +1619,19 @@ CCVector3 ccGLWindow::getCurrentViewDir() const
 	return axis;
 }
 
+CCVector3 ccGLWindow::getCurrentUpDir() const
+{
+	//if (m_params.objectCenteredView)
+	//	return CCVector3(0.0f,1.0f,0.0f);
+
+	//otherwise up direction is the 2nd line of the current view matrix
+	const float* M = m_params.viewMat.data();
+	CCVector3 axis(M[1],M[5],M[9]);
+	axis.normalize();
+
+	return axis;
+}
+
 void ccGLWindow::setInteractionMode(INTERACTION_MODE mode)
 {
 	m_interactionMode = mode;
@@ -2954,6 +2967,39 @@ void ccGLWindow::updateZoom(float zoomFactor)
 
 	if (zoomFactor>0.0 && zoomFactor!=1.0)
 		setZoom(m_params.zoom*zoomFactor);
+}
+
+void ccGLWindow::setCustomView(const CCVector3& forward, const CCVector3& up, bool forceRedraw/*=true*/)
+{
+	makeCurrent();
+
+	bool wasViewerBased = !m_params.objectCenteredView;
+	if (wasViewerBased)
+		setPerspectiveState(m_params.perspectiveView,true);
+
+	CCVector3 uForward = forward; uForward.normalize();
+
+	CCVector3 uSide = uForward.cross(up);
+	uSide.normalize();
+	CCVector3 uUp = uSide.cross(uForward);
+	uUp.normalize();
+
+
+	float* mat = m_params.viewMat.data();
+	mat[0] = uSide.x; mat[4] = uSide.y; mat[8] = uSide.z;
+	mat[1] = uUp.x; mat[5] = uUp.y; mat[9] = uUp.z;
+	mat[2] = -uForward.x; mat[6] = -uForward.y; mat[10] = -uForward.z;
+
+	if (wasViewerBased)
+		setPerspectiveState(m_params.perspectiveView,false);
+
+	invalidateVisualization();
+
+	//we emit the 'baseViewMatChanged' signal
+	emit baseViewMatChanged(m_params.viewMat);
+
+	if (forceRedraw)
+		redraw();
 }
 
 void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=true*/)

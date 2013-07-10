@@ -17,6 +17,9 @@
 
 #include "ccDBRoot.h"
 
+//Local
+#include "ccGLWindow.h"
+
 //Qt
 #include <QTreeView>
 #include <QStandardItemModel>
@@ -31,6 +34,8 @@
 #include <ccMesh.h>
 #include <ccMaterialSet.h>
 #include <cc2DLabel.h>
+#include <ccGenericPrimitive.h>
+#include <ccPlane.h>
 
 //local
 #include "ccPropertiesTreeDelegate.h"
@@ -85,6 +90,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_toggleSelectedEntitiesSF = new QAction("Toggle SF",this);
 	m_toggleSelectedEntities3DName = new QAction("Toggle 3D name",this);
 	m_addEmptyGroup = new QAction("Add empty group",this);
+	m_alignCameraWithEntity = new QAction("Align camera",this);
 
 	m_contextMenuPos = QPoint(-1,-1);
 
@@ -105,6 +111,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_toggleSelectedEntitiesSF,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesSF()));
 	connect(m_toggleSelectedEntities3DName,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities3DName()));
 	connect(m_addEmptyGroup,					SIGNAL(triggered()),								this, SLOT(addEmptyGroup()));
+	connect(m_alignCameraWithEntity,			SIGNAL(triggered()),								this, SLOT(alignCameraWithEntity()));
 
     //other DB tree signals/slots connection
     connect(m_dbTreeWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(changeSelection(const QItemSelection&, const QItemSelection&)));
@@ -233,6 +240,25 @@ void ccDBRoot::deleteSelectedEntities()
 
     hidePropertiesView();
 
+	//specific case: shared labels
+	ccHObject::Container allLabels;
+	bool hasSharedLabels = false;
+	std::set<ccHObject*> cloudsToBeDeleted; //will only be used if 'hasSharedLabels' is true
+	if (m_treeRoot->filterChildren(allLabels,true,CC_2D_LABEL) != 0)
+	{
+		for (unsigned i=0; i<allLabels.size(); ++i)
+		{
+			cc2DLabel* label = static_cast<cc2DLabel*>(allLabels[i]);
+			//shared labels are labels shared by at least 2 different clouds
+			if (label->size() > 1 && label->getPoint(0).cloud != label->getPoint(1).cloud
+				|| label->size() > 2 && label->getPoint(1).cloud != label->getPoint(2).cloud)
+			{
+				hasSharedLabels = true;
+				break;
+			}
+		}
+	}
+
 	//we remove all objects that are children of other deleted ones!
 	//(otherwise we may delete the parent before the child!)
     std::vector<ccHObject*> toBeDeleted;
@@ -272,10 +298,48 @@ void ccDBRoot::deleteSelectedEntities()
 				}
 
 			toBeDeleted.push_back(obj);
+
+			if (hasSharedLabels)
+			{
+				//we must keep a parallel list for clouds only
+				if (obj->isA(CC_POINT_CLOUD))
+				{
+					cloudsToBeDeleted.insert(obj);
+				}
+				else
+				{
+					ccHObject::Container subClouds;
+					if (obj->filterChildren(subClouds,true,CC_POINT_CLOUD) != 0)
+						for (size_t i=0; i<subClouds.size(); ++i)
+							cloudsToBeDeleted.insert(subClouds[i]);
+				}
+			}
 		}
 	}
 
     qism->clear();
+
+	//check now that we don't delete clouds on which some labels are dependent
+	if (hasSharedLabels)
+	{
+		size_t labelCount = allLabels.size();
+		for (size_t i=0;i<labelCount;++i)
+		{
+			cc2DLabel* label = static_cast<cc2DLabel*>(allLabels[i]);
+			if (label->size() > 1) //there's no issue with 1-point labels!
+			{
+				for (unsigned j=1;j<label->size();++j) //1st cloud is always the parent!
+					if (label->getPoint(j).cloud
+						&& label->getPoint(j).cloud != label->getPoint(0).cloud
+						&& cloudsToBeDeleted.find(label->getPoint(j).cloud) != cloudsToBeDeleted.end())
+					{
+						ccLog::Warning(QString("Label '%1' has been deleted as it is dependent on '%2'").arg(label->getName()).arg(label->getPoint(j).cloud->getName()));
+						label->clear();
+						toBeDeleted.push_back(label);
+					}
+			}
+		}
+	}
 
 	while (!toBeDeleted.empty())
 	{
@@ -284,29 +348,6 @@ void ccDBRoot::deleteSelectedEntities()
 		toBeDeleted.pop_back();
 
 		anObject->prepareDisplayForRefresh_recursive();
-
-		//DGM FIXME: what a burden... we should find something simpler (shared pointers?)
-		if (anObject->isKindOf(CC_POINT_CLOUD))
-		{
-			//specific case: if the entity is a cloud, we must look for 2-points
-			//or 3-points labels that may have a dependence to it
-			ccHObject::Container allLabels;
-			if (m_treeRoot->filterChildren(allLabels,true,CC_2D_LABEL) != 0)
-			{
-				size_t labelCount = allLabels.size();
-				for (size_t i=0;i<labelCount;++i)
-				{
-					cc2DLabel* label = static_cast<cc2DLabel*>(allLabels[i]);
-					for (unsigned j=1;j<label->size();++j) //the first point is always the parent cloud!
-						if (label->getPoint(j).cloud == anObject)
-						{
-							ccLog::Warning(QString("Label '%1' has been deleted as it is dependent on '%2'").arg(label->getName()).arg(anObject->getName()));
-							label->clear();
-							toBeDeleted.push_back(label);
-						}
-				}
-			}
-		}
 
 		if (anObject->isKindOf(CC_MESH))
 		{
@@ -1154,6 +1195,71 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 	}
 }
 
+void ccDBRoot::alignCameraWithEntity()
+{
+    QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
+	QModelIndexList selectedIndexes = qism->selectedIndexes();
+    int selCount = selectedIndexes.size();
+    if (selCount == 0)
+        return;
+
+	ccHObject* obj = static_cast<ccHObject*>(selectedIndexes[0].internalPointer());
+	if (!obj)
+		return;
+	ccGenericGLDisplay* display = obj->getDisplay();
+	if (!display)
+	{
+		ccLog::Warning("[alignCameraWithEntity] Selected entity has no associated display!");
+		return;
+	}
+	assert(display);
+	ccGLWindow* win = static_cast<ccGLWindow*>(display);
+
+	//plane normal
+	CCVector3 planeNormal;
+	CCVector3 planeVertDir;
+
+	//2D label with 3 points?
+	if (obj->isA(CC_2D_LABEL))
+	{
+		cc2DLabel* label = static_cast<cc2DLabel*>(obj);
+		//work only with labels with 3 points!
+		if (label->size() == 3)
+		{
+			const cc2DLabel::PickedPoint& A = label->getPoint(0);
+			const CCVector3* _A = A.cloud->getPoint(A.index);
+			const cc2DLabel::PickedPoint& B = label->getPoint(1);
+			const CCVector3* _B = B.cloud->getPoint(B.index);
+			const cc2DLabel::PickedPoint& C = label->getPoint(2);
+			const CCVector3* _C = C.cloud->getPoint(C.index);
+			planeNormal = (*_B-*_A).cross(*_C-*_A);
+			planeVertDir = (*_B-*_A)/*win->getCurrentUpDir()*/;
+		}
+		else
+		{
+			assert(false);
+			return;
+		}
+	}
+	//plane ?
+	else if (obj->isA(CC_PLANE))
+	{
+		ccPlane* plane = static_cast<ccPlane*>(obj);
+		//3rd column = plane normal!
+		planeNormal = plane->getNormal();
+		planeVertDir = CCVector3(plane->getTransformation().getColumn(1));
+	}
+	else
+	{
+		assert(false);
+		return;
+	}
+
+	//we can now make the camera look in the direction of the normal
+	CCVector3 forward = -planeNormal;
+	win->setCustomView(forward,planeVertDir);
+}
+
 void ccDBRoot::gatherRecursiveInformation()
 {
     QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
@@ -1515,6 +1621,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			bool toggleOtherProperties=false;
 			bool toggleMaterials=false;
 			bool hasMoreThan2Children=false;
+			bool hasExactlyOnePlanarEntity=false;
 			bool leafObject=false;
 			for (i=0;i<selCount;++i)
 			{
@@ -1537,9 +1644,26 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 						toggleMaterials = true;
 						toggleOtherProperties = true;
 					}
+					
+					if (selCount == 1)
+					{
+						if (item->isKindOf(CC_2D_LABEL))
+						{
+							hasExactlyOnePlanarEntity = (static_cast<cc2DLabel*>(item)->size() == 3);
+						}
+						else if (item->isA(CC_PLANE))
+						{
+							hasExactlyOnePlanarEntity = true;
+						}
+					}
 				}
 			}
 
+			if (hasExactlyOnePlanarEntity)
+			{
+				menu.addAction(m_alignCameraWithEntity);
+				menu.addSeparator();
+			}
 			menu.addAction(m_gatherInformation);
 			menu.addSeparator();
 			menu.addAction(m_toggleSelectedEntities);

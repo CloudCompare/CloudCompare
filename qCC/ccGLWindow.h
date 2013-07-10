@@ -248,7 +248,10 @@ public:
     virtual void getViewportArray(int vp[/*4*/]);
 
 	//! Sets camera to a predefined view (top, bottom, etc.)
-    virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw=true);
+    virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw = true);
+	
+	//! Sets camera to a custom view (forward and up directions must be specified)
+	virtual void setCustomView(const CCVector3& forward, const CCVector3& up, bool forceRedraw = true);
 
 	//! Sets current interaction mode
 	virtual void setInteractionMode(INTERACTION_MODE mode);
@@ -329,6 +332,18 @@ public:
 
 	//! Sets whether rectangular picking is allowed or not
 	void setRectangularPickingAllowed(bool state) { m_allowRectangularEntityPicking = state; }
+
+    //! Returns current viewing direction
+	/** This is the direction normal to the screen
+		(pointing 'inside') in world base.
+	**/
+    CCVector3 getCurrentViewDir() const;
+
+    //! Returns current up direction
+	/** This is the vertical direction of the screen
+		(pointing 'upward') in world base.
+	**/
+	CCVector3 getCurrentUpDir() const;
 
 public slots:
     void zoomGlobal();
@@ -465,12 +480,6 @@ protected:
 	//inherited from QWidget (drag & drop support)
 	virtual void dragEnterEvent(QDragEnterEvent* event);
 	virtual void dropEvent(QDropEvent* event);
-
-    //! Returns current viewing direction
-	/** This is the direction normal to the screen
-		(pointing 'inside') in world base.
-	**/
-    CCVector3 getCurrentViewDir() const;
 
     //! Starts OpenGL picking process
 	/** \param mode picking mode

@@ -68,6 +68,9 @@ public:
 	//! Returns 'Y' width
 	PointCoordinateType getYWidth() const { return m_yWidth; }
 
+	//! Returns normal
+	CCVector3 getNormal() const { return CCVector3(m_transformation.getColumn(2)); }
+
 protected:
     
     //inherited from ccGenericPrimitive

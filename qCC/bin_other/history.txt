@@ -1,6 +1,7 @@
 *** CloudCompare versions history ***
 
-v2.4 ??/??/2013
+v2.5.0 ??/??/2013
+- New version numbering scheme (build index appended instead of the release date)
 - New tool: "Cross section"
 	* accessible via 'Tools > Segmentation > Cross Section' or a dedicated icon in the main
 		toolbar (next to the scissors icon)
@@ -8,6 +9,8 @@ v2.4 ??/??/2013
 	* extract the corresponding selection as a new cloud
 	* extract multiple slices in an automated way
 	* works only with clouds for the moment
+- New DB tree context menu option:
+	* right clik on a plane or a triangle label and choose 'Align camera' to make the camera look perpendicularly to it!
 - New option for ICP registration (thanks to Luca Penasa once again!):
 	* check "Free scale parameter" to register objects with different scales
 - New dialog for computing the octree:
@@ -18,7 +21,7 @@ v2.4 ??/??/2013
 	* the tool spawns dialogs to let the user specify the ouput files (ascii grid and image)
 - New tool: "Convert RGB to scalar field"
 	* Edit > Colors
-- New option is ASCII file load/save dialogs:
+- New option in ASCII file load/save dialogs:
 	* maximum number of points per cloud on load
 	* option to write the number of points as a dedicated header line on save
 - Menus modifications:
@@ -57,6 +60,8 @@ v2.4 ??/??/2013
 	* Mesh with a single texture AND colors couldn't be saved properly in PLY format (CC would
 		refuse to save the texture)
 	* deleting a child object (e.g. labels) in ccViewer would make it crash!
+	* old viewports (prior to version 25) were wrongly imported (panning info)
+	* deleting groups containing clouds used by shared labels would make CC crash
 
 v2.4 04/25/2013
 - 3D mouses (3dConnexion devices) are now supported:

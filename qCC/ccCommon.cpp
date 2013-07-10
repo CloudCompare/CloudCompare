@@ -19,8 +19,8 @@
 
 #include "ccCommon.h"
 
-#define CC_VER_NUM  2.4
-#define CC_VER_DATE "06/21/2013"
+#define CC_VER_NUM 2.5
+#define CC_SUB_VER 0 //2013-07-10
 
 //! Returns current version as string
 QString ccCommon::GetCCVersion()
@@ -32,10 +32,12 @@ QString ccCommon::GetCCVersion()
 #endif
 
 #if defined(_WIN32) || defined(WIN32)
-    return QString::number(CC_VER_NUM)+QString(".Qt/Windows/%1 - %2").arg(format).arg(CC_VER_DATE);
+	QString platform = "Windows";
 #elif defined(__APPLE__)
-    return QString::number(CC_VER_NUM)+QString(".Qt/Mac OS/%1 - %2").arg(format).arg(CC_VER_DATE);
+	QString platform = "Mac OS";
 #else
-    return QString::number(CC_VER_NUM)+QString(".Qt/Linux/%1 - %2").arg(format).arg(CC_VER_DATE);
+	QString platform = "Linux";
 #endif
+
+	return QString("%1.%2").arg(CC_VER_NUM).arg(CC_SUB_VER)+QString(" [%1 %2]").arg(platform).arg(format);
 };

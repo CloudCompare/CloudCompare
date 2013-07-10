@@ -30,6 +30,7 @@ Various:
 [*] Command line mode could be extended (more methods, etc.)
 [*] Add 'GL filter' plugins support to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
+[*] Add 'TRANGLE_STRIPS' support to VTK I/O filter (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=598)
 
 From Thomas S. (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=550)
 [*] It would be great if the programm could manage long coordinates for the georeferencing (?!)
@@ -85,3 +86,6 @@ From Tim C.
 
 From Raphael M.
 [*] Add a checkbox on the Color Scale Manager to apply the current scale modifications in real time
+
+From 'dsims1980'
+[*] Spherical Parameterization of cloud or meshes is very useful for visual comparison of two models (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=581)

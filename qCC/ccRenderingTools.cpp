@@ -283,7 +283,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	//display area
 	const int strHeight = strMetrics.height();
 	const int scaleWidth = ccGui::Parameters().colorScaleRampWidth;
-	const int scaleMaxHeight = (keyValues.size() > 1 ? std::max(context.glH-120,2*strHeight) : scaleWidth); //if 1 value --> we draw a cube
+	const int scaleMaxHeight = (keyValues.size() > 1 ? std::max(context.glH-140,2*strHeight) : scaleWidth); //if 1 value --> we draw a cube
 
 	//centered orthoprojective view (-halfW,-halfH,halfW,halfH)
 	int halfW = (context.glW>>1);
@@ -291,7 +291,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 
 	//top-right corner of the scale ramp
 	const int xShift = 20 + (showHistogram ? scaleWidth/2 : 0);
-	const int yShift = halfH-scaleMaxHeight/2;
+	const int yShift = halfH-scaleMaxHeight/2-10;
 
 	glPushAttrib(GL_LINE_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_LINE_SMOOTH);

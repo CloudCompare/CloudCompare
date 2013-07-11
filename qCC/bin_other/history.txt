@@ -9,8 +9,9 @@ v2.5.0 ??/??/2013
 	* extract the corresponding selection as a new cloud
 	* extract multiple slices in an automated way
 	* works only with clouds for the moment
-- New DB tree context menu option:
-	* right clik on a plane or a triangle label and choose 'Align camera' to make the camera look perpendicularly to it!
+- New DB tree context menu options:
+	* right clik on a plane or a triangle label and choose 'Align camera' to make the camera look perpendicularly to it
+	* Same thing with 'Align camera (reverse)' (to look in the opposite direction)
 - New option for ICP registration (thanks to Luca Penasa once again!):
 	* check "Free scale parameter" to register objects with different scales
 - New dialog for computing the octree:

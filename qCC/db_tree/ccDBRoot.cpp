@@ -91,6 +91,7 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	m_toggleSelectedEntities3DName = new QAction("Toggle 3D name",this);
 	m_addEmptyGroup = new QAction("Add empty group",this);
 	m_alignCameraWithEntity = new QAction("Align camera",this);
+	m_alignCameraWithEntityReverse = new QAction("Align camera (reverse)",this);
 
 	m_contextMenuPos = QPoint(-1,-1);
 
@@ -111,7 +112,8 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	connect(m_toggleSelectedEntitiesSF,			SIGNAL(triggered()),								this, SLOT(toggleSelectedEntitiesSF()));
 	connect(m_toggleSelectedEntities3DName,		SIGNAL(triggered()),								this, SLOT(toggleSelectedEntities3DName()));
 	connect(m_addEmptyGroup,					SIGNAL(triggered()),								this, SLOT(addEmptyGroup()));
-	connect(m_alignCameraWithEntity,			SIGNAL(triggered()),								this, SLOT(alignCameraWithEntity()));
+	connect(m_alignCameraWithEntity,			SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityDirect()));
+	connect(m_alignCameraWithEntityReverse,		SIGNAL(triggered()),								this, SLOT(alignCameraWithEntityIndirect()));
 
     //other DB tree signals/slots connection
     connect(m_dbTreeWidget->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(changeSelection(const QItemSelection&, const QItemSelection&)));
@@ -1195,7 +1197,7 @@ void ccDBRoot::expandOrCollapseHoveredBranch(bool expand)
 	}
 }
 
-void ccDBRoot::alignCameraWithEntity()
+void ccDBRoot::alignCameraWithEntity(bool reverse)
 {
     QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
@@ -1233,7 +1235,7 @@ void ccDBRoot::alignCameraWithEntity()
 			const cc2DLabel::PickedPoint& C = label->getPoint(2);
 			const CCVector3* _C = C.cloud->getPoint(C.index);
 			planeNormal = (*_B-*_A).cross(*_C-*_A);
-			planeVertDir = (*_B-*_A)/*win->getCurrentUpDir()*/;
+			planeVertDir = /*(*_B-*_A)*/win->getCurrentUpDir();
 		}
 		else
 		{
@@ -1256,7 +1258,7 @@ void ccDBRoot::alignCameraWithEntity()
 	}
 
 	//we can now make the camera look in the direction of the normal
-	CCVector3 forward = -planeNormal;
+	CCVector3 forward = (reverse ? planeNormal : -planeNormal);
 	win->setCustomView(forward,planeVertDir);
 }
 
@@ -1662,6 +1664,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 			if (hasExactlyOnePlanarEntity)
 			{
 				menu.addAction(m_alignCameraWithEntity);
+				menu.addAction(m_alignCameraWithEntityReverse);
 				menu.addSeparator();
 			}
 			menu.addAction(m_gatherInformation);

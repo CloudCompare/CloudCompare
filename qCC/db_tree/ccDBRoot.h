@@ -174,12 +174,18 @@ protected slots:
 	void toggleSelectedEntitiesMat();
 	void toggleSelectedEntities3DName();
 	void addEmptyGroup();
-	void alignCameraWithEntity();
+	void alignCameraWithEntityDirect() { alignCameraWithEntity(false); }
+	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
 
 signals:
     void selectionChanged();
 
 protected:
+
+	//! Aligns the camera with the currently selected entity
+	/** \param reverse whether to use the entity's normal (false) or its inverse (true)
+	**/
+	void alignCameraWithEntity(bool reverse);
 
 	//! Shows properties view for a given element
     void showPropertiesView(ccHObject* obj);
@@ -251,6 +257,8 @@ protected:
 	QAction* m_addEmptyGroup;
 	//! Context menu action: use 3-points labels or planes to orient camera
 	QAction* m_alignCameraWithEntity;
+	//! Context menu action: reverse of m_alignCameraWithEntity
+	QAction* m_alignCameraWithEntityReverse;
 
 	//! Last context menu pos
 	QPoint m_contextMenuPos;

@@ -2490,7 +2490,7 @@ void ccGLWindow::displayNewMessage(const QString& message,
 		}
 		else
 		{
-			ccLog::Warning("[ccGLWindow::displayNewMessage] Append is forced for custom messages!");
+			ccLog::WarningDebug("[ccGLWindow::displayNewMessage] Append is forced for custom messages!");
 		}
 	}
 	else

@@ -3850,6 +3850,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 
 		if (ccGroup->getChildrenNumber() == 0)
 		{
+			ccConsole::Error("No component was created! Check the minimum size...");
 			delete ccGroup;
 		}
 		else
@@ -3860,7 +3861,7 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 		ccConsole::Print(QString("[createComponentsClouds] %1 component(s) where created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
 
 		cloud->prepareDisplayForRefresh();
-		cloud->setEnabled(false);
+		cloud->setEnabled(ccGroup != 0);
 	}
 }
 

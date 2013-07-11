@@ -21,6 +21,9 @@
 //Local
 #include "ccSerializableObject.h"
 
+//Qt
+#include <QString>
+
 //CCLib
 #include <CCGeom.h>
 #include <Matrix.h>
@@ -287,6 +290,12 @@ public:
 		\param coef scaling coef.
 	**/
 	void scaleColumn(unsigned colIndex, float coef);
+
+	//! Returns matrix as a string
+	/** \param precision numerical precision
+		\return string
+	**/
+	QString toString(int precision = 12, QChar separator = ' ') const;
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }

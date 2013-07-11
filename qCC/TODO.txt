@@ -68,7 +68,6 @@ From Konrad W.
 [*] Something like the plane shader from point tools where the depth is coloured with the Hue channel
 
 From Rav M.
-[*] Aligning camera (perpendicularly to a face) by chosing 3 points/vertexes or group of points
 [*] Add front and back cutting plane
 [*] move and rotate global coordinate (X,Y,Z) or aligning it like camera and then adding another parts to correct scene in right place.
 

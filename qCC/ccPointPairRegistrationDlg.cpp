@@ -15,6 +15,7 @@
 
 //Qt
 #include <QMdiSubWindow>
+#include <QMessageBox>
 
 ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 	: ccOverlayDialog(parent)
@@ -177,7 +178,7 @@ bool ccPointPairRegistrationDlg::init(ccGenericPointCloud* aligned, ccGenericPoi
 		ccGLWindow* win = (mainWin ? mainWin->new3DView() : 0);
 		if (!win)
 		{
-			ccLog::Error("[ccPointPairRegistrationDlg] Failed to create dedicated 3D view!");
+			ccLog::Error("[PointPairRegistration] Failed to create dedicated 3D view!");
 			return false;
 		}
 		linkWith(win);
@@ -523,12 +524,14 @@ void ccPointPairRegistrationDlg::align()
 {
 	CCLib::PointProjectionTools::Transformation trans;
 	double rms;
+
 	if (callHornRegistration(trans,rms))
 	{
 		if (rms >= 0)
 		{
-			ccLog::Print(QString("[ccPointPairRegistrationDlg] Current RMS: %1").arg(rms));
-			m_associatedWin->displayNewMessage(QString("RMS: %1").arg(rms),ccGLWindow::LOWER_LEFT_MESSAGE);
+			QString rmsString = QString("Current RMS: %1").arg(rms);
+			ccLog::Print(QString("[PointPairRegistration] ")+rmsString);
+			m_associatedWin->displayNewMessage(rmsString,ccGLWindow::UPPER_CENTER_MESSAGE,true);
 		}
 
 		//fixed scale?
@@ -537,10 +540,17 @@ void ccPointPairRegistrationDlg::align()
 		//apply (scaled) transformation...
 		if (!fixedScale)
 		{
-			ccLog::Print(QString("[ccPointPairRegistrationDlg] Scale: %1").arg(trans.s));
 			if (trans.R.isValid())
 				trans.R.scale(trans.s);
+
+			QString scaleString = QString("Scale: %1").arg(trans.s);
+			ccLog::Print(QString("[PointPairRegistration] ")+scaleString);
 		}
+		else
+		{
+			ccLog::Print(QString("[PointPairRegistration] Scale: fixed (1.0)"));
+		}
+
 		ccGLMatrix transMat(trans.R,trans.T);
 		//...virtually
 		m_aligned.cloud->setGLTransformation(transMat);
@@ -581,25 +591,53 @@ void ccPointPairRegistrationDlg::apply()
 	double rms;
 	if (callHornRegistration(trans,rms))
 	{
+		QStringList summary;
 		if (rms >= 0)
-			ccLog::Print(QString("[ccPointPairRegistrationDlg] Current RMS: %1").arg(rms));
+		{
+			QString rmsString = QString("Final RMS: %1").arg(rms);
+			ccLog::Print(QString("[PointPairRegistration] ")+rmsString);
+			summary << rmsString;
+			summary << "----------------";
+		}
 
 		//fixed scale?
 		bool fixedScale = fixedScalecheckBox->isChecked();
-
 		//apply (scaled) transformation...
 		if (!fixedScale && trans.R.isValid())
 			trans.R.scale(trans.s);
 		ccGLMatrix transMat(trans.R,trans.T);
-		//...acutally
+		//...for real this time!
 		m_aligned.cloud->applyGLTransformation_recursive();
 		m_alignedPoints.setGLTransformation(transMat);
 
+		QString matString = transMat.toString();
+		summary << QString("Transformation matrix");
+		summary << transMat.toString(3,'\t'); //low precision, just for display
+		summary << "----------------";
+
 		ccLog::Print("[PointPairRegistration] Applied matrix:");
-		const float* mat = transMat.data();
-		ccLog::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
-		if (!fixedScale && trans.s != 1.0)
-			ccLog::Print(QString("[PointPairRegistration] Warning: scale = %1 (already integrated in above matrix!)").arg(trans.s));
+		ccLog::Print(transMat.toString(12,' ')); //full precision
+		
+		if (!fixedScale)
+		{
+			QString scaleString = QString("Scale: %1 (already integrated in above matrix!)").arg(trans.s);
+			ccLog::Warning(QString("[PointPairRegistration] ")+scaleString);
+			summary << scaleString;
+		}
+		else
+		{
+			ccLog::Print(QString("[PointPairRegistration] Scale: fixed (1.0)"));
+			summary << "Scale: fixed (1.0)";
+		}
+		summary << "----------------";
+
+		//pop-up summary
+		summary << "Refer to Console (F8) for more details";
+		QMessageBox::information(this,"Align info",summary.join("\n"));
+	}
+	else
+	{
+		ccLog::Warning(QString("[PointPairRegistration] Failed to register entities?!"));
 	}
 
 	stop(true);

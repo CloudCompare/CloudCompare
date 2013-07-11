@@ -58,12 +58,16 @@ protected:
 		a scale 's' (different from a priori scale Sa) to bring the cloud
 		P closer to the reference cloud X (one step). Refer to the ICP
 		algorithm theory for more details about this procedure, and to
-		jschmidt 2005 for the scale estimation.
+		"Point Set Registration with Integrated Scale Estimation",
+		Znisser et al, PRIP 2005 for the scale estimation.
 
 			X = Sa.s.R.P + T (with Sa = s = 1 by default)
 
-        \param P the cloud to register
-        \param X the reference cloud
+		Warning: P and X must have the same size, and must be in the same
+		order (i.e. P[i] is the point equivalent to X[i] for all 'i').
+
+        \param P the cloud to register (data)
+        \param X the reference cloud (model)
         \param trans the resulting transformation
 		\param estimateScale whether to estimate scale (s) as well (see jschmidt 2005)
         \param weightsP weights for the registered points (optional)

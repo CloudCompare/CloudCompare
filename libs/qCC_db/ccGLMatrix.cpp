@@ -387,16 +387,27 @@ ccGLMatrix ccGLMatrix::transposed() const
 
 void ccGLMatrix::invert()
 {
+	//inverse scale as well!
+	PointCoordinateType s2 = CCVector3(m_mat).norm2(); //we use the first column == X (its norm should be 1 for an 'unscaled' matrix ;)
+
 	//we invert rotation
 	std::swap(R21,R12);
 	std::swap(R31,R13);
 	std::swap(R32,R23);
 
-	//we invert translation
+	if (s2 != 0.0 && s2 != 1.0)
+	{
+		R11 /= s2; R12 /= s2; R13 /= s2;
+		R21 /= s2; R22 /= s2; R23 /= s2;
+		R31 /= s2; R32 /= s2; R33 /= s2;
+	}
+
+	//eventually we invert translation
 	applyRotation(m_mat+12);
 	R14 = -R14;
 	R24 = -R24;
 	R34 = -R34;
+
  }
 
 ccGLMatrix ccGLMatrix::inverse() const
@@ -680,4 +691,21 @@ ccGLMatrix ccGLMatrix::zRotation() const
 	newRotMat.initFromParameters(phi,0,0,T);
 
 	return newRotMat;
+}
+
+QString ccGLMatrix::toString(int precision/*=12*/, QChar separator/*=' '*/) const
+{
+	QString str;
+	for (unsigned l=0; l<4; ++l) //lines
+	{
+		for (unsigned c=0; c<4; ++c) //columns
+		{
+			str.append(QString::number(m_mat[c*4+l],'f',precision));
+			if (c != 3)
+				str.append(separator);
+		}
+		if (l != 3)
+			str.append("\n");
+	}
+	return str;
 }

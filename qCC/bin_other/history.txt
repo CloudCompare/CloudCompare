@@ -52,6 +52,9 @@ v2.5.0 ??/??/2013
 	* global shift information is now kept by qRansacSD plugin (shape detection)
 	* qHPR (Hidden Point Removal) plugin now generates a new cloud with the visible points only
 		(instead of hacking the points visibility) along with the corresponding viewport
+	* scaled transformation matrix are now properly inversed (i.e. scale is taken into account)
+	* point-pair based alignment tool outputs a summary on completion (RMS, scale, etc.)
+	* scale estimation during point-pair based alignment has been enhanced
 - Bug fixes:
 	* applying the interactive 'rotate/translate' tool to an entity and its parent at the
 		same time would make CC crash

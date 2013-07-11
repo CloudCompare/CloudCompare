@@ -425,47 +425,7 @@ bool HornRegistrationTools::FindAbsoluteOrientation(GenericCloud* lCloud,
 													ScaledTransformation& trans,
 													bool fixedScale/*=false*/)
 {
-    //resulting transformation (R is invalid on initialization and T is (0,0,0))
-    trans.R.invalidate();
-    trans.T = CCVector3(0,0,0);
-	trans.s = (PointCoordinateType)1.0;
-
-	assert(rCloud && lCloud);
-	if (!rCloud || !lCloud || rCloud->size() != lCloud->size() || rCloud->size()<3)
-		return false;
-
-	//determine best scale?
-	double scale = 1.0;
-	if (!fixedScale)
-	{
-		CCVector3 Gr = GeometricalAnalysisTools::computeGravityCenter(rCloud);
-		CCVector3 Gl = GeometricalAnalysisTools::computeGravityCenter(lCloud);
-
-		//we determine scale with the symmetrical form as proposed by Horn
-		double lNorm2Sum = 0.0;
-		double rNorm2Sum = 0.0;
-		{		
-			lCloud->placeIteratorAtBegining();
-			rCloud->placeIteratorAtBegining();
-	
-			unsigned count = rCloud->size();
-			for (unsigned i=0;i<count;i++)
-			{
-				CCVector3 Pli = *lCloud->getNextPoint()-Gl;
-				lNorm2Sum += Pli.dot(Pli);
-				CCVector3 Pri = *rCloud->getNextPoint()-Gr;
-				rNorm2Sum += Pri.dot(Pri);
-			}
-		}
-
-		//resulting scale
-		if (lNorm2Sum > 0.0)
-		{
-			scale = (PointCoordinateType)sqrt(rNorm2Sum/lNorm2Sum);
-		}
-	}
-
-	return RegistrationProcedure(lCloud,rCloud,trans,false,0,0,(PointCoordinateType)scale);
+	return RegistrationProcedure(lCloud,rCloud,trans,!fixedScale);
 }
 
 double HornRegistrationTools::ComputeRMS(GenericCloud* lCloud,
@@ -507,6 +467,9 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
     trans.T = CCVector3(0,0,0);
 	trans.s = 1.0;
 
+	if (P == 0 || X == 0 || P->size() != X->size() || P->size() < 3)
+		return false;
+
     PointCoordinateType bbMin[3],bbMax[3];
     X->getBoundingBox(bbMin,bbMax);
 
@@ -519,7 +482,7 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
     CCVector3 Gp = GeometricalAnalysisTools::computeGravityCenter(P);
     CCVector3 Gx = GeometricalAnalysisTools::computeGravityCenter(X);
 
-    //if the cloud is equivalent to a single point (for instance
+    //if the data cloud is equivalent to a single point (for instance
     //it's the case when the two clouds are very far away from
     //each other in the ICP process) we try to get the two clouds closer
     if (fabs(dx)+fabs(dy)+fabs(dz) < ZERO_TOLERANCE)
@@ -550,23 +513,23 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
     //we build up the registration matrix (see ICP algorithm)
     SquareMatrixd QSigma(4); //#25 in the paper (besl)
 
-    QSigma.m_values[0][0]=trace;
-
-    QSigma.m_values[0][1]=QSigma.m_values[1][0]=Aij.m_values[1][2];
-    QSigma.m_values[0][2]=QSigma.m_values[2][0]=Aij.m_values[2][0];
-    QSigma.m_values[0][3]=QSigma.m_values[3][0]=Aij.m_values[0][1];
-
-    QSigma.m_values[1][1]=bottomMat.m_values[0][0];
-    QSigma.m_values[1][2]=bottomMat.m_values[0][1];
-    QSigma.m_values[1][3]=bottomMat.m_values[0][2];
-
-    QSigma.m_values[2][1]=bottomMat.m_values[1][0];
-    QSigma.m_values[2][2]=bottomMat.m_values[1][1];
-    QSigma.m_values[2][3]=bottomMat.m_values[1][2];
-
-    QSigma.m_values[3][1]=bottomMat.m_values[2][0];
-    QSigma.m_values[3][2]=bottomMat.m_values[2][1];
-    QSigma.m_values[3][3]=bottomMat.m_values[2][2];
+    QSigma.m_values[0][0] = trace;
+						    
+    QSigma.m_values[0][1] = QSigma.m_values[1][0] = Aij.m_values[1][2];
+    QSigma.m_values[0][2] = QSigma.m_values[2][0] = Aij.m_values[2][0];
+    QSigma.m_values[0][3] = QSigma.m_values[3][0] = Aij.m_values[0][1];
+						    
+    QSigma.m_values[1][1] = bottomMat.m_values[0][0];
+    QSigma.m_values[1][2] = bottomMat.m_values[0][1];
+    QSigma.m_values[1][3] = bottomMat.m_values[0][2];
+						    
+    QSigma.m_values[2][1] = bottomMat.m_values[1][0];
+    QSigma.m_values[2][2] = bottomMat.m_values[1][1];
+    QSigma.m_values[2][3] = bottomMat.m_values[1][2];
+						    
+    QSigma.m_values[3][1] = bottomMat.m_values[2][0];
+    QSigma.m_values[3][2] = bottomMat.m_values[2][1];
+    QSigma.m_values[3][3] = bottomMat.m_values[2][2];
 
     //we compute its eigenvalues and eigenvectors
     SquareMatrixd eig = QSigma.computeJacobianEigenValuesAndVectors();
@@ -584,10 +547,10 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 	if (estimateScale)
 	{
 		//two accumulators
-		double acc_1 = 0.0;
-		double acc_2 = 0.0;
+		double acc_num = 0.0;
+		double acc_denom = 0.0;
 
-		//now deduce the scale, refer to jschmidt 2005 for this
+		//now deduce the scale (refer to "Point Set Registration with Integrated Scale Estimation", Zinsser et. al, PRIP 2005)
 		X->placeIteratorAtBegining();
 		P->placeIteratorAtBegining();
 
@@ -595,18 +558,18 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 		assert(P->size() == count);
 		for (unsigned i=0; i<count; ++i)
 		{
-			//a refers to P (not moving) and b to X (moving)
-			//a and b is for following the notation of the jscmhidt paper (see #7)
-			CCVector3 a_tilde = *(P->getNextPoint()) - Gp;
-			CCVector3 b_tilde = trans.R * (*(X->getNextPoint()) - Gx);
+			//'a' refers to the data 'A' (moving) = P
+			//'b' refers to the model 'B' (not moving) = X
+			CCVector3 a_tilde = trans.R * (*(P->getNextPoint()) - Gp);	// a_tilde_i = R * (a_i - a_mean)
+			CCVector3 b_tilde = (*(X->getNextPoint()) - Gx);			// b_tilde_j =     (b_j - b_mean)
 
-			acc_1 += (double)b_tilde.dot(a_tilde);
-			acc_2 += (double)a_tilde.dot(a_tilde);
+			acc_num += (double)b_tilde.dot(a_tilde);
+			acc_denom += (double)a_tilde.dot(a_tilde);
 		}
 
 		//DGM: acc_2 can't be 0 because we already have checked that the bbox is not a single point!
-		assert(acc_2 > 0.0);
-		trans.s = static_cast<PointCoordinateType>(acc_1 / acc_2);
+		assert(acc_denom > 0.0);
+		trans.s = static_cast<PointCoordinateType>(fabs(acc_num / acc_denom));
 	}
 
     //and we deduce the translation

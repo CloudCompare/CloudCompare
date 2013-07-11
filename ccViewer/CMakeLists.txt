@@ -25,7 +25,7 @@ include_directories( ${XIOT_INCLUDE_DIR} )
 project( ccViewer )
 
 set( VERSION_MAJOR 1 )
-set( VERSION_MINOR 25 )
+set( VERSION_MINOR 26 )
 set( VERSION_PATCH 0 )
 
 set( QCC_HEADERS ../qCC/ccConsole.h ../qCC/ccGLUtils.h ../qCC/ccGLWindow.h ../qCC/ccGuiParameters.h ../qCC/ccOverlayDialog.h ../qCC/ccRenderingTools.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccShiftAndScaleCloudDlg.h ../qCC/fileIO/*.h ../qCC/ccMouse3DContextMenu.h)

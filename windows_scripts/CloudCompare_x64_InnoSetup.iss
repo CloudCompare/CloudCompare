@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.4"
+#define MyAppVersion "2.5.0"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.danielgm.net/cc/"
 #define MyAppExeName "CloudCompare.exe"
@@ -26,7 +26,7 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={pf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=true
-OutputBaseFilename={#MyAppName}_v{#MyAppVersion}_{#MyCreationDate}_setup_x64
+OutputBaseFilename={#MyAppName}_v{#MyAppVersion}_setup_x64
 Compression=lzma2/Ultra64
 SolidCompression=true
 OutputDir={#MyOutputDir}

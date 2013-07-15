@@ -268,24 +268,27 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
     {
         if (MACRO_Foreground(context) && !context.sfColorScaleToDisplay)
         {
-            if (!m_associatedCloud || !m_associatedCloud->isA(CC_POINT_CLOUD))
-                return;
+			if (sfShown())
+			{
+				if (!m_associatedCloud || !m_associatedCloud->isA(CC_POINT_CLOUD))
+					return;
 
-            ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
+				ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
 
-            //we just want to display the current SF scale if the vertices cloud is hidden
-            //(otherwise, it will take the SF display in charge)
-            if (cloud->isEnabled() && cloud->isVisible() && cloud->sfColorScaleShown())
-                return;
+				//we just need to 'display' the current SF scale if the vertices cloud is hidden
+				//(otherwise, it will be taken in charge by the cloud itself)
+				if (!cloud->sfColorScaleShown() || (cloud->sfShown() && cloud->isEnabled() && cloud->isVisible()))
+					return;
 
-            //we must also check that the parent is not a mesh itself with the same vertices! (in
-            //which case it will also take that in charge)
-            ccHObject* parent = getParent();
-            if (parent && parent->isKindOf(CC_MESH) && (static_cast<ccGenericMesh*>(parent)->getAssociatedCloud() == m_associatedCloud))
-                return;
+				//we must also check that the parent is not a mesh itself with the same vertices! (in
+				//which case it will also take that in charge)
+				ccHObject* parent = getParent();
+				if (parent && parent->isKindOf(CC_MESH) && (static_cast<ccGenericMesh*>(parent)->getAssociatedCloud() == m_associatedCloud))
+					return;
 
-            cloud->addColorRampInfo(context);
-            //cloud->drawScale(context);
+				cloud->addColorRampInfo(context);
+				//cloud->drawScale(context);
+			}
         }
     }
 	//*/

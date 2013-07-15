@@ -222,7 +222,7 @@ void ccViewer::selectEntity(int uniqueID)
 		ui.actionShowScalarField->setEnabled(hasSF);
 		ui.actionShowScalarField->setChecked(toSelect->sfShown());
 		ui.actionShowColorRamp->setEnabled(hasSF);
-		ui.actionShowColorRamp->setChecked(cloud ? cloud->sfColorScaleShown() : false);
+		ui.actionShowColorRamp->setChecked(cloud ? cloud->sfColorScaleShown() && cloud->sfShown() : false);
 
 		unsigned sfCount = (cloud ? cloud->getNumberOfScalarFields() : 0);
 		ui.menuSelectSF->setEnabled(hasSF && sfCount>1);

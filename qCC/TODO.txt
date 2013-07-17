@@ -23,6 +23,8 @@ Big ones:
 
 Various:
 [*] change the way 'father dependency' is handled (info should be held by the father!)
+[*] Let the user select and handle multiple clouds in the 'Clipping box' tool
+[*] Add a 'apply all' button for the LAS opening dialog
 [*] save materials in OBJ I/O filter 
 [*] Per-point size based on SF values (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=507)
 [*] Display ortho-rectified images as high-res textures (instead of point clouds!)
@@ -66,6 +68,8 @@ From Jean-Francois H.
 
 From Konrad W.
 [*] Something like the plane shader from point tools where the depth is coloured with the Hue channel
+[*]	Something that helps you to reject the triangles at the borders. Perfect would be obviously a distance from the mesh to the original cloud (e.g. by a convex hull) – but of course the length of the face edges would also do it (like in Meshlab).
+[*] Out-of-core support (like those guys: http://ros.org/wiki/megatree or the out-of-core structure in the PCL)
 
 From Rav M.
 [*] Add front and back cutting plane
@@ -99,3 +103,5 @@ From Andrew O.
 
 From 'dsims1980'
 [*] Spherical Parameterization of cloud or meshes is very useful for visual comparison of two models (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=581)
+
+From Konrad

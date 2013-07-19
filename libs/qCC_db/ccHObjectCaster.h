@@ -34,6 +34,8 @@ class ccCalibratedImage;
 class cc2DLabel;
 class cc2DViewportObject;
 class cc2DViewportLabel;
+class ccFacet;
+class ccPolyline;
 
 //! Useful class to (try to) statically cast a basic ccHObject to a given type
 #ifdef QCC_DB_USE_AS_DLL
@@ -65,6 +67,12 @@ class ccHObjectCaster
 
         //! converts current object to ccMeshGroup (if possible)
         static ccMeshGroup* ToMeshGroup(ccHObject* obj);
+
+        //! converts current object to ccPolyline (if possible)
+        static ccPolyline* ToPolyline(ccHObject* obj);
+
+        //! converts current object to ccFacet (if possible)
+        static ccFacet* ToFacet(ccHObject* obj);
 
         //! converts current object to ccGenericPrimitive (if possible)
 		static ccGenericPrimitive* ToPrimitive(ccHObject* obj);

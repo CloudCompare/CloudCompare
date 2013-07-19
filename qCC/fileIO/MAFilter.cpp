@@ -70,7 +70,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	QString baseFilename = QFileInfo(filename).fileName();
 
     //the mesh to save
-    ccGenericMesh* theMesh = static_cast<ccGenericMesh*>(meshes[0]);
+    ccGenericMesh* theMesh = ccHObjectCaster::ToGenericMesh(meshes[0]);
     //and its vertices
     ccGenericPointCloud* theCloud = theMesh->getAssociatedCloud();
 

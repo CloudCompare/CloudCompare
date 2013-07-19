@@ -60,7 +60,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
         hClouds[i]->filterChildren(cloudSensors,false,CC_GBL_SENSOR);
         if (!cloudSensors.empty())
         {
-            clouds.push_back(static_cast<ccGenericPointCloud*>(hClouds[i]));
+            clouds.push_back(ccHObjectCaster::ToGenericPointCloud(hClouds[i]));
             if (cloudSensors.size()>1)
                 ccConsole::Warning(QString("Found more than one ground-based LIDAR sensor associated to entity '%1'. Only the first will be saved!").arg(hClouds[i]->getName()));
 
@@ -321,7 +321,7 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
 
                 for (unsigned i=0;i<clouds.size();++i)
                 {
-                    ccGenericPointCloud* theCloud = static_cast<ccGenericPointCloud*>(clouds[i]);
+                    ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[i]);
                     CCLib::GenericIndexedCloud* projectedList = gls->project(theCloud,errorCode,true);
 
                     switch (errorCode)

@@ -52,12 +52,12 @@ class Neighbourhood
 	public:
 
 		//! Geometric properties/elements that can be computed from the set of points (see Neighbourhood::getGeometricalElement)
-		enum CC_GEOM_ELEMENT {  DEPRECATED=0,
-                                GRAVITY_CENTER=1,
-                                LSQ_PLANE=2,
-                                HEIGHT_FUNCTION=4,
-                                HEIGHT_FUNCTION_DIRECTIONS=8,
-                                QUADRIC_3D=16};
+		enum CC_GEOM_ELEMENT {  DEPRECATED					= 0,
+                                GRAVITY_CENTER				= 1,
+                                LSQ_PLANE					= 2,
+                                HEIGHT_FUNCTION				= 4,
+                                HEIGHT_FUNCTION_DIRECTIONS	= 8,
+                                QUADRIC_3D					= 16};
 
 		//! Curvature type
 		enum CC_CURVATURE_TYPE {GAUSSIAN_CURV, MEAN_CURV};
@@ -123,6 +123,21 @@ class Neighbourhood
 			\return 0 if computation failed
 		**/
 		const PointCoordinateType* getLSQPlane();
+		//! Returns best interpolating plane (Least-square) 'X' base vector
+		/** This corresponds to the largest eigen value (i.e. the largest cloud dimension)
+			\return 0 if computation failed
+		**/
+		const CCVector3* getLSQPlaneX();
+		//! Returns best interpolating plane (Least-square) 'Y' base vector
+		/** This corresponds to the second largest eigen value (i.e. the second largest cloud dimension)
+			\return 0 if computation failed
+		**/
+		const CCVector3* getLSQPlaneY();
+		//! Returns best interpolating plane (Least-square) normal vector
+		/** This corresponds to the smallest eigen value (i.e. the second largest cloud dimension)
+			\return 0 if computation failed
+		**/
+		const CCVector3* getLSQPlaneNormal();
 
 		//! Returns the best interpolating 'height function'
 		/** Returns an array of the form [a,b,c,d,e,f] such as:
@@ -148,49 +163,36 @@ class Neighbourhood
 
 	protected:
 
-		//! Height function parameters accessor
-		/** If zero, parameters are not yet computed.
-		**/
-		PointCoordinateType* _theHeightFunction;
 		//! Height function parameters
 		/** Array [a,b,c,d,e,f] such as: Z = a + b.X + c.Y + d.X^2 + e.X.Y + f.Y^2.
             Warning: 'X','Y' and 'Z' are defined by 'theHeightFunctionDirections'
-            Shouldn't be used directly: use _theHeightFunction instead.
+            Only valid if 'structuresValidity & HEIGHT_FUNCTION != 0'.
 		**/
 		PointCoordinateType theHeightFunction[6];
 		//! Height function dimensions
 		/** Array (index(X),index(Y),index(Z)) where: 0=x, 1=y, 2=z.
-            Only valid if _theHeightFunction is non zero.
+            Only valid if 'structuresValidity & HEIGHT_FUNCTION != 0'.
 		**/
 		uchar theHeightFunctionDirections[3];
 		
-		//! Least-square best fitting plane parameters accessor
-		/** If zero, parameters are not yet computed.
-		**/
-		PointCoordinateType* _theLSQPlane;
 		//! Least-square best fitting plane parameters
 		/** Array [a,b,c,d] such as: ax+by+cz=d.
-            Shouldn't be used directly: use _theLSQPlane instead.
+            Only valid if 'structuresValidity & LSQ_PLANE != 0'.
 		**/
-		PointCoordinateType theLSQPlane[4];
+		PointCoordinateType theLSQPlaneEquation[4];
+		//! Least-square best fitting plane base vectors
+		CCVector3 theLSQPlaneVectors[3];
 		
-		//! Least-square best fitting 3D quadric parameters accessor
-		/** If zero, parameters are not yet computed.
-		**/
-		double* _the3DQuadric;
 		//! Least-square best fitting 3D quadric parameters
 		/** Array [a,b,c,d,e,f,g,l,m,n] such as
             a.x^2+b.y^2+c.z^2+2e.x.y+2f.y.z+2g.z.x+2l.x+2m.y+2n.z+d = 0.
             Shouldn't be used directly: use _the3DQuadric instead.
+            Only valid if 'structuresValidity & QUADRIC_3D != 0'.
 		**/
 		double the3DQuadric[10];
 		
-		//! Gravity center accessor
-		/** If zero, parameters are not yet computed.
-		**/
-		CCVector3* _theGravityCenter;
 		//! Gravity center
-		/** Shouldn't be used directly: use _theGravityCenter instead.
+		/** Only valid if 'structuresValidity & GRAVITY_CENTER != 0'.
 		**/
 		CCVector3 theGravityCenter;
 		

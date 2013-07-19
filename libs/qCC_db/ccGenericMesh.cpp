@@ -18,6 +18,7 @@
 #include "ccGenericMesh.h"
 
 //local
+#include "ccHObjectCaster.h"
 #include "ccGenericPointCloud.h"
 #include "ccPointCloud.h"
 #include "ccNormalVectors.h"
@@ -280,11 +281,11 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (!cloud->sfColorScaleShown() || (cloud->sfShown() && cloud->isEnabled() && cloud->isVisible()))
 					return;
 
-				//we must also check that the parent is not a mesh itself with the same vertices! (in
-				//which case it will also take that in charge)
-				ccHObject* parent = getParent();
-				if (parent && parent->isKindOf(CC_MESH) && (static_cast<ccGenericMesh*>(parent)->getAssociatedCloud() == m_associatedCloud))
-					return;
+            //we must also check that the parent is not a mesh itself with the same vertices! (in
+            //which case it will also take that in charge)
+            ccHObject* parent = getParent();
+            if (parent && parent->isKindOf(CC_MESH) && (ccHObjectCaster::ToGenericMesh(parent)->getAssociatedCloud() == m_associatedCloud))
+                return;
 
 				cloud->addColorRampInfo(context);
 				//cloud->drawScale(context);

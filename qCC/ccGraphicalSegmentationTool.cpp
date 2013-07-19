@@ -161,9 +161,9 @@ void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArr
 			m_toSegment.pop_back();
 
 			if (entity->isKindOf(CC_POINT_CLOUD))
-				static_cast<ccGenericPointCloud*>(entity)->unallocateVisibilityArray();
+				ccHObjectCaster::ToGenericPointCloud(entity)->unallocateVisibilityArray();
 			else if (entity->isKindOf(CC_MESH))
-				static_cast<ccGenericMesh*>(entity)->getAssociatedCloud()->unallocateVisibilityArray();
+				ccHObjectCaster::ToGenericMesh(entity)->getAssociatedCloud()->unallocateVisibilityArray();
 		}
 	}
 	else
@@ -200,9 +200,9 @@ void ccGraphicalSegmentationTool::reset()
         for (ccHObject::Container::iterator p=m_toSegment.begin(); p!=m_toSegment.end(); ++p)
         {
             if ((*p)->isKindOf(CC_POINT_CLOUD))
-                static_cast<ccGenericPointCloud*>(*p)->razVisibilityArray();
+                ccHObjectCaster::ToGenericPointCloud(*p)->razVisibilityArray();
             else if ((*p)->isKindOf(CC_MESH))
-                static_cast<ccGenericMesh*>(*p)->getAssociatedCloud()->razVisibilityArray();
+                ccHObjectCaster::ToGenericMesh(*p)->getAssociatedCloud()->razVisibilityArray();
         }
 
         if (m_associatedWin)
@@ -230,9 +230,9 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 	bool result = false;
 	if (anObject->isKindOf(CC_POINT_CLOUD))
 	{
-		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(anObject);
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(anObject);
 		//detect vertices
-		if (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH) && static_cast<ccGenericMesh*>(cloud->getParent())->getAssociatedCloud() == cloud)
+		if (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH) && ccHObjectCaster::ToGenericMesh(cloud->getParent())->getAssociatedCloud() == cloud)
 		{
 			ccConsole::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its parent mesh instead!").arg(anObject->getName()));
 			return false;
@@ -251,7 +251,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 		}
 		else
 		{
-			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(anObject);
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(anObject);
 			mesh->getAssociatedCloud()->razVisibilityArray();
 			m_toSegment.push_back(mesh);
 			result = true;

@@ -64,12 +64,12 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
     ccGenericMesh* mesh = NULL;
     if (entity->isKindOf(CC_MESH))
     {
-        mesh = static_cast<ccGenericMesh*>(entity);
+        mesh = ccHObjectCaster::ToGenericMesh(entity);
         vertices = mesh->getAssociatedCloud();
     }
     else if (entity->isKindOf(CC_POINT_CLOUD))
     {
-        vertices = static_cast<ccGenericPointCloud*>(entity);
+        vertices = ccHObjectCaster::ToGenericPointCloud(entity);
     }
 
     if (!vertices)

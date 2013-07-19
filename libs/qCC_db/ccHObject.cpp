@@ -27,6 +27,7 @@
 #include "ccMesh.h"
 #include "ccMeshGroup.h"
 #include "ccPolyline.h"
+#include "ccFacet.h"
 #include "ccMaterialSet.h"
 #include "ccAdvancedTypes.h"
 #include "ccImage.h"
@@ -85,6 +86,8 @@ ccHObject* ccHObject::New(unsigned objectType, const char* name/*=0*/)
 	case CC_POLY_LINE:
 		//warning: no associated vertices --> retrieved later
 		return new ccPolyline(0);
+	case CC_FACET:
+		return new ccFacet();
 	case CC_MATERIAL_SET:
 		return new ccMaterialSet();
 	case CC_NORMALS_ARRAY:

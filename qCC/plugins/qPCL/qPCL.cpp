@@ -30,6 +30,7 @@
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
 #include <StatisticalOutliersRemover.h>
+#include <CurveFitting.h>
 //#include <ComputeSPINImages.h>
 
 
@@ -78,6 +79,9 @@ void qPCL::getActions(QActionGroup& group)
 		addFilter( new NormalEstimation());
 		addFilter( new StatisticalOutliersRemover() );
 		addFilter( new MLSSmoothingUpsampling() );
+#ifdef _DEBUG
+		addFilter( new CurveFitting() );
+#endif
 		//  addFilter( new ComputeSPINImages() );
 	}
 

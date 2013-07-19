@@ -164,7 +164,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 			db->filterChildren(meshes,false,CC_MESH);
 			if (!meshes.empty())
 			{
-				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(meshes[0]);
+				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[0]);
 				mesh->setFlagState(CC_FATHER_DEPENDANT,false);
 				Print(QString("Found one mesh with %1 faces and %2 vertices").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()));
 				m_meshes.push_back(std::pair<ccGenericMesh*,QString>(mesh,filename));

@@ -94,7 +94,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 		std::vector<const ccHObject*> dependencies;
 		if (currentObject->isKindOf(CC_MESH))
 		{
-			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(currentObject);
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(currentObject);
 			if (mesh->getAssociatedCloud())
 				dependencies.push_back(mesh->getAssociatedCloud());
 			if (mesh->getMaterialSet())
@@ -103,8 +103,11 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 		else if (currentObject->isKindOf(CC_POLY_LINE))
 		{
 			CCLib::GenericIndexedCloudPersist* cloud = static_cast<ccPolyline*>(currentObject)->getAssociatedCloud();
-			//TODO: dirty!
-			dependencies.push_back(dynamic_cast<ccPointCloud*>(cloud));
+			ccPointCloud* pc = dynamic_cast<ccPointCloud*>(cloud);
+			if (pc)
+				dependencies.push_back(pc);
+			else
+				ccLog::Warning(QString("[BIN] Poyline '%1' is associated to an unhandled vertices structure?!").arg(currentObject->getName()));
 		}
 		else if (currentObject->isA(CC_2D_LABEL))
 		{
@@ -121,7 +124,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 		{
 			if (!root->find(dependencies.back()->getUniqueID()))
 			{
-				ccLog::Warning(QString("Dependency broken: entity '%1' must also be in selection in order to save '%2'").arg(dependencies.back()->getName()).arg(currentObject->getName()));
+				ccLog::Warning(QString("[BIN] Dependency broken: entity '%1' must also be in selection in order to save '%2'").arg(dependencies.back()->getName()).arg(currentObject->getName()));
 				result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 			}
 			dependencies.pop_back();
@@ -210,17 +213,17 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 		//we check objects that have links to other entities (meshes, polylines, etc.)
 		if (currentObject->isKindOf(CC_MESH))
 		{
-			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(currentObject);
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(currentObject);
 			//vertices
 			//special case: if the parent is a mesh group, then the job has already be done once and for all!
 			if (!mesh->getParent() || !mesh->getParent()->isA(CC_MESH_GROUP))
 			{
 				intptr_t cloudID = (intptr_t)mesh->getAssociatedCloud();
-				if (cloudID>0)
+				if (cloudID > 0)
 				{
 					ccHObject* cloud = root->find(cloudID);
 					if (cloud && cloud->isKindOf(CC_POINT_CLOUD))
-						mesh->setAssociatedCloud(static_cast<ccGenericPointCloud*>(cloud));
+						mesh->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
 					else
 					{
 						//we have a problem here ;)
@@ -236,7 +239,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 			}
 			//materials
 			intptr_t matSetID = (intptr_t)mesh->getMaterialSet();
-			if (matSetID>0)
+			if (matSetID > 0)
 			{
 				ccHObject* materials = root->find(matSetID);
 				if (materials && materials->isA(CC_MATERIAL_SET))
@@ -252,7 +255,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 			}
 			//per-triangle normals
 			intptr_t triNormsTableID = (intptr_t)mesh->getTriNormsTable();
-			if (triNormsTableID>0)
+			if (triNormsTableID > 0)
 			{
 				ccHObject* triNormsTable = root->find(triNormsTableID);
 				if (triNormsTable && triNormsTable->isA(CC_NORMAL_INDEXES_ARRAY))
@@ -262,13 +265,13 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 					//we have a (less severe) problem here ;)
 					mesh->setTriNormsTable(0,false);
 					mesh->showTriNorms(false);
-					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared normals (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
+					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared normals (ID=%1) for mesh '%2' in the file!").arg(triNormsTableID).arg(mesh->getName()));
 					result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 				}
 			}
 			//per-triangle texture coordinates
 			intptr_t texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable();
-			if (texCoordArrayID>0)
+			if (texCoordArrayID > 0)
 			{
 				ccHObject* texCoordsTable = root->find(texCoordArrayID);
 				if (texCoordsTable && texCoordsTable->isA(CC_TEX_COORDS_ARRAY))
@@ -277,7 +280,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 				{
 					//we have a (less severe) problem here ;)
 					mesh->setTexCoordinatesTable(0,false);
-					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared texture coordinates (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
+					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared texture coordinates (ID=%1) for mesh '%2' in the file!").arg(texCoordArrayID).arg(mesh->getName()));
 					result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 				}
 			}
@@ -288,7 +291,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 			intptr_t cloudID = (intptr_t)poly->getAssociatedCloud();
 			ccHObject* cloud = root->find(cloudID);
 			if (cloud && cloud->isKindOf(CC_POINT_CLOUD))
-				poly->setAssociatedCloud(static_cast<ccGenericPointCloud*>(cloud));
+				poly->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
 			else
 			{
 				//we have a problem here ;)
@@ -311,7 +314,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 				ccHObject* cloud = root->find(cloudID);
 				if (cloud && cloud->isKindOf(CC_POINT_CLOUD))
 				{
-					ccGenericPointCloud* genCloud = static_cast<ccGenericPointCloud*>(cloud);
+					ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
 					assert(genCloud->size()>pp.index);
 					correctedPickedPoints.push_back(cc2DLabel::PickedPoint(genCloud,pp.index));
 				}

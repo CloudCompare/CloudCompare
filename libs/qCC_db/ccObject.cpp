@@ -35,8 +35,9 @@
    v2.5 - 03/16/2013 - ccViewportParameters structure modified
    v2.6 - 04/03/2013 - strictly positive scalar field removed and 'hidden' values marker is now NaN
    v2.7 - 04/12/2013 - Customizable color scales
+   v2.8 - 07/12/2013 - Poylines are now supported
 **/
-const unsigned c_currentDBVersion = 27; //2.7
+const unsigned c_currentDBVersion = 28; //2.8
 
 unsigned ccObject::GetCurrentDBVersion()
 {

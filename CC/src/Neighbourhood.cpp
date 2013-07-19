@@ -34,11 +34,7 @@
 using namespace CCLib;
 
 Neighbourhood::Neighbourhood(GenericIndexedCloudPersist* associatedCloud)
-	: _theHeightFunction(0)
-	, _theLSQPlane(0)
-	, _the3DQuadric(0)
-	, _theGravityCenter(0)
-	, structuresValidity(DEPRECATED)
+	: structuresValidity(DEPRECATED)
 	, m_associatedCloud(associatedCloud)
 {
 	assert(m_associatedCloud);
@@ -47,24 +43,41 @@ Neighbourhood::Neighbourhood(GenericIndexedCloudPersist* associatedCloud)
 void Neighbourhood::reset()
 {
 	structuresValidity = DEPRECATED;
-	_theLSQPlane=0;
-	_theHeightFunction=0;
-	_the3DQuadric=0;
-	_theGravityCenter=0;
 }
 
 const CCVector3* Neighbourhood::getGravityCenter()
 {
 	if (!(structuresValidity & GRAVITY_CENTER))
 		computeGravityCenter();
-	return _theGravityCenter;
+	return ((structuresValidity & GRAVITY_CENTER) ? &theGravityCenter : 0);
 }
 
 const PointCoordinateType* Neighbourhood::getLSQPlane()
 {
 	if (!(structuresValidity & LSQ_PLANE))
 		computeLeastSquareBestFittingPlane();
-	return _theLSQPlane;
+	return ((structuresValidity & LSQ_PLANE) ? theLSQPlaneEquation : 0);
+}
+
+const CCVector3* Neighbourhood::getLSQPlaneX()
+{
+	if (!(structuresValidity & LSQ_PLANE))
+		computeLeastSquareBestFittingPlane();
+	return ((structuresValidity & LSQ_PLANE) ? theLSQPlaneVectors : 0);
+}
+
+const CCVector3* Neighbourhood::getLSQPlaneY()
+{
+	if (!(structuresValidity & LSQ_PLANE))
+		computeLeastSquareBestFittingPlane();
+	return ((structuresValidity & LSQ_PLANE) ? theLSQPlaneVectors+1 : 0);
+}
+
+const CCVector3* Neighbourhood::getLSQPlaneNormal()
+{
+	if (!(structuresValidity & LSQ_PLANE))
+		computeLeastSquareBestFittingPlane();
+	return ((structuresValidity & LSQ_PLANE) ? theLSQPlaneVectors+2 : 0);
 }
 
 const PointCoordinateType* Neighbourhood::getHeightFunction(uchar* dimsHF/*=0*/)
@@ -77,21 +90,20 @@ const PointCoordinateType* Neighbourhood::getHeightFunction(uchar* dimsHF/*=0*/)
 		dimsHF[1]=theHeightFunctionDirections[1];
 		dimsHF[2]=theHeightFunctionDirections[2];
 	}
-	return _theHeightFunction;
+	return ((structuresValidity & HEIGHT_FUNCTION) ? theHeightFunction : 0);
 }
 
 const double* Neighbourhood::get3DQuadric()
 {
 	if (!(structuresValidity & QUADRIC_3D))
 		compute3DQuadric();
-	return _the3DQuadric;
+	return ((structuresValidity & QUADRIC_3D) ? the3DQuadric : 0);
 }
 
 void Neighbourhood::computeGravityCenter()
 {
 	//invalidate precedent centroid (if any)
 	structuresValidity &= (~GRAVITY_CENTER);
-	_theGravityCenter = 0;
 
 	assert(m_associatedCloud);
 	unsigned count = (m_associatedCloud ? m_associatedCloud->size() : 0);
@@ -130,7 +142,6 @@ void Neighbourhood::computeGravityCenter()
 	theGravityCenter += C;
 	#endif
 
-	_theGravityCenter = &theGravityCenter;
 	structuresValidity |= GRAVITY_CENTER;
 }
 
@@ -205,7 +216,6 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 {
 	//invalidate precedent LS plane (if any)
 	structuresValidity &= (~LSQ_PLANE);
-	_theLSQPlane = 0;
 
 	assert(m_associatedCloud);
 	unsigned pointCount = (m_associatedCloud ? m_associatedCloud->size() : 0);
@@ -218,7 +228,7 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 		return false;
 	}
 
-	const CCVector3* G = 0;
+	CCVector3 G(0,0,0);
 	if (pointCount > 3)
 	{
 		//we determine plane normal by computing the smallest eigen value of M = 1/n * S[(p-µ)*(p-µ)']
@@ -228,19 +238,27 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 		if (!eig.isValid())
 			return false;
 
-		//the smallest eigen vector corresponds to the "least square best fitting plane" normal
-		double vec[3];
-		eig.getMinEigenValueAndVector(vec);
-		
-		//make sure the result is a normal vector!
-		Vector3Tpl<double>::vnormalize(vec);
-		
-		theLSQPlane[0] = (PointCoordinateType)vec[0];
-		theLSQPlane[1] = (PointCoordinateType)vec[1];
-		theLSQPlane[2] = (PointCoordinateType)vec[2];
+		//get normal
+		{
+			double vec[3];
+			//the smallest eigen vector corresponds to the "least square best fitting plane" normal
+			eig.getMinEigenValueAndVector(vec);
+			theLSQPlaneVectors[2].x = (PointCoordinateType)vec[0];
+			theLSQPlaneVectors[2].y = (PointCoordinateType)vec[1];
+			theLSQPlaneVectors[2].z = (PointCoordinateType)vec[2];
+		}
+
+		//get also X
+		{
+			double vec[3];
+			eig.getMaxEigenValueAndVector(vec);
+			theLSQPlaneVectors[0].x = (PointCoordinateType)vec[0];
+			theLSQPlaneVectors[0].y = (PointCoordinateType)vec[1];
+			theLSQPlaneVectors[0].z = (PointCoordinateType)vec[2];
+		}
 
 		//get the centroid (should already be up-to-date - see computeCovarianceMatrix)
-		G = getGravityCenter();
+		G = *getGravityCenter();
 	}
 	else
 	{
@@ -248,26 +266,42 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 		const CCVector3* A = m_associatedCloud->getPoint(0);
 		const CCVector3* B = m_associatedCloud->getPoint(1);
 		const CCVector3* C = m_associatedCloud->getPoint(2);
-		CCVector3 N = (*B-*A).cross(*C-*A);
 
-		//make sure the result is a normal vector!
-		N.normalize();
+		//get X (AB by default) and Y (AC - will be updated later) and deduce N = X ^ Y
+		theLSQPlaneVectors[0] = (*B-*A);
+		theLSQPlaneVectors[1] = (*C-*A);
+		theLSQPlaneVectors[2] = theLSQPlaneVectors[0].cross(theLSQPlaneVectors[1]);
 
-		theLSQPlane[0] = N.x;
-		theLSQPlane[1] = N.y;
-		theLSQPlane[2] = N.z;
-
-		//the plane pass through any of the 3 points
-		G = A;
+		//the plane passes through any of the 3 points
+		G = *A;
 	}
+
+	//make sure all vectors are unit!
+	if (theLSQPlaneVectors[2].norm2() < ZERO_TOLERANCE)
+	{
+		//this means that the points are colinear!
+		theLSQPlaneVectors[2] = CCVector3(0,0,1); //any normal will do
+	}
+	else
+	{
+		theLSQPlaneVectors[2].normalize();
+	}
+	//normalize X as well
+	theLSQPlaneVectors[0].normalize();
+	//and update Y
+	theLSQPlaneVectors[1] = theLSQPlaneVectors[2].cross(theLSQPlaneVectors[1]);
+
+
+	//deduce the proper equation
+	theLSQPlaneEquation[0] = theLSQPlaneVectors[2].x;
+	theLSQPlaneEquation[1] = theLSQPlaneVectors[2].y;
+	theLSQPlaneEquation[2] = theLSQPlaneVectors[2].z;
 
 	//eventually we just have to compute the 'constant' coefficient a3
 	//we use the fact that the plane pass through G --> GM.N = 0 (scalar prod)
 	//i.e. a0*G[0]+a1*G[1]+a2*G[2]=a3
-	assert(G);
-	theLSQPlane[3] = G->dot(CCVector3(theLSQPlane));
+	theLSQPlaneEquation[3] = G.dot(theLSQPlaneVectors[2]);
 
-	_theLSQPlane = theLSQPlane;
 	structuresValidity |= LSQ_PLANE;
 
 	return true;
@@ -277,7 +311,6 @@ bool Neighbourhood::computeHeightFunction()
 {
 	//invalidate precedent quadric (if any)
 	structuresValidity &= (~HEIGHT_FUNCTION);
-	_theHeightFunction = 0;
 
 	assert(m_associatedCloud);
 	if (!m_associatedCloud)
@@ -441,7 +474,6 @@ bool Neighbourhood::computeHeightFunction()
 		theHeightFunctionDirections[1]=idx_Y;
 		theHeightFunctionDirections[2]=idx_Z;
 
-		_theHeightFunction=theHeightFunction;
 		structuresValidity |= HEIGHT_FUNCTION;
 	}
 
@@ -452,7 +484,6 @@ bool Neighbourhood::compute3DQuadric()
 {
 	//invalidate precedent quadric (if any)
 	structuresValidity &= (~QUADRIC_3D);
-	_the3DQuadric = 0;
 
 	assert(m_associatedCloud);
 	if (!m_associatedCloud)
@@ -530,7 +561,6 @@ bool Neighbourhood::compute3DQuadric()
 	for (i=0;i<10;++i)
         the3DQuadric[i]=vec[i];
 
-	_the3DQuadric = the3DQuadric;
 	structuresValidity |= QUADRIC_3D;
 
 	return true;
@@ -563,8 +593,7 @@ bool Neighbourhood::projectPointsOnPlane(const PointCoordinateType* thePlaneEqua
 
     //we construct the plane local frame
 	CCVector3 u(1.0,0.0,0.0), v(0.0,1.0,0.0);
-	if (thePlaneEquation[0] != 0 || thePlaneEquation[1] != 0)
-		CCMiscTools::ComputeBaseVectors(thePlaneEquation,u.u,v.u);
+	CCMiscTools::ComputeBaseVectors(thePlaneEquation,u.u,v.u);
 
 	//project the points
 	for (unsigned i=0; i<count; ++i)

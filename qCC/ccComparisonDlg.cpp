@@ -137,7 +137,7 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 			ccConsole::Error("Dialog initialization error! (bad entity type)");
 			return false;
 		}
-		ccGenericMesh* compMesh = static_cast<ccGenericMesh*>(compEnt);
+		ccGenericMesh* compMesh = ccHObjectCaster::ToGenericMesh(compEnt);
 		if (!compMesh->getAssociatedCloud()->isA(CC_POINT_CLOUD)) //TODO
 		{
 			ccConsole::Error("Dialog initialization error! (bad entity type - works only with real point clouds [todo])");
@@ -168,13 +168,13 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 
 	if (compType == CLOUDMESH_DIST)
 	{
-		refMesh = static_cast<ccGenericMesh*>(refEnt);
+		refMesh = ccHObjectCaster::ToGenericMesh(refEnt);
 		refCloud = refMesh->getAssociatedCloud();
 		refOctree = 0;
 	}
 	else /*if (compType == CLOUDCLOUD_DIST)*/
 	{
-		refCloud = static_cast<ccGenericPointCloud*>(refEnt);
+		refCloud = ccHObjectCaster::ToGenericPointCloud(refEnt);
 		refOctree = static_cast<CCLib::DgmOctree*>(refCloud->getOctree());
 		//on a besoin du deuxieme octree uniquement dans le cas de la distance nuage/nuage
 		if (!refOctree)

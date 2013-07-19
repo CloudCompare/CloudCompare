@@ -178,41 +178,41 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 
     if (m_currentObject->isKindOf(CC_POINT_CLOUD))
     {
-        fillWithPointCloud(static_cast<ccGenericPointCloud*>(m_currentObject));
+        fillWithPointCloud(ccHObjectCaster::ToGenericPointCloud(m_currentObject));
     }
     else if (m_currentObject->isKindOf(CC_MESH))
     {
-        fillWithMesh(static_cast<ccGenericMesh*>(m_currentObject));
+		fillWithMesh(ccHObjectCaster::ToGenericMesh(m_currentObject));
     
 		if (m_currentObject->isKindOf(CC_PRIMITIVE))
-			fillWithPrimitive(static_cast<ccGenericPrimitive*>(m_currentObject));
+			fillWithPrimitive(ccHObjectCaster::ToPrimitive(m_currentObject));
     }
     else if (m_currentObject->isA(CC_POINT_OCTREE))
     {
-        fillWithPointOctree(static_cast<ccOctree*>(m_currentObject));
+		fillWithPointOctree(ccHObjectCaster::ToOctree(m_currentObject));
     }
     else if (m_currentObject->isA(CC_POINT_KDTREE))
     {
-        fillWithPointKdTree(static_cast<ccKdTree*>(m_currentObject));
+		fillWithPointKdTree(ccHObjectCaster::ToKdTree(m_currentObject));
     }
     else if (m_currentObject->isKindOf(CC_IMAGE))
     {
-        fillWithImage(static_cast<ccImage*>(m_currentObject));
+		fillWithImage(ccHObjectCaster::ToImage(m_currentObject));
 
         if (m_currentObject->isA(CC_CALIBRATED_IMAGE))
-            fillWithCalibratedImage(static_cast<ccCalibratedImage*>(m_currentObject));
+			fillWithCalibratedImage(ccHObjectCaster::ToCalibratedImage(m_currentObject));
     }
     else if (m_currentObject->isA(CC_2D_LABEL))
     {
-        fillWithLabel(static_cast<cc2DLabel*>(m_currentObject));
+		fillWithLabel(ccHObjectCaster::To2DLabel(m_currentObject));
     }
     else if (m_currentObject->isKindOf(CC_2D_VIEWPORT_OBJECT))
     {
-        fillWithViewportObject(static_cast<cc2DViewportObject*>(m_currentObject));
+		fillWithViewportObject(ccHObjectCaster::To2DViewportLabel(m_currentObject));
     }
     else if (m_currentObject->isKindOf(CC_GBL_SENSOR))
     {
-        fillWithGBLSensor(static_cast<ccGBLSensor*>(m_currentObject));
+		fillWithGBLSensor(ccHObjectCaster::ToGBLSensor(m_currentObject));
     }
     else if (m_currentObject->isA(CC_MATERIAL_SET))
     {

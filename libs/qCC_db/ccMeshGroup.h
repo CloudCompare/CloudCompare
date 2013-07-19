@@ -87,7 +87,7 @@ protected:
 	bool getTriangleSummits_recursive(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
 
 	//iterator
-	int currentChildIndex;
+	size_t m_currentChildIndex;
 };
 
 #endif //CC_MESH_GROUP_HEADER

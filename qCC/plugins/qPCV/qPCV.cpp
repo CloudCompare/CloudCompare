@@ -26,6 +26,7 @@
 #include <PCV.h>
 
 //qCC_db
+#include <ccHObjectCaster.h>
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
@@ -89,7 +90,7 @@ void qPCV::doAction()
     ccGenericMesh* mesh = NULL;
     if (ent->isKindOf(CC_POINT_CLOUD))
     {
-        cloud = static_cast<ccGenericPointCloud*>(ent);
+        cloud = ccHObjectCaster::ToGenericPointCloud(ent);
     }
     else if (ent->isKindOf(CC_MESH))
     {
@@ -134,7 +135,7 @@ void qPCV::doAction()
 		for (size_t i=0;i<clouds.size();++i)
 		{
 			//we keep only clouds with normals
-			ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(clouds[i]);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(clouds[i]);
 			if (cloud && cloud->hasNormals())
 			{
 				cloudsWithNormals.push_back(cloud);

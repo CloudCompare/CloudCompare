@@ -129,7 +129,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
         return CC_FERR_WRITING;
 	QTextStream stream(&file);
 
-    ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(entity);
 
     unsigned numberOfPoints = cloud->size();
     bool writeColors = cloud->hasColors();

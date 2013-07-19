@@ -51,6 +51,7 @@ public:
 
     //! Returns class ID
     virtual CC_CLASS_ENUM getClassID() const {return CC_POLY_LINE;};
+	virtual bool isSerializable() const { return true; }
 
 	//inherited methods (ccHObject)
     virtual bool hasColors() const;
@@ -59,6 +60,9 @@ public:
 	/** \param state if true, the polyline is 2D
 	**/
     void set2DMode(bool state);
+
+	//! Returns whether the polyline is considered as 2D or 3D
+	inline bool is2DMode() const { return m_mode2D; }
 
 	//! Defines if the polyline is drawn in background or foreground
 	/** \param state if true, the polyline is drawn in foreground
@@ -79,6 +83,10 @@ public:
     virtual ccBBox getMyOwnBB();
 
 protected:
+
+	//inherited from ccHObject
+	virtual bool toFile_MeOnly(QFile& out) const;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
 
 	//inherited methods (ccHObject)
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);

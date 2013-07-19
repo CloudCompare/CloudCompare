@@ -50,7 +50,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
     }
 
     //the cloud to save
-    ccGenericPointCloud* theCloud = static_cast<ccGenericPointCloud*>(clouds[0]);
+    ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[0]);
 	unsigned numberOfPoints = theCloud->size();
 
 	if (numberOfPoints==0)

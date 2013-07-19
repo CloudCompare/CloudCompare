@@ -72,7 +72,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 	unsigned triCount = 0;
 	if (!clouds.empty()) //1 cloud, no mesh
 	{
-		vertices = static_cast<ccGenericPointCloud*>(clouds[0]);
+		vertices = ccHObjectCaster::ToGenericPointCloud(clouds[0]);
 	}
 	else //1 mesh, with vertices as cloud
 	{

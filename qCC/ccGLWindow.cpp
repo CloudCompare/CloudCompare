@@ -26,6 +26,7 @@
 
 //qCC_db
 #include <ccHObject.h>
+#include <ccHObjectCaster.h>
 #include <ccBBox.h>
 #include <ccCalibratedImage.h>
 #include <cc2DLabel.h>
@@ -2408,13 +2409,13 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 				if (obj->isKindOf(CC_POINT_CLOUD))
 				{
 					label = new cc2DLabel();
-					label->addPoint(static_cast<ccGenericPointCloud*>(obj),subSelectedID);
+					label->addPoint(ccHObjectCaster::ToGenericPointCloud(obj),subSelectedID);
 					obj->addChild(label,true);
 				}
 				else if (obj->isKindOf(CC_MESH))
 				{
 					label = new cc2DLabel();
-					ccGenericMesh *mesh = static_cast<ccGenericMesh*>(obj);
+					ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(obj);
 					ccGenericPointCloud *cloud = mesh->getAssociatedCloud();
 					assert(cloud);
 					CCLib::TriangleSummitsIndexes *summitsIndexes = mesh->getTriangleIndexes(subSelectedID);

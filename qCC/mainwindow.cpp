@@ -1344,7 +1344,7 @@ void MainWindow::doActionResampleWithOctree()
         ccPointCloud* cloud = 0;
         ccHObject* ent = selectedEntities[i];
         /*if (ent->isKindOf(CC_MESH)) //TODO
-            cloud = static_cast<ccGenericMesh*>(ent)->getAssociatedCloud();
+            cloud = ccHObjectCaster::ToGenericMesh(ent)->getAssociatedCloud();
         else */
         if (ent->isKindOf(CC_POINT_CLOUD))
             cloud = static_cast<ccPointCloud*>(ent);
@@ -1639,7 +1639,7 @@ void MainWindow::doActionClearProperty(int prop)
 		//specific case: clear normals on a mesh
 		if (prop == 1 && ent->isKindOf(CC_MESH))
 		{
-			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
 			if (mesh->hasTriNormals())
 			{
 				mesh->showNormals(false);
@@ -1654,7 +1654,7 @@ void MainWindow::doActionClearProperty(int prop)
 			{
 				if (mesh->getParent()
 					&& mesh->getParent()->isKindOf(CC_MESH)
-					&& static_cast<ccGenericMesh*>(mesh->getParent())->getAssociatedCloud() == mesh->getAssociatedCloud())
+					&& ccHObjectCaster::ToGenericMesh(mesh->getParent())->getAssociatedCloud() == mesh->getAssociatedCloud())
 				{
 					ccLog::Warning("[doActionClearNormals] Can't remove per-vertex normals on a sub mesh!");
 				}
@@ -1728,7 +1728,7 @@ void MainWindow::doActionMeasureMeshSurface()
         ccHObject* ent = m_selectedEntities[i];
         if (ent->isKindOf(CC_MESH))
         {
-			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
             double S = CCLib::MeshSamplingTools::computeMeshArea(mesh);
             //we force the console to display itself
             forceConsoleDisplay();
@@ -1918,7 +1918,7 @@ void MainWindow::doActionProjectSensor()
         ccHObject* ent = selectedEntities[i];
         if (ent->isKindOf(CC_POINT_CLOUD))
         {
-            ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
+            ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 
             //we create a new sensor
             ccGBLSensor* sensor = new ccGBLSensor();
@@ -1997,7 +1997,7 @@ void MainWindow::doActionModifySensor()
             if (gbl->getParent()->isKindOf(CC_POINT_CLOUD))
             {
                 int errorCode;
-                ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(gbl->getParent());
+                ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(gbl->getParent());
                 CCLib::GenericIndexedCloud* projectedPoints = gbl->project(cloud,errorCode,true);
 
                 if (projectedPoints)
@@ -2141,7 +2141,7 @@ void MainWindow::doActionConvertTextureToColor()
         ccHObject* ent = selectedEntities[i];
         if (ent->isKindOf(CC_MESH))
         {
-            ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+            ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
 			assert(mesh);
 
 			if (!mesh->hasMaterials())
@@ -2213,7 +2213,7 @@ void MainWindow::doActionSamplePoints()
         ccHObject* ent = selectedEntities[i];
         if (ent->isKindOf(CC_MESH))
         {
-            ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+            ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
 			assert(mesh);
 
             CCLib::GenericIndexedCloud* sampledCloud = 0;
@@ -2420,13 +2420,13 @@ void MainWindow::doActionFilterByValue()
         if (ent->isKindOf(CC_MESH))
         {
             pc->hidePointsByScalarValue(minVal,maxVal);
-            result = static_cast<ccGenericMesh*>(ent)->createNewMeshFromSelection(false);
+            result = ccHObjectCaster::ToGenericMesh(ent)->createNewMeshFromSelection(false);
             pc->unallocateVisibilityArray();
         }
         else if (ent->isKindOf(CC_POINT_CLOUD))
         {
             //pc->hidePointsByScalarValue(minVal,maxVal);
-            //result = static_cast<ccGenericPointCloud*>(ent)->hidePointsByScalarValue(false);
+            //result = ccHObjectCaster::ToGenericPointCloud(ent)->hidePointsByScalarValue(false);
             //pc->unallocateVisibilityArray();
 
             //shortcut, as we now here that the point cloud is a "ccPointCloud"
@@ -2861,7 +2861,7 @@ void MainWindow::doMeshSFAction(ccGenericMesh::MESH_SCALAR_FIELD_PROCESS process
         ccHObject* ent = m_selectedEntities[i];
         if (ent->isKindOf(CC_MESH))
         {
-            ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+            ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
             ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
 
             if (cloud && cloud->isA(CC_POINT_CLOUD)) //TODO
@@ -2963,7 +2963,7 @@ void MainWindow::doActionSmoothMeshLaplacian()
         ccHObject* ent = m_selectedEntities[i];
         if (ent->isKindOf(CC_MESH))
         {
-            ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
+            ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
 
 			if (mesh->laplacianSmooth(s_laplacianSmooth_nbIter, s_laplacianSmooth_factor,&pDlg))
 			{
@@ -3035,7 +3035,7 @@ void MainWindow::doActionFuse()
         //and then removed
         if (ent->isKindOf(CC_POINT_CLOUD))
         {
-            ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
+            ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 
             if (cloud && cloud->isA(CC_POINT_CLOUD)) //TODO
             {
@@ -3168,7 +3168,7 @@ void MainWindow::doActionRegister()
     CCLib::GenericIndexedCloudPersist* modelCloud = 0;
     if (model->isKindOf(CC_MESH))
     {
-        modelCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(static_cast<ccGenericMesh*>(model),(unsigned)100000,&pDlg);
+        modelCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(model),(unsigned)100000,&pDlg);
         if (!modelCloud)
         {
             ccConsole::Error("Failed to sample points on 'model' mesh!");
@@ -3177,14 +3177,14 @@ void MainWindow::doActionRegister()
     }
     else
     {
-        modelCloud = static_cast<ccGenericPointCloud*>(model);
+        modelCloud = ccHObjectCaster::ToGenericPointCloud(model);
     }
 
     //if the 'data' entity is a mesh, we need to sample points on it
     CCLib::GenericIndexedCloudPersist* dataCloud = 0;
     if (data->isKindOf(CC_MESH))
     {
-        dataCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(static_cast<ccGenericMesh*>(data),(unsigned)50000,&pDlg);
+        dataCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(data),(unsigned)50000,&pDlg);
         if (!dataCloud)
         {
             ccConsole::Error("Failed to sample points on 'data' mesh!");
@@ -3193,7 +3193,7 @@ void MainWindow::doActionRegister()
     }
     else
     {
-        dataCloud = static_cast<ccGenericPointCloud*>(data);
+        dataCloud = ccHObjectCaster::ToGenericPointCloud(data);
     }
 
     //we activate a temporary scalar field for registration distances computation
@@ -3305,11 +3305,11 @@ void MainWindow::doActionRegister()
 
         if (data->isKindOf(CC_POINT_CLOUD))
         {
-            pc = static_cast<ccGenericPointCloud*>(data);
+            pc = ccHObjectCaster::ToGenericPointCloud(data);
         }
         else if (data->isKindOf(CC_MESH))
         {
-            ccGenericMesh* mesh = static_cast<ccGenericMesh*>(data);
+            ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(data);
             pc = mesh->getAssociatedCloud();
 
             //warning: point cloud is locked!
@@ -3354,7 +3354,7 @@ void MainWindow::doActionRegister()
 
             //don't forget to update mesh bounding box also!
             if (data->isKindOf(CC_MESH))
-                static_cast<ccGenericMesh*>(data)->refreshBB();
+                ccHObjectCaster::ToGenericMesh(data)->refreshBB();
 
             data->prepareDisplayForRefresh_recursive();
             data->setName(data->getName()+QString(".registered"));
@@ -3409,8 +3409,8 @@ void MainWindow::doAction4pcsRegister()
         return;
     }
 
-    ccGenericPointCloud *model = static_cast<ccGenericPointCloud*>(m_selectedEntities[0]);
-    ccGenericPointCloud *data = static_cast<ccGenericPointCloud*>(m_selectedEntities[1]);
+    ccGenericPointCloud *model = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0]);
+    ccGenericPointCloud *data = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1]);
 
     ccAlignDlg aDlg(model, data);
     if (!aDlg.exec())
@@ -3884,7 +3884,7 @@ void MainWindow::doActionLabelConnectedComponents()
         ccHObject* ent = selectedEntities[i];
         if (ent->isKindOf(CC_POINT_CLOUD))
         {
-            ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
+            ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 
             if (cloud && cloud->isA(CC_POINT_CLOUD)) //TODO
             {
@@ -4046,7 +4046,7 @@ void MainWindow::doActionHeightGridGeneration()
 	ccBBox box = dlg.getCustomBBox();
 
     ccProgressDialog pDlg(true,this);
-    ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
+    ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 
     //let's rock
 	ccPointCloud* outputGrid = ccHeightGridGeneration::Compute(
@@ -4125,7 +4125,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
         ccHObject* ent = selectedEntities[i];
         if (ent->isKindOf(CC_POINT_CLOUD))
         {
-            ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
+            ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 			bool hadNormals = cloud->hasNormals();
 
             CCLib::GenericIndexedMesh* dummyMesh = CCLib::PointProjectionTools::computeTriangulation(cloud,type);
@@ -4189,7 +4189,7 @@ void MainWindow::doActionComputeQuadric3D()
         ccHObject* ent = selectedEntities[i];
         if (ent->isKindOf(CC_POINT_CLOUD))
         {
-            ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(ent);
+            ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
             CCLib::Neighbourhood Yk(cloud);
 
 //#define USE_QUADRIC_3D
@@ -4390,8 +4390,8 @@ void MainWindow::doActionComputeCPS()
     if (!dlg.exec())
         return;
 
-    ccGenericPointCloud* compCloud = static_cast<ccGenericPointCloud*>(dlg.getFirstEntity());
-    ccGenericPointCloud* srcCloud = static_cast<ccGenericPointCloud*>(dlg.getSecondEntity());
+    ccGenericPointCloud* compCloud = ccHObjectCaster::ToGenericPointCloud(dlg.getFirstEntity());
+    ccGenericPointCloud* srcCloud = ccHObjectCaster::ToGenericPointCloud(dlg.getSecondEntity());
 
     if (!compCloud->isA(CC_POINT_CLOUD)) //TODO
     {
@@ -4537,7 +4537,7 @@ void MainWindow::doActionComputeNormals()
 		}
 		else if (m_selectedEntities[i]->isKindOf(CC_MESH))
 		{
-			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(m_selectedEntities[i]);
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(m_selectedEntities[i]);
 			if (!mesh->computeNormals())
 			{
 				ccConsole::Error(QString("Failed to compute normals on mesh '%1'").arg(mesh->getName()));
@@ -5005,8 +5005,8 @@ void MainWindow::activateRegisterPointPairTool()
 		if (!dlg.exec())
 			return;
 
-		aligned = static_cast<ccGenericPointCloud*>(dlg.getFirstEntity());
-		reference = static_cast<ccGenericPointCloud*>(dlg.getSecondEntity());
+		aligned = ccHObjectCaster::ToGenericPointCloud(dlg.getFirstEntity());
+		reference = ccHObjectCaster::ToGenericPointCloud(dlg.getSecondEntity());
 	}
 
 	//we disable all windows
@@ -5153,11 +5153,11 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				ccHObject* segmentationResult = 0;
 				if (entity->isKindOf(CC_POINT_CLOUD))
 				{
-					segmentationResult = static_cast<ccGenericPointCloud*>(entity)->createNewCloudFromVisibilitySelection(true);
+					segmentationResult = ccHObjectCaster::ToGenericPointCloud(entity)->createNewCloudFromVisibilitySelection(true);
 				}
 				else if (entity->isKindOf(CC_MESH))
 				{
-					segmentationResult = static_cast<ccGenericMesh*>(entity)->createNewMeshFromSelection(true);
+					segmentationResult = ccHObjectCaster::ToGenericMesh(entity)->createNewMeshFromSelection(true);
 				}
 
 				if (!deleteHiddenPoints) //no need to put it back if we delete it afterwards!
@@ -5170,7 +5170,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					//keep original name(s)
 					segmentationResult->setName(entity->getName());
 					if (entity->isKindOf(CC_MESH) && segmentationResult->isKindOf(CC_MESH))
-						static_cast<ccGenericMesh*>(segmentationResult)->getAssociatedCloud()->setName(static_cast<ccGenericMesh*>(entity)->getAssociatedCloud()->getName());
+						ccHObjectCaster::ToGenericMesh(segmentationResult)->getAssociatedCloud()->setName(ccHObjectCaster::ToGenericMesh(entity)->getAssociatedCloud()->getName());
 
 					delete entity;
 					entity=0;
@@ -5753,7 +5753,7 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 			obj = db->find(cloudUniqueID);
 		if (obj && obj->isKindOf(CC_POINT_CLOUD))
 		{
-			ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(obj);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
 			const CCVector3* P = cloud->getPoint(pointIndex);
 			if (P)
 			{
@@ -5906,7 +5906,7 @@ void MainWindow::doActionClone()
     {
         if (selectedEntities[i]->isKindOf(CC_POINT_CLOUD))
         {
-            ccGenericPointCloud* clone = static_cast<ccGenericPointCloud*>(selectedEntities[i])->clone();
+            ccGenericPointCloud* clone = ccHObjectCaster::ToGenericPointCloud(selectedEntities[i])->clone();
             if (clone)
             {
                 addToDB(clone, true, 0, true, false);
@@ -5932,7 +5932,7 @@ void MainWindow::doActionClone()
         }
         else if (selectedEntities[i]->isKindOf(CC_MESH))
         {
-            ccGenericMesh* clone = static_cast<ccGenericMesh*>(selectedEntities[i])->clone();
+            ccGenericMesh* clone = ccHObjectCaster::ToGenericMesh(selectedEntities[i])->clone();
             if (clone)
             {
                 addToDB(clone, true, 0, true, false);
@@ -6306,11 +6306,11 @@ void MainWindow::doComputePlaneOrientation()
 				ccConsole::Print("\t- plane fitting RMS: %f",rms);
 
 				const ccGLMatrix& planteTrans = pPlane->getTransformation();
-				CCVector3 N(planteTrans.getColumn(2)); //plane normal
+				CCVector3 N = pPlane->getNormal(); //plane normal
 
-				//the plane normal is equivalent to the 3 first coefficients
+				//We always consider the normal with a positive 'Z' by default!
 				if(N.z < 0.0)
-					N *= -1.0; //always with a positive 'Z' by default!
+					N *= -1.0;
 				ccConsole::Print("\t- normal: (%f,%f,%f)",N.x,N.y,N.z);
 
 				//we compute strike & dip by the way
@@ -6554,7 +6554,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
             //by default, we apply processings on clouds only
             default:
                 if (entities[i]->isKindOf(CC_POINT_CLOUD))
-					cloud = static_cast<ccGenericPointCloud*>(entities[i]);
+					cloud = ccHObjectCaster::ToGenericPointCloud(entities[i]);
                 break;
         }
 
@@ -6711,8 +6711,8 @@ void MainWindow::doActionCloudCloudDist()
     if (!dlg.exec())
         return;
 
-    ccGenericPointCloud* compCloud = static_cast<ccGenericPointCloud*>(dlg.getFirstEntity());
-    ccGenericPointCloud* refCloud = static_cast<ccGenericPointCloud*>(dlg.getSecondEntity());
+    ccGenericPointCloud* compCloud = ccHObjectCaster::ToGenericPointCloud(dlg.getFirstEntity());
+    ccGenericPointCloud* refCloud = ccHObjectCaster::ToGenericPointCloud(dlg.getSecondEntity());
 
     //assert(!m_compDlg);
 	if (m_compDlg)
@@ -6767,7 +6767,7 @@ void MainWindow::doActionCloudMeshDist()
     if (meshNum==1)
     {
         compEnt = m_selectedEntities[isMesh[0] ? 1 : 0];
-        refMesh = static_cast<ccGenericMesh*>(m_selectedEntities[isMesh[0] ? 0 : 1]);
+        refMesh = ccHObjectCaster::ToGenericMesh(m_selectedEntities[isMesh[0] ? 0 : 1]);
     }
     else
     {
@@ -6778,7 +6778,7 @@ void MainWindow::doActionCloudMeshDist()
             return;
 
         compEnt = dlg.getFirstEntity();
-        refMesh = static_cast<ccGenericMesh*>(dlg.getSecondEntity());
+        refMesh = ccHObjectCaster::ToGenericMesh(dlg.getSecondEntity());
     }
 
     //assert(!m_compDlg);
@@ -6943,7 +6943,7 @@ void MainWindow::addToDB(ccHObject* obj,
 
 					if (child->isKindOf(CC_POINT_CLOUD))
 					{
-						ccGenericPointCloud* pc = static_cast<ccGenericPointCloud*>(child);
+						ccGenericPointCloud* pc = ccHObjectCaster::ToGenericPointCloud(child);
 						const double* oShift = pc->getOriginalShift();
 						assert(oShift);
 						pc->setOriginalShift(Pshift[0]+oShift[0],Pshift[1]+oShift[1],Pshift[2]+oShift[2]);

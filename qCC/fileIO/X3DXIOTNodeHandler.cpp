@@ -154,7 +154,7 @@ int X3DXIOTNodeHandler::startCoordinate(const X3DAttributes &attr)
 	//cloud = parent vertices?
 	if (m_currentLeaf->isKindOf(CC_MESH))
 	{
-		ccGenericMesh* mesh = static_cast<ccGenericMesh*>(m_currentLeaf);
+		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(m_currentLeaf);
 		if (mesh->getAssociatedCloud()==0)
 		{
 			mesh->setAssociatedCloud(cloud);

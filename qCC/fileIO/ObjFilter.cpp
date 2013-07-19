@@ -45,7 +45,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (!entity->isKindOf(CC_MESH))
 		return CC_FERR_BAD_ENTITY_TYPE;
 
-	ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
+	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 	if (mesh->size()==0)
 	{
 		ccConsole::Warning(QString("[ObjFilter] No facet in mesh '%1'!").arg(mesh->getName()));
@@ -135,7 +135,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile)
 			{
 				ccHObject* child = subMesh->getChild(i);
 				if (child->isKindOf(CC_MESH))
-					subMeshes.push_back(static_cast<ccGenericMesh*>(child));
+					subMeshes.push_back(ccHObjectCaster::ToGenericMesh(child));
 			}
 		}
 		else if (subMesh->isA(CC_MESH))

@@ -37,7 +37,7 @@
 
 ccMeshGroup::ccMeshGroup(ccGenericPointCloud* vertices)
     : ccGenericMesh(vertices, "Mesh Group")
-	, currentChildIndex(-1)
+	, m_currentChildIndex(0)
 {
     showColors(true);
     showNormals(true);
@@ -49,11 +49,12 @@ ccMeshGroup::ccMeshGroup(ccGenericPointCloud* vertices)
 
 unsigned ccMeshGroup::size() const
 {
-    unsigned i,s=0;
-    for (i=0;i<m_children.size();++i)
-        if (m_children[i]->isKindOf(CC_MESH))
-            s+= static_cast<ccGenericMesh*>(m_children[i])->size();
-
+    unsigned s = 0;
+	{
+		for (unsigned i=0;i<m_children.size();++i)
+			if (m_children[i]->isKindOf(CC_MESH))
+				s += static_cast<ccGenericMesh*>(m_children[i])->size();
+	}
     return s;
 }
 
@@ -175,31 +176,32 @@ void ccMeshGroup::forEach(genericTriangleAction& anAction)
 
 void ccMeshGroup::placeIteratorAtBegining()
 {
-	currentChildIndex=-1;
     //let's look for the first sub-mesh!
-    while (++currentChildIndex<(int)m_children.size())
-    {
-        if (m_children[currentChildIndex]->isKindOf(CC_MESH))
+	for (m_currentChildIndex=0; m_currentChildIndex<m_children.size(); ++m_currentChildIndex)
+	{
+        if (m_children[m_currentChildIndex]->isKindOf(CC_MESH))
         {
-            static_cast<ccGenericMesh*>(m_children[currentChildIndex])->placeIteratorAtBegining();
-            break;
+            static_cast<ccGenericMesh*>(m_children[m_currentChildIndex])->placeIteratorAtBegining();
+            return;
         }
     }
 }
 
 CCLib::GenericTriangle* ccMeshGroup::_getNextTriangle() //temporary object
 {
-    if (currentChildIndex<(int)m_children.size())
+    if (m_currentChildIndex < m_children.size())
     {
-        CCLib::GenericTriangle* tri = static_cast<ccGenericMesh*>(m_children[currentChildIndex])->_getNextTriangle();
+		//try next triangle?
+        CCLib::GenericTriangle* tri = static_cast<ccGenericMesh*>(m_children[m_currentChildIndex])->_getNextTriangle();
         if (tri)
             return tri;
 
-        while (++currentChildIndex<(int)m_children.size())
+		//try next sub-mesh?
+        while (++m_currentChildIndex < m_children.size())
         {
-            if (m_children[currentChildIndex]->isKindOf(CC_MESH))
+            if (m_children[m_currentChildIndex]->isKindOf(CC_MESH))
             {
-                static_cast<ccGenericMesh*>(m_children[currentChildIndex])->placeIteratorAtBegining();
+                static_cast<ccGenericMesh*>(m_children[m_currentChildIndex])->placeIteratorAtBegining();
                 return _getNextTriangle();
             }
         }
@@ -210,17 +212,19 @@ CCLib::GenericTriangle* ccMeshGroup::_getNextTriangle() //temporary object
 
 CCLib::TriangleSummitsIndexes* ccMeshGroup::getNextTriangleIndexes()
 {
-    if (currentChildIndex<int(m_children.size()))
+    if (m_currentChildIndex < m_children.size())
     {
-        CCLib::TriangleSummitsIndexes* tsi = static_cast<ccGenericMesh*>(m_children[currentChildIndex])->getNextTriangleIndexes();
+		//try next triangle?
+        CCLib::TriangleSummitsIndexes* tsi = static_cast<ccGenericMesh*>(m_children[m_currentChildIndex])->getNextTriangleIndexes();
         if (tsi)
             return tsi;
 
-        while (++currentChildIndex<(int)m_children.size())
+		//try next sub-mesh?
+        while (++m_currentChildIndex<(int)m_children.size())
         {
-            if (m_children[currentChildIndex]->isKindOf(CC_MESH))
+            if (m_children[m_currentChildIndex]->isKindOf(CC_MESH))
             {
-                static_cast<ccGenericMesh*>(m_children[currentChildIndex])->placeIteratorAtBegining();
+                static_cast<ccGenericMesh*>(m_children[m_currentChildIndex])->placeIteratorAtBegining();
                 return getNextTriangleIndexes();
             }
         }
@@ -449,7 +453,11 @@ void ccMeshGroup::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateTyp
 
 void ccMeshGroup::addChild(ccHObject* anObject, bool dependant/*=true*/)
 {
-    assert(anObject->isKindOf(CC_MESH) ? static_cast<ccGenericMesh*>(anObject)->getAssociatedCloud()==m_associatedCloud : true);
+    if (anObject->isKindOf(CC_MESH) && (static_cast<ccGenericMesh*>(anObject)->getAssociatedCloud() != m_associatedCloud || anObject->isA(CC_FACET)))
+	{
+		ccLog::Error("Internal error: can't add to a ccMeshGroup a mesh-like child that is not a true mesh sharing the same vertices!");
+		return;
+	}
 
     ccHObject::addChild(anObject,dependant);
 }

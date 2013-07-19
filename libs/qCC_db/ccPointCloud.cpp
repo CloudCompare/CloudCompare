@@ -147,6 +147,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 
 	//visibility
 	result->setVisible(isVisible());
+	result->setDisplay(getDisplay());
 
 	//RGB colors
 	if (hasColors())

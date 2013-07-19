@@ -94,7 +94,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
         return CC_FERR_NO_ERROR; //this is not a severe error (the process can go on)
     }
 
-    ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(sensor->getParent());
+    ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(sensor->getParent());
 
     //the depth map associated to this sensor
     const ccGBLSensor::DepthBuffer& db = sensor->getDepthBuffer();

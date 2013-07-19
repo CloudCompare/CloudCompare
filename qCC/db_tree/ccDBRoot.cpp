@@ -293,7 +293,7 @@ void ccDBRoot::deleteSelectedEntities()
 		{
 			//last check: mesh vertices
 			if (obj->isKindOf(CC_POINT_CLOUD) && obj->getParent()->isKindOf(CC_MESH))
-				if (static_cast<ccGenericMesh*>(obj->getParent())->getAssociatedCloud() == obj)
+				if (ccHObjectCaster::ToGenericMesh(obj->getParent())->getAssociatedCloud() == obj)
 				{
 					ccConsole::Warning("Mesh vertices can't be deleted without their parent mesh!");
 					continue;
@@ -355,7 +355,7 @@ void ccDBRoot::deleteSelectedEntities()
 		{
 			//specific case: the object is a mesh and its parent is its vertices!
 			//(can happen if a Delaunay mesh is computed directly in CC)
-			if (anObject->getParent() && anObject->getParent() == static_cast<ccGenericMesh*>(anObject)->getAssociatedCloud())
+			if (anObject->getParent() && anObject->getParent() == ccHObjectCaster::ToGenericMesh(anObject)->getAssociatedCloud())
 				anObject->getParent()->setVisible(true);
 		}
 
@@ -424,6 +424,7 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 			case CC_BOX:	
 			case CC_DISH:	
 			case CC_EXTRU:	
+			case CC_FACET:	
                 if (locked)
                     return QIcon(QString::fromUtf8(":/CC/images/dbMiscGeomSymbolLocked.png"));
                 else
@@ -904,7 +905,7 @@ int ccDBRoot::getSelectedEntities(ccHObject::Container& selEntities,
 
             if (obj->isKindOf(CC_POINT_CLOUD))
             {
-                ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(obj);
+                ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
                 info->cloudCount++;
                 info->octreeCount += int(cloud->getOctree()!=NULL);
             }
@@ -1023,7 +1024,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 			if (item->isKindOf(CC_POINT_CLOUD))
 			{
 				//point cloud == mesh vertices?
-				if (oldParent->isKindOf(CC_MESH) && static_cast<ccGenericMesh*>(oldParent)->getAssociatedCloud() == item)
+				if (oldParent->isKindOf(CC_MESH) && ccHObjectCaster::ToGenericMesh(oldParent)->getAssociatedCloud() == item)
 					if (oldParent != newParent)
 					{
 						ccConsole::Error("Vertices can't leave their parent mesh!");
@@ -1033,7 +1034,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 			else if (item->isKindOf(CC_MESH))
 			{
 				//a mesh can't leave it's mesh group
-				if (oldParent->isA(CC_MESH_GROUP) && static_cast<ccGenericMesh*>(item)->getAssociatedCloud() == static_cast<ccGenericMesh*>(oldParent)->getAssociatedCloud())
+				if (oldParent->isA(CC_MESH_GROUP) && ccHObjectCaster::ToGenericMesh(item)->getAssociatedCloud() == ccHObjectCaster::ToGenericMesh(oldParent)->getAssociatedCloud())
 				{
 					if (oldParent != newParent)
 					{
@@ -1042,7 +1043,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 					}
 				}
 				//a mesh can't leave it's associated cloud
-				else if (oldParent->isKindOf(CC_POINT_CLOUD) &&  static_cast<ccGenericMesh*>(item)->getAssociatedCloud() == oldParent)
+				else if (oldParent->isKindOf(CC_POINT_CLOUD) &&  ccHObjectCaster::ToGenericMesh(item)->getAssociatedCloud() == oldParent)
 				{
 					if (oldParent != newParent)
 					{
@@ -1051,7 +1052,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 					}
 				}
 				//a mesh can't be inserted in a mesh group
-				else if (newParent->isA(CC_MESH_GROUP) && static_cast<ccGenericMesh*>(item)->getAssociatedCloud() != static_cast<ccGenericMesh*>(newParent)->getAssociatedCloud())
+				else if (newParent->isA(CC_MESH_GROUP) && ccHObjectCaster::ToGenericMesh(item)->getAssociatedCloud() != ccHObjectCaster::ToGenericMesh(newParent)->getAssociatedCloud())
 				{
 					ccConsole::Error("Outside meshes can't be added to mesh groups!");
 					return false;

@@ -22,6 +22,7 @@
 
 //qCC_db
 #include <ccGLUtils.h>
+#include <ccHObjectCaster.h>
 
 //CCLib
 #include <CCConst.h>
@@ -215,7 +216,7 @@ void ccCameraParamEditDlg::processPickedPoint(int cloudUniqueID, unsigned pointI
 		obj = db->find(cloudUniqueID);
 	if (obj && obj->isKindOf(CC_POINT_CLOUD))
 	{
-		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(obj);
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
 		const CCVector3* P = cloud->getPoint(pointIndex);
 
 		if (P)

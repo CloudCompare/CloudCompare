@@ -282,7 +282,7 @@ void ccPointPairRegistrationDlg::processPickedPoint(int cloudUniqueID, unsigned 
 	ccHObject* obj = db->find(cloudUniqueID);
 	if (obj && obj->isKindOf(CC_POINT_CLOUD))
 	{
-		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(obj);
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
 		const CCVector3* P = cloud->getPoint(pointIndex);
 
 		if (P)

@@ -26,6 +26,7 @@
 #include <ccCone.h>
 #include <ccSphere.h>
 #include <ccTorus.h>
+#include <ccHObjectCaster.h>
 
 //system
 #include <assert.h>
@@ -194,7 +195,7 @@ void ccClipBox::setAssociatedEntity(ccHObject* associatedEntity)
 	//release precedent one
 	if (m_associatedEntity && m_associatedEntity->isKindOf(CC_POINT_CLOUD))
 	{
-		static_cast<ccGenericPointCloud*>(m_associatedEntity)->unallocateVisibilityArray();
+		ccHObjectCaster::ToGenericPointCloud(m_associatedEntity)->unallocateVisibilityArray();
 	}
 	m_associatedEntity = 0;
 
@@ -207,7 +208,7 @@ void ccClipBox::setAssociatedEntity(ccHObject* associatedEntity)
 		}
 		else
 		{
-			if (static_cast<ccGenericPointCloud*>(associatedEntity)->razVisibilityArray())
+			if (ccHObjectCaster::ToGenericPointCloud(associatedEntity)->razVisibilityArray())
 			{
 				m_associatedEntity = associatedEntity;
 			}
@@ -497,7 +498,7 @@ void ccClipBox::update(bool shrink/*=false*/)
 	if (!m_associatedEntity || !m_associatedEntity->isKindOf(CC_POINT_CLOUD))
 		return;
 
-	ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(m_associatedEntity);
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_associatedEntity);
 	unsigned count = cloud->size();
 	if (count==0 || !cloud->isVisibilityTableInstantiated())
 	{

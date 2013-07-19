@@ -47,7 +47,7 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (!entity->isKindOf(CC_MESH))
 		return CC_FERR_BAD_ENTITY_TYPE;
 
-	ccGenericMesh* mesh = static_cast<ccGenericMesh*>(entity);
+	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 	if (mesh->size()==0)
 	{
 		ccConsole::Warning(QString("[ObjFilter] No facet in mesh '%1'!").arg(mesh->getName()));

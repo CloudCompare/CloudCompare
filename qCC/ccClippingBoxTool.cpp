@@ -191,7 +191,7 @@ void ccClippingBoxTool::exportCloud()
 
 	if (obj && obj->isKindOf(CC_POINT_CLOUD))
 	{
-		ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(obj)->createNewCloudFromVisibilitySelection(false);
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
 		MainWindow::TheInstance()->addToDB(cloud);
 	}
 }

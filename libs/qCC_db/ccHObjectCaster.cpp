@@ -23,6 +23,8 @@
 #include "ccPointCloud.h"
 #include "ccGenericMesh.h"
 #include "ccMesh.h"
+#include "ccFacet.h"
+#include "ccPolyline.h"
 #include "ccMeshGroup.h"
 #include "ccOctree.h"
 #include "ccKdTree.h"
@@ -41,22 +43,23 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 	if (lockedVertices)
 		*lockedVertices = false;
 
-	if (!obj)
-        return 0;
-
-    if (obj->isA(CC_POINT_CLOUD))
-        return static_cast<ccPointCloud*>(obj);
-
-    if (obj->isKindOf(CC_MESH))
-    {
-        ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
-        if (vertices && vertices->isA(CC_POINT_CLOUD))
-        {
-			if (lockedVertices)
-				*lockedVertices = vertices->isLocked();
-            return static_cast<ccPointCloud*>(vertices);
-        }
-    }
+	if (obj)
+	{
+		if (obj->isA(CC_POINT_CLOUD))
+		{
+			return static_cast<ccPointCloud*>(obj);
+		}
+		else if (obj->isKindOf(CC_MESH))
+		{
+			ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
+			if (vertices)
+			{
+				if (lockedVertices)
+					*lockedVertices = vertices->isLocked();
+				return ccHObjectCaster::ToPointCloud(vertices);
+			}
+		}
+	}
 
     return 0;
 }
@@ -66,34 +69,45 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 	if (lockedVertices)
 		*lockedVertices = false;
 
-    if (!obj)
-        return 0;
-
-    if (obj->isKindOf(CC_POINT_CLOUD))
-        return static_cast<ccGenericPointCloud*>(obj);
-
-    if (obj->isKindOf(CC_MESH))
-    {
-        ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
-        if (vertices)
-        {
-			if (lockedVertices)
-				*lockedVertices = vertices->isLocked();
-            return static_cast<ccGenericPointCloud*>(vertices);
-        }
-    }
+    if (obj)
+	{
+		if (obj->isKindOf(CC_POINT_CLOUD))
+		{
+			return static_cast<ccGenericPointCloud*>(obj);
+		}
+		else if (obj->isKindOf(CC_MESH))
+		{
+			ccGenericPointCloud* vertices = static_cast<ccGenericMesh*>(obj)->getAssociatedCloud();
+			if (vertices)
+			{
+				if (lockedVertices)
+					*lockedVertices = vertices->isLocked();
+				return vertices;
+			}
+		}
+	}
 
     return 0;
 }
 
 ccGenericMesh* ccHObjectCaster::ToGenericMesh(ccHObject* obj)
 {
-	return obj && obj->isKindOf(CC_MESH) ? static_cast<ccGenericMesh*>(obj) : 0;
+	return (obj && obj->isKindOf(CC_MESH) ? static_cast<ccGenericMesh*>(obj) : 0);
 }
 
 ccMesh* ccHObjectCaster::ToMesh(ccHObject* obj)
 {
-	return obj && obj->isA(CC_MESH) ? static_cast<ccMesh*>(obj) : 0;
+	return (obj && obj->isA(CC_MESH) ? static_cast<ccMesh*>(obj) : 0);
+}
+
+ccPolyline* ccHObjectCaster::ToPolyline(ccHObject* obj)
+{
+	return (obj && obj->isA(CC_POLY_LINE) ? static_cast<ccPolyline*>(obj) : 0);
+}
+
+ccFacet* ccHObjectCaster::ToFacet(ccHObject* obj)
+{
+	return obj && obj->isA(CC_FACET) ? static_cast<ccFacet*>(obj) : 0;
 }
 
 ccMeshGroup* ccHObjectCaster::ToMeshGroup(ccHObject* obj)

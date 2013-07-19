@@ -236,16 +236,25 @@ void CCMiscTools::ComputeBaseVectors(const PointCoordinateType *aPlane, PointCoo
 {
     //on cree un vecteur appartenant au plan (et donc orthogonal a "a")
     //c'est le premier de la base
-    u[0] = -aPlane[1];
-    u[1] = aPlane[0];
-    u[2] = 0;
+	if (aPlane[0] != 0 || aPlane[1] != 0)
+	{
+		u[0] = -aPlane[1];
+		u[1] = aPlane[0];
+		u[2] = 0;
+		
+		//on deduit le deuxieme vecteur de la base par produit vectoriel
+		CCVector3::vcross(aPlane,u,v);
 
-    //on deduit le deuxieme vecteur de la base par produit vectoriel
-    CCVector3::vcross(aPlane,u,v);
-
-    //on normalise u et v
-    CCVector3::vnormalize(u);
-    CCVector3::vnormalize(v);
+		//on normalise u et v
+		CCVector3::vnormalize(u);
+		CCVector3::vnormalize(v);
+	}
+	else
+	{
+		u[0] = (PointCoordinateType)1.0; v[0] = (PointCoordinateType)0.0;
+		u[1] = (PointCoordinateType)0.0; v[1] = (PointCoordinateType)(aPlane[2] < 0 ? -1.0 : 1.0);
+		u[2] = (PointCoordinateType)0.0; v[2] = (PointCoordinateType)0.0;
+	}
 
     if (n)
     {

@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>21</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -152,6 +152,7 @@
      <addaction name="actionRenameSF"/>
      <addaction name="separator"/>
      <addaction name="actionAddConstantSF"/>
+     <addaction name="actionAddIdField"/>
      <addaction name="actionScalarFieldArithmetic"/>
      <addaction name="separator"/>
      <addaction name="actionOpenColorScalesManager"/>
@@ -370,8 +371,8 @@
   <widget class="QDockWidget" name="DockableDBTree">
    <property name="minimumSize">
     <size>
-     <width>109</width>
-     <height>147</height>
+     <width>135</width>
+     <height>155</height>
     </size>
    </property>
    <property name="floating">
@@ -622,7 +623,7 @@
    <property name="minimumSize">
     <size>
      <width>100</width>
-     <height>111</height>
+     <height>116</height>
     </size>
    </property>
    <property name="floating">
@@ -2323,6 +2324,14 @@
   <action name="actionTest">
    <property name="text">
     <string>test</string>
+   </property>
+  </action>
+  <action name="actionAddIdField">
+   <property name="text">
+    <string>Add IDs as scalar field</string>
+   </property>
+   <property name="toolTip">
+    <string>Adds a scalar field with ordered integers for each point in the cloud</string>
    </property>
   </action>
  </widget>

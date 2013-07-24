@@ -862,6 +862,7 @@ void MainWindow::connectActions()
     connect(actionConvertToRGB,                 SIGNAL(triggered()),    this,       SLOT(doActionSFConvertToRGB()));
 	connect(actionRenameSF,						SIGNAL(triggered()),    this,       SLOT(doActionRenameSF()));
 	connect(actionOpenColorScalesManager,		SIGNAL(triggered()),    this,       SLOT(doActionOpenColorScalesManager()));
+    connect(actionAddIdField,                   SIGNAL(triggered()),    this,       SLOT(doActionAddIdField()));
     connect(actionDeleteScalarField,            SIGNAL(triggered()),    this,       SLOT(doActionDeleteScalarField()));
     connect(actionDeleteAllSF,                  SIGNAL(triggered()),    this,       SLOT(doActionDeleteAllSF()));
     //"Edit" menu
@@ -2617,6 +2618,35 @@ void MainWindow::doActionOpenColorScalesManager()
 
 	updateUI();
 
+}
+
+void MainWindow::doActionAddIdField()
+{
+    size_t i,selNum = m_selectedEntities.size();
+    for (i=0;i<selNum;++i)
+    {
+        ccGenericPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]);
+        if (cloud) //TODO
+        {
+            ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+            ccScalarField* sf = new ccScalarField;
+
+            sf->resize(pc->size());
+            sf->setName("Id");
+
+            for (int j = 0 ; j < cloud->size(); j ++)
+                sf->setValue(j, j);
+
+
+            sf->computeMinAndMax();
+            int id = pc->addScalarField(sf);
+
+            pc->setCurrentScalarField(id);
+
+        }
+    }
+
+    updateUI();
 }
 
 PointCoordinateType MainWindow::GetDefaultCloudKernelSize(const ccHObject::Container& entities)
@@ -7699,6 +7729,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionFilterByValue->setEnabled(atLeastOneSF);
     actionConvertToRGB->setEnabled(atLeastOneSF);
 	actionRenameSF->setEnabled(atLeastOneSF);
+	actionAddIdField->setEnabled(atLeastOneCloud);
     actionComputeStatParams->setEnabled(atLeastOneSF);
     actionShowHistogram->setEnabled(atLeastOneSF);
     actionGaussianFilter->setEnabled(atLeastOneSF);

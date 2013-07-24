@@ -30,7 +30,9 @@
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
 #include <StatisticalOutliersRemover.h>
-#include <CurveFitting.h>
+#ifdef _DEBUG
+    #include <CurveFitting.h>
+#endif
 //#include <ComputeSPINImages.h>
 
 

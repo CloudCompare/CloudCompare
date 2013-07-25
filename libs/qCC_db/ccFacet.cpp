@@ -64,8 +64,8 @@ void ccFacet::clearInternalRepresentation()
 ccFacet::~ccFacet()
 {
 	clearInternalRepresentation();
-	if (m_originPoints)
-		delete m_originPoints;
+	//if (m_originPoints) //DGM: m_originPoints is a child now
+	//	delete m_originPoints;
 }
 
 void ccFacet::setDisplay_recursive(ccGenericGLDisplay* win)
@@ -195,6 +195,9 @@ ccFacet* ccFacet::Create(ccPointCloud* points, bool transferOwnership/*=false*/)
 		//create facet structure
 		facet = new ccFacet();
 		facet->m_originPoints = clonedPoints;
+		facet->m_originPoints->setEnabled(false);
+		facet->m_originPoints->setLocked(true);
+		facet->addChild(facet->m_originPoints);
 		memcpy(facet->m_planeEquation,planeEquation,sizeof(PointCoordinateType)*4);
 		facet->m_center = *Yk.getGravityCenter();
 		facet->m_rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(clonedPoints, planeEquation);
@@ -387,12 +390,29 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
     if (MACRO_Draw3D(context))
     {
-		if (m_originPoints)
-			m_originPoints->draw(context);
-		if (m_contourPolyline)
-			m_contourPolyline->draw(context);
+		CC_DRAW_CONTEXT localContext = context;
+
+		bool pickingMode = MACRO_DrawEntityNames(context);
+		if (pickingMode)
+		{
+			if (MACRO_DrawFastNamesOnly(context)) //not particularly fast ;)
+				return;
+
+			glPushName(getUniqueID());
+			localContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sub-entities won't push their own!
+		}
+
+		//if (m_originPoints && !pickingMode) //DGM: m_originPoints is a child now!
+		//	m_originPoints->draw(localContext);
+		if (m_contourPolyline && !pickingMode)
+			m_contourPolyline->draw(localContext);
 		if (m_polygonMesh)
-			m_polygonMesh->draw(context);
+			m_polygonMesh->draw(localContext);
+
+		if (pickingMode)
+		{
+			glPopName();
+		}
     }
 }
 
@@ -489,6 +509,7 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion)
 			m_originPoints = new ccPointCloud();
 			if (!m_originPoints->fromFile(in,dataVersion))
 				return false;
+			addChild(m_originPoints);
 		}
 	}
 

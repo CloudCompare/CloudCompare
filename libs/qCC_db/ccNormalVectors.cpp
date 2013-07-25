@@ -696,6 +696,14 @@ void ccNormalVectors::Quant_dequantize_normal(unsigned q, unsigned level, float*
 	res[2] = ((sector & 1) != 0 ? -(box[5] + box[2]) : box[5] + box[2]);
 }
 
+QString ccNormalVectors::ConvertStrikeAndDipToString(double& strike, double& dip)
+{
+	int iStrike = (int)strike;
+	int iDip = (int)dip;
+
+	return QString("N%1°E - %2°SE").arg(iStrike,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
+}
+
 void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike, double& dip)
 {
 	//let's compute strike & dip also

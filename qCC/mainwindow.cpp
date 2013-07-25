@@ -6344,12 +6344,10 @@ void MainWindow::doComputePlaneOrientation()
 				ccConsole::Print("\t- normal: (%f,%f,%f)",N.x,N.y,N.z);
 
 				//we compute strike & dip by the way
-				double strike,dip;
+				double strike = 0.0, dip = 0.0;
 				ccNormalVectors::ConvertNormalToStrikeAndDip(N,strike,dip);
+				QString strikeAndDipStr = ccNormalVectors::ConvertStrikeAndDipToString(strike,dip);
 
-                int iStrike = (int)strike;
-                int iDip = (int)dip;
-				QString strikeAndDipStr = QString("N%1°E - %2°SE").arg(iStrike,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
 				ccConsole::Print(QString("\t- strike/dip: %1").arg(strikeAndDipStr));
 
 				//hack: output the transformation matrix that would make this normal points towards +Z

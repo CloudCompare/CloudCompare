@@ -91,10 +91,17 @@ public:
 
 	//! Converts a normal vector to geological 'strike & dip' parameters (N[dip]°E - [strike]°SE)
 	/** \param[in] N normal (should be normalized!)
-		\param[out] strike strike
-		\param[out] dip dip
+		\param[out] strike strike value (in degrees)
+		\param[out] dip dip value (in degrees)
 	**/
 	static void ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike, double& dip);
+
+	//! Converts a geological 'strike & dip' parameters (N[dip]°E - [strike]°SE) to a string
+	/** \param[in] strike strike value (in degrees)
+		\param[in] dip dip  value (in degrees)
+		\return formatted string "N[strike]°E - [dip]°SE"
+	**/
+	static QString ConvertStrikeAndDipToString(double& strike, double& dip);
 
 	//! Converts a normal vector to HSV color space
 	/** Uses 'strike & dip' parameters (H=strike, S=dip, V=constant)

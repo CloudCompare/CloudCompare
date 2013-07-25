@@ -1,5 +1,9 @@
 *** CloudCompare versions history ***
 
+v2.5.1 ??/??/2013
+- bug fix:
+	* The 'max distance' parameter for cloud/mesh distance computation was incorrectly squared before being used!
+
 v2.5.0 07/12/2013
 - New version numbering scheme (build index appended instead of the release date)
 - New tool: "Cross section"

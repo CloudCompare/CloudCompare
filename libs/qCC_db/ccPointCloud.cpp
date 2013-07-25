@@ -2082,7 +2082,7 @@ void ccPointCloud::setCurrentDisplayedScalarField(int index)
 
 void ccPointCloud::deleteScalarField(int index)
 {
-	//we 'store' the currently displayed SF, as the SF order maybe mixed up
+	//we 'store' the currently displayed SF, as the SF order may be mixed up
 	setCurrentInScalarField(m_currentDisplayedScalarFieldIndex);
 
 	//the father does all the work

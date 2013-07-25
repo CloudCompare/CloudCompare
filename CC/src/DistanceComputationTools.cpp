@@ -895,10 +895,8 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 	//bounded search
 	bool boundedSearch=(maxSearchDist>=0);
 	int maxNeighbourhoodLength=0; //distance maximale de recherche des voisinages, dans le cas o\F9 "maxSearchDist" est defini
-	ScalarType maxSearchDistSq2=0; //time saver
 	if (boundedSearch)
 	{
-		maxSearchDistSq2 = maxSearchDist*maxSearchDist;
 		maxNeighbourhoodLength = int(ceil(maxSearchDist/cellLength+(ScalarType)((sqrt(2.0)-1.0)/2.0)));
 	}
 
@@ -1014,8 +1012,8 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 
 			//if (boundedSearch)  //should always be true if we are here!
 			{
-				maxSearchDistSq2 = std::max(maxSearchDist,maxRadius);
-				maxSearchDistSq2 *= maxSearchDistSq2;
+				if (maxRadius > maxSearchDist)
+					maxSearchDist = maxRadius;
 			}
 		}
 
@@ -1059,7 +1057,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 			maxDist = std::min(maxDistToBoundaries,maxNeighbourhoodLength);
 
 			for (unsigned j=0;j<remainingPoints;++j)
-				Yk.setPointScalarValue(j,maxSearchDistSq2);
+				Yk.setPointScalarValue(j,maxSearchDist);
 		}
 
 		//on va essayer de trouver les triangles les plus proches de chaque point du "voisinage" Yk

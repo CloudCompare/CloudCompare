@@ -102,19 +102,21 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 		//look for textures/materials in case there's no color
 		//if (!mesh->hasColors())
 		{
+			unsigned textureCount = 0;
 			const ccMaterialSet* materials = mesh->getMaterialSet();
 			assert(materials);
-
-			unsigned textureCount = 0;
-			for (size_t i=0; i < materials->size(); ++i)
+			if (materials)
 			{
-				//texture?
-				if (materials->at(i).texID != 0)
+				for (size_t i=0; i < materials->size(); ++i)
 				{
-					//save first encountered texture
-					if (!material)
-						material = &materials->at(i);
-					++textureCount;
+					//texture?
+					if (materials->at(i).texID != 0)
+					{
+						//save first encountered texture
+						if (!material)
+							material = &materials->at(i);
+						++textureCount;
+					}
 				}
 			}
 
@@ -125,7 +127,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 				{
 					//just one texture/material --> we can handle it 
 				}
-				else /*if (materials->size() > 1)*/
+				else if (materials->size() > 1)
 				{
 					if (mesh->hasColors())
 					{
@@ -149,8 +151,12 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 						}
 					}
 				}
+				else
+				{
+					assert(false);
+				}
 			}
-			else //multiple materials
+			else if (textureCount > 1) //multiple materials
 			{
 				assert(materials->size() != 0);
 				//we can forget the (first) texture (if any)

@@ -873,6 +873,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						triGroup->setTriNormsTable(normals);
 						triGroup->showTriNorms(true);
 					}
+					if (materials)
+					{
+						triGroup->setMaterialSet(materials);
+						triGroup->showMaterials(true);
+					}
 					baseMesh = triGroup;
 				}
 

@@ -83,7 +83,7 @@ public:
 protected:
 
 	//! Changes the current number of classes
-	/** Warning: n should be a mutliple of 4.
+	/** Warning: n should be a multiple of 4.
 	**/
 	void setNumberOfClasses(unsigned  n);
 

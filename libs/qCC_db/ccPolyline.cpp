@@ -122,7 +122,7 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
 	if (!ccHObject::toFile_MeOnly(out))
 		return false;
 
-	//we can't save the associated cloud here (as it may be shared by mutliple polylines)
+	//we can't save the associated cloud here (as it may be shared by multiple polylines)
 	//so instead we save it's unique ID (dataVersion>=28)
 	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
 	ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(m_theAssociatedCloud);
@@ -175,7 +175,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion)
 	if (dataVersion<28)
 		return false;
 
-	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by mutliple polylines)
+	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple polylines)
 	//we only store its unique ID (dataVersion>=28) --> we hope we will find it at loading time (i.e. this
 	//is the responsibility of the caller to make sure that all dependencies are saved together)
 	uint32_t vertUniqueID = 0;

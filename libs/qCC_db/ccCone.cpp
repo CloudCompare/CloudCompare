@@ -157,7 +157,7 @@ bool ccCone::buildUp()
 	
 	//mesh faces
 	{
-		assert(m_triIndexes);
+		assert(m_triVertIndexes);
 
 		unsigned bottomIndex = 2;
 		unsigned topIndex = 2+(singlePointBottom ? 0 : steps);

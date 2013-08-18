@@ -142,7 +142,7 @@ public:
 									double* maxCorner=0,
 									double* realCorners = 0) const;
 
-	//! Projective ortho-rectification for mutliple images
+	//! Projective ortho-rectification for multiple images
 	/** \param images set of N calibrated images
 		\param a {a0, a1, a2} triplets for all images (size: 3*N)
 		\param b {b0, b1, b2} triplets for all images (size: 3*N)

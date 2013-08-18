@@ -38,7 +38,7 @@ public:
     //! Default constructor
     /** \param name object name (optional)
     **/
-    ccHObject(QString name=QString());
+    ccHObject(QString name = QString());
 
     //! Default destructor
     virtual ~ccHObject();
@@ -51,7 +51,7 @@ public:
 		\param name object name (optional)
 		\return instantiated object (if type is valid) or 0
 	**/
-	static ccHObject* New(unsigned objectType, const char* name=0);
+	static ccHObject* New(unsigned objectType, const char* name = 0);
 
     //! Returns class ID
     /** \return class unique ID
@@ -70,7 +70,7 @@ public:
         \param dependant specifies if the child object should be deleted with its parent
 		\param insertIndex insertion index (if <0, item is simply appended to the children list)
     **/
-    virtual void addChild(ccHObject* anObject, bool dependant=true, int insertIndex=-1);
+    virtual void addChild(ccHObject* anObject, bool dependant = true, int insertIndex = -1);
 
     //! Returns the number of children
     /** \return children number
@@ -98,7 +98,7 @@ public:
         \param filter pattern for children selection
         \return number of collected children
     **/
-    unsigned filterChildren(Container& filteredChildren, bool recursive=false, CC_CLASS_ENUM filter = CC_OBJECT) const;
+    unsigned filterChildren(Container& filteredChildren, bool recursive = false, CC_CLASS_ENUM filter = CC_OBJECT) const;
 
     //! Removes a specific child
     void removeChild(const ccHObject* anObject, bool preventAutoDelete = false);
@@ -130,7 +130,7 @@ public:
     bool isAncestorOf(const ccHObject *anObject) const;
 
     //Inherited from ccDrawableObject
-    virtual ccBBox getBB(bool relative=true, bool withGLfeatures=false, const ccGenericGLDisplay* window=NULL);
+    virtual ccBBox getBB(bool relative = true, bool withGLfeatures = false, const ccGenericGLDisplay* window = NULL);
     virtual void draw(CC_DRAW_CONTEXT& context);
 
 	//! Returns whether the object is actually displayed (visible) or not
@@ -146,7 +146,7 @@ public:
 	inline virtual void recursiveName() \
 	{ \
 		baseName(); \
-		for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it) \
+		for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it) \
 			(*it)->recursiveName(); \
 	} \
 
@@ -155,9 +155,8 @@ public:
 	inline virtual void recursiveName() \
 	{ \
 		baseName(); \
-		if (getClassID() != CC_MESH_GROUP) \
-			for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it) \
-				(*it)->recursiveName(); \
+		for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it) \
+			(*it)->recursiveName(); \
 	} \
 
 	//1 parameter
@@ -165,7 +164,7 @@ public:
 	inline virtual void recursiveName(param1Type p) \
 	{ \
 		baseName(p); \
-		for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it) \
+		for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it) \
 			(*it)->recursiveName(p); \
 	} \
 
@@ -299,11 +298,11 @@ protected:
 inline void RemoveSiblings(const ccHObject::Container& origin, ccHObject::Container& dest)
 {
 	size_t count = origin.size();
-	for (size_t i=0;i<count;++i)
+	for (size_t i=0; i<count; ++i)
 	{
 		//we don't take objects that are siblings of others
 		bool isSiblingOfAnotherOne = false;
-		for (size_t j=0;j<count;++j)
+		for (size_t j=0; j<count; ++j)
 		{
 			if (i != j && origin[j]->isAncestorOf(origin[i]))
 			{

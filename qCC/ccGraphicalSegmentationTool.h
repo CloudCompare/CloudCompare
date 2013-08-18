@@ -25,7 +25,7 @@
 #include <ccHObject.h>
 
 //system
-#include <vector>
+#include <set>
 
 //GUI
 #include <ui_graphicalSegmentationDlg.h>
@@ -56,16 +56,16 @@ public:
 	//! Returns the number of entites currently in the the 'to be segmented' pool
 	unsigned getNumberOfValidEntities();
 
-	//! Returns a given entity in the the 'to be segmented' pool
-	ccHObject* getEntity(unsigned pos);
+	//! Returns the active 'to be segmented' set
+	const std::set<ccHObject*>& entities() const { return m_toSegment; }
 
 	//inherited from ccOverlayDialog
     virtual bool linkWith(ccGLWindow* win);
 	virtual bool start();
 	virtual void stop(bool accepted);
 
-	//! Returns whether hidden points should be delete after segmentation
-	bool deleteHiddenPoints() const { return m_deleteHiddenPoints; }
+	//! Returns whether hidden parts should be delete after segmentation
+	bool deleteHiddenParts() const { return m_deleteHiddenParts; }
 
 	//! Remove entities from the 'to be segmented' pool
 	void removeAllEntities(bool unallocateVisibilityArrays);
@@ -89,7 +89,7 @@ protected slots:
 protected:
 
 	//! To be segmented entities
-	ccHObject::Container m_toSegment;
+	std::set<ccHObject*> m_toSegment;
 
 	//! Whether something has changed or not (for proper 'cancel')
 	bool m_somethingHasChanged;
@@ -118,8 +118,8 @@ protected:
 	//! Selection mode
 	bool m_rectangularSelection;
 
-	//! Whether to delete or not hidden points after segmentation
-	bool m_deleteHiddenPoints;
+	//! Whether to delete hidden parts after segmentation
+	bool m_deleteHiddenParts;
 };
 
 #endif

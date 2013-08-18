@@ -23,9 +23,9 @@
 #include "ccPointCloud.h"
 #include "ccGenericMesh.h"
 #include "ccMesh.h"
+#include "ccSubMesh.h"
 #include "ccFacet.h"
 #include "ccPolyline.h"
-#include "ccMeshGroup.h"
 #include "ccOctree.h"
 #include "ccKdTree.h"
 #include "ccImage.h"
@@ -100,6 +100,11 @@ ccMesh* ccHObjectCaster::ToMesh(ccHObject* obj)
 	return (obj && obj->isA(CC_MESH) ? static_cast<ccMesh*>(obj) : 0);
 }
 
+ccSubMesh* ccHObjectCaster::ToSubMesh(ccHObject* obj)
+{
+	return (obj && obj->isA(CC_SUB_MESH) ? static_cast<ccSubMesh*>(obj) : 0);
+}
+
 ccPolyline* ccHObjectCaster::ToPolyline(ccHObject* obj)
 {
 	return (obj && obj->isA(CC_POLY_LINE) ? static_cast<ccPolyline*>(obj) : 0);
@@ -108,11 +113,6 @@ ccPolyline* ccHObjectCaster::ToPolyline(ccHObject* obj)
 ccFacet* ccHObjectCaster::ToFacet(ccHObject* obj)
 {
 	return obj && obj->isA(CC_FACET) ? static_cast<ccFacet*>(obj) : 0;
-}
-
-ccMeshGroup* ccHObjectCaster::ToMeshGroup(ccHObject* obj)
-{
-	return obj && obj->isA(CC_MESH_GROUP) ? static_cast<ccMeshGroup*>(obj) : 0;
 }
 
 ccGenericPrimitive* ccHObjectCaster::ToPrimitive(ccHObject* obj)

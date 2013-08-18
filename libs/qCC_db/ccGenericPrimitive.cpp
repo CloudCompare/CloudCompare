@@ -212,8 +212,8 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 	verts->clear(); //takes care of vertices normals
 
 	//clear triangles indexes
-	assert(m_triIndexes);
-	m_triIndexes->clear();
+	assert(m_triVertIndexes);
+	m_triVertIndexes->clear();
 
 	//clear per triangle normals
 	removePerTriangleNormalIndexes();
@@ -249,7 +249,7 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 		if (!normsTable || !normsTable->reserve(faceNormCounts) || !reservePerTriangleNormalIndexes())
 		{
 			verts->clear();
-			m_triIndexes->clear();
+			m_triVertIndexes->clear();
 			if (normsTable)
 				delete normsTable;
 			return false;

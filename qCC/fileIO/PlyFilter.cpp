@@ -135,19 +135,32 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 					}
 					else
 					{
-						if (QMessageBox::question(	0,
-													"Multiple materials, one texture",
-													"This mesh has only one texture but multiple materials. PLY files can only handle one texture.\nShall we drop the materials (yes) or convert all materials and texture to per-vertex RGB colors? (no)",
-													QMessageBox::Yes | QMessageBox::No,
-													QMessageBox::Yes) == QMessageBox::No)
+						if (mesh->isA(CC_MESH))
+						{
+							if (QMessageBox::question(	0,
+														"Multiple materials, one texture",
+														"This mesh has only one texture but multiple materials. PLY files can only handle one texture.\nShall we drop the materials (yes) or convert all materials and texture to per-vertex RGB colors? (no)",
+														QMessageBox::Yes | QMessageBox::No,
+														QMessageBox::Yes) == QMessageBox::No)
+							{
+								//we can forget the texture
+								material = 0;
+								//try to convert materials to RGB
+								if (!static_cast<ccMesh*>(mesh)->convertMaterialsToVertexColors())
+								{
+									ccLog::Error("Conversion failed! (not enough memory?)");
+								}
+							}
+						}
+						else if (mesh->isA(CC_SUB_MESH))
 						{
 							//we can forget the texture
 							material = 0;
-							//try to convert materials to RGB
-							if (!mesh->convertMaterialsToVertexColors())
-							{
-								ccLog::Error("Conversion failed! (not enough memory?)");
-							}
+							ccLog::Warning("This sub-mesh has one texture and multiple materials. As this is a sub-mesh, we will ignore them...  you should convert the parent mesh textures/materials to RGB colors first");
+						}
+						else
+						{
+							assert(false);
 						}
 					}
 				}
@@ -168,17 +181,28 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 				}
 				else
 				{
-					//we ask the user if he wants to convert them to RGB
-					if (QMessageBox::question(	0,
-												"Multiple textures/materials",
-												"PLY files can't handle multiple textures/materials!\nDo you want to convert them to per-vertex RGB colors?",
-												QMessageBox::Yes | QMessageBox::No,
-												QMessageBox::No ) == QMessageBox::Yes)
+					if (mesh->isA(CC_MESH))
 					{
-						if (!mesh->convertMaterialsToVertexColors())
+						//we ask the user if he wants to convert them to RGB
+						if (QMessageBox::question(	0,
+													"Multiple textures/materials",
+													"PLY files can't handle multiple textures/materials!\nDo you want to convert them to per-vertex RGB colors?",
+													QMessageBox::Yes | QMessageBox::No,
+													QMessageBox::No ) == QMessageBox::Yes)
 						{
-							ccLog::Error("Conversion failed! (not enough memory?)");
+							if (!static_cast<ccMesh*>(mesh)->convertMaterialsToVertexColors())
+							{
+								ccLog::Error("Conversion failed! (not enough memory?)");
+							}
 						}
+					}
+					else if (mesh->isA(CC_SUB_MESH))
+					{
+						ccLog::Warning("This sub-mesh has multiple textures/materials. PLY files can't handle them.\nAs this is a sub-mesh, we will have to ignore them... you should convert the parent mesh textures/materials to RGB colors first");
+					}
+					else
+					{
+						assert(false);
 					}
 				}
 			}

@@ -20,7 +20,6 @@
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccMesh.h>
-#include <ccMeshGroup.h>
 #include <ccProgressDialog.h>
 
 //Qt

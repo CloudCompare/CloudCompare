@@ -22,14 +22,15 @@
     <file>images/dbCloudSymbol.png</file>
     <file>images/dbCloudSymbolLocked.png</file>
     <file>images/dbLockSymbol.png</file>
-    <file>images/dbMeshGroupSymbol.png</file>
-    <file>images/dbMeshGroupSymbolLocked.png</file>
+    <file>images/dbSubMeshSymbol.png</file>
+    <file>images/dbSubMeshSymbolLocked.png</file>
     <file>images/dbMeshSymbol.png</file>
     <file>images/dbMeshSymbolLocked.png</file>
     <file>images/dbMiscGeomSymbol.png</file>
     <file>images/dbMiscGeomSymbolLocked.png</file>
     <file>images/dbOctreeSymbol.png</file>
     <file>images/dbOctreeSymbolLocked.png</file>
+    <file>images/dbPolylineSymbol.png</file>
     <file>images/ccPivotAuto.png</file>
     <file>images/ccPivotOff.png</file>
     <file>images/ccPivotOn.png</file>

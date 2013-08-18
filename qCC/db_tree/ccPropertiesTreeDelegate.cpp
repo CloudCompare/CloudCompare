@@ -29,7 +29,8 @@
 #include <ccHObjectCaster.h>
 #include <ccHObject.h>
 #include <ccPointCloud.h>
-#include <ccGenericMesh.h>
+#include <ccMesh.h>
+#include <ccSubMesh.h>
 #include <ccOctree.h>
 #include <ccKdTree.h>
 #include <ccImage.h>
@@ -464,7 +465,9 @@ void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
 {
     assert(_obj && m_model);
 
-    addSeparator("Mesh");
+	bool isSubMesh = _obj->isA(CC_SUB_MESH);
+
+    addSeparator(isSubMesh ? "Sub-mesh" : "Mesh");
 
     //number of facets
 	appendRow( ITEM("Faces"), ITEM(QLocale(QLocale::English).toString(_obj->size())) );
@@ -482,7 +485,7 @@ void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
 
 	//we also integrate vertices SF into mesh properties
     ccGenericPointCloud* vertices = _obj->getAssociatedCloud();
-    if (vertices && (_obj->isA(CC_MESH_GROUP) || !vertices->isLocked() || _obj->isAncestorOf(vertices)))
+    if (vertices && (!vertices->isLocked() || _obj->isAncestorOf(vertices)))
         fillSFWithPointCloud(vertices);
 }
 
@@ -1102,7 +1105,7 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		break;
 	case OBJECT_MESH_STIPPLING:
 		{
-			ccMesh* mesh = ccHObjectCaster::ToMesh(m_currentObject);
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(m_currentObject);
 			assert(mesh);
 			mesh->enableStippling(item->checkState() == Qt::Checked);
 		}

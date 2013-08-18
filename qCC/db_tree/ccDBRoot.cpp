@@ -434,11 +434,13 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
                     return QIcon(QString::fromUtf8(":/CC/images/dbMeshSymbolLocked.png"));
                 else
                     return QIcon(QString::fromUtf8(":/CC/images/dbMeshSymbol.png"));
-            case CC_MESH_GROUP:
+            case CC_SUB_MESH:
                 if (locked)
-                    return QIcon(QString::fromUtf8(":/CC/images/dbMeshGroupSymbolLocked.png"));
+                    return QIcon(QString::fromUtf8(":/CC/images/dbSubMeshSymbolLocked.png"));
                 else
-                    return QIcon(QString::fromUtf8(":/CC/images/dbMeshGroupSymbol.png"));
+                    return QIcon(QString::fromUtf8(":/CC/images/dbSubMeshSymbol.png"));
+			case CC_POLY_LINE:
+				return QIcon(QString::fromUtf8(":/CC/images/dbPolylineSymbol.png"));
             case CC_POINT_OCTREE:
                 if (locked)
                     return QIcon(QString::fromUtf8(":/CC/images/dbOctreeSymbolLocked.png"));
@@ -948,11 +950,11 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 	assert(item);
 	if (item)
 	{
-		if (item->isA(CC_HIERARCHY_OBJECT)	||
-			item->isKindOf(CC_POINT_CLOUD)	||
-			item->isKindOf(CC_MESH)			||
-			item->isKindOf(CC_IMAGE)		||
-			item->isKindOf(CC_2D_LABEL)		||
+		if (item->isA(CC_HIERARCHY_OBJECT)							||
+			item->isKindOf(CC_POINT_CLOUD)							||
+			(item->isKindOf(CC_MESH) && !item->isA(CC_SUB_MESH))	|| //a sub-mesh can't leave its parent mesh
+			item->isKindOf(CC_IMAGE)								||
+			item->isKindOf(CC_2D_LABEL)								||
 			item->isKindOf(CC_PRIMITIVE))
 		{
 			defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
@@ -1033,16 +1035,14 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 			}
 			else if (item->isKindOf(CC_MESH))
 			{
-				//a mesh can't leave it's mesh group
-				if (oldParent->isA(CC_MESH_GROUP) && ccHObjectCaster::ToGenericMesh(item)->getAssociatedCloud() == ccHObjectCaster::ToGenericMesh(oldParent)->getAssociatedCloud())
+				//a sub-mesh can't leave its parent mesh
+				if (item->isA(CC_SUB_MESH))
 				{
-					if (oldParent != newParent)
-					{
-						ccConsole::Error("Sub-meshes can't leave their mesh group!");
-						return false;
-					}
+					assert(false);
+					ccConsole::Error("Sub-meshes can't leave their mesh group!");
+					return false;
 				}
-				//a mesh can't leave it's associated cloud
+				//a mesh can't leave its associated cloud
 				else if (oldParent->isKindOf(CC_POINT_CLOUD) &&  ccHObjectCaster::ToGenericMesh(item)->getAssociatedCloud() == oldParent)
 				{
 					if (oldParent != newParent)
@@ -1050,12 +1050,6 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 						ccConsole::Error("Sub-meshes can't leave their associated cloud!");
 						return false;
 					}
-				}
-				//a mesh can't be inserted in a mesh group
-				else if (newParent->isA(CC_MESH_GROUP) && ccHObjectCaster::ToGenericMesh(item)->getAssociatedCloud() != ccHObjectCaster::ToGenericMesh(newParent)->getAssociatedCloud())
-				{
-					ccConsole::Error("Outside meshes can't be added to mesh groups!");
-					return false;
 				}
 			}
 			else if (/*item->isKindOf(CC_PRIMITIVE) || */item->isKindOf(CC_IMAGE))
@@ -1334,13 +1328,10 @@ void ccDBRoot::gatherRecursiveInformation()
 		{
 			ccMesh* mesh = static_cast<ccMesh*>(ent);
 
-			if (!ent->isA(CC_MESH_GROUP)) //CC_MESH_GROUPs already return the sum of their children sizes!
-			{
-				info.meshCount++;
-				unsigned meshSize = mesh->size();
-				info.triangleCount += meshSize;
-				info.normalCount += (mesh->hasTriNormals() ? meshSize : 0);
-			}
+			info.meshCount++;
+			unsigned meshSize = mesh->size();
+			info.triangleCount += meshSize;
+			info.normalCount += (mesh->hasTriNormals() ? meshSize : 0);
 			info.materialCount += (mesh->getMaterialSet() ? (unsigned)mesh->getMaterialSet()->size() : 0);
 		}
 		else if (ent->isKindOf(CC_2D_LABEL))

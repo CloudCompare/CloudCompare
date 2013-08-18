@@ -36,8 +36,9 @@
    v2.6 - 04/03/2013 - strictly positive scalar field removed and 'hidden' values marker is now NaN
    v2.7 - 04/12/2013 - Customizable color scales
    v2.8 - 07/12/2013 - Poylines are now supported
+   v2.9 - 08/14/2013 - ccMeshGroup removed, ccSubMesh added
 **/
-const unsigned c_currentDBVersion = 28; //2.8
+const unsigned c_currentDBVersion = 29; //2.9
 
 unsigned ccObject::GetCurrentDBVersion()
 {

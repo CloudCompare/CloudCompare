@@ -20,7 +20,7 @@
 #include "ccCommon.h"
 
 #define CC_VER_NUM 2.5
-#define CC_SUB_VER 0 //2013-07-10
+#define CC_SUB_VER 1 //2013-08-18
 
 //! Returns current version as string
 QString ccCommon::GetCCVersion()

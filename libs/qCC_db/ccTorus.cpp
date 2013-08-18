@@ -187,7 +187,7 @@ bool ccTorus::buildUp()
 
 	//mesh faces
 	{
-		assert(m_triIndexes);
+		assert(m_triVertIndexes);
 
 		for (unsigned t=0;t<sweepSteps;++t)
 		{

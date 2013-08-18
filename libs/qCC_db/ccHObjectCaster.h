@@ -23,7 +23,7 @@ class ccGenericPointCloud;
 class ccPointCloud;
 class ccGenericMesh;
 class ccMesh;
-class ccMeshGroup;
+class ccSubMesh;
 class ccGenericPrimitive;
 class ccOctree;
 class ccKdTree;
@@ -65,8 +65,8 @@ class ccHObjectCaster
         //! converts current object to ccMesh (if possible)
         static ccMesh* ToMesh(ccHObject* obj);
 
-        //! converts current object to ccMeshGroup (if possible)
-        static ccMeshGroup* ToMeshGroup(ccHObject* obj);
+		//! converts current object to ccSubMesh (if possible)
+        static ccSubMesh* ToSubMesh(ccHObject* obj);
 
         //! converts current object to ccPolyline (if possible)
         static ccPolyline* ToPolyline(ccHObject* obj);

@@ -106,7 +106,7 @@ bool ccSphere::buildUp()
 
 	//faces
 	{
-		assert(m_triIndexes);
+		assert(m_triVertIndexes);
 
 		//north pole
 		{

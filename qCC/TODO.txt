@@ -9,6 +9,7 @@ Methods not yet migrated back to V2:
 
 File I/O:
 - PDF 3D
+- PTX files (http://www.danielgm.net/cc/forum/viewtopic.php?t=638)
 - X3D files (integration with 'xiot' in... standbye)
 - POD files (Pointools)
 - FARO and LEICA file formats

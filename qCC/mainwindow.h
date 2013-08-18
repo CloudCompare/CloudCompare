@@ -36,7 +36,7 @@
 #include <ui_mainWindow.h>
 
 //qCC_db
-#include <ccGenericMesh.h>
+#include <ccMesh.h>
 
 //db
 #include "db_tree/ccDBRoot.h"
@@ -437,7 +437,7 @@ protected:
     //! Apply a specific process to a mesh scalar field
 	/** \param process process
     **/
-	void doMeshSFAction(ccGenericMesh::MESH_SCALAR_FIELD_PROCESS process);
+	void doMeshSFAction(ccMesh::MESH_SCALAR_FIELD_PROCESS process);
 
     //! Connects all QT actions to slots
     void connectActions();

@@ -17,643 +17,77 @@
 
 #include "ccMeshGroup.h"
 
-//Local
-#include "ccMaterialSet.h"
-#include "ccGenericPointCloud.h"
-#include "ccMesh.h"
-
-//Qt
-#include <QString>
-
-//CCLib
-#include <ManualSegmentationTools.h>
-
 //system
-#include <string.h>
 #include <assert.h>
 
-#define CC_MESH_RECURSIVE_CALL(method) for (size_t i=0; i<m_children.size(); ++i){if (m_children[i]->isKindOf(CC_MESH)) static_cast<ccGenericMesh*>(m_children[i])->method;}
-#define CC_MESH_RECURSIVE_TEST(method) for (size_t i=0; i<m_children.size(); ++i) {if (m_children[i]->isKindOf(CC_MESH)) {if (static_cast<ccGenericMesh*>(m_children[i])->method()) return true;}} return false;
-
-ccMeshGroup::ccMeshGroup(ccGenericPointCloud* vertices)
-    : ccGenericMesh(vertices, "Mesh Group")
-	, m_currentChildIndex(0)
+void ccMeshGroup::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-    showColors(true);
-    showNormals(true);
-
-    //we automatically lock the cloud, to prevent vertices sharing issues!
-    if (vertices)
-        vertices->setLocked(true);
+	//does nothing
+	return;
 }
 
-unsigned ccMeshGroup::size() const
+bool ccMeshGroup::toFile_MeOnly(QFile& out) const
 {
-    unsigned s = 0;
+	ccLog::Error("[Mesh groups are not handled any more!");
+	return false;
+}
+
+bool ccMeshGroup::fromFile_MeOnly(QFile& in, short dataVersion)
+{
+	//Mesh groups are deprecated since version 2.9
+	assert(dataVersion < 29);
+	if (dataVersion >= 29)
+		return false;
+
+	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion))
+		return false;
+
+	/*** we simply read the data as it was before, so as to be able to read the other entities from the file! ***/
+
+	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple meshes)
+	//we only store its unique ID (dataVersion>=20) --> we hope we will find it at loading time (i.e. this
+	//is the responsibility of the caller to make sure that all dependencies are saved together)
+	uint32_t vertUniqueID = 0;
+	if (in.read((char*)&vertUniqueID,4)<0)
+		return ReadError();
+	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_associatedCloud' pointer!!!
+	//*(uint32_t*)(&m_associatedCloud) = vertUniqueID;
+
+	//per-triangle normals array (dataVersion>=20)
 	{
-		for (unsigned i=0;i<m_children.size();++i)
-			if (m_children[i]->isKindOf(CC_MESH))
-				s += static_cast<ccGenericMesh*>(m_children[i])->size();
+		//as the associated normals array can't be saved directly (as it may be shared by multiple meshes)
+		//we only store its unique ID (dataVersion>=20) --> we hope we will find it at loading time (i.e. this
+		//is the responsibility of the caller to make sure that all dependencies are saved together)
+		uint32_t normArrayID = 0;
+		if (in.read((char*)&normArrayID,4)<0)
+			return ReadError();
+		//[DIRTY] WARNING: temporarily, we set the array unique ID in the 'm_triNormals' pointer!!!
+		//*(uint32_t*)(&m_triNormals) = normArrayID;
 	}
-    return s;
-}
 
-void ccMeshGroup::setVisible(bool state)
-{
-    ccHObject::setVisible(state);
-    CC_MESH_RECURSIVE_CALL(setVisible(state));
-}
-
-void ccMeshGroup::showNormals(bool state)
-{
-	showTriNorms(state);
-	ccHObject::showNormals(state);
-	CC_MESH_RECURSIVE_CALL(showNormals(state));
-}
-
-void ccMeshGroup::showColors(bool state)
-{
-    ccHObject::showColors(state);
-    CC_MESH_RECURSIVE_CALL(showColors(state));
-}
-
-void ccMeshGroup::showTriNorms(bool state)
-{
-	CC_MESH_RECURSIVE_CALL(showTriNorms(state));
-}
-
-void ccMeshGroup::showMaterials(bool state)
-{
-    CC_MESH_RECURSIVE_CALL(showMaterials(state));
-}
-
-bool ccMeshGroup::triNormsShown() const
-{
-	CC_MESH_RECURSIVE_TEST(triNormsShown);
-}
-
-bool ccMeshGroup::materialsShown() const
-{
-	CC_MESH_RECURSIVE_TEST(materialsShown);
-}
-
-void ccMeshGroup::toggleMaterials()
-{
-    CC_MESH_RECURSIVE_CALL(toggleMaterials());
-}
-
-bool ccMeshGroup::hasTriNormals() const
-{
-	CC_MESH_RECURSIVE_TEST(hasTriNormals);
-}
-
-bool ccMeshGroup::isDisplayed() const
-{
-	CC_MESH_RECURSIVE_TEST(isDisplayed);
-}
-
-void ccMeshGroup::clearTriNormals()
-{
-    CC_MESH_RECURSIVE_CALL(clearTriNormals());
-
-	setTriNormsTable(0);
-
-	//due to an old bug on mesh groups we have to look for 'm_triNormals' as a child)
-	for (unsigned i=0;i<getChildrenNumber();++i)
+	//texture coordinates array (dataVersion>=20)
 	{
-		if (getChild(i)->isA(CC_NORMAL_INDEXES_ARRAY))
-		{
-			removeChild((int)i);
-			break;
-		}
+		//as the associated texture coordinates array can't be saved directly (as it may be shared by multiple meshes)
+		//we only store its unique ID (dataVersion>=20) --> we hope we will find it at loading time (i.e. this
+		//is the responsibility of the caller to make sure that all dependencies are saved together)
+		uint32_t texCoordArrayID = 0;
+		if (in.read((char*)&texCoordArrayID,4)<0)
+			return ReadError();
+		//[DIRTY] WARNING: temporarily, we set the array unique ID in the 'm_texCoords' pointer!!!
+		//*(uint32_t*)(&m_texCoords) = texCoordArrayID;
 	}
-}
-
-bool ccMeshGroup::hasMaterials() const
-{
-	CC_MESH_RECURSIVE_TEST(hasMaterials);
-}
-
-void ccMeshGroup::showSF(bool state)
-{
-    ccHObject::showSF(state);
-    CC_MESH_RECURSIVE_CALL(showSF(state));
-}
-
-void ccMeshGroup::showWired(bool state)
-{
-    ccGenericMesh::showWired(state);
-    CC_MESH_RECURSIVE_CALL(showWired(state));
-}
-
-void ccMeshGroup::setTempColor(const colorType* col, bool autoActivate /*= true*/)
-{
-    ccGenericMesh::setTempColor(col,autoActivate);
-    CC_MESH_RECURSIVE_CALL(setTempColor(col,autoActivate));
-}
-
-void ccMeshGroup::enableTempColor(bool state)
-{
-    ccGenericMesh::enableTempColor(state);
-    CC_MESH_RECURSIVE_CALL(enableTempColor(state));
-}
-
-void ccMeshGroup::setAssociatedCloud(ccGenericPointCloud* cloud)
-{
-    ccGenericMesh::setAssociatedCloud(cloud);
-    CC_MESH_RECURSIVE_CALL(setAssociatedCloud(cloud));
-}
-
-void ccMeshGroup::shiftTriangleIndexes(unsigned shift)
-{
-    CC_MESH_RECURSIVE_CALL(shiftTriangleIndexes(shift));
-}
-
-void ccMeshGroup::forEach(genericTriangleAction& anAction)
-{
-    CC_MESH_RECURSIVE_CALL(forEach(anAction));
-}
-
-void ccMeshGroup::placeIteratorAtBegining()
-{
-    //let's look for the first sub-mesh!
-	for (m_currentChildIndex=0; m_currentChildIndex<m_children.size(); ++m_currentChildIndex)
-	{
-        if (m_children[m_currentChildIndex]->isKindOf(CC_MESH))
-        {
-            static_cast<ccGenericMesh*>(m_children[m_currentChildIndex])->placeIteratorAtBegining();
-            return;
-        }
-    }
-}
-
-CCLib::GenericTriangle* ccMeshGroup::_getNextTriangle() //temporary object
-{
-    if (m_currentChildIndex < m_children.size())
-    {
-		//try next triangle?
-        CCLib::GenericTriangle* tri = static_cast<ccGenericMesh*>(m_children[m_currentChildIndex])->_getNextTriangle();
-        if (tri)
-            return tri;
-
-		//try next sub-mesh?
-        while (++m_currentChildIndex < m_children.size())
-        {
-            if (m_children[m_currentChildIndex]->isKindOf(CC_MESH))
-            {
-                static_cast<ccGenericMesh*>(m_children[m_currentChildIndex])->placeIteratorAtBegining();
-                return _getNextTriangle();
-            }
-        }
-    }
-
-    return NULL;
-}
-
-CCLib::TriangleSummitsIndexes* ccMeshGroup::getNextTriangleIndexes()
-{
-    if (m_currentChildIndex < m_children.size())
-    {
-		//try next triangle?
-        CCLib::TriangleSummitsIndexes* tsi = static_cast<ccGenericMesh*>(m_children[m_currentChildIndex])->getNextTriangleIndexes();
-        if (tsi)
-            return tsi;
-
-		//try next sub-mesh?
-        while (++m_currentChildIndex<(int)m_children.size())
-        {
-            if (m_children[m_currentChildIndex]->isKindOf(CC_MESH))
-            {
-                static_cast<ccGenericMesh*>(m_children[m_currentChildIndex])->placeIteratorAtBegining();
-                return getNextTriangleIndexes();
-            }
-        }
-    }
-
-    return NULL;
-}
-
-//FIXME!
-static CCLib::GenericTriangle* s_triangle; //to avoid heap overflow
-CCLib::GenericTriangle* ccMeshGroup::_getTriangle_recursive(unsigned& index)
-{
-    for (size_t i=0; i<m_children.size(); ++i)
-    {
-        if (m_children[i]->isKindOf(CC_MESH))
-        {
-            if (m_children[i]->isA(CC_MESH_GROUP))
-            {
-                if ((s_triangle = static_cast<ccMeshGroup*>(m_children[i])->_getTriangle_recursive(index)))
-                    return s_triangle;
-            }
-            else
-            {
-                ccMesh* child = static_cast<ccMesh*>(m_children[i]);
-                unsigned cs = child->size();
-                if (index < cs)
-                    return child->_getTriangle(index);
-                else
-                    index -= cs;
-            }
-        }
-    }
-
-    return NULL;
-}
-
-bool ccMeshGroup::getTriangleSummits_recursive(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
-{
-    for (size_t i=0; i<m_children.size(); ++i)
-    {
-        if (m_children[i]->isKindOf(CC_MESH))
-        {
-            if (m_children[i]->isA(CC_MESH_GROUP))
-            {
-                if (static_cast<ccMeshGroup*>(m_children[i])->getTriangleSummits_recursive(triangleIndex,A,B,C))
-                    return true;
-            }
-            else
-            {
-                ccMesh* child = static_cast<ccMesh*>(m_children[i]);
-                unsigned cs = child->size();
-                if (triangleIndex < cs)
-				{
-                    child->getTriangleSummits(triangleIndex,A,B,C);
-					return true;
-				}
-                else
-				{
-                    triangleIndex -= cs;
-				}
-            }
-        }
-    }
-
-	return false;
-}
-
-
-//FIXME: so slow on big mesh groups!!!
-static CCLib::TriangleSummitsIndexes* s_triSummits; //to avoid heap overflow
-CCLib::TriangleSummitsIndexes* ccMeshGroup::getTriangleIndexes_recursive(unsigned& triangleIndex)
-{
-    for (size_t i=0; i<m_children.size(); ++i)
-    {
-        if (m_children[i]->isKindOf(CC_MESH))
-        {
-            if (m_children[i]->isGroup())
-            {
-                if ((s_triSummits = static_cast<ccMeshGroup*>(m_children[i])->getTriangleIndexes_recursive(triangleIndex)))
-                    return s_triSummits;
-            }
-            else
-            {
-                ccMesh* child = static_cast<ccMesh*>(m_children[i]);
-                unsigned cs = child->size();
-                if (triangleIndex < cs)
-                    return child->getTriangleIndexes(triangleIndex);
-                else
-                    triangleIndex -= cs;
-            }
-        }
-    }
-
-    return NULL;
-}
-
-bool ccMeshGroup::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N)
-{
-    for (size_t i=0; i<m_children.size(); ++i)
-    {
-        if (m_children[i]->isKindOf(CC_MESH))
-        {
-			ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(m_children[i]);
-			unsigned triCount = subMesh->size();
-			if (triIndex < triCount)
-				return subMesh->interpolateNormals(triIndex,P,N);
-			else
-				triIndex -= triCount;
-		}
-	}
-
-	//shouldn't happen
-	assert(false);
-	return false;
-}
-
-bool ccMeshGroup::interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[])
-{
-    for (size_t i=0; i<m_children.size(); ++i)
-    {
-        if (m_children[i]->isKindOf(CC_MESH))
-        {
-			ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(m_children[i]);
-			unsigned triCount = subMesh->size();
-			if (triIndex < triCount)
-				return subMesh->interpolateColors(triIndex,P,rgb);
-			else
-				triIndex -= triCount;
-		}
-	}
-
-	//shouldn't happen
-	assert(false);
-	return false;
-}
-
-bool ccMeshGroup::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture)
-{
-    for (size_t i=0; i<m_children.size(); ++i)
-    {
-        if (m_children[i]->isKindOf(CC_MESH))
-        {
-			ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(m_children[i]);
-			unsigned triCount = subMesh->size();
-			if (triIndex < triCount)
-				return subMesh->getColorFromMaterial(triIndex,P,rgb,interpolateColorIfNoTexture);
-			else
-				triIndex -= triCount;
-		}
-	}
-
-	//shouldn't happen
-	assert(false);
-	return false;
-}
-
-bool ccMeshGroup::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, colorType rgb[], bool returnColorIfNoTexture)
-{
-    for (size_t i=0; i<m_children.size(); ++i)
-    {
-        if (m_children[i]->isKindOf(CC_MESH))
-        {
-			ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(m_children[i]);
-			unsigned triCount = subMesh->size();
-			if (triIndex < triCount)
-				return subMesh->getVertexColorFromMaterial(triIndex,vertIndex,rgb,returnColorIfNoTexture);
-			else
-				triIndex -= triCount;
-		}
-	}
-
-	//shouldn't happen
-	assert(false);
-	return false;
-}
-
-void ccMeshGroup::getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const
-{
-    for (size_t i=0; i<m_children.size(); ++i)
-    {
-        if (m_children[i]->isKindOf(CC_MESH))
-        {
-			ccGenericMesh* subMesh = static_cast<ccGenericMesh*>(m_children[i]);
-			unsigned triCount = subMesh->size();
-			if (triIndex < triCount)
-			{
-				subMesh->getTriangleTexCoordinates(triIndex,tx1,tx2,tx3);
-				return;
-			}
-			else
-			{
-				triIndex -= triCount;
-			}
-		}
-	}
-
-	//shouldn't happen
-	assert(false);
-}
-
-//FIXME!
-CCLib::GenericTriangle* ccMeshGroup::_getTriangle(unsigned index) //temporary object
-{
-    return _getTriangle_recursive(index);
-}
-
-//FIXME!
-void ccMeshGroup::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
-{
-    getTriangleSummits_recursive(triangleIndex,A,B,C);
-}
-
-//FIXME!
-CCLib::TriangleSummitsIndexes* ccMeshGroup::getTriangleIndexes(unsigned triangleIndex)
-{
-    return getTriangleIndexes_recursive(triangleIndex);
-}
-
-void ccMeshGroup::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
-{
-    ccBBox bb = getBB();
-
-    memcpy(bbMin, bb.minCorner().u, 3*sizeof(PointCoordinateType));
-    memcpy(bbMax, bb.maxCorner().u, 3*sizeof(PointCoordinateType));
-}
-
-void ccMeshGroup::addChild(ccHObject* anObject, bool dependant/*=true*/)
-{
-    if (anObject->isKindOf(CC_MESH) && (static_cast<ccGenericMesh*>(anObject)->getAssociatedCloud() != m_associatedCloud || anObject->isA(CC_FACET)))
-	{
-		ccLog::Error("Internal error: can't add to a ccMeshGroup a mesh-like child that is not a true mesh sharing the same vertices!");
-		return;
-	}
-
-    ccHObject::addChild(anObject,dependant);
-}
-
-ccGenericMesh* ccMeshGroup::createNewMeshFromSelection(bool removeSelectedVertices, CCLib::ReferenceCloud* selection/*=NULL*/, ccGenericPointCloud* vertices/*=NULL*/)
-{
-    assert(m_associatedCloud);
-
-    ccGenericPointCloud* newVertices = NULL;
-    if (!vertices)
-    {
-		//TODO FIXME: share common materials/normals/texture coordinates!
-        newVertices = m_associatedCloud->createNewCloudFromVisibilitySelection(false);
-        if (!newVertices)
-        {
-            //ccConsole::Error("An error occured: not enough memory ?");
-            return NULL;
-        }
-    }
-    else
-    {
-        newVertices = vertices;
-    }
-    assert(newVertices);
-
-    CCLib::ReferenceCloud* rc = selection;
-    if (!rc)
-    {
-        rc = m_associatedCloud->getTheVisiblePoints();
-        if (!rc || rc->size()==0)
-        {
-            //ccConsole::Error("No Points in selection!\n");
-            if (rc)
-				delete rc;
-            return 0;
-        }
-    }
-    assert(rc);
-
-    //new mesh group
-    ccMeshGroup* mg = new ccMeshGroup(newVertices);
-
-    for (size_t i=0; i<m_children.size(); ++i)
-    {
-        if (m_children[i]->isKindOf(CC_MESH))
-        {
-            ccGenericMesh* childTri = static_cast<ccGenericMesh*>(m_children[i]);
-            ccGenericMesh* newTri = childTri->createNewMeshFromSelection(removeSelectedVertices, rc, newVertices);
-            if (newTri)
-                mg->addChild(newTri);
-        }
-    }
-
-    if (!selection) //if we have created a selection for this mesh
-    {
-        delete rc;
-        rc=0;
-    }
-
-    if (mg->getChildrenNumber())
-    {
-        mg->setName(getName()+QString(".part"));
-        if (!vertices) //if we have created vertices for this mesh
-        {
-            mg->addChild(newVertices);
-            mg->setDisplay_recursive(getDisplay());
-            mg->showColors(colorsShown());
-            mg->showNormals(normalsShown());
-			mg->showMaterials(materialsShown());
-            mg->showSF(sfShown());
-            newVertices->setEnabled(false);
-            //newVertices->setLocked(true);
-        }
-    }
-    else
-    {
-        delete mg;
-        mg=NULL;
-
-        if (!vertices) //if we have created vertices for this mesh
-        {
-            delete newVertices;
-            newVertices=0;
-        }
-    }
-
-	return mg;
-}
-
-ccGenericMesh* ccMeshGroup::clone(ccGenericPointCloud* vertices/*=0*/,
-								  ccMaterialSet* clonedMaterials/*=0*/,
-								  NormsIndexesTableType* clonedNormsTable/*=0*/,
-								  TextureCoordsContainer* cloneTexCoords/*=0*/)
-{
-    assert(m_associatedCloud);
-
-    ccGenericPointCloud* newVertices = vertices;
-    if (!newVertices)
-    {
-        newVertices = m_associatedCloud->clone();
-        if (!newVertices)
-        {
-            ccLog::Error("[ccGenericMesh::clone] Failed to clone vertices! (not enough memory?)");
-            return 0;
-        }
-    }
 
 	//materials
-	assert(!clonedMaterials);
-	if (getMaterialSet())
 	{
-		clonedMaterials = getMaterialSet()->clone();
-		if (!clonedMaterials)
-			ccLog::Error("[ccMeshGroup::clone] Failed to clone materials set!");
-	}
-	//normals
-	assert(!clonedNormsTable);
-	if (getTriNormsTable())
-	{
-		clonedNormsTable=getTriNormsTable()->clone();
-		if (!clonedNormsTable)
-			ccLog::Error("[ccMeshGroup::clone] Failed to clone (per-triangle) normals!");
-	}
-	//texture coordinates
-	assert(!cloneTexCoords);
-	if (getTexCoordinatesTable())
-	{
-		cloneTexCoords=getTexCoordinatesTable()->clone();
-		if (!cloneTexCoords)
-			ccLog::Error("[ccMeshGroup::clone] Failed to clone texture coordinates!");
+		//as the associated materials can't be saved directly (as it may be shared by multiple meshes)
+		//we only store its unique ID (dataVersion>=20) --> we hope we will find it at loading time (i.e. this
+		//is the responsibility of the caller to make sure that all dependencies are saved together)
+		uint32_t matSetID = 0;
+		if (in.read((char*)&matSetID,4)<0)
+			return ReadError();
+		//[DIRTY] WARNING: temporarily, we set the array unique ID in the 'm_materials' pointer!!!
+		//*(uint32_t*)(&m_materials) = matSetID;
 	}
 
-    //new mesh group
-    ccMeshGroup* mg = new ccMeshGroup(newVertices);
-
-    for (size_t i=0; i<m_children.size(); ++i)
-    {
-        if (m_children[i]->isKindOf(CC_MESH))
-        {
-            ccGenericMesh* childTri = static_cast<ccGenericMesh*>(m_children[i]);
-            ccGenericMesh* newTri = childTri->clone(newVertices,clonedMaterials,clonedNormsTable,cloneTexCoords);
-            if (newTri)
-                mg->addChild(newTri);
-        }
-    }
-
-    if (mg->getChildrenNumber())
-    {
-        mg->setName(getName()+QString(".clone"));
-
-        if (!vertices) //if we have created vertices for this mesh
-        {
-            mg->addChild(newVertices);
-            mg->setDisplay_recursive(getDisplay());
-            //newVertices->setLocked(true);
-        }
-
-		if (clonedMaterials)
-		{
-			mg->setMaterialSet(clonedMaterials);
-			mg->addChild(clonedMaterials);
-		}
-		if (clonedNormsTable)
-		{
-			mg->setTriNormsTable(clonedNormsTable);
-			mg->addChild(clonedNormsTable);
-		}
-		if (cloneTexCoords)
-		{
-			mg->setTexCoordinatesTable(cloneTexCoords);
-			mg->addChild(cloneTexCoords);
-		}
-		mg->showColors(colorsShown());
-		mg->showNormals(normalsShown());
-		mg->showSF(sfShown());
-		mg->setVisible(isVisible());
-		mg->setEnabled(isEnabled());
-    }
-    else
-    {
-        delete mg;
-        mg=0;
-
-        if (!vertices) //if we have created vertices for this mesh
-        {
-            delete newVertices;
-            newVertices=0;
-        }
-    }
-
-    return mg;
-}
-
-void ccMeshGroup::refreshBB()
-{
-    for (size_t i=0; i<m_children.size(); ++i)
-        if (m_children[i]->isKindOf(CC_MESH))
-            static_cast<ccGenericMesh*>(m_children[i])->refreshBB();
+	return true;
 }

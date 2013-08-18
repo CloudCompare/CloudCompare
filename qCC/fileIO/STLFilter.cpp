@@ -30,7 +30,6 @@
 
 //qCC_db
 #include <ccMesh.h>
-#include <ccMeshGroup.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccNormalVectors.h>

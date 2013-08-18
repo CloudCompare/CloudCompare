@@ -31,7 +31,6 @@
 #include "ccKdTree.h"
 #include "ccGenericMesh.h"
 #include "ccMesh.h"
-#include "ccMeshGroup.h"
 #include "ccImage.h"
 #include "cc2DLabel.h"
 #include "ccGLUtils.h"
@@ -573,13 +572,13 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		ccLog::Warning(QString("[ccPointCloud::fusion] Global shift information for cloud '%1' will be lost!").arg(addedCloud->getName()));
 
 	//children (not yet reserved)
-	unsigned c,childrenCount = addedCloud->getChildrenNumber();
-	for (c=0;c<childrenCount;++c)
+	unsigned childrenCount = addedCloud->getChildrenNumber();
+	for (unsigned c=0; c<childrenCount; ++c)
 	{
 		ccHObject* child = addedCloud->getChild(c);
-		if (child->isKindOf(CC_MESH)) //mesh
+		if (child->isA(CC_MESH)) //mesh --> FIXME: what for the other types of MESH?
 		{
-			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(child);
+			ccMesh* mesh = static_cast<ccMesh*>(child);
 
 			//detach from father?
 			//mesh->setFlagState(CC_FATHER_DEPENDANT,false);
@@ -587,7 +586,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 			//ccGenericMesh* addedTri = mesh;
 
 			//or clone?
-			ccGenericMesh* cloneMesh = mesh->clone(mesh->getAssociatedCloud()==addedCloud ? this : 0);
+			ccMesh* cloneMesh = mesh->clone(mesh->getAssociatedCloud()==addedCloud ? this : 0);
 			if (cloneMesh)
 			{
 				//change mesh vertices

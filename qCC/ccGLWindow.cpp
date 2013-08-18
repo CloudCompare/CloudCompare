@@ -1965,6 +1965,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 						vertices->addPoint(A);
 						vertices->addPoint(A);
 						vertices->addPoint(A);
+						m_rectPickingPoly->addChild(vertices);
 						m_rectPickingPoly->setClosingState(true);
 						addToOwnDB(m_rectPickingPoly);
 					}

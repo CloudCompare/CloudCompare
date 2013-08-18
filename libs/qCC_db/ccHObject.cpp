@@ -25,6 +25,7 @@
 //Objects handled by factory
 #include "ccPointCloud.h"
 #include "ccMesh.h"
+#include "ccSubMesh.h"
 #include "ccMeshGroup.h"
 #include "ccPolyline.h"
 #include "ccFacet.h"
@@ -80,9 +81,14 @@ ccHObject* ccHObject::New(unsigned objectType, const char* name/*=0*/)
 	case CC_MESH:
 		//warning: no associated vertices --> retrieved later
 		return new ccMesh(0);
+	case CC_SUB_MESH:
+		//warning: no associated mesh --> retrieved later
+		return new ccSubMesh(0);
 	case CC_MESH_GROUP:
+		//warning: deprecated
+		ccLog::Warning("[ccHObject::New] Mesh groups are deprecated!");
 		//warning: no associated vertices --> retrieved later
-		return new ccMeshGroup(0);
+		return new ccMeshGroup();
 	case CC_POLY_LINE:
 		//warning: no associated vertices --> retrieved later
 		return new ccPolyline(0);

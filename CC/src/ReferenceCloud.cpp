@@ -151,7 +151,7 @@ bool ReferenceCloud::addPointIndex(unsigned globalIndex)
 
 bool ReferenceCloud::addPointIndex(unsigned firstIndex, unsigned lastIndex)
 {
-	if (firstIndex>=lastIndex)
+	if (firstIndex >= lastIndex)
 	{
 		assert(false);
 		return false;
@@ -166,12 +166,14 @@ bool ReferenceCloud::addPointIndex(unsigned firstIndex, unsigned lastIndex)
 	for (unsigned i=0; i<range; ++i,++firstIndex)
 		m_theIndexes->setValue(pos++,firstIndex);
 
+	m_validBB = false;
+
 	return true;
 }
 
 void ReferenceCloud::setPointIndex(unsigned localIndex, unsigned globalIndex)
 {
-	assert(localIndex<size());
+	assert(localIndex < size());
 	m_theIndexes->setValue(localIndex,globalIndex);
 	m_validBB = false;
 }

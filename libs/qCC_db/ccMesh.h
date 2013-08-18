@@ -18,9 +18,6 @@
 #ifndef CC_MESH_HEADER
 #define CC_MESH_HEADER
 
-//! Max number of displayed triangles (per entity) in "low detail" display
-const unsigned MAX_LOD_FACES_NUMBER = 2500000;
-
 //CCLib
 #include <SimpleTriangle.h>
 
@@ -53,24 +50,32 @@ public:
 	virtual ~ccMesh();
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const {return CC_MESH;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_MESH; };
+
+	//! Sets the associated vertices cloud (warning)
+	virtual void setAssociatedCloud(ccGenericPointCloud* cloud) { m_associatedCloud = cloud; }
+
+	//! Clones this entity
+	/** All the main features of the entity are cloned, except from the octree
+        \param vertices vertices set to use (will be automatically - AND OPTIMALLY - cloned if 0)
+		\param clonedMaterials for internal use
+		\param clonedNormsTable for internal use
+		\param cloneTexCoords for internal use
+		\return a copy of this entity
+	**/
+	virtual ccMesh* clone(	ccGenericPointCloud* vertices = 0,
+							ccMaterialSet* clonedMaterials = 0,
+							NormsIndexesTableType* clonedNormsTable = 0,
+							TextureCoordsContainer* cloneTexCoords = 0);
 
 	//inherited methods (ccGenericMesh)
-	virtual ccGenericMesh* createNewMeshFromSelection(bool removeSelectedVertices=false, CCLib::ReferenceCloud* selection=NULL, ccGenericPointCloud* vertices=NULL);
-	virtual ccGenericMesh* clone(ccGenericPointCloud* vertices = 0, ccMaterialSet* clonedMaterials = 0, NormsIndexesTableType* clonedNormsTable = 0, TextureCoordsContainer* cloneTexCoords =0);
+	inline virtual ccGenericPointCloud* getAssociatedCloud() const { return m_associatedCloud; }
     virtual void refreshBB();
-	virtual bool hasMaterials() const;
-	virtual void showMaterials(bool state) {m_materialsShown = state;}
-	virtual bool materialsShown() const {return m_materialsShown;}
-	virtual bool hasTriNormals() const;
-	virtual void showTriNorms(bool state) {m_triNormsShown=state;}
-	virtual bool triNormsShown() const {return m_triNormsShown;}
 	virtual bool interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N);
 	virtual bool interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[]);
 	virtual bool getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture);
 	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, colorType rgb[], bool returnColorIfNoTexture);
-	virtual void setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable = true);
-	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const;
+	virtual unsigned maxSize() const;
 
 	//inherited methods (GenericIndexedMesh)
 	virtual void forEach(genericTriangleAction& anAction);
@@ -82,20 +87,27 @@ public:
 	virtual void getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C);
 	virtual unsigned size() const;
 	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
-	virtual void shiftTriangleIndexes(unsigned shift);
 
 	//const version of getTriangleIndexes
 	const virtual CCLib::TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex) const;
 
 	//inherited methods (ccHObject)
     virtual ccBBox getMyOwnBB();
+	virtual bool isSerializable() const { return true; }
 
 	//inherited methods (ccDrawableObject)
+    virtual bool hasColors() const;
+    virtual bool hasNormals() const;
+    virtual bool hasScalarFields() const;
+    virtual bool hasDisplayedScalarField() const;
+    virtual bool normalsShown() const;
 	virtual void setDisplay(ccGenericGLDisplay* win);
-	virtual void toggleMaterials() {showMaterials(!materialsShown());}
+	virtual void toggleMaterials() { showMaterials(!materialsShown()); }
 
-	//! Returns max capacity
-	virtual unsigned maxSize() const;
+	//! Shifts all triangles indexes
+	/** \param shift index shift (positive)
+	**/
+	virtual void shiftTriangleIndexes(unsigned shift);
 
 	//! Adds a triangle to the mesh
 	/** Warning: bounding box validity is broken after a call to this method.
@@ -107,13 +119,13 @@ public:
 	**/
 	void addTriangle(unsigned i1, unsigned i2, unsigned i3);
 
-	//! Reserves the memory to store the triangles (as 3 indexes each)
+	//! Reserves the memory to store the vertex indexes (3 per triangle)
 	/** \param n the number of triangles to reserve
 		\return true if the method succeeds, false otherwise
 	**/
 	bool reserve(unsigned n);
 
-	//! Resizes the mesh database
+	//! Resizes the array of vertex indexes (3 per triangle)
 	/** If the new number of elements is smaller than the actual size,
 		the overflooding elements will be deleted.
 		\param n the new number of triangles
@@ -125,10 +137,22 @@ public:
 	/**************    PER-TRIANGLE NORMALS    ***************/
 	/*********************************************************/
 
+	//inherited from ccGenericMesh
+	virtual bool hasTriNormals() const;
+	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const;
+	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const;
+	virtual NormsIndexesTableType* getTriNormsTable() const { return m_triNormals; }
+
+	//! Sets per-triangle normals array (may be shared)
+	virtual void setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoReleaseOldTable = true);
+
+	//! Removes per-triangle normals
+	virtual void clearTriNormals() { setTriNormsTable(0); }
+
 	//! Returns whether per triangle normals are enabled
 	/** To enable per triangle normals, you should:
 		- first, reserve memory for triangles (this is always the first thing to do)
-		- associate this mesh to a triangle normals array (see ccGenericMesh::setTriNormsTable)
+		- associate this mesh to a triangle normals array (see ccMesh::setTriNormsTable)
 		- reserve memory to store per-triangle normal indexes with ccMesh::reservePerTriangleNormalIndexes
 		- add for each triangle a triplet of indexes (referring to stored normals)
 	**/
@@ -150,31 +174,35 @@ public:
 	/** Make sure per-triangle normal indexes array is allocated
 		(see reservePerTriangleNormalIndexes)
 		\param i1 first summit normal index
-		\param i2 first summit normal index
-		\param i3 first summit normal index
+		\param i2 second summit normal index
+		\param i3 third summit normal index
 	**/
 	void addTriangleNormalIndexes(int i1, int i2, int i3);
 
 	//! Sets a triplet of normal indexes for a given triangle
 	/** \param triangleIndex triangle index
 		\param i1 first summit normal index
-		\param i2 first summit normal index
-		\param i3 first summit normal index
+		\param i2 second summit normal index
+		\param i3 third summit normal index
 	**/
 	void setTriangleNormalIndexes(unsigned triangleIndex, int i1, int i2, int i3);
 
 	//! Removes any per-triangle triplets of normal indexes
 	void removePerTriangleNormalIndexes();
 
-	//inherited from ccGenericMesh
-	/** Re-implemented to automatically release 'per triangle normal indexes'
-		if per-triangle normals table is removed (triNormsTable==0).
-	**/
-	virtual void setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoReleaseOldTable = true);
-
 	/********************************************************/
 	/************    PER-TRIANGLE MATERIAL    ***************/
 	/********************************************************/
+
+	//inherited from ccGenericMesh
+	virtual bool hasMaterials() const;
+	virtual const ccMaterialSet* getMaterialSet() const { return m_materials; }
+	virtual int getTriangleMtlIndex(unsigned triangleIndex) const;
+
+	//! Converts materials to vertex colors
+	/** Warning: this method will overwrite colors (if any)
+	**/
+	virtual bool convertMaterialsToVertexColors();
 
 	//! Reserves memory to store per-triangle material index
 	/** Before adding per-triangle material index to
@@ -204,9 +232,21 @@ public:
 	**/
 	void setTriangleMtlIndex(unsigned triangleIndex, int mtlIndex);
 
+	//! Sets associated material set (may be shared)
+	virtual void setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseOldMaterialSet = true);
+
 	/******************************************************************/
 	/************    PER-TRIANGLE TEXTURE COORDINATE    ***************/
 	/******************************************************************/
+
+	//inherited from ccGenericMesh
+	virtual bool hasTextures() const;
+	virtual TextureCoordsContainer* getTexCoordinatesTable() const { return m_texCoords; }
+	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const;
+
+	//! Sets per-triangle texture coordinates array (may be shared)
+	virtual void setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable = true);
+
 	//! Reserves memory to store per-triangle triplets of tex coords indexes
 	/** Before adding per-triangle tex coords indexes triplets to
 		the mesh (with ccMesh::addTriangleTexCoordIndexes()) be
@@ -226,41 +266,68 @@ public:
 	/** Make sure per-triangle tex coords indexes array is allocated
 		(see reservePerTriangleTexCoordIndexes)
 		\param i1 first summit tex coords index
-		\param i2 first summit tex coords index
-		\param i3 first summit tex coords index
+		\param i2 second summit tex coords index
+		\param i3 third summit tex coords index
 	**/
 	void addTriangleTexCoordIndexes(int i1, int i2, int i3);
 
 	//! Sets a triplet of tex coords indexes for a given triangle
 	/** \param triangleIndex triangle index
 		\param i1 first summit tex coords index
-		\param i2 first summit tex coords index
-		\param i3 first summit tex coords index
+		\param i2 second summit tex coords index
+		\param i3 third summit tex coords index
 	**/
 	void setTriangleTexCoordIndexes(unsigned triangleIndex, int i1, int i2, int i3);
 
-	//! Returns whether textures are available for this mesh
-	bool hasTextures() const;
+    //! Computes per-vertex normals
+    virtual bool computeNormals();
 
-	//! Enables polygon stippling
-	void enableStippling(bool state) {m_stippling = state;}
+	//! Laplacian smoothing
+	/** \param nbIteration smoothing iterations
+		\param factor smoothing 'force'
+		\param progressCb progress dialog callback
+	**/
+	bool laplacianSmooth(unsigned nbIteration = 100, float factor = 0.01f, CCLib::GenericProgressCallback* progressCb = 0);
 
-	//! Returns whether polygon stippling is enabled or not
-	bool stipplingEnabled() const {return m_stippling;}
+	//! Mesh scalar field processes
+	enum MESH_SCALAR_FIELD_PROCESS {	SMOOTH_MESH_SF,		/**< Smooth **/
+										ENHANCE_MESH_SF,	/**< Enhance **/
+	};
+
+	//! Applies process to the mesh scalar field (the one associated to its vertices in fact)
+    /** A very simple smoothing/enhancement algorithm based on
+        each vertex direct neighbours. Prior to calling this method,
+        one should check first that the vertices are associated to a
+        scalar field.
+		Warning: the processed scalar field must be enabled for both
+		INPUT & OUTPUT! (see ccGenericCloud::setCurrentScalarField)
+        \param process either 'smooth' or 'enhance'
+    **/
+	bool processScalarField(MESH_SCALAR_FIELD_PROCESS process);
 
 	//! Subdivides mesh (so as to ensure that all triangles are falls below 'maxArea')
 	/** \return subdivided mesh (if successfull)
 	**/
 	ccMesh* subdivide(float maxArea) const;
 
+    //! Creates a new mesh with the selected vertices only
+    /** This method is called after a graphical segmentation.
+        It creates a new mesh structure with the vertices that are
+        tagged as "visible" (see ccGenericPointCloud::visibilityArray).
+		This method will also update this mesh if removeSelectedFaces is true.
+        In this case, all "selected" triangles will be removed from this mesh's instance.
+
+        \param removeSelectedFaces specifies if the faces composed only of 'selected' vertices should be removed or not
+    **/
+	virtual ccMesh* createNewMeshFromSelection(bool removeSelectedFaces);
+
 protected:
 
     //inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-
-    //inherited from ccGenericMesh
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+    virtual void applyGLTransformation(const ccGLMatrix& trans);
 
 	//! Same as other 'interpolateNormals' method with a set of 3 vertices indexes
 	bool interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3& N, const int* triNormIndexes = 0);
@@ -270,10 +337,22 @@ protected:
 	//! Used internally by 'subdivide'
 	bool pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC);
 
+	//! associated cloud (vertices)
+	ccGenericPointCloud* m_associatedCloud;
+
+	//! Per-triangle normals
+	NormsIndexesTableType* m_triNormals;
+
+	//! Texture coordinates
+	TextureCoordsContainer* m_texCoords;
+
+	//! Materials
+	ccMaterialSet* m_materials;
+
 	//! Container of per-triangle vertices indexes (3)
 	typedef GenericChunkedArray<3,unsigned> triangleIndexesContainer;
-	//! Triangles indexes
-	triangleIndexesContainer* m_triIndexes;
+	//! Triangles' vertices indexes (3 per triangle)
+	triangleIndexesContainer* m_triVertIndexes;
 
 	//! Iterator on the list of triangle summits indexes
 	unsigned m_globalIterator;
@@ -287,8 +366,6 @@ protected:
 	typedef GenericChunkedArray<1,int> triangleMaterialIndexesSet;
 	//! Per-triangle material indexes
 	triangleMaterialIndexesSet* m_triMtlIndexes;
-	//! Texture/material display flag
-	bool m_materialsShown;
 
 	//! Set of triplets of indexes referring to mesh texture coordinates
 	typedef GenericChunkedArray<3,int> triangleTexCoordIndexesSet;
@@ -299,11 +376,6 @@ protected:
 	typedef GenericChunkedArray<3,int> triangleNormalsIndexesSet;
 	//! Mesh normals indexes (per-triangle)
 	triangleNormalsIndexesSet* m_triNormalIndexes;
-	//! Per-triangle normals display flag
-	bool m_triNormsShown;
-
-	//! Polygon stippling state
-	bool m_stippling;
 };
 
 #endif //CC_MESH_HEADER

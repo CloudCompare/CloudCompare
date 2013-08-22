@@ -277,7 +277,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 
 	//groups (starting index + name)
-	std::vector<std::pair<unsigned,QString>> groups;
+    std::vector<std::pair<unsigned,QString> > groups;
 
 	//materials
 	ccMaterialSet* materials = 0;

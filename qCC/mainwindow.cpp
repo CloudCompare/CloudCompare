@@ -7178,7 +7178,8 @@ void MainWindow::loadFile()
                                 currentPath,
                                 filters,
                                 &selectedFilter
-                                /*QFileDialog::DontUseNativeDialog*/); //Windows has a limitation on the returned string size
+                                /*QFileDialog::DontUseNativeDialog*/);	//Windows has a limitation on the returned string size
+																		//BUT older buggy versions of Qt (default on Kubuntu?) could require this flag to be set!!!
     if (selectedFiles.isEmpty())
         return;
 

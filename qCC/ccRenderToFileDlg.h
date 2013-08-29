@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2011                                                              $
-//$LastChangedDate:: 2012-02-01 00:15:21 +0100 (mer., 01 fevr. 2012)      $
-//**************************************************************************
-//
 
 #ifndef CC_RENDER_TO_FILE_DLG_HEADER
 #define CC_RENDER_TO_FILE_DLG_HEADER
@@ -45,6 +38,9 @@ class ccRenderToFileDlg : public QDialog, public Ui::RenderToFileDialog
         QString getFilename() const;
 		//! On dialog acceptance, returns whether points should be scaled or not
 		bool dontScalePoints() const;
+		//! Whether overlay items should be rendered
+		bool renderOverlayItems() const;
+
 
     protected slots:
 

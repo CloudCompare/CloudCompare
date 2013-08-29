@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>123</height>
+    <height>143</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -87,6 +87,13 @@
     <widget class="QCheckBox" name="dontScaleFeaturesCheckBox">
      <property name="text">
       <string>Don't scale features (e.g. points size, lines thickness, text, etc.)</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="renderOverlayItemsCheckBox">
+     <property name="text">
+      <string>Render overlay items (scale, trihedron, etc.)</string>
      </property>
     </widget>
    </item>

@@ -305,7 +305,11 @@ public:
 	**/
     virtual void invalidateVisualization();
 
-    virtual bool renderToFile(const char* filename, float zoomFactor=1.0, bool dontScaleFeatures=false);
+	//! Renders screen to a file
+    virtual bool renderToFile(	const char* filename,
+								float zoomFactor = 1.0,
+								bool dontScaleFeatures = false,
+								bool renderOverlayItems = false);
 
     virtual void setShader(ccShader* shader);
     virtual void setGlFilter(ccGlFilter* filter);
@@ -589,10 +593,23 @@ protected:
 	//! Current picking mode
 	PICKING_MODE m_pickingMode;
 
-	//! Display capturing mode
-    bool m_captureMode;
-	//! Display capturing mode zoom factor
-	float m_captureModeZoomFactor;
+	//! Display capturing mode options
+	struct CaptureModeOptions
+	{
+		bool enabled;
+		float zoomFactor;
+		bool renderOverlayItems;
+
+		//! Default constructor
+		CaptureModeOptions()
+			: enabled(false)
+			, zoomFactor(1.0f)
+			, renderOverlayItems(false)
+		{}
+	};
+
+	//! Display capturing mode options
+    CaptureModeOptions m_captureMode;
 
     //! Temporary Message to display in the lower-left corner
 	struct MessageToDisplay

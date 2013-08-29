@@ -106,8 +106,6 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	, m_unclosable(false)
 	, m_interactionMode(TRANSFORM_CAMERA)
 	, m_pickingMode(NO_PICKING)
-	, m_captureMode(false)
-	, m_captureModeZoomFactor(1.0f)
 	, m_lastClickTime_ticks(0)
 	, m_sunLightEnabled(true)
 	, m_customLightEnabled(false)
@@ -472,11 +470,11 @@ void ccGLWindow::paintGL()
 	CC_DRAW_CONTEXT context;
 	getContext(context);
 
-	bool doDraw3D = (!m_fbo || ((m_alwaysUseFBO && m_updateFBO) || m_activeGLFilter || m_captureMode));
+	bool doDraw3D = (!m_fbo || ((m_alwaysUseFBO && m_updateFBO) || m_activeGLFilter || m_captureMode.enabled));
 
 	if (doDraw3D)
 	{
-		bool doDrawCross = (!m_captureMode && !m_params.perspectiveView && !(m_fbo && m_activeGLFilter) && ccGui::Parameters().displayCross);
+		bool doDrawCross = (!m_captureMode.enabled && !m_params.perspectiveView && !(m_fbo && m_activeGLFilter) && ccGui::Parameters().displayCross);
 		draw3D(context,doDrawCross,m_fbo);
 		m_updateFBO = false;
 	}
@@ -504,10 +502,10 @@ void ccGLWindow::paintGL()
 			ccGLUtils::CatchGLError("ccGLWindow::paintGL/glFilter shade");
 
 			//if capture mode is ON: we only want to capture it, not to display it
-			if (!m_captureMode)
+			if (!m_captureMode.enabled)
 				screenTex = m_activeGLFilter->getTexture();
 		}
-		else if (!m_captureMode)
+		else if (!m_captureMode.enabled)
 		{
 			//screenTex = m_fbo->getDepthTexture();
 			screenTex = m_fbo->getColorTexture(0);
@@ -530,12 +528,26 @@ void ccGLWindow::paintGL()
 	//current displayed scalar field color ramp (if any)
 	ccRenderingTools::DrawColorRamp(context);
 
-	//overlay entities
-	if (!m_captureMode)
-	{
-		//default overlay color
-		const unsigned char* textCol = ccGui::Parameters().textDefaultCol;
+	/*** overlay entities ***/
 
+	//default overlay color
+	const unsigned char* textCol = ccGui::Parameters().textDefaultCol;
+
+	if (!m_captureMode.enabled || m_captureMode.renderOverlayItems)
+	{
+		//scale (only in ortho mode)
+		if (!m_params.perspectiveView)
+		{
+			//if fbo --> override color
+			drawScale(m_fbo && m_activeGLFilter ? ccColor::black : textCol);
+		}
+
+		//trihedron
+		drawTrihedron();
+	}
+
+	if (!m_captureMode.enabled)
+	{
 		//transparent border at the bottom of the screen
 		if (m_activeGLFilter)
 		{
@@ -561,16 +573,6 @@ void ccGLWindow::paintGL()
 			//glColor3ubv(textCol);
 			glColor3f((float)textCol[0]/(float)MAX_COLOR_COMP,(float)textCol[1]/(float)MAX_COLOR_COMP,(float)textCol[2]/(float)MAX_COLOR_COMP);
 			renderText(10, m_glHeight-(float)borderWidth+15,QString("[GL filter] ")+m_activeGLFilter->getName()/*,m_font*/); //we ignore the custom font size
-		}
-
-		//trihedron
-		drawTrihedron();
-
-		//scale (only in ortho mode)
-		if (!m_params.perspectiveView)
-		{
-			//if fbo --> override color
-			drawScale(m_fbo && m_activeGLFilter ? ccColor::black : textCol);
 		}
 
 		//current messages (if valid)
@@ -692,7 +694,7 @@ void ccGLWindow::paintGL()
 
 	ccGLUtils::CatchGLError("ccGLWindow::paintGL");
 
-	m_shouldBeRefreshed=false;
+	m_shouldBeRefreshed = false;
 
 	//For frame rate test
 	if (s_frameRateTestInProgress)
@@ -799,7 +801,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	if (m_customLightEnabled)
 	{
 		glEnableCustomLight();
-		if (!m_captureMode/* && !m_params.perspectiveView*/)
+		if (!m_captureMode.enabled/* && !m_params.perspectiveView*/)
 			//we display it as a litle 3D star
 			drawCustomLight();
 	}
@@ -3026,7 +3028,10 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 		redraw();
 }
 
-bool ccGLWindow::renderToFile(const char* filename, float zoomFactor/*=1.0*/, bool dontScaleFeatures/*=false*/)
+bool ccGLWindow::renderToFile(	const char* filename,
+								float zoomFactor/*=1.0*/,
+								bool dontScaleFeatures/*=false*/,
+								bool renderOverlayItems/*=false*/)
 {
 	if (!filename || zoomFactor<1e-2)
 		return false;
@@ -3044,8 +3049,9 @@ bool ccGLWindow::renderToFile(const char* filename, float zoomFactor/*=1.0*/, bo
 	}
 
 	//we activate 'capture' mode
-	m_captureModeZoomFactor = zoomFactor;
-	m_captureMode = true;
+	m_captureMode.enabled = true;
+	m_captureMode.zoomFactor = zoomFactor;
+	m_captureMode.renderOverlayItems = renderOverlayItems;
 
 	//current display parameters backup
 	float _defaultPointSize = m_params.defaultPointSize;
@@ -3066,7 +3072,7 @@ bool ccGLWindow::renderToFile(const char* filename, float zoomFactor/*=1.0*/, bo
 	if (m_fbo)
 	{
 		ccConsole::Print("[Render screen via FBO]");
-		m_captureModeZoomFactor = 1.0f;
+		m_captureMode.zoomFactor = 1.0f;
 
 		ccFrameBufferObject* fbo = 0;
 		ccGlFilter* filter = 0;
@@ -3156,6 +3162,19 @@ bool ccGLWindow::renderToFile(const char* filename, float zoomFactor/*=1.0*/, bo
 			//current displayed scalar field color ramp (if any)
 			ccRenderingTools::DrawColorRamp(context);
 
+			if (m_captureMode.renderOverlayItems)
+			{
+				//scale (only in ortho mode)
+				if (!m_params.perspectiveView)
+				{
+					//if fbo --> override color
+					drawScale(m_fbo && m_activeGLFilter ? ccColor::black : ccGui::Parameters().textDefaultCol);
+				}
+
+				//trihedron
+				drawTrihedron();
+			}
+
 			//read from fbo
 			glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
 			//to avoid memory issues, we read line by line
@@ -3225,8 +3244,8 @@ bool ccGLWindow::renderToFile(const char* filename, float zoomFactor/*=1.0*/, bo
 	setPointSize(_defaultPointSize);
 	setLineWidth(_defaultLineWidth);
 	setFontPointSize(_fontSize);
-	m_captureModeZoomFactor = 1.0f;
-	m_captureMode = false;
+	m_captureMode.enabled = false;
+	//m_captureMode.zoomFactor = 1.0f;
 
 	if (result)
 		ccConsole::Print("[Snapshot] File '%s' saved! (%i x %i pixels)",filename,Wp,Hp);

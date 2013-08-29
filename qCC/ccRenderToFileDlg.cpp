@@ -14,17 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2011                                                              $
-//$LastChangedDate:: 2012-02-01 00:15:21 +0100 (mer., 01 fevr. 2012)      $
-//**************************************************************************
-//
 
 #include "ccRenderToFileDlg.h"
+
+//Local
 #include "ccConsole.h"
 
+//Qt
 #include <QFileDialog>
 #include <QDoubleSpinBox>
 #include <QImageWriter>
@@ -32,7 +28,7 @@
 #include <QSettings>
 
 //we keep track of the zoom for the session only!
-static double s_zoom = 1.0;
+static double s_renderZoom = 1.0;
 
 ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent/*=0*/)
 	: QDialog(parent)
@@ -67,12 +63,14 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
     QString selectedExtension	= settings.value("selectedExtension",firstExtension).toString();
 	QString baseFilename		= settings.value("baseFilename","capture").toString();
     bool dontScale				= settings.value("dontScaleFeatures",dontScalePoints()).toBool();
+    bool doRenderOverlayItems	= settings.value("renderOverlayItems",renderOverlayItems()).toBool();
     settings.endGroup();
 
 	dontScaleFeaturesCheckBox->setChecked(dontScale);
+	renderOverlayItemsCheckBox->setChecked(doRenderOverlayItems);
     filenameLineEdit->setText(currentPath+QString("/")+baseFilename+QString(".")+selectedExtension);
 
-	zoomDoubleSpinBox->setValue(s_zoom);
+	zoomDoubleSpinBox->setValue(s_renderZoom);
 
     connect(chooseFileButton,           SIGNAL(clicked()),              this, SLOT(chooseFile()));
     connect(zoomDoubleSpinBox,          SIGNAL(valueChanged(double)),   this, SLOT(updateInfo()));
@@ -96,6 +94,7 @@ void ccRenderToFileDlg::saveSettings()
 	settings.setValue("selectedFilter",selectedFilter);
     settings.setValue("baseFilename",baseFilename);
     settings.setValue("dontScaleFeatures",dontScalePoints());
+	settings.setValue("renderOverlayItems",renderOverlayItems());
     settings.endGroup();
 }
 
@@ -129,12 +128,17 @@ bool ccRenderToFileDlg::dontScalePoints() const
 	return dontScaleFeaturesCheckBox->isChecked();
 }
 
+bool ccRenderToFileDlg::renderOverlayItems() const
+{
+	return renderOverlayItemsCheckBox->isChecked();
+}
+
 void ccRenderToFileDlg::updateInfo()
 {
-    s_zoom = getZoom();
+    s_renderZoom = getZoom();
 
-    unsigned w2 = (unsigned)(double(w)*s_zoom);
-    unsigned h2 = (unsigned)(double(h)*s_zoom);
+    unsigned w2 = (unsigned)(double(w)*s_renderZoom);
+    unsigned h2 = (unsigned)(double(h)*s_renderZoom);
 
     finalSizeLabel->setText(QString("(%1 x %2)").arg(w2).arg(h2));
 }

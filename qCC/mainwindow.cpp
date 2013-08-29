@@ -5604,7 +5604,7 @@ void MainWindow::doActionRenderToFile()
     if (rtfDlg.exec())
     {
         QApplication::processEvents();
-        win->renderToFile(qPrintable(rtfDlg.getFilename()),rtfDlg.getZoom(),rtfDlg.dontScalePoints());
+		win->renderToFile(qPrintable(rtfDlg.getFilename()),rtfDlg.getZoom(),rtfDlg.dontScalePoints(),rtfDlg.renderOverlayItems());
     }
 }
 

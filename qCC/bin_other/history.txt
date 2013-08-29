@@ -3,6 +3,7 @@
 v2.5.1 ??/??/2013
 - Improvement:
 	* Mesh groups are replaced by standard meshes with 'sub-meshes' structures (simple subsets of faces)
+	* New checkbox in the LAS open dialog: apply same parameters to all files that will be opened next (current session)
 - bug fixes:
 	* the 'max distance' parameter for cloud/mesh distance computation was incorrectly squared before being used!
 	* materials where not associated to the base mesh when loading composite OBJ files (this could lead to crash when

@@ -87,6 +87,9 @@ public:
 	//! Whether to load a given field
 	bool doLoad(LAS_FIELDS field) const;
 
+	//! Auto-skip mode (to use the same parameters for ALL files afterwards)
+	bool autoSkipMode() const;
+
 };
 
 #endif //CC_LAS_OPEN_DIALOG

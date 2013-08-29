@@ -36,6 +36,7 @@
 
 //Qt
 #include <QFileInfo>
+#include <QSharedPointer>
 
 //System
 #include <string.h>
@@ -335,6 +336,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_ERROR;
 }
 
+QSharedPointer<LASOpenDlg> s_lasOpenDlg(0);
+
 CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
 	//opening file
@@ -378,23 +381,24 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 
 	//dialog to choose the fields to load
-	LASOpenDlg dlg;
-	dlg.setDimensions(dimensions);
-	if (alwaysDisplayLoadDialog && !dlg.exec())
+	if (!s_lasOpenDlg)
+		s_lasOpenDlg = QSharedPointer<LASOpenDlg>(new LASOpenDlg());
+	s_lasOpenDlg->setDimensions(dimensions);
+	if (alwaysDisplayLoadDialog && !s_lasOpenDlg->autoSkipMode() && !s_lasOpenDlg->exec())
 	{
 		delete reader;
 		ifs.close();
 		return CC_FERR_CANCELED_BY_USER;
 	}
-	bool ignoreDefaultFields = dlg.ignoreDefaultFieldsCheckBox->isChecked();
+	bool ignoreDefaultFields = s_lasOpenDlg->ignoreDefaultFieldsCheckBox->isChecked();
 
 	//RGB color
 	liblas::Color rgbColorMask; //(0,0,0) on construction
-	if (dlg.doLoad(LAS_RED))
+	if (s_lasOpenDlg->doLoad(LAS_RED))
 		rgbColorMask.SetRed(~0);
-	if (dlg.doLoad(LAS_GREEN))
+	if (s_lasOpenDlg->doLoad(LAS_GREEN))
 		rgbColorMask.SetGreen(~0);
-	if (dlg.doLoad(LAS_BLUE))
+	if (s_lasOpenDlg->doLoad(LAS_BLUE))
 		rgbColorMask.SetBlue(~0);
 	bool loadColor = (rgbColorMask[0] || rgbColorMask[1] || rgbColorMask[2]);
 
@@ -517,33 +521,33 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 			loadedCloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
 
 			//DGM: from now on, we only enable scalar fields when we detect a valid value!
-			if (dlg.doLoad(LAS_CLASSIFICATION))
+			if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
 					fieldsToLoad.push_back(LasField(LAS_CLASSIFICATION,0,0,255)); //unsigned char: between 0 and 255
-			if (dlg.doLoad(LAS_CLASSIF_VALUE))
+			if (s_lasOpenDlg->doLoad(LAS_CLASSIF_VALUE))
 				fieldsToLoad.push_back(LasField(LAS_CLASSIF_VALUE,0,0,31)); //5 bits: between 0 and 31
-			if (dlg.doLoad(LAS_CLASSIF_SYNTHETIC))
+			if (s_lasOpenDlg->doLoad(LAS_CLASSIF_SYNTHETIC))
 				fieldsToLoad.push_back(LasField(LAS_CLASSIF_SYNTHETIC,0,0,1)); //1 bit: 0 or 1
-			if (dlg.doLoad(LAS_CLASSIF_KEYPOINT))
+			if (s_lasOpenDlg->doLoad(LAS_CLASSIF_KEYPOINT))
 				fieldsToLoad.push_back(LasField(LAS_CLASSIF_KEYPOINT,0,0,1)); //1 bit: 0 or 1
-			if (dlg.doLoad(LAS_CLASSIF_WITHHELD))
+			if (s_lasOpenDlg->doLoad(LAS_CLASSIF_WITHHELD))
 				fieldsToLoad.push_back(LasField(LAS_CLASSIF_WITHHELD,0,0,1)); //1 bit: 0 or 1
-			if (dlg.doLoad(LAS_INTENSITY))
+			if (s_lasOpenDlg->doLoad(LAS_INTENSITY))
 				fieldsToLoad.push_back(LasField(LAS_INTENSITY,0,0,65535)); //16 bits: between 0 and 65536
-			if (dlg.doLoad(LAS_TIME))
+			if (s_lasOpenDlg->doLoad(LAS_TIME))
 				fieldsToLoad.push_back(LasField(LAS_TIME,0,0,-1.0)); //8 bytes (double)
-			if (dlg.doLoad(LAS_RETURN_NUMBER))
+			if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
 				fieldsToLoad.push_back(LasField(LAS_RETURN_NUMBER,1,1,7)); //3 bits: between 1 and 7
-			if (dlg.doLoad(LAS_NUMBER_OF_RETURNS))
+			if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
 				fieldsToLoad.push_back(LasField(LAS_NUMBER_OF_RETURNS,1,1,7)); //3 bits: between 1 and 7
-			if (dlg.doLoad(LAS_SCAN_DIRECTION))
+			if (s_lasOpenDlg->doLoad(LAS_SCAN_DIRECTION))
 				fieldsToLoad.push_back(LasField(LAS_SCAN_DIRECTION,0,0,1)); //1 bit: 0 or 1
-			if (dlg.doLoad(LAS_FLIGHT_LINE_EDGE))
+			if (s_lasOpenDlg->doLoad(LAS_FLIGHT_LINE_EDGE))
 				fieldsToLoad.push_back(LasField(LAS_FLIGHT_LINE_EDGE,0,0,1)); //1 bit: 0 or 1
-			if (dlg.doLoad(LAS_SCAN_ANGLE_RANK))
+			if (s_lasOpenDlg->doLoad(LAS_SCAN_ANGLE_RANK))
 				fieldsToLoad.push_back(LasField(LAS_SCAN_ANGLE_RANK,0,-90,90)); //signed char: between -90 and +90
-			if (dlg.doLoad(LAS_USER_DATA))
+			if (s_lasOpenDlg->doLoad(LAS_USER_DATA))
 				fieldsToLoad.push_back(LasField(LAS_USER_DATA,0,0,255)); //unsigned char: between 0 and 255
-			if (dlg.doLoad(LAS_POINT_SOURCE_ID))
+			if (s_lasOpenDlg->doLoad(LAS_POINT_SOURCE_ID))
 				fieldsToLoad.push_back(LasField(LAS_POINT_SOURCE_ID,0,0,65535)); //16 bits: between 0 and 65536
 		}
 

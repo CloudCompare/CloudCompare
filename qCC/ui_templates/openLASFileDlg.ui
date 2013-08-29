@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>242</width>
+    <width>260</width>
     <height>503</height>
    </rect>
   </property>
@@ -258,6 +258,17 @@
      </property>
      <property name="checked">
       <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="autoSkipNextCheckBox">
+     <property name="styleSheet">
+      <string notr="true">color: red;</string>
+     </property>
+     <property name="text">
+      <string>Apply settings to ALLfiles that will be loaded
+next (this session only)</string>
      </property>
     </widget>
    </item>

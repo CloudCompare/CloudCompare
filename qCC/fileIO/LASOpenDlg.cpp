@@ -27,6 +27,7 @@
 LASOpenDlg::LASOpenDlg(QWidget* parent) : QDialog(parent), Ui::OpenLASFileDialog()
 {
     setupUi(this);
+	autoSkipNextCheckBox->setChecked(false); //just to be sure
 }
 
 bool FieldIsPresent(const std::vector<std::string>& dimensions, LAS_FIELDS field)
@@ -116,4 +117,9 @@ bool LASOpenDlg::doLoad(LAS_FIELDS field) const
 	}
 
 	return false;
+}
+
+bool LASOpenDlg::autoSkipMode() const
+{
+	return autoSkipNextCheckBox->isChecked();
 }

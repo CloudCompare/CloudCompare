@@ -18,6 +18,7 @@
 #include "PNFilter.h"
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
@@ -40,12 +41,12 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
 
     if (clouds.empty())
     {
-        ccConsole::Error("No point cloud in input selection!");
+        ccLog::Error("No point cloud in input selection!");
         return CC_FERR_BAD_ENTITY_TYPE;
     }
     else if (clouds.size()>1)
     {
-        ccConsole::Error("Can't save more than one cloud per PN file!");
+        ccLog::Error("Can't save more than one cloud per PN file!");
         return CC_FERR_BAD_ENTITY_TYPE;
     }
 
@@ -55,7 +56,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	if (numberOfPoints==0)
 	{
-        ccConsole::Error("Cloud is empty!");
+        ccLog::Error("Cloud is empty!");
         return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
@@ -67,11 +68,11 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
     //Has the cloud been recentered?
 	const double* shift = theCloud->getOriginalShift();
 	if (fabs(shift[0])+fabs(shift[0])+fabs(shift[0])>0.0)
-        ccConsole::Warning(QString("[PNFilter::save] Can't recenter cloud '%1' when saving it in a PN file!").arg(theCloud->getName()));
+        ccLog::Warning(QString("[PNFilter::save] Can't recenter cloud '%1' when saving it in a PN file!").arg(theCloud->getName()));
 
 	bool hasNorms = theCloud->hasNormals();
 	if (!hasNorms)
-        ccConsole::Warning(QString("[PNFilter::save] Cloud '%1' has no normal (we will save points with a default normal)!").arg(theCloud->getName()));
+        ccLog::Warning(QString("[PNFilter::save] Cloud '%1' has no normal (we will save points with a default normal)!").arg(theCloud->getName()));
 	float norm[3] = {(float)s_defaultNorm[0], (float)s_defaultNorm[1], (float)s_defaultNorm[2]};
 
 	//progress dialog

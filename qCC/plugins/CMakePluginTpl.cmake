@@ -20,12 +20,6 @@ file( GLOB ui_list *.ui )
 file( GLOB qrc_list *.qrc )
 file( GLOB rc_list *.rc )
 
-# find Qt mocable files
-find_mocable_files( mocable_list ${header_list} )
-qt4_wrap_cpp( moc_list ${mocable_list} )
-QT4_WRAP_UI( generated_ui_list ${ui_list} )
-QT4_ADD_RESOURCES( generated_qrc_list ${qrc_list} )
-
 if ( CC_PLUGIN_CUSTOM_HEADER_LIST )
 	list( APPEND header_list ${CC_PLUGIN_CUSTOM_HEADER_LIST} )
 endif()
@@ -33,6 +27,12 @@ endif()
 if ( CC_PLUGIN_CUSTOM_SOURCE_LIST )
 	list( APPEND source_list ${CC_PLUGIN_CUSTOM_SOURCE_LIST} )
 endif()
+
+# find Qt mocable files (do this AFTER including custom header and source files ;) 
+find_mocable_files( mocable_list ${header_list} )
+qt4_wrap_cpp( moc_list ${mocable_list} )
+QT4_WRAP_UI( generated_ui_list ${ui_list} )
+QT4_ADD_RESOURCES( generated_qrc_list ${qrc_list} )
 
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} ${generated_ui_list} ${generated_qrc_list})
 

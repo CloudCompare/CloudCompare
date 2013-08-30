@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1947                                                              $
-//$LastChangedDate:: 2011-11-27 09:57:04 +0100 (dim., 27 nov. 2011)        $
-//**************************************************************************
-//
+
 #include "BundlerFilter.h"
 
 //Local
@@ -28,6 +22,7 @@
 #include "BinFilter.h"
 
 //qCC_db
+#include <ccLog.h>
 #include <ccCalibratedImage.h>
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
@@ -115,14 +110,14 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 	QString currentLine = stream.readLine();
 	if (!currentLine.startsWith("# Bundle file",Qt::CaseInsensitive))
 	{
-		ccConsole::Error("File should start by '# Bundle file vX.Y'!");
+		ccLog::Error("File should start by '# Bundle file vX.Y'!");
 		return CC_FERR_MALFORMED_FILE;
 	}
 	unsigned majorVer=0,minorVer=0;
 	sscanf(qPrintable(currentLine),"# Bundle file v%i.%i",&majorVer,&minorVer);
 	if (majorVer!=0 || (minorVer!=3 && minorVer!=4))
 	{
-		ccConsole::Error("Only version 0.3 and 0.4 of Bundler files are supported!");
+		ccLog::Error("Only version 0.3 and 0.4 of Bundler files are supported!");
 		return CC_FERR_WRONG_FILE_TYPE;
 	}
 
@@ -131,16 +126,16 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 	QStringList list = currentLine.split(QRegExp("\\s+"),QString::SkipEmptyParts);
 	if (list.size() != 2)
 	{
-		ccConsole::Error("[BundlerFilter::loadFile] Second line should be <num_cameras> <num_points>!");
+		ccLog::Error("[BundlerFilter::loadFile] Second line should be <num_cameras> <num_points>!");
 		return CC_FERR_MALFORMED_FILE;
 	}
 	unsigned camCount = list[0].toInt();
 	if (camCount==0)
-		ccConsole::Warning("[BundlerFilter::loadFile] No camera defined in Bundler file!");
+		ccLog::Warning("[BundlerFilter::loadFile] No camera defined in Bundler file!");
 
 	unsigned ptsCount = list[1].toInt();
 	if (ptsCount==0)
-		ccConsole::Warning("[BundlerFilter::loadFile] No keypoints defined in Bundler file!");
+		ccLog::Warning("[BundlerFilter::loadFile] No keypoints defined in Bundler file!");
 
 	//parameters
 	bool importKeypoints = false;
@@ -268,7 +263,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 			}
 			if (importImages && sum<ZERO_TOLERANCE)
 			{
-				ccConsole::Warning("[BundlerFilter::loadFile] Camera #%i is invalid!",camIndex+1);
+				ccLog::Warning("[BundlerFilter::loadFile] Camera #%i is invalid!",camIndex+1);
 				it->isValid=false;
 			}
 			//Translation
@@ -297,7 +292,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 			{
 				hasColors = keypointsCloud->reserveTheRGBTable();
 				if (!hasColors)
-					ccConsole::Warning("[BundlerFilter::loadFile] Not enough memory to load colors!");
+					ccLog::Warning("[BundlerFilter::loadFile] Not enough memory to load colors!");
 				else
 					keypointsCloud->showColors(true);
 			}
@@ -351,7 +346,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 				{
 					//sometimes, it appears that keypoints has no associated color!
 					//so we skip the line and assume it's in fact the keypoint description...
-					ccConsole::Warning("[BundlerFilter::loadFile] Keypoint #%i has no associated color!",i);
+					ccLog::Warning("[BundlerFilter::loadFile] Keypoint #%i has no associated color!",i);
 					if (hasColors)
 						keypointsCloud->addRGBColor(0,0,0); //black by default
 				}
@@ -377,7 +372,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 						unsigned nviews = parts[0].toInt(&ok);
 						if (!ok || 1+nviews*4>(unsigned)parts.size())
 						{
-							ccConsole::Warning("[BundlerFilter::loadFile] View list for point #%i is invalid!",i);
+							ccLog::Warning("[BundlerFilter::loadFile] View list for point #%i is invalid!",i);
 						}
 						else
 						{
@@ -427,9 +422,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 			|| (!altKeypointsContainer->getChild(0)->isKindOf(CC_POINT_CLOUD) && !altKeypointsContainer->getChild(0)->isKindOf(CC_MESH)))
 		{
 			if (!altKeypointsContainer)
-				ccConsole::Error(QString("[BundlerFilter::loadFile] Failed to load alternative keypoints file:\n'%1'").arg(altKeypointsFilename));
+				ccLog::Error(QString("[BundlerFilter::loadFile] Failed to load alternative keypoints file:\n'%1'").arg(altKeypointsFilename));
 			else
-				ccConsole::Error("[BundlerFilter::loadFile] Can't use this kind of entities as keypoints (need one and only one cloud or mesh)");
+				ccLog::Error("[BundlerFilter::loadFile] Can't use this kind of entities as keypoints (need one and only one cloud or mesh)");
 
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
@@ -455,7 +450,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 		QFile imageListFile(imageListFilename);
 		if (!imageListFile.exists() || !imageListFile.open(QIODevice::ReadOnly))
 		{
-			ccConsole::Error(QString("[BundlerFilter::loadFile] Failed to open image list file! (%1)").arg(imageListFilename));
+			ccLog::Error(QString("[BundlerFilter::loadFile] Failed to open image list file! (%1)").arg(imageListFilename));
 			if (!importKeypoints && keypointsCloud)
 				delete keypointsCloud;
 			if (!importKeypoints && altEntity)
@@ -478,7 +473,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 				imageFilenames << parts[0];
 			else
 			{
-				ccConsole::Error(QString("[BundlerFilter::loadFile] Couldn't extract image name from line %1 in file '%2'!").arg(lineIndex).arg(imageListFilename));
+				ccLog::Error(QString("[BundlerFilter::loadFile] Couldn't extract image name from line %1 in file '%2'!").arg(lineIndex).arg(imageListFilename));
 				break;
 			}
 		}
@@ -487,9 +482,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 	if (imageFilenames.size() < (int)camCount) //not enough images!
 	{
 		if (imageFilenames.isEmpty())
-			ccConsole::Error(QString("[BundlerFilter::loadFile] No filename could be extracted from file '%1'!").arg(imageListFilename));
+			ccLog::Error(QString("[BundlerFilter::loadFile] No filename could be extracted from file '%1'!").arg(imageListFilename));
 		else
-			ccConsole::Error(QString("[BundlerFilter::loadFile] Only %1 filenames (out of %2) could be extracted\nfrom file '%3'!").arg(imageFilenames.size()).arg(camCount).arg(imageListFilename));
+			ccLog::Error(QString("[BundlerFilter::loadFile] Only %1 filenames (out of %2) could be extracted\nfrom file '%3'!").arg(imageFilenames.size()).arg(camCount).arg(imageListFilename));
 		if (!importKeypoints && keypointsCloud)
 			delete keypointsCloud;
 		if (!importKeypoints && altEntity)
@@ -529,7 +524,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 			dummyMesh = CCLib::PointProjectionTools::computeTriangulation(altKeypoints ? altKeypoints : keypointsCloud,GENERIC_BEST_LS_PLANE);
 			if (!dummyMesh)
 			{
-				ccConsole::Warning("[BundlerFilter::loadFile] Failed to generate DTM! (not enough memory?)");
+				ccLog::Warning("[BundlerFilter::loadFile] Failed to generate DTM! (not enough memory?)");
 			}
 		}
 		else
@@ -553,7 +548,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 				if (!mntColors)
 				{
 					//not enough memory
-					ccConsole::Error("Not enough memory to store DTM colors! DTM generation cancelled");
+					ccLog::Error("Not enough memory to store DTM colors! DTM generation cancelled");
 					delete mntSamples;
 					mntSamples=0;
 					generateColoredDTM=false;
@@ -591,7 +586,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 		QString errorStr;
 		if (!image->load(imageDir.absoluteFilePath(imageFilenames[i]),errorStr))
 		{
-			ccConsole::Error(QString("[BundlerFilter::loadFile] %1 (image '%2')").arg(errorStr).arg(imageFilenames[i]));
+			ccLog::Error(QString("[BundlerFilter::loadFile] %1 (image '%2')").arg(errorStr).arg(imageFilenames[i]));
 			delete image;
 			image=0;
 			break;
@@ -645,7 +640,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 
 			if (keypointsImage.size()<4)
 			{
-				ccConsole::Warning(QString("[BundlerFilter::loadFile] Not enough keypoints descriptors for image '%1'!").arg(image->getName()));
+				ccLog::Warning(QString("[BundlerFilter::loadFile] Not enough keypoints descriptors for image '%1'!").arg(image->getName()));
 			}
 			else
 			{
@@ -667,7 +662,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 						info.w = orthoImage->getW();
 						info.h = orthoImage->getH();
 						orthoImage->data().save(imageDir.absoluteFilePath(info.name));
-						ccConsole::Print(QString("[BundlerFilter] Ortho-rectified version of image '%1' saved to '%2'").arg(imageFilenames[i]).arg(imageDir.absoluteFilePath(info.name)));
+						ccLog::Print(QString("[BundlerFilter] Ortho-rectified version of image '%1' saved to '%2'").arg(imageFilenames[i]).arg(imageDir.absoluteFilePath(info.name)));
 
 #ifdef TEST_TEXTURED_BUNDLER_IMPORT
 
@@ -797,7 +792,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 					}
 					else
 					{
-						ccConsole::Warning(QString("[BundlerFilter::loadFile] Failed to ortho-rectify image '%1'!").arg(image->getName()));
+						ccLog::Warning(QString("[BundlerFilter::loadFile] Failed to ortho-rectify image '%1'!").arg(image->getName()));
 					}
 				}
 
@@ -807,7 +802,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 					if (orthoCloud)
 						container.addChild(orthoCloud);
 					else
-						ccConsole::Warning(QString("[BundlerFilter::loadFile] Failed to ortho-rectify image '%1' as a cloud!").arg(image->getName()));
+						ccLog::Warning(QString("[BundlerFilter::loadFile] Failed to ortho-rectify image '%1' as a cloud!").arg(image->getName()));
 				}
 			}
 		}
@@ -815,7 +810,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 		//undistortion
 		if (undistortImages)
 			if (!image->undistort())
-				ccConsole::Warning(QString("[BundlerFilter::loadFile] Failed to undistort image '%1'!").arg(image->getName()));
+				ccLog::Warning(QString("[BundlerFilter::loadFile] Failed to undistort image '%1'!").arg(image->getName()));
 
 		//DTM color 'blending'
 		if (generateColoredDTM)
@@ -914,7 +909,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 		}
 		else
 		{
-			ccConsole::Warning("Failed to save orthorectification log file! (ortho_rectification_log.txt)");
+			ccLog::Warning("Failed to save orthorectification log file! (ortho_rectification_log.txt)");
 		}
 	}
 
@@ -954,7 +949,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 
 					mntCloud->showColors(true);
 					container.addChild(mntCloud);
-					ccConsole::Warning("[BundlerFilter::loadFile] DTM vertices sucessfully generated: clean it if necessary then use 'Edit > Mesh > Compute Delaunay 2D (Best LS plane)' then 'Smooth' to get a proper mesh");
+					ccLog::Warning("[BundlerFilter::loadFile] DTM vertices sucessfully generated: clean it if necessary then use 'Edit > Mesh > Compute Delaunay 2D (Best LS plane)' then 'Smooth' to get a proper mesh");
 
 					if (!displayLoadDialog)
 					{
@@ -962,19 +957,19 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 						BinFilter bf;
 						QString outputFile = imageDir.absoluteFilePath("colored_dtm_vertices.bin");
 						if (bf.saveToFile(mntCloud,qPrintable(outputFile)) == CC_FERR_NO_ERROR)
-							ccConsole::Print(QString("[BundlerFilter] Color DTM vertices automatically saved to '%2'").arg(outputFile));
+							ccLog::Print(QString("[BundlerFilter] Color DTM vertices automatically saved to '%2'").arg(outputFile));
 						else
-							ccConsole::Warning(QString("[BundlerFilter] Failed to save DTM vertices to '%2'").arg(outputFile));
+							ccLog::Warning(QString("[BundlerFilter] Failed to save DTM vertices to '%2'").arg(outputFile));
 					}
 				}
 				else
 				{
-					ccConsole::Warning("[BundlerFilter::loadFile] Failed to generate DTM! (no point viewed in images?)");
+					ccLog::Warning("[BundlerFilter::loadFile] Failed to generate DTM! (no point viewed in images?)");
 				}
 			}
 			else
 			{
-				ccConsole::Warning("[BundlerFilter::loadFile] Failed to generate DTM vertices cloud! (not enough memory?)");
+				ccLog::Warning("[BundlerFilter::loadFile] Failed to generate DTM vertices cloud! (not enough memory?)");
 				delete mntCloud;
 				mntCloud=0;
 			}

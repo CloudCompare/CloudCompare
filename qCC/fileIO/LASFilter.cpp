@@ -25,6 +25,7 @@
 #include "LASOpenDlg.h"
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
@@ -73,12 +74,12 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	if (clouds.empty())
 	{
-		ccConsole::Error("No point cloud in input selection!");
+		ccLog::Error("No point cloud in input selection!");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 	else if (clouds.size()>1)
 	{
-		ccConsole::Error("Can't save more than one cloud per LAS file!");
+		ccLog::Error("Can't save more than one cloud per LAS file!");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
@@ -88,7 +89,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	if (numberOfPoints==0)
 	{
-		ccConsole::Error("Cloud is empty!");
+		ccLog::Error("Cloud is empty!");
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
@@ -565,7 +566,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 			if (ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 			{
 				loadedCloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-				ccConsole::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+				ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
 
 				//we save coordinates shift information
 				if (applyAll && coordinatesShiftEnabled && coordinatesShift)
@@ -605,7 +606,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 					}
 					else
 					{
-						ccConsole::Warning("[LAS FILE] Not enough memory: color field will be ignored!");
+						ccLog::Warning("[LAS FILE] Not enough memory: color field will be ignored!");
 						loadColor = false; //no need to retry with the other chunks anyway
 						pushColor = false;
 					}
@@ -732,7 +733,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 					}
 					else
 					{
-						ccConsole::Warning(QString("[LAS FILE] Not enough memory: '%1' field will be ignored!").arg(LAS_FIELD_NAMES[it->type]));
+						ccLog::Warning(QString("[LAS FILE] Not enough memory: '%1' field will be ignored!").arg(LAS_FIELD_NAMES[it->type]));
 						it->sf->release();
 						it->sf = 0;
 					}

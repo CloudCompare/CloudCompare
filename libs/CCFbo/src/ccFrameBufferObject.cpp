@@ -126,7 +126,7 @@ bool ccFrameBufferObject::initTexture(unsigned index,
 
     if (fboId==0)
     {
-        //ccConsole::Warning("[FBO::initTexture] Internal error: FBO not yet initialized!");
+        //ccLog::Warning("[FBO::initTexture] Internal error: FBO not yet initialized!");
         return false;
     }
 
@@ -162,7 +162,7 @@ bool ccFrameBufferObject::initTexture(unsigned index,
             success = true;
 			break;
 		default:
-            //ccConsole::Warning("[FBO] Color texture %i init. error: %i",index+1,status);
+            //ccLog::Warning("[FBO] Color texture %i init. error: %i",index+1,status);
             break;
 	}
 
@@ -182,7 +182,7 @@ bool ccFrameBufferObject::initTextures(unsigned count,
 
     if (fboId==0)
     {
-        //ccConsole::Warning("[FBO::initTextures] Internal error: FBO not yet initialized!");
+        //ccLog::Warning("[FBO::initTextures] Internal error: FBO not yet initialized!");
         return false;
     }
 
@@ -199,7 +199,7 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
 {
     if (fboId==0)
     {
-        //ccConsole::Warning("[FBO::initDepth] Internal error: FBO not yet initialized!");
+        //ccLog::Warning("[FBO::initDepth] Internal error: FBO not yet initialized!");
         return false;
     }
 
@@ -236,11 +236,11 @@ bool ccFrameBufferObject::initDepth(GLint wrapParam /*=GL_CLAMP_TO_BORDER*/,
 	switch (status)
 	{
 		case GL_FRAMEBUFFER_COMPLETE_EXT:
-            //ccConsole::Print("[FBO] Depth init. ok");
+            //ccLog::Print("[FBO] Depth init. ok");
             success = true;
 			break;
 		default:
-            //ccConsole::Warning("[FBO] Depth texture init. error: %i",status);
+            //ccLog::Warning("[FBO] Depth texture init. error: %i",status);
             break;
 	}
 

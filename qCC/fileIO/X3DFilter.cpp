@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
+
 #include "X3DFilter.h"
 
 #ifdef CC_X3D_SUPPORT
@@ -37,6 +31,7 @@
 #include <ScalarField.h>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccMesh.h>
 
@@ -62,7 +57,7 @@ CC_FILE_ERROR X3DFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 	catch (XIOT::X3DParseException& e)
 	{
-		ccConsole::Error("[X3DFilter] Error: '%s' (line: %i, col.: %i)\n",e.getMessage().c_str(),e.getLineNumber(),e.getColumnNumber());
+		ccLog::Error("[X3DFilter] Error: '%s' (line: %i, col.: %i)\n",e.getMessage().c_str(),e.getLineNumber(),e.getColumnNumber());
 		return CC_FERR_READING;
 	}
 

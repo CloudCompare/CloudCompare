@@ -21,10 +21,10 @@
 //qCC
 #include "ccGLWindow.h"
 #include "ccGuiParameters.h"
-#include "ccConsole.h"
 #include "ccRenderingTools.h"
 
 //qCC_db
+#include <ccLog.h>
 #include <ccHObject.h>
 #include <ccHObjectCaster.h>
 #include <ccBBox.h>
@@ -268,35 +268,35 @@ void ccGLWindow::initializeGL()
 	InitGLEW();
 
 	//OpenGL version
-	ccConsole::Print("[3D View %i] GL version: %s",m_uniqueID,glGetString(GL_VERSION));
+	ccLog::Print("[3D View %i] GL version: %s",m_uniqueID,glGetString(GL_VERSION));
 
 	//Shaders and other OpenGL extensions
 	m_shadersEnabled = CheckShadersAvailability();
 	if (!m_shadersEnabled)
 	{
 		//if no shader, no GL filter!
-		ccConsole::Warning("[3D View %i] Shaders and GL filters unavailable",m_uniqueID);
+		ccLog::Warning("[3D View %i] Shaders and GL filters unavailable",m_uniqueID);
 	}
 	else
 	{
-		ccConsole::Print("[3D View %i] Shaders available",m_uniqueID);
+		ccLog::Print("[3D View %i] Shaders available",m_uniqueID);
 
 		m_glFiltersEnabled = CheckFBOAvailability();
 		if (m_glFiltersEnabled)
 		{
-			ccConsole::Print("[3D View %i] GL filters available",m_uniqueID);
+			ccLog::Print("[3D View %i] GL filters available",m_uniqueID);
 			m_alwaysUseFBO = true;
 		}
 		else
 		{
-			ccConsole::Warning("[3D View %i] GL filters unavailable (FBO not supported)",m_uniqueID);
+			ccLog::Warning("[3D View %i] GL filters unavailable (FBO not supported)",m_uniqueID);
 		}
 
 		//color ramp shader
 		if (!m_colorRampShader)
 		{
 			const char* vendorName = (const char*)glGetString(GL_VENDOR);
-			ccConsole::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
+			ccLog::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
 
 			//we will update global parameters
 			ccGui::ParamStruct params = ccGui::Parameters();
@@ -307,7 +307,7 @@ void ccGLWindow::initializeGL()
 			const GLint minRequiredBytes = ccColorRampShader::MinRequiredBytes();
 			if (maxBytes < minRequiredBytes)
 			{
-				ccConsole::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)",m_uniqueID,maxBytes,minRequiredBytes);
+				ccLog::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)",m_uniqueID,maxBytes,minRequiredBytes);
 				params.colorScaleShaderSupported = false;
 			}
 			else
@@ -316,14 +316,14 @@ void ccGLWindow::initializeGL()
 				QString shadersPath = ccGLWindow::getShadersPath();
 				if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag"))))
 				{
-					ccConsole::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
+					ccLog::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
 					params.colorScaleShaderSupported = false;
 					delete colorRampShader;
 					colorRampShader = 0;
 				}
 				else
 				{
-					ccConsole::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
+					ccLog::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
 					m_colorRampShader = colorRampShader;
 					params.colorScaleShaderSupported = true;
 
@@ -333,7 +333,7 @@ void ccGLWindow::initializeGL()
 						bool shouldUseShader = true;
 						if (!vendorName || QString(vendorName).toUpper().startsWith("ATI"))
 						{
-							ccConsole::Warning("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
+							ccLog::Warning("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
 							shouldUseShader = false;
 						}
 						params.colorScaleUseShader = shouldUseShader;
@@ -452,7 +452,7 @@ void ccGLWindow::stopFrameRateTest()
 	{
 		QString message = QString("Framerate: %1 f/s").arg((double)s_frameRateCurrentFrame*1.0e3/(double)s_frameRateElapsedTime_ms,0,'f',3);
 		displayNewMessage(message,ccGLWindow::LOWER_LEFT_MESSAGE,true);
-		ccConsole::Print(message);
+		ccLog::Print(message);
 	}
 	else
 	{
@@ -856,15 +856,15 @@ void ccGLWindow::dragEnterEvent(QDragEnterEvent *event)
 	for (unsigned i=0;i<mimeData->formats().size();++i)
 	{
 	QString format = mimeData->formats().at(i);
-	ccConsole::Print(QString("Drop format: %1").arg(format));
+	ccLog::Print(QString("Drop format: %1").arg(format));
 	if (mimeData->hasFormat("FileNameW"))
 	{
 	QByteArray byteData = mimeData->data(format);
-	ccConsole::Print(QString("\tdata: %1").arg(QString::fromUtf16((ushort*)byteData.data(), byteData.size() / 2)));
+	ccLog::Print(QString("\tdata: %1").arg(QString::fromUtf16((ushort*)byteData.data(), byteData.size() / 2)));
 	}
 	else
 	{
-	ccConsole::Print(QString("\tdata: %1").arg(QString(mimeData->data(format))));
+	ccLog::Print(QString("\tdata: %1").arg(QString(mimeData->data(format))));
 	}
 	}
 	//*/
@@ -892,7 +892,7 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 #endif
 			//fileNames[i] = QUrl(fileNames[i].trimmed()).toLocalFile(); //toLocalFile removes the end of filenames sometimes!
 #ifdef _DEBUG
-			ccConsole::Print(QString("File dropped: %1").arg(fileNames[i]));
+			ccLog::Print(QString("File dropped: %1").arg(fileNames[i]));
 #endif
 		}
 
@@ -917,7 +917,7 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 	event->acceptProposedAction();
 	}
 
-	ccConsole::Print(QString("Drop file(s): %1").arg(filename));
+	ccLog::Print(QString("Drop file(s): %1").arg(filename));
 	//*/
 
 	event->ignore();
@@ -1053,7 +1053,7 @@ void ccGLWindow::setShader(ccShader* _shader)
 {
 	if (!m_shadersEnabled)
 	{
-		ccConsole::Warning("[ccGLWindow::setShader] Shader ignored (not supported)");
+		ccLog::Warning("[ccGLWindow::setShader] Shader ignored (not supported)");
 		return;
 	}
 
@@ -1068,7 +1068,7 @@ void ccGLWindow::setGlFilter(ccGlFilter* filter)
 {
 	if (!m_glFiltersEnabled)
 	{
-		ccConsole::Warning("[ccGLWindow::setGlFilter] GL filter ignored (not supported)");
+		ccLog::Warning("[ccGLWindow::setGlFilter] GL filter ignored (not supported)");
 		return;
 	}
 
@@ -2334,10 +2334,10 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 
 	ccGLUtils::CatchGLError("ccGLWindow::startPicking.render");
 
-	ccConsole::PrintDebug("Picking hits: %i",hits);
+	ccLog::PrintDebug("Picking hits: %i",hits);
 	if (hits<0)
 	{
-		ccConsole::Warning("Too many items inside picking zone! Try to zoom in...");
+		ccLog::Warning("Too many items inside picking zone! Try to zoom in...");
 		return -1;
 	}
 
@@ -3044,7 +3044,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 	GLubyte* data = output.bits();
 	if (!data)
 	{
-		ccConsole::Error("[ccGLWindow::renderToFile] Not enough memory!");
+		ccLog::Error("[ccGLWindow::renderToFile] Not enough memory!");
 		return false;
 	}
 
@@ -3071,7 +3071,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 	bool result = false;
 	if (m_fbo)
 	{
-		ccConsole::Print("[Render screen via FBO]");
+		ccLog::Print("[Render screen via FBO]");
 		m_captureMode.zoomFactor = 1.0f;
 
 		ccFrameBufferObject* fbo = 0;
@@ -3090,7 +3090,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 					success = fbo->initDepth(GL_CLAMP_TO_BORDER,GL_DEPTH_COMPONENT32,GL_NEAREST,GL_TEXTURE_2D);
 			if (!success)
 			{
-				ccConsole::Error("[FBO] Initialization failed! (not enough memory?)");
+				ccLog::Error("[FBO] Initialization failed! (not enough memory?)");
 				delete fbo;
 				fbo=0;
 			}
@@ -3109,7 +3109,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 
 				if (!m_activeGLFilter->init(Wp,Hp,qPrintable(shadersPath)))
 				{
-					ccConsole::Error("[GL Filter] GL filter can't be used during rendering (not enough memory)!");
+					ccLog::Error("[GL Filter] GL filter can't be used during rendering (not enough memory)!");
 				}
 				else
 				{
@@ -3206,12 +3206,12 @@ bool ccGLWindow::renderToFile(	const char* filename,
 	}
 	else if (m_activeShader)
 	{
-		ccConsole::Error("Screen capture with shader not supported!");
+		ccLog::Error("Screen capture with shader not supported!");
 	}
 	//if no shader or fbo --> we grab screen directly
 	else
 	{
-		ccConsole::Print("[Render screen via QT pixmap]");
+		ccLog::Print("[Render screen via QT pixmap]");
 
 		QPixmap capture = renderPixmap(Wp,Hp);
 		if (capture.width()>0 && capture.height()>0)
@@ -3221,12 +3221,12 @@ bool ccGLWindow::renderToFile(	const char* filename,
 		}
 		else
 		{
-			ccConsole::Error("Direct screen capture failed! (not enough memory?)");
-			/*ccConsole::Warning("Direct screen capture failed! Let's try with a frame buffer object");
+			ccLog::Error("Direct screen capture failed! (not enough memory?)");
+			/*ccLog::Warning("Direct screen capture failed! Let's try with a frame buffer object");
 
 			resizeGL(Wp,Hp);
 			if (!initFBO(Wp,Hp))
-			ccConsole::Warning("Couldn't create FBO ... screen capture aborted");
+			ccLog::Warning("Couldn't create FBO ... screen capture aborted");
 			else
 			{
 			result = ccGLUtils::SaveTextureToFile(filename,m_fbo->getColorTexture(0),Wp,Hp);
@@ -3248,7 +3248,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 	//m_captureMode.zoomFactor = 1.0f;
 
 	if (result)
-		ccConsole::Print("[Snapshot] File '%s' saved! (%i x %i pixels)",filename,Wp,Hp);
+		ccLog::Print("[Snapshot] File '%s' saved! (%i x %i pixels)",filename,Wp,Hp);
 
 	return true;
 }
@@ -3283,14 +3283,14 @@ bool ccGLWindow::initFBO(int w, int h)
 
 	if (!success)
 	{
-		ccConsole::Warning("[FBO] Initialization failed!");
+		ccLog::Warning("[FBO] Initialization failed!");
 		delete _fbo;
 		_fbo=0;
 		m_alwaysUseFBO=false;
 		return false;
 	}
 
-	//ccConsole::Print("[FBO] Initialized");
+	//ccLog::Print("[FBO] Initialized");
 
 	m_fbo = _fbo;
 	m_updateFBO = true;
@@ -3321,15 +3321,15 @@ bool ccGLWindow::initGLFilter(int w, int h)
 
 	QString shadersPath = ccGLWindow::getShadersPath();
 
-	//ccConsole::Print(QString("Shaders path: %1").arg(shadersPath));
+	//ccLog::Print(QString("Shaders path: %1").arg(shadersPath));
 
 	if (!_filter->init(w,h,qPrintable(shadersPath)))
 	{
-		ccConsole::Warning("[GL Filter] Initialization failed!");
+		ccLog::Warning("[GL Filter] Initialization failed!");
 		return false;
 	}
 
-	ccConsole::Print("[GL Filter] Filter initialized");
+	ccLog::Print("[GL Filter] Filter initialized");
 
 	m_activeGLFilter = _filter;
 

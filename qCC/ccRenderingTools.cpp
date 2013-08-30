@@ -19,7 +19,6 @@
 #include "ccGuiParameters.h"
 
 //qCC
-#include "ccConsole.h"
 #include "ccGLWindow.h"
 
 //qCC_db

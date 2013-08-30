@@ -21,6 +21,7 @@
 #include <SimpleCloud.h>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccGBLSensor.h>
 
@@ -29,8 +30,6 @@
 
 //System
 #include <assert.h>
-
-#include "../ccConsole.h"
 
 //Ground based LiDAR sensor mirror and body rotation order
 //Refer to ccGBLSensor::ROTATION_ORDER
@@ -62,7 +61,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
         {
             clouds.push_back(ccHObjectCaster::ToGenericPointCloud(hClouds[i]));
             if (cloudSensors.size()>1)
-                ccConsole::Warning(QString("Found more than one ground-based LIDAR sensor associated to entity '%1'. Only the first will be saved!").arg(hClouds[i]->getName()));
+                ccLog::Warning(QString("Found more than one ground-based LIDAR sensor associated to entity '%1'. Only the first will be saved!").arg(hClouds[i]->getName()));
 
             sensors.push_back(static_cast<ccGBLSensor*>(cloudSensors[0]));
         }
@@ -76,7 +75,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
     //the first GLS sensor will be used as reference! (ugly)
     ccGBLSensor* firstGls = sensors.front();
     if (sensors.size()>1)
-        ccConsole::Warning("Assuming all sensors are equivalent...");
+        ccLog::Warning("Assuming all sensors are equivalent...");
 
     //we extract the body of the filename (without extension)
 	QString fullBaseName = QFileInfo(filename).completeBaseName();
@@ -240,7 +239,7 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
         return CC_FERR_READING;
     }
 
-    ccConsole::Print("[PovFilter::loadFile] POV FILE [Type %s - base=%f - unit: %s}\n",sensorType,base,unitsType);
+    ccLog::Print("[PovFilter::loadFile] POV FILE [Type %s - base=%f - unit: %s}\n",sensorType,base,unitsType);
 
     //on extrait le chemin relatif
 	QString path = QFileInfo(filename).absolutePath();
@@ -252,16 +251,16 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
     {
         if ((line[0]=='#')&&(line[1]=='P'))
         {
-            ccConsole::Print("%s",line);
+            ccLog::Print("%s",line);
             if (fscanf(fp,"F %s\n",subFileName)<0)
             {
-                ccConsole::PrintDebug("[PovFilter::loadFile] Read error (F) !\n");
+                ccLog::PrintDebug("[PovFilter::loadFile] Read error (F) !\n");
                 fclose(fp);
                 return CC_FERR_READING;
             }
             if (fscanf(fp,"T %s\n",subFileType)<0)
             {
-                ccConsole::PrintDebug("[PovFilter::loadFile] Read error (T) !\n");
+                ccLog::PrintDebug("[PovFilter::loadFile] Read error (T) !\n");
                 fclose(fp);
                 return CC_FERR_READING;
             }
@@ -327,16 +326,16 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                     switch (errorCode)
                     {
                     case -1:
-                        ccConsole::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): nothing to project?! Must be a bug, sorry ;)").arg(i).arg(theCloud->getName()));
+                        ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): nothing to project?! Must be a bug, sorry ;)").arg(i).arg(theCloud->getName()));
                         break;
                     case -2:
-                        ccConsole::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): the resulting depth map seems much too big! Check parameters, or reduce angular steps ...").arg(i).arg(theCloud->getName()));
+                        ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): the resulting depth map seems much too big! Check parameters, or reduce angular steps ...").arg(i).arg(theCloud->getName()));
                         break;
                     case -3:
-                        ccConsole::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): the resulting depth map is void (too small)! Check parameters and input, or increase angular steps ...").arg(i).arg(theCloud->getName()));
+                        ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): the resulting depth map is void (too small)! Check parameters and input, or increase angular steps ...").arg(i).arg(theCloud->getName()));
                         break;
                     case -4:
-                        ccConsole::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): not enough memory!").arg(i).arg(theCloud->getName()));
+                        ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): not enough memory!").arg(i).arg(theCloud->getName()));
                         break;
                     }
 
@@ -358,7 +357,7 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
             }
             else
 			{
-				ccConsole::Print("[PovFilter::loadFile] File (%s) not found or empty!\n",subFileName);
+				ccLog::Print("[PovFilter::loadFile] File (%s) not found or empty!\n",subFileName);
 			}
         }
     }

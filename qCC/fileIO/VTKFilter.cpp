@@ -22,6 +22,7 @@
 #include <ScalarField.h>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccMesh.h>
 
@@ -57,12 +58,12 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 
     if (clouds.empty() && meshes.empty())
     {
-        ccConsole::Error("No point cloud nor mesh in input selection!");
+        ccLog::Error("No point cloud nor mesh in input selection!");
         return CC_FERR_BAD_ENTITY_TYPE;
     }
     else if (clouds.size()+meshes.size()>1)
     {
-        ccConsole::Error("Can't save more than one entity per VTK file!");
+        ccLog::Error("Can't save more than one entity per VTK file!");
         return CC_FERR_BAD_ENTITY_TYPE;
     }
 
@@ -80,7 +81,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 		triCount = mesh->size();
 		if (triCount == 0)
 		{
-			ccConsole::Error("Mesh has no triangle?!");
+			ccLog::Error("Mesh has no triangle?!");
 			return CC_FERR_NO_SAVE;
 		}
 		vertices = mesh->getAssociatedCloud();
@@ -90,7 +91,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 	unsigned ptsCount = vertices->size();
 	if (!ptsCount)
 	{
-		ccConsole::Error("No point/vertex to save?!");
+		ccLog::Error("No point/vertex to save?!");
 		return CC_FERR_NO_SAVE;
 	}
 	const double* shift = vertices->getOriginalShift();
@@ -220,7 +221,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	//comment
 	nextline = inFile.readLine();
-	ccConsole::Print(QString("[VTK] ")+nextline);
+	ccLog::Print(QString("[VTK] ")+nextline);
 
 	ccMesh* mesh=0;
 	ccPointCloud* vertices=0;
@@ -229,7 +230,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 	if (fileType.startsWith("BINARY"))
 	{
 		//binary not supported yet!
-		ccConsole::Error("VTK binary format not supported yet!");
+		ccLog::Error("VTK binary format not supported yet!");
 		return CC_FERR_WRONG_FILE_TYPE;
 	}
 	else if (fileType.startsWith("ASCII"))
@@ -249,7 +250,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 		}
 		else
 		{
-			ccConsole::Error(QString("VTK entity '%1' is not supported!").arg(dataType));
+			ccLog::Error(QString("VTK entity '%1' is not supported!").arg(dataType));
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
 	}
@@ -287,7 +288,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 			//}
 			//else if (dataFormat != "FLOAT")
 			//{
-			//	ccConsole::Error(QString("Non floating point data (%1) is not supported!").arg(dataFormat));
+			//	ccLog::Error(QString("Non floating point data (%1) is not supported!").arg(dataFormat));
 			//	error=CC_FERR_WRONG_FILE_TYPE;
 			//	break;
 			//}
@@ -314,7 +315,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 					Pd[j] = parts[j].toDouble(&ok);
 					if (!ok)
 					{
-						ccConsole::Warning("[VTK] Element #%1 of POINTS data is corrupted!",i);
+						ccLog::Warning("[VTK] Element #%1 of POINTS data is corrupted!",i);
 						error=CC_FERR_MALFORMED_FILE;
 						break;
 					}
@@ -329,7 +330,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 					if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 					{
 						vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-						ccConsole::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+						ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
 
 						//we save coordinates shift information
 						if (applyAll && coordinatesShiftEnabled && coordinatesShift)
@@ -373,13 +374,13 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 			if (totalElements != 4*triCount)
 			{
 				//TODO
-				ccConsole::Warning("[VTK] Polygons other than triangle are not supported yet!");
+				ccLog::Warning("[VTK] Polygons other than triangle are not supported yet!");
 			}
 
 			assert(mesh);
 			if (!mesh)
 			{
-				ccConsole::Warning("[VTK] We found polygon data while file is not composed of POLYDATA!");
+				ccLog::Warning("[VTK] We found polygon data while file is not composed of POLYDATA!");
 				mesh= new ccMesh(vertices); //however, we can still try to load it?
 			}
 
@@ -415,7 +416,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 						indexes[j] = parts[j+1].toInt(&ok);
 						if (!ok)
 						{
-							ccConsole::Warning("[VTK] Element #%1 of POLYGONS data is corrupted!",i);
+							ccLog::Warning("[VTK] Element #%1 of POLYGONS data is corrupted!",i);
 							error=CC_FERR_MALFORMED_FILE;
 							break;
 						}
@@ -460,7 +461,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 			{
 				bool loadNormals = vertices->reserveTheNormsTable();
 				if (!loadNormals)
-					ccConsole::Warning("[VTK] Not enough memory to load normals!");
+					ccLog::Warning("[VTK] Not enough memory to load normals!");
 				for (unsigned i=0;i<ptsCount;++i)
 				{
 					nextline = inFile.readLine();
@@ -479,7 +480,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 							N.u[j] = (PointCoordinateType)parts[j].toDouble(&ok);
 							if (!ok)
 							{
-								ccConsole::Warning("[VTK] Element #%1 of NORMALS data is corrupted!",i);
+								ccLog::Warning("[VTK] Element #%1 of NORMALS data is corrupted!",i);
 								error=CC_FERR_MALFORMED_FILE;
 								break;
 							}
@@ -502,7 +503,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 			{
 				bool loadRGBColors = vertices->reserveTheRGBTable();
 				if (!loadRGBColors)
-					ccConsole::Warning("[VTK] Not enough memory to load RGB colors!");
+					ccLog::Warning("[VTK] Not enough memory to load RGB colors!");
 				for (unsigned i=0;i<ptsCount;++i)
 				{
 					nextline = inFile.readLine();
@@ -521,7 +522,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 							rgb[j] = (colorType)(parts[j].toDouble(&ok) * (double)MAX_COLOR_COMP);
 							if (!ok)
 							{
-								ccConsole::Warning("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!",i);
+								ccLog::Warning("[VTK] Element #%1 of COLOR_SCALARS data is corrupted!",i);
 								error=CC_FERR_MALFORMED_FILE;
 								break;
 							}
@@ -559,7 +560,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 				}
 				parts = nextline.split(" ",QString::SkipEmptyParts);
 				if (parts.size()>1 && parts[1].toUpper() != "DEFAULT")
-					ccConsole::Warning(QString("[VTK] Lookup table other than default (%1) not supported!").arg(parts[1]));
+					ccLog::Warning(QString("[VTK] Lookup table other than default (%1) not supported!").arg(parts[1]));
 
 				int newSFIndex = vertices->addScalarField(qPrintable(sfName));
 				CCLib::ScalarField* sf = vertices->getScalarField(newSFIndex);

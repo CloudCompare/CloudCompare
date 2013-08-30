@@ -28,6 +28,7 @@
 #include <ScalarFieldTools.h>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccHObject.h>
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
@@ -37,7 +38,6 @@
 //Local
 #include "ccDisplayOptionsDlg.h"
 #include "mainwindow.h"
-#include "ccConsole.h"
 #include "ccCommon.h"
 #include "ccHistogramWindow.h"
 
@@ -134,13 +134,13 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	{
 		if (compType == CLOUDCLOUD_DIST || (compType == CLOUDMESH_DIST && !compEnt->isKindOf(CC_MESH)))
 		{
-			ccConsole::Error("Dialog initialization error! (bad entity type)");
+			ccLog::Error("Dialog initialization error! (bad entity type)");
 			return false;
 		}
 		ccGenericMesh* compMesh = ccHObjectCaster::ToGenericMesh(compEnt);
 		if (!compMesh->getAssociatedCloud()->isA(CC_POINT_CLOUD)) //TODO
 		{
-			ccConsole::Error("Dialog initialization error! (bad entity type - works only with real point clouds [todo])");
+			ccLog::Error("Dialog initialization error! (bad entity type - works only with real point clouds [todo])");
 			return false;
 		}
 		compCloud = static_cast<ccPointCloud*>(compMesh->getAssociatedCloud());
@@ -162,7 +162,7 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	if ((compType == CLOUDMESH_DIST && !refEnt->isKindOf(CC_MESH))
 		|| (compType == CLOUDCLOUD_DIST && !refEnt->isA(CC_POINT_CLOUD)))
 	{
-		ccConsole::Error("Dialog initialization error! (bad entity type)");
+		ccLog::Error("Dialog initialization error! (bad entity type)");
 		return false;
 	}
 
@@ -197,7 +197,7 @@ void ccComparisonDlg::updateOctreeLevel(double value)
 		}
 		else
 		{
-			ccConsole::Error("Can't evaluate best computation level! Try to set it manually ...");
+			ccLog::Error("Can't evaluate best computation level! Try to set it manually ...");
 			octreeLevelCheckBox->setCheckState(Qt::Checked);
 			octreeLevelSpinBox->setEnabled(true);
 		}
@@ -275,7 +275,7 @@ bool ccComparisonDlg::isValid()
 {
 	if (!compCloud || !compOctree || (!refMesh && !refCloud) || (!refMesh && !refOctree))
 	{
-		ccConsole::Error("Dialog initialization error! (void entity)");
+		ccLog::Error("Dialog initialization error! (void entity)");
 		return false;
 	}
 
@@ -297,7 +297,7 @@ int ccComparisonDlg::computeApproxResults()
 		sfIdx=compCloud->addScalarField(CC_TEMP_CHAMFER_DISTANCES_DEFAULT_SF_NAME);
 	if (sfIdx<0)
 	{
-		ccConsole::Error("Failed to allocate a new scalar field for computing distances! Try to free some memory ...");
+		ccLog::Error("Failed to allocate a new scalar field for computing distances! Try to free some memory ...");
 		return approxResult;
 	}
 
@@ -328,14 +328,14 @@ int ccComparisonDlg::computeApproxResults()
 	//si le calcul de distances approx a echoue ...
 	if (approxResult<0)
 	{
-		ccConsole::Warning("Approx. results computation failed (error code %i)",approxResult);
+		ccLog::Warning("Approx. results computation failed (error code %i)",approxResult);
 		compCloud->deleteScalarField(sfIdx);
 		sfIdx = -1;
 		sfCanBeUsedToEstimateBestOctreeLevel = false;
 	}
 	else
 	{
-		ccConsole::Print("[ComputeApproxDistances] Time: %3.2f s.",elapsedTime_ms/1.0e3);
+		ccLog::Print("[ComputeApproxDistances] Time: %3.2f s.",elapsedTime_ms/1.0e3);
 
 		//affichage des infos sur le champ scalaire approx.
 		ScalarType mean,variance;
@@ -402,7 +402,7 @@ int ccComparisonDlg::computeApproxResults()
 
 	if (guessedBestOctreeLevel<0)
 	{
-		ccConsole::Warning("Can't evaluate best computation level! Try to set it manually ...");
+		ccLog::Warning("Can't evaluate best computation level! Try to set it manually ...");
 		octreeLevelCheckBox->setCheckState(Qt::Checked);
 		octreeLevelSpinBox->setEnabled(true);
 		guessedBestOctreeLevel = (int)DEFAULT_OCTREE_LEVEL;
@@ -448,13 +448,13 @@ int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(ScalarType m
 	{
 		if (!refMesh)
 		{
-			ccConsole::Error("Error: reference entity should be a mesh!");
+			ccLog::Error("Error: reference entity should be a mesh!");
 			return -1;
 		}
 		mesh = static_cast<CCLib::GenericIndexedMesh*>(refMesh);
 		if (!mesh || mesh->size()==0)
 		{
-			ccConsole::Warning("Mesh is empty! Can't go further...");
+			ccLog::Warning("Mesh is empty! Can't go further...");
 			return -1;
 		}
 		//Surface totale du maillage
@@ -553,13 +553,13 @@ int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(ScalarType m
 			++numberOfPointsInCell;
 		}
 
-		//ccConsole::Print("[Timing] Level %i --> %f",level,timings[level]);
+		//ccLog::Print("[Timing] Level %i --> %f",level,timings[level]);
 
 		if (timings[level]<timings[theBestOctreeLevel])
 			theBestOctreeLevel = level;
 	}
 
-	ccConsole::PrintDebug("[ccComparisonDlg] Best level: %i (maxSearchDist=%f)",theBestOctreeLevel,maxSearchDist);
+	ccLog::PrintDebug("[ccComparisonDlg] Best level: %i (maxSearchDist=%f)",theBestOctreeLevel,maxSearchDist);
 
 	return theBestOctreeLevel;
 }
@@ -599,7 +599,7 @@ void ccComparisonDlg::compute()
 		sfIdx = compCloud->addScalarField(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 		if (sfIdx<0)
 		{
-			ccConsole::Error("Couldn't allocate a new scalar field for computing distances! Try to free some memory ...");
+			ccLog::Error("Couldn't allocate a new scalar field for computing distances! Try to free some memory ...");
 			return;
 		}
 	}
@@ -655,7 +655,7 @@ void ccComparisonDlg::compute()
 		break;
 	case CLOUDMESH_DIST: //cloud-mesh
 		if (enableMT && maxSearchDistSpinBox->isEnabled())
-			ccConsole::Warning("[Cloud/Mesh comparison] Max search distance is not supported in multi-thread mode! Switching to single thread mode...");
+			ccLog::Warning("[Cloud/Mesh comparison] Max search distance is not supported in multi-thread mode! Switching to single thread mode...");
 		result = CCLib::DistanceComputationTools::computePointCloud2MeshDistance(compCloud,
 			refMesh,
 			bestOctreeLevel,
@@ -674,13 +674,13 @@ void ccComparisonDlg::compute()
 
 	if (result>=0)
 	{
-		ccConsole::Print("[ComputeDistances] Time: %3.2f s.",elapsedTime_ms/1.0e3);
+		ccLog::Print("[ComputeDistances] Time: %3.2f s.",elapsedTime_ms/1.0e3);
 
 		//affichage des infos sur le champ scalaire
 		ScalarType mean,variance;
 		sf->computeMinAndMax();
 		sf->computeMeanAndVariance(mean,&variance);
-		ccConsole::Print("[ComputeDistances] Mean distance = %f / std deviation = %f",mean,sqrt(variance));
+		ccLog::Print("[ComputeDistances] Mean distance = %f / std deviation = %f",mean,sqrt(variance));
 
 		compCloud->setCurrentDisplayedScalarField(sfIdx);
 		compCloud->showSF(sfIdx>=0);
@@ -760,11 +760,11 @@ void ccComparisonDlg::compute()
 						compCloud->deleteScalarField(sfExit);
 					compCloud->addScalarField(sfDims[i]);
 				}
-				ccConsole::Warning("[ComputeDistances] Result has been split along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
+				ccLog::Warning("[ComputeDistances] Result has been split along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
 			}
 			else
 			{
-				ccConsole::Error("[ComputeDistances] Not enough memory to generate 3D split fields!");
+				ccLog::Error("[ComputeDistances] Not enough memory to generate 3D split fields!");
 			}
 
 			for (i=0;i<3;++i)
@@ -775,7 +775,7 @@ void ccComparisonDlg::compute()
 	}
 	else
 	{
-		ccConsole::Error("[ComputeDistances] Error (%i)",result);
+		ccLog::Error("[ComputeDistances] Error (%i)",result);
 		compCloud->deleteScalarField(sfIdx);
 		compCloud->showSF(false);
 		sfIdx=-1;
@@ -831,7 +831,7 @@ void ccComparisonDlg::applyAndExit()
 		{
 			if (sfName.isEmpty()) //hum,hum
 			{
-				ccConsole::Warning("Something went wrong!");
+				ccLog::Warning("Something went wrong!");
 				compCloud->deleteScalarField(sfIdx);
 				compCloud->setCurrentDisplayedScalarField(-1);
 				compCloud->showSF(false);

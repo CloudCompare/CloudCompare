@@ -14,22 +14,17 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
+
 #include "SoiFilter.h"
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
 CC_FILE_ERROR SoiFilter::saveToFile(ccHObject* entity, const char* filename)
 {
-	ccConsole::Print("Function is not implemented yet !");
+	ccLog::Print("Function is not implemented yet !");
 	return CC_FERR_NO_SAVE;
 }
 
@@ -56,13 +51,13 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 		{
 			std::string numPoints (line,4,line.size()-4);
 			nbPointsTotal=strtol(numPoints.c_str(),&pEnd,0);
-			//ccConsole::Print("[SoiFilter::loadFile] Total number of points: %i\n",nbPointsTotal);
+			//ccLog::Print("[SoiFilter::loadFile] Total number of points: %i\n",nbPointsTotal);
 		}
 		else if (strcmp(line.substr(0,4).c_str(),"#NS#")==0)
 		{
 			std::string numScans (line,4,line.size()-4);
 			nbScansTotal=strtol(numScans.c_str(),&pEnd,0);
-			//ccConsole::Print("[SoiFilter::loadFile] Total number of scans: %i\n",nbScansTotal);
+			//ccLog::Print("[SoiFilter::loadFile] Total number of scans: %i\n",nbScansTotal);
 		}
 
 		eof = fgets ((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH , fp);
@@ -70,7 +65,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	if ((nbScansTotal == 0)||(nbPointsTotal == 0))
 	{
-		ccConsole::Warning("[SoiFilter::loadFile] No points or scans defined in this file!");
+		ccLog::Warning("[SoiFilter::loadFile] No points or scans defined in this file!");
 		fclose(fp);
 		return CC_FERR_NO_LOAD;
 	}
@@ -100,11 +95,11 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 		{
 			std::string numPoints(line,4,line.size()-4);
 			nbOfPoints=strtol(numPoints.c_str(),&pEnd,0);
-			//ccConsole::Print("[SoiFilter::loadFile] Scan %i - points: %i\n",k+1,nbOfPoints);
+			//ccLog::Print("[SoiFilter::loadFile] Scan %i - points: %i\n",k+1,nbOfPoints);
 		}
 		else
 		{
-			ccConsole::Warning("[SoiFilter::loadFile] Can't find marker '#pt#'!\n");
+			ccLog::Warning("[SoiFilter::loadFile] Can't find marker '#pt#'!\n");
 			fclose(fp);
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
@@ -128,7 +123,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 		}
 		else
 		{
-			ccConsole::Warning("[SoiFilter::loadFile] Scan #%i is empty!\n",k);
+			ccLog::Warning("[SoiFilter::loadFile] Scan #%i is empty!\n",k);
 			continue;
 		}
 

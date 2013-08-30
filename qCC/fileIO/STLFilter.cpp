@@ -17,7 +17,6 @@
 
 #include "STLFilter.h"
 #include "../ccCoordinatesShiftManager.h"
-#include "../ccConsole.h"
 
 //Qt
 #include <QApplication>
@@ -29,6 +28,7 @@
 #include <QMessageBox>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
@@ -49,7 +49,7 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const char* filename)
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 	if (mesh->size()==0)
 	{
-		ccConsole::Warning(QString("[ObjFilter] No facet in mesh '%1'!").arg(mesh->getName()));
+		ccLog::Warning(QString("[ObjFilter] No facet in mesh '%1'!").arg(mesh->getName()));
 		return CC_FERR_NO_ERROR;
 	}
 
@@ -280,7 +280,7 @@ bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** addi
 
 CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
-	ccConsole::Print("[STLFilter::Load] %s",filename);
+	ccLog::Print("[STLFilter::Load] %s",filename);
 
 	//ouverture du fichier
 	QFile fp(filename);
@@ -344,7 +344,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	unsigned vertCount = vertices->size();
 	unsigned faceCount = mesh->size();
-	ccConsole::Print("[STLFilter::Load] %i points, %i face(s)",vertCount,faceCount);
+	ccLog::Print("[STLFilter::Load] %i points, %i face(s)",vertCount,faceCount);
 
 	//remove duplicated vertices
 	{
@@ -407,7 +407,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 						vertices = newVertices;
 						vertCount = vertices->size();
 	
-						ccConsole::Print("[STLFilter::Load] Remaining vertices after auto-removal of duplicate ones: %i",vertCount);
+						ccLog::Print("[STLFilter::Load] Remaining vertices after auto-removal of duplicate ones: %i",vertCount);
 					}
 					else
 					{
@@ -618,7 +618,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-					ccConsole::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
 
 					//we save coordinates shift information
 					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
@@ -834,7 +834,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 				if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-					ccConsole::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
 
 					//we save coordinates shift information
 					if (applyAll && coordinatesShiftEnabled && coordinatesShift)

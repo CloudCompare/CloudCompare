@@ -19,13 +19,13 @@
 
 //Local
 #include "ccGLWindow.h"
-#include "ccConsole.h"
 
 //CCLib
 #include <ManualSegmentationTools.h>
 #include <Matrix.h>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPolyline.h>
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
@@ -131,7 +131,7 @@ bool ccGraphicalSegmentationTool::start()
 
     if (!m_associatedWin)
     {
-        ccConsole::Warning("[Graphical Segmentation Tool] No associated window!");
+        ccLog::Warning("[Graphical Segmentation Tool] No associated window!");
         return false;
     }
 
@@ -216,16 +216,16 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 {
     //FIXME
     /*if (anObject->isLocked())
-        ccConsole::Warning(QString("Can't use entity [%1] cause it's locked!").arg(anObject->getName()));
+        ccLog::Warning(QString("Can't use entity [%1] cause it's locked!").arg(anObject->getName()));
     else */
     if (anObject->getDisplay() != m_associatedWin)
     {
-        ccConsole::Warning(QString("[Graphical Segmentation Tool] Can't use entity [%1] cause it's not displayed in the active 3D view!").arg(anObject->getName()));
+        ccLog::Warning(QString("[Graphical Segmentation Tool] Can't use entity [%1] cause it's not displayed in the active 3D view!").arg(anObject->getName()));
 		return false;
     }
 	if (!anObject->isVisible() || !anObject->isBranchEnabled())
     {
-        ccConsole::Warning(QString("[Graphical Segmentation Tool] Entity [%1] is not visible in the active 3D view!").arg(anObject->getName()));
+        ccLog::Warning(QString("[Graphical Segmentation Tool] Entity [%1] is not visible in the active 3D view!").arg(anObject->getName()));
     }
 
 	bool result = false;
@@ -237,7 +237,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 			//either the cloud is the child of its parent mesh
 			if (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH) && ccHObjectCaster::ToGenericMesh(cloud->getParent())->getAssociatedCloud() == cloud)
 			{
-				ccConsole::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its parent mesh instead!").arg(anObject->getName()));
+				ccLog::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its parent mesh instead!").arg(anObject->getName()));
 				return false;
 			}
 			//or the parent of its child mesh!
@@ -247,7 +247,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 				for (unsigned i=0; i<meshes.size(); ++i)
 					if (ccHObjectCaster::ToGenericMesh(meshes[i])->getAssociatedCloud() == cloud)
 					{
-						ccConsole::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its child mesh instead!").arg(anObject->getName()));
+						ccLog::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its child mesh instead!").arg(anObject->getName()));
 						return false;
 					}
 			}
@@ -282,7 +282,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 						if (otherMesh->isA(CC_SUB_MESH) && mesh->isA(CC_MESH)
 							|| otherMesh->isA(CC_MESH) && mesh->isA(CC_SUB_MESH))
 						{
-							ccConsole::Warning("[Graphical Segmentation Tool] Can't mix sub-meshes with their parent mesh!");
+							ccLog::Warning("[Graphical Segmentation Tool] Can't mix sub-meshes with their parent mesh!");
 							return false;
 						}
 					}
@@ -507,13 +507,13 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 
     if (!m_segmentationPoly)
     {
-        ccConsole::Error("No polyline defined!");
+        ccLog::Error("No polyline defined!");
         return;
     }
 
     if (!m_segmentationPoly->getClosingState())
     {
-        ccConsole::Error("Define and/or close the segmentation border first! (right click to close)");
+        ccLog::Error("Define and/or close the segmentation border first! (right click to close)");
         return;
     }
 

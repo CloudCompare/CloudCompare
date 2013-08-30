@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 1804                                                              $
-//$LastChangedDate:: 2011-02-16 11:32:04 +0100 (mer., 16 fevr. 2011)      $
-//**************************************************************************
-//
+
 #ifndef CC_BUNDLER_FILTER_HEADER
 #define CC_BUNDLER_FILTER_HEADER
 

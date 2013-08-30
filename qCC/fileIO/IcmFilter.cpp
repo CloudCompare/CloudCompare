@@ -14,17 +14,12 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
+
 #include "IcmFilter.h"
 
 //qCC_db
 #include <ccCalibratedImage.h>
+#include <ccLog.h>
 
 //Qt
 #include <QFileInfo>
@@ -33,7 +28,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "../ccConsole.h"
 
 CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
@@ -102,7 +96,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bo
 	//chargement des images
 	if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 	{
-		ccConsole::Error("[IcmFilter::loadModelFromIcmFile] Read error (IMAGES_DESCRIPTOR)! No image loaded");
+		ccLog::Error("[IcmFilter::loadModelFromIcmFile] Read error (IMAGES_DESCRIPTOR)! No image loaded");
 		fclose(fp);
 		return CC_FERR_READING;
 	}
@@ -116,7 +110,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bo
 		char imagesDescriptorFileName[MAX_ASCII_FILE_LINE_LENGTH];
 		sscanf(line,"IMAGES_DESCRIPTOR=%s",imagesDescriptorFileName);
 		int n = loadCalibratedImages(entities,path,imagesDescriptorFileName);
-		ccConsole::Print("[IcmFilter::loadModelFromIcmFile] %i image(s) loaded ...",n);
+		ccLog::Print("[IcmFilter::loadModelFromIcmFile] %i image(s) loaded ...",n);
 	}
 
 	fclose(fp);
@@ -132,7 +126,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
     FILE *fp;
     if ((fp = fopen(qPrintable(completeImageDescFilename), "rt"))==NULL)
     {
-		ccConsole::Error(QString("[IcmFilter::loadCalibratedImages] Error opening file %1!").arg(completeImageDescFilename));
+		ccLog::Error(QString("[IcmFilter::loadCalibratedImages] Error opening file %1!").arg(completeImageDescFilename));
         return -1;
     }
 
@@ -157,12 +151,12 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			if (!CI->load(QString("%0/%1").arg(path).arg(imageFileName),errorStr))
 			{
 				delete CI;
-				ccConsole::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped ...").arg(imageFileName).arg(errorStr));
+				ccLog::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped ...").arg(imageFileName).arg(errorStr));
 				fclose(fp);
 				return loadedImages;
 			}
 
-			ccConsole::Print("[IcmFilter] Image '%s' loaded",imageFileName);
+			ccLog::Print("[IcmFilter] Image '%s' loaded",imageFileName);
             CI->setEnabled(false);
 			CI->setName(imageFileName);
             #ifdef INCLUDE_PHOTOS
@@ -172,7 +166,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			//FOV
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 			{
-				ccConsole::Print("[IcmFilter] Read error (fieldOfView)!");
+				ccLog::Print("[IcmFilter] Read error (fieldOfView)!");
 				fclose(fp);
 				return loadedImages;
 			}
@@ -181,44 +175,44 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			//fov *= CC_RAD_TO_DEG*float(CI->getH())/float(CI->getW());
 			float fov_deg = fov_rad*(float)CC_RAD_TO_DEG;
 			CI->setFov(fov_deg);
-			ccConsole::Print("\t FOV=%f (degrees)",fov_deg);
+			ccLog::Print("\t FOV=%f (degrees)",fov_deg);
 
 			//Position
 			float t[3];
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 			{
-				ccConsole::Error("[IcmFilter] Read error (position)!");
+				ccLog::Error("[IcmFilter] Read error (position)!");
 				fclose(fp);
 				return loadedImages;
 			}
 			sscanf(line,"\t position %f %f %f\n",t,t+1,t+2);
 
-			ccConsole::Print("\t Camera pos=(%f,%f,%f)",t[0],t[1],t[2]);
+			ccLog::Print("\t Camera pos=(%f,%f,%f)",t[0],t[1],t[2]);
 
 			//Description
 			char desc[MAX_ASCII_FILE_LINE_LENGTH];
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 			{
-				ccConsole::Error("[IcmFilter] Read error (description)!");
+				ccLog::Error("[IcmFilter] Read error (description)!");
 				fclose(fp);
 				return loadedImages;
 			}
 			sscanf(line,"\t description \"%s\"\n",desc);
 
 			//CI->setDescription(desc);
-			ccConsole::Print("\t Description: '%s'",desc);
+			ccLog::Print("\t Description: '%s'",desc);
 
 			//Orientation
 			float axis[3], angle_rad;
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 			{
-				ccConsole::Error("[IcmFilter] Read error (orientation)!");
+				ccLog::Error("[IcmFilter] Read error (orientation)!");
 				fclose(fp);
 				return loadedImages;
 			}
 			sscanf(line,"\t orientation %f %f %f %f\n",axis,axis+1,axis+2,&angle_rad);
 
-			ccConsole::Print("\t Camera orientation=(%f,%f,%f)+[%f]",axis[0],axis[1],axis[2],angle_rad);
+			ccLog::Print("\t Camera orientation=(%f,%f,%f)+[%f]",axis[0],axis[1],axis[2],angle_rad);
 			CI->setCameraMatrix(CCVector3(axis),angle_rad,CCVector3(t));
 
 			entities->addChild(CI);
@@ -234,7 +228,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 
 CC_FILE_ERROR IcmFilter::saveToFile(ccHObject* entity, const char* filename)
 {
-    ccConsole::Error("Not available yet!");
+    ccLog::Error("Not available yet!");
 
 	return CC_FERR_NO_ERROR;
 }

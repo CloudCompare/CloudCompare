@@ -443,7 +443,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 			}
 			else
 			{
-				ccConsole::Warning("Failed to allocate memory for normals! (skipped)");
+				ccLog::Warning("Failed to allocate memory for normals! (skipped)");
 			}
 			break;
 		case ASCII_OPEN_DLG_NY:
@@ -455,7 +455,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 			}
 			else
 			{
-				ccConsole::Warning("Failed to allocate memory for normals! (skipped)");
+				ccLog::Warning("Failed to allocate memory for normals! (skipped)");
 			}
 			break;
 		case ASCII_OPEN_DLG_NZ:
@@ -467,7 +467,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 			}
 			else
 			{
-				ccConsole::Warning("Failed to allocate memory for normals! (skipped)");
+				ccLog::Warning("Failed to allocate memory for normals! (skipped)");
 			}
 			break;
 		case ASCII_OPEN_DLG_Scalar:
@@ -493,7 +493,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 				}
 				else
 				{
-					ccConsole::Warning("Failed to add scalar field #%i to cloud #%i! (skipped)",sfIndex);
+					ccLog::Warning("Failed to add scalar field #%i to cloud #%i! (skipped)",sfIndex);
 				}
 				sf->release();
 			}
@@ -507,7 +507,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 			}
 			else
 			{
-				ccConsole::Warning("Failed to allocate memory for colors! (skipped)");
+				ccLog::Warning("Failed to allocate memory for colors! (skipped)");
 			}
 			break;
 		case ASCII_OPEN_DLG_G:
@@ -519,7 +519,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 			}
 			else
 			{
-				ccConsole::Warning("Failed to allocate memory for colors! (skipped)");
+				ccLog::Warning("Failed to allocate memory for colors! (skipped)");
 			}
 			break;
 		case ASCII_OPEN_DLG_B:
@@ -531,7 +531,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 			}
 			else
 			{
-				ccConsole::Warning("Failed to allocate memory for colors! (skipped)");
+				ccLog::Warning("Failed to allocate memory for colors! (skipped)");
 			}
 			break;
 		case ASCII_OPEN_DLG_RGB32i:
@@ -547,7 +547,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 			}
 			else
 			{
-				ccConsole::Warning("Failed to allocate memory for colors! (skipped)");
+				ccLog::Warning("Failed to allocate memory for colors! (skipped)");
 			}
 			break;
 		case ASCII_OPEN_DLG_Grey:
@@ -558,7 +558,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 			}
 			else
 			{
-				ccConsole::Warning("Failed to allocate memory for colors! (skipped)");
+				ccLog::Warning("Failed to allocate memory for colors! (skipped)");
 			}
 			break;
         }
@@ -651,14 +651,14 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 
         if (currentLine[0]==0 || currentLine[0]==10)
         {
-            ccConsole::Warning("[AsciiFilter::Load] Line %i is corrupted (empty)!",linesRead);
+            ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (empty)!",linesRead);
             continue;
         }
 
         //if we have reached the max. number of points per cloud
         if (pointsRead == nextLimit)
         {
-            ccConsole::PrintDebug("[ASCII] Point %i -> end of chunk (%i points)",pointsRead,cloudChunkSize);
+            ccLog::PrintDebug("[ASCII] Point %i -> end of chunk (%i points)",pointsRead,cloudChunkSize);
 
         	//we re-evaluate the average line size
 			{
@@ -671,29 +671,29 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
         			newNbOfLinesApproximation = std::max((double)(cloudChunkPos+cloudChunkSize)+1.0,(double)pointsRead * 1.02);
         		}
 				approximateNumberOfLines = (unsigned)ceil(newNbOfLinesApproximation);
-				ccConsole::PrintDebug("[ASCII] New approximate nb of lines: %i",approximateNumberOfLines);
+				ccLog::PrintDebug("[ASCII] New approximate nb of lines: %i",approximateNumberOfLines);
 			}
 
         	//we try to resize actual clouds
         	if (cloudChunkSize < maxCloudSize || approximateNumberOfLines-cloudChunkPos <= maxCloudSize)
         	{
-                ccConsole::PrintDebug("[ASCII] We choose to enlarge existing clouds");
+                ccLog::PrintDebug("[ASCII] We choose to enlarge existing clouds");
 
         		cloudChunkSize = std::min(maxCloudSize,approximateNumberOfLines-cloudChunkPos);
        			if (!cloudDesc.cloud->reserve(cloudChunkSize))
         		{
-        			ccConsole::Error("Not enough memory! Process stopped ...");
+        			ccLog::Error("Not enough memory! Process stopped ...");
 					result = CC_FERR_NOT_ENOUGH_MEMORY;
         			break;
         		}
         	}
         	else //otherwise we have to create new clouds
         	{
-                ccConsole::PrintDebug("[ASCII] We choose to instantiate new clouds");
+                ccLog::PrintDebug("[ASCII] We choose to instantiate new clouds");
 
         		//we store (and resize) actual cloud
         		if (!cloudDesc.cloud->resize(cloudChunkSize))
-        			ccConsole::Warning("Memory reallocation failed ... some memory may have been wasted ...");
+        			ccLog::Warning("Memory reallocation failed ... some memory may have been wasted ...");
 				if (!cloudDesc.scalarFields.empty())
 				{
 					for (unsigned k=0;k<cloudDesc.scalarFields.size();++k)
@@ -711,7 +711,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
         		cloudDesc = prepareCloud(openSequence, cloudChunkSize, maxPartIndex, ++chunkRank);
         		if (!cloudDesc.cloud)
         		{
-        			ccConsole::Error("Not enough memory! Process stopped ...");
+        			ccLog::Error("Not enough memory! Process stopped ...");
         			break;
         		}
 				cloudDesc.cloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
@@ -730,7 +730,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
         int nParts = parts.size();
         if (nParts<=maxPartIndex)
         {
-            ccConsole::Warning("[AsciiFilter::Load] Line %i is corrupted (found %i part(s) on %i attended)!",linesRead,nParts,maxPartIndex+1);
+            ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (found %i part(s) on %i attended)!",linesRead,nParts,maxPartIndex+1);
             continue;
         }
 
@@ -752,7 +752,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 			if (ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 			{
 				cloudDesc.cloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-				ccConsole::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+				ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
 
 				//we save coordinates shift information
 				if (applyAll && coordinatesShiftEnabled && coordinatesShift)

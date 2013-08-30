@@ -18,10 +18,10 @@
 #include "ccGraphicalTransformationTool.h"
 
 #include "ccGLWindow.h"
-#include "ccConsole.h"
 #include "mainwindow.h"
 
 //qCC_db
+#include <ccLog.h>
 #include <ccHObject.h>
 #include <ccGLUtils.h>
 
@@ -64,21 +64,21 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 	//we don't handle entities associated to another context
 	if (entity->getDisplay()!=m_associatedWin)
 	{
-		ccConsole::Warning(QString("[Graphical Transformation Tool] Can't use entity '%1' cause it's not displayed in the active 3D view!").arg(entity->getName()));
+		ccLog::Warning(QString("[Graphical Transformation Tool] Can't use entity '%1' cause it's not displayed in the active 3D view!").arg(entity->getName()));
 		return false;
 	}
 
 	//we can't tranform locked entities
 	if (entity->isLocked())
 	{
-		ccConsole::Warning(QString("[Graphical Transformation Tool] Can't transform entity '%1' cause it's locked!").arg(entity->getName()));
+		ccLog::Warning(QString("[Graphical Transformation Tool] Can't transform entity '%1' cause it's locked!").arg(entity->getName()));
 		return false;
 	}
 
 	//we can't tranform child meshes
 	if (entity->isA(CC_MESH) && entity->getParent() && entity->getParent()->isKindOf(CC_MESH))
 	{
-		ccConsole::Warning(QString("[Graphical Transformation Tool] Entity '%1' can't be modified as it is part of a mesh group. You should 'clone' it first.").arg(entity->getName()));
+		ccLog::Warning(QString("[Graphical Transformation Tool] Entity '%1' can't be modified as it is part of a mesh group. You should 'clone' it first.").arg(entity->getName()));
 		return false;
 	}
 
@@ -247,9 +247,9 @@ void ccGraphicalTransformationTool::apply()
 		ccGLMatrix finalTrans = m_rotation;
 		finalTrans += (m_rotationCenter+m_translation-m_rotation*m_rotationCenter);
 		//output resulting transformation matrix
-		ccConsole::Print("[GraphicalTransformationTool] Applied transformation:");
+		ccLog::Print("[GraphicalTransformationTool] Applied transformation:");
 		const float* mat = finalTrans.data();
-		ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+		ccLog::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
 	}
 
 	for (unsigned i=0; i<m_toTransform->getChildrenNumber();++i)

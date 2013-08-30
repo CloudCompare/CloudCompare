@@ -17,8 +17,8 @@
 
 #include "ccRenderToFileDlg.h"
 
-//Local
-#include "ccConsole.h"
+//qCC_db
+#include <ccLog.h>
 
 //Qt
 #include <QFileDialog>
@@ -41,7 +41,7 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
     QList<QByteArray> list = QImageWriter::supportedImageFormats();
     if (list.size()<1)
     {
-        ccConsole::Error("No supported image format on this platform?!");
+        ccLog::Error("No supported image format on this platform?!");
         reject();
         return;
     }

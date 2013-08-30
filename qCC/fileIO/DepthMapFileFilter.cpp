@@ -14,18 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2257                                                              $
-//$LastChangedDate:: 2012-10-11 23:48:15 +0200 (jeu., 11 oct. 2012)        $
-//**************************************************************************
-//
+
 #include "DepthMapFileFilter.h"
 
 //qCC_db
 #include <ccGBLSensor.h>
 #include <ccPointCloud.h>
+#include <ccLog.h>
 
 //Qt
 #include <QFileInfo>
@@ -47,7 +42,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const char* file
 
     if (sensors.empty())
     {
-        ccConsole::Error("No sensor in input selection!");
+        ccLog::Error("No sensor in input selection!");
         return CC_FERR_BAD_ENTITY_TYPE;
     }
 
@@ -70,7 +65,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const char* file
         FILE* fp = fopen(qPrintable(thisFilename),"wt");
         if (!fp)
         {
-            ccConsole::Error(QString("[ccGBLSensor::saveASCII] Can't open file '%1' for writing!").arg(thisFilename));
+            ccLog::Error(QString("[ccGBLSensor::saveASCII] Can't open file '%1' for writing!").arg(thisFilename));
             result=CC_FERR_WRITING;
         }
         else
@@ -90,7 +85,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 
     if (!sensor->getParent()->isKindOf(CC_POINT_CLOUD))
     {
-        ccConsole::Warning(QString("Warning: sensor '%1' is not associated to a point cloud!").arg(sensor->getName()));
+        ccLog::Warning(QString("Warning: sensor '%1' is not associated to a point cloud!").arg(sensor->getName()));
         return CC_FERR_NO_ERROR; //this is not a severe error (the process can go on)
     }
 
@@ -128,7 +123,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
         unsigned nbPoints = cloud->size();
         if (nbPoints == 0)
         {
-            ccConsole::Warning(QString("Warning: sensor '%1' is associated to an empty cloud!").arg(sensor->getName()));
+            ccLog::Warning(QString("Warning: sensor '%1' is associated to an empty cloud!").arg(sensor->getName()));
             return CC_FERR_NO_ERROR; //this is not a severe error (the process can go on)
         }
         else
@@ -212,7 +207,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 
 CC_FILE_ERROR DepthMapFileFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
-    ccConsole::Error("Not available yet!\n");
+    ccLog::Error("Not available yet!\n");
 
     return CC_FERR_NO_ERROR;
 }

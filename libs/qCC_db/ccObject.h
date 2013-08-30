@@ -23,6 +23,7 @@
 
 //Qt
 #include <QString>
+#include <QVariant>
 
 //! Object state flag
 enum CC_OBJECT_FLAG {
@@ -199,6 +200,24 @@ public:
 	**/
 	static bool ReadClassIDFromFile(unsigned& classID, QFile& in, short dataVersion);
 
+	//! Returns a given associated meta data
+	/** \param key meta data unique identifier (case sensitive!)
+		\return meta data (if any) or an invalid QVariant
+	**/
+	QVariant getMetaData(QString key) const;
+
+	//! Removes a given associated meta data
+	/** \param key meta data unique identifier (case sensitive!)
+		\return success
+	**/
+	bool removeMetaData(QString key);
+
+	//! Sets a meta data element
+	/** \param key meta data unique identifier (case sensitive!)
+		\param data data
+	**/
+	void setMetaData(QString key, QVariant& data);
+
 protected:
 
 	//inherited from ccSerializableObject
@@ -224,6 +243,9 @@ protected:
 
     //! Object flags
     unsigned m_flags;
+
+	//! Associated meta-data
+	QVariantMap m_metaData;
 
 private:
 

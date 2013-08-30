@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2241                                                              $
-//$LastChangedDate:: 2012-09-21 23:22:39 +0200 (ven., 21 sept. 2012)       $
-//**************************************************************************
-//
 
 #include "ccSubsamplingDlg.h"
 
@@ -31,11 +24,9 @@
 #include <GeometricalAnalysisTools.h>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccGenericPointCloud.h>
 #include <ccOctree.h>
-
-//qCC
-#include "ccConsole.h"
 
 //Qt
 #include <QElapsedTimer>
@@ -106,7 +97,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(CCLib::GenericProgressC
 		break;
 	}
 
-	ccConsole::Print("[Subsampling] Timing: %3.3f s.",eTimer.elapsed()/1000.0);
+	ccLog::Print("[Subsampling] Timing: %3.3f s.",eTimer.elapsed()/1000.0);
 
 	return sampledCloud;
 }

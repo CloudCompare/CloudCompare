@@ -32,6 +32,7 @@
 #include <QApplication>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <cc2DLabel.h>
 
@@ -192,14 +193,14 @@ void ccPointListPickingDlg::exportToNewCloud()
 		}
 		else
 		{
-			ccConsole::Error("Couldn't export picked points as point cloud: not enough memory!");
+			ccLog::Error("Couldn't export picked points as point cloud: not enough memory!");
 			delete cloud;
 			cloud=0;
 		}
 	}
 	else
 	{
-		ccConsole::Error("Pick some points first!");
+		ccLog::Error("Pick some points first!");
 	}
 }
 
@@ -334,7 +335,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	FILE* fp = fopen(qPrintable(filename),"wt");
 	if (!fp)
 	{
-		ccConsole::Error(QString("Failed to open file '%1' for saving!").arg(filename));
+		ccLog::Error(QString("Failed to open file '%1' for saving!").arg(filename));
 		return;
 	}
 
@@ -358,7 +359,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 
 	fclose(fp);
 
-	ccConsole::Print(QString("File '%1' successfully saved!").arg(filename));
+	ccLog::Print(QString("File '%1' successfully saved!").arg(filename));
 }
 
 void ccPointListPickingDlg::updateList()

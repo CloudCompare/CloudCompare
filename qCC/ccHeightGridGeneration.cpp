@@ -41,14 +41,13 @@
 using namespace std;
 
 //! Cell of a regular 2D height grid (height map)
-struct hgCell
+struct HeightGridCell
 {
     //! Default constructor
-    hgCell()
-    {
-        height=0.0;
-        nbPoints=0;
-    }
+    HeightGridCell()
+		: height(0)
+		, nbPoints(0)
+    {}
 
     //! Value
     float height;
@@ -112,14 +111,14 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 	// memory allocation of the height grid
 	bool memError = true;
-    hgCell** grid = new hgCell*[grid_size_Y];
+    HeightGridCell** grid = new HeightGridCell*[grid_size_Y];
 	if (grid)
 	{
 		memset(grid,0,sizeof(grid_size_Y)*sizeof(void*));
 		memError = false;
 		for (unsigned i=0; i<grid_size_Y; ++i)
 		{
-			grid[i] = new hgCell[grid_size_X];
+			grid[i] = new HeightGridCell[grid_size_X];
 			if (!grid[i])
 			{
 				for (unsigned j=0; j<i; ++j)
@@ -183,7 +182,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 		assert(i >= 0 && j >= 0);
 
-		hgCell* aCell = grid[j]+i;
+		HeightGridCell* aCell = grid[j]+i;
         unsigned& pointsInCell = aCell->nbPoints;
 		if (pointsInCell)
 		{
@@ -278,7 +277,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 					double* _gridSF = gridScalarFields[k];
 					for (unsigned j=0;j<grid_size_Y;++j)
 					{
-						hgCell* cell = grid[j];
+						HeightGridCell* cell = grid[j];
 						for (unsigned i=0;i<grid_size_X;++i,++cell,++_gridSF)
 						{
 							if (cell->nbPoints)
@@ -295,7 +294,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 		{
 			for (unsigned j=0; j<grid_size_Y; ++j)
 			{
-				hgCell* cell = grid[j];
+				HeightGridCell* cell = grid[j];
 				for (unsigned i=0; i<grid_size_X; ++i,++cell)
 					if (cell->nbPoints>1)
 						cell->height /= (double)cell->nbPoints;
@@ -413,7 +412,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 							if (progressCb)
 								progressCb->update(30.0 + 50.0*((float)j/(float)grid_size_Y));
 
-							const hgCell* aCell = grid[j];
+							const HeightGridCell* aCell = grid[j];
 							for (unsigned i=0; i<grid_size_X; ++i,++aCell)
 								fprintf(pFile,"%.8f ", aCell->nbPoints ? aCell->height : empty_cell_height);
 
@@ -490,7 +489,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 					// Filling the image with grid values
 					for (unsigned j=0; j<grid_size_Y; ++j)
 					{
-						const hgCell* aCell = grid[j];
+						const HeightGridCell* aCell = grid[j];
 						for (unsigned i=0; i<grid_size_X; ++i,++aCell)
 						{
 							if (aCell->nbPoints)
@@ -601,7 +600,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 					unsigned n = 0;
 					for (unsigned j=0; j<grid_size_Y; ++j)
 					{
-						const hgCell* aCell = grid[j];
+						const HeightGridCell* aCell = grid[j];
 						double Px = (double)box.minCorner().u[X];
 						for (unsigned i=0; i<grid_size_X; ++i,++aCell)
 						{
@@ -682,7 +681,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 								const ScalarType emptyCellSFValue = formerSf->NaN();
 								for (unsigned j=0; j<grid_size_Y; ++j)
 								{
-									const hgCell* aCell = grid[j];
+									const HeightGridCell* aCell = grid[j];
 									for (unsigned i=0; i<grid_size_X; ++i, ++_sfGrid, ++aCell, ++n)
 									{
 										if (aCell->nbPoints)

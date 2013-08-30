@@ -25,8 +25,6 @@
 #include <ccHObject.h>
 #include <ccHObjectCaster.h>
 
-#include "../ccConsole.h"
-
 //Support for LAS ASPRS files
 #if defined(_WIN32) || defined(WIN32)
 #ifndef _MSC_VER

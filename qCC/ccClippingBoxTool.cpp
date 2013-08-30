@@ -19,11 +19,11 @@
 
 //Local
 #include "ccGLWindow.h"
-#include "ccConsole.h"
 #include "mainwindow.h"
 #include "ccClippingBoxRepeatDlg.h"
 
 //qCC_db
+#include <ccLog.h>
 #include <ccHObject.h>
 #include <ccClipBox.h>
 #include <ccGenericPointCloud.h>
@@ -92,21 +92,21 @@ bool ccClippingBoxTool::setAssociatedEntity(ccHObject* entity)
 {
 	if (!m_associatedWin || !m_clipBox)
 	{
-		ccConsole::Error(QString("[Clipping box] No associated 3D view or no valid clipping box!"));
+		ccLog::Error(QString("[Clipping box] No associated 3D view or no valid clipping box!"));
 		return false;
 	}
 
 	//we don't handle entities associated to another context
 	if (entity->getDisplay() != m_associatedWin)
 	{
-		ccConsole::Warning(QString("[Clipping box] Can't use entity '%1' cause it's not displayed in the active 3D view!").arg(entity->getName()));
+		ccLog::Warning(QString("[Clipping box] Can't use entity '%1' cause it's not displayed in the active 3D view!").arg(entity->getName()));
 		return false;
 	}
 
 	//we can't handle other entities than clouds for the moment
 	if (!entity->isA(CC_POINT_CLOUD))
 	{
-		ccConsole::Warning(QString("[Clipping box] Only points clouds are handled! Entity '%1' will be ignored.").arg(entity->getName()));
+		ccLog::Warning(QString("[Clipping box] Only points clouds are handled! Entity '%1' will be ignored.").arg(entity->getName()));
 		return false;
 	}
 

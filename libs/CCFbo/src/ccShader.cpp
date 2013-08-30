@@ -120,11 +120,11 @@ bool ccShader::loadProgram(const char *vertexShaderFile, const char *pixelShader
             memset(log, '\0', logSize + 1);
             glGetProgramInfoLog(prog, logSize, &logSize, log);
 
-            //ccConsole::Error("Can't create shader program! (%s)", log);
+            //ccLog::Error("Can't create shader program! (%s)", log);
 
             delete[] log;
         }
-        //else ccConsole::Error("Can't create shader program! (unable to get GL log)");
+        //else ccLog::Error("Can't create shader program! (unable to get GL log)");
 
         glDeleteProgram(prog);
         prog = 0;
@@ -145,7 +145,7 @@ char* ccShader::ReadShaderFile(const char *filename)
     FILE *fp = fopen(filename, "rb");
     if(!fp)
     {
-        //ccConsole::Error("Can't open file '%s'", filename);
+        //ccLog::Error("Can't open file '%s'", filename);
         return NULL;
     }
 
@@ -158,7 +158,7 @@ char* ccShader::ReadShaderFile(const char *filename)
     if(!src)
     {
         fclose(fp);
-        //ccConsole::Error("Not enough memory!");
+        //ccLog::Error("Not enough memory!");
         return NULL;
     }
 
@@ -179,7 +179,7 @@ GLuint ccShader::LoadShader(GLenum type, const char *filename)
     GLuint shader = glCreateShader(type);
     if(shader == 0)
     {
-        //ccConsole::Error("Can't create shader!");
+        //ccLog::Error("Can't create shader!");
         return 0;
     }
 
@@ -211,13 +211,13 @@ GLuint ccShader::LoadShader(GLenum type, const char *filename)
         char* log = new char[logSize+1];
         if(!log)
         {
-            //ccConsole::Warning("Not enough memory to log shader creation...");
+            //ccLog::Warning("Not enough memory to log shader creation...");
             return 0;
         }
         memset(log, 0, logSize+1);
 
         glGetShaderInfoLog(shader, logSize, &logSize, log);
-        //ccConsole::Error("Can't compile shader (file:'%s').\nLog: %s",filename,log);
+        //ccLog::Error("Can't compile shader (file:'%s').\nLog: %s",filename,log);
 
         //free memory
         delete[] log;
@@ -521,7 +521,7 @@ bool ccShaderARB::loadProgram(const char *vertexShaderFile, const char *pixelSha
 
     if (!frag && !vert)
     {
-        //ccConsole::Warning("No shader loaded! Wrong filename?");
+        //ccLog::Warning("No shader loaded! Wrong filename?");
         return false;
     }
 
@@ -550,11 +550,11 @@ bool ccShaderARB::loadProgram(const char *vertexShaderFile, const char *pixelSha
             memset(log, '\0', logSize + 1);
             glGetProgramInfoLog(prog, logSize, &logSize, log);
 
-            ccConsole::Error("Can't create shader program! (%s)", log);
+            ccLog::Error("Can't create shader program! (%s)", log);
 
             delete[] log;
         }
-        else ccConsole::Error("Can't create shader program! (unable to get GL log)");
+        else ccLog::Error("Can't create shader program! (unable to get GL log)");
 
         glDeleteProgram(prog);
         prog = 0;
@@ -572,7 +572,7 @@ GLhandleARB ccShaderARB::LoadShaderARB(GLenum type, const char *filename)
     GLhandleARB shader = glCreateShaderObjectARB(type);
     if(shader == 0)
     {
-        //ccConsole::Error("Can't create shader!");
+        //ccLog::Error("Can't create shader!");
         return 0;
     }
 
@@ -604,13 +604,13 @@ GLhandleARB ccShaderARB::LoadShaderARB(GLenum type, const char *filename)
         char* log = new char[logSize+1];
         if(!log)
         {
-            ccConsole::Warning("Not enough memory to log shader creation...");
+            ccLog::Warning("Not enough memory to log shader creation...");
             return 0;
         }
         memset(log, 0, logSize+1);
 
         glGetShaderInfoLog(shader, logSize, &logSize, log);
-        ccConsole::Error("Can't compile shader (file:'%s').\nLog: %s",filename,log);
+        ccLog::Error("Can't compile shader (file:'%s').\nLog: %s",filename,log);
 
         //free memory
         delete[] log;

@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2229                                                              $
-//$LastChangedDate:: 2012-07-28 12:26:44 +0200 (sam., 28 juil. 2012)       $
-//**************************************************************************
-//
+
 #include "PDMSFilter.h"
 #include "PdmsParser.h"
 //#include "../ccCoordinatesShiftManager.h"
@@ -29,6 +23,7 @@
 #include <QProgressDialog>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccMesh.h>
 #include <ccPointCloud.h>
 #include <ccCylinder.h>
@@ -38,15 +33,13 @@
 #include <ccDish.h>
 #include <ccExtru.h>
 
-//#include "../ccConsole.h"
-
 #include <assert.h>
 
 using namespace CCLib;
 
 CC_FILE_ERROR PDMSFilter::saveToFile(ccHObject* entity, const char* filename)
 {
-	ccConsole::Print("Function is not implemented yet !");
+	ccLog::Print("Function is not implemented yet !");
 	return CC_FERR_NO_SAVE;
 }
 

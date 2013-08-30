@@ -21,6 +21,7 @@
 #include "AsciiFilter.h"
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 
 //Qt
@@ -33,7 +34,7 @@
 
 CC_FILE_ERROR PCDFilter::saveToFile(ccHObject* entity, const char* filename)
 {
-	ccConsole::Error("Not available yet!");
+	ccLog::Error("Not available yet!");
 
 	return CC_FERR_NO_ERROR;
 }

@@ -18,6 +18,7 @@
 #include "MAFilter.h"
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccMesh.h>
 #include <ccProgressDialog.h>
@@ -56,12 +57,12 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 
     if (meshes.empty())
     {
-        ccConsole::Error("No mesh in input selection!");
+        ccLog::Error("No mesh in input selection!");
         return CC_FERR_BAD_ENTITY_TYPE;
     }
     else if (meshes.size()>1)
     {
-        ccConsole::Error("Can't save more than one mesh per MA file!");
+        ccLog::Error("Can't save more than one mesh per MA file!");
         return CC_FERR_BAD_ENTITY_TYPE;
     }
 
@@ -78,7 +79,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	if (numberOfTriangles==0 || numberOfVertexes==0)
 	{
-        ccConsole::Error("Mesh is empty!");
+        ccLog::Error("Mesh is empty!");
         return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
@@ -92,7 +93,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	    sf = static_cast<ccPointCloud*>(theCloud)->getCurrentDisplayedScalarField();
 
     if (!sf)
-        ccConsole::Warning("No displayed scalar field! Values will all be 0!\n");
+        ccLog::Warning("No displayed scalar field! Values will all be 0!\n");
 
 	//*/
 
@@ -466,7 +467,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 
 CC_FILE_ERROR MAFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
-    ccConsole::Error("Not available yet!");
+    ccLog::Error("Not available yet!");
 
 	return CC_FERR_NO_ERROR;
 }

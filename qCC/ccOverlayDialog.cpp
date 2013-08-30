@@ -19,7 +19,9 @@
 
 //Local
 #include "ccGLWindow.h"
-#include "ccConsole.h"
+
+//qCC_db
+#include <ccLog.h>
 
 //system
 #include <assert.h>
@@ -40,7 +42,7 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 {
     if (m_processing)
     {
-        ccConsole::Warning("[ccOverlayDialog] Can't change associated window while running/displayed!");
+        ccLog::Warning("[ccOverlayDialog] Can't change associated window while running/displayed!");
         return false;
     }
 

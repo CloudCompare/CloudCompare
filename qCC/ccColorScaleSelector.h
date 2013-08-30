@@ -15,25 +15,52 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_DEPTH_MAP_FILE_FILTER_HEADER
-#define CC_DEPTH_MAP_FILE_FILTER_HEADER
+//Qt
+#include <QFrame>
 
-#include "FileIOFilter.h"
+//qCC_db
+#include <ccColorScale.h>
 
-class ccGBLSensor;
+class QComboBox;
+class QToolButton;
 
-//! Depth map I/O filter
-class DepthMapFileFilter : public FileIOFilter
+//! Advanced editor for color scales
+/** Combo-box + shortcut to color scale editor
+**/
+class ccColorScaleSelector : public QFrame
 {
+	Q_OBJECT
+
 public:
 
-    //inherited from FileIOFilter
-    virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, double* coordinatesShift = 0);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename);
+	//! Default constructor
+	ccColorScaleSelector(QWidget* parent, QString defaultButtonIconPath = QString());
 
+	//! Inits selector with the Color Scales Manager
+	void init();
+
+	//! Sets selected combo box item (scale) by UUID
+	void setSelectedScale(QString uuid);
+
+	//! Returns currently selected color scale
+	ccColorScale::Shared getSelectedScale() const;
+
+	//! Returns a given color scale by index
+	ccColorScale::Shared getScale(int index) const;
+
+signals:
+
+	//! Signal emitted when a color scale is selected
+	void colorScaleSelected(int);
+
+	//! Signal emitted when the user clicks on the 'Spawn Color scale editor' button
+	void colorScaleEditorSummoned();
 
 protected:
-    CC_FILE_ERROR saveToOpenedFile(FILE* fp, ccGBLSensor* sensor);
-};
 
-#endif
+	//! Color scales combo-box
+	QComboBox* m_comboBox;
+
+	//! Spawn color scale editor button
+	QToolButton* m_button;
+};

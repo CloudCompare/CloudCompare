@@ -32,6 +32,7 @@
 #include <ScalarField.h>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccImage.h>
@@ -1658,7 +1659,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 				if (ccCoordinatesShiftManager::Handle(Pd,0,s_alwaysDisplayLoadDialog,s_coordinatesShiftEnabled,s_coordinatesShift,0,applyAll))
 				{
 					cloud->setOriginalShift(s_coordinatesShift[0],s_coordinatesShift[1],s_coordinatesShift[2]);
-					ccConsole::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)",qPrintable(guidStr),s_coordinatesShift[0],s_coordinatesShift[1],s_coordinatesShift[2]);
+					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)",qPrintable(guidStr),s_coordinatesShift[0],s_coordinatesShift[1],s_coordinatesShift[2]);
 					if (applyAll)
 						s_coordinatesShiftEnabled = true;
 				}

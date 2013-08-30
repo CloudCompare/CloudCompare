@@ -28,6 +28,7 @@
 #include <QMessageBox>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccHObject.h>
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
@@ -39,7 +40,6 @@
 
 //local
 #include "ccPropertiesTreeDelegate.h"
-#include "../ccConsole.h"
 #include "../mainwindow.h"
 
 //system
@@ -213,7 +213,7 @@ void ccDBRoot::removeElement(ccHObject* anObject)
     ccHObject* parent = anObject->getParent();
     if (!parent)
     {
-		ccConsole::Warning("[ccDBRoot::removeElement] Internal error: object has no parent!");
+		ccLog::Warning("[ccDBRoot::removeElement] Internal error: object has no parent!");
         return;
     }
 
@@ -270,7 +270,7 @@ void ccDBRoot::deleteSelectedEntities()
         //we don't take care of parentless objects (i.e. the tree root)
 		if (!obj->getParent() || obj->isLocked())
 		{
-			ccConsole::Warning(QString("Object '%1' can't be deleted this way (locked)").arg(obj->getName()));
+			ccLog::Warning(QString("Object '%1' can't be deleted this way (locked)").arg(obj->getName()));
 			continue;
 		}
 
@@ -295,7 +295,7 @@ void ccDBRoot::deleteSelectedEntities()
 			if (obj->isKindOf(CC_POINT_CLOUD) && obj->getParent()->isKindOf(CC_MESH))
 				if (ccHObjectCaster::ToGenericMesh(obj->getParent())->getAssociatedCloud() == obj)
 				{
-					ccConsole::Warning("Mesh vertices can't be deleted without their parent mesh!");
+					ccLog::Warning("Mesh vertices can't be deleted without their parent mesh!");
 					continue;
 				}
 
@@ -565,7 +565,7 @@ QModelIndex ccDBRoot::index(ccHObject* object)
     ccHObject* parent = object->getParent();
     if (!parent)
     {
-        ccConsole::Error(QString("An error while creating DB tree index: object '%1' has no parent!").arg(object->getName()));
+        ccLog::Error(QString("An error while creating DB tree index: object '%1' has no parent!").arg(object->getName()));
         return QModelIndex();
     }
 
@@ -1014,11 +1014,11 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		ccHObject *item = m_treeRoot->find(uniqueID);
 		if (!item)
 			continue;
-		//ccConsole::Print(QString("[Drag & Drop] Source: %1").arg(item->getName()));
+		//ccLog::Print(QString("[Drag & Drop] Source: %1").arg(item->getName()));
 
 		//old parent
 		ccHObject* oldParent = item->getParent();
-		//ccConsole::Print(QString("[Drag & Drop] Parent: %1").arg(oldParent ? oldParent->getName() : "none")));
+		//ccLog::Print(QString("[Drag & Drop] Parent: %1").arg(oldParent ? oldParent->getName() : "none")));
 
 		//let's check if we can actually move the entity
 		if (oldParent)
@@ -1029,7 +1029,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 				if (oldParent->isKindOf(CC_MESH) && ccHObjectCaster::ToGenericMesh(oldParent)->getAssociatedCloud() == item)
 					if (oldParent != newParent)
 					{
-						ccConsole::Error("Vertices can't leave their parent mesh!");
+						ccLog::Error("Vertices can't leave their parent mesh!");
 						return false;
 					}
 			}
@@ -1039,7 +1039,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 				if (item->isA(CC_SUB_MESH))
 				{
 					assert(false);
-					ccConsole::Error("Sub-meshes can't leave their mesh group!");
+					ccLog::Error("Sub-meshes can't leave their mesh group!");
 					return false;
 				}
 				//a mesh can't leave its associated cloud
@@ -1047,7 +1047,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 				{
 					if (oldParent != newParent)
 					{
-						ccConsole::Error("Sub-meshes can't leave their associated cloud!");
+						ccLog::Error("Sub-meshes can't leave their associated cloud!");
 						return false;
 					}
 				}
@@ -1056,7 +1056,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 			{
 				if (oldParent != newParent)
 				{
-					ccConsole::Error("This kind of entity can't leave their parent!");
+					ccLog::Error("This kind of entity can't leave their parent!");
 					return false;
 				}
 			}
@@ -1089,7 +1089,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 
 					if (!canMove)
 					{
-						ccConsole::Error("Labels (or group of) can't leave their parent!");
+						ccLog::Error("Labels (or group of) can't leave their parent!");
 						return false;
 					}
 				}
@@ -1524,7 +1524,7 @@ void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 {
 	if (prop>6)
 	{
-		ccConsole::Warning("[ccDBRoot::toggleSelectedEntitiesProperty] Internal error: invalid 'prop' value");
+		ccLog::Warning("[ccDBRoot::toggleSelectedEntitiesProperty] Internal error: invalid 'prop' value");
 		return;
 	}
 

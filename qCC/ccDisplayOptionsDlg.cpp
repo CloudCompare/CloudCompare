@@ -19,11 +19,9 @@
 
 //Qt
 #include <QColorDialog>
-#include <QWindowsStyle>
 
 //System
 #include <string.h>
-#include <assert.h>
 
 ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui::DisplayOptionsDlg()
 {
@@ -135,26 +133,6 @@ void ccDisplayOptionsDlg::refresh()
 	labelMarkerSizeSpinBox->setValue(parameters.pickedPointsSize);
 
 	update();
-}
-
-void ccDisplayOptionsDlg::SetButtonColor(QAbstractButton* button, const QColor &col)
-{
-	assert(button);
-	button->setStyleSheet(QString("* { background-color: rgb(%1,%2,%3) }").arg(col.red()).arg(col.green()).arg(col.blue()));
-}
-
-void ccDisplayOptionsDlg::SetButtonTextColor(QAbstractButton* button, const QColor &col)
-{
-	assert(button);
-
-	QPalette pal = button->palette();
-	pal.setColor(QPalette::ButtonText, col);
-	button->setPalette(pal);
-
-#ifdef _WIN32
-	button->setStyle(new QWindowsStyle());
-	button->update();
-#endif
 }
 
 void ccDisplayOptionsDlg::changeLightDiffuseColor()

@@ -19,11 +19,11 @@
 
 //Local
 #include "ccGLWindow.h"
-#include "ccConsole.h"
 #include "mainwindow.h"
 #include "db_tree/ccDBRoot.h"
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <cc2DLabel.h>
 
@@ -52,7 +52,7 @@ bool ccPointPickingGenericInterface::start()
 {
     if (!m_associatedWin)
     {
-        ccConsole::Error("[Point picking] No associated display!");
+        ccLog::Error("[Point picking] No associated display!");
         return false;
     }
 
@@ -93,7 +93,7 @@ void ccPointPickingGenericInterface::handlePickedPoint(int cloudID, unsigned poi
 
     if (!cloud)
     {
-        ccConsole::Warning("[Point picking] Picked point is not in pickable entities DB?!");
+        ccLog::Warning("[Point picking] Picked point is not in pickable entities DB?!");
         return;
     }
 
@@ -104,6 +104,6 @@ void ccPointPickingGenericInterface::handlePickedPoint(int cloudID, unsigned poi
 	}
 	else
     {
-        ccConsole::Warning("[Point picking] Invalid point index!");
+        ccLog::Warning("[Point picking] Invalid point index!");
     }
 }

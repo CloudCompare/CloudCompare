@@ -21,6 +21,7 @@
 #include <ScalarField.h>
 
 //qCC_db
+#include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
@@ -40,12 +41,12 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 
     if (clouds.empty())
     {
-        ccConsole::Error("No point cloud in input selection!");
+        ccLog::Error("No point cloud in input selection!");
         return CC_FERR_BAD_ENTITY_TYPE;
     }
     else if (clouds.size()>1)
     {
-        ccConsole::Error("Can't save more than one cloud per PV file!");
+        ccLog::Error("Can't save more than one cloud per PV file!");
         return CC_FERR_BAD_ENTITY_TYPE;
     }
 
@@ -55,7 +56,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	if (numberOfPoints==0)
 	{
-        ccConsole::Error("Cloud is empty!");
+        ccLog::Error("Cloud is empty!");
         return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
@@ -67,7 +68,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
     //Has the cloud been recentered?
 	const double* shift = theCloud->getOriginalShift();
 	if (fabs(shift[0])+fabs(shift[0])+fabs(shift[0])>0.0)
-        ccConsole::Warning(QString("[PNFilter::save] Can't recenter cloud '%1' when saving it in a PV file!").arg(theCloud->getName()));
+        ccLog::Warning(QString("[PNFilter::save] Can't recenter cloud '%1' when saving it in a PV file!").arg(theCloud->getName()));
 
 	//for point clouds with multiple SFs, we must set the currently displayed one as 'input' SF
 	//if (theCloud->isA(CC_POINT_CLOUD))
@@ -77,7 +78,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 	//}
 	bool hasSF = theCloud->hasDisplayedScalarField();
 	if (!hasSF)
-        ccConsole::Warning(QString("[PNFilter::save] Cloud '%1' has no displayed scalar field (we will save points with a default scalar value)!").arg(theCloud->getName()));
+        ccLog::Warning(QString("[PNFilter::save] Cloud '%1' has no displayed scalar field (we will save points with a default scalar value)!").arg(theCloud->getName()));
 
 	float val = (float)NAN_VALUE;
 

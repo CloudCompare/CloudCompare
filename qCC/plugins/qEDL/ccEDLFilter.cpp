@@ -147,7 +147,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
         fbo_edl0 = new ccFrameBufferObject();
     if (!fbo_edl0->init(width,height))
     {
-        //ccConsole::Warning("[EDL Filter] FBO 1:1 initialization failed!");
+        //ccLog::Warning("[EDL Filter] FBO 1:1 initialization failed!");
         reset();
         return false;
     }
@@ -156,7 +156,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
         fbo_edl1 = new ccFrameBufferObject();
     if (!fbo_edl1->init(width/2,height/2))
     {
-        //ccConsole::Warning("[EDL Filter] FBO 1:2 initialization failed!");
+        //ccLog::Warning("[EDL Filter] FBO 1:2 initialization failed!");
         reset();
         return false;
     }
@@ -165,7 +165,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
         fbo_edl2 = new ccFrameBufferObject();
     if (!fbo_edl2->init(width/4,height/4))
     {
-        //ccConsole::Warning("[EDL Filter] FBO 1:4 initialization failed!");
+        //ccLog::Warning("[EDL Filter] FBO 1:4 initialization failed!");
         reset();
         return false;
     }
@@ -178,7 +178,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
         fbo_mix = new ccFrameBufferObject();
     if (!fbo_mix->init(width,height))
     {
-        //ccConsole::Warning("[EDL Filter] FBO 'mix' initialization failed!");
+        //ccLog::Warning("[EDL Filter] FBO 'mix' initialization failed!");
         reset();
         return false;
     }
@@ -189,7 +189,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
         shader_edl = new ccShader();
         if (!shader_edl->fromFile(shadersPath,"EDL/edl_shade"))
         {
-            //ccConsole::Warning("[EDL Filter] can't find 'edl_shade' shader!");
+            //ccLog::Warning("[EDL Filter] can't find 'edl_shade' shader!");
             reset();
             return false;
         }
@@ -200,7 +200,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
         shader_mix = new ccShader();
         if (!shader_mix->fromFile(shadersPath,"EDL/edl_mix"))
         {
-            //ccConsole::Warning("[EDL Filter] can't find 'edl_mix' shader!");
+            //ccLog::Warning("[EDL Filter] can't find 'edl_mix' shader!");
             reset();
             return false;
         }
@@ -284,7 +284,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 {
     if (!fbo_edl0)
     {
-        //ccConsole::Warning("[ccEDLFilter::shade] Internal error: structures not initialized!");
+        //ccLog::Warning("[ccEDLFilter::shade] Internal error: structures not initialized!");
         return;
     }
 
@@ -518,7 +518,7 @@ GLuint ccEDLFilter::getTexture(int index)
         return (m_bilateralFilter2.filter ? m_bilateralFilter2.filter->getTexture() : 0);
     }
 
-    //ccConsole::Warning("[ccEDLFilter::getTexture] Internal error: bad argument");
+    //ccLog::Warning("[ccEDLFilter::getTexture] Internal error: bad argument");
     return 0;
 }
 

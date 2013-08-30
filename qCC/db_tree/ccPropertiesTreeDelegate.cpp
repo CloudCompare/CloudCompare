@@ -19,11 +19,11 @@
 
 //Local
 #include "sfEditDlg.h"
-#include "../ccConsole.h"
 #include "../ccGLWindow.h"
 #include "../mainwindow.h"
 #include "../ccGuiParameters.h"
 #include "../ccColorScaleEditorDlg.h"
+#include "../ccColorScaleSelector.h"
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -66,38 +66,6 @@ const QString c_defaultPointSizeString = QString("Default");
 // Default separator colors
 const QBrush SEPARATOR_BACKGROUND_BRUSH(Qt::darkGray);
 const QBrush SEPARATOR_TEXT_BRUSH(Qt::white);
-
-//! Advanced editor for color scales
-class QColorScaleSelector : public QFrame
-{
-public:
-
-	QColorScaleSelector(QWidget* parent)
-		: QFrame(parent)
-		, m_comboBox(new QComboBox())
-		, m_button(new QToolButton())
-	{
-		setLayout(new QHBoxLayout());
-		layout()->setContentsMargins(0,0,0,0);
-		setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
-
-		//combox box
-		if (m_comboBox)
-		{
-			layout()->addWidget(m_comboBox);
-		}
-		
-		//tool button
-		if (m_button)
-		{
-			m_button->setIcon(QIcon(QString::fromUtf8(":/CC/images/ccGear.png")));
-			layout()->addWidget(m_button);
-		}
-	}
-	
-	QComboBox* m_comboBox;
-	QToolButton* m_button;
-};
 
 ccPropertiesTreeDelegate::ccPropertiesTreeDelegate(QStandardItemModel* model,
 												   QAbstractItemView* view,
@@ -717,27 +685,11 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
     }
     case OBJECT_CURRENT_COLOR_RAMP:
     {
-		QColorScaleSelector* selector = new QColorScaleSelector(parent);
-
-		//fill combox box
-		if (selector->m_comboBox)
-		{
-			selector->m_comboBox->blockSignals(true);
-			selector->m_comboBox->clear();
-			//add all available color scales
-			ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
-			assert(csManager);
-			for (ccColorScalesManager::ScalesMap::const_iterator it = csManager->map().begin(); it != csManager->map().end(); ++it)
-				selector->m_comboBox->addItem((*it)->getName(),(*it)->getUuid());
-			selector->m_comboBox->blockSignals(false);
-
-			connect(selector->m_comboBox, SIGNAL(activated(int)), this, SLOT(colorScaleChanged(int)));
-		}
-		//advanced tool button
-		if (selector->m_button)
-		{
-			connect(selector->m_button, SIGNAL(clicked()), this, SLOT(spawnColorRampEditor()));
-		}
+		ccColorScaleSelector* selector = new ccColorScaleSelector(parent,QString::fromUtf8(":/CC/images/ccGear.png"));
+		//fill combox box with Color Scales Manager
+		selector->init();
+		connect(selector, SIGNAL(colorScaleSelected(int)), this, SLOT(colorScaleChanged(int)));
+		connect(selector, SIGNAL(colorScaleEditorSummoned()), this, SLOT(spawnColorRampEditor()));
 
 		selector->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
         return selector;
@@ -924,7 +876,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
         QFrame *selectorFrame = qobject_cast<QFrame*>(editor);
         if (!selectorFrame)
             return;
-		QColorScaleSelector* selector = static_cast<QColorScaleSelector*>(selectorFrame);
+		ccColorScaleSelector* selector = static_cast<ccColorScaleSelector*>(selectorFrame);
 
         ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
         assert(cloud);
@@ -932,11 +884,10 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
         ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
         if (sf)
 		{
-			int pos = -1;
-			//search right index by UUID
 			if (sf->getColorScale())
-				pos = selector->m_comboBox->findData(sf->getColorScale()->getUuid());
-			selector->m_comboBox->setCurrentIndex(pos);
+				selector->setSelectedScale(sf->getColorScale()->getUuid());
+			else
+				selector->setSelectedScale(QString());
 		}
         break;
     }
@@ -1229,13 +1180,11 @@ void ccPropertiesTreeDelegate::colorScaleChanged(int pos)
 		return;
 	}
 
-	QComboBox* comboBox = dynamic_cast<QComboBox*>(QObject::sender());
-	if (!comboBox)
+	ccColorScaleSelector* selector = dynamic_cast<ccColorScaleSelector*>(QObject::sender());
+	if (!selector)
 		return;
 
-	QString UUID = comboBox->itemData(pos).toString();
-	ccColorScale::Shared colorScale = ccColorScalesManager::GetUniqueInstance()->getScale(UUID);
-
+	ccColorScale::Shared colorScale = selector->getScale(pos);
 	if (!colorScale)
 	{
 		ccLog::Error("Internal error: color scale doesn't seem to exist anymore!");

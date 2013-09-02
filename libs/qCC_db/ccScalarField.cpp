@@ -24,6 +24,9 @@
 //CCLib
 #include <CCConst.h>
 
+//system
+#include <algorithm>
+
 using namespace CCLib;
 
 //! Default number of classes for associated histogram

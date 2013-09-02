@@ -707,7 +707,7 @@ QString ccNormalVectors::ConvertStrikeAndDipToString(double& strike, double& dip
 void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike, double& dip)
 {
 	//let's compute strike & dip also
-	/** Adapted from Andy Michaels 'stridip.c':
+	/** Adapted from Andy Michael's 'stridip.c':
 	Finds strike and dip of plane given normal vector having components n, e, and u
 	output is in degrees north of east and then
 	uses a right hand rule for the dip of the plane

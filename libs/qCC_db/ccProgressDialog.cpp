@@ -17,9 +17,11 @@
 
 #include "ccProgressDialog.h"
 
+//Qt
 #include <QApplication>
+#include <QPushButton>
 
-ccProgressDialog::ccProgressDialog(bool cancelButton,
+ccProgressDialog::ccProgressDialog(bool showCancelButton,
 								   QWidget *parent/*=0*/,
 								   Qt::WindowFlags flags/*=Qt::SubWindow|Qt::Popup*/)
 	: QProgressDialog(parent,flags)
@@ -33,8 +35,14 @@ ccProgressDialog::ccProgressDialog(bool cancelButton,
     setRange(0,100);
     setMinimumDuration(0);
 
-    if (!cancelButton)
-        setCancelButton(0);
+	QPushButton* cancelButton = 0;
+    if (showCancelButton)
+	{
+		cancelButton = new QPushButton("Cancel");
+		cancelButton->setDefault(false);
+		cancelButton->setFocusPolicy(Qt::NoFocus);
+	}
+	setCancelButton(cancelButton);
 
 	//QObject::connect(this, SIGNAL(doUpdate(int)), this, SLOT(setValue(int)), Qt::QueuedConnection); 
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(refresh()));

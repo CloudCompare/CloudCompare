@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2242                                                              $
-//$LastChangedDate:: 2012-09-22 18:54:21 +0200 (sam., 22 sept. 2012)       $
-//**************************************************************************
-//
 
 #include "ccPointListPickingDlg.h"
 
@@ -38,7 +31,6 @@
 
 //local
 #include "ccGLWindow.h"
-#include "ccGuiParameters.h"
 #include "fileIO/FileIOFilter.h"
 #include "mainwindow.h"
 #include "db_tree/ccDBRoot.h"
@@ -280,17 +272,17 @@ void ccPointListPickingDlg::startIndexChanged(int value)
 
 void ccPointListPickingDlg::markerSizeChanged(int size)
 {
-	if (size<1)
+	if (size<1 || !m_associatedWin)
 		return;
 
-	ccGui::ParamStruct guiParams = ccGui::Parameters();
+	//display parameters
+	ccGui::ParamStruct guiParams = m_associatedWin->getDisplayParameters();
 
 	if (guiParams.pickedPointsSize != (unsigned)size)
 	{
 		guiParams.pickedPointsSize = (unsigned)size;
-		ccGui::Set(guiParams);
-		if (m_associatedWin)
-			m_associatedWin->redraw();
+		m_associatedWin->setDisplayParameters(guiParams,m_associatedWin->hasOverridenDisplayParameters());
+		m_associatedWin->redraw();
 	}
 }
 
@@ -311,8 +303,8 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 
 	//get all labels
 	std::vector<cc2DLabel*> labels;
-	unsigned i,count = getPickedPoints(labels);
-	if (count==0)
+	unsigned count = getPickedPoints(labels);
+	if (count == 0)
 		return;
 
 	QSettings settings;
@@ -342,7 +334,7 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	//starting index
 	int startIndex = startIndexSpinBox->value();
 
-	for (i=0;i<count;++i)
+	for (unsigned i=0; i<count; ++i)
 	{
 		const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
 		const CCVector3* P = PP.cloud->getPoint(PP.index);
@@ -379,9 +371,9 @@ void ccPointListPickingDlg::updateList()
 
 	//starting index
 	int startIndex = startIndexSpinBox->value();
-	int precision = ccGui::Parameters().displayedNumPrecision;
+	int precision = m_associatedWin ? m_associatedWin->getDisplayParameters().displayedNumPrecision : 6;
 
-	for (unsigned i=0;i<count;++i)
+	for (unsigned i=0; i<count; ++i)
 	{
 		const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
 		const CCVector3* P = PP.cloud->getPoint(PP.index);
@@ -393,7 +385,7 @@ void ccPointListPickingDlg::updateList()
 		//point absolute index (in cloud)
 		tableWidget->setItem(i,0,new QTableWidgetItem(QString("%1").arg(PP.index)));
 
-		for (unsigned j=0;j<3;++j)
+		for (unsigned j=0; j<3; ++j)
 			tableWidget->setItem(i,j+1,new QTableWidgetItem(QString("%1").arg(P->u[j],0,'f',precision)));
 	}
 
@@ -436,7 +428,7 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 	if (clipboard)
 	{
 		const CCVector3* P = cloud->getPoint(pointIndex);
-		int precision = ccGui::Parameters().displayedNumPrecision;
+		int precision = m_associatedWin ? m_associatedWin->getDisplayParameters().displayedNumPrecision : 6;
 		int indexInList = startIndexSpinBox->value()+(int)m_orderedLabelsContainer->getChildrenNumber()-1;
 		clipboard->setText(QString("CC_POINT_#%0(%1;%2;%3)").arg(indexInList).arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision));
 	}

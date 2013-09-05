@@ -218,7 +218,7 @@ public:
 		population. Only the already allocated features will be re-reserved.
 		\return true if ok, false if there's not enough memory
 	**/
-	bool reserve(unsigned numberOfPoints);
+	virtual bool reserve(unsigned numberOfPoints);
 
 	//! Resizes all the active features arrays
 	/** This method is meant to be called after having increased the cloud
@@ -226,7 +226,7 @@ public:
 		reserved size). Otherwise, it fills all new elements with blank values.
 		\return true if ok, false if there's not enough memory
 	**/
-	bool resize(unsigned numberOfPoints);
+	virtual bool resize(unsigned numberOfPoints);
 
 
 	/***************************************************

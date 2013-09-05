@@ -614,7 +614,7 @@ public:
 		that is applied around several query points included in the same octree
 		cell. See DgmOctree::NearestNeighboursSearchStruct for more details.
 		\param nNSS NN search parameters
-		\param getOnlyPointsWithValidScalar wether to ignore points having an invalid associated scalar value
+		\param getOnlyPointsWithValidScalar whether to ignore points having an invalid associated scalar value
 		\return the number of neighbours found
 	**/
 	unsigned findNearestNeighborsStartingFromCell(NearestNeighboursSearchStruct &nNSS,
@@ -1107,7 +1107,7 @@ protected:
 	//! Gets point in the neighbourhing cells of a specific cell
 	/** \param nNSS NN search parameters (from which are used: cellPos, pointsInNeighbourCells and level)
 		\param neighbourhoodLength the new distance (in terms of cells) at which to look for neighbour cells
-		\param getOnlyPointsWithValidScalar wether to ignore points having an invalid associated scalar value
+		\param getOnlyPointsWithValidScalar whether to ignore points having an invalid associated scalar value
 	**/
 	void getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &nNSS,
 											int neighbourhoodLength,

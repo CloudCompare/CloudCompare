@@ -20,6 +20,9 @@
 
 #include "ccGenericPrimitive.h"
 
+//Qt
+#include <QImage>
+
 //CCLib
 #include <CCGeom.h>
 
@@ -70,6 +73,9 @@ public:
 
 	//! Returns normal
 	CCVector3 getNormal() const { return CCVector3(m_transformation.getColumn(2)); }
+
+	//! Sets an image as texture
+	bool setAsTexture(QImage image);
 
 protected:
     

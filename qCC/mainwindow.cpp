@@ -2610,7 +2610,7 @@ void MainWindow::doActionRenameSF()
 
 void MainWindow::doActionOpenColorScalesManager()
 {
-	ccColorScaleEditorDialog cseDlg(ccColorScale::Shared(0), this);
+	ccColorScaleEditorDialog cseDlg(ccColorScalesManager::GetUniqueInstance(),ccColorScale::Shared(0), this);
 	cseDlg.exec();
 
 	updateUI();
@@ -5333,8 +5333,8 @@ void MainWindow::activatePointListPickingMode()
         registerMDIDialog(m_plpDlg,Qt::TopRightCorner);
     }
 
-	//DGM: we must update marke size spin box value (as it may have changed by the user with the "display dialog")
-	m_plpDlg->markerSizeSpinBox->setValue(ccGui::Parameters().pickedPointsSize);
+	//DGM: we must update marker size spin box value (as it may have changed by the user with the "display dialog")
+	m_plpDlg->markerSizeSpinBox->setValue(win->getDisplayParameters().pickedPointsSize);
 
     m_plpDlg->linkWith(win);
 	m_plpDlg->linkWithCloud(pc);
@@ -5839,7 +5839,7 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 			const CCVector3* P = cloud->getPoint(pointIndex);
 			if (P)
 			{
-				unsigned precision = ccGui::Parameters().displayedNumPrecision;
+				unsigned precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
 				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear precedent message
 				s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
 
@@ -7113,6 +7113,11 @@ void MainWindow::forceConsoleDisplay()
 		DockableConsole->show();
 		QApplication::processEvents();
 	}
+}
+
+ccColorScalesManager* MainWindow::getColorScalesManager()
+{
+	return ccColorScalesManager::GetUniqueInstance();
 }
 
 void MainWindow::loadFile()

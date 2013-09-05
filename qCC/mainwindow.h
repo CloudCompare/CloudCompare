@@ -126,6 +126,7 @@ public:
 	virtual ccHObject* dbRootObject();
 	virtual QMainWindow* getMainWindow() {return this;}
 	virtual const ccHObject::Container& getSelectedEntities() const { return m_selectedEntities; }
+	virtual ccColorScalesManager* getColorScalesManager();
 
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();

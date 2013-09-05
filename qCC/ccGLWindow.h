@@ -30,6 +30,7 @@
 
 //qCC
 #include "ccCommon.h"
+#include "ccGuiParameters.h"
 
 //Qt
 #include <QFont>
@@ -73,6 +74,7 @@ public:
 	enum INTERACTION_MODE { TRANSFORM_CAMERA,
 							TRANSFORM_ENTITY,
 							SEGMENT_ENTITY,
+							PAN_ONLY,
 	};
 
 	//! Default message positions on screen
@@ -349,7 +351,37 @@ public:
 	**/
 	CCVector3 getCurrentUpDir() const;
 
+	//! Returns current parameters for this display (const version)
+	/** Warning: maybe overriden parameters!
+	**/
+	inline const ccGui::ParamStruct& getDisplayParameters() const { return m_overridenDisplayParametersEnabled ? m_overridenDisplayParameters : ccGui::Parameters(); }
+
+	//! Sets current parameters for this display
+	void setDisplayParameters(const ccGui::ParamStruct& params, bool thisWindowOnly = false)
+	{
+		if (thisWindowOnly)
+		{
+			m_overridenDisplayParametersEnabled = true;
+			m_overridenDisplayParameters = params;
+		}
+		else
+		{
+			m_overridenDisplayParametersEnabled = false;
+			ccGui::Set(params);
+		}
+	}
+
+	//! Whether display parameters are overidden for this window
+	bool hasOverridenDisplayParameters() const { return m_overridenDisplayParametersEnabled; }
+
+	//! Sets whether overlay entities (scale, tetrahedron, etc.) should be displayed or not
+	void displayOverlayEntities(bool state) { m_displayOverlayEntities = state; }
+
+	//! Returns whether overlay entities (scale, tetrahedron, etc.) are displayed or not
+	bool overlayEntitiesAreDisplayed() const { return m_displayOverlayEntities; }
+
 public slots:
+
     void zoomGlobal();
     void testFrameRate();
 
@@ -693,6 +725,15 @@ protected:
 
 	//! Rectangular picking polyline
 	ccPolyline* m_rectPickingPoly;
+
+	//! Overriden display parameter 
+	ccGui::ParamStruct m_overridenDisplayParameters;
+
+	//! Whether display parameters are overidden for this window
+	bool m_overridenDisplayParametersEnabled;
+
+	//! Whether to display overlay entities or not (scale, tetrahedron, etc.)
+	bool m_displayOverlayEntities;
 
 private:
 

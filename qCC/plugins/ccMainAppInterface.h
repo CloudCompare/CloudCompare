@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2059                                                              $
-//$LastChangedDate:: 2012-03-29 19:11:56 +0200 (jeu., 29 mars 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_MAIN_APP_INTERFACE
 #define CC_MAIN_APP_INTERFACE
@@ -33,6 +26,7 @@
 
 class QMainWindow;
 class ccGLWindow;
+class ccColorScalesManager;
 
 //! Main application interface (for plugins)
 class ccMainAppInterface
@@ -40,10 +34,10 @@ class ccMainAppInterface
 public:
 
     //! Returns main window
-	virtual QMainWindow* getMainWindow()=0;
+	virtual QMainWindow* getMainWindow() = 0;
 
     //! Returns active GL sub-window (if any)
-    virtual ccGLWindow* getActiveGLWindow()=0;
+    virtual ccGLWindow* getActiveGLWindow() = 0;
 
     //! Adds an entity to main db
     /** \param obj entity
@@ -58,29 +52,29 @@ public:
     **/
     virtual void addToDB(ccHObject* obj,
 						bool autoExpandDBTree=true,
-						const char* statusMessage=0,
+						const char* statusMessage = 0,
 						bool addToDisplay=true,
 						bool updateZoom=true,
-						ccGLWindow* winDest=0,
+						ccGLWindow* winDest = 0,
 						bool* coordinatesTransEnabled = 0,
 						double* coordinatesShift = 0,
-						double* coordinatesScale = 0)=0;
+						double* coordinatesScale = 0) = 0;
 
     //! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.
 		\param obj entity
 		\param autoDelete automatically deletes object
 	**/
-	virtual void removeFromDB(ccHObject* obj, bool autoDelete=true)=0;
+	virtual void removeFromDB(ccHObject* obj, bool autoDelete=true) = 0;
 
 	//! Selects or unselects an entity (in db tree)
 	/** \param obj entity
 		\param selected whether entity should be selected or not
 	**/
-	virtual void setSelectedInDB(ccHObject* obj, bool selected)=0;
+	virtual void setSelectedInDB(ccHObject* obj, bool selected) = 0;
 
 	//! Returns currently selected entities ("read only")
-	virtual const ccHObject::Container& getSelectedEntities() const=0;
+	virtual const ccHObject::Container& getSelectedEntities() const = 0;
 
 	//! Console message level (see dispToConsole)
 	enum ConsoleMessageLevel {	STD_CONSOLE_MESSAGE = 0,
@@ -92,53 +86,56 @@ public:
     /** \param message message
         \param level message level (standard, warning, error)
     **/
-    virtual void dispToConsole(QString message, ConsoleMessageLevel level=STD_CONSOLE_MESSAGE)=0;
+    virtual void dispToConsole(QString message, ConsoleMessageLevel level=STD_CONSOLE_MESSAGE) = 0;
 
 	//! Forces display of console widget
-	virtual void forceConsoleDisplay()=0;
+	virtual void forceConsoleDisplay() = 0;
 
 	//! Returns DB root (as a ccHObject)
-	virtual ccHObject* dbRootObject()=0;
+	virtual ccHObject* dbRootObject() = 0;
 
     //! Forces redraw of all GL windows
-    virtual void redrawAll()=0;
+    virtual void redrawAll() = 0;
 
     //! Redraws all GL windows that have the 'refresh' flag on
     /** See ccGLWindow::toBeRefreshed and ccDrawableObject::prepareDisplayForRefresh.
     **/
-    virtual void refreshAll()=0;
+    virtual void refreshAll() = 0;
 
     //! Enables all GL windows
-    virtual void enableAll()=0;
+    virtual void enableAll() = 0;
 
     //! Disables all GL windows
-    virtual void disableAll()=0;
+    virtual void disableAll() = 0;
 
     //! Disables all GL windows but the specified one
-    virtual void disableAllBut(ccGLWindow* win)=0;
+    virtual void disableAllBut(ccGLWindow* win) = 0;
 
     //! Updates UI (menu and properties browser) to reflect current selection state
     /** This method should be called whenever a change is made to any selected entity
     **/
-    virtual void updateUI()=0;
+    virtual void updateUI() = 0;
 
     //! Freezes/unfreezes UI
     /** \param state freeze state
     **/
-    virtual void freezeUI(bool state)=0;
+    virtual void freezeUI(bool state) = 0;
+
+	//! Returns color scale manager (unique instance)
+	virtual ccColorScalesManager* getColorScalesManager() = 0;
 
 	//other usefull methods
-    virtual void setFrontView()=0;
-    virtual void setBottomView()=0;
-    virtual void setTopView()=0;
-    virtual void setBackView()=0;
-    virtual void setLeftView()=0;
-    virtual void setRightView()=0;
-    virtual void toggleActiveWindowCenteredPerspective()=0;
-    virtual void toggleActiveWindowCustomLight()=0;
-    virtual void toggleActiveWindowSunLight()=0;
-    virtual void toggleActiveWindowViewerBasedPerspective()=0;
-    virtual void zoomOnSelectedEntities()=0;
+    virtual void setFrontView() = 0;
+    virtual void setBottomView() = 0;
+    virtual void setTopView() = 0;
+    virtual void setBackView() = 0;
+    virtual void setLeftView() = 0;
+    virtual void setRightView() = 0;
+    virtual void toggleActiveWindowCenteredPerspective() = 0;
+    virtual void toggleActiveWindowCustomLight() = 0;
+    virtual void toggleActiveWindowSunLight() = 0;
+    virtual void toggleActiveWindowViewerBasedPerspective() = 0;
+    virtual void zoomOnSelectedEntities() = 0;
 
 };
 

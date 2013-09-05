@@ -685,7 +685,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
     }
     case OBJECT_CURRENT_COLOR_RAMP:
     {
-		ccColorScaleSelector* selector = new ccColorScaleSelector(parent,QString::fromUtf8(":/CC/images/ccGear.png"));
+		ccColorScaleSelector* selector = new ccColorScaleSelector(ccColorScalesManager::GetUniqueInstance(),parent,QString::fromUtf8(":/CC/images/ccGear.png"));
 		//fill combox box with Color Scales Manager
 		selector->init();
 		connect(selector, SIGNAL(colorScaleSelected(int)), this, SLOT(colorScaleChanged(int)));
@@ -1151,7 +1151,7 @@ void ccPropertiesTreeDelegate::spawnColorRampEditor()
 	ccScalarField* sf = (cloud ? static_cast<ccScalarField*>(cloud->getCurrentDisplayedScalarField()) : 0);
 	if (sf)
 	{
-		ccColorScaleEditorDialog* editorDialog = new ccColorScaleEditorDialog(sf->getColorScale(),static_cast<ccGLWindow*>(cloud->getDisplay()));
+		ccColorScaleEditorDialog* editorDialog = new ccColorScaleEditorDialog(ccColorScalesManager::GetUniqueInstance(),sf->getColorScale(),static_cast<ccGLWindow*>(cloud->getDisplay()));
 		editorDialog->setAssociatedScalarField(sf);
 		if (editorDialog->exec())
 		{

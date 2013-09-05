@@ -266,7 +266,7 @@ public:
     //! Imports the current color scale
     void importColorScale(ccColorScale::Shared scale);
 
-	//! Sets wether to show the color elements labels or not
+	//! Sets whether to show the color elements labels or not
 	void showLabels(bool state);
 
 	//! Sets the labels color

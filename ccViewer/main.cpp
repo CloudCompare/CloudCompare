@@ -25,9 +25,6 @@
 #include <QFileOpenEvent>
 #endif
  
-//qCC
-#include <ccConsole.h>
-
 //qCC_db
 #include <ccIncludeGL.h>
 #include <ccTimer.h>
@@ -106,9 +103,6 @@ int main(int argc, char *argv[])
 #endif
 	w.show();
 
-	//init console
-	ccConsole::Init(0,&w);
-
 	//files to open are passed as argument
 	if (argc>1)
     {
@@ -171,7 +165,6 @@ int main(int argc, char *argv[])
 
 	ccNormalVectors::ReleaseUniqueInstance();
     ccColorScalesManager::ReleaseUniqueInstance();
-	ccConsole::ReleaseInstance();
 
 	return result;
 }

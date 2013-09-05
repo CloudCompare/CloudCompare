@@ -49,7 +49,7 @@ public:
 	//! Returns SF precision
 	int sfPrecision() const;
 
-	//! Returns wether SF(s) and color should be swapped
+	//! Returns whether SF(s) and color should be swapped
 	bool swapColorAndSF() const;
 
 protected slots:

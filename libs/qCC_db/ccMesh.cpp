@@ -1647,7 +1647,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				ccMaterialSet* newMaterials = 0;
 				if (m_materials && m_triMtlIndexes)
 				{
-					assert(m_triMtlIndexes->currentSize()==m_triVertIndexes->currentSize());
+					assert(m_triMtlIndexes->currentSize() == m_triVertIndexes->currentSize());
 					//create new 'minimal' subset
 					newMaterials = new ccMaterialSet(m_materials->getName()+QString(".subset"));
 					newMaterials->link();
@@ -2178,7 +2178,7 @@ void ccMesh::setDisplay(ccGenericGLDisplay* win)
 	{
 		const ccGenericGLDisplay* currentDisplay = m_materials->getAssociatedDisplay();
 		//if the material set is not associated to any display --> we associate it with input display!
-		if (currentDisplay==0)
+		if (currentDisplay != 0)
 			m_materials->associateTo(win);
 		/*else //else if it is associated with a different display
 		{
@@ -2246,7 +2246,7 @@ bool ccMesh::toFile_MeOnly(QFile& out) const
 		return false;
 
 	//per-triangle materials (dataVersion>=20))
-	bool hasTriMtlIndexes = (m_triMtlIndexes && m_triMtlIndexes->isAllocated());
+	bool hasTriMtlIndexes = hasPerTriangleMtlIndexes();
 	if (out.write((const char*)&hasTriMtlIndexes,sizeof(bool))<0)
 		return WriteError();
 	if (hasTriMtlIndexes)
@@ -2257,7 +2257,7 @@ bool ccMesh::toFile_MeOnly(QFile& out) const
 	}
 
 	//per-triangle texture coordinates indexes (dataVersion>=20))
-	bool hasTexCoordIndexes = (m_texCoordIndexes && m_texCoordIndexes->isAllocated());
+	bool hasTexCoordIndexes = hasPerTriangleTexCoordIndexes();
 	if (out.write((const char*)&hasTexCoordIndexes,sizeof(bool))<0)
 		return WriteError();
 	if (hasTexCoordIndexes)

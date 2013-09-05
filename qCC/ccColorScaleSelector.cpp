@@ -25,11 +25,14 @@
 //Local
 #include "ccColorScalesManager.h"
 
-ccColorScaleSelector::ccColorScaleSelector(QWidget* parent, QString defaultButtonIconPath/*=QString()*/)
+ccColorScaleSelector::ccColorScaleSelector(ccColorScalesManager* manager, QWidget* parent, QString defaultButtonIconPath/*=QString()*/)
 	: QFrame(parent)
+	, m_manager(manager)
 	, m_comboBox(new QComboBox())
 	, m_button(new QToolButton())
 {
+	assert(m_manager);
+	
 	setLayout(new QHBoxLayout());
 	layout()->setContentsMargins(0,0,0,0);
 	setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Maximum);
@@ -53,20 +56,20 @@ void ccColorScaleSelector::init()
 	//fill combox box
 	if (m_comboBox)
 	{
-		m_comboBox->blockSignals(true);
+		m_comboBox->disconnect(this);
+
 		m_comboBox->clear();
 		//add all available color scales
-		ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
-		assert(csManager);
-		for (ccColorScalesManager::ScalesMap::const_iterator it = csManager->map().begin(); it != csManager->map().end(); ++it)
+		assert(m_manager);
+		for (ccColorScalesManager::ScalesMap::const_iterator it = m_manager->map().begin(); it != m_manager->map().end(); ++it)
 			m_comboBox->addItem((*it)->getName(),(*it)->getUuid());
-		m_comboBox->blockSignals(false);
 
 		connect(m_comboBox, SIGNAL(activated(int)), this, SIGNAL(colorScaleSelected(int)));
 	}
 	//advanced tool button
 	if (m_button)
 	{
+		m_button->disconnect(this);
 		connect(m_button, SIGNAL(clicked()), this, SIGNAL(colorScaleEditorSummoned()));
 	}
 }
@@ -84,7 +87,7 @@ ccColorScale::Shared ccColorScaleSelector::getScale(int index) const
 	//get UUID associated to the combo-box item
 	QString UUID = m_comboBox->itemData(index).toString();
 
-	return ccColorScalesManager::GetUniqueInstance()->getScale(UUID);
+	return m_manager ? m_manager->getScale(UUID) : ccColorScale::Shared(0);
 }
 
 void ccColorScaleSelector::setSelectedScale(QString uuid)
@@ -95,4 +98,6 @@ void ccColorScaleSelector::setSelectedScale(QString uuid)
 	//search right index by UUID
 	int pos = m_comboBox->findData(uuid);
 	m_comboBox->setCurrentIndex(pos);
+
+	emit colorScaleSelected(pos);
 }

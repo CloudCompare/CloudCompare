@@ -204,6 +204,9 @@ public:
 	**/
 	virtual bool convertMaterialsToVertexColors();
 
+	//! Returns whether this mesh as per-triangle material index
+	bool hasPerTriangleMtlIndexes() const { return m_triMtlIndexes && m_triMtlIndexes->isAllocated(); }
+
 	//! Reserves memory to store per-triangle material index
 	/** Before adding per-triangle material index to
 		the mesh (with ccMesh::addTriangleMtlIndex()) be sure
@@ -246,6 +249,9 @@ public:
 
 	//! Sets per-triangle texture coordinates array (may be shared)
 	virtual void setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable = true);
+
+	//! Returns whether this mesh as per-triangle triplets of tex coords indexes
+	bool hasPerTriangleTexCoordIndexes() const { return m_texCoordIndexes && m_texCoordIndexes->isAllocated(); }
 
 	//! Reserves memory to store per-triangle triplets of tex coords indexes
 	/** Before adding per-triangle tex coords indexes triplets to

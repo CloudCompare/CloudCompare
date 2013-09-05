@@ -272,16 +272,18 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	//Font metrics for proper display of labels!
 	QFontMetrics strMetrics(win->font());
 
+	const ccGui::ParamStruct& displayParams = win->getDisplayParameters();
+
 	//default color: text color
-	const unsigned char* textColor = ccGui::Parameters().textDefaultCol;
+	const unsigned char* textColor = displayParams.textDefaultCol;
 
 	//histogram?
 	const::ccScalarField::Histogram histogram = sf->getHistogram();
-	bool showHistogram = (ccGui::Parameters().colorScaleShowHistogram && !logScale && histogram.maxValue != 0 && histogram.size() > 1);
+	bool showHistogram = (displayParams.colorScaleShowHistogram && !logScale && histogram.maxValue != 0 && histogram.size() > 1);
 
 	//display area
 	const int strHeight = strMetrics.height();
-	const int scaleWidth = ccGui::Parameters().colorScaleRampWidth;
+	const int scaleWidth = displayParams.colorScaleRampWidth;
 	const int scaleMaxHeight = (keyValues.size() > 1 ? std::max(context.glH-140,2*strHeight) : scaleWidth); //if 1 value --> we draw a cube
 
 	//centered orthoprojective view (-halfW,-halfH,halfW,halfH)
@@ -301,7 +303,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 
 	//const colorType* lineColor = ccColor::white;
 	////clear background?
-	//if (ccGui::Parameters().backgroundCol[0] + ccGui::Parameters().backgroundCol[1] + ccGui::Parameters().backgroundCol[2] > 3*128)
+	//if (displayParams.backgroundCol[0] + displayParams.backgroundCol[1] + displayParams.backgroundCol[2] > 3*128)
 	//	lineColor = ccColor::black;
 	const colorType* lineColor = textColor;
 
@@ -464,7 +466,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		}
 
 		//precision (same as color scale)
-		const unsigned precision = ccGui::Parameters().displayedNumPrecision;
+		const unsigned precision = displayParams.displayedNumPrecision;
 		//format
 		const char format = (sf->logScale() ? 'E' : 'f');
 		//tick
@@ -516,7 +518,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	bool symmetricalScale = sf->symmetricalScale();
 	bool logScale = sf->logScale();
 
-	const int c_cubeSize = ccGui::Parameters().colorScaleRampWidth;
+	const int c_cubeSize = displayParams.colorScaleRampWidth;
 	const int c_defaultSpace = 4;
 
 	//this vector stores the values that will be "represented" by the scale
@@ -653,7 +655,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		//TODO FIXME!!!
 
 		//if the ramp should be symmetrical
-		bool symmetry = ccGui::Parameters().colorScaleAlwaysSymmetrical;
+		bool symmetry = displayParams.colorScaleAlwaysSymmetrical;
 		if (symmetry)
 		{
 			//we display the color ramp between -maxDisp and +maxDisp
@@ -859,11 +861,11 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 	assert(win);
 
 	if (theScaleElements[0].textDisplayed)
-		win->displayText(QString::number(theScaleElements[0].value, logScale ? 'E' : 'f', ccGui::Parameters().displayedNumPrecision), halfW+x-5, y+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VMIDDLE);
+		win->displayText(QString::number(theScaleElements[0].value, logScale ? 'E' : 'f', displayParams.displayedNumPrecision), halfW+x-5, y+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VMIDDLE);
 
 	const colorType* lineColor = ccColor::white;
 	//clear background?
-	if (ccGui::Parameters().backgroundCol[0] + ccGui::Parameters().backgroundCol[1] + ccGui::Parameters().backgroundCol[2] > 3*128)
+	if (displayParams.backgroundCol[0] + displayParams.backgroundCol[1] + displayParams.backgroundCol[2] > 3*128)
 		lineColor = ccColor::black;
 
 	for (int i=0;i+1<(int)n;++i)
@@ -994,7 +996,7 @@ void ccRenderingTools::DrawColorRamp(const CC_DRAW_CONTEXT& context)
 		if (theScaleElements[i+1].textDisplayed)
 		{
 			double dispValue = theScaleElements[i+1].value;
-			win->displayText(QString::number(dispValue,logScale ? 'E' : 'f',ccGui::Parameters().displayedNumPrecision), halfW+x-5, y+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VMIDDLE);
+			win->displayText(QString::number(dispValue,logScale ? 'E' : 'f',displayParams.displayedNumPrecision), halfW+x-5, y+halfH, ccGLWindow::ALIGN_HRIGHT | ccGLWindow::ALIGN_VMIDDLE);
 		}
 	}
 

@@ -30,6 +30,7 @@
 #include <QDialog>
 
 class ccScalarField;
+class ccColorScalesManager;
 
 //! Dialog to edit/create color scales
 class ccColorScaleEditorDialog : public QDialog, public Ui::ColorScaleEditorDlg
@@ -39,7 +40,7 @@ class ccColorScaleEditorDialog : public QDialog, public Ui::ColorScaleEditorDlg
 public:
 
     //! Default constructor
-	ccColorScaleEditorDialog(ccColorScale::Shared currentScale = ccColorScale::Shared(0), QWidget* parent = 0);
+	ccColorScaleEditorDialog(ccColorScalesManager* manager, ccColorScale::Shared currentScale = ccColorScale::Shared(0), QWidget* parent = 0);
 
     //! Destructor
 	virtual ~ccColorScaleEditorDialog();
@@ -101,6 +102,9 @@ protected:
 		If current modifications have not been saved yet!
 	**/
 	void setScaleModeToRelative(bool isRelative);
+
+	//! Color scale manager
+	ccColorScalesManager* m_manager;
 
 	//! Current active color scale
 	ccColorScale::Shared m_colorScale;

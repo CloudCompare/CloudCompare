@@ -34,8 +34,9 @@
 //System
 #include <assert.h>
 
-ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScale::Shared currentScale/*=0*/, QWidget* parent/*=0*/)
+ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScalesManager* manager, ccColorScale::Shared currentScale/*=0*/, QWidget* parent/*=0*/)
 	: QDialog(parent)
+	, m_manager(manager)
 	, Ui::ColorScaleEditorDlg()
 	, m_colorScale(currentScale)
 	, m_scaleWidget(new ccColorScaleEditorWidget(this,Qt::Horizontal))
@@ -44,6 +45,8 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScale::Shared currentS
 	, m_minAbsoluteVal(0.0)
 	, m_maxAbsoluteVal(1.0)
 {
+	assert(m_manager);
+
     setupUi(this);
 
 	colorScaleEditorFrame->setLayout(new QHBoxLayout());
@@ -77,7 +80,7 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScale::Shared currentS
 	updateMainComboBox();
 
 	if (!m_colorScale)
-		m_colorScale = ccColorScalesManager::GetDefaultScale();
+		m_colorScale = m_manager->getDefaultScale(ccColorScalesManager::BGYR);
 
 	setActiveScale(m_colorScale);
 }
@@ -98,8 +101,7 @@ void ccColorScaleEditorDialog::setAssociatedScalarField(ccScalarField* sf)
 
 void ccColorScaleEditorDialog::updateMainComboBox()
 {
-	ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
-	if (!csManager)
+	if (!m_manager)
 	{
 		assert(false);
 		return;
@@ -109,8 +111,8 @@ void ccColorScaleEditorDialog::updateMainComboBox()
 	rampComboBox->clear();
 
 	//populate combo box with scale names (and UUID)
-	assert(csManager);
-	for (ccColorScalesManager::ScalesMap::const_iterator it = csManager->map().begin(); it != csManager->map().end(); ++it)
+	assert(m_manager);
+	for (ccColorScalesManager::ScalesMap::const_iterator it = m_manager->map().begin(); it != m_manager->map().end(); ++it)
 		rampComboBox->addItem((*it)->getName(),(*it)->getUuid());
 
 	//find the currently selected scale in the new 'list'
@@ -451,10 +453,9 @@ void ccColorScaleEditorDialog::copyCurrentScale()
 	}
 	m_scaleWidget->exportColorScale(scale);
 
-	ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
-	assert(csManager);
-	if (csManager)
-		csManager->addScale(scale);
+	assert(m_manager);
+	if (m_manager)
+		m_manager->addScale(scale);
 
 	updateMainComboBox();
 
@@ -527,16 +528,14 @@ void ccColorScaleEditorDialog::deleteCurrentScale()
 	else if (currentIndex > 0)
 		--currentIndex;
 
-	ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
-	assert(csManager);
-
-	if (csManager)
+	assert(m_manager);
+	if (m_manager)
 	{
 		//activate the neighbor scale in the list
-		ccColorScale::Shared nextScale = csManager->getScale(rampComboBox->itemData(currentIndex).toString());
+		ccColorScale::Shared nextScale = m_manager->getScale(rampComboBox->itemData(currentIndex).toString());
 		setActiveScale(nextScale);
 
-		csManager->removeScale(colorScaleToDelete->getUuid());
+		m_manager->removeScale(colorScaleToDelete->getUuid());
 	}
 
 	updateMainComboBox();
@@ -550,10 +549,9 @@ void ccColorScaleEditorDialog::createNewScale()
 	scale->insert(ccColorScaleElement(0.0,Qt::blue),false);
 	scale->insert(ccColorScaleElement(1.0,Qt::red),true);
 
-	ccColorScalesManager* csManager = ccColorScalesManager::GetUniqueInstance();
-	assert(csManager);
-	if (csManager)
-		csManager->addScale(scale);
+	assert(m_manager);
+	if (m_manager)
+		m_manager->addScale(scale);
 
 	updateMainComboBox();
 	

@@ -23,6 +23,7 @@
 
 class QComboBox;
 class QToolButton;
+class ccColorScalesManager;
 
 //! Advanced editor for color scales
 /** Combo-box + shortcut to color scale editor
@@ -34,7 +35,7 @@ class ccColorScaleSelector : public QFrame
 public:
 
 	//! Default constructor
-	ccColorScaleSelector(QWidget* parent, QString defaultButtonIconPath = QString());
+	ccColorScaleSelector(ccColorScalesManager* manager, QWidget* parent, QString defaultButtonIconPath = QString());
 
 	//! Inits selector with the Color Scales Manager
 	void init();
@@ -57,6 +58,9 @@ signals:
 	void colorScaleEditorSummoned();
 
 protected:
+
+	//! Color scales manager
+	ccColorScalesManager* m_manager;
 
 	//! Color scales combo-box
 	QComboBox* m_comboBox;

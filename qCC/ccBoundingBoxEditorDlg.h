@@ -80,7 +80,7 @@ protected:
 	//! Base box (invalid if none)
 	ccBBox m_baseBBox;
 
-	//! Wether base box is minimal or not
+	//! Whether base box is minimal or not
 	bool m_baseBoxIsMinimal;
 
 	//! Current box

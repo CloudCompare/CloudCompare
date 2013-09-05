@@ -22,6 +22,7 @@
 //qCC_db
 #include "ccPointCloud.h"
 #include "ccNormalVectors.h"
+#include "ccMaterialSet.h"
 
 ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const ccGLMatrix* transMat/*=0*/, QString name/*=QString("Plane")*/)
 	: ccGenericPrimitive(name,transMat)
@@ -101,4 +102,93 @@ ccBBox ccPlane::getFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
 	return ccBBox(CCVector3(-m_xWidth*0.5f,-m_yWidth*0.5f, 0),CCVector3(m_xWidth*0.5f,m_yWidth*0.5f, 0));
+}
+
+bool ccPlane::setAsTexture(QImage image)
+{
+	if (image.isNull())
+	{
+		ccLog::Warning("[ccPlane::setAsTexture] Invalid texture image!");
+		return false;
+	}
+
+	//texture coordinates
+	TextureCoordsContainer* texCoords = getTexCoordinatesTable();
+	if (!texCoords)
+	{
+		texCoords = new TextureCoordsContainer();
+		if (!texCoords->reserve(4))
+		{
+			//not enough memory
+			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
+			delete texCoords;
+			return false;
+		}
+
+		//create default texture coordinates
+		float TA[2]={0.0f,0.0f};
+		float TB[2]={0.0f,1.0f};
+		float TC[2]={1.0f,1.0f};
+		float TD[2]={1.0f,0.0f};
+		texCoords->addElement(TA);
+		texCoords->addElement(TB);
+		texCoords->addElement(TC);
+		texCoords->addElement(TD);
+
+		setTexCoordinatesTable(texCoords);
+	}
+
+	if (!hasPerTriangleTexCoordIndexes())
+	{
+		if (!reservePerTriangleTexCoordIndexes())
+		{
+			//not enough memory
+			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
+			setTexCoordinatesTable(0);
+			removePerTriangleMtlIndexes();
+			return false;
+		}
+		
+		//set default texture indexes
+		addTriangleTexCoordIndexes(0,2,1);
+		addTriangleTexCoordIndexes(0,3,2);
+	}
+	
+	if (!hasPerTriangleMtlIndexes())
+	{
+		if (!reservePerTriangleMtlIndexes())
+		{
+			//not enough memory
+			ccLog::Warning("[ccPlane::setAsTexture] Not enough memory!");
+			setTexCoordinatesTable(0);
+			removePerTriangleTexCoordIndexes();
+			return false;
+		}
+
+		//set default material indexes
+		addTriangleMtlIndex(0);
+		addTriangleMtlIndex(0);
+	}
+
+	//set material
+	if (!getMaterialSet())
+		setMaterialSet(new ccMaterialSet());
+	ccMaterialSet* materialSet = const_cast<ccMaterialSet*>(getMaterialSet());
+	assert(materialSet);
+	//remove old material (if any)
+	materialSet->clear();
+	//add new material
+	{
+		ccMaterial material("texture");
+		material.texture = image;
+		materialSet->addMaterial(material);
+		//dirty trick: reset material association so that texture will be refreshed!
+		materialSet->associateTo(0);
+		if (m_currentDisplay)
+			materialSet->associateTo(m_currentDisplay);
+	}
+
+	showMaterials(true);
+
+	return true;
 }

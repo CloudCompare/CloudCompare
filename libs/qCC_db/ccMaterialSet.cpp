@@ -224,12 +224,11 @@ void ccMaterialSet::associateTo(ccGenericGLDisplay* display)
 	if (m_display == display)
 		return;
 
-	ccMaterialSet::iterator it = begin();
-	for (;it!=end();++it)
+	for (ccMaterialSet::iterator it = begin(); it!=end(); ++it)
 		if (!it->texture.isNull())
 		{
 			//we release texture from old display (if any)
-			if (m_display)
+			if (it->texID != 0 && m_display)
 				m_display->releaseTexture(it->texID);
 			//we register texture in the new one (if any)
 			//it->texID = 0;

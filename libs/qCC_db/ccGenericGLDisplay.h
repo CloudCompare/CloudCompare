@@ -82,8 +82,14 @@ public:
 
 	//! Camera F.O.V. (field of view - for perspective mode only)
 	float fov;
-	//! Camera aspect ratio (for perspective mode only)
-	float aspectRatio;
+	//! Camera aspect ratio (perspective mode only)
+	float perspectiveAspectRatio;
+
+	//! 3D view aspect ratio (ortho mode only)
+	/** AR = width / height
+	**/
+	float orthoAspectRatio;
+
 };
 
 //! Generic interface for GL displays

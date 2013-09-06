@@ -1374,7 +1374,7 @@ void ccGLWindow::recalcProjectionMatrix()
 		maxDist_pix = std::max<float>(maxDist_pix,1.0f);
 
 		float halfW = static_cast<float>(m_glWidth)*0.5f;
-		float halfH = static_cast<float>(m_glHeight)*0.5f;
+		float halfH = static_cast<float>(m_glHeight)*0.5f * m_params.orthoAspectRatio;
 
 		glOrtho(-halfW,halfW,-halfH,halfH,-maxDist_pix,maxDist_pix);
 	}
@@ -1402,7 +1402,7 @@ void ccGLWindow::recalcModelViewMatrix()
 	if (m_params.perspectiveView) //perspective mode
 	{
 		//for proper aspect ratio handling
-		float ar = (m_glHeight != 0 ? float(m_glWidth)/(float(m_glHeight)*m_params.aspectRatio) : 0.0f);
+		float ar = (m_glHeight != 0 ? float(m_glWidth)/(float(m_glHeight)*m_params.perspectiveAspectRatio) : 0.0f);
 		if (ar<1.0)
 			glScalef(ar,ar,1.0);
 	}
@@ -1896,6 +1896,8 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		//displacement vector (in "3D")
 		float pixSize = computeActualPixelSize();
 		CCVector3 u(static_cast<float>(dx)*pixSize, -static_cast<float>(dy)*pixSize, 0);
+		if (!m_params.perspectiveView)
+			u.y *= m_params.orthoAspectRatio;
 
 		bool entityMovingMode = (m_interactionMode == TRANSFORM_ENTITY) || ((QApplication::keyboardModifiers () & Qt::ControlModifier) && m_customLightEnabled);
 		if (entityMovingMode)
@@ -2849,7 +2851,6 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 	else
 	{
 		m_params.objectCenteredView = true; //object-centered mode is forced for otho. view
-		m_params.aspectRatio = 1.0; //TODO: is it really necessary?
 
 		if (perspectiveWasEnabled) //from perspective view to ortho. view
 		{
@@ -2941,7 +2942,7 @@ void ccGLWindow::applyImageViewport(ccCalibratedImage* theImage)
 	setCameraPos(C);
 
 	//aspect ratio
-	m_params.aspectRatio = float(theImage->getW())/float(theImage->getH());
+	m_params.perspectiveAspectRatio = float(theImage->getW())/float(theImage->getH());
 
 	//apply orientation matrix
 	memset(trans.getTranslation(),0,sizeof(float)*3);

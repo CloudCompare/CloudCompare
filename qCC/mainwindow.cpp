@@ -2611,7 +2611,12 @@ void MainWindow::doActionRenameSF()
 void MainWindow::doActionOpenColorScalesManager()
 {
 	ccColorScaleEditorDialog cseDlg(ccColorScalesManager::GetUniqueInstance(),ccColorScale::Shared(0), this);
-	cseDlg.exec();
+	
+	if (cseDlg.exec())
+	{
+		//save current scale manager state to persistent settings
+		ccColorScalesManager::GetUniqueInstance()->toPersistentSettings();
+	}
 
 	updateUI();
 }

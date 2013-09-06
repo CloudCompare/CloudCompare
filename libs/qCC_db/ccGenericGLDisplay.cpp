@@ -30,7 +30,8 @@ ccViewportParameters::ccViewportParameters()
 	, pivotPoint(0.0f)
 	, cameraCenter(0.0f)
 	, fov(30.0f)
-	, aspectRatio(1.0f)
+	, perspectiveAspectRatio(1.0f)
+	, orthoAspectRatio(1.0f)
 {
 	viewMat.toIdentity();
 }
@@ -46,7 +47,8 @@ ccViewportParameters::ccViewportParameters(const ccViewportParameters& params)
 	, pivotPoint(params.pivotPoint)
 	, cameraCenter(params.cameraCenter)
 	, fov(params.fov)
-	, aspectRatio(params.aspectRatio)
+	, perspectiveAspectRatio(params.perspectiveAspectRatio)
+	, orthoAspectRatio(params.orthoAspectRatio)
 {
 }
 
@@ -71,7 +73,9 @@ bool ccViewportParameters::toFile(QFile& out) const
 	outStream << cameraCenter.y;
 	outStream << cameraCenter.z;
 	outStream << fov;
-	outStream << aspectRatio;
+	outStream << perspectiveAspectRatio;
+	//ortho mode aspect ratio (dataVersion>=30)
+	outStream << orthoAspectRatio;
 
 	return true;
 }
@@ -108,7 +112,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion)
 		cameraCenter = pivotPoint;
 	}
 	inStream >> fov;
-	inStream >> aspectRatio;
+	inStream >> perspectiveAspectRatio;
 	if (dataVersion < 25) //screenPan has been replaced by cameraCenter(x,y) in object centered mode!
 	{
 		float screenPan[2];
@@ -120,6 +124,16 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion)
 			cameraCenter.x += screenPan[0];
 			cameraCenter.y += screenPan[1];
 		}
+	}
+
+	//ortho mode aspect ratio (dataVersion>=30)
+	if (dataVersion >= 30)
+	{
+		inStream >> orthoAspectRatio;
+	}
+	else
+	{
+		orthoAspectRatio = 1.0f;
 	}
 
 	return true;

@@ -229,7 +229,7 @@ bool ccDrawableObject::sfShown() const
     return m_sfDisplayed;
 }
 
-void ccDrawableObject::setTempColor(const colorType* col, bool autoActivate /*= true*/)
+void ccDrawableObject::setTempColor(const colorType* col, bool autoActivate/*=true*/)
 {
     memcpy(m_tempColor,col,3*sizeof(colorType));
 
@@ -239,7 +239,7 @@ void ccDrawableObject::setTempColor(const colorType* col, bool autoActivate /*= 
 
 void ccDrawableObject::enableTempColor(bool state)
 {
-    m_colorIsOverriden=state;
+    m_colorIsOverriden = state;
 }
 
 bool ccDrawableObject::isColorOverriden() const

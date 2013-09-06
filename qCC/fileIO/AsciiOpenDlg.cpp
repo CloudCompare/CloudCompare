@@ -31,6 +31,8 @@
 #include <QDialogButtonBox>
 #include <QToolButton>
 #include <QPushButton>
+#include <QFile>
+#include <QTextStream>
 
 //system
 #include <string.h>
@@ -126,34 +128,23 @@ void AsciiOpenDlg::updateTable(const QString &separator)
     }
 
 	//we open the file in ASCII mode
-	FILE* pFile = fopen(qPrintable(m_filename),"rt");
-	if (!pFile)
+	QFile file(m_filename);
+	if (!file.open(QFile::ReadOnly))
 	{
 		tableWidget->clear();
 		m_invalidColumns = true;
         return;
 	}
-
-    //buffer
-	char line[MAX_ASCII_FILE_LINE_LENGTH];
+	QTextStream stream(&file);
 
     //we skip first lines (if needed)
 	{
 		for (unsigned i=0;i<m_skippedLines;++i)
 		{
-			if (fgets(line, MAX_ASCII_FILE_LINE_LENGTH, pFile))
-			{
-				//we keep track of the first line
-				if (i==0)
-					m_headerLine = QString(line);
-			}
-			else
-			{
-				fclose(pFile);
-				tableWidget->clear();
-				m_invalidColumns = true;
-				return;
-			}
+			QString currentLine = stream.readLine();
+			//we keep track of the first line
+			if (i==0)
+				m_headerLine = currentLine;
 		}
 	}
 
@@ -178,27 +169,25 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 	std::vector<bool> valueIsInteger;	//identifies columns with integer values only
 	std::vector<bool> valueIsBelow255;	//identifies columns with integer values between 0 and 255 only
 
-	while ((lineCount<LINES_READ_FOR_STATS) && fgets(line, MAX_ASCII_FILE_LINE_LENGTH, pFile))
+	QString currentLine = stream.readLine();
+	while (lineCount < LINES_READ_FOR_STATS && !currentLine.isNull())
 	{
-        //we convert char buffer to a QString object
-		QString str(line);
-
         //we recognize "//" as comment
-		if (line[0] != '/' || line[1] != '/')
+		if (!currentLine.startsWith("//"))
 		{
-			QStringList parts = str.trimmed().split(m_separator,QString::SkipEmptyParts);
-            int partsCount = parts.size();
-            if (partsCount > (int)MAX_COLUMNS)
-                partsCount = (int)MAX_COLUMNS;
+			QStringList parts = currentLine.trimmed().split(m_separator,QString::SkipEmptyParts);
+            unsigned partsCount = static_cast<unsigned>(parts.size());
+            if (partsCount > MAX_COLUMNS)
+                partsCount = MAX_COLUMNS;
 
             if (lineCount < DISPLAYED_LINES)
             {
                 //do we need to add one or several new columns?
 				{
-					if (partsCount > (int)columnsCount)
+					if (partsCount > columnsCount)
 					{
 						//we also extend vectors
-						for (int i=columnsCount; i<partsCount; ++i)
+						for (unsigned i=columnsCount; i<partsCount; ++i)
 						{
 							valueIsNumber.push_back(true);
 							valueIsBelowOne.push_back(true);
@@ -207,13 +196,13 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 						}
 
 						tableWidget->setColumnCount(partsCount);
-						columnsCount=partsCount;
+						columnsCount = partsCount;
 					}
 				}
 
                 //we fill the current row with extracted parts
 				{
-					for (int i=0; i<partsCount; ++i)
+					for (unsigned i=0; i<partsCount; ++i)
 					{
 						QTableWidgetItem *newItem = new QTableWidgetItem(parts[i]);
 
@@ -233,9 +222,9 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 							double intPart, fracPart;
 							fracPart = modf(value,&intPart);
 
-							valueIsBelowOne[i]	= valueIsBelowOne[i] && (fabs(value)<=1.0);
+							valueIsBelowOne[i]	= valueIsBelowOne[i] && (fabs(value) <= 1.0);
 							valueIsInteger[i]	= valueIsInteger[i] && (fracPart == 0.0);
-							valueIsBelow255[i]	= valueIsBelow255[i] && (valueIsInteger[i] && (intPart >= 0.0 && value<=255.0));
+							valueIsBelow255[i]	= valueIsBelow255[i] && (valueIsInteger[i] && (intPart >= 0.0 && value <= 255.0));
 						}
 
 						tableWidget->setItem(lineCount+1, i, newItem); //+1 for first line shifting
@@ -243,7 +232,7 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 				}
             }
 
-            totalChars += (str.size()+1); //+1 for return char at eol
+            totalChars += currentLine.size() + 1; //+1 for return char at eol
 
             ++lineCount;
 		}
@@ -251,16 +240,18 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 		{
 			++commentLines;
 		}
+
+		//read next line
+		currentLine = stream.readLine();
 	}
+
+	file.close();
 
 	commentLinesSkippedLabel->setVisible(commentLines != 0);
 	if (commentLines)
 		commentLinesSkippedLabel->setText(QString("+ comment/header line(s) skipped: %1").arg(commentLines));
 
-	fclose(pFile);
-	pFile=0;
-
-	if (lineCount==0 || columnsCount==0)
+	if (lineCount == 0 || columnsCount == 0)
 	{
 		m_averageLineSize = -1.0;
 		tableWidget->clear();

@@ -604,18 +604,13 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
         clearStructure(cloudDesc);
         return CC_FERR_READING;
 	}
+	QTextStream stream(&file);
 
 	//we skip lines as defined on input
-    char currentLine[MAX_ASCII_FILE_LINE_LENGTH];
 	{
-		for (unsigned i=0;i<skipLines;++i)
+		for (unsigned i=0; i<skipLines; ++i)
 		{
-			if (file.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH)<0)
-			{
-				//we clear already initialized data
-				clearStructure(cloudDesc);
-				return CC_FERR_READING;
-			}
+			stream.readLine();
 		}
 	}
 
@@ -641,15 +636,16 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 
     //main process
 	unsigned nextLimit = /*cloudChunkPos+*/cloudChunkSize;
-    while (file.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH)>0)
+	QString currentLine = stream.readLine();
+    while (!currentLine.isNull())
     {
         ++linesRead;
 
         //comment
-		if (currentLine[0]=='/' && currentLine[1]=='/')
+		if (currentLine.startsWith("//"))
             continue;
 
-        if (currentLine[0]==0 || currentLine[0]==10)
+        if (currentLine.size() == 0)
         {
             ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (empty)!",linesRead);
             continue;
@@ -725,7 +721,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
         }
 
         //we split current line
-        QStringList parts = QString(currentLine).split(separator,QString::SkipEmptyParts);
+        QStringList parts = currentLine.split(separator,QString::SkipEmptyParts);
 
         int nParts = parts.size();
         if (nParts<=maxPartIndex)
@@ -833,6 +829,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 			result = CC_FERR_CANCELED_BY_USER;
 			break;
         }
+
+		//read next line
+		currentLine = stream.readLine();
     }
 
     file.close();

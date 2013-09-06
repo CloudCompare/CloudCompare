@@ -82,11 +82,6 @@ class qccApplication : public QApplication
 
 int main(int argc, char **argv)
 {
-	//we use the English locale by default, so as to have a consistent
-	//behavior when reading/writing floating numbers, as well as the
-	//nice 'thousands' separator!
-	QLocale::setDefault(QLocale::English);
-
 	//QT initialisation
     qccApplication app(argc, argv);
 

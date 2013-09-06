@@ -236,7 +236,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 			if (getCurrentDisplayedScalarField())
 			{
 				int sfIdx = result->getScalarFieldIndexByName(getCurrentDisplayedScalarField()->getName());
-				if (sfIdx)
+				if (sfIdx >= 0)
 					result->setCurrentDisplayedScalarField(sfIdx);
 				else
 					result->setCurrentDisplayedScalarField((int)copiedSFCount-1);

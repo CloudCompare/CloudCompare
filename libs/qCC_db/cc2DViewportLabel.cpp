@@ -151,7 +151,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	QString title(getName());
 	if (!title.isEmpty())
 	{
-		QFont titleFont(context._win->getTextDisplayFont());
+		QFont titleFont(context._win->getTextDisplayFont()); //takes rendering zoom into account!
 		titleFont.setBold(true);
 		QFontMetrics titleFontMetrics(titleFont);
 		int titleHeight = titleFontMetrics.height();

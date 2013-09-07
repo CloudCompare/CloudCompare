@@ -116,11 +116,11 @@ public:
     virtual void invalidateViewport();
     virtual unsigned getTexture(const QImage& image);
     virtual void releaseTexture(unsigned texID);
-	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor=0, const QFont& font=QFont());
+	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont());
 	virtual bool supportOpenGLVersion(unsigned openGLVersionFlag);
-    virtual void displayText(QString text, int x, int y, unsigned char align=ALIGN_DEFAULT, unsigned char bkgAlpha=0, const unsigned char* rgbColor=0, const QFont* font=0);
-	virtual const QFont& getTextDisplayFont() {return m_font;}
-	virtual const ccViewportParameters& getViewportParameters() const { return m_params; }
+    virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, unsigned char bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0);
+	virtual QFont getTextDisplayFont() const; //takes rendering zoom into account!
+	virtual const ccViewportParameters& getViewportParameters() const { return m_viewportParams; }
 
     //! Displays a status message in the bottom-left corner
     /** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -281,8 +281,6 @@ public:
 
 	//! Returns current font size
     virtual int getFontPointSize() const;
-	//! Sets current font size
-    virtual void setFontPointSize(int pixelSize);
 
 	//! Returns window own DB (2D objects only)
     virtual ccHObject* getOwnDB();
@@ -352,9 +350,9 @@ public:
 	CCVector3 getCurrentUpDir() const;
 
 	//! Returns current parameters for this display (const version)
-	/** Warning: maybe overriden parameters!
+	/** Warning: may return overriden parameters!
 	**/
-	inline const ccGui::ParamStruct& getDisplayParameters() const { return m_overridenDisplayParametersEnabled ? m_overridenDisplayParameters : ccGui::Parameters(); }
+	const ccGui::ParamStruct& getDisplayParameters() const;
 
 	//! Sets current parameters for this display
 	void setDisplayParameters(const ccGui::ParamStruct& params, bool thisWindowOnly = false)
@@ -473,6 +471,12 @@ signals:
 
 protected:
 
+	//! Sets current font size
+	/** Warning: only used internally.
+		Change 'defaultFontSize' with setDisplayParameters instead!
+	**/
+    void setFontPointSize(int pixelSize);
+
     //events handling
     void mousePressEvent(QMouseEvent *event);
     void mouseMoveEvent(QMouseEvent *event);
@@ -589,7 +593,7 @@ protected:
 	GLuint m_pivotGLList;
 
 	//! Viewport parameters (zoom, etc.)
-	ccViewportParameters m_params;
+	ccViewportParameters m_viewportParams;
 
     //! Last mouse position
     QPoint m_lastMousePos;

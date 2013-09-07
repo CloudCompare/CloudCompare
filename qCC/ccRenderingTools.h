@@ -21,14 +21,18 @@
 //qCC_db
 #include <ccDrawableObject.h>
 
-class ccGBLSensor;
 class QWidget;
+class ccGBLSensor;
+class ccScalarField;
+class ccGLWindow;
 
+//! Misc. tools for rendering of advanced structures
 class ccRenderingTools
 {
 public:
 
-	static void ShowDepthBuffer(ccGBLSensor* lidar, QWidget* parent=0);
+	//! Displays a depth buffer as an image
+	static void ShowDepthBuffer(ccGBLSensor* lidar, QWidget* parent = 0);
 
     //! Displays the colored scale corresponding to the currently activated context scalar field
 	/** Its appearance depends on the scalar fields min and max displayed
@@ -38,6 +42,8 @@ public:
     **/
 	static void DrawColorRamp(const CC_DRAW_CONTEXT& context);
 
+	//! See other version of DrawColorRamp
+	static void DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, int glW, int glH, float renderZoom = 1.0f);
 };
 
 #endif //CC_RENDERING_TOOLS_HEADER

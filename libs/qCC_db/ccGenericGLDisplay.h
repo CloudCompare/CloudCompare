@@ -123,7 +123,9 @@ public:
     virtual void releaseTexture(unsigned texID) = 0;
 
 	//! Returns font
-	virtual const QFont& getTextDisplayFont() = 0;
+	/** Warning: already takes rendering zoom into account!
+	**/
+	virtual QFont getTextDisplayFont() const = 0;
 
 	//! Text alignment
 	enum TextAlign { ALIGN_HLEFT	= 1,

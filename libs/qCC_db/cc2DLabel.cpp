@@ -496,7 +496,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 
 			if (m_dispIn3D && !pushName) //no need to display label in point picking mode
 			{
-				QFont font(context._win->getTextDisplayFont());
+				QFont font(context._win->getTextDisplayFont()); //takes rendering zoom into account!
 				//font.setPointSize(font.pointSize()+2);
 				font.setBold(true);
 
@@ -564,8 +564,8 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		gluProject(arrowDest.x,arrowDest.y,arrowDest.z,MM,MP,VP,&arrowDestX,&arrowDestY,&zp);
 
 		/*** label border ***/
-		bodyFont = context._win->getTextDisplayFont();
-		titleFont = QFont(context._win->getTextDisplayFont());
+		bodyFont = context._win->getTextDisplayFont(); //takes rendering zoom into account!
+		titleFont = QFont(context._win->getTextDisplayFont()); //takes rendering zoom into account!
 		titleFont.setBold(true);
 		QFontMetrics titleFontMetrics(titleFont);
 		QFontMetrics bodyFontMetrics(bodyFont);
@@ -593,7 +593,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		}
 		else
 		{
-			dy += c_margin;		// vertical margin (purely for aesthetics)
+			dy += c_margin;	// vertical margin (purely for aesthetics)
 		}
 		dy += c_margin;		// bottom vertical margin
 		dx += c_margin*2;	// horizontal margins
@@ -627,14 +627,14 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 	//default background color
 	colorType defaultBkgColor[4];
 	memcpy(defaultBkgColor,context.labelDefaultCol,sizeof(colorType)*3);
-	defaultBkgColor[3]=(colorType)((float)context.labelsTransparency*(float)MAX_COLOR_COMP/100.0f);
+	defaultBkgColor[3] = (colorType)((float)context.labelsTransparency*(float)MAX_COLOR_COMP/100.0f);
 	//default border color (mustn't be totally transparent!)
 	colorType defaultBorderColor[4];
 	if (highlighted)
 		memcpy(defaultBorderColor,ccColor::red,sizeof(colorType)*3);
 	else
 		memcpy(defaultBorderColor,context.labelDefaultCol,sizeof(colorType)*3);
-	defaultBorderColor[3]=(colorType)((float)(50+context.labelsTransparency/2)*(float)MAX_COLOR_COMP/100.0f);
+	defaultBorderColor[3] = (colorType)((float)(50+context.labelsTransparency/2)*(float)MAX_COLOR_COMP/100.0f);
 
 	glPushAttrib(GL_COLOR_BUFFER_BIT);
 	glEnable(GL_BLEND);

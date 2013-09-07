@@ -198,6 +198,7 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		int dPix = (int)ceil(params.zoom * m_radius/params.pixelSize);
 
 		int bkgBorder = QFontMetrics(context._win->getTextDisplayFont()).height()/4+4;
-		context._win->displayText(getName(),(int)xp+dPix+bkgBorder,(int)yp,ccGenericGLDisplay::ALIGN_HLEFT | ccGenericGLDisplay::ALIGN_VMIDDLE,75);
+		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
+		context._win->displayText(getName(),(int)xp+dPix+bkgBorder,(int)yp,ccGenericGLDisplay::ALIGN_HLEFT | ccGenericGLDisplay::ALIGN_VMIDDLE,75,0,&font);
 	}
 }

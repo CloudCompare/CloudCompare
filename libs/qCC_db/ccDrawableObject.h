@@ -43,42 +43,57 @@ struct glDrawParams
 //! Display context
 struct glDrawContext
 {
-    uint16_t flags;       //drawing options (see below)
-    int glW;                    //GL screen width
-    int glH;                    //GL screen height
-    ccGenericGLDisplay* _win;   //GL window ref.
+	//! Drawing options (see below)
+    uint16_t flags;
+	//! GL screen width
+    int glW;
+	//! GL screen height
+    int glH;
+	//! Corresponding GL window
+    ccGenericGLDisplay* _win;
+	//! Current zoom (screen to file rendering mode)
+	float renderZoom;
 
-	//default materials
-	ccMaterial defaultMat; //default material
+	//! Default material
+	ccMaterial defaultMat;
+	//! Default color for mesh (front side)
 	float defaultMeshFrontDiff[4];
+	//! Default color for mesh (back side)
 	float defaultMeshBackDiff[4];
+	//! Default point color
 	unsigned char pointsDefaultCol[3];
+	//! Default text color
 	unsigned char textDefaultCol[3];
+	//! Default label color
 	unsigned char labelDefaultCol[3];
+	//! Default bounding-box color
 	unsigned char bbDefaultCol[3];
 
-	//decimation options
+	//! Whether to decimate big clouds when rotating the camera
 	bool decimateCloudOnMove;
+	//! Whether to decimate big meshes when rotating the camera
 	bool decimateMeshOnMove;
 
-	//information on displayed color scale
+	//! Currently displayed color scale (the corresponding scalar field in fact)
 	ccScalarField* sfColorScaleToDisplay;
 	
-	//shader for fast dynamic color ramp lookup
+	//! Shader for fast dynamic color ramp lookup
 	ccColorRampShader* colorRampShader;
 
-	//picked points
+	//! Picked points radius
 	float pickedPointsRadius;
+	//! Picked points shift for label display
 	float pickedPointsTextShift;
 
-	//for displaying text
+	//! Numerical precision (for displaying text)
 	unsigned dispNumberPrecision;
 
-	//for displaying labels
+	//! Label background transparency
 	unsigned labelsTransparency;
 
-	//transparency
+	//! Blending strategy (source)
 	GLenum sourceBlend;
+	//! Blending strategy (destination)
 	GLenum destBlend;
 
     //Default constructor
@@ -87,6 +102,7 @@ struct glDrawContext
     , glW(0)
     , glH(0)
     , _win(0)
+	, renderZoom(1.0f)
     , decimateCloudOnMove(true)
     , decimateMeshOnMove(true)
     , sfColorScaleToDisplay(0)

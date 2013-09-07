@@ -194,14 +194,25 @@ ccHObject* ccHObject::find(int uniqueID)
 	return NULL;
 }
 
-unsigned ccHObject::filterChildren(Container& filteredChildren, bool recursive/*=false*/, CC_CLASS_ENUM filter /*= CC_OBJECT*/) const
+unsigned ccHObject::filterChildren(Container& filteredChildren, bool recursive/*=false*/, CC_CLASS_ENUM filter/*=CC_OBJECT*/) const
 {
-	for (Container::const_iterator it = m_children.begin(); it!=m_children.end(); ++it)
+	for (Container::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
 		if ((*it)->isKindOf(filter))
+		{
 			//warning: we have to handle unicity as a sibling may be in the same container as its parent!
 			if (std::find(filteredChildren.begin(),filteredChildren.end(),*it) == filteredChildren.end()) //not yet in output vector?
+			{
 				filteredChildren.push_back(*it);
+			}
+			else
+			{
+				//don't put it twice!
+				//FIXME (for tests only)
+				QString childName = (*it)->getName();
+				childName.toUpper();
+			}
+		}
 
 		if (recursive)
 			(*it)->filterChildren(filteredChildren, true, filter);
@@ -349,7 +360,8 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		CCVector3 C = bBox.getCenter();
 		gluProject(C.x,C.y,C.z,MM,MP,VP,&xp,&yp,&zp);
 
-		context._win->displayText(getName(),(int)xp,(int)yp,ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,75);
+		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
+		context._win->displayText(getName(),(int)xp,(int)yp,ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,75,0,&font);
 	}
 }
 

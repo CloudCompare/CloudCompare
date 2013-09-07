@@ -135,9 +135,6 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	//GL window own DB
 	m_winDBRoot = new ccHObject(QString("DB.3DView_%1").arg(m_uniqueID));
 
-	//default font size
-	setFontPointSize(10);
-
 	//lights
 	m_sunLightEnabled = true;
 	m_sunLightPos[0] = 0.0f;
@@ -152,7 +149,7 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	m_customLightPos[3] = 1.0f; //positional light
 
 	//matrices
-	m_params.viewMat.toIdentity();
+	m_viewportParams.viewMat.toIdentity();
 	memset(m_viewMatd, 0, sizeof(double)*OPENGL_MATRIX_SIZE);
 	memset(m_projMatd, 0, sizeof(double)*OPENGL_MATRIX_SIZE);
 
@@ -242,6 +239,11 @@ ccGLWindow::~ccGLWindow()
 		delete m_fbo;
 }
 
+const ccGui::ParamStruct& ccGLWindow::getDisplayParameters() const
+{
+	return m_overridenDisplayParametersEnabled ? m_overridenDisplayParameters : ccGui::Parameters();
+}
+
 void ccGLWindow::initializeGL()
 {
 	if (m_initialized)
@@ -250,11 +252,11 @@ void ccGLWindow::initializeGL()
 	//we init model view matrix with identity and store it into 'viewMat' and 'm_viewMatd'
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glGetFloatv(GL_MODELVIEW_MATRIX, m_params.viewMat.data());
+	glGetFloatv(GL_MODELVIEW_MATRIX, m_viewportParams.viewMat.data());
 	glGetDoublev(GL_MODELVIEW_MATRIX, m_viewMatd);
 
 	//we emit the 'baseViewMatChanged' signal
-	emit baseViewMatChanged(m_params.viewMat);
+	emit baseViewMatChanged(m_viewportParams.viewMat);
 
 	//we init projection matrix with identity and push it on the stack
 	glMatrixMode(GL_PROJECTION);
@@ -420,7 +422,7 @@ void ccGLWindow::testFrameRate()
 	s_frameRateTestInProgress = true;
 
 	//we save the current view matrix
-	s_frameRateBackupMat = m_params.viewMat;
+	s_frameRateBackupMat = m_viewportParams.viewMat;
 
 	connect(&s_frameRateTimer, SIGNAL(timeout()), this, SLOT(redraw()), Qt::QueuedConnection);
 
@@ -446,7 +448,7 @@ void ccGLWindow::stopFrameRateTest()
 	s_frameRateTestInProgress=false;
 
 	//we restore the original view mat
-	m_params.viewMat = s_frameRateBackupMat;
+	m_viewportParams.viewMat = s_frameRateBackupMat;
 	m_validModelviewMatrix = false;
 
 	displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE); //clear message in the upper center area
@@ -476,7 +478,7 @@ void ccGLWindow::paintGL()
 
 	if (doDraw3D)
 	{
-		bool doDrawCross = (!m_captureMode.enabled && !m_params.perspectiveView && !(m_fbo && m_activeGLFilter) && getDisplayParameters().displayCross);
+		bool doDrawCross = (!m_captureMode.enabled && !m_viewportParams.perspectiveView && !(m_fbo && m_activeGLFilter) && getDisplayParameters().displayCross);
 		draw3D(context,doDrawCross,m_fbo);
 		m_updateFBO = false;
 	}
@@ -499,7 +501,7 @@ void ccGLWindow::paintGL()
 			//we process GL filter
 			GLuint depthTex = m_fbo->getDepthTexture();
 			GLuint colorTex = m_fbo->getColorTexture(0);
-			m_activeGLFilter->shade(depthTex, colorTex, (m_params.perspectiveView ? computePerspectiveZoom() : m_params.zoom)); //DGM FIXME
+			m_activeGLFilter->shade(depthTex, colorTex, (m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //DGM FIXME
 
 			ccGLUtils::CatchGLError("ccGLWindow::paintGL/glFilter shade");
 
@@ -539,7 +541,7 @@ void ccGLWindow::paintGL()
 		if (!m_captureMode.enabled || m_captureMode.renderOverlayItems)
 		{
 			//scale (only in ortho mode)
-			if (!m_params.perspectiveView)
+			if (!m_viewportParams.perspectiveView)
 			{
 				//if fbo --> override color
 				drawScale(m_fbo && m_activeGLFilter ? ccColor::black : textCol);
@@ -607,7 +609,7 @@ void ccGLWindow::paintGL()
 						{
 						case LOWER_LEFT_MESSAGE:
 							{
-								renderText(10, ll_currentHeight, it->message,m_font);
+								renderText(10, ll_currentHeight, it->message, m_font);
 								int messageHeight = QFontMetrics(m_font).height();
 								ll_currentHeight -= (messageHeight*5)/4; //add a 25% margin
 							}
@@ -621,7 +623,7 @@ void ccGLWindow::paintGL()
 							break;
 						case SCREEN_CENTER_MESSAGE:
 							{
-								QFont newFont(m_font);
+								QFont newFont(m_font); //no need to take zoom into account!
 								newFont.setPointSize(12);
 								QRect rect = QFontMetrics(newFont).boundingRect(it->message);
 								//only one message supported in the screen center (for the moment ;)
@@ -644,15 +646,13 @@ void ccGLWindow::paintGL()
 				static const int c_psi_iconSize = 16;
 				static const unsigned char c_psi_alphaChannel = 200;
 
-				QFont newFont(m_font);
+				QFont newFont(m_font); //no need to take zoom into account!
 				newFont.setPointSize(12);
-				QFontMetrics newMetrics(newFont);
 
 				glPushAttrib(GL_COLOR_BUFFER_BIT);
 				glEnable(GL_BLEND);
 
 				//label
-				//QFontMetrics::width(c_psi_title);
 				QString label(c_psi_title);
 				QRect rect = QFontMetrics(newFont).boundingRect(label);
 				//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
@@ -711,9 +711,9 @@ void ccGLWindow::paintGL()
 			//rotate base view matrtix
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
-			glLoadMatrixf(m_params.viewMat.data());
+			glLoadMatrixf(m_viewportParams.viewMat.data());
 			glRotated(360.0/(double)FRAMERATE_TEST_MIN_FRAMES,0.0,1.0,0.0);
-			glGetFloatv(GL_MODELVIEW_MATRIX, m_params.viewMat.data());
+			glGetFloatv(GL_MODELVIEW_MATRIX, m_viewportParams.viewMat.data());
 			m_validModelviewMatrix = false;
 			glPopMatrix();
 		}
@@ -733,8 +733,8 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	setStandardOrthoCenter();
 	glDisable(GL_DEPTH_TEST);
 
-	glPointSize(m_params.defaultPointSize);
-	glLineWidth(m_params.defaultLineWidth);
+	glPointSize(m_viewportParams.defaultPointSize);
+	glLineWidth(m_viewportParams.defaultLineWidth);
 
 	//gradient color background
 	if (getDisplayParameters().drawBackgroundGradient)
@@ -805,7 +805,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	if (m_customLightEnabled)
 	{
 		glEnableCustomLight();
-		if (!m_captureMode.enabled/* && !m_params.perspectiveView*/)
+		if (!m_captureMode.enabled/* && !m_viewportParams.perspectiveView*/)
 			//we display it as a litle 3D star
 			drawCustomLight();
 	}
@@ -929,18 +929,18 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 
 bool ccGLWindow::objectPerspectiveEnabled() const
 {
-	return m_params.perspectiveView && m_params.objectCenteredView;
+	return m_viewportParams.perspectiveView && m_viewportParams.objectCenteredView;
 }
 
 bool ccGLWindow::viewerPerspectiveEnabled() const
 {
-	return m_params.perspectiveView && !m_params.objectCenteredView;
+	return m_viewportParams.perspectiveView && !m_viewportParams.objectCenteredView;
 }
 
 bool ccGLWindow::getPerspectiveState(bool& objectCentered) const
 {
-	objectCentered = m_params.objectCenteredView;
-	return m_params.perspectiveView;
+	objectCentered = m_viewportParams.objectCenteredView;
+	return m_viewportParams.perspectiveView;
 }
 
 void ccGLWindow::closeEvent(QCloseEvent *event)
@@ -1018,18 +1018,18 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	//we compute the pixel size (in world coordinates)
 	{
 		int minScreenSize = std::min(m_glWidth,m_glHeight);
-		m_params.pixelSize = (minScreenSize > 0 ? bbDiag / static_cast<float>(minScreenSize) : 1.0f);
+		m_viewportParams.pixelSize = (minScreenSize > 0 ? bbDiag / static_cast<float>(minScreenSize) : 1.0f);
 	}
 
 	//we set the pivot point on the box center
 	CCVector3 P = zoomedBox.getCenter();
 	setPivotPoint(P);
 	
-	if (m_params.perspectiveView)
+	if (m_viewportParams.perspectiveView)
 	{
 		//we must go backward so as to see the object!
-		assert(m_params.fov > ZERO_TOLERANCE);
-		float d = bbDiag / tan(m_params.fov*CC_DEG_TO_RAD);
+		assert(m_viewportParams.fov > ZERO_TOLERANCE);
+		float d = bbDiag / tan(m_viewportParams.fov*CC_DEG_TO_RAD);
 		setCameraPos(P - getCurrentViewDir() * d);
 	}
 	else
@@ -1106,9 +1106,9 @@ void ccGLWindow::setZoom(float value)
 	else if (value > CC_GL_MAX_ZOOM_RATIO)
 		value = CC_GL_MAX_ZOOM_RATIO;
 
-	if (m_params.zoom != value)
+	if (m_viewportParams.zoom != value)
 	{
-		m_params.zoom = value;
+		m_viewportParams.zoom = value;
 		invalidateViewport();
 		invalidateVisualization();
 	}
@@ -1116,8 +1116,8 @@ void ccGLWindow::setZoom(float value)
 
 void ccGLWindow::setCameraPos(const CCVector3& P)
 {
-	m_params.cameraCenter = P;
-	emit cameraPosChanged(m_params.cameraCenter);
+	m_viewportParams.cameraCenter = P;
+	emit cameraPosChanged(m_viewportParams.cameraCenter);
 
 	invalidateViewport();
 	invalidateVisualization();
@@ -1135,16 +1135,16 @@ void ccGLWindow::moveCamera(float dx, float dy, float dz)
 	//correspond to the 'model view' matrix
 	//lines.
 	CCVector3 V(dx,dy,dz);
-	if (!m_params.objectCenteredView)
-		m_params.viewMat.transposed().applyRotation(V);
+	if (!m_viewportParams.objectCenteredView)
+		m_viewportParams.viewMat.transposed().applyRotation(V);
 
-	setCameraPos(m_params.cameraCenter + V);
+	setCameraPos(m_viewportParams.cameraCenter + V);
 }
 
 void ccGLWindow::setPivotPoint(const CCVector3& P)
 {
-	m_params.pivotPoint = P;
-	emit pivotPointChanged(m_params.pivotPoint);
+	m_viewportParams.pivotPoint = P;
+	emit pivotPointChanged(m_viewportParams.pivotPoint);
 
 	invalidateViewport();
 	invalidateVisualization();
@@ -1194,12 +1194,22 @@ void ccGLWindow::drawCross()
 	glEnd();
 }
 
+QFont ccGLWindow::getTextDisplayFont() const
+{
+	if (!m_captureMode.enabled || m_captureMode.zoomFactor == 1.0f)
+		return m_font;
+
+	QFont font = m_font;
+	font.setPointSize(static_cast<int>(m_font.pointSize() * m_captureMode.zoomFactor));
+	return font;
+}
+
 void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 {
-	assert(!m_params.perspectiveView); //a scale is only valid in ortho. mode!
+	assert(!m_viewportParams.perspectiveView); //a scale is only valid in ortho. mode!
 
 	float scaleMaxW = float(m_glWidth)*0.25; //25% de l'ecran
-	if (m_params.zoom < CC_GL_MIN_ZOOM_RATIO)
+	if (m_viewportParams.zoom < CC_GL_MIN_ZOOM_RATIO)
 	{
 		assert(false);
 		return;
@@ -1207,7 +1217,7 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 
 	//we first compute the width equivalent to 25% of horizontal screen width
 	//(this is why it's only valid in orthographic mode !)
-	float equivalentWidth = scaleMaxW * m_params.pixelSize / m_params.zoom;
+	float equivalentWidth = scaleMaxW * m_viewportParams.pixelSize / m_viewportParams.zoom;
 
 	//we then compute the scale granularity (to avoid width values with a lot of decimals)
 	int k = int(floor(log((float)equivalentWidth)/log((float)10.0)));
@@ -1216,41 +1226,46 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 	//we choose the value closest to equivalentWidth with the right granularity
 	equivalentWidth = floor(std::max(equivalentWidth/granularity,1.0f))*granularity;
 
-	QFontMetrics fm(m_font);
+	QFont font = getTextDisplayFont(); //we take rendering zoom into account!
+	QFontMetrics fm(font);
 
 	//we deduce the scale drawing width
-	float scaleW_pix = equivalentWidth/m_params.pixelSize * m_params.zoom;
-	float dW = 2*CC_DISPLAYED_TRIHEDRON_AXES_LENGTH+20.0;
-	float dH = std::max<float>((float)fm.height()*1.25,CC_DISPLAYED_TRIHEDRON_AXES_LENGTH+5.0);
+	float scaleW_pix = equivalentWidth/m_viewportParams.pixelSize * m_viewportParams.zoom;
+	int trihedronLength = static_cast<int>(CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor);
+	float dW = 2*trihedronLength+20.0;
+	float dH = std::max<float>((float)fm.height()*1.25,trihedronLength+5.0);
 	float w = float(m_glWidth)*0.5-dW;
 	float h = float(m_glHeight)*0.5-dH;
+	float tick = static_cast<int>(3 * m_captureMode.zoomFactor);
 
 	//scale OpenGL drawing
 	glColor3ubv(color);
 	glBegin(GL_LINES);
 	glVertex3f(w-scaleW_pix,-h,0.0);
 	glVertex3f(w,-h,0.0);
-	glVertex3f(w-scaleW_pix,-h-3,0.0);
-	glVertex3f(w-scaleW_pix,-h+3,0.0);
-	glVertex3f(w,-h+3,0.0);
-	glVertex3f(w,-h-3,0.0);
+	glVertex3f(w-scaleW_pix,-h-tick,0.0);
+	glVertex3f(w-scaleW_pix,-h+tick,0.0);
+	glVertex3f(w,-h+tick,0.0);
+	glVertex3f(w,-h-tick,0.0);
 	glEnd();
 
-	QString text = QString::number(equivalentWidth);
+	QString text = QString::number(m_captureMode.enabled ? equivalentWidth/m_captureMode.zoomFactor : equivalentWidth);
 	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
 	glColor3f((float)color[0]/(float)MAX_COLOR_COMP,(float)color[1]/(float)MAX_COLOR_COMP,(float)color[2]/(float)MAX_COLOR_COMP);
-	renderText(m_glWidth-int(scaleW_pix*0.5+dW)-fm.width(text)/2, m_glHeight-dH/2+fm.height()/3, text, m_font);
+	renderText(m_glWidth-int(scaleW_pix*0.5+dW)-fm.width(text)/2, m_glHeight-dH/2+fm.height()/3, text, font);
 }
 
 void ccGLWindow::drawTrihedron()
 {
-	float w = static_cast<float>(m_glWidth)*0.5-CC_DISPLAYED_TRIHEDRON_AXES_LENGTH-10.0;
-	float h = static_cast<float>(m_glHeight)*0.5-CC_DISPLAYED_TRIHEDRON_AXES_LENGTH-5.0;
+	float trihedronLength = static_cast<float>(CC_DISPLAYED_TRIHEDRON_AXES_LENGTH) * m_captureMode.zoomFactor;
+
+	float w = static_cast<float>(m_glWidth)*0.5f-trihedronLength-10.0f;
+	float h = static_cast<float>(m_glHeight)*0.5f-trihedronLength-5.0f;
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glTranslatef(w, -h, 0.0);
-	glMultMatrixf(m_params.viewMat.data());
+	glTranslatef(w, -h, 0.0f);
+	glMultMatrixf(m_viewportParams.viewMat.data());
 
 	if (m_trihedronGLList == GL_INVALID_LIST_ID)
 	{
@@ -1278,6 +1293,11 @@ void ccGLWindow::drawTrihedron()
 
 		glEndList();
 	}
+	else if (m_captureMode.enabled)
+	{
+		glScalef(m_captureMode.zoomFactor,m_captureMode.zoomFactor,m_captureMode.zoomFactor);
+	}
+
 	glCallList(m_trihedronGLList);
 
 	glPopMatrix();
@@ -1324,16 +1344,16 @@ void ccGLWindow::recalcProjectionMatrix()
 	}
 
 	//virtual pivot point (i.e. to handle viewer-based mode smoothly)
-	CCVector3 pivotPoint = (m_params.objectCenteredView ? m_params.pivotPoint : bbCenter);
+	CCVector3 pivotPoint = (m_viewportParams.objectCenteredView ? m_viewportParams.pivotPoint : bbCenter);
 
 	//distance between camera and pivot point
-	float CP = (m_params.cameraCenter-pivotPoint).norm();
+	float CP = (m_viewportParams.cameraCenter-pivotPoint).norm();
 	//distance between pivot point and DB farthest point
 	float MP = (bbCenter-pivotPoint).norm() + bbHalfDiag;
 
 	//pivot symbol shoud always be (potentially) visible in object-based mode
-	if (m_pivotSymbolShown && m_params.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
-	//if (m_params.objectCenteredView)
+	if (m_pivotSymbolShown && m_viewportParams.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
+	//if (m_viewportParams.objectCenteredView)
 	{
 		float pivotActualRadius = (CC_DISPLAYED_PIVOT_RADIUS_PERCENT) * (float)std::min(m_glWidth,m_glHeight) * 0.5f;
 		float pivotSymbolScale = pivotActualRadius * computeActualPixelSize();
@@ -1348,14 +1368,14 @@ void ccGLWindow::recalcProjectionMatrix()
 		MP = std::max<float>(MP,d);
 	}
 
-	if (m_params.perspectiveView)
+	if (m_viewportParams.perspectiveView)
 	{
 		//we deduce zNear et zFar
 		//DGM: by default we clip zNear just after 0 (not too close,
 		//otherwise it can cause a very strange behavior when looking
 		//at objects with large coordinates)
 		double zNear = static_cast<double>(MP)*1e-3;
-		if (m_params.objectCenteredView)
+		if (m_viewportParams.objectCenteredView)
 			zNear = std::max<double>(CP-MP,zNear);
 
 		double zFar = std::max<double>(CP+MP,1.0);
@@ -1363,18 +1383,18 @@ void ccGLWindow::recalcProjectionMatrix()
 		//and aspect ratio
 		double ar = static_cast<double>(m_glWidth)/static_cast<double>(m_glHeight);
 
-		gluPerspective(m_params.fov,ar,zNear,zFar);
+		gluPerspective(m_viewportParams.fov,ar,zNear,zFar);
 	}
 	else
 	{
 		//max distance (camera to 'farthest' point)
 		float maxDist = CP + MP;
 
-		float maxDist_pix = maxDist / m_params.pixelSize * m_params.zoom;
+		float maxDist_pix = maxDist / m_viewportParams.pixelSize * m_viewportParams.zoom;
 		maxDist_pix = std::max<float>(maxDist_pix,1.0f);
 
 		float halfW = static_cast<float>(m_glWidth)*0.5f;
-		float halfH = static_cast<float>(m_glHeight)*0.5f * m_params.orthoAspectRatio;
+		float halfH = static_cast<float>(m_glHeight)*0.5f * m_viewportParams.orthoAspectRatio;
 
 		glOrtho(-halfW,halfW,-halfH,halfH,-maxDist_pix,maxDist_pix);
 	}
@@ -1399,42 +1419,42 @@ void ccGLWindow::recalcModelViewMatrix()
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 
-	if (m_params.perspectiveView) //perspective mode
+	if (m_viewportParams.perspectiveView) //perspective mode
 	{
 		//for proper aspect ratio handling
-		float ar = (m_glHeight != 0 ? float(m_glWidth)/(float(m_glHeight)*m_params.perspectiveAspectRatio) : 0.0f);
+		float ar = (m_glHeight != 0 ? float(m_glWidth)/(float(m_glHeight)*m_viewportParams.perspectiveAspectRatio) : 0.0f);
 		if (ar<1.0)
 			glScalef(ar,ar,1.0);
 	}
 	else //ortho. mode
 	{
 		//apply zoom
-		float totalZoom = m_params.zoom / m_params.pixelSize;
+		float totalZoom = m_viewportParams.zoom / m_viewportParams.pixelSize;
 		glScalef(totalZoom,totalZoom,totalZoom);
 	}
 
 	//apply current camera parameters (see trunk/doc/rendering_pipeline.doc)
-	if (m_params.objectCenteredView)
+	if (m_viewportParams.objectCenteredView)
 	{
 		//place origin on camera center
-		glTranslatef(-m_params.cameraCenter.x, -m_params.cameraCenter.y, -m_params.cameraCenter.z);
+		glTranslatef(-m_viewportParams.cameraCenter.x, -m_viewportParams.cameraCenter.y, -m_viewportParams.cameraCenter.z);
 
 		//go back to initial origin
-		glTranslatef(m_params.pivotPoint.x, m_params.pivotPoint.y, m_params.pivotPoint.z);
+		glTranslatef(m_viewportParams.pivotPoint.x, m_viewportParams.pivotPoint.y, m_viewportParams.pivotPoint.z);
 
 		//rotation (viewMat is simply a rotation matrix around the pivot here!)
-		glMultMatrixf(m_params.viewMat.data());
+		glMultMatrixf(m_viewportParams.viewMat.data());
 
 		//place origin on pivot point
-		glTranslatef(-m_params.pivotPoint.x, -m_params.pivotPoint.y, -m_params.pivotPoint.z);
+		glTranslatef(-m_viewportParams.pivotPoint.x, -m_viewportParams.pivotPoint.y, -m_viewportParams.pivotPoint.z);
 	}
 	else
 	{
 		//rotation (viewMat is the rotation around the camera center here - no pivot)
-		glMultMatrixf(m_params.viewMat.data());
+		glMultMatrixf(m_viewportParams.viewMat.data());
 
 		//place origin on camera center
-		glTranslatef(-m_params.cameraCenter.x, -m_params.cameraCenter.y, -m_params.cameraCenter.z);
+		glTranslatef(-m_viewportParams.cameraCenter.x, -m_viewportParams.cameraCenter.y, -m_viewportParams.cameraCenter.z);
 	}		
 
 	//we save visualization matrix
@@ -1446,17 +1466,17 @@ void ccGLWindow::recalcModelViewMatrix()
 
 const ccGLMatrix& ccGLWindow::getBaseViewMat()
 {
-	return m_params.viewMat;
+	return m_viewportParams.viewMat;
 }
 
 const void ccGLWindow::setBaseViewMat(ccGLMatrix& mat)
 {
-	m_params.viewMat = mat;
+	m_viewportParams.viewMat = mat;
 
 	invalidateVisualization();
 
 	//we emit the 'baseViewMatChanged' signal
-	emit baseViewMatChanged(m_params.viewMat);
+	emit baseViewMatChanged(m_viewportParams.viewMat);
 }
 
 const double* ccGLWindow::getModelViewMatd()
@@ -1479,8 +1499,8 @@ void ccGLWindow::setStandardOrthoCenter()
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	float halfW = float(m_glWidth)*0.5;
-	float halfH = float(m_glHeight)*0.5;
+	float halfW = float(m_glWidth)*0.5f;
+	float halfH = float(m_glHeight)*0.5f;
 	float maxS = std::max(halfW,halfH);
 	glOrtho(-halfW,halfW,-halfH,halfH,-maxS,maxS);
 	glMatrixMode(GL_MODELVIEW);
@@ -1491,7 +1511,7 @@ void ccGLWindow::setStandardOrthoCorner()
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(0,0,float(m_glWidth),float(m_glHeight),0,1);
+	glOrtho(0,0,static_cast<double>(m_glWidth),static_cast<double>(m_glHeight),0,1);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 }
@@ -1615,11 +1635,11 @@ void ccGLWindow::releaseTexture(unsigned texID)
 
 CCVector3 ccGLWindow::getCurrentViewDir() const
 {
-	if (m_params.objectCenteredView)
+	if (m_viewportParams.objectCenteredView)
 		return CCVector3(0.0f,0.0f,-1.0f);
 
 	//otherwise view direction is (the opposite of) the 3rd line of the current view matrix
-	const float* M = m_params.viewMat.data();
+	const float* M = m_viewportParams.viewMat.data();
 	CCVector3 axis(-M[2],-M[6],-M[10]);
 	axis.normalize();
 
@@ -1628,11 +1648,11 @@ CCVector3 ccGLWindow::getCurrentViewDir() const
 
 CCVector3 ccGLWindow::getCurrentUpDir() const
 {
-	//if (m_params.objectCenteredView)
+	//if (m_viewportParams.objectCenteredView)
 	//	return CCVector3(0.0f,1.0f,0.0f);
 
 	//otherwise up direction is the 2nd line of the current view matrix
-	const float* M = m_params.viewMat.data();
+	const float* M = m_viewportParams.viewMat.data();
 	CCVector3 axis(M[1],M[5],M[9]);
 	axis.normalize();
 
@@ -1678,14 +1698,14 @@ CCVector3 ccGLWindow::convertMousePositionToOrientation(int x, int y)
 	PointCoordinateType yc = static_cast<PointCoordinateType>(height()/2);
 
 	GLdouble xp,yp;
-	if (m_params.objectCenteredView)
+	if (m_viewportParams.objectCenteredView)
 	{
 		GLdouble zp;
 		
 		//project the current pivot point on screen
 		int VP[4];
 		getViewportArray(VP);
-		gluProject(m_params.pivotPoint.x,m_params.pivotPoint.y,m_params.pivotPoint.z,getModelViewMatd(),getProjectionMatd(),VP,&xp,&yp,&zp);
+		gluProject(m_viewportParams.pivotPoint.x,m_viewportParams.pivotPoint.y,m_viewportParams.pivotPoint.z,getModelViewMatd(),getProjectionMatd(),VP,&xp,&yp,&zp);
 
 		//we set the virtual rotation pivot closer to the actual one (but we always stay in the central part of the screen!)
 		xp = std::min<GLdouble>(xp,3*width()/4);
@@ -1787,7 +1807,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 		{
 			ccClipBox* cbox = static_cast<ccClipBox*>(pickedObj);
 			cbox->setActiveComponent(subID);
-			cbox->setClickedPoint(x,y,width(),height(),m_params.viewMat);
+			cbox->setClickedPoint(x,y,width(),height(),m_viewportParams.viewMat);
 
 			m_activeItems.push_back(cbox);
 		}
@@ -1896,14 +1916,14 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		//displacement vector (in "3D")
 		float pixSize = computeActualPixelSize();
 		CCVector3 u(static_cast<float>(dx)*pixSize, -static_cast<float>(dy)*pixSize, 0);
-		if (!m_params.perspectiveView)
-			u.y *= m_params.orthoAspectRatio;
+		if (!m_viewportParams.perspectiveView)
+			u.y *= m_viewportParams.orthoAspectRatio;
 
 		bool entityMovingMode = (m_interactionMode == TRANSFORM_ENTITY) || ((QApplication::keyboardModifiers () & Qt::ControlModifier) && m_customLightEnabled);
 		if (entityMovingMode)
 		{
 			//apply inverse view matrix
-			m_params.viewMat.transposed().applyRotation(u);
+			m_viewportParams.viewMat.transposed().applyRotation(u);
 
 			if (m_interactionMode == TRANSFORM_ENTITY)
 			{
@@ -1920,7 +1940,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		}
 		else //camera moving mode
 		{
-			if (m_params.objectCenteredView)
+			if (m_viewportParams.objectCenteredView)
 			{
 				//inverse displacement in object-based mode
 				u *= -1.0;
@@ -1936,7 +1956,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			//displacement vector (in "3D")
 			float pixSize = computeActualPixelSize();
 			CCVector3 u(static_cast<float>(dx)*pixSize, -static_cast<float>(dy)*pixSize, 0);
-			m_params.viewMat.transposed().applyRotation(u);
+			m_viewportParams.viewMat.transposed().applyRotation(u);
 
 			for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
 			{
@@ -2008,7 +2028,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 				if (m_interactionMode == TRANSFORM_ENTITY)
 				{
-					rotMat = m_params.viewMat.transposed() * rotMat * m_params.viewMat;
+					rotMat = m_viewportParams.viewMat.transposed() * rotMat * m_viewportParams.viewMat;
 
 					//feedback for 'interactive transformation' mode
 					emit rotation(rotMat);
@@ -2144,18 +2164,18 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 					{
 						if (x >= m_hotZoneMinusIconROI[0] && x <= m_hotZoneMinusIconROI[2])
 						{
-							if (m_params.defaultPointSize>1)
+							if (m_viewportParams.defaultPointSize>1)
 							{
-								setPointSize(m_params.defaultPointSize-1);
+								setPointSize(m_viewportParams.defaultPointSize-1);
 								updateGL();
 							}
 							hotZoneClick=true;
 						}
 						else if (x >= m_hotZonePlusIconROI[0] && x <= m_hotZonePlusIconROI[2])
 						{
-							if (m_params.defaultPointSize<10)
+							if (m_viewportParams.defaultPointSize<10)
 							{
-								setPointSize(m_params.defaultPointSize+1);
+								setPointSize(m_viewportParams.defaultPointSize+1);
 								updateGL();
 							}
 							hotZoneClick=true;
@@ -2210,11 +2230,11 @@ void ccGLWindow::wheelEvent(QWheelEvent* event)
 void ccGLWindow::onWheelEvent(float wheelDelta_deg)
 {
 	//in perspective mode, wheel event corresponds to 'walking'
-	if (m_params.perspectiveView)
+	if (m_viewportParams.perspectiveView)
 	{
 		//convert degrees in 'constant' walking speed in ... pixels ;)
 		static const float c_deg2PixConversion = 1.0f;
-		moveCamera(0.0f,0.0f,-(c_deg2PixConversion * wheelDelta_deg) * m_params.pixelSize);
+		moveCamera(0.0f,0.0f,-(c_deg2PixConversion * wheelDelta_deg) * m_viewportParams.pixelSize);
 	}
 	else //ortho. mode
 	{
@@ -2524,13 +2544,13 @@ void ccGLWindow::displayNewMessage(const QString& message,
 
 void ccGLWindow::setPointSize(float size)
 {
-	m_params.defaultPointSize = size;
+	m_viewportParams.defaultPointSize = size;
 	m_updateFBO = true;
 }
 
 void ccGLWindow::setLineWidth(float width)
 {
-	m_params.defaultLineWidth = width;
+	m_viewportParams.defaultLineWidth = width;
 	m_updateFBO = true;
 }
 
@@ -2541,7 +2561,7 @@ void ccGLWindow::setFontPointSize(int pixelSize)
 
 int ccGLWindow::getFontPointSize() const
 {
-	return m_font.pointSize();
+	return m_captureMode.enabled ? m_font.pointSize() * m_captureMode.zoomFactor : m_font.pointSize();
 }
 
 void ccGLWindow::glEnableSunLight()
@@ -2680,7 +2700,7 @@ ccGLWindow::PivotVisibility ccGLWindow::getPivotVisibility() const
 void ccGLWindow::showPivotSymbol(bool state)
 {
 	//is the pivot really going to be drawn?
-	if (state && !m_pivotSymbolShown && m_params.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
+	if (state && !m_pivotSymbolShown && m_viewportParams.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
 	{
 		invalidateViewport();
 	}
@@ -2690,7 +2710,7 @@ void ccGLWindow::showPivotSymbol(bool state)
 
 void ccGLWindow::drawPivot()
 {
-	if (!m_params.objectCenteredView)
+	if (!m_viewportParams.objectCenteredView)
 		return;
 
 	if (m_pivotVisibility == PIVOT_HIDE ||
@@ -2701,7 +2721,7 @@ void ccGLWindow::drawPivot()
 	glPushMatrix();
 
 	//place origin on pivot point
-	glTranslatef(m_params.pivotPoint.x, m_params.pivotPoint.y, m_params.pivotPoint.z);
+	glTranslatef(m_viewportParams.pivotPoint.x, m_viewportParams.pivotPoint.y, m_viewportParams.pivotPoint.z);
 
 	//compute actual symbol radius
 	float symbolRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * (float)std::min(m_glWidth,m_glHeight) * 0.5f;
@@ -2776,17 +2796,17 @@ void ccGLWindow::drawPivot()
 
 void ccGLWindow::togglePerspective(bool objectCentered)
 {
-	if (m_params.objectCenteredView != objectCentered)
+	if (m_viewportParams.objectCenteredView != objectCentered)
 		setPerspectiveState(true,objectCentered);
 	else
-		setPerspectiveState(!m_params.perspectiveView,objectCentered);
+		setPerspectiveState(!m_viewportParams.perspectiveView,objectCentered);
 }
 
 float ccGLWindow::computeActualPixelSize() const
 {
-	if (!m_params.perspectiveView)
+	if (!m_viewportParams.perspectiveView)
 	{
-		return m_params.pixelSize / m_params.zoom;
+		return m_viewportParams.pixelSize / m_viewportParams.zoom;
 	}
 
 	int minScreenDim = std::min(m_glWidth,m_glHeight);
@@ -2794,51 +2814,51 @@ float ccGLWindow::computeActualPixelSize() const
 		return 1.0f;
 
 	//Camera center to pivot vector
-	float zoomEquivalentDist = (m_params.cameraCenter - m_params.pivotPoint).norm();
+	float zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 
-	return (zoomEquivalentDist * tan(m_params.fov*CC_DEG_TO_RAD) / minScreenDim);
+	return (zoomEquivalentDist * tan(m_viewportParams.fov*CC_DEG_TO_RAD) / minScreenDim);
 }
 
 float ccGLWindow::computePerspectiveZoom() const
 {
-	if (!m_params.perspectiveView)
-		return m_params.zoom;
+	if (!m_viewportParams.perspectiveView)
+		return m_viewportParams.zoom;
 	//we compute the zoom equivalent to the corresponding camera position (inverse of above calculus)
-	if (m_params.fov < ZERO_TOLERANCE)
+	if (m_viewportParams.fov < ZERO_TOLERANCE)
 		return 1.0;
 
 	//Camera center to pivot vector
-	float zoomEquivalentDist = (m_params.cameraCenter - m_params.pivotPoint).norm();
+	float zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 	if (zoomEquivalentDist < ZERO_TOLERANCE)
 		return 1.0f;
 	
-	float screenSize = static_cast<float>(std::min(m_glWidth,m_glHeight))*m_params.pixelSize; //see how pixelSize is computed!
-	return screenSize / (zoomEquivalentDist * tan(m_params.fov*CC_DEG_TO_RAD));
+	float screenSize = static_cast<float>(std::min(m_glWidth,m_glHeight))*m_viewportParams.pixelSize; //see how pixelSize is computed!
+	return screenSize / (zoomEquivalentDist * tan(m_viewportParams.fov*CC_DEG_TO_RAD));
 }
 
 void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 {
 	//precedent state
-	bool perspectiveWasEnabled = m_params.perspectiveView;
-	bool viewWasObjectCentered = m_params.objectCenteredView;
+	bool perspectiveWasEnabled = m_viewportParams.perspectiveView;
+	bool viewWasObjectCentered = m_viewportParams.objectCenteredView;
 
 	//new state
-	m_params.perspectiveView = state;
-	m_params.objectCenteredView = objectCenteredView;
+	m_viewportParams.perspectiveView = state;
+	m_viewportParams.objectCenteredView = objectCenteredView;
 
 	//Camera center to pivot vector
-	CCVector3 PC = m_params.cameraCenter - m_params.pivotPoint;
+	CCVector3 PC = m_viewportParams.cameraCenter - m_viewportParams.pivotPoint;
 
-	if (m_params.perspectiveView)
+	if (m_viewportParams.perspectiveView)
 	{
 		if (!perspectiveWasEnabled) //from ortho. mode to perspective view
 		{
 			//we compute the camera position that gives 'quite' the same view as the ortho one
 			//(i.e. we replace the zoom by setting the camera at the right distance from
 			//the pivot point)
-			assert(m_params.fov > ZERO_TOLERANCE);
-			float screenSize = static_cast<float>(std::min(m_glWidth,m_glHeight))*m_params.pixelSize; //see how pixelSize is computed!
-			PC.z = screenSize/(m_params.zoom*tan(m_params.fov*CC_DEG_TO_RAD));
+			assert(m_viewportParams.fov > ZERO_TOLERANCE);
+			float screenSize = static_cast<float>(std::min(m_glWidth,m_glHeight))*m_viewportParams.pixelSize; //see how pixelSize is computed!
+			PC.z = screenSize/(m_viewportParams.zoom*tan(m_viewportParams.fov*CC_DEG_TO_RAD));
 		}
 
 		//display message
@@ -2850,7 +2870,7 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 	}
 	else
 	{
-		m_params.objectCenteredView = true; //object-centered mode is forced for otho. view
+		m_viewportParams.objectCenteredView = true; //object-centered mode is forced for otho. view
 
 		if (perspectiveWasEnabled) //from perspective view to ortho. view
 		{
@@ -2868,12 +2888,12 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 
 	//if we change form object-based to viewer-based visualization, we must
 	//'rotate' around the object (or the opposite ;)
-	if (viewWasObjectCentered && !m_params.objectCenteredView)
-		m_params.viewMat.transposed().apply(PC); //inverse rotation
-	else if (!viewWasObjectCentered && m_params.objectCenteredView)
-		m_params.viewMat.apply(PC);
+	if (viewWasObjectCentered && !m_viewportParams.objectCenteredView)
+		m_viewportParams.viewMat.transposed().apply(PC); //inverse rotation
+	else if (!viewWasObjectCentered && m_viewportParams.objectCenteredView)
+		m_viewportParams.viewMat.apply(PC);
 
-	setCameraPos(m_params.pivotPoint + PC);
+	setCameraPos(m_viewportParams.pivotPoint + PC);
 
 	emit perspectiveStateChanged();
 
@@ -2882,8 +2902,8 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 		QSettings settings;
 		settings.beginGroup(c_ps_groupName);
 		//write parameters
-		settings.setValue(c_ps_perspectiveView, m_params.perspectiveView);
-		settings.setValue(c_ps_objectMode, m_params.objectCenteredView);
+		settings.setValue(c_ps_perspectiveView, m_viewportParams.perspectiveView);
+		settings.setValue(c_ps_objectMode, m_viewportParams.objectCenteredView);
 		settings.endGroup();
 	}
 
@@ -2899,12 +2919,12 @@ void ccGLWindow::setFov(float fov)
 		return;
 	}
 
-	if (m_params.fov != fov)
+	if (m_viewportParams.fov != fov)
 	{
 		//update param
-		m_params.fov = fov;
+		m_viewportParams.fov = fov;
 		//and camera state (if perspective view is 'on')
-		if (m_params.perspectiveView)
+		if (m_viewportParams.perspectiveView)
 		{
 			invalidateViewport();
 			invalidateVisualization();
@@ -2914,15 +2934,15 @@ void ccGLWindow::setFov(float fov)
 
 void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 {
-	ccViewportParameters oldParams = m_params;
-	m_params = params;
+	ccViewportParameters oldParams = m_viewportParams;
+	m_viewportParams = params;
 
 	invalidateViewport();
 	invalidateVisualization();
 
-	emit baseViewMatChanged(m_params.viewMat);
-	emit pivotPointChanged(m_params.pivotPoint);
-	emit cameraPosChanged(m_params.cameraCenter);
+	emit baseViewMatChanged(m_viewportParams.viewMat);
+	emit pivotPointChanged(m_viewportParams.pivotPoint);
+	emit cameraPosChanged(m_viewportParams.cameraCenter);
 }
 
 void ccGLWindow::applyImageViewport(ccCalibratedImage* theImage)
@@ -2942,7 +2962,7 @@ void ccGLWindow::applyImageViewport(ccCalibratedImage* theImage)
 	setCameraPos(C);
 
 	//aspect ratio
-	m_params.perspectiveAspectRatio = float(theImage->getW())/float(theImage->getH());
+	m_viewportParams.perspectiveAspectRatio = float(theImage->getW())/float(theImage->getH());
 
 	//apply orientation matrix
 	memset(trans.getTranslation(),0,sizeof(float)*3);
@@ -2961,10 +2981,10 @@ void ccGLWindow::getViewportArray(int vpArray[])
 
 void ccGLWindow::rotateBaseViewMat(const ccGLMatrix& rotMat)
 {
-	m_params.viewMat = rotMat * m_params.viewMat;
+	m_viewportParams.viewMat = rotMat * m_viewportParams.viewMat;
 
 	//we emit the 'baseViewMatChanged' signal
-	emit baseViewMatChanged(m_params.viewMat);
+	emit baseViewMatChanged(m_viewportParams.viewMat);
 
 	invalidateVisualization();
 }
@@ -2972,19 +2992,19 @@ void ccGLWindow::rotateBaseViewMat(const ccGLMatrix& rotMat)
 void ccGLWindow::updateZoom(float zoomFactor)
 {
 	//no 'zoom' in viewer based perspective
-	assert(!m_params.perspectiveView);
+	assert(!m_viewportParams.perspectiveView);
 
 	if (zoomFactor>0.0 && zoomFactor!=1.0)
-		setZoom(m_params.zoom*zoomFactor);
+		setZoom(m_viewportParams.zoom*zoomFactor);
 }
 
 void ccGLWindow::setCustomView(const CCVector3& forward, const CCVector3& up, bool forceRedraw/*=true*/)
 {
 	makeCurrent();
 
-	bool wasViewerBased = !m_params.objectCenteredView;
+	bool wasViewerBased = !m_viewportParams.objectCenteredView;
 	if (wasViewerBased)
-		setPerspectiveState(m_params.perspectiveView,true);
+		setPerspectiveState(m_viewportParams.perspectiveView,true);
 
 	CCVector3 uForward = forward; uForward.normalize();
 
@@ -2994,18 +3014,18 @@ void ccGLWindow::setCustomView(const CCVector3& forward, const CCVector3& up, bo
 	uUp.normalize();
 
 
-	float* mat = m_params.viewMat.data();
+	float* mat = m_viewportParams.viewMat.data();
 	mat[0] = uSide.x; mat[4] = uSide.y; mat[8] = uSide.z;
 	mat[1] = uUp.x; mat[5] = uUp.y; mat[9] = uUp.z;
 	mat[2] = -uForward.x; mat[6] = -uForward.y; mat[10] = -uForward.z;
 
 	if (wasViewerBased)
-		setPerspectiveState(m_params.perspectiveView,false);
+		setPerspectiveState(m_viewportParams.perspectiveView,false);
 
 	invalidateVisualization();
 
 	//we emit the 'baseViewMatChanged' signal
-	emit baseViewMatChanged(m_params.viewMat);
+	emit baseViewMatChanged(m_viewportParams.viewMat);
 
 	if (forceRedraw)
 		redraw();
@@ -3015,19 +3035,19 @@ void ccGLWindow::setView(CC_VIEW_ORIENTATION orientation, bool forceRedraw/*=tru
 {
 	makeCurrent();
 
-	bool wasViewerBased = !m_params.objectCenteredView;
+	bool wasViewerBased = !m_viewportParams.objectCenteredView;
 	if (wasViewerBased)
-		setPerspectiveState(m_params.perspectiveView,true);
+		setPerspectiveState(m_viewportParams.perspectiveView,true);
 
-	m_params.viewMat = ccGLUtils::GenerateViewMat(orientation);
+	m_viewportParams.viewMat = ccGLUtils::GenerateViewMat(orientation);
 
 	if (wasViewerBased)
-		setPerspectiveState(m_params.perspectiveView,false);
+		setPerspectiveState(m_viewportParams.perspectiveView,false);
 
 	invalidateVisualization();
 
 	//we emit the 'baseViewMatChanged' signal
-	emit baseViewMatChanged(m_params.viewMat);
+	emit baseViewMatChanged(m_viewportParams.viewMat);
 
 	if (forceRedraw)
 		redraw();
@@ -3042,8 +3062,8 @@ bool ccGLWindow::renderToFile(	const char* filename,
 		return false;
 
 	//taille de la fenêtre courante en pixels
-	int Wp = (int) ((float)width() * zoomFactor);
-	int Hp = (int) ((float)height() * zoomFactor);
+	int Wp = static_cast<int>(width() * zoomFactor);
+	int Hp = static_cast<int>(height() * zoomFactor);
 
 	QImage output(Wp,Hp,QImage::Format_ARGB32);
 	GLubyte* data = output.bits();
@@ -3053,15 +3073,21 @@ bool ccGLWindow::renderToFile(	const char* filename,
 		return false;
 	}
 
+	m_glWidth = Wp;
+	m_glHeight = Hp;
+
 	//we activate 'capture' mode
 	m_captureMode.enabled = true;
 	m_captureMode.zoomFactor = zoomFactor;
 	m_captureMode.renderOverlayItems = renderOverlayItems;
 
+	//current viewport parameters backup
+	float _defaultPointSize = m_viewportParams.defaultPointSize;
+	float _defaultLineWidth = m_viewportParams.defaultLineWidth;
 	//current display parameters backup
-	float _defaultPointSize = m_params.defaultPointSize;
-	float _defaultLineWidth = m_params.defaultLineWidth;
-	int _fontSize = getFontPointSize();
+	//bool displayParametersWereOverriden = m_overridenDisplayParametersEnabled;
+	//ccGui::ParamStruct displayParams = getDisplayParameters();
+	//int _fontSize = displayParams.defaultFontSize;
 
 	if (!dontScaleFeatures)
 	{
@@ -3070,14 +3096,15 @@ bool ccGLWindow::renderToFile(	const char* filename,
 		//we update line width (for bounding-boxes, etc.)
 		setLineWidth(_defaultLineWidth*zoomFactor);
 		//we update font size (for text display)
-		setFontPointSize((int)((float)_fontSize * zoomFactor));
+		//displayParams.defaultFontSize = static_cast<int>(static_cast<float>(_fontSize) * zoomFactor);
 	}
+
+	//setDisplayParameters(displayParams,true);
 
 	bool result = false;
 	if (m_fbo)
 	{
 		ccLog::Print("[Render screen via FBO]");
-		m_captureMode.zoomFactor = 1.0f;
 
 		ccFrameBufferObject* fbo = 0;
 		ccGlFilter* filter = 0;
@@ -3089,7 +3116,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 		else
 		{
 			fbo = new ccFrameBufferObject();
-			bool success=false;
+			bool success = false;
 			if (fbo->init(Wp,Hp))
 				if (fbo->initTexture(0,GL_RGBA,GL_RGBA,GL_UNSIGNED_BYTE))
 					success = fbo->initDepth(GL_CLAMP_TO_BORDER,GL_DEPTH_COMPONENT32,GL_NEAREST,GL_TEXTURE_2D);
@@ -3105,7 +3132,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 		{
 			makeCurrent();
 
-			//on redefinit le viewport
+			//update viewport
 			glViewport(0,0,Wp,Hp);
 
 			if (m_activeGLFilter && !filter)
@@ -3126,8 +3153,9 @@ bool ccGLWindow::renderToFile(	const char* filename,
 
 			CC_DRAW_CONTEXT context;
 			getContext(context);
-			//context.glW = Wp;
-			//context.glH = Hp;
+			context.glW = Wp;
+			context.glH = Hp;
+			context.renderZoom = zoomFactor;
 
 			draw3D(context,false,fbo);
 
@@ -3135,7 +3163,18 @@ bool ccGLWindow::renderToFile(	const char* filename,
 			if (m_interactionMode == TRANSFORM_ENTITY)		
 				context.flags |= CC_VIRTUAL_TRANS_ENABLED;
 
-			setStandardOrthoCenter();
+			//setStandardOrthoCenter();
+			{
+				glMatrixMode(GL_PROJECTION);
+				glLoadIdentity();
+				float halfW = float(Wp)*0.5f;
+				float halfH = float(Hp)*0.5f;
+				float maxS = std::max(halfW,halfH);
+				glOrtho(-halfW,halfW,-halfH,halfH,-maxS,maxS);
+				glMatrixMode(GL_MODELVIEW);
+				glLoadIdentity();
+			}
+
 			glDisable(GL_DEPTH_TEST);
 			//As renderPixmap (or QGLPixelBuffer or QGLRenderBuffer) doesn't seem to handle shaders and/or fbo in their
 			//own rendering context, we simply get the existing fbo texture and save it.
@@ -3147,7 +3186,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 				//we process GL filter
 				GLuint depthTex = fbo->getDepthTexture();
 				GLuint colorTex = fbo->getColorTexture(0);
-				filter->shade(depthTex, colorTex, zoomFactor*(m_params.perspectiveView ? computePerspectiveZoom() : m_params.zoom)); //DGM FIXME
+				filter->shade(depthTex, colorTex, zoomFactor*(m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //DGM FIXME
 
 				ccGLUtils::CatchGLError("ccGLWindow::renderToFile/glFilter shade");
 
@@ -3160,9 +3199,30 @@ bool ccGLWindow::renderToFile(	const char* filename,
 
 			fbo->start();
 
+			//WARNING: THIS IS A ***FRACKING*** TRICK!!!
+			//we must trick Qt painter that the widget has actually
+			//been resized, otherwise the 'renderText' won't work!
+			QRect backupRect = geometry();
+			QRect& ncrect = const_cast<QRect&>(geometry());
+			ncrect.setWidth(Wp);
+			ncrect.setHeight(Hp);
+
 			//we draw 2D entities (mainly for the color ramp!)
 			if (m_globalDBRoot)
 				m_globalDBRoot->draw(context);
+			if (m_winDBRoot)
+				m_winDBRoot->draw(context);
+
+			//For tests
+			//displayText("BOTTOM_LEFT",10,10);
+			//displayText("MIDDLE_LEFT",10,Hp/2-10);
+			//displayText("BOTTOM_RIGHT",Wp-100,10);
+			//displayText("MIDDLE_DOWN",Wp/2,10);
+			//displayText("TOP_RIGHT",Wp-100,Hp-10);
+			//displayText("MIDDLE_RIGHT",Wp-100,Hp/2-10);
+			//displayText("TOP_LEFT",10,Hp-10);
+			//displayText("MIDDLE_UP",Wp/2,Hp-10);
+			//displayText("MIDDLE",Wp/2,Hp/2);
 
 			//current displayed scalar field color ramp (if any)
 			ccRenderingTools::DrawColorRamp(context);
@@ -3170,7 +3230,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 			if (m_displayOverlayEntities && m_captureMode.renderOverlayItems)
 			{
 				//scale (only in ortho mode)
-				if (!m_params.perspectiveView)
+				if (!m_viewportParams.perspectiveView)
 				{
 					//if fbo --> override color
 					drawScale(m_fbo && m_activeGLFilter ? ccColor::black : getDisplayParameters().textDefaultCol);
@@ -3180,10 +3240,13 @@ bool ccGLWindow::renderToFile(	const char* filename,
 				drawTrihedron();
 			}
 
+			//don't forget to restore the right 'rect' or the widget will be broken!
+			ncrect = backupRect;
+
 			//read from fbo
 			glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
 			//to avoid memory issues, we read line by line
-			for (int i=0;i<Hp;++i)
+			for (int i=0; i<Hp; ++i)
 				glReadPixels(0,i,Wp,1,GL_BGRA,GL_UNSIGNED_BYTE,data+(Hp-1-i)*Wp*4);
 			glReadBuffer(GL_NONE);
 
@@ -3191,7 +3254,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 
 			if (m_fbo != fbo)
 				delete fbo;
-			fbo=0;
+			fbo = 0;
 
 			output.save(filename);
 
@@ -3244,13 +3307,26 @@ bool ccGLWindow::renderToFile(	const char* filename,
 	}
 
 	//resizeGL(width(),height());
+	m_glWidth = width();
+	m_glHeight = height();
 
-	//we restore display parameters
+	//we restore viewport parameters
 	setPointSize(_defaultPointSize);
 	setLineWidth(_defaultLineWidth);
-	setFontPointSize(_fontSize);
+	//we restore display parameters
+	//if (!displayParametersWereOverriden)
+	//{
+	//	//simply deactivate the custom parameters
+	//	m_overridenDisplayParametersEnabled = false;
+	//}
+	//else
+	//{
+	//	//we must actually restore the custom parameters
+	//	displayParams.defaultFontSize = _fontSize;
+	//	setDisplayParameters(displayParams,true);
+	//}
 	m_captureMode.enabled = false;
-	//m_captureMode.zoomFactor = 1.0f;
+	m_captureMode.zoomFactor = 1.0f;
 
 	if (result)
 		ccLog::Print("[Snapshot] File '%s' saved! (%i x %i pixels)",filename,Wp,Hp);
@@ -3356,19 +3432,12 @@ void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, cons
 	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 }
 
-void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=ALIGN_HLEFT | ALIGN_VTOP*/, unsigned char bkgAlpha/*=0*/, const unsigned char* rgbColor/*=0*/, const QFont* font/*=0*/)
+void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=ALIGN_HLEFT|ALIGN_VTOP*/, unsigned char bkgAlpha/*=0*/, const unsigned char* rgbColor/*=0*/, const QFont* font/*=0*/)
 {
 	makeCurrent();
 
 	int x2 = x;
-	int y2 = m_glHeight-1-y;
-
-	//FIXME: doesn't work!
-	//if (m_captureModeZoomFactor != 1.0f)
-	//{
-	//	x2 = (int)(m_captureModeZoomFactor * (float)x2);
-	//	y2 = (int)(m_captureModeZoomFactor * (float)y2);
-	//}
+	int y2 = m_glHeight - 1 - y;
 
 	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
 	const unsigned char* col = (rgbColor ? rgbColor : getDisplayParameters().textDefaultCol);

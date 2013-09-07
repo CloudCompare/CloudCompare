@@ -10,6 +10,8 @@ v2.5.1 ??/??/2013
 		* for instance, this allows the user to keep the "Enter" key pressed while loading multiple files with the default
 		  loading parameters (i.e. manually "skipping" the opening dialog for ASCII files for instance)
 - bug fixes:
+	* text wes misplaced when rendering screen with a zoom factor greater than 1.
+		Other features were also badly reshaped (fonts, scale, color ramp, trihedron, etc.)
 	* the 'max distance' parameter for cloud/mesh distance computation was incorrectly squared before being used!
 	* materials where not associated to the base mesh when loading composite OBJ files (this could lead to crash when
 		saving the composite mesh as PLY for instance)

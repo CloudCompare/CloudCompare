@@ -182,14 +182,14 @@ CCLib::ReferenceCloud* ccGenericPointCloud::getTheVisiblePoints() const
 
 ccBBox ccGenericPointCloud::getMyOwnBB()
 {
-    ccBBox emptyBox;
-	//specific case: empty cloud
+    ccBBox box;
+
 	if (size())
 	{
-    getBoundingBox(emptyBox.minCorner().u, emptyBox.maxCorner().u);
-    emptyBox.setValidity(true);
+		getBoundingBox(box.minCorner().u, box.maxCorner().u);
+		box.setValidity(true);
 	}
-    return emptyBox;
+    return box;
 }
 
 ccPlane* ccGenericPointCloud::fitPlane(double* rms/*= 0*/)

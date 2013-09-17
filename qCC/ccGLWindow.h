@@ -33,6 +33,7 @@
 #include "ccGuiParameters.h"
 
 //Qt
+#include <QGLWidget>
 #include <QFont>
 
 //system
@@ -386,7 +387,7 @@ public slots:
 	//inherited from ccGenericGLDisplay
     virtual void redraw();
 
-	//called when recieving muse wheel is rotated
+	//called when recieving mouse wheel is rotated
 	void onWheelEvent(float wheelDelta_deg);
 
 signals:

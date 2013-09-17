@@ -23,9 +23,10 @@ Big ones:
 [*] flythrough mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
 
 Various:
-[*] change the way 'father dependency' is handled (info should be held by the father!)
+[*] Reverse Unroll Feature (http://www.danielgm.net/cc/forum/viewtopic.php?t=645)
+[*] Change the way 'father dependency' is handled (info should be held by the father!)
 [*] Let the user select and handle multiple clouds in the 'Clipping box' tool
-[*] save materials in OBJ I/O filter 
+[*] Save materials in OBJ I/O filter 
 [*] Per-point size based on SF values (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=507)
 [*] Display ortho-rectified images as high-res textures (instead of point clouds!)
 [*] Use PDAL instead of libLAS (http://www.danielgm.net/cc/forum/viewtopic.php?f=15&t=437&p=1014#p1014)

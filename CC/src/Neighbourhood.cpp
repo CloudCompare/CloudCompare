@@ -444,6 +444,10 @@ bool Neighbourhood::computeHeightFunction()
 	X0[4] = 0;
 	X0[5] = 0;
 
+	//special case: a0 = a1 = a2 = 0! //happens for perfectly flat surfaces!
+	if (X0[1] == 0.0 && X0[2] == 0.0)
+		X0[0] = 1.0;
+
 	//init. conjugate gradient
 	cg.initConjugateGradient(X0);
 

@@ -15,7 +15,7 @@ if( ${OPTION_USE_LIBE57} )
 		message( SEND_ERROR "No LibE57 install dir specified (LIBE57_INSTALL_DIR)" )
 	else()
 		include_directories( ${LIBE57_INSTALL_DIR}/include )
-		include_directories( ${LIBE57_INSTALL_DIR}/include/E57 )
+		include_directories( ${LIBE57_INSTALL_DIR}/include/e57 )
 	endif()
 
 	# Find Boost

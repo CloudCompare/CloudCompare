@@ -237,17 +237,17 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 			assert(sf->getMin() >= 0);
 			{
 				//get min and max index
-				ScalarType minIndex = sf->getMin();
-				ScalarType maxIndex = sf->getMax();
+				double minIndex = static_cast<double>(sf->getMin());
+				double maxIndex = static_cast<double>(sf->getMax());
 
-				ScalarType intMin,intMax;
-				ScalarType fracMin = modf(minIndex,&intMin);
-				ScalarType fracMax = modf(maxIndex,&intMax);
+				double intMin,intMax;
+				double fracMin = modf(minIndex,&intMin);
+				double fracMax = modf(maxIndex,&intMax);
 
-				if (fracMin == 0 && fracMax == 0 && (int)(intMax-intMin)<256)
+				if (fracMin == 0 && fracMax == 0 && static_cast<int>(intMax-intMin) < 256)
 				{
-					int minScanIndex = (int)intMin;
-					int maxScanIndex = (int)intMax;
+					int minScanIndex = static_cast<int>(intMin);
+					int maxScanIndex = static_cast<int>(intMax);
 					
 					minReturnIndex = minScanIndex;
 					maxReturnIndex = maxScanIndex;

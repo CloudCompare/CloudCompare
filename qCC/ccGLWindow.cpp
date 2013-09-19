@@ -1793,7 +1793,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 					m_winDBRoot->filterChildren(labels,true,CC_2D_LABEL);
 
 				for (ccHObject::Container::iterator it=labels.begin(); it!=labels.end(); ++it)
-					if ((*it)->isVisible())
+					if ((*it)->isA(CC_2D_LABEL) && (*it)->isVisible()) //Warning: cc2DViewportLabel is also a kind of 'CC_2D_LABEL'!
 					{
 						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
 						if (label->isSelected())

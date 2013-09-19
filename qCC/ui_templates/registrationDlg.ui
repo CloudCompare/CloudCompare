@@ -282,7 +282,7 @@
             <string>Chose this option to remove points that are likely to disturb the registration during the computation.</string>
            </property>
            <property name="text">
-            <string>Enable furthest points removal.</string>
+            <string>Enable farthest points removal.</string>
            </property>
           </widget>
          </item>

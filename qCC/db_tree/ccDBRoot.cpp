@@ -250,13 +250,16 @@ void ccDBRoot::deleteSelectedEntities()
 	{
 		for (unsigned i=0; i<allLabels.size(); ++i)
 		{
-			cc2DLabel* label = static_cast<cc2DLabel*>(allLabels[i]);
-			//shared labels are labels shared by at least 2 different clouds
-			if (label->size() > 1 && label->getPoint(0).cloud != label->getPoint(1).cloud
-				|| label->size() > 2 && label->getPoint(1).cloud != label->getPoint(2).cloud)
+			if (allLabels[i]->isA(CC_2D_LABEL)) //Warning: cc2DViewportLabel is also a kind of 'CC_2D_LABEL'!
 			{
-				hasSharedLabels = true;
-				break;
+				cc2DLabel* label = static_cast<cc2DLabel*>(allLabels[i]);
+				//shared labels are labels shared by at least 2 different clouds
+				if (label->size() > 1 && label->getPoint(0).cloud != label->getPoint(1).cloud
+					|| label->size() > 2 && label->getPoint(1).cloud != label->getPoint(2).cloud)
+				{
+					hasSharedLabels = true;
+					break;
+				}
 			}
 		}
 	}
@@ -1072,25 +1075,28 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 				//for all labels in the sub-tree
 				for (ccHObject::Container::const_iterator it = labels.begin(); it != labels.end(); ++it)
 				{
-					cc2DLabel* label = static_cast<cc2DLabel*>(*it);
-					bool canMove = false;
-					for (unsigned j=0;j<label->size();++j)
+					if ((*it)->isA(CC_2D_LABEL)) //Warning: cc2DViewportLabel is also a kind of 'CC_2D_LABEL'!
 					{
-						assert(label->getPoint(j).cloud);
-						//3 options to allow moving a label:
-						if (item->isAncestorOf(label->getPoint(j).cloud) //label's cloud is inside sub-tree
-							|| newParent == label->getPoint(j).cloud //destination is label's cloud
-							|| label->getPoint(j).cloud->isAncestorOf(newParent)) //destination is below label's cloud
+						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
+						bool canMove = false;
+						for (unsigned j=0;j<label->size();++j)
 						{
-							canMove = true;
-							break;
+							assert(label->getPoint(j).cloud);
+							//3 options to allow moving a label:
+							if (item->isAncestorOf(label->getPoint(j).cloud) //label's cloud is inside sub-tree
+								|| newParent == label->getPoint(j).cloud //destination is label's cloud
+								|| label->getPoint(j).cloud->isAncestorOf(newParent)) //destination is below label's cloud
+							{
+								canMove = true;
+								break;
+							}
 						}
-					}
 
-					if (!canMove)
-					{
-						ccLog::Error("Labels (or group of) can't leave their parent!");
-						return false;
+						if (!canMove)
+						{
+							ccLog::Error("Labels (or group of) can't leave their parent!");
+							return false;
+						}
 					}
 				}
 			}
@@ -1641,7 +1647,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 					
 					if (selCount == 1)
 					{
-						if (item->isKindOf(CC_2D_LABEL))
+						if (item->isA(CC_2D_LABEL))
 						{
 							hasExactlyOnePlanarEntity = (static_cast<cc2DLabel*>(item)->size() == 3);
 						}

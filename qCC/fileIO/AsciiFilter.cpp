@@ -724,105 +724,107 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
         QStringList parts = currentLine.split(separator,QString::SkipEmptyParts);
 
         int nParts = parts.size();
-        if (nParts<=maxPartIndex)
+        if (nParts > maxPartIndex)
         {
-            ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (found %i part(s) on %i attended)!",linesRead,nParts,maxPartIndex+1);
-            continue;
-        }
+			//(X,Y,Z)
+			if (cloudDesc.xCoordIndex>=0)
+				P[0] = parts[cloudDesc.xCoordIndex].toDouble();
+			if (cloudDesc.yCoordIndex>=0)
+				P[1] = parts[cloudDesc.yCoordIndex].toDouble();
+			if (cloudDesc.zCoordIndex>=0)
+				P[2] = parts[cloudDesc.zCoordIndex].toDouble();
 
-		//(X,Y,Z)
-		if (cloudDesc.xCoordIndex>=0)
-			P[0] = parts[cloudDesc.xCoordIndex].toDouble();
-		if (cloudDesc.yCoordIndex>=0)
-			P[1] = parts[cloudDesc.yCoordIndex].toDouble();
-		if (cloudDesc.zCoordIndex>=0)
-			P[2] = parts[cloudDesc.zCoordIndex].toDouble();
-
-		//first point: check for 'big' coordinates
-		if (pointsRead==0)
-		{
-			bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-			if (shiftAlreadyEnabled)
-				memcpy(Pshift,coordinatesShift,sizeof(double)*3);
-			bool applyAll=false;
-			if (ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+			//first point: check for 'big' coordinates
+			if (pointsRead == 0)
 			{
-				cloudDesc.cloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-				ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
-
-				//we save coordinates shift information
-				if (applyAll && coordinatesShiftEnabled && coordinatesShift)
+				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
+				if (shiftAlreadyEnabled)
+					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+				bool applyAll=false;
+				if (ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
-					*coordinatesShiftEnabled = true;
-					coordinatesShift[0] = Pshift[0];
-					coordinatesShift[1] = Pshift[1];
-					coordinatesShift[2] = Pshift[2];
+					cloudDesc.cloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
+					ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+
+					//we save coordinates shift information
+					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
+					{
+						*coordinatesShiftEnabled = true;
+						coordinatesShift[0] = Pshift[0];
+						coordinatesShift[1] = Pshift[1];
+						coordinatesShift[2] = Pshift[2];
+					}
 				}
 			}
-		}
 
-		//add point
-		cloudDesc.cloud->addPoint(CCVector3(P[0]+Pshift[0],P[1]+Pshift[1],P[2]+Pshift[2]));
+			//add point
+			cloudDesc.cloud->addPoint(CCVector3(P[0]+Pshift[0],P[1]+Pshift[1],P[2]+Pshift[2]));
 
-		//Normal vector
-		if (cloudDesc.hasNorms)
-		{
-			if (cloudDesc.xNormIndex>=0)
-				N[0] = parts[cloudDesc.xNormIndex].toFloat();
-			if (cloudDesc.yNormIndex>=0)
-				N[1] = parts[cloudDesc.yNormIndex].toFloat();
-			if (cloudDesc.zNormIndex>=0)
-				N[2] = parts[cloudDesc.zNormIndex].toFloat();
-			cloudDesc.cloud->addNorm(N);
-		}
-
-		//Colors
-		if (cloudDesc.hasRGBColors)
-		{
-			if (cloudDesc.iRgbaIndex>=0)
+			//Normal vector
+			if (cloudDesc.hasNorms)
 			{
-				const uint32_t rgb = parts[cloudDesc.iRgbaIndex].toInt();
-				col[0] = ((rgb >> 16)	& 0x0000ff);
-				col[1] = ((rgb >> 8)	& 0x0000ff);
-				col[2] = ((rgb)			& 0x0000ff);
+				if (cloudDesc.xNormIndex>=0)
+					N[0] = parts[cloudDesc.xNormIndex].toFloat();
+				if (cloudDesc.yNormIndex>=0)
+					N[1] = parts[cloudDesc.yNormIndex].toFloat();
+				if (cloudDesc.zNormIndex>=0)
+					N[2] = parts[cloudDesc.zNormIndex].toFloat();
+				cloudDesc.cloud->addNorm(N);
+			}
 
-			}
-			else if (cloudDesc.fRgbaIndex>=0)
+			//Colors
+			if (cloudDesc.hasRGBColors)
 			{
-				const float rgbf = parts[cloudDesc.fRgbaIndex].toFloat();
-				const uint32_t rgb = (uint32_t)(*((uint32_t*)&rgbf));
-				col[0] = ((rgb >> 16)	& 0x0000ff);
-				col[1] = ((rgb >> 8)	& 0x0000ff);
-				col[2] = ((rgb)			& 0x0000ff);
+				if (cloudDesc.iRgbaIndex>=0)
+				{
+					const uint32_t rgb = parts[cloudDesc.iRgbaIndex].toInt();
+					col[0] = ((rgb >> 16)	& 0x0000ff);
+					col[1] = ((rgb >> 8)	& 0x0000ff);
+					col[2] = ((rgb)			& 0x0000ff);
+
+				}
+				else if (cloudDesc.fRgbaIndex>=0)
+				{
+					const float rgbf = parts[cloudDesc.fRgbaIndex].toFloat();
+					const uint32_t rgb = (uint32_t)(*((uint32_t*)&rgbf));
+					col[0] = ((rgb >> 16)	& 0x0000ff);
+					col[1] = ((rgb >> 8)	& 0x0000ff);
+					col[2] = ((rgb)			& 0x0000ff);
+				}
+				else
+				{
+					if (cloudDesc.redIndex>=0)
+						col[0]=(colorType)parts[cloudDesc.redIndex].toInt();
+					if (cloudDesc.greenIndex>=0)
+						col[1]=(colorType)parts[cloudDesc.greenIndex].toInt();
+					if (cloudDesc.blueIndex>=0)
+						col[2]=(colorType)parts[cloudDesc.blueIndex].toInt();
+				}
+				cloudDesc.cloud->addRGBColor(col);
 			}
-			else
+			else if (cloudDesc.greyIndex>=0)
 			{
-				if (cloudDesc.redIndex>=0)
-					col[0]=(colorType)parts[cloudDesc.redIndex].toInt();
-				if (cloudDesc.greenIndex>=0)
-					col[1]=(colorType)parts[cloudDesc.greenIndex].toInt();
-				if (cloudDesc.blueIndex>=0)
-					col[2]=(colorType)parts[cloudDesc.blueIndex].toInt();
+				col[0]=col[1]=col[2]=(colorType)parts[cloudDesc.greyIndex].toInt();
+				cloudDesc.cloud->addRGBColor(col);
 			}
-			cloudDesc.cloud->addRGBColor(col);
+
+			//Scalar distance
+			if (!cloudDesc.scalarIndexes.empty())
+			{
+				for (unsigned j=0;j<cloudDesc.scalarIndexes.size();++j)
+				{
+					D=(ScalarType)parts[cloudDesc.scalarIndexes[j]].toDouble();
+					cloudDesc.scalarFields[j]->setValue(pointsRead-cloudChunkPos,D);
+				}
+			}
+
+			++pointsRead;
 		}
-		else if (cloudDesc.greyIndex>=0)
+		else
 		{
-			col[0]=col[1]=col[2]=(colorType)parts[cloudDesc.greyIndex].toInt();
-			cloudDesc.cloud->addRGBColor(col);
-		}
+            ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (found %i part(s) on %i expected)!",linesRead,nParts,maxPartIndex+1);
+        }
 
-		//Scalar distance
-		if (!cloudDesc.scalarIndexes.empty())
-		{
-			for (unsigned j=0;j<cloudDesc.scalarIndexes.size();++j)
-			{
-				D=(ScalarType)parts[cloudDesc.scalarIndexes[j]].toDouble();
-				cloudDesc.scalarFields[j]->setValue(pointsRead-cloudChunkPos,D);
-			}
-		}
-
-        ++pointsRead;
 		if (!nprogress.oneStep())
         {
             //cancel requested

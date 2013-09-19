@@ -5163,29 +5163,30 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					if (m_ccRoot)
 						m_ccRoot->getRootEntity()->filterChildren(labels,true,CC_2D_LABEL);
 					for (ccHObject::Container::iterator it=labels.begin(); it!=labels.end(); ++it)
-					{
-						//we must check all dependent labels and remove them!!!
-						//TODO: couldn't we be more clever and update the label instead?
-						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
-						bool removeLabel = false;
-						for (unsigned i=0;i<label->size();++i)
-							if (label->getPoint(i).cloud == entity)
-							{
-								removeLabel = true;
-								break;
-							}
-
-						if (removeLabel && label->getParent())
+						if ((*it)->isA(CC_2D_LABEL)) //Warning: cc2DViewportLabel is also a kind of 'CC_2D_LABEL'!
 						{
-							ccLog::Warning(QString("[Segmentation] Label %1 is dependent on cloud %2 and will be removed").arg(label->getName()).arg(cloud->getName()));
-							ccHObject* labelParent = label->getParent();
-							ccHObject* labelParentParent = 0;
-							removeObjectTemporarilyFromDBTree(labelParent,labelParentParent);
-							labelParent->removeChild(label);
-							label=0;
-							putObjectBackIntoDBTree(labelParent,labelParentParent);
+							//we must check all dependent labels and remove them!!!
+							//TODO: couldn't we be more clever and update the label instead?
+							cc2DLabel* label = static_cast<cc2DLabel*>(*it);
+							bool removeLabel = false;
+							for (unsigned i=0;i<label->size();++i)
+								if (label->getPoint(i).cloud == entity)
+								{
+									removeLabel = true;
+									break;
+								}
+
+							if (removeLabel && label->getParent())
+							{
+								ccLog::Warning(QString("[Segmentation] Label %1 is dependent on cloud %2 and will be removed").arg(label->getName()).arg(cloud->getName()));
+								ccHObject* labelParent = label->getParent();
+								ccHObject* labelParentParent = 0;
+								removeObjectTemporarilyFromDBTree(labelParent,labelParentParent);
+								labelParent->removeChild(label);
+								label=0;
+								putObjectBackIntoDBTree(labelParent,labelParentParent);
+							}
 						}
-					}
 				}
 
 				//we temporarily detach entity, as it may undergo

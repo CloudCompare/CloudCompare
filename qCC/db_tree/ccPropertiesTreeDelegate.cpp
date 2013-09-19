@@ -177,7 +177,7 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
     }
     else if (m_currentObject->isKindOf(CC_2D_VIEWPORT_OBJECT))
     {
-		fillWithViewportObject(ccHObjectCaster::To2DViewportLabel(m_currentObject));
+		fillWithViewportObject(ccHObjectCaster::To2DViewportObject(m_currentObject));
     }
     else if (m_currentObject->isKindOf(CC_GBL_SENSOR))
     {

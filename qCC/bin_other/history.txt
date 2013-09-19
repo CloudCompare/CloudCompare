@@ -16,6 +16,8 @@ v2.5.1 ??/??/2013
 	* materials where not associated to the base mesh when loading composite OBJ files (this could lead to crash when
 		saving the composite mesh as PLY for instance)
 	* curvature or normal computation would sometimes fail on perfectly flat axis-aligned clouds (division by zero).
+	* the 'multiple slices auto extraction' tool (clipping box mode) would crash if at least one 'repeat dimension'
+		was unchecked.
 
 v2.5.0 07/12/2013
 - New version numbering scheme (build index appended instead of the release date)

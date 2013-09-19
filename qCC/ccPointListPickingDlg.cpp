@@ -92,11 +92,12 @@ unsigned ccPointListPickingDlg::getPickedPoints(std::vector<cc2DLabel*>& pickedP
 		//find highest unique ID among the VISIBLE labels
 		pickedPoints.reserve(count);
 		for (unsigned i=0;i<count;++i)
-		{
-			cc2DLabel* label = static_cast<cc2DLabel*>(labels[i]);
-			if (label->isVisible() && label->size()==1)
-				pickedPoints.push_back(label);
-		}
+			if (labels[i]->isA(CC_2D_LABEL)) //Warning: cc2DViewportLabel is also a kind of 'CC_2D_LABEL'!
+			{
+				cc2DLabel* label = static_cast<cc2DLabel*>(labels[i]);
+				if (label->isVisible() && label->size()==1)
+					pickedPoints.push_back(label);
+			}
 	}
 
 	return (unsigned)pickedPoints.size();

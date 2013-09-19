@@ -236,7 +236,7 @@ void ccClippingBoxTool::exportMultCloud()
 							repeatDlg.zRepeatCheckBox->isChecked() };
 	int indexMins[3] = { 0 , 0, 0 };
 	int indexMaxs[3] = { 0 , 0, 0 };
-	int gridDim[3] = { 0 , 0, 0 };
+	int gridDim[3] = { 1 , 1, 1 };
 	unsigned cellCount = 1;
 	CCVector3 gridOrigin = m_clipBox->getBB().minCorner();
 	CCVector3 cellSize = m_clipBox->getBB().getDiagVec();

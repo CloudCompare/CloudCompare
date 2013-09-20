@@ -87,9 +87,9 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 	const unsigned char Y  = (X==2 ? 0 : X+1);
 
 	ccBBox box = (customBox.isValid() ? customBox : cloud->getMyOwnBB());
-	CCVector3d boxDiag(	(double)box.maxCorner().x - (double)box.minCorner().x,
-						(double)box.maxCorner().y - (double)box.minCorner().y,
-						(double)box.maxCorner().z - (double)box.minCorner().z );
+	CCVector3d boxDiag(	static_cast<double>(box.maxCorner().x) - static_cast<double>(box.minCorner().x),
+						static_cast<double>(box.maxCorner().y) - static_cast<double>(box.minCorner().y),
+						static_cast<double>(box.maxCorner().z) - static_cast<double>(box.minCorner().z) );
 	if (boxDiag.u[X] <= 0 || boxDiag.u[Y] <= 0)
 	{
 		ccLog::Error("[ccHeightGridGeneration] Invalid cloud bounding box!");
@@ -107,7 +107,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
     ccLog::Print(QString("\tGrid size: [%1 x %2]").arg(grid_size_X).arg(grid_size_Y));
     ccLog::Print(QString("\tCell count: %1").arg(grid_total_size));
     if (grid_total_size > (1<<24)) //2^24 = 16 Mo
-        ccLog::Warning(QString("[ccHeightGridGeneration] The grid that will be generated is pretty huge (%1 million of cells) and this may take some time...").arg((double)grid_total_size/1.0e6));
+        ccLog::Warning(QString("[ccHeightGridGeneration] The grid that will be generated is pretty huge (%1 million of cells) and this may take some time...").arg(static_cast<double>(grid_total_size)/1.0e6));
 
 	// memory allocation of the height grid
 	bool memError = true;
@@ -163,21 +163,21 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
     {
         const CCVector3* thePoint = cloud->getPoint(n);
 
-		CCVector3d relativePos(	(double)thePoint->x - (double)box.minCorner().x,
-								(double)thePoint->y - (double)box.minCorner().y,
-								(double)thePoint->z - (double)box.minCorner().z );
+		CCVector3d relativePos(	static_cast<double>(thePoint->x) - static_cast<double>(box.minCorner().x),
+								static_cast<double>(thePoint->y) - static_cast<double>(box.minCorner().y),
+								static_cast<double>(thePoint->z) - static_cast<double>(box.minCorner().z) );
 
-        int i = (int)(relativePos.u[X]/grid_step);
-		int j = (int)(relativePos.u[Y]/grid_step);
+        int i = static_cast<int>(relativePos.u[X]/grid_step);
+		int j = static_cast<int>(relativePos.u[Y]/grid_step);
 
 		//if we fall exactly on the max corner of the grid box
-		if (i == (int)grid_size_X && relativePos.u[X] == grid_step * (double)grid_size_X)
+		if (i == static_cast<int>(grid_size_X) && relativePos.u[X] == grid_step * static_cast<double>(grid_size_X))
 			--i;
-		if (j == (int)grid_size_Y && relativePos.u[Y] == grid_step * (double)grid_size_Y)
+		if (j == static_cast<int>(grid_size_Y) && relativePos.u[Y] == grid_step * static_cast<double>(grid_size_Y))
 			--j;
 
 		//we skip points outside the box!
-		if (i<0 || i>=(int)grid_size_X || j<0 || j>=(int)grid_size_Y)
+		if (i<0 || i>=static_cast<int>(grid_size_X) || j<0 || j>=static_cast<int>(grid_size_Y))
 			continue;
 
 		assert(i >= 0 && j >= 0);
@@ -216,8 +216,8 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 		//scalar fields
 		if (interpolateSF)
 		{
-			int pos = j*(int)grid_size_X+i; //pos in 2D SF grid(s)
-			assert(pos<(int)grid_total_size);
+			int pos = j*static_cast<int>(grid_size_X)+i; //pos in 2D SF grid(s)
+			assert(pos < static_cast<int>(grid_total_size));
 			for (unsigned k=0;k<gridScalarFields.size(); ++k)
 			{
 				if (gridScalarFields[k])
@@ -263,7 +263,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
         pointsInCell++;
 
         if (progressCb)
-            progressCb->update(30.0 * (float)n / (float)cloud->size());
+            progressCb->update(30.0f * static_cast<float>(n) / static_cast<float>(cloud->size()));
     }
 
 	//update grids for 'average' cases
@@ -282,7 +282,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						{
 							if (cell->nbPoints)
 								if (ccScalarField::ValidValue(*_gridSF)) //valid SF value
-									*_gridSF /= (double)cell->nbPoints;
+									*_gridSF /= static_cast<double>(cell->nbPoints);
 						}
 					}
 				}
@@ -297,7 +297,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 				HeightGridCell* cell = grid[j];
 				for (unsigned i=0; i<grid_size_X; ++i,++cell)
 					if (cell->nbPoints>1)
-						cell->height /= (double)cell->nbPoints;
+						cell->height /= static_cast<double>(cell->nbPoints);
 			}
 		}
 	}
@@ -343,7 +343,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
     }
 	else
     {
-        meanHeight /= (double)nonEmptyCells;
+        meanHeight /= static_cast<double>(nonEmptyCells);
 
 		ccLog::Print("\tMinimal height = %f", minHeight);
         ccLog::Print("\tAverage height = %f", meanHeight);
@@ -410,7 +410,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						for (unsigned j=0; j<grid_size_Y; ++j)
 						{
 							if (progressCb)
-								progressCb->update(30.0 + 50.0*((float)j/(float)grid_size_Y));
+								progressCb->update(30.0f + 50.0f*(static_cast<float>(j)/static_cast<float>(grid_size_Y)));
 
 							const HeightGridCell* aCell = grid[j];
 							for (unsigned i=0; i<grid_size_X; ++i,++aCell)
@@ -494,9 +494,9 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						{
 							if (aCell->nbPoints)
 							{
-								double normalized_height = ((double)aCell->height - minHeight)/range;
+								double normalized_height = (static_cast<double>(aCell->height) - minHeight)/range;
 								assert(normalized_height >= 0.0 && normalized_height <= 1.0);
-								unsigned char val = (unsigned char)floor(normalized_height*maxColorComp);
+								unsigned char val = static_cast<unsigned char>(floor(normalized_height*maxColorComp));
 								bitmap8.setPixel(i,grid_size_Y-1-j,val);
 							}
 							else
@@ -506,7 +506,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						}
 
 						if (progressCb)
-							progressCb->update(80.0f + 10.0f*((float)j/(float)grid_size_Y));
+							progressCb->update(80.0f + 10.0f*(static_cast<float>(j)/static_cast<float>(grid_size_Y)));
 					}
 
 					//open file saving dialog
@@ -595,18 +595,18 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 				if (cloudGrid->reserve(pointsCount))
 				{
 					//we work with doubles as grid step can be much smaller than the cloud coordinates!
-					double Py = (double)box.minCorner().u[Y];
+					double Py = static_cast<double>(box.minCorner().u[Y]);
 	                
 					unsigned n = 0;
 					for (unsigned j=0; j<grid_size_Y; ++j)
 					{
 						const HeightGridCell* aCell = grid[j];
-						double Px = (double)box.minCorner().u[X];
+						double Px = static_cast<double>(box.minCorner().u[X]);
 						for (unsigned i=0; i<grid_size_X; ++i,++aCell)
 						{
 							if (aCell->nbPoints) //non empty cell
 							{
-								double Pz = (double)aCell->height;
+								double Pz = static_cast<double>(aCell->height);
 
 								CCVector3 Pf((PointCoordinateType)Px,(PointCoordinateType)Py,(PointCoordinateType)Pz);
 								cloudGrid->addPoint(Pf);
@@ -662,7 +662,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						if (_sfGrid) //valid SF grid
 						{
 							//the input point cloud should be empty!
-							CCLib::ScalarField* formerSf = pc->getScalarField((int)k);
+							CCLib::ScalarField* formerSf = pc->getScalarField(static_cast<int>(k));
 							assert(formerSf);
 
 							//we try to create an equivalent SF on the output grid
@@ -677,17 +677,17 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 								CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
 								assert(sf);
 								//set sf values
-								unsigned n=0;
-								const ScalarType emptyCellSFValue = formerSf->NaN();
+								n = 0;
+								const ScalarType emptyCellSFValue = CCLib::ScalarField::NaN();
 								for (unsigned j=0; j<grid_size_Y; ++j)
 								{
 									const HeightGridCell* aCell = grid[j];
-									for (unsigned i=0; i<grid_size_X; ++i, ++_sfGrid, ++aCell, ++n)
+									for (unsigned i=0; i<grid_size_X; ++i, ++_sfGrid, ++aCell)
 									{
 										if (aCell->nbPoints)
-											sf->setValue(n,*_sfGrid);
+											sf->setValue(n++,*_sfGrid);
 										else if (fillEmptyCells != LEAVE_EMPTY)
-											sf->setValue(n,emptyCellSFValue);
+											sf->setValue(n++,emptyCellSFValue);
 									}
 								}
 								sf->computeMinAndMax();

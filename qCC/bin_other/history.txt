@@ -18,6 +18,8 @@ v2.5.1 ??/??/2013
 	* curvature or normal computation would sometimes fail on perfectly flat axis-aligned clouds (division by zero).
 	* the 'multiple slices auto extraction' tool (clipping box mode) would crash if at least one 'repeat dimension'
 		was unchecked.
+	* Height Grid Generation tool would crash when generating a grid with SF interpolation and the 'leave empty'
+		option for empty cells.
 
 v2.5.0 07/12/2013
 - New version numbering scheme (build index appended instead of the release date)

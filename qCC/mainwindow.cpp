@@ -39,6 +39,7 @@
 #include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 #include <ccMesh.h>
+#include <ccPolyline.h>
 #include <ccSubMesh.h>
 #include <ccOctree.h>
 #include <ccKdTree.h>
@@ -1005,7 +1006,7 @@ void MainWindow::doActionSetColor(bool colorize)
 			for (unsigned i=0;i<ent->getChildrenNumber();++i)
 				selectedEntities.push_back(ent->getChild(i));
 		}
-		else
+        else if (ent->isA(CC_POINT_CLOUD))
 		{
 			bool lockedVertices;
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
@@ -1028,6 +1029,14 @@ void MainWindow::doActionSetColor(bool colorize)
 					ent->getParent()->showColors(true);
 			}
 		}
+        else if (ent->isA(CC_POLY_LINE))
+        {
+            ccPolyline * poly = ccHObjectCaster::ToPolyline(ent);
+            colorType col[3] = {newCol.red(), newCol.green(), newCol.blue()};
+            poly->setColor(col);
+            ent->showColors(true);
+            ent->prepareDisplayForRefresh();
+        }
     }
 
     refreshAll();

@@ -49,6 +49,7 @@ struct dbTreeSelectionInfo
     int normalsCount;
     int octreeCount;
     int cloudCount;
+    int polylineCount;
     int meshCount;
     int imageCount;
     int sensorCount;

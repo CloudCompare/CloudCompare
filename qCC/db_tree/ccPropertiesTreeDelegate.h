@@ -26,6 +26,7 @@
 
 class ccHObject;
 class ccGenericPointCloud;
+class ccPolyline;
 class ccGenericMesh;
 class ccGenericPrimitive;
 class ccOctree;
@@ -57,6 +58,7 @@ public:
 							OBJECT_COLORS_SHOWN			,
 							OBJECT_NORMALS_SHOWN		,
 							OBJECT_SCALAR_FIELD_SHOWN	,
+                            OBJECT_POLYLINE_WIDTH       ,
 							//OBJECT_XXXX				,
 							//OBJECT_XXXX				,
 							OBJECT_SF_SHOW_SCALE		,
@@ -121,6 +123,7 @@ protected slots:
     void objectDisplayChanged(const QString &newDisplayTitle);
     void sensorScaleChanged(double val);
 	void cloudPointSizeChanged(int size);
+    void polyineWidthChanged(int size);
 
 protected:
 
@@ -131,6 +134,7 @@ protected:
     void fillWithPointCloud(ccGenericPointCloud*);
     void fillSFWithPointCloud(ccGenericPointCloud*);
     void fillWithMesh(ccGenericMesh*);
+    void fillWithPolyline(ccPolyline*);
     void fillWithPrimitive(ccGenericPrimitive*);
     void fillWithPointOctree(ccOctree*);
 	void fillWithPointKdTree(ccKdTree*);

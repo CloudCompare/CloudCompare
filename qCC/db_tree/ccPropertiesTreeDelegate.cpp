@@ -30,6 +30,7 @@
 #include <ccHObject.h>
 #include <ccPointCloud.h>
 #include <ccMesh.h>
+#include <ccPolyline.h>
 #include <ccSubMesh.h>
 #include <ccOctree.h>
 #include <ccKdTree.h>
@@ -62,6 +63,7 @@
 // Default 'None' string
 const QString c_noDisplayString = QString("None");
 const QString c_defaultPointSizeString = QString("Default");
+const QString c_defaultPolyWidthSizeString = QString("Default Width");
 
 // Default separator colors
 const QBrush SEPARATOR_BACKGROUND_BRUSH(Qt::darkGray);
@@ -99,6 +101,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
         case OBJECT_COLOR_RAMP_STEPS:
         case OBJECT_CLOUD_POINT_SIZE:
             return QSize(50,18);
+        case OBJECT_POLYLINE_WIDTH:
         case OBJECT_CURRENT_COLOR_RAMP:
             return QSize(70,22);
 		case OBJECT_CLOUD_SF_EDITOR:
@@ -155,6 +158,10 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
     
 		if (m_currentObject->isKindOf(CC_PRIMITIVE))
 			fillWithPrimitive(ccHObjectCaster::ToPrimitive(m_currentObject));
+    }
+    else if (m_currentObject->isA(CC_POLY_LINE))
+    {
+        fillWithPolyline(ccHObjectCaster::ToPolyline(m_currentObject));
     }
     else if (m_currentObject->isA(CC_POINT_OCTREE))
     {
@@ -455,6 +462,20 @@ void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
     ccGenericPointCloud* vertices = _obj->getAssociatedCloud();
     if (vertices && (!vertices->isLocked() || _obj->isAncestorOf(vertices)))
         fillSFWithPointCloud(vertices);
+}
+
+void ccPropertiesTreeDelegate::fillWithPolyline(ccPolyline* _obj)
+{
+    assert(_obj && m_model);
+
+    addSeparator("Polyline");
+
+    //number of points
+    appendRow( ITEM("Points"), ITEM(QLocale(QLocale::English).toString(_obj->size())) );
+
+    //custom line width
+    appendRow( ITEM("Line width"), PERSISTENT_EDITOR(OBJECT_POLYLINE_WIDTH), true );
+
 }
 
 void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)
@@ -805,6 +826,19 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
         connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(cloudPointSizeChanged(int)));
 
 		comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+        return comboBox;
+    }
+    case OBJECT_POLYLINE_WIDTH:
+    {
+        QComboBox *comboBox = new QComboBox(parent);
+
+        comboBox->addItem(c_defaultPolyWidthSizeString); //size = 0
+        for (unsigned i=1;i<=10;++i)
+            comboBox->addItem(QString::number(i));
+
+        connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(polyineWidthChanged(int)));
+
+        comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
         return comboBox;
     }
     default:
@@ -1331,6 +1365,18 @@ void ccPropertiesTreeDelegate::cloudPointSizeChanged(int size)
 
 	cloud->setPointSize(size);
 	updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::polyineWidthChanged(int size)
+{
+    if (!m_currentObject)
+        return;
+
+    ccPolyline* pline = ccHObjectCaster::ToPolyline(m_currentObject);
+    assert(pline);
+
+    pline->setWidth(size);
+    updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTitle)

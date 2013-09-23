@@ -6429,12 +6429,12 @@ void MainWindow::doComputePlaneOrientation()
 
 				pPlane->setName(QString("Strike plane ")+strikeAndDipStr);
 				pPlane->applyGLTransformation_recursive(); //not yet in DB
-				cloud->addChild(pPlane);
+                selectedEntities[i]->addChild(pPlane);
 				pPlane->setDisplay(cloud->getDisplay());
 				pPlane->setVisible(true);
 				pPlane->enableStippling(true);
 				pPlane->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);
-				cloud->prepareDisplayForRefresh_recursive();
+                selectedEntities[i]->prepareDisplayForRefresh_recursive();
 				addToDB(pPlane);
 			}
 		}
@@ -7750,6 +7750,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     bool atLeastOneEntity = (selInfo.selCount>0);
     bool atLeastOneCloud = (selInfo.cloudCount>0);
     bool atLeastOneMesh = (selInfo.meshCount>0);
+    bool atLeastOnePolyLine (selInfo.polylineCount>0);
     //bool atLeastOneOctree = (selInfo.octreeCount>0);
     bool atLeastOneNormal = (selInfo.normalsCount>0);
     bool atLeastOneColor = (selInfo.colorCount>0);
@@ -7787,7 +7788,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionDensity->setEnabled(atLeastOneCloud);
     actionCurvature->setEnabled(atLeastOneCloud);
     actionRoughness->setEnabled(atLeastOneCloud);
-	actionPlaneOrientation->setEnabled(atLeastOneCloud);
+    actionPlaneOrientation->setEnabled(atLeastOneCloud|atLeastOnePolyLine);
 	actionSNETest->setEnabled(atLeastOneCloud);
 
     actionFilterByValue->setEnabled(atLeastOneSF);

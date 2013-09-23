@@ -36,6 +36,9 @@
 #include "cc2DViewportObject.h"
 #include "ccGenericPrimitive.h"
 
+#include <iostream>
+
+
 /*** helpers ***/
 
 ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices /*= 0*/)
@@ -59,6 +62,31 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 				return ccHObjectCaster::ToPointCloud(vertices);
 			}
 		}
+        else if (obj->isKindOf(CC_POLY_LINE))
+        {
+            //FIXME
+            // I have hardcoded the conversion
+            // Am I right??? Please check
+            ccPolyline * pline = ccHObjectCaster::ToPolyline(obj);
+            ccPointCloud * cloud = new ccPointCloud;
+            cloud->reserve(pline->size());
+
+            for (int i = 0; i < pline->size(); ++i)
+            {
+                int gindex = pline->getPointGlobalIndex(i);
+                CCVector3 point;
+                pline->getAssociatedCloud()->getPoint(gindex, point);
+
+                std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
+
+                cloud->addPoint(point);
+            }
+
+            cloud->setName(pline->getName());
+
+            return cloud;
+
+        }
 	}
 
     return 0;
@@ -84,7 +112,12 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 					*lockedVertices = vertices->isLocked();
 				return vertices;
 			}
-		}
+        }
+        else if (obj->isKindOf(CC_POLY_LINE))
+        {
+            ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(obj);
+            return ccHObjectCaster::ToGenericPointCloud(cloud);
+        }
 	}
 
     return 0;

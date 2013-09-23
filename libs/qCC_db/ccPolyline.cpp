@@ -36,7 +36,7 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
     setVisible(true);
     lockVisibility(false);
     setColor(ccColor::white);
-    setWidth(-1);
+    setWidth(0);
 }
 
 ccPolyline::ccPolyline(const ccPolyline& poly)
@@ -104,23 +104,23 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
         if (colorsShown())
             glColor3ubv(m_rgbColor);
 
+        if(m_width != 0)
+        {
+            glPushAttrib(GL_LINE_BIT);
+            glLineWidth(m_width);
+        }
+
         glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
-
-
 
         unsigned count=size();
         for (unsigned i=0;i<count;++i)
         {
-            if(m_width != -1)
-            {
-                glLineWidth(m_width);
                 glVertex3fv(m_theAssociatedCloud->getPoint(m_theIndexes->getValue(i))->u);
-            }
-            else
-                glVertex3fv(m_theAssociatedCloud->getPoint(m_theIndexes->getValue(i))->u);
-
         }
         glEnd();
+
+        if (m_width != 0)
+            glPopAttrib();
     }
 }
 
@@ -186,6 +186,9 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
     //Foreground mode (dataVersion>=28)
     outStream << m_foreground;
 
+    //The width of the line
+    outStream << m_width;
+
     return true;
 }
 
@@ -237,6 +240,9 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion)
 
     //Foreground mode (dataVersion>=28)
     inStream >> m_foreground;
+
+    //load the width
+    inStream >> m_width;
 
     return true;
 }

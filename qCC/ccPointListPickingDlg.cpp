@@ -210,26 +210,13 @@ void ccPointListPickingDlg::exportToNewPolyline()
     unsigned count = getPickedPoints(labels);
     if (count>0)
     {
-//        ccPointCloud * cloud = new ccPointCloud;
         ccPolyline* pline = new ccPolyline(m_associatedCloud);
-        pline->showColors(true);
-        pline->setColor(ccColor::red);
-        pline->setWidth(10);
 
-
-//            cloud->setName("Picking list");
             for (unsigned i=0;i<count;++i)
             {
                 const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
-//                const CCVector3* P = PP.cloud->getPoint(PP.index);
-//                cloud->addPoint(*P);
-
                 pline->addPointIndex(PP.index);
             }
-
-//            pline->setAssociatedCloud(cloud);
-
-
 
             pline->setDisplay(m_associatedCloud->getDisplay());
             MainWindow::TheInstance()->db()->addElement(pline);

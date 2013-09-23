@@ -61,25 +61,11 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 		}
         else if (obj->isKindOf(CC_POLY_LINE))
         {
-            //FIXME
-            // I have hardcoded the conversion
-            // Am I right??? Please check
-            ccPolyline * pline = ccHObjectCaster::ToPolyline(obj);
-            ccPointCloud * cloud = new ccPointCloud;
-            cloud->reserve(pline->size());
 
-            for (int i = 0; i < pline->size(); ++i)
-            {
-                int gindex = pline->getPointGlobalIndex(i);
-                CCVector3 point;
-                pline->getAssociatedCloud()->getPoint(gindex, point);
-                cloud->addPoint(point);
-            }
-
-            cloud->setName(pline->getName());
+            CCLib::ReferenceCloud * ref_cloud = static_cast<CCLib::ReferenceCloud *> (ccHObjectCaster::ToPolyline(obj));
+            ccPointCloud * cloud  = ccPointCloud::From(ref_cloud);
 
             return cloud;
-
         }
 	}
 
@@ -109,8 +95,7 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
         }
         else if (obj->isKindOf(CC_POLY_LINE))
         {
-            ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(obj);
-            return ccHObjectCaster::ToGenericPointCloud(cloud);
+            return ccHObjectCaster::ToGenericPointCloud(ccHObjectCaster::ToPointCloud(obj));
         }
 	}
 

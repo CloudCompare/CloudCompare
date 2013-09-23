@@ -20,7 +20,6 @@
 
 #include "ccPolyline.h"
 
-#include <iostream>
 //Local
 #include "ccPointCloud.h"
 

@@ -36,9 +36,6 @@
 #include "cc2DViewportObject.h"
 #include "ccGenericPrimitive.h"
 
-#include <iostream>
-
-
 /*** helpers ***/
 
 ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices /*= 0*/)
@@ -76,9 +73,6 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
                 int gindex = pline->getPointGlobalIndex(i);
                 CCVector3 point;
                 pline->getAssociatedCloud()->getPoint(gindex, point);
-
-                std::cout << point[0] << " " << point[1] << " " << point[2] << std::endl;
-
                 cloud->addPoint(point);
             }
 

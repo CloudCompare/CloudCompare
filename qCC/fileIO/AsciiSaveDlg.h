@@ -54,7 +54,7 @@ public:
 
 protected slots:
 
-	//! Saves dialog state from persistent settings
+	//! Saves dialog state to persistent settings
 	void acceptAndSaveSettings();
 
 protected:

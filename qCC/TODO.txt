@@ -23,6 +23,7 @@ Big ones:
 [*] flythrough mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
 
 Various:
+[*] Pre-defined global shift vectors list (http://www.danielgm.net/cc/forum/viewtopic.php?t=651)
 [*] Reverse Unroll Feature (http://www.danielgm.net/cc/forum/viewtopic.php?t=645)
 [*] Change the way 'father dependency' is handled (info should be held by the father!)
 [*] Let the user select and handle multiple clouds in the 'Clipping box' tool
@@ -33,6 +34,7 @@ Various:
 [*] Run the PCV plugin on more than one file at a time (or batch process)
 [*] Command line mode could be extended (more methods, etc.)
 [*] Add 'GL filter' plugins support to ccViewer
+[*] Add interactive measurement features to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
 [*] Add 'TRANGLE_STRIPS' support to VTK I/O filter (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=598)
 

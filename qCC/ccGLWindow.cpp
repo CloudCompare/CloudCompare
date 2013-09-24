@@ -258,7 +258,7 @@ void ccGLWindow::initializeGL()
 	//we emit the 'baseViewMatChanged' signal
 	emit baseViewMatChanged(m_viewportParams.viewMat);
 
-	//we init projection matrix with identity and push it on the stack
+	//we init projection matrix with identity
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 	//glGetFloatv(GL_PROJECTION_MATRIX, m_projMat.data());
@@ -363,11 +363,8 @@ void ccGLWindow::initializeGL()
 	ccLog::Print("[ccGLWindow] 3D view initialized");
 }
 
-static bool s_resizeGLInitSuccess=true;
 void ccGLWindow::resizeGL(int w, int h)
 {
-	s_resizeGLInitSuccess = true;
-
 	m_glWidth = w;
 	m_glHeight = h;
 
@@ -382,9 +379,9 @@ void ccGLWindow::resizeGL(int w, int h)
 
 	//filters
 	if (m_fbo || m_alwaysUseFBO)
-		s_resizeGLInitSuccess &= initFBO(m_glWidth,m_glHeight);
+		initFBO(m_glWidth,m_glHeight);
 	if (m_activeGLFilter)
-		s_resizeGLInitSuccess &= initGLFilter(m_glWidth,m_glHeight);
+		initGLFilter(m_glWidth,m_glHeight);
 
 	//pivot symbol is dependent on the screen size!
 	if (m_pivotGLList != GL_INVALID_LIST_ID)
@@ -399,7 +396,7 @@ void ccGLWindow::resizeGL(int w, int h)
 						2,
 						SCREEN_SIZE_MESSAGE);
 
-	s_resizeGLInitSuccess &= !ccGLUtils::CatchGLError("ccGLWindow::resizeGL");
+	ccGLUtils::CatchGLError("ccGLWindow::resizeGL");
 }
 
 //Framerate test

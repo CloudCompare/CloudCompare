@@ -61,7 +61,6 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 		}
         else if (obj->isKindOf(CC_POLY_LINE))
         {
-
             CCLib::ReferenceCloud * ref_cloud = static_cast<CCLib::ReferenceCloud *> (ccHObjectCaster::ToPolyline(obj));
             ccPointCloud * cloud  = ccPointCloud::From(ref_cloud);
 

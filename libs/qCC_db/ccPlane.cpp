@@ -75,39 +75,7 @@ ccGenericPrimitive* ccPlane::clone() const
 	return finishCloneJob(new ccPlane(m_xWidth,m_yWidth,&m_transformation,getName()));
 }
 
-bool ccPlane::toFile_MeOnly(QFile& out) const
-{
-	if (!ccGenericPrimitive::toFile_MeOnly(out))
-		return false;
-
-	//parameters (dataVersion>=21)
-	QDataStream outStream(&out);
-	outStream << m_xWidth;
-    outStream << m_yWidth;
-
-	return true;
-}
-
-bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion)
-{
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion))
-		return false;
-
-	//parameters (dataVersion>=21)
-	QDataStream inStream(&in);
-	inStream >> m_xWidth;
-	inStream >> m_yWidth;
-
-	return true;
-}
-
-ccBBox ccPlane::getFitBB(ccGLMatrix& trans)
-{
-	trans = m_transformation;
-	return ccBBox(CCVector3(-m_xWidth*0.5f,-m_yWidth*0.5f, 0),CCVector3(m_xWidth*0.5f,m_yWidth*0.5f, 0));
-}
-
-int ccPlane::fitTo(CCLib::GenericIndexedCloudPersist *cloud, double* rms/* = 0*/)
+ccPlane * ccPlane::fromFit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/* = 0*/)
 {
     //number of points
     unsigned count = cloud->size();
@@ -179,14 +147,41 @@ int ccPlane::fitTo(CCLib::GenericIndexedCloudPersist *cloud, double* rms/* = 0*/
     Gt += Y * (minY+dY*0.5);
     ccGLMatrix glMat(*X,Y,N,Gt);
 
-    m_xWidth = dX;
-    m_yWidth = dY;
-    m_transformation = glMat;
+    ccPlane * plane = new ccPlane (dX, dY, &glMat);
 
-    buildUp();
-    applyTransformationToVertices();
+    return plane;
+}
 
-    return 1;
+bool ccPlane::toFile_MeOnly(QFile& out) const
+{
+	if (!ccGenericPrimitive::toFile_MeOnly(out))
+		return false;
+
+	//parameters (dataVersion>=21)
+	QDataStream outStream(&out);
+	outStream << m_xWidth;
+    outStream << m_yWidth;
+
+	return true;
+}
+
+bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion)
+{
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion))
+		return false;
+
+	//parameters (dataVersion>=21)
+	QDataStream inStream(&in);
+	inStream >> m_xWidth;
+	inStream >> m_yWidth;
+
+	return true;
+}
+
+ccBBox ccPlane::getFitBB(ccGLMatrix& trans)
+{
+	trans = m_transformation;
+	return ccBBox(CCVector3(-m_xWidth*0.5f,-m_yWidth*0.5f, 0),CCVector3(m_xWidth*0.5f,m_yWidth*0.5f, 0));
 }
 
 bool ccPlane::setAsTexture(QImage image)

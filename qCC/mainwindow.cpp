@@ -6402,10 +6402,9 @@ void MainWindow::doComputePlaneOrientation()
         if (cloud)
         {
 			double rms=0.0;
-            ccPlane* pPlane = new ccPlane;
-            int status = pPlane->fitTo(cloud, &rms);
+            ccPlane* pPlane = ccPlane::fromFit(cloud, &rms);
 
-            if (status != 1)
+            if (!pPlane)
 			{
                 ccConsole::Warning(QString("\tWarning: failed to fit a plane on cloud '%1'").arg(ent->getName()));
 			}

@@ -212,14 +212,21 @@ void ccPointListPickingDlg::exportToNewPolyline()
     {
         ccPolyline* pline = new ccPolyline(m_associatedCloud);
 
-            for (unsigned i=0;i<count;++i)
-            {
-                const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
-                pline->addPointIndex(PP.index);
-            }
+        if (!pline->reserve(count))
+        {
+            ccLog::Error("Not enough memory!");
+            delete pline;
+            return;
+        }
 
-            pline->setDisplay(m_associatedCloud->getDisplay());
-            MainWindow::TheInstance()->db()->addElement(pline);
+        for (unsigned i=0;i<count;++i)
+        {
+            const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
+            pline->addPointIndex(PP.index);
+        }
+
+        pline->setDisplay(m_associatedCloud->getDisplay());
+        MainWindow::TheInstance()->db()->addElement(pline);
 
     }
     else

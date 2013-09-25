@@ -6381,23 +6381,40 @@ void MainWindow::doComputePlaneOrientation()
 
     for (i=0;i<selNum;++i)
     {
-        //is the ith selected data is elligible for processing?
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(selectedEntities[i]);
+        ccHObject * ent = selectedEntities[i];
+
+        CCLib::GenericIndexedCloudPersist* cloud;
+
+
+        if (ent->isKindOf(CC_POINT_CLOUD) )
+        {
+            ccPointCloud * gencloud = ccHObjectCaster::ToPointCloud(ent);
+            cloud = static_cast<CCLib::GenericIndexedCloudPersist *> (gencloud);
+        }
+        else if (ent->isKindOf(CC_POLY_LINE))
+        {
+             ccPolyline * pline = ccHObjectCaster::ToPolyline(ent);
+             cloud = static_cast<CCLib::GenericIndexedCloudPersist *> (pline);
+        }
+
+
+
         if (cloud)
         {
 			double rms=0.0;
-			ccPlane* pPlane = cloud->fitPlane(&rms);
+            ccPlane* pPlane = new ccPlane;
+            int status = pPlane->fitTo(cloud, &rms);
 
-			if (!pPlane)
+            if (status != 1)
 			{
-				ccConsole::Warning(QString("\tWarning: failed to fit a plane on cloud '%1'").arg(cloud->getName()));
+                ccConsole::Warning(QString("\tWarning: failed to fit a plane on cloud '%1'").arg(ent->getName()));
 			}
 			else
 			{
 				//as all information appears in Console...
 				forceConsoleDisplay();
 
-				ccConsole::Print(QString("[Orientation] cloud '%1'").arg(cloud->getName()));
+                ccConsole::Print(QString("[Orientation] cloud '%1'").arg(ent->getName()));
 				ccConsole::Print("\t- plane fitting RMS: %f",rms);
 
 				const ccGLMatrix& planteTrans = pPlane->getTransformation();
@@ -6430,7 +6447,7 @@ void MainWindow::doComputePlaneOrientation()
 				pPlane->setName(QString("Strike plane ")+strikeAndDipStr);
 				pPlane->applyGLTransformation_recursive(); //not yet in DB
                 selectedEntities[i]->addChild(pPlane);
-				pPlane->setDisplay(cloud->getDisplay());
+                pPlane->setDisplay(ent->getDisplay());
 				pPlane->setVisible(true);
 				pPlane->enableStippling(true);
 				pPlane->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);

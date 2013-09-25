@@ -59,13 +59,6 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 				return ccHObjectCaster::ToPointCloud(vertices);
 			}
 		}
-        else if (obj->isKindOf(CC_POLY_LINE))
-        {
-            CCLib::ReferenceCloud * ref_cloud = static_cast<CCLib::ReferenceCloud *> (ccHObjectCaster::ToPolyline(obj));
-            ccPointCloud * cloud  = ccPointCloud::From(ref_cloud);
-
-            return cloud;
-        }
 	}
 
     return 0;
@@ -91,10 +84,6 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 					*lockedVertices = vertices->isLocked();
 				return vertices;
 			}
-        }
-        else if (obj->isKindOf(CC_POLY_LINE))
-        {
-            return ccHObjectCaster::ToGenericPointCloud(ccHObjectCaster::ToPointCloud(obj));
         }
 	}
 

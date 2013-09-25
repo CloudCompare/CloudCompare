@@ -240,8 +240,11 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion)
     //Foreground mode (dataVersion>=28)
     inStream >> m_foreground;
 
-    //load the width
-    inStream >> m_width;
+    //Width of the line (dataVersion>=31)
+    if (dataVersion>=31)
+        inStream >> m_width;
+    else
+        m_width = 0;
 
     return true;
 }

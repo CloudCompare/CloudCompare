@@ -24,6 +24,9 @@
 #include "ccNormalVectors.h"
 #include "ccMaterialSet.h"
 
+//CCLIB
+#include "DistanceComputationTools.h"
+
 ccPlane::ccPlane(PointCoordinateType xWidth, PointCoordinateType yWidth, const ccGLMatrix* transMat/*=0*/, QString name/*=QString("Plane")*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_xWidth(xWidth)
@@ -102,6 +105,88 @@ ccBBox ccPlane::getFitBB(ccGLMatrix& trans)
 {
 	trans = m_transformation;
 	return ccBBox(CCVector3(-m_xWidth*0.5f,-m_yWidth*0.5f, 0),CCVector3(m_xWidth*0.5f,m_yWidth*0.5f, 0));
+}
+
+int ccPlane::fitTo(CCLib::GenericIndexedCloudPersist *cloud, double* rms/* = 0*/)
+{
+    //number of points
+    unsigned count = cloud->size();
+    if (count < 3)
+    {
+        ccLog::Warning("[ccPlane::fitTo] Not enough points in input cloud to fit a plane!");
+        return 0;
+    }
+
+    CCLib::Neighbourhood Yk(cloud);
+
+    //plane equation
+    const PointCoordinateType* theLSQPlane = Yk.getLSQPlane();
+    if (!theLSQPlane)
+    {
+        ccLog::Warning("[ccGenericPointCloud::fitPlane] Not enough points to fit a plane!");
+        return 0;
+    }
+
+    //compute least-square fitting RMS if requested
+    if (rms)
+    {
+        *rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(cloud, theLSQPlane);
+    }
+
+
+    //get the centroid
+    const CCVector3* G = Yk.getGravityCenter();
+    assert(G);
+
+    //and a local base
+    CCVector3 N(theLSQPlane);
+    const CCVector3* X = Yk.getLSQPlaneX(); //main direction
+    assert(X);
+    CCVector3 Y = N * (*X);
+
+    PointCoordinateType minX=0,maxX=0,minY=0,maxY=0;
+    cloud->placeIteratorAtBegining();
+    for (unsigned k=0;k<count;++k)
+    {
+        //projetion into local 2D plane ref.
+        CCVector3 P = *(cloud->getNextPoint()) - *G;
+        PointCoordinateType x2D = P.dot(*X);
+        PointCoordinateType y2D = P.dot(Y);
+
+        if (k!=0)
+        {
+            if (minX<x2D)
+                minX=x2D;
+            else if (maxX>x2D)
+                maxX=x2D;
+            if (minY<y2D)
+                minY=y2D;
+            else if (maxY>y2D)
+                maxY=y2D;
+        }
+        else
+        {
+            minX=maxX=x2D;
+            minY=maxY=y2D;
+        }
+    }
+
+
+    //we recenter plane (as it is not always the case!)
+    float dX = maxX-minX;
+    float dY = maxY-minY;
+    CCVector3 Gt = *G + *X * (minX+dX*0.5);
+    Gt += Y * (minY+dY*0.5);
+    ccGLMatrix glMat(*X,Y,N,Gt);
+
+    m_xWidth = dX;
+    m_yWidth = dY;
+    m_transformation = glMat;
+
+    buildUp();
+    applyTransformationToVertices();
+
+    return 1;
 }
 
 bool ccPlane::setAsTexture(QImage image)

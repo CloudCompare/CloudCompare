@@ -77,6 +77,10 @@ public:
 	//! Sets an image as texture
 	bool setAsTexture(QImage image);
 
+    //! Fit this plane using a generic point cloud (a ccPointCloud / a selection / etc)
+    int fitTo(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0);
+
+
 protected:
     
     //inherited from ccGenericPrimitive

@@ -29,7 +29,7 @@ AsciiSaveDlg::AsciiSaveDlg(QWidget* parent)
 	: QDialog(parent)
 	, Ui::AsciiSaveDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
 	connect(buttonBox, SIGNAL(accepted()), this, SLOT(acceptAndSaveSettings()));
 
@@ -65,7 +65,7 @@ uchar AsciiSaveDlg::getSeparator() const
 	default:
 		assert(false);
 	}
-	
+
 	return 0;
 }
 
@@ -86,16 +86,16 @@ bool AsciiSaveDlg::swapColorAndSF() const
 
 void AsciiSaveDlg::initFromPersistentSettings()
 {
-    QSettings settings;
-    settings.beginGroup("AsciiSaveDialog");
+	QSettings settings;
+	settings.beginGroup("AsciiSaveDialog");
 
 	//read parameters
 	bool saveColHeader		= settings.value("saveHeader", columnsHeaderCheckBox->isChecked()).toBool();
 	bool savePtsHeader		= settings.value("savePtsHeader", pointCountHeaderCheckBox->isChecked()).toBool();
-    int coordsPrecision		= settings.value("coordsPrecision", coordsPrecisionSpinBox->value()).toInt();
-    int sfPrecision			= settings.value("sfPrecision", sfPrecisionSpinBox->value()).toInt();
-    int separatorIndex		= settings.value("separator", separatorComboBox->currentIndex()).toInt();
-    int orderIndex			= settings.value("saveOrder", orderComboBox->currentIndex()).toInt();
+	int coordsPrecision		= settings.value("coordsPrecision", coordsPrecisionSpinBox->value()).toInt();
+	int sfPrecision			= settings.value("sfPrecision", sfPrecisionSpinBox->value()).toInt();
+	int separatorIndex		= settings.value("separator", separatorComboBox->currentIndex()).toInt();
+	int orderIndex			= settings.value("saveOrder", orderComboBox->currentIndex()).toInt();
 
 	//apply parameters
 	columnsHeaderCheckBox->setChecked(saveColHeader);
@@ -110,17 +110,17 @@ void AsciiSaveDlg::initFromPersistentSettings()
 
 void AsciiSaveDlg::acceptAndSaveSettings()
 {
-    QSettings settings;
-    settings.beginGroup("AsciiSaveDialog");
+	QSettings settings;
+	settings.beginGroup("AsciiSaveDialog");
 
 	//write parameters
 	settings.setValue("saveHeader", columnsHeaderCheckBox->isChecked());
 	settings.setValue("savePtsHeader", pointCountHeaderCheckBox->isChecked());
-    settings.setValue("coordsPrecision", coordsPrecisionSpinBox->value());
-    settings.setValue("sfPrecision", sfPrecisionSpinBox->value());
-    settings.setValue("separator", separatorComboBox->currentIndex());
-    settings.setValue("saveOrder", orderComboBox->currentIndex());
+	settings.setValue("coordsPrecision", coordsPrecisionSpinBox->value());
+	settings.setValue("sfPrecision", sfPrecisionSpinBox->value());
+	settings.setValue("separator", separatorComboBox->currentIndex());
+	settings.setValue("saveOrder", orderComboBox->currentIndex());
 
-    settings.endGroup();
+	settings.endGroup();
 }
 

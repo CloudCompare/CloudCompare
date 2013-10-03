@@ -5156,7 +5156,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 		//aditional vertices of which visibility array should be manually reset
 		std::set<ccGenericPointCloud*> verticesToReset;
 
-		for (std::set<ccHObject*>::iterator p = m_gsTool->entities().begin(); p != m_gsTool->entities().end(); ++p)
+		for (std::set<ccHObject*>::const_iterator p = m_gsTool->entities().begin(); p != m_gsTool->entities().end(); ++p)
         {
             ccHObject* entity = *p;
 			

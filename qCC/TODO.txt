@@ -23,6 +23,7 @@ Big ones:
 [*] flythrough mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
 
 Various:
+[*] Add touchpad support (http://www.danielgm.net/cc/forum/viewtopic.php?t=671)
 [*] Pre-defined global shift vectors list (http://www.danielgm.net/cc/forum/viewtopic.php?t=651)
 [*] Reverse Unroll Feature (http://www.danielgm.net/cc/forum/viewtopic.php?t=645)
 [*] Change the way 'father dependency' is handled (info should be held by the father!)

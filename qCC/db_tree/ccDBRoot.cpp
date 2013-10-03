@@ -918,6 +918,9 @@ int ccDBRoot::getSelectedEntities(ccHObject::Container& selEntities,
             if (obj->isKindOf(CC_MESH))
                 info->meshCount++;
 
+            if (obj->isKindOf(CC_POLY_LINE))
+                info->polylineCount++;
+
             if (obj->isKindOf(CC_SENSOR))
             {
                 info->sensorCount++;

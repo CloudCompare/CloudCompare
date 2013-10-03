@@ -39,6 +39,7 @@
 #include <ccHObjectCaster.h>
 #include <ccPointCloud.h>
 #include <ccMesh.h>
+#include <ccPolyline.h>
 #include <ccSubMesh.h>
 #include <ccOctree.h>
 #include <ccKdTree.h>
@@ -1005,7 +1006,7 @@ void MainWindow::doActionSetColor(bool colorize)
 			for (unsigned i=0;i<ent->getChildrenNumber();++i)
 				selectedEntities.push_back(ent->getChild(i));
 		}
-		else
+        else if (ent->isA(CC_POINT_CLOUD))
 		{
 			bool lockedVertices;
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
@@ -1028,6 +1029,14 @@ void MainWindow::doActionSetColor(bool colorize)
 					ent->getParent()->showColors(true);
 			}
 		}
+        else if (ent->isA(CC_POLY_LINE))
+        {
+            ccPolyline * poly = ccHObjectCaster::ToPolyline(ent);
+            colorType col[3] = {newCol.red(), newCol.green(), newCol.blue()};
+            poly->setColor(col);
+            ent->showColors(true);
+            ent->prepareDisplayForRefresh();
+        }
     }
 
     refreshAll();
@@ -6372,23 +6381,39 @@ void MainWindow::doComputePlaneOrientation()
 
     for (i=0;i<selNum;++i)
     {
-        //is the ith selected data is elligible for processing?
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(selectedEntities[i]);
+        ccHObject * ent = selectedEntities[i];
+
+        CCLib::GenericIndexedCloudPersist* cloud;
+
+
+        if (ent->isKindOf(CC_POINT_CLOUD) )
+        {
+            ccPointCloud * gencloud = ccHObjectCaster::ToPointCloud(ent);
+            cloud = static_cast<CCLib::GenericIndexedCloudPersist *> (gencloud);
+        }
+        else if (ent->isKindOf(CC_POLY_LINE))
+        {
+             ccPolyline * pline = ccHObjectCaster::ToPolyline(ent);
+             cloud = static_cast<CCLib::GenericIndexedCloudPersist *> (pline);
+        }
+
+
+
         if (cloud)
         {
 			double rms=0.0;
-			ccPlane* pPlane = cloud->fitPlane(&rms);
+            ccPlane* pPlane = ccPlane::fromFit(cloud, &rms);
 
-			if (!pPlane)
+            if (!pPlane)
 			{
-				ccConsole::Warning(QString("\tWarning: failed to fit a plane on cloud '%1'").arg(cloud->getName()));
+                ccConsole::Warning(QString("\tWarning: failed to fit a plane on cloud '%1'").arg(ent->getName()));
 			}
 			else
 			{
 				//as all information appears in Console...
 				forceConsoleDisplay();
 
-				ccConsole::Print(QString("[Orientation] cloud '%1'").arg(cloud->getName()));
+                ccConsole::Print(QString("[Orientation] cloud '%1'").arg(ent->getName()));
 				ccConsole::Print("\t- plane fitting RMS: %f",rms);
 
 				const ccGLMatrix& planteTrans = pPlane->getTransformation();
@@ -6420,12 +6445,12 @@ void MainWindow::doComputePlaneOrientation()
 
 				pPlane->setName(QString("Strike plane ")+strikeAndDipStr);
 				pPlane->applyGLTransformation_recursive(); //not yet in DB
-				cloud->addChild(pPlane);
-				pPlane->setDisplay(cloud->getDisplay());
+                selectedEntities[i]->addChild(pPlane);
+                pPlane->setDisplay(ent->getDisplay());
 				pPlane->setVisible(true);
 				pPlane->enableStippling(true);
 				pPlane->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);
-				cloud->prepareDisplayForRefresh_recursive();
+                selectedEntities[i]->prepareDisplayForRefresh_recursive();
 				addToDB(pPlane);
 			}
 		}
@@ -7741,6 +7766,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     bool atLeastOneEntity = (selInfo.selCount>0);
     bool atLeastOneCloud = (selInfo.cloudCount>0);
     bool atLeastOneMesh = (selInfo.meshCount>0);
+    bool atLeastOnePolyLine (selInfo.polylineCount>0);
     //bool atLeastOneOctree = (selInfo.octreeCount>0);
     bool atLeastOneNormal = (selInfo.normalsCount>0);
     bool atLeastOneColor = (selInfo.colorCount>0);
@@ -7778,7 +7804,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionDensity->setEnabled(atLeastOneCloud);
     actionCurvature->setEnabled(atLeastOneCloud);
     actionRoughness->setEnabled(atLeastOneCloud);
-	actionPlaneOrientation->setEnabled(atLeastOneCloud);
+    actionPlaneOrientation->setEnabled(atLeastOneCloud|atLeastOnePolyLine);
 	actionSNETest->setEnabled(atLeastOneCloud);
 
     actionFilterByValue->setEnabled(atLeastOneSF);

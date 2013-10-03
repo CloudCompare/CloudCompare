@@ -28,6 +28,7 @@
 #include <ccLog.h>
 #include <ccPointCloud.h>
 #include <cc2DLabel.h>
+#include <ccPolyline.h>
 
 //local
 #include "ccGLWindow.h"
@@ -58,6 +59,7 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	QAction* exportASCII_xyz = menu->addAction("x,y,z");
 	QAction* exportASCII_ixyz = menu->addAction("local index,x,y,z");
 	QAction* exportToNewCloud = menu->addAction("new cloud");
+    QAction* exportToNewPolyline = menu->addAction("new polyline");
 	exportToolButton->setMenu(menu);
 
 	tableWidget->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
@@ -71,6 +73,7 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	connect(exportASCII_xyz,        SIGNAL(triggered()),        this,				SLOT(exportToASCII_xyz()));
 	connect(exportASCII_ixyz,       SIGNAL(triggered()),        this,				SLOT(exportToASCII_ixyz()));
 	connect(exportToNewCloud,		SIGNAL(triggered()),        this,				SLOT(exportToNewCloud()));
+    connect(exportToNewPolyline,	SIGNAL(triggered()),        this,				SLOT(exportToNewPolyline()));
 	connect(markerSizeSpinBox,      SIGNAL(valueChanged(int)),  this,				SLOT(markerSizeChanged(int)));
 	connect(startIndexSpinBox,      SIGNAL(valueChanged(int)),  this,				SLOT(startIndexChanged(int)));
 
@@ -195,6 +198,41 @@ void ccPointListPickingDlg::exportToNewCloud()
 	{
 		ccLog::Error("Pick some points first!");
 	}
+}
+
+void ccPointListPickingDlg::exportToNewPolyline()
+{
+    if (!m_associatedCloud)
+        return;
+
+    //get all labels
+    std::vector<cc2DLabel*> labels;
+    unsigned count = getPickedPoints(labels);
+    if (count>0)
+    {
+        ccPolyline* pline = new ccPolyline(m_associatedCloud);
+
+        if (!pline->reserve(count))
+        {
+            ccLog::Error("Not enough memory!");
+            delete pline;
+            return;
+        }
+
+        for (unsigned i=0;i<count;++i)
+        {
+            const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
+            pline->addPointIndex(PP.index);
+        }
+
+        pline->setDisplay(m_associatedCloud->getDisplay());
+        MainWindow::TheInstance()->db()->addElement(pline);
+
+    }
+    else
+    {
+        ccLog::Error("Pick some points first!");
+    }
 }
 
 void ccPointListPickingDlg::applyAndExit()

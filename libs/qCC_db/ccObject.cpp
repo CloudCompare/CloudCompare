@@ -38,8 +38,9 @@
    v2.8 - 07/12/2013 - Poylines are now supported
    v2.9 - 08/14/2013 - ccMeshGroup removed, ccSubMesh added
    v3.0 - 08/30/2013 - QObject's meta data structure added
+   v3.1 - 09/25/2013 - ccPolyline width added
 **/
-const unsigned c_currentDBVersion = 30; //3.0
+const unsigned c_currentDBVersion = 31; //3.1
 
 unsigned ccObject::GetCurrentDBVersion()
 {

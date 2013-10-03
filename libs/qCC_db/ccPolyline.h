@@ -74,6 +74,11 @@ public:
 	**/
 	void setColor(const colorType col[]);
 
+    //! Set the width of the line
+    /**  \param width the desired width
+     **/
+    void setWidth(const ScalarType width);
+
 	//! Returns the polyline color
 	/** \return a pointer to the polyline RGB color
 	**/
@@ -93,6 +98,9 @@ protected:
 
 	//! Unique RGB color
 	colorType m_rgbColor[3];
+
+    //! Width of the line
+    ScalarType m_width;
 
 	//! Whether poyline should be considered as 2D (true) or 3D (false)
 	bool m_mode2D;

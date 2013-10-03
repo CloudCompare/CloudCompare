@@ -55,6 +55,9 @@ public:
 	**/
 	ccPlane(QString name = QString("Plane"));
 
+    //! create a plane as best fitting plane of any CCLib::GenericIndexedCloudPersist-derived object.
+    static ccPlane * fromFit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0);
+
     //! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_PLANE; }
 

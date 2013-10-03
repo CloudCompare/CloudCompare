@@ -78,11 +78,6 @@ bool ccPolyline::hasColors() const
 
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-//    float lineWidth[2];
-//    glGetFloatv(GL_LINE_WIDTH_RANGE, lineWidth);
-
-//    std::cout << lineWidth[0] << " " << lineWidth[1] << std::endl;
-
     if (size() < 2)
         return;
 
@@ -112,10 +107,9 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
         glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
 
         unsigned count=size();
-        for (unsigned i=0;i<count;++i)
-        {
+        for (unsigned i=0;i<count;++i)        
                 glVertex3fv(m_theAssociatedCloud->getPoint(m_theIndexes->getValue(i))->u);
-        }
+        
         glEnd();
 
         if (m_width != 0)

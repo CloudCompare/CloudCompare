@@ -59,7 +59,7 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	QAction* exportASCII_xyz = menu->addAction("x,y,z");
 	QAction* exportASCII_ixyz = menu->addAction("local index,x,y,z");
 	QAction* exportToNewCloud = menu->addAction("new cloud");
-    QAction* exportToNewPolyline = menu->addAction("new polyline");
+	QAction* exportToNewPolyline = menu->addAction("new polyline");
 	exportToolButton->setMenu(menu);
 
 	tableWidget->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
@@ -73,7 +73,7 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	connect(exportASCII_xyz,        SIGNAL(triggered()),        this,				SLOT(exportToASCII_xyz()));
 	connect(exportASCII_ixyz,       SIGNAL(triggered()),        this,				SLOT(exportToASCII_ixyz()));
 	connect(exportToNewCloud,		SIGNAL(triggered()),        this,				SLOT(exportToNewCloud()));
-    connect(exportToNewPolyline,	SIGNAL(triggered()),        this,				SLOT(exportToNewPolyline()));
+	connect(exportToNewPolyline,	SIGNAL(triggered()),        this,				SLOT(exportToNewPolyline()));
 	connect(markerSizeSpinBox,      SIGNAL(valueChanged(int)),  this,				SLOT(markerSizeChanged(int)));
 	connect(startIndexSpinBox,      SIGNAL(valueChanged(int)),  this,				SLOT(startIndexChanged(int)));
 
@@ -208,7 +208,7 @@ void ccPointListPickingDlg::exportToNewPolyline()
     //get all labels
     std::vector<cc2DLabel*> labels;
     unsigned count = getPickedPoints(labels);
-    if (count>0)
+    if (count > 1)
     {
         ccPolyline* pline = new ccPolyline(m_associatedCloud);
 
@@ -219,7 +219,7 @@ void ccPointListPickingDlg::exportToNewPolyline()
             return;
         }
 
-        for (unsigned i=0;i<count;++i)
+        for (unsigned i=0; i<count; ++i)
         {
             const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
             pline->addPointIndex(PP.index);
@@ -231,7 +231,7 @@ void ccPointListPickingDlg::exportToNewPolyline()
     }
     else
     {
-        ccLog::Error("Pick some points first!");
+        ccLog::Error("Pick at least two points!");
     }
 }
 

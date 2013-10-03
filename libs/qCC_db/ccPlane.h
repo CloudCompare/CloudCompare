@@ -55,9 +55,6 @@ public:
 	**/
 	ccPlane(QString name = QString("Plane"));
 
-    //! create a plane as best fitting plane of any CCLib::GenericIndexedCloudPersist-derived object.
-    static ccPlane * fromFit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0);
-
     //! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_PLANE; }
 
@@ -79,6 +76,15 @@ public:
 
 	//! Sets an image as texture
 	bool setAsTexture(QImage image);
+
+	//! Fits a plane primitive on a cloud
+	/** The cloud can be any CCLib::GenericIndexedCloudPersist-derived object,
+		i.e. even a ccPolyline object for instance.
+		\param cloud input cloud
+		\param rms to retrieve plane fitting rms (optional)
+		\return plane primitive (if successful)
+	**/
+	static ccPlane* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0);
 
 protected:
     

@@ -470,12 +470,11 @@ void ccPropertiesTreeDelegate::fillWithPolyline(ccPolyline* _obj)
 
     addSeparator("Polyline");
 
-    //number of points
-    appendRow( ITEM("Points"), ITEM(QLocale(QLocale::English).toString(_obj->size())) );
+    //number of vertices
+    appendRow( ITEM("Vertices"), ITEM(QLocale(QLocale::English).toString(_obj->size())) );
 
     //custom line width
     appendRow( ITEM("Line width"), PERSISTENT_EDITOR(OBJECT_POLYLINE_WIDTH), true );
-
 }
 
 void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)
@@ -833,7 +832,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
         QComboBox *comboBox = new QComboBox(parent);
 
         comboBox->addItem(c_defaultPolyWidthSizeString); //size = 0
-        for (unsigned i=1;i<=10;++i)
+        for (unsigned i=1; i<=10; ++i)
             comboBox->addItem(QString::number(i));
 
         connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(polyineWidthChanged(int)));
@@ -1375,8 +1374,10 @@ void ccPropertiesTreeDelegate::polyineWidthChanged(int size)
     ccPolyline* pline = ccHObjectCaster::ToPolyline(m_currentObject);
     assert(pline);
 
-    pline->setWidth(size);
-    updateDisplay();
+	if (pline)
+		pline->setWidth(size);
+    
+	updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTitle)

@@ -25,7 +25,7 @@
 
 //! Colored polyline
 /** Extends the Polyline class of CCLib.
-	Check CCLib documentation for more information about it.
+Check CCLib documentation for more information about it.
 **/
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"
@@ -46,20 +46,20 @@ public:
 	**/
 	ccPolyline(const ccPolyline& poly);
 
-    //! Default destructor
+	//! Destructor
 	virtual ~ccPolyline() {};
 
-    //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const {return CC_POLY_LINE;};
-	virtual bool isSerializable() const { return true; }
+	//! Returns class ID
+	virtual CC_CLASS_ENUM getClassID() const {return CC_POLY_LINE;}
 
 	//inherited methods (ccHObject)
-    virtual bool hasColors() const;
+	virtual bool isSerializable() const { return true; }
+	virtual bool hasColors() const;
 
 	//! Defines if the polyline is considered as 2D or 3D
 	/** \param state if true, the polyline is 2D
 	**/
-    void set2DMode(bool state);
+	void set2DMode(bool state);
 
 	//! Returns whether the polyline is considered as 2D or 3D
 	inline bool is2DMode() const { return m_mode2D; }
@@ -74,10 +74,10 @@ public:
 	**/
 	void setColor(const colorType col[]);
 
-    //! Set the width of the line
-    /**  \param width the desired width
-     **/
-    void setWidth(const ScalarType width);
+	//! Sets the width of the line
+	/**  \param width the desired width
+	**/
+	void setWidth(PointCoordinateType width);
 
 	//! Returns the polyline color
 	/** \return a pointer to the polyline RGB color
@@ -85,7 +85,7 @@ public:
 	const colorType* getColor() const;
 
 	//inherited methods (ccHObject)
-    virtual ccBBox getMyOwnBB();
+	virtual ccBBox getMyOwnBB();
 
 protected:
 
@@ -99,8 +99,8 @@ protected:
 	//! Unique RGB color
 	colorType m_rgbColor[3];
 
-    //! Width of the line
-    ScalarType m_width;
+	//! Width of the line
+	PointCoordinateType m_width;
 
 	//! Whether poyline should be considered as 2D (true) or 3D (false)
 	bool m_mode2D;

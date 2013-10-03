@@ -28,7 +28,6 @@
 #include "ccAdvancedTypes.h"
 
 class ccOctree;
-class ccPlane;
 
 /***************************************************
 				ccGenericPointCloud
@@ -197,12 +196,6 @@ public:
 
     //! Applies a rigid transformation (rotation + translation)
     virtual void applyRigidTransformation(const ccGLMatrix& trans)=0;
-
-	//! Fits a plane primitive on cloud
-	/** \param rms to retrieve plane fitting rms
-		\return plane primitive (if successful)
-	**/
-	ccPlane* fitPlane(double* rms = 0);
 
 	//! Sets shift to cloud original coordinates (information storage only)
 	void setOriginalShift(double x, double y, double z);

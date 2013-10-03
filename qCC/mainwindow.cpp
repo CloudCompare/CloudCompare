@@ -6375,52 +6375,45 @@ void MainWindow::doActionScalarFieldArithmetic()
 void MainWindow::doComputePlaneOrientation()
 {
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    size_t i,selNum=selectedEntities.size();
+    size_t selNum=selectedEntities.size();
     if (selNum<1)
         return;
 
-    for (i=0;i<selNum;++i)
+    for (size_t i=0; i<selNum; ++i)
     {
-        ccHObject * ent = selectedEntities[i];
+        ccHObject* ent = selectedEntities[i];
 
-        CCLib::GenericIndexedCloudPersist* cloud;
-
+        CCLib::GenericIndexedCloudPersist* cloud = 0;
 
         if (ent->isKindOf(CC_POINT_CLOUD) )
         {
-            ccPointCloud * gencloud = ccHObjectCaster::ToPointCloud(ent);
-            cloud = static_cast<CCLib::GenericIndexedCloudPersist *> (gencloud);
+            ccGenericPointCloud * gencloud = ccHObjectCaster::ToGenericPointCloud(ent);
+            cloud = static_cast<CCLib::GenericIndexedCloudPersist*>(gencloud);
         }
         else if (ent->isKindOf(CC_POLY_LINE))
         {
              ccPolyline * pline = ccHObjectCaster::ToPolyline(ent);
-             cloud = static_cast<CCLib::GenericIndexedCloudPersist *> (pline);
+             cloud = static_cast<CCLib::GenericIndexedCloudPersist*>(pline);
         }
-
-
 
         if (cloud)
         {
-			double rms=0.0;
-            ccPlane* pPlane = ccPlane::fromFit(cloud, &rms);
+			double rms = 0.0;
+            ccPlane* pPlane = ccPlane::Fit(cloud, &rms);
 
-            if (!pPlane)
-			{
-                ccConsole::Warning(QString("\tWarning: failed to fit a plane on cloud '%1'").arg(ent->getName()));
-			}
-			else
-			{
-				//as all information appears in Console...
-				forceConsoleDisplay();
+			//as all information appears in Console...
+			forceConsoleDisplay();
 
-                ccConsole::Print(QString("[Orientation] cloud '%1'").arg(ent->getName()));
+            if (pPlane)
+			{
+                ccConsole::Print(QString("[Orientation] Entity '%1'").arg(ent->getName()));
 				ccConsole::Print("\t- plane fitting RMS: %f",rms);
 
 				const ccGLMatrix& planteTrans = pPlane->getTransformation();
 				CCVector3 N = pPlane->getNormal(); //plane normal
 
 				//We always consider the normal with a positive 'Z' by default!
-				if(N.z < 0.0)
+				if (N.z < 0.0)
 					N *= -1.0;
 				ccConsole::Print("\t- normal: (%f,%f,%f)",N.x,N.y,N.z);
 
@@ -6452,6 +6445,10 @@ void MainWindow::doComputePlaneOrientation()
 				pPlane->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);
                 selectedEntities[i]->prepareDisplayForRefresh_recursive();
 				addToDB(pPlane);
+			}
+			else
+			{
+                ccConsole::Warning(QString("Failed to fit a plane on entity '%1'").arg(ent->getName()));
 			}
 		}
 	}

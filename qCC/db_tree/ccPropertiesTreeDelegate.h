@@ -58,7 +58,7 @@ public:
 							OBJECT_COLORS_SHOWN			,
 							OBJECT_NORMALS_SHOWN		,
 							OBJECT_SCALAR_FIELD_SHOWN	,
-                            OBJECT_POLYLINE_WIDTH       ,
+							OBJECT_POLYLINE_WIDTH       ,
 							//OBJECT_XXXX				,
 							//OBJECT_XXXX				,
 							OBJECT_SF_SHOW_SCALE		,

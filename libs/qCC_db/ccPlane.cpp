@@ -75,7 +75,7 @@ ccGenericPrimitive* ccPlane::clone() const
 	return finishCloneJob(new ccPlane(m_xWidth,m_yWidth,&m_transformation,getName()));
 }
 
-ccPlane * ccPlane::fromFit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/* = 0*/)
+ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/)
 {
     //number of points
     unsigned count = cloud->size();
@@ -101,7 +101,6 @@ ccPlane * ccPlane::fromFit(CCLib::GenericIndexedCloudPersist *cloud, double* rms
         *rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(cloud, theLSQPlane);
     }
 
-
     //get the centroid
     const CCVector3* G = Yk.getGravityCenter();
     assert(G);
@@ -114,40 +113,40 @@ ccPlane * ccPlane::fromFit(CCLib::GenericIndexedCloudPersist *cloud, double* rms
 
     PointCoordinateType minX=0,maxX=0,minY=0,maxY=0;
     cloud->placeIteratorAtBegining();
-    for (unsigned k=0;k<count;++k)
+    for (unsigned k=0; k<count; ++k)
     {
         //projetion into local 2D plane ref.
         CCVector3 P = *(cloud->getNextPoint()) - *G;
-        PointCoordinateType x2D = P.dot(*X);
+        
+		PointCoordinateType x2D = P.dot(*X);
         PointCoordinateType y2D = P.dot(Y);
 
         if (k!=0)
         {
-            if (minX<x2D)
-                minX=x2D;
-            else if (maxX>x2D)
-                maxX=x2D;
-            if (minY<y2D)
-                minY=y2D;
-            else if (maxY>y2D)
-                maxY=y2D;
+            if (minX < x2D)
+                minX = x2D;
+            else if (maxX > x2D)
+                maxX = x2D;
+            if (minY < y2D)
+                minY = y2D;
+            else if (maxY > y2D)
+                maxY = y2D;
         }
         else
         {
-            minX=maxX=x2D;
-            minY=maxY=y2D;
+            minX = maxX = x2D;
+            minY = maxY = y2D;
         }
     }
 
-
-    //we recenter plane (as it is not always the case!)
-    float dX = maxX-minX;
-    float dY = maxY-minY;
-    CCVector3 Gt = *G + *X * (minX+dX*0.5);
-    Gt += Y * (minY+dY*0.5);
+    //we recenter the plane
+    PointCoordinateType dX = maxX-minX;
+    PointCoordinateType dY = maxY-minY;
+    CCVector3 Gt = *G + *X * (minX + dX*static_cast<PointCoordinateType>(0.5));
+    Gt += Y * (minY + dY*static_cast<PointCoordinateType>(0.5));
     ccGLMatrix glMat(*X,Y,N,Gt);
 
-    ccPlane * plane = new ccPlane (dX, dY, &glMat);
+    ccPlane* plane = new ccPlane(dX, dY, &glMat);
 
     return plane;
 }

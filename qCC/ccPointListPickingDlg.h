@@ -26,7 +26,7 @@ class cc2DLabel;
 class ccHObject;
 
 //! Dialog/interactor to graphically pick a list of points
-/** Options let the user to export the list to an ASCII file, to a new cloud, etc.
+/** Options let the user export the list to an ASCII file, a new cloud, a polyline, etc.
 **/
 class ccPointListPickingDlg : public ccPointPickingGenericInterface, public Ui::PointListPickingDlg
 {
@@ -49,8 +49,8 @@ protected slots:
     void cancelAndExit();
     //! Exports list to a new cloud
     void exportToNewCloud();
-    //! Exports list to a new cloud
-    void exportToNewPolyline();
+	//! Exports list to a polyline
+	void exportToNewPolyline();
     //! Removes last inserted point from list
     void removeLastEntry();
     //! Exports list to an 'xyz' ASCII file

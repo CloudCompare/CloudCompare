@@ -23,7 +23,6 @@
 
 #include "ccOctree.h"
 #include "ccSensor.h"
-#include "ccPlane.h"
 
 ccGenericPointCloud::ccGenericPointCloud(QString name)
 	: ccHObject(name)

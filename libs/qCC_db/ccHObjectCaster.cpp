@@ -84,7 +84,7 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 					*lockedVertices = vertices->isLocked();
 				return vertices;
 			}
-		}
+        }
 	}
 
     return 0;

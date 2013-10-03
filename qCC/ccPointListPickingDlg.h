@@ -49,6 +49,8 @@ protected slots:
     void cancelAndExit();
     //! Exports list to a new cloud
     void exportToNewCloud();
+    //! Exports list to a new cloud
+    void exportToNewPolyline();
     //! Removes last inserted point from list
     void removeLastEntry();
     //! Exports list to an 'xyz' ASCII file

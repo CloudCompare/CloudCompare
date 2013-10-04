@@ -7268,8 +7268,7 @@ void MainWindow::saveFile()
     QString filters;
 
 	//From now on, BIN format handles about anyhting!
-    filters.append(CC_FILE_TYPE_FILTERS[BIN]);
-	filters.append("\n");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[BIN]) + ";;");
 
 	ccHObject* toSave = 0;
     QString selectedFilter = CC_FILE_TYPE_FILTERS[BIN];
@@ -7283,26 +7282,19 @@ void MainWindow::saveFile()
 			selectedFilter = CC_FILE_TYPE_FILTERS[currentCloudSaveDlgFilter];
 
 			//add cloud output file filters
-			filters.append(CC_FILE_TYPE_FILTERS[ASCII]);
-			filters.append("\n");
+            filters.append(QString(CC_FILE_TYPE_FILTERS[ASCII]) + ";;");
 	#ifdef CC_E57_SUPPORT
-			filters.append(CC_FILE_TYPE_FILTERS[E57]);
-			filters.append("\n");
+            filters.append(QString(CC_FILE_TYPE_FILTERS[E57]) + ";;");
 	#endif
 			if (clouds.getChildrenNumber()==1)
 			{
-				filters.append(CC_FILE_TYPE_FILTERS[PLY]);
-				filters.append("\n");
-				filters.append(CC_FILE_TYPE_FILTERS[VTK]);
-				filters.append("\n");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[PLY])+";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[VTK])+";;");
 	#ifdef CC_LAS_SUPPORT
-				filters.append(CC_FILE_TYPE_FILTERS[LAS]);
-				filters.append("\n");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[LAS])+";;");
 	#endif
-				filters.append(CC_FILE_TYPE_FILTERS[PN]);
-				filters.append("\n");
-				filters.append(CC_FILE_TYPE_FILTERS[PV]);
-				filters.append("\n");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[PN])+";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[PV])+";;");
 			}
 			//TODO: POV files handling!
 			//filters.append(CC_FILE_TYPE_FILTERS[POV]);
@@ -7316,20 +7308,14 @@ void MainWindow::saveFile()
 				selectedFilter = CC_FILE_TYPE_FILTERS[currentMeshSaveDlgFilter];
 
 				//add meshes output file filters
-				filters.append(CC_FILE_TYPE_FILTERS[OBJ]);
-				filters.append("\n");
-				filters.append(CC_FILE_TYPE_FILTERS[PLY]);
-				filters.append("\n");
-				filters.append(CC_FILE_TYPE_FILTERS[VTK]);
-				filters.append("\n");
-				filters.append(CC_FILE_TYPE_FILTERS[STL]);
-				filters.append("\n");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[OBJ])+";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[PLY])+";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[VTK])+";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[STL])+";;");
 		#ifdef CC_X3D_SUPPORT
-				filters.append(CC_FILE_TYPE_FILTERS[X3D]);
-				filters.append("\n");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[X3D])+";;");
 		#endif
-				filters.append(CC_FILE_TYPE_FILTERS[MA]);
-				filters.append("\n");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[MA])+";;");
 			}
 		}
 		else if (hasImage)
@@ -7347,7 +7333,7 @@ void MainWindow::saveFile()
 				QList<QByteArray> formats = QImageWriter::supportedImageFormats();
 				//we convert this list into a proper "filters" string
 				for (int i=0;i<formats.size();++i)
-					filters.append(QString("%1 image (*.%2)\n").arg(QString(formats[i].data()).toUpper()).arg(formats[i].data()));
+                    filters.append(QString("%1 image (*.%2);;").arg(QString(formats[i].data()).toUpper()).arg(formats[i].data()));
 			}
 		}
 	}

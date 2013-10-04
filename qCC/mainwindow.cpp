@@ -7155,52 +7155,12 @@ void MainWindow::loadFile()
     QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
     int currentOpenDlgFilter = settings.value("selectedFilter",BIN).toInt();
 
-    //available filters
+    //  Add all available file extension filters to a single QString.
+    //  Each filter entry is separated by double semicolon ";;".
     QString filters;
-    filters.append(CC_FILE_TYPE_FILTERS[UNKNOWN_FILE]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[BIN]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[ASCII]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[PLY]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[OBJ]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[VTK]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[STL]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[PCD]);
-    filters.append("\n");
-#ifdef CC_X3D_SUPPORT
-    filters.append(CC_FILE_TYPE_FILTERS[X3D]);
-    filters.append("\n");
-#endif
-#ifdef CC_LAS_SUPPORT
-    filters.append(CC_FILE_TYPE_FILTERS[LAS]);
-    filters.append("\n");
-#endif
-#ifdef CC_E57_SUPPORT
-    filters.append(CC_FILE_TYPE_FILTERS[E57]);
-    filters.append("\n");
-#endif
-#ifdef CC_PDMS_SUPPORT
-    filters.append(CC_FILE_TYPE_FILTERS[PDMS]);
-    filters.append("\n");
-#endif
-    filters.append(CC_FILE_TYPE_FILTERS[SOI]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[PN]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[PV]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[POV]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[ICM]);
-    filters.append("\n");
-    filters.append(CC_FILE_TYPE_FILTERS[BUNDLER]);
-    filters.append("\n");
+    for (unsigned i = 0; i < (unsigned) FILE_TYPES_COUNT; ++i){
+        filters.append(QString(CC_FILE_TYPE_FILTERS[i]) + ";;");
+    }
 
     //currently selected filter
     QString selectedFilter = CC_FILE_TYPE_FILTERS[currentOpenDlgFilter];
@@ -7210,9 +7170,7 @@ void MainWindow::loadFile()
                                 tr("Open file(s)"),
                                 currentPath,
                                 filters,
-                                &selectedFilter
-                                /*QFileDialog::DontUseNativeDialog*/);	//Windows has a limitation on the returned string size
-																		//BUT older buggy versions of Qt (default on Kubuntu?) could require this flag to be set!!!
+                                &selectedFilter);
     if (selectedFiles.isEmpty())
         return;
 

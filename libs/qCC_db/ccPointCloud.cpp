@@ -478,7 +478,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		//first we fuse the new SF with the existing one
 		for (unsigned k=0;k<newSFCount;++k)
 		{
-			const CCLib::ScalarField* sf = addedCloud->getScalarField((int)k);
+			const ccScalarField* sf = static_cast<ccScalarField*>(addedCloud->getScalarField((int)k));
 			if (sf)
 			{
 				//does this field already exist (same name)?
@@ -507,6 +507,17 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 						for (unsigned i=0; i<addedPoints; i++)
 							newSF->setValue(pointCountBefore+i,sf->getValue(i));
 						newSF->computeMinAndMax();
+						//copy color ramp parameters
+						newSF->setColorRampSteps(sf->getColorRampSteps());
+						newSF->setColorScale(sf->getColorScale());
+						newSF->showNaNValuesInGrey(sf->areNaNValuesShownInGrey());
+						newSF->setLogScale(sf->logScale());
+						newSF->setSymmetricalScale(sf->symmetricalScale());
+						newSF->alwaysShowZero(sf->isZeroAlwaysShown());
+						newSF->setMinDisplayed(sf->displayRange().start());
+						newSF->setMaxDisplayed(sf->displayRange().stop());
+						newSF->setSaturationStart(sf->saturationRange().start());
+						newSF->setSaturationStop(sf->saturationRange().stop());
 
 						//add scalar field to this cloud
 						sfIdx = addScalarField(newSF);

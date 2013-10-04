@@ -37,6 +37,7 @@
 #include <cc2DLabel.h>
 #include <ccGenericPrimitive.h>
 #include <ccPlane.h>
+#include <ccPolyline.h>
 
 //local
 #include "ccPropertiesTreeDelegate.h"
@@ -964,6 +965,14 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
 			item->isKindOf(CC_PRIMITIVE))
 		{
 			defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+		}
+		else if (item->isKindOf(CC_POLY_LINE))
+		{
+			const ccPolyline* poly = static_cast<const ccPolyline*>(item);
+			//we can only displace a polyline if it is not dependant on it's father!
+			const ccHObject* polyVertices = dynamic_cast<const ccHObject*>(poly->getAssociatedCloud());
+			if (polyVertices != poly->getParent())
+				defaultFlags |= (Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
 		}
 		else if (item->isKindOf(CC_2D_VIEWPORT_OBJECT))
 		{

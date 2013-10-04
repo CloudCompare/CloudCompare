@@ -24,6 +24,7 @@ v2.5.1 ??/??/2013
 		was unchecked.
 	* Height Grid Generation tool would crash when generating a grid with SF interpolation and the 'leave empty'
 		option for empty cells.
+	* when cloning a cloud, the scalar field display options (color scales, steps, etc.) were not duplicated.
 
 v2.5.0 07/12/2013
 - New version numbering scheme (build index appended instead of the release date)

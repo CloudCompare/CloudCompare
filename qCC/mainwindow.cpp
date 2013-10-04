@@ -7158,9 +7158,33 @@ void MainWindow::loadFile()
     //  Add all available file extension filters to a single QString.
     //  Each filter entry is separated by double semicolon ";;".
     QString filters;
-    for (unsigned i = 0; i < (unsigned) FILE_TYPES_COUNT; ++i){
-        filters.append(QString(CC_FILE_TYPE_FILTERS[i]) + ";;");
-    }
+    filters.append(QString(CC_FILE_TYPE_FILTERS[UNKNOWN_FILE]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[BIN]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[ASCII]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[PLY]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[OBJ]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[VTK]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[STL]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[PCD]) + ";;");
+#ifdef CC_X3D_SUPPORT
+    filters.append(QString(CC_FILE_TYPE_FILTERS[X3D]) + ";;");
+#endif
+
+#ifdef CC_LAS_SUPPORT
+    filters.append(QString(CC_FILE_TYPE_FILTERS[LAS]) + ";;");
+#endif
+#ifdef CC_E57_SUPPORT
+    filters.append(QString(CC_FILE_TYPE_FILTERS[E57]) + ";;");
+#endif
+#ifdef CC_PDMS_SUPPORT
+    filters.append(QString(CC_FILE_TYPE_FILTERS[PDMS]) + ";;");
+#endif
+    filters.append(QString(CC_FILE_TYPE_FILTERS[SOI]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[PN]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[PV]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[POV]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[ICM]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[BUNDLER]) + ";;");
 
     //currently selected filter
     QString selectedFilter = CC_FILE_TYPE_FILTERS[currentOpenDlgFilter];

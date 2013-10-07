@@ -343,6 +343,20 @@ void BaseFilter::getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & e
 }
 
 
+void BaseFilter::getSelectedEntitiesThatAre(CC_CLASS_ENUM  kind, ccHObject::Container & entities)
+{
+    ccHObject::Container selected = m_selected;
+    for (int i = 0 ; i < selected.size(); ++i)
+    {
+        ccHObject * this_obj = selected.at(i);
+        if (this_obj->isA(kind))
+        {
+            entities.push_back(this_obj);
+        }
+    }
+}
+
+
 int BaseFilter::hasSelectedScalarField(std::string field_name)
 {
     ccPointCloud* cloud = getSelectedEntityAsCCPointCloud();

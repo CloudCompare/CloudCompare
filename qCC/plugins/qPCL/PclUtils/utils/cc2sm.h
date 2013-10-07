@@ -22,6 +22,8 @@
 
 //PCL
 #include <sensor_msgs/PointCloud2.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -38,6 +40,8 @@ public:
 	sensor_msgs::PointCloud2 getOneOfNormal(const int coord_ids);
 
 	sensor_msgs::PointCloud2 getXYZ();
+
+    void getXYZ(pcl::PointCloud<pcl::PointXYZ> & cloud);
 
 	sensor_msgs::PointCloud2 getNormals();
 

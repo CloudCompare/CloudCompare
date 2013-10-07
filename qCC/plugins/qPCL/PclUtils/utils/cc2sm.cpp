@@ -186,6 +186,13 @@ sensor_msgs::PointCloud2 cc2smReader::getXYZ()
 	return *sm_cloud;
 }
 
+
+void cc2smReader::getXYZ(pcl::PointCloud<pcl::PointXYZ> & cloud)
+{
+    sensor_msgs::PointCloud2 sm = getXYZ();
+    pcl::fromROSMsg(sm, cloud);
+}
+
 sensor_msgs::PointCloud2 cc2smReader::getNormals()
 {
 	sensor_msgs::PointCloud2::Ptr sm_cloud (new sensor_msgs::PointCloud2);

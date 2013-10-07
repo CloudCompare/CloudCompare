@@ -124,6 +124,9 @@ public:
     //! get all entities that are slected and that also are cc_point_cloud
     void getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & entities);
 
+    //! get all entities that are slected and that also are of the specified type
+    void getSelectedEntitiesThatAre(CC_CLASS_ENUM  kind, ccHObject::Container & entities);
+
 	//! Returns 1 if the first selected entity has RGB info
 	int hasSelectedRGB();
 

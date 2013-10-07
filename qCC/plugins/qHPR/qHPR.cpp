@@ -149,7 +149,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		{
 			//not enough memory!
 			delete[] pt_array;
-			return false;
+			return 0;
 		}
 
 		vertexT *vertex = 0,**vertexp = 0;

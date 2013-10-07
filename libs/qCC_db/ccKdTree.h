@@ -20,6 +20,7 @@
 
 //CCLib
 #include <TrueKdTree.h>
+#include <GenericProgressCallback.h>
 
 //Local
 #include "ccHObject.h"
@@ -28,7 +29,6 @@
 #include <set>
 
 class ccGenericPointCloud;
-class CCLib::GenericProgressCallback;
 
 //! KD-tree structure
 /** Extends the CCLib::TrueKdTree class.

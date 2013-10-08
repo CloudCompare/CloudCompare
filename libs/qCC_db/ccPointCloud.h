@@ -28,7 +28,9 @@
 #include <ChunkedPointCloud.h>
 #include <GenericProgressCallback.h>
 
+//Local
 #include "ccGenericPointCloud.h"
+#include "ccPlatform.h"
 
 class ccPointCloud;
 class ccScalarField;
@@ -38,10 +40,10 @@ class ccScalarField;
 ***************************************************/
 
 //! Max number of points per cloud (point cloud will be chunked above this limit)
-#if defined(_W64) || defined(__x86_64__) || defined(__ppc64__)
+#if defined(CC_ENV_32)
+const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD =  128000000;
+#else //CC_ENV_64 (but maybe CC_ENV_128 one day ;)
 const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 2000000000; //we must keep it below MAX_INT to avoid probable issues ;)
-#else
-const unsigned CC_MAX_NUMBER_OF_POINTS_PER_CLOUD = 128000000;
 #endif
 
 //! Max number of displayed point (per entity) in "low detail" display

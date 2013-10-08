@@ -27,10 +27,6 @@
 //system
 #include <assert.h>
 
-#if !defined(_WIN32) && !defined(WIN32)
-#define _vsnprintf vsnprintf
-#endif
-
 /***************
  *** Globals ***
  ***************/

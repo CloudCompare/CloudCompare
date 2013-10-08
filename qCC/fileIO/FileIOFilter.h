@@ -25,13 +25,6 @@
 #include <ccHObject.h>
 #include <ccHObjectCaster.h>
 
-//Support for LAS ASPRS files
-#if defined(_WIN32) || defined(WIN32)
-#ifndef _MSC_VER
-//#define CC_LAS_SUPPORT //only available for main Code::Blocks MinGW version!
-#endif
-#endif
-
 //! Max number of characters per line in an ASCII file
 const int MAX_ASCII_FILE_LINE_LENGTH	=	4096;
 

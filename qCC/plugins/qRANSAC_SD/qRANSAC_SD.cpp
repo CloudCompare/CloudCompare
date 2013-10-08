@@ -48,9 +48,18 @@
 #include <ccCylinder.h>
 #include <ccCone.h>
 #include <ccTorus.h>
+#include <ccPlatform.h>
 
 //CCLib
 #include <ScalarField.h>
+
+//System
+#include <algorithm>
+#if defined(CC_WINDOWS)
+#include "Windows.h"
+#else
+#include <time.h>
+#endif
 
 qRansacSD::qRansacSD(QObject* parent/*=0*/)
 	: QObject(parent)
@@ -302,7 +311,7 @@ void qRansacSD::doAction()
 		unsigned progress = 0;
 		while (!future.isFinished())
 		{
-#if defined(_WIN32) || defined(WIN32)
+#if defined(CC_WINDOWS)
 			::Sleep(500);
 #else
 			sleep(500);

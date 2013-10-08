@@ -16,9 +16,12 @@
 //##########################################################################
 
 #include "ccCalibratedImage.h"
-#include "ccPointCloud.h"
 
-#if defined(_WIN32) || defined(WIN32) //DGM: I've tested levmar only on Windows yet!
+//Local
+#include "ccPointCloud.h"
+#include "ccPlatform.h"
+
+#if defined(CC_WINDOWS) //DGM: I've tested levmar only on Windows so far!
 //#define USE_LEVMAR
 #endif
 

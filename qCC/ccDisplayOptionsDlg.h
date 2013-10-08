@@ -21,12 +21,15 @@
 //Local
 #include "ccGuiParameters.h"
 
+//qCC_db
+#include <ccPlatform.h>
+
 //Qt
 #include <QDialog>
 #include <QColor>
 #include <QAbstractButton>
 #include <QPalette>
-#ifdef _WIN32
+#ifdef CC_WINDOWS
 #include <QWindowsStyle>
 #endif
 
@@ -65,7 +68,7 @@ public:
 		QPalette pal = button->palette();
 		pal.setColor(QPalette::ButtonText, col);
 		button->setPalette(pal);
-#ifdef _WIN32
+#ifdef CC_WINDOWS
 		button->setStyle(new QWindowsStyle());
 		button->update();
 #endif

@@ -22,6 +22,9 @@
 #include <ccProgressDialog.h>
 #include <ccHObjectCaster.h>
 
+//qCC_db
+#include <ccPlatform.h>
+
 //qCC
 #include <ccMainAppInterface.h>
 
@@ -32,7 +35,7 @@
 #include <qtconcurrentrun.h>
 
 //system
-#if defined(_WIN32) || defined(WIN32)
+#if defined(CC_WINDOWS)
 #include "Windows.h"
 #else
 #include <unistd.h>
@@ -188,7 +191,7 @@ int BaseFilter::start()
         QFuture<void> future = QtConcurrent::run(doCompute);
         while (!future.isFinished())
         {
-#if defined(_WIN32) || defined(WIN32)
+#if defined(CC_WINDOWS)
             ::Sleep(500);
 #else
             usleep(1.0);
@@ -218,7 +221,7 @@ int BaseFilter::start()
         QFuture<void> future = QtConcurrent::run(doCompute);
         while (!future.isFinished())
         {
-#if defined(_WIN32) || defined(WIN32)
+#if defined(CC_WINDOWS)
             ::Sleep(500);
 #else
             usleep(1.0);
@@ -332,9 +335,9 @@ void BaseFilter::getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& 
 void BaseFilter::getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & entities)
 {
     ccHObject::Container selected = m_selected;
-    for (int i = 0 ; i < selected.size(); ++i)
+    for (size_t i = 0 ; i < selected.size(); ++i)
     {
-        ccHObject * this_obj = selected.at(i);
+        ccHObject * this_obj = selected[i];
         if (this_obj->isA(CC_POINT_CLOUD))
         {
             entities.push_back(this_obj);
@@ -346,9 +349,9 @@ void BaseFilter::getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & e
 void BaseFilter::getSelectedEntitiesThatAre(CC_CLASS_ENUM  kind, ccHObject::Container & entities)
 {
     ccHObject::Container selected = m_selected;
-    for (int i = 0 ; i < selected.size(); ++i)
+    for (size_t i = 0 ; i < selected.size(); ++i)
     {
-        ccHObject * this_obj = selected.at(i);
+        ccHObject * this_obj = selected[i];
         if (this_obj->isA(kind))
         {
             entities.push_back(this_obj);

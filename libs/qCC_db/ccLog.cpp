@@ -17,10 +17,13 @@
 
 #include "ccLog.h"
 
-//system
+//Local
+#include "ccPlatform.h"
+
+//System
 #include <assert.h>
 
-#if !defined(_WIN32) && !defined(WIN32)
+#if !defined(CC_WINDOWS)
 #define _vsnprintf vsnprintf
 #endif
 

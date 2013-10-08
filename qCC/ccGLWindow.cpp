@@ -38,6 +38,7 @@
 #include <ccPointCloud.h>
 #include <ccColorRampShader.h>
 #include <ccClipBox.h>
+#include <ccPlatform.h>
 
 //CCFbo
 #include <ccShader.h>
@@ -886,7 +887,7 @@ void ccGLWindow::dropEvent(QDropEvent *event)
 		for (int i=0;i<fileNames.size();++i)
 		{
 			fileNames[i] = fileNames[i].trimmed();
-#if defined(_WIN32) || defined(WIN32)
+#if defined(CC_WINDOWS)
 			fileNames[i].remove("file:///");
 #else
 			fileNames[i].remove("file://");
@@ -1816,7 +1817,7 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 	m_cursorMoved = false;
 
 	if ((event->buttons() & Qt::RightButton)
-#ifdef __APPLE__
+#ifdef CC_MAC_OS
 		|| (QApplication::keyboardModifiers () & Qt::MetaModifier)
 #endif
 		)
@@ -1905,7 +1906,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 	int dy = y - m_lastMousePos.y();
 
 	if ((event->buttons() & Qt::RightButton)
-#ifdef __APPLE__
+#ifdef CC_MAC_OS
 		|| (QApplication::keyboardModifiers () & Qt::MetaModifier)
 #endif
 		)
@@ -2076,12 +2077,11 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 		showPivotSymbol(m_pivotVisibility == PIVOT_ALWAYS_SHOW);
 	}
 
-#ifndef __APPLE__
-	if (event->button() == Qt::RightButton)
+	if ((event->button() == Qt::RightButton)
+#ifdef CC_MAC_OS
+		|| (QApplication::keyboardModifiers () & Qt::MetaModifier)
 #endif
-#ifdef __APPLE__
-	  if ((event->button() == Qt::RightButton) || (QApplication::keyboardModifiers () & Qt::MetaModifier))
-#endif
+		)
 	{
 		if (!cursorHasMoved)
 		{

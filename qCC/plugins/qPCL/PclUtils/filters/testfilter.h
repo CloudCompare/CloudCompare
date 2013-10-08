@@ -20,13 +20,16 @@
 
 #include "BaseFilter.h"
 
+//qCC_db
+#include <ccPlatform.h>
+
 //Qt
 #include <QThreadPool>
 
 //System
 #include <iostream>
 
-#if !defined(_WIN32) && !defined(WIN32)
+#if !defined(CC_WINDOWS)
 #include <unistd.h>
 #endif
 

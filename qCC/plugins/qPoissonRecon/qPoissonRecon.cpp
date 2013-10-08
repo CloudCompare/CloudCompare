@@ -30,15 +30,15 @@
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccMesh.h>
+#include <ccPlatform.h>
 
 //System
 #include <algorithm>
-#if defined(_WIN32) || defined(WIN32)
+#if defined(CC_WINDOWS)
 #include "Windows.h"
 #else
 #include <time.h>
 #endif
-
 
 qPoissonRecon::qPoissonRecon(QObject* parent/*=0*/)
 	: QObject(parent)
@@ -188,7 +188,7 @@ void qPoissonRecon::doAction()
 		unsigned progress = 0;
 		while (!future.isFinished())
 		{
-			#if defined(_WIN32) || defined(WIN32)
+			#if defined(CC_WINDOWS)
 			::Sleep(500);
 			#else
 			struct timespec waiter = {0, 500000000L};

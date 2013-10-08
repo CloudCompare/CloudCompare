@@ -21,6 +21,9 @@
 
 #include "Mouse3DInput.h"
 
+//qCC_db
+#include <ccPlatform.h>
+
 //Qt
 #include <QApplication>
 
@@ -35,7 +38,7 @@
 #define RIDEV_DEVNOTIFY 0x00002000
 #endif
 
-#ifdef _WIN64
+#ifdef CC_ENV_64
 typedef unsigned __int64 QWORD;
 #endif
 
@@ -297,7 +300,7 @@ bool Mouse3DInput::initializeRawInput(HWND hwndTarget)
 
 UINT Mouse3DInput::getRawInputBuffer(PRAWINPUT pData, PUINT pcbSize, UINT cbSizeHeader)
 {
-#ifdef _WIN64
+#ifdef CC_ENV_64
 	return ::GetRawInputBuffer(pData, pcbSize, cbSizeHeader);
 #else
 	BOOL bIsWow64 = FALSE;

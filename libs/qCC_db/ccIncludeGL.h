@@ -18,6 +18,9 @@
 #ifndef CC_INCLUDE_GL_HEADER
 #define CC_INCLUDE_GL_HEADER
 
+//Local
+#include <ccPlatform.h>
+
 //GLEW (if needed, must be included first)
 #ifdef USE_GLEW
 #include <GL/glew.h>
@@ -27,7 +30,7 @@
 #include <QGLWidget>
 #include <QGLFormat>
 
-#ifdef __APPLE__
+#ifdef CC_MAC_OS
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
 #else

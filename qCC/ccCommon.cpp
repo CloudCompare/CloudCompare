@@ -19,24 +19,31 @@
 
 #include "ccCommon.h"
 
+//qCC_db
+#include <ccPlatform.h>
+
 #define CC_VER_NUM 2.5
 #define CC_SUB_VER 1 //2013-08-18
 
 //! Returns current version as string
 QString ccCommon::GetCCVersion()
 {
-#if defined(_W64) || defined(__x86_64__) || defined(__ppc64__)
-	QString format = "64 bits";
+#if defined(CC_WINDOWS)
+	QString platform = "Windows";
+#elif defined(CC_MAC_OS)
+	QString platform = "Mac OS";
+#elif defined(CC_LINUX)
+	QString platform = "Linux";
 #else
-	QString format = "32 bits";
+	QString platform = "Unknown OS";
 #endif
 
-#if defined(_WIN32) || defined(WIN32)
-	QString platform = "Windows";
-#elif defined(__APPLE__)
-	QString platform = "Mac OS";
+#if defined(CC_ENV_64)
+	QString format = "64 bits";
+#elif defined(CC_ENV_32)
+	QString format = "32 bits";
 #else
-	QString platform = "Linux";
+	QString format = "?? bits";
 #endif
 
 	return QString("%1.%2").arg(CC_VER_NUM).arg(CC_SUB_VER)+QString(" [%1 %2]").arg(platform).arg(format);

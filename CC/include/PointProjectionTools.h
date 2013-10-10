@@ -24,7 +24,7 @@
 
 
 //! Triangulation types
-enum CC_TRIANGULATION_TYPES {GENERIC							=		1,		/**< Default triangulation (Delaunay 2D in XY plane) **/
+enum CC_TRIANGULATION_TYPES {	GENERIC							=		1,		/**< Default triangulation (Delaunay 2D in XY plane) **/
 								GENERIC_BEST_LS_PLANE			=		2,		/**< Delaunay 2D in best least square fitting plane **/
 								GENERIC_EMPTY					=		3		/**<Empty triangulation (to be filled by user) **/
 };
@@ -107,9 +107,12 @@ public:
 		may present however several topological aberrations ;).
 		\param theCloud a point cloud
 		\param type the triangulation strategy
+		\param maxEdgeLength max edge length for output triangles (0 = ignored)
 		\return a mesh
 	**/
-	static GenericIndexedMesh* computeTriangulation(GenericIndexedCloudPersist* theCloud, CC_TRIANGULATION_TYPES type=GENERIC);
+	static GenericIndexedMesh* computeTriangulation(GenericIndexedCloudPersist* theCloud,
+													CC_TRIANGULATION_TYPES type = GENERIC,
+													PointCoordinateType maxEdgeLength = 0);
 
 };
 

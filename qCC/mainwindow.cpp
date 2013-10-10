@@ -4160,16 +4160,23 @@ void MainWindow::doActionComputeMeshLS()
     doActionComputeMesh(GENERIC_BEST_LS_PLANE);
 }
 
+static double s_maxEdgeLength = 0;
 void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 {
+	bool ok = true;
+	double maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
+	if (!ok)
+		return;
+	s_maxEdgeLength = maxEdgeLength;
+
 	QProgressDialog pDlg("Triangulation in progress...", QString(), 0, 0, this);
 	pDlg.show();
 
 	QApplication::processEvents();
 
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    size_t i,selNum = selectedEntities.size();
-    for (i=0;i<selNum;++i)
+    size_t selNum = selectedEntities.size();
+    for (size_t i=0; i<selNum; ++i)
     {
         ccHObject* ent = selectedEntities[i];
         if (ent->isKindOf(CC_POINT_CLOUD))
@@ -4177,7 +4184,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
             ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 			bool hadNormals = cloud->hasNormals();
 
-            CCLib::GenericIndexedMesh* dummyMesh = CCLib::PointProjectionTools::computeTriangulation(cloud,type);
+            CCLib::GenericIndexedMesh* dummyMesh = CCLib::PointProjectionTools::computeTriangulation(cloud,type,maxEdgeLength);
 
             if (dummyMesh)
             {
@@ -6418,9 +6425,9 @@ void MainWindow::doComputePlaneOrientation()
 				ccConsole::Print("\t- normal: (%f,%f,%f)",N.x,N.y,N.z);
 
 				//we compute strike & dip by the way
-				double strike = 0.0, dip = 0.0;
-				ccNormalVectors::ConvertNormalToStrikeAndDip(N,strike,dip);
-				QString strikeAndDipStr = ccNormalVectors::ConvertStrikeAndDipToString(strike,dip);
+				PointCoordinateType dip = 0, dipDir = 0;
+				ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
+				QString strikeAndDipStr = ccNormalVectors::ConvertDipAndDipDirToString(dip,dipDir);
 
 				ccConsole::Print(QString("\t- strike/dip: %1").arg(strikeAndDipStr));
 

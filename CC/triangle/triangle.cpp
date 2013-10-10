@@ -223,8 +223,8 @@
 /*   generating an object library (triangle.o) by defining the TRILIBRARY    */
 /*   symbol.                                                                 */
 
-#define REDUCED     //DGM 08/24/2010 (forced)
-#define CDT_ONLY    //DGM 08/24/2010 (forced)
+/* #define REDUCED */
+/* #define CDT_ONLY */
 
 /* On some machines, my exact arithmetic routines might be defeated by the   */
 /*   use of internal extended precision floating-point registers.  The best  */
@@ -270,9 +270,9 @@
 /*   at once.                                                                */
 
 #define TRIPERBLOCK 4092           /* Number of triangles allocated at once. */
-#define SUBSEGPERBLOCK 508       /* Number of subsegments allocated at once. */
-#define VERTEXPERBLOCK 4092         /* Number of vertices allocated at once. */
-#define VIRUSPERBLOCK 1020   /* Number of virus triangles allocated at once. */
+#define SUBSEGPERBLOCK 508         /* Number of subsegments allocated at once. */
+#define VERTEXPERBLOCK 4092        /* Number of vertices allocated at once. */
+#define VIRUSPERBLOCK 1020         /* Number of virus triangles allocated at once. */
 /* Number of encroached subsegments allocated at once. */
 #define BADSUBSEGPERBLOCK 252
 /* Number of skinny triangles allocated at once. */
@@ -1337,7 +1337,7 @@ int minus1mod3[3] = {2, 0, 1};
 
 #ifdef EXTERNAL_TEST
 
-int triunsuitable();
+extern int triunsuitable(vertex triorg, vertex tridest, vertex triapex, REAL area);
 
 #else /* not EXTERNAL_TEST */
 
@@ -3244,8 +3244,11 @@ void parsecommandline(int argc, const char **argv, struct behavior *b) //DGM 08/
   int increment;
   int meshnumber;
 #endif /* not TRILIBRARY */
-  int i, j/*, k*/;
-  //char workstring[FILENAMESIZE];
+  int i, j;
+#ifndef CDT_ONLY
+  int k;
+  char workstring[FILENAMESIZE];
+#endif
 
   b->poly = b->refine = b->quality = 0;
   b->vararea = b->fixedarea = b->usertest = 0;
@@ -6557,7 +6560,7 @@ void enqueuebadtriang(struct mesh *m, struct behavior *b,
   } else {
     /* `badtri->key' is 2.0 to a negative exponent, so we'll record that */
     /*   fact and use the reciprocal of `badtri->key', which is > 1.0.   */
-    length = 1.0 / badtri->key;
+    length = 1.0f / badtri->key;
     posexponent = 0;
   }
   /* `length' is approximately 2.0 to what exponent?  The following code */
@@ -6576,7 +6579,7 @@ void enqueuebadtriang(struct mesh *m, struct behavior *b,
     length *= multiplier;
   }
   /* `length' is approximately squareroot(2.0) to what exponent? */
-  exponent = 2.0 * exponent + (length > SQUAREROOTTWO);
+  exponent = 2 * exponent + (length > SQUAREROOTTWO);
   /* `exponent' is now in the range 0...2047 for IEEE double precision.   */
   /*   Choose a queue in the range 0...4095.  The shortest edges have the */
   /*   highest priority (queue 4095).                                     */
@@ -6875,7 +6878,7 @@ void testtriangle(struct mesh *m, struct behavior *b, struct otri *testtri)
 
   if (b->vararea || b->fixedarea || b->usertest) {
     /* Check whether the area is larger than permitted. */
-    area = 0.5 * (dxod * dyda - dyod * dxda);
+    area = 0.5f * (dxod * dyda - dyod * dxda);
     if (b->fixedarea && (area > b->maxarea)) {
       /* Add this triangle to the list of bad triangles. */
       enqueuebadtri(m, b, testtri, minedge, tapex, torg, tdest);
@@ -12489,7 +12492,7 @@ void splitencsegs(struct mesh *m, struct behavior *b, int triflaws)
           /* Where do we split the segment? */
           split = nearestpoweroftwo / segmentlength;
           if (acutedest) {
-            split = 1.0 - split;
+            split = 1.0f - split;
           }
         } else {
           /* If we're not worried about adjacent segments, split */

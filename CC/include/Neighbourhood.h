@@ -89,8 +89,10 @@ class Neighbourhood
 		//! Applies 2D Delaunay triangulation
 		/** Cloud selection is first projected on the best least-square plane.
 			\param duplicateVertices whether to duplicate vertices (a new point cloud is created) or to use the associated one)
+			\param maxEdgeLength max edge length for output triangles (0 = ignored)
 		***/
-		GenericIndexedMesh* triangulateOnPlane(bool duplicateVertices=false);
+		GenericIndexedMesh* triangulateOnPlane(	bool duplicateVertices = false,
+												PointCoordinateType maxEdgeLength = 0);
 
 		//! Fit a quadric on point set (see getHeightFunction) then triangulates it inside bounding box
 		GenericIndexedMesh* triangulateFromQuadric(unsigned stepsX, unsigned stepsY);

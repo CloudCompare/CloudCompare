@@ -241,12 +241,15 @@ SimpleCloud* PointProjectionTools::applyTransformation(GenericCloud* theCloud, T
     return transformedCloud;
 }
 
-GenericIndexedMesh* PointProjectionTools::computeTriangulation(GenericIndexedCloudPersist* theCloud, CC_TRIANGULATION_TYPES type)
+GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCloudPersist* theCloud,
+																CC_TRIANGULATION_TYPES type/*=GENERIC*/,
+																PointCoordinateType maxEdgeLength/*=0*/)
 {
 	if (!theCloud)
 		return 0;
 
-	GenericIndexedMesh* theMesh=0;
+	//output mesh
+	GenericIndexedMesh* theMesh = 0;
 
 	switch(type)
 	{
@@ -265,7 +268,7 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(GenericIndexedClo
 
 			theCloud->placeIteratorAtBegining();
 			CCVector3 P;
-			for (unsigned i=0;i<count;++i)
+			for (unsigned i=0; i<count; ++i)
 			{
 				theCloud->getPoint(i,P);
 				the2DPoints[i].x = P.x;
@@ -273,19 +276,32 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(GenericIndexedClo
 			}
 
 			Delaunay2dMesh* dm = new Delaunay2dMesh();
-			if (!dm->build(the2DPoints))
+			if (!dm->build(the2DPoints,0))
 			{
 				delete dm;
 				return 0;
 			}
 			dm->linkMeshWith(theCloud,false);
-			theMesh = (GenericIndexedMesh*)dm;
+
+			//remove triangles with too long edges
+			if (maxEdgeLength > 0)
+			{
+				dm->removeTrianglesLongerThan(maxEdgeLength);
+				if (dm->size() == 0)
+				{
+					//no more triangles?
+					delete dm;
+					dm = 0;
+				}
+			}
+
+			theMesh = static_cast<GenericIndexedMesh*>(dm);
 		}
 		break;
 	case GENERIC_BEST_LS_PLANE:
 		{
 			Neighbourhood Yk(theCloud);
-			theMesh = Yk.triangulateOnPlane();
+			theMesh = Yk.triangulateOnPlane(false,maxEdgeLength);
 		}
 		break;
 	case GENERIC_EMPTY:

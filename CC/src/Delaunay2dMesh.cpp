@@ -27,15 +27,39 @@
 #include <assert.h>
 #include <string.h>
 
+//! Externally defined triangle test method (when calling 'Triangle' with the -u option)
+//static float s_maxSquareEdgeLength = 0;
+//int triunsuitable(float* triorg, float* tridest, float* triapex, float area)
+//{
+//	float dxoa = triorg[0] - triapex[0];
+//	float dyoa = triorg[1] - triapex[1];
+//	float dxda = tridest[0] - triapex[0];
+//	float dyda = tridest[1] - triapex[1];
+//	float dxod = triorg[0] - tridest[0];
+//	float dyod = triorg[1] - tridest[1];
+//
+//	//Find the squares of the lengths of the triangle's three edges
+//	float oalen = dxoa * dxoa + dyoa * dyoa;
+//	float dalen = dxda * dxda + dyda * dyda;
+//	float odlen = dxod * dxod + dyod * dyod;
+//
+//	//Find the square of the length of the longest edge
+//	float maxSquarelength = std::max(std::max(dalen,oalen),oalen);
+//
+//	//This procedure returns 1 if the triangle is too large and should be
+//	//refined; 0 otherwise.
+//	return (maxSquarelength > s_maxSquareEdgeLength ? 1 : 0);
+//}
+
 using namespace CCLib;
 
 Delaunay2dMesh::Delaunay2dMesh()
 	: m_associatedCloud(0)
 	, m_triIndexes(0)
 	, m_globalIterator(0)
-	, globalIteratorEnd(0)
-	, numberOfTriangles(0)
-	, cloudIsOwnedByMesh(false)
+	, m_globalIteratorEnd(0)
+	, m_numberOfTriangles(0)
+	, m_cloudIsOwnedByMesh(false)
 {
 }
 
@@ -53,20 +77,25 @@ void Delaunay2dMesh::linkMeshWith(GenericIndexedCloud* aCloud, bool passOwnershi
 		return;
 
 	//previous cloud?
-	if (m_associatedCloud && cloudIsOwnedByMesh)
+	if (m_associatedCloud && m_cloudIsOwnedByMesh)
 		delete m_associatedCloud;
 
 	m_associatedCloud = aCloud;
-	cloudIsOwnedByMesh = passOwnership;
+	m_cloudIsOwnedByMesh = passOwnership;
 }
 
-bool Delaunay2dMesh::build(CC2DPointsContainer &the2dPoints)
+bool Delaunay2dMesh::build(	CC2DPointsContainer &the2dPoints,
+							size_t pointCountToUse/*=0*/)
 {
-	if (the2dPoints.empty())
+	size_t pointCount = the2dPoints.size();
+	//we will use at most 'pointCountToUse' points (if not 0)
+	if (pointCountToUse > 0 && pointCountToUse < pointCount)
+		pointCount = pointCountToUse;
+	if (pointCount < 3)
 		return false;
 
 	//reset
-	numberOfTriangles=0;
+	m_numberOfTriangles = 0;
 	if (m_triIndexes)
 	{
 		delete[] m_triIndexes;
@@ -77,9 +106,12 @@ bool Delaunay2dMesh::build(CC2DPointsContainer &the2dPoints)
 	triangulateio in;
 	memset(&in,0,sizeof(triangulateio));
 
-	in.numberofpoints = (int)the2dPoints.size();
-	in.pointlist = (REAL*)(&the2dPoints[0]);
+	in.numberofpoints = static_cast<int>(pointCount);
+	in.pointlist = reinterpret_cast<REAL*>(&the2dPoints[0]);
 
+	//set static variable for 'triunsuitable' (for Triangle lib with '-u' option)
+	//s_maxSquareEdgeLength = maxEdgeLength*maxEdgeLength;
+	//DGM: doesn't work this way --> triangle lib will simply add new points!
 	try 
 	{ 
 		triangulate ( "zQN", &in, &in, 0 );
@@ -89,28 +121,76 @@ bool Delaunay2dMesh::build(CC2DPointsContainer &the2dPoints)
 		return false;
 	} 
 
-	numberOfTriangles = in.numberoftriangles;
-	if (numberOfTriangles>0)
-		m_triIndexes = (int*)in.trianglelist;
+	m_numberOfTriangles = in.numberoftriangles;
+	if (m_numberOfTriangles > 0)
+		m_triIndexes = in.trianglelist;
 
-	int minIndex = m_triIndexes[0];
-	int maxIndex = m_triIndexes[0];
-	for (unsigned i=1;i<numberOfTriangles;++i)
+	m_globalIterator = m_triIndexes;
+	m_globalIteratorEnd = m_triIndexes + 3*m_numberOfTriangles;
+
+	return true;
+}
+
+bool Delaunay2dMesh::removeTrianglesLongerThan(PointCoordinateType maxEdgeLength)
+{
+	if (!m_associatedCloud || maxEdgeLength <= 0)
+		return false;
+
+	PointCoordinateType squareMaxEdgeLength = maxEdgeLength*maxEdgeLength;
+
+	unsigned lastValidIndex = 0;
+	const int* _triIndexes = m_triIndexes;
+	for (unsigned i=0; i<m_numberOfTriangles; ++i, _triIndexes+=3)
 	{
-		if (minIndex > m_triIndexes[i])
-			minIndex = m_triIndexes[i];
-		else if (maxIndex < m_triIndexes[i])
-			maxIndex = m_triIndexes[i];
+		const CCVector3* A = m_associatedCloud->getPoint(_triIndexes[0]);
+		const CCVector3* B = m_associatedCloud->getPoint(_triIndexes[1]);
+		const CCVector3* C = m_associatedCloud->getPoint(_triIndexes[2]);
+
+		if ((*B-*A).norm2() <= squareMaxEdgeLength &&
+			(*C-*A).norm2() <= squareMaxEdgeLength &&
+			(*C-*B).norm2() <= squareMaxEdgeLength)
+		{
+			if (lastValidIndex != i)
+				memcpy(m_triIndexes+3*lastValidIndex, _triIndexes, sizeof(int)*3);
+			++lastValidIndex;
+		}
 	}
-	globalIteratorEnd = m_triIndexes+3*numberOfTriangles;
+
+	if (lastValidIndex < m_numberOfTriangles)
+	{
+		m_numberOfTriangles = lastValidIndex;
+		if (m_numberOfTriangles != 0)
+		{
+			//shouldn't fail as m_numberOfTriangles is smaller than before!
+			m_triIndexes = static_cast<int*>(realloc(m_triIndexes,sizeof(int)*3*m_numberOfTriangles));
+		}
+		else //no more triangles?!
+		{
+			delete m_triIndexes;
+			m_triIndexes = 0;
+		}
+		m_globalIterator = m_triIndexes;
+		m_globalIteratorEnd = m_triIndexes + 3*m_numberOfTriangles;
+	}
 
 	return true;
 }
 
 void Delaunay2dMesh::forEach(genericTriangleAction& anAction)
 {
-	//TODO
-	assert(false);
+	if (!m_associatedCloud)
+		return;
+
+	CCLib::SimpleTriangle tri;
+
+	const int* _triIndexes = m_triIndexes;
+	for (unsigned i=0; i<m_numberOfTriangles; ++i, _triIndexes+=3)
+	{
+		tri.A = *m_associatedCloud->getPoint(_triIndexes[0]);
+		tri.B = *m_associatedCloud->getPoint(_triIndexes[1]);
+		tri.C = *m_associatedCloud->getPoint(_triIndexes[2]);
+		anAction(tri);
+	}
 }
 
 void Delaunay2dMesh::placeIteratorAtBegining()
@@ -120,45 +200,46 @@ void Delaunay2dMesh::placeIteratorAtBegining()
 
 GenericTriangle* Delaunay2dMesh::_getNextTriangle()
 {
-	if (m_globalIterator>=globalIteratorEnd)
+	assert(m_associatedCloud);
+	if (m_globalIterator>=m_globalIteratorEnd)
         return 0;
 
-	m_associatedCloud->getPoint(*m_globalIterator++,dumpTriangle.A);
-	m_associatedCloud->getPoint(*m_globalIterator++,dumpTriangle.B);
-	m_associatedCloud->getPoint(*m_globalIterator++,dumpTriangle.C);
+	m_associatedCloud->getPoint(*m_globalIterator++,m_dumpTriangle.A);
+	m_associatedCloud->getPoint(*m_globalIterator++,m_dumpTriangle.B);
+	m_associatedCloud->getPoint(*m_globalIterator++,m_dumpTriangle.C);
 
-	return &dumpTriangle; //temporary!
+	return &m_dumpTriangle; //temporary!
 }
 
 TriangleSummitsIndexes* Delaunay2dMesh::getNextTriangleIndexes()
 {
-	if (m_globalIterator>=globalIteratorEnd)
+	if (m_globalIterator>=m_globalIteratorEnd)
         return 0;
 
-	dumpTriangleIndexes.i1 = m_globalIterator[0];
-	dumpTriangleIndexes.i2 = m_globalIterator[1];
-	dumpTriangleIndexes.i3 = m_globalIterator[2];
+	m_dumpTriangleIndexes.i1 = m_globalIterator[0];
+	m_dumpTriangleIndexes.i2 = m_globalIterator[1];
+	m_dumpTriangleIndexes.i3 = m_globalIterator[2];
 
 	m_globalIterator+=3;
 
-	return &dumpTriangleIndexes;
+	return &m_dumpTriangleIndexes;
 }
 
 GenericTriangle* Delaunay2dMesh::_getTriangle(unsigned triangleIndex)
 {
-	assert(m_associatedCloud && triangleIndex<numberOfTriangles);
+	assert(m_associatedCloud && triangleIndex<m_numberOfTriangles);
 
 	const int* tri = m_triIndexes + 3*triangleIndex;
-	m_associatedCloud->getPoint(*tri++,dumpTriangle.A);
-	m_associatedCloud->getPoint(*tri++,dumpTriangle.B);
-	m_associatedCloud->getPoint(*tri++,dumpTriangle.C);
+	m_associatedCloud->getPoint(*tri++,m_dumpTriangle.A);
+	m_associatedCloud->getPoint(*tri++,m_dumpTriangle.B);
+	m_associatedCloud->getPoint(*tri++,m_dumpTriangle.C);
 
-	return (GenericTriangle*)&dumpTriangle;
+	return (GenericTriangle*)&m_dumpTriangle;
 }
 
 void Delaunay2dMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
 {
-	assert(m_associatedCloud && triangleIndex<numberOfTriangles);
+	assert(m_associatedCloud && triangleIndex<m_numberOfTriangles);
 
 	const int* tri = m_triIndexes + 3*triangleIndex;
 	m_associatedCloud->getPoint(*tri++,A);
@@ -168,7 +249,7 @@ void Delaunay2dMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CC
 
 TriangleSummitsIndexes* Delaunay2dMesh::getTriangleIndexes(unsigned triangleIndex)
 {
-	assert(triangleIndex < numberOfTriangles);
+	assert(triangleIndex < m_numberOfTriangles);
 
 	return (TriangleSummitsIndexes*)(m_triIndexes + 3*triangleIndex);
 }

@@ -698,15 +698,22 @@ void ccNormalVectors::Quant_dequantize_normal(unsigned q, unsigned level, float*
 
 QString ccNormalVectors::ConvertStrikeAndDipToString(double& strike, double& dip)
 {
-	int iStrike = (int)strike;
-	int iDip = (int)dip;
+	int iStrike = static_cast<int>(strike);
+	int iDip = static_cast<int>(dip);
 
-	return QString("N%1°E - %2°SE").arg(iStrike,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
+	return QString("N%1°E - %2°").arg(iStrike,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
+}
+
+QString ccNormalVectors::ConvertDipAndDipDirToString(PointCoordinateType dip, PointCoordinateType dipDir)
+{
+	int iDipDir = static_cast<int>(dipDir);
+	int iDip = static_cast<int>(dip);
+
+	return QString("Dip direction: %1° - Dip angle: %2°").arg(iDipDir,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
 }
 
 void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike, double& dip)
 {
-	//let's compute strike & dip also
 	/** Adapted from Andy Michael's 'stridip.c':
 	Finds strike and dip of plane given normal vector having components n, e, and u
 	output is in degrees north of east and then
@@ -717,22 +724,47 @@ void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, double& st
 	dip = atan2(x,N.z)*CC_RAD_TO_DEG;
 }
 
+void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoordinateType& dip, PointCoordinateType& dipDir)
+{
+	//http://en.wikipedia.org/wiki/Structural_geology#Geometries
+	PointCoordinateType r2 = N.x*N.x+N.y*N.y;
+	if (r2 < ZERO_TOLERANCE)
+	{
+		//purely vertical normal
+		dip = 90.0;
+		dipDir = 0.0; //anything in fact
+		return;
+	}
+
+	//"Dip direction is measured in 360 degrees, generally clockwise from North"
+	dipDir = atan2(N.x,N.y); //result in [-pi,+pi]
+	if (dipDir < 0)
+		dipDir = static_cast<PointCoordinateType>(2.0*M_PI) + dipDir;
+
+	//Dip
+	PointCoordinateType r = sqrt(r2);
+	dip = atan(fabs(N.z)/r); //atan's result in [-pi/2,+pi/2] but |N.z|/r >= 0
+
+	dipDir *= static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
+	dip *= static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
+}
+
 void ccNormalVectors::ConvertNormalToHSV(const CCVector3& N, double& H, double& S, double& V)
 {
-	double strike,dip;
-	ConvertNormalToStrikeAndDip(N,strike,dip);
+	PointCoordinateType dip=0, dipDir=0;
+	ConvertNormalToDipAndDipDir(N,dip,dipDir);
 
-	H = strike;
-	if (H==360.0) //H is in [0;360[
-		H=0.0;
-	S = (dip+180.0)/360.0; //S is in [0;1]
+	H = dipDir;
+	if (H == 360.0) //H is in [0;360[
+		H = 0.0;
+	S = dip/90.0; //S is in [0;1]
 	V = 1.0;
 }
 
 void ccNormalVectors::ConvertHSVToRGB(double H, double S, double V, colorType& R, colorType& G, colorType& B)
 {
-	int hi = ((int)floor(H/60.0))%6;
-	double f = H/60.0-(double)hi;
+	int hi = (static_cast<int>(floor(H/60.0)) % 6);
+	double f = H/60.0-static_cast<double>(hi);
 	double l = V*(1-S);
 	double m = V*(1-f*S);
 	double n = V*(1-(1-f)*S);
@@ -763,9 +795,9 @@ void ccNormalVectors::ConvertHSVToRGB(double H, double S, double V, colorType& R
 		break;
 	}
 
-	R = (colorType)(r*(double)MAX_COLOR_COMP);
-	G = (colorType)(g*(double)MAX_COLOR_COMP);
-	B = (colorType)(b*(double)MAX_COLOR_COMP);
+	R = static_cast<colorType>(r * static_cast<double>(MAX_COLOR_COMP));
+	G = static_cast<colorType>(g * static_cast<double>(MAX_COLOR_COMP));
+	B = static_cast<colorType>(b * static_cast<double>(MAX_COLOR_COMP));
 }
 
 void ccNormalVectors::ConvertNormalToRGB(const CCVector3& N, colorType& R, colorType& G, colorType& B)

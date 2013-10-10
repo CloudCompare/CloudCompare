@@ -7,12 +7,16 @@ v2.5.1 ??/??/2013
 	* the 'Tools > Other > Plane orientation' tool can be used on polylines
 - Other improvements:
 	* Mesh groups are replaced by standard meshes with 'sub-meshes' structures (simple subsets of faces)
+	* New option for Delaunay mesh computation:
+		* a max edge length can be specified to automatically remove elongted triangles
 	* New checkbox in the LAS open dialog: apply same parameters to all files that will be opened next (current session)
 	* User can now choose whether overlay items (scale, trihedron, etc.) should be rendered or not by the
 		'Display > Render to file' tool
 	* the progress bar "Cancel" button has no "focus" anymore:
 		* for instance, this allows the user to keep the "Enter" key pressed while loading multiple files with the default
 		  loading parameters (i.e. manually "skipping" the opening dialog for ASCII files for instance)
+	* the "Plane orientation" tool now outputs the orientation with the
+		"dip direction / dip angle convention" (see http://en.wikipedia.org/wiki/Structural_geology#Geometries)
 - bug fixes:
 	* text wes misplaced when rendering screen with a zoom factor greater than 1.
 		Other features were also badly reshaped (fonts, scale, color ramp, trihedron, etc.)

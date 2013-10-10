@@ -89,19 +89,36 @@ public:
                                     CCLib::GenericProgressCallback* progressCb=0,
                                     CCLib::DgmOctree* _theOctree=0);
 
-	//! Converts a normal vector to geological 'strike & dip' parameters (N[dip]°E - [strike]°SE)
+	//! Converts a normal vector to geological 'strike & dip' parameters (N[dip]°E - [strike]°)
 	/** \param[in] N normal (should be normalized!)
 		\param[out] strike strike value (in degrees)
 		\param[out] dip dip value (in degrees)
 	**/
 	static void ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike, double& dip);
 
-	//! Converts a geological 'strike & dip' parameters (N[dip]°E - [strike]°SE) to a string
+	//! Converts a normal vector to geological 'dip direction & dip' parameters
+	/** See http://en.wikipedia.org/wiki/Strike_and_dip
+		The dip direction is the azimuth of the direction (in [0,360[).
+		The dip is always in [0,90].
+		\param[in] N normal (should be normalized!)
+		\param[out] dip value (in degrees)
+		\param[out] dipDir dip direction value (in degrees)
+	**/
+	static void ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoordinateType& dip, PointCoordinateType& dipDir);
+
+	//! Converts geological 'strike & dip' parameters (N[dip]°E - [strike]°) to a string
 	/** \param[in] strike strike value (in degrees)
 		\param[in] dip dip  value (in degrees)
-		\return formatted string "N[strike]°E - [dip]°SE"
+		\return formatted string "N[strike]°E - [dip]°"
 	**/
 	static QString ConvertStrikeAndDipToString(double& strike, double& dip);
+
+	//! Converts geological 'dip direction & dip' parameters to a string
+	/** \param[in] dip dip angle value (in degrees)
+		\param[in] dipDir dip direction value (in degrees)
+		\return formatted string "Dip direction: [dipDir]° - Dip angle: [dip]°"
+	**/
+	static QString ConvertDipAndDipDirToString(PointCoordinateType dip, PointCoordinateType dipDir);
 
 	//! Converts a normal vector to HSV color space
 	/** Uses 'strike & dip' parameters (H=strike, S=dip, V=constant)

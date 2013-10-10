@@ -612,7 +612,7 @@ bool Neighbourhood::projectPointsOnPlane(const PointCoordinateType* thePlaneEqua
 	return true;
 }
 
-GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=false*/)
+GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=false*/, PointCoordinateType maxEdgeLength/*=0*/)
 {
 	if (m_associatedCloud->size()<CC_LOCAL_MODEL_MIN_SIZE[TRI])
 	{
@@ -620,12 +620,12 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
 		return 0;
 	}
 
-	//on calcule le meilleur plan interpolant le nuage selectionne
+	//compute the best LS plane
 	const PointCoordinateType* lsq = getLSQPlane();
 	if (!lsq)
         return 0;
 
-	//on projette les points sur le meilleur plan approximant
+	//project the points on this plane
 	GenericIndexedMesh* mesh = 0;
 	std::vector<CCVector2> the2DPoints;
 
@@ -633,15 +633,14 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
 	{
 		Delaunay2dMesh* dm = new Delaunay2dMesh();
 
-		//on construit le maillage par rapport aux projections 2D
-		//du voisinage
-		if (!dm->build(the2DPoints))
+		//triangulate the projected points
+		if (!dm->build(the2DPoints,0))
 		{
 			delete dm;
 			return 0;
 		}
 
-		//si on veut qu'il fasse reference au nuage lie  (c.a.d. le nuage "complet")
+		//change the default mesh's reference
 		if (duplicateVertices)
 		{
 			ChunkedPointCloud* cloud = new ChunkedPointCloud();
@@ -649,15 +648,28 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
 			if (!cloud->reserve(count))
 			{
 				delete dm;
+				delete cloud;
 				return 0;
 			}
-			for (unsigned i=0;i<count;++i)
+			for (unsigned i=0; i<count; ++i)
 				cloud->addPoint(*m_associatedCloud->getPoint(i));
 			dm->linkMeshWith(cloud,true);
 		}
 		else
 		{
 			dm->linkMeshWith(m_associatedCloud,false);
+		}
+
+		//remove triangles with too long edges
+		if (maxEdgeLength > 0)
+		{
+			dm->removeTrianglesLongerThan(maxEdgeLength);
+			if (dm->size() == 0)
+			{
+				//no more triangles?
+				delete dm;
+				dm = 0;
+			}
 		}
 		mesh = static_cast<GenericIndexedMesh*>(dm);
 	}

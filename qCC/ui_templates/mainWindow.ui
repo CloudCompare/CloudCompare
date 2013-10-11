@@ -45,7 +45,7 @@
      <x>0</x>
      <y>0</y>
      <width>1024</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">
@@ -332,7 +332,6 @@
      <addaction name="actionDensity"/>
      <addaction name="actionCurvature"/>
      <addaction name="actionRoughness"/>
-     <addaction name="actionPlaneOrientation"/>
     </widget>
     <widget class="QMenu" name="menuSand_Box">
      <property name="title">
@@ -348,11 +347,19 @@
      <addaction name="separator"/>
      <addaction name="actionSNETest"/>
     </widget>
+    <widget class="QMenu" name="menuFit">
+     <property name="title">
+      <string>Fit</string>
+     </property>
+     <addaction name="actionFitPlane"/>
+     <addaction name="actionFitFacet"/>
+    </widget>
     <addaction name="menuProjection"/>
     <addaction name="menuRegistration"/>
     <addaction name="menuDistances"/>
     <addaction name="menuStatistics"/>
     <addaction name="menuSegmentation"/>
+    <addaction name="menuFit"/>
     <addaction name="menuOther"/>
     <addaction name="separator"/>
     <addaction name="actionPointPicking"/>
@@ -1877,9 +1884,9 @@
     <string>Roughness</string>
    </property>
   </action>
-  <action name="actionPlaneOrientation">
+  <action name="actionFitPlane">
    <property name="text">
-    <string>Plane orientation</string>
+    <string>Plane</string>
    </property>
    <property name="toolTip">
     <string>Compute plane orientation (normal, srtike, dip)</string>
@@ -2332,6 +2339,11 @@
    </property>
    <property name="toolTip">
     <string>Adds a scalar field with ordered integers for each point in the cloud</string>
+   </property>
+  </action>
+  <action name="actionFitFacet">
+   <property name="text">
+    <string>2D polygon</string>
    </property>
   </action>
  </widget>

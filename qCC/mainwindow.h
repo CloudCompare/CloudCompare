@@ -267,7 +267,8 @@ protected slots:
     void doActionSFGradient();
     void doComputeRoughness();
 	void doSphericalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
-	void doComputePlaneOrientation();
+	void doActionFitPlane();
+	void doActionFitFacet();
 	void doShowPrimitiveFactory();
 
     void doActionComputeNormals();
@@ -439,6 +440,11 @@ protected:
 	/** \param process process
     **/
 	void doMeshSFAction(ccMesh::MESH_SCALAR_FIELD_PROCESS process);
+
+	//! Computes the orientation of an entity
+	/** Either fit a plane or a 'facet' (2D polygon)
+	**/
+	void doComputePlaneOrientation(bool fitFacet);
 
     //! Connects all QT actions to slots
     void connectActions();

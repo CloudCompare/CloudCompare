@@ -77,6 +77,13 @@ bool ccPolyline::hasColors() const
 	return true;
 }
 
+void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
+{
+	//invalidate the bounding-box
+	//(and we hope the vertices will be updated as well!)
+	m_validBB = false;
+}
+
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (size() < 2)

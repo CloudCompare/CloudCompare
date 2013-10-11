@@ -29,9 +29,17 @@
 #include <CCMiscTools.h>
 #include <Delaunay2dMesh.h>
 #include <DistanceComputationTools.h>
+#include <PointProjectionTools.h>
 #include <MeshSamplingTools.h>
+#include <SimpleCloud.h>
 
-ccFacet::ccFacet(QString name/*=QString("Facet")*/)
+static const char DEFAULT_POLYGON_MESH_NAME[] = "2D polygon";
+static const char DEFAULT_CONTOUR_NAME[] = "Contour";
+static const char DEFAULT_CONTOUR_POINTS_NAME[] = "Contour points";
+static const char DEFAULT_ORIGIN_POINTS_NAME[] = "Origin points";
+
+ccFacet::ccFacet(	PointCoordinateType maxEdgeLength/*=0*/,
+					QString name/*=QString("Facet")*/ )
 	: ccHObject(name)
 	, m_polygonMesh(0)
 	, m_contourPolyline(0)
@@ -40,6 +48,7 @@ ccFacet::ccFacet(QString name/*=QString("Facet")*/)
 	, m_center(0,0,0)
 	, m_rms(0.0)
 	, m_surface(0.0)
+	, m_maxEdgeLength(maxEdgeLength)
 {
 	m_planeEquation[0] = 0;
 	m_planeEquation[1] = 0;
@@ -50,176 +59,77 @@ ccFacet::ccFacet(QString name/*=QString("Facet")*/)
     lockVisibility(false);
 }
 
-void ccFacet::clearInternalRepresentation()
-{
-	if (m_polygonMesh)
-		delete m_polygonMesh;
-	if (m_contourPolyline)
-		delete m_contourPolyline;
-	if (m_contourVertices)
-		delete m_contourVertices;
-	m_surface = 0.0;
-}
-
 ccFacet::~ccFacet()
 {
-	clearInternalRepresentation();
-	//if (m_originPoints) //DGM: m_originPoints is a child now
-	//	delete m_originPoints;
 }
 
-void ccFacet::setDisplay_recursive(ccGenericGLDisplay* win)
+ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
+							PointCoordinateType maxEdgeLength/*=0*/,
+							bool transferOwnership/*=false*/)
 {
-	ccHObject::setDisplay_recursive(win);
-
-	if (m_originPoints)
-		m_originPoints->setDisplay_recursive(win);
-	if (m_contourVertices)
-		m_contourVertices->setDisplay_recursive(win);
-	if (m_polygonMesh)
-		m_polygonMesh->setDisplay_recursive(win);
-	if (m_contourPolyline)
-		m_contourPolyline->setDisplay_recursive(win);
-}
-
-class IndexedCCVector2 : public CCVector2
-{
-public:
-	unsigned index;
-};
-
-// 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.
-// Returns a positive value, if OAB makes a counter-clockwise turn,
-// negative for clockwise turn, and zero if the points are collinear.
-PointCoordinateType cross(const CCVector2& O, const CCVector2& A, const CCVector2& B)
-{
-	return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
-}
-
-// Lexicographic sorting operator
-bool LexicographicSort(const CCVector2& a, const CCVector2& b)
-{
-	return a.x < b.x || (a.x == b.x && a.y < b.y);
-}
-
-//! Returns a list of points on the convex hull in counter-clockwise order.
-/** Implementation of Andrew's monotone chain 2D convex hull algorithm.
-	Asymptotic complexity: O(n log n).
-	Practical performance: 0.5-1.0 seconds for n=1000000 on a 1GHz machine.
-	Note: the last point in the returned list is the same as the first one.
-	(retrieved from http://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain)
-**/
-bool Convex_hull_2D(std::vector<IndexedCCVector2>& P, std::vector<CCVector2>& hullPoints, std::vector<unsigned>* hullPointsIndexes = 0)
-{
-	size_t n = P.size();
-
-	try
-	{
-		hullPoints.resize(2*n);
-		if (hullPointsIndexes)
-			hullPointsIndexes->resize(2*n);
-	}
-	catch (std::bad_alloc)
-	{
-		//not enough memory
-		return false;
-	}
-
-	// Sort points lexicographically
-	std::sort(P.begin(), P.end(), LexicographicSort);
-
-	// Build lower hull
-	size_t k = 0;
-	{
-		for (size_t i = 0; i < n; i++)
-		{
-			while (k >= 2 && cross(hullPoints[k-2], hullPoints[k-1], P[i]) <= 0)
-				k--;
-			if (hullPointsIndexes)
-				hullPointsIndexes->at(k) = P[i].index;
-			hullPoints[k++] = P[i];
-		}
-	}
-
-	// Build upper hull
-	{
-		size_t t = k+1;
-		for (int i = (int)n-2; i >= 0; i--)
-		{
-			while (k >= t && cross(hullPoints[k-2], hullPoints[k-1], P[i]) <= 0)
-				k--;
-			if (hullPointsIndexes)
-				hullPointsIndexes->at(k) = P[i].index;
-			hullPoints[k++] = P[i];
-		}
-	}
-
-	if (hullPointsIndexes)
-		hullPointsIndexes->resize(k);
-	hullPoints.resize(k);
-	return true;
-}
-
-ccFacet* ccFacet::Create(ccPointCloud* points, bool transferOwnership/*=false*/)
-{
-	assert(points);
+	assert(cloud);
 
 	//we need at least 3 points to compute a mesh or a plane! ;)
-	if (!points || points->size() < 3)
+	if (!cloud || cloud->size() < 3)
 	{
 		ccLog::Error("[ccFacet::Create] Need at least 3 points to create a valid facet!");
 		return 0;
 	}
 
-	//create initial facet structure
-	ccFacet* facet = 0;
+	//create facet structure
+	ccFacet* facet = new ccFacet(maxEdgeLength,"facet");
+	if (!facet->createInternalRepresentation(cloud))
 	{
-		//convert input subset as a true point cloud
-		ccPointCloud* clonedPoints = (transferOwnership ? points : static_cast<ccPointCloud*>(points->clone()));
-		if (!clonedPoints)
-		{
-			ccLog::Error("[ccFacet::Create] Not enough memory!");
-			return 0;
-		}
-
-		//get corresponding plane
-		CCLib::Neighbourhood Yk(clonedPoints);
-		const PointCoordinateType* planeEquation = Yk.getLSQPlane();
-		if (!planeEquation)
-		{
-			delete clonedPoints;
-			ccLog::Error("[ccFacet::Create] Failed to compute the LS plane passing through the input points!");
-			return 0;
-		}
-
-		//create facet structure
-		facet = new ccFacet();
-		facet->m_originPoints = clonedPoints;
-		facet->m_originPoints->setEnabled(false);
-		facet->m_originPoints->setLocked(true);
-		facet->addChild(facet->m_originPoints);
-		memcpy(facet->m_planeEquation,planeEquation,sizeof(PointCoordinateType)*4);
-		facet->m_center = *Yk.getGravityCenter();
-		facet->m_rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(clonedPoints, planeEquation);
+		delete facet;
+		return 0;
 	}
 
-	facet->updateInternalRepresentation();
-	facet->setDisplay_recursive(points->getDisplay());
+	ccPointCloud* pc = dynamic_cast<ccPointCloud*>(cloud);
+	if (pc)
+	{
+		facet->setName(pc->getName()+QString(".facet"));
+		if (transferOwnership)
+		{
+			pc->setName(DEFAULT_ORIGIN_POINTS_NAME);
+			pc->setEnabled(false);
+			pc->setLocked(true);
+			facet->addChild(pc);
+			facet->setOriginPoints(pc);
+		}
+
+		facet->setDisplay_recursive(pc->getDisplay());
+	}
 
 	return facet;
 }
 
-bool ccFacet::updateInternalRepresentation()
+bool ccFacet::createInternalRepresentation(CCLib::GenericIndexedCloudPersist* points)
 {
-	clearInternalRepresentation();
-
-	assert(m_originPoints);
-	if (!m_originPoints)
+	assert(points);
+	if (!points)
 		return false;
-	unsigned ptsCount = m_originPoints->size();
+	unsigned ptsCount = points->size();
 	if (ptsCount < 3)
 		return false;
 
+	CCLib::Neighbourhood Yk(points);
+
+	//get corresponding plane
+	{
+		const PointCoordinateType* planeEquation = Yk.getLSQPlane();
+		if (!planeEquation)
+		{
+			ccLog::Warning("[ccFacet::createInternalRepresentation] Failed to compute the LS plane passing through the input points!");
+			return false;
+		}
+		memcpy(m_planeEquation,planeEquation,sizeof(PointCoordinateType)*4);
+	}
+
+	//get barycenter
+	m_center = *Yk.getGravityCenter();
+	//and resulting RMS
+	m_rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(points, m_planeEquation);
+	
 	//we construct the plane local frame
 	CCVector3 N(m_planeEquation);
 	if (N.norm2() < ZERO_TOLERANCE)
@@ -227,24 +137,17 @@ bool ccFacet::updateInternalRepresentation()
 	CCVector3 u(1.0,0.0,0.0), v(0.0,1.0,0.0);
 	CCLib::CCMiscTools::ComputeBaseVectors(N.u,u.u,v.u);
 
-	//compute the cloud centroid
-	CCVector3 G(0,0,0);
-	{
-		CCLib::Neighbourhood Yk(m_originPoints);
-		G = *Yk.getGravityCenter();
-	}
-
 	//we project the input points on a plane
-	std::vector<IndexedCCVector2> the2DPoints;
+	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
 	{
 		//reserve some memory for output
 		try
 		{
-			the2DPoints.resize(ptsCount);
+			points2D.resize(ptsCount);
 		}
 		catch (std::bad_alloc) //out of memory
 		{
-			ccLog::Error("[ccFacet::updateInternalRepresentation] Not enough memory!");
+			ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
 			return false;
 		}
 
@@ -252,41 +155,45 @@ bool ccFacet::updateInternalRepresentation()
 		for (unsigned i=0; i<ptsCount; ++i)
 		{
 			//we recenter current point
-			CCVector3 P = *m_originPoints->getPoint(i) - G;
+			CCVector3 P = *points->getPoint(i) - m_center;
 
 			//then we project it on plane (with scalar prods)
-			the2DPoints[i].x = P.dot(u);
-			the2DPoints[i].y = P.dot(v);
-			the2DPoints[i].index = i;
+			points2D[i].x = P.dot(u);
+			points2D[i].y = P.dot(v);
+			points2D[i].index = i;
 		}
 	}
 
-	//try to get the points on the convex hull to build the contour and the polygon
+	//try to get the points on the convex/concave hull to build the contour and the polygon
 	{
-		std::vector<CCVector2> hullPoints;
-		//std::vector<unsigned> hullPointsIndexes;
-		if (!Convex_hull_2D(the2DPoints,hullPoints/*,hullPointsIndexes*/))
+		std::list<CCLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
+		if (!CCLib::PointProjectionTools::extractConcaveHull2D(	points2D,
+																hullPoints,
+																m_maxEdgeLength) )
 		{
-			ccLog::Error("[ccFacet::updateInternalRepresentation] Failed to compute the convex hull of the input points!");
+			ccLog::Error("[ccFacet::createInternalRepresentation] Failed to compute the convex hull of the input points!");
 		}
 
-		unsigned hullPtsCount = (unsigned)hullPoints.size();
-		//assert(hullPtsCount == hullPointsIndexes.size());
+		unsigned hullPtsCount = static_cast<unsigned>(hullPoints.size());
 
 		//create vertices
-		m_contourVertices = new ccPointCloud("vertices");
+		m_contourVertices = new ccPointCloud();
 		{
 			if (!m_contourVertices->reserve(hullPtsCount))
 			{
-				clearInternalRepresentation();
-				ccLog::Error("[ccFacet::updateInternalRepresentation] Not enough memory!");
+				delete m_contourVertices;
+				m_contourVertices = 0;
+				ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
 				return false;
 			}
 			
 			//projection on the LS plane (in 3D)
-			for (unsigned i=0; i<hullPtsCount; ++i)
-				m_contourVertices->addPoint(G + u*hullPoints[i].x + v*hullPoints[i].y);
+			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+				m_contourVertices->addPoint(m_center + u*(*it)->x + v*(*it)->y);
+			m_contourVertices->setName(DEFAULT_CONTOUR_POINTS_NAME);
+			m_contourVertices->setLocked(true);
 			m_contourVertices->setVisible(false);
+			addChild(m_contourVertices);
 		}
 
 		//we create the corresponding (3D) polyline
@@ -297,19 +204,36 @@ bool ccFacet::updateInternalRepresentation()
 				m_contourPolyline->addPointIndex(0,hullPtsCount);
 				m_contourPolyline->setClosingState(true);
 				m_contourPolyline->setVisible(true);
-				//m_contourVertices->addChild(m_contourPolyline);
+				m_contourPolyline->setLocked(true);
+				m_contourPolyline->setName(DEFAULT_CONTOUR_NAME);
+				m_contourVertices->addChild(m_contourPolyline);
 			}
 			else
 			{
 				delete m_contourPolyline;
 				m_contourPolyline = 0;
-				ccLog::Warning("[ccFacet::updateInternalRepresentation] Not enough memory to create the contour polyline!");
+				ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the contour polyline!");
 			}
 		}
 
 		//we create the corresponding (2D) mesh
 		CCLib::Delaunay2dMesh dm;
-		if (dm.build(hullPoints))
+		CCLib::CC2DPointsContainer hullPointsVector;
+		try
+		{
+			hullPointsVector.reserve(hullPoints.size());
+			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+				hullPointsVector.push_back(**it);
+		}
+		catch(...)
+		{
+			ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the contour mesh!");
+		}
+
+		//if we have computed a concave hull, we must remove triangles falling outside!
+		bool removePointsOutsideHull = (m_maxEdgeLength > 0);
+
+		if (!hullPointsVector.empty() && dm.build(hullPointsVector,0,removePointsOutsideHull))
 		{
 			unsigned triCount = dm.size();
 			assert(triCount != 0);
@@ -325,7 +249,6 @@ bool ccFacet::updateInternalRepresentation()
 				}
 				m_polygonMesh->setVisible(true);
 				m_polygonMesh->enableStippling(true);
-				//m_contourVertices->addChild(m_polygonMesh);
 
 				//unique normal for facets
 				if (m_polygonMesh->reservePerTriangleNormalIndexes())
@@ -338,10 +261,13 @@ bool ccFacet::updateInternalRepresentation()
 						m_polygonMesh->addTriangleNormalIndexes(0,0,0); //all triangles will have the same normal!
 					m_polygonMesh->showNormals(true);
 					m_polygonMesh->addChild(normsTable);
+					m_polygonMesh->setLocked(true);
+					m_polygonMesh->setName(DEFAULT_POLYGON_MESH_NAME);
+					m_contourVertices->addChild(m_polygonMesh);
 				}
 				else
 				{
-					ccLog::Warning("[ccFacet::updateInternalRepresentation] Not enough memory to create the polygon mesh's normals!");
+					ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the polygon mesh's normals!");
 				}
 
 				//update facet surface
@@ -351,22 +277,12 @@ bool ccFacet::updateInternalRepresentation()
 			{
 				delete m_polygonMesh;
 				m_polygonMesh = 0;
-				ccLog::Warning("[ccFacet::updateInternalRepresentation] Not enough memory to create the polygon mesh!");
+				ccLog::Warning("[ccFacet::createInternalRepresentation] Not enough memory to create the polygon mesh!");
 			}
 		}
 	}
 
 	return true;
-}
-
-ccBBox ccFacet::getMyOwnBB()
-{
-	if (m_originPoints)
-		return m_originPoints->getBB();
-	else if (m_contourPolyline)
-		return m_contourPolyline->getBB();
-	else
-		return ccBBox();
 }
 
 void ccFacet::setColor(const colorType rgb[])
@@ -386,101 +302,66 @@ void ccFacet::setColor(const colorType rgb[])
 	showColors(true);
 }
 
-void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
-{
-    if (MACRO_Draw3D(context))
-    {
-		CC_DRAW_CONTEXT localContext = context;
-
-		bool pickingMode = MACRO_DrawEntityNames(context);
-		if (pickingMode)
-		{
-			if (MACRO_DrawFastNamesOnly(context)) //not particularly fast ;)
-				return;
-
-			glPushName(getUniqueID());
-			localContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sub-entities won't push their own!
-		}
-
-		//if (m_originPoints && !pickingMode) //DGM: m_originPoints is a child now!
-		//	m_originPoints->draw(localContext);
-		if (m_contourPolyline && !pickingMode)
-			m_contourPolyline->draw(localContext);
-		if (m_polygonMesh)
-			m_polygonMesh->draw(localContext);
-
-		if (pickingMode)
-		{
-			glPopName();
-		}
-    }
-}
-
 bool ccFacet::toFile_MeOnly(QFile& out) const
 {
 	if (!ccHObject::toFile_MeOnly(out))
 		return false;
 
-	//origin points (dataVersion>=28)
+	//we can't save the origin points here (as it will be automatically saved as a child)
+	//so instead we save it's unique ID (dataVersion>=32)
+	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
 	{
-		bool hasOriginPoints = (m_originPoints != 0);
-		if (out.write((const char*)&hasOriginPoints,sizeof(bool))<0)
+		uint32_t originPointsUniqueID = (m_originPoints ? (uint32_t)m_originPoints->getUniqueID() : 0);
+		if (out.write((const char*)&originPointsUniqueID,4)<0)
 			return WriteError();
-
-		if (hasOriginPoints)
-			if (!m_originPoints->toFile(out))
-				return false;
 	}
 
-	//plane equation (dataVersion>=28)
+	//we can't save the contour points here (as it will be automatically saved as a child)
+	//so instead we save it's unique ID (dataVersion>=32)
+	//WARNING: the cloud must be saved in the same BIN file! (responsibility of the caller)
+	{
+		uint32_t contourPointsUniqueID = (m_contourVertices ? (uint32_t)m_contourVertices->getUniqueID() : 0);
+		if (out.write((const char*)&contourPointsUniqueID,4)<0)
+			return WriteError();
+	}
+
+	//we can't save the contour polyline here (as it will be automatically saved as a child)
+	//so instead we save it's unique ID (dataVersion>=32)
+	//WARNING: the polyline must be saved in the same BIN file! (responsibility of the caller)
+	{
+		uint32_t contourPolyUniqueID = (m_contourPolyline ? (uint32_t)m_contourPolyline->getUniqueID() : 0);
+		if (out.write((const char*)&contourPolyUniqueID,4)<0)
+			return WriteError();
+	}
+
+	//we can't save the polygon mesh here (as it will be automatically saved as a child)
+	//so instead we save it's unique ID (dataVersion>=32)
+	//WARNING: the mesh must be saved in the same BIN file! (responsibility of the caller)
+	{
+		uint32_t polygonMeshUniqueID = (m_polygonMesh ? (uint32_t)m_polygonMesh->getUniqueID() : 0);
+		if (out.write((const char*)&polygonMeshUniqueID,4)<0)
+			return WriteError();
+	}
+
+	//plane equation (dataVersion>=32)
 	if (out.write((const char*)&m_planeEquation,sizeof(PointCoordinateType)*4)<0)
 		return WriteError();
 
-	//center (dataVersion>=28)
+	//center (dataVersion>=32)
 	if (out.write((const char*)m_center.u,sizeof(PointCoordinateType)*3)<0)
 		return WriteError();
 
-	//RMS (dataVersion>=28)
+	//RMS (dataVersion>=32)
 	if (out.write((const char*)&m_rms,sizeof(double))<0)
 		return WriteError();
 
-	//contour vertices (dataVersion>=28)
-	{
-		bool hasCountourVertices = (m_contourVertices != 0);
-		if (out.write((const char*)&hasCountourVertices,sizeof(bool))<0)
-			return WriteError();
-
-		if (hasCountourVertices)
-			if (!m_contourVertices->toFile(out))
-				return false;
-	}
-
-	//contour poyline (dataVersion>=28)
-	{
-		bool hasCountourPolyline = (m_contourVertices != 0 && m_contourPolyline != 0 && m_contourPolyline->getAssociatedCloud() == m_contourVertices);
-		if (out.write((const char*)&hasCountourPolyline,sizeof(bool))<0)
-			return WriteError();
-
-		if (hasCountourPolyline)
-			if (!m_contourPolyline->toFile(out))
-				return false;
-	}
-
-	//polygon (dataVersion>=28)
-	{
-		bool hasPolygon = (m_contourVertices != 0 && m_polygonMesh != 0 && m_polygonMesh->getAssociatedCloud() == m_contourVertices);
-		if (out.write((const char*)&hasPolygon,sizeof(bool))<0)
-			return WriteError();
-
-		if (hasPolygon)
-			if (!m_polygonMesh->toFile(out))
-				return false;
-	}
-
-	//surface (dataVersion>=28)
+	//surface (dataVersion>=32)
 	if (out.write((const char*)&m_surface,sizeof(double))<0)
 		return WriteError();
 
+	//Max edge length (dataVersion>=31)
+	if (out.write((const char*)&m_maxEdgeLength,sizeof(PointCoordinateType))<0)
+		return WriteError();
 
 	return true;
 }
@@ -490,121 +371,72 @@ bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion)
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion))
 		return false;
 
-	if (dataVersion < 28)
+	if (dataVersion < 32)
 		return false;
 
-	//origin points (dataVersion>=28)
+	//origin points (dataVersion>=32)
+	//as the cloud will be saved automatically (as a child)
+	//we only store its unique ID --> we hope we will find it at loading time
 	{
-		bool hasOriginPoints = (m_originPoints != 0);
-		if (in.read((char*)&hasOriginPoints,sizeof(bool))<0)
+		uint32_t origPointsUniqueID = 0;
+		if (in.read((char*)&origPointsUniqueID,4)<0)
 			return ReadError();
-
-		if (hasOriginPoints)
-		{
-			unsigned classID=0;
-			if (!ccObject::ReadClassIDFromFile(classID, in, dataVersion))
-				return ReadError();
-			if (classID != CC_POINT_CLOUD)
-				return CorruptError();
-			m_originPoints = new ccPointCloud();
-			if (!m_originPoints->fromFile(in,dataVersion))
-				return false;
-			addChild(m_originPoints);
-		}
+		//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'm_originPoints' pointer!!!
+		*(uint32_t*)(&m_originPoints) = origPointsUniqueID;
 	}
 
-	//plane equation (dataVersion>=28)
+	//contour points
+	//as the cloud will be saved automatically (as a child)
+	//we only store its unique ID --> we hope we will find it at loading time
+	{
+		uint32_t contourPointsUniqueID = 0;
+		if (in.read((char*)&contourPointsUniqueID,4)<0)
+			return ReadError();
+		//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'm_contourVertices' pointer!!!
+		*(uint32_t*)(&m_contourVertices) = contourPointsUniqueID;
+	}
+
+	//contour points
+	//as the polyline will be saved automatically (as a child)
+	//we only store its unique ID --> we hope we will find it at loading time
+	{
+		uint32_t contourPolyUniqueID = 0;
+		if (in.read((char*)&contourPolyUniqueID,4)<0)
+			return ReadError();
+		//[DIRTY] WARNING: temporarily, we set the polyline unique ID in the 'm_contourPolyline' pointer!!!
+		*(uint32_t*)(&m_contourPolyline) = contourPolyUniqueID;
+	}
+
+	//polygon mesh
+	//as the mesh will be saved automatically (as a child)
+	//we only store its unique ID --> we hope we will find it at loading time
+	{
+		uint32_t polygonMeshUniqueID = 0;
+		if (in.read((char*)&polygonMeshUniqueID,4)<0)
+			return ReadError();
+		//[DIRTY] WARNING: temporarily, we set the polyline unique ID in the 'm_contourPolyline' pointer!!!
+		*(uint32_t*)(&m_polygonMesh) = polygonMeshUniqueID;
+	}
+
+	//plane equation (dataVersion>=32)
 	if (in.read((char*)&m_planeEquation,sizeof(PointCoordinateType)*4)<0)
 		return ReadError();
 
-	//center (dataVersion>=28)
+	//center (dataVersion>=32)
 	if (in.read((char*)m_center.u,sizeof(PointCoordinateType)*3)<0)
 		return ReadError();
 
-	//RMS (dataVersion>=28)
+	//RMS (dataVersion>=32)
 	if (in.read((char*)&m_rms,sizeof(double))<0)
 		return ReadError();
 
-	//contour vertices (dataVersion>=28)
-	{
-		bool hasCountourVertices = false;
-		if (in.read((char*)&hasCountourVertices,sizeof(bool))<0)
-			return ReadError();
-
-		if (hasCountourVertices)
-		{
-			unsigned classID=0;
-			if (!ccObject::ReadClassIDFromFile(classID, in, dataVersion))
-				return ReadError();
-			if (classID != CC_POINT_CLOUD)
-				return CorruptError();
-			m_contourVertices = new ccPointCloud();
-			if (!m_contourVertices->fromFile(in,dataVersion))
-				return false;
-		}
-	}
-
-	//contour poyline (dataVersion>=28)
-	{
-		bool hasCountourPolyline = false;
-		if (in.read((char*)&hasCountourPolyline,sizeof(bool))<0)
-			return ReadError();
-
-		if (hasCountourPolyline)
-		{
-			assert(m_contourVertices);
-			unsigned classID=0;
-			if (!ccObject::ReadClassIDFromFile(classID, in, dataVersion))
-				return ReadError();
-			if (classID != CC_POLY_LINE)
-				return CorruptError();
-			m_contourPolyline = new ccPolyline(0);
-			if (!m_contourPolyline->fromFile(in,dataVersion))
-				return false;
-			//associated cloud is reset by fromFile!
-			m_contourPolyline->setAssociatedCloud(m_contourVertices);
-		}
-	}
-
-	//polygon (dataVersion>=28)
-	{
-		bool hasPolygon = false;
-		if (in.read((char*)&hasPolygon,sizeof(bool))<0)
-			return ReadError();
-
-		if (hasPolygon)
-		{
-			assert(m_contourVertices);
-			unsigned classID=0;
-			if (!ccObject::ReadClassIDFromFile(classID, in, dataVersion))
-				return ReadError();
-			if (classID != CC_MESH)
-				return CorruptError();
-			m_polygonMesh = new ccMesh(0);
-			if (!m_polygonMesh->fromFile(in,dataVersion))
-				return false;
-			m_polygonMesh->setAssociatedCloud(m_contourVertices); //associated cloud is reset by fromFile!
-
-			//we must also manually link the normal(s) table
-			intptr_t triNormsTableID = (intptr_t)m_polygonMesh->getTriNormsTable();
-			if (triNormsTableID > 0)
-			{
-				ccHObject* triNormsTable = m_polygonMesh->find(triNormsTableID);
-				if (triNormsTable && triNormsTable->isA(CC_NORMAL_INDEXES_ARRAY))
-					m_polygonMesh->setTriNormsTable(static_cast<NormsIndexesTableType*>(triNormsTable),false);
-				else
-				{
-					ccLog::Warning(QString("[ccFacet::fromFile_MeOnly] Couldn't find shared normals (ID=%1) for the facet's polygon mesh!").arg(triNormsTableID));
-					m_polygonMesh->setTriNormsTable(0,false);
-					m_polygonMesh->showTriNorms(false);
-				}
-			}
-		}
-	}
-
-	//surface (dataVersion>=28)
+	//surface (dataVersion>=32)
 	if (in.read((char*)&m_surface,sizeof(double))<0)
 		return ReadError();
+
+	//Max edge length (dataVersion>=31)
+	if (in.read((char*)&m_maxEdgeLength,sizeof(PointCoordinateType))<0)
+		return WriteError();
 
 	return true;
 }

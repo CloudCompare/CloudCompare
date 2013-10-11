@@ -43,6 +43,7 @@
 #include <ccMaterialSet.h>
 #include <ccAdvancedTypes.h>
 #include <ccGenericPrimitive.h>
+#include <ccFacet.h>
 
 //Qt
 #include <QStandardItemModel>
@@ -159,6 +160,10 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 		if (m_currentObject->isKindOf(CC_PRIMITIVE))
 			fillWithPrimitive(ccHObjectCaster::ToPrimitive(m_currentObject));
     }
+    else if (m_currentObject->isA(CC_FACET))
+    {
+		fillWithFacet(ccHObjectCaster::ToFacet(m_currentObject));
+	}
     else if (m_currentObject->isA(CC_POLY_LINE))
     {
         fillWithPolyline(ccHObjectCaster::ToPolyline(m_currentObject));
@@ -434,6 +439,33 @@ void ccPropertiesTreeDelegate::fillWithPrimitive(ccGenericPrimitive* _obj)
 	//drawing steps
 	if (_obj->hasDrawingPrecision())
 		appendRow( ITEM("Drawing precision"), PERSISTENT_EDITOR(OBJECT_PRIMITIVE_PRECISION), true );
+}
+
+void ccPropertiesTreeDelegate::fillWithFacet(ccFacet* _obj)
+{
+    assert(_obj && m_model);
+
+    addSeparator("Facet");
+
+    //surface
+	appendRow( ITEM("Surface"), ITEM(QLocale(QLocale::English).toString(_obj->getSurface())) );
+
+	//RMS
+	appendRow( ITEM("RMS"), ITEM(QLocale(QLocale::English).toString(_obj->getRMS())) );
+
+	//center
+	appendRow( ITEM("Center"), ITEM(QString("(%1 ; %2 ; %3)").arg(_obj->getCenter().x).arg(_obj->getCenter().y).arg(_obj->getCenter().z)) );
+	
+	//normal
+	appendRow( ITEM("Normal"), ITEM(QString("(%1 ; %2 ; %3)").arg(_obj->getNormal().x).arg(_obj->getNormal().y).arg(_obj->getNormal().z)) );
+
+	//contour visibility
+	if (_obj->getContour())
+		appendRow( ITEM("Show contour"), CHECKABLE_ITEM(_obj->getContour()->isVisible(),OBJECT_FACET_CONTOUR) );
+
+	//polygon visibility
+	if (_obj->getPolygon())
+		appendRow( ITEM("Show polygon"), CHECKABLE_ITEM(_obj->getPolygon()->isVisible(),OBJECT_FACET_MESH) );
 }
 
 void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
@@ -1076,6 +1108,24 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(m_currentObject);
 			assert(cloud);
 			cloud->showSFColorsScale(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
+	case OBJECT_FACET_CONTOUR:
+		{
+			ccFacet* facet = ccHObjectCaster::ToFacet(m_currentObject);
+			assert(facet);
+			if (facet && facet->getContour())
+				facet->getContour()->setVisible(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
+	case OBJECT_FACET_MESH:
+		{
+			ccFacet* facet = ccHObjectCaster::ToFacet(m_currentObject);
+			assert(facet);
+			if (facet && facet->getPolygon())
+				facet->getPolygon()->setVisible(item->checkState() == Qt::Checked);
 		}
 		redraw=true;
 		break;

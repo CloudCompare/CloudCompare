@@ -1,6 +1,11 @@
 *** CloudCompare versions history ***
 
 v2.5.1 ??/??/2013
+- The 'plane orientation' tool is replaced by two tools:
+	* Tools > Fit > Plane: same as the old tool
+	* Tools > Fit > 2D polygon: almost the same, but the fitted entity is a 2D concave polygon
+	* Both tools now output the orientation with the "dip direction / dip angle" convention
+		(see http://en.wikipedia.org/wiki/Structural_geology#Geometries)
 - 3D polylines can now be defined with the 'Point List Picking' tool
 	* select a list of points then 'export' it as a polyline
 	* the polyline displayed width is customizable
@@ -13,10 +18,10 @@ v2.5.1 ??/??/2013
 	* User can now choose whether overlay items (scale, trihedron, etc.) should be rendered or not by the
 		'Display > Render to file' tool
 	* the progress bar "Cancel" button has no "focus" anymore:
-		* for instance, this allows the user to keep the "Enter" key pressed while loading multiple files with the default
-		  loading parameters (i.e. manually "skipping" the opening dialog for ASCII files for instance)
-	* the "Plane orientation" tool now outputs the orientation with the
-		"dip direction / dip angle convention" (see http://en.wikipedia.org/wiki/Structural_geology#Geometries)
+		for instance, this allows the user to keep the "Enter" key pressed while loading multiple files with the default
+		loading parameters (i.e. manually "skipping" the opening dialog for ASCII files for instance)
+	* the 'Align camera' tool (right-click context menu for planes, 2D polygons, labels, etc.) now outputs the applied matrix
+		so that you can apply it with the 'Edit > Apply transformation' tool to actually rotate an entity the same way
 - bug fixes:
 	* text wes misplaced when rendering screen with a zoom factor greater than 1.
 		Other features were also badly reshaped (fonts, scale, color ramp, trihedron, etc.)
@@ -29,6 +34,8 @@ v2.5.1 ??/??/2013
 	* Height Grid Generation tool would crash when generating a grid with SF interpolation and the 'leave empty'
 		option for empty cells.
 	* when cloning a cloud, the scalar field display options (color scales, steps, etc.) were not duplicated.
+	* when trying to save an entity which name made an invalid filename, the file saving dialog wouldn't open
+		(now a warning message is issued and the default 'project' name is used instead)
 
 v2.5.0 07/12/2013
 - New version numbering scheme (build index appended instead of the release date)

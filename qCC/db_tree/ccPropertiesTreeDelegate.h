@@ -37,6 +37,7 @@ class ccGBLSensor;
 class ccMaterialSet;
 class cc2DLabel;
 class cc2DViewportObject;
+class ccFacet;
 class CCShareable;
 
 class QStandardItemModel;
@@ -80,6 +81,8 @@ public:
 							OBJECT_PRIMITIVE_PRECISION  ,
 							OBJECT_CLOUD_POINT_SIZE		,
 							OBJECT_NAME_IN_3D			,
+							OBJECT_FACET_CONTOUR		,
+							OBJECT_FACET_MESH			,
 	};
 
     //! Default constructor
@@ -134,6 +137,7 @@ protected:
     void fillWithPointCloud(ccGenericPointCloud*);
     void fillSFWithPointCloud(ccGenericPointCloud*);
     void fillWithMesh(ccGenericMesh*);
+	void fillWithFacet(ccFacet*);
     void fillWithPolyline(ccPolyline*);
     void fillWithPrimitive(ccGenericPrimitive*);
     void fillWithPointOctree(ccOctree*);

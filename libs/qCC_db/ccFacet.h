@@ -24,6 +24,10 @@
 #include "ccPolyline.h"
 #include "ccPointCloud.h"
 
+//CCLib
+#include <GenericIndexedCloudPersist.h>
+
+
 //! Facet
 /** Composite object: point cloud + 2D1/2 contour polyline + 2D1/2 surface mesh
 **/
@@ -37,36 +41,30 @@ class ccFacet : public ccHObject
 public:
 
 	//! Default constructor
-	ccFacet(QString name = QString("Facet"));
+	/** \param maxEdgeLength max edge length (if possible - ignored if 0)
+		\param name name
+	**/
+	ccFacet(PointCoordinateType maxEdgeLength = 0,
+			QString name = QString("Facet"));
 
 	//! Destructor
 	virtual ~ccFacet();
 
-	//! Create a facet from a set of points
-	/** \param cloud cloud from which to create the facet
-		\param transferOwnership whether the input cloud will be 'kept' by the facet (true) or cloned (false)
+	//! Creates a facet from a set of points
+	/** The facet boundary can either be the convex hull (maxEdgeLength = 0)
+		or the concave hull (maxEdgeLength > 0).
+		\param cloud cloud from which to create the facet
+		\param maxEdgeLength max edge length (if possible - ignored if 0)
+		\param transferOwnership if true and the input cloud is a ccPointCloud, it will be 'kept' as 'origin points'
 		\return a facet (or 0 if an error occured)
 	**/
-	static ccFacet* Create(ccPointCloud* cloud, bool transferOwnership = false);
-
-	////! Operator: casts to generic cloud
-	//operator ccGenericPointCloud*() const { return m_originPoints; }
-	////! Operator: casts to cloud
-	//operator ccPointCloud*() const { return m_originPoints; }
-	////! Operator: casts to generic mesh
-	//operator ccGenericMesh*() const { return m_polygonMesh; }
-	////! Operator: casts to mesh
-	//operator ccMesh*() const { return m_polygonMesh; }
-	////! Operator: casts to polyline
-	//operator ccPolyline*() const { return m_contourPolyline; }
+	static ccFacet* Create(	CCLib::GenericIndexedCloudPersist* cloud,
+							PointCoordinateType maxEdgeLength = 0,
+							bool transferOwnership = false);
 
     //! Returns class ID
     virtual CC_CLASS_ENUM getClassID() const { return CC_FACET; }
 	virtual bool isSerializable() const { return true; }
-
-	//inherited methods (ccHObject)
-    virtual ccBBox getMyOwnBB();
-    virtual void setDisplay_recursive(ccGenericGLDisplay* win);
 
 	//! Sets the facet unique color
 	/** \param rgb RGB color
@@ -88,19 +86,24 @@ public:
 	ccMesh* getPolygon() { return m_polygonMesh; }
 	//! Returns contour polyline (if any)
 	ccPolyline* getContour() { return m_contourPolyline; }
-	//! Returns associated points (if any)
-	ccPointCloud* getAssociatedPoints() { return m_originPoints; }
+	//! Returns contour vertices (if any)
+	ccPointCloud* getContourVertices() { return m_contourVertices; }
+	//! Returns origin points (if any)
+	ccPointCloud* getOriginPoints() { return m_originPoints; }
+
+	//! Sets polygon mesh
+	void setPolygon(ccMesh* mesh) { m_polygonMesh = mesh; }
+	//! Sets contour polyline
+	void setContour(ccPolyline* poly) { m_contourPolyline = poly; }
+	//! Sets contour vertices
+	void setContourVertices(ccPointCloud* cloud) { m_contourVertices = cloud; }
+	//! Sets origin points
+	void setOriginPoints(ccPointCloud* cloud) { m_originPoints = cloud; }
 
 protected:
 
-    //inherited from ccHObject
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
-    
-	//! Updates internal representation (polygon, polyline, etc.)
-	bool updateInternalRepresentation();
-
-	//! Clears the internal representation (polygon, polyline, etc.)
-	void clearInternalRepresentation();
+	//! Creates internal representation (polygon, polyline, etc.)
+	bool createInternalRepresentation(CCLib::GenericIndexedCloudPersist* points);
 
 	//! Facet 
 	ccMesh* m_polygonMesh;
@@ -122,6 +125,9 @@ protected:
 
 	//! Surface (m_polygon)
 	double m_surface;
+
+	//! Max length
+	PointCoordinateType m_maxEdgeLength;
 
     //inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;

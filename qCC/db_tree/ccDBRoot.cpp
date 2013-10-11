@@ -38,6 +38,10 @@
 #include <ccGenericPrimitive.h>
 #include <ccPlane.h>
 #include <ccPolyline.h>
+#include <ccFacet.h>
+
+//CClib
+#include <CCMiscTools.h>
 
 //local
 #include "ccPropertiesTreeDelegate.h"
@@ -428,7 +432,7 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 			case CC_BOX:	
 			case CC_DISH:	
 			case CC_EXTRU:	
-			case CC_FACET:	
+			case CC_FACET:
                 if (locked)
                     return QIcon(QString::fromUtf8(":/CC/images/dbMiscGeomSymbolLocked.png"));
                 else
@@ -1233,9 +1237,9 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	//plane normal
 	CCVector3 planeNormal;
 	CCVector3 planeVertDir;
+	CCVector3 center;
 
-	//2D label with 3 points?
-	if (obj->isA(CC_2D_LABEL))
+	if (obj->isA(CC_2D_LABEL)) //2D label with 3 points?
 	{
 		cc2DLabel* label = static_cast<cc2DLabel*>(obj);
 		//work only with labels with 3 points!
@@ -1249,6 +1253,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 			const CCVector3* _C = C.cloud->getPoint(C.index);
 			planeNormal = (*_B-*_A).cross(*_C-*_A);
 			planeVertDir = /*(*_B-*_A)*/win->getCurrentUpDir();
+			center = (*_A + *_B + *_C)/3;
 		}
 		else
 		{
@@ -1256,13 +1261,21 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 			return;
 		}
 	}
-	//plane ?
-	else if (obj->isA(CC_PLANE))
+	else if (obj->isA(CC_PLANE)) //plane
 	{
 		ccPlane* plane = static_cast<ccPlane*>(obj);
 		//3rd column = plane normal!
 		planeNormal = plane->getNormal();
 		planeVertDir = CCVector3(plane->getTransformation().getColumn(1));
+		center = plane->getCenter();
+	}
+	else if (obj->isA(CC_FACET)) //facet
+	{
+		ccFacet* facet = static_cast<ccFacet*>(obj);
+		planeNormal = facet->getNormal();
+		CCVector3 planeHorizDir(0.0,1.0,0.0);
+		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal.u,planeHorizDir.u,planeVertDir.u);
+		center = facet->getCenter();
 	}
 	else
 	{
@@ -1271,8 +1284,23 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	}
 
 	//we can now make the camera look in the direction of the normal
-	CCVector3 forward = (reverse ? planeNormal : -planeNormal);
-	win->setCustomView(forward,planeVertDir);
+	if (!reverse)
+		planeNormal *= -1;
+	win->setCustomView(planeNormal,planeVertDir);
+
+	//output the transformation matrix that would make this normal points towards +Z
+	{
+		ccGLMatrix transMat;
+		transMat.setTranslation(-center);
+		ccGLMatrix viewMat = win->getViewportParameters().viewMat;
+		viewMat = viewMat * transMat;
+		viewMat.setTranslation(CCVector3(viewMat.getTranslation()) + center);
+
+		ccLog::Print("[Align camera] Corresponding view matrix:");
+		const float* mat = viewMat.data();
+		ccLog::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+		ccLog::Print("[Orientation] You can copy this matrix values (CTRL+C) and paste them in the 'Apply transformation tool' dialog");
+	}
 }
 
 void ccDBRoot::gatherRecursiveInformation()
@@ -1663,7 +1691,7 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 						{
 							hasExactlyOnePlanarEntity = (static_cast<cc2DLabel*>(item)->size() == 3);
 						}
-						else if (item->isA(CC_PLANE))
+						else if (item->isA(CC_PLANE) || item->isA(CC_FACET))
 						{
 							hasExactlyOnePlanarEntity = true;
 						}

@@ -52,6 +52,7 @@
 #include <cc2DViewportObject.h>
 #include <ccColorScale.h>
 #include <ccColorScalesManager.h>
+#include <ccFacet.h>
 
 //qCC includes
 #include "ccHeightGridGeneration.h"
@@ -899,7 +900,8 @@ void MainWindow::connectActions()
     connect(actionDensity,                      SIGNAL(triggered()),    this,       SLOT(doComputeDensity()));
     connect(actionCurvature,                    SIGNAL(triggered()),    this,       SLOT(doComputeCurvature()));
     connect(actionRoughness,                    SIGNAL(triggered()),    this,       SLOT(doComputeRoughness()));
-    connect(actionPlaneOrientation,				SIGNAL(triggered()),    this,       SLOT(doComputePlaneOrientation()));
+    connect(actionFitPlane,						SIGNAL(triggered()),    this,       SLOT(doActionFitPlane()));
+    connect(actionFitFacet,						SIGNAL(triggered()),    this,       SLOT(doActionFitFacet()));
 	//"Tools"
     connect(actionPointListPicking,             SIGNAL(triggered()),    this,       SLOT(activatePointListPickingMode()));
     connect(actionPointPicking,                 SIGNAL(triggered()),    this,       SLOT(activatePointsPropertiesMode()));
@@ -6379,12 +6381,31 @@ void MainWindow::doActionScalarFieldArithmetic()
 	updateUI();
 }
 
-void MainWindow::doComputePlaneOrientation()
+void MainWindow::doActionFitPlane()
+{
+	doComputePlaneOrientation(false);
+}
+
+void MainWindow::doActionFitFacet()
+{
+	doComputePlaneOrientation(true);
+}
+
+void MainWindow::doComputePlaneOrientation(bool fitFacet)
 {
 	ccHObject::Container selectedEntities = m_selectedEntities;
-    size_t selNum=selectedEntities.size();
-    if (selNum<1)
+    size_t selNum = selectedEntities.size();
+    if (selNum < 1)
         return;
+
+	double maxEdgeLength = 0;
+	if (fitFacet)
+	{
+		bool ok = true;
+		maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
+		if (!ok)
+			return;
+	}
 
     for (size_t i=0; i<selNum; ++i)
     {
@@ -6392,32 +6413,56 @@ void MainWindow::doComputePlaneOrientation()
 
         CCLib::GenericIndexedCloudPersist* cloud = 0;
 
-        if (ent->isKindOf(CC_POINT_CLOUD) )
-        {
-            ccGenericPointCloud * gencloud = ccHObjectCaster::ToGenericPointCloud(ent);
-            cloud = static_cast<CCLib::GenericIndexedCloudPersist*>(gencloud);
-        }
-        else if (ent->isKindOf(CC_POLY_LINE))
+        if (ent->isKindOf(CC_POLY_LINE))
         {
              ccPolyline * pline = ccHObjectCaster::ToPolyline(ent);
              cloud = static_cast<CCLib::GenericIndexedCloudPersist*>(pline);
         }
+		else
+		{
+            ccGenericPointCloud* gencloud = ccHObjectCaster::ToGenericPointCloud(ent);
+			if (gencloud)
+			{
+				cloud = static_cast<CCLib::GenericIndexedCloudPersist*>(gencloud);
+			}
+		}
 
         if (cloud)
         {
 			double rms = 0.0;
-            ccPlane* pPlane = ccPlane::Fit(cloud, &rms);
+			CCVector3 C,N;
+
+			ccHObject* plane = 0;
+			if (fitFacet)
+			{
+				ccFacet* facet = ccFacet::Create(cloud, maxEdgeLength);
+				if (facet)
+				{
+					plane = static_cast<ccHObject*>(facet);
+					N = facet->getNormal();
+					C = facet->getCenter();
+					rms = facet->getRMS();
+				}
+			}
+			else
+			{
+				ccPlane* pPlane = ccPlane::Fit(cloud, &rms);
+				if (pPlane)
+				{
+					plane = static_cast<ccHObject*>(pPlane);
+					N = pPlane->getNormal();
+					C = *CCLib::Neighbourhood(cloud).getGravityCenter();
+					pPlane->enableStippling(true);
+				}
+			}
 
 			//as all information appears in Console...
 			forceConsoleDisplay();
 
-            if (pPlane)
+            if (plane)
 			{
                 ccConsole::Print(QString("[Orientation] Entity '%1'").arg(ent->getName()));
 				ccConsole::Print("\t- plane fitting RMS: %f",rms);
-
-				const ccGLMatrix& planteTrans = pPlane->getTransformation();
-				CCVector3 N = pPlane->getNormal(); //plane normal
 
 				//We always consider the normal with a positive 'Z' by default!
 				if (N.z < 0.0)
@@ -6427,35 +6472,32 @@ void MainWindow::doComputePlaneOrientation()
 				//we compute strike & dip by the way
 				PointCoordinateType dip = 0, dipDir = 0;
 				ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
-				QString strikeAndDipStr = ccNormalVectors::ConvertDipAndDipDirToString(dip,dipDir);
-
-				ccConsole::Print(QString("\t- strike/dip: %1").arg(strikeAndDipStr));
+				QString dipAndDipDirStr = ccNormalVectors::ConvertDipAndDipDirToString(dip,dipDir);
+				ccConsole::Print(QString("\t- %1").arg(dipAndDipDirStr));
 
 				//hack: output the transformation matrix that would make this normal points towards +Z
 				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N,CCVector3(0,0,1.0f));
-				CCVector3 G = *CCLib::Neighbourhood(cloud).getGravityCenter();
-				CCVector3 Gt = G;
+				CCVector3 Gt = C;
 				makeZPosMatrix.applyRotation(Gt.u);
-				makeZPosMatrix.setTranslation(G-Gt);
+				makeZPosMatrix.setTranslation(C-Gt);
 				makeZPosMatrix.invert();
 				ccConsole::Print("[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:");
 				const float* mat = makeZPosMatrix.data();
 				ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
 				ccConsole::Print("[Orientation] You can copy this matrix values (CTRL+C) and paste them in the 'Apply transformation tool' dialog");
 
-				pPlane->setName(QString("Strike plane ")+strikeAndDipStr);
-				pPlane->applyGLTransformation_recursive(); //not yet in DB
-                selectedEntities[i]->addChild(pPlane);
-                pPlane->setDisplay(ent->getDisplay());
-				pPlane->setVisible(true);
-				pPlane->enableStippling(true);
-				pPlane->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);
+				plane->setName(dipAndDipDirStr);
+				plane->applyGLTransformation_recursive(); //not yet in DB
+                selectedEntities[i]->addChild(plane);
+                plane->setDisplay(ent->getDisplay());
+				plane->setVisible(true);
+				plane->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);
                 selectedEntities[i]->prepareDisplayForRefresh_recursive();
-				addToDB(pPlane);
+				addToDB(plane);
 			}
 			else
 			{
-                ccConsole::Warning(QString("Failed to fit a plane on entity '%1'").arg(ent->getName()));
+                ccConsole::Warning(QString("Failed to fit a plane/facet on entity '%1'").arg(ent->getName()));
 			}
 		}
 	}
@@ -7228,6 +7270,18 @@ void MainWindow::loadFile()
     settings.endGroup();
 }
 
+//Helper: check for a filename validity
+static bool IsValidFileName(QString filename)
+{
+#ifdef CC_WINDOWS
+	QString sPattern("^(?!^(PRN|AUX|CLOCK\\$|NUL|CON|COM\\d|LPT\\d|\\..*)(\\..+)?$)[^\\x00-\\x1f\\\\?*:\\"";|/]+$");
+#else
+	QString sPattern("^(([a-zA-Z]:|\\\\)\\\\)?(((\\.)|(\\.\\.)|([^\\\\/:\\*\\?""\\|<>\\. ](([^\\\\/:\\*\\?""\\|<>\\. ])|([^\\\\/:\\*\\?""\\|<>]*[^\\\\/:\\*\\?""\\|<>\\. ]))?))\\\\)*[^\\\\/:\\*\\?""\\|<>\\. ](([^\\\\/:\\*\\?""\\|<>\\. ])|([^\\\\/:\\*\\?""\\|<>]*[^\\\\/:\\*\\?""\\|<>\\. ]))?$");
+#endif
+
+	return QRegExp(sPattern).exactMatch(filename);
+}
+
 void MainWindow::saveFile()
 {
     size_t selNum = m_selectedEntities.size();
@@ -7386,6 +7440,12 @@ void MainWindow::saveFile()
 
 		if (!QFileInfo(defaultFileName).suffix().isEmpty()) //we remove extension
 			defaultFileName = QFileInfo(defaultFileName).baseName();
+
+		if (!IsValidFileName(defaultFileName))
+		{
+			ccLog::Warning("[MainWindow::saveFile] First entity's name would make an invalid filename! Can't use it...");
+			defaultFileName = "project";
+		}
 
 		dir += defaultFileName;
 	}
@@ -7776,7 +7836,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionDensity->setEnabled(atLeastOneCloud);
     actionCurvature->setEnabled(atLeastOneCloud);
     actionRoughness->setEnabled(atLeastOneCloud);
-    actionPlaneOrientation->setEnabled(atLeastOneCloud|atLeastOnePolyLine);
+    actionFitPlane->setEnabled(atLeastOneEntity);
+    actionFitFacet->setEnabled(atLeastOneEntity);
 	actionSNETest->setEnabled(atLeastOneCloud);
 
     actionFilterByValue->setEnabled(atLeastOneSF);

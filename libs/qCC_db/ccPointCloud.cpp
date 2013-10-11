@@ -1130,8 +1130,8 @@ void ccPointCloud::applyGLTransformation(const ccGLMatrix& trans)
 
 void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 {
-	unsigned i,count=size();
-	for (i=0;i<count;i++)
+	unsigned count = size();
+	for (unsigned i=0; i<count; i++)
 		trans.apply(*point(i));
 
 	//we must also take care of the normals!
@@ -1146,7 +1146,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 			NormsIndexesTableType* newNorms = new NormsIndexesTableType;
 			if (newNorms->reserve(ccNormalVectors::GetNumberOfVectors()))
 			{
-				for (i=0;i<ccNormalVectors::GetNumberOfVectors();i++)
+				for (unsigned i=0; i<ccNormalVectors::GetNumberOfVectors(); i++)
 				{
 					CCVector3 new_n(ccNormalVectors::GetNormal(i));
 					trans.applyRotation(new_n);
@@ -1155,9 +1155,9 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 				}
 
 				m_normals->placeIteratorAtBegining();
-				for (i=0;i<count;i++)
+				for (unsigned j=0; j<count; j++)
 				{
-					m_normals->setValue(i,newNorms->getValue(m_normals->getCurrentValue()));
+					m_normals->setValue(j,newNorms->getValue(m_normals->getCurrentValue()));
 					m_normals->forwardIterator();
 				}
 				recoded=true;
@@ -1174,7 +1174,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 		{
 			//on recode direct chaque normale
 			m_normals->placeIteratorAtBegining();
-			for (i=0;i<count;i++)
+			for (unsigned i=0; i<count; i++)
 			{
 				normsType* _theNormIndex = m_normals->getCurrentValuePtr();
 				CCVector3 new_n(ccNormalVectors::GetNormal(*_theNormIndex));

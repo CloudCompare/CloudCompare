@@ -32,6 +32,7 @@
 #include <ccPolyline.h>
 #include <ccMaterialSet.h>
 #include <cc2DLabel.h>
+#include <ccFacet.h>
 
 //system
 #include <set>
@@ -102,6 +103,10 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 				dependencies.insert(mesh->getAssociatedCloud());
 			if (mesh->getMaterialSet())
 				dependencies.insert(mesh->getMaterialSet());
+			if (mesh->getTexCoordinatesTable())
+				dependencies.insert(mesh->getTexCoordinatesTable());
+			if (mesh->getTexCoordinatesTable())
+				dependencies.insert(mesh->getTexCoordinatesTable());
 		}
 		else if (currentObject->isA(CC_SUB_MESH))
 		{
@@ -124,6 +129,18 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 				const cc2DLabel::PickedPoint& pp = label->getPoint(i);
 				dependencies.insert(pp.cloud);
 			}
+		}
+		else if (currentObject->isA(CC_FACET))
+		{
+			ccFacet* facet = static_cast<ccFacet*>(currentObject);
+			if (facet->getOriginPoints())
+				dependencies.insert(facet->getOriginPoints());
+			if (facet->getContourVertices())
+				dependencies.insert(facet->getContourVertices());
+			if (facet->getPolygon())
+				dependencies.insert(facet->getPolygon());
+			if (facet->getContour())
+				dependencies.insert(facet->getContour());
 		}
 
 		for (std::set<const ccHObject*>::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it)
@@ -389,6 +406,75 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 					label->addPoint(correctedPickedPoints[i].cloud,correctedPickedPoints[i].index);
 				label->setVisible(visible);
 				label->setName(originalName);
+			}
+		}
+		else if (currentObject->isA(CC_FACET))
+		{
+			ccFacet* facet = ccHObjectCaster::ToFacet(currentObject);
+
+			//origin points
+			{
+				intptr_t cloudID = (intptr_t)facet->getOriginPoints();
+				if (cloudID > 0)
+				{
+					ccHObject* cloud = root->find(cloudID);
+					if (cloud && cloud->isA(CC_POINT_CLOUD))
+						facet->setOriginPoints(ccHObjectCaster::ToPointCloud(cloud));
+					else
+					{
+						//we have a problem here ;)
+						facet->setOriginPoints(0);
+						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find origin points (ID=%1) for facet '%2' in the file!").arg(cloudID).arg(facet->getName()));
+					}
+				}
+			}
+			//contour points
+			{
+				intptr_t cloudID = (intptr_t)facet->getContourVertices();
+				if (cloudID > 0)
+				{
+					ccHObject* cloud = root->find(cloudID);
+					if (cloud && cloud->isA(CC_POINT_CLOUD))
+						facet->setContourVertices(ccHObjectCaster::ToPointCloud(cloud));
+					else
+					{
+						//we have a problem here ;)
+						facet->setContourVertices(0);
+						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find contour points (ID=%1) for facet '%2' in the file!").arg(cloudID).arg(facet->getName()));
+					}
+				}
+			}
+			//contour polyline
+			{
+				intptr_t polyID = (intptr_t)facet->getContour();
+				if (polyID > 0)
+				{
+					ccHObject* poly = root->find(polyID);
+					if (poly && poly->isA(CC_POLY_LINE))
+						facet->setContour(ccHObjectCaster::ToPolyline(poly));
+					else
+					{
+						//we have a problem here ;)
+						facet->setContourVertices(0);
+						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find contour polyline (ID=%1) for facet '%2' in the file!").arg(polyID).arg(facet->getName()));
+					}
+				}
+			}
+			//polygon mesh
+			{
+				intptr_t polyID = (intptr_t)facet->getPolygon();
+				if (polyID > 0)
+				{
+					ccHObject* poly = root->find(polyID);
+					if (poly && poly->isA(CC_MESH))
+						facet->setPolygon(ccHObjectCaster::ToMesh(poly));
+					else
+					{
+						//we have a problem here ;)
+						facet->setContourVertices(0);
+						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find polygon mesh (ID=%1) for facet '%2' in the file!").arg(polyID).arg(facet->getName()));
+					}
+				}
 			}
 		}
 

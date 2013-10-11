@@ -39,8 +39,9 @@
    v2.9 - 08/14/2013 - ccMeshGroup removed, ccSubMesh added
    v3.0 - 08/30/2013 - QObject's meta data structure added
    v3.1 - 09/25/2013 - ccPolyline width added
+   v3.2 - 10/11/2013 - ccFacet (2D polygons) are now supported
 **/
-const unsigned c_currentDBVersion = 31; //3.1
+const unsigned c_currentDBVersion = 32; //3.2
 
 unsigned ccObject::GetCurrentDBVersion()
 {

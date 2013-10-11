@@ -169,12 +169,18 @@ public:
 	**/
 	inline Vector2Tpl(Type _x, Type _y) : x(_x), y(_y) {}
 
+	//! Copy constructor
+	inline Vector2Tpl(const Vector2Tpl& v) : x(v.x),y(v.y) {}
+
 	//! Returns vector square norm
 	inline Type norm2() const { return (x*x)+(y*y); }
 	//! Returns vector norm
 	inline Type norm() const { return sqrt(norm2()); }
 	//! Sets vector norm to unity
 	inline void normalize() { Type n = norm2(); if (n>0) *this /= sqrt(n); }
+
+	//! Dot product
+	inline Type dot(const Vector2Tpl& v) const { return (x*v.x)+(y*v.y); }
 
 	//! Inverse operator
 	inline Vector2Tpl& operator - () {x=-x; y=-y; return *this;}

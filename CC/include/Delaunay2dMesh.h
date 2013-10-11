@@ -57,10 +57,12 @@ public:
 	//! Build the Delaunay mesh on top a set of 2D points
 	/** \param the2dPoints a set of 2D points
 		\param pointCountToUse number of points to use from the input set (0 = all)
+		\param forceInputPointsAsBorder if true, the input points are considered as ordered polyon vertices and 'outside' triangles will be removed
 		\return success
 	**/
 	virtual bool build(	CC2DPointsContainer &the2dPoints,
-						size_t pointCountToUse = 0);
+						size_t pointCountToUse = 0,
+						bool forceInputPointsAsBorder = false);
 
 	//inherited methods (see GenericMesh)
 	virtual unsigned size() const { return m_numberOfTriangles; }

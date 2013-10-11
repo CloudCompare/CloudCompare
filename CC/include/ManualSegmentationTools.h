@@ -19,8 +19,7 @@
 #define MANUAL_SEGMENTATION_TOOLS_HEADER
 
 #include "CCToolbox.h"
-#include "CCTypes.h"
-#include "CCGeom.h"
+#include "Neighbourhood.h"
 
 namespace CCLib
 {
@@ -68,12 +67,19 @@ public:
 	static ReferenceCloud* segment(GenericIndexedCloudPersist* aCloud, ScalarType minDist, ScalarType maxDist);
 
 
-	//! Tests if a point is inside a polyline
+	//! Tests if a point is inside a polygon (2D)
 	/** \param P a 2D point
-		\param poly a polyline (considered as a 2D poyline only)
+		\param polyVertices polygon vertices (considered as ordered 2D poyline vertices)
 		\return true if P is inside poly
 	**/
-	static bool isPointInsidePoly(const CCVector2& P, const Polyline* poly);
+	static bool isPointInsidePoly(const CCVector2& P, const GenericIndexedCloud* polyVertices);
+
+	//! Tests if a point is inside a polygon (2D)
+	/** \param P a 2D point
+		\param polyVertices polygon vertices (considered as ordered 2D poyline vertices)
+		\return true if P is inside poly
+	**/
+	static bool isPointInsidePoly(const CCVector2& P, const CC2DPointsContainer &polyVertices);
 
 	//! Segments a mesh knowing which vertices should be kept or not
 	/** This method takes as input a set of vertex indexes and creates a new mesh

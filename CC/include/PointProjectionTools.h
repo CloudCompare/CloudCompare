@@ -18,10 +18,13 @@
 #ifndef POINT_PROJECTION_TOOLS_HEADER
 #define POINT_PROJECTION_TOOLS_HEADER
 
+//Local
 #include "CCToolbox.h"
 #include "Matrix.h"
-//#include "RegistrationTools.h" //to use
 
+//System
+#include <vector>
+#include <list>
 
 //! Triangulation types
 enum CC_TRIANGULATION_TYPES {	GENERIC							=		1,		/**< Default triangulation (Delaunay 2D in XY plane) **/
@@ -114,6 +117,49 @@ public:
 													CC_TRIANGULATION_TYPES type = GENERIC,
 													PointCoordinateType maxEdgeLength = 0);
 
+	//! Indexed 2D vector
+	/** Used for convex and concave hull computation
+	**/
+	class IndexedCCVector2 : public CCVector2
+	{
+	public:
+
+		//! Default constructor
+		IndexedCCVector2() : CCVector2(), index(0) {}
+		//! Copy constructor
+		IndexedCCVector2(const CCVector2& v) : CCVector2(v), index(0) {}
+		//! Copy constructor
+		IndexedCCVector2(const IndexedCCVector2& v) : CCVector2(v), index(v.index) {}
+
+		//! Point index
+		unsigned index;
+	};
+
+	//! Determines the convex hull of a set of points
+	/** Returns a list of points on the convex hull in counter-clockwise order.
+		Implementation of Andrew's monotone chain 2D convex hull algorithm.
+		Asymptotic complexity: O(n log n).
+		(retrieved from http://en.wikibooks.org/wiki/Algorithm_Implementation/Geometry/Convex_hull/Monotone_chain)
+		WARNING: the input 'points' set will be sorted!
+		\param points input set of points
+		\param hullPoints output points (on the convex hull)
+		\return success
+	**/
+	static bool extractConvexHull2D(std::vector<IndexedCCVector2>& points,
+									std::list<IndexedCCVector2*>& hullPoints);
+
+	//! Determines the 'concave' hull of a set of points
+	/** Inspired from JIN-SEO PARK AND SE-JONG OH, "A New Concave Hull Algorithm
+		and Concaveness Measure for n-dimensional Datasets", 2012
+		Calls extractConvexHull2D (see associated warnings).
+		\param points input set of points
+		\param hullPoints output points (on the convex hull)
+		\param maxSquareLength maximum square length (ignored if <= 0, in which case the method simply returns the convex hull!)
+		\return success
+	**/
+	static bool extractConcaveHull2D(	std::vector<IndexedCCVector2>& points,
+										std::list<IndexedCCVector2*>& hullPoints,
+										PointCoordinateType maxSquareLength = 0);
 };
 
 }

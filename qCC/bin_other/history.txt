@@ -1,9 +1,14 @@
 *** CloudCompare versions history ***
 
 v2.5.1 ??/??/2013
+- The 'Clipping-box' tool has a new feature: 'contour' extraction on the current slice
+	* Early prototype: computes the concave hull of the slice's points
+		- one parameter: maximum edge length (if possible)
+	* Exports the result as a "facet" (a composite entity with a polyline corresponding
+		to the contour and a mesh corresponding to the 'inside')
 - The 'plane orientation' tool is replaced by two tools:
 	* Tools > Fit > Plane: same as the old tool
-	* Tools > Fit > 2D polygon: almost the same, but the fitted entity is a 2D concave polygon
+	* Tools > Fit > 2D polygon: almost the same, but the fitted entity is a facet (see above)
 	* Both tools now output the orientation with the "dip direction / dip angle" convention
 		(see http://en.wikipedia.org/wiki/Structural_geology#Geometries)
 - 3D polylines can now be defined with the 'Point List Picking' tool

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>213</width>
-    <height>228</height>
+    <width>220</width>
+    <height>294</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,11 +20,8 @@
    <string>Clipping Box</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
-   <property name="margin">
-    <number>4</number>
-   </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
       <widget class="QCheckBox" name="showInteractorsCheckBox">
        <property name="text">
@@ -50,34 +47,6 @@
         </size>
        </property>
       </spacer>
-     </item>
-     <item>
-      <widget class="QToolButton" name="exportButton">
-       <property name="minimumSize">
-        <size>
-         <width>25</width>
-         <height>25</height>
-        </size>
-       </property>
-       <property name="toolTip">
-        <string>Export selection as a new cloud</string>
-       </property>
-       <property name="statusTip">
-        <string>Export selection as a new cloud</string>
-       </property>
-       <property name="icon">
-        <iconset resource="../icones.qrc">
-         <normaloff>:/CC/images/ccClippingBoxSingleExport.png</normaloff>:/CC/images/ccClippingBoxSingleExport.png</iconset>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QToolButton" name="exportMultButton">
-       <property name="icon">
-        <iconset resource="../icones.qrc">
-         <normaloff>:/CC/images/ccClippingBoxMultExport.png</normaloff>:/CC/images/ccClippingBoxMultExport.png</iconset>
-       </property>
-      </widget>
      </item>
      <item>
       <widget class="QToolButton" name="resetButton">
@@ -186,6 +155,128 @@
       </item>
      </layout>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <spacer name="horizontalSpacer_7">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="contourGroupBox">
+       <property name="title">
+        <string>Contour</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout">
+        <property name="margin">
+         <number>4</number>
+        </property>
+        <item>
+         <widget class="QToolButton" name="extractContourToolButton">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Extracts the contour (concave hull)</string>
+          </property>
+          <property name="statusTip">
+           <string>Extracts the contour (concave hull)</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../icones.qrc">
+            <normaloff>:/CC/images/smallPolygonSelect.png</normaloff>:/CC/images/smallPolygonSelect.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="removeLastContourToolButton">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Removes last extracted contour</string>
+          </property>
+          <property name="statusTip">
+           <string>Removes last extracted contour</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../icones.qrc">
+            <normaloff>:/CC/images/smallRevert.png</normaloff>:/CC/images/smallRevert.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="slicesGroupBox">
+       <property name="title">
+        <string>Slices</string>
+       </property>
+       <layout class="QHBoxLayout" name="horizontalLayout_5">
+        <property name="margin">
+         <number>4</number>
+        </property>
+        <item>
+         <widget class="QToolButton" name="exportButton">
+          <property name="minimumSize">
+           <size>
+            <width>25</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Export selection as a new cloud</string>
+          </property>
+          <property name="statusTip">
+           <string>Export selection as a new cloud</string>
+          </property>
+          <property name="icon">
+           <iconset resource="../icones.qrc">
+            <normaloff>:/CC/images/ccClippingBoxSingleExport.png</normaloff>:/CC/images/ccClippingBoxSingleExport.png</iconset>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QToolButton" name="exportMultButton">
+          <property name="icon">
+           <iconset resource="../icones.qrc">
+            <normaloff>:/CC/images/ccClippingBoxMultExport.png</normaloff>:/CC/images/ccClippingBoxMultExport.png</iconset>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </item>
    <item>
     <widget class="QFrame" name="viewButtonsFrame">

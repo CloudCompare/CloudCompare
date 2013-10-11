@@ -29,13 +29,19 @@
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
+#include <ccFacet.h>
 
 //CCLib
 #include <ReferenceCloud.h>
+#include <Neighbourhood.h>
 
 //Qt
 #include <QProgressDialog>
 #include <QMessageBox>
+#include <QInputDialog>
+
+//! Last facet unique ID
+static unsigned s_lastFacetUniqueID = 0;
 
 ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -46,10 +52,12 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
-	connect(exportButton,		SIGNAL(clicked()), this, SLOT(exportCloud()));
-	connect(exportMultButton,	SIGNAL(clicked()), this, SLOT(exportMultCloud()));
-	connect(resetButton,		SIGNAL(clicked()), this, SLOT(reset()));
-	connect(closeButton,		SIGNAL(clicked()), this, SLOT(closeDialog()));
+	connect(extractContourToolButton,		SIGNAL(clicked()), this, SLOT(extractContour()));
+	connect(removeLastContourToolButton,	SIGNAL(clicked()), this, SLOT(removeLastContour()));
+	connect(exportButton,					SIGNAL(clicked()), this, SLOT(exportCloud()));
+	connect(exportMultButton,				SIGNAL(clicked()), this, SLOT(exportMultCloud()));
+	connect(resetButton,					SIGNAL(clicked()), this, SLOT(reset()));
+	connect(closeButton,					SIGNAL(clicked()), this, SLOT(closeDialog()));
 
 	connect(showInteractorsCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleInteractors(bool)));
 
@@ -71,6 +79,9 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
     connect(viewBackToolButton,		SIGNAL(clicked()),	this,	SLOT(setBackView()));
     connect(viewLeftToolButton,		SIGNAL(clicked()),	this,	SLOT(setLeftView()));
     connect(viewRightToolButton,	SIGNAL(clicked()),	this,	SLOT(setRightView()));
+
+	s_lastFacetUniqueID = 0;
+	removeLastContourToolButton->setEnabled(false);
 }
 
 ccClippingBoxTool::~ccClippingBoxTool()
@@ -117,6 +128,9 @@ bool ccClippingBoxTool::setAssociatedEntity(ccHObject* entity)
 	m_clipBox->setAssociatedEntity(entity);
 	if (m_associatedWin)
 		m_associatedWin->redraw();
+
+	s_lastFacetUniqueID = 0;
+	removeLastContourToolButton->setEnabled(false);
 
 	return true;
 }
@@ -182,6 +196,93 @@ void ccClippingBoxTool::stop(bool state)
 	ccOverlayDialog::stop(state);
 }
 
+void ccClippingBoxTool::removeLastContour()
+{
+	if (s_lastFacetUniqueID == 0)
+		return;
+
+	MainWindow* mainWindow = MainWindow::TheInstance();
+	if (mainWindow)
+	{
+		ccHObject* obj = mainWindow->db()->find(s_lastFacetUniqueID);
+		if (obj)
+		{
+			mainWindow->removeFromDB(obj);
+			ccGLWindow* win = mainWindow->getActiveGLWindow();
+			if (win)
+				win->redraw();
+		}
+	}
+
+	s_lastFacetUniqueID = 0;
+	removeLastContourToolButton->setEnabled(false);
+}
+
+static double s_maxEdgeLength = -1.0;
+void ccClippingBoxTool::extractContour()
+{
+	if (!m_clipBox)
+		return;
+
+	ccHObject* obj = m_clipBox->getAssociatedEntity();
+
+	if (obj && obj->isKindOf(CC_POINT_CLOUD))
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
+		if (cloud)
+		{
+			//ask the user for the 'max edge length'
+			bool ok = true;
+			if (s_maxEdgeLength < 0)
+			{
+				s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/20.0;
+			}
+			double maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
+			if (!ok)
+				return;
+			s_maxEdgeLength = maxEdgeLength;
+
+			PointCoordinateType planeEquation[4] = {0,0,1,0};
+			if (m_clipBox->isGLTransEnabled())
+			{
+				ccGLMatrix localTrans = m_clipBox->getGLTransformation()/*.inverse()*/;
+				const float* Z = localTrans.getColumn(2);
+				planeEquation[0] = static_cast<PointCoordinateType>(Z[0]);
+				planeEquation[1] = static_cast<PointCoordinateType>(Z[1]);
+				planeEquation[2] = static_cast<PointCoordinateType>(Z[2]);
+			}
+			CCLib::Neighbourhood Yk(cloud);
+			const CCVector3* G = Yk.getGravityCenter();
+			planeEquation[3] = G->dot(CCVector3(planeEquation));
+
+			ccFacet* facet = ccFacet::Create(cloud,maxEdgeLength,false,planeEquation);
+			if (facet)
+			{
+				if (facet->getPolygon())
+					facet->getPolygon()->setVisible(false);
+				ccPolyline* contour = facet->getContour();
+				if (contour)
+				{
+					contour->setColor(ccColor::green);
+					contour->showColors(true);
+				}
+				MainWindow::TheInstance()->addToDB(facet);
+
+				s_lastFacetUniqueID = facet->getUniqueID();
+				removeLastContourToolButton->setEnabled(true);
+			}
+
+			delete cloud;
+			cloud = 0;
+		}
+		else
+		{
+			ccLog::Error("Not enough memory!");
+			return;
+		}
+	}
+}
+
 void ccClippingBoxTool::exportCloud()
 {
 	if (!m_clipBox)
@@ -192,6 +293,11 @@ void ccClippingBoxTool::exportCloud()
 	if (obj && obj->isKindOf(CC_POINT_CLOUD))
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
+		if (!cloud)
+		{
+			ccLog::Error("Not enough memory!");
+			return;
+		}
 		MainWindow::TheInstance()->addToDB(cloud);
 	}
 }

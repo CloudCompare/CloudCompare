@@ -65,7 +65,8 @@ ccFacet::~ccFacet()
 
 ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
 							PointCoordinateType maxEdgeLength/*=0*/,
-							bool transferOwnership/*=false*/)
+							bool transferOwnership/*=false*/,
+							const PointCoordinateType* planeEquation/*=0*/)
 {
 	assert(cloud);
 
@@ -78,7 +79,7 @@ ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
 
 	//create facet structure
 	ccFacet* facet = new ccFacet(maxEdgeLength,"facet");
-	if (!facet->createInternalRepresentation(cloud))
+	if (!facet->createInternalRepresentation(cloud,planeEquation))
 	{
 		delete facet;
 		return 0;
@@ -103,7 +104,8 @@ ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,
 	return facet;
 }
 
-bool ccFacet::createInternalRepresentation(CCLib::GenericIndexedCloudPersist* points)
+bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* points,
+											const PointCoordinateType* planeEquation/*=0*/)
 {
 	assert(points);
 	if (!points)
@@ -115,15 +117,16 @@ bool ccFacet::createInternalRepresentation(CCLib::GenericIndexedCloudPersist* po
 	CCLib::Neighbourhood Yk(points);
 
 	//get corresponding plane
+	if (!planeEquation)
 	{
-		const PointCoordinateType* planeEquation = Yk.getLSQPlane();
+		planeEquation = Yk.getLSQPlane();
 		if (!planeEquation)
 		{
 			ccLog::Warning("[ccFacet::createInternalRepresentation] Failed to compute the LS plane passing through the input points!");
 			return false;
 		}
-		memcpy(m_planeEquation,planeEquation,sizeof(PointCoordinateType)*4);
 	}
+	memcpy(m_planeEquation,planeEquation,sizeof(PointCoordinateType)*4);
 
 	//get barycenter
 	m_center = *Yk.getGravityCenter();

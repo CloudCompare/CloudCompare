@@ -56,11 +56,13 @@ public:
 		\param cloud cloud from which to create the facet
 		\param maxEdgeLength max edge length (if possible - ignored if 0)
 		\param transferOwnership if true and the input cloud is a ccPointCloud, it will be 'kept' as 'origin points'
+		\param planeEquation to input a custom plane equation
 		\return a facet (or 0 if an error occured)
 	**/
 	static ccFacet* Create(	CCLib::GenericIndexedCloudPersist* cloud,
 							PointCoordinateType maxEdgeLength = 0,
-							bool transferOwnership = false);
+							bool transferOwnership = false,
+							const PointCoordinateType* planeEquation = 0);
 
     //! Returns class ID
     virtual CC_CLASS_ENUM getClassID() const { return CC_FACET; }
@@ -103,7 +105,8 @@ public:
 protected:
 
 	//! Creates internal representation (polygon, polyline, etc.)
-	bool createInternalRepresentation(CCLib::GenericIndexedCloudPersist* points);
+	bool createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* points,
+										const PointCoordinateType* planeEquation = 0);
 
 	//! Facet 
 	ccMesh* m_polygonMesh;

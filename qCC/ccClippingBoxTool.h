@@ -65,6 +65,8 @@ protected slots:
 
 	void reset();
 	void closeDialog();
+	void extractContour();
+	void removeLastContour();
 	void exportCloud();
 	void exportMultCloud();
 

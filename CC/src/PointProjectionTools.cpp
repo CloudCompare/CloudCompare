@@ -415,12 +415,12 @@ PointCoordinateType ComputeSquareDistToEdge(const CCVector2& P, const CCVector2&
 	CCVector2 AB = B-A;
 	double squareLengthAB = static_cast<double>(AB.norm2());
 	double dot = AB.dot(AP); // = cos(PAB) * ||AP|| * ||AB||
-	if (dot < -ZERO_TOLERANCE)
+	if (dot < ZERO_TOLERANCE)
 	{
 		//return AP.norm2();
 		return -1.0;
 	}
-	else if (dot >= squareLengthAB + ZERO_TOLERANCE)
+	else if (dot >= squareLengthAB - ZERO_TOLERANCE)
 	{
 		//return (P-B).norm2();
 		return -1.0;
@@ -445,8 +445,6 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 	{
 		size_t pointCount = points.size();
 
-#define FLAG_POINTS_USED
-#ifdef FLAG_POINTS_USED
 		//list of already used point to avoid hull's inner loops
 		std::vector<bool> pointsUsed;
 		try
@@ -458,7 +456,6 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 			//not enough memory
 			return false;
 		}
-#endif
 
 		//build the initial edge list & flag the convex hull points
 		std::list<std::list<IndexedCCVector2*>::const_iterator> edges;
@@ -474,9 +471,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 					//not enough memory
 					return false;
 				}
-#ifdef FLAG_POINTS_USED
 				pointsUsed[(*itA)->index] = true;
-#endif
 			}
 		}
 
@@ -501,22 +496,17 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 				for (size_t i=0; i<pointCount; ++i)
 				{
 					const IndexedCCVector2& P = points[i];
-#ifdef FLAG_POINTS_USED
-					if (!pointsUsed[P.index]) //we don't consider already used points!
-#endif
+					
+					//skip the edge vertices!
+					if (P.index == (*itA)->index || P.index == (*itB)->index)
+						continue;
+
+					PointCoordinateType dist2 = ComputeSquareDistToEdge(P,**itA,**itB);
+					//potential candidate?
+					if (dist2 >= 0 && (minDist2 < 0 || dist2 < minDist2))
 					{
-						PointCoordinateType dist2 = ComputeSquareDistToEdge(P,**itA,**itB);
-						//potential candidate?
-#ifdef FLAG_POINTS_USED
-						if (dist2 >= 0
-#else
-						if (dist2 > ZERO_TOLERANCE
-#endif
-							&& (minDist2 < 0 || dist2 < minDist2))
-						{
-							minDist2 = dist2;
-							minIndex = i;
-						}
+						minDist2 = dist2;
+						minIndex = i;
 					}
 				}
 
@@ -526,14 +516,23 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 					bool elligible = true;
 					const IndexedCCVector2& P = points[minIndex];
 
+					if (pointsUsed[P.index])
+					{
+						//we don't consider already used points!
+						elligible = false;
+					}
+
 					//check that the point is not nearer to the next edge
 					//DGM: only if the edge needs it!
+					if (elligible)
 					{
 						//next edge vertex (BC)
 						std::list<IndexedCCVector2*>::const_iterator itC = itB; ++itC;
 						if (itC == hullPoints.end())
 							itC = hullPoints.begin();
-						PointCoordinateType squareLengthBC = (**itC-**itB).norm2();
+
+						CCVector2 BC = (**itC-**itB);
+						PointCoordinateType squareLengthBC = BC.norm2();
 						if (squareLengthBC > maxSquareLength)
 						{
 							PointCoordinateType dist2ToRight = ComputeSquareDistToEdge(P,**itB,**itC);
@@ -552,7 +551,9 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 						if (itO == hullPoints.begin())
 							itO = hullPoints.end();
 						--itO;
-						PointCoordinateType squareLengthOA = (**itA-**itO).norm2();
+
+						CCVector2 OA = (**itA-**itO);
+						PointCoordinateType squareLengthOA = OA.norm2();
 						if (squareLengthOA > maxSquareLength)
 						{
 							PointCoordinateType dist2ToLeft = ComputeSquareDistToEdge(P,**itO,**itA);
@@ -566,16 +567,15 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 
 					if (elligible)
 					{
-						PointCoordinateType squareLengthAP = (P-**itA).norm2();
-						PointCoordinateType squareLengthPB = (P-**itB).norm2();
+						CCVector2 AP = (P-**itA);
+						CCVector2 PB = (**itB-P);
+						PointCoordinateType squareLengthAP = AP.norm2();
+						PointCoordinateType squareLengthPB = PB.norm2();
 						//at least one of the new segments must be smaller than the initial one!
 						if ( squareLengthAP < squareLengthAB || squareLengthPB < squareLengthAB )
 						{
-							//add the new point to the hull (before 'B')
 							hullPoints.insert(itB == hullPoints.begin() ? hullPoints.end() : itB, &points[minIndex]);
-#ifdef FLAG_POINTS_USED
-							pointsUsed[P.index] = true;
-#endif
+
 							//we'll inspect the two new segments later
 							try
 							{
@@ -592,6 +592,9 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 								//not enough memory
 								return false;
 							}
+
+							//we won't use P anymore!
+							pointsUsed[P.index] = true;
 						}
 					}
 				}

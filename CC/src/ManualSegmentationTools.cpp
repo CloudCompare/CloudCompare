@@ -71,32 +71,30 @@ ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCl
 	return Y;
 }
 
-//Polyline objects are considered as 2D polylines!
-bool ManualSegmentationTools::isPointInsidePoly(const CCVector2& P, const Polyline* poly)
+bool ManualSegmentationTools::isPointInsidePoly(const CCVector2& P, const GenericIndexedCloud* polyVertices)
 {
-	//nombre de sommets
-	unsigned vertCount = poly->size();
+	//number of vertices
+	unsigned vertCount = (polyVertices ? polyVertices->size() : 0);
 	if (vertCount<2)
 		return false;
 
 	bool inside = false;
 
 	CCVector3 A;
-	poly->getPoint(0,A);
+	polyVertices->getPoint(0,A);
 	for (unsigned i=1; i<=vertCount; ++i)
 	{
 		CCVector3 B;
-		poly->getPoint(i%vertCount,B);
+		polyVertices->getPoint(i%vertCount,B);
 
 		//Point Inclusion in Polygon Test (inspired from W. Randolph Franklin - WRF)
-		if (((B.y<=P.y) && (P.y<A.y)) ||
-             ((A.y<=P.y) && (P.y<B.y)))
+		//The polyline is considered as a 2D polyline here!
+		if ( (B.y<=P.y && P.y<A.y) || (A.y<=P.y && P.y<B.y) )
 		{
-			PointCoordinateType ABy = A.y-B.y;
-			PointCoordinateType t = (P.x-B.x)*ABy-(A.x-B.x)*(P.y-B.y);
-			if (ABy<0)
+			PointCoordinateType t = (P.x-B.x)*(A.y-B.y) - (A.x-B.x)*(P.y-B.y);
+			if (A.y < B.y)
 				t=-t;
-			if (t<0)
+			if (t < 0)
 				inside = !inside;
 		}
 
@@ -106,6 +104,34 @@ bool ManualSegmentationTools::isPointInsidePoly(const CCVector2& P, const Polyli
 	return inside;
 }
 
+bool ManualSegmentationTools::isPointInsidePoly(const CCVector2& P, const CC2DPointsContainer &polyVertices)
+{
+	//number of vertices
+	size_t vertCount = polyVertices.size();
+	if (vertCount<2)
+		return false;
+
+	bool inside = false;
+
+	for (unsigned i=1; i<=vertCount; ++i)
+	{
+		const CCVector2& A = polyVertices[i-1];
+		const CCVector2& B = polyVertices[i%vertCount];
+
+		//Point Inclusion in Polygon Test (inspired from W. Randolph Franklin - WRF)
+		//The polyline is considered as a 2D polyline here!
+		if ( (B.y<=P.y && P.y<A.y) || (A.y<=P.y && P.y<B.y) )
+		{
+			PointCoordinateType t = (P.x-B.x)*(A.y-B.y) - (A.x-B.x)*(P.y-B.y);
+			if (A.y < B.y)
+				t=-t;
+			if (t < 0)
+				inside = !inside;
+		}
+	}
+
+	return inside;
+}
 
 ReferenceCloud* ManualSegmentationTools::segment(GenericIndexedCloudPersist* aCloud, ScalarType minDist, ScalarType maxDist)
 {

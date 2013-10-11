@@ -311,3 +311,293 @@ GenericIndexedMesh* PointProjectionTools::computeTriangulation(	GenericIndexedCl
 
 	return theMesh;
 }
+
+// 2D cross product of OA and OB vectors, i.e. z-component of their 3D cross product.
+// Returns a positive value, if OAB makes a counter-clockwise turn,
+// negative for clockwise turn, and zero if the points are collinear.
+PointCoordinateType cross(const CCVector2& O, const CCVector2& A, const CCVector2& B)
+{
+	return (A.x - O.x) * (B.y - O.y) - (A.y - O.y) * (B.x - O.x);
+}
+
+// Lexicographic sorting operator
+bool LexicographicSort(const CCVector2& a, const CCVector2& b)
+{
+	return a.x < b.x || (a.x == b.x && a.y < b.y);
+}
+
+bool PointProjectionTools::extractConvexHull2D(	std::vector<IndexedCCVector2>& points,
+												std::list<IndexedCCVector2*>& hullPoints)
+{
+	size_t n = points.size();
+
+	// Sort points lexicographically
+	std::sort(points.begin(), points.end(), LexicographicSort);
+
+	// Build lower hull
+	{
+		for (size_t i=0; i<n; i++)
+		{
+			while (hullPoints.size() >= 2)
+			{
+				std::list<IndexedCCVector2*>::iterator itB = hullPoints.end(); itB--;
+				std::list<IndexedCCVector2*>::iterator itA = itB; itA--;
+				if (cross(**itA, **itB, points[i]) <= 0)
+				{
+					hullPoints.pop_back();
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			try
+			{
+				hullPoints.push_back(&points[i]);
+			}
+			catch (std::bad_alloc)
+			{
+				//not enough memory
+				return false;
+			}
+		}
+	}
+
+	// Build upper hull
+	{
+		size_t t = hullPoints.size()+1;
+		for (int i=static_cast<int>(n)-2; i>=0; i--)
+		{
+			while (hullPoints.size() >= t)
+			{
+				std::list<IndexedCCVector2*>::iterator itB = hullPoints.end(); itB--;
+				std::list<IndexedCCVector2*>::iterator itA = itB; itA--;
+				if (cross(**itA, **itB, points[i]) <= 0)
+				{
+					hullPoints.pop_back();
+				}
+				else
+				{
+					break;
+				}
+			}
+
+			try
+			{
+				hullPoints.push_back(&points[i]);
+			}
+			catch (std::bad_alloc)
+			{
+				//not enough memory
+				return false;
+			}
+		}
+	}
+
+	//remove last point if it's the same as the first one
+	if (hullPoints.size() > 1
+		&&	hullPoints.front()->x == hullPoints.back()->x
+		&&	hullPoints.front()->y == hullPoints.back()->y )
+	{
+		hullPoints.pop_back();
+	}
+
+	return true;
+}
+
+//! Returns the (squared) distance from a point to a segment
+/** Only if the point lies 'above' the segment! Returns -1.0 otherwise.
+**/
+PointCoordinateType ComputeSquareDistToEdge(const CCVector2& P, const CCVector2& A, const CCVector2& B)
+{
+	CCVector2 AP = P-A;
+	CCVector2 AB = B-A;
+	double squareLengthAB = static_cast<double>(AB.norm2());
+	double dot = AB.dot(AP); // = cos(PAB) * ||AP|| * ||AB||
+	if (dot < -ZERO_TOLERANCE)
+	{
+		//return AP.norm2();
+		return -1.0;
+	}
+	else if (dot >= squareLengthAB + ZERO_TOLERANCE)
+	{
+		//return (P-B).norm2();
+		return -1.0;
+	}
+	else
+	{
+		CCVector2 HP = AP - AB * static_cast<PointCoordinateType>(dot / squareLengthAB);
+		return HP.norm2();
+	}
+}
+
+bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& points,
+												std::list<IndexedCCVector2*>& hullPoints,
+												PointCoordinateType maxSquareLength/*=0*/)
+{
+	//first compute the Convex hull
+	if (!extractConvexHull2D(points,hullPoints))
+		return false;
+
+	//shall we compute the concave hull?
+	if (maxSquareLength > 0)
+	{
+		size_t pointCount = points.size();
+
+#define FLAG_POINTS_USED
+#ifdef FLAG_POINTS_USED
+		//list of already used point to avoid hull's inner loops
+		std::vector<bool> pointsUsed;
+		try
+		{
+			pointsUsed.resize(pointCount,false);
+		}
+		catch(...)
+		{
+			//not enough memory
+			return false;
+		}
+#endif
+
+		//build the initial edge list & flag the convex hull points
+		std::list<std::list<IndexedCCVector2*>::const_iterator> edges;
+		{
+			for (std::list<IndexedCCVector2*>::const_iterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA)
+			{
+				try
+				{
+					edges.push_back(itA);
+				}
+				catch(...)
+				{
+					//not enough memory
+					return false;
+				}
+#ifdef FLAG_POINTS_USED
+				pointsUsed[(*itA)->index] = true;
+#endif
+			}
+		}
+
+		//we look for edges that are longer than the maximum specified length
+		while (!edges.empty())
+		{
+			//current edge (AB)
+			std::list<IndexedCCVector2*>::const_iterator itA = edges.front();
+			std::list<IndexedCCVector2*>::const_iterator itB = itA; ++itB;
+			if (itB == hullPoints.end())
+				itB = hullPoints.begin();
+
+			edges.pop_front();
+
+			PointCoordinateType squareLengthAB = (**itB-**itA).norm2();
+			//long edge?
+			if (squareLengthAB > maxSquareLength)
+			{
+				//look for the nearest point in the input set
+				PointCoordinateType minDist2 = -1.0;
+				size_t minIndex = 0;
+				for (size_t i=0; i<pointCount; ++i)
+				{
+					const IndexedCCVector2& P = points[i];
+#ifdef FLAG_POINTS_USED
+					if (!pointsUsed[P.index]) //we don't consider already used points!
+#endif
+					{
+						PointCoordinateType dist2 = ComputeSquareDistToEdge(P,**itA,**itB);
+						//potential candidate?
+#ifdef FLAG_POINTS_USED
+						if (dist2 >= 0
+#else
+						if (dist2 > ZERO_TOLERANCE
+#endif
+							&& (minDist2 < 0 || dist2 < minDist2))
+						{
+							minDist2 = dist2;
+							minIndex = i;
+						}
+					}
+				}
+
+				//if we have found a candidate
+				if (minDist2 >= 0)
+				{
+					bool elligible = true;
+					const IndexedCCVector2& P = points[minIndex];
+
+					//check that the point is not nearer to the next edge
+					//DGM: only if the edge needs it!
+					{
+						//next edge vertex (BC)
+						std::list<IndexedCCVector2*>::const_iterator itC = itB; ++itC;
+						if (itC == hullPoints.end())
+							itC = hullPoints.begin();
+						PointCoordinateType squareLengthBC = (**itC-**itB).norm2();
+						if (squareLengthBC > maxSquareLength)
+						{
+							PointCoordinateType dist2ToRight = ComputeSquareDistToEdge(P,**itB,**itC);
+							if (dist2ToRight >= 0 && minDist2 > dist2ToRight)
+							{
+								//finally we can't use this point
+								elligible = false;
+							}
+						}
+					}
+					//or the previous one
+					if (elligible)
+					{
+						//previous edge vertex (OA)
+						std::list<IndexedCCVector2*>::const_iterator itO = itA;
+						if (itO == hullPoints.begin())
+							itO = hullPoints.end();
+						--itO;
+						PointCoordinateType squareLengthOA = (**itA-**itO).norm2();
+						if (squareLengthOA > maxSquareLength)
+						{
+							PointCoordinateType dist2ToLeft = ComputeSquareDistToEdge(P,**itO,**itA);
+							if (dist2ToLeft >= 0 && minDist2 > dist2ToLeft)
+							{
+								//finally we can't use this point
+								elligible = false;
+							}
+						}
+					}
+
+					if (elligible)
+					{
+						PointCoordinateType squareLengthAP = (P-**itA).norm2();
+						PointCoordinateType squareLengthPB = (P-**itB).norm2();
+						//at least one of the new segments must be smaller than the initial one!
+						if ( squareLengthAP < squareLengthAB || squareLengthPB < squareLengthAB )
+						{
+							//add the new point to the hull (before 'B')
+							hullPoints.insert(itB == hullPoints.begin() ? hullPoints.end() : itB, &points[minIndex]);
+#ifdef FLAG_POINTS_USED
+							pointsUsed[P.index] = true;
+#endif
+							//we'll inspect the two new segments later
+							try
+							{
+								if (squareLengthAP > maxSquareLength)
+									edges.push_back(itA);
+								if (squareLengthPB > maxSquareLength)
+								{
+									std::list<IndexedCCVector2*>::const_iterator itP = itA; ++itP;
+									edges.push_back(itP);
+								}
+							}
+							catch(...)
+							{
+								//not enough memory
+								return false;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return true;
+}

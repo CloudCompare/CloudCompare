@@ -60,7 +60,7 @@ public:
 		\param forceInputPointsAsBorder if true, the input points are considered as ordered polyon vertices and 'outside' triangles will be removed
 		\return success
 	**/
-	virtual bool build(	CC2DPointsContainer &the2dPoints,
+	virtual bool build(	const std::vector<CCVector2>& the2dPoints,
 						size_t pointCountToUse = 0,
 						bool forceInputPointsAsBorder = false);
 

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>294</width>
-    <height>154</height>
+    <width>314</width>
+    <height>246</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -25,18 +25,12 @@
         <property name="text">
          <string>X</string>
         </property>
-        <property name="checked">
-         <bool>true</bool>
-        </property>
        </widget>
       </item>
       <item>
        <widget class="QCheckBox" name="yRepeatCheckBox">
         <property name="text">
          <string>Y</string>
-        </property>
-        <property name="checked">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -54,24 +48,75 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Gap</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QDoubleSpinBox" name="gapDoubleSpinBox"/>
-     </item>
-    </layout>
+    <widget class="QGroupBox" name="extractContoursGroupBox">
+     <property name="title">
+      <string>Extract contour(s)</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Max edge length</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QDoubleSpinBox" name="maxEdgeLengthDoubleSpinBox">
+        <property name="toolTip">
+         <string>Max edge length (if 0 contour = convex hull)</string>
+        </property>
+        <property name="decimals">
+         <number>6</number>
+        </property>
+        <property name="maximum">
+         <double>1000000000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
-    <widget class="QCheckBox" name="randomColorCheckBox">
-     <property name="text">
-      <string>random colors per slice (will overwrite existing color!)</string>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Other options</string>
      </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <layout class="QHBoxLayout" name="horizontalLayout_2">
+        <item>
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>Gap</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="gapDoubleSpinBox">
+          <property name="decimals">
+           <number>6</number>
+          </property>
+          <property name="maximum">
+           <double>1000000000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="randomColorCheckBox">
+        <property name="text">
+         <string>random colors per slice (will overwrite existing color!)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
    <item>

@@ -32,6 +32,7 @@
 static const int DEFAULT_SLIDER_SYMBOL_SIZE = 8;
 static const int DEFAULT_MARGIN = DEFAULT_SLIDER_SYMBOL_SIZE/2+1;
 static const int DEFAULT_TEXT_MARGIN = 2;
+static const int DEFAULT_LABEL_HEIGHT = 12;
 
 /*******************************/
 /*** ColorScaleElementSlider ***/
@@ -568,12 +569,12 @@ ccColorScaleEditorWidget::ccColorScaleEditorWidget(QWidget* parent/*=0*/, Qt::Or
 		if (m_orientation == Qt::Horizontal)
 		{
 			m_labelsWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
-			m_labelsWidget->setFixedHeight(12); //FIXME: add const
+			m_labelsWidget->setFixedHeight(DEFAULT_LABEL_HEIGHT);
 		}
 		else
 		{
 			m_labelsWidget->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-			m_labelsWidget->setFixedWidth(12); //FIXME: add const
+			m_labelsWidget->setFixedWidth(DEFAULT_LABEL_HEIGHT);
 		}
 		layout()->addWidget(m_labelsWidget);
 		m_labelsWidget->setVisible(false); //hidden by default

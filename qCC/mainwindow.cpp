@@ -4162,14 +4162,14 @@ void MainWindow::doActionComputeMeshLS()
     doActionComputeMesh(GENERIC_BEST_LS_PLANE);
 }
 
-static double s_maxEdgeLength = 0;
+static double s_meshMaxEdgeLength = 0;
 void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 {
 	bool ok = true;
-	double maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
+	double maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_meshMaxEdgeLength, 0, DBL_MAX, 8, &ok);
 	if (!ok)
 		return;
-	s_maxEdgeLength = maxEdgeLength;
+	s_meshMaxEdgeLength = maxEdgeLength;
 
 	QProgressDialog pDlg("Triangulation in progress...", QString(), 0, 0, this);
 	pDlg.show();
@@ -6391,6 +6391,7 @@ void MainWindow::doActionFitFacet()
 	doComputePlaneOrientation(true);
 }
 
+static double s_polygonMaxEdgeLength = 0;
 void MainWindow::doComputePlaneOrientation(bool fitFacet)
 {
 	ccHObject::Container selectedEntities = m_selectedEntities;
@@ -6402,9 +6403,10 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 	if (fitFacet)
 	{
 		bool ok = true;
-		maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
+		maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_polygonMaxEdgeLength, 0, DBL_MAX, 8, &ok);
 		if (!ok)
 			return;
+		s_polygonMaxEdgeLength = maxEdgeLength;
 	}
 
     for (size_t i=0; i<selNum; ++i)

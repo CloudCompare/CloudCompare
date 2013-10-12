@@ -79,7 +79,7 @@ public:
 		\param polyVertices polygon vertices (considered as ordered 2D poyline vertices)
 		\return true if P is inside poly
 	**/
-	static bool isPointInsidePoly(const CCVector2& P, const CC2DPointsContainer &polyVertices);
+	static bool isPointInsidePoly(const CCVector2& P, const std::vector<CCVector2>& polyVertices);
 
 	//! Segments a mesh knowing which vertices should be kept or not
 	/** This method takes as input a set of vertex indexes and creates a new mesh

@@ -126,6 +126,10 @@ public:
 
 		//! Default constructor
 		IndexedCCVector2() : CCVector2(), index(0) {}
+		//! Constructor
+		IndexedCCVector2(PointCoordinateType x, PointCoordinateType y) : CCVector2(x,y), index(0) {}
+		//! Constructor
+		IndexedCCVector2(PointCoordinateType x, PointCoordinateType y, unsigned i) : CCVector2(x,y), index(i) {}
 		//! Copy constructor
 		IndexedCCVector2(const CCVector2& v) : CCVector2(v), index(0) {}
 		//! Copy constructor

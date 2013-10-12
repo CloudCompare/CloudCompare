@@ -221,7 +221,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 
 		//we create the corresponding (2D) mesh
 		CCLib::Delaunay2dMesh dm;
-		CCLib::CC2DPointsContainer hullPointsVector;
+		std::vector<CCVector2> hullPointsVector;
 		try
 		{
 			hullPointsVector.reserve(hullPoints.size());

@@ -88,6 +88,15 @@ public:
 	//inherited methods (ccHObject)
 	virtual ccBBox getMyOwnBB();
 
+	//! Extracts the (flat) contour of a point cloud
+	/** Projects the cloud on its best fitting LS plane first.
+		\param points point cloud
+		\param maxEdgelLength max edge length (ignored if 0, in which case the contour is the convex hull)
+		\return contour polyline (or 0 if an error occured)
+	**/
+	static ccPolyline* ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
+											PointCoordinateType maxEdgelLength = 0);
+
 protected:
 
 	//inherited from ccHObject

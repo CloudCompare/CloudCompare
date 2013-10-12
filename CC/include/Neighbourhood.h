@@ -21,6 +21,7 @@
 #include "GenericIndexedCloudPersist.h"
 #include "Matrix.h"
 #include "CCGeom.h"
+#include "CCMiscTools.h"
 
 //system
 #include <vector>
@@ -32,9 +33,6 @@ class GenericIndexedMesh;
 
 //For more precise computations
 //#define CC_NEIGHBOURHOOD_PRECISION_COMPUTINGS
-
-//! 2D points container
-typedef std::vector<CCVector2> CC2DPointsContainer;
 
 //! A specific point could structure to handle subsets of points, provided with several geometric processings
 /** Typically suited for "nearest neighbours".
@@ -76,16 +74,6 @@ class Neighbourhood
 		//! Returns associated cloud
 		GenericIndexedCloudPersist* associatedCloud() const {return m_associatedCloud;}
 
-		//inherited from ReferenceCloud
-		/*virtual bool addPointIndex(unsigned globalIndex);
-		virtual bool addPointIndex(unsigned firstIndex, unsigned lastIndex);
-		virtual void setPointIndex(unsigned localIndex, unsigned globalIndex);
-        virtual bool resize(unsigned n);
-        virtual void swap(unsigned i, unsigned j);
-		virtual void clear(bool releaseMemory);
-		virtual void removePointGlobalIndex(unsigned localIndex);
-		**/
-
 		//! Applies 2D Delaunay triangulation
 		/** Cloud selection is first projected on the best least-square plane.
 			\param duplicateVertices whether to duplicate vertices (a new point cloud is created) or to use the associated one)
@@ -97,10 +85,70 @@ class Neighbourhood
 		//! Fit a quadric on point set (see getHeightFunction) then triangulates it inside bounding box
 		GenericIndexedMesh* triangulateFromQuadric(unsigned stepsX, unsigned stepsY);
 
-		//! Projects points on the best least-square plane.
-		/** Projected points are stored in the2DPoints.
+		//! Projects points on the best fitting LS plane
+		/** Projected points are stored in the points2D vector.
+			\param points2D output set
+			\param planeEquation custom plane equation (otherwise the default Neighbouhood's one is used)
+			\param O if set, the local plane base origin will be output here
+			\param X if set, the local plane base X vector will be output here
+			\param Y if set, the local plane base Y vector will be output here
+			\return success
 		**/
-		bool projectPointsOnPlane(const PointCoordinateType* thePlaneEquation, CC2DPointsContainer& the2DPoints);
+		template<class Vec2D> bool projectPointsOn2DPlane(	std::vector<Vec2D>& points2D,
+															const PointCoordinateType* planeEquation = 0,
+															CCVector3* O = 0,
+															CCVector3* X = 0,
+															CCVector3* Y = 0)
+		{
+			//need at least one point ;)
+			unsigned count = (m_associatedCloud ? m_associatedCloud->size() : 0);
+			if (!count)
+				return false;
+
+			//if no custom plane equation is provided, get the default best LS one
+			if (!planeEquation)
+			{
+				planeEquation = getLSQPlane();
+				if (!planeEquation)
+					return false;
+			}
+
+			//reserve memory for output set
+			try
+			{
+				points2D.resize(count);
+			}
+			catch (std::bad_alloc)
+			{
+				//out of memory
+				return false;
+			}
+
+			//we construct the plane local base
+			CCVector3 u(1,0,0), v(0,1,0);
+			CCMiscTools::ComputeBaseVectors(planeEquation,u.u,v.u);
+
+			//get the barycenter
+			const CCVector3* G = getGravityCenter();
+			assert(G);
+
+			//project the points
+			for (unsigned i=0; i<count; ++i)
+			{
+				//we recenter current point
+				CCVector3 P = *m_associatedCloud->getPoint(i) - *G;
+
+				//then we project it on plane (with scalar prods)
+				points2D[i] = Vec2D(P.dot(u),P.dot(v));
+			}
+
+			//output the local base if necessary
+			if (O) *O = *G;
+			if (X) *X = u;
+			if (Y) *Y = v;
+
+			return true;
+		}
 
 		//! Computes point set curvature with height function
 		/** \return curvature value (warning: unsigned value!) or NAN_VALUE if computation failed.

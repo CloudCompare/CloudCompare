@@ -85,7 +85,7 @@ void Delaunay2dMesh::linkMeshWith(GenericIndexedCloud* aCloud, bool passOwnershi
 	m_cloudIsOwnedByMesh = passOwnership;
 }
 
-bool Delaunay2dMesh::build(	CC2DPointsContainer &the2dPoints,
+bool Delaunay2dMesh::build(	const std::vector<CCVector2>& the2dPoints,
 							size_t pointCountToUse/*=0*/,
 							bool forceInputPointsAsBorder/*=false*/)
 {
@@ -109,7 +109,7 @@ bool Delaunay2dMesh::build(	CC2DPointsContainer &the2dPoints,
 	memset(&in,0,sizeof(triangulateio));
 
 	in.numberofpoints = static_cast<int>(pointCount);
-	in.pointlist = reinterpret_cast<REAL*>(&the2dPoints[0]);
+	in.pointlist = (REAL*)(&the2dPoints[0]);
 
 	//set static variable for 'triunsuitable' (for Triangle lib with '-u' option)
 	//s_maxSquareEdgeLength = maxEdgeLength*maxEdgeLength;

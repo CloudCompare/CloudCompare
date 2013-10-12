@@ -26,7 +26,6 @@
 #include "DistanceComputationTools.h"
 #include "ChunkedPointCloud.h"
 #include "SimpleMesh.h"
-#include "CCMiscTools.h"
 
 //system
 #include <assert.h>
@@ -570,48 +569,6 @@ bool Neighbourhood::compute3DQuadric()
 	return true;
 }
 
-bool Neighbourhood::projectPointsOnPlane(const PointCoordinateType* thePlaneEquation, CC2DPointsContainer& the2DPoints)
-{
-	assert(thePlaneEquation);
-
-	unsigned count = (m_associatedCloud ? m_associatedCloud->size() : 0);
-	if (!count)
-		return false;
-
-	//the user is in charge of clearing the input vector (if he wants to call this method several times...)
-	//the2DPoints.clear();
-
-	//we get centroid
-	const CCVector3* G = getGravityCenter();
-	assert(G);
-
-	//reserve some memory for output
-	try
-	{
-		the2DPoints.resize(count);
-	}
-	catch (std::bad_alloc) //out of memory
-	{
-		return false;
-	}
-
-    //we construct the plane local frame
-	CCVector3 u(1.0,0.0,0.0), v(0.0,1.0,0.0);
-	CCMiscTools::ComputeBaseVectors(thePlaneEquation,u.u,v.u);
-
-	//project the points
-	for (unsigned i=0; i<count; ++i)
-	{
-		//we recenter current point
-		CCVector3 P = *m_associatedCloud->getPoint(i) - *G;
-
-		//then we project it on plane (with scalar prods)
-		the2DPoints[i] = CCVector2(P.dot(u),P.dot(v));
-	}
-
-	return true;
-}
-
 GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=false*/, PointCoordinateType maxEdgeLength/*=0*/)
 {
 	if (m_associatedCloud->size()<CC_LOCAL_MODEL_MIN_SIZE[TRI])
@@ -620,21 +577,16 @@ GenericIndexedMesh* Neighbourhood::triangulateOnPlane(bool duplicateVertices/*=f
 		return 0;
 	}
 
-	//compute the best LS plane
-	const PointCoordinateType* lsq = getLSQPlane();
-	if (!lsq)
-        return 0;
-
 	//project the points on this plane
 	GenericIndexedMesh* mesh = 0;
-	std::vector<CCVector2> the2DPoints;
+	std::vector<CCVector2> points2D;
 
-	if (projectPointsOnPlane(lsq,the2DPoints))
+	if (projectPointsOn2DPlane<CCVector2>(points2D))
 	{
 		Delaunay2dMesh* dm = new Delaunay2dMesh();
 
 		//triangulate the projected points
-		if (!dm->build(the2DPoints,0))
+		if (!dm->build(points2D,0))
 		{
 			delete dm;
 			return 0;

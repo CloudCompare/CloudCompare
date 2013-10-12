@@ -29,7 +29,7 @@
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
-#include <ccFacet.h>
+#include <ccPolyline.h>
 
 //CCLib
 #include <ReferenceCloud.h>
@@ -40,8 +40,10 @@
 #include <QMessageBox>
 #include <QInputDialog>
 
-//! Last facet unique ID
-static unsigned s_lastFacetUniqueID = 0;
+//! Last contour unique ID
+static unsigned s_lastContourUniqueID = 0;
+//! Max edge length parameter (contour extraction)
+static double s_maxEdgeLength = -1.0;
 
 ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	: ccOverlayDialog(parent)
@@ -80,7 +82,8 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
     connect(viewLeftToolButton,		SIGNAL(clicked()),	this,	SLOT(setLeftView()));
     connect(viewRightToolButton,	SIGNAL(clicked()),	this,	SLOT(setRightView()));
 
-	s_lastFacetUniqueID = 0;
+	s_maxEdgeLength = -1.0;
+	s_lastContourUniqueID = 0;
 	removeLastContourToolButton->setEnabled(false);
 }
 
@@ -129,7 +132,16 @@ bool ccClippingBoxTool::setAssociatedEntity(ccHObject* entity)
 	if (m_associatedWin)
 		m_associatedWin->redraw();
 
-	s_lastFacetUniqueID = 0;
+	//set proper "steps" value for slice thickness editors
+	{
+		CCVector3 diag = entity->getBB().getDiagVec();
+		thickXDoubleSpinBox->setSingleStep(static_cast<double>(diag.x) / 100.0);
+		thickYDoubleSpinBox->setSingleStep(static_cast<double>(diag.y) / 100.0);
+		thickZDoubleSpinBox->setSingleStep(static_cast<double>(diag.z) / 100.0);
+	}
+
+	s_maxEdgeLength = -1.0;
+	s_lastContourUniqueID = 0;
 	removeLastContourToolButton->setEnabled(false);
 
 	return true;
@@ -198,13 +210,13 @@ void ccClippingBoxTool::stop(bool state)
 
 void ccClippingBoxTool::removeLastContour()
 {
-	if (s_lastFacetUniqueID == 0)
+	if (s_lastContourUniqueID == 0)
 		return;
 
 	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (mainWindow)
 	{
-		ccHObject* obj = mainWindow->db()->find(s_lastFacetUniqueID);
+		ccHObject* obj = mainWindow->db()->find(s_lastContourUniqueID);
 		if (obj)
 		{
 			mainWindow->removeFromDB(obj);
@@ -214,73 +226,8 @@ void ccClippingBoxTool::removeLastContour()
 		}
 	}
 
-	s_lastFacetUniqueID = 0;
+	s_lastContourUniqueID = 0;
 	removeLastContourToolButton->setEnabled(false);
-}
-
-static double s_maxEdgeLength = -1.0;
-void ccClippingBoxTool::extractContour()
-{
-	if (!m_clipBox)
-		return;
-
-	ccHObject* obj = m_clipBox->getAssociatedEntity();
-
-	if (obj && obj->isKindOf(CC_POINT_CLOUD))
-	{
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
-		if (cloud)
-		{
-			//ask the user for the 'max edge length'
-			bool ok = true;
-			if (s_maxEdgeLength < 0)
-			{
-				s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/20.0;
-			}
-			double maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
-			if (!ok)
-				return;
-			s_maxEdgeLength = maxEdgeLength;
-
-			PointCoordinateType planeEquation[4] = {0,0,1,0};
-			if (m_clipBox->isGLTransEnabled())
-			{
-				ccGLMatrix localTrans = m_clipBox->getGLTransformation()/*.inverse()*/;
-				const float* Z = localTrans.getColumn(2);
-				planeEquation[0] = static_cast<PointCoordinateType>(Z[0]);
-				planeEquation[1] = static_cast<PointCoordinateType>(Z[1]);
-				planeEquation[2] = static_cast<PointCoordinateType>(Z[2]);
-			}
-			CCLib::Neighbourhood Yk(cloud);
-			const CCVector3* G = Yk.getGravityCenter();
-			planeEquation[3] = G->dot(CCVector3(planeEquation));
-
-			ccFacet* facet = ccFacet::Create(cloud,maxEdgeLength,false,planeEquation);
-			if (facet)
-			{
-				if (facet->getPolygon())
-					facet->getPolygon()->setVisible(false);
-				ccPolyline* contour = facet->getContour();
-				if (contour)
-				{
-					contour->setColor(ccColor::green);
-					contour->showColors(true);
-				}
-				MainWindow::TheInstance()->addToDB(facet);
-
-				s_lastFacetUniqueID = facet->getUniqueID();
-				removeLastContourToolButton->setEnabled(true);
-			}
-
-			delete cloud;
-			cloud = 0;
-		}
-		else
-		{
-			ccLog::Error("Not enough memory!");
-			return;
-		}
-	}
 }
 
 void ccClippingBoxTool::exportCloud()
@@ -302,6 +249,50 @@ void ccClippingBoxTool::exportCloud()
 	}
 }
 
+void ccClippingBoxTool::extractContour()
+{
+	if (!m_clipBox)
+		return;
+
+	ccHObject* obj = m_clipBox->getAssociatedEntity();
+
+	if (obj && obj->isKindOf(CC_POINT_CLOUD))
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
+		if (cloud)
+		{
+			//ask the user for the 'max edge length'
+			bool ok = true;
+			if (s_maxEdgeLength < 0)
+				s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/100.0;
+			double maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
+			if (!ok)
+				return;
+			s_maxEdgeLength = maxEdgeLength;
+
+			ccPolyline* poly = ccPolyline::ExtractFlatContour(cloud,maxEdgeLength);
+			if (poly)
+			{
+				poly->setColor(ccColor::green);
+				poly->showColors(true);
+				poly->setName(cloud->getName()+QString(".contour"));
+				MainWindow::TheInstance()->addToDB(poly);
+
+				s_lastContourUniqueID = poly->getUniqueID();
+				removeLastContourToolButton->setEnabled(true);
+			}
+
+			delete cloud;
+			cloud = 0;
+		}
+		else
+		{
+			ccLog::Error("Not enough memory!");
+			return;
+		}
+	}
+}
+
 void ccClippingBoxTool::exportMultCloud()
 {
 	if (!m_clipBox)
@@ -316,9 +307,19 @@ void ccClippingBoxTool::exportMultCloud()
 
 	ccClippingBoxRepeatDlg repeatDlg(MainWindow::TheInstance()/*this*/);
 	repeatDlg.randomColorCheckBox->setEnabled(cloud->isA(CC_POINT_CLOUD)); //random colors is only available for real point clouds!
+	if (s_maxEdgeLength < 0)
+		s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/100.0;
+	repeatDlg.maxEdgeLengthDoubleSpinBox->setValue(s_maxEdgeLength);
 	
 	if (!repeatDlg.exec())
 		return;
+
+	ccHObject* contourGroup = 0;
+	if (repeatDlg.extractContoursGroupBox->isChecked())
+	{
+		s_maxEdgeLength = repeatDlg.maxEdgeLengthDoubleSpinBox->value();
+		contourGroup = new ccHObject(obj->getName()+QString(".contours"));
+	}
 
 	//compute the cloud bounding box in the local clipping box ref.
 	ccBBox localBox;
@@ -386,6 +387,8 @@ void ccClippingBoxTool::exportMultCloud()
 		if (!clouds)
 		{
 			ccLog::Error("Not enough memory!");
+			if (contourGroup)
+				delete contourGroup;
 			return;
 		}
 		memset(clouds, 0, sizeof(CCLib::ReferenceCloud*)*cellCount);
@@ -478,14 +481,29 @@ void ccClippingBoxTool::exportMultCloud()
 
 								sliceCloud->setEnabled(true);
 								sliceCloud->setVisible(true);
+								sliceCloud->setDisplay(cloud->getDisplay());
 
 								CCVector3 cellOrigin(gridOrigin.x + (PointCoordinateType)i * (cellSize.x + gap),
 													 gridOrigin.y + (PointCoordinateType)j * (cellSize.y + gap),
 													 gridOrigin.z + (PointCoordinateType)k * (cellSize.z + gap));
-								sliceCloud->setName(QString("slice @ (%1 ; %2 ; %3)").arg(cellOrigin.x).arg(cellOrigin.y).arg(cellOrigin.z));
+								QString slicePosStr = QString("(%1 ; %2 ; %3)").arg(cellOrigin.x).arg(cellOrigin.y).arg(cellOrigin.z);
+								sliceCloud->setName(QString("slice @ ")+slicePosStr);
 
 								//add slice to group
 								group->addChild(sliceCloud);
+
+								//generate contour?
+								if (contourGroup)
+								{
+									ccPolyline* poly = ccPolyline::ExtractFlatContour(sliceCloud,s_maxEdgeLength);
+									if (poly)
+									{
+										poly->setColor(ccColor::green);
+										poly->showColors(true);
+										poly->setName(QString("contour @ ")+slicePosStr);
+										contourGroup->addChild(poly);
+									}
+								}
 							}
 
 							++currentCloudCount;
@@ -504,6 +522,19 @@ void ccClippingBoxTool::exportMultCloud()
 		if (error)
 		{
 			group->removeAllChildren();
+			if (contourGroup)
+				delete contourGroup;
+			contourGroup = 0;
+		}
+
+		//if any, add contours to the main DB
+		if (contourGroup)
+		{
+			contourGroup->setDisplay_recursive(cloud->getDisplay());
+			MainWindow::TheInstance()->addToDB(contourGroup);
+			
+			s_lastContourUniqueID = contourGroup->getUniqueID();
+			removeLastContourToolButton->setEnabled(true);
 		}
 
 		//release memory

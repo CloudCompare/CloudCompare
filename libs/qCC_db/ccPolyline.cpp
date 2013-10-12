@@ -23,6 +23,11 @@
 //Local
 #include "ccPointCloud.h"
 
+//CCLib
+#include <Neighbourhood.h>
+#include <PointProjectionTools.h>
+#include <CCMiscTools.h>
+
 //System
 #include <string.h>
 
@@ -254,4 +259,80 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion)
 		m_width = 0;
 
 	return true;
+}
+
+ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
+											PointCoordinateType maxEdgelLength/*=0*/)
+{
+	assert(points);
+	if (!points)
+		return false;
+	unsigned ptsCount = points->size();
+	if (ptsCount < 3)
+		return false;
+
+	CCLib::Neighbourhood Yk(points);
+	CCVector3 O,X,Y; //local base
+
+	//we project the input points on a plane
+	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
+	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D,0,&O,&X,&Y))
+	{
+		ccLog::Warning("[ccPolyline::ExtractFlatContour] Failed to project the points on the LS plane (not enough memory?)!");
+		return false;
+	}
+
+	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
+	{
+		for (unsigned i=0; i<ptsCount; ++i)
+			points2D[i].index = i;
+	}
+
+	//try to get the points on the convex/concave hull to build the contour and the polygon
+	std::list<CCLib::PointProjectionTools::IndexedCCVector2*> hullPoints;
+	if (!CCLib::PointProjectionTools::extractConcaveHull2D(	points2D,
+		hullPoints,
+		maxEdgelLength) )
+	{
+		ccLog::Error("[ccPolyline::ExtractFlatContour] Failed to compute the convex hull of the input points!");
+	}
+
+	unsigned hullPtsCount = static_cast<unsigned>(hullPoints.size());
+
+	//create vertices
+	ccPointCloud* contourVertices = new ccPointCloud();
+	{
+		if (!contourVertices->reserve(hullPtsCount))
+		{
+			delete contourVertices;
+			contourVertices = 0;
+			ccLog::Error("[ccPolyline::ExtractFlatContour] Not enough memory!");
+			return false;
+		}
+
+		//projection on the LS plane (in 3D)
+		for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
+			contourVertices->addPoint(O + X*(*it)->x + Y*(*it)->y);
+		contourVertices->setName("vertices");
+		contourVertices->setVisible(false);
+	}
+
+	//we create the corresponding (3D) polyline
+	ccPolyline* contourPolyline = new ccPolyline(contourVertices);
+	if (contourPolyline->reserve(hullPtsCount))
+	{
+		contourPolyline->addPointIndex(0,hullPtsCount);
+		contourPolyline->setClosingState(true);
+		contourPolyline->setVisible(true);
+		contourPolyline->setName("contour");
+		contourPolyline->addChild(contourVertices);
+	}
+	else
+	{
+		delete contourPolyline;
+		contourPolyline = 0;
+		ccLog::Warning("[ccPolyline::ExtractFlatContour] Not enough memory to create the contour polyline!");
+	}
+
+	return contourPolyline;
 }

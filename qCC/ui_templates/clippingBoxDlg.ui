@@ -189,10 +189,10 @@
            </size>
           </property>
           <property name="toolTip">
-           <string>Extracts the contour (concave hull)</string>
+           <string>Extracts the contour as a polyline (concave hull)</string>
           </property>
           <property name="statusTip">
-           <string>Extracts the contour (concave hull)</string>
+           <string>Extracts the contour as a polyline (concave hull)</string>
           </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
@@ -254,6 +254,9 @@
         </item>
         <item>
          <widget class="QToolButton" name="exportMultButton">
+          <property name="toolTip">
+           <string>Export multiple slices by repeating the process along one or several dimensions (+ contour extraction)</string>
+          </property>
           <property name="icon">
            <iconset resource="../icones.qrc">
             <normaloff>:/CC/images/ccClippingBoxMultExport.png</normaloff>:/CC/images/ccClippingBoxMultExport.png</iconset>

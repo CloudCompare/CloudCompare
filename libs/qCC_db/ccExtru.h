@@ -20,9 +20,6 @@
 
 #include "ccGenericPrimitive.h"
 
-//CCLib
-#include <Neighbourhood.h>
-
 //system
 #include <vector>
 
@@ -47,7 +44,7 @@ public:
 		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
 		\param name name
 	**/
-	ccExtru(const CCLib::CC2DPointsContainer& profile,
+	ccExtru(const std::vector<CCVector2>& profile,
 			PointCoordinateType height,
 			const ccGLMatrix* transMat = 0,
 			QString name = QString("Extrusion"));
@@ -68,7 +65,7 @@ public:
 	const PointCoordinateType getThickness() const { return m_height; }
 
 	//! Returns profile
-	const CCLib::CC2DPointsContainer& getProfile() const { return m_profile; }
+	const std::vector<CCVector2>& getProfile() const { return m_profile; }
 
 protected:
     
@@ -81,7 +78,7 @@ protected:
 	PointCoordinateType m_height;
 
 	//! Profile
-	CCLib::CC2DPointsContainer m_profile;
+	std::vector<CCVector2> m_profile;
 };
 
 #endif //CC_EXTRU_PRIMITIVE_HEADER

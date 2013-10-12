@@ -128,43 +128,22 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 	}
 	memcpy(m_planeEquation,planeEquation,sizeof(PointCoordinateType)*4);
 
-	//get barycenter
-	m_center = *Yk.getGravityCenter();
-	//and resulting RMS
-	m_rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(points, m_planeEquation);
-	
-	//we construct the plane local frame
-	CCVector3 N(m_planeEquation);
-	if (N.norm2() < ZERO_TOLERANCE)
-		return false;
-	CCVector3 u(1.0,0.0,0.0), v(0.0,1.0,0.0);
-	CCLib::CCMiscTools::ComputeBaseVectors(N.u,u.u,v.u);
-
 	//we project the input points on a plane
 	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
+	CCVector3 X,Y; //local base
+	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D,0,&m_center,&X,&Y))
 	{
-		//reserve some memory for output
-		try
-		{
-			points2D.resize(ptsCount);
-		}
-		catch (std::bad_alloc) //out of memory
-		{
-			ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
-			return false;
-		}
+		ccLog::Error("[ccFacet::createInternalRepresentation] Not enough memory!");
+		return false;
+	}
 
-		//project the points
+	//compute resulting RMS
+	m_rms = CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(points, m_planeEquation);
+	
+	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
+	{
 		for (unsigned i=0; i<ptsCount; ++i)
-		{
-			//we recenter current point
-			CCVector3 P = *points->getPoint(i) - m_center;
-
-			//then we project it on plane (with scalar prods)
-			points2D[i].x = P.dot(u);
-			points2D[i].y = P.dot(v);
 			points2D[i].index = i;
-		}
 	}
 
 	//try to get the points on the convex/concave hull to build the contour and the polygon
@@ -192,7 +171,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			
 			//projection on the LS plane (in 3D)
 			for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
-				m_contourVertices->addPoint(m_center + u*(*it)->x + v*(*it)->y);
+				m_contourVertices->addPoint(m_center + X*(*it)->x + Y*(*it)->y);
 			m_contourVertices->setName(DEFAULT_CONTOUR_POINTS_NAME);
 			m_contourVertices->setLocked(true);
 			m_contourVertices->setVisible(false);
@@ -258,6 +237,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 				{
 					NormsIndexesTableType* normsTable = new NormsIndexesTableType();
 					normsTable->reserve(1);
+					CCVector3 N(m_planeEquation);
 					normsTable->addElement(ccNormalVectors::GetNormIndex(N.u));
 					m_polygonMesh->setTriNormsTable(normsTable);
 					for (unsigned i=0; i<triCount; ++i)

@@ -32,7 +32,6 @@ Refer to the wiki (http://www.danielgm.net/cc/doc/wiki/index.php5?title=Compilat
                 - OPTION_MP_BUILD: for MSVC only (mutli-process build --> much faster, but takes almost all available CPU)
                 - OPTION_SUPPORT_3D_CONNEXION_DEVICES: for 3D mouses handling
                 - OPTION_SUPPORT_MAC_PDMS_FORMAT: to activate support for PDMS .mac scripts in qCC (CAD)
-                - OPTION_USE_ULT: to be ignored
                 - OPTION_USE_DXFLIB: to activate support for DXF files in qCC (and ccViewer) with dxflib - see below
                 - OPTION_USE_LIBE57: to activate support for E57 files in qCC (and ccViewer) with libE57- see below
                 - OPTION_USE_LIBLAS: to activate support for LAS files in qCC (and ccViewer) with libLAS - see below
@@ -130,7 +129,7 @@ The CloudCompare CMake project will only require that you set the path where lib
         - QHULL_LIBRARY: main (release) qHull library (the qhull.lib or libqhull.a file itself!)
         - QHULL_LIBRARY_DEBUG: debug qHull library (the qhulld.lib or libqhulld.a file for instance)
 
-2-7) [Optional] Setup for DXFLIB support
+2-7) [Optional] Setup for dxflib support
 
 	If you want to compile CloudCompare (and ccViewer) with DXF files support, you'll need:
         - Ribbonsoft's dxflib (http://www.ribbonsoft.com/en/dxflib-downloads - last tested version: v2.5.0.0-1 on Windows)

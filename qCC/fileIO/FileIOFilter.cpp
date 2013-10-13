@@ -40,78 +40,146 @@
 #include "ObjFilter.h"
 #include "PlyFilter.h"
 #include "MAFilter.h"
-#ifdef CC_PDMS_SUPPORT
+//CAD
 #include "PDMS/PDMSFilter.h"
-#endif
 //OTHERS
 #include "DepthMapFileFilter.h"
 //#include "PovFilter.h"
+#include "DxfFilter.h"
 
 #include <assert.h>
 
-CC_FILE_TYPES FileIOFilter::StringToFileFormat(const char* ext)
+CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(const char* ext)
 {
-	CC_FILE_TYPES fType=UNKNOWN_FILE;
+	CC_FILE_TYPES fType = UNKNOWN_FILE;
 
-	if (strcmp(ext,"ASC")==0)
-		fType=ASCII;
-	else if (strcmp(ext,"TXT")==0)
-		fType=ASCII;
-	else if (strcmp(ext,"XYZ")==0)
-		fType=ASCII;
-	else if (strcmp(ext,"NEU")==0)
-		fType=ASCII;
-	else if (strcmp(ext,"PTS")==0)
-		fType=ASCII;
-	else if (strcmp(ext,"CSV")==0)
-		fType=ASCII;
-	else if (strcmp(ext,"BIN")==0)
-		fType=BIN;
-	else if (strcmp(ext,"SOI")==0)
-		fType=SOI;
-	else if (strcmp(ext,"PN")==0)
-		fType=PN;
-	else if (strcmp(ext,"PV")==0)
-		fType=PV;
-	else if (strcmp(ext,"PLY")==0)
-		fType=PLY;
-	else if (strcmp(ext,"OBJ")==0)
-		fType=OBJ;
-	else if (strcmp(ext,"POV")==0)
-		fType=POV;
-	else if (strcmp(ext,"MA")==0)
-		fType=MA;
-	else if (strcmp(ext,"ICM")==0)
-		fType=ICM;
-	else if (strcmp(ext,"OUT")==0)
-		fType=BUNDLER;
-	else if (strcmp(ext,"VTK")==0)
-		fType=VTK;
-	else if (strcmp(ext,"STL")==0)
-		fType=STL;
-    else if (strcmp(ext,"PCD")==0)
-        fType=PCD;
+	if (strcmp(ext,"ASC") == 0)
+		fType = ASCII;
+	else if (strcmp(ext,"TXT") == 0)
+		fType = ASCII;
+	else if (strcmp(ext,"XYZ") == 0)
+		fType = ASCII;
+	else if (strcmp(ext,"NEU") == 0)
+		fType = ASCII;
+	else if (strcmp(ext,"PTS") == 0)
+		fType = ASCII;
+	else if (strcmp(ext,"CSV") == 0)
+		fType = ASCII;
+	else if (strcmp(ext,"BIN") == 0)
+		fType = BIN;
+	else if (strcmp(ext,"SOI") == 0)
+		fType = SOI;
+	else if (strcmp(ext,"PN") == 0)
+		fType = PN;
+	else if (strcmp(ext,"PV") == 0)
+		fType = PV;
+	else if (strcmp(ext,"PLY") == 0)
+		fType = PLY;
+	else if (strcmp(ext,"OBJ") == 0)
+		fType = OBJ;
+	else if (strcmp(ext,"POV") == 0)
+		fType = POV;
+	else if (strcmp(ext,"MA") == 0)
+		fType = MA;
+	else if (strcmp(ext,"ICM") == 0)
+		fType = ICM;
+	else if (strcmp(ext,"OUT") == 0)
+		fType = BUNDLER;
+	else if (strcmp(ext,"VTK") == 0)
+		fType = VTK;
+	else if (strcmp(ext,"STL") == 0)
+		fType = STL;
+    else if (strcmp(ext,"PCD") == 0)
+        fType = PCD;
 #ifdef CC_X3D_SUPPORT
-	else if (strcmp(ext,"X3D")==0)
-		fType=X3D;
-	else if (strcmp(ext,"WRL")==0)
-		fType=X3D;
+	else if (strcmp(ext,"X3D") == 0)
+		fType = X3D;
+	else if (strcmp(ext,"WRL") == 0)
+		fType = X3D;
 #endif
 #ifdef CC_LAS_SUPPORT
-	else if (strcmp(ext,"LAS")==0)
-		fType=LAS;
-	else if (strcmp(ext,"LAZ")==0)
-		fType=LAS; //DGM: LAZ extension is handled by LASFilter
+	else if (strcmp(ext,"LAS") == 0)
+		fType = LAS;
+	else if (strcmp(ext,"LAZ") == 0)
+		fType = LAS; //DGM: LAZ extension is handled by LASFilter
 #endif
 #ifdef CC_E57_SUPPORT
-	else if (strcmp(ext,"E57")==0)
-		fType=E57;
+	else if (strcmp(ext,"E57") == 0)
+		fType = E57;
 #endif
 #ifdef CC_PDMS_SUPPORT
-	else if (strcmp(ext,"PDMS")==0 || strcmp(ext,"PDMSMAC")==0)
-		fType=PDMS;
+	else if (strcmp(ext,"PDMS") == 0 || strcmp(ext,"PDMSMAC") == 0)
+		fType = PDMS;
 #endif
 	return fType;
+}
+
+FileIOFilter* FileIOFilter::CreateFilter(CC_FILE_TYPES fType)
+{
+	//return corresponding loader
+	switch (fType)
+	{
+		//we keep the same order as the CC_FILE_TYPES enumerator!
+	case UNKNOWN_FILE:
+		assert(false);
+		return 0;
+	case SOI:
+		return new SoiFilter();
+	case ASCII:
+		return new AsciiFilter();
+	case BIN:
+		return new BinFilter();
+	case PN:
+		return new PNFilter();
+	case PV:
+		return new PVFilter();
+	case PLY:
+		return new PlyFilter();
+	case OBJ:
+		return new ObjFilter();
+	case POV:
+		return new PovFilter();
+	case MA:
+		return new MAFilter();
+	case ICM:
+		return new IcmFilter();
+	case DM_ASCII:
+		return new DepthMapFileFilter();
+	case BUNDLER:
+		return new BundlerFilter();
+	case VTK:
+		return new VTKFilter();
+	case STL:
+		return new STLFilter();
+	case PCD:
+		return new PCDFilter();
+#ifdef CC_X3D_SUPPORT
+	case X3D:
+		return new X3DFilter();
+#endif
+#ifdef CC_LAS_SUPPORT
+	case LAS:
+		return new LASFilter();
+#endif
+#ifdef CC_E57_SUPPORT
+	case E57:
+		return new E57Filter();
+#endif
+#ifdef CC_PDMS_SUPPORT
+	case PDMS:
+		return new PDMSFilter();
+#endif
+#ifdef CC_DXF_SUPPORT
+	case DXF:
+		return new DxfFilter();
+#endif
+	case FILE_TYPES_COUNT:
+	default:
+		assert(false);
+		break;
+	}
+
+	return 0;
 }
 
 ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
@@ -140,7 +208,7 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 		}
 
 		//convert extension to file format
-		fType = StringToFileFormat(qPrintable(extension.toUpper()));
+		fType = GuessFileFormatFromExtension(qPrintable(extension.toUpper()));
 
 		//unknown extension?
 		if (fType == UNKNOWN_FILE)
@@ -151,78 +219,7 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 	}
 
 	//get corresponding loader
-	FileIOFilter* fio = NULL;
-	switch (fType)
-	{
-	case BIN:
-      fio = new BinFilter();
-		break;
-	case OBJ:
-      fio = new ObjFilter();
-		break;
-	case PLY:
-      fio = new PlyFilter();
-		break;
-	case ICM:
-      fio = new IcmFilter();
-		break;
-	case ASCII:
-      fio = new AsciiFilter();
-		break;
-	case SOI:
-      fio = new SoiFilter();
-		break;
-	case PN:
-      fio = new PNFilter();
-		break;
-	case PV:
-      fio = new PVFilter();
-		break;
-    case DM_ASCII:
-        fio = new DepthMapFileFilter();
-        break;
-	case POV:
-      fio = new PovFilter();
-		break;
-	case BUNDLER:
-      fio = new BundlerFilter();
-		break;
-	case VTK:
-      fio = new VTKFilter();
-		break;
-	case STL:
-      fio = new STLFilter();
-		break;
-    case PCD:
-        fio = new PCDFilter();
-        break;
-#ifdef CC_X3D_SUPPORT
-    case X3D:
-      fio = new X3DFilter();
-		break;
-#endif
-#ifdef CC_E57_SUPPORT
-    case E57:
-      fio = new E57Filter();
-		break;
-#endif
-#ifdef CC_PDMS_SUPPORT
-    case PDMS:
-      fio = new PDMSFilter();
-		break;
-#endif
-#ifdef CC_LAS_SUPPORT
-	case LAS:
-      fio = new LASFilter();
-		break;
-#endif
-    case MA:
-    case UNKNOWN_FILE:
-    case FILE_TYPES_COUNT:
-        //nothing to do
-		break;
-	}
-
+	FileIOFilter* fio = CreateFilter(fType);
     if (!fio)
         return 0;
 
@@ -271,76 +268,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename
     if (!entities || !filename || fType == UNKNOWN_FILE)
         return CC_FERR_BAD_ARGUMENT;
 
-	FileIOFilter* fio = NULL;
-
-	switch (fType)
-	{
-	case BIN:
-      fio = new BinFilter();
-		break;
-	case ASCII:
-      fio = new AsciiFilter();
-		break;
-	case OBJ:
-      fio = new ObjFilter();
-		break;
-	case PLY:
-      fio = new PlyFilter();
-		break;
-	case PN:
-      fio = new PNFilter();
-		break;
-	case PV:
-      fio = new PVFilter();
-		break;
-	case MA:
-      fio = new MAFilter();
-		break;
-    case DM_ASCII:
-        fio = new DepthMapFileFilter();
-        break;
-	case VTK:
-      fio = new VTKFilter();
-		break;
-	case STL:
-      fio = new STLFilter();
-		break;
-    case PCD:
-        fio = new PCDFilter();
-        break;
-#ifdef CC_X3D_SUPPORT
-    case X3D:
-        fio = new X3DFilter();
-        break;
-#endif
-#ifdef CC_E57_SUPPORT
-    case E57:
-        fio = new E57Filter();
-        break;
-#endif
-#ifdef CC_PDMS_SUPPORT
-    case PDMS:
-      fio = new PDMSFilter();
-		break;
-#endif
-#ifdef CC_LAS_SUPPORT
-    case LAS:
-        fio = new LASFilter();
-        break;
-#endif
-	case POV:
-        //TODO
-      //fio = new PovFilter();
-		break;
-    case SOI:
-    case ICM:
-    case BUNDLER:
-    case UNKNOWN_FILE:
-    case FILE_TYPES_COUNT:
-        //nothing to do
-		break;
-	}
-
+	FileIOFilter* fio = CreateFilter(fType);
 	if (!fio)
         return CC_FERR_WRONG_FILE_TYPE;
 

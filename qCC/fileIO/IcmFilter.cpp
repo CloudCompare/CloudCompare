@@ -81,7 +81,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 	sscanf(line,"FILE_TYPE=%s",subFileType);
 
-	CC_FILE_TYPES fType = FileIOFilter::StringToFileFormat(subFileType);
+	CC_FILE_TYPES fType = FileIOFilter::GuessFileFormatFromExtension(subFileType);
 
 	//chargement du fichier (potentiellement plusieurs listes) correspondant
 	ccHObject* entities = FileIOFilter::LoadFromFile(qPrintable(QString("%0/%1").arg(path).arg(cloudFileName)),fType);

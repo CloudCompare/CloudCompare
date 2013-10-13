@@ -50,7 +50,7 @@ ccPolyline::ccPolyline(const ccPolyline& poly)
 	assert(m_theAssociatedCloud);
 	if (m_theAssociatedCloud)
 		addPointIndex(0,m_theAssociatedCloud->size());
-	setClosingState(poly.m_isClosed);
+	setClosed(poly.m_isClosed);
 	set2DMode(poly.m_mode2D);
 	setForeground(poly.m_foreground);
 	setVisible(poly.isVisible());
@@ -322,7 +322,7 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 	if (contourPolyline->reserve(hullPtsCount))
 	{
 		contourPolyline->addPointIndex(0,hullPtsCount);
-		contourPolyline->setClosingState(true);
+		contourPolyline->setClosed(true);
 		contourPolyline->setVisible(true);
 		contourPolyline->setName("contour");
 		contourPolyline->addChild(contourVertices);

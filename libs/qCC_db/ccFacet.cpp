@@ -184,7 +184,7 @@ bool ccFacet::createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* p
 			if (m_contourPolyline->reserve(hullPtsCount))
 			{
 				m_contourPolyline->addPointIndex(0,hullPtsCount);
-				m_contourPolyline->setClosingState(true);
+				m_contourPolyline->setClosed(true);
 				m_contourPolyline->setVisible(true);
 				m_contourPolyline->setLocked(true);
 				m_contourPolyline->setName(DEFAULT_CONTOUR_NAME);

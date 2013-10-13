@@ -15,16 +15,13 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_BIN_FILTER_HEADER
-#define CC_BIN_FILTER_HEADER
+#ifndef CC_DXF_FILTER_HEADER
+#define CC_DXF_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
-//Qt
-#include <QFile>
-
-//! CloudCompare dedicated binary point cloud I/O filter
-class BinFilter : public FileIOFilter
+//! Autocad DXF file I/O filter
+class DxfFilter : public FileIOFilter
 {
 public:
 
@@ -34,12 +31,6 @@ public:
 
 protected:
 
-	//! old style BIN loading
-    virtual CC_FILE_ERROR loadFileV1(QFile& in, ccHObject& container, unsigned nbScansTotal);
-
-	//! new style BIN loading
-    virtual CC_FILE_ERROR loadFileV2(QFile& in, ccHObject& container);
-	//virtual CC_FILE_ERROR saveToFileV2(ccHObject* entity, const char* filename);
 };
 
-#endif //CC_BIN_FILTER_HEADER
+#endif //CC_DXF_FILTER_HEADER

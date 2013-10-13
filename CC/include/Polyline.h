@@ -41,15 +41,11 @@ class Polyline : public ReferenceCloud
 		//! Polyline constructor
 		Polyline(GenericIndexedCloudPersist* associatedCloud);
 
-		//! Returns the polyline closing state
-		/** \return the polyline closing state
-		**/
-		bool getClosingState() const {return m_isClosed;};
+		//! Returns whether the polyline is closed or not
+		inline bool isClosed() const { return m_isClosed; }
 
-		//! Sets the polyline closing state
-		/** \param state the polyline closing state
-		**/
-		void setClosingState(bool state) {m_isClosed=state;};
+		//! Sets whether the polyline is closed or not
+		inline void setClosed(bool state) { m_isClosed = state; }
 
 		//inherited from ReferenceCloud
 		virtual void clear();

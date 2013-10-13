@@ -266,7 +266,7 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
             }
 
             //chargement du fichier (potentiellement plusieurs listes) correspondant au point de vue en cours
-            CC_FILE_TYPES fType = FileIOFilter::StringToFileFormat(subFileType);
+            CC_FILE_TYPES fType = FileIOFilter::GuessFileFormatFromExtension(subFileType);
             ccHObject* loadedLists = FileIOFilter::LoadFromFile(qPrintable(QString("%0/%1").arg(path).arg(subFileName)),fType);
 
             if (loadedLists)

@@ -1,14 +1,11 @@
 ********************************************
 *         COMPILATION WITH CMAKE           *
 *                                          *
-*    Last modification: 09/02/2013 (DGM)   *
+*    Last modification: 10/13/2013 (DGM)   *
 *                                          *
 ********************************************
 
 Refer to the wiki (http://www.danielgm.net/cc/doc/wiki/index.php5?title=Compilation_CMake) for up-to-date information.
-
-WARNING: if you already have an old CloudCompare local repository (pior to April 2012)
-         erase it and check a new one out before doing anything!
 
 0) Prerequisites
 
@@ -36,6 +33,7 @@ WARNING: if you already have an old CloudCompare local repository (pior to April
                 - OPTION_SUPPORT_3D_CONNEXION_DEVICES: for 3D mouses handling
                 - OPTION_SUPPORT_MAC_PDMS_FORMAT: to activate support for PDMS .mac scripts in qCC (CAD)
                 - OPTION_USE_ULT: to be ignored
+                - OPTION_USE_DXFLIB: to activate support for DXF files in qCC (and ccViewer) with dxflib - see below
                 - OPTION_USE_LIBE57: to activate support for E57 files in qCC (and ccViewer) with libE57- see below
                 - OPTION_USE_LIBLAS: to activate support for LAS files in qCC (and ccViewer) with libLAS - see below
                 - OPTION_USE_QUICKHULL: to use the Qhull library (necessary for the qHPR plugin)
@@ -51,20 +49,20 @@ WARNING: if you already have an old CloudCompare local repository (pior to April
                 - qPoissonRecon
                 - qRansacSD (SD = Shape Detection)
                 - qSSAO
-        - eventually, the "CMAKE" group contains a CMAKE_INSTALL_PREFIX which is where qCC (CloudCompare) and ccViewer will be installed (with the 'install' build configuration in your project)
+        - eventually the "CMAKE" group contains a CMAKE_INSTALL_PREFIX which is where qCC (CloudCompare) and ccViewer will be installed (with the 'install' build configuration in your project)
                 Note: On Linux, default install dir is /usr/local (be sure to have administrative rights if you want to install CloudCompare there - or change the default path)
                       On Windows Seven, you may not have the right to 'install' files in Program Files (x86)
 
 
 2-1) [Optional] Setup for LibLAS support
 
-If you want to compile CloudCompare (and ccViewer) with LAS files support, you'll need:
+	If you want to compile CloudCompare (and ccViewer) with LAS files support, you'll need:
         - LibLAS (last tested version: 1.7 on Windows)
         - Boost multi-thread shared libraries
                 * make the BOOST_ROOT environment variable point to your Boost installation before launching CMake in order for the automatic 'find_package' script to work properly
                 * otherwise refer to LibLAS documentation for more directions
 
-Then, the CloudCompare CMake project will request that you set the 3 following variables:
+	The CMake project will request you to set the 3 following variables:
         - LIBLAS_INCLUDE_DIR: LibLAS include directory (pretty straightforward ;)
         - LIBLAS_RELEASE_LIBRARY_FILE: main LibLAS release library (the .lib or .a file itself!)
         - [Windows] LIBLAS_SHARED_LIBRARY_FILE: full path to the liblas.dll file
@@ -73,7 +71,7 @@ Note: For the moment, only the release version of CloudCompare supports LibLAS f
 
 2-2) [Optional] Setup for LibE57 support
 
-If you want to compile CloudCompare (and ccViewer) with LibE57 files support, you'll need:
+	If you want to compile CloudCompare (and ccViewer) with E57 files support, you'll need:
         - LibE57 (last tested version: 1.0.224 on Windows)
         - Boost multi-thread static libraries (same as libLAS)
         - Xerces-C++ multi-thread static libraries
@@ -81,56 +79,67 @@ If you want to compile CloudCompare (and ccViewer) with LibE57 files support, yo
                 * eventually, CMake will look for the resulting files in '/include' (instead of /src)
                   and /lib (instead of /Build/Win32/VCX/Static Debug or Release)
 
-WARNING: on Microsoft Visual (at least), you'll need the libraries compiled with /MD (=DLL Multithreaded)
+	WARNING: on Microsoft Visual (at least), you'll need the libraries compiled with /MD (=DLL Multithreaded)
          in release mode and /MDd in debug mode. You may have to change this in both Xerces (change
-                XercesLib project's options 'C/C++ > Code Generation > Runtime Library') as well as in libE57
-                root CMake file (replace all '/MT' by '/MD' in it)
+         XercesLib project's options 'C/C++ > Code Generation > Runtime Library') as well as in libE57
+         root CMake file (replace all '/MT' by '/MD' in it)
 
 The CloudCompare CMake project will only require that you set the path where libE57 has been installed (LIBE57_INSTALL_DIR)
 
 2-3) [Optional] Setup for libfreenect support
 
-If you want to compile qKinect you'll need:
+	If you want to compile qKinect you'll need:
         - OpenKinect / libfreenect (last tested version: trunk @ 03/22/2012, compiled on Windows XP 32 & 64bits)
 
-Then, the CloudCompare CMake project will request that you set the 3 following variables:
+	The CloudCompare CMake project will request you to set the 3 following variables:
         - LIBFREENECT_INCLUDE_DIR: libfreenect include directory (pretty straightforward ;)
         - LIBFREENECT_LIBRARY_FILE: main libfreenect library (the freenect.lib or libfreenect.a file itself!)
         - [Windows] LIBFREENECT_SHARED_LIBRARY_FILE: full path to the freenect.dll file
 
 2-4) [Optional] Setup for XIOT support
 
-NOT READY YET
+	(NOT READY YET)
 
-If you want to compile CloudCompare (and ccViewer) with LAS files support, you'll need:
+	If you want to compile CloudCompare (and ccViewer) with LAS files support, you'll need:
         - XIOT (last tested version: 0.9.patched in trunk/contrib - on Windows)
 		* XIOT CMake makefile has been patched to let the user set its own version of Xerces and zlib!
 		
-Then, the CloudCompare CMake project will request that you set the following variable:
+	Then, the CloudCompare CMake project will request that you set the following variable:
         - XIOT_INSTALL_DIR: XIOT install directory (once CMAKE has run, and project "INSTALL" configuration properly run/compiled as well)
 
 2-5) [Optional] Setup for PCL support
 
-If you want to compile qPCL you'll need:
+	If you want to compile qPCL you'll need:
         - PCL (http://pointclouds.org/ - last tested version: 1.5.1 on Windows 32 & 64 bits)
 
-Follow the online instructions/tutorials. Basically, you'll need Boost, Qt, Flann and Eigen.
+	Follow the online instructions/tutorials. Basically, you'll need Boost, Qt, Flann and Eigen.
 
-Once properly installed, the CloudCompare CMake script should automatically find PCL definitions.
-However, you'll have to set again the parameters related to Flann and Eigen.
+	Once properly installed, the CloudCompare CMake script should automatically find PCL definitions.
+	However, you'll have to set again the parameters related to Flann and Eigen.
 
-Note: if you have applied Luca Penasa' PCL patch (http://dev.pointclouds.org/issues/845), you must check the OPTION_LP_PCL_PATCH_ENABLED
-option in CMake gui (otherwise just ignore this option).
+	Note: if you have applied Luca Penasa' PCL patch (http://dev.pointclouds.org/issues/845), you must check the OPTION_LP_PCL_PATCH_ENABLED
+	option in CMake gui (otherwise just ignore this option).
 
 2-6) [Optional] Setup for Qhull support
 
-If you want to compile qHPR you'll need:
+	If you want to compile qHPR you'll need:
         - Qhull (http://www.qhull.org/)
 
-Then, the CloudCompare CMake project will request that you set the 3 following variables:
+	The CMake project will request you to set the 3 following variables:
         - QHULL_INCLUDE_DIRS: qHull include directory (pretty straightforward ;)
         - QHULL_LIBRARY: main (release) qHull library (the qhull.lib or libqhull.a file itself!)
         - QHULL_LIBRARY_DEBUG: debug qHull library (the qhulld.lib or libqhulld.a file for instance)
+
+2-7) [Optional] Setup for DXFLIB support
+
+	If you want to compile CloudCompare (and ccViewer) with DXF files support, you'll need:
+        - Ribbonsoft's dxflib (http://www.ribbonsoft.com/en/dxflib-downloads - last tested version: v2.5.0.0-1 on Windows)
+
+	WARNING: on Microsoft Visual (at least), you'll need to edit the file 'dl_writer.h':
+		- comment the "#include <strings.h>" line (29)
+		- comment the 'strcasecmp' definition block (35-37)
+
+	The CMake project will only require that you set the path where dxflib sources are (DXF_LIB_SRC_DIR)
 
 3) Generate the project files
 

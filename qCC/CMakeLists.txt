@@ -106,6 +106,8 @@ target_link_XIOT( ${PROJECT_NAME} ${CloudCompare_dest_release} ${CloudCompare_de
 target_link_LIBE57( ${PROJECT_NAME} )
 # 3dConnexion devices support
 target_link_3DXWARE( ${PROJECT_NAME} )
+#DXF support
+target_link_DXFLIB( ${PROJECT_NAME} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )

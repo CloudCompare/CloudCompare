@@ -49,6 +49,8 @@ include( contrib/E57Support.cmake )
 include( contrib/3DXSupport.cmake )
 # PDMS support
 OPTION( OPTION_SUPPORT_MAC_PDMS_FORMAT "Build with .mac PDMS format" OFF )
+# DXF support
+include( contrib/DxfLibSupport.cmake )
 
 # qCC
 add_subdirectory( qCC )

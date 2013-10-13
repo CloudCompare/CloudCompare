@@ -19,6 +19,10 @@ v2.5.1 ??/??/2013
 	* select a list of points then 'export' it as a polyline
 	* the polyline displayed width is customizable
 	* the 'Tools > Other > Plane orientation' tool can be used on polylines
+- DXF (Autocad) support:
+	* only to output polylines for now
+	* warning: DXF can save 3D coordinates but Autocad doesn't seem to handle them properly.
+		The user is advised to save polyines in the (X,Y) plane only.
 - Other improvements:
 	* Mesh groups are replaced by standard meshes with 'sub-meshes' structures (simple subsets of faces)
 	* New option for Delaunay mesh computation:

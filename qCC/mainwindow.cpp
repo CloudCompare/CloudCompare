@@ -7300,6 +7300,7 @@ void MainWindow::saveFile()
 	ccHObject clouds("clouds");
 	ccHObject meshes("meshes");
 	ccHObject images("images");
+	ccHObject polylines("polylines");
 	ccHObject other("other");
 	ccHObject otherSerializable("serializable");
 	ccHObject::Container entitiesToSave;
@@ -7324,6 +7325,8 @@ void MainWindow::saveFile()
 				dest = &meshes;
 			else if (child->isKindOf(CC_IMAGE))
 				dest = &images;
+			else if (child->isKindOf(CC_POLY_LINE))
+				dest = &polylines;
 			else if (child->isSerializable())
 				dest = &otherSerializable;
 			else
@@ -7337,16 +7340,17 @@ void MainWindow::saveFile()
         }
 	}
 
-	bool hasCloud = (clouds.getChildrenNumber()!=0);
-	bool hasMesh = (meshes.getChildrenNumber()!=0);
-	bool hasImage = (images.getChildrenNumber()!=0);
-	bool hasSerializable = (otherSerializable.getChildrenNumber()!=0);
-	bool hasOther = (other.getChildrenNumber()!=0);
+	bool hasCloud = (clouds.getChildrenNumber() != 0);
+	bool hasMesh = (meshes.getChildrenNumber() != 0);
+	bool hasImage = (images.getChildrenNumber() != 0);
+	bool hasPolylines = (polylines.getChildrenNumber() != 0);
+	bool hasSerializable = (otherSerializable.getChildrenNumber() != 0);
+	bool hasOther = (other.getChildrenNumber() != 0);
 	
-	int stdSaveTypes = (int)hasCloud + (int)hasMesh + (int)hasImage + (int)hasSerializable;
+	int stdSaveTypes = (int)hasCloud + (int)hasMesh + (int)hasImage + (int)hasPolylines + (int)hasSerializable;
 	if (stdSaveTypes == 0)
 	{
-		ccConsole::Error("Can't save this entity(ies) this way!");
+		ccConsole::Error("Can't save selected entity(ies) this way!");
 		return;
 	}
 	
@@ -7405,6 +7409,13 @@ void MainWindow::saveFile()
                 filters.append(QString(CC_FILE_TYPE_FILTERS[MA])+";;");
 			}
 		}
+		else if (hasPolylines)
+		{
+#ifdef CC_DXF_SUPPORT
+			filters.append(QString(CC_FILE_TYPE_FILTERS[DXF])+";;");
+#endif
+			toSave = &polylines;
+		}
 		else if (hasImage)
 		{
 			if (images.getChildrenNumber()>1)
@@ -7425,9 +7436,8 @@ void MainWindow::saveFile()
 		}
 	}
 
-
     QString dir = currentPath+QString("/");
-    if (selNum==1)
+    if (selNum == 1)
 	{
 		//hierarchy objects have generally as name: 'filename.ext (fullpath)'
 		//so we must only take the first part! (otherwise this type of name
@@ -7473,7 +7483,7 @@ void MainWindow::saveFile()
 	//bin format
 	if (selectedFilter == QString(CC_FILE_TYPE_FILTERS[BIN]))
 	{
-		if (selNum==1)
+		if (selNum == 1)
 			result = FileIOFilter::SaveToFile(m_selectedEntities[0],qPrintable(selectedFilename),BIN);
 		else
 		{
@@ -7483,7 +7493,7 @@ void MainWindow::saveFile()
 			if (tempContainer.size())
 			{
 				ccHObject root;
-				for (unsigned i=0;i<tempContainer.size();++i)
+				for (size_t i=0; i<tempContainer.size(); ++i)
 					root.addChild(tempContainer[i],false);
 				result = FileIOFilter::SaveToFile(&root,qPrintable(selectedFilename),BIN);
 			}
@@ -7503,14 +7513,14 @@ void MainWindow::saveFile()
 		{
 			if (!hasOther)
 				ccConsole::Warning("[MainWindow::saveFile] The following selected entites won't be saved:"); //display this warning only if not already done
-			for (unsigned i=0;i<otherSerializable.getChildrenNumber();++i)
+			for (unsigned i=0; i<otherSerializable.getChildrenNumber(); ++i)
 				ccConsole::Warning(QString("\t- %1").arg(otherSerializable.getChild(i)->getName()));
 		}
 
 		if (hasCloud || hasMesh)
 		{
 			CC_FILE_TYPES fType = UNKNOWN_FILE;
-			for (unsigned i=0;i<(unsigned)FILE_TYPES_COUNT;++i)
+			for (unsigned i=0; i<static_cast<unsigned>(FILE_TYPES_COUNT); ++i)
 			{
 				if (selectedFilter == QString(CC_FILE_TYPE_FILTERS[i]))
 				{
@@ -7524,9 +7534,17 @@ void MainWindow::saveFile()
 			else if (hasMesh)
 				currentMeshSaveDlgFilter = fType;
 
-			result = FileIOFilter::SaveToFile(toSave->getChildrenNumber()>1 ? toSave : toSave->getChild(0),
+			result = FileIOFilter::SaveToFile(toSave->getChildrenNumber() > 1 ? toSave : toSave->getChild(0),
 											   qPrintable(selectedFilename),
 											   fType);
+		}
+		else if (hasPolylines)
+		{
+#ifdef CC_DXF_SUPPORT
+			result = FileIOFilter::SaveToFile(toSave,
+											   qPrintable(selectedFilename),
+											   DXF);
+#endif
 		}
 		else if (hasImage)
 		{

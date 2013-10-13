@@ -57,6 +57,9 @@ enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
 #ifdef CC_PDMS_SUPPORT
 					PDMS         		,		/**< PDMS (.pdmsmac) */
 #endif
+#ifdef CC_DXF_SUPPORT
+					DXF					,		/**< DXF (Autocad) */
+#endif
 					FILE_TYPES_COUNT	,		/**< Fake file type (for automatic counting) */
 };
 
@@ -76,6 +79,9 @@ const CC_FILE_TYPES CC_FILE_TYPES_ENUMS[] = {UNKNOWN_FILE, SOI, ASCII, BIN,
 #ifdef CC_PDMS_SUPPORT
 												,PDMS
 #endif
+#ifdef CC_DXF_SUPPORT
+												,DXF
+#endif
 };
 
 const char CC_FILE_TYPE_FILTERS[][64] = {
@@ -94,18 +100,21 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
             "Snavely's Bundler output (*.out)",
             "VTK cloud or mesh (*.vtk)",
             "STL mesh or mesh (*.stl)",
-            "PCD Point Cloud Library cloud (*.pcd)",
+            "PCD Point Cloud Library cloud (*.pcd)"
 #ifdef CC_X3D_SUPPORT
-            "X3D mesh file (*.x3d)",
+            , "X3D mesh file (*.x3d)"
 #endif
 #ifdef CC_LAS_SUPPORT
-            "LAS lidar point cloud (*.las *.laz)",
+            , "LAS lidar point cloud (*.las *.laz)"
 #endif
 #ifdef CC_E57_SUPPORT
-            "E57 ASTM E2807-11 files (*.e57)",
+            , "E57 ASTM E2807-11 files (*.e57)"
 #endif
 #ifdef CC_PDMS_SUPPORT
-			"PDMS (*.pdms *.pdmsmac *.mac)",
+			, "PDMS (*.pdms *.pdmsmac *.mac)"
+#endif
+#ifdef CC_DXF_SUPPORT
+			, "DXF (*.dxf)"
 #endif
 };
 
@@ -125,21 +134,25 @@ const char CC_FILE_TYPE_DEFAULT_EXTENSION[][8] = {
             "out",
             "vtk",
 			"stl",
-            "pcd",
+            "pcd"
 #ifdef CC_X3D_SUPPORT
-            "x3d",
+            , "x3d"
 #endif
 #ifdef CC_LAS_SUPPORT
-            "las",
+            , "las"
 #endif
 #ifdef CC_E57_SUPPORT
-			"e57",
+			, "e57"
 #endif
 #ifdef CC_PDMS_SUPPORT
-			"pdms"
+			, "pdms"
+#endif
+#ifdef CC_DXF_SUPPORT
+			, "dxf"
 #endif
 };
 
+//! Typical I/O filter errors
 enum CC_FILE_ERROR {CC_FERR_NO_ERROR,
                     CC_FERR_BAD_ARGUMENT,
                     CC_FERR_UNKNOWN_FILE,
@@ -164,9 +177,6 @@ class FileIOFilter
 {
 public:
 
-	//! Detecs file type from file extension
-	static CC_FILE_TYPES StringToFileFormat(const char* ext);
-
 	//! Loads one or more entites from a file with known type
 	/** \param filename filename
 		\param fType file type (if left to UNKNOWN_FILE, file type will be guessed from extension)
@@ -182,14 +192,18 @@ public:
 									double* coordinatesShift = 0);
 
 	//! Saves an entity (or a group of) to a specific file (with name and type)
-	static CC_FILE_ERROR SaveToFile(ccHObject* entities, const char* filename, CC_FILE_TYPES fType);
+	static CC_FILE_ERROR SaveToFile(ccHObject* entities,
+									const char* filename,
+									CC_FILE_TYPES fType);
 
     //! Displays (to console) the message corresponding to a given error code
     /** \param err error code
         \param action "saving", "reading", etc.
         \param filename corresponding file
     **/
-	static void DisplayErrorMessage(CC_FILE_ERROR err, const QString& action, const QString& filename);
+	static void DisplayErrorMessage(CC_FILE_ERROR err,
+									const QString& action,
+									const QString& filename);
 
 	//! Loads one or more entites from a file
 	/** This method must be implemented by children classes.
@@ -200,11 +214,11 @@ public:
 		\param coordinatesShift already applied (input) or newly applied (output) shift on load (3D translation)
         \return error
 	**/
-	virtual CC_FILE_ERROR loadFile(const char* filename,
-										ccHObject& container,
-										bool alwaysDisplayLoadDialog = true,
-										bool* coordinatesShiftEnabled = 0,
-										double* coordinatesShift = 0)=0;
+	virtual CC_FILE_ERROR loadFile(	const char* filename,
+									ccHObject& container,
+									bool alwaysDisplayLoadDialog = true,
+									bool* coordinatesShiftEnabled = 0,
+									double* coordinatesShift = 0)=0;
 
 	//! Saves an entity (or a group of) to a file
 	/** This method must be implemented by children classes.
@@ -213,6 +227,13 @@ public:
         \return error
 	**/
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename)=0;
+
+	//! Detecs file type from file extension
+	static CC_FILE_TYPES GuessFileFormatFromExtension(const char* ext);
+
+	//! Factory: returns a filter given it's type
+	static FileIOFilter* CreateFilter(CC_FILE_TYPES fType);
+
 };
 
 #endif

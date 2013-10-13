@@ -345,7 +345,7 @@ void ccGraphicalSegmentationTool::updatePolyLine(int x, int y, Qt::MouseButtons 
 				ccLog::Error("Out of memory!");
 				return;
 			}
-			m_segmentationPoly->setClosingState(true);
+			m_segmentationPoly->setClosed(true);
 		}
 	}
 	else if (m_state & POLYLINE)
@@ -424,7 +424,7 @@ void ccGraphicalSegmentationTool::addPointToPolyline(int x, int y)
 				ccLog::Error("Out of memory!");
 				return;
 			}
-			m_segmentationPoly->setClosingState(true);
+			m_segmentationPoly->setClosed(true);
 		}
 		else //we must change mode
 		{
@@ -480,7 +480,7 @@ void ccGraphicalSegmentationTool::closePolyLine(int, int)
 	{
 		//remove last point!
 		m_segmentationPoly->resize(sz-1); //can't fail --> smaller
-		m_segmentationPoly->setClosingState(true);
+		m_segmentationPoly->setClosed(true);
 	}
 
 	//stop
@@ -511,7 +511,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
         return;
     }
 
-    if (!m_segmentationPoly->getClosingState())
+    if (!m_segmentationPoly->isClosed())
     {
         ccLog::Error("Define and/or close the segmentation border first! (right click to close)");
         return;

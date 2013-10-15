@@ -7227,6 +7227,9 @@ void MainWindow::loadFile()
 #ifdef CC_E57_SUPPORT
     filters.append(QString(CC_FILE_TYPE_FILTERS[E57]) + ";;");
 #endif
+#ifdef CC_DXF_SUPPORT
+	filters.append(QString(CC_FILE_TYPE_FILTERS[DXF]) + ";;");
+#endif
 #ifdef CC_PDMS_SUPPORT
     filters.append(QString(CC_FILE_TYPE_FILTERS[PDMS]) + ";;");
 #endif

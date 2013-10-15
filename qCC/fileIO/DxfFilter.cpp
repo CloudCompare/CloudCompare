@@ -27,14 +27,140 @@
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccPolyline.h>
+#include <ccLog.h>
 
 //DXF lib
 #ifdef CC_DXF_SUPPORT
 #include <dl_dxf.h>
+#include <dl_creationadapter.h>
 #endif
 
 //system
 #include <assert.h>
+
+#ifdef CC_DXF_SUPPORT
+class DxfImporter : public DL_CreationAdapter
+{
+public:
+	//! Default constructor
+	DxfImporter(ccHObject* root)
+		: m_root(root)
+		, m_points(0)
+		, m_poly(0)
+		, m_polyVertices(0)
+	{
+		assert(m_root);
+	}
+
+	virtual void addPoint(const DL_PointData& P)
+	{
+		//create the 'points' point cloud if necessary
+		if (!m_points)
+		{
+			m_points = new ccPointCloud("Points");
+			m_root->addChild(m_points);
+		}
+		if (!m_points->reserve(m_points->size()+1))
+		{
+			ccLog::Error("[DxfImporter] Not enough memory!");
+			return;
+		}
+		m_points->addPoint(CCVector3(	static_cast<PointCoordinateType>(P.x),
+										static_cast<PointCoordinateType>(P.y),
+										static_cast<PointCoordinateType>(P.z) ));
+	}
+
+	virtual void addPolyline(const DL_PolylineData& poly)
+	{
+		//create a new polyline if necessary
+		if (m_poly && !m_poly->size())
+			delete m_poly;
+		m_polyVertices = new ccPointCloud("vertices");
+		m_poly = new ccPolyline(m_polyVertices);
+		m_poly->addChild(m_polyVertices);
+		if (!m_polyVertices->reserve(poly.number) || !m_poly->reserve(poly.number))
+		{
+			ccLog::Error("[DxfImporter] Not enough memory!");
+			delete m_poly;
+			m_polyVertices = 0;
+			m_poly = 0;
+			return;
+		}
+		m_polyVertices->setVisible(false);
+		m_poly->setVisible(true);
+		m_poly->setName("Polyline");
+
+		//flags
+		m_poly->setClosed(poly.flags & 1);
+		//m_poly->set2DMode(poly.flags & 8); //DGM: "2D" polylines in CC doesn't mean the same thing ;)
+	}
+
+	virtual void addVertex(const DL_VertexData& vertex)
+	{
+		//we assume it's a polyline vertex!
+		if (	m_poly
+			&&	m_polyVertices
+			&&	m_polyVertices->size() < m_polyVertices->capacity() )
+		{
+			m_poly->addPointIndex(m_polyVertices->size());
+			m_polyVertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(vertex.x),
+												static_cast<PointCoordinateType>(vertex.y),
+												static_cast<PointCoordinateType>(vertex.z) ));
+
+			if (m_poly->size() == 1)
+				m_root->addChild(m_poly);
+		}
+	}
+
+	//virtual void add3dFace(const DL_3dFaceData&)
+	//{
+	//	//TODO: understand what this really is?!
+	//}
+
+	virtual void addLine(const DL_LineData& line)
+	{
+		//we open lines as simple polylines!
+		ccPointCloud* polyVertices = new ccPointCloud("vertices");
+		ccPolyline* poly = new ccPolyline(polyVertices);
+		poly->addChild(polyVertices);
+		if (!polyVertices->reserve(2) || !poly->reserve(2))
+		{
+			ccLog::Error("[DxfImporter] Not enough memory!");
+			delete poly;
+			return;
+		}
+		polyVertices->setVisible(false);
+		poly->setVisible(true);
+		poly->setName("Line");
+		poly->addPointIndex(0,2);
+		//add first point
+		polyVertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(line.x1),
+											static_cast<PointCoordinateType>(line.y1),
+											static_cast<PointCoordinateType>(line.z1) ));
+		//add second point
+		polyVertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(line.x2),
+											static_cast<PointCoordinateType>(line.y2),
+											static_cast<PointCoordinateType>(line.z2) ));
+
+		//flags
+		poly->setClosed(false);
+		m_root->addChild(poly);
+	}
+
+protected:
+
+	//! Root object (new objects will be added as its children)
+	ccHObject* m_root;
+
+	//! Points
+	ccPointCloud* m_points;
+	//! Current polyline (if any)
+	ccPolyline* m_poly;
+	//! Current polyline vertices
+	ccPointCloud* m_polyVertices;
+
+};
+#endif
 
 CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 {
@@ -233,8 +359,11 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 		{
 			const ccPolyline* poly = static_cast<ccPolyline*>(polylines[i]);
 			unsigned vertexCount = poly->size();
+			int flags = poly->isClosed() ? 1 : 0;
+			if (!poly->is2DMode())
+				flags |= 8; //3D polyline
 			dxf.writePolyline(	*dw,
-								DL_PolylineData(static_cast<int>(vertexCount),0,0,poly->isClosed() ? 1 : 0),
+								DL_PolylineData(static_cast<int>(vertexCount),0,0,flags),
 								DL_Attributes(layerNames[i].toStdString(), DL_Codes::bylayer, -1, "BYLAYER") );
 
 			for (unsigned i=0; i<vertexCount; ++i)
@@ -269,8 +398,11 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 
 CC_FILE_ERROR DxfFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
-	ccLog::Error("Not supported yet!");
-	//ccLog::Print("[DXF] Opening file '%s'...",filename);
+	DxfImporter importer(&container);
+	if (!DL_Dxf().in(qPrintable(filename), &importer))
+	{
+		return CC_FERR_READING;
+	}
 
 	return CC_FERR_NO_ERROR;
 }

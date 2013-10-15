@@ -111,6 +111,10 @@ CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(const char* ext)
 	else if (strcmp(ext,"PDMS") == 0 || strcmp(ext,"PDMSMAC") == 0)
 		fType = PDMS;
 #endif
+#ifdef CC_DXF_SUPPORT
+	else if (strcmp(ext,"DXF") == 0)
+		fType = DXF;
+#endif
 	return fType;
 }
 

@@ -398,6 +398,7 @@ void ccClippingBoxTool::exportMultCloud()
 		{
 			QProgressDialog pDlg(this);
 			pDlg.show();
+			pDlg.setCancelButton(0);
 			QApplication::processEvents();
 
 			unsigned pointCount = cloud->size(); 

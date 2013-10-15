@@ -530,9 +530,9 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 			minSquareEdgeLength = std::min(minSquareEdgeLength, maxSquareEdgeLength/10);
 
 			//we remove very small edges
-			for (std::list<IndexedCCVector2*>::const_iterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA)
+			for (std::list<IndexedCCVector2*>::iterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA)
 			{
-				std::list<IndexedCCVector2*>::const_iterator itB = itA; ++itB;
+				std::list<IndexedCCVector2*>::iterator itB = itA; ++itB;
 				if (itB == hullPoints.end())
 					itB = hullPoints.begin();
 				if ((**itB-**itA).norm2() < minSquareEdgeLength)
@@ -550,9 +550,9 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 		}
 
 		//build the initial edge list & flag the convex hull points
-		std::list<std::list<PointProjectionTools::IndexedCCVector2*>::const_iterator> edges;
+		std::list<std::list<PointProjectionTools::IndexedCCVector2*>::iterator> edges;
 		{
-			for (std::list<PointProjectionTools::IndexedCCVector2*>::const_iterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA)
+			for (std::list<PointProjectionTools::IndexedCCVector2*>::iterator itA = hullPoints.begin(); itA != hullPoints.end(); ++itA)
 			{
 				try
 				{
@@ -571,8 +571,8 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 		while (!edges.empty())
 		{
 			//current edge (AB)
-			std::list<PointProjectionTools::IndexedCCVector2*>::const_iterator itA = edges.front();
-			std::list<PointProjectionTools::IndexedCCVector2*>::const_iterator itB = itA; ++itB;
+			std::list<PointProjectionTools::IndexedCCVector2*>::iterator itA = edges.front();
+			std::list<PointProjectionTools::IndexedCCVector2*>::iterator itB = itA; ++itB;
 			if (itB == hullPoints.end())
 				itB = hullPoints.begin();
 
@@ -633,7 +633,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 							//DGM: only if the edge could 'need' it!
 
 							//next edge vertex (BC)
-							std::list<PointProjectionTools::IndexedCCVector2*>::const_iterator itC = itB; ++itC;
+							std::list<PointProjectionTools::IndexedCCVector2*>::iterator itC = itB; ++itC;
 							if (itC == hullPoints.end())
 								itC = hullPoints.begin();
 
@@ -647,7 +647,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 							if (dist2ToRight < 0 || minDist2 <= dist2ToRight)
 							{
 								//previous edge vertex (OA)
-								std::list<PointProjectionTools::IndexedCCVector2*>::const_iterator itO = itA;
+								std::list<PointProjectionTools::IndexedCCVector2*>::iterator itO = itA;
 								if (itO == hullPoints.begin())
 									itO = hullPoints.end();
 								--itO;
@@ -664,9 +664,9 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 									//last check: the new segments must not intersect with the actual hull!
 									bool intersect = false;
 									{
-										for (std::list<IndexedCCVector2*>::const_iterator itI = hullPoints.begin(); itI != hullPoints.end(); ++itI)
+										for (std::list<IndexedCCVector2*>::iterator itI = hullPoints.begin(); itI != hullPoints.end(); ++itI)
 										{
-											std::list<IndexedCCVector2*>::const_iterator itJ = itI; ++itJ;
+											std::list<IndexedCCVector2*>::iterator itJ = itI; ++itJ;
 											if (itJ == hullPoints.end())
 												itJ = hullPoints.begin();
 
@@ -697,7 +697,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 											}
 											if (squareLengthPB > maxSquareEdgeLength)
 											{
-												std::list<PointProjectionTools::IndexedCCVector2*>::const_iterator itP = itA; ++itP;
+												std::list<PointProjectionTools::IndexedCCVector2*>::iterator itP = itA; ++itP;
 												edges.push_back(itP);
 											}
 										}

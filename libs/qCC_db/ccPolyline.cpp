@@ -266,10 +266,10 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 {
 	assert(points);
 	if (!points)
-		return false;
+		return 0;
 	unsigned ptsCount = points->size();
 	if (ptsCount < 3)
-		return false;
+		return 0;
 
 	CCLib::Neighbourhood Yk(points);
 	CCVector3 O,X,Y; //local base
@@ -279,7 +279,7 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D,0,&O,&X,&Y))
 	{
 		ccLog::Warning("[ccPolyline::ExtractFlatContour] Failed to project the points on the LS plane (not enough memory?)!");
-		return false;
+		return 0;
 	}
 
 	//update the points indexes (not done by Neighbourhood::projectPointsOn2DPlane)
@@ -307,7 +307,7 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 			delete contourVertices;
 			contourVertices = 0;
 			ccLog::Error("[ccPolyline::ExtractFlatContour] Not enough memory!");
-			return false;
+			return 0;
 		}
 
 		//projection on the LS plane (in 3D)

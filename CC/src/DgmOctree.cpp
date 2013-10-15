@@ -576,7 +576,7 @@ struct MonoDimensionalCellCodes
 };
 static MonoDimensionalCellCodes PRE_COMPUTED_POS_CODES;
 
-inline DgmOctree::OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const int pos[], uchar level) const
+DgmOctree::OctreeCellCodeType DgmOctree::generateTruncatedCellCode(const int pos[], uchar level) const
 {
 	assert(		pos[0] >= 0 && pos[0] < MonoDimensionalCellCodes::VALUE_COUNT
 			&&	pos[1] >= 0 && pos[1] < MonoDimensionalCellCodes::VALUE_COUNT
@@ -636,32 +636,6 @@ void DgmOctree::getCellPos(OctreeCellCodeType code, uchar level, int pos[], bool
 	}
 }
 
-inline void DgmOctree::computeCellCenter(OctreeCellCodeType code, uchar level,PointCoordinateType center[], bool isCodeTruncated) const
-{
-    int cellPos[3];
-    getCellPos(code,level,cellPos,isCodeTruncated);
-
-	return computeCellCenter(cellPos,level,center);
-}
-
-inline void DgmOctree::computeCellCenter(const int cellPos[], uchar level, PointCoordinateType center[]) const
-{
-    const PointCoordinateType& cs = getCellSize(level);
-    center[0] = m_dimMin[0] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[0]));
-    center[1] = m_dimMin[1] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[1]));
-    center[2] = m_dimMin[2] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[2]));
-}
-
-#ifndef OCTREE_CODES_64_BITS
-inline void DgmOctree::computeCellCenter(const short cellPos[], uchar level, PointCoordinateType center[]) const
-{
-    const PointCoordinateType& cs = getCellSize(level);
-    center[0] = m_dimMin[0] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[0]));
-    center[1] = m_dimMin[1] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[1]));
-    center[2] = m_dimMin[2] + cs*(static_cast<PointCoordinateType>(0.5) + static_cast<PointCoordinateType>(cellPos[2]));
-}
-#endif
-
 void DgmOctree::computeCellLimits(OctreeCellCodeType code, uchar level, PointCoordinateType cellMin[], PointCoordinateType cellMax[], bool isCodeTruncated) const
 {
     int cellPos[3];
@@ -676,27 +650,6 @@ void DgmOctree::computeCellLimits(OctreeCellCodeType code, uchar level, PointCoo
 	cellMax[0] = cellMin[0] + cs;
     cellMax[1] = cellMin[1] + cs;
     cellMax[2] = cellMin[2] + cs;
-}
-
-inline void DgmOctree::getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint,int cellPos[], uchar level) const
-{
-	assert(level <= MAX_OCTREE_LEVEL);
-
-	getTheCellPosWhichIncludesThePoint(thePoint,cellPos);
-
-	const uchar dec = MAX_OCTREE_LEVEL-level;
-	cellPos[0] >>= dec;
-	cellPos[1] >>= dec;
-	cellPos[2] >>= dec;
-}
-
-inline void DgmOctree::getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, int cellPos[], uchar level, bool& inBounds) const
-{
-	getTheCellPosWhichIncludesThePoint(thePoint,cellPos, level);
-
-    inBounds =	(	cellPos[0] >= 0 && cellPos[0] < MAX_OCTREE_LENGTH
-				 && cellPos[1] >= 0 && cellPos[1] < MAX_OCTREE_LENGTH
-				 && cellPos[2] >= 0 && cellPos[2] < MAX_OCTREE_LENGTH );
 }
 
 unsigned DgmOctree::getCellIndex(OctreeCellCodeType cellCode, uchar bitDec, bool isCodeTruncated) const

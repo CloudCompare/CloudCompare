@@ -477,6 +477,12 @@ bool Intersect(const CCVector2& A, const CCVector2& B, const CCVector2& C, const
 	}
 }
 
+//list of already used point to avoid hull's inner loops
+enum HullPointFlags {	POINT_NOT_USED	= 0,
+						POINT_USED		= 1,
+						POINT_IGNORED	= 2,
+};
+
 bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& points,
 												std::list<IndexedCCVector2*>& hullPoints,
 												PointCoordinateType maxSquareEdgeLength/*=0*/)
@@ -490,13 +496,7 @@ bool PointProjectionTools::extractConcaveHull2D(std::vector<IndexedCCVector2>& p
 	{
 		size_t pointCount = points.size();
 
-		//list of already used point to avoid hull's inner loops
-		enum flags {	POINT_NOT_USED	= 0,
-						POINT_USED		= 1,
-						POINT_IGNORED	= 2,
-		};
-
-		std::vector<flags> pointFlags;
+		std::vector<HullPointFlags> pointFlags;
 		try
 		{
 			pointFlags.resize(pointCount,POINT_NOT_USED);

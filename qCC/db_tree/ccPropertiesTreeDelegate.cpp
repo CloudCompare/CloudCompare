@@ -505,6 +505,9 @@ void ccPropertiesTreeDelegate::fillWithPolyline(ccPolyline* _obj)
     //number of vertices
     appendRow( ITEM("Vertices"), ITEM(QLocale(QLocale::English).toString(_obj->size())) );
 
+	//polyline's length
+	appendRow( ITEM("Length"), ITEM(QLocale(QLocale::English).toString(_obj->computeLength())) );
+
     //custom line width
     appendRow( ITEM("Line width"), PERSISTENT_EDITOR(OBJECT_POLYLINE_WIDTH), true );
 }

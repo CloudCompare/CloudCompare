@@ -36,8 +36,8 @@
 
 ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScalesManager* manager, ccColorScale::Shared currentScale/*=0*/, QWidget* parent/*=0*/)
 	: QDialog(parent)
-	, m_manager(manager)
 	, Ui::ColorScaleEditorDlg()
+	, m_manager(manager)
 	, m_colorScale(currentScale)
 	, m_scaleWidget(new ccColorScaleEditorWidget(this,Qt::Horizontal))
 	, m_associatedSF(0)

@@ -5159,7 +5159,6 @@ void MainWindow::deactivateSegmentationMode(bool state)
     {
         ccHObject* firstResult = 0;
 
-        unsigned n = m_gsTool->getNumberOfValidEntities();
 		deleteHiddenParts = m_gsTool->deleteHiddenParts();
 
 		//aditional vertices of which visibility array should be manually reset
@@ -7821,7 +7820,6 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     bool atLeastOneEntity = (selInfo.selCount>0);
     bool atLeastOneCloud = (selInfo.cloudCount>0);
     bool atLeastOneMesh = (selInfo.meshCount>0);
-    bool atLeastOnePolyLine (selInfo.polylineCount>0);
     //bool atLeastOneOctree = (selInfo.octreeCount>0);
     bool atLeastOneNormal = (selInfo.normalsCount>0);
     bool atLeastOneColor = (selInfo.colorCount>0);

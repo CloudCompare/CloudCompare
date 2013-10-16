@@ -2186,7 +2186,7 @@ void ccMesh::setDisplay(ccGenericGLDisplay* win)
 {
 	if (m_materials && !m_materials->empty())
 	{
-		const ccGenericGLDisplay* currentDisplay = m_materials->getAssociatedDisplay();
+		//const ccGenericGLDisplay* currentDisplay = m_materials->getAssociatedDisplay();
 		//if the material set is not associated to any display --> we associate it with input display!
 		//if (currentDisplay != 0)
 			m_materials->associateTo(win);

@@ -322,8 +322,6 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (!pushTriangleNames && !visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || greyForNanScalarValues))
 		{
-			const unsigned step = 3*decimStep;
-
 			glEnableClientState(GL_VERTEX_ARRAY);
 			glVertexPointer(3,GL_FLOAT,0,GetVertexBuffer());
 
@@ -342,8 +340,6 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//we mimic the way ccMesh beahves by using virtual chunks!
 			unsigned chunks = static_cast<unsigned>(ceil((double)displayedTriNum/(double)MAX_NUMBER_OF_ELEMENTS_PER_CHUNK));
 			unsigned chunkStart = 0;
-			const PointCoordinateType* P = 0;
-			const PointCoordinateType* N = 0;
 			const colorType* col = 0;
 			for (unsigned k=0; k<chunks; ++k, chunkStart += MAX_NUMBER_OF_ELEMENTS_PER_CHUNK)
 			{

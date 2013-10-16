@@ -398,11 +398,15 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 
 CC_FILE_ERROR DxfFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
 {
+#ifdef CC_DXF_SUPPORT
 	DxfImporter importer(&container);
 	if (!DL_Dxf().in(qPrintable(filename), &importer))
 	{
 		return CC_FERR_READING;
 	}
+#else
+	ccLog::Error("[DXF] Not supported in this version!");
+#endif
 
 	return CC_FERR_NO_ERROR;
 }

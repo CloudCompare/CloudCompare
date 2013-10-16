@@ -97,6 +97,9 @@ public:
 	static ccPolyline* ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
 											PointCoordinateType maxEdgelLength = 0);
 
+	//! Computes the polyline length
+	PointCoordinateType computeLength() const;
+
 protected:
 
 	//inherited from ccHObject

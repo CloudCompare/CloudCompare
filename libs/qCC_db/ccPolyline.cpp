@@ -336,3 +336,25 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 
 	return contourPolyline;
 }
+
+PointCoordinateType ccPolyline::computeLength() const
+{
+	PointCoordinateType length = 0;
+
+	unsigned vertCount = size();
+	if (vertCount > 1 && m_theAssociatedCloud)
+	{
+		unsigned lastVert = isClosed() ? vertCount : vertCount-1;
+		for (unsigned i=0; i<lastVert; ++i)
+		{
+			CCVector3 A;
+			getPoint(i,A);
+			CCVector3 B;
+			getPoint((i+1)%vertCount,B);
+
+			length += (B-A).norm();
+		}
+	}
+
+	return length;
+}

@@ -35,6 +35,7 @@ v2.5.1 ??/??/2013
 		loading parameters (i.e. manually "skipping" the opening dialog for ASCII files for instance)
 	* the 'Align camera' tool (right-click context menu for planes, 2D polygons, labels, etc.) now outputs the applied matrix
 		so that you can apply it with the 'Edit > Apply transformation' tool to actually rotate an entity the same way
+	* Polyline's length now appears automatically in the 'Properties' view
 - bug fixes:
 	* text wes misplaced when rendering screen with a zoom factor greater than 1.
 		Other features were also badly reshaped (fonts, scale, color ramp, trihedron, etc.)
@@ -49,6 +50,7 @@ v2.5.1 ??/??/2013
 	* when cloning a cloud, the scalar field display options (color scales, steps, etc.) were not duplicated.
 	* when trying to save an entity which name made an invalid filename, the file saving dialog wouldn't open
 		(now a warning message is issued and the default 'project' name is used instead)
+	* Graphical segmentation area type selection icons would 'disappear' when toggled
 
 v2.5.0 07/12/2013
 - New version numbering scheme (build index appended instead of the release date)

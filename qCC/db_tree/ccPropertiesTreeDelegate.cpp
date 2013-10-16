@@ -239,7 +239,7 @@ void ccPropertiesTreeDelegate::appendRow(QStandardItem* leftItem, QStandardItem*
 		}
 		m_model->appendRow(rowItems);
 
-		//the presistent editor (if any) is always the right one!
+		//the persistent editor (if any) is always the right one!
 		if (openPersistentEditor)
 			m_view->openPersistentEditor(m_model->index(m_model->rowCount()-1,1));
 	}
@@ -307,7 +307,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
     //number of children
 	appendRow( ITEM("Children"), ITEM(QString::number(_obj->getChildrenNumber())) );
 
-    //visiblity
+    //visibility
     if (!_obj->isVisiblityLocked())
 		appendRow( ITEM("Visible"), CHECKABLE_ITEM(_obj->isVisible(),OBJECT_VISIBILITY) );
 
@@ -505,7 +505,7 @@ void ccPropertiesTreeDelegate::fillWithPolyline(ccPolyline* _obj)
     //number of vertices
     appendRow( ITEM("Vertices"), ITEM(QLocale(QLocale::English).toString(_obj->size())) );
 
-	//polyline's length
+	//polyline length
 	appendRow( ITEM("Length"), ITEM(QLocale(QLocale::English).toString(_obj->computeLength())) );
 
     //custom line width
@@ -664,7 +664,7 @@ void ccPropertiesTreeDelegate::fillWithShareable(CCShareable* _obj)
     addSeparator("Array");
 
 	//Link count
-	unsigned linkCount = _obj->getLinkCount(); //if we display it, it means it is a member of the DB --> ie. link is already >1
+	unsigned linkCount = _obj->getLinkCount(); //if we display it, it means it is a member of the DB --> i.e. link is already >1
 	appendRow( ITEM("Shared"), ITEM(linkCount < 3 ? QString("No") : QString("Yes (%1)").arg(linkCount-1)) );
 }
 
@@ -713,7 +713,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
         comboBox->addItem(c_noDisplayString);
 
-        for (unsigned i=0;i<glWindows.size();++i)
+        for (unsigned i=0; i<glWindows.size(); ++i)
             comboBox->addItem(glWindows[i]->windowTitle());
 
         connect(comboBox, SIGNAL(currentIndexChanged(const QString)), this, SLOT(objectDisplayChanged(const QString)));
@@ -741,7 +741,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
     case OBJECT_CURRENT_COLOR_RAMP:
     {
 		ccColorScaleSelector* selector = new ccColorScaleSelector(ccColorScalesManager::GetUniqueInstance(),parent,QString::fromUtf8(":/CC/images/ccGear.png"));
-		//fill combox box with Color Scales Manager
+		//fill combobox box with Color Scales Manager
 		selector->init();
 		connect(selector, SIGNAL(colorScaleSelected(int)), this, SLOT(colorScaleChanged(int)));
 		connect(selector, SIGNAL(colorScaleEditorSummoned()), this, SLOT(spawnColorRampEditor()));
@@ -1449,7 +1449,7 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
     if (actualDisplayTitle != newDisplayTitle)
     {
         //we first mark the "old displays" before removal,
-        //to be sure that they wiil also be redrawn!
+        //to be sure that they will also be redrawn!
         m_currentObject->prepareDisplayForRefresh_recursive();
 
         ccGLWindow* win = MainWindow::GetGLWindow(newDisplayTitle);

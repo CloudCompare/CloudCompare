@@ -320,6 +320,23 @@ void ccSubMesh::getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float*
 	}
 }
 
+bool ccSubMesh::hasPerTriangleTexCoordIndexes() const
+{
+	return m_associatedMesh ? m_associatedMesh->hasPerTriangleTexCoordIndexes() : false;
+}
+
+void ccSubMesh::getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const
+{
+	if (m_associatedMesh && triangleIndex < size())
+	{
+		m_associatedMesh->getTriangleTexCoordinatesIndexes(getTriGlobalIndex(triangleIndex),i1,i2,i3);
+	}
+	else
+	{
+		i1 = i2 = i3 = -1;
+	}
+}
+
 void ccSubMesh::getTriangleNormalIndexes(unsigned triIndex, int& i1, int& i2, int& i3) const
 {
 	if (m_associatedMesh && triIndex < size())

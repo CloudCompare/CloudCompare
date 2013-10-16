@@ -82,6 +82,17 @@ public:
 	//! Returns per-triangle texture coordinates (pointer to)
 	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const = 0;
 
+	//! Returns whether this mesh as per-triangle triplets of tex coords indexes
+	virtual bool hasPerTriangleTexCoordIndexes() const = 0;
+
+	//! Returns the triplet of tex coords indexes for a given triangle
+	/** \param triangleIndex triangle index
+		\param i1 first summit tex coords index
+		\param i2 second summit tex coords index
+		\param i3 third summit tex coords index
+	**/
+	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const = 0;
+
 	//! Returns whether the mesh has per-triangle normals
 	virtual bool hasTriNormals() const = 0;
 

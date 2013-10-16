@@ -2108,15 +2108,26 @@ void ccMesh::removePerTriangleTexCoordIndexes()
 void ccMesh::addTriangleTexCoordIndexes(int i1, int i2, int i3)
 {
 	assert(m_texCoordIndexes && m_texCoordIndexes->isAllocated());
-	int indexes[3]={i1,i2,i3};
+	int indexes[3] = { i1, i2, i3 };
 	m_texCoordIndexes->addElement(indexes);
 }
 
 void ccMesh::setTriangleTexCoordIndexes(unsigned triangleIndex, int i1, int i2, int i3)
 {
 	assert(m_texCoordIndexes && m_texCoordIndexes->currentSize() > triangleIndex);
-	int indexes[3]={i1,i2,i3};
+	int indexes[3] = { i1, i2, i3 };
 	m_texCoordIndexes->setValue(triangleIndex,indexes);
+}
+
+void ccMesh::getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const
+{
+	if (m_texCoordIndexes && triangleIndex < m_texCoordIndexes->currentSize())
+	{
+		const int* tci = m_texCoordIndexes->getValue(triangleIndex);
+		i1 = tci[0];
+		i2 = tci[1];
+		i3 = tci[2];
+	}
 }
 
 bool ccMesh::hasTextures() const

@@ -59,6 +59,9 @@ public:
 	**/
 	static bool ParseMTL(QString path, const QString& filename, ccMaterialSet& materials, QStringList& errors);
 
+	//! Saves to an MTL file (+ associated texture images)
+	bool saveAsMTL(QString path, const QString& baseFilename, QStringList& errors) const;
+
 	//! Associates to a given context
 	void associateTo(ccGenericGLDisplay* display);
 

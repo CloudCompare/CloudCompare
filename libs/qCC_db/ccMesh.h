@@ -246,12 +246,11 @@ public:
 	virtual bool hasTextures() const;
 	virtual TextureCoordsContainer* getTexCoordinatesTable() const { return m_texCoords; }
 	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const;
+	virtual bool hasPerTriangleTexCoordIndexes() const { return m_texCoordIndexes && m_texCoordIndexes->isAllocated(); }
+	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const;
 
 	//! Sets per-triangle texture coordinates array (may be shared)
 	virtual void setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool autoReleaseOldTable = true);
-
-	//! Returns whether this mesh as per-triangle triplets of tex coords indexes
-	bool hasPerTriangleTexCoordIndexes() const { return m_texCoordIndexes && m_texCoordIndexes->isAllocated(); }
 
 	//! Reserves memory to store per-triangle triplets of tex coords indexes
 	/** Before adding per-triangle tex coords indexes triplets to

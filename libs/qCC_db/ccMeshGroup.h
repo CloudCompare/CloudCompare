@@ -53,6 +53,8 @@ public:
 	virtual bool hasTextures() const { return false; }
 	virtual TextureCoordsContainer* getTexCoordinatesTable() const { return 0; }
 	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const { tx1 = tx2 = tx3 = 0; }
+	virtual bool hasPerTriangleTexCoordIndexes() const { return false; }
+	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const { i1 = i2 = i3 = -1; }
 	virtual bool hasTriNormals() const { return false; }
 	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const { i1 = i2 = i3 = -1; }
 	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const { return false; }

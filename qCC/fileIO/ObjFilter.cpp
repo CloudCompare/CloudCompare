@@ -23,6 +23,8 @@
 #include <QFileInfo>
 #include <QStringList>
 #include <QString>
+#include <QFile>
+#include <QTextStream>
 
 //qCC_db
 #include <ccLog.h>
@@ -46,7 +48,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
 		return CC_FERR_BAD_ENTITY_TYPE;
 
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
-	if (mesh->size()==0)
+	if (!mesh || mesh->size() == 0)
 	{
 		ccLog::Warning(QString("[ObjFilter] No facet in mesh '%1'!").arg(mesh->getName()));
 		return CC_FERR_NO_ERROR;
@@ -57,14 +59,14 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (!theFile)
 		return CC_FERR_WRITING;
 
-	CC_FILE_ERROR result = saveToFile(mesh, theFile);
+	CC_FILE_ERROR result = saveToFile(mesh, theFile, filename);
 
 	fclose(theFile);
 
 	return result;
 }
 
-CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile)
+CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const char* filename)
 {
 	assert(theFile && mesh && mesh->size()!=0);
 	unsigned numberOfTriangles = mesh->size();
@@ -125,6 +127,46 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile)
 		}
 	}
 
+	//materials
+	const ccMaterialSet* materials = mesh->getMaterialSet();
+	if (materials)
+	{
+		//save mtl file
+		QStringList errors;
+		QString baseName = QFileInfo(filename).baseName();
+		if (materials->saveAsMTL(QFileInfo(filename).absolutePath(),baseName,errors))
+		{
+			fprintf(theFile,"mtllib %s\n",qPrintable(baseName+QString(".mtl")));
+		}
+		else
+		{
+			materials = 0;
+		}
+
+		for (int i=0; i<errors.size(); ++i)
+			ccLog::Warning(QString("[ObjFilter::Save::MTL writer] ")+errors[i]);
+	}
+	bool withMaterials = (materials && mesh->hasMaterials());
+
+	//save texture coordinates
+	bool withTexCoordinates = withMaterials && mesh->hasPerTriangleTexCoordIndexes();
+	if (withTexCoordinates)
+	{
+		TextureCoordsContainer* texCoords = mesh->getTexCoordinatesTable();
+		if (texCoords)
+		{
+			for (unsigned i=0; i<texCoords->currentSize(); ++i)
+			{
+				const float* tc = texCoords->getValue(i);
+				fprintf(theFile,"tc %f %f\n",tc[0],tc[1]);
+			}
+		}
+		else
+		{
+			withTexCoordinates = false;
+		}
+	}
+
 	bool withNormals = (withTriNormals || withVertNormals);
 
 	std::vector<ccGenericMesh*> subMeshes;
@@ -145,8 +187,37 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile)
 			unsigned triNum = st->size();
 			st->placeIteratorAtBegining();
 
+			int lastMtlIndex = -1;
+			int t1 = -1, t2 = -1, t3 = -1;
+
 			for (unsigned i=0;i<triNum;++i)
 			{
+				if (withMaterials)
+				{
+					int mtlIndex = mesh->getTriangleMtlIndex(i);
+					if (mtlIndex != lastMtlIndex)
+					{
+						if (mtlIndex >= 0 && mtlIndex < static_cast<int>(materials->size()))
+						{
+							const ccMaterial& mat = materials->at(mtlIndex);
+							fprintf(theFile, "usemtl %s\n",qPrintable(mat.name));
+						}
+						else
+						{
+							fprintf(theFile, "usemtl \n");
+						}
+						lastMtlIndex = mtlIndex;
+					}
+				}
+
+				if (withTexCoordinates)
+				{
+					mesh->getTriangleTexCoordinatesIndexes(i,t1,t2,t3);
+					if (t1 >= 0) ++t1;
+					if (t2 >= 0) ++t2;
+					if (t3 >= 0) ++t3;
+				}
+
 				const CCLib::TriangleSummitsIndexes* tsi = st->getNextTriangleIndexes();
 				//for per-triangle normals
 				unsigned i1 = 1+tsi->i1;
@@ -169,15 +240,33 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile)
 						n3 = (int)i3;
 					}
 
-					if (fprintf(theFile,"f %i//%i %i//%i %i//%i\n",	i1, n1, i2, n2, i3,	n3) < 0)
+					if (withTexCoordinates)
 					{
-						return CC_FERR_WRITING;
+						if (fprintf(theFile,"f %i/%i/%i %i/%i/%i %i/%i/%i\n", i1, t1, n1, i2, t2, n2, i3, t3, n3) < 0)
+						{
+							return CC_FERR_WRITING;
+						}
+					}
+					else
+					{
+						if (fprintf(theFile,"f %i//%i %i//%i %i//%i\n",	i1, n1, i2, n2, i3,	n3) < 0)
+						{
+							return CC_FERR_WRITING;
+						}
 					}
 				}
 				else
 				{
-					if (fprintf(theFile,"f %i %i %i\n",i1,i2,i3) < 0)
-						return CC_FERR_WRITING;
+					if (withTexCoordinates)
+					{
+						if (fprintf(theFile,"f %i/%i %i/%i %i/%i\n",i1,t1,i2,t2,i3,t3) < 0)
+							return CC_FERR_WRITING;
+					}
+					else
+					{
+						if (fprintf(theFile,"f %i %i %i\n",i1,i2,i3) < 0)
+							return CC_FERR_WRITING;
+					}
 				}
 
 				if (!nprogress.oneStep()) //cancel requested
@@ -249,10 +338,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 {
 	ccLog::Print("[ObjFilter::Load] %s",filename);
 
-	//ouverture du fichier
-	FILE *fp = fopen(filename, "rt");
-	if (!fp)
+	//open file
+	QFile file(filename);
+	if (!file.open(QFile::ReadOnly))
 		return CC_FERR_READING;
+	QTextStream stream(&file);
 
 	//current vertex shift
 	double Pshift[3] = {0.0,0.0,0.0};
@@ -317,11 +407,9 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	bool objWarnings[6] = { false, false, false, false, false, false };
 	bool error = false;
 
-	//buffer
-	char currentLine[MAX_ASCII_FILE_LINE_LENGTH];
-
 	unsigned lineCount = 0;
-	while (fgets (currentLine , MAX_ASCII_FILE_LINE_LENGTH , fp) > 0)
+	QString currentLine = stream.readLine();
+	while (!currentLine.isNull())
 	{
 		if ((++lineCount % 4096) == 0)
 			progressDlg.update(lineCount>>12);
@@ -330,7 +418,10 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 
 		//skip comments & empty lines
 		if( tokens.empty() || tokens.front().startsWith('/',Qt::CaseInsensitive) || tokens.front().startsWith('#',Qt::CaseInsensitive) )
+		{
+			currentLine = stream.readLine();
 			continue;
+		}
 
 		/*** new vertex ***/
 		if (tokens.front() == "v")
@@ -483,6 +574,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			if (tokens.size() < 4)
 			{
 				objWarnings[INVALID_LINE] = true;
+				currentLine = stream.readLine();
 				continue;
 				//error = true;
 				//break;
@@ -656,7 +748,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 		{
 			if (materials) //otherwise we have failed to load MTL file!!!
 			{
-				QString mtlName = QString(currentLine+7).trimmed();
+				QString mtlName = currentLine.mid(7).trimmed();
 				//DGM: in case there's space characters in the material name, we must read it again from the original line buffer
 				//QString mtlName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "");
 				currentMaterial = (!mtlName.isEmpty() ? materials->findMaterial(mtlName) : -1);
@@ -676,7 +768,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				//we build the whole MTL filename + path
 				//DGM: in case there's space characters in the filename, we must read it again from the original line buffer
 				//QString mtlFilename = tokens[1];
-				QString mtlFilename = QString(currentLine+7).trimmed();
+				QString mtlFilename = currentLine.mid(7).trimmed();
 				ccLog::Print(QString("[ObjFilter::Load] Material file: ")+mtlFilename);
 				QString mtlPath = QFileInfo(filename).canonicalPath();
 				//we try to load it
@@ -720,9 +812,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 
 		if (error)
 			break;
+
+		currentLine = stream.readLine();
 	}
 
-	fclose(fp);
+	file.close();
 
 	//1st check
 	if (!error && pointsRead == 0)
@@ -809,7 +903,10 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					unsigned endIndex = (i+1 == groups.size() ? baseMesh->size() : groups[i+1].first);
 
 					if (startIndex == endIndex)
+					{
+						currentLine = stream.readLine();
 						continue;
+					}
 
 					ccSubMesh* subTri = new ccSubMesh(baseMesh);
 					if (subTri->reserve(endIndex-startIndex))

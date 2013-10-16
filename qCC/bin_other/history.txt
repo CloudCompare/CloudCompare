@@ -3,7 +3,7 @@
 v2.5.1 ??/??/2013
 - The 'Clipping-box' tool has a new feature: 'contour' extraction
 	* Contour extraction on the current slice
-	* Contour extraction on mutliple slices (with the 'repeat' button)
+	* Contour extraction on multiple slices (with the 'repeat' button)
 	* Early prototype: computes the concave hull of the slice's points
 		- one parameter: maximum edge length (if possible)
 		- the smaller the finer the contour (+ the slower)
@@ -26,8 +26,8 @@ v2.5.1 ??/??/2013
 - Other improvements:
 	* Mesh groups are replaced by standard meshes with 'sub-meshes' structures (simple subsets of faces)
 	* New option for Delaunay mesh computation:
-		* a max edge length can be specified to automatically remove elongted triangles
-	* New checkbox in the LAS open dialog: apply same parameters to all files that will be opened next (current session)
+		* a max edge length can be specified to automatically remove elongated triangles
+	* New check-box in the LAS open dialog: apply same parameters to all files that will be opened next (current session)
 	* User can now choose whether overlay items (scale, trihedron, etc.) should be rendered or not by the
 		'Display > Render to file' tool
 	* the progress bar "Cancel" button has no "focus" anymore:
@@ -37,7 +37,7 @@ v2.5.1 ??/??/2013
 		so that you can apply it with the 'Edit > Apply transformation' tool to actually rotate an entity the same way
 	* Polyline's length now appears automatically in the 'Properties' view
 - bug fixes:
-	* text wes misplaced when rendering screen with a zoom factor greater than 1.
+	* text was misplaced when rendering screen with a zoom factor greater than 1.
 		Other features were also badly reshaped (fonts, scale, color ramp, trihedron, etc.)
 	* the 'max distance' parameter for cloud/mesh distance computation was incorrectly squared before being used!
 	* materials where not associated to the base mesh when loading composite OBJ files (this could lead to crash when
@@ -71,7 +71,7 @@ v2.5.0 07/12/2013
 	* or define a custom bounding box
 - "Height grid generation" dialog enhanced:
 	* the user can now define custom grid limits
-	* the tool spawns dialogs to let the user specify the ouput files (ascii grid and image)
+	* the tool spawns dialogs to let the user specify the output files (ascii grid and image)
 - New tool: "Convert RGB to scalar field"
 	* Edit > Colors
 - New option in ASCII file load/save dialogs:
@@ -99,7 +99,7 @@ v2.5.0 07/12/2013
 	* PDMS format support added
 	* 3D mouse support added
 - Misc. improvements:
-	* new icon for the 'clone' method (thanks to JF Hullo): two sheeps instead of one!
+	* new icon for the 'clone' method (thanks to JF Hullo): two sheep instead of one!
 	* when computing local density, if two or more points are overlapping, the result density
 		will be 'NAN' and the point will appear in gray (in order to be hidden or removed easily)
 	* global shift information is now kept by qRansacSD plugin (shape detection)
@@ -146,7 +146,7 @@ v2.4 04/25/2013
 	* picking speed enhanced
 - 3D camera management enhanced:
 	* transitions between perspective modes are smoother
-	* custom light appears and can be intearctively moved (with CTRL+right click) in all modes
+	* custom light appears and can be interactively moved (with CTRL+right click) in all modes
 	* interactive transformation can be performed in all modes
 	* 3D rotation center symbol added (can be 'always visible', 'only when moving' or 'hidden')
 	* default views (top, bottom, left, etc.) are more 'intuitive'
@@ -221,13 +221,13 @@ v2.4 03/10/2013
 	* 10M. points for a cloud
 	* 2.5M. faces for a mesh
 - New command lines for ccViewer:
-	* '-top' to make the window 'alawys on top'
+	* '-top' to make the window 'always on top'
 	* '-win [X] [Y] [W] [H]' to set the position (X,Y) and size (W,H) of the window
 - New icons for CloudCompare and ccViewer
 - PCL (Point Cloud Library) 'PCD' files can now be opened without the qPCL plugin
 	* only works with ascii and uncompressed binary versions for the moment
 - Bug fixes:
-	* in the 'Point list picking' tool, when exporting a list of picked points THEN cancelling the picking process, CC will crash
+	* in the 'Point list picking' tool, when exporting a list of picked points THEN canceling the picking process, CC will crash
 	* SF scale is now rendered by the 'Render to file' tool
 	* qPCL's MLS tool would crash if the input cloud has no displayed scalar field! (+ dependency to Luca's PCL patch is now optional)
 	* 'shift on load' information is now preserved when sampling points on a mesh (and during several other operations)
@@ -314,7 +314,7 @@ v2.4 10/31/2012
 - New format handled (and the first 'CAD' one): Aveva PDMS '.mac' scripts
 	(support for all above primitives + already existing ones: cylinder, planes and spheres)
 - Height grid generation (=rasterization) upgraded:
-	* source cloud's scalar field(s) can now be projected as well (+ various opions to interpolate the SF values in each cell)
+	* source cloud's scalar field(s) can now be projected as well (+ various options to interpolate the SF values in each cell)
 	* main projection dimension can be set (X, Y or Z)
 - Points sampling on a mesh upgraded:
 	* source mesh per-triangle or per-vertices normals are now taken into account

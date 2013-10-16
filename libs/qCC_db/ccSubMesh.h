@@ -61,6 +61,8 @@ public:
 	virtual bool hasTextures() const;
 	virtual TextureCoordsContainer* getTexCoordinatesTable() const;
 	virtual void getTriangleTexCoordinates(unsigned triIndex, float* &tx1, float* &tx2, float* &tx3) const;
+	virtual bool hasPerTriangleTexCoordIndexes() const;
+	virtual void getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const;
 	virtual bool hasTriNormals() const;
 	virtual void getTriangleNormalIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const;
 	virtual bool getTriangleNormals(unsigned triangleIndex, CCVector3& Na, CCVector3& Nb, CCVector3& Nc) const;

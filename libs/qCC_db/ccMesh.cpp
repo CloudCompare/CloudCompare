@@ -2121,13 +2121,12 @@ void ccMesh::setTriangleTexCoordIndexes(unsigned triangleIndex, int i1, int i2, 
 
 void ccMesh::getTriangleTexCoordinatesIndexes(unsigned triangleIndex, int& i1, int& i2, int& i3) const
 {
-	if (m_texCoordIndexes && triangleIndex < m_texCoordIndexes->currentSize())
-	{
-		const int* tci = m_texCoordIndexes->getValue(triangleIndex);
-		i1 = tci[0];
-		i2 = tci[1];
-		i3 = tci[2];
-	}
+	assert(m_texCoordIndexes && m_texCoordIndexes->currentSize() > triangleIndex);
+
+	const int* tci = m_texCoordIndexes->getValue(triangleIndex);
+	i1 = tci[0];
+	i2 = tci[1];
+	i3 = tci[2];
 }
 
 bool ccMesh::hasTextures() const

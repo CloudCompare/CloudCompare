@@ -158,7 +158,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 			for (unsigned i=0; i<texCoords->currentSize(); ++i)
 			{
 				const float* tc = texCoords->getValue(i);
-				fprintf(theFile,"tc %f %f\n",tc[0],tc[1]);
+				fprintf(theFile,"vt %f %f\n",tc[0],tc[1]);
 			}
 		}
 		else
@@ -225,19 +225,15 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 				unsigned i3 = 1+tsi->i3;
 				if (withNormals)
 				{
-					int n1,n2,n3;
+					int n1 = static_cast<int>(i1);
+					int n2 = static_cast<int>(i2);
+					int n3 = static_cast<int>(i3);
 					if (withTriNormals)
 					{
 						st->getTriangleNormalIndexes(i,n1,n2,n3);
 						if (n1 >= 0) ++n1;
 						if (n2 >= 0) ++n2;
 						if (n3 >= 0) ++n3;
-					}
-					else
-					{
-						n1 = (int)i1;
-						n2 = (int)i2;
-						n3 = (int)i3;
 					}
 
 					if (withTexCoordinates)

@@ -263,7 +263,7 @@ bool ccMaterialSet::saveAsMTL(QString path, const QString& baseFilename, QString
 		{
 			QString texName = baseFilename + QString("_%1.jpg").arg(texIndex);
 
-			if (it->texture.save(path+QString('/')+texName))
+			if (it->texture.mirrored().save(path+QString('/')+texName)) //mirrored: see ParseMTL
 			{
 				stream << "map_Kd " << texName << endl;
 			}

@@ -25,6 +25,7 @@ v2.5.1 ??/??/2013
 		The user is advised to save polyines in the (X,Y) plane only.
 - Other improvements:
 	* Mesh groups are replaced by standard meshes with 'sub-meshes' structures (simple subsets of faces)
+	* OBJ materials (and textures) export is now supported
 	* New option for Delaunay mesh computation:
 		* a max edge length can be specified to automatically remove elongated triangles
 	* New check-box in the LAS open dialog: apply same parameters to all files that will be opened next (current session)

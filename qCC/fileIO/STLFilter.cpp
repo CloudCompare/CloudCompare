@@ -350,7 +350,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 	{
 		GenericChunkedArray<1,int>* equivalentIndexes = new GenericChunkedArray<1,int>;
 		const int razValue = -1;
-		if (equivalentIndexes->resize(vertCount,true,razValue))
+		if (equivalentIndexes && equivalentIndexes->resize(vertCount,true,razValue))
 		{
 			ccOctree* octree = vertices->computeOctree();
 			if (octree)

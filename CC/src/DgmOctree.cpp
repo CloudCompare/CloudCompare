@@ -742,7 +742,7 @@ unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bit
     while (true)
     {
 		float centralPoint = 0.5f + 0.75f*(static_cast<float>(truncatedCellCode-beginCode)/(-0.5f)); //0.75 = speed coef (empirical)
-		unsigned middle = begin + static_cast<unsigned>((centralPoint*float(end-begin));
+		unsigned middle = begin + static_cast<unsigned>(centralPoint*float(end-begin));
 		OctreeCellCodeType middleCode = (m_thePointsAndTheirCellCodes[middle].theCode >> bitDec);
 
         if (middleCode < truncatedCellCode)

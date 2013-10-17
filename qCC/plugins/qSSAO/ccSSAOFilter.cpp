@@ -49,6 +49,8 @@ ccSSAOFilter::ccSSAOFilter() : ccGlFilter("Screen Space Ambient Occlusion")
     bilateralGSize			=	5;
     bilateralGSigma			=	1.0f;
     bilateralGSigmaZ		=	0.4f;
+    
+    memset(ssao_neighbours, 0, sizeof(float) * 3*SSAO_MAX_N);
 }
 
 ccSSAOFilter::~ccSSAOFilter()

@@ -30,7 +30,7 @@
 
 using namespace pcl;
 
-cc2smReader::cc2smReader()
+cc2smReader::cc2smReader() : m_cc_cloud(NULL)
 {
 
 }

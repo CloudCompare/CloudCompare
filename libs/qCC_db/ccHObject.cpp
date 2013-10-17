@@ -166,7 +166,7 @@ void ccHObject::addChild(ccHObject* anObject, bool dependant/*=true*/, int inser
 	if (dependant)
 	{
 		anObject->setParent(this);
-		anObject->setFlagState(CC_FATHER_DEPENDANT,dependant);
+		anObject->setFlagState(CC_FATHER_DEPENDENT,dependant);
 		if (anObject->isShareable())
 			dynamic_cast<CCShareable*>(anObject)->link();
 	}
@@ -238,7 +238,7 @@ void ccHObject::detachFromParent()
 	if (!parent)
 		return;
 
-	setFlagState(CC_FATHER_DEPENDANT,false);
+	setFlagState(CC_FATHER_DEPENDENT,false);
 	parent->removeChild(this);
 }
 
@@ -252,9 +252,9 @@ void ccHObject::transferChild(unsigned index, ccHObject& newParent)
 	}
 
 	//remove link from old parent
-	bool fatherDependent = child->getFlagState(CC_FATHER_DEPENDANT);
+	bool fatherDependent = child->getFlagState(CC_FATHER_DEPENDENT);
 	if (fatherDependent)
-		child->setFlagState(CC_FATHER_DEPENDANT,false);
+		child->setFlagState(CC_FATHER_DEPENDENT,false);
 	removeChild(index);
 	newParent.addChild(child,fatherDependent);
 }
@@ -264,9 +264,9 @@ void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent
 	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
 		//remove link from old parent
-		bool fatherDependent = (*it)->getFlagState(CC_FATHER_DEPENDANT) || forceFatherDependent;
+		bool fatherDependent = (*it)->getFlagState(CC_FATHER_DEPENDENT) || forceFatherDependent;
 		if (fatherDependent)
-			(*it)->setFlagState(CC_FATHER_DEPENDANT,false);
+			(*it)->setFlagState(CC_FATHER_DEPENDENT,false);
 		newParent.addChild(*it,fatherDependent);
 	}
 
@@ -548,7 +548,7 @@ void ccHObject::removeChild(int pos, bool preventAutoDelete/*=false*/)
 	assert(pos>=0 && unsigned(pos)<m_children.size());
 
 	ccHObject* child = m_children[pos];
-	if (child->getFlagState(CC_FATHER_DEPENDANT) && !preventAutoDelete)
+	if (child->getFlagState(CC_FATHER_DEPENDENT) && !preventAutoDelete)
 	{
 		//delete object
 		if (child->isShareable())
@@ -578,7 +578,7 @@ void ccHObject::removeAllChildren()
 	{
 		ccHObject* child = m_children.back();
 		m_children.pop_back();
-		if (child->getParent()==this && child->getFlagState(CC_FATHER_DEPENDANT))
+		if (child->getParent()==this && child->getFlagState(CC_FATHER_DEPENDENT))
 		{
 			if (child->isShareable())
 				dynamic_cast<CCShareable*>(child)->release();
@@ -683,7 +683,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion)
 		{
 			if (child->fromFile(in,dataVersion))
 			{
-				addChild(child,child->getFlagState(CC_FATHER_DEPENDANT));
+				addChild(child,child->getFlagState(CC_FATHER_DEPENDENT));
 			}
 			else
 			{

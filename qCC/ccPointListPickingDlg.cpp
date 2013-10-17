@@ -283,7 +283,7 @@ void ccPointListPickingDlg::removeLastEntry()
 	}
 	else
 	{
-		lastVisibleLabel->setFlagState(CC_FATHER_DEPENDANT,false);
+		lastVisibleLabel->setFlagState(CC_FATHER_DEPENDENT,false);
 		if (m_toBeAdded && m_toBeAdded->getChildrenNumber() != 0)
 		{
 			unsigned lastIndex = m_toBeAdded->getChildrenNumber()-1;

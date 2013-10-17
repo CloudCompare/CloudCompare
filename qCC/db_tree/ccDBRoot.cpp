@@ -1138,10 +1138,10 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 
 		//remove link from old parent
 		bool fatherDependant = false;
-		if (item->getFlagState(CC_FATHER_DEPENDANT))
+		if (item->getFlagState(CC_FATHER_DEPENDENT))
 		{
 			fatherDependant = true;
-			item->setFlagState(CC_FATHER_DEPENDANT,false);
+			item->setFlagState(CC_FATHER_DEPENDENT,false);
 		}
 
 		//remove item from current position
@@ -1273,7 +1273,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	{
 		ccFacet* facet = static_cast<ccFacet*>(obj);
 		planeNormal = facet->getNormal();
-		CCVector3 planeHorizDir(0.0,1.0,0.0);
+		CCVector3 planeHorizDir(0,1,0);
 		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal.u,planeHorizDir.u,planeVertDir.u);
 		center = facet->getCenter();
 	}

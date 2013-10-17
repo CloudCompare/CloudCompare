@@ -469,9 +469,9 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeCrossCovarianceMatrix(Gene
 
 	//shortcuts to output matrix lines
 	CCLib::SquareMatrixd covMat(3);
-	double* l1 = covMat.line(0);
-	double* l2 = covMat.line(1);
-	double* l3 = covMat.line(2);
+	double* l1 = covMat.row(0);
+	double* l2 = covMat.row(1);
+	double* l3 = covMat.row(2);
 
 	P->placeIteratorAtBegining();
 	Q->placeIteratorAtBegining();
@@ -516,9 +516,9 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 
 	//shortcuts to output matrix lines
 	CCLib::SquareMatrixd covMat(3);
-	double* l1 = covMat.line(0);
-	double* l2 = covMat.line(1);
-	double* l3 = covMat.line(2);
+	double* l1 = covMat.row(0);
+	double* l2 = covMat.row(1);
+	double* l3 = covMat.row(2);
 
 	P->placeIteratorAtBegining();
 	Q->placeIteratorAtBegining();

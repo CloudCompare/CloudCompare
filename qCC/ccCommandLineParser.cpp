@@ -154,7 +154,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 			for (size_t i=0;i<count;++i)
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[0]);
-				pc->setFlagState(CC_FATHER_DEPENDANT,false);
+				pc->setFlagState(CC_FATHER_DEPENDENT,false);
 				Print(QString("Found one cloud with %1 points").arg(pc->size()));
 				m_clouds.push_back(CloudDesc(pc,filename,count == 1 ? -1 : (int)i));
 			}
@@ -165,7 +165,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 			if (!meshes.empty())
 			{
 				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[0]);
-				mesh->setFlagState(CC_FATHER_DEPENDANT,false);
+				mesh->setFlagState(CC_FATHER_DEPENDENT,false);
 				Print(QString("Found one mesh with %1 faces and %2 vertices").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()));
 				m_meshes.push_back(std::pair<ccGenericMesh*,QString>(mesh,filename));
 			}

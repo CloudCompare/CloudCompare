@@ -7027,7 +7027,7 @@ void MainWindow::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
 		return;
 
 	if (!autoDelete && obj->getParent())
-		obj->setFlagState(CC_FATHER_DEPENDANT,false);
+		obj->setFlagState(CC_FATHER_DEPENDENT,false);
 
 	if (m_ccRoot)
 		m_ccRoot->removeElement(obj);
@@ -8123,7 +8123,7 @@ void MainWindow::removeObjectTemporarilyFromDBTree(ccHObject* obj, ccHObject* &p
 	parent = obj->getParent();
 
 	//detach the object (in case its children undergo "severe" modifications)
-	obj->setFlagState(CC_FATHER_DEPENDANT,false);
+	obj->setFlagState(CC_FATHER_DEPENDENT,false);
 	m_ccRoot->removeElement(obj);
 }
 
@@ -8133,7 +8133,7 @@ void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, ccHObject* parent)
 	if (!obj || !m_ccRoot)
 		return;
 
-	obj->setFlagState(CC_FATHER_DEPENDANT,true);
+	obj->setFlagState(CC_FATHER_DEPENDENT,true);
 	if (parent)
 		parent->addChild(obj);
 	m_ccRoot->addElement(obj,false);

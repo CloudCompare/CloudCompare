@@ -27,7 +27,7 @@
 
 //! Object state flag
 enum CC_OBJECT_FLAG {
-    CC_FATHER_DEPENDANT     =   1,
+    CC_FATHER_DEPENDENT     =   1,
     CC_ENABLED              =   2,
     CC_LOCKED               =   4,
 };

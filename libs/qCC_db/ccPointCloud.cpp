@@ -592,7 +592,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 			ccMesh* mesh = static_cast<ccMesh*>(child);
 
 			//detach from father?
-			//mesh->setFlagState(CC_FATHER_DEPENDANT,false);
+			//mesh->setFlagState(CC_FATHER_DEPENDENT,false);
 			//addedCloud->removeChild(mesh);
 			//ccGenericMesh* addedTri = mesh;
 
@@ -615,7 +615,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 			//ccImage* image = static_cast<ccImage*>(child);
 
 			//DGM FIXME: take image ownership! (dirty)
-			child->setFlagState(CC_FATHER_DEPENDANT,false);
+			child->setFlagState(CC_FATHER_DEPENDENT,false);
 			addedCloud->removeChild(child);
 			addChild(child,true);
 		}

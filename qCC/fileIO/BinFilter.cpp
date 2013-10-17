@@ -413,7 +413,7 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find cloud (ID=%1) associated to label '%2' in the file!").arg(cloudID).arg(label->getName()));
 					if (label->getParent())
 						label->getParent()->removeChild(label);
-					if (!label->getFlagState(CC_FATHER_DEPENDANT))
+					if (!label->getFlagState(CC_FATHER_DEPENDENT))
 					{
 						//DGM: can't delete it, too dangerous (bad pointers ;)
 						//delete label;

@@ -706,7 +706,7 @@ rk_sobol_error rk_sobol_init(size_t dimension, rk_sobol_state *s,
   s->direction = NULL; s->numerator = NULL;
   s->direction = malloc(sizeof(*(s->direction))*dimension*LONG_BIT);
   s->numerator = malloc(sizeof(*(s->numerator))*dimension);
-  if (!s->direction | !s->numerator)
+  if (!s->direction || !s->numerator)
   {
     if (!s->direction) free(s->direction);
     if (!s->numerator) free(s->numerator);
@@ -869,7 +869,7 @@ rk_sobol_error rk_sobol_copy(rk_sobol_state *copy, rk_sobol_state *orig)
   copy->direction = NULL; copy->numerator = NULL;
   copy->direction = malloc(sizeof(*(copy->direction))*orig->dimension*LONG_BIT);
   copy->numerator = malloc(sizeof(*(copy->numerator))*orig->dimension);
-  if (!copy->direction | !copy->numerator)
+  if (!copy->direction || !copy->numerator)
   {
     if (!copy->direction) free(copy->direction);
     if (!copy->numerator) free(copy->numerator);

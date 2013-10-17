@@ -413,10 +413,8 @@ void qRansacSD::doAction()
 			}
 
 			//random color
-			unsigned char col[3]={ (unsigned char)(255.0*(float)rand()/(float)RAND_MAX),
-									(unsigned char)(255.0*(float)rand()/(float)RAND_MAX),
-									0};
-			col[2]=255-(col[1]+col[2])/2;
+			colorType col[3];
+			ccColor::Random(col);
 			pcShape->setRGBColor(col);
 			pcShape->showColors(true);
 			pcShape->showNormals(saveNormals);

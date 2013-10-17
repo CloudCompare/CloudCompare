@@ -166,14 +166,14 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* theMesh,
 
 		//we deduce the number of points to generate on this face
 		double fPointsToAdd = S*samplingDensity;
-		unsigned pointsToAdd = (unsigned)fPointsToAdd;
+		unsigned pointsToAdd = static_cast<unsigned>(fPointsToAdd);
 
         //if the face area is smaller than the surface/random point
-		if (pointsToAdd==0)
+		if (pointsToAdd == 0)
 		{
 			//we add a point with the same probability as its (relative) area
-			if (double(rand())/double(RAND_MAX) <= fPointsToAdd)
-                ++pointsToAdd;
+			if (static_cast<double>(rand()) <= fPointsToAdd * static_cast<double>(RAND_MAX))
+                pointsToAdd = 1;
 		}
 
 		if (pointsToAdd)
@@ -185,27 +185,27 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* theMesh,
 					|| (triIndices && triIndices->capacity() < theoricNumberOfPoints && !triIndices->reserve(theoricNumberOfPoints))) //not enough memory
 				{
 					delete sampledCloud;
-					sampledCloud=0;
+					sampledCloud = 0;
 					triIndices->clear();
 					break;
 				}
 			}
 
-			for (unsigned i=0;i<pointsToAdd;++i)
+			for (unsigned i=0; i<pointsToAdd; ++i)
 			{
 				//we generates random points as in:
 				//'Greg Turk. Generating random points in triangles. In A. S. Glassner, editor,Graphics Gems, pages 24-28. Academic Press, 1990.'
-				double x = double(rand())/(double)RAND_MAX;
-				double y = double(rand())/(double)RAND_MAX;
+				double x = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
+				double y = static_cast<double>(rand())/static_cast<double>(RAND_MAX);
 
 				//we test if the generated point lies on the right side of (AB)
-				if (x+y>1.0)
+				if (x+y > 1.0)
 				{
-                    x=1.0-x;
-                    y=1.0-y;
+                    x = 1.0-x;
+                    y = 1.0-y;
                 }
 
-				CCVector3 P = (*O) + (PointCoordinateType)x * u + (PointCoordinateType)y * v;
+				CCVector3 P = (*O) + static_cast<PointCoordinateType>(x) * u + static_cast<PointCoordinateType>(y) * v;
 
 				sampledCloud->addPoint(P);
 				if (triIndices)
@@ -221,7 +221,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* theMesh,
 	if (normProgress)
 	{
         delete normProgress;
-		normProgress=0;
+		normProgress = 0;
 	}
 
 	if (sampledCloud) //can be in case of memory overflow!
@@ -235,7 +235,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* theMesh,
 		else
 		{
 			delete sampledCloud;
-			sampledCloud=0;
+			sampledCloud = 0;
 			if (triIndices)
 				triIndices->clear();
 		}

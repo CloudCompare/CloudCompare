@@ -21,20 +21,17 @@
 //CCLib
 #include <CCGeom.h>
 
-/***************************************************
-			Main CloudCompare types
-***************************************************/
+//system
+#include <stdlib.h>
 
 //! Compressed normals type
 typedef unsigned short normsType;
 
 //! Color components type (R,G and B)
 typedef unsigned char colorType;
+
 //! Max value of a color component
 const colorType MAX_COLOR_COMP = 255;
-
-//! Scan index type
-typedef unsigned char scanIndexType;
 
 namespace ccColor
 {
@@ -69,6 +66,21 @@ namespace ccColor
     static const colorType defaultBkgColor[3]		=   {10,102,151};
     static const colorType defaultHistBkgColor[3]	=   {51,0,51};
     static const colorType defaultLabelColor[3]		=   {255,255,0};
+
+	//! Generates a random color
+	static void Random(colorType col[/*3*/], bool lightOnly = true)
+	{
+		col[0] = static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+		col[1] = static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+		if (lightOnly)
+		{
+			col[2] = MAX_COLOR_COMP - static_cast<colorType>((static_cast<unsigned>(col[1])+static_cast<unsigned>(col[2]))/2);
+		}
+		else
+		{
+			col[2] = static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+		}
+	}
 };
 
 #endif //CC_BASIC_TYPES_HEADER

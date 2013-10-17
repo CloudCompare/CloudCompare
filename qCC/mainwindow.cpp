@@ -3873,9 +3873,8 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 					//shall we colorize it with random color?
 					if (randomColors)
 					{
-						colorType col[3] = {colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX)),
-											colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX)),
-											colorType(float(MAX_COLOR_COMP)*float(rand())/float(RAND_MAX))};
+						colorType col[3];
+						ccColor::Random(col);
 						compCloud->setRGBColor(col);
 						compCloud->showColors(true);
 						compCloud->showSF(false);
@@ -6801,11 +6800,11 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 					double extractedPoints=0.0;
 					for (i=0;i<1000;++i)
 					{
-						unsigned randIndex = ((unsigned)((float)rand()*(float)count/(float)RAND_MAX))%count;
+						unsigned randIndex = (static_cast<unsigned>((float)rand()*(float)count/(float)RAND_MAX) % count);
 						CCLib::DgmOctree::NeighboursSet neighbours;
 						octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),roughnessKernelSize,neighbours);
 						size_t neihgboursCount=neighbours.size();
-						extractedPoints += (double)neihgboursCount;
+						extractedPoints += static_cast<double>(neihgboursCount);
 						for (size_t k=0;k<neihgboursCount;++k)
 							cloud->setPointScalarValue(neighbours[k].pointIndex,sqrt(neighbours[k].squareDist));
 					}

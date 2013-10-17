@@ -282,7 +282,7 @@ void ccSSAOFilter::setParameters(int _N, float _Kz, float _R, float _F)
 
 double frand()
 {
-    return (double)rand()/(double)RAND_MAX;
+    return static_cast<double>(rand())/static_cast<double>(RAND_MAX);
 }
 
 void randomPointInSphere(double& vx, double& vy, double& vz)

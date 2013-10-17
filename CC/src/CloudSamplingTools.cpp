@@ -415,7 +415,7 @@ bool CloudSamplingTools::subsampleCellAtLevel(const DgmOctree::octreeCell& cell,
 
 	if (subsamplingMethod == RANDOM_POINT)
 	{
-	    selectedPointIndex = ((unsigned)rand()) % pointsCount;
+	    selectedPointIndex = (static_cast<unsigned>(rand()) % pointsCount);
 	}
 	else // if (subsamplingMethod == NEAREST_POINT_TO_CELL_CENTER)
 	{

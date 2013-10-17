@@ -29,7 +29,9 @@ StatisticalOutliersRemover::StatisticalOutliersRemover()
                                    "Remove Outliers Using statistical Approach",
                                    "Remove Outliers out of a given distance from the point, expressed as sigma of mean distances",
                                    ":/toolbar/PclUtils/icons/sor_outlier_remover.png")),
-      m_dialog(0)
+      m_dialog(0),
+      m_k(0),
+      m_std(0.0f)
 {
 }
 

@@ -32,8 +32,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <algorithm>
+#include <vector>
 
-#define ROTATE(a,i,j,k,l) g=a[i][j];h=a[k][l];a[i][j]=g-s*(h+g*tau);a[k][l]=h+s*(g-h*tau);
+#define ROTATE(a,i,j,k,l) { Scalar g = a[i][j]; h = a[k][l]; a[i][j] = g-s*(h+g*tau); a[k][l] = h+s*(g-h*tau); }
 
 namespace CCLib
 {
@@ -46,27 +47,20 @@ namespace CCLib
 		//! Default constructor
 		/** Warning: invalid matrix.
 		**/
-		MatrixTpl()
-		{
-			init(0);
-		}
+		MatrixTpl() { init(0); }
 
 		//! Constructor with a given size
 		/** \param size the (square) matrix dimension
 		**/
-		MatrixTpl(unsigned size)
-		{
-			init(size);
-		}
+		MatrixTpl(unsigned size) { init(size); }
 
 		//! Constructor from another matrix
 		/** \param mat matrix
 		**/
 		MatrixTpl(const MatrixTpl& mat)
 		{
-			init(mat.m_matrixSize);
-
-			*this = mat;
+			if (init(mat.m_matrixSize))
+				*this = mat;
 		}
 
 		//! "From OpenGl" constructor (float version)
@@ -78,13 +72,14 @@ namespace CCLib
 		**/
 		MatrixTpl(const float M16f[], bool rotationOnly = false)
 		{
-			unsigned l,c,size=(rotationOnly ? 3 : 4);
+			unsigned size = (rotationOnly ? 3 : 4);
 
-			init(size);
-
-			for (l=0;l<size;l++)
-				for (c=0;c<size;c++)
-					m_values[l][c] = (Scalar)M16f[c*4+l];
+			if (init(size))
+			{
+				for (unsigned l=0; l<size; l++)
+					for (unsigned c=0; c<size; c++)
+						m_values[l][c] = static_cast<Scalar>(M16f[c*4+l]);
+			}
 		}
 
 		//! "From OpenGl" constructor (double version)
@@ -96,13 +91,14 @@ namespace CCLib
 		**/
 		MatrixTpl(const double M16d[], bool rotationOnly = false)
 		{
-			unsigned l,c,size=(rotationOnly ? 3 : 4);
+			unsigned size = (rotationOnly ? 3 : 4);
 
-			init(size);
-
-			for (l=0;l<size;l++)
-				for (c=0;c<size;c++)
-					m_values[l][c] = (Scalar)M16d[c*4+l];
+			if (init(size))
+			{
+				for (unsigned l=0; l<size; l++)
+					for (unsigned c=0; c<size; c++)
+						m_values[l][c] = static_cast<Scalar>(M16d[c*4+l]);
+			}
 		}
 
 		//! Default destructor
@@ -111,13 +107,13 @@ namespace CCLib
 			invalidate();
 		}
 
+		//! Returns matrix size
+		inline unsigned size() const { return m_matrixSize; }
+
 		//! Returns matrix validity
 		/** Matrix is invalid if its size is 0!
 		**/
-		bool isValid() const
-		{
-			return (m_matrixSize!=0);
-		}
+		inline bool isValid() const { return (m_matrixSize != 0); }
 
 		//! Invalidates matrix
 		/** Size is reset to 0.
@@ -125,38 +121,41 @@ namespace CCLib
 		void invalidate()
 		{
 			if (eigenValues)
+			{
 				delete[] eigenValues;
-			eigenValues=0;
+				eigenValues = 0;
+			}
 
-			for (unsigned i=0;i<m_matrixSize;i++)
-				delete[] m_values[i];
-			delete[] m_values;
-			m_values=0;
+			if (m_values)
+			{
+				for (unsigned i=0; i<m_matrixSize; i++)
+					if (m_values[i])
+						delete[] m_values[i];
+				delete[] m_values;
+				m_values = 0;
+			}
 
-			m_matrixSize=matrixSquareSize=0;
+			m_matrixSize = matrixSquareSize = 0;
 		}
 
-		//! Returns matrix size
-		inline unsigned size() const { return m_matrixSize; }
-
-		//! The matrix lines
+		//! The matrix rows
 		/** public for easy/fast access
 		**/
 		Scalar** m_values;
 
-		//! Returns pointer to matrix line
-		inline Scalar* line(unsigned index) { return m_values[index]; }
+		//! Returns pointer to matrix row
+		inline Scalar* row(unsigned index) { return m_values[index]; }
 
 		//! Sets a particular matrix value
-		void inline setValue(unsigned line, unsigned column, Scalar value)
+		void inline setValue(unsigned row, unsigned column, Scalar value)
 		{
-			m_values[line][column]=value;
+			m_values[row][column]=value;
 		}
 
 		//! Returns a particular matrix value
-		Scalar inline getValue(unsigned line, unsigned column) const
+		Scalar inline getValue(unsigned row, unsigned column) const
 		{
-			return m_values[line][column];
+			return m_values[row][column];
 		}
 
 		//! Matrix copy operator
@@ -168,8 +167,8 @@ namespace CCLib
 				init(B.size());
 			}
 
-			for (unsigned l=0;l<m_matrixSize;l++)
-				for (unsigned c=0;c<m_matrixSize;c++)
+			for (unsigned l=0; l<m_matrixSize; l++)
+				for (unsigned c=0; c<m_matrixSize; c++)
 					m_values[l][c] = B.m_values[l][c];
 
 			if (B.eigenValues)
@@ -185,7 +184,7 @@ namespace CCLib
 		MatrixTpl operator + (const MatrixTpl& B) const
 		{
 			MatrixTpl C = *this;
-			C+=B;
+			C += B;
 
 			return C;
 		}
@@ -195,9 +194,8 @@ namespace CCLib
 		{
 			assert(B.size() == m_matrixSize);
 
-			unsigned l,c;
-			for (l=0;l<m_matrixSize;l++)
-				for (c=0;c<m_matrixSize;c++)
+			for (unsigned l=0; l<m_matrixSize; l++)
+				for (unsigned c=0; c<m_matrixSize; c++)
 					m_values[l][c] += B.m_values[l][c];
 
 			return *this;
@@ -217,9 +215,8 @@ namespace CCLib
 		{
 			assert(B.size() == m_matrixSize);
 
-			unsigned l,c;
-			for (l=0;l<m_matrixSize;l++)
-				for (c=0;c<m_matrixSize;c++)
+			for (unsigned l=0; l<m_matrixSize; l++)
+				for (unsigned c=0; c<m_matrixSize; c++)
 					m_values[l][c] -= B.m_values[l][c];
 
 			return *this;
@@ -232,14 +229,14 @@ namespace CCLib
 
 			MatrixTpl C(m_matrixSize);
 
-			for (unsigned l=0;l<m_matrixSize;l++)
+			for (unsigned l=0; l<m_matrixSize; l++)
 			{
-				for (unsigned c=0;c<m_matrixSize;c++)
+				for (unsigned c=0; c<m_matrixSize; c++)
 				{
-					Scalar sum=0.0;
-					for (unsigned k=0;k<m_matrixSize;k++)
-						sum += m_values[l][k]*B.m_values[k][c];
-					C.m_values[l][c]=sum;
+					Scalar sum = 0;
+					for (unsigned k=0; k<m_matrixSize; k++)
+						sum += m_values[l][k] * B.m_values[k][c];
+					C.m_values[l][c] = sum;
 				}
 			}
 
@@ -253,6 +250,7 @@ namespace CCLib
 
 			CCVector3 result;
 			apply(V.u,result.u);
+
 			return result;
 		}
 
@@ -269,34 +267,38 @@ namespace CCLib
 		**/
 		void apply(Scalar Vec[]) const
 		{
-			//we apply matrix to Vec and get the result in a new vector
+			//we apply matrix to Vec and get the result in a (temporary) vector
 			Scalar* V = new Scalar[m_matrixSize];
-			apply(Vec,V);
-			//we copy result to Vec
-			memcpy(Vec,V,sizeof(Scalar)*m_matrixSize);
-			//we release temp vector
-			delete[] V;
+			if (V)
+			{
+				apply(Vec,V);
+				//we copy the result to Vec
+				memcpy(Vec,V,sizeof(Scalar)*m_matrixSize);
+				//we release temp vector
+				delete[] V;
+			}
 		}
 
 		//! Multiplication by a vector
-		/** Vec must have the same size as matrix. Returns result = M.Vec.
+		/** Vec must have the same size as matrix.
+			Returns result = M.Vec.
 		**/
 		void apply(const Scalar Vec[], Scalar result[]) const
 		{
-			for (unsigned l=0;l<m_matrixSize;l++)
+			for (unsigned l=0; l<m_matrixSize; l++)
 			{
-				Scalar sum=0.0;
-				for (unsigned k=0;k<m_matrixSize;k++)
-					sum += m_values[l][k] * (Scalar)Vec[k];
-				result[l]=sum;
+				Scalar sum = 0;
+				for (unsigned k=0; k<m_matrixSize; k++)
+					sum += m_values[l][k] * static_cast<Scalar>(Vec[k]);
+				result[l] = sum;
 			}
 		}
 
 		//! In-place transpose
 		void transpose()
 		{
-			for (unsigned l=0;l<m_matrixSize-1;l++)
-				for (unsigned c=l+1;c<m_matrixSize;c++)
+			for (unsigned l=0; l<m_matrixSize-1; l++)
+				for (unsigned c=l+1; c<m_matrixSize; c++)
 					std::swap(m_values[l][c],m_values[c][l]);
 		}
 
@@ -312,7 +314,7 @@ namespace CCLib
 		//! Sets all elements to 0
 		void clear()
 		{
-			for (unsigned l=0;l<m_matrixSize;++l)
+			for (unsigned l=0; l<m_matrixSize; ++l)
 				memset(m_values[l],0,sizeof(Scalar)*m_matrixSize);
 
 			if (eigenValues)
@@ -322,85 +324,123 @@ namespace CCLib
 		//! Returns inverse (Gauss)
 		MatrixTpl inv() const
 		{
-			unsigned i,j,k;
-			Scalar tmpVal;
-
 			//we create the n by 2n matrix, composed of this matrix and the identity
-			Scalar** tempM = new Scalar*[m_matrixSize];
-			for (i=0;i<m_matrixSize;i++)
-				tempM[i] = new Scalar[2*m_matrixSize];
-
-			for (i=0;i<m_matrixSize;i++)
-				for (j=0;j<m_matrixSize;j++)
+			Scalar** tempM = 0;
+			{
+				tempM = new Scalar*[m_matrixSize];
+				if (!tempM)
 				{
-					tempM[i][j] = m_values[i][j];
-					if (i == j)
-						tempM[i][j+m_matrixSize] = 1.0;
-					else
-						tempM[i][j+m_matrixSize] = 0.0;
+					//not enough memory
+					return MatrixTpl();
 				}
-
-				//Gauss pivot
-				for (i=0;i<m_matrixSize;i++)
+				for (unsigned i=0; i<m_matrixSize; i++)
 				{
-					//we look for pivot (first non zero element)
-					j = i;
+					tempM[i] = new Scalar[2*m_matrixSize];
+					if (!tempM[i])
+					{
+						//not enough memory
+						for (unsigned j=0; j<i; j++)
+							delete[] tempM[j];
+						delete[] tempM;
+						return MatrixTpl();
+					}
+				}
+			}
+
+			//identity
+			{
+				for (unsigned i=0; i<m_matrixSize; i++)
+				{
+					for (unsigned j=0; j<m_matrixSize; j++)
+					{
+						tempM[i][j] = m_values[i][j];
+						if (i == j)
+							tempM[i][j+m_matrixSize] = 1;
+						else
+							tempM[i][j+m_matrixSize] = 0;
+					}
+				}
+			}
+
+			//Gauss pivot
+			{
+				for (unsigned i=0; i<m_matrixSize; i++)
+				{
+					//we look for the pivot value (first non zero element)
+					unsigned j = i;
 
 					while (tempM[j][i] == 0)
 					{
 						if (++j >= m_matrixSize)
 						{
 							//non inversible matrix!
+							for (unsigned j=0; j<m_matrixSize; j++)
+								delete[] tempM[j];
+							delete[] tempM;
 							return MatrixTpl();
 						}
 					}
 
-					//swap the 2 lines if they are different
+					//swap the 2 rows if they are different
 					//(we only start by the ith element (as all the others are zero!)
 					if (i != j)
-						for (k=i; k<2*m_matrixSize; k++)
+						for (unsigned k=i; k<2*m_matrixSize; k++)
 							std::swap(tempM[i][k],tempM[j][k]);
 
 					//we scale the matrix to make the pivot equal to 1
 					if (tempM[i][i] != 1.0)
 					{
-						tmpVal = tempM[i][i];
-						for (j=i; j<2*m_matrixSize; j++)
+						const Scalar& tmpVal = tempM[i][i];
+						for (unsigned j=i; j<2*m_matrixSize; j++)
 							tempM[i][j] /= tmpVal;
 					}
 
 					//after the pivot value, all elements are set to zero
-					for (j=i+1;j<m_matrixSize;j++)
-						if (tempM[j][i] != 0.0)
+					for (unsigned j=i+1; j<m_matrixSize; j++)
+					{
+						if (tempM[j][i] != 0)
 						{
-							tmpVal = tempM[j][i];
-							for (k=i;k<2*m_matrixSize;k++)
+							const Scalar& tmpVal = tempM[j][i];
+							for (unsigned k=i; k<2*m_matrixSize; k++)
 								tempM[j][k] -= tempM[i][k]*tmpVal;
 						}
+					}
 				}
-
-				//reduction
-				for (i=m_matrixSize-1;i>0;i--)
-					for (j=0;j<i;j++)
-						if (tempM[j][i] != 0.0)
+			}
+		
+			//reduction
+			{
+				for (unsigned i = m_matrixSize-1; i>0; i--)
+				{
+					for (unsigned j=0; j<i; j++)
+					{
+						if (tempM[j][i] != 0)
 						{
-							tmpVal = tempM[j][i];
-							for (k=i;k<2*m_matrixSize;k++)
+							const Scalar& tmpVal = tempM[j][i];
+							for (unsigned k=i; k<2*m_matrixSize; k++)
 								tempM[j][k] -= tempM[i][k] * tmpVal;
 						}
+					}
+				}
+			}
 
-						//result: second part or tempM
-						MatrixTpl result(m_matrixSize);
-						for (i=0;i<m_matrixSize;i++)
-							for (j=0;j<m_matrixSize;j++)
-								result.m_values[i][j]=tempM[i][j+m_matrixSize];
+			//result: second part or tempM
+			MatrixTpl result(m_matrixSize);
+			{
+				for (unsigned i=0; i<m_matrixSize; i++)
+					for (unsigned j=0; j<m_matrixSize; j++)
+						result.m_values[i][j] = tempM[i][j+m_matrixSize];
+			}
 
-						//we release temp matrix from memory
-						for (i=0;i<m_matrixSize;i++)
-							delete[] tempM[i];
-						delete[] tempM;
+			//we release temp matrix from memory
+			{
+				for (unsigned i=0; i<m_matrixSize; i++)
+					delete[] tempM[i];
+				delete[] tempM;
+				tempM = 0;
+			}
 
-						return result;
+			return result;
 		}
 
 		//! Prints out matrix to console or file
@@ -408,13 +448,16 @@ namespace CCLib
 		**/
 		void print(FILE* fp = 0) const
 		{
-			for (unsigned l=0;l<m_matrixSize;l++)
+			for (unsigned l=0; l<m_matrixSize; l++)
 			{
-				for (unsigned c=0;c<m_matrixSize;c++)
+				for (unsigned c=0; c<m_matrixSize; c++)
+				{
 					if (fp)
-						fprintf(fp,"%6.4f ",m_values[l][c]);
+						fprintf(fp,"%6.6f ",m_values[l][c]);
 					else
-						printf("%6.4f ",m_values[l][c]);
+						printf("%6.6f ",m_values[l][c]);
+				}
+
 				if (fp)
 					fprintf(fp,"\n");
 				else
@@ -427,15 +470,15 @@ namespace CCLib
 		{
 			clear();
 
-			for (unsigned l=0;l<m_matrixSize;l++)
-				m_values[l][l]=1.0;
+			for (unsigned l=0; l<m_matrixSize; l++)
+				m_values[l][l] = 1;
 		}
 
 		//! Scales matrix (all elements are multiplied by the same coef.)
 		void scale(Scalar coef)
 		{
-			for (unsigned l=0;l<m_matrixSize;l++)
-				for (unsigned c=0;c<m_matrixSize;c++)
+			for (unsigned l=0; l<m_matrixSize; l++)
+				for (unsigned c=0; c<m_matrixSize; c++)
 					m_values[l][c] *= coef;
 		}
 
@@ -444,7 +487,7 @@ namespace CCLib
 		{
 			Scalar trace = 0;
 
-			for (unsigned l=0;l<m_matrixSize;l++)
+			for (unsigned l=0; l<m_matrixSize; l++)
 				trace += m_values[l][l];
 
 			return trace;
@@ -463,10 +506,10 @@ namespace CCLib
 		**/
 		void initFromQuaternion(const float q[])
 		{
-			double qd[4]={  (double)q[0],
-							(double)q[1],
-							(double)q[2],
-							(double)q[3]};
+			double qd[4] = {static_cast<double>(q[0]),
+							static_cast<double>(q[1]),
+							static_cast<double>(q[2]),
+							static_cast<double>(q[3]) };
 
 			initFromQuaternion(qd);
 		}
@@ -479,9 +522,10 @@ namespace CCLib
 		**/
 		void initFromQuaternion(const double q[])
 		{
-			if (m_matrixSize==0)
-				init(3);
-			assert(m_matrixSize==3);
+			if (m_matrixSize == 0)
+				if (!init(3))
+					return;
+			assert(m_matrixSize == 3);
 
 			double q00 = q[0]*q[0];
 			double q11 = q[1]*q[1];
@@ -494,15 +538,15 @@ namespace CCLib
 			double q12 = q[1]*q[2];
 			double q01 = q[0]*q[1];
 
-			m_values[0][0] = (Scalar)(q00 + q11 - q22 - q33);
-			m_values[1][1] = (Scalar)(q00 - q11 + q22 - q33);
-			m_values[2][2] = (Scalar)(q00 - q11 - q22 + q33);
-			m_values[0][1] = (Scalar)(2.0*(q12-q03));
-			m_values[1][0] = (Scalar)(2.0*(q12+q03));
-			m_values[0][2] = (Scalar)(2.0*(q13+q02));
-			m_values[2][0] = (Scalar)(2.0*(q13-q02));
-			m_values[1][2] = (Scalar)(2.0*(q23-q01));
-			m_values[2][1] = (Scalar)(2.0*(q23+q01));
+			m_values[0][0] = static_cast<Scalar>(q00 + q11 - q22 - q33);
+			m_values[1][1] = static_cast<Scalar>(q00 - q11 + q22 - q33);
+			m_values[2][2] = static_cast<Scalar>(q00 - q11 - q22 + q33);
+			m_values[0][1] = static_cast<Scalar>(2.0*(q12-q03));
+			m_values[1][0] = static_cast<Scalar>(2.0*(q12+q03));
+			m_values[0][2] = static_cast<Scalar>(2.0*(q13+q02));
+			m_values[2][0] = static_cast<Scalar>(2.0*(q13-q02));
+			m_values[1][2] = static_cast<Scalar>(2.0*(q23-q01));
+			m_values[2][1] = static_cast<Scalar>(2.0*(q23+q01));
 		}
 
 		//! Converts rotation matrix to quaternion
@@ -511,13 +555,16 @@ namespace CCLib
 		**/
 		bool toQuaternion(double q[/*4*/])
 		{
-			if (m_matrixSize!=3)
+			if (m_matrixSize != 3)
 				return false;
 
-			double w,x,y,z;		//quaternion
-
-			double dTrace = (double)m_values[0][0] + (double)m_values[1][1] + (double)m_values[2][2] + 1.0;
-			if(dTrace > 1.0e-6)
+			double dTrace =		static_cast<double>(m_values[0][0])
+							+	static_cast<double>(m_values[1][1])
+							+	static_cast<double>(m_values[2][2])
+							+	1.0;
+			
+			double w,x,y,z;	//quaternion
+			if (dTrace > 1.0e-6)
 			{
 				double S = 2.0 * sqrt(dTrace);
 				x = (m_values[2][1] - m_values[1][2]) / S;
@@ -525,7 +572,7 @@ namespace CCLib
 				z = (m_values[1][0] - m_values[0][1]) / S;
 				w = 0.25 * S;	
 			}
-			else if((m_values[0][0] > m_values[1][1]) && (m_values[0][0] > m_values[2][2]))
+			else if (m_values[0][0] > m_values[1][1] && m_values[0][0] > m_values[2][2])
 			{
 				double S = sqrt(1.0 + m_values[0][0] - m_values[1][1] - m_values[2][2]) * 2.0;
 				x = 0.25 * S;
@@ -533,7 +580,7 @@ namespace CCLib
 				z = (m_values[0][2] + m_values[2][0]) / S;
 				w = (m_values[2][1] - m_values[1][2]) / S;
 			}
-			else if(m_values[1][1] > m_values[2][2])
+			else if (m_values[1][1] > m_values[2][2])
 			{
 				double S = sqrt(1.0 + m_values[1][1] - m_values[0][0] - m_values[2][2]) * 2.0;
 				x = (m_values[1][0] + m_values[0][1]) / S;
@@ -552,7 +599,7 @@ namespace CCLib
 
 			// normalize the quaternion if the matrix is not a clean rigid body matrix or if it has scaler information.
 			double len = sqrt( w*w + x*x + y*y + z*z);
-			if (len != 0.)
+			if (len != 0)
 			{	
 				q[0] = w/len;
 				q[1] = x/len;
@@ -570,20 +617,19 @@ namespace CCLib
 		{
 			MatrixTpl mat(m_matrixSize);
 
-			unsigned i,j;
-			for (i=0;i<m_matrixSize;i++)
+			for (unsigned i=0; i<m_matrixSize; i++)
 			{
-				if (column==i)
+				if (column == i)
 				{
-					for (j=0;j<m_matrixSize;j++)
+					for (unsigned j=0; j<m_matrixSize; j++)
 					{
-						mat.m_values[j][i] = (Scalar)(*Vec);
+						mat.m_values[j][i] = static_cast<Scalar>(*Vec);
 						Vec++;
 					}
 				}
 				else
 				{
-					for (j=0;j<m_matrixSize;j++)
+					for (unsigned j=0; j<m_matrixSize; j++)
 						mat.m_values[j][i] = m_values[j][i];
 				}
 			}
@@ -599,121 +645,142 @@ namespace CCLib
 			if (!isValid())
 				return MatrixTpl();
 
-			int j,iq,ip,i,nrot;
-			Scalar tresh,theta,tau,t,sm,s,h,g,c,*b,*z,*d;
-
 			MatrixTpl eigenVectors(m_matrixSize);
 			eigenVectors.toIdentity();
-			eigenVectors.enableEigenValues();
-
-			b = new Scalar[m_matrixSize];
-			z = new Scalar[m_matrixSize];
-			d = eigenVectors.eigenValues;
-
-			for (ip=0;ip<(int)m_matrixSize;ip++)
+			if (!eigenVectors.enableEigenValues())
 			{
-				b[ip]=d[ip]=m_values[ip][ip]; //Initialize b and d to the diagonal of a.
-				z[ip]=0.0; //This vector will accumulate terms of the form tapq as in equation (11.1.14)
+				//not enough memory
+				return MatrixTpl();
+			}
+			Scalar* d = eigenVectors.eigenValues;
+			
+			std::vector<Scalar> b,z;
+			try
+			{
+				b.resize(m_matrixSize);
+				z.resize(m_matrixSize);
+			}
+			catch(std::bad_alloc)
+			{
+				//not enough memory
+				return MatrixTpl();
 			}
 
-			nrot=0;
-			for (i=1;i<=50;i++)
+			//init
 			{
-				sm=0.0;
-				for (ip=0;ip<(int)m_matrixSize-1;ip++) //Sum off-diagonal elements.
+				for (unsigned ip=0; ip<m_matrixSize; ip++)
 				{
-					for (iq=ip+1;iq<(int)m_matrixSize;iq++)
-						sm += fabs(m_values[ip][iq]);
+					b[ip] = d[ip] = m_values[ip][ip]; //Initialize b and d to the diagonal of a.
+					z[ip] = 0; //This vector will accumulate terms of the form tapq as in equation (11.1.14)
+				}
+			}
+
+			//int j,iq,ip;
+			//Scalar tresh,theta,tau,t,sm,s,h,g,c,;
+
+			//TODO: '50' should be a parameter instead!
+			static const unsigned c_maxIterationCount = 50;
+			for (unsigned i=1; i<=c_maxIterationCount; i++)
+			{
+				//Sum off-diagonal elements
+				Scalar sm = 0;
+				{
+					for (unsigned ip=0; ip<m_matrixSize-1; ip++)
+					{
+						for (unsigned iq = ip+1; iq<m_matrixSize; iq++)
+							sm += fabs(m_values[ip][iq]);
+					}
 				}
 
-				if (sm == 0.0) //The normal return, which relies on quadratic convergence to machine underflow.
+				if (sm == 0) //The normal return, which relies on quadratic convergence to machine underflow.
 				{
-					delete[] z;
-					delete[] b;
-
 					//we only need the absolute values of eigenvalues
-					for (ip=0;ip<(int)m_matrixSize;ip++)
-						d[ip]=fabs(d[ip]);
+					for (unsigned ip=0; ip<m_matrixSize; ip++)
+						d[ip] = fabs(d[ip]);
 
 					return eigenVectors;
 				}
 
+				Scalar tresh = 0;
 				if (i < 4)
-					tresh=(Scalar)0.2 * sm/(Scalar)matrixSquareSize; //...on the first three sweeps.
-				else
-					tresh=(Scalar)0.0; //...thereafter.
+					tresh = sm / static_cast<Scalar>(5*matrixSquareSize); //...on the first three sweeps.
 
-				for (ip=0;ip<(int)m_matrixSize-1;ip++)
+				for (unsigned ip=0; ip<m_matrixSize-1; ip++)
 				{
-					for (iq=ip+1;iq<(int)m_matrixSize;iq++)
+					for (unsigned iq=ip+1; iq<m_matrixSize; iq++)
 					{
-						g=(Scalar)100.0 * fabs(m_values[ip][iq]);
+						Scalar g = fabs(m_values[ip][iq]) * 100;
 						//After four sweeps, skip the rotation if the off-diagonal element is small.
-						if (i > 4 && (float)(fabs(d[ip])+g) == (float)fabs(d[ip])
-							&& (float)(fabs(d[iq])+g) == (float)fabs(d[iq]))
+						if (	i > 4
+							&&	static_cast<float>(fabs(d[ip])+g) == static_cast<float>(fabs(d[ip]))
+							&&	static_cast<float>(fabs(d[iq])+g) == static_cast<float>(fabs(d[iq])) )
 						{
-							m_values[ip][iq]=0.0;
+							m_values[ip][iq] = 0;
 						}
 						else if (fabs(m_values[ip][iq]) > tresh)
 						{
-							h=d[iq]-d[ip];
-							if ((float)(fabs(h)+g) == (float)fabs(h))
+							Scalar h = d[iq]-d[ip];
+							Scalar t = 0;
+							if (static_cast<float>(fabs(h)+g) == static_cast<float>(fabs(h)))
+							{
 								t = m_values[ip][iq]/h; //t = 1/(2¦theta)
+							}
 							else
 							{
-								theta=(Scalar)0.5 * h/m_values[ip][iq]; //Equation (11.1.10).
-								t=(Scalar)1.0/(fabs(theta)+sqrt((Scalar)1.0+theta*theta));
-								if (theta < 0.0)
+								Scalar theta = h/(2*m_values[ip][iq]); //Equation (11.1.10).
+								t = 1/(fabs(theta)+sqrt(1+theta*theta));
+								if (theta < 0)
 									t = -t;
 							}
 
-							c=(Scalar)1.0/sqrt((Scalar)1.0+t*t);
-							s=t*c;
-							tau=s/((Scalar)1.0+c);
-							h=t*m_values[ip][iq];
+							Scalar c = 1/sqrt(t*t+1);
+							Scalar s = t*c;
+							Scalar tau = s/(1+c);
+							h = t * m_values[ip][iq];
 							z[ip] -= h;
 							z[iq] += h;
 							d[ip] -= h;
 							d[iq] += h;
-							m_values[ip][iq]=0.0;
+							m_values[ip][iq] = 0;
 
-							for (j=0;j<=ip-1;j++) //Case of rotations 1 <= j < p.
+							//Case of rotations 1 <= j < p
 							{
-								ROTATE(m_values,j,ip,j,iq)
+								for (unsigned j=0; j+1<=ip; j++)
+									ROTATE(m_values,j,ip,j,iq)
 							}
-							for (j=ip+1;j<=iq-1;j++) //Case of rotations p < j < q.
+							//Case of rotations p < j < q
 							{
-								ROTATE(m_values,ip,j,j,iq)
+								for (unsigned j=ip+1; j+1<=iq; j++)
+									ROTATE(m_values,ip,j,j,iq)
 							}
-							for (j=iq+1;j<(int)m_matrixSize;j++) //Case of rotations q < j <= n.
+							//Case of rotations q < j <= n
 							{
-								ROTATE(m_values,ip,j,iq,j)
+								for (unsigned j=iq+1; j<m_matrixSize; j++)
+									ROTATE(m_values,ip,j,iq,j)
 							}
-							for (j=0;j<(int)m_matrixSize;j++)
+							//Last case
 							{
-								ROTATE(eigenVectors.m_values,j,ip,j,iq)
+								for (unsigned j=0; j<m_matrixSize; j++)
+									ROTATE(eigenVectors.m_values,j,ip,j,iq)
 							}
-
-							++nrot;
 						}
 
 					}
 
 				}
 
-				for (ip=0;ip<(int)m_matrixSize;ip++)
+				//update b, d and z
 				{
-					b[ip]+=z[ip];
-					d[ip]=b[ip]; //Update d with the sum of tapq,
-					z[ip]=0.0; //and reinitialize z.
+					for (unsigned ip=0; ip<m_matrixSize; ip++)
+					{
+						b[ip] += z[ip];
+						d[ip] = b[ip];
+						z[ip] = 0;
+					}
 				}
-
 			}
 
-			delete[] b;
-			delete[] z;
-
-			//Too many iterations in routine jacobi!
+			//Too many iterations!
 			return MatrixTpl();
 		}
 
@@ -723,20 +790,18 @@ namespace CCLib
 			assert(m_matrixSize == 3 || m_matrixSize == 4);
 			memset(M16f,0,sizeof(float)*16);
 
-			unsigned char l,c;
-
-			for (l=0;l<3;l++)
-				for (c=0;c<3;c++)
-					M16f[l+c*4] = (float)m_values[l][c];
+			for (unsigned l=0; l<3; l++)
+				for (unsigned c=0; c<3; c++)
+					M16f[l+c*4] = static_cast<float>(m_values[l][c]);
 
 			if (m_matrixSize == 4)
-				for (l=0;l<3;l++)
+				for (unsigned l=0; l<3; l++)
 				{
-					M16f[12+l] = (float)m_values[3][l];
-					M16f[3+l*4] = (float)m_values[l][3];
+					M16f[12+l] = static_cast<float>(m_values[3][l]);
+					M16f[3+l*4] = static_cast<float>(m_values[l][3]);
 				}
 
-			M16f[15]=1.0f;
+			M16f[15] = 1.0f;
 		}
 
 		//! Converts a 3*3 or 4*4 matrix to an OpenGL-style double matrix (double[16])
@@ -745,41 +810,40 @@ namespace CCLib
 			assert(m_matrixSize == 3 || m_matrixSize == 4);
 			memset(M16d,0,sizeof(double)*16);
 
-			unsigned char l,c;
-
-			for (l=0;l<3;l++)
-				for (c=0;c<3;c++)
-					M16d[l+c*4] = (double)m_values[l][c];
+			for (unsigned l=0; l<3; l++)
+				for (unsigned c=0; c<3; c++)
+					M16d[l+c*4] = static_cast<double>(m_values[l][c]);
 
 			if (m_matrixSize == 4)
-				for (l=0;l<3;l++)
+			{
+				for (unsigned l=0; l<3; l++)
 				{
-					M16d[12+l] = (double)m_values[3][l];
-					M16d[3+l*4] = (double)m_values[l][3];
+					M16d[12+l] = static_cast<double>(m_values[3][l]);
+					M16d[3+l*4] = static_cast<double>(m_values[l][3]);
 				}
+			}
 
-			M16d[15]=1.0;
+			M16d[15] = 1.0;
 		}
 
 		//! Sorts the eigenvectors in the decreasing order of their associated eigenvalues
 		void sortEigenValuesAndVectors()
 		{
-			if (!eigenValues)
+			if (!eigenValues || m_matrixSize < 2)
 				return;
 
-			unsigned k,j,i;
-			for (i=0;i<m_matrixSize-1;i++)
+			for (unsigned i=0; i<m_matrixSize-1; i++)
 			{
-				k=i;
-				for (j=i+1;j<m_matrixSize;j++)
-					if (eigenValues[j] > eigenValues[k])
-						k=j;
+				unsigned maxValIndex = i;
+				for (unsigned j=i+1; j<m_matrixSize; j++)
+					if (eigenValues[j] > eigenValues[maxValIndex])
+						maxValIndex = j;
 
-				if (k!=i)
+				if (maxValIndex != i)
 				{
-					std::swap(eigenValues[i],eigenValues[k]);
-					for (j=0;j<m_matrixSize;j++)
-						std::swap(m_values[j][i],m_values[j][k]);
+					std::swap(eigenValues[i],eigenValues[maxValIndex]);
+					for (unsigned j=0; j<m_matrixSize; j++)
+						std::swap(m_values[j][i],m_values[j][maxValIndex]);
 				}
 			}
 		}
@@ -787,40 +851,40 @@ namespace CCLib
 
 		//! Returns the biggest eigenvalue and ist associated eigenvector
 		/** \param maxEigenVector output vector to store max eigen vector
-		\return max eigen value
+			\return max eigen value
 		**/
 		Scalar getMaxEigenValueAndVector(Scalar maxEigenVector[]) const
 		{
 			assert(eigenValues);
 
-			unsigned i,maxIndex=0;
-			for (i=1;i<m_matrixSize;++i)
-				if (eigenValues[i]>eigenValues[maxIndex])
-					maxIndex=i;
+			unsigned maxIndex = 0;
+			for (unsigned i=1; i<m_matrixSize; ++i)
+				if (eigenValues[i] > eigenValues[maxIndex])
+					maxIndex = i;
 
 			return getEigenValueAndVector(maxIndex,maxEigenVector);
 		}
 
 		//! Returns the smallest eigenvalue and ist associated eigenvector
 		/** \param minEigenVector output vector to store min eigen vector
-		\return min eigen value
+			\return min eigen value
 		**/
 		Scalar getMinEigenValueAndVector(Scalar minEigenVector[]) const
 		{
 			assert(eigenValues);
 
-			unsigned i,minIndex=0;
-			for (i=1;i<m_matrixSize;++i)
-				if (eigenValues[i]<eigenValues[minIndex])
-					minIndex=i;
+			unsigned minIndex = 0;
+			for (unsigned i=1; i<m_matrixSize; ++i)
+				if (eigenValues[i] < eigenValues[minIndex])
+					minIndex = i;
 
 			return getEigenValueAndVector(minIndex,minEigenVector);
 		}
 
 		//! Returns the given eigenvalue and ist associated eigenvector
 		/** \param index eigen requested value/vector index (< matrix size)
-		\param eigenVector vector (size = matrix size) for output (or 0 if eigen vector is not requested)
-		\return requested eigen value
+			\param eigenVector vector (size = matrix size) for output (or 0 if eigen vector is not requested)
+			\return requested eigen value
 		**/
 		Scalar getEigenValueAndVector(unsigned index, Scalar* eigenVector = 0) const
 		{
@@ -828,8 +892,8 @@ namespace CCLib
 			assert(index < m_matrixSize);
 
 			if (eigenVector)
-				for (unsigned i=0;i<m_matrixSize;++i)
-					eigenVector[i]=m_values[i][index];
+				for (unsigned i=0; i<m_matrixSize; ++i)
+					eigenVector[i] = m_values[i][index];
 
 			return eigenValues[index];
 		}
@@ -837,64 +901,91 @@ namespace CCLib
 	protected:
 
 		//! Internal initialization
-		void init(unsigned size)
+		/** \return initilization success
+		**/
+		bool init(unsigned size)
 		{
 			m_matrixSize = size;
 			matrixSquareSize = m_matrixSize*m_matrixSize;
 
 			m_values = 0;
-			eigenValues=0; //no eigeinvalues associated by default
+			eigenValues = 0; //no eigeinvalues associated by default
 
-			if (size>0)
+			if (size != 0)
 			{
 				m_values = new Scalar*[m_matrixSize];
-				for (unsigned i=0;i<m_matrixSize;i++)
+				if (m_values)
 				{
-					m_values[i] = new Scalar[m_matrixSize];
-					memset(m_values[i],0,sizeof(Scalar)*m_matrixSize);
+					memset(m_values, 0, sizeof(Scalar*) * m_matrixSize);
+					for (unsigned i=0; i<m_matrixSize; i++)
+					{
+						m_values[i] = new Scalar[m_matrixSize];
+						if (m_values[i])
+						{
+							memset(m_values[i],0,sizeof(Scalar)*m_matrixSize);
+						}
+						else
+						{
+							//not enough memory!
+							invalidate();
+							return false;
+						}
+					}
+				}
+				else
+				{
+					//not enough memory!
+					return false;
 				}
 			}
+
+			return true;
 		}
 
 		//! Instantiates an array to store eigen values
 		/** Warning: sets this array to zero, even if it was already instantiated!
 		**/
-		void enableEigenValues()
+		bool enableEigenValues()
 		{
-			if (!eigenValues && m_matrixSize>0)
+			if (!eigenValues && m_matrixSize != 0)
 				eigenValues = new Scalar[m_matrixSize];
+
+			return (eigenValues != 0);
 		}
 
 		//! Computes sub-matrix determinant
 		double computeSubDet(Scalar** mat, unsigned matSize) const
 		{
-			double subDet = 0;
-
 			if (matSize == 2)
 			{
-				return (double)(mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0]);
+				return static_cast<double>(mat[0][0] * mat[1][1] - mat[0][1] * mat[1][0]);
 			}
-			else
+
+			Scalar** subMat = new Scalar*[matSize-1];
+			if (subMat)
 			{
-				unsigned i,k,line;
-				Scalar** subMat = new Scalar*[matSize-1];
+				double subDet = 0;
 				double sign = 1.0;
 
-				for (line=0;line<matSize;line++)
+				for (unsigned row=0; row<matSize; row++)
 				{
-					k=0;
-					for (i=0;i<matSize;i++)
-						if (i!=line)
+					unsigned k = 0;
+					for (unsigned i=0; i<matSize; i++)
+						if (i != row)
 							subMat[k++] = mat[i]+1;
 
-					subDet += (double)mat[line][0] * computeSubDet(subMat,matSize-1) * sign;
+					subDet += static_cast<double>(mat[row][0]) * computeSubDet(subMat,matSize-1) * sign;
 					sign = -sign;
 				}
 
 				delete[] subMat;
+				return subDet;
 			}
-
-			return subDet;
+			else
+			{
+				//not enough memory
+				return 0.0;
+			}
 		}
 
 		//! Matrix size

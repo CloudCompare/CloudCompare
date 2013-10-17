@@ -350,10 +350,6 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 	{
 		dw->sectionEntities();
 
-		//min corner of drawing area
-		const double& x0 = pageMargin;
-		const double& y0 = pageMargin;
-
 		//write polylines
 		for (unsigned i=0; i<polyCount; ++i)
 		{

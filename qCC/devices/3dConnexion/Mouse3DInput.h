@@ -152,7 +152,7 @@ protected:
 	{
 	public:
 		
-		InputData() : axes(6) {}
+		InputData() : timeToLive(0), isDirty(false), axes(6) {}
 
 		bool isZero() const { return (0.0f == axes[0] &&
 										0.0f == axes[1] &&

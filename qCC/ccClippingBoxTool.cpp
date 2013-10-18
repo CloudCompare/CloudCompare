@@ -468,7 +468,7 @@ void ccClippingBoxTool::exportMultCloud()
 								if (generateRandomColors && cloud->isA(CC_POINT_CLOUD))
 								{
 									colorType col[3];
-									ccColor::Random(col);
+									ccColor::Generator::Random(col);
 									if (!static_cast<ccPointCloud*>(sliceCloud)->setRGBColor(col))
 									{
 										ccLog::Error("Not enough memory!");
@@ -583,7 +583,7 @@ void ccClippingBoxTool::exportMultCloud()
 		//					if (generateRandomColors && cloud->isA(CC_POINT_CLOUD))
 		//					{
 		//						colorType col[3];
-		//						ccColor::Random(col);
+		//						ccColor::Generator::Random(col);
 		//						static_cast<ccPointCloud*>(sliceCloud)->setRGBColor(col);
 		//						sliceCloud->showColors(true);
 		//					}

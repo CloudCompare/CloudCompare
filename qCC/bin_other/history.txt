@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.5.1 ??/??/2013
+v2.5.1 10/19/2013
 - The 'Clipping-box' tool has a new feature: 'contour' extraction
 	* Contour extraction on the current slice
 	* Contour extraction on multiple slices (with the 'repeat' button)

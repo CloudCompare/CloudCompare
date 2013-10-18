@@ -67,20 +67,26 @@ namespace ccColor
     static const colorType defaultHistBkgColor[3]	=   {51,0,51};
     static const colorType defaultLabelColor[3]		=   {255,255,0};
 
-	//! Generates a random color
-	static void Random(colorType col[/*3*/], bool lightOnly = true)
+	//! Colors generator
+	class Generator
 	{
-		col[0] = static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
-		col[1] = static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
-		if (lightOnly)
+	public:
+		
+		//! Generates a random color
+		static void Random(colorType col[/*3*/], bool lightOnly = true)
 		{
-			col[2] = MAX_COLOR_COMP - static_cast<colorType>((static_cast<unsigned>(col[1])+static_cast<unsigned>(col[2]))/2);
+			col[0] = static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+			col[1] = static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+			if (lightOnly)
+			{
+				col[2] = MAX_COLOR_COMP - static_cast<colorType>((static_cast<unsigned>(col[1])+static_cast<unsigned>(col[2]))/2);
+			}
+			else
+			{
+				col[2] = static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
+			}
 		}
-		else
-		{
-			col[2] = static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * static_cast<float>(rand()) / static_cast<float>(RAND_MAX));
-		}
-	}
+	};
 };
 
 #endif //CC_BASIC_TYPES_HEADER

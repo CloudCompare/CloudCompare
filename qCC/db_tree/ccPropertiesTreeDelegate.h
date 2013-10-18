@@ -149,6 +149,7 @@ protected:
     void fillWithGBLSensor(ccGBLSensor*);
 	void fillWithMaterialSet(ccMaterialSet*);
 	void fillWithShareable(CCShareable*);
+	void fillWithMetaData(ccObject*);
 	template<int N, class ElementType> void fillWithChunkedArray(ccChunkedArray<N,ElementType>*);
 
 	//! Updates the current model (assuming object is the same)

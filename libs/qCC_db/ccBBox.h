@@ -86,6 +86,10 @@ public:
     CCVector3 getDiagVec() const;
     //! Returns diagonal length
     PointCoordinateType getDiagNorm() const;
+	//! Returns minimal box dimension
+	PointCoordinateType getMinBoxDim() const;
+	//! Returns maximal box dimension
+	PointCoordinateType getMaxBoxDim() const;
 
     //! Draws bounding box (OpenGL)
     /** \param col (R,G,B) color

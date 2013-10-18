@@ -215,6 +215,8 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
     {
         fillWithChunkedArray(static_cast<ColorsTableType*>(m_currentObject));
     }
+
+	fillWithMetaData(m_currentObject);
 	
 	//go back to original position
 	if (scrollPos>0)
@@ -290,6 +292,37 @@ QStandardItem* CHECKABLE_ITEM(bool checkState, ccPropertiesTreeDelegate::CC_PROP
 QStandardItem* PERSISTENT_EDITOR(ccPropertiesTreeDelegate::CC_PROPERTY_ROLE role)
 {
 	return ITEM(QString(),Qt::ItemIsEditable,role);
+}
+
+void ccPropertiesTreeDelegate::fillWithMetaData(ccObject* _obj)
+{
+	assert(_obj && m_model);
+
+	const QVariantMap& metaData = _obj->metaData();
+	if (metaData.size() == 0)
+		return;
+
+	addSeparator("Meta data");
+
+	for (QVariantMap::ConstIterator it = metaData.constBegin(); it != metaData.constEnd(); ++it)
+	{
+		QString value;
+		if (it.value().canConvert(QVariant::String))
+		{
+			QVariant var = it.value();
+			var.convert(QVariant::String);
+			value = var.toString();
+		}
+		else
+		{
+			value = QString(QVariant::typeToName(it.value().type()));
+		}
+		//switch (var.type())
+		//{
+		//	QVariant::Bool
+		//}
+		appendRow( ITEM(it.key()), ITEM(value) );
+	}
 }
 
 void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)

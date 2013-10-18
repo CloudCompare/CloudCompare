@@ -538,33 +538,34 @@ void ccHObject::removeChild(const ccHObject* anObject, bool preventAutoDelete/*=
 	assert(anObject);
 
 	int pos = getChildIndex(anObject);
-
-	if (pos>=0)
+	if (pos >= 0)
 		removeChild(pos,preventAutoDelete);
 }
 
 void ccHObject::removeChild(int pos, bool preventAutoDelete/*=false*/)
 {
-	assert(pos>=0 && unsigned(pos)<m_children.size());
+	assert(pos>=0 && static_cast<size_t>(pos)<m_children.size());
 
 	ccHObject* child = m_children[pos];
-	if (child->getFlagState(CC_FATHER_DEPENDENT) && !preventAutoDelete)
+	if (child->getParent() == this)
 	{
-		//delete object
-		if (child->isShareable())
-			dynamic_cast<CCShareable*>(child)->release();
+		if (child->getFlagState(CC_FATHER_DEPENDENT) && !preventAutoDelete)
+		{
+			//delete object
+			if (child->isShareable())
+				dynamic_cast<CCShareable*>(child)->release();
+			else
+				delete child;
+		}
 		else
-			delete child;
-	}
-	else
-	{
-		//detach object
-		if (child->getParent() == this)
+		{
+			//detach object
 			child->setParent(0);
+		}
 	}
 
 	//version "swap"
-	/*m_children[pos]=m_children.back();
+	/*m_children[pos] = m_children.back();
 	m_children.pop_back();
 	//*/
 
@@ -578,7 +579,7 @@ void ccHObject::removeAllChildren()
 	{
 		ccHObject* child = m_children.back();
 		m_children.pop_back();
-		if (child->getParent()==this && child->getFlagState(CC_FATHER_DEPENDENT))
+		if (child->getParent() == this && child->getFlagState(CC_FATHER_DEPENDENT))
 		{
 			if (child->isShareable())
 				dynamic_cast<CCShareable*>(child)->release();

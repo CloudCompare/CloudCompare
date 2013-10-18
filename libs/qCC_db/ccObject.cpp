@@ -213,7 +213,6 @@ void ccObject::setMetaData(QString key, QVariant& data)
 	m_metaData.insert(key,data);
 }
 
-
 bool ccObject::fromFile(QFile& in, short dataVersion)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));

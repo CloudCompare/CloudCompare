@@ -218,6 +218,9 @@ public:
 	**/
 	void setMetaData(QString key, QVariant& data);
 
+	//! Returns meta-data map (const only)
+	const QVariantMap& metaData() const { return m_metaData; }
+
 protected:
 
 	//inherited from ccSerializableObject

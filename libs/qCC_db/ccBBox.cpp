@@ -61,6 +61,20 @@ PointCoordinateType ccBBox::getDiagNorm() const
 	return getDiagVec().norm();
 }
 
+PointCoordinateType ccBBox::getMinBoxDim() const
+{
+	CCVector3 V = getDiagVec();
+
+	return std::min(V.x,std::min(V.y,V.z));
+}
+
+PointCoordinateType ccBBox::getMaxBoxDim() const
+{
+	CCVector3 V = getDiagVec();
+
+	return std::max(V.x,std::max(V.y,V.z));
+}
+
 void ccBBox::setValidity(bool state)
 {
     valid = state;

@@ -25,7 +25,7 @@ include_directories( ${XIOT_INCLUDE_DIR} )
 project( ccViewer )
 
 set( VERSION_MAJOR 1 )
-set( VERSION_MINOR 26 )
+set( VERSION_MINOR 27 )
 set( VERSION_PATCH 0 )
 
 set( QCC_HEADERS ../qCC/ccGLUtils.h ../qCC/ccGLWindow.h ../qCC/ccGuiParameters.h ../qCC/ccOverlayDialog.h ../qCC/ccRenderingTools.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccShiftAndScaleCloudDlg.h ../qCC/fileIO/*.h ../qCC/ccMouse3DContextMenu.h)
@@ -144,7 +144,7 @@ if( APPLE )
    set_source_files_properties( images/icon/cc_viewer_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
 
    set( MACOSX_BUNDLE_ICON_FILE cc_viewer_icon.icns ) 
-   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}" )
+   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
    set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
    set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 

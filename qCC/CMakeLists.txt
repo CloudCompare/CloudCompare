@@ -4,7 +4,7 @@ project( CloudCompare )
 
 set( VERSION_MAJOR 2 )
 set( VERSION_MINOR 5 )
-set( VERSION_PATCH 0 )
+set( VERSION_PATCH 1 )
 
 if ( UNIX )
 	set( CloudCompare_dest_release bin ) #default destination: /usr/bin
@@ -170,7 +170,7 @@ if( APPLE )
    set_source_files_properties( images/icon/cc_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )   
 
    set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 
-   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}" )
+   set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
    set( MACOSX_BUNDLE_LONG_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
    set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 

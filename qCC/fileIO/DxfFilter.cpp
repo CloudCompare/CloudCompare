@@ -51,7 +51,13 @@ public:
 	{
 		assert(m_root);
 	}
-
+   
+	virtual void addLayer(const DL_LayerData& data)
+	{
+		// store our layer colours
+		m_layerColourMap[data.name.c_str()] = getAttributes().getColor();
+	}
+   
 	virtual void addPoint(const DL_PointData& P)
 	{
 		//create the 'points' point cloud if necessary
@@ -93,6 +99,8 @@ public:
 		//flags
 		m_poly->setClosed(poly.flags & 1);
 		//m_poly->set2DMode(poly.flags & 8); //DGM: "2D" polylines in CC doesn't mean the same thing ;)
+      
+		_setPolylineColour( m_poly );
 	}
 
 	virtual void addVertex(const DL_VertexData& vertex)
@@ -144,6 +152,9 @@ public:
 
 		//flags
 		poly->setClosed(false);
+      
+		_setPolylineColour( poly );
+      
 		m_root->addChild(poly);
 	}
 
@@ -159,6 +170,37 @@ protected:
 	//! Current polyline vertices
 	ccPointCloud* m_polyVertices;
 
+private:
+   
+   //! Keep track of the colour of each layer in case the colour attribute is set to BYLAYER
+   QMap<QString,int> m_layerColourMap;
+   
+   void  _setPolylineColour( ccPolyline *ioPolyline )
+   {
+      const DL_Attributes  attributes = getAttributes();
+      
+      int   colourIndex = attributes.getColor();
+      
+      if ( colourIndex == 0 )
+      {
+         // TODO Colours BYBLOCK not handled
+         return;
+      }
+      else if ( colourIndex == 256 )
+      {
+         // an attribute of 256 means the colours are BYLAYER, so grab it from our map instead
+         colourIndex = m_layerColourMap.value( attributes.getLayer().c_str() );
+      }
+      
+      colorType   ccColour[3];
+      ccColour[0] = static_cast<colorType>( dxfColors[colourIndex][0] * 255 );
+      ccColour[1] = static_cast<colorType>( dxfColors[colourIndex][1] * 255 );
+      ccColour[2] = static_cast<colorType>( dxfColors[colourIndex][2] * 255 );
+      
+      ioPolyline->setColor( ccColour );
+      ioPolyline->showColors( true );
+   }
+   
 };
 #endif
 

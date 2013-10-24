@@ -71,6 +71,8 @@ public:
 
 	//! Flag points with cell index (as a scalar field)
 	bool convertCellIndexToSF();
+	//! Flag points with a random color per leaf
+	bool convertCellIndexToRandomColor();
 
 	//! Fuses cells
 	/** Creates a new scalar fields with the groups indexes.

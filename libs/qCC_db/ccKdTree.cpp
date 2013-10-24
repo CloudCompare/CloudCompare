@@ -211,6 +211,38 @@ bool ccKdTree::convertCellIndexToSF()
 	return true;
 }
 
+bool ccKdTree::convertCellIndexToRandomColor()
+{
+	if (!m_associatedGenericCloud || !m_associatedGenericCloud->isA(CC_POINT_CLOUD))
+		return false;
+
+	//get leaves
+	std::vector<Leaf*> leaves;
+	if (!getLeaves(leaves) || leaves.empty())
+		return false;
+
+	ccPointCloud* pc = static_cast<ccPointCloud*>(m_associatedGenericCloud);
+	if (!pc->resizeTheRGBTable())
+		return false;
+
+	//for each cell
+	for (size_t i=0; i<leaves.size(); ++i)
+	{
+		colorType col[3];
+		ccColor::Generator::Random(col);
+		CCLib::ReferenceCloud* subset = leaves[i]->points;
+		if (subset)
+		{
+			for (unsigned j=0; j<subset->size(); ++j)
+				pc->setPointColor(subset->getPointGlobalIndex(j),col);
+		}
+	}
+
+	pc->showColors(true);
+
+	return true;
+}
+
 //! Recursive visitor for ccKdTree::getCellBBox
 class GetCellBBoxVisitor
 {

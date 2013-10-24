@@ -27,14 +27,24 @@
 #include <algorithm>
 #include <assert.h>
 
+//Qt
+#include <QCoreApplication>
+
 using namespace CCLib;
 
 TrueKdTree::TrueKdTree(GenericIndexedCloudPersist* cloud)
 	: m_root(0)
 	, m_associatedCloud(cloud)
 	, m_maxRMS(0.0)
+	, m_outliersRatio(0)
+	, m_maxPointCountPerCell(0)
 {
-	assert(cloud);
+	assert(m_associatedCloud);
+}
+
+TrueKdTree::~TrueKdTree()
+{
+	clear();
 }
 
 void TrueKdTree::clear()
@@ -46,6 +56,45 @@ void TrueKdTree::clear()
 
 //shared structure used to sort the points along a single dimension (see TrueKdTree::split)
 static std::vector<PointCoordinateType> s_sortedCoordsForSplit;
+static GenericProgressCallback* s_progressCb = 0;
+static unsigned s_lastProgressCount = 0;
+static unsigned s_totalProgressCount = 0;
+static unsigned s_lastProgress = 0;
+
+static void InitProgress(GenericProgressCallback* progressCb, unsigned totalCount)
+{
+	s_progressCb = totalCount ? progressCb : 0;
+	s_totalProgressCount = totalCount;
+	s_lastProgressCount = 0;
+	s_lastProgress = 0;
+
+	if (s_progressCb)
+	{
+		s_progressCb->setMethodTitle("Kd-tree computation");
+		char info[256];
+		sprintf(info,"Points: %i",totalCount);
+		s_progressCb->setInfo(info);
+		s_progressCb->start();
+		QCoreApplication::processEvents();
+	}
+}
+
+static inline void UpdateProgress(unsigned increment)
+{
+	if (s_progressCb)
+	{
+		assert(s_totalProgressCount != 0);
+		s_lastProgressCount += increment;
+		float fPercent = static_cast<float>(s_lastProgressCount) / static_cast<float>(s_totalProgressCount) * 100.0f;
+		unsigned uiPercent = static_cast<unsigned>(fPercent);
+		if (uiPercent > s_lastProgress)
+		{
+			s_progressCb->update(fPercent);
+			s_lastProgress = uiPercent;
+			QCoreApplication::processEvents();
+		}
+	}
+}
 
 TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 {
@@ -60,21 +109,24 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		delete subset;
 		return 0;
 	}
-	
-	assert(fabs(CCVector3(planeEquation).norm2() - 1.0) < 1.0e-6);
-	//ScalarType rms = (count != 3 ? DistanceComputationTools::computeCloud2PlaneDistanceRMS(subset, planeEquation) : 0);
-	ScalarType rms = (count != 3 ? DistanceComputationTools::ComputeCloud2PlaneRobustMax(subset, planeEquation, 0.02f) : 0);
-	
-	//if we have less than 6 points, then the subdivision would produce a subset with less than 3 points
-	//(and we can't fit a plane on less than 3 points!)
-	bool isLeaf = (count < 6 || rms <= m_maxRMS);
-	if (isLeaf)
+
+	//we always split sets larger the a given size (but we can't skip cells with less than 6 points!)
+	ScalarType rms = -1;
+	if (count < m_maxPointCountPerCell || m_maxPointCountPerCell < 6)
 	{
-		Leaf* leaf = new Leaf(subset);
-		memcpy(leaf->planeEq,planeEquation,sizeof(PointCoordinateType)*4);
-		leaf->rms = rms;
-		
-		return leaf;
+		assert(fabs(CCVector3(planeEquation).norm2() - 1.0) < 1.0e-6);
+		//ScalarType rms = (count != 3 ? DistanceComputationTools::computeCloud2PlaneDistanceRMS(subset, planeEquation) : 0);
+		rms = (count != 3 ? DistanceComputationTools::ComputeCloud2PlaneRobustMax(subset, planeEquation, m_outliersRatio) : 0);
+	
+		//if we have less than 6 points, then the subdivision would produce a subset with less than 3 points
+		//(and we can't fit a plane on less than 3 points!)
+		bool isLeaf = (count < 6 || rms <= m_maxRMS);
+		if (isLeaf)
+		{
+			UpdateProgress(count);
+			//the Leaf class takes ownership of the subset!
+			return new Leaf(subset,planeEquation,rms);
+		}
 	}
 
 	/*** proceed with a 'standard' binary partition ***/
@@ -84,7 +136,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	{
 		CCVector3 bbMin,bbMax;
 		subset->getBoundingBox(bbMin.u,bbMax.u);
-		dims = bbMax-bbMin;
+		dims = bbMax - bbMin;
 	}
 
 	//find the largest dimension
@@ -95,7 +147,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		splitDim = Z_DIM;
 
 	//find the median by sorting the points coordinates
-	assert(s_sortedCoordsForSplit.size() >= (size_t)count);
+	assert(s_sortedCoordsForSplit.size() >= static_cast<size_t>(count));
 	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = subset->getPoint(i);
@@ -103,7 +155,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	}
 	std::sort(s_sortedCoordsForSplit.begin(),s_sortedCoordsForSplit.begin()+count);
 
-	unsigned splitCount = count>>1;
+	unsigned splitCount = count/2;
 	assert(splitCount >= 3); //count >= 6 (see above)
 	
 	//we must check that the split value is the 'first one'
@@ -113,7 +165,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		{
 			while (/*splitCount>0 &&*/ s_sortedCoordsForSplit[splitCount-1] == s_sortedCoordsForSplit[splitCount])
 			{
-				assert(splitCount > 0);
+				assert(splitCount > 3);
 				--splitCount;
 			}
 		}
@@ -122,16 +174,17 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 			do
 			{
 				++splitCount;
-				assert(splitCount < count);
+				assert(splitCount < count-3);
 			}
 			while (/*splitCount+1<count &&*/ s_sortedCoordsForSplit[splitCount] == s_sortedCoordsForSplit[splitCount-1]);
 		}
 		else //in fact we can't split this cell!
 		{
-			Leaf* leaf = new Leaf(subset);
-			memcpy(leaf->planeEq,planeEquation,sizeof(PointCoordinateType)*4);
-			leaf->rms = rms;
-			return leaf;
+			UpdateProgress(count);
+			if (rms < 0)
+				rms = (count != 3 ? DistanceComputationTools::ComputeCloud2PlaneRobustMax(subset, planeEquation, 0.02f) : 0);
+			//the Leaf class takes ownership of the subset!
+			return new Leaf(subset,planeEquation,rms);
 		}
 	}
 
@@ -169,7 +222,10 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	//process subsets (if any)
 	BaseNode* leftChild = split(leftSubset);
 	if (!leftChild)
+	{
+		delete rightSubset;
 		return 0;
+	}
 	BaseNode* rightChild = split(rightSubset);
 	if (!rightChild)
 	{
@@ -178,17 +234,21 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	}
 
 	Node* node = new Node;
-	node->leftChild = leftChild;
-	leftChild->parent = node;
-	node->rightChild = rightChild;
-	rightChild->parent = node;
-	node->splitDim = splitDim;
-	node->splitValue = splitCoord;
-
+	{
+		node->leftChild = leftChild;
+		leftChild->parent = node;
+		node->rightChild = rightChild;
+		rightChild->parent = node;
+		node->splitDim = splitDim;
+		node->splitValue = splitCoord;
+	}
 	return node;
 }
 
-bool TrueKdTree::build(double maxRMS, GenericProgressCallback* progressCb/*=0*/)
+bool TrueKdTree::build(	double maxRMS,
+						unsigned maxPointCountPerCell/*=0*/,
+						float outliersRatio/*=0.0*/,
+						GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!m_associatedCloud)
 		return false;
@@ -223,8 +283,12 @@ bool TrueKdTree::build(double maxRMS, GenericProgressCallback* progressCb/*=0*/)
 		return false;
 	}
 
+	InitProgress(progressCb,count);
+
 	//launch recursive process
 	m_maxRMS = maxRMS;
+	m_maxPointCountPerCell = maxPointCountPerCell;
+	m_outliersRatio = outliersRatio;
 	m_root = split(subset);
 
 	//clear static structure

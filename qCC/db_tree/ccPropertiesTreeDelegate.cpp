@@ -499,6 +499,10 @@ void ccPropertiesTreeDelegate::fillWithFacet(ccFacet* _obj)
 	//polygon visibility
 	if (_obj->getPolygon())
 		appendRow( ITEM("Show polygon"), CHECKABLE_ITEM(_obj->getPolygon()->isVisible(),OBJECT_FACET_MESH) );
+
+	//normal vector visibility
+	appendRow( ITEM("Show normal vector"), CHECKABLE_ITEM(_obj->normalVectorIsShown(),OBJECT_FACET_NORMAL_VECTOR) );
+
 }
 
 void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
@@ -1162,6 +1166,15 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(facet);
 			if (facet && facet->getPolygon())
 				facet->getPolygon()->setVisible(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
+	case OBJECT_FACET_NORMAL_VECTOR:
+		{
+			ccFacet* facet = ccHObjectCaster::ToFacet(m_currentObject);
+			assert(facet);
+			if (facet)
+				facet->showNormalVector(item->checkState() == Qt::Checked);
 		}
 		redraw=true;
 		break;

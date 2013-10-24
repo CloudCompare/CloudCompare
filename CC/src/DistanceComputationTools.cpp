@@ -2223,11 +2223,11 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(GenericCloud* c
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	if (norm2 < ZERO_TOLERANCE)
         return NAN_VALUE;
-	assert(fabs((double)norm2 - 1.0) < 1.0e-6);
+	assert(fabs(static_cast<double>(norm2) - 1.0) < 1.0e-6);
 
 	//we search the max @ 'percent'% (to avoid outliers)
 	std::vector<PointCoordinateType> tail;
-	size_t tailSize = (size_t)ceil((float)count * percent);
+	size_t tailSize = static_cast<size_t>(ceil(static_cast<float>(count) * percent));
 	tail.resize(tailSize);
 
 	//compute deviations
@@ -2236,27 +2236,32 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(GenericCloud* c
 	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = cloud->getNextPoint();
-		PointCoordinateType d2 = (CCVector3::vdot(P->u,planeEquation)-planeEquation[3])/*/norm*/; //norm == 1.0
-		d2 *= d2;
+		PointCoordinateType d = fabs(CCVector3::vdot(P->u,planeEquation)-planeEquation[3])/*/norm*/; //norm == 1.0
 
 		if (pos < tailSize)
 		{
-			tail[pos++] = d2;
+			tail[pos++] = d;
 		}
-		else if (tail.back() < d2)
+		else if (tail.back() < d)
 		{
-			tail.back() = d2;
-			//search the min element of the tail
-			size_t maxIndex = tailSize-1;
-			for (size_t j=2; j<=tailSize; ++j)
-				if (tail[tailSize-j] < tail[maxIndex])
-					maxIndex = tailSize-j;
+			tail.back() = d;
+		}
+
+		//search the max element of the tail
+		size_t maxPos = pos-1;
+		if (maxPos != 0)
+		{
+			size_t maxIndex = maxPos;
+			for (size_t j=0; j<maxPos; ++j)
+				if (tail[j] < tail[maxIndex])
+					maxIndex = j;
 			//and put it to the back!
-			std::swap(tail[maxIndex],tail.back());
-		}		
+			if (maxPos != maxIndex)
+				std::swap(tail[maxIndex],tail[maxPos]);
+		}
 	}
 
-	return (ScalarType)sqrt(tail.back());
+	return static_cast<ScalarType>(tail.back());
 }
 
 bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersist* cloud, unsigned seedPointIndex, uchar octreeLevel, GenericProgressCallback* progressCb)

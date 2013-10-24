@@ -1198,7 +1198,7 @@ void MainWindow::doActionComputeKdTree()
 	eTimer.start();
 	ccKdTree* kdtree = new ccKdTree(cloud);
 
-	if (kdtree->build(s_kdTreeMaxRMSPerCell,&pDlg))
+	if (kdtree->build(s_kdTreeMaxRMSPerCell,1000,0.02f,&pDlg))
 	{
 		int elapsedTime_ms = eTimer.elapsed();
 
@@ -1210,6 +1210,8 @@ void MainWindow::doActionComputeKdTree()
 		kdtree->prepareDisplayForRefresh();
 #ifdef _DEBUG
 		kdtree->convertCellIndexToSF();
+#else
+		kdtree->convertCellIndexToRandomColor();
 #endif
 
 		addToDB(kdtree,true,0,false,false);

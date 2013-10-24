@@ -81,6 +81,8 @@ public:
 	const PointCoordinateType* getPlaneEquation() const { return m_planeEquation; }
 	//! Returns normal
 	CCVector3 getNormal() const { return CCVector3(m_planeEquation); }
+	//! Inverts normal
+	void invertNormal();
 	//! Returns center
 	const CCVector3& getCenter() const { return m_center; }
 
@@ -102,7 +104,15 @@ public:
 	//! Sets origin points
 	void setOriginPoints(ccPointCloud* cloud) { m_originPoints = cloud; }
 
+	//! Show normal vector
+	void showNormalVector(bool state) { m_showNormalVector = state; }
+	//! Whether normal vector is shown or not
+	bool normalVectorIsShown() const { return m_showNormalVector; }
+
 protected:
+
+	//inherited from ccDrawable
+	void drawMeOnly(CC_DRAW_CONTEXT& context);
 
 	//! Creates internal representation (polygon, polyline, etc.)
 	bool createInternalRepresentation(	CCLib::GenericIndexedCloudPersist* points,
@@ -131,6 +141,9 @@ protected:
 
 	//! Max length
 	PointCoordinateType m_maxEdgeLength;
+
+	//! Whether the facet normal vector should be displayed or not
+	bool m_showNormalVector;
 
     //inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;

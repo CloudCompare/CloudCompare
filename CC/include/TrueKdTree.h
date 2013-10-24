@@ -95,8 +95,23 @@ public:
 		ScalarType rms;
 		int userData;
 
-		Leaf(ReferenceCloud* set) : BaseNode(LEAF_TYPE), points(set), rms(-1.0), userData(0) { memset(planeEq, 0, sizeof(PointCoordinateType)*4); }
-		virtual ~Leaf() { if (points) delete points; };
+		//! Constructor
+		/** The Leaf class takes ownership of its associated subset
+		**/
+		Leaf(ReferenceCloud* set, const PointCoordinateType planeEquation[], ScalarType _rms)
+			: BaseNode(LEAF_TYPE)
+			, points(set)
+			, rms(_rms)
+			, userData(0)
+		{ 
+			memcpy(planeEq, planeEquation, sizeof(PointCoordinateType)*4);
+		}
+
+		virtual ~Leaf()
+		{
+			if (points)
+				delete points;
+		}
 	};
 
 	//! A vector of leaves
@@ -105,14 +120,22 @@ public:
 	//! Default constructor
 	TrueKdTree(GenericIndexedCloudPersist* cloud);
 
+	//! Destructor
+	~TrueKdTree();
+
 	//! Returns the associated cloud
 	inline GenericIndexedCloudPersist* associatedCloud() const { return m_associatedCloud; }
 
 	//! Builds KD-tree
 	/** \param maxRMS maximum RMS per cell (LS plane fitting)
+		\param maxPointCountPerCell maximum number of points per cell (speed-up - ignored if < 6)
+		\param outliersRatio ratio of outliers considered when computing the maximum RMS (< 1)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 	**/
-	bool build(double maxRMS, GenericProgressCallback* progressCb=0);
+	bool build(	double maxRMS,
+				unsigned maxPointCountPerCell = 0,
+				float outliersRatio = 0.0f,
+				GenericProgressCallback* progressCb=0);
 
 	//! Clears structure
 	void clear();
@@ -137,6 +160,14 @@ protected:
 
 	//! Max RMS for planarity-based split strategy
 	double m_maxRMS;
+
+	//! Outliers ratio (< 0)
+	float m_outliersRatio;
+
+	//! Max number of points per cell (speed-up)
+	/** Ignored if < 6
+	**/
+	unsigned m_maxPointCountPerCell;
 
 };
 

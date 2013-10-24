@@ -83,6 +83,7 @@ public:
 							OBJECT_NAME_IN_3D			,
 							OBJECT_FACET_CONTOUR		,
 							OBJECT_FACET_MESH			,
+							OBJECT_FACET_NORMAL_VECTOR	,
 	};
 
     //! Default constructor

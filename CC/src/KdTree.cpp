@@ -24,7 +24,7 @@ using namespace CCLib;
 
 KDTree::KDTree()
 	: m_root(0)
-	, associatedCloud(0)
+	, m_associatedCloud(0)
 	, m_cellCount(0)
 {
 }
@@ -36,31 +36,29 @@ KDTree::~KDTree()
 
 bool KDTree::buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback *progressCb)
 {
-    unsigned i, cloudsize=cloud->size();
+    unsigned cloudsize = cloud->size();
 
     m_indexes.clear();
     m_cellCount = 0;
-	associatedCloud = 0;
+	m_associatedCloud = 0;
+	m_root = 0;
 
     if(cloudsize == 0)
         return false;
 
 	try
 	{
-		m_list.resize(cloudsize);
+		m_indexes.resize(cloudsize);
 	}
 	catch (.../*const std::bad_alloc&*/) //out of memory
 	{
 		return false;
 	}
 
-	associatedCloud = cloud;
+	m_associatedCloud = cloud;
 
-	for(i=0; i<cloudsize; i++)
-    {
-        m_list[i].index = i;
-        cloud->getPoint(i,m_list[i].point);
-    }
+	for (unsigned i=0; i<cloudsize; i++)
+        m_indexes[i] = i;
 
     if(progressCb)
     {
@@ -71,13 +69,13 @@ bool KDTree::buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback 
 
     m_root = buildSubTree(0, cloudsize-1, (KdCell*)0, m_cellCount, progressCb);
 
-    if(progressCb)
+    if (progressCb)
         progressCb->stop();
 
     //if the tree building has failed (memory issues)
-    if(!m_root)
+    if (!m_root)
     {
-        associatedCloud = 0;
+        m_associatedCloud = 0;
         m_cellCount = 0;
         return false;
     }
@@ -88,13 +86,10 @@ bool KDTree::buildFromCloud(GenericIndexedCloud *cloud, GenericProgressCallback 
 	}
 	catch (.../*const std::bad_alloc&*/) //out of memory
 	{
-        associatedCloud = 0;
+        m_associatedCloud = 0;
         m_cellCount = 0;
         return false;
     }
-    for(i=0; i<cloudsize; i++)
-        m_indexes[i]=m_list[i].index;
-    m_list.clear();
 
     return true;
 }
@@ -110,6 +105,27 @@ void KDTree::deleteSubTree(KdCell *cell)
     delete cell;
 	assert(m_cellCount>0);
     m_cellCount--;
+}
+
+/*** Comparison functions used by the sort function (Strict ordering must be used) ***/
+static CCLib::GenericIndexedCloud* s_comparisonCloud = 0;
+
+//! Compares X coordinates of two points designated by their index
+static bool ComparisonX(const unsigned &a, const unsigned &b)
+{
+	return (s_comparisonCloud->getPoint(a)->x < s_comparisonCloud->getPoint(b)->x);
+}
+
+//! Compares Y coordinates of two points designated by their index
+static bool ComparisonY(const unsigned &a, const unsigned &b)
+{
+	return (s_comparisonCloud->getPoint(a)->y < s_comparisonCloud->getPoint(b)->y);
+}
+
+//! Compares Z coordinates of two points designated by their index
+static bool ComparisonZ(const unsigned &a, const unsigned &b)
+{
+	return (s_comparisonCloud->getPoint(a)->z < s_comparisonCloud->getPoint(b)->z);
 }
 
 KDTree::KdCell* KDTree::buildSubTree(unsigned first, unsigned last, KdCell* father, unsigned &nbBuildCell, GenericProgressCallback *progressCb)
@@ -128,7 +144,7 @@ KDTree::KdCell* KDTree::buildSubTree(unsigned first, unsigned last, KdCell* fath
     cell->cuttingDim = dim;
     updateOutsideBoundingBox(cell);
     if(progressCb)
-        progressCb->update((float)m_cellCount*100.0f/(float)(m_list.size()*2-1));
+        progressCb->update((float)m_cellCount*100.0f/(float)(m_indexes.size()*2-1));
 
     //If there is only one point to insert, build a leaf
     if(first == last)
@@ -140,16 +156,17 @@ KDTree::KdCell* KDTree::buildSubTree(unsigned first, unsigned last, KdCell* fath
     else
     {
         //sort the remaining points considering dimension dim
+		s_comparisonCloud = m_associatedCloud; //TODO: not compatible with parallelism!!!
         if(dim == 0)
-            sort(m_list.begin()+first, m_list.begin()+(last+1), ComparisonX);
+            sort(m_indexes.begin()+first, m_indexes.begin()+(last+1), ComparisonX);
         else if(dim == 1)
-            sort(m_list.begin()+first, m_list.begin()+(last+1), ComparisonY);
+            sort(m_indexes.begin()+first, m_indexes.begin()+(last+1), ComparisonY);
         else if(dim == 2)
-            sort(m_list.begin()+first, m_list.begin()+(last+1), ComparisonZ);
+            sort(m_indexes.begin()+first, m_indexes.begin()+(last+1), ComparisonZ);
         //find the median point in the sorted tab
         unsigned split = (first+last)/2;
-        const CCVector3& p = m_list[split].point;
-        cell->cuttingCoordinate = p.u[dim];
+        const CCVector3* P = m_associatedCloud->getPoint(m_indexes[split]);
+        cell->cuttingCoordinate = P->u[dim];
         //recursively build the other two sub trees
         //trap the memory issues. At this point, none of the cell sons can be set to 0. Otherwise there has been memory allocation failure.
         cell->leSon = cell->gSon = 0;
@@ -203,7 +220,7 @@ bool KDTree::findNearestNeighbour(const PointCoordinateType *queryPoint,
     //Once we found the cell containing the query point, the nearest neighbour has great chances to lie in this cell
     for(i=0; i<cellPtr->nbPoints; i++)
     {
-        const CCVector3 *p = associatedCloud->getPoint(m_indexes[cellPtr->startingPointIndex+i]);
+        const CCVector3 *p = m_associatedCloud->getPoint(m_indexes[cellPtr->startingPointIndex+i]);
         sqrdist = CCVector3::vdistance2(p->u, queryPoint);
         if(sqrdist<maxDist)
         {
@@ -268,7 +285,7 @@ bool KDTree::findPointBelowDistance(
     //Once we found the cell containing the query point, there are great chance to find a point if it exists
     for(i=0; i<cellPtr->nbPoints; i++)
     {
-		const CCVector3 *p = associatedCloud->getPoint(m_indexes[cellPtr->startingPointIndex+i]);
+		const CCVector3 *p = m_associatedCloud->getPoint(m_indexes[cellPtr->startingPointIndex+i]);
         sqrdist = CCVector3::vdistance2(p->u, queryPoint);
         if(sqrdist<maxDist)
             return true;
@@ -326,17 +343,17 @@ void KDTree::updateInsideBoundingBox(KdCell* cell)
     }
     else
     {
-        CCVector3& p = m_list[cell->startingPointIndex].point;
-        cell->inbbmin = cell->inbbmax = p;
+        const CCVector3* P = m_associatedCloud->getPoint(m_indexes[cell->startingPointIndex]);
+        cell->inbbmin = cell->inbbmax = *P;
         for(unsigned i=1; i<cell->nbPoints; i++)
         {
-            p = m_list[i+cell->startingPointIndex].point;
-            cell->inbbmax.x = std::max(cell->inbbmax.x, p.x);
-            cell->inbbmax.y = std::max(cell->inbbmax.y, p.y);
-            cell->inbbmax.z = std::max(cell->inbbmax.z, p.z);
-            cell->inbbmin.x = std::min(cell->inbbmin.x, p.x);
-            cell->inbbmin.y = std::min(cell->inbbmin.y, p.y);
-            cell->inbbmin.z = std::min(cell->inbbmin.z, p.z);
+            P = m_associatedCloud->getPoint(m_indexes[i+cell->startingPointIndex]);
+            cell->inbbmax.x = std::max(cell->inbbmax.x, P->x);
+            cell->inbbmax.y = std::max(cell->inbbmax.y, P->y);
+            cell->inbbmax.z = std::max(cell->inbbmax.z, P->z);
+            cell->inbbmin.x = std::min(cell->inbbmin.x, P->x);
+            cell->inbbmin.y = std::min(cell->inbbmin.y, P->y);
+            cell->inbbmin.z = std::min(cell->inbbmin.z, P->z);
         }
     }
 }
@@ -354,9 +371,9 @@ void KDTree::updateOutsideBoundingBox(KdCell *cell)
         cell->boundsMask = cell->father->boundsMask;
         cell->outbbmax = cell->father->outbbmax;
         cell->outbbmin = cell->father->outbbmin;
-        const CCVector3& p = m_list[cell->startingPointIndex].point;
+        const CCVector3* P = m_associatedCloud->getPoint(m_indexes[cell->startingPointIndex]);
         //Check if this cell is its father leSon (if...) or gSon (else...)
-        if(p.u[cell->father->cuttingDim] <= cell->father->cuttingCoordinate)
+        if(P->u[cell->father->cuttingDim] <= cell->father->cuttingCoordinate)
         {
             //Bounding box max point is linked to the bits [3..5] in the bounds mask
             bound = bound<<(3+cell->father->cuttingDim);
@@ -372,7 +389,6 @@ void KDTree::updateOutsideBoundingBox(KdCell *cell)
         }
     }
 }
-
 
 ScalarType KDTree::pointToCellSquareDistance(const PointCoordinateType *queryPoint, KdCell *cell)
 {
@@ -394,7 +410,6 @@ ScalarType KDTree::pointToCellSquareDistance(const PointCoordinateType *queryPoi
 
     return (dx*dx)+(dy*dy)+(dz*dz);
 }
-
 
 void KDTree::pointToCellDistances(const PointCoordinateType *queryPoint, KdCell *cell, ScalarType& min, ScalarType &max)
 {
@@ -449,7 +464,6 @@ ScalarType KDTree::InsidePointToCellDistance(const PointCoordinateType *queryPoi
     return std::min(dx, std::min(dy, dz));
 }
 
-
 int KDTree::checkNearerPointInSubTree(const PointCoordinateType *queryPoint, ScalarType &maxSqrDist, KdCell *cell)
 {
     if(pointToCellSquareDistance(queryPoint, cell)>=maxSqrDist)
@@ -460,7 +474,7 @@ int KDTree::checkNearerPointInSubTree(const PointCoordinateType *queryPoint, Sca
         int a = -1;
         for(unsigned i=0; i<cell->nbPoints; i++)
         {
-            const CCVector3 *p = associatedCloud->getPoint(m_indexes[cell->startingPointIndex+i]);
+            const CCVector3 *p = m_associatedCloud->getPoint(m_indexes[cell->startingPointIndex+i]);
             ScalarType dist = CCVector3::vdistance2(p->u, queryPoint);
             if(dist<maxSqrDist)
             {
@@ -479,7 +493,6 @@ int KDTree::checkNearerPointInSubTree(const PointCoordinateType *queryPoint, Sca
 	return checkNearerPointInSubTree(queryPoint,  maxSqrDist, cell->leSon);
 }
 
-
 bool KDTree::checkDistantPointInSubTree(const PointCoordinateType *queryPoint, ScalarType &maxSqrDist, KdCell *cell)
 {
     if(pointToCellSquareDistance(queryPoint, cell)>=maxSqrDist)
@@ -489,7 +502,7 @@ bool KDTree::checkDistantPointInSubTree(const PointCoordinateType *queryPoint, S
     {
         for(unsigned i=0; i<cell->nbPoints; i++)
         {
-            const CCVector3 *p = associatedCloud->getPoint(m_indexes[cell->startingPointIndex+i]);
+            const CCVector3 *p = m_associatedCloud->getPoint(m_indexes[cell->startingPointIndex+i]);
             ScalarType dist = CCVector3::vdistance2(p->u, queryPoint);
             if(dist<maxSqrDist)
                 return true;
@@ -504,7 +517,6 @@ bool KDTree::checkDistantPointInSubTree(const PointCoordinateType *queryPoint, S
 
     return false;
 }
-
 
 void KDTree::distanceScanTree(
     const PointCoordinateType *queryPoint,
@@ -530,7 +542,7 @@ void KDTree::distanceScanTree(
             {
                 for(unsigned i=0; i<cell->nbPoints; i++)
                 {
-                    const CCVector3 *p = associatedCloud->getPoint(m_indexes[i+cell->startingPointIndex]);
+                    const CCVector3 *p = m_associatedCloud->getPoint(m_indexes[i+cell->startingPointIndex]);
                     ScalarType dist = CCVector3::vdistance(queryPoint, p->u);
                     if((distance-tolerance<=dist) && (dist<=distance+tolerance))
                         localArray.push_back(m_indexes[cell->startingPointIndex+i]);

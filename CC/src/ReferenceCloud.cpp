@@ -64,22 +64,22 @@ void ReferenceCloud::clear(bool releaseMemory)
 void ReferenceCloud::updateBBWithPoint(const CCVector3* P)
 {
 	//X boundaries
-	if (m_bbMins[0]>P->x)
-		m_bbMins[0]=P->x;
-	else if (m_bbMaxs[0]<P->x)
-		m_bbMaxs[0]=P->x;
+	if (m_bbMins[0] > P->x)
+		m_bbMins[0] = P->x;
+	else if (m_bbMaxs[0] < P->x)
+		m_bbMaxs[0] = P->x;
 
 	//Y boundaries
-	if (m_bbMins[1]>P->y)
-		m_bbMins[1]=P->y;
-	else if (m_bbMaxs[1]<P->y)
-		m_bbMaxs[1]=P->y;
+	if (m_bbMins[1] > P->y)
+		m_bbMins[1] = P->y;
+	else if (m_bbMaxs[1] < P->y)
+		m_bbMaxs[1] = P->y;
 
 	//Z boundaries
-	if (m_bbMins[2]>P->z)
-		m_bbMins[2]=P->z;
-	else if (m_bbMaxs[2]<P->z)
-		m_bbMaxs[2]=P->z;
+	if (m_bbMins[2] > P->z)
+		m_bbMins[2] = P->z;
+	else if (m_bbMaxs[2] < P->z)
+		m_bbMaxs[2] = P->z;
 }
 
 void ReferenceCloud::computeBB()
@@ -87,24 +87,24 @@ void ReferenceCloud::computeBB()
 	assert(m_theAssociatedCloud);
 
 	//empty cloud?!
-	if (size()==0)
+	if (size() == 0)
 	{
-		m_bbMins[0]=m_bbMaxs[0]=0.0;
-		m_bbMins[1]=m_bbMaxs[1]=0.0;
-		m_bbMins[2]=m_bbMaxs[2]=0.0;
+		m_bbMins[0] = m_bbMaxs[0] = 0;
+		m_bbMins[1] = m_bbMaxs[1] = 0;
+		m_bbMins[2] = m_bbMaxs[2] = 0;
 		return;
 	}
 
 	//initialize BBox with first point
-	const CCVector3* P = m_theAssociatedCloud->getPointPersistentPtr(m_theIndexes->getValue(0));
-	m_bbMins[0]=m_bbMaxs[0]=P->x;
-	m_bbMins[1]=m_bbMaxs[1]=P->y;
-	m_bbMins[2]=m_bbMaxs[2]=P->z;
+	const CCVector3* P = getPointPersistentPtr(0);
+	m_bbMins[0] = m_bbMaxs[0] = P->x;
+	m_bbMins[1] = m_bbMaxs[1] = P->y;
+	m_bbMins[2] = m_bbMaxs[2] = P->z;
 
-	unsigned i,count=size();
-	for (i=1;i<count;++i)
+	unsigned count = size();
+	for (unsigned i=1; i<count; ++i)
 	{
-		P = m_theAssociatedCloud->getPointPersistentPtr(m_theIndexes->getValue(i));
+		P = getPointPersistentPtr(i);
 		updateBBWithPoint(P);
 	}
 

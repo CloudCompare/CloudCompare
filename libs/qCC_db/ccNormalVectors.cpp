@@ -731,7 +731,7 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 	if (r2 < ZERO_TOLERANCE)
 	{
 		//purely vertical normal
-		dip = 90.0;
+		dip = 0.0;
 		dipDir = 0.0; //anything in fact
 		return;
 	}
@@ -739,11 +739,12 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 	//"Dip direction is measured in 360 degrees, generally clockwise from North"
 	dipDir = atan2(N.x,N.y); //result in [-pi,+pi]
 	if (dipDir < 0)
-		dipDir = static_cast<PointCoordinateType>(2.0*M_PI) + dipDir;
+		dipDir += static_cast<PointCoordinateType>(2.0*M_PI);
 
 	//Dip
 	PointCoordinateType r = sqrt(r2);
 	dip = atan(fabs(N.z)/r); //atan's result in [-pi/2,+pi/2] but |N.z|/r >= 0
+	dip = M_PI/2.0 - dip; //DGM: we always measure the dip downward from horizontal
 
 	dipDir *= static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
 	dip *= static_cast<PointCoordinateType>(CC_RAD_TO_DEG);

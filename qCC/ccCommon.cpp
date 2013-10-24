@@ -19,9 +19,6 @@
 
 #include "ccCommon.h"
 
-//qCC_db
-#include <ccPlatform.h>
-
 #define CC_VER_NUM 2.5
 #define CC_SUB_VER 2 //2013-10-24
 

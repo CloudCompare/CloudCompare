@@ -476,6 +476,7 @@ bool ccKdTree::fuseCells(double maxRMS, double maxAngle_deg, double overlapCoef,
 
 	//fuse all cells, starting from the ones with the best RMS
 	const int unvisitedNeighborValue = -1;
+	bool cancelled = false;
 	int macroIndex = 1; //starts at 1 (0 is reserved for cells already above the max RMS)
 	{
 		for (size_t i=0; i<leaves.size(); ++i)
@@ -488,7 +489,10 @@ bool ccKdTree::fuseCells(double maxRMS, double maxAngle_deg, double overlapCoef,
 			if (currentCell->userData != -1)
 			{
 				if (nProgress && !nProgress->oneStep()) //process canceled by user
+				{
+					cancelled = true;
 					break;
+				}
 				continue;
 			}
 
@@ -515,7 +519,10 @@ bool ccKdTree::fuseCells(double maxRMS, double maxAngle_deg, double overlapCoef,
 			cellsToTest.push_back(currentCell);
 
 			if (nProgress && !nProgress->oneStep()) //process canceled by user
+			{
+				cancelled = true;
 				break;
+			}
 
 			while (!cellsToTest.empty() || !candidates.empty())
 			{
@@ -685,10 +692,10 @@ bool ccKdTree::fuseCells(double maxRMS, double maxAngle_deg, double overlapCoef,
 
 						if (nProgress && !nProgress->oneStep()) //process canceled by user
 						{
-							//permaturate end!
+							//premature end!
 							candidates.clear();
 							cellsToTest.clear();
-							i = leaves.size();
+							cancelled = true;
 							break;
 						}
 						QApplication::processEvents();
@@ -711,10 +718,14 @@ bool ccKdTree::fuseCells(double maxRMS, double maxAngle_deg, double overlapCoef,
 			if (currentPointSet != currentCell->points)
 				delete currentPointSet;
 			currentPointSet = 0;
+
+			if (cancelled)
+				break;
 		}
 	}
 
 	//convert fused indexes to SF
+	if (!cancelled)
 	{
 		pc->enableScalarField();
 
@@ -735,5 +746,5 @@ bool ccKdTree::fuseCells(double maxRMS, double maxAngle_deg, double overlapCoef,
 		//pc->setCurrentDisplayedScalarField(sfIdx);
 	}
 
-	return true;
+	return !cancelled;
 }

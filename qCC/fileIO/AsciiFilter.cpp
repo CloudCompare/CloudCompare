@@ -643,11 +643,15 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 
         //comment
 		if (currentLine.startsWith("//"))
+		{
+			currentLine = stream.readLine();
             continue;
+		}
 
         if (currentLine.size() == 0)
         {
             ccLog::Warning("[AsciiFilter::Load] Line %i is corrupted (empty)!",linesRead);
+			currentLine = stream.readLine();
             continue;
         }
 

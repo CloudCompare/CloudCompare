@@ -3,9 +3,10 @@
 v2.5.2 XX/XX/2013
 - enhancement:
 	- the 'facet' entity's normal vector can now be displayed or hidden via the facet properties
-- Bug fix:
+- Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
 		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)
+	- Blank lines or commentaries were causing an infinite loop when importing ASCII files
 
 v2.5.1 10/19/2013
 - The 'Clipping-box' tool has a new feature: 'contour' extraction

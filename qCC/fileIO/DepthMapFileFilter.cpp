@@ -55,8 +55,8 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const char* file
 
     CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-    size_t sensorCount=sensors.size();
-	for (size_t i=0;i<sensorCount && result==CC_FERR_NO_ERROR;++i)
+    size_t sensorCount = sensors.size();
+	for (size_t i=0; i < sensorCount && result == CC_FERR_NO_ERROR; ++i)
     {
         //more than one sensor? we must generate auto filename
 		QString thisFilename = (sensorCount < 2 ? filename : baseName + QString::number(i) + extension);
@@ -66,7 +66,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const char* file
         if (!fp)
         {
             ccLog::Error(QString("[ccGBLSensor::saveASCII] Can't open file '%1' for writing!").arg(thisFilename));
-            result=CC_FERR_WRITING;
+            result = CC_FERR_WRITING;
         }
         else
         {
@@ -134,36 +134,35 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
                 NormsTableType* decodedNorms = new NormsTableType;
                 decodedNorms->reserve(nbPoints);
 
-                for (unsigned i=0;i<nbPoints;++i)
+                for (unsigned i=0; i<nbPoints; ++i)
                     decodedNorms->addElement(pc->getPointNormal(i));
 
                 theNorms = sensor->projectNormals(pc,*decodedNorms);
                 decodedNorms->clear();
 				decodedNorms->release();
-				decodedNorms=0;
+				decodedNorms = 0;
             }
 
             //if possible, we create the array of projected colors
             if (pc->hasColors())
             {
                 GenericChunkedArray<3,uchar>* rgbColors = new GenericChunkedArray<3,uchar>();
-                uchar rgb[3];
                 rgbColors->reserve(nbPoints);
 
-                for (unsigned i=0;i<nbPoints;++i)
+                for (unsigned i=0; i<nbPoints; ++i)
                 {
-                    //conversion from colorType[3] to uchar[3]
+                    //conversion from colorType[3] to unsigned char[3]
                     const colorType* col = pc->getPointColor(i);
-                    rgb[0]=uchar(col[0]);
-                    rgb[1]=uchar(col[1]);
-                    rgb[2]=uchar(col[2]);
+					uchar rgb[3] = {static_cast<uchar>(col[0]),
+									static_cast<uchar>(col[1]),
+									static_cast<uchar>(col[2])};
                     rgbColors->addElement(rgb);
                 }
 
                 theColors = sensor->projectColors(pc,*rgbColors);
                 rgbColors->clear();
 				rgbColors->release();
-				rgbColors=0;
+				rgbColors = 0;
             }
         }
     }
@@ -172,25 +171,25 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
     uchar* _theColors = theColors;
     ScalarType* _zBuff = db.zBuff;
 
-    for (int j=0;j<db.width;++j)
+    for (int j=0; j<db.width; ++j)
 	{
-        for (int k=0;k<db.height;++k)
+        for (int k=0; k<db.height; ++k)
         {
             //grid index and depth
-            fprintf(fp,"%f %f %f",float(k),float(j),*_zBuff++);
+            fprintf(fp,"%f %f %f",static_cast<float>(k),static_cast<float>(j),*_zBuff++);
 
             //color
             if (_theColors)
             {
                 fprintf(fp," %i %i %i",_theColors[0],_theColors[1],_theColors[2]);
-                _theColors+=3;
+                _theColors += 3;
             }
 
             //normal
             if (_theNorms)
             {
                 fprintf(fp," %f %f %f",_theNorms[0],_theNorms[1],_theNorms[2]);
-                _theNorms+=3;
+                _theNorms += 3;
             }
 
             fprintf(fp,"\n");

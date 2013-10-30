@@ -171,6 +171,8 @@ MainWindow::MainWindow()
 {
     //Dialog "auto-construction"
     setupUi(this);
+    QSettings settings("CloudCompare", "qCC");
+    restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
 
 	//advanced widgets not handled by QDesigner
 	{
@@ -255,6 +257,8 @@ MainWindow::MainWindow()
 
     QMainWindow::statusBar()->showMessage(QString("Ready"));
     ccConsole::Print("CloudCompare started!");
+
+    restoreState(settings.value("mainWindowState").toByteArray());
 }
 
 MainWindow::~MainWindow()
@@ -415,6 +419,11 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 				if (destMenu)
 					destMenu->setIcon(stdPlugin->getIcon());
 				destToolBar = addToolBar(pluginName+QString(" toolbar"));
+
+                //not sure why but it seems that we must specifically set the object name.
+                //if not the QSettings thing will complain about a not-setted name
+                //when saving settings of qCC mainwindow
+                destToolBar->setObjectName(pluginName);
 			}
 			else //default destination
 			{
@@ -4905,6 +4914,11 @@ void MainWindow::closeEvent(QCloseEvent *event)
             event->ignore();
         }
     }
+
+    //save the state as settings
+    QSettings settings("CloudCompare", "qCC");
+    settings.setValue("mainWindowGeometry", saveGeometry());
+    settings.setValue("mainWindowState", saveState());
 }
 
 void MainWindow::moveEvent(QMoveEvent* event)

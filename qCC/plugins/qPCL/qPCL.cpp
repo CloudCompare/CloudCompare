@@ -37,8 +37,7 @@
 
 
 qPCL::qPCL()
-	: m_toolbar(0)
-	, m_menu(0)
+    : m_menu(0)
 {
 }
 

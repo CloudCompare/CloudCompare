@@ -66,9 +66,6 @@ public slots:
 
 protected:
 
-	//! Toolbar
-	QToolBar* m_toolbar;
-
 	//! Menu
 	QMenu* m_menu;
 

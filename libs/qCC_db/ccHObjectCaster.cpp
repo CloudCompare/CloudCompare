@@ -97,7 +97,7 @@ ccGenericMesh* ccHObjectCaster::ToGenericMesh(ccHObject* obj)
 
 ccMesh* ccHObjectCaster::ToMesh(ccHObject* obj)
 {
-	return (obj && obj->isA(CC_MESH) ? static_cast<ccMesh*>(obj) : 0);
+	return (obj && (obj->isA(CC_MESH) || obj->isKindOf(CC_PRIMITIVE)) ? static_cast<ccMesh*>(obj) : 0);
 }
 
 ccSubMesh* ccHObjectCaster::ToSubMesh(ccHObject* obj)

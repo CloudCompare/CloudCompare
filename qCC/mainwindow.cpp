@@ -1656,7 +1656,7 @@ void MainWindow::doActionClearProperty(int prop)
         ccHObject* ent = selectedEntities[i];
 
 		//specific case: clear normals on a mesh
-		if (prop == 1 && ent->isA(CC_MESH))
+		if (prop == 1 && ( ent->isA(CC_MESH) /*|| ent->isKindOf(CC_PRIMITIVE)*/ )) //TODO
 		{
 			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
 			if (mesh->hasTriNormals())
@@ -1672,7 +1672,7 @@ void MainWindow::doActionClearProperty(int prop)
 			else if (mesh->hasNormals()) //per-vertex normals?
 			{
 				if (mesh->getParent()
-					&& mesh->getParent()->isA(CC_MESH)
+					&& (mesh->getParent()->isA(CC_MESH)/*|| mesh->getParent()->isKindOf(CC_PRIMITIVE)*/) //TODO
 					&& ccHObjectCaster::ToMesh(mesh->getParent())->getAssociatedCloud() == mesh->getAssociatedCloud())
 				{
 					ccLog::Warning("[doActionClearNormals] Can't remove per-vertex normals on a sub mesh!");
@@ -2158,7 +2158,7 @@ void MainWindow::doActionConvertTextureToColor()
 	for (size_t i=0; i<selectedEntities.size(); ++i)
     {
         ccHObject* ent = selectedEntities[i];
-        if (ent->isA(CC_MESH))
+        if (ent->isA(CC_MESH)/*|| ent->isKindOf(CC_PRIMITIVE)*/) //TODO
         {
             ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
 			assert(mesh);
@@ -2434,7 +2434,7 @@ void MainWindow::doActionFilterByValue()
 			//CCLib::ScalarField* sf = pc->getCurrentDisplayedScalarField();
 			//assert(sf);
 
-			//on met en lecture (OUT) le champ scalaire actuellement affiche
+			//we set as output (OUT) the currently displayed scalar field
 			int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
 			assert(outSfIdx >= 0);
 			pc->setCurrentOutScalarField(outSfIdx);
@@ -2444,7 +2444,7 @@ void MainWindow::doActionFilterByValue()
 			if (ent->isKindOf(CC_MESH))
 			{
 				pc->hidePointsByScalarValue(minVal,maxVal);
-				if (ent->isA(CC_MESH))
+				if (ent->isA(CC_MESH)/*|| ent->isKindOf(CC_PRIMITIVE)*/) //TODO
 					result = ccHObjectCaster::ToMesh(ent)->createNewMeshFromSelection(false);
 				else if (ent->isA(CC_SUB_MESH))
 					result = ccHObjectCaster::ToSubMesh(ent)->createNewSubMeshFromSelection(false);
@@ -2919,29 +2919,32 @@ void MainWindow::doMeshSFAction(ccMesh::MESH_SCALAR_FIELD_PROCESS process)
     for (size_t i=0; i<selNum; ++i)
     {
         ccHObject* ent = m_selectedEntities[i];
-        if (ent->isKindOf(CC_MESH))
+        if (ent->isKindOf(CC_MESH) || ent->isKindOf(CC_PRIMITIVE)) //TODO
         {
             ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
-            ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
+			if (mesh)
+			{
+				ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
 
-            if (cloud && cloud->isA(CC_POINT_CLOUD)) //TODO
-            {
-                ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+				if (cloud && cloud->isA(CC_POINT_CLOUD)) //TODO
+				{
+					ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-                //on active le champ scalaire actuellement affiche
-                int sfIdx = pc->getCurrentDisplayedScalarFieldIndex();
-                if (sfIdx >= 0)
-                {
-                    pc->setCurrentScalarField(sfIdx);
-                    mesh->processScalarField(process);
-                    pc->getCurrentInScalarField()->computeMinAndMax();
-                    mesh->prepareDisplayForRefresh_recursive();
-                }
-                else
-                {
-                    ccConsole::Warning(QString("Mesh [%1] vertices have no activated scalar field!").arg(mesh->getName()));
-                }
-            }
+					//on active le champ scalaire actuellement affiche
+					int sfIdx = pc->getCurrentDisplayedScalarFieldIndex();
+					if (sfIdx >= 0)
+					{
+						pc->setCurrentScalarField(sfIdx);
+						mesh->processScalarField(process);
+						pc->getCurrentInScalarField()->computeMinAndMax();
+						mesh->prepareDisplayForRefresh_recursive();
+					}
+					else
+					{
+						ccConsole::Warning(QString("Mesh [%1] vertices have no activated scalar field!").arg(mesh->getName()));
+					}
+				}
+			}
         }
     }
 
@@ -3021,7 +3024,7 @@ void MainWindow::doActionSmoothMeshLaplacian()
     for (size_t i=0; i<selNum; ++i)
     {
         ccHObject* ent = m_selectedEntities[i];
-        if (ent->isA(CC_MESH))
+        if (ent->isA(CC_MESH) || ent->isA(CC_PRIMITIVE)) //FIXME: can we really do this with primitives?
         {
             ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
 
@@ -4609,7 +4612,7 @@ void MainWindow::doActionComputeNormals()
 			cloud->showNormals(true);
 			cloud->prepareDisplayForRefresh();
 		}
-		else if (m_selectedEntities[i]->isA(CC_MESH))
+		else if (m_selectedEntities[i]->isA(CC_MESH)/*|| m_selectedEntities[i]->isA(CC_PRIMITIVE)*/) //TODO
 		{
 			ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
 			if (!mesh->computeNormals())
@@ -5239,7 +5242,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						entity = 0;
 					}
 				}
-				else if (entity->isKindOf(CC_MESH))
+				else if (entity->isKindOf(CC_MESH)/*|| entity->isA(CC_PRIMITIVE)*/) //TODO
 				{
 					if (entity->isA(CC_MESH))
 						segmentationResult = ccHObjectCaster::ToMesh(entity)->createNewMeshFromSelection(!deleteHiddenParts);

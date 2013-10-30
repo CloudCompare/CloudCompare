@@ -123,7 +123,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 
 		//we check objects that have links to other entities (meshes, polylines, etc.)
 		std::set<const ccHObject*> dependencies;
-		if (currentObject->isA(CC_MESH))
+		if (currentObject->isA(CC_MESH) || currentObject->isKindOf(CC_PRIMITIVE))
 		{
 			ccMesh* mesh = ccHObjectCaster::ToMesh(currentObject);
 			if (mesh->getAssociatedCloud())
@@ -283,14 +283,18 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 				if (meshID > 0)
 				{
 					ccHObject* mesh = root->find(meshID);
-					if (mesh&& mesh->isKindOf(CC_MESH))
+					if (mesh && mesh->isA(CC_MESH))
+					{
 						subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(mesh));
+					}
 					else
 					{
 						//we have a problem here ;)
 						//normally, the associated mesh should be the sub-mesh's parent!
 						if (subMesh->getParent() && subMesh->getParent()->isA(CC_MESH))
+						{
 							subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(subMesh->getParent()));
+						}
 						else
 						{
 							subMesh->setAssociatedMesh(0);
@@ -302,9 +306,10 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 					}
 				}
 			}
-			else if (currentObject->isA(CC_MESH))
+			else if (currentObject->isA(CC_MESH) || currentObject->isKindOf(CC_PRIMITIVE)) //CC_MESH or CC_PRIMITIVE!
 			{
 				ccMesh* mesh = ccHObjectCaster::ToMesh(currentObject);
+				assert(mesh);
 
 				//vertices
 				intptr_t cloudID = (intptr_t)mesh->getAssociatedCloud();
@@ -494,7 +499,9 @@ CC_FILE_ERROR BinFilter::loadFileV2(QFile& in, ccHObject& container)
 				{
 					ccHObject* poly = root->find(polyID);
 					if (poly && poly->isA(CC_MESH))
+					{
 						facet->setPolygon(ccHObjectCaster::ToMesh(poly));
+					}
 					else
 					{
 						//we have a problem here ;)

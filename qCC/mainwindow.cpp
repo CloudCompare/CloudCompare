@@ -171,7 +171,7 @@ MainWindow::MainWindow()
 {
     //Dialog "auto-construction"
     setupUi(this);
-    QSettings settings("CloudCompare", "qCC");
+    QSettings settings;
     restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
 
 	//advanced widgets not handled by QDesigner
@@ -4916,7 +4916,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     }
 
     //save the state as settings
-    QSettings settings("CloudCompare", "qCC");
+    QSettings settings;
     settings.setValue("mainWindowGeometry", saveGeometry());
     settings.setValue("mainWindowState", saveState());
 }
@@ -7107,8 +7107,8 @@ void MainWindow::addToDB(ccHObject* obj,
 			PointCoordinateType diag = bBox.getDiagNorm();
 
 			bool shiftAlreadyEnabled = (coordinatesTransEnabled && *coordinatesTransEnabled && coordinatesShift);
-			double P[3]={center[0],center[1],center[2]};
-			double Pshift[3]={0};
+			double P[3] = {center[0],center[1],center[2]};
+			double Pshift[3] = {0};
 			if (shiftAlreadyEnabled)
 				memcpy(Pshift,coordinatesShift,sizeof(double)*3);
 			double scale = (coordinatesScale ? *coordinatesScale : 1.0);
@@ -7117,10 +7117,10 @@ void MainWindow::addToDB(ccHObject* obj,
 			{
 				ccGLMatrix mat;
 				mat.toIdentity();
-				mat.data()[12] = (float)Pshift[0];
-				mat.data()[13] = (float)Pshift[1];
-				mat.data()[14] = (float)Pshift[2];
-				mat.data()[0] = mat.data()[5] = mat.data()[10] = scale;
+				mat.data()[12] = static_cast<float>(Pshift[0]);
+				mat.data()[13] = static_cast<float>(Pshift[1]);
+				mat.data()[14] = static_cast<float>(Pshift[2]);
+				mat.data()[0] = mat.data()[5] = mat.data()[10] = static_cast<float>(scale);
 				obj->applyGLTransformation_recursive(&mat);
 				ccConsole::Warning(QString("Entity '%1' will be translated: (%2,%3,%4)").arg(obj->getName()).arg(Pshift[0],0,'f',2).arg(Pshift[1],0,'f',2).arg(Pshift[2],0,'f',2));
 				if (scale != 1.0)
@@ -7142,7 +7142,7 @@ void MainWindow::addToDB(ccHObject* obj,
 						pc->setOriginalShift(Pshift[0]+oShift[0],Pshift[1]+oShift[1],Pshift[2]+oShift[2]);
 					}
 
-					for (unsigned i=0;i<child->getChildrenNumber();++i)
+					for (unsigned i=0; i<child->getChildrenNumber(); ++i)
 						children.push_back(child->getChild(i));
 				}
 
@@ -7164,7 +7164,7 @@ void MainWindow::addToDB(ccHObject* obj,
 	if (m_ccRoot)
 		m_ccRoot->addElement(obj,autoExpandDBTree);
 
-	//we can now update the current display, as GL windows use DB root as scene graph!
+	//we can now update the current display, as GL windows use the DB root as scene graph!
 	if (addToDisplay)
     {
 		ccGLWindow* activeWin = (winDest ? winDest : getActiveGLWindow());
@@ -7176,7 +7176,6 @@ void MainWindow::addToDB(ccHObject* obj,
                 activeWin->zoomGlobal();
             else
                 activeWin->redraw();
-
         }
     }
 }

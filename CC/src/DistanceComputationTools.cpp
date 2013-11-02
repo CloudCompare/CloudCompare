@@ -2268,25 +2268,23 @@ bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersi
 {
     assert(cloud);
 
-	unsigned n=cloud->size();
-	if (n==0 || seedPointIndex>=n)
+	unsigned n = cloud->size();
+	if (n == 0 || seedPointIndex >= n)
         return false;
 
 	cloud->enableScalarField();
 	cloud->forEach(ScalarFieldTools::SetScalarValueToNaN);
 
 	DgmOctree* theOctree = new DgmOctree(cloud);
-	if (theOctree->build(progressCb)<1)
+	if (theOctree->build(progressCb) < 1)
 	{
 		delete theOctree;
 		return false;
 	}
 
 	FastMarchingForPropagation fm;
-
-	if (fm.init(cloud,theOctree,octreeLevel,true)<0)
+	if (fm.init(cloud,theOctree,octreeLevel,true) < 0)
 	{
-		//fl_alert("Probleme lors de l'initialisation");
 		delete theOctree;
 		return false;
 	}
@@ -2296,12 +2294,12 @@ bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersi
 	theOctree->getTheCellPosWhichIncludesThePoint(cloud->getPoint(seedPointIndex),cellPos,octreeLevel);
 	fm.setSeedCell(cellPos);
 
-	bool result=false;
-	if (fm.propagate()>=0)
+	bool result = false;
+	if (fm.propagate() >= 0)
 		result = fm.setPropagationTimingsAsDistances();
 
 	delete theOctree;
-	theOctree=0;
+	theOctree = 0;
 
 	return result;
 }
@@ -2313,8 +2311,8 @@ int DistanceComputationTools::diff(GenericIndexedCloudPersist* comparedCloud,
 	if (!comparedCloud || !referenceCloud)
 		return -1;
 
-	unsigned nA=comparedCloud->size();
-	if (nA==0)
+	unsigned nA = comparedCloud->size();
+	if (nA == 0)
 		return -2;
 
 	//Reference cloud to store closest point set
@@ -2325,10 +2323,10 @@ int DistanceComputationTools::diff(GenericIndexedCloudPersist* comparedCloud,
 	params.CPSet = &A_in_B;
 
 	int result = computeHausdorffDistance(comparedCloud,referenceCloud,params,progressCb);
-	if (result<0)
+	if (result < 0)
 		return -3;
 
-	for (unsigned i=0;i<nA;++i)
+	for (unsigned i=0; i<nA; ++i)
 	{
 		ScalarType dA = comparedCloud->getPointScalarValue(i);
 		ScalarType dB = A_in_B.getPointScalarValue(i);

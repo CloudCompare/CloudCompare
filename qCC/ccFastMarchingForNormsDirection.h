@@ -33,7 +33,7 @@ class ccGenericPointCloud;
 class ccPointCloud;
 
 //! Fast Marching algorithm for normals direction resolution
-/** Extends the FastMarchingAlgorithm class (basic algorithm).
+/** Extends the FastMarching class.
 **/
 class ccFastMarchingForNormsDirection : public CCLib::FastMarching
 {
@@ -44,8 +44,8 @@ public:
 	static int ResolveNormsDirectionByFrontPropagation(ccPointCloud* theCloud,
                                                         NormsIndexesTableType* theNorms,
                                                         uchar octreeLevel,
-                                                        CCLib::GenericProgressCallback* progressCb=0,
-                                                        CCLib::DgmOctree* _theOctree=0);
+                                                        CCLib::GenericProgressCallback* progressCb = 0,
+                                                        CCLib::DgmOctree* _theOctree = 0);
 	//! Default constructor
 	ccFastMarchingForNormsDirection();
 
@@ -55,13 +55,13 @@ public:
 		the octree considered at a given level of subdivision. The local
 		front acceleration in each cell is deduced from the scalar values
 		associated to the points lying in the octree cell (mean value).
-		\param aList the point cloud
+		\param cloud the point cloud
 		\param theNorms the normals array
 		\param theOctree the associated octree
 		\param gridLevel the level of subdivision
 		\return a negative value if something went wrong
 	**/
-	int init(ccGenericPointCloud* aList,
+	int init(ccGenericPointCloud* cloud,
             NormsIndexesTableType* theNorms,
             CCLib::DgmOctree* theOctree,
             uchar gridLevel);
@@ -72,8 +72,9 @@ public:
 	**/
 	void endPropagation();
 
-	//! updates a list of point flags, indicating the points alreay processed
-	/** \return the number of resolved points **/
+	//! Updates a list of point flags, indicating the points alreay processed
+	/** \return the number of resolved points
+	**/
 	int updateResolvedTable(ccGenericPointCloud* theCloud,
                             GenericChunkedArray<1,uchar> &resolved,
                             NormsIndexesTableType* theNorms);
@@ -91,36 +92,53 @@ public:
 protected:
 
     //! A Fast Marching grid cell for normals direction resolution
-    class DirectionCell : public CCLib::FastMarching::Cell
+    struct DirectionCell : CCLib::FastMarching::Cell
     {
-    public:
-        //! The local front acceleration
+		//! Default constructor
+		DirectionCell()
+			: Cell()
+			, N(0,0,0)
+			, cellCode(0)
+			, population(0)
+			, signConfidence(1)
+			, processed(false)
+		{}
+
+		//! The local cell normal
         CCVector3 N;
         //! the code of the equivalent cell in the octree
         CCLib::DgmOctree::OctreeCellCodeType cellCode;
-        //Temp value
-        ScalarType v;
-        //marker
+		//! Cell population
+		unsigned population;
+        //! Confidence value
+        float signConfidence;
+        //! Flag
         bool processed;
     };
 
 	//inherited methods (see FastMarchingAlgorithm)
 	virtual float computeT(unsigned index);
-	virtual float computeTCoefApprox(CCLib::FastMarching::Cell* currentCell, CCLib::FastMarching::Cell* neighbourCell) {return 1.0;};
+	virtual float computeTCoefApprox(CCLib::FastMarching::Cell* currentCell, CCLib::FastMarching::Cell* neighbourCell) const;
 	virtual int step();
-	virtual void addTrialCell(unsigned index, float T);
-	virtual unsigned getNearestTrialCell();
 	virtual void initTrialCells();
-	virtual bool instantiateGrid(unsigned size);
+	virtual bool instantiateGrid(unsigned size) { return instantiateGridTpl<DirectionCell*>(size); }
 
 	//! Compute the "biggest" (latest) front arrival time of the ACTIVE cells
 	void initLastT();
 
+	//! Resolves the direction of a given cell (once and for all)
+	void resolveCellOrientation(unsigned index);
+
+	//! Sets the propagation timings as distances for each point
+	/** \return true if ok, false otherwise
+	**/
+	bool setPropagationTimingsAsDistances();
+
 	//! TRIAL cells list
-	std::vector<unsigned> trialCells;
+	std::vector<unsigned> m_trialCells;
 
 	//! Last arrival time
-	float lastT;
+	float m_lastT;
 };
 
 #endif

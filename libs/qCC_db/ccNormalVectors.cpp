@@ -536,36 +536,36 @@ unsigned ccNormalVectors::Quant_quantize_normal(const float* n, unsigned level)
 		return 0;
 
 	/// compute in which sector lie the elements
-	unsigned res = 0, sector = 0;
-	bool flip = false;
-	float x,y,z,box[6],halfBox[3],psnorm;
-	if (n[0] >= 0.) { x = n[0]; } else { res |= 4; x = -n[0]; }
-	if (n[1] >= 0.) { y = n[1]; } else { res |= 2; y = -n[1]; }
-	if (n[2] >= 0.) { z = n[2]; } else { res |= 1; z = -n[2]; }
+	unsigned res = 0;
+	float x,y,z;
+	if (n[0] >= 0) { x = n[0]; } else { res |= 4; x = -n[0]; }
+	if (n[1] >= 0) { y = n[1]; } else { res |= 2; y = -n[1]; }
+	if (n[2] >= 0) { z = n[2]; } else { res |= 1; z = -n[2]; }
 
 	/// scale the sectored vector - early return for null vector
-	psnorm = x + y + z;
-	if (psnorm ==  0)
+	float psnorm = x + y + z;
+	if (psnorm == 0)
 	{
 		res <<= (level<<1);
 		return res;
 	}
-	psnorm = 1. / psnorm;
+	psnorm = 1.0f / psnorm;
 	x *= psnorm; y *= psnorm; z *= psnorm;
+
 	/// compute the box
-	box[0] = box[1] = box[2] = 0.;
-	box[3] = box[4] = box[5] = 1.;
+	float box[6] = { 0, 0, 0, 1, 1, 1 };
 	/// then for each required level, quantize...
+	bool flip = false;
 	while (level > 0)
 	{
 		//next level
 		res <<= 2;
 		--level;
-		halfBox[0] = 0.5 * (box[0] + box[3]);
-		halfBox[1] = 0.5 * (box[1] + box[4]);
-		halfBox[2] = 0.5 * (box[2] + box[5]);
+		float halfBox[3] = {0.5f * (box[0] + box[3]),
+							0.5f * (box[1] + box[4]),
+							0.5f * (box[2] + box[5]) };
 
-		sector = 3;
+		unsigned sector = 3;
 		if (flip)
 		{
 			if (z < halfBox[2]) sector = 2;

@@ -102,10 +102,6 @@ public:
                                     ccGenericPointCloud* sourceCloud,
                                     float norm[]);
 
-	static void ComputeRobustAverageNorm(CCLib::ReferenceCloud* subset,
-                                            ccGenericPointCloud* sourceCloud,
-                                            PointCoordinateType norm[]);
-
 protected:
 
     //Inherited from ccHObject

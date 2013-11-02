@@ -28,13 +28,11 @@ namespace CCLib
 class ReferenceCloud;
 class GenericCloud;
 
-//! Fast Marching algorithm for surfacical front propagation
-/** Re-implements the FastMarching class.
+//! Fast Marching algorithm for surface front propagation
+/** Extends the FastMarching class.
 **/
-
 class FastMarchingForPropagation : public FastMarching
 {
-
 public:
 
 	//! Default constructor
@@ -56,7 +54,7 @@ public:
 	int init(GenericCloud* theCloud,
 				DgmOctree* theOctree,
 				uchar gridLevel,
-				bool constantAcceleration=false);
+				bool constantAcceleration = false);
 
 	/** Finalizes an iteration process
         Resets the different lists and the grid. This method should be
@@ -78,12 +76,11 @@ public:
 
 	//! Sets the threshold for propagation stop
 	/** This threshold corresponds to the maximum front arrival time
-		increase allowed. If the delta between the fornt arrival time
-		at two consecutive cells is higher, the propagation process is
-		stoped.
+		increase allowed. If the delta between the fornt arrival time at
+		two consecutive cells is higher, the propagation process is stoped.
 		\param value the threshold
 	**/
-	void setDetectionThreshold(float value) {detectionThreshold=value;};
+	void setDetectionThreshold(float value) { m_detectionThreshold = value; }
 
 	//! Sets the accceleration exageration factor
 	/** In order to detect the front arrival time jumps (see
@@ -92,7 +89,7 @@ public:
 		computation with this factor.
 		\param value the acceleration exageration factor
 	**/
-	void setJumpCoef(float value) {jumpCoef=value;};
+	void setJumpCoef(float value) { m_jumpCoef = value; };
 
 	//! Find peaks of local acceleration values
 	/** This method is useful when using this Fast Marching
@@ -107,9 +104,15 @@ public:
 protected:
 
     //! A Fast Marching grid cell for surfacical propagation
-    class PropagationCell : public Cell
+    struct PropagationCell : Cell
     {
-    public:
+		//! Default constructor
+		PropagationCell()
+			: Cell()
+			, f(0)
+			, cellCode(0)
+		{}
+
         //! Local front acceleration
         float f;
         //! Equivalent cell code in the octree
@@ -118,24 +121,19 @@ protected:
 
 	//inherited methods (see FastMarching)
 	virtual float computeT(unsigned index);
-	virtual float computeTCoefApprox(Cell* currentCell, Cell* neighbourCell);
+	virtual float computeTCoefApprox(Cell* currentCell, Cell* neighbourCell) const;
 	virtual int step();
-	virtual void addTrialCell(unsigned index, float T);
-	virtual unsigned getNearestTrialCell();
-	virtual bool instantiateGrid(unsigned size);
+	virtual bool instantiateGrid(unsigned size) { return instantiateGridTpl<PropagationCell>(size); }
 
 	//! Compute the "biggest" (latest) front arrival time of the ACTIVE cells
 	void initLastT();
 
-	//! TRIAL cells list
-	std::vector<unsigned> trialCells;
-
 	//! Accceleration exageration factor
-	float jumpCoef;
+	float m_jumpCoef;
 	//! Threshold for propagation stop
-	float detectionThreshold;
+	float m_detectionThreshold;
 	//! Latest front arrival time of the ACTIVE cells
-	float lastT;
+	float m_lastT;
 
 };
 

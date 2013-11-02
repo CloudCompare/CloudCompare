@@ -1521,7 +1521,8 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		if (cloud->hasNormals())
             mesh->showNormals(true);
         else
-            mesh->computeNormals();
+            mesh->computeNormals(); //DGM: not sure it's a good idea if the user don't want normals
+									//especially in ccViewer!
 
 		if (mesh->hasMaterials())
 			mesh->showNormals(false);

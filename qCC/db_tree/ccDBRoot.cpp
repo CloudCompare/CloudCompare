@@ -175,16 +175,27 @@ void ccDBRoot::addElement(ccHObject* anObject, bool autoExpand/*=true*/)
         parentObject = m_treeRoot;
         m_treeRoot->addChild(anObject);
     }
+	else
+	{
+		//DGM TODO: how could we check that the object is not already inserted in the DB tree?
+		//The double insertion can cause serious damage to it (not sure why excatly though).
+
+		//The code below doesn't work because the 'index' method will always return a valid index
+		//as soon as the object has a parent (index creation is a purely 'logical' approach)
+		//QModelIndex nodeIndex = index(anObject);
+		//if (nodeIndex.isValid())
+		//	return;
+	}
 
     //look for insert node index in tree
     QModelIndex insertNodeIndex = index(parentObject);
     int childPos = parentObject->getChildIndex(anObject);
+	
+	//row insertion operation (start)
+	beginInsertRows(insertNodeIndex, childPos, childPos);
 
-    //row insertion operation (start)
-    beginInsertRows(insertNodeIndex, childPos, childPos);
-
-    //row insertion operation (end)
-    endInsertRows();
+	//row insertion operation (end)
+	endInsertRows();
 
 	if (autoExpand)
 	{

@@ -3,6 +3,9 @@
 v2.5.2 XX/XX/2013
 - enhancement:
 	- the 'facet' entity's normal vector can now be displayed or hidden via the facet properties
+	- BIN file loading/saving is now done in a separate thread
+		* a progress dialog is now displayed during loading/saving
+		* multiple loading sesssions can be done concurrently (only interesting when loading from diffrent drives)
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
 		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)

@@ -482,9 +482,9 @@ void ccClippingBoxTool::exportMultCloud()
 								sliceCloud->setVisible(true);
 								sliceCloud->setDisplay(cloud->getDisplay());
 
-								CCVector3 cellOrigin(gridOrigin.x + (PointCoordinateType)i * (cellSize.x + gap),
-													 gridOrigin.y + (PointCoordinateType)j * (cellSize.y + gap),
-													 gridOrigin.z + (PointCoordinateType)k * (cellSize.z + gap));
+								CCVector3 cellOrigin(gridOrigin.x + static_cast<PointCoordinateType>(i) * (cellSize.x + gap),
+													 gridOrigin.y + static_cast<PointCoordinateType>(j) * (cellSize.y + gap),
+													 gridOrigin.z + static_cast<PointCoordinateType>(k) * (cellSize.z + gap));
 								QString slicePosStr = QString("(%1 ; %2 ; %3)").arg(cellOrigin.x).arg(cellOrigin.y).arg(cellOrigin.z);
 								sliceCloud->setName(QString("slice @ ")+slicePosStr);
 
@@ -506,7 +506,7 @@ void ccClippingBoxTool::exportMultCloud()
 							}
 
 							++currentCloudCount;
-							pDlg.setValue((int)floor(100.0f*(float)currentCloudCount/(float)cellCount));
+							pDlg.setValue(static_cast<int>(floor(100.0f*static_cast<float>(currentCloudCount)/static_cast<float>(cellCount))));
 						}
 					}
 				}

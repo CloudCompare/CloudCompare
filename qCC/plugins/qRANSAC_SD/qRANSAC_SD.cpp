@@ -36,10 +36,11 @@
 //Qt
 #include <QtGui>
 #include <QApplication>
-#include <qtconcurrentrun.h>
+#include <QtConcurrentRun>
+#include <QApplication>
+#include <QProgressDialog>
 
 //qCC_db
-#include <ccProgressDialog.h>
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
@@ -238,25 +239,23 @@ void qRansacSD::doAction()
 		ransacOptions.m_probability = rsdDlg.probaDoubleSpinBox->value();
 	}
 
-	//progress dialog
-	ccProgressDialog progressCb(false,m_app->getMainWindow());
-	progressCb.setRange(0,0);
-
 	if (!hasNorms)
 	{
-		progressCb.setInfo("Computing normals (please wait)");
-		progressCb.start();
+		QProgressDialog pDlg("Computing normals (please wait)",QString(),0,0,m_app->getMainWindow());
+		pDlg.setWindowTitle("Ransac Shape Detection");
+		pDlg.show();
 		QApplication::processEvents();
 
 		cloud.calcNormals(.01f * scale);
 
 		if (pc->reserveTheNormsTable())
 		{
-			for (size_t i=0;i<count;++i)
+			for (size_t i=0; i<count; ++i)
 			{
-				CCVector3 N(cloud[i].normal);
-				N.normalize();
-				pc->addNorm(N.u);
+				Vec3f& Ni = cloud[i].normal;
+				//normalize the vector in case of
+				Vector3Tpl<float>::vnormalize(Ni);
+				pc->addNorm(Ni[0],Ni[1],Ni[2]);
 			}
 			pc->showNormals(true);
 			
@@ -298,9 +297,11 @@ void qRansacSD::doAction()
 	// [ pc.size() - \sum_{j=0..i} shapes[j].second, pc.size() - \sum_{j=0..i-1} shapes[j].second )
 
 	{
-		progressCb.setInfo("Operation in progress");
-		progressCb.setMethodTitle("Ransac Shape Detection");
-		progressCb.start();
+		//progress dialog (Qtconcurrent::run can't be canceled!)
+		QProgressDialog pDlg("Operation in progress (please wait)",QString(),0,0,m_app->getMainWindow());
+		pDlg.setWindowTitle("Ransac Shape Detection");
+		pDlg.show();
+		QApplication::processEvents();
 
 		//run in a separate thread
 		s_detector = &detector;
@@ -308,7 +309,6 @@ void qRansacSD::doAction()
 		s_cloud = &cloud;
 		QFuture<void> future = QtConcurrent::run(doDetection);
 
-		unsigned progress = 0;
 		while (!future.isFinished())
 		{
 #if defined(CC_WINDOWS)
@@ -316,21 +316,13 @@ void qRansacSD::doAction()
 #else
 			sleep(500);
 #endif
-			progressCb.update(++progress);
-			//Qtconcurrent::run can't be canceled!
-			/*if (progressCb.isCancelRequested())
-			{
-				future.cancel();
-				future.waitForFinished();
-				s_remainingPoints = count;
-				break;
-			}
-			//*/
+			pDlg.setValue(pDlg.value()+1);
+			QApplication::processEvents();
 		}
 
 		remaining = s_remainingPoints;
 
-		progressCb.stop();
+		pDlg.hide();
 		QApplication::processEvents();
 	}
 	//else

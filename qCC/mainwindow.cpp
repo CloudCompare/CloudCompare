@@ -4548,7 +4548,7 @@ void MainWindow::doActionComputeNormals()
 			if (defaultRadius == 0.0 && m_selectedEntities[i]->isA(CC_POINT_CLOUD))
 			{
 				ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
-				defaultRadius = cloud->getBB().getDiagNorm() * static_cast<PointCoordinateType>(0.02); //diameter=2% of the bounding box diagonal
+				defaultRadius = cloud->getBB().getDiagNorm() * static_cast<PointCoordinateType>(0.01); //diameter=1% of the bounding box diagonal
 			}
 			onlyMeshes = false;
 			break;

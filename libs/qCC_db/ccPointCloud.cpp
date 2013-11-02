@@ -962,7 +962,7 @@ void ccPointCloud::addRGBColor(colorType r, colorType g, colorType b)
 
 void ccPointCloud::addNorm(PointCoordinateType Nx, PointCoordinateType Ny, PointCoordinateType Nz)
 {
-	PointCoordinateType N[3]={Nx,Ny,Nz};
+	PointCoordinateType N[3] = {Nx,Ny,Nz};
 	addNorm(N);
 }
 

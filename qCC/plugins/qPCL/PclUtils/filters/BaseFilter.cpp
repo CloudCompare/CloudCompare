@@ -194,7 +194,7 @@ int BaseFilter::start()
 #if defined(CC_WINDOWS)
             ::Sleep(500);
 #else
-            usleep(1.0);
+            sleep(500);
 #endif
             progressCb->update(++progress);
         }
@@ -224,7 +224,7 @@ int BaseFilter::start()
 #if defined(CC_WINDOWS)
             ::Sleep(500);
 #else
-            usleep(1.0);
+            sleep(500);
 #endif
         }
         int is_ok = s_computeStatus;

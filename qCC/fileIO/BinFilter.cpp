@@ -132,7 +132,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 #if defined(CC_WINDOWS)
 		::Sleep(500);
 #else
-		sleep(500);
+        usleep(500 * 1000);
 #endif
 		pDlg.setValue(pDlg.value()+1);
 		QApplication::processEvents();
@@ -292,7 +292,7 @@ CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bo
 #if defined(CC_WINDOWS)
 			::Sleep(500);
 #else
-			sleep(500);
+            usleep(500 * 1000);
 #endif
 			if (alwaysDisplayLoadDialog)
 			{

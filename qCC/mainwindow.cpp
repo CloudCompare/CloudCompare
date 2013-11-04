@@ -4772,7 +4772,7 @@ void MainWindow::doActionUnroll()
     //for "real" point clouds only
     if (!cloud || !cloud->isA(CC_POINT_CLOUD))
     {
-        ccConsole::Error("Method can't be applied on virtual point clouds!");
+        ccConsole::Error("Method can't be applied on locked vertices or virtual point clouds!");
         return;
     }
     ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);

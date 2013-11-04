@@ -190,7 +190,7 @@ void qPoissonRecon::doAction()
 			#if defined(CC_WINDOWS)
 			::Sleep(500);
 			#else
-			sleep(500);
+            usleep(500 * 1000);
 			#endif
 
 			pDlg.setValue(pDlg.value()+1);

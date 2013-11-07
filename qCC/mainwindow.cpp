@@ -4640,13 +4640,13 @@ void MainWindow::doActionComputeNormals()
 
 void MainWindow::doActionResolveNormalsDirection()
 {
-    if (m_selectedEntities.size() < 1)
+    if (m_selectedEntities.empty())
     {
         ccConsole::Error("Select at least one point cloud");
         return;
     }
 
-    ccAskOneIntValueDlg vDlg("Octree level", 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, 7, "Resolve normal directions");
+    ccAskOneIntValueDlg vDlg("Octree level", 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, 5, "Resolve normal directions");
     if (!vDlg.exec())
         return;
 	assert(vDlg.getValue() && vDlg.getValue()<=255);
@@ -4697,6 +4697,8 @@ void MainWindow::doActionResolveNormalsDirection()
 
         cloud->prepareDisplayForRefresh();
     }
+
+	ccLog::Warning("Normal Sign Resolve done. You may have to globally invert the cloud normals (Edit > Normals > Invert).");
 
     refreshAll();
 	updateUI();

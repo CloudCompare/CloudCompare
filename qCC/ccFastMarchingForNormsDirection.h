@@ -61,23 +61,17 @@ public:
 		\param gridLevel the level of subdivision
 		\return a negative value if something went wrong
 	**/
-	int init(ccGenericPointCloud* cloud,
-            NormsIndexesTableType* theNorms,
-            CCLib::DgmOctree* theOctree,
-            uchar gridLevel);
-
-	//! Finalizes an iteration process
-	/** Resets the different lists and the grid. This method should be
-		called after each propagation.
-	**/
-	void endPropagation();
+	int init(	ccGenericPointCloud* cloud,
+				NormsIndexesTableType* theNorms,
+				CCLib::DgmOctree* theOctree,
+				uchar gridLevel);
 
 	//! Updates a list of point flags, indicating the points alreay processed
 	/** \return the number of resolved points
 	**/
-	int updateResolvedTable(ccGenericPointCloud* theCloud,
-                            GenericChunkedArray<1,uchar> &resolved,
-                            NormsIndexesTableType* theNorms);
+	unsigned updateResolvedTable(	ccGenericPointCloud* theCloud,
+									GenericChunkedArray<1,uchar> &resolved,
+									NormsIndexesTableType* theNorms);
 
 	//! Find peaks of local acceleration values
 	/** This method is usefull when using this Fast Marching
@@ -92,28 +86,39 @@ public:
 protected:
 
     //! A Fast Marching grid cell for normals direction resolution
-    struct DirectionCell : CCLib::FastMarching::Cell
+    class DirectionCell : public CCLib::FastMarching::Cell
     {
+	public:
 		//! Default constructor
 		DirectionCell()
 			: Cell()
 			, N(0,0,0)
+			, C(0,0,0)
 			, cellCode(0)
-			, population(0)
 			, signConfidence(1)
 			, processed(false)
+#ifdef _DEBUG
+			, scalar(0)
+#endif
 		{}
+
+		///! Destructor
+		virtual ~DirectionCell() {}
 
 		//! The local cell normal
         CCVector3 N;
+		//! The local cell center
+        CCVector3 C;
         //! the code of the equivalent cell in the octree
         CCLib::DgmOctree::OctreeCellCodeType cellCode;
-		//! Cell population
-		unsigned population;
         //! Confidence value
         float signConfidence;
         //! Flag
         bool processed;
+#ifdef _DEBUG
+		//! Undefined scalar for debug purposes
+		float scalar;
+#endif
     };
 
 	//inherited methods (see FastMarchingAlgorithm)
@@ -123,8 +128,10 @@ protected:
 	virtual void initTrialCells();
 	virtual bool instantiateGrid(unsigned size) { return instantiateGridTpl<DirectionCell*>(size); }
 
-	//! Compute the "biggest" (latest) front arrival time of the ACTIVE cells
-	void initLastT();
+	//! Computes relative 'confidence' between two cells (orientations)
+	/** \return confidence between 0 and 1
+	**/
+	float computePropagationConfidence(DirectionCell* originCell, DirectionCell* destCell) const;
 
 	//! Resolves the direction of a given cell (once and for all)
 	void resolveCellOrientation(unsigned index);
@@ -133,12 +140,6 @@ protected:
 	/** \return true if ok, false otherwise
 	**/
 	bool setPropagationTimingsAsDistances();
-
-	//! TRIAL cells list
-	std::vector<unsigned> m_trialCells;
-
-	//! Last arrival time
-	float m_lastT;
 };
 
 #endif

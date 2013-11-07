@@ -43,9 +43,10 @@
 #include <set>
 #include <assert.h>
 #if defined(CC_WINDOWS)
-#include "Windows.h"
+#include <Windows.h>
 #else
 #include <time.h>
+#include <unistd.h>
 #endif
 
 //! Per-cloud header flags (old style)

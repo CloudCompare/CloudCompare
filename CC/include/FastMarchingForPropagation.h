@@ -56,12 +56,6 @@ public:
 				uchar gridLevel,
 				bool constantAcceleration = false);
 
-	/** Finalizes an iteration process
-        Resets the different lists and the grid. This method should be
-		called after each propagation.
-	**/
-	void endPropagation();
-
 	//! Returns a list of the points (references to) reached by the propagation process
 	/** Returns a cloud of points (references to) corresponding to the points that are
 		lying in cells that have been visited by the last propagation process.
@@ -104,14 +98,18 @@ public:
 protected:
 
     //! A Fast Marching grid cell for surfacical propagation
-    struct PropagationCell : Cell
+    class PropagationCell : public Cell
     {
+	public:
 		//! Default constructor
 		PropagationCell()
 			: Cell()
 			, f(0)
 			, cellCode(0)
 		{}
+
+		//! Destructor
+		virtual ~PropagationCell() {}
 
         //! Local front acceleration
         float f;
@@ -125,15 +123,10 @@ protected:
 	virtual int step();
 	virtual bool instantiateGrid(unsigned size) { return instantiateGridTpl<PropagationCell>(size); }
 
-	//! Compute the "biggest" (latest) front arrival time of the ACTIVE cells
-	void initLastT();
-
 	//! Accceleration exageration factor
 	float m_jumpCoef;
 	//! Threshold for propagation stop
 	float m_detectionThreshold;
-	//! Latest front arrival time of the ACTIVE cells
-	float m_lastT;
 
 };
 

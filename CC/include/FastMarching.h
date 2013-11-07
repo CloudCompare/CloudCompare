@@ -29,6 +29,9 @@
 //system
 #include <vector>
 #include <float.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 namespace CCLib
 {
@@ -85,6 +88,12 @@ public:
 	**/
 	virtual int propagate() = 0;
 
+	/** Finalizes an iteration process
+        Resets the different lists and the grid. This method should be
+		called after each propagation (before starting a new one).
+	**/
+	virtual void cleanLastPropagation();
+
 	//! Returns the front arrival time at a given cell
 	/** This method should only be called after the propagation
 		succeeded. The coordinates of the cell can be absolute
@@ -98,7 +107,7 @@ public:
 protected:
 
     //! A generic Fast Marching grid cell
-    struct Cell
+    class Cell
     {
     public:
 
@@ -116,6 +125,9 @@ protected:
 			: state(FAR_CELL)
 			, T(T_INF())
 		{}
+
+		//! Virtual destructor
+		virtual ~Cell() {}
 
         //! Cell state
         STATE state;

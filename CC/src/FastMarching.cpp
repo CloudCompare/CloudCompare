@@ -23,6 +23,8 @@
 //system
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 using namespace CCLib;
 
@@ -138,6 +140,40 @@ int FastMarching::initOther()
         return -3;
 
 	return 0;
+}
+
+void FastMarching::cleanLastPropagation()
+{
+	while (!m_activeCells.empty())
+	{
+		Cell* aCell = m_theGrid[m_activeCells.back()];
+		if (aCell)
+		{
+			aCell->state = Cell::FAR_CELL;
+			aCell->T = Cell::T_INF();
+		}
+		else
+		{
+			assert(false);
+		}
+		m_activeCells.pop_back();
+	}
+
+	while (!m_trialCells.empty())
+	{
+		Cell* aCell = m_theGrid[m_trialCells.back()];
+		if (aCell)
+		{
+			aCell->state = Cell::FAR_CELL;
+			aCell->T = Cell::T_INF();
+		}
+		else
+		{
+			assert(false);
+		}
+
+		m_trialCells.pop_back();
+	}
 }
 
 void FastMarching::setSeedCell(int pos[])

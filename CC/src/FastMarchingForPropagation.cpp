@@ -31,9 +31,8 @@ using namespace CCLib;
 
 FastMarchingForPropagation::FastMarchingForPropagation()
 	: FastMarching()
-	, m_jumpCoef(0)						//resistance a l'avancement du front, en fonction de Cell->f (ici, pas de resistance)
+	, m_jumpCoef(0)							//resistance a l'avancement du front, en fonction de Cell->f (ici, pas de resistance)
 	, m_detectionThreshold(Cell::T_INF())	//saut relatif de la valeur d'arrivee qui arrete la propagation (ici, "desactive")
-	, m_lastT(0)							//derniere valeur d'arrivee
 {
 }
 
@@ -92,9 +91,12 @@ int FastMarchingForPropagation::step()
 	Cell* minTCell =  m_theGrid[minTCellIndex];
 	assert(minTCell != 0);
 
-	if (minTCell->T-m_lastT > m_detectionThreshold * m_cellSize)
+	//last arrival time
+	float lastT = (m_activeCells.empty() ? 0 : m_theGrid[m_activeCells.back()]->T);
+
+	if (minTCell->T-lastT > m_detectionThreshold * m_cellSize)
 	{
-		//endPropagation();
+		//reset();
 		return 0;
 	}
 
@@ -106,7 +108,7 @@ int FastMarchingForPropagation::step()
 		minTCell->state = Cell::ACTIVE_CELL;
 		m_activeCells.push_back(minTCellIndex);
 
-		m_lastT = minTCell->T;
+		assert(minTCell->T >= lastT);
 
 		//on doit rajouter ses voisines au groupe TRIAL
 		unsigned nIndex;
@@ -238,17 +240,6 @@ float FastMarchingForPropagation::computeT(unsigned index)
 	return (float)TijNew;
 }
 
-void FastMarchingForPropagation::initLastT()
-{
-	Cell* aCell;
-	m_lastT = 0;
-	for (unsigned i=0; i<m_activeCells.size(); i++)
-	{
-		aCell = m_theGrid[m_activeCells[i]];
-		m_lastT = std::max(m_lastT,aCell->T);
-	}
-}
-
 int FastMarchingForPropagation::propagate()
 {
 	int iteration = 0;
@@ -256,8 +247,6 @@ int FastMarchingForPropagation::propagate()
 
 	//initialisation de la liste des "TRIAL" cells
 	initTrialCells();
-
-	initLastT();
 
 	while (result>0)
 	{
@@ -323,33 +312,6 @@ bool FastMarchingForPropagation::setPropagationTimingsAsDistances()
 
 	return true;
 }
-
-
-void FastMarchingForPropagation::endPropagation()
-{
-	while (!m_activeCells.empty())
-	{
-		PropagationCell* aCell = (PropagationCell*)m_theGrid[m_activeCells.back()];
-		delete aCell;
-		m_theGrid[m_activeCells.back()]=0;
-
-		m_activeCells.pop_back();
-	}
-
-	while (!m_trialCells.empty())
-	{
-		Cell* aCell = m_theGrid[m_trialCells.back()];
-		assert(aCell != 0);
-
-		aCell->state = Cell::FAR_CELL;
-		aCell->T = Cell::T_INF();
-
-		m_trialCells.pop_back();
-	}
-
-	m_lastT = 0;
-}
-
 
 float FastMarchingForPropagation::computeTCoefApprox(Cell* currentCell, Cell* neighbourCell) const
 {

@@ -260,7 +260,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 			if (progressCb)
                 progressCb->update(float(numberOfSegmentedLists % 100));
 
-			fm->endPropagation();
+			fm->cleanLastPropagation();
 
 			//break;
 		}

@@ -91,7 +91,8 @@ void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
 
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	if (size() < 2)
+	unsigned vertCount = size();
+	if (vertCount < 2)
 		return;
 
 	bool draw = false;
@@ -119,11 +120,9 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
 
-		unsigned count = size();
-		
-		for (unsigned i=0; i<count; ++i)
+		for (unsigned i=0; i<vertCount; ++i)
 		{
-			glVertex3fv(m_theAssociatedCloud->getPoint(m_theIndexes->getValue(i))->u);
+			glVertex3fv(getPoint(i)->u);
 		}
 
 		glEnd();

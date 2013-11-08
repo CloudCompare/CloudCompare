@@ -144,39 +144,25 @@ int FastMarching::initOther()
 
 void FastMarching::cleanLastPropagation()
 {
-	while (!m_activeCells.empty())
+	//reset cells state
+	//DGM: we don't use anymore the m_activeCells and
+	//m_trialCells vectors to optimize the number of cells
+	//tested as some cells may be 'lost' (i.e. not in those
+	//vectors).
+	for (unsigned i=0; i<m_gridSize; ++i)
 	{
-		Cell* aCell = m_theGrid[m_activeCells.back()];
-		if (aCell)
+		if (m_theGrid[i])
 		{
-			aCell->state = Cell::FAR_CELL;
-			aCell->T = Cell::T_INF();
+			m_theGrid[i]->state = Cell::FAR_CELL;
+			m_theGrid[i]->T = Cell::T_INF();
 		}
-		else
-		{
-			assert(false);
-		}
-		m_activeCells.pop_back();
 	}
 
-	while (!m_trialCells.empty())
-	{
-		Cell* aCell = m_theGrid[m_trialCells.back()];
-		if (aCell)
-		{
-			aCell->state = Cell::FAR_CELL;
-			aCell->T = Cell::T_INF();
-		}
-		else
-		{
-			assert(false);
-		}
-
-		m_trialCells.pop_back();
-	}
+	m_activeCells.clear();
+	m_trialCells.clear();
 }
 
-void FastMarching::setSeedCell(int pos[])
+bool FastMarching::setSeedCell(int pos[])
 {
 	unsigned index = FM_pos2index(pos);
 
@@ -188,9 +174,13 @@ void FastMarching::setSeedCell(int pos[])
 	if (aCell && aCell->state != Cell::ACTIVE_CELL)
 	{
 		//we add the cell to the "ACTIVE" set
-		aCell->state = Cell::ACTIVE_CELL;
 		aCell->T = 0;
-		m_activeCells.push_back(index);
+		addActiveCell(index);
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
@@ -213,9 +203,7 @@ void FastMarching::initTrialCells()
 				//and if it's not already in the TRIAL set
 				if (nCell->state == Cell::FAR_CELL)
 				{
-					nCell->state = Cell::TRIAL_CELL;
 					nCell->T = m_neighboursDistance[i] * computeTCoefApprox(aCell,nCell);
-
 					addTrialCell(nIndex);
 				}
 			}
@@ -225,7 +213,14 @@ void FastMarching::initTrialCells()
 
 void FastMarching::addTrialCell(unsigned index)
 {
+	m_theGrid[index]->state = Cell::TRIAL_CELL;
 	m_trialCells.push_back(index);
+}
+
+void FastMarching::addActiveCell(unsigned index)
+{
+	m_theGrid[index]->state = Cell::ACTIVE_CELL;
+	m_activeCells.push_back(index);
 }
 
 unsigned FastMarching::getNearestTrialCell()
@@ -234,8 +229,8 @@ unsigned FastMarching::getNearestTrialCell()
 		return 0; //0 = error
 
 	//we look for the "TRIAL" cell with the minimum time (T)
-	unsigned minTCellIndex = m_trialCells.front();
 	size_t minTCellIndexPos = 0;
+	unsigned minTCellIndex = m_trialCells[minTCellIndexPos];
 	CCLib::FastMarching::Cell* minTCell = m_theGrid[minTCellIndex];
 	assert(minTCell != 0);
 
@@ -243,14 +238,13 @@ unsigned FastMarching::getNearestTrialCell()
 	{
 		unsigned cellIndex = m_trialCells[i];
 		CCLib::FastMarching::Cell* cell = m_theGrid[cellIndex];
-		
 		assert(cell != 0);
 		
 		if (cell->T < minTCell->T)
 		{
+			minTCellIndexPos = i;
 			minTCellIndex = cellIndex;
 			minTCell = cell;
-			minTCellIndexPos = i;
 		}
 	}
 

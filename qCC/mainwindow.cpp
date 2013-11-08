@@ -1172,7 +1172,7 @@ void MainWindow::doActionConvertNormalsToHSV()
 	updateUI();
 }
 
-static double s_kdTreeMaxRMSPerCell = 0.1;
+static double s_kdTreeMaxErrorPerCell = 0.1;
 void MainWindow::doActionComputeKdTree()
 {
 	ccGenericPointCloud* cloud = 0;
@@ -1196,7 +1196,7 @@ void MainWindow::doActionComputeKdTree()
 	}
 
 	bool ok;
-	s_kdTreeMaxRMSPerCell = QInputDialog::getDouble(this, "Kd-tree", "Max RMS per leaf cell:", s_kdTreeMaxRMSPerCell, 1.0e-6, 1.0e6, 6, &ok);
+	s_kdTreeMaxErrorPerCell = QInputDialog::getDouble(this, "Kd-tree", "Max error per leaf cell:", s_kdTreeMaxErrorPerCell, 1.0e-6, 1.0e6, 6, &ok);
 	if (!ok)
 		return;
 
@@ -1207,7 +1207,7 @@ void MainWindow::doActionComputeKdTree()
 	eTimer.start();
 	ccKdTree* kdtree = new ccKdTree(cloud);
 
-	if (kdtree->build(s_kdTreeMaxRMSPerCell,1000,0.02f,&pDlg))
+	if (kdtree->build(s_kdTreeMaxErrorPerCell,CCLib::DistanceComputationTools::MAX_DIST_95_PERCENT,1000,&pDlg))
 	{
 		int elapsedTime_ms = eTimer.elapsed();
 

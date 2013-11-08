@@ -20,7 +20,6 @@
 
 //CCLib
 #include <TrueKdTree.h>
-#include <GenericProgressCallback.h>
 
 //Local
 #include "ccHObject.h"
@@ -74,14 +73,6 @@ public:
 	//! Flag points with a random color per leaf
 	bool convertCellIndexToRandomColor();
 
-	//! Fuses cells
-	/** Creates a new scalar fields with the groups indexes.
-		\param maxRMS max RMS after fusion
-		\param maxAngle_deg maximum angle between two sets to allow fusion (in degrees)
-		\param overlapCoef maximum relative distance between two sets to accept fusion (1 = no distance, < 1 = overlap, > 1 = gap)
-	**/
-	bool fuseCells(double maxRMS, double maxAngle_deg, double overlapCoef = 1.0, bool closestFirst = true, CCLib::GenericProgressCallback* progressCb = 0);
-
 	//! Returns the bounding-box of a given cell
 	ccBBox getCellBBox(BaseNode* node) const;
 
@@ -99,6 +90,7 @@ protected:
     //Inherited from ccHObject
     void drawMeOnly(CC_DRAW_CONTEXT& context);
 
+	//! Associated cloud
     ccGenericPointCloud* m_associatedGenericCloud;
 
 };

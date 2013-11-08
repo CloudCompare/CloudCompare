@@ -79,8 +79,9 @@ public:
 
 	//! Sets a given cell as "seed"
 	/** \param pos the cell position in the grid (3 integer coordinates)
+		\return whether the cell could be set as a seed or not
 	**/
-	virtual void setSeedCell(int pos[]);
+	virtual bool setSeedCell(int pos[]);
 
 	//! Propagates the front
 	/** The seeds should have already been initialized
@@ -204,6 +205,11 @@ protected:
 	/** \param index index of the cell
 	**/
 	virtual void addTrialCell(unsigned index);
+
+	//! Add a cell to the ACTIVE cells list
+	/** \param index index of the cell
+	**/
+	virtual void addActiveCell(unsigned index);
 
 	//! Returns the TRIAL cell with the smallest front arrival time
 	/** \return the index of the "earliest" TRIAL cell (or 0 in case of error)

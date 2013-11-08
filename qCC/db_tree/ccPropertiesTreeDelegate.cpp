@@ -585,8 +585,35 @@ void ccPropertiesTreeDelegate::fillWithPointKdTree(ccKdTree* _obj)
 
     addSeparator("Kd-tree");
 
-    //max rms
-	appendRow( ITEM("Max RMS"), ITEM(QString::number(_obj->getMaxRMS())) );
+    //max error
+	appendRow( ITEM("Max Error"), ITEM(QString::number(_obj->getMaxError())) );
+    //max error measure
+	{
+		QString errorMeasure;
+		switch(_obj->getMaxErrorType())
+		{
+		case CCLib::DistanceComputationTools::RMS:
+			errorMeasure = "RMS";
+			break;
+		case CCLib::DistanceComputationTools::MAX_DIST_68_PERCENT:
+			errorMeasure = "Max dist @ 68%";
+			break;
+		case CCLib::DistanceComputationTools::MAX_DIST_95_PERCENT:
+			errorMeasure = "Max dist @ 95%";
+			break;
+		case CCLib::DistanceComputationTools::MAX_DIST_99_PERCENT:
+			errorMeasure = "Max dist @ 99%";
+			break;
+		case CCLib::DistanceComputationTools::MAX_DIST:
+			errorMeasure = "Max distance";
+			break;
+		default:
+			assert(false);
+			errorMeasure = "unknown";
+			break;
+		}
+		appendRow( ITEM("Error measure"), ITEM(errorMeasure) );
+	}
 }
 
 void ccPropertiesTreeDelegate::fillWithImage(ccImage* _obj)

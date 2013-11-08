@@ -2169,7 +2169,8 @@ ScalarType DistanceComputationTools::computePoint2TriangleDistance(const CCVecto
 	}
 }
 
-ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* planeEquation)
+ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3* P,
+																const PointCoordinateType* planeEquation)
 {
 	//point to plane distance: d = fabs(a0*x+a1*y+a2*z-a3)/sqrt(a0^2+a1^2+a2^2)
 	assert(fabs((double)CCVector3::vnorm2(planeEquation) - 1.0) < ZERO_TOLERANCE);
@@ -2177,7 +2178,8 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 	return static_cast<ScalarType>(fabs(CCVector3::vdot(P->u,planeEquation)-planeEquation[3])/*/CCVector3::vnorm(planeEquation)*/); //norm == 1.0!
 }
 
-ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(GenericCloud* cloud, const PointCoordinateType* planeEquation)
+ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(	GenericCloud* cloud,
+																	const PointCoordinateType* planeEquation)
 {
     assert(cloud && planeEquation);
 
@@ -2208,7 +2210,9 @@ ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(GenericCloud*
 	return (ScalarType)sqrt(dSumSq/(double)count);
 }
 
-ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(GenericCloud* cloud, const PointCoordinateType* planeEquation, float percent)
+ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* cloud,
+																	const PointCoordinateType* planeEquation,
+																	float percent)
 {
     assert(cloud && planeEquation);
 	assert(percent < 1.0f);
@@ -2262,6 +2266,62 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(GenericCloud* c
 	}
 
 	return static_cast<ScalarType>(tail.back());
+}
+
+ScalarType DistanceComputationTools::ComputeCloud2PlaneMaxDistance(	GenericCloud* cloud,
+																	const PointCoordinateType* planeEquation)
+{
+    assert(cloud && planeEquation);
+
+	//point count
+	unsigned count = cloud->size();
+	if (count == 0)
+		return 0;
+
+	//point to plane distance: d = fabs(a0*x+a1*y+a2*z-a3) / sqrt(a0^2+a1^2+a2^2) <-- "norm"
+	//but the norm should always be equal to 1.0!
+	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
+	if (norm2 < ZERO_TOLERANCE)
+        return NAN_VALUE;
+	assert(fabs(static_cast<double>(norm2) - 1.0) < 1.0e-6);
+
+	//we search the max distance
+	PointCoordinateType maxDist = 0;
+	
+	cloud->placeIteratorAtBegining();
+	for (unsigned i=0; i<count; ++i)
+	{
+		const CCVector3* P = cloud->getNextPoint();
+		PointCoordinateType d = fabs(CCVector3::vdot(P->u,planeEquation)-planeEquation[3])/*/norm*/; //norm == 1.0
+		maxDist = std::max(d,maxDist);
+	}
+
+	return static_cast<ScalarType>(maxDist);
+}
+
+ScalarType DistanceComputationTools::ComputeCloud2PlaneDistance(CCLib::GenericCloud* cloud,
+																const PointCoordinateType* planeEquation,
+																ERROR_MEASURES measureType)
+{
+	switch (measureType)
+	{
+	case RMS:
+		return CCLib::DistanceComputationTools::computeCloud2PlaneDistanceRMS(cloud,planeEquation);
+
+	case MAX_DIST_68_PERCENT:
+		return CCLib::DistanceComputationTools::ComputeCloud2PlaneRobustMax(cloud,planeEquation,0.32f);
+	case MAX_DIST_95_PERCENT:
+		return CCLib::DistanceComputationTools::ComputeCloud2PlaneRobustMax(cloud,planeEquation,0.05f);
+	case MAX_DIST_99_PERCENT:
+		return CCLib::DistanceComputationTools::ComputeCloud2PlaneRobustMax(cloud,planeEquation,0.01f);
+	
+	case MAX_DIST:
+		return CCLib::DistanceComputationTools::ComputeCloud2PlaneMaxDistance(cloud,planeEquation);
+
+	default:
+		assert(false);
+		return -1.0;
+	}
 }
 
 bool DistanceComputationTools::computeGeodesicDistances(GenericIndexedCloudPersist* cloud, unsigned seedPointIndex, uchar octreeLevel, GenericProgressCallback* progressCb)

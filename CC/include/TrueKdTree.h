@@ -22,6 +22,7 @@
 #include "CCTypes.h"
 #include "CCConst.h"
 #include "ReferenceCloud.h"
+#include "DistanceComputationTools.h"
 
 //system
 #include <assert.h>
@@ -92,16 +93,16 @@ public:
 	public:
 		ReferenceCloud* points;
 		PointCoordinateType planeEq[4];
-		ScalarType rms;
+		ScalarType error;
 		int userData;
 
 		//! Constructor
 		/** The Leaf class takes ownership of its associated subset
 		**/
-		Leaf(ReferenceCloud* set, const PointCoordinateType planeEquation[], ScalarType _rms)
+		Leaf(ReferenceCloud* set, const PointCoordinateType planeEquation[], ScalarType _error)
 			: BaseNode(LEAF_TYPE)
 			, points(set)
-			, rms(_rms)
+			, error(_error)
 			, userData(0)
 		{ 
 			memcpy(planeEq, planeEquation, sizeof(PointCoordinateType)*4);
@@ -127,25 +128,27 @@ public:
 	inline GenericIndexedCloudPersist* associatedCloud() const { return m_associatedCloud; }
 
 	//! Builds KD-tree
-	/** \param maxRMS maximum RMS per cell (LS plane fitting)
+	/** \param maxError maximum error per cell (relatively to the best LS plane fit)
+		\param errorMeasure error measurement
 		\param maxPointCountPerCell maximum number of points per cell (speed-up - ignored if < 6)
-		\param outliersRatio ratio of outliers considered when computing the maximum RMS (< 1)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 	**/
-	bool build(	double maxRMS,
+	bool build(	double maxError,
+				DistanceComputationTools::ERROR_MEASURES errorMeasure = DistanceComputationTools::RMS,
 				unsigned maxPointCountPerCell = 0,
-				float outliersRatio = 0.0f,
-				GenericProgressCallback* progressCb=0);
+				GenericProgressCallback* progressCb = 0);
 
 	//! Clears structure
 	void clear();
 
-	//! Returns max RMS used for planarity-based split strategy
-	double getMaxRMS() const { return m_maxRMS; }
+	//! Returns max error threshold used for planarity-based split strategy
+	double getMaxError() const { return m_maxError; }
+
+	//! Returns max error estimator used for planarity-based split strategy
+	DistanceComputationTools::ERROR_MEASURES getMaxErrorType() const { return m_errorMeasure; }
 
 	//! Returns all leaf nodes
 	bool getLeaves(LeafVector& leaves) const;
-
 
 protected:
 
@@ -158,17 +161,16 @@ protected:
     //! Associated cloud
 	GenericIndexedCloudPersist* m_associatedCloud;
 
-	//! Max RMS for planarity-based split strategy
-	double m_maxRMS;
+	//! Max error for planarity-based split strategy (see m_errorMeasure)
+	double m_maxError;
 
-	//! Outliers ratio (< 0)
-	float m_outliersRatio;
+	//! Error measurement
+	DistanceComputationTools::ERROR_MEASURES m_errorMeasure;
 
 	//! Max number of points per cell (speed-up)
 	/** Ignored if < 6
 	**/
 	unsigned m_maxPointCountPerCell;
-
 };
 
 } //namespace CCLib

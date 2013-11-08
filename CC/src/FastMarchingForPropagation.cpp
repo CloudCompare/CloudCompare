@@ -104,34 +104,29 @@ int FastMarchingForPropagation::step()
 
 	if (minTCell->T < Cell::T_INF())
 	{
-		//on rajoute cette cellule au groupe des cellules "ACTIVE"
-		minTCell->state = Cell::ACTIVE_CELL;
-		m_activeCells.push_back(minTCellIndex);
+		//we add this cell to the "ACTIVE" set
+		addActiveCell(minTCellIndex);
 
 		assert(minTCell->T >= lastT);
 
-		//on doit rajouter ses voisines au groupe TRIAL
+		//add its neighbors to the TRIAL set
 		unsigned nIndex;
 		Cell* nCell;
 		for (int i=0;i<CC_FM_NUMBER_OF_NEIGHBOURS;++i)
 		{
+			//get neighbor cell
 			nIndex = minTCellIndex + m_neighboursIndexShift[i];
-			//pointeur vers la cellule voisine
 			nCell = m_theGrid[nIndex];
-
-			//si elle est definie
 			if (nCell)
 			{
-				//et si elle n'est pas encore dans un groupe, on la rajoute
+				//if it' not yet a TRIAL cell
 				if (nCell->state == Cell::FAR_CELL)
 				{
-					nCell->state = Cell::TRIAL_CELL;
 					nCell->T = computeT(nIndex);
-
 					addTrialCell(nIndex);
 				}
 				else if (nCell->state == Cell::TRIAL_CELL)
-				//sinon, il faut recaculer T
+				//otherwise we must update it's arrival time
 				{
 					float t_old = nCell->T;
 					float t_new = computeT(nIndex);
@@ -410,9 +405,8 @@ void FastMarchingForPropagation::findPeaks()
 
 						if (isMax)
 						{
-							theCell->state = Cell::ACTIVE_CELL;
 							theCell->T = 0;
-							m_activeCells.push_back(index);
+							addActiveCell(index);
 						}
 					}
 					//else theCell->T = 0;

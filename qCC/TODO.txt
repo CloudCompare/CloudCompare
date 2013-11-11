@@ -22,6 +22,7 @@ Big ones:
 [*] flythrough mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
 
 Various:
+[*] Add "pause" function (shortcut: spacebar) to the "Graphical Transformation" tool (https://github.com/cloudcompare/trunk/issues/112)
 [*] Add touchpad support (http://www.danielgm.net/cc/forum/viewtopic.php?t=671)
 [*] Pre-defined global shift vectors list (http://www.danielgm.net/cc/forum/viewtopic.php?t=651)
 [*] Reverse Unroll Feature (http://www.danielgm.net/cc/forum/viewtopic.php?t=645)

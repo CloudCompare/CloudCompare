@@ -4109,6 +4109,7 @@ void MainWindow::doActionHeightGridGeneration()
 
     bool generateCloud = dlg.generateCloud();
 	bool generateCountSF = dlg.generateCountSF();
+	bool resampleOriginalCloud = dlg.resampleOriginalCloud();
     bool generateImage = dlg.generateImage();
     bool generateASCII = dlg.generateASCII();
 
@@ -4141,6 +4142,7 @@ void MainWindow::doActionHeightGridGeneration()
 		generateImage,
 		generateASCII,
 		generateCountSF,
+		resampleOriginalCloud,
 		&pDlg);
 
 	//a cloud was demanded as output?

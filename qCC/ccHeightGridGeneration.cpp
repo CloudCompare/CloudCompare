@@ -47,12 +47,15 @@ struct HeightGridCell
     HeightGridCell()
 		: height(0)
 		, nbPoints(0)
+		, pointIndex(0)
     {}
 
     //! Value
     float height;
     //! Number of points projected in this cell
     unsigned nbPoints;
+    //! Nearest point index (if any)
+    unsigned pointIndex;
 };
 
 //************************************************************************************************************************
@@ -68,6 +71,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 												bool generateImage/*=false*/,
 												bool generateASCII/*=false*/,
 												bool generateCountSF/*=false*/,
+												bool resampleOriginalCloud/*=false*/,
 												CCLib::GenericProgressCallback* progressCb/*=0*/)
 {
     if (progressCb)
@@ -76,6 +80,10 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
         progressCb->setMethodTitle("Height grid generation");
         progressCb->start();
     }
+
+	//we can't use the 'resample origin cloud' option with 'average height' projection
+	if (projectionType == PROJ_AVERAGE_HEIGHT)
+		resampleOriginalCloud = false;
 
     //=========================================================================================================
     ccLog::Print("[ccHeightGridGeneration] 1 - Initialization");
@@ -191,12 +199,18 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 			case PROJ_MINIMUM_HEIGHT:
 				// Set the minimum height
 				if (thePoint->u[Z] < aCell->height)
+				{
 					aCell->height = thePoint->u[Z];
+					aCell->pointIndex = n;
+				}
 				break;
 			case PROJ_MAXIMUM_HEIGHT:
 				// Set the maximum height
 				if (thePoint->u[Z] > aCell->height)
+				{
 					aCell->height = thePoint->u[Z];
+					aCell->pointIndex = n;
+				}
 				break;
 			case PROJ_AVERAGE_HEIGHT:
 				// Sum the points heights
@@ -211,6 +225,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 		{
 			//for the first point, we simply have to store its height (in any case)
 			aCell->height = thePoint->u[Z];
+			aCell->pointIndex = n;
 		}
 
 		//scalar fields
@@ -218,7 +233,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 		{
 			int pos = j*static_cast<int>(grid_size_X)+i; //pos in 2D SF grid(s)
 			assert(pos < static_cast<int>(grid_total_size));
-			for (unsigned k=0;k<gridScalarFields.size(); ++k)
+			for (unsigned k=0; k<gridScalarFields.size(); ++k)
 			{
 				if (gridScalarFields[k])
 				{
@@ -255,7 +270,6 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						//for the first (vaild) point, we simply have to store its SF value (in any case)
 						gridScalarFields[k][pos] = sfValue;
 					}
-
 				}
 			}
 		}
@@ -596,7 +610,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 				{
 					//we work with doubles as grid step can be much smaller than the cloud coordinates!
 					double Py = static_cast<double>(box.minCorner().u[Y]);
-	                
+
 					unsigned n = 0;
 					for (unsigned j=0; j<grid_size_Y; ++j)
 					{
@@ -608,7 +622,18 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 							{
 								double Pz = static_cast<double>(aCell->height);
 
-								CCVector3 Pf((PointCoordinateType)Px,(PointCoordinateType)Py,(PointCoordinateType)Pz);
+								CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
+									static_cast<PointCoordinateType>(Py),
+									static_cast<PointCoordinateType>(Pz) );
+
+								//use the original cloud as 'support'?
+								if (resampleOriginalCloud)
+								{
+									const CCVector3* P = cloud->getPoint(aCell->pointIndex);
+									Pf.x = P->u[X];
+									Pf.y = P->u[Y];
+								}
+
 								cloudGrid->addPoint(Pf);
 
 								//if a SF is available, we set the point height as its associated scalar
@@ -635,7 +660,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 									countSF->setValue(n,NAN_VALUE);
 								++n;
 							}
-	                        
+
 							Px += grid_step;
 						}
 
@@ -677,7 +702,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 								CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
 								assert(sf);
 								//set sf values
-								n = 0;
+								unsigned n = 0;
 								const ScalarType emptyCellSFValue = CCLib::ScalarField::NaN();
 								for (unsigned j=0; j<grid_size_Y; ++j)
 								{

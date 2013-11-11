@@ -65,6 +65,7 @@ public:
 									bool generateImage = false,
 									bool generateASCII = false,
 									bool generateCountSF = false,
+									bool resampleOriginalCloud = false,
 									CCLib::GenericProgressCallback* progressCb=0);
 };
 

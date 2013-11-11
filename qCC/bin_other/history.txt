@@ -1,7 +1,11 @@
 *** CloudCompare versions history ***
 
 v2.5.2 XX/XX/2013
-- enhancement:
+- 'Height grid generation' tool enhancement:
+	- when selecting the 'min' or 'max height' projections, the user can now choose
+		to 'resample' the original cloud in order to produce a new cloud (instead
+		of generating a regularly sampled cloud using the grid cell's centers)
+- Other enhancements:
 	- the 'facet' entity's normal vector can now be displayed or hidden via the facet properties
 	- BIN file loading/saving is now done in a separate thread
 		* a progress dialog is now displayed during loading/saving

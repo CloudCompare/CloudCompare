@@ -143,7 +143,7 @@ void ccFastMarchingForNormsDirection::resolveCellOrientation(unsigned index)
 	unsigned nNeg = 0;
 	float confNeg = 0;
 #endif
-	for (unsigned i=0; i<6; ++i)
+	for (unsigned i=0; i<m_numberOfNeighbours; ++i)
 	{
 		DirectionCell* nCell = static_cast<DirectionCell*>(m_theGrid[static_cast<int>(index) + m_neighboursIndexShift[i]]);
 		if (nCell && nCell->state == DirectionCell::ACTIVE_CELL)
@@ -223,7 +223,7 @@ int ccFastMarchingForNormsDirection::step()
 		addActiveCell(minTCellIndex);
 
 		//add its neighbors to the TRIAL set
-		for (unsigned i=0;i<CC_FM_NUMBER_OF_NEIGHBOURS;++i)
+		for (unsigned i=0;i<m_numberOfNeighbours;++i)
 		{
 			//get neighbor cell
 			unsigned nIndex = minTCellIndex + m_neighboursIndexShift[i];
@@ -259,112 +259,6 @@ float ccFastMarchingForNormsDirection::computeTCoefApprox(CCLib::FastMarching::C
 	float orientationConfidence = computePropagationConfidence(oCell,dCell); //between 0 and 1 (ideal: 1)
 
 	return (1.0f-orientationConfidence) * oCell->signConfidence;
-}
-
-float ccFastMarchingForNormsDirection::computeT(unsigned index)
-{
-	DirectionCell* theCell = static_cast<DirectionCell*>(m_theGrid[index]);
-
-	//arrival time FROM the 6 neighbors
-	double T[6] = { 0,0,0,0,0,0 };
-	{
-		for (unsigned n=0; n<6; ++n)
-		{
-			int nIndex = static_cast<int>(index) + m_neighboursIndexShift[n];
-			DirectionCell* nCell = static_cast<DirectionCell*>(m_theGrid[nIndex]);
-			if (nCell)
-			{
-				T[n] = nCell->T + m_neighboursDistance[n] * computeTCoefApprox(nCell,theCell);
-			}
-			else
-			{
-				//no front yet
-				T[n] = Cell::T_INF();
-			}
-		}
-	}
-
-	double A=0, B=0, C=0;
-	double Tij = static_cast<double>(theCell->T);
-
-	//Quadratic eq. along X
-	{
-		//see c_FastMarchingNeighbourPosShift for correspondances
-		const double& Txm = T[3];
-		const double& Txp = T[1];
-		double Tmin = std::min(Txm,Txp);
-		if (Tij > Tmin)
-		{
-			A += 1.0;
-			B += -2.0 * Tmin;
-			C += Tmin * Tmin;
-		}
-	}
-
-	//Quadratic eq. along Y
-	{
-		//see c_FastMarchingNeighbourPosShift for correspondances
-		const double& Tym = T[0];
-		const double& Typ = T[2];
-		double Tmin = std::min(Tym,Typ);
-		if (Tij > Tmin)
-		{
-			A += 1.0;
-			B += -2.0 * Tmin;
-			C += Tmin * Tmin;
-		}
-	}
-
-	//Quadratic eq. along Z
-	{
-		//see c_FastMarchingNeighbourPosShift for correspondances
-		const double& Tzm = T[4];
-		const double& Tzp = T[5];
-		double Tmin = std::min(Tzm,Tzp);
-		if (Tij > Tmin)
-		{
-			A += 1.0;
-			B += -2.0 * Tmin;
-			C += Tmin * Tmin;
-		}
-	}
-
-	//DGM: why?
-	//C -=  static_cast<double>(m_cellSize*m_cellSize);
-
-	//solve the quadratic equation
-	double delta = B*B - 4.0*A*C;
-
-	//cases when the quadratic equation is singular
-	if (A == 0 || delta < 0)
-	{
-		Tij = Cell::T_INF();
-
-		for (unsigned n=0; n<CC_FM_NUMBER_OF_NEIGHBOURS; n++)
-		{
-			int nIndex = static_cast<int>(index) + m_neighboursIndexShift[n];
-			DirectionCell* nCell = static_cast<DirectionCell*>(m_theGrid[nIndex]);
-			if (nCell)
-			{
-				if (nCell->state == CCLib::FastMarching::Cell::TRIAL_CELL || nCell->state == CCLib::FastMarching::Cell::ACTIVE_CELL)
-				{
-					float candidateT = nCell->T + m_neighboursDistance[n] * computeTCoefApprox(nCell,theCell);
-					//take the 'closest' neighbour
-					if (candidateT < Tij)
-						Tij = candidateT;
-				}
-			}
-		}
-	}
-	else
-	{
-		//Note that the new crossing must be GREATER than the average
-		//of the active neighbors, since only EARLIER elements are active.
-		//Therefore the plus sign is appropriate.
-		Tij = (-B + sqrt(delta))/(2.0*A);
-	}
-
-	return static_cast<float>(Tij);
 }
 
 int ccFastMarchingForNormsDirection::propagate()
@@ -412,8 +306,8 @@ unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointClo
 			}
 
 #ifdef _DEBUG
-			//theCloud->setPointScalarValue(index,aCell->T);
-			theCloud->setPointScalarValue(index,aCell->signConfidence);
+			theCloud->setPointScalarValue(index,aCell->T);
+			//theCloud->setPointScalarValue(index,aCell->signConfidence);
 			//theCloud->setPointScalarValue(index,aCell->scalar);
 #endif
 			
@@ -440,7 +334,7 @@ void ccFastMarchingForNormsDirection::initTrialCells()
 		assert(seedCell->signConfidence == 1);
 
 		//add all its neighbour cells to the TRIAL set
-		for (unsigned i=0; i<CC_FM_NUMBER_OF_NEIGHBOURS; ++i)
+		for (unsigned i=0; i<m_numberOfNeighbours; ++i)
 		{
 			unsigned nIndex = index + m_neighboursIndexShift[i];
 			DirectionCell* nCell = (DirectionCell*)m_theGrid[nIndex];
@@ -544,6 +438,9 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 	}
 
 	const int octreeWidth = (1<<octreeLevel)-1;
+
+	//enable 26-connectivity
+	//fm.setExtendedConnectivity(true);
 
 	//while non-processed points remain...
 	unsigned resolvedPoints = 0;

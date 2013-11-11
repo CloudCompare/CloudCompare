@@ -107,7 +107,6 @@ protected:
     };
 
 	//inherited methods (see FastMarchingAlgorithm)
-	virtual float computeT(unsigned index);
 	virtual float computeTCoefApprox(CCLib::FastMarching::Cell* currentCell, CCLib::FastMarching::Cell* neighbourCell) const;
 	virtual int step();
 	virtual void initTrialCells();

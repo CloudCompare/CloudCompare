@@ -44,16 +44,38 @@ class DgmOctree;
 							+ static_cast<unsigned>(pos[2] - m_minFillIndexes[2]) * m_decZ \
 							+ m_indexDec )
 
-// Number of neighbuors in 6 connexity mode (common faces)
-#define CC_FM_NUMBER_OF_NEIGHBOURS 6
+// Maximum number of neighbors
+#define CC_FM_MAX_NUMBER_OF_NEIGHBOURS 26
 
-//! 6-connexity neighbouring cells positions (common faces)
-const int c_FastMarchingNeighbourPosShift[] = {	 0,-1, 0,
+//! Grid neighboring cells positions
+const int c_FastMarchingNeighbourPosShift[] = {	//6  common faces
+												 0,-1, 0,
 												 1, 0, 0,
 												 0, 1, 0,
 												-1, 0, 0,
 												 0, 0,-1,
-												 0, 0, 1 };
+												 0, 0, 1,
+												// 20 other neighbors
+												-1,-1,-1,
+												-1,-1, 0,
+												-1,-1, 1,
+												-1, 0,-1,
+												-1, 0, 1,
+												-1, 1,-1,
+												-1, 1, 0,
+												-1, 1, 1,
+												 0,-1,-1,
+												 0,-1, 1,
+												 0, 1,-1,
+												 0, 1, 1,
+												 1,-1,-1,
+												 1,-1, 0,
+												 1,-1, 1,
+												 1, 0,-1,
+												 1, 0, 1,
+												 1, 1,-1,
+												 1, 1, 0,
+												 1, 1, 1 };
 
 //! Fast Marching algorithm (front propagation)
 /** Implementation of the Fast Marching algorithm [Sethian 1996].
@@ -103,7 +125,12 @@ public:
 		\param pos the cell position (3 integer coordinates)
 		\param absoluteCoordinates whether the cell coordinates are absolute or relative
 	**/
-	float getTime(int pos[], bool absoluteCoordinates = false) const;
+	virtual float getTime(int pos[], bool absoluteCoordinates = false) const;
+
+	//! Sets extended connectivity mode
+	/** To use common edges instead of common faces (much slower)
+	**/
+	virtual void setExtendedConnectivity(bool state) { m_numberOfNeighbours = state ? 26 : 6; }
 
 protected:
 
@@ -159,7 +186,7 @@ protected:
 		\param index the cell index
 		\return the computed front arrival time
 	**/
-	virtual float computeT(unsigned index) = 0;
+	virtual float computeT(unsigned index);
 
 	//! Computes the front acceleration between two cells
 	/** \param currentCell the "central" cell
@@ -249,10 +276,12 @@ protected:
 	//! Octree min fill indexes at 'm_gridLevel'
 	int m_minFillIndexes[3];
 
+	//! Current number of neighbours (6 or 26)
+	unsigned m_numberOfNeighbours;
 	//! Neighbours coordinates shifts in grid
-	int m_neighboursIndexShift[CC_FM_NUMBER_OF_NEIGHBOURS];
+	int m_neighboursIndexShift[CC_FM_MAX_NUMBER_OF_NEIGHBOURS];
 	//! Neighbours distance weight
-	float m_neighboursDistance[CC_FM_NUMBER_OF_NEIGHBOURS];
+	float m_neighboursDistance[CC_FM_MAX_NUMBER_OF_NEIGHBOURS];
 
 };
 

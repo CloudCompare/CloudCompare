@@ -68,11 +68,17 @@ protected slots:
     //! Cancels (no transformation is applied)
     void cancel();
 
+	//! Pauses the transformation mode
+	void pause(bool);
+
     //! Applies translation (graphically) to selected entities
     void glTranslate(const CCVector3&);
 
     //! Applies rotation (graphically) to selected entities
     void glRotate(const ccGLMatrix&);
+
+	//! To capture overridden shortcuts (pause button, etc.)
+	void onShortcutTriggered(int);
 
 protected:
 

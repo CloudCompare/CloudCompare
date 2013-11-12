@@ -10,10 +10,23 @@ v2.5.2 XX/XX/2013
 	- BIN file loading/saving is now done in a separate thread
 		* a progress dialog is now displayed during loading/saving
 		* multiple loading sesssions can be done concurrently (only interesting when loading from diffrent drives)
+	- pause button added to the "Graphical Transformation" tool (to allow rotating/panning the 3D view)
+	- new shortcuts added to the "Graphical Transformation" tool:
+		* space bar = pause/unpause
+		* return key = apply transformation (close the tool)
+		* escape key = cancel transformation (close the tool)
+	- new shortcuts added to the "Graphical Segmentation" tool:
+		* space bar = pause/unpause
+		* tab key = switch between polygonal and rectangular selection mode
+		* I key = segment points inside
+		* O key = segment points outside
+		* return key = apply segmentation (close the tool)
+		* delete key = apply segmentation and delete hidden points (close the tool)
+		* escape key = cancel transformation (close the tool)
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
 		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)
-	- Blank lines or commentaries were causing an infinite loop when importing ASCII files
+	- blank lines or commentaries were causing an infinite loop when importing ASCII files
 	- primitives (sphere, cylinder, etc.) were not correctly loaded from BIN files (CC would crash when loading them)
 
 v2.5.1 10/19/2013

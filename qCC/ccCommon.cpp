@@ -17,6 +17,7 @@
 //#                                                                        #
 //##########################################################################
 
+#include "ccPlatform.h"
 #include "ccCommon.h"
 
 #define CC_VER_NUM 2.5

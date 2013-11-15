@@ -84,7 +84,7 @@ template <typename PointInT, typename PointOutT> int
 template <typename PointInT, typename PointOutT> int
 	compute_normals(                                                const typename pcl::PointCloud<PointInT>::Ptr incloud,
 	const float radius,
-	const bool mode, //true if use knn, false if radius search
+	const bool useKnn, //true if use knn, false if radius search
 	typename pcl::PointCloud<PointOutT>::Ptr outcloud
 	);
 
@@ -94,7 +94,7 @@ int
 	computeIntensitySPINImages(const typename pcl::PointCloud<PointInT>::Ptr incloud,
 	const float radius,
 	const int k_nn,
-	const bool mode, //true if use knn, false if radius search
+	const bool useKnn, //true if use knn, false if radius search
 	const int n_distance_bins,
 	const int n_intensity_bins,
 	typename pcl::PointCloud<PointOutT>::Ptr);
@@ -104,7 +104,7 @@ int
 //computeIntensitySPINImages2(const sensor_msgs::PointCloud2Ptr incloud,
 //                           const float radius,
 //                           const int k_nn,
-//                           const bool mode, //true if use knn, false if radius search
+//                           const bool useKnn, //true if use knn, false if radius search
 //                           sensor_msgs::PointCloud2Ptr outcloud);
 
 

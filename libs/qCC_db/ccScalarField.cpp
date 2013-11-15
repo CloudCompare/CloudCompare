@@ -453,7 +453,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 				return ReadError();
 
 			//Retrieve equivalent default scale
-			ccColorScalesManager::DEFAULT_SCALE activeColorScaleType = ccColorScalesManager::BGYR;
+			ccColorScalesManager::DEFAULT_SCALES activeColorScaleType = ccColorScalesManager::BGYR;
 			switch(activeColorScale)
 			{
 			case ccColorScalesManager::BGYR:

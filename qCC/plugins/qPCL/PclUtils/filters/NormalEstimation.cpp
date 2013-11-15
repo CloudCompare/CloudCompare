@@ -98,18 +98,13 @@ int NormalEstimation::compute()
      if (cloud->hasNormals())
          cloud->unallocateNorms();
 
-        if (cloud->hasNormals())
-            cloud->unallocateNorms();
-
     //get xyz in sensor_msgs format
     cc2smReader converter;
     converter.setInputCloud(cloud);
     sensor_msgs::PointCloud2 sm_cloud = converter.getXYZ();
 
-
     //get as pcl point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
-
     pcl::fromROSMsg(sm_cloud, *pcl_cloud);
 
     //create storage for normals
@@ -133,5 +128,5 @@ int NormalEstimation::compute()
 //INSTANTIATING TEMPLATED FUNCTIONS
 template int compute_normals<pcl::PointXYZ, pcl::PointNormal> (const  pcl::PointCloud<pcl::PointXYZ>::Ptr incloud,
                                                                const float radius,
-                                                               const bool mode, //true if use knn, false if radius search
+                                                               const bool useKnn, //true if use knn, false if radius search
                                                                pcl::PointCloud<pcl::PointNormal>::Ptr outcloud);

@@ -626,10 +626,10 @@ unsigned ccNormalVectors::Quant_quantize_normal(const float* n, unsigned level)
 /************************************************************************/
 /* DeQuantize a normal => 2D problem.                                   */
 /* input :                                                              */
-/*      q : quantized normal                                            */
-/*	level : the level of the quantized normal has 3+2*level bits    */
-/* output :                                                             */
-/*	res : the result : a NON-normalized normal is returned          */
+/*		q : quantized normal                                            */
+/*		level : the level of the quantized normal has 3+2*level bits	*/
+/* output :																*/
+/*		res : the result : a NON-normalized normal is returned			*/
 /************************************************************************/
 void ccNormalVectors::Quant_dequantize_normal(unsigned q, unsigned level, float* res)
 {

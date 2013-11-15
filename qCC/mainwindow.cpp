@@ -3931,16 +3931,23 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 		{
 			ccConsole::Error("No component was created! Check the minimum size...");
 			delete ccGroup;
+			ccGroup = 0;
 		}
 		else
 		{
 			addToDB(ccGroup,true,0,true,false);
 		}
 
-		ccConsole::Print(QString("[createComponentsClouds] %1 component(s) where created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
+		ccConsole::Print(QString("[createComponentsClouds] %1 component(s) were created from cloud '%2'").arg(ccGroup->getChildrenNumber()).arg(cloud->getName()));
 
 		cloud->prepareDisplayForRefresh();
-		cloud->setEnabled(ccGroup != 0);
+
+		//auto-hide original cloud
+		if (ccGroup)
+		{
+			cloud->setEnabled(false);
+			ccConsole::Warning("[createComponentsClouds] Original cloud has been automatically hidden");
+		}
 	}
 }
 

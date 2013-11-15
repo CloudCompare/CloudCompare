@@ -176,8 +176,12 @@ void ColorBarWidget::mousePressEvent(QMouseEvent* e)
 			}
 
 			emit pointClicked(relativePos);
+			e->accept();
+			return;
 		}
 	}
+
+	e->ignore();
 }
 
 void ColorBarWidget::paintEvent(QPaintEvent* e)

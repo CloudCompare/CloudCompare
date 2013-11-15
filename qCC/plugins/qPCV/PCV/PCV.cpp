@@ -41,7 +41,7 @@ int PCV::Launch(unsigned numberOfRays,
 	//generates light directions
 	unsigned lightDirs = numberOfRays*(mode360 ? 1 : 2);
 	float *rays = CCMiscTools::SampleSphere(lightDirs);
-	if (!rays) //an error occured?
+	if (!rays) //an error occurred?
 		return -2;
 
 	//we keep only the light directions that meets input parameters (non predictible if not in 360° mode!)

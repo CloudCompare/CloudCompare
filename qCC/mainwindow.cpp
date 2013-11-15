@@ -520,7 +520,7 @@ void MainWindow::doEnableGLFilter()
 	}
 	else
 	{
-		ccConsole::Error("Can't load GL filter (an error occured)!");
+		ccConsole::Error("Can't load GL filter (an error occurred)!");
 	}
 }
 
@@ -1230,7 +1230,7 @@ void MainWindow::doActionComputeKdTree()
 	}
 	else
 	{
-		ccLog::Error("An error occured!");
+		ccLog::Error("An error occurred!");
 		delete kdtree;
 		kdtree = 0;
 	}
@@ -1428,7 +1428,7 @@ void MainWindow::doActionResampleWithOctree()
     }
 
 	if (errors)
-		ccLog::Error("[ResampleWithOctree] Errors occured during the process! Result may be incomplete!");
+		ccLog::Error("[ResampleWithOctree] Errors occurred during the process! Result may be incomplete!");
 
     refreshAll();
 }
@@ -1784,7 +1784,7 @@ void displaySensorProjectErrorString(int errorCode)
         ccConsole::Error("Error: not enough memory! (try to reduce angular steps)");
         break;
     default:
-        ccConsole::Error("An unknown error occured while creating sensor (code: %i)",errorCode);
+        ccConsole::Error("An unknown error occurred while creating sensor (code: %i)",errorCode);
     }
 }
 
@@ -2362,7 +2362,7 @@ void MainWindow::doActionSamplePoints()
     }
 
 	if (errors)
-		ccLog::Error("[doActionSamplePoints] Errors occured during the process! Result may be incomplete!");
+		ccLog::Error("[doActionSamplePoints] Errors occurred during the process! Result may be incomplete!");
 
     refreshAll();
 }
@@ -2989,7 +2989,7 @@ void MainWindow::doActionSubdivideMesh()
 				}
 				catch(...)
 				{
-					ccLog::Error(QString("[Subdivide] An error occured while trying to subdivide mesh '%1' (not enough memory?)").arg(mesh->getName()));
+					ccLog::Error(QString("[Subdivide] An error occurred while trying to subdivide mesh '%1' (not enough memory?)").arg(mesh->getName()));
 				}
 
 				if (subdividedMesh)
@@ -3353,7 +3353,7 @@ void MainWindow::doActionRegister()
 
     if (result >= CCLib::ICPRegistrationTools::ICP_ERROR)
     {
-        ccConsole::Error("Registration failed: an error occured (code %i)",result);
+        ccConsole::Error("Registration failed: an error occurred (code %i)",result);
     }
     else if (result == CCLib::ICPRegistrationTools::ICP_APPLY_TRANSFO)
     {
@@ -3580,7 +3580,7 @@ void MainWindow::doActionSubsample()
     CCLib::ReferenceCloud *sampledCloud = sDlg.getSampledCloud(&pDlg);
     if (!sampledCloud)
     {
-        ccConsole::Error("An internal error occured: failed to sample cloud!");
+        ccConsole::Error("An internal error occurred: failed to sample cloud!");
         return;
     }
 
@@ -4261,12 +4261,12 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
                 }
                 else
                 {
-                    ccConsole::Error("An error occured while computing mesh! (not enough memory?)");
+                    ccConsole::Error("An error occurred while computing mesh! (not enough memory?)");
                 }
             }
             else
             {
-                ccConsole::Error("An error occured while computing mesh! (not enough memory?)");
+                ccConsole::Error("An error occurred while computing mesh! (not enough memory?)");
             }
         }
     }
@@ -5333,7 +5333,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				}
 				else if (entity)
 				{
-					//ccConsole::Error("An error occured! (not enough memory?)");
+					//ccConsole::Error("An error occurred! (not enough memory?)");
 					putObjectBackIntoDBTree(entity,parent);
 				}
 			}
@@ -6061,7 +6061,7 @@ void MainWindow::doActionClone()
             }
             else
             {
-                ccConsole::Error(QString("An error occured while cloning cloud %1").arg(selectedEntities[i]->getName()));
+                ccConsole::Error(QString("An error occurred while cloning cloud %1").arg(selectedEntities[i]->getName()));
             }
         }
         else if (selectedEntities[i]->isKindOf(CC_PRIMITIVE))
@@ -6074,7 +6074,7 @@ void MainWindow::doActionClone()
             }
             else
             {
-				ccConsole::Error(QString("An error occured while cloning primitive %1").arg(selectedEntities[i]->getName()));
+				ccConsole::Error(QString("An error occurred while cloning primitive %1").arg(selectedEntities[i]->getName()));
             }
         }
         else if (selectedEntities[i]->isA(CC_MESH))
@@ -6087,7 +6087,7 @@ void MainWindow::doActionClone()
             }
             else
             {
-				ccConsole::Error(QString("An error occured while cloning mesh %1").arg(selectedEntities[i]->getName()));
+				ccConsole::Error(QString("An error occurred while cloning mesh %1").arg(selectedEntities[i]->getName()));
             }
         }
 		else
@@ -6157,7 +6157,7 @@ void MainWindow::doActionAddConstantSF()
 	int pos = cloud->addScalarField(qPrintable(sfName));
 	if (pos < 0)
 	{
-		ccLog::Error("An error occured! (see console)");
+		ccLog::Error("An error occurred! (see console)");
 		return;
 	}
 	

@@ -183,7 +183,7 @@ public:
 		\param alwaysDisplayLoadDialog always display (eventual) display dialog, even if automatic guess is possible
 		\param coordinatesShiftEnabled whether shift on load has been applied after loading
 		\param coordinatesShift if applicable, applied shift on load (3D translation)
-		\return loaded entities (or 0 if an error occured)
+		\return loaded entities (or 0 if an error occurred)
 	**/
 	static ccHObject* LoadFromFile(const QString& filename,
 									CC_FILE_TYPES fType = UNKNOWN_FILE,

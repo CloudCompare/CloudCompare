@@ -158,7 +158,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 	}
 	else
 	{
-	    //if an error occured during distances computation...
+	    //if an error occurred during distances computation...
 		error = -1.0;
 		result = ICP_ERROR_DIST_COMPUTATION;
 	}
@@ -340,7 +340,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 			params.CPSet = CPSet;
 			if (DistanceComputationTools::computeHausdorffDistance(dataCloud,modelCloud,params)<0)
 			{
-                //an error occured during distances computation...
+                //an error occurred during distances computation...
 				result = ICP_ERROR_REGISTRATION_STEP;
 				break;
 			}

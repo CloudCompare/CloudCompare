@@ -191,7 +191,7 @@ public:
 			- the name must be unique (the method will fail if a SF with the same name already exists)
 			- this method DOES resize the scalar field to match the current cloud size
             \param uniqueName scalar field name (must be unique)
-			\return index of this new scalar field (or -1 if an error occured)
+			\return index of this new scalar field (or -1 if an error occurred)
 		**/
 		virtual int addScalarField(const char* uniqueName);
 

@@ -1581,7 +1581,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		{
 			delete newVertices;
 			newVertices = NULL;
-			ccLog::Error("An error occured: not enough memory?");
+			ccLog::Error("An error occurred: not enough memory?");
 		}
 		else
 		{
@@ -2914,7 +2914,7 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 	}
 	catch(...)
 	{
-		ccLog::Error("[ccMesh::subdivide] An error occured!");
+		ccLog::Error("[ccMesh::subdivide] An error occurred!");
 		delete resultMesh;
 		return 0;
 	}
@@ -3054,7 +3054,7 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 	}
 	catch(...)
 	{
-		ccLog::Error("[ccMesh::subdivide] An error occured!");
+		ccLog::Error("[ccMesh::subdivide] An error occurred!");
 		delete resultMesh;
 		return 0;
 	}

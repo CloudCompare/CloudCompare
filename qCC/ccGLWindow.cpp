@@ -458,7 +458,7 @@ void ccGLWindow::stopFrameRateTest()
 	}
 	else
 	{
-		ccLog::Error("An error occured during framerate test!");
+		ccLog::Error("An error occurred during framerate test!");
 	}
 
 	QApplication::processEvents();

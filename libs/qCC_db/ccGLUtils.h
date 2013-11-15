@@ -108,7 +108,7 @@ public:
 	/** Displays an error message. In debug mode, pauses execution
 		and then exits.
 		\param context name of the method/object that try to catch the error
-		\return true if an error occured, false otherwise
+		\return true if an error occurred, false otherwise
 	**/
 	static bool CatchGLError(const char* context);
 

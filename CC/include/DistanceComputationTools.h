@@ -265,7 +265,7 @@ public:
 		WARNING: this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d'
-		\return the RMS of distances (or NaN if an error occured)
+		\return the RMS of distances (or NaN if an error occurred)
 	**/
 	static ScalarType computeCloud2PlaneDistanceRMS(	GenericCloud* cloud,
 														const PointCoordinateType* planeEquation);
@@ -317,7 +317,7 @@ protected:
 		\param flipTriangleNormals if 'signedDistances' is true,  specify whether triangle normals should be computed in the 'direct' order (true) or 'indirect' (false)
 		\param maxSearchDist if greater than 0 (default value: '-1'), then the algorithm won't compute distances over this value
 		\param progressCb the client method can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\return -1 if an error occured (e.g. not enough memory) and 0 otherwise
+		\return -1 if an error occurred (e.g. not enough memory) and 0 otherwise
 	**/
 	static int computePointCloud2MeshDistanceWithOctree(OctreeAndMeshIntersection* theIntersection,
                                                                 uchar octreeLevel,

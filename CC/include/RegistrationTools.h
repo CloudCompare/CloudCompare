@@ -114,7 +114,7 @@ public:
 		\param lCloud left cloud {Pl}
 		\param rCloud right cloud {Pr}
 		\param trans transformation: Pr = s.R.Pl + T
-		\return RMS (or -1.0 if an error occured)
+		\return RMS (or -1.0 if an error occurred)
 	**/
 	static double ComputeRMS(GenericCloud* lCloud,
 								GenericCloud* rCloud,
@@ -245,7 +245,7 @@ protected:
         \param delta used for the tolerance when searching for congruent bases
         \param base the reference base made of 4 points
         \param results the resulting bases
-        \return the number of bases found (number of element in the results array) or -1 is a problem occured
+        \return the number of bases found (number of element in the results array) or -1 is a problem occurred
     **/
     static int FindCongruentBases(KDTree* tree,
                                             float delta,

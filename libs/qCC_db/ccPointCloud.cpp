@@ -1530,7 +1530,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						colorRampShader->start();
 						if (!colorRampShader->setup(sfMinSatRel, sfMaxSatRel, steps, colorScale))
 						{
-							//An error occured during shader initialization?
+							//An error occurred during shader initialization?
 							ccLog::WarningDebug("Failed to init ColorRamp shader!");
 							colorRampShader->stop();
 							colorRampShader = 0;
@@ -2004,7 +2004,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 		CCLib::ReferenceCloud* rc = getTheVisiblePoints();
 		if (!rc)
 		{
-			ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occured during points selection!");
+			ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occurred during points selection!");
 			return 0;
 		}
 		assert(rc->size() != 0);
@@ -2019,7 +2019,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 
 	if (!result)
 	{
-		ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occured during points duplication!");
+		ccLog::Warning("[ccPointCloud::createNewCloudFromVisibilitySelection] An error occurred during points duplication!");
 		return 0;
 	}
 

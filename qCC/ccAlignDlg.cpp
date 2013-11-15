@@ -250,7 +250,7 @@ void ccAlignDlg::dataSliderReleased()
 
 void ccAlignDlg::modelSamplingRateChanged(double value)
 {
-    QString message("An error occured");
+    QString message("An error occurred");
 
     CC_SAMPLING_METHOD method = getSamplingMethod();
     float rate = (float)modelSamplingRate->value()/(float)modelSamplingRate->maximum();
@@ -297,7 +297,7 @@ void ccAlignDlg::modelSamplingRateChanged(double value)
 
 void ccAlignDlg::dataSamplingRateChanged(double value)
 {
-    QString message("An error occured");
+    QString message("An error occurred");
 
     CC_SAMPLING_METHOD method = getSamplingMethod();
     float rate = (float)dataSamplingRate->value()/(float)dataSamplingRate->maximum();

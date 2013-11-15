@@ -49,7 +49,7 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 		if (result == EXIT_SUCCESS)
 			QMessageBox::information(&consoleDlg,"Processed finished","Job done");
 		else
-			QMessageBox::warning(&consoleDlg,"Processed finished","An error occured! Check console");
+			QMessageBox::warning(&consoleDlg,"Processed finished","An error occurred! Check console");
 	}
 
 	ccConsole::ReleaseInstance();

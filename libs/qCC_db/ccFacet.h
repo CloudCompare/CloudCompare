@@ -57,7 +57,7 @@ public:
 		\param maxEdgeLength max edge length (if possible - ignored if 0)
 		\param transferOwnership if true and the input cloud is a ccPointCloud, it will be 'kept' as 'origin points'
 		\param planeEquation to input a custom plane equation
-		\return a facet (or 0 if an error occured)
+		\return a facet (or 0 if an error occurred)
 	**/
 	static ccFacet* Create(	CCLib::GenericIndexedCloudPersist* cloud,
 							PointCoordinateType maxEdgeLength = 0,

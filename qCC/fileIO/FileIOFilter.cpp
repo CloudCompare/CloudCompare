@@ -341,7 +341,7 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
             return; //no message will be displayed!
     }
 
-    QString outputString = QString("An error occured while %1 '%2': ").arg(action).arg(filename) + errorStr;
+    QString outputString = QString("An error occurred while %1 '%2': ").arg(action).arg(filename) + errorStr;
     if (warning)
         ccLog::Warning(outputString);
     else

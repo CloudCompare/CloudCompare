@@ -133,7 +133,7 @@ QString LoadPCD::getErrorMessage(int errorCode)
 		//THESE CASES CAN BE USED TO OVERRIDE OR ADD FILTER-SPECIFIC ERRORS CODES
 		//ALSO IN DERIVED CLASSES DEFAULT MUST BE ""
 	case -31:
-		return QString("An error occured while converting PCD to CC cloud!");
+		return QString("An error occurred while converting PCD to CC cloud!");
 	case -21:
 		return QString("No filename given, please select a pcd file.");
 	}

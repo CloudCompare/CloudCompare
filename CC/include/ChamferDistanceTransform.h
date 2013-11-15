@@ -64,7 +64,7 @@ public:
 		ChamferDistanceTransform::setZero).
 		\param type the Chamfer distance type
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\return max distance (or -1 if an error occured)
+		\return max distance (or -1 if an error occurred)
 	**/
 	int propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, GenericProgressCallback* progressCb=0);
 

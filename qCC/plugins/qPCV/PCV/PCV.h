@@ -42,7 +42,7 @@ public:
 		\param width width  of the OpenGL context used to simulate illumination
 		\param height height of the OpenGL context used to simulate illumination
 		\param progressCb optional progress bar
-		\return number of 'light' directions actually used (or a value <0 if an error occured)
+		\return number of 'light' directions actually used (or a value <0 if an error occurred)
 	**/
 	static int Launch(unsigned numberOfRays,
 							CCLib::GenericCloud* vertices,

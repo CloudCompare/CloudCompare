@@ -117,7 +117,7 @@ public:
         See CClib documentation for more information about ReferenceClouds.
 		Warning: the ReferenceCloud structure must refer to this cloud. 
 		\param selection a ReferenceCloud structure (pointing to source)
-		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occured during the duplication process
+		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
 	**/
 	ccPointCloud* partialClone(const CCLib::ReferenceCloud* selection, int* warnings = 0) const;
 
@@ -454,7 +454,7 @@ public:
 	//! Adds an existing scalar field to this cloud
 	/** Warning: the cloud takes ownership of it!
 		\param sf existing scalar field
-		\return index of added scalar field (or -1 if an error occured)
+		\return index of added scalar field (or -1 if an error occurred)
 	**/
 	int addScalarField(ccScalarField* sf);
 

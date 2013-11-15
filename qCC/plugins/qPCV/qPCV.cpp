@@ -207,7 +207,7 @@ void qPCV::doAction()
 	if (!success)
     {
         pc->deleteScalarField(sfIdx);
-		m_app->dispToConsole("En error occured during the PCV field computation!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+		m_app->dispToConsole("En error occurred during the PCV field computation!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
         return;
     }
     else

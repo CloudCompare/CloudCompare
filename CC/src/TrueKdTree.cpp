@@ -104,7 +104,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	const PointCoordinateType* planeEquation = Neighbourhood(subset).getLSQPlane();
 	if (!planeEquation)
 	{
-		//an error occured during LS plane computation?!
+		//an error occurred during LS plane computation?!
 		delete subset;
 		return 0;
 	}

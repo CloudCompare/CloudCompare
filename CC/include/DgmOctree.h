@@ -806,7 +806,7 @@ public:
 		to the indexes of the first points of each cell.
 		\param level the level of subdivision
 		\param vec the list of indexes
-		\return false if an error occured (e.g. not enough memory)
+		\return false if an error occurred (e.g. not enough memory)
 	**/
 	bool getCellIndexes(uchar level, cellIndexesContainer& vec) const;
 

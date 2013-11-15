@@ -238,13 +238,27 @@ protected:
 	**/
 	virtual void addActiveCell(unsigned index);
 
+	//! Add a cell to the IGNORED cells list
+	/** \param index index of the cell
+	**/
+	virtual void addIgnoredCell(unsigned index);
+
 	//! Returns the TRIAL cell with the smallest front arrival time
 	/** \return the index of the "earliest" TRIAL cell (or 0 in case of error)
 	**/
 	virtual unsigned getNearestTrialCell();
 
+	//! Resets the state of cells in a given list
+	/** Warning: the list will be cleared!
+	**/
+	void resetCells(std::vector<unsigned>& list);
+
 	//! ACTIVE cells list
 	std::vector<unsigned> m_activeCells;
+	//! TRIAL cells list
+	std::vector<unsigned> m_trialCells;
+	//! IGNORED cells lits
+	std::vector<unsigned> m_ignoredCells;
 
 	//! Specifiies whether structure is initialized or not
 	bool m_initialized;
@@ -264,8 +278,6 @@ protected:
 	unsigned m_gridSize;
 	//! Grid used to process Fast Marching
 	Cell** m_theGrid;
-	//! TRIAL cells list
-	std::vector<unsigned> m_trialCells;
 
 	//! Associated octree
 	DgmOctree* m_octree;

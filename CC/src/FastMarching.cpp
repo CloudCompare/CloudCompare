@@ -136,6 +136,8 @@ int FastMarching::initOther()
 	}
 
 	m_activeCells.clear();
+	m_trialCells.clear();
+	m_ignoredCells.clear();
 
 	if (!instantiateGrid(m_gridSize))
         return -3;
@@ -143,31 +145,32 @@ int FastMarching::initOther()
 	return 0;
 }
 
-void FastMarching::cleanLastPropagation()
+void FastMarching::resetCells(std::vector<unsigned>& list)
 {
-	//reset cells state
-	//DGM: we don't use anymore the m_activeCells and
-	//m_trialCells vectors to optimize the number of cells
-	//tested as some cells may be 'lost' (i.e. not in those
-	//vectors).
-	for (unsigned i=0; i<m_gridSize; ++i)
+	for (std::vector<unsigned>::const_iterator it = list.begin(); it != list.end(); ++it)
 	{
-		if (m_theGrid[i])
+		if (m_theGrid[*it])
 		{
-			m_theGrid[i]->state = Cell::FAR_CELL;
-			m_theGrid[i]->T = Cell::T_INF();
+			m_theGrid[*it]->state = Cell::FAR_CELL;
+			m_theGrid[*it]->T = Cell::T_INF();
 		}
 	}
+	list.clear();
+}
 
-	m_activeCells.clear();
-	m_trialCells.clear();
+void FastMarching::cleanLastPropagation()
+{
+	//reset all cells state
+	resetCells(m_activeCells);
+	resetCells(m_trialCells);
+	resetCells(m_ignoredCells);
 }
 
 bool FastMarching::setSeedCell(int pos[])
 {
 	unsigned index = FM_pos2index(pos);
 
-	assert(index<m_gridSize);
+	assert(index < m_gridSize);
 
 	Cell* aCell = m_theGrid[index];
 	assert(aCell);
@@ -224,6 +227,12 @@ void FastMarching::addActiveCell(unsigned index)
 	m_activeCells.push_back(index);
 }
 
+void FastMarching::addIgnoredCell(unsigned index)
+{
+	m_theGrid[index]->state = Cell::EMPTY_CELL;
+	m_ignoredCells.push_back(index);
+}
+
 unsigned FastMarching::getNearestTrialCell()
 {
 	if (m_trialCells.empty())
@@ -269,7 +278,7 @@ float FastMarching::computeT(unsigned index)
 		{
 			int nIndex = static_cast<int>(index) + m_neighboursIndexShift[n];
 			Cell* nCell = m_theGrid[nIndex];
-			if (nCell && (nCell->state == CCLib::FastMarching::Cell::TRIAL_CELL || nCell->state == CCLib::FastMarching::Cell::ACTIVE_CELL))
+			if (nCell && (nCell->state == Cell::TRIAL_CELL || nCell->state == Cell::ACTIVE_CELL))
 			{
 				//compute front arrival time
 				T[n] = static_cast<double>(nCell->T) + static_cast<double>(m_neighboursDistance[n]) * static_cast<double>(computeTCoefApprox(nCell,theCell));

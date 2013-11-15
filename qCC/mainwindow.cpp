@@ -6057,7 +6057,7 @@ void MainWindow::doActionClone()
             if (clone)
             {
                 addToDB(clone, true, 0, true, false);
-				lastClone=clone;
+				lastClone = clone;
             }
             else
             {
@@ -6070,7 +6070,7 @@ void MainWindow::doActionClone()
             if (clone)
             {
                 addToDB(clone, true, 0, true, false);
-				lastClone=clone;
+				lastClone = clone;
             }
             else
             {
@@ -6083,13 +6083,41 @@ void MainWindow::doActionClone()
             if (clone)
             {
                 addToDB(clone, true, 0, true, false);
-				lastClone=clone;
+				lastClone = clone;
             }
             else
             {
 				ccConsole::Error(QString("An error occurred while cloning mesh %1").arg(selectedEntities[i]->getName()));
             }
         }
+		else if (selectedEntities[i]->isA(CC_POLY_LINE))
+		{
+			ccPolyline* poly = ccHObjectCaster::ToPolyline(selectedEntities[i]);
+			ccPolyline* clone = (poly ? new ccPolyline(*poly) : 0);
+            if (clone)
+			{
+                addToDB(clone, true, 0, true, false);
+				lastClone = clone;
+			}
+            else
+            {
+				ccConsole::Error(QString("An error occurred while cloning polyline %1").arg(selectedEntities[i]->getName()));
+            }
+		}
+		else if (selectedEntities[i]->isA(CC_FACET))
+		{
+			ccFacet* facet = ccHObjectCaster::ToFacet(selectedEntities[i]);
+			ccFacet* clone = (facet ? facet->clone() : 0);
+            if (clone)
+			{
+                addToDB(clone, true, 0, true, false);
+				lastClone = clone;
+			}
+            else
+            {
+				ccConsole::Error(QString("An error occurred while cloning facet %1").arg(selectedEntities[i]->getName()));
+            }
+		}
 		else
 		{
 			ccLog::Error("This type of entity is not supported yet!");
@@ -7881,7 +7909,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
     actionZoomAndCenter->setEnabled(atLeastOneEntity && activeWindow);
     actionSave->setEnabled(atLeastOneEntity);
-    actionClone->setEnabled(atLeastOneCloud || atLeastOneMesh);
+    actionClone->setEnabled(atLeastOneEntity);
     actionDelete->setEnabled(atLeastOneEntity);
 	actionExportCoordToSF->setEnabled(atLeastOneEntity);
     actionSegment->setEnabled(atLeastOneEntity && activeWindow);

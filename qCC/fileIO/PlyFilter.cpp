@@ -41,6 +41,12 @@
 //System
 #include <string.h>
 #include <assert.h>
+#if defined(CC_WINDOWS)
+#include <Windows.h>
+#else
+#include <time.h>
+#include <unistd.h>
+#endif
 
 using namespace CCLib;
 
@@ -413,13 +419,13 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 
 #define POS_MASK    0x00000003
 
-static double s_Point[3]={0,0,0};
-static int s_PointCount=0;
-static bool s_PointDataCorrupted=false;
-static bool s_ShiftAlreadyEnabled=false;
-static bool s_AlwaysDisplayLoadDialog=true;
-static bool s_ShiftApplyAll=false;
-static double s_Pshift[3]={0,0,0};
+static double s_Point[3] = {0,0,0};
+static int s_PointCount = 0;
+static bool s_PointDataCorrupted = false;
+static bool s_ShiftAlreadyEnabled = false;
+static bool s_AlwaysDisplayLoadDialog = true;
+static bool s_ShiftApplyAll = false;
+static double s_Pshift[3] = {0,0,0};
 
 static int vertex_cb(p_ply_argument argument)
 {
@@ -446,9 +452,9 @@ static int vertex_cb(p_ply_argument argument)
 	if (flags & ELEM_EOL)
 	{
 		//first point: check for 'big' coordinates
-		if (s_PointCount==0)
+		if (s_PointCount == 0)
 		{
-			s_ShiftApplyAll=false; //should already be false!
+			s_ShiftApplyAll = false; //should already be false!
 			if (ccCoordinatesShiftManager::Handle(s_Point,0,s_AlwaysDisplayLoadDialog,s_ShiftAlreadyEnabled,s_Pshift,0,s_ShiftApplyAll))
 			{
 				cloud->setOriginalShift(s_Pshift[0],s_Pshift[1],s_Pshift[2]);
@@ -670,14 +676,14 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	s_unsupportedPolygonType = false;
 	s_texCoordCount = 0;
 	s_invalidTexCoordinates = false;
-	s_scalarCount=0;
-	s_IntensityCount=0;
-	s_ColorCount=0;
-	s_NormalCount=0;
-	s_PointCount=0;
-	s_PointDataCorrupted=false;
-	s_AlwaysDisplayLoadDialog=alwaysDisplayLoadDialog;
-	s_ShiftApplyAll=false;
+	s_scalarCount = 0;
+	s_IntensityCount = 0;
+	s_ColorCount = 0;
+	s_NormalCount = 0;
+	s_PointCount = 0;
+	s_PointDataCorrupted = false;
+	s_AlwaysDisplayLoadDialog = alwaysDisplayLoadDialog;
+	s_ShiftApplyAll = false;
 	s_ShiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 	if (s_ShiftAlreadyEnabled)
 		memcpy(s_Pshift,coordinatesShift,sizeof(double)*3);
@@ -1355,16 +1361,17 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
         }
 	}
 
-    QProgressDialog progressDlg(QString("Loading in progress..."),0,0,0,0,Qt::Popup);
-    progressDlg.setMinimumDuration(0);
-	progressDlg.setModal(true);
-	progressDlg.show();
-	QApplication::processEvents();
+	QProgressDialog pDlg(QString("Loading in progress..."),QString(),0,0);
+	if (alwaysDisplayLoadDialog)
+	{
+		pDlg.setWindowTitle("PLY file");
+		pDlg.show();
+		QApplication::processEvents();
+	}
 
 	//let 'Rply' do the job;)
-    int success = ply_read(ply);
+	int success = ply_read(ply);
 
-    progressDlg.close();
 	ply_close(ply);
 
 	if (success<1)

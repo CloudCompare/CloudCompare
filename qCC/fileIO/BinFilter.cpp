@@ -275,38 +275,42 @@ CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 	else
 	{
-		QProgressDialog pDlg(QString("Loading: %1").arg(QFileInfo(filename).fileName()),QString(),0,0/*static_cast<int>(in.size())*/);
 		if (alwaysDisplayLoadDialog)
 		{
+			QProgressDialog pDlg(QString("Loading: %1").arg(QFileInfo(filename).fileName()),QString(),0,0/*static_cast<int>(in.size())*/);
 			pDlg.setWindowTitle("BIN file");
 			pDlg.show();
-		}
 
-		//concurrent call
-		s_file = &in;
-		s_container = &container;
+			//concurrent call in a separate thread
+			s_file = &in;
+			s_container = &container;
 
-		QFuture<CC_FILE_ERROR> future = QtConcurrent::run(_LoadFileV2);
+			QFuture<CC_FILE_ERROR> future = QtConcurrent::run(_LoadFileV2);
 
-		while (!future.isFinished())
-		{
-#if defined(CC_WINDOWS)
-			::Sleep(500);
-#else
-            usleep(500 * 1000);
-#endif
-			if (alwaysDisplayLoadDialog)
+			while (!future.isFinished())
 			{
-				pDlg.setValue(pDlg.value()+1);
-				//pDlg.setValue(static_cast<int>(in.pos())); //DGM: in fact, the file reading part is just half of the work!
-				QApplication::processEvents();
+	#if defined(CC_WINDOWS)
+				::Sleep(500);
+	#else
+				usleep(500 * 1000);
+	#endif
+				if (alwaysDisplayLoadDialog)
+				{
+					pDlg.setValue(pDlg.value()+1);
+					//pDlg.setValue(static_cast<int>(in.pos())); //DGM: in fact, the file reading part is just half of the work!
+					QApplication::processEvents();
+				}
 			}
-		}
 	
-		s_file = 0;
-		s_container = 0;
+			s_file = 0;
+			s_container = 0;
 
-		return future.result();
+			return future.result();
+		}
+		else
+		{
+			return BinFilter::LoadFileV2(in,container);
+		}
 	}
 }
 

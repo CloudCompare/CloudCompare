@@ -18,24 +18,64 @@
 #ifndef CC_OCTREE_HEADER
 #define CC_OCTREE_HEADER
 
+//Local
+#include "ccHObject.h"
+
 //CCLib
 #include <DgmOctree.h>
 #include <ReferenceCloud.h>
 
-//Local
-#include "ccHObject.h"
+//Qt
+#include <QSpinBox>
 
 class ccGenericPointCloud;
 
 //! Octree displaying methods
-enum CC_OCTREE_DISPLAY_TYPE {WIRE					=	0,					/**< The octree is displayed as wired boxes (one box per cell) */
+enum CC_OCTREE_DISPLAY_TYPE {	WIRE				=	0,					/**< The octree is displayed as wired boxes (one box per cell) */
 								MEAN_POINTS			=	1,					/**< The octree is displayed as points (one point per cell = the center of gravity of the points lying in it) */
 								MEAN_CUBES			=	2					/**< The octree is displayed as plain 3D cubes (one cube per cell) */
 };
-const unsigned char OCTREE_DISPLAY_TYPE_NUMBERS										=		3;
-const CC_OCTREE_DISPLAY_TYPE DEFAULT_OCTREE_DISPLAY_TYPE							=		WIRE;
-const CC_OCTREE_DISPLAY_TYPE OCTREE_DISPLAY_TYPE_ENUMS[OCTREE_DISPLAY_TYPE_NUMBERS] =		{WIRE, MEAN_POINTS, MEAN_CUBES};
-const char COCTREE_DISPLAY_TYPE_TITLES[OCTREE_DISPLAY_TYPE_NUMBERS][18]				=		{"Wire","Points","Plain cubes"};
+const unsigned char OCTREE_DISPLAY_TYPE_NUMBERS										=	3;
+const CC_OCTREE_DISPLAY_TYPE DEFAULT_OCTREE_DISPLAY_TYPE							=	WIRE;
+const CC_OCTREE_DISPLAY_TYPE OCTREE_DISPLAY_TYPE_ENUMS[OCTREE_DISPLAY_TYPE_NUMBERS] =	{WIRE, MEAN_POINTS, MEAN_CUBES};
+const char COCTREE_DISPLAY_TYPE_TITLES[OCTREE_DISPLAY_TYPE_NUMBERS][18]				=	{"Wire","Points","Plain cubes"};
+
+//! Octree level editor dialog
+#ifdef QCC_DB_USE_AS_DLL
+#include "qCC_db_dll.h"
+class QCC_DB_DLL_API ccOctreeSpinBox : public QSpinBox
+#else
+class ccOctreeSpinBox : public QSpinBox
+#endif
+{
+	Q_OBJECT
+
+public:
+
+	//! Default constructor
+	ccOctreeSpinBox(QWidget* parent = 0);
+
+	//! Sets associated cloud on which the octree will be computed
+	/** Alternative to ccOctreeSpinBox::setOctree
+	**/
+	void setCloud(ccGenericPointCloud* cloud);
+
+	//! Sets associated octree
+	/** Alternative to ccOctreeSpinBox::setCloud
+	**/
+	void setOctree(CCLib::DgmOctree* octree);
+
+protected slots:
+
+	//! Called each time the spinbox value changes
+	void onValueChange(int);
+
+protected:
+
+	//! Corresponding octree base size
+	double m_octreeBoxWidth;
+
+};
 
 //! Octree structure
 /** Extends the CCLib::DgmOctree class.

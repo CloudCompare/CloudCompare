@@ -23,6 +23,9 @@ v2.5.2 XX/XX/2013
 		* return key = apply segmentation (close the tool)
 		* delete key = apply segmentation and delete hidden points (close the tool)
 		* escape key = cancel transformation (close the tool)
+	- New types of entities can now be cloned:
+		* polylines
+		* facets
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
 		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)

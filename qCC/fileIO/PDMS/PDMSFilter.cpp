@@ -17,10 +17,6 @@
 
 #include "PDMSFilter.h"
 #include "PdmsParser.h"
-//#include "../ccCoordinatesShiftManager.h"
-
-//Qt
-#include <QProgressDialog>
 
 //qCC_db
 #include <ccLog.h>

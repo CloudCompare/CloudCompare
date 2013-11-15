@@ -535,7 +535,7 @@ namespace PdmsTools
                 virtual bool handle(PointCoordinateType numvalue);
                 virtual bool handle(const char* str);
                 virtual bool isValid() const;
-                bool getAxis(CCVector3 &x, CCVector3 &y, CCVector3 &z) const;
+                bool getAxes(CCVector3 &x, CCVector3 &y, CCVector3 &z) const;
                 virtual bool execute(PdmsObjects::GenericItem **item) const;
 
             protected:

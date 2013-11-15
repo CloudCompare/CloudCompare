@@ -202,7 +202,7 @@ int ccFastMarchingForNormsDirection::step()
 		return 0;
 
 	CCLib::FastMarching::Cell* minTCell =  m_theGrid[minTCellIndex];
-	assert(minTCell && minTCell->state != CCLib::FastMarching::Cell::ACTIVE_CELL);
+	assert(minTCell && minTCell->state != DirectionCell::ACTIVE_CELL);
 
 	if (minTCell->T < Cell::T_INF())
 	{
@@ -231,13 +231,13 @@ int ccFastMarchingForNormsDirection::step()
 			if (nCell)
 			{
 				//if it' not yet a TRIAL cell
-				if (nCell->state == CCLib::FastMarching::Cell::FAR_CELL)
+				if (nCell->state == DirectionCell::FAR_CELL)
 				{
 					nCell->T = computeT(nIndex);
 					addTrialCell(nIndex);
 				}
 				//otherwise we must update it's arrival time
-				else if (nCell->state == CCLib::FastMarching::Cell::TRIAL_CELL)
+				else if (nCell->state == DirectionCell::TRIAL_CELL)
 				{
 					const float& t_old = nCell->T;
 					float t_new = computeT(nIndex);
@@ -247,6 +247,10 @@ int ccFastMarchingForNormsDirection::step()
 				}
 			}
 		}
+	}
+	else
+	{
+		addIgnoredCell(minTCellIndex);
 	}
 
 	return 1;
@@ -339,9 +343,9 @@ void ccFastMarchingForNormsDirection::initTrialCells()
 			unsigned nIndex = index + m_neighboursIndexShift[i];
 			DirectionCell* nCell = (DirectionCell*)m_theGrid[nIndex];
 			//if the neighbor exists (it shouldn't be in the TRIAL or ACTIVE sets)
-			if (nCell/* && nCell->state == CCLib::FastMarching::Cell::FAR_CELL*/)
+			if (nCell/* && nCell->state == DirectionCell::FAR_CELL*/)
 			{
-				assert(nCell->state == CCLib::FastMarching::Cell::FAR_CELL);
+				assert(nCell->state == DirectionCell::FAR_CELL);
 				addTrialCell(nIndex);
 
 				//compute its approximate arrival time

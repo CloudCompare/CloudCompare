@@ -193,8 +193,8 @@ void qPCV::doAction()
 		std::vector<CCVector3> rays;
 		unsigned count = pc->size();
 		rays.resize(count);
-		for (unsigned i=0;i<count;++i)
-			rays[i]=CCVector3(pc->getPointNormal(i));
+		for (unsigned i=0; i<count; ++i)
+			rays[i] = CCVector3(pc->getPointNormal(i));
 
 		success = PCV::Launch(rays,cloud,mesh,meshIsClosed,res,res,&progressCb);
 	}

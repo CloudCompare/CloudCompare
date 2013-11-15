@@ -30,6 +30,7 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccPolyline.h>
+#include <ccProgressDialog.h>
 
 //CCLib
 #include <ReferenceCloud.h>
@@ -396,12 +397,15 @@ void ccClippingBoxTool::exportMultCloud()
 		//project points into grid
 		bool error = false;
 		{
-			QProgressDialog pDlg(this);
+			unsigned pointCount = cloud->size(); 
+
+			ccProgressDialog pDlg(false,this);
+			pDlg.setInfo(qPrintable(QString("Points: %1").arg(pointCount)));
+			pDlg.start();
 			pDlg.show();
-			pDlg.setCancelButton(0);
 			QApplication::processEvents();
 
-			unsigned pointCount = cloud->size(); 
+			CCLib::NormalizedProgress nProgress(&pDlg,pointCount);
 			for (unsigned i=0; i<pointCount; ++i)
 			{
 				CCVector3 P = *cloud->getPoint(i);
@@ -436,7 +440,7 @@ void ccClippingBoxTool::exportMultCloud()
 					}
 				}
 
-				pDlg.setValue((int)floor(100.0f*(float)i/(float)pointCount));
+				nProgress.oneStep();
 			}
 		}
 

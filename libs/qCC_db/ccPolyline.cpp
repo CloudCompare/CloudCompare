@@ -44,12 +44,24 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 }
 
 ccPolyline::ccPolyline(const ccPolyline& poly)
-	: Polyline(ccPointCloud::From(poly.getAssociatedCloud()))
-	, ccHObject("Polyline")
+	: Polyline(0)
+	, ccHObject(poly.getName())
 {
-	assert(m_theAssociatedCloud);
-	if (m_theAssociatedCloud)
-		addPointIndex(0,m_theAssociatedCloud->size());
+	ccPointCloud* cloud = dynamic_cast<ccPointCloud*>(poly.m_theAssociatedCloud);
+	ccPointCloud* clone = cloud ? cloud->partialClone(&poly) : ccPointCloud::From(&poly);
+	if (clone)
+	{
+		setAssociatedCloud(clone);
+		assert(m_theAssociatedCloud);
+		if (m_theAssociatedCloud)
+			addPointIndex(0,m_theAssociatedCloud->size());
+	}
+	else
+	{
+		//not enough memory?
+		ccLog::Warning("[ccPolyline][copy constructor] Not enough memory!");
+		//return;
+	}
 	setClosed(poly.m_isClosed);
 	set2DMode(poly.m_mode2D);
 	setForeground(poly.m_foreground);
@@ -57,6 +69,8 @@ ccPolyline::ccPolyline(const ccPolyline& poly)
 	lockVisibility(poly.isVisiblityLocked());
 	setColor(poly.m_rgbColor);
 	setWidth(poly.m_width);
+	showColors(poly.colorsShown());
+	setVisible(poly.isVisible());
 }
 
 void ccPolyline::set2DMode(bool state)

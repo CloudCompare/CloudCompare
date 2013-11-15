@@ -109,6 +109,9 @@ public:
 	//! Whether normal vector is shown or not
 	bool normalVectorIsShown() const { return m_showNormalVector; }
 
+	//! Clones this facet
+	ccFacet* clone() const;
+
 protected:
 
 	//inherited from ccDrawable

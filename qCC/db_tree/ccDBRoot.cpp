@@ -1285,7 +1285,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		ccFacet* facet = static_cast<ccFacet*>(obj);
 		planeNormal = facet->getNormal();
 		CCVector3 planeHorizDir(0,1,0);
-		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal.u,planeHorizDir.u,planeVertDir.u);
+		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
 		center = facet->getCenter();
 	}
 	else

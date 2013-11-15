@@ -126,7 +126,10 @@ class Neighbourhood
 
 			//we construct the plane local base
 			CCVector3 u(1,0,0), v(0,1,0);
-			CCMiscTools::ComputeBaseVectors(planeEquation,u.u,v.u);
+			{
+				CCVector3 N(planeEquation);
+				CCMiscTools::ComputeBaseVectors(N,u,v);
+			}
 
 			//get the barycenter
 			const CCVector3* G = getGravityCenter();

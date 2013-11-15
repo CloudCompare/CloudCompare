@@ -28,6 +28,65 @@
 //CCLib
 #include <ScalarFieldTools.h>
 #include <Neighbourhood.h>
+#include <CCMiscTools.h>
+
+ccOctreeSpinBox::ccOctreeSpinBox(QWidget* parent/*=0*/)
+	: QSpinBox(parent)
+	, m_octreeBoxWidth(0)
+{
+	setRange(0,CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+	//we'll catch any modification of the spinbox value and update the suffix consequently
+	connect(this, SIGNAL(valueChanged(int)), this, SLOT(onValueChange(int)));
+}
+
+void ccOctreeSpinBox::setCloud(ccGenericPointCloud* cloud)
+{
+	if (!cloud)
+		return;
+
+	if (cloud->getOctree())
+	{
+		setOctree(cloud->getOctree());
+	}
+	else
+	{
+		ccBBox box = cloud->getMyOwnBB();
+		CCLib::CCMiscTools::MakeMinAndMaxCubical(box.minCorner(),box.maxCorner());
+		m_octreeBoxWidth = box.getMaxBoxDim();
+		onValueChange(value());
+	}
+}
+
+void ccOctreeSpinBox::setOctree(CCLib::DgmOctree* octree)
+{
+	if (octree)
+	{
+		m_octreeBoxWidth = static_cast<double>(octree->getCellSize(0));
+		onValueChange(value());
+	}
+	else
+	{
+		m_octreeBoxWidth = 0;
+		setSuffix(QString());
+	}
+}
+
+void ccOctreeSpinBox::onValueChange(int level)
+{
+	if (m_octreeBoxWidth > 0)
+	{
+		if (level >= 0/* && level <= CCLib::DgmOctree::MAX_OCTREE_LEVEL*/)
+		{
+			double cs = m_octreeBoxWidth / pow(2.0,static_cast<double>(level));
+			setSuffix(QString(" (grid step = %1)").arg(cs));
+		}
+		else
+		{
+			//invalid level?!
+			setSuffix(QString());
+		}
+	}
+}
 
 ccOctree::ccOctree(ccGenericPointCloud* aCloud)
 	: CCLib::DgmOctree(aCloud)

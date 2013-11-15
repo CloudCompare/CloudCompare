@@ -56,7 +56,7 @@ ccFacet::ccFacet(	PointCoordinateType maxEdgeLength/*=0*/,
 	m_planeEquation[0] = 0;
 	m_planeEquation[1] = 0;
 	m_planeEquation[2] = 1;
-	m_planeEquation[0] = 0;
+	m_planeEquation[3] = 0;
 
 	setVisible(true);
     lockVisibility(false);
@@ -64,6 +64,84 @@ ccFacet::ccFacet(	PointCoordinateType maxEdgeLength/*=0*/,
 
 ccFacet::~ccFacet()
 {
+}
+
+ccFacet* ccFacet::clone() const
+{
+	ccFacet* facet = new ccFacet(m_maxEdgeLength, m_name);
+
+	//clone contour
+	if (m_contourPolyline)
+	{
+		assert(m_contourVertices);
+		facet->m_contourPolyline = new ccPolyline(*m_contourPolyline);
+		facet->m_contourVertices = dynamic_cast<ccPointCloud*>(facet->m_contourPolyline->getAssociatedCloud());
+
+		if (!facet->m_contourPolyline || !facet->m_contourVertices)
+		{
+			//not enough memory?!
+			ccLog::Warning(QString("[ccFacet::clone][%1] Failed to clone countour!").arg(getName()));
+			delete facet;
+			return 0;
+		}
+
+		facet->m_contourPolyline->setLocked(m_contourPolyline->isLocked());
+		facet->m_contourVertices->setEnabled(m_contourVertices->isEnabled());
+		facet->m_contourVertices->setVisible(m_contourVertices->isVisible());
+		facet->m_contourVertices->setLocked(m_contourVertices->isLocked());
+		facet->m_contourVertices->setName(m_contourVertices->getName());
+		facet->m_contourVertices->addChild(facet->m_contourPolyline);
+		facet->addChild(facet->m_contourVertices);
+	}
+
+	//clone mesh
+	if (m_polygonMesh)
+	{
+		facet->m_polygonMesh = m_polygonMesh->clone(facet->m_contourVertices);
+		if (!facet->m_polygonMesh)
+		{
+			//not enough memory?!
+			ccLog::Warning(QString("[ccFacet::clone][%1] Failed to clone polygon!").arg(getName()));
+			delete facet;
+			return 0;
+		}
+		
+		facet->m_polygonMesh->setLocked(m_polygonMesh->isLocked());
+		facet->m_polygonMesh->setName(m_polygonMesh->getName());
+		if (facet->m_contourVertices)
+			facet->m_contourVertices->addChild(facet->m_polygonMesh);
+		else
+			facet->addChild(facet->m_polygonMesh);
+	}
+
+
+	if (m_originPoints)
+	{
+		facet->m_originPoints = dynamic_cast<ccPointCloud*>(m_originPoints->clone());
+		if (!facet->m_originPoints)
+		{
+			ccLog::Warning(QString("[ccFacet::clone][%1] Failed to clone origin points!").arg(getName()));
+			//delete facet;
+			//return 0;
+		}
+		else
+		{
+			facet->m_originPoints->setLocked(m_originPoints->isLocked());
+			facet->m_originPoints->setName(m_originPoints->getName());
+			facet->addChild(facet->m_originPoints);
+		}
+	}
+
+	facet->m_center = m_center;
+	facet->m_rms = m_rms;
+	facet->m_surface = m_surface;
+	facet->m_showNormalVector = m_showNormalVector;
+	memcpy(facet->m_planeEquation, m_planeEquation, sizeof(PointCoordinateType)*4);
+	facet->setVisible(isVisible());
+	facet->lockVisibility(isVisiblityLocked());
+	facet->setDisplay_recursive(getDisplay());
+
+	return facet;
 }
 
 ccFacet* ccFacet::Create(	CCLib::GenericIndexedCloudPersist* cloud,

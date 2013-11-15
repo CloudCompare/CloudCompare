@@ -137,6 +137,10 @@ int FastMarchingForPropagation::step()
 			}
 		}
 	}
+	else
+	{
+		addIgnoredCell(minTCellIndex);
+	}
 
 	return 1;
 }

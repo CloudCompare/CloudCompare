@@ -26,6 +26,9 @@ v2.5.2 XX/XX/2013
 	- New types of entities can now be cloned:
 		* polylines
 		* facets
+	- Max coordinate absolute value lowered (10.000 instead of 1.000.000)
+		in order to avoid accuracy loss and display issues. However the user
+		still has the choice to ignore CC's warnings.
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
 		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)

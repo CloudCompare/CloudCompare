@@ -28,7 +28,7 @@
 #include <string.h>
 
 // Max acceptable coordinate value
-#define MAX_COORDINATE_ABS_VALUE ((PointCoordinateType)1.0e6)
+#define MAX_COORDINATE_ABS_VALUE static_cast<PointCoordinateType>(1.0e4)
 
 //! Helper class to handle coordinates shift while loading entities (GUI, etc.)
 class ccCoordinatesShiftManager

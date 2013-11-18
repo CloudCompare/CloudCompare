@@ -74,40 +74,40 @@ public:
 	void setColor(const colorType rgb[]);
 
 	//! Returns associated RMS
-	double getRMS() const { return m_rms; }
+	inline double getRMS() const { return m_rms; }
 	//! Returns associated surface
-	double getSurface() const { return m_surface; }
+	inline double getSurface() const { return m_surface; }
 	//! Returns plane equation
-	const PointCoordinateType* getPlaneEquation() const { return m_planeEquation; }
+	inline const PointCoordinateType* getPlaneEquation() const { return m_planeEquation; }
 	//! Returns normal
-	CCVector3 getNormal() const { return CCVector3(m_planeEquation); }
+	inline CCVector3 getNormal() const { return CCVector3(m_planeEquation); }
 	//! Inverts normal
 	void invertNormal();
 	//! Returns center
-	const CCVector3& getCenter() const { return m_center; }
+	inline const CCVector3& getCenter() const { return m_center; }
 
 	//! Returns polygon mesh (if any)
-	ccMesh* getPolygon() { return m_polygonMesh; }
+	inline ccMesh* getPolygon() { return m_polygonMesh; }
 	//! Returns contour polyline (if any)
-	ccPolyline* getContour() { return m_contourPolyline; }
+	inline ccPolyline* getContour() { return m_contourPolyline; }
 	//! Returns contour vertices (if any)
-	ccPointCloud* getContourVertices() { return m_contourVertices; }
+	inline ccPointCloud* getContourVertices() { return m_contourVertices; }
 	//! Returns origin points (if any)
-	ccPointCloud* getOriginPoints() { return m_originPoints; }
+	inline ccPointCloud* getOriginPoints() { return m_originPoints; }
 
 	//! Sets polygon mesh
-	void setPolygon(ccMesh* mesh) { m_polygonMesh = mesh; }
+	inline void setPolygon(ccMesh* mesh) { m_polygonMesh = mesh; }
 	//! Sets contour polyline
-	void setContour(ccPolyline* poly) { m_contourPolyline = poly; }
+	inline void setContour(ccPolyline* poly) { m_contourPolyline = poly; }
 	//! Sets contour vertices
-	void setContourVertices(ccPointCloud* cloud) { m_contourVertices = cloud; }
+	inline void setContourVertices(ccPointCloud* cloud) { m_contourVertices = cloud; }
 	//! Sets origin points
-	void setOriginPoints(ccPointCloud* cloud) { m_originPoints = cloud; }
+	inline void setOriginPoints(ccPointCloud* cloud) { m_originPoints = cloud; }
 
 	//! Show normal vector
-	void showNormalVector(bool state) { m_showNormalVector = state; }
+	inline void showNormalVector(bool state) { m_showNormalVector = state; }
 	//! Whether normal vector is shown or not
-	bool normalVectorIsShown() const { return m_showNormalVector; }
+	inline bool normalVectorIsShown() const { return m_showNormalVector; }
 
 	//! Clones this facet
 	ccFacet* clone() const;

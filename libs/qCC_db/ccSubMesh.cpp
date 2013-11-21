@@ -432,12 +432,21 @@ void ccSubMesh::refreshBB()
 		m_bBox.add(*tri->_getB());
 		m_bBox.add(*tri->_getC());
 	}
+
+	updateModificationTime();
 }
 
 ccBBox ccSubMesh::getMyOwnBB()
 {
-	if (!m_bBox.isValid() && size() != 0)
-		refreshBB();
+	if (size() != 0)
+	{
+		if (   !m_bBox.isValid()
+			|| getLastModificationTime() < m_associatedMesh->getLastModificationTime()
+			|| (m_associatedMesh->getAssociatedCloud() && getLastModificationTime() < m_associatedMesh->getAssociatedCloud()->getLastModificationTime()) )
+		{
+			refreshBB();
+		}
+	}
 
 	return m_bBox;
 }

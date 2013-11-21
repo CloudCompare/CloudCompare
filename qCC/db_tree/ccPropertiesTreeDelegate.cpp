@@ -371,7 +371,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 		{
 			ccGLMatrix trans;
 			box = _obj->getFitBB(trans);
-			box += CCVector3(trans.getTranslation());
+			box += trans.getTranslationAsVec3D();
 			fitBBox = true;
 		}
 		else
@@ -1432,7 +1432,7 @@ void ccPropertiesTreeDelegate::imageAlphaChanged(int val)
     ccImage* image = ccHObjectCaster::ToImage(m_currentObject);
     if (!image)
         return;
-    image->setAlpha(float(val)/255.0);
+    image->setAlpha(static_cast<float>(val)/255.0f);
 
 	updateDisplay();
 }
@@ -1476,7 +1476,7 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
     ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_currentObject);
     assert(sensor);
 
-	sensor->setGraphicScale(val);
+	sensor->setGraphicScale(static_cast<PointCoordinateType>(val));
 	updateDisplay();
 }
 
@@ -1501,7 +1501,7 @@ void ccPropertiesTreeDelegate::polyineWidthChanged(int size)
     assert(pline);
 
 	if (pline)
-		pline->setWidth(size);
+		pline->setWidth(static_cast<PointCoordinateType>(size));
     
 	updateDisplay();
 }

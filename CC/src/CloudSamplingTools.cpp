@@ -239,7 +239,7 @@ ReferenceCloud* CloudSamplingTools::subsampleCloudRandomly(GenericIndexedCloudPe
 }
 
 ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPersist* theCloud,
-															float minDistance,
+															PointCoordinateType minDistance,
 															DgmOctree* theOctree/*=0*/,
 															GenericProgressCallback* progressCb/*=0*/)
 {
@@ -410,7 +410,7 @@ bool CloudSamplingTools::subsampleCellAtLevel(const DgmOctree::octreeCell& cell,
 	ReferenceCloud* cloud					    = (ReferenceCloud*)additionalParameters[0];
 	SUBSAMPLING_CELL_METHOD subsamplingMethod	= *((SUBSAMPLING_CELL_METHOD*)additionalParameters[1]);
 
-	unsigned selectedPointIndex=0;
+	unsigned selectedPointIndex = 0;
 	unsigned pointsCount = cell.points->size();
 
 	if (subsamplingMethod == RANDOM_POINT)
@@ -422,16 +422,15 @@ bool CloudSamplingTools::subsampleCellAtLevel(const DgmOctree::octreeCell& cell,
 		PointCoordinateType center[3];
 		cell.parentOctree->computeCellCenter(cell.truncatedCode,cell.level,center,true);
 
-		ScalarType dist,minDist;
-		minDist = CCVector3::vdistance2(cell.points->getPoint(0)->u,center);
+		PointCoordinateType minDist = CCVector3::vdistance2(cell.points->getPoint(0)->u,center);
 
-		for (unsigned i=1;i<pointsCount;++i)
+		for (unsigned i=1; i<pointsCount; ++i)
 		{
-			dist = CCVector3::vdistance2(cell.points->getPoint(i)->u,center);
-			if (dist<minDist)
+			PointCoordinateType dist = CCVector3::vdistance2(cell.points->getPoint(i)->u,center);
+			if (dist < minDist)
 			{
 				selectedPointIndex = i;
-                minDist=dist;
+                minDist = dist;
             }
         }
     }

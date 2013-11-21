@@ -112,7 +112,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
     //an array of projected normals (same size a depth map)
     PointCoordinateType* theNorms = NULL;
     //an array of projected colors (same size a depth map)
-    uchar* theColors = NULL;
+    colorType* theColors = NULL;
 
     //if the sensor is associated to a "ccPointCloud", we may also extract
     //normals and color!
@@ -146,17 +146,14 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
             //if possible, we create the array of projected colors
             if (pc->hasColors())
             {
-                GenericChunkedArray<3,uchar>* rgbColors = new GenericChunkedArray<3,uchar>();
+                GenericChunkedArray<3,colorType>* rgbColors = new GenericChunkedArray<3,colorType>();
                 rgbColors->reserve(nbPoints);
 
                 for (unsigned i=0; i<nbPoints; ++i)
                 {
                     //conversion from colorType[3] to unsigned char[3]
                     const colorType* col = pc->getPointColor(i);
-					uchar rgb[3] = {static_cast<uchar>(col[0]),
-									static_cast<uchar>(col[1]),
-									static_cast<uchar>(col[2])};
-                    rgbColors->addElement(rgb);
+                    rgbColors->addElement(col);
                 }
 
                 theColors = sensor->projectColors(pc,*rgbColors);
@@ -168,7 +165,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
     }
 
     PointCoordinateType* _theNorms = theNorms;
-    uchar* _theColors = theColors;
+    colorType* _theColors = theColors;
     ScalarType* _zBuff = db.zBuff;
 
     for (int j=0; j<db.width; ++j)

@@ -104,7 +104,7 @@ int FastMarching::initGridWithOctree(DgmOctree* octree, uchar gridLevel)
 
 	m_octree = octree;
 	m_gridLevel = gridLevel;
-	m_cellSize = octree->getCellSize(gridLevel);
+	m_cellSize = static_cast<float>(octree->getCellSize(gridLevel));
 	m_minFillIndexes[0] = minFillIndexes[0];
 	m_minFillIndexes[1] = minFillIndexes[1];
 	m_minFillIndexes[2] = minFillIndexes[2];

@@ -105,37 +105,37 @@ void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
     sensor->setRotationOrder(rotOrder);
 
     //center
-    CCVector3 C(posXEdit->text().toDouble(),
-                posYEdit->text().toDouble(),
-                posZEdit->text().toDouble());
+    CCVector3 C(static_cast<PointCoordinateType>(posXEdit->text().toDouble()),
+                static_cast<PointCoordinateType>(posYEdit->text().toDouble()),
+                static_cast<PointCoordinateType>(posZEdit->text().toDouble()));
     sensor->setSensorCenter(C);
 
     //base
-    sensor->setSensorBase(baseSpinBox->value());
+    sensor->setSensorBase(static_cast<PointCoordinateType>(baseSpinBox->value()));
 
     //max. range
-    sensor->setSensorRange(maxRangeDoubleSpinBox->value());
+    sensor->setSensorRange(static_cast<ScalarType>(maxRangeDoubleSpinBox->value()));
 
     //orientation matrix
     ccGLMatrix rot;
     {
 		float* mat = rot.data();
-        mat[0]  = x1rot->text().toDouble();
-        mat[4]  = x2rot->text().toDouble();
-        mat[8]  = x3rot->text().toDouble();
-        mat[1]  = y1rot->text().toDouble();
-        mat[5]  = y2rot->text().toDouble();
-        mat[9]  = y3rot->text().toDouble();
-        mat[2]  = z1rot->text().toDouble();
-        mat[6]  = z2rot->text().toDouble();
-        mat[10] = z3rot->text().toDouble();
+        mat[0]  = x1rot->text().toFloat();
+        mat[4]  = x2rot->text().toFloat();
+        mat[8]  = x3rot->text().toFloat();
+        mat[1]  = y1rot->text().toFloat();
+        mat[5]  = y2rot->text().toFloat();
+        mat[9]  = y3rot->text().toFloat();
+        mat[2]  = z1rot->text().toFloat();
+        mat[6]  = z2rot->text().toFloat();
+        mat[10] = z3rot->text().toFloat();
     }
 	sensor->setOrientationMatrix(rot);
 
     //angular steps
-    sensor->setDeltaPhi(dPhiSpinBox->value());
-    sensor->setDeltaTheta(dThetaSpinBox->value());
+    sensor->setDeltaPhi(static_cast<PointCoordinateType>(dPhiSpinBox->value()));
+    sensor->setDeltaTheta(static_cast<PointCoordinateType>(dThetaSpinBox->value()));
 
     //uncertainty
-    sensor->setUncertainty(uncertaintyDoubleSpinBox->value());
+    sensor->setUncertainty(static_cast<ScalarType>(uncertaintyDoubleSpinBox->value()));
 }

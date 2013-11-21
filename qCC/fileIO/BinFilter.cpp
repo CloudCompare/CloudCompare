@@ -161,6 +161,9 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 
 	//header
 	char firstBytes[5] = "CCB2";
+	if (sizeof(PointCoordinateType) == 8)
+		firstBytes[3] = '3'; //DGM: we change the header if coords are 64 bits so as to recognize it!
+
 	if (out.write(firstBytes,4)<0)
 		return CC_FERR_WRITING;
 
@@ -267,14 +270,28 @@ CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bo
 	uint32_t firstBytes = 0;
 	if (in.read((char*)&firstBytes,4)<0)
 		return CC_FERR_READING;
-	bool v1 = (strncmp((char*)&firstBytes,"CCB2",4) != 0);
+	bool v1 = (strncmp((char*)&firstBytes,"CCB2",4) != 0 //'float' version
+				&& strncmp((char*)&firstBytes,"CCB3",4) != 0); //'double' version
+
+	if (sizeof(PointCoordinateType) == 8 && strncmp((char*)&firstBytes,"CCB3",4) != 0)
+	{
+		QMessageBox::information(0, QString("Wrong version"), QString("This file has been generated with the standard 'float' version!\nAt this time it cannot be read with the 'double' version."),QMessageBox::Ok);
+		return CC_FERR_WRONG_FILE_TYPE;
+	}
 
 	if (v1)
 	{
+
 		return LoadFileV1(in,container,static_cast<unsigned>(firstBytes),alwaysDisplayLoadDialog); //firstBytes == number of scans for V1 files!
 	}
 	else
 	{
+		if (sizeof(PointCoordinateType) == 4 && strncmp((char*)&firstBytes,"CCB2",4) != 0)
+		{
+			QMessageBox::information(0, QString("Wrong version"), QString("This file has been generated with the new 'double' version!\nAt this time it cannot be read with the standard 'float' version."),QMessageBox::Ok);
+			return CC_FERR_WRONG_FILE_TYPE;
+		}
+
 		if (alwaysDisplayLoadDialog)
 		{
 			QProgressDialog pDlg(QString("Loading: %1").arg(QFileInfo(filename).fileName()),QString(),0,0/*static_cast<int>(in.size())*/);
@@ -375,7 +392,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 				intptr_t meshID = (intptr_t)subMesh->getAssociatedMesh();
 				if (meshID > 0)
 				{
-					ccHObject* mesh = root->find(meshID);
+					ccHObject* mesh = root->find(static_cast<int>(meshID));
 					if (mesh && mesh->isA(CC_MESH))
 					{
 						subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(mesh));
@@ -408,7 +425,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 				intptr_t cloudID = (intptr_t)mesh->getAssociatedCloud();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = root->find(cloudID);
+					ccHObject* cloud = root->find(static_cast<int>(cloudID));
 					if (cloud && cloud->isKindOf(CC_POINT_CLOUD))
 						mesh->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
 					else
@@ -427,7 +444,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 				intptr_t matSetID = (intptr_t)mesh->getMaterialSet();
 				if (matSetID > 0)
 				{
-					ccHObject* materials = root->find(matSetID);
+					ccHObject* materials = root->find(static_cast<int>(matSetID));
 					if (materials && materials->isA(CC_MATERIAL_SET))
 						mesh->setMaterialSet(static_cast<ccMaterialSet*>(materials),false);
 					else
@@ -443,7 +460,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 				intptr_t triNormsTableID = (intptr_t)mesh->getTriNormsTable();
 				if (triNormsTableID > 0)
 				{
-					ccHObject* triNormsTable = root->find(triNormsTableID);
+					ccHObject* triNormsTable = root->find(static_cast<int>(triNormsTableID));
 					if (triNormsTable && triNormsTable->isA(CC_NORMAL_INDEXES_ARRAY))
 						mesh->setTriNormsTable(static_cast<NormsIndexesTableType*>(triNormsTable),false);
 					else
@@ -459,7 +476,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 				intptr_t texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable();
 				if (texCoordArrayID > 0)
 				{
-					ccHObject* texCoordsTable = root->find(texCoordArrayID);
+					ccHObject* texCoordsTable = root->find(static_cast<int>(texCoordArrayID));
 					if (texCoordsTable && texCoordsTable->isA(CC_TEX_COORDS_ARRAY))
 						mesh->setTexCoordinatesTable(static_cast<TextureCoordsContainer*>(texCoordsTable),false);
 					else
@@ -476,7 +493,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 		{
 			ccPolyline* poly = static_cast<ccPolyline*>(currentObject);
 			intptr_t cloudID = (intptr_t)poly->getAssociatedCloud();
-			ccHObject* cloud = root->find(cloudID);
+			ccHObject* cloud = root->find(static_cast<int>(cloudID));
 			if (cloud && cloud->isKindOf(CC_POINT_CLOUD))
 				poly->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
 			else
@@ -498,7 +515,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 			{
 				const cc2DLabel::PickedPoint& pp = label->getPoint(i);
 				intptr_t cloudID = (intptr_t)pp.cloud;
-				ccHObject* cloud = root->find(cloudID);
+				ccHObject* cloud = root->find(static_cast<int>(cloudID));
 				if (cloud && cloud->isKindOf(CC_POINT_CLOUD))
 				{
 					ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
@@ -542,7 +559,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 				intptr_t cloudID = (intptr_t)facet->getOriginPoints();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = root->find(cloudID);
+					ccHObject* cloud = root->find(static_cast<int>(cloudID));
 					if (cloud && cloud->isA(CC_POINT_CLOUD))
 						facet->setOriginPoints(ccHObjectCaster::ToPointCloud(cloud));
 					else
@@ -558,7 +575,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 				intptr_t cloudID = (intptr_t)facet->getContourVertices();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = root->find(cloudID);
+					ccHObject* cloud = root->find(static_cast<int>(cloudID));
 					if (cloud && cloud->isA(CC_POINT_CLOUD))
 						facet->setContourVertices(ccHObjectCaster::ToPointCloud(cloud));
 					else
@@ -574,7 +591,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 				intptr_t polyID = (intptr_t)facet->getContour();
 				if (polyID > 0)
 				{
-					ccHObject* poly = root->find(polyID);
+					ccHObject* poly = root->find(static_cast<int>(polyID));
 					if (poly && poly->isA(CC_POLY_LINE))
 						facet->setContour(ccHObjectCaster::ToPolyline(poly));
 					else
@@ -590,7 +607,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 				intptr_t polyID = (intptr_t)facet->getPolygon();
 				if (polyID > 0)
 				{
-					ccHObject* poly = root->find(polyID);
+					ccHObject* poly = root->find(static_cast<int>(polyID));
 					if (poly && poly->isA(CC_MESH))
 					{
 						facet->setPolygon(ccHObjectCaster::ToMesh(poly));

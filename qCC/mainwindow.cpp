@@ -763,7 +763,7 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 			float scale = (float)std::min(win->width(),win->height()) * viewParams.pixelSize;
 			if (perspectiveView)
 			{
-				float tanFOV = tan(viewParams.fov*CC_DEG_TO_RAD/**0.5f*/);
+				float tanFOV = tan(viewParams.fov*static_cast<float>(CC_DEG_TO_RAD)/*/2*/);
 				vec[0] *= tanFOV;
 				vec[2] *= tanFOV;
 				scale /= win->computePerspectiveZoom();
@@ -1030,9 +1030,17 @@ void MainWindow::doActionSetColor(bool colorize)
 			if (cloud && cloud->isA(CC_POINT_CLOUD)) // TODO
 			{
 				if (colorize)
-					static_cast<ccPointCloud*>(cloud)->colorize(newCol.redF(), newCol.greenF(), newCol.blueF());
+				{
+					static_cast<ccPointCloud*>(cloud)->colorize(static_cast<float>(newCol.redF()),
+																static_cast<float>(newCol.greenF()),
+																static_cast<float>(newCol.blueF()) );
+				}
 				else
-					static_cast<ccPointCloud*>(cloud)->setRGBColor(newCol.red(), newCol.green(), newCol.blue());
+				{
+					static_cast<ccPointCloud*>(cloud)->setRGBColor(	static_cast<colorType>(newCol.red()),
+																	static_cast<colorType>(newCol.green()),
+																	static_cast<colorType>(newCol.blue()));
+				}
 				ent->showColors(true);
 				ent->prepareDisplayForRefresh();
 
@@ -1209,9 +1217,9 @@ void MainWindow::doActionComputeKdTree()
 
 	if (kdtree->build(s_kdTreeMaxErrorPerCell,CCLib::DistanceComputationTools::MAX_DIST_95_PERCENT,1000,&pDlg))
 	{
-		int elapsedTime_ms = eTimer.elapsed();
+		qint64 elapsedTime_ms = eTimer.elapsed();
 
-		ccConsole::Print("[doActionComputeKdTree] Timing: %2.3f s",elapsedTime_ms/1.0e3);
+		ccConsole::Print("[doActionComputeKdTree] Timing: %2.3f s",static_cast<double>(elapsedTime_ms)/1.0e3);
 		cloud->setEnabled(true); //for mesh vertices!
 		cloud->addChild(kdtree);
 		kdtree->setDisplay(cloud->getDisplay());
@@ -1336,14 +1344,14 @@ void MainWindow::doActionComputeOctree()
 			assert(false);
 			return;
 		}
-		int elapsedTime_ms = eTimer.elapsed();
+		qint64 elapsedTime_ms = eTimer.elapsed();
 		
 		//put object back in tree
 		putObjectBackIntoDBTree(cloud,parent);
 		
 		if (octree)
 		{
-			ccConsole::Print("[doActionComputeOctree] Timing: %2.3f s",elapsedTime_ms/1.0e3);
+			ccConsole::Print("[doActionComputeOctree] Timing: %2.3f s",static_cast<double>(elapsedTime_ms)/1.0e3);
 			cloud->setEnabled(true); //for mesh vertices!
 			octree->setVisible(true);
 			octree->prepareDisplayForRefresh();
@@ -1604,11 +1612,13 @@ void MainWindow::doComputeBestFitBB()
                     {
 						double u[3];
                         eig.getEigenValueAndVector(j,u);
-                        CCVector3 v(u[0],u[1],u[2]);
+                        CCVector3 v(static_cast<PointCoordinateType>(u[0]),
+									static_cast<PointCoordinateType>(u[1]),
+									static_cast<PointCoordinateType>(u[2]));
                         v.normalize();
-                        rotMat[j*4] = v.x;
-                        rotMat[j*4+1] = v.y;
-                        rotMat[j*4+2] = v.z;
+                        rotMat[j*4]   = static_cast<float>(v.x);
+                        rotMat[j*4+1] = static_cast<float>(v.y);
+                        rotMat[j*4+2] = static_cast<float>(v.z);
                     }
 
 					const CCVector3* G = Yk.getGravityCenter();
@@ -1841,7 +1851,8 @@ void MainWindow::doActionComputeDistancesFromSensor()
 	for (unsigned i=0; i<cloud->size(); ++i)
 	{
 		const CCVector3* P = cloud->getPoint(i);
-		distances->setValue(i, squared ? (*P-center).norm2() :  (*P-center).norm());
+		ScalarType s = static_cast<ScalarType>(squared ? (*P-center).norm2() :  (*P-center).norm());
+		distances->setValue(i, s);
 	}
 
 	distances->computeMinAndMax();
@@ -1914,11 +1925,11 @@ void MainWindow::doActionComputeScatteringAngles()
 		//normal.normalize(); //should already be the case!
 
 		//compute the angle
-		float cosTheta = ray.dot(normal);
-		float theta = acos(std::min<float>(fabs(cosTheta),1.0f));
+		PointCoordinateType cosTheta = ray.dot(normal);
+		ScalarType theta = static_cast<ScalarType>( acos(std::min<PointCoordinateType>(fabs(cosTheta),1)) );
 
 		if (toDegreeFlag)
-			theta *= (float)CC_RAD_TO_DEG;
+			theta *= static_cast<ScalarType>(CC_RAD_TO_DEG);
 
 		angles->setValue(i,theta);
 	}
@@ -1966,9 +1977,9 @@ void MainWindow::doActionProjectSensor()
                 ccBBox bb = cloud->getBB();
                 double diag = bb.getDiagNorm();
                 if (diag < 1.0)
-                    sensor->setGraphicScale(1e-3);
+                    sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e-3));
                 else if (diag > 10000.0)
-                    sensor->setGraphicScale(1e3);
+                    sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e3));
 
                 //we update sensor graphic representation
                 sensor->updateGraphicRepresentation();
@@ -2783,8 +2794,12 @@ void MainWindow::doActionSFGaussianFilter()
                 ccProgressDialog pDlg(true,this);
 				QElapsedTimer eTimer;
 				eTimer.start();
-                CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(sigma,pc,-1,&pDlg, octree);
-				ccConsole::Print("[GaussianFilter] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
+                CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
+																		pc,
+																		-1,
+																		&pDlg,
+																		octree);
+				ccConsole::Print("[GaussianFilter] Timing: %3.2f s.",static_cast<double>(eTimer.elapsed())/1.0e3);
                 pc->setCurrentDisplayedScalarField(sfIdx);
 				pc->showSF(sfIdx >= 0);
                 sf = pc->getCurrentDisplayedScalarField();
@@ -2825,7 +2840,7 @@ void MainWindow::doActionSFBilateralFilter()
     ccPointCloud* pc_test = ccHObjectCaster::ToPointCloud(m_selectedEntities[0]);
     CCLib::ScalarField* sf_test = pc_test->getCurrentDisplayedScalarField();
     ScalarType range = sf_test->getMax() - sf_test->getMin();
-    ScalarType scalarFieldSigma = range / 4.0f; // using 1/4 of total range
+    double scalarFieldSigma = range / 4; // using 1/4 of total range
 
 
     ccAskTwoDoubleValuesDlg dlg("Spatial sigma", "Scalar sigma", DBL_MIN, DBL_MAX, sigma, scalarFieldSigma , 8, 0, this);
@@ -2890,7 +2905,11 @@ void MainWindow::doActionSFBilateralFilter()
                 QElapsedTimer eTimer;
                 eTimer.start();
 
-                CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(sigma,pc, scalarFieldSigma,&pDlg,octree);
+                CCLib::ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<PointCoordinateType>(sigma),
+																		pc,
+																		static_cast<PointCoordinateType>(scalarFieldSigma),
+																		&pDlg,
+																		octree);
                 ccConsole::Print("[BilateralFilter] Timing: %3.2f s.",eTimer.elapsed()/1.0e3);
                 pc->setCurrentDisplayedScalarField(sfIdx);
                 pc->showSF(sfIdx >= 0);
@@ -2961,7 +2980,7 @@ void MainWindow::doMeshSFAction(ccMesh::MESH_SCALAR_FIELD_PROCESS process)
 	updateUI();
 }
 
-static float s_subdivideMaxArea = 1.0f;
+static double s_subdivideMaxArea = 1.0;
 void MainWindow::doActionSubdivideMesh()
 {
 	bool ok;
@@ -2985,7 +3004,7 @@ void MainWindow::doActionSubdivideMesh()
 				ccMesh* subdividedMesh = 0;
 				try
 				{
-					subdividedMesh = mesh->subdivide(s_subdivideMaxArea);
+					subdividedMesh = mesh->subdivide(static_cast<PointCoordinateType>(s_subdivideMaxArea));
 				}
 				catch(...)
 				{
@@ -3015,8 +3034,8 @@ void MainWindow::doActionSubdivideMesh()
 	updateUI();
 }
 
-static unsigned s_laplacianSmooth_nbIter = 20;
-static float    s_laplacianSmooth_factor = 0.2f;
+static unsigned	s_laplacianSmooth_nbIter = 20;
+static double	s_laplacianSmooth_factor = 0.2;
 void MainWindow::doActionSmoothMeshLaplacian()
 {
 	bool ok;
@@ -3037,7 +3056,9 @@ void MainWindow::doActionSmoothMeshLaplacian()
         {
             ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
 
-			if (mesh->laplacianSmooth(s_laplacianSmooth_nbIter, s_laplacianSmooth_factor,&pDlg))
+			if (mesh->laplacianSmooth(	s_laplacianSmooth_nbIter,
+										static_cast<PointCoordinateType>(s_laplacianSmooth_factor),
+										&pDlg) )
 			{
 				mesh->prepareDisplayForRefresh_recursive();
 			}
@@ -3508,7 +3529,16 @@ void MainWindow::doAction4pcsRegister()
     ccProgressDialog pDlg(true,this);
 
     CCLib::PointProjectionTools::Transformation transform;
-    if (CCLib::FPCSRegistrationTools::RegisterClouds(subModel, subData, transform, aDlg.getDelta(), aDlg.getDelta()/2, aDlg.getOverlap(), aDlg.getNbTries(), 5000, &pDlg, nbMaxCandidates))
+    if (CCLib::FPCSRegistrationTools::RegisterClouds(	subModel,
+														subData,
+														transform,
+														static_cast<ScalarType>(aDlg.getDelta()),
+														static_cast<ScalarType>(aDlg.getDelta()/2),
+														static_cast<PointCoordinateType>(aDlg.getOverlap()),
+														aDlg.getNbTries(),
+														5000,
+														&pDlg,
+														nbMaxCandidates))
     {
 		//output resulting transformation matrix
 		{
@@ -3650,9 +3680,9 @@ void MainWindow::doActionStatisticalTest()
 	//build up corresponding distribution
     CCLib::GenericDistribution* distrib=0;
 	{
-		double a = sDlg->getParam1();
-		double b = sDlg->getParam2();
-		double c = sDlg->getParam3();
+		ScalarType a = static_cast<ScalarType>(sDlg->getParam1());
+		ScalarType b = static_cast<ScalarType>(sDlg->getParam2());
+		ScalarType c = static_cast<ScalarType>(sDlg->getParam3());
 
 		switch (distribIndex)
 		{
@@ -3729,9 +3759,9 @@ void MainWindow::doActionStatisticalTest()
 					ccScalarField* chi2SF = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
 					chi2SF->computeMinAndMax();
 					chi2dist *= chi2dist;
-					chi2SF->setMinDisplayed(chi2dist);
+					chi2SF->setMinDisplayed(static_cast<ScalarType>(chi2dist));
 					chi2SF->setSymmetricalScale(false);
-					chi2SF->setSaturationStart(chi2dist);
+					chi2SF->setSaturationStart(static_cast<ScalarType>(chi2dist));
 					//chi2SF->setSaturationStop(chi2dist);
 					pc->setCurrentDisplayedScalarField(chi2SfIdx);
 					pc->showSF(true);
@@ -4077,8 +4107,11 @@ void MainWindow::doActionExportCoordToSF()
 					assert(sf && sf->currentSize() >= ptsCount);
 					if (sf)
 					{
-						for (unsigned k=0;k<ptsCount;++k)
-							sf->setValue(k,pc->getPoint(k)->u[d]);
+						for (unsigned k=0; k<ptsCount; ++k)
+						{
+							ScalarType s = static_cast<ScalarType>(pc->getPoint(k)->u[d]);
+							sf->setValue(k,s);
+						}
 						sf->computeMinAndMax();
 						pc->setCurrentDisplayedScalarField(sfIndex);
 						m_selectedEntities[i]->showSF(true);
@@ -4223,7 +4256,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
             ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
 			bool hadNormals = cloud->hasNormals();
 
-            CCLib::GenericIndexedMesh* dummyMesh = CCLib::PointProjectionTools::computeTriangulation(cloud,type,maxEdgeLength);
+            CCLib::GenericIndexedMesh* dummyMesh = CCLib::PointProjectionTools::computeTriangulation(cloud,type,static_cast<PointCoordinateType>(maxEdgeLength));
 
             if (dummyMesh)
             {
@@ -4344,13 +4377,13 @@ void MainWindow::doActionComputeQuadric3D()
 
 #ifndef USE_QUADRIC_3D
 				//Sample points on Quadric and triangulate them!
-				float spanX = bboxDiag.u[hfX];
-				float spanY = bboxDiag.u[hfY];
+				PointCoordinateType spanX = bboxDiag.u[hfX];
+				PointCoordinateType spanY = bboxDiag.u[hfY];
 
 				const unsigned nStepX = 20;
 				const unsigned nStepY = 20;
-				float stepX = spanX/(float)(nStepX-1);
-				float stepY = spanY/(float)(nStepY-1);
+				PointCoordinateType stepX = spanX/static_cast<PointCoordinateType>(nStepX-1);
+				PointCoordinateType stepY = spanY/static_cast<PointCoordinateType>(nStepY-1);
 
                 ccPointCloud* vertices = new ccPointCloud();
 				const double* shift = cloud->getOriginalShift();
@@ -4364,10 +4397,10 @@ void MainWindow::doActionComputeQuadric3D()
 
 				for (unsigned x=0;x<nStepX;++x)
 				{
-					P.x = bbox.minCorner().u[hfX] + stepX*(float)x - G->u[hfX];
+					P.x = bbox.minCorner().u[hfX] + stepX*static_cast<PointCoordinateType>(x) - G->u[hfX];
 					for (unsigned y=0;y<nStepY;++y)
 					{
-						P.y = bbox.minCorner().u[hfY] + stepY*(float)y - G->u[hfY];
+						P.y = bbox.minCorner().u[hfY] + stepY*static_cast<PointCoordinateType>(y) - G->u[hfY];
 						P.z = a+b*P.x+c*P.y+d*P.x*P.x+e*P.x*P.y+f*P.y*P.y;
 
 						Pc.u[hfX] = P.x;
@@ -4549,7 +4582,7 @@ void MainWindow::doActionComputeNormals()
     }
 
     size_t count = m_selectedEntities.size();
-	float defaultRadius = 0;
+	PointCoordinateType defaultRadius = 0;
 	bool onlyMeshes = true;
 	for (size_t i=0; i<count; ++i)
 		if (!m_selectedEntities[i]->isA(CC_MESH))
@@ -4577,7 +4610,7 @@ void MainWindow::doActionComputeNormals()
 
 		model = ncDlg.getLocalModel();
 		preferedOrientation = ncDlg.getPreferedOrientation();
-		defaultRadius = ncDlg.radiusDoubleSpinBox->value();
+		defaultRadius = ncDlg.getRadius();
 	}
 
     //Compute normals for each selected cloud
@@ -4793,7 +4826,7 @@ void MainWindow::doActionUnroll()
         return;
 
     int mode = unrollDlg.getType();
-    double radius = unrollDlg.getRadius();
+    PointCoordinateType radius = static_cast<PointCoordinateType>(unrollDlg.getRadius());
     double angle = unrollDlg.getAngle();
     unsigned char dim = (unsigned char)unrollDlg.getAxisDimension();
     CCVector3* pCenter = 0;
@@ -6178,7 +6211,7 @@ void MainWindow::doActionAddConstantSF()
 		return;
 	}
 
-	double sfValue = QInputDialog::getDouble(this,"SF value", "value", s_constantSFValue, -DBL_MAX, DBL_MAX, 8, &ok);
+	ScalarType sfValue = static_cast<ScalarType>(QInputDialog::getDouble(this,"SF value", "value", s_constantSFValue, -DBL_MAX, DBL_MAX, 8, &ok));
 	if (!ok)
 		return;
 
@@ -6510,7 +6543,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 			ccHObject* plane = 0;
 			if (fitFacet)
 			{
-				ccFacet* facet = ccFacet::Create(cloud, maxEdgeLength);
+				ccFacet* facet = ccFacet::Create(cloud, static_cast<PointCoordinateType>(maxEdgeLength));
 				if (facet)
 				{
 					plane = static_cast<ccHObject*>(facet);
@@ -6553,7 +6586,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 				//hack: output the transformation matrix that would make this normal points towards +Z
 				ccGLMatrix makeZPosMatrix = ccGLMatrix::FromToRotation(N,CCVector3(0,0,1.0f));
 				CCVector3 Gt = C;
-				makeZPosMatrix.applyRotation(Gt.u);
+				makeZPosMatrix.applyRotation(Gt);
 				makeZPosMatrix.setTranslation(C-Gt);
 				makeZPosMatrix.invert();
 				ccConsole::Print("[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:");
@@ -6641,14 +6674,14 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
     QString sfName;
 
     //curvature parameters
-	double curvKernelSize = -1.0;
+	PointCoordinateType curvKernelSize = -PC_ONE;
 	CCLib::Neighbourhood::CC_CURVATURE_TYPE curvType = CCLib::Neighbourhood::GAUSSIAN_CURV;
 
     //computeScalarFieldGradient parameters
-    bool euclidian=false;
+    bool euclidian = false;
 
     //computeRoughness parameters
-    float roughnessKernelSize = 1.0;
+    PointCoordinateType roughnessKernelSize = PC_ONE;
 
     switch (algo)
     {
@@ -6664,12 +6697,12 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				if (additionalParameters)
 				{
 					curvType = *(CCLib::Neighbourhood::CC_CURVATURE_TYPE*)additionalParameters[0];
-					curvKernelSize = *(double*)additionalParameters[1];
+					curvKernelSize = *(PointCoordinateType*)additionalParameters[1];
 				}
 				else //ask the user!
 				{
 					curvKernelSize = GetDefaultCloudKernelSize(entities);
-					if (curvKernelSize < 0.0)
+					if (curvKernelSize < 0)
 					{
 						ccConsole::Error("No elligible point cloud in selection!");
 						return false;
@@ -6681,7 +6714,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 						return false;
 
 					curvType = curvDlg.getCurvatureType();
-					curvKernelSize = curvDlg.getKernelSize();
+					curvKernelSize = static_cast<PointCoordinateType>(curvDlg.getKernelSize());
 				}
 
 				if (curvType == CCLib::Neighbourhood::MEAN_CURV)
@@ -6717,20 +6750,20 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				//parameters already provided?
 				if (additionalParameters)
 				{
-					roughnessKernelSize = *(float*)additionalParameters[0];
+					roughnessKernelSize = *(PointCoordinateType*)additionalParameters[0];
 				}
 				else //ask the user!
 				{
 					roughnessKernelSize = GetDefaultCloudKernelSize(entities);
-					if (roughnessKernelSize < 0.0)
+					if (roughnessKernelSize < 0)
 					{
 						ccConsole::Error("No elligible point cloud in selection!");
 						return false;
 					}
-					ccAskOneDoubleValueDlg dlg("Kernel size", DBL_MIN, DBL_MAX, roughnessKernelSize, 8, 0, 0);
+					ccAskOneDoubleValueDlg dlg("Kernel size", DBL_MIN, DBL_MAX, static_cast<double>(roughnessKernelSize), 8, 0, 0);
 					if (!dlg.exec())
 						return false;
-					roughnessKernelSize = (float)dlg.dValueSpinBox->value();
+					roughnessKernelSize = static_cast<PointCoordinateType>(dlg.dValueSpinBox->value());
 				}
 				
 				sfName = QString(CC_ROUGHNESS_FIELD_NAME)+QString("(%1)").arg(roughnessKernelSize);
@@ -6895,7 +6928,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                     //missed something?
                     assert(false);
             }
-			int elapsedTime_ms = eTimer.elapsed();
+			qint64 elapsedTime_ms = eTimer.elapsed();
 
             if (result == 0)
             {
@@ -6906,7 +6939,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                     pc->getCurrentInScalarField()->computeMinAndMax();
                 }
                 cloud->prepareDisplayForRefresh();
-				ccConsole::Print("[Algortihm] Timing: %3.2f s.",elapsedTime_ms/1.0e3);
+				ccConsole::Print("[Algortihm] Timing: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
             }
             else
             {
@@ -7152,13 +7185,15 @@ void MainWindow::addToDB(ccHObject* obj,
 				memcpy(Pshift,coordinatesShift,sizeof(double)*3);
 			double scale = (coordinatesScale ? *coordinatesScale : 1.0);
 			bool applyAll=false;
+			//here we must test that coordinates are not too big whatever the case because OpenGL
+			//really don't like big ones (even if we work with GLdoubles).
 			if (ccCoordinatesShiftManager::Handle(P,diag,true,shiftAlreadyEnabled,Pshift,&scale,applyAll))
 			{
 				ccGLMatrix mat;
 				mat.toIdentity();
-				mat.data()[12] = static_cast<float>(Pshift[0]);
-				mat.data()[13] = static_cast<float>(Pshift[1]);
-				mat.data()[14] = static_cast<float>(Pshift[2]);
+				mat.data()[12] = static_cast<float>(Pshift[0]*scale);
+				mat.data()[13] = static_cast<float>(Pshift[1]*scale);
+				mat.data()[14] = static_cast<float>(Pshift[2]*scale);
 				mat.data()[0] = mat.data()[5] = mat.data()[10] = static_cast<float>(scale);
 				obj->applyGLTransformation_recursive(&mat);
 				ccConsole::Warning(QString("Entity '%1' will be translated: (%2,%3,%4)").arg(obj->getName()).arg(Pshift[0],0,'f',2).arg(Pshift[1],0,'f',2).arg(Pshift[2],0,'f',2));

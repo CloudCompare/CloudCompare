@@ -1160,7 +1160,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 					m_normals->setValue(j,newNorms->getValue(m_normals->getCurrentValue()));
 					m_normals->forwardIterator();
 				}
-				recoded=true;
+				recoded = true;
 			}
 			newNorms->clear();
 			newNorms->release();
@@ -1178,7 +1178,7 @@ void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 			{
 				normsType* _theNormIndex = m_normals->getCurrentValuePtr();
 				CCVector3 new_n(ccNormalVectors::GetNormal(*_theNormIndex));
-				trans.applyRotation(new_n.u);
+				trans.applyRotation(new_n);
 				*_theNormIndex = ccNormalVectors::GetNormIndex(new_n.u);
 				m_normals->forwardIterator();
 			}
@@ -1433,6 +1433,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			decimStep = int(ceil(float(numberOfPoints) / float(MAX_LOD_POINTS_NUMBER)));
 		}
 
+		//the GL type depends on the PointCoordinateType 'size' (float or double)
+		GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
+
 		/*** DISPLAY ***/
 
 		//custom point size?
@@ -1466,9 +1469,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						if (glParams.showNorms)
 						{
-							glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
+							ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)));
 						}
-						glVertex3fv(m_points->getValue(j));
+						ccGL::Vertex3v(m_points->getValue(j));
 					}
 				}
 
@@ -1585,7 +1588,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					if (glParams.showNorms)
 					{
-						glNormalPointer(GL_FLOAT,0,s_normBuffer);
+						glNormalPointer(GL_COORD_TYPE,0,s_normBuffer);
 						glEnableClientState(GL_NORMAL_ARRAY);
 					}
 
@@ -1652,7 +1655,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						if (decimStep > 1)
 							chunkSize = (unsigned)floor((float)chunkSize/(float)decimStep);
 
-						glVertexPointer(3,GL_FLOAT,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
+						glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
 						glDrawArrays(GL_POINTS,0,chunkSize);
 					}
 
@@ -1679,8 +1682,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
 										glColor3f(GetNormalizedValue(sf,sfDisplayRange),1.0f,1.0f);
-										glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
-										glVertex3fv(m_points->getValue(j));
+										ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)));
+										ccGL::Vertex3v(m_points->getValue(j));
 									}
 								}
 							}
@@ -1693,8 +1696,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
 										glColor3f(GetSymmetricalNormalizedValue(sf,sfSaturationRange),1.0f,1.0f);
-										glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
-										glVertex3fv(m_points->getValue(j));
+										ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)));
+										ccGL::Vertex3v(m_points->getValue(j));
 									}
 								}
 							}
@@ -1708,8 +1711,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								if (col)
 								{
 									glColor3ubv(col);
-									glNormal3fv(compressedNormals->getNormal(m_normals->getValue(j)));
-									glVertex3fv(m_points->getValue(j));
+									ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)));
+									ccGL::Vertex3v(m_points->getValue(j));
 								}
 							}
 						}
@@ -1727,7 +1730,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
 										glColor3f(GetNormalizedValue(sf,sfDisplayRange),1.0f,1.0f);
-										glVertex3fv(m_points->getValue(j));
+										ccGL::Vertex3v(m_points->getValue(j));
 									}
 								}
 							}
@@ -1740,7 +1743,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
 										glColor3f(GetSymmetricalNormalizedValue(sf,sfSaturationRange),1.0f,1.0f);
-										glVertex3fv(m_points->getValue(j));
+										ccGL::Vertex3v(m_points->getValue(j));
 									}
 								}
 							}
@@ -1754,7 +1757,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								if (col)
 								{
 									glColor3ubv(col);
-									glVertex3fv(m_points->getValue(j));
+									ccGL::Vertex3v(m_points->getValue(j));
 								}
 							}
 						}
@@ -1772,7 +1775,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else if (glParams.showNorms) //no visibility table enabled, no scalar field + normals
 			{
-				glNormalPointer(GL_FLOAT,0,s_normBuffer);
+				glNormalPointer(GL_COORD_TYPE,0,s_normBuffer);
 				glEnableClientState(GL_VERTEX_ARRAY);
 				glEnableClientState(GL_NORMAL_ARRAY);
 				if (glParams.showColors)
@@ -1801,7 +1804,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					if (decimStep > 1)
 						chunkSize = (unsigned)floor((float)chunkSize/(float)decimStep);
 
-					glVertexPointer(3,GL_FLOAT,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
+					glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
 					glDrawArrays(GL_POINTS,0,chunkSize);
 				}
 
@@ -1829,7 +1832,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(!glParams.showColors || m_rgbColors->chunkSize(k) == chunkSize);
 						if (decimStep > 1)
 							chunkSize = (unsigned)floor((float)chunkSize/(float)decimStep);
-						glVertexPointer(3,GL_FLOAT,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
+						glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
 						if (glParams.showColors)
 							glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),m_rgbColors->chunkStartPtr(k));
 						glDrawArrays(GL_POINTS,0,chunkSize);
@@ -1848,7 +1851,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showColors)
 				glColor3ubv(m_rgbColors->getValue(j));
 
-				glVertex3fv(m_points->getValue(j));
+				ccGL::Vertex3v(m_points->getValue(j));
 				}
 				glEnd();
 				}
@@ -1867,7 +1870,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						glLoadName(j);
 						glBegin(GL_POINTS);
-						glVertex3fv(m_points->getValue(j));
+						ccGL::Vertex3v(m_points->getValue(j));
 						glEnd();
 					}
 				}
@@ -1894,7 +1897,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							glLoadName(j);
 							glBegin(GL_POINTS);
-							glVertex3fv(m_points->getValue(j));
+							ccGL::Vertex3v(m_points->getValue(j));
 							glEnd();
 						}
 					}
@@ -1905,7 +1908,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						glLoadName(j);
 						glBegin(GL_POINTS);
-						glVertex3fv(m_points->getValue(j));
+						ccGL::Vertex3v(m_points->getValue(j));
 						glEnd();
 					}
 				}
@@ -2158,7 +2161,10 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
 	return true;
 }
 
-void ccPointCloud::unrollOnCylinder(double radius, CCVector3* center, unsigned char dim/*=2*/, CCLib::GenericProgressCallback* progressCb/*=NULL*/)
+void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
+									CCVector3* center,
+									unsigned char dim/*=2*/,
+									CCLib::GenericProgressCallback* progressCb/*=NULL*/)
 {
 	assert(dim <= 2);
 	uchar dim1 = (dim<2 ? dim+1 : 0);
@@ -2230,7 +2236,11 @@ void ccPointCloud::unrollOnCylinder(double radius, CCVector3* center, unsigned c
 		progressCb->stop();
 }
 
-void ccPointCloud::unrollOnCone(double baseRadius, double alpha_deg, const CCVector3& apex, unsigned char dim/*=2*/, CCLib::GenericProgressCallback* progressCb/*=NULL*/)
+void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
+								double alpha_deg,
+								const CCVector3& apex,
+								unsigned char dim/*=2*/,
+								CCLib::GenericProgressCallback* progressCb/*=NULL*/)
 {
 	assert(dim < 3);
 	uchar dim1 = (dim<2 ? dim+1 : 0);
@@ -2248,9 +2258,9 @@ void ccPointCloud::unrollOnCone(double baseRadius, double alpha_deg, const CCVec
 		progressCb->start();
 	}
 
-	float tan_alpha = tan(alpha_deg*CC_DEG_TO_RAD);
-	float cos_alpha = cos(alpha_deg*CC_DEG_TO_RAD);
-	float sin_alpha = sin(alpha_deg*CC_DEG_TO_RAD);
+	PointCoordinateType tan_alpha = static_cast<PointCoordinateType>( tan(alpha_deg*CC_DEG_TO_RAD) );
+	PointCoordinateType cos_alpha = static_cast<PointCoordinateType>( cos(alpha_deg*CC_DEG_TO_RAD) );
+	PointCoordinateType sin_alpha = static_cast<PointCoordinateType>( sin(alpha_deg*CC_DEG_TO_RAD) );
 
 	for (unsigned i=0; i<numberOfPoints; i++)
 	{

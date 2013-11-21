@@ -244,9 +244,9 @@ void ccGraphicalTransformationTool::stop(bool state)
 
 void ccGraphicalTransformationTool::glTranslate(const CCVector3& realT)
 {
-	CCVector3 t(realT.x * (TxCheckBox->isChecked() ? 1.0 : 0.0),
-				realT.y * (TyCheckBox->isChecked() ? 1.0 : 0.0),
-				realT.z * (TzCheckBox->isChecked() ? 1.0 : 0.0));
+	CCVector3 t(realT.x * (TxCheckBox->isChecked() ? PC_ONE : 0),
+				realT.y * (TyCheckBox->isChecked() ? PC_ONE : 0),
+				realT.z * (TzCheckBox->isChecked() ? PC_ONE : 0));
 
 	if (t.norm2() != 0)
 	{

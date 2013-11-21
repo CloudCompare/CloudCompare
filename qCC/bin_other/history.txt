@@ -5,6 +5,15 @@ v2.5.2 XX/XX/2013
 	- when selecting the 'min' or 'max height' projections, the user can now choose
 		to 'resample' the original cloud in order to produce a new cloud (instead
 		of generating a regularly sampled cloud using the grid cell's centers)
+- It is now possible to compile CloudCompare with 64 bits floating point values
+	for coordinates (i.e 'doubles' instead of 'floats'). This doubles the memory
+	consumption, but it increases a lot the accuracy. Moreover, there's absolutely
+	no loss of information when importing/exporting clouds with very big coordinates.
+	However:
+		* OpenGL still requires rather small coordinates for a proper display (so the
+			'shift on load' mechanism is still necessary)
+		* a version of CloudCompare compiled in 'double' mode won't be able to load BIN
+			files saved with the standard version, and vice versa.
 - Other enhancements:
 	- the 'facet' entity's normal vector can now be displayed or hidden via the facet properties
 	- BIN file loading/saving is now done in a separate thread
@@ -34,6 +43,10 @@ v2.5.2 XX/XX/2013
 		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)
 	- blank lines or commentaries were causing an infinite loop when importing ASCII files
 	- primitives (sphere, cylinder, etc.) were not correctly loaded from BIN files (CC would crash when loading them)
+	- sub-meshes' bounding boxes were not updated when a transformation was applied to their parent mesh or its
+		associated vertices
+	- at loading time when an entity was both too far and too big, the (optional) applied transformation to
+		recenter and rescale the entity was wrong.
 
 v2.5.1 10/19/2013
 - The 'Clipping-box' tool has a new feature: 'contour' extraction

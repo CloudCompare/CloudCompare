@@ -292,7 +292,9 @@ public:
 		\param factor smoothing 'force'
 		\param progressCb progress dialog callback
 	**/
-	bool laplacianSmooth(unsigned nbIteration = 100, float factor = 0.01f, CCLib::GenericProgressCallback* progressCb = 0);
+	bool laplacianSmooth(	unsigned nbIteration = 100,
+							PointCoordinateType factor = static_cast<PointCoordinateType>(0.01),
+							CCLib::GenericProgressCallback* progressCb = 0);
 
 	//! Mesh scalar field processes
 	enum MESH_SCALAR_FIELD_PROCESS {	SMOOTH_MESH_SF,		/**< Smooth **/
@@ -313,7 +315,7 @@ public:
 	//! Subdivides mesh (so as to ensure that all triangles are falls below 'maxArea')
 	/** \return subdivided mesh (if successfull)
 	**/
-	ccMesh* subdivide(float maxArea) const;
+	ccMesh* subdivide(PointCoordinateType maxArea) const;
 
     //! Creates a new mesh with the selected vertices only
     /** This method is called after a graphical segmentation.

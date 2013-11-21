@@ -135,6 +135,14 @@ void ccDisplayOptionsDlg::refresh()
 	update();
 }
 
+static void QColorToFloat(const QColor& col, float rgba[4])
+{
+	rgba[0] = static_cast<float>(col.redF());
+	rgba[1] = static_cast<float>(col.greenF());
+	rgba[2] = static_cast<float>(col.blueF());
+	rgba[3] = static_cast<float>(col.alphaF());
+}
+
 void ccDisplayOptionsDlg::changeLightDiffuseColor()
 {
 	QColor newCol = QColorDialog::getColor(lightDiffuseColor, this);
@@ -144,7 +152,9 @@ void ccDisplayOptionsDlg::changeLightDiffuseColor()
 	lightDiffuseColor = newCol;
 	SetButtonColor(diffuseColorButton,lightDiffuseColor);
 
-	float rgba[4]={lightDiffuseColor.redF(),lightDiffuseColor.greenF(),lightDiffuseColor.blueF(),lightDiffuseColor.alphaF()};
+	float rgba[4];
+	QColorToFloat(lightDiffuseColor,rgba);
+
 	memcpy(parameters.lightDiffuseColor,rgba,sizeof(float)*4);
 }
 
@@ -157,7 +167,8 @@ void ccDisplayOptionsDlg::changeLightAmbientColor()
 	lightAmbientColor = newCol;
 	SetButtonColor(ambientColorButton,lightAmbientColor);
 
-	float rgba[4]={lightAmbientColor.redF(),lightAmbientColor.greenF(),lightAmbientColor.blueF(),lightAmbientColor.alphaF()};
+	float rgba[4];
+	QColorToFloat(lightAmbientColor,rgba);
 	memcpy(parameters.lightAmbientColor,rgba,sizeof(float)*4);
 
 	update();
@@ -172,7 +183,8 @@ void ccDisplayOptionsDlg::changeLightSpecularColor()
 	lightSpecularColor = newCol;
 	SetButtonColor(specularColorButton,lightSpecularColor);
 
-	float rgba[4]={lightSpecularColor.redF(),lightSpecularColor.greenF(),lightSpecularColor.blueF(),lightSpecularColor.alphaF()};
+	float rgba[4];
+	QColorToFloat(lightSpecularColor,rgba);
 	memcpy(parameters.lightSpecularColor,rgba,sizeof(float)*4);
 
 	update();
@@ -187,7 +199,8 @@ void ccDisplayOptionsDlg::changeMeshFrontDiffuseColor()
 	meshFrontDiff = newCol;
 	SetButtonColor(meshFrontColorButton,meshFrontDiff);
 
-	float rgba[4]={meshFrontDiff.redF(),meshFrontDiff.greenF(),meshFrontDiff.blueF(),meshFrontDiff.alphaF()};
+	float rgba[4];
+	QColorToFloat(meshFrontDiff,rgba);
 	memcpy(parameters.meshFrontDiff,rgba,sizeof(float)*4);
 
 	update();
@@ -202,7 +215,8 @@ void ccDisplayOptionsDlg::changeMeshBackDiffuseColor()
 	meshBackDiff = newCol;
 	SetButtonColor(meshBackColorButton,meshBackDiff);
 
-	float rgba[4]={meshBackDiff.redF(),meshBackDiff.greenF(),meshBackDiff.blueF(),meshBackDiff.alphaF()};
+	float rgba[4];
+	QColorToFloat(meshBackDiff,rgba);
 	memcpy(parameters.meshBackDiff,rgba,sizeof(float)*4);
 
 	update();
@@ -217,7 +231,8 @@ void ccDisplayOptionsDlg::changeMeshSpecularColor()
 	meshSpecularColor = newCol;
 	SetButtonColor(meshSpecularColorButton,meshSpecularColor);
 
-	float rgba[4]={meshSpecularColor.redF(),meshSpecularColor.greenF(),meshSpecularColor.blueF(),meshSpecularColor.alphaF()};
+	float rgba[4];
+	QColorToFloat(meshSpecularColor,rgba);
 	memcpy(parameters.meshSpecular,rgba,sizeof(float)*4);
 
 	update();

@@ -33,6 +33,18 @@
 //system
 #include <assert.h>
 
+//type-less glVertex3Xv call (X=f,d)
+static inline void glVertex3v(const float* v) { glVertex3fv(v); }
+static inline void glVertex3v(const double* v) { glVertex3dv(v); }
+
+//type-less glTranslateX call (X=f,d)
+static inline void glTranslate(float x, float y, float z) { glTranslatef(x,y,z); }
+static inline void glTranslate(double x, double y, double z) { glTranslated(x,y,z); }
+
+//type-less glScaleX call (X=f,d)
+static inline void glScale(float x, float y, float z) { glScalef(x,y,z); }
+static inline void glScale(double x, double y, double z) { glScaled(x,y,z); }
+
 using namespace CCLib;
 
 #ifndef ZTWIST
@@ -42,7 +54,7 @@ using namespace CCLib;
 PCVContext::PCVContext()
 	: m_vertices(0)
 	, m_mesh(0)
-	, m_zoom(1.0f)
+	, m_zoom(1)
 	, m_pixBuffer(0)
 	, m_width(0)
 	, m_height(0)
@@ -130,10 +142,10 @@ void PCVContext::associateToEntity(GenericCloud* cloud, GenericMesh* mesh)
 	PointCoordinateType maxD = (bbMax-bbMin).norm();
 
 	//we deduce default zoom
-	m_zoom = (maxD > (float)ZERO_TOLERANCE ? (float)std::min(m_width,m_height) / maxD : 1.0f);
+	m_zoom = (maxD > ZERO_TOLERANCE ? static_cast<PointCoordinateType>(std::min(m_width,m_height)) / maxD : static_cast<PointCoordinateType>(1.0));
 
 	//as well as display center
-	m_viewCenter = (bbMax+bbMin)*0.5f;
+	m_viewCenter = (bbMax+bbMin)/2;
 }
 
 void PCVContext::glInit()
@@ -168,7 +180,7 @@ void PCVContext::glInit()
 	glPushMatrix();
 }
 
-void PCVContext::setViewDirection(const float* V)
+void PCVContext::setViewDirection(const CCVector3& V)
 {
 	if (!m_pixBuffer || !m_pixBuffer->isValid())
 		return;
@@ -179,14 +191,14 @@ void PCVContext::setViewDirection(const float* V)
 	glPushMatrix();
     glLoadIdentity();
 
-	float U[3]={0.0,0.0,1.0};
-	if (1.0f-fabs(Vector3Tpl<float>::vdot(V,U))<1e-4f)
+	CCVector3 U(0,0,1);
+	if (1-fabs(V.dot(U)) < 1.0e-4)
 	{
-		U[1]=1.0;
-		U[2]=0.0;
+		U.y = 1;
+		U.z = 0;
 	}
 
-	gluLookAt(-V[0],-V[1],-V[2],0.0,0.0,0.0,U[0],U[1],U[2]);
+	gluLookAt(-V.x,-V.y,-V.z,0.0,0.0,0.0,U.x,U.y,U.z);
 	glGetFloatv(GL_MODELVIEW_MATRIX, m_viewMat);
 	glPopMatrix();
 }
@@ -197,23 +209,23 @@ void PCVContext::drawEntity()
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadMatrixf(m_viewMat);
-	glScalef(m_zoom,m_zoom,m_zoom);
-	glTranslatef(-m_viewCenter.x, -m_viewCenter.y, -m_viewCenter.z);
+	glScale(m_zoom,m_zoom,m_zoom);
+	glTranslate(-m_viewCenter.x, -m_viewCenter.y, -m_viewCenter.z);
 
 	glColor3ub(255,255,0); //yellow by default
 
 	if (m_mesh)
 	{
-		unsigned nTri=m_mesh->size();
+		unsigned nTri = m_mesh->size();
 		m_mesh->placeIteratorAtBegining();
 
 		glBegin(GL_TRIANGLES);
-		for (unsigned i=0;i<nTri;++i)
+		for (unsigned i=0; i<nTri; ++i)
 		{
 			const GenericTriangle* t = m_mesh->_getNextTriangle();
-			glVertex3fv(t->_getA()->u);
-			glVertex3fv(t->_getB()->u);
-			glVertex3fv(t->_getC()->u);
+			glVertex3v(t->_getA()->u);
+			glVertex3v(t->_getB()->u);
+			glVertex3v(t->_getC()->u);
 		}
 		glEnd();
 	}
@@ -224,7 +236,7 @@ void PCVContext::drawEntity()
 
 		glBegin(GL_POINTS);
 		for (unsigned i=0;i<nPts;++i)
-            glVertex3fv(m_vertices->getNextPoint()->u);
+            glVertex3v(m_vertices->getNextPoint()->u);
 		glEnd();
 	}
 }

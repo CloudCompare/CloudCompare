@@ -70,44 +70,44 @@ public:
 	/** \param minV min latitude
 		\param maxV max latitude
 	**/
-	void setPhi(float minV, float maxV);
+	void setPhi(PointCoordinateType minV, PointCoordinateType maxV);
 
 	//! Sets the lateral angular scanning step
 	/** \param dPhi latitudinal step
 	**/
-	void setDeltaPhi(float dPhi);
+	void setDeltaPhi(PointCoordinateType dPhi);
 
 	//! Returns the lateral minimal angular scanning limit
-	float getPhiMin() const;
+	PointCoordinateType getPhiMin() const;
 
 	//! Returns the lateral maximal angular scanning limit
-	float getPhiMax() const;
+	PointCoordinateType getPhiMax() const;
 
 	//! Returns the lateral angular scanning step
-	float getDeltaPhi() const;
+	PointCoordinateType getDeltaPhi() const;
 
 	//! Sets the vertical angular scanning limits
 	/** \param minV min longitude
 		\param maxV max longitude
 	**/
-	void setTheta(float minV, float maxV);
+	void setTheta(PointCoordinateType minV, PointCoordinateType maxV);
 
 	//! Sets the vertical angular scanning step
 	/** \param dTheta longitudinal step
 	**/
-	void setDeltaTheta(float dTheta);
+	void setDeltaTheta(PointCoordinateType dTheta);
 
 	//! Returns the vertical minimal angular scanning limit
-	float getThetaMin() const;
+	PointCoordinateType getThetaMin() const;
 
 	//! Returns the vertical maximal angular scanning limit
-	float getThetaMax() const;
+	PointCoordinateType getThetaMax() const;
 
 	//! Returns the vertical angular scanning step
-	float getDeltaTheta() const;
+	PointCoordinateType getDeltaTheta() const;
 
 	//! Returns the sensor base (distance between emitter and reciever)
-	float getSensorBase() const;
+	PointCoordinateType getSensorBase() const;
 
 	//! Sets the sensor base (distance between emitter and reciever)
 	/** \param base the sensor base
@@ -186,7 +186,7 @@ public:
 		\param rgbColors the RGB colors (should have the same size and order as the point cloud)
 		\return a bidimensional array of RGB colors (same size as the depth buffer)
 	**/
-	uchar* projectColors(CCLib::GenericCloud* cloud, GenericChunkedArray<3,uchar>& rgbColors) const;
+	colorType* projectColors(CCLib::GenericCloud* cloud, GenericChunkedArray<3,colorType>& rgbColors) const;
 
 	//! Determines a point "visibility"
 	/** \param P the point to test
@@ -234,10 +234,10 @@ public:
 	void updateGraphicRepresentation();
 
     //! Sets the sensor graphic representation scale
-	void setGraphicScale(double scale);
+	void setGraphicScale(PointCoordinateType scale);
 
     //! Returns the sensor graphic representation scale
-	double getGraphicScale() const;
+	PointCoordinateType getGraphicScale() const;
 
     //Inherited from ccHObject
     //virtual ccBBox getMyOwnBB();
@@ -263,18 +263,18 @@ protected:
 	ccGLMatrix m_orientation;
 
 	//! lateral minimal angular scanning limit
-	float phiMin;
+	PointCoordinateType phiMin;
 	//! lateral maximal angular scanning limit
-	float phiMax;
+	PointCoordinateType phiMax;
 	//! lateral angular scanning step
-	float deltaPhi;
+	PointCoordinateType deltaPhi;
 
 	//! Vertical minimal angular scanning limit
-	float thetaMin;
+	PointCoordinateType thetaMin;
 	//! Vertical maximal angular scanning limit
-	float thetaMax;
+	PointCoordinateType thetaMax;
 	//! Vertical angular scanning step
-	float deltaTheta;
+	PointCoordinateType deltaTheta;
 
 	//! Mirrors rotation order
 	ROTATION_ORDER rotationOrder;
@@ -287,7 +287,7 @@ protected:
 	ScalarType uncertainty;
 	
 	//! Sensor graphic representation scale
-    double scale;
+    PointCoordinateType scale;
 
     //! Bounding-box (body)
     ccBBox bBox;

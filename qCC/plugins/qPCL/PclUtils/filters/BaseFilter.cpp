@@ -19,7 +19,6 @@
 
 //qCC_db
 #include <ccPointCloud.h>
-#include <ccProgressDialog.h>
 #include <ccHObjectCaster.h>
 
 //qCC_db
@@ -32,6 +31,7 @@
 #include <QAction>
 #include <QFuture>
 #include <QApplication>
+#include <QProgressDialog>
 #include <qtconcurrentrun.h>
 
 //system
@@ -166,79 +166,53 @@ static void doCompute()
 
 int BaseFilter::start()
 {   
+	if (s_computing)
+	{
+		throwError(-32);
+		return -1;
+	}
 
-    if (m_show_progress)
+	QProgressDialog progressCb("Operation in progress",QString(),0,0);
+
+	if (m_show_progress)
     {
-        ccProgressDialog* progressCb = new ccProgressDialog();
-        progressCb->setCancelButton(0);
-        progressCb->setRange(0,0);
-        progressCb->setInfo("Operation in progress");
-        progressCb->setMethodTitle(qPrintable(getFilterName()));
-        progressCb->start();
-        QApplication::processEvents();
+		progressCb.setWindowTitle(getFilterName());
+		progressCb.show();
+		QApplication::processEvents();
+	}
 
-        if (s_computing)
-        {
-            throwError(-32);
-            return -1;
-        }
+	s_computeStatus = -1;
+	s_filter = this;
+	s_computing = true;
+	int progress = 0;
 
-        s_computeStatus = -1;
-        s_filter = this;
-        s_computing = true;
-        unsigned progress = 0;
-
-        QFuture<void> future = QtConcurrent::run(doCompute);
-        while (!future.isFinished())
-        {
+	QFuture<void> future = QtConcurrent::run(doCompute);
+	while (!future.isFinished())
+	{
 #if defined(CC_WINDOWS)
-            ::Sleep(500);
+		::Sleep(500);
 #else
-            usleep(500 * 1000);
+		usleep(500 * 1000);
 #endif
-            progressCb->update(++progress);
-        }
-        int is_ok = s_computeStatus;
-        s_filter = 0;
-        s_computing = false;
+		if (m_show_progress)
+			progressCb.setValue(++progress);
+	}
+	
+	int is_ok = s_computeStatus;
+	s_filter = 0;
+	s_computing = false;
 
-        progressCb->stop();
+	if (m_show_progress)
+	{
+        progressCb.close();
         QApplication::processEvents();
-        if (is_ok < 0)
-        {
-            throwError(is_ok);
-            return -1;
-        }
+	}
 
-
-    }
-    else
-    {
-        s_computeStatus = -1;
-        s_filter = this;
-        s_computing = true;
-
-        QFuture<void> future = QtConcurrent::run(doCompute);
-        while (!future.isFinished())
-        {
-#if defined(CC_WINDOWS)
-            ::Sleep(500);
-#else
-            usleep(500 * 1000);
-#endif
-        }
-        int is_ok = s_computeStatus;
-        s_filter = 0;
-        s_computing = false;
-
-        if (is_ok < 0)
-        {
-            throwError(is_ok);
-            return -1;
-        }
-    }
-
-
+	if (is_ok < 0)
+	{
+		throwError(is_ok);
+		return -1;
+	}
 
 	return 1;
 }

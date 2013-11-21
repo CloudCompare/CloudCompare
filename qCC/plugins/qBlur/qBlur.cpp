@@ -36,8 +36,8 @@ ccGlFilter* qBlur::getFilter()
     if (!ok)
         return 0;
 
-    int filterSize = 1+2*(int)ceil(2.5*sigma);
-    filter->setParameters(filterSize,sigma,0.0);
+    int filterSize = 1+2*static_cast<int>(ceil(2.5*sigma));
+    filter->setParameters(filterSize,static_cast<float>(sigma),0);
 
     return filter;
 }

@@ -404,10 +404,10 @@ void ccFacet::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
-		glTranslatef(m_center.x,m_center.y,m_center.z);
+		ccGL::Translate(m_center.x,m_center.y,m_center.z);
 		ccGLMatrix mat = ccGLMatrix::FromToRotation(getNormal(),CCVector3(0,0,1));
 		glMultMatrixf(mat.data());
-		glScalef(scale,scale,scale);
+		ccGL::Scale(scale,scale,scale);
 		glTranslatef(0,0,0.45f);
 		c_unitNormalSymbol->draw(markerContext);
 		glTranslatef(0,0,0.45f);

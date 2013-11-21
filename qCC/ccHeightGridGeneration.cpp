@@ -51,7 +51,7 @@ struct HeightGridCell
     {}
 
     //! Value
-    float height;
+    PointCoordinateType height;
     //! Number of points projected in this cell
     unsigned nbPoints;
     //! Nearest point index (if any)
@@ -240,7 +240,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 					CCLib::ScalarField* sf = pc->getScalarField(k);
 					assert(sf);
 					ScalarType sfValue = sf->getValue(n);
-					ScalarType formerValue = gridScalarFields[k][pos];
+					ScalarType formerValue = static_cast<ScalarType>(gridScalarFields[k][pos]);
 
 					if (pointsInCell && ccScalarField::ValidValue(formerValue))
 					{
@@ -295,8 +295,11 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						for (unsigned i=0;i<grid_size_X;++i,++cell,++_gridSF)
 						{
 							if (cell->nbPoints)
-								if (ccScalarField::ValidValue(*_gridSF)) //valid SF value
+							{
+								ScalarType s = static_cast<ScalarType>(*_gridSF);
+								if (ccScalarField::ValidValue(s)) //valid SF value
 									*_gridSF /= static_cast<double>(cell->nbPoints);
+							}
 						}
 					}
 				}
@@ -311,7 +314,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 				HeightGridCell* cell = grid[j];
 				for (unsigned i=0; i<grid_size_X; ++i,++cell)
 					if (cell->nbPoints>1)
-						cell->height /= static_cast<double>(cell->nbPoints);
+						cell->height /= static_cast<PointCoordinateType>(cell->nbPoints);
 			}
 		}
 	}
@@ -638,26 +641,36 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 								//if a SF is available, we set the point height as its associated scalar
 								if (heightSF)
-									heightSF->setValue(n,aCell->height);
+								{
+									ScalarType h = static_cast<ScalarType>(aCell->height);
+									heightSF->setValue(n,h);
+								}
 
 								//per-cell population SF
 								if (countSF)
 								{
-									ScalarType pop = aCell->nbPoints;
+									ScalarType pop = static_cast<ScalarType>(aCell->nbPoints);
 									countSF->setValue(n,pop);
 								}
 								++n;
 							}
 							else if (fillEmptyCells != LEAVE_EMPTY) //empty cell
 							{
-								CCVector3 Pf((PointCoordinateType)Px,(PointCoordinateType)Py,empty_cell_height);
+								CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
+												static_cast<PointCoordinateType>(Py),
+												static_cast<PointCoordinateType>(empty_cell_height) );
 								cloudGrid->addPoint(Pf);
 
 								//if a SF is available, we set the point height as the default one
 								if (heightSF)
-									heightSF->setValue(n,empty_cell_height);
+								{
+									ScalarType s = static_cast<ScalarType>(empty_cell_height);
+									heightSF->setValue(n,s);
+								}
 								if (countSF)
+								{
 									countSF->setValue(n,NAN_VALUE);
+								}
 								++n;
 							}
 
@@ -707,12 +720,17 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 								for (unsigned j=0; j<grid_size_Y; ++j)
 								{
 									const HeightGridCell* aCell = grid[j];
-									for (unsigned i=0; i<grid_size_X; ++i, ++_sfGrid, ++aCell)
+									for (unsigned i=0; i<grid_size_X; ++i, /*++_sfGrid, */++aCell)
 									{
 										if (aCell->nbPoints)
-											sf->setValue(n++,*_sfGrid);
+										{
+											ScalarType s = static_cast<ScalarType>(empty_cell_height);
+											sf->setValue(n++,s);
+										}
 										else if (fillEmptyCells != LEAVE_EMPTY)
+										{
 											sf->setValue(n++,emptyCellSFValue);
+										}
 									}
 								}
 								sf->computeMinAndMax();
@@ -745,7 +763,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 	//...and of the scalar fields
 	{
-		for (unsigned i=0;i<gridScalarFields.size();++i)
+		for (unsigned i=0; i<gridScalarFields.size(); ++i)
 		{
 			if (gridScalarFields[i])
 				delete[] gridScalarFields[i];

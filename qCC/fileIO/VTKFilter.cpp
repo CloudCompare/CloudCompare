@@ -327,7 +327,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 					if (shiftAlreadyEnabled)
 						memcpy(Pshift,coordinatesShift,sizeof(double)*3);
 					bool applyAll=false;
-					if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+					if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 					{
 						vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
 						ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
@@ -343,7 +343,9 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 					}
 				}
 
-				vertices->addPoint(CCVector3(Pd[0]+Pshift[0],Pd[1]+Pshift[1],Pd[2]+Pshift[2]));
+				vertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(Pd[0]+Pshift[0]),
+												static_cast<PointCoordinateType>(Pd[1]+Pshift[1]),
+												static_cast<PointCoordinateType>(Pd[2]+Pshift[2])) );
 			}
 		//end POINTS
 		}

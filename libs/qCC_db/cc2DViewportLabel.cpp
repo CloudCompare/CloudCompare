@@ -123,8 +123,8 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 		CCVector3 P = m_params.pivotPoint - params.pivotPoint;
 		m_params.viewMat.apply(P);
 
-		dx = dC.x + P.x;
-		dy = dC.y + P.y;
+		dx = static_cast<float>(dC.x + P.x);
+		dy = static_cast<float>(dC.y + P.y);
 
 		dx *= winTotalZoom;
 		dy *= winTotalZoom;

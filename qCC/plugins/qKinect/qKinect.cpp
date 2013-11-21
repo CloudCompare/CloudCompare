@@ -417,16 +417,16 @@ void qKinect::grabCloud()
         /*** Depth calibration info ***/
 
         //see http://openkinect.org/wiki/Imaging_Information
-        /*static const double minDistance = -10.0;
-        static const double scaleFactor = .0021;
+        /*static const float minDistance = -10.0f;
+        static const float scaleFactor = .0021f;
         const float cx = (float)w/2;
         const float cy = (float)h/2;
-        const float fx = 1.0/scaleFactor; //* (480.0/640.0);
-        const float fy = 1.0/scaleFactor; //~476
+        const float fx = 1.0f/scaleFactor; //* (480.0/640.0);
+        const float fy = 1.0f/scaleFactor; //~476
         //*/
 
         //see http://nicolas.burrus.name/index.php/Research/KinectCalibration
-        static const double minDistance = -10.0;
+        static const float minDistance = -10.0f;
         static const float cx = 339.5f;
         static const float cy = 242.7f;
         static const float fx = 594.21f;
@@ -507,10 +507,10 @@ void qKinect::grabCloud()
 					if (d < FREENECT_DEPTH_RAW_NO_VALUE)
 					{
 						//see http://openkinect.org/wiki/Imaging_Information
-						P.z = 12.36f * tanf((float)d / 2842.5f + 1.1863f) - 3.7f;
+						P.z = 12.36f * tanf(static_cast<float>(d) / 2842.5f + 1.1863f) - 3.7f;
 						//see http://nicolas.burrus.name/index.php/Research/KinectCalibration
-						P.x = ((float)i - cx) * (P.z + minDistance) / fx;
-						P.y = ((float)j - cy) * (P.z + minDistance) / fy ;
+						P.x = (static_cast<float>(i) - cx) * (P.z + minDistance) / fx;
+						P.y = (static_cast<float>(j) - cy) * (P.z + minDistance) / fy ;
 
 						if (hasRGB)
 						{

@@ -627,8 +627,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 					//apply bundler equation
 					cam.trans.apply(P);
 					//convert to keypoint
-					kp.x = -cam.f * P.x/P.z;
-					kp.y = cam.f * P.y/P.z;
+					kp.x = -cam.f * static_cast<float>(P.x/P.z);
+					kp.y = cam.f * static_cast<float>(P.y/P.z);
 					if ((int)kp.x > -half_w && (int)kp.x < half_w
 						&& (int)kp.y > -half_h && (int)kp.y < half_h)
 					{

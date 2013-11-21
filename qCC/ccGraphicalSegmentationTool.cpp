@@ -569,8 +569,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
     //viewing parameters
     const double* MM = m_associatedWin->getModelViewMatd(); //viewMat
 	const double* MP = m_associatedWin->getProjectionMatd(); //projMat
-	const float half_w = (float)m_associatedWin->width() * 0.5f;
-	const float half_h = (float)m_associatedWin->height() * 0.5f;
+	const GLdouble half_w = (GLdouble)m_associatedWin->width()/2;
+	const GLdouble half_h = (GLdouble)m_associatedWin->height()/2;
 
 	int VP[4];
 	m_associatedWin->getViewportArray(VP);
@@ -597,7 +597,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 				GLdouble xp,yp,zp;
 				gluProject(P.x,P.y,P.z,MM,MP,VP,&xp,&yp,&zp);
 
-				CCVector2 P2D(xp-half_w,yp-half_h);
+				CCVector2 P2D(	static_cast<PointCoordinateType>(xp-half_w),
+								static_cast<PointCoordinateType>(yp-half_h) );
 				bool pointInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D,m_segmentationPoly);
 
 				visibilityArray->setValue(i, keepPointsInside != pointInside ? POINT_HIDDEN : POINT_VISIBLE );

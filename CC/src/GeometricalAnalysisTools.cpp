@@ -33,7 +33,7 @@
 using namespace CCLib;
 
 //#define COMPUTE_CURVATURE_2
-int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, float kernelRadius, GenericProgressCallback* progressCb, DgmOctree* _theOctree)
+int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb, DgmOctree* _theOctree)
 {
 	if (!theCloud)
         return -1;
@@ -91,12 +91,12 @@ int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCl
 //FONCTION "CELLULAIRE" DE CALCUL DE COURBURE (PAR FONCTION DE HAUTEUR LOCALE)
 //DETAIL DES PARAMETRES ADDITIONNELS (2) :
 // [0] -> (CC_CURVATURE_TYPE*) cType : curvature type
-// [1] -> (float*) radius : sphere radius
+// [1] -> (PointCoordinateType*) radius : sphere radius
 bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
 {
 	//parameters
 	Neighbourhood::CC_CURVATURE_TYPE cType	= *((Neighbourhood::CC_CURVATURE_TYPE*)additionalParameters[0]);
-	float radius							= *((float*)additionalParameters[1]);
+	PointCoordinateType radius				= *((PointCoordinateType*)additionalParameters[1]);
 
 	//structure for nearest neighbors search
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
@@ -268,7 +268,7 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(const DgmOctre
 	return true;
 }
 
-int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCloud, float kernelRadius, GenericProgressCallback* progressCb/*=0*/, DgmOctree* _theOctree/*=0*/)
+int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCloud, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb/*=0*/, DgmOctree* _theOctree/*=0*/)
 {
 	if (!theCloud)
         return -1;
@@ -320,12 +320,12 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 
 //FONCTION "CELLULAIRE" DE CALCUL DE RUGOSITE (PAR PLAN AUX MOINDRES CARRES)
 //DETAIL DES PARAMETRES ADDITIONNELS (1) :
-// [0] -> (float*) kernelRadius : le rayon du voisinage de calcul
+// [0] -> (PointCoordinateType*) kernelRadius : le rayon du voisinage de calcul
 bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOctree::octreeCell& cell, 
 																	void** additionalParameters)
 {
 	//parameter(s)
-	float radius = *((float*)additionalParameters[0]);
+	PointCoordinateType radius = *((PointCoordinateType*)additionalParameters[0]);
 
 	//structure for nearest neighbors search
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;

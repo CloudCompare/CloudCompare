@@ -455,14 +455,16 @@ static int vertex_cb(p_ply_argument argument)
 		if (s_PointCount == 0)
 		{
 			s_ShiftApplyAll = false; //should already be false!
-			if (ccCoordinatesShiftManager::Handle(s_Point,0,s_AlwaysDisplayLoadDialog,s_ShiftAlreadyEnabled,s_Pshift,0,s_ShiftApplyAll))
+			if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(s_Point,0,s_AlwaysDisplayLoadDialog,s_ShiftAlreadyEnabled,s_Pshift,0,s_ShiftApplyAll))
 			{
 				cloud->setOriginalShift(s_Pshift[0],s_Pshift[1],s_Pshift[2]);
 				ccLog::Warning("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f,%.2f,%.2f)",s_Pshift[0],s_Pshift[1],s_Pshift[2]);
 			}
 		}
 
-		cloud->addPoint(CCVector3(s_Point[0]+s_Pshift[0],s_Point[1]+s_Pshift[1],s_Point[2]+s_Pshift[2]));
+		cloud->addPoint(CCVector3(	static_cast<PointCoordinateType>(s_Point[0]+s_Pshift[0]),
+									static_cast<PointCoordinateType>(s_Point[1]+s_Pshift[1]),
+									static_cast<PointCoordinateType>(s_Point[2]+s_Pshift[2])));
 		++s_PointCount;
 
 		s_PointDataCorrupted = false;
@@ -473,8 +475,8 @@ static int vertex_cb(p_ply_argument argument)
 	return 1;
 }
 
-static float s_Normal[3]={0.0,0.0,0.0};
-static int s_NormalCount=0;
+static PointCoordinateType s_Normal[3] = {0,0,0};
+static int s_NormalCount = 0;
 
 static int normal_cb(p_ply_argument argument)
 {
@@ -482,7 +484,7 @@ static int normal_cb(p_ply_argument argument)
 	ccPointCloud* cloud;
 	ply_get_argument_user_data(argument, (void**)(&cloud), &flags);
 
-	s_Normal[flags & POS_MASK] = ply_get_argument_value(argument);
+	s_Normal[flags & POS_MASK] = static_cast<PointCoordinateType>( ply_get_argument_value(argument) );
 
 	if (flags & ELEM_EOL)
 	{

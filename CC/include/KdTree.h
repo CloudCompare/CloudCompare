@@ -71,14 +71,14 @@ public:
         \param maxDist distance above which the function doesn't consider points
         \return true if it finds a point p such that ||p-queryPoint||<=maxDist. False otherwise
     **/
-    bool findNearestNeighbour(const PointCoordinateType *queryPoint,
+    bool findNearestNeighbour(	const PointCoordinateType *queryPoint,
                                 unsigned &nearestPointIndex,
-                                PointCoordinateType maxDist);
+                                ScalarType maxDist);
 
 
     //! Optimized version of nearest point research which only check if there is a point p int the tree such that ||p-queryPoint||<=maxDist (see FindNearestNeighbour())
     bool findPointBelowDistance(const PointCoordinateType *queryPoint,
-									PointCoordinateType maxDist);
+								ScalarType maxDist);
 
 
     //! Searches for the points that lie to a given distance (up to a tolerance) from a query point
@@ -90,8 +90,8 @@ public:
         \return the number of matching points
     **/
     unsigned findPointsLyingToDistance(const PointCoordinateType *queryPoint,
-										PointCoordinateType distance,
-										PointCoordinateType tolerance,
+										ScalarType distance,
+										ScalarType tolerance,
 										std::vector<unsigned> &points);
 
 protected:

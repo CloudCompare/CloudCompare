@@ -138,9 +138,8 @@ public:
                                     ccGenericPointCloud* sourceCloud,
                                     colorType meanCol[]);
 
-	static void ComputeAverageNorm(CCLib::ReferenceCloud* subset,
-                                    ccGenericPointCloud* sourceCloud,
-                                    float norm[]);
+	static CCVector3 ComputeAverageNorm(CCLib::ReferenceCloud* subset,
+										ccGenericPointCloud* sourceCloud);
 
 protected:
 

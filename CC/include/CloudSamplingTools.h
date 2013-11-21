@@ -61,11 +61,11 @@ public:
 		\param _theOctree if the octree has been already computed, it can be used by the process (avoid recomputation)
 		\return the resampled cloud (new cloud)
 	**/
-	static SimpleCloud* resampleCloudWithOctreeAtLevel(GenericIndexedCloudPersist* theCloud,
-                                                                uchar octreeLevel,
-                                                                RESAMPLING_CELL_METHOD resamplingMethod,
-                                                                GenericProgressCallback* progressCb=0,
-                                                                DgmOctree* _theOctree=0);
+	static SimpleCloud* resampleCloudWithOctreeAtLevel(	GenericIndexedCloudPersist* theCloud,
+														uchar octreeLevel,
+                                                        RESAMPLING_CELL_METHOD resamplingMethod,
+														GenericProgressCallback* progressCb = 0,
+														DgmOctree* _theOctree = 0);
 
 	//! Resamples a point cloud (process based on the octree)
 	/** Same as 'resampleCloudWithOctreeAtLevel' method, appart the fact that instead
@@ -82,8 +82,8 @@ public:
 	static GenericIndexedCloud* resampleCloudWithOctree(GenericIndexedCloudPersist* theCloud,
                                                         int newNumberOfPoints,
                                                         RESAMPLING_CELL_METHOD resamplingMethod,
-                                                        GenericProgressCallback* progressCb=0,
-                                                        DgmOctree* _theOctree=0);
+                                                        GenericProgressCallback* progressCb = 0,
+                                                        DgmOctree* _theOctree = 0);
 
 	//! Subsamples a point cloud (process based on the octree)
 	/** A subsampling algorithm is applied inside each cell of the octree. The
@@ -100,8 +100,8 @@ public:
 	static ReferenceCloud* subsampleCloudWithOctreeAtLevel(GenericIndexedCloudPersist* theCloud,
                                                             uchar octreeLevel,
                                                             SUBSAMPLING_CELL_METHOD subsamplingMethod,
-                                                            GenericProgressCallback* progressCb=0,
-                                                            DgmOctree* _theOctree=0);
+                                                            GenericProgressCallback* progressCb = 0,
+                                                            DgmOctree* _theOctree = 0);
 
 	//! Subsamples a point cloud (process based on the octree)
 	/** Same as 'subsampleCloudWithOctreeAtLevel' method, appart the fact that instead
@@ -118,8 +118,8 @@ public:
 	static ReferenceCloud* subsampleCloudWithOctree(GenericIndexedCloudPersist* theCloud,
                                                     int newNumberOfPoints,
                                                     SUBSAMPLING_CELL_METHOD subsamplingMethod,
-                                                    GenericProgressCallback* progressCb=0,
-                                                    DgmOctree* _theOctree=0);
+                                                    GenericProgressCallback* progressCb = 0,
+                                                    DgmOctree* _theOctree = 0);
 
 	//! Subsamples a point cloud (process based on random selections)
 	/** A very simple subsampling algorithm that simply consists in selecting
@@ -129,9 +129,9 @@ public:
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return a reference cloud corresponding to the subsampling 'selection'
 	**/
-	static ReferenceCloud* subsampleCloudRandomly(GenericIndexedCloudPersist* theCloud,
+	static ReferenceCloud* subsampleCloudRandomly(	GenericIndexedCloudPersist* theCloud,
                                                     unsigned newNumberOfPoints,
-                                                    GenericProgressCallback* progressCb=0);
+                                                    GenericProgressCallback* progressCb = 0);
 
 	//! Resamples a point cloud (process based on inter point distance)
 	/** The cloud is resampled so that there is no point nearer than a given distance to other points
@@ -142,10 +142,10 @@ public:
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return a reference cloud corresponding to the resampling 'selection'
 	**/
-	static ReferenceCloud* resampleCloudSpatially(GenericIndexedCloudPersist* theCloud,
-                                                    float minDistance,
-													DgmOctree* theOctree=0,
-													GenericProgressCallback* progressCb=0);
+	static ReferenceCloud* resampleCloudSpatially(	GenericIndexedCloudPersist* theCloud,
+                                                    PointCoordinateType minDistance,
+													DgmOctree* theOctree = 0,
+													GenericProgressCallback* progressCb = 0);
 
 protected:
 
@@ -170,7 +170,7 @@ protected:
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
 	**/
-	static bool subsampleCellAtLevel(const DgmOctree::octreeCell& cell,
+	static bool subsampleCellAtLevel(	const DgmOctree::octreeCell& cell,
                                         void** additionalParameters);
 };
 

@@ -338,11 +338,11 @@ void ccHistogramWindow::paintGL()
 	glColor3ubv(textCol);
 	glBegin(GL_LINES);
 	//vertical
-	glVertex2f(m_roi[0],m_roi[1]);
-	glVertex2f(m_roi[0],m_roi[3]);
+	glVertex2i(m_roi[0],m_roi[1]);
+	glVertex2i(m_roi[0],m_roi[3]);
 	//horizontal
-	glVertex2f(m_roi[0],m_roi[1]);
-	glVertex2f(m_roi[2],m_roi[1]);
+	glVertex2i(m_roi[0],m_roi[1]);
+	glVertex2i(m_roi[2],m_roi[1]);
 	glEnd();
 
 	//horizontal labels
@@ -352,15 +352,15 @@ void ccHistogramWindow::paintGL()
 
 		//draw first value tick & label
 		glBegin(GL_LINES);
-		glVertex2f(m_roi[0],m_roi[1]-c_ticksSize);
-		glVertex2f(m_roi[0],m_roi[1]);
+		glVertex2i(m_roi[0],m_roi[1]-c_ticksSize);
+		glVertex2i(m_roi[0],m_roi[1]);
 		glEnd();
 		renderText(m_roi[0]-firstXLabelWidth/2, h-c_outerMargin, firstlabel, m_renderingFont);
 
 		//draw last value tick & label
 		glBegin(GL_LINES);
-		glVertex2f(m_roi[0]+dx,m_roi[1]-c_ticksSize);
-		glVertex2f(m_roi[0]+dx,m_roi[1]);
+		glVertex2i(m_roi[0]+dx,m_roi[1]-c_ticksSize);
+		glVertex2i(m_roi[0]+dx,m_roi[1]);
 		glEnd();
 		renderText(m_roi[0]+dx-lastXLabelWidth/2, h-c_outerMargin, lastlabel, m_renderingFont);
 
@@ -393,8 +393,8 @@ void ccHistogramWindow::paintGL()
 					//draw corresponding tick
 					int x = (currentLabel.leftXpos+currentLabel.rightXpos)/2;
 					glBegin(GL_LINES);
-					glVertex2f(m_roi[0]+x,m_roi[1]-c_ticksSize);
-					glVertex2f(m_roi[0]+x,m_roi[1]);
+					glVertex2i(m_roi[0]+x,m_roi[1]-c_ticksSize);
+					glVertex2i(m_roi[0]+x,m_roi[1]);
 					glEnd();
 
 					//try to draw label as well
@@ -459,8 +459,8 @@ void ccHistogramWindow::paintGL()
 		{
 			int y = m_roi[1] + (dy*i)/n;
 			glBegin(GL_LINES);
-			glVertex2f(m_roi[0]-5,y);
-			glVertex2f(m_roi[0],y);
+			glVertex2i(m_roi[0]-5,y);
+			glVertex2i(m_roi[0],y);
 			glEnd();
 
 			int vi = (int)((float)(m_maxHistoVal*i)/(float)n);
@@ -494,7 +494,7 @@ void ccHistogramWindow::paintGL()
 			{
 				//Equivalent SF value
 				double scalarVal = m_minVal + (m_maxVal-m_minVal)*normVal;
-				const colorType* col = m_associatedSF->getColor(scalarVal);
+				const colorType* col = m_associatedSF->getColor(static_cast<ScalarType>(scalarVal));
 				glColor3ubv(col ? col : ccColor::lightGrey);
 			}
 			else
@@ -544,8 +544,8 @@ void ccHistogramWindow::paintGL()
 		int y = m_roi[3] - c_strHeight;
 
 		glBegin(GL_LINES);
-		glVertex2f(x,m_roi[1]);
-		glVertex2f(x,m_roi[3]);
+		glVertex2i(x,m_roi[1]);
+		glVertex2i(x,m_roi[3]);
 		glEnd();
 
 		bool leftSide = (m_verticalIndicatorPositionPercent>0.5);

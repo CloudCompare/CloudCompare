@@ -575,7 +575,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 				DL_Attributes(
 				std::string(""),
 				i == 0 ? DL_Codes::green : /*-*/DL_Codes::green, //invisible if negative!
-				lineWidth,
+				static_cast<int>(lineWidth),
 				"CONTINUOUS"));
 		}
 	}

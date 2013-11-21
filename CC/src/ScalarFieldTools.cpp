@@ -88,7 +88,7 @@ int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* the
 	}
 
 	//structure contenant les parametres additionnels
-	float radius = theOctree->getCellSize(octreeLevel);
+	PointCoordinateType radius = theOctree->getCellSize(octreeLevel);
 	void* additionalParameters[3] = {	(void*)&euclidianDistances,
 										additionalParameters[1] = (void*)&radius,
 										additionalParameters[2] = (void*)_theGradientNorms
@@ -125,7 +125,7 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
 {
 	//variables additionnelles
 	bool euclidianDistances									= *((bool*)additionalParameters[0]);
-	float radius											= *((float*)additionalParameters[1]);
+	PointCoordinateType radius								= *((PointCoordinateType*)additionalParameters[1]);
 	ScalarField* theGradientNorms							= (ScalarField*)additionalParameters[2];
 
 	//nombre de points dans la cellule courante
@@ -177,8 +177,8 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
             //if more than one neighbour (the query point itself)
 			if (k>1)
 			{
-				double sum[3]={0.0,0.0,0.0};
-				unsigned counter=0;
+				CCVector3d sum(0,0,0);
+				unsigned counter = 0;
 
 				//j=1 because the first point is the query point itself --> contribution = 0
 				for (int j=1; j<k; ++j)
@@ -191,13 +191,13 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
 
 						if (norm2 > ZERO_TOLERANCE)
 						{
-                            ScalarType dd = d2 - d1;
-							if (!euclidianDistances || dd*dd < 1.01 * norm2)
+                            PointCoordinateType dd = static_cast<PointCoordinateType>(d2 - d1);
+							if (!euclidianDistances || dd*dd < static_cast<PointCoordinateType>(1.01) * norm2)
 							{
 								dd /= norm2;
-								sum[0] += (double)(u.x * dd); //warning: and here 'dd'=dd/norm2 ;)
-								sum[1] += (double)(u.y * dd);
-								sum[2] += (double)(u.z * dd);
+								sum.x += static_cast<double>(u.x * dd); //warning: and here 'dd'=dd/norm2 ;)
+								sum.y += static_cast<double>(u.y * dd);
+								sum.z += static_cast<double>(u.z * dd);
 								++counter;
 							}
 						}
@@ -205,7 +205,7 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
 				}
 
 				if (counter != 0)
-					gN = (ScalarType)(sqrt(sum[0]*sum[0]*+sum[1]*sum[1]+sum[2]*sum[2])/(double)counter);
+					gN = static_cast<ScalarType>(sum.norm()/static_cast<double>(counter));
 			}
 		}
 
@@ -220,9 +220,9 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
 	return true;
 }
 
-bool ScalarFieldTools::applyScalarFieldGaussianFilter(float sigma,
+bool ScalarFieldTools::applyScalarFieldGaussianFilter(PointCoordinateType sigma,
 													  GenericIndexedCloudPersist* theCloud,
-													  float sigmaSF,
+													  PointCoordinateType sigmaSF,
 													  GenericProgressCallback* progressCb,
 													  DgmOctree* theCloudOctree)
 {
@@ -286,20 +286,20 @@ bool ScalarFieldTools::applyScalarFieldGaussianFilter(float sigma,
 
 //FONCTION "CELLULAIRE" DE CALCUL DU FILTRE GAUSSIEN (PAR PROJECTION SUR LE PLAN AUX MOINDRES CARRES)
 //DETAIL DES PARAMETRES ADDITIONNELS (2) :
-// [0] -> (float*) sigma : gauss function sigma
-// [1] -> (float*) sigmaSF : used when in "bilateral modality" - if -1 pure gaussian filtering is performed
+// [0] -> (PointCoordinateType*) sigma : gauss function sigma
+// [1] -> (PointCoordinateType*) sigmaSF : used when in "bilateral modality" - if -1 pure gaussian filtering is performed
 bool ScalarFieldTools::computeCellGaussianFilter(const DgmOctree::octreeCell& cell, void** additionalParameters)
 {
 	//variables additionnelles
-	float sigma     = *((float*)additionalParameters[0]);
-    float sigmaSF	= *((float*)additionalParameters[1]);
+	PointCoordinateType sigma	= *((PointCoordinateType*)additionalParameters[0]);
+    PointCoordinateType sigmaSF	= *((PointCoordinateType*)additionalParameters[1]);
 
     //we use only the squared value of sigma
-	float sigma2 = 2.0f*sigma*sigma;
-	float radius = 3.0f*sigma; //2.5 sigma > 99%
+	PointCoordinateType sigma2 = 2*sigma*sigma;
+	PointCoordinateType radius = 3*sigma; //2.5 sigma > 99%
 
 	//we use only the squared value of sigmaSF
-    float sigmaSF2 = 2.0f*sigmaSF*sigmaSF;
+    PointCoordinateType sigmaSF2 = 2*sigmaSF*sigmaSF;
 
 	//number of points inside the current cell
 	unsigned n = cell.points->size();
@@ -324,7 +324,7 @@ bool ScalarFieldTools::computeCellGaussianFilter(const DgmOctree::octreeCell& ce
 	
 	DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 	{
-		for (unsigned i=0;i<n;++i,++it)
+		for (unsigned i=0; i<n; ++i,++it)
 		{
 			it->point = cell.points->getPointPersistentPtr(i);
 			it->pointIndex = cell.points->getPointGlobalIndex(i);
@@ -337,7 +337,7 @@ bool ScalarFieldTools::computeCellGaussianFilter(const DgmOctree::octreeCell& ce
     //Pure Gaussian Filtering
     if (sigmaSF == -1)
     {
-        for (unsigned i=0;i<n;++i) //for each point in cell
+        for (unsigned i=0; i<n; ++i) //for each point in cell
         {
             //we get the points inside a spherical neighbourhood (radius: '3*sigma')
             cell.points->getPoint(i,nNSS.queryPoint);
@@ -354,12 +354,12 @@ bool ScalarFieldTools::computeCellGaussianFilter(const DgmOctree::octreeCell& ce
                 //scalar value must be valid
 				if (ScalarField::ValidValue(val))
                 {
-                    meanValue += (double)val * weight;
+                    meanValue += static_cast<double>(val) * weight;
                     wSum += weight;
                 }
             }
 
-			ScalarType newValue = (wSum > 0.0 ? (ScalarType)(meanValue / wSum) : NAN_VALUE);
+			ScalarType newValue = (wSum > 0.0 ? static_cast<ScalarType>(meanValue / wSum) : NAN_VALUE);
 
             cell.points->setPointScalarValue(i,newValue);
         }
@@ -546,7 +546,7 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
 	bool meansHaveMoved = true;
 	int iteration = 0;
 
-	float initialCMD=0.0,classMovingDist=0.0;
+	float initialCMD = 0, classMovingDist = 0;
 
 	while (meansHaveMoved)
 	{

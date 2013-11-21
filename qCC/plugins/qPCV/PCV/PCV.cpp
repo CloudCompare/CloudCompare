@@ -267,7 +267,7 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 		for (unsigned i=0;i<numberOfRays;++i)
 		{
 			//set current 'light' direction
-			win.setViewDirection(rays[i].u);
+			win.setViewDirection(rays[i]);
 
 			//flag viewed vertices
 			win.GLAccumPixel(vertexAccum);

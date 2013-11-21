@@ -1383,10 +1383,10 @@ bool SCylinder::setValue(Token t, PointCoordinateType value)
 	{
 	case PDMS_DIAMETER: diameter = value; break;
 	case PDMS_HEIGHT: height=value; break;
-	case PDMS_X_TOP_SHEAR: xtshear=value; if (fabsf(xtshear)>90.) return false; break;
-	case PDMS_Y_TOP_SHEAR: ytshear=value; if (fabsf(ytshear)>90.) return false; break;
-	case PDMS_X_BOTTOM_SHEAR: xbshear=value; if (fabsf(xbshear)>90.) return false; break;
-	case PDMS_Y_BOTTOM_SHEAR: ybshear=value; if (fabsf(ybshear)>90.) return false; break;
+	case PDMS_X_TOP_SHEAR: xtshear=value; if (fabs(xtshear)>90.) return false; break;
+	case PDMS_Y_TOP_SHEAR: ytshear=value; if (fabs(ytshear)>90.) return false; break;
+	case PDMS_X_BOTTOM_SHEAR: xbshear=value; if (fabs(xbshear)>90.) return false; break;
+	case PDMS_Y_BOTTOM_SHEAR: ybshear=value; if (fabs(ybshear)>90.) return false; break;
 	default: return false;
 	}
 	return true;
@@ -1446,7 +1446,7 @@ bool CTorus::setValue(Token t, PointCoordinateType value)
 {
 	switch(t)
 	{
-	case PDMS_ANGLE: angle=value; if (fabsf(angle)>(2.*M_PI)) return false; break;
+	case PDMS_ANGLE: angle=value; if (fabs(angle)>(2.*M_PI)) return false; break;
 	case PDMS_INSIDE_RADIUS: inside_radius=value; break;
 	case PDMS_OUTSIDE_RADIUS: outside_radius=value; break;
 	default: return false;
@@ -1501,7 +1501,7 @@ bool RTorus::setValue(Token t, PointCoordinateType value)
 {
 	switch(t)
 	{
-	case PDMS_ANGLE: angle=value; if (fabsf(angle)>(2.*M_PI)) return false; break;
+	case PDMS_ANGLE: angle=value; if (fabs(angle)>(2.*M_PI)) return false; break;
 	case PDMS_INSIDE_RADIUS: inside_radius=value; break;
 	case PDMS_OUTSIDE_RADIUS: outside_radius=value; break;
 	case PDMS_HEIGHT: height=value; break;

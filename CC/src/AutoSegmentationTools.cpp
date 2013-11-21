@@ -153,8 +153,8 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	if (applyGaussianFilter)
 	{
 		uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION);
-		float cellSize = theOctree->getCellSize(level);
-        ScalarFieldTools::applyScalarFieldGaussianFilter(cellSize*0.33f,theCloud,-1,progressCb,theOctree);
+		PointCoordinateType cellSize = theOctree->getCellSize(level);
+        ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<float>(cellSize/3),theCloud,-1,progressCb,theOctree);
 	}
 
 	unsigned seedPoints = 0;

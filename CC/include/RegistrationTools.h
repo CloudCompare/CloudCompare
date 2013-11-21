@@ -209,9 +209,9 @@ public:
     static bool RegisterClouds(GenericIndexedCloud* modelCloud,
                                 GenericIndexedCloud* dataCloud,
                                 ScaledTransformation& transform,
-                                float delta,
-                                float beta,
-                                float overlap,
+                                ScalarType delta,
+                                ScalarType beta,
+                                PointCoordinateType overlap,
                                 unsigned nbBases,
                                 unsigned nbTries,
                                 GenericProgressCallback* progressCb=0,
@@ -236,7 +236,7 @@ protected:
         \return false: failure ; true: success
     **/
     static bool FindBase(GenericIndexedCloud* cloud,
-                            float overlap,
+                            PointCoordinateType overlap,
                             unsigned nbTries,
                             Base &base);
 
@@ -248,7 +248,7 @@ protected:
         \return the number of bases found (number of element in the results array) or -1 is a problem occurred
     **/
     static int FindCongruentBases(KDTree* tree,
-                                            float delta,
+                                            ScalarType delta,
                                             const CCVector3* base[4],
                                             std::vector<Base>& results);
 
@@ -282,8 +282,8 @@ protected:
                                     const CCVector3 &p2,
                                     const CCVector3 &p3,
                                     CCVector3 &inter,
-                                    float& lambda,
-                                    float& mu);
+                                    PointCoordinateType& lambda,
+                                    PointCoordinateType& mu);
 
     /**!function to keep only the N best candidates bases (by comparison with the reference base invariants)
         Let B1 and B2 be 2 candidates, R be the reference, B1 and B2 aligned with R.

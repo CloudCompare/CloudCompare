@@ -960,7 +960,7 @@ void ccViewer::on3DMouseMove(std::vector<float>& vec)
 			float scale = (float)std::min(win->width(),win->height()) * viewParams.pixelSize;
 			if (perspectiveView)
 			{
-				float tanFOV = tan(viewParams.fov*CC_DEG_TO_RAD/**0.5f*/);
+				float tanFOV = tan(viewParams.fov*static_cast<float>(CC_DEG_TO_RAD)/*/2*/);
 				vec[0] *= tanFOV;
 				vec[2] *= tanFOV;
 				scale /= win->computePerspectiveZoom();

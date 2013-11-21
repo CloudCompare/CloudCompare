@@ -136,7 +136,7 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		for (unsigned i=0; i<vertCount; ++i)
 		{
-			glVertex3fv(getPoint(i)->u);
+			ccGL::Vertex3v(getPoint(i)->u);
 		}
 
 		glEnd();

@@ -287,7 +287,7 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                     {
                         float C[3];
                         sscanf(line,"C %f %f %f\n",C,C+1,C+2);
-                        gls->setSensorCenter(C);
+						gls->setSensorCenter(CCVector3::fromArray(C));
                     }
                     else if (line[0]=='X' || line[0]=='Y' || line[0]=='Z')
                     {

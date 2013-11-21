@@ -432,7 +432,10 @@ public:
 		\param dim dimension along which the cylinder axis is aligned (X=0, Y=1, Z=2)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism
 	**/
-	void unrollOnCylinder(double radius, CCVector3* center=0, unsigned char dim=2, CCLib::GenericProgressCallback* progressCb=NULL);
+	void unrollOnCylinder(	PointCoordinateType radius,
+							CCVector3* center = 0,
+							unsigned char dim = 2,
+							CCLib::GenericProgressCallback* progressCb = NULL);
 
 	//! Unrolls the cloud and its normals on a cone
 	/** This method is redundant with the "developCloudOnCone" method of CCLib,
@@ -443,7 +446,11 @@ public:
 		\param dim dimension along which the cone axis is aligned (X=0, Y=1, Z=2)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism
 	**/
-	void unrollOnCone(double baseRadius, double alpha_deg, const CCVector3& apex, unsigned char dim=2, CCLib::GenericProgressCallback* progressCb=NULL);
+	void unrollOnCone(	PointCoordinateType baseRadius,
+						double alpha_deg,
+						const CCVector3& apex,
+						unsigned char dim = 2,
+						CCLib::GenericProgressCallback* progressCb = NULL);
 
 	//! Adds associated SF color ramp info to current GL context
 	virtual void addColorRampInfo(CC_DRAW_CONTEXT& context);

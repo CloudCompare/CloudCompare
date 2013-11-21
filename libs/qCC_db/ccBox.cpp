@@ -33,7 +33,7 @@ bool ccBox::buildUp()
 {
 	//upper plane
 	ccGLMatrix upperMat;
-	upperMat.getTranslation()[2] = m_dims.z/2.0f;
+	upperMat.getTranslation()[2] = static_cast<float>(m_dims.z)/2.0f;
 	*this += ccPlane(m_dims.x,m_dims.y,&upperMat);
 	//lower plane
 	ccGLMatrix lowerMat;

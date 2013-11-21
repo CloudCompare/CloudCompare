@@ -1002,13 +1002,13 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 		startPos[2] -= theIntersection->minFillIndexes[2];
 
 		//initialisation de la recurrence
-		ScalarType maxRadius=0;
-		int dist=0;
+		ScalarType maxRadius = 0;
+		int dist = 0;
 
 		if (theIntersection->distanceTransform)
 		{
 			unsigned short dist = theIntersection->distanceTransform->getValue(startPos);
-			maxRadius = ((ScalarType)dist/(ScalarType)0.3) * cellLength;
+			maxRadius = (static_cast<ScalarType>(dist)/static_cast<ScalarType>(0.3)) * static_cast<ScalarType>(cellLength);
 
 			//if (boundedSearch)  //should always be true if we are here!
 			{
@@ -1045,7 +1045,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 			const CCVector3 *tempPt = Yk.getPointPersistentPtr(j);
 			//distance du bord le plus proche = taille de la cellule - distance la plus grande par rapport au centre de la cellule
 			//minDists.push_back(cellLength*0.5-DgmOctree::computeMaxDistanceToCellCenter(tempPt,cellCenter));
-			minDists[j] = DgmOctree::ComputeMinDistanceToCellBorder(tempPt,cellLength,cellCenter);
+			minDists[j] = static_cast<ScalarType>(DgmOctree::ComputeMinDistanceToCellBorder(tempPt,cellLength,cellCenter));
 		}
 
 		//MODE : ON CALCULE LES DISTANCES PRECISES EN DESSOUS DE "maxSearchDist"
@@ -1313,7 +1313,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 			//*/
 
 			++dist;
-			maxRadius += cellLength;
+			maxRadius += static_cast<ScalarType>(cellLength);
 		}
 
 		//Yk.clear(); //pas necessaire
@@ -2463,9 +2463,9 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 
 	//maintenant on recupere les cellules de l'octree A, et on assigne
 	//aux points la distance de Chanfrein
-	PointCoordinateType cellSize = octreeA->getCellSize(octreeLevel);
-	if (cType==CHAMFER_345)
-		cellSize*=0.3333f;
+	ScalarType cellSize = static_cast<ScalarType>(octreeA->getCellSize(octreeLevel));
+	if (cType == CHAMFER_345)
+		cellSize /= 3;
 
 	DgmOctree::cellIndexesContainer theIndexes;
 	if (!octreeA->getCellIndexes(octreeLevel,theIndexes))
@@ -2495,12 +2495,12 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 		pos[1] -= minIndexes[1];
 		pos[2] -= minIndexes[2];
 		unsigned di = dg->getValue(pos);
-		if (di>maxDi)
+		if (di > maxDi)
 			maxDi = di;
-		ScalarType d = ScalarType(di)*cellSize;
+		ScalarType d = static_cast<ScalarType>(di) * cellSize;
 
 		octreeA->getPointsInCellByCellIndex(&Yk,theIndex,octreeLevel);
-		for (unsigned j=0;j<Yk.size();++j)
+		for (unsigned j=0; j<Yk.size(); ++j)
 			Yk.setPointScalarValue(j,d);
 	}
 

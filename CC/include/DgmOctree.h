@@ -767,7 +767,7 @@ public:
 	/** \param radius the sphere radius
 		\return the 'best' level
 	**/
-	uchar findBestLevelForAGivenNeighbourhoodSizeExtraction(float radius) const;
+	uchar findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const;
 
 	//! Determines the best level of subdivision of the octree at which to apply a cloud-2-cloud distance computation algorithm
 	/** The octree instance on which is "applied" this method should be the compared cloud's one.

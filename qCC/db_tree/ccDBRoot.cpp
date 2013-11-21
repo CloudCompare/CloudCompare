@@ -1277,7 +1277,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		ccPlane* plane = static_cast<ccPlane*>(obj);
 		//3rd column = plane normal!
 		planeNormal = plane->getNormal();
-		planeVertDir = CCVector3(plane->getTransformation().getColumn(1));
+		planeVertDir = plane->getTransformation().getColumnAsVec3D(1);
 		center = plane->getCenter();
 	}
 	else if (obj->isA(CC_FACET)) //facet
@@ -1305,7 +1305,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		transMat.setTranslation(-center);
 		ccGLMatrix viewMat = win->getViewportParameters().viewMat;
 		viewMat = viewMat * transMat;
-		viewMat.setTranslation(CCVector3(viewMat.getTranslation()) + center);
+		viewMat.setTranslation(viewMat.getTranslationAsVec3D() + center);
 
 		ccLog::Print("[Align camera] Corresponding view matrix:");
 		const float* mat = viewMat.data();

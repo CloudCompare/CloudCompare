@@ -235,7 +235,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 
 				bool ok;
 				double step = QString(args[i]).toDouble(&ok);
-				if (!ok || step<=0.0)
+				if (!ok || step <= 0)
 					return Error("Invalid step value for spatial resampling!");
 				Print(QString("\tSpatial step: %1").arg(step));
 
@@ -245,7 +245,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 					const QString& cloudFilename = m_clouds[i].filename;
 					Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
-					CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud,step,0,_progressDlg);
+					CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud,static_cast<PointCoordinateType>(step),0,_progressDlg);
 					if (!refCloud)
 						return Error("Subsampling process failed!");
 					Print(QString("\tResult: %1 points").arg(refCloud->size()));
@@ -349,8 +349,8 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 			if (++i==nargs)
 				return Error("Missing parameter: kernel size after curvature type");
 
-			bool paramOk=false;
-			double kernelSize = QString(args[i]).toDouble(&paramOk);
+			bool paramOk = false;
+			PointCoordinateType kernelSize = static_cast<PointCoordinateType>(QString(args[i]).toDouble(&paramOk));
 			if (!paramOk)
 				return Error(QString("Failed to read a numerical parameter: kernel size (after curvature type). Got '%1' instead.").arg(args[i]));
 			Print(QString("\tKernel size: %1").arg(kernelSize));
@@ -465,7 +465,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 				return Error("Missing parameter: kernel size after \"-ROUGH\"");
 
 			bool paramOk=false;
-			float kernelSize = QString(args[i]).toFloat(&paramOk);
+			PointCoordinateType kernelSize = static_cast<PointCoordinateType>(QString(args[i]).toDouble(&paramOk));
 			if (!paramOk)
 				return Error(QString("Failed to read a numerical parameter: kernel size (after \"-ROUGH\"). Got '%1' instead.").arg(args[i]));
 			Print(QString("\tKernel size: %1").arg(kernelSize));

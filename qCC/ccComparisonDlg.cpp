@@ -190,8 +190,8 @@ void ccComparisonDlg::updateOctreeLevel(double value)
 	if (!octreeLevelSpinBox->isEnabled() || octreeLevelSpinBox->value()==0)
 	{
 		//predMaxSearchDistValue = maxSearchDistSpinBox->value();
-		int guessedBestOctreeLevel = determineBestOctreeLevelForDistanceComputation(value);
-		if (guessedBestOctreeLevel>0)
+		int guessedBestOctreeLevel = determineBestOctreeLevelForDistanceComputation(static_cast<ScalarType>(value));
+		if (guessedBestOctreeLevel > 0)
 		{
 			octreeLevelSpinBox->setValue(guessedBestOctreeLevel);
 		}
@@ -319,7 +319,7 @@ int ccComparisonDlg::computeApproxResults()
 		approxResult = CCLib::DistanceComputationTools::computePointCloud2MeshDistance(compCloud,refMesh,DEFAULT_OCTREE_LEVEL,-1.0,true,false,false,false,&progressCb,compOctree);
 		break;
 	}
-	int elapsedTime_ms = eTimer.elapsed();
+	qint64 elapsedTime_ms = eTimer.elapsed();
 
 	progressCb.stop();
 
@@ -335,16 +335,12 @@ int ccComparisonDlg::computeApproxResults()
 	}
 	else
 	{
-		ccLog::Print("[ComputeApproxDistances] Time: %3.2f s.",elapsedTime_ms/1.0e3);
+		ccLog::Print("[ComputeApproxDistances] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
 
 		//affichage des infos sur le champ scalaire approx.
 		ScalarType mean,variance;
 		sf->computeMinAndMax();
 		sf->computeMeanAndVariance(mean,&variance);
-		//precision
-		PointCoordinateType cs = compOctree->getCellSize(DEFAULT_OCTREE_LEVEL);
-		float e1 = 100.0*(1.0-sqrt(25.0/27.0));
-		float e2 = 100.0*cs;
 
 		approxStats->setColumnCount(2);
 		approxStats->setRowCount(5);
@@ -378,6 +374,9 @@ int ccComparisonDlg::computeApproxResults()
 		approxStats->setItem(curRow++, 1, item);
 
 		//Max relative error
+		PointCoordinateType cs = compOctree->getCellSize(DEFAULT_OCTREE_LEVEL);
+		double e1 = 100.0*(1.0-sqrt(25.0/27.0));
+		double e2 = 100.0*static_cast<double>(cs);
 		item = new QTableWidgetItem("Max relative error");
 		approxStats->setItem(curRow, 0, item);
 		item = new QTableWidgetItem(QString("%1 + %2/d % (d>%3)").arg(e1).arg(e2).arg(cs));
@@ -424,7 +423,7 @@ int ccComparisonDlg::computeApproxResults()
 	return guessedBestOctreeLevel;
 }
 
-int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(ScalarType maxSearchDist)
+int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(double maxSearchDist)
 {
 	if (!isValid())
 		return -1;
@@ -465,24 +464,24 @@ int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(ScalarType m
 	}
 
 	//On saute les niveaux les plus faibles, car il sont "inutiles" et font foirer les calculs suivants ;)
-	int theBestOctreeLevel=2;
+	int theBestOctreeLevel = 2;
 
 	//Pour chaque niveau ...
-	for (unsigned char level=2; level<CCLib::DgmOctree::MAX_OCTREE_LEVEL; ++level)
+	for (int level=2; level<CCLib::DgmOctree::MAX_OCTREE_LEVEL; ++level)
 	{
 		//Structures utiles pour le parcours de la structure octree
-		const uchar bitDec = GET_BIT_SHIFT(level);
-		unsigned numberOfPointsInCell=0;
-		unsigned index=0;
-		ScalarType cellDist=-1.0;
+		const int bitDec = GET_BIT_SHIFT(level);
+		unsigned numberOfPointsInCell = 0;
+		unsigned index = 0;
+		double cellDist = -1;
 
 		//on calcule un facteur de correction qui va nous donner a partir de la distance
 		//approximative une approximation (reelle) de la taille du voisinage necessaire
 		//a inspecter au niveau courant
-		ScalarType cellSize = compOctree->getCellSize(level);
+		PointCoordinateType cellSize = compOctree->getCellSize(level);
 
 		//densite du nuage de reference (en points/cellule) s'il existe
-		double refListDensity=1.0;
+		double refListDensity = 1.0;
 		if (refOctree)
 			refListDensity = refOctree->computeMeanOctreeDensity(level);
 
@@ -505,28 +504,28 @@ int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(ScalarType m
 					if (maxSearchDist < 0 || cellDist <= maxSearchDist)
 					{
 						//approximation (flotante) de la taille du voisinage
-						cellDist /= cellSize;
+						cellDist /= static_cast<double>(cellSize);
 
 						//largeur (flotante) du voisinage (en nombre de cellules)
-						double neighbourSize = (double)(2.0*cellDist+1.0);
+						double neighbourSize = 2.0*cellDist + 1.0;
 
 						//si la reference est un maillage
 						if (mesh)
 						{
 							//approximation (entiere) de la taille du voisinage
 							//en nombre de cellules au niveau courant
-							int nCell = (int)ceil(cellDist);
+							int nCell = static_cast<int>(ceil(cellDist));
 
 							//surface probable de maillage rencontree dans ce
 							//voisinage : largeur du voisinage au carre
-							double crossingMeshSurface = (2.0*nCell+1.0)*cellSize;
+							double crossingMeshSurface = (2.0*nCell+1.0) * static_cast<double>(cellSize);
 							crossingMeshSurface*=crossingMeshSurface;
 
 							//"volume" du voisinage (en nombre de cellules)
 							double neighbourSize3 = neighbourSize*neighbourSize*neighbourSize;
 
 							//TEMPS = RECHERCHE DES VOISINS + facteur_proportion * COMPARAISONS POINTS/TRIANGLES
-							timings[level] += neighbourSize3 + 0.5 * double(numberOfPointsInCell)*crossingMeshSurface/meanTriangleSurface;
+							timings[level] += neighbourSize3 + 0.5 * static_cast<double>(numberOfPointsInCell) * crossingMeshSurface/meanTriangleSurface;
 						}
 						else
 						{
@@ -539,7 +538,7 @@ int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(ScalarType m
 							double lastSliceCellNumber = (cellDist > 0 ? cellDist*cellDist*24.0+2.0 : 1.0);
 							//TEMPS = RECHERCHE DES VOISINS + facteur_proportion * COMPARAISONS POINTS/TRIANGLES
 							//(on estime que les cellules remplies representent la racine du total)
-							timings[level] += neighbourSize3 + 0.1 * double(numberOfPointsInCell)*sqrt(lastSliceCellNumber)*refListDensity;
+							timings[level] += neighbourSize3 + 0.1 * static_cast<double>(numberOfPointsInCell)*sqrt(lastSliceCellNumber)*refListDensity;
 						}
 					}
 				}
@@ -609,9 +608,9 @@ void ccComparisonDlg::compute()
 	assert(sf);
 
 	//max search distance
-	ScalarType maxSearchDist = (maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
+	ScalarType maxSearchDist = static_cast<ScalarType>(maxSearchDistSpinBox->isEnabled() ? maxSearchDistSpinBox->value() : -1.0);
 	//multi-thread
-	bool enableMT = multiThreadedCheckBox->isChecked();
+	bool multiThread = multiThreadedCheckBox->isChecked();
 
 	int result=-1;
 	ccProgressDialog progressCb(true,this);
@@ -632,13 +631,13 @@ void ccComparisonDlg::compute()
 		if (params.localModel != NO_MODEL)
 		{
 			params.useSphericalSearchForLocalModel = lmRadiusRadioButton->isChecked();
-			params.kNNForLocalModel = lmKNNSpinBox->value();
-			params.radiusForLocalModel = lmRadiusDoubleSpinBox->value();
+			params.kNNForLocalModel = static_cast<unsigned>(std::max(0,lmKNNSpinBox->value()));
+			params.radiusForLocalModel = static_cast<ScalarType>(lmRadiusDoubleSpinBox->value());
 			params.reuseExistingLocalModels = lmOptimizeCheckBox->isChecked();
 		}
 	}
 	params.maxSearchDist = maxSearchDist;
-	params.multiThread = enableMT;
+	params.multiThread = multiThread;
 	params.CPSet = CPSet;
 
 	QElapsedTimer eTimer;
@@ -654,27 +653,28 @@ void ccComparisonDlg::compute()
 			refOctree);
 		break;
 	case CLOUDMESH_DIST: //cloud-mesh
-		if (enableMT && maxSearchDistSpinBox->isEnabled())
+		if (multiThread && maxSearchDistSpinBox->isEnabled())
 			ccLog::Warning("[Cloud/Mesh comparison] Max search distance is not supported in multi-thread mode! Switching to single thread mode...");
-		result = CCLib::DistanceComputationTools::computePointCloud2MeshDistance(compCloud,
-			refMesh,
-			bestOctreeLevel,
-			maxSearchDist,
-			false,
-			signedDistances,
-			flipNormals,
-			enableMT,
-			&progressCb,
-			compOctree);
+		
+		result = CCLib::DistanceComputationTools::computePointCloud2MeshDistance(	compCloud,
+																					refMesh,
+																					bestOctreeLevel,
+																					maxSearchDist,
+																					false,
+																					signedDistances,
+																					flipNormals,
+																					multiThread,
+																					&progressCb,
+																					compOctree);
 		break;
 	}
-	int elapsedTime_ms = eTimer.elapsed();
+	qint64 elapsedTime_ms = eTimer.elapsed();
 
 	progressCb.stop();
 
 	if (result>=0)
 	{
-		ccLog::Print("[ComputeDistances] Time: %3.2f s.",elapsedTime_ms/1.0e3);
+		ccLog::Print("[ComputeDistances] Time: %3.2f s.",static_cast<double>(elapsedTime_ms)/1.0e3);
 
 		//affichage des infos sur le champ scalaire
 		ScalarType mean,variance;
@@ -725,40 +725,39 @@ void ccComparisonDlg::compute()
 		{
 			//we create 3 new scalar fields, one for each dimension
 			assert(CPSet && CPSet->size() == compCloud->size());
-			unsigned i,count=CPSet->size();
+			unsigned count = CPSet->size();
 			ccScalarField* sfDims[3]= {	new ccScalarField(qPrintable(sfName+QString(" (X)"))),
 										new ccScalarField(qPrintable(sfName+QString(" (Y)"))),
 										new ccScalarField(qPrintable(sfName+QString(" (Z)")))
 			};
 
-			for (i=0;i<3;++i)
-			{
-				sfDims[i]->link();
-			}
+			sfDims[0]->link();
+			sfDims[1]->link();
+			sfDims[2]->link();
 
 			if (sfDims[0]->resize(count) &&
 				sfDims[1]->resize(count) &&
 				sfDims[2]->resize(count))
 			{
-				for (i=0;i<count;++i)
+				for (unsigned i=0; i<count; ++i)
 				{
 					const CCVector3* P = CPSet->getPoint(i);
 					const CCVector3* Q = compCloud->getPoint(i);
 					CCVector3 D = *Q-*P;
 
-					sfDims[0]->setValue(i,split3DSigned ? D.x : fabs(D.x));
-					sfDims[1]->setValue(i,split3DSigned ? D.y : fabs(D.y));
-					sfDims[2]->setValue(i,split3DSigned ? D.z : fabs(D.z));
+					sfDims[0]->setValue(i,static_cast<ScalarType>(split3DSigned ? D.x : fabs(D.x)));
+					sfDims[1]->setValue(i,static_cast<ScalarType>(split3DSigned ? D.y : fabs(D.y)));
+					sfDims[2]->setValue(i,static_cast<ScalarType>(split3DSigned ? D.z : fabs(D.z)));
 				}
 
-				for (i=0;i<3;++i)
+				for (unsigned j=0;j<3;++j)
 				{
-					sfDims[i]->computeMinAndMax();
+					sfDims[j]->computeMinAndMax();
 					//check that SF doesn't already exist
-					int sfExit = compCloud->getScalarFieldIndexByName(sfDims[i]->getName());
-					if (sfExit>=0)
+					int sfExit = compCloud->getScalarFieldIndexByName(sfDims[j]->getName());
+					if (sfExit >= 0)
 						compCloud->deleteScalarField(sfExit);
-					compCloud->addScalarField(sfDims[i]);
+					compCloud->addScalarField(sfDims[j]);
 				}
 				ccLog::Warning("[ComputeDistances] Result has been split along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
 			}
@@ -767,10 +766,9 @@ void ccComparisonDlg::compute()
 				ccLog::Error("[ComputeDistances] Not enough memory to generate 3D split fields!");
 			}
 
-			for (i=0;i<3;++i)
-			{
-				sfDims[i]->release();
-			}
+			sfDims[0]->release();
+			sfDims[1]->release();
+			sfDims[2]->release();
 		}
 	}
 	else
@@ -778,7 +776,7 @@ void ccComparisonDlg::compute()
 		ccLog::Error("[ComputeDistances] Error (%i)",result);
 		compCloud->deleteScalarField(sfIdx);
 		compCloud->showSF(false);
-		sfIdx=-1;
+		sfIdx = -1;
 	}
 
 	//m.a.j. affichage

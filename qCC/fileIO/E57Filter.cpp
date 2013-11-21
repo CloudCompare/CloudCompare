@@ -1293,9 +1293,9 @@ bool GetPoseInformation(e57::StructureNode& node, ccGLMatrix& poseMat)
 		if(pose.isDefined("translation"))
 		{
 			e57::StructureNode transNode(pose.get("translation"));  
-			poseMat.getTranslation()[0] = (PointCoordinateType)e57::FloatNode(transNode.get("x")).value();
-			poseMat.getTranslation()[1] = (PointCoordinateType)e57::FloatNode(transNode.get("y")).value();
-			poseMat.getTranslation()[2] = (PointCoordinateType)e57::FloatNode(transNode.get("z")).value();
+			poseMat.getTranslation()[0] = static_cast<float>(e57::FloatNode(transNode.get("x")).value());
+			poseMat.getTranslation()[1] = static_cast<float>(e57::FloatNode(transNode.get("y")).value());
+			poseMat.getTranslation()[2] = static_cast<float>(e57::FloatNode(transNode.get("z")).value());
 			validPoseMat=true;
 		}
 	}
@@ -1503,10 +1503,10 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	//ScalarType invalidSFValue = 0;
 
 	ccScalarField* intensitySF = 0;
-	if(header.pointFields.intensityField)
+	if (header.pointFields.intensityField)
 	{
 		intensitySF = new ccScalarField(CC_E57_INTENSITY_FIELD_NAME);
-		if (!intensitySF->resize(pointCount))
+		if (!intensitySF->resize(static_cast<unsigned>(pointCount)))
 		{
 			ccLog::Error("[E57] Not enough memory!");
 			intensitySF->release();
@@ -1581,7 +1581,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	{
 		//we store the point return index as a scalar field
 		returnIndexSF = new ccScalarField(CC_E57_RETURN_INDEX_FIELD_NAME);
-		if (!returnIndexSF->resize(pointCount))
+		if (!returnIndexSF->resize(static_cast<unsigned>(pointCount)))
 		{
 			ccLog::Error("[E57] Not enough memory!");
 			delete cloud;
@@ -1601,7 +1601,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	CCLib::NormalizedProgress* nprogress=0;
 	if (showProgressBar)
 	{
-		nprogress = new CCLib::NormalizedProgress(&pdlg,pointCount/nSize);
+		nprogress = new CCLib::NormalizedProgress(&pdlg,static_cast<unsigned>(pointCount)/nSize);
 		pdlg.setMethodTitle("Read E57 file");
 		pdlg.setInfo(qPrintable(QString("Scan #%1 - %2 points").arg(s_absoluteScanIndex).arg(pointCount)));
 		pdlg.start();
@@ -1656,7 +1656,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			if (realCount==0)
 			{
 				bool applyAll=false;
-				if (ccCoordinatesShiftManager::Handle(Pd,0,s_alwaysDisplayLoadDialog,s_coordinatesShiftEnabled,s_coordinatesShift,0,applyAll))
+				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,s_alwaysDisplayLoadDialog,s_coordinatesShiftEnabled,s_coordinatesShift,0,applyAll))
 				{
 					cloud->setOriginalShift(s_coordinatesShift[0],s_coordinatesShift[1],s_coordinatesShift[2]);
 					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)",qPrintable(guidStr),s_coordinatesShift[0],s_coordinatesShift[1],s_coordinatesShift[2]);
@@ -1665,12 +1665,14 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 				}
 			}
 
-			CCVector3 P(Pd[0]+s_coordinatesShift[0],Pd[1]+s_coordinatesShift[1],Pd[2]+s_coordinatesShift[2]);
+			CCVector3 P(static_cast<PointCoordinateType>(Pd[0]+s_coordinatesShift[0]),
+						static_cast<PointCoordinateType>(Pd[1]+s_coordinatesShift[1]),
+						static_cast<PointCoordinateType>(Pd[2]+s_coordinatesShift[2]));
 			cloud->addPoint(P);
 
 			if (hasNormals)
 			{
-				CCVector3 N(0.0,0.0,0.0);
+				CCVector3 N(0,0,0);
 				if (arrays.xNormData)
 					N.x = (PointCoordinateType)arrays.xNormData[i];
 				if (arrays.yNormData)
@@ -1688,7 +1690,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 				{
 					//ScalarType intensity = (ScalarType)((arrays.intData[i] - intOffset)/intRange); //Normalize intensity to 0 - 1.
 					ScalarType intensity = (ScalarType)arrays.intData[i];
-					intensitySF->setValue(realCount,intensity);
+					intensitySF->setValue(static_cast<unsigned>(realCount),intensity);
 
 					//track max intensity (for proper visualization)
 					if (s_absoluteScanIndex!=0 || realCount!=0)
@@ -1705,7 +1707,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 				}
 				else
 				{
-					intensitySF->flagValueAsInvalid(realCount);
+					intensitySF->flagValueAsInvalid(static_cast<unsigned>(realCount));
 				}
 			}
 
@@ -1726,7 +1728,8 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			if (arrays.scanIndexData)
 			{
 				assert(returnIndexSF);
-				returnIndexSF->setValue(realCount,(ScalarType)arrays.scanIndexData[i]);
+				ScalarType s = static_cast<ScalarType>(arrays.scanIndexData[i]);
+				returnIndexSF->setValue(static_cast<unsigned>(realCount),s);
 			}
 
 			realCount++;
@@ -1757,7 +1760,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 	else if (realCount < pointCount)
 	{
 		ccLog::Warning(QString("[E57] We read less points than expected for scan '%1'! (%2/%3)").arg(scanNode.elementName().c_str()).arg(realCount).arg(pointCount));
-		cloud->resize(realCount);
+		cloud->resize(static_cast<unsigned>(realCount));
 	}
 
 	//Scalar fields
@@ -1958,7 +1961,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 
 	QImage qImage;
 	assert(imageBits);
-	bool loadResult = qImage.loadFromData(imageBits,visualRefRepresentation->imageSize,imageFormat);
+	bool loadResult = qImage.loadFromData(imageBits,static_cast<int>(visualRefRepresentation->imageSize),imageFormat);
 	delete[] imageBits;
 	imageBits=0;
 
@@ -1988,7 +1991,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 			double dx = pinhole->pixelWidth * (double)pinhole->imageWidth;
 			double f = pinhole->focalLength;
 			double fov_x = 2.0*atan(dx/(2.0*f)); //FIXME: we only take x into account! (we hope it's okay)
-			calibImage->setFov(fov_x*180.0/M_PI);
+			calibImage->setFov(static_cast<float>(fov_x*180.0/M_PI));
 			//calibImage->setFocal(f,false); //FIXME: focal handled in pixels only!
 
 			imageObj = calibImage;
@@ -2009,7 +2012,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 		cameraType == E57_SPHERICAL)
 	{
 		SphericalRepresentation* spherical = static_cast<SphericalRepresentation*>(cameraRepresentation);
-		imageObj->setAspectRatio((spherical->pixelWidth/spherical->pixelHeight) * imageObj->getAspectRatio());
+		imageObj->setAspectRatio(static_cast<float>(spherical->pixelWidth/spherical->pixelHeight) * imageObj->getAspectRatio());
 	}
 
 	if (cameraRepresentation)

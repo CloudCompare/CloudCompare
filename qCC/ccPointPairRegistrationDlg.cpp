@@ -242,9 +242,9 @@ void ccPointPairRegistrationDlg::addManualAlignedPoint()
 	s_last_ay = ptsDlg.doubleSpinBox2->value();
 	s_last_az = ptsDlg.doubleSpinBox3->value();
 
-	CCVector3 P(s_last_ax,
-				s_last_ay,
-				s_last_az);
+	CCVector3 P(static_cast<PointCoordinateType>(s_last_ax),
+				static_cast<PointCoordinateType>(s_last_ay),
+				static_cast<PointCoordinateType>(s_last_az));
 
 	addAlignedPoint(P);
 }
@@ -263,9 +263,9 @@ void ccPointPairRegistrationDlg::addManualRefPoint()
 	s_last_ry = ptsDlg.doubleSpinBox2->value();
 	s_last_rz = ptsDlg.doubleSpinBox3->value();
 
-	CCVector3 P(s_last_rx,
-				s_last_ry,
-				s_last_rz);
+	CCVector3 P(static_cast<PointCoordinateType>(s_last_rx),
+				static_cast<PointCoordinateType>(s_last_ry),
+				static_cast<PointCoordinateType>(s_last_rz));
 
 	addReferencePoint(P);
 }

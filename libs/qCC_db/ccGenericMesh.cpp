@@ -322,13 +322,16 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (!pushTriangleNames && !visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || greyForNanScalarValues))
 		{
+			//the GL type depends on the PointCoordinateType 'size' (float or double)
+			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
+			
 			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(3,GL_FLOAT,0,GetVertexBuffer());
+			glVertexPointer(3,GL_COORD_TYPE,0,GetVertexBuffer());
 
 			if (glParams.showNorms)
 			{
 				glEnableClientState(GL_NORMAL_ARRAY);
-				glNormalPointer(GL_FLOAT,0,GetNormalsBuffer());
+				glNormalPointer(GL_COORD_TYPE,0,GetNormalsBuffer());
 			}
 			if (glParams.showSF || glParams.showColors)
 			{
@@ -582,30 +585,30 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				//vertex 1
 				if (N1)
-					glNormal3fv(N1);
+					ccGL::Normal3v(N1);
 				if (col1)
 					glColor3ubv(col1);
 				if (Tx1)
 					glTexCoord2fv(Tx1);
-				glVertex3fv(vertices->getPoint(tsi->i1)->u);
+				ccGL::Vertex3v(vertices->getPoint(tsi->i1)->u);
 
 				//vertex 2
 				if (N2)
-					glNormal3fv(N2);
+					ccGL::Normal3v(N2);
 				if (col2)
 					glColor3ubv(col2);
 				if (Tx2)
 					glTexCoord2fv(Tx2);
-				glVertex3fv(vertices->getPoint(tsi->i2)->u);
+				ccGL::Vertex3v(vertices->getPoint(tsi->i2)->u);
 
 				//vertex 3
 				if (N3)
-					glNormal3fv(N3);
+					ccGL::Normal3v(N3);
 				if (col3)
 					glColor3ubv(col3);
 				if (Tx3)
 					glTexCoord2fv(Tx3);
-				glVertex3fv(vertices->getPoint(tsi->i3)->u);
+				ccGL::Vertex3v(vertices->getPoint(tsi->i3)->u);
 			}
 
 			glEnd();

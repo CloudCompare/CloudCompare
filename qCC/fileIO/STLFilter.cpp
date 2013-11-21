@@ -26,6 +26,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 //qCC_db
 #include <ccLog.h>
@@ -208,7 +209,7 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile)
 	return CC_FERR_NO_ERROR;
 }
 
-const double c_defaultSearchRadius = sqrt(ZERO_TOLERANCE);
+const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(ZERO_TOLERANCE));
 bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
 {
 	GenericChunkedArray<1,int>* equivalentIndexes = (GenericChunkedArray<1,int>*)additionalParameters[0];
@@ -492,10 +493,8 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 	mesh->setName(name);
 
 	//progress dialog
-	ccProgressDialog progressDlg(true);
-	progressDlg.setMethodTitle("Loading ASCII STL file");
-	progressDlg.setInfo("Loading in progress...");
-	progressDlg.setRange(0,0);
+	QProgressDialog progressDlg("Loading in progress...","Cancel",0,0);
+	progressDlg.setWindowTitle("Loading ASCII STL file");
 	progressDlg.show();
 	QApplication::processEvents();
 
@@ -535,12 +534,14 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				//let's try to read normal
 				if (tokens[1].toUpper() == "NORMAL")
 				{
-					N.x = tokens[2].toDouble(&normalIsOk);
+					N.x = static_cast<PointCoordinateType>(tokens[2].toDouble(&normalIsOk));
 					if (normalIsOk)
 					{
-						N.y = tokens[3].toDouble(&normalIsOk);
+						N.y = static_cast<PointCoordinateType>(tokens[3].toDouble(&normalIsOk));
 						if (normalIsOk)
-							N.z = tokens[4].toDouble(&normalIsOk);
+						{
+							N.z = static_cast<PointCoordinateType>(tokens[4].toDouble(&normalIsOk));
+						}
 					}
 					if (!normalIsOk && !normalWarningAlreadyDisplayed)
 					{
@@ -615,7 +616,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				if (shiftAlreadyEnabled)
 					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
 				bool applyAll=false;
-				if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
 					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
@@ -738,16 +739,16 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		//progress
 		if ((faceCount % 1024) == 0)
 		{
-			if (progressDlg.isCancelRequested())
+			if (progressDlg.wasCanceled())
 				break;
-			progressDlg.update(faceCount>>10);
+			progressDlg.setValue(static_cast<int>(faceCount>>10));
 		}
 	}
 
 	if (normalWarningAlreadyDisplayed)
 		ccLog::Warning("[STL] Failed to read some 'normal' values!");
 
-	progressDlg.stop();
+	progressDlg.close();
 
 	//do some cleaning
 	if (vertices->size() < vertices->capacity())
@@ -831,7 +832,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 				if (shiftAlreadyEnabled)
 					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
 				bool applyAll=false;
-				if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
 					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);

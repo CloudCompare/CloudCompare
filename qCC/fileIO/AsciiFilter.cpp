@@ -571,7 +571,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
     return cloudDesc;
 }
 
-CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
+CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
                                                             ccHObject& container,
                                                             const AsciiOpenDlg::Sequence& openSequence,
                                                             char separator,
@@ -623,9 +623,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 
     //buffers
     ScalarType D = 0;
-	double P[3] = {0.0,0.0,0.0};
-    double Pshift[3] = {0.0,0.0,0.0};
-    float N[3] = {0.0,0.0,0.0};
+	double P[3] = {0,0,0};
+    double Pshift[3] = {0,0,0};
+    PointCoordinateType N[3] = {0,0,0};
     colorType col[3] = {0,0,0};
 
     //other useful variables
@@ -745,7 +745,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 				if (shiftAlreadyEnabled)
 					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
 				bool applyAll=false;
-				if (ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					cloudDesc.cloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
 					ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
@@ -762,17 +762,19 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(const char* filename,
 			}
 
 			//add point
-			cloudDesc.cloud->addPoint(CCVector3(P[0]+Pshift[0],P[1]+Pshift[1],P[2]+Pshift[2]));
+			cloudDesc.cloud->addPoint(CCVector3(static_cast<PointCoordinateType>(P[0]+Pshift[0]),
+												static_cast<PointCoordinateType>(P[1]+Pshift[1]),
+												static_cast<PointCoordinateType>(P[2]+Pshift[2])) );
 
 			//Normal vector
 			if (cloudDesc.hasNorms)
 			{
 				if (cloudDesc.xNormIndex>=0)
-					N[0] = parts[cloudDesc.xNormIndex].toFloat();
+					N[0] = static_cast<PointCoordinateType>(parts[cloudDesc.xNormIndex].toDouble());
 				if (cloudDesc.yNormIndex>=0)
-					N[1] = parts[cloudDesc.yNormIndex].toFloat();
+					N[1] = static_cast<PointCoordinateType>(parts[cloudDesc.yNormIndex].toDouble());
 				if (cloudDesc.zNormIndex>=0)
-					N[2] = parts[cloudDesc.zNormIndex].toFloat();
+					N[2] = static_cast<PointCoordinateType>(parts[cloudDesc.zNormIndex].toDouble());
 				cloudDesc.cloud->addNorm(N);
 			}
 

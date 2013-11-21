@@ -113,9 +113,9 @@ public:
 		\param theOctree the octree, if it has already been computed
 		\return success
 	**/
-	static bool applyScalarFieldGaussianFilter(float sigma, 
+	static bool applyScalarFieldGaussianFilter(	PointCoordinateType sigma, 
 												GenericIndexedCloudPersist* theCloud, 
-                                                float sigmaSF,
+                                                PointCoordinateType sigmaSF,
 												GenericProgressCallback* progressCb=0, 
 												DgmOctree* theOctree=0);
 
@@ -192,7 +192,7 @@ protected:
 		Method parameters (defined in "additionalParameters") are :
 		- (GenericCloud*) the point cloud
 		- (bool*) specifies if the scalar values are euclidian distances
-		- (float*) radius
+		- (PointCoordinateType*) radius
 		- (std::vector<ScalarType>*) the gradient norms container
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
@@ -206,7 +206,7 @@ protected:
 		(it is of the form DgmOctree::localFunctionPtr).
 		See ScalarFieldTools::applyScalarFieldGaussianFilter.
 		Method parameters (defined in "additionalParameters") are :
-		- (float*) sigma
+		- (PointCoordinateType*) sigma
 		- (std::vector<ScalarType>*) the smoothed values
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description

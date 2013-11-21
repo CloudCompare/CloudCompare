@@ -33,7 +33,7 @@ class ccRenderToFileDlg : public QDialog, public Ui::RenderToFileDialog
         ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent=0);
 
 		//! On dialog acceptance, returns requested zoom
-        double getZoom() const;
+        float getZoom() const;
 		//! On dialog acceptance, returns requested output filename
         QString getFilename() const;
 		//! On dialog acceptance, returns whether points should be scaled or not

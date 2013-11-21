@@ -220,15 +220,15 @@ void ccScalarField::updateSaturationBounds()
 		double minVal=0, maxVal=0;
 		m_colorScale->getAbsoluteBoundaries(minVal,maxVal);
 
-		m_saturationRange.setBounds(minVal,maxVal);
+		m_saturationRange.setBounds(static_cast<ScalarType>(minVal),static_cast<ScalarType>(maxVal));
 
 		//log scale (we always update it even if m_logScale is not enabled!)
 		//if (m_logScale)
 		{
-			ScalarType minAbsVal = ( maxVal < 0 ? std::min(-maxVal,-minVal) : std::max<ScalarType>(minVal,0) );
-			ScalarType maxAbsVal = (ScalarType)std::max(fabs(minVal),fabs(maxVal));
-			ScalarType minSatLog = log10(std::max(minAbsVal,(ScalarType)ZERO_TOLERANCE));
-			ScalarType maxSatLog = log10(std::max(maxAbsVal,(ScalarType)ZERO_TOLERANCE));
+			ScalarType minAbsVal = static_cast<ScalarType>( maxVal < 0 ? std::min(-maxVal,-minVal) : std::max(minVal,0.0) );
+			ScalarType maxAbsVal = static_cast<ScalarType>( std::max(fabs(minVal),fabs(maxVal)) );
+			ScalarType minSatLog = log10(std::max(minAbsVal,static_cast<ScalarType>(ZERO_TOLERANCE)));
+			ScalarType maxSatLog = log10(std::max(maxAbsVal,static_cast<ScalarType>(ZERO_TOLERANCE)));
 			m_logSaturationRange.setBounds(minSatLog,maxSatLog);
 		}
 	}

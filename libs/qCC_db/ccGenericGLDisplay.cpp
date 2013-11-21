@@ -91,7 +91,7 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion)
 	inStream >> pixelSize;
 	//before version 25, we were saving the inverse of 'pixelSize' ('globalZoom')
 	if (dataVersion < 25)
-		pixelSize = (pixelSize> ZERO_TOLERANCE ? 1.0/pixelSize : 1.0);
+		pixelSize = (pixelSize> ZERO_TOLERANCE ? 1.0f/pixelSize : 1.0f);
     inStream >> zoom;
     inStream >> defaultPointSize;
     inStream >> defaultLineWidth;

@@ -67,7 +67,7 @@ protected:
     bool isValid();
     bool prepareEntitiesForComparison();
     int computeApproxResults();
-    int determineBestOctreeLevelForDistanceComputation(ScalarType maxDist);
+    int determineBestOctreeLevelForDistanceComputation(double maxDist);
     void clean();
     void updateDisplay(bool showSF, bool hideRef);
 

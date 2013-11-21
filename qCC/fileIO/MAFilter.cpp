@@ -402,13 +402,14 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 		}
 
 		//pour chaque vertex
-		float col[3],coef=1.0/float(MAX_COLOR_COMP);
-		for (i=0;i<numberOfVertexes;++i)
+		float col[3];
+		float coef = 1.0f/static_cast<float>(MAX_COLOR_COMP);
+		for (i=0; i<numberOfVertexes; ++i)
 		{
 			const colorType* c = pc->getPointColor(i);
-			col[0]=float(c[0])*coef;
-			col[1]=float(c[1])*coef;
-			col[2]=float(c[2])*coef;
+			col[0] = static_cast<float>(c[0]) * coef;
+			col[1] = static_cast<float>(c[1]) * coef;
+			col[2] = static_cast<float>(c[2]) * coef;
 
 			//on compte le nombre de faces
 			int nf = 0;
@@ -416,25 +417,28 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 			while (f)
 			{
 				++nf;
-				f=f->nextFace;
+				f = f->nextFace;
 			}
 
-			if (nf>0)
+			if (nf > 0)
 			{
 				if (fprintf(fp,"\tsetAttr -s %i \".vclr[%i].vfcl\";\n",nf,i) < 0)
 					{fclose(fp);return CC_FERR_WRITING;}
 
-				faceIndexes *oldf,*f = theFacesIndexes[i];
+				faceIndexes *oldf, *f = theFacesIndexes[i];
 				while (f)
 				{
 					if (fprintf(fp,"\tsetAttr \".vclr[%i].vfcl[%i].frgb\" -type \"float3\" %f %f %f;\n",i,f->faceIndex,col[0],col[1],col[2]) < 0)
-					{fclose(fp);return CC_FERR_WRITING;}
+					{
+						fclose(fp);
+						return CC_FERR_WRITING;
+					}
 
 					oldf = f;
-					f=f->nextFace;
+					f = f->nextFace;
 					delete oldf;
 				}
-				theFacesIndexes[i]=NULL;
+				theFacesIndexes[i] = NULL;
 			}
 
 			nprogress.oneStep();
@@ -442,23 +446,38 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 		delete[] theFacesIndexes;
 
 		if (fprintf(fp,"\tsetAttr \".cn\" -type \"string\" \"colorSet%i\";\n",currentMesh+1) < 0)
-			{fclose(fp);return CC_FERR_WRITING;}
+		{
+			fclose(fp);
+			return CC_FERR_WRITING;
+		}
 	}
 
 	//Maya connections
 	if (hasColors)
 	{
 		if (fprintf(fp,"connectAttr \"polyColorPerVertex%i.out\" \"MeshShape%i.i\";\n",currentMesh+1,currentMesh+1) < 0)
-			{fclose(fp);return CC_FERR_WRITING;}
+		{
+			fclose(fp);
+			return CC_FERR_WRITING;
+		}
 		if (fprintf(fp,"connectAttr \"polySurfaceShape%i.o\" \"polyColorPerVertex%i.ip\";\n",currentMesh+1,currentMesh+1) < 0)
-			{fclose(fp);return CC_FERR_WRITING;}
+		{
+			fclose(fp);
+			return CC_FERR_WRITING;
+		}
 	}
 	if (fprintf(fp,"connectAttr \"MeshShape%i.iog\" \":initialShadingGroup.dsm\" -na;\n",currentMesh+1) < 0)
-		{fclose(fp);return CC_FERR_WRITING;}
+	{
+		fclose(fp);
+		return CC_FERR_WRITING;
+	}
 
 	//fin du fichier
 	if (fprintf(fp,"//End of %s\n",qPrintable(baseFilename)) < 0)
-		{fclose(fp);return CC_FERR_WRITING;}
+	{
+		fclose(fp);
+		return CC_FERR_WRITING;
+	}
 
 	fclose(fp);
 

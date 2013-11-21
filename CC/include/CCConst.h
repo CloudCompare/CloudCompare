@@ -55,9 +55,12 @@
 #define ZERO_TOLERANCE (1.0e-8)
 #endif
 
+//! '1' as a PointCoordinateType value
+/** To avoid compiler warnings about 'possible loss of data' **/
+const PointCoordinateType PC_ONE = static_cast<PointCoordinateType>(1.0);
+
 //! NaN scalar value
-/** Warning: handle with care!
-**/
+/** Warning: handle with care! **/
 const ScalarType NAN_VALUE = std::numeric_limits<ScalarType>::quiet_NaN();
 
 // Point visibility states

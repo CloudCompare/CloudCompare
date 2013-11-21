@@ -25,6 +25,7 @@
 #include <QString>
 #include <QFile>
 #include <QTextStream>
+#include <QProgressDialog>
 
 //qCC_db
 #include <ccLog.h>
@@ -385,10 +386,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	int maxTriNormIndex = -1;
 
 	//progress dialog
-	ccProgressDialog progressDlg(false);
-	progressDlg.setMethodTitle("Loading OBJ file");
-	progressDlg.setInfo("Loading in progress...");
-	progressDlg.setRange(0,0);
+	QProgressDialog progressDlg("Loading OBJ file",QString(),0,0);
 	progressDlg.show();
 	QApplication::processEvents();
 
@@ -408,7 +406,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	while (!currentLine.isNull())
 	{
 		if ((++lineCount % 4096) == 0)
-			progressDlg.update(lineCount>>12);
+			progressDlg.setValue(static_cast<int>(lineCount>>12));
 
 		QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
 
@@ -450,7 +448,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				if (shiftAlreadyEnabled)
 					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
 				bool applyAll = false;
-				if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
 					ccLog::Warning("[ObjFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
@@ -978,7 +976,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 		materials=0;
 	}
 
-	progressDlg.stop();
+	progressDlg.close();
 
 	//potential warnings
 	if (objWarnings[DISCARED_GROUP])

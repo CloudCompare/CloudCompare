@@ -93,26 +93,16 @@ computeIntensitySPINImages(const typename pcl::PointCloud<PointInT>::Ptr incloud
     estimator.setNrIntensityBins(n_intensity_bins);
 
     if (useKnn)
-    {
         //knn
         estimator.setKSearch(k_nn);
-    }
-    else
-    {
+    else if (!useKnn)
         estimator.setRadiusSearch((double) radius);
-    }
-    else
-    {
+    else // can be a bool not set?? not sure
         return -1;
-    }
 
     estimator.compute(*outcloud);
 
     return 1;
-
-
-
-
 }
 
 

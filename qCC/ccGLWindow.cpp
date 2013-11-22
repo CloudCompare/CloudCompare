@@ -1121,12 +1121,13 @@ void ccGLWindow::setCameraPos(const CCVector3& P)
 	invalidateVisualization();
 }
 
-void ccGLWindow::moveCamera(float dx, float dy, float dz)
+void ccGLWindow::moveCamera(float dx, float dy, float dz, bool blockSignal/*=false*/)
 {
 	if (dx != 0 || dy != 0) //camera movement? (dz doesn't count as ot only corresponds to a zoom)
 	{
 		//feedback for echo mode
-		emit cameraDisplaced(dx,dy);
+		if (!blockSignal)
+			emit cameraDisplaced(dx,dy);
 	}
 
 	//curent X, Y and Z viewing directions

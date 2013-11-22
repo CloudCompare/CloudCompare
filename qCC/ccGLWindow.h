@@ -186,7 +186,7 @@ public:
 		* Y: vertical axis (up)
 		* Z: depth axis (pointing out of the screen)
 	**/
-	virtual void moveCamera(float dx, float dy, float dz);
+	virtual void moveCamera(float dx, float dy, float dz, bool blockSignal = false);
 
 	//! Set perspective state/mode
 	/** Persepctive mode can be:

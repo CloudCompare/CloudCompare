@@ -582,7 +582,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 	dw->tableEnd();
 
 	//Writing Various Other Tables
-	dxf.writeStyle(*dw);
+	dxf.writeStyle(*dw,DL_StyleData("Standard",0,0.0,0.75,0.0,0,2.5,"txt",""));
 	dxf.writeView(*dw);
 	dxf.writeUcs(*dw);
 

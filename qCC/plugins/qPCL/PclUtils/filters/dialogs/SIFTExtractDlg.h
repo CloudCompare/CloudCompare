@@ -32,8 +32,8 @@ public:
 
 	void updateComboBox(std::vector<std::string> fields);
 
-public slots:
-	void disableCombo();
+//public slots:
+//	void disableCombo();
 
 };
 

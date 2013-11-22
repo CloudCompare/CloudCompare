@@ -106,50 +106,6 @@ computeIntensitySPINImages(const typename pcl::PointCloud<PointInT>::Ptr incloud
 }
 
 
-//template <int n_dist, int n_int>
-//int
-//computeIntensitySPINImages2(const sensor_msgs::PointCloud2Ptr incloud,
-//                           const float radius,
-//                           const int k_nn,
-//                           const bool useKnn, //true if use knn, false if radius search
-//                            sensor_msgs::PointCloud2Ptr outcloud)
-//{
-
-//    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZI>);
-//    pcl::fromROSMsg(*incloud, *cloud);
-
-//    const int full_size = n_dist * n_int;
-//    typename pcl::PointCloud<pcl::Histogram<full_size> >::Ptr features_cloud (new pcl::PointCloud<pcl::Histogram< full_size > >);
-
-//    pcl::IntensitySpinEstimation<pcl::PointXYZI, pcl::Histogram<full_size> > estimator;
-//    estimator.setInputCloud(cloud);
-//    estimator.setNrDistanceBins(n_dist);
-//    estimator.setNrIntensityBins(n_int);
-
-//    if (useKnn)
-//    {
-//        //knn
-//        estimator.setKSearch(k_nn);
-//    }
-//    else
-//    {
-//        estimator.setRadiusSearch((double) radius);
-//    }
-//    else
-//    {
-//        return -1;
-//    }
-
-//    estimator.compute(*features_cloud);
-
-//    pcl::toROSMsg(*features_cloud, *outcloud);
-
-//    return 1;
-
-//}
-
-
-
 template <typename PointInT, typename PointOutT>
 int compute_normals(const typename pcl::PointCloud<PointInT>::Ptr incloud,
 					const float radius,

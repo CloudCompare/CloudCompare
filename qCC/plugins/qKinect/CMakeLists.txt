@@ -9,9 +9,9 @@ project( QKINECT_PLUGIN_DLL )
 
 # libfreenect is needed to build library
 set( LIBFREENECT_INCLUDE_DIR "" CACHE PATH "Include directory of libfreenect" )
-set( LIBFREENECT_LIBRARY_FILE "" CACHE FILE "Library file of libfreenect" )
+set( LIBFREENECT_LIBRARY_FILE "" CACHE FILEPATH "Library file of libfreenect" )
 if (WIN32)
-	set( LIBFREENECT_SHARED_LIBRARY_FILE "" CACHE FILE "Shared library file of libfreenect (dll)" )
+	set( LIBFREENECT_SHARED_LIBRARY_FILE "" CACHE FILEPATH "Shared library file of libfreenect (dll)" )
 endif()
 
 if ( NOT LIBFREENECT_INCLUDE_DIR )

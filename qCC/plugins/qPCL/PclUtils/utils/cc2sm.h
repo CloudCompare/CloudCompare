@@ -21,7 +21,6 @@
 #include "pcl_utilities.h"
 
 //PCL
-#include <sensor_msgs/PointCloud2.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
@@ -33,33 +32,33 @@ class cc2smReader
 public:
 	cc2smReader();
 
-	sensor_msgs::PointCloud2 getGenericField(std::string field_name);
+	PCLCloud getGenericField(std::string field_name);
 
-	sensor_msgs::PointCloud2 getOneOfXYZ(const int coord_ids);
+	PCLCloud getOneOfXYZ(const int coord_ids);
 
-	sensor_msgs::PointCloud2 getOneOfNormal(const int coord_ids);
+	PCLCloud getOneOfNormal(const int coord_ids);
 
-	sensor_msgs::PointCloud2 getXYZ();
+	PCLCloud getXYZ();
 
     void getXYZ(pcl::PointCloud<pcl::PointXYZ> & cloud);
 
-	sensor_msgs::PointCloud2 getNormals();
+	PCLCloud getNormals();
 
-	sensor_msgs::PointCloud2 getFloatScalarField(const std::string field_name);
+	PCLCloud getFloatScalarField(const std::string field_name);
 
-	sensor_msgs::PointCloud2 getColors();
+	PCLCloud getColors();
 
 	int checkIfFieldExist(const std::string field_name);
 
 	void setInputCloud(const ccPointCloud * cc_cloud);
 
-	int getAsSM(std::vector<std::string> requested_fields, sensor_msgs::PointCloud2 &sm_cloud );
+	int getAsSM(std::vector<std::string> requested_fields, PCLCloud &sm_cloud );
 
 	/** \brief this convert all the data in a ccPointCloud to a sesor_msgs::PointCloud2
 	* this is useful for saving all the data in a ccPointCloud into a PCD file
 	* Is suggested to use other methods for get a cloud for pcl filters (so to get only needed data)
 	*/
-	int getAsSM(sensor_msgs::PointCloud2 &sm_cloud);
+	int getAsSM(PCLCloud &sm_cloud);
 
 protected:
 	const ccPointCloud* m_cc_cloud;

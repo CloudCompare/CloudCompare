@@ -18,9 +18,9 @@
 
 #include <filtering.h>
 #include <pcl/filters/statistical_outlier_removal.h>
-int	removeOutliersStatistical(const sensor_msgs::PointCloud2ConstPtr incloud, const int &k, const float &nStds, sensor_msgs::PointCloud2Ptr outcloud)
+int	removeOutliersStatistical(const PCLCloud::ConstPtr incloud, const int &k, const float &nStds, PCLCloud::Ptr outcloud)
 {
-	pcl::StatisticalOutlierRemoval<sensor_msgs::PointCloud2> remover;
+	pcl::StatisticalOutlierRemoval<PCLCloud> remover;
 	remover.setInputCloud(incloud);
 	remover.setMeanK(k);
 	remover.setStddevMulThresh(nStds);

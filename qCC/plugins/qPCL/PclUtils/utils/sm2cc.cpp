@@ -24,14 +24,11 @@
 //PCL
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
-#include <sensor_msgs/PointField.h>
 
 //system
 #include <assert.h>
 
-using ::sensor_msgs::PointField;
-
-sm2ccConverter::sm2ccConverter(sensor_msgs::PointCloud2::Ptr sm_cloud)
+sm2ccConverter::sm2ccConverter(PCLCloud::Ptr sm_cloud)
 	: m_sm_cloud(sm_cloud)
 {
 	assert(sm_cloud);
@@ -47,7 +44,7 @@ ccPointCloud* sm2ccConverter::getCCloud()
 	
 	//get the fields list
 	std::list<std::string> fields;
-	for (std::vector< ::sensor_msgs::PointField >::const_iterator it = m_sm_cloud->fields.begin(); it != m_sm_cloud->fields.end(); ++it)
+	for (std::vector< PCLScalarField >::const_iterator it = m_sm_cloud->fields.begin(); it != m_sm_cloud->fields.end(); ++it)
 		if (it->name != "_") //PCL padding fields
 			fields.push_back(it->name);
 
@@ -113,7 +110,7 @@ bool sm2ccConverter::addXYZ(ccPointCloud *cloud)
 
 	//add xyz to the given cloud taking xyz infos from the sm cloud
 	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::fromROSMsg(*m_sm_cloud, *pcl_cloud);
+	FROM_PCL_CLOUD(*m_sm_cloud, *pcl_cloud);
 
 	//loop
 	for (size_t i = 0; i < pointCount; ++i)
@@ -135,7 +132,7 @@ bool sm2ccConverter::addNormals(ccPointCloud *cloud)
 		return false;
 
 	pcl::PointCloud<OnlyNormals>::Ptr pcl_cloud_normals (new pcl::PointCloud<OnlyNormals>);
-	pcl::fromROSMsg(*m_sm_cloud, *pcl_cloud_normals);
+	FROM_PCL_CLOUD(*m_sm_cloud, *pcl_cloud_normals);
 
 	if (!cloud->reserveTheNormsTable())
 		return false;
@@ -164,7 +161,7 @@ bool sm2ccConverter::addRGB(ccPointCloud * cloud)
 		return false;
 
 	pcl::PointCloud<OnlyRGB>::Ptr pcl_cloud_rgb (new pcl::PointCloud<OnlyRGB>);
-	pcl::fromROSMsg(*m_sm_cloud, *pcl_cloud_rgb);
+	FROM_PCL_CLOUD(*m_sm_cloud, *pcl_cloud_rgb);
 
 	if (!cloud->reserveTheRGBTable())
 		return false;
@@ -192,7 +189,7 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 		return false;
 
 	//get the field
-	PointField field = m_sm_cloud->fields.at(pcl::getFieldIndex(*m_sm_cloud, name));
+	PCLScalarField field = m_sm_cloud->fields.at(pcl::getFieldIndex(*m_sm_cloud, name));
 
 	//if this field already exist, simply delete it
 	int id = cloud->getScalarFieldIndexByName(name.c_str());
@@ -215,10 +212,10 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 	}
 
 	//get PCL field
-	PointField pclField = m_sm_cloud->fields.at(pcl::getFieldIndex(*m_sm_cloud, name));
+	PCLScalarField pclField = m_sm_cloud->fields.at(pcl::getFieldIndex(*m_sm_cloud, name));
 
 	//check if int or float
-	bool floatField = (pclField.datatype == PointField::FLOAT32 || pclField.datatype == PointField::FLOAT64);
+	bool floatField = (pclField.datatype == PCLScalarField::FLOAT32 || pclField.datatype == PCLScalarField::FLOAT64);
 
 	//temporary change the name of the given field to something else -> S5c4laR should be a pretty uncommon name,
 	int field_index = pcl::getFieldIndex(*m_sm_cloud, name);
@@ -227,7 +224,7 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 	if (floatField)
 	{
 		pcl::PointCloud<FloatScalar>::Ptr pcl_scalar(new pcl::PointCloud<FloatScalar>);
-		pcl::fromROSMsg(*m_sm_cloud, *pcl_scalar);
+		FROM_PCL_CLOUD(*m_sm_cloud, *pcl_scalar);
 
 		for (size_t i = 0; i < pointCount; ++i)
 		{
@@ -238,7 +235,7 @@ bool sm2ccConverter::addScalarField(ccPointCloud * cloud, const std::string& nam
 	else
 	{
 		pcl::PointCloud<IntScalar>::Ptr pcl_scalar(new pcl::PointCloud<IntScalar>);
-		pcl::fromROSMsg(*m_sm_cloud, *pcl_scalar);
+		FROM_PCL_CLOUD(*m_sm_cloud, *pcl_scalar);
 
 		for (size_t i = 0; i < pointCount; ++i)
 		{
@@ -266,7 +263,7 @@ size_t sm2ccConverter::getNumberOfPoints()
 bool sm2ccConverter::existField(std::string name) const
 {
 	if (m_sm_cloud)
-		for (std::vector< ::sensor_msgs::PointField >::const_iterator it = m_sm_cloud->fields.begin(); it != m_sm_cloud->fields.end(); ++it)
+		for (std::vector< PCLScalarField >::const_iterator it = m_sm_cloud->fields.begin(); it != m_sm_cloud->fields.end(); ++it)
 			if (it->name == name)
 				return true;
 
@@ -278,7 +275,7 @@ void sm2ccConverter::eraseString(std::list<std::string> &fields, std::string nam
 	fields.remove(name);
 }
 
-std::vector<std::string> getFieldList(const sensor_msgs::PointCloud2 &cloud)
+std::vector<std::string> getFieldList(const PCLCloud &cloud)
 {
 	std::vector<std::string> field_list;
 	for (size_t d = 0; d < cloud.fields.size (); ++d)

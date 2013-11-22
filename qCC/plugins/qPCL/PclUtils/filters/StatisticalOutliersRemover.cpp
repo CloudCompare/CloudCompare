@@ -39,14 +39,14 @@ int StatisticalOutliersRemover::compute()
 {
     //get selected as pointcloud
     ccPointCloud * cloud = this->getSelectedEntityAsCCPointCloud();
-    sensor_msgs::PointCloud2::Ptr  tmp_cloud (new sensor_msgs::PointCloud2);
+    PCLCloud::Ptr  tmp_cloud (new PCLCloud);
 
     //now as sensor message
     cc2smReader converter;
     converter.setInputCloud(cloud);
     converter.getAsSM(*tmp_cloud);
 
-    sensor_msgs::PointCloud2Ptr outcloud ( new sensor_msgs::PointCloud2);
+    PCLCloud::Ptr outcloud ( new PCLCloud);
     removeOutliersStatistical(tmp_cloud, m_k, m_std, outcloud);
 
     //get back outcloud as a ccPointCloud

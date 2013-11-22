@@ -22,7 +22,6 @@
 //PCL
 #include <pcl/pcl_base.h>
 #include <pcl/point_types.h>
-#include <pcl/ros/conversions.h>
 #include <pcl/io/pcd_io.h>
 
 //CCLib
@@ -36,9 +35,9 @@ cc2smReader::cc2smReader() : m_cc_cloud(NULL)
 }
 
 
-sensor_msgs::PointCloud2 cc2smReader::getGenericField(std::string field_name)
+PCLCloud cc2smReader::getGenericField(std::string field_name)
 {
-	sensor_msgs::PointCloud2 sm_cloud;
+	PCLCloud sm_cloud;
 
 	if (field_name == "x")
 	{
@@ -101,7 +100,7 @@ sensor_msgs::PointCloud2 cc2smReader::getGenericField(std::string field_name)
 }
 
 
-sensor_msgs::PointCloud2 cc2smReader::getOneOfXYZ(const int coord_ids)
+PCLCloud cc2smReader::getOneOfXYZ(const int coord_ids)
 {
 	std::string name;
 	if (coord_ids == 0)
@@ -112,7 +111,7 @@ sensor_msgs::PointCloud2 cc2smReader::getOneOfXYZ(const int coord_ids)
 		name = "z";
 
 
-	sensor_msgs::PointCloud2::Ptr sm_cloud (new sensor_msgs::PointCloud2);
+	PCLCloud::Ptr sm_cloud (new PCLCloud);
 	PointCloud<FloatScalar>::Ptr pcl_cloud (new PointCloud<FloatScalar>);
 
 
@@ -127,12 +126,12 @@ sensor_msgs::PointCloud2 cc2smReader::getOneOfXYZ(const int coord_ids)
         pcl_cloud->at(i).S5c4laR = (float) this_point[coord_ids];
 	}
 
-	toROSMsg(*pcl_cloud, *sm_cloud);
+	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
 	sm_cloud->fields[0].name = name.c_str();
 	return *sm_cloud;
 }
 
-sensor_msgs::PointCloud2 cc2smReader::getOneOfNormal(const int coord_ids)
+PCLCloud cc2smReader::getOneOfNormal(const int coord_ids)
 {
 	std::string name;
 	if (coord_ids == 0)
@@ -143,7 +142,7 @@ sensor_msgs::PointCloud2 cc2smReader::getOneOfNormal(const int coord_ids)
 		name = "normal_z";
 
 
-	sensor_msgs::PointCloud2::Ptr sm_cloud (new sensor_msgs::PointCloud2);
+	PCLCloud::Ptr sm_cloud (new PCLCloud);
 	PointCloud<FloatScalar>::Ptr pcl_cloud (new PointCloud<FloatScalar>);
 
 
@@ -158,14 +157,14 @@ sensor_msgs::PointCloud2 cc2smReader::getOneOfNormal(const int coord_ids)
         pcl_cloud->at(i).S5c4laR = (float) normal[coord_ids];
 	}
 
-	toROSMsg(*pcl_cloud, *sm_cloud);
+	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
 	sm_cloud->fields[0].name = name.c_str();
 	return *sm_cloud;
 }
 
-sensor_msgs::PointCloud2 cc2smReader::getXYZ()
+PCLCloud cc2smReader::getXYZ()
 {
-	sensor_msgs::PointCloud2::Ptr sm_cloud (new sensor_msgs::PointCloud2);
+	PCLCloud::Ptr sm_cloud (new PCLCloud);
 	PointCloud<PointXYZ>::Ptr pcl_cloud (new PointCloud<PointXYZ>);
 
 
@@ -182,20 +181,20 @@ sensor_msgs::PointCloud2 cc2smReader::getXYZ()
 		pcl_cloud->at(i).z = (float) this_point[2];
 	}
 
-	toROSMsg(*pcl_cloud, *sm_cloud);
+	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
 	return *sm_cloud;
 }
 
 
 void cc2smReader::getXYZ(pcl::PointCloud<pcl::PointXYZ> & cloud)
 {
-    sensor_msgs::PointCloud2 sm = getXYZ();
-    pcl::fromROSMsg(sm, cloud);
+    PCLCloud sm = getXYZ();
+    FROM_PCL_CLOUD(sm, cloud);
 }
 
-sensor_msgs::PointCloud2 cc2smReader::getNormals()
+PCLCloud cc2smReader::getNormals()
 {
-	sensor_msgs::PointCloud2::Ptr sm_cloud (new sensor_msgs::PointCloud2);
+	PCLCloud::Ptr sm_cloud (new PCLCloud);
 	PointCloud<OnlyNormals>::Ptr pcl_cloud (new PointCloud<OnlyNormals>);
 
 	int pnumber = m_cc_cloud->size();
@@ -210,13 +209,13 @@ sensor_msgs::PointCloud2 cc2smReader::getNormals()
 		pcl_cloud->at(i).normal_z = normal[2];
 	}
 
-	toROSMsg(*pcl_cloud, *sm_cloud);
+	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
 	return *sm_cloud;
 }
 
-sensor_msgs::PointCloud2 cc2smReader::getFloatScalarField(const std::string field_name)
+PCLCloud cc2smReader::getFloatScalarField(const std::string field_name)
 {
-	sensor_msgs::PointCloud2::Ptr sm_cloud (new sensor_msgs::PointCloud2);
+	PCLCloud::Ptr sm_cloud (new PCLCloud);
 	PointCloud<FloatScalar>::Ptr pcl_cloud (new PointCloud<FloatScalar>);
 
 	CCLib::ScalarField * scalar_field = m_cc_cloud->getScalarField(m_cc_cloud->getScalarFieldIndexByName(field_name.c_str()));
@@ -229,7 +228,7 @@ sensor_msgs::PointCloud2 cc2smReader::getFloatScalarField(const std::string fiel
         pcl_cloud->at(i).S5c4laR = scalar;
 	}
 
-	toROSMsg(*pcl_cloud, *sm_cloud);
+	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
 
 	//Now change the name of the scalar field -> we cannot have any space into the field name
 	//NOTE this is a little trick for put any number of scalar fields in a message PointCloud2 object
@@ -245,9 +244,9 @@ sensor_msgs::PointCloud2 cc2smReader::getFloatScalarField(const std::string fiel
 	return *sm_cloud;
 }
 
-sensor_msgs::PointCloud2 cc2smReader::getColors()
+PCLCloud cc2smReader::getColors()
 {
-	sensor_msgs::PointCloud2::Ptr sm_cloud (new sensor_msgs::PointCloud2);
+	PCLCloud::Ptr sm_cloud (new PCLCloud);
 	PointCloud<OnlyRGB>::Ptr pcl_cloud (new PointCloud<OnlyRGB>);
 
 	int pnumber = m_cc_cloud->size();
@@ -261,7 +260,7 @@ sensor_msgs::PointCloud2 cc2smReader::getColors()
 		pcl_cloud->at(i).b = m_cc_cloud->getPointColor(i)[2];
 	}
 
-	toROSMsg(*pcl_cloud, *sm_cloud);
+	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
 	return *sm_cloud;
 }
 
@@ -285,7 +284,7 @@ int cc2smReader::checkIfFieldExist(const std::string field_name)
 		return (m_cc_cloud->getScalarFieldIndexByName(field_name.c_str()) >= 0);
 }
 
-int cc2smReader::getAsSM(std::vector<std::string> requested_fields, sensor_msgs::PointCloud2 &sm_cloud )
+int cc2smReader::getAsSM(std::vector<std::string> requested_fields, PCLCloud &sm_cloud )
 {
 	//sort requested_fields, needed by binary_search
 	std::sort(requested_fields.begin(), requested_fields.end());
@@ -321,7 +320,7 @@ int cc2smReader::getAsSM(std::vector<std::string> requested_fields, sensor_msgs:
 	}
 
 	//a vector for PointCloud2 clouds
-	std::vector<sensor_msgs::PointCloud2> clouds;
+	std::vector<PCLCloud> clouds;
 
 
 	//TODO we should load and merge one-by-one, so to free some memory
@@ -338,14 +337,14 @@ int cc2smReader::getAsSM(std::vector<std::string> requested_fields, sensor_msgs:
 	return 1;
 }
 
-int cc2smReader::getAsSM(sensor_msgs::PointCloud2 &sm_cloud)
+int cc2smReader::getAsSM(PCLCloud &sm_cloud)
 {
 	//does the cloud have some points?
 	if (m_cc_cloud->size() == 0)
 		return -1;
 
 	//container
-	std::vector<sensor_msgs::PointCloud2> clouds;
+	std::vector<PCLCloud> clouds;
 
 
 	//load the geometry

@@ -52,20 +52,20 @@ int MLSSmoothingUpsampling::compute()
 	if (!cloud)
 		return -1;
 
-	//get xyz in sensor_msgs format
+	//get xyz in PCL format
 	cc2smReader converter;
 	converter.setInputCloud(cloud);
 
 	//take out the xyz info
-	sensor_msgs::PointCloud2 sm_xyz = converter.getXYZ();
-	sensor_msgs::PointCloud2 sm_cloud;
+	PCLCloud sm_xyz = converter.getXYZ();
+	PCLCloud sm_cloud;
 
 	//take out the current scalar field (if any)
 	if (cloud->getCurrentDisplayedScalarField())
 	{
 		const char* current_sf_name = cloud->getCurrentDisplayedScalarField()->getName();
 
-		sensor_msgs::PointCloud2 sm_field = converter.getFloatScalarField(current_sf_name);
+		PCLCloud sm_field = converter.getFloatScalarField(current_sf_name);
 		//change its name
 		std::string new_name = "scalar";
 		sm_field.fields[0].name = new_name.c_str();
@@ -79,7 +79,7 @@ int MLSSmoothingUpsampling::compute()
 
 	//get as pcl point cloud
 	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
-	pcl::fromROSMsg(sm_cloud, *pcl_cloud);
+	FROM_PCL_CLOUD(sm_cloud, *pcl_cloud);
 
 	//create storage for outcloud
 	pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);
@@ -90,8 +90,8 @@ int MLSSmoothingUpsampling::compute()
 	smooth_mls<pcl::PointXYZ, pcl::PointNormal> (pcl_cloud, *m_parameters, normals);
 #endif
 
-	sensor_msgs::PointCloud2::Ptr sm_normals (new sensor_msgs::PointCloud2);
-	pcl::toROSMsg(*normals, *sm_normals);
+	PCLCloud::Ptr sm_normals (new PCLCloud);
+	TO_PCL_CLOUD(*normals, *sm_normals);
 
 	ccPointCloud* new_cloud = sm2ccConverter(sm_normals).getCCloud();
 	if (!new_cloud)

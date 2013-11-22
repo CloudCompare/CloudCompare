@@ -3,6 +3,8 @@ cmake_minimum_required (VERSION 2.8)
 #requires PCL
 find_package(PCL REQUIRED)
 
+option( PCL_VERSION_1_6_OR_OLDER "Check this if you use an old version of PCL (1.6 or older)" OFF )
+
 if( NOT MSVC )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp -lpthread" )
 endif()
@@ -45,6 +47,11 @@ add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${impl_list} $
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )
+
+#define the PCL_VER_1_6_OR_OLDER preprocessor to compile qPCL with older versions of PCL
+if ( ${PCL_VERSION_1_6_OR_OLDER} )
+	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS PCL_VER_1_6_OR_OLDER )
+endif()
 
 # Add custom prepocessor definitions
 if (WIN32)

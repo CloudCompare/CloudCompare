@@ -47,6 +47,8 @@ v2.5.2 XX/XX/2013
 		associated vertices
 	- at loading time when an entity was both too far and too big, the (optional) applied transformation to
 		recenter and rescale the entity was wrong.
+	- a call to the 'Zoom on selected entities' tool on entities not displayed in the active window would be ignored.
+	- the 'camera link' tool would sometimes make CC crash (windows were playing ping-pong ;).
 
 v2.5.1 10/19/2013
 - The 'Clipping-box' tool has a new feature: 'contour' extraction

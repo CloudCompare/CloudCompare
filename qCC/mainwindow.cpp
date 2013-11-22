@@ -5752,19 +5752,33 @@ void MainWindow::setGlobalZoom()
 
 void MainWindow::zoomOnSelectedEntities()
 {
-    ccGLWindow* win = getActiveGLWindow();
-    if (!win)
-        return;
+    ccGLWindow* win = 0;
 
     ccHObject tempGroup("TempGroup");
     size_t selNum = m_selectedEntities.size();
     for (size_t i=0; i<selNum; ++i)
     {
-        if (m_selectedEntities[i]->getDisplay()==win)
-            tempGroup.addChild(m_selectedEntities[i],false);
+		if (i == 0 || !win)
+		{
+			//take the first valid window as reference
+			win = static_cast<ccGLWindow*>(m_selectedEntities[i]->getDisplay());
+		}
+        
+		if (win)
+		{
+			if (m_selectedEntities[i]->getDisplay() == win)
+			{
+				tempGroup.addChild(m_selectedEntities[i],false);
+			}
+			else if (m_selectedEntities[i]->getDisplay() != 0)
+			{
+				ccLog::Error("All selected entities must be displayed in the same 3D view!");
+				return;
+			}
+		}
     }
 
-    if (tempGroup.getChildrenNumber()>0)
+    if (tempGroup.getChildrenNumber() != 0)
     {
         ccBBox box = tempGroup.getBB(false, false, win);
         win->updateConstellationCenterAndZoom(&box);
@@ -8089,7 +8103,7 @@ void MainWindow::echoCameraDisplaced(float ddx, float ddy)
         ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
         if (child != sendingWindow)
         {
-			child->moveCamera(ddx,ddy,0.0f);
+			child->moveCamera(ddx,ddy,0.0f,true);
             child->redraw();
         }
     }

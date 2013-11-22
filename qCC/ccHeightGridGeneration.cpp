@@ -573,173 +573,249 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 			if (generateCloud)
 			{
 				ccLog::Print("[ccHeightGridGeneration] Saving the height grid as a cloud...");
-				cloudGrid = new ccPointCloud("grid");
-
-				//per-point height SF
-				CCLib::ScalarField* heightSF = 0;
-				int heightSFIdx = -1;
-				{
-					heightSFIdx = cloudGrid->addScalarField(CC_HEIGHT_GRID_FIELD_NAME);
-					if (heightSFIdx<0)
-					{
-						ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing height grid values! Try to free some memory ...");
-					}
-					else
-					{
-						heightSF = cloudGrid->getScalarField(heightSFIdx);
-						assert(heightSF);
-					}
-				}
-
-				//shall we save per-cell population as well?
-				CCLib::ScalarField* countSF = 0;
-				int countSFIdx = -1;
-				if (generateCountSF)
-				{
-					countSFIdx = cloudGrid->addScalarField("Per-cell population");
-					if (countSFIdx<0)
-					{
-						ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing per-cell population count! Try to free some memory ...");
-					}
-					else
-					{
-						countSF = cloudGrid->getScalarField(countSFIdx);
-						assert(countSF);
-					}
-				}
 
 				unsigned pointsCount = (fillEmptyCells != LEAVE_EMPTY ? grid_size_X*grid_size_Y : nonEmptyCells);
-				if (cloudGrid->reserve(pointsCount))
+				if (resampleOriginalCloud)
 				{
-					//we work with doubles as grid step can be much smaller than the cloud coordinates!
-					double Py = static_cast<double>(box.minCorner().u[Y]);
-
-					unsigned n = 0;
-					for (unsigned j=0; j<grid_size_Y; ++j)
+					CCLib::ReferenceCloud refCloud(cloud);
+					if (refCloud.reserve(cloud->size()))
 					{
-						const HeightGridCell* aCell = grid[j];
-						double Px = static_cast<double>(box.minCorner().u[X]);
-						for (unsigned i=0; i<grid_size_X; ++i,++aCell)
+						for (unsigned j=0; j<grid_size_Y; ++j)
 						{
-							if (aCell->nbPoints) //non empty cell
+							const HeightGridCell* aCell = grid[j];
+							for (unsigned i=0; i<grid_size_X; ++i,++aCell)
 							{
-								double Pz = static_cast<double>(aCell->height);
-
-								CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
-									static_cast<PointCoordinateType>(Py),
-									static_cast<PointCoordinateType>(Pz) );
-
-								//use the original cloud as 'support'?
-								if (resampleOriginalCloud)
+								if (aCell->nbPoints) //non empty cell
 								{
-									const CCVector3* P = cloud->getPoint(aCell->pointIndex);
-									Pf.x = P->u[X];
-									Pf.y = P->u[Y];
+									refCloud.addPointIndex(aCell->pointIndex);
 								}
-
-								cloudGrid->addPoint(Pf);
-
-								//if a SF is available, we set the point height as its associated scalar
-								if (heightSF)
-								{
-									ScalarType h = static_cast<ScalarType>(aCell->height);
-									heightSF->setValue(n,h);
-								}
-
-								//per-cell population SF
-								if (countSF)
-								{
-									ScalarType pop = static_cast<ScalarType>(aCell->nbPoints);
-									countSF->setValue(n,pop);
-								}
-								++n;
 							}
-							else if (fillEmptyCells != LEAVE_EMPTY) //empty cell
-							{
-								CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
-												static_cast<PointCoordinateType>(Py),
-												static_cast<PointCoordinateType>(empty_cell_height) );
-								cloudGrid->addPoint(Pf);
-
-								//if a SF is available, we set the point height as the default one
-								if (heightSF)
-								{
-									ScalarType s = static_cast<ScalarType>(empty_cell_height);
-									heightSF->setValue(n,s);
-								}
-								if (countSF)
-								{
-									countSF->setValue(n,NAN_VALUE);
-								}
-								++n;
-							}
-
-							Px += grid_step;
 						}
 
-						Py += grid_step;
-					}
-
-					if (heightSF)
-					{
-						heightSF->computeMinAndMax();
-						cloudGrid->setCurrentDisplayedScalarField(heightSFIdx);
-					}
-					if (countSF)
-					{
-						countSF->computeMinAndMax();
-						if (!heightSF)
-							cloudGrid->setCurrentDisplayedScalarField(countSFIdx);
-					}
-					cloudGrid->showSF(heightSF || countSF);
-
-					//former scalar fields
-					for (size_t k=0; k<gridScalarFields.size(); ++k)
-					{
-						double* _sfGrid = gridScalarFields[k];
-						if (_sfGrid) //valid SF grid
+						if (refCloud.size() == 0)
 						{
-							//the input point cloud should be empty!
-							CCLib::ScalarField* formerSf = pc->getScalarField(static_cast<int>(k));
-							assert(formerSf);
-
-							//we try to create an equivalent SF on the output grid
-							int sfIdx = cloudGrid->addScalarField(formerSf->getName());
-							if (sfIdx<0) //if we aren't lucky, the input cloud already had a SF with CC_HEIGHT_GRID_FIELD_NAME as name
-								sfIdx = cloudGrid->addScalarField(qPrintable(QString(formerSf->getName()).append(".old")));
-
-							if (sfIdx<0)
-								ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing SF '%s' values! Try to free some memory ...",formerSf->getName());
-							else
-							{
-								CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
-								assert(sf);
-								//set sf values
-								unsigned n = 0;
-								const ScalarType emptyCellSFValue = CCLib::ScalarField::NaN();
-								for (unsigned j=0; j<grid_size_Y; ++j)
-								{
-									const HeightGridCell* aCell = grid[j];
-									for (unsigned i=0; i<grid_size_X; ++i, /*++_sfGrid, */++aCell)
-									{
-										if (aCell->nbPoints)
-										{
-											ScalarType s = static_cast<ScalarType>(empty_cell_height);
-											sf->setValue(n++,s);
-										}
-										else if (fillEmptyCells != LEAVE_EMPTY)
-										{
-											sf->setValue(n++,emptyCellSFValue);
-										}
-									}
-								}
-								sf->computeMinAndMax();
-								assert(sf->currentSize()==pointsCount);
-							}
+							ccLog::Warning("[ccHeightGridGeneration] No point fell in the grid?!");
+						}
+						else
+						{
+							cloudGrid = cloud->isA(CC_POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud)->partialClone(&refCloud) : ccPointCloud::From(&refCloud);
 						}
 					}
 				}
 				else
+				{
+					cloudGrid = new ccPointCloud("grid");
+				}
+
+				//even if we have already resampled the original cloud
+				//we may have to create new points and/or scalar fields
+				if (cloudGrid && pointsCount > cloudGrid->size())
+				{
+					//per-point height SF
+					CCLib::ScalarField* heightSF = 0;
+					int heightSFIdx = -1;
+					{
+						heightSFIdx = cloudGrid->addScalarField(CC_HEIGHT_GRID_FIELD_NAME);
+						if (heightSFIdx<0)
+						{
+							ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing height grid values! Try to free some memory ...");
+						}
+						else
+						{
+							heightSF = cloudGrid->getScalarField(heightSFIdx);
+							assert(heightSF);
+						}
+					}
+
+					//shall we save per-cell population as well?
+					CCLib::ScalarField* countSF = 0;
+					int countSFIdx = -1;
+					if (generateCountSF)
+					{
+						countSFIdx = cloudGrid->addScalarField("Per-cell population");
+						if (countSFIdx<0)
+						{
+							ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing per-cell population count! Try to free some memory ...");
+						}
+						else
+						{
+							countSF = cloudGrid->getScalarField(countSFIdx);
+							assert(countSF);
+						}
+					}
+
+					if (!cloudGrid->reserve(pointsCount))
+					{
+						if (resampleOriginalCloud)
+						{
+							ccLog::Warning("[ccHeightGridGeneration] Not enough memory to finish the point cloud generation!");
+							//clear the new SF(s) and return the resampled cloud 'as is'
+							if (heightSFIdx >= 0)
+							{
+								cloudGrid->deleteScalarField(heightSFIdx);
+								heightSF = 0;
+								heightSFIdx = -1;
+							}
+							if (countSFIdx >= 0)
+							{
+								cloudGrid->deleteScalarField(countSFIdx);
+								countSF = 0;
+								countSFIdx = -1;
+							}
+						}
+						else
+						{
+							ccLog::Warning("[ccHeightGridGeneration] Coudln't create cloud! (not enough memory)");
+							assert(cloudGrid->size() == 0);
+							delete cloudGrid;
+							cloudGrid = 0;
+						}
+					}
+					else
+					{
+						//we work with doubles as grid step can be much smaller than the cloud coordinates!
+						double Py = static_cast<double>(box.minCorner().u[Y]);
+
+						unsigned emptyCellIndex = 0;
+						if (resampleOriginalCloud)
+						{
+							//as the 'non empty cells points' are already in the cloud
+							//we must take care were we put the equvialent scalar fields!
+							emptyCellIndex = cloudGrid->size();
+						}
+
+						unsigned n = 0;
+						for (unsigned j=0; j<grid_size_Y; ++j)
+						{
+							const HeightGridCell* aCell = grid[j];
+							double Px = static_cast<double>(box.minCorner().u[X]);
+							for (unsigned i=0; i<grid_size_X; ++i,++aCell)
+							{
+								if (aCell->nbPoints) //non empty cell
+								{
+									if (!resampleOriginalCloud)
+									{
+										double Pz = static_cast<double>(aCell->height);
+
+										CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
+														static_cast<PointCoordinateType>(Py),
+														static_cast<PointCoordinateType>(Pz) );
+										
+										cloudGrid->addPoint(Pf);
+									}
+
+									//if a SF is available, we set the point height as its associated scalar
+									if (heightSF)
+									{
+										ScalarType h = static_cast<ScalarType>(aCell->height);
+										heightSF->setValue(n,h);
+									}
+
+									//per-cell population SF
+									if (countSF)
+									{
+										ScalarType pop = static_cast<ScalarType>(aCell->nbPoints);
+										countSF->setValue(n,pop);
+									}
+									++n;
+								}
+								else if (fillEmptyCells != LEAVE_EMPTY) //empty cell
+								{
+									CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
+													static_cast<PointCoordinateType>(Py),
+													static_cast<PointCoordinateType>(empty_cell_height) );
+									cloudGrid->addPoint(Pf);
+
+									if (!resampleOriginalCloud)
+										n = emptyCellIndex;
+
+									//if a SF is available, we set the point height as the default one
+									if (heightSF)
+									{
+										ScalarType s = static_cast<ScalarType>(empty_cell_height);
+										heightSF->setValue(emptyCellIndex,s);
+									}
+									if (countSF)
+									{
+										countSF->setValue(emptyCellIndex,NAN_VALUE);
+									}
+
+									if (!resampleOriginalCloud)
+										++n;
+									else
+										++emptyCellIndex;
+								}
+
+								Px += grid_step;
+							}
+
+							Py += grid_step;
+						}
+
+						if (heightSF)
+						{
+							heightSF->computeMinAndMax();
+							cloudGrid->setCurrentDisplayedScalarField(heightSFIdx);
+						}
+						if (countSF)
+						{
+							countSF->computeMinAndMax();
+							if (!heightSF)
+								cloudGrid->setCurrentDisplayedScalarField(countSFIdx);
+						}
+						cloudGrid->showSF(heightSF || countSF);
+
+						//take care of former scalar fields
+						if (!resampleOriginalCloud)
+						{
+							for (size_t k=0; k<gridScalarFields.size(); ++k)
+							{
+								double* _sfGrid = gridScalarFields[k];
+								if (_sfGrid) //valid SF grid
+								{
+									//the input point cloud should be empty!
+									CCLib::ScalarField* formerSf = pc->getScalarField(static_cast<int>(k));
+									assert(formerSf);
+
+									//we try to create an equivalent SF on the output grid
+									int sfIdx = cloudGrid->addScalarField(formerSf->getName());
+									if (sfIdx<0) //if we aren't lucky, the input cloud already had a SF with CC_HEIGHT_GRID_FIELD_NAME as name
+										sfIdx = cloudGrid->addScalarField(qPrintable(QString(formerSf->getName()).append(".old")));
+
+									if (sfIdx<0)
+										ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing SF '%s' values! Try to free some memory ...",formerSf->getName());
+									else
+									{
+										CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
+										assert(sf);
+										//set sf values
+										unsigned n = 0;
+										const ScalarType emptyCellSFValue = CCLib::ScalarField::NaN();
+										for (unsigned j=0; j<grid_size_Y; ++j)
+										{
+											const HeightGridCell* aCell = grid[j];
+											for (unsigned i=0; i<grid_size_X; ++i, /*++_sfGrid, */++aCell)
+											{
+												if (aCell->nbPoints)
+												{
+													ScalarType s = static_cast<ScalarType>(empty_cell_height);
+													sf->setValue(n++,s);
+												}
+												else if (fillEmptyCells != LEAVE_EMPTY)
+												{
+													sf->setValue(n++,emptyCellSFValue);
+												}
+											}
+										}
+										sf->computeMinAndMax();
+										assert(sf->currentSize()==pointsCount);
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (!cloudGrid)
 				{
 					ccLog::Warning("[ccHeightGridGeneration] Coudln't create cloud! (not enough memory)");
 					delete cloudGrid;

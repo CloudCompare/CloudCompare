@@ -842,9 +842,29 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 		{
 			//hum, we've got a problem here
 			ccLog::Warning("[ObjFilter::Load] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)",maxVertexIndex,maxTexCoordIndex,maxTriNormIndex);
-			error = true;
+			if (maxVertexIndex >= pointsRead)
+			{
+				error = true;
+			}
+			else
+			{
+				objWarnings[INVALID_INDEX] = true;
+				if (maxTexCoordIndex >= texCoordsRead)
+				{
+					texCoords->release();
+					texCoords = 0;
+					materials->release();
+					materials = 0;
+				}
+				if (maxTriNormIndex >= normsRead)
+				{
+					normals->release();
+					normals = 0;
+				}
+			}
 		}
-		else
+		
+		if (!error)
 		{
 			if (normals && normalsPerFacet)
 			{

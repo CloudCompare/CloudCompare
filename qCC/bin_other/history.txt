@@ -49,6 +49,8 @@ v2.5.2 XX/XX/2013
 		recenter and rescale the entity was wrong.
 	- a call to the 'Zoom on selected entities' tool on entities not displayed in the active window would be ignored.
 	- the 'camera link' tool would sometimes make CC crash (windows were playing ping-pong ;).
+	- CloudCompare can now recover from errors encountered in OBJ normals or texture coordinates (normals or textures
+		are simply discarded)
 
 v2.5.1 10/19/2013
 - The 'Clipping-box' tool has a new feature: 'contour' extraction

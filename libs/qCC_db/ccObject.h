@@ -229,10 +229,9 @@ protected:
 	//! Reimplemented from ccSerializableObject::fromFile
 	/** Be sure to call ccObject::ReadClassIDFromFile (once)
 		before calling this method, as the classID is voluntarily
-		skipped (in order to let the user instantiate the object
-		first)
+		skipped (in order to let the user instantiate the object first)
 	**/
-	virtual bool fromFile(QFile& in, short dataVersion);
+	virtual bool fromFile(QFile& in, short dataVersion, int flags);
 
 	//! Sets last assigned unique ID
 	/** Unique IDs are handled with persistent settings

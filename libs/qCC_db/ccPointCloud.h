@@ -480,7 +480,7 @@ protected:
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
     virtual void applyGLTransformation(const ccGLMatrix& trans);
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
     //inherited from ChunkedPointCloud
 	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex);

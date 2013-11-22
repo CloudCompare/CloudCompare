@@ -63,7 +63,7 @@ int FastMarchingForPropagation::init(	GenericCloud* theCloud,
 
 			PropagationCell* aCell = new PropagationCell;
 			aCell->cellCode = cellCodes.back();
-			aCell->f = (constantAcceleration ? 1.0f : ScalarFieldTools::computeMeanScalarValue(Yk));
+			aCell->f = (constantAcceleration ? 1.0f : static_cast<float>(ScalarFieldTools::computeMeanScalarValue(Yk)));
 
 			m_theGrid[gridPos] = aCell;
 		}

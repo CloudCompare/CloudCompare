@@ -478,12 +478,12 @@ int ccComparisonDlg::determineBestOctreeLevelForDistanceComputation(double maxSe
 		//on calcule un facteur de correction qui va nous donner a partir de la distance
 		//approximative une approximation (reelle) de la taille du voisinage necessaire
 		//a inspecter au niveau courant
-		PointCoordinateType cellSize = compOctree->getCellSize(level);
+		PointCoordinateType cellSize = compOctree->getCellSize(static_cast<uchar>(level));
 
 		//densite du nuage de reference (en points/cellule) s'il existe
 		double refListDensity = 1.0;
 		if (refOctree)
-			refListDensity = refOctree->computeMeanOctreeDensity(level);
+			refListDensity = refOctree->computeMeanOctreeDensity(static_cast<uchar>(level));
 
 		CCLib::DgmOctree::OctreeCellCodeType tempCode = 0xFFFFFFFF;
 
@@ -624,7 +624,7 @@ void ccComparisonDlg::compute()
 	}
 
 	CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
-	params.octreeLevel = bestOctreeLevel;
+	params.octreeLevel = static_cast<uchar>(bestOctreeLevel);
 	if (localModelingTab->isEnabled())
 	{
 		params.localModel = (CC_LOCAL_MODEL_TYPES)localModelComboBox->currentIndex();
@@ -658,7 +658,7 @@ void ccComparisonDlg::compute()
 		
 		result = CCLib::DistanceComputationTools::computePointCloud2MeshDistance(	compCloud,
 																					refMesh,
-																					bestOctreeLevel,
+																					static_cast<uchar>(bestOctreeLevel),
 																					maxSearchDist,
 																					false,
 																					signedDistances,

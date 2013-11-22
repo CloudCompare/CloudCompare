@@ -161,8 +161,8 @@ bool ccObject::toFile(QFile& out) const
 	}
 
 	//flags (dataVersion>=20)
-	uint32_t flags = (uint32_t)m_flags;
-	if (out.write((const char*)&flags,4)<0)
+	uint32_t objFlags = (uint32_t)m_flags;
+	if (out.write((const char*)&objFlags,4)<0)
 		return WriteError();
 
 	//meta data (dataVersion>=30)
@@ -213,7 +213,7 @@ void ccObject::setMetaData(QString key, QVariant& data)
 	m_metaData.insert(key,data);
 }
 
-bool ccObject::fromFile(QFile& in, short dataVersion)
+bool ccObject::fromFile(QFile& in, short dataVersion, int flags)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -249,10 +249,10 @@ bool ccObject::fromFile(QFile& in, short dataVersion)
 	}
 
 	//flags (dataVersion>=20)
-	uint32_t flags = 0;
-	if (in.read((char*)&flags,4)<0)
+	uint32_t objFlags = 0;
+	if (in.read((char*)&objFlags,4)<0)
 		return ReadError();
-	m_flags = (unsigned)flags;
+	m_flags = (unsigned)objFlags;
 
 	//meta data (dataVersion>=30)
 	if (dataVersion >= 30)

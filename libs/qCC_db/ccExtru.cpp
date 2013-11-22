@@ -161,9 +161,9 @@ bool ccExtru::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccExtru::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccExtru::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//parameters (dataVersion>=21)

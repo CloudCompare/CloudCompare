@@ -130,7 +130,7 @@ static unsigned short HidToVirtualKey(unsigned long pid, unsigned short hidKeyCo
 		if (pid == Mouse3DVirtualKeys[i].pid)
 		{
 			if (hidKeyCode < Mouse3DVirtualKeys[i].nKeys)
-				virtualkey = Mouse3DVirtualKeys[i].vkeys[hidKeyCode];
+				virtualkey = static_cast<unsigned short>(Mouse3DVirtualKeys[i].vkeys[hidKeyCode]);
 			else
 				virtualkey = Mouse3DInput::V3DK_INVALID;
 			break;
@@ -638,7 +638,7 @@ bool Mouse3DInput::translateRawInputData(UINT nInputCode, PRAWINPUT pRawInput)
 					{
 						if (dwChange & 0x01)
 						{
-							int nVirtualKeyCode = HidToVirtualKey(sRidDeviceInfo.hid.dwProductId, nKeycode);
+							int nVirtualKeyCode = HidToVirtualKey(sRidDeviceInfo.hid.dwProductId, static_cast<unsigned short>(nKeycode));
 							if (nVirtualKeyCode)
 							{
 								if (dwKeystate&0x01)

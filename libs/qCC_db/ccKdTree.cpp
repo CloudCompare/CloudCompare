@@ -245,8 +245,8 @@ public:
 	GetCellBBoxVisitor()
 	{
 		//invalidate the initial bounding box
-		m_UpdatedBox.maxCorner() = CCVector3(NAN_VALUE,NAN_VALUE,NAN_VALUE);
-		m_UpdatedBox.minCorner() = CCVector3(NAN_VALUE,NAN_VALUE,NAN_VALUE);
+		m_UpdatedBox.maxCorner() = CCVector3(PC_NAN,PC_NAN,PC_NAN);
+		m_UpdatedBox.minCorner() = CCVector3(PC_NAN,PC_NAN,PC_NAN);
 	}
 	
 	void visit(ccKdTree::BaseNode* node)

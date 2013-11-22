@@ -68,7 +68,8 @@ void ccHeightGridGenerationDlg::showGridBoxEditor()
 {
 	if (m_bbEditorDlg)
 	{
-		m_bbEditorDlg->set2DMode(true,dimensionComboBox->currentIndex());
+		assert(dimensionComboBox->currentIndex() < 255);
+		m_bbEditorDlg->set2DMode(true,static_cast<uchar>(dimensionComboBox->currentIndex()));
 		m_bbEditorDlg->exec();
 	}
 }

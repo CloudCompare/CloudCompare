@@ -65,7 +65,7 @@ protected:
 
     //inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual bool buildUp();
 
 	//! Box dimensions

@@ -480,9 +480,9 @@ bool ccFacet::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccFacet::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	if (dataVersion < 32)

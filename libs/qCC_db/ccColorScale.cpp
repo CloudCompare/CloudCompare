@@ -199,7 +199,7 @@ bool ccColorScale::toFile(QFile& out) const
 	return true;
 }
 
-bool ccColorScale::fromFile(QFile& in, short dataVersion)
+bool ccColorScale::fromFile(QFile& in, short dataVersion, int flags)
 {
 	if (dataVersion < 27) //structure appeared at version 27!
 		return false;

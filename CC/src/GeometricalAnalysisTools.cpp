@@ -545,21 +545,21 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 				continue;
 		}
 		ScalarType wpq = wp*wq;
-		Pt *= wpq;
-		wSum += (double)wpq;
+		Pt *= static_cast<PointCoordinateType>(wpq);
+		wSum += static_cast<double>(wpq);
 
-        l1[0] += Pt.x*Qt.x;
-        l1[1] += Pt.x*Qt.y;
-        l1[2] += Pt.x*Qt.z;
-        l2[0] += Pt.y*Qt.x;
-        l2[1] += Pt.y*Qt.y;
-        l2[2] += Pt.y*Qt.z;
-        l3[0] += Pt.z*Qt.x;
-        l3[1] += Pt.z*Qt.y;
-        l3[2] += Pt.z*Qt.z;
+        l1[0] += Pt.x * Qt.x;
+        l1[1] += Pt.x * Qt.y;
+        l1[2] += Pt.x * Qt.z;
+        l2[0] += Pt.y * Qt.x;
+        l2[1] += Pt.y * Qt.y;
+        l2[2] += Pt.y * Qt.z;
+        l3[0] += Pt.z * Qt.x;
+        l3[1] += Pt.z * Qt.y;
+        l3[2] += Pt.z * Qt.z;
 	}
 
-	if (wSum!=0.0)
+	if (wSum != 0.0)
 		covMat.scale(1.0/wSum);
 
 	return covMat;

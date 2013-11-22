@@ -409,7 +409,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 	nNSS_Model.level = cell.level;
 	if (params->useSphericalSearchForLocalModel)
 	{
-		nNSS_Model.prepare(params->radiusForLocalModel,cell.parentOctree->getCellSize(cell.level));
+		nNSS_Model.prepare(static_cast<PointCoordinateType>(params->radiusForLocalModel),cell.parentOctree->getCellSize(cell.level));
 		//curent cell (DGM: is it necessary? This is not always the right one)
 		//nNSS_Model_spherical.truncatedCellCode				= cell.truncatedCode;
 		//memcpy(nNSS_Model_spherical.cellCenter,nNSS.cellCenter,3*sizeof(PointCoordinateType));
@@ -496,7 +496,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 					if (params->useSphericalSearchForLocalModel)
 					{
 						//we only need to sort neighbours if we want to use the 'reuseExistingLocalModels' optimization
-						kNN = referenceOctree->findNeighborsInASphereStartingFromCell(nNSS_Model,params->radiusForLocalModel,params->reuseExistingLocalModels);
+						kNN = referenceOctree->findNeighborsInASphereStartingFromCell(nNSS_Model,static_cast<PointCoordinateType>(params->radiusForLocalModel),params->reuseExistingLocalModels);
 					}
 					else
 					{
@@ -513,7 +513,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 						//Neighbours are sorted, so the farthest is at the end. It also gives us
 						//an approximation of the model 'size'
 						ScalarType maxSquareDist = nNSS_Model.pointsInNeighbourhood[kNN-1].squareDist;
-						lm = new LocalModel(Z,params->localModel,nearestPoint,maxSquareDist);
+						lm = new LocalModel(Z,params->localModel,nearestPoint,static_cast<PointCoordinateType>(maxSquareDist));
 
 						if (params->reuseExistingLocalModels)
 						{

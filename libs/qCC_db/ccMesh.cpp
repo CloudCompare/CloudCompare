@@ -2297,9 +2297,9 @@ bool ccMesh::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion))
+	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple meshes)
@@ -2582,9 +2582,9 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 
 					QRgb pixel = material.texture.pixel(xPix,yPix);
 
-					rgb[0] = qRed(pixel);
-					rgb[1] = qGreen(pixel);
-					rgb[2] = qBlue(pixel);
+					rgb[0] = static_cast<colorType>(qRed(pixel));
+					rgb[1] = static_cast<colorType>(qGreen(pixel));
+					rgb[2] = static_cast<colorType>(qBlue(pixel));
 
 					foundMaterial = true;
 				}

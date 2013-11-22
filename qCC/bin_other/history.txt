@@ -6,14 +6,11 @@ v2.5.2 XX/XX/2013
 		to 'resample' the original cloud in order to produce a new cloud (instead
 		of generating a regularly sampled cloud using the grid cell's centers)
 - It is now possible to compile CloudCompare with 64 bits floating point values
-	for coordinates (i.e 'doubles' instead of 'floats'). This doubles the memory
-	consumption, but it increases a lot the accuracy. Moreover, there's absolutely
-	no loss of information when importing/exporting clouds with very big coordinates.
-	However:
-		* OpenGL still requires rather small coordinates for a proper display (so the
-			'shift on load' mechanism is still necessary)
-		* a version of CloudCompare compiled in 'double' mode won't be able to load BIN
-			files saved with the standard version, and vice versa.
+	(i.e 64 bits 'doubles' instead of 32 bits 'floats') for coordinates and/or scalars.
+	It doubles the memory consumption but it increases a lot the accuracy.
+	Moreover there's absolutely no loss of information when importing/exporting clouds
+	with very big coordinates (however OpenGL still requires rather small coordinates
+	for a proper display, therefore the 'shift on load' mechanism might still necessary)
 - Other enhancements:
 	- the 'facet' entity's normal vector can now be displayed or hidden via the facet properties
 	- BIN file loading/saving is now done in a separate thread
@@ -35,7 +32,7 @@ v2.5.2 XX/XX/2013
 	- New types of entities can now be cloned:
 		* polylines
 		* facets
-	- Max coordinate absolute value lowered (10.000 instead of 1.000.000)
+	- Max coordinate absolute value lowered (100.000 instead of 1.000.000)
 		in order to avoid accuracy loss and display issues. However the user
 		still has the choice to ignore CC's warnings.
 - Bug fixes:

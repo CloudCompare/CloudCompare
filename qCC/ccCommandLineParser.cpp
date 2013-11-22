@@ -289,7 +289,7 @@ int ccCommandLineParser::parse(int nargs, char** args, bool silent, QDialog* dia
 					const QString& cloudFilename = m_clouds[i].filename;
 					Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
-					CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(cloud,octreeLevel,CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,_progressDlg);
+					CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(cloud,static_cast<uchar>(octreeLevel),CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,_progressDlg);
 					if (!refCloud)
 						return Error("Subsampling process failed!");
 					Print(QString("\tResult: %1 points").arg(refCloud->size()));

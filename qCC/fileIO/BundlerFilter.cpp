@@ -337,7 +337,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 					if (hasColors)
 					{
 						sscanf(qPrintable(currentLine),"%i %i %i",&R,&G,&B);
-						keypointsCloud->addRGBColor(R,G,B);
+						keypointsCloud->addRGBColor(static_cast<colorType>(std::min<int>(R,MAX_COLOR_COMP)),
+													static_cast<colorType>(std::min<int>(G,MAX_COLOR_COMP)),
+													static_cast<colorType>(std::min<int>(B,MAX_COLOR_COMP)));
 					}
 
 					currentLine = stream.readLine();

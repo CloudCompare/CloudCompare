@@ -234,9 +234,9 @@ bool ccCone::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//parameters (dataVersion>=21)

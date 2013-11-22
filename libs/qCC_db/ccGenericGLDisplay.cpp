@@ -80,10 +80,10 @@ bool ccViewportParameters::toFile(QFile& out) const
 	return true;
 }
 
-bool ccViewportParameters::fromFile(QFile& in, short dataVersion)
+bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags)
 {
 	//base modelview matrix (dataVersion>=20)
-	if (!viewMat.fromFile(in,dataVersion))
+	if (!viewMat.fromFile(in, dataVersion, flags))
 		return false;
 
 	//other parameters (dataVersion>=20)

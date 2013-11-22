@@ -574,7 +574,7 @@ bool ccGLMatrix::toFile(QFile& out) const
 	return true;
 }
 
-bool ccGLMatrix::fromFile(QFile& in, short dataVersion)
+bool ccGLMatrix::fromFile(QFile& in, short dataVersion, int flags)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 

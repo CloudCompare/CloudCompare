@@ -177,7 +177,8 @@ void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glPushName(getUniqueID());
 		}
 
-		RenderOctreeAs(m_displayType,this,m_displayedLevel,m_associatedCloud,m_glListID,m_shouldBeRefreshed);
+		assert(m_displayedLevel < 256);
+		RenderOctreeAs(m_displayType,this,static_cast<uchar>(m_displayedLevel),m_associatedCloud,m_glListID,m_shouldBeRefreshed);
 
 		if (m_shouldBeRefreshed)
 			m_shouldBeRefreshed = false;

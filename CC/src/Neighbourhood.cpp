@@ -197,7 +197,7 @@ PointCoordinateType Neighbourhood::computeLargestRadius()
 	//get the centroid
 	const CCVector3* G = getGravityCenter();
 	if (!G)
-		return NAN_VALUE;
+		return PC_NAN;
 
 	PointCoordinateType maxSquareDist = 0;
 	for (unsigned i=0; i<pointCount; ++i)

@@ -470,9 +470,9 @@ bool ccSubMesh::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccSubMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion))
+	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//as the associated mesh can't be saved directly

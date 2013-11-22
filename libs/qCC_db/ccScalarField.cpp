@@ -335,7 +335,7 @@ bool ccScalarField::toFile(QFile& out) const
 	return true;
 }
 
-bool ccScalarField::fromFile(QFile& in, short dataVersion)
+bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -355,7 +355,23 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 	}
 
 	//data (dataVersion>=20)
-	if (!ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion))
+	bool result = false;
+	{
+		bool fileScalarIsFloat = (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS);
+		if (fileScalarIsFloat && sizeof(ScalarType) == 8) //file is 'float' and current type is 'double'
+		{
+			result = ccSerializationHelper::GenericArrayFromTypedFile<1,ScalarType,float>(*this,in,dataVersion);
+		}
+		else if (!fileScalarIsFloat && sizeof(ScalarType) == 4) //file is 'double' and current type is 'float'
+		{
+			result = ccSerializationHelper::GenericArrayFromTypedFile<1,ScalarType,double>(*this,in,dataVersion);
+		}
+		else
+		{
+			result = ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion);
+		}
+	}
+	if (!result)
 		return false;
 
 	//convert former 'hidden/NaN' values for non strictly positive SFs (dataVersion < 26)
@@ -486,7 +502,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 			if (hasColorScale)
 			{
 				ccColorScale::Shared colorScale = ccColorScale::Create("temp");
-				if (!colorScale->fromFile(in,dataVersion))
+				if (!colorScale->fromFile(in, dataVersion, flags))
 					return ReadError();
 				m_colorScale = colorScale;
 

@@ -64,7 +64,7 @@ public:
 	//inherited methods (ccHObject)
 	virtual bool isSerializable() const { return true; }
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
 	//inherited methods (GenericIndexedMesh)
 	virtual unsigned size() const { return 0; }

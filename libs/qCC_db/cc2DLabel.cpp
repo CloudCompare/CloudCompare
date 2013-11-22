@@ -169,9 +169,9 @@ bool cc2DLabel::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion)
+bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccHObject::fromFile_MeOnly(in,dataVersion))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//points count (dataVersion>=20)

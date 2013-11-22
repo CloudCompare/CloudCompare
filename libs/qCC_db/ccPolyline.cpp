@@ -216,9 +216,9 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccHObject::fromFile_MeOnly(in,dataVersion))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	if (dataVersion<28)

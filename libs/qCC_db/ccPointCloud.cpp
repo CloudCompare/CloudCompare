@@ -2425,16 +2425,35 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccGenericPointCloud::fromFile_MeOnly(in, dataVersion))
+	if (!ccGenericPointCloud::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//points array (dataVersion>=20)
 	if (!m_points)
+	{
 		return ccLog::Error("Internal error: point cloud has no valid point array! (not enough memory?)");
-	if (!ccSerializationHelper::GenericArrayFromFile(*m_points,in,dataVersion))
-		return false;
+	}
+	else
+	{
+		bool result = false;
+		bool fileCoordIsDouble = (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS);
+		if (!fileCoordIsDouble && sizeof(PointCoordinateType) == 8) //file is 'float' and current type is 'double'
+		{
+			result = ccSerializationHelper::GenericArrayFromTypedFile<3,PointCoordinateType,float>(*m_points,in,dataVersion);
+		}
+		else if (fileCoordIsDouble && sizeof(PointCoordinateType) == 4) //file is 'double' and current type is 'float'
+		{
+			result = ccSerializationHelper::GenericArrayFromTypedFile<3,PointCoordinateType,double>(*m_points,in,dataVersion);
+		}
+		else
+		{
+			result = ccSerializationHelper::GenericArrayFromFile(*m_points,in,dataVersion);
+		}
+		if (!result)
+			return false;
+	}
 
 	//colors array (dataVersion>=20)
 	{
@@ -2453,7 +2472,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion)
 				return false;
 			if (classID != CC_RGB_COLOR_ARRAY)
 				return CorruptError();
-			if (!m_rgbColors->fromFile(in,dataVersion))
+			if (!m_rgbColors->fromFile(in, dataVersion, flags))
 			{
 				unallocateColors();
 				return false;
@@ -2478,7 +2497,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion)
 				return false;
 			if (classID != CC_NORMAL_INDEXES_ARRAY)
 				return CorruptError();
-			if (!m_normals->fromFile(in,dataVersion))
+			if (!m_normals->fromFile(in, dataVersion, flags))
 			{
 				unallocateNorms();
 				return false;
@@ -2497,7 +2516,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion)
 		for (uint32_t i=0;i<sfCount;++i)
 		{
 			ccScalarField* sf = new ccScalarField();
-			if (!sf->fromFile(in,dataVersion))
+			if (!sf->fromFile(in, dataVersion, flags))
 			{
 				sf->release();
 				return false;

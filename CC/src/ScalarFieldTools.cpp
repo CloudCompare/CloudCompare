@@ -28,6 +28,7 @@
 //system
 #include <string.h>
 #include <assert.h>
+#include <vector>
 
 using namespace CCLib;
 
@@ -511,123 +512,126 @@ void ScalarFieldTools::computeScalarFieldHistogram(const GenericCloud* theCloud,
 	}
 }
 
-bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMeanClass kmcc[], GenericProgressCallback* progressCb)
+bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
+										uchar K,
+										KMeanClass kmcc[],
+										GenericProgressCallback* progressCb)
 {
 	assert(theCloud);
+	if (K == 0)
+		return false;
 
 	unsigned n = theCloud->size();
 	if (n==0)
         return false;
 
 	//on a besoin de memoire ici !
-	ScalarType* theKMeans = new ScalarType[n]; //le centre des K clusters
-	uchar* belongings = new uchar[n]; //l'appartenance d'un point a un cluster
-	uchar* _belongings = 0;
-	ScalarType* minDistsToMean = new ScalarType[n];  //les distances au centre de cluster le plus proche
+	std::vector<ScalarType> theKMeans;		//le centre des K clusters
+	std::vector<uchar> belongings;			//l'appartenance d'un point a un cluster
+	std::vector<ScalarType> minDistsToMean;	//les distances au centre de cluster le plus proche
+	std::vector<ScalarType> theKSums;		//le cumuls de distance des k clusters
+	std::vector<unsigned> theKNums;			//le nombre de point par cluster
+	std::vector<unsigned> theOldKNums;		//le nombre de point par cluster (ancien)
 
-	ScalarType* theKSums = new ScalarType[K]; //le cumuls de distance des k clusters
-	unsigned* theKNums = new unsigned[K]; //le nombre de point par cluster
-	unsigned* theOldKNums = new unsigned[K]; //le nombre de point par cluster (ancien)
+	try
+	{
+		theKMeans.resize(n);
+		belongings.resize(n);
+		minDistsToMean.resize(n);
+		theKSums.resize(K);
+		theKNums.resize(K);
+		theOldKNums.resize(K);
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return false;
+	}
 
 	//on recupere les extremas
-	ScalarType V,minV,maxV;
+	ScalarType minV,maxV;
 	computeScalarFieldExtremas(theCloud, minV, maxV);
 
-	//initialisation des K-means
-	ScalarType delta = maxV - minV;
-	ScalarType step = delta / ScalarType(K);
+	//init classes centers (regularly sampled)
+	{
+		ScalarType step = (maxV - minV) / ScalarType(K);
+		for (uchar j=0;j<K;++j)
+			theKMeans[j] = minV + ScalarType(j)*step;
+	}
 
-	unsigned i;
-	uchar j;
-	for (j=0;j<K;++j)
-        theKMeans[j] = minV + ScalarType(j)*step;
+	//for progress notification
+	double initialCMD = 0, classMovingDist = 0;
 
-	//on lance l'iterration
-	bool meansHaveMoved = true;
+	//let's start
+	bool meansHaveMoved = false;
 	int iteration = 0;
-
-	float initialCMD = 0, classMovingDist = 0;
-
-	while (meansHaveMoved)
+	do
 	{
 		meansHaveMoved = false;
 		++iteration;
-
-		_belongings = belongings;
-
-		uchar minK;
-		ScalarType distToMean,newMean;
-		ScalarType *_minDistToMean = minDistsToMean;
-
-		//pour chaque point
-		//Console::print("[Kmeans] Calcul des distances ...\n");
-		//Fl::wait(1.0);
-		for (i=0;i<n;++i)
 		{
-			minK = 0;
-
-			V = theCloud->getPointScalarValue(i);
-			if (ScalarField::ValidValue(V))
+			for (unsigned i=0; i<n; ++i)
 			{
-                *_minDistToMean = fabs(theKMeans[minK]-V);
+				uchar minK = 0;
 
-                //on recherche le centre de cluster le plus proche
-                for (j=1;j<K;++j)
-                {
-                    distToMean = fabs(theKMeans[j]-V);
-                    if (distToMean<*_minDistToMean)
-                    {
-                        *_minDistToMean=distToMean;
-                        minK = j;
-                    }
-                }
+				ScalarType V = theCloud->getPointScalarValue(i);
+				if (ScalarField::ValidValue(V))
+				{
+					minDistsToMean[i] = fabs(theKMeans[minK]-V);
+
+					//on recherche le centre de cluster le plus proche
+					for (uchar j=1; j<K; ++j)
+					{
+						ScalarType distToMean = fabs(theKMeans[j]-V);
+						if (distToMean<minDistsToMean[i])
+						{
+							minDistsToMean[i]=distToMean;
+							minK = j;
+						}
+					}
+				}
+
+				belongings[i] = minK;
+				minDistsToMean[i] = V;
 			}
-
-			*_belongings = minK;
-			++_belongings;
-			*_minDistToMean = V;
-			++_minDistToMean;
 		}
 
 		//on peut maintenant recalculer les centres des clusters
 		//Console::print("[Kmeans] Calcul des centres ...\n");
 		//Fl::wait(1.0);
 
-		_minDistToMean = minDistsToMean;
-		_belongings = belongings;
-
-		memset(theKSums,0,sizeof(ScalarType)*K);
-		memcpy(theOldKNums,theKNums,sizeof(unsigned)*K);
-		memset(theKNums,0,sizeof(unsigned)*K);
-
-		for (i=0;i<n;++i)
+		theOldKNums = theKNums;
+		std::fill(theKSums.begin(),theKSums.end(),0);
+		std::fill(theKNums.begin(),theKNums.end(),0);
 		{
-		    if (*_minDistToMean >= 0.0) //must be a valid value!
-		    {
-                theKSums[*_belongings] += *_minDistToMean;
-                ++theKNums[*_belongings];
-		    }
-
-			++_belongings;
-			++_minDistToMean;
+			for (unsigned i=0; i<n; ++i)
+			{
+				if (minDistsToMean[i] >= 0.0) //must be a valid value!
+				{
+					theKSums[belongings[i]] += minDistsToMean[i];
+					++theKNums[belongings[i]];
+				}
+			}
 		}
 
 		classMovingDist = 0.0;
-		for (j=0;j<K;++j)
 		{
-			newMean = (theKNums[j]>0 ? theKSums[j]/(ScalarType)theKNums[j] : theKMeans[j]);
+			for (uchar j=0; j<K; ++j)
+			{
+				ScalarType newMean = (theKNums[j]>0 ? theKSums[j]/(ScalarType)theKNums[j] : theKMeans[j]);
 
-			if (theOldKNums[j] != theKNums[j])
-                meansHaveMoved=true;
+				if (theOldKNums[j] != theKNums[j])
+					meansHaveMoved = true;
 
-			classMovingDist += fabs(theKMeans[j] - newMean);
+				classMovingDist += static_cast<double>(fabs(theKMeans[j] - newMean));
 
-			theKMeans[j] = newMean;
+				theKMeans[j] = newMean;
+			}
 		}
 
 		if (progressCb)
 		{
-			if (iteration==1)
+			if (iteration == 1)
 			{
 				progressCb->reset();
 				progressCb->setMethodTitle("KMeans");
@@ -639,61 +643,59 @@ bool ScalarFieldTools::computeKmeans(const GenericCloud* theCloud, uchar K, KMea
 			}
 			else
 			{
-				progressCb->update((1.0f-classMovingDist/initialCMD)*100.0f);
+				progressCb->update(static_cast<float>((1.0 - classMovingDist/initialCMD) * 100.0));
+			}
+		}
+	}
+	while (meansHaveMoved);
+
+	//on met a jour les distances pour refleter la segmentation
+	std::vector<ScalarType> mins,maxs;
+	try
+	{
+		mins.resize(K,maxV);
+		maxs.resize(K,minV);
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return false;
+	}
+
+	//on recherche les mins et maxs de chaque cluster
+	{
+		for (unsigned i=0;i<n;++i)
+		{
+			ScalarType V = theCloud->getPointScalarValue(i);
+			if (ScalarField::ValidValue(V))
+			{
+				if (V < mins[belongings[i]])
+					mins[belongings[i]] = V;
+				else if (V > maxs[belongings[i]])
+					maxs[belongings[i]] = V;
 			}
 		}
 	}
 
-	//on met a jour les distances pour refleter la segmentation
-	ScalarType* mins = new ScalarType[K];
-	ScalarType* maxs = new ScalarType[K];
-
-	for (j=0;j<K;++j)
-	{
-		mins[j]=maxV;
-		maxs[j]=minV;
-	}
-
-	//on recherche les mins et maxs de chaque cluster
-	_belongings = belongings;
-	for (i=0;i<n;++i)
-	{
-		V = theCloud->getPointScalarValue(i);
-		if (ScalarField::ValidValue(V))
-		{
-            if (V<mins[*_belongings])
-                mins[*_belongings] = V;
-            else if (V>maxs[*_belongings])
-                maxs[*_belongings] = V;
-		}
-
-		++_belongings;
-	}
-
 	//derniere verif
-	for (j=0;j<K;++j)
-        if (theKNums[j]==0)
-            mins[j]=maxs[j]=-1.0;
+	{
+		for (uchar j=0; j<K; ++j)
+			if (theKNums[j] == 0)
+				mins[j] = maxs[j] = -1.0;
+	}
 
 	//format de sortie
-	for (j=0;j<K;++j)
 	{
-		kmcc[j].mean = theKMeans[j];
-		kmcc[j].minValue = mins[j];
-		kmcc[j].maxValue = maxs[j];
+		for (uchar j=0; j<K; ++j)
+		{
+			kmcc[j].mean = theKMeans[j];
+			kmcc[j].minValue = mins[j];
+			kmcc[j].maxValue = maxs[j];
+		}
 	}
 
 	if (progressCb)
         progressCb->stop();
-
-	delete[] mins;
-	delete[] maxs;
-	delete[] theKMeans;
-	delete[] theKSums;
-	delete[] belongings;
-	delete[] minDistsToMean;
-	delete[] theKNums;
-	delete[] theOldKNums;
 
 	return true;
 }

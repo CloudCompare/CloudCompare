@@ -28,7 +28,7 @@
 #include <string.h>
 
 // Max acceptable coordinate value
-#define MAX_COORDINATE_ABS_VALUE static_cast<PointCoordinateType>(1.0e4)
+#define MAX_COORDINATE_ABS_VALUE static_cast<PointCoordinateType>(1.0e5)
 
 //! Helper class to handle coordinates shift while loading entities (GUI, etc.)
 class ccCoordinatesShiftManager
@@ -45,16 +45,16 @@ public:
 						bool& applyAll)
 	{
 		assert(P && coordinatesShift);
-		assert(diagonal>=0.0);
+		assert(diagonal >= 0);
 		
-		applyAll=false;
+		applyAll = false;
 
 		//if we can't display a dialog and no shift is specified, there's nothing we can do...
 		if (!alwaysDisplayLoadDialog && !coordinatesTransformationEnabled)
 		{
 			memset(coordinatesShift,0,sizeof(double)*3);
 			if (coordinatesScale)
-				*coordinatesScale=1.0;
+				*coordinatesScale = 1.0;
 			return false;
 		}
 
@@ -104,7 +104,7 @@ public:
 			else
 			{
 				sasDlg.setShift(-P[0],-P[1],-P[2]);
-				sasDlg.setScale(diagonal > MAX_COORDINATE_ABS_VALUE ? pow(10.0,-(double)ceil(log(diagonal/MAX_COORDINATE_ABS_VALUE))) : 1.0);
+				sasDlg.setScale(diagonal > MAX_COORDINATE_ABS_VALUE ? pow(10.0,-static_cast<double>(ceil(log(diagonal/MAX_COORDINATE_ABS_VALUE)))) : 1.0);
 			}
 
 			if (sasDlg.exec())

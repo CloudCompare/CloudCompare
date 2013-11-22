@@ -247,7 +247,9 @@ void ccDisplayOptionsDlg::changePointsColor()
 	pointsDefaultCol = newCol;
 	SetButtonColor(pointsColorButton,pointsDefaultCol);
 
-	unsigned char rgb[3]={pointsDefaultCol.red(),pointsDefaultCol.green(),pointsDefaultCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(pointsDefaultCol.red()),
+							static_cast<unsigned char>(pointsDefaultCol.green()),
+							static_cast<unsigned char>(pointsDefaultCol.blue())	};
 	memcpy(parameters.pointsDefaultCol,rgb,sizeof(unsigned char)*3);
 
 	update();
@@ -262,7 +264,9 @@ void ccDisplayOptionsDlg::changeBBColor()
 	bbDefaultCol = newCol;
 	SetButtonColor(bbColorButton,bbDefaultCol);
 
-	unsigned char rgb[3]={bbDefaultCol.red(),bbDefaultCol.green(),bbDefaultCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(bbDefaultCol.red()),
+							static_cast<unsigned char>(bbDefaultCol.green()),
+							static_cast<unsigned char>(bbDefaultCol.blue())	};
 	memcpy(parameters.bbDefaultCol,rgb,sizeof(unsigned char)*3);
 
 	update();
@@ -277,7 +281,9 @@ void ccDisplayOptionsDlg::changeTextColor()
 	textDefaultCol = newCol;
 	SetButtonColor(textColorButton,textDefaultCol);
 
-	unsigned char rgb[3]={textDefaultCol.red(),textDefaultCol.green(),textDefaultCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(textDefaultCol.red()),
+							static_cast<unsigned char>(textDefaultCol.green()),
+							static_cast<unsigned char>(textDefaultCol.blue())	};
 	memcpy(parameters.textDefaultCol,rgb,sizeof(unsigned char)*3);
 }
 
@@ -290,7 +296,9 @@ void ccDisplayOptionsDlg::changeBackgroundColor()
 	backgroundCol = newCol;
 	SetButtonColor(bkgColorButton,backgroundCol);
 
-	unsigned char rgb[3]={backgroundCol.red(),backgroundCol.green(),backgroundCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(backgroundCol.red()),
+							static_cast<unsigned char>(backgroundCol.green()),
+							static_cast<unsigned char>(backgroundCol.blue())	};
 	memcpy(parameters.backgroundCol,rgb,sizeof(unsigned char)*3);
 
 	update();
@@ -305,7 +313,9 @@ void ccDisplayOptionsDlg::changeHistBackgroundColor()
 	histBackgroundCol = newCol;
 	SetButtonColor(histBkgColorButton,histBackgroundCol);
 
-	unsigned char rgb[3]={histBackgroundCol.red(),histBackgroundCol.green(),histBackgroundCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(histBackgroundCol.red()),
+							static_cast<unsigned char>(histBackgroundCol.green()),
+							static_cast<unsigned char>(histBackgroundCol.blue())	};
 	memcpy(parameters.histBackgroundCol,rgb,sizeof(unsigned char)*3);
 
 	update();
@@ -320,7 +330,9 @@ void ccDisplayOptionsDlg::changeLabelColor()
 	labelCol = newCol;
 	SetButtonColor(labelsColorButton,labelCol);
 
-	unsigned char rgb[3]={labelCol.red(),labelCol.green(),labelCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(labelCol.red()),
+							static_cast<unsigned char>(labelCol.green()),
+							static_cast<unsigned char>(labelCol.blue())	};
 	memcpy(parameters.labelCol,rgb,sizeof(unsigned char)*3);
 
 	update();

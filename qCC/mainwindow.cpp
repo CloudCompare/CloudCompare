@@ -1051,7 +1051,9 @@ void MainWindow::doActionSetColor(bool colorize)
         else if (ent->isA(CC_POLY_LINE))
         {
             ccPolyline * poly = ccHObjectCaster::ToPolyline(ent);
-            colorType col[3] = {newCol.red(), newCol.green(), newCol.blue()};
+            colorType col[3] = {static_cast<colorType>(newCol.red()),
+								static_cast<colorType>(newCol.green()),
+								static_cast<colorType>(newCol.blue()) };
             poly->setColor(col);
             ent->showColors(true);
             ent->prepareDisplayForRefresh();
@@ -1059,7 +1061,9 @@ void MainWindow::doActionSetColor(bool colorize)
         else if (ent->isA(CC_FACET))
         {
             ccFacet* facet = ccHObjectCaster::ToFacet(ent);
-            colorType col[3] = {newCol.red(), newCol.green(), newCol.blue()};
+            colorType col[3] = {static_cast<colorType>(newCol.red()),
+								static_cast<colorType>(newCol.green()),
+								static_cast<colorType>(newCol.blue()) };
             facet->setColor(col);
             ent->showColors(true);
             ent->prepareDisplayForRefresh();
@@ -4031,7 +4035,7 @@ void MainWindow::doActionLabelConnectedComponents()
 
                 //we try to label all CCs
                 CCLib::ReferenceCloudContainer components;
-                if (CCLib::AutoSegmentationTools::labelConnectedComponents(cloud,octreeLevel,false,&pDlg,theOctree) >= 0)
+                if (CCLib::AutoSegmentationTools::labelConnectedComponents(cloud,static_cast<uchar>(octreeLevel),false,&pDlg,theOctree) >= 0)
                 {
                     //if successful, we extract each CC (stored in "components")
                     pc->getCurrentInScalarField()->computeMinAndMax();

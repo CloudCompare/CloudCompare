@@ -333,7 +333,7 @@ protected:
     //inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
     virtual void applyGLTransformation(const ccGLMatrix& trans);
 
 	//! Same as other 'interpolateNormals' method with a set of 3 vertices indexes

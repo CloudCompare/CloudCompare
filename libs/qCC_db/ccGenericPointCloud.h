@@ -210,7 +210,7 @@ public:
 	/** Overrides default value one if superior than 0
 		(see glPointSize).
 	**/
-	void setPointSize(unsigned size = 0) { m_pointSize = size; }
+	void setPointSize(unsigned size = 0) { m_pointSize = static_cast<unsigned char>(size); }
 
 	//! Returns current point size
 	/** 0 means that the cloud will use current OpenGL value
@@ -222,7 +222,7 @@ protected:
 
     //inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
 	//! Per-point visibility table
 	/** If this table is allocated, only values set to POINT_VISIBLE

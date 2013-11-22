@@ -579,7 +579,9 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 			}
 		}
 
-		CCVector3 P(p.GetX()+Pshift[0],p.GetY()+Pshift[1],p.GetZ()+Pshift[2]);
+		CCVector3 P(static_cast<PointCoordinateType>(p.GetX()+Pshift[0]),
+					static_cast<PointCoordinateType>(p.GetY()+Pshift[1]),
+					static_cast<PointCoordinateType>(p.GetZ()+Pshift[2]));
 		loadedCloud->addPoint(P);
 
 		//color field
@@ -710,7 +712,8 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 
 			if (it->sf)
 			{
-				it->sf->addElement(value);
+				ScalarType s = static_cast<ScalarType>(value);
+				it->sf->addElement(s);
 			}
 			else
 			{
@@ -727,9 +730,12 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 					{
 						it->sf->link();
 						//we must set the value (firstClassifValue) of all the precedently skipped points
+						ScalarType firstS = static_cast<ScalarType>(it->firstValue);
 						for (unsigned i=0; i<loadedCloud->size()-1; ++i)
-							it->sf->addElement(it->firstValue);
-						it->sf->addElement(value);
+							it->sf->addElement(firstS);
+
+						ScalarType s = static_cast<ScalarType>(value);
+						it->sf->addElement(s);
 					}
 					else
 					{

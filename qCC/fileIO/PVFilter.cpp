@@ -80,7 +80,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (!hasSF)
         ccLog::Warning(QString("[PNFilter::save] Cloud '%1' has no displayed scalar field (we will save points with a default scalar value)!").arg(theCloud->getName()));
 
-	float val = (float)NAN_VALUE;
+	float val = std::numeric_limits<float>::quiet_NaN();
 
 	//progress dialog
 	ccProgressDialog pdlg(true); //cancel available
@@ -108,7 +108,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 			
 		//write scalar value
 		if (hasSF)
-			val = (float)theCloud->getPointScalarValue(i);
+			val = static_cast<float>(theCloud->getPointScalarValue(i));
 		if (out.write((const char*)&val,sizeof(float))<0)
 		{
 			result = CC_FERR_WRITING;

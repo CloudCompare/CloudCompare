@@ -96,11 +96,12 @@ static int ReadEntityHeader(QFile& in, unsigned &numberOfPoints, HeaderFlags& he
 }
 
 static QFile* s_file = 0;
+static int s_flags = 0;
 static ccHObject* s_container = 0;
 
 CC_FILE_ERROR _LoadFileV2()
 {
-	return (s_file && s_container ? BinFilter::LoadFileV2(*s_file,*s_container) : CC_FERR_BAD_ARGUMENT);
+	return (s_file && s_container ? BinFilter::LoadFileV2(*s_file,*s_container,s_flags) : CC_FERR_BAD_ARGUMENT);
 }
 
 CC_FILE_ERROR _SaveFileV2()
@@ -160,9 +161,18 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 	//- 'new' evolutive version, starts by 4 bytes ("CCB2") + save the current ccObject version
 
 	//header
+	//Since ver 2.5.2, the 4th character of the header corresponds to
+	//'deserialization flags' (see ccSerializableObject::DeserializationFlags)
 	char firstBytes[5] = "CCB2";
-	if (sizeof(PointCoordinateType) == 8)
-		firstBytes[3] = '3'; //DGM: we change the header if coords are 64 bits so as to recognize it!
+	{
+		char flags = 0;
+		if (sizeof(PointCoordinateType) == 8)
+			flags |= static_cast<char>(ccSerializableObject::DF_POINT_COORDS_64_BITS);
+		if (sizeof(ScalarType) == 4)
+			flags |= static_cast<char>(ccSerializableObject::DF_SCALAR_VAL_32_BITS);
+		assert(flags <= 8);
+		firstBytes[3] = 48+flags; //48 = ASCII("0")
+	}
 
 	if (out.write(firstBytes,4)<0)
 		return CC_FERR_WRITING;
@@ -270,27 +280,37 @@ CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bo
 	uint32_t firstBytes = 0;
 	if (in.read((char*)&firstBytes,4)<0)
 		return CC_FERR_READING;
-	bool v1 = (strncmp((char*)&firstBytes,"CCB2",4) != 0 //'float' version
-				&& strncmp((char*)&firstBytes,"CCB3",4) != 0); //'double' version
-
-	if (sizeof(PointCoordinateType) == 8 && strncmp((char*)&firstBytes,"CCB3",4) != 0)
-	{
-		QMessageBox::information(0, QString("Wrong version"), QString("This file has been generated with the standard 'float' version!\nAt this time it cannot be read with the 'double' version."),QMessageBox::Ok);
-		return CC_FERR_WRONG_FILE_TYPE;
-	}
+	bool v1 = (strncmp((char*)&firstBytes,"CCB",3) != 0);
 
 	if (v1)
 	{
-
 		return LoadFileV1(in,container,static_cast<unsigned>(firstBytes),alwaysDisplayLoadDialog); //firstBytes == number of scans for V1 files!
 	}
 	else
 	{
-		if (sizeof(PointCoordinateType) == 4 && strncmp((char*)&firstBytes,"CCB2",4) != 0)
+		//Since ver 2.5.2, the 4th character of the header corresponds to 'load flags'
+		int flags = 0;
 		{
-			QMessageBox::information(0, QString("Wrong version"), QString("This file has been generated with the new 'double' version!\nAt this time it cannot be read with the standard 'float' version."),QMessageBox::Ok);
-			return CC_FERR_WRONG_FILE_TYPE;
+			QChar c(reinterpret_cast<char*>(&firstBytes)[3]);
+			bool ok;
+			flags = QString(c).toInt(&ok);
+			if (!ok || flags > 8)
+			{
+				ccLog::Error(QString("Invalid file header (4th byte is '%1'?!)").arg(c));
+				return CC_FERR_WRONG_FILE_TYPE;
+			}
 		}
+
+		//if (sizeof(PointCoordinateType) == 8 && strncmp((char*)&firstBytes,"CCB3",4) != 0)
+		//{
+		//	QMessageBox::information(0, QString("Wrong version"), QString("This file has been generated with the standard 'float' version!\nAt this time it cannot be read with the 'double' version."),QMessageBox::Ok);
+		//	return CC_FERR_WRONG_FILE_TYPE;
+		//}
+		//else if (sizeof(PointCoordinateType) == 4 && strncmp((char*)&firstBytes,"CCB2",4) != 0)
+		//{
+		//	QMessageBox::information(0, QString("Wrong version"), QString("This file has been generated with the new 'double' version!\nAt this time it cannot be read with the standard 'float' version."),QMessageBox::Ok);
+		//	return CC_FERR_WRONG_FILE_TYPE;
+		//}
 
 		if (alwaysDisplayLoadDialog)
 		{
@@ -301,6 +321,7 @@ CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bo
 			//concurrent call in a separate thread
 			s_file = &in;
 			s_container = &container;
+			s_flags = flags;
 
 			QFuture<CC_FILE_ERROR> future = QtConcurrent::run(_LoadFileV2);
 
@@ -326,12 +347,12 @@ CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bo
 		}
 		else
 		{
-			return BinFilter::LoadFileV2(in,container);
+			return BinFilter::LoadFileV2(in,container,flags);
 		}
 	}
 }
 
-CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
+CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 {
 	assert(in.isOpen());
 
@@ -342,21 +363,23 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container)
 	if (binVersion<20) //should be superior to 2.0!
 		return CC_FERR_MALFORMED_FILE;
 
-	ccLog::Print(QString("[BIN] Version %1.%2").arg(binVersion/10).arg(binVersion%10));
+	QString coordsFormat = (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS ? "double" : "float");
+	QString scalarFormat = (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS ? "float" : "double");
+	ccLog::Print(QString("[BIN] Version %1.%2 (coords: %3 / scalar: %4)").arg(binVersion/10).arg(binVersion%10).arg(coordsFormat).arg(scalarFormat));
 
 	//we keep track of the last unique ID before load
 	unsigned lastUniqueIDBeforeLoad = ccObject::GetLastUniqueID();
 
 	//we read first entity type
 	unsigned classID = 0;
-	if (!ccObject::ReadClassIDFromFile(classID, in, binVersion))
+	if (!ccObject::ReadClassIDFromFile(classID, in, static_cast<short>(binVersion)))
 		return CC_FERR_CONSOLE_ERROR;
 
 	ccHObject* root = ccHObject::New(classID);
 	if (!root)
 		return CC_FERR_MALFORMED_FILE;
 
-	if (!root->fromFile(in,binVersion))
+	if (!root->fromFile(in,static_cast<short>(binVersion),flags))
 	{
 		//DGM: can't delete it, too dangerous (bad pointers ;)
 		//delete root;
@@ -800,13 +823,13 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 					loadedCloud->enableScalarField();
 			}
 
-			CCVector3 P;
-			if (in.read((char*)P.u,sizeof(float)*3)<0)
+			float Pf[3];
+			if (in.read((char*)Pf,sizeof(float)*3)<0)
 			{
 				//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity point !\n",k);
 				return CC_FERR_READING;
 			}
-			loadedCloud->addPoint(P);
+			loadedCloud->addPoint(CCVector3::fromArray(Pf));
 
 			if (header.colors)
 			{
@@ -838,7 +861,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity distance!\n",k);
 					return CC_FERR_READING;
 				}
-				ScalarType d = (ScalarType)D;
+				ScalarType d = static_cast<ScalarType>(D);
 				loadedCloud->setPointScalarValue(i,d);
 			}
 

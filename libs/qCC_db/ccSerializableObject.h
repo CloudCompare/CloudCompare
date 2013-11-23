@@ -107,12 +107,12 @@ public:
 			return ccSerializableObject::MemoryError();
 
 		//component count (dataVersion>=20)
-		::uint8_t componentCount = static_cast<::uint8_t>(N);
+		::uint8_t componentCount = static_cast< ::uint8_t >(N);
 		if (out.write((const char*)&componentCount,1) < 0)
 			return ccSerializableObject::WriteError();
 
 		//element count = array size (dataVersion>=20)
-		::uint32_t elementCount = static_cast<::uint32_t>(chunkArray.currentSize());
+		::uint32_t elementCount = static_cast< ::uint32_t >(chunkArray.currentSize());
 		if (out.write((const char*)&elementCount,4) < 0)
 			return ccSerializableObject::WriteError();
 

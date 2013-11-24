@@ -38,6 +38,7 @@
 #if defined(CC_WINDOWS)
 #include "Windows.h"
 #else
+#include <time.h>
 #include <unistd.h>
 #endif
 

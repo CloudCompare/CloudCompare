@@ -30,6 +30,7 @@
 #include <iostream>
 
 #if !defined(CC_WINDOWS)
+#include <time.h>
 #include <unistd.h>
 #endif
 

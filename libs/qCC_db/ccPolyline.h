@@ -56,6 +56,7 @@ public:
 	virtual bool isSerializable() const { return true; }
 	virtual bool hasColors() const;
     virtual void applyGLTransformation(const ccGLMatrix& trans);
+	virtual unsigned getUniqueIDForDisplay() const;
 
 	//! Defines if the polyline is considered as 2D or 3D
 	/** \param state if true, the polyline is 2D

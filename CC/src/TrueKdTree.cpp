@@ -109,7 +109,7 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		return 0;
 	}
 
-	//we always split sets larger the a given size (but we can't skip cells with less than 6 points!)
+	//we always split sets larger than a given size (but we can't skip cells with less than 6 points!)
 	ScalarType error = -1;
 	if (count < m_maxPointCountPerCell || m_maxPointCountPerCell < 6)
 	{

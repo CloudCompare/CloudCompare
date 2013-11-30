@@ -606,7 +606,7 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//not particulary fast
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
-            glPushName(getUniqueID());
+            glPushName(getUniqueIDForDisplay());
 		}
 
 		//DGM FIXME: crap!

@@ -69,7 +69,7 @@ protected:
         \param P the cloud to register (data)
         \param X the reference cloud (model)
         \param trans the resulting transformation
-		\param estimateScale whether to estimate scale (s) as well (see jschmidt 2005)
+		\param adjustScale whether to estimate scale (s) as well (see jschmidt 2005)
         \param weightsP weights for the registered points (optional)
         \param weightsX weights for the reference points (optional)
         \param aPrioriScale 'a priori' scale (Sa) between P and X
@@ -78,7 +78,7 @@ protected:
     static bool RegistrationProcedure(GenericCloud* P,
 										GenericCloud* X,
 										ScaledTransformation& trans,
-										bool estimateScale = false,
+										bool adjustScale = false,
 										ScalarField* weightsP = 0,
 										ScalarField* weightsX = 0,
 										PointCoordinateType aPrioriScale = 1.0f);
@@ -160,7 +160,7 @@ public:
 		\param minErrorDecrease the minimum (mean square) error decrease between two consecutive steps to continue process (ignored if convType is not MAX_ERROR_CONVERGENCE)
 		\param nbMaxIterations the maximum number of iteration (ignored if convType is not MAX_ITER_CONVERGENCE)
 		\param finalError [output] final error (rms)
-		\param freeScale release the scale during the registration procedure
+		\param adjustScale release the scale during the registration procedure
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param filterOutFarthestPoints if true, the algorithm will automatically ignore farthest points from the reference, for better convergence
 		\param samplingLimit maximum number of points per cloud (they are randomly resampled below this limit otherwise)
@@ -175,7 +175,7 @@ public:
                                         double minErrorDecrease,
                                         unsigned nbMaxIterations,
                                         double& finalError,
-                                        bool freeScale = false,
+                                        bool adjustScale = false,
                                         GenericProgressCallback* progressCb = 0,
                                         bool filterOutFarthestPoints = false,
                                         unsigned samplingLimit = 20000,

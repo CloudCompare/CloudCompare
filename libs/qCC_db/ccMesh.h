@@ -68,6 +68,9 @@ public:
 							NormsIndexesTableType* clonedNormsTable = 0,
 							TextureCoordsContainer* cloneTexCoords = 0);
 
+	//inherited methods (ccHObject)
+	virtual unsigned getUniqueIDForDisplay() const;
+
 	//inherited methods (ccGenericMesh)
 	inline virtual ccGenericPointCloud* getAssociatedCloud() const { return m_associatedCloud; }
     virtual void refreshBB();

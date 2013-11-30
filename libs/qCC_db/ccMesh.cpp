@@ -937,6 +937,14 @@ CCLib::TriangleSummitsIndexes* ccMesh::getNextTriangleIndexes()
 	return NULL;
 }
 
+unsigned ccMesh::getUniqueIDForDisplay() const
+{
+	if (m_parent && m_parent->getParent() && m_parent->getParent()->isA(CC_FACET))
+		return m_parent->getParent()->getUniqueID();
+	else
+		return getUniqueID();
+}
+
 static PointCoordinateType s_blankNorm[3] = {0.0,0.0,0.0};
 
 void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -990,7 +998,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//not fast at all!
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
-			glPushName(getUniqueID());
+			glPushName(getUniqueIDForDisplay());
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;

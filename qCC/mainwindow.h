@@ -310,7 +310,7 @@ protected slots:
     void doActionFrontPropagation();
     void doActionMultiply();
 	void doActionEditGlobalShift();
-    void doActionSynchronize();
+    void doActionMatchBarycenters();
     void doActionUnroll();
     void doActionProjectSensor();
     void doActionModifySensor();
@@ -389,7 +389,8 @@ protected:
 	void createComponentsClouds(ccGenericPointCloud* cloud,
 								CCLib::ReferenceCloudContainer& components,
 								unsigned minPointPerComponent,
-								bool randomColors);
+								bool randomColors,
+								bool selectComponents);
 
     void closeEvent(QCloseEvent* event);
     void moveEvent(QMoveEvent* event);

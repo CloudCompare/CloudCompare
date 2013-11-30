@@ -412,7 +412,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		//not particularily fast
 		if (MACRO_DrawFastNamesOnly(context))
 			return;
-		glPushName(getUniqueID());
+		glPushName(getUniqueIDForDisplay());
 	}
 
     const float c_sizeFactor = 4.0f;

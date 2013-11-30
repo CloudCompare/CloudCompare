@@ -265,6 +265,7 @@ public:
 
     //inherited from ccHObject
 	virtual void getDrawingParameters(glDrawParams& params) const;
+	virtual unsigned getUniqueIDForDisplay() const;
 
     //inherited from ccDrawableObject
     virtual bool hasColors() const;

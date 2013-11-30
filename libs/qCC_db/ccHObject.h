@@ -248,6 +248,9 @@ public:
 	//! Returns selection behavior
 	SelectionBehavior getSelectionBehavior() const { return m_selectionBehavior; }
 
+	//! Returns object unqiue ID used for display
+	virtual unsigned getUniqueIDForDisplay() const { return getUniqueID(); }
+
 protected:
 
     //! Sets parent object

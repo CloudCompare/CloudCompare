@@ -48,7 +48,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 																			double minErrorDecrease,
 																			unsigned nbMaxIterations,
 																			double& finalError,
-                                                                            bool freeScale/*=false*/,
+                                                                            bool adjustScale/*=false*/,
 																			GenericProgressCallback* progressCb/*=0*/,
 																			bool filterOutFarthestPoints/*=false*/,
 																			unsigned samplingLimit/*=20000*/,
@@ -298,7 +298,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 
 			//single iteration of the registration procedure
             ScaledTransformation currentTrans;
-			if (!RegistrationTools::RegistrationProcedure(dataCloud, CPSet, currentTrans, freeScale, _dataWeights, _modelWeights))
+			if (!RegistrationTools::RegistrationProcedure(dataCloud, CPSet, currentTrans, adjustScale, _dataWeights, _modelWeights))
 			{
 				result = ICP_ERROR_REGISTRATION_STEP;
 				break;
@@ -372,7 +372,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
                     transform.T = currentTrans.R * transform.T;
 			    }
 
-				if (freeScale)
+				if (adjustScale)
                     transform.s *= currentTrans.s;
 
 				transform.T += currentTrans.T;
@@ -457,7 +457,7 @@ double HornRegistrationTools::ComputeRMS(GenericCloud* lCloud,
 bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
                                               GenericCloud* X,
                                               ScaledTransformation& trans,
-											  bool estimateScale/*=false*/,
+											  bool adjustScale/*=false*/,
                                               ScalarField* weightsP/*=0*/,
                                               ScalarField* weightsX/*=0*/,
                                               PointCoordinateType aPrioriScale/*=1.0f*/)
@@ -544,7 +544,7 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
     //these eigenvalue and eigenvector correspond to a quaternion --> we get the corresponding matrix
     trans.R.initFromQuaternion(qR);
 
-	if (estimateScale)
+	if (adjustScale)
 	{
 		//two accumulators
 		double acc_num = 0.0;

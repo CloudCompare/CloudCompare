@@ -883,7 +883,7 @@ void MainWindow::connectActions()
     connect(actionMultiply,                     SIGNAL(triggered()),    this,       SLOT(doActionMultiply()));
     connect(actionEditGlobalShift,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalShift()));
     connect(actionSubsample,                    SIGNAL(triggered()),    this,       SLOT(doActionSubsample())); //Aurelien BEY le 13/11/2008
-    connect(actionSynchronize,                  SIGNAL(triggered()),    this,       SLOT(doActionSynchronize()));
+	connect(actionMatchBarycenters,				SIGNAL(triggered()),    this,       SLOT(doActionMatchBarycenters()));
     connect(actionDelete,                       SIGNAL(triggered()),    m_ccRoot,	SLOT(deleteSelectedEntities()));
 
     //"Tools > Projection" menu
@@ -3116,7 +3116,7 @@ void MainWindow::doActionFuse()
     //we deselect all selected entities (as they are going to disappear)
     ccHObject::Container _selectedEntities = m_selectedEntities;
 	if (m_ccRoot)
-		m_ccRoot->selectEntity(0);
+		m_ccRoot->unselectAllEntities();
 
 	//we will remove the useless clouds later
 	ccHObject::Container toBeRemoved;
@@ -3327,7 +3327,7 @@ void MainWindow::doActionRegister()
     ConvergenceMethod method		= rDlg.getConvergenceMethod();
 	bool useDataSFAsWeights			= rDlg.useDataSFAsWeights();
     bool useModelSFAsWeights		= rDlg.useModelSFAsWeights();
-    bool useScaleFree               = rDlg.useFreeScaleParameter();
+    bool adjustScale				= rDlg.adjustScale();
     double finalError				= 0.0;
 
 	CCLib::ScalarField* modelWeights = 0;
@@ -3369,7 +3369,7 @@ void MainWindow::doActionRegister()
              minErrorDecrease,
              maxIterationCount,
              finalError,
-             useScaleFree,
+             adjustScale,
              (CCLib::GenericProgressCallback*)&pDlg,
              removeFarthestPoints,
 			 randomSamplingLimit,
@@ -3382,21 +3382,41 @@ void MainWindow::doActionRegister()
     }
     else if (result == CCLib::ICPRegistrationTools::ICP_APPLY_TRANSFO)
     {
-        ccConsole::Print("[Register] Convergence reached (RMS at last step: %f)",finalError);
+		QStringList summary;
+		QString rmsString = QString("Final RMS: %1").arg(finalError);
+        ccConsole::Print(QString("[Register] ") + rmsString);
+
+		summary << rmsString;
+		summary << "----------------";
 
         ccGLMatrix transMat(transform.R,transform.T, transform.s);
 
 		forceConsoleDisplay();
 
-		if (useScaleFree)
-			ccConsole::Print("[Register] Scale: %f",transform.s);
-
-		ccConsole::Print("[Register] Resulting matrix:");
+		//transformation matrix
 		{
-			const float* mat = transMat.data();
-			ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+			QString matString = transMat.toString();
+			summary << QString("Transformation matrix");
+			summary << transMat.toString(3,'\t'); //low precision, just for display
+			summary << "----------------";
+
+			ccConsole::Print("[Register] Applied transformation matrix:");
+			ccConsole::Print(transMat.toString(12,' ')); //full precision
 			ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 		}
+
+		if (adjustScale)
+		{
+			QString scaleString = QString("Scale: %1 (already integrated in above matrix!)").arg(transform.s);
+			ccLog::Warning(QString("[Register] ")+scaleString);
+			summary << scaleString;
+		}
+		else
+		{
+			ccLog::Print(QString("[Register] Scale: fixed (1.0)"));
+			summary << "Scale: fixed (1.0)";
+		}
+		summary << "----------------";
 
         //cloud to move
         ccGenericPointCloud* pc = 0;
@@ -3465,6 +3485,10 @@ void MainWindow::doActionRegister()
             data->setName(data->getName()+QString(".registered"));
             zoomOn(data);
         }
+
+		//pop-up summary
+		summary << "Refer to Console (F8) for more details";
+		QMessageBox::information(this,"Register info",summary.join("\n"));
     }
 
     //if we had to sample points an the data mesh
@@ -3549,8 +3573,7 @@ void MainWindow::doAction4pcsRegister()
 			ccGLMatrix transMat(transform.R,transform.T);
 			forceConsoleDisplay();
 			ccConsole::Print("[Align] Resulting matrix:");
-			const float* mat = transMat.data();
-			ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+			ccConsole::Print(transMat.toString(12,' ')); //full precision
 			ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 		}
 
@@ -3905,7 +3928,11 @@ void MainWindow::doActionComputeStatParams()
     delete distrib;
 }
 
-void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::ReferenceCloudContainer& components, unsigned minPointsPerComponent, bool randomColors)
+void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
+										CCLib::ReferenceCloudContainer& components,
+										unsigned minPointsPerComponent,
+										bool randomColors,
+										bool selectComponents)
 {
 	if (!cloud || components.empty())
 		return;
@@ -3950,6 +3977,9 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 
 					//we add new CC to group
 					ccGroup->addChild(compCloud);
+
+					if (selectComponents && m_ccRoot)
+						m_ccRoot->selectEntity(compCloud,true);
 				}
 				else
 				{
@@ -3987,7 +4017,26 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud, CCLib::Refer
 
 void MainWindow::doActionLabelConnectedComponents()
 {
-    ccLabelingDlg dlg(this);
+	ccHObject::Container selectedEntities = m_selectedEntities;
+	//keep only the point clouds!
+	std::vector<ccGenericPointCloud*> clouds;
+	{
+		size_t selNum = selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccHObject* ent = selectedEntities[i];
+			if (ent->isKindOf(CC_POINT_CLOUD))
+				clouds.push_back(ccHObjectCaster::ToGenericPointCloud(ent));
+		}
+	}
+
+	size_t count = clouds.size();
+	if (count == 0)
+		return;
+
+	ccLabelingDlg dlg(this);
+	if (count == 1)
+		dlg.octreeLevelSpinBox->setCloud(clouds.front());
     if (!dlg.exec())
         return;
 
@@ -3997,68 +4046,67 @@ void MainWindow::doActionLabelConnectedComponents()
 
     ccProgressDialog pDlg(false,this);
 
-	ccHObject::Container selectedEntities = m_selectedEntities;
-    size_t selNum = selectedEntities.size();
-    for (size_t i=0; i<selNum; ++i)
+	//we unselect all entities as we are going to automatically select the created components
+	//(otherwise the user won't percieve the change!)
+	if (m_ccRoot)
+		m_ccRoot->unselectAllEntities();
+
+    for (size_t i=0; i<count; ++i)
     {
-        ccHObject* ent = selectedEntities[i];
-        if (ent->isKindOf(CC_POINT_CLOUD))
-        {
-            ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
+		ccGenericPointCloud* cloud = clouds[i];
 
-            if (cloud && cloud->isA(CC_POINT_CLOUD)) //TODO
-            {
-                ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+		if (cloud && cloud->isA(CC_POINT_CLOUD)) //TODO
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-                ccOctree* theOctree = cloud->getOctree();
-                if (!theOctree)
-                {
-					ccProgressDialog pDlg(true,this);
-                    theOctree = cloud->computeOctree(&pDlg);
-                    if (!theOctree)
-                    {
-                        ccConsole::Error(QString("Couldn't compute octree for cloud '%s'!").arg(cloud->getName()));
-                        break;
-                    }
-                }
-
-                //we create/activate CCs label scalar field
-                int sfIdx = pc->getScalarFieldIndexByName(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
-                if (sfIdx < 0)
-                    sfIdx=pc->addScalarField(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
-                if (sfIdx < 0)
-                {
-                    ccConsole::Error("Couldn't allocate a new scalar field for computing CC labels! Try to free some memory ...");
-                    break;
-                }
-                pc->setCurrentScalarField(sfIdx);
-
-                //we try to label all CCs
-                CCLib::ReferenceCloudContainer components;
-                if (CCLib::AutoSegmentationTools::labelConnectedComponents(cloud,static_cast<uchar>(octreeLevel),false,&pDlg,theOctree) >= 0)
-                {
-                    //if successful, we extract each CC (stored in "components")
-                    pc->getCurrentInScalarField()->computeMinAndMax();
-                    if (!CCLib::AutoSegmentationTools::extractConnectedComponents(cloud,components))
-					{
-						ccConsole::Warning(QString("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
-					}
-                }
-                else
-                {
-                    ccConsole::Warning(QString("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
-                }
-
-                //we delete the CCs label scalar field (we don't need it anymore)
-                pc->deleteScalarField(sfIdx);
-                sfIdx=-1;
-
-                //we create "real" point clouds for all CCs
-                if (!components.empty())
+			ccOctree* theOctree = cloud->getOctree();
+			if (!theOctree)
+			{
+				ccProgressDialog pDlg(true,this);
+				theOctree = cloud->computeOctree(&pDlg);
+				if (!theOctree)
 				{
-					createComponentsClouds(cloud, components, minComponentSize, randColors);
+					ccConsole::Error(QString("Couldn't compute octree for cloud '%s'!").arg(cloud->getName()));
+					break;
 				}
-            }
+			}
+
+			//we create/activate CCs label scalar field
+			int sfIdx = pc->getScalarFieldIndexByName(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
+			if (sfIdx < 0)
+				sfIdx=pc->addScalarField(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
+			if (sfIdx < 0)
+			{
+				ccConsole::Error("Couldn't allocate a new scalar field for computing CC labels! Try to free some memory ...");
+				break;
+			}
+			pc->setCurrentScalarField(sfIdx);
+
+			//we try to label all CCs
+			CCLib::ReferenceCloudContainer components;
+			if (CCLib::AutoSegmentationTools::labelConnectedComponents(cloud,static_cast<uchar>(octreeLevel),false,&pDlg,theOctree) >= 0)
+			{
+				//if successful, we extract each CC (stored in "components")
+				pc->getCurrentInScalarField()->computeMinAndMax();
+				if (!CCLib::AutoSegmentationTools::extractConnectedComponents(cloud,components))
+				{
+					ccConsole::Warning(QString("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
+				}
+			}
+			else
+			{
+				ccConsole::Warning(QString("[doActionLabelConnectedComponents] Something went wrong while extracting CCs from cloud %1...").arg(cloud->getName()));
+			}
+
+			//we delete the CCs label scalar field (we don't need it anymore)
+			pc->deleteScalarField(sfIdx);
+			sfIdx = -1;
+
+			//we create "real" point clouds for all CCs
+			if (!components.empty())
+			{
+				createComponentsClouds(cloud, components, minComponentSize, randColors, true);
+			}
         }
     }
 
@@ -4750,7 +4798,7 @@ void MainWindow::doActionResolveNormalsDirection()
 	updateUI();
 }
 
-void MainWindow::doActionSynchronize()
+void MainWindow::doActionMatchBarycenters()
 {
     size_t selNum = m_selectedEntities.size();
 
@@ -4777,16 +4825,14 @@ void MainWindow::doActionSynchronize()
         ccGLMatrix glTrans;
         glTrans += T;
 
-        //ccConsole::Print("[Synchronize] Translation: (%f,%f,%f)",T.x,T.y,T.z);
 		forceConsoleDisplay();
 		ccConsole::Print(QString("[Synchronize] Transformation matrix (%1 --> %2):").arg(ent->getName()).arg(selectedEntities[0]->getName()));
-		const float* mat = glTrans.data();
-		ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+		ccConsole::Print(glTrans.toString(12,' ')); //full precision
 		ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 
 		//we temporarily detach entity, as it may undergo
 		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
-		ccHObject* parent=0;
+		ccHObject* parent = 0;
 		removeObjectTemporarilyFromDBTree(ent,parent);
 		ent->applyGLTransformation_recursive(&glTrans);
 		putObjectBackIntoDBTree(ent,parent);
@@ -5118,9 +5164,9 @@ void MainWindow::activateRegisterPointPairTool()
         return;
     }
 
-	bool lockedVertices1=false;
+	bool lockedVertices1 = false;
 	ccGenericPointCloud* cloud1 = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0],&lockedVertices1);
-	bool lockedVertices2=false;
+	bool lockedVertices2 = false;
 	ccGenericPointCloud* cloud2 = (m_selectedEntities.size()>1 ? ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1],&lockedVertices2) : 0);
     if (!cloud1 || (m_selectedEntities.size()>1 && !cloud2))
     {
@@ -5477,7 +5523,7 @@ void MainWindow::activatePointsPropertiesMode()
         return;
 
 	if (m_ccRoot)
-		m_ccRoot->selectEntity(0); //we don't want any entity selected (especially existing labels!)
+		m_ccRoot->unselectAllEntities(); //we don't want any entity selected (especially existing labels!)
 
     if (!m_ppDlg)
     {
@@ -6608,8 +6654,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 				makeZPosMatrix.setTranslation(C-Gt);
 				makeZPosMatrix.invert();
 				ccConsole::Print("[Orientation] A matrix that would make this plane horizontal (normal towards Z+) is:");
-				const float* mat = makeZPosMatrix.data();
-				ccConsole::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+				ccConsole::Print(makeZPosMatrix.toString(12,' ')); //full precision
 				ccConsole::Print("[Orientation] You can copy this matrix values (CTRL+C) and paste them in the 'Apply transformation tool' dialog");
 
 				plane->setName(dipAndDipDirStr);
@@ -8064,7 +8109,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     bool atLeastTwoEntities = (selInfo.selCount>1);
 
     actionFuse->setEnabled(atLeastTwoEntities);
-    actionSynchronize->setEnabled(atLeastTwoEntities);
+    actionMatchBarycenters->setEnabled(atLeastTwoEntities);
 
     //standard plugins
 	foreach (ccStdPluginInterface* plugin, m_stdPlugins)

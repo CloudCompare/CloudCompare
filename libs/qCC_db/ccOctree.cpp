@@ -174,7 +174,7 @@ void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//not fast at all!
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
-			glPushName(getUniqueID());
+			glPushName(getUniqueIDForDisplay());
 		}
 
 		assert(m_displayedLevel < 256);

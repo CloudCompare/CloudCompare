@@ -312,8 +312,7 @@ void ccGraphicalTransformationTool::apply()
 		finalTrans += (m_rotationCenter+m_translation-m_rotation*m_rotationCenter);
 		//output resulting transformation matrix
 		ccLog::Print("[GraphicalTransformationTool] Applied transformation:");
-		const float* mat = finalTrans.data();
-		ccLog::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+		ccLog::Print(finalTrans.toString(12,' ')); //full precision
 	}
 
 	for (unsigned i=0; i<m_toTransform->getChildrenNumber();++i)

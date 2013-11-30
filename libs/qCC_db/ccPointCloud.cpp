@@ -1376,7 +1376,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
 
-			glPushName(getUniqueID());
+			glPushName(getUniqueIDForDisplay());
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
@@ -2553,4 +2553,12 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	updateModificationTime();
 
 	return true;
+}
+
+unsigned ccPointCloud::getUniqueIDForDisplay() const
+{
+	if (m_parent && m_parent->isA(CC_FACET))
+		return m_parent->getUniqueID();
+	else
+		return getUniqueID();
 }

@@ -584,7 +584,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//standard case: list names pushing
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
-		glPushName(getUniqueID());
+		glPushName(getUniqueIDForDisplay());
 
 	if (m_selected)
 	{

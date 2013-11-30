@@ -35,6 +35,13 @@ v2.5.2 XX/XX/2013
 	- Max coordinate absolute value lowered (100.000 instead of 1.000.000)
 		in order to avoid accuracy loss and display issues. However the user
 		still has the choice to ignore CC's warnings.
+	- For the sake of consistency and clarity:
+		* the 'Free scale parameter' option of the ICP registration dialog and the 'fixed scale' option
+			of the Point-pair based alignment dialog are both renamed 'Adjust scale'
+		* the 'Edit > Synchronize' tool is moved and renamed 'Tools > Registration > Match barycenters'
+		* the ICP registration tool now issues the same textual report as the Point-pair based alignment tool
+	- the Connected Components tool dialog now displays the octree cell size as the currently selected level
+		and the 'random colors' checkbox is not selected by default anymore
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
 		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)

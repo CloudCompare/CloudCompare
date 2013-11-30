@@ -254,7 +254,6 @@
     <addaction name="actionMultiply"/>
     <addaction name="actionEditGlobalShift"/>
     <addaction name="actionSubsample"/>
-    <addaction name="actionSynchronize"/>
     <addaction name="menuToggle"/>
     <addaction name="separator"/>
     <addaction name="actionDelete"/>
@@ -322,6 +321,7 @@
      <property name="title">
       <string>Registration</string>
      </property>
+     <addaction name="actionMatchBarycenters"/>
      <addaction name="actionPointPairsAlign"/>
      <addaction name="actionRegister"/>
     </widget>
@@ -1367,9 +1367,9 @@
     <string>Multiply coordinates (separately)</string>
    </property>
   </action>
-  <action name="actionSynchronize">
+  <action name="actionMatchBarycenters">
    <property name="text">
-    <string>Synchronize</string>
+    <string>Match barycenters</string>
    </property>
    <property name="toolTip">
     <string>Synchronize selected entities bbox centers</string>

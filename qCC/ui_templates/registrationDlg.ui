@@ -123,7 +123,7 @@
       <item>
        <widget class="QGroupBox" name="groupBox_2">
         <property name="title">
-         <string>Parameters (stop criterion and scale)</string>
+         <string>Parameters</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
@@ -211,9 +211,9 @@
           </layout>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBoxFreeScale">
+          <widget class="QCheckBox" name="adjustScaleCheckBox">
            <property name="text">
-            <string>Free scale parameter</string>
+            <string>Adjust scale</string>
            </property>
           </widget>
          </item>
@@ -260,20 +260,6 @@
           </layout>
          </item>
          <item>
-          <widget class="QCheckBox" name="checkBoxUseModelSFAsWeights">
-           <property name="text">
-            <string>use displayed model scalar field as weights</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QCheckBox" name="checkBoxUseDataSFAsWeights">
-           <property name="text">
-            <string>use displayed data scalar field as weights</string>
-           </property>
-          </widget>
-         </item>
-         <item>
           <widget class="QCheckBox" name="pointsRemoval">
            <property name="toolTip">
             <string>Chose this option to remove points that are likely to disturb the registration during the computation.</string>
@@ -283,6 +269,20 @@
            </property>
            <property name="text">
             <string>Enable farthest points removal.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxUseModelSFAsWeights">
+           <property name="text">
+            <string>Use displayed model scalar field as weights</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QCheckBox" name="checkBoxUseDataSFAsWeights">
+           <property name="text">
+            <string>Use displayed data scalar field as weights</string>
            </property>
           </widget>
          </item>

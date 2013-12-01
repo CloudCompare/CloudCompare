@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 2.8)
 
 project( CloudCompareProjects )
 
+# One shouldn't generate the BUILD project directly in the SOURCES folder!
+message( ${CMAKE_CURRENT_BINARY_DIR} )
+message( ${CMAKE_CURRENT_SOURCE_DIR} )
+
+if ( ${CMAKE_CURRENT_BINARY_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR} )
+	if ( NOT SAME_BUILD_AND_SOURCE_FOLDER_WARNING_ALREADY_ISSUED )
+		message(FATAL_ERROR "It is not advised to BUILD the binaries directly in the SOURCE folder!\n If you want to proceed with this option, just CONFIGURE the project once again" )
+		set( SAME_BUILD_AND_SOURCE_FOLDER_WARNING_ALREADY_ISSUED TRUE )
+	endif()
+endif()
+
+
 # Default debug suffix for libraries
 set( CMAKE_DEBUG_POSTFIX d )
 

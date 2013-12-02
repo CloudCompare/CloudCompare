@@ -180,9 +180,9 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 
 		//perspective
 		if (!perspectiveView)
-			ccLog::Print("[ccGLWindow] Persective is off by default");
+			ccLog::Print("[ccGLWindow] Perspective is off by default");
 		else
-			ccLog::Print(QString("[ccGLWindow] Persective is on by default (%1)").arg(objectCenteredView ? "object-centered" : "viewer-centered"));
+			ccLog::Print(QString("[ccGLWindow] Perspective is on by default (%1)").arg(objectCenteredView ? "object-centered" : "viewer-centered"));
 
 		//pivot visibility
 		switch(pivotVisibility)

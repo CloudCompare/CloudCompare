@@ -354,7 +354,7 @@ void ccGLWindow::initializeGL()
 	glDisable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	//no global ambiant
+	//no global ambient
 	glLightModelfv(GL_LIGHT_MODEL_AMBIENT,ccColor::night);
 
 	ccGLUtils::CatchGLError("ccGLWindow::initializeGL");
@@ -706,7 +706,7 @@ void ccGLWindow::paintGL()
 			stopFrameRateTest();
 		else
 		{
-			//rotate base view matrtix
+			//rotate base view matrix
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
 			glLoadMatrixf(m_viewportParams.viewMat.data());
@@ -1130,7 +1130,7 @@ void ccGLWindow::moveCamera(float dx, float dy, float dz, bool blockSignal/*=fal
 			emit cameraDisplaced(dx,dy);
 	}
 
-	//curent X, Y and Z viewing directions
+	//current X, Y and Z viewing directions
 	//correspond to the 'model view' matrix
 	//lines.
 	CCVector3 V(dx,dy,dz);
@@ -1207,7 +1207,7 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 {
 	assert(!m_viewportParams.perspectiveView); //a scale is only valid in ortho. mode!
 
-	float scaleMaxW = static_cast<float>(m_glWidth) / 4; //25% de l'ecran
+	float scaleMaxW = static_cast<float>(m_glWidth) / 4; //25% of screen width
 	if (m_viewportParams.zoom < CC_GL_MIN_ZOOM_RATIO)
 	{
 		assert(false);
@@ -1350,7 +1350,7 @@ void ccGLWindow::recalcProjectionMatrix()
 	//distance between pivot point and DB farthest point
 	float MP = static_cast<float>( (bbCenter-pivotPoint).norm() + bbHalfDiag );
 
-	//pivot symbol shoud always be (potentially) visible in object-based mode
+	//pivot symbol should always be (potentially) visible in object-based mode
 	if (m_pivotSymbolShown && m_viewportParams.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
 	//if (m_viewportParams.objectCenteredView)
 	{
@@ -1529,7 +1529,7 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	context.decimateCloudOnMove = guiParams.decimateCloudOnMove;
 	context.decimateMeshOnMove = guiParams.decimateMeshOnMove;
 
-	//scalar field colorbar
+	//scalar field color-bar
 	context.sfColorScaleToDisplay = 0;
 
 	//point picking
@@ -2375,7 +2375,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 			const GLuint& n = _selectBuf[0]; //number of names on stack
 			if (n) //if we draw anything outside of 'glPushName()... glPopName()' then it will appear here with as an empty set!
 			{
-				//n should be esqual to 1 (CC_DRAW_ENTITY_NAMES mode) or 2 (CC_DRAW_POINT_NAMES/CC_DRAW_TRIANGLES_NAMES modes)!
+				//n should be equal to 1 (CC_DRAW_ENTITY_NAMES mode) or 2 (CC_DRAW_POINT_NAMES/CC_DRAW_TRIANGLES_NAMES modes)!
 				assert(n==1 || n==2);
 				const GLuint& minDepth = _selectBuf[1];
 				//const GLuint& maxDepth = _selectBuf[2];
@@ -3065,7 +3065,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 	if (!filename || zoomFactor<1e-2)
 		return false;
 
-	//taille de la fenêtre courante en pixels
+	//current window size (in pixels)
 	int Wp = static_cast<int>(width() * zoomFactor);
 	int Hp = static_cast<int>(height() * zoomFactor);
 
@@ -3561,4 +3561,3 @@ bool ccGLWindow::CheckVBOAvailability()
 {
     return CheckExtension("GL_ARB_vertex_buffer_object");
 }
-

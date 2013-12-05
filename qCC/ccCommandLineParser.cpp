@@ -144,24 +144,50 @@ static bool Error(const QString& message)
 	return false;
 }
 
-QString ccCommandLineParser::Export2BIN(CloudDesc& cloudDesc, QString suffix)
+ccCommandLineParser::EntityDesc::EntityDesc(QString filename)
+{
+	if (filename.isNull())
+	{
+		basename = "unknown";
+		path = QApplication::applicationDirPath();
+	}
+	else
+	{
+		QFileInfo fi(filename);
+		basename = fi.baseName();
+		path = fi.path();
+	}
+}
+
+ccCommandLineParser::EntityDesc::EntityDesc(QString _basename, QString _path)
+	: basename(_basename)
+	, path(_path)
+{
+}
+
+
+QString ccCommandLineParser::Export2BIN(CloudDesc& cloudDesc, QString suffix/*=QString()*/)
 {
     assert(cloudDesc.pc);
-	QFileInfo info(cloudDesc.filename);
 
-	if (cloudDesc.indexInFile>=0)
-		suffix.prepend(QString("%1_").arg(cloudDesc.indexInFile));
-	QString cloudName = QString("%1_%2").arg(!cloudDesc.pc->getName().isEmpty() ? cloudDesc.pc->getName() : info.baseName()).arg(suffix);
+	QString cloudName = (!cloudDesc.pc->getName().isEmpty() ? cloudDesc.pc->getName() : cloudDesc.basename);
+	if (cloudDesc.indexInFile >= 0)
+		cloudName += QString("_%1").arg(cloudDesc.indexInFile);
+	if (!suffix.isEmpty())
+		cloudName += QString("_") + suffix;
 	cloudDesc.pc->setName(cloudName);
 
-	QString outputFilename = QString("%1/%2_%3_%4.bin").arg(info.path()).arg(info.baseName()).arg(suffix).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+	QString baseName = cloudDesc.basename;
+	if (!suffix.isEmpty())
+		baseName += QString("_") + suffix;
+	QString outputFilename = QString("%1/%2_%3.bin").arg(cloudDesc.path).arg(baseName).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
 
 	ccHObject group;
 	group.addChild(cloudDesc.pc,false);
 	if (FileIOFilter::SaveToFile(&group,qPrintable(outputFilename),BIN) != CC_FERR_NO_ERROR)
 		return QString("Failed to save result in file '%1'").arg(outputFilename);
 
-	Print(QString("--> result saved to file '%1'").arg(outputFilename));
+	//Print(QString("--> result saved to file '%1'").arg(outputFilename)); //DGM: message already logged by FileIOFilter::SaveToFile (or BinFilter?)
     return QString();
 }
 
@@ -232,7 +258,6 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 		for (unsigned i=0; i<m_clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = m_clouds[i].pc;
-			const QString& cloudFilename = m_clouds[i].filename;
 			Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(cloud,count,pDlg);
@@ -247,7 +272,7 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 
 			if (result)
 			{
-				CloudDesc cloudDesc(result,cloudFilename,m_clouds[i].indexInFile);
+				CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
 				QString errorStr = Export2BIN(cloudDesc,"RANDOM_SUBSAMPLED");
 				delete result;
 				result = 0;
@@ -274,7 +299,6 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 		for (unsigned i=0; i<m_clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = m_clouds[i].pc;
-			const QString& cloudFilename = m_clouds[i].filename;
 			Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(cloud,static_cast<PointCoordinateType>(step),0,pDlg);
@@ -289,7 +313,7 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 
 			if (result)
 			{
-				CloudDesc cloudDesc(result,cloudFilename,m_clouds[i].indexInFile);
+				CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
 				QString errorStr = Export2BIN(cloudDesc,"SPATIAL_SUBSAMPLED");
 
 				delete result;
@@ -318,7 +342,6 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 		for (unsigned i=0; i<m_clouds.size(); ++i)
 		{
 			ccPointCloud* cloud = m_clouds[i].pc;
-			const QString& cloudFilename = m_clouds[i].filename;
 			Print(QString("\tProcessing cloud #%1 (%2)").arg(i+1).arg(!cloud->getName().isEmpty() ? cloud->getName() : "no name"));
 
 			CCLib::ReferenceCloud* refCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(cloud,static_cast<uchar>(octreeLevel),CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,pDlg);
@@ -333,7 +356,7 @@ bool ccCommandLineParser::commandSubsample(QStringList& arguments, ccProgressDia
 
 			if (result)
 			{
-				CloudDesc cloudDesc(result,cloudFilename,m_clouds[i].indexInFile);
+				CloudDesc cloudDesc(result,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
 				QString errorStr = Export2BIN(cloudDesc,QString("OCTREE_LEVEL_%1_SUBSAMPLED").arg(octreeLevel));
 
 				delete result;
@@ -535,16 +558,25 @@ bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 {
 	Print("[FILTER BY VALUE]");
 
-	ScalarType minVal, maxVal;
+	ScalarType minVal = 0, maxVal = 0;
+	bool useCloudMin = false;
+	bool useCloudMax = false;
 
 	if (arguments.empty())
 		return Error(QString("Missing parameter: min value after \"-%1\"").arg(COMMAND_FILTER_SF_BY_VALUE));
 	{
 		bool paramOk = false;
 		QString param1 = arguments.takeFirst();
-		minVal = static_cast<ScalarType>(param1.toDouble(&paramOk));
-		if (!paramOk)
-			return Error(QString("Failed to read a numerical parameter: min value (after \"-%1\"). Got '%2' instead.").arg(COMMAND_FILTER_SF_BY_VALUE).arg(param1));
+		if (param1.toUpper() == "MIN")
+		{
+			useCloudMin = true;
+		}
+		else
+		{
+			minVal = static_cast<ScalarType>(param1.toDouble(&paramOk));
+			if (!paramOk)
+				return Error(QString("Failed to read a numerical parameter: min value (after \"-%1\"). Got '%2' instead.").arg(COMMAND_FILTER_SF_BY_VALUE).arg(param1));
+		}
 	}
 
 	if (arguments.empty())
@@ -552,9 +584,16 @@ bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 	{
 		bool paramOk = false;
 		QString param2 = arguments.takeFirst();
-		maxVal = static_cast<ScalarType>(param2.toDouble(&paramOk));
-		if (!paramOk)
-			return Error(QString("Failed to read a numerical parameter: max value (after min value). Got '%1' instead.").arg(COMMAND_FILTER_SF_BY_VALUE).arg(param2));
+		if (param2.toUpper() == "MAX")
+		{
+			useCloudMax = true;
+		}
+		else
+		{
+			maxVal = static_cast<ScalarType>(param2.toDouble(&paramOk));
+			if (!paramOk)
+				return Error(QString("Failed to read a numerical parameter: max value (after min value). Got '%1' instead.").arg(COMMAND_FILTER_SF_BY_VALUE).arg(param2));
+		}
 	}
 
 	Print(QString("\tInterval: [%1 - %2]").arg(minVal).arg(maxVal));
@@ -565,14 +604,26 @@ bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 
 	for (unsigned i=0; i<m_clouds.size(); ++i)
 	{
-		ccPointCloud* fitleredCloud = m_clouds[i].pc->filterPointsByScalarValue(minVal,maxVal);
-		if (fitleredCloud)
+		CCLib::ScalarField* sf = m_clouds[i].pc->getCurrentOutScalarField();
+		if (sf)
 		{
-			CloudDesc resultDesc(fitleredCloud,m_clouds[i].filename,m_clouds[i].indexInFile);
-			Export2BIN(resultDesc,QString("FILTERED_[%1_%2]").arg(minVal).arg(maxVal));
+			ScalarType thisMinVal = minVal;
+			ScalarType thisMaxVal = maxVal;
+		
+			if (useCloudMin)
+				thisMinVal = sf->getMin();
+			if (useCloudMax)
+				thisMaxVal = sf->getMax();
 
-			delete fitleredCloud;
-			fitleredCloud = 0;
+			ccPointCloud* fitleredCloud = m_clouds[i].pc->filterPointsByScalarValue(thisMinVal,thisMaxVal);
+			if (fitleredCloud)
+			{
+				CloudDesc resultDesc(fitleredCloud,m_clouds[i].basename,m_clouds[i].path,m_clouds[i].indexInFile);
+				Export2BIN(resultDesc,QString("FILTERED_[%1_%2]").arg(thisMinVal).arg(thisMaxVal));
+
+				delete fitleredCloud;
+				fitleredCloud = 0;
+			}
 		}
 	}
 
@@ -606,22 +657,24 @@ bool ccCommandLineParser::commandSampleMesh(QStringList& arguments, ccProgressDi
 
 	if (m_meshes.empty())
 		return Error(QString("No mesh available. Be sure to open one first!"));
-	else if (m_meshes.size() != 1)
-		ccConsole::Warning("Multiple meshes loaded! We take the first one by default");
 
-	ccPointCloud* cloud = m_meshes.front().mesh->samplePoints(useDensity,parameter,true,true,true,pDlg);
-
-	if (!cloud)
+	for (size_t i=0; i<m_meshes.size(); ++i)
 	{
-		return Error(QString("Cloud sampling failed!"));
+
+		ccPointCloud* cloud = m_meshes[i].mesh->samplePoints(useDensity,parameter,true,true,true,pDlg);
+
+		if (!cloud)
+		{
+			return Error(QString("Cloud sampling failed!"));
+		}
+
+		//add the resulting cloud to the main set
+		Print(QString("Sampled cloud created: %1 points").arg(cloud->size()));
+		m_clouds.push_back(CloudDesc(cloud,m_meshes[i].basename+QString("_SAMPLED_POINTS"),m_meshes[i].path));
+
+		//save it as well
+		Export2BIN(m_clouds.back());
 	}
-
-	//add the resulting cloud to the main set
-	Print(QString("Sampled cloud (%1 points) added to the available set").arg(cloud->size()));
-	m_clouds.push_back(CloudDesc(cloud,m_meshes.front().filename));
-
-	//save it as well
-	Export2BIN(m_clouds.back(),"SAMPLED_POINTS");
 
 	return true;
 }
@@ -909,11 +962,13 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 
 	compDlg.applyAndExit();
 	
-	QString suffix(cloud2meshDist ? "C2M_DIST" : "C2C_DIST");
+	QString suffix(cloud2meshDist ? "_C2M_DIST" : "_C2C_DIST");
 	if (maxDist > 0)
 		suffix += QString("_MAX_DIST_%1").arg(maxDist);
+
+	compCloud.basename += suffix;
 	
-	Export2BIN(compCloud,suffix);
+	Export2BIN(compCloud);
 
 	return true;
 }

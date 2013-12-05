@@ -1962,6 +1962,9 @@ void ccPointCloud::addColorRampInfo(CC_DRAW_CONTEXT& context)
 
 ccPointCloud* ccPointCloud::filterPointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 {
+	if (!getCurrentOutScalarField())
+		return 0;
+
 	QSharedPointer<CCLib::ReferenceCloud> c(CCLib::ManualSegmentationTools::segment(this,minVal,maxVal));
 
 	return (c ? partialClone(c.data()) : 0);

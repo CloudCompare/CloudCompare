@@ -47,40 +47,57 @@ protected:
 	//! Parses command line
 	int parse(QStringList& arguments, bool silent, QDialog* parent = 0);
 
+	//! Loaded entity description
+	struct EntityDesc
+	{
+		QString basename;
+		QString path;
+
+		EntityDesc(QString filename);
+		EntityDesc(QString basename, QString path);
+	};
+
 	//! Loaded cloud description
-	struct CloudDesc
+	struct CloudDesc : EntityDesc
 	{
 		ccPointCloud* pc;
-		QString filename;
 		int indexInFile;
 
-		CloudDesc(ccPointCloud* cloud = 0,
-					const QString& file = QString(),
+		CloudDesc(ccPointCloud* cloud,
+					QString filename,
 					int index = -1)
-			: pc(cloud)
-			, filename(file)
+			: EntityDesc(filename)
+			, pc(cloud)
 			, indexInFile(index)
-		{
-		}
+		{}
+
+		CloudDesc(ccPointCloud* cloud,
+					QString basename,
+					QString path,
+					int index = -1)
+			: EntityDesc(basename,path)
+			, pc(cloud)
+			, indexInFile(index)
+		{}
+		
 	};
 
 	//! Loaded mesh description
-	struct MeshDesc
+	struct MeshDesc : EntityDesc
 	{
 		ccGenericMesh* mesh;
-		QString filename;
 
-		MeshDesc(ccGenericMesh* _mesh = 0,
-					const QString& file = QString())
-			: mesh(_mesh)
-			, filename(file)
+		MeshDesc(ccGenericMesh* _mesh,
+					QString filename)
+			: EntityDesc(filename)
+			, mesh(_mesh)
 		{}
 	};
 
 	//! Exports a cloud
 	/** \return error string (if any)
 	**/
-	static QString Export2BIN(CloudDesc& cloudDesc, QString suffix);
+	static QString Export2BIN(CloudDesc& cloudDesc, QString suffix = QString());
 
     //! Removes all clouds
 	void removeClouds();

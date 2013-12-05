@@ -12,6 +12,9 @@ v2.5.2 XX/XX/2013
 	with very big coordinates (however OpenGL still requires rather small coordinates
 	for a proper display, therefore the 'shift on load' mechanism might still necessary)
 - Other enhancements:
+	- when using 'Local models' when computing cloud-to-cloud distances, CC will now take the
+		smallest distance between each point and either the local model or the nearest neighbor
+		(in order to avoid clearly erroneous distances due to badly shaped local models).
 	- the 'facet' entity's normal vector can now be displayed or hidden via the facet properties
 	- BIN file loading/saving is now done in a separate thread
 		* a progress dialog is now displayed during loading/saving
@@ -42,6 +45,11 @@ v2.5.2 XX/XX/2013
 		* the ICP registration tool now issues the same textual report as the Point-pair based alignment tool
 	- the Connected Components tool dialog now displays the octree cell size as the currently selected level
 		and the 'random colors' checkbox is not selected by default anymore
+	- new command lines options:
+		* C2C_DIST: cloud to cloud distance computation
+		* C2M_DIST: cloud to mesh distance computation
+		* SAMPLE_MESH: to sample points on a mesh
+		* FILTER_SF: to filter a cloud based on its scalar values
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
 		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)

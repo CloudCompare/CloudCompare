@@ -2259,120 +2259,16 @@ void MainWindow::doActionSamplePoints()
             ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
 			assert(mesh);
 
-            CCLib::GenericIndexedCloud* sampledCloud = 0;
-			GenericChunkedArray<1,unsigned>* triIndices = (withFeatures ? new GenericChunkedArray<1,unsigned> : 0);
+			ccPointCloud* cloud = mesh->samplePoints(useDensity,useDensity ? s_ptsSamplingDensity : s_ptsSamplingCount,withNormals,withRGB,withTexture,&pDlg);
 
-            if (useDensity)
-            {
-				sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(mesh,s_ptsSamplingDensity,&pDlg,triIndices);
-            }
-            else
-            {
-				sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(mesh,s_ptsSamplingCount,&pDlg,triIndices);
-            }
-
-            if (sampledCloud)
-            {
-				//convert to real point cloud
-                ccPointCloud* cloud = ccPointCloud::From(sampledCloud);
-
-				delete sampledCloud;
-				sampledCloud = 0;
-
-				if (!cloud)
-				{
-					if (triIndices)
-						triIndices->release();
-					errors = true;
-					continue;
-				}
-
-				if (withFeatures && triIndices && triIndices->currentSize() >= cloud->size())
-				{
-					//generate normals
-					if (withNormals && mesh->hasNormals())
-					{
-						if (cloud->reserveTheNormsTable())
-						{
-							for (unsigned i=0; i<cloud->size(); ++i)
-							{
-								unsigned triIndex = triIndices->getValue(i);
-								const CCVector3* P = cloud->getPoint(i);
-
-								CCVector3 N(0.0,0.0,1.0);
-								mesh->interpolateNormals(triIndex,*P,N);
-								cloud->addNorm(N.u);
-							}
-
-							cloud->showNormals(true);
-						}
-						else
-						{
-							ccConsole::Error("Failed to interpolate normals (not enough memory?)");
-						}
-					}
-					
-					//generate colors
-					if (withTexture && mesh->hasMaterials())
-					{
-						if (cloud->reserveTheRGBTable())
-						{
-							for (unsigned i=0; i<cloud->size(); ++i)
-							{
-								unsigned triIndex = triIndices->getValue(i);
-								const CCVector3* P = cloud->getPoint(i);
-
-								colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
-								mesh->getColorFromMaterial(triIndex,*P,C,withRGB);
-								cloud->addRGBColor(C);
-							}
-
-							cloud->showColors(true);
-						}
-						else
-						{
-							ccConsole::Error("Failed to export texture colors (not enough memory?)");
-						}
-					}
-					else if (withRGB && mesh->hasColors())
-					{
-						if (cloud->reserveTheRGBTable())
-						{
-							for (unsigned i=0; i<cloud->size(); ++i)
-							{
-								unsigned triIndex = triIndices->getValue(i);
-								const CCVector3* P = cloud->getPoint(i);
-
-								colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
-								mesh->interpolateColors(triIndex,*P,C);
-								cloud->addRGBColor(C);
-							}
-
-							cloud->showColors(true);
-						}
-						else
-						{
-							ccConsole::Error("Failed to interpolate colors (not enough memory?)");
-						}
-					}
-                }
-
-                //we rename the resulting cloud
-                cloud->setName(mesh->getName()+QString(".sampled"));
-                cloud->setDisplay(mesh->getDisplay());
-                cloud->prepareDisplayForRefresh();
-				//copy 'shift on load' information
-				if (mesh->getAssociatedCloud())
-				{
-					const double* shift = mesh->getAssociatedCloud()->getOriginalShift();
-					if (shift)
-						cloud->setOriginalShift(shift[0],shift[1],shift[2]);
-				}
+			if (cloud)
+			{
                 addToDB(cloud,true,0,false,false);
             }
-
-			if (triIndices)
-				triIndices->release();
+			else
+			{
+				errors = true;
+			}
         }
     }
 

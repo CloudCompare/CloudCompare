@@ -28,6 +28,7 @@
 #include "ccAdvancedTypes.h"
 
 class ccGenericPointCloud;
+class ccPointCloud;
 class ccMaterialSet;
 
 //! Generic mesh interface
@@ -169,6 +170,14 @@ public:
 
 	//! Enables polygon stippling
 	void enableStippling(bool state) { m_stippling = state; }
+
+	//! Samples points on a mesh
+	ccPointCloud* samplePoints(	bool densityBased,
+								double samplingParameter,
+								bool withNormals,
+								bool withRGB,
+								bool withTexture,
+								CCLib::GenericProgressCallback* pDlg = 0);
 
 protected:
 

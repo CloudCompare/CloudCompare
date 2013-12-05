@@ -27,6 +27,10 @@
 #include "ccNormalVectors.h"
 #include "ccMaterialSet.h"
 
+//CCLib
+#include <MeshSamplingTools.h>
+#include <SimpleCloud.h>
+
 //system
 #include <assert.h>
 
@@ -692,4 +696,130 @@ bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	}
 
 	return true;
+}
+
+ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
+											double samplingParameter,
+											bool withNormals,
+											bool withRGB,
+											bool withTexture,
+											CCLib::GenericProgressCallback* pDlg/*=0*/)
+{
+	bool withFeatures = (withNormals || withRGB || withTexture);
+
+	GenericChunkedArray<1,unsigned>* triIndices = (withFeatures ? new GenericChunkedArray<1,unsigned> : 0);
+
+	CCLib::SimpleCloud* sampledCloud = 0;
+	if (densityBased)
+	{
+		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this,samplingParameter,pDlg,triIndices);
+	}
+	else
+	{
+		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this,static_cast<unsigned>(samplingParameter),pDlg,triIndices);
+	}
+
+	//convert to real point cloud
+	ccPointCloud* cloud = 0;
+	
+	if (sampledCloud)
+	{
+		cloud = ccPointCloud::From(sampledCloud);
+		delete sampledCloud;
+		sampledCloud = 0;
+	}
+
+	if (!cloud)
+	{
+		if (triIndices)
+			triIndices->release();
+
+		ccLog::Warning("[ccGenericMesh::samplePoints] Not enough memory!");
+		return 0;
+	}
+
+	if (withFeatures && triIndices && triIndices->currentSize() >= cloud->size())
+	{
+		//generate normals
+		if (withNormals && hasNormals())
+		{
+			if (cloud->reserveTheNormsTable())
+			{
+				for (unsigned i=0; i<cloud->size(); ++i)
+				{
+					unsigned triIndex = triIndices->getValue(i);
+					const CCVector3* P = cloud->getPoint(i);
+
+					CCVector3 N(0.0,0.0,1.0);
+					interpolateNormals(triIndex,*P,N);
+					cloud->addNorm(N.u);
+				}
+
+				cloud->showNormals(true);
+			}
+			else
+			{
+				ccLog::Warning("[ccGenericMesh::samplePoints] Failed to interpolate normals (not enough memory?)");
+			}
+		}
+
+		//generate colors
+		if (withTexture && hasMaterials())
+		{
+			if (cloud->reserveTheRGBTable())
+			{
+				for (unsigned i=0; i<cloud->size(); ++i)
+				{
+					unsigned triIndex = triIndices->getValue(i);
+					const CCVector3* P = cloud->getPoint(i);
+
+					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					getColorFromMaterial(triIndex,*P,C,withRGB);
+					cloud->addRGBColor(C);
+				}
+
+				cloud->showColors(true);
+			}
+			else
+			{
+				ccLog::Warning("[ccGenericMesh::samplePoints] Failed to export texture colors (not enough memory?)");
+			}
+		}
+		else if (withRGB && hasColors())
+		{
+			if (cloud->reserveTheRGBTable())
+			{
+				for (unsigned i=0; i<cloud->size(); ++i)
+				{
+					unsigned triIndex = triIndices->getValue(i);
+					const CCVector3* P = cloud->getPoint(i);
+
+					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					interpolateColors(triIndex,*P,C);
+					cloud->addRGBColor(C);
+				}
+
+				cloud->showColors(true);
+			}
+			else
+			{
+				ccLog::Warning("[ccGenericMesh::samplePoints] Failed to interpolate colors (not enough memory?)");
+			}
+		}
+	}
+
+	//we rename the resulting cloud
+	cloud->setName(getName()+QString(".sampled"));
+	cloud->setDisplay(getDisplay());
+	cloud->prepareDisplayForRefresh();
+	
+	//copy 'shift on load' information
+	if (getAssociatedCloud())
+	{
+		const double* shift = getAssociatedCloud()->getOriginalShift();
+		if (shift)
+			cloud->setOriginalShift(shift[0],shift[1],shift[2]);
+	}
+
+	return cloud;
 }

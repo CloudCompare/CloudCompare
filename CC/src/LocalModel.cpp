@@ -117,7 +117,7 @@ ScalarType LocalModel::computeDistanceFromModelToPoint(const CCVector3* aPoint)
 			{
 				unsigned numberOfTriangles = delaunayTri->size();
 				delaunayTri->placeIteratorAtBegining();
-				for (unsigned i=0;i<numberOfTriangles;++i)
+				for (unsigned i=0; i<numberOfTriangles; ++i)
 				{
 					GenericTriangle* tri = delaunayTri->_getNextTriangle();
 					ScalarType dist2 = DistanceComputationTools::computePoint2TriangleDistance(aPoint,tri,false);

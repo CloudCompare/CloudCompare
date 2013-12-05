@@ -438,12 +438,12 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 		if (params->CPSet || referenceCloud->testVisibility(nNSS.queryPoint) == POINT_VISIBLE) //to build the closest point set up we must process the point whatever its visibility is!
 		{
 			//first, we look for the nearest point to "_queryPoint" in the reference cloud
-			ScalarType squareDistPt = referenceOctree->findTheNearestNeighborStartingFromCell(nNSS);
+			ScalarType squareDistToNearestPoint = referenceOctree->findTheNearestNeighborStartingFromCell(nNSS);
 
 			//if it exists
-			if (squareDistPt >= 0)
+			if (squareDistToNearestPoint >= 0)
 			{
-				distPt = sqrt(squareDistPt);
+				ScalarType distToNearestPoint = sqrt(squareDistToNearestPoint);
 
 				CCVector3 nearestPoint;
 				referenceCloud->getPoint(nNSS.theNearestPointIndex,nearestPoint);
@@ -472,7 +472,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 
 					//update cell pos information (as the nearestPoint may not be inside the same cell as the actual query point!)
 					{
-						bool inbounds=false;
+						bool inbounds = false;
 						int cellPos[3];
 						referenceOctree->getTheCellPosWhichIncludesThePoint(&nearestPoint,cellPos,cell.level,inbounds);
 						//if the cell is different or the structure has not yet been initialized, we reset it!
@@ -528,7 +528,12 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 				//if we have a local model
 				if (lm)
 				{
-					distPt = lm->computeDistanceFromModelToPoint(&nNSS.queryPoint);
+					ScalarType distToModel = lm->computeDistanceFromModelToPoint(&nNSS.queryPoint);
+
+					//we take the best estimation between the nearest neighbor and the model!
+					//this way we only reduce any potential noise (that would be due to sampling)
+					//instead of 'adding' noise if the model is badly shaped
+					distPt = std::min(distToNearestPoint,distToModel);
 
 					if (!params->reuseExistingLocalModels)
 					{
@@ -536,6 +541,10 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 						delete lm;
 						lm = 0;
 					}
+				}
+				else
+				{
+					distPt = distToNearestPoint;
 				}
 			}
 			else if (nNSS.maxSearchSquareDist > 0)

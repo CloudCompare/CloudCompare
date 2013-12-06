@@ -875,6 +875,7 @@ void MainWindow::connectActions()
 	connect(actionRenameSF,						SIGNAL(triggered()),    this,       SLOT(doActionRenameSF()));
 	connect(actionOpenColorScalesManager,		SIGNAL(triggered()),    this,       SLOT(doActionOpenColorScalesManager()));
     connect(actionAddIdField,                   SIGNAL(triggered()),    this,       SLOT(doActionAddIdField()));
+	connect(actionSetSFAsCoord,					SIGNAL(triggered()),    this,       SLOT(doActionSetSFAsCoord()));
     connect(actionDeleteScalarField,            SIGNAL(triggered()),    this,       SLOT(doActionDeleteScalarField()));
     connect(actionDeleteAllSF,                  SIGNAL(triggered()),    this,       SLOT(doActionDeleteAllSF()));
     //"Edit" menu
@@ -2592,8 +2593,7 @@ void MainWindow::doActionAddIdField()
 
             sf->computeMinAndMax();
             int sfIdx = pc->addScalarField(sf);
-
-            pc->setCurrentScalarField(sfIdx);
+			pc->setCurrentDisplayedScalarField(sfIdx);
 			pc->showSF(true);
         }
     }
@@ -4010,6 +4010,57 @@ void MainWindow::doActionLabelConnectedComponents()
     }
 
     refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionSetSFAsCoord()
+{
+	ccExportCoordToSFDlg ectsDlg(this);
+	ectsDlg.warningLabel->setVisible(false);
+	ectsDlg.setWindowTitle("Export SF to coordinate(s)");
+
+	if (!ectsDlg.exec())
+		return;
+
+	bool exportDim[3] = {ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ()};
+	if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
+		return;
+
+	//for each selected cloud (or vertices set)
+	size_t selNum = m_selectedEntities.size();
+	for (size_t i=0; i<selNum; ++i)
+	{
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[i]);
+		if (cloud && cloud->isA(CC_POINT_CLOUD))
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+
+			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+			if (sf)
+			{
+				unsigned ptsCount = pc->size();
+
+				for (unsigned i=0; i<ptsCount; ++i)
+				{
+					const ScalarType& s = sf->getValue(i);
+
+					CCVector3* P = const_cast<CCVector3*>(pc->getPoint(i));
+
+					//test each dimension
+					for (unsigned d=0;d<3;++d)
+					{
+						if (exportDim[d])
+							P->u[d] = s;
+					}
+				}
+
+				pc->invalidateBoundingBox();
+			}
+		}
+
+	}
+
+	refreshAll();
 	updateUI();
 }
 
@@ -7329,6 +7380,9 @@ void MainWindow::loadFile()
 #ifdef CC_PDMS_SUPPORT
     filters.append(QString(CC_FILE_TYPE_FILTERS[PDMS]) + ";;");
 #endif
+#ifdef CC_GDAL_SUPPORT
+    filters.append(QString(CC_FILE_TYPE_FILTERS[RASTER]) + ";;");
+#endif
     filters.append(QString(CC_FILE_TYPE_FILTERS[SOI]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[PN]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[PV]) + ";;");
@@ -7970,6 +8024,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionDeleteAllSF->setEnabled(atLeastOneSF);
     actionMultiplySF->setEnabled(/*TODO: atLeastOneSF*/false);
     actionSFGradient->setEnabled(atLeastOneSF);
+	actionSetSFAsCoord->setEnabled(atLeastOneSF && atLeastOneCloud);
 
     actionSamplePoints->setEnabled(atLeastOneMesh);
     actionMeasureMeshSurface->setEnabled(atLeastOneMesh);

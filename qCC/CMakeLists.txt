@@ -108,6 +108,8 @@ target_link_LIBE57( ${PROJECT_NAME} )
 target_link_3DXWARE( ${PROJECT_NAME} )
 #DXF support
 target_link_DXFLIB( ${PROJECT_NAME} )
+#GDAL support
+target_link_GDAL( ${PROJECT_NAME} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )

@@ -60,6 +60,8 @@ include( contrib/3DXSupport.cmake )
 OPTION( OPTION_SUPPORT_MAC_PDMS_FORMAT "Build with .mac PDMS format" OFF )
 # DXF support
 include( contrib/DxfLibSupport.cmake )
+# GDAL support
+include( contrib/GDALSupport.cmake )
 
 # qCC
 add_subdirectory( qCC )

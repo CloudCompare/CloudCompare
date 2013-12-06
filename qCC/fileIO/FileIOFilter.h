@@ -60,6 +60,9 @@ enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
 #ifdef CC_DXF_SUPPORT
 					DXF					,		/**< DXF (Autocad) */
 #endif
+#ifdef CC_GDAL_SUPPORT
+					RASTER				,		/**< GIS 2D1/2 raster (supported by GDAL) */
+#endif
 					FILE_TYPES_COUNT	,		/**< Fake file type (for automatic counting) */
 };
 
@@ -81,6 +84,9 @@ const CC_FILE_TYPES CC_FILE_TYPES_ENUMS[] = {UNKNOWN_FILE, SOI, ASCII, BIN,
 #endif
 #ifdef CC_DXF_SUPPORT
 												,DXF
+#endif
+#ifdef CC_GDAL_SUPPORT
+												,RASTER
 #endif
 };
 
@@ -116,6 +122,9 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
 #ifdef CC_DXF_SUPPORT
 			, "DXF (*.dxf)"
 #endif
+#ifdef CC_GDAL_SUPPORT
+			, "2D1/2 raster grid (*.*)"
+#endif
 };
 
 const char CC_FILE_TYPE_DEFAULT_EXTENSION[][8] = {
@@ -149,6 +158,9 @@ const char CC_FILE_TYPE_DEFAULT_EXTENSION[][8] = {
 #endif
 #ifdef CC_DXF_SUPPORT
 			, "dxf"
+#endif
+#ifdef CC_GDAL_SUPPORT
+			, "tif"
 #endif
 };
 

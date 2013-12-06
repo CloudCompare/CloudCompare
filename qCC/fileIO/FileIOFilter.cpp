@@ -44,6 +44,7 @@
 #include "PDMS/PDMSFilter.h"
 //OTHERS
 #include "DepthMapFileFilter.h"
+#include "RasterGridFilter.h"
 //#include "PovFilter.h"
 #include "DxfFilter.h"
 
@@ -115,6 +116,10 @@ CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(const char* ext)
 	else if (strcmp(ext,"DXF") == 0)
 		fType = DXF;
 #endif
+#ifdef CC_GDAL_SUPPORT
+	else if (strcmp(ext,"TIF") == 0 || strcmp(ext,"TIFF") == 0 || strcmp(ext,"ADF") == 0)
+		fType = RASTER;
+#endif
 	return fType;
 }
 
@@ -176,6 +181,10 @@ FileIOFilter* FileIOFilter::CreateFilter(CC_FILE_TYPES fType)
 #ifdef CC_DXF_SUPPORT
 	case DXF:
 		return new DxfFilter();
+#endif
+#ifdef CC_GDAL_SUPPORT
+	case RASTER:
+		return new RasterGridFilter();
 #endif
 	case FILE_TYPES_COUNT:
 	default:

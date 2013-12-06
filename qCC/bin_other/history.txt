@@ -12,8 +12,13 @@ v2.5.2 XX/XX/2013
 	with very big coordinates (however OpenGL still requires rather small coordinates
 	for a proper display, therefore the 'shift on load' mechanism might still necessary)
 - New tool: 'Display > Adjust zoom'
-	Let the user set the current window zoom either directly or by specifying a pixel
+	- Let the user set the current window zoom either directly or by specifying a pixel
 	size in the (implicit) units of the current entities.
+- GDAL library support added:
+	- CC can now load dozens of standard GIS 2D1/2 raster formats (Arc Grid, GeoTiff, etc.)
+- New tool: Edit > Scalar fields > Set SF as coordinate(s)
+	- allows the user to map a scalar field to one or several dimensions (X,Y or Z)
+	- usefull to convert a 2D raster with a scalar field (gray level, etc.) to a 2D1/2 point cloud
 - Other enhancements:
 	- when using 'Local models' when computing cloud-to-cloud distances, CC will now take the
 		smallest distance between each point and either the local model or the nearest neighbor

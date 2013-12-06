@@ -261,6 +261,7 @@ protected slots:
 	void doActionRenameSF();
 	void doActionOpenColorScalesManager();
     void doActionAddIdField();
+	void doActionSetSFAsCoord();
 
 	void doComputeDensity();
     void doComputeCurvature();

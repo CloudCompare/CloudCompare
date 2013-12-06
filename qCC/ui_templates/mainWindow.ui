@@ -154,6 +154,7 @@
      <addaction name="separator"/>
      <addaction name="actionAddConstantSF"/>
      <addaction name="actionAddIdField"/>
+     <addaction name="actionSetSFAsCoord"/>
      <addaction name="actionScalarFieldArithmetic"/>
      <addaction name="separator"/>
      <addaction name="actionOpenColorScalesManager"/>
@@ -2339,7 +2340,7 @@
   </action>
   <action name="actionAddIdField">
    <property name="text">
-    <string>Add IDs as scalar field</string>
+    <string>Add point indexes as SF</string>
    </property>
    <property name="toolTip">
     <string>Adds a scalar field with ordered integers for each point in the cloud</string>
@@ -2356,6 +2357,14 @@
    </property>
    <property name="toolTip">
     <string>Adjusts zoom with a given pixel/unit ratio (orthographic projection only)</string>
+   </property>
+  </action>
+  <action name="actionSetSFAsCoord">
+   <property name="text">
+    <string>Set SF as coordinate(s)</string>
+   </property>
+   <property name="toolTip">
+    <string>Set SF as coordinate(s) (X, Y or Z)</string>
    </property>
   </action>
  </widget>

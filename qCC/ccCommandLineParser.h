@@ -31,7 +31,7 @@ protected:
 	bool commandBundler			(QStringList& arguments);
 	bool commandDist			(QStringList& arguments, bool cloud2meshDist, QDialog* parent = 0);
 	bool commandFilterSFByValue	(QStringList& arguments);
-	bool commandFuseClouds		(QStringList& arguments);
+	bool commandMergeClouds		(QStringList& arguments);
 	bool commandStatTest		(QStringList& arguments, ccProgressDialog* pDlg = 0);
 
 protected:

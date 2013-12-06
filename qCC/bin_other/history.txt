@@ -11,6 +11,9 @@ v2.5.2 XX/XX/2013
 	Moreover there's absolutely no loss of information when importing/exporting clouds
 	with very big coordinates (however OpenGL still requires rather small coordinates
 	for a proper display, therefore the 'shift on load' mechanism might still necessary)
+- New tool: 'Display > Adjust zoom'
+	Let the user set the current window zoom either directly or by specifying a pixel
+	size in the (implicit) units of the current entities.
 - Other enhancements:
 	- when using 'Local models' when computing cloud-to-cloud distances, CC will now take the
 		smallest distance between each point and either the local model or the nearest neighbor
@@ -45,11 +48,14 @@ v2.5.2 XX/XX/2013
 		* the ICP registration tool now issues the same textual report as the Point-pair based alignment tool
 	- the Connected Components tool dialog now displays the octree cell size as the currently selected level
 		and the 'random colors' checkbox is not selected by default anymore
-	- new command lines options:
+	- new command lines options (see http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine):
 		* C2C_DIST: cloud to cloud distance computation
 		* C2M_DIST: cloud to mesh distance computation
 		* SAMPLE_MESH: to sample points on a mesh
 		* FILTER_SF: to filter a cloud based on its scalar values
+		* STAT_TEST: to apply the local statistical filter
+		* MERGE_CLOUDS: to merge all loaded clouds
+	- 'Edit > Fuse' entry renamed 'Edit > Merge'
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
 		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)

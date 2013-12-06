@@ -50,7 +50,7 @@ static const char COMMAND_C2C_LOCAL_MODEL[]			= "MODEL";
 static const char COMMAND_MAX_DISTANCE[]			= "MAX_DIST";
 static const char COMMAND_OCTREE_LEVEL[]			= "OCTREE_LEVEL";
 static const char COMMAND_SAMPLE_MESH[]				= "SAMPLE_MESH";
-static const char COMMAND_FUSE_CLOUDS[]				= "FUSE_CLOUDS";
+static const char COMMAND_MERGE_CLOUDS[]			= "MERGE_CLOUDS";
 static const char COMMAND_STAT_TEST[]				= "STAT_TEST";
 static const char COMMAND_FILTER_SF_BY_VALUE[]		= "FILTER_SF";
 static const char COMMAND_CLEAR_CLOUDS[]			= "CLEAR_CLOUDS";
@@ -699,9 +699,9 @@ bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 	return true;
 }
 
-bool ccCommandLineParser::commandFuseClouds(QStringList& arguments)
+bool ccCommandLineParser::commandMergeClouds(QStringList& arguments)
 {
-	Print("[FUSE CLOUDS]");
+	Print("[MERGE CLOUDS]");
 
 	if (m_clouds.size() < 2)
 	{
@@ -709,7 +709,7 @@ bool ccCommandLineParser::commandFuseClouds(QStringList& arguments)
 		return true;
 	}
 
-	//fuse clouds
+	//merge clouds
 	{
 		for (size_t i=1; i<m_clouds.size(); ++i)
 		{
@@ -733,7 +733,7 @@ bool ccCommandLineParser::commandFuseClouds(QStringList& arguments)
 	//clean the 'm_clouds' vector
 	m_clouds.resize(1);
 	//update the first one
-	m_clouds.front().basename += QString("_FUSED");
+	m_clouds.front().basename += QString("_MERGED");
 	Export2BIN(m_clouds.front());
 
 	return true;
@@ -1301,9 +1301,9 @@ int ccCommandLineParser::parse(QStringList& arguments, bool silent, QDialog* par
 		{
 			success = commandFilterSFByValue(arguments);
 		}
-		else if (IsCommand(argument,COMMAND_FUSE_CLOUDS))
+		else if (IsCommand(argument,COMMAND_MERGE_CLOUDS))
 		{
-			success = commandFuseClouds(arguments);
+			success = commandMergeClouds(arguments);
 		}
 		else if (IsCommand(argument,COMMAND_STAT_TEST))
 		{

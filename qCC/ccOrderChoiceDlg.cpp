@@ -14,22 +14,23 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2172                                                              $
-//$LastChangedDate:: 2012-06-24 18:33:24 +0200 (dim., 24 juin 2012)        $
-//**************************************************************************
-//
 
 #include "ccOrderChoiceDlg.h"
 
-#include <ccHObject.h>
+//local
 #include "ccDisplayOptionsDlg.h"
 #include "mainwindow.h"
 
-ccOrderChoiceDlg::ccOrderChoiceDlg(ccHObject* firstEntity, const char* firstRole, ccHObject* secondEntity, const char* secondRole, QWidget* parent/* = 0*/)
-    : QDialog(parent), Ui::RoleChoiceDialog()
+//qCC_db
+#include <ccHObject.h>
+
+ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
+									const char* firstRole,
+									ccHObject* secondEntity,
+									const char* secondRole,
+									QWidget* parent/*=0*/)
+    : QDialog(parent)
+	, Ui::RoleChoiceDialog()
 {
     setupUi(this);
     setWindowFlags(Qt::Tool);

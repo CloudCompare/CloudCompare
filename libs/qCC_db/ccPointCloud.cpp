@@ -375,7 +375,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		return *this;
 	}
 
-	//fuse display parameters
+	//merge display parameters
 	setVisible(isVisible() || addedCloud->isVisible());
 
 	//3D points (already reserved)
@@ -395,7 +395,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	//Colors (already reserved)
 	if (hasColors() || addedCloud->hasColors())
 	{
-		//fuse display parameters
+		//merge display parameters
 		showColors(colorsShown() || addedCloud->colorsShown());
 
 		//if the added cloud has no color
@@ -433,7 +433,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	//normales (reserved)
 	if (hasNormals() || addedCloud->hasNormals())
 	{
-		//fuse display parameters
+		//merge display parameters
 		showNormals(normalsShown() || addedCloud->normalsShown());
 
 		//if the added cloud hasn't any normal
@@ -475,7 +475,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	{
 		std::vector<bool> sfUpdated(sfCount, false);
 
-		//first we fuse the new SF with the existing one
+		//first we merge the new SF with the existing one
 		for (unsigned k=0;k<newSFCount;++k)
 		{
 			const ccScalarField* sf = static_cast<ccScalarField*>(addedCloud->getScalarField((int)k));
@@ -572,7 +572,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				}
 			}
 
-			//fuse display parameters
+			//merge display parameters
 			showSF(sfShown() || addedCloud->sfShown());
 		}
 	}

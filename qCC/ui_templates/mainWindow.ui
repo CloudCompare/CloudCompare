@@ -119,6 +119,7 @@
     <addaction name="actionDisplayOptions"/>
     <addaction name="actionEditCamera"/>
     <addaction name="actionSaveViewportAsObject"/>
+    <addaction name="actionAdjustZoom"/>
     <addaction name="actionTestFrameRate"/>
     <addaction name="separator"/>
     <addaction name="menuLights"/>
@@ -249,7 +250,7 @@
     <addaction name="menuScalarFields"/>
     <addaction name="separator"/>
     <addaction name="actionClone"/>
-    <addaction name="actionFuse"/>
+    <addaction name="actionMerge"/>
     <addaction name="actionApplyTransformation"/>
     <addaction name="actionMultiply"/>
     <addaction name="actionEditGlobalShift"/>
@@ -570,7 +571,7 @@
    <addaction name="actionPointPicking"/>
    <addaction name="actionPointListPicking"/>
    <addaction name="actionClone"/>
-   <addaction name="actionFuse"/>
+   <addaction name="actionMerge"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
    <addaction name="actionPointPairsAlign"/>
@@ -952,13 +953,16 @@
     <string>Clone</string>
    </property>
   </action>
-  <action name="actionFuse">
+  <action name="actionMerge">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccFuse.png</normaloff>:/CC/images/ccFuse.png</iconset>
+     <normaloff>:/CC/images/ccMerge.png</normaloff>:/CC/images/ccMerge.png</iconset>
    </property>
    <property name="text">
-    <string>Fuse</string>
+    <string>Merge</string>
+   </property>
+   <property name="toolTip">
+    <string>Merge multiple clouds</string>
    </property>
   </action>
   <action name="actionDelete">
@@ -2344,6 +2348,14 @@
   <action name="actionFitFacet">
    <property name="text">
     <string>2D polygon</string>
+   </property>
+  </action>
+  <action name="actionAdjustZoom">
+   <property name="text">
+    <string>Adjust zoom</string>
+   </property>
+   <property name="toolTip">
+    <string>Adjusts zoom with a given pixel/unit ratio (orthographic projection only)</string>
    </property>
   </action>
  </widget>

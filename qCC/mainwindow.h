@@ -277,7 +277,7 @@ protected slots:
     void doActionComputeOctree();
 	void doActionComputeKdTree();
     void doActionApplyTransformation();
-    void doActionFuse();
+    void doActionMerge();
     void doActionRegister();
     void doAction4pcsRegister(); //Aurelien BEY le 13/11/2008
     void doActionSubsample(); //Aurelien BEY le 4/12/2008
@@ -322,8 +322,8 @@ protected slots:
 	void doActionExportCoordToSF();
     void doComputeBestFitBB();
 
-
     void doActionEditCamera();
+	void doActionAdjustZoom();
 	void doActionSaveViewportAsCamera();
 
     void doEnableGLFilter();

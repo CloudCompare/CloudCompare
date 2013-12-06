@@ -116,6 +116,7 @@
 #include "ccMouse3DContextMenu.h"
 #include "ccColorScaleEditorDlg.h"
 #include "ccComputeOctreeDlg.h"
+#include "ccAdjustZoomDlg.h"
 #include <ui_aboutDlg.h>
 
 //3D mouse handler
@@ -878,7 +879,7 @@ void MainWindow::connectActions()
     connect(actionDeleteAllSF,                  SIGNAL(triggered()),    this,       SLOT(doActionDeleteAllSF()));
     //"Edit" menu
     connect(actionClone,                        SIGNAL(triggered()),    this,       SLOT(doActionClone()));
-    connect(actionFuse,                         SIGNAL(triggered()),    this,       SLOT(doActionFuse()));
+    connect(actionMerge,                        SIGNAL(triggered()),    this,       SLOT(doActionMerge()));
     connect(actionApplyTransformation,			SIGNAL(triggered()),    this,       SLOT(doActionApplyTransformation()));
     connect(actionMultiply,                     SIGNAL(triggered()),    this,       SLOT(doActionMultiply()));
     connect(actionEditGlobalShift,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalShift()));
@@ -929,6 +930,7 @@ void MainWindow::connectActions()
     connect(actionToggleCenteredPerspective,    SIGNAL(triggered()),    this,       SLOT(toggleActiveWindowCenteredPerspective()));
     connect(actionToggleViewerBasedPerspective, SIGNAL(triggered()),    this,       SLOT(toggleActiveWindowViewerBasedPerspective()));
     connect(actionEditCamera,                   SIGNAL(triggered()),    this,       SLOT(doActionEditCamera()));
+	connect(actionAdjustZoom,					SIGNAL(triggered()),    this,       SLOT(doActionAdjustZoom()));
 	connect(actionSaveViewportAsObject,			SIGNAL(triggered()),    this,       SLOT(doActionSaveViewportAsCamera()));
 
     //"Display > Lights & Materials" menu
@@ -3004,7 +3006,7 @@ void MainWindow::RemoveSiblingsFromCCObjectList(ccHObject::Container& ccObjects)
     ccObjects = keptObjects;
 }
 
-void MainWindow::doActionFuse()
+void MainWindow::doActionMerge()
 {
     ccPointCloud* firstCloud = 0;
 	ccHObject* firstCloudParent = 0;
@@ -3098,11 +3100,11 @@ void MainWindow::doActionFuse()
         //meshes are placed in a common mesh group
         else if (ent->isKindOf(CC_MESH))
         {
-            ccConsole::Warning("Can't fuse meshes yet! Sorry ...");
+            ccConsole::Warning("Can't merge meshes yet! Sorry ...");
         }
 		else
 		{
-			ccConsole::Warning(QString("Entity '%1' is neither a cloud nor a mesh, can't fuse it!").arg(ent->getName()));
+			ccConsole::Warning(QString("Entity '%1' is neither a cloud nor a mesh, can't merge it!").arg(ent->getName()));
 		}
 
 		//security (we don't want to encounter it again)
@@ -5677,6 +5679,31 @@ void MainWindow::doActionEditCamera()
     updateMDIDialogsPlacement();
 }
 
+void MainWindow::doActionAdjustZoom()
+{
+    //current active MDI area
+    ccGLWindow* win = getActiveGLWindow();
+    if (!win)
+        return;
+
+	const ccViewportParameters& params = win->getViewportParameters();
+	if (params.perspectiveView)
+	{
+		ccConsole::Error("Orthographic mode only!");
+		return;
+	}
+
+	ccAdjustZoomDlg azDlg(win,this);
+
+	if (!azDlg.exec())
+		return;
+
+	//apply zoom
+	double zoom = azDlg.getZoom();
+	win->setZoom(zoom);
+	win->redraw();
+}
+
 static unsigned s_viewportIndex = 0;
 void MainWindow::doActionSaveViewportAsCamera()
 {
@@ -8005,7 +8032,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     //>1
     bool atLeastTwoEntities = (selInfo.selCount>1);
 
-    actionFuse->setEnabled(atLeastTwoEntities);
+    actionMerge->setEnabled(atLeastTwoEntities);
     actionMatchBarycenters->setEnabled(atLeastTwoEntities);
 
     //standard plugins

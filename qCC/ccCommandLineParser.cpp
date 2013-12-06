@@ -2,16 +2,21 @@
 
 //CCLib
 #include <CloudSamplingTools.h>
+#include <WeibullDistribution.h>
+#include <NormalDistribution.h>
+#include <StatisticalTestingTools.h>
+#include <Neighbourhood.h>
 
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
 #include <ccProgressDialog.h>
-#include <Neighbourhood.h>
+#include <ccOctree.h>
 
 //qCC
 #include "fileIO/FileIOFilter.h"
 #include "fileIO/BundlerFilter.h"
+#include "ccCommon.h"
 #include <ui_commandLineDlg.h>
 #include "ccConsole.h"
 #include "mainwindow.h"
@@ -45,6 +50,8 @@ static const char COMMAND_C2C_LOCAL_MODEL[]			= "MODEL";
 static const char COMMAND_MAX_DISTANCE[]			= "MAX_DIST";
 static const char COMMAND_OCTREE_LEVEL[]			= "OCTREE_LEVEL";
 static const char COMMAND_SAMPLE_MESH[]				= "SAMPLE_MESH";
+static const char COMMAND_FUSE_CLOUDS[]				= "FUSE_CLOUDS";
+static const char COMMAND_STAT_TEST[]				= "STAT_TEST";
 static const char COMMAND_FILTER_SF_BY_VALUE[]		= "FILTER_SF";
 static const char COMMAND_CLEAR_CLOUDS[]			= "CLEAR_CLOUDS";
 static const char COMMAND_CLEAR_MESHES[]			= "CLEAR_MESHES";
@@ -116,7 +123,8 @@ void ccCommandLineParser::removeClouds()
 {
 	while (!m_clouds.empty())
 	{
-		delete m_clouds.back().pc;
+		if (m_clouds.back().pc)
+			delete m_clouds.back().pc;
 		m_clouds.pop_back();
 	}
 }
@@ -125,7 +133,8 @@ void ccCommandLineParser::removeMeshes()
 {
 	while (!m_meshes.empty())
 	{
-		delete m_meshes.back().mesh;
+		if (m_meshes.back().mesh)
+			delete m_meshes.back().mesh;
 		m_meshes.pop_back();
 	}
 }
@@ -554,49 +563,79 @@ bool ccCommandLineParser::commandRoughness(QStringList& arguments, QDialog* pare
 	return true;
 }
 
+//special SF values that can be used instead of explicit ones
+enum USE_SPECIAL_SF_VALUE { USE_NONE,
+							USE_MIN,
+							USE_DISP_MIN,
+							USE_SAT_MIN,
+							USE_MAX,
+							USE_DISP_MAX,
+							USE_SAT_MAX
+};
+
 bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 {
 	Print("[FILTER BY VALUE]");
 
-	ScalarType minVal = 0, maxVal = 0;
-	bool useCloudMin = false;
-	bool useCloudMax = false;
-
-	if (arguments.empty())
-		return Error(QString("Missing parameter: min value after \"-%1\"").arg(COMMAND_FILTER_SF_BY_VALUE));
+	USE_SPECIAL_SF_VALUE useValForMin = USE_NONE;
+	ScalarType minVal = 0;
+	QString minValStr;
 	{
+		if (arguments.empty())
+			return Error(QString("Missing parameter: min value after \"-%1\"").arg(COMMAND_FILTER_SF_BY_VALUE));
+
 		bool paramOk = false;
-		QString param1 = arguments.takeFirst();
-		if (param1.toUpper() == "MIN")
+		minValStr = arguments.takeFirst();
+		if (minValStr.toUpper() == "MIN")
 		{
-			useCloudMin = true;
+			useValForMin = USE_MIN;
+		}
+		else if (minValStr.toUpper() == "DISP_MIN")
+		{
+			useValForMin = USE_DISP_MIN;
+		}
+		else if (minValStr.toUpper() == "SAT_MIN")
+		{
+			useValForMin = USE_SAT_MIN;
 		}
 		else
 		{
-			minVal = static_cast<ScalarType>(param1.toDouble(&paramOk));
+			minVal = static_cast<ScalarType>(minValStr.toDouble(&paramOk));
 			if (!paramOk)
-				return Error(QString("Failed to read a numerical parameter: min value (after \"-%1\"). Got '%2' instead.").arg(COMMAND_FILTER_SF_BY_VALUE).arg(param1));
+				return Error(QString("Failed to read a numerical parameter: min value (after \"-%1\"). Got '%2' instead.").arg(COMMAND_FILTER_SF_BY_VALUE).arg(minValStr));
 		}
 	}
 
-	if (arguments.empty())
-		return Error(QString("Missing parameter: max value after min value"));
+	USE_SPECIAL_SF_VALUE useValForMax = USE_NONE;
+	ScalarType maxVal = 0;
+	QString maxValStr;
 	{
+		if (arguments.empty())
+			return Error(QString("Missing parameter: max value after \"-%1\" {min}").arg(COMMAND_FILTER_SF_BY_VALUE));
+
 		bool paramOk = false;
-		QString param2 = arguments.takeFirst();
-		if (param2.toUpper() == "MAX")
+		maxValStr = arguments.takeFirst();
+		if (maxValStr.toUpper() == "MAX")
 		{
-			useCloudMax = true;
+			useValForMax = USE_MAX;
+		}
+		else if (maxValStr.toUpper() == "DISP_MAX")
+		{
+			useValForMax = USE_DISP_MAX;
+		}
+		else if (maxValStr.toUpper() == "SAT_MAX")
+		{
+			useValForMax = USE_SAT_MAX;
 		}
 		else
 		{
-			maxVal = static_cast<ScalarType>(param2.toDouble(&paramOk));
+			maxVal = static_cast<ScalarType>(maxValStr.toDouble(&paramOk));
 			if (!paramOk)
-				return Error(QString("Failed to read a numerical parameter: max value (after min value). Got '%1' instead.").arg(COMMAND_FILTER_SF_BY_VALUE).arg(param2));
+				return Error(QString("Failed to read a numerical parameter: max value (after min value). Got '%1' instead.").arg(COMMAND_FILTER_SF_BY_VALUE).arg(maxValStr));
 		}
 	}
 
-	Print(QString("\tInterval: [%1 - %2]").arg(minVal).arg(maxVal));
+	Print(QString("\tInterval: [%1 - %2]").arg(minValStr).arg(maxValStr));
 
 	if (m_clouds.empty())
 		return Error(QString("No point cloud on which to filter SF! (be sure to open one or generate one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_FILTER_SF_BY_VALUE));
@@ -608,12 +647,42 @@ bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 		if (sf)
 		{
 			ScalarType thisMinVal = minVal;
+			{
+				switch(useValForMin)
+				{
+				case USE_MIN:
+					thisMinVal = sf->getMin();
+					break;
+				case USE_DISP_MIN:
+					thisMinVal = static_cast<ccScalarField*>(sf)->displayRange().start();
+					break;
+				case USE_SAT_MIN:
+					thisMinVal = static_cast<ccScalarField*>(sf)->saturationRange().start();
+					break;
+				default:
+					//nothing to do
+					break;
+				}
+			}
+
 			ScalarType thisMaxVal = maxVal;
-		
-			if (useCloudMin)
-				thisMinVal = sf->getMin();
-			if (useCloudMax)
-				thisMaxVal = sf->getMax();
+			{
+				switch(useValForMax)
+				{
+				case USE_MAX:
+					thisMaxVal = sf->getMax();
+					break;
+				case USE_DISP_MAX:
+					thisMaxVal = static_cast<ccScalarField*>(sf)->displayRange().stop();
+					break;
+				case USE_SAT_MAX:
+					thisMaxVal = static_cast<ccScalarField*>(sf)->saturationRange().stop();
+					break;
+				default:
+					//nothing to do
+					break;
+				}
+			}
 
 			ccPointCloud* fitleredCloud = m_clouds[i].pc->filterPointsByScalarValue(thisMinVal,thisMaxVal);
 			if (fitleredCloud)
@@ -626,6 +695,46 @@ bool ccCommandLineParser::commandFilterSFByValue(QStringList& arguments)
 			}
 		}
 	}
+
+	return true;
+}
+
+bool ccCommandLineParser::commandFuseClouds(QStringList& arguments)
+{
+	Print("[FUSE CLOUDS]");
+
+	if (m_clouds.size() < 2)
+	{
+		ccConsole::Warning("Less than 2 clouds! Nothing to do...");
+		return true;
+	}
+
+	//fuse clouds
+	{
+		for (size_t i=1; i<m_clouds.size(); ++i)
+		{
+			unsigned beforePts = m_clouds.front().pc->size();
+			unsigned newPts = m_clouds[i].pc->size();
+			*m_clouds.front().pc += m_clouds[i].pc;
+
+			//success?
+			if (m_clouds.front().pc->size() == beforePts + newPts)
+			{
+				delete m_clouds[i].pc;
+				m_clouds[i].pc = 0;
+			}
+			else
+			{
+				return Error("Fusion failed! (not enough memory?)");
+			}
+		}
+	}
+
+	//clean the 'm_clouds' vector
+	m_clouds.resize(1);
+	//update the first one
+	m_clouds.front().basename += QString("_FUSED");
+	Export2BIN(m_clouds.front());
 
 	return true;
 }
@@ -646,7 +755,7 @@ bool ccCommandLineParser::commandSampleMesh(QStringList& arguments, ccProgressDi
 	else if (sampleMode == "DENSITY")
 		useDensity = true;
 	else
-		return Error(QString("Invalid parameter: unknown sampling mode s\"%1\"").arg(sampleMode));
+		return Error(QString("Invalid parameter: unknown sampling mode \"%1\"").arg(sampleMode));
 
 	if (arguments.empty())
 		return Error(QString("Missing parameter: value after sampling mode"));
@@ -973,6 +1082,159 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 	return true;
 }
 
+bool ccCommandLineParser::commandStatTest(QStringList& arguments, ccProgressDialog* pDlg/*=0*/)
+{
+	Print("[STATISTICAL TEST]");
+
+	//distribution
+    CCLib::GenericDistribution* distrib = 0;
+	{
+		if (arguments.empty())
+			return Error(QString("Missing parameter: distribution type after \"-%1\" (GAUSS/WEIBULL)").arg(COMMAND_STAT_TEST));
+
+		QString distribStr = arguments.takeFirst().toUpper();
+		if (distribStr == "GAUSS")
+		{
+			//mu
+			if (arguments.empty())
+				return Error(QString("Missing parameter: mean value after \"GAUSS\""));
+			bool conversionOk = false;
+			double mu = arguments.takeFirst().toDouble(&conversionOk);
+			if (!conversionOk)
+				return Error(QString("Invalid parameter: mean value after \"GAUSS\""));
+			//sigma
+			if (arguments.empty())
+				return Error(QString("Missing parameter: sigma value after \"GAUSS\" {mu}"));
+			conversionOk = false;
+			double sigma = arguments.takeFirst().toDouble(&conversionOk);
+			if (!conversionOk)
+				return Error(QString("Invalid parameter: sigma value after \"GAUSS\" {mu}"));
+
+			CCLib::NormalDistribution* N = new CCLib::NormalDistribution();
+			N->setParameters(static_cast<ScalarType>(mu),static_cast<ScalarType>(sigma*sigma)); //warning: we input sigma2 here (not sigma)
+			distrib = static_cast<CCLib::GenericDistribution*>(N);
+		}
+		else if (distribStr == "WEIBULL")
+		{
+			//a
+			if (arguments.empty())
+				return Error(QString("Missing parameter: a value after \"WEIBULL\""));
+			bool conversionOk = false;
+			double a = arguments.takeFirst().toDouble(&conversionOk);
+			if (!conversionOk)
+				return Error(QString("Invalid parameter: a value after \"WEIBULL\""));
+			//b
+			if (arguments.empty())
+				return Error(QString("Missing parameter: b value after \"WEIBULL\" {a}"));
+			conversionOk = false;
+			double b = arguments.takeFirst().toDouble(&conversionOk);
+			if (!conversionOk)
+				return Error(QString("Invalid parameter: b value after \"WEIBULL\" {a}"));
+			//c
+			if (arguments.empty())
+				return Error(QString("Missing parameter: shift value after \"WEIBULL\" {a} {b}"));
+			conversionOk = false;
+			double shift = arguments.takeFirst().toDouble(&conversionOk);
+			if (!conversionOk)
+				return Error(QString("Invalid parameter: shift value after \"WEIBULL\" {a} {b}"));
+
+			CCLib::WeibullDistribution* N = new CCLib::WeibullDistribution();
+			N->setParameters(static_cast<ScalarType>(a),static_cast<ScalarType>(b),static_cast<ScalarType>(shift));
+			distrib = static_cast<CCLib::GenericDistribution*>(N);
+		}
+		else
+		{
+			return Error(QString("Invalid parameter: unknown distribution \"%1\"").arg(distribStr));
+		}
+	}
+
+	//pValue
+	double pValue = 0.0005;
+	{
+		if (arguments.empty())
+			return Error(QString("Missing parameter: p-value after distribution"));
+		bool conversionOk = false;
+		pValue = arguments.takeFirst().toDouble(&conversionOk);
+		if (!conversionOk)
+			return Error(QString("Invalid parameter:  p-value after distribution"));
+	}
+
+	//kNN
+	unsigned kNN = 16;
+	{
+		if (arguments.empty())
+			return Error(QString("Missing parameter: neighbors after p-value"));
+		bool conversionOk = false;
+		kNN = arguments.takeFirst().toUInt(&conversionOk);
+		if (!conversionOk)
+			return Error(QString("Invalid parameter: neighbors after p-value"));
+	}
+
+	if (m_clouds.empty())
+		return Error(QString("No cloud available. Be sure to open one first!"));
+
+	for (size_t i=0; i<m_clouds.size(); ++i)
+	{
+		ccPointCloud* pc = m_clouds[i].pc;
+		
+		//we apply method on currently 'output' SF
+		CCLib::ScalarField* outSF = pc->getCurrentOutScalarField();
+		if (outSF)
+		{
+			assert(outSF->isAllocated());
+
+			//force Chi2 Distances field as 'IN' field (create it by the way if necessary)
+			int chi2SfIdx = pc->getScalarFieldIndexByName(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
+			if (chi2SfIdx < 0)
+				chi2SfIdx = pc->addScalarField(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
+			if (chi2SfIdx < 0)
+			{
+				if (distrib)
+					delete distrib;
+				return Error("Couldn't allocate a new scalar field for computing chi2 distances! Try to free some memory ...");
+			}
+			pc->setCurrentInScalarField(chi2SfIdx);
+
+			//compute octree if necessary
+			ccOctree* theOctree=pc->getOctree();
+			if (!theOctree)
+			{
+				theOctree = pc->computeOctree(pDlg);
+				if (!theOctree)
+				{
+					if (distrib)
+						delete distrib;
+					ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
+					break;
+				}
+			}
+
+			double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,kNN,pValue,pDlg,theOctree);
+
+			Print(QString("[Chi2 Test] %1 test result = %2").arg(distrib->getName()).arg(chi2dist));
+
+			//we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed
+			{
+				ccScalarField* chi2SF = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
+				assert(chi2SF);
+				chi2SF->computeMinAndMax();
+				chi2dist *= chi2dist;
+				chi2SF->setMinDisplayed(static_cast<ScalarType>(chi2dist));
+				chi2SF->setSymmetricalScale(false);
+				chi2SF->setSaturationStart(static_cast<ScalarType>(chi2dist));
+				//chi2SF->setSaturationStop(chi2dist);
+				pc->setCurrentDisplayedScalarField(chi2SfIdx);
+				pc->showSF(true);
+			}
+
+			m_clouds[i].basename += QString("_STAT_TEST_%1").arg(distrib->getName());
+			Export2BIN(m_clouds[i]);
+		}
+	}
+
+	return true;
+}
+
 int ccCommandLineParser::parse(QStringList& arguments, bool silent, QDialog* parent/*=0*/)
 {
 	ccProgressDialog progressDlg(false,parent);
@@ -1038,6 +1300,14 @@ int ccCommandLineParser::parse(QStringList& arguments, bool silent, QDialog* par
 		else if (IsCommand(argument,COMMAND_FILTER_SF_BY_VALUE))
 		{
 			success = commandFilterSFByValue(arguments);
+		}
+		else if (IsCommand(argument,COMMAND_FUSE_CLOUDS))
+		{
+			success = commandFuseClouds(arguments);
+		}
+		else if (IsCommand(argument,COMMAND_STAT_TEST))
+		{
+			success = commandStatTest(arguments,&progressDlg);
 		}
 		else if (IsCommand(argument,COMMAND_CLEAR_CLOUDS))
 		{

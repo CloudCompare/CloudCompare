@@ -2204,9 +2204,9 @@ void MainWindow::doActionConvertTextureToColor()
 				}
 			
 
-								//colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
-								//mesh->getColorFromMaterial(triIndex,*P,C,withRGB);
-								//cloud->addRGBColor(C);
+				//colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+				//mesh->getColorFromMaterial(triIndex,*P,C,withRGB);
+				//cloud->addRGBColor(C);
 				if (mesh->convertMaterialsToVertexColors())
 				{
 					mesh->showColors(true);
@@ -3580,7 +3580,7 @@ void MainWindow::doActionStatisticalTest()
 
     int distribIndex = pDlg.getSelectedIndex();
 
-    ccStatisticalTestDlg* sDlg=0;
+    ccStatisticalTestDlg* sDlg = 0;
     switch (distribIndex)
     {
     case 0: //Gauss
@@ -3624,6 +3624,9 @@ void MainWindow::doActionStatisticalTest()
 		}
 	}
 
+	double pChi2 = sDlg->getProba();
+	int nn = sDlg->getNeighborsNumber();
+
     size_t selNum = m_selectedEntities.size();
     for (size_t i=0; i<selNum; ++i)
     {
@@ -3666,9 +3669,6 @@ void MainWindow::doActionStatisticalTest()
 
 				ccProgressDialog pDlg(true,this);
 
-				double pChi2 = sDlg->getProba();
-				int nn = sDlg->getNeighborsNumber();
-
 				QElapsedTimer eTimer;
 				eTimer.start();
 
@@ -3677,9 +3677,10 @@ void MainWindow::doActionStatisticalTest()
 				ccConsole::Print("[Chi2 Test] Timing: %3.2f ms.",eTimer.elapsed()/1.0e3);
 				ccConsole::Print("[Chi2 Test] %s test result = %f",distrib->getName(),chi2dist);
 
-				//we set the theoretical Chi2 distance limit as the minimumed displayed SF value so that all points below are grayed
+				//we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed
 				{
 					ccScalarField* chi2SF = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
+					assert(chi2SF);
 					chi2SF->computeMinAndMax();
 					chi2dist *= chi2dist;
 					chi2SF->setMinDisplayed(static_cast<ScalarType>(chi2dist));

@@ -31,6 +31,8 @@ protected:
 	bool commandBundler			(QStringList& arguments);
 	bool commandDist			(QStringList& arguments, bool cloud2meshDist, QDialog* parent = 0);
 	bool commandFilterSFByValue	(QStringList& arguments);
+	bool commandFuseClouds		(QStringList& arguments);
+	bool commandStatTest		(QStringList& arguments, ccProgressDialog* pDlg = 0);
 
 protected:
 
@@ -63,6 +65,12 @@ protected:
 		ccPointCloud* pc;
 		int indexInFile;
 
+		CloudDesc()
+			: EntityDesc(QString())
+			, pc(0)
+			, indexInFile(-1)
+		{}
+
 		CloudDesc(ccPointCloud* cloud,
 					QString filename,
 					int index = -1)
@@ -86,6 +94,11 @@ protected:
 	struct MeshDesc : EntityDesc
 	{
 		ccGenericMesh* mesh;
+
+		MeshDesc()
+			: EntityDesc(QString())
+			, mesh(0)
+		{}
 
 		MeshDesc(ccGenericMesh* _mesh,
 					QString filename)

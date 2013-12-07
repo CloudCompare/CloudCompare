@@ -725,7 +725,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 				
 				if (!ignoreDefaultFields || value != it->firstValue || it->firstValue != it->defaultValue)
 				{
-					it->sf = new ccScalarField(qPrintable(it->getName()));
+					it->sf = new ccScalarField(it->getName());
 					if (it->sf->reserve(fileChunkSize))
 					{
 						it->sf->link();

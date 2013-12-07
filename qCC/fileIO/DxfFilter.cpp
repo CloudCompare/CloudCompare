@@ -480,7 +480,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 	double pageMargin = baseSize / 20.0;
 
 	DL_Dxf dxf;
-	DL_WriterA* dw = dxf.out(qPrintable(filename), DL_VERSION_R12);
+	DL_WriterA* dw = dxf.out(filename, DL_VERSION_R12);
 	if (!dw)
 	{
 		return CC_FERR_WRITING;
@@ -673,7 +673,7 @@ CC_FILE_ERROR DxfFilter::loadFile(const char* filename, ccHObject& container, bo
 {
 #ifdef CC_DXF_SUPPORT
 	DxfImporter importer(&container);
-	if (!DL_Dxf().in(qPrintable(filename), &importer))
+	if (!DL_Dxf().in(filename, &importer))
 	{
 		return CC_FERR_READING;
 	}

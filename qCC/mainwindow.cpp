@@ -375,7 +375,7 @@ void MainWindow::loadPlugins()
         }
         else
         {
-            ccConsole::Warning(QString("[%1] %2").arg(pluginsDir.absoluteFilePath(filename)).arg(loader.errorString()));
+            ccConsole::Warning(QString("[Plugin] %1")/*.arg(pluginsDir.absoluteFilePath(filename))*/.arg(loader.errorString()));
         }
     }
 

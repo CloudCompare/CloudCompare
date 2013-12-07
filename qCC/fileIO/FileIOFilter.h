@@ -123,7 +123,7 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
 			, "DXF (*.dxf)"
 #endif
 #ifdef CC_GDAL_SUPPORT
-			, "2D1/2 raster grid (*.*)"
+			, "RASTER grid (*.*)"
 #endif
 };
 

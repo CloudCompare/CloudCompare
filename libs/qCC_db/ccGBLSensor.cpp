@@ -20,12 +20,11 @@
 
 #include "ccGBLSensor.h"
 
-//CCLib
-//#include <GenericIndexedCloud.h>
-
 //system
 #include <string.h>
 #include <assert.h>
+
+static const int s_MaxDepthBufferSize = 4096;
 
 ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=THETA_PHI*/)
 	: ccSensor()
@@ -153,7 +152,7 @@ CCLib::SimpleCloud* ccGBLSensor::project(CCLib::GenericCloud* theCloud, int& err
 		int width = static_cast<int>(ceil((thetaMax-thetaMin)/deltaTheta));
 		int height = static_cast<int>(ceil((phiMax-phiMin)/deltaPhi));
 
-		if (width*height == 0 || std::max(width,height) > 2048) //too small or... too big!
+		if (width*height == 0 || std::max(width,height) > s_MaxDepthBufferSize) //too small or... too big!
 		{
 			errorCode = -2;
 			delete newCloud;

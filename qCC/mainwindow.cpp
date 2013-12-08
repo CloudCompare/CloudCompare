@@ -4039,15 +4039,33 @@ void MainWindow::doActionSetSFAsCoord()
 			if (sf)
 			{
 				unsigned ptsCount = pc->size();
+				bool hasDefaultValueForNaN = false;
+				ScalarType defaultValueForNaN = sf->getMin();
 
 				for (unsigned i=0; i<ptsCount; ++i)
 				{
-					const ScalarType& s = sf->getValue(i);
+					ScalarType s = sf->getValue(i);
+
+					//handle NaN values
+					if (!CCLib::ScalarField::ValidValue(s))
+					{
+						if (!hasDefaultValueForNaN)
+						{
+							bool ok;
+							double out = QInputDialog::getDouble(this,"NaN height","Enter the coordinate equivalent for NaN values:",defaultValueForNaN,-DBL_MAX,DBL_MAX,6,&ok);
+							if (ok)
+								defaultValueForNaN = static_cast<ScalarType>(out);
+							else
+								ccLog::Warning("[SetSFAsCoord] By default the coordinate equivalent for NaN values will be the minimum SF value");
+							hasDefaultValueForNaN = true;
+						}
+						s = defaultValueForNaN;
+					}
 
 					CCVector3* P = const_cast<CCVector3*>(pc->getPoint(i));
 
 					//test each dimension
-					for (unsigned d=0;d<3;++d)
+					for (unsigned d=0; d<3; ++d)
 					{
 						if (exportDim[d])
 							P->u[d] = s;

@@ -377,7 +377,11 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 
 		if (pc)
 		{
-			if (zInvalid != 0 && zInvalid < pc->size())
+			if (!zRasterProcessed)
+			{
+				ccLog::Warning("Raster has no height (Z) information: you can convert one of its scalar fields to Z with 'Edit > Scalar Fields > Set SF as coordinate(s)'");
+			}
+			else if (zInvalid != 0 && zInvalid < pc->size())
 			{
 				//shall we remove the points with invalid heights?
 				if (QMessageBox::question(0,"Remove NaN points?","This raster has pixels with invalid heights. Shall we remove them?",QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)

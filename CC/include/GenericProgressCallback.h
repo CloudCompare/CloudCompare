@@ -18,6 +18,9 @@
 #ifndef GENERIC_PROGRESS_CALLBACK_HEADER
 #define GENERIC_PROGRESS_CALLBACK_HEADER
 
+//Qt
+#include <QAtomicInt>
+
 //system
 #include <assert.h>
 #include <math.h>
@@ -98,10 +101,10 @@ public:
 		\param totalPercentage equivalent percentage
 	**/
 	NormalizedProgress(GenericProgressCallback* callback, unsigned totalSteps, unsigned totalPercentage=100)
-		: percent(0.0f)
-		, step(1)
-      , percentAdd(1.0f)
-		, counter(0)
+		: m_percent(0)
+		, m_step(1)
+		, m_percentAdd(1.0f)
+		, m_counter(0)
 		, progressCallback(callback)
 	{
 		assert(progressCallback);
@@ -110,53 +113,70 @@ public:
 	}
 
 	//! Scales inner parameters so that 'totalSteps' calls of the 'oneStep' method correspond to 'totalPercentage' percents
-	void scale(unsigned totalSteps, unsigned totalPercentage=100, bool updateCurrentProgress=false)
+	void scale(unsigned totalSteps, unsigned totalPercentage = 100, bool updateCurrentProgress = false)
 	{
-		if (totalSteps*totalPercentage==0)
+		if (totalSteps*totalPercentage == 0)
 		{
-			step = 1;
-			percentAdd = 0.0f;
+			m_step = 1;
+			m_percentAdd = 0;
 			return;
 		}
 
         if (totalSteps >= 2*totalPercentage)
 		{
-            step = static_cast<unsigned>(ceil(static_cast<float>(totalSteps) / static_cast<float>(totalPercentage)));
-			assert(step!=0 && step<totalSteps);
-            percentAdd = static_cast<float>(totalPercentage) / static_cast<float>(totalSteps/step);
+            m_step = static_cast<unsigned>(ceil(static_cast<float>(totalSteps) / static_cast<float>(totalPercentage)));
+			assert(m_step!=0 && m_step<totalSteps);
+            m_percentAdd = static_cast<float>(totalPercentage) / static_cast<float>(totalSteps/m_step);
 		}
         else
 		{
-			step = 1;
-            percentAdd = static_cast<float>(totalPercentage) / static_cast<float>(totalSteps);
+			m_step = 1;
+            m_percentAdd = static_cast<float>(totalPercentage) / static_cast<float>(totalSteps);
 		}
 
 		if (updateCurrentProgress)
 		{
-			percent = (float)counter*(float)totalPercentage/(float)totalSteps;
-			progressCallback->update(percent);
+			m_percent = static_cast<float>(m_counter) * static_cast<float>(totalPercentage) / static_cast<float>(totalSteps);
+			progressCallback->update(m_percent);
 		}
 		else
 		{
-			counter = 0;
+			m_counter = 0;
 		}
 	}
 
 	//! Resets progress state
 	void reset()
 	{
-		percent = 0.0;
-		counter = 0;
-		progressCallback->update(0.0);
+		m_percent = 0;
+		m_counter = 0;
+		progressCallback->update(0);
 	}
 
-	//! Increments total progress value
+	//! Increments total progress value of a single unit
 	inline bool oneStep()
 	{
-		if (((++counter) % step)==0)
+		unsigned currentCount = m_counter.fetchAndAddRelaxed(1)+1;
+		if ((currentCount % m_step) == 0)
 		{
-			percent += percentAdd;
-			progressCallback->update(percent);
+			m_percent += m_percentAdd;
+			progressCallback->update(m_percent);
+		}
+
+		return !progressCallback->isCancelRequested();
+	}
+
+	//! Increments total progress value of more than a single unit
+	inline bool steps(unsigned n)
+	{
+		unsigned currentCount = m_counter.fetchAndAddRelaxed(n);
+		unsigned d1 = currentCount / m_step;
+		unsigned d2 = (currentCount+n) / m_step;
+
+		if (d2 != d1) //thread safe? Well '++int' is a kind of atomic operation ;)
+		{
+			m_percent += static_cast<float>(d2-d1) * m_percentAdd;
+			progressCallback->update(m_percent);
 		}
 
 		return !progressCallback->isCancelRequested();
@@ -165,20 +185,19 @@ public:
 protected:
 
 	//! Total progress value (in percent)
-	float percent;
+	float m_percent;
 
 	//! Number of necessary calls to 'oneStep' to actually call progress callback
-    unsigned step;
+    unsigned m_step;
 
 	//! Percentage added to total progress value at each step
-	float percentAdd;
+	float m_percentAdd;
 
 	//! Current number of calls to 'oneStep'
-	unsigned counter;
+	QAtomicInt m_counter;
 
 	//! associated GenericProgressCallback
 	GenericProgressCallback* progressCallback;
-
 };
 
 }

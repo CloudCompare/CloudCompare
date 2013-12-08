@@ -156,9 +156,13 @@ protected:
 		Method parameters (defined in "additionalParameters") are :
 		- (SimpleCloud*) point cloud to store new points
 		- (RESAMPLING_CELL_METHOD*) resampling method
+		\param cell structure describing the cell on which processing is applied
+		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
 	static bool resampleCellAtLevel(const DgmOctree::octreeCell& cell,
-                                    void** additionalParameters);
+                                    void** additionalParameters,
+									NormalizedProgress* nProgress = 0);
 
 	//! "Cellular" function to select a unique point inside an octree cell
 	/** This function is meant to be applied to all cells of the octree
@@ -169,9 +173,11 @@ protected:
 		- (SUBSAMPLING_CELL_METHOD*) subampling method
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
 	static bool subsampleCellAtLevel(	const DgmOctree::octreeCell& cell,
-                                        void** additionalParameters);
+                                        void** additionalParameters,
+										NormalizedProgress* nProgress = 0);
 };
 
 }

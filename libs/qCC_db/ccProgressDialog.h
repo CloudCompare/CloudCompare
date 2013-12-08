@@ -70,6 +70,9 @@ public:
 	virtual void start();
 	virtual void stop();
 
+	//! Sets base 'refresh' interval (in percents - strictly positive)
+	void setMinRefreshInterval(int i);
+
 public slots:
 
 	//! Refreshes widget
@@ -91,6 +94,9 @@ protected:
 
 	//! Timer for automatic update
 	QTimer m_timer;
+
+	//! Minimum refresh interval (in percents)
+	int m_refreshInterval;
 };
 
 #endif //CC_PROGRESS_DIALOG_HEADER

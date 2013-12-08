@@ -129,8 +129,11 @@ protected:
 		- (bool) specifies whether negative values should be included in computation
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computeLocalChi2DistAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computeLocalChi2DistAtLevel(const DgmOctree::octreeCell& cell,
+											void** additionalParameters,
+											NormalizedProgress* nProgress = 0);
 
 };
 

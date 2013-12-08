@@ -291,7 +291,9 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCell& cell,
+												void** additionalParameters,
+												CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	NormsTableType* theNorms	= (NormsTableType*)additionalParameters[0];
@@ -357,21 +359,20 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 			//FIN CALCUL DE LA NORMALE
 		}
 
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCell& cell,
+												void** additionalParameters,
+												CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	NormsTableType* theNorms	= (NormsTableType*)additionalParameters[0];
 	PointCoordinateType radius	= *(PointCoordinateType*)additionalParameters[1];
-
-	unsigned i,j,n;
-
-	//nombre de points dans la cellule courante
-	n = cell.points->size();
 
 	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level												= cell.level;
@@ -382,21 +383,24 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 
 	//on connait deja les points de la premiere cellule
 	//(c'est la cellule qu'on est en train de traiter !)
+	unsigned n = cell.points->size();
     nNSS.pointsInNeighbourhood.resize(n);
-	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-	for (j=0;j<n;++j,++it)
 	{
-		it->point = cell.points->getPointPersistentPtr(j);
-		it->pointIndex = cell.points->getPointGlobalIndex(j);
+		CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+		for (unsigned j=0; j<n; ++j,++it)
+		{
+			it->point = cell.points->getPointPersistentPtr(j);
+			it->pointIndex = cell.points->getPointGlobalIndex(j);
+		}
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	for (i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
-		if (k>=NUMBER_OF_POINTS_FOR_NORM_WITH_HF)
+		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_HF)
 		{
 			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood,k);
 			CCLib::Neighbourhood Z(&neighbours);
@@ -413,20 +417,20 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 			}
 			//FIN CALCUL DE LA NORMALE
 		}
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octreeCell& cell,
+													void** additionalParameters,
+													CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	NormsTableType* theNorms				    = (NormsTableType*)additionalParameters[0];
-
-	unsigned i,j,n;
-
-	//nombre de points dans la cellule courante
-	n = cell.points->size();
 
 	CCLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level												= cell.level;
@@ -437,16 +441,19 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 
 	//on connait deja les points de la premiere cellule
 	//(c'est la cellule qu'on est en train de traiter !)
+	unsigned n = cell.points->size();
     nNSS.pointsInNeighbourhood.resize(n);
 	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-	for (j=0;j<n;++j,++it)
 	{
-		it->point = cell.points->getPointPersistentPtr(j);
-		it->pointIndex = cell.points->getPointGlobalIndex(j);
+		for (unsigned j=0; j<n; ++j,++it)
+		{
+			it->point = cell.points->getPointPersistentPtr(j);
+			it->pointIndex = cell.points->getPointGlobalIndex(j);
+		}
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	for (i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
@@ -469,7 +476,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 
 				//pour tous les triangles
 				theMesh->placeIteratorAtBegining();
-				for (j=0;j<faceCount;++j)
+				for (unsigned j=0; j<faceCount; ++j)
 				{
 					//on recupere le jieme triangle
 #ifndef ENABLE_MT_OCTREE
@@ -479,15 +486,15 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 #endif
 					//on cherche si le point courant est un sommet de ce triangle
 					int k=-1;
-					if (tsi->i1==0)
+					if (tsi->i1 == 0)
 						k=0; //le point courant est cense être en 0 !
-					else if (tsi->i2==0)
+					else if (tsi->i2 == 0)
 						k=1;
-					else if (tsi->i3==0)
+					else if (tsi->i3 == 0)
 						k=2;
 
 					//si oui
-					if (k>=0)
+					if (k >= 0)
 					{
 						const CCVector3 *A = neighbours.getPoint(tsi->i1);
 						const CCVector3 *B = neighbours.getPoint(tsi->i2);
@@ -500,7 +507,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 						//calcule de la normale (par produit vectoriel)
 						CCVector3 no = u.cross(v);
 						no.normalize();
-						N+=no;
+						N += no;
 					}
 				}
 
@@ -513,6 +520,9 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 
 			theNorms->setValue(cell.points->getPointGlobalIndex(i),N.u);
 		}
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;

@@ -92,7 +92,9 @@ int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCl
 //DETAIL DES PARAMETRES ADDITIONNELS (2) :
 // [0] -> (CC_CURVATURE_TYPE*) cType : curvature type
 // [1] -> (PointCoordinateType*) radius : sphere radius
-bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
+bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::octreeCell& cell,
+															void** additionalParameters,
+															NormalizedProgress* nProgress/*=0*/)
 {
 	//parameters
 	Neighbourhood::CC_CURVATURE_TYPE cType	= *((Neighbourhood::CC_CURVATURE_TYPE*)additionalParameters[0]);
@@ -172,6 +174,9 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(const DgmOctree::octr
 		}
 
 		cell.points->setPointScalarValue(i,curv);
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
@@ -226,7 +231,9 @@ int GeometricalAnalysisTools::computeLocalDensity(GenericIndexedCloudPersist* th
 //FONCTION "CELLULAIRE" DE CALCUL DE DENSITE LOCALE
 //PAS DE PARAMETRES ADDITIONNELS
 const double c_sphereVolumeCoef = (4.0/3.0*M_PI);
-bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
+bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctree::octreeCell& cell,
+																	void** additionalParameters,
+																	NormalizedProgress* nProgress/*=0*/)
 {
 	//structures pour la recherche de voisinages SPECIFIQUES
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
@@ -263,6 +270,9 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(const DgmOctre
 			//shoudln't happen! Appart if the cloud has only one point...
             cell.points->setPointScalarValue(i,NAN_VALUE);
 		}
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
@@ -322,7 +332,8 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 //DETAIL DES PARAMETRES ADDITIONNELS (1) :
 // [0] -> (PointCoordinateType*) kernelRadius : le rayon du voisinage de calcul
 bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOctree::octreeCell& cell, 
-																	void** additionalParameters)
+																	void** additionalParameters,
+																	NormalizedProgress* nProgress/*=0*/)
 {
 	//parameter(s)
 	PointCoordinateType radius = *((PointCoordinateType*)additionalParameters[0]);
@@ -379,6 +390,9 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 		}
 
         cell.points->setPointScalarValue(i,d);
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;

@@ -149,13 +149,16 @@ protected:
 	/*** RENDERING METHODS ***/
 
 	static bool DrawCellAsABox(const CCLib::DgmOctree::octreeCell& cell,
-                                void** additionalParameters);
+                                void** additionalParameters,
+								CCLib::NormalizedProgress* nProgress = 0);
 
 	static bool DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
-                                    void** additionalParameters);
+                                    void** additionalParameters,
+									CCLib::NormalizedProgress* nProgress = 0);
 
 	static bool DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
-                                        void** additionalParameters);
+                                        void** additionalParameters,
+										CCLib::NormalizedProgress* nProgress = 0);
 
     ccGenericPointCloud* m_associatedCloud;
     CC_OCTREE_DISPLAY_TYPE m_displayType;

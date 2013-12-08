@@ -129,20 +129,29 @@ protected:
 	//! Computes cell curvature inside a cell
 	/**	\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computeCellCurvatureAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computeCellCurvatureAtLevel(const DgmOctree::octreeCell& cell,
+											void** additionalParameters,
+											NormalizedProgress* nProgress = 0);
 
 	//! Computes point density inside a cell
 	/**	\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computePointsDensityInACellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computePointsDensityInACellAtLevel(	const DgmOctree::octreeCell& cell,
+													void** additionalParameters,
+													NormalizedProgress* nProgress = 0);
 
 	//! Computes point roughness inside a cell
 	/**	\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computePointsRoughnessInACellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computePointsRoughnessInACellAtLevel(	const DgmOctree::octreeCell& cell,
+														void** additionalParameters,
+														NormalizedProgress* nProgress = 0);
 };
 
 }

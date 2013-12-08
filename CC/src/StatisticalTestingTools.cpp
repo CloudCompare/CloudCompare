@@ -395,7 +395,9 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	return maxChi2;
 }
 
-bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
+bool StatisticalTestingTools::computeLocalChi2DistAtLevel(	const DgmOctree::octreeCell& cell,
+															void** additionalParameters,
+															NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	GenericDistribution* statModel		= (GenericDistribution*)additionalParameters[0];
@@ -470,6 +472,9 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 
 		//We assume that "IN" and "OUT" scalar fields are different!
 		cell.points->setPointScalarValue(i,D);
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;

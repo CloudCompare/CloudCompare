@@ -351,9 +351,11 @@ protected:
 		- (DgmOctree*) the octree corresponding to the compared cloud
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
 	static bool computeCellHausdorffDistance(const DgmOctree::octreeCell& cell,
-                                                void** additionalParameters);
+                                                void** additionalParameters,
+												NormalizedProgress* nProgress = 0);
 
 	//! Computes the "nearest neighbour distance" with local modeling for all points of an octree cell
 	/** This method has the generic syntax of a "cellular function" (see DgmOctree::localFunctionPtr).
@@ -365,9 +367,11 @@ protected:
 		- (CC_LOCAL_MODEL_TYPES*) type of local model to apply
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
 	static bool computeCellHausdorffDistanceWithLocalModel(const DgmOctree::octreeCell& cell,
-                                                            void** additionalParameters);
+                                                            void** additionalParameters,
+															NormalizedProgress* nProgress = 0);
 };
 
 }

@@ -122,7 +122,9 @@ int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* the
     return result;
 }
 
-bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& cell,
+													void** additionalParameters,
+													NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	bool euclidianDistances									= *((bool*)additionalParameters[0]);
@@ -162,7 +164,7 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
 
 	const GenericIndexedCloudPersist* cloud = cell.points->getAssociatedCloud();
 
-	for (unsigned i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
 		ScalarType gN = NAN_VALUE;
 
@@ -216,6 +218,9 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(const DgmOctree::octreeCell& c
 		else
 			//mode champs scalaires "IN" et "OUT" differents
 			cell.points->setPointScalarValue(i,gN);
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
@@ -289,7 +294,9 @@ bool ScalarFieldTools::applyScalarFieldGaussianFilter(PointCoordinateType sigma,
 //DETAIL DES PARAMETRES ADDITIONNELS (2) :
 // [0] -> (PointCoordinateType*) sigma : gauss function sigma
 // [1] -> (PointCoordinateType*) sigmaSF : used when in "bilateral modality" - if -1 pure gaussian filtering is performed
-bool ScalarFieldTools::computeCellGaussianFilter(const DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ScalarFieldTools::computeCellGaussianFilter(	const DgmOctree::octreeCell& cell,
+													void** additionalParameters,
+													NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	PointCoordinateType sigma	= *((PointCoordinateType*)additionalParameters[0]);
@@ -363,6 +370,9 @@ bool ScalarFieldTools::computeCellGaussianFilter(const DgmOctree::octreeCell& ce
 			ScalarType newValue = (wSum > 0.0 ? static_cast<ScalarType>(meanValue / wSum) : NAN_VALUE);
 
             cell.points->setPointScalarValue(i,newValue);
+
+			if (nProgress && !nProgress->oneStep())
+				return false;
         }
     }
     //Bilateral Filtering using the second sigma parameters on values (when given)
@@ -394,6 +404,9 @@ bool ScalarFieldTools::computeCellGaussianFilter(const DgmOctree::octreeCell& ce
             }
 
             cell.points->setPointScalarValue(i,wSum > 0.0 ? (ScalarType)(meanValue / wSum) : NAN_VALUE);
+
+			if (nProgress && !nProgress->oneStep())
+				return false;
         }
     }
 

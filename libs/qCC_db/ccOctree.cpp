@@ -299,7 +299,9 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 }
 
 //FONCTION "CELLULAIRE" D'AFFICHAGE "FIL DE FER"
-bool ccOctree::DrawCellAsABox(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
+								void** additionalParameters,
+								CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	CCVector3 bbMin,bbMax;
 	cell.parentOctree->computeCellLimits(cell.truncatedCode,cell.level,bbMin.u,bbMax.u,true);
@@ -334,7 +336,9 @@ bool ccOctree::DrawCellAsABox(const CCLib::DgmOctree::octreeCell& cell, void** a
 }
 
 //FONCTION "CELLULAIRE" D'AFFICHAGE "POINT MOYEN"
-bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
+								void** additionalParameters,
+								CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	glDrawParams* glParams						= (glDrawParams*)additionalParameters[0];
@@ -366,7 +370,9 @@ bool ccOctree::DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell, void**
 }
 
 //FONCTION "CELLULAIRE" D'AFFICHAGE "CUBE MOYEN"
-bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ccOctree::DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
+									void** additionalParameters,
+									CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	glDrawParams* glParams						= (glDrawParams*)additionalParameters[0];

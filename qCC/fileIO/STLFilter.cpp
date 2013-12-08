@@ -210,7 +210,9 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile)
 }
 
 const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(ZERO_TOLERANCE));
-bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+bool tagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
+							void** additionalParameters,
+							CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	GenericChunkedArray<1,int>* equivalentIndexes = (GenericChunkedArray<1,int>*)additionalParameters[0];
 
@@ -249,10 +251,10 @@ bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** addi
 	}
 
 	//for each point in the cell
-	for (unsigned i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
 		int thisIndex = (int)cell.points->getPointGlobalIndex(i);
-		if (equivalentIndexes->getValue(thisIndex)<0) //has no equivalent yet 
+		if (equivalentIndexes->getValue(thisIndex) < 0) //has no equivalent yet 
 		{
 			cell.points->getPoint(i,nNSS.queryPoint);
 
@@ -262,7 +264,7 @@ bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** addi
 			//if there are some very close points
 			if (k>1)
 			{
-				for (unsigned j=0;j<k;++j)
+				for (unsigned j=0; j<k; ++j)
 				{
 					//all the other points are equivalent to the query point
 					const unsigned& otherIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
@@ -274,6 +276,9 @@ bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** addi
 			//and the query point is always root
 			equivalentIndexes->setValue(thisIndex,thisIndex);
 		}
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;

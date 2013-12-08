@@ -384,7 +384,9 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
     return sampledCloud;
 }
 
-bool CloudSamplingTools::resampleCellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
+bool CloudSamplingTools::resampleCellAtLevel(	const DgmOctree::octreeCell& cell,
+												void** additionalParameters,
+												NormalizedProgress* nProgress/*=0*/)
 {
 	SimpleCloud* cloud						= (SimpleCloud*)additionalParameters[0];
 	RESAMPLING_CELL_METHOD resamplingMethod	= *((RESAMPLING_CELL_METHOD*)additionalParameters[1]);
@@ -402,10 +404,15 @@ bool CloudSamplingTools::resampleCellAtLevel(const DgmOctree::octreeCell& cell, 
         cloud->addPoint(center);
 	}
 
+	if (nProgress && !nProgress->steps(cell.points->size()))
+		return false;
+
 	return true;
 }
 
-bool CloudSamplingTools::subsampleCellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
+bool CloudSamplingTools::subsampleCellAtLevel(	const DgmOctree::octreeCell& cell,
+												void** additionalParameters,
+												NormalizedProgress* nProgress/*=0*/)
 {
 	ReferenceCloud* cloud					    = (ReferenceCloud*)additionalParameters[0];
 	SUBSAMPLING_CELL_METHOD subsamplingMethod	= *((SUBSAMPLING_CELL_METHOD*)additionalParameters[1]);
@@ -416,6 +423,9 @@ bool CloudSamplingTools::subsampleCellAtLevel(const DgmOctree::octreeCell& cell,
 	if (subsamplingMethod == RANDOM_POINT)
 	{
 	    selectedPointIndex = (static_cast<unsigned>(rand()) % pointsCount);
+
+		if (nProgress && !nProgress->steps(pointsCount))
+			return false;
 	}
 	else // if (subsamplingMethod == NEAREST_POINT_TO_CELL_CENTER)
 	{
@@ -432,6 +442,9 @@ bool CloudSamplingTools::subsampleCellAtLevel(const DgmOctree::octreeCell& cell,
 				selectedPointIndex = i;
                 minDist = dist;
             }
+
+			if (nProgress && !nProgress->oneStep())
+				return false;
         }
     }
 

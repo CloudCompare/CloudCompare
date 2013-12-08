@@ -326,7 +326,9 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 // [1] -> (Octree*): reference cloud octree
 // [2] -> (Cloud2CloudDistanceComputationParams*): parameters
 // [3] -> (ScalarType*): max search distance (squared)
-bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::octreeCell& cell, void** additionalParameters)
+bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::octreeCell& cell,
+															void** additionalParameters,
+															NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
 	const GenericIndexedCloudPersist* referenceCloud	= (GenericIndexedCloudPersist*)additionalParameters[0];
@@ -370,6 +372,9 @@ bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::oct
 		{
 			cell.points->setPointScalarValue(i,NAN_VALUE);
 		}
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
@@ -381,7 +386,8 @@ bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::oct
 // [2] -> (Cloud2CloudDistanceComputationParams*): parameters
 // [3] -> (ScalarType*): max search distance (squared)
 bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const DgmOctree::octreeCell& cell,
-                                                                          void** additionalParameters)
+                                                                          void** additionalParameters,
+																		  NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
 	GenericIndexedCloudPersist* referenceCloud		= (GenericIndexedCloudPersist*)additionalParameters[0];
@@ -557,6 +563,9 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 		}
 	
 		cell.points->setPointScalarValue(i,distPt);
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	//clear all models for this cell

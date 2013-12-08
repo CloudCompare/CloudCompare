@@ -20,6 +20,7 @@
 //Qt
 #include <QApplication>
 #include <QPushButton>
+#include <QProgressBar>
 
 ccProgressDialog::ccProgressDialog(bool showCancelButton,
 								   QWidget *parent/*=0*/,
@@ -28,6 +29,7 @@ ccProgressDialog::ccProgressDialog(bool showCancelButton,
     , m_currentValue(0)
 	, m_lastValue(-1)
 	, m_timer(this)
+	, m_refreshInterval(1)
 {
     setAutoClose(true);
 	setWindowModality(Qt::ApplicationModal); //not compatible with Qt::QueuedConnection?!
@@ -44,8 +46,7 @@ ccProgressDialog::ccProgressDialog(bool showCancelButton,
 	}
 	setCancelButton(cancelButton);
 
-	//QObject::connect(this, SIGNAL(doUpdate(int)), this, SLOT(setValue(int)), Qt::QueuedConnection); 
-	connect(&m_timer, SIGNAL(timeout()), this, SLOT(refresh()));
+	connect(&m_timer,	SIGNAL(timeout()),			this,	SLOT(refresh())/*, Qt::DirectConnection*/);
 }
 
 void ccProgressDialog::reset()
@@ -53,41 +54,58 @@ void ccProgressDialog::reset()
     QProgressDialog::reset();
 
     setValue(0);
-    m_currentValue=0;
-	m_lastValue=-1;
+    m_currentValue = 0;
+	m_lastValue = -1;
     QApplication::processEvents();
 }
 
 void ccProgressDialog::refresh()
 {
-	if (m_lastValue != m_currentValue)
+	if (m_mutex.tryLock())
 	{
-		setValue(m_currentValue);
-		m_lastValue=m_currentValue;
+		if (m_lastValue == m_currentValue)
+		{
+			m_mutex.unlock();
+		}
+		else
+		{
+			int value = m_lastValue = m_currentValue;
+			m_mutex.unlock();
+
+			setValue(value);
+			//repaint();
+		}
 	}
 }
 
 //Thread-safe!
 void ccProgressDialog::update(float percent)
 {
-    int value = (int)percent;
+    int value = static_cast<int>(percent);
 
 	m_mutex.lock();
     if (value != m_currentValue)
     {
 		m_currentValue = value;
 
-		//every 5% (or more) we let the dialog (and more generally the GUI) re-display itself and treat events!
-		bool refresh=(abs(m_lastValue-m_currentValue)>4);
+		//every now and then we let the dialog (and more generally the GUI) re-display itself and process events!
+		bool refresh = (abs(m_lastValue-m_currentValue) >= m_refreshInterval);
 		m_mutex.unlock();
 
 		if (refresh)
-            QApplication::processEvents();
+			QApplication::processEvents();
     }
 	else
 	{
 		m_mutex.unlock();
 	}
+}
+
+void ccProgressDialog::setMinRefreshInterval(int i)
+{
+	m_mutex.lock();
+	m_refreshInterval = std::max(1,i);
+	m_mutex.unlock();
 }
 
 void ccProgressDialog::setMethodTitle(const char* methodTitle)

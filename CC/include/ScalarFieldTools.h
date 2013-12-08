@@ -196,8 +196,11 @@ protected:
 		- (std::vector<ScalarType>*) the gradient norms container
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computeMeanGradientOnPatch(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computeMeanGradientOnPatch(	const DgmOctree::octreeCell& cell,
+											void** additionalParameters,
+											NormalizedProgress* nProgress = 0);
 
 	//! "Cellular" function to apply a gaussian filter on the scalar values of points inside an octree cell
 	/** This function is meant to be applied to all cells of the octree
@@ -210,8 +213,11 @@ protected:
 		- (std::vector<ScalarType>*) the smoothed values
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computeCellGaussianFilter(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computeCellGaussianFilter(	const DgmOctree::octreeCell& cell,
+											void** additionalParameters,
+											NormalizedProgress* nProgress = 0);
 
 };
 

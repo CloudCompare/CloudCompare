@@ -3528,7 +3528,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
             progressCb->setMethodTitle(functionTitle);
         char buffer[512];
 		sprintf(buffer,"Octree level %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %i",level,cellCount,m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
-		nprogress = new NormalizedProgress(progressCb,cellCount);
+		nprogress = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
         progressCb->setInfo(buffer);
         progressCb->start();
     }
@@ -3550,7 +3550,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
         if (nextCode != cell.truncatedCode)
         {
             //if not, we call the user function on the precedent cell
-            result = (*func)(cell,additionalParameters);
+            result = (*func)(cell,additionalParameters,nprogress);
 
 			if (!result)
 				break;
@@ -3560,12 +3560,12 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
             cell.points->clear(false);
 			cell.truncatedCode = nextCode;
 
-			if (nprogress && !nprogress->oneStep())
-			{
-				//process canceled by user
-				result = false;
-				break;
-			}
+			//if (nprogress && !nprogress->oneStep())
+			//{
+			//	//process canceled by user
+			//	result = false;
+			//	break;
+			//}
         }
 
         cell.points->addPointIndex(p->theIndex); //can't fail (see above)
@@ -3573,7 +3573,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
 
     //don't forget last cell!
 	if (result)
-		result = (*func)(cell,additionalParameters);
+		result = (*func)(cell,additionalParameters, nprogress);
 
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 	FILE* fp=fopen("octree_log.txt","at");
@@ -3641,7 +3641,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 				m_maxCellPopulation[startingLevel],m_maxCellPopulation[MAX_OCTREE_LEVEL]);
         progressCb->setInfo(buffer);
 #ifndef ENABLE_DOWN_TOP_TRAVERSAL
-		nprogress = new NormalizedProgress(progressCb,cellsNumber);
+		nprogress = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
 #endif
         progressCb->start();
     }
@@ -3670,15 +3670,14 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 
 		//progress notification
 #ifndef ENABLE_DOWN_TOP_TRAVERSAL
-		if (cell.level == startingLevel)
-		{
-			if (nprogress)
-				if (!nprogress->oneStep())
-				{
-					result=false;
-					break;
-				}
-		}
+		//if (cell.level == startingLevel)
+		//{
+		//	if (nprogress && !nprogress->oneStep())
+		//	{
+		//		result=false;
+		//		break;
+		//	}
+		//}
 #else
 		//in this mode, we can't update progress notification regularly...
 		if (progressCb)
@@ -3823,7 +3822,13 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 			cell.points->addPointIndex((startingElement++)->theIndex);
 
 		//call user method on current cell
-		result = (*func)(cell,additionalParameters);
+		result = (*func)(cell,additionalParameters,
+#ifndef ENABLE_DOWN_TOP_TRAVERSAL
+			nProgress
+#else
+			0
+#endif
+			);
 
 		if (!result)
 			break;
@@ -3873,6 +3878,7 @@ struct octreeCellDesc
 static DgmOctree* s_octree_MT = 0;
 static DgmOctree::octreeCellFunc s_func_MT = 0;
 static void** s_userParams_MT = 0;
+static GenericProgressCallback* s_progressCb_MT = 0;
 static NormalizedProgress* s_normProgressCb_MT = 0;
 static bool s_cellFunc_MT_success = true;
 
@@ -3882,37 +3888,44 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 	if (!s_cellFunc_MT_success)
 		return;
 
-	if (s_normProgressCb_MT)
-	{
-		QApplication::processEvents(); //let the application breath!
-		if (!s_normProgressCb_MT->oneStep())
-		{
-			s_cellFunc_MT_success = false;
-            return;
-		}
-	}
-
 	const DgmOctree::cellsContainer& pointsAndCodes = s_octree_MT->pointsAndTheirCellCodes();
 
     //cell descriptor
-    DgmOctree::octreeCell* cell = new DgmOctree::octreeCell(s_octree_MT);
-	cell->level = desc.level;
-	cell->index = desc.i1;
-	cell->truncatedCode = desc.truncatedCode;
-	if (cell->points->reserve(desc.i2-desc.i1+1))
+    DgmOctree::octreeCell cell(s_octree_MT);
+	cell.level = desc.level;
+	cell.index = desc.i1;
+	cell.truncatedCode = desc.truncatedCode;
+	if (cell.points->reserve(desc.i2-desc.i1+1))
 	{
 		for (unsigned i=desc.i1; i<=desc.i2; ++i)
-			cell->points->addPointIndex(pointsAndCodes[i].theIndex);
+			cell.points->addPointIndex(pointsAndCodes[i].theIndex);
 
-		s_cellFunc_MT_success &= (*s_func_MT)(*cell,s_userParams_MT);
+		s_cellFunc_MT_success &= (*s_func_MT)(cell,s_userParams_MT,s_normProgressCb_MT);
 	}
 	else
 	{
 		s_cellFunc_MT_success = false;
 	}
 
-	delete cell;
-	cell=0;
+	if (!s_cellFunc_MT_success)
+	{
+		//TODO: display a message to make clear that the cancel order has been understood!
+		if (s_progressCb_MT)
+		{
+			s_progressCb_MT->setInfo("Cancelling...");
+			QApplication::processEvents();
+		}
+
+	//if (s_normProgressCb_MT)
+	//{
+	//	//QApplication::processEvents(); //let the application breath!
+	//	if (!s_normProgressCb_MT->oneStep())
+	//	{
+	//		s_cellFunc_MT_success = false;
+	//		return;
+	//	}
+	//}
+	}
 }
 
 unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
@@ -3969,9 +3982,12 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
 	s_func_MT = func;
 	s_userParams_MT = additionalParameters;
 	s_cellFunc_MT_success = true;
+	s_progressCb_MT = progressCb;
 	if (s_normProgressCb_MT)
+	{
 		delete s_normProgressCb_MT;
-	s_normProgressCb_MT = 0;
+		s_normProgressCb_MT = 0;
+	}
 
     //progress notification
     if (progressCb)
@@ -3982,7 +3998,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
         char buffer[512];
 		sprintf(buffer,"Octree level %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %d",level,cells.size(),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
         progressCb->setInfo(buffer);
-		s_normProgressCb_MT = new NormalizedProgress(progressCb,static_cast<unsigned>(cells.size()));
+		s_normProgressCb_MT = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
         progressCb->start();
     }
 
@@ -4019,7 +4035,8 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
         progressCb->stop();
 		if (s_normProgressCb_MT)
 			delete s_normProgressCb_MT;
-		s_normProgressCb_MT=0;
+		s_normProgressCb_MT = 0;
+		s_progressCb_MT = 0;
 	}
 
 	//if something went wrong, we clear everything and return 0!

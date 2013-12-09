@@ -15,14 +15,16 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_ARCGRID_ASCII_FILTER_HEADER
-#define CC_ARCGRID_ASCII_FILTER_HEADER
+#ifndef CC_RASTER_FILTER_HEADER
+#define CC_RASTER_FILTER_HEADER
 
 #include "FileIOFilter.h"
 
 #ifdef CC_GDAL_SUPPORT
 
-//! ArcInfo ASCII Grid format file I/O filter
+//! Raster grid format file I/O filter
+/** Multiple formats are handled: see GDAL (http://www.gdal.org/)
+**/
 class RasterGridFilter : public FileIOFilter
 {
 public:
@@ -33,6 +35,6 @@ public:
 
 };
 
-#endif //CC_ARCGRID_ASCII_FILTER_HEADER
+#endif //CC_RASTER_FILTER_HEADER
 
 #endif

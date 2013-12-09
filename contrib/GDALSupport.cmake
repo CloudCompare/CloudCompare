@@ -23,10 +23,9 @@ if( ${OPTION_USE_GDAL} )
 	if( GDAL_FOUND )
 
 		target_link_libraries( ${ARGV0} ${GDAL_LIBRARY} )
+		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_GDAL_SUPPORT )
 		
 		if( WIN32 )
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE CC_GDAL_SUPPORT )
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG CC_GDAL_SUPPORT )
 			
 			#install DLLs
 			file( GLOB dll_files ${GDAL_INCLUDE_DIR}/../bin/*.dll )
@@ -39,8 +38,6 @@ if( ${OPTION_USE_GDAL} )
 				endif()
 			endforeach()
 			
-		else()
-			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_GDAL_SUPPORT )
 		endif()
 	
 	else()

@@ -40,6 +40,7 @@
 #include "ObjFilter.h"
 #include "PlyFilter.h"
 #include "MAFilter.h"
+#include "FBXFilter.h"
 //CAD
 #include "PDMS/PDMSFilter.h"
 //OTHERS
@@ -120,6 +121,10 @@ CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(const char* ext)
 	else if (strcmp(ext,"TIF") == 0 || strcmp(ext,"TIFF") == 0 || strcmp(ext,"ADF") == 0)
 		fType = RASTER;
 #endif
+#ifdef CC_FBX_SUPPORT
+	else if (strcmp(ext,"FBX") == 0)
+		fType = FBX;
+#endif
 	return fType;
 }
 
@@ -185,6 +190,10 @@ FileIOFilter* FileIOFilter::CreateFilter(CC_FILE_TYPES fType)
 #ifdef CC_GDAL_SUPPORT
 	case RASTER:
 		return new RasterGridFilter();
+#endif
+#ifdef CC_FBX_SUPPORT
+	case FBX:
+		return new FBXFilter();
 #endif
 	case FILE_TYPES_COUNT:
 	default:

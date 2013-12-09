@@ -110,6 +110,8 @@ target_link_3DXWARE( ${PROJECT_NAME} )
 target_link_DXFLIB( ${PROJECT_NAME} )
 #GDAL support
 target_link_GDAL( ${PROJECT_NAME} ${CloudCompare_dest_release} ${CloudCompare_dest_debug} )
+#FBX support
+target_link_FBX_SDK( ${PROJECT_NAME} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )

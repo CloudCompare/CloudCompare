@@ -63,6 +63,9 @@ enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
 #ifdef CC_GDAL_SUPPORT
 					RASTER				,		/**< GIS 2D1/2 raster (supported by GDAL) */
 #endif
+#ifdef CC_FBX_SUPPORT
+					FBX					,		/**< Autodesk FBX format */
+#endif
 					FILE_TYPES_COUNT	,		/**< Fake file type (for automatic counting) */
 };
 
@@ -87,6 +90,9 @@ const CC_FILE_TYPES CC_FILE_TYPES_ENUMS[] = {UNKNOWN_FILE, SOI, ASCII, BIN,
 #endif
 #ifdef CC_GDAL_SUPPORT
 												,RASTER
+#endif
+#ifdef CC_FBX_SUPPORT
+												,FBX
 #endif
 };
 
@@ -125,6 +131,9 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
 #ifdef CC_GDAL_SUPPORT
 			, "RASTER grid (*.*)"
 #endif
+#ifdef CC_FBX_SUPPORT
+			, "Autodesk FBX mesh (*.fbx)"
+#endif
 };
 
 const char CC_FILE_TYPE_DEFAULT_EXTENSION[][8] = {
@@ -161,6 +170,9 @@ const char CC_FILE_TYPE_DEFAULT_EXTENSION[][8] = {
 #endif
 #ifdef CC_GDAL_SUPPORT
 			, "tif"
+#endif
+#ifdef CC_FBX_SUPPORT
+			, "fbx"
 #endif
 };
 

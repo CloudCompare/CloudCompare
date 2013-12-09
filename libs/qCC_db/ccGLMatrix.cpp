@@ -51,9 +51,15 @@ ccGLMatrix::ccGLMatrix()
 	toIdentity();
 }
 
-ccGLMatrix::ccGLMatrix(const float* mat16)
+ccGLMatrix::ccGLMatrix(const float* mat16f)
 {
-    memcpy(m_mat, mat16, sizeof(float)*OPENGL_MATRIX_SIZE);
+    memcpy(m_mat, mat16f, sizeof(float)*OPENGL_MATRIX_SIZE);
+}
+
+ccGLMatrix::ccGLMatrix(const double* mat16d)
+{
+	for (unsigned i=0; i<16; ++i)
+		m_mat[i] = static_cast<float>(mat16d[i]);
 }
 
 ccGLMatrix::ccGLMatrix(const ccGLMatrix& mat)

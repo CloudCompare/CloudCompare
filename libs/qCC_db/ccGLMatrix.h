@@ -70,10 +70,16 @@ public:
 	**/
 	ccGLMatrix();
 
-	//! Constructor from a GL matrix array
-	/** \param mat16 a 16 elements array (OpenGL style matrix)
+	//! Constructor from a float GL matrix array
+	/** \param mat16 a 16 elements array (column major order)
 	**/
-	ccGLMatrix(const float* mat16);
+	ccGLMatrix(const float* mat16f);
+
+	//! Constructor from a double GL matrix array
+	/** \warning Will implicitly cast the elements to float!
+		\param mat16 a 16 elements array (column major order)
+	**/
+	ccGLMatrix(const double* mat16d);
 
 	//! Constructor from 4 columns (X,Y,Z,T)
 	/** \param X 3 first elements of the 1st column (last one is 0)

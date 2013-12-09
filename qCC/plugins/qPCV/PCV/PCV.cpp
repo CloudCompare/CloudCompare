@@ -199,7 +199,7 @@ int PCV::Launch(unsigned numberOfRays,
 		unsigned lastIndex = 0;
 		for (size_t i=0; i<rays.size(); ++i)
 		{
-			if (rays[i].z > 0)
+			if (rays[i].z < 0)
 			{
 				if (lastIndex != i)
 					rays[lastIndex] = rays[i];

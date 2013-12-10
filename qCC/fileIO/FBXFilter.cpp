@@ -78,8 +78,9 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 		return 0;
 
 	int polyCount = fbxMesh->GetPolygonCount();
+	//fbxMesh->GetLayer(
 	unsigned triCount = 0;
-	unsigned normalCount = 0;
+	unsigned polyVertCount = 0; //different from vertCount (vertices can be counted multiple times here!)
 	//as we can't load all polygons (yet ;) we already look if we can load any!
 	{
 		unsigned skipped = 0;
@@ -90,12 +91,12 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 			if (pSize == 3)
 			{
 				++triCount;
-				normalCount += 3;
+				polyVertCount += 3;
 			}
 			else if (pSize == 4)
 			{
 				triCount += 2;
-				normalCount += 4;
+				polyVertCount += 4;
 			}
 			else
 			{
@@ -135,19 +136,212 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 		return 0;
 	}
 
-	NormsIndexesTableType* normsTable = new NormsIndexesTableType();
-	if (!normsTable->reserve(normalCount) || !mesh->reservePerTriangleNormalIndexes())
+	//colors
 	{
-		ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' normals!").arg(fbxMesh->GetName()));
-		normsTable->release();
-		normsTable = 0;
+		for (int l=0; l<fbxMesh->GetElementVertexColorCount(); l++)
+		{
+			FbxGeometryElementVertexColor* vertColor = fbxMesh->GetElementVertexColor(l);
+			//CC can only handle per-vertex colors
+			if (vertColor->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+			{
+				if (vertColor->GetReferenceMode() == FbxGeometryElement::eDirect
+					|| vertColor->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
+				{
+					if (vertices->reserveTheRGBTable())
+					{
+						switch (vertColor->GetReferenceMode())
+						{
+						case FbxGeometryElement::eDirect:
+							{
+								for (int i=0; i<vertCount; ++i)
+								{
+									FbxColor c = vertColor->GetDirectArray().GetAt(i);
+									vertices->addRGBColor(	static_cast<colorType>(c.mRed	* MAX_COLOR_COMP),
+															static_cast<colorType>(c.mGreen	* MAX_COLOR_COMP),
+															static_cast<colorType>(c.mBlue	* MAX_COLOR_COMP) );
+								}
+							}
+							break;
+						case FbxGeometryElement::eIndexToDirect:
+							{
+								for (int i=0; i<vertCount; ++i)
+								{
+									int id = vertColor->GetIndexArray().GetAt(i);
+									FbxColor c = vertColor->GetDirectArray().GetAt(id);
+									vertices->addRGBColor(	static_cast<colorType>(c.mRed	* MAX_COLOR_COMP),
+															static_cast<colorType>(c.mGreen	* MAX_COLOR_COMP),
+															static_cast<colorType>(c.mBlue	* MAX_COLOR_COMP) );
+								}
+							}
+							break;
+						default:
+							assert(false);
+							break;
+						}
+
+						vertices->showColors(true);
+						mesh->showColors(true);
+						break; //no need to look for other color fields (we won't be able to handle them!
+					}
+					else
+					{
+						ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' colors!").arg(fbxMesh->GetName()));
+					}
+				}
+				else
+				{
+					ccLog::Warning(QString("[FBX] Color field #%i of mesh '%1' will be ignored (unhandled type)").arg(l).arg(fbxMesh->GetName()));
+				}
+			}
+			else
+			{
+				ccLog::Warning(QString("[FBX] Color field #%i of mesh '%1' will be ignored (unhandled type)").arg(l).arg(fbxMesh->GetName()));
+			}
+		}
 	}
-	else
+
+
+	//normals can be per vertices or per-triangle
+	int perPointNormals = -1;
+	int perVertexNormals = -1;
+	int perPolygonNormals = -1;
 	{
-		mesh->setTriNormsTable(normsTable);
-		mesh->addChild(normsTable);
-		vertices->showNormals(true);
-		mesh->showNormals(true);
+        for (int j=0; j<fbxMesh->GetElementNormalCount(); j++)
+        {
+			FbxGeometryElementNormal* leNormals = fbxMesh->GetElementNormal(j);
+			switch(leNormals->GetMappingMode())
+			{
+			case FbxGeometryElement::eByControlPoint:
+				perPointNormals = j;
+				break;
+			case FbxGeometryElement::eByPolygonVertex:
+				perVertexNormals = j;
+				break;
+			case FbxGeometryElement::eByPolygon:
+				perPolygonNormals = j;
+				break;
+			default:
+				//not handled
+				break;
+			}
+		}
+	}
+
+	//per-point normals
+	if (perPointNormals >= 0)
+	{
+		FbxGeometryElementNormal* leNormals = fbxMesh->GetElementNormal(perPointNormals);
+		FbxLayerElement::EReferenceMode refMode = leNormals->GetReferenceMode();
+		const FbxLayerElementArrayTemplate<FbxVector4>& normals = leNormals->GetDirectArray();
+		assert(normals.GetCount() == vertCount);
+		if (normals.GetCount() != vertCount)
+		{
+			ccLog::Warning(QString("[FBX] Wrong number of normals on mesh '%1'!").arg(fbxMesh->GetName()));
+			perPointNormals = -1;
+		}
+		else if (!vertices->reserveTheNormsTable())
+		{
+			ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' normals!").arg(fbxMesh->GetName()));
+			perPointNormals = -1;
+		}
+		else
+		{
+			//import normals
+			for (int i=0; i<vertCount; ++i)
+			{
+				int id = refMode != FbxGeometryElement::eDirect ? leNormals->GetIndexArray().GetAt(i) : i;
+				FbxVector4 N = normals.GetAt(id);
+				//convert to CC-structure
+				CCVector3 Npc(	static_cast<PointCoordinateType>(N.Buffer()[0]),
+								static_cast<PointCoordinateType>(N.Buffer()[1]),
+								static_cast<PointCoordinateType>(N.Buffer()[2]) );
+				vertices->addNorm(Npc.u);
+			}
+			vertices->showNormals(true);
+			mesh->showNormals(true);
+			//no need to import the other normals (if any)
+			perVertexNormals = -1;
+			perPolygonNormals = -1;
+		}
+	}
+
+	//per-triangle normals
+	NormsIndexesTableType* normsTable = 0;
+	if (perVertexNormals >= 0 || perPolygonNormals >= 0)
+	{
+		normsTable = new NormsIndexesTableType();
+		if (!normsTable->reserve(polyVertCount) || !mesh->reservePerTriangleNormalIndexes())
+		{
+			ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' normals!").arg(fbxMesh->GetName()));
+			normsTable->release();
+			normsTable = 0;
+		}
+		else
+		{
+			mesh->setTriNormsTable(normsTable);
+			mesh->addChild(normsTable);
+			vertices->showNormals(true);
+			mesh->showNormals(true);
+		}
+	}
+
+	//import textures UV
+	int perVertexUV = -1;
+	bool hasTexUV = false;
+	{
+		for (int l=0; l<fbxMesh->GetElementUVCount(); ++l)
+		{
+			FbxGeometryElementUV* leUV = fbxMesh->GetElementUV(l);
+			//per-point UV coordinates
+			if (leUV->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+			{
+				TextureCoordsContainer* vertTexUVTable = new TextureCoordsContainer();
+				if (!vertTexUVTable->reserve(vertCount) || !mesh->reservePerTriangleTexCoordIndexes())
+				{
+					vertTexUVTable->release();
+					ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' UV coordinates!").arg(fbxMesh->GetName()));
+				}
+				else
+				{
+					FbxLayerElement::EReferenceMode refMode = leUV->GetReferenceMode();
+					for (int i=0; i<vertCount; ++i)
+					{
+						int id = refMode != FbxGeometryElement::eDirect ? leUV->GetIndexArray().GetAt(i) : i;
+						FbxVector2 uv = leUV->GetDirectArray().GetAt(id);
+						//convert to CC-structure
+						float uvf[2] = {static_cast<float>(uv.Buffer()[0]),
+										static_cast<float>(uv.Buffer()[1])};
+						vertTexUVTable->addElement(uvf);
+					}
+					mesh->addChild(vertTexUVTable);
+					hasTexUV = true;
+				}
+				perVertexUV = -1;
+				break; //no need to look to the other UV fields (can't handle them!)
+			}
+			else if (leUV->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
+			{
+				//per-vertex UV coordinates
+				perVertexUV = l;
+			}
+		}
+	}
+
+	//per-vertex UV coordinates
+	TextureCoordsContainer* texUVTable = 0;
+	if (perVertexUV >= 0)
+	{
+		texUVTable = new TextureCoordsContainer();
+		if (!texUVTable->reserve(polyVertCount) || !mesh->reservePerTriangleTexCoordIndexes())
+		{
+			texUVTable->release();
+			ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' UV coordinates!").arg(fbxMesh->GetName()));
+		}
+		else
+		{
+			mesh->addChild(texUVTable);
+			hasTexUV = true;
+		}
 	}
 
 	//import polygons
@@ -169,13 +363,43 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 			int i3 = fbxMesh->GetPolygonVertex(i, 2);
 			mesh->addTriangle(i1,i2,i3);
 
+			int i4 = -1;
 			if (pSize == 4)
 			{
-				int i4 = fbxMesh->GetPolygonVertex(i, 3);
+				i4 = fbxMesh->GetPolygonVertex(i, 3);
 				mesh->addTriangle(i1,i3,i4);
 			}
 
-			//normals
+			if (hasTexUV)
+			{
+				if (texUVTable)
+				{
+					assert(perVertexUV >= 0);
+
+					int uvIndex = static_cast<int>(texUVTable->currentSize());
+					for (int j=0; j<pSize; ++j)
+					{
+						int lTextureUVIndex = fbxMesh->GetTextureUVIndex(i, j);
+						FbxGeometryElementUV* leUV = fbxMesh->GetElementUV(perVertexUV);
+						FbxVector2 uv = leUV->GetDirectArray().GetAt(lTextureUVIndex);
+						//convert to CC-structure
+						float uvf[2] = {static_cast<float>(uv.Buffer()[0]),
+										static_cast<float>(uv.Buffer()[1])};
+						texUVTable->addElement(uvf);
+					}
+					mesh->addTriangleTexCoordIndexes(uvIndex,uvIndex+1,uvIndex+2);
+					if (pSize == 4)
+						mesh->addTriangleTexCoordIndexes(uvIndex,uvIndex+2,uvIndex+3);
+				}
+				else
+				{
+					mesh->addTriangleTexCoordIndexes(i1,i2,i3);
+					if (pSize == 4)
+						mesh->addTriangleTexCoordIndexes(i1,i3,i4);
+				}
+			}
+
+			//per-triangle normals
 			if (normsTable)
 			{
 				int nIndex = static_cast<int>(normsTable->currentSize());
@@ -184,8 +408,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 					FbxVector4 N;
 					fbxMesh->GetPolygonVertexNormal(i, j, N);
 					CCVector3 Npc(	static_cast<PointCoordinateType>(N.Buffer()[0]),
-						static_cast<PointCoordinateType>(N.Buffer()[1]),
-						static_cast<PointCoordinateType>(N.Buffer()[2]) );
+									static_cast<PointCoordinateType>(N.Buffer()[1]),
+									static_cast<PointCoordinateType>(N.Buffer()[2]) );
 					normsTable->addElement(ccNormalVectors::GetNormIndex(Npc.u));
 				}
 
@@ -235,12 +459,18 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 					}
 				}
 			}
+
 			CCVector3 PV(	static_cast<PointCoordinateType>(P[0] + Pshift[0]),
 							static_cast<PointCoordinateType>(P[1] + Pshift[1]),
 							static_cast<PointCoordinateType>(P[2] + Pshift[0]) );
 
 			vertices->addPoint(PV);
 		}
+	}
+
+	//import textures
+	{
+		//TODO
 	}
 
 	return mesh;
@@ -255,7 +485,12 @@ CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bo
 	// Create the IO settings object.
 	FbxIOSettings *ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
 	lSdkManager->SetIOSettings(ios);
-
+	
+	// Import options determine what kind of data is to be imported.
+	// True is the default, but here we’ll set some to true explicitly, and others to false.
+	//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_MATERIAL,        true);
+	//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_TEXTURE,         true);
+	
 	// Create an importer using the SDK manager.
 	FbxImporter* lImporter = FbxImporter::Create(lSdkManager,"");
 
@@ -291,10 +526,6 @@ CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bo
 #ifdef _DEBUG
 				ccLog::Print(QString("Node: %1 - %2 properties").arg(nodeName).arg(pNode->GetNodeAttributeCount()));
 #endif
-				//FbxDouble3 translation = pNode->LclTranslation.Get(); 
-				//FbxDouble3 rotation = pNode->LclRotation.Get(); 
-				//FbxDouble3 scaling = pNode->LclScaling.Get();
-				
 				// scan the node's attributes.
 				for(int i=0; i<pNode->GetNodeAttributeCount(); i++)
 				{

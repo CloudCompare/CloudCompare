@@ -7553,13 +7553,13 @@ void MainWindow::saveFile()
 	#endif
 			if (clouds.getChildrenNumber() == 1)
 			{
-                filters.append(QString(CC_FILE_TYPE_FILTERS[PLY])+";;");
-                filters.append(QString(CC_FILE_TYPE_FILTERS[VTK])+";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[PLY]) + ";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[VTK]) + ";;");
 	#ifdef CC_LAS_SUPPORT
-                filters.append(QString(CC_FILE_TYPE_FILTERS[LAS])+";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[LAS]) + ";;");
 	#endif
-                filters.append(QString(CC_FILE_TYPE_FILTERS[PN])+";;");
-                filters.append(QString(CC_FILE_TYPE_FILTERS[PV])+";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[PN]) + ";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[PV]) + ";;");
 			}
 			//TODO: POV files handling!
 			//filters.append(CC_FILE_TYPE_FILTERS[POV]);
@@ -7582,6 +7582,9 @@ void MainWindow::saveFile()
 		#endif
                 filters.append(QString(CC_FILE_TYPE_FILTERS[MA])+";;");
 			}
+#ifdef CC_FBX_SUPPORT
+			filters.append(QString(CC_FILE_TYPE_FILTERS[FBX]) + ";;");
+#endif
 		}
 		else if (hasPolylines)
 		{
@@ -7729,8 +7732,14 @@ void MainWindow::saveFile()
 		}
 	}
 
-	if (result!=CC_FERR_NO_ERROR)
+	if (result != CC_FERR_NO_ERROR)
+	{
 		FileIOFilter::DisplayErrorMessage(result,"saving",selectedFilename);
+	}
+	else
+	{
+		ccLog::Print(QString("[I/O] File '%1' saved successfully").arg(selectedFilename));
+	}
 
     //we update current file path
     currentPath = QFileInfo(selectedFilename).absolutePath();

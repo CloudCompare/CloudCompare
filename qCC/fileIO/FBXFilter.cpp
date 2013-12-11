@@ -21,6 +21,7 @@
 
 //qCC
 #include "../ccCoordinatesShiftManager.h"
+#include "../ccCommon.h"
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -34,10 +35,302 @@
 #include <vector>
 #include <assert.h>
 
+// Converts a CC mesh to an FBX mesh
+static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
+{
+	if (!mesh)
+		return 0;
+
+    FbxMesh* lMesh = FbxMesh::Create(pScene, qPrintable(mesh->getName()));
+
+	ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
+	if (!cloud)
+		return 0;
+	unsigned vertCount = cloud->size();
+	unsigned faceCount = mesh->size();
+
+    // Create control points.
+	{
+		lMesh->InitControlPoints(vertCount);
+		FbxVector4* lControlPoints = lMesh->GetControlPoints();
+
+		for (unsigned i=0; i<vertCount; ++i)
+		{
+			const CCVector3* P = cloud->getPoint(i);
+			lControlPoints[i] = FbxVector4(P->x,P->y,P->z);
+		}
+	}
+
+	ccMesh* asCCMesh = 0;
+	if (mesh->isA(CC_MESH))
+		asCCMesh = static_cast<ccMesh*>(mesh);
+
+    // normals
+	if (mesh->hasNormals())
+	{
+		FbxGeometryElementNormal* lGeometryElementNormal = lMesh->CreateElementNormal();
+		if (mesh->hasTriNormals())
+		{
+			// We want to have one normal per vertex of each polygon,
+			// so we set the mapping mode to eByPolygonVertex.
+			lGeometryElementNormal->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+			lGeometryElementNormal->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
+			lGeometryElementNormal->GetIndexArray().SetCount(faceCount*3);
+			
+			if (asCCMesh)
+			{
+				NormsIndexesTableType* triNorms = asCCMesh->getTriNormsTable();
+				assert(triNorms);
+				for (unsigned i=0; i<triNorms->currentSize(); ++i)
+				{
+					const PointCoordinateType* N = ccNormalVectors::GetNormal(triNorms->getValue(i));
+					FbxVector4 Nfbx(N[0],N[1],N[2]);
+					lGeometryElementNormal->GetDirectArray().Add(Nfbx);
+				}
+				for (unsigned j=0; j<faceCount; ++j)
+				{
+					int i1,i2,i3;
+					asCCMesh->getTriangleNormalIndexes(j,i1,i2,i3);
+					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j)*3+0, i1);
+					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j)*3+1, i2);
+					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j)*3+2, i3);
+				}
+			}
+			else
+			{
+				for (unsigned j=0; j<faceCount; ++j)
+				{
+					//we can't use the 'NormsIndexesTable' so we save all the normals of all the vertices
+					CCVector3 Na,Nb,Nc;
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Na.x,Na.y,Na.z));
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nb.x,Nb.y,Nb.z));
+					lGeometryElementNormal->GetDirectArray().Add(FbxVector4(Nc.x,Nc.y,Nc.z));
+					
+					mesh->getTriangleNormals(j,Na,Nb,Nc);
+					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j)*3+0, static_cast<int>(j)*3+0);
+					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j)*3+1, static_cast<int>(j)*3+1);
+					lGeometryElementNormal->GetIndexArray().SetAt(static_cast<int>(j)*3+2, static_cast<int>(j)*3+2);
+				}
+			}
+		}
+		else
+		{
+			// We want to have one normal for each vertex (or control point),
+			// so we set the mapping mode to eByControlPoint.
+			lGeometryElementNormal->SetMappingMode(FbxGeometryElement::eByControlPoint);
+			// The first method is to set the actual normal value
+			// for every control point.
+			lGeometryElementNormal->SetReferenceMode(FbxGeometryElement::eDirect);
+			for (unsigned i=0; i<vertCount; ++i)
+			{
+				const PointCoordinateType* N = cloud->getPointNormal(i);
+				FbxVector4 Nfbx(N[0],N[1],N[2]);
+				lGeometryElementNormal->GetDirectArray().Add(Nfbx);
+			}
+		}
+	}
+
+    // colors
+	if (cloud->hasColors())
+	{
+		FbxGeometryElementVertexColor* lGeometryElementVertexColor = lMesh->CreateElementVertexColor();
+		lGeometryElementVertexColor->SetMappingMode(FbxGeometryElement::eByControlPoint);
+		lGeometryElementVertexColor->SetReferenceMode(FbxGeometryElement::eDirect);
+		for (unsigned i=0; i<vertCount; ++i)
+		{
+			const colorType* C = cloud->getPointColor(i);
+			FbxColor col( FbxDouble3(	static_cast<double>(C[0])/MAX_COLOR_COMP,
+										static_cast<double>(C[1])/MAX_COLOR_COMP,
+										static_cast<double>(C[2])/MAX_COLOR_COMP ) );
+			lGeometryElementVertexColor->GetDirectArray().Add(col);
+		}
+	}
+
+	// Set material mapping.
+    //FbxGeometryElementMaterial* lMaterialElement = lMesh->CreateElementMaterial();
+    //lMaterialElement->SetMappingMode(FbxGeometryElement::eByPolygon);
+    //lMaterialElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
+
+    // Create polygons. Assign material indices.
+	{
+		for (unsigned j=0; j<faceCount; ++j)
+		{
+			const CCLib::TriangleSummitsIndexes* tsi = mesh->getTriangleIndexes(j);
+
+			lMesh->BeginPolygon(static_cast<int>(j));
+			lMesh->AddPolygon(tsi->i1);
+			lMesh->AddPolygon(tsi->i2);
+			lMesh->AddPolygon(tsi->i3);
+			lMesh->EndPolygon();
+		}
+	}
+
+    FbxNode* lNode = FbxNode::Create(pScene,qPrintable(mesh->getName()));
+
+    lNode->SetNodeAttribute(lMesh);
+
+    //CreateMaterials(pScene, lMesh);
+
+    return lNode;
+}
+
+static bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename, int pFileFormat = -1, bool pEmbedMedia = false)
+{
+    // Create an exporter
+    FbxExporter* lExporter = FbxExporter::Create(pManager, "");
+
+    if( pFileFormat < 0 || pFileFormat >= pManager->GetIOPluginRegistry()->GetWriterFormatCount() )
+    {
+        // Write in fall back format in less no ASCII format found
+        pFileFormat = pManager->GetIOPluginRegistry()->GetNativeWriterFormat();
+
+        //Try to export in ASCII if possible
+        int lFormatIndex, lFormatCount = pManager->GetIOPluginRegistry()->GetWriterFormatCount();
+
+        for (lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
+        {
+            if (pManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
+            {
+                FbxString lDesc = pManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
+                const char *lASCII = "ascii";
+                if (lDesc.Find(lASCII)>=0)
+                {
+                    pFileFormat = lFormatIndex;
+                    break;
+                }
+            }
+        } 
+    }
+
+    // Set the export states. By default, the export states are always set to 
+    // true except for the option eEXPORT_TEXTURE_AS_EMBEDDED. The code below 
+    // shows how to change these states
+    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_MATERIAL,        true);
+    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_TEXTURE,         true);
+    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_EMBEDDED,        pEmbedMedia);
+    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_SHAPE,           true);
+    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_GOBO,            true);
+    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_ANIMATION,       true);
+    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
+
+    // Initialize the exporter by providing a filename
+    if(lExporter->Initialize(pFilename, pFileFormat, pManager->GetIOSettings()) == false)
+    {
+        ccLog::Warning("[FBX] Call to FbxExporter::Initialize() failed");
+        ccLog::Warning("[FBX] Error returned: %s", lExporter->GetStatus().GetErrorString());
+        return false;
+    }
+
+    // Export the scene
+    bool lStatus = lExporter->Export(pScene); 
+
+    // Destroy the exporter
+    lExporter->Destroy();
+
+    return lStatus;
+}
+
 CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const char* filename)
 {
+	if (!entity)
+		return CC_FERR_BAD_ARGUMENT;
+	
+	std::vector<ccGenericMesh*> meshes;
+	if (entity->isKindOf(CC_MESH))
+	{
+		meshes.push_back(static_cast<ccGenericMesh*>(entity));
+	}
+	else if (entity->isA(CC_HIERARCHY_OBJECT))
+	{
+		for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
+		{
+			ccHObject* child = entity->getChild(i);
+			if (child->isKindOf(CC_MESH))
+				meshes.push_back(static_cast<ccGenericMesh*>(child));
+		}
+	}
 
-	return CC_FERR_NO_ERROR;
+	if (meshes.empty())
+	{
+        return CC_FERR_NO_SAVE;
+	}
+
+	//The first thing to do is to create the FBX Manager which is the object allocator for almost all the classes in the SDK
+    FbxManager* lSdkManager = FbxManager::Create();
+    if( !lSdkManager )
+    {
+		ccLog::Warning("[FBX] Error: Unable to create FBX Manager!");
+        return CC_FERR_CONSOLE_ERROR;
+    }
+	else
+	{
+		ccLog::Print("[FBX] Autodesk FBX SDK version %s", lSdkManager->GetVersion());
+	}
+
+	//Create an IOSettings object. This object holds all import/export settings.
+	FbxIOSettings* ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
+	lSdkManager->SetIOSettings(ios);
+
+	//Load plugins from the executable directory (optional)
+	//FbxString lPath = FbxGetApplicationDirectory();
+	//lSdkManager->LoadPluginsDirectory(lPath.Buffer());
+
+    //Create an FBX scene. This object holds most objects imported/exported from/to files.
+    FbxScene* lScene = FbxScene::Create(lSdkManager, "My Scene");
+	if( !lScene )
+    {
+		ccLog::Warning("[FBX] Error: Unable to create FBX scene!");
+        return CC_FERR_CONSOLE_ERROR;
+    }
+
+    // create scene info
+	{
+		FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(lSdkManager,"SceneInfo");
+		sceneInfo->mTitle = qPrintable(QString("Mesh: ") + (meshes.size() == 1 ? meshes[0]->getName() : QString("Multiple meshes")));
+		sceneInfo->mAuthor = "CloudCompare";
+		sceneInfo->mRevision = "rev. 1.0";
+		sceneInfo->mKeywords = "cloudcompare mesh";
+
+		// we need to add the sceneInfo before calling AddThumbNailToScene because
+		// that function is asking the scene for the sceneInfo.
+		lScene->SetSceneInfo(sceneInfo);
+	}
+
+	//create thumbnail
+	//{
+	//	FbxThumbnail* lThumbnail = FbxThumbnail::Create(lScene,"");
+
+	//	lThumbnail->SetDataFormat(FbxThumbnail::eRGB_24);
+	//	lThumbnail->SetSize(FbxThumbnail::e64x64);
+	//	lThumbnail->SetThumbnailImage(cSceneThumbnail);
+
+	//	if (lScene->GetSceneInfo())
+	//	{
+	//		lScene->GetSceneInfo()->SetSceneThumbnail(lThumbnail);
+	//	}
+	//}
+
+    // Build the node tree.
+    FbxNode* lRootNode = lScene->GetRootNode();
+	{
+		for (size_t i=0; i<meshes.size(); ++i)
+		{
+			FbxNode* meshNode = ToFbxMesh(meshes[i],lScene);
+			if (meshNode)
+				lRootNode->AddChild(meshNode);
+			else
+				ccLog::Warning(QString("[FBX] Failed to convert mesh '%1' to FBX mesh/node!").arg(meshes[i]->getName()));
+		}
+	}
+
+	// Save the scene.
+    bool lResult = SaveScene(lSdkManager, lScene, filename);
+
+    // Destroy all objects created by the FBX SDK.
+    if( lSdkManager )
+		lSdkManager->Destroy();
+
+	return lResult ? CC_FERR_NO_ERROR : CC_FERR_CONSOLE_ERROR;
 }
 
 QString GetAttributeTypeName(FbxNodeAttribute::EType type)
@@ -519,17 +812,17 @@ CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bo
 
 			while (!nodes.empty())
 			{
-				FbxNode* pNode = nodes.back();
+				FbxNode* lNode = nodes.back();
 				nodes.pop_back();
 
-				const char* nodeName = pNode->GetName();
+				const char* nodeName = lNode->GetName();
 #ifdef _DEBUG
-				ccLog::Print(QString("Node: %1 - %2 properties").arg(nodeName).arg(pNode->GetNodeAttributeCount()));
+				ccLog::Print(QString("Node: %1 - %2 properties").arg(nodeName).arg(lNode->GetNodeAttributeCount()));
 #endif
 				// scan the node's attributes.
-				for(int i=0; i<pNode->GetNodeAttributeCount(); i++)
+				for(int i=0; i<lNode->GetNodeAttributeCount(); i++)
 				{
-					FbxNodeAttribute* pAttribute = pNode->GetNodeAttributeByIndex(i);
+					FbxNodeAttribute* pAttribute = lNode->GetNodeAttributeByIndex(i);
 					FbxNodeAttribute::EType type = pAttribute->GetAttributeType();
 #ifdef _DEBUG
 					ccLog::Print(QString("\tProp. #%1").arg(GetAttributeTypeName(type)));
@@ -543,7 +836,7 @@ CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bo
 							if (mesh)
 							{
 								//apply transformation
-								FbxAMatrix& transform = lScene->GetEvaluator()->GetNodeGlobalTransform(pNode);
+								FbxAMatrix& transform = lNode->EvaluateGlobalTransform();
 								ccGLMatrix mat;
 								float* data = mat.data();
 								for (int c=0; c<4; ++c)
@@ -555,6 +848,9 @@ CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bo
 									*data++ = static_cast<float>(C[3]);
 								}
 								mesh->applyGLTransformation_recursive(&mat);
+
+								if (mesh->getName().isEmpty())
+									mesh->setName(nodeName);
 
 								container.addChild(mesh);
 							}
@@ -587,9 +883,9 @@ CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bo
 				}
 
 				// Recursively add the children.
-				for(int j=0; j<pNode->GetChildCount(); j++)
+				for(int j=0; j<lNode->GetChildCount(); j++)
 				{
-					nodes.push_back(pNode->GetChild(j));
+					nodes.push_back(lNode->GetChild(j));
 				}
 			}
 		}

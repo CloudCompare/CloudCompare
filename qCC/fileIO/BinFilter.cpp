@@ -145,9 +145,6 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 
 	CC_FILE_ERROR result = future.result();
 
-	if (result == CC_FERR_NO_ERROR)
-		ccLog::Print("[BIN] File %s saved successfully",filename);
-
 	return result;
 }
 

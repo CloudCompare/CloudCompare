@@ -90,6 +90,8 @@ target_link_LIBE57( ${PROJECT_NAME} )
 target_link_3DXWARE( ${PROJECT_NAME} )
 #DXF support
 target_link_DXFLIB( ${PROJECT_NAME} )
+#FBX support
+target_link_FBX_SDK( ${PROJECT_NAME} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )

@@ -662,8 +662,6 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 	delete dw;
 	dw = 0;
 
-	ccLog::Print("[DXF] File %s saved successfully",filename);
-
 	return CC_FERR_NO_ERROR;
 
 #endif

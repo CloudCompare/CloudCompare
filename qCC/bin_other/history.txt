@@ -19,6 +19,13 @@ v2.5.2 XX/XX/2013
 - New tool: Edit > Scalar fields > Set SF as coordinate(s)
 	- allows the user to map a scalar field to one or several dimensions (X,Y or Z)
 	- usefull to convert a 2D raster with a scalar field (gray level, etc.) to a 2D1/2 point cloud
+- New formats:
+	- Autodesk(R) FBX (http://en.wikipedia.org/wiki/FBX)
+		* meshes only
+		* support for materials is planned but not finished yet
+	- Any geo-localized raster (geotiff, ArcGrid, etc.) thanks to GDAL library (http://www.gdal.org/)
+		* on input: use 'File > Open' (raster will be converted to a point cloud)
+		* on output: use the Height Grid Generation tool (this way, any cloud can be converted to raster)
 - Other enhancements:
 	- the qPoissonRecon plugin (Poisson Surface Reconstruction) is now able to map the
 		input cloud colors on the resulting mesh:

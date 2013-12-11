@@ -14,7 +14,6 @@ File I/O:
 - POD files (Pointools)
 - FARO and LEICA file formats
 - SHP files (--> GDAL)
-- geotiff files (--> GDAL)
 
 *** And from the forum topic or emails 'recent requests' ***
 
@@ -22,6 +21,8 @@ Big ones:
 [*] flythrough mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
 
 Various:
+[*] Finish FBX support (materials)
+[*] Output geolocalized rasters (geotiff) in the Height Grid Generation tool (with GDAL)
 [*] Add new options in the 'Apply > Transformation tool': rotation(axis,angle) and rotation(vecSrc,vecDest)
 [*] Sort the connected components based on their point count
 [*] Use a scalar field (such as scattering angles) in the subsampling method to keep the "best" points
@@ -80,7 +81,6 @@ From Rav M.
 [*] move and rotate global coordinate (X,Y,Z) or aligning it like camera and then adding another parts to correct scene in right place.
 
 From Gianluca C.
-[*] find a way to transfer the colors from the pointcloud to the Poisson reconstructed surface (qPoissonRecon)
 [*] to overlay an image over the mesh with some common points and "drape" the photo on the surface
 
 From Andrew O.

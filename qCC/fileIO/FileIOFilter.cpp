@@ -258,6 +258,8 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 
 	if (result != CC_FERR_NO_ERROR)
         DisplayErrorMessage(result,"loading",fi.baseName());
+	else
+		ccLog::Print(QString("[I/O] File '%1' loaded successfully").arg(fi.baseName()));
 
     unsigned childrenCount = container->getChildrenNumber();
     if (childrenCount != 0)
@@ -302,7 +304,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename
     CC_FILE_ERROR result = fio->saveToFile(entities, qPrintable(completeFileName));
 
     delete fio;
-    fio=0;
+    fio = 0;
 
     return result;
 }

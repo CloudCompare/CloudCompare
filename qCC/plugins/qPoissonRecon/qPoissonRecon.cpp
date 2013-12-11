@@ -307,7 +307,7 @@ void qPoissonRecon::doAction()
 
 					if (result >= 0)
 					{
-						assert(params.CPSet == nr_vertices);
+						assert(CPSet.size() == nr_vertices);
 						for (unsigned i=0; i<nr_vertices; ++i)
 						{
 							unsigned index = CPSet.getPointGlobalIndex(i);

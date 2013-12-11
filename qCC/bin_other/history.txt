@@ -20,13 +20,17 @@ v2.5.2 XX/XX/2013
 	- allows the user to map a scalar field to one or several dimensions (X,Y or Z)
 	- usefull to convert a 2D raster with a scalar field (gray level, etc.) to a 2D1/2 point cloud
 - Other enhancements:
+	- the qPoissonRecon plugin (Poisson Surface Reconstruction) is now able to map the
+		input cloud colors on the resulting mesh:
+		* quick & dirty approach: simply assign to each mesh vertex the color of the nearest input point
 	- when using 'Local models' when computing cloud-to-cloud distances, CC will now take the
 		smallest distance between each point and either the local model or the nearest neighbor
 		(in order to avoid clearly erroneous distances due to badly shaped local models).
 	- the 'facet' entity's normal vector can now be displayed or hidden via the facet properties
-	- BIN file loading/saving is now done in a separate thread
+	- BIN file loading/saving is now performed in a separate thread
 		* a progress dialog is now displayed during loading/saving
-		* multiple loading sesssions can be done concurrently (only interesting when loading from diffrent drives)
+		* multiple loading sessions (drag & drop) can be done concurrently (mainly interesting when
+			loading files from different drives)
 	- pause button added to the "Graphical Transformation" tool (to allow rotating/panning the 3D view)
 	- new shortcuts added to the "Graphical Transformation" tool:
 		* space bar = pause/unpause

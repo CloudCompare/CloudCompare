@@ -23,6 +23,7 @@
 #include <QtCore>
 #include <QProgressDialog>
 #include <QtConcurrentRun>
+#include <QMessageBox>
 
 //PoissonRecon
 #include <PoissonReconLib.h>
@@ -32,6 +33,10 @@
 #include <ccPointCloud.h>
 #include <ccMesh.h>
 #include <ccPlatform.h>
+#include <ccProgressDialog.h>
+
+//CCLib
+#include <DistanceComputationTools.h>
 
 //System
 #include <algorithm>
@@ -119,9 +124,9 @@ void qPoissonRecon::doAction()
 
 	bool ok;
 	#if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))
-	int depth = QInputDialog::getInt(0, "Poisson reconstruction","Octree depth:", 8, 1, 24, 1, &ok);
+	int depth = QInputDialog::getInt(m_app->getMainWindow(), "Poisson reconstruction","Octree depth:", 8, 1, 24, 1, &ok);
 	#else
-	int depth = QInputDialog::getInteger(0, "Poisson reconstruction","Octree depth:", 8, 1, 24, 1, &ok);
+	int depth = QInputDialog::getInteger(m_app->getMainWindow(), "Poisson reconstruction","Octree depth:", 8, 1, 24, 1, &ok);
 	#endif
 
 	if (!ok)
@@ -272,6 +277,54 @@ void qPoissonRecon::doAction()
 				{
 					//Can't handle anything else than triangles yet!
 					assert(false);
+				}
+			}
+		}
+
+		//if the input cloud has colors, try to 'map' them on the resulting mesh
+		if (pc->hasColors())
+		{
+			if (QMessageBox::question(m_app->getMainWindow(), "Poisson reconstruction","Import input cloud colors? (this may take some time)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+			{
+				if (newPC->reserveTheRGBTable())
+				{
+					ccProgressDialog pDlg(true, m_app->getMainWindow());
+					pDlg.setInfo("Importing input colors");
+					pDlg.setMethodTitle("Poisson Reconstruction");
+					//pDlg.start();
+
+					//compute the closest-point set of 'newPc' relatively to 'pc'
+					//(to get a mapping between the resulting vertices and the input points)
+					int result = 0;
+					CCLib::ReferenceCloud CPSet(pc);
+					{
+						CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
+						params.CPSet = &CPSet;
+						params.octreeLevel = 7; //static_cast<uchar>(std::min(depth,CCLib::DgmOctree::MAX_OCTREE_LEVEL)); //TODO: find a better way to set the computation level
+
+						result = CCLib::DistanceComputationTools::computeHausdorffDistance(newPC, pc, params, &pDlg);
+					}
+
+					if (result >= 0)
+					{
+						assert(params.CPSet == nr_vertices);
+						for (unsigned i=0; i<nr_vertices; ++i)
+						{
+							unsigned index = CPSet.getPointGlobalIndex(i);
+							newPC->addRGBColor(pc->getPointColor(index));
+						}
+						newPC->showColors(true);
+						newMesh->showColors(true);
+					}
+					else
+					{
+						m_app->dispToConsole(QString("[PoissonReconstruction] Failed to transfer colors: an error (%1) occurred during closest-point set computation!").arg(result),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+						newPC->unallocateColors();
+					}
+				}
+				else
+				{
+					m_app->dispToConsole("[PoissonReconstruction] Failed to transfer colors: not enough memory!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 				}
 			}
 		}

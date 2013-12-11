@@ -83,5 +83,5 @@ void StatisticalOutliersRemover::getParametersFromDialog()
 {
     //get values from dialog
     m_k = m_dialog->spinK->value();
-    m_std = m_dialog->spinStd->value();
+    m_std = static_cast<float>(m_dialog->spinStd->value());
 }

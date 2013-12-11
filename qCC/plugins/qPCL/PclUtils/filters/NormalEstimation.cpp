@@ -83,7 +83,7 @@ void NormalEstimation::getParametersFromDialog()
     m_useKnn = m_dialog->useKnnCheckBox->isChecked();
     m_overwrite_curvature = m_dialog->curvatureCheckBox->isChecked();
     m_knn_radius = m_dialog->knnSpinBox->value();
-    m_radius = m_dialog->radiusDoubleSpinBox->value();
+    m_radius = static_cast<float>(m_dialog->radiusDoubleSpinBox->value());
 }
 
 int NormalEstimation::compute()

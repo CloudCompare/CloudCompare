@@ -190,7 +190,7 @@ int DistanceComputationTools::computeHausdorffDistance(GenericIndexedCloudPersis
 		}
 	}
 
-	//structure contenant les parametres additionnels
+	//additional parameters
 	void* additionalParameters[4] = {(void*)referenceCloud,
 									 (void*)referenceOctree,
 									 (void*)&params,

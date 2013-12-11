@@ -11,7 +11,7 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#               COPYRIGHT: Luca Penasa                                   #
+//#                         COPYRIGHT: Luca Penasa                         #
 //#                                                                        #
 //##########################################################################
 //
@@ -70,7 +70,8 @@ class BaseFilter: public QObject
 
 public:
 	/** \brief Default constructor
-	* \param[in] desc a FilterDescription structure containing filter infos
+	*	\param[in] desc a FilterDescription structure containing filter infos
+	*	\param[in] parent_plugin parent plugin (optional)
 	*/
     BaseFilter(FilterDescription desc = FilterDescription(), ccPluginInterface * parent_plugin = 0);
 
@@ -105,10 +106,10 @@ public:
 	//! Returns the icon associated with the button
 	QIcon getIcon() const;
 
-    //! set wether we want to show a progressbar while coputing
+    //! Sets whether to show a progressbar while computing or not
     void setShowProgressBar(bool status) {m_show_progress = status;}
 
-	//! Returns a vector of strings representing the names of the availabe scalar fields
+	//! Returns a vector of strings representing the names of the available scalar fields
 	/** For the first selected entity.
 	**/
 	std::vector<std::string> getSelectedAvailableScalarFields();
@@ -121,10 +122,10 @@ public:
     //! Returns all the objects in db tree of type "type"
     void getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& entities);
 
-    //! get all entities that are slected and that also are cc_point_cloud
+    //! get all entities that are selected and that also are cc_point_cloud
     void getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & entities);
 
-    //! get all entities that are slected and that also are of the specified type
+    //! get all entities that are selected and that also are of the specified type
     void getSelectedEntitiesThatAre(CC_CLASS_ENUM  kind, ccHObject::Container & entities);
 
 	//! Returns 1 if the first selected entity has RGB info
@@ -154,17 +155,11 @@ public:
 	void setMainAppInterface(ccMainAppInterface* app) { m_app = app; }
 
     //! get the associated parent plugin interface
-    ccPluginInterface * getParentPlugin() const {return m_parent_plugin;}
+    ccPluginInterface * getParentPlugin() const { return m_parent_plugin; }
 
 protected slots:
 
-	//! Returns is called when the dialog window is accepted.
-	/** it can be overridden but normally should not be necessary
-		the parameters will be retrieved from the dialog
-		via the getParametersFromDialog() method
-		this always need to be overridden.
-	**/
-	//DGM: useless, are dialogs are always modal
+	//DGM: useless as dialogs are always modal
 	//virtual int dialogAccepted();
 
 	//! Called when action is triggered
@@ -231,21 +226,21 @@ protected:
 	**/
     virtual int start();
 
-	//! Initalize the corresponding action
+	//! Initializes the corresponding action
 	/** Action can be retrieved with getAction.
 	**/
 	virtual void initAction();
 
 	//! Emits the error corresponding to a given error code (see newErrorMessage)
-	/** Error code identifird a given error message.
-		Error messages are retrived from getErrorMessage() and getFilterErrorMessage()
+	/** Error messages are retrieved from getErrorMessage() and getFilterErrorMessage()
+		\param errCode Error code (identifies a given error message)
 	**/
 	void throwError(int errCode);
 
 	//! Forces the Ui to be updated
 	/** Simply calls m_q_parent->UpdateUI();
 	**/
-	//DGM: dirty! library has no access to GUI (see model-vue-controller architecture)
+	//DGM: dirty! library has no access to GUI (see MVC architecture)
 	//virtual void updateUi();
 
 	//! The filter action (created by initAction)
@@ -254,12 +249,12 @@ protected:
 	//! Pointer to the main window
 	/** Used for accessing qCC functionalities from filters
 	**/
-	//DGM: dirty! library has no access to GUI (see model-vue-controller architecture)
+	//DGM: dirty! library has no access to GUI (see MVC architecture)
 	//MainWindow * m_q_parent;
 
 	//! Currently selected entities
 	/** Updated using updateSelectedEntities()
-		--> DGM: now called by qPCL! (see model-vue-controller architecture)
+		\note DGM: now called by qPCL! (see MVC architecture)
 	**/
 	ccHObject::Container m_selected;
 

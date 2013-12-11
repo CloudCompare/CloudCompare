@@ -5769,7 +5769,7 @@ void MainWindow::doActionAdjustZoom()
 
 	//apply zoom
 	double zoom = azDlg.getZoom();
-	win->setZoom(zoom);
+	win->setZoom(static_cast<float>(zoom));
 	win->redraw();
 }
 

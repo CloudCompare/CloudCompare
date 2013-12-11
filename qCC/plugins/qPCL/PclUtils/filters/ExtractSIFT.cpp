@@ -112,10 +112,10 @@ void ExtractSIFT::getParametersFromDialog()
 
 	//get the parameters from the dialog
 	m_nr_octaves = m_dialog->nrOctaves->value();
-	m_min_scale = m_dialog->minScale->value();
+	m_min_scale = static_cast<float>(m_dialog->minScale->value());
 	m_nr_scales_per_octave = m_dialog->scalesPerOctave->value();
 	m_use_min_contrast = m_dialog->useMinContrast->checkState();
-	m_min_contrast = m_use_min_contrast ? m_dialog->minContrast->value() : 0;
+	m_min_contrast = m_use_min_contrast ? static_cast<float>(m_dialog->minContrast->value()) : 0;
 	m_field_to_use = m_dialog->intensityCombo->currentText().toStdString();
 
 	if (m_field_to_use == "rgb")

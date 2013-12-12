@@ -363,7 +363,11 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 			{
 				ccProgressDialog progressDlg(true);
 				void* additionalParameters[1] = {(void*)equivalentIndexes};
-				unsigned result = octree->executeFunctionForAllCellsAtLevel(ccOctree::MAX_OCTREE_LEVEL,tagDuplicatedVertices,additionalParameters,&progressDlg,"Tag duplicated vertices");
+				unsigned result = octree->executeFunctionForAllCellsAtLevel(ccOctree::MAX_OCTREE_LEVEL,
+																			tagDuplicatedVertices,
+																			additionalParameters,
+																			&progressDlg,
+																			"Tag duplicated vertices");
 				vertices->deleteOctree();
 				octree=0;
 

@@ -132,7 +132,7 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
 			, "RASTER grid (*.*)"
 #endif
 #ifdef CC_FBX_SUPPORT
-			, "Autodesk FBX mesh (*.fbx)"
+			, "FBX Autodesk mesh (*.fbx)"
 #endif
 };
 

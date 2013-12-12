@@ -132,8 +132,10 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 				}
 			}
 
-			pc->setMetaData("raster_width",QVariant::fromValue<int>(rasterX));
-			pc->setMetaData("raster_height",QVariant::fromValue<int>(rasterY));
+			QVariant xVar = QVariant::fromValue<int>(rasterX);
+			QVariant yVar = QVariant::fromValue<int>(rasterY);
+			pc->setMetaData("raster_width",xVar);
+			pc->setMetaData("raster_height",yVar);
 		}
 
 		//fetch raster bands

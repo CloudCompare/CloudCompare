@@ -23,7 +23,6 @@ Big ones:
 Various:
 [*] Finish FBX support (materials)
 [*] Output geolocalized rasters (geotiff) in the Height Grid Generation tool (with GDAL)
-[*] Add new options in the 'Apply > Transformation tool': rotation(axis,angle) and rotation(vecSrc,vecDest)
 [*] Sort the connected components based on their point count
 [*] Use a scalar field (such as scattering angles) in the subsampling method to keep the "best" points
 [*] Add touchpad support (http://www.danielgm.net/cc/forum/viewtopic.php?t=671)

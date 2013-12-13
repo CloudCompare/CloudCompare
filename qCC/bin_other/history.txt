@@ -27,6 +27,8 @@ v2.5.2 XX/XX/2013
 		* on input: use 'File > Open' (raster will be converted to a point cloud)
 		* on output: use the Height Grid Generation tool (this way, any cloud can be converted to raster)
 - Other enhancements:
+	- the qPoissonRecon plugin is now based on the latest version of PoissonRecon (5.5) and it
+		has its own parameters dialog (see http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version5.5/)
 	- the 'Edit > Transformation' tool now offers 3 different ways to input a transformation:
 		* classical 4x4 transformation matrix
 		* rotation axis, rotation angle and translation vector

@@ -247,14 +247,26 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 
 	//load file
     ccHObject* container = new ccHObject();
-	CC_FILE_ERROR result = fio->loadFile(qPrintable(filename),
-											*container,
-											alwaysDisplayLoadDialog,
-											coordinatesShiftEnabled,
-											coordinatesShift);
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	try
+	{
+		result = fio->loadFile(	qPrintable(filename),
+								*container,
+								alwaysDisplayLoadDialog,
+								coordinatesShiftEnabled,
+								coordinatesShift);
+	}
+	catch(...)
+	{
+		ccLog::Warning("[I/O] Exception caught during file opening!");
+		if (container)
+			container->removeAllChildren();
+		result = CC_FERR_CONSOLE_ERROR;
+	}
+
 	//we can release the loader instance
     delete fio;
-    fio=0;
+    fio = 0;
 
 	if (result != CC_FERR_NO_ERROR)
         DisplayErrorMessage(result,"loading",fi.baseName());
@@ -281,7 +293,7 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 	else
     {
         delete container;
-        container=0;
+        container = 0;
     }
 
 	return container;

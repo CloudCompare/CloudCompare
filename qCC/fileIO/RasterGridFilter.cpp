@@ -48,7 +48,8 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
 
 	GDALDataset* poDataset = static_cast<GDALDataset*>(GDALOpen( filename, GA_ReadOnly ));
-    if( poDataset != NULL )
+    
+	if( poDataset != NULL )
     {
 		ccLog::Print("Raster file: '%s'", filename);
 		ccLog::Print( "Driver: %s/%s",
@@ -166,6 +167,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 			adfMinMax[0] = poBand->GetMinimum( &bGotMin );
 			adfMinMax[1] = poBand->GetMaximum( &bGotMax );
 			if (!bGotMin || !bGotMax )
+				//DGM FIXME: if the file is corrupted (e.g. ASCII ArcGrid with missing rows) this method will enter in a infinite loop!
 				GDALComputeRasterMinMax((GDALRasterBandH)poBand, TRUE, adfMinMax);
 			ccLog::Print( "Min=%.3fd, Max=%.3f", adfMinMax[0], adfMinMax[1] );
 

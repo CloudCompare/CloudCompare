@@ -391,7 +391,8 @@ protected:
 								CCLib::ReferenceCloudContainer& components,
 								unsigned minPointPerComponent,
 								bool randomColors,
-								bool selectComponents);
+								bool selectComponents,
+								bool sortBysize = true);
 
     void closeEvent(QCloseEvent* event);
     void moveEvent(QMoveEvent* event);

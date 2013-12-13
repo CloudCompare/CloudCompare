@@ -3827,14 +3827,54 @@ void MainWindow::doActionComputeStatParams()
     delete distrib;
 }
 
+struct ComponentIndexAndSize
+{
+	unsigned index;
+	unsigned size;
+
+	ComponentIndexAndSize(unsigned i, unsigned s) : index(i), size(s) {}
+
+	static bool DescendingCompOperator(const ComponentIndexAndSize& a, const ComponentIndexAndSize& b)
+	{
+		return a.size > b.size;
+	}
+};
+
 void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 										CCLib::ReferenceCloudContainer& components,
 										unsigned minPointsPerComponent,
 										bool randomColors,
-										bool selectComponents)
+										bool selectComponents,
+										bool sortBysize/*=true*/)
 {
 	if (!cloud || components.empty())
 		return;
+
+	std::vector<ComponentIndexAndSize> sortedIndexes;
+	std::vector<ComponentIndexAndSize>* _sortedIndexes = 0;
+	if (sortBysize)
+	{
+		try
+		{
+			sortedIndexes.reserve(components.size());
+		}
+		catch (std::bad_alloc)
+		{
+			ccLog::Warning("[CreateComponentsClouds] Not enough memory to sort components by size!");
+			sortBysize = false;
+		}
+
+		if (sortBysize) //still ok?
+		{
+			for (unsigned i=0; i<components.size(); ++i)
+			{
+				sortedIndexes.push_back(ComponentIndexAndSize(i,components[i]->size()));
+			}
+
+			std::sort(sortedIndexes.begin(), sortedIndexes.end(), ComponentIndexAndSize::DescendingCompOperator);
+			_sortedIndexes = &sortedIndexes;
+		}
+	}
 
 	//we create "real" point clouds for all input components
 	{
@@ -3847,10 +3887,9 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		const double* shift = (pc ? pc->getOriginalShift() : 0);
 
 		//for each component
-		while (!components.empty())
+		for (unsigned i=0; i<components.size(); ++i)
 		{
-			CCLib::ReferenceCloud* compIndexes = components.back();
-			components.pop_back();
+			CCLib::ReferenceCloud* compIndexes = _sortedIndexes ? components[_sortedIndexes->at(i).index] : components[i];
 
 			//if it has enough points
 			if (compIndexes->size() >= minPointsPerComponent)
@@ -3889,6 +3928,8 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 			delete compIndexes;
 			compIndexes = 0;
 		}
+
+		components.clear();
 
 		if (ccGroup->getChildrenNumber() == 0)
 		{

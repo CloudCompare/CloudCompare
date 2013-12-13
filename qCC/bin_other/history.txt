@@ -70,8 +70,11 @@ v2.5.2 XX/XX/2013
 			of the Point-pair based alignment dialog are both renamed 'Adjust scale'
 		* the 'Edit > Synchronize' tool is moved and renamed 'Tools > Registration > Match barycenters'
 		* the ICP registration tool now issues the same textual report as the Point-pair based alignment tool
-	- the Connected Components tool dialog now displays the octree cell size as the currently selected level
-		and the 'random colors' checkbox is not selected by default anymore
+	- the Connected Components tool dialog now:
+		* displays the octree cell size as the currently selected level
+		* the components are automatically 'selected' in order to clearly identify them without random colors
+			(the 'random colors' checkbox is not selected by default anymore)
+		* the components are sorted by their size (starting from the biggest)
 	- new command lines options (see http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine):
 		* C2C_DIST: cloud to cloud distance computation
 		* C2M_DIST: cloud to mesh distance computation

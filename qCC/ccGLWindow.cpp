@@ -336,7 +336,7 @@ void ccGLWindow::initializeGL()
 					if (!getDisplayParameters().isInPersistentSettings("colorScaleUseShader"))
 					{
 						bool shouldUseShader = true;
-						if (!vendorName || QString(vendorName).toUpper().startsWith("ATI"))
+						if (!vendorName || QString(vendorName).toUpper().startsWith("ATI") || QString(vendorName).toUpper().startsWith("VMWARE"))
 						{
 							ccLog::Warning("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
 							shouldUseShader = false;

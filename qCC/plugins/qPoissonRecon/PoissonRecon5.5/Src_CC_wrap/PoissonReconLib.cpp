@@ -27,7 +27,7 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
-#include "../Src/Time.h"
+#include "../Src/poissonTime.h"
 #include "../Src/MarchingCubes.h"
 #include "../Src/Octree.h"
 #include "../Src/SparseMatrix.h"
@@ -45,6 +45,9 @@
 template< int Degree , bool OutputDensity >
 class LibOctree : public Octree<Degree, OutputDensity>
 {
+private:
+   typedef typename Octree<Degree, OutputDensity>::TreeOctNode TreeOctNode;
+      
 public:
 	template<typename T>
 	int setTree(	unsigned count,
@@ -65,7 +68,7 @@ public:
 		this->samplesPerNode = samplesPerNode;
 		this->splatDepth = splatDepth;
 
-		if( _boundaryType == 0 )
+		if( this->_boundaryType == 0 )
 		{
 			maxDepth++,
 			minDepth = std::max< int >( 1 , minDepth )+1;
@@ -76,16 +79,16 @@ public:
 		{
 			minDepth = std::max< int >( 0 , minDepth );
 		}
-		_minDepth = std::min< int >( minDepth , maxDepth );
-		_constrainValues = (constraintWeight>0);
+		this->_minDepth = std::min< int >( minDepth , maxDepth );
+		this->_constrainValues = (constraintWeight>0);
 
 		double pointWeightSum = 0;
 		Point3D< Real > min , max;
 
-		typename TreeOctNode::NeighborKey3 neighborKey;
+		typename Octree<Degree, OutputDensity>::TreeOctNode::NeighborKey3 neighborKey;
 		neighborKey.set( maxDepth );
 
-		tree.setFullDepth( _minDepth );
+		this->tree.setFullDepth( this->_minDepth );
 		// Read through once to get the center and scale
 		{
 			const T* _P = P;
@@ -111,17 +114,17 @@ public:
 				}
 			}
 
-			_center = ( max+min ) /2;
-			_scale = std::max< Real >( max[0]-min[0] , std::max< Real >( max[1]-min[1] , max[2]-min[2] ) ) * 2;
-			if( _boundaryType == 0 )
-				_scale *= 2;
+			this->_center = ( max+min ) /2;
+			this->_scale = std::max< Real >( max[0]-min[0] , std::max< Real >( max[1]-min[1] , max[2]-min[2] ) ) * 2;
+			if( this->_boundaryType == 0 )
+				this->_scale *= 2;
 		}
 
 		//update scale and center with scale factor
 		{
-			_scale *= scaleFactor;
+			this->_scale *= scaleFactor;
 			for( int i=0 ; i<DIMENSION ; i++ )
-				_center[i] -= _scale/2;
+				this->_center[i] -= this->_scale/2;
 		}
 
 		if( splatDepth > 0 )
@@ -134,7 +137,7 @@ public:
 									static_cast<Real>(_P[1]),
 									static_cast<Real>(_P[2]) );
 
-				p = ( p - _center ) / _scale;
+				p = ( p - this->_center ) / this->_scale;
 				
 				if( !_inBounds(p) )
 					continue;
@@ -151,7 +154,7 @@ public:
 					weight = Real( Length(n) );
 				}
 
-				TreeOctNode* temp = &tree;
+				TreeOctNode* temp = &this->tree;
 				int d = 0;
 				while( d < splatDepth )
 				{
@@ -174,7 +177,7 @@ public:
 		}
 
 		//normals
-		normals = new std::vector< Point3D<Real> >();
+		this->normals = new std::vector< Point3D<Real> >();
 		int cnt = 0;
 		{
 			const T* _P = P;
@@ -184,7 +187,7 @@ public:
 				Point3D< Real > p(	static_cast<Real>(_P[0]),
 									static_cast<Real>(_P[1]),
 									static_cast<Real>(_P[2]) );
-				p = ( p - _center ) / _scale;
+				p = ( p - this->_center ) / this->_scale;
 				if( !_inBounds(p) )
 					continue;
 
@@ -205,11 +208,11 @@ public:
 				Real pointWeight = Real(1.0f);
 				if ( samplesPerNode > 0 && splatDepth )
 				{
-					pointWeight = SplatOrientedPoint( p , n , neighborKey , splatDepth , samplesPerNode , _minDepth , maxDepth );
+					pointWeight = SplatOrientedPoint( p , n , neighborKey , splatDepth , samplesPerNode , this->_minDepth , maxDepth );
 				}
 				else
 				{
-					TreeOctNode* temp = &tree;
+					TreeOctNode* temp = &this->tree;
 					int d = 0;
 					if( splatDepth )
 					{
@@ -250,25 +253,26 @@ public:
 					SplatOrientedPoint( temp , p , n , neighborKey );
 				}
 				pointWeightSum += pointWeight;
-				if ( _constrainValues )
+				if ( this->_constrainValues )
 				{
 					int d = 0;
-					TreeOctNode* temp = &tree;
+					TreeOctNode* temp = &this->tree;
 					Point3D< Real > myCenter = Point3D< Real >( Real(0.5) , Real(0.5) , Real(0.5) );
 					Real myWidth = Real(1.0);
 					while( true )
 					{
 						int idx = temp->nodeData.pointIndex;
 						if( idx == -1 )
-						{
-							idx = static_cast<int>( _points.size() );
-							_points.push_back( PointData( p , Real(1.0) ) );
+						{                     
+							idx = static_cast<int>( this->_points.size() );
+                     typename Octree<Degree, OutputDensity>::PointData   pd( p , Real(1.0) );
+							this->_points.push_back( pd );
 							temp->nodeData.pointIndex = idx;
 						}
 						else
 						{
-							_points[idx].weight += Real(1.0);
-							_points[idx].position += p;
+							this->_points[idx].weight += Real(1.0);
+							this->_points[idx].position += p;
 						}
 
 						int cIndex = TreeOctNode::CornerIndex( myCenter , p );
@@ -291,7 +295,7 @@ public:
 			}
 		}
 
-		if( _boundaryType == 0 )
+		if( this->_boundaryType == 0 )
 			pointWeightSum *= Real(4.0);
 		
 		constraintWeight *= static_cast<Real>(pointWeightSum);
@@ -299,30 +303,30 @@ public:
 
 		MemoryUsage( );
 
-		if( _constrainValues )
+		if( this->_constrainValues )
 		{
-			for( TreeOctNode* node=tree.nextNode() ; node ; node=tree.nextNode(node) )
+			for( TreeOctNode* node=this->tree.nextNode() ; node ; node=this->tree.nextNode(node) )
 			{
 				if( node->nodeData.pointIndex != -1 )
 				{
 					int idx = node->nodeData.pointIndex;
-					_points[idx].position /= _points[idx].weight;
-					int e = ( _boundaryType == 0 ? node->depth()-1 : node->depth() ) * adaptiveExponent - ( _boundaryType == 0 ? maxDepth-1 : maxDepth ) * (adaptiveExponent-1);
+					this->_points[idx].position /= this->_points[idx].weight;
+					int e = ( this->_boundaryType == 0 ? node->depth()-1 : node->depth() ) * adaptiveExponent - ( this->_boundaryType == 0 ? maxDepth-1 : maxDepth ) * (adaptiveExponent-1);
 					
 					if ( e < 0 )
-						_points[idx].weight /= Real( 1<<(-e) );
+						this->_points[idx].weight /= Real( 1<<(-e) );
 					else
-						_points[idx].weight *= Real( 1<<  e  );
+						this->_points[idx].weight *= Real( 1<<  e  );
 
-					_points[idx].weight *= Real( constraintWeight );
+					this->_points[idx].weight *= Real( constraintWeight );
 				}
 			}
 		}
 
 #if FORCE_NEUMANN_FIELD
-		if( _boundaryType == 1 )
+		if( this->_boundaryType == 1 )
 		{
-			for( TreeOctNode* node=tree.nextNode() ; node ; node=tree.nextNode( node ) )
+			for( TreeOctNode* node=this->tree.nextNode() ; node ; node=this->tree.nextNode( node ) )
 			{
 				int d , off[3];
 				node->depthAndOffset( d , off );
@@ -330,7 +334,7 @@ public:
 				if( node->nodeData.normalIndex < 0 )
 					continue;
 				
-				Point3D< Real >& normal = (*normals)[node->nodeData.normalIndex];
+				Point3D< Real >& normal = (*this->normals)[node->nodeData.normalIndex];
 				for( int d=0 ; d<3 ; d++ )
 					if ( off[d]==0 || off[d]==res-1 )
 						normal[d] = 0;

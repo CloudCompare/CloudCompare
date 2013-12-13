@@ -20,6 +20,10 @@
 //CCLib
 #include <CCConst.h>
 
+//Qt
+#include <QStringList>
+#include <QRegExp>
+
 //System
 #include <math.h>
 #include <string.h>
@@ -136,6 +140,28 @@ ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, const C
     shiftRotationCenter(rotCenter);
 }
 
+ccGLMatrix ccGLMatrix::FromString(QString matText, bool& success)
+{
+	QStringList valuesStr = matText.split(QRegExp("\\s+"),QString::SkipEmptyParts);
+	if (valuesStr.size() != 16)
+	{
+		success = false;
+		return ccGLMatrix();
+	}
+
+	ccGLMatrix matrix;
+	float* matValues = matrix.data();
+	for (int i=0; i<16; ++i)
+	{
+		matValues[i] = valuesStr[(i%4)*4+(i>>2)].toFloat(&success);
+		if (!success)
+			return ccGLMatrix();
+	}
+
+	success = true;
+	return matrix;
+}
+
 void ccGLMatrix::toZero()
 {
 	memset(m_mat,0,OPENGL_MATRIX_SIZE*sizeof(float));
@@ -189,12 +215,19 @@ bool ccGLMatrix::fomAsciiFile(const char* filename)
 	return true;
 }
 
-void ccGLMatrix::initFromParameters(PointCoordinateType alpha, const CCVector3& axis3D, const CCVector3& t3D)
+void ccGLMatrix::initFromParameters(PointCoordinateType alpha_rad, const CCVector3& axis3D, const CCVector3& t3D)
 {
-	PointCoordinateType cosw = cos(alpha);
-	PointCoordinateType sinw = sin(alpha);
+	PointCoordinateType cosw = cos(alpha_rad);
+	PointCoordinateType sinw = sin(alpha_rad);
 	PointCoordinateType inv_cosw = 1 - cosw;
 
+	//normalize rotation axis
+	CCVector3 uAxis3D = CCVector3(0,0,1);
+	PointCoordinateType n2 = axis3D.norm2();
+	if (n2 > ZERO_TOLERANCE)
+		uAxis3D = axis3D / sqrt(n2);
+
+	uAxis3D.normalize();
 	const PointCoordinateType& l1 = axis3D.x;
 	const PointCoordinateType& l2 = axis3D.y;
 	const PointCoordinateType& l3 = axis3D.z;
@@ -223,43 +256,52 @@ void ccGLMatrix::initFromParameters(PointCoordinateType alpha, const CCVector3& 
 	R34 = static_cast<float>(t3D.z);
 }
 
-void ccGLMatrix::getParameters(PointCoordinateType& alpha, CCVector3& axis3D, CCVector3& t3D) const
+void ccGLMatrix::getParameters(PointCoordinateType& alpha_rad, CCVector3& axis3D, CCVector3& t3D) const
 {
 	PointCoordinateType trace = R11 + R22 + R33;
 	trace = (trace - 1)/2;
 	if (fabs(trace) < 1)
 	{
-		alpha = acos(trace);
-		if (alpha > static_cast<PointCoordinateType>(M_PI_2))
-			alpha -= static_cast<PointCoordinateType>(M_PI);
+		alpha_rad = acos(trace);
+		if (alpha_rad > static_cast<PointCoordinateType>(M_PI_2))
+			alpha_rad -= static_cast<PointCoordinateType>(M_PI);
 	}
 	else
 	{
-		alpha = 0;
+		alpha_rad = 0;
 	}
 
 	axis3D.x = static_cast<PointCoordinateType>(R32-R23);
 	axis3D.y = static_cast<PointCoordinateType>(R13-R31);
 	axis3D.z = static_cast<PointCoordinateType>(R21-R12);
-	axis3D.normalize();
+	PointCoordinateType n2 = axis3D.norm2();
+	if (n2 > ZERO_TOLERANCE)
+	{
+		axis3D /= sqrt(n2);
+	}
+	else
+	{
+		//axis is too small!
+		axis3D = CCVector3(0,0,1);
+	}
 
 	t3D.x = static_cast<PointCoordinateType>(R14);
 	t3D.y = static_cast<PointCoordinateType>(R24);
 	t3D.z = static_cast<PointCoordinateType>(R34);
 }
 
-void ccGLMatrix::initFromParameters(PointCoordinateType phi,
-									PointCoordinateType theta,
-									PointCoordinateType psi,
+void ccGLMatrix::initFromParameters(PointCoordinateType phi_rad,
+									PointCoordinateType theta_rad,
+									PointCoordinateType psi_rad,
 									const CCVector3& t3D)
 {
-	PointCoordinateType cos_phi =	cos(phi);
-	PointCoordinateType cos_theta =	cos(theta);
-	PointCoordinateType cos_psi =	cos(psi);
+	PointCoordinateType cos_phi =	cos(phi_rad);
+	PointCoordinateType cos_theta =	cos(theta_rad);
+	PointCoordinateType cos_psi =	cos(psi_rad);
 
-	PointCoordinateType sin_phi =	sin(phi);
-	PointCoordinateType sin_theta =	sin(theta);
-	PointCoordinateType sin_psi =	sin(psi);
+	PointCoordinateType sin_phi =	sin(phi_rad);
+	PointCoordinateType sin_theta =	sin(theta_rad);
+	PointCoordinateType sin_psi =	sin(psi_rad);
 
 	//1st column
 	R11 = static_cast<float>(cos_theta*cos_phi);
@@ -282,17 +324,17 @@ void ccGLMatrix::initFromParameters(PointCoordinateType phi,
 	R34 = static_cast<float>(t3D.z);
 }
 
-void ccGLMatrix::getParameters(	PointCoordinateType &phi,
-								PointCoordinateType &theta,
-								PointCoordinateType &psi,
+void ccGLMatrix::getParameters(	PointCoordinateType &phi_rad,
+								PointCoordinateType &theta_rad,
+								PointCoordinateType &psi_rad,
 								CCVector3& t3D) const
 {
 	if (fabs(R31) != 1)
 	{
-		theta = -static_cast<PointCoordinateType>(asin(R31));
-		PointCoordinateType cos_theta = cos(theta);
-		psi = atan2(static_cast<PointCoordinateType>(R32)/cos_theta, static_cast<PointCoordinateType>(R33)/cos_theta);
-		phi = atan2(static_cast<PointCoordinateType>(R21)/cos_theta, static_cast<PointCoordinateType>(R11)/cos_theta);
+		theta_rad = -static_cast<PointCoordinateType>(asin(R31));
+		PointCoordinateType cos_theta = cos(theta_rad);
+		psi_rad = atan2(static_cast<PointCoordinateType>(R32)/cos_theta, static_cast<PointCoordinateType>(R33)/cos_theta);
+		phi_rad = atan2(static_cast<PointCoordinateType>(R21)/cos_theta, static_cast<PointCoordinateType>(R11)/cos_theta);
 
 		//Other solution
 		/*theta = M_PI+asin(R31);
@@ -303,11 +345,11 @@ void ccGLMatrix::getParameters(	PointCoordinateType &phi,
 	}
 	else
 	{
-		phi = 0;
+		phi_rad = 0;
 
 		PointCoordinateType sign = (R31 == -1 ? PC_ONE : -PC_ONE);
-		theta = sign*static_cast<PointCoordinateType>(M_PI_2);
-		psi = sign*static_cast<PointCoordinateType>(atan2(R12,R13));
+		theta_rad = sign*static_cast<PointCoordinateType>(M_PI_2);
+		psi_rad = sign*static_cast<PointCoordinateType>(atan2(R12,R13));
 	}
 
 	t3D.x = static_cast<PointCoordinateType>(R14);

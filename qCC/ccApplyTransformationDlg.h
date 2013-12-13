@@ -38,16 +38,21 @@ public:
 
 protected slots:
 
-	//! Check matrix validity and 'accept' dialog if ok
+	//! Checks matrix validity and 'accept' dialog if ok
 	void checkMatrixValidityAndAccept();
+
+	//! Automatically removes anything between square brackets, and update the other forms
+	void onMatrixTextChange();
+
+	//! Updates dialog when a component of the rotation axis/angle form changes
+	void onRotAngleValueChanged(double);
+	//! Updates dialog when a component of the euleur form changes
+	void onEulerValueChanged(double);
 
 protected:
 
-	//! Check matrix validity
-	/** \return true if input matrix is valid (false otherwise)
-	**/
-	bool checkMatrixValidity() const;
-
+	//! Updates all forms with a given matrix
+	void updateAll(const ccGLMatrix& mat, bool textForm = true, bool axisAngleForm = true, bool eulerForm = true);
 };
 
 #endif

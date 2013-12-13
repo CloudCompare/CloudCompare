@@ -122,6 +122,18 @@ public:
 	**/
 	static ccGLMatrix FromQuaternion(const float q[]);
 
+	//! Converts a 'text' matrix to a ccGLMatrix
+	/** \param[in] matText matrix text
+		\param[out] success whether input matrix text is valid or not
+	**/
+	static ccGLMatrix FromString(QString matText, bool& success);
+
+	//! Returns matrix as a string
+	/** \param precision numerical precision
+		\return string
+	**/
+	QString toString(int precision = 12, QChar separator = ' ') const;
+
 	//! Returns the rotation component around X only
 	ccGLMatrix xRotation() const;
 	//! Returns the rotation component around Y only
@@ -142,32 +154,46 @@ public:
 	**/
 	void clearTranslation();
 
-	//! Inits transformation from a rotation axis, an angle (in radians) and a translation
-	void initFromParameters(PointCoordinateType alpha,
+	//! Inits transformation from a rotation axis, an angle and a translation
+	/** \param[in] alpha_rad rotation angle (in radians)
+		\param[in] axis3D rotation axis
+		\param[in] t3D translation
+	**/
+	void initFromParameters(PointCoordinateType alpha_rad,
 							const CCVector3& axis3D,
 							const CCVector3& t3D);
 
-	//! Inits transformation from 3 rotation angles (in radians), and a translation
-	void initFromParameters(	PointCoordinateType phi,
-								PointCoordinateType theta,
-								PointCoordinateType psi,
+	//! Inits transformation from 3 rotation angles and a translation
+	/** See http://en.wikipedia.org/wiki/Euler_angles
+		\param[in] phi_rad Phi angle (in radians)
+		\param[in] theta_rad Theta angle (in radians)
+		\param[in] psi_rad Psi angle (in radians)
+		\param[in] t3D translation
+	**/
+	void initFromParameters(	PointCoordinateType phi_rad,
+								PointCoordinateType theta_rad,
+								PointCoordinateType psi_rad,
 								const CCVector3& t3D);
 
-	//! Gets transformation equivalent parameters
-	/** Extracts parameters from transformation: a rotation axis,
-		an angle (in radians) and a translation.
+	//! Returns equivalent parameters: a rotation axis, an angle and a translation
+	/** \param[out] alpha_rad rotation angle (in radians)
+		\param[out] axis3D rotation axis
+		\param[out] t3D translation
 	**/
-	void getParameters(	PointCoordinateType& alpha,
+	void getParameters(	PointCoordinateType& alpha_rad,
 						CCVector3& axis3D,
 						CCVector3& t3D) const;
 
-	//! Gets transformation equivalent parameters
-	/** Extracts parameters from transformation: 3 rotation angles (in radians),
-		and a translation.
+	//! Returns equivalent parameters: 3 rotation angles and a translation
+	/** See http://en.wikipedia.org/wiki/Euler_angles
+		\param[out] phi_rad Phi angle (in radians)
+		\param[out] theta_rad Theta angle (in radians)
+		\param[out] psi_rad Psi angle (in radians)
+		\param[out] t3D translation
 	**/
-	void getParameters(	PointCoordinateType &phi,
-						PointCoordinateType &theta,
-						PointCoordinateType &psi,
+	void getParameters(	PointCoordinateType &phi_rad,
+						PointCoordinateType &theta_rad,
+						PointCoordinateType &psi_rad,
 						CCVector3& t3D) const;
 
 	//! Returns a pointer to internal data
@@ -352,12 +378,6 @@ public:
 		\param coef scaling coef.
 	**/
 	void scaleColumn(unsigned colIndex, float coef);
-
-	//! Returns matrix as a string
-	/** \param precision numerical precision
-		\return string
-	**/
-	QString toString(int precision = 12, QChar separator = ' ') const;
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }

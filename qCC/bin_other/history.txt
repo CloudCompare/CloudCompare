@@ -27,6 +27,12 @@ v2.5.2 XX/XX/2013
 		* on input: use 'File > Open' (raster will be converted to a point cloud)
 		* on output: use the Height Grid Generation tool (this way, any cloud can be converted to raster)
 - Other enhancements:
+	- the 'Edit > Transformation' tool now offers 3 different ways to input a transformation:
+		* classical 4x4 transformation matrix
+		* rotation axis, rotation angle and translation vector
+		* euler angles and translation vector
+	- if you paste a transformation matrix copied from the console, the 'Edit > Transformation' tool
+		will now automatically remove the timetsamp (between square brackets)
 	- the qPoissonRecon plugin (Poisson Surface Reconstruction) is now able to map the
 		input cloud colors on the resulting mesh:
 		* quick & dirty approach: simply assign to each mesh vertex the color of the nearest input point

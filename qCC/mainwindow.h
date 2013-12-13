@@ -376,6 +376,9 @@ protected slots:
 	//! Setups 3D mouse (if any)
 	void setup3DMouse(bool);
 
+	//! Removes all entiites currently loaded in the DB tree
+	void closeAll();
+
 protected:
 
     //! Removes from a list all elements that are sibling of others

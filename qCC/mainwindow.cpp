@@ -828,6 +828,7 @@ void MainWindow::connectActions()
     connect(actionSave,                         SIGNAL(triggered()),    this,       SLOT(saveFile()));
 	connect(actionPrimitiveFactory,				SIGNAL(triggered()),    this,       SLOT(doShowPrimitiveFactory()));
 	connect(actionEnable3DMouse,				SIGNAL(toggled(bool)),	this,		SLOT(setup3DMouse(bool)));
+	connect(actionCloseAll,						SIGNAL(triggered()),    this,       SLOT(closeAll()));
     connect(actionQuit,                         SIGNAL(triggered()),    this,       SLOT(close()));
 
     //"Edit > Colors" menu
@@ -7403,6 +7404,21 @@ void MainWindow::forceConsoleDisplay()
 ccColorScalesManager* MainWindow::getColorScalesManager()
 {
 	return ccColorScalesManager::GetUniqueInstance();
+}
+
+void MainWindow::closeAll()
+{
+	if (!m_ccRoot)
+		return;
+
+	if (QMessageBox::question(	this, "Close all", "Are you sure you want to remove all loaded entities?", QMessageBox::Yes, QMessageBox::No ) != QMessageBox::Yes)
+		return;
+
+	ccHObject* root = m_ccRoot->getRootEntity();
+	if (root)
+	{
+		m_ccRoot->unloadAll();
+	}
 }
 
 void MainWindow::loadFile()

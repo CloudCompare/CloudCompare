@@ -133,6 +133,9 @@ public:
 	//! Unselects all entities
     void unselectAllEntities();
 
+	//! Unloads all entities
+	void unloadAll();
+
     //inherited from QAbstractItemModel
     virtual QVariant data(const QModelIndex &index, int role) const;
     virtual QModelIndex index(int row, int column, const QModelIndex &parentIndex = QModelIndex()) const;

@@ -19,6 +19,8 @@ v2.5.2 XX/XX/2013
 - New tool: Edit > Scalar fields > Set SF as coordinate(s)
 	- allows the user to map a scalar field to one or several dimensions (X,Y or Z)
 	- usefull to convert a 2D raster with a scalar field (gray level, etc.) to a 2D1/2 point cloud
+- New method: File > Close all
+	- to remove all loaded entities
 - New formats:
 	- Autodesk(R) FBX (http://en.wikipedia.org/wiki/FBX)
 		* meshes only

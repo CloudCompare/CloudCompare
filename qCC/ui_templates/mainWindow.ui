@@ -68,6 +68,7 @@
     <addaction name="separator"/>
     <addaction name="menu3DMouse"/>
     <addaction name="separator"/>
+    <addaction name="actionCloseAll"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuDisplay">
@@ -2365,6 +2366,14 @@
    </property>
    <property name="toolTip">
     <string>Set SF as coordinate(s) (X, Y or Z)</string>
+   </property>
+  </action>
+  <action name="actionCloseAll">
+   <property name="text">
+    <string>Close all</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove all entiites currently loaded in the DB tree</string>
    </property>
   </action>
  </widget>

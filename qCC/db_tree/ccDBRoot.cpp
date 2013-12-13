@@ -157,6 +157,29 @@ ccDBRoot::~ccDBRoot()
         delete m_treeRoot;
 }
 
+void ccDBRoot::unloadAll()
+{
+	if (!m_treeRoot)
+		return;
+
+	while (m_treeRoot->getChildrenNumber() > 0)
+	{
+		int i = static_cast<int>(m_treeRoot->getChildrenNumber())-1;
+		ccHObject* anObject = m_treeRoot->getChild(i);
+		assert(anObject);
+
+		anObject->prepareDisplayForRefresh_recursive();
+
+        beginRemoveRows(index(anObject).parent(),i,i);
+        m_treeRoot->removeChild(i);
+        endRemoveRows();
+    }
+
+    updatePropertiesView();
+
+    MainWindow::RefreshAllGLWindow();
+}
+
 ccHObject* ccDBRoot::getRootEntity()
 {
     return m_treeRoot;
@@ -1786,3 +1809,4 @@ QItemSelectionModel::SelectionFlags ccCustomQTreeView::selectionCommand(const QM
 
 	return QTreeView::selectionCommand(index,event);
 }
+

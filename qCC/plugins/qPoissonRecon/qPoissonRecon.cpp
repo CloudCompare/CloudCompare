@@ -17,6 +17,9 @@
 
 #include "qPoissonRecon.h"
 
+//dialog
+#include "ui_poissonReconParamDlg.h"
+
 //Qt
 #include <QtGui>
 #include <QInputDialog>
@@ -24,6 +27,7 @@
 #include <QProgressDialog>
 #include <QtConcurrentRun>
 #include <QMessageBox>
+#include <QDialog>
 
 //PoissonRecon
 #include <PoissonReconLib.h>
@@ -46,6 +50,17 @@
 #include <time.h>
 #include <unistd.h>
 #endif
+
+//dialog for qPoissonRecon plugin
+class PoissonReconParamDlg : public QDialog, public Ui::PoissonReconParamDialog
+{
+public:
+    PoissonReconParamDlg(QWidget* parent = 0) : QDialog(parent), Ui::PoissonReconParamDialog()
+	{
+		setupUi(this);
+		setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	}
+};
 
 qPoissonRecon::qPoissonRecon(QObject* parent/*=0*/)
 	: QObject(parent)
@@ -77,17 +92,16 @@ void qPoissonRecon::getActions(QActionGroup& group)
 static float* s_points = 0;
 static float* s_normals = 0;
 static unsigned s_count = 0;
-static int s_depth = 0;
-static CoredVectorMeshData* s_mesh;
-static PoissonReconLib::PoissonReconResultInfo* s_info;
+static PoissonReconLib::Parameters s_params;
+static CoredVectorMeshData<PoissonReconLib::Vertex>* s_mesh;
 
 bool doReconstruct()
 {
 	//invalid parameters
-	if (!s_points || !s_normals || !s_mesh || s_depth < 2  || s_count == 0)
+	if (!s_points || !s_normals || !s_mesh || s_params.depth < 2  || s_count == 0)
 		return false;
 
-	return PoissonReconLib::reconstruct(s_count, s_points, s_normals, *s_mesh, s_depth, s_info);
+	return PoissonReconLib::Reconstruct(s_count, s_points, s_normals, s_params, *s_mesh);
 }
 
 void qPoissonRecon::doAction()
@@ -122,15 +136,23 @@ void qPoissonRecon::doAction()
 		return;
 	}
 
-	bool ok;
-	#if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))
-	int depth = QInputDialog::getInt(m_app->getMainWindow(), "Poisson reconstruction","Octree depth:", 8, 1, 24, 1, &ok);
-	#else
-	int depth = QInputDialog::getInteger(m_app->getMainWindow(), "Poisson reconstruction","Octree depth:", 8, 1, 24, 1, &ok);
-	#endif
+	PoissonReconParamDlg prpDlg(m_app->getMainWindow());
+	//init dialog with semi-persistent settings
+	prpDlg.octreeLevelSpinBox->setValue(s_params.depth);
+	prpDlg.weightDoubleSpinBox->setValue(s_params.pointWeight);
+	prpDlg.minDepthSpinBox->setValue(s_params.minDepth);
+	prpDlg.samplesSpinBox->setValue(static_cast<int>(s_params.samplesPerNode));
+	prpDlg.solverAccuracyDoubleSpinBox->setValue(s_params.solverAccuracy);
 
-	if (!ok)
+	if (!prpDlg.exec())
 		return;
+
+	//set parameters with dialog settings
+	s_params.depth = prpDlg.octreeLevelSpinBox->value();
+	s_params.pointWeight = prpDlg.weightDoubleSpinBox->value();
+	s_params.minDepth = prpDlg.minDepthSpinBox->value();
+	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesSpinBox->value());
+	s_params.solverAccuracy = prpDlg.solverAccuracyDoubleSpinBox->value();
 
 	 //TODO: faster, lighter
 	unsigned count = pc->size();
@@ -169,8 +191,7 @@ void qPoissonRecon::doAction()
 
 	/*** RECONSTRUCTION PROCESS ***/
 
-	CoredVectorMeshData mesh;
-	PoissonReconLib::PoissonReconResultInfo info;
+	CoredVectorMeshData<PoissonReconLib::Vertex> mesh;
 
 	//run in a separate thread
 	bool result = false;
@@ -185,9 +206,7 @@ void qPoissonRecon::doAction()
 		s_points = points;
 		s_normals = normals;
 		s_count = count;
-		s_depth = depth;
 		s_mesh = &mesh;
-		s_info = &info;
 		QFuture<bool> future = QtConcurrent::run(doReconstruct);
 
 		//wait until process is finished!
@@ -221,6 +240,7 @@ void qPoissonRecon::doAction()
 		return;
 	}
 
+	mesh.resetIterator();
 	unsigned nic         = static_cast<unsigned>(mesh.inCorePoints.size());
 	unsigned noc         = static_cast<unsigned>(mesh.outOfCorePointCount());
 	unsigned nr_faces    = static_cast<unsigned>(mesh.polygonCount());
@@ -236,10 +256,10 @@ void qPoissonRecon::doAction()
 		{
 			for (unsigned i=0; i<nic; i++)
 			{
-				const Point3D<float>& p = mesh.inCorePoints[i];
-				CCVector3 p2(	p.coords[0]*info.scale + info.center[0],
-								p.coords[1]*info.scale + info.center[1],
-								p.coords[2]*info.scale + info.center[2] );
+				PoissonReconLib::Vertex& p = mesh.inCorePoints[i];
+				CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
+								static_cast<PointCoordinateType>(p.point.coords[1]),
+								static_cast<PointCoordinateType>(p.point.coords[2]) );
 				newPC->addPoint(p2);
 			}
 		}
@@ -247,11 +267,11 @@ void qPoissonRecon::doAction()
 		{
 			for (unsigned i=0; i<noc; i++)
 			{
-				Point3D<float> p;
+				PoissonReconLib::Vertex p;
 				mesh.nextOutOfCorePoint(p);
-				CCVector3 p2(	p.coords[0]*info.scale + info.center[0],
-								p.coords[1]*info.scale + info.center[1],
-								p.coords[2]*info.scale + info.center[2] );
+				CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
+								static_cast<PointCoordinateType>(p.point.coords[1]),
+								static_cast<PointCoordinateType>(p.point.coords[2]) );
 				newPC->addPoint(p2);
 			}
 		}
@@ -260,18 +280,18 @@ void qPoissonRecon::doAction()
 		{
 			for (unsigned i=0; i<nr_faces; i++)
 			{
-				std::vector<CoredVertexIndex> vertices;
-				mesh.nextPolygon(vertices);
+				std::vector<CoredVertexIndex> triangleIndexes;
+				mesh.nextPolygon(triangleIndexes);
 
-				if (vertices.size() == 3)
+				if (triangleIndexes.size() == 3)
 				{
-					for (std::vector<CoredVertexIndex>::iterator it = vertices.begin(); it != vertices.end(); ++it)
+					for (std::vector<CoredVertexIndex>::iterator it = triangleIndexes.begin(); it != triangleIndexes.end(); ++it)
 						if (!it->inCore)
 							it->idx += nic;
 
-					newMesh->addTriangle(	vertices[0].idx,
-											vertices[1].idx,
-											vertices[2].idx );
+					newMesh->addTriangle(	triangleIndexes[0].idx,
+											triangleIndexes[1].idx,
+											triangleIndexes[2].idx );
 				}
 				else
 				{
@@ -329,7 +349,7 @@ void qPoissonRecon::doAction()
 			}
 		}
 
-		newMesh->setName(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(depth));
+		newMesh->setName(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(s_params.depth));
 		newPC->setVisible(false);
 		newMesh->setVisible(true);
 		newMesh->computeNormals();

@@ -16,7 +16,7 @@ file( GLOB header_list Src_CC_wrap/*.h )
 list (APPEND header_list Src/Allocator.h Src/Array.h Src/BinaryNode.h Src/BSplineData.h Src/CmdLineParser.h Src/Factor.h Src/Geometry.h Src/Hash.h Src/MarchingCubes.h Src/MAT.h Src/MemoryUsage.h Src/MultiGridOctreeData.h Src/Octree.h Src/Ply.h Src/PlyFile.h Src/PointStream.h Src/Polynomial.h Src/PPolynomial.h Src/SparseMatrix.h Src/poissonTime.h Src/Vector.h )
 list (APPEND header_list Src/Array.inl Src/CmdLineParser.inl Src/MAT.inl Src/PointStream.inl Src/BSplineData.inl Src/Geometry.inl Src/MultiGridOctreeData.inl Src/Octree.inl Src/Polynomial.inl Src/PPolynomial.inl Src/SparseMatrix.inl Src/Vector.inl )
 file( GLOB source_list Src_CC_wrap/*.cpp )
-list (APPEND source_list Src/CmdLineParser.cpp Src/Factor.cpp Src/Geometry.cpp Src/MarchingCubes.cpp Src/Ply.cpp Src/PlyFile.cpp Src/poissonTime.cpp )
+list (APPEND source_list Src/CmdLineParser.cpp Src/Factor.cpp Src/Geometry.cpp Src/MarchingCubes.cpp Src/PlyFile.cpp Src/poissonTime.cpp )
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${inline_list} ${source_list} )
 

@@ -36,23 +36,19 @@
 #include "../Src/Ply.h"
 #include "../Src/MemoryUsage.h"
 
-//#include <stdio.h>
-//#define DumpOutput printf
 #define DumpOutput(...) ((void)0)
 #include "../Src/MultiGridOctreeData.h" //only after DumpOutput has been defined!
 
+static const bool OutputDensity = false;
+
 //specialization of Octree::setTree to fit library 'input'
-template< int Degree , bool OutputDensity >
-class LibOctree : public Octree<Degree, OutputDensity>
+class LibOctree : public Octree<2, OutputDensity>
 {
-private:
-   typedef typename Octree<Degree, OutputDensity>::TreeOctNode TreeOctNode;
-      
 public:
-	template<typename T>
+
 	int setTree(	unsigned count,
-					const T* P,
-					const T* N,
+					const Point3D< Real > * inPoints,
+					const Point3D< Real > * inNormals,
 					int maxDepth,
 					int minDepth,
 					int splatDepth,
@@ -85,18 +81,15 @@ public:
 		double pointWeightSum = 0;
 		Point3D< Real > min , max;
 
-		typename Octree<Degree, OutputDensity>::TreeOctNode::NeighborKey3 neighborKey;
+		TreeOctNode::NeighborKey3 neighborKey;
 		neighborKey.set( maxDepth );
 
-		this->tree.setFullDepth( this->_minDepth );
+		this->tree.setFullDepth( _minDepth );
 		// Read through once to get the center and scale
 		{
-			const T* _P = P;
-			for (unsigned k=0; k<count; ++k, _P+=3)
+			for (unsigned k=0; k<count; ++k)
 			{
-				Point3D< Real > p(	static_cast<Real>(_P[0]),
-									static_cast<Real>(_P[1]),
-									static_cast<Real>(_P[2]) );
+				const Point3D< Real >& p = inPoints[k];
 
 				for( int i=0 ; i<DIMENSION ; i++ )
 				{
@@ -124,20 +117,16 @@ public:
 		{
 			this->_scale *= scaleFactor;
 			for( int i=0 ; i<DIMENSION ; i++ )
-				this->_center[i] -= this->_scale/2;
+				this->_center[i] -= _scale/2;
 		}
 
 		if( splatDepth > 0 )
 		{
-			const T* _P = P;
-			const T* _N = N;
-			for (unsigned k=0; k<count; ++k, _P+=3, _N+=3)
+			const Point3D< Real >* _p = inPoints;
+			const Point3D< Real >* _n = inNormals;
+			for (unsigned k=0; k<count; ++k, ++_p, ++_n)
 			{
-				Point3D< Real > p(	static_cast<Real>(_P[0]),
-									static_cast<Real>(_P[1]),
-									static_cast<Real>(_P[2]) );
-
-				p = ( p - this->_center ) / this->_scale;
+				Point3D< Real > p = ( inPoints[k] - _center ) / _scale;
 				
 				if( !_inBounds(p) )
 					continue;
@@ -148,10 +137,7 @@ public:
 
 				if( useConfidence )
 				{
-					Point3D< Real > n(	static_cast<Real>(_N[0]),
-										static_cast<Real>(_N[1]),
-										static_cast<Real>(_N[2]) );
-					weight = Real( Length(n) );
+					weight = Real( Length(inNormals[k]) );
 				}
 
 				TreeOctNode* temp = &this->tree;
@@ -180,21 +166,14 @@ public:
 		this->normals = new std::vector< Point3D<Real> >();
 		int cnt = 0;
 		{
-			const T* _P = P;
-			const T* _N = N;
-			for (unsigned k=0; k<count; ++k, _P+=3, _N+=3)
+			for (unsigned k=0; k<count; ++k)
 			{
-				Point3D< Real > p(	static_cast<Real>(_P[0]),
-									static_cast<Real>(_P[1]),
-									static_cast<Real>(_P[2]) );
-				p = ( p - this->_center ) / this->_scale;
+				Point3D< Real > p = ( inPoints[k] - _center ) / _scale;
 				if( !_inBounds(p) )
 					continue;
 
-				Point3D< Real > n(	static_cast<Real>(_N[0]),
-									static_cast<Real>(_N[1]),
-									static_cast<Real>(_N[2]) );
-				n *= Real(-1.0);
+				Point3D< Real > n = inNormals[k] * Real(-1.0);
+				
 				//normalize n
 				Real l = Real( Length( n ) );
 				if( l!=l || l<=EPSILON )
@@ -208,7 +187,7 @@ public:
 				Real pointWeight = Real(1.0f);
 				if ( samplesPerNode > 0 && splatDepth )
 				{
-					pointWeight = SplatOrientedPoint( p , n , neighborKey , splatDepth , samplesPerNode , this->_minDepth , maxDepth );
+					pointWeight = SplatOrientedPoint( p , n , neighborKey , splatDepth , samplesPerNode , _minDepth , maxDepth );
 				}
 				else
 				{
@@ -263,10 +242,9 @@ public:
 					{
 						int idx = temp->nodeData.pointIndex;
 						if( idx == -1 )
-						{                     
+						{
 							idx = static_cast<int>( this->_points.size() );
-                     typename Octree<Degree, OutputDensity>::PointData   pd( p , Real(1.0) );
-							this->_points.push_back( pd );
+							this->_points.push_back( PointData( p , Real(1.0) ) );
 							temp->nodeData.pointIndex = idx;
 						}
 						else
@@ -347,54 +325,82 @@ public:
 	}
 };
 
-
-static const bool OutputDensity = false;
-
-bool PoissonReconLib::Reconstruct(	unsigned count,
-									const float* P,
-									const float* N,
-									const Parameters& inParams,
-									CoredVectorMeshData< Vertex >& outMesh)
+PoissonReconLib::~PoissonReconLib()
 {
-	Parameters params = inParams;
-	if (params.depth < 2)
+	if (m_octree)
+		delete m_octree;
+	m_octree = 0;
+}
+
+bool PoissonReconLib::init(	unsigned count,
+							const Point3D* inPoints,
+							const Point3D* inNormals,
+							const Parameters& inParams,
+							int* outThreadCount/*=0*/)
+{
+	m_params = inParams;
+	if (m_params.depth < 2)
 		return false;
 
-	//params.depth = std::max(params.minDepth,params.depth);
+	//m_params.depth = std::max(m_params.minDepth,m_params.depth);
 
 	//TODO: let the user set these parameters?
-	assert(params.depth > 2);
-	int maxSolveDepth = params.depth;
-	int kernelDepth = params.depth-2;
+	assert(m_params.depth > 2);
+	int kernelDepth = m_params.depth-2;
 	
-	params.solverDivide = std::max(params.minDepth,params.solverDivide); //solverDivide must be at least as large as minDepth
-	params.isoDivide = std::max(params.minDepth,params.isoDivide); //isoDivide must be at least as large as minDepth
-	kernelDepth = std::min(kernelDepth,params.depth); //kernelDepth can't be greater than depth
+	m_params.solverDivide = std::max(m_params.minDepth,m_params.solverDivide); //solverDivide must be at least as large as minDepth
+	m_params.isoDivide = std::max(m_params.minDepth,m_params.isoDivide); //isoDivide must be at least as large as minDepth
+	kernelDepth = std::min(kernelDepth,m_params.depth); //kernelDepth can't be greater than depth
+
+	if (m_octree)
+		delete m_octree;
+	m_octree = 0;
 
 	try
 	{
 		//Tree construction
 		OctNode< TreeNodeData< OutputDensity > , Real >::SetAllocator( MEMORY_ALLOCATOR_BLOCK_SIZE );
-		LibOctree< 2 , OutputDensity > tree;
-	#ifdef WITH_OPENMP
-		tree.threads = omp_get_num_procs();
-	#else
-		tree.threads = 1;
-	#endif
-		tree.setBSplineData( params.depth , 1 );
-		int pointCount = tree.setTree<float>( count, P, N, params.depth, params.minDepth, kernelDepth, params.samplesPerNode, params.scale, params.useConfidence, params.pointWeight, params.adaptiveExponent );
-		tree.ClipTree();
-		tree.finalize( params.isoDivide );
+		LibOctree* octree = new LibOctree;
+#ifdef WITH_OPENMP
+		octree->threads = omp_get_num_procs();
+#else
+		octree->threads = 1;
+#endif
+		if (outThreadCount)
+			*outThreadCount = octree->threads;
+		octree->setBSplineData( m_params.depth , 1 );
+		int pointCount = octree->setTree( count, inPoints, inNormals, m_params.depth, m_params.minDepth, kernelDepth, m_params.samplesPerNode, m_params.scale, m_params.useConfidence, m_params.pointWeight, m_params.adaptiveExponent );
+		octree->ClipTree();
+		octree->finalize( m_params.isoDivide );
 
+		m_octree = octree;
+	}
+	catch(...)
+	{
+		//an error occurred!
+		return false;
+	}
+
+	return true;
+}
+
+bool PoissonReconLib::reconstruct( CoredVectorMeshData< Vertex >& outMesh )
+{
+	if (!m_octree)
+		return false;
+
+	try
+	{
 		//Set constraints
-		tree.SetLaplacianConstraints();
+		m_octree->SetLaplacianConstraints();
 
 		//Solve linear system
-		tree.LaplacianMatrixIteration( params.solverDivide, /*ShowResidual*/0, params.minIters, params.solverAccuracy, maxSolveDepth, params.fixedIters );
+		int maxSolveDepth = m_params.depth;
+		m_octree->LaplacianMatrixIteration( m_params.solverDivide, /*ShowResidual*/0, m_params.minIters, m_params.solverAccuracy, maxSolveDepth, m_params.fixedIters );
 
 		//get triangles
-		Real isoValue = tree.GetIsoValue();
-		tree.GetMCIsoTriangles( isoValue , params.isoDivide, &outMesh , 0 , 1 , !params.nonManifold, /*PolygonMesh*/0 );
+		Real isoValue = m_octree->GetIsoValue();
+		m_octree->GetMCIsoTriangles( isoValue , m_params.isoDivide, &outMesh , 0 , 1 , !m_params.nonManifold, /*PolygonMesh*/0 );
 	}
 	catch(...)
 	{

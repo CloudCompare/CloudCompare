@@ -3220,8 +3220,7 @@ Real Octree< Degree , OutputDensity >::GetIsoValue( void )
 	{
 		int start = _sNodes.nodeCount[d] , end = _sNodes.nodeCount[d+1] , range = end-start;
 #ifdef WITH_OPENMP
-#pragma omp parallel for num_threads( threads )
- reduction( + : isoValue , weightSum )
+#pragma omp parallel for num_threads( threads ) reduction( + : isoValue , weightSum )
 #endif
 		for( int t=0 ; t<threads ; t++ )
 		{
@@ -3297,7 +3296,11 @@ void Octree< Degree , OutputDensity >::SetIsoCorners( Real isoValue , TreeOctNod
 		if( mcid )
 		{
 #ifdef WIN32
+#if defined(_WIN64) || ((_WIN32_WINNT > 0x0600) && defined(_WINBASE_))
 			InterlockedOr( (volatile unsigned long long*)&(parent->nodeData.mcIndex) , mcid );
+#else
+			parent->nodeData.mcIndex |= mcid;
+#endif
 #else // !WIN32
 #ifdef WITH_OPENMP
 #pragma omp atomic
@@ -3309,7 +3312,11 @@ void Octree< Degree , OutputDensity >::SetIsoCorners( Real isoValue , TreeOctNod
 				if( parent->parent && parent->parent->depth()>=_minDepth && (parent-parent->parent->children)==c )
 				{
 #ifdef WIN32
+#if defined(_WIN64) || ((_WIN32_WINNT > 0x0600) && defined(_WINBASE_))
 					InterlockedOr( (volatile unsigned long long*)&(parent->parent->nodeData.mcIndex) , mcid );
+#else
+					parent->parent->nodeData.mcIndex |= mcid;
+#endif
 #else // !WIN32
 #ifdef WITH_OPENMP
 #pragma omp atomic

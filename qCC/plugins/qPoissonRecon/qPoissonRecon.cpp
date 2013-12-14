@@ -89,19 +89,30 @@ void qPoissonRecon::getActions(QActionGroup& group)
 	group.addAction(m_action);
 }
 
-static float* s_points = 0;
-static float* s_normals = 0;
+static PoissonReconLib::Point3D* s_points = 0;
+static PoissonReconLib::Point3D* s_normals = 0;
 static unsigned s_count = 0;
 static PoissonReconLib::Parameters s_params;
 static CoredVectorMeshData<PoissonReconLib::Vertex>* s_mesh;
+static int s_threadCountUsed = 0;
+static PoissonReconLib* s_poisson = 0;
+
+bool doInit()
+{
+	//invalid parameters
+	if (!s_poisson || !s_points || !s_normals || s_params.depth < 2  || s_count == 0)
+		return false;
+
+	return s_poisson->init(s_count, s_points, s_normals, s_params, &s_threadCountUsed);
+}
 
 bool doReconstruct()
 {
 	//invalid parameters
-	if (!s_points || !s_normals || !s_mesh || s_params.depth < 2  || s_count == 0)
+	if (!s_poisson || !s_mesh)
 		return false;
 
-	return PoissonReconLib::Reconstruct(s_count, s_points, s_normals, s_params, *s_mesh);
+	return s_poisson->reconstruct(*s_mesh);
 }
 
 void qPoissonRecon::doAction()
@@ -156,14 +167,14 @@ void qPoissonRecon::doAction()
 
 	 //TODO: faster, lighter
 	unsigned count = pc->size();
-	float* points = new float[count*3];
+	PoissonReconLib::Point3D* points = new PoissonReconLib::Point3D[count];
 	if (!points)
 	{
 		m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
-	float* normals = new float[count*3];
+	PoissonReconLib::Point3D* normals = new PoissonReconLib::Point3D[count];
 	if (!normals)
 	{
 		delete[] points;
@@ -173,19 +184,17 @@ void qPoissonRecon::doAction()
 
 	//copy points and normals in dedicated arrays
 	{
-		float* _points = points;
-		float* _normals = normals;
 		for (unsigned i=0; i<count; ++i)
 		{
 			const CCVector3* P = pc->getPoint(i);
-			*_points++ = static_cast<float>(P->x);
-			*_points++ = static_cast<float>(P->y);
-			*_points++ = static_cast<float>(P->z);
+			points[i] = PoissonReconLib::Point3D(	static_cast<float>(P->x),
+													static_cast<float>(P->y),
+													static_cast<float>(P->z) );
 
 			const PointCoordinateType* N = pc->getPointNormal(i);
-			*_normals++ = static_cast<float>(N[0]);
-			*_normals++ = static_cast<float>(N[1]);
-			*_normals++ = static_cast<float>(N[2]);
+			normals[i] = PoissonReconLib::Point3D(	static_cast<float>(N[0]),
+													static_cast<float>(N[1]),
+													static_cast<float>(N[2]) );
 		}
 	}
 
@@ -196,43 +205,83 @@ void qPoissonRecon::doAction()
 	//run in a separate thread
 	bool result = false;
 	{
+		//start message
+		m_app->dispToConsole(QString("[PoissonRecon] Job started (level %1)").arg(s_params.depth),ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
 		//progress dialog (Qtconcurrent::run can't be canceled!)
-		QProgressDialog pDlg("Operation in progress",QString(),0,0,m_app->getMainWindow());
+		QProgressDialog pDlg("Initialization",QString(),0,0,m_app->getMainWindow());
 		pDlg.setWindowTitle("Poisson Reconstruction");
 		pDlg.show();
 		//QApplication::processEvents();
+
+		PoissonReconLib poisson;
 
 		//run in a separate thread
 		s_points = points;
 		s_normals = normals;
 		s_count = count;
 		s_mesh = &mesh;
-		QFuture<bool> future = QtConcurrent::run(doReconstruct);
+		s_threadCountUsed = 1;
+		s_poisson = &poisson;
 
-		//wait until process is finished!
-		while (!future.isFinished())
+		//init
 		{
-			#if defined(CC_WINDOWS)
-			::Sleep(500);
-			#else
-            usleep(500 * 1000);
-			#endif
+			QFuture<bool> initFuture = QtConcurrent::run(doInit);
 
-			pDlg.setValue(pDlg.value()+1);
-			QApplication::processEvents();
+			//wait until process is finished!
+			while (!initFuture.isFinished())
+			{
+				#if defined(CC_WINDOWS)
+				::Sleep(500);
+				#else
+				usleep(500 * 1000);
+				#endif
+
+				pDlg.setValue(pDlg.value()+1);
+				QApplication::processEvents();
+			}
+
+			result = initFuture.result();
 		}
 
-		result = future.result();
+		//release some memory
+		delete[] points;
+		s_points = points = 0;
+		delete[] normals;
+		s_normals = normals = 0;
+
+		//init successful?
+		if (result)
+		{
+			m_app->dispToConsole(QString("[PoissonRecon] Initialization done... starting reconstruction (%1 thread(s))").arg(s_threadCountUsed),ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
+			pDlg.setLabelText(QString("Reconstruction in progress\nlevel: %1 [%2 thread(s)]").arg(s_params.depth).arg(s_threadCountUsed));
+			QApplication::processEvents();
+			
+			QFuture<bool> future = QtConcurrent::run(doReconstruct);
+
+			//wait until process is finished!
+			while (!future.isFinished())
+			{
+				#if defined(CC_WINDOWS)
+				::Sleep(500);
+				#else
+				usleep(500 * 1000);
+				#endif
+
+				pDlg.setValue(pDlg.value()+1);
+				QApplication::processEvents();
+			}
+
+			result = future.result();
+		}
+
+		s_mesh = 0;
+		s_poisson = 0;
 
 		pDlg.hide();
 		QApplication::processEvents();
 	}
-
-	//release some memory
-	delete[] points;
-	points = 0;
-	delete[] normals;
-	normals = 0;
 
 	if (!result || mesh.polygonCount() < 1)
 	{
@@ -245,6 +294,9 @@ void qPoissonRecon::doAction()
 	unsigned noc         = static_cast<unsigned>(mesh.outOfCorePointCount());
 	unsigned nr_faces    = static_cast<unsigned>(mesh.polygonCount());
 	unsigned nr_vertices = nic+noc;
+
+	//end message
+	m_app->dispToConsole(QString("[PoissonRecon] Job finished (%1 triangles, %2 vertices)").arg(nr_faces).arg(nr_vertices),ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 	ccPointCloud* newPC = new ccPointCloud("vertices");
 	ccMesh* newMesh = new ccMesh(newPC);

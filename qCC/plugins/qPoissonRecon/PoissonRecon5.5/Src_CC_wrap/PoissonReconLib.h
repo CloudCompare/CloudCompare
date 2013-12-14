@@ -18,16 +18,27 @@
 #ifndef CC_POISSON_RECON_LIB_5_5_WRAPPER
 #define CC_POISSON_RECON_LIB_5_5_WRAPPER
 
-#include "../Src/Geometry.h"
-#include "../Src/Ply.h"
+//PoissonRecon
+#include "../Src/PlyVertex.h"
+
+class LibOctree;
 
 //! Wrapper to use PoissonRecon (Kazdan et. al) as a library
 class PoissonReconLib
 {
 public:
 
+	//! Default constructor
+	PoissonReconLib() : m_octree(0) {}
+
+	//! Destructor
+	~PoissonReconLib();
+
 	//! Default vertex type
 	typedef PlyVertex< float > Vertex;
+
+	//! Default point type
+	typedef Point3D< float > Point3D;
 
 	//! Algorithm parameters
 	struct Parameters
@@ -63,15 +74,33 @@ public:
 		{}
 	};
 
-	//! Launches reconstruction process
+	//! Initializes reconstruction process
 	/** \param[in] count point cloud size
-		\param[in] P array of points (3 floats per point)
-		\param[in] N array of normals (3 floats per point)
+		\param[in] inPoints array of points
+		\param[in] inNormals array of normals
 		\param[in] params reconstruction parameters
-		\param[out] outMesh output mesh (if successful)
+		\param[out] outThreadCount number of thread that will be used (optional)
+		\return initialization success
+	**/
+	bool init(	unsigned count,
+				const Point3D* inPoints,
+				const Point3D* inNormals,
+				const Parameters& params,
+				int* outThreadCount = 0);
+
+	//! Launches reconstruction process
+	/** \param[out] outMesh output mesh (if successful)
 		\return reconstruction success
 	**/
-	static bool Reconstruct(unsigned count, const float* P, const float* N, const Parameters& params, CoredVectorMeshData< Vertex >& outMesh);
+	bool reconstruct( CoredVectorMeshData< Vertex >& outMesh );
+
+protected:
+
+	//! Current parameters
+	Parameters m_params;
+
+	//! Associated octree
+	LibOctree* m_octree;
 };
 
 #endif // CC_POISSON_RECON_LIB_5_5_WRAPPER

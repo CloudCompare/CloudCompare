@@ -239,14 +239,14 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 
 					if (withTexCoordinates)
 					{
-						if (fprintf(theFile,"f %i/%i/%i %i/%i/%i %i/%i/%i\n", i1, t1, n1, i2, t2, n2, i3, t3, n3) < 0)
+						if (fprintf(theFile,"f %u/%i/%i %u/%i/%i %u/%i/%i\n", i1, t1, n1, i2, t2, n2, i3, t3, n3) < 0)
 						{
 							return CC_FERR_WRITING;
 						}
 					}
 					else
 					{
-						if (fprintf(theFile,"f %i//%i %i//%i %i//%i\n",	i1, n1, i2, n2, i3,	n3) < 0)
+						if (fprintf(theFile,"f %u//%i %u//%i %u//%i\n",	i1, n1, i2, n2, i3, n3) < 0)
 						{
 							return CC_FERR_WRITING;
 						}
@@ -256,12 +256,12 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 				{
 					if (withTexCoordinates)
 					{
-						if (fprintf(theFile,"f %i/%i %i/%i %i/%i\n",i1,t1,i2,t2,i3,t3) < 0)
+						if (fprintf(theFile,"f %u/%i %u/%i %u/%i\n",i1,t1,i2,t2,i3,t3) < 0)
 							return CC_FERR_WRITING;
 					}
 					else
 					{
-						if (fprintf(theFile,"f %i %i %i\n",i1,i2,i3) < 0)
+						if (fprintf(theFile,"f %u %u %u\n",i1,i2,i3) < 0)
 							return CC_FERR_WRITING;
 					}
 				}
@@ -270,7 +270,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 					return CC_FERR_CANCELED_BY_USER;
 			}
 
-			if (fprintf(theFile,"#%i faces\n",triNum) < 0)
+			if (fprintf(theFile,"#%u faces\n",triNum) < 0)
 				return CC_FERR_WRITING;
 		}
 	}

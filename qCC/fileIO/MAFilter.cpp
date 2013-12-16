@@ -109,7 +109,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	CCLib::NormalizedProgress nprogress(&pdlg,unsigned(float((2+palierModifier)*numberOfTriangles+(3+palierModifier)*numberOfVertexes)));
 	pdlg.setMethodTitle("Save MA file");
 	char buffer[256];
-    sprintf(buffer,"Triangles = %i",numberOfTriangles);
+    sprintf(buffer,"Triangles = %u",numberOfTriangles);
 	pdlg.setInfo(buffer);
 	pdlg.start();
 
@@ -185,7 +185,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	}
 
 	//ecriture des "vertexes"
-	if (fprintf(fp,"\tsetAttr -s %i \".vt[0:%i]\"\n",numberOfVertexes,numberOfVertexes-1) < 0)
+	if (fprintf(fp,"\tsetAttr -s %u \".vt[0:%u]\"\n",numberOfVertexes,numberOfVertexes-1) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
 	const double* shift = theCloud->getOriginalShift();
@@ -270,7 +270,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	//ecriture effective des edges
 	unsigned numberOfEdges = unsigned(lastEdgeIndexPushed+1);
-	if (fprintf(fp,"\tsetAttr -s %i \".ed[0:%i]\"",numberOfEdges,numberOfEdges-1) < 0)
+	if (fprintf(fp,"\tsetAttr -s %u \".ed[0:%u]\"",numberOfEdges,numberOfEdges-1) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
 	lastEdgeIndexPushed=0;
@@ -282,7 +282,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 			while (e)
 			{
 				e->edgeIndex = lastEdgeIndexPushed++;
-				if (fprintf(fp,"\n \t\t%i %i %i",i,e->theOtherPoint,hard) < 0)
+				if (fprintf(fp,"\n \t\t%u %u %i",i,e->theOtherPoint,hard) < 0)
 					{fclose(fp);return CC_FERR_WRITING;}
 				e=e->nextEdge;
 			}
@@ -295,7 +295,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 		{fclose(fp);return CC_FERR_WRITING;}
 
 	//ectitures des "faces"
-	if (fprintf(fp,"\tsetAttr -s %i \".fc[0:%i]\" -type \"polyFaces\"\n",numberOfTriangles,numberOfTriangles-1) < 0)
+	if (fprintf(fp,"\tsetAttr -s %u \".fc[0:%u]\" -type \"polyFaces\"\n",numberOfTriangles,numberOfTriangles-1) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
 	theMesh->placeIteratorAtBegining();
@@ -365,7 +365,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 		if (fprintf(fp,"\tsetAttr \".uopa\" yes;\n") < 0)
 			{fclose(fp);return CC_FERR_WRITING;}
 
-		if (fprintf(fp,"\tsetAttr -s %i \".vclr\";\n",numberOfVertexes) < 0)
+		if (fprintf(fp,"\tsetAttr -s %u \".vclr\";\n",numberOfVertexes) < 0)
 			{fclose(fp);return CC_FERR_WRITING;}
 
 		//on construit une structure qui associe chaque vertex aux faces auxquelles elle appartient
@@ -422,13 +422,13 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 
 			if (nf > 0)
 			{
-				if (fprintf(fp,"\tsetAttr -s %i \".vclr[%i].vfcl\";\n",nf,i) < 0)
+				if (fprintf(fp,"\tsetAttr -s %i \".vclr[%u].vfcl\";\n",nf,i) < 0)
 					{fclose(fp);return CC_FERR_WRITING;}
 
 				faceIndexes *oldf, *f = theFacesIndexes[i];
 				while (f)
 				{
-					if (fprintf(fp,"\tsetAttr \".vclr[%i].vfcl[%i].frgb\" -type \"float3\" %f %f %f;\n",i,f->faceIndex,col[0],col[1],col[2]) < 0)
+					if (fprintf(fp,"\tsetAttr \".vclr[%u].vfcl[%i].frgb\" -type \"float3\" %f %f %f;\n",i,f->faceIndex,col[0],col[1],col[2]) < 0)
 					{
 						fclose(fp);
 						return CC_FERR_WRITING;

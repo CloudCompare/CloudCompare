@@ -182,7 +182,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 		progressCb->reset();
 		progressCb->setMethodTitle("FM Propagation");
 		char buffer[256];
-		sprintf(buffer,"Octree level: %i\nNumber of points: %i",octreeLevel,numberOfPoints);
+		sprintf(buffer,"Octree level: %i\nNumber of points: %u",octreeLevel,numberOfPoints);
 		progressCb->setInfo(buffer);
 		progressCb->start();
 	}

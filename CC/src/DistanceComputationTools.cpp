@@ -632,7 +632,7 @@ int DistanceComputationTools::intersectMeshWithOctree(OctreeAndMeshIntersection*
 	{
 		nProgress = new NormalizedProgress(progressCb,numberOfTriangles);
 		char buffer[64];
-		sprintf(buffer,"Faces = %i",numberOfTriangles);
+		sprintf(buffer,"Faces = %u",numberOfTriangles);
 		progressCb->reset();
 		progressCb->setInfo(buffer);
 		progressCb->setMethodTitle("Intersect Cloud/Mesh");
@@ -961,7 +961,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 	{
 		nProgress = new NormalizedProgress(progressCb,numberOfCells);
 		char buffer[256];
-		sprintf(buffer,"Cells=%i",numberOfCells);
+		sprintf(buffer,"Cells=%u",numberOfCells);
 		progressCb->reset();
 		progressCb->setInfo(buffer);
 		progressCb->setMethodTitle(signedDistances ? "Compute signed distances" : "Compute distances");
@@ -1720,7 +1720,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree_MT(Octree
 	{
 		nProgress = new NormalizedProgress(progressCb,numberOfCells);
 		char buffer[256];
-		sprintf(buffer,"Cells=%i",numberOfCells);
+		sprintf(buffer,"Cells=%u",numberOfCells);
 		progressCb->reset();
 		progressCb->setInfo(buffer);
 		progressCb->setMethodTitle("Compute signed distances");

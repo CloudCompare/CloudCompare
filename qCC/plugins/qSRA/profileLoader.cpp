@@ -87,7 +87,7 @@ ccPolyline* ProfileLoader::Load(QString filename, bool ignoreAxisShift/*=true*/,
 			}
 
 			QString line = stream.readLine();
-			std::vector<Vector2Tpl<double>> points;
+            std::vector<Vector2Tpl<double> > points;
 			while (!line.isEmpty())
 			{
 				QStringList tokens = line.split(QRegExp("\\s+"),QString::SkipEmptyParts);

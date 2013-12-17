@@ -227,7 +227,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
 	pdlg.setMethodTitle("Save LAS file");
 	char buffer[256];
-	sprintf(buffer,"Points: %i",numberOfPoints);
+	sprintf(buffer,"Points: %u",numberOfPoints);
 	pdlg.setInfo(buffer);
 	pdlg.start();
 

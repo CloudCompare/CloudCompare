@@ -352,7 +352,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 
 #ifdef _DEBUG
 			if (fp)
-			    fprintf(fp,"Iteration #%i --> error: %f\n",iteration,error);
+			    fprintf(fp,"Iteration #%u --> error: %f\n",iteration,error);
 #endif
 
             //error update
@@ -700,7 +700,7 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
         if (progressCb)
         {
             char buffer[256];
-            sprintf(buffer,"Trial %d/%d [best score = %d]\n",i+1,nbBases,bestScore);
+            sprintf(buffer,"Trial %u/%u [best score = %u]\n",i+1,nbBases,bestScore);
             progressCb->setInfo(buffer);
             progressCb->update(((float)(i+1)*100.0f)/(float)nbBases);
 

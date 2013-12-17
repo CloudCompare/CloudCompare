@@ -71,7 +71,7 @@ static void InitProgress(GenericProgressCallback* progressCb, unsigned totalCoun
 	{
 		s_progressCb->setMethodTitle("Kd-tree computation");
 		char info[256];
-		sprintf(info,"Points: %i",totalCount);
+		sprintf(info,"Points: %u",totalCount);
 		s_progressCb->setInfo(info);
 		s_progressCb->start();
 		QCoreApplication::processEvents();

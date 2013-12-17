@@ -712,7 +712,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			nprogress = new CCLib::NormalizedProgress(&pdlg,nbOfPoints);
 			pdlg.reset();
 			char buffer[256];
-			sprintf(buffer,"cloud %i/%i (%i points)",k+1,nbScansTotal,nbOfPoints);
+			sprintf(buffer,"cloud %u/%u (%u points)",k+1,nbScansTotal,nbOfPoints);
 			pdlg.setInfo(buffer);
 			pdlg.start();
 			QApplication::processEvents();
@@ -737,7 +737,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		}
 		else
 		{
-			sprintf(cloudName,"unnamed - Cloud #%i",k);
+			sprintf(cloudName,"unnamed - Cloud #%u",k);
 		}
 
 		//Cloud name

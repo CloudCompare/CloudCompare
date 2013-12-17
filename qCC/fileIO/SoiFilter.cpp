@@ -74,7 +74,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 	ccProgressDialog pdlg(false); //cancel is not supported
 	pdlg.setMethodTitle("Open SOI file");
 	char buffer[256];
-	sprintf(buffer,"%i scans / %i points\n",nbScansTotal,nbPointsTotal);
+	sprintf(buffer,"%u scans / %u points\n",nbScansTotal,nbPointsTotal);
 	CCLib::NormalizedProgress nprogress(&pdlg,nbPointsTotal);
 	pdlg.setInfo(buffer);
 	pdlg.start();

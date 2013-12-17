@@ -236,7 +236,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
         progressCb->reset();
         progressCb->setMethodTitle("Build Octree");
         char infosBuffer[256];
-        sprintf(infosBuffer,"Projecting %i points\nMax. depth: %i",pointCount,MAX_OCTREE_LEVEL);
+        sprintf(infosBuffer,"Projecting %u points\nMax. depth: %i",pointCount,MAX_OCTREE_LEVEL);
         progressCb->setInfo(infosBuffer);
         progressCb->start();
     }
@@ -317,7 +317,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 			if (m_numberOfProjectedPoints == 0)
 				sprintf(buffer,"[Octree::build] Warning : no point projected in the Octree!");
 			else
-				sprintf(buffer,"[Octree::build] Warning: some points have been filtered out (%i/%i)",pointCount-m_numberOfProjectedPoints,pointCount);
+				sprintf(buffer,"[Octree::build] Warning: some points have been filtered out (%u/%u)",pointCount-m_numberOfProjectedPoints,pointCount);
 		}
 
         progressCb->setInfo(buffer);
@@ -3527,7 +3527,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
         if (functionTitle)
             progressCb->setMethodTitle(functionTitle);
         char buffer[512];
-		sprintf(buffer,"Octree level %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %i",level,cellCount,m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
+		sprintf(buffer,"Octree level %i\nCells: %u\nMean population: %3.2f (+/-%3.2f)\nMax population: %i",level,cellCount,m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
 		nprogress = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
         progressCb->setInfo(buffer);
         progressCb->start();
@@ -4266,7 +4266,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
         if (functionTitle)
             progressCb->setMethodTitle(functionTitle);
         char buffer[1024];
-		sprintf(buffer,"Octree levels %i - %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %d",startingLevel,MAX_OCTREE_LEVEL,static_cast<int>(cells.size()),mean,stddev,maxPop);
+		sprintf(buffer,"Octree levels %i - %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %u",startingLevel,MAX_OCTREE_LEVEL,static_cast<int>(cells.size()),mean,stddev,maxPop);
         progressCb->setInfo(buffer);
 		if (s_normProgressCb_MT)
 			delete s_normProgressCb_MT;

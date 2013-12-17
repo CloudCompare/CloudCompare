@@ -126,6 +126,8 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 	glPopMatrix();
 }
 
+/* 
+  // Unused function
 static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const colorType* col, CC_DRAW_CONTEXT& context)
 {
 	if (ID > 0)
@@ -145,6 +147,7 @@ static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType 
 
 	glPopMatrix();
 }
+*/
 
 static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const colorType* col, CC_DRAW_CONTEXT& context)
 {

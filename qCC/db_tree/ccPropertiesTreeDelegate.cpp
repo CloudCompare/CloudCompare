@@ -1414,7 +1414,7 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
     ccGenericPrimitive* primitive = ccHObjectCaster::ToPrimitive(m_currentObject);
     assert(primitive);
 
-	if (val == primitive->getDrawingPrecision())
+	if (static_cast<unsigned int>(val) == primitive->getDrawingPrecision())
 		return;
 
 	bool wasVisible = primitive->isVisible();

@@ -85,7 +85,7 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 	const double ySpan = yMax - yMin;
 	//For the 'X' dimension, it's easier to stick with the th. profile
 	const double xMin = profileBBMin[0];
-	const double xMax = profileBBMax[0];
+//	const double xMax = profileBBMax[0];
 	const double xSpan = profileBBMax[0] - profileBBMin[0];
 
 	if (xSpan == 0.0 || ySpan == 0.0)
@@ -571,7 +571,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 	const double ySpan = yMax - yMin;
 
 	//For the 'X' dimension, it's easier to stick with the th. profile
-	const double xMin = profileBBMin[0];
+//	const double xMin = profileBBMin[0];
 	const double xMax = profileBBMax[0];
 	const double xSpan = profileBBMax[0] - profileBBMin[0];
 	//shortcut for clarity
@@ -756,7 +756,7 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 								(c_pageHeight_mm - 2.0 * c_profileMargin_mm)/(2.0*maxRadius));
 
 		//min corner of profile area
-		const double x0 = (c_pageWidth_mm - 2.0*maxRadius*scale) / 2.0;
+//		const double x0 = (c_pageWidth_mm - 2.0*maxRadius*scale) / 2.0;
 		const double y0 = (c_pageHeight_mm - 2.0*maxRadius*scale) / 2.0;
 		//center of profile area
 		const double xc = c_pageWidth_mm / 2.0;

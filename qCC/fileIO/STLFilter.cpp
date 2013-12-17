@@ -268,7 +268,7 @@ bool tagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 				{
 					//all the other points are equivalent to the query point
 					const unsigned& otherIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
-					if (otherIndex != thisIndex)
+					if (otherIndex != static_cast<unsigned int>(thisIndex))
 						equivalentIndexes->setValue(otherIndex,thisIndex);
 				}
 			}

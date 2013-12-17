@@ -160,10 +160,10 @@ void qPoissonRecon::doAction()
 
 	//set parameters with dialog settings
 	s_params.depth = prpDlg.octreeLevelSpinBox->value();
-	s_params.pointWeight = prpDlg.weightDoubleSpinBox->value();
+	s_params.pointWeight = static_cast<float>(prpDlg.weightDoubleSpinBox->value());
 	s_params.minDepth = prpDlg.minDepthSpinBox->value();
 	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesSpinBox->value());
-	s_params.solverAccuracy = prpDlg.solverAccuracyDoubleSpinBox->value();
+	s_params.solverAccuracy = static_cast<float>(prpDlg.solverAccuracyDoubleSpinBox->value());
 
 	 //TODO: faster, lighter
 	unsigned count = pc->size();

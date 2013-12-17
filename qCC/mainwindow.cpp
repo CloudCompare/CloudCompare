@@ -2250,7 +2250,6 @@ void MainWindow::doActionSamplePoints()
 	s_ptsSamplingCount = (unsigned)dlg.getPointsNumber();
 	s_ptsSamplingDensity = dlg.getDensityValue();
 
-	bool withFeatures = (withNormals || withRGB || withTexture);
 	bool errors = false;
 
 	ccHObject::Container selectedEntities = m_selectedEntities;

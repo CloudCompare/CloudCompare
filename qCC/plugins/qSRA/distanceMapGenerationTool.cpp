@@ -908,8 +908,6 @@ bool DistanceMapGenerationTool::ComputeSurfacesAndVolumes(	const QSharedPointer<
 		volume.theoretical  = M_PI / 3.0 * volumeProd;
 	}
 
-	unsigned count = map->ySteps * map->xSteps;
-
 	int revolDim = GetPoylineAxis(profile);
 	if (revolDim < 0)
 		return false;

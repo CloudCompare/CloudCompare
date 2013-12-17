@@ -176,7 +176,6 @@ void ccSymbolCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		font.setPointSize(static_cast<int>(m_fontSize * context.renderZoom));
 		//font.setBold(true);
 		QFontMetrics fontMetrics(font);
-		const float& pixelSize = context._win->getViewportParameters().pixelSize * context._win->getViewportParameters().zoom;
 
 		double symbolSizeBackup = m_symbolSize;
 		m_symbolSize *= static_cast<double>(context.renderZoom);

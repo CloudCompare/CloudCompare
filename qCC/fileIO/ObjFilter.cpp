@@ -349,8 +349,8 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	int pointsRead = 0;
 
 	//facets
-	int facesRead = 0;
-	int totalFacesRead = 0;
+	unsigned int facesRead = 0;
+	unsigned int totalFacesRead = 0;
 	int maxVertexIndex = -1;
 
 	//base mesh
@@ -623,7 +623,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						error = true;
 						break;
 					}
-					for (int i=0; i<totalFacesRead; ++i)
+					for (unsigned int i=0; i<totalFacesRead; ++i)
 						baseMesh->addTriangleTexCoordIndexes(-1, -1, -1);
 
 					hasTexCoords = true;
@@ -639,7 +639,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						error = true;
 						break;
 					}
-					for (int i=0; i<totalFacesRead; ++i)
+					for (unsigned int i=0; i<totalFacesRead; ++i)
 						baseMesh->addTriangleNormalIndexes(-1, -1, -1);
 					normalsPerFacet = true;
 				}
@@ -696,7 +696,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						error = true;
 						break;
 					}
-					for (int i=0; i<totalFacesRead; ++i)
+					for (unsigned int i=0; i<totalFacesRead; ++i)
 						baseMesh->addTriangleMtlIndex(-1);
 
 					hasMaterial = true;
@@ -822,7 +822,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	if (!error)
 	{
-		ccLog::Print("[ObjFilter::Load] %i points, %i faces",pointsRead,totalFacesRead);
+		ccLog::Print("[ObjFilter::Load] %i points, %u faces",pointsRead,totalFacesRead);
 		if (texCoordsRead>0 || normsRead>0)
 			ccLog::Print("[ObjFilter::Load] %i tex. coords, %i normals",texCoordsRead,normsRead);
 

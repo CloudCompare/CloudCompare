@@ -28,6 +28,11 @@ v2.5.2 XX/XX/2013
 	- Any geo-localized raster (geotiff, ArcGrid, etc.) thanks to GDAL library (http://www.gdal.org/)
 		* on input: use 'File > Open' (raster will be converted to a point cloud)
 		* on output: use the Height Grid Generation tool (this way, any cloud can be converted to raster)
+- New plugin: qSRA (Surface of Revolution Analysis)
+	- for comparison between a point cloud and a surface of revolution
+	- generates a map of deviations (with cylindrical or conical projection)
+	- exports resulting map as an image, a textured mesh or a point cloud
+	- can generate vertical and horizontal profiles in DXF format
 - Other enhancements:
 	- the qPoissonRecon plugin is now based on the latest version of PoissonRecon (5.5) and it
 		has its own parameters dialog (see http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version5.5/)

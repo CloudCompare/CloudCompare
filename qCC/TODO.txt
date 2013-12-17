@@ -10,7 +10,7 @@ Methods not yet migrated back to V2:
 File I/O:
 - PDF 3D
 - PTX files (http://www.danielgm.net/cc/forum/viewtopic.php?t=638)
-- X3D files (integration with 'xiot' in... standbye)
+- X3D files (integration with 'xiot' in... standby)
 - POD files (Pointools)
 - FARO and LEICA file formats
 - SHP files (--> GDAL)
@@ -18,7 +18,7 @@ File I/O:
 *** And from the forum topic or emails 'recent requests' ***
 
 Big ones:
-[*] flythrough mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
+[*] fly-through mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
 
 Various:
 [*] Finish FBX support (materials)
@@ -41,7 +41,7 @@ Various:
 [*] Add 'TRANGLE_STRIPS' support to VTK I/O filter (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=598)
 
 From Thomas S. (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=550)
-[*] It would be great if the programm could manage long coordinates for the georeferencing (?!)
+[*] It would be great if the program could manage long coordinates for the georeferencing (?!)
 [*] If CloudCompare would support VisualSFM, it would be possible to import the VisualSFM-Project (with the saved camera positions).
 	Then it should be possible to measure the points for the georeferencing in the images itself, instead of the point-cloud, which would be much more accurate.
 

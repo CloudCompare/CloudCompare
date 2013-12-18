@@ -37,6 +37,14 @@
 #include <QApplication>
 #include <QImageWriter>
 #include <QSettings>
+#include <QMessageBox>
+
+#ifdef CC_GDAL_SUPPORT
+//GDAL
+#include <gdal.h>
+#include <gdal_priv.h>
+#include <cpl_string.h>
+#endif
 
 using namespace std;
 
@@ -69,6 +77,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 												double customEmptyCellsHeight/*=-1.0*/,
 												bool generateCloud/*=true*/,
 												bool generateImage/*=false*/,
+												bool generateRaster/*=false*/,
 												bool generateASCII/*=false*/,
 												bool generateCountSF/*=false*/,
 												bool resampleOriginalCloud/*=false*/,
@@ -366,7 +375,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
         ccLog::Print("\tAverage height = %f", meanHeight);
         ccLog::Print("\tMaximal height = %f", maxHeight);
 
-		if (generateASCII || generateImage || generateCloud)
+		if (generateASCII || generateImage || generateRaster || generateCloud)
 		{
 			//=========================================================================================================
 			if (fillEmptyCells == FILL_AVERAGE_HEIGHT)
@@ -497,7 +506,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						assert(false);
 					}
 
-					ccLog::Print("\tempty_cell_color_index = %1",empty_cell_color_index);
+					ccLog::Print("\tempty_cell_color_index = %u",empty_cell_color_index);
 
 					double range = maxHeight - minHeight;
 					if (range < ZERO_TOLERANCE)
@@ -567,6 +576,221 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 				{
 					ccLog::Error("[ccHeightGridGeneration] Failed to create output image! (not enough memory?)");
 				}
+			}
+
+			//=========================================================================================================
+			if (generateRaster)
+			{
+#ifdef CC_GDAL_SUPPORT
+				ccLog::Print("[ccHeightGridGeneration] Saving the height grid as a raster...");
+
+				bool keepGoing = true;
+
+				GDALAllRegister();
+				ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
+
+				const char *pszFormat = "GTiff";
+				GDALDriver *poDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
+				if (!poDriver)
+				{
+						ccLog::Warning("[GDAL] Driver %s is not supported", pszFormat);
+						keepGoing = false;
+				}
+
+				if (keepGoing)
+				{
+					char ** papszMetadata = poDriver->GetMetadata();
+					if( !CSLFetchBoolean( papszMetadata, GDAL_DCAP_CREATE, FALSE ) )
+					{
+						ccLog::Warning("[GDAL] Driver %s doesn't support Create() method", pszFormat);
+						keepGoing = false;
+					}
+				}
+
+				QString outputFilename;
+				if (keepGoing)
+				{
+					QString imageSavePath = settings.value("savePathImage",QApplication::applicationDirPath()).toString();
+					outputFilename = QFileDialog::getSaveFileName(0,"Save height grid raster",imageSavePath+QString("/height_grid_raster.tif"),"geotiff (*.tif)");
+
+					if (outputFilename.isNull())
+						keepGoing = false;
+					else
+						//save current export path to persistent settings
+						settings.setValue("savePathImage",QFileInfo(outputFilename).absolutePath());
+				}
+
+				if (keepGoing)
+				{
+					double empty_cell_height = 0;
+					switch (fillEmptyCells)
+					{
+					case LEAVE_EMPTY:
+						empty_cell_height = minHeight-1.0; //should be transparent!
+						break;
+					case FILL_MINIMUM_HEIGHT:
+						empty_cell_height = minHeight;
+						break;
+					case FILL_MAXIMUM_HEIGHT:
+						empty_cell_height = maxHeight;
+						break;
+					case FILL_CUSTOM_HEIGHT:
+						empty_cell_height = customEmptyCellsHeight;
+						break;
+					case FILL_AVERAGE_HEIGHT:
+						empty_cell_height = meanHeight;
+						break;
+					default:
+						assert(false);
+					}
+
+					ccLog::Print("\tempty_cell_height = %f",empty_cell_height);
+
+					int bands = 1; //height by default
+					//take care of former scalar fields
+					int sfBands = 0;
+					//TODO
+					//if (!gridScalarFields.empty()
+					//	&& QMessageBox::question(0,"Export scalar fields","Input cloud has scalar-fields. Shall we export them in raster?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+					//{
+					//	sfBands = static_cast<int>(gridScalarFields.size());
+					//}
+					bands += sfBands;
+
+					//data type
+					GDALDataType dataType = (std::max(sizeof(PointCoordinateType),sizeof(ScalarType)) > 4 ? GDT_Float64 : GDT_Float32);
+
+					char **papszOptions = NULL;
+					GDALDataset* poDstDS = poDriver->Create(qPrintable(outputFilename),
+															static_cast<int>(grid_size_X),
+															static_cast<int>(grid_size_Y),
+															bands,
+															dataType, 
+															papszOptions);
+
+					if (poDstDS)
+					{
+						double shiftX = box.minCorner().u[X];
+						double shiftY = box.minCorner().u[Y];
+						if (cloud->isA(CC_POINT_CLOUD))
+						{
+							const double* shift = static_cast<ccPointCloud*>(cloud)->getOriginalShift();
+							shiftX -= shift[X];
+							shiftY -= shift[Y];
+						}
+
+						double adfGeoTransform[6] = {	shiftX,		//top left x
+														grid_step,	//w-e pixel resolution (can be negative)
+														0,			//0
+														shiftY,		//top left y
+														0,			//0
+														grid_step	//n-s pixel resolution (can be negative)
+						};
+
+						poDstDS->SetGeoTransform( adfGeoTransform );
+
+						//OGRSpatialReference oSRS;
+						//oSRS.SetUTM( 11, TRUE );
+						//oSRS.SetWellKnownGeogCS( "NAD27" );
+						//char *pszSRS_WKT = NULL;
+						//oSRS.exportToWkt( &pszSRS_WKT );
+						//poDstDS->SetProjection( pszSRS_WKT );
+						//CPLFree( pszSRS_WKT );
+
+						//Height band
+						GDALRasterBand* poBand = poDstDS->GetRasterBand(1);
+						assert(poBand);
+
+						bool error = false;
+
+						double* scanline = (double*) CPLMalloc(sizeof(double)*grid_size_X);
+						for (unsigned j=0; j<grid_size_Y; ++j)
+						{
+							const HeightGridCell* aCell = grid[j];
+							for (unsigned i=0; i<grid_size_X; ++i,++aCell)
+							{
+								if (aCell->nbPoints)
+								{
+									scanline[i] = static_cast<double>(aCell->height);
+								}
+								else
+								{
+									scanline[i] = empty_cell_height;
+								}
+							}
+							
+							if (poBand->RasterIO( GF_Write, 0, static_cast<int>(j), static_cast<int>(grid_size_X), 1, scanline, static_cast<int>(grid_size_X), 1, GDT_Float64, 0, 0 ) != CE_None)
+							{
+								ccLog::Error("[GDAL] An error occurred while writing the raster file!");
+								error = true;
+								break;
+							}
+						}
+
+						if (!error && sfBands)
+						{
+							//TODO
+							//for (size_t k=0; k<gridScalarFields.size(); ++k)
+							//{
+							//	double* _sfGrid = gridScalarFields[k];
+							//	if (_sfGrid) //valid SF grid
+							//	{
+							//		//the input point cloud should be empty!
+							//		CCLib::ScalarField* formerSf = pc->getScalarField(static_cast<int>(k));
+							//		assert(formerSf);
+
+							//		//we try to create an equivalent SF on the output grid
+							//		int sfIdx = cloudGrid->addScalarField(formerSf->getName());
+							//		if (sfIdx<0) //if we aren't lucky, the input cloud already had a SF with CC_HEIGHT_GRID_FIELD_NAME as name
+							//			sfIdx = cloudGrid->addScalarField(qPrintable(QString(formerSf->getName()).append(".old")));
+
+							//		if (sfIdx<0)
+							//			ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing SF '%s' values! Try to free some memory ...",formerSf->getName());
+							//		else
+							//		{
+							//			CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
+							//			assert(sf);
+							//			//set sf values
+							//			unsigned n = 0;
+							//			const ScalarType emptyCellSFValue = CCLib::ScalarField::NaN();
+							//			for (unsigned j=0; j<grid_size_Y; ++j)
+							//			{
+							//				const HeightGridCell* aCell = grid[j];
+							//				for (unsigned i=0; i<grid_size_X; ++i, /*++_sfGrid, */++aCell)
+							//				{
+							//					if (aCell->nbPoints)
+							//					{
+							//						ScalarType s = static_cast<ScalarType>(empty_cell_height);
+							//						sf->setValue(n++,s);
+							//					}
+							//					else if (fillEmptyCells != LEAVE_EMPTY)
+							//					{
+							//						sf->setValue(n++,emptyCellSFValue);
+							//					}
+							//				}
+							//			}
+							//			sf->computeMinAndMax();
+							//			assert(sf->currentSize()==pointsCount);
+							//		}
+							//	}
+							//}
+						}
+
+						/* Once we're done, close properly the dataset */
+						GDALClose( (GDALDatasetH) poDstDS );
+					}
+					else
+					{
+						ccLog::Error("[GDAL] Failed to create output raster (not enough memory?)");
+					}
+				}
+				else
+				{
+					ccLog::Error("[ccHeightGridGeneration] Failed to create output image! (not enough memory?)");
+				}
+#else
+				ccLog::Warning("[ccHeightGridGeneration] GDAL not supported by this version! Can't generate a raster...");
+#endif
 			}
 
 			//=========================================================================================================

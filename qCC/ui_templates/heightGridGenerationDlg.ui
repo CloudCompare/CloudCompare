@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>464</height>
+    <height>487</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -302,12 +302,19 @@
        </widget>
       </item>
       <item>
+       <widget class="QCheckBox" name="generateRasterCheckBox">
+        <property name="text">
+         <string>Grid as a raster (geotiff)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QCheckBox" name="generateImageCheckBox">
         <property name="toolTip">
          <string>image is automatically generated in the application directory</string>
         </property>
         <property name="text">
-         <string>Grid as an image (height_grid_image.tiff)</string>
+         <string>Grid as an image</string>
         </property>
        </widget>
       </item>
@@ -317,7 +324,7 @@
          <string>file is automatically generated in the application directory</string>
         </property>
         <property name="text">
-         <string>Grid as a matrix (height_grid_text_file.txt)</string>
+         <string>Grid as a matrix (text file)</string>
         </property>
         <property name="checked">
          <bool>false</bool>

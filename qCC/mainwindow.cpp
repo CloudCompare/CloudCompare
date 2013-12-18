@@ -4213,8 +4213,9 @@ void MainWindow::doActionHeightGridGeneration()
 	bool resampleOriginalCloud = dlg.resampleOriginalCloud();
     bool generateImage = dlg.generateImage();
     bool generateASCII = dlg.generateASCII();
+	bool generateRaster = dlg.generateRaster();
 
-    if (!generateCloud && !generateImage && !generateASCII)
+    if (!generateCloud && !generateImage && !generateASCII && !generateRaster)
     {
         ccConsole::Error("Nothing to do?! Mind the 'Generate' checkboxes...");
         return;
@@ -4222,7 +4223,7 @@ void MainWindow::doActionHeightGridGeneration()
 
     //Grid step must be > 0
     double gridStep = dlg.getGridStep();
-    assert(gridStep>0);
+    assert(gridStep > 0);
 	//Custom bundig box
 	ccBBox box = dlg.getCustomBBox();
 
@@ -4241,6 +4242,7 @@ void MainWindow::doActionHeightGridGeneration()
 		dlg.getCustomHeightForEmptyCells(),
 		generateCloud,
 		generateImage,
+		generateRaster,
 		generateASCII,
 		generateCountSF,
 		resampleOriginalCloud,

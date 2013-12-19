@@ -14,9 +14,9 @@ v2.5.2 12/19/2013
 	It doubles the memory consumption but it increases a lot the accuracy.
 	Moreover there's absolutely no loss of information when importing/exporting clouds
 	with very big coordinates (however OpenGL still requires rather small coordinates
-	for a proper display, therefore the 'shift on load' mechanism might still necessary)
+	for a proper display, therefore the 'shift on load' mechanism might still be necessary)
 - New tool: 'Display > Adjust zoom'
-	- Let the user set the current window zoom either directly or by specifying a pixel
+	- let the user set the current window zoom either directly or by specifying a pixel
 	size in the (implicit) units of the current entities.
 - New tool: Edit > Scalar fields > Set SF as coordinate(s)
 	- allows the user to map a scalar field to one or several dimensions (X,Y or Z)
@@ -36,17 +36,17 @@ v2.5.2 12/19/2013
 	- exports resulting map as an image, a textured mesh or a point cloud
 	- can generate vertical and horizontal profiles in DXF format
 - Other enhancements:
-	- the qPoissonRecon plugin is now based on the latest version of PoissonRecon (5.5) and it
-		has its own parameters dialog (see http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version5.5/)
+	- the qPoissonRecon plugin is now based on the latest version of PoissonRecon (5.5)
+		* see http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version5.5/
+		* new parameters dialog
+		* the input cloud colors can now be mapped on the resulting mesh (quick & dirty approach:
+			simply assigns to each mesh vertex the color of the nearest input point)
 	- the 'Edit > Transformation' tool now offers 3 different ways to input a transformation:
 		* classical 4x4 transformation matrix
 		* rotation axis, rotation angle and translation vector
 		* euler angles and translation vector
 	- if you paste a transformation matrix copied from the console, the 'Edit > Transformation' tool
 		will now automatically remove the timetsamp (between square brackets)
-	- the qPoissonRecon plugin (Poisson Surface Reconstruction) is now able to map the
-		input cloud colors on the resulting mesh:
-		* quick & dirty approach: simply assign to each mesh vertex the color of the nearest input point
 	- when using 'Local models' when computing cloud-to-cloud distances, CC will now take the
 		smallest distance between each point and either the local model or the nearest neighbor
 		(in order to avoid clearly erroneous distances due to badly shaped local models).
@@ -54,7 +54,7 @@ v2.5.2 12/19/2013
 	- BIN file loading/saving is now performed in a separate thread
 		* a progress dialog is now displayed during loading/saving
 		* multiple loading sessions can be done concurrently (use drag & drop on a 3D view
-			(note: only interesting when loading files from different drives)
+			- note: only interesting when loading files from different drives)
 		* additional check addded to detect corrupted meshes
 	- Global rescaling applying at loading time is now properly handled
 		* works just like global shift

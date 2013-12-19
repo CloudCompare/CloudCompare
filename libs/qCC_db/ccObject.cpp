@@ -40,8 +40,9 @@
    v3.0 - 08/30/2013 - QObject's meta data structure added
    v3.1 - 09/25/2013 - ccPolyline width added
    v3.2 - 10/11/2013 - ccFacet (2D polygons) are now supported
+   v3.3 - 12/19/2013 - global scale information is now saved for point clouds
 **/
-const unsigned c_currentDBVersion = 32; //3.2
+const unsigned c_currentDBVersion = 33; //3.3
 
 unsigned ccObject::GetCurrentDBVersion()
 {

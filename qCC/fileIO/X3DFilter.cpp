@@ -42,11 +42,10 @@
 CC_FILE_ERROR X3DFilter::saveToFile(ccHObject* entity, const char* filename)
 {
 	//TODO
-	//const double* shift = theCloud->getOriginalShift();
 	return CC_FERR_NO_SAVE;
 }
 
-CC_FILE_ERROR X3DFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR X3DFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	XIOT::X3DLoader loader;
 	X3DXIOTNodeHandler handler(&container);

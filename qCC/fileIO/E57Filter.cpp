@@ -319,18 +319,20 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	}
 
 	// Cloud shift
-	const double* shift = cloud->getOriginalShift();
+	const CCVector3d& shift = cloud->getGlobalShift();
+	double scale = cloud->getGlobalScale();
+	assert(scale != 0);
 
 	// Add Cartesian bounding box to scan.
 	assert(bbox.isValid());
 	{
 		e57::StructureNode bboxNode = e57::StructureNode(imf);
-		bboxNode.set("xMinimum", e57::FloatNode(imf,-shift[0]+(double)bbox.minCorner().x));
-		bboxNode.set("xMaximum", e57::FloatNode(imf,-shift[0]+(double)bbox.maxCorner().x));
-		bboxNode.set("yMinimum", e57::FloatNode(imf,-shift[1]+(double)bbox.minCorner().y));
-		bboxNode.set("yMaximum", e57::FloatNode(imf,-shift[1]+(double)bbox.maxCorner().y));
-		bboxNode.set("zMinimum", e57::FloatNode(imf,-shift[2]+(double)bbox.minCorner().z));
-		bboxNode.set("zMaximum", e57::FloatNode(imf,-shift[2]+(double)bbox.maxCorner().z));
+		bboxNode.set("xMinimum", e57::FloatNode(imf,static_cast<double>(bbox.minCorner().x)/scale-shift.x));
+		bboxNode.set("xMaximum", e57::FloatNode(imf,static_cast<double>(bbox.maxCorner().x)/scale-shift.x));
+		bboxNode.set("yMinimum", e57::FloatNode(imf,static_cast<double>(bbox.minCorner().y)/scale-shift.y));
+		bboxNode.set("yMaximum", e57::FloatNode(imf,static_cast<double>(bbox.maxCorner().y)/scale-shift.y));
+		bboxNode.set("zMinimum", e57::FloatNode(imf,static_cast<double>(bbox.minCorner().z)/scale-shift.z));
+		bboxNode.set("zMaximum", e57::FloatNode(imf,static_cast<double>(bbox.maxCorner().z)/scale-shift.z));
 		scanNode.set("cartesianBounds", bboxNode);
 	}
 
@@ -367,15 +369,27 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	{
 		e57::FloatPrecision precision = sizeof(PointCoordinateType)==8 ? e57::E57_DOUBLE : e57::E57_SINGLE;
 
-		proto.set("cartesianX", e57::FloatNode(imf, -shift[0]+(double)(bbox.minCorner().x + bbox.maxCorner().x)/2.0, precision, -shift[0]+(double)bbox.minCorner().x, -shift[0]+(double)bbox.maxCorner().x));
+		proto.set("cartesianX", e57::FloatNode(	imf,
+												static_cast<double>(bbox.minCorner().x + bbox.maxCorner().x)/(2.0*scale) - shift.x,
+												precision,
+												static_cast<double>(bbox.minCorner().x)/scale - shift.x,
+												static_cast<double>(bbox.maxCorner().x)/scale - shift.x ) );
 		arrays.xData = new double[nSize];
 		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianX",  arrays.xData,  nSize, true, true));
 
-		proto.set("cartesianY", e57::FloatNode(imf, -shift[1]+(double)(bbox.minCorner().y + bbox.maxCorner().y)/2, precision, -shift[1]+(double)bbox.minCorner().y, -shift[1]+(double)bbox.maxCorner().y));
+		proto.set("cartesianY", e57::FloatNode(	imf,
+												static_cast<double>(bbox.minCorner().y + bbox.maxCorner().y)/(2.0*scale) - shift.y,
+												precision,
+												static_cast<double>(bbox.minCorner().y)/scale - shift.y,
+												static_cast<double>(bbox.maxCorner().y)/scale - shift.y ) );
 		arrays.yData = new double[nSize];
 		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianY",  arrays.yData,  nSize, true, true));
 
-		proto.set("cartesianZ", e57::FloatNode(imf, -shift[2]+(double)(bbox.minCorner().z + bbox.maxCorner().z)/2, precision, -shift[2]+(double)bbox.minCorner().z, -shift[2]+(double)bbox.maxCorner().z));
+		proto.set("cartesianZ", e57::FloatNode(	imf,
+												static_cast<double>(bbox.minCorner().z + bbox.maxCorner().z)/(2.0*scale) - shift.z,
+												precision,
+												static_cast<double>(bbox.minCorner().z)/scale - shift.z,
+												static_cast<double>(bbox.maxCorner().z)/scale - shift.z ) );
 		arrays.zData = new double[nSize];
 		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianZ",  arrays.zData,  nSize, true, true));
 	}
@@ -476,9 +490,9 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 		for(unsigned i=0; i<size; i++)
 		{
 			const CCVector3* P = cloud->getPointPersistentPtr(indexShift+i);
-			arrays.xData[i]=-shift[0]+(double)P->x;
-			arrays.yData[i]=-shift[1]+(double)P->y;
-			arrays.zData[i]=-shift[2]+(double)P->z;
+			arrays.xData[i] = static_cast<double>(P->x)/scale - shift.x;
+			arrays.yData[i] = static_cast<double>(P->y)/scale - shift.y;
+			arrays.zData[i] = static_cast<double>(P->z)/scale - shift.z;
 
 			if(intensitySF)
 			{
@@ -492,18 +506,18 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 			if (hasNormals)
 			{
 				const PointCoordinateType* N = cloud->getPointNormal(indexShift+i);
-				arrays.xNormData[i]=(double)N[0];
-				arrays.yNormData[i]=(double)N[1];
-				arrays.zNormData[i]=(double)N[2];
+				arrays.xNormData[i] = static_cast<double>(N[0]);
+				arrays.yNormData[i] = static_cast<double>(N[1]);
+				arrays.zNormData[i] = static_cast<double>(N[2]);
 			}
 
 			if (hasColors)
 			{
 				//Normalize color to 0 - 255
 				const colorType* C = cloud->getPointColor(indexShift+i);
-				arrays.redData[i]=(double)C[0];
-				arrays.greenData[i]=(double)C[1];
-				arrays.blueData[i]=(double)C[2];
+				arrays.redData[i]	= static_cast<double>(C[0]);
+				arrays.greenData[i]	= static_cast<double>(C[1]);
+				arrays.blueData[i]	= static_cast<double>(C[2]);
 			}
 
 			if (returnIndexSF)
@@ -518,12 +532,12 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 		if (!nprogress.oneStep())
 		{
 			QApplication::processEvents();
-			s_cancelRequestedByUser=true;
+			s_cancelRequestedByUser = true;
 			break;
 		}
 
 		indexShift += size;
-		assert(size<=pointCount);
+		assert(size <= pointCount);
 		pointCount -= size;
 	}
 
@@ -1309,7 +1323,7 @@ static ScalarType s_minIntensity = 0;
 //for coordinate shif handling
 static bool s_alwaysDisplayLoadDialog = true;
 static bool s_coordinatesShiftEnabled = false;
-static double s_coordinatesShift[3] = {0,0,0};
+static CCVector3d s_coordinatesShift(0,0,0);
 
 ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=true*/)
 {
@@ -1658,16 +1672,16 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 				bool applyAll=false;
 				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,s_alwaysDisplayLoadDialog,s_coordinatesShiftEnabled,s_coordinatesShift,0,applyAll))
 				{
-					cloud->setOriginalShift(s_coordinatesShift[0],s_coordinatesShift[1],s_coordinatesShift[2]);
-					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)",qPrintable(guidStr),s_coordinatesShift[0],s_coordinatesShift[1],s_coordinatesShift[2]);
+					cloud->setGlobalShift(s_coordinatesShift);
+					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)",qPrintable(guidStr),s_coordinatesShift.x,s_coordinatesShift.y,s_coordinatesShift.z);
 					if (applyAll)
 						s_coordinatesShiftEnabled = true;
 				}
 			}
 
-			CCVector3 P(static_cast<PointCoordinateType>(Pd[0]+s_coordinatesShift[0]),
-						static_cast<PointCoordinateType>(Pd[1]+s_coordinatesShift[1]),
-						static_cast<PointCoordinateType>(Pd[2]+s_coordinatesShift[2]));
+			CCVector3 P(static_cast<PointCoordinateType>(Pd[0] + s_coordinatesShift.x),
+						static_cast<PointCoordinateType>(Pd[1] + s_coordinatesShift.y),
+						static_cast<PointCoordinateType>(Pd[2] + s_coordinatesShift.z));
 			cloud->addPoint(P);
 
 			if (hasNormals)
@@ -2022,7 +2036,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	return imageObj;
 }
 
-CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	s_alwaysDisplayLoadDialog = alwaysDisplayLoadDialog;
 

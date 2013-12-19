@@ -365,7 +365,7 @@ QString GetAttributeTypeName(FbxNodeAttribute::EType type)
 }
 
 //converts a FBX mesh to a CC mesh
-static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	if (!fbxMesh)
 		return 0;
@@ -724,7 +724,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 	{
 		const FbxVector4* fbxVertices = fbxMesh->GetControlPoints();
 		assert(vertices && fbxVertices);
-		double Pshift[3] = {0,0,0};
+		CCVector3d Pshift(0,0,0);
 		for (int i=0; i<vertCount; ++i, ++fbxVertices)
 		{
 			const double* P = fbxVertices->Buffer();
@@ -735,27 +735,25 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 			{
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 				if (shiftAlreadyEnabled)
-					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+					Pshift = *coordinatesShift;
 				bool applyAll=false;
 				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
-					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-					ccLog::Warning("[FBX] Mesh has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+					vertices->setGlobalShift(Pshift);
+					ccLog::Warning("[FBX] Mesh has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 
 					//we save coordinates shift information
 					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
 					{
 						*coordinatesShiftEnabled = true;
-						coordinatesShift[0] = Pshift[0];
-						coordinatesShift[1] = Pshift[1];
-						coordinatesShift[2] = Pshift[2];
+						*coordinatesShift = Pshift;
 					}
 				}
 			}
 
-			CCVector3 PV(	static_cast<PointCoordinateType>(P[0] + Pshift[0]),
-							static_cast<PointCoordinateType>(P[1] + Pshift[1]),
-							static_cast<PointCoordinateType>(P[2] + Pshift[0]) );
+			CCVector3 PV(	static_cast<PointCoordinateType>(P[0] + Pshift.x),
+							static_cast<PointCoordinateType>(P[1] + Pshift.y),
+							static_cast<PointCoordinateType>(P[2] + Pshift.z) );
 
 			vertices->addPoint(PV);
 		}
@@ -770,7 +768,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 }
 
 
-CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	// Initialize the SDK manager. This object handles memory management.
 	FbxManager* lSdkManager = FbxManager::Create();

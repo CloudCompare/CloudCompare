@@ -208,7 +208,7 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 										CC_FILE_TYPES fType,
 										bool alwaysDisplayLoadDialog/*=true*/,
 										bool* coordinatesShiftEnabled/*=0*/,
-										double* coordinatesShift/*=0*/)
+										CCVector3d* coordinatesShift/*=0*/)
 {
 	//check file existence
     QFileInfo fi(filename);

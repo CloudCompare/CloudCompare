@@ -194,7 +194,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 			{
 				//we create a new scalar field with same name
 				int sfIdx = result->addScalarField(sf->getName());
-				if (sfIdx>=0) //success
+				if (sfIdx >= 0) //success
 				{
 					ccScalarField* currentScalarField = static_cast<ccScalarField*>(result->getScalarField(sfIdx));
 					assert(currentScalarField);
@@ -275,9 +275,8 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 	*/
 
 	//original center
-	const double* shift = getOriginalShift();
-	if (shift)
-		result->setOriginalShift(shift[0],shift[1],shift[2]);
+	result->setGlobalShift(getGlobalShift());
+	result->setGlobalScale(getGlobalScale());
 
 	//custom point size
 	result->setPointSize(getPointSize());
@@ -344,8 +343,8 @@ ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/)
 	result->setCurrentDisplayedScalarField(getCurrentDisplayedScalarFieldIndex());
 
 	//original shift
-	const double* shift = getOriginalShift();
-	result->setOriginalShift(shift[0],shift[1],shift[2]);
+	result->setGlobalShift(getGlobalShift());
+	result->setGlobalScale(getGlobalScale());
 
 	result->setName(getName()+QString(".clone"));
 
@@ -385,7 +384,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		deleteOctree();
 		unallocateVisibilityArray();
 
-		for (unsigned i=0;i<addedPoints;i++)
+		for (unsigned i=0; i<addedPoints; i++)
 			addPoint(*addedCloud->getPoint(i));
 	}
 
@@ -402,7 +401,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		if (!addedCloud->hasColors())
 		{
 			//we set a white color to new points
-			for (unsigned i=0;i<addedPoints;i++)
+			for (unsigned i=0; i<addedPoints; i++)
 				addRGBColor(ccColor::white);
 		}
 		else //otherwise
@@ -413,7 +412,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				//we try to resrve a new array
 				if (reserveTheRGBTable())
 				{
-					for (unsigned i=0;i<pointCountBefore;i++)
+					for (unsigned i=0; i<pointCountBefore; i++)
 						addRGBColor(ccColor::white);
 				}
 				else
@@ -425,7 +424,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 			//we import colors (if necessary)
 			if (hasColors() && m_rgbColors->currentSize() == pointCountBefore)
-				for (unsigned i=0;i<addedPoints;i++)
+				for (unsigned i=0; i<addedPoints; i++)
 					addRGBColor(addedCloud->m_rgbColors->getValue(i));
 		}
 	}
@@ -440,7 +439,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		if (!addedCloud->hasNormals())
 		{
 			//we associate imported points with '0' normals
-			for (unsigned i=0;i<addedPoints;i++)
+			for (unsigned i=0; i<addedPoints; i++)
 				addNormIndex(0);
 		}
 		else //otherwise
@@ -476,14 +475,14 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		std::vector<bool> sfUpdated(sfCount, false);
 
 		//first we merge the new SF with the existing one
-		for (unsigned k=0;k<newSFCount;++k)
+		for (unsigned k=0; k<newSFCount; ++k)
 		{
-			const ccScalarField* sf = static_cast<ccScalarField*>(addedCloud->getScalarField((int)k));
+			const ccScalarField* sf = static_cast<ccScalarField*>(addedCloud->getScalarField(static_cast<int>(k)));
 			if (sf)
 			{
 				//does this field already exist (same name)?
 				int sfIdx = getScalarFieldIndexByName(sf->getName());
-				if (sfIdx>=0) //yes
+				if (sfIdx >= 0) //yes
 				{
 					CCLib::ScalarField* sameSF = getScalarField(sfIdx);
 					assert(sameSF && sameSF->capacity()>=pointCountBefore+addedPoints);
@@ -521,7 +520,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 						//add scalar field to this cloud
 						sfIdx = addScalarField(newSF);
-						assert(sfIdx>=0);
+						assert(sfIdx >= 0);
 					}
 					else
 					{
@@ -534,7 +533,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		}
 
 		//let's check if there are non-updated fields
-		for (unsigned j=0;j<sfCount;++j)
+		for (unsigned j=0; j<sfCount; ++j)
 		{
 			if (!sfUpdated[j])
 			{
@@ -552,7 +551,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		}
 
 		//in case something bad happened
-		if (getNumberOfScalarFields()==0)
+		if (getNumberOfScalarFields() == 0)
 		{
 			setCurrentDisplayedScalarField(-1);
 			showSF(false);
@@ -560,7 +559,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		else
 		{
 			//if there was no scalar field before
-			if (sfCount==0)
+			if (sfCount == 0)
 			{
 				//and if the added cloud has one displayed
 				const ccScalarField* dispSF = addedCloud->getCurrentDisplayedScalarField();
@@ -577,10 +576,15 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 		}
 	}
 
-	//Has the cloud been recentered?
-	const double* shift = addedCloud->getOriginalShift();
-	if (fabs(shift[0])+fabs(shift[1])+fabs(shift[1])>0.0)
-		ccLog::Warning(QString("[ccPointCloud::fusion] Global shift information for cloud '%1' will be lost!").arg(addedCloud->getName()));
+	//Has the cloud been recentered/rescaled?
+	{
+		const CCVector3d& shift = addedCloud->getGlobalShift();
+		if (fabs(shift.x) + fabs(shift.y) + fabs(shift.z) > 0)
+			ccLog::Warning(QString("[ccPointCloud::fusion] Global shift information for cloud '%1' will be lost!").arg(addedCloud->getName()));
+		double scale = addedCloud->getGlobalScale();
+		if (scale != 1.0)
+			ccLog::Warning(QString("[ccPointCloud::fusion] Global scale information for cloud '%1' will be lost!").arg(addedCloud->getName()));
+	}
 
 	//children (not yet reserved)
 	unsigned childrenCount = addedCloud->getChildrenNumber();
@@ -2092,7 +2096,7 @@ void ccPointCloud::setCurrentDisplayedScalarField(int index)
 	m_currentDisplayedScalarFieldIndex=index;
 	m_currentDisplayedScalarField=static_cast<ccScalarField*>(getScalarField(index));
 
-	if (m_currentDisplayedScalarFieldIndex>=0 && m_currentDisplayedScalarField)
+	if (m_currentDisplayedScalarFieldIndex >= 0 && m_currentDisplayedScalarField)
 		setCurrentOutScalarField(m_currentDisplayedScalarFieldIndex);
 }
 
@@ -2109,7 +2113,7 @@ void ccPointCloud::deleteScalarField(int index)
 		setCurrentInScalarField((int)getNumberOfScalarFields()-1);
 
 	setCurrentDisplayedScalarField(m_currentInScalarFieldIndex);
-	showSF(m_currentInScalarFieldIndex>=0);
+	showSF(m_currentInScalarFieldIndex >= 0);
 }
 
 void ccPointCloud::deleteAllScalarFields()
@@ -2319,7 +2323,7 @@ void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
 int ccPointCloud::addScalarField(const char* uniqueName)
 {
 	//we don't accept two SF with the same name!
-	if (getScalarFieldIndexByName(uniqueName)>=0)
+	if (getScalarFieldIndexByName(uniqueName) >= 0)
 	{
 		ccLog::Warning("[ccPointCloud::addScalarField] Names already exists!");
 		return -1;
@@ -2345,7 +2349,7 @@ int ccPointCloud::addScalarField(ccScalarField* sf)
 	assert(sf);
 
 	//we don't accept two SF with the same name!
-	if (getScalarFieldIndexByName(sf->getName())>=0)
+	if (getScalarFieldIndexByName(sf->getName()) >= 0)
 		return -1;
 
 	if (sf->currentSize() < m_points->capacity())

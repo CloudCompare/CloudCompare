@@ -213,7 +213,7 @@ public:
 									CC_FILE_TYPES fType = UNKNOWN_FILE,
 									bool alwaysDisplayLoadDialog = true,
 									bool* coordinatesShiftEnabled = 0,
-									double* coordinatesShift = 0);
+									CCVector3d* coordinatesShift = 0);
 
 	//! Saves an entity (or a group of) to a specific file (with name and type)
 	static CC_FILE_ERROR SaveToFile(ccHObject* entities,
@@ -242,7 +242,7 @@ public:
 									ccHObject& container,
 									bool alwaysDisplayLoadDialog = true,
 									bool* coordinatesShiftEnabled = 0,
-									double* coordinatesShift = 0)=0;
+									CCVector3d* coordinatesShift = 0)=0;
 
 	//! Saves an entity (or a group of) to a file
 	/** This method must be implemented by children classes.

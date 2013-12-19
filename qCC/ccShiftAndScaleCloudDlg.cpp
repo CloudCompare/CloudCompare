@@ -30,18 +30,16 @@ void ccShiftAndScaleCloudDlg::showScaleItems(bool state)
 	scaleFrame->setVisible(state);
 }
 
-void ccShiftAndScaleCloudDlg::setShift(double x, double y, double z)
+void ccShiftAndScaleCloudDlg::setShift(const CCVector3d& shift)
 {
-	shiftX->setValue(x);
-	shiftY->setValue(y);
-	shiftZ->setValue(z);
+	shiftX->setValue(shift.x);
+	shiftY->setValue(shift.y);
+	shiftZ->setValue(shift.z);
 }
 
-void ccShiftAndScaleCloudDlg::getShift(double& x, double& y, double& z) const
+CCVector3d ccShiftAndScaleCloudDlg::getShift() const
 {
-	x = shiftX->value();
-	y = shiftY->value();
-	z = shiftZ->value();
+	return CCVector3d( shiftX->value(), shiftY->value(), shiftZ->value() );
 }
 
 void ccShiftAndScaleCloudDlg::setScale(double scale)

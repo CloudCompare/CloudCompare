@@ -672,19 +672,27 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 					{
 						double shiftX = box.minCorner().u[X];
 						double shiftY = box.minCorner().u[Y];
+
+						double stepX = grid_step;
+						double stepY = grid_step;
 						if (cloud->isA(CC_POINT_CLOUD))
 						{
-							const double* shift = static_cast<ccPointCloud*>(cloud)->getOriginalShift();
-							shiftX -= shift[X];
-							shiftY -= shift[Y];
+							const CCVector3d& shift = static_cast<ccPointCloud*>(cloud)->getGlobalShift();
+							shiftX -= shift.u[X];
+							shiftY -= shift.u[Y];
+
+							double scale = cloud->getGlobalScale();
+							assert(scale != 0);
+							stepX /= scale;
+							stepY /= scale;
 						}
 
 						double adfGeoTransform[6] = {	shiftX,		//top left x
-														grid_step,	//w-e pixel resolution (can be negative)
+														stepX,		//w-e pixel resolution (can be negative)
 														0,			//0
 														shiftY,		//top left y
 														0,			//0
-														grid_step	//n-s pixel resolution (can be negative)
+														stepY		//n-s pixel resolution (can be negative)
 						};
 
 						poDstDS->SetGeoTransform( adfGeoTransform );

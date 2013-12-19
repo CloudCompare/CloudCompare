@@ -39,7 +39,7 @@ CC_FILE_ERROR PDMSFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_SAVE;
 }
 
-CC_FILE_ERROR PDMSFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR PDMSFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	PdmsParser parser;
 	PdmsFileSession session(filename);

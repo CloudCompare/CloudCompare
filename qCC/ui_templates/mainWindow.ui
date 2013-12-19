@@ -253,10 +253,13 @@
     <addaction name="separator"/>
     <addaction name="actionClone"/>
     <addaction name="actionMerge"/>
+    <addaction name="actionSubsample"/>
     <addaction name="actionApplyTransformation"/>
     <addaction name="actionMultiply"/>
+    <addaction name="separator"/>
     <addaction name="actionEditGlobalShift"/>
-    <addaction name="actionSubsample"/>
+    <addaction name="actionEditGlobalScale"/>
+    <addaction name="separator"/>
     <addaction name="menuToggle"/>
     <addaction name="separator"/>
     <addaction name="actionDelete"/>
@@ -2374,6 +2377,11 @@
    </property>
    <property name="toolTip">
     <string>Remove all entiites currently loaded in the DB tree</string>
+   </property>
+  </action>
+  <action name="actionEditGlobalScale">
+   <property name="text">
+    <string>Edit global scale</string>
    </property>
   </action>
  </widget>

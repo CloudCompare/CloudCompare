@@ -677,7 +677,7 @@ void MainWindow::on3DMouseKeyDown(int key)
 				CCVector3 axis(0.0f,0.0f,-1.0f);
 				CCVector3 trans(0.0f);
 				ccGLMatrix mat;
-				float angle = (float)(M_PI/2.0);
+				float angle = static_cast<float>(M_PI/2.0);
 				if (key == Mouse3DInput::V3DK_CCW)
 					angle = -angle;
 				mat.initFromParameters(angle,axis,trans);
@@ -761,7 +761,7 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 		{
 			const ccViewportParameters& viewParams = win->getViewportParameters();
 
-			float scale = (float)std::min(win->width(),win->height()) * viewParams.pixelSize;
+			float scale = static_cast<float>(std::min(win->width(),win->height()) * viewParams.pixelSize);
 			if (perspectiveView)
 			{
 				float tanFOV = tan(viewParams.fov*static_cast<float>(CC_DEG_TO_RAD)/*/2*/);
@@ -885,6 +885,7 @@ void MainWindow::connectActions()
     connect(actionApplyTransformation,			SIGNAL(triggered()),    this,       SLOT(doActionApplyTransformation()));
     connect(actionMultiply,                     SIGNAL(triggered()),    this,       SLOT(doActionMultiply()));
     connect(actionEditGlobalShift,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalShift()));
+    connect(actionEditGlobalScale,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalScale()));
     connect(actionSubsample,                    SIGNAL(triggered()),    this,       SLOT(doActionSubsample())); //Aurelien BEY le 13/11/2008
 	connect(actionMatchBarycenters,				SIGNAL(triggered()),    this,       SLOT(doActionMatchBarycenters()));
     connect(actionDelete,                       SIGNAL(triggered()),    m_ccRoot,	SLOT(deleteSelectedEntities()));
@@ -1292,7 +1293,7 @@ void MainWindow::doActionComputeOctree()
 	}
 
 	//min(cellSize) = max(dim)/2^N with N = max subidivision level
-	double minCellSize = (double)maxBoxSize/(double)(1 << ccOctree::MAX_OCTREE_LEVEL);
+	double minCellSize = static_cast<double>(maxBoxSize)/(1 << ccOctree::MAX_OCTREE_LEVEL);
 
 	ccComputeOctreeDlg coDlg(bbox,minCellSize,this);
 	if (!coDlg.exec())
@@ -1329,7 +1330,7 @@ void MainWindow::doActionComputeOctree()
 				if (coDlg.getMode() == ccComputeOctreeDlg::MIN_CELL_SIZE)
 				{
 					double cellSize = coDlg.getMinCellSize();
-					PointCoordinateType halfBoxWidth = (PointCoordinateType)(cellSize * (double)(1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
+					PointCoordinateType halfBoxWidth = (PointCoordinateType)(cellSize * (1 << ccOctree::MAX_OCTREE_LEVEL) / 2.0);
 					CCVector3 C = cloud->getBB().getCenter();
 					bbox = ccBBox(	C-CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth),
 									C+CCVector3(halfBoxWidth,halfBoxWidth,halfBoxWidth));
@@ -1381,7 +1382,7 @@ void MainWindow::doActionResampleWithOctree()
         return;
 
     ccProgressDialog pDlg(false,this);
-    unsigned aimedPoints = (unsigned)dlg.getValue();
+    unsigned aimedPoints = static_cast<unsigned>(dlg.getValue());
 
 	ccHObject::Container selectedEntities = m_selectedEntities;
     size_t selNum = selectedEntities.size();
@@ -1428,9 +1429,9 @@ void MainWindow::doActionResampleWithOctree()
 
 				if (newCloud)
 				{
-					const double* shift = cloud->getOriginalShift();
-					if (shift)
-						newCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+					const CCVector3d& shift = cloud->getGlobalShift();
+					newCloud->setGlobalShift(shift);
+					newCloud->setGlobalScale(cloud->getGlobalScale());
 					addToDB(newCloud, true, 0, false, false);
 					newCloud->setDisplay(cloud->getDisplay());
 					newCloud->prepareDisplayForRefresh();
@@ -1527,13 +1528,12 @@ void MainWindow::doActionMultiply()
             cloud->prepareDisplayForRefresh_recursive();
 
 			//don't forget shift on load!
-			const double* shift = cloud->getOriginalShift();
-			if (shift)
-			{
-				cloud->setOriginalShift(shift[0]*s_lastMultFactorX,
-										shift[1]*s_lastMultFactorY,
-										shift[2]*s_lastMultFactorZ);
-			}
+			//TODO: and what about the original scale?
+			CCVector3d shift = cloud->getGlobalShift();
+			shift.x *= s_lastMultFactorX;
+			shift.y *= s_lastMultFactorY;
+			shift.z *= s_lastMultFactorZ;
+			cloud->setGlobalShift(shift);
         }
     }
 
@@ -1554,8 +1554,7 @@ void MainWindow::doActionEditGlobalShift()
 
 	bool lockedVertices;
 	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-
-	//for "real" point clouds only
+	//for point clouds only
 	if (!cloud)
 		return;
 	if (lockedVertices && !ent->isAncestorOf(cloud))
@@ -1566,9 +1565,9 @@ void MainWindow::doActionEditGlobalShift()
 	}
 
 	assert(cloud);
-	const double* shift = cloud->getOriginalShift();
+	const CCVector3d& shift = cloud->getGlobalShift();
 
-	ccAskThreeDoubleValuesDlg dlg("x","y","z",-DBL_MAX,DBL_MAX,shift[0],shift[1],shift[2],2,"Global shift",this);
+	ccAskThreeDoubleValuesDlg dlg("x","y","z",-DBL_MAX,DBL_MAX,shift.x,shift.y,shift.z,2,"Global shift",this);
     if (!dlg.exec())
         return;
 
@@ -1577,8 +1576,46 @@ void MainWindow::doActionEditGlobalShift()
 	double z = dlg.doubleSpinBox3->value();
 
 	//apply new shift
-	cloud->setOriginalShift(x,y,z);
+	cloud->setGlobalShift(x,y,z);
 	ccLog::Print("[doActionEditGlobalShift] New shift: (%f, %f, %f)",x,y,z);
+    
+	updateUI();
+}
+
+void MainWindow::doActionEditGlobalScale()
+{
+    size_t selNum = m_selectedEntities.size();
+    if (selNum != 1)
+    {
+		if (selNum > 1)
+			ccConsole::Error("Select only one point cloud or mesh!");
+        return;
+    }
+	ccHObject* ent = m_selectedEntities[0];
+
+	bool lockedVertices;
+	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
+	//for point clouds only
+	if (!cloud)
+		return;
+	if (lockedVertices && !ent->isAncestorOf(cloud))
+	{
+		//see ccPropertiesTreeDelegate::fillWithMesh
+		DisplayLockedVerticesWarning();
+		return;
+	}
+
+	assert(cloud);
+	double scale = cloud->getGlobalScale();
+
+	bool ok;
+	scale = QInputDialog::getDouble(this, "Edit global scale", "Global scale", scale, 1e-6, 1e6, 6, &ok);
+    if (!ok)
+        return;
+
+	//apply new scale
+	cloud->setGlobalScale(scale);
+	ccLog::Print("[doActionEditGlobalScale] New scale: %f",scale);
     
 	updateUI();
 }
@@ -2141,7 +2178,7 @@ void MainWindow::doActionExportDepthBuffer()
         //we try to find the selected file format
         QString filter = dialog.selectedFilter();
         CC_FILE_TYPES fType = UNKNOWN_FILE;
-        for (unsigned i=0;i<(unsigned)FILE_TYPES_COUNT;++i)
+        for (unsigned i=0; i<static_cast<unsigned>(FILE_TYPES_COUNT); ++i)
         {
             if (filter == QString(CC_FILE_TYPE_FILTERS[i]))
             {
@@ -2247,7 +2284,7 @@ void MainWindow::doActionSamplePoints()
     bool withTexture = dlg.interpolateTexture();
 	bool useDensity = dlg.useDensity();
 	assert(dlg.getPointsNumber() >= 0);
-	s_ptsSamplingCount = (unsigned)dlg.getPointsNumber();
+	s_ptsSamplingCount = static_cast<unsigned>(dlg.getPointsNumber());
 	s_ptsSamplingDensity = dlg.getDensityValue();
 
 	bool errors = false;
@@ -2328,15 +2365,15 @@ void MainWindow::doActionFilterByValue()
 
 			if (i == 0)
 			{
-				minVald = (double)sf->displayRange().start();
-				maxVald = (double)sf->displayRange().stop();
+				minVald = static_cast<double>(sf->displayRange().start());
+				maxVald = static_cast<double>(sf->displayRange().stop());
 			}
 			else
 			{
-				if (minVald > (double)sf->displayRange().start())
-					minVald = (double)sf->displayRange().start();
-				if (maxVald < (double)sf->displayRange().stop())
-					maxVald = (double)sf->displayRange().stop();
+				if (minVald > static_cast<double>(sf->displayRange().start()))
+					minVald = static_cast<double>(sf->displayRange().start());
+				if (maxVald < static_cast<double>(sf->displayRange().stop()))
+					maxVald = static_cast<double>(sf->displayRange().stop());
 			}
 		}
 	}
@@ -2517,7 +2554,7 @@ void MainWindow::doApplyActiveSFAction(int action)
 			}
 			break;
 		case 2: //Activate next SF
-			if (sfIdx+1<(int)cloud->getNumberOfScalarFields())
+			if (sfIdx+1 < static_cast<int>(cloud->getNumberOfScalarFields()))
 			{
 				cloud->setCurrentDisplayedScalarField(sfIdx+1);
 				cloud->prepareDisplayForRefresh();
@@ -3164,7 +3201,7 @@ void MainWindow::doActionRegister()
     CCLib::GenericIndexedCloudPersist* modelCloud = 0;
     if (model->isKindOf(CC_MESH))
     {
-        modelCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(model),(unsigned)100000,&pDlg);
+        modelCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(model),static_cast<unsigned>(100000),&pDlg);
         if (!modelCloud)
         {
             ccConsole::Error("Failed to sample points on 'model' mesh!");
@@ -3180,7 +3217,7 @@ void MainWindow::doActionRegister()
     CCLib::GenericIndexedCloudPersist* dataCloud = 0;
     if (data->isKindOf(CC_MESH))
     {
-        dataCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(data),(unsigned)50000,&pDlg);
+        dataCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(data),static_cast<unsigned>(50000),&pDlg);
         if (!dataCloud)
         {
             ccConsole::Error("Failed to sample points on 'data' mesh!");
@@ -3483,9 +3520,9 @@ void MainWindow::doAction4pcsRegister()
         else
 		{
             newDataCloud = ccPointCloud::From(data);
-			const double* shift = data->getOriginalShift();
-			if (shift)
-				newDataCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+			const CCVector3d& shift = data->getGlobalShift();
+			newDataCloud->setGlobalShift(shift);
+			newDataCloud->setGlobalScale(data->getGlobalScale());
 		}
 
         if (data->getParent())
@@ -3545,9 +3582,9 @@ void MainWindow::doActionSubsample()
 	{
 		newPointCloud->setName(pointCloud->getName()+QString(".subsampled"));
 		newPointCloud->setDisplay(pointCloud->getDisplay());
-		const double* shift = pointCloud->getOriginalShift();
-		if (shift)
-			newPointCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+		const CCVector3d& shift = pointCloud->getGlobalShift();
+		newPointCloud->setGlobalShift(shift);
+		newPointCloud->setGlobalScale(pointCloud->getGlobalScale());
 		newPointCloud->prepareDisplayForRefresh();
 		if (pointCloud->getParent())
 			pointCloud->getParent()->addChild(newPointCloud);
@@ -3776,7 +3813,7 @@ void MainWindow::doActionComputeStatParams()
 					ccConsole::Print(QString("[Distribution fitting] %1").arg(description));
 
                     //Auto Chi2
-                    unsigned numberOfClasses = (unsigned)ceil(sqrt((double)pc->size()));
+                    unsigned numberOfClasses = static_cast<unsigned>(ceil(sqrt(static_cast<double>(pc->size()))));
                     unsigned* histo = new unsigned[numberOfClasses];
                     double* npis = new double[numberOfClasses];
 					{
@@ -3883,9 +3920,6 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 		//we create a new group to store all CCs
 		ccHObject* ccGroup = new ccHObject(cloud->getName()+QString(" [CCs]"));
 
-		//'shift on load' information
-		const double* shift = (pc ? pc->getOriginalShift() : 0);
-
 		//for each component
 		for (unsigned i=0; i<components.size(); ++i)
 		{
@@ -3908,8 +3942,12 @@ void MainWindow::createComponentsClouds(ccGenericPointCloud* cloud,
 						compCloud->showSF(false);
 					}
 
-					if (shift)
-						compCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+					//'shift on load' information
+					if (pc)
+					{
+						compCloud->setGlobalShift(pc->getGlobalShift());
+						compCloud->setGlobalScale(pc->getGlobalScale());
+					}
 					compCloud->setVisible(true);
 					compCloud->setName(QString("CC#%1").arg(ccGroup->getChildrenNumber()));
 
@@ -4265,9 +4303,9 @@ void MainWindow::doActionHeightGridGeneration()
 				m_ccRoot->selectEntity(outputGrid);
 
 			//don't forget original shift
-			const double* shift = cloud->getOriginalShift();
-			if (shift)
-				outputGrid->setOriginalShift(shift[0],shift[1],shift[2]);
+			const CCVector3d& shift = cloud->getGlobalShift();
+			outputGrid->setGlobalShift(shift);
+			outputGrid->setGlobalScale(cloud->getGlobalScale());
 			cloud->prepareDisplayForRefresh_recursive();
 			cloud->setEnabled(false);
 			ccConsole::Warning("Previously selected entity (source) has been hidden!");
@@ -4347,9 +4385,9 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
                     cloud->prepareDisplayForRefresh();
 					if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud() != cloud)
 					{
-						const double* shift = cloud->getOriginalShift();
-						if (shift)
-							mesh->getAssociatedCloud()->setOriginalShift(shift[0],shift[1],shift[2]);
+						const CCVector3d& shift = cloud->getGlobalShift();
+						mesh->getAssociatedCloud()->setGlobalShift(shift);
+						mesh->getAssociatedCloud()->setGlobalScale(cloud->getGlobalScale());
 					}
                     addToDB(mesh,true,0,false,false);
 					if (i == 0)
@@ -4449,9 +4487,9 @@ void MainWindow::doActionComputeQuadric3D()
 				PointCoordinateType stepY = spanY/static_cast<PointCoordinateType>(nStepY-1);
 
                 ccPointCloud* vertices = new ccPointCloud();
-				const double* shift = cloud->getOriginalShift();
-				if (shift)
-					vertices->setOriginalShift(shift[0],shift[1],shift[2]);
+				const CCVector3d& shift = cloud->getGlobalShift();
+				vertices->setGlobalShift(shift);
+				vertices->setGlobalScale(cloud->getGlobalScale());
 				vertices->setName("vertices");
                 vertices->reserve(nStepX*nStepY);
 
@@ -4619,9 +4657,9 @@ void MainWindow::doActionComputeCPS()
         else
 		{
             newCloud = ccPointCloud::From(&CPSet);
-			const double* shift = srcCloud->getOriginalShift();
-			if (shift)
-				newCloud->setOriginalShift(shift[0],shift[1],shift[2]);
+			const CCVector3d& shift = srcCloud->getGlobalShift();
+			newCloud->setGlobalShift(shift);
+			newCloud->setGlobalScale(srcCloud->getGlobalScale());
 		}
 
 		newCloud->setName(QString("[%1]->CPSet(%2)").arg(srcCloud->getName()).arg(compCloud->getName()));
@@ -6161,7 +6199,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 				ccHistogramWindow* histogram = hDlg->window();
 				{
 					unsigned numberOfPoints = cloud->size();
-					unsigned numberOfClasses = (unsigned)sqrt((double)numberOfPoints);
+					unsigned numberOfClasses = static_cast<unsigned>(sqrt(static_cast<double>(numberOfPoints)));
 					//we take the 'nearest' multiple of 4
 					numberOfClasses &= (~3);
 					numberOfClasses = std::max<unsigned>(4,numberOfClasses);
@@ -7009,7 +7047,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 					double extractedPoints = 0.0;
 					for (unsigned j=0; j<1000; ++j)
 					{
-						unsigned randIndex = (static_cast<unsigned>((float)rand()*(float)count/(float)RAND_MAX) % count);
+						unsigned randIndex = (static_cast<unsigned>(static_cast<double>(rand())*static_cast<double>(count)/static_cast<double>(RAND_MAX)) % count);
 						CCLib::DgmOctree::NeighboursSet neighbours;
 						octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),roughnessKernelSize,neighbours);
 						size_t neihgboursCount = neighbours.size();
@@ -7259,7 +7297,7 @@ void MainWindow::addToDB(ccHObject* obj,
 						 bool updateZoom/*=true*/,
 						 ccGLWindow* winDest/*=0*/,
 						 bool* coordinatesTransEnabled/*=0*/,
-						 double* coordinatesShift/*=0*/,
+						 CCVector3d* coordinatesShift/*=0*/,
 						 double* coordinatesScale/*=0*/)
 {
     if (statusMessage)
@@ -7279,27 +7317,38 @@ void MainWindow::addToDB(ccHObject* obj,
 
 			bool shiftAlreadyEnabled = (coordinatesTransEnabled && *coordinatesTransEnabled && coordinatesShift);
 			double P[3] = {center[0],center[1],center[2]};
-			double Pshift[3] = {0};
+			CCVector3d Pshift(0,0,0);
 			if (shiftAlreadyEnabled)
-				memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+				Pshift = *coordinatesShift;
 			double scale = (coordinatesScale ? *coordinatesScale : 1.0);
 			bool applyAll=false;
 			//here we must test that coordinates are not too big whatever the case because OpenGL
 			//really don't like big ones (even if we work with GLdoubles).
 			if (ccCoordinatesShiftManager::Handle(P,diag,true,shiftAlreadyEnabled,Pshift,&scale,applyAll))
 			{
-				ccGLMatrix mat;
-				mat.toIdentity();
-				mat.data()[12] = static_cast<float>(Pshift[0]*scale);
-				mat.data()[13] = static_cast<float>(Pshift[1]*scale);
-				mat.data()[14] = static_cast<float>(Pshift[2]*scale);
-				mat.data()[0] = mat.data()[5] = mat.data()[10] = static_cast<float>(scale);
-				obj->applyGLTransformation_recursive(&mat);
-				ccConsole::Warning(QString("Entity '%1' will be translated: (%2,%3,%4)").arg(obj->getName()).arg(Pshift[0],0,'f',2).arg(Pshift[1],0,'f',2).arg(Pshift[2],0,'f',2));
-				if (scale != 1.0)
-					ccConsole::Warning(QString("Entity '%1' will be rescaled: X%2").arg(obj->getName().arg(scale)));
+				//apply global shift
+				if (Pshift.norm2() > 0)
+				{
+					ccGLMatrix mat;
+					mat.toIdentity();
+					mat.data()[12] = static_cast<float>(Pshift.x);
+					mat.data()[13] = static_cast<float>(Pshift.y);
+					mat.data()[14] = static_cast<float>(Pshift.z);
+					obj->applyGLTransformation_recursive(&mat);
+					ccConsole::Warning(QString("Entity '%1' has been translated: (%2,%3,%4) [original position will be restored when saving]").arg(obj->getName()).arg(Pshift.x,0,'f',2).arg(Pshift.y,0,'f',2).arg(Pshift.z,0,'f',2));
+				}
 
-				//update 'original shift' for ALL clouds
+				//apply global scale
+				if (scale != 1.0)
+				{
+					ccGLMatrix mat;
+					mat.toIdentity();
+					mat.data()[0] = mat.data()[5] = mat.data()[10] = static_cast<float>(scale);
+					obj->applyGLTransformation_recursive(&mat);
+					ccConsole::Warning(QString("Entity '%1' has been rescaled: X%2 [original scale will be restored when saving]").arg(obj->getName()).arg(scale,0,'f',6));
+				}
+
+				//update 'global shift' and 'global scale' for ALL clouds
 				ccHObject::Container children;
 				children.push_back(obj);
 				while (!children.empty())
@@ -7310,9 +7359,12 @@ void MainWindow::addToDB(ccHObject* obj,
 					if (child->isKindOf(CC_POINT_CLOUD))
 					{
 						ccGenericPointCloud* pc = ccHObjectCaster::ToGenericPointCloud(child);
-						const double* oShift = pc->getOriginalShift();
-						assert(oShift);
-						pc->setOriginalShift(Pshift[0]+oShift[0],Pshift[1]+oShift[1],Pshift[2]+oShift[2]);
+						const CCVector3d& oShift = pc->getGlobalShift();
+						CCVector3d PoShift = Pshift + oShift;
+						pc->setGlobalShift(PoShift);
+
+						double oScale = pc->getGlobalScale();
+						pc->setGlobalScale(oScale * scale);
 					}
 
 					for (unsigned i=0; i<child->getChildrenNumber(); ++i)
@@ -7323,9 +7375,7 @@ void MainWindow::addToDB(ccHObject* obj,
 				if (applyAll && coordinatesTransEnabled && coordinatesShift)
 				{
 					*coordinatesTransEnabled = true;
-					coordinatesShift[0] = Pshift[0];
-					coordinatesShift[1] = Pshift[1];
-					coordinatesShift[2] = Pshift[2];
+					*coordinatesShift = Pshift;
 					if (coordinatesScale)
 						*coordinatesScale = scale;
 				}
@@ -7363,20 +7413,20 @@ void MainWindow::addToDBAuto(const QStringList& filenames)
 void MainWindow::addToDB(const QStringList& filenames, CC_FILE_TYPES fType, ccGLWindow* destWin/*=0*/)
 {
 	//to handle same 'shift on load' for multiple files
-	double loadCoordinatesShift[3]={0,0,0};
-	bool loadCoordinatesTransEnabled=false;
+	CCVector3d loadCoordinatesShift(0,0,0);
+	bool loadCoordinatesTransEnabled = false;
 
 	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
-	double addCoordinatesShift[3]={0,0,0};
-	bool addCoordinatesTransEnabled=false;
+	CCVector3d addCoordinatesShift(0,0,0);
+	bool addCoordinatesTransEnabled = false;
 	double addCoordinatesScale = 1.0;
 
 	for (int i=0; i<filenames.size(); ++i)
 	{
-		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i],fType,true,&loadCoordinatesTransEnabled,loadCoordinatesShift);
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i],fType,true,&loadCoordinatesTransEnabled,&loadCoordinatesShift);
 
 		if (newGroup)
-			addToDB(newGroup,true,"File loaded",true,true,destWin,&addCoordinatesTransEnabled,addCoordinatesShift,&addCoordinatesScale);
+			addToDB(newGroup,true,"File loaded",true,true,destWin,&addCoordinatesTransEnabled,&addCoordinatesShift,&addCoordinatesScale);
 	}
 }
 
@@ -7482,7 +7532,7 @@ void MainWindow::loadFile()
         return;
 
     CC_FILE_TYPES fType = UNKNOWN_FILE;
-    for (unsigned i=0;i<(unsigned)FILE_TYPES_COUNT;++i)
+    for (unsigned i=0;i<static_cast<unsigned>(FILE_TYPES_COUNT);++i)
     {
         if (selectedFilter == QString(CC_FILE_TYPE_FILTERS[i]))
         {
@@ -7579,7 +7629,11 @@ void MainWindow::saveFile()
 	bool hasSerializable = (otherSerializable.getChildrenNumber() != 0);
 	bool hasOther = (other.getChildrenNumber() != 0);
 	
-	int stdSaveTypes = (int)hasCloud + (int)hasMesh + (int)hasImage + (int)hasPolylines + (int)hasSerializable;
+	int stdSaveTypes =		static_cast<int>(hasCloud)
+						+	static_cast<int>(hasMesh)
+						+	static_cast<int>(hasImage)
+						+	static_cast<int>(hasPolylines)
+						+	static_cast<int>(hasSerializable);
 	if (stdSaveTypes == 0)
 	{
 		ccConsole::Error("Can't save selected entity(ies) this way!");
@@ -7803,8 +7857,8 @@ void MainWindow::saveFile()
     currentPath = QFileInfo(selectedFilename).absolutePath();
 
     settings.setValue("currentPath",currentPath);
-    settings.setValue("selectedFilterCloud",(int)currentCloudSaveDlgFilter);
-    settings.setValue("selectedFilterMesh",(int)currentMeshSaveDlgFilter);
+    settings.setValue("selectedFilterCloud",static_cast<int>(currentCloudSaveDlgFilter));
+    settings.setValue("selectedFilterMesh",static_cast<int>(currentMeshSaveDlgFilter));
     settings.endGroup();
 }
 
@@ -8147,6 +8201,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);
 	actionAddConstantSF->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionEditGlobalShift->setEnabled(exactlyOneCloud || exactlyOneMesh);
+	actionEditGlobalScale->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionComputeKdTree->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	
 	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);

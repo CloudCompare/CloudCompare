@@ -54,6 +54,10 @@ v2.5.2 XX/XX/2013
 		* a progress dialog is now displayed during loading/saving
 		* multiple loading sessions (drag & drop) can be done concurrently (mainly interesting when
 			loading files from different drives)
+	- Global rescaling applying at loading time is now properly handled
+		* works just like global shift
+		* appears in the entity properties as well
+		* dedicated menu entry (Edit > Edit global scale)
 	- pause button added to the "Graphical Transformation" tool (to allow rotating/panning the 3D view)
 	- new shortcuts added to the "Graphical Transformation" tool:
 		* space bar = pause/unpause

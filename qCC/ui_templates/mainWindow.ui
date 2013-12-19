@@ -1764,7 +1764,7 @@
   </action>
   <action name="actionHeightGridGeneration">
    <property name="text">
-    <string>Height grid generation</string>
+    <string>Raterize (Height grid generation)</string>
    </property>
   </action>
   <action name="actionAlign">

@@ -1,13 +1,14 @@
 *** CloudCompare versions history ***
 
-v2.5.2 XX/XX/2013
+v2.5.2 12/19/2013
 - GDAL library support added:
 	- CC can now load dozens of standard GIS 2D1/2 raster formats (Arc Grid, GeoTiff, etc.)
 - 'Height grid generation' tool enhancement:
 	- when selecting the 'min' or 'max height' projections, the user can now choose
 		to 'resample' the original cloud in order to produce a new cloud (instead
 		of generating a regularly sampled cloud using the grid cell's centers)
-	- the tool can now export the result as a true geotiff raster
+	- the tool can now export the resulting grid as a true multiband raster (geotiff)
+	- menu entry renamed: "Tools > Projection > Rasterize (Height grid generation)"
 - It is now possible to compile CloudCompare with 64 bits floating point values
 	(i.e 64 bits 'doubles' instead of 32 bits 'floats') for coordinates and/or scalars.
 	It doubles the memory consumption but it increases a lot the accuracy.

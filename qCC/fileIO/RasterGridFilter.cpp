@@ -228,7 +228,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 				switch(colorInterp)
 				{
 				case GCI_Undefined:
-					assert(false);
+					isScalar = true;
 					break;
 				case GCI_PaletteIndex:
 					isPalette = true;

@@ -52,8 +52,9 @@ v2.5.2 XX/XX/2013
 	- the 'facet' entity's normal vector can now be displayed or hidden via the facet properties
 	- BIN file loading/saving is now performed in a separate thread
 		* a progress dialog is now displayed during loading/saving
-		* multiple loading sessions (drag & drop) can be done concurrently (mainly interesting when
-			loading files from different drives)
+		* multiple loading sessions can be done concurrently (use drag & drop on a 3D view
+			(note: only interesting when loading files from different drives)
+		* additional check addded to detect corrupted meshes
 	- Global rescaling applying at loading time is now properly handled
 		* works just like global shift
 		* appears in the entity properties as well

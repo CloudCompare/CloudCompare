@@ -152,15 +152,7 @@ bool DistanceMapGenerationTool::ComputeRadialDist(	ccPointCloud* cloud,
 		{
 			ccPointCloud* pcVertices = dynamic_cast<ccPointCloud*>(vertices);
 			if (pcVertices)
-			{
-				const double* shift = pcVertices->getOriginalShift();
-				if (shift)
-				{
-					profileOrigin.x = shift[0];
-					profileOrigin.y = shift[1];
-					profileOrigin.z = shift[2];
-				}
-			}
+				profileOrigin = pcVertices->getGlobalShift();
 		}
 
 		//we try to get the revolution axis from the polyline meta-data
@@ -1197,12 +1189,8 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 		//auto apply 3D shift
 		CCVector3d shift(0,0,0);
 		ccPointCloud* pcVertices = dynamic_cast<ccPointCloud*>(profileVertices);
-		if (pcVertices && pcVertices->getOriginalShift())
-		{
-			shift = CCVector3d(	pcVertices->getOriginalShift()[0],
-								pcVertices->getOriginalShift()[1],
-								pcVertices->getOriginalShift()[2]);
-		}
+		if (pcVertices)
+			shift = pcVertices->getGlobalShift();
 
 		double cwSign = (counterclockwise ? -1.0 : 1.0);
 		for (unsigned j=0; j<angularSteps; ++j)
@@ -1365,15 +1353,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 	{
 		ccPointCloud* pcVertices = dynamic_cast<ccPointCloud*>(polyVertices);
 		if (pcVertices)
-		{
-			const double* shift = pcVertices->getOriginalShift();
-			if (shift)
-			{
-				profileOrigin.x = shift[0];
-				profileOrigin.y = shift[1];
-				profileOrigin.z = shift[2];
-			}
-		}
+			profileOrigin = pcVertices->getGlobalShift();
 	}
 
 	const double xStep = baseRadius * (2.0*M_PI) / static_cast<double>(map->xSteps);

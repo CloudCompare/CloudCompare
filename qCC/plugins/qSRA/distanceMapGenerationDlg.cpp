@@ -155,13 +155,10 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		ccPointCloud* pcVertices = dynamic_cast<ccPointCloud*>(m_profile->getAssociatedCloud());
 		if (pcVertices)
 		{
-			const double* profileOrigin = pcVertices->getOriginalShift();
-			if (profileOrigin)
-			{
-				xOriginDoubleSpinBox->setValue(profileOrigin[0]);
-				yOriginDoubleSpinBox->setValue(profileOrigin[1]);
-				zOriginDoubleSpinBox->setValue(profileOrigin[2]);
-			}
+			const CCVector3d& profileOrigin = pcVertices->getGlobalShift();
+			xOriginDoubleSpinBox->setValue(profileOrigin.x);
+			yOriginDoubleSpinBox->setValue(profileOrigin.y);
+			zOriginDoubleSpinBox->setValue(profileOrigin.z);
 
 			//compute mean 'radius'
 			//as well as min and max 'height'

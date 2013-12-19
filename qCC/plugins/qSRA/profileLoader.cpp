@@ -146,7 +146,7 @@ ccPolyline* ProfileLoader::Load(QString filename, bool ignoreAxisShift/*=true*/,
 							vertices->addPoint(CCVector3((PointCoordinateType)points[i].x,(PointCoordinateType)points[i].y,0));
 						}
 
-						vertices->setOriginalShift(G.x,G.y,G.z);
+						vertices->setGlobalShift(G);
 					}
 
 					//add segments

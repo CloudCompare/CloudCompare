@@ -175,10 +175,10 @@ void qSRA::loadProfile()
 		ccPointCloud* vertices = dynamic_cast<ccPointCloud*>(polyline->getAssociatedCloud());
 		if (vertices)
 		{
-			const double* O = vertices->getOriginalShift();
+			const CCVector3d& O = vertices->getGlobalShift();
 
 			ccGLMatrix trans;
-			trans.setTranslation(CCVector3::fromArray(O));
+			trans.setTranslation(CCVector3::fromArray(O.u));
 			float* mat = trans.data();
 			switch(axisDim)
 			{

@@ -29,6 +29,7 @@ DAMAGE.
 #ifndef ALLOCATOR_INCLUDED
 #define ALLOCATOR_INCLUDED
 #include <vector>
+#include <stdio.h>
 
 class AllocatorState{
 public:

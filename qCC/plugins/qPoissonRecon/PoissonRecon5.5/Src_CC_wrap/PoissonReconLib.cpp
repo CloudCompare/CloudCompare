@@ -19,6 +19,8 @@
 
 //system
 #include <assert.h>
+#include <string.h>
+#include <stdio.h>
 #ifdef WITH_OPENMP
 #include <omp.h>
 #endif
@@ -333,8 +335,8 @@ PoissonReconLib::~PoissonReconLib()
 }
 
 bool PoissonReconLib::init(	unsigned count,
-							const Point3D* inPoints,
-							const Point3D* inNormals,
+							const Point* inPoints,
+							const Point* inNormals,
 							const Parameters& inParams,
 							int* outThreadCount/*=0*/)
 {

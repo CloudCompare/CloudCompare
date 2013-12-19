@@ -1165,7 +1165,7 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 	CCLib::GenericIndexedCloudPersist* profileVertices = profile->getAssociatedCloud();
 	unsigned profVertCount = profileVertices->size();
 	if (profVertCount < 2)
-		return false;
+		return 0;
 
 	unsigned char Z = static_cast<unsigned char>(GetPoylineAxis(profile));
 	//we deduce the 2 other ('horizontal') dimensions
@@ -1346,7 +1346,7 @@ ccPointCloud* DistanceMapGenerationTool::ConvertMapToCloud(	const QSharedPointer
 	CCLib::GenericIndexedCloudPersist* polyVertices = profile->getAssociatedCloud();
 	unsigned polyVertCount = polyVertices->size();
 	if (polyVertCount < 2)
-		return false;
+		return 0;
 
 	//trick: we get the polyline origin from its 'original shift' field
 	CCVector3d profileOrigin(0,0,0);

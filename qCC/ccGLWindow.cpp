@@ -209,6 +209,12 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 
 ccGLWindow::~ccGLWindow()
 {
+	if (m_globalDBRoot)
+	{
+		//we must unlink entities currently linked to this window
+		m_globalDBRoot->removeFromDisplay_recursive(this);
+	}
+
 	makeCurrent();
 	if (m_trihedronGLList != GL_INVALID_LIST_ID)
 	{

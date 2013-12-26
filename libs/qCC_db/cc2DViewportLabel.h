@@ -48,7 +48,7 @@ protected:
 
 	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
     //! Draws the entity only (not its children)
     virtual void drawMeOnly(CC_DRAW_CONTEXT& context);

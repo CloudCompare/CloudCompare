@@ -66,9 +66,9 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
 		return CC_FERR_WRITING;
 
     //Has the cloud been recentered?
-	const double* shift = theCloud->getOriginalShift();
-	if (fabs(shift[0])+fabs(shift[0])+fabs(shift[0])>0.0)
-        ccLog::Warning(QString("[PNFilter::save] Can't recenter cloud '%1' when saving it in a PN file!").arg(theCloud->getName()));
+	const CCVector3d& shift = theCloud->getGlobalShift();
+	if (fabs(shift.x)+fabs(shift.y)+fabs(shift.z) > 0 || theCloud->getGlobalScale() != 0)
+        ccLog::Warning(QString("[PNFilter::save] Can't recenter or rescale cloud '%1' when saving it in a PN file!").arg(theCloud->getName()));
 
 	bool hasNorms = theCloud->hasNormals();
 	if (!hasNorms)
@@ -126,7 +126,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
 	return result;
 }
 
-CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//opening file
 	QFile in(filename);

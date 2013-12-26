@@ -57,58 +57,58 @@ void ccPrimitiveFactoryDlg::createPrimitive()
 		//Plane
 		case 0:
 			{
-				primitive = new ccPlane(planeWidthDoubleSpinBox->value(),
-										planeHeightDoubleSpinBox->value());
+				primitive = new ccPlane(static_cast<PointCoordinateType>(planeWidthDoubleSpinBox->value()),
+										static_cast<PointCoordinateType>(planeHeightDoubleSpinBox->value()));
 			}
 			break;
 		//Box
 		case 1:
 			{
-				CCVector3 dims(boxDxDoubleSpinBox->value(),
-								boxDyDoubleSpinBox->value(),
-								boxDzDoubleSpinBox->value());
+				CCVector3 dims(	static_cast<PointCoordinateType>(boxDxDoubleSpinBox->value()),
+								static_cast<PointCoordinateType>(boxDyDoubleSpinBox->value()),
+								static_cast<PointCoordinateType>(boxDzDoubleSpinBox->value()));
 				primitive = new ccBox(dims);
 			}
 			break;
 		//Sphere
 		case 2:
 			{
-				primitive = new ccSphere(sphereRadiusDoubleSpinBox->value());
+				primitive = new ccSphere(static_cast<PointCoordinateType>(sphereRadiusDoubleSpinBox->value()));
 			}
 			break;
 		//Cylinder
 		case 3:
 			{
-				primitive = new ccCylinder( cylRadiusDoubleSpinBox->value(),
-											cylHeightDoubleSpinBox->value());
+				primitive = new ccCylinder( static_cast<PointCoordinateType>(cylRadiusDoubleSpinBox->value()),
+											static_cast<PointCoordinateType>(cylHeightDoubleSpinBox->value()));
 			}
 			break;
 		//Cone
 		case 4:
 			{
-				primitive = new ccCone( coneBottomRadiusDoubleSpinBox->value(),
-										coneTopRadiusDoubleSpinBox->value(),
-										coneHeightDoubleSpinBox->value(),
-										snoutGroupBox->isChecked() ? coneXOffsetDoubleSpinBox->value() : 0,
-										snoutGroupBox->isChecked() ? coneYOffsetDoubleSpinBox->value() : 0);
+				primitive = new ccCone( static_cast<PointCoordinateType>(coneBottomRadiusDoubleSpinBox->value()),
+										static_cast<PointCoordinateType>(coneTopRadiusDoubleSpinBox->value()),
+										static_cast<PointCoordinateType>(coneHeightDoubleSpinBox->value()),
+										static_cast<PointCoordinateType>(snoutGroupBox->isChecked() ? coneXOffsetDoubleSpinBox->value() : 0),
+										static_cast<PointCoordinateType>(snoutGroupBox->isChecked() ? coneYOffsetDoubleSpinBox->value() : 0));
 			}
 			break;
 		//Torus
 		case 5:
 			{
-				primitive = new ccTorus( torusInsideRadiusDoubleSpinBox->value(),
-										torusOutsideRadiusDoubleSpinBox->value(),
-										torusAngleDoubleSpinBox->value()*CC_DEG_TO_RAD,
+				primitive = new ccTorus(static_cast<PointCoordinateType>(torusInsideRadiusDoubleSpinBox->value()),
+										static_cast<PointCoordinateType>(torusOutsideRadiusDoubleSpinBox->value()),
+										static_cast<PointCoordinateType>(torusAngleDoubleSpinBox->value()*CC_DEG_TO_RAD),
 										torusRectGroupBox->isChecked(),
-										torusRectGroupBox->isChecked() ? torusRectSectionHeightDoubleSpinBox->value() : 0);
+										static_cast<PointCoordinateType>(torusRectGroupBox->isChecked() ? torusRectSectionHeightDoubleSpinBox->value() : 0));
 			}
 			break;
 		//Dish
 		case 6:
 			{
-				primitive = new ccDish( dishRadiusDoubleSpinBox->value(),
-										dishHeightDoubleSpinBox->value(),
-										dishEllipsoidGroupBox->isChecked() ? dishRadius2DoubleSpinBox->value() : 0);
+				primitive = new ccDish( static_cast<PointCoordinateType>(dishRadiusDoubleSpinBox->value()),
+										static_cast<PointCoordinateType>(dishHeightDoubleSpinBox->value()),
+										static_cast<PointCoordinateType>(dishEllipsoidGroupBox->isChecked() ? dishRadius2DoubleSpinBox->value() : 0));
 			}
 			break;
 	}

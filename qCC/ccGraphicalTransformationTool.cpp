@@ -34,9 +34,16 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
-	connect(okButton,       SIGNAL(clicked()), this, SLOT(apply()));
-	connect(razButton,      SIGNAL(clicked()), this, SLOT(reset()));
-	connect(cancelButton,   SIGNAL(clicked()), this, SLOT(cancel()));
+    connect(pauseButton,	SIGNAL(toggled(bool)),  this, SLOT(pause(bool)));
+	connect(okButton,		SIGNAL(clicked()),		this, SLOT(apply()));
+	connect(razButton,		SIGNAL(clicked()),		this, SLOT(reset()));
+	connect(cancelButton,	SIGNAL(clicked()),		this, SLOT(cancel()));
+
+	//add shortcuts
+	addOverridenShortcut(Qt::Key_Space); //space bar for the "pause" button
+	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
+	addOverridenShortcut(Qt::Key_Return); //return key for the "ok" button
+	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
 
 	m_toTransform = new ccHObject("ToTransform");
 }
@@ -50,6 +57,53 @@ ccGraphicalTransformationTool::~ccGraphicalTransformationTool()
 	m_toTransform=0;
 }
 
+void ccGraphicalTransformationTool::onShortcutTriggered(int key)
+{
+ 	switch(key)
+	{
+	case Qt::Key_Space:
+		pauseButton->toggle();
+		return;
+
+	case Qt::Key_Return:
+		okButton->click();
+		return;
+
+	case Qt::Key_Escape:
+		cancelButton->click();
+		return;
+
+	default:
+		//nothing to do
+		break;
+	}
+}
+
+void ccGraphicalTransformationTool::pause(bool state)
+{
+    if (!m_associatedWin)
+        return;
+
+    if (state)
+    {
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
+        m_associatedWin->displayNewMessage("Transformation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+        m_associatedWin->displayNewMessage("Unpause to transform again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+    }
+    else
+    {
+		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITY);
+		m_associatedWin->displayNewMessage("[Rotation/Translation mode]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+    }
+
+	//update mini-GUI
+	pauseButton->blockSignals(true);
+	pauseButton->setChecked(state);
+	pauseButton->blockSignals(false);
+
+    m_associatedWin->redraw();
+}
+
 void ccGraphicalTransformationTool::clear()
 {
 	m_toTransform->removeAllChildren();
@@ -61,8 +115,12 @@ void ccGraphicalTransformationTool::clear()
 
 bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 {
+	assert(entity);
+	if (!entity)
+		return false;
+
 	//we don't handle entities associated to another context
-	if (entity->getDisplay()!=m_associatedWin)
+	if (entity->getDisplay() != m_associatedWin)
 	{
 		ccLog::Warning(QString("[Graphical Transformation Tool] Can't use entity '%1' cause it's not displayed in the active 3D view!").arg(entity->getName()));
 		return false;
@@ -123,9 +181,15 @@ bool ccGraphicalTransformationTool::linkWith(ccGLWindow* win)
 	if (!ccOverlayDialog::linkWith(win))
 		return false;
 	
-	assert(m_toTransform);
-	assert(!win || m_toTransform->getChildrenNumber()==0);
-	m_toTransform->setDisplay(win);
+	if (m_toTransform)
+	{
+		assert(!win || m_toTransform->getChildrenNumber() == 0);
+		m_toTransform->setDisplay(win);
+	}
+	else
+	{
+		assert(false);
+	}
 	
 	return true;
 }
@@ -139,8 +203,8 @@ bool ccGraphicalTransformationTool::start()
 	if (!m_associatedWin)
 		return false;
 
-	unsigned childNum=m_toTransform->getChildrenNumber();
-	if (childNum==0)
+	unsigned childNum = m_toTransform->getChildrenNumber();
+	if (childNum == 0)
 		return false;
 
 	m_rotation.toIdentity();
@@ -180,9 +244,9 @@ void ccGraphicalTransformationTool::stop(bool state)
 
 void ccGraphicalTransformationTool::glTranslate(const CCVector3& realT)
 {
-	CCVector3 t(realT.x * (TxCheckBox->isChecked() ? 1.0 : 0.0),
-				realT.y * (TyCheckBox->isChecked() ? 1.0 : 0.0),
-				realT.z * (TzCheckBox->isChecked() ? 1.0 : 0.0));
+	CCVector3 t(realT.x * (TxCheckBox->isChecked() ? PC_ONE : 0),
+				realT.y * (TyCheckBox->isChecked() ? PC_ONE : 0),
+				realT.z * (TzCheckBox->isChecked() ? PC_ONE : 0));
 
 	if (t.norm2() != 0)
 	{
@@ -248,8 +312,7 @@ void ccGraphicalTransformationTool::apply()
 		finalTrans += (m_rotationCenter+m_translation-m_rotation*m_rotationCenter);
 		//output resulting transformation matrix
 		ccLog::Print("[GraphicalTransformationTool] Applied transformation:");
-		const float* mat = finalTrans.data();
-		ccLog::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+		ccLog::Print(finalTrans.toString(12,' ')); //full precision
 	}
 
 	for (unsigned i=0; i<m_toTransform->getChildrenNumber();++i)

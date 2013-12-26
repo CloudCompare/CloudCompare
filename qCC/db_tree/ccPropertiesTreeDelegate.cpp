@@ -371,7 +371,7 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 		{
 			ccGLMatrix trans;
 			box = _obj->getFitBB(trans);
-			box += CCVector3(trans.getTranslation());
+			box += trans.getTranslationAsVec3D();
 			fitBBox = true;
 		}
 		else
@@ -405,8 +405,11 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 
     //shift
 	{
-		const double* shift = _obj->getOriginalShift();
-		appendRow( ITEM("Global shift"), ITEM(QString("(%1;%2;%3)").arg(shift[0],0,'f',2).arg(shift[1],0,'f',2).arg(shift[2],0,'f',2)) );
+		const CCVector3d& shift = _obj->getGlobalShift();
+		appendRow( ITEM("Global shift"), ITEM(QString("(%1;%2;%3)").arg(shift.x,0,'f',2).arg(shift.y,0,'f',2).arg(shift.z,0,'f',2)) );
+
+		double scale = _obj->getGlobalScale();
+		appendRow( ITEM("Global scale"), ITEM(QString("%1").arg(scale,0,'f',6)) );
 	}
 
 	//custom point size
@@ -568,11 +571,11 @@ void ccPropertiesTreeDelegate::fillWithPointOctree(ccOctree* _obj)
 	assert(level>0 && level<=ccOctree::MAX_OCTREE_LEVEL);
 
 	//cell size
-	PointCoordinateType cellSize = _obj->getCellSize(level);
+	PointCoordinateType cellSize = _obj->getCellSize(static_cast<uchar>(level));
 	appendRow( ITEM("Cell size"), ITEM(QString::number(cellSize)) );
 
 	//cell count
-	unsigned cellCount = _obj->getCellNumber(level);
+	unsigned cellCount = _obj->getCellNumber(static_cast<uchar>(level));
 	appendRow( ITEM("Cell count"), ITEM(QLocale(QLocale::English).toString(cellCount)) );
 
 	//total volume of filled cells
@@ -585,8 +588,35 @@ void ccPropertiesTreeDelegate::fillWithPointKdTree(ccKdTree* _obj)
 
     addSeparator("Kd-tree");
 
-    //max rms
-	appendRow( ITEM("Max RMS"), ITEM(QString::number(_obj->getMaxRMS())) );
+    //max error
+	appendRow( ITEM("Max Error"), ITEM(QString::number(_obj->getMaxError())) );
+    //max error measure
+	{
+		QString errorMeasure;
+		switch(_obj->getMaxErrorType())
+		{
+		case CCLib::DistanceComputationTools::RMS:
+			errorMeasure = "RMS";
+			break;
+		case CCLib::DistanceComputationTools::MAX_DIST_68_PERCENT:
+			errorMeasure = "Max dist @ 68%";
+			break;
+		case CCLib::DistanceComputationTools::MAX_DIST_95_PERCENT:
+			errorMeasure = "Max dist @ 95%";
+			break;
+		case CCLib::DistanceComputationTools::MAX_DIST_99_PERCENT:
+			errorMeasure = "Max dist @ 99%";
+			break;
+		case CCLib::DistanceComputationTools::MAX_DIST:
+			errorMeasure = "Max distance";
+			break;
+		default:
+			assert(false);
+			errorMeasure = "unknown";
+			break;
+		}
+		appendRow( ITEM("Error measure"), ITEM(errorMeasure) );
+	}
 }
 
 void ccPropertiesTreeDelegate::fillWithImage(ccImage* _obj)
@@ -1387,7 +1417,7 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
     ccGenericPrimitive* primitive = ccHObjectCaster::ToPrimitive(m_currentObject);
     assert(primitive);
 
-	if (val == primitive->getDrawingPrecision())
+	if (static_cast<unsigned int>(val) == primitive->getDrawingPrecision())
 		return;
 
 	bool wasVisible = primitive->isVisible();
@@ -1405,7 +1435,7 @@ void ccPropertiesTreeDelegate::imageAlphaChanged(int val)
     ccImage* image = ccHObjectCaster::ToImage(m_currentObject);
     if (!image)
         return;
-    image->setAlpha(float(val)/255.0);
+    image->setAlpha(static_cast<float>(val)/255.0f);
 
 	updateDisplay();
 }
@@ -1449,7 +1479,7 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
     ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_currentObject);
     assert(sensor);
 
-	sensor->setGraphicScale(val);
+	sensor->setGraphicScale(static_cast<PointCoordinateType>(val));
 	updateDisplay();
 }
 
@@ -1474,7 +1504,7 @@ void ccPropertiesTreeDelegate::polyineWidthChanged(int size)
     assert(pline);
 
 	if (pline)
-		pline->setWidth(size);
+		pline->setWidth(static_cast<PointCoordinateType>(size));
     
 	updateDisplay();
 }

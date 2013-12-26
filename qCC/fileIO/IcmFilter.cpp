@@ -29,7 +29,7 @@
 #include <assert.h>
 
 
-CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
     //ouverture du fichier
     FILE *fp = fopen(filename, "rt");
@@ -213,7 +213,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			sscanf(line,"\t orientation %f %f %f %f\n",axis,axis+1,axis+2,&angle_rad);
 
 			ccLog::Print("\t Camera orientation=(%f,%f,%f)+[%f]",axis[0],axis[1],axis[2],angle_rad);
-			CI->setCameraMatrix(CCVector3(axis),angle_rad,CCVector3(t));
+			CI->setCameraMatrix(CCVector3::fromArray(axis),angle_rad,CCVector3::fromArray(t));
 
 			entities->addChild(CI);
 			++loadedImages;

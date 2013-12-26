@@ -69,8 +69,9 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(CCLib::GenericProgressC
 				octree = m_pointCloud->computeOctree(progressCb);
 			if (octree)
 			{
+				PointCoordinateType minDist = static_cast<PointCoordinateType>(samplingValue->value());
 				sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(m_pointCloud, 
-																					samplingValue->value(), 
+																					minDist,
 																					octree,
 																					progressCb);
 			}
@@ -134,56 +135,59 @@ void ccSubsamplingDlg::sliderReleased()
 
 void ccSubsamplingDlg::sliderMoved(int sliderPos)
 {
-    float rate = (float)sliderPos/(float)(slider->maximum()-slider->minimum());
-    if(samplingMethod->currentIndex() == SPACE)
-        rate = 1.-rate;
+    double rate = static_cast<double>(sliderPos)/static_cast<double>(slider->maximum()-slider->minimum());
+    if (samplingMethod->currentIndex() == SPACE)
+        rate = 1.0 - rate;
 
-    samplingValue->setValue(samplingValue->minimum() + rate * (float)(samplingValue->maximum()-samplingValue->minimum()));
+    samplingValue->setValue(samplingValue->minimum() + rate * static_cast<double>(samplingValue->maximum()-samplingValue->minimum()));
     //updateLabels();
 }
 
 void ccSubsamplingDlg::samplingRateChanged(double value)
 {
-    float rate = (float)(samplingValue->value()-samplingValue->minimum())/(float)(samplingValue->maximum()-samplingValue->minimum());
+    double rate = static_cast<double>(samplingValue->value()-samplingValue->minimum())/static_cast<double>(samplingValue->maximum()-samplingValue->minimum());
 
     CC_SUBSAMPLING_METHOD method = (CC_SUBSAMPLING_METHOD)samplingMethod->currentIndex();
-    if(method == SPACE)
-        rate = 1.-rate;
+    if (method == SPACE)
+        rate = 1.0 - rate;
 
-    slider->setSliderPosition(slider->minimum()+(unsigned)(rate * (float)(slider->maximum()-slider->minimum())));
+    slider->setSliderPosition(slider->minimum() + static_cast<int>(rate * static_cast<double>(slider->maximum()-slider->minimum())));
     //updateLabels();
 }
 
 void ccSubsamplingDlg::changeSamplingMethod(int index)
 {
-    float dist;
-    unsigned oldSliderPos;
-    CCVector3 min, max;
-
-    oldSliderPos = slider->sliderPosition();
+    int oldSliderPos = slider->sliderPosition();
 
     //Reste a changer les textes d'aide
     switch(index)
     {
         case OCTREE:
-            samplingValue->setDecimals(0);
-            samplingValue->setMinimum(1);
-            samplingValue->setMaximum((double)CCLib::DgmOctree::MAX_OCTREE_LEVEL);
-            samplingValue->setSingleStep(1);
+			{
+				samplingValue->setDecimals(0);
+				samplingValue->setMinimum(1);
+				samplingValue->setMaximum((double)CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+				samplingValue->setSingleStep(1);
+			}
             break;
         case SPACE:
-            samplingValue->setDecimals(4);
-            samplingValue->setMinimum(0.0);
-            m_pointCloud->getBoundingBox(min.u, max.u);
-            dist = CCVector3::vdistance(min.u, max.u);
-            samplingValue->setMaximum(dist);
-            samplingValue->setSingleStep(0.01);
+			{
+				samplingValue->setDecimals(4);
+				samplingValue->setMinimum(0.0);
+				CCVector3 min, max;
+				m_pointCloud->getBoundingBox(min.u, max.u);
+				double dist = static_cast<double>(CCVector3::vdistance(min.u, max.u));
+				samplingValue->setMaximum(dist);
+				samplingValue->setSingleStep(0.01);
+			}
             break;
         case RANDOM:
-            samplingValue->setDecimals(0);
-            samplingValue->setMinimum(0);
-            samplingValue->setMaximum((float)m_pointCloud->size());
-            samplingValue->setSingleStep(1);
+			{
+				samplingValue->setDecimals(0);
+				samplingValue->setMinimum(0);
+				samplingValue->setMaximum(static_cast<double>(m_pointCloud->size()));
+				samplingValue->setSingleStep(1);
+			}
             break;
         default:
             break;

@@ -70,10 +70,16 @@ public:
 	**/
 	ccGLMatrix();
 
-	//! Constructor from a GL matrix array
-	/** \param mat16 a 16 elements array (OpenGL style matrix)
+	//! Constructor from a float GL matrix array
+	/** \param mat16 a 16 elements array (column major order)
 	**/
-	ccGLMatrix(const float* mat16);
+	ccGLMatrix(const float* mat16f);
+
+	//! Constructor from a double GL matrix array
+	/** \warning Will implicitly cast the elements to float!
+		\param mat16 a 16 elements array (column major order)
+	**/
+	ccGLMatrix(const double* mat16d);
 
 	//! Constructor from 4 columns (X,Y,Z,T)
 	/** \param X 3 first elements of the 1st column (last one is 0)
@@ -87,7 +93,7 @@ public:
 	ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T);
 
     //! Constructor from a 3x3 rotation matrix R, a vector T, a scale S
-    ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, float S);
+    ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, PointCoordinateType S);
 
 	//! Constructor from a rotation center G, a 3x3 rotation matrix R and a vector T
 	ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, const CCVector3& rotCenter);
@@ -116,6 +122,18 @@ public:
 	**/
 	static ccGLMatrix FromQuaternion(const float q[]);
 
+	//! Converts a 'text' matrix to a ccGLMatrix
+	/** \param[in] matText matrix text
+		\param[out] success whether input matrix text is valid or not
+	**/
+	static ccGLMatrix FromString(QString matText, bool& success);
+
+	//! Returns matrix as a string
+	/** \param precision numerical precision
+		\return string
+	**/
+	QString toString(int precision = 12, QChar separator = ' ') const;
+
 	//! Returns the rotation component around X only
 	ccGLMatrix xRotation() const;
 	//! Returns the rotation component around Y only
@@ -136,23 +154,47 @@ public:
 	**/
 	void clearTranslation();
 
-	//! Inits transformation from a rotation axis, an angle (in radians) and a translation
-	void initFromParameters(float alpha, const CCVector3& axis3D, const CCVector3& t3D);
-
-	//! Inits transformation from 3 rotation angles (in radians), and a translation
-	void initFromParameters(float phi, float theta, float psi, const CCVector3& t3D);
-
-	//! Gets transformation equivalent parameters
-	/** Extracts parameters from transformation: a rotation axis,
-		an angle (in radians) and a translation.
+	//! Inits transformation from a rotation axis, an angle and a translation
+	/** \param[in] alpha_rad rotation angle (in radians)
+		\param[in] axis3D rotation axis
+		\param[in] t3D translation
 	**/
-	void getParameters(float& alpha, CCVector3& axis3D, CCVector3& t3D) const;
+	void initFromParameters(PointCoordinateType alpha_rad,
+							const CCVector3& axis3D,
+							const CCVector3& t3D);
 
-	//! Gets transformation equivalent parameters
-	/** Extracts parameters from transformation: 3 rotation angles (in radians),
-		and a translation.
+	//! Inits transformation from 3 rotation angles and a translation
+	/** See http://en.wikipedia.org/wiki/Euler_angles
+		\param[in] phi_rad Phi angle (in radians)
+		\param[in] theta_rad Theta angle (in radians)
+		\param[in] psi_rad Psi angle (in radians)
+		\param[in] t3D translation
 	**/
-	void getParameters(float &phi, float &theta, float &psi, CCVector3& t3D) const;
+	void initFromParameters(	PointCoordinateType phi_rad,
+								PointCoordinateType theta_rad,
+								PointCoordinateType psi_rad,
+								const CCVector3& t3D);
+
+	//! Returns equivalent parameters: a rotation axis, an angle and a translation
+	/** \param[out] alpha_rad rotation angle (in radians)
+		\param[out] axis3D rotation axis
+		\param[out] t3D translation
+	**/
+	void getParameters(	PointCoordinateType& alpha_rad,
+						CCVector3& axis3D,
+						CCVector3& t3D) const;
+
+	//! Returns equivalent parameters: 3 rotation angles and a translation
+	/** See http://en.wikipedia.org/wiki/Euler_angles
+		\param[out] phi_rad Phi angle (in radians)
+		\param[out] theta_rad Theta angle (in radians)
+		\param[out] psi_rad Psi angle (in radians)
+		\param[out] t3D translation
+	**/
+	void getParameters(	PointCoordinateType &phi_rad,
+						PointCoordinateType &theta_rad,
+						PointCoordinateType &psi_rad,
+						CCVector3& t3D) const;
 
 	//! Returns a pointer to internal data
 	inline float* data() { return m_mat; }
@@ -172,16 +214,39 @@ public:
 	**/
 	inline const float* getTranslation() const { return m_mat+12; }
 
+	//! Returns a copy of the translation as a CCVector3
+	/** \return translation vector
+	**/
+	inline CCVector3 getTranslationAsVec3D() const { return getColumnAsVec3D(3); }
+
 	//! Sets translation
 	/** \param T 3D vector
 	**/
 	void setTranslation(const CCVector3& T);
 
+	//! Sets translation
+	/** \param T 3D vector as a float array
+	**/
+	void setTranslation(const float T[3]);
+
 	//! Returns a pointer to a given column
-	inline float* getColumn(int index) { return m_mat+(index<<2); }
+	/** \param index column index (between 0 and 3)
+		\return pointer to the first element of the corresponding column
+	**/
+	inline float* getColumn(unsigned index) { return m_mat+(index<<2); }
 
 	//! Returns a const pointer to a given column
-	inline const float* getColumn(int index) const { return m_mat+(index<<2); }
+	/** \param index column index (between 0 and 3)
+		\return pointer to the first element of the corresponding column
+	**/
+	inline const float* getColumn(unsigned index) const { return m_mat+(index<<2); }
+
+	//! Returns a copy of a given column as a CCVector3
+	/** 4th value is ignored.
+		\param index column index (between 0 and 3)
+		\return copy of the three first elements of the corresponding column
+	**/
+	inline CCVector3 getColumnAsVec3D(unsigned index) const { return CCVector3::fromArray(getColumn(index)); }
 
 	//! Multiplication by a matrix operator
 	ccGLMatrix operator * (const ccGLMatrix& mat) const;
@@ -210,21 +275,30 @@ public:
 	}
 
 	//! Get the resulting transformation along X dimension
-	inline float applyX(const CCVector3& vec) const
+	inline PointCoordinateType applyX(const CCVector3& vec) const
 	{
-		return CC_MAT_R11*vec.x + CC_MAT_R12*vec.y + CC_MAT_R13*vec.z + CC_MAT_R14;
+		return    static_cast<PointCoordinateType>(CC_MAT_R11) * vec.x
+				+ static_cast<PointCoordinateType>(CC_MAT_R12) * vec.y
+				+ static_cast<PointCoordinateType>(CC_MAT_R13) * vec.z
+				+ static_cast<PointCoordinateType>(CC_MAT_R14);
 	}
 
 	//! Get the resulting transformation along Y dimension
-	inline float applyY(const CCVector3& vec) const
+	inline PointCoordinateType applyY(const CCVector3& vec) const
 	{
-		return CC_MAT_R21*vec.x + CC_MAT_R22*vec.y + CC_MAT_R23*vec.z + CC_MAT_R24;
+		return    static_cast<PointCoordinateType>(CC_MAT_R21) * vec.x
+				+ static_cast<PointCoordinateType>(CC_MAT_R22) * vec.y
+				+ static_cast<PointCoordinateType>(CC_MAT_R23) * vec.z
+				+ static_cast<PointCoordinateType>(CC_MAT_R24);
 	}
 
 	//! Get the resulting transformation along Z dimension
-	inline float applyZ(const CCVector3& vec) const
+	inline PointCoordinateType applyZ(const CCVector3& vec) const
 	{
-		return CC_MAT_R31*vec.x + CC_MAT_R32*vec.y + CC_MAT_R33*vec.z + CC_MAT_R34;
+		return    static_cast<PointCoordinateType>(CC_MAT_R31) * vec.x
+				+ static_cast<PointCoordinateType>(CC_MAT_R32) * vec.y
+				+ static_cast<PointCoordinateType>(CC_MAT_R33) * vec.z
+				+ static_cast<PointCoordinateType>(CC_MAT_R34);
 	}
 
 	//! Applies rotation only to a 3D vector (in place)
@@ -232,21 +306,35 @@ public:
 	**/
 	inline void applyRotation(CCVector3& vec) const
 	{
-		applyRotation(vec.u);
+		register PointCoordinateType vx = vec.x;
+		register PointCoordinateType vy = vec.y;
+		register PointCoordinateType vz = vec.z;
+
+		vec.x =   static_cast<PointCoordinateType>(CC_MAT_R11) * vx
+				+ static_cast<PointCoordinateType>(CC_MAT_R12) * vy
+				+ static_cast<PointCoordinateType>(CC_MAT_R13) * vz;
+
+		vec.y =   static_cast<PointCoordinateType>(CC_MAT_R21) * vx
+				+ static_cast<PointCoordinateType>(CC_MAT_R22) * vy
+				+ static_cast<PointCoordinateType>(CC_MAT_R23) * vz;
+
+		vec.z =   static_cast<PointCoordinateType>(CC_MAT_R31) * vx
+				+ static_cast<PointCoordinateType>(CC_MAT_R32) * vy
+				+ static_cast<PointCoordinateType>(CC_MAT_R33) * vz;
 	}
 
 	//! Applies rotation only to a 3D vector (in place)
-	/** Input vector is directly modified after calling this method
+	/** Input array is directly modified after calling this method
 	**/
-    inline void applyRotation(float* vec) const
+    inline void applyRotation(float vec[3]) const
 	{
-		register float vx=vec[0];
-		register float vy=vec[1];
-		register float vz=vec[2];
+		register float vx = vec[0];
+		register float vy = vec[1];
+		register float vz = vec[2];
 
-		vec[0] = CC_MAT_R11*vx + CC_MAT_R12*vy + CC_MAT_R13*vz;
-		vec[1] = CC_MAT_R21*vx + CC_MAT_R22*vy + CC_MAT_R23*vz;
-		vec[2] = CC_MAT_R31*vx + CC_MAT_R32*vy + CC_MAT_R33*vz;
+		vec[0] =  CC_MAT_R11 * vx + CC_MAT_R12 * vy + CC_MAT_R13 * vz;
+		vec[1] =  CC_MAT_R21 * vx + CC_MAT_R22 * vy + CC_MAT_R23 * vz;
+		vec[2] =  CC_MAT_R31 * vx + CC_MAT_R32 * vy + CC_MAT_R33 * vz;
 	}
 
     //! Shifts rotation center
@@ -291,16 +379,10 @@ public:
 	**/
 	void scaleColumn(unsigned colIndex, float coef);
 
-	//! Returns matrix as a string
-	/** \param precision numerical precision
-		\return string
-	**/
-	QString toString(int precision = 12, QChar separator = ' ') const;
-
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }
 	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion);
+	virtual bool fromFile(QFile& in, short dataVersion, int flags);
 
 protected:
 

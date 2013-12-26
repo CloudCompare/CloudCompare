@@ -36,11 +36,18 @@ ccHeightGridGenerationDlg::ccHeightGridGenerationDlg(const ccBBox& gridBBox, QWi
 
     setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
+#ifndef CC_GDAL_SUPPORT
+	generateRasterCheckBox->setDisabled(true);
+	generateRasterCheckBox->setChecked(false);
+#endif
+
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
     connect(fillEmptyCells, SIGNAL(currentIndexChanged(int)), this, SLOT(projectionChanged(int)));
-    connect(generateCloudCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
+    connect(generateCloudGroupBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
     connect(generateImageCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
+    connect(generateRasterCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
     connect(generateASCIICheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
+	connect(typeOfProjectionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(projectionTypeChanged(int)));
 
 	//custom bbox editor
 	if (gridBBox.isValid())
@@ -57,11 +64,18 @@ ccHeightGridGenerationDlg::ccHeightGridGenerationDlg(const ccBBox& gridBBox, QWi
 	loadSettings();
 }
 
+void ccHeightGridGenerationDlg::projectionTypeChanged(int index)
+{
+	//we can't use the 'resample origin cloud' option with 'average height' projection
+	resampleOriginalCloudCheckBox->setEnabled(index != 1);
+}
+
 void ccHeightGridGenerationDlg::showGridBoxEditor()
 {
 	if (m_bbEditorDlg)
 	{
-		m_bbEditorDlg->set2DMode(true,dimensionComboBox->currentIndex());
+		assert(dimensionComboBox->currentIndex() < 255);
+		m_bbEditorDlg->set2DMode(true,static_cast<uchar>(dimensionComboBox->currentIndex()));
 		m_bbEditorDlg->exec();
 	}
 }
@@ -78,7 +92,7 @@ double ccHeightGridGenerationDlg::getGridStep() const
 
 bool ccHeightGridGenerationDlg::generateCloud() const
 {
-    return generateCloudCheckBox->isChecked();
+    return generateCloudGroupBox->isChecked();
 }
 
 bool ccHeightGridGenerationDlg::generateCountSF() const
@@ -86,9 +100,19 @@ bool ccHeightGridGenerationDlg::generateCountSF() const
     return generateCloud() && generateCountSFcheckBox->isChecked();
 }
 
+bool ccHeightGridGenerationDlg::resampleOriginalCloud() const
+{
+    return generateCloud() && resampleOriginalCloudCheckBox->isEnabled() && resampleOriginalCloudCheckBox->isChecked();
+}
+
 bool ccHeightGridGenerationDlg::generateImage() const
 {
     return generateImageCheckBox->isChecked();
+}
+
+bool ccHeightGridGenerationDlg::generateRaster() const
+{
+    return generateRasterCheckBox->isChecked();
 }
 
 bool ccHeightGridGenerationDlg::generateASCII() const
@@ -111,7 +135,7 @@ void ccHeightGridGenerationDlg::projectionChanged(int)
 
 void ccHeightGridGenerationDlg::toggleFillEmptyCells(bool)
 {
-    emptyCellsFrame->setEnabled(generateCloudCheckBox->isChecked() || generateImageCheckBox->isChecked());
+    emptyCellsFrame->setEnabled(generateCloudGroupBox->isChecked() || generateImageCheckBox->isChecked() || generateRasterCheckBox->isChecked());
 }
 
 double ccHeightGridGenerationDlg::getCustomHeightForEmptyCells() const
@@ -121,7 +145,7 @@ double ccHeightGridGenerationDlg::getCustomHeightForEmptyCells() const
 
 ccHeightGridGeneration::ProjectionType ccHeightGridGenerationDlg::getTypeOfProjection() const
 {
-    switch (typeOfProjection->currentIndex())
+    switch (typeOfProjectionComboBox->currentIndex())
     {
         case 0:
             return ccHeightGridGeneration::PROJ_MINIMUM_HEIGHT;
@@ -184,30 +208,36 @@ void ccHeightGridGenerationDlg::loadSettings()
 {
     QSettings settings;
     settings.beginGroup("HeightGridGeneration");
-    int projType        = settings.value("ProjectionType",typeOfProjection->currentIndex()).toInt();
+    int projType        = settings.value("ProjectionType",typeOfProjectionComboBox->currentIndex()).toInt();
     int fillStrategy    = settings.value("FillStrategy",fillEmptyCells->currentIndex()).toInt();
 	bool sfProj			= settings.value("SfProjEnabled",interpolateSFCheckBox->isChecked()).toBool();
     int sfProjStrategy  = settings.value("SfProjStrategy",scalarFieldProjection->currentIndex()).toInt();
     int projDim			= settings.value("ProjectionDim",dimensionComboBox->currentIndex()).toInt();
     double step         = settings.value("GridStep",gridStep->value()).toDouble();
     double emptyHeight  = settings.value("EmptyCellsHeight",emptyValueDoubleSpinBox->value()).toDouble();
-    bool genCloud       = settings.value("GenerateCloud",generateCloudCheckBox->isChecked()).toBool();
+    bool genCloud       = settings.value("GenerateCloud",generateCloudGroupBox->isChecked()).toBool();
     bool genImage       = settings.value("GenerateImage",generateImageCheckBox->isChecked()).toBool();
+    bool genRaster		= settings.value("GenerateRaster",generateImageCheckBox->isChecked()).toBool();
     bool genASCII       = settings.value("GenerateASCII",generateASCIICheckBox->isChecked()).toBool();
     bool genCountSF		= settings.value("GenerateCountSF",generateCountSFcheckBox->isChecked()).toBool();
+	bool resampleCloud	= settings.value("ResampleOrigCloud",resampleOriginalCloudCheckBox->isChecked()).toBool();
     settings.endGroup();
 
     gridStep->setValue(step);
-    typeOfProjection->setCurrentIndex(projType);
+    typeOfProjectionComboBox->setCurrentIndex(projType);
     fillEmptyCells->setCurrentIndex(fillStrategy);
     emptyValueDoubleSpinBox->setValue(emptyHeight);
-    generateCloudCheckBox->setChecked(genCloud);
+    generateCloudGroupBox->setChecked(genCloud);
     generateImageCheckBox->setChecked(genImage);
     generateASCIICheckBox->setChecked(genASCII);
 	dimensionComboBox->setCurrentIndex(projDim);
 	interpolateSFCheckBox->setChecked(sfProj);
 	scalarFieldProjection->setCurrentIndex(sfProjStrategy);
 	generateCountSFcheckBox->setChecked(genCountSF);
+	resampleOriginalCloudCheckBox->setChecked(resampleCloud);
+#ifdef CC_GDAL_SUPPORT
+	generateRasterCheckBox->setChecked(genRaster);
+#endif
 
     toggleFillEmptyCells(false);
 }
@@ -216,17 +246,21 @@ void ccHeightGridGenerationDlg::saveSettings()
 {
     QSettings settings;
     settings.beginGroup("HeightGridGeneration");
-    settings.setValue("ProjectionType",typeOfProjection->currentIndex());
+    settings.setValue("ProjectionType",typeOfProjectionComboBox->currentIndex());
     settings.setValue("ProjectionDim",dimensionComboBox->currentIndex());
 	settings.setValue("SfProjEnabled",interpolateSFCheckBox->isChecked());
     settings.setValue("SfProjStrategy",scalarFieldProjection->currentIndex());
     settings.setValue("FillStrategy",fillEmptyCells->currentIndex());
     settings.setValue("GridStep",gridStep->value());
     settings.setValue("EmptyCellsHeight",emptyValueDoubleSpinBox->value());
-    settings.setValue("GenerateCloud",generateCloudCheckBox->isChecked());
+    settings.setValue("GenerateCloud",generateCloudGroupBox->isChecked());
     settings.setValue("GenerateImage",generateImageCheckBox->isChecked());
     settings.setValue("GenerateASCII",generateASCIICheckBox->isChecked());
     settings.setValue("GenerateCountSF",generateCountSFcheckBox->isChecked());
+	settings.setValue("ResampleOrigCloud",resampleOriginalCloudCheckBox->isChecked());
+#ifdef CC_GDAL_SUPPORT
+    settings.setValue("GenerateRaster",generateRasterCheckBox->isChecked());
+#endif
     settings.endGroup();
 
     accept();

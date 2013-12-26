@@ -40,10 +40,12 @@
 #include "ObjFilter.h"
 #include "PlyFilter.h"
 #include "MAFilter.h"
+#include "FBXFilter.h"
 //CAD
 #include "PDMS/PDMSFilter.h"
 //OTHERS
 #include "DepthMapFileFilter.h"
+#include "RasterGridFilter.h"
 //#include "PovFilter.h"
 #include "DxfFilter.h"
 
@@ -115,6 +117,14 @@ CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(const char* ext)
 	else if (strcmp(ext,"DXF") == 0)
 		fType = DXF;
 #endif
+#ifdef CC_GDAL_SUPPORT
+	else if (strcmp(ext,"TIF") == 0 || strcmp(ext,"TIFF") == 0 || strcmp(ext,"ADF") == 0)
+		fType = RASTER;
+#endif
+#ifdef CC_FBX_SUPPORT
+	else if (strcmp(ext,"FBX") == 0)
+		fType = FBX;
+#endif
 	return fType;
 }
 
@@ -177,6 +187,14 @@ FileIOFilter* FileIOFilter::CreateFilter(CC_FILE_TYPES fType)
 	case DXF:
 		return new DxfFilter();
 #endif
+#ifdef CC_GDAL_SUPPORT
+	case RASTER:
+		return new RasterGridFilter();
+#endif
+#ifdef CC_FBX_SUPPORT
+	case FBX:
+		return new FBXFilter();
+#endif
 	case FILE_TYPES_COUNT:
 	default:
 		assert(false);
@@ -190,7 +208,7 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 										CC_FILE_TYPES fType,
 										bool alwaysDisplayLoadDialog/*=true*/,
 										bool* coordinatesShiftEnabled/*=0*/,
-										double* coordinatesShift/*=0*/)
+										CCVector3d* coordinatesShift/*=0*/)
 {
 	//check file existence
     QFileInfo fi(filename);
@@ -229,17 +247,31 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 
 	//load file
     ccHObject* container = new ccHObject();
-	CC_FILE_ERROR result = fio->loadFile(qPrintable(filename),
-											*container,
-											alwaysDisplayLoadDialog,
-											coordinatesShiftEnabled,
-											coordinatesShift);
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	try
+	{
+		result = fio->loadFile(	qPrintable(filename),
+								*container,
+								alwaysDisplayLoadDialog,
+								coordinatesShiftEnabled,
+								coordinatesShift);
+	}
+	catch(...)
+	{
+		ccLog::Warning("[I/O] Exception caught during file opening!");
+		if (container)
+			container->removeAllChildren();
+		result = CC_FERR_CONSOLE_ERROR;
+	}
+
 	//we can release the loader instance
     delete fio;
-    fio=0;
+    fio = 0;
 
 	if (result != CC_FERR_NO_ERROR)
         DisplayErrorMessage(result,"loading",fi.baseName());
+	else
+		ccLog::Print(QString("[I/O] File '%1' loaded successfully").arg(fi.baseName()));
 
     unsigned childrenCount = container->getChildrenNumber();
     if (childrenCount != 0)
@@ -261,7 +293,7 @@ ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
 	else
     {
         delete container;
-        container=0;
+        container = 0;
     }
 
 	return container;
@@ -284,7 +316,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename
     CC_FILE_ERROR result = fio->saveToFile(entities, qPrintable(completeFileName));
 
     delete fio;
-    fio=0;
+    fio = 0;
 
     return result;
 }
@@ -341,7 +373,7 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
             return; //no message will be displayed!
     }
 
-    QString outputString = QString("An error occured while %1 '%2': ").arg(action).arg(filename) + errorStr;
+    QString outputString = QString("An error occurred while %1 '%2': ").arg(action).arg(filename) + errorStr;
     if (warning)
         ccLog::Warning(outputString);
     else

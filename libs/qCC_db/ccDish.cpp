@@ -91,17 +91,17 @@ bool ccDish::buildUp()
 	assert(verts);
 
 	//first point: north pole
-	verts->addPoint(CCVector3(0.0,0.0,m_height));
-	verts->addNorm(0.0,0.0,1.0);
+	verts->addPoint(CCVector3(0,0,m_height));
+	verts->addNorm(0,0,1);
 
 	//then, angular sweep
 	CCVector3 N0,N,P;
 	{
 		for (unsigned j=1;j<=sectionSteps;++j)
 		{
-			float theta = endAngle_rad - (double)j * sectionAngleStep_rad; //we start from north pole!
-			float cos_theta = cos(theta);
-			float sin_theta = sin(theta);
+			PointCoordinateType theta = static_cast<PointCoordinateType>(endAngle_rad - static_cast<double>(j) * sectionAngleStep_rad); //we start from north pole!
+			PointCoordinateType cos_theta = cos(theta);
+			PointCoordinateType sin_theta = sin(theta);
 
 			N0.x = cos_theta;
 			N0.y = 0;
@@ -109,12 +109,12 @@ bool ccDish::buildUp()
 		
 			for (unsigned i=0;i<steps;++i) //then we make a full revolution
 			{
-				float phi = (double)i * angleStep_rad;
-				float cos_phi = cos(phi);
-				float sin_phi = sin(phi);
+				PointCoordinateType phi = static_cast<PointCoordinateType>(static_cast<double>(i) * angleStep_rad);
+				PointCoordinateType cos_phi = cos(phi);
+				PointCoordinateType sin_phi = sin(phi);
 
-				N.x = N0.x*cos_phi;
-				N.y = N0.x*sin_phi;
+				N.x = N0.x * cos_phi;
+				N.y = N0.x * sin_phi;
 				N.z = N0.z;
 				N.normalize();
 
@@ -183,9 +183,9 @@ bool ccDish::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccDish::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccDish::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//parameters (dataVersion>=21)

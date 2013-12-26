@@ -118,7 +118,7 @@ public:
 	virtual void addToDB(const QStringList& filenames, CC_FILE_TYPES fType = UNKNOWN_FILE, ccGLWindow* destWin = 0);
 
 	//inherited from ccMainAppInterface
-    virtual void addToDB(ccHObject* obj, bool autoExpandDBTree=true, const char* statusMessage=NULL, bool addToDisplay=true, bool updateZoom=true, ccGLWindow* winDest=0, bool* coordinatesTransEnabled = 0, double* coordinatesShift = 0, double* coordinatesScale = 0);
+    virtual void addToDB(ccHObject* obj, bool autoExpandDBTree=true, const char* statusMessage=NULL, bool addToDisplay=true, bool updateZoom=true, ccGLWindow* winDest=0, bool* coordinatesTransEnabled = 0, CCVector3d* coordinatesShift = 0, double* coordinatesScale = 0);
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete=true);
 	virtual void setSelectedInDB(ccHObject* obj, bool selected);
     virtual void dispToConsole(QString message, ConsoleMessageLevel level=STD_CONSOLE_MESSAGE);
@@ -261,6 +261,7 @@ protected slots:
 	void doActionRenameSF();
 	void doActionOpenColorScalesManager();
     void doActionAddIdField();
+	void doActionSetSFAsCoord();
 
 	void doComputeDensity();
     void doComputeCurvature();
@@ -277,7 +278,7 @@ protected slots:
     void doActionComputeOctree();
 	void doActionComputeKdTree();
     void doActionApplyTransformation();
-    void doActionFuse();
+    void doActionMerge();
     void doActionRegister();
     void doAction4pcsRegister(); //Aurelien BEY le 13/11/2008
     void doActionSubsample(); //Aurelien BEY le 4/12/2008
@@ -310,7 +311,8 @@ protected slots:
     void doActionFrontPropagation();
     void doActionMultiply();
 	void doActionEditGlobalShift();
-    void doActionSynchronize();
+	void doActionEditGlobalScale();
+    void doActionMatchBarycenters();
     void doActionUnroll();
     void doActionProjectSensor();
     void doActionModifySensor();
@@ -322,8 +324,8 @@ protected slots:
 	void doActionExportCoordToSF();
     void doComputeBestFitBB();
 
-
     void doActionEditCamera();
+	void doActionAdjustZoom();
 	void doActionSaveViewportAsCamera();
 
     void doEnableGLFilter();
@@ -375,6 +377,9 @@ protected slots:
 	//! Setups 3D mouse (if any)
 	void setup3DMouse(bool);
 
+	//! Removes all entiites currently loaded in the DB tree
+	void closeAll();
+
 protected:
 
     //! Removes from a list all elements that are sibling of others
@@ -389,7 +394,9 @@ protected:
 	void createComponentsClouds(ccGenericPointCloud* cloud,
 								CCLib::ReferenceCloudContainer& components,
 								unsigned minPointPerComponent,
-								bool randomColors);
+								bool randomColors,
+								bool selectComponents,
+								bool sortBysize = true);
 
     void closeEvent(QCloseEvent* event);
     void moveEvent(QMoveEvent* event);

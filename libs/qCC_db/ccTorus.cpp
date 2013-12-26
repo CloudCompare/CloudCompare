@@ -126,11 +126,11 @@ bool ccTorus::buildUp()
 	//main sweep
 	PointCoordinateType sweepRadius = (m_insideRadius+m_outsideRadius)/(PointCoordinateType)2.0;
 	double sweepStep_rad = m_angle_rad/(double)sweepSteps;
-	for (unsigned t=0;t<(closed ? sweepSteps : sweepSteps+1);++t)
+	for (unsigned t=0; t<(closed ? sweepSteps : sweepSteps+1); ++t)
 	{
 		//unit director vector
-		CCVector3 sweepU(cos((double)t*sweepStep_rad),
-						 sin((double)t*sweepStep_rad),
+		CCVector3 sweepU(static_cast<PointCoordinateType>(cos(t*sweepStep_rad)),
+						 static_cast<PointCoordinateType>(sin(t*sweepStep_rad)),
 						 0);
 
 		//section points
@@ -166,10 +166,10 @@ bool ccTorus::buildUp()
 
 	if (!closed && !m_rectSection)
 	{
-		CCVector3 P(sweepRadius,0.0,0.0);
+		CCVector3 P(sweepRadius,0,0);
 		verts->addPoint(P);
-		CCVector3 P2(cos(m_angle_rad)*sweepRadius,
-						 sin(m_angle_rad)*sweepRadius,
+		CCVector3 P2(	static_cast<PointCoordinateType>(cos(m_angle_rad))*sweepRadius,
+						static_cast<PointCoordinateType>(sin(m_angle_rad))*sweepRadius,
 						 0);
 		verts->addPoint(P2);
 	}
@@ -177,9 +177,11 @@ bool ccTorus::buildUp()
 	if (!closed)
 	{
 		//first section (left side)
-		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0.0,-1.0,0.0).u));
+		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(0,-1,0).u));
 		//last section (right side)
-		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(-sin(m_angle_rad),cos(m_angle_rad),0.0).u));
+		m_triNormals->addElement(ccNormalVectors::GetNormIndex(CCVector3(	static_cast<PointCoordinateType>(-sin(m_angle_rad)),
+																			static_cast<PointCoordinateType>(cos(m_angle_rad)),
+																			0).u));
 	}
 
 	delete[] sectPoints;
@@ -267,9 +269,9 @@ bool ccTorus::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccTorus::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccTorus::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//parameters (dataVersion>=21)

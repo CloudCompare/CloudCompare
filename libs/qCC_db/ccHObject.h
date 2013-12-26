@@ -225,7 +225,7 @@ public:
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const;
 	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion);
+	virtual bool fromFile(QFile& in, short dataVersion, int flags);
 
 	//! Returns whether object is shareable or not
 	/** If object is father dependent and 'shared', it won't
@@ -247,6 +247,9 @@ public:
 
 	//! Returns selection behavior
 	SelectionBehavior getSelectionBehavior() const { return m_selectionBehavior; }
+
+	//! Returns object unqiue ID used for display
+	virtual unsigned getUniqueIDForDisplay() const { return getUniqueID(); }
 
 protected:
 
@@ -271,8 +274,11 @@ protected:
 	//! Loads own object data
 	/** Called by 'fromFile' (recursive scheme)
 		To be overloaded (but still called;) by subclass.
+		\param in input file
+		\param dataVersion file version
+		\param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
 	**/
-	virtual bool fromFile_MeOnly(QFile& out, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
 	//! Draws the entity name in 3D
 	/** Names is displayed at the center of the bounding box by default.

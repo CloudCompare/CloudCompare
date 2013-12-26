@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>350</width>
-    <height>410</height>
+    <height>487</height>
    </rect>
   </property>
   <property name="acceptDrops">
@@ -81,7 +81,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="typeOfProjection">
+         <widget class="QComboBox" name="typeOfProjectionComboBox">
           <property name="toolTip">
            <string>choose the height (z coordinate) projected : maximum = highest point in the cell or average)</string>
           </property>
@@ -267,35 +267,45 @@
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QFrame" name="frame">
-        <property name="frameShape">
-         <enum>QFrame::StyledPanel</enum>
+       <widget class="QGroupBox" name="generateCloudGroupBox">
+        <property name="title">
+         <string>Grid as a point cloud</string>
         </property>
-        <property name="frameShadow">
-         <enum>QFrame::Raised</enum>
+        <property name="checkable">
+         <bool>true</bool>
         </property>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="margin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="QCheckBox" name="generateCloudCheckBox">
-           <property name="text">
-            <string>Grid as a point cloud</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-         </item>
+        <layout class="QVBoxLayout" name="verticalLayout_4">
          <item>
           <widget class="QCheckBox" name="generateCountSFcheckBox">
+           <property name="toolTip">
+            <string>Adds a scalar field with the grid density (= number of points falling in each cell)</string>
+           </property>
            <property name="text">
             <string>save per-cell count as SF</string>
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QCheckBox" name="resampleOriginalCloudCheckBox">
+           <property name="toolTip">
+            <string>Keeps the nearest point in each cell instead of the cell center</string>
+           </property>
+           <property name="text">
+            <string>resample original cloud</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
+         </item>
         </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="generateRasterCheckBox">
+        <property name="text">
+         <string>Grid as a raster (geotiff)</string>
+        </property>
        </widget>
       </item>
       <item>
@@ -304,7 +314,7 @@
          <string>image is automatically generated in the application directory</string>
         </property>
         <property name="text">
-         <string>Grid as an image (height_grid_image.tiff)</string>
+         <string>Grid as an image</string>
         </property>
        </widget>
       </item>
@@ -314,7 +324,7 @@
          <string>file is automatically generated in the application directory</string>
         </property>
         <property name="text">
-         <string>Grid as a matrix (height_grid_text_file.txt)</string>
+         <string>Grid as a matrix (text file)</string>
         </property>
         <property name="checked">
          <bool>false</bool>
@@ -396,22 +406,6 @@
     <hint type="destinationlabel">
      <x>296</x>
      <y>102</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>generateCloudCheckBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>generateCountSFcheckBox</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>103</x>
-     <y>180</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>296</x>
-     <y>180</y>
     </hint>
    </hints>
   </connection>

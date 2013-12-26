@@ -112,10 +112,10 @@ void ExtractSIFT::getParametersFromDialog()
 
 	//get the parameters from the dialog
 	m_nr_octaves = m_dialog->nrOctaves->value();
-	m_min_scale = m_dialog->minScale->value();
+	m_min_scale = static_cast<float>(m_dialog->minScale->value());
 	m_nr_scales_per_octave = m_dialog->scalesPerOctave->value();
 	m_use_min_contrast = m_dialog->useMinContrast->checkState();
-	m_min_contrast = m_use_min_contrast ? m_dialog->minContrast->value() : 0;
+	m_min_contrast = m_use_min_contrast ? static_cast<float>(m_dialog->minContrast->value()) : 0;
 	m_field_to_use = m_dialog->intensityCombo->currentText().toStdString();
 
 	if (m_field_to_use == "rgb")
@@ -164,7 +164,7 @@ int ExtractSIFT::compute()
 	if (!cloud)
 		return -1;
 
-	sensor_msgs::PointCloud2::Ptr sm_cloud (new sensor_msgs::PointCloud2);
+	PCLCloud::Ptr sm_cloud (new PCLCloud);
 
 	std::vector<std::string> req_fields;
 	req_fields.resize(2);
@@ -198,17 +198,17 @@ int ExtractSIFT::compute()
 	//Now do the actual computation
 	if (m_mode == SCALAR_FIELD)
 	{
-		pcl::fromROSMsg(*sm_cloud, *cloud_i);
+		FROM_PCL_CLOUD(*sm_cloud, *cloud_i);
 		estimateSIFT<pcl::PointXYZI, pcl::PointXYZ>(cloud_i, out_cloud, m_nr_octaves, m_min_scale, m_nr_scales_per_octave, m_min_contrast );
 	}
 	else if (m_mode == RGB)
 	{
-		pcl::fromROSMsg(*sm_cloud, *cloud_rgb);
+		FROM_PCL_CLOUD(*sm_cloud, *cloud_rgb);
 		estimateSIFT<pcl::PointXYZRGB, pcl::PointXYZ>(cloud_rgb, out_cloud, m_nr_octaves, m_min_scale, m_nr_scales_per_octave, m_min_contrast );
 	}
 
-	sensor_msgs::PointCloud2::Ptr out_cloud_sm (new sensor_msgs::PointCloud2);
-	pcl::toROSMsg(*out_cloud, *out_cloud_sm);
+	PCLCloud::Ptr out_cloud_sm (new PCLCloud);
+	TO_PCL_CLOUD(*out_cloud, *out_cloud_sm);
 
 	if ( (out_cloud_sm->height * out_cloud_sm->width) == 0)
 	{

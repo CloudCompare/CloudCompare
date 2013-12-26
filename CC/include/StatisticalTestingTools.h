@@ -60,7 +60,7 @@ public:
 		\param histoMax [optional] maximum histogram value
 		\param[out] histoValues [optional] histogram array (its size should be equal to the initial number of classes)
 		\param[out] npis [optional] array containing the theoretical probabilities for each class (its size should be equal to the initial number of classes)
-		\return the Chi2 distance (or -1.0 if an error occured)
+		\return the Chi2 distance (or -1.0 if an error occurred)
 	**/
 	static double computeAdaptativeChi2Dist(const GenericDistribution* distrib,
 											const GenericCloud* cloud,
@@ -129,8 +129,11 @@ protected:
 		- (bool) specifies whether negative values should be included in computation
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computeLocalChi2DistAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computeLocalChi2DistAtLevel(const DgmOctree::octreeCell& cell,
+											void** additionalParameters,
+											NormalizedProgress* nProgress = 0);
 
 };
 

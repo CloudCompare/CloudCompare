@@ -25,7 +25,7 @@
 
 //*********** OPENGL TEXTURES ***********//
 
-void ccGLUtils::DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h, unsigned char alpha/*=255*/)
+void ccGLUtils::DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h, uchar alpha/*=255*/)
 {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex);
@@ -46,23 +46,23 @@ void ccGLUtils::DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h,
     glDisable(GL_TEXTURE_2D);
 }
 
-void ccGLUtils::DisplayTexture2D(GLuint tex, int w, int h, unsigned char alpha/*=255*/)
+void ccGLUtils::DisplayTexture2D(GLuint tex, int w, int h, uchar alpha/*=255*/)
 {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex);
 
-    float halfW = float(w)*0.5;
-    float halfH = float(h)*0.5;
+    float halfW = static_cast<float>(w)/2;
+    float halfH = static_cast<float>(h)/2;
 
     glColor4ub(255, 255, 255, alpha);
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0, 0.0);
+    glTexCoord2f(0, 0);
     glVertex2f(-halfW, -halfH);
-    glTexCoord2f(1.0, 0.0);
+    glTexCoord2f(1, 0);
     glVertex2f( halfW, -halfH);
-    glTexCoord2f(1.0, 1.0);
+    glTexCoord2f(1, 1);
     glVertex2f( halfW,  halfH);
-    glTexCoord2f(0.0, 1.0);
+    glTexCoord2f(0, 1);
     glVertex2f(-halfW,  halfH);
     glEnd();
 
@@ -70,21 +70,21 @@ void ccGLUtils::DisplayTexture2D(GLuint tex, int w, int h, unsigned char alpha/*
     glDisable(GL_TEXTURE_2D);
 }
 
-void ccGLUtils::DisplayTexture2DCorner(GLuint tex, int w, int h, unsigned char alpha/*=255*/)
+void ccGLUtils::DisplayTexture2DCorner(GLuint tex, int w, int h, uchar alpha/*=255*/)
 {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex);
 
     glColor4ub(255, 255, 255, alpha);
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0, 0.0);
+    glTexCoord2f(0, 0);
     glVertex2f(0, 0);
-    glTexCoord2f(1.0, 0.0);
-    glVertex2f( w, 0);
-    glTexCoord2f(1.0, 1.0);
-    glVertex2f( w,  h);
-    glTexCoord2f(0.0, 1.0);
-    glVertex2f(0,  h);
+    glTexCoord2f(1, 0);
+    glVertex2f(static_cast<float>(w), 0);
+    glTexCoord2f(1, 1);
+    glVertex2f(static_cast<float>(w),  static_cast<float>(h));
+    glTexCoord2f(0, 1);
+    glVertex2f(0, static_cast<float>(h));
     glEnd();
 
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -96,15 +96,15 @@ void ccGLUtils::DisplayTexture2DCorner(GLuint tex, int w, int h, unsigned char a
 #endif
 
 #define READ_PIXELS_PER_LINE
-void ccGLUtils::SaveTextureToArray(unsigned char* data, GLuint texID, unsigned w, unsigned h)
+void ccGLUtils::SaveTextureToArray(uchar* data, GLuint texID, unsigned w, unsigned h)
 {
 	assert(data);
 
 #ifdef READ_PIXELS_PER_LINE
 	//to avoid memory issues, we read line by line
-	for (int i=0;i<(int)h;++i)
+	for (int i=0; i<static_cast<int>(h); ++i)
 	{
-		glReadPixels(0,i,w,1,GL_BGRA,GL_UNSIGNED_BYTE,data+((int)h-1-i)*(int)w*4);
+		glReadPixels(0,i,w,1,GL_BGRA,GL_UNSIGNED_BYTE,data+(static_cast<int>(h)-1-i)*static_cast<int>(w)*4);
 		ccGLUtils::CatchGLError("ccGLUtils::SaveTextureToArray");
 	}
 #else
@@ -146,59 +146,36 @@ bool ccGLUtils::SaveTextureToFile(const char* filename, GLuint texID, unsigned w
 
 //*********** OPENGL MATRICES ***********//
 
-void ccGLUtils::MultGLMatrices(const float* A, const float* B, float* dest)
-{
-    //we backup actual matrix...
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-
-    glLoadMatrixf(A);
-    glMultMatrixf(B);
-    glGetFloatv(GL_MODELVIEW_MATRIX, dest);
-
-    //... and restore it
-    glPopMatrix();
-}
-
-void ccGLUtils::TransposeGLMatrix(const float* A, float* dest)
-{
-    unsigned char i,j;
-
-    for (i=0;i<4;i++)
-        for (j=0;j<4;j++)
-            dest[(i<<2)+j] = A[(j<<2)+i];
-}
-
-ccGLMatrix ccGLUtils::GenerateGLRotationMatrixFromVectors(const float* sourceVec, const float* destVec)
+ccGLMatrix ccGLUtils::GenerateGLRotationMatrixFromVectors(const CCVector3& sourceVec, const CCVector3& destVec)
 {
     //we compute scalar prod between the two vectors
-    float ps = Vector3Tpl<float>::vdot(sourceVec,destVec);
+    PointCoordinateType ps = sourceVec.dot(destVec);
 
     //we bound result (in case vecors are not exactly unit)
-    if (ps>1.0)
-        ps=1.0;
-    else if (ps<-1.0)
-        ps=-1.0;
+    if (ps > 1)
+        ps = 1;
+    else if (ps < -1)
+        ps = -1;
 
     //we deduce angle from scalar prod
-    float angle_deg = acos(ps)*CC_RAD_TO_DEG;
+    PointCoordinateType angle_deg = acos(ps) * static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
 
     //we compute rotation axis with scalar prod
-    float axis[3];
-    CCVector3::vcross(sourceVec,destVec,axis);
+    CCVector3 axis = sourceVec.cross(destVec);
 
     //we eventually compute the rotation matrix with axis and angle
     return GenerateGLRotationMatrixFromAxisAndAngle(axis, angle_deg);
 }
 
-ccGLMatrix ccGLUtils::GenerateGLRotationMatrixFromAxisAndAngle(const float* axis, float angle_deg)
+ccGLMatrix ccGLUtils::GenerateGLRotationMatrixFromAxisAndAngle(const CCVector3& axis, PointCoordinateType angle_deg)
 {
     //we backup actual matrix...
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
     glLoadIdentity();
-    glRotatef(angle_deg, axis[0], axis[1], axis[2]);
+    ccGL::Rotate(angle_deg, axis.x, axis.y, axis.z);
+	
 	ccGLMatrix mat;
     glGetFloatv(GL_MODELVIEW_MATRIX, mat.data());
 
@@ -217,8 +194,8 @@ ccGLMatrix ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
     switch (orientation)
     {
     case CC_TOP_VIEW:
-        eye[2] = 1.0;
-        top[1] = 1.0;
+        eye[2] =  1.0;
+        top[1] =  1.0;
         break;
     case CC_BOTTOM_VIEW:
         eye[2] = -1.0;
@@ -226,35 +203,35 @@ ccGLMatrix ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
         break;
     case CC_FRONT_VIEW:
         eye[1] = -1.0;
-        top[2] = 1.0;
+        top[2] =  1.0;
         break;
     case CC_BACK_VIEW:
-        eye[1] = 1.0;
-        top[2] = 1.0;
+        eye[1] =  1.0;
+        top[2] =  1.0;
         break;
     case CC_LEFT_VIEW:
         eye[0] = -1.0;
-        top[2] = 1.0;
+        top[2] =  1.0;
         break;
     case CC_RIGHT_VIEW:
-        eye[0] = 1.0;
-        top[2] = 1.0;
+        eye[0] =  1.0;
+        top[2] =  1.0;
         break;
     case CC_ISO_VIEW_1:
         eye[0] = -1.0;
         eye[1] = -1.0;
-        eye[2] = 1.0;
-		top[0] = 1.0;
-		top[1] = 1.0;
-        top[2] = 1.0;
+        eye[2] =  1.0;
+		top[0] =  1.0;
+		top[1] =  1.0;
+        top[2] =  1.0;
         break;
     case CC_ISO_VIEW_2:
-        eye[0] = 1.0;
-        eye[1] = 1.0;
-        eye[2] = 1.0;
+        eye[0] =  1.0;
+        eye[1] =  1.0;
+        eye[2] =  1.0;
         top[0] = -1.0;
         top[1] = -1.0;
-        top[2] = 1.0;
+        top[2] =  1.0;
         break;
     }
 
@@ -262,12 +239,16 @@ ccGLMatrix ccGLUtils::GenerateViewMat(CC_VIEW_ORIENTATION orientation)
 
     glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
-    glLoadIdentity();
-    gluLookAt(eye[0],eye[1],eye[2],0.0,0.0,0.0,top[0],top[1],top[2]);
-    glGetFloatv(GL_MODELVIEW_MATRIX, result.data());
-    result.data()[14] = 0.0; //annoying value (?!)
-    glPopMatrix();
 
+	//call gluLookAt
+	glLoadIdentity();
+	gluLookAt(eye[0],eye[1],eye[2],0.0,0.0,0.0,top[0],top[1],top[2]);
+	//then grab the resulting matrix
+    glGetFloatv(GL_MODELVIEW_MATRIX, result.data());
+    
+	glPopMatrix();
+
+    result.data()[14] = 0.0; //annoying value (?!)
     return result;
 }
 
@@ -311,7 +292,8 @@ void ccGLUtils::MakeLightsNeutral()
 {
 	GLint maxLightCount;
 	glGetIntegerv(GL_MAX_LIGHTS,&maxLightCount);
-	for (int i=0;i<maxLightCount;++i)
+	
+	for (int i=0; i<maxLightCount; ++i)
 	{
 		if (glIsEnabled(GL_LIGHT0+i))
 		{
@@ -323,12 +305,12 @@ void ccGLUtils::MakeLightsNeutral()
 			glGetLightfv(GL_LIGHT0+i,GL_AMBIENT,ambiant);
 			glGetLightfv(GL_LIGHT0+i,GL_SPECULAR,specular);
 
-			diffuse[0]=diffuse[1]=diffuse[2]=(diffuse[0]+diffuse[1]+diffuse[2])/3.0f;		//gray 'mean' value
-			ambiant[0]=ambiant[1]=ambiant[2]=(ambiant[0]+ambiant[1]+ambiant[2])/3.0f;		//gray 'mean' value
-			specular[0]=specular[1]=specular[2]=(specular[0]+specular[1]+specular[2])/3.0f;	//gray 'mean' value
+			 diffuse[0] =  diffuse[1] =  diffuse[2] = ( diffuse[0] +  diffuse[1] +  diffuse[2]) / 3.0f;	//'mean' (gray) value
+			 ambiant[0] =  ambiant[1] =  ambiant[2] = ( ambiant[0] +  ambiant[1] +  ambiant[2]) / 3.0f;	//'mean' (gray) value
+			specular[0] = specular[1] = specular[2] = (specular[0] + specular[1] + specular[2]) / 3.0f;	//'mean' (gray) value
 
-			glLightfv(GL_LIGHT0+i,GL_DIFFUSE,diffuse);
-			glLightfv(GL_LIGHT0+i,GL_AMBIENT,ambiant);
+			glLightfv(GL_LIGHT0+i, GL_DIFFUSE, diffuse);
+			glLightfv(GL_LIGHT0+i, GL_AMBIENT, ambiant);
 			glLightfv(GL_LIGHT0+i,GL_SPECULAR,specular);
 		}
 	}

@@ -118,7 +118,6 @@ protected:
     };
 
 	//inherited methods (see FastMarching)
-	virtual float computeT(unsigned index);
 	virtual float computeTCoefApprox(Cell* currentCell, Cell* neighbourCell) const;
 	virtual int step();
 	virtual bool instantiateGrid(unsigned size) { return instantiateGridTpl<PropagationCell>(size); }

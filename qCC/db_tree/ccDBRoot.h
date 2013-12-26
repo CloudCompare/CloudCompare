@@ -122,11 +122,19 @@ public:
 	//! Selects a given entity
 	/** If ctrl is pressed by the user at the same time,
 		previous selection will be simply updated accordingly.
+		\param entity to select
+		\param forceAdditiveSelection whether to force additive selection (just as if CTRL key is pressed) or not
 	**/
-    void selectEntity(ccHObject* obj);
+    void selectEntity(ccHObject* obj, bool forceAdditiveSelection = false);
 
 	//! Unselects a given entity
     void unselectEntity(ccHObject* obj);
+
+	//! Unselects all entities
+    void unselectAllEntities();
+
+	//! Unloads all entities
+	void unloadAll();
 
     //inherited from QAbstractItemModel
     virtual QVariant data(const QModelIndex &index, int role) const;

@@ -43,16 +43,22 @@ class ccHeightGridGenerationDlg : public QDialog, public Ui::HeightGridGeneratio
         //! Returns projection grid step
         double getGridStep() const;
 
-        //! Returns whether grid should be generated as a cloud
+        //! Returns whether grid should be converted to a cloud
         bool generateCloud() const;
 
         //! Returns whether a SF with per-cell count should be generated (only if a cloud is generated!)
         bool generateCountSF() const;
 
-        //! Returns whether grid should be generated as an image
+        //! Returns whether the output cloud should use the original cloud or the grid as 'support'
+		bool resampleOriginalCloud() const;
+
+        //! Returns whether grid should be converted to an image
         bool generateImage() const;
 
-        //! Returns whether grid should be generated as an ASCII file
+        //! Returns whether grid should be converted to a raster
+        bool generateRaster() const;
+
+        //! Returns whether grid should be converted to an ASCII file
         bool generateASCII() const;
 
 		//! Returns projection dimension
@@ -80,14 +86,17 @@ class ccHeightGridGenerationDlg : public QDialog, public Ui::HeightGridGeneratio
         //! Save persistent settings and 'accept' dialog
         void saveSettings();
 
-        //! slot to handle projection type change
+        //! Slot to handle projection type change
         void projectionChanged(int);
 
-        //! updates the "fill empty cells" frame state
+        //! Updates the "fill empty cells" frame state
         void toggleFillEmptyCells(bool);
 
 		//! Show grid box editor
         void showGridBoxEditor();
+
+		//! Called when the projection type changes
+		void projectionTypeChanged(int);
 
     protected:
 

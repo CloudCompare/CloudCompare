@@ -53,14 +53,14 @@ void ccNormalComputationDlg::localModelChanged(int index)
 	radiusDoubleSpinBox->setEnabled(index != 2);
 }
 
-void ccNormalComputationDlg::setRadius(float radius)
+void ccNormalComputationDlg::setRadius(PointCoordinateType radius)
 {
-	radiusDoubleSpinBox->setValue(radius);
+	radiusDoubleSpinBox->setValue(static_cast<double>(radius));
 }
 
-float ccNormalComputationDlg::getRadius() const
+PointCoordinateType ccNormalComputationDlg::getRadius() const
 {
-	return radiusDoubleSpinBox->value();
+	return static_cast<PointCoordinateType>(radiusDoubleSpinBox->value());
 }
 
 int ccNormalComputationDlg::getPreferedOrientation() const

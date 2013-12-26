@@ -113,28 +113,28 @@ void ccBBox::draw(const colorType col[]) const
     glColor3ubv(col);
 
     glBegin(GL_LINE_LOOP);
-    glVertex3fv(bbMin.u);
-    glVertex3f(bbMax.x,bbMin.y,bbMin.z);
-    glVertex3f(bbMax.x,bbMax.y,bbMin.z);
-    glVertex3f(bbMin.x,bbMax.y,bbMin.z);
+    ccGL::Vertex3v(bbMin.u);
+    ccGL::Vertex3(bbMax.x,bbMin.y,bbMin.z);
+    ccGL::Vertex3(bbMax.x,bbMax.y,bbMin.z);
+    ccGL::Vertex3(bbMin.x,bbMax.y,bbMin.z);
     glEnd();
 
     glBegin(GL_LINE_LOOP);
-    glVertex3f(bbMin.x,bbMin.y,bbMax.z);
-    glVertex3f(bbMax.x,bbMin.y,bbMax.z);
-    glVertex3fv(bbMax.u);
-    glVertex3f(bbMin.x,bbMax.y,bbMax.z);
+    ccGL::Vertex3(bbMin.x,bbMin.y,bbMax.z);
+    ccGL::Vertex3(bbMax.x,bbMin.y,bbMax.z);
+    ccGL::Vertex3v(bbMax.u);
+    ccGL::Vertex3(bbMin.x,bbMax.y,bbMax.z);
     glEnd();
 
     glBegin(GL_LINES);
-    glVertex3fv(bbMin.u);
-    glVertex3f(bbMin.x,bbMin.y,bbMax.z);
-    glVertex3f(bbMax.x,bbMin.y,bbMin.z);
-    glVertex3f(bbMax.x,bbMin.y,bbMax.z);
-    glVertex3f(bbMax.x,bbMax.y,bbMin.z);
-    glVertex3fv(bbMax.u);
-    glVertex3f(bbMin.x,bbMax.y,bbMin.z);
-    glVertex3f(bbMin.x,bbMax.y,bbMax.z);
+    ccGL::Vertex3v(bbMin.u);
+    ccGL::Vertex3(bbMin.x,bbMin.y,bbMax.z);
+    ccGL::Vertex3(bbMax.x,bbMin.y,bbMin.z);
+    ccGL::Vertex3(bbMax.x,bbMin.y,bbMax.z);
+    ccGL::Vertex3(bbMax.x,bbMax.y,bbMin.z);
+    ccGL::Vertex3v(bbMax.u);
+    ccGL::Vertex3(bbMin.x,bbMax.y,bbMin.z);
+    ccGL::Vertex3(bbMin.x,bbMax.y,bbMax.z);
     glEnd();
 }
 

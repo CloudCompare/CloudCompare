@@ -7,9 +7,13 @@ file(GLOB subdirectories *)
 
 foreach(dir ${subdirectories})
     if(IS_DIRECTORY ${dir})
-		if (NOT ${dir} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR}/.svn ) #ignore svn subdir!
-			message( STATUS "Auto-add plugin subdir:" ${dir})
-			add_subdirectory (${dir})
+		#in case the user generates the BUILD project in the same folder as the sources!
+		if ( NOT ${dir} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR}/CMakeFiles )
+			#if the user uses an old version of TortoiseSVN!
+			if ( NOT ${dir} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR}/.svn )
+				message( STATUS "Auto-add plugin subdir:" ${dir})
+				add_subdirectory (${dir})
+			endif()
 		endif()
 	endif()
 endforeach()

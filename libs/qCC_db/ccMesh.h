@@ -68,6 +68,9 @@ public:
 							NormsIndexesTableType* clonedNormsTable = 0,
 							TextureCoordsContainer* cloneTexCoords = 0);
 
+	//inherited methods (ccHObject)
+	virtual unsigned getUniqueIDForDisplay() const;
+
 	//inherited methods (ccGenericMesh)
 	inline virtual ccGenericPointCloud* getAssociatedCloud() const { return m_associatedCloud; }
     virtual void refreshBB();
@@ -292,7 +295,9 @@ public:
 		\param factor smoothing 'force'
 		\param progressCb progress dialog callback
 	**/
-	bool laplacianSmooth(unsigned nbIteration = 100, float factor = 0.01f, CCLib::GenericProgressCallback* progressCb = 0);
+	bool laplacianSmooth(	unsigned nbIteration = 100,
+							PointCoordinateType factor = static_cast<PointCoordinateType>(0.01),
+							CCLib::GenericProgressCallback* progressCb = 0);
 
 	//! Mesh scalar field processes
 	enum MESH_SCALAR_FIELD_PROCESS {	SMOOTH_MESH_SF,		/**< Smooth **/
@@ -313,7 +318,7 @@ public:
 	//! Subdivides mesh (so as to ensure that all triangles are falls below 'maxArea')
 	/** \return subdivided mesh (if successfull)
 	**/
-	ccMesh* subdivide(float maxArea) const;
+	ccMesh* subdivide(PointCoordinateType maxArea) const;
 
     //! Creates a new mesh with the selected vertices only
     /** This method is called after a graphical segmentation.
@@ -331,7 +336,7 @@ protected:
     //inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
     virtual void applyGLTransformation(const ccGLMatrix& trans);
 
 	//! Same as other 'interpolateNormals' method with a set of 3 vertices indexes

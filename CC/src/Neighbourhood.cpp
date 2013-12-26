@@ -197,7 +197,7 @@ PointCoordinateType Neighbourhood::computeLargestRadius()
 	//get the centroid
 	const CCVector3* G = getGravityCenter();
 	if (!G)
-		return NAN_VALUE;
+		return PC_NAN;
 
 	PointCoordinateType maxSquareDist = 0;
 	for (unsigned i=0; i<pointCount; ++i)
@@ -660,10 +660,10 @@ GenericIndexedMesh* Neighbourhood::triangulateFromQuadric(unsigned nStepX, unsig
 	CCVector3 bboxDiag = CCVector3(bbMax)-CCVector3(bbMin);
 
 	//Sample points on Quadric and triangulate them!
-	float spanX = bboxDiag.u[hfX];
-	float spanY = bboxDiag.u[hfY];
-	float stepX = spanX/(float)(nStepX-1);
-	float stepY = spanY/(float)(nStepY-1);
+	PointCoordinateType spanX = bboxDiag.u[hfX];
+	PointCoordinateType spanY = bboxDiag.u[hfY];
+	PointCoordinateType stepX = spanX/(nStepX-1);
+	PointCoordinateType stepY = spanY/(nStepY-1);
 
 	ChunkedPointCloud* vertices = new ChunkedPointCloud();
 	if (!vertices->reserve(nStepX*nStepY))
@@ -746,15 +746,21 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
     switch (cType)
     {
         case GAUSSIAN_CURV:
-            //to sign the curvature, we need a normal!
-            return fabs((fxx*fyy - fxy*fxy)/(1.0f + fx*fx + fy*fy));
+			{
+				//to sign the curvature, we need a normal!
+				PointCoordinateType c = fabs((fxx*fyy - fxy*fxy)/(1 + fx*fx + fy*fy));
+				return static_cast<ScalarType>(c);
+			}
+
         case MEAN_CURV:
             {
-                float fx2 = fx*fx;
-                float fy2 = fy*fy;
+                PointCoordinateType fx2 = fx*fx;
+                PointCoordinateType fy2 = fy*fy;
                 //to sign the curvature, we need a normal!
-                return fabs(((1.0f+fx2)*fyy - 2.0f*fx*fy*fxy + (1.0f+fy2)*fxx)/(2.0f*pow(1.0f+fx2+fy2,1.5f)));
+				PointCoordinateType c = fabs(((1+fx2)*fyy - 2*fx*fy*fxy + (1+fy2)*fxx)/(2*pow(1+fx2+fy2,static_cast<PointCoordinateType>(1.5))));
+				return static_cast<ScalarType>(c);
             }
+
 		default:
 			assert(false);
     }

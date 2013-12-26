@@ -20,9 +20,6 @@
 
 #include "pcl_utilities.h"
 
-//PCL
-#include <sensor_msgs/PointCloud2.h>
-
 //system
 #include <list>
 
@@ -38,7 +35,7 @@ class sm2ccConverter
 public:
 
 	//! Default constructor
-	sm2ccConverter(sensor_msgs::PointCloud2::Ptr sm_cloud);
+	sm2ccConverter(PCLCloud::Ptr sm_cloud);
 
 	//! Converts inut cloud (see constructor) to a ccPointCloud
 	ccPointCloud* getCCloud();
@@ -57,12 +54,12 @@ private:
 	void eraseString(std::list<std::string> &fields, std::string name);
 
 	//! Associated PCL cloud
-	sensor_msgs::PointCloud2::Ptr m_sm_cloud;
+	PCLCloud::Ptr m_sm_cloud;
 
 };
 
-//! Convert any given sensor_msgs::PointCloud2 to ccPointCloud
-/** \param[in] sm_cloud sensor_msgs cloud
+//! Convert any given PCLCloud to ccPointCloud
+/** \param[in] sm_cloud PCL cloud
 	\return a pointer to a ccPointCloud
 	\note Not all the fields are read, only the followings:
 	- x, y, and z euclidean coordinates
@@ -73,19 +70,19 @@ private:
 	- curvature
 	- ...
 **/
-ccPointCloud* sensorToCC(const sensor_msgs::PointCloud2 &sm_cloud);
+ccPointCloud* sensorToCC(const PCLCloud &sm_cloud);
 
-//! Returns the list of fields contained in a sensor_msgs cloud
+//! Returns the list of fields contained in a PCL cloud
 /** \param[in] cloud
 	\return a std::vector of std::strings
 **/
-std::vector<std::string> getFieldList(const sensor_msgs::PointCloud2 &cloud);
+std::vector<std::string> getFieldList(const PCLCloud &cloud);
 
-//! Checks if a field exists in a sensor_msgs cloud
-/** \param[in] cloud the sensor_msgs cloud
+//! Checks if a field exists in a PCL cloud
+/** \param[in] cloud the PCL cloud
 	\param[in] field_name the name of the field to be checked
 	\return true if the field exists
 **/
-bool checkField(const sensor_msgs::PointCloud2 &cloud, std::string field_name);
+bool checkField(const PCLCloud &cloud, std::string field_name);
 
 #endif // Q_PCL_PLUGIN_SM2CC_H

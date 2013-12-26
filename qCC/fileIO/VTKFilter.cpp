@@ -94,7 +94,9 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 		ccLog::Error("No point/vertex to save?!");
 		return CC_FERR_NO_SAVE;
 	}
-	const double* shift = vertices->getOriginalShift();
+	const CCVector3d& shift = vertices->getGlobalShift();
+	double scale = vertices->getGlobalScale();
+	assert(scale != 0);
 
     //open ASCII file for writing
 	QFile file(filename);
@@ -121,7 +123,9 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 		for (unsigned i=0; i<ptsCount; ++i)
 		{
 			const CCVector3* P = vertices->getPoint(i);
-			outFile << -shift[0]+(double)P->x << " " <<  -shift[1]+(double)P->y  << " " << -shift[2]+(double)P->z << endl;
+			outFile << static_cast<double>(P->x)/scale - shift.x << " "
+					<< static_cast<double>(P->y)/scale - shift.y << " "
+					<< static_cast<double>(P->z)/scale - shift.z << endl;
 		}
 	}
 
@@ -205,7 +209,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
     //open ASCII file for reading
 	QFile file(filename);
@@ -257,7 +261,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	//loop on keywords/data
 	CC_FILE_ERROR error=CC_FERR_NO_ERROR;
-	double Pshift[3]={0,0,0};
+	CCVector3d Pshift(0,0,0);
 	while (error == CC_FERR_NO_ERROR)
 	{
 		nextline = inFile.readLine().toUpper();
@@ -325,25 +329,25 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 				{
 					bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 					if (shiftAlreadyEnabled)
-						memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+						Pshift = *coordinatesShift;
 					bool applyAll=false;
-					if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+					if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 					{
-						vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-						ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+						vertices->setGlobalShift(Pshift);
+						ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 
 						//we save coordinates shift information
 						if (applyAll && coordinatesShiftEnabled && coordinatesShift)
 						{
 							*coordinatesShiftEnabled = true;
-							coordinatesShift[0] = Pshift[0];
-							coordinatesShift[1] = Pshift[1];
-							coordinatesShift[2] = Pshift[2];
+							*coordinatesShift = Pshift;
 						}
 					}
 				}
 
-				vertices->addPoint(CCVector3(Pd[0]+Pshift[0],Pd[1]+Pshift[1],Pd[2]+Pshift[2]));
+				vertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(Pd[0] + Pshift.x),
+												static_cast<PointCoordinateType>(Pd[1] + Pshift.y),
+												static_cast<PointCoordinateType>(Pd[2] + Pshift.z)) );
 			}
 		//end POINTS
 		}

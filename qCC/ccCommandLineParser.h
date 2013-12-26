@@ -3,12 +3,14 @@
 
 //Qt
 #include <QString>
+#include <QStringList>
 
 //STL
 #include <vector>
 
 class ccPointCloud;
 class ccGenericMesh;
+class ccProgressDialog;
 class QDialog;
 
 //! Command line parser
@@ -19,22 +21,20 @@ public:
 
 protected:
 
-	//! Loaded cloud description
-	struct CloudDesc
-	{
-		ccPointCloud* pc;
-		QString filename;
-		int indexInFile;
+	bool commandLoad			(QStringList& arguments);
+	bool commandSubsample		(QStringList& arguments, ccProgressDialog* pDlg = 0);
+	bool commandCurvature		(QStringList& arguments, QDialog* parent = 0);
+	bool commandDensity			(QStringList& arguments, QDialog* parent = 0);
+	bool commandSFGradient		(QStringList& arguments, QDialog* parent = 0);
+	bool commandRoughness		(QStringList& arguments, QDialog* parent = 0);
+	bool commandSampleMesh		(QStringList& arguments, ccProgressDialog* pDlg = 0);
+	bool commandBundler			(QStringList& arguments);
+	bool commandDist			(QStringList& arguments, bool cloud2meshDist, QDialog* parent = 0);
+	bool commandFilterSFByValue	(QStringList& arguments);
+	bool commandMergeClouds		(QStringList& arguments);
+	bool commandStatTest		(QStringList& arguments, ccProgressDialog* pDlg = 0);
 
-		CloudDesc(ccPointCloud* cloud = 0,
-					const QString& file = QString(),
-					int index = -1)
-			: pc(cloud)
-			, filename(file)
-			, indexInFile(index)
-		{
-		}
-	};
+protected:
 
 	//! Default constructor
 	/** Shouldn't be called by user.
@@ -47,18 +47,70 @@ protected:
 	~ccCommandLineParser();
 
 	//! Parses command line
-	int parse(int nargs, char** args, bool silent, QDialog* dialog=0);
+	int parse(QStringList& arguments, bool silent, QDialog* parent = 0);
 
-	//! Outputs error
-	static int Error(const QString& message);
+	//! Loaded entity description
+	struct EntityDesc
+	{
+		QString basename;
+		QString path;
 
-	//! Outputs message
-	static void Print(const QString& message);
+		EntityDesc(QString filename);
+		EntityDesc(QString basename, QString path);
+	};
+
+	//! Loaded cloud description
+	struct CloudDesc : EntityDesc
+	{
+		ccPointCloud* pc;
+		int indexInFile;
+
+		CloudDesc()
+			: EntityDesc(QString())
+			, pc(0)
+			, indexInFile(-1)
+		{}
+
+		CloudDesc(ccPointCloud* cloud,
+					QString filename,
+					int index = -1)
+			: EntityDesc(filename)
+			, pc(cloud)
+			, indexInFile(index)
+		{}
+
+		CloudDesc(ccPointCloud* cloud,
+					QString basename,
+					QString path,
+					int index = -1)
+			: EntityDesc(basename,path)
+			, pc(cloud)
+			, indexInFile(index)
+		{}
+		
+	};
+
+	//! Loaded mesh description
+	struct MeshDesc : EntityDesc
+	{
+		ccGenericMesh* mesh;
+
+		MeshDesc()
+			: EntityDesc(QString())
+			, mesh(0)
+		{}
+
+		MeshDesc(ccGenericMesh* _mesh,
+					QString filename)
+			: EntityDesc(filename)
+			, mesh(_mesh)
+		{}
+	};
 
 	//! Exports a cloud
 	/** \return error string (if any)
 	**/
-	static QString Export2BIN(CloudDesc& cloudDesc, QString suffix);
+	static QString Export2BIN(CloudDesc& cloudDesc, QString suffix = QString());
 
     //! Removes all clouds
 	void removeClouds();
@@ -70,7 +122,7 @@ protected:
 	std::vector< CloudDesc > m_clouds;
 
 	//! Currently opened meshes and their filename
-	std::vector< std::pair<ccGenericMesh*,QString> > m_meshes;
+	std::vector< MeshDesc > m_meshes;
 
 	//! Mesh filename
 	QString m_meshFilename;

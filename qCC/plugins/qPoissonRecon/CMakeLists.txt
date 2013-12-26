@@ -7,7 +7,7 @@ if (INSTALL_QPOISSON_RECON_PLUGIN)
 #CloudCompare 'PoissonRecon' plugin
 project( QPOISSON_RECON_PLUGIN_DLL )
 
-add_subdirectory (PoissonRecon3)
+add_subdirectory (PoissonRecon5.5)
 
 include( ../CMakePluginTpl.cmake )
 

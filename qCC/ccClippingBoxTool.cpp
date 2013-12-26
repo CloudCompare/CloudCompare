@@ -30,6 +30,7 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccPolyline.h>
+#include <ccProgressDialog.h>
 
 //CCLib
 #include <ReferenceCloud.h>
@@ -270,7 +271,7 @@ void ccClippingBoxTool::extractContour()
 				return;
 			s_maxEdgeLength = maxEdgeLength;
 
-			ccPolyline* poly = ccPolyline::ExtractFlatContour(cloud,maxEdgeLength);
+			ccPolyline* poly = ccPolyline::ExtractFlatContour(cloud,static_cast<PointCoordinateType>((maxEdgeLength)));
 			if (poly)
 			{
 				poly->setColor(ccColor::green);
@@ -396,12 +397,15 @@ void ccClippingBoxTool::exportMultCloud()
 		//project points into grid
 		bool error = false;
 		{
-			QProgressDialog pDlg(this);
+			unsigned pointCount = cloud->size(); 
+
+			ccProgressDialog pDlg(false,this);
+			pDlg.setInfo(qPrintable(QString("Points: %1").arg(pointCount)));
+			pDlg.start();
 			pDlg.show();
-			pDlg.setCancelButton(0);
 			QApplication::processEvents();
 
-			unsigned pointCount = cloud->size(); 
+			CCLib::NormalizedProgress nProgress(&pDlg,pointCount);
 			for (unsigned i=0; i<pointCount; ++i)
 			{
 				CCVector3 P = *cloud->getPoint(i);
@@ -436,7 +440,7 @@ void ccClippingBoxTool::exportMultCloud()
 					}
 				}
 
-				pDlg.setValue((int)floor(100.0f*(float)i/(float)pointCount));
+				nProgress.oneStep();
 			}
 		}
 
@@ -494,7 +498,7 @@ void ccClippingBoxTool::exportMultCloud()
 								//generate contour?
 								if (contourGroup)
 								{
-									ccPolyline* poly = ccPolyline::ExtractFlatContour(sliceCloud,s_maxEdgeLength);
+									ccPolyline* poly = ccPolyline::ExtractFlatContour(sliceCloud,static_cast<PointCoordinateType>((s_maxEdgeLength)));
 									if (poly)
 									{
 										poly->setColor(ccColor::green);
@@ -642,15 +646,15 @@ void ccClippingBoxTool::thicknessChanged(double)
 	if (!m_clipBox || !m_clipBox->getBox().isValid())
 		return;
 
-	CCVector3 th(thickXDoubleSpinBox->value(),
-				 thickYDoubleSpinBox->value(),
-				 thickZDoubleSpinBox->value());
+	CCVector3 th(static_cast<PointCoordinateType>(thickXDoubleSpinBox->value()),
+				 static_cast<PointCoordinateType>(thickYDoubleSpinBox->value()),
+				 static_cast<PointCoordinateType>(thickZDoubleSpinBox->value()));
 
 	ccBBox box = m_clipBox->getBox();
-	CCVector3 boxCenter = (box.maxCorner() + box.minCorner())/2.0;
+	CCVector3 boxCenter = (box.maxCorner() + box.minCorner()) / 2;
 
-	box.minCorner() = boxCenter - th/2.0;
-	box.maxCorner() = boxCenter + th/2.0;
+	box.minCorner() = boxCenter - th/2;
+	box.maxCorner() = boxCenter + th/2;
 
 	m_clipBox->setBox(box);
 

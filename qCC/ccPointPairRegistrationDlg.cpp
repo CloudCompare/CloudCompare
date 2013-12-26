@@ -76,9 +76,9 @@ void ccPointPairRegistrationDlg::clear()
 	alignToolButton->setEnabled(false);
 	validToolButton->setEnabled(false);
 
-	while (alignedPointsTableWidget->rowCount()!=0)
+	while (alignedPointsTableWidget->rowCount() != 0)
 		alignedPointsTableWidget->removeRow(alignedPointsTableWidget->rowCount()-1);
-	while (refPointsTableWidget->rowCount()!=0)
+	while (refPointsTableWidget->rowCount() != 0)
 		refPointsTableWidget->removeRow(refPointsTableWidget->rowCount()-1);
 
 	m_alignedPoints.removeAllChildren();
@@ -142,8 +142,6 @@ bool ccPointPairRegistrationDlg::start()
 
 void ccPointPairRegistrationDlg::stop(bool state)
 {
-	//TODO
-
 	ccOverlayDialog::stop(state);
 }
 
@@ -242,9 +240,9 @@ void ccPointPairRegistrationDlg::addManualAlignedPoint()
 	s_last_ay = ptsDlg.doubleSpinBox2->value();
 	s_last_az = ptsDlg.doubleSpinBox3->value();
 
-	CCVector3 P(s_last_ax,
-				s_last_ay,
-				s_last_az);
+	CCVector3 P(static_cast<PointCoordinateType>(s_last_ax),
+				static_cast<PointCoordinateType>(s_last_ay),
+				static_cast<PointCoordinateType>(s_last_az));
 
 	addAlignedPoint(P);
 }
@@ -263,9 +261,9 @@ void ccPointPairRegistrationDlg::addManualRefPoint()
 	s_last_ry = ptsDlg.doubleSpinBox2->value();
 	s_last_rz = ptsDlg.doubleSpinBox3->value();
 
-	CCVector3 P(s_last_rx,
-				s_last_ry,
-				s_last_rz);
+	CCVector3 P(static_cast<PointCoordinateType>(s_last_rx),
+				static_cast<PointCoordinateType>(s_last_ry),
+				static_cast<PointCoordinateType>(s_last_rz));
 
 	addReferencePoint(P);
 }
@@ -506,10 +504,10 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTool
 	}
 
 	//fixed scale?
-	bool fixedScale = fixedScalecheckBox->isChecked();
+	bool adjustScale = adjustScaleCheckBox->isChecked();
 
 	//call Horn registration method
-	if (!CCLib::HornRegistrationTools::FindAbsoluteOrientation(&m_alignedPoints, &m_refPoints, trans, fixedScale))
+	if (!CCLib::HornRegistrationTools::FindAbsoluteOrientation(&m_alignedPoints, &m_refPoints, trans, !adjustScale))
 	{
 		ccLog::Error("Registration failed! (points are aligned?)");
 		return false;
@@ -535,10 +533,10 @@ void ccPointPairRegistrationDlg::align()
 		}
 
 		//fixed scale?
-		bool fixedScale = fixedScalecheckBox->isChecked();
+		bool adjustScale = adjustScaleCheckBox->isChecked();
 
 		//apply (scaled) transformation...
-		if (!fixedScale)
+		if (adjustScale)
 		{
 			if (trans.R.isValid())
 				trans.R.scale(trans.s);
@@ -601,9 +599,9 @@ void ccPointPairRegistrationDlg::apply()
 		}
 
 		//fixed scale?
-		bool fixedScale = fixedScalecheckBox->isChecked();
+		bool adjustScale = adjustScaleCheckBox->isChecked();
 		//apply (scaled) transformation...
-		if (!fixedScale && trans.R.isValid())
+		if (adjustScale && trans.R.isValid())
 			trans.R.scale(trans.s);
 		ccGLMatrix transMat(trans.R,trans.T);
 		//...for real this time!
@@ -615,10 +613,10 @@ void ccPointPairRegistrationDlg::apply()
 		summary << transMat.toString(3,'\t'); //low precision, just for display
 		summary << "----------------";
 
-		ccLog::Print("[PointPairRegistration] Applied matrix:");
+		ccLog::Print("[PointPairRegistration] Applied transformation matrix:");
 		ccLog::Print(transMat.toString(12,' ')); //full precision
 		
-		if (!fixedScale)
+		if (adjustScale)
 		{
 			QString scaleString = QString("Scale: %1 (already integrated in above matrix!)").arg(trans.s);
 			ccLog::Warning(QString("[PointPairRegistration] ")+scaleString);

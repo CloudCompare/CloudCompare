@@ -219,9 +219,9 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	if (!noClassCompression)
 	{
 		//lowest acceptable value: "K/n" (K=5 generally, but it could be 3 or 1 at the tail!)
-		double minPi = 5.0/(double)numberOfElements;
+		double minPi = 5.0/static_cast<double>(numberOfElements);
 
-		while (classes.size()>2)
+		while (classes.size() > 2)
 		{
 			//we look for the smallest class (smallest "npi")
 			Chi2ClassList::iterator it = classes.begin();
@@ -233,7 +233,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 			if (minIt->pi >= minPi) //all classes are bigger than the minimum requirement
 				break;
 
-			//otherwise we must fuse the smallest class with its neighbor (to make the classes repartition more equilibrated)
+			//otherwise we must merge the smallest class with its neighbor (to make the classes repartition more equilibrated)
 			Chi2ClassList::iterator smallestIt;
 			{
 				Chi2ClassList::iterator nextIt = minIt; nextIt++;
@@ -257,7 +257,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	}
 
 	//we compute the Chi2 distance with the remaining classes
-	double D2=0.0;
+	double D2 = 0.0;
 	{
 		for (Chi2ClassList::iterator it = classes.begin(); it != classes.end(); ++it)
 		{
@@ -395,7 +395,9 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	return maxChi2;
 }
 
-bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
+bool StatisticalTestingTools::computeLocalChi2DistAtLevel(	const DgmOctree::octreeCell& cell,
+															void** additionalParameters,
+															NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	GenericDistribution* statModel		= (GenericDistribution*)additionalParameters[0];
@@ -470,6 +472,9 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(const DgmOctree::octre
 
 		//We assume that "IN" and "OUT" scalar fields are different!
 		cell.points->setPointScalarValue(i,D);
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;

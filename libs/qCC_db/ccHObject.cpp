@@ -184,7 +184,7 @@ ccHObject* ccHObject::find(int uniqueID)
 		ccHObject* obj = toTest.back();
 		toTest.pop_back();
 
-		if (obj->getUniqueID() == uniqueID)
+		if (obj->getUniqueID() == static_cast<unsigned int>(uniqueID))
 			return obj;
 
 		for (unsigned i=0;i<obj->getChildrenNumber();++i)
@@ -652,16 +652,16 @@ bool ccHObject::toFile(QFile& out) const
 	return true;
 }
 
-bool ccHObject::fromFile(QFile& in, short dataVersion)
+bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
 	//read 'ccObject' header
-	if (!ccObject::fromFile(in,dataVersion))
+	if (!ccObject::fromFile(in, dataVersion, flags))
 		return false;
 
 	//read own data
-	if (!fromFile_MeOnly(in,dataVersion))
+	if (!fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//(serializable) child count (dataVersion>=20)
@@ -682,7 +682,7 @@ bool ccHObject::fromFile(QFile& in, short dataVersion)
 		assert(child && child->isSerializable());
 		if (child)
 		{
-			if (child->fromFile(in,dataVersion))
+			if (child->fromFile(in, dataVersion, flags))
 			{
 				addChild(child,child->getFlagState(CC_FATHER_DEPENDENT));
 			}
@@ -756,7 +756,7 @@ bool ccHObject::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -790,7 +790,7 @@ bool ccHObject::fromFile_MeOnly(QFile& in, short dataVersion)
 	if (in.read((char*)&m_glTransEnabled,sizeof(bool))<0)
 		return ReadError();
 	if (m_glTransEnabled)
-		if (!m_glTrans.fromFile(in,dataVersion))
+		if (!m_glTrans.fromFile(in, dataVersion, flags))
 			return false;
 
 	//'showNameIn3D' state (dataVersion>=24)

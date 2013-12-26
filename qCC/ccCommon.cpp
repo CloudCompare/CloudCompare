@@ -17,10 +17,11 @@
 //#                                                                        #
 //##########################################################################
 
+#include "ccPlatform.h"
 #include "ccCommon.h"
 
 #define CC_VER_NUM 2.5
-#define CC_SUB_VER 2 //2013-10-24
+#define CC_SUB_VER 3 //2013-12-21
 
 //! Returns current version as string
 QString ccCommon::GetCCVersion()

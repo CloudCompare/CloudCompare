@@ -157,6 +157,29 @@ ccDBRoot::~ccDBRoot()
         delete m_treeRoot;
 }
 
+void ccDBRoot::unloadAll()
+{
+	if (!m_treeRoot)
+		return;
+
+	while (m_treeRoot->getChildrenNumber() > 0)
+	{
+		int i = static_cast<int>(m_treeRoot->getChildrenNumber())-1;
+		ccHObject* anObject = m_treeRoot->getChild(i);
+		assert(anObject);
+
+		anObject->prepareDisplayForRefresh_recursive();
+
+        beginRemoveRows(index(anObject).parent(),i,i);
+        m_treeRoot->removeChild(i);
+        endRemoveRows();
+    }
+
+    updatePropertiesView();
+
+    MainWindow::RefreshAllGLWindow();
+}
+
 ccHObject* ccDBRoot::getRootEntity()
 {
     return m_treeRoot;
@@ -687,9 +710,17 @@ void ccDBRoot::unselectEntity(ccHObject* obj)
 	}
 }
 
-void ccDBRoot::selectEntity(ccHObject* obj)
+void ccDBRoot::unselectAllEntities()
 {
-    bool ctrlPushed = (QApplication::keyboardModifiers () & Qt::ControlModifier);
+    QItemSelectionModel* selectionModel = m_dbTreeWidget->selectionModel();
+	assert(selectionModel);
+
+	selectionModel->clear();
+}
+
+void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/*=false*/)
+{
+    bool additiveSelection = forceAdditiveSelection || (QApplication::keyboardModifiers () & Qt::ControlModifier);
 
     QItemSelectionModel* selectionModel = m_dbTreeWidget->selectionModel();
 	assert(selectionModel);
@@ -700,8 +731,8 @@ void ccDBRoot::selectEntity(ccHObject* obj)
 		QModelIndex selectedIndex = index(obj);
 		if (selectedIndex.isValid())
 		{
-			//if CTRL is pushed
-			if (ctrlPushed)
+			//if CTRL is pushed (or additive selection is forced)
+			if (additiveSelection)
 			{
 				//default case: toggle current item selection state
 				if (!obj->isSelected())
@@ -718,21 +749,23 @@ void ccDBRoot::selectEntity(ccHObject* obj)
 					}
 				}
 				selectionModel->select(selectedIndex,QItemSelectionModel::Toggle);
+				obj->setSelected(true);
 			}
 			else
 			{
 				if (selectionModel->isSelected(selectedIndex))  //nothing to do
 					return;
 				selectionModel->select(selectedIndex,QItemSelectionModel::ClearAndSelect);
+				obj->setSelected(true);
 			}
 
 			//hack: auto-scroll to selected element
-			if (obj->isSelected() && !ctrlPushed)
+			if (obj->isSelected() && !additiveSelection)
 				m_dbTreeWidget->scrollTo(selectedIndex);
 		}
 	}
 	//otherwise we clear current selection (if CTRL is not pushed)
-	else if (!ctrlPushed)
+	else if (!additiveSelection)
 	{
 		selectionModel->clear();
 	}
@@ -742,7 +775,7 @@ void ccDBRoot::selectEntity(int uniqueID)
 {
 	ccHObject* obj = 0;
     //minimum unqiue ID is 1 (0 means 'deselect')
-    if (uniqueID>0)
+    if (uniqueID > 0)
         obj = find(uniqueID);
 
 	selectEntity(obj);
@@ -1277,7 +1310,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		ccPlane* plane = static_cast<ccPlane*>(obj);
 		//3rd column = plane normal!
 		planeNormal = plane->getNormal();
-		planeVertDir = CCVector3(plane->getTransformation().getColumn(1));
+		planeVertDir = plane->getTransformation().getColumnAsVec3D(1);
 		center = plane->getCenter();
 	}
 	else if (obj->isA(CC_FACET)) //facet
@@ -1285,7 +1318,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		ccFacet* facet = static_cast<ccFacet*>(obj);
 		planeNormal = facet->getNormal();
 		CCVector3 planeHorizDir(0,1,0);
-		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal.u,planeHorizDir.u,planeVertDir.u);
+		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
 		center = facet->getCenter();
 	}
 	else
@@ -1305,11 +1338,10 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		transMat.setTranslation(-center);
 		ccGLMatrix viewMat = win->getViewportParameters().viewMat;
 		viewMat = viewMat * transMat;
-		viewMat.setTranslation(CCVector3(viewMat.getTranslation()) + center);
+		viewMat.setTranslation(viewMat.getTranslationAsVec3D() + center);
 
 		ccLog::Print("[Align camera] Corresponding view matrix:");
-		const float* mat = viewMat.data();
-		ccLog::Print("%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f\n%6.12f\t%6.12f\t%6.12f\t%6.12f",mat[0],mat[4],mat[8],mat[12],mat[1],mat[5],mat[9],mat[13],mat[2],mat[6],mat[10],mat[14],mat[3],mat[7],mat[11],mat[15]);
+		ccLog::Print(viewMat.toString(12,' ')); //full precision
 		ccLog::Print("[Orientation] You can copy this matrix values (CTRL+C) and paste them in the 'Apply transformation tool' dialog");
 	}
 }
@@ -1777,3 +1809,4 @@ QItemSelectionModel::SelectionFlags ccCustomQTreeView::selectionCommand(const QM
 
 	return QTreeView::selectionCommand(index,event);
 }
+

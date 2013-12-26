@@ -41,6 +41,12 @@
 //System
 #include <string.h>
 #include <assert.h>
+#if defined(CC_WINDOWS)
+#include <Windows.h>
+#else
+#include <time.h>
+#include <unistd.h>
+#endif
 
 using namespace CCLib;
 
@@ -80,21 +86,24 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
         return CC_FERR_NOT_ENOUGH_MEMORY;
 
     //Has the cloud been recentered?
-	const double* shift = vertices->getOriginalShift();
-	bool hasShift = (fabs(shift[0])+fabs(shift[0])+fabs(shift[0])>0.0);
-	e_ply_type coordType = hasShift ? PLY_DOUBLE : PLY_FLOAT; //we use double coordinates for shifted vertices (i.e. >1e6)
+	const CCVector3d& shift = vertices->getGlobalShift();
+	double scale = vertices->getGlobalScale();
+	assert(scale != 0);
 
-	int result=1;
+	bool hasShift = (fabs(shift.x)+fabs(shift.y)+fabs(shift.z) > 0);
+	e_ply_type coordType = hasShift || sizeof(PointCoordinateType) > 4 ? PLY_DOUBLE : PLY_FLOAT; //we use double coordinates for shifted vertices (i.e. >1e6)
+
+	int result = 1;
 	unsigned vertCount = vertices->size();
 
 	//3D points (x,y,z)
 	if (ply_add_element(ply, "vertex", vertCount))
 	{
-		result=ply_add_scalar_property(ply, "x", coordType);
-		result=ply_add_scalar_property(ply, "y", coordType);
-		result=ply_add_scalar_property(ply, "z", coordType);
+		result = ply_add_scalar_property(ply, "x", coordType);
+		result = ply_add_scalar_property(ply, "y", coordType);
+		result = ply_add_scalar_property(ply, "z", coordType);
 	}
-	else result=0;
+	else result = 0;
 
 	const ccMaterial* material = 0;
 	if (mesh && mesh->hasMaterials())
@@ -236,11 +245,11 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 		hasColors = true;
 		//if (ply_add_element(ply, "color", vertCount))
 		//{
-			result=ply_add_scalar_property(ply, "red", PLY_UCHAR);
-			result=ply_add_scalar_property(ply, "green", PLY_UCHAR);
-			result=ply_add_scalar_property(ply, "blue", PLY_UCHAR);
+			result = ply_add_scalar_property(ply, "red", PLY_UCHAR);
+			result = ply_add_scalar_property(ply, "green", PLY_UCHAR);
+			result = ply_add_scalar_property(ply, "blue", PLY_UCHAR);
 		//}
-		//else result=0;
+		//else result = 0;
 	}
 
 	//Normals (nx,ny,nz)
@@ -249,11 +258,12 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 	{
 		//if (ply_add_element(ply, "normal", vertCount))
 		//{
-			result=ply_add_scalar_property(ply, "nx", PLY_FLOAT);
-			result=ply_add_scalar_property(ply, "ny", PLY_FLOAT);
-			result=ply_add_scalar_property(ply, "nz", PLY_FLOAT);
+			e_ply_type normType = (sizeof(PointCoordinateType) > 4 ? PLY_DOUBLE : PLY_FLOAT);
+			result = ply_add_scalar_property(ply, "nx", normType);
+			result = ply_add_scalar_property(ply, "ny", normType);
+			result = ply_add_scalar_property(ply, "nz", normType);
 		//}
-		//else result=0;
+		//else result = 0;
 	}
 
 	//Scalar fields
@@ -262,28 +272,33 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 	{
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(vertices);
 		unsigned sfCount = ccCloud->getNumberOfScalarFields();
-		scalarFields.resize(sfCount);
-		unsigned unnamedSF=0;
-		for (unsigned i=0;i<sfCount;++i)
+		if (sfCount)
 		{
-			scalarFields[i] = ccCloud->getScalarField(i);
-			const char* sfName = scalarFields[i]->getName();
-			QString propName;
-			if (!sfName)
-			{
-				if (unnamedSF++==0)
-					propName = "scalar";
-				else
-					propName = QString("scalar_%1").arg(unnamedSF);
-			}
-			else
-			{
-				propName = QString("scalar_%1").arg(sfName);
-				propName.replace(' ','_');
-			}
+			e_ply_type scalarType = (sizeof(ScalarType) > 4 ? PLY_DOUBLE : PLY_FLOAT);
 
-			result=ply_add_scalar_property(ply, qPrintable(propName), PLY_FLOAT);
-        }
+			scalarFields.resize(sfCount);
+			unsigned unnamedSF = 0;
+			for (unsigned i=0; i<sfCount; ++i)
+			{
+				scalarFields[i] = ccCloud->getScalarField(i);
+				const char* sfName = scalarFields[i]->getName();
+				QString propName;
+				if (!sfName)
+				{
+					if (unnamedSF++==0)
+						propName = "scalar";
+					else
+						propName = QString("scalar_%1").arg(unnamedSF);
+				}
+				else
+				{
+					propName = QString("scalar_%1").arg(sfName);
+					propName.replace(' ','_');
+				}
+
+				result = ply_add_scalar_property(ply, qPrintable(propName), scalarType);
+			}
+		}
 	}
 	
 	//Mesh
@@ -312,20 +327,20 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 				else
 				{
 					//save texture filename as a comment!
-					result=ply_add_comment(ply,qPrintable(QString("TEXTUREFILE %1").arg(defaultTextureName)));
+					result = ply_add_comment(ply,qPrintable(QString("TEXTUREFILE %1").arg(defaultTextureName)));
 					//DGM FIXME: is this the right name?
 					result = ply_add_list_property(ply, "texcoord", PLY_UCHAR, PLY_FLOAT); //'texcoord' to mimick Photoscan
 				}
 			}
 		}
-		else result=0;
+		else result = 0;
 	}
 
-	result=ply_add_comment(ply,"Author: CloudCompare (TELECOM PARISTECH/EDF R&D)");
-	result=ply_add_obj_info(ply,"Generated by CloudCompare!");
+	result = ply_add_comment(ply,"Author: CloudCompare (TELECOM PARISTECH/EDF R&D)");
+	result = ply_add_obj_info(ply,"Generated by CloudCompare!");
 
 	//try to write header
-	result=ply_write_header(ply);
+	result = ply_write_header(ply);
 	if (!result)
 	{
 		ply_close(ply);
@@ -336,34 +351,36 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 	for (unsigned i=0; i<vertCount; ++i)
 	{
 		const CCVector3* P=vertices->getPoint(i);
-		ply_write(ply, double(P->x)-shift[0]);
-		ply_write(ply, double(P->y)-shift[1]);
-		ply_write(ply, double(P->z)-shift[2]);
+		ply_write(ply, static_cast<double>(P->x)/scale-shift.x);
+		ply_write(ply, static_cast<double>(P->y)/scale-shift.y);
+		ply_write(ply, static_cast<double>(P->z)/scale-shift.z);
 
 		if (hasColors)
 		{
 			const colorType* col = vertices->getPointColor(i);
-			ply_write(ply, double(col[0]));
-			ply_write(ply, double(col[1]));
-			ply_write(ply, double(col[2]));
+			ply_write(ply,static_cast<double>(col[0]));
+			ply_write(ply,static_cast<double>(col[1]));
+			ply_write(ply,static_cast<double>(col[2]));
 		}
 		else if (hasUniqueColor)
 		{
-			ply_write(ply, double(uniqueColor[0]));
-			ply_write(ply, double(uniqueColor[1]));
-			ply_write(ply, double(uniqueColor[2]));
+			ply_write(ply, static_cast<double>(uniqueColor[0]));
+			ply_write(ply, static_cast<double>(uniqueColor[1]));
+			ply_write(ply, static_cast<double>(uniqueColor[2]));
 		}
 
 		if (hasNormals)
 		{
 			const PointCoordinateType* N = vertices->getPointNormal(i);
-			ply_write(ply, double(N[0]));
-			ply_write(ply, double(N[1]));
-			ply_write(ply, double(N[2]));
+			ply_write(ply, static_cast<double>(N[0]));
+			ply_write(ply, static_cast<double>(N[1]));
+			ply_write(ply, static_cast<double>(N[2]));
 		}
 
 		for (std::vector<CCLib::ScalarField*>::const_iterator sf =  scalarFields.begin(); sf != scalarFields.end(); ++sf)
-			ply_write(ply, (double)(*sf)->getValue(i));
+		{
+			ply_write(ply, static_cast<double>((*sf)->getValue(i)));
+		}
 	}
 
 	//and the mesh structure
@@ -398,8 +415,6 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 
 	ply_close(ply);
 
-	ccLog::Print(QString("[PLY] Entity '%1' successfully saved to file '%2'").arg(mesh ? mesh->getName() : vertices->getName()).arg(filename));
-
 	return CC_FERR_NO_ERROR;
 }
 
@@ -413,13 +428,13 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 
 #define POS_MASK    0x00000003
 
-static double s_Point[3]={0,0,0};
-static int s_PointCount=0;
-static bool s_PointDataCorrupted=false;
-static bool s_ShiftAlreadyEnabled=false;
-static bool s_AlwaysDisplayLoadDialog=true;
-static bool s_ShiftApplyAll=false;
-static double s_Pshift[3]={0,0,0};
+static double s_Point[3] = {0,0,0};
+static int s_PointCount = 0;
+static bool s_PointDataCorrupted = false;
+static bool s_ShiftAlreadyEnabled = false;
+static bool s_AlwaysDisplayLoadDialog = true;
+static bool s_ShiftApplyAll = false;
+static CCVector3d s_Pshift(0,0,0);
 
 static int vertex_cb(p_ply_argument argument)
 {
@@ -446,17 +461,19 @@ static int vertex_cb(p_ply_argument argument)
 	if (flags & ELEM_EOL)
 	{
 		//first point: check for 'big' coordinates
-		if (s_PointCount==0)
+		if (s_PointCount == 0)
 		{
-			s_ShiftApplyAll=false; //should already be false!
-			if (ccCoordinatesShiftManager::Handle(s_Point,0,s_AlwaysDisplayLoadDialog,s_ShiftAlreadyEnabled,s_Pshift,0,s_ShiftApplyAll))
+			s_ShiftApplyAll = false; //should already be false!
+			if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(s_Point,0,s_AlwaysDisplayLoadDialog,s_ShiftAlreadyEnabled,s_Pshift,0,s_ShiftApplyAll))
 			{
-				cloud->setOriginalShift(s_Pshift[0],s_Pshift[1],s_Pshift[2]);
-				ccLog::Warning("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f,%.2f,%.2f)",s_Pshift[0],s_Pshift[1],s_Pshift[2]);
+				cloud->setGlobalShift(s_Pshift);
+				ccLog::Warning("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f,%.2f,%.2f)",s_Pshift.x,s_Pshift.y,s_Pshift.z);
 			}
 		}
 
-		cloud->addPoint(CCVector3(s_Point[0]+s_Pshift[0],s_Point[1]+s_Pshift[1],s_Point[2]+s_Pshift[2]));
+		cloud->addPoint(CCVector3(	static_cast<PointCoordinateType>(s_Point[0]+s_Pshift.u[0]),
+									static_cast<PointCoordinateType>(s_Point[1]+s_Pshift.u[1]),
+									static_cast<PointCoordinateType>(s_Point[2]+s_Pshift.u[2])));
 		++s_PointCount;
 
 		s_PointDataCorrupted = false;
@@ -467,8 +484,8 @@ static int vertex_cb(p_ply_argument argument)
 	return 1;
 }
 
-static float s_Normal[3]={0.0,0.0,0.0};
-static int s_NormalCount=0;
+static PointCoordinateType s_Normal[3] = {0,0,0};
+static int s_NormalCount = 0;
 
 static int normal_cb(p_ply_argument argument)
 {
@@ -476,7 +493,7 @@ static int normal_cb(p_ply_argument argument)
 	ccPointCloud* cloud;
 	ply_get_argument_user_data(argument, (void**)(&cloud), &flags);
 
-	s_Normal[flags & POS_MASK] = ply_get_argument_value(argument);
+	s_Normal[flags & POS_MASK] = static_cast<PointCoordinateType>( ply_get_argument_value(argument) );
 
 	if (flags & ELEM_EOL)
 	{
@@ -663,26 +680,26 @@ static int texCoords_cb(p_ply_argument argument)
     return 1;
 }
 
-CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//reset statics!
 	s_triCount = 0;
 	s_unsupportedPolygonType = false;
 	s_texCoordCount = 0;
 	s_invalidTexCoordinates = false;
-	s_scalarCount=0;
-	s_IntensityCount=0;
-	s_ColorCount=0;
-	s_NormalCount=0;
-	s_PointCount=0;
-	s_PointDataCorrupted=false;
-	s_AlwaysDisplayLoadDialog=alwaysDisplayLoadDialog;
-	s_ShiftApplyAll=false;
+	s_scalarCount = 0;
+	s_IntensityCount = 0;
+	s_ColorCount = 0;
+	s_NormalCount = 0;
+	s_PointCount = 0;
+	s_PointDataCorrupted = false;
+	s_AlwaysDisplayLoadDialog = alwaysDisplayLoadDialog;
+	s_ShiftApplyAll = false;
 	s_ShiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 	if (s_ShiftAlreadyEnabled)
-		memcpy(s_Pshift,coordinatesShift,sizeof(double)*3);
+		s_Pshift = *coordinatesShift;
 	else
-		memset(s_Pshift,0,sizeof(double)*3);
+		s_Pshift = CCVector3d(0,0,0);
 
     /****************/
 	/***  Header  ***/
@@ -1355,16 +1372,17 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
         }
 	}
 
-    QProgressDialog progressDlg(QString("Loading in progress..."),0,0,0,0,Qt::Popup);
-    progressDlg.setMinimumDuration(0);
-	progressDlg.setModal(true);
-	progressDlg.show();
-	QApplication::processEvents();
+	QProgressDialog pDlg(QString("Loading in progress..."),QString(),0,0);
+	if (alwaysDisplayLoadDialog)
+	{
+		pDlg.setWindowTitle("PLY file");
+		pDlg.show();
+		QApplication::processEvents();
+	}
 
 	//let 'Rply' do the job;)
-    int success = ply_read(ply);
+	int success = ply_read(ply);
 
-    progressDlg.close();
 	ply_close(ply);
 
 	if (success<1)
@@ -1397,9 +1415,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	if (s_ShiftApplyAll && coordinatesShiftEnabled && coordinatesShift)
 	{
 		*coordinatesShiftEnabled = true;
-		coordinatesShift[0] = s_Pshift[0];
-		coordinatesShift[1] = s_Pshift[1];
-		coordinatesShift[2] = s_Pshift[2];
+		*coordinatesShift = s_Pshift;
 	}
 
     //we update scalar field

@@ -134,7 +134,7 @@ void ccNormalVectors::InvertNormal(normsType &code)
 bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
                                             NormsIndexesTableType& theNormsCodes,
                                             CC_LOCAL_MODEL_TYPES method,
-											float radius,
+											PointCoordinateType radius,
                                             int preferedOrientation/*=-1*/,
                                             CCLib::GenericProgressCallback* progressCb/*=0*/,
                                             CCLib::DgmOctree* _theOctree/*=0*/)
@@ -246,7 +246,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 	if (hasPreferedOrientation)
 	{
 		if (preferedOrientation<6) //6 and 7 = +/-barycenter
-			orientation.u[preferedOrientation>>1]=((preferedOrientation & 1) == 0 ? 1.0 : -1.0); //odd number --> inverse direction
+			orientation.u[preferedOrientation>>1]=((preferedOrientation & 1) == 0 ? PC_ONE : -PC_ONE); //odd number --> inverse direction
 		else
 		{
 			barycenter = CCLib::GeometricalAnalysisTools::computeGravityCenter(theCloud);
@@ -257,7 +257,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 	//we 'compress' each normal (and we check its orientation if necessary)
 	theNormsCodes.fill(0);
 	theNorms->placeIteratorAtBegining();
-	for (unsigned i=0;i<n;i++)
+	for (unsigned i=0; i<n; i++)
 	{
 		PointCoordinateType* N = theNorms->getCurrentValue();
 
@@ -274,7 +274,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 			}
 
 			if (CCVector3::vdot(N,orientation.u) < 0)
-				CCVector3::vmultiply(N,-1.0);
+				CCVector3::vmultiply(N,-1);
 		}
 
 		normsType nCode = (normsType)Quant_quantize_normal(N,NORMALS_QUANTIZE_LEVEL);
@@ -291,16 +291,16 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCell& cell,
+												void** additionalParameters,
+												CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
-	NormsTableType* theNorms				    = (NormsTableType*)additionalParameters[0];
-	float radius								= *(float*)additionalParameters[1];
-
-	unsigned i,j,n;
+	NormsTableType* theNorms	= (NormsTableType*)additionalParameters[0];
+	PointCoordinateType radius	= *(PointCoordinateType*)additionalParameters[1];
 
 	//nombre de points dans la cellule courante
-	n = cell.points->size();
+	unsigned n = cell.points->size();
 
 	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level												= cell.level;
@@ -313,28 +313,25 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 	//(c'est la cellule qu'on est en train de traiter !)
     nNSS.pointsInNeighbourhood.resize(n);
 	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-	for (j=0;j<n;++j,++it)
+	for (unsigned j=0; j<n; ++j,++it)
 	{
 		it->point = cell.points->getPointPersistentPtr(j);
 		it->pointIndex = cell.points->getPointGlobalIndex(j);
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	//pour la HF
-	PointCoordinateType N[3],lX,lY,lZ;
-	uchar hfDims[3];
-
-	for (i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
-		if (k>=NUMBER_OF_POINTS_FOR_NORM_WITH_LS)
+		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_LS)
 		{
 			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood,k);
 			CCLib::Neighbourhood Z(&neighbours);
 
 			//CALCUL DE LA NORMALE PAR INTERPOLATION AVEC UNE FONCTION DE HAUTEUR
+			uchar hfDims[3];
 			const PointCoordinateType* h = Z.getHeightFunction(hfDims);
 			if (h)
 			{
@@ -345,13 +342,13 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 				const uchar& iY = hfDims[1];
 				const uchar& iZ = hfDims[2];
 
-				lX = nNSS.queryPoint.u[iX]-gv->u[iX];
-				lY = nNSS.queryPoint.u[iY]-gv->u[iY];
-				lZ = nNSS.queryPoint.u[iZ]-gv->u[iZ];
+				PointCoordinateType lX = nNSS.queryPoint.u[iX] - gv->u[iX];
+				PointCoordinateType lY = nNSS.queryPoint.u[iY] - gv->u[iY];
 
-				N[iX] = h[1] + (2. * h[3] * lX) + (h[4] * lY);
-				N[iY] = h[2] + (2. * h[5] * lY) + (h[4] * lX);
-				N[iZ] = - 1.0;
+				PointCoordinateType N[3];
+				N[iX] = h[1] + (2 * h[3] * lX) + (h[4] * lY);
+				N[iY] = h[2] + (2 * h[5] * lY) + (h[4] * lX);
+				N[iZ] = -1;
 
 				//on normalise
 				CCVector3::vnormalize(N);
@@ -361,21 +358,20 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 			//FIN CALCUL DE LA NORMALE
 		}
 
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCell& cell,
+												void** additionalParameters,
+												CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
-	NormsTableType* theNorms				    = (NormsTableType*)additionalParameters[0];
-	float radius								= *(float*)additionalParameters[1];
-
-	unsigned i,j,n;
-
-	//nombre de points dans la cellule courante
-	n = cell.points->size();
+	NormsTableType* theNorms	= (NormsTableType*)additionalParameters[0];
+	PointCoordinateType radius	= *(PointCoordinateType*)additionalParameters[1];
 
 	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level												= cell.level;
@@ -386,21 +382,24 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 
 	//on connait deja les points de la premiere cellule
 	//(c'est la cellule qu'on est en train de traiter !)
+	unsigned n = cell.points->size();
     nNSS.pointsInNeighbourhood.resize(n);
-	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-	for (j=0;j<n;++j,++it)
 	{
-		it->point = cell.points->getPointPersistentPtr(j);
-		it->pointIndex = cell.points->getPointGlobalIndex(j);
+		CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
+		for (unsigned j=0; j<n; ++j,++it)
+		{
+			it->point = cell.points->getPointPersistentPtr(j);
+			it->pointIndex = cell.points->getPointGlobalIndex(j);
+		}
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	for (i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
-		if (k>=NUMBER_OF_POINTS_FOR_NORM_WITH_HF)
+		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_HF)
 		{
 			CCLib::DgmOctreeReferenceCloud neighbours(&nNSS.pointsInNeighbourhood,k);
 			CCLib::Neighbourhood Z(&neighbours);
@@ -417,20 +416,20 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 			}
 			//FIN CALCUL DE LA NORMALE
 		}
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
 }
 
-bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octreeCell& cell,
+													void** additionalParameters,
+													CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
 	NormsTableType* theNorms				    = (NormsTableType*)additionalParameters[0];
-
-	unsigned i,j,n;
-
-	//nombre de points dans la cellule courante
-	n = cell.points->size();
 
 	CCLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level												= cell.level;
@@ -441,16 +440,19 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 
 	//on connait deja les points de la premiere cellule
 	//(c'est la cellule qu'on est en train de traiter !)
+	unsigned n = cell.points->size();
     nNSS.pointsInNeighbourhood.resize(n);
 	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-	for (j=0;j<n;++j,++it)
 	{
-		it->point = cell.points->getPointPersistentPtr(j);
-		it->pointIndex = cell.points->getPointGlobalIndex(j);
+		for (unsigned j=0; j<n; ++j,++it)
+		{
+			it->point = cell.points->getPointPersistentPtr(j);
+			it->pointIndex = cell.points->getPointGlobalIndex(j);
+		}
 	}
 	nNSS.alreadyVisitedNeighbourhoodSize = 1;
 
-	for (i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
@@ -473,7 +475,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 
 				//pour tous les triangles
 				theMesh->placeIteratorAtBegining();
-				for (j=0;j<faceCount;++j)
+				for (unsigned j=0; j<faceCount; ++j)
 				{
 					//on recupere le jieme triangle
 #ifndef ENABLE_MT_OCTREE
@@ -483,15 +485,15 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 #endif
 					//on cherche si le point courant est un sommet de ce triangle
 					int k=-1;
-					if (tsi->i1==0)
+					if (tsi->i1 == 0)
 						k=0; //le point courant est cense être en 0 !
-					else if (tsi->i2==0)
+					else if (tsi->i2 == 0)
 						k=1;
-					else if (tsi->i3==0)
+					else if (tsi->i3 == 0)
 						k=2;
 
 					//si oui
-					if (k>=0)
+					if (k >= 0)
 					{
 						const CCVector3 *A = neighbours.getPoint(tsi->i1);
 						const CCVector3 *B = neighbours.getPoint(tsi->i2);
@@ -504,7 +506,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 						//calcule de la normale (par produit vectoriel)
 						CCVector3 no = u.cross(v);
 						no.normalize();
-						N+=no;
+						N += no;
 					}
 				}
 
@@ -517,6 +519,9 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 
 			theNorms->setValue(cell.points->getPointGlobalIndex(i),N.u);
 		}
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
@@ -530,30 +535,30 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeC
 /* output :                                                             */
 /*	res : the result - least significant bits are filled !!!        */
 /************************************************************************/
-unsigned ccNormalVectors::Quant_quantize_normal(const float* n, unsigned level)
+unsigned ccNormalVectors::Quant_quantize_normal(const PointCoordinateType* n, unsigned level)
 {
 	if (level == 0)
 		return 0;
 
 	/// compute in which sector lie the elements
 	unsigned res = 0;
-	float x,y,z;
+	PointCoordinateType x,y,z;
 	if (n[0] >= 0) { x = n[0]; } else { res |= 4; x = -n[0]; }
 	if (n[1] >= 0) { y = n[1]; } else { res |= 2; y = -n[1]; }
 	if (n[2] >= 0) { z = n[2]; } else { res |= 1; z = -n[2]; }
 
 	/// scale the sectored vector - early return for null vector
-	float psnorm = x + y + z;
+	PointCoordinateType psnorm = x + y + z;
 	if (psnorm == 0)
 	{
 		res <<= (level<<1);
 		return res;
 	}
-	psnorm = 1.0f / psnorm;
+	psnorm = 1 / psnorm;
 	x *= psnorm; y *= psnorm; z *= psnorm;
 
 	/// compute the box
-	float box[6] = { 0, 0, 0, 1, 1, 1 };
+	PointCoordinateType box[6] = { 0, 0, 0, 1, 1, 1 };
 	/// then for each required level, quantize...
 	bool flip = false;
 	while (level > 0)
@@ -561,20 +566,20 @@ unsigned ccNormalVectors::Quant_quantize_normal(const float* n, unsigned level)
 		//next level
 		res <<= 2;
 		--level;
-		float halfBox[3] = {0.5f * (box[0] + box[3]),
-							0.5f * (box[1] + box[4]),
-							0.5f * (box[2] + box[5]) };
+		PointCoordinateType halfBox[3] = {	(box[0] + box[3])/2,
+											(box[1] + box[4])/2,
+											(box[2] + box[5])/2 };
 
 		unsigned sector = 3;
 		if (flip)
 		{
-			if (z < halfBox[2]) sector = 2;
+			     if (z < halfBox[2]) sector = 2;
 			else if (y < halfBox[1]) sector = 1;
 			else if (x < halfBox[0]) sector = 0;
 		}
 		else
 		{
-			if (z > halfBox[2]) sector = 2;
+			     if (z > halfBox[2]) sector = 2;
 			else if (y > halfBox[1]) sector = 1;
 			else if (x > halfBox[0]) sector = 0;
 		}
@@ -626,39 +631,38 @@ unsigned ccNormalVectors::Quant_quantize_normal(const float* n, unsigned level)
 /************************************************************************/
 /* DeQuantize a normal => 2D problem.                                   */
 /* input :                                                              */
-/*      q : quantized normal                                            */
-/*	level : the level of the quantized normal has 3+2*level bits    */
-/* output :                                                             */
-/*	res : the result : a NON-normalized normal is returned          */
+/*		q : quantized normal                                            */
+/*		level : the level of the quantized normal has 3+2*level bits	*/
+/* output :																*/
+/*		res : the result : a NON-normalized normal is returned			*/
 /************************************************************************/
-void ccNormalVectors::Quant_dequantize_normal(unsigned q, unsigned level, float* res)
+void ccNormalVectors::Quant_dequantize_normal(unsigned q, unsigned level, PointCoordinateType* res)
 {
-	unsigned sector, k, l_shift;
-	bool flip = false;
-	float box[6], tmp = 0;
 	/// special case for level = 0
 	if (level == 0)
 	{
-		res[0] = ((q & 4)!=0 ? -1.0 : 1.0);
-		res[1] = ((q & 2)!=0 ? -1.0 : 1.0);
-		res[2] = ((q & 1)!=0 ? -1.0 : 1.0);
+		res[0] = ((q & 4) != 0 ? -PC_ONE : PC_ONE);
+		res[1] = ((q & 2) != 0 ? -PC_ONE : PC_ONE);
+		res[2] = ((q & 1) != 0 ? -PC_ONE : PC_ONE);
 		return;
 	}
+
+	bool flip = false;
+
 	/// recompute the box in the sector...
-	box[0] = box[1] = box[2] = 0.;
-	box[3] = box[4] = box[5] = 1.;
-	l_shift = (level<<1);
-	for (k=0; k<level; ++k)
+	PointCoordinateType box[6] = { 0, 0, 0, 1, 1, 1 };
+
+	unsigned l_shift = (level<<1);
+	for (unsigned k=0; k<level; ++k)
 	{
 		l_shift -= 2;
-		sector = (q >> l_shift) & 3;
+		unsigned sector = (q >> l_shift) & 3;
 		if (flip)
 		{
-			if (sector != 3)
-				tmp = box[sector];
-			box[0] = 0.5 * (box[0] + box[3]);
-			box[1] = 0.5 * (box[1] + box[4]);
-			box[2] = 0.5 * (box[2] + box[5]);
+			PointCoordinateType tmp = box[sector];
+			box[0] = (box[0] + box[3]) / 2;
+			box[1] = (box[1] + box[4]) / 2;
+			box[2] = (box[2] + box[5]) / 2;
 			if (sector != 3)
 			{
 				box[3+sector] = box[sector];
@@ -671,11 +675,10 @@ void ccNormalVectors::Quant_dequantize_normal(unsigned q, unsigned level, float*
 		}
 		else
 		{
-			if (sector != 3)
-				tmp = box[3+sector];
-			box[3] = 0.5 * (box[0] + box[3]);
-			box[4] = 0.5 * (box[1] + box[4]);
-			box[5] = 0.5 * (box[2] + box[5]);
+			PointCoordinateType tmp = box[3+sector];
+			box[3] = (box[0] + box[3]) / 2;
+			box[4] = (box[1] + box[4]) / 2;
+			box[5] = (box[2] + box[5]) / 2;
 			if (sector != 3)
 			{
 				box[sector] = box[3+sector];
@@ -689,7 +692,7 @@ void ccNormalVectors::Quant_dequantize_normal(unsigned q, unsigned level, float*
 	}
 
 	//get the sector
-	sector = q >> (level+level);
+	unsigned sector = q >> (level+level);
 
 	res[0] = ((sector & 4) != 0 ? -(box[3] + box[0]) : box[3] + box[0]);
 	res[1] = ((sector & 2) != 0 ? -(box[4] + box[1]) : box[4] + box[1]);
@@ -744,7 +747,7 @@ void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoord
 	//Dip
 	PointCoordinateType r = sqrt(r2);
 	dip = atan(fabs(N.z)/r); //atan's result in [-pi/2,+pi/2] but |N.z|/r >= 0
-	dip = M_PI/2.0 - dip; //DGM: we always measure the dip downward from horizontal
+	dip = static_cast<PointCoordinateType>(M_PI/2) - dip; //DGM: we always measure the dip downward from horizontal
 
 	dipDir *= static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
 	dip *= static_cast<PointCoordinateType>(CC_RAD_TO_DEG);

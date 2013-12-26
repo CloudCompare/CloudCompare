@@ -113,9 +113,9 @@ public:
 		\param theOctree the octree, if it has already been computed
 		\return success
 	**/
-	static bool applyScalarFieldGaussianFilter(float sigma, 
+	static bool applyScalarFieldGaussianFilter(	PointCoordinateType sigma, 
 												GenericIndexedCloudPersist* theCloud, 
-                                                float sigmaSF,
+                                                PointCoordinateType sigmaSF,
 												GenericProgressCallback* progressCb=0, 
 												DgmOctree* theOctree=0);
 
@@ -192,12 +192,15 @@ protected:
 		Method parameters (defined in "additionalParameters") are :
 		- (GenericCloud*) the point cloud
 		- (bool*) specifies if the scalar values are euclidian distances
-		- (float*) radius
+		- (PointCoordinateType*) radius
 		- (std::vector<ScalarType>*) the gradient norms container
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computeMeanGradientOnPatch(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computeMeanGradientOnPatch(	const DgmOctree::octreeCell& cell,
+											void** additionalParameters,
+											NormalizedProgress* nProgress = 0);
 
 	//! "Cellular" function to apply a gaussian filter on the scalar values of points inside an octree cell
 	/** This function is meant to be applied to all cells of the octree
@@ -206,12 +209,15 @@ protected:
 		(it is of the form DgmOctree::localFunctionPtr).
 		See ScalarFieldTools::applyScalarFieldGaussianFilter.
 		Method parameters (defined in "additionalParameters") are :
-		- (float*) sigma
+		- (PointCoordinateType*) sigma
 		- (std::vector<ScalarType>*) the smoothed values
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computeCellGaussianFilter(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computeCellGaussianFilter(	const DgmOctree::octreeCell& cell,
+											void** additionalParameters,
+											NormalizedProgress* nProgress = 0);
 
 };
 

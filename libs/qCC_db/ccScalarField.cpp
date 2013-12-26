@@ -220,15 +220,15 @@ void ccScalarField::updateSaturationBounds()
 		double minVal=0, maxVal=0;
 		m_colorScale->getAbsoluteBoundaries(minVal,maxVal);
 
-		m_saturationRange.setBounds(minVal,maxVal);
+		m_saturationRange.setBounds(static_cast<ScalarType>(minVal),static_cast<ScalarType>(maxVal));
 
 		//log scale (we always update it even if m_logScale is not enabled!)
 		//if (m_logScale)
 		{
-			ScalarType minAbsVal = ( maxVal < 0 ? std::min(-maxVal,-minVal) : std::max<ScalarType>(minVal,0) );
-			ScalarType maxAbsVal = (ScalarType)std::max(fabs(minVal),fabs(maxVal));
-			ScalarType minSatLog = log10(std::max(minAbsVal,(ScalarType)ZERO_TOLERANCE));
-			ScalarType maxSatLog = log10(std::max(maxAbsVal,(ScalarType)ZERO_TOLERANCE));
+			ScalarType minAbsVal = static_cast<ScalarType>( maxVal < 0 ? std::min(-maxVal,-minVal) : std::max(minVal,0.0) );
+			ScalarType maxAbsVal = static_cast<ScalarType>( std::max(fabs(minVal),fabs(maxVal)) );
+			ScalarType minSatLog = log10(std::max(minAbsVal,static_cast<ScalarType>(ZERO_TOLERANCE)));
+			ScalarType maxSatLog = log10(std::max(maxAbsVal,static_cast<ScalarType>(ZERO_TOLERANCE)));
 			m_logSaturationRange.setBounds(minSatLog,maxSatLog);
 		}
 	}
@@ -335,7 +335,7 @@ bool ccScalarField::toFile(QFile& out) const
 	return true;
 }
 
-bool ccScalarField::fromFile(QFile& in, short dataVersion)
+bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -355,7 +355,23 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 	}
 
 	//data (dataVersion>=20)
-	if (!ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion))
+	bool result = false;
+	{
+		bool fileScalarIsFloat = (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS);
+		if (fileScalarIsFloat && sizeof(ScalarType) == 8) //file is 'float' and current type is 'double'
+		{
+			result = ccSerializationHelper::GenericArrayFromTypedFile<1,ScalarType,float>(*this,in,dataVersion);
+		}
+		else if (!fileScalarIsFloat && sizeof(ScalarType) == 4) //file is 'double' and current type is 'float'
+		{
+			result = ccSerializationHelper::GenericArrayFromTypedFile<1,ScalarType,double>(*this,in,dataVersion);
+		}
+		else
+		{
+			result = ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion);
+		}
+	}
+	if (!result)
 		return false;
 
 	//convert former 'hidden/NaN' values for non strictly positive SFs (dataVersion < 26)
@@ -453,7 +469,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 				return ReadError();
 
 			//Retrieve equivalent default scale
-			ccColorScalesManager::DEFAULT_SCALE activeColorScaleType = ccColorScalesManager::BGYR;
+			ccColorScalesManager::DEFAULT_SCALES activeColorScaleType = ccColorScalesManager::BGYR;
 			switch(activeColorScale)
 			{
 			case ccColorScalesManager::BGYR:
@@ -486,7 +502,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion)
 			if (hasColorScale)
 			{
 				ccColorScale::Shared colorScale = ccColorScale::Create("temp");
-				if (!colorScale->fromFile(in,dataVersion))
+				if (!colorScale->fromFile(in, dataVersion, flags))
 					return ReadError();
 				m_colorScale = colorScale;
 

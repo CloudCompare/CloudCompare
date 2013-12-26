@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2183                                                              $
-//$LastChangedDate:: 2012-07-02 18:38:13 +0200 (lun., 02 juil. 2012)       $
-//**************************************************************************
-//
 
 #ifndef CC_REGISTRATION_DLG_HEADER
 #define CC_REGISTRATION_DLG_HEADER
@@ -83,10 +76,11 @@ public:
 	//! Whether to use model displayed SF as weights
 	bool useModelSFAsWeights() const;
 
-    //! Returns whether to free the scale parameter during optimization
+    //! Returns whether to adjust the scale during optimization
     /** This is useful for co-registration of lidar and photogrammetric clouds
+		for instance.
     **/
-    bool useFreeScaleParameter() const;
+    bool adjustScale() const;
 
 protected slots:
     void swapModelAndData();

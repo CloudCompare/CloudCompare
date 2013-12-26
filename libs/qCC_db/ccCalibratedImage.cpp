@@ -64,7 +64,7 @@ void ccCalibratedImage::setFocal(float focal_pix, bool deduceFOV/*=true*/)
 
 void ccCalibratedImage::setFovFromFocal(float focal_pix)
 {
-	setFov(CC_RAD_TO_DEG * 2.0 * atan((float)m_height * 0.5f / m_focal_pix));
+	setFov(static_cast<float>(CC_RAD_TO_DEG*2.0) * atan(static_cast<float>(m_height) / (m_focal_pix*2.0f)));
 }
 
 void ccCalibratedImage::setCameraMatrix(const ccGLMatrix& mat)
@@ -810,7 +810,7 @@ ccPointCloud* ccCalibratedImage::orthoRectifyAsCloud(CCLib::GenericIndexedCloud*
 	const double& c1 = c[1];
 	const double& c2 = c[2];
 
-	PointCoordinateType defaultZ = 0.0;
+	PointCoordinateType defaultZ = 0;
 
 	ccPointCloud* proj = new ccPointCloud(getName()+QString(".ortho-rectified"));
 	if (!proj->reserve(m_width*m_height))
@@ -825,33 +825,35 @@ ccPointCloud* ccCalibratedImage::orthoRectifyAsCloud(CCLib::GenericIndexedCloud*
 		return 0;
 	}
 	proj->showColors(true);
-	colorType C[3];
 
-	unsigned realCount=0;
+	unsigned realCount = 0;
 
 	//ortho rectification
 	{
-		for (unsigned pi = 0; pi<(unsigned)m_width; ++pi)
+		for (unsigned pi = 0; pi<m_width; ++pi)
 		{
-			double xi = (double)pi-0.5*(double)m_width;
-			for (unsigned pj = 0; pj<(unsigned)m_height; ++pj)
+			double xi = static_cast<PointCoordinateType>(pi) - 0.5*static_cast<PointCoordinateType>(m_width);
+			for (unsigned pj = 0; pj<m_height; ++pj)
 			{
-				double yi = (double)pj-0.5*(double)m_height;
-				double qi = (1.0+c1*xi+c2*yi);
-				CCVector3 P((a0+a1*xi+a2*yi)/qi,
-							(b0+b1*xi+b2*yi)/qi,
+				double yi = static_cast<PointCoordinateType>(pj) - 0.5*static_cast<PointCoordinateType>(m_height);
+				double qi = 1.0 + c1*xi + c2*yi;
+				CCVector3 P(static_cast<PointCoordinateType>((a0+a1*xi+a2*yi)/qi),
+							static_cast<PointCoordinateType>((b0+b1*xi+b2*yi)/qi),
 							defaultZ);
 
 				//and color?
 				QRgb rgb = m_image.pixel(pi,pj);
-				C[0]=qRed(rgb);
-				C[1]=qGreen(rgb);
-				C[2]=qBlue(rgb);
-				if ((int)C[0]+(int)C[1]+(int)C[2]>0)
+				int r = qRed(rgb);
+				int g = qGreen(rgb);
+				int b = qBlue(rgb);
+				if (r+g+b > 0)
 				{
 					//add point
 					proj->addPoint(P);
 					//and color
+					colorType C[3] = {	static_cast<colorType>(r),
+										static_cast<colorType>(g),
+										static_cast<colorType>(b) };
 					proj->addRGBColor(C);
 					++realCount;
 				}
@@ -859,10 +861,10 @@ ccPointCloud* ccCalibratedImage::orthoRectifyAsCloud(CCLib::GenericIndexedCloud*
 		}
 	}
 
-	if (realCount==0)
+	if (realCount == 0)
 	{
 		delete proj;
-		proj=0;
+		proj = 0;
 	}
 	else
 	{

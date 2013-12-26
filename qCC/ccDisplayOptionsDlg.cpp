@@ -135,6 +135,14 @@ void ccDisplayOptionsDlg::refresh()
 	update();
 }
 
+static void QColorToFloat(const QColor& col, float rgba[4])
+{
+	rgba[0] = static_cast<float>(col.redF());
+	rgba[1] = static_cast<float>(col.greenF());
+	rgba[2] = static_cast<float>(col.blueF());
+	rgba[3] = static_cast<float>(col.alphaF());
+}
+
 void ccDisplayOptionsDlg::changeLightDiffuseColor()
 {
 	QColor newCol = QColorDialog::getColor(lightDiffuseColor, this);
@@ -144,7 +152,9 @@ void ccDisplayOptionsDlg::changeLightDiffuseColor()
 	lightDiffuseColor = newCol;
 	SetButtonColor(diffuseColorButton,lightDiffuseColor);
 
-	float rgba[4]={lightDiffuseColor.redF(),lightDiffuseColor.greenF(),lightDiffuseColor.blueF(),lightDiffuseColor.alphaF()};
+	float rgba[4];
+	QColorToFloat(lightDiffuseColor,rgba);
+
 	memcpy(parameters.lightDiffuseColor,rgba,sizeof(float)*4);
 }
 
@@ -157,7 +167,8 @@ void ccDisplayOptionsDlg::changeLightAmbientColor()
 	lightAmbientColor = newCol;
 	SetButtonColor(ambientColorButton,lightAmbientColor);
 
-	float rgba[4]={lightAmbientColor.redF(),lightAmbientColor.greenF(),lightAmbientColor.blueF(),lightAmbientColor.alphaF()};
+	float rgba[4];
+	QColorToFloat(lightAmbientColor,rgba);
 	memcpy(parameters.lightAmbientColor,rgba,sizeof(float)*4);
 
 	update();
@@ -172,7 +183,8 @@ void ccDisplayOptionsDlg::changeLightSpecularColor()
 	lightSpecularColor = newCol;
 	SetButtonColor(specularColorButton,lightSpecularColor);
 
-	float rgba[4]={lightSpecularColor.redF(),lightSpecularColor.greenF(),lightSpecularColor.blueF(),lightSpecularColor.alphaF()};
+	float rgba[4];
+	QColorToFloat(lightSpecularColor,rgba);
 	memcpy(parameters.lightSpecularColor,rgba,sizeof(float)*4);
 
 	update();
@@ -187,7 +199,8 @@ void ccDisplayOptionsDlg::changeMeshFrontDiffuseColor()
 	meshFrontDiff = newCol;
 	SetButtonColor(meshFrontColorButton,meshFrontDiff);
 
-	float rgba[4]={meshFrontDiff.redF(),meshFrontDiff.greenF(),meshFrontDiff.blueF(),meshFrontDiff.alphaF()};
+	float rgba[4];
+	QColorToFloat(meshFrontDiff,rgba);
 	memcpy(parameters.meshFrontDiff,rgba,sizeof(float)*4);
 
 	update();
@@ -202,7 +215,8 @@ void ccDisplayOptionsDlg::changeMeshBackDiffuseColor()
 	meshBackDiff = newCol;
 	SetButtonColor(meshBackColorButton,meshBackDiff);
 
-	float rgba[4]={meshBackDiff.redF(),meshBackDiff.greenF(),meshBackDiff.blueF(),meshBackDiff.alphaF()};
+	float rgba[4];
+	QColorToFloat(meshBackDiff,rgba);
 	memcpy(parameters.meshBackDiff,rgba,sizeof(float)*4);
 
 	update();
@@ -217,7 +231,8 @@ void ccDisplayOptionsDlg::changeMeshSpecularColor()
 	meshSpecularColor = newCol;
 	SetButtonColor(meshSpecularColorButton,meshSpecularColor);
 
-	float rgba[4]={meshSpecularColor.redF(),meshSpecularColor.greenF(),meshSpecularColor.blueF(),meshSpecularColor.alphaF()};
+	float rgba[4];
+	QColorToFloat(meshSpecularColor,rgba);
 	memcpy(parameters.meshSpecular,rgba,sizeof(float)*4);
 
 	update();
@@ -232,7 +247,9 @@ void ccDisplayOptionsDlg::changePointsColor()
 	pointsDefaultCol = newCol;
 	SetButtonColor(pointsColorButton,pointsDefaultCol);
 
-	unsigned char rgb[3]={pointsDefaultCol.red(),pointsDefaultCol.green(),pointsDefaultCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(pointsDefaultCol.red()),
+							static_cast<unsigned char>(pointsDefaultCol.green()),
+							static_cast<unsigned char>(pointsDefaultCol.blue())	};
 	memcpy(parameters.pointsDefaultCol,rgb,sizeof(unsigned char)*3);
 
 	update();
@@ -247,7 +264,9 @@ void ccDisplayOptionsDlg::changeBBColor()
 	bbDefaultCol = newCol;
 	SetButtonColor(bbColorButton,bbDefaultCol);
 
-	unsigned char rgb[3]={bbDefaultCol.red(),bbDefaultCol.green(),bbDefaultCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(bbDefaultCol.red()),
+							static_cast<unsigned char>(bbDefaultCol.green()),
+							static_cast<unsigned char>(bbDefaultCol.blue())	};
 	memcpy(parameters.bbDefaultCol,rgb,sizeof(unsigned char)*3);
 
 	update();
@@ -262,7 +281,9 @@ void ccDisplayOptionsDlg::changeTextColor()
 	textDefaultCol = newCol;
 	SetButtonColor(textColorButton,textDefaultCol);
 
-	unsigned char rgb[3]={textDefaultCol.red(),textDefaultCol.green(),textDefaultCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(textDefaultCol.red()),
+							static_cast<unsigned char>(textDefaultCol.green()),
+							static_cast<unsigned char>(textDefaultCol.blue())	};
 	memcpy(parameters.textDefaultCol,rgb,sizeof(unsigned char)*3);
 }
 
@@ -275,7 +296,9 @@ void ccDisplayOptionsDlg::changeBackgroundColor()
 	backgroundCol = newCol;
 	SetButtonColor(bkgColorButton,backgroundCol);
 
-	unsigned char rgb[3]={backgroundCol.red(),backgroundCol.green(),backgroundCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(backgroundCol.red()),
+							static_cast<unsigned char>(backgroundCol.green()),
+							static_cast<unsigned char>(backgroundCol.blue())	};
 	memcpy(parameters.backgroundCol,rgb,sizeof(unsigned char)*3);
 
 	update();
@@ -290,7 +313,9 @@ void ccDisplayOptionsDlg::changeHistBackgroundColor()
 	histBackgroundCol = newCol;
 	SetButtonColor(histBkgColorButton,histBackgroundCol);
 
-	unsigned char rgb[3]={histBackgroundCol.red(),histBackgroundCol.green(),histBackgroundCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(histBackgroundCol.red()),
+							static_cast<unsigned char>(histBackgroundCol.green()),
+							static_cast<unsigned char>(histBackgroundCol.blue())	};
 	memcpy(parameters.histBackgroundCol,rgb,sizeof(unsigned char)*3);
 
 	update();
@@ -305,7 +330,9 @@ void ccDisplayOptionsDlg::changeLabelColor()
 	labelCol = newCol;
 	SetButtonColor(labelsColorButton,labelCol);
 
-	unsigned char rgb[3]={labelCol.red(),labelCol.green(),labelCol.blue()};
+	unsigned char rgb[3] = {static_cast<unsigned char>(labelCol.red()),
+							static_cast<unsigned char>(labelCol.green()),
+							static_cast<unsigned char>(labelCol.blue())	};
 	memcpy(parameters.labelCol,rgb,sizeof(unsigned char)*3);
 
 	update();

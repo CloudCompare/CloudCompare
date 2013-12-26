@@ -68,6 +68,7 @@
     <addaction name="separator"/>
     <addaction name="menu3DMouse"/>
     <addaction name="separator"/>
+    <addaction name="actionCloseAll"/>
     <addaction name="actionQuit"/>
    </widget>
    <widget class="QMenu" name="menuDisplay">
@@ -119,6 +120,7 @@
     <addaction name="actionDisplayOptions"/>
     <addaction name="actionEditCamera"/>
     <addaction name="actionSaveViewportAsObject"/>
+    <addaction name="actionAdjustZoom"/>
     <addaction name="actionTestFrameRate"/>
     <addaction name="separator"/>
     <addaction name="menuLights"/>
@@ -153,6 +155,7 @@
      <addaction name="separator"/>
      <addaction name="actionAddConstantSF"/>
      <addaction name="actionAddIdField"/>
+     <addaction name="actionSetSFAsCoord"/>
      <addaction name="actionScalarFieldArithmetic"/>
      <addaction name="separator"/>
      <addaction name="actionOpenColorScalesManager"/>
@@ -249,12 +252,14 @@
     <addaction name="menuScalarFields"/>
     <addaction name="separator"/>
     <addaction name="actionClone"/>
-    <addaction name="actionFuse"/>
+    <addaction name="actionMerge"/>
+    <addaction name="actionSubsample"/>
     <addaction name="actionApplyTransformation"/>
     <addaction name="actionMultiply"/>
+    <addaction name="separator"/>
     <addaction name="actionEditGlobalShift"/>
-    <addaction name="actionSubsample"/>
-    <addaction name="actionSynchronize"/>
+    <addaction name="actionEditGlobalScale"/>
+    <addaction name="separator"/>
     <addaction name="menuToggle"/>
     <addaction name="separator"/>
     <addaction name="actionDelete"/>
@@ -322,6 +327,7 @@
      <property name="title">
       <string>Registration</string>
      </property>
+     <addaction name="actionMatchBarycenters"/>
      <addaction name="actionPointPairsAlign"/>
      <addaction name="actionRegister"/>
     </widget>
@@ -570,7 +576,7 @@
    <addaction name="actionPointPicking"/>
    <addaction name="actionPointListPicking"/>
    <addaction name="actionClone"/>
-   <addaction name="actionFuse"/>
+   <addaction name="actionMerge"/>
    <addaction name="actionDelete"/>
    <addaction name="separator"/>
    <addaction name="actionPointPairsAlign"/>
@@ -952,13 +958,16 @@
     <string>Clone</string>
    </property>
   </action>
-  <action name="actionFuse">
+  <action name="actionMerge">
    <property name="icon">
     <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/ccFuse.png</normaloff>:/CC/images/ccFuse.png</iconset>
+     <normaloff>:/CC/images/ccMerge.png</normaloff>:/CC/images/ccMerge.png</iconset>
    </property>
    <property name="text">
-    <string>Fuse</string>
+    <string>Merge</string>
+   </property>
+   <property name="toolTip">
+    <string>Merge multiple clouds</string>
    </property>
   </action>
   <action name="actionDelete">
@@ -1367,9 +1376,9 @@
     <string>Multiply coordinates (separately)</string>
    </property>
   </action>
-  <action name="actionSynchronize">
+  <action name="actionMatchBarycenters">
    <property name="text">
-    <string>Synchronize</string>
+    <string>Match barycenters</string>
    </property>
    <property name="toolTip">
     <string>Synchronize selected entities bbox centers</string>
@@ -1755,7 +1764,7 @@
   </action>
   <action name="actionHeightGridGeneration">
    <property name="text">
-    <string>Height grid generation</string>
+    <string>Raterize (Height grid generation)</string>
    </property>
   </action>
   <action name="actionAlign">
@@ -2335,7 +2344,7 @@
   </action>
   <action name="actionAddIdField">
    <property name="text">
-    <string>Add IDs as scalar field</string>
+    <string>Add point indexes as SF</string>
    </property>
    <property name="toolTip">
     <string>Adds a scalar field with ordered integers for each point in the cloud</string>
@@ -2344,6 +2353,35 @@
   <action name="actionFitFacet">
    <property name="text">
     <string>2D polygon</string>
+   </property>
+  </action>
+  <action name="actionAdjustZoom">
+   <property name="text">
+    <string>Adjust zoom</string>
+   </property>
+   <property name="toolTip">
+    <string>Adjusts zoom with a given pixel/unit ratio (orthographic projection only)</string>
+   </property>
+  </action>
+  <action name="actionSetSFAsCoord">
+   <property name="text">
+    <string>Set SF as coordinate(s)</string>
+   </property>
+   <property name="toolTip">
+    <string>Set SF as coordinate(s) (X, Y or Z)</string>
+   </property>
+  </action>
+  <action name="actionCloseAll">
+   <property name="text">
+    <string>Close all</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove all entiites currently loaded in the DB tree</string>
+   </property>
+  </action>
+  <action name="actionEditGlobalScale">
+   <property name="text">
+    <string>Edit global scale</string>
    </property>
   </action>
  </widget>

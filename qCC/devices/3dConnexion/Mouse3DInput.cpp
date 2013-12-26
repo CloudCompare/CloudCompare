@@ -130,7 +130,7 @@ static unsigned short HidToVirtualKey(unsigned long pid, unsigned short hidKeyCo
 		if (pid == Mouse3DVirtualKeys[i].pid)
 		{
 			if (hidKeyCode < Mouse3DVirtualKeys[i].nKeys)
-				virtualkey = Mouse3DVirtualKeys[i].vkeys[hidKeyCode];
+				virtualkey = static_cast<unsigned short>(Mouse3DVirtualKeys[i].vkeys[hidKeyCode]);
 			else
 				virtualkey = Mouse3DInput::V3DK_INVALID;
 			break;
@@ -387,31 +387,31 @@ void Mouse3DInput::on3dmouseInput()
 	// Take a look at the users preferred speed setting and adjust the sensitivity accordingly
 	Mouse3DParameters::SpeedMode speedSetting = m_mouseParams.speedMode();
 	// See "Programming for the 3D Mouse", Section 6.1.3
-	float speed = 0.25f;
+	double speed = 0.25;
 	switch(speedSetting)
 	{
 	case Mouse3DParameters::LowestSpeed:
-		speed = 0.25f;
+		speed = 0.25;
 		break;
 	case Mouse3DParameters::LowSpeed:
-		speed = 0.5f;
+		speed = 0.5;
 		break;
 	case Mouse3DParameters::MidSpeed:
-		speed = 1.0f;
+		speed = 1.0;
 		break;
 	case Mouse3DParameters::HighSpeed:
-		speed = 2.0f;
+		speed = 2.0;
 		break;
 	case Mouse3DParameters::HighestSpeed:
-		speed = 4.0f;
+		speed = 4.0;
 		break;
 	default:
 		assert(false);
 	}
 
 	//we integrate time asap so as to loose 'less' accuracy
-	float mouseData2PanZoom = c_3dmouseAngularVelocity * (speed * (float)dwElapsedTime); 
-	float mouseData2Rotation = c_3dmouseAngularVelocity * (speed * (float)dwElapsedTime); // v = w * r,  we don't know r yet so lets assume r=1
+	float mouseData2PanZoom = static_cast<float>(c_3dmouseAngularVelocity * (speed * static_cast<double>(dwElapsedTime)));
+	float mouseData2Rotation = static_cast<float>(c_3dmouseAngularVelocity * (speed * static_cast<double>(dwElapsedTime))); // v = w * r,  we don't know r yet so lets assume r=1
 
 	std::map<HANDLE, InputData>::iterator iterator = m_device2Data.begin();
 	while (iterator != m_device2Data.end())
@@ -638,7 +638,7 @@ bool Mouse3DInput::translateRawInputData(UINT nInputCode, PRAWINPUT pRawInput)
 					{
 						if (dwChange & 0x01)
 						{
-							int nVirtualKeyCode = HidToVirtualKey(sRidDeviceInfo.hid.dwProductId, nKeycode);
+							int nVirtualKeyCode = HidToVirtualKey(sRidDeviceInfo.hid.dwProductId, static_cast<unsigned short>(nKeycode));
 							if (nVirtualKeyCode)
 							{
 								if (dwKeystate&0x01)

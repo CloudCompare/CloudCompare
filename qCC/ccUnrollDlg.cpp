@@ -49,9 +49,9 @@ bool ccUnrollDlg::isAxisPositionAuto()
 
 CCVector3 ccUnrollDlg::getAxisPosition()
 {
-    return CCVector3(doubleSpinBoxAxisX->value(),
-                     doubleSpinBoxAxisY->value(),
-                     doubleSpinBoxAxisZ->value());
+    return CCVector3(static_cast<PointCoordinateType>(doubleSpinBoxAxisX->value()),
+                     static_cast<PointCoordinateType>(doubleSpinBoxAxisY->value()),
+                     static_cast<PointCoordinateType>(doubleSpinBoxAxisZ->value()));
 }
 
 double ccUnrollDlg::getRadius()

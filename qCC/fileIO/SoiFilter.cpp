@@ -28,7 +28,7 @@ CC_FILE_ERROR SoiFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_SAVE;
 }
 
-CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
     //open the file
 	FILE *fp = fopen(filename, "rt");
@@ -51,13 +51,13 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 		{
 			std::string numPoints (line,4,line.size()-4);
 			nbPointsTotal=strtol(numPoints.c_str(),&pEnd,0);
-			//ccLog::Print("[SoiFilter::loadFile] Total number of points: %i\n",nbPointsTotal);
+			//ccLog::Print("[SoiFilter::loadFile] Total number of points: %i",nbPointsTotal);
 		}
 		else if (strcmp(line.substr(0,4).c_str(),"#NS#")==0)
 		{
 			std::string numScans (line,4,line.size()-4);
 			nbScansTotal=strtol(numScans.c_str(),&pEnd,0);
-			//ccLog::Print("[SoiFilter::loadFile] Total number of scans: %i\n",nbScansTotal);
+			//ccLog::Print("[SoiFilter::loadFile] Total number of scans: %i",nbScansTotal);
 		}
 
 		eof = fgets ((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH , fp);
@@ -70,18 +70,17 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 		return CC_FERR_NO_LOAD;
 	}
 
-
 	//Progress dialog
 	ccProgressDialog pdlg(false); //cancel is not supported
 	pdlg.setMethodTitle("Open SOI file");
 	char buffer[256];
-	sprintf(buffer,"%i scans / %i points\n",nbScansTotal,nbPointsTotal);
+	sprintf(buffer,"%u scans / %u points\n",nbScansTotal,nbPointsTotal);
 	CCLib::NormalizedProgress nprogress(&pdlg,nbPointsTotal);
 	pdlg.setInfo(buffer);
 	pdlg.start();
 
     //Scan by scan
-	for (unsigned k=0;k<nbScansTotal;k++)
+	for (unsigned k=0; k<nbScansTotal; k++)
 	{
 		char* eof = fgets ((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH , fp);
 
@@ -94,49 +93,43 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 		if (strcmp(line.substr(0,4).c_str(),"#pt#")==0)
 		{
 			std::string numPoints(line,4,line.size()-4);
-			nbOfPoints=strtol(numPoints.c_str(),&pEnd,0);
-			//ccLog::Print("[SoiFilter::loadFile] Scan %i - points: %i\n",k+1,nbOfPoints);
+			nbOfPoints = strtol(numPoints.c_str(),&pEnd,0);
+			//ccLog::Print("[SoiFilter::loadFile] Scan %i - points: %i",k+1,nbOfPoints);
 		}
 		else
 		{
-			ccLog::Warning("[SoiFilter::loadFile] Can't find marker '#pt#'!\n");
+			ccLog::Warning("[SoiFilter::loadFile] Can't find marker '#pt#'!");
 			fclose(fp);
 			return CC_FERR_WRONG_FILE_TYPE;
 		}
-
-		//Creation de la liste de points
-		char name[64];
-		sprintf(name,"unnamed - Scan #%i",k);
-		ccPointCloud* loadedCloud = new ccPointCloud(name);
-
-		if (!loadedCloud)
+		
+		if (nbOfPoints == 0)
 		{
-            fclose(fp);
-            return CC_FERR_NOT_ENOUGH_MEMORY;
-		}
-
-		if (nbOfPoints>0)
-		{
-            loadedCloud->reserveThePointsTable(nbOfPoints);
-			loadedCloud->reserveTheRGBTable();
-			loadedCloud->showColors(true);
-		}
-		else
-		{
-			ccLog::Warning("[SoiFilter::loadFile] Scan #%i is empty!\n",k);
+			ccLog::Warning("[SoiFilter::loadFile] Scan #%i is empty!",k);
 			continue;
 		}
 
-		CCVector3 P;
-		int c = 0;
+		//Creation de la liste de points
+		QString name = QString("unnamed - Scan #%1").arg(k);
+
+		ccPointCloud* loadedCloud = new ccPointCloud(name);
+		if ( !loadedCloud->reserveThePointsTable(nbOfPoints) || !loadedCloud->reserveTheRGBTable() )
+		{
+			fclose(fp);
+			delete loadedCloud;
+			return CC_FERR_NOT_ENOUGH_MEMORY;
+		}
+		loadedCloud->showColors(true);
 
 		//we can read points now
-		for (unsigned i=0;i<nbOfPoints;i++)
+		for (unsigned i=0; i<nbOfPoints; i++)
 		{
-			fscanf(fp,"%f %f %f %i",&P.x,&P.y,&P.z,&c);
+			float P[3];
+			int c = 0;
+			fscanf(fp,"%f %f %f %i",P,P+1,P+2,&c);
 
-			loadedCloud->addPoint(P);
-			loadedCloud->addGreyColor(colorType(c<<3)); //<<2 ? <<3 ? we lack some info. here ...
+			loadedCloud->addPoint(CCVector3::fromArray(P));
+			loadedCloud->addGreyColor(static_cast<colorType>(c<<3)); //<<2 ? <<3 ? we lack some info. here ...
 
 			nprogress.oneStep();
 		}

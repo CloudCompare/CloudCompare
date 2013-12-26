@@ -117,7 +117,7 @@ public:
         See CClib documentation for more information about ReferenceClouds.
 		Warning: the ReferenceCloud structure must refer to this cloud. 
 		\param selection a ReferenceCloud structure (pointing to source)
-		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occured during the duplication process
+		\param[out] warnings [optional] to determine if warnings (CTOR_ERRORS) occurred during the duplication process
 	**/
 	ccPointCloud* partialClone(const CCLib::ReferenceCloud* selection, int* warnings = 0) const;
 
@@ -265,6 +265,7 @@ public:
 
     //inherited from ccHObject
 	virtual void getDrawingParameters(glDrawParams& params) const;
+	virtual unsigned getUniqueIDForDisplay() const;
 
     //inherited from ccDrawableObject
     virtual bool hasColors() const;
@@ -432,7 +433,10 @@ public:
 		\param dim dimension along which the cylinder axis is aligned (X=0, Y=1, Z=2)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism
 	**/
-	void unrollOnCylinder(double radius, CCVector3* center=0, unsigned char dim=2, CCLib::GenericProgressCallback* progressCb=NULL);
+	void unrollOnCylinder(	PointCoordinateType radius,
+							CCVector3* center = 0,
+							unsigned char dim = 2,
+							CCLib::GenericProgressCallback* progressCb = NULL);
 
 	//! Unrolls the cloud and its normals on a cone
 	/** This method is redundant with the "developCloudOnCone" method of CCLib,
@@ -443,7 +447,11 @@ public:
 		\param dim dimension along which the cone axis is aligned (X=0, Y=1, Z=2)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism
 	**/
-	void unrollOnCone(double baseRadius, double alpha_deg, const CCVector3& apex, unsigned char dim=2, CCLib::GenericProgressCallback* progressCb=NULL);
+	void unrollOnCone(	PointCoordinateType baseRadius,
+						double alpha_deg,
+						const CCVector3& apex,
+						unsigned char dim = 2,
+						CCLib::GenericProgressCallback* progressCb = NULL);
 
 	//! Adds associated SF color ramp info to current GL context
 	virtual void addColorRampInfo(CC_DRAW_CONTEXT& context);
@@ -454,7 +462,7 @@ public:
 	//! Adds an existing scalar field to this cloud
 	/** Warning: the cloud takes ownership of it!
 		\param sf existing scalar field
-		\return index of added scalar field (or -1 if an error occured)
+		\return index of added scalar field (or -1 if an error occurred)
 	**/
 	int addScalarField(ccScalarField* sf);
 
@@ -473,7 +481,7 @@ protected:
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
     virtual void applyGLTransformation(const ccGLMatrix& trans);
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
     //inherited from ChunkedPointCloud
 	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex);

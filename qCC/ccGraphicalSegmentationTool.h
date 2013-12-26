@@ -71,7 +71,8 @@ public:
 	void removeAllEntities(bool unallocateVisibilityArrays);
 
 protected slots:
-    void segmentIn();
+
+	void segmentIn();
     void segmentOut();
     void segment(bool);
 	void reset();
@@ -85,6 +86,9 @@ protected slots:
 	void pauseSegmentationMode(bool);
 	void doSetPolylineSelection();
 	void doSetRectangularSelection();
+
+	//! To capture overridden shortcuts (pause button, etc.)
+	void onShortcutTriggered(int);
 
 protected:
 

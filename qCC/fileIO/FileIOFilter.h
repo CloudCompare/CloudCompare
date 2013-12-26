@@ -60,6 +60,12 @@ enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
 #ifdef CC_DXF_SUPPORT
 					DXF					,		/**< DXF (Autocad) */
 #endif
+#ifdef CC_GDAL_SUPPORT
+					RASTER				,		/**< GIS 2D1/2 raster (supported by GDAL) */
+#endif
+#ifdef CC_FBX_SUPPORT
+					FBX					,		/**< Autodesk FBX format */
+#endif
 					FILE_TYPES_COUNT	,		/**< Fake file type (for automatic counting) */
 };
 
@@ -81,6 +87,12 @@ const CC_FILE_TYPES CC_FILE_TYPES_ENUMS[] = {UNKNOWN_FILE, SOI, ASCII, BIN,
 #endif
 #ifdef CC_DXF_SUPPORT
 												,DXF
+#endif
+#ifdef CC_GDAL_SUPPORT
+												,RASTER
+#endif
+#ifdef CC_FBX_SUPPORT
+												,FBX
 #endif
 };
 
@@ -116,6 +128,12 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
 #ifdef CC_DXF_SUPPORT
 			, "DXF (*.dxf)"
 #endif
+#ifdef CC_GDAL_SUPPORT
+			, "RASTER grid (*.*)"
+#endif
+#ifdef CC_FBX_SUPPORT
+			, "FBX Autodesk mesh (*.fbx)"
+#endif
 };
 
 const char CC_FILE_TYPE_DEFAULT_EXTENSION[][8] = {
@@ -150,6 +168,12 @@ const char CC_FILE_TYPE_DEFAULT_EXTENSION[][8] = {
 #ifdef CC_DXF_SUPPORT
 			, "dxf"
 #endif
+#ifdef CC_GDAL_SUPPORT
+			, "tif"
+#endif
+#ifdef CC_FBX_SUPPORT
+			, "fbx"
+#endif
 };
 
 //! Typical I/O filter errors
@@ -183,13 +207,13 @@ public:
 		\param alwaysDisplayLoadDialog always display (eventual) display dialog, even if automatic guess is possible
 		\param coordinatesShiftEnabled whether shift on load has been applied after loading
 		\param coordinatesShift if applicable, applied shift on load (3D translation)
-		\return loaded entities (or 0 if an error occured)
+		\return loaded entities (or 0 if an error occurred)
 	**/
 	static ccHObject* LoadFromFile(const QString& filename,
 									CC_FILE_TYPES fType = UNKNOWN_FILE,
 									bool alwaysDisplayLoadDialog = true,
 									bool* coordinatesShiftEnabled = 0,
-									double* coordinatesShift = 0);
+									CCVector3d* coordinatesShift = 0);
 
 	//! Saves an entity (or a group of) to a specific file (with name and type)
 	static CC_FILE_ERROR SaveToFile(ccHObject* entities,
@@ -218,7 +242,7 @@ public:
 									ccHObject& container,
 									bool alwaysDisplayLoadDialog = true,
 									bool* coordinatesShiftEnabled = 0,
-									double* coordinatesShift = 0)=0;
+									CCVector3d* coordinatesShift = 0)=0;
 
 	//! Saves an entity (or a group of) to a file
 	/** This method must be implemented by children classes.

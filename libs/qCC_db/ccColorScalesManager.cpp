@@ -199,7 +199,7 @@ void ccColorScalesManager::removeScale(QString UUID)
 	}
 }
 
-ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALE scaleType)
+ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 {
 	QString name;
 	switch (scaleType)

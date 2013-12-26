@@ -36,10 +36,10 @@ public:
     CC_LOCAL_MODEL_TYPES getLocalModel() const;
 
 	//! Sets default value for local neighbourhood radius
-	void setRadius(float radius);
+	void setRadius(PointCoordinateType radius);
 	
 	//! Returns local neighbourhood radius
-	float getRadius() const;
+	PointCoordinateType getRadius() const;
 
 	//! Returns prefered orientation
     /** \return prefered orientation (-1: none, 0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z)

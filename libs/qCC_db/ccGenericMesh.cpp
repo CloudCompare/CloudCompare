@@ -27,6 +27,10 @@
 #include "ccNormalVectors.h"
 #include "ccMaterialSet.h"
 
+//CCLib
+#include <MeshSamplingTools.h>
+#include <SimpleCloud.h>
+
 //system
 #include <assert.h>
 
@@ -228,7 +232,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//not fast at all!
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
-			glPushName(getUniqueID());
+			glPushName(getUniqueIDForDisplay());
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
@@ -322,13 +326,16 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (!pushTriangleNames && !visFiltering && !(applyMaterials || showTextures) && (!glParams.showSF || greyForNanScalarValues))
 		{
+			//the GL type depends on the PointCoordinateType 'size' (float or double)
+			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
+			
 			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(3,GL_FLOAT,0,GetVertexBuffer());
+			glVertexPointer(3,GL_COORD_TYPE,0,GetVertexBuffer());
 
 			if (glParams.showNorms)
 			{
 				glEnableClientState(GL_NORMAL_ARRAY);
-				glNormalPointer(GL_FLOAT,0,GetNormalsBuffer());
+				glNormalPointer(GL_COORD_TYPE,0,GetNormalsBuffer());
 			}
 			if (glParams.showSF || glParams.showColors)
 			{
@@ -582,30 +589,30 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				//vertex 1
 				if (N1)
-					glNormal3fv(N1);
+					ccGL::Normal3v(N1);
 				if (col1)
 					glColor3ubv(col1);
 				if (Tx1)
 					glTexCoord2fv(Tx1);
-				glVertex3fv(vertices->getPoint(tsi->i1)->u);
+				ccGL::Vertex3v(vertices->getPoint(tsi->i1)->u);
 
 				//vertex 2
 				if (N2)
-					glNormal3fv(N2);
+					ccGL::Normal3v(N2);
 				if (col2)
 					glColor3ubv(col2);
 				if (Tx2)
 					glTexCoord2fv(Tx2);
-				glVertex3fv(vertices->getPoint(tsi->i2)->u);
+				ccGL::Vertex3v(vertices->getPoint(tsi->i2)->u);
 
 				//vertex 3
 				if (N3)
-					glNormal3fv(N3);
+					ccGL::Normal3v(N3);
 				if (col3)
 					glColor3ubv(col3);
 				if (Tx3)
 					glTexCoord2fv(Tx3);
-				glVertex3fv(vertices->getPoint(tsi->i3)->u);
+				ccGL::Vertex3v(vertices->getPoint(tsi->i3)->u);
 			}
 
 			glEnd();
@@ -664,9 +671,9 @@ bool ccGenericMesh::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//'show wired' state (dataVersion>=20)
@@ -689,4 +696,131 @@ bool ccGenericMesh::fromFile_MeOnly(QFile& in, short dataVersion)
 	}
 
 	return true;
+}
+
+ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
+											double samplingParameter,
+											bool withNormals,
+											bool withRGB,
+											bool withTexture,
+											CCLib::GenericProgressCallback* pDlg/*=0*/)
+{
+	bool withFeatures = (withNormals || withRGB || withTexture);
+
+	GenericChunkedArray<1,unsigned>* triIndices = (withFeatures ? new GenericChunkedArray<1,unsigned> : 0);
+
+	CCLib::SimpleCloud* sampledCloud = 0;
+	if (densityBased)
+	{
+		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this,samplingParameter,pDlg,triIndices);
+	}
+	else
+	{
+		sampledCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(this,static_cast<unsigned>(samplingParameter),pDlg,triIndices);
+	}
+
+	//convert to real point cloud
+	ccPointCloud* cloud = 0;
+	
+	if (sampledCloud)
+	{
+		cloud = ccPointCloud::From(sampledCloud);
+		delete sampledCloud;
+		sampledCloud = 0;
+	}
+
+	if (!cloud)
+	{
+		if (triIndices)
+			triIndices->release();
+
+		ccLog::Warning("[ccGenericMesh::samplePoints] Not enough memory!");
+		return 0;
+	}
+
+	if (withFeatures && triIndices && triIndices->currentSize() >= cloud->size())
+	{
+		//generate normals
+		if (withNormals && hasNormals())
+		{
+			if (cloud->reserveTheNormsTable())
+			{
+				for (unsigned i=0; i<cloud->size(); ++i)
+				{
+					unsigned triIndex = triIndices->getValue(i);
+					const CCVector3* P = cloud->getPoint(i);
+
+					CCVector3 N(0.0,0.0,1.0);
+					interpolateNormals(triIndex,*P,N);
+					cloud->addNorm(N.u);
+				}
+
+				cloud->showNormals(true);
+			}
+			else
+			{
+				ccLog::Warning("[ccGenericMesh::samplePoints] Failed to interpolate normals (not enough memory?)");
+			}
+		}
+
+		//generate colors
+		if (withTexture && hasMaterials())
+		{
+			if (cloud->reserveTheRGBTable())
+			{
+				for (unsigned i=0; i<cloud->size(); ++i)
+				{
+					unsigned triIndex = triIndices->getValue(i);
+					const CCVector3* P = cloud->getPoint(i);
+
+					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					getColorFromMaterial(triIndex,*P,C,withRGB);
+					cloud->addRGBColor(C);
+				}
+
+				cloud->showColors(true);
+			}
+			else
+			{
+				ccLog::Warning("[ccGenericMesh::samplePoints] Failed to export texture colors (not enough memory?)");
+			}
+		}
+		else if (withRGB && hasColors())
+		{
+			if (cloud->reserveTheRGBTable())
+			{
+				for (unsigned i=0; i<cloud->size(); ++i)
+				{
+					unsigned triIndex = triIndices->getValue(i);
+					const CCVector3* P = cloud->getPoint(i);
+
+					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					interpolateColors(triIndex,*P,C);
+					cloud->addRGBColor(C);
+				}
+
+				cloud->showColors(true);
+			}
+			else
+			{
+				ccLog::Warning("[ccGenericMesh::samplePoints] Failed to interpolate colors (not enough memory?)");
+			}
+		}
+	}
+
+	//we rename the resulting cloud
+	cloud->setName(getName()+QString(".sampled"));
+	cloud->setDisplay(getDisplay());
+	cloud->prepareDisplayForRefresh();
+	
+	//copy 'shift on load' information
+	if (getAssociatedCloud())
+	{
+		const CCVector3d& shift = getAssociatedCloud()->getGlobalShift();
+		cloud->setGlobalShift(shift);
+		double scale = getAssociatedCloud()->getGlobalScale();
+		cloud->setGlobalScale(scale);
+	}
+
+	return cloud;
 }

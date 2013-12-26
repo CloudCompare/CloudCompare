@@ -41,6 +41,7 @@ FastMarching::FastMarching()
 	, m_octree(0)
 	, m_gridLevel(0)
 	, m_cellSize(1.0f)
+	, m_numberOfNeighbours(6)
 {
 	memset(m_minFillIndexes,0,sizeof(int)*3);
 }
@@ -103,7 +104,7 @@ int FastMarching::initGridWithOctree(DgmOctree* octree, uchar gridLevel)
 
 	m_octree = octree;
 	m_gridLevel = gridLevel;
-	m_cellSize = octree->getCellSize(gridLevel);
+	m_cellSize = static_cast<float>(octree->getCellSize(gridLevel));
 	m_minFillIndexes[0] = minFillIndexes[0];
 	m_minFillIndexes[1] = minFillIndexes[1];
 	m_minFillIndexes[2] = minFillIndexes[2];
@@ -122,7 +123,7 @@ int FastMarching::initOther()
 	m_gridSize = m_decZ*(m_dz+2);
 	m_indexDec = 1+m_decY+m_decZ;
 
-	for (unsigned i=0; i<CC_FM_NUMBER_OF_NEIGHBOURS; ++i)
+	for (unsigned i=0; i<CC_FM_MAX_NUMBER_OF_NEIGHBOURS; ++i)
 	{
 		m_neighboursIndexShift[i] =	  c_FastMarchingNeighbourPosShift[i*3  ]
 									+ c_FastMarchingNeighbourPosShift[i*3+1] * static_cast<int>(m_decY)
@@ -135,6 +136,8 @@ int FastMarching::initOther()
 	}
 
 	m_activeCells.clear();
+	m_trialCells.clear();
+	m_ignoredCells.clear();
 
 	if (!instantiateGrid(m_gridSize))
         return -3;
@@ -142,45 +145,32 @@ int FastMarching::initOther()
 	return 0;
 }
 
-void FastMarching::cleanLastPropagation()
+void FastMarching::resetCells(std::vector<unsigned>& list)
 {
-	while (!m_activeCells.empty())
+	for (std::vector<unsigned>::const_iterator it = list.begin(); it != list.end(); ++it)
 	{
-		Cell* aCell = m_theGrid[m_activeCells.back()];
-		if (aCell)
+		if (m_theGrid[*it])
 		{
-			aCell->state = Cell::FAR_CELL;
-			aCell->T = Cell::T_INF();
+			m_theGrid[*it]->state = Cell::FAR_CELL;
+			m_theGrid[*it]->T = Cell::T_INF();
 		}
-		else
-		{
-			assert(false);
-		}
-		m_activeCells.pop_back();
 	}
-
-	while (!m_trialCells.empty())
-	{
-		Cell* aCell = m_theGrid[m_trialCells.back()];
-		if (aCell)
-		{
-			aCell->state = Cell::FAR_CELL;
-			aCell->T = Cell::T_INF();
-		}
-		else
-		{
-			assert(false);
-		}
-
-		m_trialCells.pop_back();
-	}
+	list.clear();
 }
 
-void FastMarching::setSeedCell(int pos[])
+void FastMarching::cleanLastPropagation()
+{
+	//reset all cells state
+	resetCells(m_activeCells);
+	resetCells(m_trialCells);
+	resetCells(m_ignoredCells);
+}
+
+bool FastMarching::setSeedCell(int pos[])
 {
 	unsigned index = FM_pos2index(pos);
 
-	assert(index<m_gridSize);
+	assert(index < m_gridSize);
 
 	Cell* aCell = m_theGrid[index];
 	assert(aCell);
@@ -188,9 +178,13 @@ void FastMarching::setSeedCell(int pos[])
 	if (aCell && aCell->state != Cell::ACTIVE_CELL)
 	{
 		//we add the cell to the "ACTIVE" set
-		aCell->state = Cell::ACTIVE_CELL;
 		aCell->T = 0;
-		m_activeCells.push_back(index);
+		addActiveCell(index);
+		return true;
+	}
+	else
+	{
+		return false;
 	}
 }
 
@@ -203,7 +197,7 @@ void FastMarching::initTrialCells()
 
 		assert(aCell != 0);
 
-		for (unsigned i=0; i<CC_FM_NUMBER_OF_NEIGHBOURS; ++i)
+		for (unsigned i=0; i<m_numberOfNeighbours; ++i)
 		{
 			unsigned nIndex = index + m_neighboursIndexShift[i];
 			Cell* nCell = m_theGrid[nIndex];
@@ -213,9 +207,7 @@ void FastMarching::initTrialCells()
 				//and if it's not already in the TRIAL set
 				if (nCell->state == Cell::FAR_CELL)
 				{
-					nCell->state = Cell::TRIAL_CELL;
 					nCell->T = m_neighboursDistance[i] * computeTCoefApprox(aCell,nCell);
-
 					addTrialCell(nIndex);
 				}
 			}
@@ -225,7 +217,20 @@ void FastMarching::initTrialCells()
 
 void FastMarching::addTrialCell(unsigned index)
 {
+	m_theGrid[index]->state = Cell::TRIAL_CELL;
 	m_trialCells.push_back(index);
+}
+
+void FastMarching::addActiveCell(unsigned index)
+{
+	m_theGrid[index]->state = Cell::ACTIVE_CELL;
+	m_activeCells.push_back(index);
+}
+
+void FastMarching::addIgnoredCell(unsigned index)
+{
+	m_theGrid[index]->state = Cell::EMPTY_CELL;
+	m_ignoredCells.push_back(index);
 }
 
 unsigned FastMarching::getNearestTrialCell()
@@ -234,8 +239,8 @@ unsigned FastMarching::getNearestTrialCell()
 		return 0; //0 = error
 
 	//we look for the "TRIAL" cell with the minimum time (T)
-	unsigned minTCellIndex = m_trialCells.front();
 	size_t minTCellIndexPos = 0;
+	unsigned minTCellIndex = m_trialCells[minTCellIndexPos];
 	CCLib::FastMarching::Cell* minTCell = m_theGrid[minTCellIndex];
 	assert(minTCell != 0);
 
@@ -243,14 +248,13 @@ unsigned FastMarching::getNearestTrialCell()
 	{
 		unsigned cellIndex = m_trialCells[i];
 		CCLib::FastMarching::Cell* cell = m_theGrid[cellIndex];
-		
 		assert(cell != 0);
 		
 		if (cell->T < minTCell->T)
 		{
+			minTCellIndexPos = i;
 			minTCellIndex = cellIndex;
 			minTCell = cell;
-			minTCellIndexPos = i;
 		}
 	}
 
@@ -259,4 +263,107 @@ unsigned FastMarching::getNearestTrialCell()
 	m_trialCells.pop_back();
 
 	return minTCellIndex;
+}
+
+float FastMarching::computeT(unsigned index)
+{
+	Cell* theCell = m_theGrid[index];
+	if (!theCell)
+		return Cell::T_INF();
+
+	//arrival time FROM the neighbors
+	double T[CC_FM_MAX_NUMBER_OF_NEIGHBOURS] = { 0 };
+	{
+		for (unsigned n=0; n<m_numberOfNeighbours; ++n)
+		{
+			int nIndex = static_cast<int>(index) + m_neighboursIndexShift[n];
+			Cell* nCell = m_theGrid[nIndex];
+			if (nCell && (nCell->state == Cell::TRIAL_CELL || nCell->state == Cell::ACTIVE_CELL))
+			{
+				//compute front arrival time
+				T[n] = static_cast<double>(nCell->T) + static_cast<double>(m_neighboursDistance[n]) * static_cast<double>(computeTCoefApprox(nCell,theCell));
+			}
+			else
+			{
+				//no front yet
+				T[n] = static_cast<double>(Cell::T_INF());
+			}
+		}
+	}
+
+	double A=0, B=0, C=0;
+	double Tij = static_cast<double>(theCell->T/*Cell::T_INF()*/);
+
+	//Quadratic eq. along X
+	{
+		//look for the minimum arrival time from +/-X
+		double Tmin = static_cast<double>(Cell::T_INF());
+		for (unsigned n=0; n<m_numberOfNeighbours; ++n)
+			if (CCLib::c_FastMarchingNeighbourPosShift[n*3] != 0)
+				if (T[n] < Tmin)
+					Tmin = T[n];
+		if (Tij > Tmin)
+		{
+			A += 1.0;
+			B += -2.0 * Tmin;
+			C += Tmin * Tmin;
+		}
+	}
+
+	//Quadratic eq. along Y
+	{
+		//look for the minimum arrival time from +/-Y
+		double Tmin = static_cast<double>(Cell::T_INF());
+		for (unsigned n=0; n<m_numberOfNeighbours; ++n)
+			if (CCLib::c_FastMarchingNeighbourPosShift[n*3+1] != 0)
+				if (T[n] < Tmin)
+					Tmin = T[n];
+		if (Tij > Tmin)
+		{
+			A += 1.0;
+			B += -2.0 * Tmin;
+			C += Tmin * Tmin;
+		}
+	}
+
+	//Quadratic eq. along Z
+	{
+		//look for the minimum arrival time from +/-Z
+		double Tmin = static_cast<double>(Cell::T_INF());
+		for (unsigned n=0; n<m_numberOfNeighbours; ++n)
+			if (CCLib::c_FastMarchingNeighbourPosShift[n*3+2] != 0)
+				if (T[n] < Tmin)
+					Tmin = T[n];
+		if (Tij > Tmin)
+		{
+			A += 1.0;
+			B += -2.0 * Tmin;
+			C += Tmin * Tmin;
+		}
+	}
+
+	//DGM: why?
+	//C -=  static_cast<double>(m_cellSize*m_cellSize);
+
+	//solve the quadratic equation
+	double delta = B*B - 4.0*A*C;
+
+	//cases when the quadratic equation is singular
+	if (A == 0 || delta < 0)
+	{
+		//take the 'earliest' neighbour
+		Tij = T[0];
+		for (unsigned n=1; n<m_numberOfNeighbours; n++)
+			if (T[n] < Tij)
+				Tij = T[n];
+	}
+	else
+	{
+		//Note that the new crossing must be GREATER than the average
+		//of the active neighbors, since only EARLIER elements are active.
+		//Therefore the plus sign is appropriate.
+		Tij = (-B + sqrt(delta))/(2.0*A);
+	}
+
+	return static_cast<float>(Tij);
 }

@@ -48,7 +48,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 																			double minErrorDecrease,
 																			unsigned nbMaxIterations,
 																			double& finalError,
-                                                                            bool freeScale/*=false*/,
+                                                                            bool adjustScale/*=false*/,
 																			GenericProgressCallback* progressCb/*=0*/,
 																			bool filterOutFarthestPoints/*=false*/,
 																			unsigned samplingLimit/*=20000*/,
@@ -158,7 +158,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 	}
 	else
 	{
-	    //if an error occured during distances computation...
+	    //if an error occurred during distances computation...
 		error = -1.0;
 		result = ICP_ERROR_DIST_COMPUTATION;
 	}
@@ -298,7 +298,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 
 			//single iteration of the registration procedure
             ScaledTransformation currentTrans;
-			if (!RegistrationTools::RegistrationProcedure(dataCloud, CPSet, currentTrans, freeScale, _dataWeights, _modelWeights))
+			if (!RegistrationTools::RegistrationProcedure(dataCloud, CPSet, currentTrans, adjustScale, _dataWeights, _modelWeights))
 			{
 				result = ICP_ERROR_REGISTRATION_STEP;
 				break;
@@ -340,7 +340,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 			params.CPSet = CPSet;
 			if (DistanceComputationTools::computeHausdorffDistance(dataCloud,modelCloud,params)<0)
 			{
-                //an error occured during distances computation...
+                //an error occurred during distances computation...
 				result = ICP_ERROR_REGISTRATION_STEP;
 				break;
 			}
@@ -352,7 +352,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 
 #ifdef _DEBUG
 			if (fp)
-			    fprintf(fp,"Iteration #%i --> error: %f\n",iteration,error);
+			    fprintf(fp,"Iteration #%u --> error: %f\n",iteration,error);
 #endif
 
             //error update
@@ -372,7 +372,7 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
                     transform.T = currentTrans.R * transform.T;
 			    }
 
-				if (freeScale)
+				if (adjustScale)
                     transform.s *= currentTrans.s;
 
 				transform.T += currentTrans.T;
@@ -457,7 +457,7 @@ double HornRegistrationTools::ComputeRMS(GenericCloud* lCloud,
 bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
                                               GenericCloud* X,
                                               ScaledTransformation& trans,
-											  bool estimateScale/*=false*/,
+											  bool adjustScale/*=false*/,
                                               ScalarField* weightsP/*=0*/,
                                               ScalarField* weightsX/*=0*/,
                                               PointCoordinateType aPrioriScale/*=1.0f*/)
@@ -544,7 +544,7 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
     //these eigenvalue and eigenvector correspond to a quaternion --> we get the corresponding matrix
     trans.R.initFromQuaternion(qR);
 
-	if (estimateScale)
+	if (adjustScale)
 	{
 		//two accumulators
 		double acc_num = 0.0;
@@ -581,9 +581,9 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
 bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
                                             GenericIndexedCloud* dataCloud,
                                             ScaledTransformation& transform,
-                                            float delta,
-                                            float beta,
-                                            float overlap,
+                                            ScalarType delta,
+                                            ScalarType beta,
+                                            PointCoordinateType overlap,
                                             unsigned nbBases,
                                             unsigned nbTries,
                                             GenericProgressCallback* progressCb,
@@ -618,7 +618,7 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
     //Adapt overlap to the model cloud size
     modelCloud->getBoundingBox(min.u, max.u);
     diff = max-min;
-    overlap *= diff.norm()/2.0f;
+    overlap *= diff.norm() / 2;
 
     //Buil the associated KDtrees
     dataTree = new KDTree();
@@ -635,13 +635,13 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
         return false;
     }
 
-    //if(progressCb)
+    //if (progressCb)
     //    progressCb->stop();
 
     for(i=0; i<nbBases; i++)
     {
         //Randomly find the current reference base
-        if(!FindBase(modelCloud, overlap, nbTries, reference))
+        if (!FindBase(modelCloud, overlap, nbTries, reference))
             continue;
 
         //Search for all the congruent bases in the second cloud
@@ -683,12 +683,12 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
             //Register the current candidate base with the reference base
             RT = transforms[j];
             //Apply the rigid transform to the data cloud and compute the registration score
-            if(RT.R.isValid())
+            if (RT.R.isValid())
             {
                 score = ComputeRegistrationScore(modelTree, dataCloud, delta, RT);
 
                 //Keep parameters that lead to the best result
-                if(score > bestScore)
+                if (score > bestScore)
                 {
                     transform.R = RT.R;
                     transform.T = RT.T;
@@ -700,7 +700,7 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
         if (progressCb)
         {
             char buffer[256];
-            sprintf(buffer,"Trial %d/%d [best score = %d]\n",i+1,nbBases,bestScore);
+            sprintf(buffer,"Trial %u/%u [best score = %u]\n",i+1,nbBases,bestScore);
             progressCb->setInfo(buffer);
             progressCb->update(((float)(i+1)*100.0f)/(float)nbBases);
 
@@ -717,7 +717,7 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
     delete dataTree;
     delete modelTree;
 
-    if(progressCb)
+    if (progressCb)
         progressCb->stop();
 
     return (bestScore > 0);
@@ -741,7 +741,7 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
         //Apply rigid transform to each point
         Q = dataToModel.R * Q + dataToModel.T;
         //Check if there is a point in the model cloud that is close enough to q
-        if(modelTree->findPointBelowDistance(Q.u, delta))
+        if (modelTree->findPointBelowDistance(Q.u, delta))
             score++;
     }
 
@@ -749,13 +749,13 @@ bool FPCSRegistrationTools::RegisterClouds(GenericIndexedCloud* modelCloud,
 }
 
 bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
-                                        float overlap,
+                                        PointCoordinateType overlap,
                                         unsigned nbTries,
                                         Base &base)
 {
     unsigned a, b, c, d, t1, t2;
     unsigned i, size;
-    float best, f, d0, d1, d2, x, y, z, w;
+    PointCoordinateType f, best, d0, d1, d2, x, y, z, w;
     const CCVector3 *p0, *p1, *p2, *p3;
     CCVector3 normal, u, v;
 
@@ -770,17 +770,17 @@ bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
     {
         t1 = rand()%size;
         t2 = rand()%size;
-        if(t1 == a || t2 == a || t1 == t2)
+        if (t1 == a || t2 == a || t1 == t2)
             continue;
 
         p1 = cloud->getPoint(t1);
         p2 = cloud->getPoint(t2);
         //Checked that the selected points are not more than overlap-distant from p0
         u = *p1-*p0;
-        if(u.norm2() > overlap)
+        if (u.norm2() > overlap)
             continue;
         u = *p2-*p0;
-        if(u.norm2() > overlap)
+        if (u.norm2() > overlap)
             continue;
 
         //compute [p0, p1, p2] area thanks to cross product
@@ -788,8 +788,8 @@ bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
         y = ((p1->z-p0->z)*(p2->x-p0->x))-((p1->x-p0->x)*(p2->z-p0->z));
         z = ((p1->x-p0->x)*(p2->y-p0->y))-((p1->y-p0->y)*(p2->x-p0->x));
         //don't need to compute the true area : f=(area²)*2 is sufficient for comparison
-        f = (x*x)+(y*y)+(z*z);
-        if(f > best)
+        f = x*x + y*y + z*z;
+        if (f > best)
         {
             b = t1;
             c = t2;
@@ -800,12 +800,12 @@ bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
         }
     }
 
-    if(b == c)
+    if (b == c)
         return false;
 
     //Once we found the points, we have to search for a fourth coplanar point
     f = normal.norm();
-    if(f<=0.)
+    if (f<=0.)
         return false;
     normal *= 1.0f/f;
     //plane equation : p lies in the plane if x*p[0] + y*p[1] + z*p[2] + w = 0
@@ -820,20 +820,20 @@ bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
     for(i=0; i<nbTries; i++)
     {
         t1 = rand()%size;
-        if(t1 == a || t1 == b || t1 == c)
+        if (t1 == a || t1 == b || t1 == c)
             continue;
         p3 = cloud->getPoint(t1);
         //p3 must be close enough to at least two other points (considering overlap)
         d0 = (*p3 - *p0).norm2();
         d1 = (*p3 - *p1).norm2();
         d2 = (*p3 - *p2).norm2();
-        if((d0>=overlap && d1>=overlap) || (d0>=overlap && d2>=overlap) || (d1>=overlap && d2>=overlap))
+        if ((d0>=overlap && d1>=overlap) || (d0>=overlap && d2>=overlap) || (d1>=overlap && d2>=overlap))
             continue;
         //Compute distance to the plane (cloud[a], cloud[b], cloud[c])
         f = fabs((x*p3->x)+(y*p3->y)+(z*p3->z)+w);
         //keep the point which is the closest to the plane, while being as far as possible from the other three points
         f=(f+1.0f)/(sqrt(d0)+sqrt(d1)+sqrt(d2));
-        if((best < 0.) || (f < best))
+        if ((best < 0.) || (f < best))
         {
             d = t1;
             best = f;
@@ -841,7 +841,7 @@ bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
     }
 
     //Store the result in the base parameter
-    if(d != a)
+    if (d != a)
     {
         //Find the points order in the quadrilateral
         p0 = cloud->getPoint(a);
@@ -852,7 +852,7 @@ bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
         //Note : if the convexe hull is made of 3 points, the points order has no importance
         u = (*p1-*p0)*(*p2-*p0);
         v = (*p1-*p0)*(*p3-*p0);
-        if(u.dot(v) <= 0)
+        if (u.dot(v) <= 0)
         {
             //p2 and p3 lie on both sides of [p0, p1]
             base.init(a, b, c, d);
@@ -860,7 +860,7 @@ bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
         }
         u = (*p2-*p1)*(*p0-*p1);
         v = (*p2-*p1)*(*p3-*p1);
-        if(u.dot(v) <= 0)
+        if (u.dot(v) <= 0)
         {
             //p0 and p3 lie on both sides of [p2, p1]
             base.init(b, c, d, a);
@@ -877,12 +877,12 @@ bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
 typedef std::pair<unsigned,unsigned> IndexPair;
 
 int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
-												float delta,
+												ScalarType delta,
 												const CCVector3* base[4],
 												std::vector<Base>& results)
 {
     //Compute reference base invariants (r1, r2)
-    float r1, r2, d1, d2;
+    PointCoordinateType r1, r2, d1, d2;
 	{
 		const CCVector3* p0 = base[0];
 		const CCVector3* p1 = base[1];
@@ -893,7 +893,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 		d2 = (*p3-*p2).norm();
 
 		CCVector3 inter;
-		if(!LinesIntersections(*p0, *p1, *p2, *p3, inter, r1, r2))
+		if (!LinesIntersections(*p0, *p1, *p2, *p3, inter, r1, r2))
 			return 0;
 	}
 
@@ -921,12 +921,12 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 			idxPair.first = i;
 			//Extract all points from the cloud which are d1-appart (up to delta) from q0
 			pointsIndexes.clear();
-			tree->findPointsLyingToDistance(q0->u, d1, delta, pointsIndexes);
+			tree->findPointsLyingToDistance(q0->u, static_cast<ScalarType>(d1), delta, pointsIndexes);
 			{
 				for(size_t j=0; j<pointsIndexes.size(); j++)
 				{
 					//As ||pi-pj|| = ||pj-pi||,  we only take care of pairs that verify i<j
-					if(pointsIndexes[j]>i)
+					if (pointsIndexes[j]>i)
 					{
 						idxPair.second = pointsIndexes[j];
 						pairs1.push_back(idxPair);
@@ -935,11 +935,11 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 			}
 			//Extract all points from the cloud which are d2-appart (up to delta) from q0
 			pointsIndexes.clear();
-			tree->findPointsLyingToDistance(q0->u, d2, delta, pointsIndexes);
+			tree->findPointsLyingToDistance(q0->u, static_cast<ScalarType>(d2), delta, pointsIndexes);
 			{
 				for(size_t j=0; j<pointsIndexes.size(); j++)
 				{
-					if(pointsIndexes[j]>i)
+					if (pointsIndexes[j]>i)
 					{
 						idxPair.second = pointsIndexes[j];
 						pairs2.push_back(idxPair);
@@ -1001,7 +1001,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 			{
 				const CCVector3 *q0 = tmpCloud2.getPoint(i);
 				unsigned a;
-				if(intermediateTree.findNearestNeighbour(q0->u, a, delta))
+				if (intermediateTree.findNearestNeighbour(q0->u, a, delta))
 				{
 					IndexPair idxPair;
 					idxPair.first = i;
@@ -1016,7 +1016,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 	{
 		results.clear();
 		size_t count = match.size();
-		if(count>0)
+		if (count>0)
 		{
 			results.reserve(count);
 			if (results.capacity() < count)  //not enough memory
@@ -1025,7 +1025,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 			{
 				Base quad;
 				unsigned b = match[i].second / 2;
-				if((match[i].second % 2) == 0)
+				if ((match[i].second % 2) == 0)
 				{
 					quad.a = pairs1[b].first;
 					quad.b = pairs1[b].second;
@@ -1037,7 +1037,7 @@ int FPCSRegistrationTools::FindCongruentBases(KDTree* tree,
 				}
             
 				unsigned a = match[i].first / 2;
-				if((match[i].first % 2) == 0)
+				if ((match[i].first % 2) == 0)
 				{
 					quad.c = pairs2[a].first;
 					quad.d = pairs2[a].second;
@@ -1062,11 +1062,11 @@ bool FPCSRegistrationTools::LinesIntersections(
     const CCVector3 &p2,
     const CCVector3 &p3,
     CCVector3 &inter,
-    float& lambda,
-    float& mu)
+    PointCoordinateType& lambda,
+    PointCoordinateType& mu)
 {
     CCVector3 p02, p32, p10, A, B;
-    float num, denom;
+    PointCoordinateType num, denom;
 
     //Find lambda and mu such that :
     //A = p0+lambda(p1-p0)
@@ -1077,12 +1077,12 @@ bool FPCSRegistrationTools::LinesIntersections(
     p10 = p1-p0;
     num = (p02.dot(p32) * p32.dot(p10)) - (p02.dot(p10) * p32.dot(p32));
     denom = (p10.dot(p10) * p32.dot(p32)) - (p32.dot(p10) * p32.dot(p10));
-    if(fabs(denom) < 0.00001)
+    if (fabs(denom) < 0.00001)
         return false;
     lambda = num / denom;
     num = p02.dot(p32) + (lambda*p32.dot(p10));
     denom = p32.dot(p32);
-    if(fabs(denom) < 0.00001)
+    if (fabs(denom) < 0.00001)
         return false;
     mu = num / denom;
     A.x = p0.x+(lambda*p10.x);
@@ -1115,7 +1115,7 @@ bool FPCSRegistrationTools::FilterCandidates(
     SimpleCloud referenceBaseCloud, dataBaseCloud;
 
 	unsigned candidatesCount = (unsigned)candidates.size();
-    if(candidatesCount == 0)
+    if (candidatesCount == 0)
         return false;
 
     bool filter = (nbMaxCandidates>0 && candidatesCount>nbMaxCandidates);
@@ -1172,16 +1172,16 @@ bool FPCSRegistrationTools::FilterCandidates(
             return false;
 
         tarray.push_back(t);
-        if(filter)
+        if (filter)
         {
-            float score = 0.;
+            float score = 0;
 			GenericIndexedCloud* b = PointProjectionTools::applyTransformation(&dataBaseCloud, t);
 			if (!b)
 				return false; //not enough memory
             for (j=0; j<4; j++)
             {
                 q = b->getPoint(j);
-                score += (*q - *(p[j])).norm();
+                score += static_cast<float>((*q - *(p[j])).norm());
             }
             delete b;
             scores.push_back(score);
@@ -1189,7 +1189,7 @@ bool FPCSRegistrationTools::FilterCandidates(
         }
     }
 
-    if(filter)
+    if (filter)
     {
         transforms.clear();
         candidates.clear();
@@ -1209,7 +1209,7 @@ bool FPCSRegistrationTools::FilterCandidates(
         j = 0;
         for(i=0; i<scores.size(); i++)
         {
-            if(scores[i]<=score && j<nbMaxCandidates)
+            if (scores[i]<=score && j<nbMaxCandidates)
             {
                 candidates[i].copy(table[i]);
                 transforms.push_back(tarray[i]);

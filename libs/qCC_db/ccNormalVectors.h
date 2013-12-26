@@ -84,7 +84,7 @@ public:
 	static bool ComputeCloudNormals(ccGenericPointCloud* theCloud,
                                     NormsIndexesTableType& theNormsCodes,
                                     CC_LOCAL_MODEL_TYPES method,
-									float radius,
+									PointCoordinateType radius,
                                     int preferedOrientation=-1,
                                     CCLib::GenericProgressCallback* progressCb=0,
                                     CCLib::DgmOctree* _theOctree=0);
@@ -184,16 +184,16 @@ protected:
 	unsigned m_numberOfVectors;
 
 	//! Decompression algorithm
-    static void Quant_dequantize_normal(unsigned q, unsigned level, float* res);
+    static void Quant_dequantize_normal(unsigned q, unsigned level, PointCoordinateType* res);
 	//! Compression algorithm
-    static unsigned Quant_quantize_normal(const float* n, unsigned level);
+    static unsigned Quant_quantize_normal(const PointCoordinateType* n, unsigned level);
 
 	//! Cellular method for octree-based normal computation
-	static bool ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);
 	//! Cellular method for octree-based normal computation
-	static bool ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);
 	//! Cellular method for octree-based normal computation
-	static bool ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool ComputeNormsAtLevelWithTri(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);
 };
 
  #endif //CC_NORMAL_VECTORS_HEADER

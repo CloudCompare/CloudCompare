@@ -23,6 +23,7 @@
 //system
 #include <algorithm>
 #include <string.h>
+#include <assert.h>
 
 /*** MACROS FOR TRIBOXOVERLAP ***/
 
@@ -49,28 +50,34 @@ using namespace CCLib;
 
 void CCMiscTools::MakeMinAndMaxCubical(CCVector3& dimMin, CCVector3& dimMax, double enlargeFactor/*=0.01*/)
 {
-    CCVector3 dd=dimMax-dimMin;
-	CCVector3 md=dimMax+dimMin;
+	//get box max dimension
+	PointCoordinateType maxDD = 0;
+	{
+		CCVector3 diag = dimMax-dimMin;
+		maxDD = std::max(diag.x,diag.y);
+		maxDD = std::max(maxDD,diag.z);
+	}
 
-    PointCoordinateType maxDD = dd.x;
-	if (dd.y>maxDD)
-		maxDD=dd.y;
-	if (dd.z>maxDD)
-		maxDD=dd.z;
+	//enlarge it if necessary
+	if (enlargeFactor > 0)
+		maxDD = static_cast<PointCoordinateType>( static_cast<double>(maxDD) * (1.0+enlargeFactor) );
 
-	maxDD *= (PointCoordinateType)(1.0+enlargeFactor);
-	dd = CCVector3(maxDD);
-	dimMin = (md-dd)*0.5;
-	dimMax = dimMin+dd;
+	//build corresponding 'square' box
+	{
+		CCVector3 dd(maxDD);
+		CCVector3 md = dimMax+dimMin;
+	
+		dimMin = (md-dd) * static_cast<PointCoordinateType>(0.5);
+		dimMax = dimMin+dd;
+	}
 }
 
 void CCMiscTools::EnlargeBox(CCVector3& dimMin, CCVector3& dimMax, double coef)
 {
-    CCVector3 dd=dimMax-dimMin;
-	CCVector3 md=dimMax+dimMin;
+    CCVector3 dd = (dimMax-dimMin) * static_cast<PointCoordinateType>(1.0+coef);
+	CCVector3 md = dimMax+dimMin;
 
-	dd *= (PointCoordinateType)(1.0+coef);
-	dimMin = (md-dd)*0.5;
+	dimMin = (md-dd) * static_cast<PointCoordinateType>(0.5);
 	dimMax = dimMin+dd;
 }
 
@@ -79,23 +86,23 @@ void CCMiscTools::EnlargeBox(CCVector3& dimMin, CCVector3& dimMax, double coef)
 bool planeBoxOverlap(PointCoordinateType normal[3], PointCoordinateType vert[3], PointCoordinateType maxbox)	// -NJMP-
 {
     PointCoordinateType vmin[3],vmax[3];
-    for (int q=0;q<=2;q++)
+    for (int q=0; q<=2; q++)
     {
-        if (normal[q]>0)
+        if (normal[q] > 0)
         {
-            vmin[q]=-maxbox - vert[q];
-            vmax[q]= maxbox - vert[q];
+            vmin[q] = -maxbox - vert[q];
+            vmax[q] =  maxbox - vert[q];
         }
         else
         {
-            vmin[q]= maxbox - vert[q];
-            vmax[q]=-maxbox - vert[q];
+            vmin[q] =  maxbox - vert[q];
+            vmax[q] = -maxbox - vert[q];
         }
     }
 
-    if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmin)>0)
+    if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmin) > 0)
         return false;
-    if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmax)>=0)
+    if (Vector3Tpl<PointCoordinateType>::vdot(normal,vmax) >= 0)
         return true;
 
     return false;
@@ -111,8 +118,6 @@ bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
     /*    3) crossproduct(edge from tri, {X,Y,Z}-direction) */
     /*       this gives 3x3=9 more tests */
 
-	PointCoordinateType minV,maxV;
-
     /* move everything so that the boxcenter is in (0,0,0) */
     PointCoordinateType v0[3],v1[3],v2[3];
     CCVector3::vsubstract(triverts[0]->u,boxcenter,v0);
@@ -126,36 +131,37 @@ bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
 
 	/*  test the 9 tests first (this was faster) */
 	PointCoordinateType rad,fex,fey,fez;		// -NJMP- "d" local variable removed
-	//fex = fabsf(e0[0]);
-	fey = fabsf(e0[1]);
-	fez = fabsf(e0[2]);
+	//fex = fabs(e0[0]);
+	fey = fabs(e0[1]);
+	fez = fabs(e0[2]);
 
+	PointCoordinateType minV,maxV;
 	AXISTEST_X01(e0[2], e0[1], fez, fey);
-	fex = fabsf(e0[0]); //DGM: not necessary before!
+	fex = fabs(e0[0]); //DGM: not necessary before!
 	AXISTEST_Y02(e0[2], e0[0], fez, fex);
 	AXISTEST_Z12(e0[1], e0[0], fey, fex);
 
 	PointCoordinateType e1[3];
 	CCVector3::vsubstract(v2,v1,e1);      /* compute triangle edge 1 */
 
-	//fex = fabsf(e1[0]);
-	fey = fabsf(e1[1]);
-	fez = fabsf(e1[2]);
+	//fex = fabs(e1[0]);
+	fey = fabs(e1[1]);
+	fez = fabs(e1[2]);
 
 	AXISTEST_X01(e1[2], e1[1], fez, fey);
-	fex = fabsf(e1[0]); //DGM: not necessary before!
+	fex = fabs(e1[0]); //DGM: not necessary before!
 	AXISTEST_Y02(e1[2], e1[0], fez, fex);
 	AXISTEST_Z0(e1[1], e1[0], fey, fex);
 
 	PointCoordinateType e2[3];
 	CCVector3::vsubstract(v0,v2,e2);      /* compute triangle edge 2 */
 
-	//fex = fabsf(e2[0]);
-	fey = fabsf(e2[1]);
-	fez = fabsf(e2[2]);
+	//fex = fabs(e2[0]);
+	fey = fabs(e2[1]);
+	fez = fabs(e2[2]);
 
 	AXISTEST_X2(e2[2], e2[1], fez, fey);
-	fex = fabsf(e2[0]); //DGM: not necessary before!
+	fex = fabs(e2[0]); //DGM: not necessary before!
 	AXISTEST_Y1(e2[2], e2[0], fez, fex);
 	AXISTEST_Z12(e2[1], e2[0], fey, fex);
 
@@ -195,190 +201,52 @@ bool CCMiscTools::TriBoxOverlap(PointCoordinateType* boxcenter, PointCoordinateT
 		//PointCoordinateType vmin[3],vmax[3]; //DGM: we use e0 and e1 instead of vmin and vmax
 		if (/*normal*/e2[0]>0)
 		{
-			/*vmin*/e0[0]=-boxhalfsize - v0[0];
-			/*vmax*/e1[0]= boxhalfsize - v0[0];
+			/*vmin*/e0[0] = -boxhalfsize - v0[0];
+			/*vmax*/e1[0] =  boxhalfsize - v0[0];
 		}
 		else
 		{
-			/*vmin*/e0[0]= boxhalfsize - v0[0];
-			/*vmax*/e1[0]=-boxhalfsize - v0[0];
+			/*vmin*/e0[0] =  boxhalfsize - v0[0];
+			/*vmax*/e1[0] = -boxhalfsize - v0[0];
 		}
 		if (/*normal*/e2[1]>0)
 		{
-			/*vmin*/e0[1]=-boxhalfsize - v0[1];
-			/*vmax*/e1[1]= boxhalfsize - v0[1];
+			/*vmin*/e0[1] = -boxhalfsize - v0[1];
+			/*vmax*/e1[1] =  boxhalfsize - v0[1];
 		}
 		else
 		{
-			/*vmin*/e0[1]= boxhalfsize - v0[1];
-			/*vmax*/e1[1]=-boxhalfsize - v0[1];
+			/*vmin*/e0[1] =  boxhalfsize - v0[1];
+			/*vmax*/e1[1] = -boxhalfsize - v0[1];
 		}
 		if (/*normal*/e2[2]>0)
 		{
-			/*vmin*/e0[2]=-boxhalfsize - v0[2];
-			/*vmax*/e1[2]= boxhalfsize - v0[2];
+			/*vmin*/e0[2] = -boxhalfsize - v0[2];
+			/*vmax*/e1[2] =  boxhalfsize - v0[2];
 		}
 		else
 		{
-			/*vmin*/e0[2]= boxhalfsize - v0[2];
-			/*vmax*/e1[2]=-boxhalfsize - v0[2];
+			/*vmin*/e0[2] =  boxhalfsize - v0[2];
+			/*vmax*/e1[2] = -boxhalfsize - v0[2];
 		}
 
-		if (	Vector3Tpl<PointCoordinateType>::vdot(/*normal*/e2,/*vmin*/e0)>0
-			||	Vector3Tpl<PointCoordinateType>::vdot(/*normal*/e2,/*vmax*/e1)<0)
+		if (	Vector3Tpl<PointCoordinateType>::vdot(/*normal*/e2,/*vmin*/e0) > 0
+			||	Vector3Tpl<PointCoordinateType>::vdot(/*normal*/e2,/*vmax*/e1) < 0)
 			return false;
 	}
 
     return true;   /* box and triangle overlaps */
 }
 
-void CCMiscTools::ComputeBaseVectors(const PointCoordinateType *aPlane, PointCoordinateType* u, PointCoordinateType* v, PointCoordinateType* n)
+void CCMiscTools::ComputeBaseVectors(const CCVector3 &N, CCVector3& X, CCVector3& Y)
 {
-    //on cree un vecteur appartenant au plan (et donc orthogonal a "a")
-    //c'est le premier de la base
-	if (aPlane[0] != 0 || aPlane[1] != 0)
-	{
-		u[0] = -aPlane[1];
-		u[1] = aPlane[0];
-		u[2] = 0;
-		
-		//on deduit le deuxieme vecteur de la base par produit vectoriel
-		CCVector3::vcross(aPlane,u,v);
+	CCVector3 Nunit = N;
+	Nunit.normalize();
 
-		//on normalise u et v
-		CCVector3::vnormalize(u);
-		CCVector3::vnormalize(v);
-	}
-	else
-	{
-		u[0] = (PointCoordinateType)1.0; v[0] = (PointCoordinateType)0.0;
-		u[1] = (PointCoordinateType)0.0; v[1] = (PointCoordinateType)(aPlane[2] < 0 ? -1.0 : 1.0);
-		u[2] = (PointCoordinateType)0.0; v[2] = (PointCoordinateType)0.0;
-	}
+    //we create a first vector orthogonal to the input one
+	X = Nunit.orthogonal(); //X is also normalized
 
-    if (n)
-    {
-        //et enfin, n, vecteur unitaire normal au plan
-        n[0] = aPlane[0];
-        n[1] = aPlane[1];
-        n[2] = aPlane[2];
-        CCVector3::vnormalize(n);
-    }
-}
-
-int gcd(int num1, int num2)
-{
-    int remainder = num2 % num1;
-
-    return (remainder != 0 ? gcd(remainder,num1) : num1);
-}
-
-//TRANSCRIPTED BY DGM FROM MATLAB FUNCTION "partsphere.m" (Paul Leopardi, 2003-10-13, for UNSW School of Mathematics)
-float* CCMiscTools::SampleSphere(unsigned N)
-{
-    if (N <= 0)
-		return 0;
-
-    float* dirs = new float[3*N];
-	if (!dirs) //not enough memory
-		return 0;
-    memset(dirs,0,3*N*sizeof(float));
-    dirs[2]=1.0;
-
-    if (N == 1)
-		return dirs;
-
-    double area = 4.0*M_PI/double(N);
-    double beta = acos(1.0-2.0/double(N));
-    static const double eps = 2.2204e-16;
-    double fuzz = eps*2.0*double(N);
-    int Ltemp = (int)ceil( (M_PI-2.0*beta)/sqrt(area)-fuzz );
-	int L = 2+(Ltemp>1 ? Ltemp : 1);
-
-	double* mbar = new double[L];
-	if (!mbar) //not enough memory
-	{
-		delete[] dirs;
-		return 0;
-	}
-
-	memset(mbar,0,L*sizeof(double));
-    mbar[0] = 1.0;
-
-	double theta = (M_PI-2.0*beta)/double(L-2);
-    int i;
-    for (i=1;i<L-1;++i)
-        mbar[i] = double(N)*(cos(theta*double(i-1)+beta)-cos(theta*double(i)+beta))*0.5;
-    mbar[L-1] = 1.0;
-
-    int *m = new int[L];
-	if (!m) //not enough memory
-	{
-		delete[] dirs;
-		delete[] mbar;
-		return 0;
-	}
-	memset(m,0,L*sizeof(int));
-    m[0] = 1;
-
-    double alpha = 0.0;
-    for (i=1;i<L;++i)
-    {
-        if ((mbar[i]-floor(mbar[i]+alpha+fuzz)) < 0.5)
-            m[i] = int(floor(mbar[i]+alpha+fuzz));
-        else
-            m[i] = int(ceil(mbar[i]+alpha-fuzz));
-
-        alpha += mbar[i]-m[i];
-    }
-
-    double z = 1.0-double(2+m[1])/double(N);
-    double *offset = new double[L-1];
-	if (!offset) //not enough memory
-	{
-		delete[] dirs;
-		delete[] mbar;
-		delete[] m;
-		return 0;
-	}
-    memset(offset,0,(L-1)*sizeof(double));
-    //offset[0] = 0.0;
-
-    int n=3;
-    for (i=1;i<L-1;++i)
-    {
-        static const double twist=4.0;
-        if (m[i-1]!=0 && m[i]!=0)
-			offset[i] = offset[i-1]+double(gcd(m[i],m[i-1]))/double(2*m[i]*m[i-1])+std::min(twist,floor(double(m[i-1])/twist))/double(m[i-1]);
-        else
-            offset[i] = 0.0;
-
-        double temp = double(m[i])/double(N);
-        double top = z+temp;
-        double bot = z-temp;
-
-        double h = cos((acos(top)+acos(bot))*0.5);
-        double r = sqrt(1.0-h*h);
-
-        for (int j=0;j<m[i];++j)
-        {
-            double s = offset[i]+double(j)/double(m[i]);
-            dirs[n++]=float(r*cos(2.0*M_PI*s));
-            dirs[n++]=float(r*sin(2.0*M_PI*s));
-            dirs[n++]=float(h);
-        }
-
-        z -= double(m[i]+m[i+1])/double(N);
-    }
-
-    //i = L;
-    //dirs[3*(N-1)]=0.0;
-    //dirs[3*(N-1)+1]=0.0;
-    dirs[3*(N-1)+2]=-1.0;
-
-    delete[] mbar;
-    delete[] m;
-    delete[] offset;
-
-    return dirs;
+	//we deduce the orthogonal vector to the input one and X
+	Y = N.cross(X);
+	//Y.normalize(); //should already be normalized!
 }

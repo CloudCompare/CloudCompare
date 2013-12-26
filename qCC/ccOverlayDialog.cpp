@@ -23,6 +23,11 @@
 //qCC_db
 #include <ccLog.h>
 
+//Qt
+#include <QEvent>
+#include <QKeyEvent>
+#include <QApplication>
+
 //system
 #include <assert.h>
 
@@ -53,13 +58,27 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 			return false;
 		
 		//otherwise, we automatically detach it
+		{
+			QWidgetList topWidgets = QApplication::topLevelWidgets();
+			foreach(QWidget* widget,topWidgets)
+			{
+				widget->removeEventFilter(this);
+			}
+		}
 		disconnect(m_associatedWin, SIGNAL(destroyed(QObject*)), this, SLOT(onLinkedWindowDeletion(QObject*)));
 		m_associatedWin = 0;
 	}
 
 	m_associatedWin = win;
 	if (m_associatedWin)
+	{
+		QWidgetList topWidgets = QApplication::topLevelWidgets();
+		foreach(QWidget* widget,topWidgets)
+		{
+			widget->installEventFilter(this);
+		}
 		connect(m_associatedWin, SIGNAL(destroyed(QObject*)), this, SLOT(onLinkedWindowDeletion(QObject*)));
+	}
 
 	return true;
 }
@@ -102,4 +121,32 @@ void ccOverlayDialog::reject()
 	QDialog::reject();
 
 	stop(false);
+}
+
+void ccOverlayDialog::addOverridenShortcut(Qt::Key key)
+{
+	m_overriddenKeys.push_back(key);
+}
+
+bool ccOverlayDialog::eventFilter(QObject *obj, QEvent *e)
+{
+	if (e->type() == QEvent::KeyPress)
+	{
+		QKeyEvent* keyEvent = static_cast<QKeyEvent*>(e);
+
+		if (m_overriddenKeys.contains(keyEvent->key()))
+		{
+			emit shortcutTriggered(keyEvent->key());
+			return true;
+		}
+		else
+		{
+			return QObject::eventFilter(obj, e);
+		}
+	}
+	else
+	{
+		// standard event processing
+		return QObject::eventFilter(obj, e);
+	}
 }

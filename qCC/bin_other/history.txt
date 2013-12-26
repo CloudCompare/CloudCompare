@@ -1,16 +1,120 @@
 *** CloudCompare versions history ***
 
-v2.5.2 XX/XX/2013
-- enhancement:
+v2.5.3 12/21/2013
+- Bug fix:
+	* Deleting a 3D view and then selecting an entity previously displayed in this view
+		would make CC crash
+
+v2.5.2 12/19/2013
+- GDAL library support added:
+	- CC can now load dozens of standard GIS 2D1/2 raster formats (Arc Grid, GeoTiff, etc.)
+- 'Height grid generation' tool enhancement:
+	- when selecting the 'min' or 'max height' projections, the user can now choose
+		to 'resample' the original cloud in order to produce a new cloud (instead
+		of generating a regularly sampled cloud using the grid cell's centers)
+	- the tool can now export the resulting grid as a true multiband raster (geotiff)
+	- menu entry renamed: "Tools > Projection > Rasterize (Height grid generation)"
+- It is now possible to compile CloudCompare with 64 bits floating point values
+	(i.e 64 bits 'doubles' instead of 32 bits 'floats') for coordinates and/or scalars.
+	It doubles the memory consumption but it increases a lot the accuracy.
+	Moreover there's absolutely no loss of information when importing/exporting clouds
+	with very big coordinates (however OpenGL still requires rather small coordinates
+	for a proper display, therefore the 'shift on load' mechanism might still be necessary)
+- New tool: 'Display > Adjust zoom'
+	- let the user set the current window zoom either directly or by specifying a pixel
+	size in the (implicit) units of the current entities.
+- New tool: Edit > Scalar fields > Set SF as coordinate(s)
+	- allows the user to map a scalar field to one or several dimensions (X,Y or Z)
+	- useful to convert a 2D raster with a scalar field (gray level, etc.) to a 2D1/2 point cloud
+- New method: File > Close all
+	- to remove all loaded entities
+- New formats:
+	- Autodesk(R) FBX (http://en.wikipedia.org/wiki/FBX)
+		* meshes only
+		* support for materials is planned but not finished yet
+	- Any geo-localized raster (geotiff, ArcGrid, etc.) thanks to GDAL library (http://www.gdal.org/)
+		* on input: use 'File > Open' (raster will be converted to a point cloud)
+		* on output: use the Height Grid Generation tool (this way, any cloud can be converted to raster)
+- New plugin: qSRA (Surface of Revolution Analysis)
+	- for comparison between a point cloud and a surface of revolution
+	- generates a map of deviations (with cylindrical or conical projection)
+	- exports resulting map as an image, a textured mesh or a point cloud
+	- can generate vertical and horizontal profiles in DXF format
+- Other enhancements:
+	- the qPoissonRecon plugin is now based on the latest version of PoissonRecon (5.5)
+		* see http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version5.5/
+		* new parameters dialog
+		* the input cloud colors can now be mapped on the resulting mesh (quick & dirty approach:
+			simply assigns to each mesh vertex the color of the nearest input point)
+	- the 'Edit > Transformation' tool now offers 3 different ways to input a transformation:
+		* classical 4x4 transformation matrix
+		* rotation axis, rotation angle and translation vector
+		* euler angles and translation vector
+	- if you paste a transformation matrix copied from the console, the 'Edit > Transformation' tool
+		will now automatically remove the timetsamp (between square brackets)
+	- when using 'Local models' when computing cloud-to-cloud distances, CC will now take the
+		smallest distance between each point and either the local model or the nearest neighbor
+		(in order to avoid clearly erroneous distances due to badly shaped local models).
 	- the 'facet' entity's normal vector can now be displayed or hidden via the facet properties
-	- BIN file loading/saving is now done in a separate thread
+	- BIN file loading/saving is now performed in a separate thread
 		* a progress dialog is now displayed during loading/saving
-		* multiple loading sesssions can be done concurrently (only interesting when loading from diffrent drives)
+		* multiple loading sessions can be done concurrently (use drag & drop on a 3D view
+			- note: only interesting when loading files from different drives)
+		* additional check addded to detect corrupted meshes
+	- Global rescaling applying at loading time is now properly handled
+		* works just like global shift
+		* appears in the entity properties as well
+		* dedicated menu entry (Edit > Edit global scale)
+	- pause button added to the "Graphical Transformation" tool (to allow rotating/panning the 3D view)
+	- new shortcuts added to the "Graphical Transformation" tool:
+		* space bar = pause/unpause
+		* return key = apply transformation (close the tool)
+		* escape key = cancel transformation (close the tool)
+	- new shortcuts added to the "Graphical Segmentation" tool:
+		* space bar = pause/unpause
+		* tab key = switch between polygonal and rectangular selection mode
+		* I key = segment points inside
+		* O key = segment points outside
+		* return key = apply segmentation (close the tool)
+		* delete key = apply segmentation and delete hidden points (close the tool)
+		* escape key = cancel transformation (close the tool)
+	- New types of entities can now be cloned:
+		* polylines
+		* facets
+	- Max coordinate absolute value lowered (100.000 instead of 1.000.000)
+		in order to avoid accuracy loss and display issues. However the user
+		still has the choice to ignore CC's warnings.
+	- For the sake of consistency and clarity:
+		* the 'Free scale parameter' option of the ICP registration dialog and the 'fixed scale' option
+			of the Point-pair based alignment dialog are both renamed 'Adjust scale'
+		* the 'Edit > Synchronize' tool is moved and renamed 'Tools > Registration > Match barycenters'
+		* the ICP registration tool now issues the same textual report as the Point-pair based alignment tool
+	- the Connected Components tool dialog now:
+		* displays the octree cell size as the currently selected level
+		* the components are automatically 'selected' in order to clearly identify them without random colors
+			(the 'random colors' checkbox is not selected by default anymore)
+		* the components are sorted by their size (starting from the biggest)
+	- new command lines options (see http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine):
+		* C2C_DIST: cloud to cloud distance computation
+		* C2M_DIST: cloud to mesh distance computation
+		* SAMPLE_MESH: to sample points on a mesh
+		* FILTER_SF: to filter a cloud based on its scalar values
+		* STAT_TEST: to apply the local statistical filter
+		* MERGE_CLOUDS: to merge all loaded clouds
+	- 'Edit > Fuse' entry renamed 'Edit > Merge'
 - Bug fixes:
 	- the 'dip' value (in "dip & dip direction" computation with e.g. the plane orientation tool)
 		was inversed from the currently accepted definition (i.e. 0° for horizontal and 90° for vertical planes)
-	- Blank lines or commentaries were causing an infinite loop when importing ASCII files
+	- blank lines or commentaries were causing an infinite loop when importing ASCII files
 	- primitives (sphere, cylinder, etc.) were not correctly loaded from BIN files (CC would crash when loading them)
+	- sub-meshes' bounding boxes were not updated when a transformation was applied to their parent mesh or its
+		associated vertices
+	- at loading time when an entity was both too far and too big, the (optional) applied transformation to
+		recenter and rescale the entity was wrong.
+	- a call to the 'Zoom on selected entities' tool on entities not displayed in the active window would be ignored.
+	- the 'camera link' tool would sometimes make CC crash (windows were playing ping-pong ;).
+	- CloudCompare can now recover from errors encountered in OBJ normals or texture coordinates (normals or textures
+		are simply discarded)
 
 v2.5.1 10/19/2013
 - The 'Clipping-box' tool has a new feature: 'contour' extraction

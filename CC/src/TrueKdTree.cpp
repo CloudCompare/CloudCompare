@@ -21,7 +21,6 @@
 #include "GenericProgressCallback.h"
 #include "GenericIndexedCloudPersist.h"
 #include "Neighbourhood.h"
-#include "DistanceComputationTools.h"
 
 //system
 #include <algorithm>
@@ -35,8 +34,8 @@ using namespace CCLib;
 TrueKdTree::TrueKdTree(GenericIndexedCloudPersist* cloud)
 	: m_root(0)
 	, m_associatedCloud(cloud)
-	, m_maxRMS(0.0)
-	, m_outliersRatio(0)
+	, m_maxError(0.0)
+	, m_errorMeasure(DistanceComputationTools::RMS)
 	, m_maxPointCountPerCell(0)
 {
 	assert(m_associatedCloud);
@@ -72,7 +71,7 @@ static void InitProgress(GenericProgressCallback* progressCb, unsigned totalCoun
 	{
 		s_progressCb->setMethodTitle("Kd-tree computation");
 		char info[256];
-		sprintf(info,"Points: %i",totalCount);
+		sprintf(info,"Points: %u",totalCount);
 		s_progressCb->setInfo(info);
 		s_progressCb->start();
 		QCoreApplication::processEvents();
@@ -105,27 +104,26 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	const PointCoordinateType* planeEquation = Neighbourhood(subset).getLSQPlane();
 	if (!planeEquation)
 	{
-		//an error occured during LS plane computation?!
+		//an error occurred during LS plane computation?!
 		delete subset;
 		return 0;
 	}
 
-	//we always split sets larger the a given size (but we can't skip cells with less than 6 points!)
-	ScalarType rms = -1;
+	//we always split sets larger than a given size (but we can't skip cells with less than 6 points!)
+	ScalarType error = -1;
 	if (count < m_maxPointCountPerCell || m_maxPointCountPerCell < 6)
 	{
 		assert(fabs(CCVector3(planeEquation).norm2() - 1.0) < 1.0e-6);
-		//ScalarType rms = (count != 3 ? DistanceComputationTools::computeCloud2PlaneDistanceRMS(subset, planeEquation) : 0);
-		rms = (count != 3 ? DistanceComputationTools::ComputeCloud2PlaneRobustMax(subset, planeEquation, m_outliersRatio) : 0);
+		error = (count != 3 ? DistanceComputationTools::ComputeCloud2PlaneDistance(subset, planeEquation, m_errorMeasure) : 0);
 	
 		//if we have less than 6 points, then the subdivision would produce a subset with less than 3 points
 		//(and we can't fit a plane on less than 3 points!)
-		bool isLeaf = (count < 6 || rms <= m_maxRMS);
+		bool isLeaf = (count < 6 || error <= m_maxError);
 		if (isLeaf)
 		{
 			UpdateProgress(count);
 			//the Leaf class takes ownership of the subset!
-			return new Leaf(subset,planeEquation,rms);
+			return new Leaf(subset,planeEquation,error);
 		}
 	}
 
@@ -181,10 +179,10 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 		else //in fact we can't split this cell!
 		{
 			UpdateProgress(count);
-			if (rms < 0)
-				rms = (count != 3 ? DistanceComputationTools::ComputeCloud2PlaneRobustMax(subset, planeEquation, 0.02f) : 0);
+			if (error < 0)
+				error = (count != 3 ? DistanceComputationTools::ComputeCloud2PlaneDistance(subset, planeEquation, m_errorMeasure) : 0);
 			//the Leaf class takes ownership of the subset!
-			return new Leaf(subset,planeEquation,rms);
+			return new Leaf(subset,planeEquation,error);
 		}
 	}
 
@@ -245,9 +243,9 @@ TrueKdTree::BaseNode* TrueKdTree::split(ReferenceCloud* subset)
 	return node;
 }
 
-bool TrueKdTree::build(	double maxRMS,
+bool TrueKdTree::build(	double maxError,
+						DistanceComputationTools::ERROR_MEASURES errorMeasure/*=DistanceComputationTools::RMS*/,
 						unsigned maxPointCountPerCell/*=0*/,
-						float outliersRatio/*=0.0*/,
 						GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!m_associatedCloud)
@@ -286,9 +284,9 @@ bool TrueKdTree::build(	double maxRMS,
 	InitProgress(progressCb,count);
 
 	//launch recursive process
-	m_maxRMS = maxRMS;
+	m_maxError = maxError;
 	m_maxPointCountPerCell = maxPointCountPerCell;
-	m_outliersRatio = outliersRatio;
+	m_errorMeasure = errorMeasure;
 	m_root = split(subset);
 
 	//clear static structure

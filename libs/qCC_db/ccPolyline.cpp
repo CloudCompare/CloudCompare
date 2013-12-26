@@ -44,12 +44,24 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 }
 
 ccPolyline::ccPolyline(const ccPolyline& poly)
-	: Polyline(ccPointCloud::From(poly.getAssociatedCloud()))
-	, ccHObject("Polyline")
+	: Polyline(0)
+	, ccHObject(poly.getName())
 {
-	assert(m_theAssociatedCloud);
-	if (m_theAssociatedCloud)
-		addPointIndex(0,m_theAssociatedCloud->size());
+	ccPointCloud* cloud = dynamic_cast<ccPointCloud*>(poly.m_theAssociatedCloud);
+	ccPointCloud* clone = cloud ? cloud->partialClone(&poly) : ccPointCloud::From(&poly);
+	if (clone)
+	{
+		setAssociatedCloud(clone);
+		assert(m_theAssociatedCloud);
+		if (m_theAssociatedCloud)
+			addPointIndex(0,m_theAssociatedCloud->size());
+	}
+	else
+	{
+		//not enough memory?
+		ccLog::Warning("[ccPolyline][copy constructor] Not enough memory!");
+		//return;
+	}
 	setClosed(poly.m_isClosed);
 	set2DMode(poly.m_mode2D);
 	setForeground(poly.m_foreground);
@@ -57,6 +69,8 @@ ccPolyline::ccPolyline(const ccPolyline& poly)
 	lockVisibility(poly.isVisiblityLocked());
 	setColor(poly.m_rgbColor);
 	setWidth(poly.m_width);
+	showColors(poly.colorsShown());
+	setVisible(poly.isVisible());
 }
 
 void ccPolyline::set2DMode(bool state)
@@ -91,7 +105,8 @@ void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
 
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-	if (size() < 2)
+	unsigned vertCount = size();
+	if (vertCount < 2)
 		return;
 
 	bool draw = false;
@@ -119,11 +134,9 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
 
-		unsigned count = size();
-		
-		for (unsigned i=0; i<count; ++i)
+		for (unsigned i=0; i<vertCount; ++i)
 		{
-			glVertex3fv(m_theAssociatedCloud->getPoint(m_theIndexes->getValue(i))->u);
+			ccGL::Vertex3v(getPoint(i)->u);
 		}
 
 		glEnd();
@@ -203,9 +216,9 @@ bool ccPolyline::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccHObject::fromFile_MeOnly(in,dataVersion))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	if (dataVersion<28)
@@ -357,4 +370,12 @@ PointCoordinateType ccPolyline::computeLength() const
 	}
 
 	return length;
+}
+
+unsigned ccPolyline::getUniqueIDForDisplay() const
+{
+	if (m_parent && m_parent->getParent() && m_parent->getParent()->isA(CC_FACET))
+		return m_parent->getParent()->getUniqueID();
+	else
+		return getUniqueID();
 }

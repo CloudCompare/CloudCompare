@@ -17,9 +17,6 @@
 
 #include "ccFastMarchingForNormsDirection.h"
 
-//CCLib
-#include <DistanceComputationTools.h>
-
 //qCC_db
 #include <ccNormalVectors.h>
 #include <ccGenericPointCloud.h>
@@ -44,28 +41,17 @@ static CCVector3 ComputeRobustAverageNorm(	CCLib::ReferenceCloud* subset,
 	assert(sourceCloud->hasNormals());
 	assert(subset->getAssociatedCloud() == static_cast<CCLib::GenericIndexedCloud*>(sourceCloud));
 
-	//we compute the (least square) best fit plane
-	CCVector3 Nplane;
-	const PointCoordinateType* Nlsq = CCLib::Neighbourhood(subset).getLSQPlane();
-	if (Nlsq)
-	{
-		Nplane = CCVector3(Nlsq);
-	}
-	//else //not enough points?
-	{
-		//we simply take the first one!
-		const PointCoordinateType* N = sourceCloud->getPointNormal(subset->getPointGlobalIndex(0));
-		Nplane = CCVector3(N);
-	}
+	//we simply take the first normal as reference (DGM: seems to work better than the LSQ plane!)
+	const PointCoordinateType* N = sourceCloud->getPointNormal(subset->getPointGlobalIndex(0));
 
-	//now we can compute the mean normal, using the plane normal as reference for their sign
+	//now we can compute the mean normal, using the first normal as reference for the sign
 	CCVector3 Nout(0,0,0);
 	unsigned n = subset->size();
 	for (unsigned i=0; i<n; ++i)
 	{
 		const PointCoordinateType* Ni = sourceCloud->getPointNormal(subset->getPointGlobalIndex(i));
 		//compute the scalar product between the ith point normal and the robust one
-		PointCoordinateType ps = CCVector3::vdot(Ni,Nplane.u);
+		PointCoordinateType ps = CCVector3::vdot(Ni,N);
 		if (ps < 0)
 		{
 			CCVector3::vsubstract(Nout.u,Ni,Nout.u);
@@ -109,7 +95,6 @@ int ccFastMarchingForNormsDirection::init(ccGenericPointCloud* cloud,
 			//create corresponding cell
 			DirectionCell* aCell = new DirectionCell;
 			{
-				//aCell->processed = false;
 				//aCell->signConfidence = 1;
 				aCell->cellCode = cellCodes.back();
 				aCell->N = ComputeRobustAverageNorm(Yk,cloud);
@@ -158,10 +143,10 @@ void ccFastMarchingForNormsDirection::resolveCellOrientation(unsigned index)
 	unsigned nNeg = 0;
 	float confNeg = 0;
 #endif
-	for (unsigned i=0; i<6; ++i)
+	for (unsigned i=0; i<m_numberOfNeighbours; ++i)
 	{
 		DirectionCell* nCell = static_cast<DirectionCell*>(m_theGrid[static_cast<int>(index) + m_neighboursIndexShift[i]]);
-		if (nCell && nCell->processed)
+		if (nCell && nCell->state == DirectionCell::ACTIVE_CELL)
 		{
 			//compute the confidence for each neighbor
 			float confidence = computePropagationConfidence(nCell,theCell);
@@ -200,7 +185,6 @@ void ccFastMarchingForNormsDirection::resolveCellOrientation(unsigned index)
 	}
 	theCell->signConfidence = bestConf;
 	assert(theCell->signConfidence > 0);
-	theCell->processed = true;
 }
 
 #ifdef _DEBUG
@@ -218,7 +202,7 @@ int ccFastMarchingForNormsDirection::step()
 		return 0;
 
 	CCLib::FastMarching::Cell* minTCell =  m_theGrid[minTCellIndex];
-	assert(minTCell && minTCell->state != CCLib::FastMarching::Cell::ACTIVE_CELL);
+	assert(minTCell && minTCell->state != DirectionCell::ACTIVE_CELL);
 
 	if (minTCell->T < Cell::T_INF())
 	{
@@ -233,14 +217,13 @@ int ccFastMarchingForNormsDirection::step()
 		static_cast<DirectionCell*>(minTCell)->scalar = static_cast<float>(s_cellIndex++);
 #endif
 
-		//we add this cell to the "ACTIVE" set
-		minTCell->state = CCLib::FastMarching::Cell::ACTIVE_CELL;
-		m_activeCells.push_back(minTCellIndex);
-		//resolve its orientation by the way
+		//resolve the cell orientation
 		resolveCellOrientation(minTCellIndex);
+		//we add this cell to the "ACTIVE" set
+		addActiveCell(minTCellIndex);
 
 		//add its neighbors to the TRIAL set
-		for (unsigned i=0;i<CC_FM_NUMBER_OF_NEIGHBOURS;++i)
+		for (unsigned i=0;i<m_numberOfNeighbours;++i)
 		{
 			//get neighbor cell
 			unsigned nIndex = minTCellIndex + m_neighboursIndexShift[i];
@@ -248,15 +231,13 @@ int ccFastMarchingForNormsDirection::step()
 			if (nCell)
 			{
 				//if it' not yet a TRIAL cell
-				if (nCell->state == CCLib::FastMarching::Cell::FAR_CELL)
+				if (nCell->state == DirectionCell::FAR_CELL)
 				{
-					nCell->state = CCLib::FastMarching::Cell::TRIAL_CELL;
 					nCell->T = computeT(nIndex);
-
 					addTrialCell(nIndex);
 				}
 				//otherwise we must update it's arrival time
-				else if (nCell->state == CCLib::FastMarching::Cell::TRIAL_CELL)
+				else if (nCell->state == DirectionCell::TRIAL_CELL)
 				{
 					const float& t_old = nCell->T;
 					float t_new = computeT(nIndex);
@@ -266,6 +247,10 @@ int ccFastMarchingForNormsDirection::step()
 				}
 			}
 		}
+	}
+	else
+	{
+		addIgnoredCell(minTCellIndex);
 	}
 
 	return 1;
@@ -278,112 +263,6 @@ float ccFastMarchingForNormsDirection::computeTCoefApprox(CCLib::FastMarching::C
 	float orientationConfidence = computePropagationConfidence(oCell,dCell); //between 0 and 1 (ideal: 1)
 
 	return (1.0f-orientationConfidence) * oCell->signConfidence;
-}
-
-float ccFastMarchingForNormsDirection::computeT(unsigned index)
-{
-	DirectionCell* theCell = static_cast<DirectionCell*>(m_theGrid[index]);
-
-	//arrival time FROM the 6 neighbors
-	double T[6] = { 0,0,0,0,0,0 };
-	{
-		for (unsigned n=0; n<6; ++n)
-		{
-			int nIndex = static_cast<int>(index) + m_neighboursIndexShift[n];
-			DirectionCell* nCell = static_cast<DirectionCell*>(m_theGrid[nIndex]);
-			if (nCell)
-			{
-				T[n] = nCell->T + m_neighboursDistance[n] * computeTCoefApprox(nCell,theCell);
-			}
-			else
-			{
-				//no front yet
-				T[n] = Cell::T_INF();
-			}
-		}
-	}
-
-	double A=0, B=0, C=0;
-	double Tij = static_cast<double>(theCell->T);
-
-	//Quadratic eq. along X
-	{
-		//see c_FastMarchingNeighbourPosShift for correspondances
-		const double& Txm = T[3];
-		const double& Txp = T[1];
-		double Tmin = std::min(Txm,Txp);
-		if (Tij > Tmin)
-		{
-			A += 1.0;
-			B += -2.0 * Tmin;
-			C += Tmin * Tmin;
-		}
-	}
-
-	//Quadratic eq. along Y
-	{
-		//see c_FastMarchingNeighbourPosShift for correspondances
-		const double& Tym = T[0];
-		const double& Typ = T[2];
-		double Tmin = std::min(Tym,Typ);
-		if (Tij > Tmin)
-		{
-			A += 1.0;
-			B += -2.0 * Tmin;
-			C += Tmin * Tmin;
-		}
-	}
-
-	//Quadratic eq. along Z
-	{
-		//see c_FastMarchingNeighbourPosShift for correspondances
-		const double& Tzm = T[4];
-		const double& Tzp = T[5];
-		double Tmin = std::min(Tzm,Tzp);
-		if (Tij > Tmin)
-		{
-			A += 1.0;
-			B += -2.0 * Tmin;
-			C += Tmin * Tmin;
-		}
-	}
-
-	//DGM: why?
-	//C -=  static_cast<double>(m_cellSize*m_cellSize);
-
-	//solve the quadratic equation
-	double delta = B*B - 4.0*A*C;
-
-	//cases when the quadratic equation is singular
-	if (A == 0 || delta < 0)
-	{
-		Tij = Cell::T_INF();
-
-		for (unsigned n=0; n<CC_FM_NUMBER_OF_NEIGHBOURS; n++)
-		{
-			int nIndex = static_cast<int>(index) + m_neighboursIndexShift[n];
-			DirectionCell* nCell = static_cast<DirectionCell*>(m_theGrid[nIndex]);
-			if (nCell)
-			{
-				if (nCell->state == CCLib::FastMarching::Cell::TRIAL_CELL || nCell->state == CCLib::FastMarching::Cell::ACTIVE_CELL)
-				{
-					float candidateT = nCell->T + m_neighboursDistance[n] * computeTCoefApprox(nCell,theCell);
-					//take the 'closest' neighbour
-					if (candidateT < Tij)
-						Tij = candidateT;
-				}
-			}
-		}
-	}
-	else
-	{
-		//Note that the new crossing must be GREATER than the average
-		//of the active neighbors, since only EARLIER elements are active.
-		//Therefore the plus sign is appropriate.
-		Tij = (-B + sqrt(delta))/(2.0*A);
-	}
-
-	return static_cast<float>(Tij);
 }
 
 int ccFastMarchingForNormsDirection::propagate()
@@ -431,8 +310,8 @@ unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointClo
 			}
 
 #ifdef _DEBUG
-			//theCloud->setPointScalarValue(index,aCell->T);
-			theCloud->setPointScalarValue(index,aCell->signConfidence);
+			theCloud->setPointScalarValue(index,aCell->T);
+			//theCloud->setPointScalarValue(index,aCell->signConfidence);
 			//theCloud->setPointScalarValue(index,aCell->scalar);
 #endif
 			
@@ -457,18 +336,16 @@ void ccFastMarchingForNormsDirection::initTrialCells()
 		assert(seedCell != NULL);
 		assert(seedCell->T == 0);
 		assert(seedCell->signConfidence == 1);
-		seedCell->processed = true; //mark the seed cell as 'processed' (i.e. its nomal has been resolved)
 
 		//add all its neighbour cells to the TRIAL set
-		for (unsigned i=0; i<CC_FM_NUMBER_OF_NEIGHBOURS; ++i)
+		for (unsigned i=0; i<m_numberOfNeighbours; ++i)
 		{
 			unsigned nIndex = index + m_neighboursIndexShift[i];
 			DirectionCell* nCell = (DirectionCell*)m_theGrid[nIndex];
 			//if the neighbor exists (it shouldn't be in the TRIAL or ACTIVE sets)
-			if (nCell/* && nCell->state == CCLib::FastMarching::Cell::FAR_CELL*/)
+			if (nCell/* && nCell->state == DirectionCell::FAR_CELL*/)
 			{
-				assert(nCell->state == CCLib::FastMarching::Cell::FAR_CELL);
-				nCell->state = CCLib::FastMarching::Cell::TRIAL_CELL;
+				assert(nCell->state == DirectionCell::FAR_CELL);
 				addTrialCell(nIndex);
 
 				//compute its approximate arrival time
@@ -488,7 +365,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 
 	unsigned numberOfPoints = theCloud->size();
 	if (numberOfPoints == 0)
-        return -2;
+        return -1;
 
 	//we compute the octree if none is provided
 	CCLib::DgmOctree* theOctree = _theOctree;
@@ -498,7 +375,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 		if (theOctree->build(progressCb)<1)
 		{
 			delete theOctree;
-			return -3;
+			return -2;
 		}
 	}
 
@@ -514,15 +391,17 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 		ccLog::Warning("[ccFastMarchingForNormsDirection] Couldn't create temporary scalar field! Not enough memory?");
 		if (!_theOctree)
 			delete theOctree;
-		return -5;
+		return -3;
 	}
 
 	if (!theCloud->enableScalarField())
 	{
 		ccLog::Warning("[ccFastMarchingForNormsDirection] Couldn't enable temporary scalar field! Not enough memory?");
+		theCloud->deleteScalarField(sfIdx);
+		theCloud->setCurrentScalarField(oldSfIdx);
 		if (!_theOctree)
 			delete theOctree;
-		return -5;
+		return -4;
 	}
 
 	//flags indicating if each point has been processed or not
@@ -550,7 +429,7 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 		resolved->release();
 		if (!_theOctree)
 			delete theOctree;
-		return -4;
+		return -6;
 	}
 
 	//progress notification
@@ -563,6 +442,9 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 	}
 
 	const int octreeWidth = (1<<octreeLevel)-1;
+
+	//enable 26-connectivity
+	//fm.setExtendedConnectivity(true);
 
 	//while non-processed points remain...
 	unsigned resolvedPoints = 0;
@@ -591,17 +473,14 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 		pos[1] = std::min(octreeWidth,pos[1]);
 		pos[2] = std::min(octreeWidth,pos[2]);
 
-		//1st pass
-		{
-			//set corresponding FM cell as 'seed'
-			fm.setSeedCell(pos);
+		//set corresponding FM cell as 'seed'
+		fm.setSeedCell(pos);
 
-			//launch propagation
-			int result = fm.propagate();
-		}
+		//launch propagation
+		int propagationResult = fm.propagate();
 
 		//if it's a success
-		if (result >= 0)
+		if (propagationResult >= 0)
 		{
 			//compute the number of points processed during this pass
 			unsigned count = fm.updateResolvedTable(theCloud,*resolved,theNorms);
@@ -614,6 +493,11 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 			}
 
 			fm.cleanLastPropagation();
+		}
+		else
+		{
+			ccLog::Error("An error occurred during front propagation! Process cancelled...");
+			break;
 		}
 	}
 

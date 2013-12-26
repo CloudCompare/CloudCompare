@@ -71,20 +71,25 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 	if (!theCloud->isScalarFieldEnabled())
 		return false;
 
-	cc.clear();
+	//empty the input vector if necessary
+	while (!cc.empty())
+	{
+		delete cc.back();
+		cc.pop_back();
+	}
 
-	for (unsigned i=0;i<numberOfPoints;++i)
+	for (unsigned i=0; i<numberOfPoints; ++i)
 	{
 		ScalarType slabel = theCloud->getPointScalarValue(i);
-		if (slabel >= 1.0) //rejects NaN values as well
+		if (slabel >= 1) //labels start from 1! (this test rejects NaN values as well)
 		{
-			int ccLabel = (int)theCloud->getPointScalarValue(i)-1; //labels stat from 1!
+			int ccLabel = static_cast<int>(theCloud->getPointScalarValue(i))-1; 
 
-			//we fill the CCs vector with empty components until we reach the current label
-			//(they will be "filled" later)
+			//we fill the components vector with empty components until we reach the current label
+			//(they will be "used" later)
 			try
 			{
-				while (ccLabel >= (int)cc.size())
+				while (static_cast<size_t>(ccLabel) >= cc.size())
 					cc.push_back(new ReferenceCloud(theCloud));
 			}
 			catch(std::bad_alloc)
@@ -98,7 +103,11 @@ bool AutoSegmentationTools::extractConnectedComponents(GenericIndexedCloudPersis
 			if (!cc[ccLabel]->addPointIndex(i))
 			{
 				//not enough memory
-				cc.clear();
+				while (!cc.empty())
+				{
+					delete cc.back();
+					cc.pop_back();
+				}
 				return false;
 			}
 		}
@@ -144,8 +153,8 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	if (applyGaussianFilter)
 	{
 		uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(NUMBER_OF_POINTS_FOR_GRADIENT_COMPUTATION);
-		float cellSize = theOctree->getCellSize(level);
-        ScalarFieldTools::applyScalarFieldGaussianFilter(cellSize*0.33f,theCloud,-1,progressCb,theOctree);
+		PointCoordinateType cellSize = theOctree->getCellSize(level);
+        ScalarFieldTools::applyScalarFieldGaussianFilter(static_cast<float>(cellSize/3),theCloud,-1,progressCb,theOctree);
 	}
 
 	unsigned seedPoints = 0;
@@ -173,7 +182,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 		progressCb->reset();
 		progressCb->setMethodTitle("FM Propagation");
 		char buffer[256];
-		sprintf(buffer,"Octree level: %i\nNumber of points: %i",octreeLevel,numberOfPoints);
+		sprintf(buffer,"Octree level: %i\nNumber of points: %u",octreeLevel,numberOfPoints);
 		progressCb->setInfo(buffer);
 		progressCb->start();
 	}

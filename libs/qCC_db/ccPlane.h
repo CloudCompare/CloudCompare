@@ -72,7 +72,7 @@ public:
 	PointCoordinateType getYWidth() const { return m_yWidth; }
 
 	//! Returns normal
-	CCVector3 getNormal() const { return CCVector3(m_transformation.getColumn(2)); }
+	CCVector3 getNormal() const { return m_transformation.getColumnAsVec3D(2); }
 
 	//! Sets an image as texture
 	bool setAsTexture(QImage image);
@@ -90,7 +90,7 @@ protected:
     
     //inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual bool buildUp();
 
 	//! Width along 'X' dimension

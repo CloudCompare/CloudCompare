@@ -17,12 +17,17 @@
 
 #include "qPoissonRecon.h"
 
+//dialog
+#include "ui_poissonReconParamDlg.h"
+
 //Qt
 #include <QtGui>
 #include <QInputDialog>
 #include <QtCore>
 #include <QProgressDialog>
 #include <QtConcurrentRun>
+#include <QMessageBox>
+#include <QDialog>
 
 //PoissonRecon
 #include <PoissonReconLib.h>
@@ -32,6 +37,10 @@
 #include <ccPointCloud.h>
 #include <ccMesh.h>
 #include <ccPlatform.h>
+#include <ccProgressDialog.h>
+
+//CCLib
+#include <DistanceComputationTools.h>
 
 //System
 #include <algorithm>
@@ -39,7 +48,19 @@
 #include "Windows.h"
 #else
 #include <time.h>
+#include <unistd.h>
 #endif
+
+//dialog for qPoissonRecon plugin
+class PoissonReconParamDlg : public QDialog, public Ui::PoissonReconParamDialog
+{
+public:
+    PoissonReconParamDlg(QWidget* parent = 0) : QDialog(parent), Ui::PoissonReconParamDialog()
+	{
+		setupUi(this);
+		setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	}
+};
 
 qPoissonRecon::qPoissonRecon(QObject* parent/*=0*/)
 	: QObject(parent)
@@ -68,20 +89,30 @@ void qPoissonRecon::getActions(QActionGroup& group)
 	group.addAction(m_action);
 }
 
-static float* s_points = 0;
-static float* s_normals = 0;
+static PoissonReconLib::Point* s_points = 0;
+static PoissonReconLib::Point* s_normals = 0;
 static unsigned s_count = 0;
-static int s_depth = 0;
-static CoredVectorMeshData* s_mesh;
-static PoissonReconLib::PoissonReconResultInfo* s_info;
+static PoissonReconLib::Parameters s_params;
+static CoredVectorMeshData<PoissonReconLib::Vertex>* s_mesh;
+static int s_threadCountUsed = 0;
+static PoissonReconLib* s_poisson = 0;
+
+bool doInit()
+{
+	//invalid parameters
+	if (!s_poisson || !s_points || !s_normals || s_params.depth < 2  || s_count == 0)
+		return false;
+
+	return s_poisson->init(s_count, s_points, s_normals, s_params, &s_threadCountUsed);
+}
 
 bool doReconstruct()
 {
 	//invalid parameters
-	if (!s_points || !s_normals || !s_mesh || s_depth < 2  || s_count == 0)
+	if (!s_poisson || !s_mesh)
 		return false;
 
-	return PoissonReconLib::reconstruct(s_count, s_points, s_normals, *s_mesh, s_depth, s_info);
+	return s_poisson->reconstruct(*s_mesh);
 }
 
 void qPoissonRecon::doAction()
@@ -116,26 +147,34 @@ void qPoissonRecon::doAction()
 		return;
 	}
 
-	bool ok;
-	#if (QT_VERSION >= QT_VERSION_CHECK(4, 5, 0))
-	int depth = QInputDialog::getInt(0, "Poisson reconstruction","Octree depth:", 8, 1, 24, 1, &ok);
-	#else
-	int depth = QInputDialog::getInteger(0, "Poisson reconstruction","Octree depth:", 8, 1, 24, 1, &ok);
-	#endif
+	PoissonReconParamDlg prpDlg(m_app->getMainWindow());
+	//init dialog with semi-persistent settings
+	prpDlg.octreeLevelSpinBox->setValue(s_params.depth);
+	prpDlg.weightDoubleSpinBox->setValue(s_params.pointWeight);
+	prpDlg.minDepthSpinBox->setValue(s_params.minDepth);
+	prpDlg.samplesSpinBox->setValue(static_cast<int>(s_params.samplesPerNode));
+	prpDlg.solverAccuracyDoubleSpinBox->setValue(s_params.solverAccuracy);
 
-	if (!ok)
+	if (!prpDlg.exec())
 		return;
+
+	//set parameters with dialog settings
+	s_params.depth = prpDlg.octreeLevelSpinBox->value();
+	s_params.pointWeight = static_cast<float>(prpDlg.weightDoubleSpinBox->value());
+	s_params.minDepth = prpDlg.minDepthSpinBox->value();
+	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesSpinBox->value());
+	s_params.solverAccuracy = static_cast<float>(prpDlg.solverAccuracyDoubleSpinBox->value());
 
 	 //TODO: faster, lighter
 	unsigned count = pc->size();
-	float* points = new float[count*3];
+	PoissonReconLib::Point* points = new PoissonReconLib::Point[count];
 	if (!points)
 	{
 		m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
-	float* normals = new float[count*3];
+	PoissonReconLib::Point* normals = new PoissonReconLib::Point[count];
 	if (!normals)
 	{
 		delete[] points;
@@ -145,69 +184,104 @@ void qPoissonRecon::doAction()
 
 	//copy points and normals in dedicated arrays
 	{
-		float* _points = points;
-		float* _normals = normals;
 		for (unsigned i=0; i<count; ++i)
 		{
 			const CCVector3* P = pc->getPoint(i);
-			*_points++ = static_cast<float>(P->x);
-			*_points++ = static_cast<float>(P->y);
-			*_points++ = static_cast<float>(P->z);
+			points[i] = PoissonReconLib::Point(	static_cast<float>(P->x),
+													static_cast<float>(P->y),
+													static_cast<float>(P->z) );
 
 			const PointCoordinateType* N = pc->getPointNormal(i);
-			*_normals++ = static_cast<float>(N[0]);
-			*_normals++ = static_cast<float>(N[1]);
-			*_normals++ = static_cast<float>(N[2]);
+			normals[i] = PoissonReconLib::Point(	static_cast<float>(N[0]),
+													static_cast<float>(N[1]),
+													static_cast<float>(N[2]) );
 		}
 	}
 
 	/*** RECONSTRUCTION PROCESS ***/
 
-	CoredVectorMeshData mesh;
-	PoissonReconLib::PoissonReconResultInfo info;
+	CoredVectorMeshData<PoissonReconLib::Vertex> mesh;
 
 	//run in a separate thread
 	bool result = false;
 	{
+		//start message
+		m_app->dispToConsole(QString("[PoissonRecon] Job started (level %1)").arg(s_params.depth),ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
 		//progress dialog (Qtconcurrent::run can't be canceled!)
-		QProgressDialog pDlg("Operation in progress",QString(),0,0,m_app->getMainWindow());
+		QProgressDialog pDlg("Initialization",QString(),0,0,m_app->getMainWindow());
 		pDlg.setWindowTitle("Poisson Reconstruction");
 		pDlg.show();
 		//QApplication::processEvents();
+
+		PoissonReconLib poisson;
 
 		//run in a separate thread
 		s_points = points;
 		s_normals = normals;
 		s_count = count;
-		s_depth = depth;
 		s_mesh = &mesh;
-		s_info = &info;
-		QFuture<bool> future = QtConcurrent::run(doReconstruct);
+		s_threadCountUsed = 1;
+		s_poisson = &poisson;
 
-		//wait until process is finished!
-		while (!future.isFinished())
+		//init
 		{
-			#if defined(CC_WINDOWS)
-			::Sleep(500);
-			#else
-            usleep(500 * 1000);
-			#endif
+			QFuture<bool> initFuture = QtConcurrent::run(doInit);
 
-			pDlg.setValue(pDlg.value()+1);
-			QApplication::processEvents();
+			//wait until process is finished!
+			while (!initFuture.isFinished())
+			{
+				#if defined(CC_WINDOWS)
+				::Sleep(500);
+				#else
+				usleep(500 * 1000);
+				#endif
+
+				pDlg.setValue(pDlg.value()+1);
+				QApplication::processEvents();
+			}
+
+			result = initFuture.result();
 		}
 
-		result = future.result();
+		//release some memory
+		delete[] points;
+		s_points = points = 0;
+		delete[] normals;
+		s_normals = normals = 0;
+
+		//init successful?
+		if (result)
+		{
+			m_app->dispToConsole(QString("[PoissonRecon] Initialization done... starting reconstruction (%1 thread(s))").arg(s_threadCountUsed),ccMainAppInterface::STD_CONSOLE_MESSAGE);
+
+			pDlg.setLabelText(QString("Reconstruction in progress\nlevel: %1 [%2 thread(s)]").arg(s_params.depth).arg(s_threadCountUsed));
+			QApplication::processEvents();
+			
+			QFuture<bool> future = QtConcurrent::run(doReconstruct);
+
+			//wait until process is finished!
+			while (!future.isFinished())
+			{
+				#if defined(CC_WINDOWS)
+				::Sleep(500);
+				#else
+				usleep(500 * 1000);
+				#endif
+
+				pDlg.setValue(pDlg.value()+1);
+				QApplication::processEvents();
+			}
+
+			result = future.result();
+		}
+
+		s_mesh = 0;
+		s_poisson = 0;
 
 		pDlg.hide();
 		QApplication::processEvents();
 	}
-
-	//release some memory
-	delete[] points;
-	points = 0;
-	delete[] normals;
-	normals = 0;
 
 	if (!result || mesh.polygonCount() < 1)
 	{
@@ -215,10 +289,14 @@ void qPoissonRecon::doAction()
 		return;
 	}
 
+	mesh.resetIterator();
 	unsigned nic         = static_cast<unsigned>(mesh.inCorePoints.size());
 	unsigned noc         = static_cast<unsigned>(mesh.outOfCorePointCount());
 	unsigned nr_faces    = static_cast<unsigned>(mesh.polygonCount());
 	unsigned nr_vertices = nic+noc;
+
+	//end message
+	m_app->dispToConsole(QString("[PoissonRecon] Job finished (%1 triangles, %2 vertices)").arg(nr_faces).arg(nr_vertices),ccMainAppInterface::STD_CONSOLE_MESSAGE);
 
 	ccPointCloud* newPC = new ccPointCloud("vertices");
 	ccMesh* newMesh = new ccMesh(newPC);
@@ -230,10 +308,10 @@ void qPoissonRecon::doAction()
 		{
 			for (unsigned i=0; i<nic; i++)
 			{
-				const Point3D<float>& p = mesh.inCorePoints[i];
-				CCVector3 p2(	p.coords[0]*info.scale + info.center[0],
-								p.coords[1]*info.scale + info.center[1],
-								p.coords[2]*info.scale + info.center[2] );
+				PoissonReconLib::Vertex& p = mesh.inCorePoints[i];
+				CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
+								static_cast<PointCoordinateType>(p.point.coords[1]),
+								static_cast<PointCoordinateType>(p.point.coords[2]) );
 				newPC->addPoint(p2);
 			}
 		}
@@ -241,11 +319,11 @@ void qPoissonRecon::doAction()
 		{
 			for (unsigned i=0; i<noc; i++)
 			{
-				Point3D<float> p;
+				PoissonReconLib::Vertex p;
 				mesh.nextOutOfCorePoint(p);
-				CCVector3 p2(	p.coords[0]*info.scale + info.center[0],
-								p.coords[1]*info.scale + info.center[1],
-								p.coords[2]*info.scale + info.center[2] );
+				CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
+								static_cast<PointCoordinateType>(p.point.coords[1]),
+								static_cast<PointCoordinateType>(p.point.coords[2]) );
 				newPC->addPoint(p2);
 			}
 		}
@@ -254,18 +332,18 @@ void qPoissonRecon::doAction()
 		{
 			for (unsigned i=0; i<nr_faces; i++)
 			{
-				std::vector<CoredVertexIndex> vertices;
-				mesh.nextPolygon(vertices);
+				std::vector<CoredVertexIndex> triangleIndexes;
+				mesh.nextPolygon(triangleIndexes);
 
-				if (vertices.size() == 3)
+				if (triangleIndexes.size() == 3)
 				{
-					for (std::vector<CoredVertexIndex>::iterator it = vertices.begin(); it != vertices.end(); ++it)
+					for (std::vector<CoredVertexIndex>::iterator it = triangleIndexes.begin(); it != triangleIndexes.end(); ++it)
 						if (!it->inCore)
 							it->idx += nic;
 
-					newMesh->addTriangle(	vertices[0].idx,
-											vertices[1].idx,
-											vertices[2].idx );
+					newMesh->addTriangle(	triangleIndexes[0].idx,
+											triangleIndexes[1].idx,
+											triangleIndexes[2].idx );
 				}
 				else
 				{
@@ -275,7 +353,55 @@ void qPoissonRecon::doAction()
 			}
 		}
 
-		newMesh->setName(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(depth));
+		//if the input cloud has colors, try to 'map' them on the resulting mesh
+		if (pc->hasColors())
+		{
+			if (QMessageBox::question(m_app->getMainWindow(), "Poisson reconstruction","Import input cloud colors? (this may take some time)", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+			{
+				if (newPC->reserveTheRGBTable())
+				{
+					ccProgressDialog pDlg(true, m_app->getMainWindow());
+					pDlg.setInfo("Importing input colors");
+					pDlg.setMethodTitle("Poisson Reconstruction");
+					//pDlg.start();
+
+					//compute the closest-point set of 'newPc' relatively to 'pc'
+					//(to get a mapping between the resulting vertices and the input points)
+					int result = 0;
+					CCLib::ReferenceCloud CPSet(pc);
+					{
+						CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
+						params.CPSet = &CPSet;
+						params.octreeLevel = 7; //static_cast<uchar>(std::min(depth,CCLib::DgmOctree::MAX_OCTREE_LEVEL)); //TODO: find a better way to set the computation level
+
+						result = CCLib::DistanceComputationTools::computeHausdorffDistance(newPC, pc, params, &pDlg);
+					}
+
+					if (result >= 0)
+					{
+						assert(CPSet.size() == nr_vertices);
+						for (unsigned i=0; i<nr_vertices; ++i)
+						{
+							unsigned index = CPSet.getPointGlobalIndex(i);
+							newPC->addRGBColor(pc->getPointColor(index));
+						}
+						newPC->showColors(true);
+						newMesh->showColors(true);
+					}
+					else
+					{
+						m_app->dispToConsole(QString("[PoissonReconstruction] Failed to transfer colors: an error (%1) occurred during closest-point set computation!").arg(result),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+						newPC->unallocateColors();
+					}
+				}
+				else
+				{
+					m_app->dispToConsole("[PoissonReconstruction] Failed to transfer colors: not enough memory!",ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				}
+			}
+		}
+
+		newMesh->setName(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(s_params.depth));
 		newPC->setVisible(false);
 		newMesh->setVisible(true);
 		newMesh->computeNormals();

@@ -48,11 +48,11 @@ class PCVContext
 		bool init(unsigned W,
 					unsigned H,
 					CCLib::GenericCloud* cloud,
-					CCLib::GenericMesh* mesh=0,
-					bool closedMesh=true);
+					CCLib::GenericMesh* mesh = 0,
+					bool closedMesh = true);
 
-		//defini la direction de visee
-		void setViewDirection(const float* V);
+		//! Set the viewing directions
+		void setViewDirection(const CCVector3& V);
 
 		//! Increments counter for points viewed in the current display orientation (see setViewDirection)
 		/** \param pixelsSeen array of the same size as the number of vertices
@@ -73,7 +73,7 @@ class PCVContext
 		CCLib::GenericMesh* m_mesh;
 
 		//zoom courant
-		float m_zoom;
+		PointCoordinateType m_zoom;
 		//translation vers le centre de l'entitee a afficher
 		CCVector3 m_viewCenter;
 

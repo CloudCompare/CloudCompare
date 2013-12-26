@@ -10,18 +10,20 @@ Methods not yet migrated back to V2:
 File I/O:
 - PDF 3D
 - PTX files (http://www.danielgm.net/cc/forum/viewtopic.php?t=638)
-- X3D files (integration with 'xiot' in... standbye)
+- X3D files (integration with 'xiot' in... standby)
 - POD files (Pointools)
 - FARO and LEICA file formats
 - SHP files (--> GDAL)
-- geotiff files (--> GDAL)
 
 *** And from the forum topic or emails 'recent requests' ***
 
 Big ones:
-[*] flythrough mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
+[*] fly-through mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
 
 Various:
+[*] Finish FBX support (materials)
+[*] Use a scalar field (such as scattering angles) in the subsampling method to keep the "best" points
+	Equivalent approach with the local curvature (http://www.danielgm.net/cc/forum/viewtopic.php?t=711)
 [*] Add touchpad support (http://www.danielgm.net/cc/forum/viewtopic.php?t=671)
 [*] Pre-defined global shift vectors list (http://www.danielgm.net/cc/forum/viewtopic.php?t=651)
 [*] Reverse Unroll Feature (http://www.danielgm.net/cc/forum/viewtopic.php?t=645)
@@ -32,13 +34,13 @@ Various:
 [*] Use PDAL instead of libLAS (http://www.danielgm.net/cc/forum/viewtopic.php?f=15&t=437&p=1014#p1014)
 [*] Run the PCV plugin on more than one file at a time (or batch process)
 [*] Command line mode could be extended (more methods, etc.)
-[*] Add 'GL filter' plugins support to ccViewer
+[*] Add 'GL filter' plugins support to ccViewer (i.e. qEDL & qSSAO)
 [*] Add interactive measurement features to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
 [*] Add 'TRANGLE_STRIPS' support to VTK I/O filter (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=598)
 
 From Thomas S. (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=550)
-[*] It would be great if the programm could manage long coordinates for the georeferencing (?!)
+[*] It would be great if the program could manage long coordinates for the georeferencing (?!)
 [*] If CloudCompare would support VisualSFM, it would be possible to import the VisualSFM-Project (with the saved camera positions).
 	Then it should be possible to measure the points for the georeferencing in the images itself, instead of the point-cloud, which would be much more accurate.
 
@@ -77,7 +79,6 @@ From Rav M.
 [*] move and rotate global coordinate (X,Y,Z) or aligning it like camera and then adding another parts to correct scene in right place.
 
 From Gianluca C.
-[*] find a way to transfer the colors from the pointcloud to the Poisson reconstructed surface (qPoissonRecon)
 [*] to overlay an image over the mesh with some common points and "drape" the photo on the surface
 
 From Andrew O.
@@ -102,6 +103,6 @@ From Andrew O.
 From 'dsims1980'
 [*] Spherical Parameterization of cloud or meshes is very useful for visual comparison of two models (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=581)
 
-From Eugene
+From Eugene L.
 [*] To be able to transfer color from a jpg image to a mesh or point cloud.
 [*] To perform volume calculation

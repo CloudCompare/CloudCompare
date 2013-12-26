@@ -83,7 +83,7 @@ int SavePCD::compute()
 	if (!cloud)
 		return -1;
 
-    sensor_msgs::PointCloud2::Ptr out_cloud (new sensor_msgs::PointCloud2);
+    PCLCloud::Ptr out_cloud (new PCLCloud);
 
     cc2smReader* converter = new cc2smReader();
     converter->setInputCloud(cloud);

@@ -226,12 +226,12 @@ namespace PdmsTools
         class SCylinder : public DesignElement
         {
              public:
-                float diameter;
-                float height;
-                float xtshear;
-                float ytshear;
-                float xbshear;
-                float ybshear;
+                PointCoordinateType diameter;
+                PointCoordinateType height;
+                PointCoordinateType xtshear;
+                PointCoordinateType ytshear;
+                PointCoordinateType xbshear;
+                PointCoordinateType ybshear;
 
 				SCylinder()
 					: diameter(0)
@@ -255,9 +255,9 @@ namespace PdmsTools
         class CTorus : public DesignElement
         {
              public:
-                float inside_radius;
-                float outside_radius;
-                float angle;
+                PointCoordinateType inside_radius;
+                PointCoordinateType outside_radius;
+                PointCoordinateType angle;
 
 				CTorus() : inside_radius(0), outside_radius(0), angle(0) {}
 
@@ -274,7 +274,7 @@ namespace PdmsTools
         class RTorus : public CTorus
         {
              public:
-                float height;
+                PointCoordinateType height;
 
 				RTorus() : CTorus(), height(0) {}
 
@@ -289,9 +289,9 @@ namespace PdmsTools
         class Dish : public DesignElement
         {
             public:
-                float diameter;
-                float height;
-                float radius;
+                PointCoordinateType diameter;
+                PointCoordinateType height;
+                PointCoordinateType radius;
 
                 Dish();
 
@@ -306,9 +306,9 @@ namespace PdmsTools
         class Cone : public DesignElement
         {
             public:
-                float dtop;
-                float dbottom;
-                float height;
+                PointCoordinateType dtop;
+                PointCoordinateType dbottom;
+                PointCoordinateType height;
 
 				Cone() : dtop(0), dbottom(0), height(0) {}
 
@@ -406,7 +406,7 @@ namespace PdmsTools
         {
             public:
                 Loop *loop;
-                float height;
+                PointCoordinateType height;
 
 				Extrusion() : loop(0), height(0.0f) {}
                 virtual ~Extrusion() {if(loop) delete loop;}
@@ -535,7 +535,7 @@ namespace PdmsTools
                 virtual bool handle(PointCoordinateType numvalue);
                 virtual bool handle(const char* str);
                 virtual bool isValid() const;
-                bool getAxis(CCVector3 &x, CCVector3 &y, CCVector3 &z) const;
+                bool getAxes(CCVector3 &x, CCVector3 &y, CCVector3 &z) const;
                 virtual bool execute(PdmsObjects::GenericItem **item) const;
 
             protected:

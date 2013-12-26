@@ -35,13 +35,13 @@ bool cc2DViewportObject::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool cc2DViewportObject::fromFile_MeOnly(QFile& in, short dataVersion)
+bool cc2DViewportObject::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccHObject::fromFile_MeOnly(in,dataVersion))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//ccViewportParameters (dataVersion>=20)
-	if (!m_params.fromFile(in,dataVersion))
+	if (!m_params.fromFile(in, dataVersion, flags))
 		return false;
 
 	return true;

@@ -59,7 +59,7 @@ protected:
 
     //inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const { return ccSerializationHelper::GenericArrayToFile(*this,out); }
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion) { return ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion); }
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags) { return ccSerializationHelper::GenericArrayFromFile(*this,in,dataVersion); }
 
 };
 

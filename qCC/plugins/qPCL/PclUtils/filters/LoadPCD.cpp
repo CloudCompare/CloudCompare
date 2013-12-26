@@ -86,19 +86,19 @@ int LoadPCD::compute()
 	{
 		QString filename = m_filenames[k];
 
-        boost::shared_ptr<sensor_msgs::PointCloud2> cloud_ptr_in = loadSensorMessage(filename);
+        boost::shared_ptr<PCLCloud> cloud_ptr_in = loadSensorMessage(filename);
         
 		if (!cloud_ptr_in) //loading failed?
 			return 0;
 
-		sensor_msgs::PointCloud2::Ptr cloud_ptr;
+		PCLCloud::Ptr cloud_ptr;
         if (!cloud_ptr_in->is_dense) //data may contain nans. Remove them
         {
             //now we need to remove nans
-            pcl::PassThrough<sensor_msgs::PointCloud2> passFilter;
+            pcl::PassThrough<PCLCloud> passFilter;
             passFilter.setInputCloud(cloud_ptr_in);
 
-			cloud_ptr = sensor_msgs::PointCloud2::Ptr(new sensor_msgs::PointCloud2);
+			cloud_ptr = PCLCloud::Ptr(new PCLCloud);
             passFilter.filter(*cloud_ptr);
         }
         else
@@ -133,7 +133,7 @@ QString LoadPCD::getErrorMessage(int errorCode)
 		//THESE CASES CAN BE USED TO OVERRIDE OR ADD FILTER-SPECIFIC ERRORS CODES
 		//ALSO IN DERIVED CLASSES DEFAULT MUST BE ""
 	case -31:
-		return QString("An error occured while converting PCD to CC cloud!");
+		return QString("An error occurred while converting PCD to CC cloud!");
 	case -21:
 		return QString("No filename given, please select a pcd file.");
 	}

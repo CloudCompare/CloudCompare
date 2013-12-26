@@ -14,29 +14,27 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2241                                                              $
-//$LastChangedDate:: 2012-09-21 23:22:39 +0200 (ven., 21 sept. 2012)       $
-//**************************************************************************
-//
 
 #include "ccRegistrationDlg.h"
 
+//Local
+#include "ccDisplayOptionsDlg.h"
+#include "mainwindow.h"
+
+//CCLib
 #include <DgmOctree.h>
 #include <CloudSamplingTools.h>
 #include <GeometricalAnalysisTools.h>
 #include <ReferenceCloud.h>
 
-#include "ccDisplayOptionsDlg.h"
-#include "mainwindow.h"
+//qCC_db
 #include <ccHObject.h>
 
+//system
 #include <assert.h>
 
 //semi-persistent options
-static bool s_freeScaleParameter = false;
+static bool s_adjustScale = false;
 static unsigned s_randomSamplingLimit = 20000;
 static double s_errorDifference = 1.0e-6;
 
@@ -59,7 +57,7 @@ ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget*
     ccDisplayOptionsDlg::SetButtonColor(modelColorButton,qYellow);
 
 	//restore semi-persistent settings
-	checkBoxFreeScale->setChecked(s_freeScaleParameter);
+	adjustScaleCheckBox->setChecked(s_adjustScale);
 	randomSamplingLimitSpinBox->setValue(s_randomSamplingLimit);
 	errorDifferenceLineEdit->setText(QString::number(s_errorDifference,'e',3));
 
@@ -102,11 +100,11 @@ bool ccRegistrationDlg::useModelSFAsWeights() const
     return checkBoxUseModelSFAsWeights->isChecked();
 }
 
-bool ccRegistrationDlg::useFreeScaleParameter() const
+bool ccRegistrationDlg::adjustScale() const
 {
 	//we save the parameter by the way ;)
-    s_freeScaleParameter = checkBoxFreeScale->isChecked();
-	return s_freeScaleParameter;
+    s_adjustScale = adjustScaleCheckBox->isChecked();
+	return s_adjustScale;
 }
 
 bool ccRegistrationDlg::removeFarthestPoints() const

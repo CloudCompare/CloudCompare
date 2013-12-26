@@ -65,31 +65,31 @@ bool ccSphere::buildUp()
 	}
 
 	//2 first points: poles
-	verts->addPoint(CCVector3(0.0,0.0,m_radius));
-	verts->addNorm(0.0,0.0,1.0);
+	verts->addPoint(CCVector3(0,0,m_radius));
+	verts->addNorm(0,0,1);
 
-	verts->addPoint(CCVector3(0.0,0.0,-m_radius));
-	verts->addNorm(0.0,0.0,-1.0);
+	verts->addPoint(CCVector3(0,0,-m_radius));
+	verts->addNorm(0,0,-1);
 
 	//then, angular sweep
-	float angle_rad_step = M_PI/(float)steps;
+	PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(M_PI)/static_cast<PointCoordinateType>(steps);
 	CCVector3 N0,N,P;
 	{
-		for (unsigned j=1;j<steps;++j)
+		for (unsigned j=1; j<steps; ++j)
 		{
-			float theta = (float)j * angle_rad_step;
-			float cos_theta = cos(theta);
-			float sin_theta = sin(theta);
+			PointCoordinateType theta = static_cast<PointCoordinateType>(j) * angle_rad_step;
+			PointCoordinateType cos_theta = cos(theta);
+			PointCoordinateType sin_theta = sin(theta);
 
 			N0.x = sin_theta;
 			N0.y = 0;
 			N0.z = cos_theta;
 		
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i=0; i<steps; ++i)
 			{
-				float phi = (float)i * 2.0f * angle_rad_step;
-				float cos_phi = cos(phi);
-				float sin_phi = sin(phi);
+				PointCoordinateType phi = static_cast<PointCoordinateType>(2*i) * angle_rad_step;
+				PointCoordinateType cos_phi = cos(phi);
+				PointCoordinateType sin_phi = sin(phi);
 
 				N.x = N0.x*cos_phi;
 				N.y = N0.x*sin_phi;
@@ -110,7 +110,7 @@ bool ccSphere::buildUp()
 
 		//north pole
 		{
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i=0; i<steps; ++i)
 			{
 				unsigned A = 2+i;
 				unsigned B = (i+1<steps ? A+1 : 2);
@@ -119,10 +119,10 @@ bool ccSphere::buildUp()
 		}
 
 		//slices
-		for (unsigned j=1;j+1<steps;++j)
+		for (unsigned j=1; j+1<steps; ++j)
 		{
 			unsigned shift = 2+(j-1)*steps;		
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i=0; i<steps; ++i)
 			{
 				unsigned A = shift+i;
 				unsigned B = (i+1<steps ? A+1 : shift);
@@ -135,7 +135,7 @@ bool ccSphere::buildUp()
 		//south pole
 		{
 			unsigned shift = 2+(steps-2)*steps;
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i=0; i<steps; ++i)
 			{
 				unsigned A = shift+i;
 				unsigned B = (i+1<steps ? A+1 : shift);
@@ -163,9 +163,9 @@ bool ccSphere::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccSphere::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccSphere::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//parameters (dataVersion>=21)

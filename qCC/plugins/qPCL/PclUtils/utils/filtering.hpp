@@ -78,7 +78,7 @@ int
 computeIntensitySPINImages(const typename pcl::PointCloud<PointInT>::Ptr incloud,
                            const float radius,
                            const int k_nn,
-                           const bool mode, //true if use knn, false if radius search
+                           const bool useKnn, //true if use knn, false if radius search
                            const int n_distance_bins,
                            const int n_intensity_bins,
                            typename pcl::PointCloud<PointOutT>::Ptr outcloud)
@@ -92,84 +92,30 @@ computeIntensitySPINImages(const typename pcl::PointCloud<PointInT>::Ptr incloud
     estimator.setNrDistanceBins(n_distance_bins);
     estimator.setNrIntensityBins(n_intensity_bins);
 
-    if (mode == true)
-    {
+    if (useKnn)
         //knn
         estimator.setKSearch(k_nn);
-    }
-    else if (mode == false)
-    {
+    else if (!useKnn)
         estimator.setRadiusSearch((double) radius);
-    }
-    else
-    {
+    else // can be a bool not set?? not sure
         return -1;
-    }
 
     estimator.compute(*outcloud);
 
     return 1;
-
-
-
-
 }
-
-
-//template <int n_dist, int n_int>
-//int
-//computeIntensitySPINImages2(const sensor_msgs::PointCloud2Ptr incloud,
-//                           const float radius,
-//                           const int k_nn,
-//                           const bool mode, //true if use knn, false if radius search
-//                            sensor_msgs::PointCloud2Ptr outcloud)
-//{
-
-//    pcl::PointCloud<pcl::PointXYZI>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZI>);
-//    pcl::fromROSMsg(*incloud, *cloud);
-
-//    const int full_size = n_dist * n_int;
-//    typename pcl::PointCloud<pcl::Histogram<full_size> >::Ptr features_cloud (new pcl::PointCloud<pcl::Histogram< full_size > >);
-
-//    pcl::IntensitySpinEstimation<pcl::PointXYZI, pcl::Histogram<full_size> > estimator;
-//    estimator.setInputCloud(cloud);
-//    estimator.setNrDistanceBins(n_dist);
-//    estimator.setNrIntensityBins(n_int);
-
-//    if (mode == true)
-//    {
-//        //knn
-//        estimator.setKSearch(k_nn);
-//    }
-//    else if (mode == false)
-//    {
-//        estimator.setRadiusSearch((double) radius);
-//    }
-//    else
-//    {
-//        return -1;
-//    }
-
-//    estimator.compute(*features_cloud);
-
-//    pcl::toROSMsg(*features_cloud, *outcloud);
-
-//    return 1;
-
-//}
-
 
 
 template <typename PointInT, typename PointOutT>
 int compute_normals(const typename pcl::PointCloud<PointInT>::Ptr incloud,
 					const float radius,
-					const bool mode, //true if use knn, false if radius search
+					const bool useKnn, //true if use knn, false if radius search
 					typename pcl::PointCloud<PointOutT>::Ptr outcloud)
 {
 	typename pcl::NormalEstimationOMP<PointInT, PointOutT> normal_estimator;
 	//typename pcl::PointCloud<PointOutT>::Ptr normals (new pcl::PointCloud<PointOutT>);
 
-	if (mode) //use knn
+	if (useKnn) //use knn
 	{
 		int knn_radius = (int) radius; //cast to int
 		normal_estimator.setKSearch(knn_radius);

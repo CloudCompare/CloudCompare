@@ -27,11 +27,12 @@
 ccGenericPointCloud::ccGenericPointCloud(QString name)
 	: ccHObject(name)
 	, m_pointsVisibility(0)
+	, m_globalShift(0,0,0)
+	, m_globalScale(1.0)
 	, m_pointSize(0)
 {
     setVisible(true);
     lockVisibility(false);
-	setOriginalShift(0,0,0);
 }
 
 ccGenericPointCloud::~ccGenericPointCloud()
@@ -191,11 +192,28 @@ ccBBox ccGenericPointCloud::getMyOwnBB()
     return box;
 }
 
-void ccGenericPointCloud::setOriginalShift(double x, double y, double z)
+void ccGenericPointCloud::setGlobalShift(const CCVector3d& shift)
 {
-	m_originalShift[0]=x;
-	m_originalShift[1]=y;
-	m_originalShift[2]=z;
+	m_globalShift = shift;
+}
+
+void ccGenericPointCloud::setGlobalShift(double x, double y, double z)
+{
+	m_globalShift.x = x;
+	m_globalShift.y = y;
+	m_globalShift.z = z;
+}
+
+void ccGenericPointCloud::setGlobalScale(double scale)
+{
+	if (scale == 0)
+	{
+		ccLog::Warning("[ccGenericPointCloud::setGlobalScale] Can't handle a global scale equal to zero!");
+		m_globalScale = 1.0;
+		return;
+	}
+
+	m_globalScale = scale;
 }
 
 bool ccGenericPointCloud::toFile_MeOnly(QFile& out) const
@@ -203,8 +221,12 @@ bool ccGenericPointCloud::toFile_MeOnly(QFile& out) const
 	if (!ccHObject::toFile_MeOnly(out))
 		return false;
 
-	//'coordinates shift' (dataVersion>=20)
-	if (out.write((const char*)m_originalShift,sizeof(double)*3)<0)
+	//'global shift' (dataVersion>=20)
+	if (out.write((const char*)m_globalShift.u,sizeof(double)*3)<0)
+		return WriteError();
+
+	//'global scale' (dataVersion>=32)
+	if (out.write((const char*)&m_globalScale,sizeof(double))<0)
 		return WriteError();
 
 	//'visibility' array (dataVersion>=20)
@@ -225,17 +247,28 @@ bool ccGenericPointCloud::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccHObject::fromFile_MeOnly(in, dataVersion))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	if (dataVersion<20)
 		return CorruptError();
 
 	//'coordinates shift' (dataVersion>=20)
-	if (in.read((char*)m_originalShift,sizeof(double)*3)<0)
+	if (in.read((char*)m_globalShift.u,sizeof(double)*3)<0)
 		return ReadError();
+
+	//'global scale' (dataVersion>=32)
+	if (dataVersion >= 33)
+	{
+		if (in.read((char*)&m_globalScale,sizeof(double))<0)
+			return ReadError();
+	}
+	else
+	{
+		m_globalScale = 1.0;
+	}
 
 	//'visibility' array (dataVersion>=20)
 	bool hasVisibilityArray = false;

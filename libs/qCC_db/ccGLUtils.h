@@ -46,10 +46,11 @@ public:
                     OpenGL Textures
 	***************************************************/
 
-    static void DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h, unsigned char alpha=255);
-    static void DisplayTexture2D(GLuint tex, int w, int h, unsigned char alpha=255);
-    static void DisplayTexture2DCorner(GLuint tex, int w, int h, unsigned char alpha=255);
+    static void DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h, uchar alpha = 255);
+    static void DisplayTexture2D(GLuint tex, int w, int h, uchar alpha = 255);
+    static void DisplayTexture2DCorner(GLuint tex, int w, int h, uchar alpha = 255);
 
+	//! Saves a given texture (texID) to an image file
     static bool SaveTextureToFile(const char* filename, GLuint texID, unsigned w, unsigned h);
 
 	//! Loads texture from GPU mem to an RGBA array (i.e. 32 bits per pixel)
@@ -65,7 +66,7 @@ public:
 		\param destVec the resulting UNIT vector
 		\return 'OpenGL' style 4x4 matrix
 	**/
-	static ccGLMatrix GenerateGLRotationMatrixFromVectors(const float* sourceVec, const float* destVec);
+	static ccGLMatrix GenerateGLRotationMatrixFromVectors(const CCVector3& sourceVec, const CCVector3& destVec);
 
 	//! Generates the rotation matrix corresponding to an axis (vector) and an angle
 	/** WARNING: an OpenGL context must be active!
@@ -73,21 +74,7 @@ public:
 		\param angle_deg the rotation angle (in degrees)
 		\return 'OpenGL' style 4x4 matrix
 	**/
-	static ccGLMatrix GenerateGLRotationMatrixFromAxisAndAngle(const float* axis, float angle_deg);
-
-	//! Multiplies tow OpenGL style matrices
-	/** This method uses OpenGL by default.
-		\param A the first matrix
-		\param B the second matrix
-		\param dest the resulting matrix (A*B)
-	**/
-	static void MultGLMatrices(const float* A, const float* B, float* dest);
-
-	//! Transposes an OpenGL style matrix
-	/** \param A a matrix (4*4=16 values)
-		\param dest the resulting matrix (tA)
-	**/
-	static void TransposeGLMatrix(const float* A, float* dest);
+	static ccGLMatrix GenerateGLRotationMatrixFromAxisAndAngle(const CCVector3& axis, PointCoordinateType angle_deg);
 
     //! Returns a 4x4 'OpenGL' matrix corresponding to a given vue orientation
     /** \param orientation view orientation
@@ -108,7 +95,7 @@ public:
 	/** Displays an error message. In debug mode, pauses execution
 		and then exits.
 		\param context name of the method/object that try to catch the error
-		\return true if an error occured, false otherwise
+		\return true if an error occurred, false otherwise
 	**/
 	static bool CatchGLError(const char* context);
 

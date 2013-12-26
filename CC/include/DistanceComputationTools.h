@@ -219,7 +219,26 @@ public:
 	**/
 	static int diff(GenericIndexedCloudPersist* comparedCloud,
 					GenericIndexedCloudPersist* referenceCloud,
-					GenericProgressCallback* progressCb=0);
+					GenericProgressCallback* progressCb = 0);
+
+	//! Error estimators
+	enum ERROR_MEASURES
+	{
+		RMS,						/**< Root Mean Square error **/
+		MAX_DIST_68_PERCENT,		/**< Max distance @ 68% (1 sigma) **/
+		MAX_DIST_95_PERCENT,		/**< Max distance @ 98% (2 sigmas) **/
+		MAX_DIST_99_PERCENT,		/**< Max distance @ 99% (3 sigmas) **/
+		MAX_DIST,					/**< Max distance **/
+	};
+
+	//! Computes the "distance" (see ERROR_MEASURES) between a point cloud and a plane
+	/** \param cloud a point cloud
+		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d'
+		\param measureType measure type
+	**/
+	static ScalarType ComputeCloud2PlaneDistance(	CCLib::GenericCloud* cloud,
+													const PointCoordinateType* planeEquation,
+													ERROR_MEASURES measureType);
 
 	//! Computes the maximum distance between a point cloud and a plane
 	/** WARNING: this method uses the cloud global iterator
@@ -228,16 +247,28 @@ public:
 		\param percent percentage of lowest values ignored
 		\return the max distance @ 'percent' % between the point and the plane
 	**/
-	static ScalarType ComputeCloud2PlaneRobustMax(GenericCloud* cloud, const PointCoordinateType* planeEquation, float percent);
+	static ScalarType ComputeCloud2PlaneRobustMax(	GenericCloud* cloud,
+													const PointCoordinateType* planeEquation,
+													float percent);
+
+	//! Computes the maximum distance between a point cloud and a plane
+	/** WARNING: this method uses the cloud global iterator
+		\param cloud a point cloud
+		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d'
+		\return the max distance between the point and the plane
+	**/
+	static ScalarType ComputeCloud2PlaneMaxDistance(GenericCloud* cloud,
+													const PointCoordinateType* planeEquation);
 
 	//! Computes the Root Mean Square (RMS) distance between a cloud and a plane
 	/** Sums the squared distances between each point of the cloud and the plane, then computes the mean value.
 		WARNING: this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d'
-		\return the RMS of distances (or NaN if an error occured)
+		\return the RMS of distances (or NaN if an error occurred)
 	**/
-	static ScalarType computeCloud2PlaneDistanceRMS(GenericCloud* cloud, const PointCoordinateType* planeEquation);
+	static ScalarType computeCloud2PlaneDistanceRMS(	GenericCloud* cloud,
+														const PointCoordinateType* planeEquation);
 
 	//! Computes the Chamfer distances (approximated distances) between two point clouds
 	/** This methods uses a 3D grid to perfrom the Chamfer Distance propagation.
@@ -286,7 +317,7 @@ protected:
 		\param flipTriangleNormals if 'signedDistances' is true,  specify whether triangle normals should be computed in the 'direct' order (true) or 'indirect' (false)
 		\param maxSearchDist if greater than 0 (default value: '-1'), then the algorithm won't compute distances over this value
 		\param progressCb the client method can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\return -1 if an error occured (e.g. not enough memory) and 0 otherwise
+		\return -1 if an error occurred (e.g. not enough memory) and 0 otherwise
 	**/
 	static int computePointCloud2MeshDistanceWithOctree(OctreeAndMeshIntersection* theIntersection,
                                                                 uchar octreeLevel,
@@ -320,9 +351,11 @@ protected:
 		- (DgmOctree*) the octree corresponding to the compared cloud
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
 	static bool computeCellHausdorffDistance(const DgmOctree::octreeCell& cell,
-                                                void** additionalParameters);
+                                                void** additionalParameters,
+												NormalizedProgress* nProgress = 0);
 
 	//! Computes the "nearest neighbour distance" with local modeling for all points of an octree cell
 	/** This method has the generic syntax of a "cellular function" (see DgmOctree::localFunctionPtr).
@@ -334,9 +367,11 @@ protected:
 		- (CC_LOCAL_MODEL_TYPES*) type of local model to apply
 		\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
 	static bool computeCellHausdorffDistanceWithLocalModel(const DgmOctree::octreeCell& cell,
-                                                            void** additionalParameters);
+                                                            void** additionalParameters,
+															NormalizedProgress* nProgress = 0);
 };
 
 }

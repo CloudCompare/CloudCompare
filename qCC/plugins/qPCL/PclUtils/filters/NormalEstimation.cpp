@@ -25,7 +25,6 @@
 #include <sm2cc.h>
 
 //PCL
-#include <sensor_msgs/PointCloud2.h>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
@@ -84,7 +83,7 @@ void NormalEstimation::getParametersFromDialog()
     m_useKnn = m_dialog->useKnnCheckBox->isChecked();
     m_overwrite_curvature = m_dialog->curvatureCheckBox->isChecked();
     m_knn_radius = m_dialog->knnSpinBox->value();
-    m_radius = m_dialog->radiusDoubleSpinBox->value();
+    m_radius = static_cast<float>(m_dialog->radiusDoubleSpinBox->value());
 }
 
 int NormalEstimation::compute()
@@ -98,19 +97,14 @@ int NormalEstimation::compute()
      if (cloud->hasNormals())
          cloud->unallocateNorms();
 
-        if (cloud->hasNormals())
-            cloud->unallocateNorms();
-
-    //get xyz in sensor_msgs format
+    //get xyz in PCL format
     cc2smReader converter;
     converter.setInputCloud(cloud);
-    sensor_msgs::PointCloud2 sm_cloud = converter.getXYZ();
-
+    PCLCloud sm_cloud = converter.getXYZ();
 
     //get as pcl point cloud
     pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
-
-    pcl::fromROSMsg(sm_cloud, *pcl_cloud);
+    FROM_PCL_CLOUD(sm_cloud, *pcl_cloud);
 
     //create storage for normals
     pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);
@@ -118,8 +112,8 @@ int NormalEstimation::compute()
     //now compute
     int result = compute_normals<pcl::PointXYZ, pcl::PointNormal>(pcl_cloud, m_useKnn ? m_knn_radius: m_radius, m_useKnn, normals);
 
-    sensor_msgs::PointCloud2::Ptr sm_normals (new sensor_msgs::PointCloud2);
-    pcl::toROSMsg(*normals, *sm_normals);
+    PCLCloud::Ptr sm_normals (new PCLCloud);
+    TO_PCL_CLOUD(*normals, *sm_normals);
 
 	sm2ccConverter converter2(sm_normals);
     converter2.addNormals(cloud);
@@ -133,5 +127,5 @@ int NormalEstimation::compute()
 //INSTANTIATING TEMPLATED FUNCTIONS
 template int compute_normals<pcl::PointXYZ, pcl::PointNormal> (const  pcl::PointCloud<pcl::PointXYZ>::Ptr incloud,
                                                                const float radius,
-                                                               const bool mode, //true if use knn, false if radius search
+                                                               const bool useKnn, //true if use knn, false if radius search
                                                                pcl::PointCloud<pcl::PointNormal>::Ptr outcloud);

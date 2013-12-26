@@ -137,9 +137,9 @@ void ccCameraParamEditDlg::cameraCenterChanged()
         return;
 
 	m_associatedWin->blockSignals(true);
-    m_associatedWin->setCameraPos( CCVector3(exDoubleSpinBox->value(),
-												eyDoubleSpinBox->value(),
-												ezDoubleSpinBox->value()));
+    m_associatedWin->setCameraPos( CCVector3(	static_cast<PointCoordinateType>(exDoubleSpinBox->value()),
+												static_cast<PointCoordinateType>(eyDoubleSpinBox->value()),
+												static_cast<PointCoordinateType>(ezDoubleSpinBox->value())));
 	m_associatedWin->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -151,9 +151,9 @@ void ccCameraParamEditDlg::pivotChanged()
         return;
 
 	m_associatedWin->blockSignals(true);
-    m_associatedWin->setPivotPoint(CCVector3(rcxDoubleSpinBox->value(),
-												rcyDoubleSpinBox->value(),
-													rczDoubleSpinBox->value()));
+    m_associatedWin->setPivotPoint(CCVector3(	static_cast<PointCoordinateType>(rcxDoubleSpinBox->value()),
+												static_cast<PointCoordinateType>(rcyDoubleSpinBox->value()),
+												static_cast<PointCoordinateType>(rczDoubleSpinBox->value())));
 	m_associatedWin->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -164,7 +164,7 @@ void ccCameraParamEditDlg::fovChanged(double value)
     if (!m_associatedWin)
         return;
 
-    m_associatedWin->setFov(value);
+    m_associatedWin->setFov(static_cast<float>(value));
     m_associatedWin->redraw();
 }
 
@@ -370,7 +370,7 @@ void ccCameraParamEditDlg::updateViewMode()
 
 void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrix& mat)
 {
-    PointCoordinateType phi=0.0,theta=0.0,psi=0.0;
+    PointCoordinateType phi=0, theta=0, psi=0;
     CCVector3 trans;
     mat.getParameters(phi,theta,psi,trans);
 
@@ -429,15 +429,15 @@ void ccCameraParamEditDlg::updatePivotPoint(const CCVector3& P)
 
 ccGLMatrix ccCameraParamEditDlg::getMatrix()
 {
-    PointCoordinateType phi=0.0,theta=0.0,psi=0.0;
-    CCVector3 trans;
+    PointCoordinateType phi = 0, theta = 0, psi = 0;
 
-    phi     = CC_DEG_TO_RAD * (PointCoordinateType)phiSpinBox->value();
-    psi     = CC_DEG_TO_RAD * (PointCoordinateType)psiSpinBox->value();
-    theta   = CC_DEG_TO_RAD * (PointCoordinateType)thetaSpinBox->value();
+    phi     = static_cast<PointCoordinateType>(CC_DEG_TO_RAD * phiSpinBox->value());
+    psi     = static_cast<PointCoordinateType>(CC_DEG_TO_RAD * psiSpinBox->value());
+    theta   = static_cast<PointCoordinateType>(CC_DEG_TO_RAD * thetaSpinBox->value());
 
     ccGLMatrix mat;
-    mat.initFromParameters(phi,theta,psi,trans);
+    CCVector3 T(0,0,0);
+    mat.initFromParameters(phi,theta,psi,T);
 
     return mat;
 }

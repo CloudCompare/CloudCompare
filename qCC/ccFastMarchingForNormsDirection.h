@@ -26,9 +26,6 @@
 //qCC_db
 #include <ccAdvancedTypes.h>
 
-//System
-#include <queue>
-
 class ccGenericPointCloud;
 class ccPointCloud;
 
@@ -50,11 +47,9 @@ public:
 	ccFastMarchingForNormsDirection();
 
 	//! Initializes the grid with a point cloud (and ist corresponding octree)
-	/** The points should be associated to scalar values.
-		The Fast Marching grid will have the same characteristics as
-		the octree considered at a given level of subdivision. The local
-		front acceleration in each cell is deduced from the scalar values
-		associated to the points lying in the octree cell (mean value).
+	/** The points should be associated to an (active) scalar field.
+		The Fast Marching grid will have the same dimensions as
+		the input octree considered at a given level of subdivision.
 		\param cloud the point cloud
 		\param theNorms the normals array
 		\param theOctree the associated octree
@@ -66,19 +61,12 @@ public:
 				CCLib::DgmOctree* theOctree,
 				uchar gridLevel);
 
-	//! Updates a list of point flags, indicating the points alreay processed
+	//! Updates a list of point flags, indicating the points already processed
 	/** \return the number of resolved points
 	**/
 	unsigned updateResolvedTable(	ccGenericPointCloud* theCloud,
 									GenericChunkedArray<1,uchar> &resolved,
 									NormsIndexesTableType* theNorms);
-
-	//! Find peaks of local acceleration values
-	/** This method is usefull when using this Fast Marching
-		algorithm in a Watershed process. Peak cells are
-		automatically set as "seeds".
-	**/
-	void findPeaks();
 
 	//inherited methods (see FastMarchingAlgorithm)
 	int propagate();
@@ -96,7 +84,6 @@ protected:
 			, C(0,0,0)
 			, cellCode(0)
 			, signConfidence(1)
-			, processed(false)
 #ifdef _DEBUG
 			, scalar(0)
 #endif
@@ -113,8 +100,6 @@ protected:
         CCLib::DgmOctree::OctreeCellCodeType cellCode;
         //! Confidence value
         float signConfidence;
-        //! Flag
-        bool processed;
 #ifdef _DEBUG
 		//! Undefined scalar for debug purposes
 		float scalar;
@@ -122,7 +107,6 @@ protected:
     };
 
 	//inherited methods (see FastMarchingAlgorithm)
-	virtual float computeT(unsigned index);
 	virtual float computeTCoefApprox(CCLib::FastMarching::Cell* currentCell, CCLib::FastMarching::Cell* neighbourCell) const;
 	virtual int step();
 	virtual void initTrialCells();
@@ -135,11 +119,6 @@ protected:
 
 	//! Resolves the direction of a given cell (once and for all)
 	void resolveCellOrientation(unsigned index);
-
-	//! Sets the propagation timings as distances for each point
-	/** \return true if ok, false otherwise
-	**/
-	bool setPropagationTimingsAsDistances();
 };
 
 #endif

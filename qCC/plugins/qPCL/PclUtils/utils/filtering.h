@@ -18,6 +18,8 @@
 #ifndef qPCL_FILTERING_H
 #define qPCL_FILTERING_H
 
+#include "pcl_utilities.h"
+
 //PCL
 #include <pcl/point_types.h>
 #include <pcl/point_cloud.h>
@@ -84,7 +86,7 @@ template <typename PointInT, typename PointOutT> int
 template <typename PointInT, typename PointOutT> int
 	compute_normals(                                                const typename pcl::PointCloud<PointInT>::Ptr incloud,
 	const float radius,
-	const bool mode, //true if use knn, false if radius search
+	const bool useKnn, //true if use knn, false if radius search
 	typename pcl::PointCloud<PointOutT>::Ptr outcloud
 	);
 
@@ -94,19 +96,10 @@ int
 	computeIntensitySPINImages(const typename pcl::PointCloud<PointInT>::Ptr incloud,
 	const float radius,
 	const int k_nn,
-	const bool mode, //true if use knn, false if radius search
+	const bool useKnn, //true if use knn, false if radius search
 	const int n_distance_bins,
 	const int n_intensity_bins,
 	typename pcl::PointCloud<PointOutT>::Ptr);
-
-//template <int n_dist, int n_int>
-//int
-//computeIntensitySPINImages2(const sensor_msgs::PointCloud2Ptr incloud,
-//                           const float radius,
-//                           const int k_nn,
-//                           const bool mode, //true if use knn, false if radius search
-//                           sensor_msgs::PointCloud2Ptr outcloud);
-
 
 template <typename PointInT, typename PointOutT> int
 	smooth_mls(
@@ -118,7 +111,7 @@ template <typename PointInT, typename PointOutT> int
 #endif
 	);
 
-int removeOutliersStatistical(const sensor_msgs::PointCloud2ConstPtr incloud, const int &k, const float &nStds, sensor_msgs::PointCloud2Ptr outcloud);
+int removeOutliersStatistical(const PCLCloud::ConstPtr incloud, const int &k, const float &nStds, PCLCloud::Ptr outcloud);
 
 //! Make a forced copy of all scalar fields from one cloud to another
 /** \note This algorithm simply copy the scalar fields from a cloud

@@ -1,0 +1,9 @@
+<RCC>
+  <qresource prefix="/CC/plugin/qSRA">
+    <file>qSRA.png</file>
+    <file>gearIcon.png</file>
+    <file>loadProfileIcon.png</file>
+    <file>distToProfileIcon.png</file>
+    <file>createMapIcon.png</file>
+  </qresource>
+</RCC>

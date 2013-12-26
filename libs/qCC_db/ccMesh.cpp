@@ -396,7 +396,7 @@ void ccMesh::applyGLTransformation(const ccGLMatrix& trans)
             {
                 normsType* _theNormIndex = m_triNormals->getCurrentValuePtr();
                 CCVector3 new_n(ccNormalVectors::GetNormal(*_theNormIndex));
-                trans.applyRotation(new_n.u);
+                trans.applyRotation(new_n);
                 *_theNormIndex = ccNormalVectors::GetNormIndex(new_n.u);
                 m_triNormals->forwardIterator();
             }
@@ -408,7 +408,9 @@ void ccMesh::applyGLTransformation(const ccGLMatrix& trans)
 	}
 }
 
-bool ccMesh::laplacianSmooth(unsigned nbIteration, float factor, CCLib::GenericProgressCallback* progressCb/*=0*/)
+bool ccMesh::laplacianSmooth(	unsigned nbIteration,
+								PointCoordinateType factor,
+								CCLib::GenericProgressCallback* progressCb/*=0*/)
 {
 	if (!m_associatedCloud)
 		return false;
@@ -497,7 +499,7 @@ bool ccMesh::laplacianSmooth(unsigned nbIteration, float factor, CCLib::GenericP
 			//this is a "persistent" pointer and we know what type of cloud is behind ;)
 			CCVector3* P = const_cast<CCVector3*>(m_associatedCloud->getPointPersistentPtr(i));
 			const CCVector3* d = (const CCVector3*)verticesDisplacement->getValue(i);
-			(*P) += (*d)*(factor/(PointCoordinateType)edgesCount[i]);
+			(*P) += (*d)*(factor/static_cast<PointCoordinateType>(edgesCount[i]));
 		}
 	}
 
@@ -834,9 +836,9 @@ void ccMesh::refreshBB()
 	{
 		m_bBox.clear();
 
-		unsigned i,count=m_triVertIndexes->currentSize();
+		unsigned count = m_triVertIndexes->currentSize();
 		m_triVertIndexes->placeIteratorAtBegining();
-		for (i=0;i<count;++i)
+		for (unsigned i=0;i<count;++i)
 		{
 			const unsigned* tri = m_triVertIndexes->getCurrentValue();
 			assert(tri[0]<m_associatedCloud->size() && tri[1]<m_associatedCloud->size() && tri[2]<m_associatedCloud->size());
@@ -845,6 +847,8 @@ void ccMesh::refreshBB()
 			m_bBox.add(*m_associatedCloud->getPoint(tri[2]));
 			m_triVertIndexes->forwardIterator();
 		}
+	
+		updateModificationTime();
 	}
 }
 
@@ -933,6 +937,14 @@ CCLib::TriangleSummitsIndexes* ccMesh::getNextTriangleIndexes()
 	return NULL;
 }
 
+unsigned ccMesh::getUniqueIDForDisplay() const
+{
+	if (m_parent && m_parent->getParent() && m_parent->getParent()->isA(CC_FACET))
+		return m_parent->getParent()->getUniqueID();
+	else
+		return getUniqueID();
+}
+
 static PointCoordinateType s_blankNorm[3] = {0.0,0.0,0.0};
 
 void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -986,7 +998,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//not fast at all!
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
-			glPushName(getUniqueID());
+			glPushName(getUniqueIDForDisplay());
 			//minimal display for picking mode!
 			glParams.showNorms = false;
 			glParams.showColors = false;
@@ -1086,14 +1098,16 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 #else
 			const unsigned step = 3*decimStep;
 #endif
+			//the GL type depends on the PointCoordinateType 'size' (float or double)
+			GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 
 			glEnableClientState(GL_VERTEX_ARRAY);
-			glVertexPointer(3,GL_FLOAT,0,GetVertexBuffer());
+			glVertexPointer(3,GL_COORD_TYPE,0,GetVertexBuffer());
 
 			if (glParams.showNorms)
 			{
 				glEnableClientState(GL_NORMAL_ARRAY);
-				glNormalPointer(GL_FLOAT,0,GetNormalsBuffer());
+				glNormalPointer(GL_COORD_TYPE,0,GetNormalsBuffer());
 			}
 			if (glParams.showSF || glParams.showColors)
 			{
@@ -1463,30 +1477,30 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 				//vertex 1
 				if (N1)
-					glNormal3fv(N1);
+					ccGL::Normal3v(N1);
 				if (col1)
 					glColor3ubv(col1);
 				if (Tx1)
 					glTexCoord2fv(Tx1);
-				glVertex3fv(m_associatedCloud->getPoint(tsi->i1)->u);
+				ccGL::Vertex3v(m_associatedCloud->getPoint(tsi->i1)->u);
 
 				//vertex 2
 				if (N2)
-					glNormal3fv(N2);
+					ccGL::Normal3v(N2);
 				if (col2)
 					glColor3ubv(col2);
 				if (Tx2)
 					glTexCoord2fv(Tx2);
-				glVertex3fv(m_associatedCloud->getPoint(tsi->i2)->u);
+				ccGL::Vertex3v(m_associatedCloud->getPoint(tsi->i2)->u);
 
 				//vertex 3
 				if (N3)
-					glNormal3fv(N3);
+					ccGL::Normal3v(N3);
 				if (col3)
 					glColor3ubv(col3);
 				if (Tx3)
 					glTexCoord2fv(Tx3);
-				glVertex3fv(m_associatedCloud->getPoint(tsi->i3)->u);
+				ccGL::Vertex3v(m_associatedCloud->getPoint(tsi->i3)->u);
 			}
 
 			glEnd();
@@ -1581,7 +1595,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		{
 			delete newVertices;
 			newVertices = NULL;
-			ccLog::Error("An error occured: not enough memory?");
+			ccLog::Error("An error occurred: not enough memory?");
 		}
 		else
 		{
@@ -2291,9 +2305,9 @@ bool ccMesh::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion))
+	if (!ccGenericMesh::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//as the associated cloud (=vertices) can't be saved directly (as it may be shared by multiple meshes)
@@ -2576,9 +2590,9 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 
 					QRgb pixel = material.texture.pixel(xPix,yPix);
 
-					rgb[0] = qRed(pixel);
-					rgb[1] = qGreen(pixel);
-					rgb[2] = qBlue(pixel);
+					rgb[0] = static_cast<colorType>(qRed(pixel));
+					rgb[1] = static_cast<colorType>(qGreen(pixel));
+					rgb[2] = static_cast<colorType>(qBlue(pixel));
 
 					foundMaterial = true;
 				}
@@ -2643,17 +2657,17 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 	const CCVector3 *B = m_associatedCloud->getPointPersistentPtr(tri[1]);
 	const CCVector3 *C = m_associatedCloud->getPointPersistentPtr(tri[2]);
 
-	PointCoordinateType d1 = ((P-*B).cross(*C-*B)).norm()/*/2.0*/;
-	PointCoordinateType d2 = ((P-*C).cross(*A-*C)).norm()/*/2.0*/;
-	PointCoordinateType d3 = ((P-*A).cross(*B-*A)).norm()/*/2.0*/;
+	float d1 = static_cast<float>(((P-*B).cross(*C-*B)).norm()/*/2*/);
+	float d2 = static_cast<float>(((P-*C).cross(*A-*C)).norm()/*/2*/);
+	float d3 = static_cast<float>(((P-*A).cross(*B-*A)).norm()/*/2*/);
 	//we must normalize weights
-	PointCoordinateType dsum = d1+d2+d3;
-	d1/=dsum;
-	d2/=dsum;
-	d3/=dsum;
+	float dsum = d1+d2+d3;
+	d1 /= dsum;
+	d2 /= dsum;
+	d3 /= dsum;
 
-	float x = (Tx1 ? Tx1[0] : 0)*d1 + (Tx2 ? Tx2[0] : 0)*d2 + (Tx3 ? Tx3[0] : 0)*d3;
-	float y = (Tx1 ? Tx1[1] : 0)*d1 + (Tx2 ? Tx2[1] : 0)*d2 + (Tx3 ? Tx3[1] : 0)*d3;
+	float x = (Tx1 ? Tx1[0]*d1 : 0) + (Tx2 ? Tx2[0]*d2 : 0) + (Tx3 ? Tx3[0]*d3 : 0);
+	float y = (Tx1 ? Tx1[1]*d1 : 0) + (Tx2 ? Tx2[1]*d2 : 0) + (Tx3 ? Tx3[1]*d3 : 0);
 
 	if (x<0 || x>1.0f || y<0 || y>1.0f)
 	{
@@ -2664,14 +2678,14 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 
 	//get color from texture image
 	{
-		int xPix = std::min((int)floor(x*(float)material.texture.width()),material.texture.width()-1);
-		int yPix = std::min((int)floor(y*(float)material.texture.height()),material.texture.height()-1);
+		int xPix = std::min(static_cast<int>(floor(x*static_cast<float>(material.texture.width()))),material.texture.width()-1);
+		int yPix = std::min(static_cast<int>(floor(y*static_cast<float>(material.texture.height()))),material.texture.height()-1);
 
 		QRgb pixel = material.texture.pixel(xPix,yPix);
 
-		rgb[0] = qRed(pixel);
-		rgb[1] = qGreen(pixel);
-		rgb[2] = qBlue(pixel);
+		rgb[0] = static_cast<colorType>(qRed(pixel));
+		rgb[1] = static_cast<colorType>(qGreen(pixel));
+		rgb[2] = static_cast<colorType>(qBlue(pixel));
 	}
 
 	return true;
@@ -2679,7 +2693,7 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 
 //we use as many static variables as we can to limit the size of the heap used by each recursion...
 static const unsigned s_defaultSubdivideGrowRate = 50;
-static float s_maxSubdivideArea = 1;
+static PointCoordinateType s_maxSubdivideArea = 1;
 static QMap<qint64,unsigned> s_alreadyCreatedVertices; //map to store already created edges middle points
 
 static qint64 GenerateKey(unsigned edgeIndex1, unsigned edgeIndex2)
@@ -2692,7 +2706,7 @@ static qint64 GenerateKey(unsigned edgeIndex1, unsigned edgeIndex2)
 
 bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC)
 {
-	if (s_maxSubdivideArea/*maxArea*/<=ZERO_TOLERANCE)
+	if (s_maxSubdivideArea/*maxArea*/ <= ZERO_TOLERANCE)
 	{
 		ccLog::Error("[ccMesh::pushSubdivide] Invalid input argument!");
 		return false;
@@ -2710,7 +2724,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 	const CCVector3* C = vertices->getPoint(indexC);
 
 	//do we need to sudivide this triangle?
-	PointCoordinateType area = ((*B-*A)*(*C-*A)).norm()/(PointCoordinateType)2.0;
+	PointCoordinateType area = ((*B-*A)*(*C-*A)).norm()/2;
 	if (area > s_maxSubdivideArea/*maxArea*/)
 	{
 		//we will add 3 new vertices, so we must be sure to have enough memory
@@ -2858,9 +2872,9 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 	return true;
 }
 
-ccMesh* ccMesh::subdivide(float maxArea) const
+ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 {
-	if (maxArea<=ZERO_TOLERANCE)
+	if (maxArea <= ZERO_TOLERANCE)
 	{
 		ccLog::Error("[ccMesh::subdivide] Invalid input argument!");
 		return 0;
@@ -2914,7 +2928,7 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 	}
 	catch(...)
 	{
-		ccLog::Error("[ccMesh::subdivide] An error occured!");
+		ccLog::Error("[ccMesh::subdivide] An error occurred!");
 		delete resultMesh;
 		return 0;
 	}
@@ -3054,7 +3068,7 @@ ccMesh* ccMesh::subdivide(float maxArea) const
 	}
 	catch(...)
 	{
-		ccLog::Error("[ccMesh::subdivide] An error occured!");
+		ccLog::Error("[ccMesh::subdivide] An error occurred!");
 		delete resultMesh;
 		return 0;
 	}

@@ -28,6 +28,7 @@
 #include "ccAdvancedTypes.h"
 
 class ccGenericPointCloud;
+class ccPointCloud;
 class ccMaterialSet;
 
 //! Generic mesh interface
@@ -170,11 +171,19 @@ public:
 	//! Enables polygon stippling
 	void enableStippling(bool state) { m_stippling = state; }
 
+	//! Samples points on a mesh
+	ccPointCloud* samplePoints(	bool densityBased,
+								double samplingParameter,
+								bool withNormals,
+								bool withRGB,
+								bool withTexture,
+								CCLib::GenericProgressCallback* pDlg = 0);
+
 protected:
 
     //inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
 	//! Max number of displayed triangles (per entity) in "low detail" display
 	static unsigned GET_MAX_LOD_FACES_NUMBER();

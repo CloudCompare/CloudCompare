@@ -39,45 +39,45 @@ static QSharedPointer<ccTorus> c_torus(0);
 
 static void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direction, PointCoordinateType scale, const colorType* col, CC_DRAW_CONTEXT& context)
 {
-	if (ID>0)
+	if (ID > 0)
 		glLoadName(ID);
 	
 	glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-	glTranslatef(start.x,start.y,start.z);
-	glScalef(scale,scale,scale);
+	ccGL::Translate(start.x,start.y,start.z);
+	ccGL::Scale(scale,scale,scale);
 
     //we compute scalar prod between the two vectors
 	CCVector3 Z(0.0,0.0,1.0);
-    float ps = Z.dot(direction);
+    PointCoordinateType ps = Z.dot(direction);
 	
-	if (ps < 1.0)
+	if (ps < 1)
 	{
-		CCVector3 axis(1.0,0.0,0.0);
-		float angle_deg = 180.0;
+		CCVector3 axis(1,0,0);
+		PointCoordinateType angle_deg = static_cast<PointCoordinateType>(180.0);
 		
-		if (ps>-1.0)
+		if (ps > -1)
 		{
 			//we deduce angle from scalar prod
-			angle_deg = acos(ps)*CC_RAD_TO_DEG;
+			angle_deg = acos(ps) * static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
 
 			//we compute rotation axis with scalar prod
 			axis = Z.cross(direction);
 		}
 		
-		glRotatef(angle_deg, axis.x, axis.y, axis.z);
+		ccGL::Rotate(angle_deg, axis.x, axis.y, axis.z);
 	}
 
 	if (!c_arrowShaft)
 		c_arrowShaft = QSharedPointer<ccCylinder>(new ccCylinder(0.15f,0.6f,0,"ArrowShaft",12));
 	if (!c_arrowHead)
-		c_arrowHead = QSharedPointer<ccCone>(new ccCone(0.3f,0.0f,0.4f,0,0,0,"ArrowHead",24));
+		c_arrowHead = QSharedPointer<ccCone>(new ccCone(0.3f,0,0.4f,0,0,0,"ArrowHead",24));
 
-	glTranslatef(0.0f,0.0f,0.3f);
+	glTranslatef(0,0,0.3f);
 	c_arrowShaft->setTempColor(col);
 	c_arrowShaft->draw(context);
-	glTranslatef(0.0f,0.0f,0.3f+0.2f);
+	glTranslatef(0,0,0.3f+0.2f);
 	c_arrowHead->setTempColor(col);
 	c_arrowHead->draw(context);
 
@@ -92,71 +92,75 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 	glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-	glTranslatef(center.x,center.y,center.z);
-	glScalef(scale,scale,scale);
+	ccGL::Translate(center.x,center.y,center.z);
+	ccGL::Scale(scale,scale,scale);
 
     //we compute scalar prod between the two vectors
-	CCVector3 Z(0.0,0.0,1.0);
-    float ps = Z.dot(direction);
+	CCVector3 Z(0,0,1);
+    PointCoordinateType ps = Z.dot(direction);
 	
-	if (ps < 1.0)
+	if (ps < 1)
 	{
-		CCVector3 axis(1.0,0.0,0.0);
-		float angle_deg = 180.0;
+		CCVector3 axis(1,0,0);
+		PointCoordinateType angle_deg = 180;
 		
-		if (ps>-1.0)
+		if (ps > -1)
 		{
 			//we deduce angle from scalar prod
-			angle_deg = acos(ps)*CC_RAD_TO_DEG;
+			angle_deg = acos(ps) * static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
 
 			//we compute rotation axis with scalar prod
 			axis = Z.cross(direction);
 		}
 		
-		glRotatef(angle_deg, axis.x, axis.y, axis.z);
+		ccGL::Rotate(angle_deg, axis.x, axis.y, axis.z);
 	}
 
 	if (!c_torus)
 		c_torus = QSharedPointer<ccTorus>(new ccTorus(0.2f,0.4f,2.0*M_PI,false,0,0,"Torus",12));
 
-	glTranslatef(0.0f,0.0f,0.3f);
+	glTranslatef(0,0,0.3f);
 	c_torus->setTempColor(col);
 	c_torus->draw(context);
 
 	glPopMatrix();
 }
 
+/* 
+  // Unused function
 static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType radius, const colorType* col, CC_DRAW_CONTEXT& context)
 {
-	if (ID>0)
+	if (ID > 0)
 		glLoadName(ID);
 	
 	glMatrixMode(GL_MODELVIEW);
     glPushMatrix();
 
-	glTranslatef(center.x,center.y,center.z);
-	glScalef(radius,radius,radius);
+	ccGL::Translate(center.x,center.y,center.z);
+	ccGL::Scale(radius,radius,radius);
 
 	if (!c_centralSphere)
-		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1.0f,0,"CentralSphere",24));
+		c_centralSphere = QSharedPointer<ccSphere>(new ccSphere(1,0,"CentralSphere",24));
+	
 	c_centralSphere->setTempColor(col);
 	c_centralSphere->draw(context);
 
 	glPopMatrix();
 }
+*/
 
 static void DrawUnitCross(int ID, const CCVector3& center, PointCoordinateType scale, const colorType* col, CC_DRAW_CONTEXT& context)
 {
 	if (ID>0)
 		glLoadName(ID);
 	
-	scale /= 2.0;
-	DrawUnitArrow(0, center, CCVector3(-1.0, 0.0, 0.0), scale, col, context);
-	DrawUnitArrow(0, center, CCVector3( 1.0, 0.0, 0.0), scale, col, context);
-	DrawUnitArrow(0, center, CCVector3( 0.0,-1.0, 0.0), scale, col, context);
-	DrawUnitArrow(0, center, CCVector3( 0.0, 1.0, 0.0), scale, col, context);
-	DrawUnitArrow(0, center, CCVector3( 0.0, 0.0,-1.0), scale, col, context);
-	DrawUnitArrow(0, center, CCVector3( 0.0, 0.0, 1.0), scale, col, context);
+	scale /= 2;
+	DrawUnitArrow(0, center, CCVector3(-1, 0, 0), scale, col, context);
+	DrawUnitArrow(0, center, CCVector3( 1, 0, 0), scale, col, context);
+	DrawUnitArrow(0, center, CCVector3( 0,-1, 0), scale, col, context);
+	DrawUnitArrow(0, center, CCVector3( 0, 1, 0), scale, col, context);
+	DrawUnitArrow(0, center, CCVector3( 0, 0,-1), scale, col, context);
+	DrawUnitArrow(0, center, CCVector3( 0, 0, 1), scale, col, context);
 }
 
 ccClipBox::ccClipBox(ccHObject* associatedEntity, QString name/*= QString("clipping box")*/)
@@ -276,24 +280,23 @@ void ccClipBox::setActiveComponent(int id)
 static CCVector3 PointToVector(int x, int y, int screenWidth, int screenHeight)
 {
 	//convert mouse position to vector (screen-centered)
-	CCVector3 v;
-	v.x = float(2.0 * std::max(std::min(x,screenWidth-1),-screenWidth+1) - screenWidth) / (float)screenWidth;
-	v.y = float(screenHeight - 2.0 * std::max(std::min(y,screenHeight-1),-screenHeight+1)) / (float)screenHeight;
-	v.z = 0;
+	CCVector3 v(	static_cast<PointCoordinateType>(2 * std::max(std::min(x,screenWidth-1),-screenWidth+1) - screenWidth) / static_cast<PointCoordinateType>(screenWidth),
+					static_cast<PointCoordinateType>(screenHeight - 2 * std::max(std::min(y,screenHeight-1),-screenHeight+1)) / static_cast<PointCoordinateType>(screenHeight),
+					0 );
 
 	//square 'radius'
-	float d2 = v.x*v.x + v.y*v.y;
+	PointCoordinateType d2 = v.x*v.x + v.y*v.y;
 
 	//projection on the unit sphere
-	if (d2 > 1.0f)
+	if (d2 > 1)
 	{
-		float d = sqrt(d2);
+		PointCoordinateType d = sqrt(d2);
 		v.x /= d;
 		v.y /= d;
 	}
 	else
 	{
-		v.z = (PointCoordinateType)sqrt(1.0f-d2);
+		v.z = sqrt(1 - d2);
 	}
 
 	return v;
@@ -314,7 +317,7 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 	ccGLMatrix transMat;
 	transMat.setTranslation(-C);
 	transMat = rotMat * transMat;
-	transMat.setTranslation(CCVector3(transMat.getTranslation())+C);
+	transMat.setTranslation(transMat.getTranslationAsVec3D()+C);
 
 	//rotateGL(transMat);
     m_glTrans = transMat.inverse() * m_glTrans;
@@ -433,10 +436,10 @@ bool ccClipBox::move3D(const CCVector3& uInput)
 
 		//look for the most parallel dimension
 		int minDim = 0;
-		PointCoordinateType maxDot = CCVector3(m_viewMatrix.getColumn(0)).dot(RxU);
+		PointCoordinateType maxDot = m_viewMatrix.getColumnAsVec3D(0).dot(RxU);
 		for (int i=1;i<3;++i)
 		{
-			PointCoordinateType dot = CCVector3(m_viewMatrix.getColumn(i)).dot(RxU);
+			PointCoordinateType dot = m_viewMatrix.getColumnAsVec3D(i).dot(RxU);
 			if (fabs(dot) > fabs(maxDot))
 			{
 				maxDot = dot;
@@ -445,18 +448,18 @@ bool ccClipBox::move3D(const CCVector3& uInput)
 		}
 
 		//angle is proportional to absolute displacement
-		PointCoordinateType angle_rad = u.norm()/m_box.getDiagNorm() * M_PI;
+		PointCoordinateType angle_rad = u.norm()/m_box.getDiagNorm() * static_cast<PointCoordinateType>(M_PI);
 		if (maxDot < 0.0)
 			angle_rad = -angle_rad;
 
 		ccGLMatrix rotMat;
-		rotMat.initFromParameters(angle_rad,Rb,CCVector3(0.0,0.0,0.0));
+		rotMat.initFromParameters(angle_rad,Rb,CCVector3(0,0,0));
 
 		CCVector3 C = m_box.getCenter();
 		ccGLMatrix transMat;
 		transMat.setTranslation(-C);
 		transMat = rotMat * transMat;
-		transMat.setTranslation(CCVector3(transMat.getTranslation())+C);
+		transMat.setTranslation(transMat.getTranslationAsVec3D()+C);
 
 		m_glTrans = m_glTrans * transMat.inverse();
 		enableGLTransformation(true);
@@ -584,7 +587,7 @@ void ccClipBox::drawMeOnly(CC_DRAW_CONTEXT& context)
 	//standard case: list names pushing
 	bool pushName = MACRO_DrawEntityNames(context);
 	if (pushName)
-		glPushName(getUniqueID());
+		glPushName(getUniqueIDForDisplay());
 
 	if (m_selected)
 	{

@@ -14,13 +14,7 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2224                                                              $
-//$LastChangedDate:: 2012-07-25 19:13:23 +0200 (mer., 25 juil. 2012)       $
-//**************************************************************************
-//
+
 #ifndef CC_STL_FILTER_HEADER
 #define CC_STL_FILTER_HEADER
 
@@ -41,7 +35,7 @@ class STLFilter : public FileIOFilter
 public:
 
 	//inherited from FileIOFilter
-	virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, double* coordinatesShift = 0);
+	virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename);
 
 protected:
@@ -56,7 +50,7 @@ protected:
 								ccPointCloud* vertices,
 								bool alwaysDisplayLoadDialog,
 								bool* coordinatesShiftEnabled=0,
-								double* coordinatesShift=0);
+								CCVector3d* coordinatesShift=0);
 
 	//! Custom load method for binary files
 	CC_FILE_ERROR loadBinaryFile(QFile& fp,
@@ -64,7 +58,7 @@ protected:
 								ccPointCloud* vertices,
 								bool alwaysDisplayLoadDialog,
 								bool* coordinatesShiftEnabled=0,
-								double* coordinatesShift=0);
+								CCVector3d* coordinatesShift=0);
 };
 
 #endif //CC_STL_FILTER_HEADER

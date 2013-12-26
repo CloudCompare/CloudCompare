@@ -69,7 +69,7 @@ protected:
         \param P the cloud to register (data)
         \param X the reference cloud (model)
         \param trans the resulting transformation
-		\param estimateScale whether to estimate scale (s) as well (see jschmidt 2005)
+		\param adjustScale whether to estimate scale (s) as well (see jschmidt 2005)
         \param weightsP weights for the registered points (optional)
         \param weightsX weights for the reference points (optional)
         \param aPrioriScale 'a priori' scale (Sa) between P and X
@@ -78,7 +78,7 @@ protected:
     static bool RegistrationProcedure(GenericCloud* P,
 										GenericCloud* X,
 										ScaledTransformation& trans,
-										bool estimateScale = false,
+										bool adjustScale = false,
 										ScalarField* weightsP = 0,
 										ScalarField* weightsX = 0,
 										PointCoordinateType aPrioriScale = 1.0f);
@@ -114,7 +114,7 @@ public:
 		\param lCloud left cloud {Pl}
 		\param rCloud right cloud {Pr}
 		\param trans transformation: Pr = s.R.Pl + T
-		\return RMS (or -1.0 if an error occured)
+		\return RMS (or -1.0 if an error occurred)
 	**/
 	static double ComputeRMS(GenericCloud* lCloud,
 								GenericCloud* rCloud,
@@ -160,7 +160,7 @@ public:
 		\param minErrorDecrease the minimum (mean square) error decrease between two consecutive steps to continue process (ignored if convType is not MAX_ERROR_CONVERGENCE)
 		\param nbMaxIterations the maximum number of iteration (ignored if convType is not MAX_ITER_CONVERGENCE)
 		\param finalError [output] final error (rms)
-		\param freeScale release the scale during the registration procedure
+		\param adjustScale release the scale during the registration procedure
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param filterOutFarthestPoints if true, the algorithm will automatically ignore farthest points from the reference, for better convergence
 		\param samplingLimit maximum number of points per cloud (they are randomly resampled below this limit otherwise)
@@ -175,7 +175,7 @@ public:
                                         double minErrorDecrease,
                                         unsigned nbMaxIterations,
                                         double& finalError,
-                                        bool freeScale = false,
+                                        bool adjustScale = false,
                                         GenericProgressCallback* progressCb = 0,
                                         bool filterOutFarthestPoints = false,
                                         unsigned samplingLimit = 20000,
@@ -209,9 +209,9 @@ public:
     static bool RegisterClouds(GenericIndexedCloud* modelCloud,
                                 GenericIndexedCloud* dataCloud,
                                 ScaledTransformation& transform,
-                                float delta,
-                                float beta,
-                                float overlap,
+                                ScalarType delta,
+                                ScalarType beta,
+                                PointCoordinateType overlap,
                                 unsigned nbBases,
                                 unsigned nbTries,
                                 GenericProgressCallback* progressCb=0,
@@ -236,7 +236,7 @@ protected:
         \return false: failure ; true: success
     **/
     static bool FindBase(GenericIndexedCloud* cloud,
-                            float overlap,
+                            PointCoordinateType overlap,
                             unsigned nbTries,
                             Base &base);
 
@@ -245,10 +245,10 @@ protected:
         \param delta used for the tolerance when searching for congruent bases
         \param base the reference base made of 4 points
         \param results the resulting bases
-        \return the number of bases found (number of element in the results array) or -1 is a problem occured
+        \return the number of bases found (number of element in the results array) or -1 is a problem occurred
     **/
     static int FindCongruentBases(KDTree* tree,
-                                            float delta,
+                                            ScalarType delta,
                                             const CCVector3* base[4],
                                             std::vector<Base>& results);
 
@@ -282,8 +282,8 @@ protected:
                                     const CCVector3 &p2,
                                     const CCVector3 &p3,
                                     CCVector3 &inter,
-                                    float& lambda,
-                                    float& mu);
+                                    PointCoordinateType& lambda,
+                                    PointCoordinateType& mu);
 
     /**!function to keep only the N best candidates bases (by comparison with the reference base invariants)
         Let B1 and B2 be 2 candidates, R be the reference, B1 and B2 aligned with R.

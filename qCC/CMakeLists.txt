@@ -4,7 +4,7 @@ project( CloudCompare )
 
 set( VERSION_MAJOR 2 )
 set( VERSION_MINOR 5 )
-set( VERSION_PATCH 2 )
+set( VERSION_PATCH 3 )
 
 if ( UNIX )
 	set( CloudCompare_dest_release bin ) #default destination: /usr/bin
@@ -108,6 +108,10 @@ target_link_LIBE57( ${PROJECT_NAME} )
 target_link_3DXWARE( ${PROJECT_NAME} )
 #DXF support
 target_link_DXFLIB( ${PROJECT_NAME} )
+#GDAL support
+target_link_GDAL( ${PROJECT_NAME} ${CloudCompare_dest_release} ${CloudCompare_dest_debug} )
+#FBX support
+target_link_FBX_SDK( ${PROJECT_NAME} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )

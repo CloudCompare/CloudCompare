@@ -141,9 +141,9 @@ bool ccGenericPrimitive::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccMesh::fromFile_MeOnly(in, dataVersion))
+	if (!ccMesh::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//HACK: first, we have to remove any 'wrongly' associated vertices cloud!
@@ -153,7 +153,7 @@ bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion)
 		removeChild(0);
 
 	//Transformation matrix backup (dataVersion>=21)
-	if (!m_transformation.fromFile(in, dataVersion))
+	if (!m_transformation.fromFile(in, dataVersion, flags))
 		return false;
 
 	//'drawing precision' (dataVersion>=21))

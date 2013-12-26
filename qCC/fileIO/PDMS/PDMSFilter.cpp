@@ -17,10 +17,6 @@
 
 #include "PDMSFilter.h"
 #include "PdmsParser.h"
-//#include "../ccCoordinatesShiftManager.h"
-
-//Qt
-#include <QProgressDialog>
 
 //qCC_db
 #include <ccLog.h>
@@ -43,7 +39,7 @@ CC_FILE_ERROR PDMSFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_SAVE;
 }
 
-CC_FILE_ERROR PDMSFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR PDMSFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	PdmsParser parser;
 	PdmsFileSession session(filename);
@@ -98,7 +94,7 @@ CC_FILE_ERROR PDMSFilter::loadFile(const char* filename, ccHObject& container, b
 				case PDMS_SCYLINDER:
 					{
 						PdmsTools::PdmsObjects::SCylinder* pdmsCyl = static_cast<PdmsTools::PdmsObjects::SCylinder*>(currentPair.first);
-						primitive = new ccCylinder(pdmsCyl->diameter*0.5,pdmsCyl->height,0,pdmsCyl->name);
+						primitive = new ccCylinder(pdmsCyl->diameter/2,pdmsCyl->height,0,pdmsCyl->name);
 					}
 					break;
 				case PDMS_CTORUS:
@@ -115,13 +111,13 @@ CC_FILE_ERROR PDMSFilter::loadFile(const char* filename, ccHObject& container, b
 				case PDMS_DISH:
 					{
 						PdmsTools::PdmsObjects::Dish* pdmsDish = static_cast<PdmsTools::PdmsObjects::Dish*>(currentPair.first);
-						primitive = new ccDish(pdmsDish->diameter/2.0,pdmsDish->height,pdmsDish->radius,0,pdmsDish->name);
+						primitive = new ccDish(pdmsDish->diameter/2,pdmsDish->height,pdmsDish->radius,0,pdmsDish->name);
 					}
 					break;
 				case PDMS_CONE:
 					{
 						PdmsTools::PdmsObjects::Cone* pdmsCone = static_cast<PdmsTools::PdmsObjects::Cone*>(currentPair.first);
-						primitive = new ccCone(pdmsCone->dbottom*0.5,pdmsCone->dtop*0.5,pdmsCone->height,0,0,0,pdmsCone->name);
+						primitive = new ccCone(pdmsCone->dbottom/2,pdmsCone->dtop/2,pdmsCone->height,0,0,0,pdmsCone->name);
 					}
 					break;
 				case PDMS_PYRAMID:
@@ -130,7 +126,7 @@ CC_FILE_ERROR PDMSFilter::loadFile(const char* filename, ccHObject& container, b
 				case PDMS_SNOUT:
 					{
 						PdmsTools::PdmsObjects::Snout* pdmsSnout = static_cast<PdmsTools::PdmsObjects::Snout*>(currentPair.first);
-						primitive = new ccCone(pdmsSnout->dbottom*0.5,pdmsSnout->dtop*0.5,pdmsSnout->height,pdmsSnout->xoff,pdmsSnout->yoff,0,pdmsSnout->name);
+						primitive = new ccCone(pdmsSnout->dbottom/2,pdmsSnout->dtop/2,pdmsSnout->height,pdmsSnout->xoff,pdmsSnout->yoff,0,pdmsSnout->name);
 					}
 					break;
 				case PDMS_BOX:
@@ -176,7 +172,7 @@ CC_FILE_ERROR PDMSFilter::loadFile(const char* filename, ccHObject& container, b
 					trans.setTranslation(currentPair.first->position);
 					for (unsigned c=0;c<3;++c)
 						for (unsigned l=0;l<3;++l)
-							trans.getColumn(c)[l] = currentPair.first->orientation[c].u[l];
+							trans.getColumn(c)[l] = static_cast<float>(currentPair.first->orientation[c].u[l]);
 
 					primitive->setGLTransformation(trans);
 					primitive->setVisible(true);

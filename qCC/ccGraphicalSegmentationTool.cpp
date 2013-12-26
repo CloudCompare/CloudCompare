@@ -66,6 +66,16 @@ ccGraphicalSegmentationTool::ccGraphicalSegmentationTool(QWidget* parent)
 	connect(actionSetPolylineSelection,		SIGNAL(triggered()),	this,	SLOT(doSetPolylineSelection()));
 	connect(actionSetRectangularSelection,	SIGNAL(triggered()),	this,	SLOT(doSetRectangularSelection()));
 
+	//add shortcuts
+	addOverridenShortcut(Qt::Key_Space); //space bar for the "pause" button
+	addOverridenShortcut(Qt::Key_Escape); //escape key for the "cancel" button
+	addOverridenShortcut(Qt::Key_Return); //return key for the "apply" button
+	addOverridenShortcut(Qt::Key_Delete); //delete key for the "apply and delete" button
+	addOverridenShortcut(Qt::Key_Tab); //tab key to switch between rectangular and polygonal selection modes
+	addOverridenShortcut(Qt::Key_I); //'I' key for the "segment in" button
+	addOverridenShortcut(Qt::Key_O); //'O' key for the "segment out" button
+	connect(this, SIGNAL(shortcutTriggered(int)), this, SLOT(onShortcutTriggered(int)));
+
 	QMenu* selectionModeMenu = new QMenu(this);
 	selectionModeMenu->addAction(actionSetPolylineSelection);
 	selectionModeMenu->addAction(actionSetRectangularSelection);
@@ -89,6 +99,45 @@ ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
     if (m_polyVertices)
         delete m_polyVertices;
     m_polyVertices=0;
+}
+
+void ccGraphicalSegmentationTool::onShortcutTriggered(int key)
+{
+ 	switch(key)
+	{
+	case Qt::Key_Space:
+		pauseButton->toggle();
+		return;
+
+	case Qt::Key_I:
+		inButton->click();
+		return;
+
+	case Qt::Key_O:
+		outButton->click();
+		return;
+
+	case Qt::Key_Return:
+		validButton->click();
+		return;
+	case Qt::Key_Delete:
+		validAndDeleteButton->click();
+		return;
+	case Qt::Key_Escape:
+		cancelButton->click();
+		return;
+
+	case Qt::Key_Tab:
+		if (m_rectangularSelection)
+			doSetPolylineSelection();
+		else
+			doSetRectangularSelection();
+		return;
+
+	default:
+		//nothing to do
+		break;
+	}
 }
 
 bool ccGraphicalSegmentationTool::linkWith(ccGLWindow* win)
@@ -520,8 +569,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
     //viewing parameters
     const double* MM = m_associatedWin->getModelViewMatd(); //viewMat
 	const double* MP = m_associatedWin->getProjectionMatd(); //projMat
-	const float half_w = (float)m_associatedWin->width() * 0.5f;
-	const float half_h = (float)m_associatedWin->height() * 0.5f;
+	const GLdouble half_w = (GLdouble)m_associatedWin->width()/2;
+	const GLdouble half_h = (GLdouble)m_associatedWin->height()/2;
 
 	int VP[4];
 	m_associatedWin->getViewportArray(VP);
@@ -548,7 +597,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 				GLdouble xp,yp,zp;
 				gluProject(P.x,P.y,P.z,MM,MP,VP,&xp,&yp,&zp);
 
-				CCVector2 P2D(xp-half_w,yp-half_h);
+				CCVector2 P2D(	static_cast<PointCoordinateType>(xp-half_w),
+								static_cast<PointCoordinateType>(yp-half_h) );
 				bool pointInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D,m_segmentationPoly);
 
 				visibilityArray->setValue(i, keepPointsInside != pointInside ? POINT_HIDDEN : POINT_VISIBLE );
@@ -580,7 +630,7 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
         }
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
         m_associatedWin->displayNewMessage("Segmentation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
-        m_associatedWin->displayNewMessage("Unpause to segment",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
+        m_associatedWin->displayNewMessage("Unpause to segment again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_SEGMENTATION_MESSAGE);
     }
     else
     {
@@ -599,7 +649,9 @@ void ccGraphicalSegmentationTool::pauseSegmentationMode(bool state)
     }
 
 	//update mini-GUI
+	pauseButton->blockSignals(true);
 	pauseButton->setChecked(state);
+	pauseButton->blockSignals(false);
 
     m_associatedWin->redraw();
 }

@@ -14,19 +14,13 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2257                                                              $
-//$LastChangedDate:: 2012-10-11 23:48:15 +0200 (jeu., 11 oct. 2012)        $
-//**************************************************************************
-//
 
 #ifndef CC_OVERLAY_DIALOG_HEADER
 #define CC_OVERLAY_DIALOG_HEADER
 
 //Qt
 #include <QDialog>
+#include <QList>
 
 class ccGLWindow;
 
@@ -63,12 +57,22 @@ public:
 	//reimplemented from QDialog
 	virtual void reject();
 
+	//! Adds a keyboard shortcut (single key) that will be overridden from the associated window
+	/** When an overridden key is pressed, the shortcutTriggered(int) signal is emitted.
+	**/
+	void addOverridenShortcut(Qt::Key key);
+
 signals:
 
     //! Signal emitted when process is finished
     /** \param accepted specifies how the process finished (accepted or not)
     **/
     void processFinished(bool accepted);
+
+	//! Signal emitted when an overridden key shortcut is pressed
+	/** See ccOverlayDialog::addOverridenShortcut
+	**/
+	void shortcutTriggered(int key);
 
 protected slots:
 
@@ -77,13 +81,17 @@ protected slots:
 
 protected:
 
+	//inherited from QObject
+	bool eventFilter(QObject *obj, QEvent *e);
+
 	//! Associated (MDI) window
 	ccGLWindow* m_associatedWin;
 
 	//! Running/processing state
 	bool m_processing;
 
-
+	//! Overridden keys
+	QList<int> m_overriddenKeys;
 };
 
 #endif //CC_OVERLAY_DIALOG_HEADER

@@ -260,12 +260,12 @@ void ccBoundingBoxEditorDlg::updateZWidth(double value)
 
 void ccBoundingBoxEditorDlg::updateCurrentBBox(double dummy)
 {
-	CCVector3 A(xDoubleSpinBox->value(),
-				yDoubleSpinBox->value(),
-				zDoubleSpinBox->value());
-	CCVector3 W(dxDoubleSpinBox->value(),
-				dyDoubleSpinBox->value(),
-				dzDoubleSpinBox->value());
+	CCVector3 A(static_cast<PointCoordinateType>(xDoubleSpinBox->value()),
+				static_cast<PointCoordinateType>(yDoubleSpinBox->value()),
+				static_cast<PointCoordinateType>(zDoubleSpinBox->value()));
+	CCVector3 W(static_cast<PointCoordinateType>(dxDoubleSpinBox->value()),
+				static_cast<PointCoordinateType>(dyDoubleSpinBox->value()),
+				static_cast<PointCoordinateType>(dzDoubleSpinBox->value()));
 
 	switch (pointTypeComboBox->currentIndex())
 	{

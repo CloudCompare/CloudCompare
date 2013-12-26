@@ -38,53 +38,63 @@ class ccComparisonDlg: public QDialog, public Ui::ComparisonDialog
 public:
 
 	//! Comparison type
-    typedef enum
+    enum CC_COMPARISON_TYPE
     {
         CLOUDCLOUD_DIST = 0,
         CLOUDMESH_DIST  = 1,
-    } CC_COMPARISON_TYPE;
+    };
 
     //! Default constructor
-	ccComparisonDlg(ccHObject* compEntity, ccHObject* refEntity, CC_COMPARISON_TYPE cpType, QWidget* parent = 0);
+	ccComparisonDlg(ccHObject* compEntity,
+					ccHObject* refEntity,
+					CC_COMPARISON_TYPE cpType,
+					QWidget* parent = 0,
+					bool noDisplay = false);
 
 	//! Default destructor
 	~ccComparisonDlg();
 
-protected slots:
-    void showHisto();
-    void compute();
-	void split3DCheckboxToggled(bool);
+public slots:
+
+	bool compute();
     void applyAndExit();
     void cancelAndExit();
+
+protected slots:
+    void showHisto();
+	void split3DCheckboxToggled(bool);
 	void locaModelChanged(int);
-    //! automatically updates best octree level guess when maxDist parameter changes
-    void updateOctreeLevel(double);
-    //! sets whether to guess automatically best octree level
-    void guessBestOctreeLevel(int);
 
 protected:
 
     bool isValid();
     bool prepareEntitiesForComparison();
     int computeApproxResults();
-    int determineBestOctreeLevelForDistanceComputation(ScalarType maxDist);
-    void clean();
+    void updateOctreeLevel(double);
+    int determineBestOctreeLevel(double);
     void updateDisplay(bool showSF, bool hideRef);
+    void clean();
 
-    ccHObject *compEnt,*refEnt;
-    CCLib::DgmOctree *compOctree,*refOctree;
-    ccPointCloud* compCloud;
-    ccGenericPointCloud* refCloud;
-    ccGenericMesh* refMesh;
-    CC_COMPARISON_TYPE compType;
+    ccHObject *m_compEnt,*m_refEnt;
+    CCLib::DgmOctree *m_compOctree,*m_refOctree;
+    ccPointCloud* m_compCloud;
+    ccGenericPointCloud* m_refCloud;
+    ccGenericMesh* m_refMesh;
+    CC_COMPARISON_TYPE m_compType;
 
     //! last computed scalar field name
-    QString sfName;
+    QString m_sfName;
 
-    bool refVisibility;
-    bool compSFVisibility;
-    QString oldSfName;
-	bool sfCanBeUsedToEstimateBestOctreeLevel;
+	//initial state
+    bool m_refVisibility;
+    bool m_compSFVisibility;
+    QString m_oldSfName;
+
+	//! Whether the current SF is a distance field or not
+	bool m_currentSFIsDistance;
+
+	//! Whether a display is active (and should be refreshed) or not
+	bool m_noDisplay;
 };
 
 #endif

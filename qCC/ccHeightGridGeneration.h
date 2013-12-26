@@ -63,8 +63,10 @@ public:
 									double customEmptyCellsHeight = -1.0,
 									bool generateCloud = true,
 									bool generateImage = false,
+									bool generateRaster = false,
 									bool generateASCII = false,
 									bool generateCountSF = false,
+									bool resampleOriginalCloud = false,
 									CCLib::GenericProgressCallback* progressCb=0);
 };
 

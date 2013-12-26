@@ -22,6 +22,7 @@
 #include "GenericOctree.h"
 #include "CCTypes.h"
 #include "CCConst.h"
+#include "GenericProgressCallback.h"
 
 //system
 #include <vector>
@@ -53,7 +54,6 @@ namespace CCLib
 {
 
 class ReferenceCloud;
-class GenericProgressCallback;
 class GenericIndexedCloudPersist;
 
 /*** MACROS ***/
@@ -419,9 +419,10 @@ public:
 		The parameters of such a function are:
 		- (octreeCell) cell descriptor
 		- (void**) table of user parameters for the fonction (maybe void)
+		- (NormalizedProgress*) optional (normalized) progress callback
 		- return success
 	**/
-	typedef bool (*octreeCellFunc)(const octreeCell& cell, void**);
+	typedef bool (*octreeCellFunc)(const octreeCell& cell, void**, NormalizedProgress*);
 
 	/******************************/
 	/**          METHODS         **/
@@ -443,7 +444,7 @@ public:
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return the number of points projected in the octree
 	**/
-	int build(GenericProgressCallback* progressCb=0);
+	int build(GenericProgressCallback* progressCb = 0);
 
 	//! Builds the structure with constraints
 	/** Octree spatial limits must be specified. Also, if specified, points falling outside
@@ -456,7 +457,11 @@ public:
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return the number of points projected in the octree
 	**/
-	int build(const CCVector3& octreeMin, const CCVector3& octreeMax, const CCVector3* pointsMinFilter=0, const CCVector3* pointsMaxFilter=0, GenericProgressCallback* progressCb=0);
+	int build(	const CCVector3& octreeMin,
+				const CCVector3& octreeMax,
+				const CCVector3* pointsMinFilter = 0,
+				const CCVector3* pointsMaxFilter = 0,
+				GenericProgressCallback* progressCb = 0);
 
 	/**** GETTERS ****/
 
@@ -767,7 +772,7 @@ public:
 	/** \param radius the sphere radius
 		\return the 'best' level
 	**/
-	uchar findBestLevelForAGivenNeighbourhoodSizeExtraction(float radius) const;
+	uchar findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const;
 
 	//! Determines the best level of subdivision of the octree at which to apply a cloud-2-cloud distance computation algorithm
 	/** The octree instance on which is "applied" this method should be the compared cloud's one.
@@ -806,7 +811,7 @@ public:
 		to the indexes of the first points of each cell.
 		\param level the level of subdivision
 		\param vec the list of indexes
-		\return false if an error occured (e.g. not enough memory)
+		\return false if an error occurred (e.g. not enough memory)
 	**/
 	bool getCellIndexes(uchar level, cellIndexesContainer& vec) const;
 
@@ -888,7 +893,10 @@ public:
 			- '-2' = not enough memory
 			- '-3' = no CC found
 	**/
-	int extractCCs(const cellCodesContainer& cellCodes, uchar level, bool sixConnexity, GenericProgressCallback* progressCb=0) const;
+	int extractCCs(	const cellCodesContainer& cellCodes,
+					uchar level,
+					bool sixConnexity,
+					GenericProgressCallback* progressCb = 0) const;
 
 	//! Computes the connected components (considering the octree cells only) for a given level of subidivision (complete)
 	/** The octree is seen as a regular 3D grid, and each cell of this grid is either set to 0
@@ -904,7 +912,9 @@ public:
 			- '-2' = not enough memory
 			- '-3' = no CC found
 	**/
-	int extractCCs(uchar level, bool sixConnexity, GenericProgressCallback* progressCb=0) const;
+	int extractCCs(	uchar level,
+					bool sixConnexity,
+					GenericProgressCallback* progressCb = 0) const;
 
 	/**** OCTREE VISITOR ****/
 
@@ -929,8 +939,8 @@ public:
                                                         void** additionalParameters,
 														unsigned minNumberOfPointsPerCell,
                                                         unsigned maxNumberOfPointsPerCell,
-                                                        GenericProgressCallback* progressCb=0,
-                                                        const char* functionTitle=0);
+                                                        GenericProgressCallback* progressCb = 0,
+                                                        const char* functionTitle = 0);
 
 	//! Method to apply automatically a specific function to each cell of the octree
 	/** The function to apply should be of the form DgmOctree::octreeCellFunc. In this case
@@ -945,8 +955,8 @@ public:
 	unsigned executeFunctionForAllCellsAtLevel(uchar level,
                                                 octreeCellFunc func,
                                                 void** additionalParameters,
-                                                GenericProgressCallback* progressCb=0,
-                                                const char* functionTitle=0);
+                                                GenericProgressCallback* progressCb = 0,
+                                                const char* functionTitle = 0);
 
 #ifdef ENABLE_MT_OCTREE
 	//! Multi-threaded version of executeFunctionForAllCellsAtLevel
@@ -957,8 +967,8 @@ public:
 	unsigned executeFunctionForAllCellsAtLevel_MT(uchar level,
 													octreeCellFunc func,
 													void** additionalParameters,
-													GenericProgressCallback* progressCb=0,
-													const char* functionTitle=0);
+													GenericProgressCallback* progressCb = 0,
+													const char* functionTitle = 0);
 
 	//! Multi-threaded version of executeFunctionForAllCellsAtLevel
 	/** Based on QtConcurrent::map system. Dispacthes automatically
@@ -970,8 +980,8 @@ public:
                                                         void** additionalParameters,
 														unsigned minNumberOfPointsPerCell,
                                                         unsigned maxNumberOfPointsPerCell,
-                                                        GenericProgressCallback* progressCb=0,
-                                                        const char* functionTitle=0);
+                                                        GenericProgressCallback* progressCb = 0,
+                                                        const char* functionTitle = 0);
 #endif
 
 	//! Returns the associated cloud
@@ -1111,7 +1121,7 @@ protected:
 	/** \param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return the number of points projected in the octree
 	**/
-	int genericBuild(GenericProgressCallback* progressCb=0);
+	int genericBuild(GenericProgressCallback* progressCb = 0);
 
 	//! Updates the tables containing octree limits and boundaries
 	void updateMinAndMaxTables();

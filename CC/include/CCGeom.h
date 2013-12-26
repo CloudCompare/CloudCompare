@@ -58,6 +58,13 @@ public:
 	//! Copy constructor
 	inline Vector3Tpl(const Vector3Tpl& v) : x(v.x),y(v.y),z(v.z) {}
 
+	//! Constructor from an int array
+	static inline Vector3Tpl fromArray(const int a[3]) { return Vector3Tpl(static_cast<Type>(a[0]),static_cast<Type>(a[1]),static_cast<Type>(a[2])); }
+	//! Constructor from a float array
+	static inline Vector3Tpl fromArray(const float a[3]) { return Vector3Tpl(static_cast<Type>(a[0]),static_cast<Type>(a[1]),static_cast<Type>(a[2])); }
+	//! Constructor from a double array
+	static inline Vector3Tpl fromArray(const double a[3]) { return Vector3Tpl(static_cast<Type>(a[0]),static_cast<Type>(a[1]),static_cast<Type>(a[2])); }
+
 	//! Dot product
 	inline Type dot(const Vector3Tpl& v) const { return (x*v.x)+(y*v.y)+(z*v.z); }
 	//! Cross product

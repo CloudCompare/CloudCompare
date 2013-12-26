@@ -66,9 +66,9 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 		return CC_FERR_WRITING;
 
     //Has the cloud been recentered?
-	const double* shift = theCloud->getOriginalShift();
-	if (fabs(shift[0])+fabs(shift[0])+fabs(shift[0])>0.0)
-        ccLog::Warning(QString("[PNFilter::save] Can't recenter cloud '%1' when saving it in a PV file!").arg(theCloud->getName()));
+	const CCVector3d& shift = theCloud->getGlobalShift();
+	if (fabs(shift.x)+fabs(shift.y)+fabs(shift.z) > 0 || theCloud->getGlobalScale() != 0)
+        ccLog::Warning(QString("[PVFilter::save] Can't recenter or rescale cloud '%1' when saving it in a PN file!").arg(theCloud->getName()));
 
 	//for point clouds with multiple SFs, we must set the currently displayed one as 'input' SF
 	//if (theCloud->isA(CC_POINT_CLOUD))
@@ -78,9 +78,9 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 	//}
 	bool hasSF = theCloud->hasDisplayedScalarField();
 	if (!hasSF)
-        ccLog::Warning(QString("[PNFilter::save] Cloud '%1' has no displayed scalar field (we will save points with a default scalar value)!").arg(theCloud->getName()));
+        ccLog::Warning(QString("[PVFilter::save] Cloud '%1' has no displayed scalar field (we will save points with a default scalar value)!").arg(theCloud->getName()));
 
-	float val = (float)NAN_VALUE;
+	float val = std::numeric_limits<float>::quiet_NaN();
 
 	//progress dialog
 	ccProgressDialog pdlg(true); //cancel available
@@ -108,7 +108,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 			
 		//write scalar value
 		if (hasSF)
-			val = (float)theCloud->getPointScalarValue(i);
+			val = static_cast<float>(theCloud->getPointScalarValue(i));
 		if (out.write((const char*)&val,sizeof(float))<0)
 		{
 			result = CC_FERR_WRITING;
@@ -127,7 +127,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 	return result;
 }
 
-CC_FILE_ERROR PVFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR PVFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//opening file
 	QFile in(filename);

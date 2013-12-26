@@ -212,7 +212,7 @@ void ccPointListPickingDlg::exportToNewPolyline()
     {
 		//we create an "independent" polyline
 		ccPointCloud* vertices = new ccPointCloud("vertices");
-        ccPolyline* pline = new ccPolyline(m_associatedCloud);
+        ccPolyline* pline = new ccPolyline(vertices);
 
         if (!vertices->reserve(count) || !pline->reserve(count))
         {
@@ -229,7 +229,7 @@ void ccPointListPickingDlg::exportToNewPolyline()
         }
 		pline->addPointIndex(0,count);
 		pline->setVisible(true);
-		vertices->setVisible(false);
+		vertices->setEnabled(false);
 		pline->addChild(vertices);
 		pline->setDisplay_recursive(m_associatedCloud->getDisplay());
         
@@ -306,9 +306,11 @@ void ccPointListPickingDlg::removeLastEntry()
 
 void ccPointListPickingDlg::startIndexChanged(int value)
 {
-	if (value != s_pickedPointsStartIndex)
+	unsigned int   uValue = static_cast<unsigned int>(value);
+   
+	if (uValue != s_pickedPointsStartIndex)
 	{
-		s_pickedPointsStartIndex = (unsigned)value;
+		s_pickedPointsStartIndex = uValue;
 
 		updateList();
 		if (m_associatedWin)

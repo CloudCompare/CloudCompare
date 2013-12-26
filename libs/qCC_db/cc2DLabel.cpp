@@ -169,9 +169,9 @@ bool cc2DLabel::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion)
+bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccHObject::fromFile_MeOnly(in,dataVersion))
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//points count (dataVersion>=20)
@@ -412,7 +412,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		//not particularily fast
 		if (MACRO_DrawFastNamesOnly(context))
 			return;
-		glPushName(getUniqueID());
+		glPushName(getUniqueIDForDisplay());
 	}
 
     const float c_sizeFactor = 4.0f;
@@ -429,8 +429,8 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			//we draw the triangle
 			glColor4ub(255,255,0,128);
 			glBegin(GL_TRIANGLES);
-			for (unsigned i=0;i<count;++i)
-				glVertex3fv(m_points[i].cloud->getPoint(m_points[i].index)->u);
+			for (unsigned i=0; i<count; ++i)
+				ccGL::Vertex3v(m_points[i].cloud->getPoint(m_points[i].index)->u);
 			glEnd();
 
 			glPopAttrib();
@@ -452,8 +452,8 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			{
 				if (i+1<count || loop)
 				{
-					glVertex3fv(m_points[i].cloud->getPoint(m_points[i].index)->u);
-					glVertex3fv(m_points[(i+1)%count].cloud->getPoint(m_points[(i+1)%count].index)->u);
+					ccGL::Vertex3v(m_points[i].cloud->getPoint(m_points[i].index)->u);
+					ccGL::Vertex3v(m_points[(i+1)%count].cloud->getPoint(m_points[(i+1)%count].index)->u);
 				}
 			}
 			glEnd();
@@ -487,7 +487,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 					glMatrixMode(GL_MODELVIEW);
 					glPushMatrix();
 					const CCVector3* P = m_points[i].cloud->getPoint(m_points[i].index);
-					glTranslatef(P->x,P->y,P->z);
+					ccGL::Translate(P->x,P->y,P->z);
 					glScalef(context.pickedPointsRadius,context.pickedPointsRadius,context.pickedPointsRadius);
 					c_unitPointMarker->draw(markerContext);
 					glPopMatrix();
@@ -641,7 +641,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glTranslatef(-halfW+xStart,-halfH+yStart,0);
+	glTranslatef(static_cast<GLfloat>(-halfW+xStart),static_cast<GLfloat>(-halfH+yStart),0);
 
 	if (!pushName)
 	{

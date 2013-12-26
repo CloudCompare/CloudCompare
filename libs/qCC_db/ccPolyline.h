@@ -56,6 +56,7 @@ public:
 	virtual bool isSerializable() const { return true; }
 	virtual bool hasColors() const;
     virtual void applyGLTransformation(const ccGLMatrix& trans);
+	virtual unsigned getUniqueIDForDisplay() const;
 
 	//! Defines if the polyline is considered as 2D or 3D
 	/** \param state if true, the polyline is 2D
@@ -92,7 +93,7 @@ public:
 	/** Projects the cloud on its best fitting LS plane first.
 		\param points point cloud
 		\param maxEdgelLength max edge length (ignored if 0, in which case the contour is the convex hull)
-		\return contour polyline (or 0 if an error occured)
+		\return contour polyline (or 0 if an error occurred)
 	**/
 	static ccPolyline* ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
 											PointCoordinateType maxEdgelLength = 0);
@@ -104,7 +105,7 @@ protected:
 
 	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
-	virtual bool fromFile_MeOnly(QFile& in, short dataVersion);
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
 	//inherited methods (ccHObject)
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);

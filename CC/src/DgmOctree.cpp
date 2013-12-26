@@ -236,7 +236,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
         progressCb->reset();
         progressCb->setMethodTitle("Build Octree");
         char infosBuffer[256];
-        sprintf(infosBuffer,"Projecting %i points\nMax. depth: %i",pointCount,MAX_OCTREE_LEVEL);
+        sprintf(infosBuffer,"Projecting %u points\nMax. depth: %i",pointCount,MAX_OCTREE_LEVEL);
         progressCb->setInfo(infosBuffer);
         progressCb->start();
     }
@@ -317,7 +317,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 			if (m_numberOfProjectedPoints == 0)
 				sprintf(buffer,"[Octree::build] Warning : no point projected in the Octree!");
 			else
-				sprintf(buffer,"[Octree::build] Warning: some points have been filtered out (%i/%i)",pointCount-m_numberOfProjectedPoints,pointCount);
+				sprintf(buffer,"[Octree::build] Warning: some points have been filtered out (%u/%u)",pointCount-m_numberOfProjectedPoints,pointCount);
 		}
 
         progressCb->setInfo(buffer);
@@ -1534,13 +1534,13 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
     //for each dimension, we look for the min distance between the query point and the celle border.
     //This distance (minDistToBorder) correponds to the maximal radius of a sphere centered on the
     //query point and totaly included inside the cell
-    ScalarType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
+    PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
 
     //cells for which we have already computed the distances from their points to the query point
     unsigned alreadyProcessedCells = 0;
 
     //Min (squared) distance of neighbours
-    ScalarType minSquareDist = (ScalarType)-1.0;
+    PointCoordinateType minSquareDist = -1;
 
     while (true)
     {
@@ -1548,7 +1548,7 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
         if (minSquareDist > 0)
         {
             //what would be the correct neighbourhood size to be sure of it?
-            int newElligibleCellDistance = static_cast<int>(ceil((sqrt(minSquareDist)-minDistToBorder)/ScalarType(cs)));
+            int newElligibleCellDistance = static_cast<int>(ceil((sqrt(minSquareDist)-minDistToBorder)/cs));
             elligibleCellDistance = std::max(newElligibleCellDistance,elligibleCellDistance);
         }
 
@@ -1572,7 +1572,7 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
             while (m<m_numberOfProjectedPoints && (p->theCode >> bitDec) == code)
             {
                 //square distance to query point
-                ScalarType dist2 = (*m_theAssociatedCloud->getPointPersistentPtr(p->theIndex) - nNSS.queryPoint).norm2();
+                PointCoordinateType dist2 = (*m_theAssociatedCloud->getPointPersistentPtr(p->theIndex) - nNSS.queryPoint).norm2();
                 //we keep track of the closest one
                 if (dist2 < minSquareDist || minSquareDist < 0)
                 {
@@ -1588,22 +1588,22 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
         //equivalent spherical neighbourhood radius (as we are actually looking to 'square' neighbourhoods,
         //we must check that the nearest points inside such neighbourhoods are indeed near enough to fall
         //inside the biggest included sphere). Otherwise we must look further.
-        ScalarType elligibleDist = ScalarType(elligibleCellDistance-1)*ScalarType(cs)+minDistToBorder;
-        ScalarType squareElligibleDist = elligibleDist * elligibleDist;
+        PointCoordinateType elligibleDist = static_cast<PointCoordinateType>(elligibleCellDistance-1) * cs + minDistToBorder;
+        PointCoordinateType squareElligibleDist = elligibleDist * elligibleDist;
 
         //if we have found an elligible point
         if (minSquareDist >= 0 && minSquareDist <= squareElligibleDist)
         {
             if (nNSS.maxSearchSquareDist < 0 || minSquareDist <= nNSS.maxSearchSquareDist)
-                return minSquareDist;
+                return static_cast<ScalarType>(minSquareDist);
 			else
-                return -1.0;
+                return -1;
         }
 		else
 		{
 			//no elligible point? Maybe we are already too far?
 			if (nNSS.maxSearchSquareDist >= 0 && squareElligibleDist > nNSS.maxSearchSquareDist)
-				return -1.0;
+				return -1;
 		}
 
         //default strategy: increase neighbourhood size of +1 (for next step)
@@ -1613,7 +1613,7 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
     //we should never get here!
     assert(false);
 
-    return -1.0;
+    return -1;
 }
 
 //search for at least "minNumberOfNeighbors" points around a query point
@@ -1705,7 +1705,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
     //for each dimension, we look for the min distance between the query point and the celle border.
     //This distance (minDistToBorder) correponds to the maximal radius of a sphere centered on the
     //query point and totaly included inside the cell
-    ScalarType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
+    PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
 
     //elligible points found
     unsigned elligiblePoints = 0;
@@ -1714,7 +1714,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
     unsigned alreadyProcessedPoints = 0;
 
     //Min (squared) distance of non elligible points
-    ScalarType minSquareDist = -1.0;
+    PointCoordinateType minSquareDist = -1;
 
     //while we don't have enough 'nearest neighbours'
     while (elligiblePoints<nNSS.minNumberOfNeighbors)
@@ -1723,7 +1723,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
         if (minSquareDist > 0)
         {
             //what would be the correct neighbourhood size to be sure of it?
-            int newElligibleCellDistance = static_cast<int>(ceil((sqrt(minSquareDist)-minDistToBorder)/ScalarType(cs)));
+            int newElligibleCellDistance = static_cast<int>(ceil((sqrt(minSquareDist)-minDistToBorder)/cs));
             elligibleCellDistance = std::max(newElligibleCellDistance,elligibleCellDistance);
         }
 
@@ -1737,14 +1737,14 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
         //we compute distances for the new points
         NeighboursSet::iterator q;
         for (q = nNSS.pointsInNeighbourhood.begin()+alreadyProcessedPoints; q != nNSS.pointsInNeighbourhood.end(); ++q)
-            q->squareDist = (*q->point - nNSS.queryPoint).norm2();
+            q->squareDist = static_cast<ScalarType>((*q->point - nNSS.queryPoint).norm2());
         alreadyProcessedPoints = static_cast<unsigned>(nNSS.pointsInNeighbourhood.size());
 
         //equivalent spherical neighbourhood radius (as we are actually looking to 'square' neighbourhoods,
         //we must check that the nearest points inside such neighbourhoods are indeed near enough to fall
         //inside the biggest included sphere). Otherwise we must look further.
-        ScalarType elligibleDist = ScalarType(elligibleCellDistance-1)*ScalarType(cs)+minDistToBorder;
-        ScalarType squareElligibleDist = elligibleDist * elligibleDist;
+        PointCoordinateType elligibleDist = static_cast<PointCoordinateType>(elligibleCellDistance-1) * cs + minDistToBorder;
+        PointCoordinateType squareElligibleDist = elligibleDist * elligibleDist;
 
         //let's test all the previous 'not yet elligible' points and the new ones
         unsigned j=elligiblePoints;
@@ -1760,7 +1760,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
             //otherwise we track the nearest one
             else if (q->squareDist<minSquareDist || j == elligiblePoints)
             {
-                minSquareDist = q->squareDist;
+                minSquareDist = static_cast<PointCoordinateType>(q->squareDist);
             }
         }
 
@@ -2063,8 +2063,8 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 		CCVector3 cellCorners[MAX_OCTREE_LEVEL+1];
 		cellCorners[level]=bbMin;
 
-		PointCoordinateType currentSquareDistanceToCellCenter = -1.0;
-		float squareRadius = radius*radius;
+		PointCoordinateType currentSquareDistanceToCellCenter = -1;
+		PointCoordinateType squareRadius = radius*radius;
 
 		for (cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+startIndex; p != m_thePointsAndTheirCellCodes.end() && (p->theCode >> bitDec) == englobCode; ++p) //we are looking to all points inside the main englobing cell!
 		{
@@ -2101,9 +2101,9 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 						const CCVector3* P = m_theAssociatedCloud->getPointPersistentPtr(p->theIndex);
 						PointCoordinateType d2 = (*P - sphereCenter).norm2();
 
-						if (d2<=squareRadius)
+						if (d2 <= squareRadius)
 						{
-							if (n+1>neighbours.size())
+							if (n+1 > neighbours.size())
 							{
 								try
 								{
@@ -2114,7 +2114,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 									return -1; //not enough memory
 								}
 							}
-							neighbours[n++] = PointDescriptor(P,p->theIndex,d2);
+							neighbours[n++] = PointDescriptor(P,p->theIndex,static_cast<ScalarType>(d2));
 						}
 						skipCell=true;
 						break;
@@ -2164,7 +2164,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 				{
 					try
 					{
-						neighbours.push_back(PointDescriptor(0,p->theIndex,currentSquareDistanceToCellCenter));
+						neighbours.push_back(PointDescriptor(0,p->theIndex,static_cast<ScalarType>(currentSquareDistanceToCellCenter)));
 					}
 					catch (.../*const std::bad_alloc&*/) //out of memory
 					{
@@ -2182,7 +2182,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 					{
 						try
 						{
-							neighbours.push_back(PointDescriptor(P,p->theIndex,d2));
+							neighbours.push_back(PointDescriptor(P,p->theIndex,static_cast<ScalarType>(d2)));
 						}
 						catch (.../*const std::bad_alloc&*/) //out of memory
 						{
@@ -2251,10 +2251,10 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 	}
 #else
     //current level cell size
-    const PointCoordinateType& cs=getCellSize(nNSS.level);
+    const PointCoordinateType& cs = getCellSize(nNSS.level);
 
     //we compute the minimal distance between the query point and all cell borders
-    ScalarType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
+    PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
 
     //we deduce the minimum cell neighbourhood size (integer) that includes the search sphere
     int minNeighbourhoodSize = 1+(radius>minDistToBorder ? int(ceil((radius-minDistToBorder)/cs)) : 0);
@@ -2273,7 +2273,7 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 #endif
 
 	//squared distances comparison is faster!
-    ScalarType squareRadius = radius * radius;
+    PointCoordinateType squareRadius = radius * radius;
     unsigned numberOfElligiblePoints = 0;
 
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN
@@ -2342,7 +2342,7 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
     size_t k = nNSS.pointsInNeighbourhood.size();
     for (size_t i=0; i<k; ++i,++p)
     {
-        p->squareDist = (*p->point - nNSS.queryPoint).norm2();
+        p->squareDist = static_cast<ScalarType>( (*p->point - nNSS.queryPoint).norm2() );
         //if the distance is inferior to the sphere radius...
         if (p->squareDist <= squareRadius)
         {
@@ -2593,22 +2593,22 @@ void DgmOctree::diff(uchar octreeLevel, const cellsContainer &codesA, const cell
     }
 }
 
-uchar DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(float radius) const
+uchar DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const
 {
-	float aim = radius/2.5f;
-    uchar level=1;
-	float minValue = getCellSize(1)-aim;
+	PointCoordinateType aim = radius / static_cast<PointCoordinateType>(2.5);
+    uchar level = 1;
+	PointCoordinateType minValue = getCellSize(1)-aim;
 	minValue *= minValue;
     for (uchar i=2; i<=MAX_OCTREE_LEVEL; ++i)
     {
         //The level with cell size as near as possible to the aim
-        float cellSizeDelta = getCellSize(i)-aim;
+        PointCoordinateType cellSizeDelta = getCellSize(i)-aim;
         cellSizeDelta *= cellSizeDelta;
 
         if (cellSizeDelta < minValue)
         {
-            level=i;
-            minValue=cellSizeDelta;
+            level = i;
+            minValue = cellSizeDelta;
         }
     }
 
@@ -3527,8 +3527,8 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
         if (functionTitle)
             progressCb->setMethodTitle(functionTitle);
         char buffer[512];
-		sprintf(buffer,"Octree level %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %i",level,cellCount,m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
-		nprogress = new NormalizedProgress(progressCb,cellCount);
+		sprintf(buffer,"Octree level %i\nCells: %u\nMean population: %3.2f (+/-%3.2f)\nMax population: %i",level,cellCount,m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
+		nprogress = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
         progressCb->setInfo(buffer);
         progressCb->start();
     }
@@ -3550,7 +3550,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
         if (nextCode != cell.truncatedCode)
         {
             //if not, we call the user function on the precedent cell
-            result = (*func)(cell,additionalParameters);
+            result = (*func)(cell,additionalParameters,nprogress);
 
 			if (!result)
 				break;
@@ -3560,12 +3560,12 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
             cell.points->clear(false);
 			cell.truncatedCode = nextCode;
 
-			if (nprogress && !nprogress->oneStep())
-			{
-				//process canceled by user
-				result = false;
-				break;
-			}
+			//if (nprogress && !nprogress->oneStep())
+			//{
+			//	//process canceled by user
+			//	result = false;
+			//	break;
+			//}
         }
 
         cell.points->addPointIndex(p->theIndex); //can't fail (see above)
@@ -3573,7 +3573,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
 
     //don't forget last cell!
 	if (result)
-		result = (*func)(cell,additionalParameters);
+		result = (*func)(cell,additionalParameters, nprogress);
 
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 	FILE* fp=fopen("octree_log.txt","at");
@@ -3641,7 +3641,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 				m_maxCellPopulation[startingLevel],m_maxCellPopulation[MAX_OCTREE_LEVEL]);
         progressCb->setInfo(buffer);
 #ifndef ENABLE_DOWN_TOP_TRAVERSAL
-		nprogress = new NormalizedProgress(progressCb,cellsNumber);
+		nprogress = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
 #endif
         progressCb->start();
     }
@@ -3670,15 +3670,14 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 
 		//progress notification
 #ifndef ENABLE_DOWN_TOP_TRAVERSAL
-		if (cell.level == startingLevel)
-		{
-			if (nprogress)
-				if (!nprogress->oneStep())
-				{
-					result=false;
-					break;
-				}
-		}
+		//if (cell.level == startingLevel)
+		//{
+		//	if (nprogress && !nprogress->oneStep())
+		//	{
+		//		result=false;
+		//		break;
+		//	}
+		//}
 #else
 		//in this mode, we can't update progress notification regularly...
 		if (progressCb)
@@ -3823,7 +3822,13 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 			cell.points->addPointIndex((startingElement++)->theIndex);
 
 		//call user method on current cell
-		result = (*func)(cell,additionalParameters);
+		result = (*func)(cell,additionalParameters,
+#ifndef ENABLE_DOWN_TOP_TRAVERSAL
+			nProgress
+#else
+			0
+#endif
+			);
 
 		if (!result)
 			break;
@@ -3873,6 +3878,7 @@ struct octreeCellDesc
 static DgmOctree* s_octree_MT = 0;
 static DgmOctree::octreeCellFunc s_func_MT = 0;
 static void** s_userParams_MT = 0;
+static GenericProgressCallback* s_progressCb_MT = 0;
 static NormalizedProgress* s_normProgressCb_MT = 0;
 static bool s_cellFunc_MT_success = true;
 
@@ -3882,37 +3888,44 @@ void LaunchOctreeCellFunc_MT(const octreeCellDesc& desc)
 	if (!s_cellFunc_MT_success)
 		return;
 
-	if (s_normProgressCb_MT)
-	{
-		QApplication::processEvents(); //let the application breath!
-		if (!s_normProgressCb_MT->oneStep())
-		{
-			s_cellFunc_MT_success = false;
-            return;
-		}
-	}
-
 	const DgmOctree::cellsContainer& pointsAndCodes = s_octree_MT->pointsAndTheirCellCodes();
 
     //cell descriptor
-    DgmOctree::octreeCell* cell = new DgmOctree::octreeCell(s_octree_MT);
-	cell->level = desc.level;
-	cell->index = desc.i1;
-	cell->truncatedCode = desc.truncatedCode;
-	if (cell->points->reserve(desc.i2-desc.i1+1))
+    DgmOctree::octreeCell cell(s_octree_MT);
+	cell.level = desc.level;
+	cell.index = desc.i1;
+	cell.truncatedCode = desc.truncatedCode;
+	if (cell.points->reserve(desc.i2-desc.i1+1))
 	{
 		for (unsigned i=desc.i1; i<=desc.i2; ++i)
-			cell->points->addPointIndex(pointsAndCodes[i].theIndex);
+			cell.points->addPointIndex(pointsAndCodes[i].theIndex);
 
-		s_cellFunc_MT_success &= (*s_func_MT)(*cell,s_userParams_MT);
+		s_cellFunc_MT_success &= (*s_func_MT)(cell,s_userParams_MT,s_normProgressCb_MT);
 	}
 	else
 	{
 		s_cellFunc_MT_success = false;
 	}
 
-	delete cell;
-	cell=0;
+	if (!s_cellFunc_MT_success)
+	{
+		//TODO: display a message to make clear that the cancel order has been understood!
+		if (s_progressCb_MT)
+		{
+			s_progressCb_MT->setInfo("Cancelling...");
+			QApplication::processEvents();
+		}
+
+	//if (s_normProgressCb_MT)
+	//{
+	//	//QApplication::processEvents(); //let the application breath!
+	//	if (!s_normProgressCb_MT->oneStep())
+	//	{
+	//		s_cellFunc_MT_success = false;
+	//		return;
+	//	}
+	//}
+	}
 }
 
 unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
@@ -3969,9 +3982,12 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
 	s_func_MT = func;
 	s_userParams_MT = additionalParameters;
 	s_cellFunc_MT_success = true;
+	s_progressCb_MT = progressCb;
 	if (s_normProgressCb_MT)
+	{
 		delete s_normProgressCb_MT;
-	s_normProgressCb_MT = 0;
+		s_normProgressCb_MT = 0;
+	}
 
     //progress notification
     if (progressCb)
@@ -3980,9 +3996,9 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
         if (functionTitle)
             progressCb->setMethodTitle(functionTitle);
         char buffer[512];
-		sprintf(buffer,"Octree level %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %d",level,cells.size(),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
+		sprintf(buffer,"Octree level %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %d",level,static_cast<int>(cells.size()),m_averageCellPopulation[level],m_stdDevCellPopulation[level],m_maxCellPopulation[level]);
         progressCb->setInfo(buffer);
-		s_normProgressCb_MT = new NormalizedProgress(progressCb,static_cast<unsigned>(cells.size()));
+		s_normProgressCb_MT = new NormalizedProgress(progressCb,m_theAssociatedCloud->size());
         progressCb->start();
     }
 
@@ -4019,7 +4035,8 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel_MT(uchar level,
         progressCb->stop();
 		if (s_normProgressCb_MT)
 			delete s_normProgressCb_MT;
-		s_normProgressCb_MT=0;
+		s_normProgressCb_MT = 0;
+		s_progressCb_MT = 0;
 	}
 
 	//if something went wrong, we clear everything and return 0!
@@ -4249,7 +4266,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
         if (functionTitle)
             progressCb->setMethodTitle(functionTitle);
         char buffer[1024];
-		sprintf(buffer,"Octree levels %i - %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %d",startingLevel,MAX_OCTREE_LEVEL,cells.size(),mean,stddev,maxPop);
+		sprintf(buffer,"Octree levels %i - %i\nCells: %i\nMean population: %3.2f (+/-%3.2f)\nMax population: %u",startingLevel,MAX_OCTREE_LEVEL,static_cast<int>(cells.size()),mean,stddev,maxPop);
         progressCb->setInfo(buffer);
 		if (s_normProgressCb_MT)
 			delete s_normProgressCb_MT;

@@ -68,12 +68,12 @@ void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 	{
 		ccColorScale::Shared colorScale = ccColorScalesManager::GetDefaultScale();
 		assert(colorScale);
-		ScalarType coef = maxDist-minDist < ZERO_TOLERANCE ? 0.0 : (ScalarType)(ccColorScale::MAX_STEPS-1)/(maxDist-minDist);
+		ScalarType coef = maxDist-minDist < ZERO_TOLERANCE ? 0 : static_cast<ScalarType>(ccColorScale::MAX_STEPS-1)/(maxDist-minDist);
 
 		const ScalarType* _zBuff = depthBuffer.zBuff;
-		for (int y=0;y<depthBuffer.height;++y)
+		for (int y=0; y<depthBuffer.height; ++y)
 		{
-			for (int x=0;x<depthBuffer.width;++x,++_zBuff)
+			for (int x=0; x<depthBuffer.width; ++x,++_zBuff)
 			{
 				const colorType* col = (*_zBuff >= minDist ? colorScale->getColorByIndex(static_cast<unsigned>((*_zBuff-minDist)*coef)) : ccColor::black);
 				bufferImage.setPixel(x,depthBuffer.height-1-y,qRgb(col[0],col[1],col[2]));
@@ -283,9 +283,9 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 
 	//display area
 	QFont font = win->getTextDisplayFont(); //takes rendering zoom into account!
-	const int strHeight = displayParams.defaultFontSize * renderZoom; //QFontMetrics(font).height() --> always returns the same value?!
-	const int scaleWidth = displayParams.colorScaleRampWidth * renderZoom;
-	const int scaleMaxHeight = (keyValues.size() > 1 ? std::max(glH-static_cast<int>(140 * renderZoom),2*strHeight) : scaleWidth); //if 1 value --> we draw a cube
+	const int strHeight = static_cast<int>(displayParams.defaultFontSize * renderZoom); //QFontMetrics(font).height() --> always returns the same value?!
+	const int scaleWidth = static_cast<int>(displayParams.colorScaleRampWidth * renderZoom);
+	const int scaleMaxHeight = (keyValues.size() > 1 ? std::max(glH-static_cast<int>(140 * renderZoom), 2*strHeight) : scaleWidth); //if 1 value --> we draw a cube
 
 	//centered orthoprojective view (-halfW,-halfH,halfW,halfH)
 	int halfW = (glW>>1);
@@ -361,7 +361,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 			double value = sortedKeyValues.front();
 			if (logScale)
 				value = exp(value*c_log10);
-			const colorType* col = sf->getColor(value);
+			const colorType* col = sf->getColor(static_cast<ScalarType>(value));
 			glColor3ubv(col ? col : ccColor::lightGrey);
 			glBegin(GL_POLYGON);
 			glVertex2i(x,y);
@@ -498,8 +498,8 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 
 			win->displayText(QString::number(value,format,precision), x, y+it->yPos, align, 0, 0, &font);
 			glBegin(GL_LINES);
-			glVertex2f(xTick,yTick+it->yPos);
-			glVertex2f(xTick+tickSize,yTick+it->yPos);
+			glVertex2i(xTick,yTick+it->yPos);
+			glVertex2i(xTick+tickSize,yTick+it->yPos);
 			glEnd();
 		}
 	}

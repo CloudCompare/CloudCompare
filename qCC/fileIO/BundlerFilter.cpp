@@ -77,7 +77,7 @@ struct BundlerCamera
 	bool isValid;
 };
 
-CC_FILE_ERROR BundlerFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR BundlerFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	return loadFileExtended(filename,container,true);
 }
@@ -114,7 +114,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 		return CC_FERR_MALFORMED_FILE;
 	}
 	unsigned majorVer=0,minorVer=0;
-	sscanf(qPrintable(currentLine),"# Bundle file v%i.%i",&majorVer,&minorVer);
+	sscanf(qPrintable(currentLine),"# Bundle file v%u.%u",&majorVer,&minorVer);
 	if (majorVer!=0 || (minorVer!=3 && minorVer!=4))
 	{
 		ccLog::Error("Only version 0.3 and 0.4 of Bundler files are supported!");
@@ -337,7 +337,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 					if (hasColors)
 					{
 						sscanf(qPrintable(currentLine),"%i %i %i",&R,&G,&B);
-						keypointsCloud->addRGBColor(R,G,B);
+						keypointsCloud->addRGBColor(static_cast<colorType>(std::min<int>(R,MAX_COLOR_COMP)),
+													static_cast<colorType>(std::min<int>(G,MAX_COLOR_COMP)),
+													static_cast<colorType>(std::min<int>(B,MAX_COLOR_COMP)));
 					}
 
 					currentLine = stream.readLine();
@@ -627,8 +629,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 					//apply bundler equation
 					cam.trans.apply(P);
 					//convert to keypoint
-					kp.x = -cam.f * P.x/P.z;
-					kp.y = cam.f * P.y/P.z;
+					kp.x = -cam.f * static_cast<float>(P.x/P.z);
+					kp.y = cam.f * static_cast<float>(P.y/P.z);
 					if ((int)kp.x > -half_w && (int)kp.x < half_w
 						&& (int)kp.y > -half_h && (int)kp.y < half_h)
 					{

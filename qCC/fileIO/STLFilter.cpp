@@ -26,6 +26,7 @@
 #include <QMessageBox>
 #include <QPushButton>
 #include <QMessageBox>
+#include <QProgressDialog>
 
 //qCC_db
 #include <ccLog.h>
@@ -171,10 +172,12 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile)
 
 	//vertices
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
-	const double* shift = vertices->getOriginalShift();
+	const CCVector3d& shift = vertices->getGlobalShift();
+	double scale = vertices->getGlobalScale();
+	assert(scale != 0);
 
 	mesh->placeIteratorAtBegining();
-	for (unsigned i=0;i<faceCount;++i)
+	for (unsigned i=0; i<faceCount; ++i)
 	{
 		CCLib::TriangleSummitsIndexes*tsi = mesh->getNextTriangleIndexes();
 
@@ -184,15 +187,22 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile)
 		//compute face normal (right hand rule)
 		CCVector3 N = (*B-*A).cross(*C-*A);
 
-		if (fprintf(theFile,"facet normal %e %e %e\n",N.x,N.y,N.z) < 0) //scientific notation
+		//%e = scientific notation
+		if (fprintf(theFile,"facet normal %e %e %e\n",N.x,N.y,N.z) < 0)
 			return CC_FERR_WRITING;
 		if (fprintf(theFile,"outer loop\n") < 0)
 			return CC_FERR_WRITING;
-		if (fprintf(theFile,"vertex %e %e %e\n",-shift[0]+(double)A->x,-shift[1]+(double)A->y,-shift[2]+(double)A->z) < 0) //scientific notation
+		if (fprintf(theFile,"vertex %e %e %e\n",static_cast<double>(A->x)/scale - shift.x,
+												static_cast<double>(A->y)/scale - shift.y,
+												static_cast<double>(A->z)/scale - shift.z) < 0)
 			return CC_FERR_WRITING;
-		if (fprintf(theFile,"vertex %e %e %e\n",-shift[0]+(double)B->x,-shift[1]+(double)B->y,-shift[2]+(double)B->z) < 0) //scientific notation
+		if (fprintf(theFile,"vertex %e %e %e\n",static_cast<double>(B->x)/scale - shift.x,
+												static_cast<double>(B->y)/scale - shift.y,
+												static_cast<double>(B->z)/scale - shift.z) < 0)
 			return CC_FERR_WRITING;
-		if (fprintf(theFile,"vertex %e %e %e\n",-shift[0]+(double)C->x,-shift[1]+(double)C->y,-shift[2]+(double)C->z) < 0) //scientific notation
+		if (fprintf(theFile,"vertex %e %e %e\n",static_cast<double>(C->x)/scale - shift.x,
+												static_cast<double>(C->y)/scale - shift.y,
+												static_cast<double>(C->z)/scale - shift.z) < 0)
 			return CC_FERR_WRITING;
 		if (fprintf(theFile,"endloop\nendfacet\n") < 0)
 			return CC_FERR_WRITING;
@@ -208,8 +218,10 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile)
 	return CC_FERR_NO_ERROR;
 }
 
-const double c_defaultSearchRadius = sqrt(ZERO_TOLERANCE);
-bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters)
+const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(ZERO_TOLERANCE));
+bool tagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
+							void** additionalParameters,
+							CCLib::NormalizedProgress* nProgress/*=0*/)
 {
 	GenericChunkedArray<1,int>* equivalentIndexes = (GenericChunkedArray<1,int>*)additionalParameters[0];
 
@@ -248,10 +260,10 @@ bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** addi
 	}
 
 	//for each point in the cell
-	for (unsigned i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
 		int thisIndex = (int)cell.points->getPointGlobalIndex(i);
-		if (equivalentIndexes->getValue(thisIndex)<0) //has no equivalent yet 
+		if (equivalentIndexes->getValue(thisIndex) < 0) //has no equivalent yet 
 		{
 			cell.points->getPoint(i,nNSS.queryPoint);
 
@@ -261,11 +273,11 @@ bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** addi
 			//if there are some very close points
 			if (k>1)
 			{
-				for (unsigned j=0;j<k;++j)
+				for (unsigned j=0; j<k; ++j)
 				{
 					//all the other points are equivalent to the query point
 					const unsigned& otherIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
-					if (otherIndex != thisIndex)
+					if (otherIndex != static_cast<unsigned int>(thisIndex))
 						equivalentIndexes->setValue(otherIndex,thisIndex);
 				}
 			}
@@ -273,12 +285,15 @@ bool tagDuplicatedVertices(const CCLib::DgmOctree::octreeCell& cell, void** addi
 			//and the query point is always root
 			equivalentIndexes->setValue(thisIndex,thisIndex);
 		}
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
 }
 
-CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	ccLog::Print("[STLFilter::Load] %s",filename);
 
@@ -357,7 +372,11 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 			{
 				ccProgressDialog progressDlg(true);
 				void* additionalParameters[1] = {(void*)equivalentIndexes};
-				unsigned result = octree->executeFunctionForAllCellsAtLevel(ccOctree::MAX_OCTREE_LEVEL,tagDuplicatedVertices,additionalParameters,&progressDlg,"Tag duplicated vertices");
+				unsigned result = octree->executeFunctionForAllCellsAtLevel(ccOctree::MAX_OCTREE_LEVEL,
+																			tagDuplicatedVertices,
+																			additionalParameters,
+																			&progressDlg,
+																			"Tag duplicated vertices");
 				vertices->deleteOctree();
 				octree=0;
 
@@ -462,7 +481,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 									ccPointCloud* vertices,
 									bool alwaysDisplayLoadDialog,
 									bool* coordinatesShiftEnabled/*=0*/,
-									double* coordinatesShift/*=0*/)
+									CCVector3d* coordinatesShift/*=0*/)
 {
 	assert(fp.isOpen() && mesh && vertices);
 
@@ -492,15 +511,13 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 	mesh->setName(name);
 
 	//progress dialog
-	ccProgressDialog progressDlg(true);
-	progressDlg.setMethodTitle("Loading ASCII STL file");
-	progressDlg.setInfo("Loading in progress...");
-	progressDlg.setRange(0,0);
+	QProgressDialog progressDlg("Loading in progress...","Cancel",0,0);
+	progressDlg.setWindowTitle("Loading ASCII STL file");
 	progressDlg.show();
 	QApplication::processEvents();
 
 	//current vertex shift
-	double Pshift[3]={0.0,0.0,0.0};
+	CCVector3d Pshift(0,0,0);
 
 	unsigned pointCount = 0;
 	unsigned faceCount = 0;
@@ -535,12 +552,14 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				//let's try to read normal
 				if (tokens[1].toUpper() == "NORMAL")
 				{
-					N.x = tokens[2].toDouble(&normalIsOk);
+					N.x = static_cast<PointCoordinateType>(tokens[2].toDouble(&normalIsOk));
 					if (normalIsOk)
 					{
-						N.y = tokens[3].toDouble(&normalIsOk);
+						N.y = static_cast<PointCoordinateType>(tokens[3].toDouble(&normalIsOk));
 						if (normalIsOk)
-							N.z = tokens[4].toDouble(&normalIsOk);
+						{
+							N.z = static_cast<PointCoordinateType>(tokens[4].toDouble(&normalIsOk));
+						}
 					}
 					if (!normalIsOk && !normalWarningAlreadyDisplayed)
 					{
@@ -613,27 +632,25 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			{
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 				if (shiftAlreadyEnabled)
-					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+					Pshift = *coordinatesShift;
 				bool applyAll=false;
-				if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
-					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+					vertices->setGlobalShift(Pshift);
+					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 
 					//we save coordinates shift information
 					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
 					{
 						*coordinatesShiftEnabled = true;
-						coordinatesShift[0] = Pshift[0];
-						coordinatesShift[1] = Pshift[1];
-						coordinatesShift[2] = Pshift[2];
+						*coordinatesShift = Pshift;
 					}
 				}
 			}
 
-			CCVector3 P((PointCoordinateType)(Pd[0]+Pshift[0]),
-						(PointCoordinateType)(Pd[1]+Pshift[1]),
-						(PointCoordinateType)(Pd[2]+Pshift[2]));
+			CCVector3 P(static_cast<PointCoordinateType>(Pd[0] + Pshift.x),
+						static_cast<PointCoordinateType>(Pd[1] + Pshift.y),
+						static_cast<PointCoordinateType>(Pd[2] + Pshift.z));
 
 			//look for existing vertices at the same place! (STL format is so dumb...)
 			{
@@ -738,16 +755,16 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		//progress
 		if ((faceCount % 1024) == 0)
 		{
-			if (progressDlg.isCancelRequested())
+			if (progressDlg.wasCanceled())
 				break;
-			progressDlg.update(faceCount>>10);
+			progressDlg.setValue(static_cast<int>(faceCount>>10));
 		}
 	}
 
 	if (normalWarningAlreadyDisplayed)
 		ccLog::Warning("[STL] Failed to read some 'normal' values!");
 
-	progressDlg.stop();
+	progressDlg.close();
 
 	//do some cleaning
 	if (vertices->size() < vertices->capacity())
@@ -765,7 +782,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 									ccPointCloud* vertices,
 									bool alwaysDisplayLoadDialog,
 									bool* coordinatesShiftEnabled/*=0*/,
-									double* coordinatesShift/*=0*/)
+									CCVector3d* coordinatesShift/*=0*/)
 {
 	assert(fp.isOpen() && mesh && vertices);
 
@@ -803,7 +820,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	QApplication::processEvents();
 
 	//current vertex shift
-	double Pshift[3]={0.0,0.0,0.0};
+	CCVector3d Pshift(0,0,0);
 
 	for (unsigned f=0;f<faceCount;++f)
 	{
@@ -829,27 +846,25 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 			{
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 				if (shiftAlreadyEnabled)
-					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+					Pshift = *coordinatesShift;
 				bool applyAll=false;
-				if (ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
-					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+					vertices->setGlobalShift(Pshift);
+					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 
 					//we save coordinates shift information
 					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
 					{
 						*coordinatesShiftEnabled = true;
-						coordinatesShift[0] = Pshift[0];
-						coordinatesShift[1] = Pshift[1];
-						coordinatesShift[2] = Pshift[2];
+						*coordinatesShift = Pshift;
 					}
 				}
 			}
 
-			CCVector3 P((PointCoordinateType)(Pd[0]+Pshift[0]),
-						(PointCoordinateType)(Pd[1]+Pshift[1]),
-						(PointCoordinateType)(Pd[2]+Pshift[2]));
+			CCVector3 P(static_cast<PointCoordinateType>(Pd[0] + Pshift.x),
+						static_cast<PointCoordinateType>(Pd[1] + Pshift.y),
+						static_cast<PointCoordinateType>(Pd[2] + Pshift.z));
 
 			//look for existing vertices at the same place! (STL format is so dumb...)
 			{

@@ -52,7 +52,7 @@ public:
 		\param _theOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
     **/
-	static int computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, float kernelRadius, GenericProgressCallback* progressCb=0, DgmOctree* _theOctree=0);
+	static int computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb=0, DgmOctree* _theOctree=0);
 
 	//! Computes the local density
     /** Warning: this method assumes the input scalar field is different from output.
@@ -73,7 +73,7 @@ public:
 		\param _theOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
     **/
-	static int computeRoughness(GenericIndexedCloudPersist* theCloud, float kernelRadius, GenericProgressCallback* progressCb=0, DgmOctree* _theOctree=0);
+	static int computeRoughness(GenericIndexedCloudPersist* theCloud, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb=0, DgmOctree* _theOctree=0);
 
 	//! Computes the gravity center of a point cloud
 	/** WARNING: this method uses the cloud global iterator
@@ -129,20 +129,29 @@ protected:
 	//! Computes cell curvature inside a cell
 	/**	\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computeCellCurvatureAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computeCellCurvatureAtLevel(const DgmOctree::octreeCell& cell,
+											void** additionalParameters,
+											NormalizedProgress* nProgress = 0);
 
 	//! Computes point density inside a cell
 	/**	\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computePointsDensityInACellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computePointsDensityInACellAtLevel(	const DgmOctree::octreeCell& cell,
+													void** additionalParameters,
+													NormalizedProgress* nProgress = 0);
 
 	//! Computes point roughness inside a cell
 	/**	\param cell structure describing the cell on which processing is applied
 		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
 	**/
-	static bool computePointsRoughnessInACellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters);
+	static bool computePointsRoughnessInACellAtLevel(	const DgmOctree::octreeCell& cell,
+														void** additionalParameters,
+														NormalizedProgress* nProgress = 0);
 };
 
 }

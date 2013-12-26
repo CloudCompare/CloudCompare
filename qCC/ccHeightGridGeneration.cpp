@@ -38,6 +38,31 @@
 #include <QImageWriter>
 #include <QSettings>
 
+#ifdef CC_GDAL_SUPPORT
+//GDAL
+#include <gdal.h>
+#include <gdal_priv.h>
+#include <cpl_string.h>
+
+//local
+#include "ui_rasterExportOptionsDlg.h"
+#include <QDialog>
+
+class RasterExportOptionsDlg : public QDialog, public Ui::RasterExportOptionsDialog
+{
+public:
+
+	RasterExportOptionsDlg(QWidget* parent = 0)
+		: QDialog(parent)
+		, Ui::RasterExportOptionsDialog()
+	{
+		setupUi(this);
+		setWindowFlags(Qt::Tool);
+	}
+};
+
+#endif
+
 using namespace std;
 
 //! Cell of a regular 2D height grid (height map)
@@ -47,12 +72,15 @@ struct HeightGridCell
     HeightGridCell()
 		: height(0)
 		, nbPoints(0)
+		, pointIndex(0)
     {}
 
     //! Value
-    float height;
+    PointCoordinateType height;
     //! Number of points projected in this cell
     unsigned nbPoints;
+    //! Nearest point index (if any)
+    unsigned pointIndex;
 };
 
 //************************************************************************************************************************
@@ -66,8 +94,10 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 												double customEmptyCellsHeight/*=-1.0*/,
 												bool generateCloud/*=true*/,
 												bool generateImage/*=false*/,
+												bool generateRaster/*=false*/,
 												bool generateASCII/*=false*/,
 												bool generateCountSF/*=false*/,
+												bool resampleOriginalCloud/*=false*/,
 												CCLib::GenericProgressCallback* progressCb/*=0*/)
 {
     if (progressCb)
@@ -76,6 +106,10 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
         progressCb->setMethodTitle("Height grid generation");
         progressCb->start();
     }
+
+	//we can't use the 'resample origin cloud' option with 'average height' projection
+	if (projectionType == PROJ_AVERAGE_HEIGHT)
+		resampleOriginalCloud = false;
 
     //=========================================================================================================
     ccLog::Print("[ccHeightGridGeneration] 1 - Initialization");
@@ -139,12 +173,12 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 	//do we need to interpolate scalar fields?
 	ccPointCloud* pc = (cloud->isA(CC_POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud) : 0);
 	std::vector<double*> gridScalarFields;
-	bool interpolateSF = (sfInterpolation != INVALID_PROJECTION_TYPE) && generateCloud && pc && pc->hasScalarFields();
+	bool interpolateSF = (sfInterpolation != INVALID_PROJECTION_TYPE) && ((generateCloud && pc && pc->hasScalarFields()) || generateRaster);
 	if (!memError && interpolateSF)
 	{
 		unsigned sfCount = pc->getNumberOfScalarFields();
 		gridScalarFields.resize(sfCount,0);
-		for (unsigned i=0;i<sfCount;++i)
+		for (unsigned i=0; i<sfCount; ++i)
 		{
 			gridScalarFields[i] = new double[grid_total_size];
 			if (!gridScalarFields[i])
@@ -191,12 +225,18 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 			case PROJ_MINIMUM_HEIGHT:
 				// Set the minimum height
 				if (thePoint->u[Z] < aCell->height)
+				{
 					aCell->height = thePoint->u[Z];
+					aCell->pointIndex = n;
+				}
 				break;
 			case PROJ_MAXIMUM_HEIGHT:
 				// Set the maximum height
 				if (thePoint->u[Z] > aCell->height)
+				{
 					aCell->height = thePoint->u[Z];
+					aCell->pointIndex = n;
+				}
 				break;
 			case PROJ_AVERAGE_HEIGHT:
 				// Sum the points heights
@@ -211,6 +251,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 		{
 			//for the first point, we simply have to store its height (in any case)
 			aCell->height = thePoint->u[Z];
+			aCell->pointIndex = n;
 		}
 
 		//scalar fields
@@ -218,14 +259,14 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 		{
 			int pos = j*static_cast<int>(grid_size_X)+i; //pos in 2D SF grid(s)
 			assert(pos < static_cast<int>(grid_total_size));
-			for (unsigned k=0;k<gridScalarFields.size(); ++k)
+			for (unsigned k=0; k<gridScalarFields.size(); ++k)
 			{
 				if (gridScalarFields[k])
 				{
 					CCLib::ScalarField* sf = pc->getScalarField(k);
 					assert(sf);
 					ScalarType sfValue = sf->getValue(n);
-					ScalarType formerValue = gridScalarFields[k][pos];
+					ScalarType formerValue = static_cast<ScalarType>(gridScalarFields[k][pos]);
 
 					if (pointsInCell && ccScalarField::ValidValue(formerValue))
 					{
@@ -255,7 +296,6 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						//for the first (vaild) point, we simply have to store its SF value (in any case)
 						gridScalarFields[k][pos] = sfValue;
 					}
-
 				}
 			}
 		}
@@ -281,8 +321,11 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						for (unsigned i=0;i<grid_size_X;++i,++cell,++_gridSF)
 						{
 							if (cell->nbPoints)
-								if (ccScalarField::ValidValue(*_gridSF)) //valid SF value
+							{
+								ScalarType s = static_cast<ScalarType>(*_gridSF);
+								if (ccScalarField::ValidValue(s)) //valid SF value
 									*_gridSF /= static_cast<double>(cell->nbPoints);
+							}
 						}
 					}
 				}
@@ -297,7 +340,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 				HeightGridCell* cell = grid[j];
 				for (unsigned i=0; i<grid_size_X; ++i,++cell)
 					if (cell->nbPoints>1)
-						cell->height /= static_cast<double>(cell->nbPoints);
+						cell->height /= static_cast<PointCoordinateType>(cell->nbPoints);
 			}
 		}
 	}
@@ -349,7 +392,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
         ccLog::Print("\tAverage height = %f", meanHeight);
         ccLog::Print("\tMaximal height = %f", maxHeight);
 
-		if (generateASCII || generateImage || generateCloud)
+		if (generateASCII || generateImage || generateRaster || generateCloud)
 		{
 			//=========================================================================================================
 			if (fillEmptyCells == FILL_AVERAGE_HEIGHT)
@@ -480,7 +523,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						assert(false);
 					}
 
-					ccLog::Print("\tempty_cell_color_index = %1",empty_cell_color_index);
+					ccLog::Print("\tempty_cell_color_index = %u",empty_cell_color_index);
 
 					double range = maxHeight - minHeight;
 					if (range < ZERO_TOLERANCE)
@@ -553,150 +596,526 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 			}
 
 			//=========================================================================================================
+			if (generateRaster)
+			{
+#ifdef CC_GDAL_SUPPORT
+				ccLog::Print("[ccHeightGridGeneration] Saving the height grid as a raster...");
+
+				bool keepGoing = true;
+
+				GDALAllRegister();
+				ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
+
+				const char *pszFormat = "GTiff";
+				GDALDriver *poDriver = GetGDALDriverManager()->GetDriverByName(pszFormat);
+				if (!poDriver)
+				{
+						ccLog::Warning("[GDAL] Driver %s is not supported", pszFormat);
+						keepGoing = false;
+				}
+
+				if (keepGoing)
+				{
+					char** papszMetadata = poDriver->GetMetadata();
+					if( !CSLFetchBoolean( papszMetadata, GDAL_DCAP_CREATE, FALSE ) )
+					{
+						ccLog::Warning("[GDAL] Driver %s doesn't support Create() method", pszFormat);
+						keepGoing = false;
+					}
+				}
+
+				QString outputFilename;
+				if (keepGoing)
+				{
+					QString imageSavePath = settings.value("savePathImage",QApplication::applicationDirPath()).toString();
+					outputFilename = QFileDialog::getSaveFileName(0,"Save height grid raster",imageSavePath+QString("/height_grid_raster.tif"),"geotiff (*.tif)");
+
+					if (outputFilename.isNull())
+						keepGoing = false;
+					else
+						//save current export path to persistent settings
+						settings.setValue("savePathImage",QFileInfo(outputFilename).absolutePath());
+				}
+
+				//which (and how many) bands shall we create?
+				bool heightBand = true; //height by default
+				bool densityBand = false;
+				bool allSFBands = false;
+				int sfBandIndex = -1; //scalar field index
+				int totalBands = 0;
+
+				if (keepGoing)
+				{
+					bool hasSF = !gridScalarFields.empty();
+					RasterExportOptionsDlg reoDlg;
+					reoDlg.dimensionsLabel->setText(QString("%1 x %2").arg(grid_size_X).arg(grid_size_Y));
+					reoDlg.exportHeightsCheckBox->setChecked(heightBand);
+					reoDlg.exportDensityCheckBox->setChecked(densityBand);
+					reoDlg.exportDisplayedSFCheckBox->setEnabled(hasSF);
+					reoDlg.exportAllSFCheckBox->setEnabled(hasSF);
+					reoDlg.exportAllSFCheckBox->setChecked(allSFBands);
+						
+					if (!reoDlg.exec())
+						keepGoing = false;
+
+					heightBand = reoDlg.exportHeightsCheckBox->isChecked();
+					densityBand = reoDlg.exportDensityCheckBox->isChecked();
+					if (hasSF)
+					{
+						allSFBands = reoDlg.exportAllSFCheckBox->isChecked();
+						if (!allSFBands && reoDlg.exportDisplayedSFCheckBox->isChecked())
+						{
+							sfBandIndex = pc->getCurrentDisplayedScalarFieldIndex();
+							if (sfBandIndex < 0)
+								ccLog::Warning("[ccHeightGridGeneration] Cloud has no currently displayed SF!");
+						}
+					}
+
+					totalBands = heightBand ? 1 : 0;
+					if (densityBand)
+						++totalBands;
+					if (allSFBands)
+						totalBands += static_cast<int>(gridScalarFields.size());
+					else if (sfBandIndex >= 0)
+						totalBands++;
+
+					if (totalBands == 0)
+					{
+						ccLog::Warning("[ccHeightGridGeneration] Warning, can't output a raster with no band! (check export parameters)");
+						keepGoing = false;
+					}
+				}
+
+				if (keepGoing)
+				{
+					//data type
+					GDALDataType dataType = (std::max(sizeof(PointCoordinateType),sizeof(ScalarType)) > 4 ? GDT_Float64 : GDT_Float32);
+
+					char **papszOptions = NULL;
+					GDALDataset* poDstDS = poDriver->Create(qPrintable(outputFilename),
+															static_cast<int>(grid_size_X),
+															static_cast<int>(grid_size_Y),
+															totalBands,
+															dataType, 
+															papszOptions);
+
+					if (poDstDS)
+					{
+						double shiftX = box.minCorner().u[X];
+						double shiftY = box.minCorner().u[Y];
+
+						double stepX = grid_step;
+						double stepY = grid_step;
+						if (cloud->isA(CC_POINT_CLOUD))
+						{
+							const CCVector3d& shift = static_cast<ccPointCloud*>(cloud)->getGlobalShift();
+							shiftX -= shift.u[X];
+							shiftY -= shift.u[Y];
+
+							double scale = cloud->getGlobalScale();
+							assert(scale != 0);
+							stepX /= scale;
+							stepY /= scale;
+						}
+
+						double adfGeoTransform[6] = {	shiftX,		//top left x
+														stepX,		//w-e pixel resolution (can be negative)
+														0,			//0
+														shiftY,		//top left y
+														0,			//0
+														stepY		//n-s pixel resolution (can be negative)
+						};
+
+						poDstDS->SetGeoTransform( adfGeoTransform );
+
+						//OGRSpatialReference oSRS;
+						//oSRS.SetUTM( 11, TRUE );
+						//oSRS.SetWellKnownGeogCS( "NAD27" );
+						//char *pszSRS_WKT = NULL;
+						//oSRS.exportToWkt( &pszSRS_WKT );
+						//poDstDS->SetProjection( pszSRS_WKT );
+						//CPLFree( pszSRS_WKT );
+
+						double* scanline = (double*) CPLMalloc(sizeof(double)*grid_size_X);
+						bool error = false;
+						int currentBand = 0;
+
+						//exort height band?
+						if (heightBand)
+						{
+							GDALRasterBand* poBand = poDstDS->GetRasterBand(++currentBand);
+							assert(poBand);
+							poBand->SetColorInterpretation(GCI_Undefined);
+
+							double empty_cell_height = 0;
+							switch (fillEmptyCells)
+							{
+							case LEAVE_EMPTY:
+								empty_cell_height = minHeight-1.0;
+								poBand->SetNoDataValue(empty_cell_height); //should be transparent!
+								break;
+							case FILL_MINIMUM_HEIGHT:
+								empty_cell_height = minHeight;
+								break;
+							case FILL_MAXIMUM_HEIGHT:
+								empty_cell_height = maxHeight;
+								break;
+							case FILL_CUSTOM_HEIGHT:
+								empty_cell_height = customEmptyCellsHeight;
+								break;
+							case FILL_AVERAGE_HEIGHT:
+								empty_cell_height = meanHeight;
+								break;
+							default:
+								assert(false);
+							}
+							//ccLog::Print("\tempty_cell_height = %f",empty_cell_height);
+
+							for (unsigned j=0; j<grid_size_Y; ++j)
+							{
+								const HeightGridCell* aCell = grid[j];
+								for (unsigned i=0; i<grid_size_X; ++i,++aCell)
+								{
+									scanline[i] = aCell->nbPoints ? static_cast<double>(aCell->height) : empty_cell_height;
+								}
+							
+								if (poBand->RasterIO( GF_Write, 0, static_cast<int>(j), static_cast<int>(grid_size_X), 1, scanline, static_cast<int>(grid_size_X), 1, GDT_Float64, 0, 0 ) != CE_None)
+								{
+									ccLog::Error("[GDAL] An error occurred while writing the height band!");
+									error = true;
+									break;
+								}
+							}
+						}
+
+						//export density band
+						if (!error && densityBand)
+						{
+							GDALRasterBand* poBand = poDstDS->GetRasterBand(++currentBand);
+							assert(poBand);
+							poBand->SetColorInterpretation(GCI_Undefined);
+							for (unsigned j=0; j<grid_size_Y; ++j)
+							{
+								const HeightGridCell* aCell = grid[j];
+								for (unsigned i=0; i<grid_size_X; ++i,++aCell)
+								{
+									scanline[i] = static_cast<double>(aCell->nbPoints);
+								}
+							
+								if (poBand->RasterIO( GF_Write, 0, static_cast<int>(j), static_cast<int>(grid_size_X), 1, scanline, static_cast<int>(grid_size_X), 1, GDT_Float64, 0, 0 ) != CE_None)
+								{
+									ccLog::Error("[GDAL] An error occurred while writing the height band!");
+									error = true;
+									break;
+								}
+							}
+						}
+
+						//export SF bands
+						if (!error && (allSFBands || sfBandIndex >= 0))
+						{
+							for (size_t k=0; k<gridScalarFields.size(); ++k)
+							{
+								double* _sfGrid = gridScalarFields[k];
+								if (_sfGrid && (allSFBands || sfBandIndex == static_cast<int>(k))) //valid SF grid
+								{
+									GDALRasterBand* poBand = poDstDS->GetRasterBand(++currentBand);
+
+									double sfNanValue = static_cast<double>(CCLib::ScalarField::NaN());
+									poBand->SetNoDataValue(sfNanValue); //should be transparent!
+									assert(poBand);
+									poBand->SetColorInterpretation(GCI_Undefined);
+
+									for (unsigned j=0; j<grid_size_Y; ++j)
+									{
+										const HeightGridCell* aCell = grid[j];
+										for (unsigned i=0; i<grid_size_X; ++i,++_sfGrid,++aCell)
+										{
+											scanline[i] = aCell->nbPoints ? *_sfGrid : sfNanValue;
+										}
+
+										if (poBand->RasterIO( GF_Write, 0, static_cast<int>(j), static_cast<int>(grid_size_X), 1, scanline, static_cast<int>(grid_size_X), 1, GDT_Float64, 0, 0 ) != CE_None)
+										{
+											//the corresponding SF should exist on the input cloud
+											CCLib::ScalarField* formerSf = pc->getScalarField(static_cast<int>(k));
+											assert(formerSf);
+											ccLog::Error(QString("[GDAL] An error occurred while writing the '%1' scalar field band!").arg(formerSf->getName()));
+											error = true;
+											break;
+										}
+									}
+								}
+							}
+						}
+
+						if (scanline)
+							CPLFree(scanline);
+						scanline = 0;
+
+						/* Once we're done, close properly the dataset */
+						GDALClose( (GDALDatasetH) poDstDS );
+					}
+					else
+					{
+						ccLog::Error("[GDAL] Failed to create output raster (not enough memory?)");
+					}
+				}
+				else
+				{
+					ccLog::Error("[ccHeightGridGeneration] Failed to create output raster! (not enough memory?)");
+				}
+#else
+				ccLog::Warning("[ccHeightGridGeneration] GDAL not supported by this version! Can't generate a raster...");
+#endif
+			}
+
+			//=========================================================================================================
 			if (generateCloud)
 			{
 				ccLog::Print("[ccHeightGridGeneration] Saving the height grid as a cloud...");
-				cloudGrid = new ccPointCloud("grid");
-
-				//per-point height SF
-				CCLib::ScalarField* heightSF = 0;
-				int heightSFIdx = -1;
-				{
-					heightSFIdx = cloudGrid->addScalarField(CC_HEIGHT_GRID_FIELD_NAME);
-					if (heightSFIdx<0)
-					{
-						ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing height grid values! Try to free some memory ...");
-					}
-					else
-					{
-						heightSF = cloudGrid->getScalarField(heightSFIdx);
-						assert(heightSF);
-					}
-				}
-
-				//shall we save per-cell population as well?
-				CCLib::ScalarField* countSF = 0;
-				int countSFIdx = -1;
-				if (generateCountSF)
-				{
-					countSFIdx = cloudGrid->addScalarField("Per-cell population");
-					if (countSFIdx<0)
-					{
-						ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing per-cell population count! Try to free some memory ...");
-					}
-					else
-					{
-						countSF = cloudGrid->getScalarField(countSFIdx);
-						assert(countSF);
-					}
-				}
 
 				unsigned pointsCount = (fillEmptyCells != LEAVE_EMPTY ? grid_size_X*grid_size_Y : nonEmptyCells);
-				if (cloudGrid->reserve(pointsCount))
+				if (resampleOriginalCloud)
 				{
-					//we work with doubles as grid step can be much smaller than the cloud coordinates!
-					double Py = static_cast<double>(box.minCorner().u[Y]);
-	                
-					unsigned n = 0;
-					for (unsigned j=0; j<grid_size_Y; ++j)
+					CCLib::ReferenceCloud refCloud(cloud);
+					if (refCloud.reserve(cloud->size()))
 					{
-						const HeightGridCell* aCell = grid[j];
-						double Px = static_cast<double>(box.minCorner().u[X]);
-						for (unsigned i=0; i<grid_size_X; ++i,++aCell)
+						for (unsigned j=0; j<grid_size_Y; ++j)
 						{
-							if (aCell->nbPoints) //non empty cell
+							const HeightGridCell* aCell = grid[j];
+							for (unsigned i=0; i<grid_size_X; ++i,++aCell)
 							{
-								double Pz = static_cast<double>(aCell->height);
-
-								CCVector3 Pf((PointCoordinateType)Px,(PointCoordinateType)Py,(PointCoordinateType)Pz);
-								cloudGrid->addPoint(Pf);
-
-								//if a SF is available, we set the point height as its associated scalar
-								if (heightSF)
-									heightSF->setValue(n,aCell->height);
-
-								//per-cell population SF
-								if (countSF)
+								if (aCell->nbPoints) //non empty cell
 								{
-									ScalarType pop = aCell->nbPoints;
-									countSF->setValue(n,pop);
+									refCloud.addPointIndex(aCell->pointIndex);
 								}
-								++n;
 							}
-							else if (fillEmptyCells != LEAVE_EMPTY) //empty cell
-							{
-								CCVector3 Pf((PointCoordinateType)Px,(PointCoordinateType)Py,empty_cell_height);
-								cloudGrid->addPoint(Pf);
-
-								//if a SF is available, we set the point height as the default one
-								if (heightSF)
-									heightSF->setValue(n,empty_cell_height);
-								if (countSF)
-									countSF->setValue(n,NAN_VALUE);
-								++n;
-							}
-	                        
-							Px += grid_step;
 						}
 
-						Py += grid_step;
-					}
-
-					if (heightSF)
-					{
-						heightSF->computeMinAndMax();
-						cloudGrid->setCurrentDisplayedScalarField(heightSFIdx);
-					}
-					if (countSF)
-					{
-						countSF->computeMinAndMax();
-						if (!heightSF)
-							cloudGrid->setCurrentDisplayedScalarField(countSFIdx);
-					}
-					cloudGrid->showSF(heightSF || countSF);
-
-					//former scalar fields
-					for (size_t k=0; k<gridScalarFields.size(); ++k)
-					{
-						double* _sfGrid = gridScalarFields[k];
-						if (_sfGrid) //valid SF grid
+						if (refCloud.size() == 0)
 						{
-							//the input point cloud should be empty!
-							CCLib::ScalarField* formerSf = pc->getScalarField(static_cast<int>(k));
-							assert(formerSf);
-
-							//we try to create an equivalent SF on the output grid
-							int sfIdx = cloudGrid->addScalarField(formerSf->getName());
-							if (sfIdx<0) //if we aren't lucky, the input cloud already had a SF with CC_HEIGHT_GRID_FIELD_NAME as name
-								sfIdx = cloudGrid->addScalarField(qPrintable(QString(formerSf->getName()).append(".old")));
-
-							if (sfIdx<0)
-								ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing SF '%s' values! Try to free some memory ...",formerSf->getName());
-							else
-							{
-								CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
-								assert(sf);
-								//set sf values
-								n = 0;
-								const ScalarType emptyCellSFValue = CCLib::ScalarField::NaN();
-								for (unsigned j=0; j<grid_size_Y; ++j)
-								{
-									const HeightGridCell* aCell = grid[j];
-									for (unsigned i=0; i<grid_size_X; ++i, ++_sfGrid, ++aCell)
-									{
-										if (aCell->nbPoints)
-											sf->setValue(n++,*_sfGrid);
-										else if (fillEmptyCells != LEAVE_EMPTY)
-											sf->setValue(n++,emptyCellSFValue);
-									}
-								}
-								sf->computeMinAndMax();
-								assert(sf->currentSize()==pointsCount);
-							}
+							ccLog::Warning("[ccHeightGridGeneration] No point fell in the grid?!");
+						}
+						else
+						{
+							cloudGrid = cloud->isA(CC_POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud)->partialClone(&refCloud) : ccPointCloud::From(&refCloud);
 						}
 					}
 				}
 				else
+				{
+					cloudGrid = new ccPointCloud("grid");
+				}
+
+				//even if we have already resampled the original cloud
+				//we may have to create new points and/or scalar fields
+				if (cloudGrid && pointsCount > cloudGrid->size())
+				{
+					//per-point height SF
+					CCLib::ScalarField* heightSF = 0;
+					int heightSFIdx = -1;
+					{
+						heightSFIdx = cloudGrid->addScalarField(CC_HEIGHT_GRID_FIELD_NAME);
+						if (heightSFIdx<0)
+						{
+							ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing height grid values! Try to free some memory ...");
+						}
+						else
+						{
+							heightSF = cloudGrid->getScalarField(heightSFIdx);
+							assert(heightSF);
+						}
+					}
+
+					//shall we save per-cell population as well?
+					CCLib::ScalarField* countSF = 0;
+					int countSFIdx = -1;
+					if (generateCountSF)
+					{
+						countSFIdx = cloudGrid->addScalarField("Per-cell population");
+						if (countSFIdx<0)
+						{
+							ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing per-cell population count! Try to free some memory ...");
+						}
+						else
+						{
+							countSF = cloudGrid->getScalarField(countSFIdx);
+							assert(countSF);
+						}
+					}
+
+					if (!cloudGrid->reserve(pointsCount))
+					{
+						if (resampleOriginalCloud)
+						{
+							ccLog::Warning("[ccHeightGridGeneration] Not enough memory to finish the point cloud generation!");
+							//clear the new SF(s) and return the resampled cloud 'as is'
+							if (heightSFIdx >= 0)
+							{
+								cloudGrid->deleteScalarField(heightSFIdx);
+								heightSF = 0;
+								heightSFIdx = -1;
+							}
+							if (countSFIdx >= 0)
+							{
+								cloudGrid->deleteScalarField(countSFIdx);
+								countSF = 0;
+								countSFIdx = -1;
+							}
+						}
+						else
+						{
+							ccLog::Warning("[ccHeightGridGeneration] Coudln't create cloud! (not enough memory)");
+							assert(cloudGrid->size() == 0);
+							delete cloudGrid;
+							cloudGrid = 0;
+						}
+					}
+					else
+					{
+						//we work with doubles as grid step can be much smaller than the cloud coordinates!
+						double Py = static_cast<double>(box.minCorner().u[Y]);
+
+						unsigned emptyCellIndex = 0;
+						if (resampleOriginalCloud)
+						{
+							//as the 'non empty cells points' are already in the cloud
+							//we must take care were we put the equvialent scalar fields!
+							emptyCellIndex = cloudGrid->size();
+						}
+
+						unsigned n = 0;
+						for (unsigned j=0; j<grid_size_Y; ++j)
+						{
+							const HeightGridCell* aCell = grid[j];
+							double Px = static_cast<double>(box.minCorner().u[X]);
+							for (unsigned i=0; i<grid_size_X; ++i,++aCell)
+							{
+								if (aCell->nbPoints) //non empty cell
+								{
+									if (!resampleOriginalCloud)
+									{
+										double Pz = static_cast<double>(aCell->height);
+
+										CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
+														static_cast<PointCoordinateType>(Py),
+														static_cast<PointCoordinateType>(Pz) );
+										
+										cloudGrid->addPoint(Pf);
+									}
+
+									//if a SF is available, we set the point height as its associated scalar
+									if (heightSF)
+									{
+										ScalarType h = static_cast<ScalarType>(aCell->height);
+										heightSF->setValue(n,h);
+									}
+
+									//per-cell population SF
+									if (countSF)
+									{
+										ScalarType pop = static_cast<ScalarType>(aCell->nbPoints);
+										countSF->setValue(n,pop);
+									}
+									++n;
+								}
+								else if (fillEmptyCells != LEAVE_EMPTY) //empty cell
+								{
+									CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
+													static_cast<PointCoordinateType>(Py),
+													static_cast<PointCoordinateType>(empty_cell_height) );
+									cloudGrid->addPoint(Pf);
+
+									if (!resampleOriginalCloud)
+										n = emptyCellIndex;
+
+									//if a SF is available, we set the point height as the default one
+									if (heightSF)
+									{
+										ScalarType s = static_cast<ScalarType>(empty_cell_height);
+										heightSF->setValue(emptyCellIndex,s);
+									}
+									if (countSF)
+									{
+										countSF->setValue(emptyCellIndex,NAN_VALUE);
+									}
+
+									if (!resampleOriginalCloud)
+										++n;
+									else
+										++emptyCellIndex;
+								}
+
+								Px += grid_step;
+							}
+
+							Py += grid_step;
+						}
+
+						if (heightSF)
+						{
+							heightSF->computeMinAndMax();
+							cloudGrid->setCurrentDisplayedScalarField(heightSFIdx);
+						}
+						if (countSF)
+						{
+							countSF->computeMinAndMax();
+							if (!heightSF)
+								cloudGrid->setCurrentDisplayedScalarField(countSFIdx);
+						}
+						cloudGrid->showSF(heightSF || countSF);
+
+						//take care of former scalar fields
+						if (!resampleOriginalCloud)
+						{
+							for (size_t k=0; k<gridScalarFields.size(); ++k)
+							{
+								double* _sfGrid = gridScalarFields[k];
+								if (_sfGrid) //valid SF grid
+								{
+									//the corresponding SF should exist on the input cloud
+									CCLib::ScalarField* formerSf = pc->getScalarField(static_cast<int>(k));
+									assert(formerSf);
+
+									//we try to create an equivalent SF on the output grid
+									int sfIdx = cloudGrid->addScalarField(formerSf->getName());
+									if (sfIdx<0) //if we aren't lucky, the input cloud already had a SF with CC_HEIGHT_GRID_FIELD_NAME as name
+										sfIdx = cloudGrid->addScalarField(qPrintable(QString(formerSf->getName()).append(".old")));
+
+									if (sfIdx<0)
+										ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing SF '%s' values! Try to free some memory ...",formerSf->getName());
+									else
+									{
+										CCLib::ScalarField* sf = cloudGrid->getScalarField(sfIdx);
+										assert(sf);
+										//set sf values
+										unsigned n = 0;
+										const ScalarType emptyCellSFValue = CCLib::ScalarField::NaN();
+										for (unsigned j=0; j<grid_size_Y; ++j)
+										{
+											const HeightGridCell* aCell = grid[j];
+											for (unsigned i=0; i<grid_size_X; ++i, ++_sfGrid, ++aCell)
+											{
+												if (aCell->nbPoints)
+												{
+													ScalarType s = static_cast<ScalarType>(*_sfGrid);
+													sf->setValue(n++,s);
+												}
+												else if (fillEmptyCells != LEAVE_EMPTY)
+												{
+													sf->setValue(n++,emptyCellSFValue);
+												}
+											}
+										}
+										sf->computeMinAndMax();
+										assert(sf->currentSize()==pointsCount);
+									}
+								}
+							}
+						}
+					}
+				}
+				else if (!cloudGrid)
 				{
 					ccLog::Warning("[ccHeightGridGeneration] Coudln't create cloud! (not enough memory)");
 					delete cloudGrid;
@@ -720,7 +1139,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 	//...and of the scalar fields
 	{
-		for (unsigned i=0;i<gridScalarFields.size();++i)
+		for (unsigned i=0; i<gridScalarFields.size(); ++i)
 		{
 			if (gridScalarFields[i])
 				delete[] gridScalarFields[i];

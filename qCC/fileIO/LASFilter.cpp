@@ -168,7 +168,9 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (ofs.fail())
 		return CC_FERR_WRITING;
 
-	const double* shift = theCloud->getOriginalShift();
+	const CCVector3d& shift = theCloud->getGlobalShift();
+	double scale = theCloud->getGlobalScale();
+	assert(scale != 0);
 
 	liblas::Writer* writer = 0;
 	try
@@ -185,16 +187,23 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 		ccBBox bBox = theCloud->getBB();
 		if (bBox.isValid())
 		{
-			header.SetMin(-shift[0]+(double)bBox.minCorner().x,-shift[1]+(double)bBox.minCorner().y,-shift[2]+(double)bBox.minCorner().z);
-			header.SetMax(-shift[0]+(double)bBox.maxCorner().x,-shift[1]+(double)bBox.maxCorner().y,-shift[2]+(double)bBox.maxCorner().z);
+			header.SetMin(	static_cast<double>(bBox.minCorner().x)/scale-shift.x,
+							static_cast<double>(bBox.minCorner().y)/scale-shift.y,
+							static_cast<double>(bBox.minCorner().z)/scale-shift.z );
+			header.SetMax(	static_cast<double>(bBox.maxCorner().x)/scale-shift.x,
+							static_cast<double>(bBox.maxCorner().y)/scale-shift.y,
+							static_cast<double>(bBox.maxCorner().z)/scale-shift.z );
 			CCVector3 diag = bBox.getDiagVec();
 
 			//Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
 			//int_value = (double_value-offset)/scale
-			header.SetOffset(-shift[0]+(double)bBox.minCorner().x,-shift[1]+(double)bBox.minCorner().y,-shift[2]+(double)bBox.minCorner().z);
-			header.SetScale(1.0e-9*std::max<double>(diag.x,ZERO_TOLERANCE), //result must fit in 32bits?!
-							1.0e-9*std::max<double>(diag.y,ZERO_TOLERANCE),
-							1.0e-9*std::max<double>(diag.z,ZERO_TOLERANCE));
+			header.SetOffset(	static_cast<double>(bBox.minCorner().x)/scale-shift.x,
+								static_cast<double>(bBox.minCorner().y)/scale-shift.y,
+								static_cast<double>(bBox.minCorner().z)/scale-shift.z );
+			
+			header.SetScale(1.0e-9 * std::max<double>(diag.x,ZERO_TOLERANCE), //result must fit in 32bits?!
+							1.0e-9 * std::max<double>(diag.y,ZERO_TOLERANCE),
+							1.0e-9 * std::max<double>(diag.z,ZERO_TOLERANCE));
 		}
 		header.SetPointRecordsCount(numberOfPoints);
 
@@ -227,7 +236,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
 	pdlg.setMethodTitle("Save LAS file");
 	char buffer[256];
-	sprintf(buffer,"Points: %i",numberOfPoints);
+	sprintf(buffer,"Points: %u",numberOfPoints);
 	pdlg.setInfo(buffer);
 	pdlg.start();
 
@@ -239,9 +248,9 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	{
 		const CCVector3* P = theCloud->getPoint(i);
 		{
-			double x=-shift[0]+(double)P->x;
-			double y=-shift[1]+(double)P->y;
-			double z=-shift[2]+(double)P->z;
+			double x = static_cast<double>(P->x)/scale - shift.x;
+			double y = static_cast<double>(P->y)/scale - shift.y;
+			double z = static_cast<double>(P->z)/scale - shift.z;
 			point.SetCoordinates(x, y, z);
 		}
 		
@@ -339,7 +348,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 
 QSharedPointer<LASOpenDlg> s_lasOpenDlg(0);
 
-CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//opening file
 	std::ifstream ifs;
@@ -412,7 +421,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	//number of points read from the begining of the current cloud part
 	unsigned pointsRead = 0;
-	double Pshift[3] = {0.0,0.0,0.0};
+	CCVector3d Pshift(0,0,0);
 
 	//by default we read color as 8 bits integers and we will change this to 16 bits if it's not (16 bits is the standard!)
 	unsigned char colorCompBitDec = 0;
@@ -519,7 +528,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 				ifs.close();
 				return CC_FERR_NOT_ENOUGH_MEMORY;
 			}
-			loadedCloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
+			loadedCloud->setGlobalShift(Pshift);
 
 			//DGM: from now on, we only enable scalar fields when we detect a valid value!
 			if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
@@ -556,30 +565,30 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 		const liblas::Point& p = reader->GetPoint();
 
 		//first point: check for 'big' coordinates
-		if (pointsRead==0)
+		if (pointsRead == 0)
 		{
-			double P[3] = {p.GetX(),p.GetY(),p.GetZ()};
+			CCVector3d P( p.GetX(),p.GetY(),p.GetZ() );
 			bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 			if (shiftAlreadyEnabled)
-				memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+				Pshift = *coordinatesShift;
 			bool applyAll=false;
-			if (ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+			if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(P.u,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 			{
-				loadedCloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-				ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+				loadedCloud->setGlobalShift(Pshift);
+				ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 
 				//we save coordinates shift information
 				if (applyAll && coordinatesShiftEnabled && coordinatesShift)
 				{
 					*coordinatesShiftEnabled = true;
-					coordinatesShift[0] = Pshift[0];
-					coordinatesShift[1] = Pshift[1];
-					coordinatesShift[2] = Pshift[2];
+					*coordinatesShift = Pshift;
 				}
 			}
 		}
 
-		CCVector3 P(p.GetX()+Pshift[0],p.GetY()+Pshift[1],p.GetZ()+Pshift[2]);
+		CCVector3 P(static_cast<PointCoordinateType>(p.GetX()+Pshift.x),
+					static_cast<PointCoordinateType>(p.GetY()+Pshift.y),
+					static_cast<PointCoordinateType>(p.GetZ()+Pshift.z));
 		loadedCloud->addPoint(P);
 
 		//color field
@@ -710,7 +719,8 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 
 			if (it->sf)
 			{
-				it->sf->addElement(value);
+				ScalarType s = static_cast<ScalarType>(value);
+				it->sf->addElement(s);
 			}
 			else
 			{
@@ -722,14 +732,17 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 				
 				if (!ignoreDefaultFields || value != it->firstValue || it->firstValue != it->defaultValue)
 				{
-					it->sf = new ccScalarField(qPrintable(it->getName()));
+					it->sf = new ccScalarField(it->getName());
 					if (it->sf->reserve(fileChunkSize))
 					{
 						it->sf->link();
 						//we must set the value (firstClassifValue) of all the precedently skipped points
+						ScalarType firstS = static_cast<ScalarType>(it->firstValue);
 						for (unsigned i=0; i<loadedCloud->size()-1; ++i)
-							it->sf->addElement(it->firstValue);
-						it->sf->addElement(value);
+							it->sf->addElement(firstS);
+
+						ScalarType s = static_cast<ScalarType>(value);
+						it->sf->addElement(s);
 					}
 					else
 					{

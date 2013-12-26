@@ -113,9 +113,9 @@ void ccRenderToFileDlg::chooseFile()
 	filenameLineEdit->setText(selectedFileName);
 }
 
-double ccRenderToFileDlg::getZoom() const
+float ccRenderToFileDlg::getZoom() const
 {
-    return zoomDoubleSpinBox->value();
+    return static_cast<float>(zoomDoubleSpinBox->value());
 }
 
 QString ccRenderToFileDlg::getFilename() const

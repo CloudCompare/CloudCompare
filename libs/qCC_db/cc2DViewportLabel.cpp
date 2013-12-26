@@ -55,9 +55,9 @@ bool cc2DViewportLabel::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool cc2DViewportLabel::fromFile_MeOnly(QFile& in, short dataVersion)
+bool cc2DViewportLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!cc2DViewportObject::fromFile_MeOnly(in,dataVersion))
+	if (!cc2DViewportObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	if (dataVersion<21)
@@ -123,8 +123,8 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 		CCVector3 P = m_params.pivotPoint - params.pivotPoint;
 		m_params.viewMat.apply(P);
 
-		dx = dC.x + P.x;
-		dy = dC.y + P.y;
+		dx = static_cast<float>(dC.x + P.x);
+		dy = static_cast<float>(dC.y + P.y);
 
 		dx *= winTotalZoom;
 		dy *= winTotalZoom;

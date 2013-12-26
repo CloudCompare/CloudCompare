@@ -33,7 +33,7 @@
 using namespace CCLib;
 
 //#define COMPUTE_CURVATURE_2
-int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, float kernelRadius, GenericProgressCallback* progressCb, DgmOctree* _theOctree)
+int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb, DgmOctree* _theOctree)
 {
 	if (!theCloud)
         return -1;
@@ -91,12 +91,14 @@ int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCl
 //FONCTION "CELLULAIRE" DE CALCUL DE COURBURE (PAR FONCTION DE HAUTEUR LOCALE)
 //DETAIL DES PARAMETRES ADDITIONNELS (2) :
 // [0] -> (CC_CURVATURE_TYPE*) cType : curvature type
-// [1] -> (float*) radius : sphere radius
-bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
+// [1] -> (PointCoordinateType*) radius : sphere radius
+bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::octreeCell& cell,
+															void** additionalParameters,
+															NormalizedProgress* nProgress/*=0*/)
 {
 	//parameters
 	Neighbourhood::CC_CURVATURE_TYPE cType	= *((Neighbourhood::CC_CURVATURE_TYPE*)additionalParameters[0]);
-	float radius							= *((float*)additionalParameters[1]);
+	PointCoordinateType radius				= *((PointCoordinateType*)additionalParameters[1]);
 
 	//structure for nearest neighbors search
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
@@ -172,6 +174,9 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(const DgmOctree::octr
 		}
 
 		cell.points->setPointScalarValue(i,curv);
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
@@ -226,7 +231,9 @@ int GeometricalAnalysisTools::computeLocalDensity(GenericIndexedCloudPersist* th
 //FONCTION "CELLULAIRE" DE CALCUL DE DENSITE LOCALE
 //PAS DE PARAMETRES ADDITIONNELS
 const double c_sphereVolumeCoef = (4.0/3.0*M_PI);
-bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(const DgmOctree::octreeCell& cell, void** additionalParameters)
+bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctree::octreeCell& cell,
+																	void** additionalParameters,
+																	NormalizedProgress* nProgress/*=0*/)
 {
 	//structures pour la recherche de voisinages SPECIFIQUES
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
@@ -263,12 +270,15 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(const DgmOctre
 			//shoudln't happen! Appart if the cloud has only one point...
             cell.points->setPointScalarValue(i,NAN_VALUE);
 		}
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
 }
 
-int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCloud, float kernelRadius, GenericProgressCallback* progressCb/*=0*/, DgmOctree* _theOctree/*=0*/)
+int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCloud, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb/*=0*/, DgmOctree* _theOctree/*=0*/)
 {
 	if (!theCloud)
         return -1;
@@ -320,12 +330,13 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 
 //FONCTION "CELLULAIRE" DE CALCUL DE RUGOSITE (PAR PLAN AUX MOINDRES CARRES)
 //DETAIL DES PARAMETRES ADDITIONNELS (1) :
-// [0] -> (float*) kernelRadius : le rayon du voisinage de calcul
+// [0] -> (PointCoordinateType*) kernelRadius : le rayon du voisinage de calcul
 bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOctree::octreeCell& cell, 
-																	void** additionalParameters)
+																	void** additionalParameters,
+																	NormalizedProgress* nProgress/*=0*/)
 {
 	//parameter(s)
-	float radius = *((float*)additionalParameters[0]);
+	PointCoordinateType radius = *((PointCoordinateType*)additionalParameters[0]);
 
 	//structure for nearest neighbors search
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
@@ -379,6 +390,9 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 		}
 
         cell.points->setPointScalarValue(i,d);
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
 	}
 
 	return true;
@@ -545,21 +559,21 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 				continue;
 		}
 		ScalarType wpq = wp*wq;
-		Pt *= wpq;
-		wSum += (double)wpq;
+		Pt *= static_cast<PointCoordinateType>(wpq);
+		wSum += static_cast<double>(wpq);
 
-        l1[0] += Pt.x*Qt.x;
-        l1[1] += Pt.x*Qt.y;
-        l1[2] += Pt.x*Qt.z;
-        l2[0] += Pt.y*Qt.x;
-        l2[1] += Pt.y*Qt.y;
-        l2[2] += Pt.y*Qt.z;
-        l3[0] += Pt.z*Qt.x;
-        l3[1] += Pt.z*Qt.y;
-        l3[2] += Pt.z*Qt.z;
+        l1[0] += Pt.x * Qt.x;
+        l1[1] += Pt.x * Qt.y;
+        l1[2] += Pt.x * Qt.z;
+        l2[0] += Pt.y * Qt.x;
+        l2[1] += Pt.y * Qt.y;
+        l2[2] += Pt.y * Qt.z;
+        l3[0] += Pt.z * Qt.x;
+        l3[1] += Pt.z * Qt.y;
+        l3[2] += Pt.z * Qt.z;
 	}
 
-	if (wSum!=0.0)
+	if (wSum != 0.0)
 		covMat.scale(1.0/wSum);
 
 	return covMat;

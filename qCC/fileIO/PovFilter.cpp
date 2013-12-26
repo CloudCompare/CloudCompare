@@ -33,9 +33,8 @@
 
 //Ground based LiDAR sensor mirror and body rotation order
 //Refer to ccGBLSensor::ROTATION_ORDER
-const char CC_SENSOR_ROTATION_ORDER_NAMES[][12] = {
-	"THETA_PHI",		//Rotation: body then mirror
-	"PHI_THETA"			//Rotation: mirror then body
+const char CC_SENSOR_ROTATION_ORDER_NAMES[][12] = {	"THETA_PHI",		//Rotation: body then mirror
+													"PHI_THETA"			//Rotation: mirror then body
 };
 
 CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
@@ -49,23 +48,23 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
     if (hClouds.empty())
         return CC_FERR_NO_SAVE;
 
-    unsigned i;
-
     std::vector<ccGBLSensor*> sensors;
     std::vector<ccGenericPointCloud*> clouds;
-    for (i=0;hClouds.size();++i)
-    {
-        ccHObject::Container cloudSensors;
-        hClouds[i]->filterChildren(cloudSensors,false,CC_GBL_SENSOR);
-        if (!cloudSensors.empty())
-        {
-            clouds.push_back(ccHObjectCaster::ToGenericPointCloud(hClouds[i]));
-            if (cloudSensors.size()>1)
-                ccLog::Warning(QString("Found more than one ground-based LIDAR sensor associated to entity '%1'. Only the first will be saved!").arg(hClouds[i]->getName()));
+	{
+		for (unsigned i=0; i<hClouds.size(); ++i)
+		{
+			ccHObject::Container cloudSensors;
+			hClouds[i]->filterChildren(cloudSensors,false,CC_GBL_SENSOR);
+			if (!cloudSensors.empty())
+			{
+				clouds.push_back(ccHObjectCaster::ToGenericPointCloud(hClouds[i]));
+				if (cloudSensors.size()>1)
+					ccLog::Warning(QString("Found more than one ground-based LIDAR sensor associated to entity '%1'. Only the first will be saved!").arg(hClouds[i]->getName()));
 
-            sensors.push_back(static_cast<ccGBLSensor*>(cloudSensors[0]));
-        }
-    }
+				sensors.push_back(static_cast<ccGBLSensor*>(cloudSensors[0]));
+			}
+		}
+	}
     assert(sensors.size() == clouds.size());
 
     if (sensors.empty())
@@ -74,7 +73,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
     //FIXME
     //the first GLS sensor will be used as reference! (ugly)
     ccGBLSensor* firstGls = sensors.front();
-    if (sensors.size()>1)
+    if (sensors.size() > 1)
         ccLog::Warning("Assuming all sensors are equivalent...");
 
     //we extract the body of the filename (without extension)
@@ -85,93 +84,77 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
     if (!mainFile)
         return CC_FERR_WRITING;
 
-    if (fprintf(mainFile,"#CC_POVS_FILE\n")<0)
+    if (	fprintf(mainFile,"#CC_POVS_FILE\n") < 0
+		||	fprintf(mainFile,"SENSOR_TYPE = %s\n",CC_SENSOR_ROTATION_ORDER_NAMES[firstGls->getRotationOrder()]) < 0
+		||	fprintf(mainFile,"SENSOR_BASE = %f\n",firstGls->getSensorBase()) < 0
+		||	fprintf(mainFile,"UNITS = IGNORED\n") < 0
+		||	fprintf(mainFile,"#END_HEADER\n") < 0 )
     {
         fclose(mainFile);
         return CC_FERR_WRITING;
-    };
-    if (fprintf(mainFile,"SENSOR_TYPE = %s\n",CC_SENSOR_ROTATION_ORDER_NAMES[firstGls->getRotationOrder()])<0)
-    {
-        fclose(mainFile);
-        return CC_FERR_WRITING;
-    };
-    if (fprintf(mainFile,"SENSOR_BASE = %f\n",firstGls->getSensorBase())<0)
-    {
-        fclose(mainFile);
-        return CC_FERR_WRITING;
-    };
-    if (fprintf(mainFile,"UNITS = IGNORED\n")<0)
-    {
-        fclose(mainFile);
-        return CC_FERR_WRITING;
-    };
-    if (fprintf(mainFile,"#END_HEADER\n")<0)
-    {
-        fclose(mainFile);
-        return CC_FERR_WRITING;
-    };
-
-    for (i=0;i<clouds.size();++i)
-    {
-		QString thisFilename = fullBaseName + QString("_%1.bin").arg(i);
-
-        CC_FILE_ERROR error = FileIOFilter::SaveToFile(clouds[i],qPrintable(thisFilename),BIN);
-        if (error != CC_FERR_NO_ERROR)
-        {
-            fclose(mainFile);
-            return error;
-        }
-
-        ccGBLSensor* gls = sensors[i];
-
-        //il faut ecrire le nom du fichier relatif et non absolu !
-		int result = fprintf(mainFile,"\n#POV %i\nF %s\nT ASC\n",i,qPrintable(QFileInfo(thisFilename).fileName()));
-
-        if (result>0)
-        {
-            CCVector3 C = gls->getSensorCenter();
-            result = fprintf(mainFile,"C %f %f %f\n",C[0],C[1],C[2]);
-
-            if (result>0)
-			{
-				const float* mat = gls->getOrientationMatrix().data();
-                result = fprintf(mainFile,"X %f %f %f\n",mat[0],mat[4],mat[8]);
-                result = fprintf(mainFile,"Y %f %f %f\n",mat[1],mat[5],mat[9]);
-                result = fprintf(mainFile,"Z %f %f %f\n",mat[2],mat[6],mat[10]);
-            }
-
-            if (result>0)
-                result = fprintf(mainFile,"A %f %f\n",gls->getDeltaPhi(),gls->getDeltaTheta());
-
-            if (result>0)
-                result = fprintf(mainFile,"#END_POV\n");
-        }
-
-        /*if (++n==palier)
-        {
-            //cancel requested
-            if (pwin->isCancelRequested())
-                result=-1;
-
-            percent += 1.0;
-            pwin->update(percent);
-            n = 0;
-        }
-        //*/
     }
 
-    //delete pwin;
+	//save sensor(s) info
+	{
+		for (unsigned i=0; i<clouds.size(); ++i)
+		{
+			QString thisFilename = fullBaseName + QString("_%1.bin").arg(i);
 
+			CC_FILE_ERROR error = FileIOFilter::SaveToFile(clouds[i],qPrintable(thisFilename),BIN);
+			if (error != CC_FERR_NO_ERROR)
+			{
+				fclose(mainFile);
+				return error;
+			}
+
+			//il faut ecrire le nom du fichier relatif et non absolu !
+			int result = fprintf(mainFile,"\n#POV %u\nF %s\nT ASC\n",i,qPrintable(QFileInfo(thisFilename).fileName()));
+
+			if (result > 0)
+			{
+				ccGBLSensor* gls = sensors[i];
+				CCVector3 C = gls->getSensorCenter();
+				result = fprintf(mainFile,"C %f %f %f\n",C[0],C[1],C[2]);
+
+				if (result > 0)
+				{
+					const float* mat = gls->getOrientationMatrix().data();
+					result = fprintf(mainFile,"X %f %f %f\n",mat[0],mat[4],mat[8]);
+					result = fprintf(mainFile,"Y %f %f %f\n",mat[1],mat[5],mat[9]);
+					result = fprintf(mainFile,"Z %f %f %f\n",mat[2],mat[6],mat[10]);
+				}
+
+				if (result > 0)
+					result = fprintf(mainFile,"A %f %f\n",gls->getDeltaPhi(),gls->getDeltaTheta());
+
+				if (result > 0)
+					result = fprintf(mainFile,"#END_POV\n");
+			}
+
+			/*if (++n==palier)
+			{
+				//cancel requested
+				if (pwin->isCancelRequested())
+					result=-1;
+
+				percent += 1.0;
+				pwin->update(percent);
+				n = 0;
+			}
+			//*/
+		}
+	}
+
+    //delete pwin;
 
     fclose(mainFile);
 
     return CC_FERR_NO_ERROR;
-
 }
 
-CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-    assert(!filename);
+    assert(filename);
 
     //opening file
     FILE* fp = fopen(filename, "rt");
@@ -212,34 +195,18 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
         return CC_FERR_READING;
     }
 
-    float base=0.0f;
-    if (fscanf(fp,"SENSOR_BASE = %f\n",&base)<0)
+    float base = 0.0f;
+    char unitsType[3]; //units: ignored in this version
+	if (	fscanf(fp,"SENSOR_BASE = %f\n",&base) < 0
+		||	fscanf(fp,"UNITS = %s\n",unitsType) < 0
+		||	!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp)
+		||	strcmp(line,"#END_HEADER\n") != 0 )
     {
         fclose(fp);
         return CC_FERR_READING;
     }
 
-    //units: ignored in this version
-    char unitsType[3];
-    if (fscanf(fp,"UNITS = %s\n",unitsType)<0)
-    {
-        fclose(fp);
-        return CC_FERR_READING;
-    }
-
-    if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
-    {
-        fclose(fp);
-        return CC_FERR_READING;
-    }
-
-    if (strcmp(line,"#END_HEADER\n")!=0)
-    {
-        fclose(fp);
-        return CC_FERR_READING;
-    }
-
-    ccLog::Print("[PovFilter::loadFile] POV FILE [Type %s - base=%f - unit: %s}\n",sensorType,base,unitsType);
+    ccLog::Print("[PovFilter::loadFile] POV FILE [Type %s - base=%f - unit: %s]",sensorType,base,unitsType);
 
     //on extrait le chemin relatif
 	QString path = QFileInfo(filename).absolutePath();
@@ -254,13 +221,13 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
             ccLog::Print("%s",line);
             if (fscanf(fp,"F %s\n",subFileName)<0)
             {
-                ccLog::PrintDebug("[PovFilter::loadFile] Read error (F) !\n");
+                ccLog::PrintDebug("[PovFilter::loadFile] Read error (F) !");
                 fclose(fp);
                 return CC_FERR_READING;
             }
             if (fscanf(fp,"T %s\n",subFileType)<0)
             {
-                ccLog::PrintDebug("[PovFilter::loadFile] Read error (T) !\n");
+                ccLog::PrintDebug("[PovFilter::loadFile] Read error (T) !");
                 fclose(fp);
                 return CC_FERR_READING;
             }
@@ -271,13 +238,10 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
 
             if (loadedLists)
             {
-                ccGBLSensor* gls = new ccGBLSensor(rotationOrder);
-
-                //ne pas oublier la base du scanner (SOISIC)
-                gls->setSensorBase(base);
-
                 ccGLMatrix rot;
 				rot.toIdentity();
+				CCVector3 sensorCenter(0,0,0);
+				float dPhi = 1.0f, dTheta = 1.0f;
 
                 while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH, fp))
                 {
@@ -287,7 +251,7 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                     {
                         float C[3];
                         sscanf(line,"C %f %f %f\n",C,C+1,C+2);
-                        gls->setSensorCenter(C);
+						sensorCenter = CCVector3::fromArray(C);
                     }
                     else if (line[0]=='X' || line[0]=='Y' || line[0]=='Z')
                     {
@@ -302,14 +266,9 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                     }
                     else if (line[0]=='A')
                     {
-                        float dPhi,dTheta;
                         sscanf(line,"A %f %f\n",&dPhi,&dTheta);
-                        gls->setDeltaPhi(dPhi);
-                        gls->setDeltaTheta(dTheta);
                     }
                 }
-
-				gls->setOrientationMatrix(rot);
 
                 int errorCode;
                 ccHObject::Container clouds;
@@ -321,7 +280,16 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                 for (unsigned i=0;i<clouds.size();++i)
                 {
                     ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[i]);
-                    CCLib::GenericIndexedCloud* projectedList = gls->project(theCloud,errorCode,true);
+
+					ccGBLSensor* gls = new ccGBLSensor(rotationOrder);
+					//ne pas oublier la base du scanner (SOISIC)
+					gls->setSensorBase(base);
+					gls->setSensorCenter(sensorCenter);
+					gls->setDeltaPhi(dPhi);
+					gls->setDeltaTheta(dTheta);
+					gls->setOrientationMatrix(rot);
+
+					CCLib::GenericIndexedCloud* projectedList = gls->project(theCloud,errorCode,true);
 
                     switch (errorCode)
                     {
@@ -342,22 +310,22 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                     if (projectedList)
                     {
                         delete projectedList;
-                        projectedList=0;
+                        projectedList = 0;
                         theCloud->addChild(gls);
                     }
                     else
                     {
                         delete gls;
-                        gls=0;
+                        gls = 0;
                     }
 
-                    theCloud->setName(subFileName);
+                    //theCloud->setName(subFileName);
                     container.addChild(theCloud);
                 }
             }
             else
 			{
-				ccLog::Print("[PovFilter::loadFile] File (%s) not found or empty!\n",subFileName);
+				ccLog::Print("[PovFilter::loadFile] File (%s) not found or empty!",subFileName);
 			}
         }
     }

@@ -1,2 +1,2 @@
 @set PATH=.
-qCC.exe
+CloudCompare.exe

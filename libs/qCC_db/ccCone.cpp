@@ -99,29 +99,29 @@ bool ccCone::buildUp()
 	assert(m_triNormals);
 
 	//2 first points: centers of the top & bottom surfaces
-	CCVector3 bottomCenter = CCVector3(-m_xOff,-m_yOff,m_height)*(PointCoordinateType)-0.5;
-	CCVector3 topCenter = CCVector3(-m_xOff,-m_yOff,m_height)*(PointCoordinateType)0.5;
+	CCVector3 bottomCenter = -CCVector3(-m_xOff,-m_yOff,m_height)/2;
+	CCVector3 topCenter = CCVector3(-m_xOff,-m_yOff,m_height)/2;
 	{
 		//bottom center
 		verts->addPoint(bottomCenter);
-		normsType nIndex = ccNormalVectors::GetNormIndex(CCVector3(0.0,0.0,-1.0).u);
+		normsType nIndex = ccNormalVectors::GetNormIndex(CCVector3(0,0,-1).u);
 		m_triNormals->addElement(nIndex);
 		//top center
 		verts->addPoint(topCenter);
-		nIndex = ccNormalVectors::GetNormIndex(CCVector3(0.0,0.0,1.0).u);
+		nIndex = ccNormalVectors::GetNormIndex(CCVector3(0,0,1).u);
 		m_triNormals->addElement(nIndex);
 	}
 	
 	//then, angular sweep for top and/or bottom surfaces
 	{
-		float angle_rad_step = 2.0*M_PI/(float)steps;
+		PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(2.0*M_PI)/static_cast<PointCoordinateType>(steps);
 		//bottom surface
 		if (!singlePointBottom)
 		{
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i=0; i<steps; ++i)
 			{
-				CCVector3 P(bottomCenter.x+cos(angle_rad_step*(float)i)*m_bottomRadius,
-							bottomCenter.y+sin(angle_rad_step*(float)i)*m_bottomRadius,
+				CCVector3 P(bottomCenter.x + cos(angle_rad_step*static_cast<PointCoordinateType>(i))*m_bottomRadius,
+							bottomCenter.y + sin(angle_rad_step*static_cast<PointCoordinateType>(i))*m_bottomRadius,
 							bottomCenter.z);
 				verts->addPoint(P);
 			}
@@ -129,20 +129,20 @@ bool ccCone::buildUp()
 		//top surface
 		if (!singlePointTop)
 		{
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i=0; i<steps; ++i)
 			{
-				CCVector3 P(topCenter.x+cos(angle_rad_step*(float)i)*m_topRadius,
-							topCenter.y+sin(angle_rad_step*(float)i)*m_topRadius,
+				CCVector3 P(topCenter.x + cos(angle_rad_step*static_cast<PointCoordinateType>(i))*m_topRadius,
+							topCenter.y + sin(angle_rad_step*static_cast<PointCoordinateType>(i))*m_topRadius,
 							topCenter.z);
 				verts->addPoint(P);
 			}
 		}
 		//side normals
 		{
-			for (unsigned i=0;i<steps;++i)
+			for (unsigned i=0; i<steps; ++i)
 			{
 				//slope
-				CCVector3 u(-sin(angle_rad_step*(float)i),cos(angle_rad_step*(float)i),0.0);
+				CCVector3 u(-sin(angle_rad_step*static_cast<PointCoordinateType>(i)),cos(angle_rad_step*static_cast<PointCoordinateType>(i)),0);
 				CCVector3 v(bottomCenter.x-topCenter.x + u.y*(m_bottomRadius-m_topRadius),
 							 bottomCenter.y-topCenter.y - u.x*(m_bottomRadius-m_topRadius),
 							 bottomCenter.z-topCenter.z);
@@ -234,9 +234,9 @@ bool ccCone::toFile_MeOnly(QFile& out) const
 	return true;
 }
 
-bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion)
+bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 {
-	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion))
+	if (!ccGenericPrimitive::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
 	//parameters (dataVersion>=21)

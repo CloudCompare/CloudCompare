@@ -41,7 +41,7 @@ public:
 	static void ReleaseUniqueInstance();
 
 	//! Pre-defined color scales (all relative - i.e. expand to actual SF)
-	enum DEFAULT_SCALE	{	BGYR			=	0,		/**< Blue-Green-Yellow-Red ramp (default for distances display) */
+	enum DEFAULT_SCALES	{	BGYR			=	0,		/**< Blue-Green-Yellow-Red ramp (default for distances display) */
 							GREY			=	1,		/**< Grey ramp (default for Global Illumination) */
 							BWR				=	2,		/**< Blue-White-Red ramp (for signed SF)*/
 							RY				=	3,		/**< Red-Yellow ramp */
@@ -53,14 +53,14 @@ public:
 	static QString GetDefaultScaleUUID(int scale) { return QString::number(scale); }
 
 	//! Returns a pre-defined color scale (static shortcut)
-	static ccColorScale::Shared GetDefaultScale(DEFAULT_SCALE scale = BGYR)
+	static ccColorScale::Shared GetDefaultScale(DEFAULT_SCALES scale = BGYR)
 	{
 		ccColorScalesManager* instance = GetUniqueInstance();
 		return instance ? instance->getDefaultScale(scale) : ccColorScale::Shared(0);
 	}
 
 	//! Returns a pre-defined color scale
-	ccColorScale::Shared getDefaultScale(DEFAULT_SCALE scale) { return getScale(GetDefaultScaleUUID(scale)); }
+	ccColorScale::Shared getDefaultScale(DEFAULT_SCALES scale) { return getScale(GetDefaultScaleUUID(scale)); }
 
 	//! Returns a color scale based on its UUID
 	ccColorScale::Shared getScale(QString UUID) const;
@@ -97,7 +97,7 @@ protected:
 	virtual ~ccColorScalesManager();
 
 	//! Creates a pre-defined color scale
-	static ccColorScale::Shared Create(DEFAULT_SCALE scaleType);
+	static ccColorScale::Shared Create(DEFAULT_SCALES scaleType);
 
 	//! Color scales
 	ScalesMap m_scales;

@@ -20,6 +20,10 @@
 //CCLib
 #include <CCConst.h>
 
+//Qt
+#include <QStringList>
+#include <QRegExp>
+
 //System
 #include <math.h>
 #include <string.h>
@@ -51,9 +55,15 @@ ccGLMatrix::ccGLMatrix()
 	toIdentity();
 }
 
-ccGLMatrix::ccGLMatrix(const float* mat16)
+ccGLMatrix::ccGLMatrix(const float* mat16f)
 {
-    memcpy(m_mat, mat16, sizeof(float)*OPENGL_MATRIX_SIZE);
+    memcpy(m_mat, mat16f, sizeof(float)*OPENGL_MATRIX_SIZE);
+}
+
+ccGLMatrix::ccGLMatrix(const double* mat16d)
+{
+	for (unsigned i=0; i<16; ++i)
+		m_mat[i] = static_cast<float>(mat16d[i]);
 }
 
 ccGLMatrix::ccGLMatrix(const ccGLMatrix& mat)
@@ -63,25 +73,25 @@ ccGLMatrix::ccGLMatrix(const ccGLMatrix& mat)
 
 ccGLMatrix::ccGLMatrix(const CCVector3& X, const CCVector3& Y, const CCVector3& Z, const CCVector3& T)
 {
-	R11 = X[0];
-	R21 = X[1];
-	R31 = X[2];
-	R41 = 0.0f;
+	R11 = static_cast<float>(X.x);
+	R21 = static_cast<float>(X.y);
+	R31 = static_cast<float>(X.z);
+	R41 = 0;
 
-	R12 = Y[0];
-	R22 = Y[1];
-	R32 = Y[2];
-	R42 = 0.0f;
+	R12 = static_cast<float>(Y.x);
+	R22 = static_cast<float>(Y.y);
+	R32 = static_cast<float>(Y.z);
+	R42 = 0;
 
-	R13 = Z[0];
-	R23 = Z[1];
-	R33 = Z[2];
-	R43 = 0.0f;
+	R13 = static_cast<float>(Z.x);
+	R23 = static_cast<float>(Z.y);
+	R33 = static_cast<float>(Z.z);
+	R43 = 0;
 
-	R14 = T[0];
-	R24 = T[1];
-	R34 = T[2];
-	R44 = 1.0f;
+	R14 = static_cast<float>(T.x);
+	R24 = static_cast<float>(T.y);
+	R34 = static_cast<float>(T.z);
+	R44 = 1;
 }
 
 ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T)
@@ -94,9 +104,9 @@ ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T)
 		float* mat = m_mat;
 		for (unsigned j=0;j<3;++j)
 		{
-			*mat++ = (float)R.m_values[0][j];
-			*mat++ = (float)R.m_values[1][j];
-			*mat++ = (float)R.m_values[2][j];
+			*mat++ = static_cast<float>(R.m_values[0][j]);
+			*mat++ = static_cast<float>(R.m_values[1][j]);
+			*mat++ = static_cast<float>(R.m_values[2][j]);
 			mat++;
 		}
 	}
@@ -104,20 +114,20 @@ ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T)
     *this += T;
 }
 
-ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, float S)
+ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, PointCoordinateType S)
 {
     toIdentity();
 
-    if (R.size()==3)
+    if (R.size() == 3)
     {
         //we copy each column
         float* mat = m_mat;
-        for (unsigned j=0;j<3;++j)
+        for (unsigned j=0; j<3; ++j)
         {
-            *mat++ = (float)R.m_values[0][j] * S;
-            *mat++ = (float)R.m_values[1][j] * S;
-            *mat++ = (float)R.m_values[2][j] * S;
-            mat++;
+            *mat++ = static_cast<float>(R.m_values[0][j] * S);
+            *mat++ = static_cast<float>(R.m_values[1][j] * S);
+            *mat++ = static_cast<float>(R.m_values[2][j] * S);
+             mat++;
         }
     }
 
@@ -128,6 +138,28 @@ ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, const C
 {
     *this = ccGLMatrix(R,T);
     shiftRotationCenter(rotCenter);
+}
+
+ccGLMatrix ccGLMatrix::FromString(QString matText, bool& success)
+{
+	QStringList valuesStr = matText.split(QRegExp("\\s+"),QString::SkipEmptyParts);
+	if (valuesStr.size() != 16)
+	{
+		success = false;
+		return ccGLMatrix();
+	}
+
+	ccGLMatrix matrix;
+	float* matValues = matrix.data();
+	for (int i=0; i<16; ++i)
+	{
+		matValues[i] = valuesStr[(i%4)*4+(i>>2)].toFloat(&success);
+		if (!success)
+			return ccGLMatrix();
+	}
+
+	success = true;
+	return matrix;
 }
 
 void ccGLMatrix::toZero()
@@ -148,9 +180,9 @@ bool ccGLMatrix::toAsciiFile(const char* filename) const
 		return false;
 
 	const float* mat = m_mat;
-	for (int i=0;i<4;++i)
+	for (unsigned i=0; i<4; ++i)
 	{
-		if (fprintf(fp,"%f %f %f %f\n",mat[0],mat[4],mat[8],mat[12])<0)
+		if (fprintf(fp,"%f %f %f %f\n",mat[0],mat[4],mat[8],mat[12]) < 4)
 		{
 			fclose(fp);
 			return false;
@@ -169,9 +201,9 @@ bool ccGLMatrix::fomAsciiFile(const char* filename)
 		return false;
 
 	float* mat = m_mat;
-	for (int i=0;i<4;++i)
+	for (unsigned i=0; i<4; ++i)
 	{
-		if (fscanf(fp,"%f %f %f %f\n",mat,mat+4,mat+8,mat+12)<4)
+		if (fscanf(fp,"%f %f %f %f\n",mat,mat+4,mat+8,mat+12) < 4)
 		{
 			fclose(fp);
 			return false;
@@ -183,123 +215,146 @@ bool ccGLMatrix::fomAsciiFile(const char* filename)
 	return true;
 }
 
-void ccGLMatrix::initFromParameters(float alpha, const CCVector3& axis3D, const CCVector3& t3D)
+void ccGLMatrix::initFromParameters(PointCoordinateType alpha_rad, const CCVector3& axis3D, const CCVector3& t3D)
 {
-	float cosw = (float)cos(alpha);
-	float sinw = (float)sin(alpha);
-	float inv_cosw = 1.0f-cosw;
+	PointCoordinateType cosw = cos(alpha_rad);
+	PointCoordinateType sinw = sin(alpha_rad);
+	PointCoordinateType inv_cosw = 1 - cosw;
 
-	float l1 = (float)axis3D.x;
-	float l2 = (float)axis3D.y;
-	float l3 = (float)axis3D.z;
+	//normalize rotation axis
+	CCVector3 uAxis3D = CCVector3(0,0,1);
+	PointCoordinateType n2 = axis3D.norm2();
+	if (n2 > ZERO_TOLERANCE)
+		uAxis3D = axis3D / sqrt(n2);
 
-	float l1_inv_cosw = l1*inv_cosw;
-	float l3_inv_cosw = l3*inv_cosw;
+	uAxis3D.normalize();
+	const PointCoordinateType& l1 = axis3D.x;
+	const PointCoordinateType& l2 = axis3D.y;
+	const PointCoordinateType& l3 = axis3D.z;
+
+	PointCoordinateType l1_inv_cosw = l1*inv_cosw;
+	PointCoordinateType l3_inv_cosw = l3*inv_cosw;
 
 	//1st column
-	R11 = cosw+l1*l1_inv_cosw;
-	R21 = l2*l1_inv_cosw+l3*sinw;
-	R31 = l3*l1_inv_cosw-l2*sinw;
+	R11 = static_cast<float>(cosw+l1*l1_inv_cosw);
+	R21 = static_cast<float>(l2*l1_inv_cosw+l3*sinw);
+	R31 = static_cast<float>(l3*l1_inv_cosw-l2*sinw);
 
 	//2nd column
-	R12 = l2*l1_inv_cosw-l3*sinw;
-	R22 = cosw+l2*l2*inv_cosw;
-	R32 = l2*l3_inv_cosw+l1*sinw;
+	R12 = static_cast<float>(l2*l1_inv_cosw-l3*sinw);
+	R22 = static_cast<float>(cosw+l2*l2*inv_cosw);
+	R32 = static_cast<float>(l2*l3_inv_cosw+l1*sinw);
 
 	//3rd column
-	R13 = l3*l1_inv_cosw+l2*sinw;
-	R23 = l2*l3_inv_cosw-l1*sinw;
-	R33 = cosw+l3*l3_inv_cosw;
+	R13 = static_cast<float>(l3*l1_inv_cosw+l2*sinw);
+	R23 = static_cast<float>(l2*l3_inv_cosw-l1*sinw);
+	R33 = static_cast<float>(cosw+l3*l3_inv_cosw);
 
 	//4th column
-	R14 = t3D.x;
-	R24 = t3D.y;
-	R34 = t3D.z;
+	R14 = static_cast<float>(t3D.x);
+	R24 = static_cast<float>(t3D.y);
+	R34 = static_cast<float>(t3D.z);
 }
 
-void ccGLMatrix::getParameters(float& alpha, CCVector3& axis3D, CCVector3& t3D) const
+void ccGLMatrix::getParameters(PointCoordinateType& alpha_rad, CCVector3& axis3D, CCVector3& t3D) const
 {
-	float trace = R11 + R22 + R33;
-	trace = 0.5f*(trace-1.0f);
-	if (fabs(trace)<1.0)
+	PointCoordinateType trace = R11 + R22 + R33;
+	trace = (trace - 1)/2;
+	if (fabs(trace) < 1)
 	{
-		alpha = acos(trace);
-		if (alpha > (float)M_PI_2)
-			alpha -= (float)M_PI;
+		alpha_rad = acos(trace);
+		if (alpha_rad > static_cast<PointCoordinateType>(M_PI_2))
+			alpha_rad -= static_cast<PointCoordinateType>(M_PI);
 	}
 	else
 	{
-		alpha = 0.0f;
+		alpha_rad = 0;
 	}
 
-	axis3D.x = (float)(R32-R23);
-	axis3D.y = (float)(R13-R31);
-	axis3D.z = (float)(R21-R12);
-	axis3D.normalize();
+	axis3D.x = static_cast<PointCoordinateType>(R32-R23);
+	axis3D.y = static_cast<PointCoordinateType>(R13-R31);
+	axis3D.z = static_cast<PointCoordinateType>(R21-R12);
+	PointCoordinateType n2 = axis3D.norm2();
+	if (n2 > ZERO_TOLERANCE)
+	{
+		axis3D /= sqrt(n2);
+	}
+	else
+	{
+		//axis is too small!
+		axis3D = CCVector3(0,0,1);
+	}
 
-	t3D.x = R14;
-	t3D.y = R24;
-	t3D.z = R34;
+	t3D.x = static_cast<PointCoordinateType>(R14);
+	t3D.y = static_cast<PointCoordinateType>(R24);
+	t3D.z = static_cast<PointCoordinateType>(R34);
 }
 
-void ccGLMatrix::initFromParameters(float phi, float theta, float psi, const CCVector3& t3D)
+void ccGLMatrix::initFromParameters(PointCoordinateType phi_rad,
+									PointCoordinateType theta_rad,
+									PointCoordinateType psi_rad,
+									const CCVector3& t3D)
 {
-	float cos_phi = (float)cos(phi);
-	float cos_theta = (float)cos(theta);
-	float cos_psi = (float)cos(psi);
+	PointCoordinateType cos_phi =	cos(phi_rad);
+	PointCoordinateType cos_theta =	cos(theta_rad);
+	PointCoordinateType cos_psi =	cos(psi_rad);
 
-	float sin_phi = (float)sin(phi);
-	float sin_theta = (float)sin(theta);
-	float sin_psi = (float)sin(psi);
+	PointCoordinateType sin_phi =	sin(phi_rad);
+	PointCoordinateType sin_theta =	sin(theta_rad);
+	PointCoordinateType sin_psi =	sin(psi_rad);
 
 	//1st column
-	R11 = cos_theta*cos_phi;
-	R21 = cos_theta*sin_phi;
-	R31 = -sin_theta;
+	R11 = static_cast<float>(cos_theta*cos_phi);
+	R21 = static_cast<float>(cos_theta*sin_phi);
+	R31 = static_cast<float>(-sin_theta);
 
 	//2nd column
-	R12 = sin_psi*sin_theta*cos_phi-cos_psi*sin_phi;
-	R22 = sin_psi*sin_theta*sin_phi+cos_psi*cos_phi;
-	R32 = sin_psi*cos_theta;
+	R12 = static_cast<float>(sin_psi*sin_theta*cos_phi-cos_psi*sin_phi);
+	R22 = static_cast<float>(sin_psi*sin_theta*sin_phi+cos_psi*cos_phi);
+	R32 = static_cast<float>(sin_psi*cos_theta);
 
 	//3rd column
-	R13 = cos_psi*sin_theta*cos_phi+sin_psi*sin_phi;
-	R23 = cos_psi*sin_theta*sin_phi-sin_psi*cos_phi;
-	R33 = cos_psi*cos_theta;
+	R13 = static_cast<float>(cos_psi*sin_theta*cos_phi+sin_psi*sin_phi);
+	R23 = static_cast<float>(cos_psi*sin_theta*sin_phi-sin_psi*cos_phi);
+	R33 = static_cast<float>(cos_psi*cos_theta);
 
 	//4th column
-	R14 = (float)t3D.x;
-	R24 = (float)t3D.y;
-	R34 = (float)t3D.z;
+	R14 = static_cast<float>(t3D.x);
+	R24 = static_cast<float>(t3D.y);
+	R34 = static_cast<float>(t3D.z);
 }
 
-void ccGLMatrix::getParameters(float &phi, float &theta, float &psi, CCVector3& t3D) const
+void ccGLMatrix::getParameters(	PointCoordinateType &phi_rad,
+								PointCoordinateType &theta_rad,
+								PointCoordinateType &psi_rad,
+								CCVector3& t3D) const
 {
-	if (fabs(R31)!=1.0)
+	if (fabs(R31) != 1)
 	{
-		theta = -asin(R31);
-		float cos_theta = cos(theta);
-		psi = atan2(R32/cos_theta,R33/cos_theta);
-		phi = atan2(R21/cos_theta,R11/cos_theta);
+		theta_rad = -static_cast<PointCoordinateType>(asin(R31));
+		PointCoordinateType cos_theta = cos(theta_rad);
+		psi_rad = atan2(static_cast<PointCoordinateType>(R32)/cos_theta, static_cast<PointCoordinateType>(R33)/cos_theta);
+		phi_rad = atan2(static_cast<PointCoordinateType>(R21)/cos_theta, static_cast<PointCoordinateType>(R11)/cos_theta);
 
 		//Other solution
 		/*theta = M_PI+asin(R31);
-		UL_SCALAR cos_theta = cos(theta);
+		PointCoordinateType cos_theta = cos(theta);
 		psi = atan2(R32/cos_theta,R33/cos_theta);
 		phi = atan2(R21/cos_theta,R11/cos_theta);
 		//*/
 	}
 	else
 	{
-		phi = 0.0;
-		float sign = (float)(R31 == -1.0 ? 1.0 : -1.0);
-		theta = sign*(float)M_PI_2;
-		psi = sign*atan2(R12,R13);
+		phi_rad = 0;
+
+		PointCoordinateType sign = (R31 == -1 ? PC_ONE : -PC_ONE);
+		theta_rad = sign*static_cast<PointCoordinateType>(M_PI_2);
+		psi_rad = sign*static_cast<PointCoordinateType>(atan2(R12,R13));
 	}
 
-	t3D.x = (float)R14;
-	t3D.y = (float)R24;
-	t3D.z = (float)R34;
+	t3D.x = static_cast<PointCoordinateType>(R14);
+	t3D.y = static_cast<PointCoordinateType>(R24);
+	t3D.z = static_cast<PointCoordinateType>(R34);
 }
 
 void ccGLMatrix::clearTranslation()
@@ -309,9 +364,16 @@ void ccGLMatrix::clearTranslation()
 
 void ccGLMatrix::setTranslation(const CCVector3& T)
 {
-	R14 = (float)T.x;
-	R24 = (float)T.y;
-	R34 = (float)T.z;
+	R14 = static_cast<float>(T.x);
+	R24 = static_cast<float>(T.y);
+	R34 = static_cast<float>(T.z);
+}
+
+void ccGLMatrix::setTranslation(const float T[3])
+{
+	R14 = T[0];
+	R24 = T[1];
+	R34 = T[2];
 }
 
 ccGLMatrix ccGLMatrix::operator * (const ccGLMatrix& M) const
@@ -322,13 +384,9 @@ ccGLMatrix ccGLMatrix::operator * (const ccGLMatrix& M) const
 	const float* B = M.m_mat;
 	float* C = result.m_mat;
 
-	for (int j=0;j<4;++j)
-	{
-		for (int i=0;i<4;++i)
+	for (unsigned j=0; j<4; ++j, B+=4)
+		for (unsigned i=0; i<4; ++i)
 			*C++ = A[i]*B[0]+A[i+4]*B[1]+A[i+8]*B[2]+A[i+12]*B[3];
-
-		B+=4;
-	}
 
 	return result;
 }
@@ -343,18 +401,18 @@ ccGLMatrix& ccGLMatrix::operator *= (const ccGLMatrix& M)
 
 ccGLMatrix& ccGLMatrix::operator += (const CCVector3& T)
 {
-	R14 += (float)T.x;
-	R24 += (float)T.y;
-	R34 += (float)T.z;
+	R14 += static_cast<float>(T.x);
+	R24 += static_cast<float>(T.y);
+	R34 += static_cast<float>(T.z);
 
 	return (*this);
 }
 
 ccGLMatrix& ccGLMatrix::operator -= (const CCVector3& T)
 {
-	R14 -= (float)T.x;
-	R24 -= (float)T.y;
-	R34 -= (float)T.z;
+	R14 -= static_cast<float>(T.x);
+	R24 -= static_cast<float>(T.y);
+	R34 -= static_cast<float>(T.z);
 
 	return (*this);
 }
@@ -363,7 +421,7 @@ void ccGLMatrix::shiftRotationCenter(const CCVector3& vec)
 {
     //R(X-vec)+T+vec = R(X)+T + vec-R(vec)
     CCVector3 Rvec = vec;
-    applyRotation(Rvec.u);
+    applyRotation(Rvec);
     *this += (vec - Rvec);
 }
 
@@ -388,14 +446,15 @@ ccGLMatrix ccGLMatrix::transposed() const
 void ccGLMatrix::invert()
 {
 	//inverse scale as well!
-	PointCoordinateType s2 = CCVector3(m_mat).norm2(); //we use the first column == X (its norm should be 1 for an 'unscaled' matrix ;)
+	//we use the first column == X (its norm should be 1 for an 'unscaled' matrix ;)
+	float s2 = static_cast<float>(getColumnAsVec3D(0).norm2());
 
 	//we invert rotation
 	std::swap(R21,R12);
 	std::swap(R31,R13);
 	std::swap(R32,R23);
 
-	if (s2 != 0.0 && s2 != 1.0)
+	if (s2 != 0 && s2 != 1)
 	{
 		R11 /= s2; R12 /= s2; R13 /= s2;
 		R21 /= s2; R22 /= s2; R23 /= s2;
@@ -418,14 +477,16 @@ ccGLMatrix ccGLMatrix::inverse() const
 	return result;
 }
 
-ccGLMatrix ccGLMatrix::Interpolate(float coef, const ccGLMatrix& glMat1, const ccGLMatrix& glMat2)
+ccGLMatrix ccGLMatrix::Interpolate(	PointCoordinateType coef,
+									const ccGLMatrix& glMat1,
+									const ccGLMatrix& glMat2)
 {
 	//we compute the transformation matrix between glMat1 and glMat2
 	ccGLMatrix invTrans1 = glMat1.inverse();
 	ccGLMatrix m12 = invTrans1 * glMat2;
 
     CCVector3 axis,tr;
-	float alpha;
+	PointCoordinateType alpha;
 	m12.getParameters(alpha,axis,tr);
 
 	//we only have to interpolate the angle value
@@ -442,7 +503,7 @@ ccGLMatrix ccGLMatrix::Interpolate(float coef, const ccGLMatrix& glMat1, const c
 
 void ccGLMatrix::scale(float coef)
 {
-	for (unsigned i=0;i<OPENGL_MATRIX_SIZE;++i)
+	for (unsigned i=0; i<OPENGL_MATRIX_SIZE; ++i)
 		m_mat[i] *= coef;
 }
 
@@ -469,14 +530,13 @@ void ccGLMatrix::scaleColumn(unsigned colIndex, float coef)
 
 ccGLMatrix ccGLMatrix::FromToRotation(const CCVector3& from, const CCVector3& to)
 {
-	float e = from.dot(to);
-	float f = (e < 0 ? -e : e);
+	PointCoordinateType e = from.dot(to);
+	PointCoordinateType f = (e < 0 ? -e : e);
 	ccGLMatrix result;
-	float* mat = result.data();
 
-	if (f > 1.0-ZERO_TOLERANCE)     //"from" and "to"-vector almost parallel
+	if (f > 1.0-ZERO_TOLERANCE) //"from" and "to"-vector almost parallel
 	{
-		CCVector3 x;       // vector most nearly orthogonal to "from"
+		CCVector3 x; // vector most nearly orthogonal to "from"
 		x.x = (from.x > 0 ? from.x : -from.x);
 		x.y = (from.y > 0 ? from.y : -from.y);
 		x.z = (from.z > 0 ? from.z : -from.z);
@@ -485,39 +545,40 @@ ccGLMatrix ccGLMatrix::FromToRotation(const CCVector3& from, const CCVector3& to
 		{
 			if (x.x < x.z)
 			{
-				x.x = 1.0f; x.y = x.z = 0;
+				x.x = 1; x.y = x.z = 0;
 			}
 			else
 			{
-				x.z = 1.0f; x.x = x.y = 0;
+				x.z = 1; x.x = x.y = 0;
 			}
 		}
 		else
 		{
 			if (x.y < x.z)
 			{
-				x.y = 1.0f; x.x = x.z = 0;
+				x.y = 1; x.x = x.z = 0;
 			}
 			else
 			{
-				x.z = 1.0f; x.x = x.y = 0;
+				x.z = 1; x.x = x.y = 0;
 			}
 		}
 
-		CCVector3 u(x.x-from.x, x.y-from.y, x.z-from.z);
-		CCVector3 v(x.x-to.x, x.y-to.y, x.z-to.z);
+		CCVector3 u = x-from;
+		CCVector3 v = x-to;
 
-		float c1 = 2.0f / u.dot(u);
-		float c2 = 2.0f / v.dot(v);
-		float c3 = c1 * c2  * u.dot(v);
+		PointCoordinateType c1 = 2 / u.dot(u);
+		PointCoordinateType c2 = 2 / v.dot(v);
+		PointCoordinateType c3 = c1 * c2  * u.dot(v);
 
-		for (unsigned i = 0; i < 3; i++)
+		float* mat = result.data();
+		for (unsigned i=0; i<3; i++)
 		{
-			for (unsigned j = 0; j < 3; j++)
+			for (unsigned j=0; j<3; j++)
 			{
-				mat[i*4+j]=  c3 * v.u[i] * u.u[j]
-						   - c2 * v.u[i] * v.u[j]
-						   - c1 * u.u[i] * u.u[j];
+				mat[i*4+j] = static_cast<float>(  c3 * v.u[i] * u.u[j]
+												- c2 * v.u[i] * v.u[j]
+												- c1 * u.u[i] * u.u[j]);
 			}
 			mat[i*4+i] += 1.0f;
 		}
@@ -526,24 +587,25 @@ ccGLMatrix ccGLMatrix::FromToRotation(const CCVector3& from, const CCVector3& to
 	{
 		//hand optimized version (9 mults less)
 		CCVector3 v = from.cross(to);
-		float h = 1.0f/(1.0f + e);
-		float hvx = h * v.x;
-		float hvz = h * v.z;
-		float hvxy = hvx * v.y;
-		float hvxz = hvx * v.z;
-		float hvyz = hvz * v.y;
+		PointCoordinateType h = 1/(1 + e);
+		PointCoordinateType hvx = h * v.x;
+		PointCoordinateType hvz = h * v.z;
+		PointCoordinateType hvxy = hvx * v.y;
+		PointCoordinateType hvxz = hvx * v.z;
+		PointCoordinateType hvyz = hvz * v.y;
 
-		mat[0] = e + hvx * v.x;
-		mat[1] = hvxy - v.z;
-		mat[2] = hvxz + v.y;
+		float* mat = result.data();
+		mat[0]  = static_cast<float>(e + hvx * v.x);
+		mat[1]  = static_cast<float>(hvxy - v.z);
+		mat[2]  = static_cast<float>(hvxz + v.y);
+			    
+		mat[4]  = static_cast<float>(hvxy + v.z);
+		mat[5]  = static_cast<float>(e + h * v.y * v.y);
+		mat[6]  = static_cast<float>(hvyz - v.x);
 
-		mat[4] = hvxy + v.z;
-		mat[5] = e + h * v.y * v.y;
-		mat[6] = hvyz - v.x;
-
-		mat[8] = hvxz - v.y;
-		mat[9] = hvyz + v.x;
-		mat[10] = e + hvz * v.z;
+		mat[8]  = static_cast<float>(hvxz - v.y);
+		mat[9]  = static_cast<float>(hvyz + v.x);
+		mat[10] = static_cast<float>(e + hvz * v.z);
 	}
 
 	return result;
@@ -560,7 +622,7 @@ bool ccGLMatrix::toFile(QFile& out) const
 	return true;
 }
 
-bool ccGLMatrix::fromFile(QFile& in, short dataVersion)
+bool ccGLMatrix::fromFile(QFile& in, short dataVersion, int flags)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -682,10 +744,10 @@ ccGLMatrix ccGLMatrix::yRotation() const
 ccGLMatrix ccGLMatrix::zRotation() const
 {
 	//we can use the standard Euler angles convention here
-	float phi,theta,psi;
+	PointCoordinateType phi,theta,psi;
 	CCVector3 T;
 	getParameters(phi,theta,psi,T);
-	assert(T.norm2()==0);
+	assert(T.norm2() == 0);
 
 	ccGLMatrix newRotMat;
 	newRotMat.initFromParameters(phi,0,0,T);

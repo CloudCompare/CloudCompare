@@ -480,7 +480,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 	double pageMargin = baseSize / 20.0;
 
 	DL_Dxf dxf;
-	DL_WriterA* dw = dxf.out(qPrintable(filename), DL_VERSION_R12);
+	DL_WriterA* dw = dxf.out(filename, DL_VERSION_R12);
 	if (!dw)
 	{
 		return CC_FERR_WRITING;
@@ -575,14 +575,15 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 				DL_Attributes(
 				std::string(""),
 				i == 0 ? DL_Codes::green : /*-*/DL_Codes::green, //invisible if negative!
-				lineWidth,
+				static_cast<int>(lineWidth),
 				"CONTINUOUS"));
 		}
 	}
 	dw->tableEnd();
 
 	//Writing Various Other Tables
-	dxf.writeStyle(*dw);
+	//dxf.writeStyle(*dw); //DXFLIB V2.5
+	dxf.writeStyle(*dw,DL_StyleData("Standard",0,0.0,0.75,0.0,0,2.5,"txt","")); //DXFLIB V3.3
 	dxf.writeView(*dw);
 	dxf.writeUcs(*dw);
 
@@ -662,18 +663,16 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 	delete dw;
 	dw = 0;
 
-	ccLog::Print("[DXF] File %s saved successfully",filename);
-
 	return CC_FERR_NO_ERROR;
 
 #endif
 }
 
-CC_FILE_ERROR DxfFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR DxfFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 #ifdef CC_DXF_SUPPORT
 	DxfImporter importer(&container);
-	if (!DL_Dxf().in(qPrintable(filename), &importer))
+	if (!DL_Dxf().in(filename, &importer))
 	{
 		return CC_FERR_READING;
 	}

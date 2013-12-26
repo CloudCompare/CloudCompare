@@ -47,7 +47,7 @@ public:
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }
 	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion);
+	virtual bool fromFile(QFile& in, short dataVersion, int flags);
 
     //! Current pixel size (in 'current unit'/pixel)
 	/** This scale is valid eveywhere in ortho. mode 

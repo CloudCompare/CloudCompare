@@ -444,6 +444,12 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
     }
     else if (role == Qt::DecorationRole)
     {
+        // does the object have an "embedded icon?"
+        // this is pretty useful for external (read plugins) objects
+        QIcon * icon = item->getIcon();
+        if (icon)
+            return *icon;
+
         bool locked = item->isLocked();
         switch (item->getClassID())
         {

@@ -117,10 +117,18 @@ public:
 	//! Returns the first selected entity as a ccPointCloud
 	/** \return NULL if no cloud is selected or if is not a ccPointCloud
 	**/
-	ccPointCloud * getSelectedEntityAsCCPointCloud();
+    ccPointCloud * getSelectedEntityAsCCPointCloud() const;
+
+    //! Returns the first selected entity as a ccHObject
+    /** \return NULL if no object is selected
+    **/
+    ccHObject * getSelectedEntityAsCCHObject() const;
 
     //! Returns all the objects in db tree of type "type"
     void getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& entities);
+
+    //! Returns allt the existent hierarchical objects filtering that have a specific metadata
+    void getAllEntitiesThatHaveMetaData(QString key, ccHObject::Container & entities);
 
     //! get all entities that are selected and that also are cc_point_cloud
     void getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & entities);
@@ -154,11 +162,20 @@ public:
 	//! Sets associated CC application interface (to access DB)
 	void setMainAppInterface(ccMainAppInterface* app) { m_app = app; }
 
+    //! Get associated CC application interface for accessing to some of mainWindow methods
+    ccMainAppInterface * getMainAppInterface() { return m_app; }
+
     //! get the associated parent plugin interface
     ccPluginInterface * getParentPlugin() const { return m_parent_plugin; }
 
 protected slots:
 
+	//! Returns is called when the dialog window is accepted.
+	/** it can be overridden but normally should not be necessary
+		the parameters will be retrieved from the dialog
+		via the getParametersFromDialog() method
+		this always need to be overridden.
+	**/
 	//DGM: useless as dialogs are always modal
 	//virtual int dialogAccepted();
 

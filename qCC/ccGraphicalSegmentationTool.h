@@ -56,6 +56,9 @@ public:
 	//! Returns the number of entites currently in the the 'to be segmented' pool
 	unsigned getNumberOfValidEntities();
 
+    //! Get a pointer to the polyline that has been segmented
+    ccPolyline *getPolyLine() {return m_segmentationPoly;}
+
 	//! Returns the active 'to be segmented' set
 	const std::set<ccHObject*>& entities() const { return m_toSegment; }
 

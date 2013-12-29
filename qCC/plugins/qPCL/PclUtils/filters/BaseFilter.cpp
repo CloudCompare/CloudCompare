@@ -283,7 +283,7 @@ QString BaseFilter::getErrorMessage(int errorCode)
 	return errorMsg;
 }
 
-ccPointCloud* BaseFilter::getSelectedEntityAsCCPointCloud()
+ccPointCloud* BaseFilter::getSelectedEntityAsCCPointCloud() const
 {
     //does we have any selected entity?
     if (m_selected.size() == 0)
@@ -298,13 +298,36 @@ ccPointCloud* BaseFilter::getSelectedEntityAsCCPointCloud()
     return ccHObjectCaster::ToPointCloud(entity);
 }
 
+ccHObject *BaseFilter::getSelectedEntityAsCCHObject() const
+{
+    //does we have any selected entity?
+    if (m_selected.size() == 0)
+        return NULL;
+
+    return m_selected.at(0);
+}
+
 void BaseFilter::getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& entities)
 {
 	if (!m_app || !m_app->dbRootObject())
 		return;
 
-	m_app->dbRootObject()->filterChildren(entities,true,type);
+    m_app->dbRootObject()->filterChildren(entities,true,type);
 }
+
+void BaseFilter::getAllEntitiesThatHaveMetaData(QString key, ccHObject::Container &entities)
+{
+    entities.clear(); //better be sure
+    ccHObject::Container tmp_cont;
+    getAllEntitiesOfType(CC_HIERARCHY_OBJECT, tmp_cont);
+
+    for (ccHObject::Container::const_iterator it = tmp_cont.begin(); it != tmp_cont.end(); ++it )
+    {
+        if ((*it)->hasMetaData(key))
+            entities.push_back(*it);
+    }
+}
+
 
 
 void BaseFilter::getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & entities)

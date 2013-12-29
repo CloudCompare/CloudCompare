@@ -58,6 +58,15 @@ public:
     **/
     virtual CC_CLASS_ENUM getClassID() const {return CC_HIERARCHY_OBJECT;};
 
+
+    //! Return an icon for this object
+    /** \return a null pointer for now.
+     * the icons are best handled by ccDBRoot
+     * ccDBRoot will try to call this method.
+     * if null, the default, as defined in ccDBRoot will be simpy applied.
+     **/
+    virtual QIcon * getIcon() const {return 0;}
+
     //! Returns parent object
     /** \return parent object (NULL if no parent)
     **/

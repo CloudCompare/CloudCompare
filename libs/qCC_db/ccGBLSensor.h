@@ -70,92 +70,66 @@ public:
 	/** \param minV min latitude
 		\param maxV max latitude
 	**/
-	void setPhi(PointCoordinateType minV, PointCoordinateType maxV);
+	void setPhi(PointCoordinateType minV, PointCoordinateType maxV) { m_phiMin = minV; m_phiMax = maxV; }
 
 	//! Sets the lateral angular scanning step
 	/** \param dPhi latitudinal step
 	**/
-	void setDeltaPhi(PointCoordinateType dPhi);
+	void setDeltaPhi(PointCoordinateType dPhi)  { m_deltaPhi = dPhi; }
 
 	//! Returns the lateral minimal angular scanning limit
-	PointCoordinateType getPhiMin() const;
+	PointCoordinateType getPhiMin() const { return m_phiMin; }
 
 	//! Returns the lateral maximal angular scanning limit
-	PointCoordinateType getPhiMax() const;
+	PointCoordinateType getPhiMax() const { return m_phiMax; }
 
 	//! Returns the lateral angular scanning step
-	PointCoordinateType getDeltaPhi() const;
+	PointCoordinateType getDeltaPhi() const { return m_deltaPhi; }
 
 	//! Sets the vertical angular scanning limits
 	/** \param minV min longitude
 		\param maxV max longitude
 	**/
-	void setTheta(PointCoordinateType minV, PointCoordinateType maxV);
+	void setTheta(PointCoordinateType minV, PointCoordinateType maxV)  { m_thetaMin = minV; m_thetaMax = maxV; }
 
 	//! Sets the vertical angular scanning step
 	/** \param dTheta longitudinal step
 	**/
-	void setDeltaTheta(PointCoordinateType dTheta);
+	void setDeltaTheta(PointCoordinateType dTheta) { m_deltaTheta = dTheta; }
 
 	//! Returns the vertical minimal angular scanning limit
-	PointCoordinateType getThetaMin() const;
+	PointCoordinateType getThetaMin() const { return m_thetaMin; }
 
 	//! Returns the vertical maximal angular scanning limit
-	PointCoordinateType getThetaMax() const;
+	PointCoordinateType getThetaMax() const { return m_thetaMax; }
 
 	//! Returns the vertical angular scanning step
-	PointCoordinateType getDeltaTheta() const;
-
-	//! Returns the sensor base (distance between emitter and reciever)
-	PointCoordinateType getSensorBase() const;
-
-	//! Sets the sensor base (distance between emitter and reciever)
-	/** \param base the sensor base
-	**/
-	void setSensorBase(PointCoordinateType base);
+	PointCoordinateType getDeltaTheta() const { return m_deltaTheta; }
 
 	//! Returns the sensor max. range
-	ScalarType getSensorRange() const;
+	ScalarType getSensorRange() const { return m_sensorRange; }
 
 	//! Sets the sensor max. range
 	/** \param range max. range of the sensor
 	**/
-	void setSensorRange(ScalarType range);
-
-	//! Returns the sensor optical center
-	CCVector3 getSensorCenter() const;
-
-	//! Sets the sensor optical center
-	/** \param C the sensor optical center
-	**/
-	void setSensorCenter(const CCVector3& C);
+	void setSensorRange(ScalarType range) { m_sensorRange = range; }
 
 	//! Returns the Z-buffer uncertainty on depth values
-	ScalarType getUncertainty() const;
+	ScalarType getUncertainty() const { return m_uncertainty; }
 
 	//! Sets the Z-buffer uncertainty on depth values
 	/** The uncertainty is used to handle numerical inaccuracies
 		\param u the Z-buffer uncertainty
 	**/
-	void setUncertainty(ScalarType u);
-
-	//! Returns the sensor attitude
-	/** Only rotation part is valid
-	**/
-	const ccGLMatrix& getOrientationMatrix() const;
-
-	//! Sets the sensor attitude (as a rotation matrix)
-	/** \param mat transformation matrix (only rotation)
-	**/
-	void setOrientationMatrix(const ccGLMatrix& mat);
+	void setUncertainty(ScalarType u) { m_uncertainty = u; }
 
 	//! Returns the sensor rotations order
-	ROTATION_ORDER getRotationOrder() const;
+	ROTATION_ORDER getRotationOrder() const { return m_rotationOrder; }
 
 	//! Sets the sensor rotations order
 	/** \param rotOrder the sensor rotations order
 	**/
-	void setRotationOrder(ROTATION_ORDER rotOrder);
+	void setRotationOrder(ROTATION_ORDER rotOrder) { m_rotationOrder = rotOrder; }
 
 	//! Projects a point cloud along the sensor point of view defined by this instance
 	/** WARNING: this method uses the cloud global iterator
@@ -164,13 +138,7 @@ public:
 		\param autoParameters try to deduce most trivial parameters (min and max angles, max range and uncertainty) from input cloud
 		\return a point cloud with the projected 2D points (Theta, Phi) + distances to sensor as a scalar field [should be deleted by the user if not used]
 	**/
-	CCLib::SimpleCloud* project(CCLib::GenericCloud* cloud, int& errorCode, bool autoParameters=false);
-
-	/** Apply a mean filter to fill the small holes (lack of information) of the depth map.
-		The depth buffer must have been created before (see GroundBasedLidarSensor::project).
-		\return a negative value if an error occurs, 0 otherwise
-	**/
-	int fillZBufferHoles();
+	CCLib::SimpleCloud* project(CCLib::GenericCloud* cloud, int& errorCode, bool autoParameters = false);
 
 	//! Projects a set of point cloud normals in the sensor world
 	/** WARNING: this method uses the cloud global iterator
@@ -203,24 +171,21 @@ public:
 		//! Z-Buffer grid
 		ScalarType* zBuff;
 		//! Buffer width
-		int width;
+		unsigned width;
 		//! Buffer height
-		int height;
+		unsigned height;
 
 		//! Default constructor
-		DepthBuffer()
-			: zBuff(0)
-			, width(0)
-			, height(0)
-		{
-		}
-
+		DepthBuffer();
 		//! Destructor
-		~DepthBuffer()
-		{
-			if (zBuff)
-				delete[] zBuff;
-		}
+		~DepthBuffer();
+
+		//! Applies a mean filter to fill the small holes (lack of information) of the depth map.
+		/**	The depth buffer must have been created before (see GroundBasedLidarSensor::project).
+			\return a negative value if an error occurs, 0 otherwise
+		**/
+		int fillHoles();
+
 	};
 
 	//! Returns the corresponding depth buffer
@@ -228,16 +193,13 @@ public:
 		dB.zBuff will be 0. Otherwise dB will contain the projection result expressed
 		as a depth buffer.
 	**/
-	const DepthBuffer& getDepthBuffer() const;
-
-	//! Updates graphic representation to reflect current sensor parameters
-	void updateGraphicRepresentation();
+	const DepthBuffer& getDepthBuffer() const { return m_depthBuffer; }
 
     //! Sets the sensor graphic representation scale
-	void setGraphicScale(PointCoordinateType scale);
+	void setGraphicScale(PointCoordinateType scale) { m_scale = scale; }
 
     //! Returns the sensor graphic representation scale
-	PointCoordinateType getGraphicScale() const;
+	PointCoordinateType getGraphicScale() const { return m_scale; }
 
     //Inherited from ccHObject
     //virtual ccBBox getMyOwnBB();
@@ -252,45 +214,36 @@ protected:
 	/** \param[in] sourcePoint 3D point to project
 		\param[out] destPoint projected point in polar coordinates: (theta,phi) or (phi,theta)
 		\param[out] depth distance from the sensor optical center to the source point
+		\param[in] (optional) sensor position index (see ccIndexedTransformationBuffer)
 	**/
-	void projectPoint(const CCVector3& sourcePoint, CCVector2& destPoint, ScalarType &depth) const;
-
-	//! Base distance (distance form emitter to receptor)
-	PointCoordinateType base;
-	//! Center (origin)
-	CCVector3 sensorCenter;
-	//! Orientation
-	ccGLMatrix m_orientation;
+	void projectPoint(const CCVector3& sourcePoint, CCVector2& destPoint, ScalarType &depth, double posIndex = 0) const;
 
 	//! lateral minimal angular scanning limit
-	PointCoordinateType phiMin;
+	PointCoordinateType m_phiMin;
 	//! lateral maximal angular scanning limit
-	PointCoordinateType phiMax;
+	PointCoordinateType m_phiMax;
 	//! lateral angular scanning step
-	PointCoordinateType deltaPhi;
+	PointCoordinateType m_deltaPhi;
 
 	//! Vertical minimal angular scanning limit
-	PointCoordinateType thetaMin;
+	PointCoordinateType m_thetaMin;
 	//! Vertical maximal angular scanning limit
-	PointCoordinateType thetaMax;
+	PointCoordinateType m_thetaMax;
 	//! Vertical angular scanning step
-	PointCoordinateType deltaTheta;
+	PointCoordinateType m_deltaTheta;
 
 	//! Mirrors rotation order
-	ROTATION_ORDER rotationOrder;
+	ROTATION_ORDER m_rotationOrder;
 
 	//! Sensor max range
-	ScalarType sensorRange;
+	ScalarType m_sensorRange;
 	//! Associated Z-buffer
 	DepthBuffer m_depthBuffer;
 	//! Z-buffer uncertainty
-	ScalarType uncertainty;
+	ScalarType m_uncertainty;
 	
 	//! Sensor graphic representation scale
-    PointCoordinateType scale;
-
-    //! Bounding-box (body)
-    ccBBox bBox;
+    PointCoordinateType m_scale;
 };
 
 #endif //CC_GROUND_LIDAR_SENSOR_HEADER

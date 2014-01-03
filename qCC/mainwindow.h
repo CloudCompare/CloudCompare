@@ -315,8 +315,9 @@ protected slots:
     void doActionUnroll();
     void doActionProjectSensor();
     void doActionModifySensor();
-    void doActionComputeDistancesFromSensor(); 
-    void doActionComputeScatteringAngles(); 
+    void doActionComputeDistancesFromSensor();
+    void doActionComputeScatteringAngles();
+	void doActionSetViewFromSensor();
     void doActionShowDepthBuffer();
     void doActionExportDepthBuffer();
     void doActionHeightGridGeneration();

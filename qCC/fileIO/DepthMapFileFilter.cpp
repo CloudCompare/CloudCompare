@@ -168,9 +168,9 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
     colorType* _theColors = theColors;
     ScalarType* _zBuff = db.zBuff;
 
-    for (int j=0; j<db.width; ++j)
+    for (unsigned j=0; j<db.width; ++j)
 	{
-        for (int k=0; k<db.height; ++k)
+        for (unsigned k=0; k<db.height; ++k)
         {
             //grid index and depth
             fprintf(fp,"%f %f %f",static_cast<float>(k),static_cast<float>(j),*_zBuff++);

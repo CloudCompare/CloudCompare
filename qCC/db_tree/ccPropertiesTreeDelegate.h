@@ -38,6 +38,7 @@ class ccMaterialSet;
 class cc2DLabel;
 class cc2DViewportObject;
 class ccFacet;
+class ccSensor;
 class CCShareable;
 
 class QStandardItemModel;
@@ -84,6 +85,7 @@ public:
 							OBJECT_FACET_CONTOUR		,
 							OBJECT_FACET_MESH			,
 							OBJECT_FACET_NORMAL_VECTOR	,
+							OBJECT_SENSOR_INDEX			,
 	};
 
     //! Default constructor
@@ -112,22 +114,23 @@ signals:
     void ccObjectAndChildrenAppearanceChanged(ccHObject* hObject) const;
 
 protected slots:
-    void updateItem(QStandardItem* item);
-    void scalarFieldChanged(int pos);
-    void colorScaleChanged(int pos);
-    void colorRampStepsChanged(int val);
+    void updateItem(QStandardItem*);
+    void scalarFieldChanged(int);
+    void colorScaleChanged(int);
+    void colorRampStepsChanged(int);
     void spawnColorRampEditor();
-    void octreeDisplayTypeChanged(int pos);
-    void octreeDisplayedLevelChanged(int val);
-	void primitivePrecisionChanged(int val);
-    void imageAlphaChanged(int val);
+    void octreeDisplayTypeChanged(int);
+    void octreeDisplayedLevelChanged(int);
+	void primitivePrecisionChanged(int);
+    void imageAlphaChanged(int);
     void applyImageViewport();
 	void applyLabelViewport();
     void updateDisplay();
-    void objectDisplayChanged(const QString &newDisplayTitle);
-    void sensorScaleChanged(double val);
-	void cloudPointSizeChanged(int size);
-    void polyineWidthChanged(int size);
+    void objectDisplayChanged(const QString &);
+    void sensorScaleChanged(double);
+	void sensorIndexChanged(double);
+	void cloudPointSizeChanged(int);
+    void polyineWidthChanged(int);
 
 protected:
 
@@ -139,6 +142,7 @@ protected:
     void fillSFWithPointCloud(ccGenericPointCloud*);
     void fillWithMesh(ccGenericMesh*);
 	void fillWithFacet(ccFacet*);
+	void fillWithSensor(ccSensor*);
     void fillWithPolyline(ccPolyline*);
     void fillWithPrimitive(ccGenericPrimitive*);
     void fillWithPointOctree(ccOctree*);

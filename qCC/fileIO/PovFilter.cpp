@@ -86,7 +86,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
 
     if (	fprintf(mainFile,"#CC_POVS_FILE\n") < 0
 		||	fprintf(mainFile,"SENSOR_TYPE = %s\n",CC_SENSOR_ROTATION_ORDER_NAMES[firstGls->getRotationOrder()]) < 0
-		||	fprintf(mainFile,"SENSOR_BASE = %f\n",firstGls->getSensorBase()) < 0
+		||	fprintf(mainFile,"SENSOR_BASE = 0\n") < 0 //DGM: sensor base is deprecated
 		||	fprintf(mainFile,"UNITS = IGNORED\n") < 0
 		||	fprintf(mainFile,"#END_HEADER\n") < 0 )
     {
@@ -113,15 +113,15 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
 			if (result > 0)
 			{
 				ccGBLSensor* gls = sensors[i];
-				CCVector3 C = gls->getSensorCenter();
+				const float* C = gls->getRigidTransformation().getTranslation();
 				result = fprintf(mainFile,"C %f %f %f\n",C[0],C[1],C[2]);
 
 				if (result > 0)
 				{
-					const float* mat = gls->getOrientationMatrix().data();
-					result = fprintf(mainFile,"X %f %f %f\n",mat[0],mat[4],mat[8]);
-					result = fprintf(mainFile,"Y %f %f %f\n",mat[1],mat[5],mat[9]);
-					result = fprintf(mainFile,"Z %f %f %f\n",mat[2],mat[6],mat[10]);
+					const float* mat = gls->getRigidTransformation().data();
+					result = fprintf(mainFile,"X %f %f %f\n",mat[0],mat[1],mat[2]);
+					result = fprintf(mainFile,"Y %f %f %f\n",mat[4],mat[5],mat[6]);
+					result = fprintf(mainFile,"Z %f %f %f\n",mat[8],mat[9],mat[10]);
 				}
 
 				if (result > 0)
@@ -282,12 +282,14 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                     ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[i]);
 
 					ccGBLSensor* gls = new ccGBLSensor(rotationOrder);
-					//ne pas oublier la base du scanner (SOISIC)
-					gls->setSensorBase(base);
-					gls->setSensorCenter(sensorCenter);
+					//DGM: the base simply corresponds to a shift of the center along the X axis!
+					sensorCenter.x -= base;
+					//DGM: sensor center is now integrated in rigid transformation (= inverse of former rotation matrix + center as translation)
+					ccGLMatrix trans = rot.inverse();
+					trans.setTranslation(sensorCenter);
+					gls->setRigidTransformation(trans);
 					gls->setDeltaPhi(dPhi);
 					gls->setDeltaTheta(dTheta);
-					gls->setOrientationMatrix(rot);
 
 					CCLib::GenericIndexedCloud* projectedList = gls->project(theCloud,errorCode,true);
 

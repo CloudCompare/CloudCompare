@@ -44,6 +44,7 @@
 #include <ccAdvancedTypes.h>
 #include <ccGenericPrimitive.h>
 #include <ccFacet.h>
+#include <ccSensor.h>
 
 //Qt
 #include <QStandardItemModel>
@@ -689,6 +690,27 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(cc2DViewportObject* _obj)
 	appendRow( ITEM("Apply Viewport"), PERSISTENT_EDITOR(OBJECT_APPLY_LABEL_VIEWPORT), true );
 }
 
+void ccPropertiesTreeDelegate::fillWithSensor(ccSensor* _obj)
+{
+    assert(_obj && m_model);
+
+    addSeparator("Associated positions");
+
+    //Associated positions
+	appendRow( ITEM("Count"), ITEM(QString::number(_obj->getPositions() ? _obj->getPositions()->size() : 0)) );
+
+	double minIndex,maxIndex;
+	_obj->getIndexBounds(minIndex,maxIndex);
+	if (minIndex != maxIndex)
+	{
+		//Index span
+		appendRow( ITEM("Indexes"), ITEM(QString("%1 - %2").arg(minIndex).arg(maxIndex)) );
+
+		//Current index
+		appendRow( ITEM("Active index"), PERSISTENT_EDITOR(OBJECT_SENSOR_INDEX), true );
+	}
+}
+
 void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 {
     assert(_obj && m_model);
@@ -706,6 +728,9 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 
 	//Sensor drawing scale
 	appendRow( ITEM("Drawing scale"), PERSISTENT_EDITOR(OBJECT_SENSOR_DISPLAY_SCALE), true );
+
+	//Positions
+	fillWithSensor(_obj);
 }
 
 void ccPropertiesTreeDelegate::fillWithMaterialSet(ccMaterialSet* _obj)
@@ -883,6 +908,23 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 		slider->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
         return slider;
+    }
+    case OBJECT_SENSOR_INDEX:
+    {
+        ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
+        assert(sensor);
+        
+		double minIndex, maxIndex;
+		sensor->getIndexBounds(minIndex, maxIndex);
+		
+		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
+        spinBox->setRange(minIndex, maxIndex);
+        spinBox->setSingleStep((maxIndex-minIndex)/1000.0);
+
+        connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(sensorIndexChanged(double)));
+
+		spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+        return spinBox;
     }
     case OBJECT_APPLY_IMAGE_VIEWPORT:
     {
@@ -1092,10 +1134,21 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 
         ccImage* image = ccHObjectCaster::ToImage(m_currentObject);
         assert(image);
-        slider->setValue(int(image->getAlpha()*255.0));
+        slider->setValue(static_cast<int>(image->getAlpha()*255.0f));
         //slider->setTickPosition(QSlider::NoTicks);
         break;
     }
+	case OBJECT_SENSOR_INDEX:
+	{
+        QDoubleSpinBox *spinBox = qobject_cast<QDoubleSpinBox*>(editor);
+        if (!spinBox)
+            return;
+
+        ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
+        assert(sensor);
+        spinBox->setValue(sensor->getActiveIndex());
+        break;
+	}
     case OBJECT_SENSOR_DISPLAY_SCALE:
     {
         QDoubleSpinBox *spinBox = qobject_cast<QDoubleSpinBox*>(editor);
@@ -1477,6 +1530,18 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
     assert(sensor);
 
 	sensor->setGraphicScale(static_cast<PointCoordinateType>(val));
+	updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::sensorIndexChanged(double val)
+{
+    if (!m_currentObject)
+        return;
+
+    ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
+    assert(sensor);
+
+	sensor->setActiveIndex(val);
 	updateDisplay();
 }
 

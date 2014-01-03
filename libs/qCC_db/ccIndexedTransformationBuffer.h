@@ -28,9 +28,9 @@
 //! Indexed Transformation buffer
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccIndexedTransformationBuffer : std::vector< ccIndexedTransformation >
+class QCC_DB_DLL_API ccIndexedTransformationBuffer : public std::vector< ccIndexedTransformation >
 #else
-class ccIndexedTransformationBuffer : std::vector< ccIndexedTransformation >
+class ccIndexedTransformationBuffer : public std::vector< ccIndexedTransformation >
 #endif
 {
 public:

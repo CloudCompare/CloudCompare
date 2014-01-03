@@ -864,6 +864,7 @@ void MainWindow::connectActions()
     connect(actionModifySensor,                 SIGNAL(triggered()),    this,       SLOT(doActionModifySensor()));
     connect(actionComputeDistancesFromSensor,   SIGNAL(triggered()),    this,       SLOT(doActionComputeDistancesFromSensor()));
     connect(actionComputeScatteringAngles,      SIGNAL(triggered()),    this,       SLOT(doActionComputeScatteringAngles()));
+	connect(actionViewFromSensor,				SIGNAL(triggered()),    this,       SLOT(doActionSetViewFromSensor()));
     //"Edit > Scalar fields" menu
     connect(actionSFGradient,                   SIGNAL(triggered()),    this,       SLOT(doActionSFGradient()));
     connect(actionGaussianFilter,               SIGNAL(triggered()),    this,       SLOT(doActionSFGaussianFilter()));
@@ -1817,6 +1818,8 @@ void MainWindow::doActionComputeDistancesFromSensor()
 
 	ccSensor* sensor = ccHObjectCaster::ToSensor(m_selectedEntities[0]);
 	assert(sensor);
+	if (!sensor)
+		return;
 
     //sensor must have a parent cloud -> this error probably could not happen
     //If in a future cc will permits to have not-cloud-associated sensors this will
@@ -1831,6 +1834,15 @@ void MainWindow::doActionComputeDistancesFromSensor()
 	ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
 	assert(cloud);
 
+    //sensor center
+	ccIndexedTransformation trans;
+	if (!sensor->getCenterPosition(trans, sensor->getActiveIndex()))
+	{
+		ccLog::Error("[doActionComputeDistancesFromSensor] Failed to get a valid position for current index!");
+		return;
+	}
+	CCVector3 sensorCenter = trans.getTranslationAsVec3D();
+	
     //start dialog
     ccSensorComputeDistancesDlg cdDlg(this);
     if (!cdDlg.exec())
@@ -1853,13 +1865,10 @@ void MainWindow::doActionComputeDistancesFromSensor()
 	}
 	CCLib::ScalarField* distances = cloud->getScalarField(sfIdx);
 
-    //sensor center
-    CCVector3 center = sensor->getCenter();
-
 	for (unsigned i=0; i<cloud->size(); ++i)
 	{
 		const CCVector3* P = cloud->getPoint(i);
-		ScalarType s = static_cast<ScalarType>(squared ? (*P-center).norm2() :  (*P-center).norm());
+		ScalarType s = static_cast<ScalarType>(squared ? (*P-sensorCenter).norm2() :  (*P-sensorCenter).norm());
 		distances->setValue(i, s);
 	}
 
@@ -1891,9 +1900,20 @@ void MainWindow::doActionComputeScatteringAngles()
         return;
     }
 
+    //sensor center
+	ccIndexedTransformation trans;
+	if (!sensor->getCenterPosition(trans, sensor->getActiveIndex()))
+	{
+		ccLog::Error("[doActionComputeDistancesFromSensor] Failed to get a valid position for current index!");
+		return;
+	}
+	CCVector3 sensorCenter = trans.getTranslationAsVec3D();
+	
     //get associated cloud
 	ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
 	assert(cloud);
+	if (!cloud)
+		return;
 
     ccSensorComputeScatteringAnglesDlg cdDlg(this);
     if (!cdDlg.exec())
@@ -1914,9 +1934,6 @@ void MainWindow::doActionComputeScatteringAngles()
 		}
 	}
 	CCLib::ScalarField* angles = cloud->getScalarField(sfIdx);
-
-	//Sensor center
-	CCVector3 sensorCenter = sensor->getCenter();
 
 	//perform computations
 	for (unsigned i=0; i<cloud->size(); ++i)
@@ -1949,6 +1966,54 @@ void MainWindow::doActionComputeScatteringAngles()
 
 	refreshAll();
 	updateUI();
+}
+
+void MainWindow::doActionSetViewFromSensor()
+{
+    //there should be only one sensor in current selection!
+    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_SENSOR))
+    {
+        ccConsole::Error("Select one and only one sensor!");
+        return;
+    }
+
+	ccSensor* sensor = ccHObjectCaster::ToSensor(m_selectedEntities[0]);
+	assert(sensor);
+    //sensor center
+	ccIndexedTransformation trans;
+	if (!sensor->getCenterPosition(trans, sensor->getActiveIndex()))
+	{
+		ccLog::Error("[doActionSetViewFromSensor] Failed to get a valid position for current index!");
+		return;
+	}
+	CCVector3 sensorCenter = trans.getTranslationAsVec3D();
+
+	//get associated cloud
+	ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
+	assert(cloud);
+
+	ccGLWindow* win = 0;
+	if (cloud)
+		win = static_cast<ccGLWindow*>(cloud->getDisplay());
+	else
+		win = getActiveGLWindow();
+
+	if (win)
+	{
+		//ccViewportParameters params = win->getViewportParameters();
+		win->setPerspectiveState(true,false);
+		win->setCameraPos(sensorCenter);
+		win->setPivotPoint(sensorCenter);
+		//FIXME: more complicated! Depends on the 'rotation order' for GBL sensors for instance
+		win->setView(CC_FRONT_VIEW,false);
+		win->rotateBaseViewMat(trans);
+		//TODO: can we set the right FOV?
+		win->redraw();
+	}
+	else
+	{
+		ccLog::Warning("[doActionSetViewFromSensor] Failed to get a valid 3D view!");
+	}
 }
 
 void MainWindow::doActionProjectSensor()
@@ -1988,9 +2053,6 @@ void MainWindow::doActionProjectSensor()
                     sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e-3));
                 else if (diag > 10000.0)
                     sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e3));
-
-                //we update sensor graphic representation
-                sensor->updateGraphicRepresentation();
 
                 //we display depth buffer
                 ccRenderingTools::ShowDepthBuffer(sensor,this);
@@ -2045,15 +2107,13 @@ void MainWindow::doActionModifySensor()
             {
                 int errorCode;
                 ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(gbl->getParent());
-                CCLib::GenericIndexedCloud* projectedPoints = gbl->project(cloud,errorCode,true);
-
+                
+				CCLib::GenericIndexedCloud* projectedPoints = gbl->project(cloud,errorCode,true);
                 if (projectedPoints)
                 {
-                    //we don't need the projected points
+                    //we don't need the projected points anymore
                     delete projectedPoints;
-
-                    //we update sensor graphic representation
-                    gbl->updateGraphicRepresentation();
+					projectedPoints = 0;
 
                     //we display depth buffer
                     ccRenderingTools::ShowDepthBuffer(gbl,this);
@@ -8140,6 +8200,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionModifySensor->setEnabled(exactlyOneSensor);
     actionComputeDistancesFromSensor->setEnabled(exactlyOneSensor);
     actionComputeScatteringAngles->setEnabled(exactlyOneSensor);
+	actionViewFromSensor->setEnabled(exactlyOneSensor);
     actionProjectSensor->setEnabled(atLeastOneCloud);
     actionLabelConnectedComponents->setEnabled(atLeastOneCloud);
     actionUnroll->setEnabled(exactlyOneEntity);

@@ -230,8 +230,10 @@
      <addaction name="menuGroundBasedLidar"/>
      <addaction name="actionProjectSensor"/>
      <addaction name="actionModifySensor"/>
+     <addaction name="separator"/>
      <addaction name="actionComputeDistancesFromSensor"/>
      <addaction name="actionComputeScatteringAngles"/>
+     <addaction name="actionViewFromSensor"/>
     </widget>
     <widget class="QMenu" name="menuToggle">
      <property name="title">
@@ -2374,6 +2376,11 @@
    </property>
    <property name="toolTip">
     <string>Remove all entiites currently loaded in the DB tree</string>
+   </property>
+  </action>
+  <action name="actionViewFromSensor">
+   <property name="text">
+    <string>View from sensor</string>
    </property>
   </action>
  </widget>

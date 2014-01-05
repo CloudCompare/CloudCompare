@@ -351,6 +351,7 @@
      <addaction name="actionAlign"/>
      <addaction name="separator"/>
      <addaction name="actionSNETest"/>
+     <addaction name="actionFindBiggestInnerRectangle"/>
     </widget>
     <widget class="QMenu" name="menuFit">
      <property name="title">
@@ -2381,6 +2382,11 @@
   <action name="actionViewFromSensor">
    <property name="text">
     <string>View from sensor</string>
+   </property>
+  </action>
+  <action name="actionFindBiggestInnerRectangle">
+   <property name="text">
+    <string>Find biggest inner rectangle (2D)</string>
    </property>
   </action>
  </widget>

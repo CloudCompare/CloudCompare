@@ -58,6 +58,7 @@
 #include "ccHeightGridGeneration.h"
 #include "ccRenderingTools.h"
 #include "ccFastMarchingForNormsDirection.h"
+#include <ccInnerRect2DFinder.h>
 #include "ccCommon.h"
 
 //sub-windows
@@ -84,7 +85,6 @@
 #include "ccComparisonDlg.h"
 #include "ccTwoColorsDlg.h"
 #include "ccAskOneIntValueDlg.h"
-#include "ccAskOneStringDlg.h"
 #include "ccAskOneDoubleValueDlg.h"
 #include "ccAskTwoDoubleValuesDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
@@ -925,6 +925,7 @@ void MainWindow::connectActions()
     connect(actionComputeBestFitBB,             SIGNAL(triggered()),    this,       SLOT(doComputeBestFitBB()));
     connect(actionAlign,                        SIGNAL(triggered()),    this,       SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
     connect(actionSNETest,						SIGNAL(triggered()),    this,       SLOT(doSphericalNeighbourhoodExtractionTest()));
+	connect(actionFindBiggestInnerRectangle,	SIGNAL(triggered()),    this,       SLOT(doActionFindBiggestInnerRectangle()));
 
     //"Display" menu
     connect(actionFullScreen,                   SIGNAL(toggled(bool)),  this,       SLOT(toggleFullScreen(bool)));
@@ -2607,11 +2608,12 @@ void MainWindow::doActionRenameSF()
 			}
 			else
 			{
-				const char* sfName = sf->getName();
-				ccAskOneStringDlg casd("Name",sfName ? QString(sfName) : "unknown","S.F. name",this);
+				QString sfName(sf->getName());
 
-				if (casd.exec())
-					sf->setName(qPrintable(casd.result()));
+				bool ok;
+				QString newSfName = QInputDialog::getText(this,"SF name","Enter SF name",QLineEdit::Normal,sfName,&ok);
+				if (ok && !newSfName.isEmpty())
+					sf->setName(qPrintable(newSfName));
             }
         }
     }
@@ -3613,7 +3615,7 @@ void MainWindow::doActionSubsample()
 		if (pointCloud->getParent())
 			pointCloud->getParent()->addChild(newPointCloud);
 		newPointCloud->setDisplay(pointCloud->getDisplay());
-		pointCloud->setVisible(false);
+		pointCloud->setEnabled(false);
 		addToDB(newPointCloud, true, 0, false, false);
 
 		newPointCloud->refreshDisplay();
@@ -4865,6 +4867,40 @@ void MainWindow::doActionResolveNormalsDirection()
 	ccLog::Warning("Normal Sign Resolve done. You may have to globally invert the cloud normals (Edit > Normals > Invert).");
 
     refreshAll();
+	updateUI();
+}
+
+static int s_innerRectDim = 2;
+void MainWindow::doActionFindBiggestInnerRectangle()
+{
+    size_t selNum = m_selectedEntities.size();
+    if (selNum == 0)
+        return;
+
+	ccHObject* entity = m_selectedEntities.size() == 1 ? m_selectedEntities[0] : 0;
+	if (!entity || !entity->isKindOf(CC_POINT_CLOUD))
+    {
+        ccConsole::Error("Select one point cloud!");
+        return;
+    }
+
+	bool ok;
+	int dim = QInputDialog::getInt(this,"Dimension","Orthogonal dim (X=0 / Y=1 / Z=2)",s_innerRectDim,0,2,1,&ok);
+	if (!ok)
+		return;
+	s_innerRectDim = dim;
+
+	ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
+	ccBox* box = ccInnerRect2DFinder().process(cloud,dim);
+
+	if (box)
+	{
+		cloud->addChild(box);
+		box->setVisible(true);
+		box->setDisplay(cloud->getDisplay());
+		addToDB(box,true);
+	}
+
 	updateUI();
 }
 
@@ -8211,6 +8247,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	
 	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
     actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
+
+	actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
 	
 	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount>0);
 	actionCrossSection->setEnabled(exactlyOneCloud);

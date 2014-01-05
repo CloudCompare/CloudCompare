@@ -330,6 +330,8 @@ protected slots:
 
     void doEnableGLFilter();
 
+	void doActionFindBiggestInnerRectangle();
+
 	//Clipping box
 	void activateClippingBoxMode();
 	void deactivateClippingBoxMode(bool);

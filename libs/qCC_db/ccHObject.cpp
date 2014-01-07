@@ -155,7 +155,6 @@ QIcon ccHObject::getIcon() const
     return QIcon();
 }
 
-
 void ccHObject::addChild(ccHObject* anObject, bool dependant/*=true*/, int insertIndex/*=-1*/)
 {
 	if (!anObject)

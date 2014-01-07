@@ -127,7 +127,9 @@ public:
     //! Returns all the objects in db tree of type "type"
     void getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& entities);
 
-    //! Returns allt the existent hierarchical objects filtering that have a specific metadata
+    //! Returns all the existent hierarchical objects which have a specific metadata
+	/** May return an empty container if none found.
+	**/
     void getAllEntitiesThatHaveMetaData(QString key, ccHObject::Container & entities);
 
     //! get all entities that are selected and that also are cc_point_cloud

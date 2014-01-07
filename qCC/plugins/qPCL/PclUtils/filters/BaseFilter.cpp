@@ -318,10 +318,10 @@ void BaseFilter::getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& 
 void BaseFilter::getAllEntitiesThatHaveMetaData(QString key, ccHObject::Container &entities)
 {
     entities.clear(); //better be sure
-    ccHObject::Container tmp_cont;
-    getAllEntitiesOfType(CC_HIERARCHY_OBJECT, tmp_cont);
+    ccHObject::Container tempContainer;
+    getAllEntitiesOfType(CC_HIERARCHY_OBJECT, tempContainer);
 
-    for (ccHObject::Container::const_iterator it = tmp_cont.begin(); it != tmp_cont.end(); ++it )
+    for (ccHObject::Container::const_iterator it = tempContainer.begin(); it != tempContainer.end(); ++it )
     {
         if ((*it)->hasMetaData(key))
             entities.push_back(*it);

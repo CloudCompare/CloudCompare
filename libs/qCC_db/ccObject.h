@@ -218,9 +218,8 @@ public:
 	**/
 	void setMetaData(QString key, QVariant& data);
 
-    //!
-    /** \brief hasMetaData says if a metadata with the given key exists or not
-        \param key the key to look for
+    //! Says if a metadata with the given key exists or not
+    /** \param key is the key to look for
         \return true, if exists
     **/
     bool hasMetaData(QString key);

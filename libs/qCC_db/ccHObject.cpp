@@ -53,6 +53,9 @@
 #include <stdint.h>
 #include <assert.h>
 
+//Qt
+#include <QIcon>
+
 ccHObject::ccHObject(QString name/*=QString()*/)
 	: ccObject(name)
 	, ccDrawableObject()
@@ -146,6 +149,12 @@ ccHObject* ccHObject::New(unsigned objectType, const char* name/*=0*/)
 
 	return 0;
 }
+
+QIcon ccHObject::getIcon() const
+{
+    return QIcon();
+}
+
 
 void ccHObject::addChild(ccHObject* anObject, bool dependant/*=true*/, int insertIndex/*=-1*/)
 {

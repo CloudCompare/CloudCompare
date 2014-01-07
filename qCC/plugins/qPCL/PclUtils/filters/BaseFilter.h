@@ -162,10 +162,10 @@ public:
 	//! Sets associated CC application interface (to access DB)
 	void setMainAppInterface(ccMainAppInterface* app) { m_app = app; }
 
-    //! Get associated CC application interface for accessing to some of mainWindow methods
+    //! Returns associated CC application interface for accessing to some of mainWindow methods
     ccMainAppInterface * getMainAppInterface() { return m_app; }
 
-    //! get the associated parent plugin interface
+    //! Returns the associated parent plugin interface
     ccPluginInterface * getParentPlugin() const { return m_parent_plugin; }
 
 protected slots:

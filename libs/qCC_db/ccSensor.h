@@ -46,8 +46,9 @@ public:
 	//! Default constructor
 	ccSensor(QString name);
 
-    //! Returns class ID
+    //inherited from ccHObject
     virtual CC_CLASS_ENUM getClassID() const { return CC_SENSOR; };
+	virtual bool isSerializable() const { return true; }
 
 	//! Returns the sensor type
 	/** Should be re-implemented by sub-classes
@@ -67,10 +68,10 @@ public:
 	virtual inline uchar checkVisibility(const CCVector3& P) const { return POINT_VISIBLE; }
 
 	//! Returns associated positions
-	QSharedPointer<ccIndexedTransformationBuffer>& getPositions()  { return m_posBuffer; }
+	ccIndexedTransformationBuffer* getPositions()  { return m_posBuffer; }
 
 	//! Sets associated positions
-	void setPositions(QSharedPointer<ccIndexedTransformationBuffer>& positions)  { m_posBuffer = positions; }
+	void setPositions(ccIndexedTransformationBuffer* positions)  { m_posBuffer = positions; }
 
 	//! Add position (shortcut)
 	/** \warning: may be slow as this method will sort the positions
@@ -103,14 +104,18 @@ public:
 
 protected:
 
+    //inherited from ccHObject
+	virtual bool toFile_MeOnly(QFile& out) const;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+
 	//inherited from ccHObject
     virtual void applyGLTransformation(const ccGLMatrix& trans);
 
 	//! Positions buffer (optional)
-	QSharedPointer<ccIndexedTransformationBuffer> m_posBuffer;
+	ccIndexedTransformationBuffer* m_posBuffer;
 
 	//! Rigid transformation between this sensor and its associated positions
-	/** Rigid transformation goes from the sensor position(s) to the sensor "optical" center.
+	/** The transformation goes from the sensor position(s) to the sensor "optical" center.
 	**/
     ccGLMatrix m_rigidTransformation;
 

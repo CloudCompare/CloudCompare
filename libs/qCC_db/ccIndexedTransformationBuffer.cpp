@@ -18,6 +18,14 @@
 //Local
 #include "ccIndexedTransformationBuffer.h"
 
+ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(QString name)
+	: ccHObject(name)
+	, m_showAsPolyline(false)
+	, m_showTrihedrons(true)
+	, m_trihedronsScale(1.0f)
+{
+}
+
 static bool IndexedSortOperator(const ccIndexedTransformation& a, const ccIndexedTransformation& b)
 {
 	return a.getIndex() < b.getIndex();
@@ -140,4 +148,125 @@ bool ccIndexedTransformationBuffer::getInterpolatedTransformation(	double index,
 	}
 
 	return true;
+}
+
+bool ccIndexedTransformationBuffer::toFile_MeOnly(QFile& out) const
+{
+	if (!ccHObject::toFile_MeOnly(out))
+		return false;
+
+	//vector size (dataVersion>=33)
+	uint32_t count = static_cast<uint32_t>(size());
+	if (out.write((const char*)&count,4)<0)
+		return WriteError();
+
+	//transformations (dataVersion>=33)
+	for (ccIndexedTransformationBuffer::const_iterator it=begin(); it!=end(); ++it)
+		if (!it->toFile(out))
+			return false;
+
+	//display options
+	{
+		//Show polyline (dataVersion>=33)
+		if (out.write((const char*)&m_showAsPolyline,sizeof(bool))<0)
+			return WriteError();
+		//Show trihedrons (dataVersion>=33)
+		if (out.write((const char*)&m_showTrihedrons,sizeof(bool))<0)
+			return WriteError();
+		//Display scale (dataVersion>=33)
+		if (out.write((const char*)&m_trihedronsScale,sizeof(float))<0)
+			return WriteError();
+	}
+
+	return true;
+}
+
+bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+{
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+		return false;
+
+	//vector size (dataVersion>=33)
+	uint32_t count = 0;
+	if (in.read((char*)&count,4)<0)
+		return ReadError();
+
+	//try to resize the vector accordingly
+	try
+	{
+		resize(count);
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return MemoryError();
+	}
+
+	//transformations (dataVersion>=33)
+	for (ccIndexedTransformationBuffer::iterator it=begin(); it!=end(); ++it)
+		if (!it->fromFile(in, dataVersion, flags))
+			return false;
+
+	//display options
+	{
+		//Show polyline (dataVersion>=33)
+		if (in.read((char*)&m_showAsPolyline,sizeof(bool))<0)
+			return ReadError();
+		//Show trihedrons (dataVersion>=33)
+		if (in.read((char*)&m_showTrihedrons,sizeof(bool))<0)
+			return ReadError();
+		//Display scale (dataVersion>=33)
+		if (in.read((char*)&m_trihedronsScale,sizeof(float))<0)
+			return ReadError();
+	}
+
+	return true;
+}
+
+void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
+{
+	//no picking enabled on trans. buffers
+	if (MACRO_DrawNames(context))
+		return;
+	//only in 3D
+	if (!MACRO_Draw3D(context))
+		return;
+
+	size_t count = size();
+
+	//show path
+	{
+		glColor3ubv(ccColor::green);
+		glBegin(count > 1 && m_showAsPolyline ? GL_LINE_STRIP : GL_POINTS); //show path as a polyline or points?
+		for (ccIndexedTransformationBuffer::const_iterator it=begin(); it!=end(); ++it)
+			glVertex3fv(it->getTranslation());
+		glEnd();
+	}
+
+	//show trihedrons?
+	if (m_showTrihedrons)
+	{
+		for (ccIndexedTransformationBuffer::const_iterator it=begin(); it!=end(); ++it)
+		{
+			glMatrixMode(GL_MODELVIEW);
+			glPushMatrix();
+			const float* t = it->getTranslation();
+			glTranslatef(t[0],t[1],t[2]);
+			glMultMatrixf(it->data());
+
+			glBegin(GL_LINES);
+			glColor3f(1.0f,0.0f,0.0f);
+			glVertex3f(0.0f,0.0f,0.0f);
+			glVertex3f(m_trihedronsScale,0.0f,0.0f);
+			glColor3f(0.0f,1.0f,0.0f);
+			glVertex3f(0.0f,0.0f,0.0f);
+			glVertex3f(0.0f,m_trihedronsScale,0.0f);
+			glColor3f(0.0f,0.7f,1.0f);
+			glVertex3f(0.0f,0.0f,0.0f);
+			glVertex3f(0.0f,0.0f,m_trihedronsScale);
+			glEnd();
+
+			glPopMatrix();
+		}
+	}
 }

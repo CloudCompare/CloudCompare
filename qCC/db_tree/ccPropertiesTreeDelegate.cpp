@@ -45,6 +45,7 @@
 #include <ccGenericPrimitive.h>
 #include <ccFacet.h>
 #include <ccSensor.h>
+#include <ccIndexedTransformationBuffer.h>
 
 //Qt
 #include <QStandardItemModel>
@@ -690,6 +691,25 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(cc2DViewportObject* _obj)
 	appendRow( ITEM("Apply Viewport"), PERSISTENT_EDITOR(OBJECT_APPLY_LABEL_VIEWPORT), true );
 }
 
+void ccPropertiesTreeDelegate::fillWithTransBuffer(ccIndexedTransformationBuffer* _obj)
+{
+    assert(_obj && m_model);
+
+    addSeparator("Trans. buffer");
+
+    //Associated positions
+	appendRow( ITEM("Count"), ITEM(QString::number(_obj->size())) );
+
+	//Show path as polyline
+	appendRow( ITEM("Show path"), CHECKABLE_ITEM(_obj->isPathShonwAsPolyline(),OBJECT_SHOW_TRANS_BUFFER_PATH) );
+
+	//Show trihedrons
+	appendRow( ITEM("Show trihedrons"), CHECKABLE_ITEM(_obj->triherdonsShown(),OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS) );
+
+	//Trihedrons scale
+	appendRow( ITEM("Scale"), PERSISTENT_EDITOR(OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE), true );
+}
+
 void ccPropertiesTreeDelegate::fillWithSensor(ccSensor* _obj)
 {
     assert(_obj && m_model);
@@ -922,6 +942,17 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
         spinBox->setSingleStep((maxIndex-minIndex)/1000.0);
 
         connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(sensorIndexChanged(double)));
+
+		spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+        return spinBox;
+    }
+	case OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE:
+    {
+		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
+        spinBox->setRange(1.0e-6, 1.0e6);
+        spinBox->setSingleStep(1.0);
+
+        connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(trihedronsScaleChanged(double)));
 
 		spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
         return spinBox;
@@ -1294,6 +1325,22 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		m_currentObject->showNameIn3D(item->checkState() == Qt::Checked);
 		redraw=true;
 		break;
+	case OBJECT_SHOW_TRANS_BUFFER_PATH:
+		{
+			ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
+			assert(buffer);
+			buffer->showPathAsPolyline(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
+	case OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS:
+		{
+			ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
+			assert(buffer);
+			buffer->showTriherdons(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
 	}
 
     if (redraw)
@@ -1543,6 +1590,19 @@ void ccPropertiesTreeDelegate::sensorIndexChanged(double val)
 
 	sensor->setActiveIndex(val);
 	updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::trihedronsScaleChanged(double val)
+{
+    if (!m_currentObject)
+        return;
+
+	ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
+	assert(buffer);
+
+	buffer->setTriherdonsDisplayScale(val);
+	if (buffer->triherdonsShown())
+		updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::cloudPointSizeChanged(int size)

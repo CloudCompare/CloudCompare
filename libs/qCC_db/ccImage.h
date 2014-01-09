@@ -43,7 +43,7 @@ public:
 	ccImage(const QImage& image, const QString& name = QString("unknown"));
 
     //! Returns unique class ID
-    virtual CC_CLASS_ENUM getClassID() const {return CC_IMAGE;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_IMAGE; }
 
     //! Loads image from file
 	/** \param filename image filename

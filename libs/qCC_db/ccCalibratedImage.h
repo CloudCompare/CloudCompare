@@ -44,7 +44,7 @@ public:
 	ccCalibratedImage();
 
     //! Returns unique class ID
-    virtual CC_CLASS_ENUM getClassID() const {return CC_CALIBRATED_IMAGE;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_CALIBRATED_IMAGE; }
 
 	//! Sets camera focal (in pixels)
 	/** \param focal_pix focal expressed in pixels

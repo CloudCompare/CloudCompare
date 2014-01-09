@@ -1045,7 +1045,7 @@ void MainWindow::doActionSetColor(bool colorize)
 				{
 					static_cast<ccPointCloud*>(cloud)->setRGBColor(	static_cast<colorType>(newCol.red()),
 																	static_cast<colorType>(newCol.green()),
-																	static_cast<colorType>(newCol.blue()));
+																	static_cast<colorType>(newCol.blue()) );
 				}
 				ent->showColors(true);
 				ent->prepareDisplayForRefresh();
@@ -1073,6 +1073,37 @@ void MainWindow::doActionSetColor(bool colorize)
             facet->setColor(col);
             ent->showColors(true);
             ent->prepareDisplayForRefresh();
+        }
+        else if (ent->isKindOf(CC_MESH))
+        {
+			if (ent->isA(CC_SUB_MESH))
+			{
+				ccLog::Warning("[doActionSetColor] Can't set colors on a sub-mesh (call this method on the parent mesh)");
+			}
+			else
+			{
+				ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
+				assert(mesh);
+				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+				if (vertices && vertices->isA(CC_POINT_CLOUD))
+				{
+					if (colorize)
+					{
+						static_cast<ccPointCloud*>(vertices)->colorize(	static_cast<float>(newCol.redF()),
+																		static_cast<float>(newCol.greenF()),
+																		static_cast<float>(newCol.blueF()) );
+					}
+					else
+					{
+						static_cast<ccPointCloud*>(vertices)->setRGBColor(	static_cast<colorType>(newCol.red()),
+																			static_cast<colorType>(newCol.green()),
+																			static_cast<colorType>(newCol.blue()) );
+					}
+					vertices->showColors(true);
+					ent->showColors(true);
+					ent->prepareDisplayForRefresh();
+				}
+			}
         }
     }
 

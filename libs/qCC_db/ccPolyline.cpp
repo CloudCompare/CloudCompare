@@ -105,6 +105,10 @@ void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
 
 void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
+	//no picking enabled on polylines
+	if (MACRO_DrawNames(context))
+		return;
+
 	unsigned vertCount = size();
 	if (vertCount < 2)
 		return;
@@ -267,7 +271,7 @@ bool ccPolyline::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//Width of the line (dataVersion>=31)
 	if (dataVersion >= 31)
-		inStream >> m_width;
+		ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_width,1);
 	else
 		m_width = 0;
 

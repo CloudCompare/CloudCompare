@@ -190,9 +190,9 @@ bool ccDish::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	inStream >> m_baseRadius;
-	inStream >> m_secondRadius;
-	inStream >> m_height;
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_baseRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_secondRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_height);
 
 	return true;
 }

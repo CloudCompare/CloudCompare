@@ -48,7 +48,7 @@ public:
 	virtual void update(float percent);
 	virtual void setMethodTitle(const char* methodTitle);
 	virtual void setInfo(const char* infoStr);
-	virtual bool isCancelRequested() {return false;}; //no cancel request mechanism available in "console" mode
+	virtual bool isCancelRequested() { return false; } //no cancel request mechanism available in "console" mode
 	virtual void start();
 	virtual void stop();
 

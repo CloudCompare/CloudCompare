@@ -79,7 +79,7 @@ public:
 	virtual ~ccPointCloud();
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const {return CC_POINT_CLOUD;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_POINT_CLOUD; }
 
     /***************************************************
 						Clone/Copy
@@ -193,7 +193,7 @@ public:
 		\param fillWithWhite whether to fill new array elements with zeros (false) or white color (true)
 		\return true if ok, false if there's not enough memory
 	**/
-	bool resizeTheRGBTable(bool fillWithWhite=false);
+	bool resizeTheRGBTable(bool fillWithWhite = false);
 
 	//! Reserves memory to store the compressed normals
 	/** Before adding normals to the cloud (with addNorm())
@@ -282,7 +282,7 @@ public:
 	virtual const PointCoordinateType* getPointNormal(unsigned pointIndex) const;
 	/** WARNING: if removeSelectedPoints is true, any attached octree will be deleted.
 	**/
-	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints=false);
+	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false);
     virtual void applyRigidTransformation(const ccGLMatrix& trans);
     //virtual bool isScalarFieldEnabled() const;
     virtual void refreshBB();
@@ -467,10 +467,10 @@ public:
 	int addScalarField(ccScalarField* sf);
 
 	//! Returns pointer on RGB colors table
-	ColorsTableType* rgbColors() const {return m_rgbColors;}
+	ColorsTableType* rgbColors() const { return m_rgbColors; }
 
 	//! Returns pointer on compressed normals indexes table
-	NormsIndexesTableType* normals() const {return m_normals;}
+	NormsIndexesTableType* normals() const { return m_normals; }
 
 protected:
 

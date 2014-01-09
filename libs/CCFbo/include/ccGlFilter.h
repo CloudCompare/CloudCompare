@@ -18,8 +18,10 @@
 #ifndef CC_GL_FILTER_HEADER
 #define CC_GL_FILTER_HEADER
 
+//local
 #include "ccGlew.h"
 
+//system
 #include <string.h>
 
 //! Default GL filter interface
@@ -35,10 +37,10 @@ public:
     ccGlFilter(const char* filterName)
     {
         strcpy(name,filterName);
-    };
+    }
 
 	//! Default destructor
-	virtual ~ccGlFilter() {};
+	virtual ~ccGlFilter() {}
 
     //! Initializes GL filter
     /** Must support reinit!
@@ -47,18 +49,20 @@ public:
         \param shadersPath path where shader files are stored
         \return success
     **/
-	virtual bool init(int width,
+	virtual bool init(	int width,
                         int height,
-                        const char* shadersPath)=0;
+                        const char* shadersPath) = 0;
 
     //! Applies filter to texture (depth + color)
-	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0)=0;
+	virtual void shade(	GLuint texDepth,
+						GLuint texColor,
+						float zoom = 1.0f) = 0;
 
     //! Returns resulting texture
-	virtual GLuint getTexture()=0;
+	virtual GLuint getTexture() = 0;
 
     //! Returns filter name
-	virtual const char* getName() const {return name;};
+	virtual const char* getName() const { return name; }
 
 protected:
 

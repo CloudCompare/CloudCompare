@@ -164,3 +164,8 @@ cc2DViewportObject* ccHObjectCaster::To2DViewportObject(ccHObject* obj)
 {
 	return obj && obj->isKindOf(CC_2D_VIEWPORT_OBJECT) ? static_cast<cc2DViewportObject*>(obj) : 0;
 }
+
+ccIndexedTransformationBuffer* ccHObjectCaster::ToTransBuffer(ccHObject* obj)
+{
+	return obj && obj->isKindOf(CC_TRANS_BUFFER) ? static_cast<ccIndexedTransformationBuffer*>(obj) : 0;
+}

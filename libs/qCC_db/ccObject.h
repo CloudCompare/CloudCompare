@@ -59,7 +59,7 @@ enum CC_OBJECT_FLAG {
 #define CC_FACET_BIT					0x00800000		//Facet (composite object: cloud + 2D1/2 mesh + 2D1/2 polyline)
 #define CC_MATERIAL_BIT					0x01000000		//Material
 #define CC_CLIP_BOX_BIT					0x02000000		//Clipping box
-//#define CC_FREE_BIT					0x04000000
+#define CC_TRANS_BUFFER_BIT				0x04000000		//Indexed transformation buffer
 //#define CC_FREE_BIT					0x08000000
 #define CC_RGB_COLOR_BIT				0x10000000		//Color (R,G,B)
 #define CC_NORMAL_BIT					0x20000000		//Normal (Nx,Ny,Nz)
@@ -101,6 +101,7 @@ enum CC_CLASS_ENUM {
 	CC_2D_VIEWPORT_OBJECT	=	CC_HIERARCHY_OBJECT | CC_VIEWPORT_BIT | CC_LEAF_BIT,
 	CC_2D_VIEWPORT_LABEL	=	CC_2D_VIEWPORT_OBJECT | CC_LABEL_BIT,
 	CC_CLIPPING_BOX			=	CC_CLIP_BOX_BIT | CC_LEAF_BIT,
+	CC_TRANS_BUFFER			=	CC_TRANS_BUFFER_BIT | CC_LEAF_BIT,
 };
 
 //! Generic "CloudCompare Object" template

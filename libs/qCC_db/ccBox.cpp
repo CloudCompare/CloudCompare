@@ -91,9 +91,7 @@ bool ccBox::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	inStream >> m_dims.x;
-	inStream >> m_dims.y;
-	inStream >> m_dims.z;
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,m_dims.u,3);
 
 	return true;
 }

@@ -56,7 +56,7 @@ public:
     //! Returns class ID
     /** \return class unique ID
     **/
-    virtual CC_CLASS_ENUM getClassID() const {return CC_HIERARCHY_OBJECT;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_HIERARCHY_OBJECT; }
 
     //! Returns parent object
     /** \return parent object (NULL if no parent)

@@ -63,8 +63,9 @@ public:
 	//! Destructor
 	virtual ~ccGBLSensor();
 
-    //! Returns class ID
+    //inherited from ccHObject
     virtual CC_CLASS_ENUM getClassID() const { return CC_GBL_SENSOR; };
+	virtual bool isSerializable() const { return true; }
 
 	//! Sets the lateral angular scanning limits
 	/** \param minV min latitude
@@ -208,6 +209,8 @@ public:
 protected:
 
     //Inherited from ccHObject
+	virtual bool toFile_MeOnly(QFile& out) const;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
 
 	//! Projects a point in the sensor world
@@ -237,13 +240,14 @@ protected:
 
 	//! Sensor max range
 	ScalarType m_sensorRange;
-	//! Associated Z-buffer
-	DepthBuffer m_depthBuffer;
 	//! Z-buffer uncertainty
 	ScalarType m_uncertainty;
 	
 	//! Sensor graphic representation scale
     PointCoordinateType m_scale;
+
+	//! Associated Z-buffer
+	DepthBuffer m_depthBuffer;
 };
 
 #endif //CC_GROUND_LIDAR_SENSOR_HEADER

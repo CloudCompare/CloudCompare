@@ -36,6 +36,7 @@ class cc2DViewportObject;
 class cc2DViewportLabel;
 class ccFacet;
 class ccPolyline;
+class ccIndexedTransformationBuffer;
 
 //! Useful class to (try to) statically cast a basic ccHObject to a given type
 #ifdef QCC_DB_USE_AS_DLL
@@ -103,7 +104,10 @@ class ccHObjectCaster
 
 		//! converts current object to cc2DViewportObject (if possible)
         static cc2DViewportObject* To2DViewportObject(ccHObject* obj);
-		
+
+		//! converts current object to ccIndexedTransformationBuffer (if possible)
+        static ccIndexedTransformationBuffer* ToTransBuffer(ccHObject* obj);
+	
 };
 
 #endif //CC_HIERARCHY_OBJECT_CASTER_HEADER

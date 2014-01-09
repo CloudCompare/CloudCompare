@@ -28,7 +28,10 @@ ccSensor::ccSensor(QString name)
 bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 {
 	if (!m_posBuffer)
-		m_posBuffer = QSharedPointer<ccIndexedTransformationBuffer>(new ccIndexedTransformationBuffer());
+	{
+		m_posBuffer = new ccIndexedTransformationBuffer();
+		addChild(m_posBuffer);
+	}
 
 	bool sort = (!m_posBuffer->empty() && m_posBuffer->back().getIndex() > index);
 	try
@@ -75,6 +78,58 @@ bool ccSensor::getCenterPosition(ccIndexedTransformation& trans, double index)
 			return false;
 
 	trans *= m_rigidTransformation;
+
+	return true;
+}
+
+bool ccSensor::toFile_MeOnly(QFile& out) const
+{
+	if (!ccHObject::toFile_MeOnly(out))
+		return false;
+
+	//rigid transformation (dataVersion>=33)
+	if (!m_rigidTransformation.toFile(out))
+		return WriteError();
+
+	//active index (dataVersion>=33)
+	if (out.write((const char*)&m_activeIndex,sizeof(double))<0)
+		return WriteError();
+
+	//we can't save the associated position buffer (as it may be shared by multiple sensors)
+	//so instead we save it's unique ID (dataVersion>=33)
+	//WARNING: the buffer must be saved in the same BIN file! (responsibility of the caller)
+	uint32_t bufferUniqueID = (m_posBuffer ? (uint32_t)m_posBuffer->getUniqueID() : 0);
+	if (out.write((const char*)&bufferUniqueID,4)<0)
+		return WriteError();
+
+	return true;
+}
+
+bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+{
+	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
+		return false;
+
+	//serialization wasn't possible before v3.3!
+	if (dataVersion < 33)
+		return false;
+
+	//rigid transformation (dataVersion>=33)
+	if (!m_rigidTransformation.fromFile(in,dataVersion,flags))
+		return ReadError();
+
+	//active index (dataVersion>=33)
+	if (in.read((char*)&m_activeIndex,sizeof(double))<0)
+		return ReadError();
+
+	//as the associated position buffer can't be saved directly (as it may be shared by multiple sensors)
+	//we only store its unique ID (dataVersion>=33) --> we hope we will find it at loading time (i.e. this
+	//is the responsibility of the caller to make sure that all dependencies are saved together)
+	uint32_t bufferUniqueID = 0;
+	if (in.read((char*)&bufferUniqueID,4)<0)
+		return ReadError();
+	//[DIRTY] WARNING: temporarily, we set the vertices unique ID in the 'm_posBuffer' pointer!!!
+	*(uint32_t*)(&m_posBuffer) = bufferUniqueID;
 
 	return true;
 }

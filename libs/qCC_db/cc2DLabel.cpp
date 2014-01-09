@@ -181,7 +181,7 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//points & associated cloud ID (dataVersion>=20)
 	assert(m_points.empty());
-	for (uint32_t i=0;i<count;++i)
+	for (uint32_t i=0; i<count; ++i)
 	{
 		//point index
 		uint32_t index = 0;

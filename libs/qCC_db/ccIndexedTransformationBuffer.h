@@ -20,6 +20,7 @@
 
 //Local
 #include "ccIndexedTransformation.h"
+#include "ccHObject.h"
 
 //system
 #include <float.h>
@@ -28,13 +29,20 @@
 //! Indexed Transformation buffer
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccIndexedTransformationBuffer : public std::vector< ccIndexedTransformation >
+class QCC_DB_DLL_API ccIndexedTransformationBuffer : public ccHObject, public std::vector< ccIndexedTransformation >
 #else
-class ccIndexedTransformationBuffer : public std::vector< ccIndexedTransformation >
+class ccIndexedTransformationBuffer : public ccHObject, public std::vector< ccIndexedTransformation >
 #endif
 {
 public:
     
+	//! Default constructor
+	ccIndexedTransformationBuffer(QString name = QString("Trans. buffer"));
+
+	//inherited from ccHObject
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TRANS_BUFFER; }
+	virtual bool isSerializable() const { return true; }
+
 	//! Sorts transformations based on their index
 	/** Ascending sort.
 	**/
@@ -70,8 +78,34 @@ public:
 										ccIndexedTransformation& trans,
 										double maxIndexDistForInterpolation = DBL_MAX) const;
 
+	//! [Display option] Returns whether trihedrons should be displayed or not (otherwise only points or a polyline)
+	bool triherdonsShown() { return m_showTrihedrons; }
+	//! [Display option] Sets whether trihedrons should be displayed or not (otherwise only points or a polyline)
+	void showTriherdons(bool state) { m_showTrihedrons = state; }
+
+	//! [Display option] Returns trihedron display size
+	float triherdonsDisplayScale() { return m_trihedronsScale; }
+	//! [Display option] Sets trihedron display size
+	void setTriherdonsDisplayScale(float scale) { m_trihedronsScale = scale; }
+
+	//! [Display option] Returns whether the path should be displayed as a polyline or not (otherwise only points)
+	bool isPathShonwAsPolyline() { return m_showAsPolyline; }
+	//! [Display option] Sets whether the path should be displayed as a polyline or not (otherwise only points)
+	void showPathAsPolyline(bool state) { m_showAsPolyline = state; }
+
 protected:
 
+    //inherited from ccHObject
+	virtual bool toFile_MeOnly(QFile& out) const;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+    virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+
+	//! Whether the path should be displayed as a polyline or not
+	bool m_showAsPolyline;
+	//! Whether trihedrons should be displayed or not
+	bool m_showTrihedrons;
+	//! Trihedrons display scale
+	float m_trihedronsScale;
 };
 
 #endif

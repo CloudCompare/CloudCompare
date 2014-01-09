@@ -1526,7 +1526,6 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
 	updateModel();
 }
 
-
 void ccPropertiesTreeDelegate::imageAlphaChanged(int val)
 {
     ccImage* image = ccHObjectCaster::ToImage(m_currentObject);

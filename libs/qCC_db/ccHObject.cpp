@@ -150,6 +150,46 @@ ccHObject* ccHObject::New(unsigned objectType, const char* name/*=0*/)
 	return 0;
 }
 
+//enum DEPENDENCY_FLAGS {	DP_NOTIFY_OTHER_ON_DELETE	= 1,
+//							DP_REDRAW_OTHER				= 2,
+//							DP_UPDATE_OTHER_BB			= 4,
+//							DP_DELETE_OTHER				= 8,
+//};
+
+void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*=true*/)
+{
+	if (additive)
+	{
+		//look for an existing value
+		std::map<ccHObject*,int>::iterator it = m_dependencies.find(otherObject);
+		if (it != m_dependencies.end())
+			flags |= it->second;
+	}
+
+	m_dependencies[otherObject] = flags;
+}
+
+int ccHObject::getDependencyFlagsWith(ccHObject* otherObject)
+{
+	std::map<ccHObject*,int>::const_iterator it = m_dependencies.find(otherObject);
+
+	return it != m_dependencies.end() ? it->second : 0;
+}
+
+void ccHObject::removeDependencyWith(ccHObject* otherObject)
+{
+	m_dependencies.erase(otherObject);
+}
+
+void ccHObject::onDeletionOf(ccHObject* obj)
+{
+	//remove any dependency declated with this object
+	removeDependencyWith(obj);
+
+	//check that it's no a child either
+	removeChild(obj);
+}
+
 void ccHObject::addChild(ccHObject* anObject, bool dependant/*=true*/, int insertIndex/*=-1*/)
 {
 	if (!anObject)
@@ -312,8 +352,7 @@ ccBBox ccHObject::getBB(bool relative/*=true*/, bool withGLfeatures/*=false*/, c
 	if (!display || m_currentDisplay==display)
 		box = (withGLfeatures ? getDisplayBB() : getMyOwnBB());
 
-	Container::iterator it = m_children.begin();
-	for (;it!=m_children.end();++it)
+	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
 	{
 		if ((*it)->isEnabled())
 			box += ((*it)->getBB(false, withGLfeatures, display));

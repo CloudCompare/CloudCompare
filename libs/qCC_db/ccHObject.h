@@ -63,6 +63,37 @@ public:
     **/
 	inline ccHObject* getParent() const { return m_parent; }
 
+    /*** Inter-objects dependencies management ***/
+
+	//! Dependency flags
+	enum DEPENDENCY_FLAGS {	DP_NOTIFY_OTHER_ON_DELETE	= 1,
+							DP_REDRAW_OTHER				= 2,
+							DP_UPDATE_OTHER_BB			= 4,
+							DP_DELETE_OTHER				= 8,
+	};
+
+	//! Adds a new dependence (additive or not)
+	/** \param otherObject other object
+		\param flags dependency flags (see DEPENDENCY_FLAGS)
+		\param additive whether we should 'add' the flag(s) if there's already a dependence with the other object or not
+	**/
+	void addDependency(ccHObject* otherObject, int flags, bool additive = true);
+
+	//! Returns the dependency flags with a given object
+	/** \param otherObject other object
+	**/
+	int getDependencyFlagsWith(ccHObject* otherObject);
+
+	//! Removes any dependency flags with a given object
+	/** \param otherObject other object
+	**/
+	void removeDependencyWith(ccHObject* otherObject);
+
+	//! This method is called when another object is deleted
+	/** \warning For internal use.
+	**/
+	virtual void onDeletionOf(ccHObject* obj);
+
     /*** children management ***/
 
     //! Adds a child to object's children list
@@ -296,6 +327,12 @@ protected:
 
 	//! Selection behavior
 	SelectionBehavior m_selectionBehavior;
+
+	//! Dependencies map
+	/** First parameter: other object
+		Second parameter: dependency flags (see DEPENDENCY_FLAGS)
+	**/
+	std::map<ccHObject*,int> m_dependencies;
 };
 
 /*** Helpers ***/

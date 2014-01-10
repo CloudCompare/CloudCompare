@@ -186,18 +186,38 @@ ccHObject* ccHObject::New(unsigned objectType, const char* name/*=0*/)
 
 void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*=true*/)
 {
-	if (flags <= 0)
+	if (!otherObject || flags < 0)
+	{
+		ccLog::Error("[ccHObject::addDependency] Invalid arguments");
+		assert(false);
 		return;
+	}
+	else if (flags == 0)
+	{
+		return;
+	}
 
 	if (additive)
 	{
 		//look for already defined flags for this object
 		std::map<ccHObject*,int>::iterator it = m_dependencies.find(otherObject);
 		if (it != m_dependencies.end())
+		{
+			//nothing changes? we stop here (especially to avoid infinite
+			//loop when setting  the DP_NOTIFY_OTHER_ON_DELETE flag below!)
+			if ((it->second & flags) == flags)
+				return;
 			flags |= it->second;
+		}
 	}
+	assert(flags != 0);
 
 	m_dependencies[otherObject] = flags;
+
+	//whenever we add a dependency, we must be sure to be notified
+	//by the other object when its deleted! Otherwise we'll keep
+	//bad pointers in the dependency list...
+	otherObject->addDependency(this,DP_NOTIFY_OTHER_ON_DELETE);
 }
 
 int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject)
@@ -269,7 +289,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 	}
 
 	//we want to be notified whenever this child is deleted!
-	child->addDependency(this,DP_NOTIFY_OTHER_ON_DELETE);
+	child->addDependency(this,DP_NOTIFY_OTHER_ON_DELETE); //DGM: potentially redundant with calls to 'addDependency' but we can't miss that ;)
 
 	if (dependencyFlags != 0)
 		addDependency(child,dependencyFlags);

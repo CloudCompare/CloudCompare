@@ -274,7 +274,6 @@ CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bo
 {
 	ccLog::Print("[BIN] Opening file '%s'...",filename);
 
-
 	//opening file
 	QFile in(filename);
 	if (!in.open(QIODevice::ReadOnly))
@@ -625,7 +624,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			cc2DLabel* label = static_cast<cc2DLabel*>(currentObject);
 			std::vector<cc2DLabel::PickedPoint> correctedPickedPoints;
 			//we must check all label 'points'!
-			for (unsigned i=0;i<label->size();++i)
+			for (unsigned i=0; i<label->size(); ++i)
 			{
 				const cc2DLabel::PickedPoint& pp = label->getPoint(i);
 				intptr_t cloudID = (intptr_t)pp.cloud;
@@ -654,8 +653,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				assert(correctedPickedPoints.size() == label->size());
 				bool visible = label->isVisible();
 				QString originalName(label->getRawName());
-				label->clear();
-				for (unsigned i=0;i<correctedPickedPoints.size();++i)
+				label->clear(true);
+				for (unsigned i=0; i<correctedPickedPoints.size(); ++i)
 					label->addPoint(correctedPickedPoints[i].cloud,correctedPickedPoints[i].index);
 				label->setVisible(visible);
 				label->setName(originalName);

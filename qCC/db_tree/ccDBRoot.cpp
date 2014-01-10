@@ -258,16 +258,17 @@ void ccDBRoot::removeElement(ccHObject* anObject)
 
     int childPos = parent->getChildIndex(anObject);
     assert(childPos>=0);
+	{
+		//row removal operation (start)
+		beginRemoveRows(index(parent),childPos,childPos);
 
-    //row removal operation (start)
-    beginRemoveRows(index(parent),childPos,childPos);
+		parent->removeChild(childPos);
 
-    parent->removeChild(childPos);
+		//row removal operation (end)
+		endRemoveRows();
+	}
 
-    //row removal operation (end)
-    endRemoveRows();
-
-    //we restablish properties view
+    //we restore properties view
     updatePropertiesView();
 }
 
@@ -277,39 +278,18 @@ void ccDBRoot::deleteSelectedEntities()
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
     if (selectedIndexes.size() < 1)
         return;
-    unsigned selCount = (unsigned)selectedIndexes.size();
+    unsigned selCount = static_cast<unsigned>(selectedIndexes.size());
 
     hidePropertiesView();
 
-	//specific case: shared labels
-	ccHObject::Container allLabels;
-	bool hasSharedLabels = false;
-	std::set<ccHObject*> cloudsToBeDeleted; //will only be used if 'hasSharedLabels' is true
-	if (m_treeRoot->filterChildren(allLabels,true,CC_2D_LABEL) != 0)
-	{
-		for (unsigned i=0; i<allLabels.size(); ++i)
-		{
-			if (allLabels[i]->isA(CC_2D_LABEL)) //Warning: cc2DViewportLabel is also a kind of 'CC_2D_LABEL'!
-			{
-				cc2DLabel* label = static_cast<cc2DLabel*>(allLabels[i]);
-				//shared labels are labels shared by at least 2 different clouds
-				if (label->size() > 1 && label->getPoint(0).cloud != label->getPoint(1).cloud
-					|| label->size() > 2 && label->getPoint(1).cloud != label->getPoint(2).cloud)
-				{
-					hasSharedLabels = true;
-					break;
-				}
-			}
-		}
-	}
-
 	//we remove all objects that are children of other deleted ones!
 	//(otherwise we may delete the parent before the child!)
+	//TODO DGM: not sure this is still necessary with the new dependency mechanism
     std::vector<ccHObject*> toBeDeleted;
-    for (unsigned i=0;i<selCount;++i)
+    for (unsigned i=0; i<selCount; ++i)
     {
         ccHObject* obj = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-        //we don't take care of parentless objects (i.e. the tree root)
+        //we don't take care of parent-less objects (i.e. the tree root)
 		if (!obj->getParent() || obj->isLocked())
 		{
 			ccLog::Warning(QString("Object '%1' can't be deleted this way (locked)").arg(obj->getName()));
@@ -318,7 +298,7 @@ void ccDBRoot::deleteSelectedEntities()
 
 		//we don't take objects that are siblings of others
 		bool isSiblingOfAnotherOne = false;
-		for (unsigned j=0;j<selCount;++j)
+		for (unsigned j=0; j<selCount; ++j)
 		{
 			if (i != j)
 			{
@@ -342,48 +322,10 @@ void ccDBRoot::deleteSelectedEntities()
 				}
 
 			toBeDeleted.push_back(obj);
-
-			if (hasSharedLabels)
-			{
-				//we must keep a parallel list for clouds only
-				if (obj->isA(CC_POINT_CLOUD))
-				{
-					cloudsToBeDeleted.insert(obj);
-				}
-				else
-				{
-					ccHObject::Container subClouds;
-					if (obj->filterChildren(subClouds,true,CC_POINT_CLOUD) != 0)
-						for (size_t i=0; i<subClouds.size(); ++i)
-							cloudsToBeDeleted.insert(subClouds[i]);
-				}
-			}
 		}
 	}
 
     qism->clear();
-
-	//check now that we don't delete clouds on which some labels are dependent
-	if (hasSharedLabels)
-	{
-		size_t labelCount = allLabels.size();
-		for (size_t i=0;i<labelCount;++i)
-		{
-			cc2DLabel* label = static_cast<cc2DLabel*>(allLabels[i]);
-			if (label->size() > 1) //there's no issue with 1-point labels!
-			{
-				for (unsigned j=1;j<label->size();++j) //1st cloud is always the parent!
-					if (label->getPoint(j).cloud
-						&& label->getPoint(j).cloud != label->getPoint(0).cloud
-						&& cloudsToBeDeleted.find(label->getPoint(j).cloud) != cloudsToBeDeleted.end())
-					{
-						ccLog::Warning(QString("Label '%1' has been deleted as it is dependent on '%2'").arg(label->getName()).arg(label->getPoint(j).cloud->getName()));
-						label->clear();
-						toBeDeleted.push_back(label);
-					}
-			}
-		}
-	}
 
 	while (!toBeDeleted.empty())
 	{
@@ -403,7 +345,7 @@ void ccDBRoot::deleteSelectedEntities()
 
         ccHObject* parent = anObject->getParent();
         int childPos = parent->getChildIndex(anObject);
-        assert(childPos>=0);
+        assert(childPos >= 0);
 
         beginRemoveRows(index(anObject).parent(),childPos,childPos);
         parent->removeChild(childPos);
@@ -1126,7 +1068,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 			else if (oldParent != newParent)
 			{
 				//a label or a group of labels can't be moved to another cloud!
-				ccHObject::Container labels;
+				/*ccHObject::Container labels;
 				if (item->isA(CC_2D_LABEL))
 					labels.push_back(item);
 				else
@@ -1159,6 +1101,7 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 						}
 					}
 				}
+				//*/
 			}
 		}
 
@@ -1166,34 +1109,42 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		if (oldParent && newParent == oldParent)
 		{
 			int oldRow = newParent->getChildIndex(item);
-			if (destRow<0)
+			if (destRow < 0)
 			{
 				assert(newParent->getChildrenNumber()>0);
-				destRow = (int)newParent->getChildrenNumber()-1;
+				destRow = static_cast<int>(newParent->getChildrenNumber())-1;
 			}
 			else if (oldRow<destRow)
 			{
-				assert(destRow>0);
+				assert(destRow > 0);
 				--destRow;
 			}
-			else if (oldRow==destRow)
+			else if (oldRow == destRow)
 				return false; //nothing to do
 		}
 
-		//remove link with old parent
+		//remove link with old parent (only CHILD/PARENT related flags!)
 		int itemDependencyFlags = item->getDependencyFlagsWith(oldParent); //works even with NULL
 		int fatherDependencyFlags = oldParent ? oldParent->getDependencyFlagsWith(item) : 0;
 		if (oldParent)
-			oldParent->removeDependencyWith(item);
-		item->removeDependencyWith(oldParent);
+		{
+			oldParent->removeDependencyFlag(item,ccHObject::DP_PARENT_OF_OTHER);
+			item->removeDependencyFlag(oldParent,ccHObject::DP_PARENT_OF_OTHER);
+		}
 
 		//remove item from current position
 		removeElement(item);
 
 		//sets new parent
 		assert(newParent);
-		newParent->addChild(item,fatherDependencyFlags,destRow);
-		item->addDependency(newParent,itemDependencyFlags);
+		newParent->addChild(item,fatherDependencyFlags & ccHObject::DP_PARENT_OF_OTHER,destRow);
+		item->addDependency(newParent,itemDependencyFlags & ccHObject::DP_PARENT_OF_OTHER);
+		//restore other flags on old parent (as all flags have been removed when calling removeElement!)
+		if (oldParent)
+		{
+			oldParent->addDependency(item,fatherDependencyFlags & (~ccHObject::DP_PARENT_OF_OTHER));
+			item->addDependency(oldParent,itemDependencyFlags & (~ccHObject::DP_PARENT_OF_OTHER));
+		}
 
 		if (newParent->getDisplay() == 0)
 			newParent->setDisplay(item->getDisplay());

@@ -816,9 +816,10 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 	//copy 'shift on load' information
 	if (getAssociatedCloud())
 	{
-		const double* shift = getAssociatedCloud()->getOriginalShift();
-		if (shift)
-			cloud->setOriginalShift(shift[0],shift[1],shift[2]);
+		const CCVector3d& shift = getAssociatedCloud()->getGlobalShift();
+		cloud->setGlobalShift(shift);
+		double scale = getAssociatedCloud()->getGlobalScale();
+		cloud->setGlobalScale(scale);
 	}
 
 	return cloud;

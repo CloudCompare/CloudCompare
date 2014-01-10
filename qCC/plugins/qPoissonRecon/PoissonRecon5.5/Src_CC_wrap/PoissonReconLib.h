@@ -38,7 +38,7 @@ public:
 	typedef PlyVertex< float > Vertex;
 
 	//! Default point type
-	typedef Point3D< float > Point3D;
+	typedef Point3D< float > Point;
 
 	//! Algorithm parameters
 	struct Parameters
@@ -83,8 +83,8 @@ public:
 		\return initialization success
 	**/
 	bool init(	unsigned count,
-				const Point3D* inPoints,
-				const Point3D* inNormals,
+				const Point* inPoints,
+				const Point* inNormals,
 				const Parameters& params,
 				int* outThreadCount = 0);
 

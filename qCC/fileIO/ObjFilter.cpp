@@ -84,15 +84,19 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 
 	//vertices
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+	const CCVector3d& shift = vertices->getGlobalShift();
+	double scale = vertices->getGlobalScale();
+	assert(scale != 0);
 	unsigned nbPoints = vertices->size();
-	const double* shift = vertices->getOriginalShift();
 	for (unsigned i=0; i<nbPoints; ++i)
 	{
 		const CCVector3* P = vertices->getPoint(i);
-		if (fprintf(theFile,"v %f %f %f\n",-shift[0]+(double)P->x,
-			-shift[1]+(double)P->y,
-			-shift[2]+(double)P->z) < 0)
+		if (fprintf(theFile,"v %f %f %f\n",	static_cast<double>(P->x)/scale-shift.x,
+											static_cast<double>(P->y)/scale-shift.y,
+											static_cast<double>(P->z)/scale-shift.z) < 0)
+		{
 			return CC_FERR_WRITING;
+		}
 	}
 
 	//per-triangle normals
@@ -239,14 +243,14 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 
 					if (withTexCoordinates)
 					{
-						if (fprintf(theFile,"f %i/%i/%i %i/%i/%i %i/%i/%i\n", i1, t1, n1, i2, t2, n2, i3, t3, n3) < 0)
+						if (fprintf(theFile,"f %u/%i/%i %u/%i/%i %u/%i/%i\n", i1, t1, n1, i2, t2, n2, i3, t3, n3) < 0)
 						{
 							return CC_FERR_WRITING;
 						}
 					}
 					else
 					{
-						if (fprintf(theFile,"f %i//%i %i//%i %i//%i\n",	i1, n1, i2, n2, i3,	n3) < 0)
+						if (fprintf(theFile,"f %u//%i %u//%i %u//%i\n",	i1, n1, i2, n2, i3, n3) < 0)
 						{
 							return CC_FERR_WRITING;
 						}
@@ -256,12 +260,12 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 				{
 					if (withTexCoordinates)
 					{
-						if (fprintf(theFile,"f %i/%i %i/%i %i/%i\n",i1,t1,i2,t2,i3,t3) < 0)
+						if (fprintf(theFile,"f %u/%i %u/%i %u/%i\n",i1,t1,i2,t2,i3,t3) < 0)
 							return CC_FERR_WRITING;
 					}
 					else
 					{
-						if (fprintf(theFile,"f %i %i %i\n",i1,i2,i3) < 0)
+						if (fprintf(theFile,"f %u %u %u\n",i1,i2,i3) < 0)
 							return CC_FERR_WRITING;
 					}
 				}
@@ -270,7 +274,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 					return CC_FERR_CANCELED_BY_USER;
 			}
 
-			if (fprintf(theFile,"#%i faces\n",triNum) < 0)
+			if (fprintf(theFile,"#%u faces\n",triNum) < 0)
 				return CC_FERR_WRITING;
 		}
 	}
@@ -331,7 +335,7 @@ struct facetElement
 	}
 };
 
-CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	ccLog::Print("[ObjFilter::Load] %s",filename);
 
@@ -342,15 +346,15 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	QTextStream stream(&file);
 
 	//current vertex shift
-	double Pshift[3] = {0.0,0.0,0.0};
+	CCVector3d Pshift(0,0,0);
 
 	//vertices
 	ccPointCloud* vertices = new ccPointCloud("vertices");
 	int pointsRead = 0;
 
 	//facets
-	int facesRead = 0;
-	int totalFacesRead = 0;
+	unsigned int facesRead = 0;
+	unsigned int totalFacesRead = 0;
 	int maxVertexIndex = -1;
 
 	//base mesh
@@ -446,28 +450,26 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			{
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 				if (shiftAlreadyEnabled)
-					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+					Pshift = *coordinatesShift;
 				bool applyAll = false;
 				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
-					vertices->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-					ccLog::Warning("[ObjFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+					vertices->setGlobalShift(Pshift);
+					ccLog::Warning("[ObjFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 
 					//we save coordinates shift information
 					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
 					{
 						*coordinatesShiftEnabled = true;
-						coordinatesShift[0] = Pshift[0];
-						coordinatesShift[1] = Pshift[1];
-						coordinatesShift[2] = Pshift[2];
+						*coordinatesShift = Pshift;
 					}
 				}
 			}
 
 			//shifted point
-			CCVector3 P((PointCoordinateType)(Pd[0]+Pshift[0]),
-				(PointCoordinateType)(Pd[1]+Pshift[1]),
-				(PointCoordinateType)(Pd[2]+Pshift[2]));
+			CCVector3 P(static_cast<PointCoordinateType>(Pd[0] + Pshift.x),
+						static_cast<PointCoordinateType>(Pd[1] + Pshift.y),
+						static_cast<PointCoordinateType>(Pd[2] + Pshift.z));
 
 			vertices->addPoint(P);
 			++pointsRead;
@@ -623,7 +625,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						error = true;
 						break;
 					}
-					for (int i=0; i<totalFacesRead; ++i)
+					for (unsigned int i=0; i<totalFacesRead; ++i)
 						baseMesh->addTriangleTexCoordIndexes(-1, -1, -1);
 
 					hasTexCoords = true;
@@ -639,7 +641,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						error = true;
 						break;
 					}
-					for (int i=0; i<totalFacesRead; ++i)
+					for (unsigned int i=0; i<totalFacesRead; ++i)
 						baseMesh->addTriangleNormalIndexes(-1, -1, -1);
 					normalsPerFacet = true;
 				}
@@ -696,7 +698,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 						error = true;
 						break;
 					}
-					for (int i=0; i<totalFacesRead; ++i)
+					for (unsigned int i=0; i<totalFacesRead; ++i)
 						baseMesh->addTriangleMtlIndex(-1);
 
 					hasMaterial = true;
@@ -822,7 +824,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	if (!error)
 	{
-		ccLog::Print("[ObjFilter::Load] %i points, %i faces",pointsRead,totalFacesRead);
+		ccLog::Print("[ObjFilter::Load] %i points, %u faces",pointsRead,totalFacesRead);
 		if (texCoordsRead>0 || normsRead>0)
 			ccLog::Print("[ObjFilter::Load] %i tex. coords, %i normals",texCoordsRead,normsRead);
 

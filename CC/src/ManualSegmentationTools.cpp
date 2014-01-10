@@ -213,7 +213,7 @@ GenericIndexedMesh* ManualSegmentationTools::segmentMesh(GenericIndexedMesh* the
 			progressCb->reset();
 			progressCb->setMethodTitle("Extract mesh");
 			char buffer[256];
-			sprintf(buffer,"New vertex number: %i",numberOfIndexes);
+			sprintf(buffer,"New vertex number: %u",numberOfIndexes);
 			nprogress = new NormalizedProgress(progressCb,numberOfTriangles);
 			progressCb->setInfo(buffer);
 			progressCb->start();

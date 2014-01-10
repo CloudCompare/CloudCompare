@@ -2,13 +2,13 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.5.0"
+#define MyAppVersion "2.5.2.laszip"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.danielgm.net/cc/"
 #define MyAppExeName "CloudCompare.exe"
-#define MyVCRedistPath "C:\dev\vc_redist"
-#define MyCCPath "C:\dev\CloudCompare_git\build\msvc2008_32bits_official\bin\CloudCompare"
-#define MyOutputDir "C:\dev\CloudCompare_git\build\msvc2008_32bits_official\bin"
+#define MyVCRedistPath "E:\Incoming\vc_redist"
+#define MyCCPath "E:\These\C++\CloudCompare\bin_x86_msvc_2008\CloudCompare"
+#define MyOutputDir "E:\These\C++\CloudCompare\bin_x86_msvc_2008"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
 
 [Setup]

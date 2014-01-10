@@ -28,7 +28,7 @@ CC_FILE_ERROR SoiFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_SAVE;
 }
 
-CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
     //open the file
 	FILE *fp = fopen(filename, "rt");
@@ -74,7 +74,7 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 	ccProgressDialog pdlg(false); //cancel is not supported
 	pdlg.setMethodTitle("Open SOI file");
 	char buffer[256];
-	sprintf(buffer,"%i scans / %i points\n",nbScansTotal,nbPointsTotal);
+	sprintf(buffer,"%u scans / %u points\n",nbScansTotal,nbPointsTotal);
 	CCLib::NormalizedProgress nprogress(&pdlg,nbPointsTotal);
 	pdlg.setInfo(buffer);
 	pdlg.start();

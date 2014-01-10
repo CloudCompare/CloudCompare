@@ -136,7 +136,8 @@ void qRansacSD::doAction()
 	bool hasNorms = pc->hasNormals();
     PointCoordinateType bbMin[3],bbMax[3];
     pc->getBoundingBox(bbMin,bbMax);
-	const double* originalShift = pc->getOriginalShift();
+	const CCVector3d& globalShift = pc->getGlobalShift();
+	double globalScale = pc->getGlobalScale();
 
     //Convert CC point cloud to RANSAC_SD type
 	PointCloud cloud;
@@ -411,8 +412,8 @@ void qRansacSD::doAction()
 			pcShape->showColors(true);
 			pcShape->showNormals(saveNormals);
 			pcShape->setVisible(true);
-			if (originalShift)
-				pcShape->setOriginalShift(originalShift[0],originalShift[1],originalShift[2]);
+			pcShape->setGlobalShift(globalShift);
+			pcShape->setGlobalScale(globalScale);
 
 			//convert detected primitive into a CC primitive type
 			ccGenericPrimitive* prim = 0;

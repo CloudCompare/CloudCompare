@@ -306,9 +306,11 @@ void ccPointListPickingDlg::removeLastEntry()
 
 void ccPointListPickingDlg::startIndexChanged(int value)
 {
-	if (value != s_pickedPointsStartIndex)
+	unsigned int   uValue = static_cast<unsigned int>(value);
+   
+	if (uValue != s_pickedPointsStartIndex)
 	{
-		s_pickedPointsStartIndex = (unsigned)value;
+		s_pickedPointsStartIndex = uValue;
 
 		updateList();
 		if (m_associatedWin)

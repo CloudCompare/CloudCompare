@@ -201,7 +201,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
     return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR DepthMapFileFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR DepthMapFileFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
     ccLog::Error("Not available yet!\n");
 

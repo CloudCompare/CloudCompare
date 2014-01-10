@@ -264,7 +264,7 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 	return result;
 }
 
-CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	ccLog::Print("[BIN] Opening file '%s'...",filename);
 
@@ -354,10 +354,10 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 	assert(in.isOpen());
 
 	uint32_t binVersion = 20;
-	if (in.read((char*)&binVersion,4)<0)
+	if (in.read((char*)&binVersion,4) < 0)
 		return CC_FERR_READING;
 
-	if (binVersion<20) //should be superior to 2.0!
+	if (binVersion < 20) //should be superior to 2.0!
 		return CC_FERR_MALFORMED_FILE;
 
 	QString coordsFormat = (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS ? "double" : "float");
@@ -385,7 +385,9 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-	//re-link objects
+	//re-link objects (and check errors)
+	bool checkErrors = true;
+	ccHObject* orphans = new ccHObject("Orphans (CORRUPTED FILE)");;
 	ccHObject::Container toCheck;
 	toCheck.push_back(root);
 	while (!toCheck.empty())
@@ -447,7 +449,9 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				{
 					ccHObject* cloud = root->find(static_cast<int>(cloudID));
 					if (cloud && cloud->isKindOf(CC_POINT_CLOUD))
+					{
 						mesh->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
+					}
 					else
 					{
 						//we have a problem here ;)
@@ -460,11 +464,13 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						return CC_FERR_MALFORMED_FILE;
 					}
 				}
+
 				//materials
+				ccHObject* materials = 0;
 				intptr_t matSetID = (intptr_t)mesh->getMaterialSet();
 				if (matSetID > 0)
 				{
-					ccHObject* materials = root->find(static_cast<int>(matSetID));
+					materials = root->find(static_cast<int>(matSetID));
 					if (materials && materials->isA(CC_MATERIAL_SET))
 						mesh->setMaterialSet(static_cast<ccMaterialSet*>(materials),false);
 					else
@@ -474,15 +480,23 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						mesh->showMaterials(false);
 						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared materials set (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
 						result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
+
+						//add it to the 'orphans' set
+						if (materials)
+							orphans->addChild(materials);
+						materials = 0;
 					}
 				}
 				//per-triangle normals
+				ccHObject* triNormsTable = 0;
 				intptr_t triNormsTableID = (intptr_t)mesh->getTriNormsTable();
 				if (triNormsTableID > 0)
 				{
-					ccHObject* triNormsTable = root->find(static_cast<int>(triNormsTableID));
+					triNormsTable = root->find(static_cast<int>(triNormsTableID));
 					if (triNormsTable && triNormsTable->isA(CC_NORMAL_INDEXES_ARRAY))
+					{
 						mesh->setTriNormsTable(static_cast<NormsIndexesTableType*>(triNormsTable),false);
+					}
 					else
 					{
 						//we have a (less severe) problem here ;)
@@ -490,13 +504,19 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						mesh->showTriNorms(false);
 						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared normals (ID=%1) for mesh '%2' in the file!").arg(triNormsTableID).arg(mesh->getName()));
 						result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
+
+						//add it to the 'orphans' set
+						if (triNormsTable)
+							orphans->addChild(triNormsTable);
+						triNormsTable = 0;
 					}
 				}
 				//per-triangle texture coordinates
+				ccHObject* texCoordsTable = 0;
 				intptr_t texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable();
 				if (texCoordArrayID > 0)
 				{
-					ccHObject* texCoordsTable = root->find(static_cast<int>(texCoordArrayID));
+					texCoordsTable = root->find(static_cast<int>(texCoordArrayID));
 					if (texCoordsTable && texCoordsTable->isA(CC_TEX_COORDS_ARRAY))
 						mesh->setTexCoordinatesTable(static_cast<TextureCoordsContainer*>(texCoordsTable),false);
 					else
@@ -505,6 +525,57 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						mesh->setTexCoordinatesTable(0,false);
 						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared texture coordinates (ID=%1) for mesh '%2' in the file!").arg(texCoordArrayID).arg(mesh->getName()));
 						result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
+
+						//add it to the 'orphans' set
+						if (texCoordsTable)
+							orphans->addChild(texCoordsTable);
+						texCoordsTable = 0;
+					}
+				}
+
+				if (checkErrors)
+				{
+					ccGenericPointCloud* pc = mesh->getAssociatedCloud();
+					unsigned faceCount = mesh->size();
+					unsigned vertCount = pc->size();
+					for (unsigned i=0; i<faceCount; ++i)
+					{
+						const CCLib::TriangleSummitsIndexes* tri = mesh->getTriangleIndexes(i);
+						if (	tri->i1 >= vertCount
+							||	tri->i2 >= vertCount
+							||	tri->i3 >= vertCount )
+						{
+							ccLog::Warning(QString("[BinFilter::loadFileV2] File is corrupted: missing vertices for mesh '%1'!").arg(mesh->getName()));
+
+							//add cloud to the 'orphans' set
+							pc->setName(mesh->getName() + QString(".") + pc->getName());
+							orphans->addChild(pc);
+							if (texCoordsTable)
+							{
+								texCoordsTable->setName(mesh->getName() + QString(".") + texCoordsTable->getName());
+								orphans->addChild(texCoordsTable);
+							}
+							if (triNormsTable)
+							{
+								triNormsTable->setName(mesh->getName() + QString(".") + triNormsTable->getName());
+								orphans->addChild(triNormsTable);
+							}
+							if (materials)
+							{
+								materials->setName(mesh->getName() + QString(".") + materials->getName());
+								orphans->addChild(materials);
+							}
+
+							//delete corrupted mesh
+							mesh->setMaterialSet(0,false);
+							mesh->setTriNormsTable(0,false);
+							mesh->setTexCoordinatesTable(0,false);
+							if (mesh->getParent())
+								mesh->getParent()->removeChild(mesh);
+							mesh = 0;
+
+							break;
+						}
 					}
 				}
 			}
@@ -670,6 +741,21 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		container.addChild(root);
 	}
 
+	//orphans
+	if (orphans)
+	{
+		if (orphans->getChildrenNumber() != 0)
+		{
+			orphans->setEnabled(false);
+			container.addChild(orphans);
+		}
+		else
+		{
+			delete orphans;
+			orphans = 0;
+		}
+	}
+
 	return result;
 }
 
@@ -679,7 +765,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 	if (nbScansTotal > 99)
 	{
-		if (QMessageBox::question(0, QString("Oups"), QString("Hum, do you really expect %1 point clouds?").arg(nbScansTotal)) == QMessageBox::No)
+		if (QMessageBox::question(0, QString("Oups"), QString("Hum, do you really expect %1 point clouds?").arg(nbScansTotal), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
 			return CC_FERR_WRONG_FILE_TYPE;
 	}
 	else if (nbScansTotal == 0)
@@ -712,7 +798,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 			nprogress = new CCLib::NormalizedProgress(&pdlg,nbOfPoints);
 			pdlg.reset();
 			char buffer[256];
-			sprintf(buffer,"cloud %i/%i (%i points)",k+1,nbScansTotal,nbOfPoints);
+			sprintf(buffer,"cloud %u/%u (%u points)",k+1,nbScansTotal,nbOfPoints);
 			pdlg.setInfo(buffer);
 			pdlg.start();
 			QApplication::processEvents();
@@ -737,7 +823,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 		}
 		else
 		{
-			sprintf(cloudName,"unnamed - Cloud #%i",k);
+			sprintf(cloudName,"unnamed - Cloud #%u",k);
 		}
 
 		//Cloud name

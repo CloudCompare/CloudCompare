@@ -42,7 +42,7 @@ CC_FILE_ERROR RasterGridFilter::saveToFile(ccHObject* entity, const char* filena
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	GDALAllRegister();
 	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
@@ -92,41 +92,39 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 		}
 
 		double origin[3] = { adfGeoTransform[0], adfGeoTransform[3], 0.0 };
-		double Pshift[3] = {0,0,0};
+		CCVector3d Pshift(0,0,0);
 		//check for 'big' coordinates
 		{
 			bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 			if (shiftAlreadyEnabled)
-				memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+				Pshift = *coordinatesShift;
 			bool applyAll = false;
 			if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(origin,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 			{
-				pc->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-				ccLog::Warning("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+				pc->setGlobalShift(Pshift);
+				ccLog::Warning("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 
 				//we save coordinates shift information
 				if (applyAll && coordinatesShiftEnabled && coordinatesShift)
 				{
 					*coordinatesShiftEnabled = true;
-					coordinatesShift[0] = Pshift[0];
-					coordinatesShift[1] = Pshift[1];
-					coordinatesShift[2] = Pshift[2];
+					*coordinatesShift = Pshift;
 				}
 			}
 		}
 
 		//create blank raster 'grid'
 		{
-			double z = 0.0 /*+ Pshift[2]*/;
+			double z = 0.0 /*+ Pshift.z*/;
 			for (int j=0; j<rasterY; ++j)
 			{
-				double y = adfGeoTransform[3] + static_cast<double>(j) * adfGeoTransform[5] + Pshift[1];
+				double y = adfGeoTransform[3] + static_cast<double>(j) * adfGeoTransform[5] + Pshift.y;
 				CCVector3 P(	0,
 								static_cast<PointCoordinateType>(y),
 								static_cast<PointCoordinateType>(z));
 				for (int i=0; i<rasterX; ++i)
 				{
-					double x = adfGeoTransform[0] + static_cast<double>(i) * adfGeoTransform[1] + Pshift[0];
+					double x = adfGeoTransform[0] + static_cast<double>(i) * adfGeoTransform[1] + Pshift.x;
 
 					P.x = static_cast<PointCoordinateType>(x);
 					pc->addPoint(P);
@@ -230,7 +228,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 				switch(colorInterp)
 				{
 				case GCI_Undefined:
-					assert(false);
+					isScalar = true;
 					break;
 				case GCI_PaletteIndex:
 					isPalette = true;

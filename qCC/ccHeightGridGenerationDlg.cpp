@@ -36,10 +36,16 @@ ccHeightGridGenerationDlg::ccHeightGridGenerationDlg(const ccBBox& gridBBox, QWi
 
     setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
+#ifndef CC_GDAL_SUPPORT
+	generateRasterCheckBox->setDisabled(true);
+	generateRasterCheckBox->setChecked(false);
+#endif
+
     connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
     connect(fillEmptyCells, SIGNAL(currentIndexChanged(int)), this, SLOT(projectionChanged(int)));
     connect(generateCloudGroupBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
     connect(generateImageCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
+    connect(generateRasterCheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
     connect(generateASCIICheckBox, SIGNAL(toggled(bool)), this, SLOT(toggleFillEmptyCells(bool)));
 	connect(typeOfProjectionComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(projectionTypeChanged(int)));
 
@@ -104,6 +110,11 @@ bool ccHeightGridGenerationDlg::generateImage() const
     return generateImageCheckBox->isChecked();
 }
 
+bool ccHeightGridGenerationDlg::generateRaster() const
+{
+    return generateRasterCheckBox->isChecked();
+}
+
 bool ccHeightGridGenerationDlg::generateASCII() const
 {
     return generateASCIICheckBox->isChecked();
@@ -124,7 +135,7 @@ void ccHeightGridGenerationDlg::projectionChanged(int)
 
 void ccHeightGridGenerationDlg::toggleFillEmptyCells(bool)
 {
-    emptyCellsFrame->setEnabled(generateCloudGroupBox->isChecked() || generateImageCheckBox->isChecked());
+    emptyCellsFrame->setEnabled(generateCloudGroupBox->isChecked() || generateImageCheckBox->isChecked() || generateRasterCheckBox->isChecked());
 }
 
 double ccHeightGridGenerationDlg::getCustomHeightForEmptyCells() const
@@ -206,6 +217,7 @@ void ccHeightGridGenerationDlg::loadSettings()
     double emptyHeight  = settings.value("EmptyCellsHeight",emptyValueDoubleSpinBox->value()).toDouble();
     bool genCloud       = settings.value("GenerateCloud",generateCloudGroupBox->isChecked()).toBool();
     bool genImage       = settings.value("GenerateImage",generateImageCheckBox->isChecked()).toBool();
+    bool genRaster		= settings.value("GenerateRaster",generateImageCheckBox->isChecked()).toBool();
     bool genASCII       = settings.value("GenerateASCII",generateASCIICheckBox->isChecked()).toBool();
     bool genCountSF		= settings.value("GenerateCountSF",generateCountSFcheckBox->isChecked()).toBool();
 	bool resampleCloud	= settings.value("ResampleOrigCloud",resampleOriginalCloudCheckBox->isChecked()).toBool();
@@ -223,6 +235,9 @@ void ccHeightGridGenerationDlg::loadSettings()
 	scalarFieldProjection->setCurrentIndex(sfProjStrategy);
 	generateCountSFcheckBox->setChecked(genCountSF);
 	resampleOriginalCloudCheckBox->setChecked(resampleCloud);
+#ifdef CC_GDAL_SUPPORT
+	generateRasterCheckBox->setChecked(genRaster);
+#endif
 
     toggleFillEmptyCells(false);
 }
@@ -243,6 +258,9 @@ void ccHeightGridGenerationDlg::saveSettings()
     settings.setValue("GenerateASCII",generateASCIICheckBox->isChecked());
     settings.setValue("GenerateCountSF",generateCountSFcheckBox->isChecked());
 	settings.setValue("ResampleOrigCloud",resampleOriginalCloudCheckBox->isChecked());
+#ifdef CC_GDAL_SUPPORT
+    settings.setValue("GenerateRaster",generateRasterCheckBox->isChecked());
+#endif
     settings.endGroup();
 
     accept();

@@ -227,7 +227,7 @@ ccHObject* ccHObject::find(int uniqueID)
 		ccHObject* obj = toTest.back();
 		toTest.pop_back();
 
-		if (obj->getUniqueID() == uniqueID)
+		if (obj->getUniqueID() == static_cast<unsigned int>(uniqueID))
 			return obj;
 
 		for (unsigned i=0;i<obj->getChildrenNumber();++i)

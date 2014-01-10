@@ -151,7 +151,9 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
     pdlg.start();
 
 	//shift on load
-	const double* shift = cloud->getOriginalShift();
+	const CCVector3d shift = cloud->getGlobalShift();
+	double scale = cloud->getGlobalScale();
+	assert(scale != 0);
 
 	//output precision
 	const int s_coordPrecision = s_saveDialog->coordsPrecision();
@@ -231,11 +233,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 
 		//write current point coordinates
         const CCVector3* P = cloud->getPoint(i);
-		line.append(QString::number(-shift[0]+(double)P->x,'f',s_coordPrecision));
+		line.append(QString::number(static_cast<double>(P->x)/scale - shift.x,'f',s_coordPrecision));
 		line.append(separator);
-		line.append(QString::number(-shift[1]+(double)P->y,'f',s_coordPrecision));
+		line.append(QString::number(static_cast<double>(P->y)/scale - shift.y,'f',s_coordPrecision));
 		line.append(separator);
-		line.append(QString::number(-shift[2]+(double)P->z,'f',s_coordPrecision));
+		line.append(QString::number(static_cast<double>(P->z)/scale - shift.z,'f',s_coordPrecision));
 
 		QString color;
 		if (writeColors)
@@ -293,7 +295,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
     return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR AsciiFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR AsciiFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
     //we get the size of the file to open
 	QFile file(filename);
@@ -581,7 +583,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
                                                             unsigned skipLines/*=0*/,
 															bool alwaysDisplayLoadDialog/*=true*/,
 															bool* coordinatesShiftEnabled/*=0*/,
-															double* coordinatesShift/*=0*/)
+															CCVector3d* coordinatesShift/*=0*/)
 {
     //we may have to "slice" clouds when opening them if they are too big!
 	maxCloudSize = std::min(maxCloudSize,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
@@ -624,7 +626,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
     //buffers
     ScalarType D = 0;
 	double P[3] = {0,0,0};
-    double Pshift[3] = {0,0,0};
+    CCVector3d Pshift(0,0,0);
     PointCoordinateType N[3] = {0,0,0};
     colorType col[3] = {0,0,0};
 
@@ -714,7 +716,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
         			ccLog::Error("Not enough memory! Process stopped ...");
         			break;
         		}
-				cloudDesc.cloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
+				cloudDesc.cloud->setGlobalShift(Pshift);
         	}
 
         	//we update the progress info
@@ -743,28 +745,26 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 			{
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 				if (shiftAlreadyEnabled)
-					memcpy(Pshift,coordinatesShift,sizeof(double)*3);
+					Pshift = *coordinatesShift;
 				bool applyAll=false;
 				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
-					cloudDesc.cloud->setOriginalShift(Pshift[0],Pshift[1],Pshift[2]);
-					ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift[0],Pshift[1],Pshift[2]);
+					cloudDesc.cloud->setGlobalShift(Pshift);
+					ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 
 					//we save coordinates shift information
 					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
 					{
 						*coordinatesShiftEnabled = true;
-						coordinatesShift[0] = Pshift[0];
-						coordinatesShift[1] = Pshift[1];
-						coordinatesShift[2] = Pshift[2];
+						*coordinatesShift = Pshift;
 					}
 				}
 			}
 
 			//add point
-			cloudDesc.cloud->addPoint(CCVector3(static_cast<PointCoordinateType>(P[0]+Pshift[0]),
-												static_cast<PointCoordinateType>(P[1]+Pshift[1]),
-												static_cast<PointCoordinateType>(P[2]+Pshift[2])) );
+			cloudDesc.cloud->addPoint(CCVector3(static_cast<PointCoordinateType>(P[0] + Pshift.x),
+												static_cast<PointCoordinateType>(P[1] + Pshift.y),
+												static_cast<PointCoordinateType>(P[2] + Pshift.z)) );
 
 			//Normal vector
 			if (cloudDesc.hasNorms)

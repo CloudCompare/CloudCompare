@@ -108,7 +108,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
 			}
 
 			//il faut ecrire le nom du fichier relatif et non absolu !
-			int result = fprintf(mainFile,"\n#POV %i\nF %s\nT ASC\n",i,qPrintable(QFileInfo(thisFilename).fileName()));
+			int result = fprintf(mainFile,"\n#POV %u\nF %s\nT ASC\n",i,qPrintable(QFileInfo(thisFilename).fileName()));
 
 			if (result > 0)
 			{
@@ -152,7 +152,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
     return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, double* coordinatesShift/*=0*/)
+CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
     assert(filename);
 

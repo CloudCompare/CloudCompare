@@ -197,11 +197,29 @@ public:
     //! Applies a rigid transformation (rotation + translation)
     virtual void applyRigidTransformation(const ccGLMatrix& trans)=0;
 
-	//! Sets shift to cloud original coordinates (information storage only)
-	void setOriginalShift(double x, double y, double z);
+	//! Sets shift applied to original coordinates (information storage only)
+	/** Such a shift can typically be applied at loading time.
+	**/
+	void setGlobalShift(double x, double y, double z);
 
-	//! Returns shift to cloud original coordinates
-	const double* getOriginalShift() const { return m_originalShift; }
+	//! Sets shift applied to original coordinates (information storage only)
+	/** Such a shift can typically be applied at loading time.
+		Original coordinates are equal to '(P/scale - shift)'
+	**/
+	void setGlobalShift(const CCVector3d& shift);
+
+	//! Returns the shift applied to original coordinates
+	/** See ccGenericPointCloud::setOriginalShift
+	**/
+	const CCVector3d& getGlobalShift() const { return m_globalShift; }
+
+	//! Sets the scale applied to original coordinates (information storage only)
+	void setGlobalScale(double scale);
+
+	//! Returns the scale applied to original coordinates
+	/** See ccGenericPointCloud::setOriginalScale
+	**/
+	double getGlobalScale() const { return m_globalScale; }
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }
@@ -230,8 +248,11 @@ protected:
     **/
 	VisibilityTableType* m_pointsVisibility;
 
-	//! Original shift (information backup)
-	double m_originalShift[3];
+	//! Global shift (typically applied at loading time)
+	CCVector3d m_globalShift;
+
+	//! Global scale (typically applied at loading time)
+	double m_globalScale;
 
 	//! Point size (won't be applied if 0)
 	unsigned char m_pointSize;

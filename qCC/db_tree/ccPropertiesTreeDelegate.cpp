@@ -407,8 +407,11 @@ void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
 
     //shift
 	{
-		const double* shift = _obj->getOriginalShift();
-		appendRow( ITEM("Global shift"), ITEM(QString("(%1;%2;%3)").arg(shift[0],0,'f',2).arg(shift[1],0,'f',2).arg(shift[2],0,'f',2)) );
+		const CCVector3d& shift = _obj->getGlobalShift();
+		appendRow( ITEM("Global shift"), ITEM(QString("(%1;%2;%3)").arg(shift.x,0,'f',2).arg(shift.y,0,'f',2).arg(shift.z,0,'f',2)) );
+
+		double scale = _obj->getGlobalScale();
+		appendRow( ITEM("Global scale"), ITEM(QString("%1").arg(scale,0,'f',6)) );
 	}
 
 	//custom point size
@@ -1514,7 +1517,7 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
     ccGenericPrimitive* primitive = ccHObjectCaster::ToPrimitive(m_currentObject);
     assert(primitive);
 
-	if (val == primitive->getDrawingPrecision())
+	if (static_cast<unsigned int>(val) == primitive->getDrawingPrecision())
 		return;
 
 	bool wasVisible = primitive->isVisible();

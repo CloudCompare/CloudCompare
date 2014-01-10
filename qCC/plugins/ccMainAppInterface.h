@@ -57,7 +57,7 @@ public:
 						bool updateZoom=true,
 						ccGLWindow* winDest = 0,
 						bool* coordinatesTransEnabled = 0,
-						double* coordinatesShift = 0,
+						CCVector3d* coordinatesShift = 0,
 						double* coordinatesScale = 0) = 0;
 
     //! Removes an entity from main db tree

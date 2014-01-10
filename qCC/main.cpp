@@ -172,7 +172,7 @@ int main(int argc, char **argv)
 	unsigned alive = CCShareable::GetAliveCount();
 	if (alive>1)
 	{
-		printf("Error: some shared objects (%i) have not been released on program end!",alive);
+		printf("Error: some shared objects (%u) have not been released on program end!",alive);
 		system("PAUSE");
 	}
 #endif

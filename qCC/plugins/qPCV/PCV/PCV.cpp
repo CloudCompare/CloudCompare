@@ -139,7 +139,7 @@ static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 
 		double z = 1.0 - static_cast<double>(2+m[1])/Nd;
 
-	    int rayIndex = 1; //the first one is already (0,0,1)
+		unsigned int rayIndex = 1; //the first one is already (0,0,1)
 		for (int i=1; i<L-1; ++i)
 		{
 			if (m[i-1] != 0 && m[i] != 0)

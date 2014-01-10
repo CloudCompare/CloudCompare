@@ -52,7 +52,7 @@ static const unsigned OPENGL_MATRIX_SIZE = 16;
 #define CC_MAT_R34 m_mat[14]
 #define CC_MAT_R44 m_mat[15]
 
-//! A 4x4 OpenGL float matrix
+//! A 4x4 'transformation' matrix (column major order)
 /** Transformation (M) is composed by a rotation (R) and a translation (T):
 	M*X = R*X + T
 **/

@@ -137,7 +137,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* theMesh,
 		normProgress = new NormalizedProgress(progressCb,triCount);
 		progressCb->setMethodTitle("Mesh sampling");
 		char buffer[256];
-		sprintf(buffer,"Triangles: %i\nPoints: %i",triCount,theoricNumberOfPoints);
+		sprintf(buffer,"Triangles: %u\nPoints: %u",triCount,theoricNumberOfPoints);
 		progressCb->setInfo(buffer);
         progressCb->reset();
 		progressCb->start();

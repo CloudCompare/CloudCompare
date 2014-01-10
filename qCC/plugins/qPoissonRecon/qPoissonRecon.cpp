@@ -89,8 +89,8 @@ void qPoissonRecon::getActions(QActionGroup& group)
 	group.addAction(m_action);
 }
 
-static PoissonReconLib::Point3D* s_points = 0;
-static PoissonReconLib::Point3D* s_normals = 0;
+static PoissonReconLib::Point* s_points = 0;
+static PoissonReconLib::Point* s_normals = 0;
 static unsigned s_count = 0;
 static PoissonReconLib::Parameters s_params;
 static CoredVectorMeshData<PoissonReconLib::Vertex>* s_mesh;
@@ -160,21 +160,21 @@ void qPoissonRecon::doAction()
 
 	//set parameters with dialog settings
 	s_params.depth = prpDlg.octreeLevelSpinBox->value();
-	s_params.pointWeight = prpDlg.weightDoubleSpinBox->value();
+	s_params.pointWeight = static_cast<float>(prpDlg.weightDoubleSpinBox->value());
 	s_params.minDepth = prpDlg.minDepthSpinBox->value();
 	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesSpinBox->value());
-	s_params.solverAccuracy = prpDlg.solverAccuracyDoubleSpinBox->value();
+	s_params.solverAccuracy = static_cast<float>(prpDlg.solverAccuracyDoubleSpinBox->value());
 
 	 //TODO: faster, lighter
 	unsigned count = pc->size();
-	PoissonReconLib::Point3D* points = new PoissonReconLib::Point3D[count];
+	PoissonReconLib::Point* points = new PoissonReconLib::Point[count];
 	if (!points)
 	{
 		m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
-	PoissonReconLib::Point3D* normals = new PoissonReconLib::Point3D[count];
+	PoissonReconLib::Point* normals = new PoissonReconLib::Point[count];
 	if (!normals)
 	{
 		delete[] points;
@@ -187,12 +187,12 @@ void qPoissonRecon::doAction()
 		for (unsigned i=0; i<count; ++i)
 		{
 			const CCVector3* P = pc->getPoint(i);
-			points[i] = PoissonReconLib::Point3D(	static_cast<float>(P->x),
+			points[i] = PoissonReconLib::Point(	static_cast<float>(P->x),
 													static_cast<float>(P->y),
 													static_cast<float>(P->z) );
 
 			const PointCoordinateType* N = pc->getPointNormal(i);
-			normals[i] = PoissonReconLib::Point3D(	static_cast<float>(N[0]),
+			normals[i] = PoissonReconLib::Point(	static_cast<float>(N[0]),
 													static_cast<float>(N[1]),
 													static_cast<float>(N[2]) );
 		}

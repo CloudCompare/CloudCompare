@@ -344,7 +344,6 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 
 				PointCoordinateType lX = nNSS.queryPoint.u[iX] - gv->u[iX];
 				PointCoordinateType lY = nNSS.queryPoint.u[iY] - gv->u[iY];
-				PointCoordinateType lZ = nNSS.queryPoint.u[iZ] - gv->u[iZ];
 
 				PointCoordinateType N[3];
 				N[iX] = h[1] + (2 * h[3] * lX) + (h[4] * lY);

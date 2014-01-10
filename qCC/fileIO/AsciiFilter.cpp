@@ -704,7 +704,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 					cloudDesc.cloud->showSF(true);
 				}
 				//we add this cloud to the output container
-				container.addChild(cloudDesc.cloud,true);
+				container.addChild(cloudDesc.cloud);
 				cloudDesc.reset();
 
         		//and create new one
@@ -858,7 +858,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 			cloudDesc.cloud->showSF(true);
 		}
 
-		container.addChild(cloudDesc.cloud,true);
+		container.addChild(cloudDesc.cloud);
     }
 
     return result;

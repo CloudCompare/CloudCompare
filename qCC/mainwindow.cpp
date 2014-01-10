@@ -1344,8 +1344,7 @@ void MainWindow::doActionComputeOctree()
 
 		//we temporarily detach entity, as it may undergo
 		//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
-		ccHObject* parent=0;
-		removeObjectTemporarilyFromDBTree(cloud,parent);
+		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
 		
 		//computation
 		QElapsedTimer eTimer;
@@ -1389,7 +1388,7 @@ void MainWindow::doActionComputeOctree()
 		qint64 elapsedTime_ms = eTimer.elapsed();
 		
 		//put object back in tree
-		putObjectBackIntoDBTree(cloud,parent);
+		putObjectBackIntoDBTree(cloud,objContext);
 		
 		if (octree)
 		{
@@ -1509,12 +1508,11 @@ void MainWindow::doActionApplyTransformation()
 
 		//we temporarily detach entity, as it may undergo
 		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyRigidTransformation
-		ccHObject* parent = 0;
-		removeObjectTemporarilyFromDBTree(ent,parent);
+		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(ent);
 		ent->setGLTransformation(transMat);
 		ent->applyGLTransformation_recursive();
 		ent->prepareDisplayForRefresh_recursive();
-		putObjectBackIntoDBTree(ent,parent);
+		putObjectBackIntoDBTree(ent,objContext);
     }
 
     refreshAll();
@@ -1552,12 +1550,11 @@ void MainWindow::doActionMultiply()
         {
 			//we temporarily detach entity, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::multiply
-			ccHObject* parent=0;
-			removeObjectTemporarilyFromDBTree(cloud,parent);
+			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
             static_cast<ccPointCloud*>(cloud)->multiply((PointCoordinateType)s_lastMultFactorX,
 														(PointCoordinateType)s_lastMultFactorY,
 														(PointCoordinateType)s_lastMultFactorZ);
-			putObjectBackIntoDBTree(cloud,parent);
+			putObjectBackIntoDBTree(cloud,objContext);
             cloud->prepareDisplayForRefresh_recursive();
 
 			//don't forget shift on load!
@@ -1708,10 +1705,9 @@ void MainWindow::doComputeBestFitBB()
 
 					//we temporarily detach entity, as it may undergo
 					//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
-					ccHObject* parent = 0;
-					removeObjectTemporarilyFromDBTree(cloud,parent);
+					ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
 					static_cast<ccPointCloud*>(cloud)->applyRigidTransformation(trans);
-					putObjectBackIntoDBTree(cloud,parent);
+					putObjectBackIntoDBTree(cloud,objContext);
 
                     ent->prepareDisplayForRefresh_recursive();
                 }
@@ -1759,10 +1755,9 @@ void MainWindow::doActionClearProperty(int prop)
 			if (mesh->hasTriNormals())
 			{
 				mesh->showNormals(false);
-				ccHObject* parent = 0;
-				removeObjectTemporarilyFromDBTree(mesh,parent);
+				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(mesh);
 				mesh->clearTriNormals();
-				putObjectBackIntoDBTree(mesh,parent);
+				putObjectBackIntoDBTree(mesh,objContext);
 				ent->prepareDisplayForRefresh();
 				continue;
 			}
@@ -1905,9 +1900,9 @@ void MainWindow::doActionComputeDistancesFromSensor()
 
     //sensor center
 	ccIndexedTransformation trans;
-	if (!sensor->getCenterPosition(trans, sensor->getActiveIndex()))
+	if (!sensor->getAbsoluteTransformation(trans, sensor->getActiveIndex()))
 	{
-		ccLog::Error("[doActionComputeDistancesFromSensor] Failed to get a valid position for current index!");
+		ccLog::Error("[doActionComputeDistancesFromSensor] Failed to get a valid transformation for current index!");
 		return;
 	}
 	CCVector3 sensorCenter = trans.getTranslationAsVec3D();
@@ -1971,9 +1966,9 @@ void MainWindow::doActionComputeScatteringAngles()
 
     //sensor center
 	ccIndexedTransformation trans;
-	if (!sensor->getCenterPosition(trans, sensor->getActiveIndex()))
+	if (!sensor->getAbsoluteTransformation(trans, sensor->getActiveIndex()))
 	{
-		ccLog::Error("[doActionComputeDistancesFromSensor] Failed to get a valid position for current index!");
+		ccLog::Error("[doActionComputeDistancesFromSensor] Failed to get a valid transformation for current index!");
 		return;
 	}
 	CCVector3 sensorCenter = trans.getTranslationAsVec3D();
@@ -2050,9 +2045,9 @@ void MainWindow::doActionSetViewFromSensor()
 	assert(sensor);
     //sensor center
 	ccIndexedTransformation trans;
-	if (!sensor->getCenterPosition(trans, sensor->getActiveIndex()))
+	if (!sensor->getAbsoluteTransformation(trans, sensor->getActiveIndex()))
 	{
-		ccLog::Error("[doActionSetViewFromSensor] Failed to get a valid position for current index!");
+		ccLog::Error("[doActionSetViewFromSensor] Failed to get a valid transformation for current index!");
 		return;
 	}
 	CCVector3 sensorCenter = trans.getTranslationAsVec3D();
@@ -2286,8 +2281,8 @@ void MainWindow::doActionExportDepthBuffer()
         {
             toSave = new ccHObject("Temp Group");
             for (size_t i=0; i<m_selectedEntities.size(); ++i)
-                toSave->addChild(m_selectedEntities[i],false);
-            multEntities=true;
+				toSave->addChild(m_selectedEntities[i],ccHObject::DP_NONE);
+            multEntities = true;
         }
         else
         {
@@ -3139,7 +3134,7 @@ void MainWindow::RemoveSiblingsFromCCObjectList(ccHObject::Container& ccObjects)
 void MainWindow::doActionMerge()
 {
     ccPointCloud* firstCloud = 0;
-	ccHObject* firstCloudParent = 0;
+	ccHObjectContext firstCloudContext;
 
     //we deselect all selected entities (as they are going to disappear)
     ccHObject::Container _selectedEntities = m_selectedEntities;
@@ -3168,10 +3163,10 @@ void MainWindow::doActionMerge()
 
                 if (!firstCloud)
 				{
-                    firstCloud=pc;
+                    firstCloud = pc;
 					//we temporarily detach the first cloud, as it may undergo
 					//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
-					removeObjectTemporarilyFromDBTree(firstCloud,firstCloudParent);
+					firstCloudContext = removeObjectTemporarilyFromDBTree(firstCloud);
 				}
                 else
                 {
@@ -3187,7 +3182,7 @@ void MainWindow::doActionMerge()
 						ccHObject* toRemove = 0;
 						//if the entity to remove is a group with a unique child, we can remove it as well
 						ccHObject* parent = pc->getParent();
-						if (parent && parent->isA(CC_HIERARCHY_OBJECT) && parent->getChildrenNumber() == 1 && parent!=firstCloudParent)
+						if (parent && parent->isA(CC_HIERARCHY_OBJECT) && parent->getChildrenNumber() == 1 && parent!=firstCloudContext.parent)
 							toRemove = parent;
 						else
 							toRemove = pc;
@@ -3250,7 +3245,7 @@ void MainWindow::doActionMerge()
 	}
 
 	if (firstCloud)
-		putObjectBackIntoDBTree(firstCloud,firstCloudParent);
+		putObjectBackIntoDBTree(firstCloud,firstCloudContext);
 
     refreshAll();
 	updateUI();
@@ -3500,10 +3495,9 @@ void MainWindow::doActionRegister()
         {
 			//we temporarily detach cloud, as it may undergo
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::applyRigidTransformation
-			ccHObject* parent=0;
-			removeObjectTemporarilyFromDBTree(pc,parent);
+			ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(pc);
 			pc->applyRigidTransformation(transMat);
-			putObjectBackIntoDBTree(pc,parent);
+			putObjectBackIntoDBTree(pc,objContext);
 
             //don't forget to update mesh bounding box also!
             if (data->isKindOf(CC_MESH))
@@ -4961,7 +4955,7 @@ void MainWindow::doActionFindBiggestInnerRectangle()
 	s_innerRectDim = dim;
 
 	ccGenericPointCloud* cloud = static_cast<ccGenericPointCloud*>(entity);
-	ccBox* box = ccInnerRect2DFinder().process(cloud,dim);
+	ccBox* box = ccInnerRect2DFinder().process(cloud,static_cast<unsigned char>(dim));
 
 	if (box)
 	{
@@ -5008,10 +5002,9 @@ void MainWindow::doActionMatchBarycenters()
 
 		//we temporarily detach entity, as it may undergo
 		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyGLTransformation
-		ccHObject* parent = 0;
-		removeObjectTemporarilyFromDBTree(ent,parent);
+		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(ent);
 		ent->applyGLTransformation_recursive(&glTrans);
-		putObjectBackIntoDBTree(ent,parent);
+		putObjectBackIntoDBTree(ent,objContext);
 
 		ent->prepareDisplayForRefresh_recursive();
     }
@@ -5500,19 +5493,17 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							{
 								ccLog::Warning(QString("[Segmentation] Label %1 is dependent on cloud %2 and will be removed").arg(label->getName()).arg(cloud->getName()));
 								ccHObject* labelParent = label->getParent();
-								ccHObject* labelParentParent = 0;
-								removeObjectTemporarilyFromDBTree(labelParent,labelParentParent);
+								ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(labelParent);
 								labelParent->removeChild(label);
 								label=0;
-								putObjectBackIntoDBTree(labelParent,labelParentParent);
+								putObjectBackIntoDBTree(labelParent,objContext);
 							}
 						}
 				}
 
 				//we temporarily detach entity, as it may undergo
 				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
-				ccHObject* parent=0;
-				removeObjectTemporarilyFromDBTree(entity,parent);
+				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 
 				ccHObject* segmentationResult = 0;
 				if (entity->isKindOf(CC_POINT_CLOUD))
@@ -5547,7 +5538,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						if (entity)
 						{
 							entity->setName(entity->getName()+QString(".remaining"));
-							putObjectBackIntoDBTree(entity,parent);
+							putObjectBackIntoDBTree(entity,objContext);
 						}
 					}
 					else
@@ -5572,17 +5563,17 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					if (segmentationResult->isA(CC_SUB_MESH))
 					{
 						//for sub-meshes, we have no choice but to use its parent mesh!
-						parent = static_cast<ccSubMesh*>(segmentationResult)->getAssociatedMesh();
+						objContext.parent = static_cast<ccSubMesh*>(segmentationResult)->getAssociatedMesh();
 					}
 					else
 					{
 						//otherwise we look for first non-mesh or non-cloud parent
-						while (parent && (parent->isKindOf(CC_MESH) || parent->isKindOf(CC_POINT_CLOUD)))
-							parent = parent->getParent();
+						while (objContext.parent && (objContext.parent->isKindOf(CC_MESH) || objContext.parent->isKindOf(CC_POINT_CLOUD)))
+							objContext.parent = objContext.parent->getParent();
 					}
 
-					if (parent)
-						parent->addChild(segmentationResult);
+					if (objContext.parent)
+						objContext.parent->addChild(segmentationResult); //FiXME: objContext.parentFlags?
 
 					addToDB(segmentationResult, true, 0, true, false);
 					segmentationResult->prepareDisplayForRefresh_recursive();
@@ -5593,7 +5584,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				else if (entity)
 				{
 					//ccConsole::Error("An error occurred! (not enough memory?)");
-					putObjectBackIntoDBTree(entity,parent);
+					putObjectBackIntoDBTree(entity,objContext);
 				}
 			}
         }
@@ -6019,7 +6010,7 @@ void MainWindow::zoomOnSelectedEntities()
 		{
 			if (m_selectedEntities[i]->getDisplay() == win)
 			{
-				tempGroup.addChild(m_selectedEntities[i],false);
+				tempGroup.addChild(m_selectedEntities[i],ccHObject::DP_NONE);
 			}
 			else if (m_selectedEntities[i]->getDisplay() != 0)
 			{
@@ -7399,8 +7390,9 @@ void MainWindow::removeFromDB(ccHObject* obj, bool autoDelete/*=true*/)
 	if (!obj)
 		return;
 
+	//remove dependency to avoid deleting the object when removing it from DB tree
 	if (!autoDelete && obj->getParent())
-		obj->setFlagState(CC_FATHER_DEPENDENT,false);
+		obj->getParent()->removeDependencyWith(obj);
 
 	if (m_ccRoot)
 		m_ccRoot->removeElement(obj);
@@ -7745,7 +7737,7 @@ void MainWindow::saveFile()
 
 			//we don't want double insertions if the user has clicked both the father and child
 			if (!dest->find(child->getUniqueID()))
-				dest->addChild(child,false);
+				dest->addChild(child,ccHObject::DP_NONE);
         }
 	}
 
@@ -7910,7 +7902,7 @@ void MainWindow::saveFile()
 			{
 				ccHObject root;
 				for (size_t i=0; i<tempContainer.size(); ++i)
-					root.addChild(tempContainer[i],false);
+					root.addChild(tempContainer[i],ccHObject::DP_NONE);
 				result = FileIOFilter::SaveToFile(&root,qPrintable(selectedFilename),BIN);
 			}
 			else
@@ -8536,34 +8528,46 @@ ccHObject* MainWindow::dbRootObject()
 	return (m_ccRoot ? m_ccRoot->getRootEntity() : 0);
 }
 
-void MainWindow::removeObjectTemporarilyFromDBTree(ccHObject* obj, ccHObject* &parent)
+MainWindow::ccHObjectContext MainWindow::removeObjectTemporarilyFromDBTree(ccHObject* obj)
 {
-	parent = 0;
+	ccHObjectContext context;
 
 	assert(obj);
 	if (!m_ccRoot || !obj)
-		return;
+		return context;
 
 	//mandatory (to call putObjectBackIntoDBTree)
-	parent = obj->getParent();
+	context.parent = obj->getParent();
 
-	//detach the object (in case its children undergo "severe" modifications)
-	obj->setFlagState(CC_FATHER_DEPENDENT,false);
+	//remove the object's dependency to its father (in case it undergoes "severe" modifications)
+	if (context.parent)
+	{
+		context.parentFlags = context.parent->getDependencyFlagsWith(obj);
+		context.childFlags = obj->getDependencyFlagsWith(context.parent);
+
+		context.parent->removeDependencyWith(obj);
+		obj->removeDependencyWith(context.parent);
+	}
+
 	m_ccRoot->removeElement(obj);
+
+	return context;
 }
 
-void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, ccHObject* parent)
+void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context)
 {
 	assert(obj);
 	if (!obj || !m_ccRoot)
 		return;
 
-	obj->setFlagState(CC_FATHER_DEPENDENT,true);
-	if (parent)
-		parent->addChild(obj);
+	if (context.parent)
+	{
+		context.parent->addChild(obj,context.parentFlags);
+		obj->addDependency(context.parent,context.childFlags);
+	}
+
 	m_ccRoot->addElement(obj,false);
 }
-
 
 //For primitives test
 /*#include <ccBox.h>

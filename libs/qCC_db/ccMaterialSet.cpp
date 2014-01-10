@@ -39,7 +39,6 @@ ccMaterialSet::ccMaterialSet(QString name/*=QString()*/)
 	, m_display(0)
 {
 	setFlagState(CC_LOCKED,true);
-	setFlagState(CC_FATHER_DEPENDENT,false);
 }
 
 ccMaterialSet::~ccMaterialSet()

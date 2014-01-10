@@ -27,7 +27,7 @@
 
 //! Object state flag
 enum CC_OBJECT_FLAG {
-    CC_FATHER_DEPENDENT     =   1,
+    //CC_UNUSED				=   1, //DGM: not used anymore (former CC_FATHER_DEPENDENT)
     CC_ENABLED              =   2,
     CC_LOCKED               =   4,
 };

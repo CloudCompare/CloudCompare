@@ -1180,20 +1180,20 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 				return false; //nothing to do
 		}
 
-		//remove link from old parent
-		bool fatherDependant = false;
-		if (item->getFlagState(CC_FATHER_DEPENDENT))
-		{
-			fatherDependant = true;
-			item->setFlagState(CC_FATHER_DEPENDENT,false);
-		}
+		//remove link with old parent
+		int itemDependencyFlags = item->getDependencyFlagsWith(oldParent); //works even with NULL
+		int fatherDependencyFlags = oldParent ? oldParent->getDependencyFlagsWith(item) : 0;
+		if (oldParent)
+			oldParent->removeDependencyWith(item);
+		item->removeDependencyWith(oldParent);
 
 		//remove item from current position
 		removeElement(item);
 
 		//sets new parent
 		assert(newParent);
-		newParent->addChild(item,fatherDependant,destRow);
+		newParent->addChild(item,fatherDependencyFlags,destRow);
+		item->addDependency(newParent,itemDependencyFlags);
 
 		if (newParent->getDisplay() == 0)
 			newParent->setDisplay(item->getDisplay());

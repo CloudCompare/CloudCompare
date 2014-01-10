@@ -145,7 +145,7 @@ bool ccSphere::buildUp()
 		}
 	}
 
-	updateModificationTime();
+	notifyGeometryUpdate();
 	showNormals(true);
 
 	return true;

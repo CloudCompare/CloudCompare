@@ -212,7 +212,7 @@ bool ccCone::buildUp()
 		}
 	}
 
-	updateModificationTime();
+	notifyGeometryUpdate();
 	showTriNorms(true);
 
 	return true;

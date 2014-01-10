@@ -38,6 +38,7 @@
 #include <ccMaterialSet.h>
 #include <cc2DLabel.h>
 #include <ccFacet.h>
+#include <ccSensor.h>
 
 //system
 #include <set>
@@ -217,6 +218,11 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 				dependencies.insert(pc);
 			else
 				ccLog::Warning(QString("[BIN] Poyline '%1' is associated to an unhandled vertices structure?!").arg(currentObject->getName()));
+		}
+		else if (currentObject->isKindOf(CC_SENSOR))
+		{
+			ccIndexedTransformationBuffer* buffer = static_cast<ccSensor*>(currentObject)->getPositions();
+			dependencies.insert(buffer);
 		}
 		else if (currentObject->isA(CC_2D_LABEL))
 		{
@@ -597,6 +603,23 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				return CC_FERR_MALFORMED_FILE;
 			}
 		}
+		else if (currentObject->isKindOf(CC_SENSOR))
+		{
+			ccSensor* sensor = static_cast<ccSensor*>(currentObject);
+			intptr_t bufferID = (intptr_t)sensor->getPositions();
+			ccHObject* buffer = root->find(static_cast<int>(bufferID));
+			if (buffer && buffer->isKindOf(CC_TRANS_BUFFER))
+				sensor->setPositions(ccHObjectCaster::ToTransBuffer(buffer));
+			else
+			{
+				//we have a problem here ;)
+				sensor->setPositions(0);
+				//DGM: can't delete it, too dangerous (bad pointers ;)
+				//delete root;
+				ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
+				return CC_FERR_MALFORMED_FILE;
+			}
+		}
 		else if (currentObject->isA(CC_2D_LABEL))
 		{
 			cc2DLabel* label = static_cast<cc2DLabel*>(currentObject);
@@ -619,11 +642,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find cloud (ID=%1) associated to label '%2' in the file!").arg(cloudID).arg(label->getName()));
 					if (label->getParent())
 						label->getParent()->removeChild(label);
-					if (!label->getFlagState(CC_FATHER_DEPENDENT))
-					{
-						//DGM: can't delete it, too dangerous (bad pointers ;)
-						//delete label;
-					}
+					//DGM: can't delete it, too dangerous (bad pointers ;)
+					//delete label;
 					label=0;
 					break;
 				}

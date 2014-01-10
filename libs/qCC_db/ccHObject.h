@@ -66,10 +66,12 @@ public:
     /*** Inter-objects dependencies management ***/
 
 	//! Dependency flags
-	enum DEPENDENCY_FLAGS {	DP_NOTIFY_OTHER_ON_DELETE	= 1,
-							DP_REDRAW_OTHER				= 2,
-							DP_UPDATE_OTHER_BB			= 4,
-							DP_DELETE_OTHER				= 8,
+	enum DEPENDENCY_FLAGS {	DP_NONE						= 0,	//no dependency
+							DP_NOTIFY_OTHER_ON_DELETE	= 1,	//notify 'other' when deleted
+							DP_NOTIFY_OTHER_ON_UPDATE	= 2,	//notify 'other' when modified (geometry)
+							//DP_NOTIFY_XXX				= 4,	
+							DP_DELETE_OTHER				= 8,	//delete 'other' before deleting itself
+							DP_PARENT_OF_OTHER			= 24,	//same as DP_DELETE_OTHER + declares itself as parent of 'other'
 	};
 
 	//! Adds a new dependence (additive or not)
@@ -82,37 +84,42 @@ public:
 	//! Returns the dependency flags with a given object
 	/** \param otherObject other object
 	**/
-	int getDependencyFlagsWith(ccHObject* otherObject);
+	int getDependencyFlagsWith(const ccHObject* otherObject);
 
 	//! Removes any dependency flags with a given object
 	/** \param otherObject other object
 	**/
-	void removeDependencyWith(ccHObject* otherObject);
+	void removeDependencyWith(const ccHObject* otherObject);
 
-	//! This method is called when another object is deleted
-	/** \warning For internal use.
+	//! Removes a given dependency flag
+	/** \param otherObject other object
+		\param flag dependency flag to remove (see DEPENDENCY_FLAGS)
 	**/
-	virtual void onDeletionOf(ccHObject* obj);
+	void removeDependencyFlag(ccHObject* otherObject, DEPENDENCY_FLAGS flag);
 
     /*** children management ***/
 
-    //! Adds a child to object's children list
-    /** \param anObject child
-        \param dependant specifies if the child object should be deleted with its parent
-		\param insertIndex insertion index (if <0, item is simply appended to the children list)
+    //! Adds a child
+    /** \warning by default (i.e. with the DP_PARENT_OF_OTHER flag) the child's parent
+		will be automatically replaced by this instance. Moreover the child will be deleted
+
+		\param child child instance
+        \param dependencyFlags dependency flags
+		\param insertIndex insertion index (if <0, child is simply appended to the children list)
+		\return success
     **/
-    virtual void addChild(ccHObject* anObject, bool dependant = true, int insertIndex = -1);
+    virtual bool addChild(ccHObject* child, int dependencyFlags = DP_PARENT_OF_OTHER, int insertIndex = -1);
 
     //! Returns the number of children
     /** \return children number
     **/
-	inline unsigned getChildrenNumber() const { return (unsigned)m_children.size(); }
+	inline unsigned getChildrenNumber() const { return static_cast<unsigned>(m_children.size()); }
 
     //! Returns the ith child
     /** \param childPos child position
         \return child object (or NULL if wrong position)
     **/
-	inline ccHObject* getChild(unsigned childPos) const { return (childPos < m_children.size() ? m_children[childPos] : 0); }
+	inline ccHObject* getChild(unsigned childPos) const { return (childPos < getChildrenNumber() ? m_children[childPos] : 0); }
 
 	//! Finds an entity in this object hierarchy
 	/** \param uniqueID child unique ID
@@ -131,10 +138,26 @@ public:
     **/
     unsigned filterChildren(Container& filteredChildren, bool recursive = false, CC_CLASS_ENUM filter = CC_OBJECT) const;
 
+    //! Detaches a specific child
+	/** This method does not delete the child.
+		Removes any dependency between the flag and this object
+	**/
+    void detachChild(ccHObject* child);
     //! Removes a specific child
-    void removeChild(const ccHObject* anObject, bool preventAutoDelete = false);
+	/** \warning This method may delete the child if the DP_PARENT_OF_OTHER
+		dependency flag is set for this child (use detachChild if you
+		want to avoid deletion).
+	**/
+    //! Detaches all children
+    void detatchAllChildren();
+
+	void removeChild(ccHObject* child);
     //! Removes a specific child given its index
-    void removeChild(int pos, bool preventAutoDelete = false);
+	/** \warning This method may delete the child if the DP_PARENT_OF_OTHER
+		dependency flag is set for this child (use detachChild if you
+		want to avoid deletion).
+	**/
+    void removeChild(int pos);
     //! Removes all children
     void removeAllChildren();
     //! Returns child index
@@ -144,11 +167,8 @@ public:
     //! Returns index relatively to its parent or -1 if no parent
     int getIndex() const;
 
-	//! Detaches entity from parent
-	void detachFromParent();
-
 	//! Transfer a given child to another parent
-	void transferChild(unsigned index, ccHObject& newParent);
+	void transferChild(ccHObject* child, ccHObject& newParent);
 	//! Transfer all children to another parent
 	void transferChildren(ccHObject& newParent, bool forceFatherDependent = false);
 
@@ -226,18 +246,8 @@ public:
     **/
     virtual CCVector3 getCenter();
 
-    //! Returns last modification time
-    /** \return last modification time
-    **/
-	inline int getLastModificationTime() const { return m_lastModificationTime_ms; }
-
-    //! Returns last modification time (recursive)
-    /** \return last modification time
-    **/
-    int getLastModificationTime_recursive() const;
-
-    //! Updates modification time
-    void updateModificationTime();
+	//! Notifies all dependent entities that the geometry of this entity has changed
+	void notifyGeometryUpdate();
 
     //! Returns the entity bounding-box only
     /** Children bboxes are ignored.
@@ -316,14 +326,21 @@ protected:
 	**/
 	virtual void drawNameIn3D(CC_DRAW_CONTEXT& context);
 
+	//! This method is called when another object is deleted
+	/** For internal use.
+	**/
+	virtual void onDeletionOf(const ccHObject* obj);
+
+	//! This method is called when another object (geometry) is updated
+	/** For internal use.
+	**/
+	virtual void onUpdateOf(ccHObject* obj) { /*does nothing by default*/ }
+
     //! Object's parent
     ccHObject* m_parent;
 
     //! Object's children
     Container m_children;
-
-    //! Last modification time (ms)
-    int m_lastModificationTime_ms;
 
 	//! Selection behavior
 	SelectionBehavior m_selectionBehavior;

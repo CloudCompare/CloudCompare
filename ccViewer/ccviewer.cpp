@@ -172,15 +172,15 @@ void ccViewer::doActionDeleteSelectedEntity()
 		
 		if (obj->isSelected())
 		{
-			bool fatherDependant = false;
 			if (obj->getParent())
 			{
-				//Warning: we must ask the object if it is fatehr dependant BEFORE removing it ;)
-				fatherDependant = obj->getFlagState(CC_FATHER_DEPENDENT);
+				obj->getParent()->addDependency(obj,ccHObject::DP_DELETE_OTHER); //we force deletion!
 				obj->getParent()->removeChild(obj);
 			}
-			if (!fatherDependant)
+			else
+			{
 				delete obj;
+			}
 		}
 		else
 		{

@@ -1512,7 +1512,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 							mesh->addTriangleTexCoordIndexes(i*3,i*3+1,i*3+2);
 						}
 						mesh->showMaterials(true);
-						mesh->addChild(materials,true);
+						mesh->addChild(materials);
 					}
 					else
 					{

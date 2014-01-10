@@ -259,7 +259,7 @@ bool ccGenericPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flag
 	if (in.read((char*)m_globalShift.u,sizeof(double)*3)<0)
 		return ReadError();
 
-	//'global scale' (dataVersion>=32)
+	//'global scale' (dataVersion>=33)
 	if (dataVersion >= 33)
 	{
 		if (in.read((char*)&m_globalScale,sizeof(double))<0)

@@ -191,9 +191,7 @@ QString ccCommandLineParser::Export2BIN(CloudDesc& cloudDesc, QString suffix/*=Q
 		baseName += QString("_") + suffix;
 	QString outputFilename = QString("%1/%2_%3.bin").arg(cloudDesc.path).arg(baseName).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
 
-	ccHObject group;
-	group.addChild(cloudDesc.pc,false);
-	if (FileIOFilter::SaveToFile(&group,qPrintable(outputFilename),BIN) != CC_FERR_NO_ERROR)
+	if (FileIOFilter::SaveToFile(cloudDesc.pc,qPrintable(outputFilename),BIN) != CC_FERR_NO_ERROR)
 		return QString("Failed to save result in file '%1'").arg(outputFilename);
 
 	//Print(QString("--> result saved to file '%1'").arg(outputFilename)); //DGM: message already logged by FileIOFilter::SaveToFile (or BinFilter?)
@@ -220,7 +218,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	for (size_t i=0;i<count;++i)
 	{
 		ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[0]);
-		pc->setFlagState(CC_FATHER_DEPENDENT,false);
+		db->detachChild(pc);
 		Print(QString("Found one cloud with %1 points").arg(pc->size()));
 		m_clouds.push_back(CloudDesc(pc,filename,count == 1 ? -1 : static_cast<int>(i)));
 	}
@@ -231,7 +229,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	if (!meshes.empty())
 	{
 		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[0]);
-		mesh->setFlagState(CC_FATHER_DEPENDENT,false);
+		db->detachChild(mesh);
 		Print(QString("Found one mesh with %1 faces and %2 vertices").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()));
 		m_meshes.push_back(MeshDesc(mesh,filename));
 	}

@@ -872,20 +872,20 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			{
 				baseMesh->setTriNormsTable(normals);
 				baseMesh->showTriNorms(true);
-				baseMesh->addChild(normals,true);
+				baseMesh->addChild(normals);
 			}
 			if (materials)
 			{
 				baseMesh->setMaterialSet(materials);
 				baseMesh->showMaterials(true);
-				baseMesh->addChild(materials,true);
+				baseMesh->addChild(materials);
 			}
 			if (texCoords)
 			{
 				if (materials)
 				{
 					baseMesh->setTexCoordinatesTable(texCoords);
-					baseMesh->addChild(texCoords,true);
+					baseMesh->addChild(texCoords);
 				}
 				else
 				{

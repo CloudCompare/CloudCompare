@@ -30,7 +30,7 @@ ccGenericPrimitive::ccGenericPrimitive(QString name/*=QString()*/, const ccGLMat
 
 	ccPointCloud* vert = vertices();
 	assert(vert);
-	addChild(vert,true);
+	addChild(vert);
 	vert->setEnabled(false);
 
 	if (transMat)
@@ -97,10 +97,10 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 				setTriNormsTable(normsTable);
 				assert(m_triNormals);
 				//primitives must have their normal table as child!
-				addChild(m_triNormals,true);
+				addChild(m_triNormals);
 			}
 
-			for (unsigned i=0;i<primTriNormCount;++i)
+			for (unsigned i=0; i<primTriNormCount; ++i)
 				normsTable->addElement(primNorms->getValue(i));
 		}
 
@@ -261,7 +261,7 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 			setTriNormsTable(normsTable);
 			assert(m_triNormals);
 			//primitives must have their normal table as child!
-			addChild(m_triNormals,true);
+			addChild(m_triNormals);
 		}
 	}
 

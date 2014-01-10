@@ -316,6 +316,11 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment primitives yet! Sorry...");
 			return false;
 		}
+		if (anObject->isKindOf(CC_SUB_MESH))
+		{
+			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment sub-meshes! Select the parent mesh...");
+			return false;
+		}
 		else
 		{
 			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(anObject);

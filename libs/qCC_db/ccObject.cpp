@@ -43,7 +43,7 @@
    v3.3 - 12/19/2013 - global scale information is now saved for point clouds
    v3.4 - 01/09/2014 - ccIndexedTransformation and ccIndexedTransformationBuffer added
 **/
-const unsigned c_currentDBVersion = 33; //3.3
+const unsigned c_currentDBVersion = 34; //3.4
 
 unsigned ccObject::GetCurrentDBVersion()
 {

@@ -48,8 +48,6 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	, m_associatedCloud(0)
 	, m_lastPreviousID(0)
 	, m_orderedLabelsContainer(0)
-	, m_toBeDeleted(0)
-	, m_toBeAdded(0)
 {
 	setupUi(this);
 	setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);
@@ -76,9 +74,6 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	connect(exportToNewPolyline,	SIGNAL(triggered()),        this,				SLOT(exportToNewPolyline()));
 	connect(markerSizeSpinBox,      SIGNAL(valueChanged(int)),  this,				SLOT(markerSizeChanged(int)));
 	connect(startIndexSpinBox,      SIGNAL(valueChanged(int)),  this,				SLOT(startIndexChanged(int)));
-
-	m_toBeDeleted = new ccHObject("To be deleted");
-	m_toBeAdded = new ccHObject("To be Added");
 
 	updateList();
 }
@@ -140,11 +135,11 @@ void ccPointListPickingDlg::cancelAndExit()
 	if (m_orderedLabelsContainer)
 	{
 		//Restore previous state
-		for (unsigned i=0;i<m_toBeAdded->getChildrenNumber();++i)
-			MainWindow::TheInstance()->db()->removeElement(m_toBeAdded->getChild(i));
-			//m_orderedLabelsContainer->removeChild(m_toBeAdded->getChild(i));
-		for (unsigned j=0;j<m_toBeDeleted->getChildrenNumber();++j)
-			m_toBeDeleted->getChild(j)->setVisible(true);
+		for (size_t i=0; i<m_toBeAdded.size(); ++i)
+			MainWindow::TheInstance()->db()->removeElement(m_toBeAdded[i]);
+			//m_orderedLabelsContainer->removeChild(m_toBeAdded[i]);
+		for (size_t j=0; j<m_toBeDeleted.size(); ++j)
+			m_toBeDeleted[j]->setVisible(true);
 		if (m_orderedLabelsContainer->getChildrenNumber() == 0)
 		{
 			MainWindow::TheInstance()->db()->removeElement(m_orderedLabelsContainer);
@@ -153,8 +148,8 @@ void ccPointListPickingDlg::cancelAndExit()
 		}
 	}
 
-	m_toBeDeleted->removeAllChildren();
-	m_toBeAdded->removeAllChildren();
+	m_toBeDeleted.clear();
+	m_toBeAdded.clear();
 	m_associatedCloud = 0;
 	m_orderedLabelsContainer = 0;
 
@@ -248,14 +243,14 @@ void ccPointListPickingDlg::applyAndExit()
 	{
 		//Apply modifications
 		{
-			for (unsigned i=0;i<m_toBeDeleted->getChildrenNumber();++i)
-				MainWindow::TheInstance()->db()->removeElement(m_toBeDeleted->getChild(i));
+			for (size_t i=0; i<m_toBeDeleted.size(); ++i)
+				MainWindow::TheInstance()->db()->removeElement(m_toBeDeleted[i]);
 		}
 		m_associatedCloud = 0;
 	}
 
-	m_toBeDeleted->removeAllChildren();
-	m_toBeAdded->removeAllChildren();
+	m_toBeDeleted.clear();
+	m_toBeAdded.clear();
 	m_orderedLabelsContainer = 0;
 
 	updateList();
@@ -279,23 +274,28 @@ void ccPointListPickingDlg::removeLastEntry()
 	{
 		//old label: hide it and add it to the 'to be deleted' list (will be restored if process is cancelled)
 		lastVisibleLabel->setVisible(false);
-		m_toBeDeleted->addChild(lastVisibleLabel,false);
+		m_toBeDeleted.push_back(lastVisibleLabel);
 	}
 	else
 	{
-		lastVisibleLabel->setFlagState(CC_FATHER_DEPENDENT,false);
-		if (m_toBeAdded && m_toBeAdded->getChildrenNumber() != 0)
+		if (!m_toBeAdded.empty())
 		{
-			unsigned lastIndex = m_toBeAdded->getChildrenNumber()-1;
-			assert(m_toBeAdded->getChild(lastIndex) == lastVisibleLabel);
-			m_toBeAdded->removeChild(lastIndex);
+			assert(m_toBeAdded.back() == lastVisibleLabel);
+			m_toBeAdded.pop_back();
 		}
 
 		if (m_orderedLabelsContainer)
+		{
+			if (lastVisibleLabel->getParent())
+			{
+				lastVisibleLabel->getParent()->removeDependencyWith(lastVisibleLabel);
+				lastVisibleLabel->removeDependencyWith(lastVisibleLabel->getParent());
+			}
 			//m_orderedLabelsContainer->removeChild(lastVisibleLabel);
 			MainWindow::TheInstance()->db()->removeElement(lastVisibleLabel);
+		}
 		else
-			m_associatedCloud->removeChild(lastVisibleLabel);
+			m_associatedCloud->detachChild(lastVisibleLabel);
 	}
 
 	updateList();
@@ -463,13 +463,13 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 	if (!m_orderedLabelsContainer)
 	{
 		m_orderedLabelsContainer = new ccHObject(s_pickedPointContainerName);
-		m_associatedCloud->addChild(m_orderedLabelsContainer,true);
+		m_associatedCloud->addChild(m_orderedLabelsContainer);
 		MainWindow::TheInstance()->addToDB(m_orderedLabelsContainer,true,0,true,false);
 	}
 	assert(m_orderedLabelsContainer);
-	m_orderedLabelsContainer->addChild(newLabel,true);
+	m_orderedLabelsContainer->addChild(newLabel);
 	MainWindow::TheInstance()->addToDB(newLabel,true,0,true,false);
-	m_toBeAdded->addChild(newLabel,false);
+	m_toBeAdded.push_back(newLabel);
 
 	//automatically send the new point coordinates to the clipboard
 	QClipboard* clipboard = QApplication::clipboard();

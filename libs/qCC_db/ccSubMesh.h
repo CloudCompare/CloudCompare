@@ -160,6 +160,7 @@ protected:
     //inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual void onUpdateOf(ccHObject* obj);
 
 	//! Associated mesh
 	ccMesh* m_associatedMesh;

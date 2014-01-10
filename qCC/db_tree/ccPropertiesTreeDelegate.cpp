@@ -1602,7 +1602,7 @@ void ccPropertiesTreeDelegate::trihedronsScaleChanged(double val)
 	ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
 	assert(buffer);
 
-	buffer->setTriherdonsDisplayScale(val);
+	buffer->setTriherdonsDisplayScale(static_cast<float>(val));
 	if (buffer->triherdonsShown())
 		updateDisplay();
 }

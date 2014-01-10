@@ -19,7 +19,6 @@
 
 //Local
 #include "ccIncludeGL.h"
-#include "ccTimer.h"
 #include "ccLog.h"
 
 //Objects handled by factory
@@ -58,17 +57,52 @@ ccHObject::ccHObject(QString name/*=QString()*/)
 	: ccObject(name)
 	, ccDrawableObject()
 	, m_parent(0)
-	, m_lastModificationTime_ms(0)
 	, m_selectionBehavior(SELECTION_AA_BBOX)
 {
 	setVisible(false);
 	lockVisibility(true);
-	updateModificationTime();
 }
 
 ccHObject::~ccHObject()
 {
+	//process dependencies
+	for (std::map<ccHObject*,int>::const_iterator it=m_dependencies.begin(); it!=m_dependencies.end(); ++it)
+	{
+		assert(it->first);
+		//notify deletion to other object?
+		if ((it->second & DP_NOTIFY_OTHER_ON_DELETE) == DP_NOTIFY_OTHER_ON_DELETE)
+		{
+			it->first->onDeletionOf(this);
+		}
+
+		//delete other object?
+		if ((it->second & DP_DELETE_OTHER) == DP_DELETE_OTHER)
+		{
+			it->first->removeDependencyFlag(this,DP_NOTIFY_OTHER_ON_DELETE); //in order to avoid any loop!
+			//delete object
+			if (it->first->isShareable())
+				dynamic_cast<CCShareable*>(it->first)->release();
+			else
+				delete it->first;
+		}
+	}
+	m_dependencies.clear();
+
 	removeAllChildren();
+}
+
+void ccHObject::notifyGeometryUpdate()
+{
+	//process dependencies
+	for (std::map<ccHObject*,int>::const_iterator it=m_dependencies.begin(); it!=m_dependencies.end(); ++it)
+	{
+		assert(it->first);
+		//notify deletion to other object?
+		if ((it->second & DP_NOTIFY_OTHER_ON_UPDATE) == DP_NOTIFY_OTHER_ON_UPDATE)
+		{
+			it->first->onUpdateOf(this);
+		}
+	}
 }
 
 ccHObject* ccHObject::New(unsigned objectType, const char* name/*=0*/)
@@ -150,17 +184,14 @@ ccHObject* ccHObject::New(unsigned objectType, const char* name/*=0*/)
 	return 0;
 }
 
-//enum DEPENDENCY_FLAGS {	DP_NOTIFY_OTHER_ON_DELETE	= 1,
-//							DP_REDRAW_OTHER				= 2,
-//							DP_UPDATE_OTHER_BB			= 4,
-//							DP_DELETE_OTHER				= 8,
-//};
-
 void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*=true*/)
 {
+	if (flags <= 0)
+		return;
+
 	if (additive)
 	{
-		//look for an existing value
+		//look for already defined flags for this object
 		std::map<ccHObject*,int>::iterator it = m_dependencies.find(otherObject);
 		if (it != m_dependencies.end())
 			flags |= it->second;
@@ -169,72 +200,104 @@ void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*
 	m_dependencies[otherObject] = flags;
 }
 
-int ccHObject::getDependencyFlagsWith(ccHObject* otherObject)
+int ccHObject::getDependencyFlagsWith(const ccHObject* otherObject)
 {
-	std::map<ccHObject*,int>::const_iterator it = m_dependencies.find(otherObject);
+	std::map<ccHObject*,int>::const_iterator it = m_dependencies.find(const_cast<ccHObject*>(otherObject)); //DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
 
-	return it != m_dependencies.end() ? it->second : 0;
+	return (it != m_dependencies.end() ? it->second : 0);
 }
 
-void ccHObject::removeDependencyWith(ccHObject* otherObject)
+void ccHObject::removeDependencyWith(const ccHObject* otherObject)
 {
-	m_dependencies.erase(otherObject);
+	m_dependencies.erase(const_cast<ccHObject*>(otherObject)); //DGM: not sure why erase won't accept a const pointer?! We try to modify the map here, not the pointer object!
 }
 
-void ccHObject::onDeletionOf(ccHObject* obj)
+void ccHObject::removeDependencyFlag(ccHObject* otherObject, DEPENDENCY_FLAGS flag)
+{
+	int flags = getDependencyFlagsWith(otherObject);
+	if ((flags & flag) == flag)
+	{
+		flags = (flags & (~flag));
+		//either update the flags (if some bits remain)
+		if (flags != 0)
+			m_dependencies[otherObject] = flags;
+		else //otherwise remove the dependency
+			m_dependencies.erase(otherObject);
+	}
+}
+
+void ccHObject::onDeletionOf(const ccHObject* obj)
 {
 	//remove any dependency declated with this object
+	//and remove it from the children list as well (in case of)
+	//DGM: we can't call 'detachChild' as this method will try to
+	//modify the child's content!
+	//remove any dependency (bilateral)
 	removeDependencyWith(obj);
 
-	//check that it's no a child either
-	removeChild(obj);
+	int pos = getChildIndex(obj);
+	if (pos >= 0)
+	{
+		//we can't swap children as we want to keep the order!
+		m_children.erase(m_children.begin()+pos);
+	}
 }
 
-void ccHObject::addChild(ccHObject* anObject, bool dependant/*=true*/, int insertIndex/*=-1*/)
+bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OTHER*/, int insertIndex/*=-1*/)
 {
-	if (!anObject)
-		return;
+	if (!child)
+		return false;
 
 	if (isLeaf())
 	{
 		ccLog::ErrorDebug("[ccHObject::addChild] Leaf objects shouldn't have any child!");
-		return;
+		return false;
 	}
 
-	if (insertIndex<0 || insertIndex>=(int)m_children.size())
-		m_children.push_back(anObject);
-	else
-		m_children.insert(m_children.begin()+insertIndex,anObject);
-
-	if (dependant)
+	//insert child
+	try
 	{
-		anObject->setParent(this);
-		anObject->setFlagState(CC_FATHER_DEPENDENT,dependant);
-		if (anObject->isShareable())
-			dynamic_cast<CCShareable*>(anObject)->link();
+		if (insertIndex < 0 || static_cast<size_t>(insertIndex) >= m_children.size())
+			m_children.push_back(child);
+		else
+			m_children.insert(m_children.begin()+insertIndex,child);
 	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory!
+		return false;
+	}
+
+	//we want to be notified whenever this child is deleted!
+	child->addDependency(this,DP_NOTIFY_OTHER_ON_DELETE);
+
+	if (dependencyFlags != 0)
+		addDependency(child,dependencyFlags);
+	if ((dependencyFlags & DP_PARENT_OF_OTHER) == DP_PARENT_OF_OTHER)
+	{
+		child->setParent(this);
+		if (child->isShareable())
+			dynamic_cast<CCShareable*>(child)->link();
+	}
+
+	return true;
 }
 
 ccHObject* ccHObject::find(int uniqueID)
 {
-	//now, we are going to test each object in the database!
-	//(any better idea ?)
-	ccHObject::Container toTest;
-	toTest.push_back(this);
+	//found the right item?
+	if (getUniqueID() == uniqueID)
+		return this;
 
-	while (!toTest.empty())
+	//otherwise we are going to test all children recursively
+	for (unsigned i=0; i<getChildrenNumber(); ++i)
 	{
-		ccHObject* obj = toTest.back();
-		toTest.pop_back();
-
-		if (obj->getUniqueID() == static_cast<unsigned int>(uniqueID))
-			return obj;
-
-		for (unsigned i=0;i<obj->getChildrenNumber();++i)
-			toTest.push_back(obj->getChild(i));
+		ccHObject* match = getChild(i)->find(uniqueID);
+		if (match)
+			return match;
 	}
 
-	return NULL;
+	return 0;
 }
 
 unsigned ccHObject::filterChildren(Container& filteredChildren, bool recursive/*=false*/, CC_CLASS_ENUM filter/*=CC_OBJECT*/) const
@@ -248,78 +311,73 @@ unsigned ccHObject::filterChildren(Container& filteredChildren, bool recursive/*
 			{
 				filteredChildren.push_back(*it);
 			}
-			else
-			{
-				//don't put it twice!
-				//FIXME (for tests only)
-				QString childName = (*it)->getName();
-				childName.toUpper();
-			}
+			//else //FIXME (for tests only)
+			//{
+			//	//don't put it twice!
+			//	QString childName = (*it)->getName();
+			//	childName.toUpper();
+			//}
 		}
 
 		if (recursive)
 			(*it)->filterChildren(filteredChildren, true, filter);
 	}
 
-	return (unsigned)filteredChildren.size();
+	return static_cast<unsigned>(filteredChildren.size());
 }
 
-int ccHObject::getChildIndex(const ccHObject* aChild) const
+int ccHObject::getChildIndex(const ccHObject* child) const
 {
-	for (unsigned i=0; i<m_children.size(); ++i)
-	{
-		if (m_children[i] == aChild)
-			return (int)i;
-	}
+	for (size_t i=0; i<m_children.size(); ++i)
+		if (m_children[i] == child)
+			return static_cast<int>(i);
 
 	return -1;
 }
 
-void ccHObject::detachFromParent()
+void ccHObject::transferChild(ccHObject* child, ccHObject& newParent)
 {
-	ccHObject* parent = getParent();
-	if (!parent)
-		return;
-
-	setFlagState(CC_FATHER_DEPENDENT,false);
-	parent->removeChild(this);
-}
-
-void ccHObject::transferChild(unsigned index, ccHObject& newParent)
-{
-	ccHObject* child = getChild(index);
-	if (!child)
-	{
-		assert(false);
-		return;
-	}
+	assert(child);
 
 	//remove link from old parent
-	bool fatherDependent = child->getFlagState(CC_FATHER_DEPENDENT);
-	if (fatherDependent)
-		child->setFlagState(CC_FATHER_DEPENDENT,false);
-	removeChild(index);
-	newParent.addChild(child,fatherDependent);
+	int childDependencyFlags = child->getDependencyFlagsWith(this);
+	int parentDependencyFlags = getDependencyFlagsWith(child);
+	
+	detachChild(child); //automatically removes any dependency with this object
+
+	newParent.addChild(child,parentDependencyFlags);
+	child->addDependency(&newParent,childDependencyFlags);
+
+	//after a successful transfer, either the parent is 'newParent' or a null pointer
+	assert(child->getParent() == &newParent || child->getParent() == 0);
 }
 
 void ccHObject::transferChildren(ccHObject& newParent, bool forceFatherDependent/*=false*/)
 {
 	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
+		ccHObject* child = *it;
 		//remove link from old parent
-		bool fatherDependent = (*it)->getFlagState(CC_FATHER_DEPENDENT) || forceFatherDependent;
-		if (fatherDependent)
-			(*it)->setFlagState(CC_FATHER_DEPENDENT,false);
-		newParent.addChild(*it,fatherDependent);
-	}
+		int childDependencyFlags = child->getDependencyFlagsWith(this);
+		int fatherDependencyFlags = getDependencyFlagsWith(child);
+	
+		//we must explicitely remove any depedency with the child as we don't call 'detachChild'
+		removeDependencyWith(child);
+		child->removeDependencyWith(this);
 
+		newParent.addChild(child,fatherDependencyFlags);
+		child->addDependency(&newParent,childDependencyFlags);
+
+		//after a successful transfer, either the parent is 'newParent' or a null pointer
+		assert(child->getParent() == &newParent || child->getParent() == 0);
+	}
 	m_children.clear();
 }
 
 void ccHObject::swapChildren(unsigned firstChildIndex, unsigned secondChildIndex)
 {
-	assert(firstChildIndex<m_children.size());
-	assert(secondChildIndex<m_children.size());
+	assert(firstChildIndex < m_children.size());
+	assert(secondChildIndex < m_children.size());
 
 	std::swap(m_children[firstChildIndex],m_children[secondChildIndex]);
 }
@@ -355,11 +413,11 @@ ccBBox ccHObject::getBB(bool relative/*=true*/, bool withGLfeatures/*=false*/, c
 	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
 	{
 		if ((*it)->isEnabled())
-			box += ((*it)->getBB(false, withGLfeatures, display));
+			box += (*it)->getBB(false, withGLfeatures, display);
 	}
 
 	//apply GL transformation afterwards!
-	if (!display || m_currentDisplay==display)
+	if (!display || m_currentDisplay == display)
 		if (box.isValid() && !relative && m_glTransEnabled)
 			box *= m_glTrans;
 
@@ -521,7 +579,7 @@ void ccHObject::applyGLTransformation_recursive(ccGLMatrix* trans/*=NULL*/)
 	if (trans)
 	{
 		applyGLTransformation(*trans);
-		updateModificationTime();
+		notifyGeometryUpdate();
 	}
 
 	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
@@ -534,84 +592,79 @@ void ccHObject::applyGLTransformation_recursive(ccGLMatrix* trans/*=NULL*/)
 		razGLTransformation();
 }
 
-//void ccHObject::setDisplay_recursive(ccGenericGLDisplay* win)
-//{
-//	setDisplay(win);
-//
-//	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-//		(*it)->setDisplay_recursive(win);
-//}
-//
-//void ccHObject::setSelected_recursive(bool state)
-//{
-//	setSelected(state);
-//
-//	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-//		(*it)->setSelected_recursive(state);
-//}
-//
-//
-//void ccHObject::removeFromDisplay_recursive(ccGenericGLDisplay* win)
-//{
-//	removeFromDisplay(win);
-//
-//	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-//		(*it)->removeFromDisplay_recursive(win);
-//}
-//
-//void ccHObject::refreshDisplay_recursive()
-//{
-//	refreshDisplay();
-//
-//	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-//		(*it)->refreshDisplay_recursive();
-//}
-//
-//void ccHObject::prepareDisplayForRefresh_recursive()
-//{
-//	prepareDisplayForRefresh();
-//
-//	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
-//		(*it)->prepareDisplayForRefresh_recursive();
-//}
-
-void ccHObject::removeChild(const ccHObject* anObject, bool preventAutoDelete/*=false*/)
+void ccHObject::detachChild(ccHObject* child)
 {
-	assert(anObject);
-
-	int pos = getChildIndex(anObject);
-	if (pos >= 0)
-		removeChild(pos,preventAutoDelete);
-}
-
-void ccHObject::removeChild(int pos, bool preventAutoDelete/*=false*/)
-{
-	assert(pos>=0 && static_cast<size_t>(pos)<m_children.size());
-
-	ccHObject* child = m_children[pos];
-	if (child->getParent() == this)
+	if (!child)
 	{
-		if (child->getFlagState(CC_FATHER_DEPENDENT) && !preventAutoDelete)
-		{
-			//delete object
-			if (child->isShareable())
-				dynamic_cast<CCShareable*>(child)->release();
-			else
-				delete child;
-		}
-		else
-		{
-			//detach object
-			child->setParent(0);
-		}
+		assert(false);
+		return;
 	}
 
-	//version "swap"
-	/*m_children[pos] = m_children.back();
-	m_children.pop_back();
-	//*/
+	//remove any dependency (bilateral)
+	removeDependencyWith(child);
+	child->removeDependencyWith(this);
 
-	//version "shift"
+	if (child->getParent() == this)
+		child->setParent(0);
+
+	int pos = getChildIndex(child);
+	if (pos >= 0)
+	{
+		//we can't swap children as we want to keep the order!
+		m_children.erase(m_children.begin()+pos);
+	}
+}
+
+void ccHObject::detatchAllChildren()
+{
+	for (Container::iterator it=m_children.begin(); it!=m_children.end(); ++it)
+	{
+		ccHObject* child = *it;
+
+		//remove any dependency (bilateral)
+		removeDependencyWith(child);
+		child->removeDependencyWith(this);
+
+		if (child->getParent() == this)
+			child->setParent(0);
+	}
+	m_children.clear();
+}
+
+void ccHObject::removeChild(ccHObject* child)
+{
+	int pos = getChildIndex(child);
+	if (pos >= 0)
+		removeChild(pos);
+}
+
+void ccHObject::removeChild(int pos)
+{
+	assert(pos >= 0 && static_cast<size_t>(pos) < m_children.size());
+
+	ccHObject* child = m_children[pos];
+
+	//backup dependency flags
+	int flags = getDependencyFlagsWith(child);
+
+	//remove any dependency (bilateral)
+	removeDependencyWith(child);	
+	child->removeDependencyWith(this);
+
+	if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
+	{
+		//delete object
+		if (child->isShareable())
+			dynamic_cast<CCShareable*>(child)->release();
+		else
+			delete child;
+	}
+	else if (child->getParent() == this)
+	{
+		child->setParent(0);
+	}
+
+	//we can't swap as we want to keep the order!
 	m_children.erase(m_children.begin()+pos);
 }
 
@@ -621,7 +674,9 @@ void ccHObject::removeAllChildren()
 	{
 		ccHObject* child = m_children.back();
 		m_children.pop_back();
-		if (child->getParent() == this && child->getFlagState(CC_FATHER_DEPENDENT))
+
+		int flags = getDependencyFlagsWith(child);
+		if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 		{
 			if (child->isShareable())
 				dynamic_cast<CCShareable*>(child)->release();
@@ -629,30 +684,6 @@ void ccHObject::removeAllChildren()
 				delete child;
 		}
 	}
-}
-
-int ccHObject::getLastModificationTime_recursive() const
-{
-	int t = getLastModificationTime();
-
-	for (Container::const_iterator it = m_children.begin();it!=m_children.end();++it)
-	{
-		int child_t = (*it)->getLastModificationTime_recursive();
-		t = std::max(t,child_t);
-	}
-
-	return t;
-}
-
-static int s_lastModificationTime_ms = 0;
-void ccHObject::updateModificationTime()
-{
-	m_lastModificationTime_ms = ccTimer::Msec();
-	//to be sure that the clock is increasing, whatever its precision!
-	if (m_lastModificationTime_ms <= s_lastModificationTime_ms)
-		m_lastModificationTime_ms = s_lastModificationTime_ms+1;
-
-	s_lastModificationTime_ms = m_lastModificationTime_ms;
 }
 
 bool ccHObject::isSerializable() const
@@ -726,7 +757,9 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 		{
 			if (child->fromFile(in, dataVersion, flags))
 			{
-				addChild(child,child->getFlagState(CC_FATHER_DEPENDENT));
+				//FIXME
+				//addChild(child,child->getFlagState(CC_FATHER_DEPENDENT));
+				addChild(child);
 			}
 			else
 			{

@@ -146,17 +146,28 @@ public:
 	//! Returns MDI area subwindow corresponding to a given 3D view
 	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
 
+	//! Backup "context" for an object
+	/** Used with removeObjectTemporarilyFromDBTree/putObjectBackIntoDBTree.
+	**/
+	struct ccHObjectContext
+	{
+		ccHObjectContext() : parent(0), childFlags(0), parentFlags(0) {}
+		ccHObject* parent;
+		int childFlags;
+		int parentFlags;
+	};
+
 	//! Removes object temporarily from DB tree
 	/** This method must be called before any modification to the db tree
 		WARNING: may change 'selectedEntities' container!
 	**/
-	void removeObjectTemporarilyFromDBTree(ccHObject* obj, ccHObject* &parent);
+	ccHObjectContext removeObjectTemporarilyFromDBTree(ccHObject* obj);
 
 	//! Adds back object to DB tree
 	/** This method should be called once modifications to the db tree are finished
 		(see removeObjectTemporarilyFromDBTree).
 	**/
-	void putObjectBackIntoDBTree(ccHObject* obj, ccHObject* parent);
+	void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context);
 
 public slots:
 

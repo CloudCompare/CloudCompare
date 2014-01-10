@@ -550,12 +550,12 @@ bool ccGBLSensor::toFile_MeOnly(QFile& out) const
 	if (!ccSensor::toFile_MeOnly(out))
 		return false;
 
-	//rotation order (dataVersion>=33)
+	//rotation order (dataVersion>=34)
 	uint32_t rotOrder = m_rotationOrder;
 	if (out.write((const char*)&rotOrder,4)<0)
 		return WriteError();
 
-	//other parameters (dataVersion>=33)
+	//other parameters (dataVersion>=34)
 	QDataStream outStream(&out);
 	outStream << m_phiMin;
 	outStream << m_phiMax;
@@ -575,13 +575,13 @@ bool ccGBLSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
-	//rotation order (dataVersion>=33)
+	//rotation order (dataVersion>=34)
 	uint32_t rotOrder = 0;
 	if (in.read((char*)&rotOrder,4)<0)
 		return ReadError();
 	m_rotationOrder = static_cast<ROTATION_ORDER>(rotOrder);
 
-	//parameters (dataVersion>=33)
+	//parameters (dataVersion>=34)
 	QDataStream inStream(&in);
 	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_phiMin,1);
 	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_phiMax,1);

@@ -155,25 +155,25 @@ bool ccIndexedTransformationBuffer::toFile_MeOnly(QFile& out) const
 	if (!ccHObject::toFile_MeOnly(out))
 		return false;
 
-	//vector size (dataVersion>=33)
+	//vector size (dataVersion>=34)
 	uint32_t count = static_cast<uint32_t>(size());
 	if (out.write((const char*)&count,4)<0)
 		return WriteError();
 
-	//transformations (dataVersion>=33)
+	//transformations (dataVersion>=34)
 	for (ccIndexedTransformationBuffer::const_iterator it=begin(); it!=end(); ++it)
 		if (!it->toFile(out))
 			return false;
 
 	//display options
 	{
-		//Show polyline (dataVersion>=33)
+		//Show polyline (dataVersion>=34)
 		if (out.write((const char*)&m_showAsPolyline,sizeof(bool))<0)
 			return WriteError();
-		//Show trihedrons (dataVersion>=33)
+		//Show trihedrons (dataVersion>=34)
 		if (out.write((const char*)&m_showTrihedrons,sizeof(bool))<0)
 			return WriteError();
-		//Display scale (dataVersion>=33)
+		//Display scale (dataVersion>=34)
 		if (out.write((const char*)&m_trihedronsScale,sizeof(float))<0)
 			return WriteError();
 	}
@@ -186,7 +186,7 @@ bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
-	//vector size (dataVersion>=33)
+	//vector size (dataVersion>=34)
 	uint32_t count = 0;
 	if (in.read((char*)&count,4)<0)
 		return ReadError();
@@ -202,20 +202,20 @@ bool ccIndexedTransformationBuffer::fromFile_MeOnly(QFile& in, short dataVersion
 		return MemoryError();
 	}
 
-	//transformations (dataVersion>=33)
+	//transformations (dataVersion>=34)
 	for (ccIndexedTransformationBuffer::iterator it=begin(); it!=end(); ++it)
 		if (!it->fromFile(in, dataVersion, flags))
 			return false;
 
 	//display options
 	{
-		//Show polyline (dataVersion>=33)
+		//Show polyline (dataVersion>=34)
 		if (in.read((char*)&m_showAsPolyline,sizeof(bool))<0)
 			return ReadError();
-		//Show trihedrons (dataVersion>=33)
+		//Show trihedrons (dataVersion>=34)
 		if (in.read((char*)&m_showTrihedrons,sizeof(bool))<0)
 			return ReadError();
-		//Display scale (dataVersion>=33)
+		//Display scale (dataVersion>=34)
 		if (in.read((char*)&m_trihedronsScale,sizeof(float))<0)
 			return ReadError();
 	}

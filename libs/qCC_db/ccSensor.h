@@ -73,14 +73,17 @@ public:
 	//! Sets associated positions
 	void setPositions(ccIndexedTransformationBuffer* positions)  { m_posBuffer = positions; }
 
-	//! Add position (shortcut)
-	/** \warning: may be slow as this method will sort the positions
-		each time if the new index is lower than the last one pushed
+	//! Adds a new position (shortcut)
+	/** \warning: may be slow as this method may sort the positions
+		after each call (if the new index is lower than the last one pushed)
 	**/
 	bool addPosition(ccGLMatrix& trans, double index);
 
-	//! Get "optical" center position/orientation (shortcut)
-	bool getCenterPosition(ccIndexedTransformation& trans, double index);
+	//! Returns the absolute transformatin between the world and the "optical" center (shortcut)
+	/** Absolute transformation corresponds to the rigid transformation
+		multiplied by the associated transformation interpolated at the given index.
+	**/
+	bool getAbsoluteTransformation(ccIndexedTransformation& trans, double index);
 
 	//! Sets the rigid transformation between this sensor and its associated positions
 	/** Rigid transformation goes from the sensor position(s) to the sensor "optical" center.

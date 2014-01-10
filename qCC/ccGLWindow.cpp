@@ -505,7 +505,7 @@ void ccGLWindow::paintGL()
 			//we process GL filter
 			GLuint depthTex = m_fbo->getDepthTexture();
 			GLuint colorTex = m_fbo->getColorTexture(0);
-			m_activeGLFilter->shade(depthTex, colorTex, (m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //DGM FIXME
+			m_activeGLFilter->shade(depthTex, colorTex, (m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //TODO: doesn't work well with EDL in perspective mode!
 
 			ccGLUtils::CatchGLError("ccGLWindow::paintGL/glFilter shade");
 
@@ -971,7 +971,7 @@ void ccGLWindow::addToOwnDB(ccHObject* obj2D)
 
 	if (m_winDBRoot)
 	{
-		m_winDBRoot->addChild(obj2D,false);
+		m_winDBRoot->addChild(obj2D,ccHObject::DP_NONE);
 		obj2D->setDisplay(this);
 	}
 	else
@@ -2442,7 +2442,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 				{
 					label = new cc2DLabel();
 					label->addPoint(ccHObjectCaster::ToGenericPointCloud(obj),subSelectedID);
-					obj->addChild(label,true);
+					obj->addChild(label);
 				}
 				else if (obj->isKindOf(CC_MESH))
 				{
@@ -2454,7 +2454,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 					label->addPoint(cloud,summitsIndexes->i1);
 					label->addPoint(cloud,summitsIndexes->i2);
 					label->addPoint(cloud,summitsIndexes->i3);
-					cloud->addChild(label,true);
+					cloud->addChild(label);
 					if (!cloud->isEnabled())
 					{
 						cloud->setVisible(false);
@@ -3196,7 +3196,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 				//we process GL filter
 				GLuint depthTex = fbo->getDepthTexture();
 				GLuint colorTex = fbo->getColorTexture(0);
-				filter->shade(depthTex, colorTex, zoomFactor*(m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //DGM FIXME
+				filter->shade(depthTex, colorTex, zoomFactor*(m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //TODO: doesn't work well with EDL in perspective mode!
 
 				ccGLUtils::CatchGLError("ccGLWindow::renderToFile/glFilter shade");
 

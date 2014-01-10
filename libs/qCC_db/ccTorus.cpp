@@ -247,7 +247,7 @@ bool ccTorus::buildUp()
 		}
 	}
 
-	updateModificationTime();
+	notifyGeometryUpdate();
 	showTriNorms(true);
 
 	return true;

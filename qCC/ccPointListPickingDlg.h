@@ -18,12 +18,16 @@
 #ifndef CC_POINT_PICKING_LIST_DIALOG_HEADER
 #define CC_POINT_PICKING_LIST_DIALOG_HEADER
 
+//GUI
 #include <ui_pointListPickingDlg.h>
 
+//Local
 #include "ccPointPickingGenericInterface.h"
 
+//qCC_db
+#include <ccHObject.h>
+
 class cc2DLabel;
-class ccHObject;
 
 //! Dialog/interactor to graphically pick a list of points
 /** Options let the user export the list to an ASCII file, a new cloud, a polyline, etc.
@@ -92,9 +96,9 @@ protected:
 	//! Ordered labels container
 	ccHObject* m_orderedLabelsContainer;
     //! Existing picked points that the user wants to delete (for proper "cancel" mechanism)
-	ccHObject* m_toBeDeleted;
+	ccHObject::Container m_toBeDeleted;
     //! New picked points that the user has selected (for proper "cancel" mechanism)
-	ccHObject* m_toBeAdded;
+	ccHObject::Container m_toBeAdded;
 };
 
 #endif

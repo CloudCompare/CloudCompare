@@ -41,7 +41,7 @@
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices)
 	: ccGenericMesh("Mesh")
-	, m_associatedCloud(vertices)
+	, m_associatedCloud(0)
 	, m_triNormals(0)
 	, m_texCoords(0)
 	, m_materials(0)
@@ -51,13 +51,15 @@ ccMesh::ccMesh(ccGenericPointCloud* vertices)
 	, m_texCoordIndexes(0)
 	, m_triNormalIndexes(0)
 {
+	setAssociatedCloud(vertices);
+
 	m_triVertIndexes = new triangleIndexesContainer();
 	m_triVertIndexes->link();
 }
 
 ccMesh::ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertices)
 	: ccGenericMesh("Mesh")
-	, m_associatedCloud(giVertices)
+	, m_associatedCloud(0)
 	, m_triNormals(0)
 	, m_texCoords(0)
 	, m_materials(0)
@@ -67,15 +69,17 @@ ccMesh::ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertice
 	, m_texCoordIndexes(0)
 	, m_triNormalIndexes(0)
 {
+	setAssociatedCloud(giVertices);
+
 	m_triVertIndexes = new triangleIndexesContainer();
 	m_triVertIndexes->link();
 
-	unsigned i,triNum = giMesh->size();
+	unsigned triNum = giMesh->size();
 	if (!reserve(triNum))
 		return;
 
 	giMesh->placeIteratorAtBegining();
-	for (i=0;i<triNum;++i)
+	for (unsigned i=0; i<triNum; ++i)
 	{
 		const CCLib::TriangleSummitsIndexes* tsi = giMesh->getNextTriangleIndexes();
 		addTriangle(tsi->i1,tsi->i2,tsi->i3);
@@ -106,6 +110,25 @@ ccMesh::~ccMesh()
 		m_triMtlIndexes->release();
 	if (m_triNormalIndexes)
 		m_triNormalIndexes->release();
+}
+
+void ccMesh::setAssociatedCloud(ccGenericPointCloud* cloud)
+{
+	m_associatedCloud = cloud;
+
+	if (m_associatedCloud)
+		m_associatedCloud->addDependency(this,DP_NOTIFY_OTHER_ON_UPDATE);
+
+	m_bBox.setValidity(false);
+}
+
+void ccMesh::onUpdateOf(ccHObject* obj)
+{
+	if (obj == m_associatedCloud)
+	{
+		m_bBox.setValidity(false);
+		notifyGeometryUpdate(); //for sub-meshes
+	}
 }
 
 bool ccMesh::hasColors() const
@@ -503,7 +526,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 		}
 	}
 
-	m_associatedCloud->updateModificationTime();
+	m_associatedCloud->notifyGeometryUpdate();
 
 	if (hasNormals())
 		computeNormals();
@@ -829,27 +852,24 @@ void ccMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3&
 
 void ccMesh::refreshBB()
 {
-	if (!m_associatedCloud)
+	if (!m_associatedCloud || m_bBox.isValid())
 		return;
 
-	if (!m_bBox.isValid() || getLastModificationTime() < m_associatedCloud->getLastModificationTime_recursive())
-	{
-		m_bBox.clear();
+	m_bBox.clear();
 
-		unsigned count = m_triVertIndexes->currentSize();
-		m_triVertIndexes->placeIteratorAtBegining();
-		for (unsigned i=0;i<count;++i)
-		{
-			const unsigned* tri = m_triVertIndexes->getCurrentValue();
-			assert(tri[0]<m_associatedCloud->size() && tri[1]<m_associatedCloud->size() && tri[2]<m_associatedCloud->size());
-			m_bBox.add(*m_associatedCloud->getPoint(tri[0]));
-			m_bBox.add(*m_associatedCloud->getPoint(tri[1]));
-			m_bBox.add(*m_associatedCloud->getPoint(tri[2]));
-			m_triVertIndexes->forwardIterator();
-		}
-	
-		updateModificationTime();
+	unsigned count = m_triVertIndexes->currentSize();
+	m_triVertIndexes->placeIteratorAtBegining();
+	for (unsigned i=0; i<count; ++i)
+	{
+		const unsigned* tri = m_triVertIndexes->getCurrentValue();
+		assert(tri[0]<m_associatedCloud->size() && tri[1]<m_associatedCloud->size() && tri[2]<m_associatedCloud->size());
+		m_bBox.add(*m_associatedCloud->getPoint(tri[0]));
+		m_bBox.add(*m_associatedCloud->getPoint(tri[1]));
+		m_bBox.add(*m_associatedCloud->getPoint(tri[2]));
+		m_triVertIndexes->forwardIterator();
 	}
+
+	notifyGeometryUpdate();
 }
 
 void ccMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
@@ -894,7 +914,7 @@ bool ccMesh::reserve(unsigned n)
 bool ccMesh::resize(unsigned n)
 {
 	m_bBox.setValidity(false);
-	updateModificationTime();
+	notifyGeometryUpdate();
 
 	if (m_triMtlIndexes)
 	{
@@ -1812,7 +1832,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				{
 					newTriNormals->resize(newTriNormals->currentSize()); //smaller so it should always be ok!
 					newMesh->setTriNormsTable(newTriNormals);
-					newMesh->addChild(newTriNormals,true);
+					newMesh->addChild(newTriNormals);
 					newTriNormals->release();
 					newTriNormals=0;
 				}
@@ -1820,7 +1840,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				if (newTriTexIndexes)
 				{
 					newMesh->setTexCoordinatesTable(newTriTexIndexes);
-					newMesh->addChild(newTriTexIndexes,true);
+					newMesh->addChild(newTriTexIndexes);
 					newTriTexIndexes->release();
 					newTriTexIndexes=0;
 				}
@@ -1828,7 +1848,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				if (newMaterials)
 				{
 					newMesh->setMaterialSet(newMaterials);
-					newMesh->addChild(newMaterials,true);
+					newMesh->addChild(newMaterials);
 					newMaterials->release();
 					newMaterials=0;
 				}
@@ -1895,18 +1915,17 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 			for (size_t i=0; i<subMeshes.size(); ++i)
 			{
 				ccSubMesh* subMesh = static_cast<ccSubMesh*>(subMeshes[i]);
-
-				ccGenericMesh* subMesh2 = subMesh->createNewSubMeshFromSelection(removeSelectedFaces,indexMap);
+				ccSubMesh* subMesh2 = subMesh->createNewSubMeshFromSelection(removeSelectedFaces,indexMap);
 
 				if (subMesh->size() == 0) //no more faces in current sub-mesh?
 				{
-					removeChild(subMesh,true);
+					detachChild(subMesh); //FIXME: removeChild instead?
 					subMesh = 0;
 				}
 
 				if (subMesh2)
 				{
-					static_cast<ccSubMesh*>(subMesh2)->setAssociatedMesh(newMesh);
+					subMesh2->setAssociatedMesh(newMesh);
 					newMesh->addChild(subMesh2);
 				}
 			}
@@ -1948,7 +1967,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		}
 
 		resize(lastTri);
-		updateModificationTime();
+		notifyGeometryUpdate();
 	}
 
 	return newMesh;
@@ -2442,7 +2461,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		enableStippling(stippling);
 	}
 
-	updateModificationTime();
+	notifyGeometryUpdate();
 
 	return true;
 }

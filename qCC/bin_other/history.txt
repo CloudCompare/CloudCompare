@@ -4,6 +4,7 @@ v2.5.3 12/21/2013
 - Bug fix:
 	* Deleting a 3D view and then selecting an entity previously displayed in this view
 		would make CC crash
+	* The default value for scaling of the 'shift on load' dialog was 0.
 
 v2.5.2 12/19/2013
 - GDAL library support added:

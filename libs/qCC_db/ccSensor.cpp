@@ -31,6 +31,9 @@ bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 	{
 		m_posBuffer = new ccIndexedTransformationBuffer();
 		addChild(m_posBuffer);
+		m_posBuffer->setDisplay(getDisplay());
+		m_posBuffer->setVisible(true);
+		m_posBuffer->setEnabled(false);
 	}
 
 	bool sort = (!m_posBuffer->empty() && m_posBuffer->back().getIndex() > index);

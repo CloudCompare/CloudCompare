@@ -281,7 +281,7 @@ void ccViewer::selectEntity(int uniqueID)
 //			if (obj)
 //			{
 //				entities.push_back(obj);
-//				if (obj->isA(CC_2D_LABEL))
+//				if (obj->isA(CC_TYPES::LABEL_2D))
 //					++labelCount;
 //			}
 //		}
@@ -357,7 +357,7 @@ void ccViewer::addToDB(const QStringList& filenames)
 				for (unsigned i=0;i<newEntities->getChildrenNumber();++i)
 				{
 					ccHObject* ent = newEntities->getChild(i);
-					if (ent->isA(CC_POINT_CLOUD))
+					if (ent->isA(CC_TYPES::POINT_CLOUD))
 					{
 						ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
 						if (pc->hasScalarFields())
@@ -367,7 +367,7 @@ void ccViewer::addToDB(const QStringList& filenames)
 							scaleAlreadyDisplayed=true;
 						}
 					}
-					else if (ent->isKindOf(CC_MESH))
+					else if (ent->isKindOf(CC_TYPES::MESH))
 					{
 						ccGenericMesh* mesh = static_cast<ccGenericMesh*>(ent);
 						if (mesh->hasScalarFields())
@@ -396,7 +396,7 @@ void ccViewer::addToDB(ccHObject* entity)
 	if (currentRoot)
 	{
 		//already a pure 'root'
-		if (currentRoot->isA(CC_HIERARCHY_OBJECT))
+		if (currentRoot->isA(CC_TYPES::HIERARCHY_OBJECT))
 		{
 			currentRoot->addChild(entity);
 		}

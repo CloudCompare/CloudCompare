@@ -153,7 +153,7 @@ bool ccMesh::hasScalarFields() const
 
 bool ccMesh::computeNormals()
 {
-    if (!m_associatedCloud || !m_associatedCloud->isA(CC_POINT_CLOUD)) //TODO
+    if (!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
         return false;
 	
 	unsigned triCount = size();
@@ -375,7 +375,7 @@ void ccMesh::applyGLTransformation(const ccGLMatrix& trans)
 	//vertices should be handled another way!
 
     //we must take care of the triangle normals!
-	if (m_triNormals && (!getParent() || !getParent()->isKindOf(CC_MESH)))
+	if (m_triNormals && (!getParent() || !getParent()->isKindOf(CC_TYPES::MESH)))
     {
         bool recoded = false;
 
@@ -606,7 +606,7 @@ ccMesh* ccMesh::clone(	ccGenericPointCloud* vertices/*=0*/,
 						rc->addPointIndex(i); //can't fail, see above
 
 				//and the associated vertices set
-				assert(m_associatedCloud->isA(CC_POINT_CLOUD));
+				assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
 				newVertices = static_cast<ccPointCloud*>(m_associatedCloud)->partialClone(rc);
 				if (newVertices && newVertices->size() < rc->size())
 				{
@@ -959,7 +959,7 @@ CCLib::TriangleSummitsIndexes* ccMesh::getNextTriangleIndexes()
 
 unsigned ccMesh::getUniqueIDForDisplay() const
 {
-	if (m_parent && m_parent->getParent() && m_parent->getParent()->isA(CC_FACET))
+	if (m_parent && m_parent->getParent() && m_parent->getParent()->isA(CC_TYPES::FACET))
 		return m_parent->getParent()->getUniqueID();
 	else
 		return getUniqueID();
@@ -1036,7 +1036,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (glParams.showSF)
 		{
-			assert(m_associatedCloud->isA(CC_POINT_CLOUD));
+			assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
 
 			greyForNanScalarValues = (cloud->getCurrentDisplayedScalarField() && cloud->getCurrentDisplayedScalarField()->areNaNValuesShownInGrey());
@@ -1079,7 +1079,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else
 			{
-				assert(m_associatedCloud->isA(CC_POINT_CLOUD));
+				assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
 				rgbColorsTable = static_cast<ccPointCloud*>(m_associatedCloud)->rgbColors();
 			}
 		}
@@ -1101,7 +1101,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		ccNormalVectors* compressedNormals = 0;
 		if (glParams.showNorms)
 		{
-			assert(m_associatedCloud->isA(CC_POINT_CLOUD));
+			assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
 			normalsIndexesTable = static_cast<ccPointCloud*>(m_associatedCloud)->normals();
 			compressedNormals = ccNormalVectors::GetUniqueInstance();
 		}
@@ -1873,7 +1873,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 	//we must modify eventual sub-meshes!
 	ccHObject::Container subMeshes;
-	if (filterChildren(subMeshes,false,CC_SUB_MESH) != 0)
+	if (filterChildren(subMeshes,false,CC_TYPES::SUB_MESH) != 0)
 	{
 		//create index map
 		ccSubMesh::IndexMap* indexMap = new ccSubMesh::IndexMap;
@@ -2731,7 +2731,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		return false;
 	}
 
-	if (!getAssociatedCloud() || !getAssociatedCloud()->isA(CC_POINT_CLOUD))
+	if (!getAssociatedCloud() || !getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccLog::Error("[ccMesh::pushSubdivide] Vertices set must be a true point cloud!");
 		return false;
@@ -2910,7 +2910,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 	}
 
 	ccPointCloud* resultVertices = 0;
-	if (vertices->isA(CC_POINT_CLOUD))
+	if (vertices->isA(CC_TYPES::POINT_CLOUD))
 		resultVertices = static_cast<ccPointCloud*>(vertices)->cloneThis();
 	else
 		resultVertices = ccPointCloud::From(vertices);
@@ -3123,7 +3123,7 @@ bool ccMesh::convertMaterialsToVertexColors()
 		return false;
 	}
 
-	if (!m_associatedCloud->isA(CC_POINT_CLOUD))
+	if (!m_associatedCloud->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccLog::Warning("[ccMesh::convertMaterialsToVertexColors] Need a true point cloud as vertices!");
 		return false;

@@ -84,7 +84,7 @@ uchar ccGenericPointCloud::testVisibility(const CCVector3& P)
 
 	for (ccHObject::Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
-        if ((*it)->isKindOf(CC_SENSOR))
+        if ((*it)->isKindOf(CC_TYPES::SENSOR))
         {
             uchar visibility = static_cast<ccSensor*>(*it)->checkVisibility(P);
 
@@ -109,7 +109,7 @@ ccOctree* ccGenericPointCloud::getOctree()
 {
     for (unsigned i=0;i<m_children.size();++i)
     {
-        if (m_children[i]->isA(CC_POINT_OCTREE))
+        if (m_children[i]->isA(CC_TYPES::POINT_OCTREE))
             return static_cast<ccOctree*>(m_children[i]);
     }
 

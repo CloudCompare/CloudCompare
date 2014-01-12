@@ -45,7 +45,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
 
-	if (!entity->isKindOf(CC_MESH))
+	if (!entity->isKindOf(CC_TYPES::MESH))
 		return CC_FERR_BAD_ENTITY_TYPE;
 
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
@@ -183,7 +183,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 		ccGenericMesh* subMesh = subMeshes.back();
 		subMeshes.pop_back();
 
-		if (subMesh->isKindOf(CC_MESH))
+		if (subMesh->isKindOf(CC_TYPES::MESH))
 		{
 			ccGenericMesh* st = static_cast<ccGenericMesh*>(subMesh);
 			if (fprintf(theFile,"g %s\n",qPrintable(st->getName())) < 0)

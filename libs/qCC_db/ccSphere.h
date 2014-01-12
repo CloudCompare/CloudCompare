@@ -52,7 +52,7 @@ public:
 	ccSphere(QString name = QString("Sphere"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_SPHERE; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::SPHERE; }
 
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Sphere"; }

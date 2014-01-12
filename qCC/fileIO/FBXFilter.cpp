@@ -62,7 +62,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 	}
 
 	ccMesh* asCCMesh = 0;
-	if (mesh->isA(CC_MESH))
+	if (mesh->isA(CC_TYPES::MESH))
 		asCCMesh = static_cast<ccMesh*>(mesh);
 
     // normals
@@ -236,16 +236,16 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const char* filename)
 		return CC_FERR_BAD_ARGUMENT;
 	
 	std::vector<ccGenericMesh*> meshes;
-	if (entity->isKindOf(CC_MESH))
+	if (entity->isKindOf(CC_TYPES::MESH))
 	{
 		meshes.push_back(static_cast<ccGenericMesh*>(entity));
 	}
-	else if (entity->isA(CC_HIERARCHY_OBJECT))
+	else if (entity->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		for (unsigned i=0; i<entity->getChildrenNumber(); ++i)
 		{
 			ccHObject* child = entity->getChild(i);
-			if (child->isKindOf(CC_MESH))
+			if (child->isKindOf(CC_TYPES::MESH))
 				meshes.push_back(static_cast<ccGenericMesh*>(child));
 		}
 	}

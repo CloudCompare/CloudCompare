@@ -41,7 +41,7 @@ public:
 	ccSubMesh(ccMesh* parentMesh);
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_SUB_MESH; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::SUB_MESH; }
 
 	//inherited methods (ccHObject)
     virtual ccBBox getMyOwnBB();

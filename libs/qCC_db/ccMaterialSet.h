@@ -41,7 +41,7 @@ public:
 	ccMaterialSet(QString name=QString());
 
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const {return CC_MATERIAL_SET;}
+    virtual CC_CLASS_ENUM getClassID() const {return CC_TYPES::MATERIAL_SET;}
 	virtual bool isShareable() const { return true; }
 
 	//! Finds material by name

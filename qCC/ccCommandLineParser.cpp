@@ -213,7 +213,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 
 	//look for clouds inside loaded DB
 	ccHObject::Container clouds;
-	db->filterChildren(clouds,false,CC_POINT_CLOUD);
+	db->filterChildren(clouds,false,CC_TYPES::POINT_CLOUD);
 	size_t count = clouds.size();
 	for (size_t i=0;i<count;++i)
 	{
@@ -225,7 +225,7 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 
 	//look for meshes inside loaded DB
 	ccHObject::Container meshes;
-	db->filterChildren(meshes,false,CC_MESH);
+	db->filterChildren(meshes,false,CC_TYPES::MESH);
 	if (!meshes.empty())
 	{
 		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[0]);

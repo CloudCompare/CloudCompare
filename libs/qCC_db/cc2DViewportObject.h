@@ -40,7 +40,7 @@ public:
 	cc2DViewportObject(QString name=QString());
 
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_2D_VIEWPORT_OBJECT; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::VIEWPORT_2D_OBJECT; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Sets perspective view state

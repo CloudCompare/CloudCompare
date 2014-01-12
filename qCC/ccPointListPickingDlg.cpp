@@ -86,11 +86,11 @@ unsigned ccPointListPickingDlg::getPickedPoints(std::vector<cc2DLabel*>& pickedP
 	{
 		//get all labels
 		ccHObject::Container labels;
-		unsigned count = m_orderedLabelsContainer->filterChildren(labels,false,CC_2D_LABEL);
+		unsigned count = m_orderedLabelsContainer->filterChildren(labels,false,CC_TYPES::LABEL_2D);
 		//find highest unique ID among the VISIBLE labels
 		pickedPoints.reserve(count);
 		for (unsigned i=0;i<count;++i)
-			if (labels[i]->isA(CC_2D_LABEL)) //Warning: cc2DViewportLabel is also a kind of 'CC_2D_LABEL'!
+			if (labels[i]->isA(CC_TYPES::LABEL_2D)) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
 			{
 				cc2DLabel* label = static_cast<cc2DLabel*>(labels[i]);
 				if (label->isVisible() && label->size()==1)
@@ -110,7 +110,7 @@ void ccPointListPickingDlg::linkWithCloud(ccPointCloud* cloud)
 		//find default container
 		m_orderedLabelsContainer = 0;
 		ccHObject::Container groups;
-		m_associatedCloud->filterChildren(groups,true,CC_HIERARCHY_OBJECT);
+		m_associatedCloud->filterChildren(groups,true,CC_TYPES::HIERARCHY_OBJECT);
 		for (ccHObject::Container::const_iterator it = groups.begin(); it != groups.end(); ++it)
 			if ((*it)->getName() == s_pickedPointContainerName)
 			{

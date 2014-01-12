@@ -62,7 +62,7 @@ public:
 	void translateBoundingBox(const CCVector3& T);
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_POINT_KDTREE; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_KDTREE; }
 
     //Inherited from ccHObject
     virtual ccBBox getMyOwnBB();

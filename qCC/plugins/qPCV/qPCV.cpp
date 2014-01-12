@@ -88,11 +88,11 @@ void qPCV::doAction()
 
     ccGenericPointCloud* cloud = NULL;
     ccGenericMesh* mesh = NULL;
-    if (ent->isKindOf(CC_POINT_CLOUD))
+    if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
     {
         cloud = ccHObjectCaster::ToGenericPointCloud(ent);
     }
-    else if (ent->isKindOf(CC_MESH))
+    else if (ent->isKindOf(CC_TYPES::MESH))
     {
         mesh = static_cast<ccGenericMesh*>(ent);
         cloud = mesh->getAssociatedCloud();
@@ -103,7 +103,7 @@ void qPCV::doAction()
 		return;
 	}
 
-    if (!cloud->isA(CC_POINT_CLOUD)) //TODO
+    if (!cloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
 	{
 		m_app->dispToConsole("Select a real point cloud (or a mesh associated to a real point cloud)!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
         return;
@@ -131,7 +131,7 @@ void qPCV::doAction()
 	if (root)
 	{
 		ccHObject::Container clouds;
-		root->filterChildren(clouds,true,CC_POINT_CLOUD);
+		root->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD);
 		for (size_t i=0;i<clouds.size();++i)
 		{
 			//we keep only clouds with normals
@@ -140,7 +140,7 @@ void qPCV::doAction()
 			{
 				cloudsWithNormals.push_back(cloud);
 				QString cloudTitle = QString("%1 - %2 points").arg(cloud->getName()).arg(cloud->size());
-				if (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH))
+				if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
 					cloudTitle.append(QString(" (%1)").arg(cloud->getParent()->getName()));
 
 				dlg.cloudsComboBox->addItem(cloudTitle);

@@ -110,7 +110,7 @@ public:
 	void translateBoundingBox(const CCVector3& T);
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_POINT_OCTREE; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_OCTREE; }
 
 	int getDisplayedLevel() const { return m_displayedLevel; }
 	void setDisplayedLevel(int level);

@@ -50,10 +50,10 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
         return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container meshes;
-	if (entity->isKindOf(CC_MESH))
+	if (entity->isKindOf(CC_TYPES::MESH))
         meshes.push_back(entity);
     else
-        entity->filterChildren(meshes, true, CC_MESH);
+        entity->filterChildren(meshes, true, CC_TYPES::MESH);
 
     if (meshes.empty())
     {
@@ -84,12 +84,12 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	}
 
 	bool hasColors = false;
-	if (theCloud->isA(CC_POINT_CLOUD))
+	if (theCloud->isA(CC_TYPES::POINT_CLOUD))
 	    static_cast<ccPointCloud*>(theCloud)->hasColors();
 
     //and its scalar field
 	/*CCLib::ScalarField* sf = 0;
-	if (theCloud->isA(CC_POINT_CLOUD))
+	if (theCloud->isA(CC_TYPES::POINT_CLOUD))
 	    sf = static_cast<ccPointCloud*>(theCloud)->getCurrentDisplayedScalarField();
 
     if (!sf)
@@ -389,7 +389,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	//NOEUD DES VERTEX COLORS
 	if (hasColors)
 	{
-	    assert(theCloud->isA(CC_POINT_CLOUD));
+	    assert(theCloud->isA(CC_TYPES::POINT_CLOUD));
         ccPointCloud* pc = static_cast<ccPointCloud*>(theCloud);
 
 		if (fprintf(fp,"createNode polyColorPerVertex -n \"polyColorPerVertex%i\";\n",currentMesh+1) < 0)

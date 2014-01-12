@@ -40,7 +40,7 @@ public:
 	ccIndexedTransformationBuffer(QString name = QString("Trans. buffer"));
 
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TRANS_BUFFER; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::TRANS_BUFFER; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Sorts transformations based on their index
@@ -93,12 +93,26 @@ public:
 	//! [Display option] Sets whether the path should be displayed as a polyline or not (otherwise only points)
 	void showPathAsPolyline(bool state) { m_showAsPolyline = state; }
 
+	//! Invalidates the bounding box
+	/** Should be called whenever the content of this structure changes!
+	**/
+	void invalidateBoundingBox();
+
+    //Inherited from ccHObject
+    virtual ccBBox getMyOwnBB();
+    virtual ccBBox getDisplayBB();
+
 protected:
 
     //inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
     virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+
+	//! Bounding box
+	ccBBox m_bBox;
+	//! Bounding box last 'validity' size
+	size_t m_bBoxValidSize;
 
 	//! Whether the path should be displayed as a polyline or not
 	bool m_showAsPolyline;

@@ -61,7 +61,7 @@ public:
 	ccTorus(QString name = QString("Torus"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TORUS; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::TORUS; }
 
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Torus"; }

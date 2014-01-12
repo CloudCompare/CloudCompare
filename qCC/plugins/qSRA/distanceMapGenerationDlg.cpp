@@ -536,14 +536,14 @@ void DistanceMapGenerationDlg::clearView()
 	m_window->setAssociatedScalarField(0);
 	//remove existing map (or maps?)
 	ccHObject::Container maps;
-	m_window->getOwnDB()->filterChildren(maps,false,CC_MESH);
+	m_window->getOwnDB()->filterChildren(maps,false,CC_TYPES::MESH);
 	for (size_t i=0; i<maps.size(); ++i)
 		m_window->removeFromOwnDB(maps[i]);
 
 	//remove any polylines
 	{
 		ccHObject::Container polylines;
-		m_window->getOwnDB()->filterChildren(polylines,false,CC_POLY_LINE);
+		m_window->getOwnDB()->filterChildren(polylines,false,CC_TYPES::POLY_LINE);
 		for (size_t i=0; i<polylines.size(); ++i)
 			m_window->removeFromOwnDB(polylines[i]);
 	}
@@ -673,13 +673,13 @@ void DistanceMapGenerationDlg::updateMapTexture()
 	if (mode == PROJ_CYLINDRICAL)
 	{
 		//cylindrical projection: look for a plane
-		if (m_window->getOwnDB()->filterChildren(texturedEntities,false,CC_PLANE) == 0)
+		if (m_window->getOwnDB()->filterChildren(texturedEntities,false,CC_TYPES::PLANE) == 0)
 			return;
 	}
 	else if (mode == PROJ_CONICAL)
 	{
 		//conical projection: look for a standard mesh
-		if (m_window->getOwnDB()->filterChildren(texturedEntities,false,CC_MESH) == 0)
+		if (m_window->getOwnDB()->filterChildren(texturedEntities,false,CC_TYPES::MESH) == 0)
 			return;
 	}
 
@@ -709,7 +709,7 @@ void DistanceMapGenerationDlg::updateMapTexture()
 		texturedEntities[i]->setDisplay(m_window);
 		
 		//set new image as texture
-		if (mode == PROJ_CYLINDRICAL && texturedEntities[i]->isA(CC_PLANE))
+		if (mode == PROJ_CYLINDRICAL && texturedEntities[i]->isA(CC_TYPES::PLANE))
 		{
 			if (!static_cast<ccPlane*>(texturedEntities[i])->setAsTexture(mapImage))
 			{
@@ -718,7 +718,7 @@ void DistanceMapGenerationDlg::updateMapTexture()
 				return;
 			}
 		}
-		if (mode == PROJ_CONICAL && texturedEntities[i]->isA(CC_MESH))
+		if (mode == PROJ_CONICAL && texturedEntities[i]->isA(CC_TYPES::MESH))
 		{
 			ccMesh* mesh = static_cast<ccMesh*>(texturedEntities[i]);
 			//set material
@@ -1383,7 +1383,7 @@ void DistanceMapGenerationDlg::clearOverlaySymbols()
 		return;
 
 	ccHObject::Container clouds;
-	m_window->getOwnDB()->filterChildren(clouds,false,CC_POINT_CLOUD);
+	m_window->getOwnDB()->filterChildren(clouds,false,CC_TYPES::POINT_CLOUD);
 	
 	for (size_t i=0; i<clouds.size(); ++i)
 		if (clouds[i] != m_xLabels && clouds[i] != m_yLabels)
@@ -1405,7 +1405,7 @@ void DistanceMapGenerationDlg::overlaySymbolsSizeChanged(int size)
 	for (unsigned i=0; i<db->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = db->getChild(i);
-		if (child->isA(CC_POINT_CLOUD)
+		if (child->isA(CC_TYPES::POINT_CLOUD)
 			&& child != m_xLabels && child != m_yLabels) //don't modify the X an Y label clouds!
 		{
 			static_cast<ccSymbolCloud*>(child)->setSymbolSize(symbolSize);
@@ -1429,7 +1429,7 @@ void DistanceMapGenerationDlg::overlaySymbolsColorChanged()
 	for (unsigned i=0; i<db->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = db->getChild(i);
-		if (child->isA(CC_POINT_CLOUD)
+		if (child->isA(CC_TYPES::POINT_CLOUD)
 			&& child != m_xLabels && child != m_yLabels) //don't modify the X an Y label clouds!
 		{
 			child->setTempColor(rgb,true);
@@ -1454,7 +1454,7 @@ void DistanceMapGenerationDlg::overlayGridColorChanged()
 	for (unsigned i=0; i<db->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = db->getChild(i);
-		if (child->isA(CC_POLY_LINE))
+		if (child->isA(CC_TYPES::POLY_LINE))
 		{
 			static_cast<ccPolyline*>(child)->setColor(rgb);
 		}
@@ -1477,7 +1477,7 @@ void DistanceMapGenerationDlg::labelFontSizeChanged(int)
 	for (unsigned i=0; i<db->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = db->getChild(i);
-		if (child->isA(CC_POINT_CLOUD))
+		if (child->isA(CC_TYPES::POINT_CLOUD))
 		{
 			static_cast<ccSymbolCloud*>(child)->setFontSize(fontSize);
 		}
@@ -1513,7 +1513,7 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 	//remove any polylines
 	{
 		ccHObject::Container polylines;
-		m_window->getOwnDB()->filterChildren(polylines,false,CC_POLY_LINE);
+		m_window->getOwnDB()->filterChildren(polylines,false,CC_TYPES::POLY_LINE);
 		for (size_t i=0; i<polylines.size(); ++i)
 			m_window->removeFromOwnDB(polylines[i]);
 	}

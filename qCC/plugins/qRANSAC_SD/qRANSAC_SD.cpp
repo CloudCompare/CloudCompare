@@ -71,7 +71,7 @@ qRansacSD::qRansacSD(QObject* parent/*=0*/)
 void qRansacSD::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	if (m_action)
-		m_action->setEnabled(selectedEntities.size()==1 && selectedEntities[0]->isA(CC_POINT_CLOUD));
+		m_action->setEnabled(selectedEntities.size()==1 && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD));
 }
 
 void qRansacSD::getActions(QActionGroup& group)
@@ -123,7 +123,7 @@ void qRansacSD::doAction()
 
     ccHObject* ent = selectedEntities[0];
 	assert(ent);
-	if (!ent || !ent->isA(CC_POINT_CLOUD))
+	if (!ent || !ent->isA(CC_TYPES::POINT_CLOUD))
 	{
 		m_app->dispToConsole("Select a real point cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;

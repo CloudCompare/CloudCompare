@@ -37,7 +37,7 @@ public:
 	ccMeshGroup() : ccGenericMesh("[Deprecated] Mesh Group") {}
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_MESH_GROUP; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::MESH_GROUP; }
 
     //inherited methods (ccGenericMesh)
 	virtual ccGenericPointCloud* getAssociatedCloud() const { return 0; }

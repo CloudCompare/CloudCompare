@@ -61,7 +61,7 @@ public:
 	ccCone(QString name = QString("Cone"));
 
     //! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_CONE; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CONE; }
 
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Cone"; }

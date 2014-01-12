@@ -452,7 +452,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 		return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container polylines;
-	root->filterChildren(polylines,true,CC_POLY_LINE);
+	root->filterChildren(polylines,true,CC_TYPES::POLY_LINE);
 
 	//only polylines are handled for now
 	size_t polyCount = polylines.size();

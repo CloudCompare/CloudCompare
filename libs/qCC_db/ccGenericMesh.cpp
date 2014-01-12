@@ -156,7 +156,7 @@ void ccGenericMesh::handleColorRamp(CC_DRAW_CONTEXT& context)
 			if (sfShown())
 			{
 				ccGenericPointCloud* vertices = getAssociatedCloud();
-				if (!vertices || !vertices->isA(CC_POINT_CLOUD))
+				if (!vertices || !vertices->isA(CC_TYPES::POINT_CLOUD))
 					return;
 
 				ccPointCloud* cloud = static_cast<ccPointCloud*>(vertices);
@@ -169,7 +169,7 @@ void ccGenericMesh::handleColorRamp(CC_DRAW_CONTEXT& context)
 				//we must also check that the parent is not a mesh itself with the same vertices! (in
 				//which case it will also take that in charge)
 				ccHObject* parent = getParent();
-				if (parent && parent->isKindOf(CC_MESH) && (ccHObjectCaster::ToGenericMesh(parent)->getAssociatedCloud() == vertices))
+				if (parent && parent->isKindOf(CC_TYPES::MESH) && (ccHObjectCaster::ToGenericMesh(parent)->getAssociatedCloud() == vertices))
 					return;
 
 				cloud->addColorRampInfo(context);
@@ -250,7 +250,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (glParams.showSF)
 		{
-			assert(vertices->isA(CC_POINT_CLOUD));
+			assert(vertices->isA(CC_TYPES::POINT_CLOUD));
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(vertices);
 
 			greyForNanScalarValues = (cloud->getCurrentDisplayedScalarField() && cloud->getCurrentDisplayedScalarField()->areNaNValuesShownInGrey());
@@ -293,7 +293,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else
 			{
-				assert(vertices->isA(CC_POINT_CLOUD));
+				assert(vertices->isA(CC_TYPES::POINT_CLOUD));
 				rgbColorsTable = static_cast<ccPointCloud*>(vertices)->rgbColors();
 			}
 		}
@@ -315,7 +315,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		ccNormalVectors* compressedNormals = 0;
 		if (glParams.showNorms)
 		{
-			assert(vertices->isA(CC_POINT_CLOUD));
+			assert(vertices->isA(CC_TYPES::POINT_CLOUD));
 			normalsIndexesTable = static_cast<ccPointCloud*>(vertices)->normals();
 			compressedNormals = ccNormalVectors::GetUniqueInstance();
 		}

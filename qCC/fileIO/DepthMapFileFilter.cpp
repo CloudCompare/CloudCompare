@@ -35,10 +35,10 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const char* file
         return CC_FERR_BAD_ARGUMENT;
 
     ccHObject::Container sensors;
-    if (entity->isKindOf(CC_GBL_SENSOR))
+    if (entity->isKindOf(CC_TYPES::GBL_SENSOR))
         sensors.push_back(entity);
     else
-        entity->filterChildren(sensors, true, CC_GBL_SENSOR);
+        entity->filterChildren(sensors, true, CC_TYPES::GBL_SENSOR);
 
     if (sensors.empty())
     {
@@ -83,7 +83,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 {
     assert(fp && sensor);
 
-    if (!sensor->getParent()->isKindOf(CC_POINT_CLOUD))
+    if (!sensor->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
     {
         ccLog::Warning(QString("Warning: sensor '%1' is not associated to a point cloud!").arg(sensor->getName()));
         return CC_FERR_NO_ERROR; //this is not a severe error (the process can go on)
@@ -116,7 +116,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 
     //if the sensor is associated to a "ccPointCloud", we may also extract
     //normals and color!
-    if (cloud->isA(CC_POINT_CLOUD))
+    if (cloud->isA(CC_TYPES::POINT_CLOUD))
     {
         ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 

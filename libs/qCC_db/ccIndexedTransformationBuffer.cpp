@@ -23,7 +23,9 @@ ccIndexedTransformationBuffer::ccIndexedTransformationBuffer(QString name)
 	, m_showAsPolyline(false)
 	, m_showTrihedrons(true)
 	, m_trihedronsScale(1.0f)
+	, m_bBoxValidSize(0)
 {
+	lockVisibility(false);
 }
 
 static bool IndexedSortOperator(const ccIndexedTransformation& a, const ccIndexedTransformation& b)
@@ -86,15 +88,13 @@ bool ccIndexedTransformationBuffer::findNearest(double index,
 	}
 	else
 	{
-		if (trans2)
-			trans2 = &(*it);
+		trans2 = &(*it);
 		if (trans2IndexInBuffer)
 			*trans2IndexInBuffer = it - begin();
 		if (it != begin())
 		{
 			--it;
-			if (trans1)
-				trans1 = &(*it);
+			trans1 = &(*it);
 			if (trans1IndexInBuffer)
 				*trans1IndexInBuffer = it - begin();
 		}
@@ -103,11 +103,41 @@ bool ccIndexedTransformationBuffer::findNearest(double index,
 	return true;
 }
 
+void ccIndexedTransformationBuffer::invalidateBoundingBox()
+{
+	m_bBox.setValidity(false);
+}
+
+ccBBox ccIndexedTransformationBuffer::getMyOwnBB()
+{
+	if (!m_bBox.isValid() || m_bBoxValidSize != size())
+	{
+		for (ccIndexedTransformationBuffer::const_iterator it=begin(); it!=end(); ++it)
+			m_bBox.add(it->getTranslationAsVec3D());
+
+		m_bBoxValidSize = size();
+	}
+
+	return m_bBox;
+}
+
+ccBBox ccIndexedTransformationBuffer::getDisplayBB()
+{
+	ccBBox box = getMyOwnBB();
+	if (m_showTrihedrons && box.isValid())
+	{
+		box.minCorner() -= CCVector3(m_trihedronsScale,m_trihedronsScale,m_trihedronsScale);
+		box.maxCorner() += CCVector3(m_trihedronsScale,m_trihedronsScale,m_trihedronsScale);
+	}
+
+	return box;
+}
+
 bool ccIndexedTransformationBuffer::getInterpolatedTransformation(	double index,
 																	ccIndexedTransformation& trans,
 																	double maxIndexDistForInterpolation/*=DBL_MAX*/) const
 {
-	const ccIndexedTransformation *t1, *t2;
+	const ccIndexedTransformation *t1=0, *t2=0;
 
 	if (!findNearest(index, t1, t2))
 		return false;
@@ -131,6 +161,8 @@ bool ccIndexedTransformationBuffer::getInterpolatedTransformation(	double index,
 				if (i2 - maxIndexDistForInterpolation > index) //trans2 is too far
 					return false;
 
+				//interpolate
+				trans = ccIndexedTransformation::Interpolate(index, *t1, *t2);
 			}
 			else
 			{
@@ -250,8 +282,6 @@ void ccIndexedTransformationBuffer::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
-			const float* t = it->getTranslation();
-			glTranslatef(t[0],t[1],t[2]);
 			glMultMatrixf(it->data());
 
 			glBegin(GL_LINES);

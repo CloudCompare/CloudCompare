@@ -109,11 +109,11 @@ public:
     ccHObject* find(int uniqueID) const;
 
 	//! Returns the number of selected entities in DB tree (optionally with a given type)
-    int countSelectedEntities(CC_CLASS_ENUM filter = CC_OBJECT);
+    int countSelectedEntities(CC_CLASS_ENUM filter = CC_TYPES::OBJECT);
 
 	//! Returns selected entities in DB tree (optionally with a given type and additional information)
     int getSelectedEntities(ccHObject::Container& selEntities,
-                                CC_CLASS_ENUM filter = CC_OBJECT,
+                                CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
                                     dbTreeSelectionInfo* info=NULL);
 
 	//! Expands tree at a given node

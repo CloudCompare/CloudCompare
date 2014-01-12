@@ -43,7 +43,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
         return CC_FERR_BAD_ARGUMENT;
 
     ccHObject::Container hClouds;
-    entity->filterChildren(hClouds,false,CC_POINT_CLOUD);
+    entity->filterChildren(hClouds,false,CC_TYPES::POINT_CLOUD);
 
     if (hClouds.empty())
         return CC_FERR_NO_SAVE;
@@ -54,7 +54,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
 		for (unsigned i=0; i<hClouds.size(); ++i)
 		{
 			ccHObject::Container cloudSensors;
-			hClouds[i]->filterChildren(cloudSensors,false,CC_GBL_SENSOR);
+			hClouds[i]->filterChildren(cloudSensors,false,CC_TYPES::GBL_SENSOR);
 			if (!cloudSensors.empty())
 			{
 				clouds.push_back(ccHObjectCaster::ToGenericPointCloud(hClouds[i]));
@@ -272,10 +272,10 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
 
                 int errorCode;
                 ccHObject::Container clouds;
-                if (loadedLists->isKindOf(CC_POINT_CLOUD))
+                if (loadedLists->isKindOf(CC_TYPES::POINT_CLOUD))
                     clouds.push_back(loadedLists);
                 else
-                    loadedLists->filterChildren(clouds,true,CC_POINT_CLOUD);
+                    loadedLists->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD);
 
                 for (unsigned i=0;i<clouds.size();++i)
                 {

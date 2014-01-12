@@ -1774,7 +1774,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 		pickedObj = m_winDBRoot->find(itemID);
 	if (pickedObj)
 	{
-		if (pickedObj->isA(CC_2D_LABEL))
+		if (pickedObj->isA(CC_TYPES::LABEL_2D))
 		{
 			cc2DLabel* label = static_cast<cc2DLabel*>(pickedObj);
 			if (!label->isSelected() || !extendToSelectedLabels)
@@ -1790,12 +1790,12 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 				//we get the other selected labels as well!
 				ccHObject::Container labels;
 				if (m_globalDBRoot)
-					m_globalDBRoot->filterChildren(labels,true,CC_2D_LABEL);
+					m_globalDBRoot->filterChildren(labels,true,CC_TYPES::LABEL_2D);
 				if (m_winDBRoot)
-					m_winDBRoot->filterChildren(labels,true,CC_2D_LABEL);
+					m_winDBRoot->filterChildren(labels,true,CC_TYPES::LABEL_2D);
 
 				for (ccHObject::Container::iterator it=labels.begin(); it!=labels.end(); ++it)
-					if ((*it)->isA(CC_2D_LABEL) && (*it)->isVisible()) //Warning: cc2DViewportLabel is also a kind of 'CC_2D_LABEL'!
+					if ((*it)->isA(CC_TYPES::LABEL_2D) && (*it)->isVisible()) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
 					{
 						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
 						if (label->isSelected())
@@ -1805,7 +1805,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 					}
 			}
 		}
-		else if (pickedObj->isA(CC_CLIPPING_BOX))
+		else if (pickedObj->isA(CC_TYPES::CLIPPING_BOX))
 		{
 			ccClipBox* cbox = static_cast<ccClipBox*>(pickedObj);
 			cbox->setActiveComponent(subID);
@@ -2438,13 +2438,13 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 			{
 				//auto spawn the right label
 				cc2DLabel* label = 0;
-				if (obj->isKindOf(CC_POINT_CLOUD))
+				if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
 					label = new cc2DLabel();
 					label->addPoint(ccHObjectCaster::ToGenericPointCloud(obj),subSelectedID);
 					obj->addChild(label);
 				}
-				else if (obj->isKindOf(CC_MESH))
+				else if (obj->isKindOf(CC_TYPES::MESH))
 				{
 					label = new cc2DLabel();
 					ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(obj);

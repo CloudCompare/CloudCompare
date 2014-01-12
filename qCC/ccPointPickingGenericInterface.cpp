@@ -88,7 +88,7 @@ void ccPointPickingGenericInterface::handlePickedPoint(int cloudID, unsigned poi
     ccPointCloud* cloud = 0;
 
 	ccHObject* obj = MainWindow::TheInstance()->db()->find(cloudID);
-	if (obj->isKindOf(CC_POINT_CLOUD))
+	if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
 		cloud = static_cast<ccPointCloud*>(obj);
 
     if (!cloud)

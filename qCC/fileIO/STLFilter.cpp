@@ -44,7 +44,7 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
 
-	if (!entity->isKindOf(CC_MESH))
+	if (!entity->isKindOf(CC_TYPES::MESH))
 		return CC_FERR_BAD_ENTITY_TYPE;
 
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);

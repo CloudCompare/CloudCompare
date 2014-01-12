@@ -45,7 +45,7 @@ public:
 	//inherited from ccObject
     virtual QString getName() const;
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_2D_LABEL; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::LABEL_2D; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Returns 'raw' name (no replacement of default keywords)

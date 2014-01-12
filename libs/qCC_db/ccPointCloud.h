@@ -79,7 +79,7 @@ public:
 	virtual ~ccPointCloud();
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_POINT_CLOUD; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_CLOUD; }
 
     /***************************************************
 						Clone/Copy

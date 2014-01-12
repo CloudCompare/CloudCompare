@@ -53,7 +53,7 @@ public:
 	ccCylinder(QString name = QString("Cylinder"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_CYLINDER; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CYLINDER; }
 
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Cylinder"; }

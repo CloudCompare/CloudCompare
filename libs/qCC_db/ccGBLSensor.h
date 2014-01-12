@@ -64,7 +64,7 @@ public:
 	virtual ~ccGBLSensor();
 
     //inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_GBL_SENSOR; };
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::GBL_SENSOR; };
 	virtual bool isSerializable() const { return true; }
 
 	//! Sets the lateral angular scanning limits
@@ -203,7 +203,7 @@ public:
 	PointCoordinateType getGraphicScale() const { return m_scale; }
 
     //Inherited from ccHObject
-    //virtual ccBBox getMyOwnBB();
+    virtual ccBBox getMyOwnBB();
     virtual ccBBox getDisplayBB();
 
 protected:

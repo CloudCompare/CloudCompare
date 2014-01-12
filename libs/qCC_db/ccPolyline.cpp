@@ -378,7 +378,7 @@ PointCoordinateType ccPolyline::computeLength() const
 
 unsigned ccPolyline::getUniqueIDForDisplay() const
 {
-	if (m_parent && m_parent->getParent() && m_parent->getParent()->isA(CC_FACET))
+	if (m_parent && m_parent->getParent() && m_parent->getParent()->isA(CC_TYPES::FACET))
 		return m_parent->getParent()->getUniqueID();
 	else
 		return getUniqueID();

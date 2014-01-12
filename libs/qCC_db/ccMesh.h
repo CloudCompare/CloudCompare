@@ -50,7 +50,7 @@ public:
 	virtual ~ccMesh();
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_MESH; };
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::MESH; };
 
 	//! Sets the associated vertices cloud (warning)
 	virtual void setAssociatedCloud(ccGenericPointCloud* cloud);

@@ -57,7 +57,7 @@ public:
 	ccDish(QString name = QString("Dish"));
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_DISH; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::DISH; }
 
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Dish"; }

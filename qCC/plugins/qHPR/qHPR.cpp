@@ -223,7 +223,7 @@ void qHPR::doAction()
 	}
 
     ccHObject* ent = selectedEntities[0];
-    if (!ent->isA(CC_POINT_CLOUD))
+    if (!ent->isA(CC_TYPES::POINT_CLOUD))
 	{
 		m_app->dispToConsole("Select a point cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;

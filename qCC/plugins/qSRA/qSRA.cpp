@@ -92,8 +92,8 @@ void qSRA::onNewSelection(const ccHObject::Container& selectedEntities)
 	}
 
 	bool cloudAndPolylineSelected = (	selectedEntities.size() == 2
-										&& (   (selectedEntities[0]->isA(CC_POLY_LINE) && selectedEntities[1]->isA(CC_POINT_CLOUD))
-											|| (selectedEntities[1]->isA(CC_POLY_LINE) && selectedEntities[0]->isA(CC_POINT_CLOUD))) );
+										&& (   (selectedEntities[0]->isA(CC_TYPES::POLY_LINE) && selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD))
+											|| (selectedEntities[1]->isA(CC_TYPES::POLY_LINE) && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD))) );
 	
 	if (m_doCompareCloudToProfile)
 	{
@@ -102,10 +102,10 @@ void qSRA::onNewSelection(const ccHObject::Container& selectedEntities)
 
 	if (m_doProjectCloudDists)
 	{
-		m_doProjectCloudDists->setEnabled(	/*(selectedEntities.size() == 1 && selectedEntities[0]->isA(CC_POINT_CLOUD)) ||
+		m_doProjectCloudDists->setEnabled(	/*(selectedEntities.size() == 1 && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD)) ||
 											(selectedEntities.size() == 2 && 
-												(  (selectedEntities[0]->isA(CC_POLY_LINE) && selectedEntities[1]->isA(CC_POINT_CLOUD))
-												|| (selectedEntities[1]->isA(CC_POLY_LINE) && selectedEntities[0]->isA(CC_POINT_CLOUD))))*/
+												(  (selectedEntities[0]->isA(CC_TYPES::POLY_LINE) && selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD))
+												|| (selectedEntities[1]->isA(CC_TYPES::POLY_LINE) && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD))))*/
 											cloudAndPolylineSelected );
 	}
 
@@ -123,7 +123,7 @@ ccHObject* GetDefaultContainer(ccMainAppInterface* app)
 
 	//we look in qCC database for a group with the right name (i.e. if it has already been created)
 	ccHObject::Container groups;
-	app->dbRootObject()->filterChildren(groups,true,CC_HIERARCHY_OBJECT);
+	app->dbRootObject()->filterChildren(groups,true,CC_TYPES::HIERARCHY_OBJECT);
 	for (unsigned j=0;j<groups.size();++j)
 	{
 		if (groups[j]->getName() == QSRA_DEFAULT_CONTAINER_NAME)
@@ -230,9 +230,9 @@ void qSRA::computeCloud2ProfileRadialDist()
 	{
 		for (unsigned i=0; i<2; ++i)
 		{
-			if (m_selectedEntities[i]->isA(CC_POINT_CLOUD))
+			if (m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
 				cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
-			else if (m_selectedEntities[i]->isA(CC_POLY_LINE))
+			else if (m_selectedEntities[i]->isA(CC_TYPES::POLY_LINE))
 				polyline = static_cast<ccPolyline*>(m_selectedEntities[i]);
 		}
 	}
@@ -275,9 +275,9 @@ void qSRA::projectCloudDistsInGrid()
 	{
 		for (size_t i=0; i<selectCount; ++i)
 		{
-			if (m_selectedEntities[i]->isA(CC_POINT_CLOUD))
+			if (m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
 				cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
-			else if (m_selectedEntities[i]->isA(CC_POLY_LINE))
+			else if (m_selectedEntities[i]->isA(CC_TYPES::POLY_LINE))
 				polyline = static_cast<ccPolyline*>(m_selectedEntities[i]);
 		}
 	}

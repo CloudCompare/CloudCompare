@@ -494,10 +494,15 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glPushMatrix();
 		{
 			ccIndexedTransformation sensorPos;
-			if (m_posBuffer)
-				m_posBuffer->getInterpolatedTransformation(m_activeIndex,sensorPos);
-
-			sensorPos *= m_rigidTransformation;
+			if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+			{
+				//no visible position for this index!
+				glPopMatrix();
+				if (pushName)
+					glPopName();
+				return;
+			}
+				
 			glMultMatrixf(sensorPos.data());
 		}
 
@@ -530,19 +535,30 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
     }
 }
 
-/*ccBBox ccGBLSensor::getMyOwnBB()
+ccBBox ccGBLSensor::getMyOwnBB()
 {
+	return ccBBox();
+	//ccIndexedTransformation sensorPos;
+	//if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+	//	return ccBBox();
+
+	//CCVector3 center = sensorPos.getTranslationAsVec3D();
+
+ //   return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
+	//				center + CCVector3( 1, 1, 1) * m_scale);
 }
-//*/
 
 ccBBox ccGBLSensor::getDisplayBB()
 {
-    CCVector3 minCorner(-1,-1,-1);
-    CCVector3 maxCorner(1,1,1);
-    minCorner *= m_scale;
-    maxCorner *= m_scale;
+	//return getMyOwnBB();
+	ccIndexedTransformation sensorPos;
+	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+		return ccBBox();
 
-    return ccBBox(minCorner,maxCorner);
+	CCVector3 center = sensorPos.getTranslationAsVec3D();
+
+    return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
+					center + CCVector3( 1, 1, 1) * m_scale);
 }
 
 bool ccGBLSensor::toFile_MeOnly(QFile& out) const

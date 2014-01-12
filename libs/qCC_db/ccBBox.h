@@ -71,14 +71,14 @@ public:
     void add(const CCVector3& aVector);
 
     //! Returns min corner (const)
-    const CCVector3& minCorner() const;
+    inline const CCVector3& minCorner() const { return m_bbMin; }
     //! Returns max corner (const)
-    const CCVector3& maxCorner() const;
+    inline const CCVector3& maxCorner() const { return m_bbMax; }
 
     //! Returns min corner
-    CCVector3& minCorner();
+	inline CCVector3& minCorner() { return m_bbMin; }
     //! Returns max corner
-    CCVector3& maxCorner();
+    inline CCVector3& maxCorner() { return m_bbMax; }
 
     //! Returns center
     CCVector3 getCenter() const;
@@ -97,10 +97,10 @@ public:
     void draw(const colorType col[]) const;
 
     //! Sets bonding box validity
-    void setValidity(bool state);
+	inline void setValidity(bool state) { m_valid = state; }
 
     //! Returns whether bounding box is valid or not
-    bool isValid() const;
+	inline bool isValid() const { return m_valid; }
 
 	//! Computes min gap (absolute distance) between this bounding-box and another one
 	/** \return min gap (>=0) or -1 if at least one of the box is not valid
@@ -112,19 +112,19 @@ public:
 	**/
 	inline bool contains(const CCVector3& P) const
 	{
-		return (P.x >= bbMin.x && P.x <= bbMax.x &&
-				P.y >= bbMin.y && P.y <= bbMax.y &&
-				P.z >= bbMin.z && P.z <= bbMax.z);
+		return (P.x >= m_bbMin.x && P.x <= m_bbMax.x &&
+				P.y >= m_bbMin.y && P.y <= m_bbMax.y &&
+				P.z >= m_bbMin.z && P.z <= m_bbMax.z);
 	}
 
 protected:
 
     //! Lower min. corner
-    CCVector3 bbMin;
+    CCVector3 m_bbMin;
     //! Upper max. corner
-    CCVector3 bbMax;
+    CCVector3 m_bbMax;
     //! Validity
-    bool valid;
+    bool m_valid;
 };
 
 #endif //CC_BBOX_HEADER

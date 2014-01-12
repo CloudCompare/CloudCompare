@@ -214,7 +214,7 @@ void ccCameraParamEditDlg::processPickedPoint(int cloudUniqueID, unsigned pointI
 	ccHObject* db = m_associatedWin->getSceneDB();
 	if (db)
 		obj = db->find(cloudUniqueID);
-	if (obj && obj->isKindOf(CC_POINT_CLOUD))
+	if (obj && obj->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj);
 		const CCVector3* P = cloud->getPoint(pointIndex);

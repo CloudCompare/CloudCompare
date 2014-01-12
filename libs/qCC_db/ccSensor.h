@@ -47,7 +47,7 @@ public:
 	ccSensor(QString name);
 
     //inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_SENSOR; };
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::SENSOR; };
 	virtual bool isSerializable() const { return true; }
 
 	//! Returns the sensor type

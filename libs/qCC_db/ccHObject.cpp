@@ -105,73 +105,73 @@ void ccHObject::notifyGeometryUpdate()
 	}
 }
 
-ccHObject* ccHObject::New(unsigned objectType, const char* name/*=0*/)
+ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 {
 	switch(objectType)
 	{
-	case CC_HIERARCHY_OBJECT:
+	case CC_TYPES::HIERARCHY_OBJECT:
 		return new ccHObject(name);
-	case CC_POINT_CLOUD:
+	case CC_TYPES::POINT_CLOUD:
 		return new ccPointCloud(name);
-	case CC_MESH:
+	case CC_TYPES::MESH:
 		//warning: no associated vertices --> retrieved later
 		return new ccMesh(0);
-	case CC_SUB_MESH:
+	case CC_TYPES::SUB_MESH:
 		//warning: no associated mesh --> retrieved later
 		return new ccSubMesh(0);
-	case CC_MESH_GROUP:
+	case CC_TYPES::MESH_GROUP:
 		//warning: deprecated
 		ccLog::Warning("[ccHObject::New] Mesh groups are deprecated!");
 		//warning: no associated vertices --> retrieved later
 		return new ccMeshGroup();
-	case CC_POLY_LINE:
+	case CC_TYPES::POLY_LINE:
 		//warning: no associated vertices --> retrieved later
 		return new ccPolyline(0);
-	case CC_FACET:
+	case CC_TYPES::FACET:
 		return new ccFacet();
-	case CC_MATERIAL_SET:
+	case CC_TYPES::MATERIAL_SET:
 		return new ccMaterialSet();
-	case CC_NORMALS_ARRAY:
+	case CC_TYPES::NORMALS_ARRAY:
 		return new NormsTableType();
-	case CC_NORMAL_INDEXES_ARRAY:
+	case CC_TYPES::NORMAL_INDEXES_ARRAY:
 		return new NormsIndexesTableType();
-	case CC_RGB_COLOR_ARRAY:
+	case CC_TYPES::RGB_COLOR_ARRAY:
 		return new ColorsTableType();
-	case CC_TEX_COORDS_ARRAY:
+	case CC_TYPES::TEX_COORDS_ARRAY:
 		return new TextureCoordsContainer();
-	case CC_IMAGE:
+	case CC_TYPES::IMAGE:
 		return new ccImage();
-	case CC_CALIBRATED_IMAGE:
+	case CC_TYPES::CALIBRATED_IMAGE:
 		return new ccCalibratedImage();
-	case CC_GBL_SENSOR:
+	case CC_TYPES::GBL_SENSOR:
 		//warning: default sensor type set in constructor (see CCLib::GroundBasedLidarSensor::setRotationOrder)
 		return new ccGBLSensor();
-	case CC_2D_LABEL:
+	case CC_TYPES::LABEL_2D:
 		return new cc2DLabel(name);
-	case CC_2D_VIEWPORT_OBJECT:
+	case CC_TYPES::VIEWPORT_2D_OBJECT:
 		return new cc2DViewportObject(name);
-	case CC_2D_VIEWPORT_LABEL:
+	case CC_TYPES::VIEWPORT_2D_LABEL:
 		return new cc2DViewportLabel(name);
-	case CC_PLANE:
+	case CC_TYPES::PLANE:
 		return new ccPlane(name);
-	case CC_SPHERE:
+	case CC_TYPES::SPHERE:
 		return new ccSphere(name);
-	case CC_TORUS:
+	case CC_TYPES::TORUS:
 		return new ccTorus(name);
-	case CC_CYLINDER:
+	case CC_TYPES::CYLINDER:
 		return new ccCylinder(name);
-	case CC_BOX:
+	case CC_TYPES::BOX:
 		return new ccBox(name);
-	case CC_CONE:
+	case CC_TYPES::CONE:
 		return new ccCone(name);
-	case CC_DISH:
+	case CC_TYPES::DISH:
 		return new ccDish(name);
-	case CC_EXTRU:
+	case CC_TYPES::EXTRU:
 		return new ccExtru(name);
-	case CC_TRANS_BUFFER:
+	case CC_TYPES::TRANS_BUFFER:
 		return new ccIndexedTransformationBuffer(name);
-	case CC_POINT_OCTREE:
-	case CC_POINT_KDTREE:
+	case CC_TYPES::POINT_OCTREE:
+	case CC_TYPES::POINT_KDTREE:
 		//construction this way is not supported (yet)
 		ccLog::ErrorDebug("[ccHObject::New] This object (type %i) can't be constructed this way (yet)!",objectType);
 		break;
@@ -320,7 +320,7 @@ ccHObject* ccHObject::find(int uniqueID)
 	return 0;
 }
 
-unsigned ccHObject::filterChildren(Container& filteredChildren, bool recursive/*=false*/, CC_CLASS_ENUM filter/*=CC_OBJECT*/) const
+unsigned ccHObject::filterChildren(Container& filteredChildren, bool recursive/*=false*/, CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/) const
 {
 	for (Container::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
@@ -513,8 +513,8 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context._win);
 
 	//no need to display anything but clouds and meshes in "element picking mode"
-	drawInThisContext &= (( !MACRO_DrawPointNames(context) || isKindOf(CC_POINT_CLOUD) ) || 
-		                  ( !MACRO_DrawTriangleNames(context) || isKindOf(CC_MESH) ));
+	drawInThisContext &= (( !MACRO_DrawPointNames(context) || isKindOf(CC_TYPES::POINT_CLOUD) ) || 
+		                  ( !MACRO_DrawTriangleNames(context) || isKindOf(CC_TYPES::MESH) ));
 
 	//apply 3D 'temporary' transformation (for display only)
 	if (draw3D && m_glTransEnabled)
@@ -708,8 +708,8 @@ void ccHObject::removeAllChildren()
 
 bool ccHObject::isSerializable() const
 {
-	//we only handle pure CC_HIERARCHY_OBJECT here (object groups)
-	return (getClassID() == CC_HIERARCHY_OBJECT);
+	//we only handle pure CC_TYPES::HIERARCHY_OBJECT here (object groups)
+	return (getClassID() == CC_TYPES::HIERARCHY_OBJECT);
 }
 
 bool ccHObject::toFile(QFile& out) const
@@ -766,8 +766,8 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 	for (uint32_t i=0;i<serializableCount;++i)
 	{
 		//read children class ID
-		unsigned classID=0;
-		if (!ReadClassIDFromFile(classID, in, dataVersion))
+		CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
+		if (classID == CC_TYPES::OBJECT)
 			return false;
 
 		//create corresponding child object

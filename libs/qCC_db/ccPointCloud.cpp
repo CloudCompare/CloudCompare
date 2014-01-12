@@ -313,7 +313,7 @@ ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/)
 {
 	if (destCloud)
 	{
-		if (destCloud->isA(CC_POINT_CLOUD))
+		if (destCloud->isA(CC_TYPES::POINT_CLOUD))
 		{
 			return cloneThis(static_cast<ccPointCloud*>(destCloud));
 		}
@@ -591,7 +591,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	for (unsigned c=0; c<childrenCount; ++c)
 	{
 		ccHObject* child = addedCloud->getChild(c);
-		if (child->isA(CC_MESH)) //mesh --> FIXME: what for the other types of MESH?
+		if (child->isA(CC_TYPES::MESH)) //mesh --> FIXME: what for the other types of MESH?
 		{
 			ccMesh* mesh = static_cast<ccMesh*>(child);
 
@@ -613,14 +613,14 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to clone sub mesh %1!").arg(mesh->getName()));
 			}
 		}
-		else if (child->isKindOf(CC_IMAGE))
+		else if (child->isKindOf(CC_TYPES::IMAGE))
 		{
 			//ccImage* image = static_cast<ccImage*>(child);
 
 			//DGM FIXME: take image ownership! (dirty)
 			addedCloud->transferChild(child,*this);
 		}
-		else if (child->isA(CC_2D_LABEL))
+		else if (child->isA(CC_TYPES::LABEL_2D))
 		{
 			//clone label and update points if necessary
 			cc2DLabel* label = static_cast<cc2DLabel*>(child);
@@ -1219,7 +1219,7 @@ void ccPointCloud::translate(const CCVector3& T)
 
 	//and same thing for the Kd-tree(s)!
 	ccHObject::Container kdtrees;
-	filterChildren(kdtrees, false, CC_POINT_KDTREE);
+	filterChildren(kdtrees, false, CC_TYPES::POINT_KDTREE);
 	{
 		for (size_t i=0; i<kdtrees.size(); ++i)
 			static_cast<ccKdTree*>(kdtrees[i])->translateBoundingBox(T);
@@ -1270,7 +1270,7 @@ void ccPointCloud::multiply(PointCoordinateType fx, PointCoordinateType fy, Poin
 
 	//and same thing for the Kd-tree(s)!
 	ccHObject::Container kdtrees;
-	filterChildren(kdtrees, false, CC_POINT_KDTREE);
+	filterChildren(kdtrees, false, CC_TYPES::POINT_KDTREE);
 	{
 		for (size_t i=0; i<kdtrees.size(); ++i)
 			static_cast<ccKdTree*>(kdtrees[i])->multiplyBoundingBox(fx);
@@ -2475,10 +2475,8 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 				m_rgbColors = new ColorsTableType;
 				m_rgbColors->link();
 			}
-			unsigned classID=0;
-			if (!ReadClassIDFromFile(classID, in, dataVersion))
-				return false;
-			if (classID != CC_RGB_COLOR_ARRAY)
+			CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
+			if (classID != CC_TYPES::RGB_COLOR_ARRAY)
 				return CorruptError();
 			if (!m_rgbColors->fromFile(in, dataVersion, flags))
 			{
@@ -2500,10 +2498,8 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 				m_normals = new NormsIndexesTableType();
 				m_normals->link();
 			}
-			unsigned classID=0;
-			if (!ReadClassIDFromFile(classID, in, dataVersion))
-				return false;
-			if (classID != CC_NORMAL_INDEXES_ARRAY)
+			CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
+			if (classID != CC_TYPES::NORMAL_INDEXES_ARRAY)
 				return CorruptError();
 			if (!m_normals->fromFile(in, dataVersion, flags))
 			{
@@ -2565,7 +2561,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 unsigned ccPointCloud::getUniqueIDForDisplay() const
 {
-	if (m_parent && m_parent->isA(CC_FACET))
+	if (m_parent && m_parent->isA(CC_TYPES::FACET))
 		return m_parent->getUniqueID();
 	else
 		return getUniqueID();

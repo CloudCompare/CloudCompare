@@ -47,7 +47,7 @@ public:
 	virtual ccGenericPrimitive* clone() const = 0;
 
     //! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_PRIMITIVE; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::PRIMITIVE; }
 
     //! Sets primitive color (shortcut)
     /** \param col rgb color

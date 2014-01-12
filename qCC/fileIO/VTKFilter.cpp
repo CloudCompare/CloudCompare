@@ -40,18 +40,18 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	//look for either a cloud or a mesh
 	ccHObject::Container clouds,meshes;
-	if (entity->isA(CC_POINT_CLOUD))
+	if (entity->isA(CC_TYPES::POINT_CLOUD))
         clouds.push_back(entity);
-    else if (entity->isKindOf(CC_MESH))
+    else if (entity->isKindOf(CC_TYPES::MESH))
 		meshes.push_back(entity);
 	else //group?
 	{
 		for (unsigned i=0;i<entity->getChildrenNumber();++i)
 		{
 			ccHObject* child = entity->getChild(i);
-			if (child->isKindOf(CC_POINT_CLOUD))
+			if (child->isKindOf(CC_TYPES::POINT_CLOUD))
 				clouds.push_back(child);
-			else if (child->isKindOf(CC_MESH))
+			else if (child->isKindOf(CC_TYPES::MESH))
 				meshes.push_back(child);
 		}
 	}
@@ -177,7 +177,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 	}
 
 	// write scalar field(s)?
-	if (vertices->isA(CC_POINT_CLOUD))
+	if (vertices->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* pointCloud = static_cast<ccPointCloud*>(vertices);
 		unsigned sfCount = pointCloud->getNumberOfScalarFields();

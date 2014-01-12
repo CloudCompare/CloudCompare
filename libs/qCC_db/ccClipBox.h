@@ -84,7 +84,7 @@ public:
 	void setActiveComponent(int id);
 
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_CLIPPING_BOX; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CLIPPING_BOX; }
 	//virtual bool isSerializable() const { return false; }
 
 	//! Returns current box

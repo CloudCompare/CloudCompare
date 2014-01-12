@@ -47,16 +47,16 @@ public:
 	/** Warning: objects depending on other structures (such as meshes 
 		or polylines that should be linked with point clouds playing the
 		role of vertices) are returned 'naked'.
-		\param objectType object type (see CC_CLASS_ENUM)
+		\param objectType object type
 		\param name object name (optional)
 		\return instantiated object (if type is valid) or 0
 	**/
-	static ccHObject* New(unsigned objectType, const char* name = 0);
+	static ccHObject* New(CC_CLASS_ENUM objectType, const char* name = 0);
 
     //! Returns class ID
     /** \return class unique ID
     **/
-    virtual CC_CLASS_ENUM getClassID() const { return CC_HIERARCHY_OBJECT; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::HIERARCHY_OBJECT; }
 
     //! Returns parent object
     /** \return parent object (NULL if no parent)
@@ -136,7 +136,7 @@ public:
         \param filter pattern for children selection
         \return number of collected children
     **/
-    unsigned filterChildren(Container& filteredChildren, bool recursive = false, CC_CLASS_ENUM filter = CC_OBJECT) const;
+    unsigned filterChildren(Container& filteredChildren, bool recursive = false, CC_CLASS_ENUM filter = CC_TYPES::OBJECT) const;
 
     //! Detaches a specific child
 	/** This method does not delete the child.

@@ -81,6 +81,11 @@ public:
 	**/
 	void setWidth(PointCoordinateType width);
 
+    //! Returns the width of the line
+    /** \return the width of the line in pixels
+    **/
+    PointCoordinateType getWidth() const {return m_width;}
+
 	//! Returns the polyline color
 	/** \return a pointer to the polyline RGB color
 	**/

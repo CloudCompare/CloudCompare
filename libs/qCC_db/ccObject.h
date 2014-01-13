@@ -100,7 +100,7 @@ enum CC_CLASS_ENUM {
 	CC_2D_LABEL				=	CC_HIERARCHY_OBJECT | CC_LABEL_BIT | CC_LEAF_BIT,
 	CC_2D_VIEWPORT_OBJECT	=	CC_HIERARCHY_OBJECT | CC_VIEWPORT_BIT | CC_LEAF_BIT,
 	CC_2D_VIEWPORT_LABEL	=	CC_2D_VIEWPORT_OBJECT | CC_LABEL_BIT,
-	CC_CLIPPING_BOX			=	CC_CLIP_BOX_BIT | CC_LEAF_BIT,
+    CC_CLIPPING_BOX			=	CC_CLIP_BOX_BIT | CC_LEAF_BIT
 };
 
 //! Generic "CloudCompare Object" template
@@ -217,6 +217,12 @@ public:
 		\param data data
 	**/
 	void setMetaData(QString key, QVariant& data);
+
+    //! Says if a metadata with the given key exists or not
+    /** \param key is the key to look for
+        \return true, if exists
+    **/
+    bool hasMetaData(QString key);
 
 	//! Returns meta-data map (const only)
 	const QVariantMap& metaData() const { return m_metaData; }

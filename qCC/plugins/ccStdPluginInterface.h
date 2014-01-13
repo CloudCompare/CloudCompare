@@ -54,6 +54,11 @@ public:
 	**/
 	void setMainAppInterface(ccMainAppInterface* app) { m_app=app; }
 
+    //! A callback poiner to the main app interface for being used by plugins
+    /**  Any plugin (and its tools) may need to access methods of this interface
+     **/
+    ccMainAppInterface * getMainAppInterface() {return m_app;}
+
     //! Returns action(s)
     virtual void getActions(QActionGroup& group) = 0;
 

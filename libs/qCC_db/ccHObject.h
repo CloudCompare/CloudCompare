@@ -56,7 +56,16 @@ public:
     //! Returns class ID
     /** \return class unique ID
     **/
-    virtual CC_CLASS_ENUM getClassID() const {return CC_HIERARCHY_OBJECT;};
+    virtual CC_CLASS_ENUM getClassID() const {return CC_HIERARCHY_OBJECT;}
+
+
+    //! Returns an icon for this object
+    /** \return an invalid icon (please re-implement in derived classes).
+        The icons are best handled by ccDBRoot:
+        ccDBRoot will try to call this method, if ccDBRoot will find an un-valid icon
+        it will try to establish a defualt icon for that type.
+     **/
+    virtual QIcon getIcon() const;
 
     //! Returns parent object
     /** \return parent object (NULL if no parent)

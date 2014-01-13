@@ -157,7 +157,7 @@ cc2DLabel* ccHObjectCaster::To2DLabel(ccHObject* obj)
 
 cc2DViewportLabel* ccHObjectCaster::To2DViewportLabel(ccHObject* obj)
 {
-	return obj && obj->isA(CC_2D_VIEWPORT_LABEL) ? static_cast<cc2DViewportLabel*>(obj) : 0;
+    return obj && obj->isA(CC_2D_VIEWPORT_LABEL) ? static_cast<cc2DViewportLabel*>(obj) : 0;
 }
 
 cc2DViewportObject* ccHObjectCaster::To2DViewportObject(ccHObject* obj)

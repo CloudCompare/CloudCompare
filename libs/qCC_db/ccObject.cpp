@@ -211,7 +211,12 @@ bool ccObject::removeMetaData(QString key)
 
 void ccObject::setMetaData(QString key, QVariant& data)
 {
-	m_metaData.insert(key,data);
+    m_metaData.insert(key,data);
+}
+
+bool ccObject::hasMetaData(QString key)
+{
+    return ( m_metaData.find(key) != m_metaData.end());
 }
 
 bool ccObject::fromFile(QFile& in, short dataVersion, int flags)

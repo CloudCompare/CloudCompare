@@ -336,37 +336,37 @@ bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::oct
 	Cloud2CloudDistanceComputationParams* params		= (Cloud2CloudDistanceComputationParams*)additionalParameters[2];
 	const ScalarType* maxSearchSquareDist		        = (ScalarType*)additionalParameters[3];
 
-	//structure for the nearest neighbor seach
-	DgmOctree::NearestNeighboursSearchStruct nPSS;
-	nPSS.level								= cell.level;
-	nPSS.truncatedCellCode					= cell.truncatedCode;
-	nPSS.alreadyVisitedNeighbourhoodSize	= 0;
-	nPSS.theNearestPointIndex				= 0;
-	nPSS.maxSearchSquareDist				= *maxSearchSquareDist;
+	//structure for the nearest neighbor search
+	DgmOctree::NearestNeighboursSearchStruct nNSS;
+	nNSS.level								= cell.level;
+	nNSS.truncatedCellCode					= cell.truncatedCode;
+	nNSS.alreadyVisitedNeighbourhoodSize	= 0;
+	nNSS.theNearestPointIndex				= 0;
+	nNSS.maxSearchSquareDist				= *maxSearchSquareDist;
 
-	//we already compute the position of the 'equivalent' cell in the refrence octree
-	referenceOctree->getCellPos(cell.truncatedCode,cell.level,nPSS.cellPos,true);
+	//we already compute the position of the 'equivalent' cell in the reference octree
+	referenceOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	//and we deduce its center
-	referenceOctree->computeCellCenter(nPSS.cellPos,cell.level,nPSS.cellCenter);
+	referenceOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
-	//for each point of the current cell (compared octree) we look its nearest neighbour in the reference cloud
+	//for each point of the current cell (compared octree) we look for its nearest neighbour in the reference cloud
 	unsigned pointCount = cell.points->size();
-	for (unsigned i=0;i<pointCount;i++)
+	for (unsigned i=0; i<pointCount; i++)
 	{
-		cell.points->getPoint(i,nPSS.queryPoint);
+		cell.points->getPoint(i,nNSS.queryPoint);
 
-		if (params->CPSet || referenceCloud->testVisibility(nPSS.queryPoint) == POINT_VISIBLE) //to build the closest point set up we must process the point whatever its visibility is!
+		if (params->CPSet || referenceCloud->testVisibility(nNSS.queryPoint) == POINT_VISIBLE) //to build the closest point set up we must process the point whatever its visibility is!
 		{
-			ScalarType dist = referenceOctree->findTheNearestNeighborStartingFromCell(nPSS);
+			ScalarType dist = referenceOctree->findTheNearestNeighborStartingFromCell(nNSS);
 			if (dist >= 0)
 				dist = sqrt(dist);
-			else if (nPSS.maxSearchSquareDist > 0)
-				dist = sqrt(nPSS.maxSearchSquareDist);
+			else if (nNSS.maxSearchSquareDist > 0)
+				dist = sqrt(nNSS.maxSearchSquareDist);
 
 			cell.points->setPointScalarValue(i,dist);
 
 			if (params->CPSet)
-				params->CPSet->setPointIndex(cell.points->getPointGlobalIndex(i),nPSS.theNearestPointIndex);
+				params->CPSet->setPointIndex(cell.points->getPointGlobalIndex(i),nNSS.theNearestPointIndex);
 		}
 		else
 		{

@@ -74,7 +74,7 @@ class GenericIndexedCloudPersist;
 
 //! The octree structure used throughout the library
 /** Implements the GenericOctree interface.
-	Corresponds to the octree structure developped during Daniel
+	Corresponds to the octree structure developed during Daniel
 	Girardeau-Montaut's PhD (see PhD manuscript, Chapter 4).
 **/
 
@@ -197,10 +197,10 @@ public:
 
 	//! Container of in/out parameters for nearest neighbour(s) search
 	/** This structure is generic and can be used in multiple cases.
-		It is particularilly useful when searching nearest neighbours around points
-		that lie in the same octree cell. In this case, serveral informations about
-		this cell should be given to the search aglorithm through this structure, but only
-		once,before the first seach. Then the search algorithm can be called multiple times,
+		It is particularly useful when searching nearest neighbours around points
+		that lie in the same octree cell. In this case, several informations about
+		this cell should be given to the search algorithm through this structure, but only
+		once,before the first search. Then the search algorithm can be called multiple times,
 		and only few informations need to be updated (the query point, etc.).
 	**/
 	struct NearestNeighboursSearchStruct
@@ -247,7 +247,7 @@ public:
 
 		/*** Information to set to 0 before search ***/
 
-		//! List of indexes of the cells that have benn already visited by the algorithm
+		//! List of indexes of the cells that have been already visited by the algorithm
 		/** This field is updated by the search algorithm. It should only be emptied
 			if the cell that includes the query points change. Only used by the
 			"unique nearest point" search algorithm.
@@ -256,7 +256,7 @@ public:
 
 		//! All the points that belong to the cubical neighbourhood of the current cell
 		/** This structure is only used by the "multiple nearest neighbours" search algorithms.
-			The nearest points (relatively to the query point) are stored at the begining of
+			The nearest points (relatively to the query point) are stored at the beginning of
 			the vector. They are associated to their square distance to the query point.
 		**/
 		NeighboursSet pointsInNeighbourhood;
@@ -308,7 +308,7 @@ public:
 		//! min SQUARE distance from query point to cell center (to be sure of total exclusion)
 		PointCoordinateType minOutD2;
 #endif
-		//! Wheter pointsInSphericalNeighbourhood is ready or not
+		//! Whether pointsInSphericalNeighbourhood is ready or not
 		bool ready;
 
 		//! Updates maxD2 and minD2 with search radius and cellSize
@@ -418,7 +418,7 @@ public:
 	/** See DgmOctree::executeFunctionForAllCellsAtLevel and DgmOctree::executeFunctionForAllCellsAtStartingLevel.
 		The parameters of such a function are:
 		- (octreeCell) cell descriptor
-		- (void**) table of user parameters for the fonction (maybe void)
+		- (void**) table of user parameters for the function (maybe void)
 		- (NormalizedProgress*) optional (normalized) progress callback
 		- return success
 	**/
@@ -592,7 +592,7 @@ public:
 		\param _queryPoint the query point
 		\param Yk the nearest neighbours
 		\param maxNumberOfNeighbors the maximal number of points to find
-		\param level the sudivision level of the octree at which to perform the search
+		\param level the subdivision level of the octree at which to perform the search
 		\param maxSquareDist the square distance between the farthest "nearest neighbour" and the query point
 		\param maxSearchDist the maximum search distance (ignored if -1)
 		\return the number of neighbours found
@@ -878,13 +878,13 @@ public:
 
 	/**** ADVANCED METHODS ****/
 
-	//! Computes the connected components (considering the octree cells only) for a given level of subidivision (partial)
+	//! Computes the connected components (considering the octree cells only) for a given level of subdivision (partial)
 	/** The octree is seen as a regular 3D grid, and each cell of this grid is either set to 0
 		(if no points lies in it) or to 1 (if some points lie in it, e.g. if it is indeed a
 		cell of this octree). This version of the algorithm can be applied by considering only
 		a specified list of octree cells (ignoring the others).
 		\param cellCodes the cell codes to consider for the CC computation
-		\param level the level of subidivision at which to perform the algorithm
+		\param level the level of subdivision at which to perform the algorithm
 		\param sixConnexity indicates if the CC's 3D connexity should be 6 (26 otherwise)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return error code:
@@ -898,12 +898,12 @@ public:
 					bool sixConnexity,
 					GenericProgressCallback* progressCb = 0) const;
 
-	//! Computes the connected components (considering the octree cells only) for a given level of subidivision (complete)
+	//! Computes the connected components (considering the octree cells only) for a given level of subdivision (complete)
 	/** The octree is seen as a regular 3D grid, and each cell of this grid is either set to 0
 		(if no points lies in it) or to 1 (if some points lie in it, e.g. if it is indeed a
 		cell of this octree). This version of the algorithm is directly applied on the whole
 		octree.
-		\param level the level of subidivision at which to perform the algorithm
+		\param level the level of subdivision at which to perform the algorithm
 		\param sixConnexity indicates if the CC's 3D connexity should be 6 (26 otherwise)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return error code:
@@ -960,7 +960,7 @@ public:
 
 #ifdef ENABLE_MT_OCTREE
 	//! Multi-threaded version of executeFunctionForAllCellsAtLevel
-	/** Based on QtConcurrent::map system. Dispacthes automatically
+	/** Based on QtConcurrent::map system. Dispatches automatically
 		computation on as much cores on the system.
 		\return the number of processed cells (or 0 is something went wrong)
 	**/
@@ -971,7 +971,7 @@ public:
 													const char* functionTitle = 0);
 
 	//! Multi-threaded version of executeFunctionForAllCellsAtLevel
-	/** Based on QtConcurrent::map system. Dispacthes automatically
+	/** Based on QtConcurrent::map system. Dispatches automatically
 		computation on as much cores on the system.
 		\return the number of processed cells (or 0 is something went wrong)
 	**/

@@ -96,7 +96,7 @@ octreeTreeCell* getCell(OctreeCellCodeType truncatedCellCode, uchar level)
 			if (currentCell->children[i]->relativePos == childPos)
 			{
 				currentCell = currentCell->children[i];
-				if (!currentCell->childrenCount) //leafcell
+				if (!currentCell->childrenCount) //leaf cell
 					return currentCell;
 				break;
 			}
@@ -225,7 +225,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
 	}
     m_numberOfProjectedPoints = 0;
 
-    //update the pre-computed 'cell size per level of subidivision' array
+    //update the pre-computed 'cell size per level of subdivision' array
     updateCellSizeTable();
 
     //progress notification (optional)
@@ -299,7 +299,7 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
     //we sort the 'cells' by ascending code order
 	std::sort(m_thePointsAndTheirCellCodes.begin(),m_thePointsAndTheirCellCodes.end(),IndexAndCode::codeComp);
 
-    //update the pre-computed 'number of cells per level of subidivision' array
+    //update the pre-computed 'number of cells per level of subdivision' array
     updateCellCountTable();
 
     //end of process notification
@@ -433,7 +433,7 @@ void DgmOctree::updateMinAndMaxTables()
 
 void DgmOctree::updateCellSizeTable()
 {
-    //update the cell dimension for each subidivision level
+    //update the cell dimension for each subdivision level
     for (int dim=0; dim<3; ++dim)
     {
         PointCoordinateType dd = m_dimMax[dim]-m_dimMin[dim];
@@ -453,7 +453,7 @@ void DgmOctree::updateCellSizeTable()
 			dd /= 2;
         }
 		if (dim == 0)
-			m_cellSize[MAX_OCTREE_LEVEL+1] = m_cellSize[MAX_OCTREE_LEVEL] / 2; //usefull for some algorithms
+			m_cellSize[MAX_OCTREE_LEVEL+1] = m_cellSize[MAX_OCTREE_LEVEL] / 2; //useful for some algorithms
     }
 }
 
@@ -747,7 +747,7 @@ unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bit
 
         if (middleCode < truncatedCellCode)
         {
-			//no more cell inbetween?
+			//no more cell in-between?
             if (middle == begin)
                 return m_numberOfProjectedPoints;
 
@@ -756,7 +756,7 @@ unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bit
         }
         else if (middleCode > truncatedCellCode)
         {
-			//no more cell inbetween?
+			//no more cell in-between?
             if (middle == begin)
                 return m_numberOfProjectedPoints;
 
@@ -811,14 +811,14 @@ unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bit
 
         if (middleCode < truncatedCellCode)
         {
-			//no more cell inbetween?
+			//no more cell in-between?
             if (middle == begin)
                 return m_numberOfProjectedPoints;
 			begin = middle;
         }
         else if (middleCode > truncatedCellCode)
         {
-			//no more cell inbetween?
+			//no more cell in-between?
             if (middle == begin)
                 return m_numberOfProjectedPoints;
 			end = middle;
@@ -854,7 +854,7 @@ unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
     nNSS.level								= level;
     nNSS.minNumberOfNeighbors				= maxNumberOfNeighbors;
     nNSS.alreadyVisitedNeighbourhoodSize	= 0;
-    bool inbounds=false;
+    bool inbounds = false;
     getTheCellPosWhichIncludesThePoint(&nNSS.queryPoint,nNSS.cellPos,nNSS.level,inbounds);
     computeCellCenter(nNSS.cellPos,level,nNSS.cellCenter);
     nNSS.truncatedCellCode = (inbounds ? generateTruncatedCellCode(nNSS.cellPos,nNSS.level) : INVALID_CELL_CODE);
@@ -1059,7 +1059,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
         {
             OctreeCellCodeType c1 = c0 | (GenerateCellCodeForDim(nNSS.cellPos[1]+j)<<1);
 
-            //si i ou j est maximal
+            //if i or j is on the boundary
             if (iBorder || (abs(j) == neighbourhoodLength)) //test: are we already on one of the X or Y borders?
             {
                 for (int k=-kMin; k<=kMax; k++)
@@ -1452,19 +1452,18 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearch
 }
 #endif
 
-//trouve le point le plus proche d'un point donne via l'octree et renvoie la distance a celui-ci
 ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSearchStruct &nNSS) const
 {
     //binary shift for cell code truncation
     uchar bitDec = GET_BIT_SHIFT(nNSS.level);
 
-    //cell size at the current level of subdivison
+    //cell size at the current level of subdivision
     const PointCoordinateType& cs = getCellSize(nNSS.level);
 
     //already visited cells (relative distance to the cell that includes the query point)
     int visitedCellDistance = nNSS.alreadyVisitedNeighbourhoodSize;
-    //minimum (a priori) relative distance to get elligible points (see 'elligibleDist' below)
-    int elligibleCellDistance = visitedCellDistance;
+    //minimum (a priori) relative distance to get eligible points (see 'eligibleDist' below)
+    int eligibleCellDistance = visitedCellDistance;
 
     //if we have not already looked for the first cell (the one including the query point)?
     if (visitedCellDistance == 0)
@@ -1477,12 +1476,12 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
 
         visitedCellDistance = 1;
 
-        //it this cell does exsist...
+        //it this cell does exist...
         if (index < m_numberOfProjectedPoints)
         {
             //we add it to the 'cells to visit' set
             nNSS.minimalCellsSetToVisit.push_back(index);
-            elligibleCellDistance = 1;
+            eligibleCellDistance = 1;
         }
         //otherwise, we may be very far from the nearest octree cell
         //(let's try to get there asap)
@@ -1512,12 +1511,12 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
 
             //the nearest octree cell
             diagonalDistance = static_cast<int>(ceil(sqrt(static_cast<float>(diagonalDistance))));
-            elligibleCellDistance = std::max(diagonalDistance,1);
+            eligibleCellDistance = std::max(diagonalDistance,1);
 
             if (nNSS.maxSearchSquareDist >= 0)
             {
                 //Distance to the nearest point
-                ScalarType minDist = (ScalarType)(elligibleCellDistance-1) * (ScalarType)cs;
+                ScalarType minDist = (ScalarType)(eligibleCellDistance-1) * (ScalarType)cs;
                 //if we are already outside of the search limit, we can quit
                 if (minDist*minDist > nNSS.maxSearchSquareDist)
                 {
@@ -1531,9 +1530,9 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
         nNSS.alreadyVisitedNeighbourhoodSize=visitedCellDistance;
     }
 
-    //for each dimension, we look for the min distance between the query point and the celle border.
-    //This distance (minDistToBorder) correponds to the maximal radius of a sphere centered on the
-    //query point and totaly included inside the cell
+    //for each dimension, we look for the min distance between the query point and the cell border.
+    //This distance (minDistToBorder) corresponds to the maximal radius of a sphere centered on the
+    //query point and totally included inside the cell
     PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
 
     //cells for which we have already computed the distances from their points to the query point
@@ -1544,16 +1543,16 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
 
     while (true)
     {
-        //if we do have found points but that were too far to be elligible
+        //if we do have found points but that were too far to be eligible
         if (minSquareDist > 0)
         {
             //what would be the correct neighbourhood size to be sure of it?
-            int newElligibleCellDistance = static_cast<int>(ceil((sqrt(minSquareDist)-minDistToBorder)/cs));
-            elligibleCellDistance = std::max(newElligibleCellDistance,elligibleCellDistance);
+            int newEligibleCellDistance = static_cast<int>(ceil((sqrt(minSquareDist)-minDistToBorder)/cs));
+            eligibleCellDistance = std::max(newEligibleCellDistance,eligibleCellDistance);
         }
 
         //we get the (new) cells around the current neighbourhood
-        while (nNSS.alreadyVisitedNeighbourhoodSize < elligibleCellDistance) //DGM: warning, alreadyVisitedNeighbourhoodSize == 1 means that we have only visited the first cell (distance=0)
+        while (nNSS.alreadyVisitedNeighbourhoodSize < eligibleCellDistance) //DGM: warning, alreadyVisitedNeighbourhoodSize == 1 means that we have only visited the first cell (distance=0)
         {
             getNeighborCellsAround(nNSS.cellPos,nNSS.minimalCellsSetToVisit,nNSS.alreadyVisitedNeighbourhoodSize,nNSS.level);
             ++nNSS.alreadyVisitedNeighbourhoodSize;
@@ -1588,11 +1587,11 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
         //equivalent spherical neighbourhood radius (as we are actually looking to 'square' neighbourhoods,
         //we must check that the nearest points inside such neighbourhoods are indeed near enough to fall
         //inside the biggest included sphere). Otherwise we must look further.
-        PointCoordinateType elligibleDist = static_cast<PointCoordinateType>(elligibleCellDistance-1) * cs + minDistToBorder;
-        PointCoordinateType squareElligibleDist = elligibleDist * elligibleDist;
+        PointCoordinateType eligibleDist = static_cast<PointCoordinateType>(eligibleCellDistance-1) * cs + minDistToBorder;
+        PointCoordinateType squareEligibleDist = eligibleDist * eligibleDist;
 
-        //if we have found an elligible point
-        if (minSquareDist >= 0 && minSquareDist <= squareElligibleDist)
+        //if we have found an eligible point
+        if (minSquareDist >= 0 && minSquareDist <= squareEligibleDist)
         {
             if (nNSS.maxSearchSquareDist < 0 || minSquareDist <= nNSS.maxSearchSquareDist)
                 return static_cast<ScalarType>(minSquareDist);
@@ -1601,13 +1600,13 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
         }
 		else
 		{
-			//no elligible point? Maybe we are already too far?
-			if (nNSS.maxSearchSquareDist >= 0 && squareElligibleDist > nNSS.maxSearchSquareDist)
+			//no eligible point? Maybe we are already too far?
+			if (nNSS.maxSearchSquareDist >= 0 && squareEligibleDist > nNSS.maxSearchSquareDist)
 				return -1;
 		}
 
         //default strategy: increase neighbourhood size of +1 (for next step)
-        ++elligibleCellDistance;
+        ++eligibleCellDistance;
     }
 
     //we should never get here!
@@ -1623,13 +1622,13 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
     //binary shift for cell code truncation
     uchar bitDec = GET_BIT_SHIFT(nNSS.level);
 
-    //cell size at the current level of subdivison
+    //cell size at the current level of subdivision
     const PointCoordinateType& cs = getCellSize(nNSS.level);
 
     //already visited cells (relative distance to the cell that includes the query point)
     int visitedCellDistance=nNSS.alreadyVisitedNeighbourhoodSize;
-    //minimum (a priori) relative distance to get elligible points (see 'elligibleDist' below)
-    int elligibleCellDistance=visitedCellDistance;
+    //minimum (a priori) relative distance to get eligible points (see 'eligibleDist' below)
+    int eligibleCellDistance=visitedCellDistance;
 
     //shall we look inside the first cell (the one including the query point)?
     if (visitedCellDistance == 0)
@@ -1657,7 +1656,7 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
 				}
 			}
 
-            elligibleCellDistance = 1;
+            eligibleCellDistance = 1;
         }
         //otherwise, we may be very far from the nearest octree cell
         //(let's try to get there asap)
@@ -1687,12 +1686,12 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
 
             //the nearest octree cell
             diagonalDistance = static_cast<int>(ceil(sqrt(static_cast<float>(diagonalDistance))));
-            elligibleCellDistance = std::max(diagonalDistance,1);
+            eligibleCellDistance = std::max(diagonalDistance,1);
 
             if (nNSS.maxSearchSquareDist >= 0)
             {
                 //Distance of the nearest point
-                ScalarType minDist = (ScalarType)(elligibleCellDistance-1) * (ScalarType)cs;
+                ScalarType minDist = (ScalarType)(eligibleCellDistance-1) * (ScalarType)cs;
                 //if we are already outside of the search limit, we can quit
                 if (minDist*minDist > nNSS.maxSearchSquareDist)
                 {
@@ -1702,33 +1701,33 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
         }
     }
 
-    //for each dimension, we look for the min distance between the query point and the celle border.
-    //This distance (minDistToBorder) correponds to the maximal radius of a sphere centered on the
-    //query point and totaly included inside the cell
+    //for each dimension, we look for the min distance between the query point and the cell border.
+    //This distance (minDistToBorder) corresponds to the maximal radius of a sphere centered on the
+    //query point and totally included inside the cell
     PointCoordinateType minDistToBorder = ComputeMinDistanceToCellBorder(&nNSS.queryPoint,cs,nNSS.cellCenter);
 
-    //elligible points found
-    unsigned elligiblePoints = 0;
+    //eligible points found
+    unsigned eligiblePoints = 0;
 
     //points for which we have already computed the distance to the query point
     unsigned alreadyProcessedPoints = 0;
 
-    //Min (squared) distance of non elligible points
+    //Min (squared) distance of non eligible points
     PointCoordinateType minSquareDist = -1;
 
     //while we don't have enough 'nearest neighbours'
-    while (elligiblePoints<nNSS.minNumberOfNeighbors)
+    while (eligiblePoints<nNSS.minNumberOfNeighbors)
     {
-        //if we do have found points but that were too far to be elligible
+        //if we do have found points but that were too far to be eligible
         if (minSquareDist > 0)
         {
             //what would be the correct neighbourhood size to be sure of it?
-            int newElligibleCellDistance = static_cast<int>(ceil((sqrt(minSquareDist)-minDistToBorder)/cs));
-            elligibleCellDistance = std::max(newElligibleCellDistance,elligibleCellDistance);
+            int newEligibleCellDistance = static_cast<int>(ceil((sqrt(minSquareDist)-minDistToBorder)/cs));
+            eligibleCellDistance = std::max(newEligibleCellDistance,eligibleCellDistance);
         }
 
         //we get the (new) points lying in the added area
-        while (visitedCellDistance < elligibleCellDistance) //DGM: warning, visitedCellDistance == 1 means that we have only visited the first cell (distance=0)
+        while (visitedCellDistance < eligibleCellDistance) //DGM: warning, visitedCellDistance == 1 means that we have only visited the first cell (distance=0)
         {
 			getPointsInNeighbourCellsAround(nNSS,visitedCellDistance,getOnlyPointsWithValidScalar);
             ++visitedCellDistance;
@@ -1743,43 +1742,43 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
         //equivalent spherical neighbourhood radius (as we are actually looking to 'square' neighbourhoods,
         //we must check that the nearest points inside such neighbourhoods are indeed near enough to fall
         //inside the biggest included sphere). Otherwise we must look further.
-        PointCoordinateType elligibleDist = static_cast<PointCoordinateType>(elligibleCellDistance-1) * cs + minDistToBorder;
-        PointCoordinateType squareElligibleDist = elligibleDist * elligibleDist;
+        PointCoordinateType eligibleDist = static_cast<PointCoordinateType>(eligibleCellDistance-1) * cs + minDistToBorder;
+        PointCoordinateType squareEligibleDist = eligibleDist * eligibleDist;
 
-        //let's test all the previous 'not yet elligible' points and the new ones
-        unsigned j=elligiblePoints;
-        for (q = nNSS.pointsInNeighbourhood.begin()+elligiblePoints; q != nNSS.pointsInNeighbourhood.end(); ++q,++j)
+        //let's test all the previous 'not yet eligible' points and the new ones
+        unsigned j=eligiblePoints;
+        for (q = nNSS.pointsInNeighbourhood.begin()+eligiblePoints; q != nNSS.pointsInNeighbourhood.end(); ++q,++j)
         {
-            //if the point is elligible
-            if (q->squareDist <= squareElligibleDist)
+            //if the point is eligible
+            if (q->squareDist <= squareEligibleDist)
             {
-                if (elligiblePoints<j)
-                    std::swap(nNSS.pointsInNeighbourhood[elligiblePoints],nNSS.pointsInNeighbourhood[j]);
-                ++elligiblePoints;
+                if (eligiblePoints<j)
+                    std::swap(nNSS.pointsInNeighbourhood[eligiblePoints],nNSS.pointsInNeighbourhood[j]);
+                ++eligiblePoints;
             }
             //otherwise we track the nearest one
-            else if (q->squareDist<minSquareDist || j == elligiblePoints)
+            else if (q->squareDist<minSquareDist || j == eligiblePoints)
             {
                 minSquareDist = static_cast<PointCoordinateType>(q->squareDist);
             }
         }
 
         //Maybe we are already too far?
-        if (nNSS.maxSearchSquareDist >= 0 && squareElligibleDist > nNSS.maxSearchSquareDist)
+        if (nNSS.maxSearchSquareDist >= 0 && squareEligibleDist > nNSS.maxSearchSquareDist)
             break;
 
         //default strategy: increase neighbourhood size of +1 (for next step)
-        ++elligibleCellDistance;
+        ++eligibleCellDistance;
     }
 
     //update the neighbourhood size (for next call, if the query point lies in the same cell)
     nNSS.alreadyVisitedNeighbourhoodSize = visitedCellDistance;
 
-    //we sort the elligible points
-	std::sort(nNSS.pointsInNeighbourhood.begin(),nNSS.pointsInNeighbourhood.begin()+elligiblePoints,PointDescriptor::distComp);
+    //we sort the eligible points
+	std::sort(nNSS.pointsInNeighbourhood.begin(),nNSS.pointsInNeighbourhood.begin()+eligiblePoints,PointDescriptor::distComp);
 
-    //we return the number of elligible points found
-    return elligiblePoints;
+    //we return the number of eligible points found
+    return eligiblePoints;
 }
 
 #ifdef OCTREE_TREE_TEST
@@ -2043,8 +2042,8 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 		//neighbours.clear();
 		uchar bitDec = GET_BIT_SHIFT(level);
 
-		//appart from the case where we must start from the very begining of the octree (level 0)
-		//we are now gonna look to the first point in the englobing cell
+		//apart from the case where we must start from the very beginning of the octree (level 0)
+		//we are now gonna look to the first point in the including cell
 		if (englobCode>0)
 		{
 			startIndex = getCellIndex(englobCode,bitDec,true);
@@ -2066,7 +2065,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 		PointCoordinateType currentSquareDistanceToCellCenter = -1;
 		PointCoordinateType squareRadius = radius*radius;
 
-		for (cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+startIndex; p != m_thePointsAndTheirCellCodes.end() && (p->theCode >> bitDec) == englobCode; ++p) //we are looking to all points inside the main englobing cell!
+		for (cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+startIndex; p != m_thePointsAndTheirCellCodes.end() && (p->theCode >> bitDec) == englobCode; ++p) //we are looking to all points inside the main including cell!
 		{
 			//different cell?
 			if ((p->theCode >> currentBitDec) != currentTruncatedCode)
@@ -2274,7 +2273,7 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 
 	//squared distances comparison is faster!
     PointCoordinateType squareRadius = radius * radius;
-    unsigned numberOfElligiblePoints = 0;
+    unsigned numberOfEligiblePoints = 0;
 
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN
 		//cell limit relatively to sphere tight bounding box
@@ -2302,9 +2301,9 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 			unsigned count = ((c+1) != nNSS.cellsInNeighbourhood.end() ? (c+1)->index : nNSS.pointsInSphericalNeighbourhood.size()) - c->index;
 			if (!sortValues && d2 <= nNSS.maxInD2) //totally inside? (+ we can skip distances computation)
 			{
-				//... we had them to the 'elligible points' part of the container
-				std::copy(p,p+count,nNSS.pointsInNeighbourhood.begin()+numberOfElligiblePoints);
-				numberOfElligiblePoints += count;
+				//... we had them to the 'eligible points' part of the container
+				std::copy(p,p+count,nNSS.pointsInNeighbourhood.begin()+numberOfEligiblePoints);
+				numberOfEligiblePoints += count;
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 				s_skippedPoints += static_cast<double>(count);
 #endif
@@ -2320,8 +2319,8 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 					//if the distance is inferior to the sphere radius...
 					if (p->squareDist <= squareRadius)
 					{
-						//... we had it to the 'elligible points' part of the container
-						nNSS.pointsInNeighbourhood[numberOfElligiblePoints++] = *p;
+						//... we had it to the 'eligible points' part of the container
+						nNSS.pointsInNeighbourhood[numberOfEligiblePoints++] = *p;
 					}
 				}
 			}
@@ -2346,11 +2345,11 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
         //if the distance is inferior to the sphere radius...
         if (p->squareDist <= squareRadius)
         {
-            //... we had it to the 'elligible points' part of the container
-            if (i>numberOfElligiblePoints)
-                std::swap(nNSS.pointsInNeighbourhood[i],nNSS.pointsInNeighbourhood[numberOfElligiblePoints]);
+            //... we had it to the 'eligible points' part of the container
+            if (i>numberOfEligiblePoints)
+                std::swap(nNSS.pointsInNeighbourhood[i],nNSS.pointsInNeighbourhood[numberOfEligiblePoints]);
 
-            ++numberOfElligiblePoints;
+            ++numberOfEligiblePoints;
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 			s_testedPoints += 1.0;
 #endif
@@ -2359,12 +2358,12 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 
 #endif //!TEST_CELLS_FOR_SPHERICAL_NN
 
-    //eventually (if requested) we sort the elligible points
-    if (sortValues && numberOfElligiblePoints>0)
-		std::sort(nNSS.pointsInNeighbourhood.begin(),nNSS.pointsInNeighbourhood.begin()+numberOfElligiblePoints,PointDescriptor::distComp);
+    //eventually (if requested) we sort the eligible points
+    if (sortValues && numberOfEligiblePoints>0)
+		std::sort(nNSS.pointsInNeighbourhood.begin(),nNSS.pointsInNeighbourhood.begin()+numberOfEligiblePoints,PointDescriptor::distComp);
 
-    //return the number of elligible points
-    return numberOfElligiblePoints;
+    //return the number of eligible points
+    return numberOfEligiblePoints;
 }
 
 double DgmOctree::computeMeanOctreeDensity(uchar level) const

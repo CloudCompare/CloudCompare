@@ -59,7 +59,7 @@ int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCl
 
 	theCloud->enableScalarField();
 
-	uchar level = theOctree->DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
+	uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
 
 	//parameters
 	void* additionalParameters[2];
@@ -150,7 +150,7 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 		{
 		    //current point index
 			unsigned index = cell.points->getPointGlobalIndex(i);
-		    //current point index in neighbourhood (to compute curvature at thre right position!)
+		    //current point index in neighbourhood (to compute curvature at the right position!)
             unsigned indexInNeighbourhood = 0;
 
 			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,neighborCount);
@@ -300,7 +300,7 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 
 	theCloud->enableScalarField();
 
-	uchar level = theOctree->DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
+	uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
 
 	//parameters
 	void* additionalParameters[1] = { (void*)&kernelRadius };

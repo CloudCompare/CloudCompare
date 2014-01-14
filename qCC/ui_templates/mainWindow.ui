@@ -179,10 +179,17 @@
      <property name="title">
       <string>Normals</string>
      </property>
+     <widget class="QMenu" name="menuOrientNormals">
+      <property name="title">
+       <string>Orient normals</string>
+      </property>
+      <addaction name="actionOrientNormalsMST"/>
+      <addaction name="actionOrientNormalsFM"/>
+     </widget>
      <addaction name="actionComputeNormals"/>
      <addaction name="actionConvertNormalToHSV"/>
      <addaction name="actionInvertNormals"/>
-     <addaction name="actionResolveNormalsDirection"/>
+     <addaction name="menuOrientNormals"/>
      <addaction name="separator"/>
      <addaction name="actionClearNormals"/>
     </widget>
@@ -1235,17 +1242,6 @@
    </property>
    <property name="statusTip">
     <string>Clear colors</string>
-   </property>
-  </action>
-  <action name="actionResolveNormalsDirection">
-   <property name="text">
-    <string>Resolve direction</string>
-   </property>
-   <property name="toolTip">
-    <string>Resolve normals directions</string>
-   </property>
-   <property name="statusTip">
-    <string>Resolve normals directions</string>
    </property>
   </action>
   <action name="actionClearNormals">
@@ -2382,6 +2378,16 @@
   <action name="actionEditGlobalScale">
    <property name="text">
     <string>Edit global scale</string>
+   </property>
+  </action>
+  <action name="actionOrientNormalsMST">
+   <property name="text">
+    <string>With Minimum Spanning Tree</string>
+   </property>
+  </action>
+  <action name="actionOrientNormalsFM">
+   <property name="text">
+    <string>With Fast Marching</string>
    </property>
   </action>
  </widget>

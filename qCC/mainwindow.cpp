@@ -16,7 +16,7 @@
 //##########################################################################
 
 #include "mainwindow.h"
-#include <iostream>
+
 //CCLib Includes
 #include <GenericChunkedArray.h>
 #include <CloudSamplingTools.h>
@@ -58,6 +58,7 @@
 #include "ccHeightGridGeneration.h"
 #include "ccRenderingTools.h"
 #include "ccFastMarchingForNormsDirection.h"
+#include "ccMinimumSpanningTreeForNormsDirection.h"
 #include "ccCommon.h"
 
 //sub-windows
@@ -143,6 +144,7 @@
 #include <math.h>
 #include <assert.h>
 #include <cfloat>
+#include <iostream>
 
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance = 0;
@@ -840,7 +842,8 @@ void MainWindow::connectActions()
     connect(actionComputeNormals,               SIGNAL(triggered()),    this,       SLOT(doActionComputeNormals()));
     connect(actionInvertNormals,                SIGNAL(triggered()),    this,       SLOT(doActionInvertNormals()));
 	connect(actionConvertNormalToHSV,			SIGNAL(triggered()),    this,       SLOT(doActionConvertNormalsToHSV()));
-    connect(actionResolveNormalsDirection,      SIGNAL(triggered()),    this,       SLOT(doActionResolveNormalsDirection()));
+    connect(actionOrientNormalsMST,				SIGNAL(triggered()),    this,       SLOT(doActionOrientNormalsMST()));
+    connect(actionOrientNormalsFM,				SIGNAL(triggered()),    this,       SLOT(doActionOrientNormalsFM()));
     connect(actionClearNormals,                 SIGNAL(triggered()),    this,       SLOT(doActionClearNormals()));
     //"Edit > Octree" menu
     connect(actionComputeOctree,                SIGNAL(triggered()),    this,       SLOT(doActionComputeOctree()));
@@ -4781,7 +4784,7 @@ void MainWindow::doActionComputeNormals()
 	updateUI();
 }
 
-void MainWindow::doActionResolveNormalsDirection()
+void MainWindow::doActionOrientNormalsMST()
 {
     if (m_selectedEntities.empty())
     {
@@ -4789,19 +4792,69 @@ void MainWindow::doActionResolveNormalsDirection()
         return;
     }
 
-    ccAskOneIntValueDlg vDlg("Octree level", 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, 5, "Resolve normal directions");
-    if (!vDlg.exec())
-        return;
-	assert(vDlg.getValue() && vDlg.getValue()<=255);
-    uchar level = (uchar)vDlg.getValue();
+	ccProgressDialog pDlg(false,this);
 
+	bool success = false;
     for (size_t i=0; i<m_selectedEntities.size(); i++)
     {
         if (!m_selectedEntities[i]->isA(CC_POINT_CLOUD))
             continue;
 
         ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
-        ccProgressDialog pDlg(false,this);
+		if (!cloud->hasNormals())
+		{
+			ccConsole::Warning(QString("Cloud '%1' has no normals!").arg(cloud->getName()));
+			continue;
+		}
+
+		//use Minimum Spanning Tree to resolve normals direction
+		if (ccMinimumSpanningTreeForNormsDirection::Process(cloud,&pDlg,cloud->getOctree()))
+		{
+			cloud->prepareDisplayForRefresh();
+			success = true;
+		}
+		else
+		{
+			ccConsole::Error(QString("Process failed on cloud '%1'").arg(cloud->getName()));
+			break;
+		}
+	}
+
+	if (success)
+		ccLog::Warning("Normals have been oriented: you may still have to globally invert the cloud normals however (Edit > Normals > Invert).");
+
+    refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionOrientNormalsFM()
+{
+    if (m_selectedEntities.empty())
+    {
+        ccConsole::Error("Select at least one point cloud");
+        return;
+    }
+	
+	ccAskOneIntValueDlg vDlg("Octree level", 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, 5, "Resolve normal directions");
+    if (!vDlg.exec())
+        return;
+	assert(vDlg.getValue() && vDlg.getValue()<=255);
+    uchar level = (uchar)vDlg.getValue();
+
+	ccProgressDialog pDlg(false,this);
+
+	bool success = false;
+    for (size_t i=0; i<m_selectedEntities.size(); i++)
+    {
+        if (!m_selectedEntities[i]->isA(CC_POINT_CLOUD))
+            continue;
+
+        ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
+		if (!cloud->hasNormals())
+		{
+			ccConsole::Warning(QString("Cloud '%1' has no normals!").arg(cloud->getName()));
+			continue;
+		}
 
         if (!cloud->getOctree())
 		{
@@ -4838,10 +4891,12 @@ void MainWindow::doActionResolveNormalsDirection()
 		normsIndexes->release();
 		normsIndexes=0;
 
-        cloud->prepareDisplayForRefresh();
+		cloud->prepareDisplayForRefresh();
+		success = true;
     }
 
-	ccLog::Warning("Normal Sign Resolve done. You may have to globally invert the cloud normals (Edit > Normals > Invert).");
+	if (success)
+		ccLog::Warning("Normals have been oriented: you may still have to globally invert the cloud normals however (Edit > Normals > Invert).");
 
     refreshAll();
 	updateUI();
@@ -8179,7 +8234,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     //actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
     //actionEnhanceMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
 
-    actionResolveNormalsDirection->setEnabled(atLeastOneCloud && atLeastOneNormal);
+    actionOrientNormalsMST->setEnabled(atLeastOneCloud && atLeastOneNormal);
+    actionOrientNormalsFM->setEnabled(atLeastOneCloud && atLeastOneNormal);
     actionClearNormals->setEnabled(atLeastOneNormal);
     actionInvertNormals->setEnabled(atLeastOneNormal);
     actionConvertNormalToHSV->setEnabled(atLeastOneNormal);

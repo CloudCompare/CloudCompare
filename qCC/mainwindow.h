@@ -296,7 +296,8 @@ protected slots:
     void doActionScalarFieldArithmetic();
     void doActionScalarFieldFromColor();
     void doActionClearColor();
-    void doActionResolveNormalsDirection();
+    void doActionOrientNormalsFM();
+    void doActionOrientNormalsMST();
     void doActionClearNormals();
     void doActionResampleWithOctree();
     void doActionComputeMeshAA();

@@ -25,6 +25,8 @@
 class ccPointCloud;
 
 //! Minimum Spanning Tree for normals direction resolution
+/** See http://people.maths.ox.ac.uk/wendland/research/old/reconhtml/node3.html
+**/
 class ccMinimumSpanningTreeForNormsDirection
 {
 

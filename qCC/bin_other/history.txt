@@ -1,6 +1,12 @@
 *** CloudCompare versions history ***
 
 v2.5.3 12/21/2013
+- New method: "Edit > Normals > Orient > With Minimum Spanning Tree"
+	* This is an alternative method to find the correct orientation of normals based on the
+		determination of a Minimum Spanning Tree
+	* It can consumes a lot of memory but it works better on smooth shapes than the former
+		Fast-Marching based method (called "Resolve normals direction" and now renamed
+		"Edit > Normals > Orient > With Fast-Marching")
 - Bug fix:
 	* Deleting a 3D view and then selecting an entity previously displayed in this view
 		would make CC crash

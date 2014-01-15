@@ -23,6 +23,7 @@
 //qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
+#include <ccScalarField.h>
 
 //Qt
 #include <QInputDialog>
@@ -75,7 +76,7 @@ protected:
 	double m_weight;
 };
 
-//! Generic graph strucutre
+//! Generic graph structure
 class Graph
 {
 public:
@@ -150,11 +151,19 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 {
 	assert(cloud && cloud->hasNormals());
 
-#define COLOR_PATCHES
+//#define COLOR_PATCHES
 #ifdef COLOR_PATCHES
 	//Test: color patches
 	cloud->setRGBColor(ccColor::white);
 	cloud->showColors(true);
+
+	//Test: arrival time
+	int sfIdx = cloud->getScalarFieldIndexByName("MST arrival time");
+	if (sfIdx < 0)
+		sfIdx = cloud->addScalarField("MST arrival time");
+	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
+	sf->fill(NAN_VALUE);
+	cloud->setCurrentDisplayedScalarField(sfIdx);
 #endif
 
 	//reset
@@ -189,36 +198,40 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 	//while unvisited vertices remain...
 	size_t firstUnvisitedIndex = 0;
 	size_t patchCount = 0;
+	size_t inversionCount = 0;
 	while (visitedCount < vertexCount)
 	{
 		//find the first not-yet-visited vertex
 		while (visited[firstUnvisitedIndex])
-		{
 			++firstUnvisitedIndex;
-			assert(firstUnvisitedIndex < vertexCount);
-		}
-
-#ifdef COLOR_PATCHES
-		colorType patchCol[3];
-		ccColor::Generator::Random(patchCol);
-#endif
 
 		//set it as "visited"
 		{
 			visited[firstUnvisitedIndex] = true;
 			++visitedCount;
-
+			//add its neighbors to the priority queue
 			const std::set<size_t>& neighbors = graph.getVertexNeighbors(firstUnvisitedIndex);
 			for (std::set<size_t>::const_iterator it = neighbors.begin(); it != neighbors.end(); ++it)
 				priorityQueue.push(Edge(firstUnvisitedIndex, *it, graph.weight(firstUnvisitedIndex, *it)));
+
+			if (nProgress && !nProgress->oneStep())
+				break;
 		}
+
+#ifdef COLOR_PATCHES
+		colorType patchCol[3];
+		ccColor::Generator::Random(patchCol);
+		cloud->setPointColor(static_cast<unsigned>(firstUnvisitedIndex), patchCol);
+		sf->setValue(static_cast<unsigned>(firstUnvisitedIndex),static_cast<ScalarType>(visitedCount));
+#endif
 
 		while(!priorityQueue.empty() && visitedCount < vertexCount)
 		{
+			//process next edge (with the lowest 'weight')
 			Edge element = priorityQueue.top();
 			priorityQueue.pop();
 
-			//pick next unvisited vertex with the lowest 'weight'
+			//there should only be (at most) one unvisited vertex in the edge
 			size_t v = 0;
 			if (!visited[element.v1()])
 				v = element.v1();
@@ -227,17 +240,7 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 			else
 				continue;
 
-			//set it as "visited"
-			{
-				visited[v] = true;
-				++visitedCount;
-
-				const std::set<size_t>& neighbors = graph.getVertexNeighbors(v);
-				for (std::set<size_t>::const_iterator it = neighbors.begin(); it != neighbors.end(); ++it)
-					priorityQueue.push(Edge(v, *it, graph.weight(v,*it)));
-			}
-
-			//invert normal if necessary
+			//invert normal if necessary (DO THIS BEFORE SETTING THE VERTEX AS 'VISITED'!)
 			const PointCoordinateType* N1 = cloud->getPointNormal(static_cast<unsigned>(element.v1()));
 			const PointCoordinateType* N2 = cloud->getPointNormal(static_cast<unsigned>(element.v2()));
 			if (CCVector3::vdot(N1,N2) < 0)
@@ -252,17 +255,38 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 					PointCoordinateType N2neg[3] = {-N2[0],-N2[1],-N2[2]};
 					cloud->setPointNormal(static_cast<unsigned>(v), N2neg);
 				}
+				++inversionCount;
 			}
+
+			//set it as "visited"
+			{
+				visited[v] = true;
+				++visitedCount;
+				//add its neighbors to the priority queue
+				const std::set<size_t>& neighbors = graph.getVertexNeighbors(v);
+				for (std::set<size_t>::const_iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+					priorityQueue.push(Edge(v, *it, graph.weight(v,*it)));
+			}
+
 #ifdef COLOR_PATCHES
 			cloud->setPointColor(static_cast<unsigned>(v), patchCol);
+			sf->setValue(static_cast<unsigned>(v),static_cast<ScalarType>(visitedCount));
 #endif
 			if (nProgress && !nProgress->oneStep())
+			{
+				visitedCount = static_cast<unsigned>(vertexCount); //early stop
 				break;
+			}
 		}
 
 		//new patch
 		++patchCount;
 	}
+
+#ifdef COLOR_PATCHES
+	sf->computeMinAndMax();
+	cloud->showSF(true);
+#endif
 
 	if (nProgress)
 	{
@@ -271,7 +295,7 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 		progressCb->stop();
 	}
 
-	ccLog::Print(QString("[ResolveNormalsWithMST] Patches = %1").arg(patchCount));
+	ccLog::Print(QString("[ResolveNormalsWithMST] Patches = %1 / Inversions: %2").arg(patchCount).arg(inversionCount));
 
 	return true;
 }
@@ -383,6 +407,7 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 	    //current point index
 		unsigned index = cell.points->getPointGlobalIndex(i);
 		const PointCoordinateType* N1 = cloud->getPointNormal(static_cast<unsigned>(index));
+		//const CCVector3* P1 = cloud->getPoint(static_cast<unsigned>(index));
 		for (unsigned j=0; j<neighborCount; ++j)
 		{
 		    //current neighbor index
@@ -390,8 +415,19 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 			if (index != neighborIndex)
 			{
 				const PointCoordinateType* N2 = cloud->getPointNormal(static_cast<unsigned>(neighborIndex));
-				double weight = std::max(0.0,1.0 - CCVector3::vdot(N1,N2));
-				//double weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDist);
+				double weight = 0;
+				//dot product
+				weight = std::max(0.0,1.0 - fabs(CCVector3::vdot(N1,N2)));
+				
+				//distance
+				//weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDist);
+
+				//mutual dot product
+				//const CCVector3* P2 = cloud->getPoint(static_cast<unsigned>(neighborIndex));
+				//CCVector3 uAB = *P2 - *P1;
+				//uAB.normalize();
+				//weight = (fabs(CCVector3::vdot(uAB.u,N1) + fabs(CCVector3::vdot(uAB.u,N2)))) / 2.0;
+
 				graph->setEdge(index,neighborIndex,weight);
 			}
 		}

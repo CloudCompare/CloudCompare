@@ -4792,7 +4792,7 @@ void MainWindow::doActionOrientNormalsMST()
         return;
     }
 
-	ccProgressDialog pDlg(false,this);
+	ccProgressDialog pDlg(true,this);
 
 	bool success = false;
     for (size_t i=0; i<m_selectedEntities.size(); i++)

@@ -44,7 +44,7 @@ public:
 	qHPR(QObject* parent=0);
 
     //inherited from ccPluginInterface
-	virtual QString getName() const { return "H.P.R."; }
+	virtual QString getName() const { return "Hidden Point Removal"; }
 	virtual QString getDescription() const { return "Hidden Point Removal (Katz et al.)"; }
 	virtual QIcon getIcon() const;
 

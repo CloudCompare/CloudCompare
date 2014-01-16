@@ -43,7 +43,7 @@ public:
 	virtual ~qKinect();
 
     //inherited from ccPluginInterface
-	virtual QString getName() const { return "qKinect"; }
+	virtual QString getName() const { return "Kinect capture"; }
 	virtual QString getDescription() const { return "Kinect 3D stream capture (with libfreenect)"; }
 	virtual QIcon getIcon() const;
 

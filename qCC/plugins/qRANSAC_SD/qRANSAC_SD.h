@@ -39,7 +39,7 @@ public:
 	qRansacSD(QObject* parent=0);
 
     //inherited from ccPluginInterface
-	virtual QString getName() const { return "RansacSD"; }
+	virtual QString getName() const { return "RANSAC Shape Detection"; }
 	virtual QString getDescription() const { return "Efficient RANSAC for Point-Cloud Shape Detection (Schnabel et al 2007)"; }
 	virtual QIcon getIcon() const;
 

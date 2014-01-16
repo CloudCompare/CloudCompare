@@ -30,8 +30,8 @@ class qBlur : public QObject, public ccGLFilterPluginInterface
 public:
 
     //inherited from ccPluginInterface
-	virtual QString getName() const { return "Blur"; }
-	virtual QString getDescription() const { return "Bilateral smooth GL filter"; }
+	virtual QString getName() const { return "Blur (shader)"; }
+	virtual QString getDescription() const { return "Bilateral smoothing (OpenGL shader)"; }
 	virtual QIcon getIcon() const;
 
     //inherited from ccGLFilterPluginInterface

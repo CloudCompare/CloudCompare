@@ -30,11 +30,7 @@
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
 #include <StatisticalOutliersRemover.h>
-//#ifdef _DEBUG
-//    #include <CurveFitting.h>
-//#endif
 //#include <ComputeSPINImages.h>
-
 
 qPCL::qPCL()
     : m_menu(0)
@@ -80,10 +76,7 @@ void qPCL::getActions(QActionGroup& group)
 		addFilter( new NormalEstimation());
 		addFilter( new StatisticalOutliersRemover() );
 		addFilter( new MLSSmoothingUpsampling() );
-//#ifdef _DEBUG
-//		addFilter( new CurveFitting() );
-//#endif
-		//  addFilter( new ComputeSPINImages() );
+		//addFilter( new ComputeSPINImages() );
 	}
 
 	for (std::vector<BaseFilter*>::const_iterator it = m_filters.begin(); it != m_filters.end(); ++it)
@@ -116,7 +109,7 @@ int qPCL::addFilter(BaseFilter* filter)
 
 void qPCL::onNewSelection(const ccHObject::Container& selectedEntities)
 {
-	for (unsigned i=0;i<m_filters.size();++i)
+	for (size_t i=0; i<m_filters.size(); ++i)
 		m_filters[i]->updateSelectedEntities(selectedEntities);
 }
 

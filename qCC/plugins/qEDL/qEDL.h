@@ -30,8 +30,8 @@ class qEDL : public QObject, public ccGLFilterPluginInterface
 public:
 
     //inherited from ccPluginInterface
-	virtual QString getName() const { return "E.D.L."; }
-	virtual QString getDescription() const { return "Eye-dome Lighting GL filter"; }
+	virtual QString getName() const { return "E.D.L. (shader)"; }
+	virtual QString getDescription() const { return "Eye-dome Lighting OpenGL shader"; }
 	virtual QIcon getIcon() const;
 
     //inherited from ccGLFilterPluginInterface

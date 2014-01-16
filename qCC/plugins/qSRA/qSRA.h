@@ -39,8 +39,8 @@ public:
 	qSRA(QObject* parent=0);
 
     //inherited from ccPluginInterface
-	virtual QString getName() const { return "SRA"; }
-	virtual QString getDescription() const { return "Surface of Revolution Analysis"; }
+	virtual QString getName() const { return "Surface of Revolution Analysis"; }
+	virtual QString getDescription() const { return "Generates a distance map between a point cloud and a surface of revolution"; }
 	virtual QIcon getIcon() const;
 
     //inherited from ccStdPluginInterface

@@ -43,8 +43,8 @@ public:
 	virtual ~qPCL();
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "qPCL"; }
-	virtual QString getDescription() const { return "PCL bridge"; }
+	virtual QString getName() const { return "Point Cloud Library"; }
+	virtual QString getDescription() const { return "PCL (Point Cloud Library) bridge"; }
 	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface

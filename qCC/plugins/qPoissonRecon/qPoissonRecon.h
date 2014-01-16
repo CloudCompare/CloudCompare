@@ -39,8 +39,8 @@ public:
 	qPoissonRecon(QObject* parent=0);
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "PoissonReconstruction"; }
-	virtual QString getDescription() const { return "3D Mesh Poisson Reconstruction (Kazhdan et al.)"; }
+	virtual QString getName() const { return "Poisson Surface Reconstruction"; }
+	virtual QString getDescription() const { return "Poisson Surface Reconstruction (Kazhdan et al.)"; }
 	virtual QIcon getIcon() const;
 
     //inherited from ccStdPluginInterface

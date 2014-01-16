@@ -318,7 +318,6 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 	CCLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level								= cell.level;
 	nNSS.minNumberOfNeighbors				= kNN+1; //+1 because we'll get the query point itself!
-	nNSS.truncatedCellCode					= cell.truncatedCode;
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 #else
@@ -327,7 +326,6 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 
 	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level								= cell.level;
-	nNSS.truncatedCellCode					= cell.truncatedCode;
 	nNSS.prepare(radius,cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
@@ -372,7 +370,6 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 			CCLib::DgmOctree::NearestNeighboursSearchStruct nNSS2;
 			nNSS2.level								= cell.level;
 			nNSS2.minNumberOfNeighbors				= 2; //+1 because we'll get the query point itself!
-			nNSS2.truncatedCellCode					= cell.truncatedCode;
 			nNSS2.cellPos[0] = nNSS.cellPos[0];
 			nNSS2.cellPos[1] = nNSS.cellPos[1];
 			nNSS2.cellPos[2] = nNSS.cellPos[2];

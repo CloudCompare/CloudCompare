@@ -70,7 +70,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(CCLib::GenericProgressC
 			if (octree)
 			{
 				PointCoordinateType minDist = static_cast<PointCoordinateType>(samplingValue->value());
-				sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(m_pointCloud, 
+				sampledCloud = CCLib::CloudSamplingTools::resampleCloudSpatially(	m_pointCloud, 
 																					minDist,
 																					octree,
 																					progressCb);
@@ -85,7 +85,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(CCLib::GenericProgressC
 
 			if (octree)
 			{
-				sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(m_pointCloud,
+				sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	m_pointCloud,
 																							(uchar)samplingValue->value(),
 																							CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																							progressCb,

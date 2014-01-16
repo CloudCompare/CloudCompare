@@ -230,7 +230,6 @@ bool tagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 	//structure for nearest neighbors search
 	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level								= cell.level;
-	nNSS.truncatedCellCode					= cell.truncatedCode;
 	nNSS.prepare(c_defaultSearchRadius,cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);

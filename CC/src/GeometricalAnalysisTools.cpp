@@ -103,7 +103,6 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 	//structure for nearest neighbors search
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level								= cell.level;
-	nNSS.truncatedCellCode					= cell.truncatedCode;
 	nNSS.prepare(radius,cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
@@ -240,7 +239,6 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctr
 	nNSS.level								= cell.level;
 	nNSS.alreadyVisitedNeighbourhoodSize	= 0;
 	nNSS.minNumberOfNeighbors				= 2;
-	nNSS.truncatedCellCode					= cell.truncatedCode;
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
@@ -250,11 +248,11 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctr
 		cell.points->getPoint(i,nNSS.queryPoint);
 
         //the first point is always the point itself!
-		if (cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS)>1)
+		if (cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS) > 1)
 		{
             //DGM: we consider that the point is alone in a sphere of radius R and volume V=(4*pi/3)*R^3
 			//So, the local density is ~1/V!
-            double R2 = (double)nNSS.pointsInNeighbourhood[1].squareDist; //R2 in fact
+            double R2 = static_cast<double>(nNSS.pointsInNeighbourhood[1].squareDist); //R2 in fact
 			if (R2 > ZERO_TOLERANCE)
 			{
 				double V = R2*sqrt(R2)*c_sphereVolumeCoef; //R^3 * (4*pi/3)
@@ -341,7 +339,6 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 	//structure for nearest neighbors search
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level								= cell.level;
-	nNSS.truncatedCellCode					= cell.truncatedCode;
 	nNSS.prepare(radius,cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);

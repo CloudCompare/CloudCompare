@@ -33,7 +33,6 @@
 #include <GeometricalAnalysisTools.h>
 #include <SimpleCloud.h>
 #include <RegistrationTools.h>  //Aurelien BEY
-#include <CloudSamplingTools.h> //Aurelien BEY
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -3592,7 +3591,7 @@ void MainWindow::doActionSubsample()
 		if (pointCloud->getParent())
 			pointCloud->getParent()->addChild(newPointCloud);
 		newPointCloud->setDisplay(pointCloud->getDisplay());
-		pointCloud->setVisible(false);
+		pointCloud->setEnabled(false);
 		addToDB(newPointCloud, true, 0, false, false);
 
 		newPointCloud->refreshDisplay();
@@ -4618,7 +4617,9 @@ void MainWindow::doActionComputeCPS()
         return;
     }
 
-    ccOrderChoiceDlg dlg(m_selectedEntities[0], "Reference", m_selectedEntities[1], "Source", this);
+    ccOrderChoiceDlg dlg(	m_selectedEntities[0], "Compared",
+							m_selectedEntities[1], "Reference",
+							this );
     if (!dlg.exec())
         return;
 
@@ -4627,13 +4628,14 @@ void MainWindow::doActionComputeCPS()
 
     if (!compCloud->isA(CC_POINT_CLOUD)) //TODO
     {
-        ccConsole::Error("Reference cloud must be a real point cloud!");
+        ccConsole::Error("Compared cloud must be a real point cloud!");
         return;
     }
     ccPointCloud* cmpPC = static_cast<ccPointCloud*>(compCloud);
 
     int sfIdx = cmpPC->getScalarFieldIndexByName("tempScalarField");
-    if (sfIdx < 0) sfIdx=cmpPC->addScalarField("tempScalarField");
+    if (sfIdx < 0)
+		sfIdx = cmpPC->addScalarField("tempScalarField");
     if (sfIdx < 0)
     {
         ccConsole::Error("Couldn't allocate a new scalar field for computing distances! Try to free some memory ...");
@@ -4647,7 +4649,7 @@ void MainWindow::doActionComputeCPS()
     ccProgressDialog pDlg(true,this);
 	CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
 	params.CPSet = &CPSet;
-    int result=CCLib::DistanceComputationTools::computeHausdorffDistance(compCloud,srcCloud,params,&pDlg);
+    int result = CCLib::DistanceComputationTools::computeHausdorffDistance(compCloud,srcCloud,params,&pDlg);
     cmpPC->deleteScalarField(sfIdx);
 
     if (result >= 0)
@@ -5290,7 +5292,9 @@ void MainWindow::activateRegisterPointPairTool()
 	//if we have 2 clouds, we must ask the user which one is the 'aligned' one and which one is the 'reference' one
 	if (cloud2)
 	{
-		ccOrderChoiceDlg dlg(cloud1, "Aligned", cloud2, "Reference", this);
+		ccOrderChoiceDlg dlg(	cloud1, "Aligned",
+								cloud2, "Reference",
+								this );
 		if (!dlg.exec())
 			return;
 
@@ -7099,18 +7103,20 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 
 					QElapsedTimer subTimer;
 					subTimer.start();
-					double extractedPoints = 0.0;
-					for (unsigned j=0; j<1000; ++j)
+					unsigned long long extractedPoints = 0;
+					unsigned char level = 0;
+					static unsigned samples = 1000;
+					for (unsigned j=0; j<samples; ++j)
 					{
 						unsigned randIndex = (static_cast<unsigned>(static_cast<double>(rand())*static_cast<double>(count)/static_cast<double>(RAND_MAX)) % count);
 						CCLib::DgmOctree::NeighboursSet neighbours;
-						octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),roughnessKernelSize,neighbours);
+						octree->getPointsInSphericalNeighbourhood2(*cloud->getPoint(randIndex),roughnessKernelSize,neighbours,level);
 						size_t neihgboursCount = neighbours.size();
-						extractedPoints += static_cast<double>(neihgboursCount);
+						extractedPoints += static_cast<unsigned long long>(neihgboursCount);
 						for (size_t k=0; k<neihgboursCount; ++k)
 							cloud->setPointScalarValue(neighbours[k].pointIndex,sqrt(neighbours[k].squareDist));
 					}
-					ccConsole::Print("[CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST] Mean extraction time = %3.3f ms (radius = %f, mean(neighbours)=%3.1f)",subTimer.elapsed(),roughnessKernelSize,extractedPoints/1000.0);
+					ccConsole::Print("[CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST] Mean extraction time = %i ms (radius = %f, mean(neighbours)=%3.1f)",subTimer.elapsed(),roughnessKernelSize,static_cast<double>(extractedPoints)/static_cast<double>(samples));
 
 					result = 0;
 				}
@@ -7164,7 +7170,9 @@ void MainWindow::doActionCloudCloudDist()
         return;
     }
 
-    ccOrderChoiceDlg dlg(m_selectedEntities[0], "Compared", m_selectedEntities[1], "Reference", this);
+    ccOrderChoiceDlg dlg(	m_selectedEntities[0], "Compared",
+							m_selectedEntities[1], "Reference",
+							this );
     if (!dlg.exec())
         return;
 
@@ -7228,9 +7236,9 @@ void MainWindow::doActionCloudMeshDist()
     }
     else
     {
-        ccOrderChoiceDlg dlg(m_selectedEntities[0], "Compared",
-                             m_selectedEntities[1], "Reference",
-                             this);
+        ccOrderChoiceDlg dlg(	m_selectedEntities[0], "Compared",
+								m_selectedEntities[1], "Reference",
+								this );
         if (!dlg.exec())
             return;
 

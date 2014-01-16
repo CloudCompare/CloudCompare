@@ -339,7 +339,6 @@ bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::oct
 	//structure for the nearest neighbor search
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level								= cell.level;
-	nNSS.truncatedCellCode					= cell.truncatedCode;
 	nNSS.alreadyVisitedNeighbourhoodSize	= 0;
 	nNSS.theNearestPointIndex				= 0;
 	nNSS.maxSearchSquareDist				= *maxSearchSquareDist;
@@ -401,7 +400,6 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level								= cell.level;
 	nNSS.alreadyVisitedNeighbourhoodSize	= 0;
-	nNSS.truncatedCellCode					= cell.truncatedCode;
 	nNSS.theNearestPointIndex				= 0;
 	nNSS.maxSearchSquareDist				= *maxSearchSquareDist;
 	//we already compute the position of the 'equivalent' cell in the refrence octree
@@ -417,7 +415,6 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 	{
 		nNSS_Model.prepare(static_cast<PointCoordinateType>(params->radiusForLocalModel),cell.parentOctree->getCellSize(cell.level));
 		//curent cell (DGM: is it necessary? This is not always the right one)
-		//nNSS_Model_spherical.truncatedCellCode				= cell.truncatedCode;
 		//memcpy(nNSS_Model_spherical.cellCenter,nNSS.cellCenter,3*sizeof(PointCoordinateType));
 		//memcpy(nNSS_Model_spherical.cellPos,nNSS.cellPos,3*sizeof(int));
 	}
@@ -425,7 +422,6 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 	{
 		nNSS_Model.minNumberOfNeighbors = params->kNNForLocalModel;
 		//curent cell (DGM: is it necessary? This is not always the right one)
-		//nNSS_Model_kNN.truncatedCellCode					= cell.truncatedCode;
 		//memcpy(nNSS_Model_kNN.cellCenter,nNSS.cellCenter,3*sizeof(PointCoordinateType));
 		//memcpy(nNSS_Model_kNN.cellPos,nNSS.cellPos,3*sizeof(int));
 	}
@@ -482,15 +478,13 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 						int cellPos[3];
 						referenceOctree->getTheCellPosWhichIncludesThePoint(&nearestPoint,cellPos,cell.level,inbounds);
 						//if the cell is different or the structure has not yet been initialized, we reset it!
-						if (nNSS_Model.truncatedCellCode == DgmOctree::INVALID_CELL_CODE
-							|| cellPos[0] != nNSS_Model.cellPos[0]
-							|| cellPos[1] != nNSS_Model.cellPos[1]
-							|| cellPos[2] != nNSS_Model.cellPos[2])
+						if (	cellPos[0] != nNSS_Model.cellPos[0]
+							||	cellPos[1] != nNSS_Model.cellPos[1]
+							||	cellPos[2] != nNSS_Model.cellPos[2])
 						{
 							memcpy(nNSS_Model.cellPos,cellPos,sizeof(int)*3);
 							referenceOctree->computeCellCenter(nNSS_Model.cellPos,nNSS_Model.level,nNSS_Model.cellCenter);
 							assert(inbounds);
-							nNSS_Model.truncatedCellCode = (inbounds ? referenceOctree->generateTruncatedCellCode(nNSS_Model.cellPos,nNSS_Model.level) : DgmOctree::INVALID_CELL_CODE);
 							nNSS_Model.minimalCellsSetToVisit.clear();
 							nNSS_Model.pointsInNeighbourhood.clear();
 							nNSS_Model.alreadyVisitedNeighbourhoodSize=0;
@@ -502,7 +496,9 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 					if (params->useSphericalSearchForLocalModel)
 					{
 						//we only need to sort neighbours if we want to use the 'reuseExistingLocalModels' optimization
-						kNN = referenceOctree->findNeighborsInASphereStartingFromCell(nNSS_Model,static_cast<PointCoordinateType>(params->radiusForLocalModel),params->reuseExistingLocalModels);
+						kNN = referenceOctree->findNeighborsInASphereStartingFromCell(	nNSS_Model,
+																						static_cast<PointCoordinateType>(params->radiusForLocalModel),
+																						params->reuseExistingLocalModels);
 					}
 					else
 					{
@@ -752,8 +748,8 @@ int DistanceComputationTools::intersectMeshWithOctree(OctreeAndMeshIntersection*
                             if (theIntersection->distanceTransform)
                             {
                                 theIntersection->distanceTransform->setZero((int)_currentCell->pos[0]-theIntersection->minFillIndexes[0],
-                                                                            (int)_currentCell->pos[1]-theIntersection->minFillIndexes[1],
-                                                                                (int)_currentCell->pos[2]-theIntersection->minFillIndexes[2]);
+																			(int)_currentCell->pos[1]-theIntersection->minFillIndexes[1],
+																			(int)_currentCell->pos[2]-theIntersection->minFillIndexes[2]);
                             }
 						}
 					}
@@ -924,7 +920,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 	if (theIntersection->distanceTransform && !boundedSearch)
 	{
 		//on traite cellule par cellule
-		for (unsigned i=0;i<numberOfCells;++i,++pCodeAndIndex)
+		for (unsigned i=0; i<numberOfCells; ++i,++pCodeAndIndex)
 		{
 			theOctree->getPointsInCellByCellIndex(&Yk,pCodeAndIndex->theIndex,octreeLevel);
 
@@ -990,7 +986,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 	std::vector<ScalarType> minDists;
 
 	//on traite cellule par cellule
-	for (unsigned cellIndex=1;cellIndex<=numberOfCells;++cellIndex,++pCodeAndIndex) //cellIndex = identifiant unique de la cellule en cours
+	for (unsigned cellIndex=1; cellIndex<=numberOfCells; ++cellIndex,++pCodeAndIndex) //cellIndex = identifiant unique de la cellule en cours
 	{
 		theOctree->getPointsInCellByCellIndex(&Yk,pCodeAndIndex->theIndex,octreeLevel);
 

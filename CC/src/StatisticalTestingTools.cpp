@@ -413,7 +413,6 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(	const DgmOctree::octr
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level												= cell.level;
 	nNSS.minNumberOfNeighbors								= numberOfNeighbours;
-	nNSS.truncatedCellCode									= cell.truncatedCode;
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
@@ -444,7 +443,7 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(	const DgmOctree::octr
 		return false;
 	}
 
-	for (unsigned i=0;i<n;++i)
+	for (unsigned i=0; i<n; ++i)
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 		ScalarType D = cell.points->getPointScalarValue(i);
@@ -454,8 +453,8 @@ bool StatisticalTestingTools::computeLocalChi2DistAtLevel(	const DgmOctree::octr
 			//nNSS.theNearestPoints.clear();
 
 			unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS,true);
-			if (k>numberOfNeighbours)
-				k=numberOfNeighbours;
+			if (k > numberOfNeighbours)
+				k = numberOfNeighbours;
 
 			neighboursCloud.clear(false);
 			for (unsigned j=0; j<k; ++j)

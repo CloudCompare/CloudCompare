@@ -19,18 +19,25 @@
 
 //local
 #include "ccDisplayOptionsDlg.h"
-#include "mainwindow.h"
+#include "plugins/ccMainAppInterface.h"
 
 //qCC_db
 #include <ccHObject.h>
+
+//Qt
+#include <QMainwindow>
 
 ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
 									const char* firstRole,
 									ccHObject* secondEntity,
 									const char* secondRole,
-									QWidget* parent/*=0*/)
-    : QDialog(parent)
+									ccMainAppInterface* app/*=0*/)
+    : QDialog(app ? app->getMainWindow() : 0)
 	, Ui::RoleChoiceDialog()
+	, m_app(0)
+	, m_firstEnt(firstEntity)
+	, m_secondEnt(secondEntity)
+	, m_originalOrder(true)
 {
     setupUi(this);
     setWindowFlags(Qt::Tool);
@@ -45,52 +52,71 @@ ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
     ccDisplayOptionsDlg::SetButtonColor(firstColorButton,qRed);
     ccDisplayOptionsDlg::SetButtonColor(secondColorButton,qYellow);
 
-    firstEnt=firstEntity;
-    secondEnt=secondEntity;
-    originalOrder=true;
-
     setColorsAndLabels();
 }
 
 ccOrderChoiceDlg::~ccOrderChoiceDlg()
 {
-    firstEnt->enableTempColor(false);
-    secondEnt->enableTempColor(false);
-    firstEnt->prepareDisplayForRefresh_recursive();
-    secondEnt->prepareDisplayForRefresh_recursive();
-    MainWindow::RefreshAllGLWindow();
+	if (m_firstEnt)
+	{
+		m_firstEnt->enableTempColor(false);
+		m_firstEnt->prepareDisplayForRefresh_recursive();
+	}
+	if (m_secondEnt)
+	{
+		m_secondEnt->enableTempColor(false);
+		m_secondEnt->prepareDisplayForRefresh_recursive();
+	}
+	if (m_app)
+		m_app->refreshAll();
 }
 
 ccHObject* ccOrderChoiceDlg::getFirstEntity()
 {
-    return originalOrder ? firstEnt : secondEnt;
+    return m_originalOrder ? m_firstEnt : m_secondEnt;
 }
 
 ccHObject* ccOrderChoiceDlg::getSecondEntity()
 {
-    return originalOrder ? secondEnt : firstEnt;
+    return m_originalOrder ? m_secondEnt : m_firstEnt;
 }
 
 void ccOrderChoiceDlg::setColorsAndLabels()
 {
     ccHObject* o1 = getFirstEntity();
-    ccHObject* o2 = getSecondEntity();
+	if (o1)
+	{
+		firstLineEdit->setText(o1->getName());
+		o1->setEnabled(true);
+		o1->setVisible(true);
+		o1->setTempColor(ccColor::red);
+		o1->prepareDisplayForRefresh_recursive();
+	}
+	else
+	{
+		firstLineEdit->setText("No entity!");
+	}
 
-    firstLineEdit->setText(o1->getName());
-    secondLineEdit->setText(o2->getName());
-	o1->setEnabled(true);
-    o1->setVisible(true);
-	o2->setEnabled(true);
-    o2->setVisible(true);
-    o1->setTempColor(ccColor::red);
-    o2->setTempColor(ccColor::yellow);
-    o1->prepareDisplayForRefresh_recursive();
-    o2->prepareDisplayForRefresh_recursive();
-    MainWindow::RefreshAllGLWindow();
+    ccHObject* o2 = getSecondEntity();
+	if (o2)
+	{
+		secondLineEdit->setText(o2->getName());
+		o2->setEnabled(true);
+		o2->setVisible(true);
+		o2->setTempColor(ccColor::yellow);
+		o2->prepareDisplayForRefresh_recursive();
+	}
+	else
+	{
+		secondLineEdit->setText("No entity!");
+	}
+
+	if (m_app)
+		m_app->refreshAll();
 }
 
 void ccOrderChoiceDlg::swap()
 {
-    originalOrder = !originalOrder;
+    m_originalOrder = !m_originalOrder;
     setColorsAndLabels();
 }

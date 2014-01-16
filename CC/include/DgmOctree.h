@@ -38,10 +38,6 @@
 //enabled 64 bits code octree (can go up to level 21, but take 50% more memory)
 //#define OCTREE_CODES_64_BITS
 
-//enables methods related to Sankaranarayanan et al. nearest neighbors search algorithm
-//-> deprecated, as it doesn't prove to be faster than actual implementation
-//#define ENABLE_SANKARANARAYANAN_NN_SEARCH
-
 #ifndef _DEBUG
 //enables multi-threading handling
 #define ENABLE_MT_OCTREE
@@ -231,12 +227,6 @@ public:
 			This information should only be updated if the cell changes.
 		**/
 		PointCoordinateType cellCenter[3];
-		//! Truncated code of the cell including the query point
-		/** Use DgmOctree::generateTruncatedCellCode to determine this. If the cell
-			doesn't exist in the octree, the field "alreadyVisitedNeighbourhoodSize"
-			can be set directly to 1 instead of 0
-		**/
-		OctreeCellCodeType truncatedCellCode;
 
 		//! Maximum neihgbours distance
 		/** The NN search process will stop if it reaches this radius even if it
@@ -283,7 +273,6 @@ public:
 			: queryPoint(0.0)
 			, level(1)
 			, minNumberOfNeighbors(1)
-			, truncatedCellCode(INVALID_CELL_CODE)
 			, maxSearchSquareDist(-1.0)
 			, alreadyVisitedNeighbourhoodSize(0)
 			, theNearestPointIndex(0)
@@ -547,7 +536,9 @@ public:
 		\param cellIndex the cell index
 		\param level the level of subdivision
 	**/
-	void getPointsInCellByCellIndex(ReferenceCloud* cloud, unsigned cellIndex, uchar level) const;
+	void getPointsInCellByCellIndex(ReferenceCloud* cloud,
+									unsigned cellIndex,
+									uchar level) const;
 
 	//! Returns the points lying in a specific cell
 	/** In this case, the cell is recognized by its "code" which is unique. However,
@@ -560,7 +551,9 @@ public:
 		\param isCodeTruncated specifies if the code is given in a truncated form or not
 		\return the set of points lying in the cell (references, no duplication)
 	**/
-	inline ReferenceCloud* getPointsInCell(OctreeCellCodeType cellCode, uchar level, bool isCodeTruncated = false) const
+	inline ReferenceCloud* getPointsInCell(	OctreeCellCodeType cellCode,
+											uchar level,
+											bool isCodeTruncated = false) const
 	{
 		unsigned cellIndex = getCellIndex(cellCode,GET_BIT_SHIFT(level),isCodeTruncated);
 		assert(cellIndex<m_numberOfProjectedPoints);
@@ -578,7 +571,9 @@ public:
 		\param areCodesTruncated specifies if the codes are given in a truncated form or not
 		\return the set of points lying in the cell (references, no duplication)
 	**/
-	ReferenceCloud* getPointsInCellsWithSortedCellCodes(cellCodesContainer& cellCodes, uchar level, bool areCodesTruncated=false) const;
+	ReferenceCloud* getPointsInCellsWithSortedCellCodes(cellCodesContainer& cellCodes,
+														uchar level,
+														bool areCodesTruncated = false) const;
 
 	/**** NEIGHBOURHOOD SEARCH ****/
 
@@ -637,6 +632,7 @@ public:
 
 	//DGM TODO: doc
 	int getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours) const;
+	int getPointsInSphericalNeighbourhood2(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours, unsigned char& level) const;
 
 	/***** CELLS POSITION HANDLING *****/
 
@@ -704,11 +700,18 @@ public:
 	**/
 	inline void getTheCellPosWhichIncludesThePoint(const CCVector3* thePoint, int cellPos[], uchar level, bool& inBounds) const
 	{
-		getTheCellPosWhichIncludesThePoint(thePoint,cellPos, level);
+		assert(level <= MAX_OCTREE_LEVEL);
+
+		getTheCellPosWhichIncludesThePoint(thePoint,cellPos);
 
 		inBounds =	(	cellPos[0] >= 0 && cellPos[0] < MAX_OCTREE_LENGTH
 					 && cellPos[1] >= 0 && cellPos[1] < MAX_OCTREE_LENGTH
 					 && cellPos[2] >= 0 && cellPos[2] < MAX_OCTREE_LENGTH );
+
+		const uchar dec = MAX_OCTREE_LEVEL-level;
+		cellPos[0] >>= dec;
+		cellPos[1] >>= dec;
+		cellPos[2] >>= dec;
 	}
 
 	//! Returns the cell position for a given level of subdivision of a cell designated by its code
@@ -995,67 +998,6 @@ public:
 	{
 	    return m_thePointsAndTheirCellCodes;
 	}
-
-#ifdef ENABLE_SANKARANARAYANAN_NN_SEARCH
-
-	//! Structure used to describe and sort cells
-	/** See "A Fast k-Neighborhood Algorithm for Large Point-Clouds", Sankaranarayanan et al.
-	**/
-	struct cellDescription
-	{
-	    //! Truncated cell code
-		OctreeCellCodeType truncatedCode;
-		//! First point index
-		unsigned firstPointIndex;
-		//! min distance (number of cells)
-		int minDist;
-		//! max distance (number of cells)
-		int maxDist;
-
-		//! Min distance based comparison operator
-        /** \param cd1 first cell descriptor
-            \param cd2 second cell descriptor
-            \return whether the min. distance of 'cd1' is smaller than the min. distance of 'cd2'
-        **/
-		static bool minDistComp()(const cellDescription& cd1, const cellDescription& cd2)
-		{
-			return cd1.minDist > cd2.minDist;
-		}
-
-		//! Max distance based comparison operator
-        /** \param cd1 first cell descriptor
-            \param cd2 second cell descriptor
-            \return whether the max. distance of 'cd1' is greater than the max. distance of 'cd2'
-        **/
-		static bool maxDistComp()(const cellDescription& cd1, const cellDescription& cd2)
-		{
-			return cd1.maxDist > cd2.maxDist;
-		}
-	};
-
-
-	//! Pre-computation step for the "Fast k-Neighborhood Algorithm for Large Point-Clouds" of Sankaranarayanan et. al (deprecated)
-	/** This step determines the potentially nearest neighbours for all the points lying inside a given cell, and places them in
-		a container (thePoints) that will be used to determine the exact NNs for each point (see DgmOctree::getNNPointsAmong).
-		\param truncatedCellCode the truncated cell code where the points lie
-		\param cellPos its position
-		\param level the octree level at which the computation is done
-		\param numberOfNeighbours the number of exact neighbours that will be requested
-		\param thePoints an empty container that will be filled with the candidates
-	**/
-	void prepareCellForNNSearch(OctreeCellCodeType truncatedCellCode, int cellPos[], uchar level, int numberOfNeighbours, NeighboursSet &thePoints) const;
-
-	//! Finds the nearest neighbours (see "Fast k-Neighborhood Algorithm for Large Point-Clouds" of Sankaranarayanan et. al) - DEPRECATED
-	/** Once a cell has been "prepared" (see DgmOctree::prepareCellForNNSearch), this function determines the
-		exact NNs of a point that lies in this cell.
-		\param thePoints an set of candidates (resulting from the preparation step)
-		\param queryPoint the query point
-		\param numberOfNeighbours the desired number of exact NNs
-		\param Zk a structure to store the NNs
-		\param alreadySorted optimization: specifies if the container "thePoints" is already sorted (i.e. if it has already been used once by this function for another query point).
-	**/
-	void getNNPointsAmong(NeighboursSet &thePoints, CCVector3* queryPoint, int numberOfNeighbours, ReferenceCloud* Zk, bool alreadySorted=false) const;
-#endif
 
 protected:
 

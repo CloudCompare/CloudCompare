@@ -131,25 +131,25 @@ void ccNormalVectors::InvertNormal(normsType &code)
 	code += ((code & mask) ? -mask : mask);
 }
 
-bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
+bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
                                             NormsIndexesTableType& theNormsCodes,
                                             CC_LOCAL_MODEL_TYPES method,
 											PointCoordinateType radius,
                                             int preferedOrientation/*=-1*/,
                                             CCLib::GenericProgressCallback* progressCb/*=0*/,
-                                            CCLib::DgmOctree* _theOctree/*=0*/)
+                                            CCLib::DgmOctree* inputOctree/*=0*/)
 {
     assert(theCloud);
 
-	unsigned n=theCloud->size();
+	unsigned n = theCloud->size();
 	if (n<3)
         return false;
 
-	CCLib::DgmOctree* theOctree = _theOctree;
+	CCLib::DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
 		theOctree = new CCLib::DgmOctree(theCloud);
-		if (theOctree->build()==0)
+		if (theOctree->build() == 0)
 		{
 			delete theOctree;
 			return false;
@@ -160,7 +160,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 	if (!theNormsCodes.isAllocated() || theNormsCodes.currentSize()<n)
 		if (!theNormsCodes.resize(n))
 		{
-			if (!_theOctree)
+			if (!inputOctree)
                 delete theOctree;
 			return false;
 		}
@@ -171,15 +171,13 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 	if (!theNorms->resize(n,true,blankN.u))
 	{
 		theNormsCodes.clear();
-		if (!_theOctree)
+		if (!inputOctree)
             delete theOctree;
 		return false;
 	}
 	//theNorms->fill(0);
 
-	void* additionalParameters[2];
-	additionalParameters[0] = (void*)theNorms;
-	additionalParameters[1] = (void*)&radius;
+	void* additionalParameters[2] = { (void*)theNorms, (void*)&radius };
 
 	unsigned processedCells = 0;
 	switch(method)
@@ -277,7 +275,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 				CCVector3::vmultiply(N,-1);
 		}
 
-		normsType nCode = (normsType)Quant_quantize_normal(N,NORMALS_QUANTIZE_LEVEL);
+		normsType nCode = GetNormIndex(N);
 		theNormsCodes.setValue(i,nCode);
 		theNorms->forwardIterator();
 	}
@@ -285,7 +283,7 @@ bool ccNormalVectors::ComputeCloudNormals(ccGenericPointCloud* theCloud,
 	theNorms->release();
 	theNorms=0;
 
-	if (!_theOctree)
+	if (!inputOctree)
         delete theOctree;
 
 	return true;
@@ -304,7 +302,6 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 
 	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level												= cell.level;
-	nNSS.truncatedCellCode									= cell.truncatedCode;
 	nNSS.prepare(radius,cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
@@ -375,7 +372,6 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 
 	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level												= cell.level;
-	nNSS.truncatedCellCode									= cell.truncatedCode;
 	nNSS.prepare(radius,cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
@@ -434,7 +430,6 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 	CCLib::DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level												= cell.level;
 	nNSS.minNumberOfNeighbors								= NUMBER_OF_POINTS_FOR_NORM_WITH_TRI;
-	nNSS.truncatedCellCode									= cell.truncatedCode;
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
@@ -457,7 +452,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		unsigned k = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS);
-		if (k>NUMBER_OF_POINTS_FOR_NORM_WITH_TRI)
+		if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI)
 		{
 			if (k > NUMBER_OF_POINTS_FOR_NORM_WITH_TRI*3)
 				k = NUMBER_OF_POINTS_FOR_NORM_WITH_TRI*3;

@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.5.3 12/21/2013
+v2.5.3 ??/??/2014
 - New method: "Edit > Normals > Orient > With Minimum Spanning Tree"
 	* This is an alternative method to find the correct orientation of normals based on the
 		determination of a Minimum Spanning Tree
@@ -11,6 +11,7 @@ v2.5.3 12/21/2013
 	* Deleting a 3D view and then selecting an entity previously displayed in this view
 		would make CC crash
 	* The default value for scaling of the 'shift on load' dialog was 0.
+	* A bug in the (spatial) sub-sampling tool has been fixed (could make CC crash)
 
 v2.5.2 12/19/2013
 - GDAL library support added:

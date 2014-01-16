@@ -246,11 +246,11 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	assert(theCloud);
     unsigned cloudSize = theCloud->size();
 
-    DgmOctree *_theOctree=theOctree;
+    DgmOctree* _theOctree = theOctree;
 	if (!_theOctree)
 	{
 		_theOctree = new DgmOctree(theCloud);
-		if (_theOctree->build()<(int)cloudSize)
+		if (_theOctree->build() < static_cast<int>(cloudSize))
 		{
 			delete _theOctree;
 			return 0;
@@ -275,7 +275,7 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 		return 0;
 	}
 
-	NormalizedProgress* normProgress=0;
+	NormalizedProgress* normProgress = 0;
     if (progressCb)
     {
         progressCb->setInfo("Spatial resampling");
@@ -292,15 +292,6 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 	markers->placeIteratorAtBegining();
     for (unsigned i=0; i<cloudSize; i++, markers->forwardIterator())
     {
-		//progress indicator
-		if (normProgress && !normProgress->oneStep())
-		{
-			//cancel process
-			delete sampledCloud;
-			sampledCloud = 0;
-			break;
-		}
-
 		//no mark? we skip this point
 		if (!markers->getCurrentValue())
             continue;
@@ -309,12 +300,13 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
 		theCloud->getPoint(i,nss.queryPoint);
 		bool inbounds = false;
 		_theOctree->getTheCellPosWhichIncludesThePoint(&nss.queryPoint, nss.cellPos, nss.level, inbounds);
-		nss.truncatedCellCode = (inbounds ? _theOctree->generateTruncatedCellCode(nss.cellPos, nss.level) : DgmOctree::INVALID_CELL_CODE);
 		_theOctree->computeCellCenter(nss.cellPos, nss.level, nss.cellCenter);
 
         //add the points that lie in the same cell (faster)
+		if (inbounds)
 		{
-			ReferenceCloud* Y = _theOctree->getPointsInCell(nss.truncatedCellCode, nss.level, true);
+			DgmOctree::OctreeCellCodeType truncatedCellCode = _theOctree->generateTruncatedCellCode(nss.cellPos, nss.level);
+			ReferenceCloud* Y = _theOctree->getPointsInCell(truncatedCellCode, nss.level, true);
 			unsigned count = Y->size();
 			try
 			{
@@ -364,6 +356,15 @@ ReferenceCloud* CloudSamplingTools::resampleCloudSpatially(GenericIndexedCloudPe
         if (!sampledCloud->addPointIndex(i))	//not enough memory
 		{
 			//stop process
+			delete sampledCloud;
+			sampledCloud = 0;
+			break;
+		}
+
+		//progress indicator
+		if (normProgress && !normProgress->oneStep())
+		{
+			//cancel process
 			delete sampledCloud;
 			sampledCloud = 0;
 			break;

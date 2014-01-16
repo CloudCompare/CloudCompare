@@ -333,7 +333,7 @@ void qHPR::doAction()
             
 			//points in this cell...
 			CCLib::ReferenceCloud Yk(theOctree->associatedCloud());
-			theOctree->getPointsInCellByCellIndex(&Yk,cellIndexes[index],(uchar)octreeLevel);
+			theOctree->getPointsInCellByCellIndex(&Yk,cellIndexes[index],static_cast<uchar>(octreeLevel));
 			//...are all visible
 			/*unsigned count = Yk.size();
             for (unsigned j=0;j<count;++j)

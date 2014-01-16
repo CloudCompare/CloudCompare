@@ -15,10 +15,11 @@
 //#                                                                        #
 //##########################################################################
 
-#include <QtGui>
-
 //First: replace all occurences of 'qDummyPlugin' by your own plugin class name in this file!
 #include "qDummyPlugin.h"
+
+//Qt
+#include <QtGui>
 
 //Default constructor: should mainly be used to initialize
 //actions (pointers) and other members

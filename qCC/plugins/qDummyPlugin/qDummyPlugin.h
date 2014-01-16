@@ -18,9 +18,11 @@
 #ifndef Q_DUMMY_PLUGIN_HEADER
 #define Q_DUMMY_PLUGIN_HEADER
 
-#include <QObject>
-
+//qCC
 #include "../ccStdPluginInterface.h"
+
+//Qt
+#include <QObject>
 
 //! Dummy qCC plugin
 /** Replace the 'qDummyPlugin' string by your own plugin class name

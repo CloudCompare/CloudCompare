@@ -33,7 +33,7 @@
 using namespace CCLib;
 
 //#define COMPUTE_CURVATURE_2
-int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb, DgmOctree* _theOctree)
+int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb, DgmOctree* inputOctree)
 {
 	if (!theCloud)
         return -1;
@@ -46,7 +46,7 @@ int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCl
 #endif
         return -2;
 
-	DgmOctree* theOctree = _theOctree;
+	DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
@@ -82,7 +82,7 @@ int GeometricalAnalysisTools::computeCurvature(GenericIndexedCloudPersist* theCl
 		result = -4;
 	}
 
-	if (!_theOctree)
+	if (!inputOctree)
         delete theOctree;
 
 	return result;
@@ -181,7 +181,7 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 	return true;
 }
 
-int GeometricalAnalysisTools::computeLocalDensity(GenericIndexedCloudPersist* theCloud, GenericProgressCallback* progressCb, DgmOctree* _theOctree)
+int GeometricalAnalysisTools::computeLocalDensity(GenericIndexedCloudPersist* theCloud, GenericProgressCallback* progressCb, DgmOctree* inputOctree)
 {
 	if (!theCloud)
         return -1;
@@ -190,7 +190,7 @@ int GeometricalAnalysisTools::computeLocalDensity(GenericIndexedCloudPersist* th
 	if (numberOfPoints<3)
         return -2;
 
-	DgmOctree* theOctree = _theOctree;
+	DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
@@ -221,7 +221,7 @@ int GeometricalAnalysisTools::computeLocalDensity(GenericIndexedCloudPersist* th
 		result = -4;
 	}
 
-	if (!_theOctree)
+	if (!inputOctree)
         delete theOctree;
 
 	return result;
@@ -276,7 +276,7 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctr
 	return true;
 }
 
-int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCloud, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb/*=0*/, DgmOctree* _theOctree/*=0*/)
+int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCloud, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb/*=0*/, DgmOctree* inputOctree/*=0*/)
 {
 	if (!theCloud)
         return -1;
@@ -285,7 +285,7 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 	if (numberOfPoints<3)
         return -2;
 
-	DgmOctree* theOctree = _theOctree;
+	DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
@@ -319,7 +319,7 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 		result = -4;
 	}
 
-	if (!_theOctree)
+	if (!inputOctree)
         delete theOctree;
 
 	return result;

@@ -303,14 +303,14 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
                                                               unsigned numberOfNeighbours,
                                                               double pTrust,
                                                               GenericProgressCallback* progressCb/*=0*/,
-                                                              DgmOctree* _theOctree/*=0*/)
+                                                              DgmOctree* inputOctree/*=0*/)
 {
 	assert(theCloud);
 
 	if (!distrib->isValid())
 		return -1.0;
 
-	DgmOctree* theOctree = _theOctree;
+	DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
@@ -332,7 +332,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	unsigned* histoValues = new unsigned[numberOfChi2Classes];
 	if (!histoValues)
 	{
-		if (!_theOctree)
+		if (!inputOctree)
 			delete theOctree;
 		return -3.0;
 	}
@@ -389,7 +389,7 @@ double StatisticalTestingTools::testCloudWithStatisticalModel(const GenericDistr
 	delete[] histoValues;
 	histoValues=0;
 
-	if (!_theOctree)
+	if (!inputOctree)
         delete theOctree;
 
 	return maxChi2;

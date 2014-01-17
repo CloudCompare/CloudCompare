@@ -16,6 +16,7 @@ v2.5.3 ??/??/2014
 		would make CC crash
 	* The default value for scaling of the 'shift on load' dialog was 0.
 	* A bug in the (spatial) sub-sampling tool has been fixed (could make CC crash)
+	* The cloud/cloud distance computation dialog was always computing the octrees twice!
 
 v2.5.2 12/19/2013
 - GDAL library support added:

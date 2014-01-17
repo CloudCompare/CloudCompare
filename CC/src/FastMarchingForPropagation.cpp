@@ -41,6 +41,8 @@ int FastMarchingForPropagation::init(	GenericCloud* theCloud,
 										uchar level,
 										bool constantAcceleration/*=false*/)
 {
+	assert(theCloud && theOctree);
+
 	int result = initGridWithOctree(theOctree,level);
 	if (result < 0)
 		return result;
@@ -49,24 +51,28 @@ int FastMarchingForPropagation::init(	GenericCloud* theCloud,
 	DgmOctree::cellCodesContainer cellCodes;
 	theOctree->getCellCodes(level,cellCodes,true);
 
+	ReferenceCloud Yk(theOctree->associatedCloud());
+
 	while (!cellCodes.empty())
 	{
-		ReferenceCloud* Yk = theOctree->getPointsInCell(cellCodes.back(),level,true);
-		if (Yk)
+		if (!theOctree->getPointsInCell(cellCodes.back(),level,&Yk,true))
 		{
-			//on transforme le code de cellule en position
-			int cellPos[3];
-			theOctree->getCellPos(cellCodes.back(),level,cellPos,true);
-
-			//on renseigne la grille
-			unsigned gridPos = FM_pos2index(cellPos);
-
-			PropagationCell* aCell = new PropagationCell;
-			aCell->cellCode = cellCodes.back();
-			aCell->f = (constantAcceleration ? 1.0f : static_cast<float>(ScalarFieldTools::computeMeanScalarValue(Yk)));
-
-			m_theGrid[gridPos] = aCell;
+			//not enough memory?
+			return -1;
 		}
+		
+		//on transforme le code de cellule en position
+		int cellPos[3];
+		theOctree->getCellPos(cellCodes.back(),level,cellPos,true);
+
+		//on renseigne la grille
+		unsigned gridPos = FM_pos2index(cellPos);
+
+		PropagationCell* aCell = new PropagationCell;
+		aCell->cellCode = cellCodes.back();
+		aCell->f = (constantAcceleration ? 1.0f : static_cast<float>(ScalarFieldTools::computeMeanScalarValue(&Yk)));
+
+		m_theGrid[gridPos] = aCell;
 
 		cellCodes.pop_back();
 	}
@@ -158,37 +164,29 @@ int FastMarchingForPropagation::propagate()
 	return result;
 }
 
-ReferenceCloud* FastMarchingForPropagation::extractPropagatedPoints()
+bool FastMarchingForPropagation::extractPropagatedPoints(ReferenceCloud* points)
 {
-	if (!m_initialized || !m_octree || m_gridLevel > DgmOctree::MAX_OCTREE_LEVEL)
-		return 0;
+	if (!m_initialized || !m_octree || m_gridLevel > DgmOctree::MAX_OCTREE_LEVEL || !points)
+		return false;
 
-	ReferenceCloud* Zk = new ReferenceCloud(m_octree->associatedCloud());
+	points->clear(false);
 
 	for (unsigned i=0; i<m_activeCells.size(); ++i)
 	{
-		PropagationCell* aCell = (PropagationCell*)m_theGrid[m_activeCells[i]];
-		ReferenceCloud* Yk = m_octree->getPointsInCell(aCell->cellCode,m_gridLevel,true);
-
-		if (!Zk->reserve(Yk->size())) //not enough memory
-		{
-			delete Zk;
-			return 0;
-		}
-
-		Yk->placeIteratorAtBegining();
-		for (unsigned k=0;k<Yk->size();++k)
-		{
-			Zk->addPointIndex(Yk->getCurrentPointGlobalIndex()); //can't fail (see above)
-			//raz de la norme du gradient du point, pour qu'il ne soit plus pris en compte par la suite !
-			Yk->setCurrentPointScalarValue(NAN_VALUE);
-			Yk->forwardIterator();
-		}
-
-		//Yk->clear(); //inutile
+		PropagationCell* aCell = static_cast<PropagationCell*>(m_theGrid[m_activeCells[i]]);
+		if (!m_octree->getPointsInCell(aCell->cellCode,m_gridLevel,points,true,false))
+			return false;
+	}
+	
+	//raz de la norme du gradient du point, pour qu'il ne soit plus pris en compte par la suite !
+	points->placeIteratorAtBegining();
+	for (unsigned k=0; k<points->size(); ++k)
+	{
+		points->setCurrentPointScalarValue(NAN_VALUE);
+		points->forwardIterator();
 	}
 
-	return Zk;
+	return true;
 }
 
 bool FastMarchingForPropagation::setPropagationTimingsAsDistances()
@@ -196,18 +194,25 @@ bool FastMarchingForPropagation::setPropagationTimingsAsDistances()
 	if (!m_initialized || !m_octree || m_gridLevel > DgmOctree::MAX_OCTREE_LEVEL)
 		return false;
 
-	for (unsigned i=0;i<m_activeCells.size();++i)
-	{
-		PropagationCell* aCell = (PropagationCell*)m_theGrid[m_activeCells[i]];
-		ReferenceCloud* Yk = m_octree->getPointsInCell(aCell->cellCode,m_gridLevel,true);
+	ReferenceCloud Yk(m_octree->associatedCloud());
 
-		Yk->placeIteratorAtBegining();
-		for (unsigned k=0;k<Yk->size();++k)
+	for (unsigned i=0; i<m_activeCells.size(); ++i)
+	{
+		PropagationCell* aCell = static_cast<PropagationCell*>(m_theGrid[m_activeCells[i]]);
+	
+		if (!m_octree->getPointsInCell(aCell->cellCode,m_gridLevel,&Yk,true))
 		{
-			Yk->setCurrentPointScalarValue(aCell->T);
-			Yk->forwardIterator();
+			//not enough memory?
+			return false;
 		}
-		//Yk->clear(); //inutile
+
+		Yk.placeIteratorAtBegining();
+		for (unsigned k=0; k<Yk.size(); ++k)
+		{
+			Yk.setCurrentPointScalarValue(aCell->T);
+			Yk.forwardIterator();
+		}
+		//Yk.clear(); //useless
 	}
 
 	return true;

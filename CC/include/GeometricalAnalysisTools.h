@@ -49,19 +49,19 @@ public:
         \param cType curvature type
         \param kernelRadius neighbouring sphere radius
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\param _theOctree if not set as input, octree will be automatically computed.
+		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
     **/
-	static int computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb=0, DgmOctree* _theOctree=0);
+	static int computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb=0, DgmOctree* inputOctree=0);
 
 	//! Computes the local density
     /** Warning: this method assumes the input scalar field is different from output.
         \param theCloud processed cloud
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\param _theOctree if not set as input, octree will be automatically computed.
+		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
     **/
-	static int computeLocalDensity(GenericIndexedCloudPersist* theCloud, GenericProgressCallback* progressCb=0, DgmOctree* _theOctree=0);
+	static int computeLocalDensity(GenericIndexedCloudPersist* theCloud, GenericProgressCallback* progressCb=0, DgmOctree* inputOctree=0);
 
 	//! Computes the local roughness
 	/** Roughness is defined as the distance to the locally (least square) fitted plane.
@@ -70,10 +70,10 @@ public:
         \param theCloud processed cloud
         \param kernelRadius neighbouring sphere radius
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\param _theOctree if not set as input, octree will be automatically computed.
+		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
     **/
-	static int computeRoughness(GenericIndexedCloudPersist* theCloud, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb=0, DgmOctree* _theOctree=0);
+	static int computeRoughness(GenericIndexedCloudPersist* theCloud, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb=0, DgmOctree* inputOctree=0);
 
 	//! Computes the gravity center of a point cloud
 	/** WARNING: this method uses the cloud global iterator

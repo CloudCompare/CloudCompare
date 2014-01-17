@@ -79,7 +79,7 @@ public:
 		\param radius local neighborhood radius (not necessary for TRI)
         \param preferedOrientation specifies a preferred orientation for normals (-1: no preferred orientation, 0:X, 1:-X, 2:Y, 3:-Y, 4:Z, 5: -Z, 6:+Barycenter, 7:-Barycenter)
         \param progressCb progress bar
-        \param _theOctree octree associated with theCloud.
+        \param inputOctree octree associated with theCloud.
     **/
 	static bool ComputeCloudNormals(ccGenericPointCloud* theCloud,
                                     NormsIndexesTableType& theNormsCodes,
@@ -87,7 +87,7 @@ public:
 									PointCoordinateType radius,
                                     int preferedOrientation=-1,
                                     CCLib::GenericProgressCallback* progressCb=0,
-                                    CCLib::DgmOctree* _theOctree=0);
+                                    CCLib::DgmOctree* inputOctree=0);
 
 	//! Converts a normal vector to geological 'strike & dip' parameters (N[dip]°E - [strike]°)
 	/** \param[in] N normal (should be normalized!)

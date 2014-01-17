@@ -62,14 +62,14 @@ public:
 		\param level the level of subdivision of the octree (between 1 and MAX_OCTREE_LEVEL)
 		\param sixConnexity indicates if the CC's 3D connexity should be 6 (26 otherwise)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\param _theOctree the cloud octree if it has already be computed
+		\param inputOctree the cloud octree if it has already be computed
 		\return error code (see DgmOctree::extractCCs)
 	**/
 	static int labelConnectedComponents(GenericIndexedCloudPersist* theCloud,
 										uchar level,
 										bool sixConnexity = false,
 										CCLib::GenericProgressCallback* progressCb = 0,
-										CCLib::DgmOctree* _theOctree = 0);
+										CCLib::DgmOctree* inputOctree = 0);
 
 	//! Extracts connected components from a point cloud
 	/** This method shloud only be called after the connected components have been
@@ -98,7 +98,7 @@ public:
 		\param theSegmentedLists the segmented parts (as a list of subsets of points)
 		\param applyGaussianFilter to specify if a gaussian filter should be applied after computing the scalar field gradient (to smooth the results)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
-		\param _theOctree the cloud octree if it has already be computed
+		\param inputOctree the cloud octree if it has already be computed
 		\param alpha the gaussian filter kernel size (needed only if a gaussian filtering pass is required)
 		\return success
 	**/
@@ -107,7 +107,7 @@ public:
 													uchar octreeLevel,
 													ReferenceCloudContainer& theSegmentedLists,
 													CCLib::GenericProgressCallback* progressCb = 0,
-													CCLib::DgmOctree* _theOctree = 0,
+													CCLib::DgmOctree* inputOctree = 0,
 													bool applyGaussianFilter = false,
 													float alpha = 2.0f);
 

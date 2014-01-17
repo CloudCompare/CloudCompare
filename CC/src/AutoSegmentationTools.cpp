@@ -32,13 +32,13 @@
 
 using namespace CCLib;
 
-int AutoSegmentationTools::labelConnectedComponents(GenericIndexedCloudPersist* theCloud, uchar level, bool sixConnexity, GenericProgressCallback* progressCb, DgmOctree* _theOctree)
+int AutoSegmentationTools::labelConnectedComponents(GenericIndexedCloudPersist* theCloud, uchar level, bool sixConnexity, GenericProgressCallback* progressCb, DgmOctree* inputOctree)
 {
 	if (!theCloud)
 		return -1;
 
 	//compute octree if none was provided
-	DgmOctree* theOctree = _theOctree;
+	DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
@@ -55,7 +55,7 @@ int AutoSegmentationTools::labelConnectedComponents(GenericIndexedCloudPersist* 
 	int result = theOctree->extractCCs(level,sixConnexity,progressCb);
 
 	//remove octree if it was not provided as input
-	if (!_theOctree)
+	if (!inputOctree)
 		delete theOctree;
 
 	return result;
@@ -121,7 +121,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
                                                                 uchar octreeLevel,
                                                                 ReferenceCloudContainer& theSegmentedLists,
                                                                 GenericProgressCallback* progressCb,
-                                                                DgmOctree* _theOctree,
+                                                                DgmOctree* inputOctree,
                                                                 bool applyGaussianFilter,
                                                                 float alpha)
 {
@@ -130,7 +130,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
         return false;
 
 	//compute octree if none was provided
-	DgmOctree* theOctree = _theOctree;
+	DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
@@ -144,7 +144,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	//on calcule le gradient (va ecraser le champ des distances)
 	if (ScalarFieldTools::computeScalarFieldGradient(theCloud,true,true,progressCb,theOctree) < 0)
 	{
-		if (!_theOctree)
+		if (!inputOctree)
 			delete theOctree;
 		return false;
 	}
@@ -171,7 +171,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 
 	if (result<0)
 	{
-		if (!_theOctree)
+		if (!inputOctree)
             delete theOctree;
 		delete fm;
 		return false;
@@ -192,7 +192,7 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 		ScalarType d = theCloud->getPointScalarValue(0);
 		if (!theDists->resize(numberOfPoints,true,d))
 		{
-			if (!_theOctree)
+			if (!inputOctree)
 				delete theOctree;
 			return false;
 
@@ -241,12 +241,9 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 			}
 		}
 
-		//on lance la propagation a partir du point de distance maximale
-		//propagateFromPoint(aList,_GradientNorms,maxDistIndex,octreeLevel,_gui);
-
 		int pos[3];
 		theOctree->getTheCellPosWhichIncludesThePoint(&startPoint,pos,octreeLevel);
-		//clipping (important !)
+		//clipping (important!)
 		pos[0] = std::min(octreeLength,pos[0]);
 		pos[1] = std::min(octreeLength,pos[1]);
 		pos[2] = std::min(octreeLength,pos[2]);
@@ -255,16 +252,23 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 
 		int result = fm->propagate();
 
-		//si la propagation s'est bien passee
-		if (result>=0)
+		//if the propagation was successful
+		if (result >= 0)
 		{
-			//on la termine (i.e. on extrait les points correspondant)
-			ReferenceCloud* newCloud = fm->extractPropagatedPoints();
-
-			//si la liste convient
-			//on la rajoute au groupe des listes segmentees
-			theSegmentedLists.push_back(newCloud);
-			++numberOfSegmentedLists;
+			//we extract the corresponding points
+			ReferenceCloud* newCloud = new ReferenceCloud(theCloud);
+			
+			if (fm->extractPropagatedPoints(newCloud) && newCloud->size() != 0)
+			{
+				theSegmentedLists.push_back(newCloud);
+				++numberOfSegmentedLists;
+			}
+			else
+			{
+				//not enough memory?!
+				delete newCloud;
+				newCloud = 0;
+			}
 
 			if (progressCb)
                 progressCb->update(float(numberOfSegmentedLists % 100));
@@ -281,14 +285,16 @@ bool AutoSegmentationTools::frontPropagationBasedSegmentation(GenericIndexedClou
 	if (progressCb)
 		progressCb->stop();
 
-	for (unsigned i=0;i<numberOfPoints;++i)
+	for (unsigned i=0; i<numberOfPoints; ++i)
 		theCloud->setPointScalarValue(i,theDists->getValue(i));
 
 	delete fm;
-	theDists->release();
-	theDists=0;
+	fm = 0;
 
-	if (!_theOctree)
+	theDists->release();
+	theDists = 0;
+
+	if (!inputOctree)
 		delete theOctree;
 
 	return true;

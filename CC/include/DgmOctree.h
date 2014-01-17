@@ -420,7 +420,7 @@ public:
 	//! DgmOctree constructor
 	/** \param aCloud the cloud to construct the octree on
 	**/
-	DgmOctree(GenericIndexedCloudPersist* aCloud);
+	DgmOctree(GenericIndexedCloudPersist* cloud);
 
 	//! DgmOctree destructor
 	virtual ~DgmOctree();
@@ -535,10 +535,13 @@ public:
 		\param cloud ReferenceCloud to store the points lying inside the cell
 		\param cellIndex the cell index
 		\param level the level of subdivision
+		\param clearOutputCloud whether to clear the input cloud prior to inserting the points or not
+		\return success
 	**/
-	void getPointsInCellByCellIndex(ReferenceCloud* cloud,
+	bool getPointsInCellByCellIndex(ReferenceCloud* cloud,
 									unsigned cellIndex,
-									uchar level) const;
+									uchar level,
+									bool clearOutputCloud = true) const;
 
 	//! Returns the points lying in a specific cell
 	/** In this case, the cell is recognized by its "code" which is unique. However,
@@ -548,19 +551,15 @@ public:
 		wrong data.
 		\param cellCode the cell code
 		\param level the level of subdivision
+		\param[out] subset set of points lying in the cell (references, no duplication)
 		\param isCodeTruncated specifies if the code is given in a truncated form or not
-		\return the set of points lying in the cell (references, no duplication)
+		\return success
 	**/
-	inline ReferenceCloud* getPointsInCell(	OctreeCellCodeType cellCode,
-											uchar level,
-											bool isCodeTruncated = false) const
-	{
-		unsigned cellIndex = getCellIndex(cellCode,GET_BIT_SHIFT(level),isCodeTruncated);
-		assert(cellIndex<m_numberOfProjectedPoints);
-		getPointsInCellByCellIndex(m_dumpCloud,cellIndex,level);
-
-		return m_dumpCloud;
-	}
+	bool getPointsInCell(	OctreeCellCodeType cellCode,
+							uchar level,
+							ReferenceCloud* subset,
+							bool isCodeTruncated = false,
+							bool clearOutputCloud = true) const;
 
 	//! Returns the points lying in multiple cells
 	/** Cells are recognized here by their unique "code". They should be sorted
@@ -568,11 +567,13 @@ public:
 		for more information.
 		\param cellCodes the cells codes
 		\param level the level of subdivision
+		\param[out] subset set of points lying in the cell (references, no duplication)
 		\param areCodesTruncated specifies if the codes are given in a truncated form or not
 		\return the set of points lying in the cell (references, no duplication)
 	**/
 	ReferenceCloud* getPointsInCellsWithSortedCellCodes(cellCodesContainer& cellCodes,
 														uchar level,
+														ReferenceCloud* subset,
 														bool areCodesTruncated = false) const;
 
 	/**** NEIGHBOURHOOD SEARCH ****/
@@ -1062,9 +1063,6 @@ protected:
 	//! Std. dev. of cell population per level of subdivision
 	double m_stdDevCellPopulation[MAX_OCTREE_LEVEL+1];
 
-	//! Dump cloud
-	ReferenceCloud* m_dumpCloud;
-
 	/******************************/
 	/**         METHODS          **/
 	/******************************/
@@ -1123,21 +1121,20 @@ protected:
 		is between 0 and the number of points projected in the octree minus 1. If
 		the cell code cannot be found in the octree structure, then the method returns
 		an index equal to the number of projected points (m_numberOfProjectedPoints).
-		\param cellCode the octree cell code
-		\param bitDec the binary shift corresponding to the level of subdivision (see GET_BIT_SHIFT)
-		\param isCodeTruncated indicates if the cell code is truncated or not
-		\return the "index" of the cell (or 'm_numberOfProjectedPoints' if none found)
+		\param cellCode truncated cell code (i.e. original cell code shifted of 'bitDec' bits)
+		\param bitDec binary shift corresponding to the level of subdivision (see GET_BIT_SHIFT)
+		\return the index of the cell (or 'm_numberOfProjectedPoints' if none found)
 	**/
-	unsigned getCellIndex(OctreeCellCodeType cellCode, uchar bitDec, bool isCodeTruncated=false) const;
+	unsigned getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bitDec) const;
 
 	//! Returns the index of a given cell represented by its code
 	/** Same algorithm as the other "getCellIndex" method, but in an optimized form.
 		The binary search can be performed on a sub-part of the DgmOctree structure.
-		\param truncatedCellCode the octree truncated cell code
-		\param bitDec the binary shift corresponding to the level of subdivision (see GET_BIT_SHIFT)
-		\param begin the first index of the sub-list in which to perform the binary search
-		\param end the last index of the sub-list in which to perform the binary search
-		\return the "index" of the cell (or 'm_numberOfProjectedPoints' if none found)
+		\param truncatedCellCode truncated cell code (i.e. original cell code shifted of 'bitDec' bits)
+		\param bitDec binary shift corresponding to the level of subdivision (see GET_BIT_SHIFT)
+		\param begin first index of the sub-list in which to perform the binary search
+		\param end last index of the sub-list in which to perform the binary search
+		\return the index of the cell (or 'm_numberOfProjectedPoints' if none found)
 	**/
 	unsigned getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bitDec, unsigned begin, unsigned end) const;
 

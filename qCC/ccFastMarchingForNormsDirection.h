@@ -42,7 +42,7 @@ public:
                                                         NormsIndexesTableType* theNorms,
                                                         uchar octreeLevel,
                                                         CCLib::GenericProgressCallback* progressCb = 0,
-                                                        CCLib::DgmOctree* _theOctree = 0);
+                                                        CCLib::DgmOctree* inputOctree = 0);
 	//! Default constructor
 	ccFastMarchingForNormsDirection();
 

@@ -146,14 +146,15 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	{
 		m_compCloud = static_cast<ccPointCloud*>(m_compEnt);
 	}
-	m_compOctree = static_cast<CCLib::DgmOctree*>(m_compCloud->getOctree());
-	int oldSfIdx = m_compCloud->getCurrentDisplayedScalarFieldIndex();
-	if (oldSfIdx>=0)
-		m_oldSfName = QString(m_compCloud->getScalarFieldName(oldSfIdx));
 
-	//on a toujours besoin du premier octree
+	//whatever the case, we always need the compared cloud's octree
+	m_compOctree = static_cast<CCLib::DgmOctree*>(m_compCloud->getOctree());
 	if (!m_compOctree)
 		m_compOctree = new CCLib::DgmOctree(m_compCloud);
+	//backup currently displayed SF (on compared cloud)
+	int oldSfIdx = m_compCloud->getCurrentDisplayedScalarFieldIndex();
+	if (oldSfIdx >= 0)
+		m_oldSfName = QString(m_compCloud->getScalarFieldName(oldSfIdx));
 
 	//reference entity
 	if ((m_compType == CLOUDMESH_DIST && !m_refEnt->isKindOf(CC_MESH))
@@ -172,8 +173,9 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 	else /*if (m_compType == CLOUDCLOUD_DIST)*/
 	{
 		m_refCloud = ccHObjectCaster::ToGenericPointCloud(m_refEnt);
+
+		//for computing cloud/cloud distances we need also the reference cloud's octree
 		m_refOctree = static_cast<CCLib::DgmOctree*>(m_refCloud->getOctree());
-		//on a besoin du deuxieme octree uniquement dans le cas de la distance nuage/nuage
 		if (!m_refOctree)
 			m_refOctree = new CCLib::DgmOctree(m_refCloud);
 	}
@@ -228,14 +230,14 @@ void ccComparisonDlg::clean()
 {
 	if (m_compOctree && m_compCloud)
 	{
-		if (!m_compCloud->getOctree())
+		if (m_compCloud->getOctree() != m_compOctree)
 			delete m_compOctree;
 		m_compOctree = 0;
 	}
 
 	if (m_refOctree && m_refCloud)
 	{
-		if (!m_refCloud->getOctree())
+		if (m_refCloud->getOctree() != m_refOctree)
 			delete m_refOctree;
 		m_refOctree = 0;
 	}
@@ -299,22 +301,22 @@ int ccComparisonDlg::computeApproxResults()
 	assert(sf);
 
 	//Preparation des octrees
-	ccProgressDialog progressCb(true,this);
+	ccProgressDialog progressDlg(true,this);
 
 	QElapsedTimer eTimer;
 	eTimer.start();
 	switch(m_compType)
 	{
 	case CLOUDCLOUD_DIST: //hausdroff
-		approxResult = CCLib::DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CHAMFER_345,m_compCloud,m_refCloud,DEFAULT_OCTREE_LEVEL,&progressCb,m_compOctree,m_refOctree);
+		approxResult = CCLib::DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CHAMFER_345,m_compCloud,m_refCloud,DEFAULT_OCTREE_LEVEL,&progressDlg,m_compOctree,m_refOctree);
 		break;
 	case CLOUDMESH_DIST: //cloud-mesh
-		approxResult = CCLib::DistanceComputationTools::computePointCloud2MeshDistance(m_compCloud,m_refMesh,DEFAULT_OCTREE_LEVEL,-1.0,true,false,false,false,&progressCb,m_compOctree);
+		approxResult = CCLib::DistanceComputationTools::computePointCloud2MeshDistance(m_compCloud,m_refMesh,DEFAULT_OCTREE_LEVEL,-1.0,true,false,false,false,&progressDlg,m_compOctree);
 		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();
 
-	progressCb.stop();
+	progressDlg.stop();
 
 	int guessedBestOctreeLevel = -1;
 
@@ -606,7 +608,7 @@ bool ccComparisonDlg::compute()
 	bool multiThread = multiThreadedCheckBox->isChecked();
 
 	int result = -1;
-	ccProgressDialog progressCb(true,this);
+	ccProgressDialog progressDlg(true,this);
 
 	//for 3D splitting (cloud-cloud dist. only)
 	CCLib::ReferenceCloud* CPSet=0;
@@ -642,7 +644,7 @@ bool ccComparisonDlg::compute()
 		result = CCLib::DistanceComputationTools::computeHausdorffDistance(m_compCloud,
 			m_refCloud,
 			params,
-			&progressCb,
+			&progressDlg,
 			m_compOctree,
 			m_refOctree);
 		break;
@@ -660,13 +662,13 @@ bool ccComparisonDlg::compute()
 																					signedDistances,
 																					flipNormals,
 																					multiThread,
-																					&progressCb,
+																					&progressDlg,
 																					m_compOctree);
 		break;
 	}
 	qint64 elapsedTime_ms = eTimer.elapsed();
 
-	progressCb.stop();
+	progressDlg.stop();
 
 	if (result >= 0)
 	{
@@ -776,7 +778,6 @@ bool ccComparisonDlg::compute()
 		sfIdx = -1;
 	}
 
-	//m.a.j. affichage
 	updateDisplay(sfIdx >= 0, false);
 
 	if (CPSet)

@@ -293,7 +293,7 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 	{
 		needToRecalculateOctreeB = false;
 		for (uchar k=0;k<3;k++)
-			if ((maxD.u[k]!=referenceOctree->getOctreeMins().u[k])||(minD.u[k]!=referenceOctree->getOctreeMaxs().u[k]))
+			if ((maxD.u[k]!=referenceOctree->getOctreeMaxs().u[k])||(minD.u[k]!=referenceOctree->getOctreeMins().u[k]))
 			{
 				needToRecalculateOctreeB = true;
 				break;

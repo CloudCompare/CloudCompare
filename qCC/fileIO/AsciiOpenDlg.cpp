@@ -49,7 +49,6 @@ AsciiOpenDlg::AsciiOpenDlg(QString filename, QWidget* parent)
 	, m_separator(' ')
 	, m_averageLineSize(-1.0)
 	, m_filename(filename)
-	, m_invalidColumns(true)
 	, m_columnsCount(0)
 {
     setupUi(this);
@@ -118,12 +117,12 @@ void AsciiOpenDlg::updateTable(const QString &separator)
         return;
 	}
 
-    if (separator.length()<1)
+    if (separator.length() < 1)
     {
         asciiCodeLabel->setText("Enter a valid character!");
         buttonBox->setEnabled(false);
 		tableWidget->clear();
-		m_invalidColumns = true;
+		m_columnsValidty.clear();
         return;
     }
 
@@ -132,7 +131,7 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 	if (!file.open(QFile::ReadOnly))
 	{
 		tableWidget->clear();
-		m_invalidColumns = true;
+		m_columnsValidty.clear();
         return;
 	}
 	QTextStream stream(&file);
@@ -152,10 +151,10 @@ void AsciiOpenDlg::updateTable(const QString &separator)
     m_separator = separator[0];
     asciiCodeLabel->setText(QString("(ASCII code: %1)").arg(m_separator.unicode()));
 	//if the old setup has less than 3 columns, we forget it
-	if (m_columnsCount<3)
+	if (m_columnsCount < 3)
 	{
 		tableWidget->clear();
-		m_columnsCount=0;
+		m_columnsCount = 0;
 	}
     tableWidget->setRowCount(DISPLAYED_LINES+1);    //+1 for first line shifting
 
@@ -255,7 +254,7 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 	{
 		m_averageLineSize = -1.0;
 		tableWidget->clear();
-		m_invalidColumns = true;
+		m_columnsValidty.clear();
         return;
 	}
 
@@ -271,9 +270,11 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 
 	//remove unnecessary columns
 	{
-		while (columnsCount<m_columnsCount)
+		while (columnsCount < m_columnsCount)
 			tableWidget->removeColumn(--m_columnsCount);
-		for (unsigned i=lineCount+1;i<=DISPLAYED_LINES;++i)
+		if (m_columnsValidty.size() > columnsCount)
+			m_columnsValidty.resize(columnsCount);
+		for (unsigned i=lineCount+1; i<=DISPLAYED_LINES; ++i)
 			tableWidget->removeRow(i);
 	}
 
@@ -321,10 +322,14 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 				connect(columnHeader, SIGNAL(currentIndexChanged(int)), this, SLOT(columnsTypeHasChanged(int)));
 			}
 
+			while (m_columnsValidty.size() <= i)
+				m_columnsValidty.push_back(false);
+			assert(m_columnsValidty.size() >= i);
+				
 			if (valueIsNumber[i])
 			{
 				//first time? let's try to assign each column a type
-				if ((m_invalidColumns || m_columnsCount==0) && columnsCount>1)
+				if (m_columnsValidty[i] != true && columnsCount > 1)
 				{
 					columnHeader->blockSignals(true);
 					//by default, we assume that the first columns are always X,Y and Z
@@ -366,6 +371,9 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 				}
 			}
 
+			//we keep track of each columns validity
+			m_columnsValidty[i] = valueIsNumber[i];
+
 			if (!_columnHeader)
 				tableWidget->setCellWidget(0,i,columnHeader);
 			tableWidget->setColumnWidth(i,columnWidth);
@@ -380,19 +388,28 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 		extractSFNamesFrom1stLineCheckBox->setEnabled((unsigned)parts.size() == m_columnsCount);
 	}
 
+	tableWidget->setEnabled(true);
+	buttonBox->setEnabled(true);
+
 	//check for invalid columns
-	m_invalidColumns = false;
+	checkSelectedColumnsValidity(); //will eventually enable of disable the "OK" button
+}
+
+void AsciiOpenDlg::checkSelectedColumnsValidity()
+{
+	//check for invalid columns
+	bool m_selectedInvalidColumns = false;
 	{
+		assert(m_columnsValidty.size() == static_cast<size_t>(m_columnsCount));
+		assert(tableWidget->columnCount() >= static_cast<int>(m_columnsCount));
 		for (unsigned i=0; i<m_columnsCount; i++)
 		{
-			m_invalidColumns |= (!valueIsNumber[i]);
-			//tableWidget->cellWidget(0,i)->setEnabled(valueIsNumber[i]);
+			QComboBox* columnHeader = static_cast<QComboBox*>(tableWidget->cellWidget(0,i));
+			m_selectedInvalidColumns |= (!m_columnsValidty[i] && columnHeader->currentIndex() != 0);
 		}
 	}
 
-	tableWidget->setEnabled(true);
-	buttonBox->setEnabled(true);
-	buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!m_invalidColumns);
+	buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!m_selectedInvalidColumns);
 }
 
 bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QString& errorMessage)
@@ -482,7 +499,7 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 	assert(changedCombo);
 
     //now we look which column's combobox it is
-	for (unsigned i=0;i<m_columnsCount;i++)
+	for (unsigned i=0; i<m_columnsCount; i++)
 	{
 		QComboBox* combo = static_cast<QComboBox*>(tableWidget->cellWidget(0,i));
 	    //we found the right element
@@ -536,6 +553,8 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 			}
 		}
 	}
+
+	checkSelectedColumnsValidity(); //will eventually enable of disable the "OK" button
 }
 
 void AsciiOpenDlg::shortcutButtonPressed()

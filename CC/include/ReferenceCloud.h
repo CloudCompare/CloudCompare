@@ -127,6 +127,9 @@ public:
 	**/
 	virtual bool resize(unsigned n);
 
+	//! Returns max capacity
+	inline virtual unsigned capacity() const { return m_theIndexes->capacity(); }
+
 	//! Swaps two point references
 	/** the point references indexes should be smaller than the total
 		number of "reserved" points (see ReferenceCloud::reserve).

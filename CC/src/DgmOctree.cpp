@@ -1788,181 +1788,100 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
     return eligiblePoints;
 }
 
-static PointCoordinateType c_neighbourhoodSizeExtractionFactor = static_cast<PointCoordinateType>(2.5);
-
-uchar DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const
+int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours, unsigned char level/*=0*/) const
 {
-	PointCoordinateType aim = radius / c_neighbourhoodSizeExtractionFactor;
-    uchar level = 1;
-	PointCoordinateType minValue = getCellSize(1)-aim;
-	minValue *= minValue;
-    for (uchar i=2; i<=MAX_OCTREE_LEVEL; ++i)
-    {
-        //The level with cell size as near as possible to the aim
-        PointCoordinateType cellSizeDelta = getCellSize(i)-aim;
-        cellSizeDelta *= cellSizeDelta;
-
-        if (cellSizeDelta < minValue)
-        {
-            level = i;
-            minValue = cellSizeDelta;
-        }
-    }
-
-    return level;
-}
-
-uchar DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* theOtherOctree) const
-{
-    double estimatedTime[MAX_OCTREE_LEVEL];
-    estimatedTime[0] = 0.0;
-
-    unsigned ptsA = getNumberOfProjectedPoints();
-    unsigned ptsB = theOtherOctree->getNumberOfProjectedPoints();
-    int cellsA,cellsB,diffA,diffB;
-
-    //ATTENTION i>=1
-    uchar bestLevel = 1;
-    for (uchar i=1; i<MAX_OCTREE_LEVEL; ++i)
-    {
-        diff(i,m_thePointsAndTheirCellCodes,theOtherOctree->m_thePointsAndTheirCellCodes,diffA,diffB,cellsA,cellsB);
-
-        //we use a linear model for prediction
-        estimatedTime[i] = (double(ptsA)*double(ptsB)/double(cellsB)) * 0.001 + double(diffA);
-
-        if (estimatedTime[i] < estimatedTime[bestLevel])
-            bestLevel = i;
-    }
-
-    return bestLevel;
-}
-
-uchar DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const
-{
-    uchar level=MAX_OCTREE_LEVEL;
-    double density=0,predDensity=0;
-
-    for (level=MAX_OCTREE_LEVEL; level>0; --level)
-    {
-        predDensity = density;
-        density = static_cast<double>(m_numberOfProjectedPoints)/static_cast<double>(getCellNumber(level));
-        if (density>=indicativeNumberOfPointsPerCell)
-			break;
-    }
-
-    if (level<MAX_OCTREE_LEVEL)
-	{
-		if (level == 0)
-		{
-			predDensity = density;
-			density = static_cast<double>(m_numberOfProjectedPoints);
-		}
-
-		//we take the closest match
-		if (density-indicativeNumberOfPointsPerCell>indicativeNumberOfPointsPerCell-predDensity)
-			++level;
-	}
-
-    return level;
-}
-
-uchar DgmOctree::findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCells) const
-{
-    //we look for the level giviing the number of points per cell as close to the query
-    uchar bestLevel=1;
-    //number of cells for this level
-    int n = getCellNumber(bestLevel);
-    //error relatively to the query
-    int oldd=abs(n-int(indicativeNumberOfCells));
-
-    n = getCellNumber(bestLevel+1);
-    int d=abs(n-int(indicativeNumberOfCells));
-
-    while ((d<oldd)&&(bestLevel<MAX_OCTREE_LEVEL))
-    {
-        ++bestLevel;
-        oldd = d;
-        n=getCellNumber(bestLevel+1);
-        d=abs(n-int(indicativeNumberOfCells));
-    }
-
-    return bestLevel;
-}
-
-int DgmOctree::getPointsInSphericalNeighbourhood2(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours, unsigned char& level/*=0*/) const
-{
-	if (level == 0)
-	{
-		level = findBestLevelForAGivenNeighbourhoodSizeExtraction(radius * c_neighbourhoodSizeExtractionFactor);
-		//we must take a bigger cell than the radius!
-		if (level > 1 && getCellSize(level) < radius)
-			--level;
-	}
+	//cell size
+	const PointCoordinateType& cs = getCellSize(level);
+	PointCoordinateType halfCellSize = cs/2;
 
 	//squared radius
 	PointCoordinateType squareRadius = radius * radius;
-	const PointCoordinateType& cs = getCellSize(level);
+	//constant value for cell/sphere inclusion test
+	PointCoordinateType maxDiagFactor = squareRadius + cs*(0.75*cs+SQRT_3*radius); //otherwise cell is totally outside
 
-	//we are going to test the 27 potential cubes that may intersect the sphere
-	std::set<OctreeCellCodeType> truncatedCellCodes;
+	//we are going to test all the cells that may intersect the sphere
+	CCVector3 corner = sphereCenter - CCVector3(radius,radius,radius);
+	int cornerPos[3];
+	getTheCellPosWhichIncludesThePoint(&corner, cornerPos, level);
+
+	//don't need to look outside the octree limits!
+	cornerPos[0] = std::max<int>(cornerPos[0],0);
+	cornerPos[1] = std::max<int>(cornerPos[1],0);
+	cornerPos[2] = std::max<int>(cornerPos[2],0);
+
+	//corresponding cell limits
+	CCVector3 boxMin(	m_dimMin[0] + cs*static_cast<PointCoordinateType>(cornerPos[0]),
+						m_dimMin[1] + cs*static_cast<PointCoordinateType>(cornerPos[1]),
+						m_dimMin[2] + cs*static_cast<PointCoordinateType>(cornerPos[2]) );
+
+	//max number of cells for this dimension
+	int maxCellCount = OCTREE_LENGTH(level);
+	//binary shift for cell code truncation
+	uchar bitDec = GET_BIT_SHIFT(level);
+
+	CCVector3 cellMin = boxMin;
+	int cellPos[3] = { cornerPos[0], 0, 0 };
+	while (cellMin.x < sphereCenter.x + radius && cellPos[0] < maxCellCount)
 	{
-		CCVector3 corner;
-		for (int i=-1; i<2; ++i)
+		CCVector3 cellCenter(cellMin.x + halfCellSize, 0, 0);
+
+		cellMin.y = boxMin.y;
+		cellPos[1] = cornerPos[1];
+		while (cellMin.y < sphereCenter.y + radius && cellPos[1] < maxCellCount)
 		{
-			corner.x = sphereCenter.x + static_cast<PointCoordinateType>(i)*radius;
-			for (int j=-1; j<2; ++j)
+			cellCenter.y = cellMin.y + halfCellSize;
+
+			cellMin.z = boxMin.z;
+			cellPos[2] = cornerPos[2];
+			while (cellMin.z < sphereCenter.z + radius && cellPos[2] < maxCellCount)
 			{
-				corner.y = sphereCenter.y + static_cast<PointCoordinateType>(j)*radius;
-				for (int k=-1; k<2; ++k)
+				//test this cell
+				//1st test: is it close enough to the sphere center?
+				cellCenter.z = cellMin.z + halfCellSize;
+				if ((cellCenter - sphereCenter).norm2() <= maxDiagFactor) //otherwise cell is totally outside
 				{
-					corner.z = sphereCenter.z + static_cast<PointCoordinateType>(k)*radius;
-					int cellPos[3];
-					bool inBounds;
-					getTheCellPosWhichIncludesThePoint(&corner, cellPos, level, inBounds);
-					if (inBounds)
+					//2nd test: does this cell exists?
+					OctreeCellCodeType truncatedCellCode = generateTruncatedCellCode(cellPos,level);
+					unsigned cellIndex = getCellIndex(truncatedCellCode,bitDec,true);
+
+					//if yes get the corresponding points
+					if (cellIndex < m_numberOfProjectedPoints)
 					{
-						CCVector3 cellCenter;
-						computeCellCenter(cellPos,level,cellCenter.u);
-						if ((cellCenter - sphereCenter).norm2() <= squareRadius + cs*(0.75*cs+SQRT_3*radius)) //otherwise cell is totally outside
+						//we look for the first index in 'm_thePointsAndTheirCellCodes' corresponding to this cell
+						cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+cellIndex;
+						OctreeCellCodeType searchCode = (p->theCode >> bitDec);
+
+						//while the (partial) cell code matches this cell
+						for ( ; (p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == searchCode); ++p)
 						{
-							OctreeCellCodeType truncatedCellCode = generateTruncatedCellCode(cellPos,level);
-							truncatedCellCodes.insert(truncatedCellCode);
+							const CCVector3* P = m_theAssociatedCloud->getPoint(p->theIndex);
+							PointCoordinateType d2 = (*P - sphereCenter).norm2();
+							//we keep the points falling inside the sphere
+							if (d2 <= squareRadius)
+								neighbours.push_back(PointDescriptor(P,p->theIndex,d2));
 						}
 					}
 				}
+
+				//next cell
+				cellMin.z += cs;
+				++cellPos[2];
 			}
+
+			//next cell
+			cellMin.y += cs;
+			++cellPos[1];
 		}
-	}
 
-	//get the corresponding points
-	{
-		//binary shift for cell code truncation
-		uchar bitDec = GET_BIT_SHIFT(level);
-
-		for (std::set<OctreeCellCodeType>::const_iterator it=truncatedCellCodes.begin(); it!=truncatedCellCodes.end(); ++it)
-		{
-			unsigned cellIndex = getCellIndex(*it,bitDec,true);
-			if (cellIndex < m_numberOfProjectedPoints) //cell might not exist!
-			{
-				//we look for the first index in 'm_thePointsAndTheirCellCodes' corresponding to this cell
-				cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+cellIndex;
-				OctreeCellCodeType searchCode = (p->theCode >> bitDec);
-
-				//while the (partial) cell code matches this cell
-				for ( ; (p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == searchCode); ++p)
-				{
-					const CCVector3* P = m_theAssociatedCloud->getPoint(p->theIndex);
-					PointCoordinateType d2 = (*P - sphereCenter).norm2();
-					//we keep the points falling inside the sphere
-					if (d2 <= squareRadius)
-						neighbours.push_back(PointDescriptor(P,p->theIndex,d2));
-				}
-			}
-		}
+		//next cell
+		cellMin.x += cs;
+		++cellPos[0];
 	}
 
 	return static_cast<int>(neighbours.size());
 }
+
+#ifdef THIS_CODE_IS_DEPREACTED
 
 #ifdef OCTREE_TREE_TEST
 struct cellToInspect
@@ -2380,6 +2299,8 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 	return static_cast<int>(n);
 }
 
+#endif //THIS_CODE_IS_DEPREACTED
+
 #ifdef COMPUTE_NN_SEARCH_STATISTICS
 static double s_skippedPoints = 0.0;
 static double s_testedPoints = 0.0;
@@ -2547,6 +2468,107 @@ int DgmOctree::findNeighborsInASphereStartingFromCell(NearestNeighboursSpherical
 
     //return the number of eligible points
     return numberOfEligiblePoints;
+}
+
+static PointCoordinateType c_neighbourhoodSizeExtractionFactor = static_cast<PointCoordinateType>(2.5);
+
+uchar DgmOctree::findBestLevelForAGivenNeighbourhoodSizeExtraction(PointCoordinateType radius) const
+{
+	PointCoordinateType aim = radius / c_neighbourhoodSizeExtractionFactor;
+    uchar level = 1;
+	PointCoordinateType minValue = getCellSize(1)-aim;
+	minValue *= minValue;
+    for (uchar i=2; i<=MAX_OCTREE_LEVEL; ++i)
+    {
+        //The level with cell size as near as possible to the aim
+        PointCoordinateType cellSizeDelta = getCellSize(i)-aim;
+        cellSizeDelta *= cellSizeDelta;
+
+        if (cellSizeDelta < minValue)
+        {
+            level = i;
+            minValue = cellSizeDelta;
+        }
+    }
+
+    return level;
+}
+
+uchar DgmOctree::findBestLevelForComparisonWithOctree(const DgmOctree* theOtherOctree) const
+{
+    double estimatedTime[MAX_OCTREE_LEVEL];
+    estimatedTime[0] = 0.0;
+
+    unsigned ptsA = getNumberOfProjectedPoints();
+    unsigned ptsB = theOtherOctree->getNumberOfProjectedPoints();
+    int cellsA,cellsB,diffA,diffB;
+
+    //ATTENTION i>=1
+    uchar bestLevel = 1;
+    for (uchar i=1; i<MAX_OCTREE_LEVEL; ++i)
+    {
+        diff(i,m_thePointsAndTheirCellCodes,theOtherOctree->m_thePointsAndTheirCellCodes,diffA,diffB,cellsA,cellsB);
+
+        //we use a linear model for prediction
+        estimatedTime[i] = (double(ptsA)*double(ptsB)/double(cellsB)) * 0.001 + double(diffA);
+
+        if (estimatedTime[i] < estimatedTime[bestLevel])
+            bestLevel = i;
+    }
+
+    return bestLevel;
+}
+
+uchar DgmOctree::findBestLevelForAGivenPopulationPerCell(unsigned indicativeNumberOfPointsPerCell) const
+{
+    uchar level=MAX_OCTREE_LEVEL;
+    double density=0,predDensity=0;
+
+    for (level=MAX_OCTREE_LEVEL; level>0; --level)
+    {
+        predDensity = density;
+        density = static_cast<double>(m_numberOfProjectedPoints)/static_cast<double>(getCellNumber(level));
+        if (density>=indicativeNumberOfPointsPerCell)
+			break;
+    }
+
+    if (level<MAX_OCTREE_LEVEL)
+	{
+		if (level == 0)
+		{
+			predDensity = density;
+			density = static_cast<double>(m_numberOfProjectedPoints);
+		}
+
+		//we take the closest match
+		if (density-indicativeNumberOfPointsPerCell>indicativeNumberOfPointsPerCell-predDensity)
+			++level;
+	}
+
+    return level;
+}
+
+uchar DgmOctree::findBestLevelForAGivenCellNumber(unsigned indicativeNumberOfCells) const
+{
+    //we look for the level giviing the number of points per cell as close to the query
+    uchar bestLevel=1;
+    //number of cells for this level
+    int n = getCellNumber(bestLevel);
+    //error relatively to the query
+    int oldd=abs(n-int(indicativeNumberOfCells));
+
+    n = getCellNumber(bestLevel+1);
+    int d=abs(n-int(indicativeNumberOfCells));
+
+    while ((d<oldd)&&(bestLevel<MAX_OCTREE_LEVEL))
+    {
+        ++bestLevel;
+        oldd = d;
+        n=getCellNumber(bestLevel+1);
+        d=abs(n-int(indicativeNumberOfCells));
+    }
+
+    return bestLevel;
 }
 
 double DgmOctree::computeMeanOctreeDensity(uchar level) const

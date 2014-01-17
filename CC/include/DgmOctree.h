@@ -630,9 +630,19 @@ public:
                                                 PointCoordinateType radius,
                                                 bool sortValues=true) const;
 
-	//DGM TODO: doc
-	int getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours) const;
-	int getPointsInSphericalNeighbourhood2(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours, unsigned char& level) const;
+	//deprecated
+	//int getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours) const;
+
+	//! Returns the points falling inside a sphere
+	/** Use findBestLevelForAGivenNeighbourhoodSizeExtraction to get the right
+		value for 'level' (only once as it only depends on the radius value ;).
+		\param sphereCenter center
+		\param radius radius
+		\param[out] neighbours points falling inside the sphere
+		\param level subdivision level at which to apply the extraction process
+		\return the number of extracted points
+	**/
+	int getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours, unsigned char level) const;
 
 	/***** CELLS POSITION HANDLING *****/
 

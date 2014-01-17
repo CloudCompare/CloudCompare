@@ -7,6 +7,10 @@ v2.5.3 ??/??/2014
 	* It can consumes a lot of memory but it works better on smooth shapes than the former
 		Fast-Marching based method (called "Resolve normals direction" and now renamed
 		"Edit > Normals > Orient > With Fast-Marching")
+- Enhancement:
+	* The "Spatial sub-sampling tool has been (heavily) enhanced:
+		- about twice as fast
+		- consumes much less memory
 - Bug fix:
 	* Deleting a 3D view and then selecting an entity previously displayed in this view
 		would make CC crash

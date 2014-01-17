@@ -7104,13 +7104,13 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 					QElapsedTimer subTimer;
 					subTimer.start();
 					unsigned long long extractedPoints = 0;
-					unsigned char level = 0;
+					unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(roughnessKernelSize);;
 					static unsigned samples = 1000;
 					for (unsigned j=0; j<samples; ++j)
 					{
 						unsigned randIndex = (static_cast<unsigned>(static_cast<double>(rand())*static_cast<double>(count)/static_cast<double>(RAND_MAX)) % count);
 						CCLib::DgmOctree::NeighboursSet neighbours;
-						octree->getPointsInSphericalNeighbourhood2(*cloud->getPoint(randIndex),roughnessKernelSize,neighbours,level);
+						octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),roughnessKernelSize,neighbours,level);
 						size_t neihgboursCount = neighbours.size();
 						extractedPoints += static_cast<unsigned long long>(neihgboursCount);
 						for (size_t k=0; k<neihgboursCount; ++k)

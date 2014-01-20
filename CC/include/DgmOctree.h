@@ -651,6 +651,9 @@ public:
 	//! Returns the points falling inside a cylinder
 	/** Use findBestLevelForAGivenNeighbourhoodSizeExtraction to get the right
 		value for 'level' (only once as it only depends on the radius value ;).
+		\warning the 'squareDist' field of each neighbour in the NeighboursSet
+		structure is in fact the signed distance (not squared) of the point
+		relatively to the cylinder's center and projected along its axis.
 		\param cylinderCenter center
 		\param cylinderDir cylinder direction
 		\param radius radius

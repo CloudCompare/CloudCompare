@@ -1961,7 +1961,7 @@ int DgmOctree::getPointsInCylindricalNeighbourhood(	const CCVector3& cylinderCen
 							d2 = (OP - cylinderDir * dot).norm2();
 							if (d2 <= squareRadius && fabs(dot) <= halfLength)
 							{
-								neighbours.push_back(PointDescriptor(P,p->theIndex,d2/*std::min(d2,dot*dot)*/));
+								neighbours.push_back(PointDescriptor(P,p->theIndex,dot)); //we save the distance relatively to the center projected on the axis!
 							}
 						}
 					}

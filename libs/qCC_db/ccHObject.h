@@ -66,12 +66,12 @@ public:
     /*** Inter-objects dependencies management ***/
 
 	//! Dependency flags
-	enum DEPENDENCY_FLAGS {	DP_NONE						= 0,	//no dependency
-							DP_NOTIFY_OTHER_ON_DELETE	= 1,	//notify 'other' when deleted
-							DP_NOTIFY_OTHER_ON_UPDATE	= 2,	//notify 'other' when modified (geometry)
-							//DP_NOTIFY_XXX				= 4,	
-							DP_DELETE_OTHER				= 8,	//delete 'other' before deleting itself
-							DP_PARENT_OF_OTHER			= 24,	//same as DP_DELETE_OTHER + declares itself as parent of 'other'
+	enum DEPENDENCY_FLAGS {	DP_NONE						= 0,	/**< no dependency **/
+							DP_NOTIFY_OTHER_ON_DELETE	= 1,	/**< notify 'other' when deleted (will call ccHObject::onDeletionOf) **/
+							DP_NOTIFY_OTHER_ON_UPDATE	= 2,	/**< notify 'other' when its geometry is modified (will call ccHObject::onUpdateOf) **/
+							//DP_NOTIFY_XXX				= 4, 
+							DP_DELETE_OTHER				= 8,	/**< delete 'other' before deleting itself **/
+							DP_PARENT_OF_OTHER			= 24,	/**< same as DP_DELETE_OTHER + declares itself as parent of 'other' **/
 	};
 
 	//! Adds a new dependence (additive or not)

@@ -643,7 +643,28 @@ public:
 		\param level subdivision level at which to apply the extraction process
 		\return the number of extracted points
 	**/
-	int getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours, unsigned char level) const;
+	int getPointsInSphericalNeighbourhood(	const CCVector3& sphereCenter,
+											PointCoordinateType radius,
+											NeighboursSet& neighbours,
+											unsigned char level) const;
+
+	//! Returns the points falling inside a cylinder
+	/** Use findBestLevelForAGivenNeighbourhoodSizeExtraction to get the right
+		value for 'level' (only once as it only depends on the radius value ;).
+		\param cylinderCenter center
+		\param cylinderDir cylinder direction
+		\param radius radius
+		\param halfLength half length (or height ;)
+		\param[out] neighbours points falling inside the sphere
+		\param level subdivision level at which to apply the extraction process
+		\return the number of extracted points
+	**/
+	int getPointsInCylindricalNeighbourhood(const CCVector3& cylinderCenter,
+											const CCVector3& cylinderDir,
+											PointCoordinateType radius,
+											PointCoordinateType halfLength,
+											NeighboursSet& neighbours,
+											unsigned char level/*=0*/) const;
 
 	/***** CELLS POSITION HANDLING *****/
 

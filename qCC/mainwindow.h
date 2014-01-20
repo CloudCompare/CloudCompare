@@ -268,6 +268,7 @@ protected slots:
     void doActionSFGradient();
     void doComputeRoughness();
 	void doSphericalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
+	void doCylindricalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
 	void doActionFitPlane();
 	void doActionFitFacet();
 	void doShowPrimitiveFactory();

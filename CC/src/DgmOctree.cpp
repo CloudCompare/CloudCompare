@@ -950,10 +950,6 @@ void DgmOctree::getNeighborCellsAround(const int cellPos[],
     const int &kMin = limits[4];
     const int &kMax = limits[5];
 
-	//backup of the previous binary search result (acceleration)
-    OctreeCellCodeType old_c2 = 0;
-    unsigned old_index = 0;
-
     //binary shift for cell code truncation
     const uchar bitDec = GET_BIT_SHIFT(level);
 
@@ -972,12 +968,10 @@ void DgmOctree::getNeighborCellsAround(const int cellPos[],
                 {
                     OctreeCellCodeType c2 = c1 | (GenerateCellCodeForDim(cellPos[2]+k)<<2);
 
-                    unsigned index = (old_c2<c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
+                    unsigned index = getCellIndex(c2,bitDec);
                     if (index < m_numberOfProjectedPoints)
                     {
                         neighborCellsIndexes.push_back(index);
-                        old_index = index;
-                        old_c2 = c2;
                     }
                 }
 
@@ -988,12 +982,10 @@ void DgmOctree::getNeighborCellsAround(const int cellPos[],
                 {
                     OctreeCellCodeType c2 = c1 | (GenerateCellCodeForDim(cellPos[2]-neighbourhoodLength)<<2);
 
-                    unsigned index = (old_c2<c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
+					unsigned index = getCellIndex(c2,bitDec);
                     if (index < m_numberOfProjectedPoints)
                     {
                         neighborCellsIndexes.push_back(index);
-                        old_index = index;
-                        old_c2 = c2;
                     }
                 }
 
@@ -1001,12 +993,10 @@ void DgmOctree::getNeighborCellsAround(const int cellPos[],
                 {
                     OctreeCellCodeType c2 = c1+(GenerateCellCodeForDim(cellPos[2]+kMax)<<2);
 
-                    unsigned index = (old_c2<c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
+					unsigned index = getCellIndex(c2,bitDec);
                     if (index < m_numberOfProjectedPoints)
                     {
                         neighborCellsIndexes.push_back(index);
-                        old_index = index;
-                        old_c2 = c2;
                     }
                 }
             }
@@ -1032,10 +1022,6 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
     const int &kMin = limits[4];
     const int &kMax = limits[5];
 
-	//backup of the previous binary search result (acceleration)
-    OctreeCellCodeType old_c2 = 0;
-	unsigned old_index = 0;
-
     //binary shift for cell code truncation
     const uchar bitDec = GET_BIT_SHIFT(nNSS.level);
 
@@ -1055,7 +1041,7 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
                 {
                     OctreeCellCodeType c2 = c1 | (GenerateCellCodeForDim(nNSS.cellPos[2]+k)<<2);
 
-                    unsigned index = (old_c2<c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
+					unsigned index = getCellIndex(c2,bitDec);
                     if (index < m_numberOfProjectedPoints)
                     {
 						//we increase 'pointsInNeighbourCells' capacity with average cell size
@@ -1076,9 +1062,6 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
 								nNSS.pointsInNeighbourhood.push_back(newPoint);
 							}
                         }
-
-                        old_index = index;
-                        old_c2 = c2;
                     }
                 }
 
@@ -1088,7 +1071,8 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
                 if (kMin == neighbourhoodLength) //test: does the plane of equation 'Z = -neighbourhoodLength' is inside the octree box?
                 {
                     OctreeCellCodeType c2 = c1 | (GenerateCellCodeForDim(nNSS.cellPos[2]-neighbourhoodLength)<<2);
-                    unsigned index = (old_c2<c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
+
+					unsigned index = getCellIndex(c2,bitDec);
                     if (index < m_numberOfProjectedPoints)
                     {
 						//we increase 'nNSS.pointsInNeighbourhood' capacity with average cell size
@@ -1109,16 +1093,14 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
 								nNSS.pointsInNeighbourhood.push_back(newPoint);
 							}
                         }
-
-                        old_index = index;
-                        old_c2 = c2;
                     }
                 }
 
                 if (kMax == neighbourhoodLength) //test: does the plane of equation 'Z = +neighbourhoodLength' is inside the octree box? (note that neighbourhoodLength > 0)
                 {
                     OctreeCellCodeType c2 = c1 | (GenerateCellCodeForDim(nNSS.cellPos[2]+neighbourhoodLength)<<2);
-                    unsigned index = (old_c2<c2 ? getCellIndex(c2,bitDec,old_index,m_numberOfProjectedPoints-1) : getCellIndex(c2,bitDec,0,old_index));
+
+					unsigned index = getCellIndex(c2,bitDec);
                     if (index < m_numberOfProjectedPoints)
                     {
 						//we increase 'nNSS.pointsInNeighbourhood' capacity with average cell size
@@ -1139,9 +1121,6 @@ void DgmOctree::getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &n
 								nNSS.pointsInNeighbourhood.push_back(newPoint);
 							}
                         }
-
-                        old_index = index;
-                        old_c2 = c2;
                     }
                 }
             }
@@ -1607,7 +1586,7 @@ ScalarType DgmOctree::findTheNearestNeighborStartingFromCell(NearestNeighboursSe
 }
 
 //search for at least "minNumberOfNeighbors" points around a query point
-unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearchStruct &nNSS,
+unsigned DgmOctree::findNearestNeighborsStartingFromCell(	NearestNeighboursSearchStruct &nNSS,
 															bool getOnlyPointsWithValidScalar/*=false*/) const
 {
     //binary shift for cell code truncation
@@ -1773,7 +1752,10 @@ unsigned DgmOctree::findNearestNeighborsStartingFromCell(NearestNeighboursSearch
     return eligiblePoints;
 }
 
-int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours, unsigned char level/*=0*/) const
+int DgmOctree::getPointsInSphericalNeighbourhood(	const CCVector3& sphereCenter,
+													PointCoordinateType radius,
+													NeighboursSet& neighbours,
+													unsigned char level/*=0*/) const
 {
 	//cell size
 	const PointCoordinateType& cs = getCellSize(level);
@@ -1782,7 +1764,7 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 	//squared radius
 	PointCoordinateType squareRadius = radius * radius;
 	//constant value for cell/sphere inclusion test
-	PointCoordinateType maxDiagFactor = squareRadius + cs*(0.75*cs+SQRT_3*radius); //otherwise cell is totally outside
+	PointCoordinateType maxDiagFactor = squareRadius + static_cast<PointCoordinateType>((0.75*cs + SQRT_3*radius)*cs);
 
 	//we are going to test all the cells that may intersect the sphere
 	CCVector3 corner = sphereCenter - CCVector3(radius,radius,radius);
@@ -1820,9 +1802,9 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 			cellPos[2] = cornerPos[2];
 			while (cellMin.z < sphereCenter.z + radius && cellPos[2] < maxCellCount)
 			{
+				cellCenter.z = cellMin.z + halfCellSize;
 				//test this cell
 				//1st test: is it close enough to the sphere center?
-				cellCenter.z = cellMin.z + halfCellSize;
 				if ((cellCenter - sphereCenter).norm2() <= maxDiagFactor) //otherwise cell is totally outside
 				{
 					//2nd test: does this cell exists?
@@ -1843,7 +1825,144 @@ int DgmOctree::getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, 
 							PointCoordinateType d2 = (*P - sphereCenter).norm2();
 							//we keep the points falling inside the sphere
 							if (d2 <= squareRadius)
+							{
 								neighbours.push_back(PointDescriptor(P,p->theIndex,d2));
+							}
+						}
+					}
+				}
+
+				//next cell
+				cellMin.z += cs;
+				++cellPos[2];
+			}
+
+			//next cell
+			cellMin.y += cs;
+			++cellPos[1];
+		}
+
+		//next cell
+		cellMin.x += cs;
+		++cellPos[0];
+	}
+
+	return static_cast<int>(neighbours.size());
+}
+
+int DgmOctree::getPointsInCylindricalNeighbourhood(	const CCVector3& cylinderCenter,
+													const CCVector3& cylinderDir,
+													PointCoordinateType radius,
+													PointCoordinateType halfLength,
+													NeighboursSet& neighbours,
+													unsigned char level/*=0*/) const
+{
+	//cell size
+	const PointCoordinateType& cs = getCellSize(level);
+	PointCoordinateType halfCellSize = cs/2;
+
+	//squared radius
+	PointCoordinateType squareRadius = radius * radius;
+	//constant value for cell/sphere inclusion test
+	PointCoordinateType maxDiagFactor = squareRadius + static_cast<PointCoordinateType>((0.75*cs + SQRT_3*radius)*cs);
+	PointCoordinateType maxLengthFactor = halfLength + static_cast<PointCoordinateType>(cs*SQRT_3/2);
+
+	//main cylinder direction
+	unsigned char Z = 0;
+	if (fabs(cylinderDir.y) > fabs(cylinderDir.x))
+		Z = 1;
+	if (fabs(cylinderDir.z) > fabs(cylinderDir.u[Z]))
+		Z = 2;
+	unsigned char X = Z == 2 ? 0 : Z+1;
+	unsigned char Y = X == 2 ? 0 : X+1;
+
+	//we are going to test all the cells that may intersect this cylinder
+	//dumb bounding-box estimation: place two spheres at the ends of the cylinder
+	CCVector3 minCorner;
+	CCVector3 maxCorner;
+	{
+		CCVector3 C1 = cylinderCenter + cylinderDir * halfLength;
+		CCVector3 C2 = cylinderCenter - cylinderDir * halfLength;
+		CCVector3 corner1 = C1 - CCVector3(radius,radius,radius);
+		CCVector3 corner2 = C1 + CCVector3(radius,radius,radius);
+		CCVector3 corner3 = C2 - CCVector3(radius,radius,radius);
+		CCVector3 corner4 = C2 + CCVector3(radius,radius,radius);
+
+		minCorner.x = std::min(std::min(corner1.x,corner2.x),std::min(corner3.x,corner4.x));
+		minCorner.y = std::min(std::min(corner1.y,corner2.y),std::min(corner3.y,corner4.y));
+		minCorner.z = std::min(std::min(corner1.z,corner2.z),std::min(corner3.z,corner4.z));
+
+		maxCorner.x = std::max(std::max(corner1.x,corner2.x),std::max(corner3.x,corner4.x));
+		maxCorner.y = std::max(std::max(corner1.y,corner2.y),std::max(corner3.y,corner4.y));
+		maxCorner.z = std::max(std::max(corner1.z,corner2.z),std::max(corner3.z,corner4.z));
+	}
+
+	int cornerPos[3];
+	getTheCellPosWhichIncludesThePoint(&minCorner, cornerPos, level);
+
+	//don't need to look outside the octree limits!
+	cornerPos[0] = std::max<int>(cornerPos[0],0);
+	cornerPos[1] = std::max<int>(cornerPos[1],0);
+	cornerPos[2] = std::max<int>(cornerPos[2],0);
+
+	//corresponding cell limits
+	CCVector3 boxMin(	m_dimMin[0] + cs*static_cast<PointCoordinateType>(cornerPos[0]),
+						m_dimMin[1] + cs*static_cast<PointCoordinateType>(cornerPos[1]),
+						m_dimMin[2] + cs*static_cast<PointCoordinateType>(cornerPos[2]) );
+
+	//max number of cells for this dimension
+	int maxCellCount = OCTREE_LENGTH(level);
+	//binary shift for cell code truncation
+	uchar bitDec = GET_BIT_SHIFT(level);
+
+	CCVector3 cellMin = boxMin;
+	int cellPos[3] = { cornerPos[0], 0, 0 };
+	while (cellMin.x < maxCorner.x && cellPos[0] < maxCellCount)
+	{
+		CCVector3 cellCenter(cellMin.x + halfCellSize, 0, 0);
+
+		cellMin.y = boxMin.y;
+		cellPos[1] = cornerPos[1];
+		while (cellMin.y < maxCorner.y && cellPos[1] < maxCellCount)
+		{
+			cellCenter.y = cellMin.y + halfCellSize;
+
+			cellMin.z = boxMin.z;
+			cellPos[2] = cornerPos[2];
+			while (cellMin.z < maxCorner.z && cellPos[2] < maxCellCount)
+			{
+				cellCenter.z = cellMin.z + halfCellSize;
+				//test this cell
+				//1st test: is it close enough to the cylinder axis?
+				CCVector3 OC = (cellCenter - cylinderCenter);
+				PointCoordinateType dot = OC.dot(cylinderDir);
+				PointCoordinateType d2 = (OC - cylinderDir * dot).norm2();
+				if (d2 <= maxDiagFactor && fabs(dot) <= maxLengthFactor) //otherwise cell is totally outside
+				{
+					//2nd test: does this cell exists?
+					OctreeCellCodeType truncatedCellCode = generateTruncatedCellCode(cellPos,level);
+					unsigned cellIndex = getCellIndex(truncatedCellCode,bitDec);
+
+					//if yes get the corresponding points
+					if (cellIndex < m_numberOfProjectedPoints)
+					{
+						//we look for the first index in 'm_thePointsAndTheirCellCodes' corresponding to this cell
+						cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+cellIndex;
+						OctreeCellCodeType searchCode = (p->theCode >> bitDec);
+
+						//while the (partial) cell code matches this cell
+						for ( ; (p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == searchCode); ++p)
+						{
+							const CCVector3* P = m_theAssociatedCloud->getPoint(p->theIndex);
+
+							//we keep the points falling inside the sphere
+							CCVector3 OP = (*P - cylinderCenter);
+							dot = OP.dot(cylinderDir);
+							d2 = (OP - cylinderDir * dot).norm2();
+							if (d2 <= squareRadius && fabs(dot) <= halfLength)
+							{
+								neighbours.push_back(PointDescriptor(P,p->theIndex,d2/*std::min(d2,dot*dot)*/));
+							}
 						}
 					}
 				}

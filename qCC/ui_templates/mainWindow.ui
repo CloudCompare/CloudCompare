@@ -359,6 +359,7 @@
      <addaction name="actionAlign"/>
      <addaction name="separator"/>
      <addaction name="actionSNETest"/>
+     <addaction name="actionCNETest"/>
     </widget>
     <widget class="QMenu" name="menuFit">
      <property name="title">
@@ -1911,6 +1912,12 @@
    <property name="text">
     <string>SNE test</string>
    </property>
+   <property name="toolTip">
+    <string>Spherical Neighbourhood Extraction test</string>
+   </property>
+   <property name="statusTip">
+    <string>Spherical Neighbourhood Extraction test</string>
+   </property>
   </action>
   <action name="actionToggleVisibility">
    <property name="text">
@@ -2388,6 +2395,17 @@
   <action name="actionOrientNormalsFM">
    <property name="text">
     <string>With Fast Marching</string>
+   </property>
+  </action>
+  <action name="actionCNETest">
+   <property name="text">
+    <string>CNE test</string>
+   </property>
+   <property name="iconText">
+    <string>Cylindrical Neighbourhood Extraction test</string>
+   </property>
+   <property name="toolTip">
+    <string>Cylindrical Neighbourhood Extraction test</string>
    </property>
   </action>
  </widget>

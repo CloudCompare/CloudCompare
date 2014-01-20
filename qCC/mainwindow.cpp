@@ -927,6 +927,7 @@ void MainWindow::connectActions()
     connect(actionComputeBestFitBB,             SIGNAL(triggered()),    this,       SLOT(doComputeBestFitBB()));
     connect(actionAlign,                        SIGNAL(triggered()),    this,       SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
     connect(actionSNETest,						SIGNAL(triggered()),    this,       SLOT(doSphericalNeighbourhoodExtractionTest()));
+    connect(actionCNETest,						SIGNAL(triggered()),    this,       SLOT(doCylindricalNeighbourhoodExtractionTest()));
 
     //"Display" menu
     connect(actionFullScreen,                   SIGNAL(toggled(bool)),  this,       SLOT(toggleFullScreen(bool)));
@@ -6860,6 +6861,105 @@ void MainWindow::doSphericalNeighbourhoodExtractionTest()
 	updateUI();
 }
 
+void MainWindow::doCylindricalNeighbourhoodExtractionTest()
+{
+	bool ok;
+	double radius = QInputDialog::getDouble(this,"Cylinder radius","radius",0.02,1.0e-6,1.0e6,6,&ok);
+	if (!ok)
+		return;
+
+	double height = QInputDialog::getDouble(this,"Cylinder height","height",0.05,1.0e-6,1.0e6,6,&ok);
+	if (!ok)
+		return;
+
+	ccPointCloud* cloud = new ccPointCloud("cube");
+	const unsigned ptsCount = 1000000;
+	if (!cloud->reserve(ptsCount))
+	{
+		ccConsole::Error("Not enough memory!");
+		delete cloud;
+		return;
+	}
+
+	//fill a unit cube with random points
+	{
+		for (unsigned i=0; i<ptsCount; ++i)
+		{
+			CCVector3 P(	static_cast<double>(rand())/static_cast<double>(RAND_MAX),
+							static_cast<double>(rand())/static_cast<double>(RAND_MAX),
+							static_cast<double>(rand())/static_cast<double>(RAND_MAX) );
+
+			cloud->addPoint(P);
+		}
+	}
+
+	//get/Add scalar field
+	int sfIdx = cloud->getScalarFieldIndexByName("CNE test");
+	if (sfIdx < 0)
+		sfIdx = cloud->addScalarField("CNE test");
+	if (sfIdx < 0)
+	{
+		ccConsole::Error("Not enough memory!");
+		delete cloud;
+		return;
+	}
+	cloud->setCurrentScalarField(sfIdx);
+
+	//reset scalar field
+	{
+		for (unsigned j=0; j<ptsCount; ++j)
+			cloud->setPointScalarValue(j,NAN_VALUE);
+	}
+
+	ccProgressDialog pDlg(true,this);
+	ccOctree* octree = cloud->computeOctree(&pDlg);
+	if (octree)
+	{
+		QElapsedTimer subTimer;
+		subTimer.start();
+		unsigned long long extractedPoints = 0;
+		unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(radius));
+		const unsigned samples = 1000;
+		for (unsigned j=0; j<samples; ++j)
+		{
+			//generate random normal vector
+			CCVector3 dir(0,0,1);
+			{
+				ccGLMatrix rot;
+				rot.initFromParameters(	static_cast<PointCoordinateType>( static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0*M_PI ),
+										static_cast<PointCoordinateType>( static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0*M_PI ),
+										static_cast<PointCoordinateType>( static_cast<double>(rand())/static_cast<double>(RAND_MAX) * 2.0*M_PI ),
+										CCVector3(0,0,0) );
+				rot.applyRotation(dir);
+			}
+			unsigned randIndex = (static_cast<unsigned>(static_cast<double>(rand())*static_cast<double>(ptsCount)/static_cast<double>(RAND_MAX)) % ptsCount);
+			CCLib::DgmOctree::NeighboursSet neighbours;
+			octree->getPointsInCylindricalNeighbourhood(*cloud->getPoint(randIndex),dir,radius,height/2,neighbours,level);
+			//octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),radius,neighbours,level);
+			size_t neihgboursCount = neighbours.size();
+			extractedPoints += static_cast<unsigned long long>(neihgboursCount);
+			for (size_t k=0; k<neihgboursCount; ++k)
+				cloud->setPointScalarValue(neighbours[k].pointIndex,sqrt(neighbours[k].squareDist));
+		}
+		ccConsole::Print("[CNE_TEST] Mean extraction time = %i ms (radius = %f, height = %f, mean(neighbours) = %3.1f)",subTimer.elapsed(),radius,height,static_cast<double>(extractedPoints)/static_cast<double>(samples));
+	}
+	else
+	{
+		ccConsole::Error("Failed to compute octree!");
+	}
+
+	ccScalarField* sf = static_cast<ccScalarField*>(cloud->getScalarField(sfIdx));
+	sf->computeMinAndMax();
+	sf->showNaNValuesInGrey(false);
+	cloud->setCurrentDisplayedScalarField(sfIdx);
+	cloud->showSF(true);
+
+	addToDB(cloud);
+
+    refreshAll();
+	updateUI();
+}
+
 bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget *parent/*=0*/, void** additionalParameters/*=0*/)
 {
     size_t selNum = entities.size();
@@ -7084,28 +7184,21 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                                                                                 &pDlg,
                                                                                 octree);
                     break;
-
 				//TEST
 				case CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST:
 				{
 					unsigned count = cloud->size();
-					if (count<3)
-					{
-						result = -2;
-						break;
-					}
-
 					cloud->enableScalarField();
 					{
 						for (unsigned j=0; j<count; ++j)
-							cloud->setPointScalarValue(j,-1.0);
+							cloud->setPointScalarValue(j,NAN_VALUE);
 					}
 
 					QElapsedTimer subTimer;
 					subTimer.start();
 					unsigned long long extractedPoints = 0;
 					unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(roughnessKernelSize);;
-					static unsigned samples = 1000;
+					const unsigned samples = 1000;
 					for (unsigned j=0; j<samples; ++j)
 					{
 						unsigned randIndex = (static_cast<unsigned>(static_cast<double>(rand())*static_cast<double>(count)/static_cast<double>(RAND_MAX)) % count);
@@ -7116,7 +7209,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 						for (size_t k=0; k<neihgboursCount; ++k)
 							cloud->setPointScalarValue(neighbours[k].pointIndex,sqrt(neighbours[k].squareDist));
 					}
-					ccConsole::Print("[CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST] Mean extraction time = %i ms (radius = %f, mean(neighbours)=%3.1f)",subTimer.elapsed(),roughnessKernelSize,static_cast<double>(extractedPoints)/static_cast<double>(samples));
+					ccConsole::Print("[SNE_TEST] Mean extraction time = %i ms (radius = %f, mean(neighbours) = %3.1f)",subTimer.elapsed(),roughnessKernelSize,static_cast<double>(extractedPoints)/static_cast<double>(samples));
 
 					result = 0;
 				}

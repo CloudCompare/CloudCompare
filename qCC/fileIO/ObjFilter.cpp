@@ -36,6 +36,7 @@
 #include <ccProgressDialog.h>
 #include <ccNormalVectors.h>
 #include <ccMaterialSet.h>
+#include <ccPolyline.h>
 
 //System
 #include <string.h>
@@ -282,6 +283,15 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 	return CC_FERR_NO_ERROR;
 }
 
+//! Updates point index to a global index starting from 0!
+static bool UpdatePointIndex(int& vIndex, int maxIndex)
+{
+	if (vIndex == 0 || -vIndex>maxIndex)
+		return false;
+	vIndex = (vIndex>0 ? vIndex-1 : maxIndex+vIndex);
+	return true;
+}
+
 //! OBJ facet ('f') element
 struct facetElement
 {
@@ -306,16 +316,13 @@ struct facetElement
 	}
 
 	//! Updates point index to a global index starting from 0!
-	bool updatePointIndex(int maxIndex)
+	inline bool updatePointIndex(int maxIndex)
 	{
-		if (vIndex == 0 || -vIndex>maxIndex)
-			return false;
-		vIndex = (vIndex>0 ? vIndex-1 : maxIndex+vIndex);
-		return true;
+		return UpdatePointIndex(vIndex,maxIndex);
 	}
 
 	//! Updates tex coord index to a global index starting from 0!
-	bool updateTexCoordIndex(int maxIndex)
+	inline bool updateTexCoordIndex(int maxIndex)
 	{
 		if (-tcIndex > maxIndex)
 			return false;
@@ -325,7 +332,7 @@ struct facetElement
 	}
 
 	//! Updates normal index to a global index starting from 0!
-	bool updateNormalIndex(int maxIndex)
+	inline bool updateNormalIndex(int maxIndex)
 	{
 		if (-nIndex > maxIndex)
 			return false;
@@ -406,6 +413,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	bool error = false;
 
 	unsigned lineCount = 0;
+	unsigned polyCount = 0;
 	QString currentLine = stream.readLine();
 	while (!currentLine.isNull())
 	{
@@ -562,6 +570,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				groups.back().second = groupName; //simply replace the group name if the previous group was empty!
 			else
 				groups.push_back(std::pair<unsigned,QString>(totalFacesRead,groupName));
+			polyCount = 0; //restart polyline count at 0!
 		}
 		/*** new face ***/
 		else if (tokens.front().startsWith('f'))
@@ -739,6 +748,66 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					baseMesh->addTriangleNormalIndexes(A->nIndex, B->nIndex, C->nIndex);
 			}
 		}
+		/*** polyline ***/
+		else if (tokens.front().startsWith('l'))
+		{
+			//malformed line?
+			if (tokens.size() < 3)
+			{
+				objWarnings[INVALID_LINE] = true;
+				currentLine = stream.readLine();
+				continue;
+			}
+
+			//read the face elements (singleton, pair or triplet)
+			ccPolyline* polyline = new ccPolyline(vertices);
+			if (!polyline->reserve(static_cast<unsigned>(tokens.size()-1)))
+			{
+				//not enough memory
+				objWarnings[NOT_ENOUGH_MEMORY] = true;
+				delete polyline;
+				polyline = 0;
+				currentLine = stream.readLine();
+				continue;
+			}
+
+			for (int i=1; i<tokens.size(); ++i)
+			{
+				//get next polyline's vertex index
+				QStringList vertexTokens = tokens[i].split('/');
+				if (vertexTokens.size() == 0 || vertexTokens[0].isEmpty())
+				{
+					objWarnings[INVALID_LINE] = true;
+					error = true;
+					break;
+				}
+				else
+				{
+					int index = vertexTokens[0].toInt(); //we ignore normal index (if any!)
+					if (!UpdatePointIndex(index,pointsRead))
+					{
+						objWarnings[INVALID_INDEX] = true;
+						error = true;
+						break;
+					}
+
+					polyline->addPointIndex(index);
+				}
+			}
+
+			if (error)
+			{
+				delete polyline;
+				polyline = 0;
+				break;
+			}
+			
+			polyline->setVisible(true);
+			QString name = groups.empty() ? QString("Line") : groups.back().second+QString(".line");
+			polyline->setName(QString("%1 %2").arg(name).arg(++polyCount));
+			vertices->addChild(polyline);
+
+		}
 		/*** material ***/
 		else if (tokens.front() == "usemtl") //see 'MTL file' below
 		{
@@ -835,8 +904,15 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			normals->resize(normals->currentSize());
 		if (texCoords && texCoords->currentSize() < texCoords->capacity())
 			texCoords->resize(texCoords->currentSize());
-		if (baseMesh->maxSize() > baseMesh->size())
+		if (baseMesh->size() == 0)
+		{
+			delete baseMesh;
+			baseMesh = 0;
+		}
+		else if (baseMesh->maxSize() > baseMesh->size())
+		{
 			baseMesh->resize(baseMesh->size());
+		}
 
 		if (maxVertexIndex >= pointsRead
 			|| maxTexCoordIndex >= texCoordsRead
@@ -866,7 +942,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			}
 		}
 		
-		if (!error)
+		if (!error && baseMesh)
 		{
 			if (normals && normalsPerFacet)
 			{
@@ -946,7 +1022,11 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			}
 
 			baseMesh->addChild(vertices);
-			vertices->setEnabled(false);
+			//DGM: we can't deactive the vertices if it has children! (such as polyline)
+			if (vertices->getChildrenNumber() != 0)
+				vertices->setVisible(false);
+			else
+				vertices->setEnabled(false);
 
 			container.addChild(baseMesh);
 		}
@@ -955,6 +1035,9 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 		{
 			//no (valid) mesh!
 			container.addChild(vertices);
+			//we hide the vertices if the entity has children (probably polylines!)
+			if (vertices->getChildrenNumber() != 0)
+				vertices->setVisible(false);
 		}
 
 		//special case: normals held by cloud!

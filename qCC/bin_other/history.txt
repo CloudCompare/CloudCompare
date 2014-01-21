@@ -14,6 +14,11 @@ v2.5.3 ??/??/2014
 	* The ASCII file loading dialog is a bit smater: you can now open ASCII files with
 		invalid columns (such as text labels, etc.) as long as the column is not assigned
 		to any property.
+	* the OBJ importer now supports polylines ('l' tag)
+- Other:
+	* ATOM feed enabled on the forum (http://www.danielgm.net/cc/forum/)
+		(use the native ATOM support on IE or Firefox, or install an ATOM feed reader app
+		on Chrome, e.g. "RSS Feed Reader")
 - Bug fix:
 	* Deleting a 3D view and then selecting an entity previously displayed in this view
 		would make CC crash

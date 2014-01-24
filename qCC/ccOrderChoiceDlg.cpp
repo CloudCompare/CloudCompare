@@ -25,7 +25,7 @@
 #include <ccHObject.h>
 
 //Qt
-#include <QMainwindow>
+#include <QMainWindow>
 
 ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
 									const char* firstRole,

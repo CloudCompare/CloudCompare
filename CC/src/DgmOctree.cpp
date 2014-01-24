@@ -36,7 +36,7 @@
 //#define OCTREE_TREE_TEST
 
 //Const. value: log(2)
-static const double M_LN2 = log(2.0);
+static const double LOG_NAT_2 = log(2.0);
 
 #ifdef OCTREE_TREE_TEST
 
@@ -681,7 +681,7 @@ unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bit
 	//inspired from the algorithm proposed by MATT PULVER (see http://eigenjoy.com/2011/01/21/worlds-fastest-binary-search/)
 	//DGM:	it's not faster, but the code is simpler ;)
 	unsigned i = 0;
-	unsigned b = (1 << static_cast<int>( log(static_cast<double>(m_numberOfProjectedPoints-1)) / M_LN2 ));
+    unsigned b = (1 << static_cast<int>( log(static_cast<double>(m_numberOfProjectedPoints-1)) / LOG_NAT_2 ));
 	for ( ; b ; b >>= 1 )
 	{
 		unsigned j = i | b;
@@ -796,7 +796,7 @@ unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bit
 	//DGM:	it's not faster, but the code is simpler ;)
 	unsigned i = 0;
 	unsigned count = end-begin+1;
-	unsigned b = (1 << static_cast<int>( log(static_cast<double>(count-1)) / M_LN2 ));
+    unsigned b = (1 << static_cast<int>( log(static_cast<double>(count-1)) / LOG_NAT_2 ));
 	for ( ; b ; b >>= 1 )
 	{
 		unsigned j = i | b;

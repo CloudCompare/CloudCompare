@@ -144,7 +144,7 @@ protected:
 	std::map<Edge::Key, double> m_edges;
     
 	//! Set of neighbors for each vertex
-	std::vector<std::set<size_t>> m_vertexNeighbors;
+    std::vector<std::set<size_t> > m_vertexNeighbors;
 };
 
 static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib::GenericProgressCallback* progressCb = 0)

@@ -101,7 +101,7 @@ const double* Neighbourhood::get3DQuadric()
 
 void Neighbourhood::computeGravityCenter()
 {
-	//invalidate precedent centroid (if any)
+	//invalidate previous centroid (if any)
 	structuresValidity &= (~GRAVITY_CENTER);
 
 	assert(m_associatedCloud);
@@ -213,7 +213,7 @@ PointCoordinateType Neighbourhood::computeLargestRadius()
 
 bool Neighbourhood::computeLeastSquareBestFittingPlane()
 {
-	//invalidate precedent LS plane (if any)
+	//invalidate previous LS plane (if any)
 	structuresValidity &= (~LSQ_PLANE);
 
 	assert(m_associatedCloud);
@@ -308,7 +308,7 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 
 bool Neighbourhood::computeHeightFunction()
 {
-	//invalidate precedent quadric (if any)
+	//invalidate previous quadric (if any)
 	structuresValidity &= (~HEIGHT_FUNCTION);
 
 	assert(m_associatedCloud);
@@ -485,7 +485,7 @@ bool Neighbourhood::computeHeightFunction()
 
 bool Neighbourhood::compute3DQuadric()
 {
-	//invalidate precedent quadric (if any)
+	//invalidate previous quadric (if any)
 	structuresValidity &= (~QUADRIC_3D);
 
 	assert(m_associatedCloud);

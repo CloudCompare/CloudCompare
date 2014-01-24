@@ -383,7 +383,7 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 
             const PointCoordinateType* lsq = Z.getLSQPlane();
             if (lsq)
-                d = DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint,lsq);
+                d = fabs(DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint,lsq));
 		}
 
         cell.points->setPointScalarValue(i,d);

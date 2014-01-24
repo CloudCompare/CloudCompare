@@ -183,10 +183,10 @@ public:
 	**/
 	static ScalarType computePoint2TriangleDistance(const CCVector3* P, const GenericTriangle* theTriangle, bool signedDist);
 
-	//! Computes the distance between a point and a plane
+	//! Computes the (signed) distance between a point and a plane
     /** \param P a 3D point
-		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d'
-		\return the distance between the point and the plane (or NaN if plane normal (a,b,c) is too small)
+		\param planeEquation plane equation: [a,b,c,d] as 'ax+by+cz=d' with norm(a,bc)==1
+		\return the signed distance between the point and the plane
 	**/
 	static ScalarType computePoint2PlaneDistance(const CCVector3* P, const PointCoordinateType* planeEquation);
 

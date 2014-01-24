@@ -109,7 +109,7 @@ ScalarType LocalModel::computeDistanceFromModelToPoint(const CCVector3* aPoint)
     {
         case LS:
 		{
-            return DistanceComputationTools::computePoint2PlaneDistance(aPoint,lsqPlane);
+            return fabs(DistanceComputationTools::computePoint2PlaneDistance(aPoint,lsqPlane));
 		}
         case TRI:
         {

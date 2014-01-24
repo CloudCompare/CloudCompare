@@ -2189,7 +2189,7 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 	//point to plane distance: d = fabs(a0*x+a1*y+a2*z-a3)/sqrt(a0^2+a1^2+a2^2)
 	assert(fabs((double)CCVector3::vnorm2(planeEquation) - 1.0) < ZERO_TOLERANCE);
 
-	return static_cast<ScalarType>(fabs(CCVector3::vdot(P->u,planeEquation)-planeEquation[3])/*/CCVector3::vnorm(planeEquation)*/); //norm == 1.0!
+	return static_cast<ScalarType>((CCVector3::vdot(P->u,planeEquation)-planeEquation[3])/*/CCVector3::vnorm(planeEquation)*/); //norm == 1.0!
 }
 
 ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(	GenericCloud* cloud,

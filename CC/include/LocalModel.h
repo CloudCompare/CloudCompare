@@ -53,7 +53,7 @@ public:
 	**/
 	PointCoordinateType getSquareSize() const {return squareModelSize;};
 
-	//! Compute the distance between a 3D point and this model
+	//! Compute the (unsigned) distance between a 3D point and this model
 	/** \param P the query point
 		\return the (unsigned) distance (or HIDDEN_VALUE if computation failed)
 	**/

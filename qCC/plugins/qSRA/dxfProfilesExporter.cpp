@@ -367,14 +367,14 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 			}
 			catch(std::bad_alloc)
 			{
-				//not engouh memory
+				//not enough memory
 				dw->dxfEOF();
 				dw->close();
 				delete dw;
 				return false;
 			}
 
-			unsigned iMap = static_cast<unsigned>(static_cast<double>(angleStep) / static_cast<double>(angularStepCount)) * map->xSteps;
+			unsigned iMap = static_cast<unsigned>(static_cast<double>(angleStep * map->xSteps) / static_cast<double>(angularStepCount));
 			for (unsigned jMap=0; jMap < map->ySteps; ++jMap)
 			{
 				const DistanceMapGenerationTool::MapCell& cell = map->at(iMap + jMap * map->xSteps);

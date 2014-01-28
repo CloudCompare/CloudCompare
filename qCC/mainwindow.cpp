@@ -6885,9 +6885,9 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 	{
 		for (unsigned i=0; i<ptsCount; ++i)
 		{
-			CCVector3 P(	static_cast<double>(rand())/static_cast<double>(RAND_MAX),
-							static_cast<double>(rand())/static_cast<double>(RAND_MAX),
-							static_cast<double>(rand())/static_cast<double>(RAND_MAX) );
+			CCVector3 P(	static_cast<PointCoordinateType>(rand())/static_cast<PointCoordinateType>(RAND_MAX),
+							static_cast<PointCoordinateType>(rand())/static_cast<PointCoordinateType>(RAND_MAX),
+							static_cast<PointCoordinateType>(rand())/static_cast<PointCoordinateType>(RAND_MAX) );
 
 			cloud->addPoint(P);
 		}
@@ -6934,7 +6934,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 			}
 			unsigned randIndex = (static_cast<unsigned>(static_cast<double>(rand())*static_cast<double>(ptsCount)/static_cast<double>(RAND_MAX)) % ptsCount);
 			CCLib::DgmOctree::NeighboursSet neighbours;
-			octree->getPointsInCylindricalNeighbourhood(*cloud->getPoint(randIndex),dir,radius,height/2,neighbours,level);
+			octree->getPointsInCylindricalNeighbourhood(*cloud->getPoint(randIndex),dir,static_cast<PointCoordinateType>(radius),static_cast<PointCoordinateType>(height/2),neighbours,level);
 			//octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),radius,neighbours,level);
 			size_t neihgboursCount = neighbours.size();
 			extractedPoints += static_cast<unsigned long long>(neihgboursCount);

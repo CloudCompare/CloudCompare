@@ -644,7 +644,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 			{
 				CCVector3 P;
 				poly->getPoint(i,P);
-				dxf.writeVertex(*dw, DL_VertexData(	P.x, P.y, P.y ) );
+				dxf.writeVertex(*dw, DL_VertexData(	P.x, P.y, P.z ) );
 			}
 
 			dxf.writePolylineEnd(*dw);

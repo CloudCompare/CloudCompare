@@ -193,6 +193,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
     ccLog::Print("[ccHeightGridGeneration] 2 - Filling the height grid...");
 
 	unsigned count = cloud->size();
+	bool cancel = false;
     for (unsigned n=0; n<count; ++n)
     {
         const CCVector3* thePoint = cloud->getPoint(n);
@@ -303,10 +304,18 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
         pointsInCell++;
 
         if (progressCb)
+		{
             progressCb->update(30.0f * static_cast<float>(n) / static_cast<float>(cloud->size()));
+			if (progressCb->isCancelRequested())
+			{
+				cancel = true;
+				break;
+			}
+		}
     }
 
 	//update grids for 'average' cases
+	if (!cancel)
 	{
 		if (sfInterpolation == PROJ_AVERAGE_HEIGHT)
 		{
@@ -349,43 +358,50 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
     ccLog::Print("[ccHeightGridGeneration] 3 - Computation of the average and extreme height values in the grid...");
     double minHeight=0.0, maxHeight=0.0, meanHeight=0.0;
     unsigned nonEmptyCells = 0; //non empty cells count
-    for (unsigned i=0; i<grid_size_Y; ++i)
-    {
-        for (unsigned j=0; j<grid_size_X; ++j)
-        {
-            if (grid[i][j].nbPoints) //non empty cell
-            {
-                double h = static_cast<double>(grid[i][j].height);
+	if (!cancel)
+	{
+		for (unsigned i=0; i<grid_size_Y; ++i)
+		{
+			for (unsigned j=0; j<grid_size_X; ++j)
+			{
+				if (grid[i][j].nbPoints) //non empty cell
+				{
+					double h = static_cast<double>(grid[i][j].height);
 
-                if (nonEmptyCells++)
-                {
-                    if (h < minHeight)
-                        minHeight = h;
-                    else if (h > maxHeight)
-                        maxHeight = h;
-                    meanHeight += h;
-                }
-                else
-                {
-                    minHeight = maxHeight = h;
-                }
-            }
-        }
-    }
-
-	//persistent settings
-	QSettings settings;
-	settings.beginGroup("HeightGridGeneration");
+					if (nonEmptyCells++)
+					{
+						if (h < minHeight)
+							minHeight = h;
+						else if (h > maxHeight)
+							maxHeight = h;
+						meanHeight += h;
+					}
+					else
+					{
+						minHeight = maxHeight = h;
+					}
+				}
+			}
+		}
+	}
 
 	//default output
 	ccPointCloud* cloudGrid(0);
 
-    if (!nonEmptyCells)
+	if (cancel)
+	{
+		//simply skip it
+	}
+    else if (!nonEmptyCells)
     {
         ccLog::Warning("[ccHeightGridGeneration] grid is empty!");
     }
 	else
     {
+		//persistent settings
+		QSettings settings;
+		settings.beginGroup("HeightGridGeneration");
+
         meanHeight /= static_cast<double>(nonEmptyCells);
 
 		ccLog::Print("\tMinimal height = %f", minHeight);
@@ -397,7 +413,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 			//=========================================================================================================
 			if (fillEmptyCells == FILL_AVERAGE_HEIGHT)
 			{
-				//we set the custom height as the average one (so we will be able to ignore this strategy aftewards!)
+				//we set the custom height as the average one (so we will be able to ignore this strategy afterwards!)
 				fillEmptyCells = FILL_CUSTOM_HEIGHT;
 				customEmptyCellsHeight = meanHeight;
 			}
@@ -483,7 +499,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 				QImage bitmap8(grid_size_X,grid_size_Y,QImage::Format_Indexed8);
 				if (!bitmap8.isNull())
 				{
-					// Build a custom palette (greyscale)
+					// Build a custom palette (gray scale)
 					QVector<QRgb> palette(256);
 					for (unsigned i = 0; i < 256; i++)
 						palette[i] = qRgba(i,i,i,255);
@@ -909,7 +925,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 				//even if we have already resampled the original cloud
 				//we may have to create new points and/or scalar fields
-				if (cloudGrid && pointsCount > cloudGrid->size())
+				if (cloudGrid)
 				{
 					//per-point height SF
 					CCLib::ScalarField* heightSF = 0;
@@ -944,32 +960,12 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						}
 					}
 
-					if (!cloudGrid->reserve(pointsCount))
+					if (!resampleOriginalCloud && !cloudGrid->reserve(pointsCount))
 					{
-						if (resampleOriginalCloud)
-						{
-							ccLog::Warning("[ccHeightGridGeneration] Not enough memory to finish the point cloud generation!");
-							//clear the new SF(s) and return the resampled cloud 'as is'
-							if (heightSFIdx >= 0)
-							{
-								cloudGrid->deleteScalarField(heightSFIdx);
-								heightSF = 0;
-								heightSFIdx = -1;
-							}
-							if (countSFIdx >= 0)
-							{
-								cloudGrid->deleteScalarField(countSFIdx);
-								countSF = 0;
-								countSFIdx = -1;
-							}
-						}
-						else
-						{
-							ccLog::Warning("[ccHeightGridGeneration] Coudln't create cloud! (not enough memory)");
-							assert(cloudGrid->size() == 0);
-							delete cloudGrid;
-							cloudGrid = 0;
-						}
+						ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate memory for output cloud!");
+						assert(cloudGrid->size() == 0);
+						delete cloudGrid;
+						cloudGrid = 0;
 					}
 					else
 					{
@@ -980,7 +976,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						if (resampleOriginalCloud)
 						{
 							//as the 'non empty cells points' are already in the cloud
-							//we must take care were we put the equvialent scalar fields!
+							//we must take care were we put the equivalent scalar fields!
 							emptyCellIndex = cloudGrid->size();
 						}
 
@@ -1117,7 +1113,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 				}
 				else if (!cloudGrid)
 				{
-					ccLog::Warning("[ccHeightGridGeneration] Coudln't create cloud! (not enough memory)");
+					ccLog::Warning("[ccHeightGridGeneration] Couldn't create cloud! (not enough memory)");
 					delete cloudGrid;
 					cloudGrid = 0;
 				}
@@ -1127,7 +1123,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
     ccLog::Print("This is the end my friend...");
 
-    // unallocation of the height grid...
+    // de-allocate the height grid...
     if (grid)
     {
         for (unsigned i=0; i<grid_size_Y; ++i)
@@ -1137,7 +1133,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 		grid=0;
     }
 
-	//...and of the scalar fields
+	//...and the scalar fields
 	{
 		for (unsigned i=0; i<gridScalarFields.size(); ++i)
 		{

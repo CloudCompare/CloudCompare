@@ -23,6 +23,7 @@
 #include <QMenu>
 #include <QClipboard>
 #include <QApplication>
+#include <QMessageBox>
 
 //qCC_db
 #include <ccLog.h>
@@ -185,6 +186,8 @@ void ccPointListPickingDlg::exportToNewCloud()
 			}
 
 			cloud->setDisplay(m_associatedCloud->getDisplay());
+			cloud->setGlobalShift(m_associatedCloud->getGlobalShift());
+			cloud->setGlobalScale(m_associatedCloud->getGlobalScale());
 			MainWindow::TheInstance()->db()->addElement(cloud);
 		}
 		else
@@ -361,9 +364,9 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 	settings.endGroup();
 
 	filename = QFileDialog::getSaveFileName(this,
-		"Export to ASCII",
-		filename,
-		CC_FILE_TYPE_FILTERS[ASCII]);
+											"Export to ASCII",
+											filename,
+											CC_FILE_TYPE_FILTERS[ASCII]);
 
 	if (filename.isEmpty())
 		return;
@@ -379,22 +382,39 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 		return;
 	}
 
+	//if a global shift exists, ask the user if it should be applied
+	CCVector3d shift = m_associatedCloud->getGlobalShift();
+	double scale = m_associatedCloud->getGlobalScale();
+
+	if (shift.norm2() != 0 || scale != 1.0)
+	{
+		if (QMessageBox::warning(	this,
+									"Apply global shift",
+									"Do you want to apply global shift/scale to exported points?",
+									QMessageBox::Yes | QMessageBox::No,
+									QMessageBox::Yes ) == QMessageBox::No)
+		{
+			//reset shift
+			shift = CCVector3d(0,0,0);
+			scale = 1.0;
+		}
+	}
+
 	//starting index
 	int startIndex = startIndexSpinBox->value();
 
 	for (unsigned i=0; i<count; ++i)
 	{
+		assert(labels[i]->size() == 1);
 		const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
 		const CCVector3* P = PP.cloud->getPoint(PP.index);
-		switch(format)
-		{
-		case PLP_ASCII_EXPORT_XYZ:
-			fprintf(fp,"%f,%f,%f\n",P->x,P->y,P->z);
-			break;
-		case PLP_ASCII_EXPORT_IXYZ:
-			fprintf(fp,"%i,%f,%f,%f\n",i+startIndex,P->x,P->y,P->z);
-			break;
-		}
+
+		if (format == PLP_ASCII_EXPORT_IXYZ)
+			fprintf(fp,"%i,",i+startIndex);
+
+		fprintf(fp,"%f,%f,%f\n",static_cast<double>(P->x)*scale + shift.x,
+								static_cast<double>(P->y)*scale + shift.y,
+								static_cast<double>(P->z)*scale + shift.z);
 	}
 
 	fclose(fp);

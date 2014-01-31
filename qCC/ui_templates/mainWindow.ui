@@ -262,7 +262,7 @@
     <addaction name="actionMerge"/>
     <addaction name="actionSubsample"/>
     <addaction name="actionApplyTransformation"/>
-    <addaction name="actionMultiply"/>
+    <addaction name="actionApplyScale"/>
     <addaction name="separator"/>
     <addaction name="actionEditGlobalShift"/>
     <addaction name="actionEditGlobalScale"/>
@@ -352,6 +352,7 @@
      <addaction name="menuDensity"/>
      <addaction name="actionCurvature"/>
      <addaction name="actionRoughness"/>
+     <addaction name="actionRemoveDuplicatePoints"/>
     </widget>
     <widget class="QMenu" name="menuSand_Box">
      <property name="title">
@@ -1369,7 +1370,7 @@
     <string>Classify points by propagating a front on a scalar field</string>
    </property>
   </action>
-  <action name="actionMultiply">
+  <action name="actionApplyScale">
    <property name="text">
     <string>Multiply/Scale</string>
    </property>
@@ -2418,6 +2419,11 @@
   <action name="actionAccurateDensity">
    <property name="text">
     <string>Accurate (at a given scale)</string>
+   </property>
+  </action>
+  <action name="actionRemoveDuplicatePoints">
+   <property name="text">
+    <string>Remove duplicate points</string>
    </property>
   </action>
  </widget>

@@ -149,6 +149,20 @@ public:
 	static CCLib::SquareMatrixd computeCovarianceMatrix(GenericCloud* theCloud,
 														const PointCoordinateType* _gravityCenter = 0);
 
+	//! Flag duplicate points
+    /** This method only requires an output scalar field. Duplicate points will be
+		associated to scalar value 1 (and 0 for the others).
+        \param theCloud processed cloud
+		\param maxDistBetweenPoints max distance between points
+		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
+		\param inputOctree if not set as input, octree will be automatically computed.
+		\return success (0) or error code (<0)
+    **/
+	static int flagDuplicatePoints(	GenericIndexedCloudPersist* theCloud,
+									PointCoordinateType maxDistBetweenPoints = static_cast<PointCoordinateType>(1.0e-8),
+									GenericProgressCallback* progressCb = 0,
+									DgmOctree* inputOctree = 0);
+
 protected:
 
 	//! Computes cell curvature inside a cell
@@ -186,6 +200,15 @@ protected:
 	static bool computePointsRoughnessInACellAtLevel(	const DgmOctree::octreeCell& cell,
 														void** additionalParameters,
 														NormalizedProgress* nProgress = 0);
+
+	//! Flags duplicate points inside a cell
+	/**	\param cell structure describing the cell on which processing is applied
+		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
+	**/
+	static bool flagDuplicatePointsInACellAtLevel(	const DgmOctree::octreeCell& cell,
+													void** additionalParameters,
+													NormalizedProgress* nProgress = 0);
 };
 
 }

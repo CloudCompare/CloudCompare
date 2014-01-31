@@ -885,7 +885,7 @@ void MainWindow::connectActions()
     connect(actionClone,                        SIGNAL(triggered()),    this,       SLOT(doActionClone()));
     connect(actionMerge,                        SIGNAL(triggered()),    this,       SLOT(doActionMerge()));
     connect(actionApplyTransformation,			SIGNAL(triggered()),    this,       SLOT(doActionApplyTransformation()));
-    connect(actionMultiply,                     SIGNAL(triggered()),    this,       SLOT(doActionMultiply()));
+    connect(actionApplyScale,					SIGNAL(triggered()),    this,       SLOT(doActionApplyScale()));
     connect(actionEditGlobalShift,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalShift()));
     connect(actionEditGlobalScale,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalScale()));
     connect(actionSubsample,                    SIGNAL(triggered()),    this,       SLOT(doActionSubsample())); //Aurelien BEY le 13/11/2008
@@ -911,13 +911,15 @@ void MainWindow::connectActions()
     connect(actionKMeans,                       SIGNAL(triggered()),    this,       SLOT(doActionKMeans()));
     connect(actionFrontPropagation,             SIGNAL(triggered()),    this,       SLOT(doActionFrontPropagation()));
 	connect(actionCrossSection,					SIGNAL(triggered()),	this,		SLOT(activateClippingBoxMode()));
+    //"Tools > Fit" menu
+    connect(actionFitPlane,						SIGNAL(triggered()),    this,       SLOT(doActionFitPlane()));
+    connect(actionFitFacet,						SIGNAL(triggered()),    this,       SLOT(doActionFitFacet()));
     //"Tools > Other" menu
     connect(actionApproximateDensity,			SIGNAL(triggered()),    this,       SLOT(doComputeApproximateDensity()));
     connect(actionAccurateDensity,				SIGNAL(triggered()),    this,       SLOT(doComputeAccurateDensity()));
     connect(actionCurvature,                    SIGNAL(triggered()),    this,       SLOT(doComputeCurvature()));
     connect(actionRoughness,                    SIGNAL(triggered()),    this,       SLOT(doComputeRoughness()));
-    connect(actionFitPlane,						SIGNAL(triggered()),    this,       SLOT(doActionFitPlane()));
-    connect(actionFitFacet,						SIGNAL(triggered()),    this,       SLOT(doActionFitFacet()));
+	connect(actionRemoveDuplicatePoints,		SIGNAL(triggered()),    this,       SLOT(doRemoveDuplicatePoints()));
 	//"Tools"
     connect(actionPointListPicking,             SIGNAL(triggered()),    this,       SLOT(activatePointListPickingMode()));
     connect(actionPointPicking,                 SIGNAL(triggered()),    this,       SLOT(activatePointsPropertiesMode()));
@@ -1494,7 +1496,7 @@ void MainWindow::doActionApplyTransformation()
 static double s_lastMultFactorX = 1.0;
 static double s_lastMultFactorY = 1.0;
 static double s_lastMultFactorZ = 1.0;
-void MainWindow::doActionMultiply()
+void MainWindow::doActionApplyScale()
 {
     ccAskThreeDoubleValuesDlg dlg("fx","fy","fz",-1.0e6,1.0e6,s_lastMultFactorX,s_lastMultFactorY,s_lastMultFactorZ,8,"Scaling",this);
     if (!dlg.exec())
@@ -1508,6 +1510,7 @@ void MainWindow::doActionMultiply()
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
     size_t selNum = selectedEntities.size();
+	size_t processNum = 0;
     for (size_t i=0; i<selNum; ++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -1516,6 +1519,7 @@ void MainWindow::doActionMultiply()
 		if (lockedVertices)
 		{
 			DisplayLockedVerticesWarning();
+			++processNum;
 			continue;
 		}
 
@@ -1538,8 +1542,15 @@ void MainWindow::doActionMultiply()
 			shift.y *= s_lastMultFactorY;
 			shift.z *= s_lastMultFactorZ;
 			cloud->setGlobalShift(shift);
+
+			++processNum;
         }
     }
+
+	if (processNum == 0)
+	{
+		ccConsole::Warning("No elligible entities (point clouds or meshes) were selected!");
+	}
 
     refreshAll();
 	updateUI();
@@ -2318,6 +2329,99 @@ void MainWindow::doActionSamplePoints()
 
 	if (errors)
 		ccLog::Error("[doActionSamplePoints] Errors occurred during the process! Result may be incomplete!");
+
+    refreshAll();
+}
+
+//semi-persistent setting for 'doRemoveDuplicatePoints'
+static double s_maxDistanceBetweenPoints = 1.0e-8;
+
+void MainWindow::doRemoveDuplicatePoints()
+{
+	if (m_selectedEntities.empty())
+		return;
+
+	ccHObject::Container selectedEntities = m_selectedEntities;
+    size_t selNum = selectedEntities.size();
+	bool first = true;
+
+	bool ok;
+	s_maxDistanceBetweenPoints = QInputDialog::getDouble(this, "Remove duplicate points", "Max distance between points:", s_maxDistanceBetweenPoints, 0, 1.0e8, 8, &ok);
+	if (!ok)
+		return;
+
+	for (size_t i=0; i<selNum; ++i)
+	{
+		ccHObject* ent = selectedEntities[i];
+
+		ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+		if (cloud)
+		{
+			//create temporary SF for 'duplicate flags'
+			int sfIdx = cloud->getScalarFieldIndexByName("DuplicateFlags");
+			if (sfIdx < 0)
+				sfIdx = cloud->addScalarField("DuplicateFlags");
+			if (sfIdx >= 0)
+				cloud->setCurrentScalarField(sfIdx);
+			else
+			{
+				ccConsole::Error("Couldn't create temporary scalar field! Not enough memory?");
+				break;
+			}
+
+            ccOctree* octree = cloud->getOctree();
+			ccProgressDialog pDlg(true,this);
+
+			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(cloud,s_maxDistanceBetweenPoints,&pDlg,octree);
+			
+			if (result >= 0)
+			{
+				//count the number of duplicate points!
+				CCLib::ScalarField* flagSF = cloud->getScalarField(sfIdx);
+				unsigned duplicateCount = 0;
+				assert(flagSF);
+				if (flagSF)
+				{
+					for (unsigned j=0; j<flagSF->currentSize(); ++j)
+						if (flagSF->getValue(j) != 0)
+							++duplicateCount;
+				}
+
+				if (duplicateCount == 0)
+				{
+					ccConsole::Print(QString("Cloud '%1' has no duplicate points").arg(cloud->getName()));
+				}
+				else
+				{
+					ccConsole::Warning(QString("Cloud '%1' has %2 duplicate point(s)").arg(cloud->getName()).arg(duplicateCount));
+				
+					ccPointCloud* filteredCloud = cloud->filterPointsByScalarValue(0,0);
+					if (filteredCloud)
+					{
+						int sfIdx2 = filteredCloud->getScalarFieldIndexByName("DuplicateFlags");
+						assert(sfIdx2 >= 0);
+						filteredCloud->deleteScalarField(sfIdx2);
+						filteredCloud->setName(QString("%1.clean").arg(cloud->getName()));
+						filteredCloud->setDisplay(cloud->getDisplay());
+						filteredCloud->prepareDisplayForRefresh();
+						addToDB(filteredCloud,true,0,false,false);
+						if (first)
+						{
+							m_ccRoot->unselectAllEntities();
+							first = false;
+						}
+						m_ccRoot->selectEntity(filteredCloud,true);
+					}
+				}
+			}
+			else
+			{
+				ccConsole::Error("An error occurred! (Not enough memory?)");
+			}
+
+			cloud->deleteScalarField(sfIdx);
+		}
+	}
 
     refreshAll();
 }
@@ -8350,7 +8454,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionShowDepthBuffer->setEnabled(atLeastOneGDBSensor);
     actionExportDepthBuffer->setEnabled(atLeastOneGDBSensor);
     actionResampleWithOctree->setEnabled(atLeastOneCloud);
-    actionMultiply->setEnabled(atLeastOneEntity);
+    actionApplyScale->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionApplyTransformation->setEnabled(atLeastOneEntity);
     actionComputeOctree->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionComputeNormals->setEnabled(atLeastOneCloud || atLeastOneMesh);
@@ -8366,6 +8470,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionAccurateDensity->setEnabled(atLeastOneCloud);
     actionCurvature->setEnabled(atLeastOneCloud);
     actionRoughness->setEnabled(atLeastOneCloud);
+	actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);
     actionFitPlane->setEnabled(atLeastOneEntity);
     actionFitFacet->setEnabled(atLeastOneEntity);
 	actionSNETest->setEnabled(atLeastOneCloud);

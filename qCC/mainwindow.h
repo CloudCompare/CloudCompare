@@ -269,6 +269,7 @@ protected slots:
     void doComputeCurvature();
     void doActionSFGradient();
     void doComputeRoughness();
+    void doRemoveDuplicatePoints();
 	void doSphericalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
 	void doCylindricalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
 	void doActionFitPlane();
@@ -313,7 +314,7 @@ protected slots:
     void doActionDeleteAllSF();
     void doActionKMeans();
     void doActionFrontPropagation();
-    void doActionMultiply();
+    void doActionApplyScale();
 	void doActionEditGlobalShift();
 	void doActionEditGlobalScale();
     void doActionMatchBarycenters();

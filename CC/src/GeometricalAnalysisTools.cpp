@@ -26,6 +26,7 @@
 #include "DistanceComputationTools.h"
 #include "DgmOctreeReferenceCloud.h"
 #include "ScalarField.h"
+#include "ScalarFieldTools.h"
 
 //system
 #include <assert.h>
@@ -175,6 +176,107 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 		}
 
 		cell.points->setPointScalarValue(i,curv);
+
+		if (nProgress && !nProgress->oneStep())
+			return false;
+	}
+
+	return true;
+}
+
+int GeometricalAnalysisTools::flagDuplicatePoints(	GenericIndexedCloudPersist* theCloud,
+													PointCoordinateType maxDistBetweenPoints/*=1.0e-8*/,
+													GenericProgressCallback* progressCb/*=0*/,
+													DgmOctree* inputOctree/*=0*/)
+{
+	if (!theCloud)
+        return -1;
+
+	unsigned numberOfPoints = theCloud->size();
+	if (numberOfPoints <= 1)
+        return -2;
+
+	DgmOctree* theOctree = inputOctree;
+	if (!theOctree)
+	{
+		theOctree = new DgmOctree(theCloud);
+		if (theOctree->build(progressCb)<1)
+		{
+			delete theOctree;
+			return -3;
+		}
+	}
+
+	theCloud->enableScalarField();
+	//set all flags to 0 by default
+	theCloud->forEach(CCLib::ScalarFieldTools::SetScalarValueToZero);
+
+	unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(maxDistBetweenPoints);
+
+	//parameters
+	void* additionalParameters[1] = { static_cast<void*>(&maxDistBetweenPoints) };
+
+	int result = 0;
+
+	//doesn't work in parallel!
+	if (theOctree->executeFunctionForAllCellsAtLevel(	level,
+														&flagDuplicatePointsInACellAtLevel,
+														additionalParameters,
+														progressCb,
+														"Flag duplicate points") == 0)
+	{
+		//something went wrong
+		result = -4;
+	}
+
+	if (!inputOctree)
+        delete theOctree;
+
+	return result;
+}
+
+//"PER-CELL" METHOD: FLAG DUPLICATE POINTS
+//ADDITIONAL PARAMETERS (1):
+// [0] -> (double*) maxSquareDistBetweenPoints: max square distance between points
+bool GeometricalAnalysisTools::flagDuplicatePointsInACellAtLevel(const DgmOctree::octreeCell& cell,
+																		void** additionalParameters,
+																		NormalizedProgress* nProgress/*=0*/)
+{
+	//parameter(s)
+	PointCoordinateType maxDistBetweenPoints = *static_cast<PointCoordinateType*>(additionalParameters[0]);
+
+	//structure for nearest neighbors search
+	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
+	nNSS.level = cell.level;
+	nNSS.prepare(maxDistBetweenPoints,cell.parentOctree->getCellSize(nNSS.level));
+	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
+	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
+
+	unsigned n = cell.points->size(); //number of points in the current cell
+	
+	//for each point in the cell
+	for (unsigned i=0; i<n; ++i)
+	{
+		//don't process points already flagged as 'duplicate'
+		if (cell.points->getPointScalarValue(i) == 0)
+		{
+			cell.points->getPoint(i,nNSS.queryPoint);
+
+			//look for neighbors in a sphere
+			unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,maxDistBetweenPoints,false);
+			if (neighborCount > 1) //the point itslef lies in the neighborhood
+			{
+				unsigned iIndex = cell.points->getPointGlobalIndex(i);
+				for (unsigned j=0; j<nNSS.pointsInNeighbourhood.size(); ++j)
+				{
+					if (nNSS.pointsInNeighbourhood[j].pointIndex != iIndex)
+					{
+						//flag this point as 'duplicate'
+						cell.points->getAssociatedCloud()->setPointScalarValue(nNSS.pointsInNeighbourhood[j].pointIndex,static_cast<ScalarType>(1));
+					}
+				}
+			}
+		}
 
 		if (nProgress && !nProgress->oneStep())
 			return false;

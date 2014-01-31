@@ -492,7 +492,7 @@ public:
 		\param level the level of subdivision
 		\return the highest cell position along X,Y and Z for a given level of subdivision
 	**/
-	inline const int* getMaxFillIndexes(uchar level) const { return m_fillIndexes+6*level+3; }
+	inline const int* getMaxFillIndexes(uchar level) const { return getMinFillIndexes(level)+3; }
 
 	//! Returns the octree cells length for a given level of subdivision
 	/** As the octree is cubical, cells are cubical.
@@ -648,26 +648,72 @@ public:
 											NeighboursSet& neighbours,
 											unsigned char level) const;
 
+	//! Input/output parameters structure for getPointsInCylindricalNeighbourhood
+	struct CylindricalNeighbourhood
+	{
+		//! Cylinder center
+		CCVector3 center;
+		//! Cylinder axis (direction)
+		CCVector3 dir;
+		//! Cylinder radius
+		PointCoordinateType radius;
+		//! Cylinder (half) length
+		PointCoordinateType maxHalfLength;
+		//! Neighbour points falling inside the sphere
+		NeighboursSet neighbours;
+		//! subdivision level at which to apply the extraction process
+		unsigned char level;
+
+		//! Default constructor
+		CylindricalNeighbourhood()
+			: center(0,0,0)
+			, dir(0,0,1)
+			, radius(0)
+			, maxHalfLength(0)
+			, level(0)
+		{}
+	};
+
 	//! Returns the points falling inside a cylinder
 	/** Use findBestLevelForAGivenNeighbourhoodSizeExtraction to get the right
 		value for 'level' (only once as it only depends on the radius value ;).
 		\warning the 'squareDist' field of each neighbour in the NeighboursSet
 		structure is in fact the signed distance (not squared) of the point
 		relatively to the cylinder's center and projected along its axis.
-		\param cylinderCenter center
-		\param cylinderDir cylinder direction
-		\param radius radius
-		\param halfLength half length (or height ;)
-		\param[out] neighbours points falling inside the sphere
-		\param level subdivision level at which to apply the extraction process
+		\param params input/output parameters structure
 		\return the number of extracted points
 	**/
-	int getPointsInCylindricalNeighbourhood(const CCVector3& cylinderCenter,
-											const CCVector3& cylinderDir,
-											PointCoordinateType radius,
-											PointCoordinateType halfLength,
-											NeighboursSet& neighbours,
-											unsigned char level/*=0*/) const;
+	size_t getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& params) const;
+
+	//! Input/output parameters structure for getPointsInCylindricalNeighbourhoodProgressive
+	struct ProgressiveCylindricalNeighbourhood : CylindricalNeighbourhood
+	{
+		//! Current search depth
+		PointCoordinateType currentHalfLength;
+		//! Vector to store potential candidates for the next pass
+		/** Candidates are points close enough to the cylinder's axis but too far
+			from its actual center.
+		**/
+		NeighboursSet potentialCandidates;
+		//! Previous search box (min corner)
+		Vector3Tpl<int> prevMinCornerPos;
+		//! Previous search box (max corner)
+		Vector3Tpl<int> prevMaxCornerPos;
+
+		ProgressiveCylindricalNeighbourhood()
+			: CylindricalNeighbourhood()
+			, currentHalfLength(0)
+			, prevMinCornerPos(-1,-1,-1)
+			, prevMaxCornerPos(0,0,0)
+		{}
+
+	};
+
+	//! Same as getPointsInCylindricalNeighbourhood with progressive approach
+	/** Can be called multiple times (the 'currentHalfLength' parameter will increase
+		each time until 'maxHalfLength' is reached).
+	**/
+	size_t getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCylindricalNeighbourhood& params) const;
 
 	/***** CELLS POSITION HANDLING *****/
 

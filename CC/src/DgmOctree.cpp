@@ -1850,43 +1850,29 @@ int DgmOctree::getPointsInSphericalNeighbourhood(	const CCVector3& sphereCenter,
 	return static_cast<int>(neighbours.size());
 }
 
-int DgmOctree::getPointsInCylindricalNeighbourhood(	const CCVector3& cylinderCenter,
-													const CCVector3& cylinderDir,
-													PointCoordinateType radius,
-													PointCoordinateType halfLength,
-													NeighboursSet& neighbours,
-													unsigned char level/*=0*/) const
+size_t DgmOctree::getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& params) const
 {
 	//cell size
-	const PointCoordinateType& cs = getCellSize(level);
+	const PointCoordinateType& cs = getCellSize(params.level);
 	PointCoordinateType halfCellSize = cs/2;
 
 	//squared radius
-	PointCoordinateType squareRadius = radius * radius;
+	PointCoordinateType squareRadius = params.radius * params.radius;
 	//constant value for cell/sphere inclusion test
-	PointCoordinateType maxDiagFactor = squareRadius + static_cast<PointCoordinateType>((0.75*cs + SQRT_3*radius)*cs);
-	PointCoordinateType maxLengthFactor = halfLength + static_cast<PointCoordinateType>(cs*SQRT_3/2);
-
-	//main cylinder direction
-	unsigned char Z = 0;
-	if (fabs(cylinderDir.y) > fabs(cylinderDir.x))
-		Z = 1;
-	if (fabs(cylinderDir.z) > fabs(cylinderDir.u[Z]))
-		Z = 2;
-	unsigned char X = Z == 2 ? 0 : Z+1;
-	unsigned char Y = X == 2 ? 0 : X+1;
+	PointCoordinateType maxDiagFactor = squareRadius + static_cast<PointCoordinateType>((0.75*cs + SQRT_3*params.radius)*cs);
+	PointCoordinateType maxLengthFactor = params.maxHalfLength + static_cast<PointCoordinateType>(cs*SQRT_3/2);
 
 	//we are going to test all the cells that may intersect this cylinder
 	//dumb bounding-box estimation: place two spheres at the ends of the cylinder
 	CCVector3 minCorner;
 	CCVector3 maxCorner;
 	{
-		CCVector3 C1 = cylinderCenter + cylinderDir * halfLength;
-		CCVector3 C2 = cylinderCenter - cylinderDir * halfLength;
-		CCVector3 corner1 = C1 - CCVector3(radius,radius,radius);
-		CCVector3 corner2 = C1 + CCVector3(radius,radius,radius);
-		CCVector3 corner3 = C2 - CCVector3(radius,radius,radius);
-		CCVector3 corner4 = C2 + CCVector3(radius,radius,radius);
+		CCVector3 C1 = params.center + params.dir * params.maxHalfLength;
+		CCVector3 C2 = params.center - params.dir * params.maxHalfLength;
+		CCVector3 corner1 = C1 - CCVector3(params.radius,params.radius,params.radius);
+		CCVector3 corner2 = C1 + CCVector3(params.radius,params.radius,params.radius);
+		CCVector3 corner3 = C2 - CCVector3(params.radius,params.radius,params.radius);
+		CCVector3 corner4 = C2 + CCVector3(params.radius,params.radius,params.radius);
 
 		minCorner.x = std::min(std::min(corner1.x,corner2.x),std::min(corner3.x,corner4.x));
 		minCorner.y = std::min(std::min(corner1.y,corner2.y),std::min(corner3.y,corner4.y));
@@ -1898,49 +1884,50 @@ int DgmOctree::getPointsInCylindricalNeighbourhood(	const CCVector3& cylinderCen
 	}
 
 	int cornerPos[3];
-	getTheCellPosWhichIncludesThePoint(&minCorner, cornerPos, level);
+	getTheCellPosWhichIncludesThePoint(&minCorner, cornerPos, params.level);
+
+	const int* minFillIndexes = getMinFillIndexes(params.level);
+	const int* maxFillIndexes = getMaxFillIndexes(params.level);
 
 	//don't need to look outside the octree limits!
-	cornerPos[0] = std::max<int>(cornerPos[0],0);
-	cornerPos[1] = std::max<int>(cornerPos[1],0);
-	cornerPos[2] = std::max<int>(cornerPos[2],0);
+	cornerPos[0] = std::max<int>(cornerPos[0],minFillIndexes[0]);
+	cornerPos[1] = std::max<int>(cornerPos[1],minFillIndexes[1]);
+	cornerPos[2] = std::max<int>(cornerPos[2],minFillIndexes[2]);
 
 	//corresponding cell limits
 	CCVector3 boxMin(	m_dimMin[0] + cs*static_cast<PointCoordinateType>(cornerPos[0]),
 						m_dimMin[1] + cs*static_cast<PointCoordinateType>(cornerPos[1]),
 						m_dimMin[2] + cs*static_cast<PointCoordinateType>(cornerPos[2]) );
 
-	//max number of cells for this dimension
-	int maxCellCount = OCTREE_LENGTH(level);
 	//binary shift for cell code truncation
-	uchar bitDec = GET_BIT_SHIFT(level);
+	uchar bitDec = GET_BIT_SHIFT(params.level);
 
 	CCVector3 cellMin = boxMin;
 	int cellPos[3] = { cornerPos[0], 0, 0 };
-	while (cellMin.x < maxCorner.x && cellPos[0] < maxCellCount)
+	while (cellMin.x < maxCorner.x && cellPos[0] <= maxFillIndexes[0])
 	{
 		CCVector3 cellCenter(cellMin.x + halfCellSize, 0, 0);
 
 		cellMin.y = boxMin.y;
 		cellPos[1] = cornerPos[1];
-		while (cellMin.y < maxCorner.y && cellPos[1] < maxCellCount)
+		while (cellMin.y < maxCorner.y && cellPos[1] <= maxFillIndexes[1])
 		{
 			cellCenter.y = cellMin.y + halfCellSize;
 
 			cellMin.z = boxMin.z;
 			cellPos[2] = cornerPos[2];
-			while (cellMin.z < maxCorner.z && cellPos[2] < maxCellCount)
+			while (cellMin.z < maxCorner.z && cellPos[2] <= maxFillIndexes[2])
 			{
 				cellCenter.z = cellMin.z + halfCellSize;
 				//test this cell
 				//1st test: is it close enough to the cylinder axis?
-				CCVector3 OC = (cellCenter - cylinderCenter);
-				PointCoordinateType dot = OC.dot(cylinderDir);
-				PointCoordinateType d2 = (OC - cylinderDir * dot).norm2();
+				CCVector3 OC = (cellCenter - params.center);
+				PointCoordinateType dot = OC.dot(params.dir);
+				PointCoordinateType d2 = (OC - params.dir * dot).norm2();
 				if (d2 <= maxDiagFactor && fabs(dot) <= maxLengthFactor) //otherwise cell is totally outside
 				{
 					//2nd test: does this cell exists?
-					OctreeCellCodeType truncatedCellCode = generateTruncatedCellCode(cellPos,level);
+					OctreeCellCodeType truncatedCellCode = generateTruncatedCellCode(cellPos,params.level);
 					unsigned cellIndex = getCellIndex(truncatedCellCode,bitDec);
 
 					//if yes get the corresponding points
@@ -1956,12 +1943,12 @@ int DgmOctree::getPointsInCylindricalNeighbourhood(	const CCVector3& cylinderCen
 							const CCVector3* P = m_theAssociatedCloud->getPoint(p->theIndex);
 
 							//we keep the points falling inside the sphere
-							CCVector3 OP = (*P - cylinderCenter);
-							dot = OP.dot(cylinderDir);
-							d2 = (OP - cylinderDir * dot).norm2();
-							if (d2 <= squareRadius && fabs(dot) <= halfLength)
+							CCVector3 OP = (*P - params.center);
+							dot = OP.dot(params.dir);
+							d2 = (OP - params.dir * dot).norm2();
+							if (d2 <= squareRadius && fabs(dot) <= params.maxHalfLength)
 							{
-								neighbours.push_back(PointDescriptor(P,p->theIndex,dot)); //we save the distance relatively to the center projected on the axis!
+								params.neighbours.push_back(PointDescriptor(P,p->theIndex,dot)); //we save the distance relatively to the center projected on the axis!
 							}
 						}
 					}
@@ -1982,7 +1969,175 @@ int DgmOctree::getPointsInCylindricalNeighbourhood(	const CCVector3& cylinderCen
 		++cellPos[0];
 	}
 
-	return static_cast<int>(neighbours.size());
+	return params.neighbours.size();
+}
+
+size_t DgmOctree::getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCylindricalNeighbourhood& params) const
+{
+	//cell size
+	const PointCoordinateType& cs = getCellSize(params.level);
+	PointCoordinateType halfCellSize = cs/2;
+
+	//squared radius
+	PointCoordinateType squareRadius = params.radius * params.radius;
+	//constant value for cell/sphere inclusion test
+	PointCoordinateType maxDiagFactor = squareRadius + static_cast<PointCoordinateType>((0.75*cs + SQRT_3*params.radius)*cs);
+	PointCoordinateType maxLengthFactor = params.maxHalfLength + static_cast<PointCoordinateType>(cs*SQRT_3/2);
+
+	//increase the search cylinder's height
+	params.currentHalfLength += params.radius;
+
+	//no need to chop the max cylinder if the parts are too small!
+	//(takes also into account any 'overflow' above maxHalfLength ;)
+	if (params.maxHalfLength-params.currentHalfLength < params.radius/2)
+		params.currentHalfLength = params.maxHalfLength;
+
+	//first process potential candidates from the previous pass
+	{
+		for (size_t k=0; k<params.potentialCandidates.size(); /*++k*/)
+		{
+			//potentialCandidates[k].squareDist = 'dot'
+			if (fabs(params.potentialCandidates[k].squareDist) <= params.currentHalfLength)
+			{
+				params.neighbours.push_back(params.potentialCandidates[k]);
+				//and remove it from the potential list
+				std::swap(params.potentialCandidates[k],params.potentialCandidates.back());
+				params.potentialCandidates.pop_back();
+			}
+			else
+			{
+				++k;
+			}
+		}
+	}
+
+	//we are going to test all the cells that may intersect this cylinder
+	//dumb bounding-box estimation: place two spheres at the ends of the cylinder
+	CCVector3 minCorner;
+	CCVector3 maxCorner;
+	{
+		CCVector3 C1 = params.center + params.dir * params.currentHalfLength;
+		CCVector3 C2 = params.center - params.dir * params.currentHalfLength;
+		CCVector3 corner1 = C1 - CCVector3(params.radius,params.radius,params.radius);
+		CCVector3 corner2 = C1 + CCVector3(params.radius,params.radius,params.radius);
+		CCVector3 corner3 = C2 - CCVector3(params.radius,params.radius,params.radius);
+		CCVector3 corner4 = C2 + CCVector3(params.radius,params.radius,params.radius);
+
+		minCorner.x = std::min(std::min(corner1.x,corner2.x),std::min(corner3.x,corner4.x));
+		minCorner.y = std::min(std::min(corner1.y,corner2.y),std::min(corner3.y,corner4.y));
+		minCorner.z = std::min(std::min(corner1.z,corner2.z),std::min(corner3.z,corner4.z));
+
+		maxCorner.x = std::max(std::max(corner1.x,corner2.x),std::max(corner3.x,corner4.x));
+		maxCorner.y = std::max(std::max(corner1.y,corner2.y),std::max(corner3.y,corner4.y));
+		maxCorner.z = std::max(std::max(corner1.z,corner2.z),std::max(corner3.z,corner4.z));
+	}
+
+	Vector3Tpl<int> cornerPos;
+	getTheCellPosWhichIncludesThePoint(&minCorner, cornerPos.u, params.level);
+
+	const int* minFillIndexes = getMinFillIndexes(params.level);
+	const int* maxFillIndexes = getMaxFillIndexes(params.level);
+
+	//don't need to look outside the octree limits!
+	cornerPos[0] = std::max<int>(cornerPos[0],minFillIndexes[0]);
+	cornerPos[1] = std::max<int>(cornerPos[1],minFillIndexes[1]);
+	cornerPos[2] = std::max<int>(cornerPos[2],minFillIndexes[2]);
+
+	//corresponding cell limits
+	CCVector3 boxMin(	m_dimMin[0] + cs*static_cast<PointCoordinateType>(cornerPos[0]),
+						m_dimMin[1] + cs*static_cast<PointCoordinateType>(cornerPos[1]),
+						m_dimMin[2] + cs*static_cast<PointCoordinateType>(cornerPos[2]) );
+
+	//binary shift for cell code truncation
+	uchar bitDec = GET_BIT_SHIFT(params.level);
+
+	Vector3Tpl<int> cellPos(cornerPos.u[0],0,0);
+	CCVector3 cellMin = boxMin;
+	while (cellMin.x < maxCorner.x && cellPos[0] <= maxFillIndexes[0])
+	{
+		CCVector3 cellCenter(cellMin.x + halfCellSize, 0, 0);
+
+		cellMin.y = boxMin.y;
+		cellPos[1] = cornerPos[1];
+		while (cellMin.y < maxCorner.y && cellPos[1] <= maxFillIndexes[1])
+		{
+			cellCenter.y = cellMin.y + halfCellSize;
+
+			cellMin.z = boxMin.z;
+			cellPos[2] = cornerPos[2];
+			while (cellMin.z < maxCorner.z && cellPos[2] <= maxFillIndexes[2])
+			{
+				cellCenter.z = cellMin.z + halfCellSize;
+
+				//don't test already tested cells!
+				if (	cellPos.x < params.prevMinCornerPos.x || cellPos.x >= params.prevMaxCornerPos.x
+					||	cellPos.y < params.prevMinCornerPos.y || cellPos.y >= params.prevMaxCornerPos.y
+					||	cellPos.z < params.prevMinCornerPos.z || cellPos.z >= params.prevMaxCornerPos.z )
+				{
+					//test this cell
+					//1st test: is it close enough to the cylinder axis?
+					CCVector3 OC = (cellCenter - params.center);
+					PointCoordinateType dot = OC.dot(params.dir);
+					PointCoordinateType d2 = (OC - params.dir * dot).norm2();
+					if (d2 <= maxDiagFactor && fabs(dot) <= maxLengthFactor) //otherwise cell is totally outside
+					{
+						//2nd test: does this cell exists?
+						OctreeCellCodeType truncatedCellCode = generateTruncatedCellCode(cellPos.u,params.level);
+						unsigned cellIndex = getCellIndex(truncatedCellCode,bitDec);
+
+						//if yes get the corresponding points
+						if (cellIndex < m_numberOfProjectedPoints)
+						{
+							//we look for the first index in 'm_thePointsAndTheirCellCodes' corresponding to this cell
+							cellsContainer::const_iterator p = m_thePointsAndTheirCellCodes.begin()+cellIndex;
+							OctreeCellCodeType searchCode = (p->theCode >> bitDec);
+
+							//while the (partial) cell code matches this cell
+							for ( ; (p != m_thePointsAndTheirCellCodes.end()) && ((p->theCode >> bitDec) == searchCode); ++p)
+							{
+								const CCVector3* P = m_theAssociatedCloud->getPoint(p->theIndex);
+
+								//we keep the points falling inside the sphere
+								CCVector3 OP = (*P - params.center);
+								dot = OP.dot(params.dir);
+								d2 = (OP - params.dir * dot).norm2();
+								if (d2 <= squareRadius)
+								{
+									//potential candidate?
+									if (fabs(dot) <= params.currentHalfLength)
+									{
+										params.neighbours.push_back(PointDescriptor(P,p->theIndex,dot)); //we save the distance relatively to the center projected on the axis!
+									}
+									else if (params.currentHalfLength < params.maxHalfLength)
+									{
+										//we still keep it in the 'potential candidates' list
+										params.potentialCandidates.push_back(PointDescriptor(P,p->theIndex,dot)); //we save the distance relatively to the center projected on the axis!
+									}
+								}
+							}
+						}
+					}
+				}
+
+				//next cell
+				cellMin.z += cs;
+				++cellPos[2];
+			}
+
+			//next cell
+			cellMin.y += cs;
+			++cellPos[1];
+		}
+
+		//next cell
+		cellMin.x += cs;
+		++cellPos[0];
+	}
+
+	params.prevMinCornerPos = cornerPos;
+	params.prevMaxCornerPos = cellPos;
+
+	return params.neighbours.size();
 }
 
 #ifdef THIS_CODE_IS_DEPREACTED

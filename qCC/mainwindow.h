@@ -134,10 +134,11 @@ public:
     /*** CCLib "standalone" algorithms ***/
 	
 	//CCLib algorithms handled by the 'ApplyCCLibAlgortihm' method
-	enum CC_LIB_ALGORITHM { CCLIB_ALGO_DENSITY      = 0,
-							CCLIB_ALGO_CURVATURE    = 1,
-							CCLIB_ALGO_SF_GRADIENT  = 2,
-							CCLIB_ALGO_ROUGHNESS    = 3,
+	enum CC_LIB_ALGORITHM { CCLIB_ALGO_CURVATURE		= 1,
+							CCLIB_ALGO_SF_GRADIENT		= 2,
+							CCLIB_ALGO_ROUGHNESS		= 3,
+							CCLIB_ALGO_APPROX_DENSITY	= 4,
+							CCLIB_ALGO_ACCURATE_DENSITY	= 5,
 							CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST = 255,
 	};
 
@@ -263,7 +264,8 @@ protected slots:
     void doActionAddIdField();
 	void doActionSetSFAsCoord();
 
-	void doComputeDensity();
+	void doComputeApproximateDensity();
+	void doComputeAccurateDensity();
     void doComputeCurvature();
     void doActionSFGradient();
     void doComputeRoughness();

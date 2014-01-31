@@ -44,7 +44,7 @@ class GeometricalAnalysisTools : public CCToolbox
 public:
 
 	//! Computes the local curvature
-    /** Warning: this method assumes the input scalar field is different from output.
+    /** \warning this method assumes the input scalar field is different from output.
         \param theCloud processed cloud
         \param cType curvature type
         \param kernelRadius neighbouring sphere radius
@@ -52,31 +52,55 @@ public:
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
     **/
-	static int computeCurvature(GenericIndexedCloudPersist* theCloud, Neighbourhood::CC_CURVATURE_TYPE cType, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb=0, DgmOctree* inputOctree=0);
+	static int computeCurvature(GenericIndexedCloudPersist* theCloud,
+								Neighbourhood::CC_CURVATURE_TYPE cType,
+								PointCoordinateType kernelRadius,
+								GenericProgressCallback* progressCb = 0,
+								DgmOctree* inputOctree = 0);
 
-	//! Computes the local density
-    /** Warning: this method assumes the input scalar field is different from output.
+	//! Computes the local density (approximate)
+    /** Old method (based only on the distance to the nearest neighbor)
+		\warning this method assumes the input scalar field is different from output.
         \param theCloud processed cloud
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
     **/
-	static int computeLocalDensity(GenericIndexedCloudPersist* theCloud, GenericProgressCallback* progressCb=0, DgmOctree* inputOctree=0);
+	static int computeLocalDensityApprox(	GenericIndexedCloudPersist* theCloud,
+											GenericProgressCallback* progressCb = 0,
+											DgmOctree* inputOctree = 0);
 
-	//! Computes the local roughness
-	/** Roughness is defined as the distance to the locally (least square) fitted plane.
-        LS plane is computed with all neighbour points inside a sphere.
-        Warning: this method assumes the input scalar field is different from output.
+	//! Computes the local density (at a given scale)
+    /** Simply counts the number of points falling inside a sphere around each point
+		\warning this method assumes the input scalar field is different from output.
         \param theCloud processed cloud
         \param kernelRadius neighbouring sphere radius
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
     **/
-	static int computeRoughness(GenericIndexedCloudPersist* theCloud, PointCoordinateType kernelRadius, GenericProgressCallback* progressCb=0, DgmOctree* inputOctree=0);
+	static int computeLocalDensity(	GenericIndexedCloudPersist* theCloud,
+									PointCoordinateType kernelRadius,
+									GenericProgressCallback* progressCb = 0,
+									DgmOctree* inputOctree = 0);
+
+	//! Computes the local roughness
+	/** Roughness is defined as the distance to the locally (least square) fitted plane.
+        LS plane is computed with all neighbour points inside a sphere.
+        \warning this method assumes the input scalar field is different from output.
+        \param theCloud processed cloud
+        \param kernelRadius neighbouring sphere radius
+		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
+		\param inputOctree if not set as input, octree will be automatically computed.
+		\return success (0) or error code (<0)
+    **/
+	static int computeRoughness(GenericIndexedCloudPersist* theCloud,
+								PointCoordinateType kernelRadius,
+								GenericProgressCallback* progressCb = 0,
+								DgmOctree* inputOctree = 0);
 
 	//! Computes the gravity center of a point cloud
-	/** WARNING: this method uses the cloud global iterator
+	/** \warning this method uses the cloud global iterator
 		\param theCloud cloud
 		\return gravity center
 	**/
@@ -85,22 +109,22 @@ public:
 	//! Computes the cross covariance matrix between two clouds (same size)
 	/** Used in the ICP algorithm between the cloud to register and the "Closest Points Set"
 		determined from the reference cloud.
-		WARNING: this method uses the clouds global iterators
+		\warning this method uses the clouds global iterators
 		\param P the cloud to register
 		\param Q the "Closest Point Set"
 		\param pGravityCenter if available, the gravity center of P
 		\param qGravityCenter if available, the gravity center of Q
 		\return cross covariance matrix
 	**/
-	static SquareMatrixd computeCrossCovarianceMatrix(GenericCloud* P,
-																GenericCloud* Q,
-																const PointCoordinateType* pGravityCenter=0,
-																const PointCoordinateType* qGravityCenter=0);
+	static SquareMatrixd computeCrossCovarianceMatrix(	GenericCloud* P,
+														GenericCloud* Q,
+														const PointCoordinateType* pGravityCenter = 0,
+														const PointCoordinateType* qGravityCenter = 0);
 	
 	//! Computes the cross covariance matrix between two clouds (same size) - weighted version
 	/** Used in the ICP algorithm between the cloud to register and the "Closest Points Set"
 		determined from the reference cloud.
-		WARNING: this method uses the clouds global iterators
+		\warning this method uses the clouds global iterators
 		\param P the cloud to register
 		\param Q the "Closest Point Set"
 		\param pGravityCenter if available, the gravity center of P
@@ -109,20 +133,21 @@ public:
 		\param weightsQ weights for the points of Q (optional)
 		\return weighted cross covariance matrix
 	**/
-	static SquareMatrixd computeWeightedCrossCovarianceMatrix(GenericCloud* P,
-																		GenericCloud* Q,
-																		const PointCoordinateType* pGravityCenter=0,
-																		const PointCoordinateType* qGravityCenter=0,
-																		ScalarField* weightsP=0,
-																		ScalarField* weightsQ=0);
+	static SquareMatrixd computeWeightedCrossCovarianceMatrix(	GenericCloud* P,
+																GenericCloud* Q,
+																const PointCoordinateType* pGravityCenter = 0,
+																const PointCoordinateType* qGravityCenter = 0,
+																ScalarField* weightsP = 0,
+																ScalarField* weightsQ = 0);
 
 	//! Computes the covariance matrix of a clouds
-	/** WARNING: this method uses the cloud global iterator
+	/** \warning this method uses the cloud global iterator
 		\param theCloud point cloud
 		\param _gravityCenter if available, its gravity center
 		\return covariance matrix
 	**/
-	static CCLib::SquareMatrixd computeCovarianceMatrix(GenericCloud* theCloud, const PointCoordinateType* _gravityCenter=0);
+	static CCLib::SquareMatrixd computeCovarianceMatrix(GenericCloud* theCloud,
+														const PointCoordinateType* _gravityCenter = 0);
 
 protected:
 
@@ -134,6 +159,15 @@ protected:
 	static bool computeCellCurvatureAtLevel(const DgmOctree::octreeCell& cell,
 											void** additionalParameters,
 											NormalizedProgress* nProgress = 0);
+
+	//! Computes approximate point density inside a cell
+	/**	\param cell structure describing the cell on which processing is applied
+		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
+	**/
+	static bool computeApproxPointsDensityInACellAtLevel(	const DgmOctree::octreeCell& cell,
+															void** additionalParameters,
+															NormalizedProgress* nProgress = 0);
 
 	//! Computes point density inside a cell
 	/**	\param cell structure describing the cell on which processing is applied

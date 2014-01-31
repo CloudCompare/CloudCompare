@@ -34,7 +34,8 @@ static const char COMMAND_SILENT_MODE[]				= "SILENT";
 static const char COMMAND_OPEN[]					= "O";				//+file name
 static const char COMMAND_SUBSAMPLE[]				= "SS";				//+ method (RANDOM/SPATIAL/OCTREE) + parameter (resp. point count / spatial step / octree level)
 static const char COMMAND_CURVATURE[]				= "CURV";			//+ curvature type (MEAN/GAUSS) + 
-static const char COMMAND_DENSITY[]					= "DENSITY";		//
+static const char COMMAND_DENSITY[]					= "DENSITY";		//+ sphere radius
+static const char COMMAND_APPROX_DENSITY[]			= "APPROX_DENSITY";
 static const char COMMAND_SF_GRADIENT[]				= "SF_GRAD";
 static const char COMMAND_ROUGHNESS[]				= "ROUGH";
 static const char COMMAND_BUNDLER[]					= "BUNDLER_IMPORT"; //Import Bundler file + orthorectification
@@ -443,11 +444,11 @@ bool ccCommandLineParser::commandCurvature(QStringList& arguments, QDialog* pare
 	return true;
 }
 
-bool ccCommandLineParser::commandDensity(QStringList& arguments, QDialog* parent/*=0*/)
+bool ccCommandLineParser::commandApproxDensity(QStringList& arguments, QDialog* parent/*=0*/)
 {
-	Print("[DENSITY]");
+	Print("[APPROX DENSITY]");
 	if (m_clouds.empty())
-		return Error(QString("No point cloud on which to compute density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_DENSITY).arg(COMMAND_DENSITY));
+		return Error(QString("No point cloud on which to compute approx. density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_APPROX_DENSITY));
 
 	//Call MainWindow generic method
 	ccHObject::Container entities;
@@ -455,7 +456,45 @@ bool ccCommandLineParser::commandDensity(QStringList& arguments, QDialog* parent
 	for (unsigned i=0; i<m_clouds.size(); ++i)
 		entities[i] = m_clouds[i].pc;
 
-	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_DENSITY,entities,parent))
+	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_APPROX_DENSITY,entities,parent))
+	{
+		for (unsigned i=0;i<m_clouds.size();++i)
+		{
+			//save output
+			QString errorStr = Export2BIN(m_clouds[i],QString("APPROX_DENSITY"));
+			if (!errorStr.isEmpty())
+				return Error(errorStr);
+		}
+	}
+
+	return true;
+}
+
+bool ccCommandLineParser::commandDensity(QStringList& arguments, QDialog* parent/*=0*/)
+{
+	Print("[DENSITY]");
+
+	if (arguments.empty())
+		return Error(QString("Missing parameter: sphere radius after \"-%1\"").arg(COMMAND_DENSITY));
+
+	bool paramOk = false;
+	QString kernelStr = arguments.takeFirst();
+	PointCoordinateType kernelSize = static_cast<PointCoordinateType>(kernelStr.toDouble(&paramOk));
+	if (!paramOk)
+		return Error(QString("Failed to read a numerical parameter: sphere radius (after \"-%1\"). Got '%2' instead.").arg(COMMAND_DENSITY).arg(kernelStr));
+	Print(QString("\tSphere radius: %1").arg(kernelSize));
+
+	if (m_clouds.empty())
+		return Error(QString("No point cloud on which to compute density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_DENSITY));
+
+	//Call MainWindow generic method
+	void* additionalParameters[1] = {&kernelSize};
+	ccHObject::Container entities;
+	entities.resize(m_clouds.size());
+	for (unsigned i=0; i<m_clouds.size(); ++i)
+		entities[i] = m_clouds[i].pc;
+
+	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_ACCURATE_DENSITY,entities,parent,additionalParameters))
 	{
 		for (unsigned i=0;i<m_clouds.size();++i)
 		{

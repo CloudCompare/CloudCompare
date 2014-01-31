@@ -30,6 +30,7 @@
 #define CC_CHI2_DISTANCES_DEFAULT_SF_NAME "Chi2 distances"
 #define CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME "CC labels"
 #define CC_LOCAL_DENSITY_FIELD_NAME "Local density"
+#define CC_LOCAL_DENSITY_APPROX_FIELD_NAME "Local density (approx.)"
 #define CC_MEAN_CURVATURE_FIELD_NAME "Mean curvature"
 #define CC_ROUGHNESS_FIELD_NAME "Roughness"
 #define CC_GAUSSIAN_CURVATURE_FIELD_NAME "Gaussian curvature"

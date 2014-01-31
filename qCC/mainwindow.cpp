@@ -912,7 +912,8 @@ void MainWindow::connectActions()
     connect(actionFrontPropagation,             SIGNAL(triggered()),    this,       SLOT(doActionFrontPropagation()));
 	connect(actionCrossSection,					SIGNAL(triggered()),	this,		SLOT(activateClippingBoxMode()));
     //"Tools > Other" menu
-    connect(actionDensity,                      SIGNAL(triggered()),    this,       SLOT(doComputeDensity()));
+    connect(actionApproximateDensity,			SIGNAL(triggered()),    this,       SLOT(doComputeApproximateDensity()));
+    connect(actionAccurateDensity,				SIGNAL(triggered()),    this,       SLOT(doComputeAccurateDensity()));
     connect(actionCurvature,                    SIGNAL(triggered()),    this,       SLOT(doComputeCurvature()));
     connect(actionRoughness,                    SIGNAL(triggered()),    this,       SLOT(doComputeRoughness()));
     connect(actionFitPlane,						SIGNAL(triggered()),    this,       SLOT(doActionFitPlane()));
@@ -6821,9 +6822,17 @@ void MainWindow::doShowPrimitiveFactory()
 	m_pfDlg->show();
 }
 
-void MainWindow::doComputeDensity()
+void MainWindow::doComputeApproximateDensity()
 {
-	if (!ApplyCCLibAlgortihm(CCLIB_ALGO_DENSITY,m_selectedEntities,this))
+	if (!ApplyCCLibAlgortihm(CCLIB_ALGO_APPROX_DENSITY,m_selectedEntities,this))
+		return;
+    refreshAll();
+	updateUI();
+}
+
+void MainWindow::doComputeAccurateDensity()
+{
+	if (!ApplyCCLibAlgortihm(CCLIB_ALGO_ACCURATE_DENSITY,m_selectedEntities,this))
 		return;
     refreshAll();
 	updateUI();
@@ -6918,7 +6927,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 		QElapsedTimer subTimer;
 		subTimer.start();
 		unsigned long long extractedPoints = 0;
-		unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(radius));
+		unsigned char level = octree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(2.5*radius)); //2.5 = empirical
 		const unsigned samples = 1000;
 		for (unsigned j=0; j<samples; ++j)
 		{
@@ -6933,13 +6942,20 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 				rot.applyRotation(dir);
 			}
 			unsigned randIndex = (static_cast<unsigned>(static_cast<double>(rand())*static_cast<double>(ptsCount)/static_cast<double>(RAND_MAX)) % ptsCount);
-			CCLib::DgmOctree::NeighboursSet neighbours;
-			octree->getPointsInCylindricalNeighbourhood(*cloud->getPoint(randIndex),dir,static_cast<PointCoordinateType>(radius),static_cast<PointCoordinateType>(height/2),neighbours,level);
+
+			CCLib::DgmOctree::CylindricalNeighbourhood cn;
+			cn.center = *cloud->getPoint(randIndex);
+			cn.dir = dir;
+			cn.level = level;
+			cn.radius = static_cast<PointCoordinateType>(radius);
+			cn.maxHalfLength = static_cast<PointCoordinateType>(height/2);
+
+			octree->getPointsInCylindricalNeighbourhood(cn);
 			//octree->getPointsInSphericalNeighbourhood(*cloud->getPoint(randIndex),radius,neighbours,level);
-			size_t neihgboursCount = neighbours.size();
+			size_t neihgboursCount = cn.neighbours.size();
 			extractedPoints += static_cast<unsigned long long>(neihgboursCount);
 			for (size_t k=0; k<neihgboursCount; ++k)
-				cloud->setPointScalarValue(neighbours[k].pointIndex,sqrt(neighbours[k].squareDist));
+				cloud->setPointScalarValue(cn.neighbours[k].pointIndex,sqrt(cn.neighbours[k].squareDist));
 		}
 		ccConsole::Print("[CNE_TEST] Mean extraction time = %i ms (radius = %f, height = %f, mean(neighbours) = %3.1f)",subTimer.elapsed(),radius,height,static_cast<double>(extractedPoints)/static_cast<double>(samples));
 	}
@@ -6969,7 +6985,10 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
     //generic parameters
     QString sfName;
 
-    //curvature parameters
+    //computeDensity parameters
+    PointCoordinateType densityKernelSize = PC_ONE;
+
+	//curvature parameters
 	PointCoordinateType curvKernelSize = -PC_ONE;
 	CCLib::Neighbourhood::CC_CURVATURE_TYPE curvType = CCLib::Neighbourhood::GAUSSIAN_CURV;
 
@@ -6981,9 +7000,34 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 
     switch (algo)
     {
-        case CCLIB_ALGO_DENSITY:
+        case CCLIB_ALGO_APPROX_DENSITY:
 			{
-				sfName = CC_LOCAL_DENSITY_FIELD_NAME;
+				sfName = CC_LOCAL_DENSITY_APPROX_FIELD_NAME;
+			}
+			break;
+
+        case CCLIB_ALGO_ACCURATE_DENSITY:
+			{
+				//parameters already provided?
+				if (additionalParameters)
+				{
+					densityKernelSize = *static_cast<PointCoordinateType*>(additionalParameters[0]);
+				}
+				else //ask the user!
+				{
+					densityKernelSize = GetDefaultCloudKernelSize(entities)/4;
+					if (densityKernelSize < 0)
+					{
+						ccConsole::Error("Invalid kernel size!");
+						return false;
+					}
+					ccAskOneDoubleValueDlg dlg("Kernel size", DBL_MIN, DBL_MAX, static_cast<double>(densityKernelSize), 8, 0, 0);
+					if (!dlg.exec())
+						return false;
+					densityKernelSize = static_cast<PointCoordinateType>(dlg.dValueSpinBox->value());
+				}
+
+				sfName = QString("%1 (r=%2)").arg(CC_LOCAL_DENSITY_FIELD_NAME).arg(densityKernelSize);
 			}
 			break;
         
@@ -6992,15 +7036,15 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				//parameters already provided?
 				if (additionalParameters)
 				{
-					curvType = *(CCLib::Neighbourhood::CC_CURVATURE_TYPE*)additionalParameters[0];
-					curvKernelSize = *(PointCoordinateType*)additionalParameters[1];
+					curvType = *static_cast<CCLib::Neighbourhood::CC_CURVATURE_TYPE*>(additionalParameters[0]);
+					curvKernelSize = *static_cast<PointCoordinateType*>(additionalParameters[1]);
 				}
 				else //ask the user!
 				{
 					curvKernelSize = GetDefaultCloudKernelSize(entities);
 					if (curvKernelSize < 0)
 					{
-						ccConsole::Error("No elligible point cloud in selection!");
+						ccConsole::Error("Invalid kernel size!");
 						return false;
 					}
 					ccCurvatureDlg curvDlg(0);
@@ -7013,11 +7057,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 					curvKernelSize = static_cast<PointCoordinateType>(curvDlg.getKernelSize());
 				}
 
-				if (curvType == CCLib::Neighbourhood::MEAN_CURV)
-					sfName = QString(CC_MEAN_CURVATURE_FIELD_NAME);
-				else //if (curvType == CCLib::Neighbourhood::GAUSSIAN_CURV)
-					sfName = QString(CC_GAUSSIAN_CURVATURE_FIELD_NAME);
-				sfName += QString("(%1)").arg(curvKernelSize);
+				sfName = QString("%1 (%2)").arg(curvType == CCLib::Neighbourhood::MEAN_CURV ? CC_MEAN_CURVATURE_FIELD_NAME : CC_GAUSSIAN_CURVATURE_FIELD_NAME).arg(curvKernelSize);
 			}
             break;
 
@@ -7027,7 +7067,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				//parameters already provided?
 				if (additionalParameters)
 				{
-					euclidian = *(bool*)additionalParameters[0];
+					euclidian = *static_cast<bool*>(additionalParameters[0]);
 				}
 				else //ask the user!
 				{
@@ -7041,19 +7081,19 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
             break;
 
         case CCLIB_ALGO_ROUGHNESS:
-		case CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST:
+		case CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST: //for tests: we'll use the roughness kernel for SNE
             {
 				//parameters already provided?
 				if (additionalParameters)
 				{
-					roughnessKernelSize = *(PointCoordinateType*)additionalParameters[0];
+					roughnessKernelSize = *static_cast<PointCoordinateType*>(additionalParameters[0]);
 				}
 				else //ask the user!
 				{
 					roughnessKernelSize = GetDefaultCloudKernelSize(entities);
 					if (roughnessKernelSize < 0)
 					{
-						ccConsole::Error("No elligible point cloud in selection!");
+						ccConsole::Error("Invalid kernel size!");
 						return false;
 					}
 					ccAskOneDoubleValueDlg dlg("Kernel size", DBL_MIN, DBL_MAX, static_cast<double>(roughnessKernelSize), 8, 0, 0);
@@ -7084,7 +7124,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				if (lockedVertices)
 				{
 					DisplayLockedVerticesWarning();
-					cloud=0;
+					cloud = 0;
 				}
                 if (cloud)
                 {
@@ -7096,7 +7136,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                         int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
                         if (outSfIdx < 0)
                         {
-                            cloud=0;
+                            cloud = 0;
                         }
                         else
                         {
@@ -7110,7 +7150,8 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                     }
                 }
                 break;
-            //by default, we apply processings on clouds only
+            
+			//by default, we apply processings on clouds only
             default:
                 if (entities[i]->isKindOf(CC_POINT_CLOUD))
 					cloud = ccHObjectCaster::ToGenericPointCloud(entities[i]);
@@ -7156,19 +7197,35 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 			eTimer.start();
             switch(algo)
             {
-                case CCLIB_ALGO_DENSITY:
-                    result = CCLib::GeometricalAnalysisTools::computeLocalDensity(cloud,&pDlg,octree);
+                case CCLIB_ALGO_APPROX_DENSITY:
+                    result = CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(cloud,
+																						&pDlg,
+																						octree);
                     break;
-                case CCLIB_ALGO_CURVATURE:
-                    result = CCLib::GeometricalAnalysisTools::computeCurvature(cloud,
+				
+				case CCLIB_ALGO_ACCURATE_DENSITY:
+                    result = CCLib::GeometricalAnalysisTools::computeLocalDensity(	cloud,
+																					densityKernelSize,
+																					&pDlg,
+																					octree);
+                    break;
+				
+				case CCLIB_ALGO_CURVATURE:
+                    result = CCLib::GeometricalAnalysisTools::computeCurvature(	cloud,
                                                                                 curvType,
                                                                                 curvKernelSize,
                                                                                 &pDlg,
                                                                                 octree);
                     break;
-                case CCLIB_ALGO_SF_GRADIENT:
-                    result = CCLib::ScalarFieldTools::computeScalarFieldGradient(cloud,euclidian,false,&pDlg,octree);
+                
+				case CCLIB_ALGO_SF_GRADIENT:
+                    result = CCLib::ScalarFieldTools::computeScalarFieldGradient(	cloud,
+																					euclidian,
+																					false,
+																					&pDlg,
+																					octree);
 
+					//rename output scalar field
                     if (result == 0)
                     {
                         int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
@@ -7178,12 +7235,14 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                     }
                     //*/
                     break;
-                case CCLIB_ALGO_ROUGHNESS:
+
+				case CCLIB_ALGO_ROUGHNESS:
                     result = CCLib::GeometricalAnalysisTools::computeRoughness(cloud,
                                                                                 roughnessKernelSize,
                                                                                 &pDlg,
                                                                                 octree);
                     break;
+				
 				//TEST
 				case CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST:
 				{
@@ -8303,7 +8362,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionComputeMeshLS->setEnabled(atLeastOneCloud);
     //actionComputeQuadric3D->setEnabled(atLeastOneCloud);
     actionComputeBestFitBB->setEnabled(atLeastOneEntity);
-    actionDensity->setEnabled(atLeastOneCloud);
+    actionApproximateDensity->setEnabled(atLeastOneCloud);
+    actionAccurateDensity->setEnabled(atLeastOneCloud);
     actionCurvature->setEnabled(atLeastOneCloud);
     actionRoughness->setEnabled(atLeastOneCloud);
     actionFitPlane->setEnabled(atLeastOneEntity);

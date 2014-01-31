@@ -25,6 +25,7 @@ protected:
 	bool commandSubsample		(QStringList& arguments, ccProgressDialog* pDlg = 0);
 	bool commandCurvature		(QStringList& arguments, QDialog* parent = 0);
 	bool commandDensity			(QStringList& arguments, QDialog* parent = 0);
+	bool commandApproxDensity	(QStringList& arguments, QDialog* parent = 0);
 	bool commandSFGradient		(QStringList& arguments, QDialog* parent = 0);
 	bool commandRoughness		(QStringList& arguments, QDialog* parent = 0);
 	bool commandSampleMesh		(QStringList& arguments, ccProgressDialog* pDlg = 0);

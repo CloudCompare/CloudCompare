@@ -7,6 +7,12 @@ v2.5.3 ??/??/2014
 	* It can consumes a lot of memory but it works better on smooth shapes than the former
 		Fast-Marching based method (called "Resolve normals direction" and now renamed
 		"Edit > Normals > Orient > With Fast-Marching")
+- New method: "Tools > Other > Density > Accurate (at a given scale)"
+	* More accurate method to compute the local density (= number of points inside a sphere
+		around each point)
+	* The old version is now accessible via "Tools > Other > Density > Approximate (no parameter)"
+	* Command lines options have been changed accordingly
+		(see http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine)
 - Enhancement:
 	* The "Spatial sub-sampling tool has been (heavily) enhanced:
 		- about twice as fast

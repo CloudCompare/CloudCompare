@@ -342,7 +342,14 @@
      <property name="title">
       <string>Other</string>
      </property>
-     <addaction name="actionDensity"/>
+     <widget class="QMenu" name="menuDensity">
+      <property name="title">
+       <string>Density</string>
+      </property>
+      <addaction name="actionAccurateDensity"/>
+      <addaction name="actionApproximateDensity"/>
+     </widget>
+     <addaction name="menuDensity"/>
      <addaction name="actionCurvature"/>
      <addaction name="actionRoughness"/>
     </widget>
@@ -1872,11 +1879,6 @@
     <string>Pick several points (and export them to ASCII file, a new cloud, etc.)</string>
    </property>
   </action>
-  <action name="actionDensity">
-   <property name="text">
-    <string>Density</string>
-   </property>
-  </action>
   <action name="actionCurvature">
    <property name="text">
     <string>Curvature</string>
@@ -2406,6 +2408,16 @@
    </property>
    <property name="toolTip">
     <string>Cylindrical Neighbourhood Extraction test</string>
+   </property>
+  </action>
+  <action name="actionApproximateDensity">
+   <property name="text">
+    <string>Approximate (no parameter)</string>
+   </property>
+  </action>
+  <action name="actionAccurateDensity">
+   <property name="text">
+    <string>Accurate (at a given scale)</string>
    </property>
   </action>
  </widget>

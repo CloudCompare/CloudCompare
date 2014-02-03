@@ -170,6 +170,16 @@
          <string>- Barycenter</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>+ (0,0,0)</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>- (0,0,0)</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>

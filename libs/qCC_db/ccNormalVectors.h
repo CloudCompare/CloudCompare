@@ -92,7 +92,7 @@ public:
 	//! Updates normals orientation based on a preferred orientation
     /** \param theCloud point cloud on which to process the normals.
         \param theNormsCodes array in which the normals indexes are stored
-        \param preferedOrientation specifies a preferred orientation for normals (0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z, 6:+Barycenter, 7:-Barycenter)
+        \param preferedOrientation specifies a preferred orientation for normals (0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z, 6:+Barycenter, 7:-Barycenter, 8:+Zero, 9:-Zero)
 		\return success
     **/
 	static bool UpdateNormalOrientations(	ccGenericPointCloud* theCloud,

@@ -137,7 +137,7 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 {
     assert(theCloud);
 
-	if (preferedOrientation < 0 || preferedOrientation > 6)
+	if (preferedOrientation < 0 || preferedOrientation > 9)
 	{
 		ccLog::Warning(QString("[ccNormalVectors::UpdateNormalOrientations] Invalid parameter (prefered orientation = %1)").arg(preferedOrientation));
 		return false;
@@ -145,13 +145,25 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
     
 	//prefered orientation
 	CCVector3 orientation(0.0,0.0,0.0);
-	CCVector3 barycenter;
-	if (preferedOrientation<6) //6 and 7 = +/-barycenter
+	CCVector3 barycenter(0,0,0);
+	bool useBarycenter = false;
+	bool positiveSign = true;
+	if (preferedOrientation < 6) //0-5 = +/-X,Y,Z
+	{
 		orientation.u[preferedOrientation>>1]=((preferedOrientation & 1) == 0 ? PC_ONE : -PC_ONE); //odd number --> inverse direction
-	else
+	}
+	else if (preferedOrientation == 6 || preferedOrientation == 7) //+/-gravity center
 	{
 		barycenter = CCLib::GeometricalAnalysisTools::computeGravityCenter(theCloud);
 		ccLog::Print(QString("[ccNormalVectors::UpdateNormalOrientations] Barycenter: (%1,%2,%3)").arg(barycenter.x).arg(barycenter.y).arg(barycenter.z));
+		useBarycenter = true;
+		positiveSign = (preferedOrientation == 6);
+	}
+	else //if (preferedOrientation == 8 || preferedOrientation == 9) //+/-Zero
+	{
+		//barycenter = CCVector3(0,0,0);
+		useBarycenter = true;
+		positiveSign = (preferedOrientation == 8);
 	}
 
 	//we 'compress' each normal (and we check its orientation if necessary)
@@ -161,13 +173,16 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 		CCVector3 N(GetNormal(nCode));
 
 		//we check sign
-		if (preferedOrientation == 6)
+		if (useBarycenter)
 		{
-			orientation = *(theCloud->getPoint(i)) - barycenter;
-		}
-		else if (preferedOrientation == 7)
-		{
-			orientation = barycenter - *(theCloud->getPoint(i));
+			if (positiveSign)
+			{
+				orientation = *(theCloud->getPoint(i)) - barycenter;
+			}
+			else
+			{
+				orientation = barycenter - *(theCloud->getPoint(i));
+			}
 		}
 
 		if (N.dot(orientation) < 0)

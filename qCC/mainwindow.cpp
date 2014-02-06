@@ -3432,7 +3432,7 @@ void MainWindow::doActionRegister()
 		summary << rmsString;
 		summary << "----------------";
 
-        ccGLMatrix transMat(transform.R,transform.T, transform.s);
+        ccGLMatrix transMat(transform.R, transform.T, transform.s);
 
 		forceConsoleDisplay();
 

@@ -21,6 +21,7 @@
 //Local
 #include "CCToolbox.h"
 #include "Matrix.h"
+#include "CCConst.h"
 
 //System
 #include <vector>
@@ -66,7 +67,7 @@ public:
         PointCoordinateType s;
 
 		//! Default constructor
-        Transformation() : s((PointCoordinateType)1.0) {}
+        Transformation() : s(PC_ONE) {}
 	};
 
 	//! Develops a cylinder-shaped point cloud around its main axis

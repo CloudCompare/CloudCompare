@@ -98,7 +98,7 @@ ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T)
 {
     toIdentity();
 
-	if (R.size()==3)
+	if (R.isValid() && R.size() == 3)
 	{
 		//we copy each column
 		float* mat = m_mat;
@@ -118,7 +118,7 @@ ccGLMatrix::ccGLMatrix(const CCLib::SquareMatrix& R, const CCVector3& T, PointCo
 {
     toIdentity();
 
-    if (R.size() == 3)
+    if (R.isValid() && R.size() == 3)
     {
         //we copy each column
         float* mat = m_mat;

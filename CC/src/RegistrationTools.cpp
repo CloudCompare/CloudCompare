@@ -373,7 +373,10 @@ ICPRegistrationTools::CC_ICP_RESULT ICPRegistrationTools::RegisterClouds(Generic
 			    }
 
 				if (adjustScale)
+				{
                     transform.s *= currentTrans.s;
+					transform.T *= currentTrans.s;
+				}
 
 				transform.T += currentTrans.T;
             }
@@ -465,7 +468,7 @@ bool RegistrationTools::RegistrationProcedure(GenericCloud* P,
     //resulting transformation (R is invalid on initialization, T is (0,0,0) and s==1)
     trans.R.invalidate();
     trans.T = CCVector3(0,0,0);
-	trans.s = 1.0;
+	trans.s = PC_ONE;
 
 	if (P == 0 || X == 0 || P->size() != X->size() || P->size() < 3)
 		return false;

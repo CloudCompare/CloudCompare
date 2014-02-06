@@ -57,6 +57,7 @@ static const char COMMAND_FILTER_SF_BY_VALUE[]		= "FILTER_SF";
 static const char COMMAND_CLEAR_CLOUDS[]			= "CLEAR_CLOUDS";
 static const char COMMAND_CLEAR_MESHES[]			= "CLEAR_MESHES";
 static const char COMMAND_CLEAR[]					= "CLEAR";
+static const char COMMAND_BEST_FIT_PLANE[]			= "BEST_FIT_PLANE";
 
 bool IsCommand(const QString& token, const char* command)
 {
@@ -774,6 +775,56 @@ bool ccCommandLineParser::commandMergeClouds(QStringList& arguments)
 	//update the first one
 	m_clouds.front().basename += QString("_MERGED");
 	Export2BIN(m_clouds.front());
+
+	return true;
+}
+
+
+bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments, ccProgressDialog* pDlg/*=0*/)
+{
+	Print("[BEST FIT PLANE]");
+
+	//if (arguments.empty())
+	//	return Error(QString("Missing parameter: sampling mode after \"-%1\" (POINTS/DENSITY)").arg(COMMAND_SAMPLE_MESH));
+
+	//bool useDensity = false;
+	//double parameter = 0;
+
+	//QString sampleMode = arguments.takeFirst().toUpper();
+	//if (sampleMode == "POINTS")
+	//	useDensity = false;
+	//else if (sampleMode == "DENSITY")
+	//	useDensity = true;
+	//else
+	//	return Error(QString("Invalid parameter: unknown sampling mode \"%1\"").arg(sampleMode));
+
+	//if (arguments.empty())
+	//	return Error(QString("Missing parameter: value after sampling mode"));
+	//bool conversionOk = false;
+	//parameter = arguments.takeFirst().toDouble(&conversionOk);
+	//if (!conversionOk)
+	//	return Error(QString("Invalid parameter: value after sampling mode"));
+
+	//if (m_meshes.empty())
+	//	return Error(QString("No mesh available. Be sure to open one first!"));
+
+	//for (size_t i=0; i<m_meshes.size(); ++i)
+	//{
+
+	//	ccPointCloud* cloud = m_meshes[i].mesh->samplePoints(useDensity,parameter,true,true,true,pDlg);
+
+	//	if (!cloud)
+	//	{
+	//		return Error(QString("Cloud sampling failed!"));
+	//	}
+
+	//	//add the resulting cloud to the main set
+	//	Print(QString("Sampled cloud created: %1 points").arg(cloud->size()));
+	//	m_clouds.push_back(CloudDesc(cloud,m_meshes[i].basename+QString("_SAMPLED_POINTS"),m_meshes[i].path));
+
+	//	//save it as well
+	//	Export2BIN(m_clouds.back());
+	//}
 
 	return true;
 }

@@ -2,7 +2,7 @@
 //#                                                                        #
 //#                            CLOUDCOMPARE                                #
 //#                                                                        #
-//#  This project has been initated under funding from ANR/CIFRE           #
+//#  This project has been initiated under funding from ANR/CIFRE          #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -21,7 +21,7 @@
 #include "ccCommon.h"
 
 #define CC_VER_NUM 2.5
-#define CC_SUB_VER "3.beta(20140130)" //2013-12-21
+#define CC_SUB_VER "3.beta(20140206)" //2013-12-21
 
 //! Returns current version as string
 QString ccCommon::GetCCVersion()

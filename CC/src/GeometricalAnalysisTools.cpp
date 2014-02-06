@@ -141,6 +141,7 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		//look for neighbors in a sphere
+		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
 		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
 		//neighborCount = std::min(neighborCount,16);
 
@@ -185,7 +186,7 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 }
 
 int GeometricalAnalysisTools::flagDuplicatePoints(	GenericIndexedCloudPersist* theCloud,
-													PointCoordinateType maxDistBetweenPoints/*=1.0e-8*/,
+													double minDistanceBetweenPoints/*=1.0e-12*/,
 													GenericProgressCallback* progressCb/*=0*/,
 													DgmOctree* inputOctree/*=0*/)
 {
@@ -211,10 +212,10 @@ int GeometricalAnalysisTools::flagDuplicatePoints(	GenericIndexedCloudPersist* t
 	//set all flags to 0 by default
 	theCloud->forEach(CCLib::ScalarFieldTools::SetScalarValueToZero);
 
-	unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(maxDistBetweenPoints);
+	unsigned char level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(static_cast<PointCoordinateType>(minDistanceBetweenPoints));
 
 	//parameters
-	void* additionalParameters[1] = { static_cast<void*>(&maxDistBetweenPoints) };
+	void* additionalParameters[1] = { static_cast<void*>(&minDistanceBetweenPoints) };
 
 	int result = 0;
 
@@ -238,17 +239,17 @@ int GeometricalAnalysisTools::flagDuplicatePoints(	GenericIndexedCloudPersist* t
 //"PER-CELL" METHOD: FLAG DUPLICATE POINTS
 //ADDITIONAL PARAMETERS (1):
 // [0] -> (double*) maxSquareDistBetweenPoints: max square distance between points
-bool GeometricalAnalysisTools::flagDuplicatePointsInACellAtLevel(const DgmOctree::octreeCell& cell,
-																		void** additionalParameters,
-																		NormalizedProgress* nProgress/*=0*/)
+bool GeometricalAnalysisTools::flagDuplicatePointsInACellAtLevel(	const DgmOctree::octreeCell& cell,
+																	void** additionalParameters,
+																	NormalizedProgress* nProgress/*=0*/)
 {
 	//parameter(s)
-	PointCoordinateType maxDistBetweenPoints = *static_cast<PointCoordinateType*>(additionalParameters[0]);
+	double minDistBetweenPoints = *static_cast<double*>(additionalParameters[0]);
 
 	//structure for nearest neighbors search
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
 	nNSS.level = cell.level;
-	nNSS.prepare(maxDistBetweenPoints,cell.parentOctree->getCellSize(nNSS.level));
+	nNSS.prepare(static_cast<PointCoordinateType>(minDistBetweenPoints),cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
 
@@ -263,11 +264,12 @@ bool GeometricalAnalysisTools::flagDuplicatePointsInACellAtLevel(const DgmOctree
 			cell.points->getPoint(i,nNSS.queryPoint);
 
 			//look for neighbors in a sphere
-			unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,maxDistBetweenPoints,false);
-			if (neighborCount > 1) //the point itslef lies in the neighborhood
+			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
+			unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,minDistBetweenPoints,false);
+			if (neighborCount > 1) //the point itself lies in the neighborhood
 			{
 				unsigned iIndex = cell.points->getPointGlobalIndex(i);
-				for (unsigned j=0; j<nNSS.pointsInNeighbourhood.size(); ++j)
+				for (unsigned j=0; j<neighborCount; ++j)
 				{
 					if (nNSS.pointsInNeighbourhood[j].pointIndex != iIndex)
 					{
@@ -358,7 +360,7 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 		{
             //DGM: we consider that the point is alone in a sphere of radius R and volume V=(4*pi/3)*R^3
 			//So, the local density is ~1/V!
-            double R2 = static_cast<double>(nNSS.pointsInNeighbourhood[1].squareDist); //R2 in fact
+            double R2 = nNSS.pointsInNeighbourhood[1].squareDistd; //R2 in fact
 			if (R2 > ZERO_TOLERANCE)
 			{
 				double V = R2*sqrt(R2)*c_sphereVolumeCoef; //R^3 * (4*pi/3)
@@ -371,7 +373,7 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 		}
 		else
 		{
-			//shoudln't happen! Appart if the cloud has only one point...
+			//shouldn't happen! Apart if the cloud has only one point...
             cell.points->setPointScalarValue(i,NAN_VALUE);
 		}
 
@@ -467,6 +469,7 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctr
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		//look for neighbors inside a sphere
+		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
 		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
 
 		cell.points->setPointScalarValue(i,static_cast<ScalarType>(neighborCount)/volume);
@@ -554,6 +557,7 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		//look for neighbors in a sphere
+		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
 		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
 		if (neighborCount>2)
 		{

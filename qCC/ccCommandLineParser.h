@@ -34,6 +34,7 @@ protected:
 	bool commandFilterSFByValue	(QStringList& arguments);
 	bool commandMergeClouds		(QStringList& arguments);
 	bool commandStatTest		(QStringList& arguments, ccProgressDialog* pDlg = 0);
+	bool commandBestFitPlane	(QStringList& arguments, ccProgressDialog* pDlg = 0);
 
 protected:
 

@@ -67,13 +67,13 @@ const CCVector3* DgmOctreeReferenceCloud::getNextPoint()
 void DgmOctreeReferenceCloud::setPointScalarValue(unsigned pointIndex, ScalarType value)
 {
 	assert(pointIndex < size());
-	m_set->at(pointIndex).squareDist = value;
+	m_set->at(pointIndex).squareDistd = static_cast<double>(value);
 }
 
 ScalarType DgmOctreeReferenceCloud::getPointScalarValue(unsigned pointIndex) const
 {
 	assert(pointIndex < size());
-	return m_set->at(pointIndex).squareDist;
+	return static_cast<ScalarType>(m_set->at(pointIndex).squareDistd);
 }
 
 void DgmOctreeReferenceCloud::updateBBWithPoint(const CCVector3* P)
@@ -142,7 +142,12 @@ void DgmOctreeReferenceCloud::forwardIterator()
 
 void DgmOctreeReferenceCloud::forEach(genericPointAction& anAction)
 {
-	unsigned count=size();
-	for (unsigned i=0;i<count;++i)
-		anAction(*m_set->at(i).point,m_set->at(i).squareDist);
+	unsigned count = size();
+	for (unsigned i=0; i<count; ++i)
+	{
+		//we must change from double container to 'ScalarType' one!
+		ScalarType sqDist = static_cast<ScalarType>(m_set->at(i).squareDistd);
+		anAction(*m_set->at(i).point,sqDist);
+		m_set->at(i).squareDistd = static_cast<double>(sqDist);
+	}
 }

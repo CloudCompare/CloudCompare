@@ -2334,7 +2334,7 @@ void MainWindow::doActionSamplePoints()
 }
 
 //semi-persistent setting for 'doRemoveDuplicatePoints'
-static double s_maxDistanceBetweenPoints = 1.0e-8;
+static double s_minDistanceBetweenPoints = 1.0e-12;
 
 void MainWindow::doRemoveDuplicatePoints()
 {
@@ -2346,7 +2346,7 @@ void MainWindow::doRemoveDuplicatePoints()
 	bool first = true;
 
 	bool ok;
-	s_maxDistanceBetweenPoints = QInputDialog::getDouble(this, "Remove duplicate points", "Max distance between points:", s_maxDistanceBetweenPoints, 0, 1.0e8, 8, &ok);
+	s_minDistanceBetweenPoints = QInputDialog::getDouble(this, "Remove duplicate points", "Min distance between points:", s_minDistanceBetweenPoints, 0, 1.0e8, 12, &ok);
 	if (!ok)
 		return;
 
@@ -2372,7 +2372,7 @@ void MainWindow::doRemoveDuplicatePoints()
             ccOctree* octree = cloud->getOctree();
 			ccProgressDialog pDlg(true,this);
 
-			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(cloud,s_maxDistanceBetweenPoints,&pDlg,octree);
+			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(cloud,s_minDistanceBetweenPoints,&pDlg,octree);
 			
 			if (result >= 0)
 			{
@@ -7059,7 +7059,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 			size_t neihgboursCount = cn.neighbours.size();
 			extractedPoints += static_cast<unsigned long long>(neihgboursCount);
 			for (size_t k=0; k<neihgboursCount; ++k)
-				cloud->setPointScalarValue(cn.neighbours[k].pointIndex,sqrt(cn.neighbours[k].squareDist));
+				cloud->setPointScalarValue(cn.neighbours[k].pointIndex,static_cast<ScalarType>(sqrt(cn.neighbours[k].squareDistd)));
 		}
 		ccConsole::Print("[CNE_TEST] Mean extraction time = %i ms (radius = %f, height = %f, mean(neighbours) = %3.1f)",subTimer.elapsed(),radius,height,static_cast<double>(extractedPoints)/static_cast<double>(samples));
 	}
@@ -7370,7 +7370,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 						size_t neihgboursCount = neighbours.size();
 						extractedPoints += static_cast<unsigned long long>(neihgboursCount);
 						for (size_t k=0; k<neihgboursCount; ++k)
-							cloud->setPointScalarValue(neighbours[k].pointIndex,sqrt(neighbours[k].squareDist));
+							cloud->setPointScalarValue(neighbours[k].pointIndex,static_cast<ScalarType>(sqrt(neighbours[k].squareDistd)));
 					}
 					ccConsole::Print("[SNE_TEST] Mean extraction time = %i ms (radius = %f, mean(neighbours) = %3.1f)",subTimer.elapsed(),roughnessKernelSize,static_cast<double>(extractedPoints)/static_cast<double>(samples));
 

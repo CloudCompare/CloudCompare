@@ -363,6 +363,7 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 		unsigned neighborCount = cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS,false);
 		neighborCount = std::min(neighborCount,kNN+1);
 #else
+		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
 		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
 		if (neighborCount < 2)
 		{
@@ -417,7 +418,7 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 				weight = std::max(0.0,1.0 - fabs(CCVector3::vdot(N1,N2)));
 				
 				//distance
-				//weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDist);
+				//weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDistd);
 
 				//mutual dot product
 				//const CCVector3* P2 = cloud->getPoint(static_cast<unsigned>(neighborIndex));

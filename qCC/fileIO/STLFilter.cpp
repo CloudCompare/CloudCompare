@@ -261,12 +261,13 @@ bool tagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 	//for each point in the cell
 	for (unsigned i=0; i<n; ++i)
 	{
-		int thisIndex = (int)cell.points->getPointGlobalIndex(i);
+		int thisIndex = static_cast<int>(cell.points->getPointGlobalIndex(i));
 		if (equivalentIndexes->getValue(thisIndex) < 0) //has no equivalent yet 
 		{
 			cell.points->getPoint(i,nNSS.queryPoint);
 
 			//look for neighbors in a (very small) sphere
+			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
 			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,c_defaultSearchRadius,false);
 
 			//if there are some very close points
@@ -276,7 +277,7 @@ bool tagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 				{
 					//all the other points are equivalent to the query point
 					const unsigned& otherIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
-					if (otherIndex != static_cast<unsigned int>(thisIndex))
+					if (static_cast<int>(otherIndex) != thisIndex)
 						equivalentIndexes->setValue(otherIndex,thisIndex);
 				}
 			}

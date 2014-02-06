@@ -153,13 +153,13 @@ public:
     /** This method only requires an output scalar field. Duplicate points will be
 		associated to scalar value 1 (and 0 for the others).
         \param theCloud processed cloud
-		\param maxDistBetweenPoints max distance between points
+		\param minDistanceBetweenPoints min distance between (output) points
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
     **/
 	static int flagDuplicatePoints(	GenericIndexedCloudPersist* theCloud,
-									PointCoordinateType maxDistBetweenPoints = static_cast<PointCoordinateType>(1.0e-8),
+									double minDistanceBetweenPoints = 1.0e-12,
 									GenericProgressCallback* progressCb = 0,
 									DgmOctree* inputOctree = 0);
 

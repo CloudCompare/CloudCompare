@@ -71,8 +71,12 @@ public:
 	inline Vector3Tpl cross(const Vector3Tpl &v) const { return Vector3Tpl((y*v.z)-(z*v.y), (z*v.x)-(x*v.z), (x*v.y)-(y*v.x)); }
 	//! Returns vector square norm
 	inline Type norm2() const { return (x*x)+(y*y)+(z*z); }
+	//! Returns vector square norm (forces double precision output)
+	inline double norm2d() const { return static_cast<double>(x)*static_cast<double>(x) + static_cast<double>(y)*static_cast<double>(y) + static_cast<double>(z)*static_cast<double>(z); }
 	//! Returns vector norm
 	inline Type norm() const { return sqrt(norm2()); }
+	//! Returns vector norm (forces double precision output)
+	inline Type normd() const { return sqrt(norm2d()); }
 	//! Sets vector norm to unity
 	inline void normalize() { Type n = norm2(); if (n>0) *this /= sqrt(n); }
 	//! Returns a normalized vector which is orthogonal to this one

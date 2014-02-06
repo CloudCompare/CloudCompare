@@ -58,10 +58,10 @@ public:
 	//virtual uchar testVisibility(const CCVector3& P) const; //not supported
 	virtual void placeIteratorAtBegining();
 	virtual const CCVector3* getNextPoint();
-	virtual bool enableScalarField() {return true;} //use DgmOctree::PointDescriptor::squareDist by default
-	virtual bool isScalarFieldEnabled() const {return true;} //use DgmOctree::PointDescriptor::squareDist by default
-	virtual void setPointScalarValue(unsigned pointIndex, ScalarType value); //use DgmOctree::PointDescriptor::squareDist by default
-	virtual ScalarType getPointScalarValue(unsigned pointIndex) const; //use DgmOctree::PointDescriptor::squareDist by default
+	virtual bool enableScalarField() {return true;} //use DgmOctree::PointDescriptor::squareDistd by default
+	virtual bool isScalarFieldEnabled() const {return true;} //use DgmOctree::PointDescriptor::squareDistd by default
+	virtual void setPointScalarValue(unsigned pointIndex, ScalarType value); //use DgmOctree::PointDescriptor::squareDistd by default
+	virtual ScalarType getPointScalarValue(unsigned pointIndex) const; //use DgmOctree::PointDescriptor::squareDistd by default
 
 	//**** inherited form GenericIndexedCloud ****//
 	virtual const CCVector3* getPoint(unsigned index);

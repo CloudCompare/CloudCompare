@@ -127,13 +127,13 @@ public:
 		//! Point index
 		unsigned pointIndex;
 		//! Point associated distance value
-		ScalarType squareDist;
+		double squareDistd;
 
 		//! Default constructor
 		PointDescriptor()
 			: point(0)
 			, pointIndex(0)
-			, squareDist(-1.0)
+			, squareDistd(-1.0)
 		{
 		}
 
@@ -141,15 +141,15 @@ public:
 		PointDescriptor(const CCVector3* P, unsigned index)
 			: point(P)
 			, pointIndex(index)
-			, squareDist(-1.0)
+			, squareDistd(-1.0)
 		{
 		}
 
 		//! Constructor with point, its index and square distance
-		PointDescriptor(const CCVector3* P, unsigned index, ScalarType d2)
+		PointDescriptor(const CCVector3* P, unsigned index, double d2)
 			: point(P)
 			, pointIndex(index)
-			, squareDist(d2)
+			, squareDistd(d2)
 		{
 		}
 
@@ -160,7 +160,7 @@ public:
         **/
 		static bool distComp(const PointDescriptor& a, const PointDescriptor& b)
 		{
-			return a.squareDist < b.squareDist;
+			return a.squareDistd < b.squareDistd;
 		}
 	};
 
@@ -231,9 +231,9 @@ public:
 		//! Maximum neihgbours distance
 		/** The NN search process will stop if it reaches this radius even if it
 			hasn't find any neighbour (acceleration). To disable this behavior,
-			set the maxSearchSquareDist to -1).
+			set the maxSearchSquareDistd to -1.0).
 		**/
-		ScalarType maxSearchSquareDist;
+		double maxSearchSquareDistd;
 
 		/*** Information to set to 0 before search ***/
 
@@ -273,7 +273,7 @@ public:
 			: queryPoint(0.0)
 			, level(1)
 			, minNumberOfNeighbors(1)
-			, maxSearchSquareDist(-1.0)
+			, maxSearchSquareDistd(-1.0)
 			, alreadyVisitedNeighbourhoodSize(0)
 			, theNearestPointIndex(0)
 		{
@@ -594,11 +594,11 @@ public:
 		\return the number of neighbours found
 	**/
 	unsigned findPointNeighbourhood(const CCVector3* _queryPoint,
-							  ReferenceCloud* Yk,
-							  unsigned maxNumberOfNeighbors,
-							  uchar level,
-							  ScalarType &maxSquareDist,
-							  ScalarType maxSearchDist=-1.0) const;
+									ReferenceCloud* Yk,
+									unsigned maxNumberOfNeighbors,
+									uchar level,
+									double &maxSquareDist,
+									double maxSearchDist = -1.0) const;
 
 	//! Advanced form of the nearest neighbour search algorithm (unique neighbour)
 	/** This version is optimized for a unique nearest-neighbour search.
@@ -606,7 +606,7 @@ public:
 		\param nNSS NN search parameters
 		\return the square distance between the query point and its nearest neighbour (or -1 if none was found)
 	**/
-	ScalarType findTheNearestNeighborStartingFromCell(NearestNeighboursSearchStruct &nNSS) const;
+	double findTheNearestNeighborStartingFromCell(NearestNeighboursSearchStruct &nNSS) const;
 
 	//! Advanced form of the nearest neighbours search algorithm (multiple neighbours)
 	/** This version is optimized for a multiple nearest neighbours search
@@ -617,19 +617,23 @@ public:
 		\return the number of neighbours found
 	**/
 	unsigned findNearestNeighborsStartingFromCell(NearestNeighboursSearchStruct &nNSS,
-													bool getOnlyPointsWithValidScalar=false) const;
+													bool getOnlyPointsWithValidScalar = false) const;
 
 	//! Advanced form of the nearest neighbours search algorithm (in a sphere)
 	/** This version is optimized for a spatially bounded search instead of
 		a search bounded by a number of neighbours.
+		\warning the number of points in the output buffer (nNSS.pointsInNeighbourhood) may be greater
+		than the actual count of closest points inside the sphere! (which is returned by the method).
+		Only the 'k' first points are actually inside the sphere (the others are not removed for the sake
+		of performance).
 		\param nNSS a pack of parameters
 		\param radius the sphere radius
 		\param sortValues specifies if the neighbours needs to be sorted by their distance to the query point or not
 		\return the number of neighbours found
 	**/
 	int findNeighborsInASphereStartingFromCell(NearestNeighboursSphericalSearchStruct &nNSS,
-                                                PointCoordinateType radius,
-                                                bool sortValues=true) const;
+                                                double radius,
+                                                bool sortValues = true) const;
 
 	//deprecated
 	//int getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours) const;
@@ -677,7 +681,7 @@ public:
 	//! Returns the points falling inside a cylinder
 	/** Use findBestLevelForAGivenNeighbourhoodSizeExtraction to get the right
 		value for 'level' (only once as it only depends on the radius value ;).
-		\warning the 'squareDist' field of each neighbour in the NeighboursSet
+		\warning the 'squareDistd' field of each neighbour in the NeighboursSet
 		structure is in fact the signed distance (not squared) of the point
 		relatively to the cylinder's center and projected along its axis.
 		\param params input/output parameters structure
@@ -848,7 +852,7 @@ public:
 		\param cellMax the maximum coordinates along each dimension
 		\param isCodeTruncated indicates if the given code is truncated or not
 	**/
-	void computeCellLimits(OctreeCellCodeType code, uchar level, PointCoordinateType cellMin[], PointCoordinateType cellMax[], bool isCodeTruncated=false) const;
+	void computeCellLimits(OctreeCellCodeType code, uchar level, PointCoordinateType cellMin[], PointCoordinateType cellMax[], bool isCodeTruncated = false) const;
 
 	/**** OCTREE DIAGNOSIS ****/
 
@@ -887,7 +891,7 @@ public:
 		\param vec the list of codes
 		\param truncatedCodes indicates if the resulting codes should be truncated or not
 	**/
-	void getCellCodes(uchar level, cellCodesContainer& vec, bool truncatedCodes=false) const;
+	void getCellCodes(uchar level, cellCodesContainer& vec, bool truncatedCodes = false) const;
 
 	//! Returns the list of indexes corresponding to the octree cells for a given level of subdivision
 	/** Only the non empty cells are represented in the octree structure.
@@ -907,7 +911,7 @@ public:
 		\param vec the list of codes & indexes
 		\param truncatedCodes indicates if the resulting codes should be truncated or not
 	**/
-	void getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool truncatedCodes=false) const;
+	void getCellCodesAndIndexes(uchar level, cellsContainer& vec, bool truncatedCodes = false) const;
 
 
 	//! Returns the cells that differ between two octrees (for a same implicit level of subdivision)
@@ -1178,7 +1182,7 @@ protected:
 	**/
 	void getPointsInNeighbourCellsAround(NearestNeighboursSearchStruct &nNSS,
 											int neighbourhoodLength,
-											bool getOnlyPointsWithValidScalar=false) const;
+											bool getOnlyPointsWithValidScalar = false) const;
 
 #ifdef TEST_CELLS_FOR_SPHERICAL_NN
 	void getPointsInNeighbourCellsAround(NearestNeighboursSphericalSearchStruct &nNSS,

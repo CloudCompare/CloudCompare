@@ -361,6 +361,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
+		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
 		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_LS)
 		{
@@ -434,6 +435,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
+			//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (k)!
 		unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
 		if (k >= NUMBER_OF_POINTS_FOR_NORM_WITH_HF)
 		{

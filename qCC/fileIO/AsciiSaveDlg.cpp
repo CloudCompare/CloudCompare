@@ -28,6 +28,7 @@
 AsciiSaveDlg::AsciiSaveDlg(QWidget* parent)
 	: QDialog(parent)
 	, Ui::AsciiSaveDialog()
+	, m_autoShow(true)
 {
 	setupUi(this);
 

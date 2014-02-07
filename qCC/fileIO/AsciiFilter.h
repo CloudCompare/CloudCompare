@@ -19,7 +19,13 @@
 #define CC_ASCII_FILTER_HEADER
 
 #include "FileIOFilter.h"
+
+//dialogs
 #include "AsciiOpenDlg.h"
+#include "AsciiSaveDlg.h"
+
+//Qt
+#include <QSharedPointer>
 
 //! ASCII point cloud I/O filter
 class AsciiFilter : public FileIOFilter
@@ -41,9 +47,17 @@ public:
 													bool alwaysDisplayLoadDialog=true,
 													bool* coordinatesShiftEnabled=0,
 													CCVector3d* coordinatesShift=0);
+
+	//! Returns associated dialog (creates it if necessary)
+	static QSharedPointer<AsciiSaveDlg> GetSaveDialog();
+
 protected:
 
+	//! Internal use only
 	CC_FILE_ERROR saveFile(ccHObject* entity, FILE *theFile);
+
+	//! Associated (export) dialog
+	static QSharedPointer<AsciiSaveDlg> s_saveDialog;
 
 };
 

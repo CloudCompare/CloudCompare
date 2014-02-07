@@ -343,7 +343,7 @@ ccBBox ccHObject::getDisplayBB()
 	return getMyOwnBB();
 }
 
-CCVector3 ccHObject::getCenter()
+CCVector3 ccHObject::getBBCenter()
 {
 	ccBBox box = getBB(true,false,m_currentDisplay);
 

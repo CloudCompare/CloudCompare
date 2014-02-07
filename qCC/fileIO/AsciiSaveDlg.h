@@ -52,6 +52,11 @@ public:
 	//! Returns whether SF(s) and color should be swapped
 	bool swapColorAndSF() const;
 
+	//! Sets whether this dialog should appear or not by default
+	void setAutoShow(bool state) { m_autoShow = state; }
+	//! Returns whether this dialog automatically appears or not
+	bool autoShow() const { return m_autoShow; }
+
 protected slots:
 
 	//! Saves dialog state to persistent settings
@@ -61,6 +66,9 @@ protected:
 
 	//! Inits dialog state from persistent settings
 	void initFromPersistentSettings();
+
+	//! Whether this dialog should be automatically shown or not
+	bool m_autoShow;
 
 };
 

@@ -142,8 +142,9 @@ public:
 							CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST = 255,
 	};
 
-    static bool ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget* parent = 0, void** additionalParameters = 0);
-    
+	//! Applies a standard CCLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
+	static bool ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget* parent = 0, void** additionalParameters = 0);
+
 	//! Returns MDI area subwindow corresponding to a given 3D view
 	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
 
@@ -317,7 +318,7 @@ protected slots:
     void doActionApplyScale();
 	void doActionEditGlobalShift();
 	void doActionEditGlobalScale();
-    void doActionMatchBarycenters();
+    void doActionMatchBBCenters();
     void doActionUnroll();
     void doActionProjectSensor();
     void doActionModifySensor();

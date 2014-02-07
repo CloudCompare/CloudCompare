@@ -202,7 +202,7 @@ public:
     //! Returns the bounding-box center
     /** \return bounding-box center
     **/
-    virtual CCVector3 getCenter();
+    virtual CCVector3 getBBCenter();
 
     //! Returns last modification time
     /** \return last modification time

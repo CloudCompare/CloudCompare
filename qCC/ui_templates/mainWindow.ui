@@ -146,6 +146,9 @@
      <property name="title">
       <string>Scalar fields</string>
      </property>
+     <addaction name="actionShowHistogram"/>
+     <addaction name="actionComputeStatParams"/>
+     <addaction name="separator"/>
      <addaction name="actionSFGradient"/>
      <addaction name="actionGaussianFilter"/>
      <addaction name="actionBilateralFilter"/>
@@ -264,6 +267,10 @@
     <addaction name="actionApplyTransformation"/>
     <addaction name="actionApplyScale"/>
     <addaction name="separator"/>
+    <addaction name="actionTranslateRotate"/>
+    <addaction name="actionSegment"/>
+    <addaction name="actionCrossSection"/>
+    <addaction name="separator"/>
     <addaction name="actionEditGlobalShift"/>
     <addaction name="actionEditGlobalScale"/>
     <addaction name="separator"/>
@@ -303,9 +310,10 @@
       <string>Segmentation</string>
      </property>
      <addaction name="actionLabelConnectedComponents"/>
+     <addaction name="actionCrossSection"/>
+     <addaction name="separator"/>
      <addaction name="actionKMeans"/>
      <addaction name="actionFrontPropagation"/>
-     <addaction name="actionCrossSection"/>
     </widget>
     <widget class="QMenu" name="menuProjection">
      <property name="title">
@@ -334,7 +342,7 @@
      <property name="title">
       <string>Registration</string>
      </property>
-     <addaction name="actionMatchBarycenters"/>
+     <addaction name="actionMatchBBCenters"/>
      <addaction name="actionPointPairsAlign"/>
      <addaction name="actionRegister"/>
     </widget>
@@ -1349,6 +1357,9 @@
    </property>
   </action>
   <action name="actionKMeans">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>K-Means</string>
    </property>
@@ -1360,6 +1371,9 @@
    </property>
   </action>
   <action name="actionFrontPropagation">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>Front propagation</string>
    </property>
@@ -1381,9 +1395,9 @@
     <string>Multiply coordinates (separately)</string>
    </property>
   </action>
-  <action name="actionMatchBarycenters">
+  <action name="actionMatchBBCenters">
    <property name="text">
-    <string>Match barycenters</string>
+    <string>Match bounding-box centers</string>
    </property>
    <property name="toolTip">
     <string>Synchronize selected entities bbox centers</string>

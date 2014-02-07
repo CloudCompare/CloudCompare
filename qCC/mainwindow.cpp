@@ -119,6 +119,9 @@
 #include "ccAdjustZoomDlg.h"
 #include <ui_aboutDlg.h>
 
+//other
+#include "ccRegistrationTools.h"
+
 //3D mouse handler
 #ifdef CC_3DXWARE_SUPPORT
 #include "devices/3dConnexion/Mouse3DInput.h"
@@ -889,7 +892,7 @@ void MainWindow::connectActions()
     connect(actionEditGlobalShift,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalShift()));
     connect(actionEditGlobalScale,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalScale()));
     connect(actionSubsample,                    SIGNAL(triggered()),    this,       SLOT(doActionSubsample())); //Aurelien BEY le 13/11/2008
-	connect(actionMatchBarycenters,				SIGNAL(triggered()),    this,       SLOT(doActionMatchBarycenters()));
+	connect(actionMatchBBCenters,				SIGNAL(triggered()),    this,       SLOT(doActionMatchBBCenters()));
     connect(actionDelete,                       SIGNAL(triggered()),    m_ccRoot,	SLOT(deleteSelectedEntities()));
 
     //"Tools > Projection" menu
@@ -1861,7 +1864,7 @@ void displaySensorProjectErrorString(int errorCode)
 void MainWindow::doActionComputeDistancesFromSensor()
 {
     //there should be only one sensor in current selection!
-    if (m_selectedEntities.empty() || m_selectedEntities.size()>1 || !m_selectedEntities[0]->isKindOf(CC_SENSOR))
+    if (m_selectedEntities.empty() || m_selectedEntities.size()>1 || !m_selectedEntities[0]->isKindOf(CC_GBL_SENSOR))
     {
         ccConsole::Error("Select one and only one sensor!");
         return;
@@ -1906,12 +1909,12 @@ void MainWindow::doActionComputeDistancesFromSensor()
 	CCLib::ScalarField* distances = cloud->getScalarField(sfIdx);
 
     //sensor center
-    CCVector3 center = sensor->getCenter();
+	CCVector3 sensorCenter = static_cast<ccGBLSensor*>(sensor)->getSensorCenter();
 
 	for (unsigned i=0; i<cloud->size(); ++i)
 	{
 		const CCVector3* P = cloud->getPoint(i);
-		ScalarType s = static_cast<ScalarType>(squared ? (*P-center).norm2() :  (*P-center).norm());
+		ScalarType s = static_cast<ScalarType>(squared ? (*P-sensorCenter).norm2() :  (*P-sensorCenter).norm());
 		distances->setValue(i, s);
 	}
 
@@ -1927,9 +1930,9 @@ void MainWindow::doActionComputeDistancesFromSensor()
 void MainWindow::doActionComputeScatteringAngles()
 {
     //there should be only one sensor in current selection!
-    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_SENSOR))
+    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_GBL_SENSOR))
     {
-        ccConsole::Error("Select one and only one sensor!");
+        ccConsole::Error("Select one and only one GBL sensor!");
         return;
     }
 
@@ -1968,7 +1971,7 @@ void MainWindow::doActionComputeScatteringAngles()
 	CCLib::ScalarField* angles = cloud->getScalarField(sfIdx);
 
 	//Sensor center
-	CCVector3 sensorCenter = sensor->getCenter();
+	CCVector3 sensorCenter = static_cast<ccGBLSensor*>(sensor)->getSensorCenter();
 
 	//perform computations
 	for (unsigned i=0; i<cloud->size(); ++i)
@@ -3302,67 +3305,6 @@ void MainWindow::doActionRegister()
     model = rDlg.getModelEntity();
     data = rDlg.getDataEntity();
 
-    //progress bar
-    ccProgressDialog pDlg(false,this);
-
-    //if the 'model' entity is a mesh, we need to sample points on it
-    CCLib::GenericIndexedCloudPersist* modelCloud = 0;
-    if (model->isKindOf(CC_MESH))
-    {
-        modelCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(model),static_cast<unsigned>(100000),&pDlg);
-        if (!modelCloud)
-        {
-            ccConsole::Error("Failed to sample points on 'model' mesh!");
-            return;
-        }
-    }
-    else
-    {
-        modelCloud = ccHObjectCaster::ToGenericPointCloud(model);
-    }
-
-    //if the 'data' entity is a mesh, we need to sample points on it
-    CCLib::GenericIndexedCloudPersist* dataCloud = 0;
-    if (data->isKindOf(CC_MESH))
-    {
-        dataCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(data),static_cast<unsigned>(50000),&pDlg);
-        if (!dataCloud)
-        {
-            ccConsole::Error("Failed to sample points on 'data' mesh!");
-            return;
-        }
-    }
-    else
-    {
-        dataCloud = ccHObjectCaster::ToGenericPointCloud(data);
-    }
-
-    //we activate a temporary scalar field for registration distances computation
-	CCLib::ScalarField* dataDisplayedSF = 0;
-    int oldDataSfIdx=-1, dataSfIdx=-1;
-
-    //if the 'data' entity is a real ccPointCloud, we can even create a temporary SF for registration distances
-    if (data->isA(CC_POINT_CLOUD))
-    {
-        ccPointCloud* pc = static_cast<ccPointCloud*>(data);
-		dataDisplayedSF = pc->getCurrentDisplayedScalarField();
-        oldDataSfIdx = pc->getCurrentInScalarFieldIndex();
-        dataSfIdx = pc->getScalarFieldIndexByName("RegistrationDistances");
-        if (dataSfIdx < 0)
-            dataSfIdx=pc->addScalarField("RegistrationDistances");
-        if (dataSfIdx >= 0)
-            pc->setCurrentScalarField(dataSfIdx);
-        else
-            ccConsole::Warning("Couldn't create temporary scalar field! Not enough memory?");
-    }
-    else
-    {
-        dataCloud->enableScalarField();
-    }
-
-    //parameters
-    CCLib::PointProjectionTools::Transformation transform;
-
     double minErrorDecrease			= rDlg.getMinErrorDecrease();
     unsigned maxIterationCount		= rDlg.getMaxIterationCount();
 	unsigned randomSamplingLimit	= rDlg.randomSamplingLimit();
@@ -3371,70 +3313,32 @@ void MainWindow::doActionRegister()
 	bool useDataSFAsWeights			= rDlg.useDataSFAsWeights();
     bool useModelSFAsWeights		= rDlg.useModelSFAsWeights();
     bool adjustScale				= rDlg.adjustScale();
-    double finalError				= 0.0;
 
-	CCLib::ScalarField* modelWeights = 0;
-	if (useModelSFAsWeights)
+	ccGLMatrix transMat;
+	double finalError = 0.0;
+	double finalScale = 1.0;
+
+	if (ccRegistrationTools::ICP(	data,
+									model,
+									transMat,
+									finalScale,
+									finalError,
+									minErrorDecrease,
+									maxIterationCount,
+									randomSamplingLimit,
+									removeFarthestPoints,
+									method,
+									adjustScale,
+									useDataSFAsWeights,
+									useModelSFAsWeights,
+									this))
 	{
-		if (modelCloud==(CCLib::GenericIndexedCloudPersist*)model && model->isA(CC_POINT_CLOUD))
-		{
-			ccPointCloud* pc = static_cast<ccPointCloud*>(model);
-			modelWeights = pc->getCurrentDisplayedScalarField();
-			if (!modelWeights)
-				ccConsole::Warning("[MainWindow::doActionRegister] Model has no displayed scalar field!");
-		}
-		else
-		{
-			ccConsole::Warning("[MainWindow::doActionRegister] Only point clouds scalar fields can be used as weights!");
-		}
-	}
-
-	CCLib::ScalarField* dataWeights = 0;
-	if (useDataSFAsWeights)
-	{
-		if (!dataDisplayedSF)
-		{
-			if (dataCloud==(CCLib::GenericIndexedCloudPersist*)data && data->isA(CC_POINT_CLOUD))
-				ccConsole::Warning("[MainWindow::doActionRegister] Data has no displayed scalar field!");
-			else
-				ccConsole::Warning("[MainWindow::doActionRegister] Only point clouds scalar fields can be used as weights!");
-		}
-		else
-			dataWeights = dataDisplayedSF;
-
-	}
-
-    CCLib::ICPRegistrationTools::CC_ICP_RESULT result;
-    result = CCLib::ICPRegistrationTools::RegisterClouds(modelCloud,
-             dataCloud,
-             transform,
-             method,
-             minErrorDecrease,
-             maxIterationCount,
-             finalError,
-             adjustScale,
-             (CCLib::GenericProgressCallback*)&pDlg,
-             removeFarthestPoints,
-			 randomSamplingLimit,
-			 modelWeights,
-			 dataWeights);
-
-    if (result >= CCLib::ICPRegistrationTools::ICP_ERROR)
-    {
-        ccConsole::Error("Registration failed: an error occurred (code %i)",result);
-    }
-    else if (result == CCLib::ICPRegistrationTools::ICP_APPLY_TRANSFO)
-    {
-		QStringList summary;
 		QString rmsString = QString("Final RMS: %1").arg(finalError);
-        ccConsole::Print(QString("[Register] ") + rmsString);
+        ccLog::Print(QString("[Register] ") + rmsString);
 
+		QStringList summary;
 		summary << rmsString;
 		summary << "----------------";
-
-        ccGLMatrix transMat(transform.R, transform.T, transform.s);
-
-		forceConsoleDisplay();
 
 		//transformation matrix
 		{
@@ -3443,14 +3347,14 @@ void MainWindow::doActionRegister()
 			summary << transMat.toString(3,'\t'); //low precision, just for display
 			summary << "----------------";
 
-			ccConsole::Print("[Register] Applied transformation matrix:");
-			ccConsole::Print(transMat.toString(12,' ')); //full precision
-			ccConsole::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
+			ccLog::Print("[Register] Applied transformation matrix:");
+			ccLog::Print(transMat.toString(12,' ')); //full precision
+			ccLog::Print("Hint: copy it (CTRL+C) and apply it - or its inverse - on any entity with the 'Edit > Apply transformation' tool");
 		}
 
 		if (adjustScale)
 		{
-			QString scaleString = QString("Scale: %1 (already integrated in above matrix!)").arg(transform.s);
+			QString scaleString = QString("Scale: %1 (already integrated in above matrix!)").arg(finalScale);
 			ccLog::Warning(QString("[Register] ")+scaleString);
 			summary << scaleString;
 		}
@@ -3459,9 +3363,11 @@ void MainWindow::doActionRegister()
 			ccLog::Print(QString("[Register] Scale: fixed (1.0)"));
 			summary << "Scale: fixed (1.0)";
 		}
-		summary << "----------------";
 
-        //cloud to move
+		summary << "----------------";
+		summary << "Refer to Console (F8) for more details";
+		
+		//cloud to move
         ccGenericPointCloud* pc = 0;
 
         if (data->isKindOf(CC_POINT_CLOUD))
@@ -3493,7 +3399,7 @@ void MainWindow::doActionRegister()
 					else
 					{
 						//FIXME TODO
-                        ccConsole::Error("Doesn't work on sub-meshes yet!");
+                        ccLog::Error("Doesn't work on sub-meshes yet!");
 					}
 
                     if (newMesh)
@@ -3504,7 +3410,7 @@ void MainWindow::doActionRegister()
                     }
                     else
                     {
-                        ccConsole::Error("Failed to clone 'data' mesh! (not enough memory?)");
+                        ccLog::Error("Failed to clone 'data' mesh! (not enough memory?)");
                     }
                 }
             }
@@ -3532,28 +3438,8 @@ void MainWindow::doActionRegister()
 		//pop-up summary
 		summary << "Refer to Console (F8) for more details";
 		QMessageBox::information(this,"Register info",summary.join("\n"));
+		forceConsoleDisplay();
     }
-
-    //if we had to sample points an the data mesh
-    if (!data->isKindOf(CC_POINT_CLOUD))
-    {
-        delete dataCloud;
-    }
-    else
-    {
-        if (data->isA(CC_POINT_CLOUD))
-        {
-            ccPointCloud* pc = static_cast<ccPointCloud*>(data);
-            pc->setCurrentScalarField(oldDataSfIdx);
-            if (dataSfIdx >= 0)
-                pc->deleteScalarField(dataSfIdx);
-            dataSfIdx=-1;
-        }
-    }
-
-    //if we had to sample points an the model mesh
-    if (!model->isKindOf(CC_POINT_CLOUD))
-        delete modelCloud;
 
     refreshAll();
 	updateUI();
@@ -5010,7 +4896,7 @@ void MainWindow::doActionOrientNormalsFM()
 	updateUI();
 }
 
-void MainWindow::doActionMatchBarycenters()
+void MainWindow::doActionMatchBBCenters()
 {
     size_t selNum = m_selectedEntities.size();
 
@@ -5024,12 +4910,12 @@ void MainWindow::doActionMatchBarycenters()
 	//by default, we take the first entity as reference
     //TODO: maybe the user would like to select the reference himself ;)
     ccHObject* refEnt = selectedEntities[0];
-    CCVector3 refCenter = refEnt->getCenter();
+    CCVector3 refCenter = refEnt->getBBCenter();
 
     for (size_t i=1; i<selNum; ++i)
     {
         ccHObject* ent = selectedEntities[i];
-        CCVector3 center = ent->getCenter();
+        CCVector3 center = ent->getBBCenter();
 
         CCVector3 T = refCenter-center;
 
@@ -8553,7 +8439,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     bool atLeastTwoEntities = (selInfo.selCount>1);
 
     actionMerge->setEnabled(atLeastTwoEntities);
-    actionMatchBarycenters->setEnabled(atLeastTwoEntities);
+    actionMatchBBCenters->setEnabled(atLeastTwoEntities);
 
     //standard plugins
 	foreach (ccStdPluginInterface* plugin, m_stdPlugins)

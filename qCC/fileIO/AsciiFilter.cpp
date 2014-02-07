@@ -16,7 +16,6 @@
 //##########################################################################
 
 #include "AsciiFilter.h"
-#include "AsciiSaveDlg.h"
 #include "../ccCoordinatesShiftManager.h"
 
 //Qt
@@ -38,27 +37,25 @@
 #include <string.h>
 #include <assert.h>
 
-//! ASCII save dialog ('shared')
-static QSharedPointer<AsciiSaveDlg> s_saveDialog(0);
+//declaration of static member
+QSharedPointer<AsciiSaveDlg> AsciiFilter::s_saveDialog(0);
+
+QSharedPointer<AsciiSaveDlg> AsciiFilter::GetSaveDialog()
+{
+	if (!s_saveDialog)
+		s_saveDialog = QSharedPointer<AsciiSaveDlg>(new AsciiSaveDlg());
+
+	return s_saveDialog;
+}
 
 CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 {
     assert(entity && filename);
 
-	bool releaseDialog = false;
-	if (!s_saveDialog)
-	{
-		s_saveDialog = QSharedPointer<AsciiSaveDlg>(new AsciiSaveDlg());
-
-		if (!s_saveDialog->exec())
-		{
-			s_saveDialog.clear();
-			return CC_FERR_CANCELED_BY_USER;
-		}
-
-		releaseDialog = true;
-	}
-	assert(s_saveDialog);
+	QSharedPointer<AsciiSaveDlg> saveDialog = GetSaveDialog();
+	//if the dialog shouldn't be shown, we'll simply take the default values!
+	if (saveDialog->autoShow() && !saveDialog->exec())
+		return CC_FERR_CANCELED_BY_USER;
 
     if (!entity->isKindOf(CC_POINT_CLOUD))
 	{
@@ -98,8 +95,6 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 						CC_FILE_ERROR result = saveToFile(entity->getChild(i),qPrintable(subFilename));
 						if (result != CC_FERR_NO_ERROR)
 						{
-							if (releaseDialog)
-								s_saveDialog.clear();
 							return result;
 						}
 						else
@@ -112,14 +107,10 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 				}
 			}
 			
-			if (releaseDialog)
-				s_saveDialog.clear();
 			return CC_FERR_NO_ERROR;
 		}
 		else
 		{
-			if (releaseDialog)
-				s_saveDialog.clear();
 			return CC_FERR_BAD_ARGUMENT;
 		}
 	}
@@ -156,15 +147,15 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 	assert(scale != 0);
 
 	//output precision
-	const int s_coordPrecision = s_saveDialog->coordsPrecision();
-	const int s_sfPrecision = s_saveDialog->sfPrecision(); 
+	const int s_coordPrecision = saveDialog->coordsPrecision();
+	const int s_sfPrecision = saveDialog->sfPrecision(); 
 	const int s_nPrecision = 2+sizeof(PointCoordinateType);
 
 	//other parameters
-	bool saveColumnsHeader = s_saveDialog->saveColumnsNamesHeader();
-	bool savePointCountHeader = s_saveDialog->savePointCountHeader();
-	bool swapColorAndSFs = s_saveDialog->swapColorAndSF();
-	QChar separator(s_saveDialog->getSeparator());
+	bool saveColumnsHeader = saveDialog->saveColumnsNamesHeader();
+	bool savePointCountHeader = saveDialog->savePointCountHeader();
+	bool swapColorAndSFs = saveDialog->swapColorAndSF();
+	QChar separator(saveDialog->getSeparator());
 
 	if (saveColumnsHeader)
 	{
@@ -226,7 +217,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 	}
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-    for (unsigned i=0;i<numberOfPoints;++i)
+    for (unsigned i=0; i<numberOfPoints; ++i)
     {
 		//line for the current point
 		QString line;
@@ -288,9 +279,6 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 			break;
 		}
     }
-
-	if (releaseDialog)
-		s_saveDialog.clear();
 
     return CC_FERR_NO_ERROR;
 }

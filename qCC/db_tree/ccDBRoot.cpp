@@ -1316,7 +1316,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		//3rd column = plane normal!
 		planeNormal = plane->getNormal();
 		planeVertDir = plane->getTransformation().getColumnAsVec3D(1);
-		center = plane->getCenter();
+		center = plane->getBBCenter();
 	}
 	else if (obj->isA(CC_FACET)) //facet
 	{
@@ -1324,7 +1324,7 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 		planeNormal = facet->getNormal();
 		CCVector3 planeHorizDir(0,1,0);
 		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
-		center = facet->getCenter();
+		center = facet->getBBCenter();
 	}
 	else
 	{

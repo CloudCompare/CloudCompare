@@ -1604,6 +1604,8 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 				vertices->addPoint(Pup);
 				ccPolyline* poly = new ccPolyline(vertices);
 				poly->addPointIndex(0,2);
+				poly->addChild(vertices);
+				vertices->setEnabled(false);
 				poly->setColor(rgb);
 				poly->showColors(true);
 				poly->setVisible(true);
@@ -1669,6 +1671,8 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 				{
 					ccPolyline* poly = new ccPolyline(vertices);
 					poly->addPointIndex(0,vertices->size());
+					poly->addChild(vertices);
+					vertices->setEnabled(false);
 					poly->setColor(rgb);
 					poly->showColors(true);
 					poly->setVisible(true);

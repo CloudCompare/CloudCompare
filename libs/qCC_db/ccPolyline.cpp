@@ -51,7 +51,11 @@ ccPolyline::ccPolyline(const ccPolyline& poly)
 	ccPointCloud* clone = cloud ? cloud->partialClone(&poly) : ccPointCloud::From(&poly);
 	if (clone)
 	{
+		if (cloud)
+			clone->setName(cloud->getName()); //as 'partialClone' adds the '.extract' suffix by default
 		setAssociatedCloud(clone);
+		addChild(clone);
+		//clone->setEnabled(false);
 		assert(m_theAssociatedCloud);
 		if (m_theAssociatedCloud)
 			addPointIndex(0,m_theAssociatedCloud->size());
@@ -327,7 +331,7 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 		for (std::list<CCLib::PointProjectionTools::IndexedCCVector2*>::const_iterator it = hullPoints.begin(); it != hullPoints.end(); ++it)
 			contourVertices->addPoint(O + X*(*it)->x + Y*(*it)->y);
 		contourVertices->setName("vertices");
-		contourVertices->setVisible(false);
+		contourVertices->setEnabled(false);
 	}
 
 	//we create the corresponding (3D) polyline

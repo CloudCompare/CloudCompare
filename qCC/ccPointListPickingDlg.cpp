@@ -215,13 +215,13 @@ void ccPointListPickingDlg::exportToNewPolyline()
     {
 		//we create an "independent" polyline
 		ccPointCloud* vertices = new ccPointCloud("vertices");
-        ccPolyline* pline = new ccPolyline(vertices);
+        ccPolyline* polyline = new ccPolyline(vertices);
 
-        if (!vertices->reserve(count) || !pline->reserve(count))
+        if (!vertices->reserve(count) || !polyline->reserve(count))
         {
             ccLog::Error("Not enough memory!");
 			delete vertices;
-            delete pline;
+            delete polyline;
             return;
         }
 
@@ -230,13 +230,13 @@ void ccPointListPickingDlg::exportToNewPolyline()
             const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
 			vertices->addPoint(*PP.cloud->getPoint(PP.index));
         }
-		pline->addPointIndex(0,count);
-		pline->setVisible(true);
+		polyline->addPointIndex(0,count);
+		polyline->setVisible(true);
 		vertices->setEnabled(false);
-		pline->addChild(vertices);
-		pline->setDisplay_recursive(m_associatedCloud->getDisplay());
+		polyline->addChild(vertices);
+		polyline->setDisplay_recursive(m_associatedCloud->getDisplay());
         
-		MainWindow::TheInstance()->db()->addElement(pline,true);
+		MainWindow::TheInstance()->db()->addElement(polyline,true);
 
     }
     else

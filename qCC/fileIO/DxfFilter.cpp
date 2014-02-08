@@ -120,7 +120,7 @@ public:
 			m_poly = 0;
 			return;
 		}
-		m_polyVertices->setVisible(false);
+		m_polyVertices->setEnabled(false);
 		m_poly->setVisible(true);
 		m_poly->setName("Polyline");
 
@@ -142,8 +142,12 @@ public:
 		//we assume it's a polyline vertex!
 		if (	m_poly
 			&&	m_polyVertices
-			&&	m_polyVertices->size() < m_polyVertices->capacity() )
+			//&&	m_polyVertices->size() < m_polyVertices->capacity()
+			)
 		{
+			if (m_polyVertices->size() == m_polyVertices->capacity())
+				m_polyVertices->reserve(m_polyVertices->size()+1);
+			
 			m_poly->addPointIndex(m_polyVertices->size());
 			m_polyVertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(vertex.x),
 												static_cast<PointCoordinateType>(vertex.y),
@@ -359,7 +363,7 @@ public:
 			delete poly;
 			return;
 		}
-		polyVertices->setVisible(false);
+		polyVertices->setEnabled(false);
 		poly->setVisible(true);
 		poly->setName("Line");
 		poly->addPointIndex(0,2);

@@ -264,29 +264,29 @@ bool ccCameraSensor::fromIdealImCoordToRealImCoord(const CCVector2i& ideal, CCVe
 
 bool ccCameraSensor::computeUncertainty(const CCVector2i& pixel, const float depth, float& sigmaX, float& sigmaY, float& sigmaZ)
 {
-	////TO DO// ==> check if the input pixel coordinate must be the real or ideal projection
+	//TO DO// ==> check if the input pixel coordinate must be the real or ideal projection
 
-	//int u = pixel.x;
-	//int v = pixel.y;
-	//int width = m_intrinsicParams.imageSize[0];
-	//int height = m_intrinsicParams.imageSize[1];
+	int u = pixel.x;
+	int v = pixel.y;
+	int width = m_intrinsicParams.imageSize[0];
+	int height = m_intrinsicParams.imageSize[1];
 
-	//// check validity 
-	//if (u<0 || u>width || v<0 || v>height || depth<0.0 || abs(depth)<FLT_EPSILON)
-	//	return false;
+	// check validity 
+	if (u<0 || u>width || v<0 || v>height || depth<0.0 || abs(depth)<FLT_EPSILON)
+		return false;
 
-	//// init parameters
-	//float epsilon = 1.0/8.0;
-	//float mu = m_intrinsicParams.pixelSize[0];
-	//float sigmaD = epsilon * mu;
-	//float A = m_uncertaintyParams.linearDisparityParams[0];
-	//float z2 = pow(depth,2);
-	//float f = m_intrinsicParams.focalLength;
+	// init parameters
+	float epsilon = 1.0/8.0;
+	float mu = m_intrinsicParams.pixelSize[0];
+	float sigmaD = epsilon * mu;
+	float A = m_uncertaintyParams.linearDisparityParams[0];
+	float z2 = pow(depth,2);
+	float f = m_intrinsicParams.focalLength;
 
-	//// computes uncertainty
-	//sigmaX = abs(A * (u-width/2) / f * z2 * sigmaD);
-	//sigmaY = abs(A * (v-height/2) / f * z2 * sigmaD);
-	//sigmaZ = abs(A * z2 * sigmaD);
+	// computes uncertainty
+	sigmaX = abs(A * (u-width/2) / f * z2 * sigmaD);
+	sigmaY = abs(A * (v-height/2) / f * z2 * sigmaD);
+	sigmaZ = abs(A * z2 * sigmaD);
 	return true;
 }
 

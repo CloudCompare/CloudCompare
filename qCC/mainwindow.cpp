@@ -2291,177 +2291,177 @@ void MainWindow::doActionModifySensor()
     }
 }
 
-//void MainWindow::doActionProjectUncertainty()
-//{
-//	//there should be only one sensor in current selection!
-//    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_TYPES::SENSOR))
-//    {
-//        ccConsole::Error("Select one and only one sensor!");
-//        return;
-//    }
-//
-//	//for the moment, this function is evelopped only for projective sensors!
-//    if (!m_selectedEntities[0]->isA(CC_TYPES::CAMERA_SENSOR))
-//    {
-//        ccConsole::Error("Function under construction for this kind of sensor!");
-//        return;
-//    }
-//
-//	ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_selectedEntities[0]);
-//	if (!sensor)
-//		return;
-//
-//	//the sensor must be the child of a point cloud, or it is not possible to project anything
-//	if (!sensor->getParent()->isA(CC_TYPES::POINT_CLOUD))
-//	{
-//		ccConsole::Error("The sensor must be the child of a point cloud!");
-//        return;
-//	}
-//
-//	bool lockedVertices;
-//	ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(sensor->getParent(),&lockedVertices);
-//	if (!pointCloud)
-//		return;
-//
-//	std::vector<const CCVector3*> points(0);
-//	for (size_t i=0 ; i<pointCloud->size() ; i++)
-//	{
-//		points.push_back(pointCloud->getPoint(i));
-//	}
-//
-//	// get accuracy
-//	std::vector<CCVector3> accuracy;
-//	sensor->computeUncertainty(points,accuracy, false);
-//
-//	// set scalar field
-//	QString defaultName = "accuracy";
-//	unsigned trys = 1;
-//	while (pointCloud->getScalarFieldIndexByName(qPrintable(defaultName))>=0 || trys>99)
-//		defaultName = QString("accuracy #%1").arg(++trys);
-//
-//	/////////////
-//	// SIGMA X //
-//	/////////////
-//	
-//	// add scalar field
-//	QString sfName("Sensor x uncertainty");
-//	int index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
-//	if (index >= 0)
-//		pointCloud->deleteScalarField(index);
-//	int pos = pointCloud->addScalarField(qPrintable(sfName));
-//	if (pos<0)
-//	{
-//		ccLog::Error("An error occured! (see console)");
-//		return;
-//	}
-//
-//	// fill scalar field
-//	CCLib::ScalarField* sf = pointCloud->getScalarField(pos);
-//	assert(sf);
-//	if (sf)
-//	{
-//		for (size_t i=0 ; i<accuracy.size() ; i++)
-//			sf->setValue(i, accuracy[i].x);
-//		sf->computeMinAndMax();
-//		pointCloud->setCurrentDisplayedScalarField(pos);
-//		pointCloud->showSF(true);
-//		if (pointCloud->getDisplay())
-//			pointCloud->getDisplay()->redraw();
-//	}
-//
-//	/////////////
-//	// SIGMA Y //
-//	/////////////
-//
-//	// add scalar field
-//	sfName = QString("Sensor y uncertainty");
-//	index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
-//	if (index >= 0)
-//		pointCloud->deleteScalarField(index);
-//	pos = pointCloud->addScalarField(qPrintable(sfName));
-//	if (pos<0)
-//	{
-//		ccLog::Error("An error occured! (see console)");
-//		return;
-//	}
-//	
-//	// fill scalar field
-//	sf = pointCloud->getScalarField(pos);
-//	assert(sf);
-//	if (sf)
-//	{
-//		for (size_t i=0 ; i<accuracy.size() ; i++)
-//			sf->setValue(i, accuracy[i].y);
-//		sf->computeMinAndMax();
-//		pointCloud->setCurrentDisplayedScalarField(pos);
-//		pointCloud->showSF(true);
-//		if (pointCloud->getDisplay())
-//			pointCloud->getDisplay()->redraw();
-//	}
-//
-//	/////////////
-//	// SIGMA Z //
-//	/////////////
-//
-//	// add scalar field
-//	sfName = QString("Sensor z uncertainty");
-//	index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
-//	if (index >= 0)
-//		pointCloud->deleteScalarField(index);
-//	pos = pointCloud->addScalarField(qPrintable(sfName));
-//	if (pos<0)
-//	{
-//		ccLog::Error("An error occured! (see console)");
-//		return;
-//	}
-//	
-//	// fill scalar field
-//	sf = pointCloud->getScalarField(pos);
-//	assert(sf);
-//	if (sf)
-//	{
-//		for (size_t i=0 ; i<accuracy.size() ; i++)
-//			sf->setValue(i, accuracy[i].z);
-//		sf->computeMinAndMax();
-//		pointCloud->setCurrentDisplayedScalarField(pos);
-//		pointCloud->showSF(true);
-//		if (pointCloud->getDisplay())
-//			pointCloud->getDisplay()->redraw();
-//	}
-//	
-//	/////////////////
-//	// SIGMA TOTAL //
-//	/////////////////
-//
-//	// add scalar field
-//	sfName = QString("Sensor total uncertainty");
-//	index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
-//	if (index >= 0)
-//		pointCloud->deleteScalarField(index);
-//	pos = pointCloud->addScalarField(qPrintable(sfName));
-//	if (pos<0)
-//	{
-//		ccLog::Error("An error occured! (see console)");
-//		return;
-//	}
-//	
-//	// fill scalar field
-//	sf = pointCloud->getScalarField(pos);
-//	assert(sf);
-//	if (sf)
-//	{
-//		for (size_t i=0 ; i<accuracy.size() ; i++)
-//			sf->setValue(i, sqrt( pow(accuracy[i].x,2) + pow(accuracy[i].y,2) + pow(accuracy[i].z,2)) );
-//		sf->computeMinAndMax();
-//		pointCloud->setCurrentDisplayedScalarField(pos);
-//		pointCloud->showSF(true);
-//		if (pointCloud->getDisplay())
-//			pointCloud->getDisplay()->redraw();
-//	}
-//
-//	refreshAll();
-//}
-//
+void MainWindow::doActionProjectUncertainty()
+{
+	//there should be only one sensor in current selection!
+    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_TYPES::SENSOR))
+    {
+        ccConsole::Error("Select one and only one sensor!");
+        return;
+    }
+
+	//for the moment, this function is evelopped only for projective sensors!
+    if (!m_selectedEntities[0]->isA(CC_TYPES::CAMERA_SENSOR))
+    {
+        ccConsole::Error("Function under construction for this kind of sensor!");
+        return;
+    }
+
+	ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_selectedEntities[0]);
+	if (!sensor)
+		return;
+
+	//the sensor must be the child of a point cloud, or it is not possible to project anything
+	if (!sensor->getParent()->isA(CC_TYPES::POINT_CLOUD))
+	{
+		ccConsole::Error("The sensor must be the child of a point cloud!");
+        return;
+	}
+
+	bool lockedVertices;
+	ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(sensor->getParent(),&lockedVertices);
+	if (!pointCloud)
+		return;
+
+	std::vector<const CCVector3*> points(0);
+	for (size_t i=0 ; i<pointCloud->size() ; i++)
+	{
+		points.push_back(pointCloud->getPoint(i));
+	}
+
+	// get accuracy
+	std::vector<CCVector3> accuracy;
+	sensor->computeUncertainty(points, accuracy, false);
+
+	// set scalar field
+	QString defaultName = "accuracy";
+	unsigned trys = 1;
+	while (pointCloud->getScalarFieldIndexByName(qPrintable(defaultName))>=0 || trys>99)
+		defaultName = QString("accuracy #%1").arg(++trys);
+
+	/////////////
+	// SIGMA X //
+	/////////////
+	
+	// add scalar field
+	QString sfName("Sensor x uncertainty");
+	int index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+	if (index >= 0)
+		pointCloud->deleteScalarField(index);
+	int pos = pointCloud->addScalarField(qPrintable(sfName));
+	if (pos<0)
+	{
+		ccLog::Error("An error occured! (see console)");
+		return;
+	}
+
+	// fill scalar field
+	CCLib::ScalarField* sf = pointCloud->getScalarField(pos);
+	assert(sf);
+	if (sf)
+	{
+		for (size_t i=0 ; i<accuracy.size() ; i++)
+			sf->setValue(i, accuracy[i].x);
+		sf->computeMinAndMax();
+		pointCloud->setCurrentDisplayedScalarField(pos);
+		pointCloud->showSF(true);
+		if (pointCloud->getDisplay())
+			pointCloud->getDisplay()->redraw();
+	}
+
+	/////////////
+	// SIGMA Y //
+	/////////////
+
+	// add scalar field
+	sfName = QString("Sensor y uncertainty");
+	index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+	if (index >= 0)
+		pointCloud->deleteScalarField(index);
+	pos = pointCloud->addScalarField(qPrintable(sfName));
+	if (pos<0)
+	{
+		ccLog::Error("An error occured! (see console)");
+		return;
+	}
+	
+	// fill scalar field
+	sf = pointCloud->getScalarField(pos);
+	assert(sf);
+	if (sf)
+	{
+		for (size_t i=0 ; i<accuracy.size() ; i++)
+			sf->setValue(i, accuracy[i].y);
+		sf->computeMinAndMax();
+		pointCloud->setCurrentDisplayedScalarField(pos);
+		pointCloud->showSF(true);
+		if (pointCloud->getDisplay())
+			pointCloud->getDisplay()->redraw();
+	}
+
+	/////////////
+	// SIGMA Z //
+	/////////////
+
+	// add scalar field
+	sfName = QString("Sensor z uncertainty");
+	index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+	if (index >= 0)
+		pointCloud->deleteScalarField(index);
+	pos = pointCloud->addScalarField(qPrintable(sfName));
+	if (pos<0)
+	{
+		ccLog::Error("An error occured! (see console)");
+		return;
+	}
+	
+	// fill scalar field
+	sf = pointCloud->getScalarField(pos);
+	assert(sf);
+	if (sf)
+	{
+		for (size_t i=0 ; i<accuracy.size() ; i++)
+			sf->setValue(i, accuracy[i].z);
+		sf->computeMinAndMax();
+		pointCloud->setCurrentDisplayedScalarField(pos);
+		pointCloud->showSF(true);
+		if (pointCloud->getDisplay())
+			pointCloud->getDisplay()->redraw();
+	}
+	
+	/////////////////
+	// SIGMA TOTAL //
+	/////////////////
+
+	// add scalar field
+	sfName = QString("Sensor total uncertainty");
+	index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+	if (index >= 0)
+		pointCloud->deleteScalarField(index);
+	pos = pointCloud->addScalarField(qPrintable(sfName));
+	if (pos<0)
+	{
+		ccLog::Error("An error occured! (see console)");
+		return;
+	}
+	
+	// fill scalar field
+	sf = pointCloud->getScalarField(pos);
+	assert(sf);
+	if (sf)
+	{
+		for (size_t i=0 ; i<accuracy.size() ; i++)
+			sf->setValue(i, sqrt( pow(accuracy[i].x,2) + pow(accuracy[i].y,2) + pow(accuracy[i].z,2)) );
+		sf->computeMinAndMax();
+		pointCloud->setCurrentDisplayedScalarField(pos);
+		pointCloud->showSF(true);
+		if (pointCloud->getDisplay())
+			pointCloud->getDisplay()->redraw();
+	}
+
+	refreshAll();
+}
+
 //void MainWindow::doActionFilterOctree()
 //{
 //	//there should be only one sensor in current selection!

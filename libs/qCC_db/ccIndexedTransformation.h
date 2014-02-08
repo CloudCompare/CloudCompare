@@ -34,7 +34,6 @@ public:
 	//! Default constructor
 	/** Matrix is set to identity (see ccGLMatrix::toIdentity) by default.
 		Index is set to zero by default.
-		Index is set to 0 by default
 	**/
 	ccIndexedTransformation();
 

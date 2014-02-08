@@ -196,12 +196,6 @@ public:
 	**/
 	const DepthBuffer& getDepthBuffer() const { return m_depthBuffer; }
 
-    //! Sets the sensor graphic representation scale
-	void setGraphicScale(PointCoordinateType scale) { m_scale = scale; }
-
-    //! Returns the sensor graphic representation scale
-	PointCoordinateType getGraphicScale() const { return m_scale; }
-
     //Inherited from ccHObject
     virtual ccBBox getMyOwnBB();
     virtual ccBBox getDisplayBB();
@@ -242,9 +236,6 @@ protected:
 	ScalarType m_sensorRange;
 	//! Z-buffer uncertainty
 	ScalarType m_uncertainty;
-	
-	//! Sensor graphic representation scale
-    PointCoordinateType m_scale;
 
 	//! Associated Z-buffer
 	DepthBuffer m_depthBuffer;

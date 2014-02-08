@@ -21,8 +21,10 @@ ccSensor::ccSensor(QString name)
 	: ccHObject(name)
 	, m_posBuffer(0)
 	, m_activeIndex(0)
+	, m_scale(1.0)
 {
 	m_rigidTransformation.toIdentity();
+	m_color = CCVector3(1.0,1.0,1.0);
 }
 
 bool ccSensor::addPosition(ccGLMatrix& trans, double index)
@@ -81,6 +83,32 @@ bool ccSensor::getAbsoluteTransformation(ccIndexedTransformation& trans, double 
 			return false;
 
 	trans *= m_rigidTransformation;
+
+	return true;
+}
+
+bool ccSensor::getActiveAbsoluteCenter(CCVector3& vec)
+{
+	ccIndexedTransformation trans;
+	
+	if (!getActiveAbsoluteTransformation(trans))
+		return false;
+
+	const float* tmp = trans.getTranslation();
+	vec = CCVector3(*tmp,*(tmp+1),*(tmp+2));
+	return true;
+}
+
+bool ccSensor::getActiveAbsoluteRotation(ccGLMatrix& rotation)
+{
+	ccIndexedTransformation trans;
+	
+	if (!getActiveAbsoluteTransformation(trans))
+		return false;
+
+	ccGLMatrix mat = trans;
+	mat.setTranslation(CCVector3(0.0,0.0,0.0));
+	rotation = mat;
 
 	return true;
 }

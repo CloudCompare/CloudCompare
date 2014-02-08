@@ -68,7 +68,7 @@ enum CC_OBJECT_FLAG {
 #define CC_NORMAL_BIT					0x00000020000000	//Normal (Nx,Ny,Nz)
 #define CC_COMPRESSED_NORMAL_BIT		0x00000040000000	//Compressed normal (index)
 #define CC_TEX_COORDS_BIT				0x00000080000000	//Texture coordinates (u,v)
-//#define CC_FREE_BIT					0x00000100000080
+#define CC_CAMERA_BIT					0x00000100000080	//For camera sensors (projective sensors)
 //#define CC_FREE_BIT					0x00000200000080
 //#define CC_FREE_BIT					0x00000400000080
 //#define CC_FREE_BIT					0x00000800000080
@@ -101,6 +101,7 @@ public:
 	static const CC_CLASS_ENUM CALIBRATED_IMAGE		=	IMAGE  | CC_LEAF_BIT;
 	static const CC_CLASS_ENUM SENSOR				=	CC_HIERARCH_BIT | CC_SENSOR_BIT;
 	static const CC_CLASS_ENUM GBL_SENSOR			=	SENSOR | CC_GROUND_BASED_BIT;
+	static const CC_CLASS_ENUM CAMERA_SENSOR		=	SENSOR | CC_CAMERA_BIT;
 	static const CC_CLASS_ENUM PRIMITIVE			=	MESH | CC_PRIMITIVE_BIT; //primitives are meshes!
 	static const CC_CLASS_ENUM PLANE				=	PRIMITIVE | CC_PLANE_BIT;
 	static const CC_CLASS_ENUM SPHERE				=	PRIMITIVE | CC_SPHERE_BIT;

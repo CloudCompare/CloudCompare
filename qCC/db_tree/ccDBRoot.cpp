@@ -918,6 +918,8 @@ int ccDBRoot::getSelectedEntities(ccHObject::Container& selEntities,
                 info->sensorCount++;
                 if (obj->isKindOf(CC_TYPES::GBL_SENSOR))
                     info->gblSensorCount++;
+                if (obj->isKindOf(CC_TYPES::CAMERA_SENSOR))
+                    info->cameraSensorCount++;
             }
 
             if (obj->isKindOf(CC_TYPES::POINT_KDTREE))

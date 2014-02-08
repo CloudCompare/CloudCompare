@@ -227,9 +227,24 @@
       <addaction name="actionShowDepthBuffer"/>
       <addaction name="actionExportDepthBuffer"/>
      </widget>
-     <addaction name="menuGroundBasedLidar"/>
-     <addaction name="actionProjectSensor"/>
+     <widget class="QMenu" name="menuCreateSensor">
+      <property name="title">
+       <string>Create</string>
+      </property>
+      <addaction name="actionCreateGBLSensor"/>
+      <addaction name="actionCreateCameraSensor"/>
+     </widget>
+     <widget class="QMenu" name="menuCameraSensor">
+      <property name="title">
+       <string>Camera Sensor</string>
+      </property>
+      <addaction name="actionProjectUncertainty"/>
+      <addaction name="actionFilterOctree"/>
+     </widget>
+     <addaction name="menuCreateSensor"/>
      <addaction name="actionModifySensor"/>
+     <addaction name="menuGroundBasedLidar"/>
+     <addaction name="menuCameraSensor"/>
      <addaction name="separator"/>
      <addaction name="actionComputeDistancesFromSensor"/>
      <addaction name="actionComputeScatteringAngles"/>
@@ -1741,15 +1756,6 @@
     <string>Convert current scalar field to RGB colors</string>
    </property>
   </action>
-  <action name="actionProjectSensor">
-   <property name="icon">
-    <iconset resource="../icones.qrc">
-     <normaloff>:/CC/images/dbSensorSymbol.png</normaloff>:/CC/images/dbSensorSymbol.png</iconset>
-   </property>
-   <property name="text">
-    <string>Create</string>
-   </property>
-  </action>
   <action name="actionShowDepthBuffer">
    <property name="text">
     <string>Show depth buffer</string>
@@ -2395,6 +2401,26 @@
   <action name="actionFindBiggestInnerRectangle">
    <property name="text">
     <string>Find biggest inner rectangle (2D)</string>
+   </property>
+  </action>
+  <action name="actionCreateGBLSensor">
+   <property name="text">
+    <string>GBL Sensor</string>
+   </property>
+  </action>
+  <action name="actionCreateCameraSensor">
+   <property name="text">
+    <string>Camera Sensor</string>
+   </property>
+  </action>
+  <action name="actionFilterOctree">
+   <property name="text">
+    <string>Filter Octree</string>
+   </property>
+  </action>
+  <action name="actionProjectUncertainty">
+   <property name="text">
+    <string>Project Uncertainty</string>
    </property>
   </action>
  </widget>

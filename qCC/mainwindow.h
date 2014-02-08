@@ -326,7 +326,10 @@ protected slots:
     void doActionMatchBarycenters();
     void doActionUnroll();
     void doActionProjectSensor();
+	void doActionCreateCameraSensor();
     void doActionModifySensor();
+	//void doActionProjectUncertainty();
+	//void doActionFilterOctree();
     void doActionComputeDistancesFromSensor();
     void doActionComputeScatteringAngles();
 	void doActionSetViewFromSensor();

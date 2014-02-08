@@ -34,6 +34,7 @@ class ccKdTree;
 class ccImage;
 class ccCalibratedImage;
 class ccGBLSensor;
+class ccCameraSensor;
 class ccMaterialSet;
 class cc2DLabel;
 class cc2DViewportObject;
@@ -62,8 +63,8 @@ public:
 							OBJECT_NORMALS_SHOWN					,
 							OBJECT_SCALAR_FIELD_SHOWN				,
 							OBJECT_POLYLINE_WIDTH					,
-							//OBJECT_XXXX							,
-							//OBJECT_XXXX							,
+							OBJECT_SENSOR_DRAW_FRUSTRUM				,
+							OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES		,
 							OBJECT_SF_SHOW_SCALE					,
 							OBJECT_OCTREE_LEVEL						,
 							OBJECT_OCTREE_TYPE						,
@@ -158,6 +159,7 @@ protected:
 	void fillWithLabel(cc2DLabel*);
 	void fillWithViewportObject(cc2DViewportObject*);
     void fillWithGBLSensor(ccGBLSensor*);
+	void fillWithCameraSensor(ccCameraSensor*);
 	void fillWithMaterialSet(ccMaterialSet*);
 	void fillWithShareable(CCShareable*);
 	void fillWithMetaData(ccObject*);

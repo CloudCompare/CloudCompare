@@ -40,6 +40,7 @@
 #include <cc2DViewportObject.h>
 #include <ccCalibratedImage.h>
 #include <ccGBLSensor.h>
+#include <ccCameraSensor.h>
 #include <ccMaterialSet.h>
 #include <ccAdvancedTypes.h>
 #include <ccGenericPrimitive.h>
@@ -196,6 +197,10 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
     else if (m_currentObject->isKindOf(CC_TYPES::GBL_SENSOR))
     {
 		fillWithGBLSensor(ccHObjectCaster::ToGBLSensor(m_currentObject));
+    }
+    else if (m_currentObject->isKindOf(CC_TYPES::CAMERA_SENSOR))
+    {
+		fillWithCameraSensor(ccHObjectCaster::ToCameraSensor(m_currentObject));
     }
     else if (m_currentObject->isA(CC_TYPES::MATERIAL_SET))
     {
@@ -760,6 +765,20 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 	fillWithSensor(_obj);
 }
 
+void ccPropertiesTreeDelegate::fillWithCameraSensor(ccCameraSensor* _obj)
+{
+    assert(_obj && m_model);
+
+    addSeparator("Camera Sensor");
+
+    //Draw frustrum
+	appendRow( ITEM("Draw frustrum lines"), CHECKABLE_ITEM(_obj->frustrumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTRUM) );
+	appendRow( ITEM("Draw frustrum side planes"), CHECKABLE_ITEM(_obj->frustrumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES) );
+
+	//Positions
+	fillWithSensor(_obj);
+}
+
 void ccPropertiesTreeDelegate::fillWithMaterialSet(ccMaterialSet* _obj)
 {
     assert(_obj && m_model);
@@ -1193,7 +1212,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
         if (!spinBox)
             return;
 
-        ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_currentObject);
+        ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
         assert(sensor);
         spinBox->setValue(sensor->getGraphicScale());
         break;
@@ -1356,6 +1375,26 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
 			assert(buffer);
 			buffer->showTriherdons(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
+	case OBJECT_SENSOR_DRAW_FRUSTRUM:
+		{
+			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
+			if (item->checkState() == Qt::Checked)
+				sensor->drawFrustrum(true);
+			else
+				sensor->drawFrustrum(false);
+		}
+		redraw=true;
+		break;
+	case OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES:
+		{
+			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
+			if (item->checkState() == Qt::Checked)
+				sensor->drawFrustrumPlanes(true);
+			else
+				sensor->drawFrustrumPlanes(false);
 		}
 		redraw=true;
 		break;

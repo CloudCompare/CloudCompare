@@ -31,6 +31,7 @@
 #include "ccImage.h"
 #include "ccCalibratedImage.h"
 #include "ccGBLSensor.h"
+#include "ccCameraSensor.h"
 #include "cc2DLabel.h"
 #include "cc2DViewportLabel.h"
 #include "cc2DViewportObject.h"
@@ -138,6 +139,11 @@ ccSensor* ccHObjectCaster::ToSensor(ccHObject* obj)
 ccGBLSensor* ccHObjectCaster::ToGBLSensor(ccHObject* obj)
 {
 	return obj && obj->isA(CC_TYPES::GBL_SENSOR) ? static_cast<ccGBLSensor*>(obj) : 0;
+}
+
+ccCameraSensor* ccHObjectCaster::ToCameraSensor(ccHObject* obj)
+{
+	return obj && obj->isA(CC_TYPES::CAMERA_SENSOR) ? static_cast<ccCameraSensor*>(obj) : 0;
 }
 
 ccImage* ccHObjectCaster::ToImage(ccHObject* obj)

@@ -44,6 +44,7 @@
 #include <ccOctree.h>
 #include <ccKdTree.h>
 #include <ccGBLSensor.h>
+#include <ccCameraSensor.h>
 #include <ccNormalVectors.h>
 #include <ccProgressDialog.h>
 #include <ccPlane.h>
@@ -860,8 +861,11 @@ void MainWindow::connectActions()
     connect(actionShowDepthBuffer,              SIGNAL(triggered()),    this,       SLOT(doActionShowDepthBuffer()));
     connect(actionExportDepthBuffer,            SIGNAL(triggered()),    this,       SLOT(doActionExportDepthBuffer()));
     //"Edit > Sensor" menu
-    connect(actionProjectSensor,                SIGNAL(triggered()),    this,       SLOT(doActionProjectSensor()));
+    connect(actionCreateGBLSensor,              SIGNAL(triggered()),    this,       SLOT(doActionProjectSensor()));
+    connect(actionCreateCameraSensor,			SIGNAL(triggered()),    this,       SLOT(doActionCreateCameraSensor()));
     connect(actionModifySensor,                 SIGNAL(triggered()),    this,       SLOT(doActionModifySensor()));
+    connect(actionProjectUncertainty,			SIGNAL(triggered()),    this,       SLOT(doActionProjectUncertainty()));
+    connect(actionFilterOctree,                 SIGNAL(triggered()),    this,       SLOT(doActionFilterOctree()));
     connect(actionComputeDistancesFromSensor,   SIGNAL(triggered()),    this,       SLOT(doActionComputeDistancesFromSensor()));
     connect(actionComputeScatteringAngles,      SIGNAL(triggered()),    this,       SLOT(doActionComputeScatteringAngles()));
 	connect(actionViewFromSensor,				SIGNAL(triggered()),    this,       SLOT(doActionSetViewFromSensor()));
@@ -2121,24 +2125,28 @@ void MainWindow::doActionProjectSensor()
                 //we display depth buffer
                 ccRenderingTools::ShowDepthBuffer(sensor,this);
 
-				//DGM: test
-				{
-					//add positions
-					const unsigned count = 1000;
-					const PointCoordinateType R = 100;
-					const PointCoordinateType dh = 100;
-					for (unsigned i=0; i<1000; ++i)
-					{
-						float angle = (float)i/(float)count * 6 * M_PI;
-						float X = R * cos(angle);
-						float Y = R * sin(angle);
-						float Z = (float)i/(float)count * dh;
+				////DGM: test
+				//{
+				//	//add positions
+				//	const unsigned count = 1000;
+				//	const PointCoordinateType R = 100;
+				//	const PointCoordinateType dh = 100;
+				//	for (unsigned i=0; i<1000; ++i)
+				//	{
+				//		float angle = (float)i/(float)count * 6 * M_PI;
+				//		float X = R * cos(angle);
+				//		float Y = R * sin(angle);
+				//		float Z = (float)i/(float)count * dh;
 
-						ccIndexedTransformation trans;
-						trans.initFromParameters(-angle,CCVector3(0,0,1),CCVector3(X,Y,Z));
-						sensor->addPosition(trans,i);
-					}
-				}
+				//		ccIndexedTransformation trans;
+				//		trans.initFromParameters(-angle,CCVector3(0,0,1),CCVector3(X,Y,Z));
+				//		sensor->addPosition(trans,i);
+				//	}
+				//}
+
+				//set position
+				ccIndexedTransformation trans;
+				sensor->addPosition(trans,0);
 
                 ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
                 if (win)
@@ -2161,6 +2169,55 @@ void MainWindow::doActionProjectSensor()
     }
 
     updateUI();
+}
+
+void MainWindow::doActionCreateCameraSensor()
+{
+	//We create the corresponding sensor for each input cloud
+	ccHObject::Container selectedEntities = m_selectedEntities;
+	size_t i,selNum = selectedEntities.size();
+
+	for (i=0;i<selNum;++i)
+	{
+		ccHObject* ent = selectedEntities[i];
+
+		if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
+		{
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
+
+			//we create a new sensor
+			ccCameraSensor* sensor = new ccCameraSensor();
+			cloud->addChild(sensor);
+
+			//we try to guess the sensor relative size (dirty)
+			ccBBox bb = cloud->getBB();
+                double diag = bb.getDiagNorm();
+                if (diag < 1.0)
+                    sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e-3));
+                else if (diag > 10000.0)
+                    sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e3));
+
+			/*//we update sensor graphic representation
+			sensor->updateGraphicRepresentation();*/
+
+			//set position
+			ccIndexedTransformation trans;
+			sensor->addPosition(trans,0);
+			
+			ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
+			if (win)
+			{
+				sensor->setDisplay(win);
+				sensor->setVisible(true);
+				ccBBox box = cloud->getBB();
+				win->updateConstellationCenterAndZoom(&box);
+			}
+
+			addToDB(sensor,true,0,false,false);
+		}
+	}
+
+	updateUI();
 }
 
 void MainWindow::doActionModifySensor()
@@ -2233,6 +2290,259 @@ void MainWindow::doActionModifySensor()
         ccConsole::Error("Can't modify this kind of sensor!");
     }
 }
+
+//void MainWindow::doActionProjectUncertainty()
+//{
+//	//there should be only one sensor in current selection!
+//    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_TYPES::SENSOR))
+//    {
+//        ccConsole::Error("Select one and only one sensor!");
+//        return;
+//    }
+//
+//	//for the moment, this function is evelopped only for projective sensors!
+//    if (!m_selectedEntities[0]->isA(CC_TYPES::CAMERA_SENSOR))
+//    {
+//        ccConsole::Error("Function under construction for this kind of sensor!");
+//        return;
+//    }
+//
+//	ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_selectedEntities[0]);
+//	if (!sensor)
+//		return;
+//
+//	//the sensor must be the child of a point cloud, or it is not possible to project anything
+//	if (!sensor->getParent()->isA(CC_TYPES::POINT_CLOUD))
+//	{
+//		ccConsole::Error("The sensor must be the child of a point cloud!");
+//        return;
+//	}
+//
+//	bool lockedVertices;
+//	ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(sensor->getParent(),&lockedVertices);
+//	if (!pointCloud)
+//		return;
+//
+//	std::vector<const CCVector3*> points(0);
+//	for (size_t i=0 ; i<pointCloud->size() ; i++)
+//	{
+//		points.push_back(pointCloud->getPoint(i));
+//	}
+//
+//	// get accuracy
+//	std::vector<CCVector3> accuracy;
+//	sensor->computeUncertainty(points,accuracy, false);
+//
+//	// set scalar field
+//	QString defaultName = "accuracy";
+//	unsigned trys = 1;
+//	while (pointCloud->getScalarFieldIndexByName(qPrintable(defaultName))>=0 || trys>99)
+//		defaultName = QString("accuracy #%1").arg(++trys);
+//
+//	/////////////
+//	// SIGMA X //
+//	/////////////
+//	
+//	// add scalar field
+//	QString sfName("Sensor x uncertainty");
+//	int index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+//	if (index >= 0)
+//		pointCloud->deleteScalarField(index);
+//	int pos = pointCloud->addScalarField(qPrintable(sfName));
+//	if (pos<0)
+//	{
+//		ccLog::Error("An error occured! (see console)");
+//		return;
+//	}
+//
+//	// fill scalar field
+//	CCLib::ScalarField* sf = pointCloud->getScalarField(pos);
+//	assert(sf);
+//	if (sf)
+//	{
+//		for (size_t i=0 ; i<accuracy.size() ; i++)
+//			sf->setValue(i, accuracy[i].x);
+//		sf->computeMinAndMax();
+//		pointCloud->setCurrentDisplayedScalarField(pos);
+//		pointCloud->showSF(true);
+//		if (pointCloud->getDisplay())
+//			pointCloud->getDisplay()->redraw();
+//	}
+//
+//	/////////////
+//	// SIGMA Y //
+//	/////////////
+//
+//	// add scalar field
+//	sfName = QString("Sensor y uncertainty");
+//	index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+//	if (index >= 0)
+//		pointCloud->deleteScalarField(index);
+//	pos = pointCloud->addScalarField(qPrintable(sfName));
+//	if (pos<0)
+//	{
+//		ccLog::Error("An error occured! (see console)");
+//		return;
+//	}
+//	
+//	// fill scalar field
+//	sf = pointCloud->getScalarField(pos);
+//	assert(sf);
+//	if (sf)
+//	{
+//		for (size_t i=0 ; i<accuracy.size() ; i++)
+//			sf->setValue(i, accuracy[i].y);
+//		sf->computeMinAndMax();
+//		pointCloud->setCurrentDisplayedScalarField(pos);
+//		pointCloud->showSF(true);
+//		if (pointCloud->getDisplay())
+//			pointCloud->getDisplay()->redraw();
+//	}
+//
+//	/////////////
+//	// SIGMA Z //
+//	/////////////
+//
+//	// add scalar field
+//	sfName = QString("Sensor z uncertainty");
+//	index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+//	if (index >= 0)
+//		pointCloud->deleteScalarField(index);
+//	pos = pointCloud->addScalarField(qPrintable(sfName));
+//	if (pos<0)
+//	{
+//		ccLog::Error("An error occured! (see console)");
+//		return;
+//	}
+//	
+//	// fill scalar field
+//	sf = pointCloud->getScalarField(pos);
+//	assert(sf);
+//	if (sf)
+//	{
+//		for (size_t i=0 ; i<accuracy.size() ; i++)
+//			sf->setValue(i, accuracy[i].z);
+//		sf->computeMinAndMax();
+//		pointCloud->setCurrentDisplayedScalarField(pos);
+//		pointCloud->showSF(true);
+//		if (pointCloud->getDisplay())
+//			pointCloud->getDisplay()->redraw();
+//	}
+//	
+//	/////////////////
+//	// SIGMA TOTAL //
+//	/////////////////
+//
+//	// add scalar field
+//	sfName = QString("Sensor total uncertainty");
+//	index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+//	if (index >= 0)
+//		pointCloud->deleteScalarField(index);
+//	pos = pointCloud->addScalarField(qPrintable(sfName));
+//	if (pos<0)
+//	{
+//		ccLog::Error("An error occured! (see console)");
+//		return;
+//	}
+//	
+//	// fill scalar field
+//	sf = pointCloud->getScalarField(pos);
+//	assert(sf);
+//	if (sf)
+//	{
+//		for (size_t i=0 ; i<accuracy.size() ; i++)
+//			sf->setValue(i, sqrt( pow(accuracy[i].x,2) + pow(accuracy[i].y,2) + pow(accuracy[i].z,2)) );
+//		sf->computeMinAndMax();
+//		pointCloud->setCurrentDisplayedScalarField(pos);
+//		pointCloud->showSF(true);
+//		if (pointCloud->getDisplay())
+//			pointCloud->getDisplay()->redraw();
+//	}
+//
+//	refreshAll();
+//}
+//
+//void MainWindow::doActionFilterOctree()
+//{
+//	//there should be only one sensor in current selection!
+//    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_TYPES::SENSOR))
+//    {
+//        ccConsole::Error("Select one and only one sensor!");
+//        return;
+//    }
+//
+//	//for the moment, this function is evelopped only for projective sensors!
+//    if (!m_selectedEntities[0]->isKindOf(CC_TYPES::CAMERA_SENSOR))
+//    {
+//        ccConsole::Error("Function under construction for this kind of sensor!");
+//        return;
+//    }
+//
+//	ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_selectedEntities[0]);
+//	if (!sensor)
+//		return;
+//
+//	//the sensor must be the child of a point cloud, or it is not possible to project anything
+//	if (!sensor->getParent()->isA(CC_TYPES::POINT_CLOUD))
+//	{
+//		ccConsole::Error("The sensor must be the child of a point cloud!");
+//        return;
+//	}
+//
+//	ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
+//	if (!pointCloud)
+//		return;
+//
+//	//the octree of the point cloud must be computed
+//	if (!pointCloud->getOctree())
+//	{
+//		ccConsole::Error("The octree of the point cloud must be already computed!");
+//        return;
+//	}
+//
+//	ccOctree* octree = ccHObjectCaster::ToOctree(pointCloud->getOctree());
+//	if (!octree)
+//		return;
+//
+//	// filter octree then project points
+//	std::vector<unsigned int> inCameraFrustrum;
+//	inCameraFrustrum.clear();
+//	sensor->filterOctree(octree, inCameraFrustrum);
+//	
+//	// scalar field
+//	QString sfName = "Sensor filtering";	
+//	int index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
+//
+//	if (index >= 0)
+//		pointCloud->deleteScalarField(index);
+//
+//	int pos = pointCloud->addScalarField(qPrintable(sfName));
+//	if (pos<0)
+//	{
+//		ccLog::Error("An error occured! (see console)");
+//		return;
+//	}
+//	
+//	CCLib::ScalarField* sf = pointCloud->getScalarField(pos);
+//	assert(sf);
+//
+//	if (sf)
+//	{
+//		sf->fill(0.0);
+//
+//		for (size_t i=0 ; i<inCameraFrustrum.size() ; i++)
+//			sf->setValue(inCameraFrustrum[i], 1.0);
+//		
+//		sf->computeMinAndMax();
+//		pointCloud->setCurrentDisplayedScalarField(pos);
+//		pointCloud->showSF(true);
+//
+//		if (pointCloud->getDisplay())
+//			pointCloud->getDisplay()->redraw();
+//	}
+//	
+//	refreshAll();
+//}
 
 void MainWindow::doActionShowDepthBuffer()
 {
@@ -8257,11 +8567,14 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     bool atLeastOneSF = (selInfo.sfCount>0);
     //bool atLeastOneSensor = (selInfo.sensorCount>0);
     bool atLeastOneGDBSensor = (selInfo.gblSensorCount>0);
+    bool atLeastOneCameraSensor = (selInfo.cameraSensorCount>0);
     bool activeWindow = (getActiveGLWindow() != 0);
 
     //menuEdit->setEnabled(atLeastOneEntity);
     //menuTools->setEnabled(atLeastOneEntity);
+    menuCreateSensor->setEnabled(atLeastOneCloud);
     menuGroundBasedLidar->setEnabled(atLeastOneGDBSensor);
+    menuCameraSensor->setEnabled(atLeastOneCameraSensor);
 
     actionZoomAndCenter->setEnabled(atLeastOneEntity && activeWindow);
     actionSave->setEnabled(atLeastOneEntity);
@@ -8334,7 +8647,10 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionComputeDistancesFromSensor->setEnabled(exactlyOneSensor);
     actionComputeScatteringAngles->setEnabled(exactlyOneSensor);
 	actionViewFromSensor->setEnabled(exactlyOneSensor);
-    actionProjectSensor->setEnabled(atLeastOneCloud);
+    actionCreateGBLSensor->setEnabled(atLeastOneCloud);
+	actionCreateCameraSensor->setEnabled(atLeastOneCloud);
+	/*actionProjectUncertainty->setEnabled();
+	actionFilterOctree->setEnabled*/
     actionLabelConnectedComponents->setEnabled(atLeastOneCloud);
     actionUnroll->setEnabled(exactlyOneEntity);
     actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);

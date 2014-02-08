@@ -37,7 +37,6 @@ ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=THETA_PHI*/)
 	, m_rotationOrder(rotOrder)
 	, m_sensorRange(0)
 	, m_uncertainty((ScalarType)ZERO_TOLERANCE)
-	, m_scale(1)
 {
     //graphic representation
     lockVisibility(false);

@@ -29,6 +29,7 @@ class ccOctree;
 class ccKdTree;
 class ccSensor;
 class ccGBLSensor;
+class ccCameraSensor;
 class ccImage;
 class ccCalibratedImage;
 class cc2DLabel;
@@ -89,6 +90,9 @@ class ccHObjectCaster
 
         //! converts current object to ccGBLSensor (if possible)
         static ccGBLSensor* ToGBLSensor(ccHObject* obj);
+
+		//! converts current object to ccCameraSensor (if possible)
+        static ccCameraSensor* ToCameraSensor(ccHObject* obj);
 
         //! converts current object to ccImage (if possible)
         static ccImage* ToImage(ccHObject* obj);

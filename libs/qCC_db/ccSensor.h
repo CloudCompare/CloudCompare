@@ -79,11 +79,20 @@ public:
 	**/
 	bool addPosition(ccGLMatrix& trans, double index);
 
-	//! Returns the absolute transformatin between the world and the "optical" center (shortcut)
+	//! Returns the absolute transformation between the world and the "optical" center (shortcut)
 	/** Absolute transformation corresponds to the rigid transformation
 		multiplied by the associated transformation interpolated at the given index.
 	**/
 	bool getAbsoluteTransformation(ccIndexedTransformation& trans, double index);
+
+	//! Gets currently active absolute transformation
+	bool getActiveAbsoluteTransformation(ccIndexedTransformation& trans) { return getAbsoluteTransformation(trans, m_activeIndex); }
+	
+	//! Gets currently active absolute position
+	bool getActiveAbsoluteCenter(CCVector3& vec);
+
+	//! Gets currently active rotation matrix (without translation)
+	bool getActiveAbsoluteRotation(ccGLMatrix& rotation);
 
 	//! Sets the rigid transformation between this sensor and its associated positions
 	/** Rigid transformation goes from the sensor position(s) to the sensor "optical" center.
@@ -105,6 +114,12 @@ public:
 	//! Sets currently active index (displayed position, etc.)
 	void setActiveIndex(double index) { m_activeIndex = index; }
 
+	//! Sets the sensor graphic representation scale
+	void setGraphicScale(PointCoordinateType scale) { m_scale = scale; }
+
+    //! Returns the sensor graphic representation scale
+	PointCoordinateType getGraphicScale() const { return m_scale; }
+
 protected:
 
     //inherited from ccHObject
@@ -125,6 +140,13 @@ protected:
 	//! Active index (for displayed position, etc.)
 	double m_activeIndex;
 
+	//! Color of the sensor
+	/**	Default color is white=(1.0,1.0,1.0) 
+	**/
+	CCVector3 m_color;
+
+	//! Sensor graphic representation scale
+    PointCoordinateType m_scale;
 };
 
 #endif //CC_SENSOR_HEADER

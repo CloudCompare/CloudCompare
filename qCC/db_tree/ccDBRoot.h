@@ -54,6 +54,7 @@ struct dbTreeSelectionInfo
     int imageCount;
     int sensorCount;
     int gblSensorCount;
+    int cameraSensorCount;
 	int kdTreeCount;
 
     void reset()

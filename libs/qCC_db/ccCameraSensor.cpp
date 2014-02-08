@@ -97,21 +97,25 @@ const ccGLMatrix& ccCameraSensor::getProjectionMatrix()
 
 ccBBox ccCameraSensor::getMyOwnBB()
 {
-	return ccBBox();
+	CCVector3 vec;
+	if (getActiveAbsoluteCenter(vec))
+		return ccBBox(vec,vec);
+	else 
+		return ccBBox(); 
 }
 
-ccBBox ccCameraSensor::getDisplayBB()
-{
-	//return getMyOwnBB();
-	ccIndexedTransformation sensorPos;
-	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
-		return ccBBox();
-
-	CCVector3 center = sensorPos.getTranslationAsVec3D();
-
-    return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
-					center + CCVector3( 1, 1, 1) * m_scale);
-}
+//ccBBox ccCameraSensor::getDisplayBB()
+//{
+//	//return getMyOwnBB();
+//	ccIndexedTransformation sensorPos;
+//	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+//		return ccBBox();
+//
+//	CCVector3 center = sensorPos.getTranslationAsVec3D();
+//
+//    return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
+//					center + CCVector3( 1, 1, 1) * m_scale);
+//}
 
 bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 {
@@ -481,23 +485,23 @@ void ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4
 
 void ccCameraSensor::filterOctree(ccOctree* octree, std::vector<unsigned int>& inCameraFrustrum)
 {
-	//// initialization
-	//float globalPlaneCoefficients[6][4];
-	//CCVector3 globalCorners[8];
-	//CCVector3 globalEdges[6];
-	//CCVector3 globalCenter; 
-	//computeGlobalPlaneCoefficients(globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
+	// initialization
+	float globalPlaneCoefficients[6][4];
+	CCVector3 globalCorners[8];
+	CCVector3 globalEdges[6];
+	CCVector3 globalCenter; 
+	computeGlobalPlaneCoefficients(globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
 
-	//// get points of cells in frustrum
-	//std::vector< std::pair<unsigned int,CCVector3> > pointsToTest;
-	//octree->computeFrustumIntersectionWithOctree(pointsToTest, inCameraFrustrum, globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
-	//
-	//// project points
-	//for (size_t i=0 ; i<pointsToTest.size() ; i++)
-	//{
-	//	if (isGlobalCoordInFrustrum(pointsToTest[i].second, false))
-	//		inCameraFrustrum.push_back(pointsToTest[i].first);
-	//}
+	// get points of cells in frustrum
+	std::vector< std::pair<unsigned int,CCVector3> > pointsToTest;
+	octree->computeFrustumIntersectionWithOctree(pointsToTest, inCameraFrustrum, globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
+	
+	// project points
+	for (size_t i=0 ; i<pointsToTest.size() ; i++)
+	{
+		if (isGlobalCoordInFrustrum(pointsToTest[i].second, false))
+			inCameraFrustrum.push_back(pointsToTest[i].first);
+	}
 }
 
 void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)

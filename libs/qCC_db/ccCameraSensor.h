@@ -188,7 +188,7 @@ public:
     virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CAMERA_SENSOR; };
 	virtual bool isSerializable() const { return true; }
     virtual ccBBox getMyOwnBB();
-    virtual ccBBox getDisplayBB();
+    //virtual ccBBox getDisplayBB();
 	
 protected:
 

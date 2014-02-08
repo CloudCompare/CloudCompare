@@ -299,6 +299,20 @@ int DgmOctree::genericBuild(GenericProgressCallback* progressCb)
     //we sort the 'cells' by ascending code order
 	std::sort(m_thePointsAndTheirCellCodes.begin(),m_thePointsAndTheirCellCodes.end(),IndexAndCode::codeComp);
 
+	//JS_TEMP//
+	for (int i=0 ; i<MAX_OCTREE_LEVEL+1 ; i++)
+		m_cellsBuilt[i].clear();
+	for (it=m_thePointsAndTheirCellCodes.begin() ; it!=m_thePointsAndTheirCellCodes.end() ; it++)
+	{
+		OctreeCellCodeType completeCode = it->theCode;
+		for (int level=1 ; level<=MAX_OCTREE_LEVEL ; level++)
+		{
+			uchar bitDec = GET_BIT_SHIFT(level);
+			OctreeCellCodeType newCode = completeCode >> bitDec; 
+			m_cellsBuilt[level].insert(newCode);
+		}
+	}
+
     //update the pre-computed 'number of cells per level of subidivision' array
     updateCellCountTable();
 
@@ -4318,3 +4332,261 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
 }
 
 #endif
+
+
+
+
+//JS_TEMP//
+
+
+//// an other method to compute frustrum cell intersection (not used)
+//
+//unsigned char boxIntersectPlane(const CCVector3& minCorner, const CCVector3& maxCorner, const float planeCoefficient[4])
+//{
+//	CCVector3 n(planeCoefficient[0], planeCoefficient[1], planeCoefficient[2]);
+//	float d = planeCoefficient[3];
+//
+//	CCVector3 c = (maxCorner + minCorner) / 2.0;
+//	CCVector3 h = (maxCorner - minCorner) / 2.0;
+//
+//	float e = h[0]*abs(n[0]) + h[1]*abs(n[1]) + h[2]*abs(n[2]);
+//	float s = c.dot(n) + d;
+//
+//	if ((s-e) > 0.0)
+//		return CELL_OUTSIDE_FRUSTRUM;
+//	if ((s+e) < 0.0)
+//		return CELL_INSIDE_FRUSTRUM;
+//	return CELL_INTERSECT_FRUSTRUM;
+//}
+//
+//unsigned char boxIntersectFrustum(const CCVector3& minCorner, const CCVector3& maxCorner, const float planesCoefficients[6][4])
+//{
+//	bool intersecting = false;
+//
+//	for (int i=0 ; i<6 ; i++)
+//	{
+//		float onePlaneCoefficients[4];
+//		for (int j=0 ; j<4 ; j++)
+//			onePlaneCoefficients[j] = planesCoefficients[i][j];
+//
+//		int result = boxIntersectPlane(minCorner, maxCorner, onePlaneCoefficients);
+//
+//		//pay attention to the signification of OUTSIDE and INSIDE there : INSIDE means that the box is in the positive half space delimited by the plane, OUTSIDE means that the box is in the negative half space !!
+//		if (result == CELL_OUTSIDE_FRUSTRUM)
+//			return CELL_OUTSIDE_FRUSTRUM;
+//		if (result == CELL_INTERSECT_FRUSTRUM)
+//			intersecting = true;
+//	}
+//
+//	if (intersecting == true)
+//		return CELL_INTERSECT_FRUSTRUM;
+//	return CELL_INSIDE_FRUSTRUM;
+//}
+
+unsigned char DgmOctree::separatingAxisTest(const CCVector3 bbMin, const CCVector3 bbMax, const float planesCoefficients[6][4], const CCVector3 frustrumCorners[8], const CCVector3 frustrumEdges[6], const CCVector3 frustrumCenter)
+{
+	// first test : if the box is too far from the frustrum, there is no intersection
+	CCVector3 boxCenter = (bbMax + bbMin) / 2.0;
+	float dCenter = (boxCenter - frustrumCenter).norm();
+	float boxRadius = (bbMax - bbMin).norm();
+	float frustrumRadius = (frustrumCorners[0] - frustrumCenter).norm();
+	if (dCenter > (boxRadius + frustrumRadius))
+		return CELL_OUTSIDE_FRUSTRUM;
+
+	// We could add a test : is the cell circumscribed circle in the frustrum incircle frustrum ?
+	// --> if we are lucky, it could save a lot of time !...
+
+	//box corners
+	CCVector3 boxCorners[8];
+	for (int i=0 ; i<8 ; i++)
+		boxCorners[i] = CCVector3((i&4)?bbMin.x:bbMax.x, (i&2)?bbMin.y:bbMax.y, (i&1)?bbMin.z:bbMax.z);
+
+	/*There are 28 tests to do :
+		nbFacesCube = n1 = 3;
+		nbFacesFrustrum = n2 = 5;
+		nbEdgesCube = n3 = 3;
+		nbEdgesFrustrum = n4 = 6;
+		nbOtherFrustrumCombinations = n5 = 2
+		nbVecToTest = n1 + n2 + n3*n4 = 3 + 5 + 3*6 + n5 = 28;*/
+	int nbVecToTest = 28;
+	CCVector3 VecToTest[28];
+	// vectors orthogonals to box planes
+	VecToTest[0] = CCVector3(1.0, 0.0, 0.0);
+	VecToTest[1] = CCVector3(0.0, 1.0, 0.0);
+	VecToTest[2] = CCVector3(0.0, 0.0, 1.0);
+	// vectors orthogonals to frustrum planes
+	VecToTest[3] = CCVector3(planesCoefficients[0][0], planesCoefficients[0][1], planesCoefficients[0][2]);
+	VecToTest[4] = CCVector3(planesCoefficients[1][0], planesCoefficients[1][1], planesCoefficients[1][2]);
+	VecToTest[5] = CCVector3(planesCoefficients[2][0], planesCoefficients[2][1], planesCoefficients[2][2]);
+	VecToTest[6] = CCVector3(planesCoefficients[3][0], planesCoefficients[3][1], planesCoefficients[3][2]);
+	VecToTest[7] = CCVector3(planesCoefficients[4][0], planesCoefficients[4][1], planesCoefficients[4][2]);	
+	// combinations box and frustrum
+	VecToTest[8] = VecToTest[0].cross(frustrumEdges[0]);
+	VecToTest[9] = VecToTest[0].cross(frustrumEdges[1]);
+	VecToTest[10] = VecToTest[0].cross(frustrumEdges[2]);
+	VecToTest[11] = VecToTest[0].cross(frustrumEdges[3]);
+	VecToTest[12] = VecToTest[0].cross(frustrumEdges[4]);
+	VecToTest[13] = VecToTest[0].cross(frustrumEdges[5]);
+	VecToTest[14] = VecToTest[1].cross(frustrumEdges[0]);
+	VecToTest[15] = VecToTest[1].cross(frustrumEdges[1]);
+	VecToTest[16] = VecToTest[1].cross(frustrumEdges[2]);
+	VecToTest[17] = VecToTest[1].cross(frustrumEdges[3]);
+	VecToTest[18] = VecToTest[1].cross(frustrumEdges[4]);
+	VecToTest[19] = VecToTest[1].cross(frustrumEdges[5]);
+	VecToTest[20] = VecToTest[2].cross(frustrumEdges[0]);
+	VecToTest[21] = VecToTest[2].cross(frustrumEdges[1]);
+	VecToTest[22] = VecToTest[2].cross(frustrumEdges[2]);
+	VecToTest[23] = VecToTest[2].cross(frustrumEdges[3]);
+	VecToTest[24] = VecToTest[2].cross(frustrumEdges[4]);
+	VecToTest[25] = VecToTest[2].cross(frustrumEdges[5]);
+	// combinations frustrum
+	VecToTest[26] = frustrumEdges[0].cross(frustrumEdges[2]);
+	VecToTest[27] = frustrumEdges[1].cross(frustrumEdges[3]);
+
+	// normalization
+	for (int i=0 ; i<nbVecToTest ; i++)
+		VecToTest[i].normalize();
+
+	bool boxInside = true;
+
+	// project volume corners
+	for (int i=0 ; i<nbVecToTest ; i++)
+	{
+		CCVector3 testVec = VecToTest[i];
+		float d;
+		
+		//box points
+		float dMinBox = testVec.dot(boxCorners[0]);
+		float dMaxBox = dMinBox;
+		for (int j=1 ; j<8 ; j++)
+		{
+			d = testVec.dot(boxCorners[j]);
+			if (d>dMaxBox)
+				dMaxBox = d;
+			if (d<dMinBox)
+				dMinBox = d;
+		}
+		
+		//frustrum points
+		float dMinFru = testVec.dot(frustrumCorners[0]);
+		float dMaxFru = dMinFru;
+		for (int j=1 ; j<8 ; j++)
+		{
+			d = testVec.dot(frustrumCorners[j]);
+			if (d>dMaxFru)
+				dMaxFru = d;
+			if (d<dMinFru)
+				dMinFru = d;
+		}
+
+		//if this plane is a separating plane, the cell is outside the frustrum
+		if (dMaxBox < dMinFru || dMaxFru < dMinBox)
+			return CELL_OUTSIDE_FRUSTRUM;
+
+		// if this plane is NOT a separating plane, the cell is at least intersecting the frustrum
+		else 
+		{
+			// moreover, the cell can be completely inside the frustrum...
+			if (dMaxBox>dMaxFru || dMinBox<dMinFru)
+				boxInside = false;
+		}
+	}
+
+	if (boxInside)
+		return CELL_INSIDE_FRUSTRUM;
+
+	return CELL_INTERSECT_FRUSTRUM;
+}
+
+void DgmOctree::computeFrustumIntersectionByLevel(const int level, const OctreeCellCodeType parentTruncatedCode, const unsigned char parentResult, const float planesCoefficients[6][4], const CCVector3 ptsFrustrum[8], const CCVector3 edges[6], const CCVector3 center)
+{
+	if (parentResult == CELL_OUTSIDE_FRUSTRUM)
+		return;
+
+	// move code to the left
+	OctreeCellCodeType baseTruncatedCode = parentTruncatedCode;
+	baseTruncatedCode <<= 3;
+
+	// test to do on the 8 child cells
+	for (unsigned int i=0 ; i<8 ; i++)
+	{
+		// set truncated code of the current cell
+		OctreeCellCodeType truncatedCode = baseTruncatedCode + i;
+
+		// if the cell current has not been built (contains no 3D points), we skip
+		std::unordered_set<OctreeCellCodeType>::const_iterator got = m_cellsBuilt[level].find(truncatedCode);
+		if (got != m_cellsBuilt[level].end())
+		{
+			// get extrema of the current cell
+			CCVector3 bbMin, bbMax;
+			computeCellLimits(truncatedCode, level, bbMin.u, bbMax.u, true);
+
+			// look if there is a separating plane
+			unsigned char result = (parentResult == CELL_INSIDE_FRUSTRUM ? CELL_INSIDE_FRUSTRUM : separatingAxisTest(bbMin, bbMax, planesCoefficients, ptsFrustrum, edges, center));
+
+			// if the cell is not outside the frustrum, there is a kind of intersection (inside or intesecting)
+			if (result != CELL_OUTSIDE_FRUSTRUM)
+			{
+				if (result == CELL_INSIDE_FRUSTRUM)
+					m_cellsInFrustum[level].insert(truncatedCode);
+				else
+					m_cellsIntersectFrustum[level].insert(truncatedCode);
+				
+				// we do the same for the children (if we have nor already reached the end of the tree)
+				if (level<MAX_OCTREE_LEVEL)
+					computeFrustumIntersectionByLevel(level+1, truncatedCode, result, planesCoefficients, ptsFrustrum, edges, center);
+			}
+		} 
+	}
+}
+
+void DgmOctree::computeFrustumIntersectionWithOctree(std::vector< pair<unsigned int,CCVector3> >& pointsToTest, std::vector<unsigned int>& inCameraFrustrum, const float planesCoefficients[6][4], const CCVector3 ptsFrustrum[8], const CCVector3 edges[6], const CCVector3 center)
+{
+	// clear old result
+	for (int i=0 ; i<MAX_OCTREE_LEVEL+1 ; i++)
+	{
+		m_cellsInFrustum[i].clear();
+		m_cellsIntersectFrustum[i].clear();
+	}
+
+	// find intersecting cells
+	computeFrustumIntersectionByLevel(1, 0, CELL_INTERSECT_FRUSTRUM, planesCoefficients, ptsFrustrum, edges, center);
+
+	// get points
+	std::unordered_set<OctreeCellCodeType>::const_iterator it;
+	int level = MAX_OCTREE_LEVEL;
+
+	// dealing with cells completely inside the frustrum
+	for (it = m_cellsInFrustum[level].begin() ; it != m_cellsInFrustum[level].end() ; it++)
+	{
+		// get all points in cell
+		OctreeCellCodeType truncatedCode = *it;
+		CCLib::ReferenceCloud* pointsInCell = getPointsInCell(truncatedCode, level, true);
+		
+		// every point is in the frustrum since the cell itself is completely inside
+		pointsInCell->placeIteratorAtBegining();
+		for (size_t i=0 ; i<pointsInCell->size() ; i++)
+		{
+			inCameraFrustrum.push_back(pointsInCell->getCurrentPointGlobalIndex());			
+			pointsInCell->forwardIterator();
+		}
+	}
+
+	// dealing with cells intersecting the frustrum (not completely inside)
+	for (it = m_cellsIntersectFrustum[level].begin() ; it != m_cellsIntersectFrustum[level].end() ; it++)
+	{
+		// get all points in cell
+		OctreeCellCodeType truncatedCode = *it;
+		CCLib::ReferenceCloud* pointsInCell = getPointsInCell(truncatedCode, level, true);
+		
+		// every point is not in the frustrum since the cell itself is not completely inside
+		pointsInCell->placeIteratorAtBegining();
+		for (size_t i=0 ; i<pointsInCell->size() ; i++)
+		{
+			unsigned int currentIndice = pointsInCell->getCurrentPointGlobalIndex();
+			const CCVector3* vec = pointsInCell->getCurrentPointCoordinates();
+			pointsToTest.push_back( std::pair<unsigned int, CCVector3>(currentIndice, *vec) );			
+			pointsInCell->forwardIterator();
+		}
+	}
+}

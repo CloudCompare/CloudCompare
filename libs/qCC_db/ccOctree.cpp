@@ -306,7 +306,23 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	CCVector3 bbMin,bbMax;
 	cell.parentOctree->computeCellLimits(cell.truncatedCode,cell.level,bbMin.u,bbMax.u,true);
 
-	glColor3ubv(ccColor::green);
+	unsigned char position = cell.positionFromFrustum();
+
+	//JS_TEMP//
+	// outside
+	if (position == CELL_OUTSIDE_FRUSTRUM)
+		glColor3ubv(ccColor::green);
+	else
+	{
+		glLineWidth(2.0);
+		// inside
+		if (position == CELL_INSIDE_FRUSTRUM)
+			glColor3ubv(ccColor::magenta);
+		// intersecting
+		else
+			glColor3ubv(ccColor::blue);
+	}
+
 	glBegin(GL_LINE_LOOP);
 	ccGL::Vertex3v(bbMin.u);
 	ccGL::Vertex3(bbMax.x,bbMin.y,bbMin.z);
@@ -331,6 +347,11 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	ccGL::Vertex3(bbMin.x,bbMax.y,bbMin.z);
 	ccGL::Vertex3(bbMin.x,bbMax.y,bbMax.z);
 	glEnd();
+
+	//JS_TEMP//
+	// not outside
+	if (position != CELL_OUTSIDE_FRUSTRUM)
+		glLineWidth(1.0);
 
 	return true;
 }

@@ -329,7 +329,7 @@ protected slots:
 	void doActionCreateCameraSensor();
     void doActionModifySensor();
 	void doActionProjectUncertainty();
-	//void doActionFilterOctree();
+	void doActionFilterOctree();
     void doActionComputeDistancesFromSensor();
     void doActionComputeScatteringAngles();
 	void doActionSetViewFromSensor();

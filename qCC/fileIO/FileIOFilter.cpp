@@ -204,7 +204,7 @@ FileIOFilter* FileIOFilter::CreateFilter(CC_FILE_TYPES fType)
 	return 0;
 }
 
-ccHObject* FileIOFilter::LoadFromFile(const QString& filename,
+ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 										CC_FILE_TYPES fType,
 										bool alwaysDisplayLoadDialog/*=true*/,
 										bool* coordinatesShiftEnabled/*=0*/,

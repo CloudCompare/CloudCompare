@@ -115,7 +115,7 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
     cloud->placeIteratorAtBegining();
     for (unsigned k=0; k<count; ++k)
     {
-        //projetion into local 2D plane ref.
+        //projection into local 2D plane ref.
         CCVector3 P = *(cloud->getNextPoint()) - *G;
         
 		PointCoordinateType x2D = P.dot(*X);
@@ -123,13 +123,13 @@ ccPlane* ccPlane::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*
 
         if (k!=0)
         {
-            if (minX < x2D)
+            if (minX > x2D)
                 minX = x2D;
-            else if (maxX > x2D)
+            else if (maxX < x2D)
                 maxX = x2D;
-            if (minY < y2D)
+            if (minY > y2D)
                 minY = y2D;
-            else if (maxY > y2D)
+            else if (maxY < y2D)
                 maxY = y2D;
         }
         else

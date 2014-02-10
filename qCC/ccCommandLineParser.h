@@ -6,6 +6,8 @@
 
 //qCC_db
 #include <ccHObject.h>
+#include <ccGenericMesh.h>
+#include <ccPointCloud.h>
 
 //Qt
 #include <QString>
@@ -14,8 +16,6 @@
 //STL
 #include <vector>
 
-class ccPointCloud;
-class ccGenericMesh;
 class ccProgressDialog;
 class QDialog;
 
@@ -101,7 +101,7 @@ protected:
 			, indexInFile(index)
 		{}
 		
-		virtual ccHObject* getEntity() { return (ccHObject*)pc; }
+		virtual ccHObject* getEntity() { return static_cast<ccHObject*>(pc); }
 	};
 
 	//! Loaded mesh description
@@ -120,7 +120,7 @@ protected:
 			, mesh(_mesh)
 		{}
 
-		virtual ccHObject* getEntity() { return (ccHObject*)mesh; }
+		virtual ccHObject* getEntity() { return static_cast<ccHObject*>(mesh); }
 	};
 
 	//! Exports a cloud or a mesh

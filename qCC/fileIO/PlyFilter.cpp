@@ -1026,7 +1026,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 			pod.textCoordsComboBox->setMaxVisibleItems(listPropsCount);
 
 			//We execute dialog
-			if (!pod.exec())
+			if (alwaysDisplayLoadDialog && !pod.exec())
 			{
 				ply_close(ply);
 				return CC_FERR_CANCELED_BY_USER;

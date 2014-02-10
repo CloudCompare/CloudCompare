@@ -8,8 +8,6 @@
 #include <Neighbourhood.h>
 
 //qCC_db
-#include <ccPointCloud.h>
-#include <ccGenericMesh.h>
 #include <ccProgressDialog.h>
 #include <ccOctree.h>
 #include <ccPlane.h>
@@ -82,6 +80,9 @@ static const char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
 static CC_FILE_TYPES s_CloudExportFormat = BIN;
 //Current meh(es) export format (can be modified with the 'COMMAND_MESH_EXPORT_FORMAT' option)
 static CC_FILE_TYPES s_MeshExportFormat = BIN;
+//Default numerical precision for ASCII output
+static int s_precision = 12;
+
 
 bool IsCommand(const QString& token, const char* command)
 {
@@ -209,7 +210,10 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 		return QString("[Export] Internal error: invalid input entity!");
 	}
 
-	QString cloudName = (!entity->getName().isEmpty() ? entity->getName() : entDesc.basename);
+
+	QString cloudName = entity->getName();
+	if (cloudName.isEmpty())
+		cloudName = entDesc.basename;
 	bool isCloud = entity->isA(CC_POINT_CLOUD);
 	if (isCloud)
 	{
@@ -224,10 +228,13 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 	QString baseName = entDesc.basename;
 	if (!suffix.isEmpty())
 		baseName += QString("_") + suffix;
-	QString outputFilename = QString("%1/%2_%3.bin").arg(entDesc.path).arg(baseName).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+	QString outputFilename = QString("%1_%2.bin").arg(baseName).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
 
 	if (_outputFilename)
 		*_outputFilename = outputFilename;
+
+	if (!entDesc.path.isEmpty())
+		outputFilename.prepend(QString("%1/").arg(entDesc.path));
 
 	ccHObject group;
 	group.addChild(entity,false);
@@ -857,7 +864,7 @@ bool ccCommandLineParser::matchBBCenters(QStringList& arguments)
 
 		//apply translation matrix
 		ent->applyGLTransformation_recursive(&glTrans);
-		Print(QString("Entity '%1' has been translated: (%1,%2,%3)").arg(ent->getName()).arg(T.x).arg(T.y).arg(T.z));
+		Print(QString("Entity '%1' has been translated: (%2,%3,%4)").arg(ent->getName()).arg(T.x).arg(T.y).arg(T.z));
 		QString errorStr = Export(*entities[i]);
 		if (!errorStr.isEmpty())
 			return Error(errorStr);
@@ -896,8 +903,6 @@ bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments)
 			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
 		}
 	}
-
-	const int precision = 12;
 
 	if (m_clouds.empty())
 		return Error(QString("No cloud available. Be sure to open one first!"));
@@ -939,7 +944,7 @@ bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments)
 			//We always consider the normal with a positive 'Z' by default!
 			if (N.z < 0.0)
 				N *= -1.0;
-			txtStream << QString("Normal: (%1,%2,%3)").arg(N.x,0,'f',precision).arg(N.y,0,'f',precision).arg(N.z,0,'f',precision) << endl;
+			txtStream << QString("Normal: (%1,%2,%3)").arg(N.x,0,'f',s_precision).arg(N.y,0,'f',s_precision).arg(N.z,0,'f',s_precision) << endl;
 			
 			//we compute strike & dip by the way
 			{
@@ -956,7 +961,7 @@ bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments)
 			makeZPosMatrix.invert();
 
 			txtStream << "Orientation matrix:" << endl;
-			txtStream << makeZPosMatrix.toString(precision,' ') << endl; //full precision
+			txtStream << makeZPosMatrix.toString(s_precision,' ') << endl;
 
 			//close the text file
 			txtFile.close();
@@ -1508,14 +1513,14 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			//local option confirmed, we can move on
 			arguments.pop_front();
 
-			adjustScale = true;
+			referenceIsFirst = true;
 		}
 		else if (IsCommand(argument,COMMAND_ICP_ADJUST_SCALE))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
 
-			referenceIsFirst = true;
+			adjustScale = true;
 		}
 		else if (IsCommand(argument,COMMAND_ICP_ENABLE_FARTHEST_REMOVAL))
 		{
@@ -1612,6 +1617,16 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 		data->applyGLTransformation_recursive(&transMat);
 		Print(QString("Entity '%1' has been registered").arg(data->getName()));
 
+		//save matrix in a separate text file
+		{
+			QString txtFilename = QString("%1/%2_%3_%4.txt").arg(dataAndModel[0]->path).arg(dataAndModel[0]->basename).arg("_REGISTRATION_MATRIX").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+			QFile txtFile(txtFilename);
+			txtFile.open(QIODevice::WriteOnly | QIODevice::Text);
+			QTextStream txtStream(&txtFile);
+			txtStream << transMat.toString(s_precision,' ') << endl;
+			txtFile.close();
+		}
+			
 		dataAndModel[0]->basename += QString("_REGISTERED");
 		QString errorStr = Export(*dataAndModel[0]);
 		if (!errorStr.isEmpty())

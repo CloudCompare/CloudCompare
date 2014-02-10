@@ -30,7 +30,7 @@ const int MAX_ASCII_FILE_LINE_LENGTH	=	4096;
 
 //! File types handled by CloudCompare (loading and/or saving)
 enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
-					SOI					,		/**< SOI (Mensi Trimble) */
+					SOI					,		/**< SOI (Mensi Soisic) */
 					ASCII				,		/**< ASC,NEU, XYZ, TXT, PTS, etc. */
 					BIN					,		/**< CloudCompare binary */
 					PN					,		/**< Point-Normal (binary) */
@@ -38,7 +38,7 @@ enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
 					PLY					,		/**< Stanford mesh file */
 					OBJ					,		/**< Wavefront mesh file */
 					POV					,		/**< Multiple Point-Of-View cloud meta-file (ascii) */
-					MA					,		/**< Maya Ascii file */
+					MA					,		/**< Maya mesh (ascii) */
 					ICM					,		/**< Calibrated Images meta-file */
 					DM_ASCII    		,		/**< Depth Map (ascii) */
 					BUNDLER     		,		/**< Bundler output (ascii) */
@@ -201,7 +201,7 @@ class FileIOFilter
 {
 public:
 
-	//! Loads one or more entites from a file with known type
+	//! Loads one or more entities from a file with known type
 	/** \param filename filename
 		\param fType file type (if left to UNKNOWN_FILE, file type will be guessed from extension)
 		\param alwaysDisplayLoadDialog always display (eventual) display dialog, even if automatic guess is possible
@@ -229,7 +229,7 @@ public:
 									const QString& action,
 									const QString& filename);
 
-	//! Loads one or more entites from a file
+	//! Loads one or more entities from a file
 	/** This method must be implemented by children classes.
         \param filename file to load
         \param container container to store loaded entities

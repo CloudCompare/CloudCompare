@@ -228,7 +228,9 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 	QString baseName = entDesc.basename;
 	if (!suffix.isEmpty())
 		baseName += QString("_") + suffix;
-	QString outputFilename = QString("%1_%2.bin").arg(baseName).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+
+	const char* extension = CC_FILE_TYPE_DEFAULT_EXTENSION[isCloud ? s_CloudExportFormat : s_MeshExportFormat];
+	QString outputFilename = QString("%1_%2.%3").arg(baseName).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm")).arg(extension);
 
 	if (_outputFilename)
 		*_outputFilename = outputFilename;
@@ -1531,39 +1533,39 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 		}
 		else if (IsCommand(argument,COMMAND_ICP_MIN_ERROR_DIIF))
 		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: min error difference after '%1'").arg(COMMAND_ICP_MIN_ERROR_DIIF)));
 			bool ok;
 			minErrorDiff = arguments.takeFirst().toDouble(&ok);
 			if (!ok || minErrorDiff <= 0)
 				return Error(QString("Invalid value for min. error difference! (%1)").arg(COMMAND_ICP_MIN_ERROR_DIIF));
-
-			//local option confirmed, we can move on
-			arguments.pop_front();
 		}
 		else if (IsCommand(argument,COMMAND_ICP_ITERATION_COUNT))
 		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: number of iterations after '%1'").arg(COMMAND_ICP_ITERATION_COUNT)));
 			bool ok;
 			iterationCount = arguments.takeFirst().toUInt(&ok);
 			if (!ok || iterationCount == 0)
 				return Error(QString("Invalid number of iterations! (%1)").arg(COMMAND_ICP_ITERATION_COUNT));
-
-			//local option confirmed, we can move on
-			arguments.pop_front();
 		}
 		else if (IsCommand(argument,COMMAND_ICP_RANDOM_SAMPLING_LIMIT))
 		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: random sampling limit value after '%1'").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT)));
 			bool ok;
 			randomSamplingLimit = arguments.takeFirst().toUInt(&ok);
 			if (!ok || randomSamplingLimit < 3)
 				return Error(QString("Invalid random sampling limit! (%1)").arg(COMMAND_ICP_RANDOM_SAMPLING_LIMIT));
-
-			//local option confirmed, we can move on
-			arguments.pop_front();
 		}
 		else
 		{
@@ -1652,7 +1654,7 @@ CC_FILE_TYPES ccCommandLineParser::getFileFormat(QStringList& arguments)
 
 		for (int i=0; i<FILE_TYPES_COUNT; ++i)
 		{
-			if (argument == QString(CC_FILE_TYPE_FILTERS[i]))
+			if (argument == QString(CC_FILE_TYPE_DEFAULT_EXTENSION[i]).toUpper())
 			{
 				//found
 				type = static_cast<CC_FILE_TYPES>(i);
@@ -1682,12 +1684,28 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 
 	s_CloudExportFormat = type;
 
+	//default options for ASCII output
+	if (s_CloudExportFormat == ASCII)
+	{
+		QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
+		assert(saveDialog);
+		saveDialog->coordsPrecisionSpinBox->setValue(s_precision);
+		saveDialog->sfPrecisionSpinBox->setValue(s_precision);
+		saveDialog->separatorComboBox->setCurrentIndex(0); //space
+		saveDialog->orderComboBox->setCurrentIndex(0); //point, color, SF, normal
+		saveDialog->columnsHeaderCheckBox->setChecked(false);
+		saveDialog->pointCountHeaderCheckBox->setChecked(false);
+	}
+
 	//look for additional parameters
 	while (!arguments.empty())
 	{
 		QString argument = arguments.front();
 		if (IsCommand(argument,COMMAND_ASCII_EXPORT_PRECISION))
 		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+			
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: precision value after '%1'").arg(COMMAND_ASCII_EXPORT_PRECISION)));
 			bool ok;
@@ -1699,15 +1717,17 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			assert(saveDialog);
 			saveDialog->coordsPrecisionSpinBox->setValue(precision);
 			saveDialog->sfPrecisionSpinBox->setValue(precision);
-
-			//local option confirmed, we can move on
-			arguments.pop_front();
 		}
 		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_SEPARATOR))
 		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: separator character after '%1'").arg(COMMAND_ASCII_EXPORT_SEPARATOR)));
+			
 			QString separatorStr = arguments.takeFirst().toUpper();
+			printf("%s\n",qPrintable(separatorStr));
 			int index = -1;
 			if (separatorStr == "SPACE")
 				index = 0;
@@ -1723,9 +1743,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
 			assert(saveDialog);
 			saveDialog->separatorComboBox->setCurrentIndex(index);
-
-			//local option confirmed, we can move on
-			arguments.pop_front();
+			saveDialog->setAutoShow(false);
 		}
 		else
 		{

@@ -75,13 +75,21 @@ static const char COMMAND_CLOUD_EXPORT_FORMAT[]				= "C_EXPORT_FMT";
 static const char COMMAND_ASCII_EXPORT_PRECISION[]			= "PREC";
 static const char COMMAND_ASCII_EXPORT_SEPARATOR[]			= "SEP";
 static const char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
+static const char COMMAND_EXPORT_EXTENSION[]				= "EXT";
+static const char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
 
 //Current cloud(s) export format (can be modified with the 'COMMAND_CLOUD_EXPORT_FORMAT' option)
 static CC_FILE_TYPES s_CloudExportFormat = BIN;
-//Current meh(es) export format (can be modified with the 'COMMAND_MESH_EXPORT_FORMAT' option)
+//Current cloud(s) export extension (warning: can be anything)
+static QString s_CloudExportExt(CC_FILE_TYPE_DEFAULT_EXTENSION[s_CloudExportFormat]);
+//Current mesh(es) export format (can be modified with the 'COMMAND_MESH_EXPORT_FORMAT' option)
 static CC_FILE_TYPES s_MeshExportFormat = BIN;
+//Current mesh(es) export extension (warning: can be anything)
+static QString s_MeshExportExt(CC_FILE_TYPE_DEFAULT_EXTENSION[s_MeshExportFormat]);
 //Default numerical precision for ASCII output
 static int s_precision = 12;
+//Whether a timestamp should be automatically added to output files or not
+static bool s_addTimestamp = true;
 
 
 bool IsCommand(const QString& token, const char* command)
@@ -229,8 +237,12 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 	if (!suffix.isEmpty())
 		baseName += QString("_") + suffix;
 
-	const char* extension = CC_FILE_TYPE_DEFAULT_EXTENSION[isCloud ? s_CloudExportFormat : s_MeshExportFormat];
-	QString outputFilename = QString("%1_%2.%3").arg(baseName).arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm")).arg(extension);
+	QString outputFilename = baseName;
+	if (s_addTimestamp)
+		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+	QString extension = isCloud ? s_CloudExportExt : s_MeshExportExt;
+	if (!extension.isEmpty())
+		outputFilename += QString(".%1").arg(extension);
 
 	if (_outputFilename)
 		*_outputFilename = outputFilename;
@@ -935,7 +947,10 @@ bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments)
 				ccConsole::Warning(errorStr);
 
 			//open text file to save plane related information
-			QString txtFilename = QString("%1/%2_%3_%4.txt").arg(m_clouds[i].path).arg(m_clouds[i].basename).arg("BEST_FIT_PLANE_INFO").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+			QString txtFilename = QString("%1/%2_%3").arg(m_clouds[i].path).arg(m_clouds[i].basename).arg("BEST_FIT_PLANE_INFO");
+			if (s_addTimestamp)
+				txtFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+			txtFilename += QString(".txt");
 			QFile txtFile(txtFilename);
 			txtFile.open(QIODevice::WriteOnly | QIODevice::Text);
 			QTextStream txtStream(&txtFile);
@@ -1621,7 +1636,10 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 
 		//save matrix in a separate text file
 		{
-			QString txtFilename = QString("%1/%2_%3_%4.txt").arg(dataAndModel[0]->path).arg(dataAndModel[0]->basename).arg("_REGISTRATION_MATRIX").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+			QString txtFilename = QString("%1/%2_%3").arg(dataAndModel[0]->path).arg(dataAndModel[0]->basename).arg("_REGISTRATION_MATRIX");
+			if (s_addTimestamp)
+				txtFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+			txtFilename += QString(".txt");
 			QFile txtFile(txtFilename);
 			txtFile.open(QIODevice::WriteOnly | QIODevice::Text);
 			QTextStream txtStream(&txtFile);
@@ -1683,6 +1701,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 		return false;
 
 	s_CloudExportFormat = type;
+	s_CloudExportExt = QString(CC_FILE_TYPE_DEFAULT_EXTENSION[s_CloudExportFormat]);
 
 	//default options for ASCII output
 	if (s_CloudExportFormat == ASCII)
@@ -1701,7 +1720,18 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 	while (!arguments.empty())
 	{
 		QString argument = arguments.front();
-		if (IsCommand(argument,COMMAND_ASCII_EXPORT_PRECISION))
+		if (IsCommand(argument,COMMAND_EXPORT_EXTENSION))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+			
+			if (arguments.empty())
+				return Error(QString(QString("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION)));
+
+			s_CloudExportExt = arguments.takeFirst();
+			Print(QString("New output extension for clouds: %1").arg(s_CloudExportExt));
+		}
+		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_PRECISION))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
@@ -1712,6 +1742,9 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			int precision = arguments.takeFirst().toInt(&ok);
 			if (!ok || precision < 0)
 				return Error(QString("Invalid value for precision! (%1)").arg(COMMAND_ASCII_EXPORT_PRECISION));
+
+			if (type != ASCII)
+				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
 			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
 			assert(saveDialog);
@@ -1726,6 +1759,9 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: separator character after '%1'").arg(COMMAND_ASCII_EXPORT_SEPARATOR)));
 			
+			if (type != ASCII)
+				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
+
 			QString separatorStr = arguments.takeFirst().toUpper();
 			printf("%s\n",qPrintable(separatorStr));
 			int index = -1;
@@ -1749,9 +1785,6 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 		{
 			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
 		}
-
-		if (type != ASCII)
-			ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 	}
 
 	return true;
@@ -1764,6 +1797,30 @@ bool ccCommandLineParser::commandChangeMeshOutputFormat(QStringList& arguments)
 		return false;
 
 	s_MeshExportFormat = type;
+	s_MeshExportExt = QString(CC_FILE_TYPE_DEFAULT_EXTENSION[s_MeshExportFormat]);
+
+	//look for additional parameters
+	while (!arguments.empty())
+	{
+		QString argument = arguments.front();
+
+		if (IsCommand(argument,COMMAND_EXPORT_EXTENSION))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+			
+			if (arguments.empty())
+				return Error(QString(QString("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION)));
+
+			s_MeshExportExt = arguments.takeFirst();
+			Print(QString("New output extension for meshes: %1").arg(s_MeshExportExt));
+		}
+		else
+		{
+			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
+		}
+	}
+
 	return true;
 }
 
@@ -1885,6 +1942,12 @@ int ccCommandLineParser::parse(QStringList& arguments, bool silent, QDialog* par
 			removeClouds();
 			removeMeshes();
 		}
+		//no timestamp for output filenames
+		else if (IsCommand(argument,COMMAND_NO_TIMESTAMP))
+		{
+			s_addTimestamp = false;
+		}
+		//silent mode (i.e. no console)
 		else if (IsCommand(argument,COMMAND_SILENT_MODE))
 		{
 			ccConsole::Warning(QString("Misplaced command: '%1' (must be first)").arg(COMMAND_SILENT_MODE));

@@ -4683,6 +4683,7 @@ void MainWindow::doActionComputeNormals()
 	PointCoordinateType defaultRadius = 0;
 	bool onlyMeshes = true;
 	for (size_t i=0; i<count; ++i)
+	{
 		if (!m_selectedEntities[i]->isA(CC_MESH))
 		{
 			if (defaultRadius == 0 && m_selectedEntities[i]->isA(CC_POINT_CLOUD))
@@ -4693,6 +4694,7 @@ void MainWindow::doActionComputeNormals()
 			onlyMeshes = false;
 			break;
 		}
+	}
 
     CC_LOCAL_MODEL_TYPES model = NO_MODEL;
     int preferedOrientation = -1;
@@ -4756,7 +4758,7 @@ void MainWindow::doActionComputeNormals()
 				cloud->setPointNormalIndex(j, normsIndexes->getValue(j));
 
 			normsIndexes->release();
-			normsIndexes=0;
+			normsIndexes = 0;
 
 			cloud->showNormals(true);
 			cloud->prepareDisplayForRefresh();
@@ -4773,6 +4775,16 @@ void MainWindow::doActionComputeNormals()
 			mesh->prepareDisplayForRefresh_recursive();
 		}
     }
+
+	//ask the user if we wants to orient normals (with MST)
+	if (preferedOrientation < 0
+		&&	QMessageBox::question(	this,
+									"Orient normals",
+									"Orient normals with Minimum Spanning Tree?",
+									QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes)
+	{
+		doActionOrientNormalsMST();
+	}
 
     refreshAll();
 	updateUI();

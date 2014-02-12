@@ -342,9 +342,9 @@ void ccClippingBoxTool::exportMultCloud()
 	bool processDim[3] = {	repeatDlg.xRepeatCheckBox->isChecked(),
 							repeatDlg.yRepeatCheckBox->isChecked(),
 							repeatDlg.zRepeatCheckBox->isChecked() };
-	int indexMins[3] = { 0 , 0, 0 };
-	int indexMaxs[3] = { 0 , 0, 0 };
-	int gridDim[3] = { 1 , 1, 1 };
+	int indexMins[3] = { 0, 0, 0 };
+	int indexMaxs[3] = { 0, 0, 0 };
+	int gridDim[3] = { 1, 1, 1 };
 	unsigned cellCount = 1;
 	CCVector3 gridOrigin = m_clipBox->getBB().minCorner();
 	CCVector3 cellSize = m_clipBox->getBB().getDiagVec();
@@ -363,12 +363,12 @@ void ccClippingBoxTool::exportMultCloud()
 				PointCoordinateType a = (localBox.minCorner().u[d] - gridOrigin.u[d])/(cellSize.u[d]+gap); //don't forget the user defined gap between 'cells'
 				PointCoordinateType b = (localBox.maxCorner().u[d] - gridOrigin.u[d])/(cellSize.u[d]+gap);
 
-				indexMins[d] = (int)floor(a);
-				indexMaxs[d] = (int)ceil(b)-1;
+				indexMins[d] = static_cast<int>(floor(a+static_cast<PointCoordinateType>(1.0e-6)));
+				indexMaxs[d] = static_cast<int>(ceil(b-static_cast<PointCoordinateType>(1.0e-6)))-1;
 				
 				assert(indexMaxs[d] >= indexMins[d]);
 				gridDim[d] = std::max(indexMaxs[d] - indexMins[d] + 1, 1);
-				cellCount *= (unsigned)gridDim[d];
+				cellCount *= static_cast<unsigned>(gridDim[d]);
 			}
 		}
 	}
@@ -394,6 +394,8 @@ void ccClippingBoxTool::exportMultCloud()
 		}
 		memset(clouds, 0, sizeof(CCLib::ReferenceCloud*)*cellCount);
 
+		CCVector3 cellSizePlusGap = cellSize + CCVector3(gap,gap,gap);
+
 		//project points into grid
 		bool error = false;
 		{
@@ -413,20 +415,23 @@ void ccClippingBoxTool::exportMultCloud()
 
 				//relative coordinates (between 0 and 1)
 				P -= gridOrigin;
-				P.x /= (cellSize.x+gap);
-				P.y /= (cellSize.y+gap);
-				P.z /= (cellSize.z+gap);
+				P.x /= cellSizePlusGap.x;
+				P.y /= cellSizePlusGap.y;
+				P.z /= cellSizePlusGap.z;
 
-				int xi = (int)P.x; if (xi == gridDim[0]) xi--;
-				int yi = (int)P.y; if (yi == gridDim[1]) yi--;
-				int zi = (int)P.z; if (zi == gridDim[2]) zi--;
+				int xi = static_cast<int>(floor(P.x));
+				xi = std::min( std::max(xi, indexMins[0]), indexMaxs[0]);
+				int yi = static_cast<int>(floor(P.y));
+				yi = std::min( std::max(yi, indexMins[1]), indexMaxs[1]);
+				int zi = static_cast<int>(floor(P.z));
+				zi = std::min( std::max(zi, indexMins[2]), indexMaxs[2]);
 
 				if (gap == 0 ||
-					(	P.x-(PointCoordinateType)xi <= cellSize.x
-					&&	P.y-(PointCoordinateType)yi <= cellSize.y
-					&&	P.z-(PointCoordinateType)zi <= cellSize.z))
+					(	(P.x-static_cast<PointCoordinateType>(xi))*cellSizePlusGap.x <= cellSize.x
+					&&	(P.y-static_cast<PointCoordinateType>(yi))*cellSizePlusGap.y <= cellSize.y
+					&&	(P.z-static_cast<PointCoordinateType>(zi))*cellSizePlusGap.z <= cellSize.z))
 				{
-					int cloudIndex = ((zi-indexMins[2]) * (int)gridDim[1] + (yi-indexMins[1])) * (int)gridDim[0] + (xi-indexMins[0]);
+					int cloudIndex = ((zi-indexMins[2]) * static_cast<int>(gridDim[1]) + (yi-indexMins[1])) * static_cast<int>(gridDim[0]) + (xi-indexMins[0]);
 					if (!clouds[cloudIndex])
 					{
 						clouds[cloudIndex] = new CCLib::ReferenceCloud(cloud);
@@ -459,9 +464,9 @@ void ccClippingBoxTool::exportMultCloud()
 				{
 					for (int k=indexMins[2]; k<=indexMaxs[2]; ++k)
 					{
-						int cloudIndex = ((k-indexMins[2]) * (int)gridDim[1] + (j-indexMins[1])) * (int)gridDim[0] + (i-indexMins[0]);
+						int cloudIndex = ((k-indexMins[2]) * static_cast<int>(gridDim[1]) + (j-indexMins[1])) * static_cast<int>(gridDim[0]) + (i-indexMins[0]);
 
-						if (clouds[cloudIndex]) //some slices can be empty!
+						if (clouds[cloudIndex]) //some slices can be empty due to rounding issues!
 						{
 							int warnings = 0;
 							ccPointCloud* sliceCloud = cloud->partialClone(clouds[cloudIndex],&warnings);
@@ -477,7 +482,9 @@ void ccClippingBoxTool::exportMultCloud()
 									{
 										ccLog::Error("Not enough memory!");
 										error = true;
-										i = indexMaxs[0]; j = indexMaxs[1]; k = indexMaxs[2];
+										i = indexMaxs[0];
+										j = indexMaxs[1];
+										k = indexMaxs[2];
 									}
 									sliceCloud->showColors(true);
 								}
@@ -486,9 +493,9 @@ void ccClippingBoxTool::exportMultCloud()
 								sliceCloud->setVisible(true);
 								sliceCloud->setDisplay(cloud->getDisplay());
 
-								CCVector3 cellOrigin(gridOrigin.x + static_cast<PointCoordinateType>(i) * (cellSize.x + gap),
-													 gridOrigin.y + static_cast<PointCoordinateType>(j) * (cellSize.y + gap),
-													 gridOrigin.z + static_cast<PointCoordinateType>(k) * (cellSize.z + gap));
+								CCVector3 cellOrigin(gridOrigin.x + static_cast<PointCoordinateType>(i) * cellSizePlusGap.x,
+													 gridOrigin.y + static_cast<PointCoordinateType>(j) * cellSizePlusGap.y,
+													 gridOrigin.z + static_cast<PointCoordinateType>(k) * cellSizePlusGap.z);
 								QString slicePosStr = QString("(%1 ; %2 ; %3)").arg(cellOrigin.x).arg(cellOrigin.y).arg(cellOrigin.z);
 								sliceCloud->setName(QString("slice @ ")+slicePosStr);
 

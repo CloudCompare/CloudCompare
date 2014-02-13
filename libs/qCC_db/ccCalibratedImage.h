@@ -92,11 +92,9 @@ public:
 	struct KeyPoint
 	{
 		//! 'x' coordinate in pixels
-		float x;
-		
+		float x;		
 		//! 'y' coordinate in pixels
 		float y;
-
 		//! Index in associated point cloud
 		unsigned index;
 
@@ -105,16 +103,14 @@ public:
 			: x(0)
 			, y(0)
 			, index(0)
-		{
-		}
+		{}
 
 		//! Constructor from a pixel and its index in associated cloud
 		KeyPoint(float Px, float Py, unsigned indexInCloud)
 			: x(Px)
 			, y(Py)
 			, index(indexInCloud)
-		{
-		};
+		{}
 	};
 
 	//! Projective ortho-rectification (as cloud)

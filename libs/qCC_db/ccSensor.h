@@ -83,16 +83,16 @@ public:
 	/** Absolute transformation corresponds to the rigid transformation
 		multiplied by the associated transformation interpolated at the given index.
 	**/
-	bool getAbsoluteTransformation(ccIndexedTransformation& trans, double index);
+	bool getAbsoluteTransformation(ccIndexedTransformation& trans, double index) const;
 
 	//! Gets currently active absolute transformation
-	bool getActiveAbsoluteTransformation(ccIndexedTransformation& trans) { return getAbsoluteTransformation(trans, m_activeIndex); }
+	bool getActiveAbsoluteTransformation(ccIndexedTransformation& trans) const { return getAbsoluteTransformation(trans, m_activeIndex); }
 	
 	//! Gets currently active absolute position
-	bool getActiveAbsoluteCenter(CCVector3& vec);
+	bool getActiveAbsoluteCenter(CCVector3& vec) const;
 
 	//! Gets currently active rotation matrix (without translation)
-	bool getActiveAbsoluteRotation(ccGLMatrix& rotation);
+	bool getActiveAbsoluteRotation(ccGLMatrix& rotation) const;
 
 	//! Sets the rigid transformation between this sensor and its associated positions
 	/** Rigid transformation goes from the sensor position(s) to the sensor "optical" center.
@@ -141,9 +141,9 @@ protected:
 	double m_activeIndex;
 
 	//! Color of the sensor
-	/**	Default color is white=(1.0,1.0,1.0) 
+	/**	Default color is green. 
 	**/
-	CCVector3 m_color;
+	Vector3Tpl<colorType> m_color;
 
 	//! Sensor graphic representation scale
     PointCoordinateType m_scale;

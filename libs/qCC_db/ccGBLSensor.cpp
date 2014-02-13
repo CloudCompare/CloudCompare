@@ -514,10 +514,11 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
         ccBBox bbHead(minCorner,maxCorner);
         CCVector3 headCenter(0,0,(1-halfHeadSize)*m_scale);
         bbHead += headCenter;
-        bbHead.draw(ccColor::green);
+        bbHead.draw(m_color.u);
 
         //sensor legs
         CCVector3 headConnect = headCenter - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
+		glColor3ubv(m_color.u);
         glBegin(GL_LINES);
         ccGL::Vertex3v(headConnect.u);
         ccGL::Vertex3(-m_scale,-m_scale,-m_scale);

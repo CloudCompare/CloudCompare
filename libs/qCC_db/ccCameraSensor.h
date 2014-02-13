@@ -18,10 +18,14 @@
 #ifndef CC_CAMERA_SENSOR_HEADER
 #define CC_CAMERA_SENSOR_HEADER
 
+//local
 #include "ccSensor.h"
 #include "ccOctree.h"
 
+//CCLib
+#include <ReferenceCloud.h>
 
+//! Camera (projective) sensor
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db_dll.h"
 class QCC_DB_DLL_API ccCameraSensor : public ccSensor
@@ -29,49 +33,51 @@ class QCC_DB_DLL_API ccCameraSensor : public ccSensor
 class ccCameraSensor :	public ccSensor
 #endif
 {
-	//! Intrinsic parameters of the cameraSensor.
-	typedef struct intrinsicParameters
+public:
+
+	//! Intrinsic parameters of the camera sensor
+	struct IntrinsicParameters
 	{
-		float focalLength;	// focal length
-		float pixelSize[2];	// real dimension of one pixel (in meters)
-		float skew;			// skew
-		float vFieldOfView;	// vertical field of view (in Radians)
-		float zBoundary[2];	// zBoundary[0]=zNear ; zBoundary[1]=zFar
-		int	  imageSize[2];	// imageSize[0]=width ; imageSize[1]=height
-	} intrinsicParameters;
+		float focalLength;		/**< focal length **/
+		float pixelSize[2];		/**< real dimension of one pixel (in meters) **/
+		float skew;				/**< skew **/
+		float vFieldOfView;		/**< vertical field of view (in Radians) **/
+		float zBoundary[2];		/**< zBoundary[0]=zNear ; zBoundary[1]=zFar **/
+		int	  imageSize[2];		/**< imageSize[0]=width ; imageSize[1]=height **/
+	};
 
 	//! Parameters ion order to correct lens distortion.
-	/**	To know how to use K & P parameters, please read : 
-			"Decentering Distortion of Lenses", Duane C. Brown 
-		To know how to use the linearDisparityParams parameter (kinect attribute), please read :
-			"Accuracy and Resolution of Kinect Depth Data for Indoor Mapping Applications", Kourosh Khoshelham and Sander Oude Elberink
+	/**	To know how to use K & P parameters, please read:
+		"Decentering Distortion of Lenses", Duane C. Brown 
+		To know how to use the linearDisparityParams parameter (kinect attribute), please read:
+		"Accuracy and Resolution of Kinect Depth Data for Indoor Mapping Applications", K. Khoshelham and S.O. Elberink
 	**/
-	typedef struct uncertaintyParameters
+	struct UncertaintyParameters
 	{
-		float principalPointOffset[2];	// offset of the principal point (in meters)
-		float linearDisparityParams[2]; // contains A and B where : 1/Z = A*d' + B (with Z=depth and d'=normalized disparity)
-		float K_BrownParams[3];			// radial parameters Brown's distortion model
-		float P_BrownParams[2];			// tangential parameters Brown's distortion model
-	} uncertaintyParameters;
+		float principalPointOffset[2];		/**< offset of the principal point (in meters) **/
+		float linearDisparityParams[2];		/**< contains A and B where : 1/Z = A*d' + B (with Z=depth and d'=normalized disparity) **/
+		float K_BrownParams[3];				/**< radial parameters Brown's distortion model **/
+		float P_BrownParams[2];				/**< tangential parameters Brown's distortion model **/
+	};
 
-	//! It is possible to draw the frustrum associated to a cameraSensor.
-	typedef struct frustumInformations
+	//! Frustum information structure
+	/** Used to draw the frustrum associated to a camera sensor.
+	**/
+	typedef struct FrustumInformation
 	{
 		bool isComputed;
 		bool drawFrustum;
 		bool drawSidePlanes;
 		CCVector3 frustumCorners[8];
-		CCVector3 center; // center of the circumscribed sphere 
+		CCVector3 center;					/**< center of the circumscribed sphere **/
 		
-		frustumInformations() 
+		FrustumInformation() 
 			: isComputed(false)
 			, drawFrustum(false) 
 			, drawSidePlanes(false)
-		{};
+		{}
 
-	} frustumInformations;
-
-public:
+	};
 
 	//! Default constructor
 	ccCameraSensor();
@@ -79,32 +85,32 @@ public:
 	//! Destructor
 	virtual ~ccCameraSensor();
 
-	//! Returns boolean with the value of drawFrustrum
+	//! Returns whether the frustum should be displayed or not
 	inline bool frustrumIsDrawn() const { return m_frustrumInfos.drawFrustum; }
 
-	//! Set the value of drawFrustrum
+	//! Sets whether the frustum should be displayed or not
 	inline void drawFrustrum(bool state) { m_frustrumInfos.drawFrustum = state; }
 
-	//! Returns boolean with the value of drawFrustrum
+	//! Returns whether the frustum planes should be displayed or not
 	inline bool frustrumPlanesAreDrawn() const { return m_frustrumInfos.drawSidePlanes; }
 
-	//! Set the value of drawFrustrum
+	//! Sets whether the frustum planes should be displayed or not
 	inline void drawFrustrumPlanes(bool state) { m_frustrumInfos.drawSidePlanes = state; }
 
 	//! Returns the camera projection matrix
-	const ccGLMatrix& getProjectionMatrix();
+	inline const ccGLMatrix& getProjectionMatrix() const {return m_projecMatrix; }
 	
 	//! Computes the coordinates of a 3D point in the global coordinate system knowing its coordinates in the sensor coordinate system.
 	/** \param localCoord local coordinates of the 3D point (input)
 		\param globalCoord corresponding global coordinates of the 3D point (output)
 	**/
-	bool fromLocalCoordToGlobalCoord(const CCVector3& localCoord, CCVector3& globalCoord);
+	bool fromLocalCoordToGlobalCoord(const CCVector3& localCoord, CCVector3& globalCoord) const;
 
 	//! Computes the coordinates of a 3D point in the sensor coordinate system knowing its coordinates in the global coordinate system.
 	/** \param globalCoord global coordinates of the 3D point (input)
 		\param localCoord corresponding local coordinates of the 3D point (output)
 	**/
-	bool fromGlobalCoordToLocalCoord(const CCVector3& globalCoord, CCVector3& localCoord);
+	bool fromGlobalCoordToLocalCoord(const CCVector3& globalCoord, CCVector3& localCoord) const;
 	
 	//! Computes the coordinates of a 3D point in the global coordinate system knowing its coordinates in the sensor coordinate system.
 	/** \param localCoord local coordinates of the 3D point (input)
@@ -112,7 +118,7 @@ public:
 		\param withLensError if we want to simulate what the projection would be with an imperfect lens
 		\return if operation has succeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
 	**/
-	bool fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2i& imageCoord, const bool withLensError);
+	bool fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2i& imageCoord, const bool withLensError) const;
 
 	//! Computes the coordinates of a 3D point in the sensor coordinate system knowing its coordinates in the global coordinate system.
 	/** \param imageCoord image coordinates of the pixel (input) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
@@ -121,7 +127,7 @@ public:
 		\param depth if known, depth of the input pixel in meters, in order to recover third coordinates (must be positive) ; if depth is 0.0, then the reprojection is made in the focal plane 
 		\return if operation has succeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries)
 	**/
-	bool fromImageCoordToLocalCoord(const CCVector2i& imageCoord, CCVector3& localCoord, const bool withLensCorrection, const float depth = 0.0);
+	bool fromImageCoordToLocalCoord(const CCVector2i& imageCoord, CCVector3& localCoord, bool withLensCorrection, float depth = 0) const;
 
 	//! Computes the coordinates of a 3D point in the image knowing its coordinates in the global coordinate system.
 	/** \param globalCoord global coordinates of the 3D point
@@ -130,7 +136,7 @@ public:
 		\param withLensError if we want to simulate what the projection would be with an imperfect lens
 		\return if operation has succeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
 	**/ 
-	bool fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector3& localCoord, CCVector2i& imageCoord, const bool withLensError);
+	bool fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector3& localCoord, CCVector2i& imageCoord, const bool withLensError) const;
 	
 	//! Computes the global coordinates of a 3D points from its 3D coordinates (pixel position in the image)
 	/** \param imageCoord image coordinates of the pixel (input) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
@@ -140,52 +146,51 @@ public:
 		\param depth if known, depth of the input pixel, in order to recover third coordinates (must be positive) ; if depth is 0.0, then the reprojection is made in the focal plane
 		\return if operation has succeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries)
 	**/
-	bool fromImageCoordToGlobalCoord(const CCVector2i& imageCoord, CCVector3& localCoord, CCVector3& globalCoord, const bool withLensCorrection, const float depth = 0.0);
+	bool fromImageCoordToGlobalCoord(const CCVector2i& imageCoord, CCVector3& localCoord, CCVector3& globalCoord, bool withLensCorrection, float depth = 0) const;
 
 	//! Apply the Brown's lens correction to the real projection (through a lens) of a 3D point in the image
 	/**	\param real real 2D coordinates of a pixel (asumming that this pixel coordinate is obtained after projection through a lens) (input) !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		\param ideal after applying lens correction (output) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 	**/
-	bool fromRealImCoordToIdealImCoord(const CCVector2i& real, CCVector2i& ideal);
+	bool fromRealImCoordToIdealImCoord(const CCVector2i& real, CCVector2i& ideal) const;
 
 	//! Knowing the ideal projection of a 3D point, computes what would be the real projection (through a lens)
 	/**	\param ideal 2D coordinates of the ideal projection (input) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		\param real what would be the real 2D coordinates of the projection trough a lens (output) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 	**/
-	bool fromIdealImCoordToRealImCoord(const CCVector2i& ideal, CCVector2i& real);
+	bool fromIdealImCoordToRealImCoord(const CCVector2i& ideal, CCVector2i& real) const;
 
 	//! Computes the uncertainty of a point knowing its depth (from the sensor view point) and pixel projection coordinates
 	/**	\param pixel coordinates of the pixel where the 3D points is projected --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		\param depth depth from sensor center to 3D point (must be positive)
-		\param sigmaX to get back the X uncertainty
-		\param sigmaY to get back the Y uncertainty
-		\param sigmaZ to get back the Z uncertainty
+		\param sigma uncertainty vector (along X, Y and Z) 
 		\return operation has succeded (typically, errors occur when the initial pixel coordinates are not into the image boundaries, or when the depth of the 3D point is negative)
 	**/
-	bool computeUncertainty(const CCVector2i& pixel, const float depth, float& sigmaX, float& sigmaY, float& sigmaZ);
+	bool computeUncertainty(const CCVector2i& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const;
 	
 	//! Computes the coordinates of a 3D point in the sensor coordinate system knowing its coordinates in the global coordinate system.
-	/** \param points vector containing the points we want to compute the uncertainty
+	/** \param points the points we want to compute the uncertainty
 		\param accuracy to get back the uncertainty
 		\param lensDistortion if we want to take the lens distortion into consideration
+		\return success
 	**/ 
-	void computeUncertainty(std::vector<const CCVector3*> points, std::vector<CCVector3>& accuracy, bool lensDistortion);
+	bool computeUncertainty(CCLib::ReferenceCloud* points, std::vector<Vector3Tpl<ScalarType>>& accuracy, bool lensDistortion) const;
 	
 	//! Tests if a 3D point is in the field of view of the camera.
 	/** \param globalCoord global coordinates of the 3D point
 		\param withLensCorrection if we want to take the lens distortion into consideration
 		\return if operation has succeded
 	**/ 
-	bool isGlobalCoordInFrustrum(const CCVector3& globalCoord, const bool withLensCorrection);
+	bool isGlobalCoordInFrustrum(const CCVector3& globalCoord, bool withLensCorrection) const;
 
 	//! Filters an octree : all the box visible in the frustum will be drawn in red.
 	/** \param octree Octree
 		\param inCameraFrustrum indices of points in the frustrum
 	**/
-	void filterOctree(ccOctree* octree, std::vector<unsigned int>& inCameraFrustrum);
+	void filterOctree(ccOctree* octree, std::vector<unsigned>& inCameraFrustrum);
 	
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CAMERA_SENSOR; };
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CAMERA_SENSOR; }
 	virtual bool isSerializable() const { return true; }
     virtual ccBBox getMyOwnBB();
     virtual ccBBox getDisplayBB();
@@ -214,13 +219,15 @@ protected:
 protected:
 
 	//! Camera intrinsic parameters
-	intrinsicParameters m_intrinsicParams;
+	IntrinsicParameters m_intrinsicParams;
 
 	//! Lens distortion parameters 
-	uncertaintyParameters m_uncertaintyParams;
+	UncertaintyParameters m_uncertaintyParams;
 
-	//! Frustrum informations (in order to draw it properly)
-	frustumInformations m_frustrumInfos;
+	//! Frustrum information structure
+	/** Used to draw it properly.
+	**/
+	FrustumInformation m_frustrumInfos;
 
 	//! Intrinsic parameters matrix
 	ccGLMatrix m_projecMatrix;	

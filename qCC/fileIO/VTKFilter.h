@@ -14,13 +14,8 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author::                                                                $
-//$Rev::                                                                   $
-//$LastChangedDate::                                                       $
-//**************************************************************************
-//
+
+
 #ifndef CC_VTK_FILTER_HEADER
 #define CC_VTK_FILTER_HEADER
 

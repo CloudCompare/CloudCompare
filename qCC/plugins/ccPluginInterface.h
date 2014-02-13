@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2142                                                              $
-//$LastChangedDate:: 2012-05-22 19:19:08 +0200 (mar., 22 mai 2012)         $
-//**************************************************************************
-//
 
 #ifndef CC_PLUGIN_INTERFACE_HEADER
 #define CC_PLUGIN_INTERFACE_HEADER

@@ -14,13 +14,6 @@
 //#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
 //#                                                                        #
 //##########################################################################
-//
-//*********************** Last revision of this file ***********************
-//$Author:: dgm                                                            $
-//$Rev:: 2184                                                              $
-//$LastChangedDate:: 2012-07-02 18:47:25 +0200 (lun., 02 juil. 2012)       $
-//**************************************************************************
-//
 
 #ifndef CC_POINT_PROPERTIES_DIALOG_HEADER
 #define CC_POINT_PROPERTIES_DIALOG_HEADER

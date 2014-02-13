@@ -21,10 +21,10 @@ ccSensor::ccSensor(QString name)
 	: ccHObject(name)
 	, m_posBuffer(0)
 	, m_activeIndex(0)
-	, m_scale(1.0)
+	, m_color(ccColor::green)
+	, m_scale(PC_ONE)
 {
 	m_rigidTransformation.toIdentity();
-	m_color = CCVector3(1.0,1.0,1.0);
 }
 
 bool ccSensor::addPosition(ccGLMatrix& trans, double index)
@@ -75,7 +75,7 @@ void ccSensor::getIndexBounds(double& minIndex, double& maxIndex) const
 	}
 }
 
-bool ccSensor::getAbsoluteTransformation(ccIndexedTransformation& trans, double index)
+bool ccSensor::getAbsoluteTransformation(ccIndexedTransformation& trans, double index) const
 {
 	trans.toIdentity();
 	if (m_posBuffer)
@@ -87,7 +87,7 @@ bool ccSensor::getAbsoluteTransformation(ccIndexedTransformation& trans, double 
 	return true;
 }
 
-bool ccSensor::getActiveAbsoluteCenter(CCVector3& vec)
+bool ccSensor::getActiveAbsoluteCenter(CCVector3& vec) const
 {
 	ccIndexedTransformation trans;
 	
@@ -99,7 +99,7 @@ bool ccSensor::getActiveAbsoluteCenter(CCVector3& vec)
 	return true;
 }
 
-bool ccSensor::getActiveAbsoluteRotation(ccGLMatrix& rotation)
+bool ccSensor::getActiveAbsoluteRotation(ccGLMatrix& rotation) const
 {
 	ccIndexedTransformation trans;
 	
@@ -122,8 +122,13 @@ bool ccSensor::toFile_MeOnly(QFile& out) const
 	if (!m_rigidTransformation.toFile(out))
 		return WriteError();
 
-	//active index (dataVersion>=34)
-	if (out.write((const char*)&m_activeIndex,sizeof(double))<0)
+	//various parameters (dataVersion>=35)
+	QDataStream outStream(&out);
+	outStream << m_activeIndex;		//active index
+	outStream << m_scale;			//scale
+
+	//color (dataVersion>=35)
+	if (out.write((const char*)&m_color.u,sizeof(colorType)*3)<0)
 		return WriteError();
 
 	//we can't save the associated position buffer (as it may be shared by multiple sensors)
@@ -149,8 +154,13 @@ bool ccSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (!m_rigidTransformation.fromFile(in,dataVersion,flags))
 		return ReadError();
 
-	//active index (dataVersion>=34)
-	if (in.read((char*)&m_activeIndex,sizeof(double))<0)
+	//various parameters (dataVersion>=35)
+	QDataStream inStream(&in);
+	inStream >> m_activeIndex;
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_scale);
+
+	//color (dataVersion>=35)
+	if (in.read((char*)&m_color.u,sizeof(colorType)*3)<0)
 		return ReadError();
 
 	//as the associated position buffer can't be saved directly (as it may be shared by multiple sensors)

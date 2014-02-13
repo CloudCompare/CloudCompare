@@ -1381,20 +1381,14 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 	case OBJECT_SENSOR_DRAW_FRUSTRUM:
 		{
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-			if (item->checkState() == Qt::Checked)
-				sensor->drawFrustrum(true);
-			else
-				sensor->drawFrustrum(false);
+			sensor->drawFrustrum(item->checkState() == Qt::Checked);
 		}
 		redraw=true;
 		break;
 	case OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES:
 		{
 			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
-			if (item->checkState() == Qt::Checked)
-				sensor->drawFrustrumPlanes(true);
-			else
-				sensor->drawFrustrumPlanes(false);
+			sensor->drawFrustrumPlanes(item->checkState() == Qt::Checked);
 		}
 		redraw=true;
 		break;

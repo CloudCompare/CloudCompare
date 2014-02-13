@@ -77,7 +77,9 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 						++cloudCount;
 				}
 			}
+			
 			//we can now create the corresponding file(s)
+			if (cloudCount > 1)
 			{
 				unsigned counter = 0;
 				for (unsigned i=0; i<count; ++i)
@@ -105,9 +107,9 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 						ccLog::Warning(QString("[AsciiFilter::saveToFile] Entity '%1' can't be saved this way!").arg(child->getName()));
 					}
 				}
+
+				return CC_FERR_NO_ERROR;
 			}
-			
-			return CC_FERR_NO_ERROR;
 		}
 		else
 		{

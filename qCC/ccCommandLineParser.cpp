@@ -218,7 +218,6 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 		return QString("[Export] Internal error: invalid input entity!");
 	}
 
-
 	QString cloudName = entity->getName();
 	if (cloudName.isEmpty())
 		cloudName = entDesc.basename;
@@ -250,9 +249,8 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 	if (!entDesc.path.isEmpty())
 		outputFilename.prepend(QString("%1/").arg(entDesc.path));
 
-	ccHObject group;
-	group.addChild(entity,false);
-	if (FileIOFilter::SaveToFile(	&group,
+	//save file
+	if (FileIOFilter::SaveToFile(	entity,
 									qPrintable(outputFilename),
 									isCloud ? s_CloudExportFormat : s_MeshExportFormat) != CC_FERR_NO_ERROR)
 	{

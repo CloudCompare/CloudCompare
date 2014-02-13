@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 2.8)
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include )
-include_directories( ${GLEW_SOURCE_DIR}/include )
+include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 
-project( CC_FBO )
+project( CC_FBO_LIB )
 
 file( GLOB header_list include/*.h )
 file( GLOB source_list src/*.cpp )
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} )
 
-target_link_libraries( ${PROJECT_NAME} GLEW )
+target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )

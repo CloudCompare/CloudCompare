@@ -1,21 +1,15 @@
 cmake_minimum_required(VERSION 2.8)
 
-if ( UNIX )
-	set( ccViewer_dest_release bin ) #default UNIX destination: /usr/bin
-	set( ccViewer_dest_debug bin/debug )
-else()
-	set( ccViewer_dest_release ccViewer )
-	set( ccViewer_dest_debug ccViewer_debug )
-endif()
-
-include_directories( ${GLEW_SOURCE_DIR}/include )
-include_directories( ${CC_FBO_SOURCE_DIR}/include )
-include_directories( ${CC_DLL_SOURCE_DIR}/include )
-include_directories( ${QCC_DB_DLL_SOURCE_DIR} )
+include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
+include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
+include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
+include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
 if( MSVC )
-   include_directories( ${QCC_DB_DLL_SOURCE_DIR}/msvc )
+   include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
 endif()
+include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
+include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../qCC )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
@@ -75,15 +69,16 @@ else()
 endif()
 
 target_link_libraries( ${PROJECT_NAME} ${EXTERNAL_LIBS_LIBRARIES} )
-target_link_libraries( ${PROJECT_NAME} GLEW )
-target_link_libraries( ${PROJECT_NAME} CC_FBO )
-target_link_libraries( ${PROJECT_NAME} CC_DLL )
-target_link_libraries( ${PROJECT_NAME} QCC_DB_DLL )
+target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
+target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
+target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
+target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
+target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 
 # liblas support
-target_link_liblas( ${PROJECT_NAME} ${ccViewer_dest_release} )
+target_link_liblas( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
 # XIOT support
-target_link_XIOT( ${PROJECT_NAME} ${ccViewer_dest_release} ${ccViewer_dest_debug} )
+target_link_XIOT( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
 # E57 support
 target_link_LIBE57( ${PROJECT_NAME} )
 # 3dConnexion devices support
@@ -115,14 +110,14 @@ if( WIN32 )
 endif()
 
 # install program
-install_ext( TARGETS ccViewer ${ccViewer_dest_release} ${ccViewer_dest_debug} )
+install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
 
 # Auxiliary files
 set( auxFiles bin_other/license.txt )
 
 if( WIN32 )
 	# Export Qt dlls
-	install_Qt_Dlls( ${ccViewer_dest_release} ${ccViewer_dest_debug} )
+	install_Qt_Dlls( ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
 
 	# Additional auxiliary file(s)
 	list( APPEND auxFiles bin_other/start.bat )
@@ -130,17 +125,13 @@ endif()
 
 # Install auxiliary files
 foreach( filename ${auxFiles} )
-	install_ext( FILES ${filename} ${ccViewer_dest_release} ${ccViewer_dest_debug} )
+	install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
 endforeach()
 
 # Put together our App bundle on Mac OS X
 if( APPLE )
-   set( MAC_APP_NAME ${PROJECT_NAME}.app )
-   set( MAC_BUNDLE_MACOS_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/MacOS )
-   set( MAC_BUNDLE_RESOURCES_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Resources )
-   set( MAC_BUNDLE_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Plugins )
-   set( MAC_BUNDLE_LIB_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Libs )
-   set( MAC_BUNDLE_SHADERS_DIR ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME}/Contents/Shaders )
+   set( CCVIEWER_MAC_APP_NAME ${PROJECT_NAME}.app )
+   set( CCVIEWER_MAC_BASE_DIR ${CMAKE_INSTALL_PREFIX}/${CCVIEWER_DEST_FOLDER}/${CCVIEWER_MAC_APP_NAME} CACHE INTERNAL "ccViewer bundle dir.")
 
    set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/ccViewer.plist )
    set_source_files_properties( images/icon/cc_viewer_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )
@@ -155,7 +146,7 @@ endif( APPLE )
 
 # Export common shader files to all install destinations
 if( APPLE )
-   install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag DESTINATION ${MAC_BUNDLE_SHADERS_DIR}/ColorRamp )
+   install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders/ColorRamp )
 else()
-   install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${ccViewer_dest_release}/shaders/ColorRamp ${ccViewer_dest_debug}/shaders/ColorRamp )
+   install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${CCVIEWER_DEST_FOLDER}/shaders/ColorRamp ${CCVIEWER_DEST_FOLDER}_debug/shaders/ColorRamp )
 endif()

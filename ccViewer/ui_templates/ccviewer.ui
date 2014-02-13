@@ -196,7 +196,14 @@ QStatusBar
     <addaction name="separator"/>
     <addaction name="actionHelpShortctus"/>
    </widget>
+   <widget class="QMenu" name="menuPlugins">
+    <property name="title">
+     <string>Shaders</string>
+    </property>
+    <addaction name="actionNoFilter"/>
+   </widget>
    <addaction name="menuOptions"/>
+   <addaction name="menuPlugins"/>
    <addaction name="menuAbout"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -643,6 +650,11 @@ QStatusBar
    </property>
    <property name="statusTip">
     <string>Global Zoom</string>
+   </property>
+  </action>
+  <action name="actionNoFilter">
+   <property name="text">
+    <string>Remove</string>
    </property>
   </action>
  </widget>

@@ -30,7 +30,7 @@ namespace CCLib
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 
-class CC_DLL_API GenericIndexedCloud : virtual public GenericCloud
+class CC_CORE_LIB_API GenericIndexedCloud : virtual public GenericCloud
 #else
 class GenericIndexedCloud : virtual public GenericCloud
 #endif

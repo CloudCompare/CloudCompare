@@ -43,7 +43,7 @@ class GenericCloud;
 #include "CloudCompareDll.h"
 
 
-class CC_DLL_API GenericDistribution
+class CC_CORE_LIB_API GenericDistribution
 #else
 class GenericDistribution
 #endif

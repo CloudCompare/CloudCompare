@@ -24,8 +24,8 @@ class ccPointCloud;
 
 //! Generic primitive interface
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccGenericPrimitive : public ccMesh
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccGenericPrimitive : public ccMesh
 #else
 class ccGenericPrimitive : public ccMesh
 #endif

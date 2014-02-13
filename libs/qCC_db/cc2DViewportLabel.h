@@ -23,8 +23,8 @@
 
 //! 2D viewport label
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API cc2DViewportLabel : public cc2DViewportObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API cc2DViewportLabel : public cc2DViewportObject
 #else
 class cc2DViewportLabel : public cc2DViewportObject
 #endif

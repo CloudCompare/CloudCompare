@@ -31,8 +31,8 @@
 
 //! Standard parameters for GL displays/viewports
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccViewportParameters : public ccSerializableObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccViewportParameters : public ccSerializableObject
 #else
 class ccViewportParameters : public ccSerializableObject
 #endif

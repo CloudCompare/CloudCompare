@@ -33,9 +33,9 @@
 **/
 
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
+#include "qCC_db.h"
 
-class QCC_DB_DLL_API ccScalarField : public CCLib::ScalarField, public ccSerializableObject
+class QCC_DB_LIB_API ccScalarField : public CCLib::ScalarField, public ccSerializableObject
 #else
 class ccScalarField : public CCLib::ScalarField, public ccSerializableObject
 #endif

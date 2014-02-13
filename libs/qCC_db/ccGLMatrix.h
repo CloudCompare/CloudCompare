@@ -57,8 +57,8 @@ static const unsigned OPENGL_MATRIX_SIZE = 16;
 	M*X = R*X + T
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccGLMatrix : public ccSerializableObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccGLMatrix : public ccSerializableObject
 #else
 class ccGLMatrix : public ccSerializableObject
 #endif

@@ -39,7 +39,7 @@ namespace CCLib
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 
-class CC_DLL_API KDTree
+class CC_CORE_LIB_API KDTree
 #else
 class KDTree
 #endif

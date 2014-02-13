@@ -15,13 +15,15 @@
 //#                                                                        #
 //##########################################################################
 
-#include "plugins/ccPluginInterface.h"
 #include "ccPluginDlg.h"
 
+//qCC_plugins
+#include <ccPluginInterface.h>
+
+//Qt
 #include <QPluginLoader>
 #include <QStringList>
 #include <QDir>
-
 #include <QLabel>
 #include <QGridLayout>
 #include <QPushButton>

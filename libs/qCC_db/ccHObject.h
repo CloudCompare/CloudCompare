@@ -27,8 +27,8 @@
 
 //! Hierarchical CloudCompare Object
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccHObject : public ccObject, public ccDrawableObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccHObject : public ccObject, public ccDrawableObject
 #else
 class ccHObject : public ccObject, public ccDrawableObject
 #endif

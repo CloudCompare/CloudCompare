@@ -37,7 +37,7 @@ typedef std::vector<ReferenceCloud*> ReferenceCloudContainer;
 //! Several point cloud auto-segmentation algorithms (Connected Components, Front propagation, etc.)
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
-class CC_DLL_API AutoSegmentationTools : public CCToolbox
+class CC_CORE_LIB_API AutoSegmentationTools : public CCToolbox
 #else
 class AutoSegmentationTools : public CCToolbox
 #endif

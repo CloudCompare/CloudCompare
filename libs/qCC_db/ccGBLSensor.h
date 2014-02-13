@@ -42,8 +42,8 @@
 	information on this particular topic (Chapter 2, section 2.3.3).
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccGBLSensor : public ccSensor
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccGBLSensor : public ccSensor
 #else
 class ccGBLSensor : public ccSensor
 #endif

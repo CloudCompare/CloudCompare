@@ -117,7 +117,16 @@ protected slots:
 	void on3DMouseKeyDown(int);
 	void setup3DMouse(bool);
 
+	//GL filters
+    void doEnableGLFilter();
+    void doDisableGLFilter();
+
 protected:
+
+	//! Loads plugins (from files)
+    void loadPlugins();
+	//! Loads a specific plugin
+    bool loadPlugin(QObject* plugin);
 
 	//! Makes the GL frame background gradient match the OpenGL window one
 	void updateGLFrameGradient();

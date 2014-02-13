@@ -6,35 +6,16 @@ set( VERSION_MAJOR 2 )
 set( VERSION_MINOR 5 )
 set( VERSION_PATCH 3 )
 
-if ( UNIX )
-	set( CloudCompare_dest_release bin ) #default destination: /usr/bin
-	set( CloudCompare_dest_debug bin/debug )
-else()
-	set( CloudCompare_dest_release CloudCompare )
-	set( CloudCompare_dest_debug CloudCompare_debug )
-endif()
-
-if( APPLE )
-   set( MAC_APP_NAME ${PROJECT_NAME}.app )
-   set( MAC_BUNDLE_MACOS_DIR ${CMAKE_INSTALL_PREFIX}/${CloudCompare_dest_release}/${MAC_APP_NAME}/Contents/MacOS )
-   set( MAC_BUNDLE_RESOURCES_DIR ${CMAKE_INSTALL_PREFIX}/${CloudCompare_dest_release}/${MAC_APP_NAME}/Contents/Resources )
-   set( MAC_BUNDLE_PLUGIN_DIR ${CMAKE_INSTALL_PREFIX}/${CloudCompare_dest_release}/${MAC_APP_NAME}/Contents/Plugins )
-   set( MAC_BUNDLE_SHADERS_DIR ${CMAKE_INSTALL_PREFIX}/${CloudCompare_dest_release}/${MAC_APP_NAME}/Contents/Shaders )
-   
-   set( CC_PLUGINS CACHE INTERNAL "cc plugin list" )
-endif()
-
-# Load plugins
-add_subdirectory( plugins )
-
-include_directories( ${GLEW_SOURCE_DIR}/include )
-include_directories( ${CC_FBO_SOURCE_DIR}/include )
-include_directories( ${CC_DLL_SOURCE_DIR}/include )
-include_directories( ${QCC_DB_DLL_SOURCE_DIR} )
+include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
+include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
+include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
+include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
 if( MSVC )
-   include_directories( ${QCC_DB_DLL_SOURCE_DIR}/msvc )
+   include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
 endif()
+include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
+include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/db_tree )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/fileIO )
@@ -93,15 +74,16 @@ else()
 endif()
 
 target_link_libraries( ${PROJECT_NAME} ${EXTERNAL_LIBS_LIBRARIES} )
-target_link_libraries( ${PROJECT_NAME} GLEW )
-target_link_libraries( ${PROJECT_NAME} CC_FBO )
-target_link_libraries( ${PROJECT_NAME} CC_DLL )
-target_link_libraries( ${PROJECT_NAME} QCC_DB_DLL )
+target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
+target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
+target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
+target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
+target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 
 # liblas support
-target_link_liblas( ${PROJECT_NAME} ${CloudCompare_dest_release} )
+target_link_liblas( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
 # XIOT support
-target_link_XIOT( ${PROJECT_NAME} ${CloudCompare_dest_release} ${CloudCompare_dest_debug} )
+target_link_XIOT( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
 # E57 support
 target_link_LIBE57( ${PROJECT_NAME} )
 # 3dConnexion devices support
@@ -109,7 +91,7 @@ target_link_3DXWARE( ${PROJECT_NAME} )
 #DXF support
 target_link_DXFLIB( ${PROJECT_NAME} )
 #GDAL support
-target_link_GDAL( ${PROJECT_NAME} ${CloudCompare_dest_release} ${CloudCompare_dest_debug} )
+target_link_GDAL( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
 #FBX support
 target_link_FBX_SDK( ${PROJECT_NAME} )
 
@@ -138,26 +120,15 @@ if( WIN32 )
 endif()
 
 # install program
-install_ext( TARGETS ${PROJECT_NAME} ${CloudCompare_dest_release} ${CloudCompare_dest_debug} )
-
-# Export common shader files to all install destinations
-if( APPLE )
-   install( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.frag DESTINATION ${MAC_BUNDLE_SHADERS_DIR} )
-   install( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.vert DESTINATION ${MAC_BUNDLE_SHADERS_DIR} )
-   install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION ${MAC_BUNDLE_SHADERS_DIR}/ColorRamp )
-else()
-   install_ext( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.frag ${CloudCompare_dest_release}/shaders ${CloudCompare_dest_debug}/shaders )
-   install_ext( FILES ${CC_FBO_SOURCE_DIR}/bilateral/bilateral.vert ${CloudCompare_dest_release}/shaders ${CloudCompare_dest_debug}/shaders )
-   install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${CloudCompare_dest_release}/shaders/ColorRamp ${CloudCompare_dest_debug}/shaders/ColorRamp )
-endif()
+install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
 
 # Auxiliary files
 set( auxFiles bin_other/history.txt bin_other/license.txt )
 
 if( WIN32 )
-	# Export Qt dlls & plugins
-	install_Qt_Dlls( ${CloudCompare_dest_release} ${CloudCompare_dest_debug} )
-	install_Qt_ImageFormats( ${CloudCompare_dest_release} ${CloudCompare_dest_debug} )
+	# Export Qt dlls
+	install_Qt_Dlls( ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
+	install_Qt_ImageFormats( ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
 
 	# Additional auxiliary file(s)
 	list( APPEND auxFiles bin_other/start.bat )
@@ -165,7 +136,7 @@ endif()
 
 # Install auxiliary files
 foreach( filename ${auxFiles} )
-	install_ext( FILES ${filename} ${CloudCompare_dest_release} ${CloudCompare_dest_debug} )
+	install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
 endforeach()
 
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
@@ -179,4 +150,15 @@ if( APPLE )
    set( MACOSX_BUNDLE_BUNDLE_VERSION "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )
 
    add_subdirectory( Mac )
+endif()
+
+# Export common shader files to all install destinations
+if( APPLE )
+   install( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders )
+   install( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.vert DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders )
+   install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/ColorRamp )
+else()
+   install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.frag ${CLOUDCOMPARE_DEST_FOLDER}/shaders ${CLOUDCOMPARE_DEST_FOLDER}_debug/shaders )
+   install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.vert ${CLOUDCOMPARE_DEST_FOLDER}/shaders ${CLOUDCOMPARE_DEST_FOLDER}_debug/shaders )
+   install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag ${CLOUDCOMPARE_DEST_FOLDER}/shaders/ColorRamp ${CLOUDCOMPARE_DEST_FOLDER}_debug/shaders/ColorRamp )
 endif()

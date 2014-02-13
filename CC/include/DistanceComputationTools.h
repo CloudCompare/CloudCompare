@@ -50,7 +50,7 @@ struct OctreeAndMeshIntersection;
 //! Several entity-to-entity distances computation algorithms (cloud-cloud, cloud-mesh, point-triangle, etc.)
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
-class CC_DLL_API DistanceComputationTools : public CCToolbox
+class CC_CORE_LIB_API DistanceComputationTools : public CCToolbox
 #else
 class DistanceComputationTools : public CCToolbox
 #endif

@@ -2,14 +2,14 @@ cmake_minimum_required(VERSION 2.8)
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
-include_directories( ${GLEW_SOURCE_DIR}/include )
-include_directories( ${CC_DLL_SOURCE_DIR}/include )
-include_directories( ${CC_FBO_SOURCE_DIR}/include )
+include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
+include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
+include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 if( MSVC )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/msvc )
 endif()
 
-project( QCC_DB_DLL )
+project( QCC_DB_LIB )
 
 file( GLOB header_list *.h)
 file( GLOB source_list *.cpp)
@@ -20,9 +20,9 @@ qt4_wrap_cpp( moc_list ${mocable_list} )
 
 add_library( ${PROJECT_NAME} SHARED ${header_list} ${source_list} ${moc_list} )
 
-target_link_libraries( ${PROJECT_NAME} CC_DLL )
-target_link_libraries( ${PROJECT_NAME} GLEW )
-target_link_libraries( ${PROJECT_NAME} CC_FBO )
+target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
+target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
+target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} ${EXTERNAL_LIBS_LIBRARIES} )
 
 # Default preprocessors
@@ -36,9 +36,9 @@ endif()
 
 # install (shared) lib to specified destinations
 if( UNIX )
-	install_shared( QCC_DB_DLL lib lib ) #default destination: /usr/lib
+	install_shared( ${PROJECT_NAME} lib lib ) #default destination: /usr/lib
 else()
 foreach( dest ${INSTALL_DESTINATIONS} )
-	install_shared( QCC_DB_DLL ${dest} ${dest}_debug )
+	install_shared( ${PROJECT_NAME} ${dest} ${dest}_debug )
 endforeach()
 endif()

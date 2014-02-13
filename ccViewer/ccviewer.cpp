@@ -23,10 +23,17 @@
 #include <QVBoxLayout>
 #include <QMessageBox>
 
-//qCC
+//plugins handling
+#include <QPluginLoader>
+#include <QDir>
+#include <ccGLFilterPluginInterface.h>
+
+//qCC_glWindow
 #include <ccGLWindow.h>
-#include <fileIO/FileIOFilter.h>
 #include <ccGuiParameters.h>
+
+//qCC
+#include <fileIO/FileIOFilter.h>
 
 //dialogs
 #include <ccDisplayOptionsDlg.h>
@@ -132,9 +139,14 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	connect(ui.actionZoomOnSelectedEntity,			SIGNAL(triggered()),						this,	SLOT(zoomOnSelectedEntity()));
     connect(ui.actionDelete,						SIGNAL(triggered()),						this,	SLOT(doActionDeleteSelectedEntity()));
 
+	//"Shaders" menu
+    connect(ui.actionNoFilter,						SIGNAL(triggered()),						this,	SLOT(doDisableGLFilter()));
+
 	//"Help" menu
     connect(ui.actionAbout,							SIGNAL(triggered()),						this,	SLOT(doActionAbout()));
     connect(ui.actionHelpShortctus,					SIGNAL(triggered()),						this,	SLOT(doActionDisplayShortcuts()));
+
+	loadPlugins();
 }
 
 ccViewer::~ccViewer()
@@ -153,6 +165,132 @@ ccViewer::~ccViewer()
 		m_glWindow->setSceneDB(0);
 		m_glWindow->redraw();
 		delete currentRoot;
+	}
+}
+
+void ccViewer::loadPlugins()
+{
+	ui.menuPlugins->setEnabled(false);
+
+	//"static" plugins
+    foreach (QObject *plugin, QPluginLoader::staticInstances())
+		loadPlugin(plugin);
+
+    ccLog::Print(QString("Application path: ")+QCoreApplication::applicationDirPath());
+
+#if defined(Q_OS_MAC)
+    // plugins are in the bundle
+    QString  path = QCoreApplication::applicationDirPath();
+    path.remove( "MacOS" );
+    QString pluginsPath = path + "Plugins/ccViewerPlugins";
+#else
+    //plugins are in bin/plugins
+    QString pluginsPath = QCoreApplication::applicationDirPath()+QString("/plugins");
+#endif
+
+    ccLog::Print(QString("Plugins lookup dir.: %1").arg(pluginsPath));
+
+    QStringList filters;
+#if defined(Q_OS_WIN)
+    filters << "*.dll";
+#elif defined(Q_OS_LINUX)
+    filters << "*.so";
+#elif defined(Q_OS_MAC)
+    filters << "*.dylib";
+#endif
+    QDir pluginsDir(pluginsPath);
+    pluginsDir.setNameFilters(filters);
+    foreach (QString filename, pluginsDir.entryList(filters))
+    {
+        QPluginLoader loader(pluginsDir.absoluteFilePath(filename));
+        QObject* plugin = loader.instance();
+        if (plugin)
+        {
+            ccLog::Print(QString("Found new plugin! ('%1')").arg(filename));
+            if (!loadPlugin(plugin))
+            {
+                ccLog::Warning("Unsupported or invalid plugin type");
+            }
+        }
+        else
+        {
+            ccLog::Warning(QString("[Plugin] %1")/*.arg(pluginsDir.absoluteFilePath(filename))*/.arg(loader.errorString()));
+        }
+    }
+}
+
+bool ccViewer::loadPlugin(QObject *plugin)
+{
+	ccGLFilterPluginInterface* ccPlugin = qobject_cast<ccGLFilterPluginInterface*>(plugin);
+	if (!ccPlugin)
+	{
+		ccLog::Warning("Only 'GL filter' plugins are supported for now!");
+		return false;
+	}
+	plugin->setParent(this);
+
+	QString pluginName = ccPlugin->getName();
+	if (pluginName.isEmpty())
+	{
+		ccLog::Warning("Plugin has an invalid (empty) name!");
+		return false;
+	}
+    ccLog::Print("Plugin name: [%s]",qPrintable(pluginName));
+
+	//(auto)create action
+	QAction* action = new QAction(pluginName,plugin);
+	action->setToolTip(ccPlugin->getDescription());
+	action->setIcon(ccPlugin->getIcon());
+	//connect default signal
+	connect(action, SIGNAL(triggered()), this, SLOT(doEnableGLFilter()));
+
+	ui.menuPlugins->addAction(action);
+	ui.menuPlugins->setEnabled(true);
+	ui.menuPlugins->setVisible(true);
+
+    return true;
+}
+
+void ccViewer::doDisableGLFilter()
+{
+    if (m_glWindow)
+    {
+        m_glWindow->setGlFilter(0);
+        m_glWindow->redraw();
+    }
+}
+
+void ccViewer::doEnableGLFilter()
+{
+	if (!m_glWindow)
+	{
+		ccLog::Warning("[GL filter] No active 3D view!");
+		return;
+	}
+
+    QAction *action = qobject_cast<QAction*>(sender());
+    if (!action)
+        return;
+    ccGLFilterPluginInterface* ccPlugin = qobject_cast<ccGLFilterPluginInterface*>(action->parent());
+    if (!ccPlugin)
+        return;
+
+    assert(ccPlugin->getType() == CC_GL_FILTER_PLUGIN);
+
+	ccGlFilter* filter = ccPlugin->getFilter();
+	if (filter)
+	{
+		if (m_glWindow->areGLFiltersEnabled())
+		{
+			m_glWindow->setGlFilter(filter);
+			ccLog::Print("Note: go to << Display > Shaders & Filters > No filter >> to disable GL filter");
+		}
+		else
+			ccLog::Error("GL filters not supported!");
+	}
+	else
+	{
+		ccLog::Error("Can't load GL filter (an error occurred)!");
 	}
 }
 

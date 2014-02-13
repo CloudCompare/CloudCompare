@@ -59,8 +59,8 @@ const unsigned MAX_LOD_POINTS_NUMBER = 10000000;
 	- other children objects (meshes, calibrated pictures, etc.)
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccPointCloud : public CCLib::ChunkedPointCloud, public ccGenericPointCloud
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccPointCloud : public CCLib::ChunkedPointCloud, public ccGenericPointCloud
 #else
 class ccPointCloud : public CCLib::ChunkedPointCloud, public ccGenericPointCloud
 #endif

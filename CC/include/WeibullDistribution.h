@@ -30,7 +30,7 @@ namespace CCLib
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 
-class CC_DLL_API WeibullDistribution : public GenericDistribution
+class CC_CORE_LIB_API WeibullDistribution : public GenericDistribution
 #else
 class WeibullDistribution : public GenericDistribution
 #endif

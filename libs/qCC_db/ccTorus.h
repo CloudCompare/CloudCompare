@@ -27,8 +27,8 @@
 /** 3D torus primitive (with circular or rectangular section)
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccTorus : public ccGenericPrimitive
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccTorus : public ccGenericPrimitive
 #else
 class ccTorus : public ccGenericPrimitive
 #endif

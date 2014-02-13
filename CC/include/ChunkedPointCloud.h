@@ -40,7 +40,7 @@ class ScalarField;
 **/
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
-class CC_DLL_API ChunkedPointCloud : virtual public GenericIndexedCloudPersist
+class CC_CORE_LIB_API ChunkedPointCloud : virtual public GenericIndexedCloudPersist
 #else
 class ChunkedPointCloud : virtual public GenericIndexedCloudPersist
 #endif

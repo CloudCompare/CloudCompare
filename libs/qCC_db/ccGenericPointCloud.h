@@ -48,8 +48,8 @@ class ccOctree;
 	- visibility information per point (to hide/display subsets of points)
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccGenericPointCloud : public ccHObject,  virtual public CCLib::GenericIndexedCloudPersist
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccGenericPointCloud : public ccHObject,  virtual public CCLib::GenericIndexedCloudPersist
 #else
 class ccGenericPointCloud : public ccHObject,  virtual public CCLib::GenericIndexedCloudPersist
 #endif

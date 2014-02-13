@@ -34,8 +34,8 @@ enum CC_VIEW_ORIENTATION {  CC_TOP_VIEW,	/**< Top view (eye: +Z) **/
 };
 
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccGLUtils
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccGLUtils
 #else
 class ccGLUtils
 #endif

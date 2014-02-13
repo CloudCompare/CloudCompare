@@ -18,8 +18,8 @@
 #ifndef CC_MAIN_WINDOW_HEADER
 #define CC_MAIN_WINDOW_HEADER
 
-//Virtual interface (for plugins)
-#include "plugins/ccMainAppInterface.h"
+//qCC_plugins
+#include <ccMainAppInterface.h>
 
 //Qt
 #include <QMainWindow>
@@ -334,7 +334,11 @@ protected slots:
 	void doActionAdjustZoom();
 	void doActionSaveViewportAsCamera();
 
+    //Shaders & plugins
+    void doActionLoadShader();
+    void doActionDeleteShader();
     void doEnableGLFilter();
+    void doDisableGLFilter();
 
 	//Clipping box
 	void activateClippingBoxMode();
@@ -364,11 +368,6 @@ protected slots:
 	//Point-pair registration mechanism
 	void activateRegisterPointPairTool();
     void deactivateRegisterPointPairTool(bool);
-
-    //Shaders & plugins
-    void doActionLoadShader();
-    void doActionDeleteShader();
-    void doActionDeactivateGlFilter();
 
 	//Current active scalar field
 	void doActionToggleActiveSFColorScale();

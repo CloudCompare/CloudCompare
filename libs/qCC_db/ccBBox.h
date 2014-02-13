@@ -30,8 +30,8 @@
     multiplication (by a matrix or a scalar).
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccBBox
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccBBox
 #else
 class ccBBox
 #endif

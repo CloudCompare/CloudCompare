@@ -39,7 +39,7 @@ static const double c_erfRelativeError = 1e-12;
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 
-class CC_DLL_API ErrorFunction : MathTools
+class CC_CORE_LIB_API ErrorFunction : MathTools
 #else
 class ErrorFunction : MathTools
 #endif

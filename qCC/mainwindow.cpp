@@ -66,9 +66,9 @@
 #include "ccHistogramWindow.h"
 
 //plugins handling
-#include "plugins/ccPluginInterface.h"
-#include "plugins/ccStdPluginInterface.h"
-#include "plugins/ccGLFilterPluginInterface.h"
+#include <ccPluginInterface.h>
+#include <ccStdPluginInterface.h>
+#include <ccGLFilterPluginInterface.h>
 #include "ccPluginDlg.h"
 
 //shaders & Filters
@@ -953,7 +953,7 @@ void MainWindow::connectActions()
     //"Display > Shaders & filters" menu
     connect(actionLoadShader,                   SIGNAL(triggered()),    this,       SLOT(doActionLoadShader()));
     connect(actionDeleteShader,                 SIGNAL(triggered()),    this,       SLOT(doActionDeleteShader()));
-    connect(actionNoFilter,                     SIGNAL(triggered()),    this,       SLOT(doActionDeactivateGlFilter()));
+    connect(actionNoFilter,                     SIGNAL(triggered()),    this,       SLOT(doDisableGLFilter()));
 
     //"Display > Active SF" menu
     connect(actionToggleActiveSFColorScale,		SIGNAL(triggered()),    this,       SLOT(doActionToggleActiveSFColorScale()));
@@ -7474,7 +7474,7 @@ void MainWindow::doActionDeleteShader()
         win->setShader(0);
 }
 
-void MainWindow::doActionDeactivateGlFilter()
+void MainWindow::doDisableGLFilter()
 {
     ccGLWindow* win = getActiveGLWindow();
     if (win)

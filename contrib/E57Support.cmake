@@ -19,7 +19,7 @@ if( ${OPTION_USE_LIBE57} )
 	endif()
 
 	# Find Boost
-	find_package( Boost QUIET )
+	find_package( Boost COMPONENTS system QUIET ) #DGM: not sure why, but "system" lib doesn't show up otherwise...
 	if( NOT Boost_FOUND )
 		set( BOOST_ROOT CACHE PATH "Location of the boost root directory" )
 		message( FATAL_ERROR "Unable to find boost library. Please set the BOOST_ROOT to point to the boost distribution files." )
@@ -57,7 +57,6 @@ if( ${OPTION_USE_LIBE57} )
 		target_link_libraries( ${ARGV0} debug ${Xerces_LIBRARY_DEBUG} optimized ${Xerces_LIBRARY_RELEASE} ${Boost_LIBRARIES} )
 		#Boost
 		#link_directories( ${Boost_LIBRARY_DIRS} )
-		message(${Boost_LIBRARIES})
 
 		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_E57_SUPPORT XERCES_STATIC_LIBRARY )
 	else()

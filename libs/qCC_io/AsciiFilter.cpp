@@ -16,7 +16,7 @@
 //##########################################################################
 
 #include "AsciiFilter.h"
-#include "../ccCoordinatesShiftManager.h"
+#include "ccCoordinatesShiftManager.h"
 
 //Qt
 #include <QFile>
@@ -737,7 +737,8 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 				if (shiftAlreadyEnabled)
 					Pshift = *coordinatesShift;
 				bool applyAll=false;
-				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				if (	sizeof(PointCoordinateType) < 8
+					&&	ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll) )
 				{
 					cloudDesc.cloud->setGlobalShift(Pshift);
 					ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);

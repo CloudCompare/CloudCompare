@@ -20,6 +20,7 @@
 
 #include "ccGlew.h"
 
+//! Generic shader class
 class ccShader
 {
 public:
@@ -92,6 +93,7 @@ protected:
     GLuint prog;
 };
 
+//! ARB shader class
 class ccShaderARB : public ccShader
 {
 public:

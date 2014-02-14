@@ -16,7 +16,7 @@
 //##########################################################################
 
 #include "STLFilter.h"
-#include "../ccCoordinatesShiftManager.h"
+#include "ccCoordinatesShiftManager.h"
 
 //Qt
 #include <QApplication>
@@ -462,10 +462,13 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 	else
 	{
-		if (mesh->computeNormals())
-			mesh->showNormals(true);
-		else
-			ccLog::Warning("[STL] Failed to compute per-vertex normals...");
+		//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
+		//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
+		//if (mesh->computeNormals())
+		//	mesh->showNormals(true);
+		//else
+		//	ccLog::Warning("[STL] Failed to compute per-vertex normals...");
+		ccLog::Warning("[STL] Mesh has no normal! You can compute them later (select base entity, then \"Edit > Normals > Compute\")");
 	}
 	vertices->setEnabled(false);
 	vertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!
@@ -593,7 +596,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		//3rd to 5th lines: 'vertex vix viy viz'
 		unsigned vertIndexes[3];
 //		unsigned pointCountBefore = pointCount;
-		for (unsigned i=0;i<3;++i)
+		for (unsigned i=0; i<3; ++i)
 		{
 			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) <= 0 || !QString(currentLine).trimmed().toUpper().startsWith("VERTEX"))
 			{
@@ -634,7 +637,8 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				if (shiftAlreadyEnabled)
 					Pshift = *coordinatesShift;
 				bool applyAll=false;
-				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				if (	sizeof(PointCoordinateType) < 8
+					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					vertices->setGlobalShift(Pshift);
 					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
@@ -822,7 +826,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	//current vertex shift
 	CCVector3d Pshift(0,0,0);
 
-	for (unsigned f=0;f<faceCount;++f)
+	for (unsigned f=0; f<faceCount; ++f)
 	{
 		//REAL32[3] Normal vector
 		assert(sizeof(float)==4);
@@ -848,7 +852,8 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 				if (shiftAlreadyEnabled)
 					Pshift = *coordinatesShift;
 				bool applyAll=false;
-				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				if (	sizeof(PointCoordinateType) < 8
+					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					vertices->setGlobalShift(Pshift);
 					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);

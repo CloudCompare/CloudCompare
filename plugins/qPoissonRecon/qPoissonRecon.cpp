@@ -404,7 +404,8 @@ void qPoissonRecon::doAction()
 		newMesh->setName(QString("Mesh[%1] (level %2)").arg(pc->getName()).arg(s_params.depth));
 		newPC->setVisible(false);
 		newMesh->setVisible(true);
-		newMesh->computeNormals();
+		newMesh->computeNormals(true);
+		newMesh->showNormals(newMesh->hasNormals());
 
 		//output mesh
 		m_app->addToDB(newMesh);

@@ -21,9 +21,7 @@
 #include "FileIOFilter.h"
 #include "InputMemoryFile.h"
 
-
 class ccPointCloud;
-
 
 //! PCD point cloud I/O filter
 class PCDFilter : public FileIOFilter
@@ -54,7 +52,7 @@ protected:
 		size_t lineCount;
 	};
 
-	CC_FILE_ERROR LoadFileBinaryMemMap(const char* filename, ccHObject& container, const PCDHeader& header);
+	CC_FILE_ERROR loadFileBinaryMemMap(const char* filename, ccHObject& container, const PCDHeader& header);
 
 	static int ReadScalarFieldMemMap(const QString& fieldname, const InputMemoryFile& mem_file, const PCDHeader& header, ccScalarField& field, size_t count = 0);
 

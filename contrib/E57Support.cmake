@@ -57,6 +57,7 @@ if( ${OPTION_USE_LIBE57} )
 		target_link_libraries( ${ARGV0} debug ${Xerces_LIBRARY_DEBUG} optimized ${Xerces_LIBRARY_RELEASE} ${Boost_LIBRARIES} )
 		#Boost
 		#link_directories( ${Boost_LIBRARY_DIRS} )
+		message(${Boost_LIBRARIES})
 
 		set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_E57_SUPPORT XERCES_STATIC_LIBRARY )
 	else()

@@ -43,28 +43,16 @@ add_subdirectory( CC )
 
 # Add external libraries
 include( CMakeExternalLibs.cmake )
+
+# Contrib. libraries (mainly for I/O)
+include( contrib/AllSupport.cmake )
+
 # Libs requested by both qCC & ccViewer
 add_subdirectory( libs/Glew )
 add_subdirectory( libs/CCFbo )
 add_subdirectory( libs/qCC_db ) # must always be included after CCFbo (dependency)
+add_subdirectory( libs/qCC_io ) # must always be included after qCC_db (dependency)
 add_subdirectory( libs/qCC_glWindow ) # must always be included after qCC_db (dependency)
-
-# liblas support
-include( contrib/LiblasSupport.cmake )
-# XIOT support
-include( contrib/XIOTSupport.cmake )
-# E57 support
-include( contrib/E57Support.cmake )
-# 3DXWARE (3dConnexion devices) support
-include( contrib/3DXSupport.cmake )
-# PDMS support
-OPTION( OPTION_SUPPORT_MAC_PDMS_FORMAT "Build with .mac PDMS format" OFF )
-# DXF support
-include( contrib/DxfLibSupport.cmake )
-# GDAL support
-include( contrib/GDALSupport.cmake )
-# FBX support
-include( contrib/FBXSupport.cmake )
 
 # Define target folders
 # (now that ccViewer can have its own plugins, qCC and ccViewer must fall in separate folders!

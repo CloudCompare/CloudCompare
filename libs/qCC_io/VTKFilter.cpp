@@ -16,7 +16,7 @@
 //##########################################################################
 
 #include "VTKFilter.h"
-#include "../ccCoordinatesShiftManager.h"
+#include "ccCoordinatesShiftManager.h"
 
 //CCLib
 #include <ScalarField.h>
@@ -324,14 +324,16 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 						break;
 					}
 				}
+
 				//first point: check for 'big' coordinates
-				if (i==0)
+				if (i == 0)
 				{
 					bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 					if (shiftAlreadyEnabled)
 						Pshift = *coordinatesShift;
 					bool applyAll=false;
-					if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+					if (	sizeof(PointCoordinateType) < 8
+						&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 					{
 						vertices->setGlobalShift(Pshift);
 						ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
@@ -648,9 +650,12 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
         vertices->setName("Vertices");
 		vertices->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!
 
-		if (!mesh->hasNormals())
-			mesh->computeNormals();
-		mesh->showNormals(true);
+		//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
+		//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
+		//if (!mesh->hasNormals())
+		//	mesh->computeNormals();
+		ccLog::Warning("[VTK] Mesh has no normal! You can compute them later (select base entity, then \"Edit > Normals > Compute\")");
+		mesh->showNormals(mesh->hasNormals());
 		if (vertices->hasScalarFields())
 		{
 			vertices->setCurrentDisplayedScalarField(0);

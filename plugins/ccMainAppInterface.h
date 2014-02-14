@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_MAIN_APP_INTERFACE
-#define CC_MAIN_APP_INTERFACE
+#ifndef CC_MAIN_APP_INTERFACE_HEADER
+#define CC_MAIN_APP_INTERFACE_HEADER
 
 //Qt
 #include <QString>
@@ -49,23 +49,25 @@ public:
 		\param coordinatesTransEnabled whether transformation (shift + scale) on load has been applied for precedent entity
 		\param coordinatesShift if applicable, shift applied to precedent entity
 		\param coordinatesScale if applicable, scale applied to precedent entity (-1 = ignored)
+		\param checkDimensions whether to check entity's dimensions (and potentially asking the user to shift/rescale it) or not
     **/
-    virtual void addToDB(ccHObject* obj,
-						bool autoExpandDBTree=true,
-						const char* statusMessage = 0,
-						bool addToDisplay=true,
-						bool updateZoom=true,
-						ccGLWindow* winDest = 0,
-						bool* coordinatesTransEnabled = 0,
-						CCVector3d* coordinatesShift = 0,
-						double* coordinatesScale = 0) = 0;
+    virtual void addToDB(	ccHObject* obj,
+							bool autoExpandDBTree = true,
+							const char* statusMessage = 0,
+							bool addToDisplay = true,
+							bool updateZoom = true,
+							ccGLWindow* winDest = 0,
+							bool* coordinatesTransEnabled = 0,
+							CCVector3d* coordinatesShift = 0,
+							double* coordinatesScale = 0,
+							bool checkDimensions = true	) = 0;
 
     //! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.
 		\param obj entity
 		\param autoDelete automatically deletes object
 	**/
-	virtual void removeFromDB(ccHObject* obj, bool autoDelete=true) = 0;
+	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true) = 0;
 
 	//! Selects or unselects an entity (in db tree)
 	/** \param obj entity
@@ -86,7 +88,7 @@ public:
     /** \param message message
         \param level message level (standard, warning, error)
     **/
-    virtual void dispToConsole(QString message, ConsoleMessageLevel level=STD_CONSOLE_MESSAGE) = 0;
+    virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE) = 0;
 
 	//! Forces display of console widget
 	virtual void forceConsoleDisplay() = 0;
@@ -139,4 +141,4 @@ public:
 
 };
 
-#endif //CC_MAIN_APP_INTERFACE
+#endif //CC_MAIN_APP_INTERFACE_HEADER

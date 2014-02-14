@@ -35,6 +35,7 @@
 class ccShader;
 class ccFrameBufferObject;
 
+//! Bilateral smoothing filter
 class ccBilateralFilter : public ccGlFilter
 {
 public:

@@ -287,8 +287,17 @@ public:
 	**/
 	void setTriangleTexCoordIndexes(unsigned triangleIndex, int i1, int i2, int i3);
 
-    //! Computes per-vertex normals
-    virtual bool computeNormals();
+    //! Computes normals
+	/** \param perVertex whether normals should be computed per-vertex or per-triangle
+		\return success
+	**/
+    virtual bool computeNormals(bool perVertex);
+
+	//! Computes per-vertex normals
+    virtual bool computePerVertexNormals();
+
+	//! Computes per-triangle normals
+    virtual bool computePerTriangleNormals();
 
 	//! Laplacian smoothing
 	/** \param nbIteration smoothing iterations
@@ -346,6 +355,31 @@ protected:
 
 	//! Used internally by 'subdivide'
 	bool pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, unsigned indexB, unsigned indexC);
+
+	/*** EXTENDED CALL SCRIPTS (FOR CC_SUB_MESHES) ***/
+	
+	//0 parameter
+	#define ccMesh_extended_call0(baseName,recursiveName) \
+	inline virtual void recursiveName() \
+	{ \
+		baseName(); \
+		for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it) \
+			if ((*it)->isA(CC_SUB_MESH)) \
+				static_cast<ccGenericMesh*>(*it)->baseName(); \
+	} \
+
+	//1 parameter
+	#define ccMesh_extended_call1(baseName,param1Type,recursiveName) \
+	inline virtual void recursiveName(param1Type p) \
+	{ \
+		baseName(p); \
+		for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it) \
+			if ((*it)->isA(CC_SUB_MESH)) \
+				static_cast<ccGenericMesh*>(*it)->baseName(p); \
+	} \
+
+	//recursive equivalents of some of ccGenericMesh methods (applied to sub-meshes as well)
+	ccMesh_extended_call1(showNormals,bool,showNormals_extended);
 
 	//! associated cloud (vertices)
 	ccGenericPointCloud* m_associatedCloud;

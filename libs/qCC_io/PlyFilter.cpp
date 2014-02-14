@@ -19,7 +19,7 @@
 
 //Local
 #include "PlyOpenDlg.h"
-#include "../ccCoordinatesShiftManager.h"
+#include "ccCoordinatesShiftManager.h"
 
 //Qt
 #include <QProgressDialog>
@@ -453,7 +453,7 @@ static int vertex_cb(p_ply_argument argument)
 	else
 	{
 		//warning: corrupted data!
-		s_PointDataCorrupted=true;
+		s_PointDataCorrupted = true;
 		s_Point[flags & POS_MASK] = 0;
 		//return 0;
 	}
@@ -464,7 +464,8 @@ static int vertex_cb(p_ply_argument argument)
 		if (s_PointCount == 0)
 		{
 			s_ShiftApplyAll = false; //should already be false!
-			if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(s_Point,0,s_AlwaysDisplayLoadDialog,s_ShiftAlreadyEnabled,s_Pshift,0,s_ShiftApplyAll))
+			if (	sizeof(PointCoordinateType) < 8
+				&&	ccCoordinatesShiftManager::Handle(s_Point,0,s_AlwaysDisplayLoadDialog,s_ShiftAlreadyEnabled,s_Pshift,0,s_ShiftApplyAll))
 			{
 				cloud->setGlobalShift(s_Pshift);
 				ccLog::Warning("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f,%.2f,%.2f)",s_Pshift.x,s_Pshift.y,s_Pshift.z);
@@ -1537,8 +1538,11 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		if (cloud->hasNormals())
             mesh->showNormals(true);
         else
-            mesh->computeNormals(); //DGM: not sure it's a good idea if the user don't want normals
-									//especially in ccViewer!
+		{
+			//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
+			//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
+            //mesh->computeNormals();
+		}
 
 		if (mesh->hasMaterials())
 			mesh->showNormals(false);

@@ -118,7 +118,7 @@ public:
     virtual void releaseTexture(unsigned texID);
 	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font = QFont());
 	virtual bool supportOpenGLVersion(unsigned openGLVersionFlag);
-    virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, unsigned char bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0);
+    virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0);
 	virtual QFont getTextDisplayFont() const; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const { return m_viewportParams; }
 
@@ -557,6 +557,9 @@ protected:
 	/** The orientation vector origin is the current pivot point!
 	**/
 	CCVector3 convertMousePositionToOrientation(int x, int y);
+
+	//! Returns the height of the 'GL filter' banner
+	int getGlFilterBannerHeight() const;
 
 	/***************************************************
                     OpenGL Extensions

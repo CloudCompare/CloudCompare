@@ -76,6 +76,16 @@ const int CC_MAX_PICKING_CLICK_DURATION_MS = 200;
 //invalid GL list index
 const GLuint GL_INVALID_LIST_ID = (~0);
 
+//GL filter banner margin (height = 2*margin + current font height)
+const int CC_GL_FILTER_BANNER_MARGIN = 5;
+
+//'hot zone' display parameters
+static const char c_psi_title[] = "Default point size";
+static const int c_psi_margin = 16;
+static const int c_psi_iconSize = 16;
+static const unsigned char c_psi_alphaChannel = 200;
+static const unsigned char c_psi_color[4] = {133,193,39,c_psi_alphaChannel};
+
 /*** Persistent settings ***/
 
 static const char c_ps_groupName[]			= "ccGLWindow";
@@ -87,6 +97,24 @@ static const char c_ps_pivotVisibility[]	= "pivotVisibility";
 
 //Unique GL window ID
 static int s_GlWindowNumber = 0;
+
+//On some versions of Qt, QGLWidget::renderText seem to need glColorf instead of glColorub!
+// See https://bugreports.qt-project.org/browse/QTBUG-6217
+inline static void glColor3ubv_safe(const unsigned char* rgb)
+{
+	//glColor3ubv(rgb);
+	glColor3f(	static_cast<float>(rgb[0])/255.0f,
+				static_cast<float>(rgb[1])/255.0f,
+				static_cast<float>(rgb[2])/255.0f );
+}
+inline static void glColor4ubv_safe(const unsigned char* rgb)
+{
+	//glColor4ubv(rgb);
+	glColor4f(	static_cast<float>(rgb[0])/255.0f,
+				static_cast<float>(rgb[1])/255.0f,
+				static_cast<float>(rgb[2])/255.0f,
+				static_cast<float>(rgb[3])/255.0f );
+}
 
 ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shareWidget /*=0*/)
 	: QGLWidget(format,parent,shareWidget)
@@ -544,12 +572,9 @@ void ccGLWindow::paintGL()
 
 		if (!m_captureMode.enabled || m_captureMode.renderOverlayItems)
 		{
-			//scale (only in ortho mode)
+			//scale: only in ortho mode
 			if (!m_viewportParams.perspectiveView)
-			{
-				//if fbo --> override color
-				drawScale(m_fbo && m_activeGLFilter ? ccColor::black : textCol);
-			}
+				drawScale(textCol);
 
 			//trihedron
 			drawTrihedron();
@@ -557,31 +582,31 @@ void ccGLWindow::paintGL()
 
 		if (!m_captureMode.enabled)
 		{
-			//transparent border at the bottom of the screen
+			//transparent border at the top of the screen
 			if (m_activeGLFilter)
 			{
 				float w = static_cast<float>(m_glWidth)/2;
 				float h = static_cast<float>(m_glHeight)/2;
-				int borderWidth = 2*static_cast<int>(CC_DISPLAYED_TRIHEDRON_AXES_LENGTH) + 10;
+				int borderWidth = getGlFilterBannerHeight();
 
 				glPushAttrib(GL_COLOR_BUFFER_BIT);
 				glEnable(GL_BLEND);
 
 				glColor4f(1.0f,1.0f,0.0f,0.6f);
 				glBegin(GL_QUADS);
-				glVertex2f(-w,-h+static_cast<float>(borderWidth));
-				glVertex2f(w,-h+static_cast<float>(borderWidth));
-				glVertex2f(w,-h);
-				glVertex2f(-w,-h);
+				glVertex2f(w,h);
+				glVertex2f(-w,h);
+				glVertex2f(-w,h-static_cast<float>(borderWidth));
+				glVertex2f(w,h-static_cast<float>(borderWidth));
 				glEnd();
 
 				glPopAttrib();
 
-				textCol = ccColor::black;
-				//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-				//glColor3ubv(textCol);
-				glColor3f((float)textCol[0]/(float)MAX_COLOR_COMP,(float)textCol[1]/(float)MAX_COLOR_COMP,(float)textCol[2]/(float)MAX_COLOR_COMP);
-				renderText(10, m_glHeight-borderWidth+15,QString("[GL filter] ")+m_activeGLFilter->getName()/*,m_font*/); //we ignore the custom font size
+				glColor3ubv_safe(ccColor::black);
+				renderText(	10,
+							borderWidth-CC_GL_FILTER_BANNER_MARGIN-CC_GL_FILTER_BANNER_MARGIN/2,
+							QString("[GL filter] ")+m_activeGLFilter->getDescription()
+							/*,m_font*/ ); //we ignore the custom font size
 			}
 
 			//current messages (if valid)
@@ -590,11 +615,7 @@ void ccGLWindow::paintGL()
 				int currentTime_sec = ccTimer::Sec();
 				//ccLog::Print(QString("[paintGL] Current time: %1 s.").arg(currentTime_sec));
 
-				//if fbo --> override color
-				//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-				//glColor3ubv(m_fbo && m_activeGLFilter ? ccColor::black : textCol);
-				const unsigned char* col = (m_fbo && m_activeGLFilter ? ccColor::black : textCol);
-				glColor3f((float)col[0]/(float)MAX_COLOR_COMP,(float)col[1]/(float)MAX_COLOR_COMP,(float)col[2]/(float)MAX_COLOR_COMP);
+				glColor3ubv_safe(textCol);
 
 				int ll_currentHeight = m_glHeight-10; //lower left
 				int uc_currentHeight = 10; //upper center
@@ -642,13 +663,9 @@ void ccGLWindow::paintGL()
 
 			if (m_hotZoneActivated)
 			{
-				//display parameters
+				//+/- icons
 				static const QPixmap c_psi_plusPix(":/CC/images/ccPlus.png");
 				static const QPixmap c_psi_minusPix(":/CC/images/ccMinus.png");
-				static const char c_psi_title[] = "Default point size";
-				static const int c_psi_margin = 16;
-				static const int c_psi_iconSize = 16;
-				static const unsigned char c_psi_alphaChannel = 200;
 
 				QFont newFont(m_font); //no need to take zoom into account!
 				newFont.setPointSize(12);
@@ -656,27 +673,29 @@ void ccGLWindow::paintGL()
 				glPushAttrib(GL_COLOR_BUFFER_BIT);
 				glEnable(GL_BLEND);
 
+				int xStart = c_psi_margin;
+				int yStart = c_psi_margin;
+
+				if (m_activeGLFilter)
+					yStart += getGlFilterBannerHeight();
+
 				//label
 				QString label(c_psi_title);
 				QRect rect = QFontMetrics(newFont).boundingRect(label);
-				//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-				//glColor4ub(133,193,39,c_psi_alphaChannel);
-				glColor4f(0.52f,0.76f,0.15f,static_cast<float>(c_psi_alphaChannel)/static_cast<float>(MAX_COLOR_COMP));
-				renderText(c_psi_margin,(c_psi_margin+c_psi_iconSize/2)+(rect.height()/2)*2/3,label,newFont); // --> 2/3 to compensate the effect of the upper case letter (P)
+				glColor4ubv_safe(c_psi_color);
+				renderText(c_psi_margin,(yStart+c_psi_iconSize/2)+(rect.height()/2)*2/3,label,newFont); // --> 2/3 to compensate the effect of the upper case letter (P)
 
 				//icons
 				int halfW = m_glWidth/2;
 				int halfH = m_glHeight/2;
-
-				int xStart = c_psi_margin+rect.width()+c_psi_margin;
-				int yStart = c_psi_margin;
+				xStart += rect.width()+c_psi_margin;
 
 				//"minus"
 				ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_minusPix),-halfW+xStart,halfH-(yStart+c_psi_iconSize),c_psi_iconSize,c_psi_iconSize,c_psi_alphaChannel);
-				m_hotZoneMinusIconROI[0]=xStart;
-				m_hotZoneMinusIconROI[1]=yStart;
-				m_hotZoneMinusIconROI[2]=xStart+c_psi_iconSize;
-				m_hotZoneMinusIconROI[3]=yStart+c_psi_iconSize;
+				m_hotZoneMinusIconROI[0] = xStart;
+				m_hotZoneMinusIconROI[1] = yStart;
+				m_hotZoneMinusIconROI[2] = xStart+c_psi_iconSize;
+				m_hotZoneMinusIconROI[3] = yStart+c_psi_iconSize;
 				xStart += c_psi_iconSize;
 
 				//separator
@@ -1255,8 +1274,7 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 	glEnd();
 
 	QString text = QString::number(m_captureMode.enabled ? equivalentWidth/m_captureMode.zoomFactor : equivalentWidth);
-	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-	glColor3f((float)color[0]/(float)MAX_COLOR_COMP,(float)color[1]/(float)MAX_COLOR_COMP,(float)color[2]/(float)MAX_COLOR_COMP);
+	glColor3ubv_safe(color);
 	renderText(m_glWidth-static_cast<int>(scaleW_pix/2+dW)-fm.width(text)/2, m_glHeight-static_cast<int>(dH/2)+fm.height()/3, text, font);
 }
 
@@ -1692,8 +1710,8 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 
 void ccGLWindow::enableEmbeddedIcons(bool state)
 {
-	m_embeddedIconsEnabled	= state;
-	m_hotZoneActivated		= false;
+	m_embeddedIconsEnabled = state;
+	m_hotZoneActivated = false;
 	setMouseTracking(state);
 }
 
@@ -3239,12 +3257,9 @@ bool ccGLWindow::renderToFile(	const char* filename,
 
 			if (m_displayOverlayEntities && m_captureMode.renderOverlayItems)
 			{
-				//scale (only in ortho mode)
+				//scale: only in ortho mode
 				if (!m_viewportParams.perspectiveView)
-				{
-					//if fbo --> override color
-					drawScale(m_fbo && m_activeGLFilter ? ccColor::black : getDisplayParameters().textDefaultCol);
-				}
+					drawScale(getDisplayParameters().textDefaultCol);
 
 				//trihedron
 				drawTrihedron();
@@ -3393,8 +3408,8 @@ void ccGLWindow::removeGLFilter()
 {
 	//we "disconnect" current glFilter, to avoid wrong display/errors
 	//if QT tries to redraw window during object destruction
-	ccGlFilter* _filter = m_activeGLFilter;
-	m_activeGLFilter=0;
+	ccGlFilter* _filter = 0;
+	std::swap(_filter,m_activeGLFilter);
 
 	if (_filter)
 		delete _filter;
@@ -3407,8 +3422,8 @@ bool ccGLWindow::initGLFilter(int w, int h)
 
 	//we "disconnect" current glFilter, to avoid wrong display/errors
 	//if QT tries to redraw window during initialization
-	ccGlFilter* _filter = m_activeGLFilter;
-	m_activeGLFilter=0;
+	ccGlFilter* _filter = 0;
+	std::swap(_filter,m_activeGLFilter);
 
 	QString shadersPath = ccGLWindow::getShadersPath();
 
@@ -3427,6 +3442,11 @@ bool ccGLWindow::initGLFilter(int w, int h)
 	return true;
 }
 
+int ccGLWindow::getGlFilterBannerHeight() const
+{
+	return QFontMetrics(font()).height() + 2*CC_GL_FILTER_BANNER_MARGIN;
+}
+
 bool ccGLWindow::supportOpenGLVersion(unsigned openGLVersionFlag)
 {
 	return (format().openGLVersionFlags() & openGLVersionFlag);
@@ -3434,22 +3454,19 @@ bool ccGLWindow::supportOpenGLVersion(unsigned openGLVersionFlag)
 
 void ccGLWindow::display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgb/*=0*/, const QFont& font/*=QFont()*/)
 {
-	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-	//glColor3ubv(rgb ? rgb : getDisplayParameters().textDefaultCol);
-	const unsigned char* col = rgb ? rgb : getDisplayParameters().textDefaultCol;
-	glColor3f((float)col[0]/(float)MAX_COLOR_COMP,(float)col[1]/(float)MAX_COLOR_COMP,(float)col[2]/(float)MAX_COLOR_COMP);
+	glColor3ubv_safe(rgb ? rgb : getDisplayParameters().textDefaultCol);
 
 	renderText(pos3D.x, pos3D.y, pos3D.z, str, font);
 }
 
-void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=ALIGN_HLEFT|ALIGN_VTOP*/, unsigned char bkgAlpha/*=0*/, const unsigned char* rgbColor/*=0*/, const QFont* font/*=0*/)
+void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=ALIGN_HLEFT|ALIGN_VTOP*/, float bkgAlpha/*=0*/, const unsigned char* rgbColor/*=0*/, const QFont* font/*=0*/)
 {
 	makeCurrent();
 
 	int x2 = x;
 	int y2 = m_glHeight - 1 - y;
 
-	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
+	//actual text color
 	const unsigned char* col = (rgbColor ? rgbColor : getDisplayParameters().textDefaultCol);
 
 	QFont textFont = (font ? *font : m_font);
@@ -3474,10 +3491,16 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 		//background is not totally transparent
 		if (bkgAlpha != 0)
 		{
-			//inverted color with a bit of transparency
 			glPushAttrib(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_BLEND);
-			glColor4f(1.0f-(float)col[0]/(float)MAX_COLOR_COMP,1.0f-(float)col[1]/(float)MAX_COLOR_COMP,1.0f-(float)col[2]/(float)MAX_COLOR_COMP,(float)bkgAlpha/(float)100);
+
+			//inverted color with a bit of transparency
+			const float invertedCol[4] = {	1.0-static_cast<float>(col[0])/255.0,
+											1.0-static_cast<float>(col[0])/255.0,
+											1.0-static_cast<float>(col[0])/255.0,
+											bkgAlpha };
+			glColor4fv(invertedCol);
+
 			int xB = x2 - m_glWidth/2;
 			int yB = m_glHeight/2 - y2;
 			yB += margin/2; //empirical compensation
@@ -3492,7 +3515,7 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 		}
 	}
 
-	glColor3f((float)col[0]/(float)MAX_COLOR_COMP,(float)col[1]/(float)MAX_COLOR_COMP,(float)col[2]/(float)MAX_COLOR_COMP);
+	glColor3ubv_safe(col);
 	if (align & ALIGN_VBOTTOM)
 		y2 -= margin; //empirical compensation
 	else if (align & ALIGN_VMIDDLE)

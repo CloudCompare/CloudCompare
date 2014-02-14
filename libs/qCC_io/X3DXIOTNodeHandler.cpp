@@ -343,11 +343,14 @@ int X3DXIOTNodeHandler::endIndexedFaceSet()
 					mesh->removePerTriangleNormalIndexes();
 
 				//mesh without normals?
-				if (!mesh->hasNormals())
-					mesh->computeNormals();
+				//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
+				//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
+				//if (!mesh->hasNormals())
+				//	mesh->computeNormals();
+				mesh->showNormals(mesh->hasNormals());
 			}
 		}
-		m_currentLeaf=parent;
+		m_currentLeaf = parent;
 	}
 	else
 		assert(false);

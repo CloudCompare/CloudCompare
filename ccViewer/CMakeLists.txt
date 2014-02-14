@@ -7,14 +7,13 @@ include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
 if( MSVC )
    include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
 endif()
+include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../qCC )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories( ${LIBLAS_INCLUDE_DIR} )
-include_directories( ${XIOT_INCLUDE_DIR} )
 
 project( ccViewer )
 
@@ -22,9 +21,9 @@ set( VERSION_MAJOR 1 )
 set( VERSION_MINOR 29 )
 set( VERSION_PATCH 0 )
 
-set( QCC_HEADERS ../qCC/ccGLUtils.h ../qCC/ccGLWindow.h ../qCC/ccGuiParameters.h ../qCC/ccOverlayDialog.h ../qCC/ccRenderingTools.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccShiftAndScaleCloudDlg.h ../qCC/fileIO/*.h ../qCC/ccMouse3DContextMenu.h ../qCC/ccCoordinatesShiftManager.h)
-set( QCC_SOURCES ../qCC/ccGLUtils.cpp ../qCC/ccGLWindow.cpp ../qCC/ccGuiParameters.cpp ../qCC/ccOverlayDialog.cpp ../qCC/ccRenderingTools.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccShiftAndScaleCloudDlg.cpp ../qCC/fileIO/*.cpp ../qCC/fileIO/*.c  ../qCC/ccMouse3DContextMenu.cpp ../qCC/ccCoordinatesShiftManager.cpp)
-set( QCC_DIALOGS ../qCC/ui_templates/cameraParamDlg.ui ../qCC/ui_templates/displayOptionsDlg.ui ../qCC/ui_templates/shiftAndScaleCloudDlg.ui ../qCC/ui_templates/open*.ui ../qCC/ui_templates/saveAsciiFileDlg.ui )
+set( QCC_HEADERS ../qCC/ccGLUtils.h ../qCC/ccOverlayDialog.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccMouse3DContextMenu.h )
+set( QCC_SOURCES ../qCC/ccGLUtils.cpp ../qCC/ccOverlayDialog.cpp ../qCC/ccCameraParamEditDlg.cpp ../qCC/ccDisplayOptionsDlg.cpp ../qCC/ccMouse3DContextMenu.cpp )
+set( QCC_DIALOGS ../qCC/ui_templates/cameraParamDlg.ui ../qCC/ui_templates/displayOptionsDlg.ui )
 
 file( GLOB header_list *.h ${QCC_HEADERS} )
 file( GLOB source_list *.cpp ${QCC_SOURCES} )
@@ -39,14 +38,6 @@ if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	list( APPEND header_list ${3DX_header_list} )
 	list( APPEND source_list ${3DX_source_list} )
 endif()	
-
-# PDMS support
-if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
-	file( GLOB PDMS_header_list ../qCC/fileIO/PDMS/*.h )
-	file( GLOB PDMS_source_list ../qCC/fileIO/PDMS/*.cpp )
-	list( APPEND header_list ${PDMS_header_list} )
-	list( APPEND source_list ${PDMS_source_list} )
-endif()
 
 # find Qt mocable files
 find_mocable_files( mocable_list ${header_list} )
@@ -73,33 +64,22 @@ target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
+target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 
-# liblas support
-target_link_liblas( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
-# XIOT support
-target_link_XIOT( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
-# E57 support
-target_link_LIBE57( ${PROJECT_NAME} )
+# contrib. libraries support
+target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
+
 # 3dConnexion devices support
-target_link_3DXWARE( ${PROJECT_NAME} )
-#DXF support
-target_link_DXFLIB( ${PROJECT_NAME} )
-#FBX support
-target_link_FBX_SDK( ${PROJECT_NAME} )
+target_link_3DXWARE( ${ARGV0} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )
 
-# Add custom prepocessor definitions
+# Add custom preprocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_VIEWER USE_GLEW GLEW_STATIC )
 if (WIN32)
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
-endif()
-
-# PDMS support
-if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_PDMS_SUPPORT )
 endif()
 
 # App icon with Code::Blocks/MinGW

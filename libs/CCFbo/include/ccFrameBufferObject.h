@@ -25,6 +25,7 @@ const GLenum FBO_COLORS[] = {GL_COLOR_ATTACHMENT0_EXT,
                              GL_COLOR_ATTACHMENT2_EXT,
                              GL_COLOR_ATTACHMENT3_EXT};
 
+//! F.B.O. encapsulation
 class ccFrameBufferObject
 {
     public:

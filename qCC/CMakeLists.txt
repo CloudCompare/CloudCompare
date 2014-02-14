@@ -13,24 +13,22 @@ include_directories( ${QCC_DB_LIB_SOURCE_DIR} )
 if( MSVC )
    include_directories( ${QCC_DB_LIB_SOURCE_DIR}/msvc )
 endif()
+include_directories( ${QCC_IO_LIB_SOURCE_DIR} )
 include_directories( ${QCC_GL_LIB_SOURCE_DIR} )
 include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
 include_directories( ${CloudComparePlugins_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR} )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/db_tree )
-include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/fileIO )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/ui_templates )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qxt )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
-include_directories( ${LIBLAS_INCLUDE_DIR} )
-include_directories( ${XIOT_INCLUDE_DIR} )
 
 # TODO: use qxt as a standalone library!
 set( QXT_HEADERS ../libs/qxt/qxtspanslider.h ../libs/qxt/qxtspanslider_p.h )
 set( QXT_SOURCES ../libs/qxt/qxtspanslider.cpp )
 
-file( GLOB header_list *.h db_tree/*.h fileIO/*.h  ${QXT_HEADERS} )
-file( GLOB source_list *.cpp db_tree/*.cpp fileIO/*.cpp fileIO/*.c ${QXT_SOURCES} )
+file( GLOB header_list *.h db_tree/*.h ${QXT_HEADERS} )
+file( GLOB source_list *.cpp db_tree/*.cpp ${QXT_SOURCES} )
 
 # 3DX support (3dConnexion devices)
 if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
@@ -39,14 +37,6 @@ if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	list( APPEND header_list ${3DX_header_list} )
 	list( APPEND source_list ${3DX_source_list} )
 endif()	
-
-# PDMS support
-if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
-	file( GLOB PDMS_header_list fileIO/PDMS/*.h )
-	file( GLOB PDMS_source_list fileIO/PDMS/*.cpp )
-	list( APPEND header_list ${PDMS_header_list} )
-	list( APPEND source_list ${PDMS_source_list} )
-endif()
 
 file( GLOB ui_list ui_templates/*.ui )
 file( GLOB qrc_list *.qrc )
@@ -78,22 +68,14 @@ target_link_libraries( ${PROJECT_NAME} GLEW_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_FBO_LIB )
 target_link_libraries( ${PROJECT_NAME} CC_CORE_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
+target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 
-# liblas support
-target_link_liblas( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
-# XIOT support
-target_link_XIOT( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
-# E57 support
-target_link_LIBE57( ${PROJECT_NAME} )
+# contrib. libraries support
+target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
+
 # 3dConnexion devices support
-target_link_3DXWARE( ${PROJECT_NAME} )
-#DXF support
-target_link_DXFLIB( ${PROJECT_NAME} )
-#GDAL support
-target_link_GDAL( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
-#FBX support
-target_link_FBX_SDK( ${PROJECT_NAME} )
+target_link_3DXWARE( ${ARGV0} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )
@@ -104,18 +86,13 @@ if( WIN32 )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )
 endif()
 
-# PDMS support
-if( ${OPTION_SUPPORT_MAC_PDMS_FORMAT} )
-	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_PDMS_SUPPORT )
-endif()
-
 #set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE XXX) #nothing right now
 #set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG XXX) #nothing right now
 
 # App icon with Code::Blocks/MinGW
 if( WIN32 )
 	if( MINGW )
-		add_custom_command( TARGET ${PROJECT_NAME} PRE_BUILD COMMAND windres -i ${CMAKE_CURRENT_SOURCE_DIR}/images/icon/qCC.rc --input-format=rc -o ${CMAKE_CURRENT_BINARY_DIR}/qCC.res -O coff )
+		add_custom_command( TARGET ${PROJECT_NAME} PRE_BUILD COMMAND windres -i ${CMAKE_CURRENT_SOURCE_DIR}/images/icon/cc_icon.rc --input-format=rc -o ${CMAKE_CURRENT_BINARY_DIR}/cc_icon.res -O coff )
 	endif()
 endif()
 

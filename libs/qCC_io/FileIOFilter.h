@@ -242,7 +242,7 @@ public:
 									ccHObject& container,
 									bool alwaysDisplayLoadDialog = true,
 									bool* coordinatesShiftEnabled = 0,
-									CCVector3d* coordinatesShift = 0)=0;
+									CCVector3d* coordinatesShift = 0) = 0;
 
 	//! Saves an entity (or a group of) to a file
 	/** This method must be implemented by children classes.
@@ -250,7 +250,7 @@ public:
         \param filename filename
         \return error
 	**/
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename)=0;
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename) = 0;
 
 	//! Detecs file type from file extension
 	static CC_FILE_TYPES GuessFileFormatFromExtension(const char* ext);

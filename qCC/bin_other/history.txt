@@ -37,6 +37,12 @@ v2.5.3 ??/??/2014
 		- specify export format (clouds or meshes) as well as the extension
 		- prevent CC from automatically a timestamp as suffix for output files
 		(see the updated documentation here: http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine)
+	* ccViewer now supports GL filters (i.e. 'shader' plugins: qEDL and qSSAO)
+	* The GL filter banner (yellow) is now smaller, and is displayed at the top of the 3D view
+		(it doesn't hide the scale anymore!)
+	* Normals are no longer computed by default when loading a mesh without normals
+	* Normals can now be computed on a mesh either 'per-vertex' (mean normal vector of
+		all connected triangles) or 'per-triangle' (gives a 'faceted' look)
 
 - Other:
 	* ATOM feed enabled on the forum (http://www.danielgm.net/cc/forum/)

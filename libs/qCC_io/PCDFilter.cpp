@@ -106,7 +106,7 @@ CC_FILE_ERROR PCDFilter::loadFile(const char* filename, ccHObject& container, bo
 		return CC_FERR_WRONG_FILE_TYPE;
 	}
 
-	return LoadFileBinaryMemMap(filename, container, header);
+	return loadFileBinaryMemMap(filename, container, header);
 }
 
 CC_FILE_ERROR PCDFilter::readFileHeader(const char* filename, PCDHeader &header)
@@ -243,10 +243,10 @@ size_t PCDFilter::GetOffsetOfField(int fieldID, const PCDHeader& header)
 }
 
 int PCDFilter::ReadScalarFieldMemMap(const QString& fieldName,
-	const InputMemoryFile& mem_file,
-	const PCDHeader& header,
-	ccScalarField &field,
-	size_t count)
+									 const InputMemoryFile& mem_file,
+									 const PCDHeader& header,
+									 ccScalarField &field,
+									 size_t count)
 {
 	int fieldID = GetIDOfField(fieldName, header);
 	if (fieldID<0)
@@ -376,7 +376,7 @@ int PCDFilter::ReadNormalsMemMap(const InputMemoryFile & mem_file, const PCDHead
 	return 1;
 }
 
-CC_FILE_ERROR PCDFilter::LoadFileBinaryMemMap(const char* filename, ccHObject& container, const PCDHeader &header)
+CC_FILE_ERROR PCDFilter::loadFileBinaryMemMap(const char* filename, ccHObject& container, const PCDHeader &header)
 {
 	//Should be ok if we are here (header has already been successfully read)
 	//if (!QFile(filename).exists())

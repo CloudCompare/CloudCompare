@@ -16,7 +16,7 @@
 //##########################################################################
 
 #include "ObjFilter.h"
-#include "../ccCoordinatesShiftManager.h"
+#include "ccCoordinatesShiftManager.h"
 
 //Qt
 #include <QApplication>
@@ -344,7 +344,7 @@ struct facetElement
 
 CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-	ccLog::Print("[ObjFilter::Load] %s",filename);
+	ccLog::Print("[OBJ] %s",filename);
 
 	//open file
 	QFile file(filename);
@@ -460,7 +460,8 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				if (shiftAlreadyEnabled)
 					Pshift = *coordinatesShift;
 				bool applyAll = false;
-				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				if (	sizeof(PointCoordinateType) < 8
+					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					vertices->setGlobalShift(Pshift);
 					ccLog::Warning("[ObjFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
@@ -834,7 +835,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				//DGM: in case there's space characters in the filename, we must read it again from the original line buffer
 				//QString mtlFilename = tokens[1];
 				QString mtlFilename = currentLine.mid(7).trimmed();
-				ccLog::Print(QString("[ObjFilter::Load] Material file: ")+mtlFilename);
+				ccLog::Print(QString("[OBJ] Material file: ")+mtlFilename);
 				QString mtlPath = QFileInfo(filename).canonicalPath();
 				//we try to load it
 				if (!materials)
@@ -847,12 +848,12 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				QStringList errors;
 				if (ccMaterialSet::ParseMTL(mtlPath,mtlFilename,*materials,errors))
 				{
-					ccLog::Print("[ObjFilter::Load] %i materials loaded",materials->size()-oldSize);
+					ccLog::Print("[OBJ] %i materials loaded",materials->size()-oldSize);
 					materialsLoadFailed = false;
 				}
 				else
 				{
-					ccLog::Error(QString("[ObjFilter::Load] Failed to load material file! (should be in '%1')").arg(mtlPath+'/'+QString(mtlFilename)));
+					ccLog::Error(QString("[OBJ] Failed to load material file! (should be in '%1')").arg(mtlPath+'/'+QString(mtlFilename)));
 					materialsLoadFailed = true;
 				}
 
@@ -887,15 +888,15 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 	if (!error && pointsRead == 0)
 	{
 		//of course if there's no vertex, that's the end of the story ...
-		ccLog::Warning("[ObjFilter::Load] Malformed file: no vertex in file!");
+		ccLog::Warning("[OBJ] Malformed file: no vertex in file!");
 		error = true;
 	}
 
 	if (!error)
 	{
-		ccLog::Print("[ObjFilter::Load] %i points, %u faces",pointsRead,totalFacesRead);
+		ccLog::Print("[OBJ] %i points, %u faces",pointsRead,totalFacesRead);
 		if (texCoordsRead>0 || normsRead>0)
-			ccLog::Print("[ObjFilter::Load] %i tex. coords, %i normals",texCoordsRead,normsRead);
+			ccLog::Print("[OBJ] %i tex. coords, %i normals",texCoordsRead,normsRead);
 
 		//do some cleaning
 		if (vertices->size() < vertices->capacity())
@@ -919,7 +920,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			|| maxTriNormIndex >= normsRead)
 		{
 			//hum, we've got a problem here
-			ccLog::Warning("[ObjFilter::Load] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)",maxVertexIndex,maxTexCoordIndex,maxTriNormIndex);
+			ccLog::Warning("[OBJ] Malformed file: indexes go higher than the number of elements! (v=%i/tc=%i/n=%i)",maxVertexIndex,maxTexCoordIndex,maxTriNormIndex);
 			if (maxVertexIndex >= pointsRead)
 			{
 				error = true;
@@ -965,27 +966,29 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				}
 				else
 				{
-					ccLog::Warning("[ObjFilter::Load] Texture coordinates were defined but no material could be loaded!");
+					ccLog::Warning("[OBJ] Texture coordinates were defined but no material could be loaded!");
 				}
 			}
 
 			//normals: if the obj file doesn't provide any, should we compute them?
 			if (!normals)
 			{
-				if (!materials) //yes if no material is available!
+				//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
+				//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
+				//if (!materials && !baseMesh->hasColors()) //yes if no material is available!
+				//{
+				//	ccLog::Print("[OBJ] Mesh has no normal! We will compute them automatically");
+				//	baseMesh->computeNormals();
+				//	baseMesh->showNormals(true);
+				//}
+				//else
 				{
-					ccLog::Print("[ObjFilter::Load] Mesh has no normal! We will compute them automatically");
-					baseMesh->computeNormals();
-					baseMesh->showNormals(true);
-				}
-				else
-				{
-					ccLog::Warning("[ObjFilter::Load] Mesh has no normal! CloudCompare can try to compute them (select base entity, then \"Edit > Normals > Compute\")");
+					ccLog::Warning("[OBJ] Mesh has no normal! You can compute them later (select base entity, then \"Edit > Normals > Compute\")");
 				}
 			}
 
 			//create sub-meshes if necessary
-			ccLog::Print("[ObjFilter::Load] 1 mesh loaded - %i group(s)", groups.size());
+			ccLog::Print("[OBJ] 1 mesh loaded - %i group(s)", groups.size());
 			if (groups.size() > 1)
 			{
 				for (size_t i=0; i<groups.size(); ++i)
@@ -1085,17 +1088,17 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	//potential warnings
 	if (objWarnings[DISCARED_GROUP])
-		ccLog::Warning("[ObjFilter::Load] At least one group has been discared while not empty. The file might be malformed, or otherwise it's a bug! You may send us the file to help us correct it...");
+		ccLog::Warning("[OBJ] At least one group has been discared while not empty. The file might be malformed, or otherwise it's a bug! You may send us the file to help us correct it...");
 	if (objWarnings[EMPTY_GROUP])
-		ccLog::Warning("[ObjFilter::Load] At least one group has been ignored because it was empty. It's generally because it is composed of unhandled components (lines, nurbs, etc.)");
+		ccLog::Warning("[OBJ] At least one group has been ignored because it was empty. It's generally because it is composed of unhandled components (lines, nurbs, etc.)");
 	if (objWarnings[INVALID_NORMALS])
-		ccLog::Warning("[ObjFilter::Load] Some normals in file were invalid. You should re-compute them (select entity, then \"Edit > Normals > Compute\")");
+		ccLog::Warning("[OBJ] Some normals in file were invalid. You should re-compute them (select entity, then \"Edit > Normals > Compute\")");
 	if (objWarnings[INVALID_INDEX])
-		ccLog::Warning("[ObjFilter::Load] File is malformed! Check indexes...");
+		ccLog::Warning("[OBJ] File is malformed! Check indexes...");
 	if (objWarnings[NOT_ENOUGH_MEMORY])
-		ccLog::Warning("[ObjFilter::Load] Not enough memory!");
+		ccLog::Warning("[OBJ] Not enough memory!");
 	if (objWarnings[INVALID_LINE])
-		ccLog::Warning("[ObjFilter::Load] File is malformed! Missing data.");
+		ccLog::Warning("[OBJ] File is malformed! Missing data.");
 
 	return (error ? (objWarnings[NOT_ENOUGH_MEMORY] ? CC_FERR_NOT_ENOUGH_MEMORY : CC_FERR_MALFORMED_FILE) : CC_FERR_NO_ERROR);
 }

@@ -19,6 +19,9 @@
 #include "ccCoordinatesShiftManager.h"
 #include "ccShiftAndScaleCloudDlg.h"
 
+//qCC_db
+#include <ccHObject.h>
+
 //System
 #include <string.h>
 #include <assert.h>

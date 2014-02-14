@@ -31,9 +31,11 @@
 #include <cc2DLabel.h>
 #include <ccPolyline.h>
 
+//qCC_io
+#include <FileIOFilter.h>
+
 //local
 #include "ccGLWindow.h"
-#include "fileIO/FileIOFilter.h"
 #include "mainwindow.h"
 #include "db_tree/ccDBRoot.h"
 

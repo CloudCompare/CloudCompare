@@ -32,8 +32,8 @@
 #include <ccGLWindow.h>
 #include <ccGuiParameters.h>
 
-//qCC
-#include <fileIO/FileIOFilter.h>
+//qCC_io
+#include <FileIOFilter.h>
 
 //dialogs
 #include <ccDisplayOptionsDlg.h>

@@ -21,8 +21,7 @@
 
 //Local
 #include "E57Header.h"
-#include "../ccCoordinatesShiftManager.h"
-#include "../ccCommon.h"
+#include "ccCoordinatesShiftManager.h"
 
 //libE57
 #include <E57/E57Foundation.h>
@@ -1667,10 +1666,11 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			}
 
 			//first point: check for 'big' coordinates
-			if (realCount==0)
+			if (realCount == 0)
 			{
 				bool applyAll=false;
-				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(Pd,0,s_alwaysDisplayLoadDialog,s_coordinatesShiftEnabled,s_coordinatesShift,0,applyAll))
+				if (	sizeof(PointCoordinateType) < 8
+					&&	ccCoordinatesShiftManager::Handle(Pd,0,s_alwaysDisplayLoadDialog,s_coordinatesShiftEnabled,s_coordinatesShift,0,applyAll))
 				{
 					cloud->setGlobalShift(s_coordinatesShift);
 					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)",qPrintable(guidStr),s_coordinatesShift.x,s_coordinatesShift.y,s_coordinatesShift.z);

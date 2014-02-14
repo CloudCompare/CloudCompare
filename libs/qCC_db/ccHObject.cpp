@@ -369,7 +369,13 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		gluProject(C.x,C.y,C.z,MM,MP,VP,&xp,&yp,&zp);
 
 		QFont font = context._win->getTextDisplayFont(); //takes rendering zoom into account!
-		context._win->displayText(getName(),(int)xp,(int)yp,ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,75,0,&font);
+		context._win->displayText(	getName(),
+									static_cast<int>(xp),
+									static_cast<int>(yp),
+									ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VMIDDLE,
+									0.75f,
+									0,
+									&font);
 	}
 }
 

@@ -20,7 +20,7 @@
 #include "RasterGridFilter.h"
 
 //qCC
-#include "../ccCoordinatesShiftManager.h"
+#include "ccCoordinatesShiftManager.h"
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -99,7 +99,8 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 			if (shiftAlreadyEnabled)
 				Pshift = *coordinatesShift;
 			bool applyAll = false;
-			if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(origin,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+			if (	sizeof(PointCoordinateType) < 8
+				&&	ccCoordinatesShiftManager::Handle(origin,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 			{
 				pc->setGlobalShift(Pshift);
 				ccLog::Warning("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);

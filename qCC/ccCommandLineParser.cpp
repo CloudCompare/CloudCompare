@@ -13,9 +13,11 @@
 #include <ccPlane.h>
 #include <ccNormalVectors.h>
 
+//qCC_io
+#include <BundlerFilter.h>
+#include <AsciiFilter.h>
+
 //qCC
-#include "fileIO/BundlerFilter.h"
-#include "fileIO/AsciiFilter.h"
 #include "ccCommon.h"
 #include <ui_commandLineDlg.h>
 #include "ccConsole.h"
@@ -1706,12 +1708,12 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 	{
 		QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
 		assert(saveDialog);
-		saveDialog->coordsPrecisionSpinBox->setValue(s_precision);
-		saveDialog->sfPrecisionSpinBox->setValue(s_precision);
-		saveDialog->separatorComboBox->setCurrentIndex(0); //space
-		saveDialog->orderComboBox->setCurrentIndex(0); //point, color, SF, normal
-		saveDialog->columnsHeaderCheckBox->setChecked(false);
-		saveDialog->pointCountHeaderCheckBox->setChecked(false);
+		saveDialog->setCoordsPrecision(s_precision);
+		saveDialog->setSfPrecision(s_precision);
+		saveDialog->setSeparatorIndex(0); //space
+		saveDialog->enableSwapColorAndSF(false); //default order: point, color, SF, normal
+		saveDialog->enableSaveColumnsNamesHeader(false);
+		saveDialog->enableSavePointCountHeader(false);
 	}
 
 	//look for additional parameters
@@ -1746,8 +1748,11 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 
 			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
 			assert(saveDialog);
-			saveDialog->coordsPrecisionSpinBox->setValue(precision);
-			saveDialog->sfPrecisionSpinBox->setValue(precision);
+			if (saveDialog)
+			{
+				saveDialog->setCoordsPrecision(precision);
+				saveDialog->setSfPrecision(precision);
+			}
 		}
 		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_SEPARATOR))
 		{
@@ -1776,8 +1781,11 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 
 			QSharedPointer<AsciiSaveDlg> saveDialog = AsciiFilter::GetSaveDialog();
 			assert(saveDialog);
-			saveDialog->separatorComboBox->setCurrentIndex(index);
-			saveDialog->setAutoShow(false);
+			if (saveDialog)
+			{
+				saveDialog->setSeparatorIndex(index);
+				saveDialog->setAutoShow(false);
+			}
 		}
 		else
 		{

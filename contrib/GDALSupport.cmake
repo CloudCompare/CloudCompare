@@ -16,7 +16,7 @@ if( ${OPTION_USE_GDAL} )
 endif()
 
 # Link project with GDAL library
-function( target_link_GDAL ) # 2 arguments: ARGV0 = project name / ARGV1 = shared lib export folder (release) / ARGV2 = shared lib export folder (debug)
+function( target_link_GDAL ) # 3 arguments: ARGV0 = project name / ARGV1 = shared lib export folder (release) / ARGV2 = shared lib export folder (debug)
 
 if( ${OPTION_USE_GDAL} )
 	
@@ -28,15 +28,17 @@ if( ${OPTION_USE_GDAL} )
 		if( WIN32 )
 			
 			#install DLLs
-			file( GLOB dll_files ${GDAL_INCLUDE_DIR}/../bin/*.dll )
-			foreach( qtDLL ${dll_files} )
-				if( NOT CMAKE_CONFIGURATION_TYPES )
-					install( FILES ${qtDLL} DESTINATION ${ARGV1} )
-				else()
-					install( FILES ${qtDLL} CONFIGURATIONS Release DESTINATION ${ARGV1} )
-					install( FILES ${qtDLL} CONFIGURATIONS Debug DESTINATION ${ARGV2} )
-				endif()
-			endforeach()
+			if ( ARGV1 )
+				file( GLOB dll_files ${GDAL_INCLUDE_DIR}/../bin/*.dll )
+				foreach( qtDLL ${dll_files} )
+					if( NOT CMAKE_CONFIGURATION_TYPES )
+						install( FILES ${qtDLL} DESTINATION ${ARGV1} )
+					else()
+						install( FILES ${qtDLL} CONFIGURATIONS Release DESTINATION ${ARGV1} )
+						install( FILES ${qtDLL} CONFIGURATIONS Debug DESTINATION ${ARGV2} )
+					endif()
+				endforeach()
+			endif()
 			
 		endif()
 	

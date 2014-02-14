@@ -14,7 +14,7 @@
    <bool>true</bool>
   </property>
   <property name="windowTitle">
-   <string>Viewer</string>
+   <string>ccViewer</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../../qCC/icones.qrc">

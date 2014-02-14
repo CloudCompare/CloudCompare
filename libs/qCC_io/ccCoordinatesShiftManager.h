@@ -15,22 +15,30 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_ASK_ONE_INT_VALUE_DLG_HEADER
-#define CC_ASK_ONE_INT_VALUE_DLG_HEADER
+#ifndef CC_COORDINATES_SHIFT_MANAGER_HEADER
+#define CC_COORDINATES_SHIFT_MANAGER_HEADER
 
-#include <ui_askOneIntValueDlg.h>
+//CCLib
+#include <CCGeom.h>
 
-class ccAskOneIntValueDlg : public QDialog, public Ui::AskOneIntValueDialog
+//Qt
+#include <QString>
+
+class ccHObject;
+
+//! Helper class to handle coordinates shift while loading entities (GUI, etc.)
+class ccCoordinatesShiftManager
 {
 public:
-    ccAskOneIntValueDlg(const char* valueName,
-                            int minVal,
-                                int maxVal,
-                                    int defaultVal,
-                                        const char* windowTitle=0,
-                                            QWidget* parent=0);
 
-    int getValue();
+	//! Handles coordinates shift/scale given the first 3D point and current related parameters
+	static bool Handle(	const double* P,
+						double diagonal,
+						bool alwaysDisplayLoadDialog,
+						bool coordinatesTransformationEnabled,
+						CCVector3d& coordinatesShift,
+						double* coordinatesScale,
+						bool& applyAll);
 };
 
 #endif

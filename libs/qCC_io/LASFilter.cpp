@@ -20,8 +20,7 @@
 #include "LASFilter.h"
 
 //qCC
-#include "../ccCommon.h"
-#include "../ccCoordinatesShiftManager.h"
+#include "ccCoordinatesShiftManager.h"
 #include "LASOpenDlg.h"
 
 //qCC_db
@@ -571,8 +570,9 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 			bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 			if (shiftAlreadyEnabled)
 				Pshift = *coordinatesShift;
-			bool applyAll=false;
-			if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(P.u,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+			bool applyAll = false;
+			if (	sizeof(PointCoordinateType) < 8
+				&&	ccCoordinatesShiftManager::Handle(P.u,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 			{
 				loadedCloud->setGlobalShift(Pshift);
 				ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);

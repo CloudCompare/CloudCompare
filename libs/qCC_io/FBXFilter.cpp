@@ -20,8 +20,7 @@
 #include "FBXFilter.h"
 
 //qCC
-#include "../ccCoordinatesShiftManager.h"
-#include "../ccCommon.h"
+#include "ccCoordinatesShiftManager.h"
 
 //qCC_db
 #include <ccPointCloud.h>
@@ -736,8 +735,9 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 				if (shiftAlreadyEnabled)
 					Pshift = *coordinatesShift;
-				bool applyAll=false;
-				if (sizeof(PointCoordinateType) < 8 && ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				bool applyAll = false;
+				if (	sizeof(PointCoordinateType) < 8
+					&&	ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					vertices->setGlobalShift(Pshift);
 					ccLog::Warning("[FBX] Mesh has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);

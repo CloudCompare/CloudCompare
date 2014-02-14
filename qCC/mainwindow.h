@@ -541,6 +541,8 @@ protected:
 
     //! Registers a MDI area overlay dialog
     void registerMDIDialog(ccOverlayDialog* dlg, Qt::Corner pos);
+    //! Unregisters a MDI area overlay dialog
+	void unregisterMDIDialog(ccOverlayDialog* dlg);
 
     //! Automatically updates all registered MDI dialogs placement
     void updateMDIDialogsPlacement();

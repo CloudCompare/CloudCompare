@@ -19,7 +19,11 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const double* P,
 	if (diagonal > 0.0)
 		cloudDiagonalLabel->setText(QString::number(diagonal,'f',2));
 	else
-		cloudDiagonalLabel->setVisible(false);
+		scaleInfoFrame->setVisible(false);
+
+	shiftX->setRange(-DBL_MAX,DBL_MAX);
+	shiftY->setRange(-DBL_MAX,DBL_MAX);
+	shiftZ->setRange(-DBL_MAX,DBL_MAX);
 
 	connect(buttonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(onClick(QAbstractButton*)));
 }

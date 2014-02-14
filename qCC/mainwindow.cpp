@@ -176,6 +176,8 @@ MainWindow::MainWindow()
     QSettings settings;
     restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
 
+	setWindowTitle(QString("CloudCompare v")+ccCommon::GetCCVersion(false));
+
 	//advanced widgets not handled by QDesigner
 	{
 		//view mode pop-up menu
@@ -294,6 +296,7 @@ MainWindow::~MainWindow()
 	//release all 'overlay' dialogs
 	while (!m_mdiDialogs.empty())
 	{
+		m_mdiDialogs.back().dialog->disconnect();
 		m_mdiDialogs.back().dialog->stop(false);
 		m_mdiDialogs.back().dialog->setParent(0);
 		delete m_mdiDialogs.back().dialog;
@@ -5194,6 +5197,22 @@ void MainWindow::registerMDIDialog(ccOverlayDialog* dlg, Qt::Corner pos)
     m_mdiDialogs.push_back(ccMDIDialogs(dlg,pos));
 }
 
+void MainWindow::unregisterMDIDialog(ccOverlayDialog* dlg)
+{
+	if (dlg)
+	{
+		std::vector<ccMDIDialogs>::iterator it = m_mdiDialogs.begin();
+		while (it != m_mdiDialogs.end())
+			if (it->dialog == dlg)
+				break;
+		if (it != m_mdiDialogs.end())
+			m_mdiDialogs.erase(it);
+		dlg->disconnect();
+		dlg->stop(false);
+		dlg->deleteLater();
+	}
+}
+
 void MainWindow::placeMDIDialog(ccMDIDialogs& mdiDlg)
 {
     if (!mdiDlg.dialog || !mdiDlg.dialog->isVisible() || !m_mdiArea)
@@ -5370,7 +5389,7 @@ void MainWindow::deactivateRegisterPointPairTool(bool state)
 	if (m_pprDlg)
 		m_pprDlg->clear();
 
-    //we enable all GL windows
+	//we enable all GL windows
     enableAll();
 
 	QList<QMdiSubWindow*> subWindowList = m_mdiArea->subWindowList();

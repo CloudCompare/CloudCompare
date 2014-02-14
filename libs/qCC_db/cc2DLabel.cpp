@@ -237,6 +237,26 @@ double GetAngle_deg(CCVector3& AB, CCVector3& AC)
 	return 180.0*acos(dotprod)/M_PI;
 }
 
+void AddPointCoordinates(QStringList& body, unsigned pointIndex, ccGenericPointCloud* cloud, int precision)
+{
+	assert(cloud);
+	const CCVector3* P = cloud->getPointPersistentPtr(pointIndex);
+	const CCVector3d& shift = cloud->getGlobalShift();
+	bool isShifted = (shift.norm2() != 0);
+	
+	QString coordStr = QString("P#%0: (%1;%2;%3)").arg(pointIndex).arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision);
+	if (isShifted)
+		coordStr += QString(" [shifted]");
+	body << coordStr;
+	
+	if (isShifted)
+	{
+		CCVector3d Pg = CCVector3d::fromArray(P->u) + shift;
+		QString globCoordStr = QString("P#%0: (%1;%2;%3) [original]").arg(pointIndex).arg(Pg.x,0,'f',precision).arg(Pg.y,0,'f',precision).arg(Pg.z,0,'f',precision);
+		body << globCoordStr;
+	}
+}
+
 QStringList cc2DLabel::getLabelContent(int precision)
 {
 	QStringList body;
@@ -254,9 +274,7 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			//coordinates
 			ccGenericPointCloud* cloud = m_points[0].cloud;
 			const unsigned& pointIndex = m_points[0].index;
-			const CCVector3* P = cloud->getPointPersistentPtr(pointIndex);
-			QString coordStr = QString("P#%0: (%1;%2;%3)").arg(pointIndex).arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision);
-			body << coordStr;
+			AddPointCoordinates(body,pointIndex,cloud,precision);
 
 			//normal
 			if (cloud->hasNormals())
@@ -298,10 +316,8 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			QString distStr = QString("Distance = %1").arg(d,0,'f',precision);
 			body << distStr;
 
-			QString coordStr1 = QString("P#%0: (%1;%2;%3)").arg(pointIndex1).arg(P1->x,0,'f',precision).arg(P1->y,0,'f',precision).arg(P1->z,0,'f',precision);
-			body << coordStr1;
-			QString coordStr2 = QString("P#%0: (%1;%2;%3)").arg(pointIndex2).arg(P2->x,0,'f',precision).arg(P2->y,0,'f',precision).arg(P2->z,0,'f',precision);
-			body << coordStr2;
+			AddPointCoordinates(body,pointIndex1,cloud1,precision);
+			AddPointCoordinates(body,pointIndex2,cloud2,precision);
 		}
 		break;
 	case 3: //triangle/plane
@@ -328,12 +344,9 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			body << areaStr;
 
 			//coordinates
-			QString coordStr1 = QString("A#%0: (%1;%2;%3)").arg(pointIndex1).arg(P1->x,0,'f',precision).arg(P1->y,0,'f',precision).arg(P1->z,0,'f',precision);
-			body << coordStr1;
-			QString coordStr2 = QString("B#%0: (%1;%2;%3)").arg(pointIndex2).arg(P2->x,0,'f',precision).arg(P2->y,0,'f',precision).arg(P2->z,0,'f',precision);
-			body << coordStr2;
-			QString coordStr3 = QString("C#%0: (%1;%2;%3)").arg(pointIndex3).arg(P3->x,0,'f',precision).arg(P3->y,0,'f',precision).arg(P3->z,0,'f',precision);
-			body << coordStr3;
+			AddPointCoordinates(body,pointIndex1,cloud1,precision);
+			AddPointCoordinates(body,pointIndex2,cloud2,precision);
+			AddPointCoordinates(body,pointIndex3,cloud3,precision);
 
 			//normal
 			N.normalize();
@@ -416,7 +429,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 	}
 
     const float c_sizeFactor = 4.0f;
-    bool loop=false;
+    bool loop = false;
 
 	size_t count = m_points.size();
     switch (count)

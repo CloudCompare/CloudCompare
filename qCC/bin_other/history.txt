@@ -43,6 +43,8 @@ v2.5.3 ??/??/2014
 	* Normals are no longer computed by default when loading a mesh without normals
 	* Normals can now be computed on a mesh either 'per-vertex' (mean normal vector of
 		all connected triangles) or 'per-triangle' (gives a 'faceted' look)
+	* The 'Point pair-based registration' tool now handles virtual points with very large coordinates
+		(useful to register a cloud with GPS control points for instance)
 
 - Other:
 	* ATOM feed enabled on the forum (http://www.danielgm.net/cc/forum/)
@@ -61,6 +63,7 @@ v2.5.3 ??/??/2014
 	* The translation obtained by ICP registration with adaptative scale was wrong! (scale was not applied)
 	* The 'repetitive slice extraction' option of the 'Cross section' tool was behaving strangely (some slices
 		were sometimes fused together)
+	* The 'Point pair-based registration' dialog was not automatically reset
 
 v2.5.2 12/19/2013
 - GDAL library support added:

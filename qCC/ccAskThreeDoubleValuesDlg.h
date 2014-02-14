@@ -20,20 +20,32 @@
 
 #include <ui_askThreeDoubleValuesDlg.h>
 
+//Qt
+#include <QString>
+
+//! Generic dialog to query 3 (double) values
 class ccAskThreeDoubleValuesDlg : public QDialog, public Ui::AskThreeDoubleValuesDialog
 {
 public:
-    ccAskThreeDoubleValuesDlg(const char* vName1,
-                                const char* vName2,
-                                    const char* vName3,
-                                        double minVal,
-                                            double maxVal,
-                                                double defaultVal1,
-                                                    double defaultVal2,
-                                                        double defaultVal3,
-                                                            int precision=6,
-                                                                const char* windowTitle=0,
-                                                                    QWidget* parent=0);
+	
+	//! Default constructor
+    ccAskThreeDoubleValuesDlg(	const QString& vName1,
+								const QString& vName2,
+								const QString& vName3,
+								double minVal,
+								double maxVal,
+								double defaultVal1,
+								double defaultVal2,
+								double defaultVal3,
+								int precision = 6,
+								const char* windowTitle = 0,
+								QWidget* parent = 0);
+
+	//! Enable the checkbox (bottom-left)
+	void showCheckbox(const QString& label, bool state, const QString* tooltip = 0);
+
+	//! Returns 
+	bool getCheckboxState() const;
 };
 
 #endif

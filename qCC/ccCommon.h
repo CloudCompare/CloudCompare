@@ -51,7 +51,7 @@ class ccCommon
     public:
 
         //! Returns current software version
-        static QString GetCCVersion();
+        static QString GetCCVersion(bool full = true);
 };
 
 #endif

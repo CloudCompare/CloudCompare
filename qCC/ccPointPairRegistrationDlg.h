@@ -36,15 +36,15 @@ public:
 	virtual void stop(bool state);
 
 	//! Inits dialog
-	bool init(ccGenericPointCloud* aligned, ccGenericPointCloud* reference=0);
+	bool init(ccGenericPointCloud* aligned, ccGenericPointCloud* reference = 0);
 
 	//! Clears dialog
 	void clear();
 
 	//! Adds a point to the 'align' set
-	bool addAlignedPoint(const CCVector3& P, ccGenericPointCloud* cloud=0, unsigned pointIndex=0);
+	bool addAlignedPoint(CCVector3d& P, ccGenericPointCloud* cloud = 0, unsigned pointIndex = 0, bool shifted = true);
 	//! Adds a point to the 'reference' set
-	bool addReferencePoint(const CCVector3& P, ccGenericPointCloud* cloud=0, unsigned pointIndex=0);
+	bool addReferencePoint(CCVector3d& P, ccGenericPointCloud* cloud = 0, unsigned pointIndex = 0, bool shifted = true);
 
 protected slots:
 

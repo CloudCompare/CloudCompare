@@ -68,10 +68,10 @@ target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 
 # contrib. libraries support
-target_link_contrib( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
+target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
 
 # 3dConnexion devices support
-target_link_3DXWARE( ${ARGV0} )
+target_link_3DXWARE( ${PROJECT_NAME} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )

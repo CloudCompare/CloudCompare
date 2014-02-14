@@ -143,11 +143,6 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
     pdlg.setInfo(qPrintable(QString("Number of points: %1").arg(numberOfPoints)));
     pdlg.start();
 
-	//shift on load
-	const CCVector3d shift = cloud->getGlobalShift();
-	double scale = cloud->getGlobalScale();
-	assert(scale != 0);
-
 	//output precision
 	const int s_coordPrecision = saveDialog->coordsPrecision();
 	const int s_sfPrecision = saveDialog->sfPrecision(); 
@@ -226,11 +221,12 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 
 		//write current point coordinates
         const CCVector3* P = cloud->getPoint(i);
-		line.append(QString::number(static_cast<double>(P->x)/scale - shift.x,'f',s_coordPrecision));
+		CCVector3d Pglobal = cloud->toGlobal3d(*P);
+		line.append(QString::number(Pglobal.x,'f',s_coordPrecision));
 		line.append(separator);
-		line.append(QString::number(static_cast<double>(P->y)/scale - shift.y,'f',s_coordPrecision));
+		line.append(QString::number(Pglobal.y,'f',s_coordPrecision));
 		line.append(separator);
-		line.append(QString::number(static_cast<double>(P->z)/scale - shift.z,'f',s_coordPrecision));
+		line.append(QString::number(Pglobal.z,'f',s_coordPrecision));
 
 		QString color;
 		if (writeColors)

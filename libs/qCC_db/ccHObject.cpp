@@ -436,7 +436,7 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	}
 
 	//draw entity's children
-	for (Container::iterator it = m_children.begin(); it!=m_children.end(); ++it)
+	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
 		(*it)->draw(context);
 
 	//if the entity is currently selected, we draw its bounding-box

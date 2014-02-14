@@ -167,10 +167,6 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (ofs.fail())
 		return CC_FERR_WRITING;
 
-	const CCVector3d& shift = theCloud->getGlobalShift();
-	double scale = theCloud->getGlobalScale();
-	assert(scale != 0);
-
 	liblas::Writer* writer = 0;
 	try
 	{
@@ -186,19 +182,16 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 		ccBBox bBox = theCloud->getBB();
 		if (bBox.isValid())
 		{
-			header.SetMin(	static_cast<double>(bBox.minCorner().x)/scale-shift.x,
-							static_cast<double>(bBox.minCorner().y)/scale-shift.y,
-							static_cast<double>(bBox.minCorner().z)/scale-shift.z );
-			header.SetMax(	static_cast<double>(bBox.maxCorner().x)/scale-shift.x,
-							static_cast<double>(bBox.maxCorner().y)/scale-shift.y,
-							static_cast<double>(bBox.maxCorner().z)/scale-shift.z );
+			CCVector3d bbMin = theCloud->toGlobal3d<PointCoordinateType>(bBox.minCorner());
+			CCVector3d bbMax = theCloud->toGlobal3d<PointCoordinateType>(bBox.maxCorner());
+			
+			header.SetMin(	bbMin.x, bbMin.y, bbMin.z );
+			header.SetMax(	bbMax.x, bbMax.y, bbMax.z );
 			CCVector3 diag = bBox.getDiagVec();
 
 			//Set offset & scale, as points will be stored as boost::int32_t values (between 0 and 4294967296)
 			//int_value = (double_value-offset)/scale
-			header.SetOffset(	static_cast<double>(bBox.minCorner().x)/scale-shift.x,
-								static_cast<double>(bBox.minCorner().y)/scale-shift.y,
-								static_cast<double>(bBox.minCorner().z)/scale-shift.z );
+			header.SetOffset(	bbMin.x, bbMin.y, bbMin.z );
 			
 			header.SetScale(1.0e-9 * std::max<double>(diag.x,ZERO_TOLERANCE), //result must fit in 32bits?!
 							1.0e-9 * std::max<double>(diag.y,ZERO_TOLERANCE),
@@ -247,10 +240,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 	{
 		const CCVector3* P = theCloud->getPoint(i);
 		{
-			double x = static_cast<double>(P->x)/scale - shift.x;
-			double y = static_cast<double>(P->y)/scale - shift.y;
-			double z = static_cast<double>(P->z)/scale - shift.z;
-			point.SetCoordinates(x, y, z);
+			CCVector3d Pglobal = theCloud->toGlobal3d<PointCoordinateType>(*P);
+			point.SetCoordinates(Pglobal.x, Pglobal.y, Pglobal.z);
 		}
 		
 		if (hasColor)

@@ -85,16 +85,15 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 
 	//vertices
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
-	const CCVector3d& shift = vertices->getGlobalShift();
-	double scale = vertices->getGlobalScale();
-	assert(scale != 0);
 	unsigned nbPoints = vertices->size();
+
 	for (unsigned i=0; i<nbPoints; ++i)
 	{
 		const CCVector3* P = vertices->getPoint(i);
-		if (fprintf(theFile,"v %f %f %f\n",	static_cast<double>(P->x)/scale-shift.x,
-											static_cast<double>(P->y)/scale-shift.y,
-											static_cast<double>(P->z)/scale-shift.z) < 0)
+		CCVector3d Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
+		if (fprintf(theFile,"v %f %f %f\n",	Pglobal.x,
+											Pglobal.y,
+											Pglobal.z) < 0)
 		{
 			return CC_FERR_WRITING;
 		}

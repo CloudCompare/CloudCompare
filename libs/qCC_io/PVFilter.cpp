@@ -66,8 +66,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 		return CC_FERR_WRITING;
 
     //Has the cloud been recentered?
-	const CCVector3d& shift = theCloud->getGlobalShift();
-	if (fabs(shift.x)+fabs(shift.y)+fabs(shift.z) > 0 || theCloud->getGlobalScale() != 0)
+	if (theCloud->isShifted())
         ccLog::Warning(QString("[PVFilter::save] Can't recenter or rescale cloud '%1' when saving it in a PN file!").arg(theCloud->getName()));
 
 	//for point clouds with multiple SFs, we must set the currently displayed one as 'input' SF

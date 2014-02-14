@@ -1534,19 +1534,17 @@ void MainWindow::doActionApplyScale()
 			//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::multiply
 			ccHObject* parent=0;
 			removeObjectTemporarilyFromDBTree(cloud,parent);
-            static_cast<ccPointCloud*>(cloud)->multiply((PointCoordinateType)s_lastMultFactorX,
-														(PointCoordinateType)s_lastMultFactorY,
-														(PointCoordinateType)s_lastMultFactorZ);
+            static_cast<ccPointCloud*>(cloud)->multiply(static_cast<PointCoordinateType>(s_lastMultFactorX),
+														static_cast<PointCoordinateType>(s_lastMultFactorY),
+														static_cast<PointCoordinateType>(s_lastMultFactorZ));
 			putObjectBackIntoDBTree(cloud,parent);
             cloud->prepareDisplayForRefresh_recursive();
 
-			//don't forget shift on load!
-			//TODO: and what about the original scale?
-			CCVector3d shift = cloud->getGlobalShift();
-			shift.x *= s_lastMultFactorX;
-			shift.y *= s_lastMultFactorY;
-			shift.z *= s_lastMultFactorZ;
-			cloud->setGlobalShift(shift);
+			//don't forget the 'global shift'!
+			const CCVector3d& shift = cloud->getGlobalShift();
+			cloud->setGlobalShift(shift*s_lastMultFactorX);
+			const double& scale = cloud->getGlobalScale();
+			cloud->setGlobalScale(scale*s_lastMultFactorX);
 
 			++processNum;
         }
@@ -7626,6 +7624,7 @@ void MainWindow::addToDB(ccHObject* obj,
 				}
 
 				//update 'global shift' and 'global scale' for ALL clouds
+				//FIXME: why don't we do that all the time?!
 				ccHObject::Container children;
 				children.push_back(obj);
 				while (!children.empty())
@@ -7636,12 +7635,8 @@ void MainWindow::addToDB(ccHObject* obj,
 					if (child->isKindOf(CC_POINT_CLOUD))
 					{
 						ccGenericPointCloud* pc = ccHObjectCaster::ToGenericPointCloud(child);
-						const CCVector3d& oShift = pc->getGlobalShift();
-						CCVector3d PoShift = Pshift + oShift;
-						pc->setGlobalShift(PoShift);
-
-						double oScale = pc->getGlobalScale();
-						pc->setGlobalScale(oScale * scale);
+						pc->setGlobalShift(pc->getGlobalShift() + Pshift);
+						pc->setGlobalScale(pc->getGlobalScale() * scale);
 					}
 
 					for (unsigned i=0; i<child->getChildrenNumber(); ++i)

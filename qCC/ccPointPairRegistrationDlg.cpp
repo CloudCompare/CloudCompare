@@ -363,12 +363,12 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccGenericPoint
 
 	//transform the input point in the 'global world' by default
 	if (shifted)
-		Pin = m_alignedPoints.toGlobal3d(Pin);
+		Pin = m_alignedPoints.toGlobal3d<double>(Pin);
 
 	//check that we don't duplicate points
 	for (unsigned i=0; i<m_alignedPoints.size(); ++i)
 	{
-		CCVector3d Pi = m_alignedPoints.toGlobal3d(*m_alignedPoints.getPoint(i));
+		CCVector3d Pi = m_alignedPoints.toGlobal3d<PointCoordinateType>(*m_alignedPoints.getPoint(i));
 		if ((Pi-Pin).norm() < ZERO_TOLERANCE)
 		{
 			ccLog::Error("Point already picked or too close to an already selected one!");
@@ -464,13 +464,13 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccGenericPoi
 
 	//transform the input point in the 'global world' by default
 	if (shifted)
-		Pin = cloud->toGlobal3d(Pin);
+		Pin = cloud->toGlobal3d<double>(Pin);
 
 	//check that we don't duplicate points
 	for (unsigned i=0; i<m_refPoints.size(); ++i)
 	{
 		//express the 'Pi' point in the current global coordinate system
-		CCVector3d Pi = m_refPoints.toGlobal3d(*m_refPoints.getPoint(i));
+		CCVector3d Pi = m_refPoints.toGlobal3d<PointCoordinateType>(*m_refPoints.getPoint(i));
 		if ((Pi-Pin).norm() < ZERO_TOLERANCE)
 		{
 			ccLog::Error("Point already picked or too close to an already selected one!");

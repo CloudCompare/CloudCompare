@@ -94,9 +94,6 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 		ccLog::Error("No point/vertex to save?!");
 		return CC_FERR_NO_SAVE;
 	}
-	const CCVector3d& shift = vertices->getGlobalShift();
-	double scale = vertices->getGlobalScale();
-	assert(scale != 0);
 
     //open ASCII file for writing
 	QFile file(filename);
@@ -123,9 +120,10 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 		for (unsigned i=0; i<ptsCount; ++i)
 		{
 			const CCVector3* P = vertices->getPoint(i);
-			outFile << static_cast<double>(P->x)/scale - shift.x << " "
-					<< static_cast<double>(P->y)/scale - shift.y << " "
-					<< static_cast<double>(P->z)/scale - shift.z << endl;
+			CCVector3d Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
+			outFile << Pglobal.x << " "
+					<< Pglobal.y << " "
+					<< Pglobal.z << endl;
 		}
 	}
 

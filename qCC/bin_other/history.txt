@@ -45,6 +45,8 @@ v2.5.3 ??/??/2014
 		all connected triangles) or 'per-triangle' (gives a 'faceted' look)
 	* The 'Point pair-based registration' tool now handles virtual points with very large coordinates
 		(useful to register a cloud with GPS control points for instance)
+	* Labels now display both the shifted and the original points coordinates if
+		the cloud is shifted/scaled
 
 - Other:
 	* ATOM feed enabled on the forum (http://www.danielgm.net/cc/forum/)

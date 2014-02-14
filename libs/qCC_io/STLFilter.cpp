@@ -172,9 +172,6 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile)
 
 	//vertices
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
-	const CCVector3d& shift = vertices->getGlobalShift();
-	double scale = vertices->getGlobalScale();
-	assert(scale != 0);
 
 	mesh->placeIteratorAtBegining();
 	for (unsigned i=0; i<faceCount; ++i)
@@ -192,17 +189,21 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile)
 			return CC_FERR_WRITING;
 		if (fprintf(theFile,"outer loop\n") < 0)
 			return CC_FERR_WRITING;
-		if (fprintf(theFile,"vertex %e %e %e\n",static_cast<double>(A->x)/scale - shift.x,
-												static_cast<double>(A->y)/scale - shift.y,
-												static_cast<double>(A->z)/scale - shift.z) < 0)
+
+		CCVector3d Aglobal = vertices->toGlobal3d<PointCoordinateType>(*A);
+		if (fprintf(theFile,"vertex %e %e %e\n",Aglobal.x,
+												Aglobal.y,
+												Aglobal.z) < 0)
 			return CC_FERR_WRITING;
-		if (fprintf(theFile,"vertex %e %e %e\n",static_cast<double>(B->x)/scale - shift.x,
-												static_cast<double>(B->y)/scale - shift.y,
-												static_cast<double>(B->z)/scale - shift.z) < 0)
+		CCVector3d Bglobal = vertices->toGlobal3d<PointCoordinateType>(*B);
+		if (fprintf(theFile,"vertex %e %e %e\n",Bglobal.x,
+												Bglobal.y,
+												Bglobal.z) < 0)
 			return CC_FERR_WRITING;
-		if (fprintf(theFile,"vertex %e %e %e\n",static_cast<double>(C->x)/scale - shift.x,
-												static_cast<double>(C->y)/scale - shift.y,
-												static_cast<double>(C->z)/scale - shift.z) < 0)
+		CCVector3d Cglobal = vertices->toGlobal3d<PointCoordinateType>(*C);
+		if (fprintf(theFile,"vertex %e %e %e\n",Cglobal.x,
+												Cglobal.y,
+												Cglobal.z) < 0)
 			return CC_FERR_WRITING;
 		if (fprintf(theFile,"endloop\nendfacet\n") < 0)
 			return CC_FERR_WRITING;

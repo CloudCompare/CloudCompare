@@ -317,21 +317,20 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 		scanNode.set("colorLimits", colorbox);
 	}
 
-	// Cloud shift
-	const CCVector3d& shift = cloud->getGlobalShift();
-	double scale = cloud->getGlobalScale();
-	assert(scale != 0);
+	// Shifted bounding-box limits
+	CCVector3d bbMin = cloud->toGlobal3d<PointCoordinateType>(bbox.minCorner());
+	CCVector3d bbMax = cloud->toGlobal3d<PointCoordinateType>(bbox.maxCorner());
 
 	// Add Cartesian bounding box to scan.
 	assert(bbox.isValid());
 	{
 		e57::StructureNode bboxNode = e57::StructureNode(imf);
-		bboxNode.set("xMinimum", e57::FloatNode(imf,static_cast<double>(bbox.minCorner().x)/scale-shift.x));
-		bboxNode.set("xMaximum", e57::FloatNode(imf,static_cast<double>(bbox.maxCorner().x)/scale-shift.x));
-		bboxNode.set("yMinimum", e57::FloatNode(imf,static_cast<double>(bbox.minCorner().y)/scale-shift.y));
-		bboxNode.set("yMaximum", e57::FloatNode(imf,static_cast<double>(bbox.maxCorner().y)/scale-shift.y));
-		bboxNode.set("zMinimum", e57::FloatNode(imf,static_cast<double>(bbox.minCorner().z)/scale-shift.z));
-		bboxNode.set("zMaximum", e57::FloatNode(imf,static_cast<double>(bbox.maxCorner().z)/scale-shift.z));
+		bboxNode.set("xMinimum", e57::FloatNode(imf,bbMin.x));
+		bboxNode.set("xMaximum", e57::FloatNode(imf,bbMax.x));
+		bboxNode.set("yMinimum", e57::FloatNode(imf,bbMin.y));
+		bboxNode.set("yMaximum", e57::FloatNode(imf,bbMax.y));
+		bboxNode.set("zMinimum", e57::FloatNode(imf,bbMin.z));
+		bboxNode.set("zMaximum", e57::FloatNode(imf,bbMax.z));
 		scanNode.set("cartesianBounds", bboxNode);
 	}
 
@@ -368,27 +367,29 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	{
 		e57::FloatPrecision precision = sizeof(PointCoordinateType)==8 ? e57::E57_DOUBLE : e57::E57_SINGLE;
 
+		CCVector3d bbCenter = cloud->toGlobal3d<PointCoordinateType>(bbox.getCenter());
+
 		proto.set("cartesianX", e57::FloatNode(	imf,
-												static_cast<double>(bbox.minCorner().x + bbox.maxCorner().x)/(2.0*scale) - shift.x,
+												bbCenter.x,
 												precision,
-												static_cast<double>(bbox.minCorner().x)/scale - shift.x,
-												static_cast<double>(bbox.maxCorner().x)/scale - shift.x ) );
+												bbMin.x,
+												bbMax.x ) );
 		arrays.xData = new double[nSize];
 		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianX",  arrays.xData,  nSize, true, true));
 
 		proto.set("cartesianY", e57::FloatNode(	imf,
-												static_cast<double>(bbox.minCorner().y + bbox.maxCorner().y)/(2.0*scale) - shift.y,
+												bbCenter.y,
 												precision,
-												static_cast<double>(bbox.minCorner().y)/scale - shift.y,
-												static_cast<double>(bbox.maxCorner().y)/scale - shift.y ) );
+												bbMin.y,
+												bbMax.y ) );
 		arrays.yData = new double[nSize];
 		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianY",  arrays.yData,  nSize, true, true));
 
 		proto.set("cartesianZ", e57::FloatNode(	imf,
-												static_cast<double>(bbox.minCorner().z + bbox.maxCorner().z)/(2.0*scale) - shift.z,
+												bbCenter.z,
 												precision,
-												static_cast<double>(bbox.minCorner().z)/scale - shift.z,
-												static_cast<double>(bbox.maxCorner().z)/scale - shift.z ) );
+												bbMin.z,
+												bbMax.z ) );
 		arrays.zData = new double[nSize];
 		dbufs.push_back(e57::SourceDestBuffer(imf, "cartesianZ",  arrays.zData,  nSize, true, true));
 	}
@@ -489,15 +490,16 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 		for(unsigned i=0; i<size; i++)
 		{
 			const CCVector3* P = cloud->getPointPersistentPtr(indexShift+i);
-			arrays.xData[i] = static_cast<double>(P->x)/scale - shift.x;
-			arrays.yData[i] = static_cast<double>(P->y)/scale - shift.y;
-			arrays.zData[i] = static_cast<double>(P->z)/scale - shift.z;
+			CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*P);
+			arrays.xData[i] = Pglobal.x;
+			arrays.yData[i] = Pglobal.y;
+			arrays.zData[i] = Pglobal.z;
 
 			if(intensitySF)
 			{
 				assert(arrays.intData);
 				ScalarType sfVal = intensitySF->getValue(indexShift+i);
-				arrays.intData[i]=(double)sfVal;
+				arrays.intData[i] = static_cast<double>(sfVal);
 				if (arrays.isInvalidIntData)
 					arrays.isInvalidIntData[i] = ccScalarField::ValidValue(sfVal) ? 0 : 1;
 			}

@@ -188,17 +188,16 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (fprintf(fp,"\tsetAttr -s %u \".vt[0:%u]\"\n",numberOfVertexes,numberOfVertexes-1) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
-	const CCVector3d& shift = theCloud->getGlobalShift();
-	double scale = theCloud->getGlobalScale();
 	assert(scale != 0);
 	{
 		for (unsigned i=0; i<numberOfVertexes; ++i)
 		{
 			const CCVector3* P = theCloud->getPoint(i);
+			CCVector3d Pglobal = theCloud->toGlobal3d<PointCoordinateType>(*P);
 			if (fprintf(fp,(i+1==numberOfVertexes ? "\t\t%f %f %f;\n" : "\t\t%f %f %f\n"),
-							-shift.x+static_cast<double>(P->x)/scale,
-							-shift.z+static_cast<double>(P->z)/scale,
-							 shift.y-static_cast<double>(P->y)/scale) < 0)
+							Pglobal.x,
+							Pglobal.y,
+							Pglobal.z) < 0)
 			{
 				fclose(fp);
 				return CC_FERR_WRITING;

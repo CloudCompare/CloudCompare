@@ -86,12 +86,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
         return CC_FERR_NOT_ENOUGH_MEMORY;
 
     //Has the cloud been recentered?
-	const CCVector3d& shift = vertices->getGlobalShift();
-	double scale = vertices->getGlobalScale();
-	assert(scale != 0);
-
-	bool hasShift = (fabs(shift.x)+fabs(shift.y)+fabs(shift.z) > 0);
-	e_ply_type coordType = hasShift || sizeof(PointCoordinateType) > 4 ? PLY_DOUBLE : PLY_FLOAT; //we use double coordinates for shifted vertices (i.e. >1e6)
+	e_ply_type coordType = vertices->isShifted() || sizeof(PointCoordinateType) > 4 ? PLY_DOUBLE : PLY_FLOAT; //we use double coordinates for shifted vertices (i.e. >1e6)
 
 	int result = 1;
 	unsigned vertCount = vertices->size();
@@ -350,10 +345,11 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 	//save the point cloud (=vertices)
 	for (unsigned i=0; i<vertCount; ++i)
 	{
-		const CCVector3* P=vertices->getPoint(i);
-		ply_write(ply, static_cast<double>(P->x)/scale-shift.x);
-		ply_write(ply, static_cast<double>(P->y)/scale-shift.y);
-		ply_write(ply, static_cast<double>(P->z)/scale-shift.z);
+		const CCVector3* P = vertices->getPoint(i);
+		CCVector3d Pglobal = vertices->toGlobal3d<PointCoordinateType>(*P);
+		ply_write(ply, Pglobal.x);
+		ply_write(ply, Pglobal.y);
+		ply_write(ply, Pglobal.z);
 
 		if (hasColors)
 		{

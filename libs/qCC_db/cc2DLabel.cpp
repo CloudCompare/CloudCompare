@@ -243,16 +243,21 @@ void AddPointCoordinates(QStringList& body, unsigned pointIndex, ccGenericPointC
 	const CCVector3* P = cloud->getPointPersistentPtr(pointIndex);
 	const CCVector3d& shift = cloud->getGlobalShift();
 	bool isShifted = (shift.norm2() != 0);
-	
-	QString coordStr = QString("P#%0: (%1;%2;%3)").arg(pointIndex).arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision);
+
+	QString coordStr = QString("P#%0:").arg(pointIndex);
 	if (isShifted)
-		coordStr += QString(" [shifted]");
+	{
+		body << coordStr;
+		coordStr = QString("  [shifted]");
+	}
+	
+	coordStr += QString(" (%1;%2;%3)").arg(pointIndex).arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision);
 	body << coordStr;
 	
 	if (isShifted)
 	{
 		CCVector3d Pg = CCVector3d::fromArray(P->u) + shift;
-		QString globCoordStr = QString("P#%0: (%1;%2;%3) [original]").arg(pointIndex).arg(Pg.x,0,'f',precision).arg(Pg.y,0,'f',precision).arg(Pg.z,0,'f',precision);
+		QString globCoordStr = QString("  [original] (%1;%2;%3)").arg(pointIndex).arg(Pg.x,0,'f',precision).arg(Pg.y,0,'f',precision).arg(Pg.z,0,'f',precision);
 		body << globCoordStr;
 	}
 }
@@ -598,11 +603,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		if (!body.empty())
 		{
 			dy += c_margin;	//vertical margin above separator
-			for (int j=0;j<body.size();++j)
+			for (int j=0; j<body.size(); ++j)
 			{
 				dx = std::max(dx,bodyFontMetrics.width(body[j]));
-				dy += (c_margin+strHeight); //margin + body line height
+				dy += strHeight; //body line height
 			}
+			dy += c_margin;	//vertical margin below text
 		}
 		else
 		{
@@ -791,7 +797,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 			//display body
 			yStartRel -= c_margin;
-			for (int i=0;i<body.size();++i)
+			for (int i=0; i<body.size(); ++i)
 			{
 				yStartRel -= strHeight;
 				context._win->displayText(body[i],xStart+xStartRel,yStart+yStartRel,ccGenericGLDisplay::ALIGN_DEFAULT,0,defaultTextColor,&bodyFont);

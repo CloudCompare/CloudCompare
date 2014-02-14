@@ -221,7 +221,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 
 		//write current point coordinates
         const CCVector3* P = cloud->getPoint(i);
-		CCVector3d Pglobal = cloud->toGlobal3d(*P);
+		CCVector3d Pglobal = cloud->toGlobal3d<PointCoordinateType>(*P);
 		line.append(QString::number(Pglobal.x,'f',s_coordPrecision));
 		line.append(separator);
 		line.append(QString::number(Pglobal.y,'f',s_coordPrecision));

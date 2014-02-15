@@ -239,7 +239,7 @@
        <string>Camera Sensor</string>
       </property>
       <addaction name="actionProjectUncertainty"/>
-      <addaction name="actionFilterOctree"/>
+      <addaction name="actionCheckPointsInsideFrustrum"/>
      </widget>
      <addaction name="menuCreateSensor"/>
      <addaction name="actionModifySensor"/>
@@ -2413,9 +2413,9 @@
     <string>Camera Sensor</string>
    </property>
   </action>
-  <action name="actionFilterOctree">
+  <action name="actionCheckPointsInsideFrustrum">
    <property name="text">
-    <string>Filter Octree</string>
+    <string>Compute points visibility (with octree)</string>
    </property>
   </action>
   <action name="actionProjectUncertainty">

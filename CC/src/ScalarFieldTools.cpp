@@ -614,8 +614,8 @@ bool ScalarFieldTools::computeKmeans(	const GenericCloud* theCloud,
 		//Fl::wait(1.0);
 
 		theOldKNums = theKNums;
-		std::fill(theKSums.begin(),theKSums.end(),0);
-		std::fill(theKNums.begin(),theKNums.end(),0);
+		std::fill(theKSums.begin(),theKSums.end(),static_cast<ScalarType>(0));
+		std::fill(theKNums.begin(),theKNums.end(),static_cast<ScalarType>(0));
 		{
 			for (unsigned i=0; i<n; ++i)
 			{

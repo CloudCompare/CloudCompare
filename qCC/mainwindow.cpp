@@ -865,7 +865,7 @@ void MainWindow::connectActions()
     connect(actionCreateCameraSensor,			SIGNAL(triggered()),    this,       SLOT(doActionCreateCameraSensor()));
     connect(actionModifySensor,                 SIGNAL(triggered()),    this,       SLOT(doActionModifySensor()));
     connect(actionProjectUncertainty,			SIGNAL(triggered()),    this,       SLOT(doActionProjectUncertainty()));
-    connect(actionFilterOctree,                 SIGNAL(triggered()),    this,       SLOT(doActionFilterOctree()));
+    connect(actionCheckPointsInsideFrustrum,	SIGNAL(triggered()),    this,       SLOT(doActionCheckPointsInsideFrustrum()));
     connect(actionComputeDistancesFromSensor,   SIGNAL(triggered()),    this,       SLOT(doActionComputeDistancesFromSensor()));
     connect(actionComputeScatteringAngles,      SIGNAL(triggered()),    this,       SLOT(doActionComputeScatteringAngles()));
 	connect(actionViewFromSensor,				SIGNAL(triggered()),    this,       SLOT(doActionSetViewFromSensor()));
@@ -2331,7 +2331,7 @@ void MainWindow::doActionProjectUncertainty()
 
 	// compute uncertainty
 	std::vector<Vector3Tpl<ScalarType>> accuracy;
-	if (!sensor->computeUncertainty(&points, accuracy, false))
+	if (!sensor->computeUncertainty(&points, accuracy/*, false*/))
 	{
 		ccConsole::Error("Not enough memory!");
         return;
@@ -2399,19 +2399,12 @@ void MainWindow::doActionProjectUncertainty()
 	refreshAll();
 }
 
-void MainWindow::doActionFilterOctree()
+void MainWindow::doActionCheckPointsInsideFrustrum()
 {
-	//there should be only one sensor in current selection!
-    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_TYPES::SENSOR))
+	//there should be only one camera sensor in the current selection!
+    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isKindOf(CC_TYPES::CAMERA_SENSOR))
     {
-        ccConsole::Error("Select one and only one sensor!");
-        return;
-    }
-
-	//for the moment, this function is evelopped only for projective sensors!
-    if (!m_selectedEntities[0]->isKindOf(CC_TYPES::CAMERA_SENSOR))
-    {
-        ccConsole::Error("Function under construction for this kind of sensor!");
+        ccConsole::Error("Select one and only one camera sensor!");
         return;
     }
 
@@ -2419,8 +2412,8 @@ void MainWindow::doActionFilterOctree()
 	if (!sensor)
 		return;
 
-	//the sensor must be the child of a point cloud, or it is not possible to project anything
-	if (!sensor->getParent()->isA(CC_TYPES::POINT_CLOUD))
+	//the sensor must be the child of a point cloud, otherwise it won't be possible to project anything
+	if (!sensor->getParent() || !sensor->getParent()->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccConsole::Error("The sensor must be the child of a point cloud!");
         return;
@@ -2430,55 +2423,69 @@ void MainWindow::doActionFilterOctree()
 	if (!pointCloud)
 		return;
 
-	//the octree of the point cloud must be computed
-	if (!pointCloud->getOctree())
-	{
-		ccConsole::Error("The octree of the point cloud must be already computed!");
-        return;
-	}
-
-	ccOctree* octree = ccHObjectCaster::ToOctree(pointCloud->getOctree());
+	//comupte/get the point cloud's octree
+	ccOctree* octree = pointCloud->getOctree();
 	if (!octree)
-		return;
-
-	// filter octree then project points
-	std::vector<unsigned int> inCameraFrustrum;
-	inCameraFrustrum.clear();
-	sensor->filterOctree(octree, inCameraFrustrum);
-	
-	// scalar field
-	QString sfName = "Sensor filtering";	
-	int index = pointCloud->getScalarFieldIndexByName(qPrintable(sfName));
-
-	if (index >= 0)
-		pointCloud->deleteScalarField(index);
-
-	int pos = pointCloud->addScalarField(qPrintable(sfName));
-	if (pos<0)
 	{
-		ccLog::Error("An error occured! (see console)");
-		return;
+		octree = pointCloud->computeOctree();
+		if (!octree)
+		{
+			ccConsole::Error("Failed to compute the octree!");
+			return;
+		}
 	}
-	
-	CCLib::ScalarField* sf = pointCloud->getScalarField(pos);
-	assert(sf);
+	assert(octree);
 
-	if (sf)
+	// filter octree then project the points
+	std::vector<unsigned> inCameraFrustrum;
+	if (!octree->intersectWithFrustrum(sensor,inCameraFrustrum))
 	{
-		sf->fill(0.0);
+		ccConsole::Error("Failed to intersect sensor frustrum with octree!");
+	}
+	else
+	{
+		// scalar field
+		const char sfName[] = "Frustrum visibility";	
+		int sfIdx = pointCloud->getScalarFieldIndexByName(sfName);
 
-		for (size_t i=0 ; i<inCameraFrustrum.size() ; i++)
-			sf->setValue(inCameraFrustrum[i], 1.0);
+		if (inCameraFrustrum.empty())
+		{
+			ccConsole::Error("No point fell inside the frustrum!");
+			if (sfIdx >= 0)
+				pointCloud->deleteScalarField(sfIdx);
+		}
+		else
+		{
+			if (sfIdx < 0)
+				sfIdx = pointCloud->addScalarField(sfName);
+			if (sfIdx < 0)
+			{
+				ccLog::Error("Failed to allocate memory for output scalar field!");
+				return;
+			}
+	
+			CCLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
+			assert(sf);
+			if (sf)
+			{
+				sf->fill(0);
 		
-		sf->computeMinAndMax();
-		pointCloud->setCurrentDisplayedScalarField(pos);
-		pointCloud->showSF(true);
+				const ScalarType c_insideValue = static_cast<ScalarType>(1);
 
-		if (pointCloud->getDisplay())
-			pointCloud->getDisplay()->redraw();
+				for (size_t i=0; i<inCameraFrustrum.size(); i++)
+					sf->setValue(inCameraFrustrum[i], c_insideValue);
+		
+				sf->computeMinAndMax();
+				pointCloud->setCurrentDisplayedScalarField(sfIdx);
+				pointCloud->showSF(true);
+
+				pointCloud->refreshDisplay_recursive();
+			}
+		}
 	}
-	
+
 	refreshAll();
+	updateUI();
 }
 
 void MainWindow::doActionShowDepthBuffer()
@@ -8588,7 +8595,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionCreateGBLSensor->setEnabled(atLeastOneCloud);
 	actionCreateCameraSensor->setEnabled(atLeastOneCloud);
 	actionProjectUncertainty->setEnabled(exactlyOneCameraSensor);
-	//actionFilterOctree->setEnabled
+	actionCheckPointsInsideFrustrum->setEnabled(exactlyOneCameraSensor);
     actionLabelConnectedComponents->setEnabled(atLeastOneCloud);
     actionUnroll->setEnabled(exactlyOneEntity);
     actionStatisticalTest->setEnabled(exactlyOneEntity && exactlyOneSF);

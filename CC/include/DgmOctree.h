@@ -28,9 +28,6 @@
 #include <vector>
 #include <assert.h>
 #include <string.h>
-#include <unordered_set>
-#include <string>
-using namespace std;
 
 #ifdef _MSC_VER
 //To get rid of the really annoying warnings about template class exportation
@@ -80,17 +77,6 @@ class GenericIndexedCloudPersist;
 	Corresponds to the octree structure developped during Daniel
 	Girardeau-Montaut's PhD (see PhD manuscript, Chapter 4).
 **/
-
-//! Definition of the state of a cell compared to a frustrum
-/** OUTSIDE : the celle is completely outside the frustrum (no intersection, no inclusion)
-	INSIDE : the cell is completely inside the frustrum
-	INTERSECT : other cases --> the frustrum is completely inside the cell OR the frustrum and the cell have an intersection
-**/
-#define CELL_OUTSIDE_FRUSTRUM		0
-#define CELL_INSIDE_FRUSTRUM		1
-#define CELL_INTERSECT_FRUSTRUM		2
-
-
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 class CC_DLL_API DgmOctree : public GenericOctree
@@ -419,20 +405,6 @@ public:
 	    unsigned index;
 	    //! Set of points lying inside this cell
         ReferenceCloud* points;
-
-		//JS_TEMP//
-		unsigned char positionFromFrustum() const
-		{
-			if (!parentOctree)
-				return 0;
-			std::unordered_set<OctreeCellCodeType>::const_iterator got = parentOctree->m_cellsInFrustum[(int)level].find(truncatedCode);
-			if (got != parentOctree->m_cellsInFrustum[(int)level].end())
-				return 1;
-			got = parentOctree->m_cellsIntersectFrustum[(int)level].find(truncatedCode);
-			if (got != parentOctree->m_cellsIntersectFrustum[(int)level].end())
-				return 2;
-			return 0;
-		}
 
         //! Default constructor
         octreeCell(DgmOctree* parentOctree);
@@ -1215,53 +1187,6 @@ protected:
 		\return the "index" of the cell (or 'm_numberOfProjectedPoints' if none found)
 	**/
 	unsigned getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bitDec, unsigned begin, unsigned end) const;
-
-
-//JS_TEMP//
-public:
-	//! Compute intersection betwen the octree and a frustrum and send back the indices of 3D points inside the frustrum or in cells interescting it. 
-	/** Every cells of each level of the octree will be classified as INSIDE, OUTSIDE or INTERSECTING the frustrum. 
-		Their truncated code are then stored in m_cellsInFrustum (for cells INSIDE) or m_cellsIntersectFrustum (for 
-		cells INTERSECTING).
-		\param pointsToTest contains the indice and 3D position (global coordinates system) of every 3D points stored in an INTERSECTING cell
-		\param inCameraFrustrum contains the indice of every 3D points stored in an INSIDE cell
-		\param planesCoefficients coefficients (a, b, c and d) of the six frustrum planes (0:right, 1:bottom, 2:left, 3:top, 4:near, 5:far)
-		\param ptsFrustrum 3D coordinates of the eight corners of the frustrum (global coordinates sytem)
-		\param edges 3D coordinates (global coordinates sytem) of the six director vector of the frustrum edges
-		\param center 3D coordinates of the frustrum center (global coordinates sytem) ; this is the center of the circumscribed sphere
-	**/
-	void computeFrustumIntersectionWithOctree(std::vector< pair<unsigned int,CCVector3> >& pointsToTest, std::vector<unsigned int>& inCameraFrustrum, const float planesCoefficients[6][4], const CCVector3 ptsFrustrum[8], const CCVector3 edges[6], const CCVector3 center);
-	
-	//! Compute intersection betwen the octree and the height children cells of a parent cell. 
-	/** \param level current level
-		\param parentTruncatedCode truncated code of the parent cell (at level-1)
-		\param parentResult contains in which class the parent cell has been classified (OUTSIDE, INTERSECTING, INSIDE)
-		\param planesCoefficients coefficients (a, b, c and d) of the six frustrum planes (0:right, 1:bottom, 2:left, 3:top, 4:near, 5:far)
-		\param ptsFrustrum 3D coordinates of the eight corners of the frustrum (global coordinates sytem)
-		\param edges 3D coordinates (global coordinates sytem) of the six director vector of the frustrum edges
-		\param center 3D coordinates of the frustrum center (global coordinates sytem) ; this is the center of the circumscribed sphere
-	**/
-	void computeFrustumIntersectionByLevel(const int level, const OctreeCellCodeType parentTruncatedCode, const unsigned char parentResult, const float planesCoefficients[6][4], const CCVector3 ptsFrustrum[8], const CCVector3 edges[6], const CCVector3 center);
-	
-	//! Separating Axis Test : 
-	//	see "Detecting intersection of a rectangular solid and a convex polyhedron" of Ned Greene 
-	//	see	"OBBTree: A Hierarchical Structure for Rapid Interference Detection" of S. Gottschalk, M. C. Lin and D. Manocha
-	/**	\param bbMin minimum coordinates of the cell
-		\param bbMax maximum coordinates of the cell
-		\param planesCoefficients coefficients (a, b, c and d) of the six frustrum planes (0:right, 1:bottom, 2:left, 3:top, 4:near, 5:far)
-		\param ptsFrustrum 3D coordinates of the eight corners of the frustrum (global coordinates sytem)
-		\param edges 3D coordinates (global coordinates sytem) of the six director vector of the frustrum edges
-		\param center 3D coordinates of the frustrum center (global coordinates sytem) ; this is the center of the circumscribed sphere
-	**/
-	unsigned char separatingAxisTest(const CCVector3 bbMin, const CCVector3 bbMax, const float planesCoefficients[6][4], const CCVector3 frustrumCorners[8], const CCVector3 frustrumEdges[6], const CCVector3 frustrumCenter);
-
-protected:
-	// contains the truncated code of the cells built in the octree
-	std::unordered_set<OctreeCellCodeType> m_cellsBuilt[MAX_OCTREE_LEVEL+1];
-	// contains the truncated code of the cells INSIDE the frustrum
-	std::unordered_set<OctreeCellCodeType> m_cellsInFrustum[MAX_OCTREE_LEVEL+1];
-	// contains the truncated code of the cells INTERSECTING the frustrum
-	std::unordered_set<OctreeCellCodeType> m_cellsIntersectFrustum[MAX_OCTREE_LEVEL+1];
 };
 
 }

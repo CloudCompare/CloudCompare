@@ -322,10 +322,12 @@ void ccPointPairRegistrationDlg::processPickedPoint(int cloudUniqueID, unsigned 
 
 		if (P)
 		{
+			CCVector3d   pin = CCVector3d::fromArray(P->u);
+         
 			if (cloud == m_aligned.cloud)
-				addAlignedPoint(CCVector3d::fromArray(P->u),m_aligned.cloud,pointIndex,true); //picked points are always shifted by default
+				addAlignedPoint(pin,m_aligned.cloud,pointIndex,true); //picked points are always shifted by default
 			else if (cloud == m_reference.cloud)
-				addReferencePoint(CCVector3d::fromArray(P->u),m_reference.cloud,pointIndex,true); //picked points are always shifted by default
+				addReferencePoint(pin,m_reference.cloud,pointIndex,true); //picked points are always shifted by default
 			else
 			{
 				assert(false);

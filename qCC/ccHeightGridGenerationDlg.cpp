@@ -217,7 +217,9 @@ void ccHeightGridGenerationDlg::loadSettings()
     double emptyHeight  = settings.value("EmptyCellsHeight",emptyValueDoubleSpinBox->value()).toDouble();
     bool genCloud       = settings.value("GenerateCloud",generateCloudGroupBox->isChecked()).toBool();
     bool genImage       = settings.value("GenerateImage",generateImageCheckBox->isChecked()).toBool();
+#ifdef CC_GDAL_SUPPORT
     bool genRaster		= settings.value("GenerateRaster",generateImageCheckBox->isChecked()).toBool();
+#endif
     bool genASCII       = settings.value("GenerateASCII",generateASCIICheckBox->isChecked()).toBool();
     bool genCountSF		= settings.value("GenerateCountSF",generateCountSFcheckBox->isChecked()).toBool();
 	bool resampleCloud	= settings.value("ResampleOrigCloud",resampleOriginalCloudCheckBox->isChecked()).toBool();

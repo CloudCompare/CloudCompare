@@ -28,16 +28,16 @@ QIcon qBlur::getIcon() const
 
 ccGlFilter* qBlur::getFilter()
 {
-    ccBilateralFilter* filter = new ccBilateralFilter();
-
-    bool ok=false;
+    bool ok = false;
     double sigma = QInputDialog::getDouble(0,"Bilateral filter","Sigma (pixel)",1.0,0.1,8.0,1,&ok);
 
-    if (!ok)
+    if (!ok || sigma < 0)
         return 0;
 
-    int filterSize = 1+2*static_cast<int>(ceil(2.5*sigma));
-    filter->setParameters(filterSize,static_cast<float>(sigma),0);
+    unsigned halfFilterSize = static_cast<unsigned>(ceil(2.5*sigma));
+
+	ccBilateralFilter* filter = new ccBilateralFilter();
+    filter->setParams(halfFilterSize,static_cast<float>(sigma),0);
 
     return filter;
 }

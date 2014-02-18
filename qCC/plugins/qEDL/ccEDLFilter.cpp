@@ -41,52 +41,33 @@ ccEDLFilter::ccEDLFilter()
 	, shader_edl(0)
 	, fbo_mix(0)
 	, shader_mix(0)
-    , d0(1.0)
-    , d1(2.0)
-    , d2(2.0)
-    , nneighbours(1)
-    , F(5.0)
-    , power(1.0)
+    , exp_scale(100.0f)
 {
     //smoothing filter for full resolution
 	m_bilateralFilter0.enabled	= false;
-	m_bilateralFilter0.size		= 3;
+	m_bilateralFilter0.halfSize	= 1;
 	m_bilateralFilter0.sigma	= 1.0f;
 	m_bilateralFilter0.sigmaZ	= 0.2f;
 
     //smoothing filter for half resolution
 	m_bilateralFilter1.enabled	= true;
-	m_bilateralFilter1.size		= 5;
+	m_bilateralFilter1.halfSize	= 2;
 	m_bilateralFilter1.sigma	= 2.0f;
 	m_bilateralFilter1.sigmaZ	= 0.4f;
 
     //smoothing filter for quarter resolution
 	m_bilateralFilter2.enabled	= true;
-	m_bilateralFilter2.size		= 5;
+	m_bilateralFilter2.halfSize	= 2;
 	m_bilateralFilter2.sigma	= 2.0f;
 	m_bilateralFilter2.sigmaZ	= 0.4f;
 
-    //mixing coefficients
-    mix0						=	1.0f;
-    mix1						=	0.5f;
-    mix2						=	0.25f;
-    absorb						=	true;
-
-    //focus
-    b_depth_focus				=	false;
-    depth_focus					=	0.5f;
-    b_screen_focus				=	false;
-    screen_focus_x				=	0.5f;
-    screen_focus_y				=	0.5f;
-    screen_focus_sigma			=	0.1f;
-
-    setLightDir((float)(M_PI*0.5),(float)(M_PI*0.5));
+    setLightDir(static_cast<float>(M_PI*0.5),static_cast<float>(M_PI*0.5));
 	
-	memset(neighbours, 0, sizeof(float)*8*4);
-	for (int c=0;c<8;c++)
+	memset(neighbours, 0, sizeof(float)*8*2);
+	for (int c = 0; c<8; c++)
 	{
-		neighbours[4*c]		= (float)cos(static_cast<double>(c)*M_PI/4.0);
-		neighbours[4*c+1]	= (float)sin(static_cast<double>(c)*M_PI/4.0);
+		neighbours[2*c]		= static_cast<float>(cos(static_cast<double>(c)*M_PI/4.0));
+		neighbours[2*c+1]	= static_cast<float>(sin(static_cast<double>(c)*M_PI/4.0));
 	}
 }
 
@@ -99,39 +80,39 @@ void ccEDLFilter::reset()
 {
     if (fbo_edl0)
         delete fbo_edl0;
-    fbo_edl0=0;
+    fbo_edl0 = 0;
 
     if (fbo_edl1)
         delete fbo_edl1;
-    fbo_edl1=0;
+    fbo_edl1 = 0;
 
     if (fbo_edl2)
         delete fbo_edl2;
-    fbo_edl2=0;
+    fbo_edl2 = 0;
 
     if (fbo_mix)
         delete fbo_mix;
-    fbo_mix=0;
+    fbo_mix = 0;
 
     if (shader_edl)
         delete shader_edl;
-    shader_edl=0;
+    shader_edl = 0;
 
     if (shader_mix)
         delete shader_mix;
-    shader_mix=0;
+    shader_mix = 0;
 
     if (m_bilateralFilter0.filter)
         delete m_bilateralFilter0.filter;
-    m_bilateralFilter0.filter=0;
+    m_bilateralFilter0.filter = 0;
 
     if (m_bilateralFilter1.filter)
         delete m_bilateralFilter1.filter;
-    m_bilateralFilter1.filter=0;
+    m_bilateralFilter1.filter = 0;
 
     if (m_bilateralFilter2.filter)
         delete m_bilateralFilter2.filter;
-    m_bilateralFilter2.filter=0;
+    m_bilateralFilter2.filter = 0;
 
     m_screenWidth = m_screenHeight = 0;
 }
@@ -189,7 +170,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
         shader_edl = new ccShader();
         if (!shader_edl->fromFile(shadersPath,"EDL/edl_shade"))
         {
-            //ccLog::Warning("[EDL Filter] can't find 'edl_shade' shader!");
+            //ccLog::Warning("[EDL Filter] can't find or load 'edl_shade' shader files!");
             reset();
             return false;
         }
@@ -200,7 +181,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
         shader_mix = new ccShader();
         if (!shader_mix->fromFile(shadersPath,"EDL/edl_mix"))
         {
-            //ccLog::Warning("[EDL Filter] can't find 'edl_mix' shader!");
+            //ccLog::Warning("[EDL Filter] can't find or load 'edl_mix' shader files!");
             reset();
             return false;
         }
@@ -288,11 +269,13 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
         return;
     }
 
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
+	if (m_screenWidth < 4 || m_screenHeight < 4)
+	{
+        //ccLog::Warning("[ccEDLFilter::shade] Screen is too small!");
+        return;
+	}
 
-    //
-    /***	FULL SIZE	***/
-    //
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
 
     //we must use corner-based screen coordinates
     glMatrixMode(GL_PROJECTION);
@@ -303,6 +286,8 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 	glPushMatrix();
     glLoadIdentity();
 
+    /***	FULL SIZE	***/
+    //
     fbo_edl0->start();
     fbo_edl0->setDrawBuffers1();
 
@@ -310,24 +295,15 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
     shader_edl->setUniform1i("s1_color",1);
     shader_edl->setUniform1i("s2_depth",0);
 
-    shader_edl->setUniform1f("sx",zoom/float(m_screenWidth));
-    shader_edl->setUniform1f("sy",zoom/float(m_screenHeight));
-    shader_edl->setUniform1f("d",d0);
-    shader_edl->setUniform1f("P",power);
-    shader_edl->setUniform1f("F_scale",F);
-    shader_edl->setUniform1i("Nnb",nneighbours);
+    shader_edl->setUniform1f("Sx",static_cast<float>(m_screenWidth));
+    shader_edl->setUniform1f("Sy",static_cast<float>(m_screenHeight));
+	shader_edl->setUniform1f("Zoom",zoom);
+    shader_edl->setUniform1f("Pix_scale",1.0f);
+    shader_edl->setUniform1f("Exp_scale",exp_scale);
     shader_edl->setUniform1f("Zm",z_min);
     shader_edl->setUniform1f("ZM",z_max);
-    shader_edl->setUniform3fv("L",light_dir);
-    shader_edl->setTabUniform4fv("N",8,neighbours);
-
-    shader_edl->setUniform1i("ATMOSPHERIC_ON",b_depth_focus?1:0);
-    shader_edl->setUniform1f("Z_FOCUS",depth_focus);
-
-    shader_edl->setUniform1i("SCREEN_FOCUS_ON",b_screen_focus?1:0);
-    shader_edl->setUniform1f("SCREEN_FOCUS_X",screen_focus_x);
-    shader_edl->setUniform1f("SCREEN_FOCUS_Y",screen_focus_y);
-    shader_edl->setUniform1f("SCREEN_FOCUS_SIG",screen_focus_sigma);
+    shader_edl->setUniform3fv("Light_dir",light_dir);
+    shader_edl->setTabUniform2fv("Neigh_pos_2D",8,neighbours);
 
     glActiveTexture(GL_TEXTURE1);
     TEX_2D_ON;
@@ -347,7 +323,6 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 
     /***	HALF SIZE	***/
     //
-
     fbo_edl1->start();
     fbo_edl1->setDrawBuffers1();
 
@@ -355,16 +330,15 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
     shader_edl->setUniform1i("s1_color",1);
     shader_edl->setUniform1i("s2_depth",0);
 
-    shader_edl->setUniform1f("sx",zoom/float(m_screenWidth>>1));
-    shader_edl->setUniform1f("sy",zoom/float(m_screenHeight>>1));
-    shader_edl->setUniform1f("d",d1);
-    shader_edl->setUniform1f("P",power);
-    shader_edl->setUniform1f("F_scale",F);
-    shader_edl->setUniform1i("Nnb",nneighbours);
+    shader_edl->setUniform1f("Sx",static_cast<float>(m_screenWidth>>1));
+    shader_edl->setUniform1f("Sy",static_cast<float>(m_screenHeight>>1));
+	shader_edl->setUniform1f("Zoom",zoom);
+    shader_edl->setUniform1f("Pix_scale",2.0f);
+    shader_edl->setUniform1f("Exp_scale",exp_scale);
     shader_edl->setUniform1f("Zm",z_min);
     shader_edl->setUniform1f("ZM",z_max);
-    shader_edl->setUniform3fv("L",light_dir);
-    shader_edl->setTabUniform4fv("N",8,neighbours);
+    shader_edl->setUniform3fv("Light_dir",light_dir);
+    shader_edl->setTabUniform2fv("Neigh_pos_2D",8,neighbours);
     //*/
 
     glActiveTexture(GL_TEXTURE1);
@@ -392,15 +366,15 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
     shader_edl->setUniform1i("s1_color",1);
     shader_edl->setUniform1i("s2_depth",0);
 
-    shader_edl->setUniform1f("sx",zoom/float(m_screenWidth>>2));
-    shader_edl->setUniform1f("sy",zoom/float(m_screenHeight>>2));
-    shader_edl->setUniform1f("d",d2);
-    shader_edl->setUniform1f("P",power);
-    shader_edl->setUniform1f("F_scale",F);
-    shader_edl->setUniform1i("Nnb",nneighbours);
+    shader_edl->setUniform1f("Sx",static_cast<float>(m_screenWidth>>2));
+    shader_edl->setUniform1f("Sy",static_cast<float>(m_screenHeight>>2));
+	shader_edl->setUniform1f("Zoom",zoom);
+    shader_edl->setUniform1f("Pix_scale",4.0f);
+    shader_edl->setUniform1f("Exp_scale",exp_scale);
     shader_edl->setUniform1f("Zm",z_min);
     shader_edl->setUniform1f("ZM",z_max);
-    shader_edl->setTabUniform4fv("N",8,neighbours);
+    shader_edl->setUniform3fv("Light_dir",light_dir);
+    shader_edl->setTabUniform2fv("Neigh_pos_2D",8,neighbours);
     //*/
 
     glActiveTexture(GL_TEXTURE1);
@@ -420,21 +394,23 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
     /***	QUARTER SIZE	***/
 
     /***	SMOOTH RESULTS	***/
+    //
     if (m_bilateralFilter0.filter)
     {
-		m_bilateralFilter0.filter->setParameters(m_bilateralFilter0.size,m_bilateralFilter0.sigma,m_bilateralFilter0.sigmaZ);
+		m_bilateralFilter0.filter->setParams(m_bilateralFilter0.halfSize,m_bilateralFilter0.sigma,m_bilateralFilter0.sigmaZ);
         m_bilateralFilter0.filter->shade(texDepth,fbo_edl0->getColorTexture(0),zoom);
     }
     if (m_bilateralFilter1.filter)
     {
-        m_bilateralFilter1.filter->setParameters(m_bilateralFilter1.size,m_bilateralFilter1.sigma,m_bilateralFilter1.sigmaZ);
+        m_bilateralFilter1.filter->setParams(m_bilateralFilter1.halfSize,m_bilateralFilter1.sigma,m_bilateralFilter1.sigmaZ);
         m_bilateralFilter1.filter->shade(texDepth,fbo_edl1->getColorTexture(0),zoom);
     }
     if (m_bilateralFilter2.filter)
     {
-        m_bilateralFilter2.filter->setParameters(m_bilateralFilter2.size,m_bilateralFilter2.sigma,m_bilateralFilter2.sigmaZ);
+        m_bilateralFilter2.filter->setParams(m_bilateralFilter2.halfSize,m_bilateralFilter2.sigma,m_bilateralFilter2.sigmaZ);
         m_bilateralFilter2.filter->shade(texDepth,fbo_edl2->getColorTexture(0),zoom);
     }
+    //
     /***	SMOOTH RESULTS	***/
 
     //***	COMPOSITING		***/
@@ -447,10 +423,10 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
     shader_mix->setUniform1i("s2_I2",1);
     shader_mix->setUniform1i("s2_I4",2);
     shader_mix->setUniform1i("s2_D",3);
-    shader_mix->setUniform1f("A0",mix0);
-    shader_mix->setUniform1f("A1",mix1);
-    shader_mix->setUniform1f("A2",mix2);
-    shader_mix->setUniform1i("absorb",absorb?1:0);
+    shader_mix->setUniform1f("A0",1.0f);
+    shader_mix->setUniform1f("A1",0.5f);
+    shader_mix->setUniform1f("A2",0.25f);
+    shader_mix->setUniform1i("absorb",1);
 
     glActiveTexture(GL_TEXTURE3);
     TEX_2D_ON;
@@ -522,15 +498,9 @@ GLuint ccEDLFilter::getTexture(int index)
     return 0;
 }
 
-void ccEDLFilter::setLightDir(float theta, float phi)
+void ccEDLFilter::setLightDir(float theta_rad, float phi_rad)
 {
-    light_dir[0]	=	sin(phi)*cos(theta);
-    light_dir[1]	=	cos(phi);
-    light_dir[2]	=	sin(phi)*sin(theta);
-}
-
-void ccEDLFilter::setMousePos(int x, int y)
-{
-    screen_focus_x	=	float(x)/float(m_screenWidth);
-    screen_focus_y	=	float(y)/float(m_screenHeight);
+    light_dir[0]	=	sin(phi_rad)*cos(theta_rad);
+    light_dir[1]	=	cos(phi_rad);
+    light_dir[2]	=	sin(phi_rad)*sin(theta_rad);
 }

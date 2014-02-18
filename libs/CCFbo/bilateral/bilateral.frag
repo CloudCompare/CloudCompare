@@ -5,6 +5,7 @@
 //
 //		C.B.    - 08/16/2008
 //      D.G-M.  - 10/20/2010
+//      D.G-M.  - 02/18/2014
 //
 //	IN:
 //		s2_I	-	Image to blur
@@ -22,71 +23,50 @@ uniform	sampler2D	s2_I;
 uniform	sampler2D	s2_D;
 uniform	float		SX;
 uniform	float		SY;
-uniform	int		    N;					//	filter size (full width, necessarily odd, like 3, 5...) <= 15!
-uniform	int         use_gauss_p;
-uniform float		gauss_p[226];		//	pixel distance based damping coefs (max = 15*15).
-uniform float		sigma;
-uniform float		sigmaz;
-/****************************************************/
-
-/****************************************************/
-vec3	C;
-float	z;
+uniform	int		    NHalf;					//	half filter size (<= 7!)
+uniform float		DistCoefs[64];			//	pixel distance based damping coefs (max = 8*8).
+uniform float		SigmaDepth;				//  pixel depth distribution variance
 /****************************************************/
 
 void main (void)
 {
-	//C	=	texture2D(s2_I,gl_TexCoord[0].st).rgb;
-	z	=	texture2D(s2_D,gl_TexCoord[0].st).r;
+	float	z		= texture2D(s2_D,gl_TexCoord[0].st).r;
 
-	float	Wsum	=	0.0;		// sum of all weights
-	vec3	Csum	=	vec3(0.);	// sum of all contributions
-	int	    hN		=	N/2;		// filter half width
-	vec2	coordi	=	vec2(0.,0.);
-	vec3	Ci;
-	float   dist,dz,zi,Fi,Gi;
+	float	wsum	=	0.0;				// sum of all weights
+	vec3	csum	=	vec3(0.0);			// sum of all contributions
+	vec2	coordi	=	vec2(0.0,0.0);		// ith neighbor position
 
-	int	c,d;
-	for(c=-hN;c<hN+1;c++)
+	for(int c=-NHalf; c<=NHalf; c++)
 	{
 		//neighbor position (X)
-        coordi.x = float(c)*SX;
+        coordi.x = float(c)/SX;
 
-        for(d=-hN;d<hN+1;d++)
+        for(int d=-NHalf; d<=NHalf; d++)
         {
             //neighbor position (Y)
-            coordi.y    = float(d)*SY;
+            coordi.y    = float(d)/SY;
 
             //neighbor color
-            Ci	        =	texture2D(s2_I,gl_TexCoord[0].st+coordi).rgb;
+            vec3 ci	=	texture2D(s2_I,gl_TexCoord[0].st+coordi).rgb;
 
             //pixel distance based damping
-            if (use_gauss_p==1)
-            {
-                Fi	        =	gauss_p[(c+hN)*N+(d+hN)];
-            }
-            else
-            {
-                dist	    =	float(c*c+d*d)/(sigma*float(hN*hN));
-                Fi		    =	exp(-dist*dist/2.0);
-            }
+            float fi	=	DistCoefs[abs(c)*(NHalf+1)+abs(d)];
 
             //pixel depth difference based damping
-            if (sigmaz>0.0)
+            if (SigmaDepth > 0.0)
             {
 				//neighbor depth
-				zi	        =	texture2D(s2_D,gl_TexCoord[0].st+coordi).r;
-				dz	        =	(z-zi)*(z-zi)/sigmaz;
-				Gi	        =	exp(-dz*dz/2.0);
-				Fi			*=	Gi;
+				float zi	=	texture2D(s2_D,gl_TexCoord[0].st+coordi).r;
+				float dz	=	(z-zi)/SigmaDepth;
+				fi			*=	exp(-dz*dz/2.0);
 			}
 
-            Csum	+=	Ci * Fi;
-            Wsum	+=	Fi;
+            csum	+=	ci * fi;
+            wsum	+=	fi;
         }
 	}
 
 	//output
-	gl_FragColor = vec4(Csum/Wsum,1.0);
+	gl_FragColor = vec4(csum/wsum,1.0);
 }
 

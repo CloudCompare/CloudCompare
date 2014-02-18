@@ -83,7 +83,7 @@ public:
 
     //inherited from ccGlFilter
 	virtual bool init(int width,int height,const char* shadersPath);
-	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0);
+	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0f);
 	virtual GLuint getTexture();
 
 	bool init(int width,
@@ -116,7 +116,7 @@ protected:
 
 	ccBilateralFilter*	bilateralFilter;
 	bool				bilateralFilterEnabled;
-	int					bilateralGSize;
+	unsigned			bilateralGHalfSize;
 	float				bilateralGSigma;
 	float				bilateralGSigmaZ;
 };

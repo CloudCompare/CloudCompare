@@ -69,6 +69,7 @@ public:
     virtual void setUniform3fv(const char* variable, float* p_val);
     virtual void setUniform4fv(const char* variable, float* p_val);
     virtual void setTabUniform1fv(const char* uniform, int size, float* p_val);
+    virtual void setTabUniform2fv(const char* uniform, int size, float* p_val);
     virtual void setTabUniform3fv(const char* uniform, int size, float* p_val);
     virtual void setTabUniform4fv(const char* uniform, int size, float* p_val);
     virtual void setUniformMatrix4fv(const char* variable, float* p_val, bool transpose = false);

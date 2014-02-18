@@ -25,12 +25,14 @@
 //		Output:
 //			shaded image
 //
-//		creation:		23 avril 2008
+//		creation:		April 23 2008
 //					    Christian Boucheny (EDF R&D / INRIA)
-//		modification:	18  aout 2008
+//		modification:	August 18 2008
 //					    Christian Boucheny (EDF R&D / INRIA)
-//		modification:	Avril 2009
-//					    Daniel Girardeau-Montaut
+//		modification:	April 2009
+//					    Daniel Girardeau-Montaut (creation of CC plugin)
+//		modification:	February 17 2014
+//					    Daniel Girardeau-Montaut (simplification)
 //
 /*****************************************************************/
 #ifndef	CC_EDL_FILTER_HEADER
@@ -55,29 +57,36 @@ public:
 
     //inherited from ccGlFilter
 	virtual bool init(int width,int height,const char* shadersPath);
-	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0);
+	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0f);
 	virtual GLuint getTexture();
 
     //! Resets filter
     void reset();
 
     //! Inits filter
-    bool init(int width,
+    bool init(	int width,
                 int height,
                 GLenum internalFormat,
                 GLenum minMagFilter,
                 const char* shadersPath);
 
     //! Real shading process
-    void shade(GLuint texDepth, GLuint texColor, float z_min, float z_max, float zoom);
+    void shade(	GLuint texDepth,
+				GLuint texColor,
+				float z_min,
+				float z_max,
+				float zoom);
 
     //! Returns given texture index
     GLuint getTexture(int index);
 
     //! Sets light direction
-	void setLightDir(float theta, float phi);
-	//! Sets mouse position
-	void setMousePos(int x, int y);
+	void setLightDir(float theta_rad, float phi_rad);
+
+	//! Sets strength
+	/** \param value strength value (default: 100)
+	**/
+	void setStrength(float value) { exp_scale = value; }
 
 private:
 
@@ -92,32 +101,21 @@ private:
 	ccFrameBufferObject*	fbo_mix;
 	ccShader*		        shader_mix;
 
-	//
-	float	d0;
-	float	d1;
-	float	d2;
-	int		nneighbours;
-	float	neighbours[8*4];
-	float	F;
-	float	power;
+	float	neighbours[8*2];
+	float	exp_scale;
 
-	float	mix0;
-	float	mix1;
-	float	mix2;
-	bool	absorb;
-
-	//! Bilateral filter and ist parameters
+	//! Bilateral filter and its parameters
 	struct BilateralFilter
 	{
 		ccBilateralFilter* filter;
-		int size;
+		unsigned halfSize;
 		float sigma;
 		float sigmaZ;
 		bool enabled;
 
 		BilateralFilter()
 			: filter(0)
-			, size(0)
+			, halfSize(0)
 			, sigma(0.0f)
 			, sigmaZ(0.0f)
 			, enabled(false)
@@ -136,17 +134,7 @@ private:
 	BilateralFilter m_bilateralFilter1;
 	BilateralFilter m_bilateralFilter2;
 
-	//	FOCUS EN PROFONDEUR
-	float	depth_focus;
-	bool	b_depth_focus;
-
-	//	FOCUS EN ESPACE IMAGE
-	float	screen_focus_x;
-	float	screen_focus_y;
-	float	screen_focus_sigma;
-	bool	b_screen_focus;
-
-	//
+	// Light direction
 	float	light_dir[3];
 };
 //

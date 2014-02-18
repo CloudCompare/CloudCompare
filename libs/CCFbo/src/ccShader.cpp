@@ -304,6 +304,12 @@ void ccShader::setTabUniform1fv(const char* uniform, int size, float* val)
 	glUniform1fv(loc,size,val);
 }
 
+void ccShader::setTabUniform2fv(const char* uniform, int size, float* val)
+{
+	int loc = glGetUniformLocation(prog,uniform);
+	glUniform2fv(loc,size,val);
+}
+
 void ccShader::setTabUniform3fv(const char* uniform, int size, float* val)
 {
 	int loc = glGetUniformLocation(prog,uniform);

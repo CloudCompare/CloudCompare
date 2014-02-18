@@ -46,7 +46,7 @@ ccSSAOFilter::ccSSAOFilter() : ccGlFilter("Screen Space Ambient Occlusion")
 
     bilateralFilterEnabled	=	false;
     bilateralFilter			=	0;
-    bilateralGSize			=	5;
+    bilateralGHalfSize		=	2;
     bilateralGSigma			=	1.0f;
     bilateralGSigmaZ		=	0.4f;
     
@@ -252,7 +252,7 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
 
     if (bilateralFilter)
     {
-        bilateralFilter->setParameters(bilateralGSize,bilateralGSigma,bilateralGSigmaZ);
+        bilateralFilter->setParams(bilateralGHalfSize,bilateralGSigma,bilateralGSigmaZ);
         bilateralFilter->shade(texDepth,fbo->getColorTexture(0),zoom);
     }
 

@@ -357,7 +357,7 @@ bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::oct
 		if (params->CPSet || referenceCloud->testVisibility(nNSS.queryPoint) == POINT_VISIBLE) //to build the closest point set up we must process the point whatever its visibility is!
 		{
 			double squareDist = referenceOctree->findTheNearestNeighborStartingFromCell(nNSS);
-			ScalarType dist;
+			ScalarType dist = 0.0;
 			if (squareDist >= 0)
 				dist = static_cast<ScalarType>(sqrt(squareDist));
 			else if (nNSS.maxSearchSquareDistd > 0)

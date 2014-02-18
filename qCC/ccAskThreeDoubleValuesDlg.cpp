@@ -17,23 +17,24 @@
 
 #include "ccAskThreeDoubleValuesDlg.h"
 
-ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(
-                            const char* vName1,
-                            const char* vName2,
-                            const char* vName3,
-                            double minVal,
-                            double maxVal,
-                            double defaultVal1,
-                            double defaultVal2,
-                            double defaultVal3,
-                            int precision/*=6*/,
-                            const char* windowTitle/*=0*/,
-                            QWidget* parent/*=0*/)
+ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(	const QString& vName1,
+														const QString& vName2,
+														const QString& vName3,
+														double minVal,
+														double maxVal,
+														double defaultVal1,
+														double defaultVal2,
+														double defaultVal3,
+														int precision/*=6*/,
+														const char* windowTitle/*=0*/,
+														QWidget* parent/*=0*/)
     : QDialog(parent), Ui::AskThreeDoubleValuesDialog()
 {
     setupUi(this);
 
     setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+
+	checkBox->setVisible(false);
 
     label1->setText(vName1);
     label2->setText(vName2);
@@ -50,4 +51,19 @@ ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(
 
     if (windowTitle)
         setWindowTitle(windowTitle);
+}
+
+void ccAskThreeDoubleValuesDlg::showCheckbox(const QString& label, bool state, const QString* tooltip/*=0*/)
+{
+	checkBox->setVisible(true);
+	checkBox->setEnabled(true);
+	checkBox->setChecked(state);
+
+	if (tooltip)
+		checkBox->setToolTip(*tooltip);
+}
+
+bool ccAskThreeDoubleValuesDlg::getCheckboxState() const
+{
+	return checkBox->isEnabled() && checkBox->isChecked();
 }

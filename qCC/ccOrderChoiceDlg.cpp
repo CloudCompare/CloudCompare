@@ -19,7 +19,9 @@
 
 //local
 #include "ccDisplayOptionsDlg.h"
-#include "plugins/ccMainAppInterface.h"
+
+//qCC_plugins
+#include <ccMainAppInterface.h>
 
 //qCC_db
 #include <ccHObject.h>

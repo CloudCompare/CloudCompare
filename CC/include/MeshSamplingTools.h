@@ -41,7 +41,7 @@ class SimpleCloud;
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 
-class CC_DLL_API MeshSamplingTools : public CCToolbox
+class CC_CORE_LIB_API MeshSamplingTools : public CCToolbox
 #else
 class MeshSamplingTools : public CCToolbox
 #endif

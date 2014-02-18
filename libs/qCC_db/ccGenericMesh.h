@@ -33,8 +33,8 @@ class ccMaterialSet;
 
 //! Generic mesh interface
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccGenericMesh : public CCLib::GenericIndexedMesh, public ccHObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccGenericMesh : public CCLib::GenericIndexedMesh, public ccHObject
 #else
 class ccGenericMesh : public CCLib::GenericIndexedMesh, public ccHObject
 #endif

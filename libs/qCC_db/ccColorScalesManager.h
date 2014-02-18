@@ -26,8 +26,8 @@
 
 //! Color scales manager/container
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccColorScalesManager
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccColorScalesManager
 #else
 class ccColorScalesManager
 #endif

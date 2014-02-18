@@ -55,7 +55,7 @@ bool ccOverlayDialog::linkWith(ccGLWindow* win)
 	{
 		//same dialog? nothing to do
 		if (m_associatedWin == win)
-			return false;
+			return true;
 		
 		//otherwise, we automatically detach it
 		{

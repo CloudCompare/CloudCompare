@@ -28,8 +28,8 @@
 
 //! 2D viewport object
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API cc2DViewportObject : public ccHObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API cc2DViewportObject : public ccHObject
 #else
 class cc2DViewportObject : public ccHObject
 #endif

@@ -28,7 +28,7 @@ namespace CCLib
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 
-class CC_DLL_API GenericMesh
+class CC_CORE_LIB_API GenericMesh
 #else
 class GenericMesh
 #endif

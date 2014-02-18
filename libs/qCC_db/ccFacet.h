@@ -32,8 +32,8 @@
 /** Composite object: point cloud + 2D1/2 contour polyline + 2D1/2 surface mesh
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccFacet : public ccHObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccFacet : public ccHObject
 #else
 class ccFacet : public ccHObject
 #endif

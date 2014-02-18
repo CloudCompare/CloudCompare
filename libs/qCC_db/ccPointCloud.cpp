@@ -579,12 +579,8 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 	//Has the cloud been recentered/rescaled?
 	{
-		const CCVector3d& shift = addedCloud->getGlobalShift();
-		if (fabs(shift.x) + fabs(shift.y) + fabs(shift.z) > 0)
-			ccLog::Warning(QString("[ccPointCloud::fusion] Global shift information for cloud '%1' will be lost!").arg(addedCloud->getName()));
-		double scale = addedCloud->getGlobalScale();
-		if (scale != 1.0)
-			ccLog::Warning(QString("[ccPointCloud::fusion] Global scale information for cloud '%1' will be lost!").arg(addedCloud->getName()));
+		if (addedCloud->isShifted())
+			ccLog::Warning(QString("[ccPointCloud::fusion] Global shift/scale information for cloud '%1' will be lost!").arg(addedCloud->getName()));
 	}
 
 	//children (not yet reserved)

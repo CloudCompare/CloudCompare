@@ -19,11 +19,13 @@
 
 //Local
 #include "sfEditDlg.h"
-#include "../ccGLWindow.h"
 #include "../mainwindow.h"
-#include "../ccGuiParameters.h"
 #include "../ccColorScaleEditorDlg.h"
 #include "../ccColorScaleSelector.h"
+
+//qCC_glWindow
+#include <ccGLWindow.h>
+#include <ccGuiParameters.h>
 
 //qCC_db
 #include <ccHObjectCaster.h>

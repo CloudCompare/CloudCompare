@@ -1,8 +1,8 @@
 #ifndef CC_COMMAND_LINE_PARSER_HEADER
 #define CC_COMMAND_LINE_PARSER_HEADER
 
-//qCC
-#include "fileIO/FileIOFilter.h"
+//qCC_io
+#include <FileIOFilter.h>
 
 //qCC_db
 #include <ccHObject.h>

@@ -19,6 +19,7 @@ File I/O:
 
 Big ones:
 [*] fly-through mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
+[*] Command line mode could be extended (more methods, etc.)
 
 Various:
 [*] Finish FBX support (materials)
@@ -33,21 +34,18 @@ Various:
 [*] Display ortho-rectified images as high-res textures (instead of point clouds!)
 [*] Use PDAL instead of libLAS (http://www.danielgm.net/cc/forum/viewtopic.php?f=15&t=437&p=1014#p1014)
 [*] Run the PCV plugin on more than one file at a time (or batch process)
-[*] Command line mode could be extended (more methods, etc.)
-[*] Add 'GL filter' plugins support to ccViewer (i.e. qEDL & qSSAO)
 [*] Add interactive measurement features to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
 [*] Add 'TRANGLE_STRIPS' support to VTK I/O filter (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=598)
 
 From Thomas S. (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=550)
-[*] It would be great if the program could manage long coordinates for the georeferencing (?!)
 [*] If CloudCompare would support VisualSFM, it would be possible to import the VisualSFM-Project (with the saved camera positions).
 	Then it should be possible to measure the points for the georeferencing in the images itself, instead of the point-cloud, which would be much more accurate.
 
 From Andrew B.
 [*] 'minimise bounding box' or various automated ways to make objects 'stand up' the way they are supposed to or be rigid-transformed on the basis of perceived axial symmetry
 [*] An automatic 'scale to unit size' in cases where compare different sized things is of interest, but size can be discarded or treated separately
-[*] Automation of the above tasks via the command line, along with the ability output of summary stats to command line or text file, command line options for ICP and cloud-cloud distance (for batch work).
+[*] Automation of the above tasks via the command line
 
 From Dimitri L.
 [*] Auto-detect header format in ASCII files (in any) 

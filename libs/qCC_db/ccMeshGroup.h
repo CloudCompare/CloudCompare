@@ -25,8 +25,8 @@
 	Shouldn't be used anymore. 
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccMeshGroup : public ccGenericMesh
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
 #else
 class ccMeshGroup : public ccGenericMesh
 #endif

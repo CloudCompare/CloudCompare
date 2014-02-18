@@ -28,8 +28,8 @@
 Check CCLib documentation for more information about it.
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccPolyline : public CCLib::Polyline, public ccHObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccPolyline : public CCLib::Polyline, public ccHObject
 #else
 class ccPolyline : public CCLib::Polyline, public ccHObject
 #endif

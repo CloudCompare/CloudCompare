@@ -21,28 +21,39 @@
 #include "ccCommon.h"
 
 #define CC_VER_NUM 2.5
-#define CC_SUB_VER "3.beta(20140212)" //2014-02-12
+#define CC_SUB_VER "3.beta(20140214)" //2014-02-14
 
 //! Returns current version as string
-QString ccCommon::GetCCVersion()
+QString ccCommon::GetCCVersion(bool full/*=true*/)
 {
-#if defined(CC_WINDOWS)
-	QString platform = "Windows";
-#elif defined(CC_MAC_OS)
-	QString platform = "Mac OS";
-#elif defined(CC_LINUX)
-	QString platform = "Linux";
-#else
-	QString platform = "Unknown OS";
-#endif
+	QString verStr = QString("%1.%2").arg(CC_VER_NUM).arg(CC_SUB_VER);
 
 #if defined(CC_ENV_64)
-	QString format = "64 bits";
+	QString arch = "64 bits";
 #elif defined(CC_ENV_32)
-	QString format = "32 bits";
+	QString arch = "32 bits";
 #else
-	QString format = "?? bits";
+	QString arch = "?? bits";
 #endif
 
-	return QString("%1.%2").arg(CC_VER_NUM).arg(CC_SUB_VER)+QString(" [%1 %2]").arg(platform).arg(format);
+	if (full)
+	{
+#if defined(CC_WINDOWS)
+		QString platform = "Windows";
+#elif defined(CC_MAC_OS)
+		QString platform = "Mac OS";
+#elif defined(CC_LINUX)
+		QString platform = "Linux";
+#else
+		QString platform = "Unknown OS";
+#endif
+
+		verStr += QString(" [%1 %2]").arg(platform).arg(arch);
+	}
+	else
+	{
+		verStr += QString(" [%1]").arg(arch);
+	}
+
+	return verStr;
 };

@@ -37,7 +37,7 @@ namespace CCLib
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 
-class CC_DLL_API ScalarField : public GenericChunkedArray<1,ScalarType>
+class CC_CORE_LIB_API ScalarField : public GenericChunkedArray<1,ScalarType>
 #else
 class ScalarField : public GenericChunkedArray<1,ScalarType>
 #endif

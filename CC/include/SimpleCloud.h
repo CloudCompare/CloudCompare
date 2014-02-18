@@ -34,7 +34,7 @@ namespace CCLib
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 
-class CC_DLL_API SimpleCloud : public GenericIndexedCloudPersist
+class CC_CORE_LIB_API SimpleCloud : public GenericIndexedCloudPersist
 #else
 class SimpleCloud : public GenericIndexedCloudPersist
 #endif

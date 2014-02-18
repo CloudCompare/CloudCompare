@@ -32,7 +32,7 @@ namespace CCLib
 	WARNING: make sure that references are not point to temporary objects!
 **/
 #ifdef CC_USE_AS_DLL
-class CC_DLL_API SimpleRefTriangle : public GenericTriangle
+class CC_CORE_LIB_API SimpleRefTriangle : public GenericTriangle
 #else
 class SimpleRefTriangle : public GenericTriangle
 #endif
@@ -75,7 +75,7 @@ public:
 //! A simple triangle class
 /** Implements the GenericTriangle class with a triplet of 3D points **/
 #ifdef CC_USE_AS_DLL
-class CC_DLL_API SimpleTriangle : public GenericTriangle
+class CC_CORE_LIB_API SimpleTriangle : public GenericTriangle
 #else
 class SimpleTriangle : public GenericTriangle
 #endif

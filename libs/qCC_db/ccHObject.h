@@ -27,8 +27,8 @@
 
 //! Hierarchical CloudCompare Object
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccHObject : public ccObject, public ccDrawableObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccHObject : public ccObject, public ccDrawableObject
 #else
 class ccHObject : public ccObject, public ccDrawableObject
 #endif
@@ -151,16 +151,7 @@ public:
 	/*** RECURSIVE CALL SCRIPTS ***/
 	
 	//0 parameter
-	#define recursive_call0(baseName,recursiveName) \
-	inline virtual void recursiveName() \
-	{ \
-		baseName(); \
-		for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it) \
-			(*it)->recursiveName(); \
-	} \
-
-	//0 parameter (with exception: mesh groups already have a recursive behavior for some methods!)
-	#define recursive_call0_ex(baseName,recursiveName) \
+	#define ccHObject_recursive_call0(baseName,recursiveName) \
 	inline virtual void recursiveName() \
 	{ \
 		baseName(); \
@@ -169,7 +160,7 @@ public:
 	} \
 
 	//1 parameter
-	#define recursive_call1(baseName,param1Type,recursiveName) \
+	#define ccHObject_recursive_call1(baseName,param1Type,recursiveName) \
 	inline virtual void recursiveName(param1Type p) \
 	{ \
 		baseName(p); \
@@ -180,17 +171,17 @@ public:
 	/*****************************/
 
 	//recursive equivalents of some of ccDrawableObject methods
-	recursive_call1(setSelected,bool,setSelected_recursive);
-	recursive_call1(setDisplay,ccGenericGLDisplay*,setDisplay_recursive);
-	recursive_call1(removeFromDisplay,ccGenericGLDisplay*,removeFromDisplay_recursive);
-	recursive_call0(prepareDisplayForRefresh,prepareDisplayForRefresh_recursive);
-	recursive_call0(refreshDisplay,refreshDisplay_recursive);
-	recursive_call0_ex(toggleVisibility,toggleVisibility_recursive);
-	recursive_call0_ex(toggleColors,toggleColors_recursive);
-	recursive_call0_ex(toggleNormals,toggleNormals_recursive);
-	recursive_call0_ex(toggleSF,toggleSF_recursive);
-	recursive_call0_ex(toggleShowName,toggleShowName_recursive);
-	recursive_call0_ex(toggleMaterials,toggleMaterials_recursive);
+	ccHObject_recursive_call1(setSelected,bool,setSelected_recursive);
+	ccHObject_recursive_call1(setDisplay,ccGenericGLDisplay*,setDisplay_recursive);
+	ccHObject_recursive_call1(removeFromDisplay,ccGenericGLDisplay*,removeFromDisplay_recursive);
+	ccHObject_recursive_call0(prepareDisplayForRefresh,prepareDisplayForRefresh_recursive);
+	ccHObject_recursive_call0(refreshDisplay,refreshDisplay_recursive);
+	ccHObject_recursive_call0(toggleVisibility,toggleVisibility_recursive);
+	ccHObject_recursive_call0(toggleColors,toggleColors_recursive);
+	ccHObject_recursive_call0(toggleNormals,toggleNormals_recursive);
+	ccHObject_recursive_call0(toggleSF,toggleSF_recursive);
+	ccHObject_recursive_call0(toggleShowName,toggleShowName_recursive);
+	ccHObject_recursive_call0(toggleMaterials,toggleMaterials_recursive);
 
     //! Applies the active OpenGL transformation to the entity (recursive)
     /** The input ccGLMatrix should be left to 0, unless you want to apply

@@ -39,8 +39,8 @@ class ccPolyline;
 
 //! Useful class to (try to) statically cast a basic ccHObject to a given type
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccHObjectCaster
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccHObjectCaster
 #else
 class ccHObjectCaster
 #endif

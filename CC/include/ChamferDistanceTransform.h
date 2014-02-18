@@ -30,7 +30,7 @@ class NormalizedProgress;
 //! Class to compute and handle Chamfer distances on a 3D grid
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
-class CC_DLL_API ChamferDistanceTransform : MathTools
+class CC_CORE_LIB_API ChamferDistanceTransform : MathTools
 #else
 class ChamferDistanceTransform : MathTools
 #endif

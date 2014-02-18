@@ -48,8 +48,8 @@ class ccOctree;
 	- visibility information per point (to hide/display subsets of points)
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccGenericPointCloud : public ccHObject,  virtual public CCLib::GenericIndexedCloudPersist
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccGenericPointCloud : public ccHObject,  virtual public CCLib::GenericIndexedCloudPersist
 #else
 class ccGenericPointCloud : public ccHObject,  virtual public CCLib::GenericIndexedCloudPersist
 #endif
@@ -216,10 +216,37 @@ public:
 	//! Sets the scale applied to original coordinates (information storage only)
 	void setGlobalScale(double scale);
 
+	//! Returns whether the cloud is shifted or not
+	inline bool isShifted() const
+	{
+		return (	m_globalShift.x != 0
+				||	m_globalShift.y != 0
+				||	m_globalShift.z != 0
+				||	m_globalScale != 1.0 );
+	}
+
 	//! Returns the scale applied to original coordinates
 	/** See ccGenericPointCloud::setOriginalScale
 	**/
 	double getGlobalScale() const { return m_globalScale; }
+
+	//! Returns the point back-projected into the original coordinates system
+	template<typename T> inline CCVector3d toGlobal3d(const Vector3Tpl<T>& Plocal) const
+	{
+		return CCVector3d::fromArray(Plocal.u) / m_globalScale - m_globalShift;
+	}
+
+	//! Returns the point projected into the local (shifted) coordinates system
+	template<typename T> inline CCVector3d toLocal3d(const Vector3Tpl<T>& Pglobal) const
+	{
+		return CCVector3d::fromArray(Pglobal.u) * m_globalScale + m_globalShift;
+	}
+	//! Returns the point projected into the local (shifted) coordinates system
+	template<typename T> inline CCVector3 toLocal3pc(const Vector3Tpl<T>& Pglobal) const
+	{
+		CCVector3d Plocal = CCVector3d::fromArray(Pglobal.u) * m_globalScale + m_globalShift;
+		return CCVector3::fromArray(Plocal.u);
+	}
 
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }

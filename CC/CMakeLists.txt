@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
-# to compile CCLib only! (CMake implicitely imposes to declare a project before anything...)
+# to compile CCLib only! (CMake implicitly imposes to declare a project before anything...)
 project( CC_DUMMY_PROJECT )
 
-# CC_DLL only relies on 'triangle' library...
+# CC_CORE_LIB only relies on 'triangle' library...
 add_subdirectory (triangle)
 # ... and QT!
 set( DESIRED_QT_VERSION 4 )
@@ -14,7 +14,7 @@ else()
     include( ${QT_USE_FILE} )
 endif()
 
-project( CC_DLL )
+project( CC_CORE_LIB )
 
 set( VERSION_MAJOR 1 )
 set( VERSION_MINOR 0 )
@@ -45,9 +45,9 @@ endif()
 
 # Install (shared) library to specified destinations
 if( UNIX )
-	install_shared( CC_DLL lib lib ) #default destination: /usr/lib
+	install_shared( CC_CORE_LIB lib lib ) #default destination: /usr/lib
 else()
-foreach( dest ${INSTALL_DESTINATIONS} )
-	install_shared( CC_DLL ${dest} ${dest}_debug )
-endforeach()
+	foreach( dest ${INSTALL_DESTINATIONS} )
+		install_shared( CC_CORE_LIB ${dest} ${dest}_debug )
+	endforeach()
 endif()

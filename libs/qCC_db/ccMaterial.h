@@ -25,8 +25,8 @@
 
 //! Mesh (triangle) material
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-struct QCC_DB_DLL_API ccMaterial
+#include "qCC_db.h"
+struct QCC_DB_LIB_API ccMaterial
 #else
 struct ccMaterial
 #endif

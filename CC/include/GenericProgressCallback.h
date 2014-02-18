@@ -33,7 +33,7 @@ namespace CCLib
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 
-class CC_DLL_API GenericProgressCallback
+class CC_CORE_LIB_API GenericProgressCallback
 #else
 class GenericProgressCallback
 #endif

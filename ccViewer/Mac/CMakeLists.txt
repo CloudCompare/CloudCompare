@@ -2,14 +2,15 @@
 if( APPLE )
    # install support libs
    get_support_libs( SUPPORT_LIBS )
-   install( FILES ${SUPPORT_LIBS} DESTINATION ${MAC_BUNDLE_MACOS_DIR} COMPONENT Runtime )
+   install( FILES ${SUPPORT_LIBS} DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/MacOS COMPONENT Runtime )
 
    # install qt.conf
    install( CODE "
-      file( WRITE ${MAC_BUNDLE_RESOURCES_DIR}/qt.conf \"\" )
+      file( WRITE ${CCVIEWER_MAC_BASE_DIR}/Contents/Resources/qt.conf \"\" )
       " COMPONENT Runtime )
 
    set( DIRS ${EXTERNAL_LIBS_LIBRARIES} )
+   set( PLUGINS ${CCVIEWER_PLUGINS} )
 
    if( ${OPTION_USE_LIBLAS} )
       set( DIRS ${DIRS} ${Boost_LIBRARY_DIRS} )
@@ -18,6 +19,6 @@ if( APPLE )
    # call fixup_bundles to change paths using otools
    install( CODE "
       include( BundleUtilities )
-      fixup_bundle( ${CMAKE_INSTALL_PREFIX}/${ccViewer_dest_release}/${MAC_APP_NAME} \"\" \"${DIRS}\" COMPONENT Runtime ) 
+      fixup_bundle( ${CCVIEWER_MAC_BASE_DIR} \"${PLUGINS}\" \"${DIRS}\" COMPONENT Runtime ) 
       ")
 endif( APPLE )

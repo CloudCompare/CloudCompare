@@ -25,7 +25,10 @@ v2.5.3 ??/??/2014
 		invalid columns (such as text labels, etc.) as long as the column is not assigned
 		to any property.
 	* The OBJ importer now supports polylines ('l' tag)
-	* Global shift/scale is now applied when exporting points with the Point Picking List tool
+	* Global shift/scale:
+		- CC will ask the user when exporting points with the 'Point List Picking' tool
+		- CC will warn the user if the translation applied with the 'Edit > Apply transformation' tool
+			is too big (in which case it can be set as 'global shift' instead)
 	* New 'preferred' orientations for the Normals computation tool: relatively to +/- (0,0,0)
 		- new method to orient normals with a Minimum Spanning Tree (quite slow but very reliable!)
 	* Distance computation accuracy slightly enhanced (use of double precision internally)
@@ -37,6 +40,16 @@ v2.5.3 ??/??/2014
 		- specify export format (clouds or meshes) as well as the extension
 		- prevent CC from automatically a timestamp as suffix for output files
 		(see the updated documentation here: http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine)
+	* ccViewer now supports GL filters (i.e. 'shader' plugins: qEDL and qSSAO)
+	* The GL filter banner (yellow) is now smaller, and is displayed at the top of the 3D view
+		(it doesn't hide the scale anymore!)
+	* Normals are no longer computed by default when loading a mesh without normals
+	* Normals can now be computed on a mesh either 'per-vertex' (mean normal vector of
+		all connected triangles) or 'per-triangle' (gives a 'faceted' look)
+	* The 'Point pair-based registration' tool now handles virtual points with very large coordinates
+		(useful to register a cloud with GPS control points for instance)
+	* Labels now display both the shifted and the original points coordinates if
+		the cloud is shifted/scaled
 
 - Other:
 	* ATOM feed enabled on the forum (http://www.danielgm.net/cc/forum/)
@@ -56,6 +69,8 @@ v2.5.3 ??/??/2014
 	* The 'repetitive slice extraction' option of the 'Cross section' tool was behaving strangely (some slices
 		were sometimes fused together)
 	* Pixel distances were squared twice in the Bilateral filter (shader) 
+	* The 'Point pair-based registration' dialog was not automatically reset
+>>>>>>> refs/remotes/origin/shared_plugins
 
 v2.5.2 12/19/2013
 - GDAL library support added:

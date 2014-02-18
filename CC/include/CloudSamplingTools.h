@@ -35,7 +35,7 @@ class SimpleCloud;
 //! Several point cloud resampling algorithms (octree-based, random, etc.)
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
-class CC_DLL_API CloudSamplingTools : public CCToolbox
+class CC_CORE_LIB_API CloudSamplingTools : public CCToolbox
 #else
 class CloudSamplingTools : public CCToolbox
 #endif

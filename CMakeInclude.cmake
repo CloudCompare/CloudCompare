@@ -136,8 +136,8 @@ if( APPLE )
    function( get_support_libs )  # 1 argument - return var
       # get a list of support libs based on configuration
       #  we need this to install them properly when we are bundling the app
-      list( APPEND SUPPORT_LIB_NAMES libCC_DLL )
-      list( APPEND SUPPORT_LIB_NAMES libQCC_DB_DLL )
+      list( APPEND SUPPORT_LIB_NAMES libCC_CORE_LIB )
+      list( APPEND SUPPORT_LIB_NAMES libQCC_DB_LIB )
 
       if( ${OPTION_USE_XIOT} )
          list( APPEND SUPPORT_LIB_NAMES libxiot )

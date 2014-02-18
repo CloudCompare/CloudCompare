@@ -30,8 +30,8 @@
 /** 3D plane primitive
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccPlane : public ccGenericPrimitive
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccPlane : public ccGenericPrimitive
 #else
 class ccPlane : public ccGenericPrimitive
 #endif

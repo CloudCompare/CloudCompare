@@ -18,8 +18,8 @@
 #ifndef CC_MAIN_WINDOW_HEADER
 #define CC_MAIN_WINDOW_HEADER
 
-//Virtual interface (for plugins)
-#include "plugins/ccMainAppInterface.h"
+//qCC_plugins
+#include <ccMainAppInterface.h>
 
 //Qt
 #include <QMainWindow>
@@ -38,9 +38,11 @@
 //qCC_db
 #include <ccMesh.h>
 
-//db
+//qCC_io
+#include <FileIOFilter.h>
+
+//internal db
 #include "db_tree/ccDBRoot.h"
-#include "fileIO/FileIOFilter.h"
 
 class QMdiArea;
 class QSignalMapper;
@@ -110,22 +112,33 @@ public:
     //! Returns active GL sub-window (if any)
     virtual ccGLWindow* getActiveGLWindow();
 
-    //! Tries to load (and then adds to main db) several files
+    //! Tries to load several files (and then pushes them into main DB)
     /** \param filenames list of all filenames
         \param fType file type
 		\param destWin destination window (0 = active one)
     **/
-	virtual void addToDB(const QStringList& filenames, CC_FILE_TYPES fType = UNKNOWN_FILE, ccGLWindow* destWin = 0);
+	virtual void addToDB(	const QStringList& filenames,
+							CC_FILE_TYPES fType = UNKNOWN_FILE,
+							ccGLWindow* destWin = 0);
 
 	//inherited from ccMainAppInterface
-    virtual void addToDB(ccHObject* obj, bool autoExpandDBTree=true, const char* statusMessage=NULL, bool addToDisplay=true, bool updateZoom=true, ccGLWindow* winDest=0, bool* coordinatesTransEnabled = 0, CCVector3d* coordinatesShift = 0, double* coordinatesScale = 0);
-	virtual void removeFromDB(ccHObject* obj, bool autoDelete=true);
+    virtual void addToDB(	ccHObject* obj,
+							bool autoExpandDBTree = true,
+							const char* statusMessage = NULL,
+							bool addToDisplay = true,
+							bool updateZoom = true,
+							ccGLWindow* winDest = 0,
+							bool* coordinatesTransEnabled = 0,
+							CCVector3d* coordinatesShift = 0,
+							double* coordinatesScale = 0,
+							bool checkDimensions = true );
+	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true);
 	virtual void setSelectedInDB(ccHObject* obj, bool selected);
-    virtual void dispToConsole(QString message, ConsoleMessageLevel level=STD_CONSOLE_MESSAGE);
+    virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE);
 	virtual void forceConsoleDisplay();
 	virtual ccHObject* dbRootObject();
-	virtual QMainWindow* getMainWindow() {return this;}
-	virtual const ccHObject::Container& getSelectedEntities() const { return m_selectedEntities; }
+	inline virtual QMainWindow* getMainWindow() { return this; }
+	inline virtual const ccHObject::Container& getSelectedEntities() const { return m_selectedEntities; }
 	virtual ccColorScalesManager* getColorScalesManager();
 
 	//! Returns real 'dbRoot' object
@@ -143,7 +156,10 @@ public:
 	};
 
 	//! Applies a standard CCLib algorithm (see CC_LIB_ALGORITHM) on a set of entities
-	static bool ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget* parent = 0, void** additionalParameters = 0);
+	static bool ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo,
+									ccHObject::Container& entities,
+									QWidget* parent = 0,
+									void** additionalParameters = 0);
 
 	//! Returns MDI area subwindow corresponding to a given 3D view
 	QMdiSubWindow* getMDISubWindow(ccGLWindow* win);
@@ -334,7 +350,11 @@ protected slots:
 	void doActionAdjustZoom();
 	void doActionSaveViewportAsCamera();
 
+    //Shaders & plugins
+    void doActionLoadShader();
+    void doActionDeleteShader();
     void doEnableGLFilter();
+    void doDisableGLFilter();
 
 	//Clipping box
 	void activateClippingBoxMode();
@@ -364,11 +384,6 @@ protected slots:
 	//Point-pair registration mechanism
 	void activateRegisterPointPairTool();
     void deactivateRegisterPointPairTool(bool);
-
-    //Shaders & plugins
-    void doActionLoadShader();
-    void doActionDeleteShader();
-    void doActionDeactivateGlFilter();
 
 	//Current active scalar field
 	void doActionToggleActiveSFColorScale();
@@ -516,10 +531,9 @@ protected:
 
         //! Constructor with dialog and position
         ccMDIDialogs(ccOverlayDialog* dlg, Qt::Corner pos)
-        {
-            dialog = dlg;
-            position = pos;
-        }
+			: dialog(dlg)
+			, position(pos)
+        {}
     };
 
     //! Replaces an MDI dialog at its right position
@@ -527,6 +541,8 @@ protected:
 
     //! Registers a MDI area overlay dialog
     void registerMDIDialog(ccOverlayDialog* dlg, Qt::Corner pos);
+    //! Unregisters a MDI area overlay dialog
+	void unregisterMDIDialog(ccOverlayDialog* dlg);
 
     //! Automatically updates all registered MDI dialogs placement
     void updateMDIDialogsPlacement();

@@ -28,7 +28,7 @@ namespace CCLib
 	//! Miscellaneous useful functions (geometrical elements handling)
 	#ifdef CC_USE_AS_DLL
 	#include "CloudCompareDll.h"
-	class CC_DLL_API CCMiscTools : public CCToolbox
+	class CC_CORE_LIB_API CCMiscTools : public CCToolbox
 	#else
 	class CCMiscTools : public CCToolbox
 	#endif

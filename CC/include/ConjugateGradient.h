@@ -35,7 +35,7 @@ namespace CCLib
 
 //#ifdef CC_USE_AS_DLL
 //#include "CloudCompareDll.h"
-//template <int N> class CC_DLL_API ConjugateGradient : MathTools
+//template <int N> class CC_CORE_LIB_API ConjugateGradient : MathTools
 //#else
 template <int N, class Scalar> class ConjugateGradient : MathTools
 //#endif

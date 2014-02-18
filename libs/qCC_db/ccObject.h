@@ -105,8 +105,8 @@ enum CC_CLASS_ENUM {
 
 //! Generic "CloudCompare Object" template
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccObject : public ccSerializableObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccObject : public ccSerializableObject
 #else
 class ccObject : public ccSerializableObject
 #endif

@@ -42,8 +42,8 @@ const char COCTREE_DISPLAY_TYPE_TITLES[OCTREE_DISPLAY_TYPE_NUMBERS][18]				=	{"W
 
 //! Octree level editor dialog
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccOctreeSpinBox : public QSpinBox
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccOctreeSpinBox : public QSpinBox
 #else
 class ccOctreeSpinBox : public QSpinBox
 #endif
@@ -81,8 +81,8 @@ protected:
 /** Extends the CCLib::DgmOctree class.
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccOctree : public CCLib::DgmOctree, public ccHObject
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccOctree : public CCLib::DgmOctree, public ccHObject
 #else
 class ccOctree : public CCLib::DgmOctree, public ccHObject
 #endif

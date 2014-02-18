@@ -19,7 +19,7 @@ if( ${OPTION_USE_LIBE57} )
 	endif()
 
 	# Find Boost
-	find_package( Boost QUIET )
+	find_package( Boost COMPONENTS system QUIET ) #DGM: not sure why, but "system" lib doesn't show up otherwise...
 	if( NOT Boost_FOUND )
 		set( BOOST_ROOT CACHE PATH "Location of the boost root directory" )
 		message( FATAL_ERROR "Unable to find boost library. Please set the BOOST_ROOT to point to the boost distribution files." )

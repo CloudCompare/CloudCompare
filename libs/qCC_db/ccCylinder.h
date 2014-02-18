@@ -24,8 +24,8 @@
 /** 3D cylinder primitive
 **/
 #ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db_dll.h"
-class QCC_DB_DLL_API ccCylinder : public ccCone
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccCylinder : public ccCone
 #else
 class ccCylinder : public ccCone
 #endif

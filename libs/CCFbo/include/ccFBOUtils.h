@@ -27,6 +27,7 @@
 #define	TEX_3D_ON	glEnable(GL_TEXTURE_3D)
 #define	TEX_3D_OFF	glDisable(GL_TEXTURE_3D)
 
+//! Misc. FBO management related methods
 class ccFBOUtils
 {
 public:

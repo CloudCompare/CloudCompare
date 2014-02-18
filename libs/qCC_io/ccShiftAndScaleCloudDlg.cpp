@@ -1,3 +1,5 @@
+#include <float.h>
+
 #include "ccShiftAndScaleCloudDlg.h"
 
 //Qt

@@ -25,7 +25,10 @@ v2.5.3 ??/??/2014
 		invalid columns (such as text labels, etc.) as long as the column is not assigned
 		to any property.
 	* The OBJ importer now supports polylines ('l' tag)
-	* Global shift/scale is now applied when exporting points with the Point Picking List tool
+	* Global shift/scale:
+		- CC will ask the user when exporting points with the 'Point List Picking' tool
+		- CC will warn the user if the translation applied with the 'Edit > Apply transformation' tool
+			is too big (in which case it can be set as 'global shift' instead)
 	* New 'preferred' orientations for the Normals computation tool: relatively to +/- (0,0,0)
 		- new method to orient normals with a Minimum Spanning Tree (quite slow but very reliable!)
 	* Distance computation accuracy slightly enhanced (use of double precision internally)

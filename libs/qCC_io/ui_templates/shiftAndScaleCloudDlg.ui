@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>432</width>
-    <height>265</height>
+    <height>278</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       </font>
      </property>
      <property name="text">
-      <string>Cloud coordinates are too big (original precision may be lost)!</string>
+      <string>Coordinates are too big (original precision may be lost)!</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -150,7 +150,7 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>Do you wish to modify the cloud or leave it unchanged?</string>
+      <string>Do you wish to translate/rescale the entity?</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -250,10 +250,10 @@
       <item>
        <widget class="QDoubleSpinBox" name="scaleSpinBox">
         <property name="decimals">
-         <number>6</number>
+         <number>8</number>
         </property>
         <property name="minimum">
-         <double>-1000000000.000000000000000</double>
+         <double>0.000000000000000</double>
         </property>
         <property name="maximum">
          <double>1000000000.000000000000000</double>
@@ -277,13 +277,6 @@
        </spacer>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="Line" name="line_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
     </widget>
    </item>
    <item>
@@ -326,10 +319,17 @@
       </palette>
      </property>
      <property name="text">
-      <string>Warning: precedent shift information doesn't seem pertinent for this file</string>
+      <string>Warning: previous shift/scale don't seem pertinent for this file</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -340,8 +340,11 @@
        <italic>true</italic>
       </font>
      </property>
+     <property name="styleSheet">
+      <string notr="true">color: blue;</string>
+     </property>
      <property name="text">
-      <string>shift/scale information will be stored and used to center back the cloud on save</string>
+      <string>shift/scale will be stored and used to restore the original coordinates at export time</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

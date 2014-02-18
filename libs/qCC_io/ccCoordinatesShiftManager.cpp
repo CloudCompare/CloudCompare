@@ -27,9 +27,19 @@
 #include <assert.h>
 
 // Max acceptable coordinate value
-#define MAX_COORDINATE_ABS_VALUE static_cast<PointCoordinateType>(1.0e5)
+#define MAX_COORDINATE_ABS_VALUE 1.0e5
 // Max acceptable diagonal length
-#define MAX_DIAGONAL_LENGTH static_cast<PointCoordinateType>(1.0e6)
+#define MAX_DIAGONAL_LENGTH 1.0e6
+
+double ccCoordinatesShiftManager::MaxCoordinateAbsValue()
+{
+	return MAX_COORDINATE_ABS_VALUE;
+}
+
+double ccCoordinatesShiftManager::MaxBoundgBoxDiagonal()
+{
+	return MAX_DIAGONAL_LENGTH;
+}
 
 bool ccCoordinatesShiftManager::Handle(	const double* P,
 										double diagonal,

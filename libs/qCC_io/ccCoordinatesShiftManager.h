@@ -21,9 +21,6 @@
 //CCLib
 #include <CCGeom.h>
 
-//Qt
-#include <QString>
-
 class ccHObject;
 
 //! Helper class to handle coordinates shift while loading entities (GUI, etc.)
@@ -39,6 +36,11 @@ public:
 						CCVector3d& coordinatesShift,
 						double* coordinatesScale,
 						bool& applyAll);
+
+	//! Returns max coordinate (absolute) value
+	static double MaxCoordinateAbsValue();
+	//! Returns max bounding-box diagonal
+	static double MaxBoundgBoxDiagonal();
 };
 
 #endif

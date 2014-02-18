@@ -184,11 +184,12 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 			{fclose(fp);return CC_FERR_WRITING;}
 	}
 
-	//ecriture des "vertexes"
+	//save vertexes
 	if (fprintf(fp,"\tsetAttr -s %u \".vt[0:%u]\"\n",numberOfVertexes,numberOfVertexes-1) < 0)
-		{fclose(fp);return CC_FERR_WRITING;}
-
-	assert(scale != 0);
+	{
+		fclose(fp);
+		return CC_FERR_WRITING;
+	}
 	{
 		for (unsigned i=0; i<numberOfVertexes; ++i)
 		{

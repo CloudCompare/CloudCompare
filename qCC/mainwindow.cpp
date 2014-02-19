@@ -1468,28 +1468,19 @@ void MainWindow::doActionApplyTransformation()
 		return;
 
 	ccGLMatrix transMat = dlg.getTransformation();
-	CCVector3d T = CCVector3d::fromArray(transMat.getTranslation());
+	CCVector3 T = transMat.getTranslationAsVec3D();
 
 	//test if translation is very big
 	double maxCoord = ccCoordinatesShiftManager::MaxCoordinateAbsValue();
 	bool coordsAreTooBig = (	fabs(T.x) > maxCoord
 							||	fabs(T.y) > maxCoord
 							||	fabs(T.z) > maxCoord );
-	//TODO: what about the scale?
-	bool applyTranslationAsShift = (QMessageBox::question(	this,
-									"Big coordinates",
-									"Translation is too big (original precision may be lost!). Do you wish to save it as 'global shift' instead?\n(global shift will only be applied at export time)",
-									QMessageBox::Yes,
-									QMessageBox::No) == QMessageBox::Yes);
-	if (applyTranslationAsShift)
-	{
-		//clear transformation translation
-		transMat.setTranslation(CCVector3(0,0,0));
-	}
+	bool applyTranslationAsShift = false;
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
     size_t selNum = selectedEntities.size();
+	bool firstCloud = true;
     for (size_t i=0; i<selNum; ++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -1501,6 +1492,35 @@ void MainWindow::doActionApplyTransformation()
 		{
 			DisplayLockedVerticesWarning();
 			continue;
+		}
+
+		if (firstCloud)
+		{
+			if (coordsAreTooBig)
+			{
+				//if the translation is big, we must check that it's actually worsening the situation
+				//(and not improving it - in which case we shouldn't rant ;)
+				CCVector3 C = cloud->getBBCenter();
+				CCVector3 C2 = C;
+				transMat.apply(C2);
+
+				if (C2.norm() > C.norm())
+				{
+					//TODO: what about the scale?
+					applyTranslationAsShift = (QMessageBox::question(	this,
+												"Big coordinates",
+												"Translation is too big (original precision may be lost!). Do you wish to save it as 'global shift' instead?\n(global shift will only be applied at export time)",
+												QMessageBox::Yes,
+												QMessageBox::No) == QMessageBox::Yes);
+					if (applyTranslationAsShift)
+					{
+						//clear transformation translation
+						transMat.setTranslation(CCVector3(0,0,0));
+					}
+				}
+			}
+
+			firstCloud = false;
 		}
 
 		if (applyTranslationAsShift)

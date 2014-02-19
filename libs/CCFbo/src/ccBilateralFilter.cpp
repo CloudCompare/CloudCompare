@@ -27,6 +27,14 @@
 #include <assert.h>
 #include <algorithm>
 
+//! Max kernel size
+/** Can't add this as a static const definition (in the header file)
+	as this causes a 'double definition' link error on Windows - if
+	the definition is done in the cpp file - or a 'missing definition'
+	link error on MacOS - if the definition is not done in the cpp file ;)
+**/
+#define KERNEL_MAX_HALF_SIZE 7
+
 ccBilateralFilter::ccBilateralFilter()
 	: ccGlFilter("Bilateral smooth")
 	, m_width(0)
@@ -35,7 +43,9 @@ ccBilateralFilter::ccBilateralFilter()
 	, m_shader(0)
 	, m_useCurrentViewport(false)
 {
-	memset(m_dampingPixelDist, 0, KERNEL_MAX_HALF_SIZE*KERNEL_MAX_HALF_SIZE); //will be updated right away by 'setParameters'
+	unsigned maxCoefListSize = (KERNEL_MAX_HALF_SIZE+1)*(KERNEL_MAX_HALF_SIZE+1); //must be inferior to 64 to fit the equivalent array size on the shader's side
+	m_dampingPixelDist = new float[maxCoefListSize];
+	memset(m_dampingPixelDist, 0, maxCoefListSize); //will be updated right away by 'setParameters'
 
 	setParams(2,2.0f,0.4f);
 }
@@ -43,6 +53,9 @@ ccBilateralFilter::ccBilateralFilter()
 ccBilateralFilter::~ccBilateralFilter()
 {
     reset();
+
+	if (m_dampingPixelDist)
+		delete[] m_dampingPixelDist;
 }
 
 void ccBilateralFilter::useExistingViewport(bool state)

@@ -59,11 +59,8 @@ public:
 	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0f);
 	virtual GLuint getTexture();
 
-	//! Max kernel size
-	static const unsigned KERNEL_MAX_HALF_SIZE = 7;
-
 	//! Set parameters
-	/** \param halfSpatialSize half spatial kernel size (total size will be 2*h+1)
+	/** \param halfSpatialSize half spatial kernel size (between 1 and 7 - total size will be 2*h+1)
 		\param spatialSigma variance of the 'spatial' distribution (Euclidean distance of pixels)
 		\param depthSigma variance of the 'depth' distribution (depth difference of pixels)
 	**/
@@ -91,11 +88,8 @@ protected:
 	//! Variance of the 'depth' distribution (depth difference of pixels)
 	float m_depthSigma;
 
-	//! Max coef. list size
-	static const unsigned MAX_COEF_LIST_SIZE = (KERNEL_MAX_HALF_SIZE+1)*(KERNEL_MAX_HALF_SIZE+1);
-
 	//! 'spatial' distribution (kernel values)
-	float m_dampingPixelDist[MAX_COEF_LIST_SIZE];
+	float* m_dampingPixelDist;
 
 	//! Whether to use the current context (OpenGL) viewport or not
 	bool m_useCurrentViewport;

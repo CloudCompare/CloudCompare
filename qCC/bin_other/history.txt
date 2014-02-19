@@ -70,7 +70,8 @@ v2.5.3 ??/??/2014
 		were sometimes fused together)
 	* Pixel distances were squared twice in the Bilateral filter (shader) 
 	* The 'Point pair-based registration' dialog was not automatically reset
->>>>>>> refs/remotes/origin/shared_plugins
+		refs/remotes/origin/shared_plugins
+	* Wrong error code returned by PLY I/O Filter when failing to create the output file
 
 v2.5.2 12/19/2013
 - GDAL library support added:

@@ -83,7 +83,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 
 	p_ply ply = ply_create(filename, storageType, NULL, 0, NULL);
 	if (!ply)
-        return CC_FERR_NOT_ENOUGH_MEMORY;
+        return CC_FERR_WRITING;
 
     //Has the cloud been recentered?
 	e_ply_type coordType = vertices->isShifted() || sizeof(PointCoordinateType) > 4 ? PLY_DOUBLE : PLY_FLOAT; //we use double coordinates for shifted vertices (i.e. >1e6)

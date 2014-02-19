@@ -25,6 +25,7 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 	: QDialog(parent)
 	, Ui::BoundingBoxEditorDialog()
 	, m_baseBoxIsMinimal(false)
+	, m_showInclusionWarning(true)
 {
     setupUi(this);
 
@@ -167,7 +168,7 @@ void ccBoundingBoxEditorDlg::checkBaseInclusion()
 		exclude = !m_currentBBox.contains(m_baseBBox.minCorner()) || !m_currentBBox.contains(m_baseBBox.maxCorner());
 	}
 
-	warningLabel->setVisible(exclude);
+	warningLabel->setVisible(m_showInclusionWarning && exclude);
 	okPushButton->setEnabled(!m_baseBoxIsMinimal || !exclude);
 }
 

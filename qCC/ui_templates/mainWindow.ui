@@ -269,7 +269,7 @@
     <addaction name="separator"/>
     <addaction name="actionTranslateRotate"/>
     <addaction name="actionSegment"/>
-    <addaction name="actionCrossSection"/>
+    <addaction name="actionCrop"/>
     <addaction name="separator"/>
     <addaction name="actionEditGlobalShift"/>
     <addaction name="actionEditGlobalScale"/>
@@ -2438,6 +2438,11 @@
   <action name="actionRemoveDuplicatePoints">
    <property name="text">
     <string>Remove duplicate points</string>
+   </property>
+  </action>
+  <action name="actionCrop">
+   <property name="text">
+    <string>Crop</string>
    </property>
   </action>
  </widget>

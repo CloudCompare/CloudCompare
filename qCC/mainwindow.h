@@ -345,6 +345,7 @@ protected slots:
     void doActionHeightGridGeneration();
 	void doActionExportCoordToSF();
     void doComputeBestFitBB();
+	void doActionCrop();
 
     void doActionEditCamera();
 	void doActionAdjustZoom();

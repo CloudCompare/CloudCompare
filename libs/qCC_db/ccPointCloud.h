@@ -472,6 +472,13 @@ public:
 	//! Returns pointer on compressed normals indexes table
 	NormsIndexesTableType* normals() const {return m_normals;}
 
+	//! Crops the cloud inside (or outside) a boundig box
+	/** \param box croping box
+		\param inside whether selected points are inside or outside the box
+		\return points falling inside (or outside) as a selection
+	**/
+	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true);
+
 protected:
 
 	//! Appends a cloud to this one

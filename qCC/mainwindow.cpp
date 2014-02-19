@@ -114,6 +114,7 @@
 #include "ccColorScaleEditorDlg.h"
 #include "ccComputeOctreeDlg.h"
 #include "ccAdjustZoomDlg.h"
+#include "ccBoundingBoxEditorDlg.h"
 #include <ui_aboutDlg.h>
 
 //other
@@ -870,6 +871,7 @@ void MainWindow::connectActions()
     connect(actionComputeDistancesFromSensor,   SIGNAL(triggered()),    this,       SLOT(doActionComputeDistancesFromSensor()));
     connect(actionComputeScatteringAngles,      SIGNAL(triggered()),    this,       SLOT(doActionComputeScatteringAngles()));
     //"Edit > Scalar fields" menu
+    connect(actionShowHistogram,                SIGNAL(triggered()),    this,       SLOT(showSelectedEntitiesHistogram()));
     connect(actionSFGradient,                   SIGNAL(triggered()),    this,       SLOT(doActionSFGradient()));
     connect(actionGaussianFilter,               SIGNAL(triggered()),    this,       SLOT(doActionSFGaussianFilter()));
     connect(actionBilateralFilter,              SIGNAL(triggered()),    this,       SLOT(doActionSFBilateralFilter()));
@@ -889,6 +891,9 @@ void MainWindow::connectActions()
     connect(actionMerge,                        SIGNAL(triggered()),    this,       SLOT(doActionMerge()));
     connect(actionApplyTransformation,			SIGNAL(triggered()),    this,       SLOT(doActionApplyTransformation()));
     connect(actionApplyScale,					SIGNAL(triggered()),    this,       SLOT(doActionApplyScale()));
+    connect(actionTranslateRotate,              SIGNAL(triggered()),    this,       SLOT(activateTranslateRotateMode()));
+    connect(actionSegment,                      SIGNAL(triggered()),    this,       SLOT(activateSegmentationMode()));
+    connect(actionCrop,							SIGNAL(triggered()),    this,       SLOT(doActionCrop()));
     connect(actionEditGlobalShift,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalShift()));
     connect(actionEditGlobalScale,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalScale()));
     connect(actionSubsample,                    SIGNAL(triggered()),    this,       SLOT(doActionSubsample())); //Aurelien BEY le 13/11/2008
@@ -995,11 +1000,6 @@ void MainWindow::connectActions()
     connect(actionSetViewRight,		            SIGNAL(triggered()),    this,       SLOT(setRightView()));
     connect(actionSetViewIso1,		            SIGNAL(triggered()),    this,       SLOT(setIsoView1()));
     connect(actionSetViewIso2,		            SIGNAL(triggered()),    this,       SLOT(setIsoView2()));
-
-    //"Main tools" toolbar
-    connect(actionTranslateRotate,              SIGNAL(triggered()),    this,       SLOT(activateTranslateRotateMode()));
-    connect(actionSegment,                      SIGNAL(triggered()),    this,       SLOT(activateSegmentationMode()));
-    connect(actionShowHistogram,                SIGNAL(triggered()),    this,       SLOT(showSelectedEntitiesHistogram()));
 }
 
 void MainWindow::doActionColorize()
@@ -1526,7 +1526,7 @@ void MainWindow::doActionApplyTransformation()
 		if (applyTranslationAsShift)
 		{
 			//apply translation as global shift
-			cloud->setGlobalShift(cloud->getGlobalShift() - T);
+			cloud->setGlobalShift(cloud->getGlobalShift() - CCVector3d::fromArray(T.u));
 		}
 
 		//we temporarily detach entity, as it may undergo
@@ -6376,6 +6376,73 @@ void MainWindow::showSelectedEntitiesHistogram()
 	}
 }
 
+void MainWindow::doActionCrop()
+{
+	ccHObject::Container selectedEntities = m_selectedEntities;
+    size_t selNum = selectedEntities.size();
+
+	//find candidates
+	std::vector<ccPointCloud*> candidates;
+	ccBBox baseBB;
+	{
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccHObject* ent = selectedEntities[i];
+			if (ent->isA(CC_POINT_CLOUD))
+			{
+				ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
+				candidates.push_back(cloud);
+
+				baseBB += cloud->getBB();
+			}
+		}
+	}
+
+	if (candidates.empty())
+	{
+		ccConsole::Warning("[Crop] No elligible candidate found!");
+		return;
+	}
+
+	ccBoundingBoxEditorDlg bbeDlg(this);
+	bbeDlg.setBaseBBox(baseBB,false);
+	bbeDlg.showInclusionWarning(false);
+	bbeDlg.setWindowTitle("Crop");
+
+	if (!bbeDlg.exec())
+		return;
+
+	//deselect all entities
+	if (m_ccRoot)
+		m_ccRoot->unselectAllEntities();
+
+	//process cloud/meshes
+	{
+		for (size_t i=0; i<candidates.size(); ++i)
+		{
+			ccPointCloud* cloud = candidates[i];
+
+			CCLib::ReferenceCloud* selection = cloud->crop(bbeDlg.getBox(),true);
+			if (selection)
+			{
+				//crop
+				ccPointCloud* croppedEnt = cloud->partialClone(selection);
+				delete selection;
+				selection = 0;
+
+				if (croppedEnt)
+				{
+					croppedEnt->setName(cloud->getName()+QString(".cropped"));
+					addToDB(croppedEnt);
+					m_ccRoot->selectEntity(croppedEnt,true);
+				}
+			}
+		}
+	}
+
+	updateUI();
+}
+
 void MainWindow::doActionClone()
 {
 	ccHObject::Container selectedEntities = m_selectedEntities;
@@ -8456,6 +8523,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionComputeOctree->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionComputeNormals->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionSetColorGradient->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
     actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
     actionScalarFieldFromColor->setEnabled(atLeastOneEntity && atLeastOneColor);
@@ -8470,6 +8538,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);
     actionFitPlane->setEnabled(atLeastOneEntity);
     actionFitFacet->setEnabled(atLeastOneEntity);
+	
 	actionSNETest->setEnabled(atLeastOneCloud);
 
     actionFilterByValue->setEnabled(atLeastOneSF);

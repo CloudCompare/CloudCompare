@@ -2566,3 +2566,48 @@ unsigned ccPointCloud::getUniqueIDForDisplay() const
 	else
 		return getUniqueID();
 }
+
+CCLib::ReferenceCloud* ccPointCloud::crop(const ccBBox& box, bool inside/*=true*/)
+{
+	if (!box.isValid())
+	{
+		ccLog::Warning("[ccPointCloud::crop] Invalid bounding-box");
+		return 0;
+	}
+
+	unsigned count = size();
+	if (count == 0)
+	{
+		ccLog::Warning("[ccPointCloud::crop] Cloud is empty!");
+		return 0;
+	}
+
+	CCLib::ReferenceCloud* ref = new CCLib::ReferenceCloud(this);
+	if (!ref->reserve(count))
+	{
+		ccLog::Warning("[ccPointCloud::crop] Not enough memory!");
+		delete ref;
+		return 0;
+	}
+
+	for (unsigned i=0; i<count; ++i)
+	{
+		const CCVector3* P = point(i);
+		bool pointIsInside = box.contains(*P);
+		if (inside == pointIsInside)
+		{
+			ref->addPointIndex(i);
+		}
+	}
+
+	if (ref->size() == 0)
+	{
+		ccLog::Warning("[ccPointCloud::crop] Not point in bounding-box!");
+		delete ref;
+		return 0;
+	}
+
+	ref->resize(ref->size());
+
+	return ref;
+}

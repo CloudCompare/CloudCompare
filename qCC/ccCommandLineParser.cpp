@@ -79,6 +79,8 @@ static const char COMMAND_ASCII_EXPORT_SEPARATOR[]			= "SEP";
 static const char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
 static const char COMMAND_EXPORT_EXTENSION[]				= "EXT";
 static const char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
+static const char COMMAND_CROP[]							= "CROP";
+static const char COMMAND_CROP_OUTSIDE[]					= "OUTSIDE";
 
 //Current cloud(s) export format (can be modified with the 'COMMAND_CLOUD_EXPORT_FORMAT' option)
 static CC_FILE_TYPES s_CloudExportFormat = BIN;
@@ -1060,6 +1062,94 @@ bool ccCommandLineParser::commandSampleMesh(QStringList& arguments, ccProgressDi
 	return true;
 }
 
+bool ccCommandLineParser::commandCrop(QStringList& arguments)
+{
+	Print("[CROP]");
+
+	if (arguments.empty())
+		return Error(QString("Missing parameter: box extents after \"-%1\" (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)").arg(COMMAND_CROP));
+
+	//decode box extents
+	CCVector3 boxMin,boxMax;
+	{
+		QString boxBlock = arguments.takeFirst();
+		QStringList tokens = boxBlock.split(':');
+		if (tokens.size() != 6)
+			return Error(QString("Invalid parameter: box extents (expected format is 'Xmin:Ymin:Zmin:Xmax:Ymax:Zmax')").arg(COMMAND_CROP));
+
+		for (int i=0; i<6; ++i)
+		{
+			CCVector3* vec = (i<3 ? &boxMin : &boxMax);
+			bool ok = true;
+			vec->u[i%3] = static_cast<PointCoordinateType>(tokens[i].toDouble(&ok));
+			if (!ok)
+			{
+				return Error(QString("Invalid parameter: box extents (component #%1 is not a valid number)").arg(i+1));
+			}
+		}
+	}
+
+	//optional parameters
+	bool inside = true;
+	while (!arguments.empty())
+	{
+		QString argument = arguments.front();
+		if (IsCommand(argument,COMMAND_CROP_OUTSIDE))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+			inside = false;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+
+	if (m_clouds.empty())
+		return Error(QString("No point cloud available. Be sure to open or generate one first!"));
+
+	ccBBox cropBox(boxMin,boxMax);
+	for (unsigned i=0; i<m_clouds.size(); ++i)
+	{
+		CCLib::ReferenceCloud* ref = m_clouds[i].pc->crop(cropBox,inside);
+		if (ref)
+		{
+			if (ref->size() != 0)
+			{
+				ccPointCloud* croppedCloud = m_clouds[i].pc->partialClone(ref);
+				delete ref;
+				ref = 0;
+
+				if (croppedCloud)
+				{
+					m_clouds[i].pc = croppedCloud;
+					croppedCloud->setName(m_clouds[i].pc->getName() + QString(".cropped"));
+					m_clouds[i].basename += "_CROPPED";
+					Export(m_clouds[i]);
+				}
+				else
+				{
+					return Error(QString("Not enough memory to crop cloud '%1'!").arg(m_clouds[i].pc->getName()));
+				}
+			}
+			else
+			{
+				delete ref;
+				ref = 0;
+				return Error (QString("No point of cloud '%1' falls inside the input box!").arg(m_clouds[i].pc->getName()));
+			}
+		}
+		else
+		{
+			return Error(QString("Crop process failed! (not enough memory)"));
+		}
+	}
+			
+	return true;
+}
+
 bool ccCommandLineParser::commandBundler(QStringList& arguments)
 {
 	Print("[BUNDLER]");
@@ -1921,6 +2011,11 @@ int ccCommandLineParser::parse(QStringList& arguments, bool silent, QDialog* par
 		else if (IsCommand(argument,COMMAND_ICP))
 		{
 			success = commandICP(arguments,parent);
+		}
+		//Crop
+		else if (IsCommand(argument,COMMAND_CROP))
+		{
+			success = commandCrop(arguments);
 		}
 		//Change default cloud output format
 		else if (IsCommand(argument,COMMAND_CLOUD_EXPORT_FORMAT))

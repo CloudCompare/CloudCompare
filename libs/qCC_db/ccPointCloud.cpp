@@ -2602,12 +2602,13 @@ CCLib::ReferenceCloud* ccPointCloud::crop(const ccBBox& box, bool inside/*=true*
 
 	if (ref->size() == 0)
 	{
-		ccLog::Warning("[ccPointCloud::crop] Not point in bounding-box!");
-		delete ref;
-		return 0;
+		//no points inside selection!
+		ref->clear(true);
 	}
-
-	ref->resize(ref->size());
+	else
+	{
+		ref->resize(ref->size());
+	}
 
 	return ref;
 }

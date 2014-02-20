@@ -41,6 +41,7 @@ protected:
 	bool commandMergeClouds					(QStringList& arguments);
 	bool commandStatTest					(QStringList& arguments, ccProgressDialog* pDlg = 0);
 	bool commandBestFitPlane				(QStringList& arguments);
+	bool commandCrop						(QStringList& arguments);
 	bool matchBBCenters						(QStringList& arguments);
 	bool commandICP							(QStringList& arguments, QDialog* parent = 0);
 	bool commandChangeCloudOutputFormat		(QStringList& arguments);

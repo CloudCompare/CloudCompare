@@ -6425,17 +6425,25 @@ void MainWindow::doActionCrop()
 			CCLib::ReferenceCloud* selection = cloud->crop(bbeDlg.getBox(),true);
 			if (selection)
 			{
-				//crop
-				ccPointCloud* croppedEnt = cloud->partialClone(selection);
+				if (selection->size() != 0)
+				{
+					//crop
+					ccPointCloud* croppedEnt = cloud->partialClone(selection);
+					if (croppedEnt)
+					{
+						croppedEnt->setName(cloud->getName()+QString(".cropped"));
+						addToDB(croppedEnt);
+						m_ccRoot->selectEntity(croppedEnt,true);
+					}
+				}
+				else
+				{
+					//no points fall inside selection!
+					ccConsole::Warning(QString("[ccPointCloud::crop] No point of cloud '%1' falls inside the input box!").arg(cloud->getName()));
+				}
+
 				delete selection;
 				selection = 0;
-
-				if (croppedEnt)
-				{
-					croppedEnt->setName(cloud->getName()+QString(".cropped"));
-					addToDB(croppedEnt);
-					m_ccRoot->selectEntity(croppedEnt,true);
-				}
 			}
 		}
 	}

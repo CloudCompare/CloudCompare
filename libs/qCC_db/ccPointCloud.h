@@ -473,7 +473,8 @@ public:
 	NormsIndexesTableType* normals() const {return m_normals;}
 
 	//! Crops the cloud inside (or outside) a boundig box
-	/** \param box croping box
+	/** \warning Always returns a selection (potentially empty) if successful.
+		\param box croping box
 		\param inside whether selected points are inside or outside the box
 		\return points falling inside (or outside) as a selection
 	**/

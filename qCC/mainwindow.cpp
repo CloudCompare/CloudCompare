@@ -1028,39 +1028,50 @@ void MainWindow::doActionSetColor(bool colorize)
 		if (ent->isA(CC_HIERARCHY_OBJECT))
 		{
 			//automatically parse a group's children set
-			for (unsigned i=0;i<ent->getChildrenNumber();++i)
+			for (unsigned i=0; i<ent->getChildrenNumber(); ++i)
 				selectedEntities.push_back(ent->getChild(i));
 		}
-        else if (ent->isA(CC_POINT_CLOUD))
+        else if (ent->isA(CC_POINT_CLOUD) || ent->isA(CC_MESH))
 		{
-			bool lockedVertices;
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-			if (lockedVertices && !ent->isAncestorOf(cloud))
+			ccPointCloud* cloud = 0;
+			if (ent->isA(CC_POINT_CLOUD))
 			{
-				DisplayLockedVerticesWarning();
-				continue;
+				cloud = static_cast<ccPointCloud*>(ent);
+			}
+			else
+			{
+				ccMesh* mesh = static_cast<ccMesh*>(ent);
+				ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
+				if (	!vertices
+					||	!vertices->isA(CC_POINT_CLOUD)
+					||	(vertices->isLocked() && !mesh->isAncestorOf(vertices)) )
+				{
+					ccLog::Warning(QString("[SetColor] Can't set color for mesh '%1' (vertices are not accessible)").arg(ent->getName()));
+					continue;
+				}
+
+				cloud = static_cast<ccPointCloud*>(vertices);
 			}
 
-			if (cloud && cloud->isA(CC_POINT_CLOUD)) // TODO
+			if (colorize)
 			{
-				if (colorize)
-				{
-					static_cast<ccPointCloud*>(cloud)->colorize(static_cast<float>(newCol.redF()),
-																static_cast<float>(newCol.greenF()),
-																static_cast<float>(newCol.blueF()) );
-				}
-				else
-				{
-					static_cast<ccPointCloud*>(cloud)->setRGBColor(	static_cast<colorType>(newCol.red()),
-																	static_cast<colorType>(newCol.green()),
-																	static_cast<colorType>(newCol.blue()));
-				}
+				cloud->colorize(static_cast<float>(newCol.redF()),
+								static_cast<float>(newCol.greenF()),
+								static_cast<float>(newCol.blueF()) );
+			}
+			else
+			{
+				cloud->setRGBColor(	static_cast<colorType>(newCol.red()),
+									static_cast<colorType>(newCol.green()),
+									static_cast<colorType>(newCol.blue()) );
+			}
+			cloud->showColors(true);
+			cloud->prepareDisplayForRefresh();
+
+			if (ent != cloud)
 				ent->showColors(true);
-				ent->prepareDisplayForRefresh();
-
-				if (ent->getParent() && ent->getParent()->isKindOf(CC_MESH))
-					ent->getParent()->showColors(true);
-			}
+			else if (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH))
+				cloud->getParent()->showColors(true);
 		}
         else if (ent->isA(CC_POLY_LINE))
         {
@@ -1082,6 +1093,10 @@ void MainWindow::doActionSetColor(bool colorize)
             ent->showColors(true);
             ent->prepareDisplayForRefresh();
         }
+		else
+		{
+			ccLog::Warning(QString("[SetColor] Can't change color of entity '%1'").arg(ent->getName()));
+		}
     }
 
     refreshAll();

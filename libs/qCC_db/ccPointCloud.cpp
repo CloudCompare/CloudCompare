@@ -2322,7 +2322,7 @@ int ccPointCloud::addScalarField(const char* uniqueName)
 	//we don't accept two SF with the same name!
 	if (getScalarFieldIndexByName(uniqueName) >= 0)
 	{
-		ccLog::Warning("[ccPointCloud::addScalarField] Names already exists!");
+		ccLog::Warning(QString("[ccPointCloud::addScalarField] Name '%1' already exists!").arg(uniqueName));
 		return -1;
 	}
 

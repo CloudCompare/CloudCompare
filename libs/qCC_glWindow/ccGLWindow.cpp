@@ -642,7 +642,12 @@ void ccGLWindow::paintGL()
 						case UPPER_CENTER_MESSAGE:
 							{
 								QRect rect = QFontMetrics(m_font).boundingRect(it->message);
-								renderText((m_glWidth-rect.width())/2, uc_currentHeight+rect.height(), it->message,m_font);
+								//take the GL filter banner into account!
+								int x = (m_glWidth-rect.width())/2;
+								int y = uc_currentHeight+rect.height();
+								if (m_activeGLFilter)
+									y += getGlFilterBannerHeight();
+								renderText(x, y, it->message,m_font);
 								uc_currentHeight += (rect.height()*5)/4; //add a 25% margin
 							}
 							break;
@@ -3515,11 +3520,16 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 		}
 	}
 
-	glColor3ubv_safe(col);
 	if (align & ALIGN_VBOTTOM)
 		y2 -= margin; //empirical compensation
 	else if (align & ALIGN_VMIDDLE)
 		y2 -= margin/2; //empirical compensation
+	
+	//take the GL filter banner into account!
+	if (m_activeGLFilter && (align & ALIGN_VTOP))
+		y2 += getGlFilterBannerHeight();
+
+	glColor3ubv_safe(col);
 	renderText(x2, y2, text, textFont);
 }
 

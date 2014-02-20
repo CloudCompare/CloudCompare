@@ -31,6 +31,9 @@
 //Qt
 #include <QElapsedTimer>
 
+//Exponent of the 'log' scale used for 'SPACE' interval
+#define SPACE_RANGE_EXPONENT 0.05
+
 ccSubsamplingDlg::ccSubsamplingDlg(ccGenericPointCloud* cloud, QWidget* parent/*=0*/)
     : QDialog(parent)
 	, Ui::SubsamplingDialog()
@@ -42,20 +45,18 @@ ccSubsamplingDlg::ccSubsamplingDlg(ccGenericPointCloud* cloud, QWidget* parent/*
     samplingMethod->addItem("Random");
     samplingMethod->addItem("Space");
     samplingMethod->addItem("Octree");
-    samplingMethod->setCurrentIndex(RANDOM);
 
-    slider->setSliderPosition(slider->maximum());
-    changeSamplingMethod(samplingMethod->currentIndex());
-
-    connect(slider, SIGNAL(sliderReleased()), this, SLOT(sliderReleased()));
     connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
     connect(samplingValue, SIGNAL(valueChanged(double)), this, SLOT(samplingRateChanged(double)));
     connect(samplingMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSamplingMethod(int)));
+
+	samplingMethod->setCurrentIndex(1);
+	sliderMoved(slider->sliderPosition());
 }
 
 CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(CCLib::GenericProgressCallback* progressCb)
 {
-    CCLib::ReferenceCloud* sampledCloud=NULL;
+    CCLib::ReferenceCloud* sampledCloud = 0;
 
 	QElapsedTimer eTimer;
 	eTimer.start();
@@ -77,6 +78,7 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(CCLib::GenericProgressC
 			}
 		}
 		break;
+
 	case OCTREE:
 		{
 			ccOctree* octree = m_pointCloud->getOctree();
@@ -85,16 +87,23 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(CCLib::GenericProgressC
 
 			if (octree)
 			{
+				unsigned char level = static_cast<unsigned char>(samplingValue->value());
 				sampledCloud = CCLib::CloudSamplingTools::subsampleCloudWithOctreeAtLevel(	m_pointCloud,
-																							(uchar)samplingValue->value(),
+																							level,
 																							CCLib::CloudSamplingTools::NEAREST_POINT_TO_CELL_CENTER,
 																							progressCb,
 																							octree);
 			}
 		}
 		break;
+
 	case RANDOM:
-		sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(m_pointCloud, (unsigned)(samplingValue->value()), progressCb);
+		{
+			unsigned count = static_cast<unsigned>(samplingValue->value());
+			sampledCloud = CCLib::CloudSamplingTools::subsampleCloudRandomly(	m_pointCloud,
+																				count,
+																				progressCb);
+		}
 		break;
 	}
 
@@ -115,7 +124,7 @@ void ccSubsamplingDlg::updateLabels()
         case SPACE:
             labelSliderMin->setText("Large");
             labelSliderMax->setText("Small");
-            valueLabel->setText("space between points");
+            valueLabel->setText("min. space between points");
             break;
         case OCTREE:
             labelSliderMin->setText("Min");
@@ -127,32 +136,36 @@ void ccSubsamplingDlg::updateLabels()
     }
 }
 
-//SLOTS
-void ccSubsamplingDlg::sliderReleased()
-{
-    sliderMoved(slider->sliderPosition());
-}
-
 void ccSubsamplingDlg::sliderMoved(int sliderPos)
 {
-    double rate = static_cast<double>(sliderPos)/static_cast<double>(slider->maximum()-slider->minimum());
+	double sliderRange = static_cast<double>(slider->maximum()-slider->minimum());
+    double rate = static_cast<double>(sliderPos)/sliderRange;
     if (samplingMethod->currentIndex() == SPACE)
+	{
+		rate = pow(rate, SPACE_RANGE_EXPONENT);
         rate = 1.0 - rate;
+	}
 
-    samplingValue->setValue(samplingValue->minimum() + rate * static_cast<double>(samplingValue->maximum()-samplingValue->minimum()));
-    //updateLabels();
+	double valueRange = static_cast<double>(samplingValue->maximum()-samplingValue->minimum());
+    samplingValue->setValue(samplingValue->minimum() + rate * valueRange);
 }
 
 void ccSubsamplingDlg::samplingRateChanged(double value)
 {
-    double rate = static_cast<double>(samplingValue->value()-samplingValue->minimum())/static_cast<double>(samplingValue->maximum()-samplingValue->minimum());
+	double valueRange = static_cast<double>(samplingValue->maximum()-samplingValue->minimum());
+    double rate = static_cast<double>(value-samplingValue->minimum())/valueRange;
 
-    CC_SUBSAMPLING_METHOD method = (CC_SUBSAMPLING_METHOD)samplingMethod->currentIndex();
+    CC_SUBSAMPLING_METHOD method = static_cast<CC_SUBSAMPLING_METHOD>(samplingMethod->currentIndex());
     if (method == SPACE)
+	{
         rate = 1.0 - rate;
+		rate = pow(rate, 1.0/SPACE_RANGE_EXPONENT);
+	}
 
-    slider->setSliderPosition(slider->minimum() + static_cast<int>(rate * static_cast<double>(slider->maximum()-slider->minimum())));
-    //updateLabels();
+	slider->blockSignals(true);
+	double sliderRange = static_cast<double>(slider->maximum()-slider->minimum());
+    slider->setSliderPosition(slider->minimum() + static_cast<int>(rate * sliderRange));
+	slider->blockSignals(false);
 }
 
 void ccSubsamplingDlg::changeSamplingMethod(int index)
@@ -162,25 +175,6 @@ void ccSubsamplingDlg::changeSamplingMethod(int index)
     //Reste a changer les textes d'aide
     switch(index)
     {
-        case OCTREE:
-			{
-				samplingValue->setDecimals(0);
-				samplingValue->setMinimum(1);
-				samplingValue->setMaximum((double)CCLib::DgmOctree::MAX_OCTREE_LEVEL);
-				samplingValue->setSingleStep(1);
-			}
-            break;
-        case SPACE:
-			{
-				samplingValue->setDecimals(4);
-				samplingValue->setMinimum(0.0);
-				CCVector3 min, max;
-				m_pointCloud->getBoundingBox(min.u, max.u);
-				double dist = static_cast<double>(CCVector3::vdistance(min.u, max.u));
-				samplingValue->setMaximum(dist);
-				samplingValue->setSingleStep(0.01);
-			}
-            break;
         case RANDOM:
 			{
 				samplingValue->setDecimals(0);
@@ -189,12 +183,27 @@ void ccSubsamplingDlg::changeSamplingMethod(int index)
 				samplingValue->setSingleStep(1);
 			}
             break;
+        case SPACE:
+			{
+				samplingValue->setDecimals(4);
+				samplingValue->setMinimum(0.0);
+				double bbDiag = static_cast<double>(m_pointCloud->getBB().getDiagNorm());
+				samplingValue->setMaximum(bbDiag);
+				samplingValue->setSingleStep(bbDiag / 1000.0);
+			}
+            break;
+        case OCTREE:
+			{
+				samplingValue->setDecimals(0);
+				samplingValue->setMinimum(1);
+				samplingValue->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
+				samplingValue->setSingleStep(1);
+			}
+            break;
         default:
             break;
     }
 
     updateLabels();
-
     slider->setSliderPosition(oldSliderPos);
-    sliderReleased();
 }

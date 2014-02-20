@@ -68,6 +68,8 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 {
 	ui.setupUi(this);
 
+	setWindowTitle(QString("ccViewer V%1").arg(CC_VIEWER_VERSION,0,'f',2));
+
 	//insert GL window in a vertical layout
 	QVBoxLayout* verticalLayout_2 = new QVBoxLayout(ui.GLframe);
 	verticalLayout_2->setSpacing(0);

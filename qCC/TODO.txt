@@ -38,7 +38,6 @@ Various:
 [*] Run the PCV plugin on more than one file at a time (or batch process)
 [*] Add interactive measurement features to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
-[*] Add 'TRANGLE_STRIPS' support to VTK I/O filter (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=598)
 
 From Thomas S. (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=550)
 [*] If CloudCompare would support VisualSFM, it would be possible to import the VisualSFM-Project (with the saved camera positions).
@@ -51,8 +50,6 @@ From Andrew B.
 
 From Dimitri L.
 [*] Auto-detect header format in ASCII files (in any) 
-[*] Compute distances in a given direction (cylinder)
-[*] Compute signed distances between clouds
 [*] Being able to apply various methods based on a sub-sampled cloud
 [*] Vector fields (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=201&p=614#p614)
 
@@ -82,7 +79,7 @@ From Gianluca C.
 [*] to overlay an image over the mesh with some common points and "drape" the photo on the surface
 
 From Andrew O.
-[*] add some type of three dimensional eraser. Perhaps being able to select and clear an octree cell may be the place to start (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=191&p=1542#p1542)
+[*] add some type of 3D eraser. Perhaps being able to select and clear an octree cell may be the place to start (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=191&p=1542#p1542)
 
 From Tim C.
 [*] Translate/Rotate with keys or GUI buttons (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=556&p=1519#p1519)

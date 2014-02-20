@@ -76,16 +76,19 @@
        <item row="1" column="0" colspan="2">
         <widget class="QSlider" name="slider">
          <property name="toolTip">
-          <string>Move to the left (none) to decrease the number of points  to keep in the cloud.</string>
-         </property>
-         <property name="statusTip">
-          <string>Move to the left (none) to decrease the number of points  to keep in the cloud.</string>
+          <string>The more on the left, the less points will be kept</string>
          </property>
          <property name="maximum">
           <number>10000000</number>
          </property>
+         <property name="singleStep">
+          <number>10000</number>
+         </property>
+         <property name="pageStep">
+          <number>100000</number>
+         </property>
          <property name="value">
-          <number>1000</number>
+          <number>10000000</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>

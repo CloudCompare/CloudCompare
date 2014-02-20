@@ -4349,7 +4349,7 @@ void MainWindow::doActionHeightGridGeneration()
 			ccGenericGLDisplay* win = cloud->getDisplay();
 			outputGrid->setDisplay(win);
 			//zoomOn(outputGrid);
-			addToDB(outputGrid, true, 0, true, false);
+			addToDB(outputGrid,true,0,true,false,0,0,0,0,false);
 			if (m_ccRoot)
 				m_ccRoot->selectEntity(outputGrid);
 
@@ -4863,6 +4863,8 @@ void MainWindow::doActionComputeNormals()
 		else if (m_selectedEntities[i]->isA(CC_MESH)/*|| m_selectedEntities[i]->isA(CC_PRIMITIVE)*/) //TODO
 		{
 			ccMesh* mesh = ccHObjectCaster::ToMesh(m_selectedEntities[i]);
+			mesh->clearTriNormals();
+			mesh->showNormals(false);
 			if (!mesh->computeNormals(perVertex))
 			{
 				ccConsole::Error(QString("Failed to compute normals on mesh '%1'").arg(mesh->getName()));

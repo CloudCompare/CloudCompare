@@ -1124,6 +1124,7 @@ bool ccCommandLineParser::commandCrop(QStringList& arguments)
 
 				if (croppedCloud)
 				{
+					delete m_clouds[i].pc;
 					m_clouds[i].pc = croppedCloud;
 					croppedCloud->setName(m_clouds[i].pc->getName() + QString(".cropped"));
 					m_clouds[i].basename += "_CROPPED";

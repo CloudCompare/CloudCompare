@@ -20,8 +20,10 @@ File I/O:
 Big ones:
 [*] fly-through mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
 [*] Command line mode could be extended (more methods, etc.)
+[*] Point cloud cleanup tools (http://www.danielgm.net/cc/forum/viewtopic.php?t=191)
 
 Various:
+[*] Import control points from ascii file (for point pair-based registration - http://www.danielgm.net/cc/forum/viewtopic.php?t=585)
 [*] Finish FBX support (materials)
 [*] Use a scalar field (such as scattering angles) in the subsampling method to keep the "best" points
 	Equivalent approach with the local curvature (http://www.danielgm.net/cc/forum/viewtopic.php?t=711)

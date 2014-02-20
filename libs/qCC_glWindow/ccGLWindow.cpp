@@ -1333,8 +1333,18 @@ void ccGLWindow::drawTrihedron()
 
 void ccGLWindow::invalidateViewport()
 {
-	m_validProjectionMatrix=false;
+	m_validProjectionMatrix = false;
 	m_updateFBO = true;
+}
+
+CCVector3 ccGLWindow::getFilteredCameraCenter() const
+{
+	if (m_viewportParams.perspectiveView)
+		return m_viewportParams.cameraCenter;
+
+	return CCVector3(	m_viewportParams.cameraCenter.x,
+						m_viewportParams.cameraCenter.y,
+						0 );
 }
 
 void ccGLWindow::recalcProjectionMatrix()
@@ -1375,7 +1385,12 @@ void ccGLWindow::recalcProjectionMatrix()
 	CCVector3 pivotPoint = (m_viewportParams.objectCenteredView ? m_viewportParams.pivotPoint : bbCenter);
 
 	//distance between camera and pivot point
-	float CP = static_cast<float>( (m_viewportParams.cameraCenter-pivotPoint).norm() );
+	//warning: it's important to get the 'filtered' center (i.e. with z=0 in ortho. view)
+	//otherwise we (sometimes largely) overestimate this distance if the camera has been
+	//shifted in the Z direction (e.g. after switching from perspective to ortho. view).
+	//While the user won't see the difference this has a great influence on GL filters
+	//(as normalized depth map values depends on it)
+	float CP = static_cast<float>( (getFilteredCameraCenter()-pivotPoint).norm() );
 	//distance between pivot point and DB farthest point
 	float MP = static_cast<float>( (bbCenter-pivotPoint).norm() + bbHalfDiag );
 
@@ -1436,7 +1451,7 @@ void ccGLWindow::recalcProjectionMatrix()
 
 void ccGLWindow::invalidateVisualization()
 {
-	m_validModelviewMatrix=false;
+	m_validModelviewMatrix = false;
 	m_updateFBO = true;
 }
 
@@ -1461,11 +1476,13 @@ void ccGLWindow::recalcModelViewMatrix()
 		glScalef(totalZoom,totalZoom,totalZoom);
 	}
 
+	CCVector3 cameraCenter = getFilteredCameraCenter();
+
 	//apply current camera parameters (see trunk/doc/rendering_pipeline.doc)
 	if (m_viewportParams.objectCenteredView)
 	{
 		//place origin on camera center
-		ccGL::Translate(-m_viewportParams.cameraCenter.x, -m_viewportParams.cameraCenter.y, -m_viewportParams.cameraCenter.z);
+		ccGL::Translate(-cameraCenter.x, -cameraCenter.y, -cameraCenter.z);
 
 		//go back to initial origin
 		ccGL::Translate(m_viewportParams.pivotPoint.x, m_viewportParams.pivotPoint.y, m_viewportParams.pivotPoint.z);
@@ -1482,7 +1499,7 @@ void ccGLWindow::recalcModelViewMatrix()
 		glMultMatrixf(m_viewportParams.viewMat.data());
 
 		//place origin on camera center
-		ccGL::Translate(-m_viewportParams.cameraCenter.x, -m_viewportParams.cameraCenter.y, -m_viewportParams.cameraCenter.z);
+		ccGL::Translate(-cameraCenter.x, -cameraCenter.y, -cameraCenter.z);
 	}		
 
 	//we save visualization matrix
@@ -2848,8 +2865,10 @@ float ccGLWindow::computeActualPixelSize() const
 
 float ccGLWindow::computePerspectiveZoom() const
 {
-	if (!m_viewportParams.perspectiveView)
-		return m_viewportParams.zoom;
+	//DGM: in fact it can be useful to compute it even in ortho mode :)
+	//if (!m_viewportParams.perspectiveView)
+	//	return m_viewportParams.zoom;
+
 	//we compute the zoom equivalent to the corresponding camera position (inverse of above calculus)
 	if (m_viewportParams.fov < ZERO_TOLERANCE)
 		return 1.0f;

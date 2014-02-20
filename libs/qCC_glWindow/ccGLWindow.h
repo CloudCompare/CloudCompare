@@ -561,6 +561,9 @@ protected:
 	//! Returns the height of the 'GL filter' banner
 	int getGlFilterBannerHeight() const;
 
+	//! Returns filtered camera center (i.e. with z = 0 in ortho mode)
+	CCVector3 getFilteredCameraCenter() const;
+
 	/***************************************************
                     OpenGL Extensions
 	***************************************************/

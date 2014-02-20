@@ -652,7 +652,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 		//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
 		//if (!mesh->hasNormals())
 		//	mesh->computeNormals();
-		ccLog::Warning("[VTK] Mesh has no normal! You can compute them later (select base entity, then \"Edit > Normals > Compute\")");
+		ccLog::Warning("[VTK] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 		mesh->showNormals(mesh->hasNormals());
 		if (vertices->hasScalarFields())
 		{

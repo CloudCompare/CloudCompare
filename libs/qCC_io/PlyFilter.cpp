@@ -1538,6 +1538,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 			//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
 			//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
             //mesh->computeNormals();
+			ccLog::Warning("[PLY] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 		}
 
 		if (mesh->hasMaterials())

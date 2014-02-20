@@ -982,7 +982,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				//}
 				//else
 				{
-					ccLog::Warning("[OBJ] Mesh has no normal! You can compute them later (select base entity, then \"Edit > Normals > Compute\")");
+					ccLog::Warning("[OBJ] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 				}
 			}
 

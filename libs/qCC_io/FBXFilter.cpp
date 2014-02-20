@@ -128,6 +128,10 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 			}
 		}
 	}
+	else
+	{
+		ccLog::Warning("[FBX] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
+	}
 
     // colors
 	if (cloud->hasColors())

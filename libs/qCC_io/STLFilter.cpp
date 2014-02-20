@@ -469,7 +469,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 		//	mesh->showNormals(true);
 		//else
 		//	ccLog::Warning("[STL] Failed to compute per-vertex normals...");
-		ccLog::Warning("[STL] Mesh has no normal! You can compute them later (select base entity, then \"Edit > Normals > Compute\")");
+		ccLog::Warning("[STL] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 	}
 	vertices->setEnabled(false);
 	vertices->setLocked(false); //DGM: no need to lock it as it is only used by one mesh!

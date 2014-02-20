@@ -337,7 +337,6 @@ int GeometricalAnalysisTools::computeLocalDensityApprox(GenericIndexedCloudPersi
 
 //"PER-CELL" METHOD: APPROXIMATE LOCAL DENSITY
 //ADDITIONAL PARAMETERS (0): NONE
-const double c_sphereVolumeCoef = (4.0/3.0*M_PI);
 bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const DgmOctree::octreeCell& cell,
 																		void** additionalParameters,
 																		NormalizedProgress* nProgress/*=0*/)
@@ -358,18 +357,9 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
         //the first point is always the point itself!
 		if (cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS) > 1)
 		{
-            //DGM: we consider that the point is alone in a sphere of radius R and volume V=(4*pi/3)*R^3
-			//So, the local density is ~1/V!
+            //DGM: now we only output the distance to the nearest neighbor
             double R2 = nNSS.pointsInNeighbourhood[1].squareDistd; //R2 in fact
-			if (R2 > ZERO_TOLERANCE)
-			{
-				double V = R2*sqrt(R2)*c_sphereVolumeCoef; //R^3 * (4*pi/3)
-				cell.points->setPointScalarValue(i,static_cast<ScalarType>(1.0/V));
-			}
-			else
-			{
-				cell.points->setPointScalarValue(i,NAN_VALUE);
-			}
+			cell.points->setPointScalarValue(i,static_cast<ScalarType>(sqrt(R2)));
 		}
 		else
 		{

@@ -2427,7 +2427,7 @@
   </action>
   <action name="actionApproximateDensity">
    <property name="text">
-    <string>Approximate (no parameter)</string>
+    <string>Approximate (dist. to nearest neighbor)</string>
    </property>
   </action>
   <action name="actionAccurateDensity">

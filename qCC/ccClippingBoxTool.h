@@ -63,6 +63,7 @@ public slots:
 
 protected slots:
 
+	void editBox();
 	void reset();
 	void closeDialog();
 	void extractContour();

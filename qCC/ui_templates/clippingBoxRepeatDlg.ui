@@ -16,12 +16,19 @@
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QGroupBox" name="groupBox">
+     <property name="toolTip">
+      <string>The segmentation process will be repeated along the following dimensions (+/-)</string>
+     </property>
      <property name="title">
       <string>Repeat dimensions</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
        <widget class="QCheckBox" name="xRepeatCheckBox">
+        <property name="styleSheet">
+         <string notr="true">background-color: red;
+color: white;</string>
+        </property>
         <property name="text">
          <string>X</string>
         </property>
@@ -29,6 +36,10 @@
       </item>
       <item>
        <widget class="QCheckBox" name="yRepeatCheckBox">
+        <property name="styleSheet">
+         <string notr="true">background-color: green;
+color: white;</string>
+        </property>
         <property name="text">
          <string>Y</string>
         </property>
@@ -36,6 +47,10 @@
       </item>
       <item>
        <widget class="QCheckBox" name="zRepeatCheckBox">
+        <property name="styleSheet">
+         <string notr="true">background-color: blue;
+color: white;</string>
+        </property>
         <property name="text">
          <string>Z</string>
         </property>
@@ -49,6 +64,9 @@
    </item>
    <item>
     <widget class="QGroupBox" name="extractContoursGroupBox">
+     <property name="toolTip">
+      <string>Check that option if you whish to extract contour(s) form each slice</string>
+     </property>
      <property name="title">
       <string>Extract contour(s)</string>
      </property>
@@ -69,7 +87,7 @@
       <item>
        <widget class="QDoubleSpinBox" name="maxEdgeLengthDoubleSpinBox">
         <property name="toolTip">
-         <string>Max edge length (if 0 contour = convex hull)</string>
+         <string>Max edge length (if 0, generates a unique and closed contour = convex hull)</string>
         </property>
         <property name="decimals">
          <number>6</number>
@@ -99,6 +117,9 @@
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="gapDoubleSpinBox">
+          <property name="toolTip">
+           <string>Gap between the slices</string>
+          </property>
           <property name="decimals">
            <number>6</number>
           </property>
@@ -111,6 +132,9 @@
       </item>
       <item>
        <widget class="QCheckBox" name="randomColorCheckBox">
+        <property name="toolTip">
+         <string>If checked, a random color will be assigned to each slice (warning: will overwrite any existing color!)</string>
+        </property>
         <property name="text">
          <string>random colors per slice (will overwrite existing color!)</string>
         </property>

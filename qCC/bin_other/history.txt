@@ -55,7 +55,6 @@ v2.5.3 ??/??/2014
 		(useful to register a cloud with GPS control points for instance)
 	* Labels now display both the shifted and the original points coordinates if
 		the cloud is shifted/scaled
-
 - Other:
 	* ATOM feed enabled on the forum (http://www.danielgm.net/cc/forum/)
 		(use the native ATOM support on IE or Firefox, or install an ATOM feed reader app
@@ -77,6 +76,8 @@ v2.5.3 ??/??/2014
 	* The 'Point pair-based registration' dialog was not automatically reset
 		refs/remotes/origin/shared_plugins
 	* Wrong error code returned by PLY I/O Filter when failing to create the output file
+	* Meshes color couldn't be changed anymore (with 'Edit > Set color')	
+	* GL filters rendering was downgraded when switching from perspective to ortho. view
 
 v2.5.2 12/19/2013
 - GDAL library support added:
@@ -114,6 +115,13 @@ v2.5.2 12/19/2013
 	- exports resulting map as an image, a textured mesh or a point cloud
 	- can generate vertical and horizontal profiles in DXF format
 - Other enhancements:
+	- 'Clipping-box' tool:
+		* the clipping box position and extension can now be edited
+			(see the 'advanced' button in the 'Box thicnkess' frame)
+		* when extracting contours, CC will now ask the user if he wishes/accepts
+			to split the initial contour in several parts so as to really respect
+			the 'max edge length' parameter (this gives a much nicer result).
+			This feature works both with the single and multiple slice extractors.
 	- the qPoissonRecon plugin is now based on the latest version of PoissonRecon (5.5)
 		* see http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version5.5/
 		* new parameters dialog

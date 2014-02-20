@@ -21,6 +21,7 @@
 #include "ccGLWindow.h"
 #include "mainwindow.h"
 #include "ccClippingBoxRepeatDlg.h"
+#include "ccBoundingBoxEditorDlg.h"
 
 //qCC_db
 #include <ccLog.h>
@@ -42,7 +43,7 @@
 #include <QInputDialog>
 
 //! Last contour unique ID
-static unsigned s_lastContourUniqueID = 0;
+static std::vector<unsigned> s_lastContourUniqueIDs;
 //! Max edge length parameter (contour extraction)
 static double s_maxEdgeLength = -1.0;
 
@@ -55,6 +56,7 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
+	connect(editBoxToolButton,				SIGNAL(clicked()), this, SLOT(editBox()));
 	connect(extractContourToolButton,		SIGNAL(clicked()), this, SLOT(extractContour()));
 	connect(removeLastContourToolButton,	SIGNAL(clicked()), this, SLOT(removeLastContour()));
 	connect(exportButton,					SIGNAL(clicked()), this, SLOT(exportCloud()));
@@ -84,7 +86,7 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
     connect(viewRightToolButton,	SIGNAL(clicked()),	this,	SLOT(setRightView()));
 
 	s_maxEdgeLength = -1.0;
-	s_lastContourUniqueID = 0;
+	//s_lastContourUniqueIDs.clear();
 	removeLastContourToolButton->setEnabled(false);
 }
 
@@ -93,6 +95,30 @@ ccClippingBoxTool::~ccClippingBoxTool()
 	if (m_clipBox)
 		delete m_clipBox;
 	m_clipBox = 0;
+}
+
+void ccClippingBoxTool::editBox()
+{
+	if (!m_clipBox)
+		return;
+
+	ccBBox box = m_clipBox->getBox();
+
+	ccBoundingBoxEditorDlg bbeDlg(this);
+	bbeDlg.setBaseBBox(box,false);
+	bbeDlg.showInclusionWarning(false);
+	bbeDlg.setWindowTitle("Edit clipping box");
+
+	if (!bbeDlg.exec())
+		return;
+
+	box = bbeDlg.getBox();
+	m_clipBox->setBox(box);
+
+	//onBoxModified(&box); //DGM: automatically called by 'm_clipBox'
+
+	if (m_associatedWin)
+		m_associatedWin->redraw();
 }
 
 void ccClippingBoxTool::toggleInteractors(bool state)
@@ -142,7 +168,7 @@ bool ccClippingBoxTool::setAssociatedEntity(ccHObject* entity)
 	}
 
 	s_maxEdgeLength = -1.0;
-	s_lastContourUniqueID = 0;
+	s_lastContourUniqueIDs.clear();
 	removeLastContourToolButton->setEnabled(false);
 
 	return true;
@@ -211,23 +237,26 @@ void ccClippingBoxTool::stop(bool state)
 
 void ccClippingBoxTool::removeLastContour()
 {
-	if (s_lastContourUniqueID == 0)
+	if (s_lastContourUniqueIDs.empty())
 		return;
 
 	MainWindow* mainWindow = MainWindow::TheInstance();
 	if (mainWindow)
 	{
-		ccHObject* obj = mainWindow->db()->find(s_lastContourUniqueID);
-		if (obj)
+		for (size_t i=0; i<s_lastContourUniqueIDs.size(); ++i)
 		{
-			mainWindow->removeFromDB(obj);
-			ccGLWindow* win = mainWindow->getActiveGLWindow();
-			if (win)
-				win->redraw();
+			ccHObject* obj = mainWindow->db()->find(s_lastContourUniqueIDs[i]);
+			if (obj)
+			{
+				mainWindow->removeFromDB(obj);
+				ccGLWindow* win = mainWindow->getActiveGLWindow();
+				if (win)
+					win->redraw();
+			}
 		}
 	}
 
-	s_lastContourUniqueID = 0;
+	s_lastContourUniqueIDs.clear();
 	removeLastContourToolButton->setEnabled(false);
 }
 
@@ -269,18 +298,43 @@ void ccClippingBoxTool::extractContour()
 			double maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
 			if (!ok)
 				return;
+			bool splitContour = false;
+			if (maxEdgeLength > 0)
+			{
+				splitContour = (QMessageBox::question(0,"Split contour","Do you want to split the contour in multiple parts if necessary?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
+			}
 			s_maxEdgeLength = maxEdgeLength;
 
-			ccPolyline* poly = ccPolyline::ExtractFlatContour(cloud,static_cast<PointCoordinateType>((maxEdgeLength)));
-			if (poly)
+			std::vector<ccPolyline*> polys;
+			if (ccPolyline::ExtractFlatContour(	cloud,
+												static_cast<PointCoordinateType>(maxEdgeLength),
+												polys,
+												splitContour ))
 			{
-				poly->setColor(ccColor::green);
-				poly->showColors(true);
-				poly->setName(cloud->getName()+QString(".contour"));
-				MainWindow::TheInstance()->addToDB(poly);
+				if (!polys.empty())
+				{
+					s_lastContourUniqueIDs.clear();
 
-				s_lastContourUniqueID = poly->getUniqueID();
-				removeLastContourToolButton->setEnabled(true);
+					for (size_t i=0; i<polys.size(); ++i)
+					{
+						ccPolyline* poly = polys[i];
+						poly->setColor(ccColor::green);
+						poly->showColors(true);
+						poly->setName(cloud->getName()+QString(".contour"));
+						MainWindow::TheInstance()->addToDB(poly);
+
+						s_lastContourUniqueIDs.push_back(poly->getUniqueID());
+						removeLastContourToolButton->setEnabled(true);
+					}
+				}
+				else
+				{
+					ccLog::Error("Contour points are too far from each other! Increase the max edge length");
+				}
+			}
+			else
+			{
+				ccLog::Error("Contour extraction failed!");
 			}
 
 			delete cloud;
@@ -316,10 +370,15 @@ void ccClippingBoxTool::exportMultCloud()
 		return;
 
 	ccHObject* contourGroup = 0;
+	bool splitContour = false;
 	if (repeatDlg.extractContoursGroupBox->isChecked())
 	{
 		s_maxEdgeLength = repeatDlg.maxEdgeLengthDoubleSpinBox->value();
 		contourGroup = new ccHObject(obj->getName()+QString(".contours"));
+		if (s_maxEdgeLength > 0)
+		{
+			splitContour = (QMessageBox::question(0,"Split contour","Do you want to split the contour(s) in multiple parts if necessary?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
+		}
 	}
 
 	//compute the cloud bounding box in the local clipping box ref.
@@ -505,13 +564,34 @@ void ccClippingBoxTool::exportMultCloud()
 								//generate contour?
 								if (contourGroup)
 								{
-									ccPolyline* poly = ccPolyline::ExtractFlatContour(sliceCloud,static_cast<PointCoordinateType>((s_maxEdgeLength)));
-									if (poly)
+									std::vector<ccPolyline*> polys;
+									if (ccPolyline::ExtractFlatContour(	sliceCloud,
+																		static_cast<PointCoordinateType>(s_maxEdgeLength),
+																		polys,
+																		splitContour ))
 									{
-										poly->setColor(ccColor::green);
-										poly->showColors(true);
-										poly->setName(QString("contour @ ")+slicePosStr);
-										contourGroup->addChild(poly);
+										if (!polys.empty())
+										{
+											for (size_t p=0; p<polys.size(); ++p)
+											{
+												ccPolyline* poly = polys[p];
+												poly->setColor(ccColor::green);
+												poly->showColors(true);
+												QString contourName = QString("contour @ ")+slicePosStr;
+												if (polys.size() != 1)
+													contourName += QString(" (part %1)").arg(p+1);
+												poly->setName(contourName);
+												contourGroup->addChild(poly);
+											}
+										}
+										else
+										{
+											ccLog::Warning(QString("Contour @ %1: points are too far from each other! Increase the max edge length").arg(slicePosStr));
+										}
+									}
+									else
+									{
+										ccLog::Warning(QString("Contour @ %1: extraction failed!").arg(slicePosStr));
 									}
 								}
 							}
@@ -543,7 +623,8 @@ void ccClippingBoxTool::exportMultCloud()
 			contourGroup->setDisplay_recursive(cloud->getDisplay());
 			MainWindow::TheInstance()->addToDB(contourGroup);
 			
-			s_lastContourUniqueID = contourGroup->getUniqueID();
+			s_lastContourUniqueIDs.clear();
+			s_lastContourUniqueIDs.push_back(contourGroup->getUniqueID());
 			removeLastContourToolButton->setEnabled(true);
 		}
 

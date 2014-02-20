@@ -21,7 +21,13 @@
 //CCLib
 #include <Polyline.h>
 
+//Local
 #include "ccHObject.h"
+
+//system
+#include <vector>
+
+class ccPointCloud;
 
 //! Colored polyline
 /** Extends the Polyline class of CCLib.
@@ -94,7 +100,16 @@ public:
 	//inherited methods (ccHObject)
 	virtual ccBBox getMyOwnBB();
 
-	//! Extracts the (flat) contour of a point cloud
+	//! Splits the polyline into several parts based on a maximum edge length
+	/** \warning output polylines set (parts) may be empty if all the vertices are too far from each other!
+		\param maxEdgelLength maximum edge length
+		\param[out] parts output polyline parts
+		\return success
+	**/
+	bool split(	PointCoordinateType maxEdgelLength,
+				std::vector<ccPolyline*>& parts );
+
+	//! Extracts a unique closed (2D) contour polyline of a point cloud
 	/** Projects the cloud on its best fitting LS plane first.
 		\param points point cloud
 		\param maxEdgelLength max edge length (ignored if 0, in which case the contour is the convex hull)
@@ -102,6 +117,20 @@ public:
 	**/
 	static ccPolyline* ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
 											PointCoordinateType maxEdgelLength = 0);
+
+	//! Extracts one or several parts of the (2D) contour polyline of a point cloud
+	/** Projects the cloud on its best fitting LS plane first.
+		\warning output polylines set (parts) may be empty if all the vertices are too far from each other!
+		\param points point cloud
+		\param maxEdgelLength max edge length (ignored if 0, in which case the contour is the convex hull)
+		\param[out] parts output polyline parts
+		\param allowSplitting whether the polyline can be split or not
+		\return success
+	**/
+	static bool ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
+									PointCoordinateType maxEdgelLength,
+									std::vector<ccPolyline*>& parts,
+									bool allowSplitting = true);
 
 	//! Computes the polyline length
 	PointCoordinateType computeLength() const;
@@ -114,6 +143,11 @@ protected:
 
 	//inherited methods (ccHObject)
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+
+	//! Initializes the polyline with a given set of vertices and the parameters of another polyline
+	/** \warning Even the 'closed' state is copied as is!
+	**/
+	void initWith(ccPointCloud* vertices, const ccPolyline& poly);
 
 	//! Unique RGB color
 	colorType m_rgbColor[3];

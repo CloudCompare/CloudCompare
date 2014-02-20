@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>220</width>
-    <height>294</height>
+    <height>322</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -99,7 +99,7 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>Thickness</string>
+      <string>Box thickness</string>
      </property>
      <layout class="QFormLayout" name="formLayout">
       <item row="0" column="0">
@@ -112,7 +112,7 @@
       <item row="0" column="1">
        <widget class="QDoubleSpinBox" name="thickXDoubleSpinBox">
         <property name="decimals">
-         <number>6</number>
+         <number>8</number>
         </property>
         <property name="maximum">
          <double>1000000000.000000000000000</double>
@@ -129,7 +129,7 @@
       <item row="1" column="1">
        <widget class="QDoubleSpinBox" name="thickYDoubleSpinBox">
         <property name="decimals">
-         <number>6</number>
+         <number>8</number>
         </property>
         <property name="maximum">
          <double>1000000000.000000000000000</double>
@@ -146,12 +146,36 @@
       <item row="2" column="1">
        <widget class="QDoubleSpinBox" name="thickZDoubleSpinBox">
         <property name="decimals">
-         <number>6</number>
+         <number>8</number>
         </property>
         <property name="maximum">
          <double>1000000000.000000000000000</double>
         </property>
        </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <layout class="QHBoxLayout" name="horizontalLayout_6">
+        <item>
+         <spacer name="horizontalSpacer_8">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QToolButton" name="editBoxToolButton">
+          <property name="text">
+           <string>advanced</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </widget>

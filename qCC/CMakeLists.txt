@@ -119,7 +119,6 @@ endforeach()
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
 if( APPLE )
    set_property( TARGET ${PROJECT_NAME} PROPERTY MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Mac/CloudCompare.plist )
-   set_source_files_properties( images/icon/cc_icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION Resources )   
 
    set( MACOSX_BUNDLE_ICON_FILE cc_icon.icns ) 
    set( MACOSX_BUNDLE_SHORT_VERSION_STRING "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}" )

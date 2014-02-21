@@ -7,6 +7,9 @@ if( APPLE )
    get_support_libs( SUPPORT_LIBS )
    install( FILES ${SUPPORT_LIBS} DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/MacOS COMPONENT Runtime )
    
+   # install icons
+   install( FILES ../images/icon/cc_icon.icns DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Resources COMPONENT Runtime )   
+
    # install qt.conf
    install( CODE "
       file( WRITE ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Resources/qt.conf \"[Paths]\nPlugins = Plugins\" )

@@ -40,6 +40,11 @@ void main (void)
 	{
 		//neighbor position (X)
         coordi.x = float(c)/SX;
+		int cabs;
+		if (cabs < 0)
+			cabs = -c;
+		else
+			casb = c;
 
         for(int d=-NHalf; d<=NHalf; d++)
         {
@@ -50,7 +55,12 @@ void main (void)
             vec3 ci	=	texture2D(s2_I,gl_TexCoord[0].st+coordi).rgb;
 
             //pixel distance based damping
-            float fi	=	DistCoefs[c*sign(c)*(NHalf+1)+d*sign(d)];
+			int dabs;
+			if (dabs < 0)
+				dabs = -d;
+			else
+				dasb = d;
+            float fi	=	DistCoefs[cabs*(NHalf+1)+dabs];
 
             //pixel depth difference based damping
             if (SigmaDepth > 0.0)

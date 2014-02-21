@@ -49,7 +49,11 @@
 
 const uchar DEFAULT_OCTREE_LEVEL = 7;
 
-ccComparisonDlg::ccComparisonDlg(ccHObject* compEntity, ccHObject* refEntity, CC_COMPARISON_TYPE cpType, QWidget* parent/* = 0*/, bool noDisplay/*=false*/)
+ccComparisonDlg::ccComparisonDlg(	ccHObject* compEntity,
+									ccHObject* refEntity,
+									CC_COMPARISON_TYPE cpType,
+									QWidget* parent/*=0*/,
+									bool noDisplay/*=false*/)
 	: QDialog(parent)
 	, Ui::ComparisonDialog()
 	, m_compEnt(compEntity)
@@ -63,7 +67,6 @@ ccComparisonDlg::ccComparisonDlg(ccHObject* compEntity, ccHObject* refEntity, CC
 	, m_currentSFIsDistance(false)
 	, m_noDisplay(noDisplay)
 {
-
 	setupUi(this);
 	setWindowFlags(Qt::Tool);
 
@@ -98,7 +101,7 @@ ccComparisonDlg::ccComparisonDlg(ccHObject* compEntity, ccHObject* refEntity, CC
 
 	assert(compEntity);
 	ccBBox compEntBBox = compEntity->getBB();
-	maxSearchDistSpinBox->setValue((double)compEntBBox.getDiagNorm());
+	maxSearchDistSpinBox->setValue(static_cast<double>(compEntBBox.getDiagNorm()));
 
 	if (m_refMesh)
 	{
@@ -109,7 +112,7 @@ ccComparisonDlg::ccComparisonDlg(ccHObject* compEntity, ccHObject* refEntity, CC
 	else
 	{
 		split3DCheckBox->setEnabled(true);
-		lmRadiusDoubleSpinBox->setValue((double)compEntBBox.getDiagNorm()/200.0);
+		lmRadiusDoubleSpinBox->setValue(static_cast<double>(compEntBBox.getDiagNorm())/200.0);
 	}
 
 	//compute approximate results and unlock GUI
@@ -282,7 +285,7 @@ int ccComparisonDlg::computeApproxResults()
 	int approxResult = -1;
 
 	histoButton->setEnabled(false);
-	approxGroupBox->setEnabled(false);
+	preciseResultsTabWidget->widget(2)->setEnabled(false);
 
 	if (!isValid())
 		return approxResult;
@@ -381,7 +384,7 @@ int ccComparisonDlg::computeApproxResults()
 			approxStats->setRowHeight(i,20);
 
 		//on active les elements d'interface correspondant
-		approxGroupBox->setEnabled(true);
+		preciseResultsTabWidget->widget(2)->setEnabled(true);
 		histoButton->setEnabled(true);
 
 		//m.a.j. affichage

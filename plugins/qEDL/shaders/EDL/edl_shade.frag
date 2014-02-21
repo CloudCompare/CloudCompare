@@ -53,7 +53,7 @@ float computeObscurance(float depth, float scale)
 	// Light-plane point
 	vec4 P = vec4( Light_dir.xyz , -dot(Light_dir.xyz,vec3(0.0,0.0,depth)) );
 
-	float sum = 0;
+	float sum = 0.0;
 
 	// contribution of each neighbor
 	for(int c=0; c<8;c++)

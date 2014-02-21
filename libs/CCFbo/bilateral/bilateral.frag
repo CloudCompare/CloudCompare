@@ -50,7 +50,7 @@ void main (void)
             vec3 ci	=	texture2D(s2_I,gl_TexCoord[0].st+coordi).rgb;
 
             //pixel distance based damping
-            float fi	=	DistCoefs[abs(c)*(NHalf+1)+abs(d)];
+            float fi	=	DistCoefs[c*sign(c)*(NHalf+1)+d*sign(d)];
 
             //pixel depth difference based damping
             if (SigmaDepth > 0.0)

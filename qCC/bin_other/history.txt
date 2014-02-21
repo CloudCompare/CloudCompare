@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.5.3 ??/??/2014
+v2.5.3 02/21/2014
 - New method: "Edit > Normals > Orient > With Minimum Spanning Tree"
 	* This is an alternative method to find the correct orientation of normals based on the
 		determination of a Minimum Spanning Tree
@@ -20,6 +20,8 @@ v2.5.3 ??/??/2014
 	* Removes duplicate points (creates a new cloud)
 - New method: "Edit > Crop"
 	* To crop a point cloud inside a box
+- New method: "Color banding" (thanks to M.J. Smith)
+	* new option of the 'Edit > Color > Height Ramp' method
 - Enhancements:
 	* Spatial sub-sampling tool ('SPACE' mode):
 		- about twice as fast

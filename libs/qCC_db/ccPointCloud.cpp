@@ -1062,11 +1062,12 @@ bool ccPointCloud::colorize(float r, float g, float b)
 	return true;
 }
 
-bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Shared colorScale)
+//Contribution from Michael J Smith
+bool ccPointCloud::setRGBColorByBanding(unsigned char dim, int freq)
 {
-	if (!colorScale || heightDim > 2) //X=0, Y=1, Z=2
+	if (freq == 0 || dim > 2) //X=0, Y=1, Z=2
 	{
-		ccLog::Error("[ccPointCloud::colorizeWithDefaultRamp] Invalid paramter!");
+		ccLog::Error("[ccPointCloud::setRGBColorByBanding] Invalid paramter!");
 		return false;
 	}
 
@@ -1077,11 +1078,48 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 
 	enableTempColor(false);
 
-	PointCoordinateType bbMin[3],bbMax[3];
-	getBoundingBox(bbMin,bbMax);
-	const PointCoordinateType& dMin = bbMin[heightDim];
-	PointCoordinateType height = bbMax[heightDim]-dMin;
+ 	double minHeight = getBB().minCorner().u[dim];
+	double height = getBB().getDiagVec().u[dim];
+	
+	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
+		height = 1.0;
 
+   /* Repeats per spacing of 1 */
+    double bands = freq * (2 * M_PI);
+ 
+	unsigned count = size();
+	for (unsigned i=0; i<count; i++)
+	{
+		const CCVector3* P = getPoint(i);
+
+		double z = bands * (P->u[dim] - minHeight) / height;
+		colorType col[3] = {	static_cast<colorType>( ((sin(z + 0) + 1.0) / 2.0) * MAX_COLOR_COMP ),
+								static_cast<colorType>( ((sin(z + 2) + 1.0) / 2.0) * MAX_COLOR_COMP ),
+								static_cast<colorType>( ((sin(z + 4) + 1.0) / 2.0) * MAX_COLOR_COMP ) };
+
+		m_rgbColors->setValue(i,col);
+	}
+
+	return true;
+}
+
+bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Shared colorScale)
+{
+	if (!colorScale || heightDim > 2) //X=0, Y=1, Z=2
+	{
+		ccLog::Error("[ccPointCloud::setRGBColorByHeight] Invalid paramter!");
+		return false;
+	}
+
+	//allocate colors if necessary
+	if (!hasColors())
+		if (!resizeTheRGBTable(false))
+			return false;
+
+	enableTempColor(false);
+
+	double minHeight = getBB().minCorner().u[heightDim];
+	double height = getBB().getDiagVec().u[heightDim];
 	if (fabs(height) < ZERO_TOLERANCE) //flat cloud!
 	{
 		return setRGBColor(colorScale->getColorByIndex(0));
@@ -1091,7 +1129,7 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	for (unsigned i=0; i<count; i++)
 	{
 		const CCVector3* Q = getPoint(i);
-		double realtivePos = (double)(Q->u[heightDim]-dMin) / (double)height;
+		double realtivePos = (Q->u[heightDim] - minHeight) / height;
 
 		m_rgbColors->setValue(i,colorScale->getColorByRelativePos(realtivePos));
 	}

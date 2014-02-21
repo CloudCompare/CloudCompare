@@ -367,11 +367,20 @@ public:
 	//! Assigns color to points proportionnaly to their 'height'
 	/** Height is defined wrt to the specified dimension (heightDim).
 		Color array is automatically allocated if necessary.
-        \param heightDim ramp dimension (0->X, 1->Y, 2->Z)
+        \param heightDim ramp dimension (0:X, 1:Y, 2:Z)
 		\param colorScale color scale to use
 		\return success
     **/
 	bool setRGBColorByHeight(unsigned char heightDim, ccColorScale::Shared colorScale);
+
+	//! Assigns color to points by 'banding'
+	/** Banding is performed along the specified dimension
+		Color array is automatically allocated if necessary.
+        \param dim banding dimension (0:X, 1:Y, 2:Z)
+		\param freq banding frequency
+		\return success
+    **/
+	bool setRGBColorByBanding(unsigned char dim, int freq);
 
 	//! Sets RGB colors with current scalar field (values & parameters)
 	/** \return success

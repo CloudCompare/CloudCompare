@@ -82,7 +82,7 @@
 #include "ccClippingBoxTool.h"
 #include "ccOrderChoiceDlg.h"
 #include "ccComparisonDlg.h"
-#include "ccTwoColorsDlg.h"
+#include "ccColorGradientDlg.h"
 #include "ccAskTwoDoubleValuesDlg.h"
 #include "ccAskThreeDoubleValuesDlg.h"
 #include "ccPtsSamplingDlg.h"
@@ -1105,25 +1105,27 @@ void MainWindow::doActionSetColor(bool colorize)
 
 void MainWindow::doActionSetColorGradient()
 {
-    ccTwoColorsDlg dlg(this);
+    ccColorGradientDlg dlg(this);
     if (!dlg.exec())
         return;
 
-    unsigned char dim = (unsigned char)dlg.directionComboBox->currentIndex();
-    bool useDefaultRamp = (dlg.defaultRampCheckBox->checkState() == Qt::Checked);
+	unsigned char dim = dlg.getDimension();
+    ccColorGradientDlg::GradientType ramp = dlg.getType();
 
 	ccColorScale::Shared colorScale(0);
-	if (useDefaultRamp)
+	if (ramp == ccColorGradientDlg::Default)
 	{
 		colorScale = ccColorScalesManager::GetDefaultScale();
 	}
-	else
+	else if (ramp == ccColorGradientDlg::TwoColors)
 	{
 		colorScale = ccColorScale::Create("Temp scale");
-		colorScale->insert(ccColorScaleElement(0.0,dlg.s_firstColor),false);
-		colorScale->insert(ccColorScaleElement(1.0,dlg.s_secondColor),true);
+		QColor first,second;
+		dlg.getColors(first,second);
+		colorScale->insert(ccColorScaleElement(0.0,first),false);
+		colorScale->insert(ccColorScaleElement(1.0,second),true);
 	}
-	assert(colorScale);
+	assert(colorScale || ramp == ccColorGradientDlg::Banding);
 
     size_t selNum = m_selectedEntities.size();
     for (size_t i=0; i<selNum; ++i)
@@ -1140,7 +1142,15 @@ void MainWindow::doActionSetColorGradient()
 
         if (cloud && cloud->isA(CC_POINT_CLOUD)) // TODO
         {
-			if (static_cast<ccPointCloud*>(cloud)->setRGBColorByHeight(dim, colorScale))
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+
+			bool success = false;
+			if (ramp == ccColorGradientDlg::Banding)
+				success = pc->setRGBColorByBanding(dim, dlg.getBandingFrequency());
+			else
+				success = pc->setRGBColorByHeight(dim, colorScale);
+
+			if (success)
 			{
 				ent->showColors(true);
 				ent->prepareDisplayForRefresh();

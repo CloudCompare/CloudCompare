@@ -296,7 +296,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgelLength,
 	unsigned vertCount = size();
 	if (vertCount <= 2)
 	{
-		parts.push_back(new ccPolyline(this));
+		parts.push_back(new ccPolyline(*this));
 		return true;
 	}
 
@@ -327,7 +327,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgelLength,
 				if (realStartIndex == stopIndex)
 				{
 					//whole loop
-					parts.push_back(new ccPolyline(this));
+					parts.push_back(new ccPolyline(*this));
 					return true;
 				}
 				else if (realStartIndex < vertCount)
@@ -343,7 +343,7 @@ bool ccPolyline::split(	PointCoordinateType maxEdgelLength,
 			else if (partSize == vertCount)
 			{
 				//whole polyline
-				parts.push_back(new ccPolyline(this));
+				parts.push_back(new ccPolyline(*this));
 				return true;
 			}
 		}
@@ -381,12 +381,13 @@ bool ccPolyline::split(	PointCoordinateType maxEdgelLength,
 bool ccPolyline::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* points,
 									PointCoordinateType maxEdgelLength,
 									std::vector<ccPolyline*>& parts,
-									bool allowSplitting/*=true*/)
+									bool allowSplitting/*=true*/,
+									int preferredDim/*=-1*/)
 {
 	parts.clear();
 
 	//extract whole contour
-	ccPolyline* basePoly = ExtractFlatContour(points,maxEdgelLength);
+	ccPolyline* basePoly = ExtractFlatContour(points,maxEdgelLength,preferredDim);
 	if (!basePoly)
 	{
 		return false;
@@ -400,14 +401,15 @@ bool ccPolyline::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* points,
 	//and split it if necessary
 	bool success = basePoly->split(maxEdgelLength,parts);
 
-	delete basePoly;
+	//delete basePoly;
 
 	return success;
 
 }
 
 ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
-											PointCoordinateType maxEdgelLength/*=0*/)
+											PointCoordinateType maxEdgelLength/*=0*/,
+											int preferredDim/*=*-1*/)
 {
 	assert(points);
 	if (!points)
@@ -421,7 +423,17 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 
 	//we project the input points on a plane
 	std::vector<CCLib::PointProjectionTools::IndexedCCVector2> points2D;
-	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D,0,&O,&X,&Y))
+	PointCoordinateType* planeEq = 0;
+	//if the user has specified a default direction, we'll use it as 'projecting plane'
+	PointCoordinateType preferredPlaneEq[4] = {0, 0, 0, 0};
+	if (preferredDim >= 0 && preferredDim <= 2)
+	{
+		const CCVector3* G = points->getPoint(0); //any point through which the point pass is ok
+		preferredPlaneEq[preferredDim] = PC_ONE;
+		preferredPlaneEq[3] = CCVector3::vdot(G->u,preferredPlaneEq);
+		planeEq = preferredPlaneEq;
+	}
+	if (!Yk.projectPointsOn2DPlane<CCLib::PointProjectionTools::IndexedCCVector2>(points2D,planeEq,&O,&X,&Y))
 	{
 		ccLog::Warning("[ccPolyline::ExtractFlatContour] Failed to project the points on the LS plane (not enough memory?)!");
 		return 0;

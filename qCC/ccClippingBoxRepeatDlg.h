@@ -26,11 +26,16 @@
 //! Dialog for managing clipping box based repeated processes
 class ccClippingBoxRepeatDlg : public QDialog, public Ui::ClippingBoxRepeatDlg
 {
+	Q_OBJECT
 
 public:
 
 	//! Default constructor
 	ccClippingBoxRepeatDlg(QWidget* parent);
+
+protected slots:
+
+	void onDimChecked(bool);
 
 };
 

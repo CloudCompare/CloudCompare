@@ -113,10 +113,12 @@ public:
 	/** Projects the cloud on its best fitting LS plane first.
 		\param points point cloud
 		\param maxEdgelLength max edge length (ignored if 0, in which case the contour is the convex hull)
+		\param preferredDim to specifiy a preferred dimension for the polyline extraction (0:X, 1:Y, 2:Z, other: best fit plane)
 		\return contour polyline (or 0 if an error occurred)
 	**/
 	static ccPolyline* ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
-											PointCoordinateType maxEdgelLength = 0);
+											PointCoordinateType maxEdgelLength = 0,
+											int preferredDim = -1);
 
 	//! Extracts one or several parts of the (2D) contour polyline of a point cloud
 	/** Projects the cloud on its best fitting LS plane first.
@@ -125,12 +127,14 @@ public:
 		\param maxEdgelLength max edge length (ignored if 0, in which case the contour is the convex hull)
 		\param[out] parts output polyline parts
 		\param allowSplitting whether the polyline can be split or not
+		\param preferredDim to specifiy a preferred dimension for the polyline extraction (0:X, 1:Y, 2:Z, other: best fit plane)
 		\return success
 	**/
 	static bool ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
 									PointCoordinateType maxEdgelLength,
 									std::vector<ccPolyline*>& parts,
-									bool allowSplitting = true);
+									bool allowSplitting = true,
+									int preferredDim = -1);
 
 	//! Computes the polyline length
 	PointCoordinateType computeLength() const;

@@ -109,6 +109,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 		oldWin->removeFromOwnDB(&m_refPoints);
 		m_refPoints.setDisplay(0);
 
+		oldWin->lockPickingMode(false);
 		oldWin->setPickingMode(ccGLWindow::DEFAULT_PICKING);
 	}
 
@@ -128,6 +129,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 	if (m_associatedWin)
 	{
 		m_associatedWin->setPickingMode(ccGLWindow::POINT_PICKING);
+		m_associatedWin->lockPickingMode(true);
 		connect(m_associatedWin, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedPoint(int, unsigned, int, int)));
 
 		m_associatedWin->addToOwnDB(&m_alignedPoints);

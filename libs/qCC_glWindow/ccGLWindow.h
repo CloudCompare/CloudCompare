@@ -263,6 +263,17 @@ public:
 	**/
     virtual void setPickingMode(PICKING_MODE mode = DEFAULT_PICKING);
 
+	//! Returns current picking mode
+	inline virtual PICKING_MODE getPickingMode() const { return m_pickingMode; }
+
+	//! Locks picking mode
+	/** \warning Bes sure to unlock it at some point ;)
+	**/
+	inline virtual void lockPickingMode(bool state) { m_pickingModeLocked = state; }
+
+	//! Returns whether picking mode is locked or not
+	inline virtual bool isPickingModeLocked() const { return m_pickingModeLocked; }
+
 	//! Specify whether this 3D window can be closed by the user or not
     virtual void setUnclosable(bool state);
 
@@ -634,6 +645,8 @@ protected:
 	INTERACTION_MODE m_interactionMode;
 	//! Current picking mode
 	PICKING_MODE m_pickingMode;
+	//! Whether picking mode is locked or not
+	bool m_pickingModeLocked;
 
 	//! Display capturing mode options
 	struct CaptureModeOptions

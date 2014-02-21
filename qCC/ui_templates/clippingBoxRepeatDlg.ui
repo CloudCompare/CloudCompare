@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>314</width>
-    <height>246</height>
+    <height>271</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -76,24 +76,38 @@ color: white;</string>
      <property name="checked">
       <bool>false</bool>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <layout class="QVBoxLayout" name="verticalLayout_3">
       <item>
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Max edge length</string>
-        </property>
-       </widget>
+       <layout class="QHBoxLayout" name="horizontalLayout_3">
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Max edge length</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="maxEdgeLengthDoubleSpinBox">
+          <property name="toolTip">
+           <string>Max edge length (if 0, generates a unique and closed contour = convex hull)</string>
+          </property>
+          <property name="decimals">
+           <number>6</number>
+          </property>
+          <property name="maximum">
+           <double>1000000000.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
       <item>
-       <widget class="QDoubleSpinBox" name="maxEdgeLengthDoubleSpinBox">
+       <widget class="QCheckBox" name="projectOnBestFitCheckBox">
         <property name="toolTip">
-         <string>Max edge length (if 0, generates a unique and closed contour = convex hull)</string>
+         <string>Before extracting the contour, points can be projected along the repeat dimension (if only one is defined) or on the best fit plane</string>
         </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="maximum">
-         <double>1000000000.000000000000000</double>
+        <property name="text">
+         <string>Project slice(s) points on their best fit plane</string>
         </property>
        </widget>
       </item>

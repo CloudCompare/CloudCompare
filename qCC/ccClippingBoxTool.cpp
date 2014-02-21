@@ -196,7 +196,7 @@ bool ccClippingBoxTool::linkWith(ccGLWindow* win)
 			m_clipBox = new ccClipBox();
 			m_clipBox->setVisible(true);
 			m_clipBox->setEnabled(true);
-			m_clipBox->setSelected(true);
+			m_clipBox->setSelected(showInteractorsCheckBox->isChecked());
 			connect(m_clipBox, SIGNAL(boxModified(const ccBBox*)), this, SLOT(onBoxModified(const ccBBox*)));
 		}
 		m_associatedWin->addToOwnDB(m_clipBox);
@@ -352,6 +352,7 @@ void ccClippingBoxTool::exportMultCloud()
 {
 	if (!m_clipBox)
 		return;
+
 	ccHObject* obj = m_clipBox->getAssociatedEntity();
 	if (!obj || !obj->isA(CC_POINT_CLOUD))
 	{
@@ -368,6 +369,20 @@ void ccClippingBoxTool::exportMultCloud()
 	
 	if (!repeatDlg.exec())
 		return;
+
+	//repeat dimensions 
+	bool processDim[3] = {	repeatDlg.xRepeatCheckBox->isChecked(),
+							repeatDlg.yRepeatCheckBox->isChecked(),
+							repeatDlg.zRepeatCheckBox->isChecked() };
+	int processDimSum =	static_cast<int>(processDim[0])
+					+	static_cast<int>(processDim[1])
+					+	static_cast<int>(processDim[2]);
+
+	if (processDimSum == 0)
+	{
+		ccLog::Error("No dimension selected to repeat the segmentation process?!");
+		return;
+	}
 
 	ccHObject* contourGroup = 0;
 	bool splitContour = false;
@@ -398,9 +413,6 @@ void ccClippingBoxTool::exportMultCloud()
 	}
 
 	//compute 'grid' extents in the local clipping box ref.
-	bool processDim[3] = {	repeatDlg.xRepeatCheckBox->isChecked(),
-							repeatDlg.yRepeatCheckBox->isChecked(),
-							repeatDlg.zRepeatCheckBox->isChecked() };
 	int indexMins[3] = { 0, 0, 0 };
 	int indexMaxs[3] = { 0, 0, 0 };
 	int gridDim[3] = { 1, 1, 1 };
@@ -457,6 +469,7 @@ void ccClippingBoxTool::exportMultCloud()
 
 		//project points into grid
 		bool error = false;
+		unsigned subCloudsCount = 0;
 		{
 			unsigned pointCount = cloud->size(); 
 
@@ -494,6 +507,7 @@ void ccClippingBoxTool::exportMultCloud()
 					if (!clouds[cloudIndex])
 					{
 						clouds[cloudIndex] = new CCLib::ReferenceCloud(cloud);
+						++subCloudsCount;
 					}
 
 					if (!clouds[cloudIndex]->addPointIndex(i))
@@ -508,11 +522,21 @@ void ccClippingBoxTool::exportMultCloud()
 			}
 		}
 
+		//extract section clouds (and contour polylines optionaly)
 		if (!error)
 		{
-			QProgressDialog pDlg(this);
+			QProgressDialog pDlg(QString("Sections: %1").arg(subCloudsCount),"Cancel",0,static_cast<int>(subCloudsCount),this);
 			pDlg.show();
 			QApplication::processEvents();
+
+			//preferred dimension?
+			int preferredDim = -1;
+			if (processDimSum == 1 && !repeatDlg.projectOnBestFitCheckBox->isChecked())
+			{
+				for (int i=0; i<3; ++i)
+					if (processDim[i])
+						preferredDim = i;
+			}
 
 			bool warningsIssued = false;
 
@@ -568,7 +592,8 @@ void ccClippingBoxTool::exportMultCloud()
 									if (ccPolyline::ExtractFlatContour(	sliceCloud,
 																		static_cast<PointCoordinateType>(s_maxEdgeLength),
 																		polys,
-																		splitContour ))
+																		splitContour,
+																		preferredDim))
 									{
 										if (!polys.empty())
 										{
@@ -597,7 +622,17 @@ void ccClippingBoxTool::exportMultCloud()
 							}
 
 							++currentCloudCount;
-							pDlg.setValue(static_cast<int>(floor(100.0f*static_cast<float>(currentCloudCount)/static_cast<float>(cellCount))));
+							if (pDlg.wasCanceled())
+							{
+								error = true;
+								ccLog::Warning(QString("[ccClippingBoxTool::exportMultCloud] Process canceled by user"));
+								//early stop
+								i = indexMaxs[0];
+								j = indexMaxs[1];
+								k = indexMaxs[2];
+								break;
+							}
+							pDlg.setValue(static_cast<int>(currentCloudCount));
 						}
 					}
 				}

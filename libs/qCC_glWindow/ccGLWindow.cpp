@@ -135,6 +135,7 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	, m_unclosable(false)
 	, m_interactionMode(TRANSFORM_CAMERA)
 	, m_pickingMode(NO_PICKING)
+	, m_pickingModeLocked(false)
 	, m_lastClickTime_ticks(0)
 	, m_sunLightEnabled(true)
 	, m_customLightEnabled(false)
@@ -1711,6 +1712,14 @@ void ccGLWindow::setInteractionMode(INTERACTION_MODE mode)
 
 void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 {
+	//is the picking mode locked?
+	if (m_pickingModeLocked)
+	{
+		if (mode != m_pickingMode)
+			ccLog::Warning("[ccGLWindow::setPickingMode] Picking mode is locked! Can't change it...");
+		return;
+	}
+
 	switch(mode)
 	{
 	case DEFAULT_PICKING:

@@ -17,10 +17,39 @@
 
 #include "ccClippingBoxRepeatDlg.h"
 
+//Qt
+#include <QPushButton>
+
 ccClippingBoxRepeatDlg::ccClippingBoxRepeatDlg(QWidget* parent)
 	: QDialog(parent)
 {
 	setupUi(this);
 
 	//setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+	connect( xRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
+	connect( yRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
+	connect( zRepeatCheckBox, SIGNAL(toggled(bool)), this, SLOT(onDimChecked(bool)));
+}
+
+void ccClippingBoxRepeatDlg::onDimChecked(bool)
+{
+	//if only one dimension is checked, then the user can choose to project
+	//the points along this dimension
+	int sum =	static_cast<int>(xRepeatCheckBox->isChecked())
+			+	static_cast<int>(yRepeatCheckBox->isChecked())
+			+	static_cast<int>(zRepeatCheckBox->isChecked());
+
+	if (sum == 1)
+	{
+		if (!projectOnBestFitCheckBox->isEnabled())
+			projectOnBestFitCheckBox->setChecked(false);
+		projectOnBestFitCheckBox->setEnabled(true);
+	}
+	else
+	{
+		projectOnBestFitCheckBox->setEnabled(false);
+		projectOnBestFitCheckBox->setChecked(true);
+	}
+
+	buttonBox->button(QDialogButtonBox::Ok)->setEnabled(sum != 0);
 }

@@ -36,7 +36,7 @@ ccOrderChoiceDlg::ccOrderChoiceDlg(	ccHObject* firstEntity,
 									ccMainAppInterface* app/*=0*/)
     : QDialog(app ? app->getMainWindow() : 0)
 	, Ui::RoleChoiceDialog()
-	, m_app(0)
+	, m_app(app)
 	, m_firstEnt(firstEntity)
 	, m_secondEnt(secondEntity)
 	, m_originalOrder(true)

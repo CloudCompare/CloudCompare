@@ -562,7 +562,7 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 
     if (!m_segmentationPoly->isClosed())
     {
-        ccLog::Error("Define and/or close the segmentation border first! (right click to close)");
+        ccLog::Error("Define and/or close the segmentation polygon first! (right click to close)");
         return;
     }
 

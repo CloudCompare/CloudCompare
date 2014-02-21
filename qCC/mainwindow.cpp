@@ -4420,11 +4420,15 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 	}
 
 	//if the cloud(s) already had normals, ask the use if wants to update them or keep them as is (can look strange!)
-	bool updateNormals = (QMessageBox::question(this,
+	bool updateNormals = false;
+	if (hadNormals)
+	{
+		updateNormals = (QMessageBox::question(	this,
 												"Keep old normals?",
 												"Cloud(s) already have normals. Do you want to update them (yes) or keep the old ones (no)?",
 												QMessageBox::Yes,
 												QMessageBox::No ) == QMessageBox::Yes);
+	}
 
 	QProgressDialog pDlg("Triangulation in progress...", QString(), 0, 0, this);
 	pDlg.show();

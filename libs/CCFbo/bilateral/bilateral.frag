@@ -44,7 +44,7 @@ void main (void)
 		if (cabs < 0)
 			cabs = -c;
 		else
-			casb = c;
+			cabs = c;
 
         for(int d=-NHalf; d<=NHalf; d++)
         {
@@ -59,7 +59,7 @@ void main (void)
 			if (dabs < 0)
 				dabs = -d;
 			else
-				dasb = d;
+				dabs = d;
             float fi	=	DistCoefs[cabs*(NHalf+1)+dabs];
 
             //pixel depth difference based damping

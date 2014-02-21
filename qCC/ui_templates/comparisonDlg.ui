@@ -63,7 +63,7 @@
       <item>
        <widget class="QTabWidget" name="preciseResultsTabWidget">
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="generalParamsTab">
          <attribute name="title">
@@ -411,8 +411,6 @@ to help you set the general parameters</string>
            </widget>
           </item>
          </layout>
-         <zorder>approxResultsInnerFrame</zorder>
-         <zorder>approxResultsInnerFrame</zorder>
         </widget>
        </widget>
       </item>

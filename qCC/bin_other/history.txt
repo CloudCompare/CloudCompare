@@ -1,27 +1,30 @@
 *** CloudCompare versions history ***
 
+v2.5.4 XX/XX/2014
+- 
+
 v2.5.3 02/21/2014
 - New method: "Edit > Normals > Orient > With Minimum Spanning Tree"
 	* This is an alternative method to find the correct orientation of normals based on the
 		determination of a Minimum Spanning Tree
-	* It can consumes a lot of memory but it works better on smooth shapes than the former
+	* It may require a lot of memory but it works better on smooth shapes than the former
 		method based on Fast-Marching (formerly called "Resolve normals direction" and now
 		renamed and move to "Edit > Normals > Orient > With Fast-Marching")
 	* It is also automatically suggested by CC if no preferred orientation has been set in
 		the Normals computation tool.
 - New method: "Tools > Other > Density > Accurate (at a given scale)"
 	* More accurate method to compute the local density (= number of points inside a sphere
-		around each point)
+		centered on each point)
 	* The old version is now accessible via "Tools > Other > Density > Approximate"
 		(and it simply outputs the distance to the nearest neighbor now)
-	* Command lines options have been changed accordingly
+	* Command line options have been changed accordingly
 		(see http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine)
 - New method: "Tools > Other > Remove duplicate points"
 	* Removes duplicate points (creates a new cloud)
 - New method: "Edit > Crop"
 	* To crop a point cloud inside a box
 - New method: "Color banding" (thanks to M.J. Smith)
-	* new option of the 'Edit > Color > Height Ramp' method
+	* New option of the 'Edit > Color > Height Ramp' method
 - Enhancements:
 	* Spatial sub-sampling tool ('SPACE' mode):
 		- about twice as fast
@@ -33,11 +36,12 @@ v2.5.3 02/21/2014
 		to any property.
 	* The OBJ importer now supports polylines ('l' tag)
 	* Global shift/scale:
-		- CC will ask the user when exporting points with the 'Point List Picking' tool
+		- CC will ask the user when exporting points with the 'Point List Picking' tool if he wishes
+			to keep global shift/scale information
 		- CC will warn the user if the translation applied with the 'Edit > Apply transformation' tool
 			is too big (in which case it can be set as 'global shift' instead)
-	* New 'preferred' orientations for the Normals computation tool: relatively to +/- (0,0,0)
-		- new method to orient normals with a Minimum Spanning Tree (quite slow but very reliable!)
+	* New 'preferred' orientations for the Normals computation tool:
+		- relatively to (0,0,0) (positive or negative)
 	* Distance computation accuracy slightly enhanced (use of double precision internally)
 	* The DXF I/O filter can now even load polylines with no descriptor
 	* Command line mode has a lots of new options (thanks to A. Bevan, University College London)
@@ -59,6 +63,7 @@ v2.5.3 02/21/2014
 	* Labels now display both the shifted and the original points coordinates if
 		the cloud is shifted/scaled
 	* The VTK I/O filter now handles TRIANGLE_STRIP elements
+	* Cross section tool: the box position can now be edited ('advanced' button)
 - Other:
 	* ATOM feed enabled on the forum (http://www.danielgm.net/cc/forum/)
 		(use the native ATOM support on IE or Firefox, or install an ATOM feed reader app
@@ -78,7 +83,6 @@ v2.5.3 02/21/2014
 		were sometimes fused together)
 	* Pixel distances were squared twice in the Bilateral filter (shader) 
 	* The 'Point pair-based registration' dialog was not automatically reset
-		refs/remotes/origin/shared_plugins
 	* Wrong error code returned by PLY I/O Filter when failing to create the output file
 	* Meshes color couldn't be changed anymore (with 'Edit > Set color')	
 	* GL filters rendering was downgraded when switching from perspective to ortho. view

@@ -152,7 +152,7 @@ bool ccExtru::toFile_MeOnly(QFile& out) const
 	//profile size
 	outStream << (qint32)m_profile.size();
 	//profile points (2D)
-	for (unsigned i=0;i<m_profile.size();++i)
+	for (unsigned i=0; i<m_profile.size(); ++i)
 	{
 		outStream << m_profile[i].x;
 		outStream << m_profile[i].y;
@@ -168,7 +168,7 @@ bool ccExtru::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	inStream >> m_height;
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_height);
 	//profile size
 	qint32 vertCount;
 	inStream >> vertCount;
@@ -176,10 +176,9 @@ bool ccExtru::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	{
 		m_profile.resize(vertCount);
 		//profile points (2D)
-		for (unsigned i=0;i<m_profile.size();++i)
+		for (unsigned i=0; i<m_profile.size(); ++i)
 		{
-			inStream >> m_profile[i].x;
-			inStream >> m_profile[i].y;
+			ccSerializationHelper::CoordsFromDataStream(inStream,flags,m_profile[i].u,2);
 		}
 	}
 	else

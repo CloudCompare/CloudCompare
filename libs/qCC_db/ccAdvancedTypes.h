@@ -34,7 +34,7 @@ public:
 	NormsIndexesTableType() : ccChunkedArray<1,normsType>("Compressed normals") {}
 
 	//inherited from ccChunkedArray/ccHObject
-    virtual CC_CLASS_ENUM getClassID() const {return CC_NORMAL_INDEXES_ARRAY;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::NORMAL_INDEXES_ARRAY; }
 
 	//! Duplicates array (overloaded from ccChunkedArray::clone
 	virtual NormsIndexesTableType* clone()
@@ -59,7 +59,7 @@ public:
 	NormsTableType() : ccChunkedArray<3,PointCoordinateType>("Normals") {}
 
 	//inherited from ccChunkedArray/ccHObject
-    virtual CC_CLASS_ENUM getClassID() const {return CC_NORMALS_ARRAY;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::NORMALS_ARRAY; }
 
 	//! Duplicates array (overloaded from ccChunkedArray::clone
 	virtual NormsTableType* clone()
@@ -84,7 +84,7 @@ public:
 	ColorsTableType() : ccChunkedArray<3,colorType>("RGB colors") {}
 
 	//inherited from ccChunkedArray/ccHObject
-    virtual CC_CLASS_ENUM getClassID() const {return CC_RGB_COLOR_ARRAY;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::RGB_COLOR_ARRAY; }
 
 	//! Duplicates array (overloaded from ccChunkedArray::clone
 	virtual ColorsTableType* clone()
@@ -109,7 +109,7 @@ public:
 	TextureCoordsContainer() : ccChunkedArray<2,float>("Texture coordinates") {}
 
 	//inherited from ccChunkedArray/ccHObject
-    virtual CC_CLASS_ENUM getClassID() const {return CC_TEX_COORDS_ARRAY;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::TEX_COORDS_ARRAY; }
 
 	//! Duplicates array (overloaded from ccChunkedArray::clone
 	virtual TextureCoordsContainer* clone()

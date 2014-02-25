@@ -68,12 +68,12 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 
     ccGenericPointCloud* vertices = NULL;
     ccGenericMesh* mesh = NULL;
-    if (entity->isKindOf(CC_MESH))
+    if (entity->isKindOf(CC_TYPES::MESH))
     {
         mesh = ccHObjectCaster::ToGenericMesh(entity);
         vertices = mesh->getAssociatedCloud();
     }
-    else if (entity->isKindOf(CC_POINT_CLOUD))
+    else if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
     {
         vertices = ccHObjectCaster::ToGenericPointCloud(entity);
     }
@@ -139,7 +139,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 					}
 					else
 					{
-						if (mesh->isA(CC_MESH))
+						if (mesh->isA(CC_TYPES::MESH))
 						{
 							if (QMessageBox::question(	0,
 														"Multiple materials, one texture",
@@ -156,7 +156,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 								}
 							}
 						}
-						else if (mesh->isA(CC_SUB_MESH))
+						else if (mesh->isA(CC_TYPES::SUB_MESH))
 						{
 							//we can forget the texture
 							material = 0;
@@ -185,7 +185,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 				}
 				else
 				{
-					if (mesh->isA(CC_MESH))
+					if (mesh->isA(CC_TYPES::MESH))
 					{
 						//we ask the user if he wants to convert them to RGB
 						if (QMessageBox::question(	0,
@@ -200,7 +200,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 							}
 						}
 					}
-					else if (mesh->isA(CC_SUB_MESH))
+					else if (mesh->isA(CC_TYPES::SUB_MESH))
 					{
 						ccLog::Warning("This sub-mesh has multiple textures/materials. PLY files can't handle them.\nAs this is a sub-mesh, we will have to ignore them... you should convert the parent mesh textures/materials to RGB colors first");
 					}
@@ -263,7 +263,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 
 	//Scalar fields
 	std::vector<CCLib::ScalarField*> scalarFields;
-	if (vertices->isA(CC_POINT_CLOUD))
+	if (vertices->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(vertices);
 		unsigned sfCount = ccCloud->getNumberOfScalarFields();
@@ -1509,7 +1509,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 							mesh->addTriangleTexCoordIndexes(i*3,i*3+1,i*3+2);
 						}
 						mesh->showMaterials(true);
-						mesh->addChild(materials,true);
+						mesh->addChild(materials);
 					}
 					else
 					{

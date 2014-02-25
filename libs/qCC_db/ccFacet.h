@@ -65,7 +65,7 @@ public:
 							const PointCoordinateType* planeEquation = 0);
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_FACET; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::FACET; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Sets the facet unique color

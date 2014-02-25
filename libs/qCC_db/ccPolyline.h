@@ -56,7 +56,7 @@ public:
 	virtual ~ccPolyline() {};
 
 	//! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const {return CC_POLY_LINE;}
+	virtual CC_CLASS_ENUM getClassID() const {return CC_TYPES::POLY_LINE;}
 
 	//inherited methods (ccHObject)
 	virtual bool isSerializable() const { return true; }

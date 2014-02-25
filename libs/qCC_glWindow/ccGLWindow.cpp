@@ -534,7 +534,7 @@ void ccGLWindow::paintGL()
 			//we process GL filter
 			GLuint depthTex = m_fbo->getDepthTexture();
 			GLuint colorTex = m_fbo->getColorTexture(0);
-			m_activeGLFilter->shade(depthTex, colorTex, (m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //DGM FIXME
+			m_activeGLFilter->shade(depthTex, colorTex, (m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //TODO: doesn't work well with EDL in perspective mode!
 
 			ccGLUtils::CatchGLError("ccGLWindow::paintGL/glFilter shade");
 
@@ -996,7 +996,7 @@ void ccGLWindow::addToOwnDB(ccHObject* obj2D)
 
 	if (m_winDBRoot)
 	{
-		m_winDBRoot->addChild(obj2D,false);
+		m_winDBRoot->addChild(obj2D,ccHObject::DP_NONE);
 		obj2D->setDisplay(this);
 	}
 	else
@@ -1823,7 +1823,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 		pickedObj = m_winDBRoot->find(itemID);
 	if (pickedObj)
 	{
-		if (pickedObj->isA(CC_2D_LABEL))
+		if (pickedObj->isA(CC_TYPES::LABEL_2D))
 		{
 			cc2DLabel* label = static_cast<cc2DLabel*>(pickedObj);
 			if (!label->isSelected() || !extendToSelectedLabels)
@@ -1839,12 +1839,12 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 				//we get the other selected labels as well!
 				ccHObject::Container labels;
 				if (m_globalDBRoot)
-					m_globalDBRoot->filterChildren(labels,true,CC_2D_LABEL);
+					m_globalDBRoot->filterChildren(labels,true,CC_TYPES::LABEL_2D);
 				if (m_winDBRoot)
-					m_winDBRoot->filterChildren(labels,true,CC_2D_LABEL);
+					m_winDBRoot->filterChildren(labels,true,CC_TYPES::LABEL_2D);
 
 				for (ccHObject::Container::iterator it=labels.begin(); it!=labels.end(); ++it)
-					if ((*it)->isA(CC_2D_LABEL) && (*it)->isVisible()) //Warning: cc2DViewportLabel is also a kind of 'CC_2D_LABEL'!
+					if ((*it)->isA(CC_TYPES::LABEL_2D) && (*it)->isVisible()) //Warning: cc2DViewportLabel is also a kind of 'CC_TYPES::LABEL_2D'!
 					{
 						cc2DLabel* label = static_cast<cc2DLabel*>(*it);
 						if (label->isSelected())
@@ -1854,7 +1854,7 @@ void ccGLWindow::updateActiveItemsList(int x, int y, bool extendToSelectedLabels
 					}
 			}
 		}
-		else if (pickedObj->isA(CC_CLIPPING_BOX))
+		else if (pickedObj->isA(CC_TYPES::CLIPPING_BOX))
 		{
 			ccClipBox* cbox = static_cast<ccClipBox*>(pickedObj);
 			cbox->setActiveComponent(subID);
@@ -2487,13 +2487,13 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 			{
 				//auto spawn the right label
 				cc2DLabel* label = 0;
-				if (obj->isKindOf(CC_POINT_CLOUD))
+				if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
 					label = new cc2DLabel();
 					label->addPoint(ccHObjectCaster::ToGenericPointCloud(obj),subSelectedID);
-					obj->addChild(label,true);
+					obj->addChild(label);
 				}
-				else if (obj->isKindOf(CC_MESH))
+				else if (obj->isKindOf(CC_TYPES::MESH))
 				{
 					label = new cc2DLabel();
 					ccGenericMesh *mesh = ccHObjectCaster::ToGenericMesh(obj);
@@ -2503,7 +2503,7 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 					label->addPoint(cloud,summitsIndexes->i1);
 					label->addPoint(cloud,summitsIndexes->i2);
 					label->addPoint(cloud,summitsIndexes->i3);
-					cloud->addChild(label,true);
+					cloud->addChild(label);
 					if (!cloud->isEnabled())
 					{
 						cloud->setVisible(false);
@@ -3247,7 +3247,7 @@ bool ccGLWindow::renderToFile(	const char* filename,
 				//we process GL filter
 				GLuint depthTex = fbo->getDepthTexture();
 				GLuint colorTex = fbo->getColorTexture(0);
-				filter->shade(depthTex, colorTex, zoomFactor*(m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //DGM FIXME
+				filter->shade(depthTex, colorTex, zoomFactor*(m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //TODO: doesn't work well with EDL in perspective mode!
 
 				ccGLUtils::CatchGLError("ccGLWindow::renderToFile/glFilter shade");
 
@@ -3528,9 +3528,9 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 			glEnable(GL_BLEND);
 
 			//inverted color with a bit of transparency
-			const float invertedCol[4] = {	1.0-static_cast<float>(col[0])/255.0,
-											1.0-static_cast<float>(col[0])/255.0,
-											1.0-static_cast<float>(col[0])/255.0,
+			const float invertedCol[4] = {	1.0f-static_cast<float>(col[0])/255.0f,
+											1.0f-static_cast<float>(col[0])/255.0f,
+											1.0f-static_cast<float>(col[0])/255.0f,
 											bkgAlpha };
 			glColor4fv(invertedCol);
 

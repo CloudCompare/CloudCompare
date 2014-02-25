@@ -145,7 +145,7 @@ bool ccClippingBoxTool::setAssociatedEntity(ccHObject* entity)
 	}
 
 	//we can't handle other entities than clouds for the moment
-	if (!entity->isA(CC_POINT_CLOUD))
+	if (!entity->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccLog::Warning(QString("[Clipping box] Only points clouds are handled! Entity '%1' will be ignored.").arg(entity->getName()));
 		return false;
@@ -267,7 +267,7 @@ void ccClippingBoxTool::exportCloud()
 
 	ccHObject* obj = m_clipBox->getAssociatedEntity();
 
-	if (obj && obj->isKindOf(CC_POINT_CLOUD))
+	if (obj && obj->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
 		if (!cloud)
@@ -286,7 +286,7 @@ void ccClippingBoxTool::extractContour()
 
 	ccHObject* obj = m_clipBox->getAssociatedEntity();
 
-	if (obj && obj->isKindOf(CC_POINT_CLOUD))
+	if (obj && obj->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
 		if (cloud)
@@ -354,7 +354,7 @@ void ccClippingBoxTool::exportMultCloud()
 		return;
 
 	ccHObject* obj = m_clipBox->getAssociatedEntity();
-	if (!obj || !obj->isA(CC_POINT_CLOUD))
+	if (!obj || !obj->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccLog::Warning("Only works with point clouds!");
 		return;
@@ -362,7 +362,7 @@ void ccClippingBoxTool::exportMultCloud()
 	ccPointCloud* cloud = static_cast<ccPointCloud*>(obj);
 
 	ccClippingBoxRepeatDlg repeatDlg(MainWindow::TheInstance()/*this*/);
-	repeatDlg.randomColorCheckBox->setEnabled(cloud->isA(CC_POINT_CLOUD)); //random colors is only available for real point clouds!
+	repeatDlg.randomColorCheckBox->setEnabled(cloud->isA(CC_TYPES::POINT_CLOUD)); //random colors is only available for real point clouds!
 	if (s_maxEdgeLength < 0)
 		s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/100.0;
 	repeatDlg.maxEdgeLengthDoubleSpinBox->setValue(s_maxEdgeLength);
@@ -557,7 +557,7 @@ void ccClippingBoxTool::exportMultCloud()
 							
 							if (sliceCloud)
 							{
-								if (generateRandomColors && cloud->isA(CC_POINT_CLOUD))
+								if (generateRandomColors && cloud->isA(CC_TYPES::POINT_CLOUD))
 								{
 									colorType col[3];
 									ccColor::Generator::Random(col);
@@ -707,7 +707,7 @@ void ccClippingBoxTool::exportMultCloud()
 		//				ccGenericPointCloud* sliceCloud = cloud->createNewCloudFromVisibilitySelection(false);
 		//				if (sliceCloud)
 		//				{
-		//					if (generateRandomColors && cloud->isA(CC_POINT_CLOUD))
+		//					if (generateRandomColors && cloud->isA(CC_TYPES::POINT_CLOUD))
 		//					{
 		//						colorType col[3];
 		//						ccColor::Generator::Random(col);

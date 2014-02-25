@@ -41,7 +41,7 @@
 
 ccMesh::ccMesh(ccGenericPointCloud* vertices)
 	: ccGenericMesh("Mesh")
-	, m_associatedCloud(vertices)
+	, m_associatedCloud(0)
 	, m_triNormals(0)
 	, m_texCoords(0)
 	, m_materials(0)
@@ -51,13 +51,15 @@ ccMesh::ccMesh(ccGenericPointCloud* vertices)
 	, m_texCoordIndexes(0)
 	, m_triNormalIndexes(0)
 {
+	setAssociatedCloud(vertices);
+
 	m_triVertIndexes = new triangleIndexesContainer();
 	m_triVertIndexes->link();
 }
 
 ccMesh::ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertices)
 	: ccGenericMesh("Mesh")
-	, m_associatedCloud(giVertices)
+	, m_associatedCloud(0)
 	, m_triNormals(0)
 	, m_texCoords(0)
 	, m_materials(0)
@@ -67,15 +69,17 @@ ccMesh::ccMesh(CCLib::GenericIndexedMesh* giMesh, ccGenericPointCloud* giVertice
 	, m_texCoordIndexes(0)
 	, m_triNormalIndexes(0)
 {
+	setAssociatedCloud(giVertices);
+
 	m_triVertIndexes = new triangleIndexesContainer();
 	m_triVertIndexes->link();
 
-	unsigned i,triNum = giMesh->size();
+	unsigned triNum = giMesh->size();
 	if (!reserve(triNum))
 		return;
 
 	giMesh->placeIteratorAtBegining();
-	for (i=0;i<triNum;++i)
+	for (unsigned i=0; i<triNum; ++i)
 	{
 		const CCLib::TriangleSummitsIndexes* tsi = giMesh->getNextTriangleIndexes();
 		addTriangle(tsi->i1,tsi->i2,tsi->i3);
@@ -108,6 +112,25 @@ ccMesh::~ccMesh()
 		m_triNormalIndexes->release();
 }
 
+void ccMesh::setAssociatedCloud(ccGenericPointCloud* cloud)
+{
+	m_associatedCloud = cloud;
+
+	if (m_associatedCloud)
+		m_associatedCloud->addDependency(this,DP_NOTIFY_OTHER_ON_UPDATE);
+
+	m_bBox.setValidity(false);
+}
+
+void ccMesh::onUpdateOf(ccHObject* obj)
+{
+	if (obj == m_associatedCloud)
+	{
+		m_bBox.setValidity(false);
+		notifyGeometryUpdate(); //for sub-meshes
+	}
+}
+
 bool ccMesh::hasColors() const
 {
 	return (m_associatedCloud ? m_associatedCloud->hasColors() : false);
@@ -135,7 +158,7 @@ bool ccMesh::computeNormals(bool perVertex)
 
 bool ccMesh::computePerVertexNormals()
 {
-    if (!m_associatedCloud || !m_associatedCloud->isA(CC_POINT_CLOUD)) //TODO
+    if (!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
 	{
 		ccLog::Warning("[ccMesh::computePerVertexNormals] Vertex set is not a standard cloud?!");
         return false;
@@ -423,7 +446,7 @@ void ccMesh::applyGLTransformation(const ccGLMatrix& trans)
 	//vertices should be handled another way!
 
     //we must take care of the triangle normals!
-	if (m_triNormals && (!getParent() || !getParent()->isKindOf(CC_MESH)))
+	if (m_triNormals && (!getParent() || !getParent()->isKindOf(CC_TYPES::MESH)))
     {
         bool recoded = false;
 
@@ -574,7 +597,7 @@ bool ccMesh::laplacianSmooth(	unsigned nbIteration,
 		}
 	}
 
-	m_associatedCloud->updateModificationTime();
+	m_associatedCloud->notifyGeometryUpdate();
 
 	if (hasNormals())
 		computeNormals(!hasTriNormals());
@@ -654,7 +677,7 @@ ccMesh* ccMesh::clone(	ccGenericPointCloud* vertices/*=0*/,
 						rc->addPointIndex(i); //can't fail, see above
 
 				//and the associated vertices set
-				assert(m_associatedCloud->isA(CC_POINT_CLOUD));
+				assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
 				newVertices = static_cast<ccPointCloud*>(m_associatedCloud)->partialClone(rc);
 				if (newVertices && newVertices->size() < rc->size())
 				{
@@ -900,27 +923,24 @@ void ccMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3&
 
 void ccMesh::refreshBB()
 {
-	if (!m_associatedCloud)
+	if (!m_associatedCloud || m_bBox.isValid())
 		return;
 
-	if (!m_bBox.isValid() || getLastModificationTime() < m_associatedCloud->getLastModificationTime_recursive())
-	{
-		m_bBox.clear();
+	m_bBox.clear();
 
-		unsigned count = m_triVertIndexes->currentSize();
-		m_triVertIndexes->placeIteratorAtBegining();
-		for (unsigned i=0;i<count;++i)
-		{
-			const unsigned* tri = m_triVertIndexes->getCurrentValue();
-			assert(tri[0]<m_associatedCloud->size() && tri[1]<m_associatedCloud->size() && tri[2]<m_associatedCloud->size());
-			m_bBox.add(*m_associatedCloud->getPoint(tri[0]));
-			m_bBox.add(*m_associatedCloud->getPoint(tri[1]));
-			m_bBox.add(*m_associatedCloud->getPoint(tri[2]));
-			m_triVertIndexes->forwardIterator();
-		}
-	
-		updateModificationTime();
+	unsigned count = m_triVertIndexes->currentSize();
+	m_triVertIndexes->placeIteratorAtBegining();
+	for (unsigned i=0; i<count; ++i)
+	{
+		const unsigned* tri = m_triVertIndexes->getCurrentValue();
+		assert(tri[0]<m_associatedCloud->size() && tri[1]<m_associatedCloud->size() && tri[2]<m_associatedCloud->size());
+		m_bBox.add(*m_associatedCloud->getPoint(tri[0]));
+		m_bBox.add(*m_associatedCloud->getPoint(tri[1]));
+		m_bBox.add(*m_associatedCloud->getPoint(tri[2]));
+		m_triVertIndexes->forwardIterator();
 	}
+
+	notifyGeometryUpdate();
 }
 
 void ccMesh::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
@@ -965,7 +985,7 @@ bool ccMesh::reserve(unsigned n)
 bool ccMesh::resize(unsigned n)
 {
 	m_bBox.setValidity(false);
-	updateModificationTime();
+	notifyGeometryUpdate();
 
 	if (m_triMtlIndexes)
 	{
@@ -1010,7 +1030,7 @@ CCLib::TriangleSummitsIndexes* ccMesh::getNextTriangleIndexes()
 
 unsigned ccMesh::getUniqueIDForDisplay() const
 {
-	if (m_parent && m_parent->getParent() && m_parent->getParent()->isA(CC_FACET))
+	if (m_parent && m_parent->getParent() && m_parent->getParent()->isA(CC_TYPES::FACET))
 		return m_parent->getParent()->getUniqueID();
 	else
 		return getUniqueID();
@@ -1087,7 +1107,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		if (glParams.showSF)
 		{
-			assert(m_associatedCloud->isA(CC_POINT_CLOUD));
+			assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
 			ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
 
 			greyForNanScalarValues = (cloud->getCurrentDisplayedScalarField() && cloud->getCurrentDisplayedScalarField()->areNaNValuesShownInGrey());
@@ -1130,7 +1150,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else
 			{
-				assert(m_associatedCloud->isA(CC_POINT_CLOUD));
+				assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
 				rgbColorsTable = static_cast<ccPointCloud*>(m_associatedCloud)->rgbColors();
 			}
 		}
@@ -1152,7 +1172,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		ccNormalVectors* compressedNormals = 0;
 		if (glParams.showNorms)
 		{
-			assert(m_associatedCloud->isA(CC_POINT_CLOUD));
+			assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
 			normalsIndexesTable = static_cast<ccPointCloud*>(m_associatedCloud)->normals();
 			compressedNormals = ccNormalVectors::GetUniqueInstance();
 		}
@@ -1883,7 +1903,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				{
 					newTriNormals->resize(newTriNormals->currentSize()); //smaller so it should always be ok!
 					newMesh->setTriNormsTable(newTriNormals);
-					newMesh->addChild(newTriNormals,true);
+					newMesh->addChild(newTriNormals);
 					newTriNormals->release();
 					newTriNormals=0;
 				}
@@ -1891,7 +1911,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				if (newTriTexIndexes)
 				{
 					newMesh->setTexCoordinatesTable(newTriTexIndexes);
-					newMesh->addChild(newTriTexIndexes,true);
+					newMesh->addChild(newTriTexIndexes);
 					newTriTexIndexes->release();
 					newTriTexIndexes=0;
 				}
@@ -1899,7 +1919,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 				if (newMaterials)
 				{
 					newMesh->setMaterialSet(newMaterials);
-					newMesh->addChild(newMaterials,true);
+					newMesh->addChild(newMaterials);
 					newMaterials->release();
 					newMaterials=0;
 				}
@@ -1924,7 +1944,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 
 	//we must modify eventual sub-meshes!
 	ccHObject::Container subMeshes;
-	if (filterChildren(subMeshes,false,CC_SUB_MESH) != 0)
+	if (filterChildren(subMeshes,false,CC_TYPES::SUB_MESH) != 0)
 	{
 		//create index map
 		ccSubMesh::IndexMap* indexMap = new ccSubMesh::IndexMap;
@@ -1966,18 +1986,17 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 			for (size_t i=0; i<subMeshes.size(); ++i)
 			{
 				ccSubMesh* subMesh = static_cast<ccSubMesh*>(subMeshes[i]);
-
-				ccGenericMesh* subMesh2 = subMesh->createNewSubMeshFromSelection(removeSelectedFaces,indexMap);
+				ccSubMesh* subMesh2 = subMesh->createNewSubMeshFromSelection(removeSelectedFaces,indexMap);
 
 				if (subMesh->size() == 0) //no more faces in current sub-mesh?
 				{
-					removeChild(subMesh,true);
+					detachChild(subMesh); //FIXME: removeChild instead?
 					subMesh = 0;
 				}
 
 				if (subMesh2)
 				{
-					static_cast<ccSubMesh*>(subMesh2)->setAssociatedMesh(newMesh);
+					subMesh2->setAssociatedMesh(newMesh);
 					newMesh->addChild(subMesh2);
 				}
 			}
@@ -2019,7 +2038,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		}
 
 		resize(lastTri);
-		updateModificationTime();
+		notifyGeometryUpdate();
 	}
 
 	return newMesh;
@@ -2513,7 +2532,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		enableStippling(stippling);
 	}
 
-	updateModificationTime();
+	notifyGeometryUpdate();
 
 	return true;
 }
@@ -2783,7 +2802,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 		return false;
 	}
 
-	if (!getAssociatedCloud() || !getAssociatedCloud()->isA(CC_POINT_CLOUD))
+	if (!getAssociatedCloud() || !getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccLog::Error("[ccMesh::pushSubdivide] Vertices set must be a true point cloud!");
 		return false;
@@ -2962,7 +2981,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 	}
 
 	ccPointCloud* resultVertices = 0;
-	if (vertices->isA(CC_POINT_CLOUD))
+	if (vertices->isA(CC_TYPES::POINT_CLOUD))
 		resultVertices = static_cast<ccPointCloud*>(vertices)->cloneThis();
 	else
 		resultVertices = ccPointCloud::From(vertices);
@@ -3175,7 +3194,7 @@ bool ccMesh::convertMaterialsToVertexColors()
 		return false;
 	}
 
-	if (!m_associatedCloud->isA(CC_POINT_CLOUD))
+	if (!m_associatedCloud->isA(CC_TYPES::POINT_CLOUD))
 	{
 		ccLog::Warning("[ccMesh::convertMaterialsToVertexColors] Need a true point cloud as vertices!");
 		return false;

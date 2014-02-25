@@ -174,10 +174,10 @@ public:
 		/** This scalar field will be used by the ChunkedPointCloud::getPointScalarValue method.
 			\param index a scalar field index (or -1 if none)
 		**/
-		inline virtual void setCurrentOutScalarField(int index) {m_currentOutScalarFieldIndex=index;};
+		inline virtual void setCurrentOutScalarField(int index) { m_currentOutScalarFieldIndex=index; }
 
         //! Returns current OUTPUT scalar field index (or -1 if none)
-		inline virtual int getCurrentOutScalarFieldIndex() {return m_currentOutScalarFieldIndex;};
+		inline virtual int getCurrentOutScalarFieldIndex() { return m_currentOutScalarFieldIndex; }
 
 		//! Sets both the INPUT & OUTPUT scalar field
 		/** This scalar field will be used by both ChunkedPointCloud::getPointScalarValue

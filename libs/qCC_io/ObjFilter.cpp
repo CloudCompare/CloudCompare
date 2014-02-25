@@ -46,7 +46,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
 
-	if (!entity->isKindOf(CC_MESH))
+	if (!entity->isKindOf(CC_TYPES::MESH))
 		return CC_FERR_BAD_ENTITY_TYPE;
 
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
@@ -183,7 +183,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 		ccGenericMesh* subMesh = subMeshes.back();
 		subMeshes.pop_back();
 
-		if (subMesh->isKindOf(CC_MESH))
+		if (subMesh->isKindOf(CC_TYPES::MESH))
 		{
 			ccGenericMesh* st = static_cast<ccGenericMesh*>(subMesh);
 			if (fprintf(theFile,"g %s\n",qPrintable(st->getName())) < 0)
@@ -948,20 +948,20 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			{
 				baseMesh->setTriNormsTable(normals);
 				baseMesh->showTriNorms(true);
-				baseMesh->addChild(normals,true);
+				baseMesh->addChild(normals);
 			}
 			if (materials)
 			{
 				baseMesh->setMaterialSet(materials);
 				baseMesh->showMaterials(true);
-				baseMesh->addChild(materials,true);
+				baseMesh->addChild(materials);
 			}
 			if (texCoords)
 			{
 				if (materials)
 				{
 					baseMesh->setTexCoordinatesTable(texCoords);
-					baseMesh->addChild(texCoords,true);
+					baseMesh->addChild(texCoords);
 				}
 				else
 				{

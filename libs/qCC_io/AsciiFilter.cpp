@@ -57,9 +57,9 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 	if (saveDialog->autoShow() && !saveDialog->exec())
 		return CC_FERR_CANCELED_BY_USER;
 
-    if (!entity->isKindOf(CC_POINT_CLOUD))
+    if (!entity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
-		if (entity->isA(CC_HIERARCHY_OBJECT)) //multiple clouds?
+		if (entity->isA(CC_TYPES::HIERARCHY_OBJECT)) //multiple clouds?
 		{
 			QFileInfo fi(filename);
 			QString extension = fi.suffix();
@@ -73,7 +73,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 				for (unsigned i=0; i<count; ++i)
 				{
 					ccHObject* child = entity->getChild(i);
-					if (child->isKindOf(CC_POINT_CLOUD))
+					if (child->isKindOf(CC_TYPES::POINT_CLOUD))
 						++cloudCount;
 				}
 			}
@@ -85,7 +85,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 				for (unsigned i=0; i<count; ++i)
 				{
 					ccHObject* child = entity->getChild(i);
-					if (child->isKindOf(CC_POINT_CLOUD))
+					if (child->isKindOf(CC_TYPES::POINT_CLOUD))
 					{
 						QString subFilename = path+QString("/");
 						subFilename += QString(baseName).replace("cloudname",child->getName(),Qt::CaseInsensitive);
@@ -128,7 +128,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
     bool writeColors = cloud->hasColors();
     bool writeNorms = cloud->hasNormals();
 	std::vector<CCLib::ScalarField*> theScalarFields;
-    if (cloud->isKindOf(CC_POINT_CLOUD))
+    if (cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
 		for (unsigned i=0; i<ccCloud->getNumberOfScalarFields(); ++i)
@@ -690,7 +690,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 					cloudDesc.cloud->showSF(true);
 				}
 				//we add this cloud to the output container
-				container.addChild(cloudDesc.cloud,true);
+				container.addChild(cloudDesc.cloud);
 				cloudDesc.reset();
 
         		//and create new one
@@ -845,7 +845,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 			cloudDesc.cloud->showSF(true);
 		}
 
-		container.addChild(cloudDesc.cloud,true);
+		container.addChild(cloudDesc.cloud);
     }
 
     return result;

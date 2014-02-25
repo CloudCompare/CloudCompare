@@ -146,7 +146,7 @@ int X3DXIOTNodeHandler::startCoordinate(const X3DAttributes &attr)
 	m_currentLeaf->addChild(cloud);
 
 	//cloud = parent vertices?
-	if (m_currentLeaf->isKindOf(CC_MESH))
+	if (m_currentLeaf->isKindOf(CC_TYPES::MESH))
 	{
 		ccMesh* mesh = ccHObjectCaster::ToMesh(m_currentLeaf);
 		if (mesh && mesh->getAssociatedCloud()==0)
@@ -166,7 +166,7 @@ int X3DXIOTNodeHandler::endCoordinate()
 	{
 		ccHObject* parent = m_currentLeaf->getParent();
 
-		assert(m_currentLeaf->isKindOf(CC_POINT_CLOUD));
+		assert(m_currentLeaf->isKindOf(CC_TYPES::POINT_CLOUD));
 		m_currentLeaf=parent;
 	}
 	else
@@ -327,8 +327,8 @@ int X3DXIOTNodeHandler::endIndexedFaceSet()
 	{
 		ccHObject* parent = m_currentLeaf->getParent();
 
-		assert(m_currentLeaf->isA(CC_MESH));
-		if (m_currentLeaf->isA(CC_MESH))
+		assert(m_currentLeaf->isA(CC_TYPES::MESH));
+		if (m_currentLeaf->isA(CC_TYPES::MESH))
 		{
 			ccMesh* mesh = static_cast<ccMesh*>(m_currentLeaf);
 			if (!mesh->getAssociatedCloud() || mesh->getAssociatedCloud()->size()==0)

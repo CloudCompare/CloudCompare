@@ -52,7 +52,7 @@ public:
 	ccBox(QString name = QString("Box"));
 
     //! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_BOX; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::BOX; }
 
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Box"; }

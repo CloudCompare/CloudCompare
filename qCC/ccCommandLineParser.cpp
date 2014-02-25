@@ -225,7 +225,7 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 	QString cloudName = entity->getName();
 	if (cloudName.isEmpty())
 		cloudName = entDesc.basename;
-	bool isCloud = entity->isA(CC_POINT_CLOUD);
+	bool isCloud = entity->isA(CC_TYPES::POINT_CLOUD);
 	if (isCloud)
 	{
 		CloudDesc& cloudDesc = static_cast<CloudDesc&>(entDesc);
@@ -280,23 +280,23 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 
 	//look for clouds inside loaded DB
 	ccHObject::Container clouds;
-	db->filterChildren(clouds,false,CC_POINT_CLOUD);
+	db->filterChildren(clouds,false,CC_TYPES::POINT_CLOUD);
 	size_t count = clouds.size();
 	for (size_t i=0;i<count;++i)
 	{
 		ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[0]);
-		pc->setFlagState(CC_FATHER_DEPENDENT,false);
+		db->detachChild(pc);
 		Print(QString("Found one cloud with %1 points").arg(pc->size()));
 		m_clouds.push_back(CloudDesc(pc,filename,count == 1 ? -1 : static_cast<int>(i)));
 	}
 
 	//look for meshes inside loaded DB
 	ccHObject::Container meshes;
-	db->filterChildren(meshes,false,CC_MESH);
+	db->filterChildren(meshes,false,CC_TYPES::MESH);
 	if (!meshes.empty())
 	{
 		ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(meshes[0]);
-		mesh->setFlagState(CC_FATHER_DEPENDENT,false);
+		db->detachChild(mesh);
 		Print(QString("Found one mesh with %1 faces and %2 vertices").arg(mesh->size()).arg(mesh->getAssociatedCloud()->size()));
 		m_meshes.push_back(MeshDesc(mesh,filename));
 	}

@@ -41,7 +41,7 @@ public:
 	ccSubMesh(ccMesh* parentMesh);
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_SUB_MESH; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::SUB_MESH; }
 
 	//inherited methods (ccHObject)
     virtual ccBBox getMyOwnBB();
@@ -160,6 +160,7 @@ protected:
     //inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual void onUpdateOf(ccHObject* obj);
 
 	//! Associated mesh
 	ccMesh* m_associatedMesh;

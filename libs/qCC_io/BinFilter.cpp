@@ -38,6 +38,7 @@
 #include <ccMaterialSet.h>
 #include <cc2DLabel.h>
 #include <ccFacet.h>
+#include <ccSensor.h>
 
 //system
 #include <set>
@@ -193,7 +194,7 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 
 		//we check objects that have links to other entities (meshes, polylines, etc.)
 		std::set<const ccHObject*> dependencies;
-		if (currentObject->isA(CC_MESH) || currentObject->isKindOf(CC_PRIMITIVE))
+		if (currentObject->isA(CC_TYPES::MESH) || currentObject->isKindOf(CC_TYPES::PRIMITIVE))
 		{
 			ccMesh* mesh = ccHObjectCaster::ToMesh(currentObject);
 			if (mesh->getAssociatedCloud())
@@ -205,11 +206,11 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 			if (mesh->getTexCoordinatesTable())
 				dependencies.insert(mesh->getTexCoordinatesTable());
 		}
-		else if (currentObject->isA(CC_SUB_MESH))
+		else if (currentObject->isA(CC_TYPES::SUB_MESH))
 		{
 			dependencies.insert(currentObject->getParent());
 		}
-		else if (currentObject->isKindOf(CC_POLY_LINE))
+		else if (currentObject->isKindOf(CC_TYPES::POLY_LINE))
 		{
 			CCLib::GenericIndexedCloudPersist* cloud = static_cast<ccPolyline*>(currentObject)->getAssociatedCloud();
 			ccPointCloud* pc = dynamic_cast<ccPointCloud*>(cloud);
@@ -218,7 +219,12 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 			else
 				ccLog::Warning(QString("[BIN] Poyline '%1' is associated to an unhandled vertices structure?!").arg(currentObject->getName()));
 		}
-		else if (currentObject->isA(CC_2D_LABEL))
+		else if (currentObject->isKindOf(CC_TYPES::SENSOR))
+		{
+			ccIndexedTransformationBuffer* buffer = static_cast<ccSensor*>(currentObject)->getPositions();
+			dependencies.insert(buffer);
+		}
+		else if (currentObject->isA(CC_TYPES::LABEL_2D))
 		{
 			cc2DLabel* label = static_cast<cc2DLabel*>(currentObject);
 			for (unsigned i=0;i<label->size();++i)
@@ -227,7 +233,7 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 				dependencies.insert(pp.cloud);
 			}
 		}
-		else if (currentObject->isA(CC_FACET))
+		else if (currentObject->isA(CC_TYPES::FACET))
 		{
 			ccFacet* facet = static_cast<ccFacet*>(currentObject);
 			if (facet->getOriginPoints())
@@ -267,7 +273,6 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	ccLog::Print("[BIN] Opening file '%s'...",filename);
-
 
 	//opening file
 	QFile in(filename);
@@ -368,8 +373,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 	unsigned lastUniqueIDBeforeLoad = ccObject::GetLastUniqueID();
 
 	//we read first entity type
-	unsigned classID = 0;
-	if (!ccObject::ReadClassIDFromFile(classID, in, static_cast<short>(binVersion)))
+	CC_CLASS_ENUM classID = ccObject::ReadClassIDFromFile(in, static_cast<short>(binVersion));
+	if (classID == CC_TYPES::OBJECT)
 		return CC_FERR_CONSOLE_ERROR;
 
 	ccHObject* root = ccHObject::New(classID);
@@ -397,15 +402,15 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 
 		assert(currentObject);
 		//we check objects that have links to other entities (meshes, polylines, etc.)
-		if (currentObject->isKindOf(CC_MESH))
+		if (currentObject->isKindOf(CC_TYPES::MESH))
 		{
 			//specific case: mesh groups are deprecated!
-			if (currentObject->isA(CC_MESH_GROUP))
+			if (currentObject->isA(CC_TYPES::MESH_GROUP))
 			{
 				//TODO
 				ccLog::Warning(QString("Mesh groups are deprecated! Entity %1 should be ignored...").arg(currentObject->getName()));
 			}
-			else if (currentObject->isA(CC_SUB_MESH))
+			else if (currentObject->isA(CC_TYPES::SUB_MESH))
 			{
 				ccSubMesh* subMesh = ccHObjectCaster::ToSubMesh(currentObject);
 
@@ -415,7 +420,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				if (meshID > 0)
 				{
 					ccHObject* mesh = root->find(static_cast<int>(meshID));
-					if (mesh && mesh->isA(CC_MESH))
+					if (mesh && mesh->isA(CC_TYPES::MESH))
 					{
 						subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(mesh));
 					}
@@ -423,7 +428,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					{
 						//we have a problem here ;)
 						//normally, the associated mesh should be the sub-mesh's parent!
-						if (subMesh->getParent() && subMesh->getParent()->isA(CC_MESH))
+						if (subMesh->getParent() && subMesh->getParent()->isA(CC_TYPES::MESH))
 						{
 							subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(subMesh->getParent()));
 						}
@@ -438,7 +443,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					}
 				}
 			}
-			else if (currentObject->isA(CC_MESH) || currentObject->isKindOf(CC_PRIMITIVE)) //CC_MESH or CC_PRIMITIVE!
+			else if (currentObject->isA(CC_TYPES::MESH) || currentObject->isKindOf(CC_TYPES::PRIMITIVE)) //CC_TYPES::MESH or CC_TYPES::PRIMITIVE!
 			{
 				ccMesh* mesh = ccHObjectCaster::ToMesh(currentObject);
 				assert(mesh);
@@ -448,7 +453,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				if (cloudID > 0)
 				{
 					ccHObject* cloud = root->find(static_cast<int>(cloudID));
-					if (cloud && cloud->isKindOf(CC_POINT_CLOUD))
+					if (cloud && cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 					{
 						mesh->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
 					}
@@ -471,7 +476,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				if (matSetID > 0)
 				{
 					materials = root->find(static_cast<int>(matSetID));
-					if (materials && materials->isA(CC_MATERIAL_SET))
+					if (materials && materials->isA(CC_TYPES::MATERIAL_SET))
 						mesh->setMaterialSet(static_cast<ccMaterialSet*>(materials),false);
 					else
 					{
@@ -493,7 +498,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				if (triNormsTableID > 0)
 				{
 					triNormsTable = root->find(static_cast<int>(triNormsTableID));
-					if (triNormsTable && triNormsTable->isA(CC_NORMAL_INDEXES_ARRAY))
+					if (triNormsTable && triNormsTable->isA(CC_TYPES::NORMAL_INDEXES_ARRAY))
 					{
 						mesh->setTriNormsTable(static_cast<NormsIndexesTableType*>(triNormsTable),false);
 					}
@@ -517,7 +522,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				if (texCoordArrayID > 0)
 				{
 					texCoordsTable = root->find(static_cast<int>(texCoordArrayID));
-					if (texCoordsTable && texCoordsTable->isA(CC_TEX_COORDS_ARRAY))
+					if (texCoordsTable && texCoordsTable->isA(CC_TYPES::TEX_COORDS_ARRAY))
 						mesh->setTexCoordinatesTable(static_cast<TextureCoordsContainer*>(texCoordsTable),false);
 					else
 					{
@@ -580,12 +585,12 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				}
 			}
 		}
-		else if (currentObject->isKindOf(CC_POLY_LINE))
+		else if (currentObject->isKindOf(CC_TYPES::POLY_LINE))
 		{
 			ccPolyline* poly = static_cast<ccPolyline*>(currentObject);
 			intptr_t cloudID = (intptr_t)poly->getAssociatedCloud();
 			ccHObject* cloud = root->find(static_cast<int>(cloudID));
-			if (cloud && cloud->isKindOf(CC_POINT_CLOUD))
+			if (cloud && cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 				poly->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
 			else
 			{
@@ -597,17 +602,34 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				return CC_FERR_MALFORMED_FILE;
 			}
 		}
-		else if (currentObject->isA(CC_2D_LABEL))
+		else if (currentObject->isKindOf(CC_TYPES::SENSOR))
+		{
+			ccSensor* sensor = static_cast<ccSensor*>(currentObject);
+			intptr_t bufferID = (intptr_t)sensor->getPositions();
+			ccHObject* buffer = root->find(static_cast<int>(bufferID));
+			if (buffer && buffer->isKindOf(CC_TYPES::TRANS_BUFFER))
+				sensor->setPositions(ccHObjectCaster::ToTransBuffer(buffer));
+			else
+			{
+				//we have a problem here ;)
+				sensor->setPositions(0);
+				//DGM: can't delete it, too dangerous (bad pointers ;)
+				//delete root;
+				ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
+				return CC_FERR_MALFORMED_FILE;
+			}
+		}
+		else if (currentObject->isA(CC_TYPES::LABEL_2D))
 		{
 			cc2DLabel* label = static_cast<cc2DLabel*>(currentObject);
 			std::vector<cc2DLabel::PickedPoint> correctedPickedPoints;
 			//we must check all label 'points'!
-			for (unsigned i=0;i<label->size();++i)
+			for (unsigned i=0; i<label->size(); ++i)
 			{
 				const cc2DLabel::PickedPoint& pp = label->getPoint(i);
 				intptr_t cloudID = (intptr_t)pp.cloud;
 				ccHObject* cloud = root->find(static_cast<int>(cloudID));
-				if (cloud && cloud->isKindOf(CC_POINT_CLOUD))
+				if (cloud && cloud->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
 					ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
 					assert(genCloud->size()>pp.index);
@@ -619,11 +641,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find cloud (ID=%1) associated to label '%2' in the file!").arg(cloudID).arg(label->getName()));
 					if (label->getParent())
 						label->getParent()->removeChild(label);
-					if (!label->getFlagState(CC_FATHER_DEPENDENT))
-					{
-						//DGM: can't delete it, too dangerous (bad pointers ;)
-						//delete label;
-					}
+					//DGM: can't delete it, too dangerous (bad pointers ;)
+					//delete label;
 					label=0;
 					break;
 				}
@@ -634,14 +653,14 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				assert(correctedPickedPoints.size() == label->size());
 				bool visible = label->isVisible();
 				QString originalName(label->getRawName());
-				label->clear();
-				for (unsigned i=0;i<correctedPickedPoints.size();++i)
+				label->clear(true);
+				for (unsigned i=0; i<correctedPickedPoints.size(); ++i)
 					label->addPoint(correctedPickedPoints[i].cloud,correctedPickedPoints[i].index);
 				label->setVisible(visible);
 				label->setName(originalName);
 			}
 		}
-		else if (currentObject->isA(CC_FACET))
+		else if (currentObject->isA(CC_TYPES::FACET))
 		{
 			ccFacet* facet = ccHObjectCaster::ToFacet(currentObject);
 
@@ -651,7 +670,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				if (cloudID > 0)
 				{
 					ccHObject* cloud = root->find(static_cast<int>(cloudID));
-					if (cloud && cloud->isA(CC_POINT_CLOUD))
+					if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
 						facet->setOriginPoints(ccHObjectCaster::ToPointCloud(cloud));
 					else
 					{
@@ -667,7 +686,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				if (cloudID > 0)
 				{
 					ccHObject* cloud = root->find(static_cast<int>(cloudID));
-					if (cloud && cloud->isA(CC_POINT_CLOUD))
+					if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
 						facet->setContourVertices(ccHObjectCaster::ToPointCloud(cloud));
 					else
 					{
@@ -683,7 +702,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				if (polyID > 0)
 				{
 					ccHObject* poly = root->find(static_cast<int>(polyID));
-					if (poly && poly->isA(CC_POLY_LINE))
+					if (poly && poly->isA(CC_TYPES::POLY_LINE))
 						facet->setContour(ccHObjectCaster::ToPolyline(poly));
 					else
 					{
@@ -699,7 +718,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				if (polyID > 0)
 				{
 					ccHObject* poly = root->find(static_cast<int>(polyID));
-					if (poly && poly->isA(CC_MESH))
+					if (poly && poly->isA(CC_TYPES::MESH))
 					{
 						facet->setPolygon(ccHObjectCaster::ToMesh(poly));
 					}
@@ -731,7 +750,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			toCheck.push_back(currentObject->getChild(i));
 	}
 
-	if (root->isA(CC_HIERARCHY_OBJECT))
+	if (root->isA(CC_TYPES::HIERARCHY_OBJECT))
 	{
 		//transfer children to container
 		root->transferChildren(container,true);

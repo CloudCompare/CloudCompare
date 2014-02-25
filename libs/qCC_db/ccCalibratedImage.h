@@ -44,7 +44,7 @@ public:
 	ccCalibratedImage();
 
     //! Returns unique class ID
-    virtual CC_CLASS_ENUM getClassID() const {return CC_CALIBRATED_IMAGE;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CALIBRATED_IMAGE; }
 
 	//! Sets camera focal (in pixels)
 	/** \param focal_pix focal expressed in pixels
@@ -92,11 +92,9 @@ public:
 	struct KeyPoint
 	{
 		//! 'x' coordinate in pixels
-		float x;
-		
+		float x;		
 		//! 'y' coordinate in pixels
 		float y;
-
 		//! Index in associated point cloud
 		unsigned index;
 
@@ -105,16 +103,14 @@ public:
 			: x(0)
 			, y(0)
 			, index(0)
-		{
-		}
+		{}
 
 		//! Constructor from a pixel and its index in associated cloud
 		KeyPoint(float Px, float Py, unsigned indexInCloud)
 			: x(Px)
 			, y(Py)
 			, index(indexInCloud)
-		{
-		};
+		{}
 	};
 
 	//! Projective ortho-rectification (as cloud)

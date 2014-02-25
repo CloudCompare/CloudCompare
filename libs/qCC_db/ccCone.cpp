@@ -212,7 +212,7 @@ bool ccCone::buildUp()
 		}
 	}
 
-	updateModificationTime();
+	notifyGeometryUpdate();
 	showTriNorms(true);
 
 	return true;
@@ -241,11 +241,11 @@ bool ccCone::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	inStream >> m_bottomRadius;
-	inStream >> m_topRadius;
-	inStream >> m_xOff;
-	inStream >> m_yOff;
-	inStream >> m_height;
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_bottomRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_topRadius);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_xOff);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_yOff);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_height);
 
 	return true;
 }

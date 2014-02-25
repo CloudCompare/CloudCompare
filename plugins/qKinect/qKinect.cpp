@@ -558,36 +558,35 @@ void qKinect::grabCloud()
 
 				mat[4] = 0.0f;
 				mat[5] = 0.0f;
-				mat[6] = 1.0f;
+				mat[6] = -1.0f;
 
 				mat[8] = 0.0f;
-				mat[9] = -1.0f;
+				mat[9] = 1.0f;
 				mat[10] = 0.0f;
 
 				mat[15] = 1.0f;
 			}
-			sensor->setOrientationMatrix(rot);
+			sensor->setRigidTransformation(rot);
 			sensor->setDeltaPhi(0.0017f);
 			sensor->setDeltaTheta(0.0017f);
 			sensor->setUncertainty(1e-3f);
 			{
-				int errorCode=0;
+				int errorCode = 0;
 				CCLib::SimpleCloud* cloud = sensor->project(depthMap,errorCode,true);
 				if (cloud)
 					delete cloud;
-				cloud=0;
+				cloud = 0;
 				if (errorCode == 0)
 				{
 					sensor->setName("Kinect");
 					sensor->setGraphicScale(20.0f);
-					sensor->updateGraphicRepresentation();
 					sensor->setVisible(true);
 					depthMap->addChild(sensor);
 				}
 				else
 				{
 					delete sensor;
-					sensor=0;
+					sensor = 0;
 				}
 			}
 			//selectedEntities.push_back(depthMap);
@@ -598,7 +597,7 @@ void qKinect::grabCloud()
 		{
 			//not enough memory
 			delete depthMap;
-			depthMap=0;
+			depthMap = 0;
 			//result = -5;
 		}
     }

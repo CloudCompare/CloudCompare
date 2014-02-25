@@ -45,7 +45,7 @@ public:
 	//inherited from ccObject
     virtual QString getName() const;
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const {return CC_2D_LABEL;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::LABEL_2D; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Returns 'raw' name (no replacement of default keywords)
@@ -77,7 +77,7 @@ public:
 	const float* getPosition() const { return m_screenPos; }
 
 	//! Clears label
-	void clear();
+	void clear(bool ignoreDependencies = false);
 
 	//! Returns current size
 	unsigned size() const { return (unsigned)m_points.size(); }
@@ -132,6 +132,7 @@ protected:
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
     virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void onDeletionOf(const ccHObject* obj);
 
     //! Draws the entity only (not its children) - 2D version
     virtual void drawMeOnly2D(CC_DRAW_CONTEXT& context);
@@ -140,6 +141,9 @@ protected:
 
 	//! Picked points
 	std::vector<PickedPoint> m_points;
+
+	//! Updates the label 'name'
+	void updateName();
 
 	//! Whether to show full label body or not
 	bool m_showFullBody;

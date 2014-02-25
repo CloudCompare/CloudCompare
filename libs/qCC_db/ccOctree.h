@@ -28,7 +28,12 @@
 //Qt
 #include <QSpinBox>
 
+//system
+#include <vector>
+
 class ccGenericPointCloud;
+class ccOctreeFrustrumIntersector;
+class ccCameraSensor;
 
 //! Octree displaying methods
 enum CC_OCTREE_DISPLAY_TYPE {	WIRE				=	0,					/**< The octree is displayed as wired boxes (one box per cell) */
@@ -94,6 +99,9 @@ public:
 	**/
 	ccOctree(ccGenericPointCloud* aCloud);
 
+	//! Destructor
+	virtual ~ccOctree();
+
 	//! Multiplies the bounding-box of the octree
 	/** If the cloud coordinates are simply multiplied by the same factor,
 		there is no use to recompute the octree structure. It's sufficient
@@ -110,7 +118,7 @@ public:
 	void translateBoundingBox(const CCVector3& T);
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_POINT_OCTREE; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_OCTREE; }
 
 	int getDisplayedLevel() const { return m_displayedLevel; }
 	void setDisplayedLevel(int level);
@@ -128,7 +136,7 @@ public:
 	/*** RENDERING METHODS ***/
 
 	static void RenderOctreeAs(CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
-                                CCLib::DgmOctree* theOctree,
+                                ccOctree* theOctree,
                                 unsigned char level,
                                 ccGenericPointCloud* theAssociatedCloud,
                                 int &octreeGLListID,
@@ -140,6 +148,10 @@ public:
 
 	static CCVector3 ComputeAverageNorm(CCLib::ReferenceCloud* subset,
 										ccGenericPointCloud* sourceCloud);
+
+	//! Intersects octree with a camera sensor
+	bool intersectWithFrustrum(	ccCameraSensor* sensor,
+								std::vector<unsigned>& inCameraFrustrum);
 
 protected:
 
@@ -165,6 +177,8 @@ protected:
     int m_displayedLevel;
     int m_glListID;
     bool m_shouldBeRefreshed;
+
+	ccOctreeFrustrumIntersector* m_frustrumIntersector;
 
 };
 

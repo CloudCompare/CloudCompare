@@ -57,7 +57,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 
     //if the 'model' entity is a mesh, we need to sample points on it
     CCLib::GenericIndexedCloudPersist* modelCloud = 0;
-    if (model->isKindOf(CC_MESH))
+    if (model->isKindOf(CC_TYPES::MESH))
     {
         modelCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(model),s_defaultSampledPointsOnModelMesh,&pDlg);
         if (!modelCloud)
@@ -73,7 +73,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 
     //if the 'data' entity is a mesh, we need to sample points on it
     CCLib::GenericIndexedCloudPersist* dataCloud = 0;
-    if (data->isKindOf(CC_MESH))
+    if (data->isKindOf(CC_TYPES::MESH))
     {
         dataCloud = CCLib::MeshSamplingTools::samplePointsOnMesh(ccHObjectCaster::ToGenericMesh(data),s_defaultSampledPointsOnDataMesh,&pDlg);
         if (!dataCloud)
@@ -92,7 +92,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
     int oldDataSfIdx=-1, dataSfIdx=-1;
 
     //if the 'data' entity is a real ccPointCloud, we can even create a temporary SF for registration distances
-    if (data->isA(CC_POINT_CLOUD))
+    if (data->isA(CC_TYPES::POINT_CLOUD))
     {
         ccPointCloud* pc = static_cast<ccPointCloud*>(data);
 		dataDisplayedSF = pc->getCurrentDisplayedScalarField();
@@ -116,7 +116,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 	CCLib::ScalarField* modelWeights = 0;
 	if (useModelSFAsWeights)
 	{
-		if (modelCloud == (CCLib::GenericIndexedCloudPersist*)model && model->isA(CC_POINT_CLOUD))
+		if (modelCloud == (CCLib::GenericIndexedCloudPersist*)model && model->isA(CC_TYPES::POINT_CLOUD))
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(model);
 			modelWeights = pc->getCurrentDisplayedScalarField();
@@ -134,7 +134,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 	{
 		if (!dataDisplayedSF)
 		{
-			if (dataCloud == (CCLib::GenericIndexedCloudPersist*)data && data->isA(CC_POINT_CLOUD))
+			if (dataCloud == (CCLib::GenericIndexedCloudPersist*)data && data->isA(CC_TYPES::POINT_CLOUD))
 				ccLog::Warning("[ICP] 'useDataSFAsWeights' is true but data has no displayed scalar field!");
 			else
 				ccLog::Warning("[ICP] 'useDataSFAsWeights' is true but inly point clouds scalar fields can be used as weights!");
@@ -171,14 +171,14 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
     }
 
     //if we had to sample points an the data mesh
-    if (!data->isKindOf(CC_POINT_CLOUD))
+    if (!data->isKindOf(CC_TYPES::POINT_CLOUD))
     {
         delete dataCloud;
 		dataCloud = 0;
     }
     else
     {
-        if (data->isA(CC_POINT_CLOUD))
+        if (data->isA(CC_TYPES::POINT_CLOUD))
         {
             ccPointCloud* pc = static_cast<ccPointCloud*>(data);
             pc->setCurrentScalarField(oldDataSfIdx);
@@ -189,7 +189,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
     }
 
     //if we had to sample points an the model mesh
-    if (!model->isKindOf(CC_POINT_CLOUD))
+    if (!model->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
         delete modelCloud;
 		modelCloud = 0;

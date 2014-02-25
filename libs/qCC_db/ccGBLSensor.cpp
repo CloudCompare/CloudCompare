@@ -27,29 +27,17 @@
 static const int s_MaxDepthBufferSize = 4096;
 
 ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=THETA_PHI*/)
-	: ccSensor()
-	, base(0)
-	, sensorCenter(0.0f)
-	, phiMin(0)
-	, phiMax(0)
-	, deltaPhi(0)
-	, thetaMin(0)
-	, thetaMax(0)
-	, deltaTheta(0)
-	, rotationOrder(rotOrder)
-	, sensorRange(0)
-	, uncertainty((ScalarType)ZERO_TOLERANCE)
-	, scale(1)
+	: ccSensor("Ground Based Laser Scanner")
+	, m_phiMin(0)
+	, m_phiMax(0)
+	, m_deltaPhi(0)
+	, m_thetaMin(0)
+	, m_thetaMax(0)
+	, m_deltaTheta(0)
+	, m_rotationOrder(rotOrder)
+	, m_sensorRange(0)
+	, m_uncertainty((ScalarType)ZERO_TOLERANCE)
 {
-	//sensor pose
-	setSensorCenter(CCVector3(0.0,0.0,0.0));
-
-	//orientation matrix
-	m_orientation.toIdentity();
-
-	//object name
-	setName("Ground Based Laser Scanner");
-
     //graphic representation
     lockVisibility(false);
 }
@@ -58,16 +46,26 @@ ccGBLSensor::~ccGBLSensor()
 {
 }
 
-inline void ccGBLSensor::projectPoint(const CCVector3& sourcePoint, CCVector2& destPoint, ScalarType &depth) const
+void ccGBLSensor::projectPoint(	const CCVector3& sourcePoint,
+								CCVector2& destPoint,
+								ScalarType &depth,
+								double posIndex/*=0*/) const
 {
 	//project point in sensor world
-	CCVector3 P = sourcePoint - sensorCenter;
-	P.x += base;
-	m_orientation.applyRotation(P);
+	CCVector3 P = sourcePoint;
+
+	//sensor center pos in world = sensor position + rigid transformation
+	ccIndexedTransformation sensorPos; //identity by default
+	if (m_posBuffer)
+		m_posBuffer->getInterpolatedTransformation(posIndex,sensorPos);
+	sensorPos *= m_rigidTransformation;
+
+	//apply (inverse) global transformation
+	sensorPos.inverse().apply(P);
 
 	//convert to 2D ref. + compute its distance
 	PointCoordinateType norm = 0;
-	switch(rotationOrder)
+	switch (m_rotationOrder)
 	{
 	case THETA_PHI:
 	{
@@ -89,7 +87,7 @@ inline void ccGBLSensor::projectPoint(const CCVector3& sourcePoint, CCVector2& d
 		assert(false);
 	}
 
-	depth = (ScalarType)sqrt(norm);
+	depth = static_cast<ScalarType>(sqrt(norm));
 }
 
 CCLib::SimpleCloud* ccGBLSensor::project(CCLib::GenericCloud* theCloud, int& errorCode, bool autoParameters/*false*/)
@@ -110,12 +108,12 @@ CCLib::SimpleCloud* ccGBLSensor::project(CCLib::GenericCloud* theCloud, int& err
 
 	theCloud->placeIteratorAtBegining();
 	{
-		for (unsigned i=0; i<pointCount; ++i)
+		for (unsigned i = 0; i<pointCount; ++i)
 		{
 			const CCVector3 *P = theCloud->getNextPoint();
 			CCVector2 Q;
 			ScalarType depth;
-			projectPoint(*P,Q,depth);
+			projectPoint(*P,Q,depth,m_activeIndex);
 
 			newCloud->addPoint(CCVector3(Q.x,Q.y,0));
 			newCloud->setPointScalarValue(i,depth);
@@ -142,17 +140,17 @@ CCLib::SimpleCloud* ccGBLSensor::project(CCLib::GenericCloud* theCloud, int& err
 	{
 		if (m_depthBuffer.zBuff)
 			delete[] m_depthBuffer.zBuff;
-		m_depthBuffer.zBuff=0;
-		m_depthBuffer.width=0;
-		m_depthBuffer.height=0;
+		m_depthBuffer.zBuff = 0;
+		m_depthBuffer.width = 0;
+		m_depthBuffer.height = 0;
 	}
 	
 	//init new Z-buffer
 	{
-		int width = static_cast<int>(ceil((thetaMax-thetaMin)/deltaTheta));
-		int height = static_cast<int>(ceil((phiMax-phiMin)/deltaPhi));
+		int width = static_cast<int>(ceil((m_thetaMax-m_thetaMin)/m_deltaTheta));
+		int height = static_cast<int>(ceil((m_phiMax-m_phiMin)/m_deltaPhi));
 
-		if (width*height == 0 || std::max(width,height) > s_MaxDepthBufferSize) //too small or... too big!
+		if (width <= 0 || height <= 0 || std::max(width,height) > s_MaxDepthBufferSize) //too small or... too big!
 		{
 			errorCode = -2;
 			delete newCloud;
@@ -167,8 +165,8 @@ CCLib::SimpleCloud* ccGBLSensor::project(CCLib::GenericCloud* theCloud, int& err
 			delete newCloud;
 			return 0;
 		}
-		m_depthBuffer.width = width;
-		m_depthBuffer.height = height;
+		m_depthBuffer.width = static_cast<unsigned>(width);
+		m_depthBuffer.height = static_cast<unsigned>(height);
 		memset(m_depthBuffer.zBuff,0,zBuffSize*sizeof(ScalarType));
 	}
 
@@ -179,25 +177,41 @@ CCLib::SimpleCloud* ccGBLSensor::project(CCLib::GenericCloud* theCloud, int& err
 		const CCVector3 *P = newCloud->getNextPoint();
 		ScalarType depth = newCloud->getPointScalarValue(i);
 
-		int x = static_cast<int>(floor((P->x-thetaMin)/deltaTheta));
-		int y = static_cast<int>(floor((P->y-phiMin)/deltaPhi));
+		int x = static_cast<int>(floor((P->x-m_thetaMin)/m_deltaTheta));
+		int y = static_cast<int>(floor((P->y-m_phiMin)/m_deltaPhi));
 
-		ScalarType& zBuf = m_depthBuffer.zBuff[y*m_depthBuffer.width+x];
-		zBuf = std::max(zBuf,depth);
+		if (x >= 0 && y >= 0 && static_cast<unsigned>(x) < m_depthBuffer.width && static_cast<unsigned>(y) <= m_depthBuffer.height)
+		{
+			ScalarType& zBuf = m_depthBuffer.zBuff[static_cast<unsigned>(y)*m_depthBuffer.width+static_cast<unsigned>(x)];
+			zBuf = std::max(zBuf,depth);
+		}
 	}
 
 	errorCode = 0;
 	return newCloud;
 }
 
-int ccGBLSensor::fillZBufferHoles()
+ccGBLSensor::DepthBuffer::DepthBuffer()
+	: zBuff(0)
+	, width(0)
+	, height(0)
 {
-	if (!m_depthBuffer.zBuff)
+}
+
+ccGBLSensor::DepthBuffer::~DepthBuffer()
+{
+	if (zBuff)
+		delete[] zBuff;
+}
+
+int ccGBLSensor::DepthBuffer::fillHoles()
+{
+	if (!zBuff)
 		return -1; //z-buffer not initialized!
 
 	//new temp buffer
-	int dx = m_depthBuffer.width+2;
-	int dy = m_depthBuffer.height+2;
+	int dx = width+2;
+	int dy = height+2;
 	unsigned tempZBuffSize = dx*dy;
 	ScalarType* zBuffTemp = new ScalarType[tempZBuffSize];
 	if (!zBuffTemp)
@@ -207,23 +221,23 @@ int ccGBLSensor::fillZBufferHoles()
 	//copy old zBuffer in temp one (with 1 pixel border)
 	{
 		ScalarType *_zBuffTemp = zBuffTemp+dx+1; //2nd line, 2nd column
-		ScalarType *_zBuff = m_depthBuffer.zBuff; //first line, first column of the true buffer
-		for (int y=0; y<m_depthBuffer.height; ++y)
+		ScalarType *_zBuff = zBuff; //first line, first column of the true buffer
+		for (unsigned y = 0; y<height; ++y)
 		{
-			memcpy(_zBuffTemp,_zBuff,m_depthBuffer.width*sizeof(ScalarType));
+			memcpy(_zBuffTemp,_zBuff,width*sizeof(ScalarType));
 			_zBuffTemp += dx;
-			_zBuff += m_depthBuffer.width;
+			_zBuff += width;
 		}
 	}
 
 	//fill holes with their neighbor's mean value
 	{
-		for (int y=0;y<m_depthBuffer.height;++y)
+		for (unsigned y = 0; y<height; ++y)
 		{
 			ScalarType* zu = zBuffTemp + y*dx;
 			ScalarType* z = zu + dx;
 			ScalarType* zd = z + dx;
-			for (int x=0; x<m_depthBuffer.width; ++x,++zu,++z,++zd)
+			for (unsigned x = 0; x<width; ++x,++zu,++z,++zd)
 			{
 				if (z[1] == 0) //hole
 				{
@@ -242,7 +256,7 @@ int ccGBLSensor::fillZBufferHoles()
 
 					if (nsup>3)
 					{
-						m_depthBuffer.zBuff[x+y*m_depthBuffer.width] = (zu[0]+zu[1]+zu[2]+ z[0]+z[2]+ zd[0]+zd[1]+zd[2])/(ScalarType)nsup;
+						zBuff[x+y*width] = (zu[0]+zu[1]+zu[2]+ z[0]+z[2]+ zd[0]+zd[1]+zd[2])/static_cast<ScalarType>(nsup);
 					}
 				}
 			}
@@ -273,13 +287,12 @@ PointCoordinateType* ccGBLSensor::projectNormals(CCLib::GenericCloud* aCloud, Ge
 		aCloud->placeIteratorAtBegining();
 		theNorms.placeIteratorAtBegining();
 		unsigned pointCount = aCloud->size();
-		for (unsigned i=0;i<pointCount;++i)
+		for (unsigned i = 0;i<pointCount;++i)
 		{
 			const CCVector3* P = aCloud->getNextPoint();
 			const PointCoordinateType* N = theNorms.getCurrentValue();
 
-			CCVector3 U = *P - sensorCenter;
-			U.x += base;
+			CCVector3 U = *P - m_rigidTransformation.getTranslation();
 
 			CCVector3 S;
 			CCVector2 Q;
@@ -299,13 +312,13 @@ PointCoordinateType* ccGBLSensor::projectNormals(CCLib::GenericCloud* aCloud, Ge
 				{
 					//project point
 					ScalarType depth1;
-					projectPoint(*P,Q,depth1);
+					projectPoint(*P,Q,depth1,m_activeIndex);
 
 					//and point+normal
 					CCVector3 R = *P + CCVector3(N);
 					CCVector2 S2;
 					ScalarType depth2;
-					projectPoint(R,S2,depth2);
+					projectPoint(R,S2,depth2,m_activeIndex);
 
 					//deduce other normals components
 					PointCoordinateType coef = sqrt((1 - S.z*S.z)/(S.x*S.x + S.y*S.y));
@@ -319,10 +332,10 @@ PointCoordinateType* ccGBLSensor::projectNormals(CCLib::GenericCloud* aCloud, Ge
 			}
 
 			//project in Z-buffer
-			int x = static_cast<int>(floor((Q.x-thetaMin)/deltaTheta));
-			int y = static_cast<int>(floor((Q.y-phiMin)/deltaPhi));
+			unsigned x = static_cast<unsigned>(floor((Q.x-m_thetaMin)/m_deltaTheta));
+			unsigned y = static_cast<unsigned>(floor((Q.y-m_phiMin)/m_deltaPhi));
 
-			//on ajoute la normale transformee
+			//add the transformed normal
 			PointCoordinateType* newN = theNewNorms+3*(y*m_depthBuffer.width+x);
 			CCVector3::vadd(newN,S.u,newN);
 
@@ -333,7 +346,7 @@ PointCoordinateType* ccGBLSensor::projectNormals(CCLib::GenericCloud* aCloud, Ge
 	//normalize
 	{
 		PointCoordinateType* newN = theNewNorms;
-		for (int i=0; i<m_depthBuffer.height*m_depthBuffer.width; ++i,newN+=3)
+		for (unsigned i=0; i<m_depthBuffer.height*m_depthBuffer.width; ++i,newN+=3)
 		{
 			CCVector3::vnormalize(newN);
 		}
@@ -378,23 +391,23 @@ colorType* ccGBLSensor::projectColors(CCLib::GenericCloud* aCloud, GenericChunke
 				const CCVector3 *P = aCloud->getNextPoint();
 				CCVector2 Q;
 				ScalarType depth;
-				projectPoint(*P,Q,depth);
+				projectPoint(*P,Q,depth,m_activeIndex);
 
-				int x = static_cast<int>(floor((Q.x-thetaMin)/deltaTheta));
-				int y = static_cast<int>(floor((Q.y-phiMin)/deltaPhi));
-				int index = y*m_depthBuffer.width+x;
+				unsigned x = static_cast<unsigned>(floor((Q.x-m_thetaMin)/m_deltaTheta));
+				unsigned y = static_cast<unsigned>(floor((Q.y-m_phiMin)/m_deltaPhi));
+				unsigned index = y*m_depthBuffer.width+x;
 				++theNewColorsCount[index];
 				
 				//add color
 				colorType* C = theColors.getCurrentValue();
 				colorType* _theNewColor = theNewColors + 3*index;
 
-				if (_theNewColor[0] != 0 || _theNewColor[1]!=0 || _theNewColor[2]!=0)
+				if (_theNewColor[0] != 0 || _theNewColor[1] != 0 || _theNewColor[2] != 0)
 				{
 					//crappy mobile mean to avoid overflows!
-					_theNewColor[0]=static_cast<colorType>((int(_theNewColor[0])+int(C[0]))>>1);
-					_theNewColor[1]=static_cast<colorType>((int(_theNewColor[1])+int(C[1]))>>1);
-					_theNewColor[2]=static_cast<colorType>((int(_theNewColor[2])+int(C[2]))>>1);
+					_theNewColor[0]=static_cast<colorType>((static_cast<int>(_theNewColor[0])+static_cast<int>(C[0]))>>1);
+					_theNewColor[1]=static_cast<colorType>((static_cast<int>(_theNewColor[1])+static_cast<int>(C[1]))>>1);
+					_theNewColor[2]=static_cast<colorType>((static_cast<int>(_theNewColor[2])+static_cast<int>(C[2]))>>1);
 				}
 				else
 				{
@@ -411,7 +424,7 @@ colorType* ccGBLSensor::projectColors(CCLib::GenericCloud* aCloud, GenericChunke
 	//normalize
 	{
 		colorType* _theNewColor = theNewColors;
-		for (int i=0; i<m_depthBuffer.height*m_depthBuffer.width; ++i,_theNewColor+=3)
+		for (unsigned i=0; i<m_depthBuffer.height*m_depthBuffer.width; ++i,_theNewColor+=3)
 		{
 			if (theNewColorsCount[i] > 1)
 			{
@@ -435,162 +448,27 @@ uchar ccGBLSensor::checkVisibility(const CCVector3& P) const
 	//project point
 	CCVector2 Q;
 	ScalarType depth;
-	projectPoint(P,Q,depth);
+	projectPoint(P,Q,depth,m_activeIndex);
 
 	//out of sight
-	if (depth > sensorRange)
+	if (depth > m_sensorRange)
 		return POINT_OUT_OF_RANGE;
 
-	int x = static_cast<int>(floor((Q.x-thetaMin)/deltaTheta));
-	int y = static_cast<int>(floor((Q.y-phiMin)/deltaPhi));
+	int x = static_cast<int>(floor((Q.x-m_thetaMin)/m_deltaTheta));
+	int y = static_cast<int>(floor((Q.y-m_phiMin)/m_deltaPhi));
 
 	//out of field
-	if (x<0 || x>=m_depthBuffer.width || y<0 || y>=m_depthBuffer.height)
+	if (	x < 0 || static_cast<unsigned>(x) >= m_depthBuffer.width
+		||	y < 0 || static_cast<unsigned>(y) >= m_depthBuffer.height )
+	{
 		return POINT_OUT_OF_FOV;
+	}
 
 	//hidden?
-	if (depth > m_depthBuffer.zBuff[x+y*m_depthBuffer.width]*(1.0f+uncertainty))
+	if (depth > m_depthBuffer.zBuff[x+y*m_depthBuffer.width]*(1.0f+m_uncertainty))
 		return POINT_HIDDEN;
 
 	return POINT_VISIBLE;
-}
-
-void ccGBLSensor::setOrientationMatrix(const ccGLMatrix& mat)
-{
-	m_orientation = mat;
-}
-
-const ccGLMatrix& ccGBLSensor::getOrientationMatrix() const
-{
-	return m_orientation;
-}
-
-void ccGBLSensor::setPhi(PointCoordinateType minV, PointCoordinateType maxV)
-{
-	phiMin = minV;
-	phiMax = maxV;
-}
-
-void ccGBLSensor::setDeltaPhi(PointCoordinateType dPhi)
-{
-	deltaPhi = dPhi;
-}
-
-PointCoordinateType ccGBLSensor::getPhiMin() const
-{
-	return phiMin;
-}
-
-PointCoordinateType ccGBLSensor::getPhiMax() const
-{
-	return phiMax;
-}
-
-PointCoordinateType ccGBLSensor::getDeltaPhi() const
-{
-	return deltaPhi;
-}
-
-void ccGBLSensor::setTheta(PointCoordinateType minV, PointCoordinateType maxV)
-{
-	thetaMin = minV;
-	thetaMax = maxV;
-}
-
-void ccGBLSensor::setDeltaTheta(PointCoordinateType dTheta)
-{
-	deltaTheta = dTheta;
-}
-
-PointCoordinateType ccGBLSensor::getThetaMin() const
-{
-	return thetaMin;
-}
-
-PointCoordinateType ccGBLSensor::getThetaMax() const
-{
-	return thetaMax;
-}
-
-PointCoordinateType ccGBLSensor::getDeltaTheta() const
-{
-	return deltaTheta;
-}
-
-PointCoordinateType ccGBLSensor::getSensorBase() const
-{
-	return base;
-}
-
-void ccGBLSensor::setSensorBase(PointCoordinateType _base)
-{
-	base = _base;
-}
-
-ScalarType ccGBLSensor::getSensorRange() const
-{
-	return sensorRange;
-}
-
-void ccGBLSensor::setSensorRange(ScalarType range)
-{
-	sensorRange = range;
-}
-
-CCVector3 ccGBLSensor::getSensorCenter() const
-{
-	return sensorCenter;
-}
-
-void ccGBLSensor::setSensorCenter(const CCVector3& C)
-{
-	sensorCenter=C;
-}
-
-ScalarType ccGBLSensor::getUncertainty() const
-{
-	return uncertainty;
-}
-
-void ccGBLSensor::setUncertainty(ScalarType u)
-{
-	uncertainty=u;
-}
-
-ccGBLSensor::ROTATION_ORDER ccGBLSensor::getRotationOrder() const
-{
-	return rotationOrder;
-}
-
-void ccGBLSensor::setRotationOrder(ROTATION_ORDER rotOrder)
-{
-	rotationOrder=rotOrder;
-}
-
-const ccGBLSensor::DepthBuffer& ccGBLSensor::getDepthBuffer() const
-{
-	return m_depthBuffer;
-}
-
-void ccGBLSensor::setGraphicScale(PointCoordinateType _scale)
-{
-    scale = _scale;
-}
-
-PointCoordinateType ccGBLSensor::getGraphicScale() const
-{
-    return scale;
-}
-
-void ccGBLSensor::updateGraphicRepresentation()
-{
-    //rotation matrix
-    ccGLMatrix glTrans = m_orientation.inverse();
-	glTrans.shiftRotationCenter(sensorCenter); //rotation center = sensor center
-    //translation = sensor center
-    glTrans += sensorCenter;
-
-	setGLTransformation(glTrans);
 }
 
 void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -608,46 +486,128 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
             glPushName(getUniqueIDForDisplay());
 		}
 
-		//DGM FIXME: crap!
-        //sensor head
+		//DGM FIXME: this display routine is crap!
+		
+		//apply rigid transformation
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		{
+			ccIndexedTransformation sensorPos;
+			if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+			{
+				//no visible position for this index!
+				glPopMatrix();
+				if (pushName)
+					glPopName();
+				return;
+			}
+				
+			glMultMatrixf(sensorPos.data());
+		}
+
+		//sensor head
         const PointCoordinateType halfHeadSize = static_cast<PointCoordinateType>(0.3);
         CCVector3 minCorner(-halfHeadSize,-halfHeadSize,-halfHeadSize);
         CCVector3 maxCorner(halfHeadSize,halfHeadSize,halfHeadSize);
-        minCorner *= scale;
-        maxCorner *= scale;
+        minCorner *= m_scale;
+        maxCorner *= m_scale;
         ccBBox bbHead(minCorner,maxCorner);
-        CCVector3 headCenter(0,0,(1-halfHeadSize)*scale);
+        CCVector3 headCenter(0,0,(1-halfHeadSize)*m_scale);
         bbHead += headCenter;
-        bbHead.draw(ccColor::green);
+        bbHead.draw(m_color.u);
 
         //sensor legs
-        CCVector3 headConnect = headCenter - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*scale);
+        CCVector3 headConnect = headCenter - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
+		glColor3ubv(m_color.u);
         glBegin(GL_LINES);
         ccGL::Vertex3v(headConnect.u);
-        ccGL::Vertex3(-scale,-scale,-scale);
+        ccGL::Vertex3(-m_scale,-m_scale,-m_scale);
         ccGL::Vertex3v(headConnect.u);
-        ccGL::Vertex3(-scale,scale,-scale);
+        ccGL::Vertex3(-m_scale,m_scale,-m_scale);
         ccGL::Vertex3v(headConnect.u);
-        ccGL::Vertex3(scale,0,-scale);
+        ccGL::Vertex3(m_scale,0,-m_scale);
         glEnd();
 
         if (pushName)
             glPopName();
+
+		glPopMatrix();
     }
 }
 
-/*ccBBox ccGBLSensor::getMyOwnBB()
+ccBBox ccGBLSensor::getMyOwnBB()
 {
+	return ccBBox();
+	//ccIndexedTransformation sensorPos;
+	//if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+	//	return ccBBox();
+
+	//CCVector3 center = sensorPos.getTranslationAsVec3D();
+
+ //   return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
+	//				center + CCVector3( 1, 1, 1) * m_scale);
 }
-//*/
 
 ccBBox ccGBLSensor::getDisplayBB()
 {
-    CCVector3 minCorner(-1,-1,-1);
-    CCVector3 maxCorner(1,1,1);
-    minCorner *= scale;
-    maxCorner *= scale;
+	//return getMyOwnBB();
+	ccIndexedTransformation sensorPos;
+	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+		return ccBBox();
 
-    return ccBBox(minCorner,maxCorner);
+	CCVector3 center = sensorPos.getTranslationAsVec3D();
+
+    return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
+					center + CCVector3( 1, 1, 1) * m_scale);
 }
 
+bool ccGBLSensor::toFile_MeOnly(QFile& out) const
+{
+	if (!ccSensor::toFile_MeOnly(out))
+		return false;
+
+	//rotation order (dataVersion>=34)
+	uint32_t rotOrder = m_rotationOrder;
+	if (out.write((const char*)&rotOrder,4)<0)
+		return WriteError();
+
+	//other parameters (dataVersion>=34)
+	QDataStream outStream(&out);
+	outStream << m_phiMin;
+	outStream << m_phiMax;
+	outStream << m_deltaPhi;
+	outStream << m_thetaMin;
+	outStream << m_thetaMax;
+	outStream << m_deltaTheta;
+	outStream << m_sensorRange;
+	outStream << m_uncertainty;
+	outStream << m_scale;
+
+	return true;
+}
+
+bool ccGBLSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
+{
+	if (!ccSensor::fromFile_MeOnly(in, dataVersion, flags))
+		return false;
+
+	//rotation order (dataVersion>=34)
+	uint32_t rotOrder = 0;
+	if (in.read((char*)&rotOrder,4)<0)
+		return ReadError();
+	m_rotationOrder = static_cast<ROTATION_ORDER>(rotOrder);
+
+	//parameters (dataVersion>=34)
+	QDataStream inStream(&in);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_phiMin,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_phiMax,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_deltaPhi,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_thetaMin,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_thetaMax,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_deltaTheta,1);
+	ccSerializationHelper::ScalarsFromDataStream(inStream,flags,&m_sensorRange,1);
+	ccSerializationHelper::ScalarsFromDataStream(inStream,flags,&m_uncertainty,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_scale,1);
+
+	return true;
+}

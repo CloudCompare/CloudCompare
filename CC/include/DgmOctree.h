@@ -73,7 +73,6 @@ class GenericIndexedCloudPersist;
 	Corresponds to the octree structure developed during Daniel
 	Girardeau-Montaut's PhD (see PhD manuscript, Chapter 4).
 **/
-
 #ifdef CC_USE_AS_DLL
 #include "CloudCompareDll.h"
 class CC_CORE_LIB_API DgmOctree : public GenericOctree
@@ -84,7 +83,7 @@ class DgmOctree : public GenericOctree
 public:
 
 	/*******************************/
-	/**         STURCUTRES        **/
+	/**         STRUCTURES        **/
 	/*******************************/
 
 	//Max octree subdivision level
@@ -1211,7 +1210,6 @@ protected:
 		\return the index of the cell (or 'm_numberOfProjectedPoints' if none found)
 	**/
 	unsigned getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bitDec, unsigned begin, unsigned end) const;
-
 };
 
 }

@@ -130,15 +130,15 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 		return false;
 
 	//compared entity
-	if (!m_compEnt->isA(CC_POINT_CLOUD)) //TODO --> pas possible avec des GenericPointCloud ? :(
+	if (!m_compEnt->isA(CC_TYPES::POINT_CLOUD)) //TODO --> pas possible avec des GenericPointCloud ? :(
 	{
-		if (m_compType == CLOUDCLOUD_DIST || (m_compType == CLOUDMESH_DIST && !m_compEnt->isKindOf(CC_MESH)))
+		if (m_compType == CLOUDCLOUD_DIST || (m_compType == CLOUDMESH_DIST && !m_compEnt->isKindOf(CC_TYPES::MESH)))
 		{
 			ccLog::Error("Dialog initialization error! (bad entity type)");
 			return false;
 		}
 		ccGenericMesh* compMesh = ccHObjectCaster::ToGenericMesh(m_compEnt);
-		if (!compMesh->getAssociatedCloud()->isA(CC_POINT_CLOUD)) //TODO
+		if (!compMesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD)) //TODO
 		{
 			ccLog::Error("Dialog initialization error! (bad entity type - works only with real point clouds [todo])");
 			return false;
@@ -160,8 +160,8 @@ bool ccComparisonDlg::prepareEntitiesForComparison()
 		m_oldSfName = QString(m_compCloud->getScalarFieldName(oldSfIdx));
 
 	//reference entity
-	if ((m_compType == CLOUDMESH_DIST && !m_refEnt->isKindOf(CC_MESH))
-		|| (m_compType == CLOUDCLOUD_DIST && !m_refEnt->isA(CC_POINT_CLOUD)))
+	if ((m_compType == CLOUDMESH_DIST && !m_refEnt->isKindOf(CC_TYPES::MESH))
+		|| (m_compType == CLOUDCLOUD_DIST && !m_refEnt->isA(CC_TYPES::POINT_CLOUD)))
 	{
 		ccLog::Error("Dialog initialization error! (bad entity type)");
 		return false;

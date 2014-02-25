@@ -48,6 +48,15 @@ ccSubMesh::ccSubMesh(ccMesh* parentMesh)
 void ccSubMesh::setAssociatedMesh(ccMesh* mesh)
 {
 	m_associatedMesh = mesh;
+
+	if (m_associatedMesh)
+		m_associatedMesh->addDependency(this,DP_NOTIFY_OTHER_ON_UPDATE);
+}
+
+void ccSubMesh::onUpdateOf(ccHObject* obj)
+{
+	if (obj == m_associatedMesh)
+		m_bBox.setValidity(false);
 }
 
 void ccSubMesh::forEach(genericTriangleAction& anAction)
@@ -249,8 +258,9 @@ ccSubMesh* ccSubMesh::createNewSubMeshFromSelection(bool removeSelectedFaces, In
 				m_triIndexes->clear(true);
 			else
 				resize(lastTri);
+
 			m_bBox.setValidity(false);
-			updateModificationTime();
+			notifyGeometryUpdate();
 		}
 	}
 
@@ -433,19 +443,14 @@ void ccSubMesh::refreshBB()
 		m_bBox.add(*tri->_getC());
 	}
 
-	updateModificationTime();
+	notifyGeometryUpdate();
 }
 
 ccBBox ccSubMesh::getMyOwnBB()
 {
-	if (size() != 0)
+	if (!m_bBox.isValid() && size() != 0)
 	{
-		if (   !m_bBox.isValid()
-			|| getLastModificationTime() < m_associatedMesh->getLastModificationTime()
-			|| (m_associatedMesh->getAssociatedCloud() && getLastModificationTime() < m_associatedMesh->getAssociatedCloud()->getLastModificationTime()) )
-		{
-			refreshBB();
-		}
+		refreshBB();
 	}
 
 	return m_bBox;

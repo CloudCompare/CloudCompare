@@ -55,7 +55,7 @@ public:
 	ccExtru(QString name = QString("Extrusion"));
 
     //! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_EXTRU; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::EXTRU; }
 
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Extrusion"; }

@@ -54,7 +54,7 @@ ccGraphicalTransformationTool::~ccGraphicalTransformationTool()
 
 	if (m_toTransform)
 		delete m_toTransform;
-	m_toTransform=0;
+	m_toTransform = 0;
 }
 
 void ccGraphicalTransformationTool::onShortcutTriggered(int key)
@@ -106,7 +106,7 @@ void ccGraphicalTransformationTool::pause(bool state)
 
 void ccGraphicalTransformationTool::clear()
 {
-	m_toTransform->removeAllChildren();
+	m_toTransform->detatchAllChildren();
 
 	m_rotation.toIdentity();
 	m_translation = CCVector3(0,0,0);
@@ -134,7 +134,7 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 	}
 
 	//we can't tranform child meshes
-	if (entity->isA(CC_MESH) && entity->getParent() && entity->getParent()->isKindOf(CC_MESH))
+	if (entity->isA(CC_TYPES::MESH) && entity->getParent() && entity->getParent()->isKindOf(CC_TYPES::MESH))
 	{
 		ccLog::Warning(QString("[Graphical Transformation Tool] Entity '%1' can't be modified as it is part of a mesh group. You should 'clone' it first.").arg(entity->getName()));
 		return false;
@@ -144,7 +144,7 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 	//otherwise, the sibling will be rotated twice!
 	assert(m_toTransform);
 	unsigned n = m_toTransform->getChildrenNumber();
-	for (unsigned i=0; i<n;)
+	for (unsigned i=0; i<n; )
 	{
 		ccHObject* previous = m_toTransform->getChild(i);
 		if (previous->isAncestorOf(entity))
@@ -155,7 +155,7 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 		//if the inverse is true, then we get rid of the current element!
 		else if (entity->isAncestorOf(previous))
 		{
-			m_toTransform->removeChild(previous,true);
+			m_toTransform->detachChild(previous);
 			--n;
 		}
 		else
@@ -165,7 +165,7 @@ bool ccGraphicalTransformationTool::addEntity(ccHObject* entity)
 		}
 	}
 
-	m_toTransform->addChild(entity,false);
+	m_toTransform->addChild(entity,ccHObject::DP_NONE);
 
 	return true;
 }
@@ -292,7 +292,7 @@ void ccGraphicalTransformationTool::updateAllGLTransformations()
 	ccGLMatrix newTrans = m_rotation;
 	newTrans += (m_rotationCenter+m_translation-m_rotation*m_rotationCenter);
 
-	for (unsigned i=0; i<m_toTransform->getChildrenNumber();++i)
+	for (unsigned i=0; i<m_toTransform->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = m_toTransform->getChild(i);
 		child->setGLTransformation(newTrans);
@@ -315,15 +315,15 @@ void ccGraphicalTransformationTool::apply()
 		ccLog::Print(finalTrans.toString(12,' ')); //full precision
 	}
 
-	for (unsigned i=0; i<m_toTransform->getChildrenNumber();++i)
+	for (unsigned i=0; i<m_toTransform->getChildrenNumber(); ++i)
 	{
 		ccHObject* toTransform = m_toTransform->getChild(i);
 		ccHObject* parent = 0;
 		//DGM: warning, applyGLTransformation may delete associated octree!
-		MainWindow::TheInstance()->removeObjectTemporarilyFromDBTree(toTransform,parent);
+		MainWindow::ccHObjectContext objContext = MainWindow::TheInstance()->removeObjectTemporarilyFromDBTree(toTransform);
 		toTransform->applyGLTransformation_recursive();
 		toTransform->prepareDisplayForRefresh_recursive();
-		MainWindow::TheInstance()->putObjectBackIntoDBTree(toTransform,parent);
+		MainWindow::TheInstance()->putObjectBackIntoDBTree(toTransform,objContext);
 	}
 
 	stop(true);
@@ -338,7 +338,7 @@ void ccGraphicalTransformationTool::cancel()
 {
 	assert(m_toTransform);
 
-	for (unsigned i=0; i<m_toTransform->getChildrenNumber();++i)
+	for (unsigned i=0; i<m_toTransform->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = m_toTransform->getChild(i);
 		child->razGLTransformation();

@@ -35,7 +35,7 @@ public:
 	cc2DViewportLabel(const char* name=0);
 
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const {return CC_2D_VIEWPORT_LABEL;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::VIEWPORT_2D_LABEL; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Returns ROI (relative to screen)

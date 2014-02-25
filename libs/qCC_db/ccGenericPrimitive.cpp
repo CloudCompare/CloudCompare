@@ -30,7 +30,7 @@ ccGenericPrimitive::ccGenericPrimitive(QString name/*=QString()*/, const ccGLMat
 
 	ccPointCloud* vert = vertices();
 	assert(vert);
-	addChild(vert,true);
+	addChild(vert);
 	vert->setEnabled(false);
 
 	if (transMat)
@@ -97,10 +97,10 @@ const ccGenericPrimitive& ccGenericPrimitive::operator += (const ccGenericPrimit
 				setTriNormsTable(normsTable);
 				assert(m_triNormals);
 				//primitives must have their normal table as child!
-				addChild(m_triNormals,true);
+				addChild(m_triNormals);
 			}
 
-			for (unsigned i=0;i<primTriNormCount;++i)
+			for (unsigned i=0; i<primTriNormCount; ++i)
 				normsTable->addElement(primNorms->getValue(i));
 		}
 
@@ -149,7 +149,7 @@ bool ccGenericPrimitive::fromFile_MeOnly(QFile& in, short dataVersion, int flags
 	//HACK: first, we have to remove any 'wrongly' associated vertices cloud!
 	//(this is in fact the default one - automatically created on construction)
 	//while the true vertices come as a child (at least it should;)
-	if (getChildrenNumber() && getChild(0)->isKindOf(CC_POINT_CLOUD) && getChild(0) != m_associatedCloud)
+	if (getChildrenNumber() && getChild(0)->isKindOf(CC_TYPES::POINT_CLOUD) && getChild(0) != m_associatedCloud)
 		removeChild(0);
 
 	//Transformation matrix backup (dataVersion>=21)
@@ -261,7 +261,7 @@ bool ccGenericPrimitive::init(unsigned vertCount, bool vertNormals, unsigned fac
 			setTriNormsTable(normsTable);
 			assert(m_triNormals);
 			//primitives must have their normal table as child!
-			addChild(m_triNormals,true);
+			addChild(m_triNormals);
 		}
 	}
 

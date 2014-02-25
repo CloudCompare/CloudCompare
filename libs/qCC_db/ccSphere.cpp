@@ -145,7 +145,7 @@ bool ccSphere::buildUp()
 		}
 	}
 
-	updateModificationTime();
+	notifyGeometryUpdate();
 	showNormals(true);
 
 	return true;
@@ -170,7 +170,7 @@ bool ccSphere::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	inStream >> m_radius;
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_radius,1);
 
 	return true;
 }

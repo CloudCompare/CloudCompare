@@ -22,6 +22,7 @@
 
 //Local
 #include "ccGenericPointCloud.h"
+#include "ccCameraSensor.h"
 #include "ccNormalVectors.h"
 #include "ccBox.h"
 
@@ -96,9 +97,16 @@ ccOctree::ccOctree(ccGenericPointCloud* aCloud)
 	, m_displayedLevel(1)
 	, m_glListID(-1)
 	, m_shouldBeRefreshed(true)
+	, m_frustrumIntersector(0)
 {
 	setVisible(false);
 	lockVisibility(false);
+}
+
+ccOctree::~ccOctree()
+{
+	if (m_frustrumIntersector)
+		delete m_frustrumIntersector;
 }
 
 void ccOctree::setDisplayedLevel(int level)
@@ -191,7 +199,7 @@ void ccOctree::drawMeOnly(CC_DRAW_CONTEXT& context)
 /*** RENDERING METHODS ***/
 
 void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
-								CCLib::DgmOctree* theOctree,
+								ccOctree* theOctree,
 								unsigned char level,
 								ccGenericPointCloud* theAssociatedCloud,
 								int &octreeGLListID,
@@ -202,13 +210,15 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 
 	glPushAttrib(GL_LIGHTING_BIT);
 
-	if (octreeDisplayType==WIRE)
+	if (octreeDisplayType == WIRE)
 	{
 		//cet affichage demande trop de memoire pour le stocker sous forme de liste OpenGL
 		//donc on doit le generer dynamiquement
 		
 		glDisable(GL_LIGHTING); //au cas où la lumiere soit allumee
 		glColor3ubv(ccColor::green);
+
+		void* additionalParameters[] = { theOctree->m_frustrumIntersector };
 		theOctree->executeFunctionForAllCellsAtLevel(level,&DrawCellAsABox,NULL);
 	}
 	else
@@ -303,10 +313,31 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 								void** additionalParameters,
 								CCLib::NormalizedProgress* nProgress/*=0*/)
 {
+	ccOctreeFrustrumIntersector* ofi = static_cast<ccOctreeFrustrumIntersector*>(additionalParameters[0]);
+	
 	CCVector3 bbMin,bbMax;
 	cell.parentOctree->computeCellLimits(cell.truncatedCode,cell.level,bbMin.u,bbMax.u,true);
 
-	glColor3ubv(ccColor::green);
+	ccOctreeFrustrumIntersector::OctreeCellVisibility vis = ccOctreeFrustrumIntersector::CELL_INSIDE_FRUSTRUM;
+	if (ofi)
+		vis = ofi->positionFromFrustum(cell.truncatedCode,cell.level);
+
+	//JS_TEMP//
+	// outside
+	if (vis == ccOctreeFrustrumIntersector::CELL_OUTSIDE_FRUSTRUM)
+		glColor3ubv(ccColor::green);
+	else
+	{
+		glPushAttrib(GL_LINE_BIT);
+		glLineWidth(2.0f);
+		// inside
+		if (vis == ccOctreeFrustrumIntersector::CELL_INSIDE_FRUSTRUM)
+			glColor3ubv(ccColor::magenta);
+		// intersecting
+		else
+			glColor3ubv(ccColor::blue);
+	}
+
 	glBegin(GL_LINE_LOOP);
 	ccGL::Vertex3v(bbMin.u);
 	ccGL::Vertex3(bbMax.x,bbMin.y,bbMin.z);
@@ -331,6 +362,11 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	ccGL::Vertex3(bbMin.x,bbMax.y,bbMin.z);
 	ccGL::Vertex3(bbMin.x,bbMax.y,bbMax.z);
 	glEnd();
+
+	//JS_TEMP//
+	// not outside
+	if (vis != ccOctreeFrustrumIntersector::CELL_OUTSIDE_FRUSTRUM)
+		glPopAttrib();
 
 	return true;
 }
@@ -460,3 +496,40 @@ CCVector3 ccOctree::ComputeAverageNorm(CCLib::ReferenceCloud* subset, ccGenericP
 	N.normalize();
 	return N;
 }
+
+bool ccOctree::intersectWithFrustrum(ccCameraSensor* sensor, std::vector<unsigned>& inCameraFrustrum)
+{
+	if (!sensor)
+		return false;
+
+	// initialization
+	float globalPlaneCoefficients[6][4];
+	CCVector3 globalCorners[8];
+	CCVector3 globalEdges[6];
+	CCVector3 globalCenter; 
+	sensor->computeGlobalPlaneCoefficients(globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
+
+	if (!m_frustrumIntersector)
+	{
+		m_frustrumIntersector = new ccOctreeFrustrumIntersector();
+		if (!m_frustrumIntersector->build(this))
+		{
+			ccLog::Warning("[ccOctree::intersectWithFrustrum] Not enough memory!");
+			return false;
+		}
+	}
+
+	// get points of cells in frustrum
+	std::vector< std::pair<unsigned, CCVector3> > pointsToTest;
+	m_frustrumIntersector->computeFrustumIntersectionWithOctree(pointsToTest, inCameraFrustrum, globalPlaneCoefficients, globalCorners, globalEdges, globalCenter);
+	
+	// project points
+	for (size_t i=0; i<pointsToTest.size(); i++)
+	{
+		if (sensor->isGlobalCoordInFrustrum(pointsToTest[i].second/*, false*/))
+			inCameraFrustrum.push_back(pointsToTest[i].first);
+	}
+
+	return true;
+}
+

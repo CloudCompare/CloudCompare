@@ -1025,7 +1025,6 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 		P->z = 0;
     }
 
-	cloud->updateModificationTime();
 	cloud->refreshBB();
 	if (cloud->getOctree())
 		cloud->deleteOctree();
@@ -1077,7 +1076,6 @@ bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
         *P = ProjectPointOnCone(ang_rad, lat_rad, latMin_rad, nProj, counterclockwise);
     }
 
-	cloud->updateModificationTime();
 	cloud->refreshBB();
 	if (cloud->getOctree())
 		cloud->deleteOctree();

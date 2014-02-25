@@ -46,12 +46,12 @@ public:
 	//! Returns the model center
 	/** \return the model center
 	**/
-	const CCVector3& getCenter() const  {return modelCenter;};
+	inline const CCVector3& getCenter() const  { return modelCenter; }
 
 	//! Returns the model max width (squared)
 	/** \return the model max width (squared)
 	**/
-	PointCoordinateType getSquareSize() const {return squareModelSize;};
+	inline PointCoordinateType getSquareSize() const { return squareModelSize; }
 
 	//! Compute the (unsigned) distance between a 3D point and this model
 	/** \param P the query point

@@ -247,7 +247,7 @@ bool ccTorus::buildUp()
 		}
 	}
 
-	updateModificationTime();
+	notifyGeometryUpdate();
 	showTriNorms(true);
 
 	return true;
@@ -276,10 +276,10 @@ bool ccTorus::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	inStream >> m_insideRadius;
-	inStream >> m_outsideRadius;
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_insideRadius,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_outsideRadius,1);
 	inStream >> m_rectSection;
-	inStream >> m_rectSectionHeight;
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_rectSectionHeight,1);
 	inStream >> m_angle_rad;
 
 	return true;

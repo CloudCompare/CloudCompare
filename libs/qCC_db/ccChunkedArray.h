@@ -51,7 +51,7 @@ public:
 	}
 
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const {return CC_CHUNKED_ARRAY;};
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CHUNKED_ARRAY; }
 	virtual bool isShareable() const { return true; }
 	virtual bool isSerializable() const { return true; }
 

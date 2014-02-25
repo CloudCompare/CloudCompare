@@ -171,7 +171,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 	}
 
 	//do we need to interpolate scalar fields?
-	ccPointCloud* pc = (cloud->isA(CC_POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud) : 0);
+	ccPointCloud* pc = (cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud) : 0);
 	std::vector<double*> gridScalarFields;
 	bool interpolateSF = (sfInterpolation != INVALID_PROJECTION_TYPE) && ((generateCloud && pc && pc->hasScalarFields()) || generateRaster);
 	if (!memError && interpolateSF)
@@ -722,7 +722,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 						double stepX = grid_step;
 						double stepY = grid_step;
-						if (cloud->isA(CC_POINT_CLOUD))
+						if (cloud->isA(CC_TYPES::POINT_CLOUD))
 						{
 							const CCVector3d& shift = static_cast<ccPointCloud*>(cloud)->getGlobalShift();
 							shiftX -= shift.u[X];
@@ -914,7 +914,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 						}
 						else
 						{
-							cloudGrid = cloud->isA(CC_POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud)->partialClone(&refCloud) : ccPointCloud::From(&refCloud);
+							cloudGrid = cloud->isA(CC_TYPES::POINT_CLOUD) ? static_cast<ccPointCloud*>(cloud)->partialClone(&refCloud) : ccPointCloud::From(&refCloud);
 						}
 					}
 				}

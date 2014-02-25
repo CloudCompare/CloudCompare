@@ -50,10 +50,10 @@ public:
 	virtual ~ccMesh();
 
     //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_MESH; };
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::MESH; };
 
 	//! Sets the associated vertices cloud (warning)
-	virtual void setAssociatedCloud(ccGenericPointCloud* cloud) { m_associatedCloud = cloud; }
+	virtual void setAssociatedCloud(ccGenericPointCloud* cloud);
 
 	//! Clones this entity
 	/** All the main features of the entity are cloned, except from the octree
@@ -113,9 +113,9 @@ public:
 	virtual void shiftTriangleIndexes(unsigned shift);
 
 	//! Adds a triangle to the mesh
-	/** Warning: bounding box validity is broken after a call to this method.
-        However, for the sake of performance, no call to updateModificationTime
-        is made automatically. Make sure to do so when all modifications are done.
+	/** \warning Bounding-box validity is broken after a call to this method.
+        However, for the sake of performance, no call to notifyGeometryUpdate
+        is made automatically. Make sure to do so when all modifications are done!
         \param i1 first summit index (relatively to the vertex cloud)
 		\param i2 second summit index (relatively to the vertex cloud)
 		\param i3 third summit index (relatively to the vertex cloud)
@@ -347,6 +347,7 @@ protected:
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
     virtual void applyGLTransformation(const ccGLMatrix& trans);
+	virtual void onUpdateOf(ccHObject* obj);
 
 	//! Same as other 'interpolateNormals' method with a set of 3 vertices indexes
 	bool interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3& N, const int* triNormIndexes = 0);
@@ -364,7 +365,7 @@ protected:
 	{ \
 		baseName(); \
 		for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it) \
-			if ((*it)->isA(CC_SUB_MESH)) \
+			if ((*it)->isA(CC_TYPES::SUB_MESH)) \
 				static_cast<ccGenericMesh*>(*it)->baseName(); \
 	} \
 
@@ -374,7 +375,7 @@ protected:
 	{ \
 		baseName(p); \
 		for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it) \
-			if ((*it)->isA(CC_SUB_MESH)) \
+			if ((*it)->isA(CC_TYPES::SUB_MESH)) \
 				static_cast<ccGenericMesh*>(*it)->baseName(p); \
 	} \
 

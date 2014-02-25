@@ -42,10 +42,13 @@
 #include <cc2DViewportObject.h>
 #include <ccCalibratedImage.h>
 #include <ccGBLSensor.h>
+#include <ccCameraSensor.h>
 #include <ccMaterialSet.h>
 #include <ccAdvancedTypes.h>
 #include <ccGenericPrimitive.h>
 #include <ccFacet.h>
+#include <ccSensor.h>
+#include <ccIndexedTransformationBuffer.h>
 
 //Qt
 #include <QStandardItemModel>
@@ -148,75 +151,83 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	}
 
     if (m_currentObject->isHierarchy())
-		if (!m_currentObject->isA(CC_2D_VIEWPORT_LABEL)) //don't need to display this kind of info for viewport labels!
+		if (!m_currentObject->isA(CC_TYPES::VIEWPORT_2D_LABEL)) //don't need to display this kind of info for viewport labels!
 			fillWithHObject(m_currentObject);
 
-    if (m_currentObject->isKindOf(CC_POINT_CLOUD))
+    if (m_currentObject->isKindOf(CC_TYPES::POINT_CLOUD))
     {
         fillWithPointCloud(ccHObjectCaster::ToGenericPointCloud(m_currentObject));
     }
-    else if (m_currentObject->isKindOf(CC_MESH))
+    else if (m_currentObject->isKindOf(CC_TYPES::MESH))
     {
 		fillWithMesh(ccHObjectCaster::ToGenericMesh(m_currentObject));
     
-		if (m_currentObject->isKindOf(CC_PRIMITIVE))
+		if (m_currentObject->isKindOf(CC_TYPES::PRIMITIVE))
 			fillWithPrimitive(ccHObjectCaster::ToPrimitive(m_currentObject));
     }
-    else if (m_currentObject->isA(CC_FACET))
+    else if (m_currentObject->isA(CC_TYPES::FACET))
     {
 		fillWithFacet(ccHObjectCaster::ToFacet(m_currentObject));
 	}
-    else if (m_currentObject->isA(CC_POLY_LINE))
+    else if (m_currentObject->isA(CC_TYPES::POLY_LINE))
     {
         fillWithPolyline(ccHObjectCaster::ToPolyline(m_currentObject));
     }
-    else if (m_currentObject->isA(CC_POINT_OCTREE))
+    else if (m_currentObject->isA(CC_TYPES::POINT_OCTREE))
     {
 		fillWithPointOctree(ccHObjectCaster::ToOctree(m_currentObject));
     }
-    else if (m_currentObject->isA(CC_POINT_KDTREE))
+    else if (m_currentObject->isA(CC_TYPES::POINT_KDTREE))
     {
 		fillWithPointKdTree(ccHObjectCaster::ToKdTree(m_currentObject));
     }
-    else if (m_currentObject->isKindOf(CC_IMAGE))
+    else if (m_currentObject->isKindOf(CC_TYPES::IMAGE))
     {
 		fillWithImage(ccHObjectCaster::ToImage(m_currentObject));
 
-        if (m_currentObject->isA(CC_CALIBRATED_IMAGE))
+        if (m_currentObject->isA(CC_TYPES::CALIBRATED_IMAGE))
 			fillWithCalibratedImage(ccHObjectCaster::ToCalibratedImage(m_currentObject));
     }
-    else if (m_currentObject->isA(CC_2D_LABEL))
+    else if (m_currentObject->isA(CC_TYPES::LABEL_2D))
     {
 		fillWithLabel(ccHObjectCaster::To2DLabel(m_currentObject));
     }
-    else if (m_currentObject->isKindOf(CC_2D_VIEWPORT_OBJECT))
+    else if (m_currentObject->isKindOf(CC_TYPES::VIEWPORT_2D_OBJECT))
     {
 		fillWithViewportObject(ccHObjectCaster::To2DViewportObject(m_currentObject));
     }
-    else if (m_currentObject->isKindOf(CC_GBL_SENSOR))
+    else if (m_currentObject->isKindOf(CC_TYPES::GBL_SENSOR))
     {
 		fillWithGBLSensor(ccHObjectCaster::ToGBLSensor(m_currentObject));
     }
-    else if (m_currentObject->isA(CC_MATERIAL_SET))
+    else if (m_currentObject->isKindOf(CC_TYPES::CAMERA_SENSOR))
+    {
+		fillWithCameraSensor(ccHObjectCaster::ToCameraSensor(m_currentObject));
+    }
+    else if (m_currentObject->isA(CC_TYPES::MATERIAL_SET))
     {
         fillWithMaterialSet(static_cast<ccMaterialSet*>(m_currentObject));
     }
-    else if (m_currentObject->isA(CC_NORMAL_INDEXES_ARRAY))
+    else if (m_currentObject->isA(CC_TYPES::NORMAL_INDEXES_ARRAY))
     {
         fillWithChunkedArray(static_cast<NormsIndexesTableType*>(m_currentObject));
     }
-    else if (m_currentObject->isA(CC_TEX_COORDS_ARRAY))
+    else if (m_currentObject->isA(CC_TYPES::TEX_COORDS_ARRAY))
     {
         fillWithChunkedArray(static_cast<TextureCoordsContainer*>(m_currentObject));
     }
-    else if (m_currentObject->isA(CC_NORMALS_ARRAY))
+    else if (m_currentObject->isA(CC_TYPES::NORMALS_ARRAY))
     {
         fillWithChunkedArray(static_cast<NormsTableType*>(m_currentObject));
     }
-    else if (m_currentObject->isA(CC_RGB_COLOR_ARRAY))
+    else if (m_currentObject->isA(CC_TYPES::RGB_COLOR_ARRAY))
     {
         fillWithChunkedArray(static_cast<ColorsTableType*>(m_currentObject));
     }
+	else if (m_currentObject->isA(CC_TYPES::TRANS_BUFFER))
+	{
+		fillWithTransBuffer(static_cast<ccIndexedTransformationBuffer*>(m_currentObject));
+	}
 
 	fillWithMetaData(m_currentObject);
 	
@@ -514,7 +525,7 @@ void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
 {
     assert(_obj && m_model);
 
-	bool isSubMesh = _obj->isA(CC_SUB_MESH);
+	bool isSubMesh = _obj->isA(CC_TYPES::SUB_MESH);
 
     addSeparator(isSubMesh ? "Sub-mesh" : "Mesh");
 
@@ -529,7 +540,7 @@ void ccPropertiesTreeDelegate::fillWithMesh(ccGenericMesh* _obj)
 	appendRow( ITEM("Wireframe"), CHECKABLE_ITEM(_obj->isShownAsWire(),OBJECT_MESH_WIRE) );
 
     //stippling (ccMesh only)
-	if (_obj->isA(CC_MESH))
+	if (_obj->isA(CC_TYPES::MESH))
 		appendRow( ITEM("Stippling"), CHECKABLE_ITEM(static_cast<ccMesh*>(_obj)->stipplingEnabled(),OBJECT_MESH_STIPPLING) );
 
 	//we also integrate vertices SF into mesh properties
@@ -694,6 +705,46 @@ void ccPropertiesTreeDelegate::fillWithViewportObject(cc2DViewportObject* _obj)
 	appendRow( ITEM("Apply Viewport"), PERSISTENT_EDITOR(OBJECT_APPLY_LABEL_VIEWPORT), true );
 }
 
+void ccPropertiesTreeDelegate::fillWithTransBuffer(ccIndexedTransformationBuffer* _obj)
+{
+    assert(_obj && m_model);
+
+    addSeparator("Trans. buffer");
+
+    //Associated positions
+	appendRow( ITEM("Count"), ITEM(QString::number(_obj->size())) );
+
+	//Show path as polyline
+	appendRow( ITEM("Show path"), CHECKABLE_ITEM(_obj->isPathShonwAsPolyline(),OBJECT_SHOW_TRANS_BUFFER_PATH) );
+
+	//Show trihedrons
+	appendRow( ITEM("Show trihedrons"), CHECKABLE_ITEM(_obj->triherdonsShown(),OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS) );
+
+	//Trihedrons scale
+	appendRow( ITEM("Scale"), PERSISTENT_EDITOR(OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE), true );
+}
+
+void ccPropertiesTreeDelegate::fillWithSensor(ccSensor* _obj)
+{
+    assert(_obj && m_model);
+
+    addSeparator("Associated positions");
+
+    //Associated positions
+	appendRow( ITEM("Count"), ITEM(QString::number(_obj->getPositions() ? _obj->getPositions()->size() : 0)) );
+
+	double minIndex,maxIndex;
+	_obj->getIndexBounds(minIndex,maxIndex);
+	if (minIndex != maxIndex)
+	{
+		//Index span
+		appendRow( ITEM("Indexes"), ITEM(QString("%1 - %2").arg(minIndex).arg(maxIndex)) );
+
+		//Current index
+		appendRow( ITEM("Active index"), PERSISTENT_EDITOR(OBJECT_SENSOR_INDEX), true );
+	}
+}
+
 void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 {
     assert(_obj && m_model);
@@ -711,6 +762,23 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 
 	//Sensor drawing scale
 	appendRow( ITEM("Drawing scale"), PERSISTENT_EDITOR(OBJECT_SENSOR_DISPLAY_SCALE), true );
+
+	//Positions
+	fillWithSensor(_obj);
+}
+
+void ccPropertiesTreeDelegate::fillWithCameraSensor(ccCameraSensor* _obj)
+{
+    assert(_obj && m_model);
+
+    addSeparator("Camera Sensor");
+
+    //Draw frustrum
+	appendRow( ITEM("Draw frustrum lines"), CHECKABLE_ITEM(_obj->frustrumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTRUM) );
+	appendRow( ITEM("Draw frustrum side planes"), CHECKABLE_ITEM(_obj->frustrumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES) );
+
+	//Positions
+	fillWithSensor(_obj);
 }
 
 void ccPropertiesTreeDelegate::fillWithMaterialSet(ccMaterialSet* _obj)
@@ -889,6 +957,34 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		slider->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
         return slider;
     }
+    case OBJECT_SENSOR_INDEX:
+    {
+        ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
+        assert(sensor);
+        
+		double minIndex, maxIndex;
+		sensor->getIndexBounds(minIndex, maxIndex);
+		
+		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
+        spinBox->setRange(minIndex, maxIndex);
+        spinBox->setSingleStep((maxIndex-minIndex)/1000.0);
+
+        connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(sensorIndexChanged(double)));
+
+		spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+        return spinBox;
+    }
+	case OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE:
+    {
+		QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
+        spinBox->setRange(1.0e-6, 1.0e6);
+        spinBox->setSingleStep(1.0);
+
+        connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(trihedronsScaleChanged(double)));
+
+		spinBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+        return spinBox;
+    }
     case OBJECT_APPLY_IMAGE_VIEWPORT:
     {
         QPushButton* button = new QPushButton("Apply",parent);
@@ -910,8 +1006,8 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
     case OBJECT_SENSOR_DISPLAY_SCALE:
     {
         QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
-        spinBox->setRange(1e-6,1e6);
-        spinBox->setSingleStep(1e-3);
+        spinBox->setRange(1.0e-6,1.0e6);
+        spinBox->setSingleStep(1.0e-1);
 
         connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(sensorScaleChanged(double)));
 
@@ -1097,21 +1193,43 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 
         ccImage* image = ccHObjectCaster::ToImage(m_currentObject);
         assert(image);
-        slider->setValue(int(image->getAlpha()*255.0));
+        slider->setValue(static_cast<int>(image->getAlpha()*255.0f));
         //slider->setTickPosition(QSlider::NoTicks);
         break;
     }
+	case OBJECT_SENSOR_INDEX:
+	{
+        QDoubleSpinBox *spinBox = qobject_cast<QDoubleSpinBox*>(editor);
+        if (!spinBox)
+            return;
+
+        ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
+        assert(sensor);
+        spinBox->setValue(sensor->getActiveIndex());
+        break;
+	}
     case OBJECT_SENSOR_DISPLAY_SCALE:
     {
         QDoubleSpinBox *spinBox = qobject_cast<QDoubleSpinBox*>(editor);
         if (!spinBox)
             return;
 
-        ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_currentObject);
+        ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
         assert(sensor);
         spinBox->setValue(sensor->getGraphicScale());
         break;
     }
+	case OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE:
+	{
+        QDoubleSpinBox *spinBox = qobject_cast<QDoubleSpinBox*>(editor);
+        if (!spinBox)
+            return;
+
+		ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
+		assert(buffer);
+		spinBox->setValue(buffer->triherdonsDisplayScale());
+        break;
+	}
     case OBJECT_CLOUD_POINT_SIZE:
     {
         QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
@@ -1246,6 +1364,36 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 		m_currentObject->showNameIn3D(item->checkState() == Qt::Checked);
 		redraw=true;
 		break;
+	case OBJECT_SHOW_TRANS_BUFFER_PATH:
+		{
+			ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
+			assert(buffer);
+			buffer->showPathAsPolyline(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
+	case OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS:
+		{
+			ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
+			assert(buffer);
+			buffer->showTriherdons(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
+	case OBJECT_SENSOR_DRAW_FRUSTRUM:
+		{
+			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
+			sensor->drawFrustrum(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
+	case OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES:
+		{
+			ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_currentObject);
+			sensor->drawFrustrumPlanes(item->checkState() == Qt::Checked);
+		}
+		redraw=true;
+		break;
 	}
 
     if (redraw)
@@ -1262,10 +1410,10 @@ void ccPropertiesTreeDelegate::updateDisplay()
 	if (!objectIsDisplayed)
 	{
 		//DGM: point clouds may be mesh vertices of meshes which may depend on several of their parameters
-		if (object->isKindOf(CC_POINT_CLOUD))
+		if (object->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
 			ccHObject* parent = object->getParent();
-			if (parent && parent->isKindOf(CC_MESH) && parent->isDisplayed()) //specific case: vertices
+			if (parent && parent->isKindOf(CC_TYPES::MESH) && parent->isDisplayed()) //specific case: vertices
 			{
 				object = parent;
 				objectIsDisplayed = true;
@@ -1431,7 +1579,6 @@ void ccPropertiesTreeDelegate::primitivePrecisionChanged(int val)
 	updateModel();
 }
 
-
 void ccPropertiesTreeDelegate::imageAlphaChanged(int val)
 {
     ccImage* image = ccHObjectCaster::ToImage(m_currentObject);
@@ -1483,6 +1630,31 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 
 	sensor->setGraphicScale(static_cast<PointCoordinateType>(val));
 	updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::sensorIndexChanged(double val)
+{
+    if (!m_currentObject)
+        return;
+
+    ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
+    assert(sensor);
+
+	sensor->setActiveIndex(val);
+	updateDisplay();
+}
+
+void ccPropertiesTreeDelegate::trihedronsScaleChanged(double val)
+{
+    if (!m_currentObject)
+        return;
+
+	ccIndexedTransformationBuffer* buffer = ccHObjectCaster::ToTransBuffer(m_currentObject);
+	assert(buffer);
+
+	buffer->setTriherdonsDisplayScale(static_cast<float>(val));
+	if (buffer->triherdonsShown())
+		updateDisplay();
 }
 
 void ccPropertiesTreeDelegate::cloudPointSizeChanged(int size)

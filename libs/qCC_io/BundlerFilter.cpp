@@ -421,7 +421,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 		ccHObject* altKeypointsContainer = FileIOFilter::LoadFromFile(altKeypointsFilename);
 		if (!altKeypointsContainer
 			|| altKeypointsContainer->getChildrenNumber()!=1
-			|| (!altKeypointsContainer->getChild(0)->isKindOf(CC_POINT_CLOUD) && !altKeypointsContainer->getChild(0)->isKindOf(CC_MESH)))
+			|| (!altKeypointsContainer->getChild(0)->isKindOf(CC_TYPES::POINT_CLOUD) && !altKeypointsContainer->getChild(0)->isKindOf(CC_TYPES::MESH)))
 		{
 			if (!altKeypointsContainer)
 				ccLog::Error(QString("[BundlerFilter::loadFile] Failed to load alternative keypoints file:\n'%1'").arg(altKeypointsFilename));

@@ -34,10 +34,10 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
         return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container clouds;
-	if (entity->isKindOf(CC_POINT_CLOUD))
+	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
         clouds.push_back(entity);
     else
-        entity->filterChildren(clouds, true, CC_POINT_CLOUD);
+        entity->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
 
     if (clouds.empty())
     {

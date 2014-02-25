@@ -48,19 +48,16 @@ void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
         return;
 
     //center
-    CCVector3 C = sensor->getSensorCenter();
-    posXEdit->setText(QString("%1").arg(C.x));
-    posYEdit->setText(QString("%1").arg(C.y));
-    posZEdit->setText(QString("%1").arg(C.z));
+	const float* C = sensor->getRigidTransformation().getTranslation();
+    posXEdit->setText(QString("%1").arg(C[0]));
+    posYEdit->setText(QString("%1").arg(C[1]));
+    posZEdit->setText(QString("%1").arg(C[2]));
 
     //rotation order
     if (sensor->getRotationOrder() == ccGBLSensor::THETA_PHI)
         rotationOrderComboBox->setCurrentIndex(0);
     else if (sensor->getRotationOrder() == ccGBLSensor::PHI_THETA)
         rotationOrderComboBox->setCurrentIndex(1);
-
-    //base
-    baseSpinBox->setValue(sensor->getSensorBase());
 
     //max range
     maxRangeDoubleSpinBox->setValue(sensor->getSensorRange());
@@ -69,7 +66,7 @@ void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
     uncertaintyDoubleSpinBox->setValue(sensor->getUncertainty());
 
     //rotation matrix
-	const ccGLMatrix& rot = sensor->getOrientationMatrix();
+	const ccGLMatrix& rot = sensor->getRigidTransformation();
     {
 		const float* mat = rot.data();
         x1rot->setText(QString::number(mat[0]));
@@ -97,15 +94,6 @@ void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 	ccGBLSensor::ROTATION_ORDER rotOrder = (rotationOrderComboBox->currentIndex() == 0 ? ccGBLSensor::THETA_PHI : ccGBLSensor::PHI_THETA);
     sensor->setRotationOrder(rotOrder);
 
-    //center
-    CCVector3 C(static_cast<PointCoordinateType>(posXEdit->text().toDouble()),
-                static_cast<PointCoordinateType>(posYEdit->text().toDouble()),
-                static_cast<PointCoordinateType>(posZEdit->text().toDouble()));
-    sensor->setSensorCenter(C);
-
-    //base
-    sensor->setSensorBase(static_cast<PointCoordinateType>(baseSpinBox->value()));
-
     //max. range
     sensor->setSensorRange(static_cast<ScalarType>(maxRangeDoubleSpinBox->value()));
 
@@ -123,7 +111,14 @@ void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
         mat[6]  = z2rot->text().toFloat();
         mat[10] = z3rot->text().toFloat();
     }
-	sensor->setOrientationMatrix(rot);
+
+    //center
+    CCVector3 C(static_cast<PointCoordinateType>(posXEdit->text().toDouble()),
+                static_cast<PointCoordinateType>(posYEdit->text().toDouble()),
+                static_cast<PointCoordinateType>(posZEdit->text().toDouble()));
+	rot.setTranslation(C);
+
+	sensor->setRigidTransformation(rot);
 
     //angular steps
     sensor->setDeltaPhi(static_cast<PointCoordinateType>(dPhiSpinBox->value()));

@@ -208,9 +208,9 @@ void ccGraphicalSegmentationTool::removeAllEntities(bool unallocateVisibilityArr
 		{
 			ccHObject* entity = *p;
 
-			if (entity->isKindOf(CC_POINT_CLOUD))
+			if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 				ccHObjectCaster::ToGenericPointCloud(entity)->unallocateVisibilityArray();
-			else if (entity->isKindOf(CC_MESH))
+			else if (entity->isKindOf(CC_TYPES::MESH))
 				ccHObjectCaster::ToGenericMesh(entity)->getAssociatedCloud()->unallocateVisibilityArray();
 		}
 	}
@@ -245,9 +245,9 @@ void ccGraphicalSegmentationTool::reset()
     {
         for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
         {
-            if ((*p)->isKindOf(CC_POINT_CLOUD))
+            if ((*p)->isKindOf(CC_TYPES::POINT_CLOUD))
                 ccHObjectCaster::ToGenericPointCloud(*p)->razVisibilityArray();
-            else if ((*p)->isKindOf(CC_MESH))
+            else if ((*p)->isKindOf(CC_TYPES::MESH))
                 ccHObjectCaster::ToGenericMesh(*p)->getAssociatedCloud()->razVisibilityArray();
         }
 
@@ -278,20 +278,20 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
     }
 
 	bool result = false;
-	if (anObject->isKindOf(CC_POINT_CLOUD))
+	if (anObject->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(anObject);
 		//detect if this cloud is in fact a vertex set for at least one mesh
 		{
 			//either the cloud is the child of its parent mesh
-			if (cloud->getParent() && cloud->getParent()->isKindOf(CC_MESH) && ccHObjectCaster::ToGenericMesh(cloud->getParent())->getAssociatedCloud() == cloud)
+			if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH) && ccHObjectCaster::ToGenericMesh(cloud->getParent())->getAssociatedCloud() == cloud)
 			{
 				ccLog::Warning(QString("[Graphical Segmentation Tool] Can't segment mesh vertices '%1' directly! Select its parent mesh instead!").arg(anObject->getName()));
 				return false;
 			}
 			//or the parent of its child mesh!
 			ccHObject::Container meshes;
-			if (cloud->filterChildren(meshes,false,CC_MESH) != 0)
+			if (cloud->filterChildren(meshes,false,CC_TYPES::MESH) != 0)
 			{
 				for (unsigned i=0; i<meshes.size(); ++i)
 					if (ccHObjectCaster::ToGenericMesh(meshes[i])->getAssociatedCloud() == cloud)
@@ -309,11 +309,16 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 		for (unsigned i=0; i<anObject->getChildrenNumber(); ++i)
 			result |= addEntity(anObject->getChild(i));
 	}
-	else if (anObject->isKindOf(CC_MESH))
+	else if (anObject->isKindOf(CC_TYPES::MESH))
 	{
-		if (anObject->isKindOf(CC_PRIMITIVE))
+		if (anObject->isKindOf(CC_TYPES::PRIMITIVE))
 		{
 			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment primitives yet! Sorry...");
+			return false;
+		}
+		if (anObject->isKindOf(CC_TYPES::SUB_MESH))
+		{
+			ccLog::Warning("[ccGraphicalSegmentationTool] Can't segment sub-meshes! Select the parent mesh...");
 			return false;
 		}
 		else
@@ -323,13 +328,13 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 			//first, we must check that there's no mesh and at least one of its sub-mesh mixed in the current selection!
 			for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
 			{
-				if ((*p)->isKindOf(CC_MESH))
+				if ((*p)->isKindOf(CC_TYPES::MESH))
 				{
 					ccGenericMesh* otherMesh = ccHObjectCaster::ToGenericMesh(*p);
 					if (otherMesh->getAssociatedCloud() == mesh->getAssociatedCloud())
 					{
-						if (otherMesh->isA(CC_SUB_MESH) && mesh->isA(CC_MESH)
-							|| otherMesh->isA(CC_MESH) && mesh->isA(CC_SUB_MESH))
+						if (otherMesh->isA(CC_TYPES::SUB_MESH) && mesh->isA(CC_TYPES::MESH)
+							|| otherMesh->isA(CC_TYPES::MESH) && mesh->isA(CC_TYPES::SUB_MESH))
 						{
 							ccLog::Warning("[Graphical Segmentation Tool] Can't mix sub-meshes with their parent mesh!");
 							return false;

@@ -41,8 +41,10 @@
    v3.1 - 09/25/2013 - ccPolyline width added
    v3.2 - 10/11/2013 - ccFacet (2D polygons) are now supported
    v3.3 - 12/19/2013 - global scale information is now saved for point clouds
+   v3.4 - 01/09/2014 - ccIndexedTransformation and ccIndexedTransformationBuffer added + CC_CLASS_ENUM is now coded on 64 bits
+   v3.5 - 02/13/2014 - ccSensor class updated
 **/
-const unsigned c_currentDBVersion = 33; //3.3
+const unsigned c_currentDBVersion = 35; //3.5
 
 unsigned ccObject::GetCurrentDBVersion()
 {
@@ -145,8 +147,9 @@ bool ccObject::toFile(QFile& out) const
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
 	//class ID (dataVersion>=20)
-	uint32_t classID = getClassID();
-	if (out.write((const char*)&classID,4)<0)
+	//DGM: on 64 bits since version 34
+	uint64_t classID = static_cast<uint64_t>(getClassID());
+	if (out.write((const char*)&classID,8)<0)
 		return WriteError();
 
 	//unique ID (dataVersion>=20)
@@ -185,18 +188,28 @@ bool ccObject::toFile(QFile& out) const
 	return true;
 }
 
-bool ccObject::ReadClassIDFromFile(unsigned& classID, QFile& in, short dataVersion)
+CC_CLASS_ENUM ccObject::ReadClassIDFromFile(QFile& in, short dataVersion)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
-	//class ID (dataVersion>=20)
-	uint32_t _classID = 0;
-	if (in.read((char*)&_classID,4)<0)
-		return ReadError();
+	//class ID (on 32 bits between version 2.0 and 3.3, then 64 bits from version 3.4)
+	CC_CLASS_ENUM classID = CC_TYPES::OBJECT;
+	if (dataVersion < 34)
+	{
+		uint32_t _classID = 0;
+		if (in.read((char*)&_classID,4)<0)
+			return ReadError();
+		classID = static_cast<CC_CLASS_ENUM>(_classID);
+	}
+	else
+	{
+		uint64_t _classID = 0;
+		if (in.read((char*)&_classID,8)<0)
+			return ReadError();
+		classID = static_cast<CC_CLASS_ENUM>(_classID);
+	}
 	
-	classID = (unsigned)_classID;
-	
-	return true;
+	return classID;
 }
 
 QVariant ccObject::getMetaData(QString key) const

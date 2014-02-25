@@ -34,10 +34,10 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
         return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container clouds;
-	if (entity->isKindOf(CC_POINT_CLOUD))
+	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
         clouds.push_back(entity);
     else
-        entity->filterChildren(clouds, true, CC_POINT_CLOUD);
+        entity->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
 
     if (clouds.empty())
     {
@@ -70,7 +70,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
         ccLog::Warning(QString("[PVFilter::save] Can't recenter or rescale cloud '%1' when saving it in a PN file!").arg(theCloud->getName()));
 
 	//for point clouds with multiple SFs, we must set the currently displayed one as 'input' SF
-	//if (theCloud->isA(CC_POINT_CLOUD))
+	//if (theCloud->isA(CC_TYPES::POINT_CLOUD))
 	//{
 	//	ccPointCloud* pc = static_cast<ccPointCloud*>(theCloud);
 	//	pc->setCurrentInScalarField(pc->getCurrentDisplayedScalarFieldIndex());

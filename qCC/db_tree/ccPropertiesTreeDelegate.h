@@ -34,10 +34,13 @@ class ccKdTree;
 class ccImage;
 class ccCalibratedImage;
 class ccGBLSensor;
+class ccCameraSensor;
 class ccMaterialSet;
 class cc2DLabel;
 class cc2DViewportObject;
 class ccFacet;
+class ccSensor;
+class ccIndexedTransformationBuffer;
 class CCShareable;
 
 class QStandardItemModel;
@@ -52,38 +55,42 @@ class ccPropertiesTreeDelegate : public QStyledItemDelegate
 public:
 
 	//! Delegate items roles
-	enum CC_PROPERTY_ROLE { OBJECT_NO_PROPERTY		= 0	,
-							OBJECT_NAME					,
-							OBJECT_VISIBILITY           ,
-							OBJECT_CURRENT_DISPLAY		,
-							OBJECT_COLORS_SHOWN			,
-							OBJECT_NORMALS_SHOWN		,
-							OBJECT_SCALAR_FIELD_SHOWN	,
-							OBJECT_POLYLINE_WIDTH       ,
-							//OBJECT_XXXX				,
-							//OBJECT_XXXX				,
-							OBJECT_SF_SHOW_SCALE		,
-							OBJECT_OCTREE_LEVEL         ,
-							OBJECT_OCTREE_TYPE          ,
-							OBJECT_MESH_WIRE            ,
-							OBJECT_MESH_STIPPLING		,
-							OBJECT_CURRENT_SCALAR_FIELD ,
-							OBJECT_CURRENT_COLOR_RAMP   ,
-							OBJECT_IMAGE_ALPHA          ,
-							OBJECT_APPLY_IMAGE_VIEWPORT ,
-							OBJECT_CLOUD_SF_EDITOR      ,
-							OBJECT_SENSOR_DISPLAY_SCALE ,
-							OBJECT_COLOR_RAMP_STEPS     ,
-							OBJECT_MATERIALS			,
-							OBJECT_APPLY_LABEL_VIEWPORT	,
-							OBJECT_LABEL_DISP_2D		,
-							OBJECT_LABEL_DISP_3D		,
-							OBJECT_PRIMITIVE_PRECISION  ,
-							OBJECT_CLOUD_POINT_SIZE		,
-							OBJECT_NAME_IN_3D			,
-							OBJECT_FACET_CONTOUR		,
-							OBJECT_FACET_MESH			,
-							OBJECT_FACET_NORMAL_VECTOR	,
+	enum CC_PROPERTY_ROLE { OBJECT_NO_PROPERTY		= 0				,
+							OBJECT_NAME								,
+							OBJECT_VISIBILITY						,
+							OBJECT_CURRENT_DISPLAY					,
+							OBJECT_COLORS_SHOWN						,
+							OBJECT_NORMALS_SHOWN					,
+							OBJECT_SCALAR_FIELD_SHOWN				,
+							OBJECT_POLYLINE_WIDTH					,
+							OBJECT_SENSOR_DRAW_FRUSTRUM				,
+							OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES		,
+							OBJECT_SF_SHOW_SCALE					,
+							OBJECT_OCTREE_LEVEL						,
+							OBJECT_OCTREE_TYPE						,
+							OBJECT_MESH_WIRE						,
+							OBJECT_MESH_STIPPLING					,
+							OBJECT_CURRENT_SCALAR_FIELD				,
+							OBJECT_CURRENT_COLOR_RAMP				,
+							OBJECT_IMAGE_ALPHA						,
+							OBJECT_APPLY_IMAGE_VIEWPORT				,
+							OBJECT_CLOUD_SF_EDITOR					,
+							OBJECT_SENSOR_DISPLAY_SCALE				,
+							OBJECT_COLOR_RAMP_STEPS					,
+							OBJECT_MATERIALS						,
+							OBJECT_APPLY_LABEL_VIEWPORT				,
+							OBJECT_LABEL_DISP_2D					,
+							OBJECT_LABEL_DISP_3D					,
+							OBJECT_PRIMITIVE_PRECISION				,
+							OBJECT_CLOUD_POINT_SIZE					,
+							OBJECT_NAME_IN_3D						,
+							OBJECT_FACET_CONTOUR					,
+							OBJECT_FACET_MESH						,
+							OBJECT_FACET_NORMAL_VECTOR				,
+							OBJECT_SENSOR_INDEX						,
+							OBJECT_SHOW_TRANS_BUFFER_PATH			,
+							OBJECT_SHOW_TRANS_BUFFER_TRIHDERONS		,
+							OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE	,
 	};
 
     //! Default constructor
@@ -112,22 +119,24 @@ signals:
     void ccObjectAndChildrenAppearanceChanged(ccHObject* hObject) const;
 
 protected slots:
-    void updateItem(QStandardItem* item);
-    void scalarFieldChanged(int pos);
-    void colorScaleChanged(int pos);
-    void colorRampStepsChanged(int val);
+    void updateItem(QStandardItem*);
+    void scalarFieldChanged(int);
+    void colorScaleChanged(int);
+    void colorRampStepsChanged(int);
     void spawnColorRampEditor();
-    void octreeDisplayTypeChanged(int pos);
-    void octreeDisplayedLevelChanged(int val);
-	void primitivePrecisionChanged(int val);
-    void imageAlphaChanged(int val);
+    void octreeDisplayTypeChanged(int);
+    void octreeDisplayedLevelChanged(int);
+	void primitivePrecisionChanged(int);
+    void imageAlphaChanged(int);
     void applyImageViewport();
 	void applyLabelViewport();
     void updateDisplay();
-    void objectDisplayChanged(const QString &newDisplayTitle);
-    void sensorScaleChanged(double val);
-	void cloudPointSizeChanged(int size);
-    void polyineWidthChanged(int size);
+    void objectDisplayChanged(const QString &);
+    void sensorScaleChanged(double);
+	void sensorIndexChanged(double);
+	void cloudPointSizeChanged(int);
+    void polyineWidthChanged(int);
+	void trihedronsScaleChanged(double);
 
 protected:
 
@@ -139,6 +148,8 @@ protected:
     void fillSFWithPointCloud(ccGenericPointCloud*);
     void fillWithMesh(ccGenericMesh*);
 	void fillWithFacet(ccFacet*);
+	void fillWithSensor(ccSensor*);
+	void fillWithTransBuffer(ccIndexedTransformationBuffer*);
     void fillWithPolyline(ccPolyline*);
     void fillWithPrimitive(ccGenericPrimitive*);
     void fillWithPointOctree(ccOctree*);
@@ -148,6 +159,7 @@ protected:
 	void fillWithLabel(cc2DLabel*);
 	void fillWithViewportObject(cc2DViewportObject*);
     void fillWithGBLSensor(ccGBLSensor*);
+	void fillWithCameraSensor(ccCameraSensor*);
 	void fillWithMaterialSet(ccMaterialSet*);
 	void fillWithShareable(CCShareable*);
 	void fillWithMetaData(ccObject*);

@@ -171,8 +171,8 @@ bool ccPlane::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//parameters (dataVersion>=21)
 	QDataStream inStream(&in);
-	inStream >> m_xWidth;
-	inStream >> m_yWidth;
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_xWidth,1);
+	ccSerializationHelper::CoordsFromDataStream(inStream,flags,&m_yWidth,1);
 
 	return true;
 }

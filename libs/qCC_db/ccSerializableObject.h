@@ -23,6 +23,7 @@
 
 //CCLib
 #include <GenericChunkedArray.h>
+#include <CCTypes.h>
 
 //System
 #include <stdio.h>
@@ -30,6 +31,7 @@
 
 //Qt
 #include <QFile>
+#include <QDataStream>
 
 //! Serializable object interface
 class ccSerializableObject
@@ -93,6 +95,52 @@ public:
 class ccSerializationHelper
 {
 public:
+
+	//! Reads one or several 'PointCoordinateType' values from a QDataStream either in float or double format depending on the 'flag' value
+	static void CoordsFromDataStream(QDataStream& stream, int flags, PointCoordinateType* out, unsigned count = 1)
+	{
+		if (flags & ccSerializableObject::DF_POINT_COORDS_64_BITS)
+		{
+			for (unsigned i=0; i<count; ++i, ++out)
+			{
+				double val;
+				stream >> val;
+				*out = static_cast<PointCoordinateType>(val);
+			}
+		}
+		else
+		{
+			for (unsigned i=0; i<count; ++i, ++out)
+			{
+				float val;
+				stream >> val;
+				*out = static_cast<PointCoordinateType>(val);
+			}
+		}
+	}
+
+	//! Reads one or several 'ScalarType' values from a QDataStream either in float or double format depending on the 'flag' value
+	static void ScalarsFromDataStream(QDataStream& stream, int flags, ScalarType* out, unsigned count = 1)
+	{
+		if (flags & ccSerializableObject::DF_SCALAR_VAL_32_BITS)
+		{
+			for (unsigned i=0; i<count; ++i, ++out)
+			{
+				float val;
+				stream >> val;
+				*out = static_cast<PointCoordinateType>(val);
+			}
+		}
+		else
+		{
+			for (unsigned i=0; i<count; ++i, ++out)
+			{
+				double val;
+				stream >> val;
+				*out = static_cast<PointCoordinateType>(val);
+			}
+		}
+	}
 
 	//! Helper: saves a GenericChunkedArray structure to file
 	/** \param chunkArray GenericChunkedArray structure to save (must be allocated)

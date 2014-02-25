@@ -587,7 +587,7 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	}
 
 	// Create pose structure for scan (in any)
-	if (image->isA(CC_CALIBRATED_IMAGE))
+	if (image->isA(CC_TYPES::CALIBRATED_IMAGE))
 	{
 		ccGLMatrix poseMat = static_cast<ccCalibratedImage*>(image)->getCameraMatrix();
 		SavePoseInformation(imageNode,imf,poseMat);
@@ -611,7 +611,7 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	cameraRepresentation.set("imageWidth", e57::IntegerNode(imf, image->getW()));
 
 	//'pinhole' camera image
-	//if (image->isA(CC_CALIBRATED_IMAGE))
+	//if (image->isA(CC_TYPES::CALIBRATED_IMAGE))
 	//{
 	//	cameraRepresentationStr = "pinholeRepresentation";
 	//	ccCalibratedImage* calibImage = static_cast<ccCalibratedImage*>(image);
@@ -638,14 +638,14 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const char* filename)
 	//we assume the input entity is either a cloud or a group of clouds (=multiple scans)
 	std::vector<ccPointCloud*> scans;
 
-	if (entity->isA(CC_POINT_CLOUD))
+	if (entity->isA(CC_TYPES::POINT_CLOUD))
 	{
 		scans.push_back(static_cast<ccPointCloud*>(entity));
 	}
 	else
 	{
 		for (unsigned i=0;i<entity->getChildrenNumber();++i)
-			if (entity->getChild(i)->isA(CC_POINT_CLOUD))
+			if (entity->getChild(i)->isA(CC_TYPES::POINT_CLOUD))
 				scans.push_back(static_cast<ccPointCloud*>(entity->getChild(i)));
 	}
 
@@ -743,7 +743,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const char* filename)
 		{
 			ccPointCloud* cloud = scans[i];
 			ccHObject::Container images;
-			unsigned imageCount = cloud->filterChildren(images,false,CC_IMAGE);
+			unsigned imageCount = cloud->filterChildren(images,false,CC_TYPES::IMAGE);
 
 			if (imageCount!=0)
 			{
@@ -757,7 +757,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const char* filename)
 
 				for (unsigned j=0;j<imageCount;++j)
 				{
-					assert(images[j]->isKindOf(CC_IMAGE));
+					assert(images[j]->isKindOf(CC_TYPES::IMAGE));
 					assert(scansGUID.contains(cloud));
 					QString scanGUID = scansGUID.value(cloud);
 					SaveImage(static_cast<ccImage*>(images[j]),scanGUID,imf,images2D);
@@ -2152,7 +2152,7 @@ CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bo
 		//set global max intensity (saturation) for proper display
 		for (unsigned i=0;i<container.getChildrenNumber();++i)
 		{
-			if (container.getChild(i)->isA(CC_POINT_CLOUD))
+			if (container.getChild(i)->isA(CC_TYPES::POINT_CLOUD))
 			{
 				ccPointCloud* pc = static_cast<ccPointCloud*>(container.getChild(i));
 				ccScalarField* sf = pc->getCurrentDisplayedScalarField();

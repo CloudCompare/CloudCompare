@@ -56,7 +56,7 @@ public:
 	ccPlane(QString name = QString("Plane"));
 
     //! Returns class ID
-	virtual CC_CLASS_ENUM getClassID() const { return CC_PLANE; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::PLANE; }
 
 	//inherited from ccGenericPrimitive
 	virtual QString getTypeName() const { return "Plane"; }

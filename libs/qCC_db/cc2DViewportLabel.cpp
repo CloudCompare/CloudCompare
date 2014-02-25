@@ -49,7 +49,7 @@ bool cc2DViewportLabel::toFile_MeOnly(QFile& out) const
 
 	//ROI (dataVersion>=21)
 	QDataStream outStream(&out);
-	for (int i=0;i<4;++i)
+	for (int i=0; i<4; ++i)
 		outStream << m_roi[i];
 
 	return true;
@@ -65,7 +65,7 @@ bool cc2DViewportLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 	//ROI (dataVersion>=21)
 	QDataStream inStream(&in);
-	for (int i=0;i<4;++i)
+	for (int i=0; i<4; ++i)
 		inStream >> m_roi[i];
 
 	return true;

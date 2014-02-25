@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
+    <width>391</width>
     <height>235</height>
    </rect>
   </property>
@@ -54,16 +54,16 @@
         <bool>false</bool>
        </property>
        <property name="sizeAdjustPolicy">
-        <enum>QComboBox::AdjustToContentsOnFirstShow</enum>
+        <enum>QComboBox::AdjustToContents</enum>
        </property>
        <item>
         <property name="text">
-         <string>theta, phi (GS)</string>
+         <string>vertical then lateral (columns)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>phi, theta (Soisic)</string>
+         <string>lateral then vertical (lines)</string>
         </property>
        </item>
       </widget>
@@ -121,55 +121,6 @@
           <widget class="QLineEdit" name="posZEdit">
            <property name="text">
             <string>0.0</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout">
-         <item>
-          <spacer>
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_5">
-           <property name="toolTip">
-            <string>distance between sensor and emitter</string>
-           </property>
-           <property name="text">
-            <string>Sensor base</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="baseSpinBox">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>distance between sensor and emitter</string>
-           </property>
-           <property name="minimum">
-            <double>-1000000000000.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>1000000000000.000000000000000</double>
-           </property>
-           <property name="singleStep">
-            <double>0.100000000000000</double>
            </property>
           </widget>
          </item>

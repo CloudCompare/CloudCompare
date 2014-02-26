@@ -8264,6 +8264,7 @@ void MainWindow::loadFile()
     filters.append(QString(CC_FILE_TYPE_FILTERS[OBJ]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[VTK]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[STL]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[OFF]) + ";;");
 #ifdef CC_FBX_SUPPORT
     filters.append(QString(CC_FILE_TYPE_FILTERS[FBX]) + ";;");
 #endif
@@ -8464,6 +8465,7 @@ void MainWindow::saveFile()
                 filters.append(QString(CC_FILE_TYPE_FILTERS[PLY])+";;");
                 filters.append(QString(CC_FILE_TYPE_FILTERS[VTK])+";;");
                 filters.append(QString(CC_FILE_TYPE_FILTERS[STL])+";;");
+                filters.append(QString(CC_FILE_TYPE_FILTERS[OFF])+";;");
 		#ifdef CC_X3D_SUPPORT
                 filters.append(QString(CC_FILE_TYPE_FILTERS[X3D])+";;");
 		#endif

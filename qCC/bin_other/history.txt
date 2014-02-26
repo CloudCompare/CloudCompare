@@ -1,7 +1,11 @@
 *** CloudCompare versions history ***
 
 v2.5.4 XX/XX/2014
-- 
+- New file format supported: OFF meshes
+- Enhancements:
+	* 'Sensor' framework upgraded:
+		- Camera 'projective' sensors added (early support)
+		- 'View from sensor' method added
 
 v2.5.3 02/21/2014
 - New method: "Edit > Normals > Orient > With Minimum Spanning Tree"

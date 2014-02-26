@@ -41,6 +41,7 @@
 #include "PlyFilter.h"
 #include "MAFilter.h"
 #include "FBXFilter.h"
+#include "OFFFilter.h"
 //CAD
 #include "PDMS/PDMSFilter.h"
 //OTHERS
@@ -93,6 +94,8 @@ CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(const char* ext)
 		fType = STL;
     else if (strcmp(ext,"PCD") == 0)
         fType = PCD;
+    else if (strcmp(ext,"OFF") == 0)
+        fType = OFF;
 #ifdef CC_X3D_SUPPORT
 	else if (strcmp(ext,"X3D") == 0)
 		fType = X3D;
@@ -167,6 +170,8 @@ FileIOFilter* FileIOFilter::CreateFilter(CC_FILE_TYPES fType)
 		return new STLFilter();
 	case PCD:
 		return new PCDFilter();
+	case OFF:
+		return new OFFFilter();
 #ifdef CC_X3D_SUPPORT
 	case X3D:
 		return new X3DFilter();

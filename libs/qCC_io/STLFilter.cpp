@@ -50,7 +50,7 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const char* filename)
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 	if (mesh->size()==0)
 	{
-		ccLog::Warning(QString("[ObjFilter] No facet in mesh '%1'!").arg(mesh->getName()));
+		ccLog::Warning(QString("[STL] No facet in mesh '%1'!").arg(mesh->getName()));
 		return CC_FERR_NO_ERROR;
 	}
 
@@ -109,12 +109,17 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile)
 			return CC_FERR_WRITING;
 	}
 
-	//current vertex shift
 	ccGenericPointCloud* vertices = mesh->getAssociatedCloud();
 	assert(vertices);
 
+	//Can't save global shift information....
+	if (vertices->isShifted())
+	{
+		ccLog::Warning("[STL] Global shift information can't be restored in STL Binary format! (too low precision)");
+	}
+
 	mesh->placeIteratorAtBegining();
-	for (unsigned i=0;i<faceCount;++i)
+	for (unsigned i=0; i<faceCount; ++i)
 	{
 		CCLib::TriangleSummitsIndexes*tsi = mesh->getNextTriangleIndexes();
 
@@ -125,16 +130,20 @@ CC_FILE_ERROR STLFilter::saveToBINFile(ccGenericMesh* mesh, FILE *theFile)
 		CCVector3 N = (*B-*A).cross(*C-*A);
 
 		//REAL32[3] Normal vector
-		assert(sizeof(float)==4);
-		if (fwrite((const void*)N.u,4,3,theFile) < 3)
+		Vector3Tpl<float> buffer =  Vector3Tpl<float>::fromArray(N.u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		assert(sizeof(float) == 4);
+		if (fwrite((const void*)buffer.u,4,3,theFile) < 3)
 			return CC_FERR_WRITING;
 
 		//REAL32[3] Vertex 1,2 & 3
-		if (fwrite((const void*)A->u,4,3,theFile) < 3)
+		buffer =  Vector3Tpl<float>::fromArray(A->u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		if (fwrite((const void*)buffer.u,4,3,theFile) < 3)
 			return CC_FERR_WRITING;
-		if (fwrite((const void*)B->u,4,3,theFile) < 3)
+		buffer =  Vector3Tpl<float>::fromArray(B->u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		if (fwrite((const void*)buffer.u,4,3,theFile) < 3)
 			return CC_FERR_WRITING;
-		if (fwrite((const void*)C->u,4,3,theFile) < 3)
+		buffer =  Vector3Tpl<float>::fromArray(C->u); //convert to an explicit float array (as PointCoordinateType may be a double!)
+		if (fwrite((const void*)buffer.u,4,3,theFile) < 3)
 			return CC_FERR_WRITING;
 
 		//UINT16 Attribute byte count (not used)
@@ -296,9 +305,9 @@ bool tagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 
 CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-	ccLog::Print("[STLFilter::Load] %s",filename);
+	ccLog::Print("[STL] Loading '%s'",filename);
 
-	//ouverture du fichier
+	//try to open the file
 	QFile fp(filename);
 	if (!fp.open(QIODevice::ReadOnly))
 		return CC_FERR_READING;
@@ -320,7 +329,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 			ascii = false;
 		else //... but sadly some BINARY files does start by SOLID?!!!! (wtf)
 		{
-			//go back to the begining of the file
+			//go back to the beginning of the file
 			fp.seek(0);
 			char line[MAX_ASCII_FILE_LINE_LENGTH];
 			//skip first line
@@ -332,7 +341,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 				if (!QString(line).trimmed().toUpper().startsWith("FACET"))
 					ascii = false;
 		}
-		//go back to the begining of the file
+		//go back to the beginning of the file
 		fp.seek(0);
 	}
 	ccLog::Print("[STL] Detected format: %s",ascii ? "ASCII" : "BINARY");
@@ -360,7 +369,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	unsigned vertCount = vertices->size();
 	unsigned faceCount = mesh->size();
-	ccLog::Print("[STLFilter::Load] %i points, %i face(s)",vertCount,faceCount);
+	ccLog::Print("[STL] %i points, %i face(s)",vertCount,faceCount);
 
 	//remove duplicated vertices
 	{
@@ -427,7 +436,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 						vertices = newVertices;
 						vertCount = vertices->size();
 	
-						ccLog::Print("[STLFilter::Load] Remaining vertices after auto-removal of duplicate ones: %i",vertCount);
+						ccLog::Print("[STL] Remaining vertices after auto-removal of duplicate ones: %i",vertCount);
 					}
 					else
 					{
@@ -451,7 +460,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 
 		if (equivalentIndexes)
 			equivalentIndexes->release();
-		equivalentIndexes=0;
+		equivalentIndexes = 0;
 	}
 
 	NormsIndexesTableType* normals = mesh->getTriNormsTable();
@@ -502,7 +511,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
 		if (tokens.empty() || tokens[0].toUpper() != "SOLID")
 		{
-			ccLog::Error("[STL] File should begin by 'solid [name]'!");
+			ccLog::Warning("[STL] File should begin by 'solid [name]'!");
 			return CC_FERR_MALFORMED_FILE;
 		}
 		//Extract name
@@ -545,7 +554,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			{
 				if (tokens[0].toUpper() != "ENDSOLID")
 				{
-					ccLog::Error("[STL] Error on line #%i: line should start by 'facet'!",lineCount);
+					ccLog::Warning("[STL] Error on line #%i: line should start by 'facet'!",lineCount);
 					return CC_FERR_MALFORMED_FILE;
 				}
 				break;
@@ -588,7 +597,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		{
 			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) <= 0 || !QString(currentLine).trimmed().toUpper().startsWith("OUTER LOOP"))
 			{
-				ccLog::Error("[STL] Error: expecting 'outer loop' on line #%i",lineCount+1);
+				ccLog::Warning("[STL] Error: expecting 'outer loop' on line #%i",lineCount+1);
 				return CC_FERR_MALFORMED_FILE;
 			}
 			++lineCount;
@@ -601,7 +610,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		{
 			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) <= 0 || !QString(currentLine).trimmed().toUpper().startsWith("VERTEX"))
 			{
-				ccLog::Error("[STL] Error: expecting a line starting by 'vertex' on line #%i",lineCount+1);
+				ccLog::Warning("[STL] Error: expecting a line starting by 'vertex' on line #%i",lineCount+1);
 				return CC_FERR_MALFORMED_FILE;
 			}
 			++lineCount;
@@ -609,7 +618,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			QStringList tokens = QString(currentLine).split(QRegExp("\\s+"),QString::SkipEmptyParts);
 			if (tokens.size()<4)
 			{
-				ccLog::Error("[STL] Error on line #%i: incomplete 'vertex' description!",lineCount);
+				ccLog::Warning("[STL] Error on line #%i: incomplete 'vertex' description!",lineCount);
 				return CC_FERR_MALFORMED_FILE;
 			}
 
@@ -626,7 +635,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				}
 				if (!vertexIsOk)
 				{
-					ccLog::Error("[STL] Error on line #%i: failed to read 'vertex' coordinates!",lineCount);
+					ccLog::Warning("[STL] Error on line #%i: failed to read 'vertex' coordinates!",lineCount);
 					return CC_FERR_MALFORMED_FILE;
 				}
 			}
@@ -741,7 +750,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		{
 			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) <= 0 || !QString(currentLine).trimmed().toUpper().startsWith("ENDLOOP"))
 			{
-				ccLog::Error("[STL] Error: expecting 'endnloop' on line #%i",lineCount+1);
+				ccLog::Warning("[STL] Error: expecting 'endnloop' on line #%i",lineCount+1);
 				return CC_FERR_MALFORMED_FILE;
 			}
 			++lineCount;
@@ -751,7 +760,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 		{
 			if (fp.readLine(currentLine,MAX_ASCII_FILE_LINE_LENGTH) <= 0 || !QString(currentLine).trimmed().toUpper().startsWith("ENDFACET"))
 			{
-				ccLog::Error("[STL] Error: expecting 'endfacet' on line #%i",lineCount+1);
+				ccLog::Warning("[STL] Error: expecting 'endfacet' on line #%i",lineCount+1);
 				return CC_FERR_MALFORMED_FILE;
 			}
 			++lineCount;

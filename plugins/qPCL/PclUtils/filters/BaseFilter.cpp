@@ -145,7 +145,7 @@ int BaseFilter::checkSelected()
     if (m_selected.size() != 1)
         return -12;
 
-    if (!m_selected[0]->isA(CC_POINT_CLOUD) )
+    if (!m_selected[0]->isA(CC_TYPES::POINT_CLOUD) )
         return -13;
 
     return 1;
@@ -290,7 +290,7 @@ ccPointCloud* BaseFilter::getSelectedEntityAsCCPointCloud() const
         return NULL;
 
 	ccHObject* entity = m_selected.at(0);
-	if (!entity->isA(CC_POINT_CLOUD))
+	if (!entity->isA(CC_TYPES::POINT_CLOUD))
 		return NULL;
 
 
@@ -319,7 +319,7 @@ void BaseFilter::getAllEntitiesThatHaveMetaData(QString key, ccHObject::Containe
 {
     entities.clear(); //better be sure
     ccHObject::Container tempContainer;
-    getAllEntitiesOfType(CC_HIERARCHY_OBJECT, tempContainer);
+    getAllEntitiesOfType(CC_TYPES::HIERARCHY_OBJECT, tempContainer);
 
     for (ccHObject::Container::const_iterator it = tempContainer.begin(); it != tempContainer.end(); ++it )
     {
@@ -336,7 +336,7 @@ void BaseFilter::getSelectedEntitiesThatAreCCPointCloud(ccHObject::Container & e
     for (size_t i = 0 ; i < selected.size(); ++i)
     {
         ccHObject * this_obj = selected[i];
-        if (this_obj->isA(CC_POINT_CLOUD))
+        if (this_obj->isA(CC_TYPES::POINT_CLOUD))
         {
             entities.push_back(this_obj);
         }
@@ -399,7 +399,7 @@ std::vector<std::string> BaseFilter::getSelectedAvailableScalarFields()
 
 int BaseFilter::isFirstSelectedCcPointCloud()
 {
-    if (!m_selected.empty() && m_selected.at(0)->isA(CC_POINT_CLOUD))
+    if (!m_selected.empty() && m_selected.at(0)->isA(CC_TYPES::POINT_CLOUD))
         return 1;
 
 	return -1;

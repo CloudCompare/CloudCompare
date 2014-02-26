@@ -52,7 +52,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
 	if (!mesh || mesh->size() == 0)
 	{
-		ccLog::Warning(QString("[ObjFilter] No facet in mesh '%1'!").arg(mesh->getName()));
+		ccLog::Warning(QString("[OBJ] No facet in mesh '%1'!").arg(mesh->getName()));
 		return CC_FERR_NO_ERROR;
 	}
 
@@ -149,7 +149,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 		}
 
 		for (int i=0; i<errors.size(); ++i)
-			ccLog::Warning(QString("[ObjFilter::Save::MTL writer] ")+errors[i]);
+			ccLog::Warning(QString("[OBJ::Save::MTL writer] ")+errors[i]);
 	}
 	bool withMaterials = (materials && mesh->hasMaterials());
 
@@ -463,7 +463,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
 					vertices->setGlobalShift(Pshift);
-					ccLog::Warning("[ObjFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+					ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
 
 					//we save coordinates shift information
 					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
@@ -859,7 +859,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				if (!errors.empty())
 				{
 					for (int i=0; i<errors.size(); ++i)
-						ccLog::Warning(QString("[ObjFilter::Load::MTL parser] ")+errors[i]);
+						ccLog::Warning(QString("[OBJ::Load::MTL parser] ")+errors[i]);
 				}
 				if (materials->empty())
 				{

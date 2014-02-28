@@ -185,6 +185,9 @@ void ccViewer::loadPlugins()
     QString  path = QCoreApplication::applicationDirPath();
     path.remove( "MacOS" );
     QString pluginsPath = path + "Plugins/ccViewerPlugins";
+#elif defined(Q_OS_LINUX)
+    QString binPath = QCoreApplication::applicationDirPath().remove("bin");
+    QString pluginsPath = binPath + QString("lib/ccviewer/plugins");
 #else
     //plugins are in bin/plugins
     QString pluginsPath = QCoreApplication::applicationDirPath()+QString("/plugins");

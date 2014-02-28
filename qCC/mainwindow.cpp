@@ -347,6 +347,8 @@ void MainWindow::loadPlugins()
     QString  path = QCoreApplication::applicationDirPath();
     path.remove( "MacOS" );
     m_pluginsPath = path + "Plugins/ccPlugins";
+#elif defined(Q_OS_UNIX)
+    m_pluginsPath = QCoreApplication::applicationDirPath().remove("bin")+QString("lib/cloudcompare/plugins");
 #else
     //plugins are in bin/plugins
     m_pluginsPath = QCoreApplication::applicationDirPath()+QString("/plugins");

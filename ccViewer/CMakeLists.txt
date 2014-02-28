@@ -90,8 +90,11 @@ if( WIN32 )
 endif()
 
 # install program
-install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
-
+if( UNIX )
+    install(TARGETS ccViewer DESTINATION bin)
+else()
+    install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
+endif()
 # Auxiliary files
 set( auxFiles bin_other/license.txt )
 
@@ -105,7 +108,11 @@ endif()
 
 # Install auxiliary files
 foreach( filename ${auxFiles} )
-	install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
+if( UNIX)
+        install( FILES ${filename} DESTINATION share/ccviewer )
+else()
+        install( FILES ${filename} ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
+endif()
 endforeach()
 
 # Put together our App bundle on Mac OS X
@@ -126,6 +133,8 @@ endif( APPLE )
 # Export common shader files to all install destinations
 if( APPLE )
    install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders/ColorRamp )
+elseif( UNIX )
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag DESTINATION share/ccviewer/shaders)
 else()
    install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${CCVIEWER_DEST_FOLDER}/shaders/ColorRamp ${CCVIEWER_DEST_FOLDER}_debug/shaders/ColorRamp )
 endif()

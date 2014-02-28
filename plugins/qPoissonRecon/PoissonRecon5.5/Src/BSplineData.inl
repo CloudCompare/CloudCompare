@@ -657,7 +657,7 @@ template< int Degree >
 BSplineElements< Degree >::BSplineElements( int res , int offset , int boundary , int inset )
 {
 	denominator = 1;
-	resize( res , BSplineElementCoefficients< Degree >() );
+    this->resize( res , BSplineElementCoefficients< Degree >() );
 
 	for( int i=0 ; i<=Degree ; i++ )
 	{
@@ -675,7 +675,7 @@ BSplineElements< Degree >::BSplineElements( int res , int offset , int boundary 
 template< int Degree >
 void BSplineElements< Degree >::_addLeft( int offset , int boundary )
 {
-	int res = int( size() );
+    int res = int( this->size() );
 	bool set = false;
 	for( int i=0 ; i<=Degree ; i++ )
 	{
@@ -687,7 +687,7 @@ void BSplineElements< Degree >::_addLeft( int offset , int boundary )
 template< int Degree >
 void BSplineElements< Degree >::_addRight( int offset , int boundary )
 {
-	int res = int( size() );
+    int res = int( this->size() );
 	bool set = false;
 	for( int i=0 ; i<=Degree ; i++ )
 	{
@@ -761,9 +761,9 @@ void BSplineElements< 2 >::upSample( BSplineElements< 2 >& high ) const
 template< int Degree >
 void BSplineElements< Degree >::differentiate( BSplineElements< Degree-1 >& d ) const
 {
-	d.resize( size() );
+    d.resize( this->size() );
 	d.assign( d.size()  , BSplineElementCoefficients< Degree-1 >() );
-	for( int i=0 ; i<int(size()) ; i++ ) for( int j=0 ; j<=Degree ; j++ )
+    for( int i=0 ; i<int(this->size()) ; i++ ) for( int j=0 ; j<=Degree ; j++ )
 	{
 		if( j-1>=0 )   d[i][j-1] -= (*this)[i][j];
 		if( j<Degree ) d[i][j  ] += (*this)[i][j];

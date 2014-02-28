@@ -17,6 +17,13 @@ set( CMAKE_DEBUG_POSTFIX d )
 if( UNIX )
         set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
         set( CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fPIC")
+
+        # helper option for enabling c++11 support on linux
+        option(BUILD_WITH_CPP11 "Build CloudCompare enabling c++11 support" OFF)
+        if(BUILD_WITH_CPP11)
+            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+        endif()
+
 endif()
 
 if( MSVC )

@@ -253,8 +253,9 @@ bool LevMar(IteratorT begin, IteratorT end, FuncT &func,
 							fmag = abs(F0[i]);
 					lambda = 1e-3f * fmag;
 				}
-				else
-					lambda *= std::max(ScalarType(.3), 1 - std::pow(2 * rho - 1, 3));
+				else                
+                    lambda *= std::max<ScalarType>(ScalarType(.3), 1 - std::pow(2 * rho - 1, 3));
+
 			}
 
 			memcpy(H, U, sizeof(ScalarType) * paramDim * paramDim);

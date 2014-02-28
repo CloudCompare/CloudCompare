@@ -328,13 +328,13 @@ void AddPointCoordinates(QStringList& body, unsigned pointIndex, ccGenericPointC
 		coordStr = QString("  [shifted]");
 	}
 	
-	coordStr += QString(" (%1;%2;%3)").arg(pointIndex).arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision);
+	coordStr += QString(" (%1;%2;%3)").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision);
 	body << coordStr;
 	
 	if (isShifted)
 	{
 		CCVector3d Pg = CCVector3d::fromArray(P->u) + shift;
-		QString globCoordStr = QString("  [original] (%1;%2;%3)").arg(pointIndex).arg(Pg.x,0,'f',precision).arg(Pg.y,0,'f',precision).arg(Pg.z,0,'f',precision);
+		QString globCoordStr = QString("  [original] (%1;%2;%3)").arg(Pg.x,0,'f',precision).arg(Pg.y,0,'f',precision).arg(Pg.z,0,'f',precision);
 		body << globCoordStr;
 	}
 }

@@ -168,12 +168,12 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
     colorType* _theColors = theColors;
     ScalarType* _zBuff = db.zBuff;
 
-    for (unsigned j=0; j<db.width; ++j)
+	for (unsigned k=0; k<db.height; ++k)
 	{
-        for (unsigned k=0; k<db.height; ++k)
-        {
+		for (unsigned j=0; j<db.width; ++j)
+		{
             //grid index and depth
-            fprintf(fp,"%f %f %f",static_cast<float>(k),static_cast<float>(j),*_zBuff++);
+            fprintf(fp,"%.12f %.12f %.12f",static_cast<float>(j),static_cast<float>(k),*_zBuff++);
 
             //color
             if (_theColors)

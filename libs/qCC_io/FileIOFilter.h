@@ -113,7 +113,7 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
             "Snavely's Bundler output (*.out)",
             "VTK cloud or mesh (*.vtk)",
             "STL mesh (*.stl)",
-            "PCD Point Cloud Library cloud (*.pcd)"
+            "PCD Point Cloud Library cloud (*.pcd)",
 			"OFF mesh (*.off)" 
 #ifdef CC_X3D_SUPPORT
             , "X3D mesh file (*.x3d)"

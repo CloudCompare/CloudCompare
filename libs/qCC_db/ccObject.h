@@ -160,15 +160,6 @@ public:
 	**/
     virtual void setUniqueID(unsigned ID);
 
-    //! Returns flag state
-    virtual bool getFlagState(CC_OBJECT_FLAG flag) const;
-
-    //! Sets flag state
-    /** \param flag object flag to set
-        \param state flag state
-    **/
-    virtual void setFlagState(CC_OBJECT_FLAG flag, bool state);
-
     //! Returns whether the object is enabled or not
     /** Shortcut to access flag CC_ENABLED
     **/
@@ -249,6 +240,15 @@ public:
 	const QVariantMap& metaData() const { return m_metaData; }
 
 protected:
+
+    //! Returns flag state
+    virtual bool getFlagState(CC_OBJECT_FLAG flag) const;
+
+    //! Sets flag state
+    /** \param flag object flag to set
+        \param state flag state
+    **/
+    virtual void setFlagState(CC_OBJECT_FLAG flag, bool state);
 
 	//inherited from ccSerializableObject
 	virtual bool toFile(QFile& out) const;

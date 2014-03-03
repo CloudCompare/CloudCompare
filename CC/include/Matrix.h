@@ -640,7 +640,7 @@ namespace CCLib
 		//! Computes eigen vectors (and values) with the Jacobian method
 		/** See numerical recipes.
 		**/
-		MatrixTpl computeJacobianEigenValuesAndVectors() const
+		MatrixTpl computeJacobianEigenValuesAndVectors(unsigned maxIterationCount = 50) const
 		{
 			if (!isValid())
 				return MatrixTpl();
@@ -678,9 +678,7 @@ namespace CCLib
 			//int j,iq,ip;
 			//Scalar tresh,theta,tau,t,sm,s,h,g,c,;
 
-			//TODO: '50' should be a parameter instead!
-			static const unsigned c_maxIterationCount = 50;
-			for (unsigned i=1; i<=c_maxIterationCount; i++)
+			for (unsigned i=1; i<=maxIterationCount; i++)
 			{
 				//Sum off-diagonal elements
 				Scalar sm = 0;

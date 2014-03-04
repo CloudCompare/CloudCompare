@@ -341,7 +341,6 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 																		void** additionalParameters,
 																		NormalizedProgress* nProgress/*=0*/)
 {
-	//structures pour la recherche de voisinages SPECIFIQUES
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level								= cell.level;
 	nNSS.alreadyVisitedNeighbourhoodSize	= 0;

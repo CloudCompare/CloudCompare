@@ -340,6 +340,12 @@ public:
     **/
 	virtual ccMesh* createNewMeshFromSelection(bool removeSelectedFaces);
 
+	//! Swaps two triangles
+	/** Automatically updates internal structures (i.e. lookup tables for
+		material, normals, etc.).
+	**/
+	void swapTriangles(unsigned index1, unsigned index2);
+
 protected:
 
     //inherited from ccHObject

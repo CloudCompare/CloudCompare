@@ -1010,6 +1010,19 @@ bool ccMesh::resize(unsigned n)
 	return m_triVertIndexes->resize(n);
 }
 
+void ccMesh::swapTriangles(unsigned index1, unsigned index2)
+{
+	assert(std::max(index1,index2) < size());
+
+	m_triVertIndexes->swap(index1,index2);
+	if (m_triMtlIndexes)
+		m_triMtlIndexes->swap(index1,index2);
+	if (m_texCoordIndexes)
+		m_texCoordIndexes->swap(index1,index2);
+	if (m_triNormalIndexes)
+		m_triNormalIndexes->swap(index1,index2);
+}
+
 CCLib::TriangleSummitsIndexes* ccMesh::getTriangleIndexes(unsigned triangleIndex)
 {
 	return reinterpret_cast<CCLib::TriangleSummitsIndexes*>(m_triVertIndexes->getValue(triangleIndex));

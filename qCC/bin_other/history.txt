@@ -6,6 +6,7 @@ v2.5.4 XX/XX/2014
 	* 'Sensor' framework upgraded:
 		- Camera 'projective' sensors added (early support)
 		- 'View from sensor' method added
+	* STL import filter is smarter (collapsed triangle after vertex fusion are now automatically removed)
 - Bug fix:
 	* Point coordinates of 2D labels was 'shifted' ((index,x,y) was displayed instead of (x,y,z))
 

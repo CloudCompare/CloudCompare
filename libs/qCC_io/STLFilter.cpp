@@ -229,17 +229,17 @@ CC_FILE_ERROR STLFilter::saveToASCIIFile(ccGenericMesh* mesh, FILE *theFile)
 }
 
 const PointCoordinateType c_defaultSearchRadius = static_cast<PointCoordinateType>(sqrt(ZERO_TOLERANCE));
-bool tagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
-							void** additionalParameters,
-							CCLib::NormalizedProgress* nProgress/*=0*/)
+static bool TagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
+									void** additionalParameters,
+									CCLib::NormalizedProgress* nProgress/*=0*/)
 {
-	GenericChunkedArray<1,int>* equivalentIndexes = (GenericChunkedArray<1,int>*)additionalParameters[0];
+	GenericChunkedArray<1,int>* equivalentIndexes = static_cast<GenericChunkedArray<1,int>*>(additionalParameters[0]);
 
 	//we look for points very near to the others (only if not yet tagged!)
 	
 	//structure for nearest neighbors search
 	CCLib::DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
-	nNSS.level								= cell.level;
+	nNSS.level = cell.level;
 	nNSS.prepare(c_defaultSearchRadius,cell.parentOctree->getCellSize(nNSS.level));
 	cell.parentOctree->getCellPos(cell.truncatedCode,cell.level,nNSS.cellPos,true);
 	cell.parentOctree->computeCellCenter(nNSS.cellPos,cell.level,nNSS.cellCenter);
@@ -260,7 +260,7 @@ bool tagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 	//init structure with cell points
 	{
 		CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-		for (unsigned i=0;i<n;++i,++it)
+		for (unsigned i=0; i<n; ++i,++it)
 		{
 			it->point = cell.points->getPointPersistentPtr(i);
 			it->pointIndex = cell.points->getPointGlobalIndex(i);
@@ -372,6 +372,7 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 	ccLog::Print("[STL] %i points, %i face(s)",vertCount,faceCount);
 
 	//remove duplicated vertices
+	//if (false)
 	{
 		GenericChunkedArray<1,int>* equivalentIndexes = new GenericChunkedArray<1,int>;
 		const int razValue = -1;
@@ -381,25 +382,25 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 			if (octree)
 			{
 				ccProgressDialog progressDlg(true);
-				void* additionalParameters[1] = {(void*)equivalentIndexes};
+				void* additionalParameters[] = { static_cast<void*>(equivalentIndexes) };
 				unsigned result = octree->executeFunctionForAllCellsAtLevel(ccOctree::MAX_OCTREE_LEVEL,
-																			tagDuplicatedVertices,
+																			TagDuplicatedVertices,
 																			additionalParameters,
 																			&progressDlg,
 																			"Tag duplicated vertices");
 				vertices->deleteOctree();
-				octree=0;
+				octree = 0;
 
-				if (result>0)
+				if (result != 0)
 				{
 					unsigned remainingCount = 0;
-					for (unsigned i=0;i<vertCount;++i)
+					for (unsigned i=0; i<vertCount; ++i)
 					{
 						int eqIndex = equivalentIndexes->getValue(i);
 						assert(eqIndex >= 0);
-						if (eqIndex==(int)i) //root point
+						if (eqIndex == static_cast<int>(i)) //root point
 						{
-							int newIndex = (int)(vertCount+remainingCount); //We replace the root index by its 'new' index (+ vertCount, to differentiate it later)
+							int newIndex = static_cast<int>(vertCount+remainingCount); //We replace the root index by its 'new' index (+ vertCount, to differentiate it later)
 							equivalentIndexes->setValue(i,newIndex);
 							++remainingCount;
 						}
@@ -410,10 +411,10 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 					{
 						//copy root points in a new cloud
 						{
-							for (unsigned i=0;i<vertCount;++i)
+							for (unsigned i=0; i<vertCount; ++i)
 							{
 								int eqIndex = equivalentIndexes->getValue(i);
-								if (eqIndex>=(int)vertCount) //root point
+								if (eqIndex >= static_cast<int>(vertCount)) //root point
 									newVertices->addPoint(*vertices->getPoint(i));
 								else
 									equivalentIndexes->setValue(i,equivalentIndexes->getValue(eqIndex)); //and update the other indexes
@@ -422,21 +423,44 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 
 						//update face indexes
 						{
-							for (unsigned i=0;i<faceCount;++i)
+							unsigned newFaceCount = 0;
+							for (unsigned i=0; i<faceCount; ++i)
 							{
 								CCLib::TriangleSummitsIndexes* tri = mesh->getTriangleIndexes(i);
-								tri->i1 = (unsigned)equivalentIndexes->getValue(tri->i1)-vertCount;
-								tri->i2 = (unsigned)equivalentIndexes->getValue(tri->i2)-vertCount;
-								tri->i3 = (unsigned)equivalentIndexes->getValue(tri->i3)-vertCount;
+								tri->i1 = static_cast<unsigned>(equivalentIndexes->getValue(tri->i1))-vertCount;
+								tri->i2 = static_cast<unsigned>(equivalentIndexes->getValue(tri->i2))-vertCount;
+								tri->i3 = static_cast<unsigned>(equivalentIndexes->getValue(tri->i3))-vertCount;
+
+								//very small triangles (or flat ones) may be implicitly removed by vertex fusion!
+								if (tri->i1 != tri->i2 && tri->i1 != tri->i3 && tri->i2 != tri->i3)
+								{
+									if (newFaceCount != i)
+										mesh->swapTriangles(i,newFaceCount);
+									++newFaceCount;
+								}
+							}
+
+							if (newFaceCount == 0)
+							{
+								ccLog::Warning("[STL] After vertex fusion, all triangles would collapse! We'll keep the non-fused version...");
+								delete newVertices;
+								newVertices = 0;
+							}
+							else
+							{
+								mesh->resize(newFaceCount);
 							}
 						}
 						
-						mesh->setAssociatedCloud(newVertices);
-						delete vertices;
-						vertices = newVertices;
-						vertCount = vertices->size();
-	
-						ccLog::Print("[STL] Remaining vertices after auto-removal of duplicate ones: %i",vertCount);
+						if (newVertices)
+						{
+							mesh->setAssociatedCloud(newVertices);
+							delete vertices;
+							vertices = newVertices;
+							vertCount = vertices->size();
+							ccLog::Print("[STL] Remaining vertices after auto-removal of duplicate ones: %i",vertCount);
+							ccLog::Print("[STL] Remaining faces after auto-removal of duplicate ones: %i",mesh->size());
+						}
 					}
 					else
 					{

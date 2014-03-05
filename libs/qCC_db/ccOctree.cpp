@@ -219,7 +219,7 @@ void ccOctree::RenderOctreeAs(  CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
 		glColor3ubv(ccColor::green);
 
 		void* additionalParameters[] = { theOctree->m_frustrumIntersector };
-		theOctree->executeFunctionForAllCellsAtLevel(level,&DrawCellAsABox,NULL);
+		theOctree->executeFunctionForAllCellsAtLevel(level,&DrawCellAsABox,additionalParameters);
 	}
 	else
 	{
@@ -318,14 +318,15 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	CCVector3 bbMin,bbMax;
 	cell.parentOctree->computeCellLimits(cell.truncatedCode,cell.level,bbMin.u,bbMax.u,true);
 
-	ccOctreeFrustrumIntersector::OctreeCellVisibility vis = ccOctreeFrustrumIntersector::CELL_INSIDE_FRUSTRUM;
+	ccOctreeFrustrumIntersector::OctreeCellVisibility vis = ccOctreeFrustrumIntersector::CELL_OUTSIDE_FRUSTRUM;
 	if (ofi)
 		vis = ofi->positionFromFrustum(cell.truncatedCode,cell.level);
 
-	//JS_TEMP//
 	// outside
 	if (vis == ccOctreeFrustrumIntersector::CELL_OUTSIDE_FRUSTRUM)
+	{
 		glColor3ubv(ccColor::green);
+	}
 	else
 	{
 		glPushAttrib(GL_LINE_BIT);
@@ -363,7 +364,6 @@ bool ccOctree::DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
 	ccGL::Vertex3(bbMin.x,bbMax.y,bbMax.z);
 	glEnd();
 
-	//JS_TEMP//
 	// not outside
 	if (vis != ccOctreeFrustrumIntersector::CELL_OUTSIDE_FRUSTRUM)
 		glPopAttrib();

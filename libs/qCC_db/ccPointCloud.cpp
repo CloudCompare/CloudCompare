@@ -1127,8 +1127,10 @@ bool ccPointCloud::setRGBColorByHeight(unsigned char heightDim, ccColorScale::Sh
 	{
 		const CCVector3* Q = getPoint(i);
 		double realtivePos = (Q->u[heightDim] - minHeight) / height;
-
-		m_rgbColors->setValue(i,colorScale->getColorByRelativePos(realtivePos));
+		const colorType* col = colorScale->getColorByRelativePos(realtivePos);
+		if (!col) //DGM: yes it happens if we encounter a point with NaN coordinates!!!
+			col = ccColor::black;
+		m_rgbColors->setValue(i,col);
 	}
 
 	return true;
@@ -2496,6 +2498,19 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		}
 		if (!result)
 			return false;
+
+		//test: look for NaN values
+#ifdef _DEBUG
+		for (unsigned i=0; i<size(); ++i)
+		{
+			if (	point(i)->x != point(i)->x
+				||	point(i)->y != point(i)->y
+				||	point(i)->z != point(i)->z )
+			{
+				ccLog::Warning("File contains NaN points! (#%i)",i);
+			}
+		}
+#endif
 	}
 
 	//colors array (dataVersion>=20)

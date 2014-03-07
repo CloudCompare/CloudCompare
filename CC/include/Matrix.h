@@ -825,7 +825,7 @@ namespace CCLib
 		}
 
 		//! Sorts the eigenvectors in the decreasing order of their associated eigenvalues
-		void sortEigenValuesAndVectors()
+		void sortEigenValuesAndVectors(bool absVal = false)
 		{
 			if (!eigenValues || m_matrixSize < 2)
 				return;
@@ -834,7 +834,7 @@ namespace CCLib
 			{
 				unsigned maxValIndex = i;
 				for (unsigned j=i+1; j<m_matrixSize; j++)
-					if (eigenValues[j] > eigenValues[maxValIndex])
+					if (eigenValues[j] > eigenValues[maxValIndex]) //eigen values are always positive! (= square of singular values)
 						maxValIndex = j;
 
 				if (maxValIndex != i)

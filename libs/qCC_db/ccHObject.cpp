@@ -45,6 +45,7 @@
 #include "ccDish.h"
 #include "ccExtru.h"
 #include "ccIndexedTransformationBuffer.h"
+#include "ccCustomObject.h"
 
 //CCLib
 #include <CCShareable.h>
@@ -173,6 +174,10 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		return new ccExtru(name);
 	case CC_TYPES::TRANS_BUFFER:
 		return new ccIndexedTransformationBuffer(name);
+	case CC_TYPES::CUSTOM_H_OBJECT:
+		return new ccCustomHObject(name);
+	case CC_TYPES::CUSTOM_LEAF_OBJECT:
+		return new ccCustomLeafObject(name);
 	case CC_TYPES::POINT_OCTREE:
 	case CC_TYPES::POINT_KDTREE:
 		//construction this way is not supported (yet)
@@ -728,6 +733,9 @@ bool ccHObject::isSerializable() const
 
 bool ccHObject::toFile(QFile& out) const
 {
+	if (isKindOf(CC_TYPES::CUSTOM_LEAF_OBJECT))
+		return true;
+
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
 	//write 'ccObject' header
@@ -748,9 +756,13 @@ bool ccHObject::toFile(QFile& out) const
 
 	//write serializable children (if any)
 	for (unsigned i=0;i<m_children.size();++i)
+	{
 		if (m_children[i]->isSerializable())
+		{
 			if (!m_children[i]->toFile(out))
 				return false;
+		}
+	}
 
 	//write current selection behavior (dataVersion>=23)
 	if (out.write((const char*)&m_selectionBehavior,sizeof(SelectionBehavior))<0)

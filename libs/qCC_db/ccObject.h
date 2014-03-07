@@ -43,7 +43,7 @@ enum CC_OBJECT_FLAG {
 #define CC_ARRAY_BIT					0x00000000000010	//Array
 #define CC_LABEL_BIT					0x00000000000020	//2D label
 #define CC_VIEWPORT_BIT					0x00000000000040	//2D viewport
-//#define CC_FREE_BIT					0x00000000000080
+#define CC_CUSTOM_BIT					0x00000000000080	//For custom (plugin defined) objects
 #define CC_CLOUD_BIT					0x00000000000100	//Point Cloud
 #define CC_MESH_BIT						0x00000000000200	//Mesh
 #define CC_OCTREE_BIT					0x00000000000400	//Octree
@@ -122,6 +122,27 @@ public:
 	static const CC_CLASS_ENUM VIEWPORT_2D_LABEL	=	VIEWPORT_2D_OBJECT | CC_LABEL_BIT;
 	static const CC_CLASS_ENUM CLIPPING_BOX			=	CC_CLIP_BOX_BIT | CC_LEAF_BIT;
 	static const CC_CLASS_ENUM TRANS_BUFFER			=	HIERARCHY_OBJECT | CC_TRANS_BUFFER_BIT | CC_LEAF_BIT;
+	
+	//  Custom types
+	/**	Custom objects are typically defined by plugins. They can be inserted in an object
+		hierarchy or displayed in an OpenGL context like any other ccHObject.
+		To differentiate custom objects, use the meta-data mechanism (see ccOBject::getMetaData
+		and ccOBject::setMetaData). You can also define a custom icon (see ccHObject::getIcon).
+
+		It is highly advised to use the ccCustomHObject and ccCustomLeafObject interfaces to
+		define a custom types. Carefully read the ccCustomHObject::isDeserialized method's
+		description and the warning below!
+		
+		Warning: custom objects can't be 'fully' serialized. Don't overload the
+		'ccSerializableObject::toFile' method for them as this would break the deserialization mechanism!
+		They can only be serialized as plain ccHObject instances (CC_TYPES::HIERARCHY_OBJECT).
+		Hierarchical custom objects (CC_TYPES::CUSTOM_H_OBJECT) will be deserialized as ccCustomHObject
+		instances. Leaf custom objects (CC_TYPES::CUSTOM_LEAF_OBJECT) will be deserialized as
+		ccCustomLeafObject instances.
+	**/
+	static const CC_CLASS_ENUM CUSTOM_H_OBJECT		=	HIERARCHY_OBJECT | CC_CUSTOM_BIT;
+	static const CC_CLASS_ENUM CUSTOM_LEAF_OBJECT	=	CUSTOM_H_OBJECT | CC_LEAF_BIT;
+
 };
 
 //! Generic "CloudCompare Object" template
@@ -183,6 +204,7 @@ public:
     //shortcuts
     inline bool isGroup() const { return (getClassID() & CC_GROUP_BIT) != 0; }
     inline bool isLeaf() const {return (getClassID() & CC_LEAF_BIT) != 0; }
+    inline bool isCustom() const {return (getClassID() & CC_CUSTOM_BIT) != 0; }
     inline bool isHierarchy() const { return (getClassID() & CC_HIERARCH_BIT) != 0; }
 
     inline bool isKindOf(CC_CLASS_ENUM type) const { return (getClassID() & type) == type; }

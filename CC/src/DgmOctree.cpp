@@ -843,9 +843,10 @@ unsigned DgmOctree::findPointNeighbourhood(const CCVector3* queryPoint,
     nNSS.queryPoint							= *queryPoint;
     nNSS.level								= level;
     nNSS.minNumberOfNeighbors				= maxNumberOfNeighbors;
-    nNSS.alreadyVisitedNeighbourhoodSize	= 0;
     bool inbounds = false;
     getTheCellPosWhichIncludesThePoint(&nNSS.queryPoint,nNSS.cellPos,nNSS.level,inbounds);
+    nNSS.alreadyVisitedNeighbourhoodSize	= inbounds ? 0 : 1;
+
     computeCellCenter(nNSS.cellPos,level,nNSS.cellCenter);
     nNSS.maxSearchSquareDistd = (maxSearchDist >= 0 ? maxSearchDist*maxSearchDist : -1.0);
 
@@ -1883,39 +1884,39 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& 
 		maxCorner.z = std::max(std::max(corner1.z,corner2.z),std::max(corner3.z,corner4.z));
 	}
 
-	int cornerPos[3];
-	getTheCellPosWhichIncludesThePoint(&minCorner, cornerPos, params.level);
+	Vector3Tpl<int> cornerPos;
+	getTheCellPosWhichIncludesThePoint(&minCorner, cornerPos.u, params.level);
 
 	const int* minFillIndexes = getMinFillIndexes(params.level);
 	const int* maxFillIndexes = getMaxFillIndexes(params.level);
 
 	//don't need to look outside the octree limits!
-	cornerPos[0] = std::max<int>(cornerPos[0],minFillIndexes[0]);
-	cornerPos[1] = std::max<int>(cornerPos[1],minFillIndexes[1]);
-	cornerPos[2] = std::max<int>(cornerPos[2],minFillIndexes[2]);
+	cornerPos.x = std::max<int>(cornerPos[0],minFillIndexes[0]);
+	cornerPos.y = std::max<int>(cornerPos[1],minFillIndexes[1]);
+	cornerPos.z = std::max<int>(cornerPos[2],minFillIndexes[2]);
 
 	//corresponding cell limits
-	CCVector3 boxMin(	m_dimMin[0] + cs*static_cast<PointCoordinateType>(cornerPos[0]),
-						m_dimMin[1] + cs*static_cast<PointCoordinateType>(cornerPos[1]),
-						m_dimMin[2] + cs*static_cast<PointCoordinateType>(cornerPos[2]) );
+	CCVector3 boxMin(	m_dimMin[0] + cs*static_cast<PointCoordinateType>(cornerPos.x),
+						m_dimMin[1] + cs*static_cast<PointCoordinateType>(cornerPos.y),
+						m_dimMin[2] + cs*static_cast<PointCoordinateType>(cornerPos.z) );
 
 	//binary shift for cell code truncation
 	uchar bitDec = GET_BIT_SHIFT(params.level);
 
 	CCVector3 cellMin = boxMin;
-	int cellPos[3] = { cornerPos[0], 0, 0 };
+	int cellPos[3] = { cornerPos.x, 0, 0 };
 	while (cellMin.x < maxCorner.x && cellPos[0] <= maxFillIndexes[0])
 	{
 		CCVector3 cellCenter(cellMin.x + halfCellSize, 0, 0);
 
 		cellMin.y = boxMin.y;
-		cellPos[1] = cornerPos[1];
+		cellPos[1] = cornerPos.y;
 		while (cellMin.y < maxCorner.y && cellPos[1] <= maxFillIndexes[1])
 		{
 			cellCenter.y = cellMin.y + halfCellSize;
 
 			cellMin.z = boxMin.z;
-			cellPos[2] = cornerPos[2];
+			cellPos[2] = cornerPos.z;
 			while (cellMin.z < maxCorner.z && cellPos[2] <= maxFillIndexes[2])
 			{
 				cellCenter.z = cellMin.z + halfCellSize;
@@ -2039,32 +2040,32 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCyli
 	const int* maxFillIndexes = getMaxFillIndexes(params.level);
 
 	//don't need to look outside the octree limits!
-	cornerPos[0] = std::max<int>(cornerPos[0],minFillIndexes[0]);
-	cornerPos[1] = std::max<int>(cornerPos[1],minFillIndexes[1]);
-	cornerPos[2] = std::max<int>(cornerPos[2],minFillIndexes[2]);
+	cornerPos.x = std::max<int>(cornerPos.x,minFillIndexes[0]);
+	cornerPos.y = std::max<int>(cornerPos.y,minFillIndexes[1]);
+	cornerPos.z = std::max<int>(cornerPos.z,minFillIndexes[2]);
 
 	//corresponding cell limits
-	CCVector3 boxMin(	m_dimMin[0] + cs*static_cast<PointCoordinateType>(cornerPos[0]),
-						m_dimMin[1] + cs*static_cast<PointCoordinateType>(cornerPos[1]),
-						m_dimMin[2] + cs*static_cast<PointCoordinateType>(cornerPos[2]) );
+	CCVector3 boxMin(	m_dimMin[0] + cs*static_cast<PointCoordinateType>(cornerPos.x),
+						m_dimMin[1] + cs*static_cast<PointCoordinateType>(cornerPos.y),
+						m_dimMin[2] + cs*static_cast<PointCoordinateType>(cornerPos.z) );
 
 	//binary shift for cell code truncation
 	uchar bitDec = GET_BIT_SHIFT(params.level);
 
-	Vector3Tpl<int> cellPos(cornerPos.u[0],0,0);
+	Vector3Tpl<int> cellPos(cornerPos.x,0,0);
 	CCVector3 cellMin = boxMin;
 	while (cellMin.x < maxCorner.x && cellPos[0] <= maxFillIndexes[0])
 	{
 		CCVector3 cellCenter(cellMin.x + halfCellSize, 0, 0);
 
 		cellMin.y = boxMin.y;
-		cellPos[1] = cornerPos[1];
+		cellPos[1] = cornerPos.y;
 		while (cellMin.y < maxCorner.y && cellPos[1] <= maxFillIndexes[1])
 		{
 			cellCenter.y = cellMin.y + halfCellSize;
 
 			cellMin.z = boxMin.z;
-			cellPos[2] = cornerPos[2];
+			cellPos[2] = cornerPos.z;
 			while (cellMin.z < maxCorner.z && cellPos[2] <= maxFillIndexes[2])
 			{
 				cellCenter.z = cellMin.z + halfCellSize;

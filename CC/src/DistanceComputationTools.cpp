@@ -488,7 +488,7 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 							assert(inbounds);
 							nNSS_Model.minimalCellsSetToVisit.clear();
 							nNSS_Model.pointsInNeighbourhood.clear();
-							nNSS_Model.alreadyVisitedNeighbourhoodSize=0;
+							nNSS_Model.alreadyVisitedNeighbourhoodSize = inbounds ? 0 : 1;
 							//nNSS_Model.theNearestPointIndex=0;
 						}
 					}

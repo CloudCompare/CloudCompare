@@ -46,6 +46,7 @@ enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
 					STL					,		/**< STL mesh file (ascii) */
                     PCD					,		/**< Point Cloud Library file */
                     OFF					,		/**< OFF mesh file (ascii) */
+                    PTX					,		/**< PTX cloud file (ascii) */
 #ifdef CC_X3D_SUPPORT
 					X3D					,		/**< X3D mesh file */
 #endif
@@ -73,7 +74,7 @@ enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
 const CC_FILE_TYPES CC_FILE_TYPES_ENUMS[] = {UNKNOWN_FILE, SOI, ASCII, BIN,
 												PN, PV, PLY, OBJ, POV,
 												MA, ICM, DM_ASCII, BUNDLER,
-                                                VTK, STL, PCD, OFF
+                                                VTK, STL, PCD, OFF, PTX
 #ifdef CC_X3D_SUPPORT
 												,X3D
 #endif
@@ -115,6 +116,7 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
             "STL mesh (*.stl)",
             "PCD Point Cloud Library cloud (*.pcd)",
 			"OFF mesh (*.off)" 
+			"PTX cloud (*.ptx)" 
 #ifdef CC_X3D_SUPPORT
             , "X3D mesh file (*.x3d)"
 #endif
@@ -155,7 +157,8 @@ const char CC_FILE_TYPE_DEFAULT_EXTENSION[][8] = {
             "vtk",
 			"stl",
             "pcd",
-			"off"
+			"off",
+			"ptx"
 #ifdef CC_X3D_SUPPORT
             , "x3d"
 #endif

@@ -1471,8 +1471,7 @@ void MainWindow::doActionResampleWithOctree()
 
 				if (newCloud)
 				{
-					const CCVector3d& shift = cloud->getGlobalShift();
-					newCloud->setGlobalShift(shift);
+					newCloud->setGlobalShift(cloud->getGlobalShift());
 					newCloud->setGlobalScale(cloud->getGlobalScale());
 					addToDB(newCloud, true, 0, false, false);
 					newCloud->setDisplay(cloud->getDisplay());
@@ -3818,6 +3817,29 @@ void MainWindow::doActionRegister()
             if (data->isKindOf(CC_TYPES::MESH))
                 ccHObjectCaster::ToGenericMesh(data)->refreshBB();
 
+			//don't forget global shift
+			ccGenericPointCloud* refPc = ccHObjectCaster::ToGenericPointCloud(model);
+			if (refPc)
+			{
+				if (refPc->isShifted())
+				{
+					const CCVector3d& Pshift = refPc->getGlobalShift();
+					const double& scale = refPc->getGlobalScale();
+					pc->setGlobalShift(Pshift);
+					pc->setGlobalScale(scale);
+					ccLog::Warning(QString("[ICP] Aligned entity global shift has been updated to match the reference: (%1,%2,%3) [x%4]").arg(Pshift.x).arg(Pshift.y).arg(Pshift.z).arg(scale));
+				}
+				else if (pc->isShifted()) //we'll ask the user first before dropping the shift information on the aligned cloud
+				{
+					if (QMessageBox::question(this, "Drop shift information?", "Aligned entity is shifted but reference cloud is not: drop global shift information?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+					{
+						pc->setGlobalShift(0,0,0);
+						pc->setGlobalScale(1.0);
+						ccLog::Warning(QString("[ICP] Aligned entity global shift has been reset to match the reference!"));
+					}
+				}
+			}
+
             data->prepareDisplayForRefresh_recursive();
             data->setName(data->getName()+QString(".registered"));
             zoomOn(data);
@@ -3902,8 +3924,7 @@ void MainWindow::doAction4pcsRegister()
         else
 		{
             newDataCloud = ccPointCloud::From(data);
-			const CCVector3d& shift = data->getGlobalShift();
-			newDataCloud->setGlobalShift(shift);
+			newDataCloud->setGlobalShift(data->getGlobalShift());
 			newDataCloud->setGlobalScale(data->getGlobalScale());
 		}
 
@@ -3964,8 +3985,7 @@ void MainWindow::doActionSubsample()
 	{
 		newPointCloud->setName(pointCloud->getName()+QString(".subsampled"));
 		newPointCloud->setDisplay(pointCloud->getDisplay());
-		const CCVector3d& shift = pointCloud->getGlobalShift();
-		newPointCloud->setGlobalShift(shift);
+		newPointCloud->setGlobalShift(pointCloud->getGlobalShift());
 		newPointCloud->setGlobalScale(pointCloud->getGlobalScale());
 		newPointCloud->prepareDisplayForRefresh();
 		if (pointCloud->getParent())
@@ -4685,8 +4705,7 @@ void MainWindow::doActionHeightGridGeneration()
 				m_ccRoot->selectEntity(outputGrid);
 
 			//don't forget original shift
-			const CCVector3d& shift = cloud->getGlobalShift();
-			outputGrid->setGlobalShift(shift);
+			outputGrid->setGlobalShift(cloud->getGlobalShift());
 			outputGrid->setGlobalScale(cloud->getGlobalScale());
 			cloud->prepareDisplayForRefresh_recursive();
 			cloud->setEnabled(false);
@@ -4788,8 +4807,7 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 					cloud->prepareDisplayForRefresh();
 					if (mesh->getAssociatedCloud() && mesh->getAssociatedCloud() != cloud)
 					{
-						const CCVector3d& shift = cloud->getGlobalShift();
-						mesh->getAssociatedCloud()->setGlobalShift(shift);
+						mesh->getAssociatedCloud()->setGlobalShift(cloud->getGlobalShift());
 						mesh->getAssociatedCloud()->setGlobalScale(cloud->getGlobalScale());
 					}
 					addToDB(mesh,true,0,false,false);
@@ -4888,8 +4906,7 @@ void MainWindow::doActionComputeQuadric3D()
 				PointCoordinateType stepY = spanY/static_cast<PointCoordinateType>(nStepY-1);
 
                 ccPointCloud* vertices = new ccPointCloud();
-				const CCVector3d& shift = cloud->getGlobalShift();
-				vertices->setGlobalShift(shift);
+				vertices->setGlobalShift(cloud->getGlobalShift());
 				vertices->setGlobalScale(cloud->getGlobalScale());
 				vertices->setName("vertices");
                 vertices->reserve(nStepX*nStepY);
@@ -5061,8 +5078,7 @@ void MainWindow::doActionComputeCPS()
         else
 		{
             newCloud = ccPointCloud::From(&CPSet);
-			const CCVector3d& shift = srcCloud->getGlobalShift();
-			newCloud->setGlobalShift(shift);
+			newCloud->setGlobalShift(srcCloud->getGlobalShift());
 			newCloud->setGlobalScale(srcCloud->getGlobalScale());
 		}
 
@@ -8260,6 +8276,7 @@ void MainWindow::loadFile()
     filters.append(QString(CC_FILE_TYPE_FILTERS[UNKNOWN_FILE]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[BIN]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[ASCII]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[PTX]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[PLY]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[OBJ]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[VTK]) + ";;");

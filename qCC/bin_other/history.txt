@@ -1,12 +1,15 @@
 *** CloudCompare versions history ***
 
 v2.5.4 XX/XX/2014
-- New file format supported: OFF meshes
+- New file formats supported:
+	* OFF meshes
+	* PTX clouds (import only)
 - Enhancements:
 	* 'Sensor' framework upgraded:
 		- Camera 'projective' sensors added (early support)
 		- 'View from sensor' method added
 	* STL import filter is smarter (collapsed triangle after vertex fusion are now automatically removed)
+	* Global shift should be (more) properly handled by both the Point pair based and ICP registration tools
 - Bug fix:
 	* Point coordinates of 2D labels was 'shifted' ((index,x,y) was displayed instead of (x,y,z))
 

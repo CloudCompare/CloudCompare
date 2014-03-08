@@ -136,7 +136,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 	}
     bool writeSF = (theScalarFields.size()!=0);
 
-	//avancement du chargement
+	//progress dialog
     ccProgressDialog pdlg(true);
 	CCLib::NormalizedProgress nprogress(&pdlg,numberOfPoints);
     pdlg.setMethodTitle(qPrintable(QString("Saving cloud [%1]").arg(cloud->getName())));

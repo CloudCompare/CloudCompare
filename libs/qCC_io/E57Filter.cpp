@@ -36,6 +36,7 @@
 #include <ccProgressDialog.h>
 #include <ccImage.h>
 #include <ccCalibratedImage.h>
+#include <ccColorScalesManager.h>
 
 //Qt
 #include <QApplication>

@@ -242,18 +242,14 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 			double vec[3];
 			//the smallest eigen vector corresponds to the "least square best fitting plane" normal
 			eig.getMinEigenValueAndVector(vec);
-			theLSQPlaneVectors[2].x = (PointCoordinateType)vec[0];
-			theLSQPlaneVectors[2].y = (PointCoordinateType)vec[1];
-			theLSQPlaneVectors[2].z = (PointCoordinateType)vec[2];
+			theLSQPlaneVectors[2] = CCVector3::fromArray(vec);
 		}
 
-		//get also X
+		//get also X (Y will be deduced by cross product, see below
 		{
 			double vec[3];
 			eig.getMaxEigenValueAndVector(vec);
-			theLSQPlaneVectors[0].x = (PointCoordinateType)vec[0];
-			theLSQPlaneVectors[0].y = (PointCoordinateType)vec[1];
-			theLSQPlaneVectors[0].z = (PointCoordinateType)vec[2];
+			theLSQPlaneVectors[0] = CCVector3::fromArray(vec);
 		}
 
 		//get the centroid (should already be up-to-date - see computeCovarianceMatrix)
@@ -289,7 +285,6 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 	theLSQPlaneVectors[0].normalize();
 	//and update Y
 	theLSQPlaneVectors[1] = theLSQPlaneVectors[2].cross(theLSQPlaneVectors[1]);
-
 
 	//deduce the proper equation
 	theLSQPlaneEquation[0] = theLSQPlaneVectors[2].x;

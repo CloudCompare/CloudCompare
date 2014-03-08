@@ -357,7 +357,7 @@ bool ccPointPairRegistrationDlg::addAlignedPoint(CCVector3d& Pin, ccGenericPoint
 	assert(cloud == 0 || cloud == m_aligned.cloud);
 
 	//first point?
-	if (m_refPoints.size() == 0)
+	if (m_alignedPoints.size() == 0)
 	{
 		assert(m_aligned.cloud);
 		//simply copy the cloud global shift/scale
@@ -759,6 +759,15 @@ void ccPointPairRegistrationDlg::apply()
 			m_aligned.cloud->setGlobalShift(Pshift);
 			m_aligned.cloud->setGlobalScale(scale);
 			ccLog::Warning(QString("[PointPairRegistration] Aligned cloud global shift has been updated to match the reference: (%1,%2,%3) [x%4]").arg(Pshift.x).arg(Pshift.y).arg(Pshift.z).arg(scale));
+		}
+		else if (m_aligned.cloud->isShifted()) //we'll ask the user first before dropping the shift information on the aligned cloud
+		{
+			if (QMessageBox::question(this, "Drop shift information?", "Aligned cloud is shifted but reference cloud is not: drop global shift information?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+			{
+				m_aligned.cloud->setGlobalShift(0,0,0);
+				m_aligned.cloud->setGlobalScale(1.0);
+				ccLog::Warning(QString("[PointPairRegistration] Aligned cloud global shift has been reset to match the reference!"));
+			}
 		}
 	}
 	else

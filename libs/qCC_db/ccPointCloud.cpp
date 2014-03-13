@@ -448,11 +448,11 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 			//if this cloud hasn't any normal
 			if (!hasNormals())
 			{
-				//we try to resrve a new array
+				//we try to reserve a new array
 				if (reserveTheNormsTable())
 				{
-					for (unsigned i=0;i<pointCountBefore;i++)
-						addNorm(0);
+					for (unsigned i=0; i<pointCountBefore; i++)
+						addNormIndex(0);
 				}
 				else
 				{
@@ -463,7 +463,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 			//we import normals (if necessary)
 			if (hasNormals() && m_normals->currentSize() == pointCountBefore)
-				for (unsigned i=0;i<addedPoints;i++)
+				for (unsigned i=0; i<addedPoints; i++)
 					addNormIndex(addedCloud->m_normals->getValue(i));
 		}
 	}

@@ -1,7 +1,7 @@
 *** CloudCompare versions history ***
 
 v2.5.4 XX/XX/2014
-- New file formats supported:
+- New file format supported:
 	* OFF meshes
 	* PTX clouds (import only)
 - Enhancements:
@@ -10,8 +10,10 @@ v2.5.4 XX/XX/2014
 		- 'View from sensor' method added
 	* STL import filter is smarter (collapsed triangle after vertex fusion are now automatically removed)
 	* Global shift should be (more) properly handled by both the Point pair based and ICP registration tools
-- Bug fix:
+- Bug fixes:
 	* Point coordinates of 2D labels was 'shifted' ((index,x,y) was displayed instead of (x,y,z))
+	* Depending on the selection order, CC could crash when merging two clouds (one with normals and
+		the other without)
 
 v2.5.3 02/21/2014
 - New method: "Edit > Normals > Orient > With Minimum Spanning Tree"

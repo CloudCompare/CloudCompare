@@ -521,7 +521,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const char* filename,
 		for (unsigned i=0; i<container.getChildrenNumber(); ++i)
 		{
 			ccHObject* obj = container.getChild(i);
-			assert(obj && obj->isA(CC_POINT_CLOUD));
+			assert(obj && obj->isA(CC_TYPES::POINT_CLOUD));
 			CCLib::ScalarField* sf = static_cast<ccPointCloud*>(obj)->getScalarField(0);
 			if (sf)
 			{

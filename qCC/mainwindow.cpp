@@ -219,7 +219,7 @@ MainWindow::MainWindow()
     //tabifyDockWidget(DockableDBTree,DockableProperties);
 
     //Console
-    ccConsole::Init(consoleWidget,this);
+    ccConsole::Init(consoleWidget,this,this);
 
     //db-tree link
     m_ccRoot = new ccDBRoot(dbTreeView, propertiesTreeView, this);

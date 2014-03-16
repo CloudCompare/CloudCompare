@@ -35,6 +35,7 @@
 
 class QListWidget;
 class QWidget;
+class MainWindow;
 
 //! Console
 class ccConsole : public QObject, public ccLog
@@ -51,8 +52,9 @@ public:
 		In debug mode, all message are sent to system console (with 'printf').
 		\param textDisplay text output widget (optional)
 		\param parentWidget parent widget (optional)
+		\param parentWidget parent window (if any - optional)
     **/
-	static void Init(QListWidget* textDisplay=0, QWidget* parentWidget=0);
+	static void Init(QListWidget* textDisplay=0, QWidget* parentWidget=0, MainWindow* parentWindow=0);
 
     //! Returns the (unique) static instance
 	static ccConsole* TheInstance();
@@ -82,14 +84,17 @@ protected:
     //! Associated text display widget
 	QListWidget* m_textDisplay;
 
-	//! Corresponding widget
+	//! Parent widget
 	QWidget* m_parentWidget;
+
+	//! Parent window (if any)
+	MainWindow* m_parentWindow;
 
 	//! Mutex for concurrent thread access to console
 	QMutex m_mutex;
 
 	//! Queue element type (message + color)
-	typedef QPair<QString,Qt::GlobalColor> ConsoleItemType;
+	typedef QPair<QString,MessageLevel> ConsoleItemType;
 
 	//! Queue for incoming messages
 	QVector<ConsoleItemType> m_queue;

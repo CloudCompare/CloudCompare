@@ -1615,8 +1615,9 @@ void MainWindow::doActionApplyScale()
 			//don't forget the 'global shift'!
 			const CCVector3d& shift = cloud->getGlobalShift();
 			cloud->setGlobalShift(shift*s_lastMultFactorX);
-			const double& scale = cloud->getGlobalScale();
-			cloud->setGlobalScale(scale*s_lastMultFactorX);
+			//DGM: nope! Not the global scale!
+			//const double& scale = cloud->getGlobalScale();
+			//cloud->setGlobalScale(scale*s_lastMultFactorX);
 
 			++processNum;
         }

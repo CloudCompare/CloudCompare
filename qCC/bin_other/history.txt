@@ -16,6 +16,8 @@ v2.5.4 XX/XX/2014
 	* Depending on the selection order, CC could crash when merging two clouds (one with normals and
 		the other without)
 	* A too big step (causing a 1x1 cell grid) would make the Rasterize (Height Grid Generation) tool crash!
+	* When scaling a cloud (with 'Edit > Apply scale') the 'global scale' information was updated consequently.
+		Therefore the cloud was rescaled to its original state at export time!
 
 v2.5.3 02/21/2014
 - New method: "Edit > Normals > Orient > With Minimum Spanning Tree"

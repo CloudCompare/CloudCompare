@@ -834,7 +834,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	//UINT32 Number of triangles
 	{
 		unsigned tmpInt32;
-		if (fp.read((char*)&tmpInt32,4)<4)
+		if (fp.read((char*)&tmpInt32,4) < 4)
 			return CC_FERR_READING;
 		faceCount = tmpInt32;
 	}
@@ -863,29 +863,29 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 	for (unsigned f=0; f<faceCount; ++f)
 	{
 		//REAL32[3] Normal vector
-		assert(sizeof(float)==4);
+		assert(sizeof(float) == 4);
 		CCVector3 N;
-		if (fp.read((char*)N.u,12)<12)
+		if (fp.read((char*)N.u,12) < 12)
 			return CC_FERR_READING;
 
 		//3 vertices
 		unsigned vertIndexes[3];
 //		unsigned pointCountBefore=pointCount;
-		for (unsigned i=0;i<3;++i)
+		for (unsigned i=0; i<3; ++i)
 		{
 			//REAL32[3] Vertex 1,2 & 3
 			float Pf[3];
-			if (fp.read((char*)Pf,12)<0)
+			if (fp.read((char*)Pf,12) < 0)
 				return CC_FERR_READING;
 
 			//first point: check for 'big' coordinates
-			double Pd[3]={Pf[0],Pf[1],Pf[2]};
-			if (pointCount==0)
+			double Pd[3] = { Pf[0], Pf[1], Pf[2] };
+			if (pointCount == 0)
 			{
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 				if (shiftAlreadyEnabled)
 					Pshift = *coordinatesShift;
-				bool applyAll=false;
+				bool applyAll = false;
 				if (	sizeof(PointCoordinateType) < 8
 					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
 				{
@@ -911,7 +911,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 				//if (pointCount>2)
 				//{
 				//	//brute force!
-				//	for (int j=(int)pointCountBefore-1; j>=0; j--)
+				//	for (int j=static_cast<int>(pointCountBefore)-1; j>=0; j--)
 				//	{
 				//		const CCVector3* Pj = vertices->getPoint(j);
 				//		if (Pj->x == P.x &&
@@ -937,7 +937,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 				}
 				//else
 				//{
-				//	vertIndexes[i] = (unsigned)equivalentIndex;
+				//	vertIndexes[i] = static_cast<unsigned>(equivalentIndex);
 				//}
 			}
 		}
@@ -945,7 +945,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 		//UINT16 Attribute byte count (not used)
 		{
 			char a[2];
-			if (fp.read(a,2)<0)
+			if (fp.read(a,2) < 0)
 				return CC_FERR_READING;
 		}
 

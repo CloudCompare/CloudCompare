@@ -378,10 +378,10 @@ CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bo
 		const int razValue = -1;
 		if (equivalentIndexes && equivalentIndexes->resize(vertCount,true,razValue))
 		{
-			ccOctree* octree = vertices->computeOctree();
+			ccProgressDialog progressDlg(true);
+			ccOctree* octree = vertices->computeOctree(&progressDlg);
 			if (octree)
 			{
-				ccProgressDialog progressDlg(true);
 				void* additionalParameters[] = { static_cast<void*>(equivalentIndexes) };
 				unsigned result = octree->executeFunctionForAllCellsAtLevel(ccOctree::MAX_OCTREE_LEVEL,
 																			TagDuplicatedVertices,

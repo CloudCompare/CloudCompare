@@ -130,9 +130,14 @@ void ccConsole::refresh()
 #endif
 				color = Qt::red;
 				break;
-#ifndef _DEBUG
 			default:
-				return;
+#ifndef _DEBUG
+				//skip debug message in debug mode
+				continue;
+#else
+				//we shoudn't fall here in debug mode!
+				assert(false);
+				break;
 #endif
 			}
 			item->setForeground(color);

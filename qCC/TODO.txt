@@ -19,7 +19,7 @@ File I/O:
 
 Big ones:
 [*] fly-through mode (http://www.danielgm.net/cc/forum/viewtopic.php?f=14&t=179&p=607#p607)
-[*] Command line mode could be extended (more methods, etc.)
+[*] Command line mode could be extended (e.g. Rasterize tool - http://www.danielgm.net/cc/forum/viewtopic.php?t=786)
 [*] Point cloud cleanup tools (http://www.danielgm.net/cc/forum/viewtopic.php?t=191)
 
 Various:

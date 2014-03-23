@@ -90,7 +90,7 @@ public:
     //! Returns the width of the line
     /** \return the width of the line in pixels
     **/
-    PointCoordinateType getWidth() const {return m_width;}
+    PointCoordinateType getWidth() const { return m_width; }
 
 	//! Returns the polyline color
 	/** \return a pointer to the polyline RGB color
@@ -139,6 +139,17 @@ public:
 	//! Computes the polyline length
 	PointCoordinateType computeLength() const;
 
+	//! Sets whether to display or hide the polyline vertices
+	void showVertices(bool state) { m_showVertices = state; }
+	//! Whether the polyline vertices should be displayed or not
+	bool verticesShown() const { return m_showVertices; }
+
+	//! Sets the width of vertex markers
+	void setVertexMarkerWidth(int width) { m_vertMarkWidth = width; }
+	//! Returns the width of vertex markers
+    int getVertexMarkerWidth() const { return m_vertMarkWidth; }
+
+
 protected:
 
 	//inherited from ccHObject
@@ -164,6 +175,12 @@ protected:
 
 	//! Whether poyline should draws itself in background (false) or foreground (true)
 	bool m_foreground;
+	
+	//! Whether vertices should be displayed or not
+	bool m_showVertices;
+
+	//! Vertex marker width
+	int m_vertMarkWidth;
 };
 
 #endif //CC_GL_POLYLINE_HEADER

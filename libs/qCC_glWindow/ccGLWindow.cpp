@@ -116,7 +116,10 @@ inline static void glColor4ubv_safe(const unsigned char* rgb)
 				static_cast<float>(rgb[3])/255.0f );
 }
 
-ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shareWidget /*=0*/)
+ccGLWindow::ccGLWindow(	QWidget *parent,
+						const QGLFormat& format/*=QGLFormat::defaultFormat()*/,
+						QGLWidget* shareWidget/*=0*/,
+						bool silentInitialization/*=false*/)
 	: QGLWidget(format,parent,shareWidget)
 	, m_uniqueID(++s_GlWindowNumber) //GL window unique ID
 	, m_initialized(false)
@@ -158,6 +161,7 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 	, m_rectPickingPoly(0)
 	, m_overridenDisplayParametersEnabled(false)
 	, m_displayOverlayEntities(true)
+	, m_silentInitialization(silentInitialization)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -207,11 +211,14 @@ ccGLWindow::ccGLWindow(QWidget *parent, const QGLFormat& format, QGLWidget* shar
 		
 		settings.endGroup();
 
-		//perspective
-		if (!perspectiveView)
-			ccLog::Print("[ccGLWindow] Perspective is off by default");
-		else
-			ccLog::Print(QString("[ccGLWindow] Perspective is on by default (%1)").arg(objectCenteredView ? "object-centered" : "viewer-centered"));
+		//report current perspective
+		if (!m_silentInitialization)
+		{
+			if (!perspectiveView)
+				ccLog::Print("[ccGLWindow] Perspective is off by default");
+			else
+				ccLog::Print(QString("[ccGLWindow] Perspective is on by default (%1)").arg(objectCenteredView ? "object-centered" : "viewer-centered"));
+		}
 
 		//pivot visibility
 		switch(pivotVisibility)
@@ -308,26 +315,30 @@ void ccGLWindow::initializeGL()
 	InitGLEW();
 
 	//OpenGL version
-	ccLog::Print("[3D View %i] GL version: %s",m_uniqueID,glGetString(GL_VERSION));
+	if (!m_silentInitialization)
+		ccLog::Print("[3D View %i] GL version: %s",m_uniqueID,glGetString(GL_VERSION));
 
 	//Shaders and other OpenGL extensions
 	m_shadersEnabled = CheckShadersAvailability();
 	if (!m_shadersEnabled)
 	{
 		//if no shader, no GL filter!
-		ccLog::Warning("[3D View %i] Shaders and GL filters unavailable",m_uniqueID);
+		if (!m_silentInitialization)
+			ccLog::Warning("[3D View %i] Shaders and GL filters unavailable",m_uniqueID);
 	}
 	else
 	{
-		ccLog::Print("[3D View %i] Shaders available",m_uniqueID);
+		if (!m_silentInitialization)
+			ccLog::Print("[3D View %i] Shaders available",m_uniqueID);
 
 		m_glFiltersEnabled = CheckFBOAvailability();
 		if (m_glFiltersEnabled)
 		{
-			ccLog::Print("[3D View %i] GL filters available",m_uniqueID);
+			if (!m_silentInitialization)
+				ccLog::Print("[3D View %i] GL filters available",m_uniqueID);
 			m_alwaysUseFBO = true;
 		}
-		else
+		else if (!m_silentInitialization)
 		{
 			ccLog::Warning("[3D View %i] GL filters unavailable (FBO not supported)",m_uniqueID);
 		}
@@ -336,7 +347,8 @@ void ccGLWindow::initializeGL()
 		if (!m_colorRampShader)
 		{
 			const char* vendorName = (const char*)glGetString(GL_VENDOR);
-			ccLog::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
+			if (!m_silentInitialization)
+				ccLog::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
 
 			//we will update global parameters
 			ccGui::ParamStruct params = getDisplayParameters();
@@ -347,7 +359,8 @@ void ccGLWindow::initializeGL()
 			const GLint minRequiredBytes = ccColorRampShader::MinRequiredBytes();
 			if (maxBytes < minRequiredBytes)
 			{
-				ccLog::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)",m_uniqueID,maxBytes,minRequiredBytes);
+				if (!m_silentInitialization)
+					ccLog::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)",m_uniqueID,maxBytes,minRequiredBytes);
 				params.colorScaleShaderSupported = false;
 			}
 			else
@@ -356,14 +369,16 @@ void ccGLWindow::initializeGL()
 				QString shadersPath = ccGLWindow::getShadersPath();
 				if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag"))))
 				{
-					ccLog::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
+					if (!m_silentInitialization)
+						ccLog::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
 					params.colorScaleShaderSupported = false;
 					delete colorRampShader;
 					colorRampShader = 0;
 				}
 				else
 				{
-					ccLog::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
+					if (!m_silentInitialization)
+						ccLog::Print("[3D View %i] Color ramp shader loaded successfully",m_uniqueID);
 					m_colorRampShader = colorRampShader;
 					params.colorScaleShaderSupported = true;
 
@@ -373,7 +388,8 @@ void ccGLWindow::initializeGL()
 						bool shouldUseShader = true;
 						if (!vendorName || QString(vendorName).toUpper().startsWith("ATI") || QString(vendorName).toUpper().startsWith("VMWARE"))
 						{
-							ccLog::Warning("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
+							if (!m_silentInitialization)
+								ccLog::Warning("[3D View %i] Color ramp shader will remain disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
 							shouldUseShader = false;
 						}
 						params.colorScaleUseShader = shouldUseShader;
@@ -396,7 +412,8 @@ void ccGLWindow::initializeGL()
 
 	m_initialized = true;
 
-	ccLog::Print("[ccGLWindow] 3D view initialized");
+	if (!m_silentInitialization)
+		ccLog::Print("[ccGLWindow] 3D view initialized");
 }
 
 void ccGLWindow::resizeGL(int w, int h)

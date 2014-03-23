@@ -100,8 +100,12 @@ public:
 	};
 
 	//! Default constructor
-    ccGLWindow(QWidget *parent = 0, const QGLFormat& format=QGLFormat::defaultFormat(), QGLWidget* shareWidget = 0);
-	//! Default destructor
+    ccGLWindow(	QWidget *parent = 0,
+				const QGLFormat& format = QGLFormat::defaultFormat(),
+				QGLWidget* shareWidget = 0,
+				bool silentInitialization = false);
+	
+	//! Destructor
     virtual ~ccGLWindow();
 
 	//! Sets 'scene graph' root
@@ -757,6 +761,9 @@ protected:
 
 	//! Whether to display overlay entities or not (scale, tetrahedron, etc.)
 	bool m_displayOverlayEntities;
+
+	//! Whether initialization should be silent or not (i.e. no message to console)
+	bool m_silentInitialization;
 
 private:
 

@@ -40,6 +40,8 @@ ccPolyline::ccPolyline(GenericIndexedCloudPersist* associatedCloud)
 	setVisible(true);
 	lockVisibility(false);
 	setColor(ccColor::white);
+	showVertices(false);
+	setVertexMarkerWidth(3);
 	setWidth(0);
 }
 
@@ -83,6 +85,8 @@ void ccPolyline::initWith(ccPointCloud* vertices, const ccPolyline& poly)
 	setColor(poly.m_rgbColor);
 	setWidth(poly.m_width);
 	showColors(poly.colorsShown());
+	showVertices(poly.verticesShown());
+	setVertexMarkerWidth(poly.getVertexMarkerWidth());
 	setVisible(poly.isVisible());
 }
 
@@ -143,23 +147,40 @@ void ccPolyline::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (colorsShown())
 			glColor3ubv(m_rgbColor);
 
-		if (m_width != 0)
+		//display polyline
 		{
-			glPushAttrib(GL_LINE_BIT);
-			glLineWidth(static_cast<GLfloat>(m_width));
+			if (m_width != 0)
+			{
+				glPushAttrib(GL_LINE_BIT);
+				glLineWidth(static_cast<GLfloat>(m_width));
+			}
+
+			glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
+			for (unsigned i=0; i<vertCount; ++i)
+			{
+				ccGL::Vertex3v(getPoint(i)->u);
+			}
+			glEnd();
+
+			if (m_width != 0)
+			{
+				glPopAttrib();
+			}
 		}
 
-		glBegin(m_isClosed ? GL_LINE_LOOP : GL_LINE_STRIP);
-
-		for (unsigned i=0; i<vertCount; ++i)
+		//display vertices
+		if (m_showVertices)
 		{
-			ccGL::Vertex3v(getPoint(i)->u);
-		}
+			glPushAttrib(GL_POINT_BIT);
+			glPointSize((GLfloat)m_vertMarkWidth);
 
-		glEnd();
+			glBegin(GL_POINTS);
+			for (unsigned i=0; i<vertCount; ++i)
+			{
+				ccGL::Vertex3v(getPoint(i)->u);
+			}
+			glEnd();
 
-		if (m_width != 0)
-		{
 			glPopAttrib();
 		}
 	}

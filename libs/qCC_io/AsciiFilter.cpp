@@ -357,7 +357,7 @@ struct cloudAttributesDescriptor
     {
         cloud=NULL;
         for (unsigned int i=0;i<c_attribCount;++i)
-            indexes[i]=-1;
+            indexes[i] = -1;
         hasNorms=false;
         hasRGBColors=false;
 		scalarIndexes.clear();
@@ -474,7 +474,7 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
 				ccScalarField* sf = new ccScalarField(qPrintable(sfName));
 				sf->link();
 				int sfIdx = cloud->addScalarField(sf);
-				if (sfIdx>=0)
+				if (sfIdx >= 0)
 				{
 					cloudDesc.scalarIndexes.push_back(i);
 					cloudDesc.scalarFields.push_back(sf);
@@ -684,7 +684,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
         			ccLog::Warning("Memory reallocation failed ... some memory may have been wasted ...");
 				if (!cloudDesc.scalarFields.empty())
 				{
-					for (unsigned k=0;k<cloudDesc.scalarFields.size();++k)
+					for (unsigned k=0; k<cloudDesc.scalarFields.size(); ++k)
 						cloudDesc.scalarFields[k]->computeMinAndMax();
 					cloudDesc.cloud->setCurrentDisplayedScalarField(0);
 					cloudDesc.cloud->showSF(true);
@@ -719,11 +719,11 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
         if (nParts > maxPartIndex)
         {
 			//(X,Y,Z)
-			if (cloudDesc.xCoordIndex>=0)
+			if (cloudDesc.xCoordIndex >= 0)
 				P[0] = parts[cloudDesc.xCoordIndex].toDouble();
-			if (cloudDesc.yCoordIndex>=0)
+			if (cloudDesc.yCoordIndex >= 0)
 				P[1] = parts[cloudDesc.yCoordIndex].toDouble();
-			if (cloudDesc.zCoordIndex>=0)
+			if (cloudDesc.zCoordIndex >= 0)
 				P[2] = parts[cloudDesc.zCoordIndex].toDouble();
 
 			//first point: check for 'big' coordinates
@@ -756,11 +756,11 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 			//Normal vector
 			if (cloudDesc.hasNorms)
 			{
-				if (cloudDesc.xNormIndex>=0)
+				if (cloudDesc.xNormIndex >= 0)
 					N[0] = static_cast<PointCoordinateType>(parts[cloudDesc.xNormIndex].toDouble());
-				if (cloudDesc.yNormIndex>=0)
+				if (cloudDesc.yNormIndex >= 0)
 					N[1] = static_cast<PointCoordinateType>(parts[cloudDesc.yNormIndex].toDouble());
-				if (cloudDesc.zNormIndex>=0)
+				if (cloudDesc.zNormIndex >= 0)
 					N[2] = static_cast<PointCoordinateType>(parts[cloudDesc.zNormIndex].toDouble());
 				cloudDesc.cloud->addNorm(N);
 			}
@@ -768,7 +768,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 			//Colors
 			if (cloudDesc.hasRGBColors)
 			{
-				if (cloudDesc.iRgbaIndex>=0)
+				if (cloudDesc.iRgbaIndex >= 0)
 				{
 					const uint32_t rgb = parts[cloudDesc.iRgbaIndex].toInt();
 					col[0] = ((rgb >> 16)	& 0x0000ff);
@@ -776,7 +776,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 					col[2] = ((rgb)			& 0x0000ff);
 
 				}
-				else if (cloudDesc.fRgbaIndex>=0)
+				else if (cloudDesc.fRgbaIndex >= 0)
 				{
 					const float rgbf = parts[cloudDesc.fRgbaIndex].toFloat();
 					const uint32_t rgb = (uint32_t)(*((uint32_t*)&rgbf));
@@ -786,27 +786,27 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 				}
 				else
 				{
-					if (cloudDesc.redIndex>=0)
-						col[0]=(colorType)parts[cloudDesc.redIndex].toInt();
-					if (cloudDesc.greenIndex>=0)
-						col[1]=(colorType)parts[cloudDesc.greenIndex].toInt();
-					if (cloudDesc.blueIndex>=0)
-						col[2]=(colorType)parts[cloudDesc.blueIndex].toInt();
+					if (cloudDesc.redIndex >= 0)
+						col[0] = static_cast<colorType>(parts[cloudDesc.redIndex].toFloat());
+					if (cloudDesc.greenIndex >= 0)
+						col[1] = static_cast<colorType>(parts[cloudDesc.greenIndex].toFloat());
+					if (cloudDesc.blueIndex >= 0)
+						col[2] = static_cast<colorType>(parts[cloudDesc.blueIndex].toFloat());
 				}
 				cloudDesc.cloud->addRGBColor(col);
 			}
-			else if (cloudDesc.greyIndex>=0)
+			else if (cloudDesc.greyIndex >= 0)
 			{
-				col[0]=col[1]=col[2]=(colorType)parts[cloudDesc.greyIndex].toInt();
+				col[0] = col[1] = col[2] = static_cast<colorType>(parts[cloudDesc.greyIndex].toInt());
 				cloudDesc.cloud->addRGBColor(col);
 			}
 
 			//Scalar distance
 			if (!cloudDesc.scalarIndexes.empty())
 			{
-				for (unsigned j=0;j<cloudDesc.scalarIndexes.size();++j)
+				for (unsigned j=0; j<cloudDesc.scalarIndexes.size(); ++j)
 				{
-					D=(ScalarType)parts[cloudDesc.scalarIndexes[j]].toDouble();
+					D = static_cast<ScalarType>( parts[cloudDesc.scalarIndexes[j]].toDouble() );
 					cloudDesc.scalarFields[j]->setValue(pointsRead-cloudChunkPos,D);
 				}
 			}

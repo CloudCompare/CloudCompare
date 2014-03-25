@@ -187,14 +187,12 @@ public:
 	**/
 	void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context);
 
-public slots:
+protected slots:
 
     //! Creates a new 3D GL sub-window
     ccGLWindow* new3DView();
 
-protected slots:
-
-    //! Displays 'about' dialog
+	//! Displays 'about' dialog
     void about();
     //! Displays 'help' dialog
     void help();

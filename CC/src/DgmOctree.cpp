@@ -532,7 +532,7 @@ void DgmOctree::computeCellsStatistics(uchar level)
 	m_cellCount[level] = counter;
 	m_maxCellPopulation[level] = maxCellPop;
 	m_averageCellPopulation[level] = sum/static_cast<double>(counter);
-	m_stdDevCellPopulation[level] = sqrt(sum2 - m_averageCellPopulation[level]*m_averageCellPopulation[level])/static_cast<double>(counter);
+	m_stdDevCellPopulation[level] = sqrt(sum2/static_cast<double>(counter) - m_averageCellPopulation[level]*m_averageCellPopulation[level]);
 }
 
 //! Pre-computed cell codes for all potential cell positions (along a unique dimension)
@@ -4120,9 +4120,9 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
 	cellsContainer::const_iterator startingElement = m_thePointsAndTheirCellCodes.begin();
 
 	//we compute some statistics on the fly
-	double popSum = 0.0;
-	double popSum2 = 0.0;
-	unsigned maxPop = 0;
+	unsigned long long popSum = 0;
+	unsigned long long popSum2 = 0;
+	unsigned long long maxPop = 0;
 
 	//let's sweep through the octree
     while (cellDesc.i1 < m_numberOfProjectedPoints)
@@ -4251,12 +4251,12 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
         }
 
 		//we can now 'add' this cell to the list
-		cellDesc.i2=cellDesc.i1+(elements-1);
+		cellDesc.i2 = cellDesc.i1 + (elements-1);
 		cells.push_back(cellDesc);
-		popSum += static_cast<double>(elements);
-		popSum2 += static_cast<double>(elements)*static_cast<double>(elements);
-		if (maxPop<elements)
-			maxPop=elements;
+		popSum += static_cast<unsigned long long>(elements);
+		popSum2 += static_cast<unsigned long long>(elements*elements);
+		if (maxPop < elements)
+			maxPop = elements;
 
 		//proceed to next cell
 		cellDesc.i1 += elements;
@@ -4275,8 +4275,8 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
     }
 
 	//statistics
-	double mean = popSum/static_cast<double>(cells.size());
-	double stddev = sqrt(popSum2-mean*mean)/static_cast<double>(cells.size());
+	double mean = static_cast<double>(popSum)/static_cast<double>(cells.size());
+	double stddev = sqrt(static_cast<double>(popSum2-popSum*popSum))/static_cast<double>(cells.size());
 
 	//static wrap
 	s_octree_MT = this;

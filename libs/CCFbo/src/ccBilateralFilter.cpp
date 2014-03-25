@@ -50,6 +50,16 @@ ccBilateralFilter::ccBilateralFilter()
 	setParams(2,2.0f,0.4f);
 }
 
+ccGlFilter* ccBilateralFilter::clone() const
+{
+	ccBilateralFilter* filter = new ccBilateralFilter();
+	//copy parameters
+	filter->setParams(m_halfSpatialSize,m_spatialSigma,m_depthSigma);
+	filter->m_useCurrentViewport = m_useCurrentViewport;
+
+	return filter;
+}
+
 ccBilateralFilter::~ccBilateralFilter()
 {
     reset();
@@ -106,9 +116,9 @@ bool ccBilateralFilter::init(int width, int height, const char* shadersPath)
     return true;
 }
 
-void ccBilateralFilter::setParams(unsigned spatialSize, float spatialSigma, float depthSigma)
+void ccBilateralFilter::setParams(unsigned halfSpatialSize, float spatialSigma, float depthSigma)
 {
-    m_halfSpatialSize	= std::min<unsigned>(spatialSize,KERNEL_MAX_HALF_SIZE);
+    m_halfSpatialSize	= std::min<unsigned>(halfSpatialSize,KERNEL_MAX_HALF_SIZE);
     m_spatialSigma		= spatialSigma;
     m_depthSigma		= depthSigma;
 

@@ -4572,7 +4572,7 @@ void MainWindow::doActionExportCoordToSF()
 		return;
 
 	bool exportDim[3] = {ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ()};
-	QString defaultSFName[3] = {"coordX", "coordY", "coordZ"};
+	const QString defaultSFName[3] = {"Coord. X", "Coord. Y", "Coord. Z"};
 	
 	if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
 		return;
@@ -5817,7 +5817,14 @@ void MainWindow::activateRegisterPointPairTool()
         registerMDIDialog(m_pprDlg,Qt::TopRightCorner);
     }
 
-	if (!m_pprDlg->init(aligned,reference))
+	ccGLWindow* win = new3DView();
+	if (!win)
+	{
+		ccLog::Error("[PointPairRegistration] Failed to create dedicated 3D view!");
+		return;
+	}
+	
+	if (!m_pprDlg->init(win,aligned,reference))
 		deactivateRegisterPointPairTool(false);
 
     freezeUI(true);

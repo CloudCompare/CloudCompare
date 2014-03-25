@@ -36,7 +36,9 @@ public:
 	virtual void stop(bool state);
 
 	//! Inits dialog
-	bool init(ccGenericPointCloud* aligned, ccGenericPointCloud* reference = 0);
+	bool init(	ccGLWindow* win,
+				ccGenericPointCloud* aligned,
+				ccGenericPointCloud* reference = 0);
 
 	//! Clears dialog
 	void clear();

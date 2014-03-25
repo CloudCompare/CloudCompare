@@ -22,9 +22,13 @@
 #include <ccShader.h>
 #include <ccFBOUtils.h>
 
+//RandomKit
 #include <randomkit.h>
+
+//system
 #include <stdlib.h>
 #include <math.h>
+#include <vector>
 
 #ifndef GL_RGBA32F
 #define GL_RGBA32F 0x8814
@@ -58,26 +62,36 @@ ccSSAOFilter::~ccSSAOFilter()
     reset();
 }
 
+ccGlFilter* ccSSAOFilter::clone() const
+{
+	ccSSAOFilter* filter = new ccSSAOFilter();
+
+	//copy parameters
+	filter->setParameters(N, Kz, R, F);
+
+	return filter;
+}
+
 void ccSSAOFilter::reset()
 {
     if (glIsTexture(texReflect))
         glDeleteTextures(1,&texReflect);
-    texReflect=0;
+    texReflect = 0;
 
     if (fbo)
         delete fbo;
-    fbo=0;
+    fbo = 0;
 
     if (shader)
         delete shader;
-    shader=0;
+    shader = 0;
 
     if (bilateralFilter)
         delete bilateralFilter;
-    bilateralFilter=0;
+    bilateralFilter = 0;
 }
 
-bool ccSSAOFilter::init(int width,int height,const char* shadersPath)
+bool ccSSAOFilter::init(int width, int height,const char* shadersPath)
 {
     return init(width,height,true,true,shadersPath);
 }
@@ -130,7 +144,7 @@ bool ccSSAOFilter::init(int width,
     else if (bilateralFilter)
     {
         delete bilateralFilter;
-        bilateralFilter=0;
+        bilateralFilter = 0;
     }
 
     w = width;
@@ -139,7 +153,9 @@ bool ccSSAOFilter::init(int width,
     sampleSphere();
 
     if (useReflectTexture)
+	{
         initReflectTexture();
+	}
     else
     {
         if (texReflect>0)
@@ -215,7 +231,7 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
     shader->setUniform1f("F",F);
     shader->setUniform1f("Kz",Kz);
     //shader->setUniform1i("N",N);
-    shader->setUniform1i("B_REF",texReflect==0 ? 0 : 1);
+    shader->setUniform1i("B_REF",texReflect == 0 ? 0 : 1);
     shader->setTabUniform3fv("P",SSAO_MAX_N,ssao_neighbours);
 
     glActiveTexture(GL_TEXTURE2);
@@ -300,24 +316,29 @@ void ccSSAOFilter::initReflectTexture()
 {
     /***	INIT TEXTURE OF RELFECT VECTORS		***/
     /**		Fully random texture	**/
-    int size = w*h;
-    float* p_reflect = new float[3*size];
-    if (!p_reflect)
-    {
-        //not enough memory!
-        return;
-    }
+    int texSize = w*h;
+	std::vector<float> reflectTex;
+	try
+	{
+		reflectTex.resize(3*texSize);
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return;
+	}
 
-    float* _p_reflect = p_reflect;
-    double x,y,z,norm;
-    for (int i=0;i<size;i++)
+    for (int i=0; i<texSize; i++)
     {
+		double x,y,z;
         randomPointInSphere(x,y,z);
-        norm = x*x+y*y+z*z;
-        norm = (norm > 1e-12 ? 1.0/sqrt(norm) : 0.0);
-        *(_p_reflect++)	= (float)(0.5*(1.0+x*norm));
-        *(_p_reflect++)	= (float)(0.5*(1.0+y*norm));
-        *(_p_reflect++)	= (float)(0.5*(1.0+z*norm));
+        
+		double norm = x*x+y*y+z*z;
+        norm = (norm > 1.0e-12 ? 1.0/sqrt(norm) : 0.0);
+        
+		reflectTex[i*3  ] = static_cast<float>((1.0+x*norm)/2);
+        reflectTex[i*3+1] = static_cast<float>((1.0+y*norm)/2);
+        reflectTex[i*3+2] = static_cast<float>((1.0+z*norm)/2);
     }
 
     TEX_2D_ON;
@@ -332,11 +353,10 @@ void ccSSAOFilter::initReflectTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB16F,w,h,0,GL_RGB,GL_FLOAT,p_reflect);
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGB16F,w,h,0,GL_RGB,GL_FLOAT,&reflectTex[0]);
 
     TEX_2D_OFF;
 
-    delete[] p_reflect;
     // According to Wikipedia, noise is made of 4*4 repeated tiles	to have only high frequency	**/
 }
 

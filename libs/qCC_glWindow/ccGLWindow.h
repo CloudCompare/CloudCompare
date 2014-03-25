@@ -220,6 +220,9 @@ public:
 	**/
     virtual void updateConstellationCenterAndZoom(const ccBBox* aBox = 0);
 
+	//! Returns the visible objects bounding-box
+	ccBBox getVisibleObjectsBB() const;
+
     //! Rotates the base view matrix
 	/** Warning: 'base view' marix is either:
 		- the rotation around the object in object-centered mode
@@ -328,6 +331,7 @@ public:
 
     virtual void setShader(ccShader* shader);
     virtual void setGlFilter(ccGlFilter* filter);
+	ccGlFilter* getGlFilter() { return m_activeGLFilter; }
 
     virtual bool areShadersEnabled() const;
     virtual bool areGLFiltersEnabled() const;
@@ -576,8 +580,8 @@ protected:
 	//! Returns the height of the 'GL filter' banner
 	int getGlFilterBannerHeight() const;
 
-	//! Returns filtered camera center (i.e. with z = 0 in ortho mode)
-	CCVector3 getFilteredCameraCenter() const;
+	//! Returns real camera center (i.e. with z centered on the visible objects bounding-box in ortho mode)
+	CCVector3 getRealCameraCenter() const;
 
 	/***************************************************
                     OpenGL Extensions

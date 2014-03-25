@@ -1355,31 +1355,27 @@ void ccGLWindow::invalidateViewport()
 	m_updateFBO = true;
 }
 
-CCVector3 ccGLWindow::getFilteredCameraCenter() const
+CCVector3 ccGLWindow::getRealCameraCenter() const
 {
 	if (m_viewportParams.perspectiveView)
 		return m_viewportParams.cameraCenter;
 
+	ccBBox box = getVisibleObjectsBB();
+
 	return CCVector3(	m_viewportParams.cameraCenter.x,
 						m_viewportParams.cameraCenter.y,
-						0 );
+						box.isValid() ? box.getCenter().z : 0 );
 }
 
-void ccGLWindow::recalcProjectionMatrix()
+ccBBox ccGLWindow::getVisibleObjectsBB() const
 {
-	makeCurrent();
+	ccBBox box;
 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	PointCoordinateType bbHalfDiag = 1;
-	CCVector3 bbCenter(0,0,0);
-
-	//compute center of viewed objects constellation
+	//compute center of visible objects constellation
 	if (m_globalDBRoot)
 	{
 		//get whole bounding-box
-		ccBBox box = m_globalDBRoot->getBB(true, true, this);
+		box = m_globalDBRoot->getBB(true, true, this);
 		if (box.isValid())
 		{
 			//incorporate window own db
@@ -1392,6 +1388,29 @@ void ccGLWindow::recalcProjectionMatrix()
 					box.add(ownBox.maxCorner());
 				}
 			}
+		}
+	}
+
+	return box;
+}
+
+void ccGLWindow::recalcProjectionMatrix()
+{
+	makeCurrent();
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	PointCoordinateType bbHalfDiag = 1;
+	CCVector3 bbCenter(0,0,0);
+
+	//compute center of visible objects constellation
+	if (m_globalDBRoot)
+	{
+		//get whole bounding-box
+		ccBBox box = getVisibleObjectsBB();
+		if (box.isValid())
+		{
 			//get bbox center
 			bbCenter = box.getCenter();
 			//get half bbox diagonal length
@@ -1403,12 +1422,14 @@ void ccGLWindow::recalcProjectionMatrix()
 	CCVector3 pivotPoint = (m_viewportParams.objectCenteredView ? m_viewportParams.pivotPoint : bbCenter);
 
 	//distance between camera and pivot point
-	//warning: it's important to get the 'filtered' center (i.e. with z=0 in ortho. view)
-	//otherwise we (sometimes largely) overestimate this distance if the camera has been
-	//shifted in the Z direction (e.g. after switching from perspective to ortho. view).
+	//warning: it's important to get the 'real' center (i.e. with z=bbCenter.z in ortho. view)
+	//otherwise we (sometimes largely) overestimate the distance between the camera center
+	//and the displayed objects if the camera has been shifted in the Z direction (e.g. after
+	//switching from perspective to ortho. view).
 	//While the user won't see the difference this has a great influence on GL filters
 	//(as normalized depth map values depends on it)
-	float CP = static_cast<float>( (getFilteredCameraCenter()-pivotPoint).norm() );
+	float CP = static_cast<float>( (getRealCameraCenter()-pivotPoint).norm() );
+		
 	//distance between pivot point and DB farthest point
 	float MP = static_cast<float>( (bbCenter-pivotPoint).norm() + bbHalfDiag );
 
@@ -1494,7 +1515,7 @@ void ccGLWindow::recalcModelViewMatrix()
 		glScalef(totalZoom,totalZoom,totalZoom);
 	}
 
-	CCVector3 cameraCenter = getFilteredCameraCenter();
+	CCVector3 cameraCenter = getRealCameraCenter();
 
 	//apply current camera parameters (see trunk/doc/rendering_pipeline.doc)
 	if (m_viewportParams.objectCenteredView)
@@ -2128,12 +2149,6 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 
 void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 {
-	if (m_interactionMode == SEGMENT_ENTITY)
-	{
-		emit buttonReleased();
-		return;
-	}
-
 	bool cursorHasMoved = m_cursorMoved;
 	bool acceptEvent = false;
 
@@ -2141,6 +2156,12 @@ void ccGLWindow::mouseReleaseEvent(QMouseEvent *event)
 	m_cursorMoved = false;
 	m_lodActivated = false;
 	QApplication::restoreOverrideCursor();
+
+	if (m_interactionMode == SEGMENT_ENTITY)
+	{
+		emit buttonReleased();
+		return;
+	}
 
 	if (m_pivotSymbolShown)
 	{
@@ -3524,7 +3545,7 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 	QFontMetrics fm(textFont);
 	int margin = fm.height()/4;
 
-	if (align != (ALIGN_HLEFT | ALIGN_VTOP) || bkgAlpha != 0)
+	if (align != ALIGN_DEFAULT || bkgAlpha != 0)
 	{
 		QRect rect = fm.boundingRect(text);
 
@@ -3570,10 +3591,6 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 	else if (align & ALIGN_VMIDDLE)
 		y2 -= margin/2; //empirical compensation
 	
-	//take the GL filter banner into account!
-	if (m_activeGLFilter && (align & ALIGN_VTOP))
-		y2 += getGlFilterBannerHeight();
-
 	glColor3ubv_safe(col);
 	renderText(x2, y2, text, textFont);
 }

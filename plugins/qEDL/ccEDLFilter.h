@@ -56,6 +56,7 @@ public:
     virtual ~ccEDLFilter();
 
     //inherited from ccGlFilter
+	virtual ccGlFilter* clone() const;
 	virtual bool init(int width,int height,const char* shadersPath);
 	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0f);
 	virtual GLuint getTexture();

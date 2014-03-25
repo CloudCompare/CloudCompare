@@ -13,6 +13,9 @@
 //qCC_io
 #include <ccCoordinatesShiftManager.h>
 
+//CC_FBO
+#include <ccGlFilter.h>
+
 //CCLib
 #include <RegistrationTools.h>
 
@@ -171,11 +174,15 @@ static void SetEnabled_recursive(ccHObject* ent)
 //		SetVisible_recursive(ent->getParent());
 //}
 
-bool ccPointPairRegistrationDlg::init(ccGenericPointCloud* aligned, ccGenericPointCloud* reference/*=0*/)
+bool ccPointPairRegistrationDlg::init(	ccGLWindow* win,
+										ccGenericPointCloud* aligned,
+										ccGenericPointCloud* reference/*=0*/)
 {
+	assert(win);
+	assert(aligned);
+	
 	clear();
 
-	assert(aligned);
 	if (!aligned)
 	{
 		ccLog::Error("[PointPairRegistration] Need an aligned cloud at least!");
@@ -185,12 +192,17 @@ bool ccPointPairRegistrationDlg::init(ccGenericPointCloud* aligned, ccGenericPoi
 	//create dedicated 3D view
 	if (!m_associatedWin)
 	{
-		MainWindow* mainWin = MainWindow::TheInstance();
-		ccGLWindow* win = (mainWin ? mainWin->new3DView() : 0);
-		if (!win)
+		//import GL filter so as to get the same rendering aspect!
 		{
-			ccLog::Error("[PointPairRegistration] Failed to create dedicated 3D view!");
-			return false;
+			ccGenericGLDisplay* sourceDisplay = aligned->getDisplay();
+			if (!sourceDisplay && reference)
+				sourceDisplay = reference->getDisplay();
+			if (sourceDisplay)
+			{
+				ccGlFilter* filter = static_cast<ccGLWindow*>(sourceDisplay)->getGlFilter();
+				if (filter)
+					win->setGlFilter(filter->clone());
+			}
 		}
 		linkWith(win);
 		assert(m_associatedWin);

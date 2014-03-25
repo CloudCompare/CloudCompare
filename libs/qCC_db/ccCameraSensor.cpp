@@ -1017,7 +1017,7 @@ void ccOctreeFrustrumIntersector::computeFrustumIntersectionByLevel(unsigned cha
 		CCLib::DgmOctree::OctreeCellCodeType truncatedCode = baseTruncatedCode + i;
 
 		// if the cell current has not been built (contains no 3D points), we skip
-		std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator got = m_cellsBuilt[level].find(truncatedCode);
+		std::set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator got = m_cellsBuilt[level].find(truncatedCode);
 		if (got != m_cellsBuilt[level].end())
 		{
 			// get extrema of the current cell
@@ -1066,7 +1066,7 @@ void ccOctreeFrustrumIntersector::computeFrustumIntersectionWithOctree(	std::vec
 	unsigned char level = static_cast<unsigned char>(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
 	// dealing with cells completely inside the frustrum
-	std::unordered_set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator it;
+	std::set<CCLib::DgmOctree::OctreeCellCodeType>::const_iterator it;
 	CCLib::ReferenceCloud pointsInCell(m_associatedOctree->associatedCloud());
 	for (it = m_cellsInFrustum[level].begin(); it != m_cellsInFrustum[level].end(); it++)
 	{

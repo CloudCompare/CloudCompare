@@ -42,6 +42,9 @@ public:
 	//! Default destructor
 	virtual ~ccGlFilter() {}
 
+	//! Cloning mechanism
+	virtual ccGlFilter* clone() const = 0;
+
     //! Initializes GL filter
     /** Must support reinit!
         \param width texture/screen width

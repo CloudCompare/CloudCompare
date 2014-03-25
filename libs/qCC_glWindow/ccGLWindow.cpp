@@ -3585,6 +3585,11 @@ QString ccGLWindow::getShadersPath()
    QString  path = QCoreApplication::applicationDirPath();
    path.remove( "MacOS" );
    return path + "Shaders";
+
+#elif defined(Q_OS_LINUX)
+    QString  path = QCoreApplication::applicationDirPath();
+    path.remove( "bin" );
+    return path + "share/cloudcompare/shaders";
 #else
    return QApplication::applicationDirPath() + "/shaders";
 #endif

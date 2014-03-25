@@ -20,7 +20,7 @@
 
 
 #ifndef qPCL_FILTERING_IMPL_H_
-#define qPCL_FITLERING_IMPL_H_
+#define qPCL_FILTERING_IMPL_H_
 
 #include "filtering.h"
 #include "my_point_types.h"
@@ -48,10 +48,10 @@
 template <typename PointInT, typename PointOutT>
 int estimateSIFT(const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
 				 typename pcl::PointCloud<PointOutT>::Ptr out_cloud,
-				 int nr_octaves = 0,
-				 float min_scale = 0,
-				 int nr_scales_per_octave = 0,
-				 float min_contrast = 0)
+                 int nr_octaves,
+                 float min_scale,
+                 int nr_scales_per_octave,
+                 float min_contrast)
 {
 	pcl::SIFTKeypoint< PointInT, PointOutT > keypoint_detector ;
 	keypoint_detector.setInputCloud(in_cloud);

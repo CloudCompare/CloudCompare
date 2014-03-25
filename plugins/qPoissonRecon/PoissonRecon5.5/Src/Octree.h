@@ -189,6 +189,24 @@ public:
 		Neighbors3( void );
 		void clear( void );
 	};
+
+    class Neighbors5
+    {
+    public:
+        OctNode* neighbors[5][5][5];
+        Neighbors5( void );
+        void clear( void );
+    };
+
+    class ConstNeighbors5
+    {
+    public:
+        const OctNode* neighbors[5][5][5];
+        ConstNeighbors5( void );
+        void clear( void );
+    };
+
+
 	class NeighborKey3
 	{
 	public:
@@ -226,20 +244,7 @@ public:
 		ConstNeighbors3& getNeighbors( const OctNode* node , int minDepth );
 		void getNeighbors( const OctNode* node , typename OctNode< NodeData , Real >::ConstNeighbors5& neighbors );
 	};
-	class Neighbors5
-	{
-	public:
-		OctNode* neighbors[5][5][5];
-		Neighbors5( void );
-		void clear( void );
-	};
-	class ConstNeighbors5
-	{
-	public:
-		const OctNode* neighbors[5][5][5];
-		ConstNeighbors5( void );
-		void clear( void );
-	};
+
 
 	class NeighborKey5
 	{

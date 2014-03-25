@@ -966,7 +966,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 	// the corners of our pixels will be the vertices of our polygons
 	// (x, y) is the upper left corner of the pixel y * uextent + x
 	HashGrid< bool, 4 > edges;
-	unsigned int edgesExtent[] = { uextent + 1, vextent + 1, 3, 3 };
+    unsigned int edgesExtent[] = {static_cast<unsigned int>( uextent ) + 1, static_cast<unsigned int>( vextent ) + 1, 3, 3 };
 	edges.Extent(edgesExtent);
 	bool prevPixelWasWhite = true;
 	do
@@ -1011,7 +1011,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 		{
 			// on the left of pixel
 			// check if edge was visited already
-			unsigned int edgeIndex[] = { x, y, 1, 2 };
+            unsigned int edgeIndex[] = { static_cast<unsigned int>(x), static_cast<unsigned int>(y), 1, 2 };
 			if(edges.find(edgeIndex))
 				continue;
 			prevx = 0;
@@ -1024,7 +1024,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 				x, y, 1, 0, &dx, &dy))
 				continue;
 			// check if edge was visited already
-			unsigned int edgeIndex[] = { x + 1, y, 0, 1 };
+            unsigned int edgeIndex[] = { static_cast<unsigned int>(x)+ 1, static_cast<unsigned int>(y), 0, 1 };
 			if(edges.find(edgeIndex))
 				continue;
 			// on top of pixel
@@ -1040,7 +1040,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 				continue;
 			// on bottom of pixel
 			// check if edge was visited already
-			unsigned int edgeIndex[] = { x + 1, y + 1, 0, 1 };
+            unsigned int edgeIndex[] = { static_cast<unsigned int>(x) + 1, static_cast<unsigned int>(y) + 1, 0, 1 };
 			if(edges.find(edgeIndex))
 				continue;
 			prevx = -1;
@@ -1056,7 +1056,7 @@ void ComponentLoops(const MiscLib::Vector< int > &componentImg, size_t uextent,
 				continue;
 			// on bottom of pixel
 			// check if edge was visited already
-			unsigned int edgeIndex[] = { x + 1, y + 1, 1, 0 };
+            unsigned int edgeIndex[] = { static_cast<unsigned int>(x) + 1, static_cast<unsigned int>(y) + 1, 1, 0 };
 			if(edges.find(edgeIndex))
 				continue;
 			prevx = 0;

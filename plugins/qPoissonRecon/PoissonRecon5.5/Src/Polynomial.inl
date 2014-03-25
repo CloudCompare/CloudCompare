@@ -29,6 +29,7 @@ DAMAGE.
 #include <float.h>
 #include <math.h>
 #include <algorithm>
+#include "Factor.h"
 
 ////////////////
 // Polynomial //
@@ -268,13 +269,13 @@ void Polynomial<Degree>::getSolutions(double c,std::vector<double>& roots,double
 	roots.clear();
 	switch(Degree){
 	case 1:
-		rCount=Factor(coefficients[1],coefficients[0]-c,r,EPS);
+        rCount=Factor(coefficients[1],coefficients[0]-c,r,EPS);
 		break;
 	case 2:
-		rCount=Factor(coefficients[2],coefficients[1],coefficients[0]-c,r,EPS);
+        rCount=Factor(coefficients[2],coefficients[1],coefficients[0]-c,r,EPS);
 		break;
 	case 3:
-		rCount=Factor(coefficients[3],coefficients[2],coefficients[1],coefficients[0]-c,r,EPS);
+        rCount=Factor(coefficients[3],coefficients[2],coefficients[1],coefficients[0]-c,r,EPS);
 		break;
 //	case 4:
 //		rCount=Factor(coefficients[4],coefficients[3],coefficients[2],coefficients[1],coefficients[0]-c,r,EPS);

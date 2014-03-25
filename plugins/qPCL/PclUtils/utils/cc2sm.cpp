@@ -236,7 +236,7 @@ PCLCloud cc2smReader::getFloatScalarField(const std::string field_name)
 	//then we change the name to the needed one
 
 	QString qfield_name = QString(field_name.c_str());
-	qfield_name.simplified();
+//	qfield_name.simplified(); // this was doing nothing
 	qfield_name.replace(' ', '_');
 	sm_cloud->fields[0].name = qfield_name.toStdString().c_str() ;
 

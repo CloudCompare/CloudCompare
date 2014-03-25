@@ -97,8 +97,11 @@ if( WIN32 )
 endif()
 
 # install program
-install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
-
+if( UNIX )
+    install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+elseif()
+    install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
+endif()
 # Auxiliary files
 set( auxFiles bin_other/history.txt bin_other/license.txt )
 
@@ -113,7 +116,11 @@ endif()
 
 # Install auxiliary files
 foreach( filename ${auxFiles} )
+if( UNIX )
+    install(FILES ${filename} DESTINATION share/cloudcompare)
+elseif()
 	install_ext( FILES ${filename} ${CLOUDCOMPARE_DEST_FOLDER} ${CLOUDCOMPARE_DEST_FOLDER}_debug )
+endif()
 endforeach()
 
 # in order to ensure that everything else is installed first, put the Mac bundling in its own subdirectory
@@ -133,6 +140,10 @@ if( APPLE )
    install( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders )
    install( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.vert DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders )
    install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION ${CLOUDCOMPARE_MAC_BASE_DIR}/Contents/Shaders/ColorRamp )
+elseif(UNIX)
+   install( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.frag DESTINATION share/cloudcompare/shaders )
+   install( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.vert DESTINATION share/cloudcompare/shaders )
+   install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/shaders/ColorRamp/color_ramp.frag DESTINATION share/cloudcompare/shaders/ColorRamp )
 else()
    install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.frag ${CLOUDCOMPARE_DEST_FOLDER}/shaders ${CLOUDCOMPARE_DEST_FOLDER}_debug/shaders )
    install_ext( FILES ${CC_FBO_LIB_SOURCE_DIR}/bilateral/bilateral.vert ${CLOUDCOMPARE_DEST_FOLDER}/shaders ${CLOUDCOMPARE_DEST_FOLDER}_debug/shaders )

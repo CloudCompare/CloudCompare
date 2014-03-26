@@ -16,12 +16,21 @@
 //##########################################################################
 //
 #include "StatisticalOutliersRemover.h"
+
+//Local
 #include "StatisticalOutliersRemoverDlg.h"
 #include "ccPointCloud.h"
 #include "cc2sm.h"
 #include "sm2cc.h"
 #include "filtering.h"
 
+//qCC_plugins
+#include <ccMainAppInterface.h>
+
+//Qt
+#include <QMainWindow>
+
+//Boost
 #include <boost/make_shared.hpp>
 
 StatisticalOutliersRemover::StatisticalOutliersRemover()
@@ -33,6 +42,13 @@ StatisticalOutliersRemover::StatisticalOutliersRemover()
       m_k(0),
       m_std(0.0f)
 {
+}
+
+StatisticalOutliersRemover::~StatisticalOutliersRemover()
+{
+	//we must delete parent-less dialogs ourselves!
+	if (m_dialog && m_dialog->parent() == 0)
+		delete m_dialog;
 }
 
 int StatisticalOutliersRemover::compute()
@@ -73,7 +89,7 @@ int StatisticalOutliersRemover::openInputDialog()
 {
     if (!m_dialog)
     {
-        m_dialog = new ComputeSPINImages;
+        m_dialog = new SORDialog(m_app ? m_app->getMainWindow() : 0);
     }
 
     return m_dialog->exec() ? 1 : 0;
@@ -82,6 +98,9 @@ int StatisticalOutliersRemover::openInputDialog()
 void StatisticalOutliersRemover::getParametersFromDialog()
 {
     //get values from dialog
-    m_k = m_dialog->spinK->value();
-    m_std = static_cast<float>(m_dialog->spinStd->value());
+	if (m_dialog)
+	{
+		m_k = m_dialog->spinK->value();
+		m_std = static_cast<float>(m_dialog->spinStd->value());
+	}
 }

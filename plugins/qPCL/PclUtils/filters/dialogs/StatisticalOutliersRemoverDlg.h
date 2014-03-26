@@ -20,13 +20,13 @@
 
 #include <ui_StatisticalOutliersRemoverDlg.h>
 
-class ComputeSPINImages : public QDialog, public Ui::StatisticalOutliersRemoverDlg
+class SORDialog : public QDialog, public Ui::StatisticalOutliersRemoverDlg
 {
     Q_OBJECT
-public:
-    ComputeSPINImages(QWidget* parent=0);
 
 public:
+
+	SORDialog(QWidget* parent = 0);
 
 };
 

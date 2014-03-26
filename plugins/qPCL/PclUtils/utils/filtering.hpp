@@ -16,9 +16,6 @@
 //##########################################################################
 //
 
-
-
-
 #ifndef qPCL_FILTERING_IMPL_H_
 #define qPCL_FITLERING_IMPL_H_
 
@@ -40,18 +37,15 @@
 #include <pcl/features/intensity_spin.h>
 #include <pcl/features/impl/intensity_spin.hpp>
 
-
 #include <pcl/filters/statistical_outlier_removal.h>
 
-
-
 template <typename PointInT, typename PointOutT>
-int estimateSIFT(const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
-				 typename pcl::PointCloud<PointOutT>::Ptr out_cloud,
-				 int nr_octaves = 0,
-				 float min_scale = 0,
-				 int nr_scales_per_octave = 0,
-				 float min_contrast = 0)
+int estimateSIFT(	const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
+					typename pcl::PointCloud<PointOutT>::Ptr out_cloud,
+					int nr_octaves = 0,
+					float min_scale = 0,
+					int nr_scales_per_octave = 0,
+					float min_contrast = 0)
 {
 	pcl::SIFTKeypoint< PointInT, PointOutT > keypoint_detector ;
 	keypoint_detector.setInputCloud(in_cloud);
@@ -72,39 +66,38 @@ int estimateSIFT(const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
 	return 1;
 }
 
-
-template <typename PointInT, typename PointOutT>
-int
-computeIntensitySPINImages(const typename pcl::PointCloud<PointInT>::Ptr incloud,
-                           const float radius,
-                           const int k_nn,
-                           const bool useKnn, //true if use knn, false if radius search
-                           const int n_distance_bins,
-                           const int n_intensity_bins,
-                           typename pcl::PointCloud<PointOutT>::Ptr outcloud)
-{
-
-    if ((n_distance_bins <= 0) || (n_intensity_bins <= 0))
-            return -1;
-
-    pcl::IntensitySpinEstimation<PointInT, PointOutT> estimator;
-    estimator.setInputCloud(incloud);
-    estimator.setNrDistanceBins(n_distance_bins);
-    estimator.setNrIntensityBins(n_intensity_bins);
-
-    if (useKnn)
-        //knn
-        estimator.setKSearch(k_nn);
-    else if (!useKnn)
-        estimator.setRadiusSearch((double) radius);
-    else // can be a bool not set?? not sure
-        return -1;
-
-    estimator.compute(*outcloud);
-
-    return 1;
-}
-
+//DGM: deprecated?
+//template <typename PointInT, typename PointOutT>
+//int
+//computeIntensitySPINImages(const typename pcl::PointCloud<PointInT>::Ptr incloud,
+//                           const float radius,
+//                           const int k_nn,
+//                           const bool useKnn, //true if use knn, false if radius search
+//                           const int n_distance_bins,
+//                           const int n_intensity_bins,
+//                           typename pcl::PointCloud<PointOutT>::Ptr outcloud)
+//{
+//
+//    if ((n_distance_bins <= 0) || (n_intensity_bins <= 0))
+//            return -1;
+//
+//    pcl::IntensitySpinEstimation<PointInT, PointOutT> estimator;
+//    estimator.setInputCloud(incloud);
+//    estimator.setNrDistanceBins(n_distance_bins);
+//    estimator.setNrIntensityBins(n_intensity_bins);
+//
+//    if (useKnn)
+//        //knn
+//        estimator.setKSearch(k_nn);
+//    else if (!useKnn)
+//        estimator.setRadiusSearch((double) radius);
+//    else // can be a bool not set?? not sure
+//        return -1;
+//
+//    estimator.compute(*outcloud);
+//
+//    return 1;
+//}
 
 template <typename PointInT, typename PointOutT>
 int compute_normals(const typename pcl::PointCloud<PointInT>::Ptr incloud,
@@ -120,34 +113,28 @@ int compute_normals(const typename pcl::PointCloud<PointInT>::Ptr incloud,
 		int knn_radius = (int) radius; //cast to int
 		normal_estimator.setKSearch(knn_radius);
 	}
-
 	else //use radius search
 	{
 		normal_estimator.setRadiusSearch(radius);
 	}
 
-
 	normal_estimator.setInputCloud (incloud);
     //normal_estimator.setNumberOfThreads(4);
 	normal_estimator.compute (*outcloud);
 
-
 	return 1;
 }
 
-
 template <typename PointInT, typename PointOutT>
 int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
-			   const MLSParameters &params,
-			   typename pcl::PointCloud<PointOutT>::Ptr &outcloud
+				const MLSParameters &params,
+				typename pcl::PointCloud<PointOutT>::Ptr &outcloud
 #ifdef LP_PCL_PATCH_ENABLED
-			   , pcl::PointIndicesPtr &mapping_ids
+				, pcl::PointIndicesPtr &mapping_ids
 #endif
-			   )
+	)
 {
-
 	typename pcl::search::KdTree<PointInT>::Ptr tree (new pcl::search::KdTree<PointInT>);
-
 
 	//create the smoothing object
 	pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
@@ -158,14 +145,11 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 	smoother.setComputeNormals(params.compute_normals_);
 	smoother.setPolynomialFit(params.polynomial_fit_);
 
-
-
 	if (params.polynomial_fit_)
 	{
 		smoother.setPolynomialOrder(params.order_);
 		smoother.setSqrGaussParam(params.sqr_gauss_param_);
 	}
-
 
 	switch (params.upsample_method_)
 	{
@@ -173,9 +157,7 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 		{
 			smoother.setUpsamplingMethod( pcl::MovingLeastSquares<PointInT, PointOutT>::NONE );
 			//no need to set other parameters here!
-
 			break;
-
 		}
 
 	case (MLSParameters::SAMPLE_LOCAL_PLANE):
@@ -186,14 +168,12 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 			break;
 		}
 
-
 	case (MLSParameters::RANDOM_UNIFORM_DENSITY):
 		{
 			smoother.setUpsamplingMethod( pcl::MovingLeastSquares<PointInT, PointOutT>::RANDOM_UNIFORM_DENSITY );
 			smoother.setPointDensity(params.step_point_density_);
 			break;
 		}
-
 
 	case (MLSParameters::VOXEL_GRID_DILATION):
 		{
@@ -204,17 +184,13 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 		}
 	}
 
-
 	smoother.process(*outcloud);
 
 #ifdef LP_PCL_PATCH_ENABLED
-    mapping_ids = smoother.getCorrespondingIndices();
+	mapping_ids = smoother.getCorrespondingIndices();
 #endif
 
 	return 1;
 }
 
-
-#endif
-
-
+#endif //qPCL_FILTERING_IMPL_H_

@@ -29,7 +29,11 @@
 #include <pcl/point_types.h>
 #include <pcl/io/pcd_io.h>
 
+//qCC_plugins
+#include <ccMainAppInterface.h>
 
+//Qt
+#include <QMainWindow>
 
 NormalEstimation::NormalEstimation()
     : BaseFilter(FilterDescription("Estimate Normals",
@@ -47,7 +51,8 @@ NormalEstimation::NormalEstimation()
 
 NormalEstimation::~NormalEstimation()
 {
-	if (m_dialog)
+	//we must delete parent-less dialogs ourselves!
+	if (m_dialog && m_dialog->parent() == 0)
 		delete m_dialog;
 }
 
@@ -55,7 +60,8 @@ int NormalEstimation::openInputDialog()
 {
 	if (!m_dialog)
 	{
-		m_dialog = new NormalEstimationDialog;
+		m_dialog = new NormalEstimationDialog(m_app ? m_app->getMainWindow() : 0);
+		
 		//initially these are invisible
 		m_dialog->surfaceComboBox->setVisible(false);
 		m_dialog->searchSurfaceCheckBox->setVisible(false);
@@ -77,7 +83,6 @@ void NormalEstimation::getParametersFromDialog()
 	assert(m_dialog);
 	if (!m_dialog)
 		return;
-
 
     //fill in parameters from dialog
     m_useKnn = m_dialog->useKnnCheckBox->isChecked();

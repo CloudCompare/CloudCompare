@@ -24,27 +24,26 @@ class NormalEstimationDialog;
 
 class NormalEstimation : public BaseFilter
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    NormalEstimation();
-        virtual ~NormalEstimation();
+	NormalEstimation();
+	virtual ~NormalEstimation();
 
 	//inherited from BaseFilter
 	virtual int compute();
+
 protected:
 
-        //inherited from BaseFilter
-    virtual int openInputDialog();
+	//inherited from BaseFilter
+	virtual int openInputDialog();
 	virtual void getParametersFromDialog();
 
-
-    NormalEstimationDialog* m_dialog;
-    int m_knn_radius;
-    float m_radius;
-    bool m_useKnn;
-    bool m_overwrite_curvature;
-
+	NormalEstimationDialog* m_dialog;
+	int m_knn_radius;
+	float m_radius;
+	bool m_useKnn;
+	bool m_overwrite_curvature;
 };
 
 #endif // Q_PCL_PLUGIN_NORMALESTIMATION_HEADER

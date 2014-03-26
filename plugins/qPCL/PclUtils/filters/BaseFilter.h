@@ -29,7 +29,6 @@
 //qCC_plugins
 #include <ccPluginInterface.h>
 
-
 class ccPointCloud;
 class QAction;
 class ccMainAppInterface;
@@ -42,7 +41,6 @@ public:
 	QString m_entry_name;
 	QString m_status_tip;
 	QIcon m_icon;
-
 
 	FilterDescription()
 		: m_filter_name("PCLFilter")
@@ -57,8 +55,6 @@ public:
 		, m_status_tip(statusTip)
 		, m_icon(QIcon(icon))
 	{}
-
-
 };
 
 //! Base abstract class for each implemented PCL filter

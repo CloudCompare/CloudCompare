@@ -16,6 +16,8 @@
 //##########################################################################
 
 #include "MLSSmoothingUpsampling.h"
+
+//Local
 #include "dialogs/MLSDialog.h"
 #include "filtering.h"
 #include "filtering.hpp"
@@ -23,8 +25,11 @@
 #include "sm2cc.h"
 #include "my_point_types.h"
 
-//qCC
+//qCC_plugins
 #include <ccMainAppInterface.h>
+
+//Qt
+#include <QMainWindow>
 
 MLSSmoothingUpsampling::MLSSmoothingUpsampling()
     : BaseFilter(FilterDescription("MLS smoothing",
@@ -32,13 +37,14 @@ MLSSmoothingUpsampling::MLSSmoothingUpsampling()
                                    "Smooth the cloud using Moving Least Sqares algorithm, estimate normals and optionally upsample",
                                    ":/toolbar/PclUtils/icons/mls_smoothing.png"))
 	, m_dialog(0)
+	, m_parameters(new MLSParameters)
 {
-	m_parameters = new MLSParameters;
 }
 
 MLSSmoothingUpsampling::~MLSSmoothingUpsampling()
 {
-	if (m_dialog)
+	//we must delete parent-less dialogs ourselves!
+	if (m_dialog && m_dialog->parent() == 0)
 		delete m_dialog;
 
 	if (m_parameters)
@@ -123,7 +129,7 @@ int MLSSmoothingUpsampling::compute()
 int MLSSmoothingUpsampling::openInputDialog()
 {
 	if (!m_dialog)
-		m_dialog = new MLSDialog();
+		m_dialog = new MLSDialog(m_app ? m_app->getMainWindow() : 0);
 
 	return m_dialog->exec() ? 1 : 0;
 }

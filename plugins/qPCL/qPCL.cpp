@@ -30,7 +30,6 @@
 #include <NormalEstimation.h>
 #include <MLSSmoothingUpsampling.h>
 #include <StatisticalOutliersRemover.h>
-//#include <ComputeSPINImages.h>
 
 qPCL::qPCL()
     : m_menu(0)
@@ -76,7 +75,6 @@ void qPCL::getActions(QActionGroup& group)
 		addFilter( new NormalEstimation());
 		addFilter( new StatisticalOutliersRemover() );
 		addFilter( new MLSSmoothingUpsampling() );
-		//addFilter( new ComputeSPINImages() );
 	}
 
 	for (std::vector<BaseFilter*>::const_iterator it = m_filters.begin(); it != m_filters.end(); ++it)

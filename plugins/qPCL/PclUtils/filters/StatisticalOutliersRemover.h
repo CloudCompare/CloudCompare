@@ -20,19 +20,22 @@
 
 #include <BaseFilter.h>
 
-class ComputeSPINImages;
+class SORDialog;
 
 class StatisticalOutliersRemover : public BaseFilter
 {
     Q_OBJECT
+
 public:
     StatisticalOutliersRemover();
+	virtual ~StatisticalOutliersRemover();
 
 protected:
     int compute();
     int openInputDialog();
     void getParametersFromDialog();
-    ComputeSPINImages * m_dialog;
+    
+	SORDialog* m_dialog;
     int m_k;
     float m_std;
 };

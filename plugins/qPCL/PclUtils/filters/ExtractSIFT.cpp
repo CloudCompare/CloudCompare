@@ -21,8 +21,8 @@
 #include <pcl/io/pcd_io.h>
 
 #include <ccIncludeGL.h> //Always first normally, but imports 'min' and 'max' definitions that clash with PCL ones (DGM: from where?)
-//#include <GL/glut.h>
 
+//Local
 #include "ExtractSIFT.h"
 #include "dialogs/SIFTExtractDlg.h"
 
@@ -39,6 +39,12 @@
 //CCLib
 #include <GenericIndexedCloudPersist.h>
 
+//qCC_plugins
+#include <ccMainAppInterface.h>
+
+//Qt
+#include <QMainWindow>
+
 //System
 #include <iostream>
 #include <sstream>
@@ -54,7 +60,8 @@ ExtractSIFT::ExtractSIFT()
 
 ExtractSIFT::~ExtractSIFT()
 {
-	if (m_dialog)
+	//we must delete parent-less dialogs ourselves!
+	if (m_dialog && m_dialog->parent() == 0)
 		delete m_dialog;
 }
 
@@ -94,7 +101,7 @@ int ExtractSIFT::openInputDialog()
 
 	//initialize the dialog object
 	if (!m_dialog)
-		m_dialog = new SIFTExtractDlg;
+		m_dialog = new SIFTExtractDlg(m_app ? m_app->getMainWindow() : 0);
 
 	//update the combo box
 	m_dialog->updateComboBox(fields);

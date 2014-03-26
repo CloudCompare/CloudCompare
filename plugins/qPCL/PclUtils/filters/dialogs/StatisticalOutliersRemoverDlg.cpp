@@ -17,11 +17,11 @@
 //
 #include "StatisticalOutliersRemoverDlg.h"
 
-ComputeSPINImages::ComputeSPINImages(QWidget* parent) : QDialog(parent), Ui::StatisticalOutliersRemoverDlg()
+SORDialog::SORDialog(QWidget* parent)
+	: QDialog(parent),
+	Ui::StatisticalOutliersRemoverDlg()
 {
     setupUi(this);
-
-
 }
 
 

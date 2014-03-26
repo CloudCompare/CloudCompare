@@ -385,7 +385,7 @@ bool ccCameraSensor::computeUncertainty(const CCVector2i& pixel, const float dep
 	return true;
 }
 
-bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vector<Vector3Tpl<ScalarType>>& accuracy/*, bool lensCorrection*/) const
+bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vector< Vector3Tpl<ScalarType> >& accuracy/*, bool lensCorrection*/) const
 {
 	if (!points)
 		return false;

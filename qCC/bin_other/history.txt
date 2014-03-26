@@ -40,7 +40,7 @@ v2.5.3 02/21/2014
 	* The old version is now accessible via "Tools > Other > Density > Approximate"
 		(and it simply outputs the distance to the nearest neighbor now)
 	* Command line options have been changed accordingly
-		(see http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine)
+		(see http://www.cloudcompare.org/doc/wiki/index.php5?title=CommandLine)
 - New method: "Tools > Other > Remove duplicate points"
 	* Removes duplicate points (creates a new cloud)
 - New method: "Edit > Crop"
@@ -73,7 +73,7 @@ v2.5.3 02/21/2014
 		- make the (bounding-box) centers of loaded entities match
 		- specify export format (clouds or meshes) as well as the extension
 		- prevent CC from automatically a timestamp as suffix for output files
-		(see the updated documentation here: http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine)
+		(see the updated documentation here: http://www.cloudcompare.org/doc/wiki/index.php5?title=CommandLine)
 	* ccViewer now supports GL filters (i.e. 'shader' plugins: qEDL and qSSAO)
 	* The GL filter banner (yellow) is now smaller, and is displayed at the top of the 3D view
 		(it doesn't hide the scale anymore!)
@@ -87,7 +87,7 @@ v2.5.3 02/21/2014
 	* The VTK I/O filter now handles TRIANGLE_STRIP elements
 	* Cross section tool: the box position can now be edited ('advanced' button)
 - Other:
-	* ATOM feed enabled on the forum (http://www.danielgm.net/cc/forum/)
+	* ATOM feed enabled on the forum (http://www.cloudcompare.org/forum/)
 		(use the native ATOM support on IE or Firefox, or install an ATOM feed reader app
 		on Chrome, e.g. "RSS Feed Reader")
 - Bug fixes:
@@ -205,7 +205,7 @@ v2.5.2 12/19/2013
 		* the components are automatically 'selected' in order to clearly identify them without random colors
 			(the 'random colors' checkbox is not selected by default anymore)
 		* the components are sorted by their size (starting from the biggest)
-	- new command lines options (see http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine):
+	- new command lines options (see http://www.cloudcompare.org/doc/wiki/index.php5?title=CommandLine):
 		* C2C_DIST: cloud to cloud distance computation
 		* C2M_DIST: cloud to mesh distance computation
 		* SAMPLE_MESH: to sample points on a mesh
@@ -500,7 +500,7 @@ v2.4 12/16/2012
 - Introducing a new alignment/registration method: "Align (point pairs picking)"
 	* aligns clouds by interactively picking 'equivalent' points in both clouds (3 pairs at least)
 	* replaces the old "Align (auto)" research tool in the main toolbar (same icon)
-	* more information on the wiki: http://www.danielgm.net/cc/doc/wiki/index.php5?title=Alignment_and_Registration
+	* more information on the wiki: http://www.cloudcompare.org/doc/wiki/index.php5?title=Alignment_and_Registration
 - Perspective mode and lights activation state are now automatically saved and restored (on the creation of a new 3D view or when CC restarts)
 - Overlay dialogs (manual segmentation and transformation, point picking, etc.) don't prevent CC from being closed anymore
 - 'Height grid generation' tool now gives more choice for the management of empty cells
@@ -567,7 +567,7 @@ v2.4 09/22/2012
 	radius that will be used to compute local models. One can also choose to compute a model for every points or, as an approximation,
 	to "share" local models between neighbors (faster... but noisier - in fact this was done by default before!).
 - New tools accessible in command line mode: density, roughness, curvature and SF gradient.
-	(see wiki: http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine)
+	(see wiki: http://www.cloudcompare.org/doc/wiki/index.php5?title=CommandLine)
 - When exporting a cloud to a LAS file, any scalar field named 'LAS classification' will now be handled as a proper LAS classification
 	field.
 - PCV plugin (ShadeVis-like global illumination algorithm) can now take a point cloud with normals as input. The normals will be used
@@ -660,7 +660,7 @@ v2.4 06/24/2012
   * bug fix: the previous version was generating ortho-rectified images with a non constant pixel scale!
   * a 'ortho_rectification_log.txt' file is now generated along the images with relative position for each (in pixels, relatively to the first image)
   * images are now processed sequentially, and the user can choose whether they should be kept in memory or not
-  * ortho-rectification as images (on disk) is now available through command line arguments (see wiki: http://www.danielgm.net/cc/doc/wiki/index.php5?title=CommandLine)
+  * ortho-rectification as images (on disk) is now available through command line arguments (see wiki: http://www.cloudcompare.org/doc/wiki/index.php5?title=CommandLine)
 - Multiple clouds can now be automatically saved in multiple ASCII files
 	* select several clouds then 'Save' them as ASCII files
 	* enter a base name with an extension (hint: any occurrence of the string 'cloudname' will be replaced by each cloud name)
@@ -686,7 +686,7 @@ v2.4 01/04/2012
 - Bug in Delaunay 2D triangulation on least square best fitting plane fixed.
 - Crash during OBJ files loading fixed (the crash occurred when the file was referring to materials but no material file was declared)
 - The Windows release has been compiled with Visual Studio 2008. You may have to install Visual C++ 2008 Redistributable Package (x86) to launch CloudCompare.
-- Project can/should now be compiled with CMake (www.cmake.org). See http://www.danielgm.net/cc/doc/wiki/index.php5?title=Compilation_CMake
+- Project can/should now be compiled with CMake (www.cmake.org). See http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake
 
 v2.3 02/14/2012
 - Noah Snavely's Bundler import filter is now able to use an alternative cloud (or mesh) as keypoints source.

@@ -1,6 +1,6 @@
 CloudCompare V2.5
 
-Homepage: http://www.danielgm.net/cc/
+Homepage: http://www.cloudcompare.org/
 
 == Introduction ==
 
@@ -18,7 +18,7 @@ More: http://en.wikipedia.org/wiki/CloudCompare
 
 Supported OS: Windows, Linux and Mac OS X
 
-Refer to the wiki (http://www.danielgm.net/cc/doc/wiki/index.php5?title=Compilation_CMake) for up-to-date information.
+Refer to the wiki (http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake) for up-to-date information.
 
 Basically, you have to:
 - clone this repository

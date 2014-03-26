@@ -1,11 +1,11 @@
 ********************************************
 *         COMPILATION WITH CMAKE           *
 *                                          *
-*    Last modification: 10/13/2013 (DGM)   *
+*    Last modification: 03/26/2014 (DGM)   *
 *                                          *
 ********************************************
 
-Refer to the wiki (http://www.danielgm.net/cc/doc/wiki/index.php5?title=Compilation_CMake) for up-to-date information.
+Refer to the wiki (http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake) for up-to-date information.
 
 0) Prerequisites
 

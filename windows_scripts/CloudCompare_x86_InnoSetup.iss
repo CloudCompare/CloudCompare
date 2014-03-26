@@ -2,9 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.5.2.laszip"
+#define MyAppVersion "2.5.4"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
-#define MyAppURL "http://www.danielgm.net/cc/"
+#define MyAppURL "http://www.cloudcompare.org/"
 #define MyAppExeName "CloudCompare.exe"
 #define MyVCRedistPath "E:\Incoming\vc_redist"
 #define MyCCPath "E:\These\C++\CloudCompare\bin_x86_msvc_2008\CloudCompare"

@@ -500,7 +500,7 @@ CloudCompare
  après l'avoir téléchargé depuis le site 
 \begin_inset CommandInset href
 LatexCommand href
-target "http://www.danielgm.net/cc"
+target "http://www.cloudcompare.org"
 
 \end_inset
 
@@ -738,7 +738,7 @@ wiki
  : 
 \begin_inset CommandInset href
 LatexCommand href
-target "http://www.danielgm.net/cc/doc/wiki"
+target "http://wwwcloudcompare.org/doc/wiki"
 
 \end_inset
 

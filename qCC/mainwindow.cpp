@@ -5730,7 +5730,7 @@ void MainWindow::help()
 	{
         QMessageBox::warning(	this, 
 								QString("User guide not found"),
-								QString("Goto http://www.danielgm.net/cc/doc/qCC") );
+								QString("Goto http://www.cloudcompare.org/documentation.html") );
 	}
     else
     {

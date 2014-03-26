@@ -2379,7 +2379,7 @@ void MainWindow::doActionProjectUncertainty()
 	points.setPointIndex(0,pointCloud->size());
 
 	// compute uncertainty
-	std::vector<Vector3Tpl<ScalarType>> accuracy;
+	std::vector< Vector3Tpl<ScalarType> > accuracy;
 	if (!sensor->computeUncertainty(&points, accuracy/*, false*/))
 	{
 		ccConsole::Error("Not enough memory!");

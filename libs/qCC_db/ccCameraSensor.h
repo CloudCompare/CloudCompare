@@ -68,7 +68,7 @@ public:
 	//! Frustum information structure
 	/** Used to draw the frustrum associated to a camera sensor.
 	**/
-	typedef struct FrustumInformation
+	struct FrustumInformation
 	{
 		bool isComputed;
 		bool drawFrustum;
@@ -180,7 +180,7 @@ public:
 		//TODO lensDistortion if we want to take the lens distortion into consideration
 		\return success
 	**/ 
-	bool computeUncertainty(CCLib::ReferenceCloud* points, std::vector<Vector3Tpl<ScalarType>>& accuracy/*, bool lensDistortion*/) const;
+	bool computeUncertainty(CCLib::ReferenceCloud* points, std::vector< Vector3Tpl<ScalarType> >& accuracy/*, bool lensDistortion*/) const;
 	
 	//! Tests if a 3D point is in the field of view of the camera.
 	/** \param globalCoord global coordinates of the 3D point

@@ -18,7 +18,7 @@
 #include "ccConsole.h"
 
 //Local
-#include "MainWindow.h"
+#include "mainwindow.h"
 
 //Qt
 #include <QListWidget>

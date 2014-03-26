@@ -54,4 +54,4 @@ public:
     
 };
 
-#endif CC_REGISTRATION_TOOLS_HEADER
+#endif //CC_REGISTRATION_TOOLS_HEADER

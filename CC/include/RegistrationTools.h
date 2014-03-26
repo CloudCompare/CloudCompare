@@ -28,7 +28,6 @@
 #include "PointProjectionTools.h"
 #include "KdTree.h"
 
-
 //system
 #include <vector>
 

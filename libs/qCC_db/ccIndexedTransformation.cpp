@@ -80,7 +80,7 @@ bool ccIndexedTransformation::fomAsciiFile(const char* filename)
 		return false;
 
 	//read index
-	if (fscanf(fp,"%f\n",&m_index) < 1)
+	if (fscanf(fp,"%lf\n",&m_index) < 1)
 	{
 		fclose(fp);
 		return false;

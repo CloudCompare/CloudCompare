@@ -77,7 +77,7 @@ protected:
 #include "qCC_db.h"
 class QCC_DB_LIB_API ccCustomLeafObject : public ccCustomHObject
 #else
-class ccDummyLeafObject : public ccCustomHObject
+class ccCustomLeafObject : public ccCustomHObject
 #endif
 {
 public:

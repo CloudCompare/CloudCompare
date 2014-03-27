@@ -188,16 +188,6 @@
      <item row="6" column="1">
       <widget class="QComboBox" name="iComboBox"/>
      </item>
-     <item row="7" column="0">
-      <widget class="QLabel" name="label_11">
-       <property name="text">
-        <string>Scalar</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="1">
-      <widget class="QComboBox" name="sfComboBox"/>
-     </item>
      <item row="8" column="0">
       <widget class="QLabel" name="label_12">
        <property name="text">
@@ -248,7 +238,24 @@
      <item row="12" column="1">
       <widget class="QComboBox" name="textCoordsComboBox"/>
      </item>
+     <item row="13" column="1">
+      <widget class="QComboBox" name="sfComboBox"/>
+     </item>
+     <item row="13" column="0">
+      <widget class="QLabel" name="label_11">
+       <property name="text">
+        <string>Scalar</string>
+       </property>
+      </widget>
+     </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QToolButton" name="addSFToolButton">
+     <property name="text">
+      <string>Add Scalar field</string>
+     </property>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer">

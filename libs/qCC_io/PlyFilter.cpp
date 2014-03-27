@@ -590,16 +590,16 @@ static int grey_cb(p_ply_argument argument)
 	return 1;
 }
 
-static unsigned s_scalarCount=0;
+static unsigned s_totalScalarCount = 0;
 static int scalar_cb(p_ply_argument argument)
 {
-	ccPointCloud* cloud;
-	ply_get_argument_user_data(argument, (void**)(&cloud), NULL);
+	CCLib::ScalarField* sf = 0;
+	ply_get_argument_user_data(argument, (void**)(&sf), NULL);
 
-	ScalarType scal = ScalarType(ply_get_argument_value(argument));
-	cloud->getCurrentInScalarField()->setValue(s_scalarCount++,scal);
+	ScalarType scal = static_cast<ScalarType>(ply_get_argument_value(argument));
+	sf->addElement(scal);
 
-    if ((s_scalarCount % PROCESS_EVENTS_FREQ) == 0)
+    if ((++s_totalScalarCount % PROCESS_EVENTS_FREQ) == 0)
         QCoreApplication::processEvents();
 
 	return 1;
@@ -684,7 +684,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	s_unsupportedPolygonType = false;
 	s_texCoordCount = 0;
 	s_invalidTexCoordinates = false;
-	s_scalarCount = 0;
+	s_totalScalarCount = 0;
 	s_IntensityCount = 0;
 	s_ColorCount = 0;
 	s_NormalCount = 0;
@@ -758,8 +758,6 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	//Mesh-based element properties (vertex indexes, etc.)
 	std::vector<plyProperty> listProperties;
 
-    unsigned i=0;
-
     //last read element
 	plyElement lastElement;
 	lastElement.elem = 0;
@@ -801,7 +799,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
         if (lastElement.isList)
         {
             //we store its properties in 'listProperties'
-            for (i=0;i<lastElement.properties.size();++i)
+            for (size_t i=0; i<lastElement.properties.size(); ++i)
             {
                 plyProperty& prop = lastElement.properties[i];
                 prop.elemIndex = (int)meshElements.size();
@@ -822,7 +820,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
         else    //else if we have a "point-like" element
         {
             //we store its properties in 'stdProperties'
-            for (i=0;i<lastElement.properties.size();++i)
+            for (size_t i=0; i<lastElement.properties.size(); ++i)
             {
                 plyProperty& prop = lastElement.properties[i];
                 prop.elemIndex = (int)pointElements.size();
@@ -852,9 +850,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	/***  Dialog  ***/
     /****************/
 
-	//properties indexes (0=unassigned)
-	static const unsigned nStdProp=11;
-	int stdPropIndexes[nStdProp]={0,0,0,0,0,0,0,0,0,0,0};
+	//properties indexes (0 = unassigned)
+	static const unsigned nStdProp = 10;
+	int stdPropIndexes[nStdProp] = {0,0,0,0,0,0,0,0,0,0};
 	int& xIndex = stdPropIndexes[0];
 	int& yIndex = stdPropIndexes[1];
 	int& zIndex = stdPropIndexes[2];
@@ -865,162 +863,151 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	int& gIndex = stdPropIndexes[7];
 	int& bIndex = stdPropIndexes[8];
 	int& iIndex = stdPropIndexes[9];
-	int& sfIndex = stdPropIndexes[10];
 
-	static const unsigned nListProp=2;
-	int listPropIndexes[nListProp]={0,0};
+	std::vector<int> sfPropIndexes;
+	//int& sfIndex = stdPropIndexes[10];
+
+	static const unsigned nListProp = 2;
+	int listPropIndexes[nListProp] = {0,0};
 	int& facesIndex = listPropIndexes[0];
 	int& texCoordsIndex = listPropIndexes[1];
 
 	//Combo box items for standard properties (coordinates, color components, etc.)
 	QStringList stdPropsText;
 	stdPropsText << QString("None");
-    for (i=1; i<=stdProperties.size(); ++i)
-    {
-        plyProperty& pp = stdProperties[i-1];
-        QString itemText = QString("%1 - %2 [%3]").arg(pointElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
-        assert(pp.type!=16); //we don't want any PLY_LIST here
-        stdPropsText << itemText;
-
-		QString elementName = QString(pointElements[pp.elemIndex].elementName).toUpper();
-		QString propName = QString(pp.propName).toUpper();
-
-		if (nxIndex == 0 && (propName.contains("NX") || (elementName.contains("NORM") && propName.endsWith("X"))))
-			nxIndex = i;
-		else if (nyIndex == 0 && (propName.contains("NY") || (elementName.contains("NORM") && propName.endsWith("Y"))))
-			nyIndex = i;
-		else if (nzIndex == 0 && (propName.contains("NZ") || (elementName.contains("NORM") && propName.endsWith("Z"))))
-			nzIndex = i;
-		else if (rIndex == 0 && (propName.contains("RED") || (elementName.contains("COL") && propName.endsWith("R"))))
-			rIndex = i;
-		else if (gIndex == 0 && (propName.contains("GREEN") || (elementName.contains("COL") && propName.endsWith("G"))))
-			gIndex = i;
-		else if (bIndex == 0 && (propName.contains("BLUE") || (elementName.contains("COL") && propName.endsWith("B"))))
-			bIndex = i;
-		else if (iIndex == 0 && (propName.contains("INTENSITY") || propName.contains("GRAY") || propName.contains("GREY") || (elementName.contains("COL") && propName.endsWith("I"))))
-			iIndex = i;
-		else if (elementName.contains("VERT") || elementName.contains("POINT"))
+	{
+		for (int i=1; i<=static_cast<int>(stdProperties.size()); ++i)
 		{
-			if (sfIndex == 0 && propName.contains("SCAL"))
-				sfIndex = i;
-			else if (xIndex == 0 && propName.endsWith("X"))
-				xIndex = i;
-			else if (yIndex == 0 && propName.endsWith("Y"))
-				yIndex = i;
-			else if (zIndex == 0 && propName.endsWith("Z"))
-				zIndex = i;
+			plyProperty& pp = stdProperties[i-1];
+			QString itemText = QString("%1 - %2 [%3]").arg(pointElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
+			assert(pp.type!=16); //we don't want any PLY_LIST here
+			stdPropsText << itemText;
+
+			QString elementName = QString(pointElements[pp.elemIndex].elementName).toUpper();
+			QString propName = QString(pp.propName).toUpper();
+
+			if (nxIndex == 0 && (propName.contains("NX") || (elementName.contains("NORM") && propName.endsWith("X"))))
+				nxIndex = i;
+			else if (nyIndex == 0 && (propName.contains("NY") || (elementName.contains("NORM") && propName.endsWith("Y"))))
+				nyIndex = i;
+			else if (nzIndex == 0 && (propName.contains("NZ") || (elementName.contains("NORM") && propName.endsWith("Z"))))
+				nzIndex = i;
+			else if (rIndex == 0 && (propName.contains("RED") || (elementName.contains("COL") && propName.endsWith("R"))))
+				rIndex = i;
+			else if (gIndex == 0 && (propName.contains("GREEN") || (elementName.contains("COL") && propName.endsWith("G"))))
+				gIndex = i;
+			else if (bIndex == 0 && (propName.contains("BLUE") || (elementName.contains("COL") && propName.endsWith("B"))))
+				bIndex = i;
+			else if (iIndex == 0 && (propName.contains("INTENSITY") || propName.contains("GRAY") || propName.contains("GREY") || (elementName.contains("COL") && propName.endsWith("I"))))
+				iIndex = i;
+			else if (elementName.contains("VERT") || elementName.contains("POINT"))
+			{
+				if (propName.contains("SCAL"))
+					sfPropIndexes.push_back(i);
+				else if (xIndex == 0 && propName.endsWith("X"))
+					xIndex = i;
+				else if (yIndex == 0 && propName.endsWith("Y"))
+					yIndex = i;
+				else if (zIndex == 0 && propName.endsWith("Z"))
+					zIndex = i;
+			}
+			else if (propName.contains("SCAL") || propName.contains("VAL"))
+				sfPropIndexes.push_back(i);
 		}
-		else if (sfIndex == 0 && (propName.contains("SCAL") || propName.contains("VAL")))
-			sfIndex = i;
-    }
+	}
 
 	//Combo box items for list properties (vertex indexes, etc.)
 	QStringList listPropsText;
-	listPropsText << QString("None");
-    for (i=0; i<listProperties.size(); ++i)
-    {
-        plyProperty& pp = listProperties[i];
-        QString itemText = QString("%0 - %1 [%2]").arg(meshElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
-        assert(pp.type==16); //we only want PLY_LIST here
-        listPropsText << itemText;
-
-		QString elementName = QString(meshElements[pp.elemIndex].elementName).toUpper();
-		QString propName = QString(pp.propName).toUpper();
-
-		if (elementName.contains("FACE") || elementName.contains("TRI"))
+	{
+		listPropsText << QString("None");
+		for (int i=0; i<static_cast<int>(listProperties.size()); ++i)
 		{
-			if (facesIndex == 0 && propName.contains("IND"))
-				facesIndex = i+1;
-			if (texCoordsIndex == 0 && propName.contains("COORD"))
-				texCoordsIndex = i+1;
+			plyProperty& pp = listProperties[i];
+			QString itemText = QString("%0 - %1 [%2]").arg(meshElements[pp.elemIndex].elementName).arg(pp.propName).arg(e_ply_type_names[pp.type]);
+			assert(pp.type==16); //we only want PLY_LIST here
+			listPropsText << itemText;
+
+			QString elementName = QString(meshElements[pp.elemIndex].elementName).toUpper();
+			QString propName = QString(pp.propName).toUpper();
+
+			if (elementName.contains("FACE") || elementName.contains("TRI"))
+			{
+				if (facesIndex == 0 && propName.contains("IND"))
+					facesIndex = i+1;
+				if (texCoordsIndex == 0 && propName.contains("COORD"))
+					texCoordsIndex = i+1;
+			}
 		}
-    }
+	}
 
     //combo-box max visible items
     int stdPropsCount = stdPropsText.count();
     int listPropsCount = listPropsText.count();
 
 	//we need at least 2 coordinates!
-	if (stdPropsCount<2)
+	if (stdPropsCount < 2)
 	{
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
-	else if (stdPropsCount<4 && !alwaysDisplayLoadDialog)
+	else if (stdPropsCount < 4 && !alwaysDisplayLoadDialog)
 	{
 		//brute force heuristic
 		xIndex = 1;
 		yIndex = 2;
-		zIndex = (stdPropsCount>3 ? 3 : 0);
-		facesIndex = (listPropsCount>1 ? 1 : 0);
+		zIndex = (stdPropsCount > 3 ? 3 : 0);
+		facesIndex = (listPropsCount > 1 ? 1 : 0);
 	}
 	else
 	{
 		//we count all assigned properties
 		int assignedStdProperties = 0;
-		for (i=0;i<nStdProp;++i)
-			if (stdPropIndexes[i]>0)
-				++assignedStdProperties;
+		{
+			for (unsigned i=0; i<nStdProp; ++i)
+				if (stdPropIndexes[i] > 0)
+					++assignedStdProperties;
+		}
 
 		int assignedListProperties = 0;
-		for (i=0;i<nListProp;++i)
-			if (listPropIndexes[i]>0)
-				++assignedListProperties;
+		{
+			for (unsigned i=0; i<nListProp; ++i)
+				if (listPropIndexes[i] > 0)
+					++assignedListProperties;
+		}
 
-		if (alwaysDisplayLoadDialog ||
-			stdPropsCount > assignedStdProperties+1 ||	//+1 because of the first item in the combo box ('none')
-			listPropsCount > assignedListProperties+1)	//+1 because of the first item in the combo box ('none')
+		if (	alwaysDisplayLoadDialog
+			||	stdPropsCount > assignedStdProperties+1		//+1 because of the first item in the combo box ('none')
+			||	listPropsCount > assignedListProperties+1 )	//+1 because of the first item in the combo box ('none')
 		{
 			PlyOpenDlg pod/*(MainWindow::TheInstance())*/;
 			pod.plyTypeEdit->setText(e_ply_storage_mode_names[storage_mode]);
 			pod.elementsEdit->setText(QString::number(pointElements.size()));
 			pod.propertiesEdit->setText(QString::number(listProperties.size()+stdProperties.size()));
 
-			//we fill every combo box
-			pod.xComboBox->addItems(stdPropsText);
+			//we fill all combo-boxes with all items
+			pod.setDefaultComboItems(stdPropsText);
+			pod.setListComboItems(listPropsText);
+
+			//Set default/guessed element
 			pod.xComboBox->setCurrentIndex(xIndex);
-			pod.xComboBox->setMaxVisibleItems(stdPropsCount);
-			pod.yComboBox->addItems(stdPropsText);
 			pod.yComboBox->setCurrentIndex(yIndex);
-			pod.yComboBox->setMaxVisibleItems(stdPropsCount);
-			pod.zComboBox->addItems(stdPropsText);
 			pod.zComboBox->setCurrentIndex(zIndex);
-			pod.zComboBox->setMaxVisibleItems(stdPropsCount);
 
-			pod.rComboBox->addItems(stdPropsText);
 			pod.rComboBox->setCurrentIndex(rIndex);
-			pod.rComboBox->setMaxVisibleItems(stdPropsCount);
-			pod.gComboBox->addItems(stdPropsText);
 			pod.gComboBox->setCurrentIndex(gIndex);
-			pod.gComboBox->setMaxVisibleItems(stdPropsCount);
-			pod.bComboBox->addItems(stdPropsText);
 			pod.bComboBox->setCurrentIndex(bIndex);
-			pod.bComboBox->setMaxVisibleItems(stdPropsCount);
 
-			pod.iComboBox->addItems(stdPropsText);
 			pod.iComboBox->setCurrentIndex(iIndex);
-			pod.iComboBox->setMaxVisibleItems(stdPropsCount);
 
-			pod.sfComboBox->addItems(stdPropsText);
-			pod.sfComboBox->setCurrentIndex(sfIndex);
-			pod.sfComboBox->setMaxVisibleItems(stdPropsCount);
+			pod.sfComboBox->setCurrentIndex(sfPropIndexes.empty() ? 0 : sfPropIndexes.front());
+			for (size_t j=1; j<sfPropIndexes.size(); ++j)
+				pod.addSFComboBox(sfPropIndexes[j]);
 			
-			pod.nxComboBox->addItems(stdPropsText);
 			pod.nxComboBox->setCurrentIndex(nxIndex);
-			pod.nxComboBox->setMaxVisibleItems(stdPropsCount);
-			pod.nyComboBox->addItems(stdPropsText);
 			pod.nyComboBox->setCurrentIndex(nyIndex);
-			pod.nyComboBox->setMaxVisibleItems(stdPropsCount);
-			pod.nzComboBox->addItems(stdPropsText);
 			pod.nzComboBox->setCurrentIndex(nzIndex);
-			pod.nzComboBox->setMaxVisibleItems(stdPropsCount);
 
-			pod.facesComboBox->addItems(listPropsText);
 			pod.facesComboBox->setCurrentIndex(facesIndex);
-			pod.facesComboBox->setMaxVisibleItems(listPropsCount);
-
-			pod.textCoordsComboBox->addItems(listPropsText);
 			pod.textCoordsComboBox->setCurrentIndex(texCoordsIndex);
-			pod.textCoordsComboBox->setMaxVisibleItems(listPropsCount);
 
 			//We execute dialog
 			if (alwaysDisplayLoadDialog && !pod.exec())
@@ -1044,7 +1031,14 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 			iIndex = pod.iComboBox->currentIndex();
 			facesIndex = pod.facesComboBox->currentIndex();
 			texCoordsIndex = pod.textCoordsComboBox->currentIndex();
-			sfIndex = pod.sfComboBox->currentIndex();
+
+			//get (non null) SF properties
+			sfPropIndexes.clear();
+			{
+				for (size_t j=0; j<pod.m_sfCombos.size(); ++j)
+					if (pod.m_sfCombos[j]->currentIndex() > 0)
+						sfPropIndexes.push_back(pod.m_sfCombos[j]->currentIndex());
+			}
 		}
 	}
 
@@ -1057,12 +1051,12 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	/* POINTS (X,Y,Z) */
 
-	unsigned numberOfPoints=0;
+	unsigned numberOfPoints = 0;
 
     assert(xIndex != yIndex && xIndex != zIndex && yIndex != zIndex);
 
 	//POINTS (X)
-	if (xIndex>0)
+	if (xIndex > 0)
 	{
 		long flags = ELEM_POS_0; //X coordinate
 		if (xIndex > yIndex && xIndex > zIndex)
@@ -1075,7 +1069,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 
 	//POINTS (Y)
-	if (yIndex>0)
+	if (yIndex > 0)
 	{
 		long flags = ELEM_POS_1; //Y coordinate
 		if (yIndex > xIndex && yIndex > zIndex)
@@ -1098,7 +1092,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 
 	//POINTS (Z)
-	if (zIndex>0)
+	if (zIndex > 0)
 	{
 		long flags = ELEM_POS_2; //Z coordinate
 		if (zIndex > xIndex && zIndex > yIndex)
@@ -1136,7 +1130,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
     assert(nzIndex == 0 || (nzIndex != nxIndex && nzIndex != nyIndex));
 
     //NORMALS (X)
-	if (nxIndex>0)
+	if (nxIndex > 0)
 	{
 		long flags = ELEM_POS_0; //Nx
 		if (nxIndex > nyIndex && nxIndex > nzIndex)
@@ -1149,7 +1143,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 
     //NORMALS (Y)
-	if (nyIndex>0)
+	if (nyIndex > 0)
 	{
 		long flags = ELEM_POS_1; //Ny
 		if (nyIndex > nxIndex && nyIndex > nzIndex)
@@ -1162,7 +1156,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 
     //NORMALS (Z)
-	if (nzIndex>0)
+	if (nzIndex > 0)
 	{
 		long flags = ELEM_POS_2; //Nz
 		if (nzIndex > nxIndex && nzIndex > nyIndex)
@@ -1201,7 +1195,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
     assert(gIndex == 0 || (gIndex != rIndex && gIndex != bIndex));
     assert(bIndex == 0 || (bIndex != rIndex && bIndex != gIndex));
 
-	if (rIndex>0)
+	if (rIndex > 0)
 	{
 		long flags = ELEM_POS_0; //R
 		if (rIndex > gIndex && rIndex > bIndex)
@@ -1213,7 +1207,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		numberOfColors = pointElements[pp.elemIndex].elementInstances;
 	}
 
-	if (gIndex>0)
+	if (gIndex > 0)
 	{
 		long flags = ELEM_POS_1; //G
 		if (gIndex > rIndex && gIndex > bIndex)
@@ -1225,7 +1219,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		numberOfColors = std::max(numberOfColors, (unsigned)pointElements[pp.elemIndex].elementInstances);
 	}
 
-	if (bIndex>0)
+	if (bIndex > 0)
 	{
 		long flags = ELEM_POS_2; //B
 		if (bIndex > rIndex && bIndex > gIndex)
@@ -1240,9 +1234,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	/* Intensity (I) */
 
 	//INTENSITE (G)
-	if (iIndex>0)
+	if (iIndex > 0)
 	{
-        if (numberOfColors>0)
+        if (numberOfColors > 0)
         {
             ccLog::Error("Can't import colors AND intensity (intensities will be ignored)!");
             ccLog::Warning("[PLY] intensities will be ignored");
@@ -1275,54 +1269,62 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		cloud->showColors(true);
     }
 
-	/* SCALAR FIELD (SF) */
-
-	if (sfIndex>0)
+	/* SCALAR FIELDS (SF) */
 	{
-		plyProperty& pp = stdProperties[sfIndex-1];
-		unsigned numberOfScalars = pointElements[pp.elemIndex].elementInstances;
-
-		//does the number of scalars matches the number of points?
-		if (numberOfPoints != numberOfScalars)
+		for (size_t i=0; i<sfPropIndexes.size(); ++i)
 		{
-            ccLog::Error("The number of scalars doesn't match the number of points (they will be ignored)!");
-            ccLog::Warning("[PLY] Scalar field ignored!");
-            numberOfScalars = 0;
-        }
-        else if (!cloud->enableScalarField())
-        {
-            ccLog::Error("Not enough memory to load scalar field (they will be ignored)!");
-            ccLog::Warning("[PLY] Scalar field ignored!");
-            numberOfScalars = 0;
-        }
-        else
-        {
-			CCLib::ScalarField* sf = cloud->getCurrentInScalarField();
-			if (sf)
+			int sfIndex = sfPropIndexes[i];
+			plyProperty& pp = stdProperties[sfIndex-1];
+			
+			unsigned numberOfScalars = pointElements[pp.elemIndex].elementInstances;
+
+			//does the number of scalars matches the number of points?
+			if (numberOfPoints != numberOfScalars)
+			{
+				ccLog::Error(QString("Scalar field #%1: the number of scalars doesn't match the number of points (they will be ignored)!").arg(i+1));
+				ccLog::Warning(QString("[PLY] Scalar field #%1 ignored!").arg(i+1));
+				numberOfScalars = 0;
+			}
+			else 
 			{
 				QString qPropName(pp.propName);
-				if (qPropName.startsWith("scalar_") && qPropName.length()>7)
+				if (qPropName.startsWith("scalar_") && qPropName.length() > 7)
 				{
 					//remove the 'scalar_' prefix added when saving SF with CC!
 					qPropName = qPropName.mid(7).replace('_',' ');
-					sf->setName(qPrintable(qPropName));
 				}
-				else
+
+				int sfIdx = cloud->addScalarField(qPrintable(qPropName));
+				if (sfIdx >= 0)
 				{
-					sf->setName(pp.propName);
+					CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
+					assert(sf);
+					if (sf->reserve(numberOfScalars))
+					{
+						ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, scalar_cb, sf, 1);
+					}
+					else
+					{
+						cloud->deleteScalarField(sfIdx);
+						sfIdx = -1;
+					}
+				}
+				
+				if (sfIdx < 0)
+				{
+					ccLog::Error(QString("Scalar field #%1: not enough memory to load scalar field (they will be ignored)!").arg(i+1));
+					ccLog::Warning(QString("[PLY] Scalar field #%1 ignored!").arg(i+1));
 				}
 			}
-            ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, scalar_cb, cloud, 1);
-        }
-		cloud->showSF(true);
+		}
 	}
 
 	/* MESH FACETS (TRI) */
 
 	ccMesh* mesh = 0;
-	unsigned numberOfFacets=0;
+	unsigned numberOfFacets = 0;
 
-	if (facesIndex>0)
+	if (facesIndex > 0)
 	{
 		plyProperty& pp = listProperties[facesIndex-1];
 		assert(pp.type==16); //we only accept PLY_LIST here!
@@ -1345,10 +1347,10 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
         }
 	}
 
-	if (texCoordsIndex>0)
+	if (texCoordsIndex > 0)
 	{
 		plyProperty& pp = listProperties[texCoordsIndex-1];
-		assert(pp.type==16); //we only accept PLY_LIST here!
+		assert(pp.type == 16); //we only accept PLY_LIST here!
 
 		texCoords = new TextureCoordsContainer();
 		texCoords->link();
@@ -1378,11 +1380,19 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 
 	//let 'Rply' do the job;)
-	int success = ply_read(ply);
+	int success = 0;
+	try
+	{
+		success = ply_read(ply);
+	}
+	catch(...)
+	{
+		success = -1;
+	}
 
 	ply_close(ply);
 
-	if (success<1)
+	if (success < 1)
 	{
 		if (mesh)
             delete mesh;
@@ -1391,7 +1401,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	}
 
     //we check mesh
-    if (mesh && mesh->size()==0)
+    if (mesh && mesh->size() == 0)
     {
 		if (s_unsupportedPolygonType)
 			ccLog::Error("Mesh is not triangular! (unsupported)");
@@ -1415,15 +1425,20 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		*coordinatesShift = s_Pshift;
 	}
 
-    //we update scalar field
-	CCLib::ScalarField* sf = cloud->getCurrentInScalarField();
-    if (sf)
-    {
-        sf->computeMinAndMax();
-		int sfIdx = cloud->getCurrentInScalarFieldIndex();
-        cloud->setCurrentDisplayedScalarField(sfIdx);
-		cloud->showSF(sfIdx>=0);
-    }
+    //we update scalar field(s)
+	{
+		for (unsigned i=0; i<cloud->getNumberOfScalarFields(); ++i)
+		{
+			CCLib::ScalarField* sf = cloud->getScalarField(i);
+			assert(sf);
+			sf->computeMinAndMax();
+			if (i == 0)
+			{
+				cloud->setCurrentDisplayedScalarField(0);
+				cloud->showSF(true);
+			}
+		}
+	}
 
     if (mesh)
 	{

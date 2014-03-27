@@ -28,59 +28,119 @@ PlyOpenDlg::PlyOpenDlg(QWidget* parent) : QDialog(parent), Ui::PlyOpenDlg()
 {
     setupUi(this);
 
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(testBeforeAccept()));
-    connect(this, SIGNAL(fullyAccepted()), this, SLOT(accept()));
+	try
+	{
+		m_standardCombos.push_back(xComboBox);
+		m_standardCombos.push_back(yComboBox);
+		m_standardCombos.push_back(zComboBox);
+		m_standardCombos.push_back(rComboBox);
+		m_standardCombos.push_back(gComboBox);
+		m_standardCombos.push_back(bComboBox);
+		m_standardCombos.push_back(iComboBox);
+		m_standardCombos.push_back(nxComboBox);
+		m_standardCombos.push_back(nyComboBox);
+		m_standardCombos.push_back(nzComboBox);
+
+		m_sfCombos.push_back(sfComboBox);
+
+		m_listCombos.push_back(facesComboBox);
+		m_listCombos.push_back(textCoordsComboBox);
+	}
+	catch(std::bad_alloc)
+	{
+	}
+
+    connect(addSFToolButton,	SIGNAL(clicked()),			this,	SLOT(addSFComboBox()));
+    connect(buttonBox,			SIGNAL(accepted()),			this,	SLOT(testBeforeAccept()));
+	connect(this,				SIGNAL(fullyAccepted()),	this,	SLOT(accept()));
+}
+
+void PlyOpenDlg::setDefaultComboItems(const QStringList& stdPropsText)
+{
+	m_stdPropsText = stdPropsText;
+	int stdPropsCount = stdPropsText.count();
+
+	for (size_t i=0; i<m_standardCombos.size(); ++i)
+	{
+		assert(m_standardCombos[i]);
+		m_standardCombos[i]->addItems(m_stdPropsText);
+		m_standardCombos[i]->setMaxVisibleItems(stdPropsCount);
+	}
+
+	for (size_t j=0; j<m_sfCombos.size(); ++j)
+	{
+		assert(m_sfCombos[j]);
+		m_sfCombos[j]->addItems(m_stdPropsText);
+		m_sfCombos[j]->setMaxVisibleItems(stdPropsCount);
+	}
+}
+
+void PlyOpenDlg::setListComboItems(const QStringList& listPropsText)
+{
+	m_listPropsText = listPropsText;
+	int listPropsCount = listPropsText.count();
+
+	for (size_t i=0; i<m_listCombos.size(); ++i)
+	{
+		assert(m_listCombos[i]);
+		m_listCombos[i]->addItems(m_listPropsText);
+		m_listCombos[i]->setMaxVisibleItems(listPropsCount);
+	}
 }
 
 void PlyOpenDlg::testBeforeAccept()
 {
-    //we need at least two coordinates for a points (i.e. 2D)
-    int zeroCoord=0;
-    if (xComboBox->currentIndex()==0) ++zeroCoord;
-    if (yComboBox->currentIndex()==0) ++zeroCoord;
-    if (zComboBox->currentIndex()==0) ++zeroCoord;
+    //we need at least two coordinates per point (i.e. 2D)
+    int zeroCoord = 0;
+    if (xComboBox->currentIndex() == 0) ++zeroCoord;
+    if (yComboBox->currentIndex() == 0) ++zeroCoord;
+    if (zComboBox->currentIndex() == 0) ++zeroCoord;
 
-    if (zeroCoord>1)
+    if (zeroCoord > 1)
     {
         QMessageBox::warning(0, "Error", "At least two vertex coordinates (X,Y,Z) must be defined!");
         return;
     }
 
-    //we must assure that no property is assigned to more than one field
-    int n = xComboBox->count();
-	int p = facesComboBox->count();
-    assert(n+p>=2);
-    int* assignedIndexCount = new int[n+p];
-    memset(assignedIndexCount,0,(n+p)*sizeof(int));
+    //we must ensure that no property is assigned to more than one field
+    int n = m_stdPropsText.size();
+	int p = m_listPropsText.size();
 
-    ++assignedIndexCount[xComboBox->currentIndex()];
-    ++assignedIndexCount[yComboBox->currentIndex()];
-    ++assignedIndexCount[zComboBox->currentIndex()];
-    ++assignedIndexCount[rComboBox->currentIndex()];
-    ++assignedIndexCount[gComboBox->currentIndex()];
-    ++assignedIndexCount[bComboBox->currentIndex()];
-    ++assignedIndexCount[iComboBox->currentIndex()];
-    ++assignedIndexCount[sfComboBox->currentIndex()];
-    ++assignedIndexCount[nxComboBox->currentIndex()];
-    ++assignedIndexCount[nyComboBox->currentIndex()];
-    ++assignedIndexCount[nzComboBox->currentIndex()];
-    ++assignedIndexCount[facesComboBox->currentIndex() > 0 ? n+facesComboBox->currentIndex() : 0];
-    ++assignedIndexCount[textCoordsComboBox->currentIndex() > 0 ? n+textCoordsComboBox->currentIndex() : 0];
+	assert(n+p >= 2);
+	std::vector<int> assignedIndexCount(n+p,0);
+
+	for (size_t i=0; i<m_standardCombos.size(); ++i)
+		++assignedIndexCount[m_standardCombos[i]->currentIndex()];
+	for (size_t j=0; j<m_listCombos.size(); ++j)
+		++assignedIndexCount[m_listCombos[j]->currentIndex() > 0 ? n+m_listCombos[j]->currentIndex() : 0];
+	for (size_t k=0; k<m_sfCombos.size(); ++k)
+		++assignedIndexCount[m_sfCombos[k]->currentIndex()];
 
 	bool isValid = true;
-
-    for (int i=1;i<n+p;++i)
-        if (assignedIndexCount[i]>1)
-        {
-			isValid = false;
-            QMessageBox::warning(0, "Error",
-                QString("Can't assign same property to multiple fields! (%1)").arg(xComboBox->itemText(i)));
-			break;
-        }
-
-    delete[] assignedIndexCount;
-    assignedIndexCount=0;
+	{
+		for (int i=1; i<n+p; ++i)
+		{
+			if (assignedIndexCount[i] > 1)
+			{
+				isValid = false;
+				QMessageBox::warning(0, "Error", QString("Can't assign same property to multiple fields! (%1)").arg(xComboBox->itemText(i)));
+				break;
+			}
+		}
+	}
 
 	if (isValid)
 		emit fullyAccepted();
+}
+
+void PlyOpenDlg::addSFComboBox(int selectedIndex/*=0*/)
+{
+	//create a new combo-box
+	m_sfCombos.push_back(new QComboBox());
+	formLayout->addRow(QString("Scalar #%1").arg(m_sfCombos.size()), m_sfCombos.back());
+
+	//fill it with default items
+	m_sfCombos.back()->addItems(m_stdPropsText);
+	m_sfCombos.back()->setMaxVisibleItems(m_stdPropsText.size());
+	m_sfCombos.back()->setCurrentIndex(selectedIndex);
 }

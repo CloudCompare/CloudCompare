@@ -23,12 +23,14 @@
 //! Dialog for qRansacSD plugin
 class ccRansacSDDlg : public QDialog, public Ui::RansacSDDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor
     ccRansacSDDlg(QWidget* parent = 0);
 
-protected:
+protected slots:
 
 	//! Saves (temporarily) the dialog paramters on acceptation
 	void saveSettings();

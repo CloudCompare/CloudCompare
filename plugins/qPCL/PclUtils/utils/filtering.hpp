@@ -17,7 +17,7 @@
 //
 
 #ifndef qPCL_FILTERING_IMPL_H_
-#define qPCL_FITLERING_IMPL_H_
+#define qPCL_FILTERING_IMPL_H_
 
 #include "filtering.h"
 #include "my_point_types.h"

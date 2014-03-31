@@ -37,7 +37,7 @@ class qKinect : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qKinect(QObject* parent=0);
+	qKinect(QObject* parent = 0);
 
 	//! Destructor
 	virtual ~qKinect();

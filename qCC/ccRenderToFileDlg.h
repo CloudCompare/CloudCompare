@@ -30,7 +30,7 @@ class ccRenderToFileDlg : public QDialog, public Ui::RenderToFileDialog
     public:
 
 		//! Default constructor
-        ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent=0);
+        ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent = 0);
 
 		//! On dialog acceptance, returns requested zoom
         float getZoom() const;

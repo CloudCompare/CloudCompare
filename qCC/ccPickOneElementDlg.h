@@ -28,7 +28,7 @@ public:
 	//! Default constructor
     ccPickOneElementDlg(QString label,
 						QString windowTitle=QString(),
-						QWidget* parent=0);
+						QWidget* parent = 0);
 
 	//! Add an element to the combo box
     void addElement(QString elementName);

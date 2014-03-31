@@ -33,7 +33,7 @@ public:
     //! Default constructor
     ccComputeOctreeDlg(const ccBBox& baseBBox,
 						double minCellSize,
-						QWidget* parent=0);
+						QWidget* parent = 0);
 
 	//! Computation mode
 	enum ComputationMode { DEFAULT, MIN_CELL_SIZE, CUSTOM_BBOX };

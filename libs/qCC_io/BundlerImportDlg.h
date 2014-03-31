@@ -31,7 +31,7 @@ class BundlerImportDlg : public QDialog, public Ui::BundlerImportDlg
 public:
 
 	//! Default constructor
-    BundlerImportDlg(QWidget* parent=0);
+    BundlerImportDlg(QWidget* parent = 0);
 
 	//! Destructor
     virtual ~BundlerImportDlg();

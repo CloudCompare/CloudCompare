@@ -33,7 +33,7 @@ class ccMouse3DContextMenu : public QMenu
 public:
 
 	//! Default constructor
-	ccMouse3DContextMenu(Mouse3DParameters* params, ccGLWindow* win, QWidget* parent=0);
+	ccMouse3DContextMenu(Mouse3DParameters* params, ccGLWindow* win, QWidget* parent = 0);
 
 protected slots:
 

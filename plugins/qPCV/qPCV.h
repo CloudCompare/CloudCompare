@@ -35,7 +35,7 @@ class qPCV : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qPCV(QObject* parent=0);
+	qPCV(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "P.C.V. (Ambient Occlusion)"; }

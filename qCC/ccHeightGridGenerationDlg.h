@@ -38,7 +38,7 @@ class ccHeightGridGenerationDlg : public QDialog, public Ui::HeightGridGeneratio
 
     public:
         //! Default constructor
-        ccHeightGridGenerationDlg(const ccBBox& gridBBox, QWidget* parent=0);
+        ccHeightGridGenerationDlg(const ccBBox& gridBBox, QWidget* parent = 0);
 
         //! Returns projection grid step
         double getGridStep() const;

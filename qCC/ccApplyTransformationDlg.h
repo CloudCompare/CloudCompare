@@ -31,7 +31,7 @@ class ccApplyTransformationDlg : public QDialog, public Ui::ApplyTransformationD
 public:
 
 	//! Default constructor
-	ccApplyTransformationDlg(QWidget* parent=0);
+	ccApplyTransformationDlg(QWidget* parent = 0);
 
 	//! Returns input matrix
 	ccGLMatrix getTransformation() const;

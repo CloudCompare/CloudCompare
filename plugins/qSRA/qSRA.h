@@ -36,7 +36,7 @@ class qSRA : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qSRA(QObject* parent=0);
+	qSRA(QObject* parent = 0);
 
     //inherited from ccPluginInterface
 	virtual QString getName() const { return "Surface of Revolution Analysis"; }

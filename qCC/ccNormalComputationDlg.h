@@ -30,7 +30,7 @@ class ccNormalComputationDlg : public QDialog, public Ui::NormalComputationDlg
 
 public:
     //! Default constructor
-    ccNormalComputationDlg(QWidget* parent=0);
+    ccNormalComputationDlg(QWidget* parent = 0);
 
     //! Returns local model chosen for normal computation
     CC_LOCAL_MODEL_TYPES getLocalModel() const;

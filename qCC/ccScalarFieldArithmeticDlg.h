@@ -28,7 +28,7 @@ class ccScalarFieldArithmeticDlg : public QDialog, public Ui::SFComparisonDlg
 public:
 
     //! Default constructor
-    ccScalarFieldArithmeticDlg(ccPointCloud* cloud, QWidget* parent=0);
+    ccScalarFieldArithmeticDlg(ccPointCloud* cloud, QWidget* parent = 0);
 
     //! Returns first selected SF index
     int getSF1Index();

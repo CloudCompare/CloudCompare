@@ -79,7 +79,7 @@ class LASOpenDlg : public QDialog, public Ui::OpenLASFileDialog
 public:
     
 	//! Default constructor
-	LASOpenDlg(QWidget* parent=0);
+	LASOpenDlg(QWidget* parent = 0);
 
 	//! Sets available dimensions
 	void setDimensions(const std::vector<std::string>& dimensions);

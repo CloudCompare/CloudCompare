@@ -35,7 +35,7 @@ class PlyOpenDlg : public QDialog, public Ui::PlyOpenDlg
     Q_OBJECT
 
 public:
-    PlyOpenDlg(QWidget* parent=0);
+    PlyOpenDlg(QWidget* parent = 0);
 
 	void setDefaultComboItems(const QStringList& stdPropsText);
 	void setListComboItems(const QStringList& listPropsText);

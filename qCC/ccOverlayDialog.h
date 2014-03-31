@@ -32,7 +32,7 @@ class ccOverlayDialog : public QDialog
 public:
 
 	//! Default constructor
-	ccOverlayDialog(QWidget* parent=0);
+	ccOverlayDialog(QWidget* parent = 0);
 	
 	//! Destructor
 	virtual ~ccOverlayDialog();

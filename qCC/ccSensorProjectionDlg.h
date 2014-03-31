@@ -28,7 +28,7 @@ class ccSensorProjectionDlg : public QDialog, public Ui::SensorProjectDialog
 public:
 
 	//! Default constructor
-	ccSensorProjectionDlg(QWidget* parent=0);
+	ccSensorProjectionDlg(QWidget* parent = 0);
 
 	void initWithGBLSensor(const ccGBLSensor* sensor);
 	void updateGBLSensor(ccGBLSensor* sensor);

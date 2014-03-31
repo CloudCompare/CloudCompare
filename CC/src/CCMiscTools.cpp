@@ -26,6 +26,9 @@
 #include <assert.h>
 
 /*** MACROS FOR TRIBOXOVERLAP ***/
+/*** TRIBOXOVERLAP code is largely inspired from Tomas Akenine-Möller's algorithm
+	http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox3.txt
+**/
 
 #ifdef FINDMINMAX
 #undef FINDMINMAX

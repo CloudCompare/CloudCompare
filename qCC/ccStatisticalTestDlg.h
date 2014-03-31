@@ -30,7 +30,7 @@ public:
                          QString param2Label,
                          QString param3Label=QString(),
                          QString windowTitle=QString(),
-						 QWidget* parent=0);
+						 QWidget* parent = 0);
 
 	//! Returns 1st parameter value
     double getParam1() const;

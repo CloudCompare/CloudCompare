@@ -21,7 +21,7 @@ public:
 		\param diagonal cloud bounding box diagonal (or 0 to ignore)
 		\param parent mother widget
 	**/
-    ccShiftAndScaleCloudDlg(const double* P, double diagonal=0.0, QWidget* parent=0);
+    ccShiftAndScaleCloudDlg(const double* P, double diagonal=0.0, QWidget* parent = 0);
 
 	//! Sets displayed shift
 	void setShift(const CCVector3d& shift);

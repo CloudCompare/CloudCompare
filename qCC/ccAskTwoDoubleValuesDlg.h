@@ -31,7 +31,7 @@ public:
                                                 double defaultVal2,
                                                     int precision=6,
                                                         const char* windowTitle=0,
-                                                            QWidget* parent=0);
+                                                            QWidget* parent = 0);
 };
 
 #endif

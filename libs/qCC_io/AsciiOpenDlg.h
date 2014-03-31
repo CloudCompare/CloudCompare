@@ -71,7 +71,7 @@ class AsciiOpenDlg : public QDialog
 public:
 
 	//! Default constructor
-    AsciiOpenDlg(QString filename, QWidget* parent=0);
+    AsciiOpenDlg(QString filename, QWidget* parent = 0);
 
 	//! Default destructor
     virtual ~AsciiOpenDlg();

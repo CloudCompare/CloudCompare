@@ -40,7 +40,7 @@ public:
         OCTREE
     } CC_SAMPLING_METHOD;
 
-    ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QWidget* parent=0);
+    ccAlignDlg(ccGenericPointCloud *data, ccGenericPointCloud *model, QWidget* parent = 0);
     virtual ~ccAlignDlg();
 
     unsigned getNbTries();

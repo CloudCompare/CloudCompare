@@ -30,7 +30,7 @@ class ccUnrollDlg : public QDialog, public Ui::UnrollDialog
 public:
 
     //! Default constructor
-    ccUnrollDlg(QWidget* parent=0);
+    ccUnrollDlg(QWidget* parent = 0);
 
     int getType();
     int getAxisDimension();

@@ -36,7 +36,7 @@ class qPoissonRecon : public QObject, public ccStdPluginInterface
 public:
 
 	//! Default constructor
-	qPoissonRecon(QObject* parent=0);
+	qPoissonRecon(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
 	virtual QString getName() const { return "Poisson Surface Reconstruction"; }

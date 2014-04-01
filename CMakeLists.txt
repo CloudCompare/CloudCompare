@@ -74,3 +74,38 @@ add_subdirectory( qCC )
 if( ${OPTION_BUILD_CCVIEWER} )
 	add_subdirectory( ccViewer )
 endif()
+
+
+# Experimental targets exporting from the build tree
+# Note: target exporting from the install tree still need to be implemented
+OPTION( OPTION_EXPORT_TARGETS "Check to export a CCPConfig.cmake and related targets from the build tree" ON )
+if( ${OPTION_EXPORT_TARGETS} )
+    # NOTES
+    # once CloudCompareProjects (CCP) will be exported from the build tree other people that whant to
+    # use cloudcompare code - or e.g. write plugins they will be able to find the package in this way
+    # from within their cmakelists:
+        #-> find_package(CCP REQUIRED) # CloudCompareProjects
+        #-> include_directories(${CCP_INCLUDE_DIRS})
+    # and then they just need to link their plugins against ${CCP_LIBRARIES}
+
+    set(TARGETS_TO_EXPORT CC_CORE_LIB CC_FBO_LIB GLEW_LIB QCC_DB_LIB QCC_GL_LIB QCC_IO_LIB triangle)
+
+    if(${INSTALL_QPCL_PLUGIN})
+        # we also export the shared lib produced by that
+        set(TARGETS_TO_EXPORT ${TARGETS_TO_EXPORT} QPCL_PLUGIN QPCL_PLUGIN_UTILS_LIB)
+    endif()
+
+    if( ${OPTION_BUILD_CCVIEWER} )
+        # we also export the shared lib produced by that
+        set(TARGETS_TO_EXPORT ${TARGETS_TO_EXPORT} ccViewer)
+    endif()
+
+    export(PACKAGE CCP) # this will make CCP build-tree locable from anywhere on the system for the user
+                        # how? read here: http://www.cmake.org/Wiki/CMake/Tutorials/Package_Registry
+
+    # this exports targets from the build tree. See install(EXPORT) command to export targets from an installation tree.
+    export(TARGETS ${TARGETS_TO_EXPORT} FILE "${PROJECT_BINARY_DIR}/CCPTargets.cmake")
+
+    # configure the cmake.in file and place in the build tree so external apps may find it
+    configure_file(CCPConfig.cmake.in "${PROJECT_BINARY_DIR}/CCPConfig.cmake" @ONLY)
+endif()

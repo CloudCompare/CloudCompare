@@ -24,9 +24,13 @@
 #pragma warning( disable: 4530 )
 #endif
 
+//Local
 #include "GenericIndexedCloudPersist.h"
 #include "GenericChunkedArray.h"
 #include "DgmOctree.h"
+
+//system
+#include <assert.h>
 
 namespace CCLib
 {
@@ -46,52 +50,40 @@ public:
 	/** \param associatedSet associated NeighboursSet
 		\param count number of values to use (0 = all)
 	**/
-	DgmOctreeReferenceCloud(DgmOctree::NeighboursSet* associatedSet, unsigned count=0);
-
-	//! Destructor.
-	virtual ~DgmOctreeReferenceCloud();
+	DgmOctreeReferenceCloud(DgmOctree::NeighboursSet* associatedSet, unsigned count = 0);
 
 	//**** inherited form GenericCloud ****//
-	virtual unsigned size() const;
+	inline virtual unsigned size() const { return static_cast<unsigned>(m_set->size()); }
 	virtual void forEach(genericPointAction& anAction);
 	virtual void getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[]);
 	//virtual uchar testVisibility(const CCVector3& P) const; //not supported
-	virtual void placeIteratorAtBegining();
-	virtual const CCVector3* getNextPoint();
-	virtual bool enableScalarField() {return true;} //use DgmOctree::PointDescriptor::squareDistd by default
-	virtual bool isScalarFieldEnabled() const {return true;} //use DgmOctree::PointDescriptor::squareDistd by default
-	virtual void setPointScalarValue(unsigned pointIndex, ScalarType value); //use DgmOctree::PointDescriptor::squareDistd by default
-	virtual ScalarType getPointScalarValue(unsigned pointIndex) const; //use DgmOctree::PointDescriptor::squareDistd by default
-
+	inline virtual void placeIteratorAtBegining() { m_globalIterator = 0; }
+	inline virtual const CCVector3* getNextPoint() { return (m_globalIterator < size() ? m_set->at(m_globalIterator++).point : 0); }
+	inline virtual bool enableScalarField() { return true; } //use DgmOctree::PointDescriptor::squareDistd by default
+	inline virtual bool isScalarFieldEnabled() const { return true; } //use DgmOctree::PointDescriptor::squareDistd by default
+	inline virtual void setPointScalarValue(unsigned pointIndex, ScalarType value) { assert(pointIndex < size()); m_set->at(pointIndex).squareDistd = static_cast<double>(value); }
+	inline virtual ScalarType getPointScalarValue(unsigned pointIndex) const { assert(pointIndex < size()); return static_cast<ScalarType>(m_set->at(pointIndex).squareDistd); }
 	//**** inherited form GenericIndexedCloud ****//
-	virtual const CCVector3* getPoint(unsigned index);
-	virtual void getPoint(unsigned index, CCVector3& P) const;
-
+	inline virtual const CCVector3* getPoint(unsigned index) { assert(index < size()); return m_set->at(index).point; }
+	inline virtual void getPoint(unsigned index, CCVector3& P) const  { assert(index < size()); P = *m_set->at(index).point; }
 	//**** inherited form GenericIndexedCloudPersist ****//
-	virtual const CCVector3* getPointPersistentPtr(unsigned index);
+	inline virtual const CCVector3* getPointPersistentPtr(unsigned index) { assert(index < size()); return m_set->at(index).point; }
 
 	//! Forwards global iterator
-	void forwardIterator();
+	inline void forwardIterator() { ++m_globalIterator; }
 
 protected:
 
 	//! Computes the cloud bounding-box (internal)
 	virtual void computeBB();
 
-	//! Updates the bounding-box informations with a new point data (internal)
-	/** P the new point
-	**/
-	virtual void updateBBWithPoint(const CCVector3* P);
-
 	//! Iterator on the point references container
 	unsigned m_globalIterator;
 
-	//! Cloud bounding-box (min along the 3 dimensions)
-	PointCoordinateType m_bbMins[3];
-
-	//! Cloud bounding-box (max along the 3 dimensions)
-	PointCoordinateType m_bbMaxs[3];
-
+	//! Bounding-box min corner
+	CCVector3 m_bbMin;
+	//! Bounding-box max corner
+	CCVector3 m_bbMax;
 	//! Bounding-box validity
 	bool m_validBB;
 

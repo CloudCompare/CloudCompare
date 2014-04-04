@@ -39,6 +39,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits>
 
 using namespace CCLib;
 
@@ -1316,7 +1317,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 						Yk.removePointGlobalIndex(j);
 						//on applique l'operation equivalente (voir ReferenceCloud::removeCurrentPointGlobalIndex)
 						//au tableau donnant la distance minimale par rapport a la cellule
-						assert(remainingPoints>0);
+						assert(remainingPoints != 0);
 						minDists[j] = minDists[--remainingPoints];
 						//minDists.pop_back();
 					}
@@ -1666,7 +1667,7 @@ void cloudMeshDistCellFunc_MT(const DgmOctree::IndexAndCode& desc)
 					Yk.removeCurrentPointGlobalIndex();
 					//on applique l'operation equivalente (voir ReferenceCloud::removeCurrentPointGlobalIndex)
 					//au tableau donnant la distance minimale par rapport a la cellule
-					assert(remainingPoints>0);
+					assert(remainingPoints != 0);
 					minDists[j] = minDists[remainingPoints-1];
 					//minDists.pop_back();
 					--remainingPoints;
@@ -2189,7 +2190,7 @@ ScalarType DistanceComputationTools::computePoint2PlaneDistance(const CCVector3*
 																const PointCoordinateType* planeEquation)
 {
 	//point to plane distance: d = fabs(a0*x+a1*y+a2*z-a3)/sqrt(a0^2+a1^2+a2^2)
-	assert(fabs((double)CCVector3::vnorm2(planeEquation) - 1.0) < ZERO_TOLERANCE);
+	assert(fabs(CCVector3::vnorm(planeEquation) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	return static_cast<ScalarType>((CCVector3::vdot(P->u,planeEquation)-planeEquation[3])/*/CCVector3::vnorm(planeEquation)*/); //norm == 1.0!
 }
@@ -2209,7 +2210,7 @@ ScalarType DistanceComputationTools::computeCloud2PlaneDistanceRMS(	GenericCloud
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	if (norm2 < ZERO_TOLERANCE)
         return NAN_VALUE;
-	assert(fabs((double)norm2 - 1.0) < 1.0e-6);
+	assert(fabs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	double dSumSq = 0.0;
 
@@ -2243,7 +2244,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	if (norm2 < ZERO_TOLERANCE)
         return NAN_VALUE;
-	assert(fabs(static_cast<double>(norm2) - 1.0) < 1.0e-6);
+	assert(fabs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	//we search the max @ 'percent'% (to avoid outliers)
 	std::vector<PointCoordinateType> tail;
@@ -2299,7 +2300,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneMaxDistance(	GenericCloud
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	if (norm2 < ZERO_TOLERANCE)
         return NAN_VALUE;
-	assert(fabs(static_cast<double>(norm2) - 1.0) < 1.0e-6);
+	assert(fabs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	//we search the max distance
 	PointCoordinateType maxDist = 0;

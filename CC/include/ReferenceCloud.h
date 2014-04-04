@@ -172,7 +172,7 @@ protected:
 	//! Updates the bounding-box with a new point (internal)
 	/** P the new point
 	**/
-	virtual void updateBBWithPoint(const CCVector3* P);
+	virtual void updateBBWithPoint(const CCVector3& P);
 
 	//! Container of 3D point indexes
 	typedef GenericChunkedArray<1,unsigned> ReferencesContainer;
@@ -183,19 +183,17 @@ protected:
 	//! Iterator on the point references container
 	unsigned m_globalIterator;
 
-	//! Cloud bounding-box (min along the 3 dimensions)
-	PointCoordinateType m_bbMins[3];
-
-	//! Cloud bounding-box (max along the 3 dimensions)
-	PointCoordinateType m_bbMaxs[3];
-
+	//! Bounding-box min corner
+	CCVector3 m_bbMin;
+	//! Bounding-box max corner
+	CCVector3 m_bbMax;
 	//! Bounding-box validity
 	bool m_validBB;
 
 	//! Associated cloud
-	/** The cloud from which references are refering.
+	/** The cloud from which references are refering to.
 		WARNING: do not use the inner iterator as it
-		is used for implementing the ReferenceCloud one.
+		is used to 'implement' the ReferenceCloud one.
 	**/
 	GenericIndexedCloudPersist* m_theAssociatedCloud;
 };

@@ -19,7 +19,6 @@
 
 //system
 #include <string.h>
-#include <assert.h>
 
 using namespace CCLib;
 
@@ -27,98 +26,47 @@ DgmOctreeReferenceCloud::DgmOctreeReferenceCloud(DgmOctree::NeighboursSet* assoc
 	: m_globalIterator(0)
 	, m_validBB(false)
 	, m_set(associatedSet)
-	, m_size(size == 0 && associatedSet ? (unsigned)associatedSet->size() : size)
+	, m_size(size == 0 && associatedSet ? (unsigned)m_set->size() : size)
 {
 	assert(associatedSet);
-}
-
-DgmOctreeReferenceCloud::~DgmOctreeReferenceCloud()
-{
-}
-
-unsigned DgmOctreeReferenceCloud::size() const
-{
-	return m_size;
-}
-
-const CCVector3* DgmOctreeReferenceCloud::getPoint(unsigned index)
-{
-	assert(index < size());
-	return m_set->at(index).point;
-}
-
-const CCVector3* DgmOctreeReferenceCloud::getPointPersistentPtr(unsigned index)
-{
-	assert(index < size());
-	return m_set->at(index).point;
-}
-
-void DgmOctreeReferenceCloud::getPoint(unsigned index, CCVector3& P) const
-{
-	assert(index < size());
-	P = *m_set->at(index).point;
-}
-
-const CCVector3* DgmOctreeReferenceCloud::getNextPoint()
-{
-	return (m_globalIterator < size() ? m_set->at(m_globalIterator++).point : 0);
-}
-
-void DgmOctreeReferenceCloud::setPointScalarValue(unsigned pointIndex, ScalarType value)
-{
-	assert(pointIndex < size());
-	m_set->at(pointIndex).squareDistd = static_cast<double>(value);
-}
-
-ScalarType DgmOctreeReferenceCloud::getPointScalarValue(unsigned pointIndex) const
-{
-	assert(pointIndex < size());
-	return static_cast<ScalarType>(m_set->at(pointIndex).squareDistd);
-}
-
-void DgmOctreeReferenceCloud::updateBBWithPoint(const CCVector3* P)
-{
-	//X boundaries
-	if (m_bbMins[0]>P->x)
-		m_bbMins[0]=P->x;
-	else if (m_bbMaxs[0]<P->x)
-		m_bbMaxs[0]=P->x;
-
-	//Y boundaries
-	if (m_bbMins[1]>P->y)
-		m_bbMins[1]=P->y;
-	else if (m_bbMaxs[1]<P->y)
-		m_bbMaxs[1]=P->y;
-
-	//Z boundaries
-	if (m_bbMins[2]>P->z)
-		m_bbMins[2]=P->z;
-	else if (m_bbMaxs[2]<P->z)
-		m_bbMaxs[2]=P->z;
 }
 
 void DgmOctreeReferenceCloud::computeBB()
 {
 	//empty cloud?!
-	if (m_set->empty())
+	unsigned count = size();
+	if (count)
 	{
-		m_bbMins[0]=m_bbMaxs[0]=0.0;
-		m_bbMins[1]=m_bbMaxs[1]=0.0;
-		m_bbMins[2]=m_bbMaxs[2]=0.0;
+		m_bbMin = m_bbMax = CCVector3(0,0,0);
 		return;
 	}
 
 	//initialize BBox with first point
-	const CCVector3* P = m_set->at(0).point;
-	m_bbMins[0]=m_bbMaxs[0]=P->x;
-	m_bbMins[1]=m_bbMaxs[1]=P->y;
-	m_bbMins[2]=m_bbMaxs[2]=P->z;
+	m_bbMin = m_bbMax = *m_set->at(0).point;
 
-	unsigned i,count=size();
-	for (i=1;i<count;++i)
-		updateBBWithPoint(m_set->at(i).point);
+	for (unsigned i=1; i<count; ++i)
+	{
+		const CCVector3& P = *m_set->at(i).point;
+		//X boundaries
+		if (m_bbMin.x > P.x)
+			m_bbMin.x = P.x;
+		else if (m_bbMax.x < P.x)
+			m_bbMax.x = P.x;
 
-	m_validBB=true;
+		//Y boundaries
+		if (m_bbMin.y > P.y)
+			m_bbMin.y = P.y;
+		else if (m_bbMax.y < P.y)
+			m_bbMax.y = P.y;
+
+		//Z boundaries
+		if (m_bbMin.z > P.z)
+			m_bbMin.z = P.z;
+		else if (m_bbMax.z < P.z)
+			m_bbMax.z = P.z;
+	}
+
+	m_validBB = true;
 }
 
 void DgmOctreeReferenceCloud::getBoundingBox(PointCoordinateType bbMin[], PointCoordinateType bbMax[])
@@ -126,18 +74,8 @@ void DgmOctreeReferenceCloud::getBoundingBox(PointCoordinateType bbMin[], PointC
 	if (!m_validBB)
 		computeBB();
 
-	memcpy(bbMin, m_bbMins, sizeof(PointCoordinateType)*3);
-	memcpy(bbMax, m_bbMaxs, sizeof(PointCoordinateType)*3);
-}
-
-void DgmOctreeReferenceCloud::placeIteratorAtBegining()
-{
-	m_globalIterator=0;
-}
-
-void DgmOctreeReferenceCloud::forwardIterator()
-{
-	++m_globalIterator;
+	memcpy(bbMin, m_bbMin.u, sizeof(PointCoordinateType)*3);
+	memcpy(bbMax, m_bbMax.u, sizeof(PointCoordinateType)*3);
 }
 
 void DgmOctreeReferenceCloud::forEach(genericPointAction& anAction)

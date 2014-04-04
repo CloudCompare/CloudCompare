@@ -519,7 +519,6 @@ int GeometricalAnalysisTools::computeRoughness(GenericIndexedCloudPersist* theCl
 	return result;
 }
 
-
 //"PER-CELL" METHOD: ROUGHNESS ESTIMATION (LEAST SQUARES PLANE FIT)
 //ADDITIONNAL PARAMETERS (1):
 // [0] -> (PointCoordinateType*) kernelRadius : neighbourhood radius
@@ -545,17 +544,35 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
         ScalarType d = NAN_VALUE;
 		cell.points->getPoint(i,nNSS.queryPoint);
 
-		//look for neighbors in a sphere
-		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
+		//look for neighbors inside a sphere
+		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (= neighborCount)!
 		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
-		if (neighborCount>2)
+		if (neighborCount > 3)
 		{
-			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,neighborCount);
+			//find the query point in the nearest neighbors set and place it at the end
+			const unsigned globalIndex = cell.points[i].getPointGlobalIndex(i);
+			unsigned localIndex = 0;
+			while (localIndex < neighborCount && nNSS.pointsInNeighbourhood[localIndex].pointIndex != globalIndex)
+				++ localIndex;
+			//the query point should be in the nearest neighbors set!
+			assert(localIndex < neighborCount);
+			if (localIndex+1 < neighborCount) //no need to swap with another point if it's already at the end!
+			{
+				std::swap(nNSS.pointsInNeighbourhood[localIndex],nNSS.pointsInNeighbourhood[neighborCount-1]);
+			}
+
+			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,neighborCount-1); //we don't take the query point into account!
 			Neighbourhood Z(&neighboursCloud);
 
             const PointCoordinateType* lsq = Z.getLSQPlane();
             if (lsq)
                 d = fabs(DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint,lsq));
+
+			//swap the points back to their original position (DGM: not necessary)
+			//if (localIndex+1 < neighborCount)
+			//{
+			//	std::swap(nNSS.pointsInNeighbourhood[localIndex],nNSS.pointsInNeighbourhood[neighborCount-1]);
+			//}
 		}
 
         cell.points->setPointScalarValue(i,d);

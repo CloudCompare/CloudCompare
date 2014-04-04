@@ -78,7 +78,7 @@ endif()
 
 # Experimental targets exporting from the build tree
 # Note: target exporting from the install tree still need to be implemented
-OPTION( OPTION_EXPORT_TARGETS "Check to export a CCPConfig.cmake and related targets from the build tree" ON )
+OPTION( OPTION_EXPORT_TARGETS "Check to export a CCPConfig.cmake and related targets from the build tree" OFF )
 if( ${OPTION_EXPORT_TARGETS} )
     # NOTES
     # once CloudCompareProjects (CCP) will be exported from the build tree other people that whant to
@@ -89,8 +89,13 @@ if( ${OPTION_EXPORT_TARGETS} )
     # and then they just need to link their plugins against ${CCP_LIBRARIES}
 
     set(TARGETS_TO_EXPORT CC_CORE_LIB CC_FBO_LIB GLEW_LIB QCC_DB_LIB QCC_GL_LIB QCC_IO_LIB triangle)
+	
+	# add our own contrib dependencies!
+	if( ${OPTION_USE_DXF_LIB} )
+		list( APPEND TARGETS_TO_EXPORT DXF_LIB )
+	endif()
 
-    if(${INSTALL_QPCL_PLUGIN})
+    if( ${INSTALL_QPCL_PLUGIN} )
         # we also export the shared lib produced by that
         set(TARGETS_TO_EXPORT ${TARGETS_TO_EXPORT} QPCL_PLUGIN QPCL_PLUGIN_UTILS_LIB)
     endif()

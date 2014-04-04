@@ -400,7 +400,10 @@
      <addaction name="separator"/>
      <addaction name="actionSNETest"/>
      <addaction name="actionCNETest"/>
+     <addaction name="separator"/>
      <addaction name="actionFindBiggestInnerRectangle"/>
+     <addaction name="separator"/>
+     <addaction name="actionExportCloudsInfo"/>
     </widget>
     <widget class="QMenu" name="menuFit">
      <property name="title">
@@ -2494,6 +2497,11 @@
   <action name="actionConvertNormalToDipDir">
    <property name="text">
     <string>Dip/Dip direction SFs</string>
+   </property>
+  </action>
+  <action name="actionExportCloudsInfo">
+   <property name="text">
+    <string>Export cloud(s) info</string>
    </property>
   </action>
  </widget>

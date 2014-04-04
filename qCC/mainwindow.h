@@ -418,6 +418,9 @@ protected slots:
 	//! Removes all entiites currently loaded in the DB tree
 	void closeAll();
 
+	//! Batch export some pieces of info from a set of selected clouds
+	void doActionExportCloudsInfo();
+
 protected:
 
 	//! Normals conversion destinations

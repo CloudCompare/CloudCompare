@@ -140,6 +140,7 @@
 #include <QMessageBox>
 #include <QElapsedTimer>
 #include <QInputDialog>
+#include <QTextStream>
 
 //System
 #include <string.h>
@@ -947,6 +948,7 @@ void MainWindow::connectActions()
     connect(actionSNETest,						SIGNAL(triggered()),    this,       SLOT(doSphericalNeighbourhoodExtractionTest()));
     connect(actionCNETest,						SIGNAL(triggered()),    this,       SLOT(doCylindricalNeighbourhoodExtractionTest()));
 	connect(actionFindBiggestInnerRectangle,	SIGNAL(triggered()),    this,       SLOT(doActionFindBiggestInnerRectangle()));
+	connect(actionExportCloudsInfo,				SIGNAL(triggered()),    this,       SLOT(doActionExportCloudsInfo()));
 
     //"Display" menu
     connect(actionFullScreen,                   SIGNAL(toggled(bool)),  this,       SLOT(toggleFullScreen(bool)));
@@ -7650,6 +7652,113 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 	updateUI();
 }
 
+void MainWindow::doActionExportCloudsInfo()
+{
+    size_t selNum = m_selectedEntities.size();
+
+	//look for clouds
+	std::vector<ccPointCloud*> clouds;
+	unsigned maxSFCount = 0;
+	{
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccHObject* ent = m_selectedEntities[i];
+			ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+			if (cloud)
+			{
+				clouds.push_back(cloud);
+				maxSFCount = std::max<unsigned>(maxSFCount,cloud->getNumberOfScalarFields());
+			}
+		}
+	}
+
+	if (clouds.empty())
+	{
+		ccConsole::Error("Select at least one point cloud!");
+		return;
+	}
+
+    //persistent settings
+    QSettings settings;
+    settings.beginGroup("SaveFile");
+    QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
+
+	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
+	if (outputFilename.isEmpty())
+		return;
+
+	QFile csvFile(outputFilename);
+	if (!csvFile.open(QFile::WriteOnly))
+	{
+		ccConsole::Error("Failed to open file for writing! (check file permissions)");
+		return;
+	}
+
+	//write CSV header
+	QTextStream csvStream(&csvFile);
+	csvStream << "Name;";
+	csvStream << "Points;";
+	csvStream << "meanX;";
+	csvStream << "meanY;";
+	csvStream << "meanZ;";
+	{
+		for (unsigned i=0; i<maxSFCount; ++i)
+		{
+			QString sfIndex = QString("SF#%1").arg(i+1);
+			csvStream << sfIndex << " name;";
+			csvStream << sfIndex << " valid values;";
+			csvStream << sfIndex << " mean;";
+			csvStream << sfIndex << " std.dev.;";
+			csvStream << sfIndex << " sum;";
+		}
+	}
+	csvStream << endl;
+
+	//write one line per cloud
+	{
+		for (size_t i=0; i<clouds.size(); ++i)
+		{
+			ccPointCloud* cloud = clouds[i];
+			{
+				CCVector3 G = *CCLib::Neighbourhood(cloud).getGravityCenter();
+				csvStream << cloud->getName() << ";" /*"Name;"*/;
+				csvStream << cloud->size() << ";" /*"Points;"*/;
+				csvStream << G.x << ";" /*"meanX;"*/;
+				csvStream << G.y << ";" /*"meanY;"*/;
+				csvStream << G.z << ";" /*"meanZ;"*/;
+				for (unsigned j=0; j<cloud->getNumberOfScalarFields(); ++j)
+				{
+					CCLib::ScalarField* sf = cloud->getScalarField(j);
+					csvStream << sf->getName() << ";" /*"SF name;"*/;
+
+					unsigned validCount = 0;
+					double sfSum = 0;
+					double sfSum2 = 0;
+					for (unsigned k=0; k<sf->currentSize(); ++k)
+					{
+						const ScalarType& val = sf->getValue(k);
+						if (CCLib::ScalarField::ValidValue(val))
+						{
+							++validCount;
+							sfSum += val;
+							sfSum2 += val*val;
+						}
+					}
+					csvStream << validCount << ";" /*"SF valid values;"*/;
+					double mean = sfSum/validCount;
+					csvStream << mean << ";" /*"SF mean;"*/;
+					csvStream << sqrt(fabs(sfSum2/validCount - mean*mean)) << ";" /*"SF std.dev.;"*/;
+					csvStream << sfSum << ";" /*"SF sum;"*/;
+				}
+				csvStream << endl;
+			}
+		}
+	}
+
+	ccConsole::Print(QString("File '%1' successfully saved (%2 cloud(s))").arg(outputFilename).arg(clouds.size()));
+	csvFile.close();
+}
+
 bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget *parent/*=0*/, void** additionalParameters/*=0*/)
 {
     size_t selNum = entities.size();
@@ -9053,6 +9162,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionFitFacet->setEnabled(atLeastOneEntity);
 	
 	actionSNETest->setEnabled(atLeastOneCloud);
+	actionExportCloudsInfo->setEnabled(atLeastOneCloud);
 
     actionFilterByValue->setEnabled(atLeastOneSF);
     actionConvertToRGB->setEnabled(atLeastOneSF);

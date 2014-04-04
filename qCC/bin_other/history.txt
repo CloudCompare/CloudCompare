@@ -17,6 +17,13 @@ v2.5.4 XX/XX/2014
 			(the north is assumed to be +Y, and the altitude is +Z)
 		- this new method is now in a common sub-menu with the "conversion to HSV" method
 			(in 'Edit > Normals > Convert to')
+	* The way the 'roughness' is computed (Tools > Other > Roughness) has been slightly changed:
+		- for each point, the best fit plane is computed on all the neighbors except the point itself
+			(this gives a less biased measure). The roughness value is then computed as the distance
+			between the point and this plane.
+	* New 'sand box' method: "Export cloud(s) info"
+		- exports various pieces of information for all selected clouds in a CSV file (cloud name, size,
+			mean, std.dev. and sum of all scalar fields, etc.)
 
 - Bug fixes:
 	* Information displayed in 2D labels was 'shifted' ( 'P(index,x,y)' was displayed instead of 'P(x,y,z)')

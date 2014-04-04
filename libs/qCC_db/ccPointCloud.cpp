@@ -994,21 +994,61 @@ bool ccPointCloud::convertNormalToRGB()
 		return false;
 
 	if (!ccNormalVectors::GetUniqueInstance()->enableNormalHSVColorsArray())
+	{
+		ccLog::Warning("[ccPointCloud::convertNormalToRGB] Not enough memory!");
 		return false;
+	}
 	const colorType* normalHSV = ccNormalVectors::GetUniqueInstance()->getNormalHSVColorArray();
 
 	if (!resizeTheRGBTable(false))
+	{
+		ccLog::Warning("[ccPointCloud::convertNormalToRGB] Not enough memory!");
 		return false;
+	}
 	assert(m_normals && m_rgbColors);
 
-	unsigned i,count=size();
-	for (i=0;i<count;++i)
+	unsigned count = size();
+	for (unsigned i=0; i<count; ++i)
 	{
-		const colorType* rgb = normalHSV+3*m_normals->getValue(i);
+		const colorType* rgb = normalHSV + 3*m_normals->getValue(i);
 		m_rgbColors->setValue(i,rgb);
 	}
 
-	//showColors(true);
+	return true;
+}
+
+bool ccPointCloud::convertNormalToDipDirSFs(ccScalarField* dipSF, ccScalarField* dipDirSF)
+{
+	if (!dipSF && !dipDirSF)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (	(dipSF && !dipSF->resize(size()))
+		||	(dipDirSF &&  !dipDirSF->resize(size())) )
+	{
+		ccLog::Warning("[ccPointCloud::convertNormalToDipDirSFs] Not enough memory!");
+		return false;
+	}
+
+	unsigned count = size();
+	for (unsigned i=0; i<count; ++i)
+	{
+		CCVector3 N(this->getPointNormal(i));
+		PointCoordinateType dip,dipDir;
+		ccNormalVectors::ConvertNormalToDipAndDipDir(N,dip,dipDir);
+		if (dipSF)
+			dipSF->setValue(i,static_cast<ScalarType>(dip));
+		if (dipDirSF)
+			dipDirSF->setValue(i,static_cast<ScalarType>(dipDir));
+	}
+
+	if (dipSF)
+		dipSF->computeMinAndMax();
+	if (dipDirSF)
+		dipDirSF->computeMinAndMax();
+
 	return true;
 }
 

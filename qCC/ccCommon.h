@@ -41,6 +41,8 @@
 #define CC_DEFAULT_DEG_SCATTERING_ANGLES_SF_NAME "Scattering angles (deg)"
 #define CC_DEFAULT_RANGES_SF_NAME "Ranges"
 #define CC_DEFAULT_SQUARED_RANGES_SF_NAME "Ranges (squared)"
+#define CC_DEFAULT_DIP_SF_NAME "Dip (degrees)"
+#define CC_DEFAULT_DIP_DIR_SF_NAME "Dip direction (degrees)"
 
 //Qt
 #include <QString>

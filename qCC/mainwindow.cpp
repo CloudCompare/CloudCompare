@@ -847,6 +847,7 @@ void MainWindow::connectActions()
     connect(actionComputeNormals,               SIGNAL(triggered()),    this,       SLOT(doActionComputeNormals()));
     connect(actionInvertNormals,                SIGNAL(triggered()),    this,       SLOT(doActionInvertNormals()));
 	connect(actionConvertNormalToHSV,			SIGNAL(triggered()),    this,       SLOT(doActionConvertNormalsToHSV()));
+	connect(actionConvertNormalToDipDir,		SIGNAL(triggered()),    this,       SLOT(doActionConvertNormalsToDipDir()));
     connect(actionOrientNormalsMST,				SIGNAL(triggered()),    this,       SLOT(doActionOrientNormalsMST()));
     connect(actionOrientNormalsFM,				SIGNAL(triggered()),    this,       SLOT(doActionOrientNormalsFM()));
     connect(actionClearNormals,                 SIGNAL(triggered()),    this,       SLOT(doActionClearNormals()));
@@ -1198,8 +1199,20 @@ void MainWindow::doActionInvertNormals()
     refreshAll();
 }
 
+void MainWindow::doActionConvertNormalsToDipDir()
+{
+	doActionConvertNormalsTo(DIP_DIR_SFS);
+}
+
 void MainWindow::doActionConvertNormalsToHSV()
 {
+	doActionConvertNormalsTo(HSV_COLORS);
+}
+
+void MainWindow::doActionConvertNormalsTo(NORMAL_CONVERSION_DEST dest)
+{
+	unsigned errorCount = 0;
+
     size_t selNum = m_selectedEntities.size();
     for (size_t i=0; i<selNum; ++i)
     {
@@ -1217,14 +1230,92 @@ void MainWindow::doActionConvertNormalsToHSV()
             ccPointCloud* ccCloud = static_cast<ccPointCloud*>(cloud);
 			if (ccCloud->hasNormals())
 			{
-				ccCloud->convertNormalToRGB();
-				ccCloud->showColors(true);
-				ccCloud->showNormals(false);
-				ccCloud->showSF(false);
-				ccCloud->prepareDisplayForRefresh_recursive();
+				bool success = true;
+				switch(dest)
+				{
+				case HSV_COLORS:
+					{
+						success = ccCloud->convertNormalToRGB();
+						if (success)
+						{
+							ccCloud->showSF(false);
+							ccCloud->showNormals(false);
+							ccCloud->showColors(true);
+						}
+					}
+					break;
+				case DIP_DIR_SFS:
+					{
+						//get/create 'dip' scalar field
+						int dipSFIndex = ccCloud->getScalarFieldIndexByName(CC_DEFAULT_DIP_SF_NAME);
+						if (dipSFIndex < 0)
+							dipSFIndex = ccCloud->addScalarField(CC_DEFAULT_DIP_SF_NAME);
+						if (dipSFIndex < 0)
+						{
+							ccLog::Warning("[MainWindow::doActionConvertNormalsTo] Not enough memory!");
+							success = false;
+							break;
+						}
+
+						//get/create 'dip direction' scalar field
+						int dipDirSFIndex = ccCloud->getScalarFieldIndexByName(CC_DEFAULT_DIP_DIR_SF_NAME);
+						if (dipDirSFIndex < 0)
+							dipDirSFIndex = ccCloud->addScalarField(CC_DEFAULT_DIP_DIR_SF_NAME);
+						if (dipDirSFIndex < 0)
+						{
+							ccCloud->deleteScalarField(dipSFIndex);
+							ccLog::Warning("[MainWindow::doActionConvertNormalsTo] Not enough memory!");
+							success = false;
+							break;
+						}
+
+						ccScalarField* dipSF = static_cast<ccScalarField*>(ccCloud->getScalarField(dipSFIndex));
+						ccScalarField* dipDirSF = static_cast<ccScalarField*>(ccCloud->getScalarField(dipDirSFIndex));
+						assert(dipSF && dipDirSF);
+
+						success = ccCloud->convertNormalToDipDirSFs(dipSF, dipDirSF);
+
+						if (success)
+						{
+							//apply default 360 degrees color scale!
+							ccColorScale::Shared scale = ccColorScalesManager::GetDefaultScale(ccColorScalesManager::HSV_360_DEG);
+							dipSF->setColorScale(scale);
+							dipDirSF->setColorScale(scale);
+							ccCloud->setCurrentDisplayedScalarField(dipDirSFIndex); //dip dir. seems more interesting by default
+							ccCloud->showSF(true);
+						}
+						else
+						{
+							ccCloud->deleteScalarField(dipSFIndex);
+							ccCloud->deleteScalarField(dipDirSFIndex);
+						}
+					}
+					break;
+				default:
+					assert(false);
+					ccLog::Warning("[MainWindow::doActionConvertNormalsTo] Internal error: unhandled destination!");
+					success = false;
+					i = selNum; //no need to process the selected entities anymore!
+					break;
+				}
+				
+				if (success)
+				{
+					ccCloud->prepareDisplayForRefresh_recursive();
+				}
+				else
+				{
+					++errorCount;
+				}
 			}
         }
     }
+
+	//errors should have been sent to console as warnings
+	if (errorCount)
+	{
+		ccConsole::Error("Error(s) occurred! (see console)");
+	}
 
     refreshAll();
 	updateUI();
@@ -8993,6 +9084,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionClearNormals->setEnabled(atLeastOneNormal);
     actionInvertNormals->setEnabled(atLeastOneNormal);
     actionConvertNormalToHSV->setEnabled(atLeastOneNormal);
+	actionConvertNormalToDipDir->setEnabled(atLeastOneNormal);
     actionClearColor->setEnabled(atLeastOneColor);
 
     // == 1

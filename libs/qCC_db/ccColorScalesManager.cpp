@@ -73,6 +73,7 @@ ccColorScalesManager::ccColorScalesManager()
 		addScale(Create(RY));
 		addScale(Create(RW));
 		addScale(Create(ABS_NORM_GREY));
+		addScale(Create(HSV_360_DEG));
 	}
 }
 
@@ -222,6 +223,9 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 	case ABS_NORM_GREY:
 		name = "Intensity [0-1]";
 		break;
+	case HSV_360_DEG:
+		name = "HSV angle [0-360]";
+		break;
 	default:
 		ccLog::Error(QString("Unhandled pre-defined scale (%1)").arg(scaleType));
 		return ccColorScale::Shared(0);
@@ -258,6 +262,16 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 		scale->insert(ccColorScaleElement(0.0,Qt::black),false);
 		scale->insert(ccColorScaleElement(1.0,Qt::white),false);
 		scale->setAbsolute(0.0,1.0);
+		break;
+	case HSV_360_DEG:
+		scale->insert(ccColorScaleElement(  0.0/360.0,Qt::red),false);
+		scale->insert(ccColorScaleElement( 60.0/360.0,Qt::yellow),false);
+		scale->insert(ccColorScaleElement(120.0/360.0,Qt::green),false);
+		scale->insert(ccColorScaleElement(180.0/360.0,Qt::cyan),false);
+		scale->insert(ccColorScaleElement(240.0/360.0,Qt::blue),false);
+		scale->insert(ccColorScaleElement(300.0/360.0,Qt::magenta),false);
+		scale->insert(ccColorScaleElement(360.0/360.0,Qt::red),false);
+		scale->setAbsolute(0.0,360.0);
 		break;
 	default:
 		assert(false);

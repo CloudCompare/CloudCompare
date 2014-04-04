@@ -47,6 +47,7 @@ public:
 							RY				=	3,		/**< Red-Yellow ramp */
 							RW				=	4,		/**< Red-White ramp */
 							ABS_NORM_GREY	=	5,		/**< Absolute normalized grey ramp (intensities between 0 and 1) */
+							HSV_360_DEG		=	6,		/**< HSV colors between 0 and 360 degrees */
 	};
 
 	//! Returns a pre-defined color scale UUID

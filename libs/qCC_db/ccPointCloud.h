@@ -336,6 +336,14 @@ public:
 	**/
 	bool convertNormalToRGB();
 
+	//! Converts normals to two scalar fields: 'dip' and 'dip direction'
+	/**	One input scalar field may be empty if the corresponding value is not required
+		\param[out] dipSF dip values
+		\param[out] dipDirSF dip direction values
+		\return success
+	**/
+	bool convertNormalToDipDirSFs(ccScalarField* dipSF, ccScalarField* dipDirSF);
+
 	//! Pushes an RGB color on stack
     /** \param r red component
         \param g green component

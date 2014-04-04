@@ -43,7 +43,7 @@ void ccNormalVectors::ReleaseUniqueInstance()
 {
 	if (s_uniqueInstance)
 		delete s_uniqueInstance;
-	s_uniqueInstance=0;
+	s_uniqueInstance = 0;
 }
 
 ccNormalVectors::ccNormalVectors()
@@ -82,7 +82,7 @@ bool ccNormalVectors::enableNormalHSVColorsArray()
 
 	colorType* rgb = m_theNormalHSVColors;
 	PointCoordinateType* N = m_theNormalVectors;
-	for (unsigned i=0;i<m_numberOfVectors;++i,rgb+=3,N+=3)
+	for (unsigned i=0; i<m_numberOfVectors; ++i,rgb+=3,N+=3)
 		ccNormalVectors::ConvertNormalToRGB(N,rgb[0],rgb[1],rgb[2]);
 
 	return (m_theNormalHSVColors != 0);
@@ -109,7 +109,7 @@ void ccNormalVectors::init(unsigned quantizeLevel)
 	PointCoordinateType* P = m_theNormalVectors;
 	CCVector3 N;
 
-	for (unsigned i=0;i<m_numberOfVectors;++i)
+	for (unsigned i=0; i<m_numberOfVectors; ++i)
 	{
 		Quant_dequantize_normal(i,quantizeLevel,N.u);
 		N.normalize();
@@ -314,7 +314,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	}
 
 	theNorms->release();
-	theNorms=0;
+	theNorms = 0;
 
     //prefered orientation
 	if (preferedOrientation >= 0)
@@ -705,63 +705,61 @@ void ccNormalVectors::Quant_dequantize_normal(unsigned q, unsigned level, PointC
 	res[2] = ((sector & 1) != 0 ? -(box[5] + box[2]) : box[5] + box[2]);
 }
 
-QString ccNormalVectors::ConvertStrikeAndDipToString(double& strike, double& dip)
+QString ccNormalVectors::ConvertStrikeAndDipToString(double& strike_deg, double& dip_deg)
 {
-	int iStrike = static_cast<int>(strike);
-	int iDip = static_cast<int>(dip);
+	int iStrike = static_cast<int>(strike_deg);
+	int iDip = static_cast<int>(dip_deg);
 
 	return QString("N%1°E - %2°").arg(iStrike,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
 }
 
-QString ccNormalVectors::ConvertDipAndDipDirToString(PointCoordinateType dip, PointCoordinateType dipDir)
+QString ccNormalVectors::ConvertDipAndDipDirToString(PointCoordinateType dip_deg, PointCoordinateType dipDir_deg)
 {
-	int iDipDir = static_cast<int>(dipDir);
-	int iDip = static_cast<int>(dip);
+	int iDipDir = static_cast<int>(dipDir_deg);
+	int iDip = static_cast<int>(dip_deg);
 
 	return QString("Dip direction: %1° - Dip angle: %2°").arg(iDipDir,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
 }
 
-void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike, double& dip)
+void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike_deg, double& dip_deg)
 {
 	/** Adapted from Andy Michael's 'stridip.c':
 	Finds strike and dip of plane given normal vector having components n, e, and u
 	output is in degrees north of east and then
 	uses a right hand rule for the dip of the plane
 	//*/
-	strike = 180.0 - atan2(N.y,N.x)*CC_RAD_TO_DEG; //atan2 output is between -180 and 180! So strike is always positive here
+	strike_deg = 180.0 - atan2(N.y,N.x)*CC_RAD_TO_DEG; //atan2 output is between -180 and 180! So strike is always positive here
 	PointCoordinateType x = sqrt(N.x*N.x+N.y*N.y);   /* x is the horizontal magnitude */
-	dip = atan2(x,N.z)*CC_RAD_TO_DEG;
+	dip_deg = atan2(x,N.z)*CC_RAD_TO_DEG;
 }
 
-void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoordinateType& dip, PointCoordinateType& dipDir)
+void ccNormalVectors::ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoordinateType& dip_deg, PointCoordinateType& dipDir_deg)
 {
 	//http://en.wikipedia.org/wiki/Structural_geology#Geometries
-	PointCoordinateType r2 = N.x*N.x+N.y*N.y;
+	double r2 = N.x*N.x+N.y*N.y;
 	if (r2 < ZERO_TOLERANCE)
 	{
-		//purely vertical normal
-		dip = 0.0;
-		dipDir = 0.0; //anything in fact
+		dip_deg = 0; //purely vertical normal
+		dipDir_deg = 0; //anything in fact
 		return;
 	}
 
 	//"Dip direction is measured in 360 degrees, generally clockwise from North"
-	dipDir = atan2(N.x,N.y); //result in [-pi,+pi]
-	if (dipDir < 0)
-		dipDir += static_cast<PointCoordinateType>(2.0*M_PI);
+	double dipDir_rad = atan2(N.x,N.y); //result in [-pi,+pi]
+	if (dipDir_rad < 0)
+		dipDir_rad += 2.0*M_PI;
 
 	//Dip
-	PointCoordinateType r = sqrt(r2);
-	dip = atan(fabs(N.z)/r); //atan's result in [-pi/2,+pi/2] but |N.z|/r >= 0
-	dip = static_cast<PointCoordinateType>(M_PI/2) - dip; //DGM: we always measure the dip downward from horizontal
+	double dip_rad = atan(fabs(N.z)/sqrt(r2)); //atan's result in [-pi/2,+pi/2] but |N.z|/r >= 0
+	dip_rad = (M_PI/2) - dip_rad; //DGM: we always measure the dip downward from horizontal
 
-	dipDir *= static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
-	dip *= static_cast<PointCoordinateType>(CC_RAD_TO_DEG);
+	dipDir_deg = static_cast<PointCoordinateType>(dipDir_rad * CC_RAD_TO_DEG);
+	dip_deg = static_cast<PointCoordinateType>(dip_rad * CC_RAD_TO_DEG);
 }
 
 void ccNormalVectors::ConvertNormalToHSV(const CCVector3& N, double& H, double& S, double& V)
 {
-	PointCoordinateType dip=0, dipDir=0;
+	PointCoordinateType dip = 0, dipDir = 0;
 	ConvertNormalToDipAndDipDir(N,dip,dipDir);
 
 	H = dipDir;
@@ -773,11 +771,12 @@ void ccNormalVectors::ConvertNormalToHSV(const CCVector3& N, double& H, double& 
 
 void ccNormalVectors::ConvertHSVToRGB(double H, double S, double V, colorType& R, colorType& G, colorType& B)
 {
-	int hi = (static_cast<int>(floor(H/60.0)) % 6);
-	double f = H/60.0-static_cast<double>(hi);
-	double l = V*(1-S);
-	double m = V*(1-f*S);
-	double n = V*(1-(1-f)*S);
+	int hi = ((static_cast<int>(H)/60) % 6);
+	double f = 0;
+	modf(H/60.0,&f);
+	double l = V*(1.0-S);
+	double m = V*(1.0-f*S);
+	double n = V*(1.0-(1.0-f)*S);
 
 	double r = 0.0;
 	double g = 0.0;

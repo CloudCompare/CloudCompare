@@ -189,10 +189,17 @@
       <addaction name="actionOrientNormalsMST"/>
       <addaction name="actionOrientNormalsFM"/>
      </widget>
+     <widget class="QMenu" name="menuConvert_to">
+      <property name="title">
+       <string>Convert to</string>
+      </property>
+      <addaction name="actionConvertNormalToHSV"/>
+      <addaction name="actionConvertNormalToDipDir"/>
+     </widget>
      <addaction name="actionComputeNormals"/>
-     <addaction name="actionConvertNormalToHSV"/>
      <addaction name="actionInvertNormals"/>
      <addaction name="menuOrientNormals"/>
+     <addaction name="menuConvert_to"/>
      <addaction name="separator"/>
      <addaction name="actionClearNormals"/>
     </widget>
@@ -2004,7 +2011,7 @@
   </action>
   <action name="actionConvertNormalToHSV">
    <property name="text">
-    <string>Convert to HSV</string>
+    <string>HSV colors</string>
    </property>
   </action>
   <action name="actionSaveViewportAsObject">
@@ -2482,6 +2489,11 @@
   <action name="actionCrop">
    <property name="text">
     <string>Crop</string>
+   </property>
+  </action>
+  <action name="actionConvertNormalToDipDir">
+   <property name="text">
+    <string>Dip/Dip direction SFs</string>
    </property>
   </action>
  </widget>

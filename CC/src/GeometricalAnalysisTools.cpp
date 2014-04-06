@@ -550,7 +550,7 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 		if (neighborCount > 3)
 		{
 			//find the query point in the nearest neighbors set and place it at the end
-			const unsigned globalIndex = cell.points[i].getPointGlobalIndex(i);
+			const unsigned globalIndex = cell.points->getPointGlobalIndex(i);
 			unsigned localIndex = 0;
 			while (localIndex < neighborCount && nNSS.pointsInNeighbourhood[localIndex].pointIndex != globalIndex)
 				++ localIndex;

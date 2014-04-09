@@ -20,6 +20,11 @@
 //Qt
 #include <QSettings>
 
+#ifdef USE_VLD
+//VLD
+#include <vld.h>
+#endif
+
 //System
 #include <string.h>
 #include <assert.h>

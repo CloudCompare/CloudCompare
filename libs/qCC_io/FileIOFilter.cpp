@@ -17,9 +17,6 @@
 
 #include "FileIOFilter.h"
 
-//Qt
-#include <QFileInfo>
-
 //file wrappers
 //CLOUDS
 #include "BinFilter.h"
@@ -51,6 +48,15 @@
 //#include "PovFilter.h"
 #include "DxfFilter.h"
 
+//Qt
+#include <QFileInfo>
+
+#ifdef USE_VLD
+//VLD
+#include <vld.h>
+#endif
+
+//system
 #include <assert.h>
 
 CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(const char* ext)

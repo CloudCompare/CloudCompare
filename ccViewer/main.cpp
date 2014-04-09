@@ -32,8 +32,12 @@
 #include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
 
-#include "ccviewer.h"
+#ifdef USE_VLD
+//VLD
+#include <vld.h>
+#endif
 
+#include "ccviewer.h"
 
 class ccApplication : public QApplication
 {
@@ -83,6 +87,10 @@ class ccApplication : public QApplication
 int main(int argc, char *argv[])
 {
 	ccApplication a(argc, argv);
+
+#ifdef USE_VLD
+	VLDEnable();
+#endif
 
 	//OpenGL?
     if (!QGLFormat::hasOpenGL())

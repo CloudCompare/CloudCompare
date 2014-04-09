@@ -22,7 +22,7 @@ endif()
 if( MSVC )
 	OPTION( OPTION_MP_BUILD "Check to activate multithreaded compilation with MSVC" OFF )
     if( ${OPTION_MP_BUILD} )
-        set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}\ /MP)
+        list( APPEND CMAKE_CXX_FLAGS /MP)
     endif()
 endif()
 

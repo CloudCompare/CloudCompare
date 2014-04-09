@@ -17,6 +17,11 @@
 
 #include "ccFBOUtils.h"
 
+#ifdef USE_VLD
+//VLD
+#include <vld.h>
+#endif
+
 //*********** OPENGL TEXTURES ***********//
 void ccFBOUtils::DisplayTexture2D(GLuint tex, int w, int h)
 {

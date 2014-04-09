@@ -23,26 +23,33 @@
 //System
 #include <assert.h>
 
+//encapsulation of a (pointer on a) Qt timer (for proper deletion on app exit)
+struct Timer
+{
+	QTime* m_timer;
+	Timer() : m_timer(0) {}
+	~Timer() { if (m_timer) delete m_timer; }
+};
 //unique instance
-static QTime* s_eTimer = 0;
+static Timer s_timer;
 
 void ccTimer::Init()
 {
-    if (!s_eTimer)
+	if (!s_timer.m_timer)
 	{
-        s_eTimer = new QTime();
-		s_eTimer->start();
+        s_timer.m_timer = new QTime();
+		s_timer.m_timer->start();
 	}
 }
 
 int ccTimer::Sec()
 {
-	assert(s_eTimer && s_eTimer->isValid());
-	return (s_eTimer ? s_eTimer->elapsed()/1000 : 0); //QTime::elapsed = ms precision
+	assert(s_timer.m_timer && s_timer.m_timer->isValid());
+	return (s_timer.m_timer ? s_timer.m_timer->elapsed()/1000 : 0);
 }
 
 int ccTimer::Msec()
 {
-	assert(s_eTimer && s_eTimer->isValid());
-	return (s_eTimer ? s_eTimer->elapsed() : 0); //QTime::elapsed = ms precision
+	assert(s_timer.m_timer && s_timer.m_timer->isValid());
+	return (s_timer.m_timer ? s_timer.m_timer->elapsed() : 0);
 }

@@ -754,6 +754,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 	{
 		//transfer children to container
 		root->transferChildren(container,true);
+		delete root;
+		root = 0;
 	}
 	else
 	{

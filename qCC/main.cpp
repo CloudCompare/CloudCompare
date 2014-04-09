@@ -42,6 +42,11 @@
 //system
 #include <time.h>
 
+#ifdef USE_VLD
+//VLD
+#include <vld.h>
+#endif
+
 
 class qccApplication : public QApplication
 {
@@ -84,6 +89,10 @@ int main(int argc, char **argv)
 {
 	//QT initialisation
     qccApplication app(argc, argv);
+
+#ifdef USE_VLD
+	VLDEnable();
+#endif
 
     //Command line mode?
     bool commandLine = (argc>1 && argv[1][0]=='-');

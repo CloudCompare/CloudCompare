@@ -25,6 +25,11 @@
 #include <string.h>
 #include <assert.h>
 
+#ifdef USE_VLD
+//VLD
+#include <vld.h>
+#endif
+
 /*** MACROS FOR TRIBOXOVERLAP ***/
 /*** TRIBOXOVERLAP code is largely inspired from Tomas Akenine-Möller's algorithm
 	http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox3.txt

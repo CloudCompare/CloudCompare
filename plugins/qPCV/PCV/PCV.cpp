@@ -21,6 +21,11 @@
 //Qt
 #include <QString>
 
+#ifdef USE_VLD
+//VLD
+#include <vld.h>
+#endif
+
 //System
 #include <algorithm>
 #include <vector>

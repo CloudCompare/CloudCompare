@@ -51,6 +51,11 @@
 #include <QElapsedTimer>
 #include <QSettings>
 
+#ifdef USE_VLD
+//VLD
+#include <vld.h>
+#endif
+
 //System
 #include <string.h>
 #include <math.h>

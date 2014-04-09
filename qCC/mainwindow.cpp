@@ -186,12 +186,12 @@ MainWindow::MainWindow()
 	{
 		//view mode pop-up menu
 		{
-			QMenu* menu = new QMenu();
+			m_viewModePopupButton = new QToolButton();
+			QMenu* menu = new QMenu(m_viewModePopupButton);
 			menu->addAction(actionSetOrthoView);
 			menu->addAction(actionSetCenteredPerspectiveView);
 			menu->addAction(actionSetViewerPerspectiveView);
 
-			m_viewModePopupButton = new QToolButton();
 			m_viewModePopupButton->setMenu(menu);
 			m_viewModePopupButton->setPopupMode(QToolButton::InstantPopup);
 			m_viewModePopupButton->setToolTip("Set current view mode");
@@ -202,12 +202,12 @@ MainWindow::MainWindow()
 
 		//pivot center pop-up menu
 		{
-			QMenu* menu = new QMenu();
+			m_pivotVisibilityPopupButton = new QToolButton();
+			QMenu* menu = new QMenu(m_pivotVisibilityPopupButton);
 			menu->addAction(actionSetPivotAlwaysOn);
 			menu->addAction(actionSetPivotRotationOnly);
 			menu->addAction(actionSetPivotOff);
 
-			m_pivotVisibilityPopupButton = new QToolButton();
 			m_pivotVisibilityPopupButton->setMenu(menu);
 			m_pivotVisibilityPopupButton->setPopupMode(QToolButton::InstantPopup);
 			m_pivotVisibilityPopupButton->setToolTip("Set pivot visibility");
@@ -8528,7 +8528,11 @@ void MainWindow::loadFile()
                                 tr("Open file(s)"),
                                 currentPath,
                                 filters,
-                                &selectedFilter);
+                                &selectedFilter
+#ifdef _DEBUG
+								,QFileDialog::DontUseNativeDialog
+#endif
+								);
     if (selectedFiles.isEmpty())
         return;
 

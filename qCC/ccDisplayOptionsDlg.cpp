@@ -434,3 +434,20 @@ void ccDisplayOptionsDlg::doAccept()
 
 	accept();
 }
+
+#ifdef CC_WINDOWS
+static QWindowsStyle s_windowsStyle;
+#endif
+void ccDisplayOptionsDlg::SetButtonTextColor(QAbstractButton* button, const QColor &col)
+{
+	if (!button)
+		return;
+
+	QPalette pal = button->palette();
+	pal.setColor(QPalette::ButtonText, col);
+	button->setPalette(pal);
+#ifdef CC_WINDOWS
+	button->setStyle(&s_windowsStyle/*new QWindowsStyle()*/);
+	button->update();
+#endif
+}

@@ -60,19 +60,7 @@ public:
     //! Sets a button text color
     /** Support Windows XP style particularity.
     **/
-    static void SetButtonTextColor(QAbstractButton* button, const QColor &col)
-	{
-		if (!button)
-			return;
-
-		QPalette pal = button->palette();
-		pal.setColor(QPalette::ButtonText, col);
-		button->setPalette(pal);
-#ifdef CC_WINDOWS
-		button->setStyle(new QWindowsStyle());
-		button->update();
-#endif
-	}
+    static void SetButtonTextColor(QAbstractButton* button, const QColor &col);
 
 signals:
     void aspectHasChanged();

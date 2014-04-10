@@ -94,6 +94,8 @@ AsciiOpenDlg::AsciiOpenDlg(QString filename, QWidget* parent)
 
 AsciiOpenDlg::~AsciiOpenDlg()
 {
+	if (m_ui)
+		delete m_ui;
 }
 
 void AsciiOpenDlg::setSkippedLines(int linesCount)

@@ -296,7 +296,7 @@ CC_FILE_ERROR AsciiFilter::loadFile(const char* filename, ccHObject& container, 
     AsciiOpenDlg aod(filename);
 
 	QString dummyStr;
-	if (alwaysDisplayLoadDialog || aod.getColumnsCount()!=3 || !AsciiOpenDlg::CheckOpenSequence(aod.getOpenSequence(),dummyStr))
+	if (alwaysDisplayLoadDialog || aod.getColumnsCount() > 5 || !AsciiOpenDlg::CheckOpenSequence(aod.getOpenSequence(),dummyStr))
 	{
 		if (!aod.exec())
 			return CC_FERR_CANCELED_BY_USER;
@@ -327,19 +327,18 @@ struct cloudAttributesDescriptor
 	static const unsigned c_attribCount = 12;
     union
     {
-        struct{
-            int xCoordIndex;
-            int yCoordIndex;
-            int zCoordIndex;
-            int xNormIndex;
-            int yNormIndex;
-            int zNormIndex;
-            int redIndex;
-            int greenIndex;
-            int blueIndex;
-            int iRgbaIndex;
-            int fRgbaIndex;
-            int greyIndex;
+        struct{	int xCoordIndex;
+				int yCoordIndex;
+				int zCoordIndex;
+				int xNormIndex;
+				int yNormIndex;
+				int zNormIndex;
+				int redIndex;
+				int greenIndex;
+				int blueIndex;
+				int iRgbaIndex;
+				int fRgbaIndex;
+				int greyIndex;
         };
         int indexes[c_attribCount];
     };
@@ -355,24 +354,24 @@ struct cloudAttributesDescriptor
 
     void reset()
     {
-        cloud=NULL;
-        for (unsigned int i=0;i<c_attribCount;++i)
+        cloud = 0;
+        for (unsigned i=0; i<c_attribCount; ++i)
             indexes[i] = -1;
-        hasNorms=false;
-        hasRGBColors=false;
+        hasNorms = false;
+        hasRGBColors = false;
 		scalarIndexes.clear();
 		scalarFields.clear();
     };
 
     void updateMaxIndex(int& maxIndex)
     {
-		unsigned i;
-        for (i=0;i<c_attribCount;++i)
-            if (indexes[i]>maxIndex)
-                maxIndex=indexes[i];
-        for (i=0;i<scalarIndexes.size();++i)
-            if (scalarIndexes[i]>maxIndex)
-                maxIndex=scalarIndexes[i];
+        for (unsigned i=0; i<c_attribCount; ++i)
+            if (indexes[i] > maxIndex)
+                maxIndex = indexes[i];
+
+        for (size_t j=0; j<scalarIndexes.size(); ++j)
+            if (scalarIndexes[j] > maxIndex)
+                maxIndex = scalarIndexes[j];
     };
 
 };
@@ -381,14 +380,14 @@ void clearStructure(cloudAttributesDescriptor &cloudDesc)
 {
     if (cloudDesc.cloud)
 		delete cloudDesc.cloud;
-	cloudDesc.cloud=0;
+	cloudDesc.cloud = 0;
 	cloudDesc.reset();
 }
 
 cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequence,
                                        unsigned numberOfPoints,
                                        int& maxIndex,
-									   unsigned step=1)
+									   unsigned step = 1)
 {
 	ccPointCloud* cloud = new ccPointCloud();
 	if (!cloud || !cloud->reserveThePointsTable(numberOfPoints))
@@ -406,8 +405,8 @@ cloudAttributesDescriptor prepareCloud(const AsciiOpenDlg::Sequence &openSequenc
     cloudAttributesDescriptor cloudDesc;
 	cloudDesc.cloud = cloud;
 
-    size_t seqSize = openSequence.size();
-    for (int i=0;i<(int)seqSize;++i)
+    int seqSize = static_cast<int>(openSequence.size());
+    for (int i=0; i<seqSize; ++i)
     {
 		switch (openSequence[i].type)
 		{

@@ -81,6 +81,9 @@ static const char COMMAND_EXPORT_EXTENSION[]				= "EXT";
 static const char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
 static const char COMMAND_CROP[]							= "CROP";
 static const char COMMAND_CROP_OUTSIDE[]					= "OUTSIDE";
+static const char COMMAND_SAVE_CLOUDS[]						= "SAVE_CLOUDS";
+static const char COMMAND_SAVE_MESHES[]						= "SAVE_MESHES";
+static const char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
 
 //Current cloud(s) export format (can be modified with the 'COMMAND_CLOUD_EXPORT_FORMAT' option)
 static CC_FILE_TYPES s_CloudExportFormat = BIN;
@@ -94,6 +97,8 @@ static QString s_MeshExportExt(CC_FILE_TYPE_DEFAULT_EXTENSION[s_MeshExportFormat
 static int s_precision = 12;
 //Whether a timestamp should be automatically added to output files or not
 static bool s_addTimestamp = true;
+//Whether silent mode is activated or not
+static bool s_silentMode = false;
 
 
 bool IsCommand(const QString& token, const char* command)
@@ -117,15 +122,15 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 	assert(!arguments.empty());
 
 	//specific command: silent mode (will prevent the console dialog from appearing!
-	bool silent = false;
+	s_silentMode = false;
 	if (IsCommand(arguments.front(),COMMAND_SILENT_MODE))
 	{
 		arguments.pop_front();
-		silent = true;
+		s_silentMode = true;
 	}
 	
 	QDialog consoleDlg;
-	if (!silent)
+	if (!s_silentMode)
 	{
 		Ui_commandLineDlg commandLineDlg;
 		commandLineDlg.setupUi(&consoleDlg);
@@ -133,9 +138,9 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 		ccConsole::Init(commandLineDlg.consoleWidget,&consoleDlg);
 	}
 
-	int result = ccCommandLineParser().parse(arguments,silent,&consoleDlg);
+	int result = ccCommandLineParser().parse(arguments,&consoleDlg);
 
-	if (!silent)
+	if (!s_silentMode)
 	{
 		if (result == EXIT_SUCCESS)
 			QMessageBox::information(&consoleDlg,"Processed finished","Job done");
@@ -158,6 +163,22 @@ ccCommandLineParser::~ccCommandLineParser()
     removeMeshes();
 }
 
+static void Print(const QString& message)
+{
+	ccConsole::Print(message);
+	if (s_silentMode)
+		printf("%s\n",qPrintable(message));
+}
+
+static bool Error(const QString& message)
+{
+	ccConsole::Error(message);
+	if (s_silentMode)
+		printf("[ERROR] %s\n",qPrintable(message));
+
+	return false;
+}
+
 void ccCommandLineParser::removeClouds()
 {
 	while (!m_clouds.empty())
@@ -178,18 +199,30 @@ void ccCommandLineParser::removeMeshes()
 	}
 }
 
-static void Print(const QString& message)
+bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/)
 {
-	ccConsole::Print(message);
-	//printf("%s\n",qPrintable(message));
+	for (unsigned i=0; i<m_clouds.size(); ++i)
+	{
+		//save output
+		QString errorStr = Export(m_clouds[i],suffix);
+		if (!errorStr.isEmpty())
+			return Error(errorStr);
+	}
+	
+	return true;
 }
 
-static bool Error(const QString& message)
+bool ccCommandLineParser::saveMeshes(QString suffix/*=QString()*/)
 {
-	ccConsole::Error(message);
-	//printf("[ERROR] %s\n",qPrintable(message));
+	for (unsigned i=0; i<m_meshes.size(); ++i)
+	{
+		//save output
+		QString errorStr = Export(m_meshes[i],suffix);
+		if (!errorStr.isEmpty())
+			return Error(errorStr);
+	}
 
-	return false;
+	return true;
 }
 
 ccCommandLineParser::EntityDesc::EntityDesc(QString filename)
@@ -282,9 +315,9 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	ccHObject::Container clouds;
 	db->filterChildren(clouds,false,CC_TYPES::POINT_CLOUD);
 	size_t count = clouds.size();
-	for (size_t i=0;i<count;++i)
+	for (size_t i=0; i<count; ++i)
 	{
-		ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[0]);
+		ccPointCloud* pc = static_cast<ccPointCloud*>(clouds[i]);
 		db->detachChild(pc);
 		Print(QString("Found one cloud with %1 points").arg(pc->size()));
 		m_clouds.push_back(CloudDesc(pc,filename,count == 1 ? -1 : static_cast<int>(i)));
@@ -486,24 +519,21 @@ bool ccCommandLineParser::commandCurvature(QStringList& arguments, QDialog* pare
 	Print(QString("\tKernel size: %1").arg(kernelSize));
 
 	if (m_clouds.empty())
-		return Error("No point cloud on which to compute curvature! (be sure to open one with \"-O [cloud filename]\" before \"-CURV\")");
+		return Error(QString("No point cloud on which to compute curvature! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_CURVATURE));
 
 	//Call MainWindow generic method
 	void* additionalParameters[2] = {&curvType, &kernelSize};
 	ccHObject::Container entities;
 	entities.resize(m_clouds.size());
-	for (unsigned i=0;i<m_clouds.size();++i)
-		entities[i]=m_clouds[i].pc;
+	for (unsigned i=0; i<m_clouds.size(); ++i)
+		entities[i] = m_clouds[i].pc;
 
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_CURVATURE,entities,parent,additionalParameters))
 	{
-		for (unsigned i=0;i<m_clouds.size();++i)
-		{
-			//save output
-			QString errorStr = Export(m_clouds[i],QString("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize));
-			if (!errorStr.isEmpty())
-				return Error(errorStr);
-		}
+		//save output
+		QString errorStr = saveClouds(QString("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize));
+		if (!errorStr.isEmpty())
+			return false;
 	}
 	return true;
 }
@@ -522,13 +552,10 @@ bool ccCommandLineParser::commandApproxDensity(QStringList& arguments, QDialog* 
 
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_APPROX_DENSITY,entities,parent))
 	{
-		for (unsigned i=0;i<m_clouds.size();++i)
-		{
-			//save output
-			QString errorStr = Export(m_clouds[i],QString("APPROX_DENSITY"));
-			if (!errorStr.isEmpty())
-				return Error(errorStr);
-		}
+		//save output
+		QString errorStr = saveClouds("APPROX_DENSITY");
+		if (!errorStr.isEmpty())
+			return false;
 	}
 
 	return true;
@@ -560,13 +587,10 @@ bool ccCommandLineParser::commandDensity(QStringList& arguments, QDialog* parent
 
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_ACCURATE_DENSITY,entities,parent,additionalParameters))
 	{
-		for (unsigned i=0;i<m_clouds.size();++i)
-		{
-			//save output
-			QString errorStr = Export(m_clouds[i],QString("DENSITY"));
-			if (!errorStr.isEmpty())
-				return Error(errorStr);
-		}
+		//save output
+		QString errorStr = saveClouds("DENSITY");
+		if (!errorStr.isEmpty())
+			return false;
 	}
 
 	return true;
@@ -616,13 +640,10 @@ bool ccCommandLineParser::commandSFGradient(QStringList& arguments, QDialog* par
 
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_SF_GRADIENT,entities,parent,additionalParameters))
 	{
-		for (unsigned i=0; i<m_clouds.size(); ++i)
-		{
-			//save output
-			QString errorStr = Export(m_clouds[i],euclidian ? "EUCLIDIAN_SF_GRAD" : "SF_GRAD");
-			if (!errorStr.isEmpty())
-				return Error(errorStr);
-		}
+		//save output
+		QString errorStr = saveClouds(euclidian ? "EUCLIDIAN_SF_GRAD" : "SF_GRAD");
+		if (!errorStr.isEmpty())
+			return false;
 	}
 
 	return true;
@@ -654,13 +675,10 @@ bool ccCommandLineParser::commandRoughness(QStringList& arguments, QDialog* pare
 
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_ROUGHNESS,entities,parent,additionalParameters))
 	{
-		for (unsigned i=0; i<m_clouds.size(); ++i)
-		{
-			//save output
-			QString errorStr = Export(m_clouds[i],QString("ROUGHNESS_KERNEL_%2").arg(kernelSize));
-			if (!errorStr.isEmpty())
-				return Error(errorStr);
-		}
+		//save output
+		QString errorStr = saveClouds(QString("ROUGHNESS_KERNEL_%2").arg(kernelSize));
+		if (!errorStr.isEmpty())
+			return false;
 	}
 
 	return true;
@@ -843,6 +861,35 @@ bool ccCommandLineParser::commandMergeClouds(QStringList& arguments)
 	QString errorStr = Export(m_clouds.front());
 	if (!errorStr.isEmpty())
 		return Error(errorStr);
+
+	return true;
+}
+
+bool ccCommandLineParser::setActiveSF(QStringList& arguments)
+{
+	if (arguments.empty())
+		return Error(QString("Missing parameter: scalar field index after \"-%1\"").arg(COMMAND_SET_ACTIVE_SF));
+
+	bool paramOk = false;
+	QString sfIndexStr = arguments.takeFirst();
+	int sfIndex = static_cast<PointCoordinateType>(sfIndexStr.toInt(&paramOk));
+	if (!paramOk)
+		return Error(QString("Failed to read a numerical parameter: S.F. index (after \"-%1\"). Got '%2' instead.").arg(COMMAND_SET_ACTIVE_SF).arg(sfIndexStr));
+	Print(QString("Set active S.F. index: %1").arg(sfIndex));
+
+	if (m_clouds.empty())
+		return Error(QString("No point cloud loaded! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_SET_ACTIVE_SF));
+
+	for (unsigned i=0; i<m_clouds.size(); ++i)
+	{
+		if (m_clouds[i].pc && m_clouds[i].pc->hasScalarFields())
+		{
+			if (static_cast<int>(m_clouds[i].pc->getNumberOfScalarFields()) > sfIndex)
+				m_clouds[i].pc->setCurrentScalarField(sfIndex);
+			else
+				ccConsole::Warning(QString("Cloud '%1' has less scalar fields than the index to select!").arg(m_clouds[i].pc->getName()));
+		}
+	}
 
 	return true;
 }
@@ -1805,6 +1852,9 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 		saveDialog->enableSwapColorAndSF(false); //default order: point, color, SF, normal
 		saveDialog->enableSaveColumnsNamesHeader(false);
 		saveDialog->enableSavePointCountHeader(false);
+
+		if (s_silentMode)
+			saveDialog->setAutoShow(false);
 	}
 
 	//look for additional parameters
@@ -1843,6 +1893,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			{
 				saveDialog->setCoordsPrecision(precision);
 				saveDialog->setSfPrecision(precision);
+				saveDialog->setAutoShow(false);
 			}
 		}
 		else if (IsCommand(argument,COMMAND_ASCII_EXPORT_SEPARATOR))
@@ -1921,7 +1972,7 @@ bool ccCommandLineParser::commandChangeMeshOutputFormat(QStringList& arguments)
 	return true;
 }
 
-int ccCommandLineParser::parse(QStringList& arguments, bool silent, QDialog* parent/*=0*/)
+int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 {
 	ccProgressDialog progressDlg(false,parent);
 
@@ -2027,6 +2078,20 @@ int ccCommandLineParser::parse(QStringList& arguments, bool silent, QDialog* par
 		else if (IsCommand(argument,COMMAND_MESH_EXPORT_FORMAT))
 		{
 			success = commandChangeMeshOutputFormat(arguments);
+		}
+		else if (IsCommand(argument,COMMAND_SET_ACTIVE_SF))
+		{
+			success = setActiveSF(arguments);
+		}
+		//save all loaded clouds
+		else if (IsCommand(argument,COMMAND_SAVE_CLOUDS))
+		{
+			success = saveClouds();
+		}
+		//save all loaded meshes
+		else if (IsCommand(argument,COMMAND_SAVE_MESHES))
+		{
+			success = saveMeshes();
 		}
 		//unload all loaded clouds
 		else if (IsCommand(argument,COMMAND_CLEAR_CLOUDS))

@@ -46,6 +46,7 @@ protected:
 	bool commandICP							(QStringList& arguments, QDialog* parent = 0);
 	bool commandChangeCloudOutputFormat		(QStringList& arguments);
 	bool commandChangeMeshOutputFormat		(QStringList& arguments);
+	bool setActiveSF						(QStringList& arguments);
 
 protected:
 
@@ -60,7 +61,7 @@ protected:
 	~ccCommandLineParser();
 
 	//! Parses command line
-	int parse(QStringList& arguments, bool silent, QDialog* parent = 0);
+	int parse(QStringList& arguments, QDialog* parent = 0);
 
 	//! Loaded entity description
 	struct EntityDesc
@@ -132,7 +133,19 @@ protected:
 	//! Reads out file format
 	static CC_FILE_TYPES getFileFormat(QStringList& arguments);
 
-    //! Removes all clouds
+    //! Saves all clouds
+	/** \param suffix optional suffix
+		\return success
+	**/
+	bool saveClouds(QString suffix = QString());
+
+    //! Saves all meshes
+	/** \param suffix optional suffix
+		\return success
+	**/
+	bool saveMeshes(QString suffix = QString());
+
+	//! Removes all clouds
 	void removeClouds();
 
     //! Removes all meshes

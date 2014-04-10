@@ -27,6 +27,12 @@ v2.5.4 XX/XX/2014
 	* 'Camera link' feature enhanced:
 		- modification of the global zoom (magnifier icon) is now propagated
 		- modification of the rotation center is now propagated
+	* 'Command line' mode enhanced:
+		- loaded clouds and meshes can be now saved anytime with the '-SAVE_CLOUDS' and '-SAVE_MESHES' options
+			(this is not necessary by default as all modified or newly created entities are automatically saved,
+			but it can be useful for performing format conversion through the command line)
+		- ASCII files with less than 6 columns are now loaded silently (i.e. no dialog should pop-up)
+		- 
 
 - Bug fixes:
 	* Information displayed in 2D labels was 'shifted' ( 'P(index,x,y)' was displayed instead of 'P(x,y,z)')
@@ -38,6 +44,7 @@ v2.5.4 XX/XX/2014
 	* EDL / SSAO filters were performing badly on entities not centered on Z=0
 		(OpenGL Z-buffer was badly initialized in ortho. mode)
 	* When GL filters were enabled, labels text or the color ramp title were shifted in the Y direction
+	* Bug fix: in Command Line mode, when loading a BIN file with multiple clouds inside, only the first one was kept!
 		
 
 v2.5.3 02/21/2014

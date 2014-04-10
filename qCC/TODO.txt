@@ -21,8 +21,8 @@ Big ones:
 [*] fly-through mode (http://www.cloudcompare.org/forum/viewtopic.php?t=179)
 [*] Command line mode could be extended
 	- Rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
-	- Current SF selection (http://www.danielgm.net/cc/forum/viewtopic.php?t=791)
-	- Explicit export option (http://www.cloudcompare.org/forum/viewtopic.php?t=799)
+	- Let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
+		to appear (will happen - even in 'silent mode' - if the file has more than 5 columns)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 
 Various:

@@ -294,7 +294,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
     {
 		//we set the main container name as the full filename (with path)
         container->setName(QString("%1 (%2)").arg(fi.fileName()).arg(fi.absolutePath()));
-        for (unsigned i=0;i<childrenCount;++i)
+        for (unsigned i=0; i<childrenCount; ++i)
         {
             ccHObject* child = container->getChild(i);
 			QString newName = child->getName();

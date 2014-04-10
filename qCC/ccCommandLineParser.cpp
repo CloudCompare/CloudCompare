@@ -39,7 +39,7 @@
 static const char COMMAND_SILENT_MODE[]						= "SILENT";
 static const char COMMAND_OPEN[]							= "O";				//+file name
 static const char COMMAND_SUBSAMPLE[]						= "SS";				//+ method (RANDOM/SPATIAL/OCTREE) + parameter (resp. point count / spatial step / octree level)
-static const char COMMAND_CURVATURE[]						= "CURV";			//+ curvature type (MEAN/GAUSS) + 
+static const char COMMAND_CURVATURE[]						= "CURV";			//+ curvature type (MEAN/GAUSS) +
 static const char COMMAND_DENSITY[]							= "DENSITY";		//+ sphere radius
 static const char COMMAND_APPROX_DENSITY[]					= "APPROX_DENSITY";
 static const char COMMAND_SF_GRADIENT[]						= "SF_GRAD";
@@ -130,7 +130,7 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 		arguments.pop_front();
 		s_silentMode = true;
 	}
-	
+
 	QDialog consoleDlg;
 	if (!s_silentMode)
 	{
@@ -210,7 +210,7 @@ bool ccCommandLineParser::saveClouds(QString suffix/*=QString()*/)
 		if (!errorStr.isEmpty())
 			return Error(errorStr);
 	}
-	
+
 	return true;
 }
 
@@ -538,8 +538,7 @@ bool ccCommandLineParser::commandCurvature(QStringList& arguments, QDialog* pare
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_CURVATURE,entities,parent,additionalParameters))
 	{
 		//save output
-		QString errorStr = saveClouds(QString("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize));
-		if (!errorStr.isEmpty())
+		if (!saveClouds(QString("%1_CURVATURE_KERNEL_%2").arg(curvTypeStr).arg(kernelSize)))
 			return false;
 	}
 	return true;
@@ -560,8 +559,7 @@ bool ccCommandLineParser::commandApproxDensity(QStringList& arguments, QDialog* 
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_APPROX_DENSITY,entities,parent))
 	{
 		//save output
-		QString errorStr = saveClouds("APPROX_DENSITY");
-		if (!errorStr.isEmpty())
+		if (!saveClouds("APPROX_DENSITY"))
 			return false;
 	}
 
@@ -595,8 +593,7 @@ bool ccCommandLineParser::commandDensity(QStringList& arguments, QDialog* parent
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_ACCURATE_DENSITY,entities,parent,additionalParameters))
 	{
 		//save output
-		QString errorStr = saveClouds("DENSITY");
-		if (!errorStr.isEmpty())
+		if (!saveClouds("DENSITY"))
 			return false;
 	}
 
@@ -648,8 +645,7 @@ bool ccCommandLineParser::commandSFGradient(QStringList& arguments, QDialog* par
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_SF_GRADIENT,entities,parent,additionalParameters))
 	{
 		//save output
-		QString errorStr = saveClouds(euclidian ? "EUCLIDIAN_SF_GRAD" : "SF_GRAD");
-		if (!errorStr.isEmpty())
+		if (!saveClouds(euclidian ? "EUCLIDIAN_SF_GRAD" : "SF_GRAD"))
 			return false;
 	}
 
@@ -683,8 +679,7 @@ bool ccCommandLineParser::commandRoughness(QStringList& arguments, QDialog* pare
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_ROUGHNESS,entities,parent,additionalParameters))
 	{
 		//save output
-		QString errorStr = saveClouds(QString("ROUGHNESS_KERNEL_%2").arg(kernelSize));
-		if (!errorStr.isEmpty())
+		if (!saveClouds(QString("ROUGHNESS_KERNEL_%2").arg(kernelSize)))
 			return false;
 	}
 
@@ -995,7 +990,7 @@ bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments)
 			planeDesc.mesh = pPlane;
 			planeDesc.basename = m_clouds[i].basename;
 			planeDesc.path = m_clouds[i].path;
-			
+
 			//save plane as a BIN file
 			QString outputFilename;
 			QString errorStr = Export(planeDesc,"BEST_FIT_PLANE",&outputFilename);
@@ -1018,7 +1013,7 @@ bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments)
 			if (N.z < 0.0)
 				N *= -1.0;
 			txtStream << QString("Normal: (%1,%2,%3)").arg(N.x,0,'f',s_precision).arg(N.y,0,'f',s_precision).arg(N.z,0,'f',s_precision) << endl;
-			
+
 			//we compute strike & dip by the way
 			{
 				PointCoordinateType dip = 0, dipDir = 0;
@@ -1061,7 +1056,7 @@ bool ccCommandLineParser::commandBestFitPlane(QStringList& arguments)
 			ccConsole::Warning(QString("Failed to compute best fit plane for cloud '%1'").arg(m_clouds[i].pc->getName()));
 		}
 	}
-		
+
 	return true;
 }
 
@@ -1199,7 +1194,7 @@ bool ccCommandLineParser::commandCrop(QStringList& arguments)
 			return Error(QString("Crop process failed! (not enough memory)"));
 		}
 	}
-			
+
 	return true;
 }
 
@@ -1265,7 +1260,7 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 			P.u[Y] = static_cast<PointCoordinateType>( coordStr.toDouble(&ok) );
 			if (!ok)
 				return Error(QString("Invalid parameter: Y-coordinate of vertex #%1").arg(i+1));
-		
+
 			vertices.addPoint(P);
 		}
 
@@ -1326,7 +1321,7 @@ bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
 			return Error(QString("Crop process failed! (not enough memory)"));
 		}
 	}
-			
+
 	return true;
 }
 
@@ -1612,17 +1607,17 @@ bool ccCommandLineParser::commandDist(QStringList& arguments, bool cloud2meshDis
 	}
 
 	compDlg.applyAndExit();
-	
+
 	QString suffix(cloud2meshDist ? "_C2M_DIST" : "_C2C_DIST");
 	if (maxDist > 0)
 		suffix += QString("_MAX_DIST_%1").arg(maxDist);
 
 	compCloud.basename += suffix;
-	
+
 	QString errorStr = Export(compCloud);
 	if (!errorStr.isEmpty())
 		return Error(errorStr);
-	
+
 
 	return true;
 }
@@ -1721,7 +1716,7 @@ bool ccCommandLineParser::commandStatTest(QStringList& arguments, ccProgressDial
 	for (size_t i=0; i<m_clouds.size(); ++i)
 	{
 		ccPointCloud* pc = m_clouds[i].pc;
-		
+
 		//we apply method on currently 'output' SF
 		CCLib::ScalarField* outSF = pc->getCurrentOutScalarField();
 		if (outSF)
@@ -1916,7 +1911,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 			txtStream << transMat.toString(s_precision,' ') << endl;
 			txtFile.close();
 		}
-			
+
 		dataAndModel[0]->basename += QString("_REGISTERED");
 		QString errorStr = Export(*dataAndModel[0]);
 		if (!errorStr.isEmpty())
@@ -1932,7 +1927,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 
 CC_FILE_TYPES ccCommandLineParser::getFileFormat(QStringList& arguments)
 {
-	CC_FILE_TYPES type = FILE_TYPES_COUNT; 
+	CC_FILE_TYPES type = FILE_TYPES_COUNT;
 
 	if (!arguments.isEmpty())
 	{
@@ -1997,7 +1992,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
-			
+
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION)));
 
@@ -2008,7 +2003,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
-			
+
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: precision value after '%1'").arg(COMMAND_ASCII_EXPORT_PRECISION)));
 			bool ok;
@@ -2035,7 +2030,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: separator character after '%1'").arg(COMMAND_ASCII_EXPORT_SEPARATOR)));
-			
+
 			if (type != ASCII)
 				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
@@ -2088,7 +2083,7 @@ bool ccCommandLineParser::commandChangeMeshOutputFormat(QStringList& arguments)
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
-			
+
 			if (arguments.empty())
 				return Error(QString(QString("Missing parameter: extension after '%1'").arg(COMMAND_EXPORT_EXTENSION)));
 

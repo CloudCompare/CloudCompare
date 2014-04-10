@@ -321,7 +321,6 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
         connect(m_associatedWin,	SIGNAL(baseViewMatChanged(const ccGLMatrix&)),	this,	SLOT(initWithMatrix(const ccGLMatrix&)));
         connect(m_associatedWin,	SIGNAL(cameraPosChanged(const CCVector3&)),		this,	SLOT(updateCameraCenter(const CCVector3&)));
         connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3&)),	this,	SLOT(updatePivotPoint(const CCVector3&)));
-        connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3&)),	this,	SLOT(updatePivotPoint(const CCVector3&)));
         connect(m_associatedWin,	SIGNAL(perspectiveStateChanged()),				this,	SLOT(updateViewMode()));
         connect(m_associatedWin,	SIGNAL(destroyed(QObject*)),					this,	SLOT(hide()));
 

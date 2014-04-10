@@ -1069,24 +1069,22 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	//we compute the pixel size (in world coordinates)
 	{
 		int minScreenSize = std::min(m_glWidth,m_glHeight);
-		m_viewportParams.pixelSize = (minScreenSize > 0 ? bbDiag / static_cast<float>(minScreenSize) : 1.0f);
+		setPixelSize(minScreenSize > 0 ? bbDiag / static_cast<float>(minScreenSize) : 1.0f);
 	}
 
 	//we set the pivot point on the box center
 	CCVector3 P = zoomedBox.getCenter();
 	setPivotPoint(P);
 	
-	if (m_viewportParams.perspectiveView)
+	CCVector3 cameraPos = P;
+	if (m_viewportParams.perspectiveView) //camera is on the pivot in ortho mode
 	{
 		//we must go backward so as to see the object!
 		assert(m_viewportParams.fov > ZERO_TOLERANCE);
 		float d = bbDiag / tan(m_viewportParams.fov * static_cast<float>(CC_DEG_TO_RAD));
-		setCameraPos(P - getCurrentViewDir() * d);
+		cameraPos -= getCurrentViewDir() * d;
 	}
-	else
-	{
-		setCameraPos(P); //camera is on the pivot in ortho mode
-	}
+	setCameraPos(cameraPos);
 
 	invalidateViewport();
 	invalidateVisualization();
@@ -1174,13 +1172,12 @@ void ccGLWindow::setCameraPos(const CCVector3& P)
 	invalidateVisualization();
 }
 
-void ccGLWindow::moveCamera(float dx, float dy, float dz, bool blockSignal/*=false*/)
+void ccGLWindow::moveCamera(float dx, float dy, float dz)
 {
 	if (dx != 0 || dy != 0) //camera movement? (dz doesn't count as ot only corresponds to a zoom)
 	{
 		//feedback for echo mode
-		if (!blockSignal)
-			emit cameraDisplaced(dx,dy);
+		emit cameraDisplaced(dx,dy);
 	}
 
 	//current X, Y and Z viewing directions
@@ -1197,6 +1194,18 @@ void ccGLWindow::setPivotPoint(const CCVector3& P)
 {
 	m_viewportParams.pivotPoint = P;
 	emit pivotPointChanged(m_viewportParams.pivotPoint);
+
+	invalidateViewport();
+	invalidateVisualization();
+}
+
+void ccGLWindow::setPixelSize(float pixelSize)
+{
+	if (m_viewportParams.pixelSize != pixelSize)
+	{
+		m_viewportParams.pixelSize = pixelSize;
+		emit pixelSizeChanged(pixelSize);
+	}
 
 	invalidateViewport();
 	invalidateVisualization();
@@ -1282,7 +1291,7 @@ void ccGLWindow::drawScale(const colorType color[] /*= white*/)
 	QFontMetrics fm(font);
 
 	//we deduce the scale drawing width
-	float scaleW_pix = equivalentWidth/m_viewportParams.pixelSize * m_viewportParams.zoom;
+	float scaleW_pix = equivalentWidth / m_viewportParams.pixelSize * m_viewportParams.zoom;
 	float trihedronLength = CC_DISPLAYED_TRIHEDRON_AXES_LENGTH * m_captureMode.zoomFactor;
 	float dW = 2.0f * trihedronLength + 20.0f;
 	float dH = std::max<float>(static_cast<float>(fm.height()) * 1.25f,trihedronLength + 5.0f);

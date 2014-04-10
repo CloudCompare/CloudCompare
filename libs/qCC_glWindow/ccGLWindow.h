@@ -176,10 +176,19 @@ public:
 	**/
 	virtual void showPivotSymbol(bool state);
 
+	//! Sets pixel size (i.e. zoom base)
+	/** Emits the 'pixelSizeChanged' signal.
+	**/
+    virtual void setPixelSize(float pixelSize);
+
 	//! Sets pivot point
+	/** Emits the 'pivotPointChanged' signal.
+	**/
     virtual void setPivotPoint(const CCVector3& P);
 
 	//! Sets camera position
+	/** Emits the 'cameraPosChanged' signal.
+	**/
     virtual void setCameraPos(const CCVector3& P);
 
 	//! Displaces camera
@@ -189,7 +198,7 @@ public:
 		* Y: vertical axis (up)
 		* Z: depth axis (pointing out of the screen)
 	**/
-	virtual void moveCamera(float dx, float dy, float dz, bool blockSignal = false);
+	virtual void moveCamera(float dx, float dy, float dz);
 
 	//! Set perspective state/mode
 	/** Persepctive mode can be:
@@ -437,6 +446,9 @@ signals:
 
 	//! Signal emitted when the window 'base view' matrix is changed
     void baseViewMatChanged(const ccGLMatrix& newViewMat);
+
+	//! Signal emitted when the pixel size is changed
+	void pixelSizeChanged(float);
 
 	//! Signal emitted when the pivot point is changed
 	void pivotPointChanged(const CCVector3&);

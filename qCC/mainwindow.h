@@ -266,6 +266,9 @@ protected slots:
 	void echoMouseWheelRotate(float);
     void echoCameraDisplaced(float ddx, float ddy);
     void echoBaseViewMatRotation(const ccGLMatrix& rotMat);
+	void echoCameraPosChanged(const CCVector3&);
+	void echoPivotPointChanged(const CCVector3&);
+	void echoPixelSizeChanged(float);
 
 	void toggleSelectedEntitiesVisibility();
     void toggleSelectedEntitiesNormals();

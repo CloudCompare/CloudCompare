@@ -5642,13 +5642,16 @@ ccGLWindow* MainWindow::new3DView()
     connect(view3D,	SIGNAL(entitiesSelectionChanged(std::set<int>)),	m_ccRoot,	SLOT(selectEntities(std::set<int>)));
 
 	//'echo' mode
-    connect(view3D,	SIGNAL(mouseWheelRotated(float)),			this,       SLOT(echoMouseWheelRotate(float)));
-    connect(view3D,	SIGNAL(cameraDisplaced(float,float)),		this,       SLOT(echoCameraDisplaced(float,float)));
-    connect(view3D,	SIGNAL(viewMatRotated(const ccGLMatrix&)),	this,       SLOT(echoBaseViewMatRotation(const ccGLMatrix&)));
+    connect(view3D,	SIGNAL(mouseWheelRotated(float)),				this,       SLOT(echoMouseWheelRotate(float)));
+    connect(view3D,	SIGNAL(cameraDisplaced(float,float)),			this,       SLOT(echoCameraDisplaced(float,float)));
+    connect(view3D,	SIGNAL(viewMatRotated(const ccGLMatrix&)),		this,       SLOT(echoBaseViewMatRotation(const ccGLMatrix&)));
+    connect(view3D,	SIGNAL(cameraPosChanged(const CCVector3&)),		this,       SLOT(echoCameraPosChanged(const CCVector3&)));
+    connect(view3D,	SIGNAL(pivotPointChanged(const CCVector3&)),	this,       SLOT(echoPivotPointChanged(const CCVector3&)));
+    connect(view3D,	SIGNAL(pixelSizeChanged(float)),				this,       SLOT(echoPixelSizeChanged(float)));
 
-    connect(view3D,	SIGNAL(destroyed(QObject*)),				this,       SLOT(prepareWindowDeletion(QObject*)));
-    connect(view3D,	SIGNAL(filesDropped(const QStringList&)),	this,       SLOT(addToDBAuto(const QStringList&)));
-    connect(view3D,	SIGNAL(newLabel(ccHObject*)),				this,       SLOT(handleNewEntity(ccHObject*)));
+    connect(view3D,	SIGNAL(destroyed(QObject*)),					this,       SLOT(prepareWindowDeletion(QObject*)));
+    connect(view3D,	SIGNAL(filesDropped(const QStringList&)),		this,       SLOT(addToDBAuto(const QStringList&)));
+    connect(view3D,	SIGNAL(newLabel(ccHObject*)),					this,       SLOT(handleNewEntity(ccHObject*)));
 
 	view3D->setSceneDB(m_ccRoot->getRootEntity());
     view3D->setAttribute(Qt::WA_DeleteOnClose);
@@ -6739,10 +6742,6 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 			const CCVector3* P = cloud->getPoint(pointIndex);
 			if (P)
 			{
-				unsigned precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
-				s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear precedent message
-				s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
-
 				const ccViewportParameters& params = s_pickingWindow->getViewportParameters();
 				if (!params.perspectiveView || params.objectCenteredView)
 				{
@@ -6753,6 +6752,10 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 					CCVector3 newCameraPos = params.cameraCenter + MdP - dP;
 					s_pickingWindow->setCameraPos(newCameraPos);
 					s_pickingWindow->setPivotPoint(newPivot);
+
+					const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
+					s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear precedent message
+					s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
 				}
 				s_pickingWindow->redraw();
 			}
@@ -9276,7 +9279,9 @@ void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)
         ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
 		if (child != sendingWindow)
         {
+			child->blockSignals(true);
 			child->onWheelEvent(wheelDelta_deg);
+			child->blockSignals(false);
             child->redraw();
         }
     }
@@ -9297,7 +9302,9 @@ void MainWindow::echoCameraDisplaced(float ddx, float ddy)
         ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
         if (child != sendingWindow)
         {
-			child->moveCamera(ddx,ddy,0.0f,true);
+			child->blockSignals(true);
+			child->moveCamera(ddx,ddy,0.0f);
+			child->blockSignals(false);
             child->redraw();
         }
     }
@@ -9318,11 +9325,82 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrix& rotMat)
         ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
         if (child != sendingWindow)
         {
+			child->blockSignals(true);
             child->rotateBaseViewMat(rotMat);
+			child->blockSignals(false);
             child->redraw();
         }
     }
 }
+
+ void MainWindow::echoCameraPosChanged(const CCVector3& P)
+ {
+    if (checkBoxCameraLink->checkState() != Qt::Checked)
+        return;
+
+    ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
+	if (!sendingWindow)
+		return;
+
+    QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
+    for (int i=0; i<windows.size(); ++i)
+    {
+        ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
+        if (child != sendingWindow)
+        {
+			child->blockSignals(true);
+			child->setCameraPos(P);
+			child->blockSignals(false);
+            child->redraw();
+        }
+    }
+ }
+ 
+ void MainWindow::echoPivotPointChanged(const CCVector3& P)
+ {
+    if (checkBoxCameraLink->checkState() != Qt::Checked)
+        return;
+
+    ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
+	if (!sendingWindow)
+		return;
+
+    QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
+    for (int i=0; i<windows.size(); ++i)
+    {
+        ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
+        if (child != sendingWindow)
+        {
+			child->blockSignals(true);
+			child->setPivotPoint(P);
+			child->blockSignals(false);
+            child->redraw();
+        }
+    }
+ }
+
+ void MainWindow::echoPixelSizeChanged(float pixelSize)
+ {
+    if (checkBoxCameraLink->checkState() != Qt::Checked)
+        return;
+
+    ccGLWindow* sendingWindow = dynamic_cast<ccGLWindow*>(sender());
+	if (!sendingWindow)
+		return;
+
+    QList<QMdiSubWindow *> windows = m_mdiArea->subWindowList();
+    for (int i=0; i<windows.size(); ++i)
+    {
+        ccGLWindow *child = static_cast<ccGLWindow*>(windows.at(i)->widget());
+        if (child != sendingWindow)
+        {
+			child->blockSignals(true);
+			child->setPixelSize(pixelSize);
+			child->blockSignals(false);
+            child->redraw();
+        }
+    }
+ }
 
 void MainWindow::dispToConsole(QString message, ConsoleMessageLevel level/*=STD_CONSOLE_MESSAGE*/)
 {

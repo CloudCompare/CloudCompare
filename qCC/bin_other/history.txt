@@ -24,6 +24,9 @@ v2.5.4 XX/XX/2014
 	* New 'sand box' method: "Export cloud(s) info"
 		- exports various pieces of information for all selected clouds in a CSV file (cloud name, size,
 			mean, std.dev. and sum of all scalar fields, etc.)
+	* 'Camera link' feature enhanced:
+		- modification of the global zoom (magnifier icon) is now propagated
+		- modification of the rotation center is now propagated
 
 - Bug fixes:
 	* Information displayed in 2D labels was 'shifted' ( 'P(index,x,y)' was displayed instead of 'P(x,y,z)')

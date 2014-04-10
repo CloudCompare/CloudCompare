@@ -34,6 +34,7 @@
 
 class ccPointCloud;
 class ccScalarField;
+class ccPolyline;
 
 /***************************************************
 				ccPointCloud
@@ -501,6 +502,15 @@ public:
 		\return points falling inside (or outside) as a selection
 	**/
 	CCLib::ReferenceCloud* crop(const ccBBox& box, bool inside = true);
+
+	//! Crops the cloud inside (or outside) a 2D polyline
+	/** \warning Always returns a selection (potentially empty) if successful.
+		\param poly croping polyline
+		\param orthoDim dimension orthogonal to the plane in which the segmentation should occur (X=0, Y=1, Z=2)
+		\param inside whether selected points are inside or outside the polyline
+		\return points falling inside (or outside) as a selection
+	**/
+	CCLib::ReferenceCloud* crop2D(const ccPolyline* poly, unsigned char orthoDim, bool inside = true);
 
 protected:
 

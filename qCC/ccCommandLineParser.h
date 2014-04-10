@@ -42,6 +42,7 @@ protected:
 	bool commandStatTest					(QStringList& arguments, ccProgressDialog* pDlg = 0);
 	bool commandBestFitPlane				(QStringList& arguments);
 	bool commandCrop						(QStringList& arguments);
+	bool commandCrop2D						(QStringList& arguments);
 	bool matchBBCenters						(QStringList& arguments);
 	bool commandICP							(QStringList& arguments, QDialog* parent = 0);
 	bool commandChangeCloudOutputFormat		(QStringList& arguments);

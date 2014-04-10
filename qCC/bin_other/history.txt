@@ -46,7 +46,10 @@ v2.5.4 XX/XX/2014
 	* EDL / SSAO filters were performing badly on entities not centered on Z=0
 		(OpenGL Z-buffer was badly initialized in ortho. mode)
 	* When GL filters were enabled, labels text or the color ramp title were shifted in the Y direction
-	* Bug fix: in Command Line mode, when loading a BIN file with multiple clouds inside, only the first one was kept!
+	* Command Line mode:
+		- when loading a BIN file with multiple clouds inside, only the first one was kept!
+		- when saving multiple clouds coming from the same file, all files had the same name
+			(and were therefore overwritten)
 		
 
 v2.5.3 02/21/2014

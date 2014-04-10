@@ -12,6 +12,7 @@
 #include <ccOctree.h>
 #include <ccPlane.h>
 #include <ccNormalVectors.h>
+#include <ccPolyline.h>
 
 //qCC_io
 #include <BundlerFilter.h>
@@ -80,6 +81,7 @@ static const char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
 static const char COMMAND_EXPORT_EXTENSION[]				= "EXT";
 static const char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
 static const char COMMAND_CROP[]							= "CROP";
+static const char COMMAND_CROP_2D[]							= "CROP2D";
 static const char COMMAND_CROP_OUTSIDE[]					= "OUTSIDE";
 static const char COMMAND_SAVE_CLOUDS[]						= "SAVE_CLOUDS";
 static const char COMMAND_SAVE_MESHES[]						= "SAVE_MESHES";
@@ -263,7 +265,12 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 	{
 		CloudDesc& cloudDesc = static_cast<CloudDesc&>(entDesc);
 		if (cloudDesc.indexInFile >= 0)
-			cloudName += QString("_%1").arg(cloudDesc.indexInFile);
+		{
+			if (suffix.isEmpty())
+				suffix = QString("%1").arg(cloudDesc.indexInFile);
+			else
+				suffix.prepend(QString("%1_").arg(cloudDesc.indexInFile));
+		}
 	}
 	if (!suffix.isEmpty())
 		cloudName += QString("_") + suffix;
@@ -1115,6 +1122,8 @@ bool ccCommandLineParser::commandCrop(QStringList& arguments)
 
 	if (arguments.empty())
 		return Error(QString("Missing parameter: box extents after \"-%1\" (Xmin:Ymin:Zmin:Xmax:Ymax:Zmax)").arg(COMMAND_CROP));
+	if (m_clouds.empty())
+		return Error(QString("No point cloud available. Be sure to open or generate one first!"));
 
 	//decode box extents
 	CCVector3 boxMin,boxMax;
@@ -1153,10 +1162,6 @@ bool ccCommandLineParser::commandCrop(QStringList& arguments)
 		}
 	}
 
-
-	if (m_clouds.empty())
-		return Error(QString("No point cloud available. Be sure to open or generate one first!"));
-
 	ccBBox cropBox(boxMin,boxMax);
 	for (unsigned i=0; i<m_clouds.size(); ++i)
 	{
@@ -1187,6 +1192,133 @@ bool ccCommandLineParser::commandCrop(QStringList& arguments)
 				delete ref;
 				ref = 0;
 				return Error (QString("No point of cloud '%1' falls inside the input box!").arg(m_clouds[i].pc->getName()));
+			}
+		}
+		else
+		{
+			return Error(QString("Crop process failed! (not enough memory)"));
+		}
+	}
+			
+	return true;
+}
+
+bool ccCommandLineParser::commandCrop2D(QStringList& arguments)
+{
+	Print("[CROP 2D]");
+
+	if (arguments.size() < 6)
+		return Error(QString("Missing parameter(s) after \"-%1\" (ORTHO_DIM N X1 Y1 X2 Y2 ... XN YN)").arg(COMMAND_CROP_2D));
+	if (m_clouds.empty())
+		return Error(QString("No point cloud available. Be sure to open or generate one first!"));
+
+	//decode poyline extents
+	ccPointCloud vertices("polyline.vertices");
+	ccPolyline poly(&vertices);
+
+	//number of vertices
+	unsigned char orthoDim = 2;
+	{
+		QString orthoDimStr = arguments.takeFirst().toUpper();
+		if (orthoDimStr == "X")
+			orthoDim = 0;
+		else if (orthoDimStr == "Y")
+			orthoDim = 1;
+		else if (orthoDimStr == "Z")
+			orthoDim = 2;
+		else
+			return Error(QString("Invalid parameter: orthogonal dimension after \"-%1\" (expected: X, Y or Z)").arg(COMMAND_CROP_2D));
+	}
+
+	//number of vertices
+	bool ok = true;
+	unsigned N = 0;
+	{
+		QString countStr = arguments.takeFirst();
+		N = countStr.toUInt(&ok);
+		if (!ok)
+			return Error(QString("Invalid parameter: number of vertices for the 2D polyline after \"-%1\"").arg(COMMAND_CROP_2D));
+	}
+
+	//now read the vertices
+	{
+		unsigned char X = ((orthoDim+1) % 3);
+		unsigned char Y = ((X+1) % 3);
+		if (	!vertices.reserve(N)
+			||	!poly.addPointIndex(0,N) )
+		{
+			return Error("Not enough memory!");
+		}
+
+		for (unsigned i=0; i<N; ++i)
+		{
+			if (arguments.size() < 2)
+				return Error(QString("Missing parameter(s): vertex #%1 data and following").arg(i+1));
+
+			CCVector3 P(0,0,0);
+
+			QString coordStr = arguments.takeFirst();
+			P.u[X] = static_cast<PointCoordinateType>( coordStr.toDouble(&ok) );
+			if (!ok)
+				return Error(QString("Invalid parameter: X-coordinate of vertex #%1").arg(i+1));
+			/*QString */coordStr = arguments.takeFirst();
+			P.u[Y] = static_cast<PointCoordinateType>( coordStr.toDouble(&ok) );
+			if (!ok)
+				return Error(QString("Invalid parameter: Y-coordinate of vertex #%1").arg(i+1));
+		
+			vertices.addPoint(P);
+		}
+
+		poly.setClosed(true);
+	}
+
+	//optional parameters
+	bool inside = true;
+	while (!arguments.empty())
+	{
+		QString argument = arguments.front();
+		if (IsCommand(argument,COMMAND_CROP_OUTSIDE))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+			inside = false;
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	//now we can crop the loaded cloud(s)
+	for (unsigned i=0; i<m_clouds.size(); ++i)
+	{
+		CCLib::ReferenceCloud* ref = m_clouds[i].pc->crop2D(&poly,orthoDim,inside);
+		if (ref)
+		{
+			if (ref->size() != 0)
+			{
+				ccPointCloud* croppedCloud = m_clouds[i].pc->partialClone(ref);
+				delete ref;
+				ref = 0;
+
+				if (croppedCloud)
+				{
+					delete m_clouds[i].pc;
+					m_clouds[i].pc = croppedCloud;
+					croppedCloud->setName(m_clouds[i].pc->getName() + QString(".cropped"));
+					m_clouds[i].basename += "_CROPPED";
+					Export(m_clouds[i]);
+				}
+				else
+				{
+					return Error(QString("Not enough memory to crop cloud '%1'!").arg(m_clouds[i].pc->getName()));
+				}
+			}
+			else
+			{
+				delete ref;
+				ref = 0;
+				ccConsole::Warning(QString("No point of cloud '%1' falls inside the input box!").arg(m_clouds[i].pc->getName()));
 			}
 		}
 		else
@@ -2068,6 +2200,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument,COMMAND_CROP))
 		{
 			success = commandCrop(arguments);
+		}
+		//Crop 2D
+		else if (IsCommand(argument,COMMAND_CROP_2D))
+		{
+			success = commandCrop2D(arguments);
 		}
 		//Change default cloud output format
 		else if (IsCommand(argument,COMMAND_CLOUD_EXPORT_FORMAT))

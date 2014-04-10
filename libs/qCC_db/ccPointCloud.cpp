@@ -24,7 +24,9 @@
 #include <ManualSegmentationTools.h>
 #include <GeometricalAnalysisTools.h>
 #include <ReferenceCloud.h>
+#include <ManualSegmentationTools.h>
 
+//local
 #include "ccNormalVectors.h"
 #include "ccColorScalesManager.h"
 #include "ccOctree.h"
@@ -35,6 +37,7 @@
 #include "cc2DLabel.h"
 #include "ccGLUtils.h"
 #include "ccColorRampShader.h"
+#include "ccPolyline.h"
 
 //system
 #include <assert.h>
@@ -2745,6 +2748,62 @@ CCLib::ReferenceCloud* ccPointCloud::crop(const ccBBox& box, bool inside/*=true*
 	{
 		const CCVector3* P = point(i);
 		bool pointIsInside = box.contains(*P);
+		if (inside == pointIsInside)
+		{
+			ref->addPointIndex(i);
+		}
+	}
+
+	if (ref->size() == 0)
+	{
+		//no points inside selection!
+		ref->clear(true);
+	}
+	else
+	{
+		ref->resize(ref->size());
+	}
+
+	return ref;
+}
+
+CCLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned char orthoDim, bool inside/*=true*/)
+{
+	if (!poly)
+	{
+		ccLog::Warning("[ccPointCloud::crop2D] Invalid input polyline");
+		return 0;
+	}
+	if (orthoDim > 2)
+	{
+		ccLog::Warning("[ccPointCloud::crop2D] Invalid input polyline");
+		return 0;
+	}
+
+	unsigned count = size();
+	if (count == 0)
+	{
+		ccLog::Warning("[ccPointCloud::crop] Cloud is empty!");
+		return 0;
+	}
+
+	CCLib::ReferenceCloud* ref = new CCLib::ReferenceCloud(this);
+	if (!ref->reserve(count))
+	{
+		ccLog::Warning("[ccPointCloud::crop] Not enough memory!");
+		delete ref;
+		return 0;
+	}
+
+	unsigned char X = ((orthoDim+1) % 3);
+	unsigned char Y = ((X+1) % 3);
+
+	for (unsigned i=0; i<count; ++i)
+	{
+		const CCVector3* P = point(i);
+
+		CCVector2 P2D( P->u[X], P->u[Y] );
+		bool pointIsInside = CCLib::ManualSegmentationTools::isPointInsidePoly(P2D,poly);
 		if (inside == pointIsInside)
 		{
 			ref->addPointIndex(i);

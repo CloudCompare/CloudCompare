@@ -4670,6 +4670,7 @@ void exactinit()
 #endif /* LINUX */
 
 #ifdef CPU86
+#ifdef _MCW_PC //For C::B+MinGW that doesn't seem to handle this properly!
 #ifdef SINGLE
   //DGM: MSDN says "On the x64 architecture, changing the floating point precision is not supported.
   //If the precision control mask is used on that platform, an assertion and the invalid parameter
@@ -4681,6 +4682,7 @@ void exactinit()
   _control87(_PC_53, _MCW_PC); /* Set FPU control word for double precision. */
 #endif /* not SINGLE */
 #endif /* CPU86 */
+#endif /* _MCW_PC */
 #ifdef LINUX
 #ifdef SINGLE
   /*  cword = 4223; */

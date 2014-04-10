@@ -37,7 +37,7 @@ ccDrawableObject::ccDrawableObject()
 
     enableTempColor(false);
     setTempColor(ccColor::white,false);
-    razGLTransformation();
+    resetGLTransformation();
 }
 
 bool ccDrawableObject::isVisible() const
@@ -148,7 +148,7 @@ void ccDrawableObject::translateGL(const CCVector3& trans)
     enableGLTransformation(true);
 }
 
-void ccDrawableObject::razGLTransformation()
+void ccDrawableObject::resetGLTransformation()
 {
     enableGLTransformation(false);
     m_glTrans.toIdentity();

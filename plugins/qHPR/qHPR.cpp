@@ -302,7 +302,7 @@ void qHPR::doAction()
     if (visibleCells)
     {
 		//DGM: we generate a new cloud now, instead of playing with the points visiblity! (too confusing for the user)
-		/*if (!cloud->isVisibilityTableInstantiated() && !cloud->razVisibilityArray())
+		/*if (!cloud->isVisibilityTableInstantiated() && !cloud->resetVisibilityArray())
 		{
 			m_app->dispToConsole("Visibility array allocation failed! (Not enough memory?)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			return;

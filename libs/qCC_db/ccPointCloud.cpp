@@ -1090,9 +1090,9 @@ bool ccPointCloud::colorize(float r, float g, float b)
 		if (!resizeTheRGBTable(false))
 			return false;
 
-		colorType RGB[3] = {	static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * r) ,
-			static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * g) ,
-			static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * b) };
+		colorType RGB[3] = {static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * r) ,
+							static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * g) ,
+							static_cast<colorType>(static_cast<float>(MAX_COLOR_COMP) * b) };
 		m_rgbColors->fill(RGB);
 	}
 
@@ -2054,7 +2054,7 @@ ccPointCloud* ccPointCloud::filterPointsByScalarValue(ScalarType minVal, ScalarT
 
 void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 {
-	if (!razVisibilityArray())
+	if (!resetVisibilityArray())
 	{
 		ccLog::Error(QString("[Cloud %1] Visibility table could not be instantiated!").arg(getName()));
 		return;
@@ -2241,6 +2241,67 @@ bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*
 			}
 			m_rgbColors->forwardIterator();
 		}
+	}
+
+	return true;
+}
+
+bool ccPointCloud::interpolateColorsFrom(	ccGenericPointCloud* cloud,
+											CCLib::GenericProgressCallback* progressCb/*=NULL*/,
+											unsigned char octreeLevel/*=7*/)
+{
+	if (!cloud || cloud->size() == 0)
+	{
+		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Invalid/empty input cloud!");
+		return false;
+	}
+
+	//check that both bounding boxes intersect!
+	ccBBox box = getBB();
+	ccBBox otherBox = cloud->getBB();
+
+	CCVector3 dimSum = box.getDiagVec() + otherBox.getDiagVec();
+	CCVector3 dist = box.getCenter() - otherBox.getCenter();
+	if (	fabs(dist.x) > dimSum.x / 2
+		||	fabs(dist.y) > dimSum.y / 2
+		||	fabs(dist.z) > dimSum.z / 2)
+	{
+		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Clouds are too far from each other! Can't proceed.");
+		return false;
+	}
+
+	if (!resizeTheRGBTable(false))
+	{
+		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Not enough memory!");
+		return false;
+	}
+
+	//compute the closest-point set of 'this cloud' relatively to 'input cloud'
+	//(to get a mapping between the resulting vertices and the input points)
+	int result = 0;
+	CCLib::ReferenceCloud CPSet(cloud);
+	{
+		CCLib::DistanceComputationTools::Cloud2CloudDistanceComputationParams params;
+		params.CPSet = &CPSet;
+		params.octreeLevel = octreeLevel; //TODO: find a better way to set the right octree level!
+
+		result = CCLib::DistanceComputationTools::computeHausdorffDistance(this, cloud, params, progressCb);
+	}
+
+	if (result < 0)
+	{
+		ccLog::Warning("[ccPointCloud::interpolateColorsFrom] Closest-point set computation failed!");
+		unallocateColors();
+		return false;
+	}
+		
+	//import colors
+	unsigned CPsize = CPSet.size();
+	assert(CPsize == size());
+	for (unsigned i=0; i<CPsize; ++i)
+	{
+		unsigned index = CPSet.getPointGlobalIndex(i);
+		setPointColor(i,cloud->getPointColor(index));
 	}
 
 	return true;

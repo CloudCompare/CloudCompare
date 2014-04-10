@@ -47,7 +47,7 @@ void ccGenericPointCloud::clear()
     enableTempColor(false);
 }
 
-bool ccGenericPointCloud::razVisibilityArray()
+bool ccGenericPointCloud::resetVisibilityArray()
 {
 	if (!m_pointsVisibility)
 	{

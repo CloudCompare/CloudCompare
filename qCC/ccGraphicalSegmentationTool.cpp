@@ -246,9 +246,9 @@ void ccGraphicalSegmentationTool::reset()
         for (std::set<ccHObject*>::iterator p = m_toSegment.begin(); p != m_toSegment.end(); ++p)
         {
             if ((*p)->isKindOf(CC_TYPES::POINT_CLOUD))
-                ccHObjectCaster::ToGenericPointCloud(*p)->razVisibilityArray();
+                ccHObjectCaster::ToGenericPointCloud(*p)->resetVisibilityArray();
             else if ((*p)->isKindOf(CC_TYPES::MESH))
-                ccHObjectCaster::ToGenericMesh(*p)->getAssociatedCloud()->razVisibilityArray();
+                ccHObjectCaster::ToGenericMesh(*p)->getAssociatedCloud()->resetVisibilityArray();
         }
 
         if (m_associatedWin)
@@ -302,7 +302,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 			}
 		}
 
-		cloud->razVisibilityArray();
+		cloud->resetVisibilityArray();
 		m_toSegment.insert(cloud);
 
 		//automatically add cloud's children
@@ -343,7 +343,7 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 				}
 			}
 
-			mesh->getAssociatedCloud()->razVisibilityArray();
+			mesh->getAssociatedCloud()->resetVisibilityArray();
 			m_toSegment.insert(mesh);
 			result = true;
 		}

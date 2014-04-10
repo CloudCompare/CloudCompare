@@ -349,7 +349,7 @@ public:
         Note: GL transformation is automatically disabled.
         See ccDrawableObject::setGLTransformation.
     **/
-    virtual void razGLTransformation();
+    virtual void resetGLTransformation();
 
     //! Mutliplies (left) current GL transformation by a rotation matrix
     /** 'GLtrans = M * GLtrans'

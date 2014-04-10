@@ -287,6 +287,11 @@ public:
     //virtual bool isScalarFieldEnabled() const;
     virtual void refreshBB();
 
+	//! Interpolate colors from another cloud
+	bool interpolateColorsFrom(	ccGenericPointCloud* cloud,
+								CCLib::GenericProgressCallback* progressCb = NULL,
+								unsigned char octreeLevel = 7);
+
     //! Sets a particular point color
     /** WARNING: colors must be enabled.
     **/

@@ -341,7 +341,7 @@ void ccGraphicalTransformationTool::cancel()
 	for (unsigned i=0; i<m_toTransform->getChildrenNumber(); ++i)
 	{
 		ccHObject* child = m_toTransform->getChild(i);
-		child->razGLTransformation();
+		child->resetGLTransformation();
 		child->prepareDisplayForRefresh_recursive();
 	}
 

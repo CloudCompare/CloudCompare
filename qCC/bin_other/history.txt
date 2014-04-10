@@ -32,7 +32,9 @@ v2.5.4 XX/XX/2014
 			(this is not necessary by default as all modified or newly created entities are automatically saved,
 			but it can be useful for performing format conversion through the command line)
 		- ASCII files with less than 6 columns are now loaded silently (i.e. no dialog should pop-up)
-		- 
+	* New method: 'Edit > Colors > Interpolate from another entity'
+		- Set the colors of a cloud (or mesh vertices) by interpolating the colors of another cloud (or mesh vertices)
+		- Right now the only interpolation mode available consists in taking the nearest neighbor's color
 
 - Bug fixes:
 	* Information displayed in 2D labels was 'shifted' ( 'P(index,x,y)' was displayed instead of 'P(x,y,z)')

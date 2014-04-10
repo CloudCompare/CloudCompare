@@ -170,7 +170,7 @@ public:
     //! Resets the associated visiblity array
     /** Warning: allocates the array if it was not done yet!
     **/
-	virtual bool razVisibilityArray();
+	virtual bool resetVisibilityArray();
 
 	//! Erases the points visibility information
 	virtual void unallocateVisibilityArray();

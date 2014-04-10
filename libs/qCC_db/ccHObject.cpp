@@ -628,7 +628,7 @@ void ccHObject::applyGLTransformation_recursive(ccGLMatrix* trans/*=NULL*/)
 		delete _trans;
 
 	if (m_glTransEnabled)
-		razGLTransformation();
+		resetGLTransformation();
 }
 
 void ccHObject::detachChild(ccHObject* child)

@@ -844,6 +844,8 @@ void MainWindow::connectActions()
     connect(actionSetColorGradient,             SIGNAL(triggered()),    this,       SLOT(doActionSetColorGradient()));
     connect(actionColorize,                     SIGNAL(triggered()),    this,       SLOT(doActionColorize()));
     connect(actionClearColor,                   SIGNAL(triggered()),    this,       SLOT(doActionClearColor()));
+	connect(actionInterpolateColors,			SIGNAL(triggered()),    this,       SLOT(doActionInterpolateColors()));
+
     //"Edit > Normals" menu
     connect(actionComputeNormals,               SIGNAL(triggered()),    this,       SLOT(doActionComputeNormals()));
     connect(actionInvertNormals,                SIGNAL(triggered()),    this,       SLOT(doActionInvertNormals()));
@@ -1169,6 +1171,52 @@ void MainWindow::doActionSetColorGradient()
     }
 
     refreshAll();
+	updateUI();
+}
+
+void MainWindow::doActionInterpolateColors()
+{
+	ccGenericPointCloud* cloud1 = m_selectedEntities.size() > 0 ? ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0]) : 0;
+	ccGenericPointCloud* cloud2 = m_selectedEntities.size() > 1 ? ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1]) : 0;
+
+	if (!cloud1 || !cloud2)
+	{
+		ccConsole::Error("Select 2 clouds or meshes!");
+		return;
+	}
+
+	if (!cloud1->hasColors() && !cloud2->hasColors())
+	{
+		ccConsole::Error("None of the selected entities has per-point or per-vertex colors!");
+		return;
+	}
+	else if (cloud1->hasColors() && cloud2->hasColors())
+	{
+		ccConsole::Error("Both entities have colors! Remove the colors on the entity you wish to import the color to!");
+		return;
+	}
+	
+	ccGenericPointCloud* source = cloud1->hasColors() ? cloud1 : cloud2;
+	ccGenericPointCloud* dest = (source == cloud2 ? cloud1 : cloud2);
+
+	if (!dest->isA(CC_TYPES::POINT_CLOUD))
+	{
+		ccConsole::Error("Destination cloud (or vertices) must be a real point cloud!");
+		return;
+	}
+
+	ccProgressDialog pDlg(true, this);
+	if (static_cast<ccPointCloud*>(dest)->interpolateColorsFrom(source,&pDlg))
+	{
+		dest->showColors(true);
+	}
+	else
+	{
+		ccConsole::Error("An error occurred! (see console)");
+	}
+
+	if (dest->getDisplay())
+		dest->getDisplay()->redraw();
 	updateUI();
 }
 
@@ -6140,7 +6188,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 		{
 			for (std::set<ccGenericPointCloud*>::iterator p = verticesToReset.begin(); p != verticesToReset.end(); ++p)
 			{
-				(*p)->razVisibilityArray();
+				(*p)->resetVisibilityArray();
 			}
 		}
 
@@ -9245,6 +9293,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     //bool exactlyTwoSF = (selInfo.sfCount == 2);
 
     actionRegister->setEnabled(exactlyTwoEntities);
+	actionInterpolateColors->setEnabled(exactlyTwoEntities && atLeastOneColor);
 	actionPointPairsAlign->setEnabled(exactlyOneEntity || exactlyTwoEntities);
     actionAlign->setEnabled(exactlyTwoEntities); //Aurelien BEY le 13/11/2008
     actionSubsample->setEnabled(exactlyOneCloud); //Aurelien BEY le 4/12/2008

@@ -181,7 +181,7 @@ ccClipBox::~ccClipBox()
 void ccClipBox::reset()
 {
 	m_box.clear();
-	razGLTransformation();
+	resetGLTransformation();
 
 	if (m_associatedEntity)
 	{
@@ -212,7 +212,7 @@ void ccClipBox::setAssociatedEntity(ccHObject* associatedEntity)
 		}
 		else
 		{
-			if (ccHObjectCaster::ToGenericPointCloud(associatedEntity)->razVisibilityArray())
+			if (ccHObjectCaster::ToGenericPointCloud(associatedEntity)->resetVisibilityArray())
 			{
 				m_associatedEntity = associatedEntity;
 			}

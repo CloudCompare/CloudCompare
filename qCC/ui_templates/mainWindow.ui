@@ -175,6 +175,7 @@
      <addaction name="actionColorize"/>
      <addaction name="actionSetColorGradient"/>
      <addaction name="actionScalarFieldFromColor"/>
+     <addaction name="actionInterpolateColors"/>
      <addaction name="separator"/>
      <addaction name="actionClearColor"/>
     </widget>
@@ -2502,6 +2503,14 @@
   <action name="actionExportCloudsInfo">
    <property name="text">
     <string>Export cloud(s) info</string>
+   </property>
+  </action>
+  <action name="actionInterpolateColors">
+   <property name="text">
+    <string>Interpolate from another entity</string>
+   </property>
+   <property name="toolTip">
+    <string>Interpolate colors from another entity (cloud or mesh) - color is taken from the nearest neighbor</string>
    </property>
   </action>
  </widget>

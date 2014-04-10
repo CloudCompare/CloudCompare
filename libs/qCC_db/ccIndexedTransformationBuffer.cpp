@@ -61,7 +61,12 @@ bool ccIndexedTransformationBuffer::findNearest(double index,
 	if (trans2IndexInBuffer)
 		*trans2IndexInBuffer = 0;
 
+#if defined(_MSC_VER) && _MSC_VER > 1000
+	ccIndexedTransformation tIndex; tIndex.setIndex(index);
+	ccIndexedTransformationBuffer::const_iterator it = std::lower_bound(begin(),end(),tIndex,IndexedSortOperator);
+#else
 	ccIndexedTransformationBuffer::const_iterator it = std::lower_bound(begin(),end(),index,IndexCompOperator);
+#endif
 
 	//special case: all transformations are BEFORE the input index
 	if (it == end())

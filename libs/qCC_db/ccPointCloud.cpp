@@ -2464,44 +2464,56 @@ void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
 
 int ccPointCloud::addScalarField(const char* uniqueName)
 {
-	//we don't accept two SF with the same name!
-	if (getScalarFieldIndexByName(uniqueName) >= 0)
-	{
-		ccLog::Warning(QString("[ccPointCloud::addScalarField] Name '%1' already exists!").arg(uniqueName));
-		return -1;
-	}
-
-	//Nouveau champ scalaire
+	//create new scalar field
 	ccScalarField* sf = new ccScalarField(uniqueName);
-	if (size() && !sf->resize(size()))
+
+	int sfIdx = addScalarField(sf);
+
+	//failure?
+	if (sfIdx < 0)
 	{
 		sf->release();
-		ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
 		return -1;
 	}
 
-	m_scalarFields.push_back(sf);
-	sf->link();
-
-	return (int)m_scalarFields.size()-1;
+	return sfIdx;
 }
 
 int ccPointCloud::addScalarField(ccScalarField* sf)
 {
 	assert(sf);
 
-	//we don't accept two SF with the same name!
+	//we don't accept two SFs with the same name!
 	if (getScalarFieldIndexByName(sf->getName()) >= 0)
+	{
+		ccLog::Warning(QString("[ccPointCloud::addScalarField] Name '%1' already exists!").arg(sf->getName()));
 		return -1;
+	}
 
+	//auto-resize
 	if (sf->currentSize() < m_points->capacity())
+	{
 		if (!sf->resize(m_points->capacity()))
+		{
+			ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
 			return -1;
+		}
+	}
+
+	try
+	{
+		m_scalarFields.push_back(sf);
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Warning("[ccPointCloud::addScalarField] Not enough memory!");
+		sf->release();
+		return -1;
+	}
 
 	sf->link();
-	m_scalarFields.push_back(sf);
 
-	return (int)m_scalarFields.size()-1;
+	return static_cast<int>(m_scalarFields.size())-1;
 }
 
 bool ccPointCloud::toFile_MeOnly(QFile& out) const

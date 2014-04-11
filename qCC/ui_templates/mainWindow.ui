@@ -387,15 +387,15 @@
      <addaction name="actionRoughness"/>
      <addaction name="actionRemoveDuplicatePoints"/>
     </widget>
-    <widget class="QMenu" name="menuSand_Box">
+    <widget class="QMenu" name="menuSandBox">
      <property name="title">
       <string>Sand box (research)</string>
      </property>
      <addaction name="actionComputeKdTree"/>
      <addaction name="separator"/>
-     <addaction name="actionMeshBestFittingQuadric"/>
      <addaction name="separator"/>
      <addaction name="actionComputeBestFitBB"/>
+     <addaction name="actionDistanceToBestFitQuadric3D"/>
      <addaction name="separator"/>
      <addaction name="actionAlign"/>
      <addaction name="separator"/>
@@ -412,6 +412,7 @@
      </property>
      <addaction name="actionFitPlane"/>
      <addaction name="actionFitFacet"/>
+     <addaction name="actionFitQuadric"/>
     </widget>
     <addaction name="menuProjection"/>
     <addaction name="menuRegistration"/>
@@ -424,7 +425,7 @@
     <addaction name="actionPointPicking"/>
     <addaction name="actionPointListPicking"/>
     <addaction name="separator"/>
-    <addaction name="menuSand_Box"/>
+    <addaction name="menuSandBox"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menuEdit"/>
@@ -1940,9 +1941,9 @@
     <string>Rename</string>
    </property>
   </action>
-  <action name="actionMeshBestFittingQuadric">
+  <action name="actionFitQuadric">
    <property name="text">
-    <string>Best fitting quadric</string>
+    <string>2D1/2 quadric</string>
    </property>
   </action>
   <action name="actionSNETest">
@@ -2511,6 +2512,11 @@
    </property>
    <property name="toolTip">
     <string>Interpolate colors from another entity (cloud or mesh) - color is taken from the nearest neighbor</string>
+   </property>
+  </action>
+  <action name="actionDistanceToBestFitQuadric3D">
+   <property name="text">
+    <string>Distance map to best-fit 3D quadric</string>
    </property>
   </action>
  </widget>

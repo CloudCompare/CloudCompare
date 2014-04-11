@@ -304,6 +304,7 @@ protected slots:
 	void doCylindricalNeighbourhoodExtractionTest(); //DGM TODO: remove after test
 	void doActionFitPlane();
 	void doActionFitFacet();
+    void doActionFitQuadric();
 	void doShowPrimitiveFactory();
 
     void doActionComputeNormals();
@@ -337,7 +338,7 @@ protected slots:
     void doActionResampleWithOctree();
     void doActionComputeMeshAA();
     void doActionComputeMeshLS();
-    void doActionComputeQuadric3D();
+    void doActionComputeDistToBestFitQuadric3D();
     void doActionMeasureMeshSurface();
     void doActionSmoothMeshLaplacian();
 	void doActionSubdivideMesh();

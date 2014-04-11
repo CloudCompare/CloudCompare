@@ -131,7 +131,7 @@ bool ChunkedPointCloud::reserve(unsigned newNumberOfPoints)
         return false;
 
 	//then the scalarfields
-	for (unsigned i=0;i<m_scalarFields.size();++i)
+	for (size_t i=0; i<m_scalarFields.size(); ++i)
 	{
 		if (!m_scalarFields[i]->reserve(newNumberOfPoints))
 			return false;

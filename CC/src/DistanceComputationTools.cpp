@@ -429,11 +429,11 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 	}
 
 	//already computed models
-	std::vector<LocalModel*> models;
+	std::vector<const LocalModel*> models;
 
 	//for each point of the current cell (compared octree) we look its nearest neighbour in the reference cloud
 	unsigned pointCount=cell.points->size();
-	for (unsigned i=0;i<pointCount;++i)
+	for (unsigned i=0; i<pointCount; ++i)
 	{
 		//distance of the current point
 		ScalarType distPt = NAN_VALUE;
@@ -453,12 +453,12 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 				referenceCloud->getPoint(nNSS.theNearestPointIndex,nearestPoint);
 
 				//local model for the 'nearest point'
-				LocalModel* lm = 0;
+				const LocalModel* lm = 0;
 
 				if (params->reuseExistingLocalModels)
 				{
 					//we look if the nearest point is close to existing models
-					for (std::vector<LocalModel*>::const_iterator it = models.begin(); it!=models.end(); ++it)
+					for (std::vector<const LocalModel*>::const_iterator it = models.begin(); it!=models.end(); ++it)
 					{
 						//we take the first model that 'includes' the nearest point
 						if ( ((*it)->getCenter() - nearestPoint).norm2() <= (*it)->getSquareSize())
@@ -517,13 +517,26 @@ bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const 
 
 						//Neighbours are sorted, so the farthest is at the end. It also gives us
 						//an approximation of the model 'size'
-						double maxSquareDist = nNSS_Model.pointsInNeighbourhood[kNN-1].squareDistd;
-						lm = new LocalModel(Z,params->localModel,nearestPoint,static_cast<PointCoordinateType>(maxSquareDist));
+						const double& maxSquareDist = nNSS_Model.pointsInNeighbourhood[kNN-1].squareDistd;
+						lm = LocalModel::New(params->localModel,Z,nearestPoint,static_cast<PointCoordinateType>(maxSquareDist));
 
 						if (params->reuseExistingLocalModels)
 						{
 							//we add the model to the 'existing models' list
-							models.push_back(lm);
+							try
+							{
+								models.push_back(lm);
+							}
+							catch(std::bad_alloc)
+							{
+								//not enough memory!
+								while (!models.empty())
+								{
+									delete models.back();
+									models.pop_back();
+								}
+								return false;
+							}
 						}
 
 						//neighbours->clear();

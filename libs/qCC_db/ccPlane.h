@@ -80,8 +80,8 @@ public:
 	//! Fits a plane primitive on a cloud
 	/** The cloud can be any CCLib::GenericIndexedCloudPersist-derived object,
 		i.e. even a ccPolyline object for instance.
-		\param cloud input cloud
-		\param rms to retrieve plane fitting rms (optional)
+		\param[in] cloud input cloud
+		\param[out] rms plane fitting rms (optional)
 		\return plane primitive (if successful)
 	**/
 	static ccPlane* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0);

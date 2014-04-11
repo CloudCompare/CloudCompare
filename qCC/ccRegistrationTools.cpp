@@ -99,7 +99,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
         oldDataSfIdx = pc->getCurrentInScalarFieldIndex();
         dataSfIdx = pc->getScalarFieldIndexByName(REGISTRATION_DISTS_SF);
         if (dataSfIdx < 0)
-            dataSfIdx=pc->addScalarField(REGISTRATION_DISTS_SF);
+            dataSfIdx = pc->addScalarField(REGISTRATION_DISTS_SF);
         if (dataSfIdx >= 0)
             pc->setCurrentScalarField(dataSfIdx);
         else
@@ -116,7 +116,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 	CCLib::ScalarField* modelWeights = 0;
 	if (useModelSFAsWeights)
 	{
-		if (modelCloud == (CCLib::GenericIndexedCloudPersist*)model && model->isA(CC_TYPES::POINT_CLOUD))
+		if (modelCloud == dynamic_cast<CCLib::GenericIndexedCloudPersist*>(model) && model->isA(CC_TYPES::POINT_CLOUD))
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(model);
 			modelWeights = pc->getCurrentDisplayedScalarField();

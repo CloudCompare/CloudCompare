@@ -191,7 +191,7 @@ bool ccMesh::computePerVertexNormals()
 
     //allocate compressed normals array on vertices cloud
     bool normalsWereAllocated = cloud->hasNormals();
-    if (!normalsWereAllocated && !cloud->resizeTheNormsTable())
+    if (/*!normalsWereAllocated && */!cloud->resizeTheNormsTable()) //we call it whatever the case (just to be sure)
 	{
 		theNorms->release();
 		return false;

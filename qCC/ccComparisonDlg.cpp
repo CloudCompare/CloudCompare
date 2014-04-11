@@ -291,9 +291,9 @@ int ccComparisonDlg::computeApproxResults()
 		return approxResult;
 
 	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_CHAMFER_DISTANCES_DEFAULT_SF_NAME);
-	if (sfIdx<0)
-		sfIdx=m_compCloud->addScalarField(CC_TEMP_CHAMFER_DISTANCES_DEFAULT_SF_NAME);
-	if (sfIdx<0)
+	if (sfIdx < 0)
+		sfIdx = m_compCloud->addScalarField(CC_TEMP_CHAMFER_DISTANCES_DEFAULT_SF_NAME);
+	if (sfIdx < 0)
 	{
 		ccLog::Error("Failed to allocate a new scalar field for computing distances! Try to free some memory ...");
 		return approxResult;
@@ -579,22 +579,20 @@ bool ccComparisonDlg::compute()
 
 	//does the cloud has already a temporary scalar field that we can use?
 	int sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_CHAMFER_DISTANCES_DEFAULT_SF_NAME);
-	if (sfIdx<0)
+	if (sfIdx < 0)
 		sfIdx = m_compCloud->getScalarFieldIndexByName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
-	if (sfIdx>=0)
+	if (sfIdx >= 0)
 	{
 		CCLib::ScalarField* sf = m_compCloud->getScalarField(sfIdx);
 		assert(sf);
-
 		//we recycle an existing scalar field, we must rename it
 		sf->setName(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
 	}
-
-	//do we need to create a new scalar field?
-	if (sfIdx<0)
+	else
 	{
+		//we need to create a new scalar field
 		sfIdx = m_compCloud->addScalarField(CC_TEMP_DISTANCES_DEFAULT_SF_NAME);
-		if (sfIdx<0)
+		if (sfIdx < 0)
 		{
 			ccLog::Error("Couldn't allocate a new scalar field for computing distances! Try to free some memory ...");
 			return false;
@@ -758,7 +756,8 @@ bool ccComparisonDlg::compute()
 					int sfExit = m_compCloud->getScalarFieldIndexByName(sfDims[j]->getName());
 					if (sfExit >= 0)
 						m_compCloud->deleteScalarField(sfExit);
-					m_compCloud->addScalarField(sfDims[j]);
+					sfExit = m_compCloud->addScalarField(sfDims[j]);
+					assert(sfExit >= 0);
 				}
 				ccLog::Warning("[ComputeDistances] Result has been split along each dimension (check the 3 other scalar fields with '_X', '_Y' and '_Z' suffix!)");
 			}

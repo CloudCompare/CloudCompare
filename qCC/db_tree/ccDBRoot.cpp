@@ -414,6 +414,7 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 			case CC_TYPES::DISH:	
 			case CC_TYPES::EXTRU:	
 			case CC_TYPES::FACET:
+			case CC_TYPES::QUADRIC:
                 if (locked)
                     return QIcon(QString::fromUtf8(":/CC/images/dbMiscGeomSymbolLocked.png"));
                 else

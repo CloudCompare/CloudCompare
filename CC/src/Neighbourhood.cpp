@@ -28,6 +28,7 @@
 #include "SimpleMesh.h"
 
 //system
+#include <string.h>
 #include <assert.h>
 
 using namespace CCLib;
@@ -51,11 +52,30 @@ const CCVector3* Neighbourhood::getGravityCenter()
 	return ((structuresValidity & GRAVITY_CENTER) ? &theGravityCenter : 0);
 }
 
+void Neighbourhood::setGravityCenter(const CCVector3& G)
+{
+	theGravityCenter = G;
+	structuresValidity |= GRAVITY_CENTER;
+}
+
 const PointCoordinateType* Neighbourhood::getLSQPlane()
 {
 	if (!(structuresValidity & LSQ_PLANE))
 		computeLeastSquareBestFittingPlane();
 	return ((structuresValidity & LSQ_PLANE) ? theLSQPlaneEquation : 0);
+}
+
+void Neighbourhood::setLSQPlane(const PointCoordinateType eq[4],
+								const CCVector3& X,
+								const CCVector3& Y,
+								const CCVector3& N)
+{
+	memcpy(theLSQPlaneEquation,eq,sizeof(PointCoordinateType)*4);
+	theLSQPlaneVectors[0] = X;
+	theLSQPlaneVectors[1] = Y;
+	theLSQPlaneVectors[2] = N;
+	
+	structuresValidity |= LSQ_PLANE;
 }
 
 const CCVector3* Neighbourhood::getLSQPlaneX()
@@ -109,39 +129,21 @@ void Neighbourhood::computeGravityCenter()
 	if (!count)
 		return;
 
-	CCVector3d Psum(0.0);
-
-	//sums
-	#ifdef CC_NEIGHBOURHOOD_PRECISION_COMPUTINGS
-	PointCoordinateType bbMin[3],bbMax[3];
-	m_associatedCloud->getBoundingBox(bbMin,bbMax);
-	CCVector3 C = (CCVector3(bbMin)+CCVector3(bbMax))*0.5;
-	#endif
-
-	for (unsigned i=0;i<count;++i)
+	//sum
+	CCVector3d Psum(0,0,0);
+	for (unsigned i=0; i<count; ++i)
 	{
 		const CCVector3* P = m_associatedCloud->getPoint(i);
-		#ifdef CC_NEIGHBOURHOOD_PRECISION_COMPUTINGS
-		Xsum += (double)(P->x-C.x);
-		Ysum += (double)(P->y-C.y);
-		Zsum += (double)(P->z-C.z);
-		#else
-		Psum.x += (double)P->x;
-		Psum.y += (double)P->y;
-		Psum.z += (double)P->z;
-		#endif
+		Psum.x += P->x;
+		Psum.y += P->y;
+		Psum.z += P->z;
 	}
 
-	Psum /= (double)count;
-	theGravityCenter.x = (PointCoordinateType)Psum.x;
-	theGravityCenter.y = (PointCoordinateType)Psum.y;
-	theGravityCenter.z = (PointCoordinateType)Psum.z;
+	CCVector3 G(static_cast<PointCoordinateType>(Psum.x / count),
+				static_cast<PointCoordinateType>(Psum.y / count),
+				static_cast<PointCoordinateType>(Psum.z / count) );
 
-	#ifdef CC_NEIGHBOURHOOD_PRECISION_COMPUTINGS
-	theGravityCenter += C;
-	#endif
-
-	structuresValidity |= GRAVITY_CENTER;
+	setGravityCenter(G);
 }
 
 CCLib::SquareMatrixd Neighbourhood::computeCovarianceMatrix()
@@ -284,7 +286,7 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 	//normalize X as well
 	theLSQPlaneVectors[0].normalize();
 	//and update Y
-	theLSQPlaneVectors[1] = theLSQPlaneVectors[2].cross(theLSQPlaneVectors[1]);
+	theLSQPlaneVectors[1] = theLSQPlaneVectors[2].cross(theLSQPlaneVectors[0]);
 
 	//deduce the proper equation
 	theLSQPlaneEquation[0] = theLSQPlaneVectors[2].x;
@@ -350,40 +352,40 @@ bool Neighbourhood::computeHeightFunction()
 	float *A = new float[6*count];
 	float *b = new float[count];
 
-	float lmax2=0; //max (squared) dimension
+	float lmax2 = 0; //max (squared) dimension
 
     //for all points
 	{
-		float* _A=A;
-		float* _b=b;
-		for (unsigned i=0;i<count;++i)
+		float* _A = A;
+		float* _b = b;
+		for (unsigned i=0; i<count; ++i)
 		{
 			CCVector3 P = *m_associatedCloud->getPoint(i) - *G;
 
-			float lX = (float)P.u[idx_X];
-			float lY = (float)P.u[idx_Y];
-			float lZ = (float)P.u[idx_Z];
+			float lX = static_cast<float>(P.u[idx_X]);
+			float lY = static_cast<float>(P.u[idx_Y]);
+			float lZ = static_cast<float>(P.u[idx_Z]);
 
-			*_A++ = 1.0;
+			*_A++ = 1.0f;
 			*_A++ = lX;
 			*_A++ = lY;
 			*_A = lX*lX;
 			//by the way, we track the max 'X' squared dimension
-			if (*_A>lmax2)
-				lmax2=*_A;
+			if (*_A > lmax2)
+				lmax2 = *_A;
 			++_A;
 			*_A++ = lX*lY;
 			*_A = lY*lY;
 			//by the way, we track the max 'Y' squared dimension
-			if (*_A>lmax2)
-				lmax2=*_A;
+			if (*_A > lmax2)
+				lmax2 = *_A;
 			++_A;
 
 			*_b++ = lZ;
 			lZ *= lZ;
 			//and don't forget to track the max 'Z' squared dimension as well
-			if (lZ>lmax2)
-				lmax2=lZ;
+			if (lZ > lmax2)
+				lmax2 = lZ;
 		}
 	}
 
@@ -406,7 +408,7 @@ bool Neighbourhood::computeHeightFunction()
 				for (unsigned k=0; k<count; ++k)
 				{
 					//tmp += A[(6*k)+i]*A[(6*k)+j];
-					tmp += (double)((*_Ai) * (*_Aj));
+					tmp += static_cast<double>((*_Ai) * (*_Aj));
 					_Ai += 6;
 					_Aj += 6;
 				}
@@ -421,7 +423,7 @@ bool Neighbourhood::computeHeightFunction()
 				for (unsigned k=0; k<count; ++k)
 				{
 					//tmp += A[(6*k)+i]*b[k];
-					tmp += (double)((*_Ai) * (*_b++));
+					tmp += static_cast<double>((*_Ai) * (*_b++));
 					_Ai += 6;
 				}
 				tAb[i] = tmp;
@@ -430,16 +432,15 @@ bool Neighbourhood::computeHeightFunction()
 	}
 
 	//first guess for X: plane equation (a0.x+a1.y+a2.z=a3 --> z = a3/a2 - a0/a2.x - a1/a2.y)
-	double X0[6];
-	X0[0] = (double)/*lsq[3]/lsq[idx_Z]*/0; //DGM: warning, points have already been recentred around the gravity center! So forget about a3
-	X0[1] = (double)(-lsq[idx_X]/lsq[idx_Z]);
-	X0[2] = (double)(-lsq[idx_Y]/lsq[idx_Z]);
-	X0[3] = 0;
-	X0[4] = 0;
-	X0[5] = 0;
+	double X0[6] = {	static_cast<double>(/*lsq[3]/lsq[idx_Z]*/0), //DGM: warning, points have already been recentred around the gravity center! So forget about a3
+						static_cast<double>(-lsq[idx_X]/lsq[idx_Z]),
+						static_cast<double>(-lsq[idx_Y]/lsq[idx_Z]),
+						0,
+						0,
+						0 };
 
 	//special case: a0 = a1 = a2 = 0! //happens for perfectly flat surfaces!
-	if (X0[1] == 0.0 && X0[2] == 0.0)
+	if (X0[1] == 0 && X0[2] == 0)
 		X0[0] = 1.0;
 
 	//init. conjugate gradient
@@ -447,7 +448,7 @@ bool Neighbourhood::computeHeightFunction()
 
     //conjugate gradient iterations
 	{
-		double convergenceThreshold = (double)lmax2 * 1e-8;  //max. error for convergence = 1e-8 of largest cloud dimension (empirical!)
+		double convergenceThreshold = static_cast<double>(lmax2) * 1.0e-8;  //max. error for convergence = 1e-8 of largest cloud dimension (empirical!)
 		for (unsigned i=0; i<1500; ++i)
 		{
 			double lastError = cg.iterConjugateGradient(X0);
@@ -460,17 +461,19 @@ bool Neighbourhood::computeHeightFunction()
 	//fclose(fp);
 
 	delete[] A;
-	A=0;
+	A = 0;
 	delete[] b;
-	b=0;
+	b = 0;
 
 	//output
 	{
-		for (unsigned i=0;i<6;++i)
-			theHeightFunction[i]=(PointCoordinateType)X0[i];
-		theHeightFunctionDirections[0]=idx_X;
-		theHeightFunctionDirections[1]=idx_Y;
-		theHeightFunctionDirections[2]=idx_Z;
+		for (unsigned i=0; i<6; ++i)
+		{
+			theHeightFunction[i] = static_cast<PointCoordinateType>(X0[i]);
+		}
+		theHeightFunctionDirections[0] = idx_X;
+		theHeightFunctionDirections[1] = idx_Y;
+		theHeightFunctionDirections[2] = idx_Z;
 
 		structuresValidity |= HEIGHT_FUNCTION;
 	}
@@ -497,8 +500,7 @@ bool Neighbourhood::compute3DQuadric()
     //we look for the eigen vector associated to the minimum eigen value of a matrix A
     //where A=transpose(D)*D, and D=[xi^2 yi^2 zi^2 xiyi yizi xizi xi yi zi 1] (i=1..N)
 
-	unsigned i,l,c,count = m_associatedCloud->size();
-	CCVector3 P;
+	unsigned count = m_associatedCloud->size();
 
     //we compute M = [x2 y2 z2 xy yz xz x y z 1] for all points
     PointCoordinateType* M = new PointCoordinateType[count*10];
@@ -506,9 +508,9 @@ bool Neighbourhood::compute3DQuadric()
         return false;
 
 	PointCoordinateType* _M = M;
-	for (i=0;i<count;++i)
+	for (unsigned i=0; i<count; ++i)
 	{
-		P = *m_associatedCloud->getPoint(i) - *G;
+		CCVector3 P = *m_associatedCloud->getPoint(i) - *G;
 
         //we fill the ith line
 	    (*_M++) = P.x * P.x;
@@ -525,17 +527,14 @@ bool Neighbourhood::compute3DQuadric()
 
     //D = tM.M
     SquareMatrixd D(10);
-	for (l=0; l<10; ++l)
+	for (unsigned l=0; l<10; ++l)
 	{
-        for (c=0; c<10; ++c)
+        for (unsigned c=0; c<10; ++c)
         {
-            double sum=0.0;
+            double sum = 0;
             _M = M;
-            for (i=0; i<count; ++i)
-            {
-                sum += (double)(_M[l] * _M[c]);
-                _M+=10;
-            }
+            for (unsigned i=0; i<count; ++i, _M+=10)
+                sum += static_cast<double>(_M[l] * _M[c]);
 
             D.m_values[l][c] = sum;
         }
@@ -556,8 +555,10 @@ bool Neighbourhood::compute3DQuadric()
 	/*double lambdaMin = */eig.getMinEigenValueAndVector(vec);
 
     //we store result
-	for (i=0;i<10;++i)
-        the3DQuadric[i]=vec[i];
+	{
+		for (unsigned i=0; i<10; ++i)
+			the3DQuadric[i] = vec[i];
+	}
 
 	structuresValidity |= QUADRIC_3D;
 

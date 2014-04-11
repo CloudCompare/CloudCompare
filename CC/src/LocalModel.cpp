@@ -22,6 +22,7 @@
 #include "GenericMesh.h"
 #include "GenericIndexedMesh.h"
 #include "DistanceComputationTools.h"
+#include "Neighbourhood.h"
 
 //system
 #include <string.h>
@@ -29,120 +30,186 @@
 
 using namespace CCLib;
 
-LocalModel::LocalModel(Neighbourhood& Yk, CC_LOCAL_MODEL_TYPES mt, const CCVector3 &center, PointCoordinateType _squareModelSize)
-	: delaunayTri(0)
-	, lsqPlane(0)
-	, hf(0)
-	, mtype(NO_MODEL)
-	, modelCenter(center)
-	, squareModelSize(_squareModelSize)
+//! Least Squares Best Fitting Plane "local modelization"
+class LSLocalModel : public LocalModel
 {
-	switch(mt)
+public:
+
+	//! Constructor
+	LSLocalModel(const PointCoordinateType eq[4], const CCVector3 &center, PointCoordinateType squaredRadius)
+		: LocalModel(center, squaredRadius)
+	{
+		memcpy(m_eq,eq,sizeof(PointCoordinateType)*4);
+	}
+
+	//inherited from LocalModel
+	virtual CC_LOCAL_MODEL_TYPES getType() { return LS; }
+
+	//inherited from LocalModel
+	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* P) const
+	{
+		return fabs( DistanceComputationTools::computePoint2PlaneDistance(P,m_eq) );
+	}
+
+protected:
+
+	//! Plane equation
+	PointCoordinateType m_eq[4];
+};
+
+//! Delaunay 2D1/2 "local modelization"
+class DelaunayLocalModel : public LocalModel
+{
+public:
+
+	//! Constructor
+	DelaunayLocalModel(GenericMesh* tri, const CCVector3 &center, PointCoordinateType squaredRadius)
+		: LocalModel(center, squaredRadius)
+		, m_tri(tri)
+	{
+		assert(tri);
+	}
+
+	//! Destructor
+	virtual ~DelaunayLocalModel() { if (m_tri) delete m_tri; }
+
+	//inherited from LocalModel
+	virtual CC_LOCAL_MODEL_TYPES getType() { return TRI; }
+
+	//inherited from LocalModel
+	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* P) const
+	{
+		ScalarType minDist2 = NAN_VALUE;
+		if (m_tri)
+		{
+			m_tri->placeIteratorAtBegining();
+			unsigned numberOfTriangles = m_tri->size();
+			for (unsigned i=0; i<numberOfTriangles; ++i)
+			{
+				GenericTriangle* tri = m_tri->_getNextTriangle();
+				ScalarType dist2 = DistanceComputationTools::computePoint2TriangleDistance(P,tri,false);
+				if (dist2 < minDist2 || i == 0)
+					minDist2 = dist2;
+			}
+		}
+
+		//there should be at least one triangle!
+		assert(minDist2 == minDist2);
+
+		return sqrt(minDist2);
+	}
+
+protected:
+
+	//! Associated triangulation
+	GenericMesh* m_tri;
+};
+
+//! Quadric "local modelization"
+/** Former 'Height Function' model.
+**/
+class QuadricLocalModel : public LocalModel
+{
+public:
+
+	//! Constructor
+	QuadricLocalModel(	const PointCoordinateType eq[6],
+						uchar X, uchar Y, uchar Z,
+						CCVector3 gravityCenter,
+						const CCVector3 &center,
+						PointCoordinateType squaredRadius)
+		: LocalModel(center, squaredRadius)
+		, m_X(X)
+		, m_Y(Y)
+		, m_Z(Z)
+		, m_gravityCenter(gravityCenter)
+	{
+		memcpy(m_eq,eq,sizeof(PointCoordinateType)*6);
+	}
+
+	//inherited from LocalModel
+	virtual CC_LOCAL_MODEL_TYPES getType() { return HF; }
+
+	//inherited from LocalModel
+	virtual ScalarType computeDistanceFromModelToPoint(const CCVector3* _P) const
+	{
+		CCVector3 P = *_P - m_gravityCenter;
+
+		//height = h0 + h1.x + h2.y + h3.x^2 + h4.x.y + h5.y^2
+		PointCoordinateType z = m_eq[0] + m_eq[1]*P.u[m_X] + m_eq[2]*P.u[m_Y] + m_eq[3]*P.u[m_X]*P.u[m_X] + m_eq[4]*P.u[m_X]*P.u[m_Y] + m_eq[5]*P.u[m_Y]*P.u[m_Y];
+
+		return static_cast<ScalarType>( fabs(P.u[m_Z] - z) );
+	}
+
+protected:
+
+	//! Quadric equation
+	PointCoordinateType m_eq[6];
+	//! Height function first dimension (0=X, 1=Y, 2=Z)
+	uchar m_X;
+	//! Height function second dimension (0=X, 1=Y, 2=Z)
+	uchar m_Y;
+	//! Height function third dimension (0=X, 1=Y, 2=Z)
+	uchar m_Z;
+	//! Model gravity center
+	CCVector3 m_gravityCenter;
+
+};
+
+LocalModel::LocalModel(const CCVector3 &center, PointCoordinateType squaredRadius)
+	: m_modelCenter(center)
+	, m_squaredRadius(squaredRadius)
+{}
+
+LocalModel* LocalModel::New(CC_LOCAL_MODEL_TYPES type,
+							Neighbourhood& subset,
+							const CCVector3 &center,
+							PointCoordinateType squaredRadius)
+{
+	switch(type)
 	{
 	case NO_MODEL:
-        break;
+		assert(false);
+		break;
+
 	case LS:
 		{
-			const PointCoordinateType* lsq = Yk.getLSQPlane();
+			const PointCoordinateType* lsq = subset.getLSQPlane();
 			if (lsq)
 			{
-				lsqPlane = new PointCoordinateType[4];
-				memcpy(lsqPlane,lsq,sizeof(PointCoordinateType)*4);
-				mtype = mt;
+				return new LSLocalModel(lsq,center,squaredRadius);
 			}
 		}
 		break;
+
 	case TRI:
 		{
-			delaunayTri = Yk.triangulateOnPlane(true); //Yk is associated to a volatile ReferenceCloud, so we must duplicate vertices!
-			if (delaunayTri)
+			GenericMesh* tri = subset.triangulateOnPlane(true); //'subset' is potentially associated to a volatile ReferenceCloud, so we must duplicate vertices!
+			if (tri)
 			{
-				if (delaunayTri->size()!=0)
-				{
-					mtype = mt;
-				}
-				else
-				{
-					delete delaunayTri;
-					delaunayTri=0;
-				}
+				return new DelaunayLocalModel(tri,center,squaredRadius);
 			}
 		}
 		break;
+
 	case HF:
 		{
 			uchar hfdims[3];
-			const PointCoordinateType* heightFunc = Yk.getHeightFunction(hfdims);
-			if (heightFunc)
+			const PointCoordinateType* eq = subset.getHeightFunction(hfdims);
+			if (eq)
 			{
-				hf = new PointCoordinateType[6];
-				memcpy(hf,heightFunc,sizeof(PointCoordinateType)*6);
-				hfX = hfdims[0];
-				hfY = hfdims[1];
-				hfZ = hfdims[2];
-
-				const CCVector3* GC = Yk.getGravityCenter();
-				//if the HF computation succeeded, the gravity center should be ok!
-				assert(GC);
-				gravityCenter = *GC;
-
-				mtype = mt;
+				return new QuadricLocalModel(	eq,
+												hfdims[0],
+												hfdims[1],
+												hfdims[2],
+												*subset.getGravityCenter(), //should be ok as the quadric computation succeeded!
+												center,
+												squaredRadius );
 			}
 		}
 		break;
 	}
-}
 
-LocalModel::~LocalModel()
-{
-	if (delaunayTri)
-		delete delaunayTri;
-	if (lsqPlane)
-		delete[] lsqPlane;
-	if (hf)
-		delete[] hf;
-}
-
-ScalarType LocalModel::computeDistanceFromModelToPoint(const CCVector3* aPoint)
-{
-    switch(mtype)
-    {
-        case LS:
-		{
-            return fabs(DistanceComputationTools::computePoint2PlaneDistance(aPoint,lsqPlane));
-		}
-        case TRI:
-        {
-            ScalarType minDist2 = NAN_VALUE;
-			{
-				unsigned numberOfTriangles = delaunayTri->size();
-				delaunayTri->placeIteratorAtBegining();
-				for (unsigned i=0; i<numberOfTriangles; ++i)
-				{
-					GenericTriangle* tri = delaunayTri->_getNextTriangle();
-					ScalarType dist2 = DistanceComputationTools::computePoint2TriangleDistance(aPoint,tri,false);
-					if (dist2 < minDist2 || i==0)
-						minDist2 = dist2;
-				}
-			}
-
-            //there should be at least one triangle!
-			assert(minDist2==minDist2);
-            return sqrt(minDist2);
-        }
-        case HF:
-        {
-			CCVector3 P = *aPoint - gravityCenter;
-
-            //HF : h0+h1.x+h2.y+h3.x^2+h4.x.y+h5.y^2
-            PointCoordinateType z2 = hf[0]+hf[1]*P.u[hfX]+hf[2]*P.u[hfY]+hf[3]*P.u[hfX]*P.u[hfX]+hf[4]*P.u[hfX]*P.u[hfY]+hf[5]*P.u[hfY]*P.u[hfY];
-
-            return (ScalarType)fabs(P.u[hfZ]-z2);
-        }
-        case NO_MODEL:
-			//model computation failed?
-            break;
-    }
-
-	return NAN_VALUE;
+	//invalid input type or computation failed!
+	return 0;
 }

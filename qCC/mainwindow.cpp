@@ -53,6 +53,7 @@
 #include <ccColorScale.h>
 #include <ccColorScalesManager.h>
 #include <ccFacet.h>
+#include <ccQuadric.h>
 
 //qCC includes
 #include "ccHeightGridGeneration.h"
@@ -411,7 +412,7 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 
 	switch(ccPlugin->getType())
 	{
-	
+
 	case CC_STD_PLUGIN: //standard plugin
 		{
 			ccStdPluginInterface* stdPlugin = static_cast<ccStdPluginInterface*>(ccPlugin);
@@ -763,7 +764,7 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 			win->updateZoom(1.0f + vec[1]);
 			vec[1] = 0.0f;
 		}
-		
+
 		//Zoom & Panning: camera moves right/left + up/down + backward/forward (only for perspective mode)
 		if (fabs(vec[0])>ZERO_TOLERANCE || fabs(vec[1])>ZERO_TOLERANCE || fabs(vec[2])>ZERO_TOLERANCE)
 		{
@@ -781,7 +782,7 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 			{
 				scale /= win->getViewportParameters().zoom;
 			}
-			
+
 			if (objectMode)
 				scale = -scale;
 			win->moveCamera(vec[0]*scale,-vec[2]*scale,vec[1]*scale);
@@ -932,6 +933,7 @@ void MainWindow::connectActions()
     //"Tools > Fit" menu
     connect(actionFitPlane,						SIGNAL(triggered()),    this,       SLOT(doActionFitPlane()));
     connect(actionFitFacet,						SIGNAL(triggered()),    this,       SLOT(doActionFitFacet()));
+	connect(actionFitQuadric,					SIGNAL(triggered()),    this,       SLOT(doActionFitQuadric()));
     //"Tools > Other" menu
     connect(actionApproximateDensity,			SIGNAL(triggered()),    this,       SLOT(doComputeApproximateDensity()));
     connect(actionAccurateDensity,				SIGNAL(triggered()),    this,       SLOT(doComputeAccurateDensity()));
@@ -944,7 +946,7 @@ void MainWindow::connectActions()
 
 	//"Tools > Sand box (research)" menu
     connect(actionComputeKdTree,                SIGNAL(triggered()),    this,       SLOT(doActionComputeKdTree()));
-	connect(actionMeshBestFittingQuadric,		SIGNAL(triggered()),    this,       SLOT(doActionComputeQuadric3D()));
+	connect(actionDistanceToBestFitQuadric3D,	SIGNAL(triggered()),    this,       SLOT(doActionComputeDistToBestFitQuadric3D()));
     connect(actionComputeBestFitBB,             SIGNAL(triggered()),    this,       SLOT(doComputeBestFitBB()));
     connect(actionAlign,                        SIGNAL(triggered()),    this,       SLOT(doAction4pcsRegister())); //Aurelien BEY le 13/11/2008
     connect(actionSNETest,						SIGNAL(triggered()),    this,       SLOT(doSphericalNeighbourhoodExtractionTest()));
@@ -1143,7 +1145,7 @@ void MainWindow::doActionSetColorGradient()
     for (size_t i=0; i<selNum; ++i)
     {
         ccHObject* ent = m_selectedEntities[i];
-		
+
 		bool lockedVertices;
         ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
 		if (lockedVertices)
@@ -1195,7 +1197,7 @@ void MainWindow::doActionInterpolateColors()
 		ccConsole::Error("Both entities have colors! Remove the colors on the entity you wish to import the color to!");
 		return;
 	}
-	
+
 	ccGenericPointCloud* source = cloud1->hasColors() ? cloud1 : cloud2;
 	ccGenericPointCloud* dest = (source == cloud2 ? cloud1 : cloud2);
 
@@ -1348,7 +1350,7 @@ void MainWindow::doActionConvertNormalsTo(NORMAL_CONVERSION_DEST dest)
 					i = selNum; //no need to process the selected entities anymore!
 					break;
 				}
-				
+
 				if (success)
 				{
 					ccCloud->prepareDisplayForRefresh_recursive();
@@ -1400,7 +1402,7 @@ void MainWindow::doActionComputeKdTree()
 		return;
 
     ccProgressDialog pDlg(true,this);
-	
+
 	//computation
 	QElapsedTimer eTimer;
 	eTimer.start();
@@ -1423,7 +1425,7 @@ void MainWindow::doActionComputeKdTree()
 #endif
 
 		addToDB(kdtree,true,0,false,false);
-		
+
 		refreshAll();
 		updateUI();
 	}
@@ -1482,7 +1484,7 @@ void MainWindow::doActionComputeOctree()
 		return;
 
     ccProgressDialog pDlg(true,this);
-	
+
 	//if we must use a custom bounding box, we update 'bbox'
 	if (coDlg.getMode() == ccComputeOctreeDlg::CUSTOM_BBOX)
 		bbox = coDlg.getCustomBBox();
@@ -1494,7 +1496,7 @@ void MainWindow::doActionComputeOctree()
 		//we temporarily detach entity, as it may undergo
 		//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::computeOctree
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(cloud);
-		
+
 		//computation
 		QElapsedTimer eTimer;
 		eTimer.start();
@@ -1535,10 +1537,10 @@ void MainWindow::doActionComputeOctree()
 			return;
 		}
 		qint64 elapsedTime_ms = eTimer.elapsed();
-		
+
 		//put object back in tree
 		putObjectBackIntoDBTree(cloud,objContext);
-		
+
 		if (octree)
 		{
 			ccConsole::Print("[doActionComputeOctree] Timing: %2.3f s",static_cast<double>(elapsedTime_ms)/1.0e3);
@@ -1655,7 +1657,7 @@ void MainWindow::doActionApplyTransformation()
     for (size_t i=0; i<selNum; ++i)
     {
         ccHObject* ent = selectedEntities[i];
-		
+
 		//specific test for locked vertices
 		bool lockedVertices;
         ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
@@ -1810,7 +1812,7 @@ void MainWindow::doActionEditGlobalShift()
 	//apply new shift
 	cloud->setGlobalShift(x,y,z);
 	ccLog::Print("[doActionEditGlobalShift] New shift: (%f, %f, %f)",x,y,z);
-    
+
 	updateUI();
 }
 
@@ -1848,7 +1850,7 @@ void MainWindow::doActionEditGlobalScale()
 	//apply new scale
 	cloud->setGlobalScale(scale);
 	ccLog::Print("[doActionEditGlobalScale] New scale: %f",scale);
-    
+
 	updateUI();
 }
 
@@ -2104,7 +2106,7 @@ void MainWindow::doActionComputeDistancesFromSensor()
 	CCVector3 sensorCenter;
 	if (!sensor->getActiveAbsoluteCenter(sensorCenter))
 		return;
-	
+
     //start dialog
     ccSensorComputeDistancesDlg cdDlg(this);
     if (!cdDlg.exec())
@@ -2166,7 +2168,7 @@ void MainWindow::doActionComputeScatteringAngles()
 	CCVector3 sensorCenter;
 	if (!sensor->getActiveAbsoluteCenter(sensorCenter))
 		return;
-	
+
     //get associated cloud
 	ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
 	assert(cloud);
@@ -2393,7 +2395,7 @@ void MainWindow::doActionCreateCameraSensor()
 			//set position
 			ccIndexedTransformation trans;
 			sensor->addPosition(trans,0);
-			
+
 			ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
 			if (win)
 			{
@@ -2437,7 +2439,7 @@ void MainWindow::doActionModifySensor()
             {
                 int errorCode;
                 ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(gbl->getParent());
-                
+
 				CCLib::GenericIndexedCloud* projectedPoints = gbl->project(cloud,errorCode,true);
                 if (projectedPoints)
                 {
@@ -2570,7 +2572,7 @@ void MainWindow::doActionProjectUncertainty()
 			ccLog::Error("An error occured! (see console)");
 			return;
 		}
-	
+
 		// fill scalar field
 		CCLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
 		assert(sf);
@@ -2635,7 +2637,7 @@ void MainWindow::doActionCheckPointsInsideFrustrum()
 	else
 	{
 		// scalar field
-		const char sfName[] = "Frustrum visibility";	
+		const char sfName[] = "Frustrum visibility";
 		int sfIdx = pointCloud->getScalarFieldIndexByName(sfName);
 
 		if (inCameraFrustrum.empty())
@@ -2653,18 +2655,18 @@ void MainWindow::doActionCheckPointsInsideFrustrum()
 				ccLog::Error("Failed to allocate memory for output scalar field!");
 				return;
 			}
-	
+
 			CCLib::ScalarField* sf = pointCloud->getScalarField(sfIdx);
 			assert(sf);
 			if (sf)
 			{
 				sf->fill(0);
-		
+
 				const ScalarType c_insideValue = static_cast<ScalarType>(1);
 
 				for (size_t i=0; i<inCameraFrustrum.size(); i++)
 					sf->setValue(inCameraFrustrum[i], c_insideValue);
-		
+
 				sf->computeMinAndMax();
 				pointCloud->setCurrentDisplayedScalarField(sfIdx);
 				pointCloud->showSF(true);
@@ -2793,7 +2795,7 @@ void MainWindow::doActionConvertTextureToColor()
 				{
 					continue;
 				}
-			
+
 
 				//colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
 				//mesh->getColorFromMaterial(triIndex,*P,C,withRGB);
@@ -2908,7 +2910,7 @@ void MainWindow::doRemoveDuplicatePoints()
 			ccProgressDialog pDlg(true,this);
 
 			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(cloud,s_minDistanceBetweenPoints,&pDlg,octree);
-			
+
 			if (result >= 0)
 			{
 				//count the number of duplicate points!
@@ -2929,7 +2931,7 @@ void MainWindow::doRemoveDuplicatePoints()
 				else
 				{
 					ccConsole::Warning(QString("Cloud '%1' has %2 duplicate point(s)").arg(cloud->getName()).arg(duplicateCount));
-				
+
 					ccPointCloud* filteredCloud = cloud->filterPointsByScalarValue(0,0);
 					if (filteredCloud)
 					{
@@ -3241,7 +3243,7 @@ void MainWindow::doActionRenameSF()
 void MainWindow::doActionOpenColorScalesManager()
 {
 	ccColorScaleEditorDialog cseDlg(ccColorScalesManager::GetUniqueInstance(),ccColorScale::Shared(0), this);
-	
+
 	if (cseDlg.exec())
 	{
 		//save current scale manager state to persistent settings
@@ -3260,10 +3262,18 @@ void MainWindow::doActionAddIdField()
         if (cloud) //TODO
         {
             ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-            ccScalarField* sf = new ccScalarField;
 
-            sf->resize(pc->size());
-            sf->setName("Id");
+			int sfIdx = pc->getScalarFieldIndexByName("Id");
+			if (sfIdx < 0)
+				sfIdx = pc->addScalarField("Id");
+			if (sfIdx < 0)
+			{
+				ccLog::Warning("Not enough memory!");
+				return;
+			}
+
+			CCLib::ScalarField* sf = pc->getScalarField(sfIdx);
+			assert(sf->currentSize() == pc->size());
 
             for (unsigned j=0 ; j<cloud->size(); j++)
 			{
@@ -3272,7 +3282,6 @@ void MainWindow::doActionAddIdField()
 			}
 
             sf->computeMinAndMax();
-            int sfIdx = pc->addScalarField(sf);
 			pc->setCurrentDisplayedScalarField(sfIdx);
 			pc->showSF(true);
         }
@@ -3896,7 +3905,7 @@ void MainWindow::doActionRegister()
 
 		summary << "----------------";
 		summary << "Refer to Console (F8) for more details";
-		
+
 		//cloud to move
         ccGenericPointCloud* pc = 0;
 
@@ -4256,7 +4265,7 @@ void MainWindow::doActionStatisticalTest()
 				eTimer.start();
 
 				double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,nn,pChi2,&pDlg,theOctree);
-				
+
 				ccConsole::Print("[Chi2 Test] Timing: %3.2f ms.",eTimer.elapsed()/1.0e3);
 				ccConsole::Print("[Chi2 Test] %s test result = %f",distrib->getName(),chi2dist);
 
@@ -4596,7 +4605,7 @@ void MainWindow::doActionLabelConnectedComponents()
 			//we create/activate CCs label scalar field
 			int sfIdx = pc->getScalarFieldIndexByName(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
 			if (sfIdx < 0)
-				sfIdx=pc->addScalarField(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
+				sfIdx = pc->addScalarField(CC_CONNECTED_COMPONENTS_DEFAULT_LABEL_NAME);
 			if (sfIdx < 0)
 			{
 				ccConsole::Error("Couldn't allocate a new scalar field for computing CC labels! Try to free some memory ...");
@@ -4606,7 +4615,11 @@ void MainWindow::doActionLabelConnectedComponents()
 
 			//we try to label all CCs
 			CCLib::ReferenceCloudContainer components;
-			if (CCLib::AutoSegmentationTools::labelConnectedComponents(cloud,static_cast<uchar>(octreeLevel),false,&pDlg,theOctree) >= 0)
+			if (CCLib::AutoSegmentationTools::labelConnectedComponents(	cloud,
+																		static_cast<uchar>(octreeLevel),
+																		false,
+																		&pDlg,
+																		theOctree) >= 0)
 			{
 				//if successful, we extract each CC (stored in "components")
 				pc->getCurrentInScalarField()->computeMinAndMax();
@@ -4714,7 +4727,7 @@ void MainWindow::doActionExportCoordToSF()
 
 	bool exportDim[3] = {ectsDlg.exportX(), ectsDlg.exportY(), ectsDlg.exportZ()};
 	const QString defaultSFName[3] = {"Coord. X", "Coord. Y", "Coord. Z"};
-	
+
 	if (!exportDim[0] && !exportDim[1] && !exportDim[2]) //nothing to do?!
 		return;
 
@@ -4729,25 +4742,22 @@ void MainWindow::doActionExportCoordToSF()
 			unsigned ptsCount = pc->size();
 
 			//test each dimension
-			for (unsigned d=0;d<3;++d)
+			for (unsigned d=0; d<3; ++d)
 			{
 				if (exportDim[d])
 				{
 					int sfIndex = pc->getScalarFieldIndexByName(qPrintable(defaultSFName[d]));
 					if (sfIndex < 0)
-					{
 						sfIndex = pc->addScalarField(qPrintable(defaultSFName[d]));
-						if (sfIndex < 0)
-						{
-							ccLog::Error("Not enough memory!");
-							i=selNum;
-							break;
-						}
+					if (sfIndex < 0)
+					{
+						ccLog::Error("Not enough memory!");
+						i = selNum;
+						break;
 					}
 
 					CCLib::ScalarField* sf = pc->getScalarField(sfIndex);
-					sf->resize(ptsCount);
-					assert(sf && sf->currentSize() >= ptsCount);
+					assert(sf && sf->currentSize() == ptsCount);
 					if (sf)
 					{
 						for (unsigned k=0; k<ptsCount; ++k)
@@ -4970,10 +4980,61 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 	updateUI();
 }
 
-void MainWindow::doActionComputeQuadric3D()
+void MainWindow::doActionFitQuadric()
 {
 	ccHObject::Container selectedEntities = m_selectedEntities;
     size_t selNum = selectedEntities.size();
+
+	bool errors = false;
+	//for all selected entities
+    for (size_t i=0; i<selNum; ++i)
+    {
+        ccHObject* ent = selectedEntities[i];
+		//look for clouds
+        if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
+        {
+            ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
+
+			double rms = 0;
+			ccQuadric* quadric = ccQuadric::Fit(cloud,&rms);
+			if (quadric)
+			{
+				quadric->setDisplay(cloud->getDisplay());
+				cloud->addChild(quadric);
+				quadric->setName(QString("Quadric (%1)").arg(cloud->getName()));
+				addToDB(quadric,true,0,false,false,0,0,0,0,false);
+				quadric->prepareDisplayForRefresh();
+
+				ccConsole::Print(QString("[doActionFitQuadric] Quadric equation: ") + quadric->getEquationString());
+				ccConsole::Print(QString("[doActionFitQuadric] RMS: %1").arg(rms));
+
+            }
+            else
+            {
+                ccConsole::Warning(QString("Failed to compute quadric on cloud '%1'").arg(cloud->getName()));
+				errors = true;
+            }
+        }
+    }
+
+	if (errors)
+	{
+		ccConsole::Error("Error(s) occurred: see console");
+	}
+
+    refreshAll();
+}
+
+void MainWindow::doActionComputeDistToBestFitQuadric3D()
+{
+	ccHObject::Container selectedEntities = m_selectedEntities;
+
+	bool ok = true;
+	int steps = QInputDialog::getInt(this,"Distance to best fit quadric (3D)","Steps (per dim.)",50,10,10000,10,&ok);
+	if (!ok)
+		return;
+
+	size_t selNum = selectedEntities.size();
     for (size_t i=0; i<selNum; ++i)
     {
         ccHObject* ent = selectedEntities[i];
@@ -4982,48 +5043,19 @@ void MainWindow::doActionComputeQuadric3D()
             ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
             CCLib::Neighbourhood Yk(cloud);
 
-//#define USE_QUADRIC_3D
-#ifdef USE_QUADRIC_3D
-            /*void* R = */Yk.getGeometricalElement(CCLib::Neighbourhood::QUADRIC_3D);
-#else
-			uchar hfdims[3];
-            const PointCoordinateType* Q = Yk.getHeightFunction(hfdims);
-#endif
+            const double* Q = Yk.get3DQuadric();
             if (Q)
             {
-#ifdef USE_QUADRIC_3D
-                const PointCoordinateType a=Q[0];
-                const PointCoordinateType b=Q[1];
-                const PointCoordinateType c=Q[2];
-                const PointCoordinateType e=Q[3];
-                const PointCoordinateType f=Q[4];
-                const PointCoordinateType g=Q[5];
-                const PointCoordinateType l=Q[6];
-                const PointCoordinateType m=Q[7];
-                const PointCoordinateType n=Q[8];
-                const PointCoordinateType d=Q[9];
-#else
-                const PointCoordinateType a=Q[0];
-                const PointCoordinateType b=Q[1];
-                const PointCoordinateType c=Q[2];
-                const PointCoordinateType d=Q[3];
-                const PointCoordinateType e=Q[4];
-                const PointCoordinateType f=Q[5];
-
-                const uchar hfX = hfdims[0];
-                const uchar hfY = hfdims[1];
-                const uchar hfZ = hfdims[2];
-				const char dimChars[3]={'x','y','z'};
-
-				ccConsole::Print("Resulting quadric (Z=a+b*X+c*Y+d*X^2+e*XY+f*Y^2):");
-				ccConsole::Print("a=%f",a);
-				ccConsole::Print("b=%f",b);
-				ccConsole::Print("c=%f",c);
-				ccConsole::Print("d=%f",d);
-				ccConsole::Print("e=%f",e);
-				ccConsole::Print("f=%f",f);
-				ccConsole::Print("Dimensions: X=%c Y=%c Z=%c",dimChars[hfX],dimChars[hfY],dimChars[hfZ]);
-#endif
+                const PointCoordinateType& a = Q[0];
+                const PointCoordinateType& b = Q[1];
+                const PointCoordinateType& c = Q[2];
+                const PointCoordinateType& e = Q[3];
+                const PointCoordinateType& f = Q[4];
+                const PointCoordinateType& g = Q[5];
+                const PointCoordinateType& l = Q[6];
+                const PointCoordinateType& m = Q[7];
+                const PointCoordinateType& n = Q[8];
+                const PointCoordinateType& d = Q[9];
 
                 //gravity center
                 const CCVector3* G = Yk.getGravityCenter();
@@ -5034,130 +5066,78 @@ void MainWindow::doActionComputeQuadric3D()
                 }
 
                 const ccBBox bbox = cloud->getBB();
-				CCVector3 bboxDiag = bbox.getDiagVec();
-                CCVector3 P, Pc;
+				PointCoordinateType maxDim = bbox.getMaxBoxDim();
+                CCVector3 C = bbox.getCenter();
 
-#ifndef USE_QUADRIC_3D
-				//Sample points on Quadric and triangulate them!
-				PointCoordinateType spanX = bboxDiag.u[hfX];
-				PointCoordinateType spanY = bboxDiag.u[hfY];
-
-				const unsigned nStepX = 20;
-				const unsigned nStepY = 20;
-				PointCoordinateType stepX = spanX/static_cast<PointCoordinateType>(nStepX-1);
-				PointCoordinateType stepY = spanY/static_cast<PointCoordinateType>(nStepY-1);
-
-                ccPointCloud* vertices = new ccPointCloud();
-				vertices->setGlobalShift(cloud->getGlobalShift());
-				vertices->setGlobalScale(cloud->getGlobalScale());
-				vertices->setName("vertices");
-                vertices->reserve(nStepX*nStepY);
-
-				ccMesh* quadMesh = new ccMesh(vertices);
-				quadMesh->reserve((nStepX-1)*(nStepY-1)*2);
-
-				for (unsigned x=0;x<nStepX;++x)
+				//Sample points on a cube and compute for each of them the distance to the Quadric
+                ccPointCloud* newCloud = new ccPointCloud();
+                if (!newCloud->reserve(steps*steps*steps))
 				{
-					P.x = bbox.minCorner().u[hfX] + stepX*static_cast<PointCoordinateType>(x) - G->u[hfX];
-					for (unsigned y=0;y<nStepY;++y)
-					{
-						P.y = bbox.minCorner().u[hfY] + stepY*static_cast<PointCoordinateType>(y) - G->u[hfY];
-						P.z = a+b*P.x+c*P.y+d*P.x*P.x+e*P.x*P.y+f*P.y*P.y;
-
-						Pc.u[hfX] = P.x;
-						Pc.u[hfY] = P.y;
-						Pc.u[hfZ] = P.z;
-						Pc += *G;
-
-						vertices->addPoint(Pc);
-
-						if (x>0 && y>0)
-						{
-							unsigned iA = (x-1) * nStepY + y-1;
-							unsigned iB = iA+1;
-							unsigned iC = iA+nStepY;
-							unsigned iD = iB+nStepY;
-
-							quadMesh->addTriangle(iA,iC,iB);
-							quadMesh->addTriangle(iB,iC,iD);
-						}
-					}
+					ccConsole::Error("Not enough memory!");
 				}
 
-				quadMesh->computeNormals(true);
-				quadMesh->addChild(vertices);
-				quadMesh->setName(QString("Quadric(%1)").arg(cloud->getName()));
-                addToDB(quadMesh, true, 0, false, false);
-                quadMesh->setDisplay(cloud->getDisplay());
-                quadMesh->prepareDisplayForRefresh();
-#endif
-
-
-				/* //Sample points on a cube and compute for each of them the distance to the Quadric
-                const unsigned steps = 50;
-                ccPointCloud* newCloud = new ccPointCloud();
-                int sfIdx = newCloud->getScalarFieldIndexByName("Dist2Quadric");
-                if (sfIdx < 0) sfIdx=newCloud->addScalarField("Dist2Quadric");
+				const char defaultSFName[] = "Dist. to 3D quadric";
+				int sfIdx = newCloud->getScalarFieldIndexByName(defaultSFName);
+                if (sfIdx < 0)
+					sfIdx = newCloud->addScalarField(defaultSFName);
                 if (sfIdx < 0)
                 {
                     ccConsole::Error("Couldn't allocate a new scalar field for computing distances! Try to free some memory ...");
                     delete newCloud;
                     continue;
                 }
-                newCloud->setCurrentScalarField(sfIdx);
-                newCloud->reserve(steps*steps*steps);
+
+				ccScalarField* sf = static_cast<ccScalarField*>(newCloud->getScalarField(sfIdx));
+				assert(sf);
 
                 //FILE* fp = fopen("doActionComputeQuadric3D_trace.txt","wt");
-                count=0;
-                unsigned x,y,z;
-                PointCoordinateType maxDim = std::max(std::max(bboxDiag.x,bboxDiag.y),bboxDiag.z);
-                CCVector3 C = bbox.getCenter();
-                for (x=0;x<steps;++x)
+				unsigned count = 0;
+                for (int x=0; x<steps; ++x)
                 {
-                    P.x = C.x - maxDim * 0.5 + maxDim * (PointCoordinateType)x / (PointCoordinateType)(steps-1);
-                    for (y=0;y<steps;++y)
+					CCVector3 P;
+                    P.x = C.x + maxDim * (static_cast<PointCoordinateType>(x) / static_cast<PointCoordinateType>(steps-1) - PC_ONE/2);
+                    for (int y=0; y<steps; ++y)
                     {
-                        P.y = C.y - maxDim * 0.5 + maxDim * (PointCoordinateType)y / (PointCoordinateType)(steps-1);
-                        for (z=0;z<steps;++z)
+                        P.y = C.y + maxDim * (static_cast<PointCoordinateType>(y) / static_cast<PointCoordinateType>(steps-1) - PC_ONE/2);
+                        for (int z=0; z<steps; ++z)
                         {
-                            P.z = C.z - maxDim * 0.5  + maxDim * (PointCoordinateType)z / (PointCoordinateType)(steps-1);
+                            P.z = C.z + maxDim * (static_cast<PointCoordinateType>(z) / static_cast<PointCoordinateType>(steps-1) - PC_ONE/2);
                             newCloud->addPoint(P);
 
-                            Pc = P-Gc;
-
-#ifdef USE_QUADRIC_3D
-                            ScalarType dist = (ScalarType)(a*Pc.x*Pc.x + b*Pc.y*Pc.y + c*Pc.z*Pc.z + e*Pc.x*Pc.y + f*Pc.y*Pc.z + g*Pc.x*Pc.z + l*Pc.x + m*Pc.y + n*Pc.z + d);
-#else
-                            ScalarType dist = Pc.u[hfZ] - (a+b*Pc.u[hfX]+c*Pc.u[hfY]+d*Pc.u[hfX]*Pc.u[hfX]+e*Pc.u[hfX]*Pc.u[hfY]+f*Pc.u[hfY]*Pc.u[hfY]);
-#endif
-                            newCloud->setPointScalarValue(count++,dist);
+							//compute distance to quadric
+							CCVector3 Pc = P-*G;
+							ScalarType dist = static_cast<ScalarType>(		a*Pc.x*Pc.x + b*Pc.y*Pc.y + c*Pc.z*Pc.z
+																		+	e*Pc.x*Pc.y + f*Pc.y*Pc.z + g*Pc.x*Pc.z
+																		+	l*Pc.x + m*Pc.y + n*Pc.z + d);
+                            
+							sf->setValue(count++,dist);
                             //fprintf(fp,"%f %f %f %f\n",Pc.x,Pc.y,Pc.z,dist);
                         }
                     }
                 }
                 //fclose(fp);
-
-                //Yk.computeCurvature2(0,CCLib::Neighbourhood::GAUSSIAN_CURV);
-                newCloud->getScalarField(sfIdx)->computeMinAndMax();
-                newCloud->setCurrentDisplayedScalarField(sfIdx);
-				newCloud->showSF(sfIdx >= 0);
-                newCloud->setName("Distance to quadric");
-
-                addToDB(newCloud, true, 0, false, false);
+                
+				if (sf)
+				{
+					sf->computeMinAndMax();
+					newCloud->setCurrentDisplayedScalarField(sfIdx);
+					newCloud->showSF(true);
+				}
+                newCloud->setName("Distance map to 3D quadric");
                 newCloud->setDisplay(cloud->getDisplay());
+
+                addToDB(newCloud, true, 0, false, false, 0, 0, 0, 0, false);
                 newCloud->prepareDisplayForRefresh();
-				//*/
             }
             else
             {
-                ccConsole::Warning(QString("Failed to compute quadric on cloud '%1'").arg(cloud->getName()));
+                ccConsole::Warning(QString("Failed to compute 3D quadric on cloud '%1'").arg(cloud->getName()));
             }
         }
     }
 
     refreshAll();
 }
-//*/
 
 void MainWindow::doActionComputeCPS()
 {
@@ -5432,7 +5412,7 @@ void MainWindow::doActionOrientNormalsFM()
         ccConsole::Error("Select at least one point cloud");
         return;
     }
-	
+
 	bool ok;
 	int value = QInputDialog::getInt(this,"Orient normals (FM)", "Octree level", 5, 1, CCLib::DgmOctree::MAX_OCTREE_LEVEL, 1, &ok);
     if (!ok)
@@ -5479,10 +5459,10 @@ void MainWindow::doActionOrientNormalsFM()
             const normsType& index = cloud->getPointNormalIndex(j);
 			normsIndexes->addElement(index);
         }
-        
+
 		//apply algorithm
 		ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(cloud, normsIndexes, level, (CCLib::GenericProgressCallback*)&pDlg, cloud->getOctree());
-        
+
 		//compress resulting normals and transfer them to the cloud
 		for (unsigned j=0; j<pointCount; j++)
             cloud->setPointNormalIndex(j, normsIndexes->getValue(j));
@@ -5872,7 +5852,7 @@ void MainWindow::help()
 	QFile doc(QApplication::applicationDirPath()+QString("/user_guide_CloudCompare.pdf"));
     if (!doc.open(QIODevice::ReadOnly))
 	{
-        QMessageBox::warning(	this, 
+        QMessageBox::warning(	this,
 								QString("User guide not found"),
 								QString("Goto http://www.cloudcompare.org/documentation.html") );
 	}
@@ -5967,7 +5947,7 @@ void MainWindow::activateRegisterPointPairTool()
 		ccLog::Error("[PointPairRegistration] Failed to create dedicated 3D view!");
 		return;
 	}
-	
+
 	if (!m_pprDlg->init(win,aligned,reference))
 		deactivateRegisterPointPairTool(false);
 
@@ -6058,7 +6038,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 		for (std::set<ccHObject*>::const_iterator p = m_gsTool->entities().begin(); p != m_gsTool->entities().end(); ++p)
         {
             ccHObject* entity = *p;
-			
+
             if (entity->isKindOf(CC_TYPES::POINT_CLOUD) || entity->isKindOf(CC_TYPES::MESH))
 			{
 				//Special case: labels (do this before temporarily removing 'entity' from DB!)
@@ -6573,7 +6553,7 @@ void MainWindow::doActionSaveViewportAsCamera()
     ccGLWindow* win = getActiveGLWindow();
     if (!win)
         return;
- 
+
 	cc2DViewportObject* viewportObject = new cc2DViewportObject(QString("Viewport #%1").arg(++s_viewportIndex));
 	viewportObject->setParameters(win->getViewportParameters());
 
@@ -6600,7 +6580,7 @@ void MainWindow::zoomOnSelectedEntities()
 			//take the first valid window as reference
 			win = static_cast<ccGLWindow*>(m_selectedEntities[i]->getDisplay());
 		}
-        
+
 		if (win)
 		{
 			if (m_selectedEntities[i]->getDisplay() == win)
@@ -6760,7 +6740,7 @@ void MainWindow::doPickRotationCenter()
 	//				break;
 	//		}
 	//}
-			
+
 	//if (!atLeastOneCloudVisible)
 	//{
 	//	ccConsole::Error("No visible cloud in active 3D view!");
@@ -7141,20 +7121,22 @@ void MainWindow::doActionAddConstantSF()
 	if (!ok)
 		return;
 
-	int pos = cloud->addScalarField(qPrintable(sfName));
-	if (pos < 0)
+	int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
+	if (sfIdx < 0)
+		sfIdx = cloud->addScalarField(qPrintable(sfName));
+	if (sfIdx < 0)
 	{
 		ccLog::Error("An error occurred! (see console)");
 		return;
 	}
-	
-	CCLib::ScalarField* sf = cloud->getScalarField(pos);
+
+	CCLib::ScalarField* sf = cloud->getScalarField(sfIdx);
 	assert(sf);
 	if (sf)
 	{
 		sf->fill(sfValue);
 		sf->computeMinAndMax();
-		cloud->setCurrentDisplayedScalarField(pos);
+		cloud->setCurrentDisplayedScalarField(sfIdx);
 		cloud->showSF(true);
 		updateUI();
 		if (cloud->getDisplay())
@@ -7211,7 +7193,7 @@ void MainWindow::doActionScalarFieldFromColor()
 	for (std::set<ccPointCloud*>::const_iterator it = clouds.begin(); it != clouds.end(); ++it)
     {
 		ccPointCloud* cloud = *it;
-		
+
         std::vector<ccScalarField*> fields(4);
 		fields[0] = (exportR ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"R"))) : 0);
 		fields[1] = (exportG ? new ccScalarField(qPrintable(GetFirstAvailableSFName(cloud,"G"))) : 0);
@@ -7244,7 +7226,7 @@ void MainWindow::doActionScalarFieldFromColor()
 			if (fields[2])
 				fields[2]->setValue(j, rgb[2]);
 			if (fields[3])
-				fields[3]->setValue(j, (ScalarType)(rgb[0] + rgb[1] + rgb[2])/(ScalarType)3.0 );
+				fields[3]->setValue(j, static_cast<ScalarType>(rgb[0] + rgb[1] + rgb[2])/3 );
 		}
 
 		QString fieldsStr;
@@ -7254,22 +7236,35 @@ void MainWindow::doActionScalarFieldFromColor()
 				if (fields[i])
 				{
 					fields[i]->computeMinAndMax();
-					
-					int sfIdx = cloud->addScalarField(fields[i]);
-					cloud->setCurrentDisplayedScalarField(sfIdx);
-					cloud->showSF(true);
-					cloud->refreshDisplay();
 
-					//mesh vertices?
-					if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
+					int sfIdx = cloud->getScalarFieldIndexByName(fields[i]->getName());
+					if (sfIdx >= 0)
+						cloud->deleteScalarField(sfIdx);
+					sfIdx = cloud->addScalarField(fields[i]);
+					assert(sfIdx >= 0);
+					if (sfIdx >= 0)
 					{
-						cloud->getParent()->showSF(true);
-						cloud->getParent()->refreshDisplay();
+						cloud->setCurrentDisplayedScalarField(sfIdx);
+						cloud->showSF(true);
+						cloud->refreshDisplay();
+
+						//mesh vertices?
+						if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
+						{
+							cloud->getParent()->showSF(true);
+							cloud->getParent()->refreshDisplay();
+						}
+
+						if (!fieldsStr.isEmpty())
+							fieldsStr.append(", ");
+						fieldsStr.append(fields[i]->getName());
 					}
-					
-					if (!fieldsStr.isEmpty())
-						fieldsStr.append(", ");
-					fieldsStr.append(fields[i]->getName());
+					else
+					{
+						ccConsole::Warning(QString("[doActionScalarFieldFromColor] Failed to add scalar field '%1' to cloud '%2'?!").arg(fields[i]->getName()).arg(cloud->getName()));
+						fields[i]->release();
+						fields[i] = 0;
+					}
 				}
 			}
 		}
@@ -7336,7 +7331,7 @@ void MainWindow::doActionScalarFieldArithmetic()
 	int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
 	if (sfIdx >= 0)
 	{
-		if (sfIdx==sf1Idx || sfIdx==sf2Idx)
+		if (sfIdx == sf1Idx || sfIdx == sf2Idx)
 		{
 			ccConsole::Error(QString("Resulting scalar field will have the same name\nas one of the operand (%1)! Rename it first...").arg(sfName));
 			return;
@@ -7526,7 +7521,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 				plane->setVisible(true);
 				plane->setSelectionBehavior(ccHObject::SELECTION_FIT_BBOX);
                 selectedEntities[i]->prepareDisplayForRefresh_recursive();
-				addToDB(plane);
+				addToDB(plane,true,0,false,false,0,0,0,0,false);
 			}
 			else
 			{
@@ -7642,10 +7637,7 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 	cloud->setCurrentScalarField(sfIdx);
 
 	//reset scalar field
-	{
-		for (unsigned j=0; j<ptsCount; ++j)
-			cloud->setPointScalarValue(j,NAN_VALUE);
-	}
+	cloud->getScalarField(sfIdx)->fill(NAN_VALUE);
 
 	ccProgressDialog pDlg(true,this);
 	ccOctree* octree = cloud->computeOctree(&pDlg);
@@ -7865,7 +7857,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				sfName = QString("%1 (r=%2)").arg(CC_LOCAL_DENSITY_FIELD_NAME).arg(densityKernelSize);
 			}
 			break;
-        
+
 		case CCLIB_ALGO_CURVATURE:
 			{
 				//parameters already provided?
@@ -7937,11 +7929,11 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 						return false;
 					roughnessKernelSize = static_cast<PointCoordinateType>(val);
 				}
-				
+
 				sfName = QString(CC_ROUGHNESS_FIELD_NAME)+QString("(%1)").arg(roughnessKernelSize);
             }
             break;
-        
+
 		default:
             assert(false);
             return false;
@@ -7986,7 +7978,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                     }
                 }
                 break;
-            
+
 			//by default, we apply processings on clouds only
             default:
                 if (entities[i]->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -8038,14 +8030,14 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 																						&pDlg,
 																						octree);
                     break;
-				
+
 				case CCLIB_ALGO_ACCURATE_DENSITY:
                     result = CCLib::GeometricalAnalysisTools::computeLocalDensity(	cloud,
 																					densityKernelSize,
 																					&pDlg,
 																					octree);
                     break;
-				
+
 				case CCLIB_ALGO_CURVATURE:
                     result = CCLib::GeometricalAnalysisTools::computeCurvature(	cloud,
                                                                                 curvType,
@@ -8053,7 +8045,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                                                                                 &pDlg,
                                                                                 octree);
                     break;
-                
+
 				case CCLIB_ALGO_SF_GRADIENT:
                     result = CCLib::ScalarFieldTools::computeScalarFieldGradient(	cloud,
 																					euclidian,
@@ -8078,7 +8070,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
                                                                                 &pDlg,
                                                                                 octree);
                     break;
-				
+
 				//TEST
 				case CCLIB_SPHERICAL_NEIGHBOURHOOD_EXTRACTION_TEST:
 				{
@@ -8647,7 +8639,7 @@ void MainWindow::saveFile()
     {
 		ccHObject* child = entitiesToSave.back();
 		entitiesToSave.pop_back();
-        
+
         if (child->isA(CC_TYPES::HIERARCHY_OBJECT))
         {
             for (unsigned j=0;j<child->getChildrenNumber();++j)
@@ -8684,7 +8676,7 @@ void MainWindow::saveFile()
 	bool hasPolylines = (polylines.getChildrenNumber() != 0);
 	bool hasSerializable = (otherSerializable.getChildrenNumber() != 0);
 	bool hasOther = (other.getChildrenNumber() != 0);
-	
+
 	int stdSaveTypes =		static_cast<int>(hasCloud)
 						+	static_cast<int>(hasMesh)
 						+	static_cast<int>(hasImage)
@@ -8695,7 +8687,7 @@ void MainWindow::saveFile()
 		ccConsole::Error("Can't save selected entity(ies) this way!");
 		return;
 	}
-	
+
     //we set up the right file filters, depending on the selected
     //entities shared type (cloud, mesh, etc.).
     QString filters;
@@ -9215,7 +9207,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);
     actionFitPlane->setEnabled(atLeastOneEntity);
     actionFitFacet->setEnabled(atLeastOneEntity);
-	
+	actionFitQuadric->setEnabled(atLeastOneCloud);
+
 	actionSNETest->setEnabled(atLeastOneCloud);
 	actionExportCloudsInfo->setEnabled(atLeastOneCloud);
 
@@ -9238,7 +9231,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);
 	actionConvertTextureToColor->setEnabled(atLeastOneMesh);
 	actionSubdivideMesh->setEnabled(atLeastOneMesh);
-	actionMeshBestFittingQuadric->setEnabled(atLeastOneMesh);
+	actionDistanceToBestFitQuadric3D->setEnabled(atLeastOneCloud);
 
     menuMeshScalarField->setEnabled(atLeastOneSF && atLeastOneMesh);
     //actionSmoothMeshSF->setEnabled(atLeastOneSF && atLeastOneMesh);
@@ -9275,12 +9268,12 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionEditGlobalShift->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionEditGlobalScale->setEnabled(exactlyOneCloud || exactlyOneMesh);
 	actionComputeKdTree->setEnabled(exactlyOneCloud || exactlyOneMesh);
-	
+
 	actionKMeans->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
     actionFrontPropagation->setEnabled(/*TODO: exactlyOneEntity && exactlyOneSF*/false);
 
 	actionFindBiggestInnerRectangle->setEnabled(exactlyOneCloud);
-	
+
 	menuActiveScalarField->setEnabled((exactlyOneCloud || exactlyOneMesh) && selInfo.sfCount>0);
 	actionCrossSection->setEnabled(exactlyOneCloud);
 	actionHeightGridGeneration->setEnabled(exactlyOneCloud);
@@ -9404,7 +9397,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrix& rotMat)
         }
     }
  }
- 
+
  void MainWindow::echoPivotPointChanged(const CCVector3& P)
  {
     if (checkBoxCameraLink->checkState() != Qt::Checked)

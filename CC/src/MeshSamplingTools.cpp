@@ -105,7 +105,7 @@ SimpleCloud* MeshSamplingTools::samplePointsOnMesh(GenericMesh* theMesh,
 {
 	assert(theMesh);
 	unsigned triCount = (theMesh ? theMesh->size() : 0);
-	if (triCount==0)
+	if (triCount == 0)
 		return 0;
 
 	if (theoricNumberOfPoints < 1)

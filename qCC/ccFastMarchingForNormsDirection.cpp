@@ -393,7 +393,9 @@ int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccP
 	if (sfIdx < 0)
 		sfIdx = theCloud->addScalarField("FM_Propagation");
 	if (sfIdx >= 0)
+	{
 		theCloud->setCurrentScalarField(sfIdx);
+	}
 	else
 	{
 		ccLog::Warning("[ccFastMarchingForNormsDirection] Couldn't create temporary scalar field! Not enough memory?");

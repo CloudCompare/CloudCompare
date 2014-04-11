@@ -946,7 +946,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 					int heightSFIdx = -1;
 					{
 						heightSFIdx = cloudGrid->addScalarField(CC_HEIGHT_GRID_FIELD_NAME);
-						if (heightSFIdx<0)
+						if (heightSFIdx < 0)
 						{
 							ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing height grid values! Try to free some memory ...");
 						}
@@ -963,7 +963,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 					if (generateCountSF)
 					{
 						countSFIdx = cloudGrid->addScalarField("Per-cell population");
-						if (countSFIdx<0)
+						if (countSFIdx < 0)
 						{
 							ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing per-cell population count! Try to free some memory ...");
 						}
@@ -1008,8 +1008,8 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 										double Pz = static_cast<double>(aCell->height);
 
 										CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
-											static_cast<PointCoordinateType>(Py),
-											static_cast<PointCoordinateType>(Pz) );
+														static_cast<PointCoordinateType>(Py),
+														static_cast<PointCoordinateType>(Pz) );
 
 										cloudGrid->addPoint(Pf);
 									}
@@ -1032,8 +1032,8 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 								else if (fillEmptyCells != LEAVE_EMPTY) //empty cell
 								{
 									CCVector3 Pf(	static_cast<PointCoordinateType>(Px),
-										static_cast<PointCoordinateType>(Py),
-										static_cast<PointCoordinateType>(empty_cell_height) );
+													static_cast<PointCoordinateType>(Py),
+													static_cast<PointCoordinateType>(empty_cell_height) );
 									cloudGrid->addPoint(Pf);
 
 									if (!resampleOriginalCloud)
@@ -1089,10 +1089,10 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 									//we try to create an equivalent SF on the output grid
 									int sfIdx = cloudGrid->addScalarField(formerSf->getName());
-									if (sfIdx<0) //if we aren't lucky, the input cloud already had a SF with CC_HEIGHT_GRID_FIELD_NAME as name
+									if (sfIdx < 0) //if we aren't lucky, the input cloud already had a SF with CC_HEIGHT_GRID_FIELD_NAME as name
 										sfIdx = cloudGrid->addScalarField(qPrintable(QString(formerSf->getName()).append(".old")));
 
-									if (sfIdx<0)
+									if (sfIdx < 0)
 										ccLog::Warning("[ccHeightGridGeneration] Couldn't allocate a new scalar field for storing SF '%s' values! Try to free some memory ...",formerSf->getName());
 									else
 									{
@@ -1118,7 +1118,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 											}
 										}
 										sf->computeMinAndMax();
-										assert(sf->currentSize()==pointsCount);
+										assert(sf->currentSize() == pointsCount);
 									}
 								}
 							}

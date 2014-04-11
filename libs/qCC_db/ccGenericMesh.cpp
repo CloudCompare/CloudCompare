@@ -794,7 +794,7 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 					unsigned triIndex = triIndices->getValue(i);
 					const CCVector3* P = cloud->getPoint(i);
 
-					colorType C[3]={MAX_COLOR_COMP,MAX_COLOR_COMP,MAX_COLOR_COMP};
+					colorType C[3] = { MAX_COLOR_COMP, MAX_COLOR_COMP, MAX_COLOR_COMP };
 					interpolateColors(triIndex,*P,C);
 					cloud->addRGBColor(C);
 				}
@@ -821,6 +821,9 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 		double scale = getAssociatedCloud()->getGlobalScale();
 		cloud->setGlobalScale(scale);
 	}
+
+	if (triIndices)
+		triIndices->release();
 
 	return cloud;
 }

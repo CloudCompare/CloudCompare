@@ -44,6 +44,7 @@
 #include "ccCone.h"
 #include "ccDish.h"
 #include "ccExtru.h"
+#include "ccQuadric.h"
 #include "ccIndexedTransformationBuffer.h"
 #include "ccCustomObject.h"
 
@@ -172,6 +173,8 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		return new ccDish(name);
 	case CC_TYPES::EXTRU:
 		return new ccExtru(name);
+	case CC_TYPES::QUADRIC:
+		return new ccQuadric(name);
 	case CC_TYPES::TRANS_BUFFER:
 		return new ccIndexedTransformationBuffer(name);
 	case CC_TYPES::CUSTOM_H_OBJECT:

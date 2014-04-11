@@ -69,7 +69,7 @@ enum CC_OBJECT_FLAG {
 #define CC_COMPRESSED_NORMAL_BIT		0x00000040000000	//Compressed normal (index)
 #define CC_TEX_COORDS_BIT				0x00000080000000	//Texture coordinates (u,v)
 #define CC_CAMERA_BIT					0x00000100000080	//For camera sensors (projective sensors)
-//#define CC_FREE_BIT					0x00000200000080
+#define CC_QUADRIC_BIT					0x00000200000080	//Quadric (primitive)
 //#define CC_FREE_BIT					0x00000400000080
 //#define CC_FREE_BIT					0x00000800000080
 //#define CC_FREE_BIT					0x00000400000080
@@ -89,40 +89,41 @@ class CC_TYPES
 public:
 	static const CC_CLASS_ENUM OBJECT				=	0;
 	static const CC_CLASS_ENUM HIERARCHY_OBJECT		=	CC_HIERARCH_BIT;
-	static const CC_CLASS_ENUM POINT_CLOUD			=	HIERARCHY_OBJECT | CC_CLOUD_BIT;
-	static const CC_CLASS_ENUM MESH					=	HIERARCHY_OBJECT | CC_MESH_BIT;
-	static const CC_CLASS_ENUM SUB_MESH				=	HIERARCHY_OBJECT | CC_MESH_BIT | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM MESH_GROUP			=	MESH | CC_GROUP_BIT; //DEPRECATED; DEFINITION REMAINS FOR BACKWARD COMPATIBILITY ONLY!
-	static const CC_CLASS_ENUM FACET				=	HIERARCHY_OBJECT | CC_FACET_BIT;
-	static const CC_CLASS_ENUM POINT_OCTREE			=	HIERARCHY_OBJECT | CC_OCTREE_BIT | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM POINT_KDTREE			=	HIERARCHY_OBJECT | CC_KDTREE_BIT | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM POLY_LINE			=	HIERARCHY_OBJECT | CC_POLYLINE_BIT;
-	static const CC_CLASS_ENUM IMAGE				=	CC_HIERARCH_BIT | CC_IMAGE_BIT;
-	static const CC_CLASS_ENUM CALIBRATED_IMAGE		=	IMAGE  | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM SENSOR				=	CC_HIERARCH_BIT | CC_SENSOR_BIT;
-	static const CC_CLASS_ENUM GBL_SENSOR			=	SENSOR | CC_GROUND_BASED_BIT;
-	static const CC_CLASS_ENUM CAMERA_SENSOR		=	SENSOR | CC_CAMERA_BIT;
-	static const CC_CLASS_ENUM PRIMITIVE			=	MESH | CC_PRIMITIVE_BIT; //primitives are meshes!
-	static const CC_CLASS_ENUM PLANE				=	PRIMITIVE | CC_PLANE_BIT;
-	static const CC_CLASS_ENUM SPHERE				=	PRIMITIVE | CC_SPHERE_BIT;
-	static const CC_CLASS_ENUM TORUS				=	PRIMITIVE | CC_TORUS_BIT;
-	static const CC_CLASS_ENUM CYLINDER				=	PRIMITIVE | CC_CYLINDER_BIT;
-	static const CC_CLASS_ENUM CONE					=	PRIMITIVE | CC_CONE_BIT;
-	static const CC_CLASS_ENUM BOX					=	PRIMITIVE | CC_BOX_BIT;
-	static const CC_CLASS_ENUM DISH					=	PRIMITIVE | CC_DISH_BIT;
-	static const CC_CLASS_ENUM EXTRU				=	PRIMITIVE | CC_EXTRU_BIT;
-	static const CC_CLASS_ENUM MATERIAL_SET			=	CC_MATERIAL_BIT | CC_GROUP_BIT | CC_LEAF_BIT;
+	static const CC_CLASS_ENUM POINT_CLOUD			=	HIERARCHY_OBJECT	| CC_CLOUD_BIT;
+	static const CC_CLASS_ENUM MESH					=	HIERARCHY_OBJECT	| CC_MESH_BIT;
+	static const CC_CLASS_ENUM SUB_MESH				=	HIERARCHY_OBJECT	| CC_MESH_BIT				| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM MESH_GROUP			=	MESH				| CC_GROUP_BIT;				//DEPRECATED; DEFINITION REMAINS FOR BACKWARD COMPATIBILITY ONLY!
+	static const CC_CLASS_ENUM FACET				=	HIERARCHY_OBJECT	| CC_FACET_BIT;
+	static const CC_CLASS_ENUM POINT_OCTREE			=	HIERARCHY_OBJECT	| CC_OCTREE_BIT				| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM POINT_KDTREE			=	HIERARCHY_OBJECT	| CC_KDTREE_BIT				| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM POLY_LINE			=	HIERARCHY_OBJECT	| CC_POLYLINE_BIT;
+	static const CC_CLASS_ENUM IMAGE				=	CC_HIERARCH_BIT		| CC_IMAGE_BIT;
+	static const CC_CLASS_ENUM CALIBRATED_IMAGE		=	IMAGE				| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM SENSOR				=	CC_HIERARCH_BIT		| CC_SENSOR_BIT;
+	static const CC_CLASS_ENUM GBL_SENSOR			=	SENSOR				| CC_GROUND_BASED_BIT;
+	static const CC_CLASS_ENUM CAMERA_SENSOR		=	SENSOR				| CC_CAMERA_BIT;
+	static const CC_CLASS_ENUM PRIMITIVE			=	MESH				| CC_PRIMITIVE_BIT;			//primitives are meshes!
+	static const CC_CLASS_ENUM PLANE				=	PRIMITIVE			| CC_PLANE_BIT;
+	static const CC_CLASS_ENUM SPHERE				=	PRIMITIVE			| CC_SPHERE_BIT;
+	static const CC_CLASS_ENUM TORUS				=	PRIMITIVE			| CC_TORUS_BIT;
+	static const CC_CLASS_ENUM CYLINDER				=	PRIMITIVE			| CC_CYLINDER_BIT;
+	static const CC_CLASS_ENUM CONE					=	PRIMITIVE			| CC_CONE_BIT;
+	static const CC_CLASS_ENUM BOX					=	PRIMITIVE			| CC_BOX_BIT;
+	static const CC_CLASS_ENUM DISH					=	PRIMITIVE			| CC_DISH_BIT;
+	static const CC_CLASS_ENUM EXTRU				=	PRIMITIVE			| CC_EXTRU_BIT;
+	static const CC_CLASS_ENUM QUADRIC				=	PRIMITIVE			| CC_QUADRIC_BIT;
+	static const CC_CLASS_ENUM MATERIAL_SET			=	CC_MATERIAL_BIT		| CC_GROUP_BIT				| CC_LEAF_BIT;
 	static const CC_CLASS_ENUM CHUNKED_ARRAY		=	CC_ARRAY_BIT;
-	static const CC_CLASS_ENUM NORMALS_ARRAY		=	CC_ARRAY_BIT | CC_NORMAL_BIT | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM NORMAL_INDEXES_ARRAY	=	CC_ARRAY_BIT | CC_COMPRESSED_NORMAL_BIT | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM RGB_COLOR_ARRAY		=	CC_ARRAY_BIT | CC_RGB_COLOR_BIT | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM TEX_COORDS_ARRAY		=	CC_ARRAY_BIT | CC_TEX_COORDS_BIT | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM LABEL_2D				=	HIERARCHY_OBJECT | CC_LABEL_BIT | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM VIEWPORT_2D_OBJECT	=	HIERARCHY_OBJECT | CC_VIEWPORT_BIT | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM VIEWPORT_2D_LABEL	=	VIEWPORT_2D_OBJECT | CC_LABEL_BIT;
-	static const CC_CLASS_ENUM CLIPPING_BOX			=	CC_CLIP_BOX_BIT | CC_LEAF_BIT;
-	static const CC_CLASS_ENUM TRANS_BUFFER			=	HIERARCHY_OBJECT | CC_TRANS_BUFFER_BIT | CC_LEAF_BIT;
-	
+	static const CC_CLASS_ENUM NORMALS_ARRAY		=	CC_ARRAY_BIT		| CC_NORMAL_BIT				| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM NORMAL_INDEXES_ARRAY	=	CC_ARRAY_BIT		| CC_COMPRESSED_NORMAL_BIT	| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM RGB_COLOR_ARRAY		=	CC_ARRAY_BIT		| CC_RGB_COLOR_BIT			| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM TEX_COORDS_ARRAY		=	CC_ARRAY_BIT		| CC_TEX_COORDS_BIT			| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM LABEL_2D				=	HIERARCHY_OBJECT	| CC_LABEL_BIT				| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM VIEWPORT_2D_OBJECT	=	HIERARCHY_OBJECT	| CC_VIEWPORT_BIT			| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM VIEWPORT_2D_LABEL	=	VIEWPORT_2D_OBJECT	| CC_LABEL_BIT;
+	static const CC_CLASS_ENUM CLIPPING_BOX			=	CC_CLIP_BOX_BIT		| CC_LEAF_BIT;
+	static const CC_CLASS_ENUM TRANS_BUFFER			=	HIERARCHY_OBJECT	| CC_TRANS_BUFFER_BIT		| CC_LEAF_BIT;
+
 	//  Custom types
 	/**	Custom objects are typically defined by plugins. They can be inserted in an object
 		hierarchy or displayed in an OpenGL context like any other ccHObject.
@@ -132,7 +133,7 @@ public:
 		It is highly advised to use the ccCustomHObject and ccCustomLeafObject interfaces to
 		define a custom types. Carefully read the ccCustomHObject::isDeserialized method's
 		description and the warning below!
-		
+
 		Warning: custom objects can't be 'fully' serialized. Don't overload the
 		'ccSerializableObject::toFile' method for them as this would break the deserialization mechanism!
 		They can only be serialized as plain ccHObject instances (CC_TYPES::HIERARCHY_OBJECT).
@@ -217,14 +218,14 @@ public:
 
 	//! Returns a new unassigned unique ID
 	/** Unique IDs are handled with persistent settings
-		in order to assure consistency between main app 
+		in order to assure consistency between main app
 		and plugins!
 	**/
 	static unsigned GetNextUniqueID();
 
 	//! Returns last assigned unique ID
 	/** Unique IDs are handled with persistent settings
-		in order to assure consistency between main app 
+		in order to assure consistency between main app
 		and plugins!
 	**/
 	static unsigned GetLastUniqueID();
@@ -250,7 +251,7 @@ public:
 	/** \param key meta data unique identifier (case sensitive!)
 		\param data data
 	**/
-	void setMetaData(QString key, QVariant& data);
+	void setMetaData(QString key, QVariant data);
 
     //! Says if a metadata with the given key exists or not
     /** \param key is the key to look for
@@ -284,7 +285,7 @@ protected:
 
 	//! Sets last assigned unique ID
 	/** Unique IDs are handled with persistent settings
-		in order to assure consistency between main app 
+		in order to assure consistency between main app
 		and plugins!
 	**/
 	static void UpdateLastUniqueID(unsigned lastID);

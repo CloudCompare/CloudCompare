@@ -188,7 +188,7 @@ bool ccObject::toFile(QFile& out) const
 			outStream << it.key();
 			outStream << it.value();
 		}
-	}	
+	}
 
 	return true;
 }
@@ -213,7 +213,7 @@ CC_CLASS_ENUM ccObject::ReadClassIDFromFile(QFile& in, short dataVersion)
 			return ReadError();
 		classID = static_cast<CC_CLASS_ENUM>(_classID);
 	}
-	
+
 	return classID;
 }
 
@@ -227,7 +227,7 @@ bool ccObject::removeMetaData(QString key)
 	return m_metaData.remove(key) != 0;
 }
 
-void ccObject::setMetaData(QString key, QVariant& data)
+void ccObject::setMetaData(QString key, QVariant data)
 {
     m_metaData.insert(key,data);
 }
@@ -296,7 +296,7 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags)
 			inStream >> value;
 			setMetaData(key,value);
 		}
-	}	
+	}
 
 	return true;
 }

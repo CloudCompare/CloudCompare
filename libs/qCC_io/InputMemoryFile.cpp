@@ -68,7 +68,7 @@ InputMemoryFile::~InputMemoryFile()
 	::munmap(const_cast<char*>(data_), size_);
 	::close(file_handle_);
 #elif defined(_WIN32)
-	::UnmapViewOfFile(data_);
+	::UnmapViewOfFile((void*)data_);
 	::CloseHandle(file_mapping_handle_);
 	::CloseHandle(file_handle_);
 #endif

@@ -1,0 +1,115 @@
+//##########################################################################
+//#                                                                        #
+//#                            CLOUDCOMPARE                                #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                                                                        #
+//##########################################################################
+
+#ifndef CC_QUADRIC_PRIMITIVE_HEADER
+#define CC_QUADRIC_PRIMITIVE_HEADER
+
+#include "ccGenericPrimitive.h"
+
+//CCLib
+#include <CCGeom.h>
+
+//! Quadric (primitive)
+/** 2D1/2 quadric primitive
+**/
+#ifdef QCC_DB_USE_AS_DLL
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccQuadric : public ccGenericPrimitive
+#else
+class ccQuadric : public ccGenericPrimitive
+#endif
+{
+public:
+
+	//! Default constructor
+	/** Quadric orthogonal dimension is 'Z' by default
+		\param minCorner min corner of the 'representation' base area
+		\param maxCorner max corner of the 'representation' base area
+		\param eq equation coefficients ( Z = a + b.X + c.Y + d.X^2 + e.X.Y + f.Y^2)
+		\param hfDims optional dimension indexes
+		\param transMat optional 3D transformation (can be set afterwards with ccDrawableObject::setGLTransformation)
+		\param name name
+		\param precision drawing precision
+	**/
+	ccQuadric(	CCVector2 minCorner,
+				CCVector2 maxCorner,
+				const PointCoordinateType eq[6],
+				const unsigned char* hfDims = 0,
+				const ccGLMatrix* transMat = 0,
+				QString name = QString("Plane"),
+				unsigned precision = 24);
+
+	//! Simplified constructor
+	/** For ccHObject factory only!
+	**/
+	ccQuadric(QString name = QString("Plane"));
+
+    //! Returns class ID
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::QUADRIC; }
+
+	//inherited from ccGenericPrimitive
+	virtual QString getTypeName() const { return "Quadric"; }
+	virtual bool hasDrawingPrecision() const { return true; }
+	virtual ccGenericPrimitive* clone() const;
+
+	//inherited from ccDrawableObject
+	virtual ccBBox getFitBB(ccGLMatrix& trans);
+
+	//! Returns min corner
+	const CCVector2& getMinCorner() const { return m_minCorner; }
+	//! Returns max corner
+	const CCVector2& getMaxCorner() const { return m_maxCorner; }
+
+	//! Returns the equation coefficients
+	const PointCoordinateType* getEquationCoefs() const { return m_eq; }
+
+	//! Returns the equation coefficients as a string
+	QString getEquationString() const;
+
+	//! Fits a quadric primitive on a cloud
+	/** The cloud can be any CCLib::GenericIndexedCloudPersist-derived object.
+		\param[in] cloud input cloud
+		\param[out] rms quadric fitting rms (optional)
+		\return quadric primitive (if successful)
+	**/
+	static ccQuadric* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms/*=0*/);
+
+protected:
+    
+    //inherited from ccGenericPrimitive
+	virtual bool toFile_MeOnly(QFile& out) const;
+	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual bool buildUp();
+
+	//! Min corner
+	CCVector2 m_minCorner;
+	//! Max corner
+	CCVector2 m_maxCorner;
+
+	//! Equation coefficients
+	PointCoordinateType m_eq[6];
+
+	//! Dimension indexes
+	unsigned char m_hfDims[3];
+
+	//! Min height
+	PointCoordinateType m_minZ;
+	//! Max height
+	PointCoordinateType m_maxZ;
+};
+
+#endif //CC_QUADRIC_PRIMITIVE_HEADER

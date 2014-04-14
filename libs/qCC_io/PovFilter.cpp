@@ -218,7 +218,7 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
     {
         if ((line[0]=='#')&&(line[1]=='P'))
         {
-            ccLog::Print("%s",line);
+            ccLog::Print(QString(line).trimmed());
             if (fscanf(fp,"F %s\n",subFileName)<0)
             {
                 ccLog::PrintDebug("[PovFilter::loadFile] Read error (F) !");
@@ -270,14 +270,20 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
                     }
                 }
 
-                int errorCode;
                 ccHObject::Container clouds;
                 if (loadedLists->isKindOf(CC_TYPES::POINT_CLOUD))
+				{
                     clouds.push_back(loadedLists);
+				}
                 else
+				{
                     loadedLists->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD);
+					loadedLists->detatchAllChildren();
+					delete loadedLists;
+				}
+				loadedLists = 0;
 
-                for (unsigned i=0;i<clouds.size();++i)
+                for (size_t i=0; i<clouds.size(); ++i)
                 {
                     ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[i]);
 
@@ -291,6 +297,7 @@ CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bo
 					gls->setDeltaPhi(dPhi);
 					gls->setDeltaTheta(dTheta);
 
+					int errorCode = 0;
 					CCLib::GenericIndexedCloud* projectedList = gls->project(theCloud,errorCode,true);
 
                     switch (errorCode)

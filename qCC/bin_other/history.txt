@@ -12,7 +12,7 @@ v2.5.4 XX/XX/2014
 	* Global shift should be (more) properly handled by both the Point pair based and ICP registration tools
 	* The console visibility is now forced when a warning message is generated
 	* The 'Point-pair based align' tool keeps the activated GL filter (if any)
-	* Normals can now be converted into two scalar fields:
+	* Normal vectors can now be converted to two scalar fields:
 		- 'dip' and 'dip direction' (see http://en.wikipedia.org/wiki/Structural_geology#Measurement_conventions)
 			(the north is assumed to be +Y, and the altitude is +Z)
 		- this new method is now in a common sub-menu with the "conversion to HSV" method
@@ -38,6 +38,7 @@ v2.5.4 XX/XX/2014
 	* New method: 'Tools > Fit > 2D1/2 Quadric'
 		- fits a 2D1/2 quadric on the selected cloud(s)
 		- this quadric is represented as a 'primitive' (kind of mesh) and its equation is displayed in the console
+	* The 'Subsample' method can now be called on mutliple clouds at once
 
 - Bug fixes:
 	* Information displayed in 2D labels was 'shifted' ( 'P(index,x,y)' was displayed instead of 'P(x,y,z)')

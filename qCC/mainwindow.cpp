@@ -907,7 +907,7 @@ void MainWindow::connectActions()
     connect(actionCrop,							SIGNAL(triggered()),    this,       SLOT(doActionCrop()));
     connect(actionEditGlobalShift,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalShift()));
     connect(actionEditGlobalScale,				SIGNAL(triggered()),    this,       SLOT(doActionEditGlobalScale()));
-    connect(actionSubsample,                    SIGNAL(triggered()),    this,       SLOT(doActionSubsample())); //Aurelien BEY le 13/11/2008
+    connect(actionSubsample,                    SIGNAL(triggered()),    this,       SLOT(doActionSubsample()));
 	connect(actionMatchBBCenters,				SIGNAL(triggered()),    this,       SLOT(doActionMatchBBCenters()));
     connect(actionDelete,                       SIGNAL(triggered()),    m_ccRoot,	SLOT(deleteSelectedEntities()));
 
@@ -4105,57 +4105,98 @@ void MainWindow::doAction4pcsRegister()
 	updateUI();
 }
 
-//Aurelien BEY le 4/12/2008 : ajout de la fonction de sous echantillonage de nuages de points
 void MainWindow::doActionSubsample()
 {
-    if (m_selectedEntities.size() != 1 || !m_selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD)) //TODO
+	//find candidates
+	std::vector<ccPointCloud*> clouds;
+	unsigned maxPointCount = 0;
+	double maxCloudRadius = 0;
+	{
+		for (size_t i=0; i<m_selectedEntities.size(); ++i)
+		{
+			if (m_selectedEntities[i]->isA(CC_TYPES::POINT_CLOUD))
+			{
+				ccPointCloud* cloud = static_cast<ccPointCloud*>(m_selectedEntities[i]);
+				clouds.push_back(cloud);
+
+				maxPointCount = std::max<unsigned>(maxPointCount, cloud->size());
+				maxCloudRadius = std::max<double>(maxCloudRadius, cloud->getBB().getDiagNorm());
+			}
+		}
+	}
+
+    if (clouds.empty())
     {
-        ccConsole::Error("Select 1 point cloud!");
+        ccConsole::Error("Select at least one point cloud!");
         return;
     }
 
-    ccPointCloud *pointCloud = static_cast<ccPointCloud*>(m_selectedEntities[0]);
-    ccSubsamplingDlg sDlg(pointCloud);
-
+	//Display dialog
+    ccSubsamplingDlg sDlg(maxPointCount, maxCloudRadius, this);
     if (!sDlg.exec())
         return;
 
-    ccProgressDialog pDlg(false,this);
-    pDlg.setMethodTitle("Subsampling");
-
-    CCLib::ReferenceCloud *sampledCloud = sDlg.getSampledCloud(&pDlg);
-    if (!sampledCloud)
-    {
-        ccConsole::Error("An internal error occurred: failed to sample cloud!");
-        return;
-    }
-
-	int warnings = 0;
-    ccPointCloud *newPointCloud = pointCloud->partialClone(sampledCloud,&warnings);
-	if (newPointCloud)
+	//process clouds
 	{
-		newPointCloud->setName(pointCloud->getName()+QString(".subsampled"));
-		newPointCloud->setDisplay(pointCloud->getDisplay());
-		newPointCloud->setGlobalShift(pointCloud->getGlobalShift());
-		newPointCloud->setGlobalScale(pointCloud->getGlobalScale());
-		newPointCloud->prepareDisplayForRefresh();
-		if (pointCloud->getParent())
-			pointCloud->getParent()->addChild(newPointCloud);
-		newPointCloud->setDisplay(pointCloud->getDisplay());
-		pointCloud->setEnabled(false);
-		addToDB(newPointCloud, true, 0, false, false);
+		ccProgressDialog pDlg(false,this);
+		pDlg.setMethodTitle("Subsampling");
 
-		newPointCloud->refreshDisplay();
+		bool errors = false;
 
-		if (warnings)
-			ccLog::Error("Not enough memory: colors, normals or scalar fields may be missing!");
+		QElapsedTimer eTimer;
+		eTimer.start();
+
+		for (size_t i=0; i<clouds.size(); ++i)
+		{
+			ccPointCloud* cloud = clouds[i];
+			CCLib::ReferenceCloud *sampledCloud = sDlg.getSampledCloud(cloud,&pDlg);
+			if (!sampledCloud)
+			{
+				ccConsole::Warning(QString("[Subsampling] Failed to subsample cloud '%1'!").arg(cloud->getName()));
+				errors = true;
+				continue;
+			}
+
+			int warnings = 0;
+			ccPointCloud *newPointCloud = cloud->partialClone(sampledCloud,&warnings);
+			
+			delete sampledCloud;
+			sampledCloud = 0;
+			
+			if (newPointCloud)
+			{
+				newPointCloud->setName(cloud->getName()+QString(".subsampled"));
+				newPointCloud->setDisplay(cloud->getDisplay());
+				newPointCloud->setGlobalShift(cloud->getGlobalShift());
+				newPointCloud->setGlobalScale(cloud->getGlobalScale());
+				newPointCloud->prepareDisplayForRefresh();
+				if (cloud->getParent())
+					cloud->getParent()->addChild(newPointCloud);
+				cloud->setEnabled(false);
+				addToDB(newPointCloud, true, 0, false, false, 0, 0, 0, 0, false);
+
+				newPointCloud->refreshDisplay();
+
+				if (warnings)
+				{
+					ccLog::Warning("[Subsampling] Not enough memory: colors, normals or scalar fields may be missing!");
+					errors = true;
+				}
+			}
+			else
+			{
+				ccLog::Error("Not enough memory!");
+				break;
+			}
+		}
+
+		ccLog::Print("[Subsampling] Timing: %3.3f s.",eTimer.elapsed()/1000.0);
+
+		if (errors)
+		{
+			ccLog::Error("Errors occurred (see console)");
+		}
 	}
-	else
-	{
-		ccLog::Error("Not enough memory!");
-	}
-
-    delete sampledCloud;
 
     refreshAll();
 	updateUI();
@@ -9208,6 +9249,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionFitPlane->setEnabled(atLeastOneEntity);
     actionFitFacet->setEnabled(atLeastOneEntity);
 	actionFitQuadric->setEnabled(atLeastOneCloud);
+    actionSubsample->setEnabled(atLeastOneCloud);
 
 	actionSNETest->setEnabled(atLeastOneCloud);
 	actionExportCloudsInfo->setEnabled(atLeastOneCloud);
@@ -9289,7 +9331,6 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionInterpolateColors->setEnabled(exactlyTwoEntities && atLeastOneColor);
 	actionPointPairsAlign->setEnabled(exactlyOneEntity || exactlyTwoEntities);
     actionAlign->setEnabled(exactlyTwoEntities); //Aurelien BEY le 13/11/2008
-    actionSubsample->setEnabled(exactlyOneCloud); //Aurelien BEY le 4/12/2008
     actionCloudCloudDist->setEnabled(exactlyTwoClouds);
     actionCloudMeshDist->setEnabled(exactlyTwoEntities && atLeastOneMesh);
     actionCPS->setEnabled(exactlyTwoClouds);

@@ -26,7 +26,6 @@ Big ones:
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 
 Various:
-[*] Subsample on multiple point clouds at once (http://www.danielgm.net/cc/forum/viewtopic.php?t=803)
 [*] Import control points from ascii file (for point pair-based registration - http://www.cloudcompare.org/forum/viewtopic.php?t=585)
 [*] Finish FBX support (materials)
 [*] Use a scalar field (such as scattering angles) in the subsampling method to keep the "best" points

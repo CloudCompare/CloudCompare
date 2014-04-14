@@ -43,10 +43,12 @@ public:
     };
 
 	//! Default constructor
-    ccSubsamplingDlg(ccGenericPointCloud* cloud, QWidget* parent = 0);
+    ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius, QWidget* parent = 0);
 
-	//! Returns subsampled cloud (once dialog has been validated)
-    CCLib::ReferenceCloud* getSampledCloud(CCLib::GenericProgressCallback* progressCb = 0);
+	//! Returns subsampled version of a cloud according to current parameters
+	/** Should be called only once the dialog has been validated.
+	**/
+    CCLib::ReferenceCloud* getSampledCloud(ccGenericPointCloud* cloud, CCLib::GenericProgressCallback* progressCb = 0);
 
 protected slots:
 
@@ -56,8 +58,12 @@ protected slots:
 
 protected:
 
-	//! Associated cloud
-    ccGenericPointCloud* m_pointCloud;
+	//! Max point count (for RANDOM method)
+	unsigned m_maxPointCount;
+
+	//! Max radius (for SPACE method)
+	double m_maxRadius;
+
 
     void updateLabels();
 };

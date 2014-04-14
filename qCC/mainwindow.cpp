@@ -8561,7 +8561,7 @@ void MainWindow::loadFile()
     filters.append(QString(CC_FILE_TYPE_FILTERS[PV]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[POV]) + ";;");
     filters.append(QString(CC_FILE_TYPE_FILTERS[ICM]) + ";;");
-    filters.append(QString(CC_FILE_TYPE_FILTERS[BUNDLER]) + ";;");
+    filters.append(QString(CC_FILE_TYPE_FILTERS[BUNDLER])/*+ ";;"*/);
 
     //currently selected filter
     QString selectedFilter = CC_FILE_TYPE_FILTERS[currentOpenDlgFilter];

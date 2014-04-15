@@ -874,7 +874,7 @@ bool ccCommandLineParser::setActiveSF(QStringList& arguments)
 
 	bool paramOk = false;
 	QString sfIndexStr = arguments.takeFirst();
-	int sfIndex = static_cast<PointCoordinateType>(sfIndexStr.toInt(&paramOk));
+	int sfIndex = sfIndexStr.toInt(&paramOk);
 	if (!paramOk)
 		return Error(QString("Failed to read a numerical parameter: S.F. index (after \"-%1\"). Got '%2' instead.").arg(COMMAND_SET_ACTIVE_SF).arg(sfIndexStr));
 	Print(QString("Set active S.F. index: %1").arg(sfIndex));

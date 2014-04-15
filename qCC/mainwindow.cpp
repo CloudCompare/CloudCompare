@@ -5087,16 +5087,16 @@ void MainWindow::doActionComputeDistToBestFitQuadric3D()
             const double* Q = Yk.get3DQuadric();
             if (Q)
             {
-                const PointCoordinateType& a = Q[0];
-                const PointCoordinateType& b = Q[1];
-                const PointCoordinateType& c = Q[2];
-                const PointCoordinateType& e = Q[3];
-                const PointCoordinateType& f = Q[4];
-                const PointCoordinateType& g = Q[5];
-                const PointCoordinateType& l = Q[6];
-                const PointCoordinateType& m = Q[7];
-                const PointCoordinateType& n = Q[8];
-                const PointCoordinateType& d = Q[9];
+                const double& a = Q[0];
+                const double& b = Q[1];
+                const double& c = Q[2];
+                const double& e = Q[3];
+                const double& f = Q[4];
+                const double& g = Q[5];
+                const double& l = Q[6];
+                const double& m = Q[7];
+                const double& n = Q[8];
+                const double& d = Q[9];
 
                 //gravity center
                 const CCVector3* G = Yk.getGravityCenter();

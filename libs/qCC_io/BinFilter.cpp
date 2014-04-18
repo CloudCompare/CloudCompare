@@ -222,7 +222,8 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 		else if (currentObject->isKindOf(CC_TYPES::SENSOR))
 		{
 			ccIndexedTransformationBuffer* buffer = static_cast<ccSensor*>(currentObject)->getPositions();
-			dependencies.insert(buffer);
+            if (buffer)
+                dependencies.insert(buffer);
 		}
 		else if (currentObject->isA(CC_TYPES::LABEL_2D))
 		{
@@ -613,10 +614,15 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			{
 				//we have a problem here ;)
 				sensor->setPositions(0);
+
+                //aren't positions optional (so it is writtine in ccGBLSensor.cpp) ?
+                //if so we can simply set them to NULL and go ahead, we do not need to return.
+
 				//DGM: can't delete it, too dangerous (bad pointers ;)
 				//delete root;
-				ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
-				return CC_FERR_MALFORMED_FILE;
+
+                ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
+//				return CC_FERR_MALFORMED_FILE;
 			}
 		}
 		else if (currentObject->isA(CC_TYPES::LABEL_2D))

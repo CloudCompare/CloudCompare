@@ -426,7 +426,8 @@ bool ccPolyline::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* points,
 	//and split it if necessary
 	bool success = basePoly->split(maxEdgelLength,parts);
 
-	//delete basePoly;
+	delete basePoly;
+	basePoly = 0;
 
 	return success;
 

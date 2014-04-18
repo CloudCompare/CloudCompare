@@ -328,8 +328,8 @@ int ChunkedPointCloud::getScalarFieldIndexByName(const char* name) const
     for (size_t i=0; i<sfCount; ++i)
     {
         //we don't accept two SF with the same name!
-        if (strcmp(m_scalarFields[i]->getName(),name)==0)
-            return (int)i;
+        if (strcmp(m_scalarFields[i]->getName(),name) == 0)
+            return static_cast<int>(i);
     }
 
 	return -1;

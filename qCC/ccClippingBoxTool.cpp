@@ -281,74 +281,83 @@ void ccClippingBoxTool::exportCloud()
 
 void ccClippingBoxTool::extractContour()
 {
-	if (!m_clipBox)
-		return;
-
-	ccHObject* obj = m_clipBox->getAssociatedEntity();
-
-	if (obj && obj->isKindOf(CC_TYPES::POINT_CLOUD))
-	{
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
-		if (cloud)
-		{
-			//ask the user for the 'max edge length'
-			bool ok = true;
-			if (s_maxEdgeLength < 0)
-				s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/100.0;
-			double maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
-			if (!ok)
-				return;
-			bool splitContour = false;
-			if (maxEdgeLength > 0)
-			{
-				splitContour = (QMessageBox::question(0,"Split contour","Do you want to split the contour in multiple parts if necessary?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
-			}
-			s_maxEdgeLength = maxEdgeLength;
-
-			std::vector<ccPolyline*> polys;
-			if (ccPolyline::ExtractFlatContour(	cloud,
-												static_cast<PointCoordinateType>(maxEdgeLength),
-												polys,
-												splitContour ))
-			{
-				if (!polys.empty())
-				{
-					s_lastContourUniqueIDs.clear();
-
-					for (size_t i=0; i<polys.size(); ++i)
-					{
-						ccPolyline* poly = polys[i];
-						poly->setColor(ccColor::green);
-						poly->showColors(true);
-						poly->setName(cloud->getName()+QString(".contour"));
-						MainWindow::TheInstance()->addToDB(poly);
-
-						s_lastContourUniqueIDs.push_back(poly->getUniqueID());
-						removeLastContourToolButton->setEnabled(true);
-					}
-				}
-				else
-				{
-					ccLog::Error("Contour points are too far from each other! Increase the max edge length");
-				}
-			}
-			else
-			{
-				ccLog::Error("Contour extraction failed!");
-			}
-
-			delete cloud;
-			cloud = 0;
-		}
-		else
-		{
-			ccLog::Error("Not enough memory!");
-			return;
-		}
-	}
+	extractSlicesAndContours(false, true, /*singleContourMode=*/true);
 }
+//void ccClippingBoxTool::extractContour()
+//{
+//	if (!m_clipBox)
+//		return;
+//
+//	ccHObject* obj = m_clipBox->getAssociatedEntity();
+//
+//	if (obj && obj->isKindOf(CC_TYPES::POINT_CLOUD))
+//	{
+//		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
+//		if (cloud)
+//		{
+//			//ask the user for the 'max edge length'
+//			bool ok = true;
+//			if (s_maxEdgeLength < 0)
+//				s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/100.0;
+//			double maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
+//			if (!ok)
+//				return;
+//			bool splitContour = false;
+//			if (maxEdgeLength > 0)
+//			{
+//				splitContour = (QMessageBox::question(0,"Split contour","Do you want to split the contour in multiple parts if necessary?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
+//			}
+//			s_maxEdgeLength = maxEdgeLength;
+//
+//			std::vector<ccPolyline*> polys;
+//			if (ccPolyline::ExtractFlatContour(	cloud,
+//												static_cast<PointCoordinateType>(maxEdgeLength),
+//												polys,
+//												splitContour ))
+//			{
+//				if (!polys.empty())
+//				{
+//					s_lastContourUniqueIDs.clear();
+//
+//					for (size_t i=0; i<polys.size(); ++i)
+//					{
+//						ccPolyline* poly = polys[i];
+//						poly->setColor(ccColor::green);
+//						poly->showColors(true);
+//						poly->setName(cloud->getName()+QString(".contour"));
+//						MainWindow::TheInstance()->addToDB(poly);
+//
+//						s_lastContourUniqueIDs.push_back(poly->getUniqueID());
+//						removeLastContourToolButton->setEnabled(true);
+//					}
+//				}
+//				else
+//				{
+//					ccLog::Error("Contour points are too far from each other! Increase the max edge length");
+//				}
+//			}
+//			else
+//			{
+//				ccLog::Error("Contour extraction failed!");
+//			}
+//
+//			delete cloud;
+//			cloud = 0;
+//		}
+//		else
+//		{
+//			ccLog::Error("Not enough memory!");
+//			return;
+//		}
+//	}
+//}
 
 void ccClippingBoxTool::exportMultCloud()
+{
+	extractSlicesAndContours(true, true, /*singleContourMode=*/false);
+}
+
+void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extractContours, bool singleContourMode)
 {
 	if (!m_clipBox)
 		return;
@@ -361,8 +370,27 @@ void ccClippingBoxTool::exportMultCloud()
 	}
 	ccPointCloud* cloud = static_cast<ccPointCloud*>(obj);
 
-	ccClippingBoxRepeatDlg repeatDlg(MainWindow::TheInstance()/*this*/);
-	repeatDlg.randomColorCheckBox->setEnabled(cloud->isA(CC_TYPES::POINT_CLOUD)); //random colors is only available for real point clouds!
+	ccClippingBoxRepeatDlg repeatDlg(singleContourMode, MainWindow::TheInstance());
+	
+	//by default we set the 'flat/repeat' dimension to the smallest box dimension
+	{
+		CCVector3 diagVec = m_clipBox->getBB().getDiagVec();
+		unsigned char flatDim = 0;
+		if (diagVec.y < diagVec.x)
+			flatDim = 1;
+		if (diagVec.z < diagVec.u[flatDim])
+			flatDim = 2;
+		if (singleContourMode)
+			repeatDlg.setFlatDim(flatDim);
+		else
+			repeatDlg.setRepeatDim(flatDim);
+	}
+	
+	//random colors is only available for real point clouds!
+	//(and only useful for mutliple slice/contour mode in fact...)
+	repeatDlg.randomColorCheckBox->setEnabled(cloud->isA(CC_TYPES::POINT_CLOUD));
+	
+	//set default max edge length
 	if (s_maxEdgeLength < 0)
 		s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/100.0;
 	repeatDlg.maxEdgeLengthDoubleSpinBox->setValue(s_maxEdgeLength);
@@ -384,32 +412,22 @@ void ccClippingBoxTool::exportMultCloud()
 		return;
 	}
 
-	ccHObject* contourGroup = 0;
-	bool splitContour = false;
-	if (repeatDlg.extractContoursGroupBox->isChecked())
-	{
-		s_maxEdgeLength = repeatDlg.maxEdgeLengthDoubleSpinBox->value();
-		contourGroup = new ccHObject(obj->getName()+QString(".contours"));
-		if (s_maxEdgeLength > 0)
-		{
-			splitContour = (QMessageBox::question(0,"Split contour","Do you want to split the contour(s) in multiple parts if necessary?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
-		}
-	}
+	//whether to use random colors for (multiple) generated slices
+	bool generateRandomColors = repeatDlg.randomColorCheckBox->isChecked();
 
-	//compute the cloud bounding box in the local clipping box ref.
-	ccBBox localBox;
-	ccGLMatrix localTrans;
-	if (m_clipBox->isGLTransEnabled())
-		localTrans = m_clipBox->getGLTransformation().inverse();
-	else
-		localTrans.toIdentity();
+	//whether to extract contours or not
+	if (!singleContourMode)
 	{
-		for (unsigned i=0; i<cloud->size(); ++i)
-		{
-			CCVector3 P = *cloud->getPoint(i);
-			localTrans.apply(P);
-			localBox.add(P);
-		}
+		extractContours = repeatDlg.extractContoursGroupBox->isChecked();
+	}
+			
+	//compute the cloud bounding box in the local clipping box ref.
+	ccGLMatrix localTrans;
+	{
+		if (m_clipBox->isGLTransEnabled())
+			localTrans = m_clipBox->getGLTransformation().inverse();
+		else
+			localTrans.toIdentity();
 	}
 
 	//compute 'grid' extents in the local clipping box ref.
@@ -420,7 +438,18 @@ void ccClippingBoxTool::exportMultCloud()
 	CCVector3 gridOrigin = m_clipBox->getBB().minCorner();
 	CCVector3 cellSize = m_clipBox->getBB().getDiagVec();
 	PointCoordinateType gap = (PointCoordinateType)repeatDlg.gapDoubleSpinBox->value();
+
+	//for mutli-dimensional mode only!
+	if (!singleContourMode)
 	{
+		ccBBox localBox;
+		for (unsigned i=0; i<cloud->size(); ++i)
+		{
+			CCVector3 P = *cloud->getPoint(i);
+			localTrans.apply(P);
+			localBox.add(P);
+		}
+
 		for (unsigned char d=0; d<3; ++d)
 		{
 			if (processDim[d])
@@ -446,86 +475,209 @@ void ccClippingBoxTool::exportMultCloud()
 
 	//apply process
 	{
-		bool generateRandomColors = repeatDlg.randomColorCheckBox->isChecked();
-
 		//backup original clipping box
-		ccBBox originalBox = m_clipBox->getBox();
+		//ccBBox originalBox = m_clipBox->getBox();
 
 		//group to store all the resulting slices
-		ccHObject* group = new ccHObject(QString("%1.slices").arg(cloud->getName()));
+		ccHObject* sliceGroup = 0;
 
-		//grid of potential clouds
-		CCLib::ReferenceCloud** clouds = new CCLib::ReferenceCloud*[cellCount];
-		if (!clouds)
+		//slice(s) cloud(s)
+		std::vector<ccGenericPointCloud*> clouds;
+		try
+		{
+			clouds.resize(cellCount,0);
+		}
+		catch(std::bad_alloc)
 		{
 			ccLog::Error("Not enough memory!");
-			if (contourGroup)
-				delete contourGroup;
 			return;
 		}
-		memset(clouds, 0, sizeof(CCLib::ReferenceCloud*)*cellCount);
 
-		CCVector3 cellSizePlusGap = cellSize + CCVector3(gap,gap,gap);
-
-		//project points into grid
 		bool error = false;
+		bool warningsIssued = false;
 		unsigned subCloudsCount = 0;
+
+		if (singleContourMode)
 		{
-			unsigned pointCount = cloud->size(); 
-
-			ccProgressDialog pDlg(false,this);
-			pDlg.setInfo(qPrintable(QString("Points: %1").arg(pointCount)));
-			pDlg.start();
-			pDlg.show();
-			QApplication::processEvents();
-
-			CCLib::NormalizedProgress nProgress(&pDlg,pointCount);
-			for (unsigned i=0; i<pointCount; ++i)
+			//single cloud: easy
+			assert(clouds.size() == 1);
+			clouds[0] = cloud->createNewCloudFromVisibilitySelection(false);
+			if (!clouds[0])
 			{
-				CCVector3 P = *cloud->getPoint(i);
-				localTrans.apply(P);
+				ccLog::Error("Not enough memory!");
+				return;
+			}
+			clouds[0]->setName(cloud->getName() + QString(".slice"));
+			subCloudsCount = 1;
+		}
+		else
+		{
+			//we'll potentially create up to one (ref.) cloud per cell
+			std::vector<CCLib::ReferenceCloud*> refClouds;
+			try
+			{
+				refClouds.resize(cellCount,0);
+			}
+			catch(std::bad_alloc)
+			{
+				ccLog::Error("Not enough memory!");
+				return;
+			}
+			CCVector3 cellSizePlusGap = cellSize + CCVector3(gap,gap,gap);
 
-				//relative coordinates (between 0 and 1)
-				P -= gridOrigin;
-				P.x /= cellSizePlusGap.x;
-				P.y /= cellSizePlusGap.y;
-				P.z /= cellSizePlusGap.z;
+			//project points into grid
+			{
+				unsigned pointCount = cloud->size(); 
 
-				int xi = static_cast<int>(floor(P.x));
-				xi = std::min( std::max(xi, indexMins[0]), indexMaxs[0]);
-				int yi = static_cast<int>(floor(P.y));
-				yi = std::min( std::max(yi, indexMins[1]), indexMaxs[1]);
-				int zi = static_cast<int>(floor(P.z));
-				zi = std::min( std::max(zi, indexMins[2]), indexMaxs[2]);
+				ccProgressDialog pDlg(false,this);
+				pDlg.setInfo(qPrintable(QString("Points: %1").arg(pointCount)));
+				pDlg.start();
+				pDlg.show();
+				QApplication::processEvents();
 
-				if (gap == 0 ||
-					(	(P.x-static_cast<PointCoordinateType>(xi))*cellSizePlusGap.x <= cellSize.x
-					&&	(P.y-static_cast<PointCoordinateType>(yi))*cellSizePlusGap.y <= cellSize.y
-					&&	(P.z-static_cast<PointCoordinateType>(zi))*cellSizePlusGap.z <= cellSize.z))
+				CCLib::NormalizedProgress nProgress(&pDlg,pointCount);
+				for (unsigned i=0; i<pointCount; ++i)
 				{
-					int cloudIndex = ((zi-indexMins[2]) * static_cast<int>(gridDim[1]) + (yi-indexMins[1])) * static_cast<int>(gridDim[0]) + (xi-indexMins[0]);
-					if (!clouds[cloudIndex])
-					{
-						clouds[cloudIndex] = new CCLib::ReferenceCloud(cloud);
-						++subCloudsCount;
-					}
+					CCVector3 P = *cloud->getPoint(i);
+					localTrans.apply(P);
 
-					if (!clouds[cloudIndex]->addPointIndex(i))
+					//relative coordinates (between 0 and 1)
+					P -= gridOrigin;
+					P.x /= cellSizePlusGap.x;
+					P.y /= cellSizePlusGap.y;
+					P.z /= cellSizePlusGap.z;
+
+					int xi = static_cast<int>(floor(P.x));
+					xi = std::min( std::max(xi, indexMins[0]), indexMaxs[0]);
+					int yi = static_cast<int>(floor(P.y));
+					yi = std::min( std::max(yi, indexMins[1]), indexMaxs[1]);
+					int zi = static_cast<int>(floor(P.z));
+					zi = std::min( std::max(zi, indexMins[2]), indexMaxs[2]);
+
+					if ( gap == 0 ||
+						(	(P.x-static_cast<PointCoordinateType>(xi))*cellSizePlusGap.x <= cellSize.x
+						&&	(P.y-static_cast<PointCoordinateType>(yi))*cellSizePlusGap.y <= cellSize.y
+						&&	(P.z-static_cast<PointCoordinateType>(zi))*cellSizePlusGap.z <= cellSize.z) )
 					{
-						ccLog::Error("Not enough memory!");
-						error = true;
-						break;
+						int cloudIndex = ((zi-indexMins[2]) * static_cast<int>(gridDim[1]) + (yi-indexMins[1])) * static_cast<int>(gridDim[0]) + (xi-indexMins[0]);
+						assert(cloudIndex < refClouds.size());
+
+						if (!refClouds[cloudIndex])
+						{
+							refClouds[cloudIndex] = new CCLib::ReferenceCloud(cloud);
+							++subCloudsCount;
+						}
+
+						if (!refClouds[cloudIndex]->addPointIndex(i))
+						{
+							ccLog::Error("Not enough memory!");
+							error = true;
+							break;
+						}
 					}
 				}
 
 				nProgress.oneStep();
+			} //project points into grid
+
+			//now create the real clouds
+			{
+				sliceGroup = new ccHObject(QString("%1.slices").arg(cloud->getName()));
+
+				QProgressDialog pDlg(QString("Extract section(s): %1").arg(subCloudsCount),"Cancel",0,static_cast<int>(subCloudsCount),this);
+				pDlg.show();
+				QApplication::processEvents();
+
+				for (int i=indexMins[0]; i<=indexMaxs[0]; ++i)
+				{
+					for (int j=indexMins[1]; j<=indexMaxs[1]; ++j)
+					{
+						for (int k=indexMins[2]; k<=indexMaxs[2]; ++k)
+						{
+							int cloudIndex = ((k-indexMins[2]) * static_cast<int>(gridDim[1]) + (j-indexMins[1])) * static_cast<int>(gridDim[0]) + (i-indexMins[0]);
+							assert(cloudIndex < refClouds.size());
+
+							if (refClouds[cloudIndex]) //some slices can be empty due to rounding issues!
+							{
+								//generate slice from previous selection
+								int warnings = 0;
+								ccPointCloud* sliceCloud = cloud->partialClone(refClouds[cloudIndex],&warnings);
+								warningsIssued |= (warnings != 0);
+							
+								if (sliceCloud)
+								{
+									if (generateRandomColors && cloud->isA(CC_TYPES::POINT_CLOUD))
+									{
+										colorType col[3];
+										ccColor::Generator::Random(col);
+										if (!sliceCloud->setRGBColor(col))
+										{
+											ccLog::Error("Not enough memory!");
+											error = true;
+											i = indexMaxs[0];
+											j = indexMaxs[1];
+											k = indexMaxs[2];
+										}
+										sliceCloud->showColors(true);
+									}
+
+									sliceCloud->setEnabled(true);
+									sliceCloud->setVisible(true);
+									sliceCloud->setDisplay(cloud->getDisplay());
+
+									CCVector3 cellOrigin(	gridOrigin.x + static_cast<PointCoordinateType>(i) * cellSizePlusGap.x,
+															gridOrigin.y + static_cast<PointCoordinateType>(j) * cellSizePlusGap.y,
+															gridOrigin.z + static_cast<PointCoordinateType>(k) * cellSizePlusGap.z);
+									QString slicePosStr = QString("(%1 ; %2 ; %3)").arg(cellOrigin.x).arg(cellOrigin.y).arg(cellOrigin.z);
+									sliceCloud->setName(QString("slice @ ")+slicePosStr);
+
+									//add slice to group
+									sliceGroup->addChild(sliceCloud);
+									//update 'real clouds' grid
+									clouds[cloudIndex] = sliceCloud;
+									++subCloudsCount;
+								}
+
+								if (pDlg.wasCanceled())
+								{
+									error = true;
+									ccLog::Warning(QString("[ccClippingBoxTool::exportMultCloud] Process canceled by user"));
+									//early stop
+									i = indexMaxs[0];
+									j = indexMaxs[1];
+									k = indexMaxs[2];
+									break;
+								}
+								pDlg.setValue(static_cast<int>(subCloudsCount));
+
+							}
+						}
+					}
+				}
+			} //now create the real clouds
+
+			//release memory
+			{
+				for (size_t i=0; i<refClouds.size(); ++i)
+					if (refClouds[i])
+						delete refClouds[i];
+				refClouds.clear();
 			}
 		}
 
-		//extract section clouds (and contour polylines optionaly)
-		if (!error)
+		//extract contour polylines (optionaly)
+		if (!error && extractContours && subCloudsCount != 0)
 		{
-			QProgressDialog pDlg(QString("Sections: %1").arg(subCloudsCount),"Cancel",0,static_cast<int>(subCloudsCount),this);
+			//contour extraction parameter (max edge length)
+			s_maxEdgeLength = repeatDlg.maxEdgeLengthDoubleSpinBox->value();
+			bool splitContour = false;
+			if (s_maxEdgeLength > 0)
+			{
+				splitContour = (QMessageBox::question(0,"Split contour","Do you want to split the contour(s) in multiple parts if necessary?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
+			}
+			ccHObject* contourGroup = new ccHObject(obj->getName() + QString(".contours"));
+
+			QProgressDialog pDlg(QString("Extract contour(s): %1").arg(subCloudsCount),"Cancel",0,static_cast<int>(subCloudsCount),this);
 			pDlg.show();
 			QApplication::processEvents();
 
@@ -537,8 +689,8 @@ void ccClippingBoxTool::exportMultCloud()
 					if (processDim[i])
 						preferredDim = i;
 			}
-
-			bool warningsIssued = false;
+			ccGLMatrix invLocalTrans = localTrans.inverse();
+			PointCoordinateType* preferredOrientation = (preferredDim != -1 ? invLocalTrans.getColumn(preferredDim) : 0);
 
 			unsigned currentCloudCount = 0;
 			for (int i=indexMins[0]; i<=indexMaxs[0]; ++i)
@@ -548,197 +700,113 @@ void ccClippingBoxTool::exportMultCloud()
 					for (int k=indexMins[2]; k<=indexMaxs[2]; ++k)
 					{
 						int cloudIndex = ((k-indexMins[2]) * static_cast<int>(gridDim[1]) + (j-indexMins[1])) * static_cast<int>(gridDim[0]) + (i-indexMins[0]);
+						assert(cloudIndex < clouds.size());
 
 						if (clouds[cloudIndex]) //some slices can be empty due to rounding issues!
 						{
-							int warnings = 0;
-							ccPointCloud* sliceCloud = cloud->partialClone(clouds[cloudIndex],&warnings);
-							warningsIssued |= (warnings != 0);
-							
-							if (sliceCloud)
+							std::vector<ccPolyline*> polys;
+							if (ccPolyline::ExtractFlatContour(	clouds[cloudIndex],
+																static_cast<PointCoordinateType>(s_maxEdgeLength),
+																polys,
+																splitContour,
+																preferredOrientation))
 							{
-								if (generateRandomColors && cloud->isA(CC_TYPES::POINT_CLOUD))
+								if (!polys.empty())
 								{
-									colorType col[3];
-									ccColor::Generator::Random(col);
-									if (!static_cast<ccPointCloud*>(sliceCloud)->setRGBColor(col))
+									for (size_t p=0; p<polys.size(); ++p)
 									{
-										ccLog::Error("Not enough memory!");
-										error = true;
-										i = indexMaxs[0];
-										j = indexMaxs[1];
-										k = indexMaxs[2];
-									}
-									sliceCloud->showColors(true);
-								}
-
-								sliceCloud->setEnabled(true);
-								sliceCloud->setVisible(true);
-								sliceCloud->setDisplay(cloud->getDisplay());
-
-								CCVector3 cellOrigin(gridOrigin.x + static_cast<PointCoordinateType>(i) * cellSizePlusGap.x,
-													 gridOrigin.y + static_cast<PointCoordinateType>(j) * cellSizePlusGap.y,
-													 gridOrigin.z + static_cast<PointCoordinateType>(k) * cellSizePlusGap.z);
-								QString slicePosStr = QString("(%1 ; %2 ; %3)").arg(cellOrigin.x).arg(cellOrigin.y).arg(cellOrigin.z);
-								sliceCloud->setName(QString("slice @ ")+slicePosStr);
-
-								//add slice to group
-								group->addChild(sliceCloud);
-
-								//generate contour?
-								if (contourGroup)
-								{
-									std::vector<ccPolyline*> polys;
-									if (ccPolyline::ExtractFlatContour(	sliceCloud,
-																		static_cast<PointCoordinateType>(s_maxEdgeLength),
-																		polys,
-																		splitContour,
-																		preferredDim))
-									{
-										if (!polys.empty())
-										{
-											for (size_t p=0; p<polys.size(); ++p)
-											{
-												ccPolyline* poly = polys[p];
-												poly->setColor(ccColor::green);
-												poly->showColors(true);
-												QString contourName = QString("contour @ ")+slicePosStr;
-												if (polys.size() != 1)
-													contourName += QString(" (part %1)").arg(p+1);
-												poly->setName(contourName);
-												contourGroup->addChild(poly);
-											}
-										}
-										else
-										{
-											ccLog::Warning(QString("Contour @ %1: points are too far from each other! Increase the max edge length").arg(slicePosStr));
-										}
-									}
-									else
-									{
-										ccLog::Warning(QString("Contour @ %1: extraction failed!").arg(slicePosStr));
+										ccPolyline* poly = polys[p];
+										poly->setColor(ccColor::green);
+										poly->showColors(true);
+										QString contourName = clouds[cloudIndex]->getName();
+										contourName.replace("slice","contour");
+										if (polys.size() != 1)
+											contourName += QString(" (part %1)").arg(p+1);
+										poly->setName(contourName);
+										contourGroup->addChild(poly);
 									}
 								}
+								else
+								{
+									ccLog::Warning(QString("%1: points are too far from each other! Increase the max edge length").arg(clouds[cloudIndex]->getName()));
+									warningsIssued = true;
+								}
 							}
-
-							++currentCloudCount;
-							if (pDlg.wasCanceled())
+							else
 							{
-								error = true;
-								ccLog::Warning(QString("[ccClippingBoxTool::exportMultCloud] Process canceled by user"));
-								//early stop
-								i = indexMaxs[0];
-								j = indexMaxs[1];
-								k = indexMaxs[2];
-								break;
+								ccLog::Warning(QString("%1: contour extraction failed!").arg(clouds[cloudIndex]->getName()));
+								warningsIssued = true;
 							}
-							pDlg.setValue(static_cast<int>(currentCloudCount));
 						}
+						
+						++currentCloudCount;
+						if (pDlg.wasCanceled())
+						{
+							error = true;
+							ccLog::Warning(QString("[ccClippingBoxTool::exportMultCloud] Process canceled by user"));
+							//early stop
+							i = indexMaxs[0];
+							j = indexMaxs[1];
+							k = indexMaxs[2];
+							break;
+						}
+						pDlg.setValue(static_cast<int>(currentCloudCount));
 					}
 				}
 			}
 
-			if (warningsIssued)
+			if (error || contourGroup->getChildrenNumber() == 0)
 			{
-				ccLog::Warning("[ccClippingBoxTool::exportMultCloud] Warnings were issued during the process! Result may be incomplete!");
+				delete contourGroup;
+				contourGroup = 0;
+			}
+			else
+			{
+				contourGroup->setDisplay_recursive(cloud->getDisplay());
+				MainWindow::TheInstance()->addToDB(contourGroup);
+			
+				s_lastContourUniqueIDs.clear();
+				s_lastContourUniqueIDs.push_back(contourGroup->getUniqueID());
+				removeLastContourToolButton->setEnabled(true);
 			}
 		}
 
+		//release memory
 		if (error)
 		{
-			group->removeAllChildren();
-			if (contourGroup)
-				delete contourGroup;
-			contourGroup = 0;
+			clouds.clear();
+			delete sliceGroup;
+			sliceGroup = 0;
+		}
+		else if (singleContourMode)
+		{
+			assert(!sliceGroup);
+			assert(clouds.size() == 1);
+			delete clouds[0]; //temporary cloud!
+			clouds.clear();
 		}
 
-		//if any, add contours to the main DB
-		if (contourGroup)
+		if (!error)
 		{
-			contourGroup->setDisplay_recursive(cloud->getDisplay());
-			MainWindow::TheInstance()->addToDB(contourGroup);
-			
-			s_lastContourUniqueIDs.clear();
-			s_lastContourUniqueIDs.push_back(contourGroup->getUniqueID());
-			removeLastContourToolButton->setEnabled(true);
-		}
-
-		//release memory
-		{
-			for (unsigned i=0; i<cellCount; ++i)
-				if (clouds[i])
-					delete clouds[i];
-			delete[] clouds;
-			clouds = 0;
-		}
-
-		//unsigned currentCell = 0;
-		//for (int i=indexMins[0]; i<=indexMaxs[0]; ++i)
-		//{
-		//	ccBBox cellBox;
-		//	cellBox.minCorner().x = gridOrigin.x + (PointCoordinateType)i * (cellSize.x + gap);
-		//	cellBox.maxCorner().x = cellBox.minCorner().x + cellSize.x;
-		//	for (int j=indexMins[1]; j<=indexMaxs[1]; ++j)
-		//	{
-		//		cellBox.minCorner().y = gridOrigin.y + (PointCoordinateType)j * (cellSize.y + gap);
-		//		cellBox.maxCorner().y = cellBox.minCorner().y + cellSize.y;
-		//		for (int k=indexMins[2]; k<=indexMaxs[2]; ++k, ++currentCell)
-		//		{
-		//			cellBox.minCorner().z = gridOrigin.z + (PointCoordinateType)k * (cellSize.z + gap);
-		//			cellBox.maxCorner().z = cellBox.minCorner().z + cellSize.z;
-
-		//			m_clipBox->setBox(cellBox);
-
-		//			//count the number of visible slices
-		//			unsigned visibleCount = 0;
-		//			{
-		//				ccGenericPointCloud::VisibilityTableType* visArray = cloud->getTheVisibilityArray();
-		//				assert(visArray);
-		//				if (visArray)
-		//				{
-		//					for (unsigned i=0; i<cloud->size(); ++i)
-		//						if (visArray->getValue(i) == POINT_VISIBLE)
-		//							++visibleCount;
-		//				}
-		//			}
-
-		//			if (visibleCount) //some slices can be empty!
-		//			{
-		//				ccGenericPointCloud* sliceCloud = cloud->createNewCloudFromVisibilitySelection(false);
-		//				if (sliceCloud)
-		//				{
-		//					if (generateRandomColors && cloud->isA(CC_TYPES::POINT_CLOUD))
-		//					{
-		//						colorType col[3];
-		//						ccColor::Generator::Random(col);
-		//						static_cast<ccPointCloud*>(sliceCloud)->setRGBColor(col);
-		//						sliceCloud->showColors(true);
-		//					}
-
-		//					sliceCloud->setEnabled(true);
-		//					sliceCloud->setVisible(true);
-		//					sliceCloud->setName(QString("slice @ (%1 ; %2 ; %3)").arg(cellBox.minCorner().x).arg(cellBox.minCorner().y).arg(cellBox.minCorner().z));
-		//					//add slice to group
-		//					group->addChild(sliceCloud);
-		//				}
-		//			}
-
-		//			pDlg.setValue((int)floor(100.0f*(float)currentCell/(float)cellCount));
-		//		}
-		//	}
-		//}
-
-		if (group->getChildrenNumber() == 0)
-		{
-			ccLog::Warning("[ccClippingBoxTool] Repeat process generated no output!");
-			delete group;
-			group = 0;
-		}
-		else
-		{
-			QMessageBox::warning(0, "Process finished", QString("%1 clouds have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(group->getChildrenNumber()));
-			group->setDisplay_recursive(cloud->getDisplay());
-			MainWindow::TheInstance()->addToDB(group);
+			if (warningsIssued)
+			{
+				ccLog::Warning("[ccClippingBoxTool::exportMultCloud] Warnings were issued during the process! (result may be incomplete)");
+			}
+			if (sliceGroup)
+			{
+				if (sliceGroup->getChildrenNumber() == 0)
+				{
+					ccLog::Warning("[ccClippingBoxTool] Repeat process generated no output!");
+					delete sliceGroup;
+					sliceGroup = 0;
+				}
+				else
+				{
+					QMessageBox::warning(0, "Process finished", QString("%1 clouds have been generated.\n(you may have to close the tool and hide the initial cloud to see them...)").arg(sliceGroup->getChildrenNumber()));
+					sliceGroup->setDisplay_recursive(cloud->getDisplay());
+					MainWindow::TheInstance()->addToDB(sliceGroup);
+				}
+			}
 		}
 
 		//m_clipBox->setBox(originalBox);

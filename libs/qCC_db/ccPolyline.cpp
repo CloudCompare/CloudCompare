@@ -407,7 +407,7 @@ bool ccPolyline::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* points,
 									PointCoordinateType maxEdgelLength,
 									std::vector<ccPolyline*>& parts,
 									bool allowSplitting/*=true*/,
-									int preferredDim/*=-1*/)
+									const PointCoordinateType* preferredDim/*=0*/)
 {
 	parts.clear();
 
@@ -434,7 +434,7 @@ bool ccPolyline::ExtractFlatContour(CCLib::GenericIndexedCloudPersist* points,
 
 ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* points,
 											PointCoordinateType maxEdgelLength/*=0*/,
-											int preferredDim/*=*-1*/)
+											const PointCoordinateType* preferredDim/*=0*/)
 {
 	assert(points);
 	if (!points)
@@ -451,10 +451,13 @@ ccPolyline* ccPolyline::ExtractFlatContour(	CCLib::GenericIndexedCloudPersist* p
 	PointCoordinateType* planeEq = 0;
 	//if the user has specified a default direction, we'll use it as 'projecting plane'
 	PointCoordinateType preferredPlaneEq[4] = {0, 0, 0, 0};
-	if (preferredDim >= 0 && preferredDim <= 2)
+	if (preferredDim != 0)
 	{
 		const CCVector3* G = points->getPoint(0); //any point through which the point pass is ok
-		preferredPlaneEq[preferredDim] = PC_ONE;
+		preferredPlaneEq[0] = preferredDim[0];
+		preferredPlaneEq[1] = preferredDim[1];
+		preferredPlaneEq[2] = preferredDim[2];
+		CCVector3::vnormalize(preferredPlaneEq);
 		preferredPlaneEq[3] = CCVector3::vdot(G->u,preferredPlaneEq);
 		planeEq = preferredPlaneEq;
 	}

@@ -39,6 +39,9 @@ v2.5.4 XX/XX/2014
 		- fits a 2D1/2 quadric on the selected cloud(s)
 		- this quadric is represented as a 'primitive' (kind of mesh) and its equation is displayed in the console
 	* The 'Subsample' method can now be called on mutliple clouds at once
+	* Cross Section tool:
+		- contour extraction parametrization is much more clever (for 'single' and 'mutliple' contour extraction modes)
+		- the extraction with a rotated clipping box is now properly handled
 
 - Bug fixes:
 	* Information displayed in 2D labels was 'shifted' ( 'P(index,x,y)' was displayed instead of 'P(x,y,z)')

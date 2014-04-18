@@ -91,6 +91,9 @@ protected slots:
 
 protected:
 
+	//! Extracts slices and/or contours
+	void extractSlicesAndContours(bool extractSlices, bool extractContours, bool singleContourMode);
+
 	//! Shift box
 	void shiftBox(unsigned char dim, bool minus);
 

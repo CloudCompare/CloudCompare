@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="repeatDimGroupBox">
      <property name="toolTip">
       <string>The segmentation process will be repeated along the following dimensions (+/-)</string>
      </property>
@@ -115,7 +115,7 @@ color: white;</string>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_2">
+    <widget class="QGroupBox" name="otherOptionsGroupBox">
      <property name="title">
       <string>Other options</string>
      </property>

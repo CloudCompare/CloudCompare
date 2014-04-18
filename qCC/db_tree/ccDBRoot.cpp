@@ -667,7 +667,7 @@ void ccDBRoot::unselectAllEntities()
 	selectionModel->clear();
 }
 
-void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/*=false*/)
+void ccDBRoot::selectEntity(ccHObject* obj, bool forceAdditiveSelection/* = false*/)
 {
     bool additiveSelection = forceAdditiveSelection || (QApplication::keyboardModifiers () & Qt::ControlModifier);
 
@@ -1573,7 +1573,7 @@ void ccDBRoot::toggleSelectedEntities3DName()
 
 void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 {
-	if (prop>6)
+	if (prop > 6)
 	{
 		ccLog::Warning("[ccDBRoot::toggleSelectedEntitiesProperty] Internal error: invalid 'prop' value");
 		return;
@@ -1581,19 +1581,21 @@ void ccDBRoot::toggleSelectedEntitiesProperty(unsigned prop)
 
     QItemSelectionModel* qism = m_dbTreeWidget->selectionModel();
 	QModelIndexList selectedIndexes = qism->selectedIndexes();
-    int i,selCount = selectedIndexes.size();
+    int selCount = selectedIndexes.size();
     if (selCount == 0)
         return;
 
 	//hide properties view
 	hidePropertiesView();
 
-	for (i=0;i<selCount;++i)
+	for (int i=0; i<selCount; ++i)
     {
         ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-		assert(item);
 		if (!item)
+		{
+			assert(false);
 			continue;
+		}
 		switch(prop)
 		{
 		case 0: //enable state
@@ -1659,23 +1661,25 @@ void ccDBRoot::showContextMenu(const QPoint& menuPos)
 		
 		//selected items?
 		QModelIndexList selectedIndexes = qism->selectedIndexes();
-		int i,selCount = selectedIndexes.size();
+		int selCount = selectedIndexes.size();
 		if (selCount)
 		{
-			bool toggleVisibility=false;
-			bool toggleOtherProperties=false;
-			bool toggleMaterials=false;
-			bool hasMoreThan2Children=false;
-			bool hasExactlyOnePlanarEntity=false;
-			bool leafObject=false;
-			for (i=0;i<selCount;++i)
+			bool toggleVisibility = false;
+			bool toggleOtherProperties = false;
+			bool toggleMaterials = false;
+			bool hasMoreThan2Children = false;
+			bool hasExactlyOnePlanarEntity = false;
+			bool leafObject = false;
+			for (int i=0; i<selCount; ++i)
 			{
 				ccHObject* item = static_cast<ccHObject*>(selectedIndexes[i].internalPointer());
-				assert(item);
 				if (!item)
+				{
+					assert(false);
 					continue;
-				if (item->getChildrenNumber()>1)
-					hasMoreThan2Children=true;
+				}
+				if (item->getChildrenNumber() > 1)
+					hasMoreThan2Children = true;
 				leafObject |= item->isLeaf();
 				if (!item->isA(CC_TYPES::HIERARCHY_OBJECT))
 				{

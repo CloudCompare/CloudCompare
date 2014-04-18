@@ -8553,6 +8553,8 @@ void MainWindow::closeAll()
 	{
 		m_ccRoot->unloadAll();
 	}
+
+	redrawAll();
 }
 
 void MainWindow::loadFile()

@@ -280,7 +280,7 @@ public:
 	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const;
 	virtual const colorType* getPointColor(unsigned pointIndex) const;
 	virtual const normsType& getPointNormalIndex(unsigned pointIndex) const;
-	virtual const PointCoordinateType* getPointNormal(unsigned pointIndex) const;
+	virtual const CCVector3& getPointNormal(unsigned pointIndex) const;
 	/** WARNING: if removeSelectedPoints is true, any attached octree will be deleted.
 	**/
 	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints = false);
@@ -307,7 +307,7 @@ public:
     /** WARNING: normals must be enabled.
         Normal is automatically compressed before storage.
     **/
-	void setPointNormal(unsigned pointIndex, const PointCoordinateType* N);
+	void setPointNormal(unsigned pointIndex, const CCVector3& N);
 
 	//! Pushes a compressed normal vector
 	/** \param index compressed normal vector
@@ -315,16 +315,9 @@ public:
 	void addNormIndex(normsType index);
 
 	//! Pushes a normal vector on stack (shortcut)
-	/** \param Nx normal vector (X)
-        \param Ny normal vector (Y)
-        \param Nz normal vector (Z)
+	/** \param N normal vector
     **/
-	void addNorm(PointCoordinateType Nx, PointCoordinateType Ny, PointCoordinateType Nz);
-
-	//! Pushes a normal vector on stack (shortcut)
-	/** \param N normal vector (size: 3)
-    **/
-	void addNorm(const PointCoordinateType* N);
+	void addNorm(const CCVector3& N);
 
 	//! Adds a normal vector to the one at a specific index
 	/** The resulting sum is automatically normalized and compressed.

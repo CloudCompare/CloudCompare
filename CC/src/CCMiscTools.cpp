@@ -72,7 +72,7 @@ void CCMiscTools::MakeMinAndMaxCubical(CCVector3& dimMin, CCVector3& dimMax, dou
 
 	//build corresponding 'square' box
 	{
-		CCVector3 dd(maxDD);
+		CCVector3 dd(maxDD,maxDD,maxDD);
 		CCVector3 md = dimMax+dimMin;
 	
 		dimMin = (md-dd) * static_cast<PointCoordinateType>(0.5);

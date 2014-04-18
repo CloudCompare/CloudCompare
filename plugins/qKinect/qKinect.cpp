@@ -469,39 +469,39 @@ void qKinect::grabCloud()
 
 			bool meanFilter = m_kDlg->meanFilterCheckBox->isChecked();
 
-			for (unsigned j = 0; j < s_hDepth; ++j)
+			for (unsigned j=0; j<s_hDepth; ++j)
 			{
 				//P.y = (PointCoordinateType)j;
-				for (unsigned i = 0; i < s_wDepth; ++i,++depth)
+				for (unsigned i=0; i<s_wDepth; ++i,++depth)
 				{
 					uint16_t d = *depth;
 
 					//mean filter
 					if (meanFilter)
 					{
-						double sum=0.0;
-						unsigned count=0;
-						for (int k=-1;k<=1;++k)
+						double sum = 0.0;
+						unsigned count = 0;
+						for (int k=-1; k<=1; ++k)
 						{
-							int ii = (int)i+k;
-							if (ii>=0 && ii<(int)s_wDepth)
+							int ii = static_cast<int>(i)+k;
+							if (ii>=0 && ii<static_cast<int>(s_wDepth))
 								for (int l=-1;l<=1;++l)
 								{
-									int jj = (int)j+l;
-									if (jj>=0 && jj<(int)s_hDepth)
+									int jj = static_cast<int>(j)+l;
+									if (jj>=0 && jj<static_cast<int>(s_hDepth))
 									{
 										const uint16_t& dd = s_depth_data[jj*s_wDepth+ii];
 										if (dd < FREENECT_DEPTH_RAW_NO_VALUE)
 										{
-											sum += (double)s_depth_data[jj*s_wDepth+ii];
+											sum += static_cast<double>(s_depth_data[jj*s_wDepth+ii]);
 											++count;
 										}
 									}
 								}
 						}
 
-						if (count>1)
-							d = (uint16_t)(sum/(double)count);
+						if (count > 1)
+							d = static_cast<uint16_t>(sum/count);
 					}
 
 					if (d < FREENECT_DEPTH_RAW_NO_VALUE)
@@ -590,7 +590,7 @@ void qKinect::grabCloud()
 				}
 			}
 			//selectedEntities.push_back(depthMap);
-			m_app->addToDB(depthMap);
+			m_app->addToDB(depthMap,false,true,true);
 			m_app->refreshAll();
 		}
 		else

@@ -269,7 +269,7 @@ public:
 
 		//! Default constructor
 		NearestNeighboursSearchStruct()
-			: queryPoint(0.0)
+			: queryPoint(0,0,0)
 			, level(1)
 			, minNumberOfNeighbors(1)
 			, maxSearchSquareDistd(-1.0)

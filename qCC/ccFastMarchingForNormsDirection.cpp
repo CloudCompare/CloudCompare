@@ -42,24 +42,20 @@ static CCVector3 ComputeRobustAverageNorm(	CCLib::ReferenceCloud* subset,
 	assert(subset->getAssociatedCloud() == static_cast<CCLib::GenericIndexedCloud*>(sourceCloud));
 
 	//we simply take the first normal as reference (DGM: seems to work better than the LSQ plane!)
-	const PointCoordinateType* N = sourceCloud->getPointNormal(subset->getPointGlobalIndex(0));
+	const CCVector3& N = sourceCloud->getPointNormal(subset->getPointGlobalIndex(0));
 
 	//now we can compute the mean normal, using the first normal as reference for the sign
 	CCVector3 Nout(0,0,0);
 	unsigned n = subset->size();
 	for (unsigned i=0; i<n; ++i)
 	{
-		const PointCoordinateType* Ni = sourceCloud->getPointNormal(subset->getPointGlobalIndex(i));
+		const CCVector3& Ni = sourceCloud->getPointNormal(subset->getPointGlobalIndex(i));
 		//compute the scalar product between the ith point normal and the robust one
-		PointCoordinateType ps = CCVector3::vdot(Ni,N);
+		PointCoordinateType ps = Ni.dot(N);
 		if (ps < 0)
-		{
-			CCVector3::vsubstract(Nout.u,Ni,Nout.u);
-		}
+			Nout -= Ni;
 		else
-		{
-			CCVector3::vadd(Nout.u,Ni,Nout.u);
-		}
+			Nout += Ni;
 	}
 
 	Nout.normalize();
@@ -308,13 +304,12 @@ unsigned ccFastMarchingForNormsDirection::updateResolvedTable(	ccGenericPointClo
 			resolved.setValue(index,1);
 
 			const normsType& norm = theNorms->getValue(index);
-			const PointCoordinateType* N = ccNormalVectors::GetNormal(norm);
+			const CCVector3& N = ccNormalVectors::GetNormal(norm);
 
 			//inverse point normal if necessary
-			if (CCVector3::vdot(N,aCell->N.u) < 0)
+			if (N.dot(aCell->N) < 0)
 			{
-				PointCoordinateType newN[3]= { -N[0], -N[1], -N[2] };
-				theNorms->setValue(index,ccNormalVectors::GetNormIndex(newN));
+				theNorms->setValue(index,ccNormalVectors::GetNormIndex(-N));
 			}
 
 #ifdef _DEBUG

@@ -367,10 +367,10 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 
 		if (hasNormals)
 		{
-			const PointCoordinateType* N = vertices->getPointNormal(i);
-			ply_write(ply, static_cast<double>(N[0]));
-			ply_write(ply, static_cast<double>(N[1]));
-			ply_write(ply, static_cast<double>(N[2]));
+			const CCVector3& N = vertices->getPointNormal(i);
+			ply_write(ply, static_cast<double>(N.x));
+			ply_write(ply, static_cast<double>(N.y));
+			ply_write(ply, static_cast<double>(N.z));
 		}
 
 		for (std::vector<CCLib::ScalarField*>::const_iterator sf =  scalarFields.begin(); sf != scalarFields.end(); ++sf)
@@ -481,7 +481,7 @@ static int vertex_cb(p_ply_argument argument)
 	return 1;
 }
 
-static PointCoordinateType s_Normal[3] = {0,0,0};
+static CCVector3 s_Normal(0,0,0);
 static int s_NormalCount = 0;
 
 static int normal_cb(p_ply_argument argument)
@@ -490,7 +490,7 @@ static int normal_cb(p_ply_argument argument)
 	ccPointCloud* cloud;
 	ply_get_argument_user_data(argument, (void**)(&cloud), &flags);
 
-	s_Normal[flags & POS_MASK] = static_cast<PointCoordinateType>( ply_get_argument_value(argument) );
+	s_Normal.u[flags & POS_MASK] = static_cast<PointCoordinateType>( ply_get_argument_value(argument) );
 
 	if (flags & ELEM_EOL)
 	{

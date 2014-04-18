@@ -41,26 +41,14 @@ public:
 
     //! Adds an entity to main db
     /** \param obj entity
-		\param autoExpandDBTree whether DB tree should automatically be expanded
-        \param statusMessage message to be displayed on the status bar
-        \param addToDisplay automatically adds this entity to the active GL display
         \param updateZoom updates active GL display zoom to fit the whole scene, including this new entity (addToDisplay must be true)
-		\param winDest destination GL window (if 0, the current active one is used)
-		\param coordinatesTransEnabled whether transformation (shift + scale) on load has been applied for precedent entity
-		\param coordinatesShift if applicable, shift applied to precedent entity
-		\param coordinatesScale if applicable, scale applied to precedent entity (-1 = ignored)
+		\param autoExpandDBTree whether DB tree should automatically be expanded
 		\param checkDimensions whether to check entity's dimensions (and potentially asking the user to shift/rescale it) or not
     **/
     virtual void addToDB(	ccHObject* obj,
+							bool updateZoom = false,
 							bool autoExpandDBTree = true,
-							const char* statusMessage = 0,
-							bool addToDisplay = true,
-							bool updateZoom = true,
-							ccGLWindow* winDest = 0,
-							bool* coordinatesTransEnabled = 0,
-							CCVector3d* coordinatesShift = 0,
-							double* coordinatesScale = 0,
-							bool checkDimensions = true	) = 0;
+							bool checkDimensions = false ) = 0;
 
     //! Removes an entity from main db tree
 	/** Object is automatically detached from its parent.

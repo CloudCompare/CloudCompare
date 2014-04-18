@@ -28,11 +28,12 @@
 //system
 #include <math.h> //for sqrt, fabs
 
-//! 3D Vector (templated version)
-template <class Type> class Vector3Tpl
+//! 3-Tuple structure (templated version)
+template <class Type> class Tuple3Tpl
 {
 public:
-
+	
+	// The 3 tuple values as a union (array/separate values)
 	union
 	{
 		struct
@@ -43,20 +44,42 @@ public:
 	};
 
 	//! Default constructor
+	/** Inits tuple to (0,0,0).
+	**/
+	inline Tuple3Tpl() : x(0),y(0),z(0) {}
+
+	//! Constructor from a triplet of values
+	/** Inits typle to (a,b,c).
+	**/
+	inline Tuple3Tpl(Type a, Type b, Type c) : x(a),y(b),z(c) {}
+
+	//! Constructor from an array of 3 elements
+	inline Tuple3Tpl(const Type p[]) : x(p[0]),y(p[1]),z(p[2]) {}
+	
+	//! Copy constructor
+	inline Tuple3Tpl(const Tuple3Tpl& v) : x(v.x),y(v.y),z(v.z) {}
+};
+
+//! 3D Vector (templated version)
+template <class Type> class Vector3Tpl : public Tuple3Tpl<Type>
+{
+public:
+
+	//! Default constructor
 	/** Inits vector to (0,0,0).
 	**/
-	inline Vector3Tpl(Type s = 0) : x(s),y(s),z(s) {}
+	inline Vector3Tpl() : Tuple3Tpl<Type>() {}
 
 	//! Constructor from a triplet of coordinates
 	/** Inits vector to (x,y,z).
 	**/
-	inline Vector3Tpl(Type _x, Type _y, Type _z) : x(_x),y(_y),z(_z) {}
+	inline Vector3Tpl(Type _x, Type _y, Type _z) : Tuple3Tpl<Type>(_x,_y,_z) {}
 
 	//! Constructor from an array of 3 elements
-	inline Vector3Tpl(const Type p[]) : x(p[0]),y(p[1]),z(p[2]) {}
+	inline Vector3Tpl(const Type p[]) : Tuple3Tpl<Type>(p) {}
 	
 	//! Copy constructor
-	inline Vector3Tpl(const Vector3Tpl& v) : x(v.x),y(v.y),z(v.z) {}
+	inline Vector3Tpl(const Vector3Tpl& v) : Tuple3Tpl<Type>(v) {}
 
 	//! Constructor from an int array
 	static inline Vector3Tpl fromArray(const int a[3]) { return Vector3Tpl(static_cast<Type>(a[0]),static_cast<Type>(a[1]),static_cast<Type>(a[2])); }

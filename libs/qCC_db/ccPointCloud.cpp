@@ -870,40 +870,40 @@ ScalarType ccPointCloud::getPointDisplayedDistance(unsigned pointIndex) const
 const colorType* ccPointCloud::getPointColor(unsigned pointIndex) const
 {
 	assert(hasColors());
-	assert(pointIndex<m_rgbColors->currentSize());
+	assert(pointIndex < m_rgbColors->currentSize());
 
 	return m_rgbColors->getValue(pointIndex);
 }
 
 const normsType& ccPointCloud::getPointNormalIndex(unsigned pointIndex) const
 {
-	assert(m_normals && pointIndex<m_normals->currentSize());
+	assert(m_normals && pointIndex < m_normals->currentSize());
 
 	return m_normals->getValue(pointIndex);
 }
 
-const PointCoordinateType* ccPointCloud::getPointNormal(unsigned pointIndex) const
+const CCVector3& ccPointCloud::getPointNormal(unsigned pointIndex) const
 {
-	assert(m_normals && pointIndex<m_normals->currentSize());
+	assert(m_normals && pointIndex < m_normals->currentSize());
 
 	return ccNormalVectors::GetNormal(m_normals->getValue(pointIndex));
 }
 
 void ccPointCloud::setPointColor(unsigned pointIndex, const colorType* col)
 {
-	assert(m_rgbColors && pointIndex<m_rgbColors->currentSize());
+	assert(m_rgbColors && pointIndex < m_rgbColors->currentSize());
 
 	m_rgbColors->setValue(pointIndex, col);
 }
 
 void ccPointCloud::setPointNormalIndex(unsigned pointIndex, normsType norm)
 {
-	assert(m_normals && pointIndex<m_normals->currentSize());
+	assert(m_normals && pointIndex < m_normals->currentSize());
 
 	m_normals->setValue(pointIndex, norm);
 }
 
-void ccPointCloud::setPointNormal(unsigned pointIndex, const PointCoordinateType* N)
+void ccPointCloud::setPointNormal(unsigned pointIndex, const CCVector3& N)
 {
 	setPointNormalIndex(pointIndex, ccNormalVectors::GetNormIndex(N));
 }
@@ -920,20 +920,13 @@ bool ccPointCloud::hasNormals() const
 
 bool ccPointCloud::hasScalarFields() const
 {
-	return (getNumberOfScalarFields()>0);
+	return (getNumberOfScalarFields() > 0);
 }
 
 bool ccPointCloud::hasDisplayedScalarField() const
 {
 	return m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale();
 }
-
-/*bool ccPointCloud::isScalarFieldEnabled() const
-{
-//shortcut for CCLib
-return hasDisplayedScalarField();
-}
-//*/
 
 void ccPointCloud::refreshBB()
 {
@@ -944,7 +937,7 @@ void ccPointCloud::refreshBB()
 void ccPointCloud::addGreyColor(colorType g)
 {
 	assert(m_rgbColors && m_rgbColors->isAllocated());
-	const colorType G[3]={g,g,g};
+	const colorType G[3] = {g,g,g};
 	m_rgbColors->addElement(G);
 }
 
@@ -957,17 +950,11 @@ void ccPointCloud::addRGBColor(const colorType* C)
 void ccPointCloud::addRGBColor(colorType r, colorType g, colorType b)
 {
 	assert(m_rgbColors && m_rgbColors->isAllocated());
-	const colorType C[3]={r,g,b};
+	const colorType C[3] = {r,g,b};
 	m_rgbColors->addElement(C);
 }
 
-void ccPointCloud::addNorm(PointCoordinateType Nx, PointCoordinateType Ny, PointCoordinateType Nz)
-{
-	PointCoordinateType N[3] = {Nx,Ny,Nz};
-	addNorm(N);
-}
-
-void ccPointCloud::addNorm(const PointCoordinateType* N)
+void ccPointCloud::addNorm(const CCVector3& N)
 {
 	addNormIndex(ccNormalVectors::GetNormIndex(N));
 }
@@ -1077,7 +1064,7 @@ bool ccPointCloud::colorize(float r, float g, float b)
 	if (hasColors())
 	{
 		m_rgbColors->placeIteratorAtBegining();
-		for (unsigned i=0;i<m_rgbColors->currentSize();i++)
+		for (unsigned i=0; i<m_rgbColors->currentSize(); i++)
 		{
 			colorType* p = m_rgbColors->getCurrentValue();
 			{
@@ -1554,7 +1541,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						if (glParams.showNorms)
 						{
-							ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)));
+							ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)).u);
 						}
 						ccGL::Vertex3v(m_points->getValue(j));
 					}
@@ -1730,15 +1717,15 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							const normsType* _normalsIndexes = m_normals->chunkStartPtr(k);
 							for (unsigned j=0;j<chunkSize;j+=decimStep,_normalsIndexes+=decimStep)
 							{
-								const PointCoordinateType* N = compressedNormals->getNormal(*_normalsIndexes);
-								*(_normals)++ = *(N)++;
-								*(_normals)++ = *(N)++;
-								*(_normals)++ = *(N)++;
+								const CCVector3& N = compressedNormals->getNormal(*_normalsIndexes);
+								*(_normals)++ = N.x;
+								*(_normals)++ = N.y;
+								*(_normals)++ = N.z;
 							}
 						}
 
 						if (decimStep > 1)
-							chunkSize = (unsigned)floor((float)chunkSize/(float)decimStep);
+							chunkSize = static_cast<unsigned>( floor(static_cast<float>(chunkSize)/decimStep) );
 
 						glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
 						glDrawArrays(GL_POINTS,0,chunkSize);
@@ -1767,7 +1754,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
 										glColor3f(GetNormalizedValue(sf,sfDisplayRange),1.0f,1.0f);
-										ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)));
+										ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)).u);
 										ccGL::Vertex3v(m_points->getValue(j));
 									}
 								}
@@ -1781,7 +1768,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
 										glColor3f(GetSymmetricalNormalizedValue(sf,sfSaturationRange),1.0f,1.0f);
-										ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)));
+										ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)).u);
 										ccGL::Vertex3v(m_points->getValue(j));
 									}
 								}
@@ -1796,7 +1783,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								if (col)
 								{
 									glColor3ubv(col);
-									ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)));
+									ccGL::Normal3v(compressedNormals->getNormal(m_normals->getValue(j)).u);
 									ccGL::Vertex3v(m_points->getValue(j));
 								}
 							}
@@ -1876,10 +1863,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					const normsType* _normalsIndexes = m_normals->chunkStartPtr(k);
 					for (unsigned j=0;j<chunkSize;j+=decimStep,_normalsIndexes+=decimStep)
 					{
-						const PointCoordinateType* N = compressedNormals->getNormal(*_normalsIndexes);
-						*(_normals)++ = *(N)++;
-						*(_normals)++ = *(N)++;
-						*(_normals)++ = *(N)++;
+						const CCVector3& N = compressedNormals->getNormal(*_normalsIndexes);
+						*(_normals)++ = N.x;
+						*(_normals)++ = N.y;
+						*(_normals)++ = N.z;
 					}
 
 					//colors
@@ -2358,20 +2345,20 @@ void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 		// and its normal if necessary
 		if (hasNormals())
 		{
-			const PointCoordinateType *n = ccNormalVectors::GetNormal(m_normals->getValue(i));
+			const CCVector3& N = ccNormalVectors::GetNormal(m_normals->getValue(i));
 
-			PointCoordinateType px = P0+n[dim1];
-			PointCoordinateType py = P1+n[dim2];
+			PointCoordinateType px = P0+N.u[dim1];
+			PointCoordinateType py = P1+N.u[dim2];
 			PointCoordinateType nlon = atan2(px,py);
 			PointCoordinateType nu = sqrt(px*px+py*py);
 
 			CCVector3 n2;
 			n2.u[dim1] = (nlon-lon)*radius;
 			n2.u[dim2] = nu - u;
-			n2.u[dim]  = n[dim];
+			n2.u[dim]  = N.u[dim];
 
 			n2.normalize();
-			setPointNormal(i,n2.u);
+			setPointNormal(i,n2);
 		}
 
 		//process canceled by user?
@@ -2397,7 +2384,7 @@ void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
 
 	unsigned numberOfPoints = size();
 
-	CCLib::NormalizedProgress* nprogress=0;
+	CCLib::NormalizedProgress* nprogress = 0;
 	if (progressCb)
 	{
 		progressCb->reset();
@@ -2434,18 +2421,18 @@ void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
 		//and its normal if necessary
 		if (hasNormals())
 		{
-			const PointCoordinateType *n = ccNormalVectors::GetNormal(m_normals->getValue(i));
+			const CCVector3& N = ccNormalVectors::GetNormal(m_normals->getValue(i));
 
-			PointCoordinateType dX = cos(lon)*n[dim1]-sin(lon)*n[dim2];
-			PointCoordinateType dZ = sin(lon)*n[dim1]+cos(lon)*n[dim2];
+			PointCoordinateType dX = cos(lon)*N.u[dim1]-sin(lon)*N.u[dim2];
+			PointCoordinateType dZ = sin(lon)*N.u[dim1]+cos(lon)*N.u[dim2];
 
 			CCVector3 n2;
 			n2.u[dim1] = dX;
-			n2.u[dim2] = cos_alpha*dZ-sin_alpha*n[dim];
-			n2.u[dim]  = sin_alpha*dZ+cos_alpha*n[dim];
+			n2.u[dim2] = cos_alpha*dZ-sin_alpha*N.u[dim];
+			n2.u[dim]  = sin_alpha*dZ+cos_alpha*N.u[dim];
 			n2.normalize();
 
-			setPointNormal(i,n2.u);
+			setPointNormal(i,n2);
 		}
 
 		//process canceled by user?

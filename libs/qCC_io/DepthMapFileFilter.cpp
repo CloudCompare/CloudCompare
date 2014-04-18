@@ -85,7 +85,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 
     if (!sensor->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
     {
-        ccLog::Warning(QString("Warning: sensor '%1' is not associated to a point cloud!").arg(sensor->getName()));
+        ccLog::Warning(QString("[DepthMap] sensor '%1' is not associated to a point cloud!").arg(sensor->getName()));
         return CC_FERR_NO_ERROR; //this is not a severe error (the process can go on)
     }
 
@@ -123,7 +123,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
         unsigned nbPoints = cloud->size();
         if (nbPoints == 0)
         {
-            ccLog::Warning(QString("Warning: sensor '%1' is associated to an empty cloud!").arg(sensor->getName()));
+            ccLog::Warning(QString("[DepthMap] sensor '%1' is associated to an empty cloud!").arg(sensor->getName()));
             return CC_FERR_NO_ERROR; //this is not a severe error (the process can go on)
         }
         else
@@ -132,13 +132,18 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
             if (pc->hasNormals())
             {
                 NormsTableType* decodedNorms = new NormsTableType;
-                decodedNorms->reserve(nbPoints);
+                if (decodedNorms->reserve(nbPoints))
+				{
+					for (unsigned i=0; i<nbPoints; ++i)
+						decodedNorms->addElement(pc->getPointNormal(i).u);
 
-                for (unsigned i=0; i<nbPoints; ++i)
-                    decodedNorms->addElement(pc->getPointNormal(i));
-
-                theNorms = sensor->projectNormals(pc,*decodedNorms);
-                decodedNorms->clear();
+					theNorms = sensor->projectNormals(pc,*decodedNorms);
+					decodedNorms->clear();
+				}
+				else
+				{
+					ccLog::Warning(QString("[DepthMap] not enough memory to load normals on sensor '%1'!").arg(sensor->getName()));
+				}
 				decodedNorms->release();
 				decodedNorms = 0;
             }

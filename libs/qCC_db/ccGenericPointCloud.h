@@ -146,7 +146,7 @@ public:
     //! Returns normal corresponding to a given point
     /** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
     **/
-	virtual const PointCoordinateType* getPointNormal(unsigned pointIndex) const=0;
+	virtual const CCVector3& getPointNormal(unsigned pointIndex) const=0;
 
 
 	/***************************************************

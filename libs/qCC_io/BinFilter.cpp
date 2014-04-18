@@ -960,7 +960,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 					//Console::print("[BinFilter::loadModelFromBinaryFile] Error reading the %ith entity norms !\n",k);
 					return CC_FERR_READING;
 				}
-				loadedCloud->addNorm(N.u);
+				loadedCloud->addNorm(N);
 			}
 
 			if (header.scalarField)

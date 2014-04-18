@@ -359,14 +359,14 @@ int PCDFilter::ReadNormalsMemMap(const InputMemoryFile & mem_file, const PCDHead
 	for (size_t i=0; i < pointCount; ++i)
 	{
 		//unpack normals
-		PointCoordinateType N[3];
+		CCVector3 N;
 		for (unsigned char j=0; j<3; ++j)
 		{
 			const char* tmp = mem_file.data() + header.data_position + i*header.pointStride + offsets[j];
 			if (sizes[j] == 4) //is a float
-				N[j] = (PointCoordinateType)(*((float*)tmp));
+				N.u[j] = (PointCoordinateType)(*((float*)tmp));
 			else if (sizes[j] == 8) //is double
-				N[j] = (PointCoordinateType)(*((double*)tmp));
+				N.u[j] = (PointCoordinateType)(*((double*)tmp));
 		}
 
 		cloud.addNorm(N);

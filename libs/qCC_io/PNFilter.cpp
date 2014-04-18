@@ -83,15 +83,15 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-	for (unsigned i=0;i<numberOfPoints;i++)
+	for (unsigned i=0; i<numberOfPoints; i++)
 	{
 		//write point
 		{
 			const CCVector3* P = theCloud->getPoint(i);
 			
 			//conversion to float
-			float wBuff[3] = {(float)P->x, (float)P->y, (float)P->z};
-			if (out.write((const char*)wBuff,3*sizeof(float))<0)
+			Vector3Tpl<float> Pfloat = Vector3Tpl<float>::fromArray(P->u);
+			if (out.write(reinterpret_cast<const char*>(Pfloat.u),3*sizeof(float))<0)
 			{
 				result = CC_FERR_WRITING;
 				break;
@@ -101,13 +101,13 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
 		//write normal
 		if (hasNorms)
 		{
-            const PointCoordinateType* N = theCloud->getPointNormal(i);
+            const CCVector3& N = theCloud->getPointNormal(i);
 			//conversion to float
-            norm[0] = (float)N[0];
-            norm[1] = (float)N[1];
-            norm[2] = (float)N[2];
+            norm[0] = static_cast<float>(N.x);
+            norm[1] = static_cast<float>(N.y);
+            norm[2] = static_cast<float>(N.z);
 		}
-		if (out.write((const char*)norm,3*sizeof(float))<0)
+		if (out.write(reinterpret_cast<const char*>(norm),3*sizeof(float)) < 0)
 		{
 			result = CC_FERR_WRITING;
 			break;
@@ -158,7 +158,7 @@ CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, boo
 	unsigned pointsRead = 0;
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-	for (unsigned i=0;i<numberOfPoints;i++)
+	for (unsigned i=0; i<numberOfPoints; i++)
 	{
         //if we reach the max. cloud size limit, we cerate a new chunk
 		if (pointsRead == fileChunkPos+fileChunkSize)
@@ -173,7 +173,7 @@ CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, boo
 				result = CC_FERR_NOT_ENOUGH_MEMORY;
 				if (loadedCloud)
 					delete loadedCloud;
-				loadedCloud=0;
+				loadedCloud = 0;
 				break;
 			}
 			loadedCloud->showNormals(true);
@@ -198,11 +198,7 @@ CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, boo
         //then the 3 components of the normal vector
 		if (in.read((char*)rBuff,3*sizeof(float))>=0)
 		{
-		    //conversion to PointCoordinateType[3]
-			PointCoordinateType N[3] = {(PointCoordinateType)rBuff[0],
-										(PointCoordinateType)rBuff[1],
-										(PointCoordinateType)rBuff[2]};
-			loadedCloud->addNorm(N);
+			loadedCloud->addNorm(CCVector3::fromArray(rBuff));
 		}
 		else
 		{

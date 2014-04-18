@@ -100,8 +100,8 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	//Signals & slots connection
 	connect(m_glWindow,								SIGNAL(filesDropped(const QStringList&)),			this,		SLOT(addToDB(const QStringList&)));
 	connect(m_glWindow,								SIGNAL(entitySelectionChanged(int)),				this,		SLOT(selectEntity(int)));
-    //connect(m_glWindow,								SIGNAL(entitiesSelectionChanged(std::set<int>)),	this,		SLOT(selectEntities(std::set<int>))); //not supported!
-	//connect(m_glWindow,								SIGNAL(newLabel(ccHObject*),					this,		SLOT(handleNewEntity(ccHObject*))); //nothing to do in ccViewer!
+    //connect(m_glWindow,							SIGNAL(entitiesSelectionChanged(std::set<int>)),	this,		SLOT(selectEntities(std::set<int>))); //not supported!
+	//connect(m_glWindow,							SIGNAL(newLabel(ccHObject*),						this,		SLOT(handleNewEntity(ccHObject*))); //nothing to do in ccViewer!
 
 	//"Options" menu
 	connect(ui.actionDisplayParameters,				SIGNAL(triggered()),						this,	SLOT(showDisplayParameters()));
@@ -1010,10 +1010,10 @@ void ccViewer::on3DMouseKeyDown(int key)
 		{
 			if (m_glWindow)
 			{
-				CCVector3 axis(0.0f,0.0f,-1.0f);
-				CCVector3 trans(0.0f);
+				CCVector3 axis(0,0,-PC_ONE);
+				CCVector3 trans(0,0,0);
 				ccGLMatrix mat;
-				float angle = (float)(M_PI/2.0);
+				PointCoordinateType angle = static_cast<PointCoordinateType>(M_PI/2.0);
 				if (key == Mouse3DInput::V3DK_CCW)
 					angle = -angle;
 				mat.initFromParameters(angle,axis,trans);

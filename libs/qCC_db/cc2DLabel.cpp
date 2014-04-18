@@ -366,9 +366,8 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			//normal
 			if (cloud->hasNormals())
 			{
-				const PointCoordinateType* N = cloud->getPointNormal(pointIndex);
-				assert(N);
-				QString normStr = QString("Normal: (%1;%2;%3)").arg(N[0],0,'f',precision).arg(N[1],0,'f',precision).arg(N[2],0,'f',precision);
+				const CCVector3& N = cloud->getPointNormal(pointIndex);
+				QString normStr = QString("Normal: (%1;%2;%3)").arg(N.x,0,'f',precision).arg(N.y,0,'f',precision).arg(N.z,0,'f',precision);
 				body << normStr;
 			}
 			//color
@@ -610,7 +609,12 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				{
 					const CCVector3* P = m_points[j].cloud->getPoint(m_points[j].index);
 					QString title = (count == 1 ? getName() : QString("P#%0").arg(m_points[j].index));
-					context._win->display3DLabel( title, *P+CCVector3(context.pickedPointsTextShift), ccColor::magenta, font);
+					context._win->display3DLabel(	title,
+													*P + CCVector3(	context.pickedPointsTextShift,
+																	context.pickedPointsTextShift,
+																	context.pickedPointsTextShift),
+													ccColor::magenta,
+													font );
 				}
 				glPopAttrib();
 			}

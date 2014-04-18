@@ -66,10 +66,10 @@ bool ccSphere::buildUp()
 
 	//2 first points: poles
 	verts->addPoint(CCVector3(0,0,m_radius));
-	verts->addNorm(0,0,1);
+	verts->addNorm(CCVector3(0,0,1));
 
 	verts->addPoint(CCVector3(0,0,-m_radius));
-	verts->addNorm(0,0,-1);
+	verts->addNorm(CCVector3(0,0,-1));
 
 	//then, angular sweep
 	PointCoordinateType angle_rad_step = static_cast<PointCoordinateType>(M_PI)/static_cast<PointCoordinateType>(steps);
@@ -99,7 +99,7 @@ bool ccSphere::buildUp()
 				P = N * m_radius;
 
 				verts->addPoint(P);
-				verts->addNorm(N.u);
+				verts->addNorm(N);
 			}
 		}
 	}

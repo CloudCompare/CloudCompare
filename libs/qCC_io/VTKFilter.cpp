@@ -158,8 +158,8 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 		outFile << "NORMALS Normals "<< floatType << endl;
 		for (unsigned i=0; i<ptsCount; ++i)
 		{
-			const PointCoordinateType* N = vertices->getPointNormal(i);
-			outFile << N[0] << " " << N[1] << " "  << N[2] << endl;
+			const CCVector3& N = vertices->getPointNormal(i);
+			outFile << N.x << " " << N.y << " "  << N.z << endl;
 		}
 	}
 
@@ -534,7 +534,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 								break;
 							}
 						}
-						vertices->addNorm(N.u);
+						vertices->addNorm(N);
 					}
 				}
 			}

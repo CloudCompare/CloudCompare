@@ -85,9 +85,9 @@ public:
 
 	//! Default constructor
 	SimpleTriangle()
-		: A(0.0)
-		, B(0.0)
-		, C(0.0)
+		: A(0,0,0)
+		, B(0,0,0)
+		, C(0,0,0)
 	{}
 
 	//! Constructor with 3 summits

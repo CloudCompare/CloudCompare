@@ -425,11 +425,11 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						for (unsigned n=0; n<chunkSize; n+=decimStep)
 						{
 							const CCLib::TriangleSummitsIndexes* ti = getTriangleIndexes(chunkStart + n);
-							memcpy(_normals,vertices->getPointNormal(ti->i1),sizeof(PointCoordinateType)*3);
+							memcpy(_normals,vertices->getPointNormal(ti->i1).u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
-							memcpy(_normals,vertices->getPointNormal(ti->i2),sizeof(PointCoordinateType)*3);
+							memcpy(_normals,vertices->getPointNormal(ti->i2).u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
-							memcpy(_normals,vertices->getPointNormal(ti->i3),sizeof(PointCoordinateType)*3);
+							memcpy(_normals,vertices->getPointNormal(ti->i3).u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
 						}
 					}
@@ -532,16 +532,16 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(triNormals);
 						int n1,n2,n3;
 						getTriangleNormalIndexes(n,n1,n2,n3);
-						N1 = (n1>=0 ? ccNormalVectors::GetNormal(triNormals->getValue(n1)) : 0);
-						N2 = (n1==n2 ? N1 : n1>=0 ? ccNormalVectors::GetNormal(triNormals->getValue(n2)) : 0);
-						N3 = (n1==n3 ? N1 : n3>=0 ? ccNormalVectors::GetNormal(triNormals->getValue(n3)) : 0);
+						N1 = (n1>=0 ? ccNormalVectors::GetNormal(triNormals->getValue(n1)).u : 0);
+						N2 = (n1==n2 ? N1 : n1>=0 ? ccNormalVectors::GetNormal(triNormals->getValue(n2)).u : 0);
+						N3 = (n1==n3 ? N1 : n3>=0 ? ccNormalVectors::GetNormal(triNormals->getValue(n3)).u : 0);
 
 					}
 					else
 					{
-						N1 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i1));
-						N2 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i2));
-						N3 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i3));
+						N1 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i1)).u;
+						N2 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i2)).u;
+						N3 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i3)).u;
 					}
 				}
 
@@ -750,9 +750,9 @@ ccPointCloud* ccGenericMesh::samplePoints(	bool densityBased,
 					unsigned triIndex = triIndices->getValue(i);
 					const CCVector3* P = cloud->getPoint(i);
 
-					CCVector3 N(0.0,0.0,1.0);
+					CCVector3 N(0,0,1);
 					interpolateNormals(triIndex,*P,N);
-					cloud->addNorm(N.u);
+					cloud->addNorm(N);
 				}
 
 				cloud->showNormals(true);

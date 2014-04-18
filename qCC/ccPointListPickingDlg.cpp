@@ -464,21 +464,22 @@ void ccPointListPickingDlg::updateList()
 
 void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y)
 {
-	if (cloud != m_associatedCloud || !cloud)
+	if (cloud != m_associatedCloud || !cloud || !MainWindow::TheInstance())
 		return;
 
 	cc2DLabel* newLabel = new cc2DLabel();
-	ccGenericGLDisplay* display = m_associatedCloud->getDisplay();
-	newLabel->setDisplay(display);
 	newLabel->addPoint(cloud,pointIndex);
 	newLabel->setVisible(true);
 	newLabel->setDisplayedIn2D(false);
 	newLabel->setCollapsed(true);
+	ccGenericGLDisplay* display = m_associatedCloud->getDisplay();
 	if (display)
 	{
+		newLabel->setDisplay(display);
 		int vp[4];
 		display->getViewportArray(vp);
-		newLabel->setPosition((float)(x+20)/(float)(vp[2]-vp[0]),(float)(y+20)/(float)(vp[3]-vp[1]));
+		newLabel->setPosition(	static_cast<float>(x+20)/static_cast<float>(vp[2]-vp[0]),
+								static_cast<float>(y+20)/static_cast<float>(vp[3]-vp[1]) );
 	}
 
 	//add default container if necessary
@@ -486,11 +487,12 @@ void ccPointListPickingDlg::processPickedPoint(ccPointCloud* cloud, unsigned poi
 	{
 		m_orderedLabelsContainer = new ccHObject(s_pickedPointContainerName);
 		m_associatedCloud->addChild(m_orderedLabelsContainer);
-		MainWindow::TheInstance()->addToDB(m_orderedLabelsContainer,true,0,true,false);
+		m_orderedLabelsContainer->setDisplay(display);
+		MainWindow::TheInstance()->addToDB(m_orderedLabelsContainer);
 	}
 	assert(m_orderedLabelsContainer);
 	m_orderedLabelsContainer->addChild(newLabel);
-	MainWindow::TheInstance()->addToDB(newLabel,true,0,true,false);
+	MainWindow::TheInstance()->addToDB(newLabel);
 	m_toBeAdded.push_back(newLabel);
 
 	//automatically send the new point coordinates to the clipboard

@@ -489,8 +489,8 @@ CCVector3 ccOctree::ComputeAverageNorm(CCLib::ReferenceCloud* subset, ccGenericP
 	unsigned n = subset->size();
 	for (unsigned i=0; i<n; ++i)
 	{
-		const PointCoordinateType* Ni = sourceCloud->getPointNormal(subset->getPointGlobalIndex(i));
-		CCVector3::vadd(N.u,Ni,N.u);
+		const CCVector3& Ni = sourceCloud->getPointNormal(subset->getPointGlobalIndex(i));
+		N += Ni;
 	}
 
 	N.normalize();

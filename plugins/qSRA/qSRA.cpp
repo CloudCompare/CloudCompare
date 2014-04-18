@@ -124,7 +124,7 @@ ccHObject* GetDefaultContainer(ccMainAppInterface* app)
 	//we look in qCC database for a group with the right name (i.e. if it has already been created)
 	ccHObject::Container groups;
 	app->dbRootObject()->filterChildren(groups,true,CC_TYPES::HIERARCHY_OBJECT);
-	for (unsigned j=0;j<groups.size();++j)
+	for (unsigned j=0; j<groups.size(); ++j)
 	{
 		if (groups[j]->getName() == QSRA_DEFAULT_CONTAINER_NAME)
 			return groups[j];
@@ -132,7 +132,7 @@ ccHObject* GetDefaultContainer(ccMainAppInterface* app)
 
 	//otherwise we create it
 	ccHObject* defaultContainer = new ccHObject(QSRA_DEFAULT_CONTAINER_NAME);
-	app->addToDB(defaultContainer,false);
+	app->addToDB(defaultContainer);
 
 	return defaultContainer;
 }
@@ -209,7 +209,7 @@ void qSRA::loadProfile()
 		if (defaultContainer)
 			defaultContainer->addChild(polyline);
 
-		m_app->addToDB(polyline,false);
+		m_app->addToDB(polyline,true,false,true);
 
 		m_app->dispToConsole(QString("[qSRA] File '%1' succesfully loaded").arg(filename),ccMainAppInterface::STD_CONSOLE_MESSAGE);
 	}

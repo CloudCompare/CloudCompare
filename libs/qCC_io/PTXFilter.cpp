@@ -455,7 +455,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const char* filename,
 								CCVector3 viewVector = *P /*- cloudTrans.getTranslationAsVec3D()*/; //clouds are still in their local coordinate system!
 								if (viewVector.dot(N) > 0)
 									N *= -1;
-								cloud->addNorm(N.u);
+								cloud->addNorm(N);
 
 								//progress
 								if (!nprogress.oneStep())

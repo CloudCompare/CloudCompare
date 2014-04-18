@@ -106,9 +106,6 @@ public:
     //! Deletes current main window instance
     static void DestroyInstance();
 
-    //! Static shortcut to MainwWindow::addToDB
-    static void AddToDB(const QString& filename, CC_FILE_TYPES fType = UNKNOWN_FILE);
-
     //! Returns active GL sub-window (if any)
     virtual ccGLWindow* getActiveGLWindow();
 
@@ -123,15 +120,10 @@ public:
 
 	//inherited from ccMainAppInterface
     virtual void addToDB(	ccHObject* obj,
+							bool updateZoom = false,
 							bool autoExpandDBTree = true,
-							const char* statusMessage = NULL,
-							bool addToDisplay = true,
-							bool updateZoom = true,
-							ccGLWindow* winDest = 0,
-							bool* coordinatesTransEnabled = 0,
-							CCVector3d* coordinatesShift = 0,
-							double* coordinatesScale = 0,
-							bool checkDimensions = true );
+							bool checkDimensions = false );
+
 	virtual void removeFromDB(ccHObject* obj, bool autoDelete = true);
 	virtual void setSelectedInDB(ccHObject* obj, bool selected);
     virtual void dispToConsole(QString message, ConsoleMessageLevel level = STD_CONSOLE_MESSAGE);
@@ -251,7 +243,7 @@ protected slots:
     void addToDBAuto(const QStringList& filenames);
 
 	//! Handles new label
-	void handleNewEntity(ccHObject*);
+	void handleNewLabel(ccHObject*);
 
     void setActiveSubWindow(QWidget* window);
     void setLightsAndMaterials();
@@ -351,7 +343,7 @@ protected slots:
 	void doActionEditGlobalScale();
     void doActionMatchBBCenters();
     void doActionUnroll();
-    void doActionProjectSensor();
+    void doActionCreateGBLSensor();
 	void doActionCreateCameraSensor();
     void doActionModifySensor();
 	void doActionProjectUncertainty();
@@ -395,9 +387,9 @@ protected slots:
     void doActionCloudMeshDist();
     void deactivateComparisonMode(int);
 
-    //Display points properties
-    void activatePointsPropertiesMode();
-    void deactivatePointsPropertiesMode(bool);
+    //Point picking mechanism
+    void activatePointPickingMode();
+    void deactivatePointPickingMode(bool);
 
     //Point list picking mechanism
     void activatePointListPickingMode();

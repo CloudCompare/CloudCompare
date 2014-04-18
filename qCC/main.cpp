@@ -47,144 +47,154 @@
 #include <vld.h>
 #endif
 
-
+//! QApplication wrapper
 class qccApplication : public QApplication
 {
-   public:
-      qccApplication( int &argc, char **argv ) :
-         QApplication( argc, argv )
-      {
-         setOrganizationName("CCCorp");
-         setApplicationName("CloudCompare");
+public:
+	qccApplication( int &argc, char **argv )
+		: QApplication( argc, argv )
+	{
+		setOrganizationName("CCCorp");
+		setApplicationName("CloudCompare");
 #ifdef Q_OS_MAC         
-         // Mac OS X apps don't show icons in menus
-         setAttribute( Qt::AA_DontShowIconsInMenus );
+		// Mac OS X apps don't show icons in menus
+		setAttribute( Qt::AA_DontShowIconsInMenus );
 #endif
-      }
+	}
 
 #ifdef Q_OS_MAC            
-   protected:
-      bool  event( QEvent *inEvent )
-      {
-         switch ( inEvent->type() )
-         {
-            case QEvent::FileOpen:
-            {
-               if ( MainWindow::TheInstance() == NULL )
-                  return false;
-                           
-               MainWindow::AddToDB( static_cast<QFileOpenEvent *>(inEvent)->file() );
-               return true;
-            }
-               
-            default:
-               return QApplication::event( inEvent );
-         }
-      }
+protected:
+	bool event( QEvent *inEvent )
+	{
+		switch ( inEvent->type() )
+		{
+		case QEvent::FileOpen:
+			{
+				MainWindow* mainWindow = MainWindow::TheInstance();
+				if ( mainWindow == NULL )
+					return false;
+
+				mainWindow->addToDB( QStringList(static_cast<QFileOpenEvent *>(inEvent)->file()), UNKNOWN_FILE );
+				return true;
+			}
+
+		default:
+			return QApplication::event( inEvent );
+		}
+	}
 #endif
 };
 
 
 int main(int argc, char **argv)
 {
-	//QT initialisation
-    qccApplication app(argc, argv);
+	//QT initialiation
+	qccApplication app(argc, argv);
 
 #ifdef USE_VLD
 	VLDEnable();
 #endif
 
-    //Command line mode?
-    bool commandLine = (argc>1 && argv[1][0]=='-');
-
+	//splash screen
 	QSplashScreen* splash = 0;
 	clock_t start_time = 0;
-    if (!commandLine)
-    {
-        //OpenGL?
-        if (!QGLFormat::hasOpenGL())
-        {
-            QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
-            return EXIT_FAILURE;
-        }
 
-        //splash screen
-        start_time = clock();
-        QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
-        splash = new QSplashScreen(pixmap,Qt::WindowStaysOnTopHint);
-        splash->show();
-        QApplication::processEvents();
-    }
+	//Command line mode?
+	bool commandLine = (argc>1 && argv[1][0]=='-');
+	if (!commandLine)
+	{
+		//OpenGL?
+		if (!QGLFormat::hasOpenGL())
+		{
+			QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
+			return EXIT_FAILURE;
+		}
 
-    //common data initialization
+		//splash screen
+		start_time = clock();
+		QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
+		splash = new QSplashScreen(pixmap,Qt::WindowStaysOnTopHint);
+		splash->show();
+		QApplication::processEvents();
+	}
+
+	//global structures initialization
 	ccObject::ResetUniqueIDCounter();
-    ccTimer::Init();
+	ccTimer::Init();
 	ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
-    int result = 0;
+	int result = 0;
 
-    //command line processing
 	if (commandLine)
 	{
-        result = ccCommandLineParser::Parse(argc,argv);
+		//command line processing (no GUI)
+		result = ccCommandLineParser::Parse(argc,argv);
 	}
 	else
 	{
-        //main window init.
-        MainWindow::TheInstance()->show();
-        QApplication::processEvents();
+		//main window init.
+		MainWindow* mainWindow = MainWindow::TheInstance();
+		if (!mainWindow)
+		{
+			QMessageBox::critical(0, "Error", "Failed to initialize the main application window?!");
+			return EXIT_FAILURE;
+		}
+		mainWindow->show();
+		QApplication::processEvents();
 
-        if (argc>0)
-        {
+		if (argc > 1)
+		{
 			if (splash)
 				splash->close();
-            for (int i=1;i<argc;++i)
-            {
-                //any argument is assumed to be a filename --> we try to load it
-                MainWindow::AddToDB(argv[i],UNKNOWN_FILE);
-            }
-        }
-        else if (splash)
-        {
-            //we want the splash screen to be visible a minimum amount of time (1 s.)
-            while((clock() - start_time) < CLOCKS_PER_SEC)
-                splash->raise();
-            splash->close();
-        }
 
+			//any additional argument is assumed to be a filename --> we try to load it/them
+			QStringList filenames;
+			for (int i=1; i<argc; ++i)
+				filenames << QString(argv[i]);
+
+			mainWindow->addToDB(filenames,UNKNOWN_FILE);
+		}
+		
 		if (splash)
 		{
+			//we want the splash screen to be visible a minimum amount of time (1 s.)
+			while((clock() - start_time) < CLOCKS_PER_SEC)
+				splash->raise();
+
+			//splash->close();
 			delete splash;
-			splash=0;
+			splash = 0;
 		}
 
-        //let's rock!
-        try
-        {
-            result = app.exec();
-        }
-        catch(...)
-        {
-            QMessageBox::warning(0, "CC crashed!","Hum, it seems that CC has crashed... Sorry about that :)");
-        }
+		//let's rock!
+		try
+		{
+			result = app.exec();
+		}
+		catch(...)
+		{
+			QMessageBox::warning(0, "CC crashed!","Hum, it seems that CC has crashed... Sorry about that :)");
+		}
 	}
 
-    MainWindow::DestroyInstance();
+	//release global structures
+	MainWindow::DestroyInstance();
 
-    ccGui::ReleaseInstance();
+	ccGui::ReleaseInstance();
 	ccNormalVectors::ReleaseUniqueInstance();
-    ccColorScalesManager::ReleaseUniqueInstance();
+	ccColorScalesManager::ReleaseUniqueInstance();
 	ccConsole::ReleaseInstance();
 
 #ifdef CC_TRACK_ALIVE_SHARED_OBJECTS
+	//for debug purposes
 	unsigned alive = CCShareable::GetAliveCount();
-	if (alive>1)
+	if (alive > 1)
 	{
 		printf("Error: some shared objects (%u) have not been released on program end!",alive);
 		system("PAUSE");
 	}
 #endif
 
-    return result;
+	return result;
 }

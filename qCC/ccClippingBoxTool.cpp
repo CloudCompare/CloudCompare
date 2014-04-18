@@ -262,7 +262,7 @@ void ccClippingBoxTool::removeLastContour()
 
 void ccClippingBoxTool::exportCloud()
 {
-	if (!m_clipBox)
+	if (!m_clipBox || !MainWindow::TheInstance())
 		return;
 
 	ccHObject* obj = m_clipBox->getAssociatedEntity();
@@ -275,6 +275,8 @@ void ccClippingBoxTool::exportCloud()
 			ccLog::Error("Not enough memory!");
 			return;
 		}
+		
+		cloud->setDisplay(obj->getDisplay());
 		MainWindow::TheInstance()->addToDB(cloud);
 	}
 }
@@ -283,74 +285,6 @@ void ccClippingBoxTool::extractContour()
 {
 	extractSlicesAndContours(false, true, /*singleContourMode=*/true);
 }
-//void ccClippingBoxTool::extractContour()
-//{
-//	if (!m_clipBox)
-//		return;
-//
-//	ccHObject* obj = m_clipBox->getAssociatedEntity();
-//
-//	if (obj && obj->isKindOf(CC_TYPES::POINT_CLOUD))
-//	{
-//		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(obj)->createNewCloudFromVisibilitySelection(false);
-//		if (cloud)
-//		{
-//			//ask the user for the 'max edge length'
-//			bool ok = true;
-//			if (s_maxEdgeLength < 0)
-//				s_maxEdgeLength = static_cast<double>(cloud->getBB().getDiagNorm())/100.0;
-//			double maxEdgeLength = QInputDialog::getDouble(this,"Max edge length", "Max edge length (0 = no limit)", s_maxEdgeLength, 0, DBL_MAX, 8, &ok);
-//			if (!ok)
-//				return;
-//			bool splitContour = false;
-//			if (maxEdgeLength > 0)
-//			{
-//				splitContour = (QMessageBox::question(0,"Split contour","Do you want to split the contour in multiple parts if necessary?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
-//			}
-//			s_maxEdgeLength = maxEdgeLength;
-//
-//			std::vector<ccPolyline*> polys;
-//			if (ccPolyline::ExtractFlatContour(	cloud,
-//												static_cast<PointCoordinateType>(maxEdgeLength),
-//												polys,
-//												splitContour ))
-//			{
-//				if (!polys.empty())
-//				{
-//					s_lastContourUniqueIDs.clear();
-//
-//					for (size_t i=0; i<polys.size(); ++i)
-//					{
-//						ccPolyline* poly = polys[i];
-//						poly->setColor(ccColor::green);
-//						poly->showColors(true);
-//						poly->setName(cloud->getName()+QString(".contour"));
-//						MainWindow::TheInstance()->addToDB(poly);
-//
-//						s_lastContourUniqueIDs.push_back(poly->getUniqueID());
-//						removeLastContourToolButton->setEnabled(true);
-//					}
-//				}
-//				else
-//				{
-//					ccLog::Error("Contour points are too far from each other! Increase the max edge length");
-//				}
-//			}
-//			else
-//			{
-//				ccLog::Error("Contour extraction failed!");
-//			}
-//
-//			delete cloud;
-//			cloud = 0;
-//		}
-//		else
-//		{
-//			ccLog::Error("Not enough memory!");
-//			return;
-//		}
-//	}
-//}
 
 void ccClippingBoxTool::exportMultCloud()
 {

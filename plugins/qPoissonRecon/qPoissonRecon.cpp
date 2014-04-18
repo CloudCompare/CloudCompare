@@ -188,13 +188,13 @@ void qPoissonRecon::doAction()
 		{
 			const CCVector3* P = pc->getPoint(i);
 			points[i] = PoissonReconLib::Point(	static_cast<float>(P->x),
-													static_cast<float>(P->y),
-													static_cast<float>(P->z) );
+												static_cast<float>(P->y),
+												static_cast<float>(P->z) );
 
-			const PointCoordinateType* N = pc->getPointNormal(i);
-			normals[i] = PoissonReconLib::Point(	static_cast<float>(N[0]),
-													static_cast<float>(N[1]),
-													static_cast<float>(N[2]) );
+			const CCVector3& N = pc->getPointNormal(i);
+			normals[i] = PoissonReconLib::Point(static_cast<float>(N.x),
+												static_cast<float>(N.y),
+												static_cast<float>(N.z) );
 		}
 	}
 

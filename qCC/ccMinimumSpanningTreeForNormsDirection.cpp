@@ -241,19 +241,17 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 				continue;
 
 			//invert normal if necessary (DO THIS BEFORE SETTING THE VERTEX AS 'VISITED'!)
-			const PointCoordinateType* N1 = cloud->getPointNormal(static_cast<unsigned>(element.v1()));
-			const PointCoordinateType* N2 = cloud->getPointNormal(static_cast<unsigned>(element.v2()));
-			if (CCVector3::vdot(N1,N2) < 0)
+			const CCVector3& N1 = cloud->getPointNormal(static_cast<unsigned>(element.v1()));
+			const CCVector3& N2 = cloud->getPointNormal(static_cast<unsigned>(element.v2()));
+			if (N1.dot(N2) < 0)
 			{
 				if (!visited[element.v1()])
 				{
-					PointCoordinateType N1neg[3] = {-N1[0],-N1[1],-N1[2]};
-					cloud->setPointNormal(static_cast<unsigned>(v), N1neg);
+					cloud->setPointNormal(static_cast<unsigned>(v), -N1);
 				}
 				else
 				{
-					PointCoordinateType N2neg[3] = {-N2[0],-N2[1],-N2[2]};
-					cloud->setPointNormal(static_cast<unsigned>(v), N2neg);
+					cloud->setPointNormal(static_cast<unsigned>(v), -N2);
 				}
 				++inversionCount;
 			}
@@ -404,7 +402,7 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 
 	    //current point index
 		unsigned index = cell.points->getPointGlobalIndex(i);
-		const PointCoordinateType* N1 = cloud->getPointNormal(static_cast<unsigned>(index));
+		const CCVector3& N1 = cloud->getPointNormal(static_cast<unsigned>(index));
 		//const CCVector3* P1 = cloud->getPoint(static_cast<unsigned>(index));
 		for (unsigned j=0; j<neighborCount; ++j)
 		{
@@ -412,10 +410,10 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 			const unsigned& neighborIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
 			if (index != neighborIndex)
 			{
-				const PointCoordinateType* N2 = cloud->getPointNormal(static_cast<unsigned>(neighborIndex));
+				const CCVector3& N2 = cloud->getPointNormal(static_cast<unsigned>(neighborIndex));
 				double weight = 0;
 				//dot product
-				weight = std::max(0.0,1.0 - fabs(CCVector3::vdot(N1,N2)));
+				weight = std::max(0.0,1.0 - fabs(N1.dot(N2)));
 				
 				//distance
 				//weight = sqrt(nNSS.pointsInNeighbourhood[j].squareDistd);

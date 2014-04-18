@@ -31,8 +31,8 @@ SimpleMesh::SimpleMesh(GenericIndexedCloud* _theVertices, bool linkVerticesWithM
 	, globalIterator(0)
 	, theVertices(_theVertices)
 	, verticesLinked(linkVerticesWithMesh)
-	, bbMin(0.0)
-	, bbMax(0.0)
+	, bbMin(0,0,0)
+	, bbMax(0,0,0)
 	, bbIsValid(false)
 {
 	m_triIndexes = new TriangleIndexesContainer();

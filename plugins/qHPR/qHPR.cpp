@@ -349,7 +349,7 @@ void qHPR::doAction()
         }
 
         delete visibleCells;
-		visibleCells=0;
+		visibleCells = 0;
 
 		m_app->dispToConsole(QString("[HPR] Visible points: %1").arg(visiblePointCount));
 

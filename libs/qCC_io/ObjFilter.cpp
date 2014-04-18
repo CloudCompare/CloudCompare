@@ -108,8 +108,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 		{
 			for (unsigned i=0; i<normsTable->currentSize(); ++i)
 			{
-				const PointCoordinateType* _normalVec = ccNormalVectors::GetNormal(normsTable->getValue(i));
-				if (fprintf(theFile,"vn %f %f %f\n",_normalVec[0],_normalVec[1],_normalVec[2]) < 0)
+				const CCVector3& normalVec = ccNormalVectors::GetNormal(normsTable->getValue(i));
+				if (fprintf(theFile,"vn %f %f %f\n",normalVec.x,normalVec.y,normalVec.z) < 0)
 					return CC_FERR_WRITING;
 			}
 		}
@@ -126,8 +126,8 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const ch
 	{
 		for (unsigned i=0; i<nbPoints; ++i)
 		{
-			const PointCoordinateType* _normalVec = vertices->getPointNormal(i);
-			if (fprintf(theFile,"vn %f %f %f\n",_normalVec[0],_normalVec[1],_normalVec[2]) < 0)
+			const CCVector3& normalVec = vertices->getPointNormal(i);
+			if (fprintf(theFile,"vn %f %f %f\n",normalVec.x,normalVec.y,normalVec.z) < 0)
 				return CC_FERR_WRITING;
 		}
 	}

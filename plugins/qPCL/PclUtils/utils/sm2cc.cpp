@@ -142,9 +142,9 @@ bool sm2ccConverter::addNormals(ccPointCloud *cloud)
 	//loop
 	for (size_t i = 0; i < pointCount; ++i)
 	{
-		PointCoordinateType N[3] = {(PointCoordinateType)pcl_cloud_normals->at(i).normal_x,
-									(PointCoordinateType)pcl_cloud_normals->at(i).normal_y,
-									(PointCoordinateType)pcl_cloud_normals->at(i).normal_z};
+		CCVector3 N(	static_cast<PointCoordinateType>(pcl_cloud_normals->at(i).normal_x),
+						static_cast<PointCoordinateType>(pcl_cloud_normals->at(i).normal_y),
+						static_cast<PointCoordinateType>(pcl_cloud_normals->at(i).normal_z) );
 
 		cloud->addNorm(N);
 	}

@@ -121,7 +121,7 @@ bool ccQuadric::buildUp()
 			//N.y = m_eq[2] + 2*m_eq[5]*P.y + m_eq[4]*P.x;
 			//N.z = -PC_ONE;
 			//N.normalize();
-			//verts->addNorm(N.u);
+			//verts->addNorm(N);
 
 			if (x != 0 && y != 0)
 			{

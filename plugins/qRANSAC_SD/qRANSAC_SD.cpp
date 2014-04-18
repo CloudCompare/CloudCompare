@@ -165,10 +165,10 @@ void qRansacSD::doAction()
 			Pt.pos[2] = static_cast<float>(P->z);
 			if (hasNorms)
 			{
-				const PointCoordinateType* N = pc->getPointNormal(i);
-				Pt.normal[0] = static_cast<float>(N[0]);
-				Pt.normal[1] = static_cast<float>(N[1]);
-				Pt.normal[2] = static_cast<float>(N[2]);
+				const CCVector3& N = pc->getPointNormal(i);
+				Pt.normal[0] = static_cast<float>(N.x);
+				Pt.normal[1] = static_cast<float>(N.y);
+				Pt.normal[2] = static_cast<float>(N.z);
 			}
 			cloud.push_back(Pt);
 		}
@@ -253,10 +253,11 @@ void qRansacSD::doAction()
 		{
 			for (size_t i=0; i<count; ++i)
 			{
-				Vec3f& Ni = cloud[i].normal;
+				Vec3f& Nvi = cloud[i].normal;
+				CCVector3 Ni = CCVector3::fromArray(Nvi);
 				//normalize the vector in case of
-				Vector3Tpl<float>::vnormalize(Ni);
-				pc->addNorm(Ni[0],Ni[1],Ni[2]);
+				Ni.normalize();
+				pc->addNorm(Ni);
 			}
 			pc->showNormals(true);
 			
@@ -402,7 +403,7 @@ void qRansacSD::doAction()
 			{
 				pcShape->addPoint(CCVector3::fromArray(cloud[count-1-j].pos));
 				if (saveNormals)
-					pcShape->addNorm(CCVector3::fromArray(cloud[count-1-j].normal).u);
+					pcShape->addNorm(CCVector3::fromArray(cloud[count-1-j].normal));
 			}
 
 			//random color
@@ -603,12 +604,8 @@ void qRansacSD::doAction()
 			}
 
 			if (!group)
-			{
 				group = new ccHObject(QString("Ransac Detected Shapes (%1)").arg(ent->getName()));
-				m_app->addToDB(group,true,0,false);
-			}
 			group->addChild(pcShape);
-			m_app->addToDB(pcShape,true,0,false);
 
 			count -= shapePointsCount;
 
@@ -617,7 +614,7 @@ void qRansacSD::doAction()
 
 		if (group)
 		{
-			assert(group->getChildrenNumber()!=0);
+			assert(group->getChildrenNumber() != 0);
 			
 			//we hide input cloud
 			pc->setEnabled(false);
@@ -626,7 +623,8 @@ void qRansacSD::doAction()
 			//we add new group to DB/display
 			group->setVisible(true);
 			group->setDisplay_recursive(pc->getDisplay());
-			group->prepareDisplayForRefresh_recursive();
+			m_app->addToDB(group);
+
 			m_app->refreshAll();		
 		}
 	}

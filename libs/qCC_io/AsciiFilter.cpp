@@ -260,13 +260,13 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
         if (writeNorms)
         {
 			//add normal vector
-            const PointCoordinateType* N = cloud->getPointNormal(i);
+            const CCVector3& N = cloud->getPointNormal(i);
 			line.append(separator);
-			line.append(QString::number(N[0],'f',s_nPrecision));
+			line.append(QString::number(N.x,'f',s_nPrecision));
 			line.append(separator);
-			line.append(QString::number(N[1],'f',s_nPrecision));
+			line.append(QString::number(N.y,'f',s_nPrecision));
 			line.append(separator);
-			line.append(QString::number(N[2],'f',s_nPrecision));
+			line.append(QString::number(N.z,'f',s_nPrecision));
         }
 
 		stream << line << "\n";
@@ -612,7 +612,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
     ScalarType D = 0;
 	double P[3] = {0,0,0};
     CCVector3d Pshift(0,0,0);
-    PointCoordinateType N[3] = {0,0,0};
+    CCVector3 N(0,0,0);
     colorType col[3] = {0,0,0};
 
     //other useful variables
@@ -756,11 +756,11 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 			if (cloudDesc.hasNorms)
 			{
 				if (cloudDesc.xNormIndex >= 0)
-					N[0] = static_cast<PointCoordinateType>(parts[cloudDesc.xNormIndex].toDouble());
+					N.x = static_cast<PointCoordinateType>(parts[cloudDesc.xNormIndex].toDouble());
 				if (cloudDesc.yNormIndex >= 0)
-					N[1] = static_cast<PointCoordinateType>(parts[cloudDesc.yNormIndex].toDouble());
+					N.y = static_cast<PointCoordinateType>(parts[cloudDesc.yNormIndex].toDouble());
 				if (cloudDesc.zNormIndex >= 0)
-					N[2] = static_cast<PointCoordinateType>(parts[cloudDesc.zNormIndex].toDouble());
+					N.z = static_cast<PointCoordinateType>(parts[cloudDesc.zNormIndex].toDouble());
 				cloudDesc.cloud->addNorm(N);
 			}
 

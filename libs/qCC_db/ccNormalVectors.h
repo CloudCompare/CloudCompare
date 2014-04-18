@@ -19,6 +19,7 @@
 #define CC_NORMAL_VECTORS_HEADER
 
 //CCLib
+#include <CCGeom.h>
 #include <GenericIndexedMesh.h>
 #include <GenericProgressCallback.h>
 #include <DgmOctree.h>
@@ -29,9 +30,7 @@
 
 //system
 #include <math.h>
-
-//! Compressed normals quantization level (number of directions/bits: 2^(2*N+3))
-const unsigned NORMALS_QUANTIZE_LEVEL	=	6;
+#include <vector>
 
 //! Compressed normal vectors handler
 #ifdef QCC_DB_USE_AS_DLL
@@ -47,16 +46,21 @@ public:
 	static ccNormalVectors* GetUniqueInstance();
 
 	//! Releases unique instance
+	/** Call to this method is now optional.
+	**/
 	static void ReleaseUniqueInstance();
 
 	//! Returns the number of compressed normal vectors
-	static inline unsigned GetNumberOfVectors() { return GetUniqueInstance()->m_numberOfVectors; }
+	static inline unsigned GetNumberOfVectors() { return static_cast<unsigned>(GetUniqueInstance()->m_theNormalVectors.size()); }
 
 	//! Static access to ccNormalVectors::getNormal
-	static inline const PointCoordinateType* GetNormal(unsigned normIndex) { return GetUniqueInstance()->getNormal(normIndex); }
+	static inline const CCVector3& GetNormal(unsigned normIndex) { return GetUniqueInstance()->getNormal(normIndex); }
 
 	//! Returns the precomputed normal corresponding to a given compressed index
-	inline const PointCoordinateType* getNormal(unsigned normIndex) const { return m_theNormalVectors+normIndex*3; }
+	inline const CCVector3& getNormal(unsigned normIndex) const { return m_theNormalVectors[normIndex]; }
+
+	//! Compressed normals quantization level (number of directions/bits: 2^(2*N+3))
+	static const unsigned NORMALS_QUANTIZE_LEVEL =	6;
 
 	//! Computes the normal corresponding to a given compressed index
 	/** Warning: slower than 'GetNormal' (but avoids computation of the whole table)
@@ -64,7 +68,9 @@ public:
 	static inline void ComputeNormal(normsType normIndex, PointCoordinateType N[]) { Quant_dequantize_normal(normIndex,NORMALS_QUANTIZE_LEVEL,N); }
 
 	//! Returns the compressed index corresponding to a normal vector
-	static inline normsType GetNormIndex(const PointCoordinateType N[]) { return (normsType)Quant_quantize_normal(N,NORMALS_QUANTIZE_LEVEL); }
+	static inline normsType GetNormIndex(const PointCoordinateType N[]) { return static_cast<normsType>( Quant_quantize_normal(N,NORMALS_QUANTIZE_LEVEL) ); }
+	//! Returns the compressed index corresponding to a normal vector (shortcut)
+	static inline normsType GetNormIndex(const CCVector3& N) { return GetNormIndex(N.u); }
 
 	//! Inverts normal corresponding to a given compressed index
 	/** Warning: compressed index is directly updated!
@@ -158,6 +164,11 @@ public:
 	**/
 	static void ConvertHSVToRGB(double H, double S, double V, colorType& R, colorType& G, colorType& B);
 
+public:
+
+	//! Default destructor
+	virtual ~ccNormalVectors();
+
 	//! Allocates normal HSV colors array
 	/** Mandatory for HSV color related methods (getNormalHSVColor, etc.)
 	**/
@@ -176,22 +187,16 @@ protected:
 	**/
 	ccNormalVectors();
 
-	//! Default destructor
-	virtual ~ccNormalVectors();
-
 	//! Inits internal structures
-	void init(unsigned quantizeLevel);
+	bool init(unsigned quantizeLevel);
 
-	//! Compressed normal vectors array
-	PointCoordinateType* m_theNormalVectors;
+	//! Compressed normal vectors
+	std::vector<CCVector3> m_theNormalVectors;
 
 	//! 'HSV' colors corresponding to each compressed normal index
 	/** In fact, HSV color has already been converted to RGB here for faster display.
 	**/
 	colorType* m_theNormalHSVColors;
-
-	//! Number of compressed normal vectors
-	unsigned m_numberOfVectors;
 
 	//! Decompression algorithm
     static void Quant_dequantize_normal(unsigned q, unsigned level, PointCoordinateType* res);

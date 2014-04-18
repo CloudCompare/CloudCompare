@@ -39,6 +39,8 @@
 #include <string.h>
 #include <assert.h>
 
+static CCVector3 s_blankNorm(0,0,0);
+
 ccMesh::ccMesh(ccGenericPointCloud* vertices)
 	: ccGenericMesh("Mesh")
 	, m_associatedCloud(0)
@@ -180,20 +182,22 @@ bool ccMesh::computePerVertexNormals()
     ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
 
 	//we instantiate a temporary structure to store each vertex normal (uncompressed)
-	NormsTableType* theNorms = new NormsTableType;
-	if (!theNorms->reserve(vertCount))
+	std::vector<CCVector3> theNorms;
+	try
 	{
-		theNorms->release();
+		theNorms.resize(vertCount,s_blankNorm);
+	}
+	catch(std::bad_alloc)
+	{
 		ccLog::Warning("[ccMesh::computePerVertexNormals] Not enough memory!");
 		return false;
 	}
-    theNorms->fill(0);
 
     //allocate compressed normals array on vertices cloud
     bool normalsWereAllocated = cloud->hasNormals();
     if (/*!normalsWereAllocated && */!cloud->resizeTheNormsTable()) //we call it whatever the case (just to be sure)
 	{
-		theNorms->release();
+		//warning message should have been already issued!
 		return false;
 	}
 
@@ -214,12 +218,9 @@ bool ccMesh::computePerVertexNormals()
 			//N.normalize(); //DGM: no normalization = weighting by surface!
 
 			//we add this normal to all triangle vertices
-			PointCoordinateType* N1 = theNorms->getValue(tsi->i1);
-			CCVector3::vadd(N1,N.u,N1);
-			PointCoordinateType* N2 = theNorms->getValue(tsi->i2);
-			CCVector3::vadd(N2,N.u,N2);
-			PointCoordinateType* N3 = theNorms->getValue(tsi->i3);
-			CCVector3::vadd(N3,N.u,N3);
+			theNorms[tsi->i1] += N;
+			theNorms[tsi->i2] += N;
+			theNorms[tsi->i3] += N;
 		}
 	}
 
@@ -227,11 +228,10 @@ bool ccMesh::computePerVertexNormals()
 	{
 		for (unsigned i=0; i<vertCount; i++)
 		{
-			PointCoordinateType* N = theNorms->getValue(i);
+			CCVector3& N = theNorms[i];
 			//normalize the 'mean' normal
-			CCVector3::vnormalize(N);
+			N.normalize();
 			cloud->setPointNormal(i,N);
-			theNorms->forwardIterator();
 		}
 	}
 
@@ -240,9 +240,6 @@ bool ccMesh::computePerVertexNormals()
 
 	if (!normalsWereAllocated)
         cloud->showNormals(true);
-
-	theNorms->release();
-	theNorms = 0;
 
 	return true;
 }
@@ -1049,8 +1046,6 @@ unsigned ccMesh::getUniqueIDForDisplay() const
 		return getUniqueID();
 }
 
-static PointCoordinateType s_blankNorm[3] = {0.0,0.0,0.0};
-
 void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (!m_associatedCloud)
@@ -1221,10 +1216,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			//we can scan and process each chunk separately in an optimized way
 			unsigned k,chunks = m_triVertIndexes->chunksCount();
-			const PointCoordinateType* P=0;
-			const PointCoordinateType* N=0;
-			const colorType* col=0;
-			for (k=0;k<chunks;++k)
+			const colorType* col = 0;
+			for (k=0; k<chunks; ++k)
 			{
 				const unsigned chunkSize = m_triVertIndexes->chunkSize(k);
 
@@ -1232,23 +1225,23 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 				const unsigned* _vertIndexes = m_triVertIndexes->chunkStartPtr(k);
 				PointCoordinateType* _vertices = GetVertexBuffer();
 #ifdef OPTIM_MEM_CPY
-				for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
+				for (n=0; n<chunkSize; n+=decimStep,_vertIndexes+=step)
 				{
-					P = m_associatedCloud->getPoint(*_vertIndexes++)->u;
-					*(_vertices)++ = *(P)++;
-					*(_vertices)++ = *(P)++;
-					*(_vertices)++ = *(P)++;
-					P = m_associatedCloud->getPoint(*_vertIndexes++)->u;
-					*(_vertices)++ = *(P)++;
-					*(_vertices)++ = *(P)++;
-					*(_vertices)++ = *(P)++;
-					P = m_associatedCloud->getPoint(*_vertIndexes++)->u;
-					*(_vertices)++ = *(P)++;
-					*(_vertices)++ = *(P)++;
-					*(_vertices)++ = *(P)++;
+					const CCVector3* P1 = m_associatedCloud->getPoint(*_vertIndexes++);
+					*(_vertices)++ = P1->x;
+					*(_vertices)++ = P1->y;
+					*(_vertices)++ = P1->z;
+					const CCVector3* P2 = m_associatedCloud->getPoint(*_vertIndexes++);
+					*(_vertices)++ = P2->x;
+					*(_vertices)++ = P2->y;
+					*(_vertices)++ = P2->z;
+					const CCVector3* P3 = m_associatedCloud->getPoint(*_vertIndexes++);
+					*(_vertices)++ = P3->x;
+					*(_vertices)++ = P3->y;
+					*(_vertices)++ = P3->z;
 				}
 #else
-				for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
+				for (n=0; n<chunkSize; n+=decimStep, _vertIndexes+=step)
 				{
 					memcpy(_vertices,m_associatedCloud->getPoint(_vertIndexes[0])->u,sizeof(PointCoordinateType)*3);
 					_vertices+=3;
@@ -1266,7 +1259,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					_vertIndexes = m_triVertIndexes->chunkStartPtr(k);
 					assert(colorScale);
 #ifdef OPTIM_MEM_CPY
-					for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
+					for (n=0; n<chunkSize; n+=decimStep, _vertIndexes+=step)
 					{
 						col = currentDisplayedScalarField->getValueColor(*_vertIndexes++);
 						*(_rgbColors)++ = *(col)++;
@@ -1284,7 +1277,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						*(_rgbColors)++ = *(col)++;
 					}
 #else
-					for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
+					for (n=0; n<chunkSize; n+=decimStep, _vertIndexes+=step)
 					{
 						col = currentDisplayedScalarField->getValueColor(_vertIndexes[0]);
 						memcpy(_rgbColors,col,sizeof(colorType)*3);
@@ -1304,7 +1297,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					colorType* _rgbColors = GetColorsBuffer();
 					_vertIndexes = m_triVertIndexes->chunkStartPtr(k);
 #ifdef OPTIM_MEM_CPY
-					for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
+					for (n=0; n<chunkSize; n+=decimStep, _vertIndexes+=step)
 					{
 						col = rgbColorsTable->getValue(*_vertIndexes++);
 						*(_rgbColors)++ = *(col)++;
@@ -1322,7 +1315,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						*(_rgbColors)++ = *(col)++;
 					}
 #else
-					for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
+					for (n=0; n<chunkSize; n+=decimStep, _vertIndexes+=step)
 					{
 						memcpy(_rgbColors,rgbColorsTable->getValue(_vertIndexes[0]),sizeof(colorType)*3);
 						_rgbColors += 3;
@@ -1343,43 +1336,43 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						assert(m_triNormalIndexes);
 						int* _triNormalIndexes = m_triNormalIndexes->chunkStartPtr(k);
 #ifdef OPTIM_MEM_CPY
-						for (n=0;n<chunkSize;n+=decimStep,_triNormalIndexes+=step)
+						for (n=0; n<chunkSize; n+=decimStep, _triNormalIndexes+=step)
 						{
-							assert(*_triNormalIndexes<(int)m_triNormals->currentSize());
-							N = (*_triNormalIndexes>=0 ? compressedNormals->getNormal(m_triNormals->getValue(*_triNormalIndexes)) : s_blankNorm);
+							assert(*_triNormalIndexes < static_cast<int>(m_triNormals->currentSize()));
+							const CCVector3& N1 = (*_triNormalIndexes >= 0 ? compressedNormals->getNormal(m_triNormals->getValue(*_triNormalIndexes)) : s_blankNorm);
 							++_triNormalIndexes;
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
+							*(_normals)++ = N1.x;
+							*(_normals)++ = N1.y;
+							*(_normals)++ = N1.z;
 
-							assert(*_triNormalIndexes<(int)m_triNormals->currentSize());
-							N = (*_triNormalIndexes>=0 ? compressedNormals->getNormal(m_triNormals->getValue(*_triNormalIndexes)) : s_blankNorm);
+							assert(*_triNormalIndexes < static_cast<int>(m_triNormals->currentSize()));
+							const CCVector3& N2 = (*_triNormalIndexes >= 0 ? compressedNormals->getNormal(m_triNormals->getValue(*_triNormalIndexes)) : s_blankNorm);
 							++_triNormalIndexes;
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
+							*(_normals)++ = N2.x;
+							*(_normals)++ = N2.y;
+							*(_normals)++ = N2.z;
 
-							assert(*_triNormalIndexes<(int)m_triNormals->currentSize());
-							N = (*_triNormalIndexes>=0 ? compressedNormals->getNormal(m_triNormals->getValue(*_triNormalIndexes)) : s_blankNorm);
+							assert(*_triNormalIndexes < static_cast<int>(m_triNormals->currentSize()));
+							const CCVector3& N3 = (*_triNormalIndexes >= 0 ? compressedNormals->getNormal(m_triNormals->getValue(*_triNormalIndexes)) : s_blankNorm);
 							++_triNormalIndexes;
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
+							*(_normals)++ = N3.x;
+							*(_normals)++ = N3.y;
+							*(_normals)++ = N3.z;
 						}
 #else
-						for (n=0;n<chunkSize;n+=decimStep,_triNormalIndexes+=step)
+						for (n=0; n<chunkSize; n+=decimStep, _triNormalIndexes+=step)
 						{
-							assert(_triNormalIndexes[0]<(int)m_triNormals->currentSize());
-							N = (_triNormalIndexes[0]>=0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[0])) : s_blankNorm);
-							memcpy(_normals,N,sizeof(PointCoordinateType)*3);
+							assert(_triNormalIndexes[0] < static_cast<int>(m_triNormals->currentSize()));
+							const CCVector3& N1 = (_triNormalIndexes[0]>=0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[0])) : s_blankNorm);
+							memcpy(_normals,N1.u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
-							assert(_triNormalIndexes[1]<(int)m_triNormals->currentSize());
-							N = (_triNormalIndexes[0]==_triNormalIndexes[1] ? N : _triNormalIndexes[1]>=0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[1])) : s_blankNorm);
-							memcpy(_normals,N,sizeof(PointCoordinateType)*3);
+							assert(_triNormalIndexes[1] < static_cast<int>(m_triNormals->currentSize()));
+							const CCVector3& N2 = (_triNormalIndexes[0]==_triNormalIndexes[1] ? N1 : _triNormalIndexes[1]>=0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[1])) : s_blankNorm);
+							memcpy(_normals,N2.u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
-							assert(_triNormalIndexes[2]<(int)m_triNormals->currentSize());
-							N = (_triNormalIndexes[0]==_triNormalIndexes[2] ? N : _triNormalIndexes[2]>=0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[2])) : s_blankNorm);
-							memcpy(_normals,N,sizeof(PointCoordinateType)*3);
+							assert(_triNormalIndexes[2] < static_cast<int>(m_triNormals->currentSize()));
+							const CCVector3& N3 = (_triNormalIndexes[0]==_triNormalIndexes[2] ? N1 : _triNormalIndexes[2]>=0 ? compressedNormals->getNormal(m_triNormals->getValue(_triNormalIndexes[2])) : s_blankNorm);
+							memcpy(_normals,N3.u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
 						}
 #endif
@@ -1388,31 +1381,31 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						_vertIndexes = m_triVertIndexes->chunkStartPtr(k);
 #ifdef OPTIM_MEM_CPY
-						for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
+						for (n=0; n<chunkSize; n+=decimStep, _vertIndexes+=step)
 						{
-							N = compressedNormals->getNormal(normalsIndexesTable->getValue(*_vertIndexes++));
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
+							const CCVector3& N1 = compressedNormals->getNormal(normalsIndexesTable->getValue(*_vertIndexes++));
+							*(_normals)++ = N1.x;
+							*(_normals)++ = N1.y;
+							*(_normals)++ = N1.z;
 
-							N = compressedNormals->getNormal(normalsIndexesTable->getValue(*_vertIndexes++));
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
+							const CCVector3& N2 = compressedNormals->getNormal(normalsIndexesTable->getValue(*_vertIndexes++));
+							*(_normals)++ = N2.x;
+							*(_normals)++ = N2.y;
+							*(_normals)++ = N2.z;
 
-							N = compressedNormals->getNormal(normalsIndexesTable->getValue(*_vertIndexes++));
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
-							*(_normals)++ = *(N)++;
+							const CCVector3& N3 = compressedNormals->getNormal(normalsIndexesTable->getValue(*_vertIndexes++));
+							*(_normals)++ = N3.x;
+							*(_normals)++ = N3.y;
+							*(_normals)++ = N3.z;
 						}
 #else
-						for (n=0;n<chunkSize;n+=decimStep,_vertIndexes+=step)
+						for (n=0; n<chunkSize; n+=decimStep, _vertIndexes+=step)
 						{
-							memcpy(_normals,compressedNormals->getNormal(normalsIndexesTable->getValue(_vertIndexes[0])),sizeof(PointCoordinateType)*3);
+							memcpy(_normals,compressedNormals->getNormal(normalsIndexesTable->getValue(_vertIndexes[0])).u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
-							memcpy(_normals,compressedNormals->getNormal(normalsIndexesTable->getValue(_vertIndexes[1])),sizeof(PointCoordinateType)*3);
+							memcpy(_normals,compressedNormals->getNormal(normalsIndexesTable->getValue(_vertIndexes[1])).u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
-							memcpy(_normals,compressedNormals->getNormal(normalsIndexesTable->getValue(_vertIndexes[2])),sizeof(PointCoordinateType)*3);
+							memcpy(_normals,compressedNormals->getNormal(normalsIndexesTable->getValue(_vertIndexes[2])).u,sizeof(PointCoordinateType)*3);
 							_normals+=3;
 						}
 #endif
@@ -1514,19 +1507,19 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						assert(m_triNormalIndexes);
 						const int* idx = m_triNormalIndexes->getValue(n);
-						assert(idx[0]<(int)m_triNormals->currentSize());
-						assert(idx[1]<(int)m_triNormals->currentSize());
-						assert(idx[2]<(int)m_triNormals->currentSize());
-						N1 = (idx[0]>=0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx[0])) : 0);
-						N2 = (idx[0]==idx[1] ? N1 : idx[1]>=0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx[1])) : 0);
-						N3 = (idx[0]==idx[2] ? N1 : idx[2]>=0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx[2])) : 0);
+						assert(idx[0] < static_cast<int>(m_triNormals->currentSize()));
+						assert(idx[1] < static_cast<int>(m_triNormals->currentSize()));
+						assert(idx[2] < static_cast<int>(m_triNormals->currentSize()));
+						N1 = (idx[0] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx[0])).u : 0);
+						N2 = (idx[0] == idx[1] ? N1 : idx[1] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx[1])).u : 0);
+						N3 = (idx[0] == idx[2] ? N1 : idx[2] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx[2])).u : 0);
 
 					}
 					else
 					{
-						N1 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i1));
-						N2 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i2));
-						N3 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i3));
+						N1 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i1)).u;
+						N2 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i2)).u;
+						N3 = compressedNormals->getNormal(normalsIndexesTable->getValue(tsi->i3)).u;
 					}
 				}
 
@@ -1538,7 +1531,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					//do we need to change material?
 					if (lasMtlIndex != newMatlIndex)
 					{
-						assert(newMatlIndex<(int)m_materials->size());
+						assert(newMatlIndex < (int)m_materials->size());
 						glEnd();
 						if (showTextures)
 						{
@@ -1558,12 +1551,12 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						assert(m_texCoords && m_texCoordIndexes);
 						const int* txInd = m_texCoordIndexes->getValue(n);
-						assert(txInd[0]<(int)m_texCoords->currentSize());
-						assert(txInd[1]<(int)m_texCoords->currentSize());
-						assert(txInd[2]<(int)m_texCoords->currentSize());
-						Tx1 = (txInd[0]>=0 ? m_texCoords->getValue(txInd[0]) : 0);
-						Tx2 = (txInd[1]>=0 ? m_texCoords->getValue(txInd[1]) : 0);
-						Tx3 = (txInd[2]>=0 ? m_texCoords->getValue(txInd[2]) : 0);
+						assert(txInd[0] < (int)m_texCoords->currentSize());
+						assert(txInd[1] < (int)m_texCoords->currentSize());
+						assert(txInd[2] < (int)m_texCoords->currentSize());
+						Tx1 = (txInd[0] >= 0 ? m_texCoords->getValue(txInd[0]) : 0);
+						Tx2 = (txInd[1] >= 0 ? m_texCoords->getValue(txInd[1]) : 0);
+						Tx3 = (txInd[2] >= 0 ? m_texCoords->getValue(txInd[2]) : 0);
 					}
 				}
 
@@ -2727,7 +2720,7 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 	{
 		assert(m_materials);
 		matIndex = m_triMtlIndexes->getValue(triIndex);
-		assert(matIndex<(int)m_materials->size());
+		assert(matIndex < (int)m_materials->size());
 	}
 
 	//do we need to change material?
@@ -2862,7 +2855,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//vertices->reserveTheNormsTable();
 				CCVector3 N(0.0,0.0,1.0);
 				interpolateNormals(indexA,indexB,indexC,G1,N);
-				vertices->addNorm(N.u);
+				vertices->addNorm(N);
 				}
 				//*/
 				if (vertices->hasColors())
@@ -2895,7 +2888,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//vertices->reserveTheNormsTable();
 				CCVector3 N(0.0,0.0,1.0);
 				interpolateNormals(indexA,indexB,indexC,G2,N);
-				vertices->addNorm(N.u);
+				vertices->addNorm(N);
 				}
 				//*/
 				if (vertices->hasColors())
@@ -2928,7 +2921,7 @@ bool ccMesh::pushSubdivide(/*PointCoordinateType maxArea, */unsigned indexA, uns
 				//vertices->reserveTheNormsTable();
 				CCVector3 N(0.0,0.0,1.0);
 				interpolateNormals(indexA,indexB,indexC,G3,N);
-				vertices->addNorm(N.u);
+				vertices->addNorm(N);
 				}
 				//*/
 				if (vertices->hasColors())
@@ -3040,7 +3033,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 	try
 	{
 		unsigned newTriCount = resultMesh->size();
-		for (unsigned i=0;i<newTriCount;++i)
+		for (unsigned i=0; i<newTriCount; ++i)
 		{
 			unsigned* _face = resultMesh->m_triVertIndexes->getValue(i); //warning: array might change at each call to reallocate!
 			unsigned indexA = _face[0];
@@ -3068,9 +3061,9 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 			}
 
 			//at least one edge is 'wrong'
-			unsigned brokenEdges = (indexG1 < 0 ? 0:1)
-				+ (indexG2 < 0 ? 0:1)
-				+ (indexG3 < 0 ? 0:1);
+			unsigned brokenEdges =	(indexG1 < 0 ? 0:1)
+								+	(indexG2 < 0 ? 0:1)
+								+	(indexG3 < 0 ? 0:1);
 
 			if (brokenEdges == 1)
 			{
@@ -3180,7 +3173,7 @@ ccMesh* ccMesh::subdivide(PointCoordinateType maxArea) const
 
 	if (resultMesh->size() < resultMesh->maxSize())
 		resultMesh->resize(resultMesh->size());
-	if (resultVertices->size()<resultVertices->capacity())
+	if (resultVertices->size() < resultVertices->capacity())
 		resultVertices->resize(resultVertices->size());
 
 	//we import from the original mesh... what we can

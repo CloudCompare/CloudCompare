@@ -23,7 +23,17 @@
 
 #include <assert.h>
 
-static ccNormalVectors* s_uniqueInstance = 0;
+//unique instance structure
+struct ccNormalVectorsSingleton
+{
+public:
+	ccNormalVectorsSingleton() : instance(0) {}
+	~ccNormalVectorsSingleton() { release(); }
+	void release() { if (instance) delete instance; instance = 0; }
+	ccNormalVectors* instance;
+};
+//unique instance
+static ccNormalVectorsSingleton s_uniqueInstance;
 
 //Number of points for local modeling to compute normals with 2D1/2 Delaunay triangulation
 #define	NUMBER_OF_POINTS_FOR_NORM_WITH_TRI 6
@@ -34,30 +44,24 @@ static ccNormalVectors* s_uniqueInstance = 0;
 
 ccNormalVectors* ccNormalVectors::GetUniqueInstance()
 {
-	if (!s_uniqueInstance)
-		s_uniqueInstance = new ccNormalVectors();
-	return s_uniqueInstance;
+	if (!s_uniqueInstance.instance)
+		s_uniqueInstance.instance = new ccNormalVectors();
+	return s_uniqueInstance.instance;
 }
 
 void ccNormalVectors::ReleaseUniqueInstance()
 {
-	if (s_uniqueInstance)
-		delete s_uniqueInstance;
-	s_uniqueInstance = 0;
+	s_uniqueInstance.release();
 }
 
 ccNormalVectors::ccNormalVectors()
-	: m_theNormalVectors(0)
-	, m_theNormalHSVColors(0)
-	, m_numberOfVectors(0)
+	: m_theNormalHSVColors(0)
 {
 	init(NORMALS_QUANTIZE_LEVEL);
 }
 
 ccNormalVectors::~ccNormalVectors()
 {
-	if (m_theNormalVectors)
-		delete[] m_theNormalVectors;
 	if (m_theNormalHSVColors)
 		delete[] m_theNormalHSVColors;
 }
@@ -67,13 +71,13 @@ bool ccNormalVectors::enableNormalHSVColorsArray()
 	if (m_theNormalHSVColors)
 		return true;
 
-	if (m_numberOfVectors == 0)
+	if (m_theNormalVectors.empty())
 	{
 		//'init' should be called first!
 		return false;
 	}
 
-	m_theNormalHSVColors = new colorType[m_numberOfVectors*3];
+	m_theNormalHSVColors = new colorType[m_theNormalVectors.size()*3];
 	if (!m_theNormalHSVColors)
 	{
 		//not enough memory
@@ -81,9 +85,8 @@ bool ccNormalVectors::enableNormalHSVColorsArray()
 	}
 
 	colorType* rgb = m_theNormalHSVColors;
-	PointCoordinateType* N = m_theNormalVectors;
-	for (unsigned i=0; i<m_numberOfVectors; ++i,rgb+=3,N+=3)
-		ccNormalVectors::ConvertNormalToRGB(N,rgb[0],rgb[1],rgb[2]);
+	for (size_t i=0; i<m_theNormalVectors.size(); ++i, rgb+=3)
+		ccNormalVectors::ConvertNormalToRGB(m_theNormalVectors[i],rgb[0],rgb[1],rgb[2]);
 
 	return (m_theNormalHSVColors != 0);
 }
@@ -91,7 +94,7 @@ bool ccNormalVectors::enableNormalHSVColorsArray()
 const colorType* ccNormalVectors::getNormalHSVColor(unsigned index) const
 {
 	assert(m_theNormalHSVColors);
-	assert(index<m_numberOfVectors);
+	assert(index < m_theNormalVectors.size());
 	return m_theNormalHSVColors+3*index;
 }
 
@@ -101,22 +104,26 @@ const colorType* ccNormalVectors::getNormalHSVColorArray() const
 	return m_theNormalHSVColors;
 }
 
-void ccNormalVectors::init(unsigned quantizeLevel)
+bool ccNormalVectors::init(unsigned quantizeLevel)
 {
-	m_numberOfVectors = (1<<(quantizeLevel*2+3));
-	m_theNormalVectors = new PointCoordinateType[m_numberOfVectors*3];
-
-	PointCoordinateType* P = m_theNormalVectors;
-	CCVector3 N;
-
-	for (unsigned i=0; i<m_numberOfVectors; ++i)
+	unsigned numberOfVectors = (1<<(quantizeLevel*2+3));
+	try
 	{
-		Quant_dequantize_normal(i,quantizeLevel,N.u);
-		N.normalize();
-		*P++ = N.x;
-		*P++ = N.y;
-		*P++ = N.z;
+		m_theNormalVectors.resize(numberOfVectors);
 	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Warning("[ccNormalVectors::init] Not enough memory!");
+		return false;
+	}
+
+	for (unsigned i=0; i<numberOfVectors; ++i)
+	{
+		Quant_dequantize_normal(i,quantizeLevel,m_theNormalVectors[i].u);
+		m_theNormalVectors[i].normalize();
+	}
+
+	return true;
 }
 
 void ccNormalVectors::InvertNormal(normsType &code)

@@ -113,7 +113,7 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 		{
 			if (needShift)
 			{
-				sasDlg.setShift(CCVector3d(-P[0],-P[1],-P[2]));
+				sasDlg.setShift(CCVector3d(	-P[0],-P[1],fabs(P[2]) >= MAX_COORDINATE_ABS_VALUE ? -P[2] : 0)); //Z is generally the altitude and is not so big than the others!
 				sasDlg.firstPointFrame->setStyleSheet("color: red;");
 			}
 			if (needRescale)

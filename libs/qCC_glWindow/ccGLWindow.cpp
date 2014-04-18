@@ -1040,7 +1040,7 @@ void ccGLWindow::zoomGlobal()
 
 void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 {
-	setZoom(1.0);
+	setZoom(1.0f);
 
 	ccBBox zoomedBox;
 
@@ -2771,7 +2771,7 @@ void glDrawUnitCircle(unsigned char dim, int steps = 64)
 	unsigned char dimX = (dim<2 ? dim+1 : 0);
 	unsigned char dimY = (dimX<2 ? dimX+1 : 0);
 
-	CCVector3 P(0.0f);
+	CCVector3 P(0,0,0);
 
 	glBegin(GL_LINE_LOOP);
 	for (int i=0; i<steps; ++i)

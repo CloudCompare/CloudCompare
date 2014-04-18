@@ -507,10 +507,10 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 
 			if (hasNormals)
 			{
-				const PointCoordinateType* N = cloud->getPointNormal(indexShift+i);
-				arrays.xNormData[i] = static_cast<double>(N[0]);
-				arrays.yNormData[i] = static_cast<double>(N[1]);
-				arrays.zNormData[i] = static_cast<double>(N[2]);
+				const CCVector3& N = cloud->getPointNormal(indexShift+i);
+				arrays.xNormData[i] = static_cast<double>(N.x);
+				arrays.yNormData[i] = static_cast<double>(N.y);
+				arrays.zNormData[i] = static_cast<double>(N.z);
 			}
 
 			if (hasColors)
@@ -1697,7 +1697,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 				if (arrays.zNormData)
 					N.z = (PointCoordinateType)arrays.zNormData[i];
 				N.normalize();
-				cloud->addNorm(N.u);
+				cloud->addNorm(N);
 			}
 
 			if(arrays.intData)

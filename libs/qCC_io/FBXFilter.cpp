@@ -82,8 +82,8 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 				assert(triNorms);
 				for (unsigned i=0; i<triNorms->currentSize(); ++i)
 				{
-					const PointCoordinateType* N = ccNormalVectors::GetNormal(triNorms->getValue(i));
-					FbxVector4 Nfbx(N[0],N[1],N[2]);
+					const CCVector3& N = ccNormalVectors::GetNormal(triNorms->getValue(i));
+					FbxVector4 Nfbx(N.x,N.y,N.z);
 					lGeometryElementNormal->GetDirectArray().Add(Nfbx);
 				}
 				for (unsigned j=0; j<faceCount; ++j)
@@ -122,8 +122,8 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 			lGeometryElementNormal->SetReferenceMode(FbxGeometryElement::eDirect);
 			for (unsigned i=0; i<vertCount; ++i)
 			{
-				const PointCoordinateType* N = cloud->getPointNormal(i);
-				FbxVector4 Nfbx(N[0],N[1],N[2]);
+				const CCVector3& N = cloud->getPointNormal(i);
+				FbxVector4 Nfbx(N.x,N.y,N.z);
 				lGeometryElementNormal->GetDirectArray().Add(Nfbx);
 			}
 		}
@@ -551,7 +551,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 				CCVector3 Npc(	static_cast<PointCoordinateType>(N.Buffer()[0]),
 								static_cast<PointCoordinateType>(N.Buffer()[1]),
 								static_cast<PointCoordinateType>(N.Buffer()[2]) );
-				vertices->addNorm(Npc.u);
+				vertices->addNorm(Npc);
 			}
 			vertices->showNormals(true);
 			mesh->showNormals(true);

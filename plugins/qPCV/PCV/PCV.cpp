@@ -238,13 +238,19 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 	//vertices/points
 	unsigned numberOfPoints = vertices->size();
 	//rays
-	unsigned numberOfRays = (unsigned)rays.size();
+	unsigned numberOfRays = static_cast<unsigned>(rays.size());
 
 	//for each vertex we keep count of the number of light directions for which it is "illuminated"
-	int* vertexAccum = new int[numberOfPoints];
-	if (!vertexAccum) //not enough memory?
+	std::vector<int> visibilityCount;
+	try
+	{
+		visibilityCount.resize(numberOfPoints,0);
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory?
 		return false;
-	memset(vertexAccum,0,sizeof(int)*numberOfPoints);
+	}
 
 	/*** Main illumination loop ***/
 
@@ -269,13 +275,13 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 	PCVContext win;
 	if (win.init(width,height,vertices,mesh,meshIsClosed))
 	{
-		for (unsigned i=0;i<numberOfRays;++i)
+		for (unsigned i=0; i<numberOfRays; ++i)
 		{
 			//set current 'light' direction
 			win.setViewDirection(rays[i]);
 
 			//flag viewed vertices
-			win.GLAccumPixel(vertexAccum);
+			win.GLAccumPixel(visibilityCount);
 
 			if (nProgress && !nProgress->oneStep())
 			{
@@ -287,8 +293,11 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 		if (success)
 		{
 			//we convert per-vertex accumulators to an 'intensity' scalar field
-			for (unsigned j=0;j<numberOfPoints;++j)
-				vertices->setPointScalarValue(j,(ScalarType)vertexAccum[j]/(ScalarType)numberOfRays);
+			for (unsigned j=0; j<numberOfPoints; ++j)
+			{
+				ScalarType visValue = static_cast<ScalarType>(visibilityCount[j]) / static_cast<ScalarType>(numberOfRays);
+				vertices->setPointScalarValue(j,visValue);
+			}
 		}
 	}
 	else
@@ -298,11 +307,7 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 
 	if (nProgress)
 		delete nProgress;
-	nProgress=0;
-
-	if (vertexAccum)
-		delete[] vertexAccum;
-	vertexAccum=0;
+	nProgress = 0;
 
 	return success;
 }

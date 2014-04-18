@@ -22,6 +22,9 @@
 #include <GenericCloud.h>
 #include <GenericMesh.h>
 
+//system
+#include <vector>
+
 class QGLPixelBuffer;
 
 //! PCV (Portion de Ciel Visible / Ambiant Illumination) OpenGL context
@@ -45,7 +48,7 @@ class PCVContext
 			\param whether mesh is closed (faster) or not (need more memory)
 			\return initialization success
 		**/
-		bool init(unsigned W,
+		bool init(	unsigned W,
 					unsigned H,
 					CCLib::GenericCloud* cloud,
 					CCLib::GenericMesh* mesh = 0,
@@ -54,11 +57,11 @@ class PCVContext
 		//! Set the viewing directions
 		void setViewDirection(const CCVector3& V);
 
-		//! Increments counter for points viewed in the current display orientation (see setViewDirection)
-		/** \param pixelsSeen array of the same size as the number of vertices
-			\return number of vertices seen
+		//! Increments the visibility counter for points viewed in the current pass (see setViewDirection)
+		/** \param visibilityCount per-vertex visibility count (same size as the number of vertices)
+			\return number of vertices seen during this pass
 		**/
-		int GLAccumPixel(int* pixelsSeen);
+		int GLAccumPixel(std::vector<int>& visibilityCount);
 
 	protected:
 	   

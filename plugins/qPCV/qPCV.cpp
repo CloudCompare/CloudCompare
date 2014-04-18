@@ -78,7 +78,7 @@ void qPCV::doAction()
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	size_t selNum = selectedEntities.size();
-    if (selNum!=1)
+    if (selNum != 1)
 	{
 		m_app->dispToConsole("Select only one cloud or one mesh!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
         return;
@@ -132,7 +132,7 @@ void qPCV::doAction()
 	{
 		ccHObject::Container clouds;
 		root->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD);
-		for (size_t i=0;i<clouds.size();++i)
+		for (size_t i=0; i<clouds.size(); ++i)
 		{
 			//we keep only clouds with normals
 			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(clouds[i]);
@@ -164,10 +164,10 @@ void qPCV::doAction()
     
     //we get the PCV field if it already exists
     int sfIdx = pc->getScalarFieldIndexByName(CC_PCV_FIELD_LABEL_NAME);
-    if (sfIdx<0)
-		//otherwise we creat it
-        sfIdx=pc->addScalarField(CC_PCV_FIELD_LABEL_NAME);
-    if (sfIdx<0)
+	//otherwise we create it
+    if (sfIdx < 0)
+        sfIdx = pc->addScalarField(CC_PCV_FIELD_LABEL_NAME);
+    if (sfIdx < 0)
 	{
 		m_app->dispToConsole("Couldn't allocate a new scalar field for computing PCV field ! Try to free some memory ...",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
         return;
@@ -201,7 +201,7 @@ void qPCV::doAction()
 	else
 	{
 		//Version with rays sampled on a sphere
-		success = (PCV::Launch(raysNumber,cloud,mesh,meshIsClosed,mode360,res,res,&progressCb)>0);
+		success = (PCV::Launch(raysNumber,cloud,mesh,meshIsClosed,mode360,res,res,&progressCb) > 0);
 	}
     
 	if (!success)

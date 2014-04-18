@@ -260,12 +260,15 @@ void openGLSnapshot(GLenum format, GLenum type, void* buffer)
 * Visual Computing Lab                                            /\/|      *
 * ISTI - Italian National Research Council                           |      *
 *****************************************************************************/
-int PCVContext::GLAccumPixel(int* pixelsSeen)
+int PCVContext::GLAccumPixel(std::vector<int>& visibilityCount)
 {
 	if (!m_pixBuffer || !m_pixBuffer->isValid())
 		return -1;
 	if (!m_vertices)
 		return -1;
+	if (m_vertices->size() != visibilityCount.size())
+		return -1;
+
 	assert(m_snapZ);
 
 	m_pixBuffer->makeCurrent();
@@ -304,46 +307,48 @@ int PCVContext::GLAccumPixel(int* pixelsSeen)
 	int VP[4];
 	glGetIntegerv(GL_VIEWPORT,VP);
 
-	int cnt = 0;
+	int count = 0;
 	int sx4 = (m_width<<2);
 
 	unsigned nVert = m_vertices->size();
 	m_vertices->placeIteratorAtBegining();
-	for (unsigned i=0;i<nVert;++i)
+	for (unsigned i=0; i<nVert; ++i)
 	{
 		const CCVector3* P = m_vertices->getNextPoint();
 
 		double tx,ty,tz;
 		gluProject(P->x,P->y,P->z,MM,MP,VP,&tx,&ty,&tz);
 
-		int txi=(int)floor(tx);
-		int tyi=(int)floor(ty);
-		if(txi>=0 && txi<(int)m_width && tyi>=0 && tyi<(int)m_height)
+		int txi = static_cast<int>(floor(tx));
+		int tyi = static_cast<int>(floor(ty));
+		if(		txi>=0 && txi<static_cast<int>(m_width)
+			&&	tyi>=0 && tyi<static_cast<int>(m_height) )
 		{
-			int dec = txi+tyi*(int)m_width;
-			int col=1;
+			int dec = txi + tyi*static_cast<int>(m_width);
+			int col = 1;
 
 			if (!m_meshIsClosed)
 			{
 				//int c1 = std::max(m_snapC[dec],m_snapC[dec<<2+4]);
 				//int c2 = std::max(m_snapC[dec<<2+sx4],m_snapC[dec<<2+sx4+4]);
-				const uchar* pix = m_snapC+(dec<<2);
+				const uchar* pix = m_snapC + (dec<<2);
 				int c1 = std::max(pix[0],pix[4]);
 				pix += sx4;
 				int c2 = std::max(pix[0],pix[4]);
 				col = std::max(c1,c2);
 			}
 
-			if (col!=0)
+			if (col != 0)
 			{
-				if ((float)tz < m_snapZ[dec])
+				if (tz < static_cast<double>(m_snapZ[dec]))
 				{
-					++pixelsSeen[i];
-					++cnt;
+					assert(i < visibilityCount.size());
+					++visibilityCount[i];
+					++count;
 				}
 			}
 	   }
 	}
 
-	return cnt;
+	return count;
 }

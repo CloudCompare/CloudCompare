@@ -158,11 +158,6 @@ class Neighbourhood
 		**/
 		ScalarType computeCurvature(unsigned neighbourIndex, CC_CURVATURE_TYPE cType);
 
-		//! Computes point set curvature with 3D Quadric (WORK IN PROGRESS)
-		/** \return curvature (signed) value or NAN_VALUE if computation failed.
-        **/
-		ScalarType computeCurvature2(unsigned neighbourIndex, CC_CURVATURE_TYPE cType);
-
 		/**** GETTERS ****/
 
 		//! Returns gravity center

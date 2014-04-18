@@ -33,7 +33,6 @@
 
 using namespace CCLib;
 
-//#define COMPUTE_CURVATURE_2
 int GeometricalAnalysisTools::computeCurvature(	GenericIndexedCloudPersist* theCloud,
 												Neighbourhood::CC_CURVATURE_TYPE cType,
 												PointCoordinateType kernelRadius,
@@ -44,11 +43,7 @@ int GeometricalAnalysisTools::computeCurvature(	GenericIndexedCloudPersist* theC
         return -1;
 
 	unsigned numberOfPoints = theCloud->size();
-#ifdef COMPUTE_CURVATURE_2
-	if (numberOfPoints<5)
-#else
-	if (numberOfPoints<10)
-#endif
+	if (numberOfPoints < 5)
         return -2;
 
 	DgmOctree* theOctree = inputOctree;
@@ -145,11 +140,7 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
 		//neighborCount = std::min(neighborCount,16);
 
-#ifndef COMPUTE_CURVATURE_2
-		if (neighborCount>5)
-#else
-		if (neighborCount>10)
-#endif
+		if (neighborCount > 5)
 		{
 		    //current point index
 			unsigned index = cell.points->getPointGlobalIndex(i);
@@ -169,11 +160,7 @@ bool GeometricalAnalysisTools::computeCellCurvatureAtLevel(	const DgmOctree::oct
 				}
 			}
 
-#ifndef COMPUTE_CURVATURE_2
 			curv = Z.computeCurvature(indexInNeighbourhood,cType);
-#else
-			curv = Z.computeCurvature2(indexInNeighbourhood,cType);
-#endif
 		}
 
 		cell.points->setPointScalarValue(i,curv);

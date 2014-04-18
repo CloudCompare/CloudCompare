@@ -48,8 +48,8 @@ v2.5.4 XX/XX/2014
 	* Depending on the selection order, CC could crash when merging two clouds (one with normals and
 		the other without)
 	* A too big step (causing a 1x1 cell grid) would make the Rasterize tool crash!
-	* When scaling a cloud (with 'Edit > Apply scale') the 'global scale' information was (wrongly) updated
-		consequently. Therefore the cloud was rescaled to its original state at export time!
+	* When scaling a cloud (with 'Edit > Apply scale') the 'global scale' information was (wrongly) updated.
+		Therefore the cloud was rescaled to its original state at export time!
 	* EDL / SSAO filters were performing badly on entities not centered on Z=0
 		(OpenGL Z-buffer was badly initialized in ortho. mode)
 	* When GL filters were enabled, labels text or the color ramp title were shifted in the Y direction
@@ -57,6 +57,7 @@ v2.5.4 XX/XX/2014
 		- when loading a BIN file with multiple clouds inside, only the first one was kept!
 		- when saving multiple clouds coming from the same file, all files had the same name
 			(and were therefore overwritten)
+	* Gaussian curvature formula was wrong (missing square exponent)
 		
 
 v2.5.3 02/21/2014

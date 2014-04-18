@@ -733,28 +733,30 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 	const PointCoordinateType& f = H[5];
 
     //See "CURVATURE OF CURVES AND SURFACES – A PARABOLIC APPROACH" by ZVI HAR’EL
-	const PointCoordinateType fxx = 2.0f*d; // 2d
-	const PointCoordinateType& fxy = e; // e
-	const PointCoordinateType fyy = 2.0f*f; // 2f
-	const PointCoordinateType fx = b+fxx*Q.u[X]+fxy*Q.u[Y]; // b+2d*X+eY
-	const PointCoordinateType fy = c+fyy*Q.u[Y]+fxy*Q.u[X]; // c+2f*Y+eX
+	const PointCoordinateType  fx	= b + (d*2) * Q.u[X] + (e  ) * Q.u[Y];	// b+2d*X+eY
+	const PointCoordinateType  fy	= c + (e  ) * Q.u[X] + (f*2) * Q.u[Y];	// c+2f*Y+eX
+	const PointCoordinateType  fxx	= d*2;									// 2d
+	const PointCoordinateType  fyy	= f*2;									// 2f
+	const PointCoordinateType& fxy	= e;									// e
+
+	const PointCoordinateType fx2 = fx*fx;
+	const PointCoordinateType fy2 = fy*fy;
+	const PointCoordinateType q = (1 + fx2 + fy2);
 
     switch (cType)
     {
         case GAUSSIAN_CURV:
 			{
 				//to sign the curvature, we need a normal!
-				PointCoordinateType c = fabs((fxx*fyy - fxy*fxy)/(1 + fx*fx + fy*fy));
-				return static_cast<ScalarType>(c);
+				PointCoordinateType K = fabs( fxx*fyy - fxy*fxy ) / (q*q);
+				return static_cast<ScalarType>(K);
 			}
 
         case MEAN_CURV:
             {
-                PointCoordinateType fx2 = fx*fx;
-                PointCoordinateType fy2 = fy*fy;
                 //to sign the curvature, we need a normal!
-				PointCoordinateType c = fabs(((1+fx2)*fyy - 2*fx*fy*fxy + (1+fy2)*fxx)/(2*pow(1+fx2+fy2,static_cast<PointCoordinateType>(1.5))));
-				return static_cast<ScalarType>(c);
+				PointCoordinateType H = fabs( ((1+fx2)*fyy - 2*fx*fy*fxy + (1+fy2)*fxx) )  / (2*sqrt(q)*q);
+				return static_cast<ScalarType>(H);
             }
 
 		default:
@@ -763,186 +765,3 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 
 	return NAN_VALUE;
 }
-
-ScalarType Neighbourhood::computeCurvature2(unsigned neighbourIndex, CC_CURVATURE_TYPE cType)
-{
-	//we get 3D quadric parameters
-	const double* Q = get3DQuadric();
-	if (!Q)
-        return NAN_VALUE;
-
-	//we get centroid (should have already been computed during Quadric computation)
-	const CCVector3* Gc = getGravityCenter();
-
-    //we compute curvature at the input neighbour position + we recenter it by the way
-	CCVector3 Pc = *m_associatedCloud->getPoint(neighbourIndex) - *Gc;
-
-    double a=Q[0];
-    const double b=Q[1]/a;
-    const double c=Q[2]/a;
-    const double e=Q[3]/a;
-    const double f=Q[4]/a;
-    const double g=Q[5]/a;
-    const double l=Q[6]/a;
-    const double m=Q[7]/a;
-    const double n=Q[8]/a;
-    //const double d=Q[9]/a;
-    a=1.0;
-
-    const double& x=Pc.x;
-    const double& y=Pc.y;
-    const double& z=Pc.z;
-
-    //first order partial derivatives
-    const double Fx = 2.*a*x+e*y+g*z+l;
-    const double Fy = 2.*b*y+e*x+f*z+m;
-    const double Fz = 2.*c*z+f*y+g*x+n;
-
-    const double Fx2 = Fx*Fx;
-    const double Fy2 = Fy*Fy;
-    const double Fz2 = Fz*Fz;
-
-    //coefficients E,F,G
-    const double E = 1.+Fx2/Fz2;
-    const double F = Fx2/Fz2;
-    const double G = 1.+Fy2/Fz2;
-
-    //second order partial derivatives
-    //const double Fxx = 2.*a;
-    //const double Fyy = 2.*b;
-    //const double Fzz = 2.*c;
-    //const double Fxy = e;
-    //const double Fyx = e;
-    //const double Fyz = f;
-    //const double Fzy = f;
-    //const double Fxz = g;
-    //const double Fzx = g;
-
-    //gradient norm
-    const double gradF = sqrt(Fx2+Fy2+Fz2);
-
-    //coefficients L,M,N
-    SquareMatrixd D(3);
-    D.m_values[0][0] = 2.*a;//Fxx;
-    D.m_values[0][1] = g;//Fxz;
-    D.m_values[0][2] = Fx;
-    D.m_values[1][0] = g;//Fzx;
-    D.m_values[1][1] = 2.*c;//Fzz;
-    D.m_values[1][2] = Fz;
-    D.m_values[2][0] = Fx;
-    D.m_values[2][1] = Fz;
-    D.m_values[2][2] = 0.0;
-    const double L = D.computeDet()/(Fz2*gradF);
-
-    D.m_values[0][0] = e;//Fxy;
-    D.m_values[0][1] = f;//Fyz;
-    D.m_values[0][2] = Fy;
-    /*D.m_values[1][0] = Fzx;
-    D.m_values[1][1] = Fzz;
-    D.m_values[1][2] = Fz;
-    D.m_values[2][0] = Fx;
-    D.m_values[2][1] = Fz;
-    D.m_values[2][2] = 0.0;
-    //*/
-    const double M = D.computeDet()/(Fz2*gradF);
-
-      D.m_values[0][0] = 2.*b;//Fyy;
-    //D.m_values[0][1] = f;//Fyz;
-    //D.m_values[0][2] = Fy;
-      D.m_values[1][0] = f;//Fzy;
-    //D.m_values[1][1] = Fzz;
-    //D.m_values[1][2] = Fz;
-      D.m_values[2][0] = Fy;
-    //D.m_values[2][1] = Fz;
-    //D.m_values[2][2] = 0.0;
-    const double N = D.computeDet()/(Fz2*gradF);
-
-    //compute curvature
-    SquareMatrixd A(2);
-    A.m_values[0][0] = L;
-    A.m_values[0][1] = M;
-    A.m_values[1][0] = M;
-    A.m_values[1][1] = N;
-
-    SquareMatrixd B(2);
-    B.m_values[0][0] = E;
-    B.m_values[0][1] = F;
-    B.m_values[1][0] = F;
-    B.m_values[1][1] = G;
-
-    /*FILE* fp = fopen("computeCurvature2_trace.txt","wt");
-    fprintf(fp,"Fx=%f\n",Fx);
-    fprintf(fp,"Fy=%f\n",Fx);
-    fprintf(fp,"Fz=%f\n",Fx);
-    fprintf(fp,"E=%f\n",E);
-    fprintf(fp,"F=%f\n",F);
-    fprintf(fp,"G=%f\n",G);
-    fprintf(fp,"L=%f\n",L);
-    fprintf(fp,"M=%f\n",M);
-    fprintf(fp,"N=%f\n",N);
-    fprintf(fp,"A:\n%f %f\n%f %f\n",A.m_values[0][0],A.m_values[0][1],A.m_values[1][0],A.m_values[1][1]);
-    fprintf(fp,"B:\n%f %f\n%f %f\n",B.m_values[0][0],B.m_values[0][1],B.m_values[1][0],B.m_values[1][1]);
-    //fclose(fp);
-    //*/
-
-    //Gaussian curvature K = det(A)/det(B)
-    if (cType==GAUSSIAN_CURV)
-    {
-        ScalarType K = (ScalarType)(A.computeDet() / B.computeDet());
-        if (K<-1.0)
-            K=-1.0;
-        else if (K>1.0)
-            K=1.0;
-        return K;
-    }
-    //*/
-
-    SquareMatrixd Binv = B.inv();
-    if (!Binv.isValid())
-        return NAN_VALUE;
-
-    SquareMatrixd C = B.inv() * A;
-
-    //Mean curvature H = 1/2 trace(B^-1 * A)
-    if (cType==MEAN_CURV)
-    {
-        ScalarType H = (ScalarType)(0.5*C.trace());
-        if (H<-1.0)
-            H=-1.0;
-        else if (H>1.0)
-            H=1.0;
-        return fabs(H);
-    }
-    //*/
-
-    //principal curvatures are the eigenvalues k1 and k2 of B^-1 * A
-    /*SquareMatrixd eig = C.computeJacobianEigenValuesAndVectors();
-	if (!eig.isValid())
-		return NAN_VALUE;
-
-    const double k1 = eig.getEigenValueAndVector(0);
-    const double k2 = eig.getEigenValueAndVector(1);
-    //*/
-
-    /*FILE* fp = fopen("computeCurvature2_trace.txt","a");
-    fprintf(fp,"Binv:\n%f %f\n%f %f\n",Binv.values[0][0],Binv.values[0][1],Binv.values[1][0],Binv.values[1][1]);
-    fprintf(fp,"C:\n%f %f\n%f %f\n",C.values[0][0],C.values[0][1],C.values[1][0],C.values[1][1]);
-    fprintf(fp,"k1=%f\n",k1);
-    fprintf(fp,"k2=%f\n",k2);
-    fclose(fp);
-    //*/
-
-    /*switch (cType)
-    {
-        case GAUSSIAN_CURV:
-            //Gaussian curvature
-            return k1*k2;
-        case MEAN_CURV:
-            //Mean curvature
-            return (k1+k2)/2.0;
-    }
-    //*/
-
-    return NAN_VALUE;
-}
-

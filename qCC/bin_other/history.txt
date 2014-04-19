@@ -1,6 +1,6 @@
 *** CloudCompare versions history ***
 
-v2.5.4 XX/XX/2014
+v2.5.4 04/19/2014
 - New file format supported:
 	* OFF meshes
 	* PTX clouds (import only)
@@ -44,9 +44,9 @@ v2.5.4 XX/XX/2014
 	* New method: 'Tools > Fit > 2D1/2 Quadric'
 		- fits a 2D1/2 quadric on the selected cloud(s)
 		- this quadric is represented as a 'primitive' (kind of mesh) and its equation is displayed in the console
-	* The 'Subsample' method can now be called on mutliple clouds at once
+	* The 'Subsample' method can now be called on multiple clouds at once
 	* Cross Section tool:
-		- contour extraction parametrization is much more clever (for 'single' and 'mutliple' contour extraction modes)
+		- contour extraction parametrization is much more clever (for 'single' and 'multiple' contour extraction modes)
 		- the extraction with a rotated clipping box is now properly handled
 
 - Bug fixes:

@@ -10,8 +10,12 @@ v2.5.4 XX/XX/2014
 		- 'View from sensor' method added
 	* STL import filter is smarter (collapsed triangle after vertex fusion are now automatically removed)
 	* Global shift:
-		- should be (more) properly handled by both the Point pair based and ICP registration tools
-		- the Z coordinate is not shifted by default anymore (if small)
+		- a new button 'use last' will now appear on the 'Global shift/scale' dialog that
+			popups when loading a file with very big coordinates (current session only - the button
+			will appear when the dialog has been "accepted" at least once before)
+		- the Z coordinate (if small) is not shifted by default anymore
+		- shift/scale information should be (more) properly handled by both the Point pair based and
+			ICP registration tools
 	* The console visibility is now forced when a warning message is generated
 	* The 'Point-pair based align' tool keeps the activated GL filter (if any)
 	* Normal vectors can now be converted to two scalar fields:

@@ -1756,9 +1756,9 @@ void MainWindow::doActionApplyScale()
 				{
 					//we must check that the resulting cloud is not too big
 					ccBBox bbox = cloud->getBB();
-					PointCoordinateType maxx = std::max(fabs(bbox.minCorner().x), fabs(bbox.maxCorner().x)) * sX;
-					PointCoordinateType maxy = std::max(fabs(bbox.minCorner().y), fabs(bbox.maxCorner().y)) * sY;
-					PointCoordinateType maxz = std::max(fabs(bbox.minCorner().z), fabs(bbox.maxCorner().z)) * sZ;
+					double maxx = std::max(fabs(bbox.minCorner().x), fabs(bbox.maxCorner().x)) * sX;
+					double maxy = std::max(fabs(bbox.minCorner().y), fabs(bbox.maxCorner().y)) * sY;
+					double maxz = std::max(fabs(bbox.minCorner().z), fabs(bbox.maxCorner().z)) * sZ;
 
 					const double maxCoord = ccCoordinatesShiftManager::MaxCoordinateAbsValue();
 					bool coordsWereTooBig = (	maxx > maxCoord

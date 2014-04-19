@@ -20,6 +20,9 @@
 //local
 #include <ccGLWindow.h>
 
+//qCC_db
+#include <ccSingleton.h>
+
 #ifdef CC_3DXWARE_SUPPORT
 //3DxWare
 #include "devices/3dConnexion/Mouse3DParameters.h"
@@ -27,6 +30,9 @@
 
 //system
 #include <assert.h>
+
+static ccSingleton<QMenu> s_speedMenu;
+static ccSingleton<QMenu> s_rotationCenterMenu;
 
 ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, ccGLWindow* win, QWidget* parent/*=0*/)
 	: QMenu(parent)
@@ -167,12 +173,13 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, ccGLWindow
 
 	addSeparator(); //------------------------------
 	
-	QMenu* speedMenu = new QMenu("Speed");
-	{
-		for (int i=0; i<SPEED_ACTION_COUNT; ++i)
-			speedMenu->addAction(m_speedActions[i]);
-	}	
-	addMenu(speedMenu);
+	//QMenu* speedMenu = new QMenu("Speed");
+	if (!s_speedMenu.instance)
+		s_speedMenu.instance = new QMenu("Speed");
+	s_speedMenu.instance->clear();
+	for (int i=0; i<SPEED_ACTION_COUNT; ++i)
+		s_speedMenu.instance->addAction(m_speedActions[i]);
+	addMenu(s_speedMenu.instance);
 
 	addSeparator(); //------------------------------
 	
@@ -181,20 +188,21 @@ ccMouse3DContextMenu::ccMouse3DContextMenu(Mouse3DParameters* params, ccGLWindow
 
 	addSeparator(); //------------------------------
 
-	QMenu* rotationCenterMenu = new QMenu("Rotation Center");
+	//QMenu* rotationCenterMenu = new QMenu("Rotation Center");
+	if (!s_rotationCenterMenu.instance)
+		s_rotationCenterMenu.instance = new QMenu("Rotation Center");
+	s_rotationCenterMenu.instance->clear();
+	if (m_autoRotationCenter) //Auto-rotation center feature is not available in CC
 	{
-		if (m_autoRotationCenter) //Auto-rotation center feature is not available in CC
-		{
-			rotationCenterMenu->addAction(m_autoRotationCenter);
-			rotationCenterMenu->addAction(m_selectedItemAsRotationCenter);
-	
-			addSeparator(); //------------------------------
-		}
-		rotationCenterMenu->addAction(m_alwaysShowRotationCenter);
-		rotationCenterMenu->addAction(m_showRotationCenterOnMotion);
-		rotationCenterMenu->addAction(m_alwaysHideRotationCenter);
+		s_rotationCenterMenu.instance->addAction(m_autoRotationCenter);
+		s_rotationCenterMenu.instance->addAction(m_selectedItemAsRotationCenter);
+
+		addSeparator(); //------------------------------
 	}
-	addMenu(rotationCenterMenu);
+	s_rotationCenterMenu.instance->addAction(m_alwaysShowRotationCenter);
+	s_rotationCenterMenu.instance->addAction(m_showRotationCenterOnMotion);
+	s_rotationCenterMenu.instance->addAction(m_alwaysHideRotationCenter);
+	addMenu(s_rotationCenterMenu.instance);
 
 	addSeparator(); //------------------------------
 

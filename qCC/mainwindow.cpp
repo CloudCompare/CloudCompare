@@ -6184,6 +6184,9 @@ void MainWindow::deactivateSegmentationMode(bool state)
 				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::createNewCloudFromVisibilitySelection
 				ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(entity);
 
+				//save origin entity display (for later)
+				ccGenericGLDisplay* display = entity->getDisplay();
+
 				ccHObject* segmentationResult = 0;
 				if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
 				{
@@ -6236,7 +6239,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						}
 
 						delete entity;
-						entity=0;
+						entity = 0;
 					}
 
 					if (segmentationResult->isA(CC_TYPES::SUB_MESH))
@@ -6254,7 +6257,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 					if (objContext.parent)
 						objContext.parent->addChild(segmentationResult); //FiXME: objContext.parentFlags?
 
-					segmentationResult->setDisplay(entity->getDisplay());
+					segmentationResult->setDisplay(display);
 					segmentationResult->prepareDisplayForRefresh_recursive();
 
 					addToDB(segmentationResult);

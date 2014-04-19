@@ -74,6 +74,7 @@ ccColorScalesManager::ccColorScalesManager()
 
 ccColorScalesManager::~ccColorScalesManager()
 {
+	m_scales.clear();
 }
 
 void ccColorScalesManager::fromPersistentSettings()

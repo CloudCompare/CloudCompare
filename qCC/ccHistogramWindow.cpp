@@ -71,7 +71,7 @@ ccHistogramWindow::~ccHistogramWindow()
 
 void ccHistogramWindow::clear()
 {
-	if (m_ownCurveValues && m_histoValues)
+	if (m_ownHistoValues && m_histoValues)
 		delete[] m_histoValues;
 	m_histoValues = 0;
 	m_maxHistoVal = 0;
@@ -107,7 +107,7 @@ void ccHistogramWindow::fromSF(ccScalarField* sf,
 	setNumberOfClasses(initialNumberOfClasses);
 };
 
-void ccHistogramWindow::fromBinArray(unsigned* histoValues,
+void ccHistogramWindow::fromBinArray(	unsigned* histoValues,
 										unsigned numberOfClasses,
 										double minVal,
 										double maxVal,
@@ -143,7 +143,7 @@ bool ccHistogramWindow::computeBinArrayFromSF()
 	//clear any existing array
 	if (m_histoValues && m_ownHistoValues)
 		delete[] m_histoValues;
-	m_histoValues=0;
+	m_histoValues = 0;
 
 	if (!m_associatedSF)
 	{

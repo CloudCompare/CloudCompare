@@ -65,8 +65,8 @@ template <class Type> class Vector3Tpl : public Tuple3Tpl<Type>
 {
 public:
 
-	//Don't ask me what other x, y, z or u tmembers his class
-	//could use but it's necessary for compilation on some platforms...
+	//Don't ask me what other x, y, z or u members this class could
+	//use but it seems necessary for compilation on some platforms...
 	using Tuple3Tpl<Type>::x;
 	using Tuple3Tpl<Type>::y;
 	using Tuple3Tpl<Type>::z;

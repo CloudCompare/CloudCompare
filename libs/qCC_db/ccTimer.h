@@ -18,14 +18,8 @@
 #ifndef CC_TIMER_HEADER
 #define CC_TIMER_HEADER
 
-//Qt
-#include <QElapsedTimer>
-
 //! Absolute timer
-/** Now based on QElapsedTimer for 64 bits portability and 
-	sharing same time reference with plugins.
-	Timer must still be initialized once (with Init) at 
-	application/plugin start.
+/** Timer must be initialized once (with Init) at application/plugin start.
 **/
 #ifdef QCC_DB_USE_AS_DLL
 #include "qCC_db.h"
@@ -45,8 +39,6 @@ public:
     static int Sec();
     //! Returns number of milli-seconds since timer was initialized
     static int Msec();
-
-protected:
 
 };
 

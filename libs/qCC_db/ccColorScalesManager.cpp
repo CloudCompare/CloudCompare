@@ -19,16 +19,16 @@
 
 //Local
 #include "ccLog.h"
+#include "ccSingleton.h"
 
 //Qt
 #include <QSettings>
-
 
 //System
 #include <assert.h>
 
 //unique instance
-static ccColorScalesManager* s_uniqueInstance = 0;
+static ccSingleton<ccColorScalesManager> s_uniqueInstance;
 
 /*** Persistent settings ***/
 
@@ -43,24 +43,19 @@ static const char c_csm_stepColor[]				= "color";
 
 ccColorScalesManager* ccColorScalesManager::GetUniqueInstance()
 {
-    if (!s_uniqueInstance)
+	if (!s_uniqueInstance.instance)
 	{
-        s_uniqueInstance = new ccColorScalesManager();
+		s_uniqueInstance.instance = new ccColorScalesManager();
 		//load custom scales from persistent settings
-		s_uniqueInstance->fromPersistentSettings();
+		s_uniqueInstance.instance->fromPersistentSettings();
 	}
 
-    return s_uniqueInstance;
+    return s_uniqueInstance.instance;
 }
 
 void ccColorScalesManager::ReleaseUniqueInstance()
 {
-    if (s_uniqueInstance)
-	{
-		s_uniqueInstance->toPersistentSettings();
-        delete s_uniqueInstance;
-	}
-    s_uniqueInstance=0;
+	s_uniqueInstance.release();
 }
 
 ccColorScalesManager::ccColorScalesManager()

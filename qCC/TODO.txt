@@ -9,7 +9,6 @@ Methods not yet migrated back to V2:
 
 File I/O:
 - PDF 3D
-- PTX files (http://www.cloudcompare.org/forum/viewtopic.php?t=638)
 - X3D files (integration with 'xiot' in... standby)
 - POD files (Pointools)
 - FARO and LEICA file formats
@@ -22,7 +21,7 @@ Big ones:
 [*] Command line mode could be extended
 	- Rasterize tool (http://www.cloudcompare.org/forum/viewtopic.php?t=786)
 	- Let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
-		to appear (will happen - even in 'silent mode' - if the file has more than 5 columns)
+		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 
 Various:

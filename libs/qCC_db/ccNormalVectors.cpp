@@ -17,23 +17,19 @@
 
 #include "ccNormalVectors.h"
 
+//Local
+#include "ccSingleton.h"
+
+//CCLib
 #include <CCGeom.h>
 #include <DgmOctreeReferenceCloud.h>
 #include <Neighbourhood.h>
 
+//System
 #include <assert.h>
 
-//unique instance structure
-struct ccNormalVectorsSingleton
-{
-public:
-	ccNormalVectorsSingleton() : instance(0) {}
-	~ccNormalVectorsSingleton() { release(); }
-	void release() { if (instance) delete instance; instance = 0; }
-	ccNormalVectors* instance;
-};
 //unique instance
-static ccNormalVectorsSingleton s_uniqueInstance;
+static ccSingleton<ccNormalVectors> s_uniqueInstance;
 
 //Number of points for local modeling to compute normals with 2D1/2 Delaunay triangulation
 #define	NUMBER_OF_POINTS_FOR_NORM_WITH_TRI 6

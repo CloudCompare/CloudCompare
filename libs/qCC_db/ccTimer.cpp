@@ -20,36 +20,32 @@
 //Qt
 #include <QTime>
 
+//qCC_db
+#include <ccSingleton.h>
+
 //System
 #include <assert.h>
 
-//encapsulation of a (pointer on a) Qt timer (for proper deletion on app exit)
-struct Timer
-{
-	QTime* m_timer;
-	Timer() : m_timer(0) {}
-	~Timer() { if (m_timer) delete m_timer; }
-};
 //unique instance
-static Timer s_timer;
+static ccSingleton<QTime> s_timer;
 
 void ccTimer::Init()
 {
-	if (!s_timer.m_timer)
+	if (!s_timer.instance)
 	{
-        s_timer.m_timer = new QTime();
-		s_timer.m_timer->start();
+        s_timer.instance = new QTime();
+		s_timer.instance->start();
 	}
 }
 
 int ccTimer::Sec()
 {
-	assert(s_timer.m_timer && s_timer.m_timer->isValid());
-	return (s_timer.m_timer ? s_timer.m_timer->elapsed()/1000 : 0);
+	assert(s_timer.instance && s_timer.instance->isValid());
+	return (s_timer.instance ? s_timer.instance->elapsed()/1000 : 0);
 }
 
 int ccTimer::Msec()
 {
-	assert(s_timer.m_timer && s_timer.m_timer->isValid());
-	return (s_timer.m_timer ? s_timer.m_timer->elapsed() : 0);
+	assert(s_timer.instance && s_timer.instance->isValid());
+	return (s_timer.instance ? s_timer.instance->elapsed() : 0);
 }

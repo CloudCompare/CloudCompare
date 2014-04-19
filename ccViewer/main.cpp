@@ -171,8 +171,5 @@ int main(int argc, char *argv[])
 
 	int result = a.exec();
 
-	ccNormalVectors::ReleaseUniqueInstance();
-    ccColorScalesManager::ReleaseUniqueInstance();
-
 	return result;
 }

@@ -40,6 +40,9 @@ public:
 	//! Releases unique instance
 	static void ReleaseUniqueInstance();
 
+	//! Destructor
+	virtual ~ccColorScalesManager();
+
 	//! Pre-defined color scales (all relative - i.e. expand to actual SF)
 	enum DEFAULT_SCALES	{	BGYR			=	0,		/**< Blue-Green-Yellow-Red ramp (default for distances display) */
 							GREY			=	1,		/**< Grey ramp (default for Global Illumination) */
@@ -93,9 +96,6 @@ protected:
 
 	//! Default constructor
 	ccColorScalesManager();
-
-	//! Destructor
-	virtual ~ccColorScalesManager();
 
 	//! Creates a pre-defined color scale
 	static ccColorScale::Shared Create(DEFAULT_SCALES scaleType);

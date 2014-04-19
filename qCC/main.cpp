@@ -35,7 +35,6 @@
 #include <ccColorScalesManager.h>
 
 #include "mainwindow.h"
-#include "ccConsole.h"
 #include "ccGuiParameters.h"
 #include "ccCommandLineParser.h"
 
@@ -180,11 +179,6 @@ int main(int argc, char **argv)
 
 	//release global structures
 	MainWindow::DestroyInstance();
-
-	ccGui::ReleaseInstance();
-	ccNormalVectors::ReleaseUniqueInstance();
-	ccColorScalesManager::ReleaseUniqueInstance();
-	ccConsole::ReleaseInstance();
 
 #ifdef CC_TRACK_ALIVE_SHARED_OBJECTS
 	//for debug purposes

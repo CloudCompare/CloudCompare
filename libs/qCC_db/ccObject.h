@@ -168,13 +168,13 @@ public:
     virtual CC_CLASS_ENUM getClassID() const = 0;
 
     //! Returns object name
-    virtual QString getName() const;
+	virtual inline QString getName() const { return m_name; }
 
     //! Sets object name
-    virtual void setName(const QString& name);
+	virtual inline void setName(const QString& name) { m_name = name; }
 
-    //! Returns object unqiue ID
-    virtual unsigned getUniqueID() const;
+    //! Returns object unique ID
+	virtual inline unsigned getUniqueID() const { return m_uniqueID; }
 
 	//! Changes unique ID
 	/** WARNING: HANDLE WITH CARE!
@@ -185,22 +185,22 @@ public:
     //! Returns whether the object is enabled or not
     /** Shortcut to access flag CC_ENABLED
     **/
-    virtual bool isEnabled() const;
+	virtual inline bool isEnabled() const { return getFlagState(CC_ENABLED); }
 
     //! Sets the "enabled" property
     /** Shortcut to modify flag CC_ENABLED
     **/
-    virtual void setEnabled(bool state);
+	virtual inline void setEnabled(bool state) { setFlagState(CC_ENABLED,state); }
 
     //! Returns whether the object is locked  or not
     /** Shortcut to access flag CC_LOCKED
     **/
-    virtual bool isLocked() const;
+	virtual inline bool isLocked() const { return getFlagState(CC_LOCKED); }
 
     //! Sets the "enabled" property
     /** Shortcut to modify flag CC_LOCKED
     **/
-    virtual void setLocked(bool state);
+	virtual inline void setLocked(bool state) { setFlagState(CC_LOCKED,state); }
 
     //shortcuts
     inline bool isGroup() const { return (getClassID() & CC_GROUP_BIT) != 0; }
@@ -265,7 +265,7 @@ public:
 protected:
 
     //! Returns flag state
-    virtual bool getFlagState(CC_OBJECT_FLAG flag) const;
+	virtual inline bool getFlagState(CC_OBJECT_FLAG flag) const { return (m_flags & flag); }
 
     //! Sets flag state
     /** \param flag object flag to set

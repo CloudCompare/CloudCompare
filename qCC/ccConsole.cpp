@@ -20,6 +20,9 @@
 //Local
 #include "mainwindow.h"
 
+//qCC_db
+#include <ccSingleton.h>
+
 //Qt
 #include <QListWidget>
 #include <QMessageBox>
@@ -35,27 +38,23 @@
  ***************/
 
 //unique console instance
-static ccConsole* s_console = 0;
+static ccSingleton<ccConsole> s_console;
 
 ccConsole* ccConsole::TheInstance()
 {
-    if (!s_console)
+	if (!s_console.instance)
 	{
-        s_console = new ccConsole();
-		ccLog::RegisterInstance(s_console);
+        s_console.instance = new ccConsole();
+		ccLog::RegisterInstance(s_console.instance);
 	}
 
-    return s_console;
+    return s_console.instance;
 }
 
 void ccConsole::ReleaseInstance()
 {
-    if (s_console)
-	{
-		ccLog::RegisterInstance(0);
-        delete s_console;
-    s_console = 0;
-	}
+	s_console.release();
+	ccLog::RegisterInstance(0);
 }
 
 ccConsole::ccConsole()

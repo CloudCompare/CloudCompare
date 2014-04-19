@@ -51,6 +51,9 @@
 **/
 const unsigned c_currentDBVersion = 35; //3.5
 
+// Persistent settings key for storing the last generated entity ID
+static const QString s_uniqueIDKey("UniqueID");
+
 unsigned ccObject::GetCurrentDBVersion()
 {
 	return c_currentDBVersion;
@@ -59,9 +62,7 @@ unsigned ccObject::GetCurrentDBVersion()
 void ccObject::ResetUniqueIDCounter()
 {
     QSettings settings;
-    //settings.beginGroup("UniqueID");
-	settings.setValue("UniqueID",(unsigned)0);
-	//settings.endGroup();
+	settings.setValue(s_uniqueIDKey,static_cast<unsigned>(0));
 }
 
 unsigned ccObject::GetNextUniqueID()
@@ -75,34 +76,19 @@ unsigned ccObject::GetNextUniqueID()
 
 unsigned ccObject::GetLastUniqueID()
 {
-    return QSettings().value("UniqueID", 0).toInt();
+    return QSettings().value(s_uniqueIDKey, 0).toInt();
 }
 
 void ccObject::UpdateLastUniqueID(unsigned lastID)
 {
-    QSettings().setValue("UniqueID", lastID);
+    QSettings().setValue(s_uniqueIDKey, lastID);
 }
 
 ccObject::ccObject(QString name)
+	: m_name(name.isEmpty() ? "unnamed" : name)
+	, m_flags(CC_ENABLED)
+	, m_uniqueID(GetNextUniqueID())
 {
-    m_flags = CC_ENABLED;
-    m_uniqueID = GetNextUniqueID();
-    setName(name.isEmpty() ? "unnamed" : name);
-}
-
-QString ccObject::getName() const
-{
-    return m_name;
-}
-
-void ccObject::setName(const QString& name)
-{
-	m_name = name;
-}
-
-unsigned ccObject::getUniqueID() const
-{
-    return m_uniqueID;
 }
 
 void ccObject::setUniqueID(unsigned ID)
@@ -114,37 +100,12 @@ void ccObject::setUniqueID(unsigned ID)
 		UpdateLastUniqueID(m_uniqueID);
 }
 
-bool ccObject::getFlagState(CC_OBJECT_FLAG flag) const
-{
-    return (m_flags & flag);
-}
-
 void ccObject::setFlagState(CC_OBJECT_FLAG flag, bool state)
 {
     if (state)
         m_flags |= unsigned(flag);
     else
         m_flags &= (~unsigned(flag));
-}
-
-bool ccObject::isEnabled() const
-{
-    return getFlagState(CC_ENABLED);
-}
-
-void ccObject::setEnabled(bool state)
-{
-    setFlagState(CC_ENABLED,state);
-}
-
-bool ccObject::isLocked() const
-{
-    return getFlagState(CC_LOCKED);
-}
-
-void ccObject::setLocked(bool state)
-{
-    setFlagState(CC_LOCKED,state);
 }
 
 bool ccObject::toFile(QFile& out) const

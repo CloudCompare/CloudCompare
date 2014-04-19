@@ -22,40 +22,42 @@
 
 //qCC_db
 #include <ccBasicTypes.h>
+#include <ccSingleton.h>
 
 //System
 #include <string.h>
 
 //! Static unique instance of ccGui
-static ccGui* s_gui = 0;
+static ccSingleton<ccGui> s_gui;
 
 const int c_fColorArraySize = 4*sizeof(float);
 const int c_ubColorArraySize = 3*sizeof(unsigned char);
 
 const ccGui::ParamStruct& ccGui::Parameters()
 {
-    if (!s_gui)
+	if (!s_gui.instance)
     {
-        s_gui = new ccGui();
-        s_gui->params.fromPersistentSettings();
+        s_gui.instance = new ccGui();
+        s_gui.instance->params.fromPersistentSettings();
     }
 
-    return s_gui->params;
+    return s_gui.instance->params;
 }
 
 void ccGui::ReleaseInstance()
 {
-    if (s_gui)
-        delete s_gui;
-    s_gui=0;
+    s_gui.release();
 }
 
 void ccGui::Set(const ParamStruct& params)
 {
-    if (!s_gui)
-        s_gui = new ccGui();
+	if (!s_gui.instance)
+    {
+        s_gui.instance = new ccGui();
+        s_gui.instance->params.fromPersistentSettings();
+    }
 
-    s_gui->params = params;
+    s_gui.instance->params = params;
 }
 
 ccGui::ParamStruct::ParamStruct()

@@ -312,6 +312,8 @@ MainWindow::~MainWindow()
 
 	if (ccRoot)
 		delete ccRoot;
+
+	ccConsole::ReleaseInstance();
 }
 
 ccPluginInterface* MainWindow::getValidPlugin(QObject* plugin)

@@ -122,7 +122,7 @@ public:
 	static const unsigned MAX_STEPS = 1024;
 
 	//! Returns name
-	QString getName() const { return m_name; }
+	inline const QString& getName() const { return m_name; }
 	//! Sets name
 	void setName(const QString& name) { m_name = name; }
 

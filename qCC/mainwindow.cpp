@@ -5040,6 +5040,11 @@ void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 			{
 				//convert raw mesh to ccMesh
 				mesh = new ccMesh(dummyMesh, cloud);
+
+				//don't need it anymore
+				delete dummyMesh;
+				dummyMesh = 0;
+
 				if (mesh)
 				{
 					mesh->setName(cloud->getName()+QString(".mesh"));

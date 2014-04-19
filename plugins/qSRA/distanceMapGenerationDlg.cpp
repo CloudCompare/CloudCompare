@@ -264,12 +264,12 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 		m_xLabels->showSymbols(false);
 		m_xLabels->setSymbolSize(DEFAULT_LABEL_MARGIN);
 		m_xLabels->setLabelAlignmentFlags(ccGenericGLDisplay::ALIGN_HMIDDLE | ccGenericGLDisplay::ALIGN_VBOTTOM);
-		m_window->addToOwnDB(m_xLabels);
+		m_window->addToOwnDB(m_xLabels,false);
 		m_yLabels = new ccSymbolCloud(YLABEL_CLOUD_NAME);
 		m_yLabels->showSymbols(false);
 		m_yLabels->setSymbolSize(DEFAULT_LABEL_MARGIN);
 		m_yLabels->setLabelAlignmentFlags(ccGenericGLDisplay::ALIGN_HRIGHT | ccGenericGLDisplay::ALIGN_VMIDDLE);
-		m_window->addToOwnDB(m_yLabels);
+		m_window->addToOwnDB(m_yLabels,false);
 	}
 
 	connect(projectionComboBox,				SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionModeChanged(int)));
@@ -613,7 +613,7 @@ void DistanceMapGenerationDlg::update()
 		{
 			mapMesh->setVisible(true);
 			mapMesh->showNormals(false);
-			m_window->addToOwnDB(mapMesh);
+			m_window->addToOwnDB(mapMesh,false);
 
 			updateMapTexture();
 
@@ -1339,9 +1339,10 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 		}
 	}
 
-	if (symbolCloud && m_window)
+	if (symbolCloud)
 	{
 		//unroll the symbol cloud the same way as the input cloud
+		if (m_window)
 		{
 			//revolution center
 			CCVector3d C(	xOriginDoubleSpinBox->value(),
@@ -1371,11 +1372,17 @@ void DistanceMapGenerationDlg::loadOverlaySymbols()
 								static_cast<colorType>(m_symbolColor.green()),
 								static_cast<colorType>(m_symbolColor.blue()) };
 		symbolCloud->setTempColor(rgb,true);
-		m_window->addToOwnDB(symbolCloud);
+		m_window->addToOwnDB(symbolCloud,false);
 		m_window->redraw();
 
 		clearLabelsPushButton->setEnabled(true);
 		clearLabelsPushButton->setText(QString("Clear (%1)").arg(symbolCloud->size()));
+	}
+	else
+	{
+		assert(false);
+		delete symbolCloud;
+		symbolCloud = 0;
 	}
 }
 
@@ -1612,7 +1619,7 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 				poly->showColors(true);
 				poly->setVisible(true);
 				poly->set2DMode(false);
-				m_window->addToOwnDB(poly);
+				m_window->addToOwnDB(poly,false);
 
 				if (m_xLabels->isVisible())
 				{
@@ -1679,7 +1686,7 @@ void DistanceMapGenerationDlg::toggleOverlayGrid(bool state)
 					poly->showColors(true);
 					poly->setVisible(true);
 					poly->set2DMode(false);
-					m_window->addToOwnDB(poly);
+					m_window->addToOwnDB(poly,false);
 				}
 				else
 				{

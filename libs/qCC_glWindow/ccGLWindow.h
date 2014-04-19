@@ -312,7 +312,9 @@ public:
 	//! Returns window own DB (2D objects only)
     virtual ccHObject* getOwnDB();
 	//! Adds an entity to window own DB (2D objects only)
-	virtual void addToOwnDB(ccHObject* obj2D);
+	/** By default no dependency link is established between the entity and the window (DB).
+	**/
+	virtual void addToOwnDB(ccHObject* obj2D, bool noDependency = true);
 	//! Removes an entity from window own DB (2D objects only)
 	virtual void removeFromOwnDB(ccHObject* obj2D);
 

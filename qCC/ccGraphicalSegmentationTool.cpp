@@ -94,11 +94,11 @@ ccGraphicalSegmentationTool::~ccGraphicalSegmentationTool()
 {
     if (m_segmentationPoly)
         delete m_segmentationPoly;
-    m_segmentationPoly=0;
+    m_segmentationPoly = 0;
 
     if (m_polyVertices)
         delete m_polyVertices;
-    m_polyVertices=0;
+    m_polyVertices = 0;
 }
 
 void ccGraphicalSegmentationTool::onShortcutTriggered(int key)

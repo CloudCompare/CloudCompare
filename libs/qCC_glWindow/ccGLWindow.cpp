@@ -1012,13 +1012,13 @@ ccHObject* ccGLWindow::getOwnDB()
 	return m_winDBRoot;
 }
 
-void ccGLWindow::addToOwnDB(ccHObject* obj2D)
+void ccGLWindow::addToOwnDB(ccHObject* obj2D, bool noDependency/*=true*/)
 {
 	assert(obj2D);
 
 	if (m_winDBRoot)
 	{
-		m_winDBRoot->addChild(obj2D,ccHObject::DP_NONE);
+		m_winDBRoot->addChild(obj2D,noDependency ? ccHObject::DP_NONE : ccHObject::DP_PARENT_OF_OTHER);
 		obj2D->setDisplay(this);
 	}
 	else

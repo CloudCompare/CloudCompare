@@ -67,11 +67,11 @@ ccPointPropertiesDlg::~ccPointPropertiesDlg()
 {
 	if (m_label)
 		delete m_label;
-	m_label=0;
+	m_label = 0;
 
 	if (m_rect2DLabel)
         delete m_rect2DLabel;
-    m_rect2DLabel=0;
+    m_rect2DLabel = 0;
 }
 
 bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)

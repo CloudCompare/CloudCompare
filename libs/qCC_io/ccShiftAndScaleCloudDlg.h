@@ -46,6 +46,8 @@ public:
 
 protected slots:
 
+	//! Loads last shift and/or scale info
+	void useLastInfo();
 	//! Analyzes the clicked button
 	void onClick(QAbstractButton* button);
 

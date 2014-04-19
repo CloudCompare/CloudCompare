@@ -64,6 +64,9 @@ v2.5.4 XX/XX/2014
 		- when saving multiple clouds coming from the same file, all files had the same name
 			(and were therefore overwritten)
 	* Gaussian curvature formula was wrong (missing square exponent)
+	* Several memory leaks have been fixed (2D1/2 mesh triangulation, etc.)
+	* Cloning a mesh which was a child of its vertices would cause the duplication of the mesh structure
+		in the resulting entity
 		
 
 v2.5.3 02/21/2014

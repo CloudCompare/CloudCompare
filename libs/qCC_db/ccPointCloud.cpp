@@ -313,31 +313,24 @@ void ccPointCloud::clear()
 	notifyGeometryUpdate();
 }
 
-ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/)
+ccGenericPointCloud* ccPointCloud::clone(ccGenericPointCloud* destCloud/*=0*/, bool ignoreChildren/*=false*/)
 {
-	if (destCloud)
+	if (destCloud && !destCloud->isA(CC_TYPES::POINT_CLOUD))
 	{
-		if (destCloud->isA(CC_TYPES::POINT_CLOUD))
-		{
-			return cloneThis(static_cast<ccPointCloud*>(destCloud));
-		}
-		else
-		{
-			ccLog::Error("[ccPointCloud::clone] Invalid destination cloud provided! Not a ccPointCloud...");
-			return 0;
-		}
+		ccLog::Error("[ccPointCloud::clone] Invalid destination cloud provided! Not a ccPointCloud...");
+		return 0;
 	}
 
-	return cloneThis();
+	return cloneThis(static_cast<ccPointCloud*>(destCloud), ignoreChildren);
 }
 
-ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/)
+ccPointCloud* ccPointCloud::cloneThis(ccPointCloud* destCloud/*=0*/, bool ignoreChildren/*=false*/)
 {
 	ccPointCloud* result = destCloud ? destCloud : new ccPointCloud();
 
 	result->setVisible(isVisible());
 
-	result->append(this,0); //there was (virtually) no point before
+	result->append(this,0,ignoreChildren); //there was (virtually) no point before
 
 	result->showColors(colorsShown());
 	result->showSF(sfShown());
@@ -366,7 +359,7 @@ const ccPointCloud& ccPointCloud::operator +=(ccPointCloud* addedCloud)
 	return append(addedCloud,size());
 }
 
-const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned pointCountBefore)
+const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned pointCountBefore, bool ignoreChildren/*=false*/)
 {
 	assert(addedCloud);
 
@@ -474,7 +467,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	//scalar fields (resized)
 	unsigned sfCount = getNumberOfScalarFields();
 	unsigned newSFCount = addedCloud->getNumberOfScalarFields();
-	if (sfCount!=0 || newSFCount!=0)
+	if (sfCount != 0 || newSFCount != 0)
 	{
 		std::vector<bool> sfUpdated(sfCount, false);
 
@@ -498,7 +491,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 
 					//flag this SF as 'updated'
 					assert(sfIdx<(int)sfCount);
-					sfUpdated[sfIdx]=true;
+					sfUpdated[sfIdx] = true;
 				}
 				else //otherwise we create a new SF
 				{
@@ -587,59 +580,62 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 	}
 
 	//children (not yet reserved)
-	unsigned childrenCount = addedCloud->getChildrenNumber();
-	for (unsigned c=0; c<childrenCount; ++c)
+	if (!ignoreChildren)
 	{
-		ccHObject* child = addedCloud->getChild(c);
-		if (child->isA(CC_TYPES::MESH)) //mesh --> FIXME: what for the other types of MESH?
+		unsigned childrenCount = addedCloud->getChildrenNumber();
+		for (unsigned c=0; c<childrenCount; ++c)
 		{
-			ccMesh* mesh = static_cast<ccMesh*>(child);
-
-			//detach from father?
-			//addedCloud->detachChild(mesh);
-			//ccGenericMesh* addedTri = mesh;
-
-			//or clone?
-			ccMesh* cloneMesh = mesh->clone(mesh->getAssociatedCloud()==addedCloud ? this : 0);
-			if (cloneMesh)
+			ccHObject* child = addedCloud->getChild(c);
+			if (child->isA(CC_TYPES::MESH)) //mesh --> FIXME: what for the other types of MESH?
 			{
-				//change mesh vertices
-				if (cloneMesh->getAssociatedCloud() == this)
-					cloneMesh->shiftTriangleIndexes(pointCountBefore);
-				addChild(cloneMesh);
-			}
-			else
-			{
-				ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to clone sub mesh %1!").arg(mesh->getName()));
-			}
-		}
-		else if (child->isKindOf(CC_TYPES::IMAGE))
-		{
-			//ccImage* image = static_cast<ccImage*>(child);
+				ccMesh* mesh = static_cast<ccMesh*>(child);
 
-			//DGM FIXME: take image ownership! (dirty)
-			addedCloud->transferChild(child,*this);
-		}
-		else if (child->isA(CC_TYPES::LABEL_2D))
-		{
-			//clone label and update points if necessary
-			cc2DLabel* label = static_cast<cc2DLabel*>(child);
-			cc2DLabel* newLabel = new cc2DLabel(label->getName());
-			for (unsigned j=0;j<label->size();++j)
-			{
-				const cc2DLabel::PickedPoint& P = label->getPoint(j);
-				if (P.cloud == addedCloud)
-					newLabel->addPoint(this,pointCountBefore+P.index);
+				//detach from father?
+				//addedCloud->detachChild(mesh);
+				//ccGenericMesh* addedTri = mesh;
+
+				//or clone?
+				ccMesh* cloneMesh = mesh->clone(mesh->getAssociatedCloud()==addedCloud ? this : 0);
+				if (cloneMesh)
+				{
+					//change mesh vertices
+					if (cloneMesh->getAssociatedCloud() == this)
+						cloneMesh->shiftTriangleIndexes(pointCountBefore);
+					addChild(cloneMesh);
+				}
 				else
-					newLabel->addPoint(P.cloud,P.index);
+				{
+					ccLog::Warning(QString("[ccPointCloud::fusion] Not enough memory: failed to clone sub mesh %1!").arg(mesh->getName()));
+				}
 			}
-			newLabel->setDisplayedIn3D(label->isDisplayedIn3D());
-			newLabel->setDisplayedIn2D(label->isDisplayedIn2D());
-			newLabel->setCollapsed(label->isCollapsed());
-			newLabel->setPosition(label->getPosition()[0],label->getPosition()[1]);
-			newLabel->setVisible(label->isVisible());
-			newLabel->setDisplay(getDisplay());
-			addChild(newLabel);
+			else if (child->isKindOf(CC_TYPES::IMAGE))
+			{
+				//ccImage* image = static_cast<ccImage*>(child);
+
+				//DGM FIXME: take image ownership! (dirty)
+				addedCloud->transferChild(child,*this);
+			}
+			else if (child->isA(CC_TYPES::LABEL_2D))
+			{
+				//clone label and update points if necessary
+				cc2DLabel* label = static_cast<cc2DLabel*>(child);
+				cc2DLabel* newLabel = new cc2DLabel(label->getName());
+				for (unsigned j=0;j<label->size();++j)
+				{
+					const cc2DLabel::PickedPoint& P = label->getPoint(j);
+					if (P.cloud == addedCloud)
+						newLabel->addPoint(this,pointCountBefore+P.index);
+					else
+						newLabel->addPoint(P.cloud,P.index);
+				}
+				newLabel->setDisplayedIn3D(label->isDisplayedIn3D());
+				newLabel->setDisplayedIn2D(label->isDisplayedIn2D());
+				newLabel->setCollapsed(label->isCollapsed());
+				newLabel->setPosition(label->getPosition()[0],label->getPosition()[1]);
+				newLabel->setVisible(label->isVisible());
+				newLabel->setDisplay(getDisplay());
+				addChild(newLabel);
+			}
 		}
 	}
 
@@ -1575,7 +1571,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
 					GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
 					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
-					assert(steps!=0);
+					assert(steps != 0);
 
 					if (steps > CC_MAX_SHADER_COLOR_RAMP_SIZE || maxComponents < (GLint)steps)
 					{

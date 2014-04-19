@@ -73,9 +73,10 @@ public:
 	/** All the main features of the entity are cloned, except from the octree and
 		the points visibility information.
 		\param destCloud destination cloud can be provided here (must be of the exact same type as the cloned cloud!)
+		\param ignoreChildren [optional] whether to ignore the cloud's children or not (in which case they will be cloned as well)
 		\return a copy of this entity
 	**/
-	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = 0)=0;
+	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = 0, bool ignoreChildren = false) = 0;
 
 
 	/***************************************************
@@ -118,35 +119,35 @@ public:
         It may even be 0 if the value shouldn't be displayed.
         WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
     **/
-	virtual const colorType* geScalarValueColor(ScalarType d) const=0;
+	virtual const colorType* geScalarValueColor(ScalarType d) const = 0;
 
     //! Returns color corresponding to a given point associated scalar value
     /** The returned value depends on the current scalar field display parameters.
         It may even be 0 if the value shouldn't be displayed.
         WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
     **/
-	virtual const colorType* getPointScalarValueColor(unsigned pointIndex) const=0;
+	virtual const colorType* getPointScalarValueColor(unsigned pointIndex) const = 0;
 
 	//! Returns scalar value associated to a given point
     /** The returned value is taken from the current displayed scalar field
         WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
     **/
-	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const=0;
+	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const = 0;
 
     //! Returns color corresponding to a given point
     /** WARNING: color array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
     **/
-	virtual const colorType* getPointColor(unsigned pointIndex) const=0;
+	virtual const colorType* getPointColor(unsigned pointIndex) const = 0;
 
     //! Returns compressed normal corresponding to a given point
     /** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
     **/
-	virtual const normsType& getPointNormalIndex(unsigned pointIndex) const=0;
+	virtual const normsType& getPointNormalIndex(unsigned pointIndex) const = 0;
 
     //! Returns normal corresponding to a given point
     /** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
     **/
-	virtual const CCVector3& getPointNormal(unsigned pointIndex) const=0;
+	virtual const CCVector3& getPointNormal(unsigned pointIndex) const = 0;
 
 
 	/***************************************************
@@ -186,16 +187,16 @@ public:
     virtual ccBBox getMyOwnBB();
 
     //! Forces bounding-box update
-    virtual void refreshBB()=0;
+    virtual void refreshBB() = 0;
 
 	//! Creates a new point cloud with only the 'visible' points (as defined by the visibility array)
 	/** \param removeSelectedPoints if true, exported point are also removed from the current point cloud
         \return new point cloud with selected points
     **/
-	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints=false)=0;
+	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints=false) = 0;
 
     //! Applies a rigid transformation (rotation + translation)
-    virtual void applyRigidTransformation(const ccGLMatrix& trans)=0;
+    virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;
 
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.

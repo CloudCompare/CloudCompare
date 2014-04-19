@@ -132,12 +132,13 @@ public:
 	/** All the main features of the entity are cloned, except from the octree and
 		the points visibility information.
 		\param destCloud [optional] the destination cloud can be provided here
+		\param ignoreChildren [optional] whether to ignore the cloud's children or not (in which case they will be cloned as well)
 		\return a copy of this entity
 	**/
-	virtual ccPointCloud* cloneThis(ccPointCloud* destCloud = 0);
+	virtual ccPointCloud* cloneThis(ccPointCloud* destCloud = 0, bool ignoreChildren = false);
 
 	//inherited from ccGenericPointCloud
-	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = 0);
+	virtual ccGenericPointCloud* clone(ccGenericPointCloud* destCloud = 0, bool ignoreChildren = false);
 
     //! Fuses another 3D entity with this one
 	/** All the main features of the given entity are added, except from the octree and
@@ -508,7 +509,7 @@ public:
 protected:
 
 	//! Appends a cloud to this one
-	const ccPointCloud& append(ccPointCloud* cloud, unsigned pointCountBefore);
+	const ccPointCloud& append(ccPointCloud* cloud, unsigned pointCountBefore, bool ignoreChildren = false);
 
     //inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);

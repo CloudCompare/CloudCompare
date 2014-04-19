@@ -622,13 +622,12 @@ ccMesh* ccMesh::clone(	ccGenericPointCloud* vertices/*=0*/,
 	assert(m_associatedCloud);
 
 	//vertices
-	unsigned i,vertNum = m_associatedCloud->size();
+	unsigned vertNum = m_associatedCloud->size();
 	//triangles
 	unsigned triNum = size();
 
 	//temporary structure to check that vertices are really used (in case of vertices set sharing)
-	unsigned* usedVerts = 0;
-	CCLib::TriangleSummitsIndexes* tsi=0;
+	std::vector<unsigned> usedVerts;
 
 	ccGenericPointCloud* newVertices = vertices;
 
@@ -636,64 +635,66 @@ ccMesh* ccMesh::clone(	ccGenericPointCloud* vertices/*=0*/,
 	if (!newVertices)
 	{
 		//let's check the real vertex count
-		usedVerts = new unsigned[vertNum];
-		if (!usedVerts)
+		try
+		{
+			usedVerts.resize(vertNum,0);
+		}
+		catch(std::bad_alloc)
 		{
 			ccLog::Error("[ccMesh::clone] Not enough memory!");
 			return 0;
 		}
-		memset(usedVerts,0,sizeof(unsigned)*vertNum);
 
-		placeIteratorAtBegining();
-		for (i=0;i<triNum;++i)
+		//flag used vertices
 		{
-			tsi = getNextTriangleIndexes();
-			usedVerts[tsi->i1]=1;
-			usedVerts[tsi->i2]=1;
-			usedVerts[tsi->i3]=1;
+			placeIteratorAtBegining();
+			for (unsigned i=0; i<triNum; ++i)
+			{
+				const CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
+				usedVerts[tsi->i1] = 1;
+				usedVerts[tsi->i2] = 1;
+				usedVerts[tsi->i3] = 1;
+			}
 		}
 
 		//we check that all points in 'associatedCloud' are used by this mesh
-		unsigned realVertCount=0;
-		for (i=0;i<vertNum;++i)
-			usedVerts[i]=(usedVerts[i]==1 ? realVertCount++ : vertNum);
+		unsigned realVertCount = 0;
+		{
+			for (unsigned i=0; i<vertNum; ++i)
+				usedVerts[i] = (usedVerts[i] == 1 ? realVertCount++ : vertNum);
+		}
 
 		//the associated cloud is already the exact vertices set --> nothing to change
 		if (realVertCount == vertNum)
 		{
-			newVertices = m_associatedCloud->clone();
+			newVertices = m_associatedCloud->clone(0,true);
 		}
 		else
 		{
 			//we create a temporary entity with used vertices only
-			CCLib::ReferenceCloud* rc = new CCLib::ReferenceCloud(m_associatedCloud);
-			if (rc->reserve(realVertCount))
+			CCLib::ReferenceCloud rc(m_associatedCloud);
+			if (rc.reserve(realVertCount))
 			{
-				for (i=0;i<vertNum;++i)
-					if (usedVerts[i]!=vertNum)
-						rc->addPointIndex(i); //can't fail, see above
+				for (unsigned i=0; i<vertNum; ++i)
+					if (usedVerts[i] != vertNum)
+						rc.addPointIndex(i); //can't fail, see above
 
 				//and the associated vertices set
 				assert(m_associatedCloud->isA(CC_TYPES::POINT_CLOUD));
-				newVertices = static_cast<ccPointCloud*>(m_associatedCloud)->partialClone(rc);
-				if (newVertices && newVertices->size() < rc->size())
+				newVertices = static_cast<ccPointCloud*>(m_associatedCloud)->partialClone(&rc);
+				if (newVertices && newVertices->size() < rc.size())
 				{
 					//not enough memory!
 					delete newVertices;
-					newVertices=0;
+					newVertices = 0;
 				}
 			}
-
-			delete rc;
-			rc=0;
 		}
 	}
 
 	//failed to create a new vertices set!
 	if (!newVertices)
 	{
-		if (usedVerts)
-			delete[] usedVerts;
 		ccLog::Error("[ccMesh::clone] Not enough memory!");
 		return 0;
 	}
@@ -704,32 +705,28 @@ ccMesh* ccMesh::clone(	ccGenericPointCloud* vertices/*=0*/,
 	{
 		if (!vertices)
 			delete newVertices;
-		if (usedVerts)
-			delete[] usedVerts;
 		delete cloneMesh;
 		ccLog::Error("[ccMesh::clone] Not enough memory!");
 		return 0;
 	}
 
 	//let's create the new triangles
-	if (usedVerts) //in case we have an equivalence table
+	if (!usedVerts.empty()) //in case we have an equivalence table
 	{
 		placeIteratorAtBegining();
-		for (i=0;i<triNum;++i)
+		for (unsigned i=0; i<triNum; ++i)
 		{
-			tsi = getNextTriangleIndexes();
+			const CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
 			cloneMesh->addTriangle(usedVerts[tsi->i1],usedVerts[tsi->i2],usedVerts[tsi->i3]);
 		}
-
-		delete[] usedVerts;
-		usedVerts=0;
+		usedVerts.clear();
 	}
 	else
 	{
 		placeIteratorAtBegining();
-		for (i=0;i<triNum;++i)
+		for (unsigned i=0; i<triNum; ++i)
 		{
-			tsi = getNextTriangleIndexes();
+			const CCLib::TriangleSummitsIndexes* tsi = getNextTriangleIndexes();
 			cloneMesh->addTriangle(tsi->i1,tsi->i2,tsi->i3);
 		}
 	}
@@ -837,7 +834,7 @@ ccMesh* ccMesh::clone(	ccGenericPointCloud* vertices/*=0*/,
 
 	if (!vertices)
 	{
-		if (hasNormals())
+		if (hasNormals() && !cloneMesh->hasNormals())
 			cloneMesh->computeNormals(!hasTriNormals());
 		newVertices->setEnabled(false);
 		//we link the mesh structure with the new vertex set

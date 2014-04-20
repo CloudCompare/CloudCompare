@@ -52,9 +52,9 @@ public:
 		In debug mode, all message are sent to system console (with 'printf').
 		\param textDisplay text output widget (optional)
 		\param parentWidget parent widget (optional)
-		\param parentWidget parent window (if any - optional)
+		\param parentWindow parent window (if any - optional)
     **/
-	static void Init(QListWidget* textDisplay=0, QWidget* parentWidget=0, MainWindow* parentWindow=0);
+	static void Init(QListWidget* textDisplay = 0, QWidget* parentWidget = 0, MainWindow* parentWindow = 0);
 
     //! Returns the (unique) static instance
 	static ccConsole* TheInstance();

@@ -2542,7 +2542,7 @@ bool ccMesh::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 
 bool ccMesh::interpolateNormals(unsigned triIndex, const CCVector3& P, CCVector3& N)
 {
-	assert(triIndex<size());
+	assert(triIndex < size());
 
 	if (!hasNormals())
 		return false;
@@ -2595,7 +2595,7 @@ bool ccMesh::interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCV
 
 bool ccMesh::interpolateColors(unsigned triIndex, const CCVector3& P, colorType rgb[])
 {
-	assert(triIndex<size());
+	assert(triIndex < size());
 
 	if (!hasColors())
 		return false;
@@ -2709,7 +2709,7 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 
 bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorType rgb[], bool interpolateColorIfNoTexture)
 {
-	assert(triIndex<size());
+	assert(triIndex < size());
 
 	int matIndex = -1;
 

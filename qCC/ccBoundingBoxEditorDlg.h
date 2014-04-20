@@ -37,7 +37,8 @@ public:
 	ccBBox getBox() const { return m_currentBBox; }
 
     //! Sets (minimal) base box
-	/** \param isMinimal set whether the user must define a bounding-box at least as large as this one
+	/** \param box base box
+		\param isMinimal set whether the user must define a bounding-box at least as large as this one
 	**/
     void setBaseBBox(const ccBBox& box, bool isMinimal = true);
 

@@ -87,7 +87,7 @@ protected:
 	void setModified(bool state);
 
 	//! If the current scale has been modified, ask the user what to do
-	/** \param return whether user allows change
+	/** \return whether user allows the change or not
 	**/
 	bool canChangeCurrentScale();
 

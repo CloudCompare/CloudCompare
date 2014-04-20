@@ -46,7 +46,7 @@ public:
 
 	//! Computes histogram from a scalar field
 	/** Number of classes can be freely modified afterwards (if enabled).
-		\param associated scalar field
+		\param sf associated scalar field
 		\param initialNumberOfClasses initial number of classes
 		\param numberOfClassesCanBeChanged whether to allow the user to modify the number of classes
 		\return success
@@ -64,7 +64,7 @@ public:
 		\param giveArrayOwnership whether array ownership is passed to the dialog or not
 		\return success
 	**/
-	void fromBinArray(unsigned* histoValues,
+	void fromBinArray(	unsigned* histoValues,
 						unsigned numberOfClasses,
 						double minVal,
 						double maxVal,

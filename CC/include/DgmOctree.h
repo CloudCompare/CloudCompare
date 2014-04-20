@@ -417,7 +417,7 @@ public:
 	/******************************/
 
 	//! DgmOctree constructor
-	/** \param aCloud the cloud to construct the octree on
+	/** \param cloud the cloud to construct the octree on
 	**/
 	DgmOctree(GenericIndexedCloudPersist* cloud);
 
@@ -543,15 +543,11 @@ public:
 									bool clearOutputCloud = true) const;
 
 	//! Returns the points lying in a specific cell
-	/** In this case, the cell is recognized by its "code" which is unique. However,
-		one must be sure that the cell does "exist" in the octree (e.g. there is
-		indeed points inside this cell and at least one of them has been projected
-		into the octree). Otherwise the program may crash or the method may return
-		wrong data.
-		\param cellCode the cell code
+	/** \param cellCode the unique cell code
 		\param level the level of subdivision
 		\param[out] subset set of points lying in the cell (references, no duplication)
 		\param isCodeTruncated specifies if the code is given in a truncated form or not
+		\param clearOutputCloud whether to clear or not the output cloud (subest) if no points lie in the specified cell
 		\return success
 	**/
 	bool getPointsInCell(	OctreeCellCodeType cellCode,
@@ -1194,7 +1190,7 @@ protected:
 		is between 0 and the number of points projected in the octree minus 1. If
 		the cell code cannot be found in the octree structure, then the method returns
 		an index equal to the number of projected points (m_numberOfProjectedPoints).
-		\param cellCode truncated cell code (i.e. original cell code shifted of 'bitDec' bits)
+		\param truncatedCellCode truncated cell code (i.e. original cell code shifted of 'bitDec' bits)
 		\param bitDec binary shift corresponding to the level of subdivision (see GET_BIT_SHIFT)
 		\return the index of the cell (or 'm_numberOfProjectedPoints' if none found)
 	**/

@@ -124,7 +124,7 @@ public:
 
 	//! Creates a new point cloud object from a GenericIndexedCloud
 	/** Should be prefered to the equivalent constructor.
-		\param cloud a GenericIndexedCloud structure
+		\param selection a GenericIndexedCloud structure
 	**/
 	ccPointCloud* clone(const CCLib::GenericIndexedCloud* selection);
 

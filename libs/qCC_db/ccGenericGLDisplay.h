@@ -142,12 +142,18 @@ public:
 		\param text string
         \param x horizontal position of string origin
         \param y vertical position of string origin
-		\param alignRight whether to align text to the right or not
+		\param align alignment position flags
 		\param bkgAlpha background transparency (0 by default)
 		\param rgbColor text color (optional)
         \param font optional font (otherwise default one will be used)
 	**/
-    virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0) = 0;
+    virtual void displayText(	QString text,
+								int x,
+								int y,
+								unsigned char align = ALIGN_DEFAULT,
+								float bkgAlpha = 0,
+								const unsigned char* rgbColor = 0,
+								const QFont* font = 0) = 0;
 
 	//! Displays a string at a given 3D position
     /** This method should be called solely during 3D pass rendering
@@ -157,7 +163,10 @@ public:
         \param rgbColor color (optional: if let to 0, default text rendering color is used)
         \param font font (optional)
     **/
-	virtual void display3DLabel(const QString& str, const CCVector3& pos3D, const unsigned char* rgbColor = 0, const QFont& font=QFont()) = 0;
+	virtual void display3DLabel(const QString& str,
+								const CCVector3& pos3D,
+								const unsigned char* rgbColor = 0,
+								const QFont& font=QFont()) = 0;
 
 	//! Returns whether a given version of OpenGL is supported
 	/** \param openGLVersionFlag see QGLFormat::OpenGLVersionFlag

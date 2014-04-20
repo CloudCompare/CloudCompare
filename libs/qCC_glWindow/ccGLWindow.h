@@ -560,16 +560,16 @@ protected:
 		\param centerY picking area center y position
 		\param width picking area width
 		\param height picking area height
-	`	\param[out] [optional] poiter to store sub item ID (if any - <1 otherwise)
+	`	\param[out] subID [optional] poiter to store sub item ID (if any - <1 otherwise)
 		\return item ID (if any) or <1 otherwise
 	**/
-    int startPicking(PICKING_MODE mode, int centerX, int centerY, int width=5, int height=5, int* subID=0);
+    int startPicking(PICKING_MODE mode, int centerX, int centerY, int width = 5, int height = 5, int* subID = 0);
 	
 	//! Updates currently active items list (m_activeItems)
 	/** The items must be currently displayed in this context
 		AND at least one of them must be under the mouse cursor.
 	**/
-	void updateActiveItemsList(int x, int y, bool extendToSelectedLabels=false);
+	void updateActiveItemsList(int x, int y, bool extendToSelectedLabels = false);
 
 	//! Currently active items
 	/** Active items can be moved with mouse, etc.

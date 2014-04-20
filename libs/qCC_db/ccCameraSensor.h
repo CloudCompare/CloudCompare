@@ -118,7 +118,7 @@ public:
 	
 	//! Computes the coordinates of a 3D point in the global coordinate system knowing its coordinates in the sensor coordinate system.
 	/** \param localCoord local coordinates of the 3D point (input)
-		\param globalCoord image coordinates of the projected point on the image (output) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
+		\param imageCoord image coordinates of the projected point on the image (output) --> !! Note that the first index is (0,0) and the last (width-1,height-1) !!
 		//TODO: withLensError if we want to simulate what the projection would be with an imperfect lens
 		\return if operation has succeded (typically, errors occur when the projection of the initial 3D points is not into the image boundaries, or when the 3D point is behind the camera)
 	**/
@@ -281,7 +281,6 @@ public:
 	/** Every cells of each level of the octree will be classified as INSIDE, OUTSIDE or INTERSECTING the frustrum. 
 		Their truncated code are then stored in m_cellsInFrustum (for cells INSIDE) or m_cellsIntersectFrustum (for 
 		cells INTERSECTING).
-		\param octree octree
 		\param pointsToTest contains the indice and 3D position (global coordinates system) of every 3D points stored in an INTERSECTING cell
 		\param inCameraFrustrum contains the indice of every 3D points stored in an INSIDE cell
 		\param planesCoefficients coefficients (a, b, c and d) of the six frustrum planes (0:right, 1:bottom, 2:left, 3:top, 4:near, 5:far)
@@ -297,8 +296,7 @@ public:
 												const CCVector3& center);
 	
 	//! Compute intersection betwen the octree and the height children cells of a parent cell. 
-	/** \param octree octree
-		\param level current level
+	/** \param level current level
 		\param parentTruncatedCode truncated code of the parent cell (at level-1)
 		\param parentResult contains in which class the parent cell has been classified (OUTSIDE, INTERSECTING, INSIDE)
 		\param planesCoefficients coefficients (a, b, c and d) of the six frustrum planes (0:right, 1:bottom, 2:left, 3:top, 4:near, 5:far)
@@ -320,9 +318,9 @@ public:
 		\param bbMin minimum coordinates of the cell
 		\param bbMax maximum coordinates of the cell
 		\param planesCoefficients coefficients (a, b, c and d) of the six frustrum planes (0:right, 1:bottom, 2:left, 3:top, 4:near, 5:far)
-		\param ptsFrustrum 3D coordinates of the eight corners of the frustrum (global coordinates sytem)
-		\param edges 3D coordinates (global coordinates sytem) of the six director vector of the frustrum edges
-		\param center 3D coordinates of the frustrum center (global coordinates sytem) ; this is the center of the circumscribed sphere
+		\param frustrumCorners 3D coordinates of the eight corners of the frustrum (global coordinates sytem)
+		\param frustrumEdges 3D coordinates (global coordinates sytem) of the six director vector of the frustrum edges
+		\param frustrumCenter 3D coordinates of the frustrum center (global coordinates sytem) ; this is the center of the circumscribed sphere
 	**/
 	OctreeCellVisibility separatingAxisTest(const CCVector3& bbMin,
 											const CCVector3& bbMax,

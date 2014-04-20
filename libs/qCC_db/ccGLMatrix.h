@@ -71,13 +71,13 @@ public:
 	ccGLMatrix();
 
 	//! Constructor from a float GL matrix array
-	/** \param mat16 a 16 elements array (column major order)
+	/** \param mat16f a 16 elements array (column major order)
 	**/
 	ccGLMatrix(const float* mat16f);
 
 	//! Constructor from a double GL matrix array
 	/** \warning Will implicitly cast the elements to float!
-		\param mat16 a 16 elements array (column major order)
+		\param mat16d a 16 elements array (column major order)
 	**/
 	ccGLMatrix(const double* mat16d);
 
@@ -130,6 +130,7 @@ public:
 
 	//! Returns matrix as a string
 	/** \param precision numerical precision
+		\param separator separator
 		\return string
 	**/
 	QString toString(int precision = 12, QChar separator = ' ') const;

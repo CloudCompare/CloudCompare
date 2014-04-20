@@ -123,7 +123,7 @@ public:
 	//! Selects a given entity
 	/** If ctrl is pressed by the user at the same time,
 		previous selection will be simply updated accordingly.
-		\param entity to select
+		\param obj entity to select
 		\param forceAdditiveSelection whether to force additive selection (just as if CTRL key is pressed) or not
 	**/
     void selectEntity(ccHObject* obj, bool forceAdditiveSelection = false);

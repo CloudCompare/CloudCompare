@@ -200,6 +200,9 @@ public:
 
 	//! Returns color by value
 	/** Warning: only valid with absolute scales!
+		\param value value
+		\param outOfRangeColor default color to return if relativePos if out of [0;1]
+		\return corresponding color
 	**/
 	inline const colorType* getColorByValue(double value, const colorType* outOfRangeColor = 0) const
 	{
@@ -210,7 +213,8 @@ public:
 
 	//! Returns color by relative position in scale
 	/** \param relativePos relative position (should be in [0;1])
-		\param default color to return if relativePos if out of [0;1]
+		\param outOfRangeColor default color to return if relativePos if out of [0;1]
+		\return corresponding color
 	**/
 	inline const colorType* getColorByRelativePos(double relativePos, const colorType* outOfRangeColor = 0) const
 	{
@@ -224,7 +228,8 @@ public:
 	//! Returns color by relative position in scale with a given 'resolution'
 	/** \param relativePos relative position (must be between 0 and 1!)
 		\param steps desired resolution (must be greater than 1 and smaller than MAX_STEPS)
-		\param default color to return if relativePos if out of [0;1]
+		\param outOfRangeColor default color to return if relativePos if out of [0;1]
+		\return corresponding color
 	**/
 	inline const colorType* getColorByRelativePos(double relativePos, unsigned steps, const colorType* outOfRangeColor = 0) const
 	{
@@ -243,6 +248,7 @@ public:
 
 	//! Returns color by index
 	/** \param index color index in m_rgbaScale array (must be below MAX_STEPS)
+		\return corresponding color
 	**/
 	inline const colorType* getColorByIndex(unsigned index) const
 	{

@@ -59,7 +59,7 @@ public:
 	//! Returns a list of the points (references to) reached by the propagation process
 	/** Returns a cloud of points (references to) corresponding to the points that are
 		lying in cells that have been visited by the last propagation process.
-		\param[out] points cloud of references to points
+		\param[out] Zk (reference) point cloud
 	**/
 	bool extractPropagatedPoints(ReferenceCloud* Zk);
 

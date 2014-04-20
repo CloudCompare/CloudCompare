@@ -420,11 +420,11 @@ public:
 		assert(firstElementIndex < m_count && secondElementIndex < m_count);
 		ElementType* v1 = getValue(firstElementIndex);
 		ElementType* v2 = getValue(secondElementIndex);
-		/*if (N==1) --> case N==1 is specialized below
-			std::swap(*v1,*v2);
-		else
-		{
-		//*/
+		//if (N==1) --> case N==1 is specialized below
+		//	std::swap(*v1,*v2);
+		//else
+		//{
+		//
 			ElementType tempVal[N];
 			memcpy(tempVal,v1,N*sizeof(ElementType));
 			memcpy(v1,v2,N*sizeof(ElementType));
@@ -809,7 +809,6 @@ public:
 		assert(index<m_maxCount);
 		return m_theChunks[index >> CHUNK_INDEX_BIT_DEC][index & ELEMENT_INDEX_BIT_MASK];
 	}
-//		return (*this)[index];}
 
 	//! Sets the value of the ith element
 	/** \param index the index of the element to update

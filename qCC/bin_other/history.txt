@@ -1,5 +1,7 @@
 *** CloudCompare versions history ***
 
+v2.5.5 ??/??/2014
+
 v2.5.4 04/19/2014
 - New file format supported:
 	* OFF meshes

@@ -4,7 +4,7 @@ project( CloudCompare )
 
 set( VERSION_MAJOR 2 )
 set( VERSION_MINOR 5 )
-set( VERSION_PATCH 4 )
+set( VERSION_PATCH 5 )
 
 include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
@@ -80,7 +80,7 @@ target_link_3DXWARE( ${PROJECT_NAME} )
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )
 
-# Add custom prepocessor definitions
+# Add custom preprocessor definitions
 set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS USE_GLEW GLEW_STATIC )
 if( WIN32 )
 	set_property( TARGET ${PROJECT_NAME} APPEND PROPERTY COMPILE_DEFINITIONS CC_USE_AS_DLL QCC_DB_USE_AS_DLL )

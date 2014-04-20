@@ -211,7 +211,7 @@ protected:
 	/** \param[in] sourcePoint 3D point to project
 		\param[out] destPoint projected point in polar coordinates: (theta,phi) or (phi,theta)
 		\param[out] depth distance from the sensor optical center to the source point
-		\param[in] (optional) sensor position index (see ccIndexedTransformationBuffer)
+		\param[in] posIndex (optional) sensor position index (see ccIndexedTransformationBuffer)
 	**/
 	void projectPoint(const CCVector3& sourcePoint, CCVector2& destPoint, ScalarType &depth, double posIndex = 0) const;
 

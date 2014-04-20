@@ -40,6 +40,7 @@ v2.5.4 04/19/2014
 			(this is not necessary by default as all modified or newly created entities are automatically saved,
 			but it can be useful for performing format conversion through the command line)
 		- ASCII files with less than 6 columns are now loaded silently (i.e. no dialog should pop-up)
+		- new option '-CROP2D' to crop a cloud inside a 2D polygon (either in the XY, XZ or YZ planes)
 	* New method: 'Edit > Colors > Interpolate from another entity'
 		- set the colors of a cloud (or mesh vertices) by interpolating the colors of another cloud (or mesh vertices)
 		- right now the only interpolation mode available consists in taking the nearest neighbor's color

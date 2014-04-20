@@ -1180,12 +1180,21 @@ void MainWindow::doActionSetColorGradient()
 
 void MainWindow::doActionInterpolateColors()
 {
-	ccGenericPointCloud* cloud1 = m_selectedEntities.size() > 0 ? ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[0]) : 0;
-	ccGenericPointCloud* cloud2 = m_selectedEntities.size() > 1 ? ccHObjectCaster::ToGenericPointCloud(m_selectedEntities[1]) : 0;
+	if (m_selectedEntities.size() != 2)
+	{
+		ccConsole::Error("Select 2 entities (clouds or meshes)!");
+		return;
+	}
+
+	ccHObject* ent1 = m_selectedEntities[0];
+	ccHObject* ent2 = m_selectedEntities[1];
+
+	ccGenericPointCloud* cloud1 = ccHObjectCaster::ToGenericPointCloud(ent1);
+	ccGenericPointCloud* cloud2 = ccHObjectCaster::ToGenericPointCloud(ent2);
 
 	if (!cloud1 || !cloud2)
 	{
-		ccConsole::Error("Select 2 clouds or meshes!");
+		ccConsole::Error("Select 2 entities (clouds or meshes)!");
 		return;
 	}
 
@@ -1196,12 +1205,19 @@ void MainWindow::doActionInterpolateColors()
 	}
 	else if (cloud1->hasColors() && cloud2->hasColors())
 	{
-		ccConsole::Error("Both entities have colors! Remove the colors on the entity you wish to import the color to!");
+		ccConsole::Error("Both entities have colors! Remove the colors on the entity you wish to import the colors to!");
 		return;
 	}
 
-	ccGenericPointCloud* source = cloud1->hasColors() ? cloud1 : cloud2;
-	ccGenericPointCloud* dest = (source == cloud2 ? cloud1 : cloud2);
+	ccGenericPointCloud* source = cloud1;
+	ccGenericPointCloud* dest = cloud2;
+
+	if ( cloud2->hasColors())
+	{
+		std::swap(source,dest);
+		std::swap(cloud1,cloud2);
+		std::swap(ent1,ent2);
+	}
 
 	if (!dest->isA(CC_TYPES::POINT_CLOUD))
 	{
@@ -1212,15 +1228,15 @@ void MainWindow::doActionInterpolateColors()
 	ccProgressDialog pDlg(true, this);
 	if (static_cast<ccPointCloud*>(dest)->interpolateColorsFrom(source,&pDlg))
 	{
-		dest->showColors(true);
+		ent2->showColors(true);
 	}
 	else
 	{
 		ccConsole::Error("An error occurred! (see console)");
 	}
 
-	if (dest->getDisplay())
-		dest->getDisplay()->redraw();
+	ent2->prepareDisplayForRefresh_recursive();
+	refreshAll();
 	updateUI();
 }
 
@@ -9679,6 +9695,11 @@ void MainWindow::putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext&
 		context.parent->addChild(obj,context.parentFlags);
 		obj->addDependency(context.parent,context.childFlags);
 	}
+
+	//DGM: we must call 'notifyGeometryUpdate' as any call to this method
+	//while the object was temporarily 'cut' from the DB tree were
+	//ineffective!
+	obj->notifyGeometryUpdate();
 
 	m_ccRoot->addElement(obj,false);
 }

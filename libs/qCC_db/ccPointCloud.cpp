@@ -1325,7 +1325,7 @@ void ccPointCloud::multiply(PointCoordinateType fx, PointCoordinateType fy, Poin
 	ccOctree* oct = getOctree();
 	if (oct)
 	{
-		if (fx==fy && fx==fz && fx>0 && fy>0 && fz>0)
+		if (fx==fy && fx==fz && fx > 0)
 			oct->multiplyBoundingBox(fx);
 		else
 			deleteOctree();

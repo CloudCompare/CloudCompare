@@ -36,6 +36,8 @@
 
 //system
 #include <assert.h>
+#include <math.h>
+#include <limits>
 
 void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)
 {
@@ -224,6 +226,27 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 		keyValues.insert(sf->saturationRange().start());
 		keyValues.insert(sf->saturationRange().stop());
 		keyValues.insert(sf->saturationRange().max());
+	}
+
+	//magic fix (for infinite values!)
+	{
+		for (std::set<double>::iterator it = keyValues.begin(); it != keyValues.end(); ++it)
+		{
+#ifdef CC_WINDOWS
+			if (!_finite(*it))
+#else
+			if (!std::isfinite(*it))
+#endif
+			{
+				bool minusInf = (*it < 0);
+				keyValues.erase(it);
+				if (minusInf)
+					keyValues.insert(-std::numeric_limits<ScalarType>::max());
+				else
+					keyValues.insert(std::numeric_limits<ScalarType>::max());
+				it = keyValues.begin(); //restart the process (easier than trying to be intelligent here ;)
+			}
+		}
 	}
 
 	//Internally, the elements in a set are already sorted
@@ -416,13 +439,13 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 			}
 		}
 
-		//now we recursively display labels where we have some rool left
+		//now we recursively display labels for which we have some room left
 		if (drawnLabels.size() > 1)
 		{
 			const int minGap = strHeight*2;
 
 			size_t drawnLabelsBefore = 0; //just to init the loop
-			size_t drawnLabelsAfter = drawnLabels.size(); 
+			size_t drawnLabelsAfter = drawnLabels.size();
 
 			//proceed until no more label can be inserted
 			while (drawnLabelsAfter > drawnLabelsBefore)

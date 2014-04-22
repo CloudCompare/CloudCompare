@@ -596,8 +596,12 @@ static int scalar_cb(p_ply_argument argument)
 	CCLib::ScalarField* sf = 0;
 	ply_get_argument_user_data(argument, (void**)(&sf), NULL);
 
+	p_ply_element element;
+	long instance_index;
+	ply_get_argument_element(argument, &element, &instance_index);
+
 	ScalarType scal = static_cast<ScalarType>(ply_get_argument_value(argument));
-	sf->addElement(scal);
+	sf->setValue(instance_index,scal);
 
     if ((++s_totalScalarCount % PROCESS_EVENTS_FREQ) == 0)
         QCoreApplication::processEvents();

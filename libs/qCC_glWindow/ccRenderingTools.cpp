@@ -36,7 +36,7 @@
 
 //system
 #include <assert.h>
-#include <math.h>
+#include <cmath>
 #include <limits>
 
 void ccRenderingTools::ShowDepthBuffer(ccGBLSensor* sensor, QWidget* parent)

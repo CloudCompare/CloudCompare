@@ -12,7 +12,9 @@ endif()
 
 
 # Default debug suffix for libraries
-set( CMAKE_DEBUG_POSTFIX d )
+if(MSVC)
+  set( CMAKE_DEBUG_POSTFIX d )
+endif()
 
 if( UNIX )
         set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")

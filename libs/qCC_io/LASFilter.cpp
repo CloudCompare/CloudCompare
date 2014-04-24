@@ -347,35 +347,47 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 	if (ifs.fail())
 		return CC_FERR_READING;
 
-	liblas::Reader* reader = 0;
+
+	liblas::Reader reader(liblas::ReaderFactory().CreateWithStream(ifs));
 	unsigned nbOfPoints = 0;
 	std::vector<std::string> dimensions;
 
 	try
 	{
-		reader = new liblas::Reader(liblas::ReaderFactory().CreateWithStream(ifs));	//using factory for automatic and transparent
 		//handling of compressed/uncompressed files
-		liblas::Header const& header = reader->GetHeader();
+		liblas::Header const& header = reader.GetHeader();
 
-		ccLog::PrintDebug(QString("[LAS FILE] %1 - signature: %2").arg(filename).arg(header.GetFileSignature().c_str()));
+		ccLog::Print(QString("[LAS] %1 - signature: %2").arg(filename).arg(header.GetFileSignature().c_str()));
+
+		const liblas::Schema& schema = header.GetSchema();
 
 		//get fields present in file
-		dimensions = header.GetSchema().GetDimensionNames();
+		//DGM: strangely, on the 32 bits windows version, calling GetDimensionNames makes CC crash?!
+		//DGM: so we call the same code as the function does... and it works?! (DIRTY)
+		//dimensions = schema.GetDimensionNames();
+		{
+			liblas::IndexMap const& map = schema.GetDimensions();
+			liblas::index_by_position const& position_index = map.get<liblas::position>();
+			liblas::index_by_position::const_iterator it = position_index.begin();
+			while (it != position_index.end())
+			{
+				dimensions.push_back(it->GetName());
+				it++;
+			}
+		}
 
 		//and of course the number of points
 		nbOfPoints = header.GetPointRecordsCount();
 	}
 	catch (...)
 	{
-		delete reader;
 		ifs.close();
 		return CC_FERR_READING;
 	}
 
-	if (nbOfPoints==0)
+	if (nbOfPoints == 0)
 	{
 		//strange file ;)
-		delete reader;
 		ifs.close();
 		return CC_FERR_NO_LOAD;
 	}
@@ -386,7 +398,6 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 	s_lasOpenDlg->setDimensions(dimensions);
 	if (alwaysDisplayLoadDialog && !s_lasOpenDlg->autoSkipMode() && !s_lasOpenDlg->exec())
 	{
-		delete reader;
 		ifs.close();
 		return CC_FERR_CANCELED_BY_USER;
 	}
@@ -427,7 +438,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 	while (true)
 	{
 		//if we reach the end of the file, or the max. cloud size limit (in which case we cerate a new chunk)
-		bool newPointAvailable = (nprogress.oneStep() && reader->ReadNextPoint());
+		bool newPointAvailable = (nprogress.oneStep() && reader.ReadNextPoint());
 
 		if (!newPointAvailable || pointsRead == fileChunkPos+fileChunkSize)
 		{
@@ -514,7 +525,6 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 			{
 				ccLog::Warning("[LASFilter::loadFile] Not enough memory!");
 				delete loadedCloud;
-				delete reader;
 				ifs.close();
 				return CC_FERR_NOT_ENOUGH_MEMORY;
 			}
@@ -522,7 +532,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 
 			//DGM: from now on, we only enable scalar fields when we detect a valid value!
 			if (s_lasOpenDlg->doLoad(LAS_CLASSIFICATION))
-					fieldsToLoad.push_back(LasField(LAS_CLASSIFICATION,0,0,255)); //unsigned char: between 0 and 255
+				fieldsToLoad.push_back(LasField(LAS_CLASSIFICATION,0,0,255)); //unsigned char: between 0 and 255
 			if (s_lasOpenDlg->doLoad(LAS_CLASSIF_VALUE))
 				fieldsToLoad.push_back(LasField(LAS_CLASSIF_VALUE,0,0,31)); //5 bits: between 0 and 31
 			if (s_lasOpenDlg->doLoad(LAS_CLASSIF_SYNTHETIC))
@@ -552,7 +562,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 		}
 
 		assert(newPointAvailable);
-		const liblas::Point& p = reader->GetPoint();
+		const liblas::Point& p = reader.GetPoint();
 
 		//first point: check for 'big' coordinates
 		if (pointsRead == 0)
@@ -748,9 +758,6 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 		++pointsRead;
 	}
 
-	if (reader)
-		delete reader;
-	reader=0;
 	ifs.close();
 
 	return CC_FERR_NO_ERROR;

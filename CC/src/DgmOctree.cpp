@@ -3893,7 +3893,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 
 #include <QtCore>
 #include <QApplication>
-#include <QTConcurrentMap>
+#include <QtConcurrentMap>
 
 /*** MULTI THREADING WRAPPER ***/
 

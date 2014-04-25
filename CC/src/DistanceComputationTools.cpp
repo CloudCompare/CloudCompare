@@ -1367,7 +1367,7 @@ int DistanceComputationTools::computePointCloud2MeshDistanceWithOctree(OctreeAnd
 
 #include <QtCore>
 #include <QApplication>
-#include <QTConcurrentMap>
+#include <QtConcurrentMap>
 
 /*** MULTI THREADING WRAPPER ***/
 

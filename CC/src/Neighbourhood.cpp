@@ -232,7 +232,7 @@ bool Neighbourhood::computeLeastSquareBestFittingPlane()
 	CCVector3 G(0,0,0);
 	if (pointCount > 3)
 	{
-		//we determine plane normal by computing the smallest eigen value of M = 1/n * S[(p-µ)*(p-µ)']
+		//we determine plane normal by computing the smallest eigen value of M = 1/n * S[(p-Âµ)*(p-Âµ)']
 		CCLib::SquareMatrixd eig = computeCovarianceMatrix().computeJacobianEigenValuesAndVectors();
 
 		//invalid matrix?
@@ -732,7 +732,7 @@ ScalarType Neighbourhood::computeCurvature(unsigned neighbourIndex, CC_CURVATURE
 	const PointCoordinateType& e = H[4];
 	const PointCoordinateType& f = H[5];
 
-    //See "CURVATURE OF CURVES AND SURFACES – A PARABOLIC APPROACH" by ZVI HAR’EL
+    //See "CURVATURE OF CURVES AND SURFACES â€“ A PARABOLIC APPROACH" by ZVI HARâ€™EL
 	const PointCoordinateType  fx	= b + (d*2) * Q.u[X] + (e  ) * Q.u[Y];	// b+2d*X+eY
 	const PointCoordinateType  fy	= c + (e  ) * Q.u[X] + (f*2) * Q.u[Y];	// c+2f*Y+eX
 	const PointCoordinateType  fxx	= d*2;									// 2d

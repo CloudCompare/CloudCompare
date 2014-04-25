@@ -790,7 +790,7 @@ bool FPCSRegistrationTools::FindBase(GenericIndexedCloud* cloud,
         x = ((p1->y-p0->y)*(p2->z-p0->z))-((p1->z-p0->z)*(p2->y-p0->y));
         y = ((p1->z-p0->z)*(p2->x-p0->x))-((p1->x-p0->x)*(p2->z-p0->z));
         z = ((p1->x-p0->x)*(p2->y-p0->y))-((p1->y-p0->y)*(p2->x-p0->x));
-        //don't need to compute the true area : f=(area²)*2 is sufficient for comparison
+        //don't need to compute the true area : f=(areaÂ²)*2 is sufficient for comparison
         f = x*x + y*y + z*z;
         if (f > best)
         {
@@ -1074,7 +1074,7 @@ bool FPCSRegistrationTools::LinesIntersections(
     //Find lambda and mu such that :
     //A = p0+lambda(p1-p0)
     //B = p2+mu(p3-p2)
-    //(lambda, mu) = argmin(||A-B||²)
+    //(lambda, mu) = argmin(||A-B||Â²)
     p02 = p0-p2;
     p32 = p3-p2;
     p10 = p1-p0;

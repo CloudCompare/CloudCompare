@@ -105,7 +105,7 @@ public:
 											NormsIndexesTableType& theNormsCodes,
 											int preferedOrientation);
 
-	//! Converts a normal vector to geological 'strike & dip' parameters (N[dip]°E - [strike]°)
+	//! Converts a normal vector to geological 'strike & dip' parameters (N[dip]Â°E - [strike]Â°)
 	/** \param[in] N normal (should be normalized!)
 		\param[out] strike_deg strike value (in degrees)
 		\param[out] dip_deg dip value (in degrees)
@@ -122,17 +122,17 @@ public:
 	**/
 	static void ConvertNormalToDipAndDipDir(const CCVector3& N, PointCoordinateType& dip_deg, PointCoordinateType& dipDir_deg);
 
-	//! Converts geological 'strike & dip' parameters (N[dip]°E - [strike]°) to a string
+	//! Converts geological 'strike & dip' parameters (N[dip]Â°E - [strike]Â°) to a string
 	/** \param[in] strike_deg strike value (in degrees)
 		\param[in] dip_deg dip  value (in degrees)
-		\return formatted string "N[strike]°E - [dip]°"
+		\return formatted string "N[strike]Â°E - [dip]Â°"
 	**/
 	static QString ConvertStrikeAndDipToString(double& strike_deg, double& dip_deg);
 
 	//! Converts geological 'dip direction & dip' parameters to a string
 	/** \param[in] dip_deg dip angle value (in degrees)
 		\param[in] dipDir_deg dip direction value (in degrees)
-		\return formatted string "Dip direction: [dipDir]° - Dip angle: [dip]°"
+		\return formatted string "Dip direction: [dipDir]Â° - Dip angle: [dip]Â°"
 	**/
 	static QString ConvertDipAndDipDirToString(PointCoordinateType dip_deg, PointCoordinateType dipDir_deg);
 

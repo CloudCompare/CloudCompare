@@ -42,6 +42,10 @@ class qDummyPlugin : public QObject, public ccStdPluginInterface
 {
     Q_OBJECT
     Q_INTERFACES(ccStdPluginInterface)
+#ifdef CC_QT5
+	//replace qDummy by the plugin name (IID should be unique - let's hope your plugin name is unique ;)
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qDummy")
+#endif
 
 public:
 

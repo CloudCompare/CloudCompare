@@ -18,6 +18,9 @@
 #ifndef GENERIC_PROGRESS_CALLBACK_HEADER
 #define GENERIC_PROGRESS_CALLBACK_HEADER
 
+//CCConst
+#include "CCConst.h"
+
 //Qt
 #include <QAtomicInt>
 
@@ -136,8 +139,12 @@ public:
 
 		if (updateCurrentProgress)
 		{
-			m_percent = static_cast<float>(m_counter) * static_cast<float>(totalPercentage) / static_cast<float>(totalSteps);
-			progressCallback->update(m_percent);
+			m_percent = static_cast<float>(totalPercentage) / static_cast<float>(totalSteps)
+#ifdef CC_QT5
+				* static_cast<float>(m_counter.load());
+#else
+				* static_cast<float>(m_counter);
+#endif
 		}
 		else
 		{

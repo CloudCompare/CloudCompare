@@ -142,6 +142,7 @@
 #include <QElapsedTimer>
 #include <QInputDialog>
 #include <QTextStream>
+#include <QColorDialog>
 
 //System
 #include <string.h>
@@ -395,6 +396,22 @@ void MainWindow::loadPlugins()
 		actionDisplayPluginTools->setEnabled(true);
 		actionDisplayPluginTools->setChecked(true);
     }
+	else
+	{
+		//DGM: doesn't work :(
+		//actionDisplayPluginTools->setChecked(false);
+	}
+
+	if (toolBarGLFilters->isEnabled())
+	{
+		actionDisplayGLFiltersTools->setEnabled(true);
+		actionDisplayGLFiltersTools->setChecked(true);
+	}
+	else
+	{
+		//DGM: doesn't work :(
+		//actionDisplayGLFiltersTools->setChecked(false);
+	}
 }
 
 bool MainWindow::dispatchPlugin(QObject *plugin)
@@ -2775,12 +2792,12 @@ void MainWindow::doActionExportDepthBuffer()
     filters << CC_FILE_TYPE_FILTERS[DM_ASCII];
 
     QFileDialog dialog(this);
-    dialog.setFilters(filters);
+    dialog.setNameFilters(filters);
     dialog.setViewMode(QFileDialog::Detail);
     dialog.setConfirmOverwrite(true);
     dialog.setAcceptMode(QFileDialog::AcceptSave);
 
-    dialog.selectFilter(CC_FILE_TYPE_FILTERS[currentDBSaveDlgFilter]);
+    dialog.selectNameFilter(CC_FILE_TYPE_FILTERS[currentDBSaveDlgFilter]);
 
     QString filename = m_selectedEntities[0]->getName()+QString(".")+QString(CC_FILE_TYPE_DEFAULT_EXTENSION[currentDBSaveDlgFilter]);
     dialog.selectFile(filename);
@@ -2794,7 +2811,7 @@ void MainWindow::doActionExportDepthBuffer()
         assert(fileNames.size() == 1);
 
         //we try to find the selected file format
-        QString filter = dialog.selectedFilter();
+        QString filter = dialog.selectedNameFilter();
         CC_FILE_TYPES fType = UNKNOWN_FILE;
         for (unsigned i=0; i<static_cast<unsigned>(FILE_TYPES_COUNT); ++i)
         {

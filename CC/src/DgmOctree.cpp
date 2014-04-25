@@ -3891,8 +3891,9 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 
 #ifdef ENABLE_MT_OCTREE
 
-#include <QtCore/QtCore>
-#include <QtGui/QApplication>
+#include <QtCore>
+#include <QApplication>
+#include <QTConcurrentMap>
 
 /*** MULTI THREADING WRAPPER ***/
 

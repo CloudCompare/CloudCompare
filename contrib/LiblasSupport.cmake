@@ -27,7 +27,9 @@ if( ${OPTION_USE_LIBLAS} )
 	set( LIBLAS_INCLUDE_DIR "" CACHE PATH "LibLAS include directory" )
 	set( LIBLAS_RELEASE_LIBRARY_FILE "" CACHE FILEPATH "LibLAS library file (release mode)" )
 	if (WIN32)
-		set( LIBLAS_SHARED_LIBRARY_FILE "" CACHE FILEPATH "LibLAS shared library file (dll)" )
+		set( LIBLAS_SHARED_LIBRARY_FILE "" CACHE FILEPATH "LibLAS shared library file (dll release mode)" )
+		set( LIBLAS_DEBUG_LIBRARY_FILE "" CACHE FILEPATH "LibLAS library file (debug mode)" )
+		set( LIBLAS_SHARED_DEBUG_LIBRARY_FILE "" CACHE FILEPATH "LibLAS shared library file (dll debug mode)" )
 	endif()
 
 	if ( NOT LIBLAS_INCLUDE_DIR )
@@ -43,20 +45,41 @@ function( target_link_liblas ) # 2 arguments: ARGV0 = project name / ARGV1 = sha
 if( ${OPTION_USE_LIBLAS} )
 	
 	if( LIBLAS_RELEASE_LIBRARY_FILE )
-		#Release mode only for the moment!
-		target_link_libraries( ${ARGV0} ${LIBLAS_RELEASE_LIBRARY_FILE} )
+	
+		#Release mode only by default
+		target_link_libraries( ${ARGV0} optimized ${LIBLAS_RELEASE_LIBRARY_FILE} )
+		
 		if ( ARGV1 )
+			#message( Liblas output dir: ${ARGV1} )
+			
+			#release mode
 			if ( LIBLAS_SHARED_LIBRARY_FILE )
 				string( REPLACE \\ / LIBLAS_SHARED_LIBRARY_FILE ${LIBLAS_SHARED_LIBRARY_FILE} )
-				install_ext( FILES ${LIBLAS_SHARED_LIBRARY_FILE} ${ARGV1} )
+				install( FILES ${LIBLAS_SHARED_LIBRARY_FILE} CONFIGURATIONS Release DESTINATION ${ARGV1} )
+				if ( CMAKE_CONFIGURATION_TYPES )
+					install( FILES ${LIBLAS_SHARED_LIBRARY_FILE} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo )
+				endif()
 			elseif( WIN32 )
 				message( SEND_ERROR "No LibLAS DLL file specified (LIBLAS_SHARED_LIBRARY_FILE)" )
+			endif()
+
+			#optional: debug mode
+			if ( LIBLAS_DEBUG_LIBRARY_FILE )
+				target_link_libraries( ${ARGV0} debug ${LIBLAS_DEBUG_LIBRARY_FILE} )
+				if ( LIBLAS_SHARED_DEBUG_LIBRARY_FILE )
+					string( REPLACE \\ / LIBLAS_SHARED_DEBUG_LIBRARY_FILE ${LIBLAS_SHARED_DEBUG_LIBRARY_FILE} )
+					install( FILES ${LIBLAS_SHARED_DEBUG_LIBRARY_FILE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
+				endif()
 			endif()
 		endif()
 		
 		if ( CMAKE_CONFIGURATION_TYPES )
 			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELEASE CC_LAS_SUPPORT )
-			#set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG CC_LAS_SUPPORT )
+			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_RELWITHDEBINFO CC_LAS_SUPPORT )
+			
+			if ( LIBLAS_DEBUG_LIBRARY_FILE )
+				set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS_DEBUG CC_LAS_SUPPORT )
+			endif()
 		else()
 			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_LAS_SUPPORT )
 		endif()

@@ -1,5 +1,14 @@
 cmake_minimum_required (VERSION 2.8)
 
+# Eliminate a warning when building in Windows that relates
+# to static linking of Qt executables to qtmain.lib.
+# This policy was introduced in CMake version 2.8.11.
+# CMake version 2.8.11.2 warns when the policy is not set
+# and uses OLD behavior.
+if(POLICY CMP0020)
+  cmake_policy(SET CMP0020 NEW)
+endif()
+
 #requires PCL
 find_package(PCL REQUIRED)
 
@@ -31,17 +40,19 @@ file( GLOB_RECURSE ui_list *.ui )
 #file( GLOB qrc_list icons/*.qrc )
 #file( GLOB rc_list *.rc )
 
-# find Qt mocable files
-find_mocable_files( mocable_list ${header_list} )
-qt4_wrap_cpp( moc_list ${mocable_list} )
-QT4_WRAP_UI( generated_ui_list ${ui_list} )
-#QT4_ADD_RESOURCES( generated_qrc_list ${qrc_list} )
+if ( USE_QT5 )
+	qt5_wrap_ui( generated_ui_list ${ui_list} )
+else()
+	# find Qt mocable files
+	find_mocable_files( mocable_list ${header_list} )
+	qt4_wrap_cpp( moc_list ${mocable_list} )
+	qt4_wrap_ui( generated_ui_list ${ui_list} )
+endif()
 
 add_library( ${PROJECT_NAME} STATIC ${header_list} ${source_list} ${impl_list} ${moc_list} ${generated_ui_list} )
 
 # Default preprocessors
 set_default_cc_preproc( ${PROJECT_NAME} )
-
 
 # Add custom prepocessor definitions
 if (WIN32)
@@ -61,3 +72,7 @@ endif()
 link_directories( ${PCL_LIBRARY_DIRS} )
 add_definitions( ${PCL_DEFINITIONS} )
 target_link_libraries( ${PROJECT_NAME} ${PCL_LIBRARIES} ${EXTERNAL_LIBS_LIBRARIES})
+
+if ( USE_QT5 )
+	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets)
+endif()

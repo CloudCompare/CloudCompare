@@ -29,6 +29,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <QTextStream>
+#include <QMainWindow>
 
 //qCC_db
 #include <ccHObjectCaster.h>
@@ -319,4 +320,6 @@ QIcon qSRA::getIcon() const
     return QIcon(QString::fromUtf8(":/CC/plugin/qSRA/qSRA.png"));
 }
 
+#ifndef CC_QT5
 Q_EXPORT_PLUGIN2(qSRA,qSRA);
+#endif

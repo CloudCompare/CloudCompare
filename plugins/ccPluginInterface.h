@@ -22,6 +22,15 @@
 #include <QString>
 #include <QIcon>
 
+//Qt versop,
+#include <qglobal.h>
+#ifndef CC_QT5
+	#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+		#define CC_QT5
+	#endif
+#endif
+
+
 //! Plugin type
 enum  CC_PLUGIN_TYPE {  CC_STD_PLUGIN               = 0,
                         CC_GL_FILTER_PLUGIN         = 1,

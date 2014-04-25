@@ -24,6 +24,9 @@
 
 #include "Mouse3DParameters.h"
 
+//CCLib
+#include <CCConst.h>
+
 //qCC_db
 #include <ccPlatform.h>
 
@@ -114,6 +117,11 @@ public:
 	**/
 	static void GetQuaternion(const std::vector<float>& motionData, float* q);
 
+	//! Called when new raw input data is available
+	/** For 'internal' use only
+	**/
+	void onRawInput(UINT nInputCode, HRAWINPUT hRawInput);
+
 signals:
 
 	void sigMove3d(std::vector<float>& motionData);
@@ -122,16 +130,19 @@ signals:
 
 protected:
 
+	//! Windows handle type
+	/** Not the same on Qt4 and Qt5 :(
+	**/
+#ifdef CC_QT5
+	typedef WId WinHandle;
+#else
+	typedef HWND WinHandle;
+#endif
+
 	//! Initialize the window to recieve raw-input messages
 	/** This needs to be called initially so that Windows will send the messages from the 3D mouse to the window.
 	**/
-	bool initializeRawInput(HWND hwndTarget);
-
-	//! Custom 'WM_INPUT' event filter
-	static bool RawInputEventFilter(void* msg, long* result);
-
-	//! Called when new raw input data is available
-	void onRawInput(UINT nInputCode, HRAWINPUT hRawInput);
+	bool initializeRawInput(WinHandle hwndTarget);
 
 	//! Gets the raw input data from Windows
 	/** Includes workaround for incorrect alignment of the RAWINPUT structure on x64 os
@@ -168,7 +179,7 @@ protected:
 	};
 
 	//! Associated window handle
-	HWND m_window;
+	WinHandle m_window;
 
 	//! Data cache to handle multiple rawinput devices
 	std::map< HANDLE, InputData > m_device2Data;

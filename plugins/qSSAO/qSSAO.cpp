@@ -15,10 +15,13 @@
 //#                                                                        #
 //##########################################################################
 
+//first so as to be sure to include 'glew.h' before 'gl.h'
+#include "ccSSAOFilter.h"
+
+//Qt
 #include <QtGui>
 
 #include "qSSAO.h"
-#include "ccSSAOFilter.h"
 
 QIcon qSSAO::getIcon() const
 {
@@ -30,4 +33,6 @@ ccGlFilter* qSSAO::getFilter()
     return new ccSSAOFilter();
 }
 
+#ifndef CC_QT5
 Q_EXPORT_PLUGIN2(qSSAO,qSSAO);
+#endif

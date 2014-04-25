@@ -96,5 +96,7 @@ QIcon qDummyPlugin::getIcon() const
     return QIcon(":/CC/plugin/qDummyPlugin/icon.png");
 }
 
+#ifndef CC_QT5
 //Don't forget to replace 'qDummyPlugin' by your own plugin class name here also!
 Q_EXPORT_PLUGIN2(qDummyPlugin,qDummyPlugin);
+#endif

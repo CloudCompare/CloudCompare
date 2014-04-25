@@ -9,6 +9,8 @@ else()
 	set( SHARED_LIB_TYPE LIBRARY )
 endif()
 
+if ( NOT USE_QT5 )
+
 # Find mocable files (simply look for Q_OBJECT in all files!)
 function( find_mocable_files __out_var_name )   # + input list
     set( local_list )
@@ -21,64 +23,88 @@ function( find_mocable_files __out_var_name )   # + input list
     set( ${__out_var_name} ${local_list} PARENT_SCOPE )
 endfunction()
 
+endif() #if ( NOT USE_QT5 )
+
 # Export Qt Dlls to specified destinations
 function( install_Qt_Dlls ) # 2 arguments: ARGV0 = release destination / ARGV1 = debug destination
 if( WIN32 )
-if( NOT ${ARGC} EQUAL 2 )
-	message( SEND_ERROR "function install_Qt_Dlls: invalid number of arguments! (need release and debug destinations)" )
-else()
-	set( QT_RELEASE_DLLS QtCore${QT_VERSION_MAJOR} QtGui${QT_VERSION_MAJOR} QtOpenGL${QT_VERSION_MAJOR} )
-	set( QT_DEBUG_DLLS QtCored${QT_VERSION_MAJOR} QtGuid${QT_VERSION_MAJOR} QtOpenGLd${QT_VERSION_MAJOR} )
-	#specific case for the MinGW version of Qts
-	if( MINGW )
-		list( APPEND QT_RELEASE_DLLS libgcc )
-		list( APPEND QT_RELEASE_DLLS mingwm )
-		list( APPEND QT_DEBUG_DLLS libgcc )
-		list( APPEND QT_DEBUG_DLLS mingwm )
-	endif()
+	if( ${ARGC} EQUAL 1 )
+		
+		if ( NOT USE_QT5 )
+			set( QT_RELEASE_DLLS QtCore${QT_VERSION_MAJOR} QtGui${QT_VERSION_MAJOR} QtOpenGL${QT_VERSION_MAJOR} )
+		else()
+			set( QT_RELEASE_DLLS Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets icuin51 icuuc51 icudt51 )
+			set( QT_BINARY_DIR ${QT5_ROOT_PATH}/bin )
+		endif()
+		#specific case for the MinGW version of Qts
+		if( MINGW )
+			list( APPEND QT_RELEASE_DLLS libgcc )
+			list( APPEND QT_RELEASE_DLLS mingwm )
+		endif()
 
-	#release versions
-	foreach( element ${QT_RELEASE_DLLS} )
-		file( GLOB dll_files ${QT_BINARY_DIR}/${element}*.dll )
-		foreach( qtDLL ${dll_files} )
-			if( NOT CMAKE_CONFIGURATION_TYPES )
-				install( FILES ${qtDLL} DESTINATION ${ARGV0} )
-			else()
-				install( FILES ${qtDLL} CONFIGURATIONS Release DESTINATION ${ARGV0} )
-			endif()
-		endforeach()
-	endforeach()
-	
-	#debug versions (for mutli-config compiler only)
-	if( CMAKE_CONFIGURATION_TYPES )
-		foreach( element ${QT_DEBUG_DLLS} )
+		#release version
+		foreach( element ${QT_RELEASE_DLLS} )
 			file( GLOB dll_files ${QT_BINARY_DIR}/${element}*.dll )
 			foreach( qtDLL ${dll_files} )
-				install( FILES ${qtDLL} CONFIGURATIONS Debug DESTINATION ${ARGV1} )
+				if( NOT CMAKE_CONFIGURATION_TYPES )
+					install( FILES ${qtDLL} DESTINATION ${ARGV0} )
+				else()
+					install( FILES ${qtDLL} CONFIGURATIONS Release DESTINATION ${ARGV0} )
+				endif()
 			endforeach()
 		endforeach()
+		
+		# for mutli-config compiler only
+		if( CMAKE_CONFIGURATION_TYPES )
+		
+			#release with debug info version
+			foreach( element ${QT_RELEASE_DLLS} )
+				file( GLOB dll_files ${QT_BINARY_DIR}/${element}*.dll )
+				foreach( qtDLL ${dll_files} )
+					install( FILES ${qtDLL} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo )
+				endforeach()
+			endforeach()
+
+			#debug version
+			if ( NOT USE_QT5 )
+				set( QT_DEBUG_DLLS QtCored${QT_VERSION_MAJOR} QtGuid${QT_VERSION_MAJOR} QtOpenGLd${QT_VERSION_MAJOR} )
+			else()
+				set( QT_DEBUG_DLLS Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd icuin51 icuuc51 icudt51 )
+				#set( QT_BINARY_DIR ${QT5_ROOT_PATH}/bin )
+			endif()
+			#specific case for the MinGW version of Qts
+			if( MINGW )
+				list( APPEND QT_DEBUG_DLLS libgcc )
+				list( APPEND QT_DEBUG_DLLS mingwm )
+			endif()
+		
+			foreach( element ${QT_DEBUG_DLLS} )
+				file( GLOB dll_files ${QT_BINARY_DIR}/${element}*.dll )
+				foreach( qtDLL ${dll_files} )
+					install( FILES ${qtDLL} CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug )
+				endforeach()
+			endforeach()
+
+		endif()
+	else()
+		message( SEND_ERROR "function install_Qt_Dlls: invalid number of arguments! (need base destination)" )
 	endif()
-	
-endif()
 endif()
 endfunction()
 
 # Export Qt imageformats DLLs to specified destinations
 function( install_Qt_ImageFormats )
-if( WIN32 ) # 2 arguments: ARGV0 = release destination / ARGV1 = debug destination
-if( NOT ${ARGC} EQUAL 2 )
-	message( SEND_ERROR "function install_Qt_ImageFormats: invalid number of arguments! (need release and debug destinations)" )
-else()
-foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
-	if( NOT CMAKE_CONFIGURATION_TYPES )
-		install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}4.dll DESTINATION ${ARGV0}/imageformats )
-	else()
-		install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}4.dll CONFIGURATIONS Release DESTINATION ${ARGV0}/imageformats )
-		install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}d4.dll CONFIGURATIONS Debug DESTINATION ${ARGV1}/imageformats )
-	endif()
-endforeach()
-endif()
-elseif( APPLE )    # 2 arguments: ARGV0 = bundle's plugin dir (destination) / ARGV1 = list of plugins to pass to fixup_bundle
+if( WIN32 )		# 1 argument: ARGV0 = base destination
+	foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
+		if( NOT CMAKE_CONFIGURATION_TYPES )
+			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}4.dll DESTINATION ${ARGV0}/imageformats )
+		else()
+			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}4.dll CONFIGURATIONS Release DESTINATION ${ARGV0}/imageformats )
+			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}4.dll CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo/imageformats )
+			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}d4.dll CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug/imageformats )
+		endif()
+	endforeach()
+elseif( APPLE )	# 2 arguments: ARGV0 = bundle's plugin dir (destination) / ARGV1 = list of plugins to pass to fixup_bundle
    # install imageformat plugins
    foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
       set( PLUGIN_NAME lib${imagePlugin}${CMAKE_SHARED_LIBRARY_SUFFIX} )
@@ -90,12 +116,19 @@ endif()
 endfunction()
 
 # Install shared libraries depending on the build configuration and OS
-function( install_shared ) # 3 arguments: ARGV0 = target / ARGV1 = release install destination / ARGV2 = debug install destination (if available)
+function( install_shared )	# 3 arguments:
+							# ARGV0 = target
+							# ARGV1 = release install destination
+							# ARGV2 = 1 for debug install (if available)
+							# ARGV3 = suffix (optional)
 if( NOT CMAKE_CONFIGURATION_TYPES )
-	install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} DESTINATION ${ARGV1} )
+	install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} DESTINATION ${ARGV1}${ARGV3} )
 else()
-	install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Release DESTINATION ${ARGV1} )
-	install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Debug DESTINATION ${ARGV2} )
+	install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Release DESTINATION ${ARGV1}${ARGV3} )
+	install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV1}_withDebInfo${ARGV3} )
+	if (${ARGV2} EQUAL 1)
+		install( TARGETS ${ARGV0} ${SHARED_LIB_TYPE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug${ARGV3} )
+	endif()
 endif()
 endfunction()
 
@@ -103,18 +136,15 @@ endfunction()
 # 4 arguments:
 #   - ARGV0 = signature
 #   - ARGV1 = target (warning: one project or one file at a time)
-#   - ARGV2 = release install destination (or 0 to skip it)
-#   - ARGV3 = debug install destination (if configuration exist / optional)
+#   - ARGV2 = base install destination (_debug or _withDebInfo will be automatically appended if multi-conf is supported)
+#   - ARGV3 = install destination suffix (optional)
 function( install_ext )
 if( NOT CMAKE_CONFIGURATION_TYPES )
-	install( ${ARGV0} ${ARGV1} DESTINATION ${ARGV2} )
+	install( ${ARGV0} ${ARGV1} DESTINATION ${ARGV2}${ARGV3} )
 else()
-	if (NOT ${ARGV2} EQUAL 0)
-		install( ${ARGV0} ${ARGV1} CONFIGURATIONS Release DESTINATION ${ARGV2} )
-	endif()
-	if( ARGV3 )
-		install( ${ARGV0} ${ARGV1} CONFIGURATIONS Debug DESTINATION ${ARGV3} )
-	endif()
+	install( ${ARGV0} ${ARGV1} CONFIGURATIONS Release DESTINATION ${ARGV2}${ARGV3} )
+	install( ${ARGV0} ${ARGV1} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV2}_withDebInfo${ARGV3} )
+	install( ${ARGV0} ${ARGV1} CONFIGURATIONS Debug DESTINATION ${ARGV2}_debug${ARGV3} )
 endif()
 endfunction()
 

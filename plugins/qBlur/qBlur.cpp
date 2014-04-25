@@ -15,11 +15,14 @@
 //#                                                                        #
 //##########################################################################
 
+//first so as to be sure to include 'glew.h' before 'gl.h'
+#include <ccBilateralFilter.h>
+
+//Qt
 #include <QtGui>
 #include <QInputDialog>
 
 #include "qBlur.h"
-#include <ccBilateralFilter.h>
 
 QIcon qBlur::getIcon() const
 {
@@ -42,4 +45,6 @@ ccGlFilter* qBlur::getFilter()
     return filter;
 }
 
+#ifndef CC_QT5
 Q_EXPORT_PLUGIN2(qBlur,qBlur);
+#endif

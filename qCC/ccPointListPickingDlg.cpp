@@ -25,6 +25,9 @@
 #include <QApplication>
 #include <QMessageBox>
 
+//CCLib
+#include <CCConst.h>
+
 //qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
@@ -63,7 +66,11 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 	QAction* exportToNewPolyline = menu->addAction("new polyline");
 	exportToolButton->setMenu(menu);
 
+#ifdef CC_QT5
+	tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+#else
 	tableWidget->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+#endif
 
 	startIndexSpinBox->setValue(s_pickedPointsStartIndex);
 

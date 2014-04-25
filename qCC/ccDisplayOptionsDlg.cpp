@@ -435,19 +435,21 @@ void ccDisplayOptionsDlg::doAccept()
 	accept();
 }
 
-#ifdef CC_WINDOWS
-static QWindowsStyle s_windowsStyle;
-#endif
+//#ifdef CC_WINDOWS
+//#include <QWindowsStyle>
+//static QWindowsStyle s_windowsStyle;
+//#endif
 void ccDisplayOptionsDlg::SetButtonTextColor(QAbstractButton* button, const QColor &col)
 {
 	if (!button)
 		return;
 
-	QPalette pal = button->palette();
-	pal.setColor(QPalette::ButtonText, col);
-	button->setPalette(pal);
-#ifdef CC_WINDOWS
-	button->setStyle(&s_windowsStyle/*new QWindowsStyle()*/);
-	button->update();
-#endif
+	//QPalette pal = button->palette();
+	//pal.setColor(QPalette::ButtonText, col);
+	//button->setPalette(pal);
+	button->setStyleSheet(QString("background-color: rgb(%1, %2, %3)").arg(col.red(),col.green(),col.blue()));
+//#ifdef CC_WINDOWS
+//	button->setStyle(&s_windowsStyle/*new QWindowsStyle()*/);
+//	button->update();
+//#endif
 }

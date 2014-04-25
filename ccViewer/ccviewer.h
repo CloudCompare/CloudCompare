@@ -21,7 +21,7 @@
 #define CCVIEWER_H
 
 //Qt
-#include <QtGui/QMainWindow>
+#include <QMainWindow>
 
 //GUIs
 #include <ui_ccviewer.h>

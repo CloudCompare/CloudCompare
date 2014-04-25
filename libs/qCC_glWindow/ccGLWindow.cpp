@@ -50,6 +50,7 @@
 #include <QWheelEvent>
 #include <QElapsedTimer>
 #include <QSettings>
+#include <QApplication>
 
 #ifdef USE_VLD
 //VLD

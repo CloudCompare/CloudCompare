@@ -83,6 +83,7 @@
      <addaction name="actionDisplayScalarFieldsTools"/>
      <addaction name="actionDisplayViewTools"/>
      <addaction name="actionDisplayPluginTools"/>
+     <addaction name="actionDisplayGLFiltersTools"/>
     </widget>
     <widget class="QMenu" name="menuLights">
      <property name="title">
@@ -1873,8 +1874,8 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
-   <property name="enabled">
-    <bool>false</bool>
+   <property name="checked">
+    <bool>true</bool>
    </property>
    <property name="text">
     <string>Plugins</string>
@@ -2519,6 +2520,17 @@
     <string>Distance map to best-fit 3D quadric</string>
    </property>
   </action>
+  <action name="actionDisplayGLFiltersTools">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>GL filters</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -2624,6 +2636,22 @@
     <hint type="destinationlabel">
      <x>963</x>
      <y>57</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>actionDisplayGLFiltersTools</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>toolBarGLFilters</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>-1</x>
+     <y>-1</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>957</x>
+     <y>37</y>
     </hint>
    </hints>
   </connection>

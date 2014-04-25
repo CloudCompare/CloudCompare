@@ -143,27 +143,39 @@ static unsigned short HidToVirtualKey(unsigned long pid, unsigned short hidKeyCo
 //unique instance
 static Mouse3DInput* s_mouseInputInstance = 0;
 
-bool Mouse3DInput::RawInputEventFilter(void* msg, long* result)
+#ifdef CC_QT5
+#include <QAbstractNativeEventFilter>
+class RawInputEventFilter : public QAbstractNativeEventFilter
 {
-	if (!s_mouseInputInstance)
-		return false;
-
-	MSG* messageStruct = static_cast<MSG*>(msg);
-
-	if (messageStruct->message == WM_INPUT)
+public:
+	virtual bool nativeEventFilter(const QByteArray& eventType, void* msg, long* result) Q_DECL_OVERRIDE
+#else
+class RawInputEventFilter
+{
+public:
+	static bool Filter(void* msg, long* result)
+#endif
 	{
-		HRAWINPUT hRawInput = reinterpret_cast<HRAWINPUT>(messageStruct->lParam);
-		s_mouseInputInstance->onRawInput(RIM_INPUT,hRawInput);
+		if (!s_mouseInputInstance)
+			return false;
+
+		MSG* messageStruct = static_cast<MSG*>(msg);
+
+		if (messageStruct->message == WM_INPUT)
+		{
+			HRAWINPUT hRawInput = reinterpret_cast<HRAWINPUT>(messageStruct->lParam);
+			s_mouseInputInstance->onRawInput(RIM_INPUT,hRawInput);
 		
-		//DGM FIXME: what's the meaning of this?
-		//if (result)
-		//	result = 0;
+			//DGM FIXME: what's the meaning of this?
+			//if (result)
+			//	result = 0;
 
-		return true;
+			return true;
+		}
+
+		return false;
 	}
-
-	return false;
-}
+};
 
 Mouse3DInput::Mouse3DInput(QWidget* widget)
 	: QObject(widget)
@@ -178,7 +190,13 @@ Mouse3DInput::Mouse3DInput(QWidget* widget)
 	assert(s_mouseInputInstance == 0);
 	s_mouseInputInstance = this;
 
-	qApp->setEventFilter(Mouse3DInput::RawInputEventFilter);
+	//setup event filter
+#ifdef CC_QT5
+	static RawInputEventFilter s_rawInputEventFilter;
+	qApp->installNativeEventFilter(&s_rawInputEventFilter);
+#else
+	qApp->setEventFilter(RawInputEventFilter::Filter);
+#endif
 }
 
 Mouse3DInput::~Mouse3DInput()
@@ -267,7 +285,7 @@ bool Mouse3DInput::DeviceAvailable()
 	return false;
 }
 
-bool Mouse3DInput::initializeRawInput(HWND hwndTarget)
+bool Mouse3DInput::initializeRawInput(WinHandle hwndTarget)
 {
 	m_window = hwndTarget;
 
@@ -308,7 +326,7 @@ UINT Mouse3DInput::getRawInputBuffer(PRAWINPUT pData, PUINT pcbSize, UINT cbSize
 	if (!bIsWow64 || pData == NULL)
 		return ::GetRawInputBuffer(pData, pcbSize, cbSizeHeader);
 
-	HWND hwndTarget = m_window; //fParent->winId();
+	HWND hwndTarget = (HWND)m_window; //fParent->winId();
 
 	size_t cbDataSize=0;
 	UINT nCount=0;

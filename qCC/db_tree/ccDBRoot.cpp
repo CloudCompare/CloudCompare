@@ -70,7 +70,9 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
 	//m_dbTreeWidget->viewport()->setAcceptDrops(true);
 	m_dbTreeWidget->setDropIndicatorShown(true);
 	m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
+#ifndef CC_QT5
 	setSupportedDragActions(Qt::MoveAction);
+#endif
     /*//already done in ui file!
     m_dbTreeWidget->setEditTriggers(QAbstractItemView::EditKeyPressed);
     m_dbTreeWidget->setDragDropMode(QAbstractItemView::InternalMove);
@@ -135,7 +137,11 @@ ccDBRoot::ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWid
     m_ccPropDelegate = new ccPropertiesTreeDelegate(m_propertiesModel, m_propertiesTreeWidget);
     m_propertiesTreeWidget->setItemDelegate(m_ccPropDelegate);
     m_propertiesTreeWidget->setModel(m_propertiesModel);
+#ifdef CC_QT5
+	m_propertiesTreeWidget->header()->setSectionResizeMode(QHeaderView::Interactive);
+#else
 	m_propertiesTreeWidget->header()->setResizeMode(QHeaderView::Interactive);
+#endif
 	m_propertiesTreeWidget->header()->setStretchLastSection(true);
     m_propertiesTreeWidget->setEnabled(false);
 

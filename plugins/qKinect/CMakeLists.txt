@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 2.8)
 
+# Eliminate a warning when building in Windows that relates
+# to static linking of Qt executables to qtmain.lib.
+# This policy was introduced in CMake version 2.8.11.
+# CMake version 2.8.11.2 warns when the policy is not set
+# and uses OLD behavior.
+if(POLICY CMP0020)
+  cmake_policy(SET CMP0020 NEW)
+endif()
+
 option( INSTALL_QKINECT_PLUGIN "Check to install qKINECT plugin" OFF )
 
 if (INSTALL_QKINECT_PLUGIN)
@@ -31,7 +40,7 @@ target_link_libraries( ${PROJECT_NAME} ${LIBFREENECT_LIBRARY_FILE} )
 if (WIN32)
 	if( LIBFREENECT_SHARED_LIBRARY_FILE )
 		string( REPLACE \\ / LIBFREENECT_SHARED_LIBRARY_FILE ${LIBFREENECT_SHARED_LIBRARY_FILE} )
-		install_ext( FILES ${LIBFREENECT_SHARED_LIBRARY_FILE} CloudCompare CloudCompare_debug )
+		install_ext( FILES ${LIBFREENECT_SHARED_LIBRARY_FILE} ${CLOUDCOMPARE_DEST_FOLDER} )
 	endif()
 endif()
 

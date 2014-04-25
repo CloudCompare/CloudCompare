@@ -29,9 +29,6 @@
 #include <QColor>
 #include <QAbstractButton>
 #include <QPalette>
-#ifdef CC_WINDOWS
-#include <QWindowsStyle>
-#endif
 
 //system
 #include <assert.h>

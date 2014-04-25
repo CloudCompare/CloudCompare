@@ -25,6 +25,12 @@
 #include <limits>
 #include <math.h>
 
+//Qt
+#include <qglobal.h>
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 0, 0))
+	#define CC_QT5
+#endif
+
 //! Pi
 #ifndef M_PI
 #define M_PI 3.14159265358979323846

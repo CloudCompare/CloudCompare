@@ -1,5 +1,14 @@
 cmake_minimum_required(VERSION 2.8)
 
+# Eliminate a warning when building in Windows that relates
+# to static linking of Qt executables to qtmain.lib.
+# This policy was introduced in CMake version 2.8.11.
+# CMake version 2.8.11.2 warns when the policy is not set
+# and uses OLD behavior.
+if(POLICY CMP0020)
+  cmake_policy(SET CMP0020 NEW)
+endif()
+
 include_directories( ${GLEW_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_FBO_LIB_SOURCE_DIR}/include )
 include_directories( ${CC_CORE_LIB_SOURCE_DIR}/include )
@@ -39,11 +48,20 @@ if ( ${OPTION_SUPPORT_3DCONNEXION_DEVICES} )
 	list( APPEND source_list ${3DX_source_list} )
 endif()	
 
+if ( NOT USE_QT5 )
+
 # find Qt mocable files
 find_mocable_files( mocable_list ${header_list} )
 qt4_wrap_cpp( moc_list ${mocable_list} )
 qt4_wrap_ui( generated_ui_list ${ui_list} )
 qt4_add_resources( generated_qrc_list ${qrc_list} )
+
+else()
+
+qt5_wrap_ui( generated_ui_list ${ui_list} )
+qt5_add_resources( generated_qrc_list ${qrc_list} )
+
+endif()
 
 # App icon with MSVC
 if( MSVC )
@@ -66,6 +84,11 @@ target_link_libraries( ${PROJECT_NAME} QCC_DB_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_IO_LIB )
 target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 target_link_libraries( ${PROJECT_NAME} ${EXTERNAL_LIBS_LIBRARIES} )
+
+if ( USE_QT5 )
+	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
+	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
+endif()
 
 # contrib. libraries support
 target_link_contrib( ${PROJECT_NAME} ${CCVIEWER_DEST_FOLDER} )
@@ -90,14 +113,14 @@ if( WIN32 )
 endif()
 
 # install program
-install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
+install_ext( TARGETS ccViewer ${CCVIEWER_DEST_FOLDER} )
 
 # Auxiliary files
 set( auxFiles bin_other/license.txt )
 
 if( WIN32 )
 	# Export Qt dlls
-	install_Qt_Dlls( ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
+	install_Qt_Dlls( ${CCVIEWER_DEST_FOLDER} )
 
 	# Additional auxiliary file(s)
 	list( APPEND auxFiles bin_other/start.bat )
@@ -105,7 +128,7 @@ endif()
 
 # Install auxiliary files
 foreach( filename ${auxFiles} )
-	install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} ${CCVIEWER_DEST_FOLDER}_debug )
+	install_ext( FILES ${filename} ${CCVIEWER_DEST_FOLDER} )
 endforeach()
 
 # Put together our App bundle on Mac OS X
@@ -127,5 +150,5 @@ endif( APPLE )
 if( APPLE )
    install( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag DESTINATION ${CCVIEWER_MAC_BASE_DIR}/Contents/Shaders/ColorRamp )
 else()
-   install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${CCVIEWER_DEST_FOLDER}/shaders/ColorRamp ${CCVIEWER_DEST_FOLDER}_debug/shaders/ColorRamp )
+   install_ext( FILES ${CMAKE_CURRENT_SOURCE_DIR}/../qCC/shaders/ColorRamp/color_ramp.frag ${CCVIEWER_DEST_FOLDER} /shaders/ColorRamp )
 endif()

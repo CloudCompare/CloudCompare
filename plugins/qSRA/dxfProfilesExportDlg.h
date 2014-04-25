@@ -15,8 +15,8 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef QSRA_PROFILE_IMPORT_DLG_HEADER
-#define QSRA_PROFILE_IMPORT_DLG_HEADER
+#ifndef QSRA_DXF_PROFILE_IMPORT_DLG_HEADER
+#define QSRA_DXF_PROFILE_IMPORT_DLG_HEADER
 
 #include "ui_dxfProfilesExportDlg.h"
 

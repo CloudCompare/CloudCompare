@@ -18,7 +18,7 @@
 //##########################################################################
 
 //Qt
-#include <QtGui/QApplication>
+#include <QApplication>
 #include <QMessageBox>
 
 #ifdef Q_OS_MAC

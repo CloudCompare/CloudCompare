@@ -15,9 +15,6 @@
 //#                                                                        #
 //##########################################################################
 
-//Qt
-#include <QtGui>
-
 #include "qPCV.h"
 #include "ccPcvDlg.h"
 
@@ -31,6 +28,10 @@
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
 #include <ccProgressDialog.h>
+
+//Qt (last so as to be sure that glew.h is included before gl.h
+#include <QtGui>
+#include <QMainWindow>
 
 #ifndef CC_PCV_FIELD_LABEL_NAME
 #define CC_PCV_FIELD_LABEL_NAME "Illuminance (PCV)"
@@ -233,4 +234,6 @@ QIcon qPCV::getIcon() const
     return QIcon(QString::fromUtf8(":/CC/plugin/qPCV/cc_ShadeVisIcon.png"));
 }
 
+#ifndef CC_QT5
 Q_EXPORT_PLUGIN2(qPCV,qPCV);
+#endif

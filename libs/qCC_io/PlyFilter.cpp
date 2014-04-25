@@ -524,7 +524,7 @@ static int rgb_cb(p_ply_argument argument)
 	case PLY_DOUBLE:
 	case PLY_FLOAT32:
 	case PLY_FLOAT64:
-		s_color[flags & POS_MASK] = colorType(ply_get_argument_value(argument)*float(MAX_COLOR_COMP));
+		s_color[flags & POS_MASK] = colorType(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0)*float(MAX_COLOR_COMP));
 		break;
 	case PLY_INT8:
 	case PLY_UINT8:
@@ -568,7 +568,7 @@ static int grey_cb(p_ply_argument argument)
 	case PLY_DOUBLE:
 	case PLY_FLOAT32:
 	case PLY_FLOAT64:
-		G = colorType(ply_get_argument_value(argument)*float(MAX_COLOR_COMP));
+		G = colorType(std::min(std::max(0.0, ply_get_argument_value(argument)), 1.0)*float(MAX_COLOR_COMP));
 		break;
 	case PLY_INT8:
 	case PLY_UINT8:

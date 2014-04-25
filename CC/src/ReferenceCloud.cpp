@@ -20,6 +20,7 @@
 //system
 #include <string.h>
 #include <assert.h>
+#include <algorithm>
 
 using namespace CCLib;
 

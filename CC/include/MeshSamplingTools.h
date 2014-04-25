@@ -60,7 +60,7 @@ public:
 		b=1-b. Let ABC be the triangle, then the new point P will be as
 		AP = a.AB+b.AC (AP,AB and AC are vectors here). The number of
 		points sampled on each triangle depends on the triangle's area.
-		Let s be this area, and µ the sampling density, then N = s*µ is
+		Let s be this area, and Âµ the sampling density, then N = s*Âµ is
 		the theoric (floating) number of points to sample. The floating
 		part of N (let's call it Nf, and let Ni be the integer part) is
 		handled by generating another random number between 0 and 1.

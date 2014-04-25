@@ -438,7 +438,7 @@ int ccComparisonDlg::determineBestOctreeLevel(double maxSearchDist)
 	double timings[CCLib::DgmOctree::MAX_OCTREE_LEVEL];
 	memset(timings,0,sizeof(double)*CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
-	//Pour le cas où la reference est un maillage
+	//Pour le cas oÃ¹ la reference est un maillage
 	double meanTriangleSurface = 1.0;
 	CCLib::GenericIndexedMesh* mesh = 0;
 	if (!m_refOctree)

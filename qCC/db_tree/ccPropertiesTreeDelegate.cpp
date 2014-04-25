@@ -672,7 +672,7 @@ void ccPropertiesTreeDelegate::fillWithCalibratedImage(ccCalibratedImage* _obj)
 	appendRow( ITEM("Orientation"), ITEM(QString("(%0,%1,%2)").arg(axis3D.x).arg(axis3D.y).arg(axis3D.z)) );
 
     //camera orientation angle
-	appendRow( ITEM("Angle (degrees)"), ITEM(QString("%0°").arg(angle_rad*CC_RAD_TO_DEG)) );
+	appendRow( ITEM("Angle (degrees)"), ITEM(QString("%0Â°").arg(angle_rad*CC_RAD_TO_DEG)) );
 }
 
 void ccPropertiesTreeDelegate::fillWithLabel(cc2DLabel* _obj)

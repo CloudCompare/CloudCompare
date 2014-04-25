@@ -713,7 +713,7 @@ QString ccNormalVectors::ConvertStrikeAndDipToString(double& strike_deg, double&
 	int iStrike = static_cast<int>(strike_deg);
 	int iDip = static_cast<int>(dip_deg);
 
-	return QString("N%1°E - %2°").arg(iStrike,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
+	return QString("N%1Â°E - %2Â°").arg(iStrike,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
 }
 
 QString ccNormalVectors::ConvertDipAndDipDirToString(PointCoordinateType dip_deg, PointCoordinateType dipDir_deg)
@@ -721,7 +721,7 @@ QString ccNormalVectors::ConvertDipAndDipDirToString(PointCoordinateType dip_deg
 	int iDipDir = static_cast<int>(dipDir_deg);
 	int iDip = static_cast<int>(dip_deg);
 
-	return QString("Dip direction: %1° - Dip angle: %2°").arg(iDipDir,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
+	return QString("Dip direction: %1Â° - Dip angle: %2Â°").arg(iDipDir,3,10,QChar('0')).arg(iDip,3,10,QChar('0'));
 }
 
 void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, double& strike_deg, double& dip_deg)

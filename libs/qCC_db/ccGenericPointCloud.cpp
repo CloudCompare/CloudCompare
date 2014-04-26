@@ -78,7 +78,7 @@ bool ccGenericPointCloud::isVisibilityTableInstantiated() const
     return m_pointsVisibility && m_pointsVisibility->isAllocated();
 }
 
-uchar ccGenericPointCloud::testVisibility(const CCVector3& P)
+uchar ccGenericPointCloud::testVisibility(const CCVector3& P) const
 {
     uchar bestVisibility = 255; //impossible value
 

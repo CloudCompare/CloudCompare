@@ -25,7 +25,7 @@ Polyline::Polyline(GenericIndexedCloudPersist* associatedCloud)
 {
 }
 
-void Polyline::clear()
+void Polyline::clear(bool /*unusedParam*/)
 {
 	ReferenceCloud::clear(true);
 	m_isClosed=false;

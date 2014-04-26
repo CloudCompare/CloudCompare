@@ -181,7 +181,7 @@ public:
 	***************************************************/
 
     //Inherited from GenericCloud
-	virtual uchar testVisibility(const CCVector3& P);
+	virtual uchar testVisibility(const CCVector3& P) const;
 
     //Inherited from ccHObject
     virtual ccBBox getMyOwnBB();

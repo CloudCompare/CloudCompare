@@ -15,8 +15,6 @@
 //#                                                                        #
 //##########################################################################
 
-#include <QtGui>
-
 #include "qKinect.h"
 
 //qCC_db
@@ -30,6 +28,8 @@
 
 //Qt
 #include <QElapsedTimer>
+#include <QMainWindow>
+#include <QtGui>
 
 //Libfreenect
 #include <libfreenect.h>
@@ -650,4 +650,6 @@ void qKinect::dialogClosed(int result)
 	s_rgb_count=0;
 }
 
+#ifndef CC_QT5
 Q_EXPORT_PLUGIN2(qKinect,qKinect);
+#endif

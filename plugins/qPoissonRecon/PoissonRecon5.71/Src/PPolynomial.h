@@ -104,7 +104,7 @@ public:
 
 	void printnl( void ) const;
 
-	PPolynomial< Degree+1 > MovingAverage( double radius );
+	PPolynomial< Degree+1 > MovingAverage( double radius ) const;
 	static PPolynomial BSpline( double radius=0.5 );
 
 	void write( FILE* fp , int samples , double min , double max ) const;

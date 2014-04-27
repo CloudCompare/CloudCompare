@@ -675,7 +675,7 @@ BSplineElements< Degree >::BSplineElements( int res , int offset , int boundary 
 template< int Degree >
 void BSplineElements< Degree >::_addLeft( int offset , int boundary )
 {
-	int res = int( size() );
+	int res = (int)size();
 	bool set = false;
 	for( int i=0 ; i<=Degree ; i++ )
 	{

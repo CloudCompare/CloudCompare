@@ -44,7 +44,7 @@ DAMAGE.
 #include "MemoryUsage.h"
 #ifdef WITH_OPENMP
 #include "omp.h"
-#endif
+#include <stdarg.h>
 
 #include <stdarg.h>
 char* outputFile=NULL;
@@ -94,6 +94,10 @@ void DumpOutput2( char* str , const char* format , ... )
 }
 
 #include "MultiGridOctreeData.h"
+#ifdef MAX_MEMORY_GB
+#undef MAX_MEMORY_GB
+#endif // MAX_MEMORY_GB
+//#define MAX_MEMORY_GB 8
 
 cmdLineString
 	In( "in" ) ,
@@ -109,6 +113,7 @@ cmdLineReadable
 	NoComments( "noComments" ) ,
 	PolygonMesh( "polygonMesh" ) ,
 	Confidence( "confidence" ) ,
+	NormalWeights( "normalWeight" ) ,
 	NonManifold( "nonManifold" ) ,
 	ASCII( "ascii" ) ,
 	Density( "density" ) ,
@@ -150,7 +155,7 @@ cmdLineReadable* params[] =
 {
 	&In , &Depth , &Out , &XForm ,
 	&SolverDivide , &IsoDivide , &Scale , &Verbose , &SolverAccuracy , &NoComments ,
-	&KernelDepth , &SamplesPerNode , &Confidence , &NonManifold , &PolygonMesh , &ASCII , &ShowResidual , &MinIters , &FixedIters , &VoxelDepth ,
+	&KernelDepth , &SamplesPerNode , &Confidence , &NormalWeights , &NonManifold , &PolygonMesh , &ASCII , &ShowResidual , &MinIters , &FixedIters , &VoxelDepth ,
 	&PointWeight , &VoxelGrid , &Threads , &MinDepth , &MaxSolveDepth ,
 	&AdaptiveExponent , &BoundaryType ,
 	&Density ,
@@ -194,6 +199,10 @@ void ShowUsage(char* ex)
 	printf( "\t\t If this flag is enabled, the size of a sample's normals is\n" );
 	printf( "\t\t used as a confidence value, affecting the sample's\n" );
 	printf( "\t\t constribution to the reconstruction process.\n" );
+
+	printf( "\t[--%s]\n" , NormalWeights.name );
+	printf( "\t\t If this flag is enabled, the size of a sample's normals is\n" );
+	printf( "\t\t used as to modulate the interpolation weight.\n" );
 
 	printf( "\t[--%s]\n" , NonManifold.name );
 	printf( "\t\t If this flag is enabled, the isosurface extraction does not add\n" );
@@ -261,7 +270,7 @@ int Execute( int argc , char* argv[] )
 	else xForm = XForm4x4< Real >::Identity();
 	iXForm = xForm.inverse();
 
-	DumpOutput2( comments[commentNum++] , "Running Screened Poisson Reconstruction (Version 5.5)\n" , Degree );
+	DumpOutput2( comments[commentNum++] , "Running Screened Poisson Reconstruction (Version 5.71)\n" );
 	char str[1024];
 	for( int i=0 ; i<paramNum ; i++ )
 		if( params[i]->set )
@@ -308,13 +317,13 @@ int Execute( int argc , char* argv[] )
 
 	double maxMemoryUsage;
 	t=Time() , tree.maxMemoryUsage=0;
-	int pointCount = tree.setTree( In.value , Depth.value , MinDepth.value , kernelDepth , Real(SamplesPerNode.value) , Scale.value , Confidence.set , PointWeight.value , AdaptiveExponent.value , xForm );
+	int pointCount = tree.setTree( In.value , Depth.value , MinDepth.value , kernelDepth , Real(SamplesPerNode.value) , Scale.value , Confidence.set , NormalWeights.set , PointWeight.value , AdaptiveExponent.value , xForm );
 	tree.ClipTree();
 	tree.finalize( IsoDivide.value );
 
 	DumpOutput2( comments[commentNum++] , "#             Tree set in: %9.1f (s), %9.1f (MB)\n" , Time()-t , tree.maxMemoryUsage );
 	DumpOutput( "Input Points: %d\n" , pointCount );
-	DumpOutput( "Leaves/Nodes: %d/%d\n" , tree.tree.leaves() , tree.tree.nodes() );
+	DumpOutput( "Leaves/Nodes: %lld/%lld\n" , tree.tree.leaves() , tree.tree.nodes() );
 	DumpOutput( "Memory Usage: %.3f MB\n" , float( MemoryInfo::Usage() )/(1<<20) );
 
 	maxMemoryUsage = tree.maxMemoryUsage;
@@ -397,6 +406,23 @@ inline double to_seconds( const FILETIME& ft )
 
 int main( int argc , char* argv[] )
 {
+#if defined(WIN32) && defined(MAX_MEMORY_GB)
+	if( MAX_MEMORY_GB>0 )
+	{
+		SIZE_T peakMemory = 1;
+		peakMemory <<= 30;
+		peakMemory *= MAX_MEMORY_GB;
+		printf( "Limiting memory usage to %.2f GB\n" , float( peakMemory>>30 ) );
+		HANDLE h = CreateJobObject( NULL , NULL );
+		AssignProcessToJobObject( h , GetCurrentProcess() );
+
+		JOBOBJECT_EXTENDED_LIMIT_INFORMATION jeli = { 0 };
+		jeli.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_JOB_MEMORY;
+		jeli.JobMemoryLimit = peakMemory;
+		if( !SetInformationJobObject( h , JobObjectExtendedLimitInformation , &jeli , sizeof( jeli ) ) )
+			fprintf( stderr , "Failed to set memory limit\n" );
+	}
+#endif // defined(WIN32) && defined(MAX_MEMORY_GB)
 	double t = Time();
 
 	cmdLineParse( argc-1 , &argv[1] , sizeof(params)/sizeof(cmdLineReadable*) , params , 1 );

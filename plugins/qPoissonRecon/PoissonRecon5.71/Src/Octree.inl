@@ -41,21 +41,17 @@ template<class NodeData,class Real> const int OctNode<NodeData,Real>::OffsetShif
 template<class NodeData,class Real> const int OctNode<NodeData,Real>::OffsetShift2=OffsetShift1+OffsetShift;
 template<class NodeData,class Real> const int OctNode<NodeData,Real>::OffsetShift3=OffsetShift2+OffsetShift;
 
-template<class NodeData,class Real> int OctNode<NodeData,Real>::UseAlloc=0;
+template<class NodeData,class Real> bool OctNode<NodeData,Real>::UseAlloc=false;
 template<class NodeData,class Real> Allocator<OctNode<NodeData,Real> > OctNode<NodeData,Real>::Allocator;
 
 template<class NodeData,class Real>
 void OctNode<NodeData,Real>::SetAllocator(int blockSize)
 {
-	if(blockSize>0)
-	{
-		UseAlloc=1;
-		Allocator.set(blockSize);
-	}
-	else{UseAlloc=0;}
+	if( blockSize>0 ) UseAlloc=true , Allocator.set(blockSize);
+	else UseAlloc = false;
 }
 template<class NodeData,class Real>
-int OctNode<NodeData,Real>::UseAllocator(void){return UseAlloc;}
+bool OctNode<NodeData,Real>::UseAllocator(void){return UseAlloc;}
 
 template <class NodeData,class Real>
 OctNode<NodeData,Real>::OctNode(void){
@@ -78,7 +74,7 @@ void OctNode<NodeData,Real>::setFullDepth(int maxDepth){
 }
 
 template <class NodeData,class Real>
-int OctNode<NodeData,Real>::initChildren( void )
+bool OctNode<NodeData,Real>::initChildren( void )
 {
 	if( UseAlloc ) children=Allocator.newElements(8);
 	else
@@ -89,9 +85,9 @@ int OctNode<NodeData,Real>::initChildren( void )
 	}
 	if( !children )
 	{
-		fprintf(stderr,"Failed to initialize children in OctNode::initChildren\n");
+		fprintf( stderr , "[ERROR] Failed to initialize children in OctNode::initChildren\n" );
 		exit(0);
-		return 0;
+		return false;
 	}
 	int d , off[3];
 	depthAndOffset( d , off );
@@ -106,7 +102,7 @@ int OctNode<NodeData,Real>::initChildren( void )
 		off2[2] = (off[2]<<1)+k;
 		children[idx]._depthAndOffset = Index( d+1 , off2 );
 	}
-	return 1;
+	return true;
 }
 template <class NodeData,class Real>
 inline void OctNode<NodeData,Real>::Index(int depth,const int offset[3],short& d,short off[3]){
@@ -184,31 +180,37 @@ int OctNode<NodeData,Real>::maxDepth(void) const{
 		return c+1;
 	}
 }
-template <class NodeData,class Real>
-int OctNode<NodeData,Real>::nodes(void) const{
-	if(!children){return 1;}
-	else{
-		int c=0;
-		for(int i=0;i<Cube::CORNERS;i++){c+=children[i].nodes();}
+template< class NodeData , class Real >
+size_t OctNode< NodeData , Real >::nodes( void ) const
+{
+	if( !children ) return 1;
+	else
+	{
+		size_t c=0;
+		for( int i=0 ; i<Cube::CORNERS ; i++ ) c += children[i].nodes();
 		return c+1;
 	}
 }
-template <class NodeData,class Real>
-int OctNode<NodeData,Real>::leaves(void) const{
-	if(!children){return 1;}
-	else{
-		int c=0;
-		for(int i=0;i<Cube::CORNERS;i++){c+=children[i].leaves();}
+template< class NodeData , class Real >
+size_t OctNode< NodeData , Real >::leaves( void ) const
+{
+	if( !children ) return 1;
+	else
+	{
+		size_t c=0;
+		for( int i=0 ; i<Cube::CORNERS ; i++ ) c += children[i].leaves();
 		return c;
 	}
 }
-template<class NodeData,class Real>
-int OctNode<NodeData,Real>::maxDepthLeaves(int maxDepth) const{
-	if(depth()>maxDepth){return 0;}
-	if(!children){return 1;}
-	else{
-		int c=0;
-		for(int i=0;i<Cube::CORNERS;i++){c+=children[i].maxDepthLeaves(maxDepth);}
+template< class NodeData , class Real >
+size_t OctNode< NodeData , Real >::maxDepthLeaves( int maxDepth ) const
+{
+	if( depth()>maxDepth ) return 0;
+	if( !children ) return 1;
+	else
+	{
+		size_t c=0;
+		for( int i=0 ; i<Cube::CORNERS ; i++ ) c+=children[i].maxDepthLeaves(maxDepth);
 		return c;
 	}
 }
@@ -318,6 +320,18 @@ void OctNode<NodeData,Real>::processNodeFaces(OctNode* node,NodeAdjacencyFunctio
 		__processNodeFaces(node,F,c1,c2,c3,c4);
 	}
 }
+template< class NodeData , class Real >
+template< class NodeAdjacencyFunction >
+void OctNode< NodeData , Real >::processNodeFaces( const OctNode* node , NodeAdjacencyFunction* F , int fIndex , int processCurrent ) const
+{
+	if( processCurrent ) F->Function( this , node );
+	if(children)
+	{
+		int c1 , c2 , c3 , c4;
+		Cube::FaceCorners( fIndex , c1 , c2 , c3 , c4 );
+		__processNodeFaces( node , F , c1 , c2 , c3 , c4 );
+	}
+}
 template <class NodeData,class Real>
 template<class NodeAdjacencyFunction>
 void OctNode<NodeData,Real>::processNodeEdges(OctNode* node,NodeAdjacencyFunction* F,int eIndex,int processCurrent){
@@ -377,6 +391,19 @@ void OctNode<NodeData,Real>::__processNodeFaces(OctNode* node,NodeAdjacencyFunct
 	if(children[cIndex2].children){children[cIndex2].__processNodeFaces(node,F,cIndex1,cIndex2,cIndex3,cIndex4);}
 	if(children[cIndex3].children){children[cIndex3].__processNodeFaces(node,F,cIndex1,cIndex2,cIndex3,cIndex4);}
 	if(children[cIndex4].children){children[cIndex4].__processNodeFaces(node,F,cIndex1,cIndex2,cIndex3,cIndex4);}
+}
+template< class NodeData , class Real >
+template< class NodeAdjacencyFunction >
+void OctNode< NodeData , Real >::__processNodeFaces( const OctNode* node , NodeAdjacencyFunction* F , int cIndex1 , int cIndex2 , int cIndex3 , int cIndex4 ) const
+{
+	F->Function( &children[cIndex1] , node );
+	F->Function( &children[cIndex2] , node );
+	F->Function( &children[cIndex3] , node );
+	F->Function( &children[cIndex4] , node );
+	if( children[cIndex1].children ) children[cIndex1].__processNodeFaces( node , F , cIndex1 , cIndex2 , cIndex3 , cIndex4 );
+	if( children[cIndex2].children ) children[cIndex2].__processNodeFaces( node , F , cIndex1 , cIndex2 , cIndex3 , cIndex4 );
+	if( children[cIndex3].children ) children[cIndex3].__processNodeFaces( node , F , cIndex1 , cIndex2 , cIndex3 , cIndex4 );
+	if( children[cIndex4].children ) children[cIndex4].__processNodeFaces( node , F , cIndex1 , cIndex2 , cIndex3 , cIndex4 );
 }
 template<class NodeData,class Real>
 template<class NodeAdjacencyFunction>
@@ -1080,8 +1107,16 @@ template<class NodeData,class Real>
 void OctNode<NodeData,Real>::Neighbors3::clear(void){
 	for(int i=0;i<3;i++){for(int j=0;j<3;j++){for(int k=0;k<3;k++){neighbors[i][j][k]=NULL;}}}
 }
-template<class NodeData,class Real>
-OctNode<NodeData,Real>::NeighborKey3::NeighborKey3(void){ neighbors=NULL; }
+template< class NodeData , class Real >
+OctNode< NodeData , Real >::NeighborKey3::NeighborKey3( void ){ _depth = -1  , neighbors = NULL; }
+template< class NodeData , class Real >
+OctNode< NodeData , Real >::NeighborKey3::NeighborKey3( const NeighborKey3& nKey3 )
+{
+	_depth = 0 , neighbors = NULL;
+	set( nKey3._depth );
+//	for( int d=0 ; d<=_depth ; d++ ) memcpy( &neighbors[d] , &nKey3.neighbors[d] , sizeof(Neighbors3) );
+	memcpy( neighbors , nKey3.neighbors , sizeof(Neighbors3)*(_depth+1) );
+}
 template<class NodeData,class Real>
 OctNode<NodeData,Real>::NeighborKey3::~NeighborKey3(void)
 {
@@ -1094,6 +1129,7 @@ void OctNode<NodeData,Real>::NeighborKey3::set( int d )
 {
 	if( neighbors ) delete[] neighbors;
 	neighbors = NULL;
+	_depth = d;
 	if( d<0 ) return;
 	neighbors = new Neighbors3[d+1];
 }
@@ -1471,7 +1507,7 @@ void OctNode< NodeData , Real >::NeighborKey3::setNeighbors( OctNode< NodeData ,
 	else
 	{
 		int c = int( node - node->parent->children );
-		const Neighbors3& _neighbors = setNeighbors( node->parent );
+		const OctNode< NodeData , Real >::Neighbors3& _neighbors = setNeighbors( node->parent );
 		switch( c )
 		{
 		case 0:
@@ -1574,7 +1610,7 @@ void OctNode< NodeData , Real >::NeighborKey3::getNeighbors( OctNode< NodeData ,
 	else
 	{
 		int c = int( node - node->parent->children );
-		const Neighbors3& _neighbors = getNeighbors( node->parent );
+		const OctNode< NodeData , Real >::Neighbors3& _neighbors = getNeighbors( node->parent );
 		OctNode< NodeData , Real >* const * _nodes = &_neighbors.neighbors[0][0][0];
 		const OctNode< NodeData , Real >* const * _node;
 		const OctNode< NodeData , Real >* __node;
@@ -1653,7 +1689,7 @@ void OctNode< NodeData , Real >::ConstNeighborKey3::getNeighbors( const OctNode<
 	else
 	{
 		int c = int( node - node->parent->children );
-		const ConstNeighbors3& _neighbors = getNeighbors( node->parent );
+		const OctNode< NodeData , Real >::ConstNeighbors3& _neighbors = getNeighbors( node->parent );
 		switch( c )
 		{
 		case 0:
@@ -1734,19 +1770,30 @@ void OctNode<NodeData,Real>::ConstNeighbors3::clear(void){
 	for(int i=0;i<3;i++){for(int j=0;j<3;j++){for(int k=0;k<3;k++){neighbors[i][j][k]=NULL;}}}
 }
 template<class NodeData,class Real>
-OctNode<NodeData,Real>::ConstNeighborKey3::ConstNeighborKey3(void){neighbors=NULL;}
-template<class NodeData,class Real>
-OctNode<NodeData,Real>::ConstNeighborKey3::~ConstNeighborKey3(void){
-	if(neighbors){delete[] neighbors;}
-	neighbors=NULL;
+OctNode<NodeData,Real>::ConstNeighborKey3::ConstNeighborKey3( void ){ _depth=-1 , neighbors=NULL; }
+template< class NodeData , class Real >
+OctNode< NodeData , Real >::ConstNeighborKey3::ConstNeighborKey3( const ConstNeighborKey3& key3 )
+{
+	_depth = 0 , neighbors = NULL;
+	set( key3._depth );
+//	for( int d=0 ; d<=_depth ; d++ ) memcpy( &neighbors[d] , &key3.neighbors[d] , sizeof(ConstNeighbors3) );
+	memcpy( neighbors , key3.neighbors , sizeof(ConstNeighbors3)*(_depth+1) );
 }
 
 template<class NodeData,class Real>
-void OctNode<NodeData,Real>::ConstNeighborKey3::set(int d){
-	if(neighbors){delete[] neighbors;}
+OctNode< NodeData , Real >::ConstNeighborKey3::~ConstNeighborKey3(void){
+	if( neighbors ) delete[] neighbors;
+	neighbors = NULL;
+}
+
+template<class NodeData,class Real>
+void OctNode<NodeData,Real>::ConstNeighborKey3::set( int d )
+{
+	if( neighbors ) delete[] neighbors;
 	neighbors=NULL;
-	if(d<0){return;}
-	neighbors=new ConstNeighbors3[d+1];
+	_depth = d;
+	if( d<0 ) return;
+	neighbors = new ConstNeighbors3[d+1];
 }
 template<class NodeData,class Real>
 typename OctNode<NodeData,Real>::ConstNeighbors3& OctNode<NodeData,Real>::ConstNeighborKey3::getNeighbors(const OctNode<NodeData,Real>* node){

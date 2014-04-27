@@ -382,7 +382,7 @@ PPolynomial< Degree > PPolynomial<Degree>::BSpline( double radius )
 	return PPolynomial< Degree-1 >::BSpline().MovingAverage( radius );
 }
 template<int Degree>
-PPolynomial<Degree+1> PPolynomial<Degree>::MovingAverage( double radius )
+PPolynomial<Degree+1> PPolynomial<Degree>::MovingAverage( double radius ) const
 {
 	PPolynomial<Degree+1> A;
 	Polynomial<Degree+1> p;

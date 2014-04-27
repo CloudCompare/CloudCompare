@@ -44,6 +44,7 @@ struct BSplineElementCoefficients
 template< int Degree >
 struct BSplineElements : public std::vector< BSplineElementCoefficients< Degree > >
 {
+	using std::vector< BSplineElementCoefficients< Degree > >::size;
 	static const int _off = (Degree+1)/2;
 	void _addLeft ( int offset , int boundary );
 	void _addRight( int offset , int boundary );

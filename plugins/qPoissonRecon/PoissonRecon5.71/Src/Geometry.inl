@@ -444,6 +444,36 @@ int CoredVectorMeshData< Vertex >::addPolygon( const std::vector< CoredVertexInd
 	return int( polygons.size() )-1;
 }
 template< class Vertex >
+int CoredVectorMeshData< Vertex >::addOutOfCorePoint_s( const Vertex& p )
+{
+	size_t sz;
+#ifdef WITH_OPENMP
+#pragma omp critical (CoredVectorMeshData_addOutOfCorePoint_s )
+#endif
+	{
+		sz = oocPoints.size();
+		oocPoints.push_back(p);
+	}
+	return (int)sz;
+}
+template< class Vertex >
+int CoredVectorMeshData< Vertex >::addPolygon_s( const std::vector< CoredVertexIndex >& vertices )
+{
+	std::vector< int > polygon( vertices.size() );
+	for( int i=0 ; i<int(vertices.size()) ; i++ ) 
+		if( vertices[i].inCore ) polygon[i] =  vertices[i].idx;
+		else                     polygon[i] = -vertices[i].idx-1;
+	size_t sz;
+#ifdef WITH_OPENMP
+#pragma omp critical (CoredVectorMeshData_addPolygon_s)
+#endif
+	{
+		sz = polygons.size();
+		polygons.push_back( polygon );
+	}
+	return (int)sz;
+}
+template< class Vertex >
 int CoredVectorMeshData< Vertex >::nextOutOfCorePoint( Vertex& p )
 {
 	if( oocPointIndex<int(oocPoints.size()) )
@@ -505,7 +535,7 @@ int CoredFileMeshData< Vertex >::addOutOfCorePoint( const Vertex& p )
 template< class Vertex >
 int CoredFileMeshData< Vertex >::addPolygon( const std::vector< CoredVertexIndex >& vertices )
 {
-	int pSize = int( vertices.size() );
+	int pSize = (int)( vertices.size() );
 	std::vector< int > polygon( pSize );
 	for( int i=0 ; i<pSize ; i++ ) 
 		if( vertices[i].inCore ) polygon[i] =  vertices[i].idx;
@@ -515,6 +545,40 @@ int CoredFileMeshData< Vertex >::addPolygon( const std::vector< CoredVertexIndex
 	polygonFile->write( &polygon[0] , sizeof(int)*pSize );
 	polygons++;
 	return polygons-1;
+}
+template< class Vertex >
+int CoredFileMeshData< Vertex >::addOutOfCorePoint_s( const Vertex& p )
+{
+	int sz;
+#ifdef WITH_OPENMP
+#pragma omp critical (CoredFileMeshData_addOutOfCorePoint_s)
+#endif
+	{
+		sz = oocPoints;
+		oocPointFile->write( &p , sizeof( Vertex ) );
+		oocPoints++;
+	}
+	return sz;
+}
+template< class Vertex >
+int CoredFileMeshData< Vertex >::addPolygon_s( const std::vector< CoredVertexIndex >& vertices )
+{
+	int pSize = (int)( vertices.size() );
+	std::vector< int > polygon( pSize );
+	for( int i=0 ; i<pSize ; i++ ) 
+		if( vertices[i].inCore ) polygon[i] =  vertices[i].idx;
+		else                     polygon[i] = -vertices[i].idx-1;
+	int sz;
+#ifdef WITH_OPENMP
+#pragma omp critical (CoredFileMeshData_addPolygon_s )
+#endif
+	{
+		sz = polygons;
+		polygonFile->write( &pSize , sizeof(int) );
+		polygonFile->write( &polygon[0] , sizeof(int)*pSize );
+		polygons++;
+	}
+	return sz;
 }
 template< class Vertex >
 int CoredFileMeshData< Vertex >::nextOutOfCorePoint( Vertex& p )

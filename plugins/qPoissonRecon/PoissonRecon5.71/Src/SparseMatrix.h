@@ -32,6 +32,8 @@ DAMAGE.
 #include "Vector.h"
 #include "Array.h"
 
+#define NEW_MATRIX_CODE 0
+
 template <class T>
 struct MatrixEntry
 {
@@ -141,8 +143,13 @@ public:
 	template< class T2 >
 	Vector< T2 > Multiply( const Vector<T2>& V ) const;
 
+#if NEW_MATRIX_CODE
+	template< class T2 >
+	void Multiply( const Vector<T2>& In, Vector<T2>& Out , bool addDCTerm=false , int threads=1 ) const;
+#else // !NEW_MATRIX_CODE
 	template< class T2 >
 	void Multiply( const Vector<T2>& In, Vector<T2>& Out , bool addDCTerm=false ) const;
+#endif // NEW_MATRIX_CODE
 
 	template< class T2 >
 	void Multiply( const Vector<T2>& In, Vector<T2>& Out , MapReduceVector< T2 >& OutScratch , bool addDCTerm=false ) const;

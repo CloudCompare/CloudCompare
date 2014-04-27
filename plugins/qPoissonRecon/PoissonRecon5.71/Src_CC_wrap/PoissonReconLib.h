@@ -15,11 +15,11 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_POISSON_RECON_LIB_5_5_WRAPPER
-#define CC_POISSON_RECON_LIB_5_5_WRAPPER
+#ifndef CC_POISSON_RECON_LIB_5_71_WRAPPER
+#define CC_POISSON_RECON_LIB_5_71_WRAPPER
 
 //PoissonRecon
-#include "../Src/PlyVertex.h"
+#include "../Src/Ply.h"
 
 class LibOctree;
 

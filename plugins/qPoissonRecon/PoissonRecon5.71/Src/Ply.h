@@ -45,7 +45,7 @@ extern "C" {
 #include <stdio.h>
 #include <stddef.h>
 #include <string.h>
-
+    
 #define PLY_ASCII         1      /* ascii PLY file */
 #define PLY_BINARY_BE     2      /* binary PLY file, big endian */
 #define PLY_BINARY_LE     3      /* binary PLY file, little endian */
@@ -79,6 +79,20 @@ extern "C" {
 #define  PLY_SCALAR  0
 #define  PLY_LIST    1
 	
+
+typedef struct PlyProperty {    /* description of a property */
+	
+	char *name;                           /* property name */
+	int external_type;                    /* file's data type */
+	int internal_type;                    /* program's data type */
+	int offset;                           /* offset bytes of prop in a struct */
+	
+	int is_list;                          /* 1 = list, 0 = scalar */
+	int count_external;                   /* file's count type */
+	int count_internal;                   /* program's count type */
+	int count_offset;                     /* offset byte for list count */
+	
+} PlyProperty;
 
 typedef struct PlyElement {     /* description of an element */
 	char *name;                   /* element name */
@@ -204,7 +218,6 @@ extern int equal_strings(char *, char *);
 #endif
 #include "Geometry.h"
 #include <vector>
-#include "PlyVertex.h"
 
 typedef struct PlyFace
 {
@@ -217,6 +230,33 @@ static PlyProperty face_props[] =
 	{ "vertex_indices" , PLY_INT , PLY_INT , offsetof(PlyFace,vertices) , 1 , PLY_UCHAR, PLY_UCHAR , offsetof(PlyFace,nr_vertices) },
 };
 
+template< class Real >
+class PlyVertex
+{
+public:
+	const static int Components=3;
+	static PlyProperty Properties[];
+
+	Point3D< Real > point;
+
+#if 1
+	PlyVertex( void ) { ; }
+	PlyVertex( Point3D< Real > p ) { point=p; }
+	PlyVertex operator + ( PlyVertex p ) const { return PlyVertex( point+p.point ); }
+	PlyVertex operator - ( PlyVertex p ) const { return PlyVertex( point-p.point ); }
+	PlyVertex operator * ( Real s ) const { return PlyVertex( point*s ); }
+	PlyVertex operator / ( Real s ) const { return PlyVertex( point/s ); }
+	PlyVertex& operator += ( PlyVertex p ) { point += p.point ; return *this; }
+	PlyVertex& operator -= ( PlyVertex p ) { point -= p.point ; return *this; }
+	PlyVertex& operator *= ( Real s ) { point *= s ; return *this; }
+	PlyVertex& operator /= ( Real s ) { point /= s ; return *this; }
+#else
+	operator Point3D<Real>& ()					{return point;}
+	operator const Point3D<Real>& () const		{return point;}
+	PlyVertex(void)								{point.coords[0]=point.coords[1]=point.coords[2]=0;}
+	PlyVertex(const Point3D<Real>& p)			{point=p;}
+#endif
+};
 template< class Real > PlyVertex< Real > operator * ( XForm4x4< Real > xForm , PlyVertex< Real > v ) { return PlyVertex< Real >( xForm * v.point ); }
 template<>
 PlyProperty PlyVertex< float >::Properties[]=

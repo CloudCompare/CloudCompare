@@ -29,6 +29,7 @@ DAMAGE.
 #ifndef GEOMETRY_INCLUDED
 #define GEOMETRY_INCLUDED
 
+
 #include <math.h>
 #include <vector>
 #include "Hash.h"
@@ -300,6 +301,8 @@ public:
 
 	virtual int addOutOfCorePoint( const Vertex& p ) = 0;
 	virtual int addPolygon( const std::vector< CoredVertexIndex >& vertices ) = 0;
+	virtual int addOutOfCorePoint_s( const Vertex& p ) = 0;
+	virtual int addPolygon_s( const std::vector< CoredVertexIndex >& vertices ) = 0;
 
 	virtual int nextOutOfCorePoint( Vertex& p )=0;
 	virtual int nextPolygon( std::vector< CoredVertexIndex >& vertices ) = 0;
@@ -322,6 +325,8 @@ public:
 
 	int addOutOfCorePoint( const Vertex& p );
 	int addPolygon( const std::vector< CoredVertexIndex >& vertices );
+	int addOutOfCorePoint_s( const Vertex& p );
+	int addPolygon_s( const std::vector< CoredVertexIndex >& vertices );
 
 	int nextOutOfCorePoint( Vertex& p );
 	int nextPolygon( std::vector< CoredVertexIndex >& vertices );
@@ -356,6 +361,8 @@ public:
 
 	int addOutOfCorePoint( const Vertex& p );
 	int addPolygon( const std::vector< CoredVertexIndex >& vertices );
+	int addOutOfCorePoint_s( const Vertex& p );
+	int addPolygon_s( const std::vector< CoredVertexIndex >& vertices );
 
 	int nextOutOfCorePoint( Vertex& p );
 	int nextPolygon( std::vector< CoredVertexIndex >& vertices );

@@ -29,7 +29,6 @@
 #ifdef _WIN32
 #include <Windows.h>
 #endif
-#include "../Src/poissonTime.h"
 #include "../Src/MarchingCubes.h"
 #include "../Src/Octree.h"
 #include "../Src/SparseMatrix.h"

@@ -116,5 +116,6 @@ QIcon qPCL::getIcon() const
 	return QIcon(QString::fromUtf8(":/toolbar/pcl.png"));
 }
 
-//plugin export
+#ifndef CC_QT5
 Q_EXPORT_PLUGIN2(qPCL,qPCL);
+#endif

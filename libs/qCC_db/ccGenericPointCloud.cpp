@@ -82,7 +82,7 @@ uchar ccGenericPointCloud::testVisibility(const CCVector3& P) const
 {
     uchar bestVisibility = 255; //impossible value
 
-	for (ccHObject::Container::iterator it = m_children.begin(); it != m_children.end(); ++it)
+	for (ccHObject::Container::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
         if ((*it)->isKindOf(CC_TYPES::SENSOR))
         {

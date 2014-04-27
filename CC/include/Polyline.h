@@ -48,7 +48,7 @@ class Polyline : public ReferenceCloud
 		inline void setClosed(bool state) { m_isClosed = state; }
 
 		//inherited from ReferenceCloud
-		virtual void clear();
+		virtual void clear(bool unusedParam = true);
 
 	protected:
 

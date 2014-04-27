@@ -33,7 +33,7 @@ if( WIN32 )
 		if ( NOT USE_QT5 )
 			set( QT_RELEASE_DLLS QtCore${QT_VERSION_MAJOR} QtGui${QT_VERSION_MAJOR} QtOpenGL${QT_VERSION_MAJOR} )
 		else()
-			set( QT_RELEASE_DLLS Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets icuin51 icuuc51 icudt51 )
+			set( QT_RELEASE_DLLS Qt5Core Qt5Gui Qt5OpenGL Qt5Widgets Qt5Concurrent icuin51 icuuc51 icudt51 )
 			set( QT_BINARY_DIR ${QT5_ROOT_PATH}/bin )
 		endif()
 		#specific case for the MinGW version of Qts

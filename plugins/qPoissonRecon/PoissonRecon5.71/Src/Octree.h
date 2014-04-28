@@ -186,6 +186,9 @@ public:
 	int read(const char* fileName);
 	int read(FILE* fp);
 
+   class Neighbors5;
+   class ConstNeighbors5;
+
 	class Neighbors3
 	{
 	public:

@@ -371,7 +371,7 @@ public:
 	Real GetSolutionValue( Point3D< Real > p , const BSplineData< Degree , Real >* fData=NULL ) const;
 	Pointer( Real ) GetSolutionGrid( int& res , Real isoValue=0.f , int depth=-1 );
 	int setTree( char* fileName , int maxDepth , int minDepth , int kernelDepth , Real samplesPerNode ,
-		Real scaleFactor , bool useConfidence , bool useNormalWeights , Real constraintWeight , int adaptiveExponent , XForm4x4< Real > xForm=XForm4x4< Real >::Identity );
+		Real scaleFactor , bool useConfidence , bool useNormalWeights , Real constraintWeight , int adaptiveExponent , XForm4x4< Real > xForm=XForm4x4< Real >::Identity() );
 
 	void SetLaplacianConstraints(void);
 	void ClipTree(void);

@@ -86,7 +86,9 @@ target_link_libraries( ${PROJECT_NAME} QCC_GL_LIB )
 target_link_libraries( ${PROJECT_NAME} ${EXTERNAL_LIBS_LIBRARIES} )
 
 if ( USE_QT5 )
-	target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
+	if (WIN32)
+		target_link_libraries( ${PROJECT_NAME} Qt5::WinMain )
+	endif()
 	qt5_use_modules(${PROJECT_NAME} Core Gui Widgets OpenGL)
 endif()
 

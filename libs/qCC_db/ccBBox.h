@@ -43,7 +43,7 @@ public:
     //! Copy constructor
     ccBBox(const ccBBox& aBBox);
     //! Constructor from two vectors (lower min. and upper max. corners)
-    ccBBox(const CCVector3 &bbMinCorner, const CCVector3 &bbMaxCorner);
+    ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner);
 
     //! Returns the 'sum' of this bounding-box and another one
     ccBBox operator + (const ccBBox& aBBox) const;
@@ -54,7 +54,7 @@ public:
     //! Shifts the bounding box with a vector
     const ccBBox& operator -= (const CCVector3& aVector);
     //! Scales the bounding box
-    const ccBBox& operator *= (const PointCoordinateType& scaleFactor);
+    const ccBBox& operator *= (PointCoordinateType scaleFactor);
     //! Rotates the bounding box
     const ccBBox& operator *= (const CCLib::SquareMatrix& aMatrix);
     //! Applies transformation to the bounding box
@@ -65,10 +65,8 @@ public:
     **/
     void clear();
 
-    //! 'Enlarges' the bounding box with a vector
-    /** equivalent to operator +=(CCVector3)
-    **/
-    void add(const CCVector3& aVector);
+    //! 'Enlarges' the bounding box with a point
+    void add(const CCVector3& aPoint);
 
     //! Returns min corner (const)
     inline const CCVector3& minCorner() const { return m_bbMin; }

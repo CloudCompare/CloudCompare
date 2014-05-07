@@ -21,39 +21,37 @@
 #include "ccBBox.h"
 
 ccBBox::ccBBox()
-{
-    clear();
-}
+	: m_bbMin(0,0,0)
+	, m_bbMax(0,0,0)
+	, m_valid(false)
+{}
 
-ccBBox::ccBBox(const CCVector3 &bbMinCorner, const CCVector3 &bbMaxCorner)
+ccBBox::ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner)
 	: m_bbMin(bbMinCorner)
 	, m_bbMax(bbMaxCorner)
 	, m_valid(true)
-{
-}
+{}
 
 ccBBox::ccBBox(const ccBBox& aBox)
 	: m_bbMin(aBox.m_bbMin)
 	, m_bbMax(aBox.m_bbMax)
 	, m_valid(aBox.m_valid)
-{
-}
+{}
 
 void ccBBox::clear()
 {
-    m_bbMin.x = m_bbMin.y = m_bbMin.z = 0;
-    m_bbMax.x = m_bbMax.y = m_bbMax.z = 0;
+    m_bbMin = m_bbMax = CCVector3(0,0,0);
     m_valid = false;
 }
 
 CCVector3 ccBBox::getCenter() const
 {
-	return (m_bbMax + m_bbMin)*0.5;
+	return (m_bbMax + m_bbMin) * static_cast<PointCoordinateType>(0.5);
 }
 
 CCVector3 ccBBox::getDiagVec() const
 {
-    return m_bbMax - m_bbMin;
+    return (m_bbMax - m_bbMin);
 }
 
 PointCoordinateType ccBBox::getDiagNorm() const
@@ -111,7 +109,9 @@ void ccBBox::draw(const colorType col[]) const
 ccBBox ccBBox::operator + (const ccBBox& aBBox) const
 {
     if (!m_valid)
-        return ccBBox(aBBox);
+        return aBBox;
+    if (!aBBox.isValid())
+        return *this;
 
     ccBBox tempBox;
 
@@ -121,6 +121,8 @@ ccBBox ccBBox::operator + (const ccBBox& aBBox) const
     tempBox.m_bbMax.x = std::max(m_bbMax.x, aBBox.m_bbMax.x);
     tempBox.m_bbMax.y = std::max(m_bbMax.y, aBBox.m_bbMax.y);
     tempBox.m_bbMax.z = std::max(m_bbMax.z, aBBox.m_bbMax.z);
+
+	tempBox.setValidity(true);
 
     return tempBox;
 }
@@ -166,7 +168,7 @@ const ccBBox& ccBBox::operator -= (const CCVector3& aVector)
     return *this;
 }
 
-const ccBBox& ccBBox::operator *= (const PointCoordinateType& scaleFactor)
+const ccBBox& ccBBox::operator *= (PointCoordinateType scaleFactor)
 {
     if (m_valid)
     {
@@ -177,28 +179,28 @@ const ccBBox& ccBBox::operator *= (const PointCoordinateType& scaleFactor)
     return *this;
 }
 
-void ccBBox::add(const CCVector3& aVector)
+void ccBBox::add(const CCVector3& aPoint)
 {
     if (m_valid)
     {
-        if (aVector.x < m_bbMin.x)
-            m_bbMin.x = aVector.x;
-        else if (aVector.x > m_bbMax.x)
-            m_bbMax.x = aVector.x;
+        if (aPoint.x < m_bbMin.x)
+            m_bbMin.x = aPoint.x;
+        else if (aPoint.x > m_bbMax.x)
+            m_bbMax.x = aPoint.x;
 
-        if (aVector.y < m_bbMin.y)
-            m_bbMin.y = aVector.y;
-        else if (aVector.y > m_bbMax.y)
-            m_bbMax.y = aVector.y;
+        if (aPoint.y < m_bbMin.y)
+            m_bbMin.y = aPoint.y;
+        else if (aPoint.y > m_bbMax.y)
+            m_bbMax.y = aPoint.y;
 
-        if (aVector.z < m_bbMin.z)
-            m_bbMin.z = aVector.z;
-        else if (aVector.z > m_bbMax.z)
-            m_bbMax.z = aVector.z;
+        if (aPoint.z < m_bbMin.z)
+            m_bbMin.z = aPoint.z;
+        else if (aPoint.z > m_bbMax.z)
+            m_bbMax.z = aPoint.z;
     }
     else
     {
-        m_bbMax = m_bbMin = aVector;
+        m_bbMax = m_bbMin = aPoint;
         m_valid = true;
     }
 }

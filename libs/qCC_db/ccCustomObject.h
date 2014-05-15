@@ -43,7 +43,7 @@ public:
 	{}
     
 	// inherited from ccObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CUSTOM_LEAF_OBJECT; }
+    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CUSTOM_H_OBJECT; }
 
 	//! Returns whether this instance has been created by the user or if it's a plain ccCustomHObject instance created by deserialization
 	/** As custom objects can only be serialized as plain ccHObject instances (i.e. mainly with

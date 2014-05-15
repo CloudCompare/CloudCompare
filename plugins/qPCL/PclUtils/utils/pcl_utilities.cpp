@@ -60,12 +60,14 @@ PCLCloud mergeVectorOfClouds(std::vector<PCLCloud> &clouds)
 	return clouds[0];
 }
 
-PCLCloud::Ptr loadSensorMessage(const QString &filename)
+PCLCloud::Ptr loadSensorMessage(const QString &filename,
+                                Eigen::Vector4f &origin,
+                                Eigen::Quaternionf &orientation)
 {
 	PCLCloud::Ptr out_cloud(new PCLCloud);
 
 	//Load the given file
-	if (pcl::io::loadPCDFile(filename.toStdString(), *out_cloud) < 0)
+    if (pcl::io::loadPCDFile(filename.toStdString(), *out_cloud, origin, orientation) < 0)
 	{
 		//loading failed
 		out_cloud.reset();

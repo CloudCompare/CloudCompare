@@ -40,6 +40,7 @@ typedef pcl::PCLPointField PCLScalarField;
 
 #endif
 
+#include <Eigen/Dense>
 
 //Qt
 #include <QString>
@@ -48,8 +49,12 @@ PCLCloud mergeVectorOfClouds(std::vector<PCLCloud> &clouds);
 
 //! Utility function that loads a given PCD file in a PointCloud2
 /** \param[in] filename
+    \param[out] origin the position (center) of the sensor as vector
+    \param[out] orientation a quaternion with orientation os sensor
 	\return a shared pointer to a PCL cloud
 **/
-PCLCloud::Ptr loadSensorMessage(const QString &filename);
+PCLCloud::Ptr loadSensorMessage(const QString &filename,
+                                Eigen::Vector4f &origin,
+                                Eigen::Quaternionf &orientation);
 
 #endif // PCL_UTILITIES_H

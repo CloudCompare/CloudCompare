@@ -2158,69 +2158,72 @@ void displaySensorProjectErrorString(int errorCode)
 
 void MainWindow::doActionComputeDistancesFromSensor()
 {
-    //there should be only one sensor in current selection!
-	if (m_selectedEntities.empty() || m_selectedEntities.size()>1 || !m_selectedEntities[0]->isKindOf(CC_TYPES::GBL_SENSOR))
+    //we support more than just one sensor in selection
+    if (m_selectedEntities.empty())
     {
-        ccConsole::Error("Select one and only one sensor!");
+        ccConsole::Error("Select at least a sensor.");
         return;
     }
-
-	ccSensor* sensor = ccHObjectCaster::ToSensor(m_selectedEntities[0]);
-	assert(sensor);
-	if (!sensor)
-		return;
-
-    //sensor must have a parent cloud -> this error probably could not happen
-    //If in a future cc will permits to have not-cloud-associated sensors this will
-    //ensure to not have bugs
-    if (!sensor->getParent() || !sensor->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
-    {
-        ccConsole::Error("Sensor must be associated with a point cloud!");
-        return;
-    }
-
-    //get associated cloud
-	ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
-	assert(cloud);
-
-    //sensor center
-	CCVector3 sensorCenter;
-	if (!sensor->getActiveAbsoluteCenter(sensorCenter))
-		return;
 
     //start dialog
     ccSensorComputeDistancesDlg cdDlg(this);
     if (!cdDlg.exec())
         return;
 
-    //squared required?
-    bool squared = cdDlg.computeSquaredDistances();
+    for (int i = 0; i < m_selectedEntities.size(); ++i)
+    {
+        ccSensor* sensor = ccHObjectCaster::ToSensor(m_selectedEntities[i]);
+        assert(sensor);
+        if (!sensor)
+            continue; //skip this entity
 
-	//set up a new scalar field
-	const char* defaultRangesSFname = squared ? CC_DEFAULT_SQUARED_RANGES_SF_NAME : CC_DEFAULT_RANGES_SF_NAME;
-	int sfIdx = cloud->getScalarFieldIndexByName(defaultRangesSFname);
-	if (sfIdx < 0)
-	{
-		sfIdx = cloud->addScalarField(defaultRangesSFname);
-		if (sfIdx < 0)
-		{
-			ccConsole::Error("Not enough memory!");
-			return;
-		}
-	}
-	CCLib::ScalarField* distances = cloud->getScalarField(sfIdx);
+        //sensor must have a parent cloud -> this error probably could not happen
+        //If in a future cc will permits to have not-cloud-associated sensors this will
+        //ensure to not have bugs
+        if (!sensor->getParent() || !sensor->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
+        {
+            ccConsole::Error("Sensor must be associated with a point cloud!");
+            return;
+        }
 
-	for (unsigned i=0; i<cloud->size(); ++i)
-	{
-		const CCVector3* P = cloud->getPoint(i);
-		ScalarType s = static_cast<ScalarType>(squared ? (*P-sensorCenter).norm2() :  (*P-sensorCenter).norm());
-		distances->setValue(i, s);
-	}
+        //get associated cloud
+        ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
+        assert(cloud);
 
-	distances->computeMinAndMax();
-	cloud->setCurrentDisplayedScalarField(sfIdx);
-	cloud->showSF(true);
-    cloud->prepareDisplayForRefresh_recursive();
+        //sensor center
+        CCVector3 sensorCenter;
+        if (!sensor->getActiveAbsoluteCenter(sensorCenter))
+            return;
+
+        //squared required?
+        bool squared = cdDlg.computeSquaredDistances();
+
+        //set up a new scalar field
+        const char* defaultRangesSFname = squared ? CC_DEFAULT_SQUARED_RANGES_SF_NAME : CC_DEFAULT_RANGES_SF_NAME;
+        int sfIdx = cloud->getScalarFieldIndexByName(defaultRangesSFname);
+        if (sfIdx < 0)
+        {
+            sfIdx = cloud->addScalarField(defaultRangesSFname);
+            if (sfIdx < 0)
+            {
+                ccConsole::Error("Not enough memory!");
+                return;
+            }
+        }
+        CCLib::ScalarField* distances = cloud->getScalarField(sfIdx);
+
+        for (unsigned i=0; i<cloud->size(); ++i)
+        {
+            const CCVector3* P = cloud->getPoint(i);
+            ScalarType s = static_cast<ScalarType>(squared ? (*P-sensorCenter).norm2() :  (*P-sensorCenter).norm());
+            distances->setValue(i, s);
+        }
+
+        distances->computeMinAndMax();
+        cloud->setCurrentDisplayedScalarField(sfIdx);
+        cloud->showSF(true);
+        cloud->prepareDisplayForRefresh_recursive();
+    }
 
 	refreshAll();
 	updateUI();
@@ -2775,6 +2778,11 @@ void MainWindow::doActionShowDepthBuffer()
         if (ent->isKindOf(CC_TYPES::GBL_SENSOR))
         {
             ccGBLSensor* sensor = static_cast<ccGBLSensor*>(m_selectedEntities[0]);
+            if (!sensor->getDepthBuffer().zBuff)
+            {
+                ccConsole::Error("[ShowDepthBuffer] Depth buffer not computed for this sensor.");
+                return;
+            }
 
             ccRenderingTools::ShowDepthBuffer(sensor,this);
         }
@@ -6253,6 +6261,38 @@ void MainWindow::deactivateSegmentationMode(bool state)
 						if (entity)
 						{
 							entity->setName(entity->getName()+QString(".remaining"));
+
+                            //we also need to check if there is a childrent that is a GBLsensor
+                            size_t n = entity->getChildrenNumber();
+
+                            //we put a new sensor here if we will find one
+                            ccGBLSensor * sensor(NULL);
+                            for (size_t i = 0; i < n ; ++i)
+                            {
+                                if(entity->getChild(i)->isA(CC_TYPES::GBL_SENSOR))
+                                {
+                                    sensor = ccHObjectCaster::ToGBLSensor(entity->getChild(i));
+                                    break;
+                                }
+                            }
+
+                            if (sensor)
+                            {
+                                //we create a copy of that
+                                ccGBLSensor * cloned_sensor = new ccGBLSensor(*sensor);
+
+                                ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(segmentationResult);
+
+                                int errorCode;
+                                CCLib::GenericIndexedCloud* projectedPoints = cloned_sensor->project(cloud,errorCode,true);
+
+                                // we need also to do the same for the original cloud
+                                sensor->project(ccHObjectCaster::ToGenericPointCloud(entity), errorCode, true);
+
+                                cloud->addChild(cloned_sensor);
+
+
+                            }
 							putObjectBackIntoDBTree(entity,objContext);
 						}
 					}
@@ -9293,14 +9333,14 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     bool atLeastOneColor = (selInfo.colorCount>0);
     bool atLeastOneSF = (selInfo.sfCount>0);
     //bool atLeastOneSensor = (selInfo.sensorCount>0);
-    bool atLeastOneGDBSensor = (selInfo.gblSensorCount>0);
+    bool atLeastOneGBLSensor = (selInfo.gblSensorCount>0);
     bool atLeastOneCameraSensor = (selInfo.cameraSensorCount>0);
     bool activeWindow = (getActiveGLWindow() != 0);
 
     //menuEdit->setEnabled(atLeastOneEntity);
     //menuTools->setEnabled(atLeastOneEntity);
     menuCreateSensor->setEnabled(atLeastOneCloud);
-    menuGroundBasedLidar->setEnabled(atLeastOneGDBSensor);
+    menuGroundBasedLidar->setEnabled(atLeastOneGBLSensor);
     menuCameraSensor->setEnabled(atLeastOneCameraSensor);
 
     actionZoomAndCenter->setEnabled(atLeastOneEntity && activeWindow);
@@ -9310,8 +9350,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionExportCoordToSF->setEnabled(atLeastOneEntity);
     actionSegment->setEnabled(atLeastOneEntity && activeWindow);
     actionTranslateRotate->setEnabled(atLeastOneEntity && activeWindow);
-    actionShowDepthBuffer->setEnabled(atLeastOneGDBSensor);
-    actionExportDepthBuffer->setEnabled(atLeastOneGDBSensor);
+    actionShowDepthBuffer->setEnabled(atLeastOneGBLSensor);
+    actionExportDepthBuffer->setEnabled(atLeastOneGBLSensor);
     actionResampleWithOctree->setEnabled(atLeastOneCloud);
     actionApplyScale->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionApplyTransformation->setEnabled(atLeastOneEntity);
@@ -9381,7 +9421,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	bool exactlyOneCameraSensor = (selInfo.cameraSensorCount == 1);
 
     actionModifySensor->setEnabled(exactlyOneSensor);
-    actionComputeDistancesFromSensor->setEnabled(exactlyOneSensor);
+    actionComputeDistancesFromSensor->setEnabled(atLeastOneCameraSensor || atLeastOneGBLSensor);
     actionComputeScatteringAngles->setEnabled(exactlyOneSensor);
 	actionViewFromSensor->setEnabled(exactlyOneSensor);
     actionCreateGBLSensor->setEnabled(atLeastOneCloud);

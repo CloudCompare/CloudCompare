@@ -23,6 +23,8 @@
 
 //qCC_db
 #include <ccPointCloud.h>
+#include <ccGBLSensor.h>
+#include <ccHObjectCaster.h>
 
 //Qt
 #include <QApplication>
@@ -38,6 +40,7 @@
 
 //pcl
 #include <pcl/filters/passthrough.h>
+#include <pcl/io/pcd_io.h>
 
 LoadPCD::LoadPCD()
     : BaseFilter(FilterDescription("LoadPCD",
@@ -84,9 +87,12 @@ int LoadPCD::compute()
 	//for each selected filename
 	for (int k = 0; k < m_filenames.size(); ++k)
 	{
+        Eigen::Vector4f origin;
+        Eigen::Quaternionf orientation;
+
 		QString filename = m_filenames[k];
 
-        boost::shared_ptr<PCLCloud> cloud_ptr_in = loadSensorMessage(filename);
+        boost::shared_ptr<PCLCloud> cloud_ptr_in = loadSensorMessage(filename, origin, orientation);
         
 		if (!cloud_ptr_in) //loading failed?
 			return 0;
@@ -106,9 +112,43 @@ int LoadPCD::compute()
             cloud_ptr = cloud_ptr_in;
 		}
 
+        //now we construct a ccGBLSensor with these characteristics
+        ccGBLSensor * sensor = new ccGBLSensor;
+
+        // get orientation as rot matrix
+        Eigen::Matrix3f eigrot = orientation.toRotationMatrix();
+
+        // and copy it into a ccGLMatrix
+        ccGLMatrix ccRot;
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+            {
+                ccRot.getColumn(j)[i] = eigrot(i,j);
+            }
+
+        ccRot.getColumn(3)[3] = 1.0;
+
+        // now in a format good for CloudComapre
+//        ccGLMatrix ccRot = ccGLMatrix::FromQuaternion(orientation.coeffs().data());
+
+//        ccRot = ccRot.transposed();
+        ccRot.setTranslation(origin.data());
+
+        sensor->setRigidTransformation(ccRot);
+        sensor->setDeltaPhi(0.05);
+        sensor->setDeltaTheta(0.05);
+
+        //uncertainty to some default
+        sensor->setUncertainty(0.01);
+
         ccPointCloud* out_cloud = sm2ccConverter(cloud_ptr).getCCloud();
 		if (!out_cloud)
 			return -31;
+
+        //do the projection on sensor
+        ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(out_cloud);
+        int errorCode;
+        sensor->project(cloud,errorCode,true);
 
 		QString cloud_name = QFileInfo(filename).baseName();
 		out_cloud->setName(cloud_name);
@@ -118,6 +158,7 @@ int LoadPCD::compute()
 
 		ccHObject* cloudContainer = new ccHObject(containerName);
 		assert(out_cloud);
+        out_cloud->addChild(sensor);
 		cloudContainer->addChild(out_cloud);
 
 		emit newEntity(cloudContainer);

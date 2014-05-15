@@ -95,6 +95,10 @@ void copyScalarFields(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::
 
 void copyRGBColors(const ccPointCloud *inCloud, ccPointCloud *outCloud, pcl::PointIndicesPtr &in2outMapping, bool overwrite)
 {
+    // if inCloud has no color there is nothing to do
+    if (!inCloud->hasColors())
+        return;
+
 	if (in2outMapping->indices.empty())
 		return;
 	assert(in2outMapping->indices.size() == outCloud->size());

@@ -960,7 +960,7 @@ Qt::ItemFlags ccDBRoot::flags(const QModelIndex &index) const
     //class type based filtering
     const ccHObject *item = static_cast<ccHObject*>(index.internalPointer());
 	assert(item);
-	if (item)
+    if (item && !item->isLocked()) //locked items cannot be drag-dropped
 	{
 		if (item->isA(CC_TYPES::HIERARCHY_OBJECT)							||
 			item->isKindOf(CC_TYPES::POINT_CLOUD)							||

@@ -42,6 +42,27 @@ ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=THETA_PHI*/)
     lockVisibility(false);
 }
 
+ccGBLSensor::ccGBLSensor(const ccGBLSensor &sensor): ccSensor(sensor)
+{
+    this->m_phiMin = sensor.m_phiMin;
+    this->m_phiMax = sensor.m_phiMax;
+    this->m_deltaPhi = sensor.m_deltaPhi;
+    this->m_thetaMin = sensor.m_thetaMin;
+    this->m_thetaMax = sensor.m_thetaMax;
+    this->m_deltaTheta = sensor.m_deltaTheta;
+    this->m_rotationOrder = sensor.m_rotationOrder;
+
+    this->m_sensorRange = sensor.m_sensorRange;
+    this->m_uncertainty = sensor.m_uncertainty;
+
+    //! we cannot simply copy the depth buffer
+    // we setup a NULL depthbuffer - it must be recomputed using project
+    this->m_depthBuffer = DepthBuffer();
+    this->m_depthBuffer.zBuff = 0;
+    this->m_depthBuffer.width = 0;
+    this->m_depthBuffer.height = 0;
+}
+
 ccGBLSensor::~ccGBLSensor()
 {
 }

@@ -60,6 +60,9 @@ public:
 	//! Default constructor
 	ccGBLSensor(ROTATION_ORDER rotOrder = THETA_PHI);
 
+    //! Copy constructor
+    ccGBLSensor(const ccGBLSensor & sensor);
+
 	//! Destructor
 	virtual ~ccGBLSensor();
 

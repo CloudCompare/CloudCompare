@@ -29,6 +29,8 @@
 #include <ccPolyline.h>
 #include <ccPointCloud.h>
 #include <ccHObject.h>
+#include <ccSensor.h>
+#include <ccHObjectCaster.h>
 
 //CCLib
 #include <GenericIndexedCloudPersist.h>
@@ -83,6 +85,20 @@ int SavePCD::compute()
 	if (!cloud)
 		return -1;
 
+    //search for a sensor as child
+    size_t n_childs = cloud->getChildrenNumber();
+    ccSensor * sensor(0);
+    for (size_t i = 0; i < n_childs; ++i)
+    {
+        ccHObject * child = cloud->getChild(i);
+
+        //try to cast to a ccSensor
+        if (!child->isKindOf(CC_TYPES::SENSOR))
+            continue;
+
+        sensor = ccHObjectCaster::ToSensor(child);
+    }
+
     PCLCloud::Ptr out_cloud (new PCLCloud);
 
     cc2smReader* converter = new cc2smReader();
@@ -91,12 +107,41 @@ int SavePCD::compute()
     delete converter;
 	converter=0;
 
+
+    Eigen::Vector4f pos;
+    Eigen::Quaternionf ori;
+    if(!sensor)
+    {
+        //we append to the cloud null sensor informations
+        pos = Eigen::Vector4f::Zero ();
+        ori = Eigen::Quaternionf::Identity ();
+    }
+    else
+    {
+        //we get out valid sensor informations
+        ccGLMatrix mat = sensor->getRigidTransformation();
+        CCVector3 trans = mat.getTranslationAsVec3D();
+        pos(0) = trans[0];
+        pos(1) = trans[1];
+        pos(2) = trans[2];
+
+        //also the rotation
+        Eigen::Matrix3f eigrot;
+        for (int i = 0; i < 3; ++i)
+            for (int j = 0; j < 3; ++j)
+                 eigrot(i,j) = mat.getColumn(j)[i];
+
+        // now translate to a quaternion notation
+        ori = Eigen::Quaternionf(eigrot);
+
+    }
+
 	if (result != 1)
     {
         return -31;
     }
 
-    if (pcl::io::savePCDFile( m_filename.toStdString(), *out_cloud, Eigen::Vector4f::Zero (), Eigen::Quaternionf::Identity (), true) < 0)
+    if (pcl::io::savePCDFile( m_filename.toStdString(), *out_cloud, pos, ori, true) < 0)
     {
         return -32;
     }

@@ -136,9 +136,14 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 {
 	typename pcl::search::KdTree<PointInT>::Ptr tree (new pcl::search::KdTree<PointInT>);
 
+#ifdef _OPENMP
 	//create the smoothing object
-	pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
-
+    pcl::MovingLeastSquaresOMP< PointInT, PointOutT > smoother;
+    int n_threads = omp_get_max_threads();
+    smoother.setNumberOfThreads(n_threads);
+#else
+    pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
+#endif
 	smoother.setInputCloud(incloud);
 	smoother.setSearchMethod(tree);	
 	smoother.setSearchRadius(params.search_radius_);

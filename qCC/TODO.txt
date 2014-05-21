@@ -25,6 +25,7 @@ Big ones:
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 
 Various:
+[*] Support boolean operations on meshes (with Cork for instance) - http://www.danielgm.net/cc/forum/viewtopic.php?t=812
 [*] Import control points from ascii file (for point pair-based registration - http://www.cloudcompare.org/forum/viewtopic.php?t=585)
 [*] Finish FBX support (materials)
 [*] Use a scalar field (such as scattering angles) in the subsampling method to keep the "best" points
@@ -39,6 +40,13 @@ Various:
 [*] Run the PCV plugin on more than one file at a time (or batch process)
 [*] Add interactive measurement features to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
+
+From Marco R.
+[*] It can be useful to lock the rotations around X and Y in the cloud alignment.
+[*] The scan origin can also be known by GPS or by topographic survey, and optionally can be set manually and locked.
+
+From Caspar F.
+[*] Add a method to update RGB color levels
 
 From Thomas S. (http://www.cloudcompare.org/forum/viewtopic.php?t=550)
 [*] If CloudCompare would support VisualSFM, it would be possible to import the VisualSFM-Project (with the saved camera positions).

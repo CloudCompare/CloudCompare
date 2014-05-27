@@ -136,6 +136,11 @@ public:
 	//! Returns real 'dbRoot' object
 	virtual ccDBRoot* db();
 
+    //! Returns a pointer to the plugin using the name
+    /** NULL pointer if not found
+     */
+    ccPluginInterface * getPluginByName(const QString plugin_name) const;
+
     /*** CCLib "standalone" algorithms ***/
 	
 	//CCLib algorithms handled by the 'ApplyCCLibAlgortihm' method

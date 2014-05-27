@@ -379,8 +379,26 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		return CC_FERR_CONSOLE_ERROR;
 
 	ccHObject* root = ccHObject::New(classID);
-	if (!root)
-		return CC_FERR_MALFORMED_FILE;
+
+    if (!root)
+        return CC_FERR_MALFORMED_FILE;
+
+    if (classID == CC_TYPES::CUSTOM_H_OBJECT)
+    {
+        // store seeking position
+        size_t original_pos = in.pos();
+        // we need to lod it as plain ccCustomHobject
+        root->fromFile(in, static_cast<short>(binVersion), flags, true); // this will load it
+        in.seek(original_pos); // reseek back the file
+
+        // try to get a new object from external factories
+        ccHObject * new_child = ccHObject::NewFromMetadata(root);
+        if (new_child) // found a plugin that can deserialize it
+            root = new_child;
+        else
+            return CC_FERR_FILE_WAS_WRITTEN_BY_PLUGIN;
+
+    }
 
 	if (!root->fromFile(in,static_cast<short>(binVersion),flags))
 	{

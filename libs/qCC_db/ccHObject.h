@@ -55,6 +55,15 @@ public:
 	**/
 	static ccHObject* New(CC_CLASS_ENUM objectType, const char* name = 0);
 
+    //! also a version to be used with external (plugin) factories
+    /** we use two Qstrings as keys, one for the plugin name and one for the class name
+     *  int this way we can save both in metadata
+     **/
+    static ccHObject * New (const QString plugin_id, const QString classID, const char * name =0);
+
+    //! one to be used directly on ccHObjects with metadata
+    static ccHObject * NewFromMetadata(const ccHObject *obj, const char * name = 0);
+
     //! Returns class ID
     /** \return class unique ID
     **/
@@ -266,7 +275,9 @@ public:
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const;
 	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags);
+
+    //! omit_childrens permits to simulate the fromFile_meOnly behaviour from a public method call
+    virtual bool fromFile(QFile& in, short dataVersion, int flags, bool omit_childrens = false);
 
 	//! Returns whether object is shareable or not
 	/** If object is father dependent and 'shared', it won't

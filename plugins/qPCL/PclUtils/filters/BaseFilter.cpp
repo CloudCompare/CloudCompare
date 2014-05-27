@@ -307,10 +307,26 @@ ccHObject *BaseFilter::getSelectedEntityAsCCHObject() const
     return m_selected.at(0);
 }
 
+ccHObject::Container BaseFilter::getSelectedThatHaveMetaData(const QString key) const
+{
+
+    ccHObject::Container new_sel;
+
+    for (int i = 0; i < m_selected.size(); ++i)
+    {
+        ccHObject * obj = m_selected.at(i);
+        if (obj->hasMetaData(key))
+            new_sel.push_back(obj);
+    }
+
+    return new_sel;
+
+}
+
 void BaseFilter::getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& entities)
 {
-	if (!m_app || !m_app->dbRootObject())
-		return;
+    if (!m_app || !m_app->dbRootObject())
+        return;
 
     m_app->dbRootObject()->filterChildren(entities,true,type);
 }

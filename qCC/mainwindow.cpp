@@ -483,7 +483,7 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 			m_stdPlugins.push_back(stdPlugin);
 
             // see if this plugin can give back an additional factory for objects
-            ccExternalFactory * fac = stdPlugin->getPluginFactory();
+            ccExternalFactory * fac = stdPlugin->getCustomObjectsFactory();
             if (fac) // if it is valid add to the plugin_factories
                 ccExternalFactory::Container::GetExternalFactoriesContainer()->addFactory(fac);
 		}
@@ -9714,16 +9714,6 @@ void MainWindow::UpdateUI()
 ccDBRoot* MainWindow::db()
 {
 	return m_ccRoot;
-}
-
-ccPluginInterface *MainWindow::getPluginByName(const QString plugin_name) const
-{
-    foreach (ccPluginInterface * plugin, m_stdPlugins)
-    {
-        if (plugin->getName() == plugin_name)
-            return plugin;
-    }
-    return 0;
 }
 
 ccHObject* MainWindow::dbRootObject()

@@ -65,7 +65,7 @@ public:
     //! return a plugin factory object
     /** Each plugin may have a factory or not
      */
-    virtual ccExternalFactory * getPluginFactory() const
+    virtual ccExternalFactory * getCustomObjectsFactory() const
     {
         return 0; // no factory by default
     }

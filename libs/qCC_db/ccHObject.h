@@ -59,10 +59,7 @@ public:
     /** we use two Qstrings as keys, one for the plugin name and one for the class name
      *  int this way we can save both in metadata
      **/
-    static ccHObject * New (const QString plugin_id, const QString classID, const char * name =0);
-
-    //! one to be used directly on ccHObjects with metadata
-    static ccHObject * NewFromMetadata(const ccHObject *obj, const char * name = 0);
+    static ccHObject * New (const QString pluginId, const QString classId, const char * name =0);
 
     //! Returns class ID
     /** \return class unique ID
@@ -309,13 +306,13 @@ protected:
 	virtual inline void setParent(ccHObject* anObject) { m_parent = anObject; }
 
     //! Draws the entity only (not its children)
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) { /*does nothing by default*/ };
+    virtual void drawMeOnly(CC_DRAW_CONTEXT& context) { /*does nothing by default*/ }
 
     //! Applies a GL transformation to the entity
     /** this = rotMat*(this-rotCenter)+(rotCenter+trans)
         \param trans a ccGLMatrix structure
     **/
-    virtual void applyGLTransformation(const ccGLMatrix& trans) { /*does nothing by default*/ };
+    virtual void applyGLTransformation(const ccGLMatrix& trans) { /*does nothing by default*/ }
 
 	//! Save own object data
 	/** Called by 'toFile' (recursive scheme)

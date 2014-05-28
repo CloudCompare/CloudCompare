@@ -391,8 +391,11 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
         root->fromFile(in, static_cast<short>(binVersion), flags, true); // this will load it
         in.seek(original_pos); // reseek back the file
 
+        QString classId = root->getMetaData("class_name").toString();
+        QString pluginId = root->getMetaData("plugin_name").toString();
+
         // try to get a new object from external factories
-        ccHObject * new_child = ccHObject::NewFromMetadata(root);
+        ccHObject * new_child = ccHObject::New(pluginId, classId);
         if (new_child) // found a plugin that can deserialize it
             root = new_child;
         else

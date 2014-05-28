@@ -47,6 +47,7 @@
 #include "ccQuadric.h"
 #include "ccIndexedTransformationBuffer.h"
 #include "ccCustomObject.h"
+#include "ccExternalFactory.h"
 
 //CCLib
 #include <CCShareable.h>
@@ -54,7 +55,6 @@
 //System
 #include <stdint.h>
 #include <assert.h>
-#include <ccExternalFactoriesContainer.h>
 
 //Qt
 #include <QIcon>
@@ -196,34 +196,25 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
     return 0;
 }
 
-ccHObject *ccHObject::New(const QString plugin_id, const QString classID, const char *name)
+ccHObject *ccHObject::New(const QString pluginId, const QString classId, const char *name)
 {
-    ccExternalFactoriesContainer * all_ext_factories = ccExternalFactoriesContainer::getExternalFactoriesContainer();
+    ccExternalFactory::Container * all_ext_factories = ccExternalFactory::Container::GetExternalFactoriesContainer();
     if (!all_ext_factories)
         return 0;
 
-    ccExternalFactory * factory = all_ext_factories->getFactoryByName(plugin_id);
+    ccExternalFactory * factory = all_ext_factories->getFactoryByName(pluginId);
     if (!factory)
         return 0;
 
-    ccHObject * obj = factory->New(classID, name);
+    ccHObject * obj = factory->buildObject(classId);
+
+    if (name)
+        obj->setName(name);
 
     if (!obj)
         return 0;
     else
         return obj;
-}
-
-ccHObject *ccHObject::NewFromMetadata(const ccHObject * obj, const char *name)
-{
-    QString class_name = obj->getMetaData("class_name").toString();
-    QString plugin_name = obj->getMetaData("plugin_name").toString();
-
-    if (class_name.isEmpty() || plugin_name.isEmpty())
-        return 0;
-
-    return New(plugin_name, class_name, name);
-
 }
 
 QIcon ccHObject::getIcon() const
@@ -840,14 +831,20 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omit_chil
             // we need to lod it as plain ccCustomHobject
             child->fromFile(in, dataVersion, flags, true); // this will load it
             in.seek(original_pos); // reseek back the file
+            QString classId = child->getMetaData("class_name").toString();
+            QString pluginId = child->getMetaData("plugin_name").toString();
 
             // try to get a new object from external factories
-            ccHObject * new_child = ccHObject::NewFromMetadata(child);
+            ccHObject * new_child = ccHObject::New(pluginId, classId);
             if (new_child) // found a plugin that can deserialize it
+            {
+                delete child;
                 child = new_child;
+            }
             else
-                return false; // for now simply return false, we may want to simply skip it
+                return false; // for now simply return false, we may want to skip it
                               // but i am not sure if there is a simple way of doing that
+
 
         }
 

@@ -54,7 +54,7 @@
 #include <ccColorScalesManager.h>
 #include <ccFacet.h>
 #include <ccQuadric.h>
-#include <ccExternalFactoriesContainer.h>
+#include <ccExternalFactory.h>
 
 //qCC includes
 #include "ccHeightGridGeneration.h"
@@ -485,7 +485,7 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
             // see if this plugin can give back an additional factory for objects
             ccExternalFactory * fac = stdPlugin->getPluginFactory();
             if (fac) // if it is valid add to the plugin_factories
-                ccExternalFactoriesContainer::getExternalFactoriesContainer()->addFactory(fac);
+                ccExternalFactory::Container::GetExternalFactoriesContainer()->addFactory(fac);
 		}
 		break;
 
@@ -9473,16 +9473,9 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionMerge->setEnabled(atLeastTwoEntities);
     actionMatchBBCenters->setEnabled(atLeastTwoEntities);
 
-    // we must access the "current" selection from the m_ccRoot.
-    // the mainwindow member m_current_selection is still pointing to the "last" selection made
-    // Note: maybe it would be better to connect with a signal a selectionChanged(containter) signal from ccDBRoot
-    // the a slot in each plugin, when the plugin itself is created.
-    ccHObject::Container selected_ents;
-    m_ccRoot->getSelectedEntities(selected_ents);
-
     //standard plugins
 	foreach (ccStdPluginInterface* plugin, m_stdPlugins)
-        plugin->onNewSelection(selected_ents);
+        plugin->onNewSelection(m_selectedEntities);
 }
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)

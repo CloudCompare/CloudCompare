@@ -18,6 +18,9 @@
 #ifndef CC_HISTOGRAM_WINDOW_HEADER
 #define CC_HISTOGRAM_WINDOW_HEADER
 
+//Always first
+#include <ccIncludeGL.h>
+
 //Qt
 #include <QGLWidget>
 #include <QDialog>
@@ -57,35 +60,58 @@ public:
 
 	//! Creates histogram from a bin array (each bin = number of elements per class)
 	/** Number of classes can't be modified.
-		\param histoValues array of bins (number of points per class)
-		\param numberOfClasses corresponding number of classes
+		\param histoValues array of bins
 		\param minVal minimum value
 		\param maxVal maximum value
-		\param giveArrayOwnership whether array ownership is passed to the dialog or not
 		\return success
 	**/
-	void fromBinArray(	unsigned* histoValues,
-						unsigned numberOfClasses,
+	void fromBinArray(	const std::vector<unsigned>& histoValues,
 						double minVal,
-						double maxVal,
-						bool giveArrayOwnership = true);
+						double maxVal);
 
 	//! Sets overlay curve values
 	/** Curve will only appear if the number of points matches the current number of classes)
 		\param curveValues curve points 'Y' coordinates (points will be regularly spread over histogram span)
-		\param numberOfCurvePoints number of points
-		\param giveArrayOwnership whether array ownership is passed to the dialog or not
 	**/
-	void setCurveValues(double* curveValues,
-						unsigned numberOfCurvePoints,
-						bool giveArrayOwnership = true);
+	void setCurveValues(const std::vector<double>& curveValues);
+
+	//! Display parameters
+	struct DisplayParameters
+	{
+		//! Whether to use those parameters or the default ones (see ccGui::Parameters)
+		bool useDefaultParameters;
+		//! Background color
+		unsigned char backgroundColor[3];
+		//! Default color
+		unsigned char defaultColor[3];
+		//! Whether to use a gradient color or the default one for the histogram bars
+		bool useGradientColor;
+
+		//! Returns active background color
+		const unsigned char* getBackgroundColor() const;
+		//! Returns active default color
+		const unsigned char* getDefaultColor() const;
+		//! Returns whether to use a gradient color (for diplaying histogram bars) or not
+		bool useGradientColorForBars() const { return useGradientColor; }
+
+		//! Default constructor
+		DisplayParameters();
+	};
+
+	//! Returns display parameters
+	inline DisplayParameters& displayParameters() { return m_displayParameters; }
+	//! Returns display parameters (const version)
+	inline const DisplayParameters& displayParameters() const { return m_displayParameters; }
+
+	//! Clears the display
+	void clear();
 
 protected:
 
 	//! Changes the current number of classes
 	/** Warning: n should be a multiple of 4.
 	**/
-	void setNumberOfClasses(unsigned  n);
+	void setNumberOfClasses(size_t n);
 
 	//mouse events handling
 	void mousePressEvent(QMouseEvent *event);
@@ -103,10 +129,10 @@ protected:
 	unsigned getMaxHistoVal();
 
 	//! Clears internal structures
-	void clear();
+	void clearInternal();
 
 	//! Dynamically computes histogram bins from scalar field
-	bool computeBinArrayFromSF();
+	bool computeBinArrayFromSF(size_t binCount);
 
 	//! 1st line
 	QString m_infoStr;
@@ -117,18 +143,14 @@ protected:
 	ccScalarField* m_associatedSF;
 
 	//histogram variables
-	unsigned m_numberOfClasses;
-	unsigned* m_histoValues;
-	bool m_ownHistoValues;
+	std::vector<unsigned> m_histoValues;
 	double m_minVal;
 	double m_maxVal;
 	unsigned m_maxHistoVal;
 
 	//overlay curve
-	double* m_curveValues;
+	std::vector<double> m_curveValues;
 	double m_maxCurveValue;
-	unsigned m_numberOfCurvePoints;
-	bool m_ownCurveValues;
 
 	//histogram display area
 	int m_roi[4];
@@ -140,8 +162,11 @@ protected:
 	bool m_drawVerticalIndicator;
 	double m_verticalIndicatorPositionPercent;
 
-	//rendering font
+	//! Rendering font
 	QFont m_renderingFont;
+
+	//! Display parameters
+	DisplayParameters m_displayParameters;
 };
 
 //! Encapsulating dialog for ccHistogramWindow

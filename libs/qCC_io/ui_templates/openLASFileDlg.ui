@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>260</width>
-    <height>503</height>
+    <height>522</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,16 @@
       <item>
        <widget class="QFrame" name="rgbFrame">
         <layout class="QHBoxLayout">
-         <property name="margin">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>0</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
           <number>0</number>
          </property>
          <item>
@@ -258,6 +267,16 @@
      </property>
      <property name="checked">
       <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="force8bitRgbCheckBox">
+     <property name="toolTip">
+      <string>Force reading colors as 8-bit values (even if the standard is 16-bit)</string>
+     </property>
+     <property name="text">
+      <string>Force 8-bit colors</string>
      </property>
     </widget>
    </item>

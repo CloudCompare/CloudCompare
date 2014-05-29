@@ -424,8 +424,10 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 	unsigned pointsRead = 0;
 	CCVector3d Pshift(0,0,0);
 
-	//by default we read color as 8 bits integers and we will change this to 16 bits if it's not (16 bits is the standard!)
-	unsigned char colorCompBitDec = 0;
+	//by default we read colors as triplets of 8 bits integers but we might dynamically change this
+	//if we encounter values using 16 bits (16 bits is the standard!)
+	unsigned char colorCompBitShift = 0;
+	bool forced8bitRgbMode = s_lasOpenDlg->forced8bitRgbMode();
 	colorType rgb[3] = {0,0,0};
 
 	ccPointCloud* loadedCloud = 0;
@@ -611,7 +613,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 					if (loadedCloud->reserveTheRGBTable())
 					{
 						//we must set the color (black) of all the precedently skipped points
-						for (unsigned i=0;i<loadedCloud->size()-1;++i)
+						for (unsigned i=0; i<loadedCloud->size()-1; ++i)
 							loadedCloud->addRGBColor(ccColor::black);
 					}
 					else
@@ -631,7 +633,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 			if (pushColor)
 			{
 				//we test if the color components are on 16 bits (standard) or only on 8 bits (it happens ;)
-				if (colorCompBitDec==0)
+				if (!forced8bitRgbMode && colorCompBitShift == 0)
 				{
 					if (	(col[0] & 0xFF00)
 						||  (col[1] & 0xFF00)
@@ -639,16 +641,16 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 					{
 						//the color components are on 16 bits!
 						ccLog::Print("[LAS FILE] Color components are coded on 16 bits");
-						colorCompBitDec = 8;
+						colorCompBitShift = 8;
 						//we fix all the precedently read colors
-						for (unsigned i=0;i<loadedCloud->size()-1;++i)
+						for (unsigned i=0; i<loadedCloud->size()-1; ++i)
 							loadedCloud->setPointColor(i,ccColor::black); //255 >> 8 = 0!
 					}
 				}
 
-				rgb[0]=(colorType)(col[0]>>colorCompBitDec);
-				rgb[1]=(colorType)(col[1]>>colorCompBitDec);
-				rgb[2]=(colorType)(col[2]>>colorCompBitDec);
+				rgb[0] = static_cast<colorType>(col[0] >> colorCompBitShift);
+				rgb[1] = static_cast<colorType>(col[1] >> colorCompBitShift);
+				rgb[2] = static_cast<colorType>(col[2] >> colorCompBitShift);
 
 				loadedCloud->addRGBColor(rgb);
 			}

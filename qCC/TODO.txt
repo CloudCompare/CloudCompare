@@ -47,9 +47,6 @@ From Marco R.
 [*] It can be useful to lock the rotations around X and Y in the cloud alignment.
 [*] The scan origin can also be known by GPS or by topographic survey, and optionally can be set manually and locked.
 
-From Caspar F.
-[*] Add a method to update RGB color levels
-
 From Thomas S. (http://www.cloudcompare.org/forum/viewtopic.php?t=550)
 [*] If CloudCompare would support VisualSFM, it would be possible to import the VisualSFM-Project (with the saved camera positions).
 	Then it should be possible to measure the points for the georeferencing in the images itself, instead of the point-cloud, which would be much more accurate.

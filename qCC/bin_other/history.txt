@@ -1,8 +1,15 @@
 *** CloudCompare versions history ***
 
 v2.5.5 ??/??/2014
+- New method:
+	* Edit > Colors > Levels
+		- allows the user to edit the color histogram (either all channels at once or channel by channel)
 - Enhancement:
-	* qPoissonPlugin is now based on the version 5.71 of PoissonRecon lib (http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version5.71/)
+	* New option in the LAS file opening dialog:
+		- 'Force 8-bit colors': to cope with files in which colors are mistakenly coded on 8 bits (instead of 16)
+	* The 'Poisson Surface Reconstruction' plugin (qPoissonRecon) is now based on the version 5.71 of PoissonRecon lib
+		(http://www.cs.jhu.edu/~misha/Code/PoissonRecon/Version5.71/)
+
 
 v2.5.4.1 04/22/2014
 - Bug fix:

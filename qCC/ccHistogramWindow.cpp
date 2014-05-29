@@ -32,16 +32,10 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	, m_viewInitialized(false)
 	, m_numberOfClassesCanBeChanged(false)
 	, m_associatedSF(0)
-	, m_numberOfClasses(0)
-	, m_histoValues(0)
-	, m_ownHistoValues(0)
 	, m_minVal(0)
 	, m_maxVal(0)
 	, m_maxHistoVal(0)
-	, m_curveValues(0)
 	, m_maxCurveValue(0)
-	, m_numberOfCurvePoints(0)
-	, m_ownCurveValues(0)
 	, m_xMinusButton(0)
 	, m_yMinusButton(0)
 	, m_xPlusButton(0)
@@ -66,25 +60,27 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 
 ccHistogramWindow::~ccHistogramWindow()
 {
-	clear();
+	clearInternal();
 }
 
 void ccHistogramWindow::clear()
 {
-	if (m_ownHistoValues && m_histoValues)
-		delete[] m_histoValues;
-	m_histoValues = 0;
+	clearInternal();
+	updateGL();
+}
+
+void ccHistogramWindow::clearInternal()
+{
+	m_histoValues.clear();
 	m_maxHistoVal = 0;
 
-	if (m_ownCurveValues && m_curveValues)
-		delete[] m_curveValues;
-	m_curveValues = 0;
+	m_curveValues.clear();
 	m_maxCurveValue = 0.0;
 }
 
 void ccHistogramWindow::closeEvent(QCloseEvent *event)
 {
-	clear();
+	clearInternal();
 	event->accept();
 }
 
@@ -107,43 +103,48 @@ void ccHistogramWindow::fromSF(ccScalarField* sf,
 	setNumberOfClasses(initialNumberOfClasses);
 };
 
-void ccHistogramWindow::fromBinArray(	unsigned* histoValues,
-										unsigned numberOfClasses,
+void ccHistogramWindow::fromBinArray(	const std::vector<unsigned>& histoValues,
 										double minVal,
-										double maxVal,
-										bool giveArrayOwnership/*=true*/)
+										double maxVal)
 {
-	assert(histoValues);
-
-	m_histoValues = histoValues;
+	try
+	{
+		m_histoValues = histoValues;
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Warning("[ccHistogramWindow::fromBinArray] Not enough memory!");
+		return;
+	}
 	m_minVal = minVal;
 	m_maxVal = maxVal;
 	m_numberOfClassesCanBeChanged = false;
-	m_ownHistoValues = giveArrayOwnership;
 
-	setNumberOfClasses(numberOfClasses);
+	//update max histogram value
+	m_maxHistoVal = getMaxHistoVal();
 }
 
-void ccHistogramWindow::setCurveValues(double* curveValues, unsigned numberOfCurvePoints, bool giveArrayOwnership/*=true*/)
+void ccHistogramWindow::setCurveValues(const std::vector<double>& curveValues)
 {
-	assert(curveValues);
-
-	m_curveValues = curveValues;
-	m_numberOfCurvePoints = numberOfCurvePoints;
-	m_ownCurveValues = giveArrayOwnership;
-
+	try
+	{
+		m_curveValues = curveValues;
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Warning("[ccHistogramWindow::fromBinArray] Not enough memory!");
+	}
+	
 	//compute max curve value by the way
 	m_maxCurveValue = 0.0;
-	for (unsigned i=0; i<numberOfCurvePoints; ++i)
+	for (size_t i=0; i<m_curveValues.size(); ++i)
 		m_maxCurveValue = std::max(m_maxCurveValue,m_curveValues[i]);
 }
 
-bool ccHistogramWindow::computeBinArrayFromSF()
+bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 {
-	//clear any existing array
-	if (m_histoValues && m_ownHistoValues)
-		delete[] m_histoValues;
-	m_histoValues = 0;
+	//clear any existing histogram
+	m_histoValues.clear();
 
 	if (!m_associatedSF)
 	{
@@ -152,29 +153,37 @@ bool ccHistogramWindow::computeBinArrayFromSF()
 		return false;
 	}
 
-	//(try to) create new array
-	m_histoValues = new unsigned[m_numberOfClasses];
-	if (!m_histoValues)
+	if (binCount == 0)
 	{
-		ccLog::Error("[Histogram] Not enough memory!");
+		assert(false);
+		ccLog::Error("[ccHistogramWindow::computeBinArrayFromSF] Invalid number of classes!");
 		return false;
 	}
-	memset(m_histoValues,0,sizeof(unsigned)*m_numberOfClasses);
-	m_ownHistoValues = true;
 
-	double range = m_maxVal-m_minVal;
+	//(try to) create new array
+	try
+	{
+		m_histoValues.resize(binCount,0);
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Warning("[ccHistogramWindow::computeBinArrayFromSF] Not enough memory!");
+		return false;
+	}
+
+	double range = m_maxVal - m_minVal;
 	if (range > 0.0)
 	{
 		unsigned count = m_associatedSF->currentSize();
 		for (unsigned i=0; i<count; ++i)
 		{
-			double val = (double)m_associatedSF->getValue(i);
+			double val = static_cast<double>(m_associatedSF->getValue(i));
 
 			//we ignore values outside of [m_minVal,m_maxVal]
 			if (val >= m_minVal && val <= m_maxVal)
 			{
-				unsigned bin = (unsigned)floor((val-m_minVal)*(double)m_numberOfClasses/range);
-				++m_histoValues[std::min(bin,m_numberOfClasses-1)];
+				size_t bin = static_cast<size_t>( floor((val-m_minVal)*static_cast<double>(binCount)/range) );
+				++m_histoValues[std::min(bin,binCount-1)];
 			}
 		}
 	}
@@ -190,41 +199,50 @@ unsigned ccHistogramWindow::getMaxHistoVal()
 {
 	unsigned m_maxHistoVal = 0;
 	
-	if (m_histoValues)
-		for (unsigned i=0; i<m_numberOfClasses; ++i)
-			m_maxHistoVal = std::max(m_maxHistoVal,m_histoValues[i]);
+	for (size_t i=0; i<m_histoValues.size(); ++i)
+		m_maxHistoVal = std::max(m_maxHistoVal,m_histoValues[i]);
 
 	return m_maxHistoVal;
 }
 
-void ccHistogramWindow::setNumberOfClasses(unsigned n)
+void ccHistogramWindow::setNumberOfClasses(size_t n)
 {
-	if (n==0)
+	if (n == 0)
+	{
+		//invalid parameter
+		assert(false);
+		return;
+	}
+
+	if (n == m_histoValues.size())
+	{
+		//nothing to do
+		return;
+	}
+
+	if (!m_numberOfClassesCanBeChanged)
 	{
 		assert(false);
 		return;
 	}
 
-	if (n == m_numberOfClasses)
-		return;
-
-	m_numberOfClasses = n;
-
-	//dynamically recompute histogram values?
 	if (m_associatedSF)
-		computeBinArrayFromSF();
+	{
+		//dynamically recompute histogram values
+		computeBinArrayFromSF(n);
+	}
 
 	//update max histogram value
 	m_maxHistoVal = getMaxHistoVal();
 }
 
-void drawButton(int xButton,int yButton,int m_buttonSize)
+void drawButton(int xButton, int yButton, int buttonSize)
 {
 	glBegin(GL_LINE_LOOP);
 	glVertex2i(xButton,yButton);
-	glVertex2i(xButton+m_buttonSize-1,yButton);
-	glVertex2i(xButton+m_buttonSize-1,yButton-m_buttonSize+1);
-	glVertex2i(xButton,yButton-m_buttonSize+1);
+	glVertex2i(xButton+buttonSize-1,yButton);
+	glVertex2i(xButton+buttonSize-1,yButton-buttonSize+1);
+	glVertex2i(xButton,yButton-buttonSize+1);
 	glEnd();
 }
 
@@ -242,16 +260,20 @@ struct hlabel
 
 void ccHistogramWindow::paintGL()
 {
+	makeCurrent();
+
 	//for proper display of labels!
 	m_renderingFont.setPointSize(ccGui::Parameters().defaultFontSize);
 	QFontMetrics strMetrics(m_renderingFont);
 	//precision (same as color scale)
-	unsigned precision = ccGui::Parameters().displayedNumPrecision;
+	int precision = static_cast<int>(ccGui::Parameters().displayedNumPrecision);
 
-	makeCurrent();
-
-	const unsigned char* bkgCol = ccGui::Parameters().histBackgroundCol;
-	glClearColor((float)bkgCol[0]/255.0f,(float)bkgCol[1]/255.0f,(float)bkgCol[2]/255.0f,1.0f);
+	//background color
+	const unsigned char* bkgCol = m_displayParameters.getBackgroundColor();
+	glClearColor(	static_cast<float>(bkgCol[0])/255,
+					static_cast<float>(bkgCol[1])/255,
+					static_cast<float>(bkgCol[2])/255,
+					1.0f );
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	int w = width();
@@ -266,8 +288,11 @@ void ccHistogramWindow::paintGL()
 	glLoadIdentity();
 
 	//default color: text color
-	const unsigned char* textCol = ccGui::Parameters().textDefaultCol;
-	glColor3ubv(textCol);
+	const unsigned char* textCol = m_displayParameters.getDefaultColor();
+	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
+	glColor3f(	static_cast<float>(textCol[0])/255,
+				static_cast<float>(textCol[1])/255,
+				static_cast<float>(textCol[2])/255 );
 
 	//margins, etc.
 	const int c_outerMargin = 10;
@@ -308,12 +333,15 @@ void ccHistogramWindow::paintGL()
 	}
 
 	//top-left corner
-	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-	glColor3f((float)textCol[0]/255.0f,(float)textCol[1]/255.0f,(float)textCol[2]/255.0f);
-	renderText(c_outerMargin, c_outerMargin+c_strHeight-c_strDescent, strMetrics.elidedText(QString("%0 [%1 classes]").arg(m_infoStr).arg(m_numberOfClasses),Qt::ElideRight,m_xMinusButton-c_outerMargin), m_renderingFont);
+	renderText(	c_outerMargin,
+				c_outerMargin+c_strHeight-c_strDescent,
+				strMetrics.elidedText(QString("%0 [%1 classes]").arg(m_infoStr).arg(m_histoValues.size()),
+				Qt::ElideRight,
+				m_xMinusButton-c_outerMargin),
+				m_renderingFont );
 
 	//can't go any further without data!
-	if (!m_histoValues)
+	if (m_histoValues.empty())
 		return;
 
 	//update horizontal & vertical axes position so that their labels can be properly displayed
@@ -335,7 +363,6 @@ void ccHistogramWindow::paintGL()
 		return;
 
 	//draw both axes
-	glColor3ubv(textCol);
 	glBegin(GL_LINES);
 	//vertical
 	glVertex2i(m_roi[0],m_roi[1]);
@@ -347,9 +374,6 @@ void ccHistogramWindow::paintGL()
 
 	//horizontal labels
 	{
-		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-		glColor3f((float)textCol[0]/255.0f,(float)textCol[1]/255.0f,(float)textCol[2]/255.0f);
-
 		//draw first value tick & label
 		glBegin(GL_LINES);
 		glVertex2i(m_roi[0],m_roi[1]-c_ticksSize);
@@ -430,9 +454,6 @@ void ccHistogramWindow::paintGL()
 
 				if (proceedWithNextLevel)
 				{
-					//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-					glColor3f((float)textCol[0]/255.0f,(float)textCol[1]/255.0f,(float)textCol[2]/255.0f);
-
 					//we only display labels if 'proceedWithNextLevel' is true
 					while (!strToDisplay.empty())
 					{
@@ -451,11 +472,8 @@ void ccHistogramWindow::paintGL()
 
 	//vertical labels
 	{
-		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-		glColor3f((float)textCol[0]/255.0f,(float)textCol[1]/255.0f,(float)textCol[2]/255.0f);
-
-      const int n=4;
-		for (int i=0;i<=n;++i)
+		const int n = 4;
+		for (int i=0; i<=n; ++i)
 		{
 			int y = m_roi[1] + (dy*i)/n;
 			glBegin(GL_LINES);
@@ -474,21 +492,24 @@ void ccHistogramWindow::paintGL()
 	double yScale = (double)dy/std::max<double>(m_maxCurveValue,maxDisplayedHistoVal);
 
 	//the histogram itself
-	unsigned cumul=0;
+	unsigned totalSum = 0;
+	unsigned partialSum = 0;
 	{
-		float x=(float)(m_roi[0]+1);
-		float y=(float)(m_roi[1]+1);
-		float barWidth = (float)dx/(float)m_numberOfClasses;
+		float x = static_cast<float>(m_roi[0]+1);
+		float y = static_cast<float>(m_roi[1]+1);
+		float barWidth = static_cast<float>(dx)/static_cast<float>(m_histoValues.size());
 
+		bool useGradientColorForBars = m_displayParameters.useGradientColorForBars();
 		ccColorScale::Shared colorScale = (m_associatedSF && m_associatedSF->getColorScale() ? m_associatedSF->getColorScale() : ccColorScalesManager::GetDefaultScale());
 		assert(colorScale);
-		for (unsigned i=0; i<m_numberOfClasses; ++i)
+		for (size_t i=0; i<m_histoValues.size(); ++i)
 		{
-			if ((double)i / (double)m_numberOfClasses < m_verticalIndicatorPositionPercent)
-				cumul += m_histoValues[i];
+			totalSum += m_histoValues[i];
+			if (static_cast<double>(i)/m_histoValues.size() < m_verticalIndicatorPositionPercent)
+				partialSum += m_histoValues[i];
 
 			//we take the 'normalized' value at the middle of the class
-			double normVal = ((double)i + 0.5) / (double)m_numberOfClasses;
+			double normVal = (static_cast<double>(i)+0.5) / m_histoValues.size();
 
 			if (m_associatedSF)
 			{
@@ -497,12 +518,12 @@ void ccHistogramWindow::paintGL()
 				const colorType* col = m_associatedSF->getColor(static_cast<ScalarType>(scalarVal));
 				glColor3ubv(col ? col : ccColor::lightGrey);
 			}
-			else
+			else if (useGradientColorForBars)
 			{
 				glColor3ubv(colorScale->getColorByRelativePos(normVal));
 			}
 
-			float barHeight = (float)m_histoValues[i] * (float)yScale;
+			float barHeight = static_cast<float>(m_histoValues[i] * yScale);
 			glBegin(GL_QUADS);
 			glVertex2f(x,y);
 			glVertex2f(x+barWidth,y);
@@ -515,19 +536,19 @@ void ccHistogramWindow::paintGL()
 	}
 
 	//overlay curve?
-	if (m_curveValues && m_numberOfCurvePoints>1)
+	if (m_curveValues.size() > 1)
 	{
-		float step = (float)dx/(float)m_numberOfCurvePoints;
-		float x = (float)(m_roi[0]+1);
-		float y = (float)(m_roi[1]+1);
+		float x = static_cast<float>(m_roi[0]+1);
+		float y = static_cast<float>(m_roi[1]+1);
+		float step = static_cast<float>(dx)/static_cast<float>(m_curveValues.size());
 
 		//same as text color by default
 		glColor3ubv(textCol);
 
 		glBegin(GL_LINE_STRIP);
-		for (unsigned i=0;i<m_numberOfCurvePoints;++i)
+		for (size_t i=0; i<m_curveValues.size(); ++i)
 		{
-			glVertex2f(x,y+(float)(m_curveValues[i]*yScale));
+			glVertex2f(x,y+static_cast<float>(m_curveValues[i]*yScale));
 			x+=step;
 		}
 		glEnd();
@@ -548,20 +569,21 @@ void ccHistogramWindow::paintGL()
 		glVertex2i(x,m_roi[3]);
 		glEnd();
 
-		bool leftSide = (m_verticalIndicatorPositionPercent>0.5);
-		unsigned bin = (unsigned)(m_verticalIndicatorPositionPercent * (double)m_numberOfClasses);
+		bool leftSide = (m_verticalIndicatorPositionPercent > 0.5);
+		unsigned bin = static_cast<unsigned>(m_verticalIndicatorPositionPercent * m_histoValues.size());
 		QString valueStr = QString("bin %0").arg(bin);
 
 		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-		glColor3f((float)textCol[0]/255.0f,(float)textCol[1]/255.0f,(float)textCol[2]/255.0f);
+		glColor3f(	static_cast<float>(textCol[0])/255,
+					static_cast<float>(textCol[1])/255,
+					static_cast<float>(textCol[2])/255 );
 		renderText(leftSide ? x-strMetrics.width(valueStr)-c_innerMargin : x+c_innerMargin, h-y, valueStr, m_renderingFont);
 		y -= (c_strHeight+c_innerMargin);
-		if (m_associatedSF)
-		{
-			valueStr = QString("< %0 %").arg(100.0*(double)cumul/(double)m_associatedSF->currentSize(),0,'f',3);
-			renderText(leftSide ? x-strMetrics.width(valueStr)-c_innerMargin : x+c_innerMargin, h-y, valueStr, m_renderingFont);
-			y -= (c_strHeight+c_innerMargin);
-		}
+
+		valueStr = QString("< %0 %").arg(100.0*static_cast<double>(partialSum)/static_cast<double>(totalSum),0,'f',3);
+		renderText(leftSide ? x-strMetrics.width(valueStr)-c_innerMargin : x+c_innerMargin, h-y, valueStr, m_renderingFont);
+		y -= (c_strHeight+c_innerMargin);
+
 		valueStr = QString("val = %0").arg(m_minVal+(m_maxVal-m_minVal)*m_verticalIndicatorPositionPercent,0,'f',precision);
 		renderText(leftSide ? x-strMetrics.width(valueStr)-c_innerMargin : x+c_innerMargin, h-y, valueStr, m_renderingFont);
 	}
@@ -582,13 +604,13 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 
 		if (m_numberOfClassesCanBeChanged)
 		{
-			if (m_numberOfClasses>4) //"minus" button
+			if (m_histoValues.size() > 4) //"minus" button
 			{
-				if ((y>=m_yMinusButton-m_buttonSize) && (y<=m_yMinusButton))
+				if (y >= m_yMinusButton-m_buttonSize && y <= m_yMinusButton)
 				{
-					if ((x>=m_xMinusButton) && (x<=m_xMinusButton+m_buttonSize))
+					if (x >= m_xMinusButton && x <= m_xMinusButton+m_buttonSize)
 					{
-						setNumberOfClasses(m_numberOfClasses-4);
+						setNumberOfClasses(m_histoValues.size()-4);
 						actionDetected = true;
 					}
 				}
@@ -596,11 +618,11 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 
 			if (!actionDetected)
 			{
-				if ((y>=m_yPlusButton-m_buttonSize) && (y<=m_yPlusButton)) //"plus" button
+				if (y >= m_yPlusButton-m_buttonSize && y <= m_yPlusButton) //"plus" button
 				{
-					if ((x>=m_xPlusButton) && (x<=m_xPlusButton+m_buttonSize))
+					if (x >= m_xPlusButton && x <= m_xPlusButton+m_buttonSize)
 					{
-						setNumberOfClasses(m_numberOfClasses+4);
+						setNumberOfClasses(m_histoValues.size()+4);
 						actionDetected = true;
 					}
 				}
@@ -612,10 +634,10 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 			if (x>m_roi[0] && x<=m_roi[2] && y>m_roi[1] && y<=m_roi[3])
 			{
 				m_drawVerticalIndicator = true;
-				if (m_roi[2]>m_roi[0])
+				if (m_roi[2] > m_roi[0])
 				{
-					int verticalIndicatorPosition = (int)m_numberOfClasses*(x-m_roi[0])/(m_roi[2]-m_roi[0]);
-					m_verticalIndicatorPositionPercent = (double)verticalIndicatorPosition/(double)m_numberOfClasses;
+					int verticalIndicatorPosition = static_cast<int>(m_histoValues.size()) * (x-m_roi[0]) / (m_roi[2]-m_roi[0]);
+					m_verticalIndicatorPositionPercent = static_cast<double>(verticalIndicatorPosition) / m_histoValues.size();
 				}
 				else
 				{
@@ -631,25 +653,51 @@ void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 		updateGL();
 }
 
-void ccHistogramWindow::wheelEvent(QWheelEvent* event)
+void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 {
 	if (!m_numberOfClassesCanBeChanged)
 	{
-		event->ignore();
+		e->ignore();
 		return;
 	}
 
-	if (event->delta()<0)
+	if (e->delta() < 0)
 	{
-		if (m_numberOfClasses>4)
+		if (m_histoValues.size() > 4)
 		{
-			setNumberOfClasses(std::max<unsigned>(4,m_numberOfClasses-4));
+			setNumberOfClasses(std::max<size_t>(4,m_histoValues.size()-4));
 			updateGL();
 		}
 	}
-	else //if (event->delta()>0)
+	else //if (e->delta() > 0)
 	{
-		setNumberOfClasses(m_numberOfClasses+4);
+		setNumberOfClasses(m_histoValues.size()+4);
 		updateGL();
 	}
+
+	e->accept();
+}
+
+ccHistogramWindow::DisplayParameters::DisplayParameters()
+	: useDefaultParameters(true)
+	, useGradientColor(true)
+{
+	backgroundColor[0] = backgroundColor[1] = backgroundColor[2] = 255;
+	defaultColor[0] = defaultColor[1] = defaultColor[2] = 0;
+}
+
+const unsigned char* ccHistogramWindow::DisplayParameters::getBackgroundColor() const
+{
+	if (useDefaultParameters)
+		return ccGui::Parameters().histBackgroundCol;
+	else
+		return backgroundColor;
+}
+
+const unsigned char* ccHistogramWindow::DisplayParameters::getDefaultColor() const
+{
+	if (useDefaultParameters)
+		return ccGui::Parameters().textDefaultCol;
+	else
+		return defaultColor;
 }

@@ -118,6 +118,7 @@
 #include "ccComputeOctreeDlg.h"
 #include "ccAdjustZoomDlg.h"
 #include "ccBoundingBoxEditorDlg.h"
+#include "ccColorLevelsDlg.h"
 #include <ui_aboutDlg.h>
 
 //other
@@ -861,7 +862,8 @@ void MainWindow::connectActions()
 
     //"Edit > Colors" menu
     connect(actionSetUniqueColor,               SIGNAL(triggered()),    this,       SLOT(doActionSetUniqueColor()));
-    connect(actionSetColorGradient,             SIGNAL(triggered()),    this,       SLOT(doActionSetColorGradient()));
+    connect(actionSetColorGradient,				SIGNAL(triggered()),    this,       SLOT(doActionSetColorGradient()));
+	connect(actionChangeColorLevels,			SIGNAL(triggered()),    this,       SLOT(doActionChangeColorLevels()));
     connect(actionColorize,                     SIGNAL(triggered()),    this,       SLOT(doActionColorize()));
     connect(actionClearColor,                   SIGNAL(triggered()),    this,       SLOT(doActionClearColor()));
 	connect(actionInterpolateColors,			SIGNAL(triggered()),    this,       SLOT(doActionInterpolateColors()));
@@ -1193,6 +1195,33 @@ void MainWindow::doActionSetColorGradient()
 
     refreshAll();
 	updateUI();
+}
+
+void MainWindow::doActionChangeColorLevels()
+{
+    if (m_selectedEntities.size() != 1)
+	{
+        ccConsole::Error("Select one and only one colored cloud or mesh!");
+		return;
+	}
+
+	bool lockedVertices;
+	ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(m_selectedEntities[0],&lockedVertices);
+	if (!pointCloud || lockedVertices)
+	{
+		if (lockedVertices)
+			DisplayLockedVerticesWarning();
+		return;
+	}
+
+	if (!pointCloud->hasColors())
+	{
+        ccConsole::Error("Selected entity has no colors!");
+		return;
+	}
+
+	ccColorLevelsDlg dlg(this,pointCloud);
+    dlg.exec();
 }
 
 void MainWindow::doActionInterpolateColors()
@@ -4325,109 +4354,109 @@ void MainWindow::doActionStatisticalTest()
 		return;
     }
 
-    if (!sDlg->exec())
+    if (sDlg->exec())
     {
-        delete sDlg;
-        return;
-    }
-
-	//build up corresponding distribution
-    CCLib::GenericDistribution* distrib=0;
-	{
-		ScalarType a = static_cast<ScalarType>(sDlg->getParam1());
-		ScalarType b = static_cast<ScalarType>(sDlg->getParam2());
-		ScalarType c = static_cast<ScalarType>(sDlg->getParam3());
-
-		switch (distribIndex)
+		//build up corresponding distribution
+		CCLib::GenericDistribution* distrib = 0;
 		{
-		case 0: //Gauss
+			ScalarType a = static_cast<ScalarType>(sDlg->getParam1());
+			ScalarType b = static_cast<ScalarType>(sDlg->getParam2());
+			ScalarType c = static_cast<ScalarType>(sDlg->getParam3());
+
+			switch (distribIndex)
+			{
+			case 0: //Gauss
+			{
+				CCLib::NormalDistribution* N = new CCLib::NormalDistribution();
+				N->setParameters(a,b*b); //warning: we input sigma2 here (not sigma)
+				distrib = static_cast<CCLib::GenericDistribution*>(N);
+				break;
+			}
+			case 1: //Weibull
+				CCLib::WeibullDistribution* W = new CCLib::WeibullDistribution();
+				W->setParameters(a,b,c);
+				distrib = static_cast<CCLib::GenericDistribution*>(W);
+				break;
+			}
+		}
+
+		double pChi2 = sDlg->getProba();
+		int nn = sDlg->getNeighborsNumber();
+
+		size_t selNum = m_selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
 		{
-			CCLib::NormalDistribution* N = new CCLib::NormalDistribution();
-			N->setParameters(a,b*b); //warning: we input sigma2 here (not sigma)
-			distrib = static_cast<CCLib::GenericDistribution*>(N);
-			break;
-		}
-		case 1: //Weibull
-			CCLib::WeibullDistribution* W = new CCLib::WeibullDistribution();
-			W->setParameters(a,b,c);
-			distrib = static_cast<CCLib::GenericDistribution*>(W);
-			break;
-		}
-	}
-
-	double pChi2 = sDlg->getProba();
-	int nn = sDlg->getNeighborsNumber();
-
-    size_t selNum = m_selectedEntities.size();
-    for (size_t i=0; i<selNum; ++i)
-    {
-        ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]); //TODO
-        if (pc)
-        {
-            //we apply method on currently displayed SF
-            ccScalarField* inSF = pc->getCurrentDisplayedScalarField();
-            if (inSF)
-            {
-                assert(inSF->isAllocated());
-
-                //force SF as 'OUT' field (in case of)
-				int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
-				pc->setCurrentOutScalarField(outSfIdx);
-
-				//force Chi2 Distances field as 'IN' field (create it by the way if necessary)
-				int chi2SfIdx = pc->getScalarFieldIndexByName(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
-				if (chi2SfIdx < 0)
-					chi2SfIdx = pc->addScalarField(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
-				if (chi2SfIdx < 0)
+			ccPointCloud* pc = ccHObjectCaster::ToPointCloud(m_selectedEntities[i]); //TODO
+			if (pc)
+			{
+				//we apply method on currently displayed SF
+				ccScalarField* inSF = pc->getCurrentDisplayedScalarField();
+				if (inSF)
 				{
-					ccConsole::Error("Couldn't allocate a new scalar field for computing chi2 distances! Try to free some memory ...");
-					break;
-				}
-				pc->setCurrentInScalarField(chi2SfIdx);
+					assert(inSF->isAllocated());
 
-				//compute octree if necessary
-				ccOctree* theOctree=pc->getOctree();
-				if (!theOctree)
-				{
-					ccProgressDialog pDlg(true,this);
-					theOctree = pc->computeOctree(&pDlg);
-					if (!theOctree)
+					//force SF as 'OUT' field (in case of)
+					int outSfIdx = pc->getCurrentDisplayedScalarFieldIndex();
+					pc->setCurrentOutScalarField(outSfIdx);
+
+					//force Chi2 Distances field as 'IN' field (create it by the way if necessary)
+					int chi2SfIdx = pc->getScalarFieldIndexByName(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
+					if (chi2SfIdx < 0)
+						chi2SfIdx = pc->addScalarField(CC_CHI2_DISTANCES_DEFAULT_SF_NAME);
+					if (chi2SfIdx < 0)
 					{
-						ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
+						ccConsole::Error("Couldn't allocate a new scalar field for computing chi2 distances! Try to free some memory ...");
 						break;
 					}
-				}
+					pc->setCurrentInScalarField(chi2SfIdx);
 
-				ccProgressDialog pDlg(true,this);
+					//compute octree if necessary
+					ccOctree* theOctree=pc->getOctree();
+					if (!theOctree)
+					{
+						ccProgressDialog pDlg(true,this);
+						theOctree = pc->computeOctree(&pDlg);
+						if (!theOctree)
+						{
+							ccConsole::Error(QString("Couldn't compute octree for cloud '%1'!").arg(pc->getName()));
+							break;
+						}
+					}
 
-				QElapsedTimer eTimer;
-				eTimer.start();
+					ccProgressDialog pDlg(true,this);
 
-				double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,nn,pChi2,&pDlg,theOctree);
+					QElapsedTimer eTimer;
+					eTimer.start();
 
-				ccConsole::Print("[Chi2 Test] Timing: %3.2f ms.",eTimer.elapsed()/1.0e3);
-				ccConsole::Print("[Chi2 Test] %s test result = %f",distrib->getName(),chi2dist);
+					double chi2dist = CCLib::StatisticalTestingTools::testCloudWithStatisticalModel(distrib,pc,nn,pChi2,&pDlg,theOctree);
 
-				//we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed
-				{
-					ccScalarField* chi2SF = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
-					assert(chi2SF);
-					chi2SF->computeMinAndMax();
-					chi2dist *= chi2dist;
-					chi2SF->setMinDisplayed(static_cast<ScalarType>(chi2dist));
-					chi2SF->setSymmetricalScale(false);
-					chi2SF->setSaturationStart(static_cast<ScalarType>(chi2dist));
-					//chi2SF->setSaturationStop(chi2dist);
-					pc->setCurrentDisplayedScalarField(chi2SfIdx);
-					pc->showSF(true);
-					pc->prepareDisplayForRefresh_recursive();
+					ccConsole::Print("[Chi2 Test] Timing: %3.2f ms.",eTimer.elapsed()/1.0e3);
+					ccConsole::Print("[Chi2 Test] %s test result = %f",distrib->getName(),chi2dist);
+
+					//we set the theoretical Chi2 distance limit as the minimum displayed SF value so that all points below are grayed
+					{
+						ccScalarField* chi2SF = static_cast<ccScalarField*>(pc->getCurrentInScalarField());
+						assert(chi2SF);
+						chi2SF->computeMinAndMax();
+						chi2dist *= chi2dist;
+						chi2SF->setMinDisplayed(static_cast<ScalarType>(chi2dist));
+						chi2SF->setSymmetricalScale(false);
+						chi2SF->setSaturationStart(static_cast<ScalarType>(chi2dist));
+						//chi2SF->setSaturationStop(chi2dist);
+						pc->setCurrentDisplayedScalarField(chi2SfIdx);
+						pc->showSF(true);
+						pc->prepareDisplayForRefresh_recursive();
+					}
 				}
 			}
 		}
-    }
 
-    delete distrib;
+		delete distrib;
+		distrib = 0;
+	}
+
     delete sDlg;
+	sDlg = 0;
 
     refreshAll();
 	updateUI();
@@ -4442,7 +4471,7 @@ void MainWindow::doActionComputeStatParams()
     if (!pDlg.exec())
         return;
 
-    CCLib::GenericDistribution* distrib=0;
+    CCLib::GenericDistribution* distrib = 0;
 	{
 		switch (pDlg.getSelectedIndex())
 		{
@@ -4506,42 +4535,42 @@ void MainWindow::doActionComputeStatParams()
 
                     //Auto Chi2
                     unsigned numberOfClasses = static_cast<unsigned>(ceil(sqrt(static_cast<double>(pc->size()))));
-                    unsigned* histo = new unsigned[numberOfClasses];
-                    double* npis = new double[numberOfClasses];
+                    std::vector<unsigned> histo;
+                    std::vector<double> npis;
+					try
 					{
-						unsigned finalNumberOfClasses = 0;
-						double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib,pc,0,finalNumberOfClasses,false,0,0,histo,npis);
-
-						if (chi2dist >= 0.0)
-						{
-							ccConsole::Print("[Distribution fitting] %s: Chi2 Distance = %f",distrib->getName(),chi2dist);
-						}
-						else
-						{
-							ccConsole::Warning("[Distribution fitting] Failed to compute Chi2 distance?!");
-							delete[] histo;
-							histo=0;
-							delete[] npis;
-							npis=0;
-						}
+						histo.resize(numberOfClasses,0);
+						npis.resize(numberOfClasses,0.0);
+					}
+					catch(std::bad_alloc)
+					{
+						ccConsole::Warning("[Distribution fitting] Not enough memory!");
+						continue;
 					}
 
+					unsigned finalNumberOfClasses = 0;
+					double chi2dist = CCLib::StatisticalTestingTools::computeAdaptativeChi2Dist(distrib,pc,0,finalNumberOfClasses,false,0,0,&(histo[0]),&(npis[0]));
+
+					if (chi2dist >= 0.0)
+					{
+						ccConsole::Print("[Distribution fitting] %s: Chi2 Distance = %f",distrib->getName(),chi2dist);
+					}
+					else
+					{
+						ccConsole::Warning("[Distribution fitting] Failed to compute Chi2 distance?!");
+						continue;
+					}
+
+					//show histogram
 					ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
 					hDlg->setWindowTitle("[Distribution fitting]");
 					{
 						ccHistogramWindow* histogram = hDlg->window();
 						histogram->setInfoStr(description);
-						if (histo && npis)
-						{
-							histogram->fromBinArray(histo,numberOfClasses,sf->getMin(),sf->getMax(),true);
-							histo=0;
-							histogram->setCurveValues(npis,numberOfClasses,true);
-							npis=0;
-						}
-						else
-						{
-							histogram->fromSF(sf,numberOfClasses);
-						}
+						histogram->fromBinArray(histo,sf->getMin(),sf->getMax());
+						histo.clear();
+						histogram->setCurveValues(npis);
+						npis.clear();
 					}
 					hDlg->show();
 				}
@@ -4554,6 +4583,7 @@ void MainWindow::doActionComputeStatParams()
     }
 
     delete distrib;
+	distrib = 0;
 }
 
 struct ComponentIndexAndSize
@@ -6263,13 +6293,13 @@ void MainWindow::deactivateSegmentationMode(bool state)
 							entity->setName(entity->getName()+QString(".remaining"));
 
                             //we also need to check if there is a childrent that is a GBLsensor
-                            size_t n = entity->getChildrenNumber();
+                            unsigned n = entity->getChildrenNumber();
 
-                            //we put a new sensor here if we will find one
-                            ccGBLSensor * sensor(NULL);
-                            for (size_t i = 0; i < n ; ++i)
+                            //we put a new sensor here if we find one
+                            ccGBLSensor* sensor = 0;
+                            for (unsigned i=0; i<n; ++i)
                             {
-                                if(entity->getChild(i)->isA(CC_TYPES::GBL_SENSOR))
+                                if (entity->getChild(i)->isA(CC_TYPES::GBL_SENSOR))
                                 {
                                     sensor = ccHObjectCaster::ToGBLSensor(entity->getChild(i));
                                     break;
@@ -6290,8 +6320,6 @@ void MainWindow::deactivateSegmentationMode(bool state)
                                 sensor->project(ccHObjectCaster::ToGenericPointCloud(entity), errorCode, true);
 
                                 cloud->addChild(cloned_sensor);
-
-
                             }
 							putObjectBackIntoDBTree(entity,objContext);
 						}
@@ -7068,9 +7096,7 @@ void MainWindow::showSelectedEntitiesHistogram()
 			if (sf)
 			{
 				ccHistogramWindowDlg* hDlg = new ccHistogramWindowDlg(this);
-
-				const QString& cloudName = cloud->getName();
-				hDlg->setWindowTitle(QString("Histogram [%1]").arg(cloudName));
+				hDlg->setWindowTitle(QString("Histogram [%1]").arg(cloud->getName()));
 
 				ccHistogramWindow* histogram = hDlg->window();
 				{
@@ -9358,6 +9384,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
     actionComputeOctree->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionComputeNormals->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionSetColorGradient->setEnabled(atLeastOneCloud || atLeastOneMesh);
+	actionChangeColorLevels->setEnabled(atLeastOneCloud || atLeastOneMesh);
 	actionCrop->setEnabled(atLeastOneCloud || atLeastOneMesh);
     actionSetUniqueColor->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!
     actionColorize->setEnabled(atLeastOneEntity/*atLeastOneCloud || atLeastOneMesh*/); //DGM: we can set color to a group now!

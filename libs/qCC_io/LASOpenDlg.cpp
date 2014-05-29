@@ -123,3 +123,8 @@ bool LASOpenDlg::autoSkipMode() const
 {
 	return autoSkipNextCheckBox->isChecked();
 }
+
+bool LASOpenDlg::forced8bitRgbMode() const
+{
+	return force8bitRgbCheckBox->isChecked();
+}

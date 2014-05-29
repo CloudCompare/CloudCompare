@@ -90,6 +90,9 @@ public:
 	//! Auto-skip mode (to use the same parameters for ALL files afterwards)
 	bool autoSkipMode() const;
 
+	//! Whether 8-bit RGB mode is forced or not
+	bool forced8bitRgbMode() const;
+
 };
 
 #endif //CC_LAS_OPEN_DIALOG

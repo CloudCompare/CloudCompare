@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>432</width>
-    <height>278</height>
+    <width>417</width>
+    <height>276</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,7 +39,16 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -94,7 +103,16 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_3">
-      <property name="margin">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
        <number>0</number>
       </property>
       <item>
@@ -221,6 +239,12 @@
      </item>
      <item>
       <widget class="QDoubleSpinBox" name="shiftX">
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="minimum">
         <double>-1000000000.000000000000000</double>
        </property>
@@ -231,6 +255,12 @@
      </item>
      <item>
       <widget class="QDoubleSpinBox" name="shiftY">
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="minimum">
         <double>-1000000000.000000000000000</double>
        </property>
@@ -241,6 +271,12 @@
      </item>
      <item>
       <widget class="QDoubleSpinBox" name="shiftZ">
+       <property name="maximumSize">
+        <size>
+         <width>150</width>
+         <height>16777215</height>
+        </size>
+       </property>
        <property name="minimum">
         <double>-1000000000.000000000000000</double>
        </property>

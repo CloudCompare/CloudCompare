@@ -202,7 +202,9 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 					|| tokens.front() == "map_Kd"
 					|| tokens.front() == "map_Ks")
 			{
-				QString texture_filename = currentLine.mid(7).trimmed();
+				//DGM: in case there's hidden or space characters at the beginning of the line...
+				int shift = currentLine.indexOf("map_K",0);
+				QString texture_filename = (shift + 7 < currentLine.size() ? currentLine.mid(shift+7).trimmed() : QString());
 				QString fullTexName = path+QString('/')+texture_filename;
 				QImage image;
 				if (!image.load(fullTexName))

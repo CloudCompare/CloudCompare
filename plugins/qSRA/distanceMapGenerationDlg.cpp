@@ -519,8 +519,8 @@ void DistanceMapGenerationDlg::updateZoom(ccBBox& box)
 		CCVector3 P = box.getCenter();
 		if (centerPos != 0.5f) //if we don't look exactly at the center of the map
 			P.x = box.minCorner().x * (1.0f - centerPos) + box.maxCorner().x * centerPos;
-		m_window->setPivotPoint(P);
-		m_window->setCameraPos(P);
+		m_window->setPivotPoint(CCVector3d::fromArray(P.u));
+		m_window->setCameraPos(CCVector3d::fromArray(P.u));
 
 		m_window->invalidateViewport();
 		m_window->invalidateVisualization();

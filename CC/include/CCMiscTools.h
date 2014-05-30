@@ -63,6 +63,15 @@ namespace CCLib
 		static void ComputeBaseVectors(	const CCVector3 &N,
 										CCVector3& X,
 										CCVector3& Y);
+		//! Computes base vectors for a given 3D plane - double version
+		/** Determines at least two orthogonal vectors perpendicular to a third one
+			\param[in] N a non null vector
+			\param[out] X the first vector (a 3 coordinates array to be updated by the algorithm)
+			\param[out] Y the second vector (a 3 coordinates array to be updated by the algorithm)
+		**/
+		static void ComputeBaseVectors(	const CCVector3d &N,
+										CCVector3d& X,
+										CCVector3d& Y);
 
 		//! Ovelap test between a 3D cubical box and a triangle
 		/** \param boxcenter the box center (as a 3 coordinates array)

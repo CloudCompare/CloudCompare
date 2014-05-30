@@ -184,12 +184,12 @@ public:
 	//! Sets pivot point
 	/** Emits the 'pivotPointChanged' signal.
 	**/
-    virtual void setPivotPoint(const CCVector3& P);
+    virtual void setPivotPoint(const CCVector3d& P);
 
 	//! Sets camera position
 	/** Emits the 'cameraPosChanged' signal.
 	**/
-    virtual void setCameraPos(const CCVector3& P);
+    virtual void setCameraPos(const CCVector3d& P);
 
 	//! Displaces camera
 	/** Values are given in objects world along the current camera
@@ -238,7 +238,7 @@ public:
 		- the rotation around the camera center in viewer-centered mode
 		(see setPerspectiveState).
 	**/
-    virtual void rotateBaseViewMat(const ccGLMatrix& rotMat);
+    virtual void rotateBaseViewMat(const ccGLMatrixd& rotMat);
 
 	//! Returns the base view matrix
 	/** Warning: 'base view' marix is either:
@@ -246,7 +246,7 @@ public:
 		- the rotation around the camera center in viewer-centered mode
 		(see setPerspectiveState).
 	**/
-    virtual const ccGLMatrix& getBaseViewMat();
+    virtual const ccGLMatrixd& getBaseViewMat();
 	
 	//! Sets the base view matrix
 	/** Warning: 'base view' marix is either:
@@ -254,7 +254,7 @@ public:
 		- the rotation around the camera center in viewer-centered mode
 		(see setPerspectiveState).
 	**/
-    virtual const void setBaseViewMat(ccGLMatrix& mat);
+    virtual const void setBaseViewMat(ccGLMatrixd& mat);
 
 	//! Returns the current (OpenGL) view matrix as a double array
 	/** Warning: different from 'view' matrix returned by getBaseViewMat.
@@ -269,7 +269,7 @@ public:
     virtual void setView(CC_VIEW_ORIENTATION orientation, bool redraw = true);
 	
 	//! Sets camera to a custom view (forward and up directions must be specified)
-	virtual void setCustomView(const CCVector3& forward, const CCVector3& up, bool forceRedraw = true);
+	virtual void setCustomView(const CCVector3d& forward, const CCVector3d& up, bool forceRedraw = true);
 
 	//! Sets current interaction mode
 	virtual void setInteractionMode(INTERACTION_MODE mode);
@@ -353,7 +353,7 @@ public:
 	//! Returns the actual pixel size on screen (taking zoom or perspective parameters into account)
 	/** In perspective mode, this value is approximate.
 	**/
-	virtual float computeActualPixelSize() const;
+	virtual double computeActualPixelSize() const;
 
 	//! Returns the zoom value equivalent to the current camera position (perspective only)
 	float computePerspectiveZoom() const;
@@ -371,13 +371,13 @@ public:
 	/** This is the direction normal to the screen
 		(pointing 'inside') in world base.
 	**/
-    CCVector3 getCurrentViewDir() const;
+    CCVector3d getCurrentViewDir() const;
 
     //! Returns current up direction
 	/** This is the vertical direction of the screen
 		(pointing 'upward') in world base.
 	**/
-	CCVector3 getCurrentUpDir() const;
+	CCVector3d getCurrentUpDir() const;
 
 	//! Returns current parameters for this display (const version)
 	/** Warning: may return overriden parameters!
@@ -437,7 +437,7 @@ signals:
 	/*** Camera link mode (interactive modifications of the view/camera are echoed to other windows) ***/
 
 	//! Signal emitted when the window 'model view' matrix is interactively changed
-    void viewMatRotated(const ccGLMatrix& rotMat);
+    void viewMatRotated(const ccGLMatrixd& rotMat);
 	//! Signal emitted when the camera is interactively displaced
     void cameraDisplaced(float ddx, float ddy);
 	//! Signal emitted when the mouse wheel is rotated
@@ -447,24 +447,24 @@ signals:
 	void perspectiveStateChanged();
 
 	//! Signal emitted when the window 'base view' matrix is changed
-    void baseViewMatChanged(const ccGLMatrix& newViewMat);
+    void baseViewMatChanged(const ccGLMatrixd& newViewMat);
 
 	//! Signal emitted when the pixel size is changed
 	void pixelSizeChanged(float);
 
 	//! Signal emitted when the pivot point is changed
-	void pivotPointChanged(const CCVector3&);
+	void pivotPointChanged(const CCVector3d&);
 
 	//! Signal emitted when the camera position is changed
-	void cameraPosChanged(const CCVector3&);
+	void cameraPosChanged(const CCVector3d&);
 
     //! Signal emitted when the selected object is translated by the user
-    void translation(const CCVector3& t);
+    void translation(const CCVector3d& t);
 
     //! Signal emitted when the selected object is rotated by the user
 	/** \param rotMat rotation applied to current viewport (4x4 OpenGL matrix)
 	**/
-    void rotation(const ccGLMatrix& rotMat);
+    void rotation(const ccGLMatrixd& rotMat);
 
     //! Signal emitted when the left mouse button is cliked on the window
 	/** Arguments correspond to the clicked point coordinates (x,y) in
@@ -589,13 +589,13 @@ protected:
 	//! Converts a given (mouse) position in pixels to an orientation
 	/** The orientation vector origin is the current pivot point!
 	**/
-	CCVector3 convertMousePositionToOrientation(int x, int y);
+	CCVector3d convertMousePositionToOrientation(int x, int y);
 
 	//! Returns the height of the 'GL filter' banner
 	int getGlFilterBannerHeight() const;
 
 	//! Returns real camera center (i.e. with z centered on the visible objects bounding-box in ortho mode)
-	CCVector3 getRealCameraCenter() const;
+	CCVector3d getRealCameraCenter() const;
 
 	/***************************************************
                     OpenGL Extensions
@@ -637,9 +637,9 @@ protected:
     //! Last mouse position
     QPoint m_lastMousePos;
     //! Last mouse orientation
-    CCVector3 m_lastMouseOrientation;
+    CCVector3d m_lastMouseOrientation;
     //! Current mouse orientation
-    CCVector3 m_currentMouseOrientation;
+    CCVector3d m_currentMouseOrientation;
 
 	//! Complete visualization matrix (GL style - double version)
 	double m_viewMatd[OPENGL_MATRIX_SIZE];

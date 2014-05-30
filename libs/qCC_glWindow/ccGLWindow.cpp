@@ -67,10 +67,10 @@ const float CC_GL_MAX_ZOOM_RATIO = 1.0e6f;
 const float CC_GL_MIN_ZOOM_RATIO = 1.0e-6f;
 
 //Vaious overlay elements dimensions
-const float CC_DISPLAYED_TRIHEDRON_AXES_LENGTH = 25.0f;
-const float CC_DISPLAYED_PIVOT_RADIUS_PERCENT = 0.8f; //percentage of the smallest screen dimension
-const float CC_DISPLAYED_CUSTOM_LIGHT_LENGTH = 10.0f;
-const float CC_DISPLAYED_CENTER_CROSS_LENGTH = 10.0f;
+const double CC_DISPLAYED_PIVOT_RADIUS_PERCENT	= 0.8; //percentage of the smallest screen dimension
+const double CC_DISPLAYED_CUSTOM_LIGHT_LENGTH	= 10.0;
+const float CC_DISPLAYED_TRIHEDRON_AXES_LENGTH	= 25.0f;
+const float CC_DISPLAYED_CENTER_CROSS_LENGTH	= 10.0f;
 
 //Hot zone (interactors) dimensions
 const int CC_HOT_ZONE_WIDTH = 270;
@@ -301,7 +301,7 @@ void ccGLWindow::initializeGL()
 	//we init model view matrix with identity and store it into 'viewMat' and 'm_viewMatd'
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	glGetFloatv(GL_MODELVIEW_MATRIX, m_viewportParams.viewMat.data());
+	glGetDoublev(GL_MODELVIEW_MATRIX, m_viewportParams.viewMat.data());
 	glGetDoublev(GL_MODELVIEW_MATRIX, m_viewMatd);
 
 	//we emit the 'baseViewMatChanged' signal
@@ -310,7 +310,6 @@ void ccGLWindow::initializeGL()
 	//we init projection matrix with identity
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	//glGetFloatv(GL_PROJECTION_MATRIX, m_projMat.data());
 	glGetDoublev(GL_PROJECTION_MATRIX, m_projMatd);
 
 	//set viewport and visu. as invalid
@@ -462,7 +461,7 @@ void ccGLWindow::resizeGL(int w, int h)
 static const qint64 FRAMERATE_TEST_DURATION_MSEC = 10000;
 static const unsigned FRAMERATE_TEST_MIN_FRAMES = 50;
 static bool s_frameRateTestInProgress = false;
-static ccGLMatrix s_frameRateBackupMat;
+static ccGLMatrixd s_frameRateBackupMat;
 static QTimer s_frameRateTimer;
 static QElapsedTimer s_frameRateElapsedTimer;
 static qint64 s_frameRateElapsedTime_ms = 0; //i.e. not initialized
@@ -763,9 +762,9 @@ void ccGLWindow::paintGL()
 			//rotate base view matrix
 			glMatrixMode(GL_MODELVIEW);
 			glPushMatrix();
-			glLoadMatrixf(m_viewportParams.viewMat.data());
+			glLoadMatrixd(m_viewportParams.viewMat.data());
 			glRotated(360.0/static_cast<double>(FRAMERATE_TEST_MIN_FRAMES),0.0,1.0,0.0);
-			glGetFloatv(GL_MODELVIEW_MATRIX, m_viewportParams.viewMat.data());
+			glGetDoublev(GL_MODELVIEW_MATRIX, m_viewportParams.viewMat.data());
 			m_validModelviewMatrix = false;
 			glPopMatrix();
 		}
@@ -801,7 +800,7 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 		glClearColor(	static_cast<float>(bkgCol[0]) / 255.0f,
 						static_cast<float>(bkgCol[1]) / 255.0f,
 						static_cast<float>(bkgCol[2]) / 255.0f,
-						1.0f);
+						1.0f );
 
 		//we clear background
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1059,7 +1058,7 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 		return;
 
 	//we get the bounding-box diagonal length
-	float bbDiag = static_cast<float>(zoomedBox.getDiagNorm());
+	double bbDiag = zoomedBox.getDiagNorm();
 
 	if (bbDiag < ZERO_TOLERANCE)
 	{
@@ -1070,19 +1069,19 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 	//we compute the pixel size (in world coordinates)
 	{
 		int minScreenSize = std::min(m_glWidth,m_glHeight);
-		setPixelSize(minScreenSize > 0 ? bbDiag / static_cast<float>(minScreenSize) : 1.0f);
+		setPixelSize(minScreenSize > 0 ? static_cast<float>(bbDiag / minScreenSize) : 1.0f);
 	}
 
 	//we set the pivot point on the box center
-	CCVector3 P = zoomedBox.getCenter();
+	CCVector3d P = CCVector3d::fromArray(zoomedBox.getCenter().u);
 	setPivotPoint(P);
 	
-	CCVector3 cameraPos = P;
+	CCVector3d cameraPos = P;
 	if (m_viewportParams.perspectiveView) //camera is on the pivot in ortho mode
 	{
 		//we must go backward so as to see the object!
 		assert(m_viewportParams.fov > ZERO_TOLERANCE);
-		float d = bbDiag / tan(m_viewportParams.fov * static_cast<float>(CC_DEG_TO_RAD));
+		double d = bbDiag / tan(m_viewportParams.fov * CC_DEG_TO_RAD);
 		cameraPos -= getCurrentViewDir() * d;
 	}
 	setCameraPos(cameraPos);
@@ -1164,7 +1163,7 @@ void ccGLWindow::setZoom(float value)
 	}
 }
 
-void ccGLWindow::setCameraPos(const CCVector3& P)
+void ccGLWindow::setCameraPos(const CCVector3d& P)
 {
 	m_viewportParams.cameraCenter = P;
 	emit cameraPosChanged(m_viewportParams.cameraCenter);
@@ -1184,14 +1183,14 @@ void ccGLWindow::moveCamera(float dx, float dy, float dz)
 	//current X, Y and Z viewing directions
 	//correspond to the 'model view' matrix
 	//lines.
-	CCVector3 V(dx,dy,dz);
+	CCVector3d V(dx,dy,dz);
 	if (!m_viewportParams.objectCenteredView)
 		m_viewportParams.viewMat.transposed().applyRotation(V);
 
 	setCameraPos(m_viewportParams.cameraCenter + V);
 }
 
-void ccGLWindow::setPivotPoint(const CCVector3& P)
+void ccGLWindow::setPivotPoint(const CCVector3d& P)
 {
 	m_viewportParams.pivotPoint = P;
 	emit pivotPointChanged(m_viewportParams.pivotPoint);
@@ -1325,8 +1324,8 @@ void ccGLWindow::drawTrihedron()
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-	glTranslatef(w, -h, 0.0f);
-	glMultMatrixf(m_viewportParams.viewMat.data());
+	glTranslatef(w, -h, 0);
+	glMultMatrixd(m_viewportParams.viewMat.data());
 
 	if (m_trihedronGLList == GL_INVALID_LIST_ID)
 	{
@@ -1370,14 +1369,14 @@ void ccGLWindow::invalidateViewport()
 	m_updateFBO = true;
 }
 
-CCVector3 ccGLWindow::getRealCameraCenter() const
+CCVector3d ccGLWindow::getRealCameraCenter() const
 {
 	if (m_viewportParams.perspectiveView)
 		return m_viewportParams.cameraCenter;
 
 	ccBBox box = getVisibleObjectsBB();
 
-	return CCVector3(	m_viewportParams.cameraCenter.x,
+	return CCVector3d(	m_viewportParams.cameraCenter.x,
 						m_viewportParams.cameraCenter.y,
 						box.isValid() ? box.getCenter().z : 0 );
 }
@@ -1416,8 +1415,8 @@ void ccGLWindow::recalcProjectionMatrix()
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
 
-	PointCoordinateType bbHalfDiag = 1;
-	CCVector3 bbCenter(0,0,0);
+	double bbHalfDiag = 1;
+	CCVector3d bbCenter(0,0,0);
 
 	//compute center of visible objects constellation
 	if (m_globalDBRoot)
@@ -1427,14 +1426,14 @@ void ccGLWindow::recalcProjectionMatrix()
 		if (box.isValid())
 		{
 			//get bbox center
-			bbCenter = box.getCenter();
+			bbCenter = CCVector3d::fromArray(box.getCenter().u);
 			//get half bbox diagonal length
-			bbHalfDiag = box.getDiagNorm() / 2;
+			bbHalfDiag = static_cast<double>(box.getDiagNorm()) / 2;
 		}
 	}
 
 	//virtual pivot point (i.e. to handle viewer-based mode smoothly)
-	CCVector3 pivotPoint = (m_viewportParams.objectCenteredView ? m_viewportParams.pivotPoint : bbCenter);
+	CCVector3d pivotPoint = (m_viewportParams.objectCenteredView ? m_viewportParams.pivotPoint : bbCenter);
 
 	//distance between camera and pivot point
 	//warning: it's important to get the 'real' center (i.e. with z=bbCenter.z in ortho. view)
@@ -1443,26 +1442,26 @@ void ccGLWindow::recalcProjectionMatrix()
 	//switching from perspective to ortho. view).
 	//While the user won't see the difference this has a great influence on GL filters
 	//(as normalized depth map values depends on it)
-	float CP = static_cast<float>( (getRealCameraCenter()-pivotPoint).norm() );
+	double CP = (getRealCameraCenter()-pivotPoint).norm();
 		
 	//distance between pivot point and DB farthest point
-	float MP = static_cast<float>( (bbCenter-pivotPoint).norm() + bbHalfDiag );
+	double MP = (bbCenter - pivotPoint).norm() + bbHalfDiag;
 
 	//pivot symbol should always be (potentially) visible in object-based mode
 	if (m_pivotSymbolShown && m_viewportParams.objectCenteredView && m_pivotVisibility != PIVOT_HIDE)
 	//if (m_viewportParams.objectCenteredView)
 	{
-		float pivotActualRadius = (CC_DISPLAYED_PIVOT_RADIUS_PERCENT) * static_cast<float>(std::min(m_glWidth,m_glHeight)) / 2;
-		float pivotSymbolScale = pivotActualRadius * computeActualPixelSize();
-		MP = std::max<float>(MP,pivotSymbolScale);
+		double pivotActualRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * static_cast<double>(std::min(m_glWidth,m_glHeight)) / 2;
+		double pivotSymbolScale = pivotActualRadius * computeActualPixelSize();
+		MP = std::max<double>(MP,pivotSymbolScale);
 	}
-	MP *= 1.01f; //for round-off issues
+	MP *= 1.01; //for round-off issues
 	
 	if (m_customLightEnabled)
 	{
 		//distance from custom light to pivot point
-		float d = static_cast<float>( (pivotPoint-CCVector3::fromArray(m_customLightPos)).norm() );
-		MP = std::max<float>(MP,d);
+		double d = (pivotPoint - CCVector3d::fromArray(m_customLightPos)).norm();
+		MP = std::max<double>(MP,d);
 	}
 
 	if (m_viewportParams.perspectiveView)
@@ -1471,7 +1470,7 @@ void ccGLWindow::recalcProjectionMatrix()
 		//DGM: by default we clip zNear just after 0 (not too close,
 		//otherwise it can cause a very strange behavior when looking
 		//at objects with large coordinates)
-		double zNear = static_cast<double>(MP)*1e-3;
+		double zNear = static_cast<double>(MP)*1.0e-3;
 		if (m_viewportParams.objectCenteredView)
 			zNear = std::max<double>(CP-MP,zNear);
 
@@ -1485,19 +1484,18 @@ void ccGLWindow::recalcProjectionMatrix()
 	else
 	{
 		//max distance (camera to 'farthest' point)
-		float maxDist = CP + MP;
+		double maxDist = CP + MP;
 
-		float maxDist_pix = maxDist / m_viewportParams.pixelSize * m_viewportParams.zoom;
-		maxDist_pix = std::max<float>(maxDist_pix,1.0f);
+		double maxDist_pix = maxDist / m_viewportParams.pixelSize * m_viewportParams.zoom;
+		maxDist_pix = std::max<double>(maxDist_pix,1.0);
 
-		float halfW = static_cast<float>(m_glWidth)/2;
-		float halfH = static_cast<float>(m_glHeight)/2 * m_viewportParams.orthoAspectRatio;
+		double halfW = static_cast<double>(m_glWidth)/2;
+		double halfH = static_cast<double>(m_glHeight)/2 * m_viewportParams.orthoAspectRatio;
 
 		glOrtho(-halfW,halfW,-halfH,halfH,-maxDist_pix,maxDist_pix);
 	}
 
 	//we save projection matrix
-	//glGetFloatv(GL_PROJECTION_MATRIX, m_projMat.data());
 	glGetDoublev(GL_PROJECTION_MATRIX, m_projMatd);
 
 	m_validProjectionMatrix = true;
@@ -1530,30 +1528,30 @@ void ccGLWindow::recalcModelViewMatrix()
 		glScalef(totalZoom,totalZoom,totalZoom);
 	}
 
-	CCVector3 cameraCenter = getRealCameraCenter();
+	CCVector3d cameraCenter = getRealCameraCenter();
 
 	//apply current camera parameters (see trunk/doc/rendering_pipeline.doc)
 	if (m_viewportParams.objectCenteredView)
 	{
 		//place origin on camera center
-		ccGL::Translate(-cameraCenter.x, -cameraCenter.y, -cameraCenter.z);
+		glTranslated(-cameraCenter.x, -cameraCenter.y, -cameraCenter.z);
 
 		//go back to initial origin
-		ccGL::Translate(m_viewportParams.pivotPoint.x, m_viewportParams.pivotPoint.y, m_viewportParams.pivotPoint.z);
+		glTranslated(m_viewportParams.pivotPoint.x, m_viewportParams.pivotPoint.y, m_viewportParams.pivotPoint.z);
 
 		//rotation (viewMat is simply a rotation matrix around the pivot here!)
-		glMultMatrixf(m_viewportParams.viewMat.data());
+		glMultMatrixd(m_viewportParams.viewMat.data());
 
 		//place origin on pivot point
-		ccGL::Translate(-m_viewportParams.pivotPoint.x, -m_viewportParams.pivotPoint.y, -m_viewportParams.pivotPoint.z);
+		glTranslated(-m_viewportParams.pivotPoint.x, -m_viewportParams.pivotPoint.y, -m_viewportParams.pivotPoint.z);
 	}
 	else
 	{
 		//rotation (viewMat is the rotation around the camera center here - no pivot)
-		glMultMatrixf(m_viewportParams.viewMat.data());
+		glMultMatrixd(m_viewportParams.viewMat.data());
 
 		//place origin on camera center
-		ccGL::Translate(-cameraCenter.x, -cameraCenter.y, -cameraCenter.z);
+		glTranslated(-cameraCenter.x, -cameraCenter.y, -cameraCenter.z);
 	}		
 
 	//we save visualization matrix
@@ -1563,12 +1561,12 @@ void ccGLWindow::recalcModelViewMatrix()
 	m_validModelviewMatrix=true;
 }
 
-const ccGLMatrix& ccGLWindow::getBaseViewMat()
+const ccGLMatrixd& ccGLWindow::getBaseViewMat()
 {
 	return m_viewportParams.viewMat;
 }
 
-const void ccGLWindow::setBaseViewMat(ccGLMatrix& mat)
+const void ccGLWindow::setBaseViewMat(ccGLMatrixd& mat)
 {
 	m_viewportParams.viewMat = mat;
 
@@ -1633,9 +1631,9 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 	context.sfColorScaleToDisplay = 0;
 
 	//point picking
-	float pixSize = computeActualPixelSize();
-	context.pickedPointsRadius = static_cast<float>(guiParams.pickedPointsSize) * pixSize;
-	context.pickedPointsTextShift = 5.0f * pixSize; //5 pixels shift
+	double pixSize = computeActualPixelSize();
+	context.pickedPointsRadius = static_cast<float>(guiParams.pickedPointsSize * pixSize);
+	context.pickedPointsTextShift = static_cast<float>(5 * pixSize); //5 pixels shift
 
 	//text display
 	context.dispNumberPrecision = guiParams.displayedNumPrecision;
@@ -1732,27 +1730,27 @@ void ccGLWindow::releaseTexture(unsigned texID)
 	deleteTexture(texID);
 }
 
-CCVector3 ccGLWindow::getCurrentViewDir() const
+CCVector3d ccGLWindow::getCurrentViewDir() const
 {
 	if (m_viewportParams.objectCenteredView)
-		return CCVector3(0.0f,0.0f,-1.0f);
+		return CCVector3d(0,0,-1);
 
 	//otherwise view direction is (the opposite of) the 3rd line of the current view matrix
-	const float* M = m_viewportParams.viewMat.data();
-	CCVector3 axis(-M[2],-M[6],-M[10]);
+	const double* M = m_viewportParams.viewMat.data();
+	CCVector3d axis(-M[2],-M[6],-M[10]);
 	axis.normalize();
 
 	return axis;
 }
 
-CCVector3 ccGLWindow::getCurrentUpDir() const
+CCVector3d ccGLWindow::getCurrentUpDir() const
 {
 	//if (m_viewportParams.objectCenteredView)
-	//	return CCVector3(0.0f,1.0f,0.0f);
+	//	return CCVector3d(0,1,0);
 
 	//otherwise up direction is the 2nd line of the current view matrix
-	const float* M = m_viewportParams.viewMat.data();
-	CCVector3 axis(M[1],M[5],M[9]);
+	const double* M = m_viewportParams.viewMat.data();
+	CCVector3d axis(M[1],M[5],M[9]);
 	axis.normalize();
 
 	return axis;
@@ -1799,19 +1797,18 @@ void ccGLWindow::enableEmbeddedIcons(bool state)
 	setMouseTracking(state);
 }
 
-CCVector3 ccGLWindow::convertMousePositionToOrientation(int x, int y)
+CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 {
-	PointCoordinateType xc = static_cast<PointCoordinateType>(width()/2);
-	PointCoordinateType yc = static_cast<PointCoordinateType>(height()/2);
+	double xc = static_cast<double>(width()/2);
+	double yc = static_cast<double>(height()/2);
 
 	GLdouble xp,yp;
 	if (m_viewportParams.objectCenteredView)
 	{
-		GLdouble zp;
-		
 		//project the current pivot point on screen
 		int VP[4];
 		getViewportArray(VP);
+		GLdouble zp;
 		gluProject(m_viewportParams.pivotPoint.x,m_viewportParams.pivotPoint.y,m_viewportParams.pivotPoint.z,getModelViewMatd(),getProjectionMatd(),VP,&xp,&yp,&zp);
 
 		//we set the virtual rotation pivot closer to the actual one (but we always stay in the central part of the screen!)
@@ -1830,26 +1827,24 @@ CCVector3 ccGLWindow::convertMousePositionToOrientation(int x, int y)
 	//invert y
 	y = height()-1 - y;
 
-	CCVector3 v(static_cast<PointCoordinateType>(x) - static_cast<PointCoordinateType>(xp),
-				static_cast<PointCoordinateType>(y) - static_cast<PointCoordinateType>(yp),
-				0);
+	CCVector3d v(x - xp, y - yp, 0);
 
-	v.x = std::max<PointCoordinateType>(std::min<PointCoordinateType>(v.x/xc,1),-1);
-	v.y = std::max<PointCoordinateType>(std::min<PointCoordinateType>(v.y/yc,1),-1);
+	v.x = std::max<double>(std::min<double>(v.x/xc,1),-1);
+	v.y = std::max<double>(std::min<double>(v.y/yc,1),-1);
 
 	//square 'radius'
-	PointCoordinateType d2 = v.x*v.x + v.y*v.y;
+	double d2 = v.x*v.x + v.y*v.y;
 
 	//projection on the unit sphere
 	if (d2 > 1)
 	{
-		PointCoordinateType d = sqrt(d2);
+		double d = sqrt(d2);
 		v.x /= d;
 		v.y /= d;
 	}
 	else
 	{
-		v.z = sqrt(1 - d2);
+		v.z = sqrt(1.0 - d2);
 	}
 
 	return v;
@@ -1951,9 +1946,11 @@ void ccGLWindow::mousePressEvent(QMouseEvent *event)
 			QApplication::setOverrideCursor(QCursor(Qt::PointingHandCursor));
 
 			//let's check if the mouse is on a selected item first!
-			if (QApplication::keyboardModifiers () == Qt::NoModifier
-				|| QApplication::keyboardModifiers () == Qt::ControlModifier)
+			if (	QApplication::keyboardModifiers () == Qt::NoModifier
+				||	QApplication::keyboardModifiers () == Qt::ControlModifier )
+			{
 				updateActiveItemsList(event->x(), event->y(), true);
+			}
 		}
 
 		emit leftButtonClicked(event->x()-width()/2,height()/2-event->y());
@@ -2018,8 +2015,8 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		)
 	{
 		//displacement vector (in "3D")
-		float pixSize = computeActualPixelSize();
-		CCVector3 u(static_cast<float>(dx)*pixSize, -static_cast<float>(dy)*pixSize, 0);
+		double pixSize = computeActualPixelSize();
+		CCVector3d u(static_cast<double>(dx)*pixSize, -static_cast<double>(dy)*pixSize, 0);
 		if (!m_viewportParams.perspectiveView)
 			u.y *= m_viewportParams.orthoAspectRatio;
 
@@ -2058,8 +2055,8 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 		if (!m_activeItems.empty())
 		{
 			//displacement vector (in "3D")
-			float pixSize = computeActualPixelSize();
-			CCVector3 u(static_cast<float>(dx)*pixSize, -static_cast<float>(dy)*pixSize, 0);
+			double pixSize = computeActualPixelSize();
+			CCVector3d u(static_cast<double>(dx)*pixSize, -static_cast<double>(dy)*pixSize, 0);
 			m_viewportParams.viewMat.transposed().applyRotation(u);
 
 			for (std::list<ccInteractor*>::iterator it=m_activeItems.begin(); it!=m_activeItems.end(); ++it)
@@ -2128,7 +2125,7 @@ void ccGLWindow::mouseMoveEvent(QMouseEvent *event)
 			{
 				m_currentMouseOrientation = convertMousePositionToOrientation(x, y);
 
-				ccGLMatrix rotMat = ccGLUtils::GenerateGLRotationMatrixFromVectors(m_lastMouseOrientation,m_currentMouseOrientation);
+				ccGLMatrixd rotMat = ccGLUtils::GenerateGLRotationMatrixFromVectors(m_lastMouseOrientation,m_currentMouseOrientation);
 				m_lastMouseOrientation = m_currentMouseOrientation;
 				m_updateFBO = true;
 
@@ -2752,7 +2749,7 @@ void ccGLWindow::drawCustomLight()
 {
 	glColor3ubv(ccColor::yellow);
 	//ensure that the star size is constant (in pixels)
-	GLfloat d = CC_DISPLAYED_CUSTOM_LIGHT_LENGTH * computeActualPixelSize();
+	GLfloat d = static_cast<GLfloat>(CC_DISPLAYED_CUSTOM_LIGHT_LENGTH * computeActualPixelSize());
 
 	glBegin(GL_LINES);
 	glVertex3f(m_customLightPos[0]-d, m_customLightPos[1],   m_customLightPos[2]);
@@ -2765,22 +2762,21 @@ void ccGLWindow::drawCustomLight()
 }
 
 //draw a unit circle in a given plane (0=YZ, 1 = XZ, 2=XY) 
-void glDrawUnitCircle(unsigned char dim, int steps = 64)
+static void glDrawUnitCircle(unsigned char dim, unsigned steps = 64)
 {
-	PointCoordinateType thetaStep = static_cast<PointCoordinateType>(2.0*M_PI/static_cast<double>(steps));
-	PointCoordinateType theta = 0;
-	unsigned char dimX = (dim<2 ? dim+1 : 0);
-	unsigned char dimY = (dimX<2 ? dimX+1 : 0);
+	double thetaStep = 2.0 * M_PI / static_cast<double>(steps);
+	unsigned char dimX = (dim  < 2 ? dim  + 1 : 0);
+	unsigned char dimY = (dimX < 2 ? dimX + 1 : 0);
 
-	CCVector3 P(0,0,0);
+	CCVector3d P(0,0,0);
 
 	glBegin(GL_LINE_LOOP);
-	for (int i=0; i<steps; ++i)
+	for (unsigned i=0; i<steps; ++i)
 	{
+		double theta = thetaStep * i;
 		P.u[dimX] = cos(theta);
 		P.u[dimY] = sin(theta);
-		ccGL::Vertex3v(P.u);
-		theta += thetaStep;
+		glVertex3dv(P.u);
 	}
 	glEnd();
 }
@@ -2827,10 +2823,10 @@ void ccGLWindow::drawPivot()
 	glPushMatrix();
 
 	//place origin on pivot point
-	ccGL::Translate(m_viewportParams.pivotPoint.x, m_viewportParams.pivotPoint.y, m_viewportParams.pivotPoint.z);
+	glTranslated(m_viewportParams.pivotPoint.x, m_viewportParams.pivotPoint.y, m_viewportParams.pivotPoint.z);
 
 	//compute actual symbol radius
-	float symbolRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * static_cast<float>(std::min(m_glWidth,m_glHeight)) / 2;
+	double symbolRadius = CC_DISPLAYED_PIVOT_RADIUS_PERCENT * static_cast<double>(std::min(m_glWidth,m_glHeight)) / 2;
 
 	if (m_pivotGLList == GL_INVALID_LIST_ID)
 	{
@@ -2839,7 +2835,7 @@ void ccGLWindow::drawPivot()
 
 		//draw a small sphere
 		{
-			ccSphere sphere(10.0f/symbolRadius);
+			ccSphere sphere(static_cast<PointCoordinateType>(10.0/symbolRadius));
 			sphere.setColor(ccColor::yellow);
 			sphere.showColors(true);
 			sphere.setVisible(true);
@@ -2892,8 +2888,8 @@ void ccGLWindow::drawPivot()
 	}
 
 	//constant scale
-	float scale = symbolRadius * computeActualPixelSize();
-	glScalef(scale,scale,scale);
+	double scale = symbolRadius * computeActualPixelSize();
+	glScaled(scale,scale,scale);
 	
 	glCallList(m_pivotGLList);
 
@@ -2908,21 +2904,21 @@ void ccGLWindow::togglePerspective(bool objectCentered)
 		setPerspectiveState(!m_viewportParams.perspectiveView,objectCentered);
 }
 
-float ccGLWindow::computeActualPixelSize() const
+double ccGLWindow::computeActualPixelSize() const
 {
 	if (!m_viewportParams.perspectiveView)
 	{
-		return m_viewportParams.pixelSize / m_viewportParams.zoom;
+		return static_cast<double>(m_viewportParams.pixelSize) / static_cast<double>(m_viewportParams.zoom);
 	}
 
 	int minScreenDim = std::min(m_glWidth,m_glHeight);
 	if (minScreenDim <= 0)
-		return 1.0f;
+		return 1.0;
 
 	//Camera center to pivot vector
-	PointCoordinateType zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
+	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 
-	return static_cast<float>(zoomEquivalentDist) * tan(m_viewportParams.fov * static_cast<float>(CC_DEG_TO_RAD)) / static_cast<float>(minScreenDim);
+	return static_cast<double>(zoomEquivalentDist) * tan(m_viewportParams.fov * static_cast<float>(CC_DEG_TO_RAD)) / static_cast<double>(minScreenDim);
 }
 
 float ccGLWindow::computePerspectiveZoom() const
@@ -2955,7 +2951,7 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 	m_viewportParams.objectCenteredView = objectCenteredView;
 
 	//Camera center to pivot vector
-	CCVector3 PC = m_viewportParams.cameraCenter - m_viewportParams.pivotPoint;
+	CCVector3d PC = m_viewportParams.cameraCenter - m_viewportParams.pivotPoint;
 
 	if (m_viewportParams.perspectiveView)
 	{
@@ -2965,8 +2961,8 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 			//(i.e. we replace the zoom by setting the camera at the right distance from
 			//the pivot point)
 			assert(m_viewportParams.fov > ZERO_TOLERANCE);
-			float screenSize = static_cast<float>(std::min(m_glWidth,m_glHeight))*m_viewportParams.pixelSize; //see how pixelSize is computed!
-			PC.z = static_cast<PointCoordinateType>( screenSize/(m_viewportParams.zoom*tan(m_viewportParams.fov*static_cast<float>(CC_DEG_TO_RAD))) );
+			double screenSize = static_cast<double>(std::min(m_glWidth,m_glHeight))*m_viewportParams.pixelSize; //see how pixelSize is computed!
+			PC.z = static_cast<double>( screenSize/(m_viewportParams.zoom*tan(m_viewportParams.fov*CC_DEG_TO_RAD)) );
 		}
 
 		//display message
@@ -3067,14 +3063,14 @@ void ccGLWindow::applyImageViewport(ccCalibratedImage* theImage)
 	//set the image camera center as OpenGL camera center
 	ccGLMatrix trans = theImage->getCameraMatrix();
 	CCVector3 C = trans.inverse().getTranslationAsVec3D();
-	setCameraPos(C);
+	setCameraPos(CCVector3d::fromArray(C.u));
 
 	//aspect ratio
-	m_viewportParams.perspectiveAspectRatio = float(theImage->getW())/float(theImage->getH());
+	m_viewportParams.perspectiveAspectRatio = static_cast<float>(theImage->getW()) / static_cast<float>(theImage->getH());
 
 	//apply orientation matrix
-	memset(trans.getTranslation(),0,sizeof(float)*3);
-	setBaseViewMat(trans);
+	trans.clearTranslation();
+	setBaseViewMat(ccGLMatrixd(trans.data()));
 
 	ccLog::Print("[ccGLWindow] Viewport applied");
 
@@ -3087,7 +3083,7 @@ void ccGLWindow::getViewportArray(int vpArray[])
 	glGetIntegerv(GL_VIEWPORT, vpArray);
 }
 
-void ccGLWindow::rotateBaseViewMat(const ccGLMatrix& rotMat)
+void ccGLWindow::rotateBaseViewMat(const ccGLMatrixd& rotMat)
 {
 	m_viewportParams.viewMat = rotMat * m_viewportParams.viewMat;
 
@@ -3106,7 +3102,7 @@ void ccGLWindow::updateZoom(float zoomFactor)
 		setZoom(m_viewportParams.zoom*zoomFactor);
 }
 
-void ccGLWindow::setCustomView(const CCVector3& forward, const CCVector3& up, bool forceRedraw/*=true*/)
+void ccGLWindow::setCustomView(const CCVector3d& forward, const CCVector3d& up, bool forceRedraw/*=true*/)
 {
 	makeCurrent();
 
@@ -3114,24 +3110,24 @@ void ccGLWindow::setCustomView(const CCVector3& forward, const CCVector3& up, bo
 	if (wasViewerBased)
 		setPerspectiveState(m_viewportParams.perspectiveView,true);
 
-	CCVector3 uForward = forward; uForward.normalize();
+	CCVector3d uForward = forward; uForward.normalize();
 
-	CCVector3 uSide = uForward.cross(up);
+	CCVector3d uSide = uForward.cross(up);
 	uSide.normalize();
-	CCVector3 uUp = uSide.cross(uForward);
+	CCVector3d uUp = uSide.cross(uForward);
 	uUp.normalize();
 
 
-	float* mat = m_viewportParams.viewMat.data();
-	mat[0]  = static_cast<float>( uSide.x );
-	mat[4]  = static_cast<float>( uSide.y );
-	mat[8]  = static_cast<float>( uSide.z );
-	mat[1]  = static_cast<float>( uUp.x );
-	mat[5]  = static_cast<float>( uUp.y );
-	mat[9]  = static_cast<float>( uUp.z );
-	mat[2]  = static_cast<float>(-uForward.x );
-	mat[6]  = static_cast<float>(-uForward.y );
-	mat[10] = static_cast<float>(-uForward.z );
+	double* mat = m_viewportParams.viewMat.data();
+	mat[0]  =  uSide.x ;
+	mat[4]  =  uSide.y ;
+	mat[8]  =  uSide.z ;
+	mat[1]  =  uUp.x ;
+	mat[5]  =  uUp.y ;
+	mat[9]  =  uUp.z ;
+	mat[2]  = -uForward.x ;
+	mat[6]  = -uForward.y ;
+	mat[10] = -uForward.z ;
 
 	if (wasViewerBased)
 		setPerspectiveState(m_viewportParams.perspectiveView,false);
@@ -3290,10 +3286,6 @@ bool ccGLWindow::renderToFile(	const char* filename,
 			}
 
 			glDisable(GL_DEPTH_TEST);
-			//As renderPixmap (or QGLPixelBuffer or QGLRenderBuffer) doesn't seem to handle shaders and/or fbo in their
-			//own rendering context, we simply get the existing fbo texture and save it.
-			//GLuint tex = (m_activeGLFilter ? m_activeGLFilter->getTexture() : fbo->getColorTexture(0));
-			//result = ccGLUtils::SaveTextureToFile(filename,tex,Wp,Hp);
 
 			if (filter)
 			{
@@ -3401,19 +3393,6 @@ bool ccGLWindow::renderToFile(	const char* filename,
 		else
 		{
 			ccLog::Error("Direct screen capture failed! (not enough memory?)");
-			/*ccLog::Warning("Direct screen capture failed! Let's try with a frame buffer object");
-
-			resizeGL(Wp,Hp);
-			if (!initFBO(Wp,Hp))
-			ccLog::Warning("Couldn't create FBO ... screen capture aborted");
-			else
-			{
-			result = ccGLUtils::SaveTextureToFile(filename,m_fbo->getColorTexture(0),Wp,Hp);
-			if (!m_alwaysUseFBO)
-			removeFBO();
-			redraw();
-			}
-			//*/
 		}
 	}
 
@@ -3424,18 +3403,6 @@ bool ccGLWindow::renderToFile(	const char* filename,
 	//we restore viewport parameters
 	setPointSize(_defaultPointSize);
 	setLineWidth(_defaultLineWidth);
-	//we restore display parameters
-	//if (!displayParametersWereOverriden)
-	//{
-	//	//simply deactivate the custom parameters
-	//	m_overridenDisplayParametersEnabled = false;
-	//}
-	//else
-	//{
-	//	//we must actually restore the custom parameters
-	//	displayParams.defaultFontSize = _fontSize;
-	//	setDisplayParameters(displayParams,true);
-	//}
 	m_captureMode.enabled = false;
 	m_captureMode.zoomFactor = 1.0f;
 

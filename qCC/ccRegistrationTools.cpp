@@ -166,7 +166,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
     }
     else if (result == CCLib::ICPRegistrationTools::ICP_APPLY_TRANSFO)
     {
-        transMat = ccGLMatrix(transform.R, transform.T, transform.s);
+        transMat = FromCCLibMatrix<PointCoordinateType,float>(transform.R, transform.T, transform.s);
 		finalScale = transform.s;
     }
 

@@ -677,7 +677,7 @@ void ccPointPairRegistrationDlg::align()
 			ccLog::Print(QString("[PointPairRegistration] Scale: fixed (1.0)"));
 		}
 
-		ccGLMatrix transMat(trans.R,trans.T);
+		ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType,float>(trans.R,trans.T);
 		//...virtually
 		m_aligned.cloud->setGLTransformation(transMat);
 		m_alignedPoints.setGLTransformation(transMat);
@@ -732,7 +732,7 @@ void ccPointPairRegistrationDlg::apply()
 		//apply (scaled) transformation...
 		if (adjustScale && trans.R.isValid())
 			trans.R.scale(trans.s);
-		ccGLMatrix transMat(trans.R,trans.T);
+		ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType,float>(trans.R,trans.T);
 		//...for real this time!
 		assert(m_aligned.cloud);
 		m_aligned.cloud->applyGLTransformation_recursive();

@@ -72,7 +72,7 @@ void qHPR::onNewSelection(const ccHObject::Container& selectedEntities)
 		m_action->setEnabled(selectedEntities.size()==1);
 }
 
-CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, const CCVector3& viewPoint, float fParam)
+CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, const CCVector3d& viewPoint, double fParam)
 {
 	assert(theCloud);
 
@@ -93,7 +93,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		return visiblePoints;
 	}
 
-	PointCoordinateType maxRadius = 0;
+	double maxRadius = 0;
 
 	//convert point cloud to an array of double triplets (for qHull)
 	coordT* pt_array = new coordT[(nbPoints+1)*3];
@@ -102,13 +102,13 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 
 		for (unsigned i=0; i<nbPoints; ++i)
 		{
-			CCVector3 P = *theCloud->getPoint(i) - viewPoint;
+			CCVector3d P = CCVector3d::fromArray(theCloud->getPoint(i)->u) - viewPoint;
 			*_pt_array++ = (coordT)P.x;
 			*_pt_array++ = (coordT)P.y;
 			*_pt_array++ = (coordT)P.z;
 
 			//we keep track of the highest 'radius'
-			PointCoordinateType r2 = P.norm2();
+			double r2 = P.norm2();
 			if (maxRadius < r2)
 				maxRadius = r2;
 		}
@@ -123,14 +123,14 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 
 	//apply spherical flipping
 	{
-		maxRadius *= 2.0f*pow(10.0f,fParam);
+		maxRadius *= pow(10.0,fParam) * 2;
 	
 		coordT* _pt_array = pt_array;
 		for (unsigned i=0; i<nbPoints; ++i)
 		{
-			CCVector3 P = *theCloud->getPoint(i) - viewPoint;
+			CCVector3d P = CCVector3d::fromArray(theCloud->getPoint(i)->u) - viewPoint;
 
-			double r = (double)(maxRadius/P.norm()) - 1.0;
+			double r = (maxRadius/P.norm()) - 1.0;
 			*_pt_array++ *= r;
 			*_pt_array++ *= r;
 			*_pt_array++ *= r;
@@ -268,10 +268,10 @@ void qHPR::doAction()
         return;
 	}
 
-	CCVector3 viewPoint = params.cameraCenter;
+	CCVector3d viewPoint = params.cameraCenter;
 	if (params.objectCenteredView)
 	{
-		CCVector3 PC = params.cameraCenter - params.pivotPoint;
+		CCVector3d PC = params.cameraCenter - params.pivotPoint;
 		params.viewMat.inverse().apply(PC);
 		viewPoint = params.pivotPoint + PC;
 	}

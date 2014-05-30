@@ -137,9 +137,9 @@ void ccCameraParamEditDlg::cameraCenterChanged()
         return;
 
 	m_associatedWin->blockSignals(true);
-    m_associatedWin->setCameraPos( CCVector3(	static_cast<PointCoordinateType>(exDoubleSpinBox->value()),
-												static_cast<PointCoordinateType>(eyDoubleSpinBox->value()),
-												static_cast<PointCoordinateType>(ezDoubleSpinBox->value())));
+    m_associatedWin->setCameraPos( CCVector3d(	exDoubleSpinBox->value(),
+												eyDoubleSpinBox->value(),
+												ezDoubleSpinBox->value() ));
 	m_associatedWin->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -151,9 +151,9 @@ void ccCameraParamEditDlg::pivotChanged()
         return;
 
 	m_associatedWin->blockSignals(true);
-    m_associatedWin->setPivotPoint(CCVector3(	static_cast<PointCoordinateType>(rcxDoubleSpinBox->value()),
-												static_cast<PointCoordinateType>(rcyDoubleSpinBox->value()),
-												static_cast<PointCoordinateType>(rczDoubleSpinBox->value())));
+    m_associatedWin->setPivotPoint(CCVector3d(	rcxDoubleSpinBox->value(),
+												rcyDoubleSpinBox->value(),
+												rczDoubleSpinBox->value() ));
 	m_associatedWin->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -173,7 +173,7 @@ void ccCameraParamEditDlg::pushCurrentMatrix()
     if (!m_associatedWin)
         return;
 
-    ccGLMatrix mat = m_associatedWin->getBaseViewMat();
+    ccGLMatrixd mat = m_associatedWin->getBaseViewMat();
 
     std::pair<PushedMatricesMapType::iterator,bool> ret;
     ret = pushedMatrices.insert(PushedMatricesMapElement(m_associatedWin,mat));
@@ -221,7 +221,7 @@ void ccCameraParamEditDlg::processPickedPoint(int cloudUniqueID, unsigned pointI
 
 		if (P)
 		{
-			m_associatedWin->setPivotPoint(*P);
+			m_associatedWin->setPivotPoint(CCVector3d::fromArray(P->u));
 			m_associatedWin->redraw();
 		}
 	}
@@ -238,7 +238,7 @@ void ccCameraParamEditDlg::setView(CC_VIEW_ORIENTATION orientation)
     PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
 
     m_associatedWin->makeCurrent();
-    ccGLMatrix mat = ccGLUtils::GenerateViewMat(orientation) * (it->second);
+    ccGLMatrixd mat = ccGLUtils::GenerateViewMat(orientation) * (it->second);
     initWithMatrix(mat);
     m_associatedWin->blockSignals(true);
     m_associatedWin->setBaseViewMat(mat);
@@ -318,11 +318,11 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
     if (m_associatedWin)
     {
         initWithMatrix(m_associatedWin->getBaseViewMat());
-        connect(m_associatedWin,	SIGNAL(baseViewMatChanged(const ccGLMatrix&)),	this,	SLOT(initWithMatrix(const ccGLMatrix&)));
-        connect(m_associatedWin,	SIGNAL(cameraPosChanged(const CCVector3&)),		this,	SLOT(updateCameraCenter(const CCVector3&)));
-        connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3&)),	this,	SLOT(updatePivotPoint(const CCVector3&)));
-        connect(m_associatedWin,	SIGNAL(perspectiveStateChanged()),				this,	SLOT(updateViewMode()));
-        connect(m_associatedWin,	SIGNAL(destroyed(QObject*)),					this,	SLOT(hide()));
+        connect(m_associatedWin,	SIGNAL(baseViewMatChanged(const ccGLMatrixdd&)),	this,	SLOT(initWithMatrix(const ccGLMatrixd&)));
+        connect(m_associatedWin,	SIGNAL(cameraPosChanged(const CCVector3d&)),		this,	SLOT(updateCameraCenter(const CCVector3d&)));
+        connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3d&)),		this,	SLOT(updatePivotPoint(const CCVector3d&)));
+        connect(m_associatedWin,	SIGNAL(perspectiveStateChanged()),					this,	SLOT(updateViewMode()));
+        connect(m_associatedWin,	SIGNAL(destroyed(QObject*)),						this,	SLOT(hide()));
 
         PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
         buttonsFrame->setEnabled(it != pushedMatrices.end());
@@ -341,7 +341,7 @@ void ccCameraParamEditDlg::reflectParamChange()
     if (!m_associatedWin)
         return;
 
-    ccGLMatrix mat = getMatrix();
+    ccGLMatrixd mat = getMatrix();
     m_associatedWin->blockSignals(true);
     m_associatedWin->setBaseViewMat(mat);
     m_associatedWin->blockSignals(false);
@@ -364,13 +364,12 @@ void ccCameraParamEditDlg::updateViewMode()
 		pivotPickingToolButton->setEnabled(objectBased);
 		eyePositionFrame->setEnabled(perspective);
 	}
-
 }
 
-void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrix& mat)
+void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 {
-    PointCoordinateType phi=0, theta=0, psi=0;
-    CCVector3 trans;
+    double phi=0, theta=0, psi=0;
+    CCVector3d trans;
     mat.getParameters(phi,theta,psi,trans);
 
     //to prevent retro-action!
@@ -390,7 +389,7 @@ void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrix& mat)
 	}
 }
 
-void ccCameraParamEditDlg::updateCameraCenter(const CCVector3& P)
+void ccCameraParamEditDlg::updateCameraCenter(const CCVector3d& P)
 {
 	if (!m_associatedWin)
 		return;
@@ -408,7 +407,7 @@ void ccCameraParamEditDlg::updateCameraCenter(const CCVector3& P)
 	m_associatedWin = win;
 }
 
-void ccCameraParamEditDlg::updatePivotPoint(const CCVector3& P)
+void ccCameraParamEditDlg::updatePivotPoint(const CCVector3d& P)
 {
 	if (!m_associatedWin)
 		return;
@@ -426,16 +425,16 @@ void ccCameraParamEditDlg::updatePivotPoint(const CCVector3& P)
 	m_associatedWin = win;
 }
 
-ccGLMatrix ccCameraParamEditDlg::getMatrix()
+ccGLMatrixd ccCameraParamEditDlg::getMatrix()
 {
-    PointCoordinateType phi = 0, theta = 0, psi = 0;
+    double phi = 0, theta = 0, psi = 0;
 
-    phi     = static_cast<PointCoordinateType>(CC_DEG_TO_RAD * phiSpinBox->value());
-    psi     = static_cast<PointCoordinateType>(CC_DEG_TO_RAD * psiSpinBox->value());
-    theta   = static_cast<PointCoordinateType>(CC_DEG_TO_RAD * thetaSpinBox->value());
+    phi     = CC_DEG_TO_RAD * phiSpinBox->value();
+    psi     = CC_DEG_TO_RAD * psiSpinBox->value();
+    theta   = CC_DEG_TO_RAD * thetaSpinBox->value();
 
-    ccGLMatrix mat;
-    CCVector3 T(0,0,0);
+    ccGLMatrixd mat;
+    CCVector3d T(0,0,0);
     mat.initFromParameters(phi,theta,psi,T);
 
     return mat;

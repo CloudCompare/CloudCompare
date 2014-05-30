@@ -60,7 +60,7 @@ public:
     float zoom;
 
 	//! Visualization matrix (rotation only)
-	ccGLMatrix viewMat;
+	ccGLMatrixd viewMat;
 
 	//! Point size
 	float defaultPointSize;
@@ -75,10 +75,10 @@ public:
 	bool objectCenteredView;
 	
 	//! Rotation pivot point (for object-centered view modes)
-	CCVector3 pivotPoint;
+	CCVector3d pivotPoint;
 	
 	//! Camera center (for perspective mode)
-	CCVector3 cameraCenter;
+	CCVector3d cameraCenter;
 
 	//! Camera F.O.V. (field of view - for perspective mode only)
 	float fov;

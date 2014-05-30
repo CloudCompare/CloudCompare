@@ -42,7 +42,7 @@ public:
 	//! Called on mouse move (for 3D interactors)
 	/** \return true if a movement occurs
 	**/
-	virtual bool move3D(const CCVector3& u) { return false; }
+	virtual bool move3D(const CCVector3d& u) { return false; }
 
 };
 

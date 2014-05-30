@@ -889,20 +889,10 @@ void ccClippingBoxTool::setView(CC_VIEW_ORIENTATION orientation)
 		ccViewportParameters params = m_associatedWin->getViewportParameters();
 		const ccGLMatrix& glMat = m_clipBox->getGLTransformation();
 
-		ccGLMatrix rotMat = glMat; rotMat.setTranslation(CCVector3(0.0,0.0,0.0));
-
-		//CCVector3 T = CCVector3(glMat.getTranslation()) - params.pivotPoint;
-		//rotMat.inverse().apply(T);
-		//T += params.pivotPoint;
-		//params.viewMat.apply(T);
-		//params.cameraCenter -= T;
+		ccGLMatrixd rotMat(glMat.data()); rotMat.clearTranslation();
 
 		params.viewMat = params.viewMat * rotMat.inverse();
 		m_associatedWin->setViewportParameters(params);
-
-		//ccLog::Print(QString("X(%1,%2,%3)").arg(glMat.getColumn(0)[0]).arg(glMat.getColumn(0)[1]).arg(glMat.getColumn(0)[2]));
-		//ccLog::Print(QString("Y(%1,%2,%3)").arg(glMat.getColumn(1)[0]).arg(glMat.getColumn(1)[1]).arg(glMat.getColumn(1)[2]));
-		//ccLog::Print(QString("Z(%1,%2,%3)").arg(glMat.getColumn(2)[0]).arg(glMat.getColumn(2)[1]).arg(glMat.getColumn(2)[2]));
 	}
     //m_associatedWin->blockSignals(false);
     m_associatedWin->redraw();

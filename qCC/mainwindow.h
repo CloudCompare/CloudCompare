@@ -37,6 +37,7 @@
 
 //qCC_db
 #include <ccMesh.h>
+#include <ccGLMatrix.h>
 
 //qCC_io
 #include <FileIOFilter.h>
@@ -257,9 +258,9 @@ protected slots:
 
 	void echoMouseWheelRotate(float);
     void echoCameraDisplaced(float ddx, float ddy);
-    void echoBaseViewMatRotation(const ccGLMatrix& rotMat);
-	void echoCameraPosChanged(const CCVector3&);
-	void echoPivotPointChanged(const CCVector3&);
+    void echoBaseViewMatRotation(const ccGLMatrixd& rotMat);
+	void echoCameraPosChanged(const CCVector3d&);
+	void echoPivotPointChanged(const CCVector3d&);
 	void echoPixelSizeChanged(float);
 
 	void toggleSelectedEntitiesVisibility();

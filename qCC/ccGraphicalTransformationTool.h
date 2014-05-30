@@ -72,10 +72,10 @@ protected slots:
 	void pause(bool);
 
     //! Applies translation (graphically) to selected entities
-    void glTranslate(const CCVector3&);
+    void glTranslate(const CCVector3d&);
 
     //! Applies rotation (graphically) to selected entities
-    void glRotate(const ccGLMatrix&);
+    void glRotate(const ccGLMatrixd&);
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
@@ -92,15 +92,15 @@ protected:
     ccHObject* m_toTransform;
 
     //! Current rotation
-    ccGLMatrix m_rotation;
+    ccGLMatrixd m_rotation;
 
     //! Current translation
-    CCVector3 m_translation;
+    CCVector3d m_translation;
 
     //! Rotation center
     /** The rotation center is actually the center of gravity of the selected 'entities'
     **/
-    CCVector3 m_rotationCenter;
+    CCVector3d m_rotationCenter;
 };
 
 #endif //CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER

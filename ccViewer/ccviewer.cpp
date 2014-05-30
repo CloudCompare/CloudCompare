@@ -1012,10 +1012,10 @@ void ccViewer::on3DMouseKeyDown(int key)
 		{
 			if (m_glWindow)
 			{
-				CCVector3 axis(0,0,-PC_ONE);
-				CCVector3 trans(0,0,0);
-				ccGLMatrix mat;
-				PointCoordinateType angle = static_cast<PointCoordinateType>(M_PI/2.0);
+				CCVector3d axis(0,0,-1);
+				CCVector3d trans(0,0,0);
+				ccGLMatrixd mat;
+				double angle = M_PI/2;
 				if (key == Mouse3DInput::V3DK_CCW)
 					angle = -angle;
 				mat.initFromParameters(angle,axis,trans);
@@ -1120,14 +1120,14 @@ void ccViewer::on3DMouseMove(std::vector<float>& vec)
 
 	if (rotate)
 	{
-		if (fabs(vec[3])>ZERO_TOLERANCE
-			|| fabs(vec[4])>ZERO_TOLERANCE
-			|| fabs(vec[5])>ZERO_TOLERANCE)
+		if (	fabs(vec[3]) > ZERO_TOLERANCE
+			||	fabs(vec[4]) > ZERO_TOLERANCE
+			||	fabs(vec[5]) > ZERO_TOLERANCE)
 		{
 			//get corresponding quaternion
 			float q[4];
 			Mouse3DInput::GetQuaternion(vec,q);
-			ccGLMatrix rotMat = ccGLMatrix::FromQuaternion(q);
+			ccGLMatrixd rotMat = ccGLMatrixd::FromQuaternion(q);
 
 			//horizon locked?
 			if (params.horizonLocked())

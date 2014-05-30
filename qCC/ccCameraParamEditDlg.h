@@ -50,7 +50,7 @@ public:
 	void makeFrameless();
 
     //! Returns matrix corresponding to dialog values
-    ccGLMatrix getMatrix();
+    ccGLMatrixd getMatrix();
 
 	//inherited from ccOverlayDialog
 	virtual bool start();
@@ -62,13 +62,13 @@ public slots:
     void linkWith(QMdiSubWindow* qWin);
 
     //! Inits dialog values with matrix
-    void initWithMatrix(const ccGLMatrix& mat);
+    void initWithMatrix(const ccGLMatrixd& mat);
 
 	//! Updates dialog values with pivot point
-	void updatePivotPoint(const CCVector3& P);
+	void updatePivotPoint(const CCVector3d& P);
 
 	//! Updates dialog values with camera center
-	void updateCameraCenter(const CCVector3& P);
+	void updateCameraCenter(const CCVector3d& P);
 
 	//! Updates current view mode
 	void updateViewMode();
@@ -114,9 +114,9 @@ protected slots:
 protected:
 
     //! Type of the pushed matrices map structure
-    typedef std::map<ccGLWindow*,ccGLMatrix> PushedMatricesMapType;
+    typedef std::map<ccGLWindow*,ccGLMatrixd> PushedMatricesMapType;
     //! Type of an element of the pushed matrices map structure
-    typedef std::pair<ccGLWindow*,ccGLMatrix> PushedMatricesMapElement;
+    typedef std::pair<ccGLWindow*,ccGLMatrixd> PushedMatricesMapElement;
 
     //! Pushed camera matrices (per window)
     PushedMatricesMapType pushedMatrices;

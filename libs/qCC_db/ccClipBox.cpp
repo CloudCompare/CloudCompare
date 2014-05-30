@@ -277,20 +277,20 @@ void ccClipBox::setActiveComponent(int id)
 	}
 }
 
-static CCVector3 PointToVector(int x, int y, int screenWidth, int screenHeight)
+static CCVector3d PointToVector(int x, int y, int screenWidth, int screenHeight)
 {
 	//convert mouse position to vector (screen-centered)
-	CCVector3 v(	static_cast<PointCoordinateType>(2 * std::max(std::min(x,screenWidth-1),-screenWidth+1) - screenWidth) / static_cast<PointCoordinateType>(screenWidth),
-					static_cast<PointCoordinateType>(screenHeight - 2 * std::max(std::min(y,screenHeight-1),-screenHeight+1)) / static_cast<PointCoordinateType>(screenHeight),
+	CCVector3d v(	static_cast<double>(2 * std::max(std::min(x,screenWidth-1),-screenWidth+1) - screenWidth) / static_cast<double>(screenWidth),
+					static_cast<double>(screenHeight - 2 * std::max(std::min(y,screenHeight-1),-screenHeight+1)) / static_cast<double>(screenHeight),
 					0 );
 
 	//square 'radius'
-	PointCoordinateType d2 = v.x*v.x + v.y*v.y;
+	double d2 = v.x*v.x + v.y*v.y;
 
 	//projection on the unit sphere
 	if (d2 > 1)
 	{
-		PointCoordinateType d = sqrt(d2);
+		double d = sqrt(d2);
 		v.x /= d;
 		v.y /= d;
 	}
@@ -308,19 +308,19 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 		return false;
 
 	//convert mouse position to vector (screen-centered)
-	CCVector3 currentOrientation = PointToVector(x,y,screenWidth,screenHeight);
+	CCVector3d currentOrientation = PointToVector(x,y,screenWidth,screenHeight);
 
-	ccGLMatrix rotMat = ccGLMatrix::FromToRotation(m_lastOrientation,currentOrientation);
+	ccGLMatrixd rotMat = ccGLMatrixd::FromToRotation(m_lastOrientation,currentOrientation);
 
 	CCVector3 C = m_box.getCenter();
 
-	ccGLMatrix transMat;
+	ccGLMatrixd transMat;
 	transMat.setTranslation(-C);
 	transMat = rotMat * transMat;
-	transMat.setTranslation(transMat.getTranslationAsVec3D()+C);
+	transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
 
 	//rotateGL(transMat);
-    m_glTrans = transMat.inverse() * m_glTrans;
+    m_glTrans = ccGLMatrix(transMat.inverse().data()) * m_glTrans;
     enableGLTransformation(true);
 
 	m_lastOrientation = currentOrientation;
@@ -330,18 +330,18 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 	return true;
 }
 
-void ccClipBox::setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrix& viewMatrix)
+void ccClipBox::setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrixd& viewMatrix)
 {
 	m_lastOrientation = PointToVector(x,y,screenWidth,screenHeight);
 	m_viewMatrix = viewMatrix;
 }
 
-bool ccClipBox::move3D(const CCVector3& uInput)
+bool ccClipBox::move3D(const CCVector3d& uInput)
 {
 	if (m_activeComponent == NONE || !m_box.isValid())
 		return false;
 
-	CCVector3 u = uInput;
+	CCVector3d u = uInput;
 
 	//Arrows
 	if (m_activeComponent >= X_MINUS_ARROW && m_activeComponent <= CROSS)
@@ -352,38 +352,37 @@ bool ccClipBox::move3D(const CCVector3& uInput)
 		switch(m_activeComponent)
 		{
 		case X_MINUS_ARROW:
-			m_box.minCorner().x += u.x;
+			m_box.minCorner().x += static_cast<PointCoordinateType>(u.x);
 			if (m_box.minCorner().x > m_box.maxCorner().x)
 				m_box.minCorner().x = m_box.maxCorner().x;
 			break;
 		case X_PLUS_ARROW:
-			m_box.maxCorner().x += u.x;
+			m_box.maxCorner().x += static_cast<PointCoordinateType>(u.x);
 			if (m_box.minCorner().x > m_box.maxCorner().x)
 				m_box.maxCorner().x = m_box.minCorner().x;
 			break;
 		case Y_MINUS_ARROW:
-			m_box.minCorner().y += u.y;
+			m_box.minCorner().y += static_cast<PointCoordinateType>(u.y);
 			if (m_box.minCorner().y > m_box.maxCorner().y)
 				m_box.minCorner().y = m_box.maxCorner().y;
 			break;
 		case Y_PLUS_ARROW:
-			m_box.maxCorner().y += u.y;
+			m_box.maxCorner().y += static_cast<PointCoordinateType>(u.y);
 			if (m_box.minCorner().y > m_box.maxCorner().y)
 				m_box.maxCorner().y = m_box.minCorner().y;
 			break;
 		case Z_MINUS_ARROW:
-			m_box.minCorner().z += u.z;
+			m_box.minCorner().z += static_cast<PointCoordinateType>(u.z);
 			if (m_box.minCorner().z > m_box.maxCorner().z)
 				m_box.minCorner().z = m_box.maxCorner().z;
 			break;
 		case Z_PLUS_ARROW:
-			m_box.maxCorner().z += u.z;
+			m_box.maxCorner().z += static_cast<PointCoordinateType>(u.z);
 			if (m_box.minCorner().z > m_box.maxCorner().z)
 				m_box.maxCorner().z = m_box.minCorner().z;
 			break;
 		case CROSS:
-			m_box.minCorner() += u;
-			m_box.maxCorner() += u;
+			m_box += CCVector3::fromArray(u.u);
 			break;
 		default:
 			assert(false);
@@ -402,44 +401,44 @@ bool ccClipBox::move3D(const CCVector3& uInput)
 	{
 		//we guess the rotation order by comparing the current screen 'normal'
 		//and the vector prod of u and the current rotation axis
-		CCVector3 Rb(0.0,0.0,0.0);
+		CCVector3d Rb(0,0,0);
 		switch(m_activeComponent)
 		{
 		case X_MINUS_TORUS:
-			Rb.x = -1.0;
+			Rb.x = -1;
 			break;
 		case X_PLUS_TORUS:
-			Rb.x = 1.0;
+			Rb.x = 1;
 			break;
 		case Y_MINUS_TORUS:
-			Rb.y = -1.0;
+			Rb.y = -1;
 			break;
 		case Y_PLUS_TORUS:
-			Rb.y = 1.0;
+			Rb.y = 1;
 			break;
 		case Z_MINUS_TORUS:
-			Rb.z = -1.0;
+			Rb.z = -1;
 			break;
 		case Z_PLUS_TORUS:
-			Rb.z = 1.0;
+			Rb.z = 1;
 			break;
 		default:
 			assert(false);
 			return false;
 		}
 		
-		CCVector3 R = Rb;
+		CCVector3d R = Rb;
 		if (m_glTransEnabled)
 			m_glTrans.applyRotation(R);
 
-		CCVector3 RxU = R.cross(u);
+		CCVector3d RxU = R.cross(u);
 
 		//look for the most parallel dimension
 		int minDim = 0;
-		PointCoordinateType maxDot = m_viewMatrix.getColumnAsVec3D(0).dot(RxU);
-		for (int i=1;i<3;++i)
+		double maxDot = m_viewMatrix.getColumnAsVec3D(0).dot(RxU);
+		for (int i=1; i<3; ++i)
 		{
-			PointCoordinateType dot = m_viewMatrix.getColumnAsVec3D(i).dot(RxU);
+			double dot = m_viewMatrix.getColumnAsVec3D(i).dot(RxU);
 			if (fabs(dot) > fabs(maxDot))
 			{
 				maxDot = dot;
@@ -448,20 +447,20 @@ bool ccClipBox::move3D(const CCVector3& uInput)
 		}
 
 		//angle is proportional to absolute displacement
-		PointCoordinateType angle_rad = u.norm()/m_box.getDiagNorm() * static_cast<PointCoordinateType>(M_PI);
+		double angle_rad = u.norm()/m_box.getDiagNorm() * M_PI;
 		if (maxDot < 0.0)
 			angle_rad = -angle_rad;
 
-		ccGLMatrix rotMat;
-		rotMat.initFromParameters(angle_rad,Rb,CCVector3(0,0,0));
+		ccGLMatrixd rotMat;
+		rotMat.initFromParameters(angle_rad,Rb,CCVector3d(0,0,0));
 
 		CCVector3 C = m_box.getCenter();
-		ccGLMatrix transMat;
+		ccGLMatrixd transMat;
 		transMat.setTranslation(-C);
 		transMat = rotMat * transMat;
-		transMat.setTranslation(transMat.getTranslationAsVec3D()+C);
+		transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
 
-		m_glTrans = m_glTrans * transMat.inverse();
+		m_glTrans = m_glTrans * ccGLMatrix(transMat.inverse().data());
 		enableGLTransformation(true);
 	}
 	else

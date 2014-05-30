@@ -109,8 +109,7 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 	glPushAttrib(GL_LINE_BIT);
 
 	float relativeZoom = 1.0f;
-	float dx = 0.0f;
-	float dy = 0.0f;
+	float dx = 0, dy = 0;
 	if (!m_params.perspectiveView) //ortho mode
 	{
 		//Screen pan & pivot compensation
@@ -118,9 +117,9 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 		float winTotalZoom = params.zoom/params.pixelSize;
 		relativeZoom = winTotalZoom/totalZoom;
 
-		CCVector3 dC = m_params.cameraCenter - params.cameraCenter;
+		CCVector3d dC = m_params.cameraCenter - params.cameraCenter;
 
-		CCVector3 P = m_params.pivotPoint - params.pivotPoint;
+		CCVector3d P = m_params.pivotPoint - params.pivotPoint;
 		m_params.viewMat.apply(P);
 
 		dx = static_cast<float>(dC.x + P.x);

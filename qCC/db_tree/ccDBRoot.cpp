@@ -1247,8 +1247,8 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	ccGLWindow* win = static_cast<ccGLWindow*>(display);
 
 	//plane normal
-	CCVector3 planeNormal;
-	CCVector3 planeVertDir;
+	CCVector3d planeNormal;
+	CCVector3d planeVertDir;
 	CCVector3 center;
 
 	if (obj->isA(CC_TYPES::LABEL_2D)) //2D label with 3 points?
@@ -1263,7 +1263,8 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 			const CCVector3* _B = B.cloud->getPoint(B.index);
 			const cc2DLabel::PickedPoint& C = label->getPoint(2);
 			const CCVector3* _C = C.cloud->getPoint(C.index);
-			planeNormal = (*_B-*_A).cross(*_C-*_A);
+			CCVector3 N = (*_B-*_A).cross(*_C-*_A);
+			planeNormal = CCVector3d::fromArray(N.u);
 			planeVertDir = /*(*_B-*_A)*/win->getCurrentUpDir();
 			center = (*_A + *_B + *_C)/3;
 		}
@@ -1277,15 +1278,15 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 	{
 		ccPlane* plane = static_cast<ccPlane*>(obj);
 		//3rd column = plane normal!
-		planeNormal = plane->getNormal();
-		planeVertDir = plane->getTransformation().getColumnAsVec3D(1);
+		planeNormal = CCVector3d::fromArray(plane->getNormal().u);
+		planeVertDir = CCVector3d::fromArray(plane->getTransformation().getColumnAsVec3D(1).u);
 		center = plane->getBBCenter();
 	}
 	else if (obj->isA(CC_TYPES::FACET)) //facet
 	{
 		ccFacet* facet = static_cast<ccFacet*>(obj);
-		planeNormal = facet->getNormal();
-		CCVector3 planeHorizDir(0,1,0);
+		planeNormal = CCVector3d::fromArray(facet->getNormal().u);
+		CCVector3d planeHorizDir(0,1,0);
 		CCLib::CCMiscTools::ComputeBaseVectors(planeNormal,planeHorizDir,planeVertDir);
 		center = facet->getBBCenter();
 	}
@@ -1302,11 +1303,11 @@ void ccDBRoot::alignCameraWithEntity(bool reverse)
 
 	//output the transformation matrix that would make this normal points towards +Z
 	{
-		ccGLMatrix transMat;
+		ccGLMatrixd transMat;
 		transMat.setTranslation(-center);
-		ccGLMatrix viewMat = win->getViewportParameters().viewMat;
+		ccGLMatrixd viewMat = win->getViewportParameters().viewMat;
 		viewMat = viewMat * transMat;
-		viewMat.setTranslation(viewMat.getTranslationAsVec3D() + center);
+		viewMat.setTranslation(viewMat.getTranslationAsVec3D() + CCVector3d::fromArray(center.u));
 
 		ccLog::Print("[Align camera] Corresponding view matrix:");
 		ccLog::Print(viewMat.toString(12,' ')); //full precision

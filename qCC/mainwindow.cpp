@@ -703,10 +703,10 @@ void MainWindow::on3DMouseKeyDown(int key)
 			ccGLWindow* activeWin = getActiveGLWindow();
 			if (activeWin)
 			{
-				CCVector3 axis(0,0,-PC_ONE);
-				CCVector3 trans(0,0,0);
-				ccGLMatrix mat;
-				PointCoordinateType angle = static_cast<PointCoordinateType>(M_PI/2.0);
+				CCVector3d axis(0,0,-1);
+				CCVector3d trans(0,0,0);
+				ccGLMatrixd mat;
+				double angle = M_PI/2;
 				if (key == Mouse3DInput::V3DK_CCW)
 					angle = -angle;
 				mat.initFromParameters(angle,axis,trans);
@@ -811,14 +811,14 @@ void MainWindow::on3DMouseMove(std::vector<float>& vec)
 
 	if (rotate)
 	{
-		if (fabs(vec[3])>ZERO_TOLERANCE
-			|| fabs(vec[4])>ZERO_TOLERANCE
-			|| fabs(vec[5])>ZERO_TOLERANCE)
+		if (	fabs(vec[3]) > ZERO_TOLERANCE
+			||	fabs(vec[4]) > ZERO_TOLERANCE
+			||	fabs(vec[5]) > ZERO_TOLERANCE)
 		{
 			//get corresponding quaternion
 			float q[4];
 			Mouse3DInput::GetQuaternion(vec,q);
-			ccGLMatrix rotMat = ccGLMatrix::FromQuaternion(q);
+			ccGLMatrixd rotMat = ccGLMatrixd::FromQuaternion(q);
 
 			//horizon locked?
 			if (params.horizonLocked())
@@ -2375,11 +2375,11 @@ void MainWindow::doActionSetViewFromSensor()
 	{
 		//ccViewportParameters params = win->getViewportParameters();
 		win->setPerspectiveState(true,false);
-		win->setCameraPos(sensorCenter);
-		win->setPivotPoint(sensorCenter);
+		win->setCameraPos(CCVector3d::fromArray(sensorCenter.u));
+		win->setPivotPoint(CCVector3d::fromArray(sensorCenter.u));
 		//FIXME: more complicated! Depends on the 'rotation order' for GBL sensors for instance
 		win->setView(CC_FRONT_VIEW,false);
-		win->rotateBaseViewMat(trans);
+		win->rotateBaseViewMat(ccGLMatrixd(trans.data()));
 		//TODO: can we set the right FOV?
 		win->redraw();
 	}
@@ -4187,7 +4187,7 @@ void MainWindow::doAction4pcsRegister()
     {
 		//output resulting transformation matrix
 		{
-			ccGLMatrix transMat(transform.R,transform.T);
+			ccGLMatrix transMat = FromCCLibMatrix<PointCoordinateType,float>(transform.R,transform.T);
 			forceConsoleDisplay();
 			ccConsole::Print("[Align] Resulting matrix:");
 			ccConsole::Print(transMat.toString(12,' ')); //full precision
@@ -5847,9 +5847,9 @@ ccGLWindow* MainWindow::new3DView()
 	//'echo' mode
     connect(view3D,	SIGNAL(mouseWheelRotated(float)),				this,       SLOT(echoMouseWheelRotate(float)));
     connect(view3D,	SIGNAL(cameraDisplaced(float,float)),			this,       SLOT(echoCameraDisplaced(float,float)));
-    connect(view3D,	SIGNAL(viewMatRotated(const ccGLMatrix&)),		this,       SLOT(echoBaseViewMatRotation(const ccGLMatrix&)));
-    connect(view3D,	SIGNAL(cameraPosChanged(const CCVector3&)),		this,       SLOT(echoCameraPosChanged(const CCVector3&)));
-    connect(view3D,	SIGNAL(pivotPointChanged(const CCVector3&)),	this,       SLOT(echoPivotPointChanged(const CCVector3&)));
+    connect(view3D,	SIGNAL(viewMatRotated(const ccGLMatrixd&)),		this,       SLOT(echoBaseViewMatRotation(const ccGLMatrixd&)));
+    connect(view3D,	SIGNAL(cameraPosChanged(const CCVector3d&)),	this,       SLOT(echoCameraPosChanged(const CCVector3&)));
+    connect(view3D,	SIGNAL(pivotPointChanged(const CCVector3d&)),	this,       SLOT(echoPivotPointChanged(const CCVector3&)));
     connect(view3D,	SIGNAL(pixelSizeChanged(float)),				this,       SLOT(echoPixelSizeChanged(float)));
 
     connect(view3D,	SIGNAL(destroyed(QObject*)),					this,       SLOT(prepareWindowDeletion(QObject*)));
@@ -6984,11 +6984,11 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 				const ccViewportParameters& params = s_pickingWindow->getViewportParameters();
 				if (!params.perspectiveView || params.objectCenteredView)
 				{
-					CCVector3 newPivot = *P;
+					CCVector3d newPivot = CCVector3d::fromArray(P->u);
 					//compute the equivalent camera center
-					CCVector3 dP = params.pivotPoint - newPivot;
-					CCVector3 MdP = dP; params.viewMat.applyRotation(MdP);
-					CCVector3 newCameraPos = params.cameraCenter + MdP - dP;
+					CCVector3d dP = params.pivotPoint - newPivot;
+					CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
+					CCVector3d newCameraPos = params.cameraCenter + MdP - dP;
 					s_pickingWindow->setCameraPos(newCameraPos);
 					s_pickingWindow->setPivotPoint(newPivot);
 
@@ -9545,7 +9545,7 @@ void MainWindow::echoCameraDisplaced(float ddx, float ddy)
     }
 }
 
-void MainWindow::echoBaseViewMatRotation(const ccGLMatrix& rotMat)
+void MainWindow::echoBaseViewMatRotation(const ccGLMatrixd& rotMat)
 {
     if (checkBoxCameraLink->checkState() != Qt::Checked)
         return;
@@ -9568,7 +9568,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrix& rotMat)
     }
 }
 
- void MainWindow::echoCameraPosChanged(const CCVector3& P)
+ void MainWindow::echoCameraPosChanged(const CCVector3d& P)
  {
     if (checkBoxCameraLink->checkState() != Qt::Checked)
         return;
@@ -9591,7 +9591,7 @@ void MainWindow::echoBaseViewMatRotation(const ccGLMatrix& rotMat)
     }
  }
 
- void MainWindow::echoPivotPointChanged(const CCVector3& P)
+ void MainWindow::echoPivotPointChanged(const CCVector3d& P)
  {
     if (checkBoxCameraLink->checkState() != Qt::Checked)
         return;

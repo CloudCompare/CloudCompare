@@ -48,8 +48,9 @@
    v3.3 - 12/19/2013 - global scale information is now saved for point clouds
    v3.4 - 01/09/2014 - ccIndexedTransformation and ccIndexedTransformationBuffer added + CC_CLASS_ENUM is now coded on 64 bits
    v3.5 - 02/13/2014 - ccSensor class updated
+   v3.6 - 05/30/2014 - ccGLWindow and associated structures (viewport, etc.) now use double precision
 **/
-const unsigned c_currentDBVersion = 35; //3.5
+const unsigned c_currentDBVersion = 36; //3.6
 
 // Persistent settings key for storing the last generated entity ID
 static const QString s_uniqueIDKey("UniqueID");

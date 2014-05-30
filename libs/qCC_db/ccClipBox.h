@@ -22,6 +22,7 @@
 #include "ccBBox.h"
 #include "ccHObject.h"
 #include "ccInteractor.h"
+#include "ccGLMatrix.h"
 
 //Qt
 #include <QObject>
@@ -55,10 +56,10 @@ public:
 
 	//inherited from ccInteractor
 	virtual bool move2D(int x, int y, int dx, int dy, int screenWidth, int screenHeight);
-	virtual bool move3D(const CCVector3& u);
+	virtual bool move3D(const CCVector3d& u);
 
 	//! Sets last clicked point (on screen)
-	void setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrix& viewMatrix);
+	void setClickedPoint(int x, int y, int screenWidth, int screenHeight, const ccGLMatrixd& viewMatrix);
 
 	//! Components
 	enum Components {	NONE			= 0,
@@ -130,10 +131,10 @@ protected:
 	Components m_activeComponent;
 
 	//! Last "orientation" vector (corresponding to last clicked point)
-	CCVector3 m_lastOrientation;
+	CCVector3d m_lastOrientation;
 
 	//! View matrix
-	ccGLMatrix m_viewMatrix;
+	ccGLMatrixd m_viewMatrix;
 };
 
 #endif //CC_CLIP_BOX_HEADER

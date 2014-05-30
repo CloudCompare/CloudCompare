@@ -92,3 +92,31 @@ void ccMaterial::applyGL(bool lightEnabled, bool skipDiffuse) const
 		glColor4fv(diffuseFront);
 	}
 }
+
+void ccMaterial::MakeLightsNeutral()
+{
+	GLint maxLightCount;
+	glGetIntegerv(GL_MAX_LIGHTS,&maxLightCount);
+	
+	for (int i=0; i<maxLightCount; ++i)
+	{
+		if (glIsEnabled(GL_LIGHT0+i))
+		{
+			float diffuse[4];
+			float ambiant[4];
+			float specular[4];
+
+			glGetLightfv(GL_LIGHT0+i,GL_DIFFUSE,diffuse);
+			glGetLightfv(GL_LIGHT0+i,GL_AMBIENT,ambiant);
+			glGetLightfv(GL_LIGHT0+i,GL_SPECULAR,specular);
+
+			 diffuse[0] =  diffuse[1] =  diffuse[2] = ( diffuse[0] +  diffuse[1] +  diffuse[2]) / 3.0f;	//'mean' (gray) value
+			 ambiant[0] =  ambiant[1] =  ambiant[2] = ( ambiant[0] +  ambiant[1] +  ambiant[2]) / 3.0f;	//'mean' (gray) value
+			specular[0] = specular[1] = specular[2] = (specular[0] + specular[1] + specular[2]) / 3.0f;	//'mean' (gray) value
+
+			glLightfv(GL_LIGHT0+i, GL_DIFFUSE, diffuse);
+			glLightfv(GL_LIGHT0+i, GL_AMBIENT, ambiant);
+			glLightfv(GL_LIGHT0+i,GL_SPECULAR,specular);
+		}
+	}
+}

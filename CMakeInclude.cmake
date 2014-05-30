@@ -119,8 +119,6 @@ if( WIN32 )		# 1 argument: ARGV0 = base destination
 	else()
 		set( QT_VER_NUM "4")
 	endif()
-	message(${QT_PLUGINS_DIR})
-	message(${QT_IMAGEFORMATS_PLUGINS})
 	foreach( imagePlugin ${QT_IMAGEFORMATS_PLUGINS} )
 		if( NOT CMAKE_CONFIGURATION_TYPES )
 			install( FILES ${QT_PLUGINS_DIR}/imageformats/${imagePlugin}${QT_VER_NUM}.dll DESTINATION ${ARGV0}/imageformats )

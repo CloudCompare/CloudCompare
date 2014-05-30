@@ -67,6 +67,12 @@ struct ccMaterial
 
 	//! Apply parameters (OpenGL)
 	void applyGL(bool lightEnabled, bool skipDiffuse) const;
+
+	//! Helper: makes all active GL light sources neutral (i.e. 'gray')
+	/** WARNING: an OpenGL context must be active!
+	**/
+	static void MakeLightsNeutral();
+
 };
 
 #endif //CC_MATERIAL_HEADER

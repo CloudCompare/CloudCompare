@@ -35,7 +35,7 @@
 #include "ccMesh.h"
 #include "ccImage.h"
 #include "cc2DLabel.h"
-#include "ccGLUtils.h"
+#include "ccMaterial.h"
 #include "ccColorRampShader.h"
 #include "ccPolyline.h"
 
@@ -1488,7 +1488,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				//we must get rid of lights 'color' if a scalar field is displayed!
 				glPushAttrib(GL_LIGHTING_BIT);
-				ccGLUtils::MakeLightsNeutral();
+				ccMaterial::MakeLightsNeutral();
 			}
 			compressedNormals = ccNormalVectors::GetUniqueInstance();
 		}

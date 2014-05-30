@@ -904,48 +904,6 @@ public:
 		return t;
 	}
 
-	//! Saves matrix to an ASCII file
-	virtual bool toAsciiFile(const char* filename) const
-	{
-		FILE* fp = fopen(filename,"wt");
-		if (!fp)
-			return false;
-
-		for (unsigned i=0; i<4; ++i)
-		{
-			if (fprintf(fp,"%.12f %.12f %.12f %.12f\n",m_mat[i],m_mat[i+4],m_mat[i+8],m_mat[i+12]) < 4)
-			{
-				fclose(fp);
-				return false;
-			}
-		}
-		fclose(fp);
-
-		return true;
-	}
-
-	//! Loads matrix from an ASCII file
-	virtual bool fomAsciiFile(const char* filename)
-	{
-		FILE* fp = fopen(filename,"rt");
-		if (!fp)
-			return false;
-
-		T* mat = m_mat;
-		for (unsigned i=0; i<4; ++i)
-		{
-			if (fscanf(fp,"%f %f %f %f\n",mat,mat+4,mat+8,mat+12) < 4)
-			{
-				fclose(fp);
-				return false;
-			}
-			++mat;
-		}
-		fclose(fp);
-
-		return true;
-	}
-
 	//! Scales the whole matrix
 	/** \param coef scaling coef.
 	**/

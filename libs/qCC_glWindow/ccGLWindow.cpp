@@ -3061,16 +3061,16 @@ void ccGLWindow::applyImageViewport(ccCalibratedImage* theImage)
 	setFov(theImage->getFov());
 
 	//set the image camera center as OpenGL camera center
-	ccGLMatrix trans = theImage->getCameraMatrix();
-	CCVector3 C = trans.inverse().getTranslationAsVec3D();
-	setCameraPos(CCVector3d::fromArray(C.u));
+	ccGLMatrixd trans = ccGLMatrixd(theImage->getCameraMatrix().data());
+	CCVector3d C = trans.inverse().getTranslationAsVec3D();
+	setCameraPos(C);
 
 	//aspect ratio
 	m_viewportParams.perspectiveAspectRatio = static_cast<float>(theImage->getW()) / static_cast<float>(theImage->getH());
 
 	//apply orientation matrix
 	trans.clearTranslation();
-	setBaseViewMat(ccGLMatrixd(trans.data()));
+	setBaseViewMat(trans);
 
 	ccLog::Print("[ccGLWindow] Viewport applied");
 

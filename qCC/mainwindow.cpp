@@ -5848,8 +5848,8 @@ ccGLWindow* MainWindow::new3DView()
     connect(view3D,	SIGNAL(mouseWheelRotated(float)),				this,       SLOT(echoMouseWheelRotate(float)));
     connect(view3D,	SIGNAL(cameraDisplaced(float,float)),			this,       SLOT(echoCameraDisplaced(float,float)));
     connect(view3D,	SIGNAL(viewMatRotated(const ccGLMatrixd&)),		this,       SLOT(echoBaseViewMatRotation(const ccGLMatrixd&)));
-    connect(view3D,	SIGNAL(cameraPosChanged(const CCVector3d&)),	this,       SLOT(echoCameraPosChanged(const CCVector3&)));
-    connect(view3D,	SIGNAL(pivotPointChanged(const CCVector3d&)),	this,       SLOT(echoPivotPointChanged(const CCVector3&)));
+    connect(view3D,	SIGNAL(cameraPosChanged(const CCVector3d&)),	this,       SLOT(echoCameraPosChanged(const CCVector3d&)));
+    connect(view3D,	SIGNAL(pivotPointChanged(const CCVector3d&)),	this,       SLOT(echoPivotPointChanged(const CCVector3d&)));
     connect(view3D,	SIGNAL(pixelSizeChanged(float)),				this,       SLOT(echoPixelSizeChanged(float)));
 
     connect(view3D,	SIGNAL(destroyed(QObject*)),					this,       SLOT(prepareWindowDeletion(QObject*)));

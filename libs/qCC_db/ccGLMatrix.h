@@ -74,7 +74,7 @@ public:
 #include "qCC_db.h"
 class QCC_DB_LIB_API ccGLMatrixd : public ccGLMatrixTpl<double>
 #else
-class ccGLMatrix : public ccGLMatrixTpl<double>
+class ccGLMatrixd : public ccGLMatrixTpl<double>
 #endif
 {
 public:

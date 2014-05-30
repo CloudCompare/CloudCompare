@@ -127,6 +127,7 @@ if( WIN32 )
 	# Export Qt dlls
 	install_Qt_Dlls( ${CLOUDCOMPARE_DEST_FOLDER} )
 	install_Qt_ImageFormats( ${CLOUDCOMPARE_DEST_FOLDER} )
+	install_Qt5_plugins( ${CLOUDCOMPARE_DEST_FOLDER} )
 
 	# Additional auxiliary file(s)
 	list( APPEND auxFiles bin_other/start.bat )

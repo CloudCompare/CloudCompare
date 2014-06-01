@@ -1426,6 +1426,9 @@ void ccPointCloud::invertNormals()
 		ccNormalVectors::InvertNormal(*m_normals->getCurrentValuePtr());
 		m_normals->forwardIterator();
 	}
+
+	//We must update the VBOs
+	releaseVBOs();
 }
 
 void ccPointCloud::swapPoints(unsigned firstIndex, unsigned secondIndex)
@@ -1515,7 +1518,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
 
 		//can't display a SF without... a SF... and an active color scale!
-		assert(!glParams.showSF || (m_currentDisplayedScalarField && m_currentDisplayedScalarField->getColorScale()));
+		assert(!glParams.showSF || hasDisplayedScalarField());
 
 		//standard case: list names pushing
 		bool pushName = MACRO_DrawEntityNames(context);
@@ -1581,7 +1584,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		// L.O.D.
 		unsigned numberOfPoints = size();
 		unsigned decimStep = 1;
-		if (numberOfPoints>MAX_LOD_POINTS_NUMBER && context.decimateCloudOnMove &&  MACRO_LODActivated(context))
+		if (numberOfPoints > MAX_LOD_POINTS_NUMBER && context.decimateCloudOnMove &&  MACRO_LODActivated(context))
 		{
 			decimStep = int(ceil(float(numberOfPoints) / float(MAX_LOD_POINTS_NUMBER)));
 		}
@@ -1633,12 +1636,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			else if (glParams.showSF) //no visibility table enabled + scalar field
 			{
 				assert(m_currentDisplayedScalarField);
-				const ccScalarField::Range& sfDisplayRange = m_currentDisplayedScalarField->displayRange();
-				const ccScalarField::Range& sfSaturationRange = m_currentDisplayedScalarField->saturationRange();
-
-				//the fact that NaN values SHOULD be hidden, doesn't mean that we ACTUALLY hide points...
-				bool hiddenPoints = (	!m_currentDisplayedScalarField->areNaNValuesShownInGrey()
-					&& ( sfDisplayRange.stop() <= sfDisplayRange.max() || sfDisplayRange.start() >= sfDisplayRange.min()) );
 
 				//color ramp shader initialization
 				ccColorRampShader* colorRampShader = context.colorRampShader;
@@ -1649,10 +1646,13 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					colorRampShader = 0;
 				}
 
+				const ccScalarField::Range& sfDisplayRange = m_currentDisplayedScalarField->displayRange();
+				const ccScalarField::Range& sfSaturationRange = m_currentDisplayedScalarField->saturationRange();
+
 				if (colorRampShader)
 				{
 					//max available space for frament's shader uniforms
-					GLint maxBytes=0;
+					GLint maxBytes = 0;
 					glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
 					GLint maxComponents = (maxBytes>>2)-4; //leave space for the other uniforms!
 					unsigned steps = m_currentDisplayedScalarField->getColorRampSteps();
@@ -1693,10 +1693,10 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else if (glParams.showNorms)
 						{
-							//we must get rid of lights material (other than ambiant) for the red and green fields
+							//we must get rid of lights material (other than ambient) for the red and green fields
 							glPushAttrib(GL_LIGHTING_BIT);
 
-							//we use the ambiant light to pass the scalar value (and 'grayed' marker) without any
+							//we use the ambient light to pass the scalar value (and 'grayed' marker) without any
 							//modification from the GPU pipeline, even if normals are enabled!
 							glDisable(GL_COLOR_MATERIAL);
 							glColorMaterial(GL_FRONT_AND_BACK, GL_DIFFUSE);
@@ -1705,7 +1705,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 							GLint maxLightCount;
 							glGetIntegerv(GL_MAX_LIGHTS,&maxLightCount);
-							for (int i=0;i<maxLightCount;++i)
+							for (GLint i=0; i<maxLightCount; ++i)
 							{
 								if (glIsEnabled(GL_LIGHT0+i))
 								{
@@ -1728,6 +1728,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 				}
 
+				//if some points may not be displayed, we'll have to be smarter!
+				bool hiddenPoints = m_currentDisplayedScalarField->mayHaveHiddenValues();
+
 				//if all points should be displayed (fastest case)
 				if (!hiddenPoints)
 				{
@@ -1745,8 +1748,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						glEnableClientState(GL_NORMAL_ARRAY);
 					}
 
-					unsigned k,chunks = m_points->chunksCount();
-					for (k=0;k<chunks;++k)
+					unsigned chunks = m_points->chunksCount();
+					for (unsigned k=0; k<chunks; ++k)
 					{
 						unsigned chunkSize = m_points->chunkSize(k);
 
@@ -1757,7 +1760,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							float* _sfColors = s_rgbBuffer3f;
 							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep,_sfColors+=3)
+								for (unsigned j=0; j<chunkSize; j+=decimStep,_sf+=decimStep,_sfColors+=3)
 								{
 									bool valid = sfDisplayRange.isInRange(*_sf);							//NaN values are also rejected!
 									_sfColors[0] = GetNormalizedValue(*_sf,sfDisplayRange);					//normalized sf value
@@ -1768,7 +1771,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							else //symmetrical scale
 							{
 								//we must handle the values between -minSat et +minSat 'manually'
-								for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep,_sfColors+=3)
+								for (unsigned j=0; j<chunkSize; j+=decimStep,_sf+=decimStep,_sfColors+=3)
 								{
 									bool valid = sfDisplayRange.isInRange(*_sf);							//NaN values are also rejected!
 									_sfColors[0] = GetSymmetricalNormalizedValue(*_sf,sfSaturationRange);	//normalized sf value
@@ -1780,7 +1783,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						else
 						{
 							colorType* _sfColors = s_rgbBuffer3ub;
-							for (unsigned j=0;j<chunkSize;j+=decimStep,_sf+=decimStep)
+							for (unsigned j=0; j<chunkSize; j+=decimStep,_sf+=decimStep)
 							{
 								//we need to convert scalar value to color into a temporary structure
 								const colorType* col = m_currentDisplayedScalarField->getColor(*_sf);
@@ -1796,7 +1799,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							PointCoordinateType* _normals = s_normBuffer;
 							const normsType* _normalsIndexes = m_normals->chunkStartPtr(k);
-							for (unsigned j=0;j<chunkSize;j+=decimStep,_normalsIndexes+=decimStep)
+							for (unsigned j=0; j<chunkSize; j+=decimStep,_normalsIndexes+=decimStep)
 							{
 								const CCVector3& N = compressedNormals->getNormal(*_normalsIndexes);
 								*(_normals)++ = N.x;
@@ -1828,9 +1831,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+								for (unsigned j=0; j<numberOfPoints; j+=decimStep)
 								{
-									assert(j<m_currentDisplayedScalarField->currentSize());
+									assert(j < m_currentDisplayedScalarField->currentSize());
 									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
@@ -1842,9 +1845,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							else
 							{
-								for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+								for (unsigned j=0; j<numberOfPoints; j+=decimStep)
 								{
-									assert(j<m_currentDisplayedScalarField->currentSize());
+									assert(j < m_currentDisplayedScalarField->currentSize());
 									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
@@ -1857,9 +1860,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
-							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+							for (unsigned j=0; j<numberOfPoints; j+=decimStep)
 							{
-								assert(j<m_currentDisplayedScalarField->currentSize());
+								assert(j < m_currentDisplayedScalarField->currentSize());
 								const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
 								if (col)
 								{
@@ -1876,9 +1879,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						{
 							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
-								for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+								for (unsigned j=0; j<numberOfPoints; j+=decimStep)
 								{
-									assert(j<m_currentDisplayedScalarField->currentSize());
+									assert(j < m_currentDisplayedScalarField->currentSize());
 									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
@@ -1889,9 +1892,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 							else
 							{
-								for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+								for (unsigned j=0; j<numberOfPoints; j+=decimStep)
 								{
-									assert(j<m_currentDisplayedScalarField->currentSize());
+									assert(j < m_currentDisplayedScalarField->currentSize());
 									const ScalarType sf = m_currentDisplayedScalarField->getValue(j);
 									if (sfDisplayRange.isInRange(sf)) //NaN values are rejected
 									{
@@ -1903,9 +1906,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 						}
 						else
 						{
-							for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+							for (unsigned j=0; j<numberOfPoints; j+=decimStep)
 							{
-								assert(j<m_currentDisplayedScalarField->currentSize());
+								assert(j < m_currentDisplayedScalarField->currentSize());
 								const colorType* col = m_currentDisplayedScalarField->getValueColor(j);
 								if (col)
 								{
@@ -2007,7 +2010,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			//however we must take hidden points into account!
 			if (isVisibilityTableInstantiated())
 			{
-				for (unsigned j=0;j<numberOfPoints;j+=decimStep)
+				for (unsigned j=0; j<numberOfPoints; j+=decimStep)
 				{
 					if (m_pointsVisibility->getValue(j) == POINT_VISIBLE)
 					{
@@ -2025,11 +2028,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showSF)
 				{
 					assert(m_currentDisplayedScalarField);
-					if (!m_currentDisplayedScalarField->areNaNValuesShownInGrey() && m_currentDisplayedScalarField->getColorScale())
-					{
-						const ccScalarField::Range& sfDisplayRange = m_currentDisplayedScalarField->displayRange();
-						hiddenPoints = (sfDisplayRange.stop() <= sfDisplayRange.max() || sfDisplayRange.start() >= sfDisplayRange.min());
-					}
+					hiddenPoints = m_currentDisplayedScalarField->mayHaveHiddenValues() && m_currentDisplayedScalarField->getColorScale();
 				}
 				
 				if (hiddenPoints) //potentially hidden points
@@ -2236,8 +2235,8 @@ int ccPointCloud::getCurrentDisplayedScalarFieldIndex() const
 
 void ccPointCloud::setCurrentDisplayedScalarField(int index)
 {
-	m_currentDisplayedScalarFieldIndex=index;
-	m_currentDisplayedScalarField=static_cast<ccScalarField*>(getScalarField(index));
+	m_currentDisplayedScalarFieldIndex = index;
+	m_currentDisplayedScalarField = static_cast<ccScalarField*>(getScalarField(index));
 
 	if (m_currentDisplayedScalarFieldIndex >= 0 && m_currentDisplayedScalarField)
 		setCurrentOutScalarField(m_currentDisplayedScalarFieldIndex);
@@ -2271,7 +2270,7 @@ void ccPointCloud::deleteAllScalarFields()
 
 bool ccPointCloud::setRGBColorWithCurrentScalarField(bool mixWithExistingColor/*=false*/)
 {
-	if (!m_currentDisplayedScalarField || !m_currentDisplayedScalarField->getColorScale())
+	if (!hasDisplayedScalarField())
 	{
 		ccLog::Warning("[ccPointCloud::setColorWithCurrentScalarField] No active scalar field or color scale!");
 		return false;

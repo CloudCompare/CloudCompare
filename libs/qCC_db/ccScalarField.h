@@ -200,6 +200,12 @@ public:
 	//! Returns associated histogram values (for display)
 	const Histogram& getHistogram() const { return m_histogram; }
 
+	//! Returns whether the scalar field in its current configuration MAY have 'hidden' values or not
+	/** 'Hidden' values are typically NaN values or values outside of the 'displayed' intervale
+		while those values are not displayed in grey (see ccScalarField::showNaNValuesInGrey).
+	**/
+	bool mayHaveHiddenValues() const;
+
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const { return true; }
 	virtual bool toFile(QFile& out) const;

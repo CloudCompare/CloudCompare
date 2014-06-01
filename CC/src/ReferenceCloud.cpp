@@ -177,12 +177,12 @@ void ReferenceCloud::forEach(genericPointAction& anAction)
 {
 	assert(m_theAssociatedCloud);
 
-	ScalarType d,d2;
-	unsigned count=size();
-	for (unsigned i=0;i<count;++i)
+	unsigned count = size();
+	for (unsigned i=0; i<count; ++i)
 	{
 		const unsigned& index = m_theIndexes->getValue(i);
-		d2 = d = m_theAssociatedCloud->getPointScalarValue(index);
+		ScalarType d = m_theAssociatedCloud->getPointScalarValue(index);
+		ScalarType d2 = d;
 		anAction(*m_theAssociatedCloud->getPointPersistentPtr(index),d2);
 		if (d!=d2)
 			m_theAssociatedCloud->setPointScalarValue(index,d2);
@@ -191,7 +191,7 @@ void ReferenceCloud::forEach(genericPointAction& anAction)
 
 void ReferenceCloud::removePointGlobalIndex(unsigned localIndex)
 {
-	assert(localIndex<size());
+	assert(localIndex < size());
 
 	unsigned lastIndex = size()-1;
 	//swap the value to be removed with the last one

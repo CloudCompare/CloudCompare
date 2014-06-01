@@ -544,3 +544,13 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 
 	return true;
 }
+
+bool ccScalarField::mayHaveHiddenValues() const
+{
+	bool hiddenPoints = (		!areNaNValuesShownInGrey()
+						&&	(	m_displayRange.stop()	<= m_displayRange.max()
+							||	m_displayRange.start()	>= m_displayRange.min() )
+						);
+
+	return hiddenPoints;
+}

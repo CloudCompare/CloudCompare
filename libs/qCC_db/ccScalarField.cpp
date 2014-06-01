@@ -48,7 +48,7 @@ ccScalarField::ccScalarField(const char* name/*=0*/)
 ScalarType ccScalarField::normalize(ScalarType d) const
 {
 	if (/*!ValidValue(d) || */!m_displayRange.isInRange(d)) //NaN values are also rejected by 'isInRange'!
-		return (ScalarType)-1.0;
+		return static_cast<ScalarType>(-1);
 
 	//most probable path first!
 	if (!m_logScale)
@@ -58,41 +58,41 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 			if (d <= m_saturationRange.start())
 				return 0;
 			else if (d >= m_saturationRange.stop())
-				return (ScalarType)1.0;
+				return static_cast<ScalarType>(1);
 			return (d - m_saturationRange.start()) / m_saturationRange.range();
 		}
 		else //symmetric scale
 		{
 			if (fabs(d) <= m_saturationRange.start())
-				return (ScalarType)0.5;
+				return static_cast<ScalarType>(0.5);
 			
 			if (d >= 0)
 			{
 				if (d >= m_saturationRange.stop())
-					return (ScalarType)1.0;
-				return ((ScalarType)1.0 + (d - m_saturationRange.start()) / m_saturationRange.range()) / (ScalarType)2.0;
+					return static_cast<ScalarType>(1);
+				return (static_cast<ScalarType>(1) + (d - m_saturationRange.start()) / m_saturationRange.range()) / (ScalarType)2.0;
 			}
 			else
 			{
 				if (d <= -m_saturationRange.stop())
-					return (ScalarType)0.0;
-				return ((ScalarType)1.0 + (d + m_saturationRange.start()) / m_saturationRange.range()) / (ScalarType)2.0;
+					return 0;
+				return (static_cast<ScalarType>(1) + (d + m_saturationRange.start()) / m_saturationRange.range()) / (ScalarType)2.0;
 			}
 		}
 	}
 	else //log scale
 	{
-        ScalarType dLog = log10(std::max( (ScalarType) fabs(d),(ScalarType)ZERO_TOLERANCE));
+        ScalarType dLog = log10(std::max(fabs(d), static_cast<ScalarType>(ZERO_TOLERANCE)));
 		if (dLog <= m_logSaturationRange.start())
 			return 0;
 		else if (dLog >= m_logSaturationRange.stop())
-			return (ScalarType)1.0;
+			return static_cast<ScalarType>(1);
 		return (dLog - m_logSaturationRange.start()) / m_logSaturationRange.range();
 	}
 
 	//can't get here normally!
 	assert(false);
-	return (ScalarType)-1.0;
+	return static_cast<ScalarType>(-1);
 }
 
 void ccScalarField::setColorScale(ccColorScale::Shared scale)

@@ -79,6 +79,8 @@ struct glDrawContext
 	
 	//! Shader for fast dynamic color ramp lookup
 	ccColorRampShader* colorRampShader;
+	//! Use VBOs for faster display
+	bool useVBOs;
 
 	//! Picked points radius
 	float pickedPointsRadius;
@@ -107,6 +109,7 @@ struct glDrawContext
     , decimateMeshOnMove(true)
     , sfColorScaleToDisplay(0)
 	, colorRampShader(0)
+	, useVBOs(true)
 	, pickedPointsRadius(4)
 	, pickedPointsTextShift(0.0)
 	, dispNumberPrecision(6)

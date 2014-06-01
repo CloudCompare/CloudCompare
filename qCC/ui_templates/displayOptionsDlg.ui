@@ -54,7 +54,16 @@
           <enum>QFrame::NoFrame</enum>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_6">
-          <property name="margin">
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
            <number>0</number>
           </property>
           <item>
@@ -667,6 +676,16 @@
          </property>
          <property name="text">
           <string>Decimate big meshes (&gt;2.5M) when moved</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="useVBOCheckBox">
+         <property name="text">
+          <string>Try to load clouds on GPU for faster display</string>
          </property>
          <property name="checked">
           <bool>true</bool>

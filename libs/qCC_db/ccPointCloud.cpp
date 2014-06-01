@@ -1734,19 +1734,18 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				//if all points should be displayed (fastest case)
 				if (!hiddenPoints)
 				{
-					glEnableClientState(GL_VERTEX_ARRAY);
-					glEnableClientState(GL_COLOR_ARRAY);
+					if (context.useVBOs && m_vboState == VBO_NEW)
+						initVBOs();
 
+					glEnableClientState(GL_VERTEX_ARRAY);
+					if (glParams.showNorms)
+						glEnableClientState(GL_NORMAL_ARRAY);
+
+					glEnableClientState(GL_COLOR_ARRAY);
 					if (colorRampShader)
 						glColorPointer(3,GL_FLOAT,0,s_rgbBuffer3f);
 					else
 						glColorPointer(3,GL_UNSIGNED_BYTE,0,s_rgbBuffer3ub);
-
-					if (glParams.showNorms)
-					{
-						glNormalPointer(GL_COORD_TYPE,0,s_normBuffer);
-						glEnableClientState(GL_NORMAL_ARRAY);
-					}
 
 					unsigned chunks = m_points->chunksCount();
 					for (unsigned k=0; k<chunks; ++k)
@@ -1762,9 +1761,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							{
 								for (unsigned j=0; j<chunkSize; j+=decimStep,_sf+=decimStep,_sfColors+=3)
 								{
-									bool valid = sfDisplayRange.isInRange(*_sf);							//NaN values are also rejected!
 									_sfColors[0] = GetNormalizedValue(*_sf,sfDisplayRange);					//normalized sf value
-									_sfColors[1] = valid ? 1.0f : 0.0f;										//flag: whether point is grayed out or not
+									_sfColors[1] = sfDisplayRange.isInRange(*_sf) ? 1.0f : 0.0f;			//flag: whether point is grayed out or not (NaN values are also rejected!)
 									_sfColors[2] = 1.0f;													//reference value (to get the true lighting value)
 								}
 							}
@@ -1773,9 +1771,8 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 								//we must handle the values between -minSat et +minSat 'manually'
 								for (unsigned j=0; j<chunkSize; j+=decimStep,_sf+=decimStep,_sfColors+=3)
 								{
-									bool valid = sfDisplayRange.isInRange(*_sf);							//NaN values are also rejected!
 									_sfColors[0] = GetSymmetricalNormalizedValue(*_sf,sfSaturationRange);	//normalized sf value
-									_sfColors[1] = valid ? 1.0f : 0.0f;										//flag: whether point is grayed out or not
+									_sfColors[1] = sfDisplayRange.isInRange(*_sf) ? 1.0f : 0.0f;			//flag: whether point is grayed out or not (NaN values are also rejected!)
 									_sfColors[2] = 1.0f;													//reference value (to get the true lighting value)
 								}
 							}
@@ -1794,30 +1791,50 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 							}
 						}
 
-						//normals
-						if (glParams.showNorms)
+						//if available, we use the VBO for the current chunk
+						bool vboBound = false;
+						if (context.useVBOs && m_vboState == VBO_INITIALIZED && m_vbos[k].isCreated())
 						{
-							PointCoordinateType* _normals = s_normBuffer;
-							const normsType* _normalsIndexes = m_normals->chunkStartPtr(k);
-							for (unsigned j=0; j<chunkSize; j+=decimStep,_normalsIndexes+=decimStep)
+							m_vbos[k].bind();
+							//points
+							glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),0);
+							//normals
+							if (glParams.showNorms)
+								glNormalPointer(GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),(const GLvoid*)m_vbos[k].normalShift);
+							vboBound = true;
+						}
+						else
+						{
+							//points
+							glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
+							//normals
+							if (glParams.showNorms)
 							{
-								const CCVector3& N = compressedNormals->getNormal(*_normalsIndexes);
-								*(_normals)++ = N.x;
-								*(_normals)++ = N.y;
-								*(_normals)++ = N.z;
+								PointCoordinateType* _normals = s_normBuffer;
+								const normsType* _normalsIndexes = m_normals->chunkStartPtr(k);
+								for (unsigned j=0; j<chunkSize; j+=decimStep,_normalsIndexes+=decimStep)
+								{
+									const CCVector3& N = compressedNormals->getNormal(*_normalsIndexes);
+									*(_normals)++ = N.x;
+									*(_normals)++ = N.y;
+									*(_normals)++ = N.z;
+								}
+								glNormalPointer(GL_COORD_TYPE,0,s_normBuffer);
 							}
 						}
 
 						if (decimStep > 1)
 							chunkSize = static_cast<unsigned>( floor(static_cast<float>(chunkSize)/decimStep) );
-
-						glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
 						glDrawArrays(GL_POINTS,0,chunkSize);
+
+						if (vboBound)
+						{
+							m_vbos[k].release();
+						}
 					}
 
 					if (glParams.showNorms)
 						glDisableClientState(GL_NORMAL_ARRAY);
-
 					glDisableClientState(GL_VERTEX_ARRAY);
 					glDisableClientState(GL_COLOR_ARRAY);
 				}
@@ -1931,7 +1948,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else //no visibility table enabled, no scalar field
 			{
-				if (m_vboState == VBO_NEW)
+				if (context.useVBOs && m_vboState == VBO_NEW)
 					initVBOs();
 
 				unsigned chunks = m_points->chunksCount();
@@ -1952,7 +1969,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 					//if available, we use the VBO for the current chunk
 					bool vboBound = false;
-					if (m_vboState == VBO_INITIALIZED && m_vbos[k].isCreated())
+					if (context.useVBOs && m_vboState == VBO_INITIALIZED && m_vbos[k].isCreated())
 					{
 						m_vbos[k].bind();
 						glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),0);
@@ -2973,6 +2990,7 @@ bool ccPointCloud::initVBOs()
 					}
 					m_vbos[i].write(m_vbos[i].normalShift,s_normBuffer,sizeof(PointCoordinateType)*chunkSize*3);
 				}
+				m_vbos[i].release();
 				pointsInVBOs += chunkSize;
 			}
 			else //VBO initialization failed

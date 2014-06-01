@@ -83,6 +83,7 @@ void ccGui::ParamStruct::reset()
     drawBackgroundGradient      = true;
     decimateMeshOnMove          = true;
     decimateCloudOnMove         = true;
+	useVBOs						= true;
     displayCross                = true;
 
 	pickedPointsSize = 4;
@@ -115,6 +116,7 @@ ccGui::ParamStruct& ccGui::ParamStruct::operator =(const ccGui::ParamStruct& par
     drawBackgroundGradient      = params.drawBackgroundGradient;
     decimateMeshOnMove          = params.decimateMeshOnMove;
     decimateCloudOnMove         = params.decimateCloudOnMove;
+	useVBOs						= params.useVBOs;
     displayCross                = params.displayCross;
 	pickedPointsSize			= params.pickedPointsSize;
 	colorScaleShowHistogram		= params.colorScaleShowHistogram;
@@ -150,6 +152,7 @@ void ccGui::ParamStruct::fromPersistentSettings()
     drawBackgroundGradient  = settings.value("backgroundGradient", true).toBool();
     decimateMeshOnMove      = settings.value("meshDecimation", true).toBool();
     decimateCloudOnMove     = settings.value("cloudDecimation", true).toBool();
+	useVBOs					= settings.value("useVBOs", true).toBool();
     displayCross            = settings.value("crossDisplayed", true).toBool();
 
 	pickedPointsSize		= (unsigned)settings.value("pickedPointsSize", 4).toInt();
@@ -186,6 +189,7 @@ void ccGui::ParamStruct::toPersistentSettings() const
     settings.setValue("backgroundGradient",drawBackgroundGradient);
     settings.setValue("meshDecimation",decimateMeshOnMove);
     settings.setValue("cloudDecimation",decimateCloudOnMove);
+	settings.setValue("useVBOs", useVBOs);
     settings.setValue("crossDisplayed",displayCross);
 	settings.setValue("pickedPointsSize", pickedPointsSize);
     settings.setValue("colorScaleShowHistogram", colorScaleShowHistogram);

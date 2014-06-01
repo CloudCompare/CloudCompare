@@ -70,6 +70,8 @@ public:
         bool decimateCloudOnMove;
         //! Display cross in the middle of the screen
         bool displayCross;
+		//! Whether to use VBOs for faster display
+		bool useVBOs;
 
 		//! Picked points size
 		unsigned pickedPointsSize;

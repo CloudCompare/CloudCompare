@@ -44,6 +44,7 @@ ccDisplayOptionsDlg::ccDisplayOptionsDlg(QWidget* parent) : QDialog(parent), Ui:
 	connect(textColorButton, SIGNAL(clicked()), this, SLOT(changeTextColor()));
 	connect(decimateMeshBox, SIGNAL(clicked()), this, SLOT(changeMeshDecimation()));
 	connect(decimateCloudBox, SIGNAL(clicked()), this, SLOT(changeCloudDecimation()));
+	connect(useVBOCheckBox,	SIGNAL(clicked()), this, SLOT(changeVBOUsage()));
 	connect(showCrossCheckBox, SIGNAL(clicked()), this, SLOT(changeCrossDisplayed()));
 
 	connect(colorScaleShowHistogramCheckBox, SIGNAL(clicked()), this, SLOT(changeColorScaleShowHistogram()));
@@ -120,6 +121,7 @@ void ccDisplayOptionsDlg::refresh()
 	enableGradientCheckBox->setChecked(parameters.drawBackgroundGradient);
 	decimateMeshBox->setChecked(parameters.decimateMeshOnMove);
 	decimateCloudBox->setChecked(parameters.decimateCloudOnMove);
+	useVBOCheckBox->setChecked(parameters.useVBOs);
 	showCrossCheckBox->setChecked(parameters.displayCross);
 
 	colorScaleShowHistogramCheckBox->setChecked(parameters.colorScaleShowHistogram);
@@ -351,6 +353,11 @@ void ccDisplayOptionsDlg::changeMeshDecimation()
 void ccDisplayOptionsDlg::changeCloudDecimation()
 {
 	parameters.decimateCloudOnMove = decimateCloudBox->isChecked();
+}
+
+void ccDisplayOptionsDlg::changeVBOUsage()
+{
+	parameters.useVBOs = useVBOCheckBox->isChecked();
 }
 
 void ccDisplayOptionsDlg::changeCrossDisplayed()

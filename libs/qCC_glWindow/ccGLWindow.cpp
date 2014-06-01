@@ -1656,6 +1656,9 @@ void ccGLWindow::getContext(CC_DRAW_CONTEXT& context)
 
 	//default font size
 	setFontPointSize(guiParams.defaultFontSize);
+
+	//display acceleration
+	context.useVBOs = guiParams.useVBOs;
 }
 
 void ccGLWindow::toBeRefreshed()

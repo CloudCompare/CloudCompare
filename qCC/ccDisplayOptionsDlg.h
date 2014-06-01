@@ -78,6 +78,7 @@ protected slots:
     void changeBackgroundGradient();
     void changeMeshDecimation();
     void changeCloudDecimation();
+	void changeVBOUsage();
     void changeCrossDisplayed();
 	void changeColorScaleShowHistogram();
 	void changeColorScaleUseShader();

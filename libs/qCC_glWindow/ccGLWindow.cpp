@@ -1688,20 +1688,20 @@ unsigned ccGLWindow::getTexture(const QImage& image)
 	glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	//check that image size is not too big!
-	GLint maxTexSize=0;
+	GLint maxTexSize = 0;
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE,&maxTexSize);
-	int cacheLimit = context()->textureCacheLimit()*1024;
+	int cacheLimitBytes = context()->textureCacheLimit() * 1024; //result in bytes
 
-	if (image.width() <= maxTexSize && image.height() <= maxTexSize && cacheLimit >= image.width()*image.height()*4)
+	if (image.width() <= maxTexSize && image.height() <= maxTexSize && cacheLimitBytes >= image.width()*image.height()*4)
 	{
 		return bindTexture(image,GL_TEXTURE_2D,GL_RGBA,QGLContext::NoBindOption);
 	}
 	else
 	{
-		maxTexSize = std::min(maxTexSize, (int)sqrt(static_cast<double>(cacheLimit>>2))); // ">>2"="/4" because we assume all textures have 4 components
+		maxTexSize = std::min(maxTexSize, static_cast<int>(sqrt(static_cast<double>(cacheLimitBytes>>2)))); // ">>2"="/4" because we assume all textures have 4 components
 		int width = image.width();
 		int height = image.height();
-		if (width>height)
+		if (width > height)
 		{
 			width = maxTexSize;
 			height = (width*image.height()) / image.width();

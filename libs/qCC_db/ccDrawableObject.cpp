@@ -25,6 +25,7 @@
 /******************************/
 
 ccDrawableObject::ccDrawableObject()
+	: m_currentDisplay(0)
 {
     setVisible(true);
     setSelected(false);
@@ -33,7 +34,6 @@ ccDrawableObject::ccDrawableObject()
     showSF(false);
 	lockVisibility(false);
 	showNameIn3D(false);
-    m_currentDisplay=0;
 
     enableTempColor(false);
     setTempColor(ccColor::white,false);

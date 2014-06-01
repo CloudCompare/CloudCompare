@@ -247,7 +247,7 @@ public:
     virtual CCVector3 getBBCenter();
 
 	//! Notifies all dependent entities that the geometry of this entity has changed
-	void notifyGeometryUpdate();
+	virtual void notifyGeometryUpdate();
 
     //! Returns the entity bounding-box only
     /** Children bboxes are ignored.

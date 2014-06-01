@@ -184,6 +184,9 @@ public:
 
 	//! Returns viewport parameters (zoom, etc.)
 	virtual const ccViewportParameters& getViewportParameters() const = 0;
+
+	//! Makes the associated OpenGL context active
+	virtual void makeContextCurrent() = 0;
 };
 
 #endif //CC_GENERIC_GL_DISPLAY

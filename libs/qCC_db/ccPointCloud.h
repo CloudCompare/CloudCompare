@@ -32,9 +32,13 @@
 #include "ccGenericPointCloud.h"
 #include "ccPlatform.h"
 
+//Qt
+#include <QGLBuffer>
+
 class ccPointCloud;
 class ccScalarField;
 class ccPolyline;
+class QGLBuffer;
 
 /***************************************************
 				ccPointCloud
@@ -516,6 +520,7 @@ protected:
     virtual void applyGLTransformation(const ccGLMatrix& trans);
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
+	virtual void notifyGeometryUpdate();
 
     //inherited from ChunkedPointCloud
 	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex);
@@ -533,6 +538,38 @@ protected:
 	ccScalarField* m_currentDisplayedScalarField;
 	//! Currently displayed scalar field index
 	int m_currentDisplayedScalarFieldIndex;
+
+protected: // VBO
+
+	//! States of th VBO(s)
+	enum VBO_STATES { VBO_NEW, VBO_INITIALIZED, VBO_FAILED };
+
+	//! Current VBOs state
+	VBO_STATES m_vboState;
+
+	//! Init VBOs
+	bool initVBOs();
+
+	//! Release VBOs
+	void releaseVBOs();
+
+	class VBO : public QGLBuffer
+	{
+	public:
+		int rgbShift;
+		int normalShift;
+
+		bool init(int count, bool withColors, bool withNormals);
+
+		VBO()
+			: QGLBuffer(QGLBuffer::VertexBuffer)
+			, rgbShift(0)
+			, normalShift(0)
+		{}
+	};
+
+	//! VBOs attached to this cloud
+	std::vector<VBO> m_vbos;
 
 private:
 

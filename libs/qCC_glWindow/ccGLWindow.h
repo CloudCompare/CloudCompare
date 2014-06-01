@@ -125,6 +125,7 @@ public:
     virtual void displayText(QString text, int x, int y, unsigned char align = ALIGN_DEFAULT, float bkgAlpha = 0, const unsigned char* rgbColor = 0, const QFont* font = 0);
 	virtual QFont getTextDisplayFont() const; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const { return m_viewportParams; }
+	inline virtual void makeContextCurrent() { makeCurrent(); }
 
     //! Displays a status message in the bottom-left corner
     /** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE

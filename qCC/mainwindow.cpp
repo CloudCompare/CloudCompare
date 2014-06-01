@@ -5833,7 +5833,8 @@ ccGLWindow* MainWindow::new3DView()
 	if (!subWindowList.isEmpty())
 		otherWin=static_cast<ccGLWindow*>(subWindowList[0]->widget());
 
-    QGLFormat format;
+	QGLFormat format = QGLFormat::defaultFormat();
+	format.setStencil(false);
     format.setSwapInterval(0);
 	ccGLWindow *view3D = new ccGLWindow(this,format,otherWin); //We share OpenGL contexts between windows!
     view3D->setMinimumSize(400,300);

@@ -5,6 +5,9 @@ v2.5.5 ??/??/2014
 	* Edit > Colors > Levels
 		- allows the user to edit the color histogram (either all channels at once or channel by channel)
 - Enhancement:
+	* Point clouds are pre-loaded in the graphic card memory if possible (through VBOs)
+		- allows for much faster display (up to 15 times!)
+		- only available on point clouds without scalar field or hidden parts for now
 	* New option in the LAS file opening dialog:
 		- 'Force 8-bit colors': to cope with files in which colors are mistakenly coded on 8 bits (instead of 16)
 	* The 'Poisson Surface Reconstruction' plugin (qPoissonRecon) is now based on the version 5.71 of PoissonRecon lib

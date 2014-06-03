@@ -538,7 +538,7 @@ public:
 		if (fabs(CC_MAT_R31) != 1)
 		{
 			theta_rad = -asin(CC_MAT_R31);
-			PointCoordinateType cos_theta = cos(theta_rad);
+			T cos_theta = cos(theta_rad);
 			psi_rad = atan2(CC_MAT_R32/cos_theta, CC_MAT_R33/cos_theta);
 			phi_rad = atan2(CC_MAT_R21/cos_theta, CC_MAT_R11/cos_theta);
 
@@ -560,8 +560,8 @@ public:
 			}
 			else
 			{
-			theta_rad = -static_cast<T>(M_PI_2);
-			psi_rad = -atan2(CC_MAT_R12,CC_MAT_R13);
+				theta_rad = -static_cast<T>(M_PI_2);
+				psi_rad = -atan2(CC_MAT_R12,CC_MAT_R13);
 			}
 		}
 

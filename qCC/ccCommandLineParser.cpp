@@ -13,6 +13,7 @@
 #include <ccPlane.h>
 #include <ccNormalVectors.h>
 #include <ccPolyline.h>
+#include <ccScalarField.h>
 
 //qCC_io
 #include <BundlerFilter.h>

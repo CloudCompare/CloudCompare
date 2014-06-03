@@ -27,6 +27,8 @@
 #include <ccLog.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
+#include <ccScalarField.h>
+#include "ccColorScalesManager.h"
 
 //Liblas
 #include <liblas/point.hpp>

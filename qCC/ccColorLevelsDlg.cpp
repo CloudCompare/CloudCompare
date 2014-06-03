@@ -21,6 +21,9 @@
 #include "ccHistogramWindow.h"
 #include "ccGenericPointCloud.h"
 
+//qCC_db
+#include <ccGenericGLDisplay.h>
+
 //Qt
 #include <QPushButton>
 

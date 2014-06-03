@@ -602,20 +602,11 @@ protected:
                     OpenGL Extensions
 	***************************************************/
 
-    //! Loads all available OpenGL extensions
+    //! Loads OpenGL extensions
+	/** Wrapper around ccFBOUtils::InitGLEW.
+		\return success
+	**/
     static bool InitGLEW();
-
-    //! Checks for availability of a given OpenGL extension
-    static bool CheckExtension(const char *extName);
-
-    //! Shortcut: checks Shaders support
-    static bool CheckShadersAvailability();
-
-    //! Shortcut: checks FBO support
-    static bool CheckFBOAvailability();
-
-	//! Shortcut: checks VBO support
-    static bool CheckVBOAvailability();
 
 	//! GL names picking buffer
     GLuint m_pickingBuffer[CC_PICKING_BUFFER_SIZE];
@@ -745,6 +736,8 @@ protected:
 
 	// Color ramp shader
 	ccColorRampShader* m_colorRampShader;
+	// Custom rendering shader (OpenGL 3.3+)
+	ccShader* m_customRenderingShader;
 
     //! Active GL filter
     ccGlFilter* m_activeGLFilter;

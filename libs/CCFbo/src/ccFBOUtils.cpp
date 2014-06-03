@@ -22,45 +22,20 @@
 #include <vld.h>
 #endif
 
-//*********** OPENGL TEXTURES ***********//
-void ccFBOUtils::DisplayTexture2D(GLuint tex, int w, int h)
-{
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, tex);
-
-    float halfW = (float)w*0.5f;
-    float halfH = (float)h*0.5f;
-
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0.0f, 0.0f);
-    glVertex2f(-halfW, -halfH);
-    glTexCoord2f(1.0f, 0.0f);
-    glVertex2f( halfW, -halfH);
-    glTexCoord2f(1.0f, 1.0f);
-    glVertex2f( halfW,  halfH);
-    glTexCoord2f(0.0f, 1.0f);
-    glVertex2f(-halfW,  halfH);
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDisable(GL_TEXTURE_2D);
-}
-
 void ccFBOUtils::DisplayTexture2DCorner(GLuint tex, int w, int h)
 {
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, tex);
 
-    glColor4f(1.0, 1.0, 1.0, 1.0);
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     glBegin(GL_QUADS);
-    glTexCoord2f(0.0, 0.0);
+    glTexCoord2f(0.0f, 0.0f);
     glVertex2i(0, 0);
-    glTexCoord2f(1.0, 0.0);
+    glTexCoord2f(1.0f, 0.0f);
     glVertex2i(w, 0);
-    glTexCoord2f(1.0, 1.0);
+    glTexCoord2f(1.0f, 1.0f);
     glVertex2i(w, h);
-    glTexCoord2f(0.0, 1.0);
+    glTexCoord2f(0.0f, 1.0f);
     glVertex2i(0, h);
     glEnd();
 
@@ -68,15 +43,13 @@ void ccFBOUtils::DisplayTexture2DCorner(GLuint tex, int w, int h)
     glDisable(GL_TEXTURE_2D);
 }
 
-//*********** OPENGL EXTENSIONS ***********//
 bool ccFBOUtils::InitGLEW()
 {
     // GLEW initialization
+	glewExperimental = 1;
     GLenum code = glewInit();
-    if(code != GLEW_OK)
-        return false;
 
-    return true;
+	return (code == GLEW_OK);
 }
 
 bool ccFBOUtils::CheckExtension(const char *extName)
@@ -84,7 +57,7 @@ bool ccFBOUtils::CheckExtension(const char *extName)
 	if (!InitGLEW())
 		return false;
 
-    return (glewIsSupported(extName)>0);
+    return (glewIsSupported(extName) != 0);
 }
 
 bool ccFBOUtils::CheckShadersAvailability()
@@ -105,4 +78,14 @@ bool ccFBOUtils::CheckShadersAvailability()
 bool ccFBOUtils::CheckFBOAvailability()
 {
     return CheckExtension("GL_EXT_framebuffer_object");
+}
+
+bool ccFBOUtils::CheckVBOAvailability()
+{
+    return CheckExtension("GL_ARB_vertex_buffer_object");
+}
+
+bool ccFBOUtils::CheckVAAvailability()
+{
+    return CheckExtension("GL_ARB_vertex_array_object");
 }

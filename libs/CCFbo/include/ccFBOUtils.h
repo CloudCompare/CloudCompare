@@ -20,13 +20,6 @@
 
 #include "ccGlew.h"
 
-#define	TEX_1D_ON	glEnable(GL_TEXTURE_1D)
-#define	TEX_1D_OFF	glDisable(GL_TEXTURE_1D)
-#define	TEX_2D_ON	glEnable(GL_TEXTURE_2D)
-#define	TEX_2D_OFF	glDisable(GL_TEXTURE_2D)
-#define	TEX_3D_ON	glEnable(GL_TEXTURE_3D)
-#define	TEX_3D_OFF	glDisable(GL_TEXTURE_3D)
-
 //! Misc. FBO management related methods
 class ccFBOUtils
 {
@@ -36,7 +29,6 @@ public:
                     OpenGL Textures
 	***************************************************/
 
-    static void DisplayTexture2D(GLuint tex, int w, int h);
     static void DisplayTexture2DCorner(GLuint tex, int w, int h);
 
 	/***************************************************
@@ -52,8 +44,14 @@ public:
     //! Shortcut: checks Shaders support
     static bool CheckShadersAvailability();
 
-    //! Shortcut: checks FBO support
+    //! Shortcut: checks OpenGL FBO support
     static bool CheckFBOAvailability();
+
+	//! Shortcut: checks OpenGL VBO support
+    static bool CheckVBOAvailability();
+
+    //! Shortcut: checks OpenGL VA support
+	static bool CheckVAAvailability();
 };
 
 #endif

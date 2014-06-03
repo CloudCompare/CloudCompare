@@ -28,6 +28,7 @@
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
 #include <ccProgressDialog.h>
+#include <ccScalarField.h>
 #include <ccLog.h>
 
 //! Default number of points sampled on the 'model' mesh (if any)

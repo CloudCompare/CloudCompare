@@ -28,6 +28,9 @@
 //qCC_plugins
 #include <ccMainAppInterface.h>
 
+//qCC_db
+#include <ccScalarField.h>
+
 //Qt
 #include <QMainWindow>
 

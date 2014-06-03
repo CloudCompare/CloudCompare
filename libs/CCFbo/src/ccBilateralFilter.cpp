@@ -160,12 +160,12 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
 
     //Texture 1 --> 2D
     glActiveTexture(GL_TEXTURE1);
-    TEX_2D_ON;
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D,texDepth);
 
     //Texture 0 --> 2D
     glActiveTexture(GL_TEXTURE0);
-    //TEX_2D_ON;
+    //glEnable(GL_TEXTURE_2D);
     //glBindTexture(GL_TEXTURE_2D,texColor);
 
     ccFBOUtils::DisplayTexture2DCorner(texColor,m_width,m_height);
@@ -173,12 +173,12 @@ void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
     //Texture 0 --> 2D
     //glActiveTexture(GL_TEXTURE0);
     //glBindTexture(GL_TEXTURE_2D,0);
-    //TEX_2D_OFF;
+    //glDisable(GL_TEXTURE_2D);
 
     //Texture 1 --> 2D
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D,0);
-    TEX_2D_OFF;
+    glDisable(GL_TEXTURE_2D);
 
     m_shader->stop();
     m_fbo->stop();

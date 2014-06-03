@@ -37,6 +37,7 @@
 #include <ccProgressDialog.h>
 #include <ccMesh.h>
 #include <ccPolyline.h>
+#include <ccScalarField.h>
 
 //System
 #include <string.h>

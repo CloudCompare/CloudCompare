@@ -29,6 +29,7 @@
 #include <ccLog.h>
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
+#include <ccScalarField.h>
 
 //Qt
 #include <QImage>

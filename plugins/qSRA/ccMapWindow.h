@@ -21,8 +21,10 @@
 //qCC
 #include <ccGLWindow.h>
 
-class ccScalarField;
+//qCC_db
+#include <ccScalarField.h>
 
+//! 2D map display window
 class ccMapWindow : public ccGLWindow
 {
 public:

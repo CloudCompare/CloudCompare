@@ -26,6 +26,7 @@
 
 //CCLib
 #include <ChunkedPointCloud.h>
+#include <ScalarField.h>
 
 using namespace pcl;
 

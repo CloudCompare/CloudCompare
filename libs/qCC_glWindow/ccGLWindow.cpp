@@ -41,9 +41,11 @@
 #include <ccPlatform.h>
 
 //CCFbo
+#include <ccGlew.h>
 #include <ccShader.h>
 #include <ccGlFilter.h>
 #include <ccFrameBufferObject.h>
+#include <ccFBOUtils.h>
 
 //QT
 #include <QtGui>
@@ -156,6 +158,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_alwaysUseFBO(false)
 	, m_updateFBO(true)
 	, m_colorRampShader(0)
+	, m_customRenderingShader(0)
 	, m_activeGLFilter(0)
 	, m_glFiltersEnabled(false)
 	, m_winDBRoot(0)
@@ -281,6 +284,9 @@ ccGLWindow::~ccGLWindow()
 	if (m_colorRampShader)
 		delete m_colorRampShader;
 
+	if (m_customRenderingShader)
+		delete m_customRenderingShader;
+
 	if (m_activeShader)
 		delete m_activeShader;
 
@@ -324,7 +330,7 @@ void ccGLWindow::initializeGL()
 		ccLog::Print("[3D View %i] GL version: %s",m_uniqueID,glGetString(GL_VERSION));
 
 	//Shaders and other OpenGL extensions
-	m_shadersEnabled = CheckShadersAvailability();
+	m_shadersEnabled = ccFBOUtils::CheckShadersAvailability();
 	if (!m_shadersEnabled)
 	{
 		//if no shader, no GL filter!
@@ -336,7 +342,7 @@ void ccGLWindow::initializeGL()
 		if (!m_silentInitialization)
 			ccLog::Print("[3D View %i] Shaders available",m_uniqueID);
 
-		m_glFiltersEnabled = CheckFBOAvailability();
+		m_glFiltersEnabled = ccFBOUtils::CheckFBOAvailability();
 		if (m_glFiltersEnabled)
 		{
 			if (!m_silentInitialization)
@@ -351,12 +357,13 @@ void ccGLWindow::initializeGL()
 		//color ramp shader
 		if (!m_colorRampShader)
 		{
-			const char* vendorName = (const char*)glGetString(GL_VENDOR);
+			const char* vendorName = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
 			if (!m_silentInitialization)
 				ccLog::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
 
 			//we will update global parameters
 			ccGui::ParamStruct params = getDisplayParameters();
+			params.colorScaleShaderSupported = false;
 
 			GLint maxBytes = 0;
 			glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS,&maxBytes);
@@ -366,18 +373,16 @@ void ccGLWindow::initializeGL()
 			{
 				if (!m_silentInitialization)
 					ccLog::Warning("[3D View %i] Not enough memory on shader side to use color ramp shader! (max=%i/%i bytes)",m_uniqueID,maxBytes,minRequiredBytes);
-				params.colorScaleShaderSupported = false;
 			}
 			else
 			{
 				ccColorRampShader* colorRampShader = new ccColorRampShader();
 				QString shadersPath = ccGLWindow::getShadersPath();
 				QString error;
-				if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag")),error))
+				if (!colorRampShader->loadProgram(QString(),shadersPath+QString("/ColorRamp/color_ramp.frag"),error))
 				{
 					if (!m_silentInitialization)
 						ccLog::Warning(QString("[3D View %i] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
-					params.colorScaleShaderSupported = false;
 					delete colorRampShader;
 					colorRampShader = 0;
 				}
@@ -403,6 +408,32 @@ void ccGLWindow::initializeGL()
 				}
 			}
 
+			setDisplayParameters(params,hasOverridenDisplayParameters());
+		}
+	}
+
+	//OpenGL 3.3+ rendering shader
+	if ( QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_3 )
+	{
+		bool vaEnabled = ccFBOUtils::CheckVAAvailability();
+		if (vaEnabled && !m_customRenderingShader)
+		{
+			ccGui::ParamStruct params = getDisplayParameters();
+
+			ccShader* renderingShader = new ccShader();
+			QString shadersPath = ccGLWindow::getShadersPath();
+			QString error;
+			if (!renderingShader->fromFile(shadersPath+QString("/Rendering"),QString("rendering"),error))
+			{
+				if (!m_silentInitialization)
+					ccLog::Warning(QString("[3D View %i] Failed to load custom rendering shader: '%2'").arg(m_uniqueID).arg(error));
+				delete renderingShader;
+				renderingShader = 0;
+			}
+			else
+			{
+				m_customRenderingShader = renderingShader;
+			}
 			setDisplayParameters(params,hasOverridenDisplayParameters());
 		}
 	}
@@ -869,6 +900,9 @@ void ccGLWindow::draw3D(CC_DRAW_CONTEXT& context, bool doDrawCross, ccFrameBuffe
 	//color ramp shader for fast dynamic color ramp lookup-up
 	if (m_colorRampShader && getDisplayParameters().colorScaleUseShader)
 		context.colorRampShader = m_colorRampShader;
+
+	//custom rendering shader (OpenGL 3.3+)
+	context.customRenderingShader = m_customRenderingShader;
 
 	//we draw 3D entities
 	if (m_globalDBRoot)
@@ -3593,58 +3627,26 @@ QString ccGLWindow::getShadersPath()
 #endif
 }
 
-//*********** OPENGL EXTENSIONS ***********//
-
 //! Loads all available OpenGL extensions
 bool ccGLWindow::InitGLEW()
 {
-    #ifdef USE_GLEW
+#ifdef USE_GLEW
+	
     // GLEW initialization
-    GLenum code = glewInit();
-    if(code != GLEW_OK)
-    {
-        ccLog::Error("Error while initializing OpenGL extensions! (see console)");
-        ccLog::Warning("GLEW error: %s",glewGetErrorString(code));
+	if (!ccFBOUtils::InitGLEW())
+	{
+        ccLog::Warning("[Glew] An error occurred while initializing OpenGL extensions!");
         return false;
     }
+	else
+	{
+		ccLog::Print("[Glew] Initialized!");
+		return true;
+	}
 
-    ccLog::Print("GLEW: initialized!");
-    return true;
-    #else
-    return false;
-    #endif
-}
+#else
 
-bool ccGLWindow::CheckExtension(const char *extName)
-{
-    #ifdef USE_GLEW
-    return glewIsSupported(extName);
-    #else
-    return false;
-    #endif
-}
+	return false;
 
-bool ccGLWindow::CheckShadersAvailability()
-{
-    bool bARBShadingLanguage       = CheckExtension("GL_ARB_shading_language_100");
-    bool bARBShaderObjects         = CheckExtension("GL_ARB_shader_objects");
-    bool bARBVertexShader          = CheckExtension("GL_ARB_vertex_shader");
-    bool bARBFragmentShader        = CheckExtension("GL_ARB_fragment_shader");
-
-    bool bShadersSupported = bARBShadingLanguage &&
-                             bARBShaderObjects &&
-                             bARBVertexShader &&
-                             bARBFragmentShader;
-
-    return bShadersSupported;
-}
-
-bool ccGLWindow::CheckFBOAvailability()
-{
-    return CheckExtension("GL_EXT_framebuffer_object");
-}
-
-bool ccGLWindow::CheckVBOAvailability()
-{
-    return CheckExtension("GL_ARB_vertex_buffer_object");
+#endif
 }

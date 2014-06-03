@@ -32,6 +32,7 @@
 #include <ccHObject.h>
 #include <ccProgressDialog.h>
 #include <ccLog.h>
+#include <ccScalarField.h>
 
 //System
 #include <string.h>

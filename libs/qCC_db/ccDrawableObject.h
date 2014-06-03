@@ -21,13 +21,13 @@
 #include <ccIncludeGL.h>
 
 #include "ccGLMatrix.h"
-#include "ccGenericGLDisplay.h"
-#include "ccColorScalesManager.h"
 #include "ccBBox.h"
-#include "ccScalarField.h"
 #include "ccMaterial.h"
 
+class ccGenericGLDisplay;
+class ccScalarField;
 class ccColorRampShader;
+class ccShader;
 
 //! Display parameters of a 3D entity
 struct glDrawParams
@@ -79,6 +79,8 @@ struct glDrawContext
 	
 	//! Shader for fast dynamic color ramp lookup
 	ccColorRampShader* colorRampShader;
+	//! Custom rendering shader (OpenGL 3.3+)
+	ccShader* customRenderingShader;
 	//! Use VBOs for faster display
 	bool useVBOs;
 
@@ -109,6 +111,7 @@ struct glDrawContext
     , decimateMeshOnMove(true)
     , sfColorScaleToDisplay(0)
 	, colorRampShader(0)
+	, customRenderingShader(0)
 	, useVBOs(true)
 	, pickedPointsRadius(4)
 	, pickedPointsTextShift(0.0)
@@ -199,7 +202,7 @@ public:
         \param window display to compute bbox only with entities displayed in a given GL window
         \return bounding-box
     **/
-    virtual ccBBox getBB(bool relative=true, bool withGLfeatures=false, const ccGenericGLDisplay* window=0) = 0;
+    virtual ccBBox getBB(bool relative=true, bool withGLfeatures=false, const ccGenericGLDisplay* window = 0) = 0;
 
 	//! Returns best-fit bounding-box (if available)
 	/** WARNING: This method is not supported by all entities!

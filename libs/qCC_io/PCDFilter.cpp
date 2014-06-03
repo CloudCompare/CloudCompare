@@ -23,6 +23,7 @@
 //qCC_db
 #include <ccLog.h>
 #include <ccPointCloud.h>
+#include <ccScalarField.h>
 
 //Qt
 #include <QFile>

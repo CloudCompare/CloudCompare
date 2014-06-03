@@ -317,7 +317,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 		shader_edl->setTabUniform2fv("Neigh_pos_2D",8,neighbours);
 
 		glActiveTexture(GL_TEXTURE1);
-		TEX_2D_ON;
+		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texColor);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -325,7 +325,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		TEX_2D_OFF;
+		glDisable(GL_TEXTURE_2D);
 
 		shader_edl->stop();
 		fbo_edl0->stop();
@@ -353,7 +353,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 		//*/
 
 		glActiveTexture(GL_TEXTURE1);
-		TEX_2D_ON;
+		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texColor);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -361,7 +361,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		TEX_2D_OFF;
+		glDisable(GL_TEXTURE_2D);
 
 		shader_edl->stop();
 		fbo_edl1->stop();
@@ -389,7 +389,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 		//*/
 
 		glActiveTexture(GL_TEXTURE1);
-		TEX_2D_ON;
+		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, texColor);
 
 		glActiveTexture(GL_TEXTURE0);
@@ -397,7 +397,7 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, 0);
-		TEX_2D_OFF;
+		glDisable(GL_TEXTURE_2D);
 
 		shader_edl->stop();
 		fbo_edl2->stop();
@@ -440,34 +440,34 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 		shader_mix->setUniform1i("absorb",1);
 
 		glActiveTexture(GL_TEXTURE3);
-		TEX_2D_ON;
+		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D,texDepth);
 
 		glActiveTexture(GL_TEXTURE2);
-		TEX_2D_ON;
+		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_bilateralFilter2.filter ? m_bilateralFilter2.filter->getTexture() : fbo_edl2->getColorTexture(0));
 
 		glActiveTexture(GL_TEXTURE1);
-		TEX_2D_ON;
+		glEnable(GL_TEXTURE_2D);
 		glBindTexture(GL_TEXTURE_2D, m_bilateralFilter1.filter ? m_bilateralFilter1.filter->getTexture() : fbo_edl1->getColorTexture(0));
 
 		glActiveTexture(GL_TEXTURE0);
-		//TEX_2D_ON;
+		//glEnable(GL_TEXTURE_2D);
 
 		ccFBOUtils::DisplayTexture2DCorner(m_bilateralFilter0.filter ? m_bilateralFilter0.filter->getTexture() : fbo_edl0->getColorTexture(0),m_screenWidth,m_screenHeight);
 
 		//glActiveTexture(GL_TEXTURE0);
 		//glBindTexture(GL_TEXTURE_2D,0);
-		//TEX_2D_OFF;
+		//glDisable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D,0);
-		TEX_2D_OFF;
+		glDisable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE2);
 		glBindTexture(GL_TEXTURE_2D,0);
-		TEX_2D_OFF;
+		glDisable(GL_TEXTURE_2D);
 		glActiveTexture(GL_TEXTURE3);
 		glBindTexture(GL_TEXTURE_2D,0);
-		TEX_2D_OFF;
+		glDisable(GL_TEXTURE_2D);
 
 		shader_mix->stop();
 		fbo_mix->stop();

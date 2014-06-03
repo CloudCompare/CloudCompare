@@ -22,6 +22,7 @@
 #include "ccBasicTypes.h"
 #include "ccGenericPointCloud.h"
 #include "ccSphere.h"
+#include "ccGenericGLDisplay.h"
 
 //Qt
 #include <QSharedPointer>

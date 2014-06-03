@@ -38,6 +38,8 @@
 #include "ccMaterial.h"
 #include "ccColorRampShader.h"
 #include "ccPolyline.h"
+#include "ccScalarField.h"
+#include "ccGenericGLDisplay.h"
 
 //system
 #include <assert.h>
@@ -1552,7 +1554,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (glParams.showColors && isColorOverriden())
 		{
 			glColor3ubv(m_tempColor);
-			glParams.showColors=false;
+			glParams.showColors = false;
 		}
 		else
 		{
@@ -1982,6 +1984,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					else
 					{
 						glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
+
 						if (glParams.showNorms)
 						{
 							//decode normals

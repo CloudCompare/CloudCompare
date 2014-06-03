@@ -20,6 +20,7 @@
 //Local
 #include "ccPointCloud.h"
 #include "ccNormalVectors.h"
+#include "ccGenericGLDisplay.h"
 
 ccSphere::ccSphere(PointCoordinateType radius,
 				   const ccGLMatrix* transMat/*=0*/,

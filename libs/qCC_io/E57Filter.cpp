@@ -37,6 +37,7 @@
 #include <ccImage.h>
 #include <ccCalibratedImage.h>
 #include <ccColorScalesManager.h>
+#include <ccScalarField.h>
 
 //Qt
 #include <QApplication>

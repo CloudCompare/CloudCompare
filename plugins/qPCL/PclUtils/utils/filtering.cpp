@@ -21,6 +21,9 @@
 //PCL
 #include <pcl/filters/statistical_outlier_removal.h>
 
+//qCC_db
+#include <ccScalarField.h>
+
 int	removeOutliersStatistical(const PCLCloud::ConstPtr incloud, const int &k, const float &nStds, PCLCloud::Ptr outcloud)
 {
 	pcl::StatisticalOutlierRemoval<PCLCloud> remover;

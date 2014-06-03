@@ -17,6 +17,9 @@
 
 #include "ccDrawableObject.h"
 
+//Local
+#include "ccGenericGLDisplay.h"
+
 //system
 #include <string.h>
 

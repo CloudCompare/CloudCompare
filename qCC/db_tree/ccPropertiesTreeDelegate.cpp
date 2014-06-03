@@ -49,6 +49,8 @@
 #include <ccFacet.h>
 #include <ccSensor.h>
 #include <ccIndexedTransformationBuffer.h>
+#include <ccScalarField.h>
+#include <ccColorScalesManager.h>
 
 //Qt
 #include <QStandardItemModel>

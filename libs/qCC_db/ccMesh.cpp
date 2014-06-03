@@ -27,10 +27,15 @@
 #include "ccNormalVectors.h"
 #include "ccMaterialSet.h"
 #include "ccSubMesh.h"
+#include "ccScalarField.h"
+#include "ccColorScalesManager.h"
 
 //CCLib
 #include <ManualSegmentationTools.h>
 #include <ReferenceCloud.h>
+
+//qCC_db
+#include <ccScalarField.h>
 
 //Qt
 #include <QGLFormat>

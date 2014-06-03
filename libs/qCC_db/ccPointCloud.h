@@ -31,6 +31,7 @@
 //Local
 #include "ccGenericPointCloud.h"
 #include "ccPlatform.h"
+#include "ccColorScale.h"
 
 //Qt
 #include <QGLBuffer>

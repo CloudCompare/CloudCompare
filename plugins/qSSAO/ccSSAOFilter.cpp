@@ -235,13 +235,13 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
     shader->setTabUniform3fv("P",SSAO_MAX_N,ssao_neighbours);
 
     glActiveTexture(GL_TEXTURE2);
-    TEX_2D_ON;
+    glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D,texColor);
 
     if (glIsTexture(texReflect))
     {
         glActiveTexture(GL_TEXTURE1);
-        TEX_2D_ON;
+        glEnable(GL_TEXTURE_2D);
         glBindTexture(GL_TEXTURE_2D,texReflect);
     }
     glActiveTexture(GL_TEXTURE0);
@@ -256,12 +256,12 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
     {
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D,0);
-        TEX_2D_OFF;
+        glDisable(GL_TEXTURE_2D);
     }
 
     glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D,0);
-    TEX_2D_OFF;
+    glDisable(GL_TEXTURE_2D);
 
     shader->stop();
     fbo->stop();
@@ -341,7 +341,7 @@ void ccSSAOFilter::initReflectTexture()
         reflectTex[i*3+2] = static_cast<float>((1.0+z*norm)/2);
     }
 
-    TEX_2D_ON;
+    glEnable(GL_TEXTURE_2D);
 
     if (glIsTexture(texReflect))
         glDeleteTextures(1,&texReflect);
@@ -355,7 +355,7 @@ void ccSSAOFilter::initReflectTexture()
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     glTexImage2D(GL_TEXTURE_2D,0,GL_RGB16F,w,h,0,GL_RGB,GL_FLOAT,&reflectTex[0]);
 
-    TEX_2D_OFF;
+    glDisable(GL_TEXTURE_2D);
 
     // According to Wikipedia, noise is made of 4*4 repeated tiles	to have only high frequency	**/
 }

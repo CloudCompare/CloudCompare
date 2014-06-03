@@ -20,6 +20,7 @@
 
 //qCC_db
 #include <ccPointCloud.h>
+#include <ccScalarField.h>
 
 //PCL
 #include <pcl/io/pcd_io.h>

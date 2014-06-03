@@ -28,6 +28,8 @@
 #include <ccPointCloud.h>
 #include <ccGenericMesh.h>
 #include <ccProgressDialog.h>
+#include <ccScalarField.h>
+#include <ccColorScalesManager.h>
 
 //Qt (last so as to be sure that glew.h is included before gl.h
 #include <QtGui>

@@ -70,27 +70,6 @@ void ccGLUtils::DisplayTexture2D(GLuint tex, int w, int h, uchar alpha/*=255*/)
     glDisable(GL_TEXTURE_2D);
 }
 
-void ccGLUtils::DisplayTexture2DCorner(GLuint tex, int w, int h, uchar alpha/*=255*/)
-{
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, tex);
-
-    glColor4ub(255, 255, 255, alpha);
-    glBegin(GL_QUADS);
-    glTexCoord2f(0, 0);
-    glVertex2f(0, 0);
-    glTexCoord2f(1, 0);
-    glVertex2f(static_cast<float>(w), 0);
-    glTexCoord2f(1, 1);
-    glVertex2f(static_cast<float>(w),  static_cast<float>(h));
-    glTexCoord2f(0, 1);
-    glVertex2f(0, static_cast<float>(h));
-    glEnd();
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDisable(GL_TEXTURE_2D);
-}
-
 //*********** OPENGL MATRICES ***********//
 
 ccGLMatrixd ccGLUtils::GenerateGLRotationMatrixFromVectors(const CCVector3d& sourceVec, const CCVector3d& destVec)

@@ -22,6 +22,7 @@
 #include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccOctree.h>
+#include <ccScalarField.h>
 #include <ccLog.h>
 
 //system

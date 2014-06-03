@@ -1,5 +1,8 @@
 #include "ccSymbolCloud.h"
 
+//qCC_db
+#include <ccGenericGLDisplay.h>
+
 ccSymbolCloud::ccSymbolCloud(QString name/*=QString()*/)
 	: ccPointCloud(name)
 	, m_symbolSize(10.0)

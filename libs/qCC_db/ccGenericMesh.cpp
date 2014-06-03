@@ -26,6 +26,8 @@
 #include "ccPointCloud.h"
 #include "ccNormalVectors.h"
 #include "ccMaterialSet.h"
+#include "ccScalarField.h"
+#include "ccColorScalesManager.h"
 
 //CCLib
 #include <MeshSamplingTools.h>

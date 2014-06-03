@@ -372,10 +372,11 @@ void ccGLWindow::initializeGL()
 			{
 				ccColorRampShader* colorRampShader = new ccColorRampShader();
 				QString shadersPath = ccGLWindow::getShadersPath();
-				if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag"))))
+				QString error;
+				if (!colorRampShader->loadProgram(0,qPrintable(shadersPath+QString("/ColorRamp/color_ramp.frag")),error))
 				{
 					if (!m_silentInitialization)
-						ccLog::Warning("[3D View %i] Failed to load color ramp shader!",m_uniqueID);
+						ccLog::Warning(QString("[3D View %i] Failed to load color ramp shader: '%2'").arg(m_uniqueID).arg(error));
 					params.colorScaleShaderSupported = false;
 					delete colorRampShader;
 					colorRampShader = 0;
@@ -2935,7 +2936,7 @@ float ccGLWindow::computePerspectiveZoom() const
 		return 1.0f;
 
 	//Camera center to pivot vector
-	PointCoordinateType zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
+	double zoomEquivalentDist = (m_viewportParams.cameraCenter - m_viewportParams.pivotPoint).norm();
 	if (zoomEquivalentDist < ZERO_TOLERANCE)
 		return 1.0f;
 	
@@ -3252,9 +3253,10 @@ bool ccGLWindow::renderToFile(	const char* filename,
 			{
 				QString shadersPath = ccGLWindow::getShadersPath();
 
-				if (!m_activeGLFilter->init(Wp,Hp,qPrintable(shadersPath)))
+				QString error;
+				if (!m_activeGLFilter->init(Wp,Hp,shadersPath,error))
 				{
-					ccLog::Error("[GL Filter] GL filter can't be used during rendering (not enough memory)!");
+					ccLog::Error(QString("[GL Filter] GL filter can't be used during rendering: %1").arg(error));
 				}
 				else
 				{
@@ -3483,11 +3485,10 @@ bool ccGLWindow::initGLFilter(int w, int h)
 
 	QString shadersPath = ccGLWindow::getShadersPath();
 
-	//ccLog::Print(QString("Shaders path: %1").arg(shadersPath));
-
-	if (!_filter->init(w,h,qPrintable(shadersPath)))
+	QString error;
+	if (!_filter->init(w,h,shadersPath,error))
 	{
-		ccLog::Warning("[GL Filter] Initialization failed!");
+		ccLog::Warning(QString("[GL Filter] Initialization failed: ")+error.trimmed());
 		return false;
 	}
 

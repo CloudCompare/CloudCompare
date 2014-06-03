@@ -91,16 +91,17 @@ void ccSSAOFilter::reset()
     bilateralFilter = 0;
 }
 
-bool ccSSAOFilter::init(int width, int height,const char* shadersPath)
+bool ccSSAOFilter::init(int width, int height, QString shadersPath, QString& error)
 {
-    return init(width,height,true,true,shadersPath);
+    return init(width,height,true,true,shadersPath,error);
 }
 
 bool ccSSAOFilter::init(int width,
                         int height,
                         bool enableBilateralFilter,
                         bool useReflectTexture,
-                        const char* shadersPath,
+                        QString shadersPath,
+						QString& error,
                         GLenum textureMinMagFilter /*= GL_LINEAR*/)
 {
 	//in case of reinit
@@ -108,7 +109,7 @@ bool ccSSAOFilter::init(int width,
         fbo	= new ccFrameBufferObject();
     if (!fbo->init(width,height))
     {
-        //ccLog::Warning("[SSAO] FrameBufferObject initialization failed!");
+        error = "[SSAO] FrameBufferObject initialization failed!";
         reset();
         return false;
     }
@@ -117,9 +118,8 @@ bool ccSSAOFilter::init(int width,
     if (!shader)
     {
         shader = new ccShader();
-        if (!shader->fromFile(shadersPath,"SSAO/ssao"))
+        if (!shader->fromFile(shadersPath,"SSAO/ssao",error))
         {
-            //ccLog::Warning("[SSAO] Can't load SSAO program!");
             reset();
             return false;
         }
@@ -130,7 +130,7 @@ bool ccSSAOFilter::init(int width,
     {
         if (!bilateralFilter)
             bilateralFilter	= new ccBilateralFilter();
-        if (!bilateralFilter->init(width,height,shadersPath))
+        if (!bilateralFilter->init(width,height,shadersPath,error))
         {
             delete bilateralFilter;
             bilateralFilter = 0;

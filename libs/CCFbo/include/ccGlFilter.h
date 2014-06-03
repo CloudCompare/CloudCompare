@@ -21,8 +21,8 @@
 //local
 #include "ccGlew.h"
 
-//system
-#include <string.h>
+//Qt
+#include <QString>
 
 //! Default GL filter interface
 /** A GL filter is a combination of shaders applied to
@@ -34,10 +34,9 @@ class ccGlFilter
 public:
 
     //! Default constructor
-    ccGlFilter(const char* description)
-    {
-        strcpy(m_description,description);
-    }
+    ccGlFilter(QString description)
+        : m_description(description)
+    {}
 
 	//! Default destructor
 	virtual ~ccGlFilter() {}
@@ -50,11 +49,13 @@ public:
         \param width texture/screen width
         \param height texture/screen height
         \param shadersPath path where shader files are stored
+		\param error error string (if an error occurred)
         \return success
     **/
 	virtual bool init(	int width,
                         int height,
-                        const char* shadersPath) = 0;
+                        QString shadersPath,
+						QString& error) = 0;
 
     //! Applies filter to texture (depth + color)
 	virtual void shade(	GLuint texDepth,
@@ -65,13 +66,12 @@ public:
 	virtual GLuint getTexture() = 0;
 
     //! Returns filter name
-	inline virtual const char* getDescription() const { return m_description; }
+	inline virtual QString getDescription() const { return m_description; }
 
 protected:
 
     //! Filter description
-    char m_description[256];
-
+    QString m_description;
 };
 
 #endif

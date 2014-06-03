@@ -86,7 +86,7 @@ void ccBilateralFilter::reset()
     m_width = m_height = 0;
 }
 
-bool ccBilateralFilter::init(int width, int height, const char* shadersPath)
+bool ccBilateralFilter::init(int width, int height, QString shadersPath, QString& error)
 {
     if (!m_fbo)
         m_fbo = new ccFrameBufferObject();
@@ -103,9 +103,10 @@ bool ccBilateralFilter::init(int width, int height, const char* shadersPath)
 
     if (!m_shader)
         m_shader = new ccShader();
-    if (!m_shader->fromFile(shadersPath, "bilateral"))
+	
+    if (!m_shader->fromFile(shadersPath, "bilateral",error))
     {
-        //ccLog::Warning("[Bilateral Filter] Can't load shader!");
+        //ccLog::Warning(QString("[Bilateral Filter] Can't load shader: %1").arg(error));
         reset();
         return false;
     }

@@ -130,18 +130,18 @@ void ccEDLFilter::reset()
 	m_screenWidth = m_screenHeight = 0;
 }
 
-bool ccEDLFilter::init(int width, int height, const char* shadersPath)
+bool ccEDLFilter::init(int width, int height, QString shadersPath, QString& error)
 {
-	return init(width, height, GL_RGBA, GL_LINEAR, shadersPath);
+	return init(width, height, GL_RGBA, GL_LINEAR, shadersPath,error);
 }
 
-bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minMagFilter, const char* shadersPath)
+bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minMagFilter, QString shadersPath, QString& error)
 {
 	if (!fbo_edl0)
 		fbo_edl0 = new ccFrameBufferObject();
 	if (!fbo_edl0->init(width,height))
 	{
-		//ccLog::Warning("[EDL Filter] FBO 1:1 initialization failed!");
+		error = "[EDL Filter] FBO 1:1 initialization failed!";
 		reset();
 		return false;
 	}
@@ -150,7 +150,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 		fbo_edl1 = new ccFrameBufferObject();
 	if (!fbo_edl1->init(width/2,height/2))
 	{
-		//ccLog::Warning("[EDL Filter] FBO 1:2 initialization failed!");
+		error = "[EDL Filter] FBO 1:2 initialization failed!";
 		reset();
 		return false;
 	}
@@ -159,7 +159,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 		fbo_edl2 = new ccFrameBufferObject();
 	if (!fbo_edl2->init(width/4,height/4))
 	{
-		//ccLog::Warning("[EDL Filter] FBO 1:4 initialization failed!");
+		error = "[EDL Filter] FBO 1:4 initialization failed!";
 		reset();
 		return false;
 	}
@@ -172,7 +172,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 		fbo_mix = new ccFrameBufferObject();
 	if (!fbo_mix->init(width,height))
 	{
-		//ccLog::Warning("[EDL Filter] FBO 'mix' initialization failed!");
+		error = "[EDL Filter] FBO 'mix' initialization failed!";
 		reset();
 		return false;
 	}
@@ -181,9 +181,8 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	if (!shader_edl)
 	{
 		shader_edl = new ccShader();
-		if (!shader_edl->fromFile(shadersPath,"EDL/edl_shade"))
+		if (!shader_edl->fromFile(shadersPath,"EDL/edl_shade",error))
 		{
-			//ccLog::Warning("[EDL Filter] can't find or load 'edl_shade' shader files!");
 			reset();
 			return false;
 		}
@@ -192,9 +191,8 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	if (!shader_mix)
 	{
 		shader_mix = new ccShader();
-		if (!shader_mix->fromFile(shadersPath,"EDL/edl_mix"))
+		if (!shader_mix->fromFile(shadersPath,"EDL/edl_mix",error))
 		{
-			//ccLog::Warning("[EDL Filter] can't find or load 'edl_mix' shader files!");
 			reset();
 			return false;
 		}
@@ -204,7 +202,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	{
 		if (!m_bilateralFilter0.filter)
 			m_bilateralFilter0.filter = new ccBilateralFilter();
-		if (!m_bilateralFilter0.filter->init(width,height,shadersPath))
+		if (!m_bilateralFilter0.filter->init(width,height,shadersPath,error))
 		{
 			delete m_bilateralFilter0.filter;
 			m_bilateralFilter0.filter = 0;
@@ -225,7 +223,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	{
 		if (!m_bilateralFilter1.filter)
 			m_bilateralFilter1.filter = new ccBilateralFilter();
-		if (!m_bilateralFilter1.filter->init(width/2,height/2,shadersPath))
+		if (!m_bilateralFilter1.filter->init(width/2,height/2,shadersPath,error))
 		{
 			delete m_bilateralFilter1.filter;
 			m_bilateralFilter1.filter = 0;
@@ -246,7 +244,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	{
 		if (!m_bilateralFilter2.filter)
 			m_bilateralFilter2.filter = new ccBilateralFilter();
-		if (!m_bilateralFilter2.filter->init(width/4,height/4,shadersPath))
+		if (!m_bilateralFilter2.filter->init(width/4,height/4,shadersPath,error))
 		{
 			delete m_bilateralFilter2.filter;
 			m_bilateralFilter2.filter = 0;

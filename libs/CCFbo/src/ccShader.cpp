@@ -17,6 +17,9 @@
 
 #include "ccShader.h"
 
+//Qt
+#include <QFile>
+
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -33,7 +36,7 @@ ccShader::~ccShader()
 
 void ccShader::reset()
 {
-    if (prog>0)
+    if (glIsProgram(prog))
         glDeleteProgram(prog);
     prog = 0;
 }
@@ -53,24 +56,23 @@ void ccShader::stop()
     glUseProgram(0);
 }
 
-bool ccShader::fromFile(const char *shaderBasePath, const char *shaderBaseFilename)
+bool ccShader::fromFile(QString shaderBasePath, QString shaderBaseFilename, QString& error)
 {
-    if (!shaderBasePath || !shaderBaseFilename)
+	if (shaderBasePath.isEmpty() || shaderBaseFilename.isEmpty())
+	{
+		error = "Missing input argument for ccShader::fromFile";
         return false;
+	}
 
-    char vertFilename[1024];
-    sprintf(vertFilename,"%s/%s.vert",shaderBasePath,shaderBaseFilename);
-    char fragFilename[1024];
-    sprintf(fragFilename,"%s/%s.frag",shaderBasePath,shaderBaseFilename);
+    QString vertFilename = QString("%1/%2.vert").arg(shaderBasePath).arg(shaderBaseFilename);
+    QString fragFilename = QString("%1/%2.frag").arg(shaderBasePath).arg(shaderBaseFilename);
 
-    return loadProgram(vertFilename,fragFilename);
+    return loadProgram(vertFilename,fragFilename,error);
 }
 //*/
 
-bool ccShader::loadProgram(const char *vertexShaderFile, const char *pixelShaderFile)
+bool ccShader::loadProgram(QString vertexShaderFile, QString pixelShaderFile, QString& error)
 {
-    assert(vertexShaderFile || pixelShaderFile);
-
     reset();
     assert(prog == 0);
 
@@ -78,18 +80,21 @@ bool ccShader::loadProgram(const char *vertexShaderFile, const char *pixelShader
     GLuint vs = 0, ps = 0;
 
     //we load shader files
-    if(vertexShaderFile)
+    if (!vertexShaderFile.isEmpty())
     {
-        vs = LoadShader(GL_VERTEX_SHADER, vertexShaderFile);
-        if(!vs)
+        vs = LoadShader(GL_VERTEX_SHADER, qPrintable(vertexShaderFile), error);
+        if (!vs)
+		{
             return false;
+		}
     }
-    if(pixelShaderFile)
+    if (!pixelShaderFile.isEmpty())
     {
-        ps = LoadShader(GL_FRAGMENT_SHADER, pixelShaderFile);
-        if(!ps)
+        ps = LoadShader(GL_FRAGMENT_SHADER, qPrintable(pixelShaderFile), error);
+        if (!ps)
         {
-            if(glIsShader(vs))
+			//release already loaded vertex program
+            if (vs)
                 glDeleteShader(vs);
             return false;
         }
@@ -112,118 +117,91 @@ bool ccShader::loadProgram(const char *vertexShaderFile, const char *pixelShader
     glGetProgramiv(prog, GL_LINK_STATUS, &linkStatus);
     if(linkStatus != GL_TRUE)
     {
-        GLint logSize = 0;
-        glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logSize);
-        char* log = new char[logSize+1];
-        if(log)
+        GLint infoLogLength = 0;
+        glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &infoLogLength);
+        GLchar* strInfoLog = new GLchar[infoLogLength+1];
+        if (strInfoLog)
         {
-            memset(log, '\0', logSize + 1);
-            glGetProgramInfoLog(prog, logSize, &logSize, log);
-
-            //ccLog::Error("Can't create shader program! (%s)", log);
-
-            delete[] log;
+            glGetProgramInfoLog(prog, infoLogLength, 0, strInfoLog);
+			error = QString("Failed to compile shader program: %1").arg(strInfoLog);
+            delete[] strInfoLog;
+			strInfoLog = 0;
         }
-        //else ccLog::Error("Can't create shader program! (unable to get GL log)");
+        else
+		{
+			error = "Failed to compile shader program (unable to retrieve OpenGL log)";
+		}
 
-        glDeleteProgram(prog);
-        prog = 0;
+        reset();
     }
 
     // even if program creation was successful, we don't need the shaders anymore
-    if(vs)
+    if (vs)
         glDeleteShader(vs);
-    if(ps)
+    if (ps)
         glDeleteShader(ps);
 
     return true;
 }
 
-char* ccShader::ReadShaderFile(const char *filename)
+QByteArray ccShader::ReadShaderFile(QString filename)
 {
     //we try to open the ASCII file (containing the "program" source code)
-    FILE *fp = fopen(filename, "rb");
-    if(!fp)
+	QFile file(filename);
+	if (!file.open(QFile::ReadOnly))
     {
-        //ccLog::Error("Can't open file '%s'", filename);
-        return NULL;
+        //failed to open the file
+        return QByteArray();
     }
 
-    //we try to determine the file size (no need for 64bits handling here!)
-    fseek(fp, 0, SEEK_END);
-    long int count = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-
-    char *src = new char[count+1];
-    if(!src)
-    {
-        fclose(fp);
-        //ccLog::Error("Not enough memory!");
-        return NULL;
-    }
-
-    //we upload the program in memory
-    fread(src,sizeof(char),count,fp);
-
-    //last character is 0 to form a proper string
-    src[count] = 0;
-
-    fclose(fp);
-
-    return src;
+    return file.readAll();
 }
 
-GLuint ccShader::LoadShader(GLenum type, const char *filename)
+GLuint ccShader::LoadShader(GLenum type, QString filename, QString& error)
 {
-    //Shader creation
+    //load shader file
+    QByteArray shaderFileContent = ReadShaderFile(filename);
+    if (shaderFileContent.isEmpty())
+    {
+		error = QString("Failed to open shader file '%1'").arg(filename);
+        return 0;
+    }
+
+    //create shader
     GLuint shader = glCreateShader(type);
-    if(shader == 0)
+    if (!glIsShader(shader))
     {
-        //ccLog::Error("Can't create shader!");
+		error = QString("Failed to create shader (type = %1").arg(type);
         return 0;
     }
 
-    //Program loading
-    char *src = ReadShaderFile(filename);
-    if(!src)
-    {
-        glDeleteShader(shader);
-        return 0;
-    }
-
-    glShaderSource(shader, 1, (const GLchar**)&src, NULL);
-    glCompileShader(shader);
-
-    //we don't need the program code anymore
-    delete[] src;
-    src=0;
+	const GLchar* shaderStr = static_cast<const GLchar*>(shaderFileContent.data());
+    glShaderSource(shader, 1, &shaderStr, NULL);
+    
+	glCompileShader(shader);
 
     //we must check compilation result
-    GLint status = GL_TRUE;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if(status != GL_TRUE)
+    GLint compileStatus = GL_TRUE;
+    glGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+    if(compileStatus != GL_TRUE)
     {
-        //log size
-        GLsizei logSize;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
-
-        //buffer to get log from OpenGL
-        char* log = new char[logSize+1];
-        if(!log)
+        GLint infoLogLength = 0;
+        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        GLchar* strInfoLog = new GLchar[infoLogLength+1];
+        if (strInfoLog)
         {
-            //ccLog::Warning("Not enough memory to log shader creation...");
-            return 0;
+            glGetShaderInfoLog(shader, infoLogLength, 0, strInfoLog);
+			error = QString("Failed to compile shader (%1): %2").arg(filename).arg(strInfoLog);
+            delete[] strInfoLog;
+			strInfoLog = 0;
         }
-        memset(log, 0, logSize+1);
+        else
+		{
+			error = QString("Failed to compile shader (%1): unable to retrieve OpenGL log)").arg(filename);
+		}
 
-        glGetShaderInfoLog(shader, logSize, &logSize, log);
-        //ccLog::Error("Can't compile shader (file:'%s').\nLog: %s",filename,log);
-
-        //free memory
-        delete[] log;
         glDeleteShader(shader);
-
-        return 0;
+		shader = 0;
     }
 
     return shader;
@@ -351,280 +329,4 @@ void ccShader::setAttrib3fv(int loc, float* val)
 void ccShader::setAttrib4fv(int loc, float* val)
 {
 	glVertexAttrib4fv(loc, val);
-}
-
-/************************************
-            ccShaderARB
-************************************/
-
-
-ccShaderARB::ccShaderARB() : ccShader()
-{
-    vert=0;
-    frag=0;
-}
-
-ccShaderARB::~ccShaderARB()
-{
-    reset();
-}
-
-void ccShaderARB::reset()
-{
-    if (prog>0)
-    {
-        if (vert)
-            glDetachObjectARB(prog, vert);
-        if (frag)
-            glDetachObjectARB(prog, frag);
-        glDeleteObjectARB(prog);
-    }
-    prog=0;
-
-    if (vert)
-        glDeleteObjectARB(vert);
-    vert=0;
-
-    if (frag)
-        glDeleteObjectARB(frag);
-    frag=0;
-}
-
-void ccShaderARB::start()
-{
-    glUseProgramObjectARB(prog);
-}
-
-void ccShaderARB::stop()
-{
-    glUseProgramObjectARB(0);
-}
-
-void ccShaderARB::setUniform1i(int loc, int value)
-{
-	glUniform1iARB(loc,value);
-}
-
-void ccShaderARB::setUniform1f(int loc, float value)
-{
-	glUniform1fARB(loc,value);
-}
-
-void ccShaderARB::setUniform4fv(int loc, float* value)
-{
-	glUniform4fvARB(loc, 1, value);
-}
-
-void ccShaderARB::setUniform1i(const char* uniform, int value)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform1iARB(loc,value);
-}
-
-void ccShaderARB::setUniform2iv(const char* uniform, int* val)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform2ivARB(loc,1,val);
-}
-
-void ccShaderARB::setUniform3iv(const char* uniform, int* val)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform3ivARB(loc,1,val);
-}
-
-void ccShaderARB::setUniform4iv(const char* uniform, int* val)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform4ivARB(loc,1,val);
-}
-
-void ccShaderARB::setTabUniform4iv(const char* uniform, int size, int* val)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform4ivARB(loc,size,val);
-}
-
-void ccShaderARB::setUniform1f(const char* uniform, float value)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform1fARB(loc,value);
-}
-
-void ccShaderARB::setUniform2fv(const char* uniform, float* val)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform2fvARB(loc,1,val);
-}
-
-void ccShaderARB::setUniform3fv(const char* uniform, float* val)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform3fvARB(loc,1,val);
-}
-
-void ccShaderARB::setUniform4fv(const char* uniform, float* val)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform4fvARB(loc,1,val);
-}
-
-void ccShaderARB::setTabUniform1fv(const char* uniform, int size, float* val)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform1fvARB(loc,size,val);
-}
-
-void ccShaderARB::setTabUniform4fv(const char* uniform, int size, float* val)
-{
-	int loc = glGetUniformLocationARB(prog,uniform);
-	glUniform4fvARB(loc,size,val);
-}
-
-void ccShaderARB::setUniformMatrix4fv(const char* uniform, float* val, bool transpose)
-{
-	int loc	= glGetUniformLocationARB(prog,uniform);
-	glUniformMatrix4fvARB(loc,1,transpose,val);
-}
-
-void ccShaderARB::setAttrib4iv(int loc, int* val)
-{
-	glVertexAttrib4ivARB(loc, val);
-}
-
-void ccShaderARB::setAttrib1f(int loc, float value)
-{
-	glVertexAttrib1fARB(loc,value);
-}
-
-void ccShaderARB::setAttrib2fv(int loc, float* val)
-{
-	glVertexAttrib2fvARB(loc, val);
-}
-
-void ccShaderARB::setAttrib3fv(int loc, float* val)
-{
-	glVertexAttrib3fvARB(loc, val);
-}
-
-void ccShaderARB::setAttrib4fv(int loc, float* val)
-{
-	glVertexAttrib4fvARB(loc, val);
-}
-
-bool ccShaderARB::loadProgram(const char *vertexShaderFile, const char *pixelShaderFile)
-{
-    assert(vertexShaderFile || pixelShaderFile);
-
-    reset();
-    assert(prog == 0);
-
-    if (vertexShaderFile)
-        vert=LoadShaderARB(GL_VERTEX_SHADER_ARB,vertexShaderFile);
-
-    if (pixelShaderFile)
-        frag=LoadShaderARB(GL_FRAGMENT_SHADER_ARB,pixelShaderFile);
-
-    if (!frag && !vert)
-    {
-        //ccLog::Warning("No shader loaded! Wrong filename?");
-        return false;
-    }
-
-	//creating program
-	prog = glCreateProgramObjectARB();
-
-	//attaching shaders
-	if (vert)
-        glAttachObjectARB(prog,vert);
-	if (frag)
-        glAttachObjectARB(prog,frag);
-
-    //linking
-	glLinkProgramARB(prog);
-
-    //we check for success
-    /*GLint linkStatus = GL_TRUE;
-    glGetProgramiv(prog, GL_LINK_STATUS, &linkStatus);
-    if(linkStatus != GL_TRUE)
-    {
-        GLint logSize = 0;
-        glGetProgramiv(prog, GL_INFO_LOG_LENGTH, &logSize);
-        char* log = new char[logSize+1];
-        if(log)
-        {
-            memset(log, '\0', logSize + 1);
-            glGetProgramInfoLog(prog, logSize, &logSize, log);
-
-            ccLog::Error("Can't create shader program! (%s)", log);
-
-            delete[] log;
-        }
-        else ccLog::Error("Can't create shader program! (unable to get GL log)");
-
-        glDeleteProgram(prog);
-        prog = 0;
-    }
-    //*/
-
-	stop();
-
-    return true;
-}
-
-GLhandleARB ccShaderARB::LoadShaderARB(GLenum type, const char *filename)
-{
-    //Shader creation
-    GLhandleARB shader = glCreateShaderObjectARB(type);
-    if(shader == 0)
-    {
-        //ccLog::Error("Can't create shader!");
-        return 0;
-    }
-
-    //code loading
-    char *src = ReadShaderFile(filename);
-    if(!src)
-    {
-        glDeleteObjectARB(shader);
-        return 0;
-    }
-
-    glShaderSourceARB(shader, 1, (const GLcharARB**)&src, NULL);
-    glCompileShaderARB(shader);
-
-    //we don't need the program code anymore
-    delete[] src;
-    src=0;
-
-    //we must check compilation result
-    /*GLint status = GL_TRUE;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &status);
-    if(status != GL_TRUE)
-    {
-        //log size
-        GLsizei logSize;
-        glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &logSize);
-
-        //buffer to get log from OpenGL
-        char* log = new char[logSize+1];
-        if(!log)
-        {
-            ccLog::Warning("Not enough memory to log shader creation...");
-            return 0;
-        }
-        memset(log, 0, logSize+1);
-
-        glGetShaderInfoLog(shader, logSize, &logSize, log);
-        ccLog::Error("Can't compile shader (file:'%s').\nLog: %s",filename,log);
-
-        //free memory
-        delete[] log;
-        glDeleteShader(shader);
-
-        return 0;
-    }
-    //*/
-
-    return shader;
 }

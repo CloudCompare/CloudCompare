@@ -3051,7 +3051,8 @@ bool ccPointCloud::VBO::init(int count, bool withColors, bool withNormals)
 		totalSizeBytes += sizeof(PointCoordinateType) * count * 3;
 	}
 
-	setUsagePattern(QGLBuffer::DynamicDraw); //"StaticDraw: The data will be set once and used many times for drawing operations."
+	setUsagePattern(QGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
+												//"DynamicDraw: The data will be modified repeatedly and used many times for drawing operations.
 
 	allocate(totalSizeBytes);
 

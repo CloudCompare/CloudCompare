@@ -62,13 +62,13 @@ public:
 	**/
     virtual QIcon getIcon() const { return QIcon(); }
 
-    //! return a plugin factory object
-    /** Each plugin may have a factory or not
-     */
-    virtual ccExternalFactory * getCustomObjectsFactory() const
-    {
-        return 0; // no factory by default
-    }
+    //! Returns the plugin's custom object factory (if any)
+    /** Plugins may provide a factory to build custom objects.
+		This allows qCC_db to properly code and decode the custom
+		objects stream in BIN files. Custom objects must inherit the
+		ccCustomHObject or ccCustomLeafObject interfaces.
+	**/
+	virtual ccExternalFactory* getCustomObjectsFactory() const { return 0; }
 };
 
 Q_DECLARE_INTERFACE(ccPluginInterface,

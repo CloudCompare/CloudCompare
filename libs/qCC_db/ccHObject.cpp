@@ -196,25 +196,24 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
     return 0;
 }
 
-ccHObject *ccHObject::New(const QString pluginId, const QString classId, const char *name)
+ccHObject* ccHObject::New(QString pluginId, QString classId, const char* name)
 {
-    ccExternalFactory::Container * all_ext_factories = ccExternalFactory::Container::GetExternalFactoriesContainer();
-    if (!all_ext_factories)
+	ccExternalFactory::Container::Shared externalFactories = ccExternalFactory::Container::GetUniqueInstance();
+    if (!externalFactories)
         return 0;
 
-    ccExternalFactory * factory = all_ext_factories->getFactoryByName(pluginId);
+    ccExternalFactory* factory = externalFactories->getFactoryByName(pluginId);
     if (!factory)
         return 0;
 
-    ccHObject * obj = factory->buildObject(classId);
-
-    if (name)
-        obj->setName(name);
+    ccHObject* obj = factory->buildObject(classId);
 
     if (!obj)
         return 0;
-    else
-        return obj;
+
+	if (name)
+        obj->setName(name);
+	return obj;
 }
 
 QIcon ccHObject::getIcon() const
@@ -793,7 +792,7 @@ bool ccHObject::toFile(QFile& out) const
 	return true;
 }
 
-bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omit_childrens /*= false*/)
+bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omitChildren)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -805,16 +804,16 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omit_chil
 	if (!fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
-    if (omit_childrens)
+    if (omitChildren)
         return true;
 
 	//(serializable) child count (dataVersion>=20)
 	uint32_t serializableCount = 0;
-	if (in.read((char*)&serializableCount,4)<0)
+	if (in.read((char*)&serializableCount,4) < 0)
 		return ReadError();
 
 	//read serializable children (if any)
-	for (uint32_t i=0;i<serializableCount;++i)
+	for (uint32_t i=0; i<serializableCount; ++i)
 	{
 		//read children class ID
 		CC_CLASS_ENUM classID = ReadClassIDFromFile(in, dataVersion);
@@ -824,30 +823,35 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omit_chil
         //create corresponding child object
         ccHObject* child = New(classID);
 
+		//specifc case of custom objects (defined by plugins)
         if (classID == CC_TYPES::CUSTOM_H_OBJECT)
         {
-            // store seeking position
-            size_t original_pos = in.pos();
-            // we need to lod it as plain ccCustomHobject
-            child->fromFile(in, dataVersion, flags, true); // this will load it
-            in.seek(original_pos); // reseek back the file
-            QString classId = child->getMetaData("class_name").toString();
-            QString pluginId = child->getMetaData("plugin_name").toString();
+            //store current position
+            size_t originalFilePos = in.pos();
+            //we need to load the custom object as plain ccCustomHobject
+            child->fromFile(in, dataVersion, flags, true);
+			//go back to original position
+            in.seek(originalFilePos);
+			//get custom object name and plugin name
+			QString childName = child->getName();
+			QString classId = child->getMetaData(ccCustomHObject::DefautMetaDataClassName()).toString();
+            QString pluginId = child->getMetaData(ccCustomHObject::DefautMetaDataPluginName()).toString();
+			//dont' need this instance anymore
+			delete child;
+			child = 0;
 
             // try to get a new object from external factories
-            ccHObject * new_child = ccHObject::New(pluginId, classId);
-            if (new_child) // found a plugin that can deserialize it
+            ccHObject* newChild = ccHObject::New(pluginId, classId);
+            if (newChild) // found a plugin that can deserialize it
             {
-                delete child;
-                child = new_child;
+				child = newChild;
             }
             else
-                return false; // for now simply return false, we may want to skip it
-                              // but i am not sure if there is a simple way of doing that
-
-
+			{
+				ccLog::Warning(QString("[ccHObject::fromFile] Couldn't found any plugin able to deserialize custom object '%1' (class_ID = %2 / plugin_ID = %3").arg(childName).arg(classID).arg(pluginId));
+                return false; // FIXME: for now simply return false. We may want to skip it but I'm not sure if there is a simple way of doing that
+			}
         }
-
 
 		assert(child && child->isSerializable());
 		if (child)
@@ -871,9 +875,9 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omit_chil
 	}
 
 	//write current selection behavior (dataVersion>=23)
-	if (dataVersion>=23)
+	if (dataVersion >= 23)
 	{
-		if (in.read((char*)&m_selectionBehavior,sizeof(SelectionBehavior))<0)
+		if (in.read((char*)&m_selectionBehavior,sizeof(SelectionBehavior)) < 0)
 			return ReadError();
 	}
 	else

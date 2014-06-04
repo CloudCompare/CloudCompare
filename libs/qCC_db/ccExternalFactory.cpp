@@ -1,22 +1,30 @@
+//##########################################################################
+//#                                                                        #
+//#                            CLOUDCOMPARE                                #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                                                                        #
+//##########################################################################
+
 #include "ccExternalFactory.h"
 
-static ccExternalFactory::Container * s_externalFactories = new ccExternalFactory::Container();
+//! Container singleton 
+static QSharedPointer<ccExternalFactory::Container> s_externalFactoryContainer(0);
 
 ccExternalFactory::ccExternalFactory(QString factoryName)
-{
-    m_factoryName = factoryName;
+	: m_factoryName(factoryName)
+{}
 
-}
-
-QString ccExternalFactory::getFactoryName()
-{
-    return m_factoryName;
-}
-
-///// CONTAINER STUFF
-
-
-ccExternalFactory *ccExternalFactory::Container::getFactoryByName(const QString factoryName) const
+ccExternalFactory* ccExternalFactory::Container::getFactoryByName(const QString& factoryName) const
 {
     if (m_factories.contains(factoryName))
         return m_factories.value(factoryName);
@@ -34,19 +42,16 @@ void ccExternalFactory::Container::addFactory(ccExternalFactory *factory)
     m_factories[name] = factory;
 }
 
-
-ccExternalFactory::Container *ccExternalFactory::Container::GetExternalFactoriesContainer()
+ccExternalFactory::Container::Shared ccExternalFactory::Container::GetUniqueInstance()
 {
-    return s_externalFactories;
+	if (!s_externalFactoryContainer)
+	{
+		s_externalFactoryContainer = Container::Shared(new ccExternalFactory::Container());
+	}
+    return s_externalFactoryContainer;
 }
 
-void ccExternalFactory::Container::SetExternalFactoriesContainer(ccExternalFactory::Container * container)
+void ccExternalFactory::Container::SetUniqueInstance(Container::Shared container)
 {
-    if (container)
-    {
-        s_externalFactories = container;
-    }
+	s_externalFactoryContainer = container;
 }
-
-
-

@@ -484,9 +484,12 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 			m_stdPlugins.push_back(stdPlugin);
 
             // see if this plugin can give back an additional factory for objects
-            ccExternalFactory * fac = stdPlugin->getCustomObjectsFactory();
-            if (fac) // if it is valid add to the plugin_factories
-                ccExternalFactory::Container::GetExternalFactoriesContainer()->addFactory(fac);
+            ccExternalFactory* factory = stdPlugin->getCustomObjectsFactory();
+            if (factory) // if it is valid add to the plugin_factories
+			{
+				assert(ccExternalFactory::Container::GetUniqueInstance());
+				ccExternalFactory::Container::GetUniqueInstance()->addFactory(factory);
+			}
 		}
 		break;
 

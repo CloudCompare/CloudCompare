@@ -39,25 +39,22 @@ public:
     **/
 	ccCustomHObject(QString name = QString())
         : ccHObject(name)
-
 	{}
 
+	//inherited from ccHObject
     virtual bool isSerializable() const { return true; }
-    
+
 	// inherited from ccObject
     virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CUSTOM_H_OBJECT; }
 
-protected:
-    virtual bool toFile_MeOnly(QFile &out) const
-    {
-        ccHObject::toFile_MeOnly(out);
-        return true;
-    }
-    virtual bool fromFile_MeOnly(QFile &in, short dataVersion, int flags)
-    {
-        ccHObject::fromFile_MeOnly(in, dataVersion, flags);
-        return true;
-    }
+	//! Returns the default key for the "class name" metadata
+	/** See ccHObject::New.
+	**/
+	static QString DefautMetaDataClassName() { return QString("class_name"); }
+	//! Returns the default key for the "plugin name" metadata
+	/** See ccHObject::New.
+	**/
+	static QString DefautMetaDataPluginName() { return QString("plugin_name"); }
 };
 
 //! Custom leaf object
@@ -78,7 +75,7 @@ public:
     **/
 	ccCustomLeafObject(QString name = QString()) : ccCustomHObject(name) {}
 
-	// inherited from ccObject
+	// inherited from ccCustomHObject
     virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CUSTOM_LEAF_OBJECT; }
 };
 

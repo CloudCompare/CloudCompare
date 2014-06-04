@@ -1,66 +1,104 @@
-#ifndef CC_EXTERNAL_FACTORY_H
-#define CC_EXTERNAL_FACTORY_H
+//##########################################################################
+//#                                                                        #
+//#                            CLOUDCOMPARE                                #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                                                                        #
+//##########################################################################
 
-#include <ccHObject.h>
+#ifndef CC_EXTERNAL_FACTORY_HEADER
+#define CC_EXTERNAL_FACTORY_HEADER
+
+//Local
+#include "ccHObject.h"
+
+//Qt
 #include <QMap>
+#include <QSharedPointer>
 
-/**  Provide new objects with an external factory
+/**  Provides new objects with an external factory
   *  This is intendend to be used into plugins.
-  *  Each plugin may define o new factory by subclassing this class
-  *  factories are then managed in cloudcompare and used to load custom types.
+  *  Each plugin may define a new factory by subclassing this class.
+  *  Factories are then stored in a unique container and used to load custom types.
  **/
+#ifdef QCC_DB_USE_AS_DLL
+#include "qCC_db.h"
+class QCC_DB_LIB_API ccExternalFactory
+#else
 class ccExternalFactory
+#endif
 {
 public:
 
-    /** a convenience holder for all factories
-      * a static pointer to this class is declared in ccExternalFactoriesContainer.cpp
-      * external tools using qCC_db lib may want to make this static pointer to point to their own
-      * ccExternalFactoriesContainer
-     **/
-    class Container
+    //! A convenience holder for all factories
+#ifdef QCC_DB_USE_AS_DLL
+    class QCC_DB_LIB_API Container
+#else
+	class Container
+#endif
     {
     public:
-        //! def const will simply be an empty facotry set
-        Container() { }
+        //! Default constructor
+        Container() {}
 
-        /** get factory using a name as key
-         *  null pointer if not found
-         */
-        ccExternalFactory * getFactoryByName(const QString factoryName) const;
+        //! Returns factory using its (unique) name as key
+        /** \param factoryName unique name
+			\return corresponding factory (or null pointer if not found)
+		**/
+        ccExternalFactory* getFactoryByName(const QString& factoryName) const;
 
-        /** add a new factory to the container
-         * it will overwrite a previously existent factory with the same name
-         */
-        void addFactory(ccExternalFactory * factory);
+        //! Adds a new factory to the container
+        /** Any previously existing factory with the same name will be overwritten.
+		**/
+        void addFactory(ccExternalFactory* factory);
 
-        /** returns the static getFactoriesContainer which returns the pointer to the
-         * currently used external factories.
-         */
-        static ccExternalFactory::Container *GetExternalFactoriesContainer();
+		//! Shared pointer type
+		typedef QSharedPointer<Container> Shared;
 
-        /** set the static pointer to external factories
-         *  the previous one will be deleted
-         */
-        static void SetExternalFactoriesContainer(ccExternalFactory::Container * container);
+        //! Returns the unqiue static instance of the external factories container
+        static Container::Shared GetUniqueInstance();
 
-    protected:
-        QMap<QString, ccExternalFactory *> m_factories;
+        //! Sets the unqiue static instance of the external factories container
+		/** A default static instance is provided for convenience but another user defined instance
+			can be declared here instead.
+		**/
+        static void SetUniqueInstance(Container::Shared container);
 
+	protected:
+
+		//! Set of factories
+		QMap< QString, ccExternalFactory* > m_factories;
     };
 
-    //! constructor with name
+    //! Default constructor
+	/** \param factoryName unique name
+	**/
     ccExternalFactory(QString factoryName);
 
-    //! this will normally be the name of the plugin subclassing this class to provide a factory
-    QString getFactoryName();
+    //! Returns the (unique) name of the factory
+	inline QString getFactoryName() const {return m_factoryName; }
 
-    //! a new operator, just like in ccHObject, but virtual (and not-static, of course)
-    virtual ccHObject * buildObject(const QString metaname) = 0;
+    //! Custom object building method
+	/** Similar to ccHObject::New but virtual so as to be reimplemented by the plugin.
+		\param metaName custom object name
+		\return corresponding instance (or 0 if an error occurred)
+	**/
+    virtual ccHObject* buildObject(const QString& metaName) = 0;
 
 protected:
+
+	//! Name
     QString m_factoryName;
 
 };
 
-#endif // CC_EXTERNAL_FACTORY_H
+#endif // CC_EXTERNAL_FACTORY_HEADER

@@ -55,16 +55,16 @@ public:
 	**/
 	static ccHObject* New(CC_CLASS_ENUM objectType, const char* name = 0);
 
-    //! also a version to be used with external (plugin) factories
-    /** we use two Qstrings as keys, one for the plugin name and one for the class name
-     *  int this way we can save both in metadata
-     **/
-    static ccHObject * New (const QString pluginId, const QString classId, const char * name =0);
+    //! Static factory (version to be used by external plugin factories)
+    /** Two strings are used as keys, one for the plugin name and one for the class name.
+		Those strings will typically be saved as metadata of a custom object
+	**/
+    static ccHObject* New(QString pluginId, QString classId, const char* name = 0);
 
     //! Returns class ID
     /** \return class unique ID
     **/
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::HIERARCHY_OBJECT; }
+    inline virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::HIERARCHY_OBJECT; }
 
     //! Returns the icon associated to this entity
     /** ccDBRoot will call this method: if an invalid icon is returned
@@ -272,9 +272,17 @@ public:
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const;
 	virtual bool toFile(QFile& out) const;
-
-    //! omit_childrens permits to simulate the fromFile_meOnly behaviour from a public method call
-    virtual bool fromFile(QFile& in, short dataVersion, int flags, bool omit_childrens = false);
+	inline virtual bool fromFile(QFile& in, short dataVersion, int flags) { return fromFile(in,dataVersion,flags,false); }
+    
+	//! Custom version of ccSerializableObject::fromFile
+	/** This version is used to load only the object own part of a stream (an not its children's)
+		\param in input file (already opened)
+		\param dataVersion file version
+		\param flags deserialization flags (see ccSerializableObject::DeserializationFlags)
+		\param omitChildren to omit loading the children's part of the stream
+		\return success
+	**/
+    virtual bool fromFile(QFile& in, short dataVersion, int flags, bool omitChildren);
 
 	//! Returns whether object is shareable or not
 	/** If object is father dependent and 'shared', it won't

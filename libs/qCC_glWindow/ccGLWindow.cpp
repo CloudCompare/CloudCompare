@@ -412,6 +412,7 @@ void ccGLWindow::initializeGL()
 		}
 	}
 
+#ifdef 0
 	//OpenGL 3.3+ rendering shader
 	if ( QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_3 )
 	{
@@ -437,6 +438,7 @@ void ccGLWindow::initializeGL()
 			setDisplayParameters(params,hasOverridenDisplayParameters());
 		}
 	}
+#endif
 
 	//transparency off by default
 	glDisable(GL_BLEND);

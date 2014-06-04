@@ -412,7 +412,7 @@ void ccGLWindow::initializeGL()
 		}
 	}
 
-#ifdef 0
+#if 0
 	//OpenGL 3.3+ rendering shader
 	if ( QGLFormat::openGLVersionFlags() & QGLFormat::OpenGL_Version_3_3 )
 	{

@@ -26,6 +26,7 @@ Big ones:
 
 Various:
 [*] Use the official 3dConnexion SDK
+[*] Point pair based alignment tool enhancements (http://www.danielgm.net/cc/forum/viewtopic.php?t=866)
 [*] Dedicated method for isolated points removal (based on the Connected Components one)
 [*] Support boolean operations on meshes (with Cork for instance) - http://www.danielgm.net/cc/forum/viewtopic.php?t=812
 [*] Import control points from ascii file (for point pair-based registration - http://www.cloudcompare.org/forum/viewtopic.php?t=585)

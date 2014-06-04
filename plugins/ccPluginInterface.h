@@ -31,6 +31,8 @@
 #endif
 
 
+class ccExternalFactory;
+
 //! Plugin type
 enum  CC_PLUGIN_TYPE {  CC_STD_PLUGIN               = 0,
                         CC_GL_FILTER_PLUGIN         = 1,
@@ -58,7 +60,15 @@ public:
 	//! Returns icon
 	/** Should be reimplemented if necessary
 	**/
-	virtual QIcon getIcon() const { return QIcon(); }
+    virtual QIcon getIcon() const { return QIcon(); }
+
+    //! return a plugin factory object
+    /** Each plugin may have a factory or not
+     */
+    virtual ccExternalFactory * getCustomObjectsFactory() const
+    {
+        return 0; // no factory by default
+    }
 };
 
 Q_DECLARE_INTERFACE(ccPluginInterface,

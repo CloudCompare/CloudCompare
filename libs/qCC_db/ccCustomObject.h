@@ -38,35 +38,26 @@ public:
     /** \param name object name (optional)
     **/
 	ccCustomHObject(QString name = QString())
-		: ccHObject(name)
-		, m_deserialized(false)
+        : ccHObject(name)
+
 	{}
+
+    virtual bool isSerializable() const { return true; }
     
 	// inherited from ccObject
     virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CUSTOM_H_OBJECT; }
 
-	//! Returns whether this instance has been created by the user or if it's a plain ccCustomHObject instance created by deserialization
-	/** As custom objects can only be serialized as plain ccHObject instances (i.e. mainly with
-		meta-data and potentially more standard children) the user should check before using
-		a custom object instance if it's a real one or if it's an empty shell (i.e. fake instance
-		that has been deserialized). Note that if the custom type only relies on meta-data, then
-		it's safe to use this instance.
-	**/
-	bool isDeserialized() const { return !m_deserialized; }
-
 protected:
-
-	//! Overloaded from ccHObject::fromFile
-	virtual bool fromFile(QFile& in, short dataVersion, int flags)
-	{
-		bool result = ccHObject::fromFile(in,dataVersion,flags);
-		m_deserialized = true;
-
-		return result;
-	}
-
-	//! Whether the instance has been deserialized or not (see ccCustomHObject::isDeserialized)
-	bool m_deserialized;
+    virtual bool toFile_MeOnly(QFile &out) const
+    {
+        ccHObject::toFile_MeOnly(out);
+        return true;
+    }
+    virtual bool fromFile_MeOnly(QFile &in, short dataVersion, int flags)
+    {
+        ccHObject::fromFile_MeOnly(in, dataVersion, flags);
+        return true;
+    }
 };
 
 //! Custom leaf object

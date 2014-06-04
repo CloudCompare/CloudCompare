@@ -54,6 +54,7 @@
 #include <ccColorScalesManager.h>
 #include <ccFacet.h>
 #include <ccQuadric.h>
+#include <ccExternalFactory.h>
 
 //qCC includes
 #include "ccHeightGridGeneration.h"
@@ -481,6 +482,11 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 
 			//add to std. plugins list
 			m_stdPlugins.push_back(stdPlugin);
+
+            // see if this plugin can give back an additional factory for objects
+            ccExternalFactory * fac = stdPlugin->getCustomObjectsFactory();
+            if (fac) // if it is valid add to the plugin_factories
+                ccExternalFactory::Container::GetExternalFactoriesContainer()->addFactory(fac);
 		}
 		break;
 
@@ -9497,7 +9503,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
     //standard plugins
 	foreach (ccStdPluginInterface* plugin, m_stdPlugins)
-		plugin->onNewSelection(m_selectedEntities);
+        plugin->onNewSelection(m_selectedEntities);
 }
 
 void MainWindow::echoMouseWheelRotate(float wheelDelta_deg)

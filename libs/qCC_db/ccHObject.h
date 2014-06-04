@@ -55,6 +55,12 @@ public:
 	**/
 	static ccHObject* New(CC_CLASS_ENUM objectType, const char* name = 0);
 
+    //! also a version to be used with external (plugin) factories
+    /** we use two Qstrings as keys, one for the plugin name and one for the class name
+     *  int this way we can save both in metadata
+     **/
+    static ccHObject * New (const QString pluginId, const QString classId, const char * name =0);
+
     //! Returns class ID
     /** \return class unique ID
     **/
@@ -266,7 +272,9 @@ public:
 	//inherited from ccSerializableObject
 	virtual bool isSerializable() const;
 	virtual bool toFile(QFile& out) const;
-	virtual bool fromFile(QFile& in, short dataVersion, int flags);
+
+    //! omit_childrens permits to simulate the fromFile_meOnly behaviour from a public method call
+    virtual bool fromFile(QFile& in, short dataVersion, int flags, bool omit_childrens = false);
 
 	//! Returns whether object is shareable or not
 	/** If object is father dependent and 'shared', it won't
@@ -298,13 +306,13 @@ protected:
 	virtual inline void setParent(ccHObject* anObject) { m_parent = anObject; }
 
     //! Draws the entity only (not its children)
-	virtual void drawMeOnly(CC_DRAW_CONTEXT& context) { /*does nothing by default*/ };
+    virtual void drawMeOnly(CC_DRAW_CONTEXT& context) { /*does nothing by default*/ }
 
     //! Applies a GL transformation to the entity
     /** this = rotMat*(this-rotCenter)+(rotCenter+trans)
         \param trans a ccGLMatrix structure
     **/
-    virtual void applyGLTransformation(const ccGLMatrix& trans) { /*does nothing by default*/ };
+    virtual void applyGLTransformation(const ccGLMatrix& trans) { /*does nothing by default*/ }
 
 	//! Save own object data
 	/** Called by 'toFile' (recursive scheme)

@@ -47,6 +47,7 @@
 #include "ccQuadric.h"
 #include "ccIndexedTransformationBuffer.h"
 #include "ccCustomObject.h"
+#include "ccExternalFactory.h"
 
 //CCLib
 #include <CCShareable.h>
@@ -192,7 +193,28 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		break;
 	}
 
-	return 0;
+    return 0;
+}
+
+ccHObject *ccHObject::New(const QString pluginId, const QString classId, const char *name)
+{
+    ccExternalFactory::Container * all_ext_factories = ccExternalFactory::Container::GetExternalFactoriesContainer();
+    if (!all_ext_factories)
+        return 0;
+
+    ccExternalFactory * factory = all_ext_factories->getFactoryByName(pluginId);
+    if (!factory)
+        return 0;
+
+    ccHObject * obj = factory->buildObject(classId);
+
+    if (name)
+        obj->setName(name);
+
+    if (!obj)
+        return 0;
+    else
+        return obj;
 }
 
 QIcon ccHObject::getIcon() const
@@ -736,9 +758,6 @@ bool ccHObject::isSerializable() const
 
 bool ccHObject::toFile(QFile& out) const
 {
-	if (isKindOf(CC_TYPES::CUSTOM_LEAF_OBJECT))
-		return true;
-
 	assert(out.isOpen() && (out.openMode() & QIODevice::WriteOnly));
 
 	//write 'ccObject' header
@@ -774,7 +793,7 @@ bool ccHObject::toFile(QFile& out) const
 	return true;
 }
 
-bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
+bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omit_childrens /*= false*/)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
@@ -785,6 +804,9 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 	//read own data
 	if (!fromFile_MeOnly(in, dataVersion, flags))
 		return false;
+
+    if (omit_childrens)
+        return true;
 
 	//(serializable) child count (dataVersion>=20)
 	uint32_t serializableCount = 0;
@@ -799,8 +821,34 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags)
 		if (classID == CC_TYPES::OBJECT)
 			return false;
 
-		//create corresponding child object
-		ccHObject* child = New(classID);
+        //create corresponding child object
+        ccHObject* child = New(classID);
+
+        if (classID == CC_TYPES::CUSTOM_H_OBJECT)
+        {
+            // store seeking position
+            size_t original_pos = in.pos();
+            // we need to lod it as plain ccCustomHobject
+            child->fromFile(in, dataVersion, flags, true); // this will load it
+            in.seek(original_pos); // reseek back the file
+            QString classId = child->getMetaData("class_name").toString();
+            QString pluginId = child->getMetaData("plugin_name").toString();
+
+            // try to get a new object from external factories
+            ccHObject * new_child = ccHObject::New(pluginId, classId);
+            if (new_child) // found a plugin that can deserialize it
+            {
+                delete child;
+                child = new_child;
+            }
+            else
+                return false; // for now simply return false, we may want to skip it
+                              // but i am not sure if there is a simple way of doing that
+
+
+        }
+
+
 		assert(child && child->isSerializable());
 		if (child)
 		{

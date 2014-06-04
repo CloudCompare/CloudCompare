@@ -121,6 +121,9 @@ public:
     **/
     ccHObject * getSelectedEntityAsCCHObject() const;
 
+    //! Get selected object that also have the provided metadata key
+    ccHObject::Container getSelectedThatHaveMetaData(const QString key) const;
+
     //! Returns all the objects in db tree of type "type"
     void getAllEntitiesOfType(CC_CLASS_ENUM type, ccHObject::Container& entities);
 

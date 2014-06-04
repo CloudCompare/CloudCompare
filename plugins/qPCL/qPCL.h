@@ -18,7 +18,7 @@
 #ifndef Q_PCL_PLUGIN_HEADER
 #define Q_PCL_PLUGIN_HEADER
 
-#include "../ccStdPluginInterface.h"
+#include "ccStdPluginInterface.h"
 
 //Qt
 #include <QObject>

@@ -28,6 +28,7 @@
 //system
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 #include <vector>
 
 using namespace CCLib;

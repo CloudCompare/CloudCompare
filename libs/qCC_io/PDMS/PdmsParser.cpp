@@ -21,6 +21,7 @@
 #include <string.h>
 #include <iostream>
 #include <cstdlib>
+#include <stdio.h>
 
 //////////// STRING HANDLING ////////////////////
 inline void upperStr(char *s) {while(*s) {if(((*s)>='a')&&((*s)<='z')) (*s)+='A'-'a'; s++;}}

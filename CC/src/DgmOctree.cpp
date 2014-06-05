@@ -28,6 +28,7 @@
 #include <algorithm>
 #include <string.h>
 #include <assert.h>
+#include <stdio.h>
 #include <set>
 
 //DGM: tests in progress

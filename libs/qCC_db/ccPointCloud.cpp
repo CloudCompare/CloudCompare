@@ -51,7 +51,6 @@ ccPointCloud::ccPointCloud(QString name) throw()
 	, m_normals(0)
 	, m_currentDisplayedScalarField(0)
 	, m_currentDisplayedScalarFieldIndex(-1)
-	, m_vboState(VBO_NEW)
 {
 	init();
 }
@@ -1507,6 +1506,109 @@ inline float GetSymmetricalNormalizedValue(const ScalarType& sfVal, const ccScal
 	return (1.0f+static_cast<float>(relativeValue))/2.0f;	//normalized sf value
 }
 
+//the GL type depends on the PointCoordinateType 'size' (float or double)
+static GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
+
+void ccPointCloud::glChunkVertexPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs)
+{
+	assert(m_points);
+
+	if (useVBOs && m_vbos.state == vboSet::INITIALIZED && m_vbos.size() > chunkIndex && m_vbos[chunkIndex].isCreated())
+	{
+		//we can use VBOs directly
+		m_vbos[chunkIndex].bind();
+		glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),0);
+		m_vbos[chunkIndex].release();
+	}
+	else
+	{
+		glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(chunkIndex));
+	}
+}
+
+void ccPointCloud::glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs)
+{
+	assert(m_normals);
+
+	if (useVBOs && m_vbos.state == vboSet::INITIALIZED && m_vbos.size() > chunkIndex && m_vbos.hasNormals && m_vbos[chunkIndex].isCreated())
+	{
+		//we can use VBOs directly
+		m_vbos[chunkIndex].bind();
+		glNormalPointer(GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),(const GLvoid*)m_vbos[chunkIndex].normalShift);
+		m_vbos[chunkIndex].release();
+	}
+	else
+	{
+		//we must decode normals in a dedicated static array
+		PointCoordinateType* _normals = s_normBuffer;
+		const normsType* _normalsIndexes = m_normals->chunkStartPtr(chunkIndex);
+		unsigned chunkSize = m_normals->chunkSize(chunkIndex);
+
+		//compressed normals set
+		const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
+		assert(compressedNormals);
+
+		for (unsigned j=0; j<chunkSize; j+=decimStep,_normalsIndexes+=decimStep)
+		{
+			const CCVector3& N = compressedNormals->getNormal(*_normalsIndexes);
+			*(_normals)++ = N.x;
+			*(_normals)++ = N.y;
+			*(_normals)++ = N.z;
+		}
+		glNormalPointer(GL_COORD_TYPE,0,s_normBuffer);
+	}
+}
+
+void ccPointCloud::glChunkColorPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs)
+{
+	assert(m_rgbColors);
+	assert(sizeof(colorType) == 1);
+
+	if (useVBOs && m_vbos.state == vboSet::INITIALIZED && m_vbos.size() > chunkIndex && m_vbos.hasColors && m_vbos[chunkIndex].isCreated())
+	{
+		//we can use VBOs directly
+		m_vbos[chunkIndex].bind();
+		glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),(const GLvoid*)m_vbos[chunkIndex].rgbShift);
+		m_vbos[chunkIndex].release();
+	}
+	else
+	{
+		glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),m_rgbColors->chunkStartPtr(chunkIndex));
+	}
+}
+
+void ccPointCloud::glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs)
+{
+	assert(m_currentDisplayedScalarField);
+	assert(sizeof(colorType) == 1);
+
+	if (useVBOs && m_vbos.state == vboSet::INITIALIZED && m_vbos.size() > chunkIndex && m_vbos.hasColors)
+	{
+		//we can use VBOs directly
+		assert(m_vbos.colorIsSF && m_vbos.sourceSF == m_currentDisplayedScalarField);
+		m_vbos[chunkIndex].bind();
+		glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),(const GLvoid*)m_vbos[chunkIndex].rgbShift);
+		m_vbos[chunkIndex].release();
+	}
+	else
+	{
+		//we must decode normals in a dedicated static array
+		ScalarType* _sf = m_currentDisplayedScalarField->chunkStartPtr(chunkIndex);
+		colorType* _sfColors = s_rgbBuffer3ub;
+		unsigned chunkSize = m_currentDisplayedScalarField->chunkSize(chunkIndex);
+		for (unsigned j=0; j<chunkSize; j+=decimStep,_sf+=decimStep)
+		{
+			//we need to convert scalar value to color into a temporary structure
+			const colorType* col = m_currentDisplayedScalarField->getColor(*_sf);
+			assert(col);
+			*_sfColors++ = *col++;
+			*_sfColors++ = *col++;
+			*_sfColors++ = *col++;
+		}
+		glColorPointer(3,GL_UNSIGNED_BYTE,0,s_rgbBuffer3ub);
+	}
+}
+
 void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (!m_points->isAllocated())
@@ -1517,7 +1619,9 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//we get display parameters
 		glDrawParams glParams;
 		getDrawingParameters(glParams);
-		glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
+		//no normals shading without light!
+		if (!MACRO_LightIsEnabled(context))
+			glParams.showNorms = false;
 
 		//can't display a SF without... a SF... and an active color scale!
 		assert(!glParams.showSF || hasDisplayedScalarField());
@@ -1562,7 +1666,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 
 		//in the case we need normals (i.e. lighting)
-		ccNormalVectors* compressedNormals = 0;
 		if (glParams.showNorms)
 		{
 			//DGM: Strangely, when Qt::renderPixmap is called, the OpenGL version is sometimes 1.0!
@@ -1580,7 +1683,6 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glPushAttrib(GL_LIGHTING_BIT);
 				ccMaterial::MakeLightsNeutral();
 			}
-			compressedNormals = ccNormalVectors::GetUniqueInstance();
 		}
 
 		// L.O.D.
@@ -1588,24 +1690,25 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 		unsigned decimStep = 1;
 		if (numberOfPoints > MAX_LOD_POINTS_NUMBER && context.decimateCloudOnMove &&  MACRO_LODActivated(context))
 		{
-			decimStep = int(ceil(float(numberOfPoints) / float(MAX_LOD_POINTS_NUMBER)));
+			decimStep = static_cast<int>(ceil(static_cast<float>(numberOfPoints) / MAX_LOD_POINTS_NUMBER));
 		}
-
-		//the GL type depends on the PointCoordinateType 'size' (float or double)
-		GLenum GL_COORD_TYPE = sizeof(PointCoordinateType) == 4 ? GL_FLOAT : GL_DOUBLE;
 
 		/*** DISPLAY ***/
 
 		//custom point size?
 		glPushAttrib(GL_POINT_BIT);
 		if (m_pointSize != 0)
-			glPointSize((GLfloat)m_pointSize);
+			glPointSize(static_cast<GLfloat>(m_pointSize));
 
 		if (!pushPointNames) //standard "full" display
 		{
 			//if some points are hidden (= visibility table instantiated), we can't use display arrays :(
 			if (isVisibilityTableInstantiated())
 			{
+				//compressed normals set
+				const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
+				assert(compressedNormals);
+
 				glBegin(GL_POINTS);
 
 				for (unsigned j=0; j<numberOfPoints; j+=decimStep)
@@ -1639,13 +1742,30 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			{
 				assert(m_currentDisplayedScalarField);
 
+				//if some points may not be displayed, we'll have to be smarter!
+				bool hiddenPoints = m_currentDisplayedScalarField->mayHaveHiddenValues();
+
+				//whether VBOs are available (faster)
+				bool useVBOs = false;
+				if (!hiddenPoints && context.useVBOs)
+				{
+					//can't use VBOs if some points are hidden
+					useVBOs = updateVBOs(glParams);
+				}
+
 				//color ramp shader initialization
 				ccColorRampShader* colorRampShader = context.colorRampShader;
-
-				if (m_currentDisplayedScalarField->logScale())
 				{
-					//FIXME: shader doesn't support log scale yet!
-					colorRampShader = 0;
+					//color ramp shader is not compatible with VBOs (and VBOs are faster)
+					if (useVBOs)
+					{
+						colorRampShader = 0;
+					}
+					//FIXME: color ramp shader doesn't support log scale yet!
+					if (m_currentDisplayedScalarField->logScale())
+					{
+						colorRampShader = 0;
+					}
 				}
 
 				const ccScalarField::Range& sfDisplayRange = m_currentDisplayedScalarField->displayRange();
@@ -1730,34 +1850,28 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 					}
 				}
 
-				//if some points may not be displayed, we'll have to be smarter!
-				bool hiddenPoints = m_currentDisplayedScalarField->mayHaveHiddenValues();
-
 				//if all points should be displayed (fastest case)
 				if (!hiddenPoints)
 				{
-					if (context.useVBOs && m_vboState == VBO_NEW)
-						initVBOs();
-
 					glEnableClientState(GL_VERTEX_ARRAY);
+					glEnableClientState(GL_COLOR_ARRAY);
 					if (glParams.showNorms)
 						glEnableClientState(GL_NORMAL_ARRAY);
-
-					glEnableClientState(GL_COLOR_ARRAY);
-					if (colorRampShader)
-						glColorPointer(3,GL_FLOAT,0,s_rgbBuffer3f);
-					else
-						glColorPointer(3,GL_UNSIGNED_BYTE,0,s_rgbBuffer3ub);
 
 					unsigned chunks = m_points->chunksCount();
 					for (unsigned k=0; k<chunks; ++k)
 					{
 						unsigned chunkSize = m_points->chunkSize(k);
 
-						//Scalar field colors
-						ScalarType* _sf = m_currentDisplayedScalarField->chunkStartPtr(k);
+						//points
+						glChunkVertexPointer(k,decimStep,useVBOs);
+						//normals
+						if (glParams.showNorms)
+							glChunkNormalPointer(k,decimStep,useVBOs);
+						//SF colors
 						if (colorRampShader)
 						{
+							ScalarType* _sf = m_currentDisplayedScalarField->chunkStartPtr(k);
 							float* _sfColors = s_rgbBuffer3f;
 							if (!m_currentDisplayedScalarField->symmetricalScale())
 							{
@@ -1778,70 +1892,29 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 									_sfColors[2] = 1.0f;													//reference value (to get the true lighting value)
 								}
 							}
+							glColorPointer(3,GL_FLOAT,0,s_rgbBuffer3f);
 						}
 						else
 						{
-							colorType* _sfColors = s_rgbBuffer3ub;
-							for (unsigned j=0; j<chunkSize; j+=decimStep,_sf+=decimStep)
-							{
-								//we need to convert scalar value to color into a temporary structure
-								const colorType* col = m_currentDisplayedScalarField->getColor(*_sf);
-								assert(col);
-								*_sfColors++ = *col++;
-								*_sfColors++ = *col++;
-								*_sfColors++ = *col++;
-							}
-						}
-
-						//if available, we use the VBO for the current chunk
-						bool vboBound = false;
-						if (context.useVBOs && m_vboState == VBO_INITIALIZED && m_vbos[k].isCreated())
-						{
-							m_vbos[k].bind();
-							//points
-							glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),0);
-							//normals
-							if (glParams.showNorms)
-								glNormalPointer(GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),(const GLvoid*)m_vbos[k].normalShift);
-							vboBound = true;
-						}
-						else
-						{
-							//points
-							glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
-							//normals
-							if (glParams.showNorms)
-							{
-								PointCoordinateType* _normals = s_normBuffer;
-								const normsType* _normalsIndexes = m_normals->chunkStartPtr(k);
-								for (unsigned j=0; j<chunkSize; j+=decimStep,_normalsIndexes+=decimStep)
-								{
-									const CCVector3& N = compressedNormals->getNormal(*_normalsIndexes);
-									*(_normals)++ = N.x;
-									*(_normals)++ = N.y;
-									*(_normals)++ = N.z;
-								}
-								glNormalPointer(GL_COORD_TYPE,0,s_normBuffer);
-							}
+							glChunkSFPointer(k,decimStep,useVBOs);
 						}
 
 						if (decimStep > 1)
 							chunkSize = static_cast<unsigned>( floor(static_cast<float>(chunkSize)/decimStep) );
 						glDrawArrays(GL_POINTS,0,chunkSize);
-
-						if (vboBound)
-						{
-							m_vbos[k].release();
-						}
 					}
 
 					if (glParams.showNorms)
 						glDisableClientState(GL_NORMAL_ARRAY);
-					glDisableClientState(GL_VERTEX_ARRAY);
 					glDisableClientState(GL_COLOR_ARRAY);
+					glDisableClientState(GL_VERTEX_ARRAY);
 				}
 				else //potentially hidden points
 				{
+					//compressed normals set
+					const ccNormalVectors* compressedNormals = ccNormalVectors::GetUniqueInstance();
+					assert(compressedNormals);
+
 					glBegin(GL_POINTS);
 
 					if (glParams.showNorms) //with normals (slowest case!)
@@ -1950,8 +2023,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 			else //no visibility table enabled, no scalar field
 			{
-				if (context.useVBOs && m_vboState == VBO_NEW)
-					initVBOs();
+				bool useVBOs = context.useVBOs ? updateVBOs(glParams) : false;
 
 				unsigned chunks = m_points->chunksCount();
 
@@ -1959,62 +2031,24 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 				if (glParams.showNorms)
 					glEnableClientState(GL_NORMAL_ARRAY);
 				if (glParams.showColors)
-				{
-					assert(m_rgbColors && m_rgbColors->chunksCount() == chunks);
-					assert(sizeof(colorType) == 1);
 					glEnableClientState(GL_COLOR_ARRAY);
-				}
 
 				for (unsigned k=0; k<chunks; ++k)
 				{
 					unsigned chunkSize = m_points->chunkSize(k);
 
-					//if available, we use the VBO for the current chunk
-					bool vboBound = false;
-					if (context.useVBOs && m_vboState == VBO_INITIALIZED && m_vbos[k].isCreated())
-					{
-						m_vbos[k].bind();
-						glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),0);
-						if (glParams.showNorms)
-							glNormalPointer(GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),(const GLvoid*)m_vbos[k].normalShift);
-						if (glParams.showColors)
-							glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),(const GLvoid*)m_vbos[k].rgbShift);
-						vboBound = true;
-					}
-					else
-					{
-						glVertexPointer(3,GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),m_points->chunkStartPtr(k));
-
-						if (glParams.showNorms)
-						{
-							//decode normals
-							PointCoordinateType* _normals = s_normBuffer;
-							const normsType* _normalsIndexes = m_normals->chunkStartPtr(k);
-							for (unsigned j=0; j<chunkSize; j+=decimStep,_normalsIndexes+=decimStep)
-							{
-								const CCVector3& N = compressedNormals->getNormal(*_normalsIndexes);
-								*(_normals)++ = N.x;
-								*(_normals)++ = N.y;
-								*(_normals)++ = N.z;
-							}
-
-							glNormalPointer(GL_COORD_TYPE,0,s_normBuffer);
-						}
-						if (glParams.showColors)
-						{
-							assert(m_rgbColors && m_rgbColors->chunkSize(k) == chunkSize);
-							glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),m_rgbColors->chunkStartPtr(k));
-						}
-					}
+					//points
+					glChunkVertexPointer(k,decimStep,useVBOs);
+					//normals
+					if (glParams.showNorms)
+						glChunkNormalPointer(k,decimStep,useVBOs);
+					//colors
+					if (glParams.showColors)
+						glChunkColorPointer(k,decimStep,useVBOs);
 
 					if (decimStep > 1)
 						chunkSize = static_cast<unsigned>(floor(static_cast<float>(chunkSize)/decimStep));
 					glDrawArrays(GL_POINTS,0,chunkSize);
-
-					if (vboBound)
-					{
-						m_vbos[k].release();
-					}
 				}
 
 				glDisableClientState(GL_VERTEX_ARRAY);
@@ -2925,61 +2959,190 @@ CCLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned cha
 	return ref;
 }
 
-bool ccPointCloud::initVBOs()
+static void CatchGLErrors(const char* context)
 {
-	if (m_vboState == VBO_INITIALIZED)
+	//catch GL errors
 	{
-		ccLog::Warning(QString("[ccPointCloud::initVBOs] VBOs are already initialized! (cloud '%1')").arg(getName()));
+		GLenum err = glGetError();
+
+		//see http://www.opengl.org/sdk/docs/man/xhtml/glGetError.xml
+		switch(err)
+		{
+		case GL_NO_ERROR:
+			return;
+			break;
+		case GL_INVALID_ENUM:
+			ccLog::Warning("[%s] OpenGL error: invalid enumerator",context);
+			break;
+		case GL_INVALID_VALUE:
+			ccLog::Warning("[%s] OpenGL error: invalid value",context);
+			break;
+		case GL_INVALID_OPERATION:
+			ccLog::Warning("[%s] OpenGL error: invalid operation",context);
+			break;
+		case GL_STACK_OVERFLOW:
+			ccLog::Error("[%s] OpenGL error: stack overflow",context);
+			break;
+		case GL_STACK_UNDERFLOW:
+			ccLog::Error("[%s] OpenGL error: stack underflow",context);
+			break;
+		case GL_OUT_OF_MEMORY:
+			ccLog::Error("[%s] OpenGL error: out of memory",context);
+			break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:
+			ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation",context);
+			break;
+		}
+	}
+}
+
+//DGM: normals are so slow that it's a waste of memory and time to load them in VBOs!
+#define DONT_LOAD_NORMALS_IN_VBOS
+
+bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
+{
+	if (isColorOverriden())
+	{
+		//nothing to do (we don't display true colors, SF or normals!)
+		assert(false);
+		return false;
+	}
+
+	if (m_vbos.state == vboSet::FAILED)
+	{
+		//ccLog::Warning(QString("[ccPointCloud::updateVBOs] VBOs are in a 'failed' state... we won't try to update them! (cloud '%1')").arg(getName()));
 		return false;
 	}
 
 	if (!m_currentDisplay)
 	{
-		ccLog::Warning(QString("[ccPointCloud::initVBOs] Need an associated GL context! (cloud '%1')").arg(getName()));
+		ccLog::Warning(QString("[ccPointCloud::updateVBOs] Need an associated GL context! (cloud '%1')").arg(getName()));
+		assert(false);
 		return false;
 	}
 
-	unsigned chunksCount = m_points->chunksCount();
-	try
+	//fiels to init/update
+	enum UPDATE_FIELDS {	UPDATE_POINTS	= 1,
+							UPDATE_COLORS	= 2,
+							UPDATE_NORMALS	= 4,
+	};
+	int updateFlags = 0;
+
+	if (m_vbos.state == vboSet::INITIALIZED)
 	{
-		m_vbos.resize(chunksCount);
+		//let's check if something has changed
+		if (glParams.showColors && (!m_vbos.hasColors || m_vbos.colorIsSF))
+			updateFlags |= UPDATE_COLORS;
+		if (glParams.showSF && (!m_vbos.hasColors || !m_vbos.colorIsSF || m_vbos.sourceSF != m_currentDisplayedScalarField || m_currentDisplayedScalarField->getModificationFlag() == true))
+			updateFlags |= UPDATE_COLORS;
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+		if (glParams.showNorms && !m_vbos.hasNormals)
+			updateFlags |= UPDATE_NORMALS;
+#endif
+		//nothing to do?
+		if (updateFlags == 0)
+			return true;
 	}
-	catch(std::bad_alloc)
+	else
 	{
-		ccLog::Warning(QString("[ccPointCloud::initVBOs] Not enough memory! (cloud '%1')").arg(getName()));
-		m_vboState = VBO_FAILED;
-		return false;
+		updateFlags = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS;
+	}
+
+	size_t chunksCount = m_points->chunksCount();
+	//allocate per-chunk descriptors if necessary
+	if (m_vbos.size() != chunksCount)
+	{
+		try
+		{
+			m_vbos.resize(chunksCount);
+		}
+		catch(std::bad_alloc)
+		{
+			ccLog::Warning(QString("[ccPointCloud::updateVBOs] Not enough memory! (cloud '%1')").arg(getName()));
+			m_vbos.state = vboSet::FAILED;
+			return false;
+		}
 	}
 
 	//init VBOs
 	unsigned pointsInVBOs = 0;
+	int totalSizeBytesBefore = m_vbos.totalMemSizeBytes;
+	m_vbos.totalMemSizeBytes = 0;
 	{
 		m_currentDisplay->makeContextCurrent();
 
-		bool withColors = hasColors();
-		assert(!withColors || (m_rgbColors && m_rgbColors->chunksCount() >= chunksCount));
+		assert(!glParams.showSF		|| (m_currentDisplayedScalarField && m_currentDisplayedScalarField->chunksCount() >= chunksCount));
+		assert(!glParams.showColors	|| (m_rgbColors && m_rgbColors->chunksCount() >= chunksCount));
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+		assert(!glParams.showNorms	|| (m_normals && m_normals->chunksCount() >= chunksCount));
+#endif
 
-		bool withNormals = hasNormals();
-		assert(!withNormals || (m_normals && m_normals->chunksCount() >= chunksCount));
+		m_vbos.hasColors	= glParams.showSF || glParams.showColors;
+		m_vbos.colorIsSF	= glParams.showSF;
+		m_vbos.sourceSF		= glParams.showSF ? m_currentDisplayedScalarField : 0;
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
+		m_vbos.hasNormals	= glParams.showNorms;
+#else
+		m_vbos.hasNormals	= false;
+#endif
 
+		//process each chunk
 		for (unsigned i=0; i<chunksCount; ++i)
 		{
 			int chunkSize = static_cast<int>(m_points->chunkSize(i));
-			if (m_vbos[i].init(chunkSize,withColors,withNormals))
+
+			int chunkUpdateFlags = updateFlags;
+			bool reallocated = false;
+			int vboSizeBytes = m_vbos[i].init(chunkSize,m_vbos.hasColors,m_vbos.hasNormals,&reallocated);
+			if (vboSizeBytes > 0)
 			{
-				//load data
+				if (reallocated)
+				{
+					//if the vbo is reallocated, then all its content has been cleared!
+					chunkUpdateFlags = UPDATE_POINTS | UPDATE_COLORS | UPDATE_NORMALS;
+				}
+
 				m_vbos[i].bind();
+
 				//load points
+				if (chunkUpdateFlags & UPDATE_POINTS)
 				{
 					m_vbos[i].write(0,m_points->chunkStartPtr(i),sizeof(PointCoordinateType)*chunkSize*3);
 				}
 				//load colors
-				if (withColors)
+				if (chunkUpdateFlags & UPDATE_COLORS)
 				{
-					m_vbos[i].write(m_vbos[i].rgbShift,m_rgbColors->chunkStartPtr(i),sizeof(colorType)*chunkSize*3);
+					if (glParams.showSF)
+					{
+						//copy SF colors in static array
+						{
+							assert(m_vbos.sourceSF);
+							colorType* _sfColors = s_rgbBuffer3ub;
+							ScalarType* _sf = m_vbos.sourceSF->chunkStartPtr(i);
+							for (int j=0; j<chunkSize; j++,_sf++)
+							{
+								//we need to convert scalar value to color into a temporary structure
+								const colorType* col = m_vbos.sourceSF->getColor(*_sf);
+								if (!col)
+									col = ccColor::lightGrey;
+								*_sfColors++ = *col++;
+								*_sfColors++ = *col++;
+								*_sfColors++ = *col++;
+							}
+						}
+						//then send them in VRAM
+						m_vbos[i].write(m_vbos[i].rgbShift,s_rgbBuffer3ub,sizeof(colorType)*chunkSize*3);
+						//upadte 'modification' flag for current displayed SF
+						m_vbos.sourceSF->setModificationFlag(false);
+					}
+					else if (glParams.showColors)
+					{
+						m_vbos[i].write(m_vbos[i].rgbShift,m_rgbColors->chunkStartPtr(i),sizeof(colorType)*chunkSize*3);
+					}
 				}
+#ifndef DONT_LOAD_NORMALS_IN_VBOS
 				//load normals
-				if (withNormals)
+				if (glParams.showNorms && (chunkUpdateFlags & UPDATE_NORMALS))
 				{
 					//we must decode the normals first!
 					normsType* inNorms = m_normals->chunkStartPtr(i);
@@ -2993,16 +3156,20 @@ bool ccPointCloud::initVBOs()
 					}
 					m_vbos[i].write(m_vbos[i].normalShift,s_normBuffer,sizeof(PointCoordinateType)*chunkSize*3);
 				}
+#endif
+
 				m_vbos[i].release();
+
+				m_vbos.totalMemSizeBytes += vboSizeBytes;
 				pointsInVBOs += chunkSize;
 			}
-			else //VBO initialization failed
+			else if (vboSizeBytes < 0) //VBO initialization failed
 			{
 				//we can stop here
 				if (i == 0)
 				{
-					ccLog::Warning(QString("[ccPointCloud::initVBOs] Failed to initialize VBOs (not enough memory?) (cloud '%1')").arg(getName()));
-					m_vboState = VBO_FAILED;
+					ccLog::Warning(QString("[ccPointCloud::updateVBOs] Failed to initialize VBOs (not enough memory?) (cloud '%1')").arg(getName()));
+					m_vbos.state = vboSet::FAILED;
 					m_vbos.clear();
 					return false;
 				}
@@ -3015,33 +3182,19 @@ bool ccPointCloud::initVBOs()
 		}
 	}
 
-	ccLog::Print(QString("[ccPointCloud::initVBOs] VBO(s) successfully initialized for cloud '%1' (%2% of points have been loaded in VRAM)").arg(getName()).arg(static_cast<float>(pointsInVBOs)/static_cast<float>(size())*100.0f));
+	if (m_vbos.totalMemSizeBytes != totalSizeBytesBefore)
+		ccLog::Print(QString("[VBO] VBO(s) (re)initialized for cloud '%1' (%2 Mb = %3% of points could be loaded)").arg(getName()).arg(static_cast<double>(m_vbos.totalMemSizeBytes)/(1<<20),0,'f',2).arg(static_cast<float>(pointsInVBOs)/static_cast<float>(size())*100.0f));
 
-	m_vboState = VBO_INITIALIZED;
+	m_vbos.state = vboSet::INITIALIZED;
+
+	CatchGLErrors("ccPointCloud::updateVBOs");
+
 	return true;
 }
 
-bool ccPointCloud::VBO::init(int count, bool withColors, bool withNormals)
+int ccPointCloud::VBO::init(int count, bool withColors, bool withNormals, bool* reallocated/*=0*/)
 {
-	if (isCreated())
-	{
-		ccLog::Warning("[ccPointCloud::VBO::init] Already initialized!");
-		return false;
-	}
-
-	if (!create())
-	{
-		//no message as it will probably happen on a lof of (old) cards
-		return false;
-	}
-
-	if (!bind())
-	{
-		ccLog::Warning("[ccPointCloud::VBO::init] Failed to bind VBO to active context!");
-		destroy();
-		return false;
-	}
-
+	//required memory
 	int totalSizeBytes = sizeof(PointCoordinateType) * count * 3;
 	if (withColors)
 	{
@@ -3054,26 +3207,54 @@ bool ccPointCloud::VBO::init(int count, bool withColors, bool withNormals)
 		totalSizeBytes += sizeof(PointCoordinateType) * count * 3;
 	}
 
-	setUsagePattern(QGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
-												//"DynamicDraw: The data will be modified repeatedly and used many times for drawing operations.
-
-	allocate(totalSizeBytes);
-
-	if (size() != totalSizeBytes)
+	if (!isCreated())
 	{
-		ccLog::Warning("[ccPointCloud::VBO::init] Not enough (GPU) memory!");
-		release();
+		if (!create())
+		{
+			//no message as it will probably happen on a lof of (old) graphic cards
+			return false;
+		}
+		
+		setUsagePattern(QGLBuffer::DynamicDraw);	//"StaticDraw: The data will be set once and used many times for drawing operations."
+													//"DynamicDraw: The data will be modified repeatedly and used many times for drawing operations.
+	}
+
+	if (!bind())
+	{
+		ccLog::Warning("[ccPointCloud::VBO::init] Failed to bind VBO to active context!");
 		destroy();
-		return false;
+		return -1;
+	}
+
+	if (totalSizeBytes != size())
+	{
+		allocate(totalSizeBytes);
+		if (reallocated)
+			*reallocated = true;
+
+		if (size() != totalSizeBytes)
+		{
+			ccLog::Warning("[ccPointCloud::VBO::init] Not enough (GPU) memory!");
+			release();
+			destroy();
+			return -1;
+		}
+	}
+	else
+	{
+		//nothing to do
 	}
 
 	release();
-	return true;
+	
+	CatchGLErrors("ccPointCloud::vbo.init");
+
+	return totalSizeBytes;
 }
 
 void ccPointCloud::releaseVBOs()
 {
-	if (m_vboState == VBO_NEW)
+	if (m_vbos.state == vboSet::NEW)
 		return;
 
 	if (m_currentDisplay)
@@ -3091,5 +3272,10 @@ void ccPointCloud::releaseVBOs()
 	}
 
 	m_vbos.clear();
-	m_vboState = VBO_NEW;
+	m_vbos.hasColors = false;
+	m_vbos.hasNormals = false;
+	m_vbos.colorIsSF = false;
+	m_vbos.sourceSF = 0;
+	m_vbos.totalMemSizeBytes = 0;
+	m_vbos.state = vboSet::NEW;
 }

@@ -40,6 +40,7 @@ ccScalarField::ccScalarField(const char* name/*=0*/)
 	, m_alwaysShowZero(false)
 	, m_colorScale(0)
 	, m_colorRampSteps(0)
+	, m_modified(true)
 {
 	setColorRampSteps(ccColorScale::DEFAULT_STEPS);
 	setColorScale(ccColorScalesManager::GetUniqueInstance()->getDefaultScale(ccColorScalesManager::BGYR));
@@ -109,6 +110,8 @@ void ccScalarField::setColorScale(ccColorScale::Shared scale)
 
 		if (isAbsolute || wasAbsolute != isAbsolute)
 			updateSaturationBounds();
+
+		m_modified = true;
 	}
 }
 
@@ -118,6 +121,8 @@ void ccScalarField::setSymmetricalScale(bool state)
 	{
 		m_symmetricalScale = state;
 		updateSaturationBounds();
+
+		m_modified = true;
 	}
 }
 
@@ -130,6 +135,8 @@ void ccScalarField::setLogScale(bool state)
 		{
 			ccLog::Warning("[ccScalarField] Scalar field contains negative values! Log scale will only consider absolute values...");
 		}
+
+		m_modified = true;
 	}
 }
 
@@ -186,6 +193,8 @@ void ccScalarField::computeMinAndMax()
 		}
 	}
 
+	m_modified = true;
+
 	updateSaturationBounds();
 }
 
@@ -232,6 +241,20 @@ void ccScalarField::updateSaturationBounds()
 			m_logSaturationRange.setBounds(minSatLog,maxSatLog);
 		}
 	}
+
+	m_modified = true;
+}
+
+void ccScalarField::setMinDisplayed(ScalarType val)
+{
+	m_displayRange.setStart(val);
+	m_modified = true;
+}
+	
+void ccScalarField::setMaxDisplayed(ScalarType val)
+{
+	m_displayRange.setStop(val);
+	m_modified = true;
 }
 
 void ccScalarField::setSaturationStart(ScalarType val)
@@ -244,6 +267,7 @@ void ccScalarField::setSaturationStart(ScalarType val)
 	{
 		m_saturationRange.setStart(val);
 	}
+	m_modified = true;
 }
 
 void ccScalarField::setSaturationStop(ScalarType val)
@@ -256,6 +280,7 @@ void ccScalarField::setSaturationStop(ScalarType val)
 	{
 		m_saturationRange.setStop(val);
 	}
+	m_modified = true;
 }
 
 void ccScalarField::setColorRampSteps(unsigned steps)
@@ -266,6 +291,8 @@ void ccScalarField::setColorRampSteps(unsigned steps)
 		m_colorRampSteps = ccColorScale::MIN_STEPS;
 	else
 		m_colorRampSteps = steps;
+
+	m_modified = true;
 }
 
 bool ccScalarField::toFile(QFile& out) const
@@ -542,6 +569,8 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 	m_logSaturationRange.setStart((ScalarType)minLogSaturation);
 	m_logSaturationRange.setStop((ScalarType)maxLogSaturation);
 
+	m_modified = true;
+
 	return true;
 }
 
@@ -553,4 +582,16 @@ bool ccScalarField::mayHaveHiddenValues() const
 						);
 
 	return hiddenPoints;
+}
+
+void ccScalarField::showNaNValuesInGrey(bool state)
+{
+	m_showNaNValuesInGrey = state;
+	m_modified = true;
+}
+
+void ccScalarField::alwaysShowZero(bool state)
+{
+	m_alwaysShowZero = state;
+	m_modified = true;
 }

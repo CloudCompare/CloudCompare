@@ -49,7 +49,6 @@ public:
 		//! Default destructor
 		virtual ~ChunkedPointCloud();
 
-
 		//**** inherited form GenericCloud ****//
 		inline virtual unsigned size() const { return m_points->currentSize(); }
 		virtual void forEach(genericPointAction& anAction);
@@ -118,7 +117,6 @@ public:
 		/** Bounding box will be recomputed next time a request is made to 'getBoundingBox'.
 		**/
 		virtual void invalidateBoundingBox();
-
 
 		/*** scalar fields management ***/
 

@@ -52,6 +52,7 @@ public:
 
 	//! Shortcut: checks OpenGL VA support
 	static bool CheckVAAvailability();
+
 };
 
 #endif

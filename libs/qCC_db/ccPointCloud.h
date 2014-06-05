@@ -538,14 +538,8 @@ protected:
 
 protected: // VBO
 
-	//! States of th VBO(s)
-	enum VBO_STATES { VBO_NEW, VBO_INITIALIZED, VBO_FAILED };
-
-	//! Current VBOs state
-	VBO_STATES m_vboState;
-
-	//! Init VBOs
-	bool initVBOs();
+	//! Init/updates VBOs
+	bool updateVBOs(const glDrawParams& glParams);
 
 	//! Release VBOs
 	void releaseVBOs();
@@ -556,7 +550,10 @@ protected: // VBO
 		int rgbShift;
 		int normalShift;
 
-		bool init(int count, bool withColors, bool withNormals);
+		//! Inits the VBO
+		/** \return the number of allocated bytes (or -1 if an error occurred)
+		**/
+		int init(int count, bool withColors, bool withNormals, bool* reallocated = 0);
 
 		VBO()
 			: QGLBuffer(QGLBuffer::VertexBuffer)
@@ -565,8 +562,38 @@ protected: // VBO
 		{}
 	};
 
+	//! VBO set
+	struct vboSet : std::vector<VBO>
+	{
+		//! States of th VBO(s)
+		enum STATES { NEW, INITIALIZED, FAILED };
+
+		vboSet()
+			: hasColors(false)
+			, colorIsSF(false)
+			, sourceSF(0)
+			, hasNormals(false)
+			, totalMemSizeBytes(0)
+			, state(NEW)
+		{}
+
+		bool hasColors;
+		bool colorIsSF;
+		ccScalarField* sourceSF;
+		bool hasNormals;
+		int totalMemSizeBytes;
+
+		//! Current state
+		STATES state;
+	};
+
 	//! VBOs attached to this cloud
-	std::vector<VBO> m_vbos;
+	vboSet m_vbos;
+
+	void glChunkVertexPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkColorPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
+	void glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep, bool useVBOs);
 
 private:
 

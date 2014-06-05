@@ -99,10 +99,10 @@ CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(const char* ext)
 		fType = VTK;
 	else if (strcmp(ext,"STL") == 0)
 		fType = STL;
-    else if (strcmp(ext,"PCD") == 0)
-        fType = PCD;
-    else if (strcmp(ext,"OFF") == 0)
-        fType = OFF;
+	else if (strcmp(ext,"PCD") == 0)
+		fType = PCD;
+	else if (strcmp(ext,"OFF") == 0)
+		fType = OFF;
 	else if (strcmp(ext,"PTX") == 0)
 		fType = PTX;
 #ifdef CC_X3D_SUPPORT
@@ -227,12 +227,12 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 										CCVector3d* coordinatesShift/*=0*/)
 {
 	//check file existence
-    QFileInfo fi(filename);
-    if (!fi.exists())
-    {
-        ccLog::Error(QString("[Load] File '%1' doesn't exist!").arg(filename));
-        return 0;
-    }
+	QFileInfo fi(filename);
+	if (!fi.exists())
+	{
+		ccLog::Error(QString("[Load] File '%1' doesn't exist!").arg(filename));
+		return 0;
+	}
 
 	//do we need to guess file format?
 	if (fType == UNKNOWN_FILE)
@@ -258,11 +258,11 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 
 	//get corresponding loader
 	FileIOFilter* fio = CreateFilter(fType);
-    if (!fio)
-        return 0;
+	if (!fio)
+		return 0;
 
 	//load file
-    ccHObject* container = new ccHObject();
+	ccHObject* container = new ccHObject();
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
@@ -281,22 +281,22 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	}
 
 	//we can release the loader instance
-    delete fio;
-    fio = 0;
+	delete fio;
+	fio = 0;
 
 	if (result != CC_FERR_NO_ERROR)
-        DisplayErrorMessage(result,"loading",fi.baseName());
+		DisplayErrorMessage(result,"loading",fi.baseName());
 	else
 		ccLog::Print(QString("[I/O] File '%1' loaded successfully").arg(fi.baseName()));
 
-    unsigned childrenCount = container->getChildrenNumber();
-    if (childrenCount != 0)
-    {
+	unsigned childrenCount = container->getChildrenNumber();
+	if (childrenCount != 0)
+	{
 		//we set the main container name as the full filename (with path)
-        container->setName(QString("%1 (%2)").arg(fi.fileName()).arg(fi.absolutePath()));
-        for (unsigned i=0; i<childrenCount; ++i)
-        {
-            ccHObject* child = container->getChild(i);
+		container->setName(QString("%1 (%2)").arg(fi.fileName()).arg(fi.absolutePath()));
+		for (unsigned i=0; i<childrenCount; ++i)
+		{
+			ccHObject* child = container->getChild(i);
 			QString newName = child->getName();
 			if (newName.startsWith("unnamed"))
 			{
@@ -304,94 +304,94 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 				newName.replace(QString("unnamed"),fi.baseName());
 				child->setName(newName);
 			}
-        }
-    }
+		}
+	}
 	else
-    {
-        delete container;
-        container = 0;
-    }
+	{
+		delete container;
+		container = 0;
+	}
 
 	return container;
 }
 
 CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename, CC_FILE_TYPES fType)
 {
-    if (!entities || !filename || fType == UNKNOWN_FILE)
-        return CC_FERR_BAD_ARGUMENT;
+	if (!entities || !filename || fType == UNKNOWN_FILE)
+		return CC_FERR_BAD_ARGUMENT;
 
 	FileIOFilter* fio = CreateFilter(fType);
 	if (!fio)
-        return CC_FERR_WRONG_FILE_TYPE;
+		return CC_FERR_WRONG_FILE_TYPE;
 
-    //if the file name has no extension, we had a default one!
-    QString completeFileName(filename);
+	//if the file name has no extension, we had a default one!
+	QString completeFileName(filename);
 	if (QFileInfo(filename).suffix().isEmpty())
-        completeFileName += QString(".%1").arg(CC_FILE_TYPE_DEFAULT_EXTENSION[fType]);
+		completeFileName += QString(".%1").arg(CC_FILE_TYPE_DEFAULT_EXTENSION[fType]);
 
-    CC_FILE_ERROR result = fio->saveToFile(entities, qPrintable(completeFileName));
+	CC_FILE_ERROR result = fio->saveToFile(entities, qPrintable(completeFileName));
 
-    delete fio;
-    fio = 0;
+	delete fio;
+	fio = 0;
 
-    return result;
+	return result;
 }
 
 void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action, const QString& filename)
 {
-    QString errorStr;
+	QString errorStr;
 
-    bool warning=false;
-    switch(err)
-    {
-        case CC_FERR_NO_ERROR:
-            return; //no message will be displayed!
-        case CC_FERR_BAD_ARGUMENT:
-            errorStr = "[internal] bad argument";
-            break;
-        case CC_FERR_UNKNOWN_FILE:
-            errorStr = "Unknown file";
-            break;
-        case CC_FERR_WRONG_FILE_TYPE:
-            errorStr = "Wrong file type (check header)";
-            break;
-        case CC_FERR_WRITING:
-            errorStr = "Writing error (disk full/no access right?)";
-            break;
-        case CC_FERR_READING:
-            errorStr = "Reading error (no access right?)";
-            break;
-        case CC_FERR_NO_SAVE:
-            errorStr = "Nothing to save";
-            break;
-        case CC_FERR_NO_LOAD:
-            errorStr = "Nothing to load";
-            break;
-        case CC_FERR_BAD_ENTITY_TYPE:
-            errorStr = "Incompatible entity/file types";
-            break;
-        case CC_FERR_CANCELED_BY_USER:
-            errorStr = "Process canceled by user";
-            warning=true;
-            break;
-        case CC_FERR_NOT_ENOUGH_MEMORY:
-            errorStr = "Not enough memory";
-            break;
-        case CC_FERR_MALFORMED_FILE:
-            errorStr = "Malformed file";
-            break;
-		case CC_FERR_BROKEN_DEPENDENCY_ERROR:
-            errorStr = "dependent entities missing (see Console)";
-			break;
-		case CC_FERR_CONSOLE_ERROR:
-			//error already sent!
-        default:
-            return; //no message will be displayed!
-    }
+	bool warning=false;
+	switch(err)
+	{
+	case CC_FERR_NO_ERROR:
+		return; //no message will be displayed!
+	case CC_FERR_BAD_ARGUMENT:
+		errorStr = "[internal] bad argument";
+		break;
+	case CC_FERR_UNKNOWN_FILE:
+		errorStr = "Unknown file";
+		break;
+	case CC_FERR_WRONG_FILE_TYPE:
+		errorStr = "Wrong file type (check header)";
+		break;
+	case CC_FERR_WRITING:
+		errorStr = "Writing error (disk full/no access right?)";
+		break;
+	case CC_FERR_READING:
+		errorStr = "Reading error (no access right?)";
+		break;
+	case CC_FERR_NO_SAVE:
+		errorStr = "Nothing to save";
+		break;
+	case CC_FERR_NO_LOAD:
+		errorStr = "Nothing to load";
+		break;
+	case CC_FERR_BAD_ENTITY_TYPE:
+		errorStr = "Incompatible entity/file types";
+		break;
+	case CC_FERR_CANCELED_BY_USER:
+		errorStr = "Process canceled by user";
+		warning=true;
+		break;
+	case CC_FERR_NOT_ENOUGH_MEMORY:
+		errorStr = "Not enough memory";
+		break;
+	case CC_FERR_MALFORMED_FILE:
+		errorStr = "Malformed file";
+		break;
+	case CC_FERR_BROKEN_DEPENDENCY_ERROR:
+		errorStr = "dependent entities missing (see Console)";
+		break;
+	case CC_FERR_CONSOLE_ERROR:
+		//error already sent!
+	default:
+		return; //no message will be displayed!
+	}
 
-    QString outputString = QString("An error occurred while %1 '%2': ").arg(action).arg(filename) + errorStr;
-    if (warning)
-        ccLog::Warning(outputString);
-    else
-        ccLog::Error(outputString);
+	QString outputString = QString("An error occurred while %1 '%2': ").arg(action).arg(filename) + errorStr;
+	if (warning)
+		ccLog::Warning(outputString);
+	else
+		ccLog::Error(outputString);
 }

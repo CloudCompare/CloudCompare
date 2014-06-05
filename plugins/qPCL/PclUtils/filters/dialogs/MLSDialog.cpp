@@ -33,11 +33,11 @@ MLSDialog::MLSDialog(QWidget *parent)
 
 void MLSDialog::updateCombo()
 {
-        this->upsampling_method->clear();
-        this->upsampling_method->addItem(QString("None"), QVariant(MLSParameters::NONE));
-        this->upsampling_method->addItem(QString("Sample Local Plane"), QVariant(MLSParameters::SAMPLE_LOCAL_PLANE));
-        this->upsampling_method->addItem(QString("Random Uniform Density"), QVariant(MLSParameters::RANDOM_UNIFORM_DENSITY));
-        this->upsampling_method->addItem(QString("Voxel Grid Dilation"), QVariant(MLSParameters::VOXEL_GRID_DILATION));
+	this->upsampling_method->clear();
+	this->upsampling_method->addItem(QString("None"), QVariant(MLSParameters::NONE));
+	this->upsampling_method->addItem(QString("Sample Local Plane"), QVariant(MLSParameters::SAMPLE_LOCAL_PLANE));
+	this->upsampling_method->addItem(QString("Random Uniform Density"), QVariant(MLSParameters::RANDOM_UNIFORM_DENSITY));
+	this->upsampling_method->addItem(QString("Voxel Grid Dilation"), QVariant(MLSParameters::VOXEL_GRID_DILATION));
 }
 
 void MLSDialog::activateMenu(QString name)

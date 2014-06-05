@@ -23,33 +23,33 @@
 //Qt
 #include <QStringList>
 
-/** \brief LoadPCD filter
- * \author Luca Penasa
- * Enables loading of some of the types defined in PCL \n
- * This class is an implementation of the PCLFilter base class. \n
- * Overridden methods are init(), openDialog() and compute() \n
- * \note conversion is made using the function sensorToCC()
- */
+//! LoadPCD filter
+/** \author Luca Penasa
+	Enables loading of some of the types defined in PCL.
+	This class is an implementation of the PCLFilter base class.
+	Overridden methods are init(), openDialog() and compute().
+	\note conversion is made using the function sensorToCC()
+**/
 class LoadPCD: public BaseFilter
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
 	//! Default constructor
-    LoadPCD();
+	LoadPCD();
 
 protected:
 
 	//inherited from BaseFilter
-    int checkSelected();
-    int openInputDialog();
-    int compute();
-    QString getErrorMessage(int errorCode);
+	int checkSelected();
+	int openInputDialog();
+	int compute();
+	QString getErrorMessage(int errorCode);
 
-    //! Filename(s) to open
-    QStringList m_filenames;
+	//! Filename(s) to open
+	QStringList m_filenames;
 
 };
 
-#endif
+#endif //Q_PCL_PLUGIN_LOADPCD_HEADER

@@ -62,7 +62,7 @@ ccPointCloud* ccHObjectCaster::ToPointCloud(ccHObject* obj, bool* lockedVertices
 		}
 	}
 
-    return 0;
+	return 0;
 }
 
 ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* lockedVertices /*= 0*/)
@@ -70,7 +70,7 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 	if (lockedVertices)
 		*lockedVertices = false;
 
-    if (obj)
+	if (obj)
 	{
 		if (obj->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
@@ -88,7 +88,7 @@ ccGenericPointCloud* ccHObjectCaster::ToGenericPointCloud(ccHObject* obj, bool* 
 		}
 	}
 
-    return 0;
+	return 0;
 }
 
 ccGenericMesh* ccHObjectCaster::ToGenericMesh(ccHObject* obj)

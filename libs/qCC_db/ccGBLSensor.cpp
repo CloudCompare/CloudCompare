@@ -38,29 +38,29 @@ ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=THETA_PHI*/)
 	, m_sensorRange(0)
 	, m_uncertainty((ScalarType)ZERO_TOLERANCE)
 {
-    //graphic representation
-    lockVisibility(false);
+	//graphic representation
+	lockVisibility(false);
 }
 
 ccGBLSensor::ccGBLSensor(const ccGBLSensor &sensor): ccSensor(sensor)
 {
-    this->m_phiMin = sensor.m_phiMin;
-    this->m_phiMax = sensor.m_phiMax;
-    this->m_deltaPhi = sensor.m_deltaPhi;
-    this->m_thetaMin = sensor.m_thetaMin;
-    this->m_thetaMax = sensor.m_thetaMax;
-    this->m_deltaTheta = sensor.m_deltaTheta;
-    this->m_rotationOrder = sensor.m_rotationOrder;
+	this->m_phiMin = sensor.m_phiMin;
+	this->m_phiMax = sensor.m_phiMax;
+	this->m_deltaPhi = sensor.m_deltaPhi;
+	this->m_thetaMin = sensor.m_thetaMin;
+	this->m_thetaMax = sensor.m_thetaMax;
+	this->m_deltaTheta = sensor.m_deltaTheta;
+	this->m_rotationOrder = sensor.m_rotationOrder;
 
-    this->m_sensorRange = sensor.m_sensorRange;
-    this->m_uncertainty = sensor.m_uncertainty;
+	this->m_sensorRange = sensor.m_sensorRange;
+	this->m_uncertainty = sensor.m_uncertainty;
 
-    //! we cannot simply copy the depth buffer
-    // we setup a NULL depthbuffer - it must be recomputed using project
-    this->m_depthBuffer = DepthBuffer();
-    this->m_depthBuffer.zBuff = 0;
-    this->m_depthBuffer.width = 0;
-    this->m_depthBuffer.height = 0;
+	//! we cannot simply copy the depth buffer
+	// we setup a NULL depthbuffer - it must be recomputed using project
+	this->m_depthBuffer = DepthBuffer();
+	this->m_depthBuffer.zBuff = 0;
+	this->m_depthBuffer.width = 0;
+	this->m_depthBuffer.height = 0;
 }
 
 ccGBLSensor::~ccGBLSensor()
@@ -494,21 +494,21 @@ uchar ccGBLSensor::checkVisibility(const CCVector3& P) const
 
 void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
-    //we draw here a little 3d representation of the sensor
-    if (MACRO_Draw3D(context))
-    {
-        bool pushName = MACRO_DrawEntityNames(context);
+	//we draw here a little 3d representation of the sensor
+	if (MACRO_Draw3D(context))
+	{
+		bool pushName = MACRO_DrawEntityNames(context);
 
-        if (pushName)
+		if (pushName)
 		{
 			//not particulary fast
 			if (MACRO_DrawFastNamesOnly(context))
 				return;
-            glPushName(getUniqueIDForDisplay());
+			glPushName(getUniqueIDForDisplay());
 		}
 
 		//DGM FIXME: this display routine is crap!
-		
+
 		//apply rigid transformation
 		glMatrixMode(GL_MODELVIEW);
 		glPushMatrix();
@@ -522,38 +522,38 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 					glPopName();
 				return;
 			}
-				
+
 			glMultMatrixf(sensorPos.data());
 		}
 
 		//sensor head
-        const PointCoordinateType halfHeadSize = static_cast<PointCoordinateType>(0.3);
-        CCVector3 minCorner(-halfHeadSize,-halfHeadSize,-halfHeadSize);
-        CCVector3 maxCorner(halfHeadSize,halfHeadSize,halfHeadSize);
-        minCorner *= m_scale;
-        maxCorner *= m_scale;
-        ccBBox bbHead(minCorner,maxCorner);
-        CCVector3 headCenter(0,0,(1-halfHeadSize)*m_scale);
-        bbHead += headCenter;
-        bbHead.draw(m_color.u);
+		const PointCoordinateType halfHeadSize = static_cast<PointCoordinateType>(0.3);
+		CCVector3 minCorner(-halfHeadSize,-halfHeadSize,-halfHeadSize);
+		CCVector3 maxCorner(halfHeadSize,halfHeadSize,halfHeadSize);
+		minCorner *= m_scale;
+		maxCorner *= m_scale;
+		ccBBox bbHead(minCorner,maxCorner);
+		CCVector3 headCenter(0,0,(1-halfHeadSize)*m_scale);
+		bbHead += headCenter;
+		bbHead.draw(m_color.u);
 
-        //sensor legs
-        CCVector3 headConnect = headCenter - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
+		//sensor legs
+		CCVector3 headConnect = headCenter - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
 		glColor3ubv(m_color.u);
-        glBegin(GL_LINES);
-        ccGL::Vertex3v(headConnect.u);
-        ccGL::Vertex3(-m_scale,-m_scale,-m_scale);
-        ccGL::Vertex3v(headConnect.u);
-        ccGL::Vertex3(-m_scale,m_scale,-m_scale);
-        ccGL::Vertex3v(headConnect.u);
-        ccGL::Vertex3(m_scale,0,-m_scale);
-        glEnd();
+		glBegin(GL_LINES);
+		ccGL::Vertex3v(headConnect.u);
+		ccGL::Vertex3(-m_scale,-m_scale,-m_scale);
+		ccGL::Vertex3v(headConnect.u);
+		ccGL::Vertex3(-m_scale,m_scale,-m_scale);
+		ccGL::Vertex3v(headConnect.u);
+		ccGL::Vertex3(m_scale,0,-m_scale);
+		glEnd();
 
-        if (pushName)
-            glPopName();
+		if (pushName)
+			glPopName();
 
 		glPopMatrix();
-    }
+	}
 }
 
 ccBBox ccGBLSensor::getMyOwnBB()
@@ -565,7 +565,7 @@ ccBBox ccGBLSensor::getMyOwnBB()
 
 	//CCVector3 center = sensorPos.getTranslationAsVec3D();
 
- //   return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
+	//return ccBBox(center + CCVector3(-1,-1,-1) * m_scale,
 	//				center + CCVector3( 1, 1, 1) * m_scale);
 }
 
@@ -578,7 +578,7 @@ ccBBox ccGBLSensor::getDisplayBB()
 
 	CCVector3 center = sensorPos.getTranslationAsVec3D();
 
-    return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
+	return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
 					center + CCVector3( 1, 1, 1) * m_scale);
 }
 

@@ -18,26 +18,26 @@
 #include "ccPtsSamplingDlg.h"
 
 ccPtsSamplingDlg::ccPtsSamplingDlg(QWidget* parent/*=0*/)
-    : QDialog(parent), Ui::PointsSamplingDialog()
+	: QDialog(parent), Ui::PointsSamplingDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 bool ccPtsSamplingDlg::generateNormals() const
 {
-    return normalsCheckBox->isChecked();
+	return normalsCheckBox->isChecked();
 }
 
 bool ccPtsSamplingDlg::interpolateRGB() const
 {
-    return colorsCheckBox->isChecked();
+	return colorsCheckBox->isChecked();
 }
 
 bool ccPtsSamplingDlg::interpolateTexture() const
 {
-    return textureCheckBox->isChecked();
+	return textureCheckBox->isChecked();
 }
 
 bool ccPtsSamplingDlg::useDensity() const
@@ -47,7 +47,7 @@ bool ccPtsSamplingDlg::useDensity() const
 
 double ccPtsSamplingDlg::getDensityValue() const
 {
-    return dDoubleSpinBox->value();
+	return dDoubleSpinBox->value();
 }
 
 void ccPtsSamplingDlg::setDensityValue(double density)
@@ -57,7 +57,7 @@ void ccPtsSamplingDlg::setDensityValue(double density)
 
 unsigned ccPtsSamplingDlg::getPointsNumber() const
 {
-    return pnSpinBox->value();
+	return pnSpinBox->value();
 }
 
 void ccPtsSamplingDlg::setPointsNumber(int count)

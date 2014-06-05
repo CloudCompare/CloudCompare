@@ -39,7 +39,7 @@ static ccLog* s_instance = 0;
 
 ccLog* ccLog::TheInstance()
 {
-    return s_instance;
+	return s_instance;
 }
 
 void ccLog::RegisterInstance(ccLog* logInstance)

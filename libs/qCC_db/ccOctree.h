@@ -19,6 +19,7 @@
 #define CC_OCTREE_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 
 //CCLib
@@ -46,12 +47,7 @@ const CC_OCTREE_DISPLAY_TYPE OCTREE_DISPLAY_TYPE_ENUMS[OCTREE_DISPLAY_TYPE_NUMBE
 const char COCTREE_DISPLAY_TYPE_TITLES[OCTREE_DISPLAY_TYPE_NUMBERS][18]				=	{"Wire","Points","Plain cubes"};
 
 //! Octree level editor dialog
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccOctreeSpinBox : public QSpinBox
-#else
-class ccOctreeSpinBox : public QSpinBox
-#endif
 {
 	Q_OBJECT
 
@@ -85,12 +81,7 @@ protected:
 //! Octree structure
 /** Extends the CCLib::DgmOctree class.
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccOctree : public CCLib::DgmOctree, public ccHObject
-#else
-class ccOctree : public CCLib::DgmOctree, public ccHObject
-#endif
 {
 public:
 
@@ -117,8 +108,8 @@ public:
 	**/
 	void translateBoundingBox(const CCVector3& T);
 
-    //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_OCTREE; }
+	//! Returns class ID
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_OCTREE; }
 
 	int getDisplayedLevel() const { return m_displayedLevel; }
 	void setDisplayedLevel(int level);
@@ -129,22 +120,22 @@ public:
 	//inherited from DgmOctree
 	virtual void clear();
 
-    //Inherited from ccHObject
-    virtual ccBBox getMyOwnBB();
-    virtual ccBBox getDisplayBB();
+	//Inherited from ccHObject
+	virtual ccBBox getMyOwnBB();
+	virtual ccBBox getDisplayBB();
 
 	/*** RENDERING METHODS ***/
 
-	static void RenderOctreeAs(CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
-                                ccOctree* theOctree,
-                                unsigned char level,
-                                ccGenericPointCloud* theAssociatedCloud,
-                                int &octreeGLListID,
-                                bool updateOctreeGLDisplay=true);
+	static void RenderOctreeAs(	CC_OCTREE_DISPLAY_TYPE octreeDisplayType,
+								ccOctree* theOctree,
+								unsigned char level,
+								ccGenericPointCloud* theAssociatedCloud,
+								int &octreeGLListID,
+								bool updateOctreeGLDisplay = true);
 
 	static void ComputeAverageColor(CCLib::ReferenceCloud* subset,
-                                    ccGenericPointCloud* sourceCloud,
-                                    colorType meanCol[]);
+									ccGenericPointCloud* sourceCloud,
+									colorType meanCol[]);
 
 	static CCVector3 ComputeAverageNorm(CCLib::ReferenceCloud* subset,
 										ccGenericPointCloud* sourceCloud);
@@ -155,28 +146,28 @@ public:
 
 protected:
 
-    //Inherited from ccHObject
-    void drawMeOnly(CC_DRAW_CONTEXT& context);
+	//Inherited from ccHObject
+	void drawMeOnly(CC_DRAW_CONTEXT& context);
 
 	/*** RENDERING METHODS ***/
 
-	static bool DrawCellAsABox(const CCLib::DgmOctree::octreeCell& cell,
-                                void** additionalParameters,
+	static bool DrawCellAsABox(	const CCLib::DgmOctree::octreeCell& cell,
+								void** additionalParameters,
 								CCLib::NormalizedProgress* nProgress = 0);
 
-	static bool DrawCellAsAPoint(const CCLib::DgmOctree::octreeCell& cell,
-                                    void** additionalParameters,
+	static bool DrawCellAsAPoint(	const CCLib::DgmOctree::octreeCell& cell,
+									void** additionalParameters,
 									CCLib::NormalizedProgress* nProgress = 0);
 
-	static bool DrawCellAsAPrimitive(const CCLib::DgmOctree::octreeCell& cell,
-                                        void** additionalParameters,
+	static bool DrawCellAsAPrimitive(	const CCLib::DgmOctree::octreeCell& cell,
+										void** additionalParameters,
 										CCLib::NormalizedProgress* nProgress = 0);
 
-    ccGenericPointCloud* m_associatedCloud;
-    CC_OCTREE_DISPLAY_TYPE m_displayType;
-    int m_displayedLevel;
-    int m_glListID;
-    bool m_shouldBeRefreshed;
+	ccGenericPointCloud* m_associatedCloud;
+	CC_OCTREE_DISPLAY_TYPE m_displayType;
+	int m_displayedLevel;
+	int m_glListID;
+	bool m_shouldBeRefreshed;
 
 	ccOctreeFrustrumIntersector* m_frustrumIntersector;
 

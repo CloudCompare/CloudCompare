@@ -18,27 +18,20 @@
 #ifndef GENERIC_OCTREE_HEADER
 #define GENERIC_OCTREE_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "CCGeom.h"
 
 namespace CCLib
 {
 
 //! A generic octree interface for data communication between library and client applications
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API GenericOctree
-#else
-class GenericOctree
-#endif
 {
 public:
 
 	//! Default destructor
-    virtual ~GenericOctree() {};
-
-
+    virtual ~GenericOctree() {}
 };
 
 }

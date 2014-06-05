@@ -116,13 +116,13 @@ void qRansacSD::doAction()
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	size_t selNum = selectedEntities.size();
-    if (selNum!=1)
+	if (selNum!=1)
 	{
 		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
-    ccHObject* ent = selectedEntities[0];
+	ccHObject* ent = selectedEntities[0];
 	assert(ent);
 	if (!ent || !ent->isA(CC_TYPES::POINT_CLOUD))
 	{
@@ -130,17 +130,17 @@ void qRansacSD::doAction()
 		return;
 	}
 
-    ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
+	ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
 
 	//input cloud
 	size_t count = (size_t)pc->size();
 	bool hasNorms = pc->hasNormals();
-    PointCoordinateType bbMin[3],bbMax[3];
-    pc->getBoundingBox(bbMin,bbMax);
+	PointCoordinateType bbMin[3],bbMax[3];
+	pc->getBoundingBox(bbMin,bbMax);
 	const CCVector3d& globalShift = pc->getGlobalShift();
 	double globalScale = pc->getGlobalScale();
 
-    //Convert CC point cloud to RANSAC_SD type
+	//Convert CC point cloud to RANSAC_SD type
 	PointCloud cloud;
 	{
 		try
@@ -185,7 +185,7 @@ void qRansacSD::doAction()
 		cloud.setBBox(cbbMin,cbbMax);
 	}
 
-    //cloud scale (useful for setting several parameters
+	//cloud scale (useful for setting several parameters
 	const float scale = cloud.getScale();
 
 	//init dialog with default values
@@ -272,8 +272,8 @@ void qRansacSD::doAction()
 		}
 	}
 
-    // set which primitives are to be detected by adding the respective constructors
-    RansacShapeDetector detector(ransacOptions); // the detector object
+	// set which primitives are to be detected by adding the respective constructors
+	RansacShapeDetector detector(ransacOptions); // the detector object
 
 	if (rsdDlg.planeCheckBox->isChecked())
 		detector.Add(new PlanePrimitiveShapeConstructor());
@@ -290,7 +290,7 @@ void qRansacSD::doAction()
 	typedef std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > DetectedShape;
 	MiscLib::Vector< DetectedShape > shapes; // stores the detected shapes
 
-    // run detection
+	// run detection
 	// returns number of unassigned points
 	// the array shapes is filled with pointers to the detected shapes
 	// the second element per shapes gives the number of points assigned to that primitive (the support)
@@ -336,38 +336,38 @@ void qRansacSD::doAction()
 #ifdef _DEBUG
 	FILE* fp = fopen("RANS_SD_trace.txt","wt");
 
-    fprintf(fp,"[Options]\n");
-    fprintf(fp,"epsilon=%f\n",ransacOptions.m_epsilon);
-    fprintf(fp,"bitmap epsilon=%f\n",ransacOptions.m_bitmapEpsilon);
-    fprintf(fp,"normal thresh=%f\n",ransacOptions.m_normalThresh);
-    fprintf(fp,"min support=%i\n",ransacOptions.m_minSupport);
-    fprintf(fp,"probability=%f\n",ransacOptions.m_probability);
+	fprintf(fp,"[Options]\n");
+	fprintf(fp,"epsilon=%f\n",ransacOptions.m_epsilon);
+	fprintf(fp,"bitmap epsilon=%f\n",ransacOptions.m_bitmapEpsilon);
+	fprintf(fp,"normal thresh=%f\n",ransacOptions.m_normalThresh);
+	fprintf(fp,"min support=%i\n",ransacOptions.m_minSupport);
+	fprintf(fp,"probability=%f\n",ransacOptions.m_probability);
 
-    fprintf(fp,"\n[Statistics]\n");
+	fprintf(fp,"\n[Statistics]\n");
 	fprintf(fp,"input points=%i\n",count);
 	fprintf(fp,"segmented=%i\n",count-remaining);
 	fprintf(fp,"remaining=%i\n",remaining);
 
-    if (shapes.size()>0)
-    {
-        fprintf(fp,"\n[Shapes]\n");
-        for (unsigned i=0;i<shapes.size();++i)
-        {
-            PrimitiveShape* shape = shapes[i].first;
-            size_t shapePointsCount = shapes[i].second;
+	if (shapes.size()>0)
+	{
+		fprintf(fp,"\n[Shapes]\n");
+		for (unsigned i=0;i<shapes.size();++i)
+		{
+			PrimitiveShape* shape = shapes[i].first;
+			size_t shapePointsCount = shapes[i].second;
 
-            std::string desc;
-            shape->Description(&desc);
-            fprintf(fp,"#%i - %s - %i points\n",i+1,desc.c_str(),shapePointsCount);
-        }
-    }
+			std::string desc;
+			shape->Description(&desc);
+			fprintf(fp,"#%i - %s - %i points\n",i+1,desc.c_str(),shapePointsCount);
+		}
+	}
 	fclose(fp);
 #endif
 
 	if (remaining == count)
 	{
 		m_app->dispToConsole("Segmentation failed...",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-        return;
+		return;
 	}
 
 	if (shapes.size() > 0)
@@ -633,7 +633,7 @@ void qRansacSD::doAction()
 
 QIcon qRansacSD::getIcon() const
 {
-    return QIcon(QString::fromUtf8(":/CC/plugin/qRANSAC_SD/qRANSAC_SD.png"));
+	return QIcon(QString::fromUtf8(":/CC/plugin/qRANSAC_SD/qRANSAC_SD.png"));
 }
 
 #ifndef CC_QT5

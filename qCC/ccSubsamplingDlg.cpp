@@ -32,21 +32,21 @@
 static const double SPACE_RANGE_EXPONENT = 0.05;
 
 ccSubsamplingDlg::ccSubsamplingDlg(unsigned maxPointCount, double maxCloudRadius, QWidget* parent/*=0*/)
-    : QDialog(parent)
+	: QDialog(parent)
 	, Ui::SubsamplingDialog()
 	, m_maxPointCount(maxPointCount)
 	, m_maxRadius(maxCloudRadius)
 {
-    setupUi(this);
-    setWindowFlags(Qt::Tool);
+	setupUi(this);
+	setWindowFlags(Qt::Tool);
 
-    samplingMethod->addItem("Random");
-    samplingMethod->addItem("Space");
-    samplingMethod->addItem("Octree");
+	samplingMethod->addItem("Random");
+	samplingMethod->addItem("Space");
+	samplingMethod->addItem("Octree");
 
-    connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
-    connect(samplingValue, SIGNAL(valueChanged(double)), this, SLOT(samplingRateChanged(double)));
-    connect(samplingMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSamplingMethod(int)));
+	connect(slider, SIGNAL(sliderMoved(int)), this, SLOT(sliderMoved(int)));
+	connect(samplingValue, SIGNAL(valueChanged(double)), this, SLOT(samplingRateChanged(double)));
+	connect(samplingMethod, SIGNAL(currentIndexChanged(int)), this, SLOT(changeSamplingMethod(int)));
 
 	samplingMethod->setCurrentIndex(1);
 	sliderMoved(slider->sliderPosition());
@@ -111,98 +111,98 @@ CCLib::ReferenceCloud* ccSubsamplingDlg::getSampledCloud(ccGenericPointCloud* cl
 
 void ccSubsamplingDlg::updateLabels()
 {
-    switch(samplingMethod->currentIndex())
-    {
-        case RANDOM:
-            labelSliderMin->setText("None");
-            labelSliderMax->setText("All");
-            valueLabel->setText("remaining points");
-            break;
-        case SPACE:
-            labelSliderMin->setText("Large");
-            labelSliderMax->setText("Small");
-            valueLabel->setText("min. space between points");
-            break;
-        case OCTREE:
-            labelSliderMin->setText("Min");
-            labelSliderMax->setText("Max");
-            valueLabel->setText("subdivision level");
-            break;
-        default:
-            break;
-    }
+	switch(samplingMethod->currentIndex())
+	{
+	case RANDOM:
+		labelSliderMin->setText("None");
+		labelSliderMax->setText("All");
+		valueLabel->setText("remaining points");
+		break;
+	case SPACE:
+		labelSliderMin->setText("Large");
+		labelSliderMax->setText("Small");
+		valueLabel->setText("min. space between points");
+		break;
+	case OCTREE:
+		labelSliderMin->setText("Min");
+		labelSliderMax->setText("Max");
+		valueLabel->setText("subdivision level");
+		break;
+	default:
+		break;
+	}
 }
 
 void ccSubsamplingDlg::sliderMoved(int sliderPos)
 {
 	double sliderRange = static_cast<double>(slider->maximum()-slider->minimum());
-    double rate = static_cast<double>(sliderPos)/sliderRange;
-    if (samplingMethod->currentIndex() == SPACE)
+	double rate = static_cast<double>(sliderPos)/sliderRange;
+	if (samplingMethod->currentIndex() == SPACE)
 	{
 		rate = pow(rate, SPACE_RANGE_EXPONENT);
-        rate = 1.0 - rate;
+		rate = 1.0 - rate;
 	}
 
 	double valueRange = static_cast<double>(samplingValue->maximum()-samplingValue->minimum());
-    samplingValue->setValue(samplingValue->minimum() + rate * valueRange);
+	samplingValue->setValue(samplingValue->minimum() + rate * valueRange);
 }
 
 void ccSubsamplingDlg::samplingRateChanged(double value)
 {
 	double valueRange = static_cast<double>(samplingValue->maximum()-samplingValue->minimum());
-    double rate = static_cast<double>(value-samplingValue->minimum())/valueRange;
+	double rate = static_cast<double>(value-samplingValue->minimum())/valueRange;
 
-    CC_SUBSAMPLING_METHOD method = static_cast<CC_SUBSAMPLING_METHOD>(samplingMethod->currentIndex());
-    if (method == SPACE)
+	CC_SUBSAMPLING_METHOD method = static_cast<CC_SUBSAMPLING_METHOD>(samplingMethod->currentIndex());
+	if (method == SPACE)
 	{
-        rate = 1.0 - rate;
+		rate = 1.0 - rate;
 		rate = pow(rate, 1.0/SPACE_RANGE_EXPONENT);
 	}
 
 	slider->blockSignals(true);
 	double sliderRange = static_cast<double>(slider->maximum()-slider->minimum());
-    slider->setSliderPosition(slider->minimum() + static_cast<int>(rate * sliderRange));
+	slider->setSliderPosition(slider->minimum() + static_cast<int>(rate * sliderRange));
 	slider->blockSignals(false);
 }
 
 void ccSubsamplingDlg::changeSamplingMethod(int index)
 {
-    int oldSliderPos = slider->sliderPosition();
+	int oldSliderPos = slider->sliderPosition();
 
-    //update the labels
+	//update the labels
 	samplingValue->blockSignals(true);
-    switch(index)
-    {
-        case RANDOM:
-			{
-				samplingValue->setDecimals(0);
-				samplingValue->setMinimum(1);
-				samplingValue->setMaximum(static_cast<double>(m_maxPointCount));
-				samplingValue->setSingleStep(1);
-			}
-            break;
-        case SPACE:
-			{
-				samplingValue->setDecimals(4);
-				samplingValue->setMinimum(0.0);
-				samplingValue->setMaximum(m_maxRadius);
-				samplingValue->setSingleStep(m_maxRadius / 1000.0);
-			}
-            break;
-        case OCTREE:
-			{
-				samplingValue->setDecimals(0);
-				samplingValue->setMinimum(1);
-				samplingValue->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
-				samplingValue->setSingleStep(1);
-			}
-            break;
-        default:
-            break;
-    }
+	switch(index)
+	{
+	case RANDOM:
+		{
+			samplingValue->setDecimals(0);
+			samplingValue->setMinimum(1);
+			samplingValue->setMaximum(static_cast<double>(m_maxPointCount));
+			samplingValue->setSingleStep(1);
+		}
+		break;
+	case SPACE:
+		{
+			samplingValue->setDecimals(4);
+			samplingValue->setMinimum(0.0);
+			samplingValue->setMaximum(m_maxRadius);
+			samplingValue->setSingleStep(m_maxRadius / 1000.0);
+		}
+		break;
+	case OCTREE:
+		{
+			samplingValue->setDecimals(0);
+			samplingValue->setMinimum(1);
+			samplingValue->setMaximum(static_cast<double>(CCLib::DgmOctree::MAX_OCTREE_LEVEL));
+			samplingValue->setSingleStep(1);
+		}
+		break;
+	default:
+		break;
+	}
 	samplingValue->blockSignals(false);
 
-    updateLabels();
-    //slider->setSliderPosition(oldSliderPos);
+	updateLabels();
+	//slider->setSliderPosition(oldSliderPos);
 	sliderMoved(oldSliderPos);
 }

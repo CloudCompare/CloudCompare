@@ -19,6 +19,7 @@
 #define CC_CAMERA_SENSOR_HEADER
 
 //local
+#include "qCC_db.h"
 #include "ccSensor.h"
 #include "ccOctree.h"
 
@@ -31,12 +32,7 @@
 #include <assert.h>
 
 //! Camera (projective) sensor
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccCameraSensor : public ccSensor
-#else
-class ccCameraSensor :	public ccSensor
-#endif
 {
 public:
 
@@ -196,11 +192,11 @@ public:
 	void filterOctree(ccOctree* octree, std::vector<unsigned>& inCameraFrustrum);
 	
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CAMERA_SENSOR; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CAMERA_SENSOR; }
 	virtual bool isSerializable() const { return true; }
-    virtual ccBBox getMyOwnBB();
-    //virtual ccBBox getDisplayBB();
-	
+	virtual ccBBox getMyOwnBB();
+	//virtual ccBBox getDisplayBB();
+
 	//! Compute the coefficients of the 6 planes frustrum in the global coordinates system (normal vector are headed the frustrum inside), the edges direction vectors and the frustrum center
 	/** \param planeCoefficients coefficients of the six planes
 		\param edges direction vectors of the frustrum edges (there are 12 edges but some of them are colinear)

@@ -15,6 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
+#ifdef QCC_DB_USE_AS_DLL
 // The following ifdef block is the standard way of creating macros which make exporting
 // from a DLL simpler. All files within this DLL are compiled with the QCC_DB_DLL_EXPORTS
 // symbol defined on the command line. this symbol should not be defined on any project
@@ -25,4 +26,7 @@
 #define QCC_DB_LIB_API __declspec(dllexport)
 #else
 #define QCC_DB_LIB_API __declspec(dllimport)
+#endif
+#else
+#define QCC_DB_LIB_API
 #endif

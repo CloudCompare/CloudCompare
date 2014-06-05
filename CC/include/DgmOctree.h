@@ -18,7 +18,8 @@
 #ifndef DGM_OCTREE_HEADER
 #define DGM_OCTREE_HEADER
 
-//local
+//Local
+#include "CCCoreLib.h"
 #include "GenericOctree.h"
 #include "CCTypes.h"
 #include "CCConst.h"
@@ -28,12 +29,6 @@
 #include <vector>
 #include <assert.h>
 #include <string.h>
-
-#ifdef _MSC_VER
-//To get rid of the really annoying warnings about template class exportation
-#pragma warning( disable: 4251 )
-#pragma warning( disable: 4530 )
-#endif
 
 //enabled 64 bits code octree (can go up to level 21, but take 50% more memory)
 //#define OCTREE_CODES_64_BITS
@@ -73,12 +68,7 @@ class GenericIndexedCloudPersist;
 	Corresponds to the octree structure developed during Daniel
 	Girardeau-Montaut's PhD (see PhD manuscript, Chapter 4).
 **/
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API DgmOctree : public GenericOctree
-#else
-class DgmOctree : public GenericOctree
-#endif
 {
 public:
 
@@ -117,11 +107,11 @@ public:
 
 	//! Structure used during nearest neighbour search
 	/** Association between a point, its index and its square distance to the query point.
-        It has a comparison operator for fast sorting (stdlib).
+		It has a comparison operator for fast sorting (stdlib).
 	**/
 	struct PointDescriptor
 	{
-	    //! Point
+		//! Point
 		const CCVector3* point;
 		//! Point index
 		unsigned pointIndex;
@@ -152,24 +142,24 @@ public:
 		{
 		}
 
-        //! Comparison operator
-        /** \param a point A
-            \param b point B
-            \return whether the square distance associated to A is smaller than the square distance associated to B
-        **/
+		//! Comparison operator
+		/** \param a point A
+			\param b point B
+			\return whether the square distance associated to A is smaller than the square distance associated to B
+		**/
 		static bool distComp(const PointDescriptor& a, const PointDescriptor& b)
 		{
 			return a.squareDistd < b.squareDistd;
 		}
 	};
 
-    //! A set of neighbours
+	//! A set of neighbours
 	typedef std::vector<PointDescriptor> NeighboursSet;
 
 	//! Structure used during nearest neighbour search
 	struct CellDescriptor
 	{
-	    //! Cell center
+		//! Cell center
 		CCVector3 center;
 		//! First point index in associated NeighboursSet
 		unsigned index;
@@ -330,9 +320,9 @@ public:
 	**/
 	struct IndexAndCode
 	{
-        //! index
+		//! index
 		unsigned theIndex;
-	    //! cell code
+		//! cell code
 		OctreeCellCodeType theCode;
 
 		//! Default constructor
@@ -381,25 +371,25 @@ public:
 	//! Container of 'IndexAndCode' structures
 	typedef std::vector<IndexAndCode> cellsContainer;
 
-    //! Octree cell descriptor
+	//! Octree cell descriptor
 	struct octreeCell
 	{
-	    //! Octree to which the cell belongs
-	    const DgmOctree* parentOctree;
-	    //! Cell level of subdivision
-	    uchar level;
-	    //! Truncated cell code
-	    OctreeCellCodeType truncatedCode;
-	    //! Cell index in octree structure (see m_thePointsAndTheirCellCodes)
-	    unsigned index;
-	    //! Set of points lying inside this cell
-        ReferenceCloud* points;
+		//! Octree to which the cell belongs
+		const DgmOctree* parentOctree;
+		//! Cell level of subdivision
+		uchar level;
+		//! Truncated cell code
+		OctreeCellCodeType truncatedCode;
+		//! Cell index in octree structure (see m_thePointsAndTheirCellCodes)
+		unsigned index;
+		//! Set of points lying inside this cell
+		ReferenceCloud* points;
 
-        //! Default constructor
-        octreeCell(DgmOctree* parentOctree);
+		//! Default constructor
+		octreeCell(DgmOctree* parentOctree);
 
-        //! Default destructor
-        virtual ~octreeCell();
+		//! Default destructor
+		virtual ~octreeCell();
 	};
 
 	//! Generic form of a function that can be applied automatically to all cells of the octree
@@ -500,28 +490,28 @@ public:
 	**/
 	inline const PointCoordinateType& getCellSize(uchar level) const { return m_cellSize[level]; }
 
-    //! Returns distance form a cell to the filled octree borders in all directions.
+	//! Returns distance form a cell to the filled octree borders in all directions.
 	/** WARNING: distance values may be negative! (if cell is outside
 		\param cellPos cell position
-        \param level level at which octree grid is considered
-        \param cellDists output
-    **/
-    void getCellDistanceFromBorders(const int* cellPos,
-                                    uchar level,
-                                    int* cellDists) const;
+		\param level level at which octree grid is considered
+		\param cellDists output
+	**/
+	void getCellDistanceFromBorders(const int* cellPos,
+									uchar level,
+									int* cellDists) const;
 
-    //! Returns distance from cell center to cell neighbourhood INSIDE filled octree
+	//! Returns distance from cell center to cell neighbourhood INSIDE filled octree
 	/** WARNING: if cell neighbourhood is totally outside filled octree,
 		the method returns false and cellDists is invalid.
 		\param cellPos center cell position
-        \param level level at which octree grid is considered
-        \param neighbourhoodLength cell neighbourhood "radius"
-        \param cellDists output
-    **/
-    void getCellDistanceFromBorders(const int* cellPos,
-                                    uchar level,
-                                    int neighbourhoodLength,
-                                    int* cellDists) const;
+		\param level level at which octree grid is considered
+		\param neighbourhoodLength cell neighbourhood "radius"
+		\param cellDists output
+	**/
+	void getCellDistanceFromBorders(const int* cellPos,
+									uchar level,
+									int neighbourhoodLength,
+									int* cellDists) const;
 
 	//! Returns the points lying in a specific cell
 	/** Each cell at a given level of subdivision can be recognized by the index
@@ -626,9 +616,9 @@ public:
 		\param sortValues specifies if the neighbours needs to be sorted by their distance to the query point or not
 		\return the number of neighbours found
 	**/
-	int findNeighborsInASphereStartingFromCell(NearestNeighboursSphericalSearchStruct &nNSS,
-                                                double radius,
-                                                bool sortValues = true) const;
+	int findNeighborsInASphereStartingFromCell(	NearestNeighboursSphericalSearchStruct &nNSS,
+												double radius,
+												bool sortValues = true) const;
 
 	//deprecated
 	//int getPointsInSphericalNeighbourhood(const CCVector3& sphereCenter, PointCoordinateType radius, NeighboursSet& neighbours) const;
@@ -939,8 +929,8 @@ public:
 
 	//! Computes mean octree density (point/cell) at a given level of subdivision
 	/** \param level the level of subdivision
-        \return mean density (point/cell)
-    **/
+		\return mean density (point/cell)
+	**/
 	double computeMeanOctreeDensity(uchar level) const;
 
 	//! Computes the minimal distance between a point and the borders (faces) of the cell (cube) in which it is included
@@ -1017,13 +1007,13 @@ public:
 		\param functionTitle function title
 		\return the number of processed cells (or 0 is something went wrong)
 	**/
-	unsigned executeFunctionForAllCellsAtStartingLevel(uchar startingLevel,
-                                                        octreeCellFunc func,
-                                                        void** additionalParameters,
+	unsigned executeFunctionForAllCellsAtStartingLevel(	uchar startingLevel,
+														octreeCellFunc func,
+														void** additionalParameters,
 														unsigned minNumberOfPointsPerCell,
-                                                        unsigned maxNumberOfPointsPerCell,
-                                                        GenericProgressCallback* progressCb = 0,
-                                                        const char* functionTitle = 0);
+														unsigned maxNumberOfPointsPerCell,
+														GenericProgressCallback* progressCb = 0,
+														const char* functionTitle = 0);
 
 	//! Method to apply automatically a specific function to each cell of the octree
 	/** The function to apply should be of the form DgmOctree::octreeCellFunc. In this case
@@ -1035,11 +1025,11 @@ public:
 		\param functionTitle function title
 		\return the number of processed cells (or 0 is something went wrong)
 	**/
-	unsigned executeFunctionForAllCellsAtLevel(uchar level,
-                                                octreeCellFunc func,
-                                                void** additionalParameters,
-                                                GenericProgressCallback* progressCb = 0,
-                                                const char* functionTitle = 0);
+	unsigned executeFunctionForAllCellsAtLevel(	uchar level,
+												octreeCellFunc func,
+												void** additionalParameters,
+												GenericProgressCallback* progressCb = 0,
+												const char* functionTitle = 0);
 
 #ifdef ENABLE_MT_OCTREE
 	//! Multi-threaded version of executeFunctionForAllCellsAtLevel
@@ -1058,25 +1048,25 @@ public:
 		computation on as much cores on the system.
 		\return the number of processed cells (or 0 is something went wrong)
 	**/
-	unsigned executeFunctionForAllCellsAtStartingLevel_MT(uchar level,
-                                                        octreeCellFunc func,
-                                                        void** additionalParameters,
-														unsigned minNumberOfPointsPerCell,
-                                                        unsigned maxNumberOfPointsPerCell,
-                                                        GenericProgressCallback* progressCb = 0,
-                                                        const char* functionTitle = 0);
+	unsigned executeFunctionForAllCellsAtStartingLevel_MT(	uchar level,
+															octreeCellFunc func,
+															void** additionalParameters,
+															unsigned minNumberOfPointsPerCell,
+															unsigned maxNumberOfPointsPerCell,
+															GenericProgressCallback* progressCb = 0,
+															const char* functionTitle = 0);
 #endif
 
 	//! Returns the associated cloud
 	inline GenericIndexedCloudPersist* associatedCloud() const
 	{
-	    return m_theAssociatedCloud;
+		return m_theAssociatedCloud;
 	}
 
-    //! Returns the octree 'structure'
+	//! Returns the octree 'structure'
 	const cellsContainer& pointsAndTheirCellCodes() const
 	{
-	    return m_thePointsAndTheirCellCodes;
+		return m_thePointsAndTheirCellCodes;
 	}
 
 protected:
@@ -1088,7 +1078,7 @@ protected:
 	//! Internal structure used to perform a top-down scan of the octree
 	struct octreeTopDownScanStruct
 	{
-	    //! Cell position inside subdivision level
+		//! Cell position inside subdivision level
 		unsigned pos;
 		//! Number of points in cell
 		unsigned elements;
@@ -1103,7 +1093,7 @@ protected:
 	//! The coded octree structure
 	cellsContainer m_thePointsAndTheirCellCodes;
 
-    //! Associated cloud
+	//! Associated cloud
 	GenericIndexedCloudPersist* m_theAssociatedCloud;
 
 	//! Number of points projected in the octree

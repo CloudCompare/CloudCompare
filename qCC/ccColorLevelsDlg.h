@@ -29,17 +29,17 @@ class ccGenericPointCloud;
 //! Dialog to change the color levels
 class ccColorLevelsDlg : public QDialog, public Ui::ColorLevelsDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
 	//! Default constructor
-    ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCloud);
+	ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCloud);
 
 protected slots:
 
-    void onChannelChanged(int);
-    void onApply();
+	void onChannelChanged(int);
+	void onApply();
 
 protected:
 

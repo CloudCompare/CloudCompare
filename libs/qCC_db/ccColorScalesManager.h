@@ -19,18 +19,14 @@
 #define CC_COLOR_SCALES_MANAGER_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccColorScale.h"
 
 //Qt
 #include <QMap>
 
 //! Color scales manager/container
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccColorScalesManager
-#else
-class ccColorScalesManager
-#endif
 {
 public:
 

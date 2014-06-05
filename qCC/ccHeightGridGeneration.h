@@ -34,26 +34,26 @@ class ccHeightGridGeneration
 {
 public:
 
-    //! Types of projection
-    enum ProjectionType {   PROJ_MINIMUM_HEIGHT			= 0,
+	//! Types of projection
+	enum ProjectionType {	PROJ_MINIMUM_HEIGHT			= 0,
 							PROJ_MAXIMUM_HEIGHT			= 1,
 							PROJ_AVERAGE_HEIGHT			= 2,
-                            INVALID_PROJECTION_TYPE		= 255,
-    };
+							INVALID_PROJECTION_TYPE		= 255,
+	};
 
-    //! Option for handling empty cells
-    enum EmptyCellFillOption {	LEAVE_EMPTY				= 0,
+	//! Option for handling empty cells
+	enum EmptyCellFillOption {	LEAVE_EMPTY				= 0,
 								FILL_MINIMUM_HEIGHT		= 1,
 								FILL_MAXIMUM_HEIGHT		= 2,
 								FILL_CUSTOM_HEIGHT		= 3,
 								FILL_AVERAGE_HEIGHT		= 4,
-    };
+	};
 
 	//! Default constructor
 	ccHeightGridGeneration();
 
-    //! Computes height grid
-    static ccPointCloud* Compute(	ccGenericPointCloud* cloud,
+	//! Computes height grid
+	static ccPointCloud* Compute(	ccGenericPointCloud* cloud,
 									double grid_step,
 									const ccBBox& customBox,
 									unsigned char proj_dimension,

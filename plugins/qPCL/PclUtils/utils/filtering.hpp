@@ -69,34 +69,34 @@ int estimateSIFT(	const typename pcl::PointCloud<PointInT>::Ptr in_cloud,
 //DGM: deprecated?
 //template <typename PointInT, typename PointOutT>
 //int
-//computeIntensitySPINImages(const typename pcl::PointCloud<PointInT>::Ptr incloud,
-//                           const float radius,
-//                           const int k_nn,
-//                           const bool useKnn, //true if use knn, false if radius search
-//                           const int n_distance_bins,
-//                           const int n_intensity_bins,
-//                           typename pcl::PointCloud<PointOutT>::Ptr outcloud)
+//computeIntensitySPINImages(	const typename pcl::PointCloud<PointInT>::Ptr incloud,
+//								const float radius,
+//								const int k_nn,
+//								const bool useKnn, //true if use knn, false if radius search
+//								const int n_distance_bins,
+//								const int n_intensity_bins,
+//								typename pcl::PointCloud<PointOutT>::Ptr outcloud)
 //{
 //
-//    if ((n_distance_bins <= 0) || (n_intensity_bins <= 0))
-//            return -1;
+//	if ((n_distance_bins <= 0) || (n_intensity_bins <= 0))
+//		return -1;
 //
-//    pcl::IntensitySpinEstimation<PointInT, PointOutT> estimator;
-//    estimator.setInputCloud(incloud);
-//    estimator.setNrDistanceBins(n_distance_bins);
-//    estimator.setNrIntensityBins(n_intensity_bins);
+//	pcl::IntensitySpinEstimation<PointInT, PointOutT> estimator;
+//	estimator.setInputCloud(incloud);
+//	estimator.setNrDistanceBins(n_distance_bins);
+//	estimator.setNrIntensityBins(n_intensity_bins);
 //
-//    if (useKnn)
-//        //knn
-//        estimator.setKSearch(k_nn);
-//    else if (!useKnn)
-//        estimator.setRadiusSearch((double) radius);
-//    else // can be a bool not set?? not sure
-//        return -1;
+//	if (useKnn)
+//		//knn
+//		estimator.setKSearch(k_nn);
+//	else if (!useKnn)
+//		estimator.setRadiusSearch((double) radius);
+//	else // can be a bool not set?? not sure
+//		return -1;
 //
-//    estimator.compute(*outcloud);
+//	estimator.compute(*outcloud);
 //
-//    return 1;
+//	return 1;
 //}
 
 template <typename PointInT, typename PointOutT>
@@ -119,7 +119,7 @@ int compute_normals(const typename pcl::PointCloud<PointInT>::Ptr incloud,
 	}
 
 	normal_estimator.setInputCloud (incloud);
-    //normal_estimator.setNumberOfThreads(4);
+	//normal_estimator.setNumberOfThreads(4);
 	normal_estimator.compute (*outcloud);
 
 	return 1;
@@ -138,11 +138,11 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 
 #ifdef _OPENMP
 	//create the smoothing object
-    pcl::MovingLeastSquaresOMP< PointInT, PointOutT > smoother;
-    int n_threads = omp_get_max_threads();
-    smoother.setNumberOfThreads(n_threads);
+	pcl::MovingLeastSquaresOMP< PointInT, PointOutT > smoother;
+	int n_threads = omp_get_max_threads();
+	smoother.setNumberOfThreads(n_threads);
 #else
-    pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
+	pcl::MovingLeastSquares< PointInT, PointOutT > smoother;
 #endif
 	smoother.setInputCloud(incloud);
 	smoother.setSearchMethod(tree);	

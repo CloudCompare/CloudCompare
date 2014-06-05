@@ -22,10 +22,10 @@
 #include "ccNormalVectors.h"
 #include "ccGenericGLDisplay.h"
 
-ccSphere::ccSphere(PointCoordinateType radius,
-				   const ccGLMatrix* transMat/*=0*/,
-				   QString name/*=QString("Sphere")*/,
-				   unsigned precision/*=24*/)
+ccSphere::ccSphere(	PointCoordinateType radius,
+					const ccGLMatrix* transMat/*=0*/,
+					QString name/*=QString("Sphere")*/,
+					unsigned precision/*=24*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_radius(radius)
 {
@@ -182,7 +182,7 @@ void ccSphere::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		return;
 
 	//we display it in the 2D layer in fact!
-    ccBBox bBox = getBB(true,false,m_currentDisplay);
+	ccBBox bBox = getBB(true,false,m_currentDisplay);
 	if (bBox.isValid())
 	{
 		const double* MM = context._win->getModelViewMatd(); //viewMat

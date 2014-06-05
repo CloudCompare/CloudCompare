@@ -21,9 +21,9 @@ ccExportCoordToSFDlg::ccExportCoordToSFDlg(QWidget* parent/*=0*/)
 	: QDialog(parent)
 	, Ui::ExportCoordToSFDlg()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool);
+	setWindowFlags(Qt::Tool);
 }
 
 bool ccExportCoordToSFDlg::exportX() const

@@ -18,13 +18,8 @@
 #ifndef MATRIX_HEADER
 #define MATRIX_HEADER
 
-#ifdef _MSC_VER
-//To get rid of the really annoying warnings about template class exportation
-#pragma warning( disable: 4251 )
-#pragma warning( disable: 4530 )
-#endif
-
 //local
+#include "CCCoreLib.h"
 #include "CCGeom.h"
 
 //system

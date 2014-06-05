@@ -35,10 +35,10 @@
 #include <QMainWindow>
 
 MLSSmoothingUpsampling::MLSSmoothingUpsampling()
-    : BaseFilter(FilterDescription("MLS smoothing",
-                                   "Smooth using MLS, optionally upsample",
-                                   "Smooth the cloud using Moving Least Sqares algorithm, estimate normals and optionally upsample",
-                                   ":/toolbar/PclUtils/icons/mls_smoothing.png"))
+	: BaseFilter(FilterDescription(	"MLS smoothing",
+									"Smooth using MLS, optionally upsample",
+									"Smooth the cloud using Moving Least Sqares algorithm, estimate normals and optionally upsample",
+									":/toolbar/PclUtils/icons/mls_smoothing.png"))
 	, m_dialog(0)
 	, m_parameters(new MLSParameters)
 {
@@ -119,8 +119,8 @@ int MLSSmoothingUpsampling::compute()
 	copyRGBColors(cloud, new_cloud, mapping_indices, true);
 #endif
 
-    //disable original cloud
-    cloud->setEnabled(false);
+	//disable original cloud
+	cloud->setEnabled(false);
 	if (cloud->getParent())
 		cloud->getParent()->addChild(new_cloud);
 

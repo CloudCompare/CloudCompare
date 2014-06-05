@@ -64,28 +64,28 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename)
 CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_ply_storage_mode storageType)
 {
 	if (!entity || !filename)
-        return CC_FERR_BAD_ARGUMENT;
+		return CC_FERR_BAD_ARGUMENT;
 
-    ccGenericPointCloud* vertices = NULL;
-    ccGenericMesh* mesh = NULL;
-    if (entity->isKindOf(CC_TYPES::MESH))
-    {
-        mesh = ccHObjectCaster::ToGenericMesh(entity);
-        vertices = mesh->getAssociatedCloud();
-    }
-    else if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
-    {
-        vertices = ccHObjectCaster::ToGenericPointCloud(entity);
-    }
+	ccGenericPointCloud* vertices = NULL;
+	ccGenericMesh* mesh = NULL;
+	if (entity->isKindOf(CC_TYPES::MESH))
+	{
+		mesh = ccHObjectCaster::ToGenericMesh(entity);
+		vertices = mesh->getAssociatedCloud();
+	}
+	else if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
+	{
+		vertices = ccHObjectCaster::ToGenericPointCloud(entity);
+	}
 
-    if (!vertices)
-        return CC_FERR_BAD_ENTITY_TYPE;
+	if (!vertices)
+		return CC_FERR_BAD_ENTITY_TYPE;
 
 	p_ply ply = ply_create(filename, storageType, NULL, 0, NULL);
 	if (!ply)
-        return CC_FERR_WRITING;
+		return CC_FERR_WRITING;
 
-    //Has the cloud been recentered?
+	//Has the cloud been recentered?
 	e_ply_type coordType = vertices->isShifted() || sizeof(PointCoordinateType) > 4 ? PLY_DOUBLE : PLY_FLOAT; //we use double coordinates for shifted vertices (i.e. >1e6)
 
 	int result = 1;
@@ -300,7 +300,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 	unsigned triNum = 0;
 	if (mesh)
 	{
-	    triNum = mesh->size();
+		triNum = mesh->size();
 		if (triNum>0 && ply_add_element(ply, "face", triNum))
 		{
 			//DGM: don't change the field name (vertex_indices) as Meshlab
@@ -416,13 +416,13 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 
 #define PROCESS_EVENTS_FREQ 10000
 
-#define ELEM_POS_0  0x00000000
-#define ELEM_POS_1  0x00000001
-#define ELEM_POS_2  0x00000002
-#define ELEM_POS_3  0x00000003
-#define ELEM_EOL    0x00000004
+#define ELEM_POS_0	0x00000000
+#define ELEM_POS_1	0x00000001
+#define ELEM_POS_2	0x00000002
+#define ELEM_POS_3	0x00000003
+#define ELEM_EOL	0x00000004
 
-#define POS_MASK    0x00000003
+#define POS_MASK	0x00000003
 
 static double s_Point[3] = {0,0,0};
 static int s_PointCount = 0;
@@ -442,7 +442,7 @@ static int vertex_cb(p_ply_argument argument)
 
 	// This looks like it should always be true, 
 	// but it's false if x is NaN.
-    if (val == val)
+	if (val == val)
 	{
 		s_Point[flags & POS_MASK] = val;
 	}
@@ -497,8 +497,8 @@ static int normal_cb(p_ply_argument argument)
 		cloud->addNorm(s_Normal);
 		++s_NormalCount;
 
-        if ((s_NormalCount % PROCESS_EVENTS_FREQ) == 0)
-            QCoreApplication::processEvents();
+		if ((s_NormalCount % PROCESS_EVENTS_FREQ) == 0)
+			QCoreApplication::processEvents();
 	}
 
 	return 1;
@@ -540,10 +540,10 @@ static int rgb_cb(p_ply_argument argument)
 	if (flags & ELEM_EOL)
 	{
 		cloud->addRGBColor(s_color);
-        ++s_ColorCount;
+		++s_ColorCount;
 
-        if ((s_ColorCount % PROCESS_EVENTS_FREQ) == 0)
-            QCoreApplication::processEvents();
+		if ((s_ColorCount % PROCESS_EVENTS_FREQ) == 0)
+			QCoreApplication::processEvents();
 	}
 
 	return 1;
@@ -584,8 +584,8 @@ static int grey_cb(p_ply_argument argument)
 	cloud->addGreyColor(G);
 	++s_IntensityCount;
 
-    if ((s_IntensityCount % PROCESS_EVENTS_FREQ) == 0)
-        QCoreApplication::processEvents();
+	if ((s_IntensityCount % PROCESS_EVENTS_FREQ) == 0)
+		QCoreApplication::processEvents();
 
 	return 1;
 }
@@ -603,8 +603,8 @@ static int scalar_cb(p_ply_argument argument)
 	ScalarType scal = static_cast<ScalarType>(ply_get_argument_value(argument));
 	sf->setValue(instance_index,scal);
 
-    if ((++s_totalScalarCount % PROCESS_EVENTS_FREQ) == 0)
-        QCoreApplication::processEvents();
+	if ((++s_totalScalarCount % PROCESS_EVENTS_FREQ) == 0)
+		QCoreApplication::processEvents();
 
 	return 1;
 }
@@ -620,7 +620,7 @@ static int face_cb(p_ply_argument argument)
 	if (!mesh)
 		return 1;
 
-    long length, value_index;
+	long length, value_index;
 	ply_get_argument_property(argument, NULL, &length, &value_index);
 	//unsupported polygon type!
 	if (length != 3)
@@ -629,20 +629,20 @@ static int face_cb(p_ply_argument argument)
 		return 1;
 	}
 	if (value_index<0 || value_index>2)
-        return 1;
+		return 1;
 
 	s_tri[value_index] = (unsigned)ply_get_argument_value(argument);
 
 	if (value_index==2)
 	{
-	    mesh->addTriangle(s_tri[0],s_tri[1],s_tri[2]);
-	    ++s_triCount;
+		mesh->addTriangle(s_tri[0],s_tri[1],s_tri[2]);
+		++s_triCount;
 
-        if ((s_triCount % PROCESS_EVENTS_FREQ) == 0)
-            QCoreApplication::processEvents();
+		if ((s_triCount % PROCESS_EVENTS_FREQ) == 0)
+			QCoreApplication::processEvents();
 	}
 
-    return 1;
+	return 1;
 }
 
 static float s_texCoord[6];
@@ -656,7 +656,7 @@ static int texCoords_cb(p_ply_argument argument)
 	if (!texCoords)
 		return 1;
 
-    long length, value_index;
+	long length, value_index;
 	ply_get_argument_property(argument, NULL, &length, &value_index);
 	//unsupported/invalid coordinates!
 	if (length != 6)
@@ -665,20 +665,20 @@ static int texCoords_cb(p_ply_argument argument)
 		return 1;
 	}
 	if (value_index<0 || value_index>5)
-        return 1;
+		return 1;
 
 	s_texCoord[value_index] = (float)ply_get_argument_value(argument);
 
 	if (((value_index+1)%2)==0)
 	{
 		texCoords->addElement(s_texCoord+value_index-1);
-	    ++s_texCoordCount;
+		++s_texCoordCount;
 
-        if ((s_texCoordCount % PROCESS_EVENTS_FREQ) == 0)
-            QCoreApplication::processEvents();
+		if ((s_texCoordCount % PROCESS_EVENTS_FREQ) == 0)
+			QCoreApplication::processEvents();
 	}
 
-    return 1;
+	return 1;
 }
 
 CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
@@ -702,38 +702,38 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	else
 		s_Pshift = CCVector3d(0,0,0);
 
-    /****************/
+	/****************/
 	/***  Header  ***/
-    /****************/
+	/****************/
 
 	//open a PLY file for reading
 	p_ply ply = ply_open(filename,NULL, 0, NULL);
 	if (!ply)
-        return CC_FERR_READING;
+		return CC_FERR_READING;
 
 	ccLog::PrintDebug("[PLY] Opening file '%s' ...",filename);
 
 	if (!ply_read_header(ply))
 	{
-	    ply_close(ply);
-	    return CC_FERR_WRONG_FILE_TYPE;
+		ply_close(ply);
+		return CC_FERR_WRONG_FILE_TYPE;
 	}
 
-    //storage mode: little/big endian
+	//storage mode: little/big endian
 	e_ply_storage_mode storage_mode;
 	get_plystorage_mode(ply,&storage_mode);
 
-    /*****************/
+	/*****************/
 	/***  Texture  ***/
-    /*****************/
+	/*****************/
 	//eventual texture file declared in the comments (keyword: TEXTUREFILE)
 	QString textureFileName;
 	//texture coordinates
 	TextureCoordsContainer* texCoords = 0;
 
-    /******************/
+	/******************/
 	/***  Comments  ***/
-    /******************/
+	/******************/
 	{
 		const char* lastComment = NULL;
 
@@ -748,9 +748,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		}
 	}
 
-    /*******************************/
+	/*******************************/
 	/***  Elements & properties  ***/
-    /*******************************/
+	/*******************************/
 
 	//Point-based elements (points, colors, normals, etc.)
 	std::vector<plyElement> pointElements;
@@ -762,12 +762,12 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	//Mesh-based element properties (vertex indexes, etc.)
 	std::vector<plyProperty> listProperties;
 
-    //last read element
+	//last read element
 	plyElement lastElement;
 	lastElement.elem = 0;
 	while ((lastElement.elem = ply_get_next_element(ply, lastElement.elem)))
 	{
-	    //we get next element info
+		//we get next element info
 		ply_get_element_info(lastElement.elem, &lastElement.elementName, &lastElement.elementInstances);
 
 		if (lastElement.elementInstances == 0)
@@ -781,78 +781,78 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		lastElement.isList=false;
 		//printf("Element: %s\n",lastElement.elementName);
 
-        //last read property
-        plyProperty lastProperty;
+		//last read property
+		plyProperty lastProperty;
 		lastProperty.prop = 0;
 		lastProperty.elemIndex = 0;
 
 		while ((lastProperty.prop = ply_get_next_property(lastElement.elem,lastProperty.prop)))
 		{
-		    //we get next property info
+			//we get next property info
 			ply_get_property_info(lastProperty.prop, &lastProperty.propName, &lastProperty.type, &lastProperty.length_type, &lastProperty.value_type);
-            //printf("\tProperty: %s (%s)\n",lastProperty.propName,e_ply_type_names[lastProperty.type]);
+			//printf("\tProperty: %s (%s)\n",lastProperty.propName,e_ply_type_names[lastProperty.type]);
 
-            if (lastProperty.type == 16) //PLY_LIST
-                lastElement.isList = true;
+			if (lastProperty.type == 16) //PLY_LIST
+				lastElement.isList = true;
 
 			lastElement.properties.push_back(lastProperty);
 			++lastElement.propertiesCount;
 		}
 
-        //if we have a "mesh-like" element
-        if (lastElement.isList)
-        {
-            //we store its properties in 'listProperties'
-            for (size_t i=0; i<lastElement.properties.size(); ++i)
-            {
-                plyProperty& prop = lastElement.properties[i];
-                prop.elemIndex = (int)meshElements.size();
+		//if we have a "mesh-like" element
+		if (lastElement.isList)
+		{
+			//we store its properties in 'listProperties'
+			for (size_t i=0; i<lastElement.properties.size(); ++i)
+			{
+				plyProperty& prop = lastElement.properties[i];
+				prop.elemIndex = (int)meshElements.size();
 
-                //we only keep track of lists (we can't handle per triangle scalars)
-                if (prop.type == 16)
-                    listProperties.push_back(prop);
-                else
-                {
-                    ccLog::Warning("[PLY] Unhandled property: [%s:%s] (%s)",
-                                    lastElement.elementName,
-                                    prop.propName,
-                                    e_ply_type_names[prop.type]);
-                }
-            }
-            meshElements.push_back(lastElement);
-        }
-        else    //else if we have a "point-like" element
-        {
-            //we store its properties in 'stdProperties'
-            for (size_t i=0; i<lastElement.properties.size(); ++i)
-            {
-                plyProperty& prop = lastElement.properties[i];
-                prop.elemIndex = (int)pointElements.size();
-                stdProperties.push_back(prop);
-            }
-            pointElements.push_back(lastElement);
-        }
+				//we only keep track of lists (we can't handle per triangle scalars)
+				if (prop.type == 16)
+					listProperties.push_back(prop);
+				else
+				{
+					ccLog::Warning("[PLY] Unhandled property: [%s:%s] (%s)",
+						lastElement.elementName,
+						prop.propName,
+						e_ply_type_names[prop.type]);
+				}
+			}
+			meshElements.push_back(lastElement);
+		}
+		else	//else if we have a "point-like" element
+		{
+			//we store its properties in 'stdProperties'
+			for (size_t i=0; i<lastElement.properties.size(); ++i)
+			{
+				plyProperty& prop = lastElement.properties[i];
+				prop.elemIndex = (int)pointElements.size();
+				stdProperties.push_back(prop);
+			}
+			pointElements.push_back(lastElement);
+		}
 	}
 
-    //We need some points at least!
+	//We need some points at least!
 	if (pointElements.empty())
 	{
 		ply_close(ply);
 		return CC_FERR_NO_LOAD;
 	}
 
-    /**********************/
+	/**********************/
 	/***  Objects info  ***/
-    /**********************/
+	/**********************/
 	{
 		const char* lastObjInfo = NULL;
 		while ((lastObjInfo = ply_get_next_obj_info(ply, lastObjInfo)))
 			ccLog::Print("[PLY][Info] %s",lastObjInfo);
 	}
 
-    /****************/
+	/****************/
 	/***  Dialog  ***/
-    /****************/
+	/****************/
 
 	//properties indexes (0 = unassigned)
 	static const unsigned nStdProp = 10;
@@ -944,9 +944,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		}
 	}
 
-    //combo-box max visible items
-    int stdPropsCount = stdPropsText.count();
-    int listPropsCount = listPropsText.count();
+	//combo-box max visible items
+	int stdPropsCount = stdPropsText.count();
+	int listPropsCount = listPropsText.count();
 
 	//we need at least 2 coordinates!
 	if (stdPropsCount < 2)
@@ -1046,25 +1046,25 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		}
 	}
 
-    /*************************/
+	/*************************/
 	/***  Callbacks setup  ***/
-    /*************************/
+	/*************************/
 
-    //Main point cloud
+	//Main point cloud
 	ccPointCloud* cloud = new ccPointCloud("unnamed - Cloud");
 
 	/* POINTS (X,Y,Z) */
 
 	unsigned numberOfPoints = 0;
 
-    assert(xIndex != yIndex && xIndex != zIndex && yIndex != zIndex);
+	assert(xIndex != yIndex && xIndex != zIndex && yIndex != zIndex);
 
 	//POINTS (X)
 	if (xIndex > 0)
 	{
 		long flags = ELEM_POS_0; //X coordinate
 		if (xIndex > yIndex && xIndex > zIndex)
-            flags |= ELEM_EOL;
+			flags |= ELEM_EOL;
 
 		plyProperty& pp = stdProperties[xIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, vertex_cb, cloud, flags);
@@ -1077,20 +1077,20 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	{
 		long flags = ELEM_POS_1; //Y coordinate
 		if (yIndex > xIndex && yIndex > zIndex)
-            flags |= ELEM_EOL;
+			flags |= ELEM_EOL;
 
 		plyProperty& pp = stdProperties[yIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, vertex_cb, cloud, flags);
 
 		if (numberOfPoints > 0)
 		{
-            if ((long)numberOfPoints != pointElements[pp.elemIndex].elementInstances)
-            {
-                ccLog::Warning("[PLY] Bad/uncompatible assignation of point properties!");
-                delete cloud;
-                ply_close(ply);
-                return CC_FERR_BAD_ENTITY_TYPE;
-            }
+			if ((long)numberOfPoints != pointElements[pp.elemIndex].elementInstances)
+			{
+				ccLog::Warning("[PLY] Bad/uncompatible assignation of point properties!");
+				delete cloud;
+				ply_close(ply);
+				return CC_FERR_BAD_ENTITY_TYPE;
+			}
 		}
 		else numberOfPoints = pointElements[pp.elemIndex].elementInstances;
 	}
@@ -1100,45 +1100,45 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	{
 		long flags = ELEM_POS_2; //Z coordinate
 		if (zIndex > xIndex && zIndex > yIndex)
-            flags |= ELEM_EOL;
+			flags |= ELEM_EOL;
 
 		plyProperty& pp = stdProperties[zIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, vertex_cb, cloud, flags);
 
 		if (numberOfPoints > 0)
 		{
-            if ((long)numberOfPoints != pointElements[pp.elemIndex].elementInstances)
-            {
-                ccLog::Warning("[PLY] Bad/uncompatible assignation of point properties!");
-                delete cloud;
-                ply_close(ply);
-                return CC_FERR_BAD_ENTITY_TYPE;
-            }
+			if ((long)numberOfPoints != pointElements[pp.elemIndex].elementInstances)
+			{
+				ccLog::Warning("[PLY] Bad/uncompatible assignation of point properties!");
+				delete cloud;
+				ply_close(ply);
+				return CC_FERR_BAD_ENTITY_TYPE;
+			}
 		}
 		else numberOfPoints = pointElements[pp.elemIndex].elementInstances;
 	}
 
-    if (numberOfPoints == 0 || !cloud->reserveThePointsTable(numberOfPoints))
-    {
-        delete cloud;
-        ply_close(ply);
-        return CC_FERR_NOT_ENOUGH_MEMORY;
-    }
+	if (numberOfPoints == 0 || !cloud->reserveThePointsTable(numberOfPoints))
+	{
+		delete cloud;
+		ply_close(ply);
+		return CC_FERR_NOT_ENOUGH_MEMORY;
+	}
 
 	/* NORMALS (X,Y,Z) */
 
 	unsigned numberOfNormals=0;
 
-    assert(nxIndex == 0 || (nxIndex != nyIndex && nxIndex != nzIndex));
-    assert(nyIndex == 0 || (nyIndex != nxIndex && nyIndex != nzIndex));
-    assert(nzIndex == 0 || (nzIndex != nxIndex && nzIndex != nyIndex));
+	assert(nxIndex == 0 || (nxIndex != nyIndex && nxIndex != nzIndex));
+	assert(nyIndex == 0 || (nyIndex != nxIndex && nyIndex != nzIndex));
+	assert(nzIndex == 0 || (nzIndex != nxIndex && nzIndex != nyIndex));
 
-    //NORMALS (X)
+	//NORMALS (X)
 	if (nxIndex > 0)
 	{
 		long flags = ELEM_POS_0; //Nx
 		if (nxIndex > nyIndex && nxIndex > nzIndex)
-            flags |= ELEM_EOL;
+			flags |= ELEM_EOL;
 
 		plyProperty& pp = stdProperties[nxIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, normal_cb, cloud, flags);
@@ -1146,12 +1146,12 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		numberOfNormals = pointElements[pp.elemIndex].elementInstances;
 	}
 
-    //NORMALS (Y)
+	//NORMALS (Y)
 	if (nyIndex > 0)
 	{
 		long flags = ELEM_POS_1; //Ny
 		if (nyIndex > nxIndex && nyIndex > nzIndex)
-            flags |= ELEM_EOL;
+			flags |= ELEM_EOL;
 
 		plyProperty& pp = stdProperties[nyIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, normal_cb, cloud, flags);
@@ -1159,12 +1159,12 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		numberOfNormals = std::max(numberOfNormals, (unsigned)pointElements[pp.elemIndex].elementInstances);
 	}
 
-    //NORMALS (Z)
+	//NORMALS (Z)
 	if (nzIndex > 0)
 	{
 		long flags = ELEM_POS_2; //Nz
 		if (nzIndex > nxIndex && nzIndex > nyIndex)
-            flags |= ELEM_EOL;
+			flags |= ELEM_EOL;
 
 		plyProperty& pp = stdProperties[nzIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, normal_cb, cloud, flags);
@@ -1172,38 +1172,38 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		numberOfNormals = std::max(numberOfNormals, (unsigned)pointElements[pp.elemIndex].elementInstances);
 	}
 
-    //We check that the number of normals corresponds to the number of points
+	//We check that the number of normals corresponds to the number of points
 	if (numberOfNormals > 0)
 	{
-        if (numberOfPoints != numberOfNormals)
-        {
-            ccLog::Warning("[PLY] The number of normals doesn't match the number of points!");
-            delete cloud;
-            ply_close(ply);
-            return CC_FERR_BAD_ENTITY_TYPE;
-        }
+		if (numberOfPoints != numberOfNormals)
+		{
+			ccLog::Warning("[PLY] The number of normals doesn't match the number of points!");
+			delete cloud;
+			ply_close(ply);
+			return CC_FERR_BAD_ENTITY_TYPE;
+		}
 		if (!cloud->reserveTheNormsTable())
 		{
-            delete cloud;
-            ply_close(ply);
-            return CC_FERR_NOT_ENOUGH_MEMORY;
+			delete cloud;
+			ply_close(ply);
+			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 		cloud->showNormals(true);
-    }
+	}
 
 	/* COLORS (R,G,B) */
 
 	unsigned numberOfColors=0;
 
-    assert(rIndex == 0 || (rIndex != gIndex && rIndex != bIndex));
-    assert(gIndex == 0 || (gIndex != rIndex && gIndex != bIndex));
-    assert(bIndex == 0 || (bIndex != rIndex && bIndex != gIndex));
+	assert(rIndex == 0 || (rIndex != gIndex && rIndex != bIndex));
+	assert(gIndex == 0 || (gIndex != rIndex && gIndex != bIndex));
+	assert(bIndex == 0 || (bIndex != rIndex && bIndex != gIndex));
 
 	if (rIndex > 0)
 	{
 		long flags = ELEM_POS_0; //R
 		if (rIndex > gIndex && rIndex > bIndex)
-            flags |= ELEM_EOL;
+			flags |= ELEM_EOL;
 
 		plyProperty& pp = stdProperties[rIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, rgb_cb, cloud, flags);
@@ -1215,7 +1215,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	{
 		long flags = ELEM_POS_1; //G
 		if (gIndex > rIndex && gIndex > bIndex)
-            flags |= ELEM_EOL;
+			flags |= ELEM_EOL;
 
 		plyProperty& pp = stdProperties[gIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, rgb_cb, cloud, flags);
@@ -1227,7 +1227,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	{
 		long flags = ELEM_POS_2; //B
 		if (bIndex > rIndex && bIndex > gIndex)
-            flags |= ELEM_EOL;
+			flags |= ELEM_EOL;
 
 		plyProperty& pp = stdProperties[bIndex-1];
 		ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, rgb_cb, cloud, flags);
@@ -1240,13 +1240,13 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	//INTENSITE (G)
 	if (iIndex > 0)
 	{
-        if (numberOfColors > 0)
-        {
-            ccLog::Error("Can't import colors AND intensity (intensities will be ignored)!");
-            ccLog::Warning("[PLY] intensities will be ignored");
-        }
-        else
-        {
+		if (numberOfColors > 0)
+		{
+			ccLog::Error("Can't import colors AND intensity (intensities will be ignored)!");
+			ccLog::Warning("[PLY] intensities will be ignored");
+		}
+		else
+		{
 			plyProperty pp = stdProperties[iIndex-1];
 			ply_set_read_cb(ply, pointElements[pp.elemIndex].elementName, pp.propName, grey_cb, cloud, 0);
 
@@ -1254,24 +1254,24 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		}
 	}
 
-    //We check that the number of colors corresponds to the number of points
-    if (numberOfColors > 0)
-    {
-        if (numberOfPoints != numberOfColors)
-        {
-            ccLog::Warning("The number of colors doesn't match the number of points!");
-            delete cloud;
-            ply_close(ply);
-            return CC_FERR_BAD_ENTITY_TYPE;
-        }
+	//We check that the number of colors corresponds to the number of points
+	if (numberOfColors > 0)
+	{
+		if (numberOfPoints != numberOfColors)
+		{
+			ccLog::Warning("The number of colors doesn't match the number of points!");
+			delete cloud;
+			ply_close(ply);
+			return CC_FERR_BAD_ENTITY_TYPE;
+		}
 		if (!cloud->reserveTheRGBTable())
 		{
-            delete cloud;
-            ply_close(ply);
-            return CC_FERR_NOT_ENOUGH_MEMORY;
+			delete cloud;
+			ply_close(ply);
+			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 		cloud->showColors(true);
-    }
+	}
 
 	/* SCALAR FIELDS (SF) */
 	{
@@ -1333,22 +1333,22 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		plyProperty& pp = listProperties[facesIndex-1];
 		assert(pp.type==16); //we only accept PLY_LIST here!
 
-        mesh = new ccMesh(cloud);
+		mesh = new ccMesh(cloud);
 
-        numberOfFacets = meshElements[pp.elemIndex].elementInstances;
+		numberOfFacets = meshElements[pp.elemIndex].elementInstances;
 
-        if (!mesh->reserve(numberOfFacets))
-        {
-            ccLog::Error("Not enough memory to load facets (they will be ignored)!");
-            ccLog::Warning("[PLY] Mesh ignored!");
-            delete mesh;
-            mesh = 0;
-            numberOfFacets = 0;
-        }
-        else
-        {
-            ply_set_read_cb(ply, meshElements[pp.elemIndex].elementName, pp.propName, face_cb, mesh, 0);
-        }
+		if (!mesh->reserve(numberOfFacets))
+		{
+			ccLog::Error("Not enough memory to load facets (they will be ignored)!");
+			ccLog::Warning("[PLY] Mesh ignored!");
+			delete mesh;
+			mesh = 0;
+			numberOfFacets = 0;
+		}
+		else
+		{
+			ply_set_read_cb(ply, meshElements[pp.elemIndex].elementName, pp.propName, face_cb, mesh, 0);
+		}
 	}
 
 	if (texCoordsIndex > 0)
@@ -1359,20 +1359,20 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		texCoords = new TextureCoordsContainer();
 		texCoords->link();
 
-        long numberOfCoordinates = meshElements[pp.elemIndex].elementInstances;
+		long numberOfCoordinates = meshElements[pp.elemIndex].elementInstances;
 		assert(numberOfCoordinates == numberOfFacets);
 
-        if (!texCoords->reserve(numberOfCoordinates*3))
-        {
-            ccLog::Error("Not enough memory to load texture coordinates (they will be ignored)!");
-            ccLog::Warning("[PLY] Texture coordinates ignored!");
+		if (!texCoords->reserve(numberOfCoordinates*3))
+		{
+			ccLog::Error("Not enough memory to load texture coordinates (they will be ignored)!");
+			ccLog::Warning("[PLY] Texture coordinates ignored!");
 			texCoords->release();
-            texCoords = 0;
-        }
-        else
-        {
-            ply_set_read_cb(ply, meshElements[pp.elemIndex].elementName, pp.propName, texCoords_cb, texCoords, 0);
-        }
+			texCoords = 0;
+		}
+		else
+		{
+			ply_set_read_cb(ply, meshElements[pp.elemIndex].elementName, pp.propName, texCoords_cb, texCoords, 0);
+		}
 	}
 
 	QProgressDialog pDlg(QString("Loading in progress..."),QString(),0,0);
@@ -1399,21 +1399,21 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	if (success < 1)
 	{
 		if (mesh)
-            delete mesh;
-        delete cloud;
+			delete mesh;
+		delete cloud;
 		return CC_FERR_READING;
 	}
 
-    //we check mesh
-    if (mesh && mesh->size() == 0)
-    {
+	//we check mesh
+	if (mesh && mesh->size() == 0)
+	{
 		if (s_unsupportedPolygonType)
 			ccLog::Error("Mesh is not triangular! (unsupported)");
 		else
-	        ccLog::Error("Mesh is empty!");
+			ccLog::Error("Mesh is empty!");
 		delete mesh;
 		mesh=0;
-    }
+	}
 
 	if (texCoords && (s_invalidTexCoordinates || s_texCoordCount != 3*mesh->size()))
 	{
@@ -1429,7 +1429,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		*coordinatesShift = s_Pshift;
 	}
 
-    //we update scalar field(s)
+	//we update scalar field(s)
 	{
 		for (unsigned i=0; i<cloud->getNumberOfScalarFields(); ++i)
 		{
@@ -1444,7 +1444,7 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 		}
 	}
 
-    if (mesh)
+	if (mesh)
 	{
 		assert(s_triCount > 0);
 		//check number of loaded facets against 'theoretical' number
@@ -1495,9 +1495,9 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 			}
 		}
 
-        mesh->addChild(cloud);
-        cloud->setEnabled(false);
-        cloud->setName("Vertices");
+		mesh->addChild(cloud);
+		cloud->setEnabled(false);
+		cloud->setName("Vertices");
 		//cloud->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!
 
 		//associated texture
@@ -1546,29 +1546,29 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 			}
 		}
 
-        if (cloud->hasColors())
-            mesh->showColors(true);
-        if (cloud->hasDisplayedScalarField())
-            mesh->showSF(true);
+		if (cloud->hasColors())
+			mesh->showColors(true);
+		if (cloud->hasDisplayedScalarField())
+			mesh->showSF(true);
 		if (cloud->hasNormals())
-            mesh->showNormals(true);
-        else
+			mesh->showNormals(true);
+		else
 		{
 			//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later
 			//Moreover it's not always good idea if the user doesn't want normals (especially in ccViewer!)
-            //mesh->computeNormals();
+			//mesh->computeNormals();
 			ccLog::Warning("[PLY] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 		}
 
 		if (mesh->hasMaterials())
 			mesh->showNormals(false);
 
-        container.addChild(mesh);
-    }
-    else
-    {
-        container.addChild(cloud);
-    }
+		container.addChild(mesh);
+	}
+	else
+	{
+		container.addChild(cloud);
+	}
 
 	if (texCoords)
 	{

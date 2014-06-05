@@ -30,10 +30,10 @@ CC_FILE_ERROR SoiFilter::saveToFile(ccHObject* entity, const char* filename)
 
 CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-    //open the file
+	//open the file
 	FILE *fp = fopen(filename, "rt");
-    if (!fp)
-        return CC_FERR_READING;
+	if (!fp)
+		return CC_FERR_READING;
 
 	std::string line;
 	line.resize(MAX_ASCII_FILE_LINE_LENGTH);
@@ -42,9 +42,9 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	//we read the first line
 	char* eof = fgets ((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH , fp);
-    char* pEnd;
+	char* pEnd;
 
-    //header
+	//header
 	while ((strcmp((char*)line.substr(0,4).c_str(),"#CC#") != 0)&&(eof != NULL))
 	{
 		if (strcmp(line.substr(0,4).c_str(),"#NP#")==0)
@@ -79,12 +79,12 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 	pdlg.setInfo(buffer);
 	pdlg.start();
 
-    //Scan by scan
+	//Scan by scan
 	for (unsigned k=0; k<nbScansTotal; k++)
 	{
 		char* eof = fgets ((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH , fp);
 
-        //we only look for points (we ignore the rest)
+		//we only look for points (we ignore the rest)
 		while ((strcmp(line.substr(0,4).c_str(),"#pt#")!=0)&&(eof != NULL))
 			eof = fgets ((char*)line.c_str(), MAX_ASCII_FILE_LINE_LENGTH , fp);
 
@@ -139,6 +139,6 @@ CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	fclose(fp);
 
-    return CC_FERR_NO_ERROR;
+	return CC_FERR_NO_ERROR;
 }
 

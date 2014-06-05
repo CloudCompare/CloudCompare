@@ -20,8 +20,7 @@
 
 cc2DViewportObject::cc2DViewportObject(QString name/*=QString()*/)
 	: ccHObject(name)
-{
-}
+{}
 
 bool cc2DViewportObject::toFile_MeOnly(QFile& out) const
 {

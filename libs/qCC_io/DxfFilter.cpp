@@ -56,13 +56,13 @@ public:
 	{
 		assert(m_root);
 	}
-   
+
 	virtual void addLayer(const DL_LayerData& data)
 	{
 		// store our layer colours
 		m_layerColourMap[data.name.c_str()] = getAttributes().getColor();
 	}
-   
+
 	virtual void addPoint(const DL_PointData& P)
 	{
 		//create the 'points' point cloud if necessary
@@ -386,7 +386,7 @@ public:
 			poly->setColor(col);
 			poly->showColors(true);
 		}
-      
+
 		m_root->addChild(poly);
 	}
 
@@ -560,10 +560,10 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, const char* filename)
 		dxf.writeLayer(*dw, 
 			DL_LayerData("0", 0), 
 			DL_Attributes(
-			std::string(""),      // leave empty
-			DL_Codes::black,      // default color
-			100,                  // default width (in 1/100 mm)
-			"CONTINUOUS"));       // default line style
+			std::string(""),		// leave empty
+			DL_Codes::black,		// default color
+			100,					// default width (in 1/100 mm)
+			"CONTINUOUS"));			// default line style
 
 		//polylines layers
 		for (unsigned i=0; i<polyCount; ++i)

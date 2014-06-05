@@ -21,12 +21,12 @@
 #include "ccGLWindow.h"
 
 ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=0*/)
-    : QDialog(parent)
+	: QDialog(parent)
 	, Ui::AdjustZoomDialog()
 	, m_basePixelSize(1.0)
 {
-    setupUi(this);
-    setWindowFlags(Qt::Tool);
+	setupUi(this);
+	setWindowFlags(Qt::Tool);
 
 	if (win)
 	{
@@ -46,8 +46,8 @@ ccAdjustZoomDlg::ccAdjustZoomDlg(ccGLWindow* win, QWidget* parent/*=0*/)
 	}
 
 	connect(zoomDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(onZoomChanged(double)));
-    connect(pixelSizeDoubleSpinBox,	SIGNAL(valueChanged(double)),	this, SLOT(onPixelSizeChanged(double)));
-    connect(pixelCountSpinBox,		SIGNAL(valueChanged(int)),		this, SLOT(onPixelCountChanged(int)));
+	connect(pixelSizeDoubleSpinBox,	SIGNAL(valueChanged(double)),	this, SLOT(onPixelSizeChanged(double)));
+	connect(pixelCountSpinBox,		SIGNAL(valueChanged(int)),		this, SLOT(onPixelCountChanged(int)));
 }
 
 double ccAdjustZoomDlg::getZoom() const

@@ -29,22 +29,22 @@ class ccNormalComputationDlg : public QDialog, public Ui::NormalComputationDlg
 	Q_OBJECT
 
 public:
-    //! Default constructor
-    ccNormalComputationDlg(QWidget* parent = 0);
+	//! Default constructor
+	ccNormalComputationDlg(QWidget* parent = 0);
 
-    //! Returns local model chosen for normal computation
-    CC_LOCAL_MODEL_TYPES getLocalModel() const;
+	//! Returns local model chosen for normal computation
+	CC_LOCAL_MODEL_TYPES getLocalModel() const;
 
 	//! Sets default value for local neighbourhood radius
 	void setRadius(PointCoordinateType radius);
-	
+
 	//! Returns local neighbourhood radius
 	PointCoordinateType getRadius() const;
 
 	//! Returns prefered orientation
-    /** \return prefered orientation (-1: none, 0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z)
-    **/
-    int getPreferedOrientation() const;
+	/** \return prefered orientation (-1: none, 0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z)
+	**/
+	int getPreferedOrientation() const;
 
 protected slots:
 

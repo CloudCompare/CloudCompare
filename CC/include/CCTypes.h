@@ -18,9 +18,6 @@
 #ifndef CC_TYPES_HEADER
 #define CC_TYPES_HEADER
 
-//system
-#include <stdio.h>
-
 //'uchar' shortcut
 #ifndef uchar
 typedef unsigned char uchar;

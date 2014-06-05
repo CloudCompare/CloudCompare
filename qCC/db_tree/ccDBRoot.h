@@ -45,25 +45,25 @@ class ccGLWindow;
 //! Precise statistics about current selection
 struct dbTreeSelectionInfo
 {
-    int selCount;
+	int selCount;
 
-    int sfCount;
-    int colorCount;
-    int normalsCount;
-    int octreeCount;
-    int cloudCount;
-    int polylineCount;
-    int meshCount;
-    int imageCount;
-    int sensorCount;
-    int gblSensorCount;
-    int cameraSensorCount;
+	int sfCount;
+	int colorCount;
+	int normalsCount;
+	int octreeCount;
+	int cloudCount;
+	int polylineCount;
+	int meshCount;
+	int imageCount;
+	int sensorCount;
+	int gblSensorCount;
+	int cameraSensorCount;
 	int kdTreeCount;
 
-    void reset()
-    {
-        memset(this,0,sizeof(dbTreeSelectionInfo));
-    }
+	void reset()
+	{
+		memset(this,0,sizeof(dbTreeSelectionInfo));
+	}
 };
 
 //! Custom QTreeView widget (for advanced selection behavior)
@@ -81,7 +81,7 @@ protected:
 //! GUI database tree root
 class ccDBRoot : public QAbstractItemModel
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
@@ -90,35 +90,35 @@ public:
 		\param propertiesTreeWidget widget for selected entity's properties tree display
 		\param parent widget QObject parent
 	**/
-    ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWidget, QObject* parent = 0);
+	ccDBRoot(ccCustomQTreeView* dbTreeWidget, QTreeView* propertiesTreeWidget, QObject* parent = 0);
 
 	//! Destructor
-    virtual ~ccDBRoot();
+	virtual ~ccDBRoot();
 
 	//! Returns associated root object
-    ccHObject* getRootEntity();
+	ccHObject* getRootEntity();
 
 	//! Hides properties view
-    void hidePropertiesView();
+	void hidePropertiesView();
 	//! Updates properties view
-    void updatePropertiesView();
+	void updatePropertiesView();
 
 	//! Adds an element to the DB tree
-    void addElement(ccHObject* anObject, bool autoExpand = true);
+	void addElement(ccHObject* anObject, bool autoExpand = true);
 
 	//! Removes an element from the DB tree
-    void removeElement(ccHObject* anObject);
+	void removeElement(ccHObject* anObject);
 
 	//! Finds an element in DB
-    ccHObject* find(int uniqueID) const;
+	ccHObject* find(int uniqueID) const;
 
 	//! Returns the number of selected entities in DB tree (optionally with a given type)
-    int countSelectedEntities(CC_CLASS_ENUM filter = CC_TYPES::OBJECT);
+	int countSelectedEntities(CC_CLASS_ENUM filter = CC_TYPES::OBJECT);
 
 	//! Returns selected entities in DB tree (optionally with a given type and additional information)
-    int getSelectedEntities(ccHObject::Container& selEntities,
-                                CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
-                                    dbTreeSelectionInfo* info=NULL);
+	int getSelectedEntities(ccHObject::Container& selEntities,
+							CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
+							dbTreeSelectionInfo* info = NULL);
 
 	//! Expands tree at a given node
 	void expandElement(ccHObject* anObject, bool state);
@@ -129,26 +129,26 @@ public:
 		\param obj entity to select
 		\param forceAdditiveSelection whether to force additive selection (just as if CTRL key is pressed) or not
 	**/
-    void selectEntity(ccHObject* obj, bool forceAdditiveSelection = false);
+	void selectEntity(ccHObject* obj, bool forceAdditiveSelection = false);
 
 	//! Unselects a given entity
-    void unselectEntity(ccHObject* obj);
+	void unselectEntity(ccHObject* obj);
 
 	//! Unselects all entities
-    void unselectAllEntities();
+	void unselectAllEntities();
 
 	//! Unloads all entities
 	void unloadAll();
 
-    //inherited from QAbstractItemModel
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual QModelIndex index(int row, int column, const QModelIndex &parentIndex = QModelIndex()) const;
-    virtual QModelIndex index(ccHObject* object);
-    virtual QModelIndex parent(const QModelIndex &index) const;
-    virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
-    virtual Qt::ItemFlags flags(const QModelIndex &index) const;
-    virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
+	//inherited from QAbstractItemModel
+	virtual QVariant data(const QModelIndex &index, int role) const;
+	virtual QModelIndex index(int row, int column, const QModelIndex &parentIndex = QModelIndex()) const;
+	virtual QModelIndex index(ccHObject* object);
+	virtual QModelIndex parent(const QModelIndex &index) const;
+	virtual int rowCount(const QModelIndex &parent = QModelIndex()) const;
+	virtual int columnCount(const QModelIndex &parent = QModelIndex()) const;
+	virtual Qt::ItemFlags flags(const QModelIndex &index) const;
+	virtual bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole);
 	virtual Qt::DropActions supportedDropActions() const;
 	virtual bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent);
 	virtual QMap<int,QVariant> itemData(const QModelIndex& index) const;
@@ -157,12 +157,12 @@ public:
 #endif
 
 public slots:
-    void changeSelection(const QItemSelection & selected, const QItemSelection & deselected);
-    void reflectObjectPropChange(ccHObject* obj);
-    void redrawCCObject(ccHObject* anObject);
-    void redrawCCObjectAndChildren(ccHObject* anObject);
-    void updateCCObject(ccHObject* anObject);
-    void deleteSelectedEntities();
+	void changeSelection(const QItemSelection & selected, const QItemSelection & deselected);
+	void reflectObjectPropChange(ccHObject* obj);
+	void redrawCCObject(ccHObject* anObject);
+	void redrawCCObjectAndChildren(ccHObject* anObject);
+	void updateCCObject(ccHObject* anObject);
+	void deleteSelectedEntities();
 
 	//! Shortcut to selectEntity(ccHObject*)
 	void selectEntity(int uniqueID);
@@ -171,7 +171,7 @@ public slots:
 	/** If ctrl is pressed by the user at the same time,
 		previous selection will be simply updated accordingly.
 	**/
-    void selectEntities(std::set<int> entIDs);
+	void selectEntities(std::set<int> entIDs);
 
 protected slots:
 	void showContextMenu(const QPoint&);
@@ -194,7 +194,7 @@ protected slots:
 	void alignCameraWithEntityIndirect() { alignCameraWithEntity(true); }
 
 signals:
-    void selectionChanged();
+	void selectionChanged();
 
 protected:
 
@@ -204,7 +204,7 @@ protected:
 	void alignCameraWithEntity(bool reverse);
 
 	//! Shows properties view for a given element
-    void showPropertiesView(ccHObject* obj);
+	void showPropertiesView(ccHObject* obj);
 
 	//! Toggles a given property (enable state, visibility, normal, color, SF, etc.) on selected entities
 	/** Properties are:
@@ -228,18 +228,18 @@ protected:
 	void expandOrCollapseHoveredBranch(bool expand);
 
 	//! Associated DB root
-    ccHObject* m_treeRoot;
+	ccHObject* m_treeRoot;
 
 	//! Associated widget for DB tree
-    QTreeView* m_dbTreeWidget;
+	QTreeView* m_dbTreeWidget;
 
 	//! Associated widget for selected entity's properties tree
-    QTreeView* m_propertiesTreeWidget;
+	QTreeView* m_propertiesTreeWidget;
 
 	//! Selected entity's properties data model
-    QStandardItemModel* m_propertiesModel;
+	QStandardItemModel* m_propertiesModel;
 	//! Selected entity's properties delegate
-    ccPropertiesTreeDelegate* m_ccPropDelegate;
+	ccPropertiesTreeDelegate* m_ccPropDelegate;
 
 	//! Context menu action: expand tree branch
 	QAction* m_expandBranch;

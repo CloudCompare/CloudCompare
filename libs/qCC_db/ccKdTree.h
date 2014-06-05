@@ -22,6 +22,7 @@
 #include <TrueKdTree.h>
 
 //Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 
 //System
@@ -32,12 +33,7 @@ class ccGenericPointCloud;
 //! KD-tree structure
 /** Extends the CCLib::TrueKdTree class.
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccKdTree : public CCLib::TrueKdTree, public ccHObject
-#else
-class ccKdTree : public CCLib::TrueKdTree, public ccHObject
-#endif
 {
 public:
 
@@ -61,12 +57,12 @@ public:
 	**/
 	void translateBoundingBox(const CCVector3& T);
 
-    //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_KDTREE; }
+	//! Returns class ID
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::POINT_KDTREE; }
 
-    //Inherited from ccHObject
-    virtual ccBBox getMyOwnBB();
-    virtual ccBBox getDisplayBB();
+	//Inherited from ccHObject
+	virtual ccBBox getMyOwnBB();
+	virtual ccBBox getDisplayBB();
 
 	//! Flag points with cell index (as a scalar field)
 	bool convertCellIndexToSF();
@@ -87,11 +83,11 @@ public:
 
 protected:
 
-    //Inherited from ccHObject
-    void drawMeOnly(CC_DRAW_CONTEXT& context);
+	//Inherited from ccHObject
+	void drawMeOnly(CC_DRAW_CONTEXT& context);
 
 	//! Associated cloud
-    ccGenericPointCloud* m_associatedGenericCloud;
+	ccGenericPointCloud* m_associatedGenericCloud;
 
 };
 

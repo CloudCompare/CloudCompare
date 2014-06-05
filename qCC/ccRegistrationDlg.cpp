@@ -39,77 +39,78 @@ static unsigned s_randomSamplingLimit = 20000;
 static double s_errorDifference = 1.0e-6;
 
 ccRegistrationDlg::ccRegistrationDlg(ccHObject *data, ccHObject *model, QWidget* parent/*=0*/)
-    : QDialog(parent), Ui::RegistrationDialog()
+	: QDialog(parent)
+	, Ui::RegistrationDialog()
 {
-    assert(data && model);
-    dataEntity = data;
-    modelEntity = model;
+	assert(data && model);
+	dataEntity = data;
+	modelEntity = model;
 
-    setupUi(this);
-    errorDifferenceLineEdit->setValidator(new QDoubleValidator(errorDifferenceLineEdit));
-    setWindowFlags(Qt::Tool);
+	setupUi(this);
+	errorDifferenceLineEdit->setValidator(new QDoubleValidator(errorDifferenceLineEdit));
+	setWindowFlags(Qt::Tool);
 
-    setColorsAndLabels();
+	setColorsAndLabels();
 
-    QColor qRed(255,0,0);
-    QColor qYellow(255,255,0);
-    ccDisplayOptionsDlg::SetButtonColor(dataColorButton,qRed);
-    ccDisplayOptionsDlg::SetButtonColor(modelColorButton,qYellow);
+	QColor qRed(255,0,0);
+	QColor qYellow(255,255,0);
+	ccDisplayOptionsDlg::SetButtonColor(dataColorButton,qRed);
+	ccDisplayOptionsDlg::SetButtonColor(modelColorButton,qYellow);
 
 	//restore semi-persistent settings
 	adjustScaleCheckBox->setChecked(s_adjustScale);
 	randomSamplingLimitSpinBox->setValue(s_randomSamplingLimit);
 	errorDifferenceLineEdit->setText(QString::number(s_errorDifference,'e',3));
 
-    connect(swapButton, SIGNAL(clicked()), this, SLOT(swapModelAndData()));
+	connect(swapButton, SIGNAL(clicked()), this, SLOT(swapModelAndData()));
 }
 
 ccRegistrationDlg::~ccRegistrationDlg()
 {
-    if (modelEntity)
-    {
-        modelEntity->enableTempColor(false);
-        modelEntity->prepareDisplayForRefresh_recursive();
-    }
-    if (dataEntity)
-    {
-        dataEntity->enableTempColor(false);
-        dataEntity->prepareDisplayForRefresh_recursive();
-    }
+	if (modelEntity)
+	{
+		modelEntity->enableTempColor(false);
+		modelEntity->prepareDisplayForRefresh_recursive();
+	}
+	if (dataEntity)
+	{
+		dataEntity->enableTempColor(false);
+		dataEntity->prepareDisplayForRefresh_recursive();
+	}
 
 	MainWindow::RefreshAllGLWindow();
 }
 
 ccHObject *ccRegistrationDlg::getDataEntity()
 {
-    return dataEntity;
+	return dataEntity;
 }
 
 ccHObject *ccRegistrationDlg::getModelEntity()
 {
-    return modelEntity;
+	return modelEntity;
 }
 
 bool ccRegistrationDlg::useDataSFAsWeights() const
 {
-    return checkBoxUseDataSFAsWeights->isChecked();
+	return checkBoxUseDataSFAsWeights->isChecked();
 }
 
 bool ccRegistrationDlg::useModelSFAsWeights() const
 {
-    return checkBoxUseModelSFAsWeights->isChecked();
+	return checkBoxUseModelSFAsWeights->isChecked();
 }
 
 bool ccRegistrationDlg::adjustScale() const
 {
 	//we save the parameter by the way ;)
-    s_adjustScale = adjustScaleCheckBox->isChecked();
+	s_adjustScale = adjustScaleCheckBox->isChecked();
 	return s_adjustScale;
 }
 
 bool ccRegistrationDlg::removeFarthestPoints() const
 {
-    return pointsRemoval->isChecked();
+	return pointsRemoval->isChecked();
 }
 
 unsigned ccRegistrationDlg::randomSamplingLimit() const
@@ -121,50 +122,50 @@ unsigned ccRegistrationDlg::randomSamplingLimit() const
 
 unsigned ccRegistrationDlg::getMaxIterationCount() const
 {
-    return maxIterationCount->value();
+	return maxIterationCount->value();
 }
 
 double ccRegistrationDlg::getMinErrorDecrease() const
 {
-    bool ok = true;
-    double val = errorDifferenceLineEdit->text().toDouble(&ok);
-    assert(ok);
+	bool ok = true;
+	double val = errorDifferenceLineEdit->text().toDouble(&ok);
+	assert(ok);
 
 	//we save the parameter by the way ;)
 	if (ok)
 		s_errorDifference = val;
 
-    return val;
+	return val;
 }
 
 ConvergenceMethod ccRegistrationDlg::getConvergenceMethod() const
 {
-    if(errorCriterion->isChecked())
-        return CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
-    else
-        return CCLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE;
+	if(errorCriterion->isChecked())
+		return CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
+	else
+		return CCLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE;
 }
 
 void ccRegistrationDlg::setColorsAndLabels()
 {
-    if (!modelEntity || !dataEntity)
-        return;
+	if (!modelEntity || !dataEntity)
+		return;
 
-    modelLineEdit->setText(modelEntity->getName());
-    modelEntity->setVisible(true);
-    modelEntity->setTempColor(ccColor::yellow);
-    modelEntity->prepareDisplayForRefresh_recursive();
+	modelLineEdit->setText(modelEntity->getName());
+	modelEntity->setVisible(true);
+	modelEntity->setTempColor(ccColor::yellow);
+	modelEntity->prepareDisplayForRefresh_recursive();
 
-    dataLineEdit->setText(dataEntity->getName());
-    dataEntity->setVisible(true);
-    dataEntity->setTempColor(ccColor::red);
-    dataEntity->prepareDisplayForRefresh_recursive();
+	dataLineEdit->setText(dataEntity->getName());
+	dataEntity->setVisible(true);
+	dataEntity->setTempColor(ccColor::red);
+	dataEntity->prepareDisplayForRefresh_recursive();
 
-    MainWindow::RefreshAllGLWindow();
+	MainWindow::RefreshAllGLWindow();
 }
 
 void ccRegistrationDlg::swapModelAndData()
 {
-    std::swap(dataEntity,modelEntity);
-    setColorsAndLabels();
+	std::swap(dataEntity,modelEntity);
+	setColorsAndLabels();
 }

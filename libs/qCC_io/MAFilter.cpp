@@ -32,7 +32,7 @@
 
 struct edge
 {
-    int edgeIndex;
+	int edgeIndex;
 	bool positif;
 	unsigned theOtherPoint;
 	edge* nextEdge;
@@ -40,76 +40,76 @@ struct edge
 
 struct faceIndexes
 {
-    int faceIndex;
+	int faceIndex;
 	faceIndexes* nextFace;
 };
 
 CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 {
 	if (!entity || !filename)
-        return CC_FERR_BAD_ARGUMENT;
+		return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container meshes;
 	if (entity->isKindOf(CC_TYPES::MESH))
-        meshes.push_back(entity);
-    else
-        entity->filterChildren(meshes, true, CC_TYPES::MESH);
+		meshes.push_back(entity);
+	else
+		entity->filterChildren(meshes, true, CC_TYPES::MESH);
 
-    if (meshes.empty())
-    {
-        ccLog::Error("No mesh in input selection!");
-        return CC_FERR_BAD_ENTITY_TYPE;
-    }
-    else if (meshes.size()>1)
-    {
-        ccLog::Error("Can't save more than one mesh per MA file!");
-        return CC_FERR_BAD_ENTITY_TYPE;
-    }
+	if (meshes.empty())
+	{
+		ccLog::Error("No mesh in input selection!");
+		return CC_FERR_BAD_ENTITY_TYPE;
+	}
+	else if (meshes.size()>1)
+	{
+		ccLog::Error("Can't save more than one mesh per MA file!");
+		return CC_FERR_BAD_ENTITY_TYPE;
+	}
 
-    //we extract the (short) filename from the whole path
+	//we extract the (short) filename from the whole path
 	QString baseFilename = QFileInfo(filename).fileName();
 
-    //the mesh to save
-    ccGenericMesh* theMesh = ccHObjectCaster::ToGenericMesh(meshes[0]);
-    //and its vertices
-    ccGenericPointCloud* theCloud = theMesh->getAssociatedCloud();
+	//the mesh to save
+	ccGenericMesh* theMesh = ccHObjectCaster::ToGenericMesh(meshes[0]);
+	//and its vertices
+	ccGenericPointCloud* theCloud = theMesh->getAssociatedCloud();
 
 	unsigned numberOfTriangles = theMesh->size();
 	unsigned numberOfVertexes = theCloud->size();
 
 	if (numberOfTriangles==0 || numberOfVertexes==0)
 	{
-        ccLog::Error("Mesh is empty!");
-        return CC_FERR_BAD_ENTITY_TYPE;
+		ccLog::Error("Mesh is empty!");
+		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
 	bool hasColors = false;
 	if (theCloud->isA(CC_TYPES::POINT_CLOUD))
-	    static_cast<ccPointCloud*>(theCloud)->hasColors();
+		static_cast<ccPointCloud*>(theCloud)->hasColors();
 
-    //and its scalar field
+	//and its scalar field
 	/*CCLib::ScalarField* sf = 0;
 	if (theCloud->isA(CC_TYPES::POINT_CLOUD))
-	    sf = static_cast<ccPointCloud*>(theCloud)->getCurrentDisplayedScalarField();
+	sf = static_cast<ccPointCloud*>(theCloud)->getCurrentDisplayedScalarField();
 
-    if (!sf)
-        ccLog::Warning("No displayed scalar field! Values will all be 0!\n");
+	if (!sf)
+		ccLog::Warning("No displayed scalar field! Values will all be 0!\n");
 
 	//*/
 
-    //open ASCII file for writing
+	//open ASCII file for writing
 	FILE* fp = fopen(filename , "wt");
 
 	if (!fp)
-        return CC_FERR_WRITING;
+		return CC_FERR_WRITING;
 
 	//progress dialog
 	ccProgressDialog pdlg(true); //cancel available
-    unsigned palierModifier = (hasColors ? 1 : 0);
+	unsigned palierModifier = (hasColors ? 1 : 0);
 	CCLib::NormalizedProgress nprogress(&pdlg,unsigned(float((2+palierModifier)*numberOfTriangles+(3+palierModifier)*numberOfVertexes)));
 	pdlg.setMethodTitle("Save MA file");
 	char buffer[256];
-    sprintf(buffer,"Triangles = %u",numberOfTriangles);
+	sprintf(buffer,"Triangles = %u",numberOfTriangles);
 	pdlg.setInfo(buffer);
 	pdlg.start();
 
@@ -126,14 +126,14 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 		{fclose(fp);return CC_FERR_WRITING;}
 
 
-    //for multiple meshes handling (does not work yet)
-    unsigned char currentMesh = 0;
+	//for multiple meshes handling (does not work yet)
+	unsigned char currentMesh = 0;
 
 	//NOEUD DE TRANSFORMATION
 	if (fprintf(fp,"createNode transform -n \"Mesh%i\";\n",currentMesh+1) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
-    //NOEUD "PRINCIPAL"
+	//NOEUD "PRINCIPAL"
 	if (fprintf(fp,"createNode mesh -n \"MeshShape%i\" -p \"Mesh%i\";\n",currentMesh+1,currentMesh+1) < 0)
 		{fclose(fp);return CC_FERR_WRITING;}
 
@@ -389,8 +389,8 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	//NOEUD DES VERTEX COLORS
 	if (hasColors)
 	{
-	    assert(theCloud->isA(CC_TYPES::POINT_CLOUD));
-        ccPointCloud* pc = static_cast<ccPointCloud*>(theCloud);
+		assert(theCloud->isA(CC_TYPES::POINT_CLOUD));
+		ccPointCloud* pc = static_cast<ccPointCloud*>(theCloud);
 
 		if (fprintf(fp,"createNode polyColorPerVertex -n \"polyColorPerVertex%i\";\n",currentMesh+1) < 0)
 			{fclose(fp);return CC_FERR_WRITING;}
@@ -521,7 +521,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 
 CC_FILE_ERROR MAFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-    ccLog::Error("Not available yet!");
+	ccLog::Error("Not available yet!");
 
 	return CC_FERR_NO_ERROR;
 }

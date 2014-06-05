@@ -18,7 +18,8 @@
 #ifndef CC_SCALAR_FIELD_HEADER
 #define CC_SCALAR_FIELD_HEADER
 
-//local
+//Local
+#include "CCCoreLib.h"
 #include "CCConst.h"
 #include "CCTypes.h"
 #include "GenericChunkedArray.h"
@@ -33,37 +34,30 @@ namespace CCLib
 
 	Invalid values can be represented by NAN_VALUE.
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API ScalarField : public GenericChunkedArray<1,ScalarType>
-#else
-class ScalarField : public GenericChunkedArray<1,ScalarType>
-#endif
 {
 public:
 
 	//! Default constructor
 	/** [SHAREABLE] Call 'link' when associating this structure to an object.
 		\param name scalar field name
-    **/
+	**/
 	ScalarField(const char* name = 0);
 
 	//! Sets scalar field name
-    void setName(const char* name);
+	void setName(const char* name);
 
 	//! Returns scalar field name
 	inline const char* getName() const { return m_name; }
 
 	//! Returns the specific NaN value
-	static inline ScalarType NaN() { return NAN_VALUE; };
+	static inline ScalarType NaN() { return NAN_VALUE; }
 
 	//! Computes the mean value (and optionnaly the variance value) of the scalar field
 	/** \param mean a field to store the mean value
 		\param variance if not void, the variance will be computed and stored here
 	**/
-	void computeMeanAndVariance(ScalarType &mean, ScalarType* variance=0) const;
+	void computeMeanAndVariance(ScalarType &mean, ScalarType* variance = 0) const;
 
 	//inherited from GenericChunkedArray
 	virtual void computeMinAndMax();
@@ -72,14 +66,14 @@ public:
 	static inline bool ValidValue(ScalarType value) { return value == value; } //'value == value' fails for NaN values
 
 	//! Sets the value as 'invalid' (i.e. NAN_VALUE)
-	virtual void flagValueAsInvalid(unsigned index) { setValue(index,NaN()); }
+	inline virtual void flagValueAsInvalid(unsigned index) { setValue(index,NaN()); }
 
 protected:
 
 	//! Default destructor
 	/** [SHAREABLE] Call 'release' to destroy this object properly.
 	**/
-	virtual ~ScalarField() {};
+	virtual ~ScalarField() {}
 
 	//! Scalar field name
 	char m_name[256];

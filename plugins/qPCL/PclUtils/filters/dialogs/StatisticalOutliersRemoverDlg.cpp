@@ -18,10 +18,8 @@
 #include "StatisticalOutliersRemoverDlg.h"
 
 SORDialog::SORDialog(QWidget* parent)
-	: QDialog(parent),
-	Ui::StatisticalOutliersRemoverDlg()
+	: QDialog(parent)
+	, Ui::StatisticalOutliersRemoverDlg()
 {
-    setupUi(this);
+	setupUi(this);
 }
-
-

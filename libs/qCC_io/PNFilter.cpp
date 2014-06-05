@@ -31,47 +31,47 @@ static const PointCoordinateType s_defaultNorm[3] = {0,0,1};
 CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
 {
 	if (!entity || !filename)
-        return CC_FERR_BAD_ARGUMENT;
+		return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container clouds;
 	if (entity->isKindOf(CC_TYPES::POINT_CLOUD))
-        clouds.push_back(entity);
-    else
-        entity->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
+		clouds.push_back(entity);
+	else
+		entity->filterChildren(clouds, true, CC_TYPES::POINT_CLOUD);
 
-    if (clouds.empty())
-    {
-        ccLog::Error("No point cloud in input selection!");
-        return CC_FERR_BAD_ENTITY_TYPE;
-    }
-    else if (clouds.size()>1)
-    {
-        ccLog::Error("Can't save more than one cloud per PN file!");
-        return CC_FERR_BAD_ENTITY_TYPE;
-    }
-
-    //the cloud to save
-    ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[0]);
-	unsigned numberOfPoints = theCloud->size();
-
-	if (numberOfPoints==0)
+	if (clouds.empty())
 	{
-        ccLog::Error("Cloud is empty!");
-        return CC_FERR_BAD_ENTITY_TYPE;
+		ccLog::Error("No point cloud in input selection!");
+		return CC_FERR_BAD_ENTITY_TYPE;
+	}
+	else if (clouds.size()>1)
+	{
+		ccLog::Error("Can't save more than one cloud per PN file!");
+		return CC_FERR_BAD_ENTITY_TYPE;
 	}
 
-    //open binary file for writing
+	//the cloud to save
+	ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[0]);
+	unsigned numberOfPoints = theCloud->size();
+
+	if (numberOfPoints == 0)
+	{
+		ccLog::Error("Cloud is empty!");
+		return CC_FERR_BAD_ENTITY_TYPE;
+	}
+
+	//open binary file for writing
 	QFile out(filename);
 	if (!out.open(QIODevice::WriteOnly))
 		return CC_FERR_WRITING;
 
-    //Has the cloud been recentered?
+	//Has the cloud been recentered?
 	if (theCloud->isShifted())
-        ccLog::Warning(QString("[PNFilter::save] Can't recenter or rescale cloud '%1' when saving it in a PN file!").arg(theCloud->getName()));
+		ccLog::Warning(QString("[PNFilter::save] Can't recenter or rescale cloud '%1' when saving it in a PN file!").arg(theCloud->getName()));
 
 	bool hasNorms = theCloud->hasNormals();
 	if (!hasNorms)
-        ccLog::Warning(QString("[PNFilter::save] Cloud '%1' has no normal (we will save points with a default normal)!").arg(theCloud->getName()));
+		ccLog::Warning(QString("[PNFilter::save] Cloud '%1' has no normal (we will save points with a default normal)!").arg(theCloud->getName()));
 	float norm[3] = {(float)s_defaultNorm[0], (float)s_defaultNorm[1], (float)s_defaultNorm[2]};
 
 	//progress dialog
@@ -101,11 +101,11 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
 		//write normal
 		if (hasNorms)
 		{
-            const CCVector3& N = theCloud->getPointNormal(i);
+			const CCVector3& N = theCloud->getPointNormal(i);
 			//conversion to float
-            norm[0] = static_cast<float>(N.x);
-            norm[1] = static_cast<float>(N.y);
-            norm[2] = static_cast<float>(N.z);
+			norm[0] = static_cast<float>(N.x);
+			norm[1] = static_cast<float>(N.y);
+			norm[2] = static_cast<float>(N.z);
 		}
 		if (out.write(reinterpret_cast<const char*>(norm),3*sizeof(float)) < 0)
 		{
@@ -132,7 +132,7 @@ CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, boo
 	if (!in.open(QIODevice::ReadOnly))
 		return CC_FERR_READING;
 
-    //we deduce the points number from the file size
+	//we deduce the points number from the file size
 	qint64 fileSize = in.size();
 	qint64 singlePointSize = 6*sizeof(float);
 	//check that size is ok
@@ -150,17 +150,17 @@ CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, boo
 	pdlg.start();
 
 	ccPointCloud* loadedCloud = 0;
-    //if the file is too big, it will be chuncked in multiple parts
+	//if the file is too big, it will be chuncked in multiple parts
 	unsigned chunkIndex = 0;
 	unsigned fileChunkPos = 0;
 	unsigned fileChunkSize = 0;
-    //number of points read for the current cloud part
+	//number of points read for the current cloud part
 	unsigned pointsRead = 0;
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
 	for (unsigned i=0; i<numberOfPoints; i++)
 	{
-        //if we reach the max. cloud size limit, we cerate a new chunk
+		//if we reach the max. cloud size limit, we cerate a new chunk
 		if (pointsRead == fileChunkPos+fileChunkSize)
 		{
 			if (loadedCloud)
@@ -168,7 +168,7 @@ CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, boo
 			fileChunkPos = pointsRead;
 			fileChunkSize = std::min<unsigned>(numberOfPoints-pointsRead,CC_MAX_NUMBER_OF_POINTS_PER_CLOUD);
 			loadedCloud = new ccPointCloud(QString("unnamed - Cloud #%1").arg(++chunkIndex));
-            if (!loadedCloud || !loadedCloud->reserveThePointsTable(fileChunkSize) || !loadedCloud->reserveTheNormsTable())
+			if (!loadedCloud || !loadedCloud->reserveThePointsTable(fileChunkSize) || !loadedCloud->reserveTheNormsTable())
 			{
 				result = CC_FERR_NOT_ENOUGH_MEMORY;
 				if (loadedCloud)
@@ -179,12 +179,12 @@ CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, boo
 			loadedCloud->showNormals(true);
 		}
 
-        //we read the 3 coordinates of the point
+		//we read the 3 coordinates of the point
 		float rBuff[3];
 		if (in.read((char*)rBuff,3*sizeof(float))>=0)
 		{
-		    //conversion to CCVector3
-		    CCVector3 P((PointCoordinateType)rBuff[0],
+			//conversion to CCVector3
+			CCVector3 P((PointCoordinateType)rBuff[0],
 						(PointCoordinateType)rBuff[1],
 						(PointCoordinateType)rBuff[2]);
 			loadedCloud->addPoint(P);
@@ -195,7 +195,7 @@ CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, boo
 			break;
 		}
 
-        //then the 3 components of the normal vector
+		//then the 3 components of the normal vector
 		if (in.read((char*)rBuff,3*sizeof(float))>=0)
 		{
 			loadedCloud->addNorm(CCVector3::fromArray(rBuff));
@@ -215,7 +215,7 @@ CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, boo
 			result = CC_FERR_CANCELED_BY_USER;
 			break;
 		}
-    }
+	}
 
 	in.close();
 

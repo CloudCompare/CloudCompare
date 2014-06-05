@@ -32,7 +32,7 @@ class ccMinimumSpanningTreeForNormsDirection
 
 public:
 
-    //! Main entry point
+	//! Main entry point
 	static bool Process(	ccPointCloud* cloud,
 							CCLib::GenericProgressCallback* progressCb = 0,
 							CCLib::DgmOctree* octree = 0);

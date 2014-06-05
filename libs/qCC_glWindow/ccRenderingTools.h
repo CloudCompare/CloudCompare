@@ -34,12 +34,12 @@ public:
 	//! Displays a depth buffer as an image
 	static void ShowDepthBuffer(ccGBLSensor* lidar, QWidget* parent = 0);
 
-    //! Displays the colored scale corresponding to the currently activated context scalar field
+	//! Displays the colored scale corresponding to the currently activated context scalar field
 	/** Its appearance depends on the scalar fields min and max displayed
-        values, min and max saturation values, and also the selected
+		values, min and max saturation values, and also the selected
 		color ramp.
 		\param context OpenGL context description
-    **/
+	**/
 	static void DrawColorRamp(const CC_DRAW_CONTEXT& context);
 
 	//! See other version of DrawColorRamp

@@ -59,7 +59,7 @@ ccFacet::ccFacet(	PointCoordinateType maxEdgeLength/*=0*/,
 	m_planeEquation[3] = 0;
 
 	setVisible(true);
-    lockVisibility(false);
+	lockVisibility(false);
 }
 
 ccFacet::~ccFacet()

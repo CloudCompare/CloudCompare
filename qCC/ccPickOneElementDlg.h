@@ -26,16 +26,16 @@ class ccPickOneElementDlg : public QDialog, public Ui::PickOneElementDialog
 public:
 
 	//! Default constructor
-    ccPickOneElementDlg(QString label,
+	ccPickOneElementDlg(QString label,
 						QString windowTitle=QString(),
 						QWidget* parent = 0);
 
 	//! Add an element to the combo box
-    void addElement(QString elementName);
+	void addElement(QString elementName);
 	//! Sets the combo box default index
-    void setDefaultIndex(int index);
+	void setDefaultIndex(int index);
 	//! Returns the combo box current index (after completion)
-    int getSelectedIndex();
+	int getSelectedIndex();
 };
 
 #endif //CC_PICK_ONE_ELEMENT_DLG_HEADER

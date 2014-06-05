@@ -30,8 +30,8 @@
 **/
 class qPoissonRecon : public QObject, public ccStdPluginInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(ccStdPluginInterface)
+	Q_OBJECT
+	Q_INTERFACES(ccStdPluginInterface)
 #ifdef CC_QT5
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qPoissonRecon")
 #endif
@@ -46,9 +46,9 @@ public:
 	virtual QString getDescription() const { return "Poisson Surface Reconstruction (Kazhdan et al.)"; }
 	virtual QIcon getIcon() const;
 
-    //inherited from ccStdPluginInterface
+	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-    virtual void getActions(QActionGroup& group);
+	virtual void getActions(QActionGroup& group);
 
 protected slots:
 

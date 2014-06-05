@@ -18,6 +18,8 @@
 #ifndef CC_IMAGE_HEADER
 #define CC_IMAGE_HEADER
 
+//Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 
 //Qt
@@ -27,12 +29,7 @@
 class ccGenericGLDisplay;
 
 //! Generic image
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccImage : public ccHObject
-#else
-class ccImage : public ccHObject
-#endif
 {
 public:
 
@@ -42,10 +39,10 @@ public:
 	//! Constructor from QImage
 	ccImage(const QImage& image, const QString& name = QString("unknown"));
 
-    //! Returns unique class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::IMAGE; }
+	//! Returns unique class ID
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::IMAGE; }
 
-    //! Loads image from file
+	//! Loads image from file
 	/** \param filename image filename
 		\param error a human readable description of what went wrong (if method fails)
 		\return success
@@ -89,11 +86,11 @@ public:
 
 protected:
 
-    //inherited from ccHObject
-    virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	//inherited from ccHObject
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
 
 	//! Unbinds texture from currently associated GL context
-    virtual bool unbindTexture();
+	virtual bool unbindTexture();
 
 	//! Binds texture to a GL context (and creates texture if necessary)
 	/** \param win 3D display to which to bind the texture

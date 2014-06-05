@@ -22,11 +22,11 @@
 
 class NormalEstimationDialog : public QDialog, public Ui::NormalEstimationDialog
 {
-    Q_OBJECT
-public:
-    NormalEstimationDialog(QWidget* parent = 0);
+	Q_OBJECT
 
 public:
+
+	NormalEstimationDialog(QWidget* parent = 0);
 
 };
 

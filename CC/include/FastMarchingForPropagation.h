@@ -97,9 +97,9 @@ public:
 
 protected:
 
-    //! A Fast Marching grid cell for surfacical propagation
-    class PropagationCell : public Cell
-    {
+	//! A Fast Marching grid cell for surfacical propagation
+	class PropagationCell : public Cell
+	{
 	public:
 		//! Default constructor
 		PropagationCell()
@@ -111,11 +111,11 @@ protected:
 		//! Destructor
 		virtual ~PropagationCell() {}
 
-        //! Local front acceleration
-        float f;
-        //! Equivalent cell code in the octree
-        DgmOctree::OctreeCellCodeType cellCode;
-    };
+		//! Local front acceleration
+		float f;
+		//! Equivalent cell code in the octree
+		DgmOctree::OctreeCellCodeType cellCode;
+	};
 
 	//inherited methods (see FastMarching)
 	virtual float computeTCoefApprox(Cell* currentCell, Cell* neighbourCell) const;

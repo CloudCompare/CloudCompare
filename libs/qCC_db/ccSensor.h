@@ -19,6 +19,7 @@
 #define CC_SENSOR_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 #include "ccIndexedTransformationBuffer.h"
 
@@ -34,28 +35,23 @@ enum CC_SENSOR_TYPE {	UNKNOWN_SENSOR,
 	to a 'rigid transformation' (e.g. a rigid mechanical link between
 	the sensor 'optical' center and the GPS/IMU center position).
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccSensor : public ccHObject
-#else
-class ccSensor : public ccHObject
-#endif
 {
 public:
 
 	//! Default constructor
 	ccSensor(QString name);
 
-    //! Copy constructor
-    ccSensor(const ccSensor &sensor);
+	//! Copy constructor
+	ccSensor(const ccSensor &sensor);
 
-    //inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::SENSOR; }
+	//inherited from ccHObject
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::SENSOR; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Returns the sensor type
 	/** Should be re-implemented by sub-classes
-        \return the sensor type
+		\return the sensor type
 	**/
 	virtual CC_SENSOR_TYPE getType() const { return UNKNOWN_SENSOR; }
 
@@ -120,17 +116,17 @@ public:
 	//! Sets the sensor graphic representation scale
 	void setGraphicScale(PointCoordinateType scale) { m_scale = scale; }
 
-    //! Returns the sensor graphic representation scale
+	//! Returns the sensor graphic representation scale
 	PointCoordinateType getGraphicScale() const { return m_scale; }
 
 protected:
 
-    //inherited from ccHObject
+	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
 	//inherited from ccHObject
-    virtual void applyGLTransformation(const ccGLMatrix& trans);
+	virtual void applyGLTransformation(const ccGLMatrix& trans);
 
 	//! Positions buffer (optional)
 	ccIndexedTransformationBuffer* m_posBuffer;
@@ -138,7 +134,7 @@ protected:
 	//! Rigid transformation between this sensor and its associated positions
 	/** The transformation goes from the sensor position(s) to the sensor "optical" center.
 	**/
-    ccGLMatrix m_rigidTransformation;
+	ccGLMatrix m_rigidTransformation;
 
 	//! Active index (for displayed position, etc.)
 	double m_activeIndex;
@@ -149,7 +145,7 @@ protected:
 	Vector3Tpl<colorType> m_color;
 
 	//! Sensor graphic representation scale
-    PointCoordinateType m_scale;
+	PointCoordinateType m_scale;
 };
 
 #endif //CC_SENSOR_HEADER

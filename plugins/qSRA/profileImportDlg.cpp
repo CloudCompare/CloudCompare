@@ -27,9 +27,9 @@ ProfileImportDlg::ProfileImportDlg(QWidget* parent)
 	: QDialog(parent)
 	, Ui::ProfileImportDlg()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool);
+	setWindowFlags(Qt::Tool);
 
 	connect(browseToolButton, SIGNAL(clicked()), this, SLOT(browseFile()));
 }

@@ -18,6 +18,8 @@
 #ifndef CC_POLYLINE_HEADER
 #define CC_POLYLINE_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "ReferenceCloud.h"
 
 namespace CCLib
@@ -28,13 +30,7 @@ namespace CCLib
 	(in a specific order) with a open/closed state
 	information.
 **/
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API Polyline : public ReferenceCloud
-#else
-class Polyline : public ReferenceCloud
-#endif
 {
 	public:
 

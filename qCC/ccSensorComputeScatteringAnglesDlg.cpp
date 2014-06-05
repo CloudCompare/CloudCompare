@@ -18,10 +18,11 @@
 #include "ccSensorComputeScatteringAnglesDlg.h"
 
 ccSensorComputeScatteringAnglesDlg::ccSensorComputeScatteringAnglesDlg(QWidget* parent/*=0*/)
-    : QDialog(parent), Ui::sensorComputeScatteringAnglesDlg()
+	: QDialog(parent)
+	, Ui::sensorComputeScatteringAnglesDlg()
 {
-    setupUi(this);
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setupUi(this);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 

@@ -18,6 +18,8 @@
 #ifndef CHAMFER_DISTANCE_TRANSFORM_HEADER
 #define CHAMFER_DISTANCE_TRANSFORM_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "CCConst.h"
 #include "MathTools.h"
 
@@ -28,12 +30,7 @@ class GenericProgressCallback;
 class NormalizedProgress;
 
 //! Class to compute and handle Chamfer distances on a 3D grid
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API ChamferDistanceTransform : MathTools
-#else
-class ChamferDistanceTransform : MathTools
-#endif
 {
 
 public:
@@ -66,7 +63,7 @@ public:
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\return max distance (or -1 if an error occurred)
 	**/
-	int propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, GenericProgressCallback* progressCb=0);
+	int propagateDistance(CC_CHAMFER_DISTANCE_TYPE type, GenericProgressCallback* progressCb = 0);
 
 	//! Sets a cell as a "zero"
 	/** Chamfer distance is computed on the whole grid relatively to the
@@ -107,12 +104,12 @@ protected:
 	//! Internal method for distance propagation
 	/** \return max distance
 	**/
-	GridElement propagateDistance(GridElement iStart,
-							GridElement jStart,
-							GridElement kStart,
-							int sign,
-							const int neighbours[14][4],
-							NormalizedProgress* normProgress=0);
+	GridElement propagateDistance(	GridElement iStart,
+									GridElement jStart,
+									GridElement kStart,
+									int sign,
+									const int neighbours[14][4],
+									NormalizedProgress* normProgress = 0);
 
     //! Grid structure
 	GridElement *m_grid;

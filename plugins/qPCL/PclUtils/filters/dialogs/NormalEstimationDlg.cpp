@@ -19,8 +19,7 @@
 
 NormalEstimationDialog::NormalEstimationDialog(QWidget* parent) : QDialog(parent), Ui::NormalEstimationDialog()
 {
-    setupUi(this);
-
+	setupUi(this);
 }
 
 

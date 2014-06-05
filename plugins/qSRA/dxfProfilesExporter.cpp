@@ -174,10 +174,10 @@ bool DxfProfilesExporter::SaveVerticalProfiles(	const QSharedPointer<DistanceMap
 		dxf.writeLayer(*dw, 
 			DL_LayerData("0", 0), 
 			DL_Attributes(
-			std::string(""),      // leave empty
-			DL_Codes::black,      // default color
-			100,                  // default width (in 1/100 mm)
-			"CONTINUOUS"));       // default line style
+			std::string(""),		// leave empty
+			DL_Codes::black,		// default color
+			100,					// default width (in 1/100 mm)
+			"CONTINUOUS"));			// default line style
 
 		//theoretical profile layer
 		dxf.writeLayer(*dw, 
@@ -663,10 +663,10 @@ bool DxfProfilesExporter::SaveHorizontalProfiles(	const QSharedPointer<DistanceM
 		dxf.writeLayer(*dw, 
 			DL_LayerData("0", 0), 
 			DL_Attributes(
-			std::string(""),      // leave empty
-			DL_Codes::black,      // default color
-			100,                  // default width (in 1/100 mm)
-			"CONTINUOUS"));       // default line style
+			std::string(""),		// leave empty
+			DL_Codes::black,		// default color
+			100,					// default width (in 1/100 mm)
+			"CONTINUOUS"));			// default line style
 
 		//legend layer
 		dxf.writeLayer(*dw, 

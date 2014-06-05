@@ -15,7 +15,6 @@
 //#                                                                        #
 //##########################################################################
 
-
 #ifndef CC_SF_DISTANCES_DLG_HEADER
 #define CC_SF_DISTANCES_DLG_HEADER
 
@@ -26,12 +25,12 @@ class ccSensorComputeDistancesDlg : public QDialog, public Ui::sensorComputeDist
 {
 public:
 
-    //! Default constructor
-    ccSensorComputeDistancesDlg(QWidget* parent = 0);
+	//! Default constructor
+	ccSensorComputeDistancesDlg(QWidget* parent = 0);
 
 	//! Returns whether computed distances should be squared or not
 	bool computeSquaredDistances() const;
 
 };
 
-#endif
+#endif //CC_SF_DISTANCES_DLG_HEADER

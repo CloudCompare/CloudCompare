@@ -19,31 +19,31 @@
 
 ccCurvatureDlg::ccCurvatureDlg(QWidget* parent/*=0*/) : QDialog(parent), Ui::CurvatureDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 double ccCurvatureDlg::getKernelSize() const
 {
-    return kernelDoubleSpinBox->value();
+	return kernelDoubleSpinBox->value();
 }
 
 void ccCurvatureDlg::setKernelSize(double size)
 {
-    kernelDoubleSpinBox->setValue(size<0.0 ? 0.0 : size);
+	kernelDoubleSpinBox->setValue(size<0.0 ? 0.0 : size);
 }
 
 CCLib::Neighbourhood::CC_CURVATURE_TYPE ccCurvatureDlg::getCurvatureType() const
 {
-    switch(curvatureTypeComboBox->currentIndex())
-    {
-        case 0:
-            return CCLib::Neighbourhood::GAUSSIAN_CURV;
-        case 1:
-            return CCLib::Neighbourhood::MEAN_CURV;
-        default:
-            assert(false);
-    }
-    return CCLib::Neighbourhood::GAUSSIAN_CURV;
+	switch(curvatureTypeComboBox->currentIndex())
+	{
+	case 0:
+		return CCLib::Neighbourhood::GAUSSIAN_CURV;
+	case 1:
+		return CCLib::Neighbourhood::MEAN_CURV;
+	default:
+		assert(false);
+	}
+	return CCLib::Neighbourhood::GAUSSIAN_CURV;
 }

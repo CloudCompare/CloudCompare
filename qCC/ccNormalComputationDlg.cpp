@@ -25,27 +25,27 @@
 
 ccNormalComputationDlg::ccNormalComputationDlg(QWidget* parent) : QDialog(parent), Ui::NormalComputationDlg()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
-	
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+
 	connect(localModelComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(localModelChanged(int)));
 }
 
 CC_LOCAL_MODEL_TYPES ccNormalComputationDlg::getLocalModel() const
 {
-    switch (localModelComboBox->currentIndex())
-    {
-    case 0:
-        return LS;
-    case 1:
-        return HF;
-    case 2:
-        return TRI;
-    }
+	switch (localModelComboBox->currentIndex())
+	{
+	case 0:
+		return LS;
+	case 1:
+		return HF;
+	case 2:
+		return TRI;
+	}
 
-    assert(false);
-    return LS;
+	assert(false);
+	return LS;
 }
 
 void ccNormalComputationDlg::localModelChanged(int index)
@@ -65,8 +65,8 @@ PointCoordinateType ccNormalComputationDlg::getRadius() const
 
 int ccNormalComputationDlg::getPreferedOrientation() const
 {
-    if (!preferedOrientationCheckBox->isChecked())
-        return -1;
+	if (!preferedOrientationCheckBox->isChecked())
+		return -1;
 
-    return preferedOrientationComboBox->currentIndex();
+	return preferedOrientationComboBox->currentIndex();
 }

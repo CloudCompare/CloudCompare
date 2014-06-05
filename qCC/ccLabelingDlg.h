@@ -25,17 +25,17 @@ class ccLabelingDlg : public QDialog, public Ui::LabelingDialog
 {
 public:
 
-    //! Default constructor
-    ccLabelingDlg(QWidget* parent = 0);
+	//! Default constructor
+	ccLabelingDlg(QWidget* parent = 0);
 
-    //! Returns octree level (defines grid step)
-    int getOctreeLevel();
+	//! Returns octree level (defines grid step)
+	int getOctreeLevel();
 
-    //! Returns min number of points per extracted CC
-    int getMinPointsNb();
+	//! Returns min number of points per extracted CC
+	int getMinPointsNb();
 
-    //! Specifies whether each extracted CC should get a random color
-    bool randomColors();
+	//! Specifies whether each extracted CC should get a random color
+	bool randomColors();
 };
 
 #endif

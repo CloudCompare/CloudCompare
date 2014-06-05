@@ -28,17 +28,17 @@ class ccCurvatureDlg : public QDialog, public Ui::CurvatureDialog
 {
 public:
 
-    //! Default constructor
-    ccCurvatureDlg(QWidget* parent = 0);
+	//! Default constructor
+	ccCurvatureDlg(QWidget* parent = 0);
 
-    //! Returns kernel size
-    double getKernelSize() const;
+	//! Returns kernel size
+	double getKernelSize() const;
 
-    //! Sets kernel size
-    void setKernelSize(double size);
+	//! Sets kernel size
+	void setKernelSize(double size);
 
-    //! Returns curvature type
-    CCLib::Neighbourhood::CC_CURVATURE_TYPE getCurvatureType() const;
+	//! Returns curvature type
+	CCLib::Neighbourhood::CC_CURVATURE_TYPE getCurvatureType() const;
 };
 
 #endif //CC_CURVATURE_DLG_HEADER

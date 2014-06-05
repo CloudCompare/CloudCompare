@@ -226,9 +226,9 @@ bool ccCone::toFile_MeOnly(QFile& out) const
 	//parameters (dataVersion>=21)
 	QDataStream outStream(&out);
 	outStream << m_bottomRadius;
-    outStream << m_topRadius;
-    outStream << m_xOff;
-    outStream << m_yOff;
+	outStream << m_topRadius;
+	outStream << m_xOff;
+	outStream << m_yOff;
 	outStream << m_height;
 
 	return true;

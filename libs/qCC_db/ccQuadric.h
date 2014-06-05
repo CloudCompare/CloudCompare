@@ -18,6 +18,8 @@
 #ifndef CC_QUADRIC_PRIMITIVE_HEADER
 #define CC_QUADRIC_PRIMITIVE_HEADER
 
+//Local
+#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
 //CCLib
@@ -26,12 +28,7 @@
 //! Quadric (primitive)
 /** 2D1/2 quadric primitive
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccQuadric : public ccGenericPrimitive
-#else
-class ccQuadric : public ccGenericPrimitive
-#endif
 {
 public:
 
@@ -58,7 +55,7 @@ public:
 	**/
 	ccQuadric(QString name = QString("Plane"));
 
-    //! Returns class ID
+	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::QUADRIC; }
 
 	//inherited from ccGenericPrimitive
@@ -89,8 +86,8 @@ public:
 	static ccQuadric* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms/*=0*/);
 
 protected:
-    
-    //inherited from ccGenericPrimitive
+
+	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual bool buildUp();

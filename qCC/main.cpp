@@ -55,13 +55,13 @@ public:
 	{
 		setOrganizationName("CCCorp");
 		setApplicationName("CloudCompare");
-#ifdef Q_OS_MAC         
+#ifdef Q_OS_MAC
 		// Mac OS X apps don't show icons in menus
 		setAttribute( Qt::AA_DontShowIconsInMenus );
 #endif
 	}
 
-#ifdef Q_OS_MAC            
+#ifdef Q_OS_MAC
 protected:
 	bool event( QEvent *inEvent )
 	{

@@ -19,6 +19,7 @@
 #define CC_FACET_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 #include "ccMesh.h"
 #include "ccPolyline.h"
@@ -31,12 +32,7 @@
 //! Facet
 /** Composite object: point cloud + 2D1/2 contour polyline + 2D1/2 surface mesh
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccFacet : public ccHObject
-#else
-class ccFacet : public ccHObject
-#endif
 {
 public:
 
@@ -64,8 +60,8 @@ public:
 							bool transferOwnership = false,
 							const PointCoordinateType* planeEquation = 0);
 
-    //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::FACET; }
+	//! Returns class ID
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::FACET; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Sets the facet unique color
@@ -148,7 +144,7 @@ protected:
 	//! Whether the facet normal vector should be displayed or not
 	bool m_showNormalVector;
 
-    //inherited from ccHObject
+	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 };

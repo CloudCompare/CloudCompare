@@ -42,13 +42,13 @@ ccColorLevelsDlg::ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCl
 	, m_histogram(0)
 	, m_cloud(pointCloud)
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	//connect GUI elements
-    connect(channelComboBox,							SIGNAL(currentIndexChanged(int)),	this,	SLOT(onChannelChanged(int)));
-    connect(buttonBox->button(QDialogButtonBox::Apply),	SIGNAL(clicked()),					this,	SLOT(onApply()));
+	connect(channelComboBox,							SIGNAL(currentIndexChanged(int)),	this,	SLOT(onChannelChanged(int)));
+	connect(buttonBox->button(QDialogButtonBox::Apply),	SIGNAL(clicked()),					this,	SLOT(onApply()));
 
 	//create histogram view
 	m_histogram = new ccHistogramWindow(this);

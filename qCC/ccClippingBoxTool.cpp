@@ -78,12 +78,12 @@ ccClippingBoxTool::ccClippingBoxTool(QWidget* parent)
 	connect(plusZShiftToolButton,	SIGNAL(clicked()), this, SLOT(shiftZPlus()));
 
 	viewButtonsFrame->setEnabled(true);
-    connect(viewUpToolButton,		SIGNAL(clicked()),	this,	SLOT(setTopView()));
-    connect(viewDownToolButton,		SIGNAL(clicked()),	this,	SLOT(setBottomView()));
-    connect(viewFrontToolButton,	SIGNAL(clicked()),	this,	SLOT(setFrontView()));
-    connect(viewBackToolButton,		SIGNAL(clicked()),	this,	SLOT(setBackView()));
-    connect(viewLeftToolButton,		SIGNAL(clicked()),	this,	SLOT(setLeftView()));
-    connect(viewRightToolButton,	SIGNAL(clicked()),	this,	SLOT(setRightView()));
+	connect(viewUpToolButton,		SIGNAL(clicked()),	this,	SLOT(setTopView()));
+	connect(viewDownToolButton,		SIGNAL(clicked()),	this,	SLOT(setBottomView()));
+	connect(viewFrontToolButton,	SIGNAL(clicked()),	this,	SLOT(setFrontView()));
+	connect(viewBackToolButton,		SIGNAL(clicked()),	this,	SLOT(setBackView()));
+	connect(viewLeftToolButton,		SIGNAL(clicked()),	this,	SLOT(setLeftView()));
+	connect(viewRightToolButton,	SIGNAL(clicked()),	this,	SLOT(setRightView()));
 
 	s_maxEdgeLength = -1.0;
 	//s_lastContourUniqueIDs.clear();
@@ -849,41 +849,41 @@ void ccClippingBoxTool::closeDialog()
 
 void ccClippingBoxTool::setTopView()
 {
-    setView(CC_TOP_VIEW);
+	setView(CC_TOP_VIEW);
 }
 
 void ccClippingBoxTool::setBottomView()
 {
-    setView(CC_BOTTOM_VIEW);
+	setView(CC_BOTTOM_VIEW);
 }
 
 void ccClippingBoxTool::setFrontView()
 {
-    setView(CC_FRONT_VIEW);
+	setView(CC_FRONT_VIEW);
 }
 
 void ccClippingBoxTool::setBackView()
 {
-    setView(CC_BACK_VIEW);
+	setView(CC_BACK_VIEW);
 }
 
 void ccClippingBoxTool::setLeftView()
 {
-    setView(CC_LEFT_VIEW);
+	setView(CC_LEFT_VIEW);
 }
 
 void ccClippingBoxTool::setRightView()
 {
-    setView(CC_RIGHT_VIEW);
+	setView(CC_RIGHT_VIEW);
 }
 
 void ccClippingBoxTool::setView(CC_VIEW_ORIENTATION orientation)
 {
-    if (!m_associatedWin)
-        return;
+	if (!m_associatedWin)
+		return;
 
-    //m_associatedWin->blockSignals(true);
-    m_associatedWin->setView(orientation,false);
+	//m_associatedWin->blockSignals(true);
+	m_associatedWin->setView(orientation,false);
 	if (m_clipBox && m_clipBox->isGLTransEnabled())
 	{
 		ccViewportParameters params = m_associatedWin->getViewportParameters();
@@ -894,6 +894,6 @@ void ccClippingBoxTool::setView(CC_VIEW_ORIENTATION orientation)
 		params.viewMat = params.viewMat * rotMat.inverse();
 		m_associatedWin->setViewportParameters(params);
 	}
-    //m_associatedWin->blockSignals(false);
-    m_associatedWin->redraw();
+	//m_associatedWin->blockSignals(false);
+	m_associatedWin->redraw();
 }

@@ -40,7 +40,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 	if (!mesh)
 		return 0;
 
-    FbxMesh* lMesh = FbxMesh::Create(pScene, qPrintable(mesh->getName()));
+	FbxMesh* lMesh = FbxMesh::Create(pScene, qPrintable(mesh->getName()));
 
 	ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
 	if (!cloud)
@@ -48,7 +48,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 	unsigned vertCount = cloud->size();
 	unsigned faceCount = mesh->size();
 
-    // Create control points.
+	// Create control points.
 	{
 		lMesh->InitControlPoints(vertCount);
 		FbxVector4* lControlPoints = lMesh->GetControlPoints();
@@ -64,7 +64,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 	if (mesh->isA(CC_TYPES::MESH))
 		asCCMesh = static_cast<ccMesh*>(mesh);
 
-    // normals
+	// normals
 	if (mesh->hasNormals())
 	{
 		FbxGeometryElementNormal* lGeometryElementNormal = lMesh->CreateElementNormal();
@@ -133,7 +133,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 		ccLog::Warning("[FBX] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 	}
 
-    // colors
+	// colors
 	if (cloud->hasColors())
 	{
 		FbxGeometryElementVertexColor* lGeometryElementVertexColor = lMesh->CreateElementVertexColor();
@@ -150,11 +150,11 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 	}
 
 	// Set material mapping.
-    //FbxGeometryElementMaterial* lMaterialElement = lMesh->CreateElementMaterial();
-    //lMaterialElement->SetMappingMode(FbxGeometryElement::eByPolygon);
-    //lMaterialElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
+	//FbxGeometryElementMaterial* lMaterialElement = lMesh->CreateElementMaterial();
+	//lMaterialElement->SetMappingMode(FbxGeometryElement::eByPolygon);
+	//lMaterialElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
-    // Create polygons. Assign material indices.
+	// Create polygons. Assign material indices.
 	{
 		for (unsigned j=0; j<faceCount; ++j)
 		{
@@ -168,69 +168,69 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 		}
 	}
 
-    FbxNode* lNode = FbxNode::Create(pScene,qPrintable(mesh->getName()));
+	FbxNode* lNode = FbxNode::Create(pScene,qPrintable(mesh->getName()));
 
-    lNode->SetNodeAttribute(lMesh);
+	lNode->SetNodeAttribute(lMesh);
 
-    //CreateMaterials(pScene, lMesh);
+	//CreateMaterials(pScene, lMesh);
 
-    return lNode;
+	return lNode;
 }
 
 static bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFilename, int pFileFormat = -1, bool pEmbedMedia = false)
 {
-    // Create an exporter
-    FbxExporter* lExporter = FbxExporter::Create(pManager, "");
+	// Create an exporter
+	FbxExporter* lExporter = FbxExporter::Create(pManager, "");
 
-    if( pFileFormat < 0 || pFileFormat >= pManager->GetIOPluginRegistry()->GetWriterFormatCount() )
-    {
-        // Write in fall back format in less no ASCII format found
-        pFileFormat = pManager->GetIOPluginRegistry()->GetNativeWriterFormat();
+	if( pFileFormat < 0 || pFileFormat >= pManager->GetIOPluginRegistry()->GetWriterFormatCount() )
+	{
+		// Write in fall back format in less no ASCII format found
+		pFileFormat = pManager->GetIOPluginRegistry()->GetNativeWriterFormat();
 
-        //Try to export in ASCII if possible
-        int lFormatIndex, lFormatCount = pManager->GetIOPluginRegistry()->GetWriterFormatCount();
+		//Try to export in ASCII if possible
+		int lFormatIndex, lFormatCount = pManager->GetIOPluginRegistry()->GetWriterFormatCount();
 
-        for (lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
-        {
-            if (pManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
-            {
-                FbxString lDesc = pManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
-                const char *lASCII = "ascii";
-                if (lDesc.Find(lASCII)>=0)
-                {
-                    pFileFormat = lFormatIndex;
-                    break;
-                }
-            }
-        } 
-    }
+		for (lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
+		{
+			if (pManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
+			{
+				FbxString lDesc = pManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
+				const char *lASCII = "ascii";
+				if (lDesc.Find(lASCII)>=0)
+				{
+					pFileFormat = lFormatIndex;
+					break;
+				}
+			}
+		} 
+	}
 
-    // Set the export states. By default, the export states are always set to 
-    // true except for the option eEXPORT_TEXTURE_AS_EMBEDDED. The code below 
-    // shows how to change these states
-    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_MATERIAL,        true);
-    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_TEXTURE,         true);
-    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_EMBEDDED,        pEmbedMedia);
-    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_SHAPE,           true);
-    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_GOBO,            true);
-    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_ANIMATION,       true);
-    (*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_GLOBAL_SETTINGS, true);
+	// Set the export states. By default, the export states are always set to 
+	// true except for the option eEXPORT_TEXTURE_AS_EMBEDDED. The code below 
+	// shows how to change these states
+	(*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_MATERIAL,		true);
+	(*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_TEXTURE,			true);
+	(*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_EMBEDDED,		pEmbedMedia);
+	(*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_SHAPE,			true);
+	(*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_GOBO,			true);
+	(*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_ANIMATION,		true);
+	(*(pManager->GetIOSettings())).SetBoolProp(EXP_FBX_GLOBAL_SETTINGS,	true);
 
-    // Initialize the exporter by providing a filename
-    if(lExporter->Initialize(pFilename, pFileFormat, pManager->GetIOSettings()) == false)
-    {
-        ccLog::Warning("[FBX] Call to FbxExporter::Initialize() failed");
-        ccLog::Warning("[FBX] Error returned: %s", lExporter->GetStatus().GetErrorString());
-        return false;
-    }
+	// Initialize the exporter by providing a filename
+	if(lExporter->Initialize(pFilename, pFileFormat, pManager->GetIOSettings()) == false)
+	{
+		ccLog::Warning("[FBX] Call to FbxExporter::Initialize() failed");
+		ccLog::Warning("[FBX] Error returned: %s", lExporter->GetStatus().GetErrorString());
+		return false;
+	}
 
-    // Export the scene
-    bool lStatus = lExporter->Export(pScene); 
+	// Export the scene
+	bool lStatus = lExporter->Export(pScene); 
 
-    // Destroy the exporter
-    lExporter->Destroy();
+	// Destroy the exporter
+	lExporter->Destroy();
 
-    return lStatus;
+	return lStatus;
 }
 
 CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const char* filename)
@@ -255,16 +255,16 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	if (meshes.empty())
 	{
-        return CC_FERR_NO_SAVE;
+		return CC_FERR_NO_SAVE;
 	}
 
 	//The first thing to do is to create the FBX Manager which is the object allocator for almost all the classes in the SDK
-    FbxManager* lSdkManager = FbxManager::Create();
-    if( !lSdkManager )
-    {
+	FbxManager* lSdkManager = FbxManager::Create();
+	if( !lSdkManager )
+	{
 		ccLog::Warning("[FBX] Error: Unable to create FBX Manager!");
-        return CC_FERR_CONSOLE_ERROR;
-    }
+		return CC_FERR_CONSOLE_ERROR;
+	}
 	else
 	{
 		ccLog::Print("[FBX] Autodesk FBX SDK version %s", lSdkManager->GetVersion());
@@ -278,15 +278,15 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const char* filename)
 	//FbxString lPath = FbxGetApplicationDirectory();
 	//lSdkManager->LoadPluginsDirectory(lPath.Buffer());
 
-    //Create an FBX scene. This object holds most objects imported/exported from/to files.
-    FbxScene* lScene = FbxScene::Create(lSdkManager, "My Scene");
+	//Create an FBX scene. This object holds most objects imported/exported from/to files.
+	FbxScene* lScene = FbxScene::Create(lSdkManager, "My Scene");
 	if( !lScene )
-    {
+	{
 		ccLog::Warning("[FBX] Error: Unable to create FBX scene!");
-        return CC_FERR_CONSOLE_ERROR;
-    }
+		return CC_FERR_CONSOLE_ERROR;
+	}
 
-    // create scene info
+	// create scene info
 	{
 		FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(lSdkManager,"SceneInfo");
 		sceneInfo->mTitle = qPrintable(QString("Mesh: ") + (meshes.size() == 1 ? meshes[0]->getName() : QString("Multiple meshes")));
@@ -313,8 +313,8 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const char* filename)
 	//	}
 	//}
 
-    // Build the node tree.
-    FbxNode* lRootNode = lScene->GetRootNode();
+	// Build the node tree.
+	FbxNode* lRootNode = lScene->GetRootNode();
 	{
 		for (size_t i=0; i<meshes.size(); ++i)
 		{
@@ -327,10 +327,10 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const char* filename)
 	}
 
 	// Save the scene.
-    bool lResult = SaveScene(lSdkManager, lScene, filename);
+	bool lResult = SaveScene(lSdkManager, lScene, filename);
 
-    // Destroy all objects created by the FBX SDK.
-    if( lSdkManager )
+	// Destroy all objects created by the FBX SDK.
+	if( lSdkManager )
 		lSdkManager->Destroy();
 
 	return lResult ? CC_FERR_NO_ERROR : CC_FERR_CONSOLE_ERROR;
@@ -502,8 +502,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 	int perVertexNormals = -1;
 	int perPolygonNormals = -1;
 	{
-        for (int j=0; j<fbxMesh->GetElementNormalCount(); j++)
-        {
+		for (int j=0; j<fbxMesh->GetElementNormalCount(); j++)
+		{
 			FbxGeometryElementNormal* leNormals = fbxMesh->GetElementNormal(j);
 			switch(leNormals->GetMappingMode())
 			{
@@ -783,8 +783,8 @@ CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bo
 	
 	// Import options determine what kind of data is to be imported.
 	// True is the default, but here we’ll set some to true explicitly, and others to false.
-	//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_MATERIAL,        true);
-	//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_TEXTURE,         true);
+	//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_MATERIAL,	true);
+	//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_TEXTURE,	true);
 	
 	// Create an importer using the SDK manager.
 	FbxImporter* lImporter = FbxImporter::Create(lSdkManager,"");

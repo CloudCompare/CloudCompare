@@ -56,22 +56,22 @@ AsciiOpenDlg::AsciiOpenDlg(QString filename, QWidget* parent)
 	, m_filename(filename)
 	, m_columnsCount(0)
 {
-    m_ui->setupUi(this);
+	m_ui->setupUi(this);
 
-    //spinBoxSkipLines->setValue(0);
+	//spinBoxSkipLines->setValue(0);
 	m_ui->commentLinesSkippedLabel->hide();
 
-    connect(m_ui->buttonBox,			SIGNAL(accepted()),						this, SLOT(testBeforeAccept()));
-    connect(m_ui->lineEditSeparator,	SIGNAL(textChanged(const QString &)),	this, SLOT(updateTable(const QString &)));
-    connect(m_ui->spinBoxSkipLines,		SIGNAL(valueChanged(int)),				this, SLOT(setSkippedLines(int)));
+	connect(m_ui->buttonBox,			SIGNAL(accepted()),						this, SLOT(testBeforeAccept()));
+	connect(m_ui->lineEditSeparator,	SIGNAL(textChanged(const QString &)),	this, SLOT(updateTable(const QString &)));
+	connect(m_ui->spinBoxSkipLines,		SIGNAL(valueChanged(int)),				this, SLOT(setSkippedLines(int)));
 
-    //shortcut buttons
-    connect(m_ui->toolButtonShortcutESP,		SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
-    connect(m_ui->toolButtonShortcutTAB,		SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
-    connect(m_ui->toolButtonShortcutComma,		SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
-    connect(m_ui->toolButtonShortcutDotcomma,	SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
+	//shortcut buttons
+	connect(m_ui->toolButtonShortcutESP,		SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
+	connect(m_ui->toolButtonShortcutTAB,		SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
+	connect(m_ui->toolButtonShortcutComma,		SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
+	connect(m_ui->toolButtonShortcutDotcomma,	SIGNAL(clicked()), this, SLOT(shortcutButtonPressed()));
 
-    m_ui->lineEditFileName->setText(m_filename);
+	m_ui->lineEditFileName->setText(m_filename);
 
 	m_ui->maxCloudSizeDoubleSpinBox->setMaximum(static_cast<double>(CC_MAX_NUMBER_OF_POINTS_PER_CLOUD)/1.0e6);
 	m_ui->maxCloudSizeDoubleSpinBox->setValue(s_maxCloudSizeDoubleSpinBoxValue);
@@ -100,12 +100,12 @@ AsciiOpenDlg::~AsciiOpenDlg()
 
 void AsciiOpenDlg::setSkippedLines(int linesCount)
 {
-    if (linesCount<0)
-        return;
+	if (linesCount<0)
+		return;
 
-    m_skippedLines = (unsigned)linesCount;
+	m_skippedLines = (unsigned)linesCount;
 
-    updateTable(m_separator);
+	updateTable(m_separator);
 }
 
 static const unsigned MAX_COLUMNS = 256;				//maximum number of columns that can be handled
@@ -121,17 +121,17 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 	if (m_filename.isEmpty())
 	{
 		m_ui->tableWidget->clear();
-        return;
+		return;
 	}
 
-    if (separator.length() < 1)
-    {
-        m_ui->asciiCodeLabel->setText("Enter a valid character!");
-        m_ui->buttonBox->setEnabled(false);
+	if (separator.length() < 1)
+	{
+		m_ui->asciiCodeLabel->setText("Enter a valid character!");
+		m_ui->buttonBox->setEnabled(false);
 		m_ui->tableWidget->clear();
 		m_columnsValidty.clear();
-        return;
-    }
+		return;
+	}
 
 	//we open the file in ASCII mode
 	QFile file(m_filename);
@@ -139,11 +139,11 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 	{
 		m_ui->tableWidget->clear();
 		m_columnsValidty.clear();
-        return;
+		return;
 	}
 	QTextStream stream(&file);
 
-    //we skip first lines (if needed)
+	//we skip first lines (if needed)
 	{
 		for (unsigned i=0;i<m_skippedLines;++i)
 		{
@@ -154,16 +154,16 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 		}
 	}
 
-    //new separator
-    m_separator = separator[0];
-    m_ui->asciiCodeLabel->setText(QString("(ASCII code: %1)").arg(m_separator.unicode()));
+	//new separator
+	m_separator = separator[0];
+	m_ui->asciiCodeLabel->setText(QString("(ASCII code: %1)").arg(m_separator.unicode()));
 	//if the old setup has less than 3 columns, we forget it
 	if (m_columnsCount < 3)
 	{
 		m_ui->tableWidget->clear();
 		m_columnsCount = 0;
 	}
-    m_ui->tableWidget->setRowCount(DISPLAYED_LINES+1);    //+1 for first line shifting
+	m_ui->tableWidget->setRowCount(DISPLAYED_LINES+1);    //+1 for first line shifting
 
 	unsigned lineCount = 0;			//number of lines read
 	unsigned totalChars = 0;        //total read characters (for stats)
@@ -178,17 +178,17 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 	QString currentLine = stream.readLine();
 	while (lineCount < LINES_READ_FOR_STATS && !currentLine.isNull())
 	{
-        //we recognize "//" as comment
+		//we recognize "//" as comment
 		if (!currentLine.startsWith("//"))
 		{
 			QStringList parts = currentLine.trimmed().split(m_separator,QString::SkipEmptyParts);
-            unsigned partsCount = static_cast<unsigned>(parts.size());
-            if (partsCount > MAX_COLUMNS)
-                partsCount = MAX_COLUMNS;
+			unsigned partsCount = static_cast<unsigned>(parts.size());
+			if (partsCount > MAX_COLUMNS)
+				partsCount = MAX_COLUMNS;
 
-            if (lineCount < DISPLAYED_LINES)
-            {
-                //do we need to add one or several new columns?
+			if (lineCount < DISPLAYED_LINES)
+			{
+				//do we need to add one or several new columns?
 				{
 					if (partsCount > columnsCount)
 					{
@@ -206,7 +206,7 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 					}
 				}
 
-                //we fill the current row with extracted parts
+				//we fill the current row with extracted parts
 				{
 					for (unsigned i=0; i<partsCount; ++i)
 					{
@@ -236,11 +236,11 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 						m_ui->tableWidget->setItem(lineCount+1, i, newItem); //+1 for first line shifting
 					}
 				}
-            }
+			}
 
-            totalChars += currentLine.size() + 1; //+1 for return char at eol
+			totalChars += currentLine.size() + 1; //+1 for return char at eol
 
-            ++lineCount;
+			++lineCount;
 		}
 		else
 		{
@@ -262,13 +262,13 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 		m_averageLineSize = -1.0;
 		m_ui->tableWidget->clear();
 		m_columnsValidty.clear();
-        return;
+		return;
 	}
 
 	//average line size
 	m_averageLineSize = double(totalChars)/double(lineCount);
 
-    //we add a type selector for each column
+	//we add a type selector for each column
 	QStringList propsText;
 	{
 		for (unsigned i=0; i<ASCII_OPEN_DLG_TYPES_NUMBER; i++)
@@ -455,7 +455,7 @@ void AsciiOpenDlg::testBeforeAccept()
 	QString errorMessage;
 	if (!CheckOpenSequence(getOpenSequence(),errorMessage))
 	{
-        QMessageBox::warning(0, "Error", errorMessage);
+		QMessageBox::warning(0, "Error", errorMessage);
 	}
 	else
 	{
@@ -466,10 +466,10 @@ void AsciiOpenDlg::testBeforeAccept()
 
 AsciiOpenDlg::Sequence AsciiOpenDlg::getOpenSequence()
 {
-    Sequence seq;
+	Sequence seq;
 
-    if (m_columnsCount>0)
-    {
+	if (m_columnsCount>0)
+	{
 		//shall we extract headerParts?
 		QStringList headerParts;
 		if (!m_headerLine.isEmpty()
@@ -479,77 +479,77 @@ AsciiOpenDlg::Sequence AsciiOpenDlg::getOpenSequence()
 			headerParts = m_headerLine.trimmed().split(m_separator,QString::SkipEmptyParts);
 		}
 
-        seq.reserve(m_columnsCount-1);
-        for (unsigned i=0;i<m_columnsCount;i++)
-        {
+		seq.reserve(m_columnsCount-1);
+		for (unsigned i=0;i<m_columnsCount;i++)
+		{
 			const QComboBox* combo = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0,i));
 			assert(combo);
 			seq.push_back(SequenceItem((CC_ASCII_OPEN_DLG_TYPES)combo->currentIndex(),headerParts.size()>(int)i ? headerParts[i] : QString()));
-        }
-    }
+		}
+	}
 
-    return seq;
+	return seq;
 }
 
 void AsciiOpenDlg::columnsTypeHasChanged(int index)
 {
-    if (!m_columnsCount)
-        return;
+	if (!m_columnsCount)
+		return;
 
-    //we get the signal sender
-    QObject* obj = sender();
-    if (!obj)
-        return;
+	//we get the signal sender
+	QObject* obj = sender();
+	if (!obj)
+		return;
 
-    //it should be a QComboBox (could we test this?)
-    QComboBox* changedCombo = static_cast<QComboBox*>(obj);
+	//it should be a QComboBox (could we test this?)
+	QComboBox* changedCombo = static_cast<QComboBox*>(obj);
 	assert(changedCombo);
 
-    //now we look which column's combobox it is
+	//now we look which column's combobox it is
 	for (unsigned i=0; i<m_columnsCount; i++)
 	{
 		QComboBox* combo = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0,i));
-	    //we found the right element
-        if (changedCombo == combo)
-        {
-            if (index == int(ASCII_OPEN_DLG_X) ||
-                index == int(ASCII_OPEN_DLG_NX) ||
-                index == int(ASCII_OPEN_DLG_R))
-            {
+		//we found the right element
+		if (changedCombo == combo)
+		{
+			if (index == int(ASCII_OPEN_DLG_X) ||
+				index == int(ASCII_OPEN_DLG_NX) ||
+				index == int(ASCII_OPEN_DLG_R))
+			{
 				//Auto select the next columns type
-                if (i+2<m_columnsCount)
-                {
+				if (i+2<m_columnsCount)
+				{
 					QComboBox* nextCombo = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0,i+1));
 					QComboBox* nextNextCombo = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0,i+2));
-                    //if the two next columns have no assigned type, we set them auto.
-                    if (nextCombo->currentIndex()==int(ASCII_OPEN_DLG_None)
-                        && nextNextCombo->currentIndex()==int(ASCII_OPEN_DLG_None))
-                    {
+					//if the two next columns have no assigned type, we set them auto.
+					if (nextCombo->currentIndex()==int(ASCII_OPEN_DLG_None)
+						&& nextNextCombo->currentIndex()==int(ASCII_OPEN_DLG_None))
+					{
 						nextCombo->blockSignals(true);
 						nextNextCombo->blockSignals(true);
 
-                        if (index == int(ASCII_OPEN_DLG_X))
-                        {
-                            nextCombo->setCurrentIndex(ASCII_OPEN_DLG_Y);
-                            nextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_Z);
-                        }
-                        else if (index == int(ASCII_OPEN_DLG_NX))
-                        {
-                            nextCombo->setCurrentIndex(ASCII_OPEN_DLG_NY);
-                            nextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_NZ);
-                        }
-                        else if (index == int(ASCII_OPEN_DLG_R))
-                        {
-                            nextCombo->setCurrentIndex(ASCII_OPEN_DLG_G);
-                            nextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_B);
-                        }
-                    }
+						if (index == int(ASCII_OPEN_DLG_X))
+						{
+							nextCombo->setCurrentIndex(ASCII_OPEN_DLG_Y);
+							nextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_Z);
+						}
+						else if (index == int(ASCII_OPEN_DLG_NX))
+						{
+							nextCombo->setCurrentIndex(ASCII_OPEN_DLG_NY);
+							nextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_NZ);
+						}
+						else if (index == int(ASCII_OPEN_DLG_R))
+						{
+							nextCombo->setCurrentIndex(ASCII_OPEN_DLG_G);
+							nextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_B);
+						}
+					}
 
 					nextCombo->blockSignals(false);
 					nextNextCombo->blockSignals(false);
-                }
-            }
-        }
+				}
+			}
+		}
 		else if (index< ASCII_OPEN_DLG_Scalar) //check that the other combo as the same index (appart from SF)
 		{
 			if (combo->currentIndex() == index)
@@ -566,29 +566,29 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 
 void AsciiOpenDlg::shortcutButtonPressed()
 {
-    if (!m_columnsCount)
-        return;
+	if (!m_columnsCount)
+		return;
 
-    //we get the signal sender
-    QObject* obj = sender();
-    if (!obj)
-        return;
+	//we get the signal sender
+	QObject* obj = sender();
+	if (!obj)
+		return;
 
-    //it should be a QToolButton (could we test this?)
-    QToolButton* shortcutButton = static_cast<QToolButton*>(obj);
+	//it should be a QToolButton (could we test this?)
+	QToolButton* shortcutButton = static_cast<QToolButton*>(obj);
 
-    uchar newSeparator=0;
-    if (shortcutButton == m_ui->toolButtonShortcutESP)
-        newSeparator=uchar(32);
-    else if (shortcutButton == m_ui->toolButtonShortcutTAB)
-        newSeparator=uchar(9);
-    else if (shortcutButton == m_ui->toolButtonShortcutComma)
-        newSeparator=uchar(44);
-    else if (shortcutButton == m_ui->toolButtonShortcutDotcomma)
-        newSeparator=uchar(59);
+	uchar newSeparator=0;
+	if (shortcutButton == m_ui->toolButtonShortcutESP)
+		newSeparator=uchar(32);
+	else if (shortcutButton == m_ui->toolButtonShortcutTAB)
+		newSeparator=uchar(9);
+	else if (shortcutButton == m_ui->toolButtonShortcutComma)
+		newSeparator=uchar(44);
+	else if (shortcutButton == m_ui->toolButtonShortcutDotcomma)
+		newSeparator=uchar(59);
 
-    if (newSeparator>0 && getSeparator()!=newSeparator)
-        m_ui->lineEditSeparator->setText(QChar(newSeparator));
+	if (newSeparator>0 && getSeparator()!=newSeparator)
+		m_ui->lineEditSeparator->setText(QChar(newSeparator));
 }
 
 unsigned AsciiOpenDlg::getMaxCloudSize() const

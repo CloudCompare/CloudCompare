@@ -44,25 +44,25 @@ public:
 	//! Destructor
 	virtual ~ccPointPickingGenericInterface() {};
 
-    //inherited from ccOverlayDialog
-    virtual bool linkWith(ccGLWindow* win);
+	//inherited from ccOverlayDialog
+	virtual bool linkWith(ccGLWindow* win);
 	virtual bool start();
 	virtual void stop(bool state);
 
 protected slots:
 
-    //! Slot to handle directly a picked point (OpenGL based picking)
-    virtual void handlePickedPoint(int cloudID, unsigned pointIdx, int x, int y);
+	//! Slot to handle directly a picked point (OpenGL based picking)
+	virtual void handlePickedPoint(int cloudID, unsigned pointIdx, int x, int y);
 
 protected:
 
-    //! Generic method to process picked points
-    /** \param cloud picked point cloud
-        \param pointIndex point index in cloud
-        \param x picked pixel X position
-        \param y picked pixel Y position
-    **/
-    virtual void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y)=0;
+	//! Generic method to process picked points
+	/** \param cloud picked point cloud
+		\param pointIndex point index in cloud
+		\param x picked pixel X position
+		\param y picked pixel Y position
+	**/
+	virtual void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y) = 0;
 
 };
 

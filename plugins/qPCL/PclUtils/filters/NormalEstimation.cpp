@@ -36,17 +36,17 @@
 #include <QMainWindow>
 
 NormalEstimation::NormalEstimation()
-    : BaseFilter(FilterDescription("Estimate Normals",
-                                   "Estimate Normals and Curvature",
-                                   "Estimate Normals and Curvature for the selected entity",
-                                   ":/toolbar/PclUtils/icons/normal_curvature.png"))
+	: BaseFilter(FilterDescription(	"Estimate Normals",
+									"Estimate Normals and Curvature",
+									"Estimate Normals and Curvature for the selected entity",
+									":/toolbar/PclUtils/icons/normal_curvature.png"))
 	, m_dialog(0)
 	, m_radius(0)
 	, m_knn_radius(10)
 	, m_useKnn(false)
 	, m_overwrite_curvature(false)
 {
-    m_overwrite_curvature = true;
+	m_overwrite_curvature = true;
 }
 
 NormalEstimation::~NormalEstimation()
@@ -84,53 +84,53 @@ void NormalEstimation::getParametersFromDialog()
 	if (!m_dialog)
 		return;
 
-    //fill in parameters from dialog
-    m_useKnn = m_dialog->useKnnCheckBox->isChecked();
-    m_overwrite_curvature = m_dialog->curvatureCheckBox->isChecked();
-    m_knn_radius = m_dialog->knnSpinBox->value();
-    m_radius = static_cast<float>(m_dialog->radiusDoubleSpinBox->value());
+	//fill in parameters from dialog
+	m_useKnn = m_dialog->useKnnCheckBox->isChecked();
+	m_overwrite_curvature = m_dialog->curvatureCheckBox->isChecked();
+	m_knn_radius = m_dialog->knnSpinBox->value();
+	m_radius = static_cast<float>(m_dialog->radiusDoubleSpinBox->value());
 }
 
 int NormalEstimation::compute()
 {
-    //pointer to selected cloud
-    ccPointCloud* cloud = getSelectedEntityAsCCPointCloud();
-     if (!cloud)
-         return -1;
+	//pointer to selected cloud
+	ccPointCloud* cloud = getSelectedEntityAsCCPointCloud();
+	if (!cloud)
+		return -1;
 
-     //if we have normals delete them!
-     if (cloud->hasNormals())
-         cloud->unallocateNorms();
+	//if we have normals delete them!
+	if (cloud->hasNormals())
+		cloud->unallocateNorms();
 
-    //get xyz in PCL format
-    cc2smReader converter;
-    converter.setInputCloud(cloud);
-    PCLCloud sm_cloud = converter.getXYZ();
+	//get xyz in PCL format
+	cc2smReader converter;
+	converter.setInputCloud(cloud);
+	PCLCloud sm_cloud = converter.getXYZ();
 
-    //get as pcl point cloud
-    pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
-    FROM_PCL_CLOUD(sm_cloud, *pcl_cloud);
+	//get as pcl point cloud
+	pcl::PointCloud<pcl::PointXYZ>::Ptr pcl_cloud  (new pcl::PointCloud<pcl::PointXYZ>);
+	FROM_PCL_CLOUD(sm_cloud, *pcl_cloud);
 
-    //create storage for normals
-    pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);
+	//create storage for normals
+	pcl::PointCloud<pcl::PointNormal>::Ptr normals (new pcl::PointCloud<pcl::PointNormal>);
 
-    //now compute
-    int result = compute_normals<pcl::PointXYZ, pcl::PointNormal>(pcl_cloud, m_useKnn ? m_knn_radius: m_radius, m_useKnn, normals);
+	//now compute
+	int result = compute_normals<pcl::PointXYZ, pcl::PointNormal>(pcl_cloud, m_useKnn ? m_knn_radius: m_radius, m_useKnn, normals);
 
-    PCLCloud::Ptr sm_normals (new PCLCloud);
-    TO_PCL_CLOUD(*normals, *sm_normals);
+	PCLCloud::Ptr sm_normals (new PCLCloud);
+	TO_PCL_CLOUD(*normals, *sm_normals);
 
 	sm2ccConverter converter2(sm_normals);
-    converter2.addNormals(cloud);
-    converter2.addScalarField(cloud, "curvature", m_overwrite_curvature);
+	converter2.addNormals(cloud);
+	converter2.addScalarField(cloud, "curvature", m_overwrite_curvature);
 
-    emit entityHasChanged(cloud);
+	emit entityHasChanged(cloud);
 
-    return 1;
+	return 1;
 }
 
 //INSTANTIATING TEMPLATED FUNCTIONS
-template int compute_normals<pcl::PointXYZ, pcl::PointNormal> (const  pcl::PointCloud<pcl::PointXYZ>::Ptr incloud,
-                                                               const float radius,
-                                                               const bool useKnn, //true if use knn, false if radius search
-                                                               pcl::PointCloud<pcl::PointNormal>::Ptr outcloud);
+template int compute_normals<pcl::PointXYZ, pcl::PointNormal> (	const  pcl::PointCloud<pcl::PointXYZ>::Ptr incloud,
+																const float radius,
+																const bool useKnn, //true if use knn, false if radius search
+																pcl::PointCloud<pcl::PointNormal>::Ptr outcloud);

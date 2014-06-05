@@ -22,7 +22,7 @@
 
 class SORDialog : public QDialog, public Ui::StatisticalOutliersRemoverDlg
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 

@@ -129,7 +129,7 @@ void PCVContext::associateToEntity(GenericCloud* cloud, GenericMesh* mesh)
 {
 	assert(cloud);
 	if (!cloud)
-        return;
+		return;
 
 	m_vertices = cloud;
 	m_mesh = mesh;
@@ -189,7 +189,7 @@ void PCVContext::setViewDirection(const CCVector3& V)
 
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
-    glLoadIdentity();
+	glLoadIdentity();
 
 	CCVector3 U(0,0,1);
 	if (1-fabs(V.dot(U)) < 1.0e-4)
@@ -236,7 +236,7 @@ void PCVContext::drawEntity()
 
 		glBegin(GL_POINTS);
 		for (unsigned i=0;i<nPts;++i)
-            glVertex3v(m_vertices->getNextPoint()->u);
+			glVertex3v(m_vertices->getNextPoint()->u);
 		glEnd();
 	}
 }
@@ -347,7 +347,7 @@ int PCVContext::GLAccumPixel(std::vector<int>& visibilityCount)
 					++count;
 				}
 			}
-	   }
+		}
 	}
 
 	return count;

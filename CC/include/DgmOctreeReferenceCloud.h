@@ -18,13 +18,8 @@
 #ifndef DGM_OCTREE_REFERENCE_CLOUD_HEADER
 #define DGM_OCTREE_REFERENCE_CLOUD_HEADER
 
-#ifdef _MSC_VER
-//To get rid of the really annoying warnings about template class exportation
-#pragma warning( disable: 4251 )
-#pragma warning( disable: 4530 )
-#endif
-
 //Local
+#include "CCCoreLib.h"
 #include "GenericIndexedCloudPersist.h"
 #include "GenericChunkedArray.h"
 #include "DgmOctree.h"
@@ -36,13 +31,7 @@ namespace CCLib
 {
 
 //! A kind of ReferenceCloud based on the DgmOctree::NeighboursSet structure
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API DgmOctreeReferenceCloud : public GenericIndexedCloudPersist
-#else
-class DgmOctreeReferenceCloud : public GenericIndexedCloudPersist
-#endif
 {
 public:
 

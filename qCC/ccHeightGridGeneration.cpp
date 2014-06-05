@@ -119,8 +119,8 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 	assert(proj_dimension<3);
 	const unsigned char Z = proj_dimension;
-	const unsigned char X  = (Z==2 ? 0 : Z+1);
-	const unsigned char Y  = (X==2 ? 0 : X+1);
+	const unsigned char X = (Z==2 ? 0 : Z+1);
+	const unsigned char Y = (X==2 ? 0 : X+1);
 
 	ccBBox box = (customBox.isValid() ? customBox : cloud->getMyOwnBB());
 	CCVector3d boxDiag(	static_cast<double>(box.maxCorner().x) - static_cast<double>(box.minCorner().x),

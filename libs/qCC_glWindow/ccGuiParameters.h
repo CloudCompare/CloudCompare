@@ -33,43 +33,43 @@ class ccGui
 {
 public:
 
-    //! GUI parameters
-    struct ParamStruct
-    {
-        //! Light diffuse color (RGBA)
-        float lightDiffuseColor[4];
-        //! Light ambient color (RGBA)
-        float lightAmbientColor[4];
-        //! Light specular color (RGBA)
-        float lightSpecularColor[4];
+	//! GUI parameters
+	struct ParamStruct
+	{
+		//! Light diffuse color (RGBA)
+		float lightDiffuseColor[4];
+		//! Light ambient color (RGBA)
+		float lightAmbientColor[4];
+		//! Light specular color (RGBA)
+		float lightSpecularColor[4];
 
-        //! Default mesh diffuse color (front)
-        float meshFrontDiff[4];
-        //! Default mesh diffuse color (back)
-        float meshBackDiff[4];
-        //! Default mesh specular color
-        float meshSpecular[4];
+		//! Default mesh diffuse color (front)
+		float meshFrontDiff[4];
+		//! Default mesh diffuse color (back)
+		float meshBackDiff[4];
+		//! Default mesh specular color
+		float meshSpecular[4];
 
-        //! Default text color
-        unsigned char textDefaultCol[3];
-        //! Default 3D points color
-        unsigned char pointsDefaultCol[3];
-        //! Background color
-        unsigned char backgroundCol[3];
+		//! Default text color
+		unsigned char textDefaultCol[3];
+		//! Default 3D points color
+		unsigned char pointsDefaultCol[3];
+		//! Background color
+		unsigned char backgroundCol[3];
 		//! Histogram background color
 		unsigned char histBackgroundCol[3];
 		//! Labels color
 		unsigned char labelCol[3];
-        //! Bounding-boxes color
-        unsigned char bbDefaultCol[3];
-        //! Use background gradient
-        bool drawBackgroundGradient;
-        //! Decimate meshes when moved
-        bool decimateMeshOnMove;
-        //! Decimate clouds when moved
-        bool decimateCloudOnMove;
-        //! Display cross in the middle of the screen
-        bool displayCross;
+		//! Bounding-boxes color
+		unsigned char bbDefaultCol[3];
+		//! Use background gradient
+		bool drawBackgroundGradient;
+		//! Decimate meshes when moved
+		bool decimateMeshOnMove;
+		//! Decimate clouds when moved
+		bool decimateCloudOnMove;
+		//! Display cross in the middle of the screen
+		bool displayCross;
 		//! Whether to use VBOs for faster display
 		bool useVBOs;
 
@@ -84,7 +84,7 @@ public:
 		bool colorScaleShaderSupported;
 		//! Color scale ramp width (for display)
 		unsigned colorScaleRampWidth;
-		
+
 		//! Default displayed font size
 		unsigned defaultFontSize;
 		//! Displayed numbers precision
@@ -92,41 +92,41 @@ public:
 		//! Labels transparency
 		unsigned labelsTransparency;
 
-        //! Default constructor
-        ParamStruct();
+		//! Default constructor
+		ParamStruct();
 
-        //! Copy operator
-        ParamStruct& operator =(const ParamStruct& params);
+		//! Copy operator
+		ParamStruct& operator =(const ParamStruct& params);
 
-        //! Resets parameters to default values
-        void reset();
+		//! Resets parameters to default values
+		void reset();
 
-        //! Loads from persistent DB
-        void fromPersistentSettings();
+		//! Loads from persistent DB
+		void fromPersistentSettings();
 
-        //! Saves to persistent DB
-        void toPersistentSettings() const;
+		//! Saves to persistent DB
+		void toPersistentSettings() const;
 
 		//! Returns whether a given parameter is already defined in persistent settings or not
 		/** \param paramName the corresponding attribute name
 		**/
 		bool isInPersistentSettings(QString paramName) const;
-    };
+	};
 
 	//! Returns the stored values of each parameter.
 	static const ParamStruct& Parameters();
 
-    //! Sets GUI parameters
+	//! Sets GUI parameters
 	static void Set(const ParamStruct& params);
 
-    //! Release unique instance (if any)
-    static void ReleaseInstance();
+	//! Release unique instance (if any)
+	static void ReleaseInstance();
 
 protected:
 
-    //! Parameters set
-    ParamStruct params;
+	//! Parameters set
+	ParamStruct params;
 
 };
 
- #endif
+#endif

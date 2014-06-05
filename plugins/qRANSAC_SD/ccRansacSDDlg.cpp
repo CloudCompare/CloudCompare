@@ -25,9 +25,9 @@ static double s_probability = .01;	// this is the "probability" with which a pri
 
 ccRansacSDDlg::ccRansacSDDlg(QWidget* parent) : QDialog(parent), Ui::RansacSDDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(saveSettings()));
 
 	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 

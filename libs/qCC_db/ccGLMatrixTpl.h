@@ -795,7 +795,7 @@ public:
 	//! Applies rotation only to a 3D vector (in place) - float version
 	/** Input array is directly modified after calling this method
 	**/
-    inline void applyRotation(float vec[3]) const
+	inline void applyRotation(float vec[3]) const
 	{
 		register float vx = vec[0];
 		register float vy = vec[1];
@@ -816,7 +816,7 @@ public:
 	//! Applies rotation only to a 3D vector (in place) - float version
 	/** Input array is directly modified after calling this method
 	**/
-    inline void applyRotation(double vec[3]) const
+	inline void applyRotation(double vec[3]) const
 	{
 		register double vx = vec[0];
 		register double vy = vec[1];
@@ -835,12 +835,12 @@ public:
 				+ static_cast<double>(CC_MAT_R33) * vz;
 	}
 
-    //! Shifts rotation center
-    /** Warning, this method only applies a shift (i.e. relatively to the
-        current rotation center). This is not a way to set an
-        absolute rotation center 'directly'.
-    **/
-    void shiftRotationCenter(const Vector3Tpl<T>& vec)
+	//! Shifts rotation center
+	/** Warning, this method only applies a shift (i.e. relatively to the
+		current rotation center). This is not a way to set an
+		absolute rotation center 'directly'.
+	**/
+	void shiftRotationCenter(const Vector3Tpl<T>& vec)
 	{
 		//R(X-vec)+T+vec = R(X)+T + vec-R(vec)
 		Vector3Tpl<T> Rvec = vec;

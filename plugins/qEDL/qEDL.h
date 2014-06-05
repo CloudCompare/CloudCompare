@@ -24,21 +24,21 @@
 
 class qEDL : public QObject, public ccGLFilterPluginInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(ccGLFilterPluginInterface)
+	Q_OBJECT
+	Q_INTERFACES(ccGLFilterPluginInterface)
 #ifdef CC_QT5
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qEDL")
 #endif
 
 public:
 
-    //inherited from ccPluginInterface
+	//inherited from ccPluginInterface
 	virtual QString getName() const { return "E.D.L. (shader)"; }
 	virtual QString getDescription() const { return "Eye-dome Lighting OpenGL shader"; }
 	virtual QIcon getIcon() const;
 
-    //inherited from ccGLFilterPluginInterface
-    ccGlFilter* getFilter();
+	//inherited from ccGLFilterPluginInterface
+	ccGlFilter* getFilter();
 };
 
 #endif

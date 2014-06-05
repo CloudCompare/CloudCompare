@@ -51,16 +51,16 @@ public:
 
 	//! Checks for loaded entities
 	/** If none, a message is displayed to invite the user
-        to drag & drop files.
-    **/
+		to drag & drop files.
+	**/
 	bool checkForLoadedEntities();
 
 public slots:
 
 	//! Tries to load (and then adds to main db) a list of entity (files)
-    /** \param filenames list of all filenames
-    **/
-    void addToDB(const QStringList& filenames);
+	/** \param filenames list of all filenames
+	**/
+	void addToDB(const QStringList& filenames);
 
 protected slots:
 
@@ -72,35 +72,35 @@ protected slots:
 
 	//! Selects entity
 	void selectEntity(int uniqueID);
-	
+
 	//! Selects multiple entities
 	//void selectEntities(std::set<int> entIDs); //not supported yet!
 
 	//! Delete selected entity
 	void doActionDeleteSelectedEntity();
 
-    void doActionEditCamera();
-    void toggleSunLight(bool);
-    void toggleCustomLight(bool);
+	void doActionEditCamera();
+	void toggleSunLight(bool);
+	void toggleCustomLight(bool);
 	void toggleFullScreen(bool);
-    void doActionAbout();
-    void doActionDisplayShortcuts();
+	void doActionAbout();
+	void doActionDisplayShortcuts();
 	void setPivotAlwaysOn();
 	void setPivotRotationOnly();
 	void setPivotOff();
 	void setOrthoView();
 	void setCenteredPerspectiveView();
 	void setViewerPerspectiveView();
-    void setGlobalZoom();
-    void zoomOnSelectedEntity();
+	void setGlobalZoom();
+	void zoomOnSelectedEntity();
 
 	//default views
 	void setFrontView();
-    void setBottomView();
-    void setTopView();
-    void setBackView();
-    void setLeftView();
-    void setRightView();
+	void setBottomView();
+	void setTopView();
+	void setBackView();
+	void setLeftView();
+	void setRightView();
 	void setIsoView1();
 	void setIsoView2();
 
@@ -118,15 +118,15 @@ protected slots:
 	void setup3DMouse(bool);
 
 	//GL filters
-    void doEnableGLFilter();
-    void doDisableGLFilter();
+	void doEnableGLFilter();
+	void doDisableGLFilter();
 
 protected:
 
 	//! Loads plugins (from files)
-    void loadPlugins();
+	void loadPlugins();
 	//! Loads a specific plugin
-    bool loadPlugin(QObject* plugin);
+	bool loadPlugin(QObject* plugin);
 
 	//! Makes the GL frame background gradient match the OpenGL window one
 	void updateGLFrameGradient();

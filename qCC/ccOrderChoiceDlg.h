@@ -29,7 +29,7 @@ class ccMainAppInterface;
 //! Dialog to assign roles to two entities (e.g. compared/reference)
 class ccOrderChoiceDlg: public QDialog, public Ui::RoleChoiceDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
@@ -43,20 +43,20 @@ public:
 	//! Destructor
 	virtual ~ccOrderChoiceDlg();
 
-    ccHObject* getFirstEntity();
-    ccHObject* getSecondEntity();
+	ccHObject* getFirstEntity();
+	ccHObject* getSecondEntity();
 
 protected slots:
-    void swap();
+	void swap();
 
 protected:
 
-    void setColorsAndLabels();
+	void setColorsAndLabels();
 
 	ccMainAppInterface* m_app;
-    ccHObject* m_firstEnt;
+	ccHObject* m_firstEnt;
 	ccHObject* m_secondEnt;
-    bool m_originalOrder;
+	bool m_originalOrder;
 };
 
 #endif // CC_ORDER_CHOICE_DIALOG_HEADER

@@ -23,14 +23,14 @@
 #include <ccGLMatrix.h>
 
 //! View orientation
-enum CC_VIEW_ORIENTATION {  CC_TOP_VIEW,	/**< Top view (eye: +Z) **/
-                            CC_BOTTOM_VIEW,	/**< Bottom view **/
-                            CC_FRONT_VIEW,	/**< Front view **/
-                            CC_BACK_VIEW,	/**< Back view **/
-                            CC_LEFT_VIEW,	/**< Left view **/
-                            CC_RIGHT_VIEW,	/**< Right view **/
-                            CC_ISO_VIEW_1,	/**< Isometric view 1: front, right and top **/
-                            CC_ISO_VIEW_2,	/**< Isometric view 2: back, left and top **/
+enum CC_VIEW_ORIENTATION {	CC_TOP_VIEW,	/**< Top view (eye: +Z) **/
+							CC_BOTTOM_VIEW,	/**< Bottom view **/
+							CC_FRONT_VIEW,	/**< Front view **/
+							CC_BACK_VIEW,	/**< Back view **/
+							CC_LEFT_VIEW,	/**< Left view **/
+							CC_RIGHT_VIEW,	/**< Right view **/
+							CC_ISO_VIEW_1,	/**< Isometric view 1: front, right and top **/
+							CC_ISO_VIEW_2,	/**< Isometric view 2: back, left and top **/
 };
 
 class ccGLUtils
@@ -38,14 +38,14 @@ class ccGLUtils
 public:
 
 	/***************************************************
-                    OpenGL Textures
+					OpenGL Textures
 	***************************************************/
 
-    static void DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h, uchar alpha = 255);
-    static void DisplayTexture2D(GLuint tex, int w, int h, uchar alpha = 255);
+	static void DisplayTexture2DPosition(GLuint tex, int x, int y, int w, int h, uchar alpha = 255);
+	static void DisplayTexture2D(GLuint tex, int w, int h, uchar alpha = 255);
 
 	/***************************************************
-                    OpenGL Matrices
+					OpenGL Matrices
 	***************************************************/
 
 	//! Generates the rotation matrix that transforms a vector in another given one
@@ -64,14 +64,14 @@ public:
 	**/
 	static ccGLMatrixd GenerateGLRotationMatrixFromAxisAndAngle(const CCVector3d& axis, double angle_deg);
 
-    //! Returns a 4x4 'OpenGL' matrix corresponding to a given vue orientation
-    /** \param orientation view orientation
-        \return corresponding GL matrix
-    **/
-    static ccGLMatrixd GenerateViewMat(CC_VIEW_ORIENTATION orientation);
+	//! Returns a 4x4 'OpenGL' matrix corresponding to a given vue orientation
+	/** \param orientation view orientation
+		\return corresponding GL matrix
+	**/
+	static ccGLMatrixd GenerateViewMat(CC_VIEW_ORIENTATION orientation);
 
 	/***************************************************
-                    OpenGL Helpers
+					OpenGL Helpers
 	***************************************************/
 
 	//! Catches last GL error (if any)
@@ -81,7 +81,6 @@ public:
 		\return true if an error occurred, false otherwise
 	**/
 	static bool CatchGLError(const char* context);
-
 
 };
 

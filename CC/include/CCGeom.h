@@ -18,11 +18,8 @@
 #ifndef CC_GEOM_HEADER
 #define CC_GEOM_HEADER
 
-#ifdef _MSC_VER
-//To get rid of the really annoying warnings about template class exportation
-#pragma warning( disable: 4251 )
-#endif
-
+//Local
+#include "CCCoreLib.h"
 #include "CCTypes.h"
 
 //system

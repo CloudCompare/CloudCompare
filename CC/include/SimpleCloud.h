@@ -18,6 +18,8 @@
 #ifndef SIMPLE_CLOUD_HEADER
 #define SIMPLE_CLOUD_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "GenericIndexedCloudPersist.h"
 #include "GenericChunkedArray.h"
 #include "PointProjectionTools.h"
@@ -30,14 +32,7 @@ namespace CCLib
 /** Implements the GenericIndexedCloud interface. A simple point cloud
 	that stores its own point instances and distances in a vector.
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API SimpleCloud : public GenericIndexedCloudPersist
-#else
-class SimpleCloud : public GenericIndexedCloudPersist
-#endif
 {
 public:
 
@@ -94,7 +89,7 @@ public:
 	/** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
 		\param trans transformation (scale * rotation matrix + translation vector)
 	**/
-    virtual void applyTransformation(PointProjectionTools::Transformation& trans);
+	virtual void applyTransformation(PointProjectionTools::Transformation& trans);
 
 
 	//! Returns associated scalar field (if any)
@@ -105,7 +100,7 @@ public:
 
 protected:
 
-    //! Point container
+	//! Point container
 	typedef GenericChunkedArray<3,PointCoordinateType> PointsContainer;
 
 	//! 3D Points container

@@ -22,17 +22,18 @@
 
 class SavePCD: public BaseFilter
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    SavePCD();
+	SavePCD();
 
 	//inherited from BaseFilter
 	virtual int compute();
+
 protected:
 
 	//inherited from BaseFilter
-    virtual int openInputDialog();
+	virtual int openInputDialog();
 
 	QString m_filename;
 };

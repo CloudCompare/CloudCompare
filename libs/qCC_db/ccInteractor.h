@@ -18,16 +18,14 @@
 #ifndef CC_INTERACTOR_HEADER
 #define CC_INTERACTOR_HEADER
 
+//Local
+#include "qCC_db.h"
+
 //Qt
 #include <QString>
 
 //! Interactor interface (entity that can be dragged or clicked in a 3D view)
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccInteractor
-#else
-class ccInteractor
-#endif
 {
 public:
 

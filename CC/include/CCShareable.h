@@ -18,6 +18,9 @@
 #ifndef CC_SHAREABLE_HEADER
 #define CC_SHAREABLE_HEADER
 
+//Local
+#include "CCCoreLib.h"
+
 //system
 #include <assert.h>
 
@@ -27,12 +30,7 @@
 #endif
 
 //CCShareable object (with counter)
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API CCShareable
-#else
-class CCShareable
-#endif
 {
 public:
 

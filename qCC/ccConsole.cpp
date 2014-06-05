@@ -44,11 +44,11 @@ ccConsole* ccConsole::TheInstance()
 {
 	if (!s_console.instance)
 	{
-        s_console.instance = new ccConsole();
+		s_console.instance = new ccConsole();
 		ccLog::RegisterInstance(s_console.instance);
 	}
 
-    return s_console.instance;
+	return s_console.instance;
 }
 
 void ccConsole::ReleaseInstance()
@@ -68,9 +68,9 @@ void ccConsole::Init(	QListWidget* textDisplay/*=0*/,
 						QWidget* parentWidget/*=0*/,
 						MainWindow* parentWindow/*=0*/)
 {
-    ccConsole* console = TheInstance();
-    assert(console);
-    console->m_textDisplay = textDisplay;
+	ccConsole* console = TheInstance();
+	assert(console);
+	console->m_textDisplay = textDisplay;
 	console->m_parentWidget = parentWidget;
 	console->m_parentWindow = parentWindow;
 	if (textDisplay)
@@ -156,15 +156,15 @@ void ccConsole::displayMessage(const QString& message, MessageLevel level)
 {
 	QString formatedMessage = QString("[")+QTime::currentTime().toString()+QString("] ")+message;
 
-    if (m_textDisplay)
-    {
+	if (m_textDisplay)
+	{
 		m_mutex.lock();
 		m_queue.push_back(ConsoleItemType(formatedMessage,level));
 		m_mutex.unlock();
-    }
+	}
 #ifdef _DEBUG
-    else
-    {
+	else
+	{
 		switch(level)
 		{
 		case LOG_STANDARD:
@@ -185,9 +185,9 @@ void ccConsole::displayMessage(const QString& message, MessageLevel level)
 		case LOG_ERROR_DEBUG:
 			printf("ERROR-DBG: ");
 			break;
-    }
+		}
 		printf(" %s\n",qPrintable(formatedMessage));
-    }
+	}
 #endif
 
 	if (m_parentWidget && (level==LOG_ERROR || level==LOG_ERROR_DEBUG))

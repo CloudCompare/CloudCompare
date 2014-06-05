@@ -30,27 +30,22 @@
 
 class MLSDialog : public QDialog, public Ui::MLSDialog
 {
-    Q_OBJECT
-
+	Q_OBJECT
 
 public:
-   MLSDialog(QWidget *parent = 0);
+	MLSDialog(QWidget *parent = 0);
 
 private:
 
 
-    void updateCombo();
-    void deactivateAllMethods();
+	void updateCombo();
+	void deactivateAllMethods();
 
 
 private slots:
-    void activateMenu(QString name);
-    void toggleMethods(bool status);
-    void updateSquaredGaussian(double radius);
-
-private:
-
-
+	void activateMenu(QString name);
+	void toggleMethods(bool status);
+	void updateSquaredGaussian(double radius);
 
 };
 

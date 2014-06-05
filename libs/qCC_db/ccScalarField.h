@@ -22,6 +22,7 @@
 #include <ScalarField.h>
 
 //qCC_db
+#include "qCC_db.h"
 #include "ccSerializableObject.h"
 #include "ccColorScale.h"
 
@@ -31,20 +32,13 @@
 //! A scalar field associated to display-related parameters
 /** Extends the CCLib::ScalarField object.
 **/
-
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
-
 class QCC_DB_LIB_API ccScalarField : public CCLib::ScalarField, public ccSerializableObject
-#else
-class ccScalarField : public CCLib::ScalarField, public ccSerializableObject
-#endif
 {
 public:
 
 	//! Default constructor
 	/** \param name scalar field name
-    **/
+	**/
 	ccScalarField(const char* name = 0);
 
 	/*** Scalar values display handling ***/
@@ -185,7 +179,7 @@ public:
 	inline unsigned getColorRampSteps() const { return m_colorRampSteps; }
 
 	//! Sets number of color ramp steps used for display
-    void setColorRampSteps(unsigned steps);
+	void setColorRampSteps(unsigned steps);
 
 	//! Simple histogram structure
 	struct Histogram : std::vector<unsigned>

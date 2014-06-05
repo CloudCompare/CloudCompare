@@ -24,6 +24,7 @@
 #include <GenericProgressCallback.h>
 
 //Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 #include "ccAdvancedTypes.h"
 
@@ -32,26 +33,21 @@ class ccPointCloud;
 class ccMaterialSet;
 
 //! Generic mesh interface
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccGenericMesh : public CCLib::GenericIndexedMesh, public ccHObject
-#else
-class ccGenericMesh : public CCLib::GenericIndexedMesh, public ccHObject
-#endif
 {
 
 public:
 
-    //! Default constructor
-    /** \param name object name
-    **/
-    ccGenericMesh(QString name = QString());
+	//! Default constructor
+	/** \param name object name
+	**/
+	ccGenericMesh(QString name = QString());
 
 	//! Destructor
 	virtual ~ccGenericMesh() {};
 
 	//inherited methods (ccDrawableObject)
-    virtual void showNormals(bool state);
+	virtual void showNormals(bool state);
 
 	//inherited methods (ccHObject)
 	virtual bool isSerializable() const { return true; }
@@ -59,8 +55,8 @@ public:
 	//! Returns the vertices cloud
 	virtual ccGenericPointCloud* getAssociatedCloud() const = 0;
 
-    //! Forces bounding-box update
-    virtual void refreshBB() = 0;
+	//! Forces bounding-box update
+	virtual void refreshBB() = 0;
 
 	//! Returns max capacity
 	virtual unsigned maxSize() const = 0;
@@ -147,10 +143,10 @@ public:
 	**/
 	virtual bool getVertexColorFromMaterial(unsigned triIndex, unsigned char vertIndex, colorType rgb[], bool returnColorIfNoTexture) = 0;
 
-    //! Returns whether the mesh is displayed as wired or with plain facets
+	//! Returns whether the mesh is displayed as wired or with plain facets
 	virtual bool isShownAsWire() const { return m_showWired; }
 
-    //! Sets whether mesh should be displayed as a wire or with plain facets
+	//! Sets whether mesh should be displayed as a wire or with plain facets
 	virtual void showWired(bool state) { m_showWired = state; }
 
 	//! Returns whether per-triangle normals are shown or not 
@@ -181,7 +177,7 @@ public:
 
 protected:
 
-    //inherited from ccHObject
+	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 

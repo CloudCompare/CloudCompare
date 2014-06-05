@@ -36,13 +36,13 @@
 CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 {
 	if (!entity || !filename)
-        return CC_FERR_BAD_ARGUMENT;
+		return CC_FERR_BAD_ARGUMENT;
 
 	//look for either a cloud or a mesh
 	ccHObject::Container clouds,meshes;
 	if (entity->isA(CC_TYPES::POINT_CLOUD))
-        clouds.push_back(entity);
-    else if (entity->isKindOf(CC_TYPES::MESH))
+		clouds.push_back(entity);
+	else if (entity->isKindOf(CC_TYPES::MESH))
 		meshes.push_back(entity);
 	else //group?
 	{
@@ -56,20 +56,20 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 		}
 	}
 
-    if (clouds.empty() && meshes.empty())
-    {
-        ccLog::Error("No point cloud nor mesh in input selection!");
-        return CC_FERR_BAD_ENTITY_TYPE;
-    }
-    else if (clouds.size()+meshes.size()>1)
-    {
-        ccLog::Error("Can't save more than one entity per VTK file!");
-        return CC_FERR_BAD_ENTITY_TYPE;
-    }
+	if (clouds.empty() && meshes.empty())
+	{
+		ccLog::Error("No point cloud nor mesh in input selection!");
+		return CC_FERR_BAD_ENTITY_TYPE;
+	}
+	else if (clouds.size()+meshes.size()>1)
+	{
+		ccLog::Error("Can't save more than one entity per VTK file!");
+		return CC_FERR_BAD_ENTITY_TYPE;
+	}
 
 	//the cloud to save
-    ccGenericPointCloud* vertices = 0;
-    ccMesh* mesh = 0;
+	ccGenericPointCloud* vertices = 0;
+	ccMesh* mesh = 0;
 	unsigned triCount = 0;
 	if (!clouds.empty()) //1 cloud, no mesh
 	{
@@ -95,7 +95,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 		return CC_FERR_NO_SAVE;
 	}
 
-    //open ASCII file for writing
+	//open ASCII file for writing
 	QFile file(filename);
 	if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
 		return CC_FERR_WRITING;
@@ -112,7 +112,7 @@ CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
 	//data type
 	QString floatType = (sizeof(PointCoordinateType) == 4 ? "float" : "double");
 
-    /*** what shall we save now? ***/
+	/*** what shall we save now? ***/
 
 	// write the points
 	{
@@ -224,7 +224,7 @@ static bool GetNextNonEmptyLine(QTextStream& stream, QString& line)
 
 CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-    //open ASCII file for reading
+	//open ASCII file for reading
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 		return CC_FERR_READING;
@@ -744,8 +744,8 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 
 		mesh->addChild(vertices);
 		vertices->setVisible(false);
-        vertices->setEnabled(false);
-        vertices->setName("Vertices");
+		vertices->setEnabled(false);
+		vertices->setName("Vertices");
 		vertices->setLocked(true); //DGM: no need to lock it as it is only used by one mesh!
 
 		//DGM: normals can be per-vertex or per-triangle so it's better to let the user do it himself later

@@ -18,18 +18,13 @@
 #ifndef CC_TOOLBOX_HEADER
 #define CC_TOOLBOX_HEADER
 
+//Local
+#include "CCCoreLib.h"
+
 namespace CCLib
 {
-
-//! Empty class - for classification purpose only
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-class CC_CORE_LIB_API CCToolbox
-#else
-class CCToolbox
-#endif
-{
-};
+	//! Empty class - for classification purpose only
+	class CC_CORE_LIB_API CCToolbox	{};
 
 } //namespace CCLib
 

@@ -357,7 +357,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	// No point grouping scheme (unstructured cloud)
 
 	// Make a prototype of datatypes that will be stored in points record.
-    /// This prototype will be used in creating the points CompressedVector.
+	/// This prototype will be used in creating the points CompressedVector.
 	e57::StructureNode proto = e57::StructureNode(imf);
 
 	//prepare temporary structures
@@ -464,13 +464,13 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 	//"isTimeStampInvalid"
 
 	// Make empty codecs vector for use in creating points CompressedVector.
-    /// If this vector is empty, it is assumed that all fields will use the BitPack codec.
+	/// If this vector is empty, it is assumed that all fields will use the BitPack codec.
 	e57::VectorNode codecs = e57::VectorNode(imf, true);
 
 	// Create CompressedVector for storing points.
-    /// We use the prototype and empty codecs tree from above.
+	/// We use the prototype and empty codecs tree from above.
 	e57::CompressedVectorNode points = e57::CompressedVectorNode(imf, proto, codecs);
-    scanNode.set("points", points);
+	scanNode.set("points", points);
 	data3D.append(scanNode);
 
 	e57::CompressedVectorWriter writer = points.writer(dbufs);
@@ -792,59 +792,59 @@ bool NodeStructureToTree(ccHObject* currentTreeNode, e57::Node currentE57Node)
 
 	switch(currentE57Node.type())
 	{
-        case e57::E57_STRUCTURE:
+	case e57::E57_STRUCTURE:
 		{
 			infoStr += QString(" [STRUCTURE]");
 			e57::StructureNode s = static_cast<e57::StructureNode>(currentE57Node);
 			for (boost::int64_t i=0;i<s.childCount();++i)
 				NodeStructureToTree(obj,s.get(i));
-        }
-        break;
-        case e57::E57_VECTOR:
+		}
+		break;
+	case e57::E57_VECTOR:
 		{
 			infoStr += QString(" [VECTOR]");
-            e57::VectorNode v = static_cast<e57::VectorNode>(currentE57Node);
+			e57::VectorNode v = static_cast<e57::VectorNode>(currentE57Node);
 			for (boost::int64_t i=0;i<v.childCount();++i)
 				NodeStructureToTree(obj,v.get(i));
-        }
-        break;
-        case e57::E57_COMPRESSED_VECTOR:
+		}
+		break;
+	case e57::E57_COMPRESSED_VECTOR:
 		{
-            e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(currentE57Node);
+			e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(currentE57Node);
 			infoStr += QString(" [COMPRESSED VECTOR (%1 elements)]").arg(cv.childCount());
-        }
-        break;
-        case e57::E57_INTEGER:
+		}
+		break;
+	case e57::E57_INTEGER:
 		{
-            e57::IntegerNode i = static_cast<e57::IntegerNode>(currentE57Node);
+			e57::IntegerNode i = static_cast<e57::IntegerNode>(currentE57Node);
 			infoStr += QString(" [INTEGER: %1]").arg(i.value());
-        }
-        break;
-        case e57::E57_SCALED_INTEGER:
+		}
+		break;
+	case e57::E57_SCALED_INTEGER:
 		{
-            e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(currentE57Node);
+			e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(currentE57Node);
 			infoStr += QString(" [SCALED INTEGER: %1]").arg(si.scaledValue());
-        }
-        break;
-        case e57::E57_FLOAT:
+		}
+		break;
+	case e57::E57_FLOAT:
 		{
-            e57::FloatNode f = static_cast<e57::FloatNode>(currentE57Node);
+			e57::FloatNode f = static_cast<e57::FloatNode>(currentE57Node);
 			infoStr += QString(" [FLOAT: %1]").arg(f.value());
-        }
-        break;
-        case e57::E57_STRING:
+		}
+		break;
+	case e57::E57_STRING:
 		{
-            e57::StringNode s = static_cast<e57::StringNode>(currentE57Node);
+			e57::StringNode s = static_cast<e57::StringNode>(currentE57Node);
 			infoStr += QString(" [STRING: %1]").arg(s.value().c_str());
-        }
-        break;
-        case e57::E57_BLOB:
+		}
+		break;
+	case e57::E57_BLOB:
 		{
-            e57::BlobNode b = static_cast<e57::BlobNode>(currentE57Node);
+			e57::BlobNode b = static_cast<e57::BlobNode>(currentE57Node);
 			infoStr += QString(" [BLOB (%1 bytes)]").arg(b.byteCount());
-        }
-        break;
-		default:
+		}
+		break;
+	default:
 		{
 			infoStr += QString( "[INVALID]");
 			obj->setName(infoStr);
@@ -862,55 +862,55 @@ void NodeToConsole(e57::Node node)
 	QString infoStr = QString("[E57] '%1' - ").arg(node.elementName().c_str());
 	switch(node.type())
 	{
-        case e57::E57_STRUCTURE:
+	case e57::E57_STRUCTURE:
 		{
 			e57::StructureNode s = static_cast<e57::StructureNode>(node);
 			infoStr += QString("STRUCTURE, %1 child(ren)").arg(s.childCount());
-        }
-        break;
-        case e57::E57_VECTOR:
+		}
+		break;
+	case e57::E57_VECTOR:
 		{
-            e57::VectorNode v = static_cast<e57::VectorNode>(node);
+			e57::VectorNode v = static_cast<e57::VectorNode>(node);
 			infoStr += QString("VECTOR, %1 child(ren)").arg(v.childCount());
-        }
-        break;
-        case e57::E57_COMPRESSED_VECTOR:
+		}
+		break;
+	case e57::E57_COMPRESSED_VECTOR:
 		{
-            e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(node);
+			e57::CompressedVectorNode cv = static_cast<e57::CompressedVectorNode>(node);
 			infoStr += QString("COMPRESSED VECTOR, %1 elements").arg(cv.childCount());
-        }
-        break;
-        case e57::E57_INTEGER:
+		}
+		break;
+	case e57::E57_INTEGER:
 		{
-            e57::IntegerNode i = static_cast<e57::IntegerNode>(node);
+			e57::IntegerNode i = static_cast<e57::IntegerNode>(node);
 			infoStr += QString("%1 (INTEGER)").arg(i.value());
-        }
-        break;
-        case e57::E57_SCALED_INTEGER:
+		}
+		break;
+	case e57::E57_SCALED_INTEGER:
 		{
-            e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(node);
+			e57::ScaledIntegerNode si = static_cast<e57::ScaledIntegerNode>(node);
 			infoStr += QString("%1 (SCALED INTEGER)").arg(si.scaledValue());
-        }
-        break;
-        case e57::E57_FLOAT:
+		}
+		break;
+	case e57::E57_FLOAT:
 		{
-            e57::FloatNode f = static_cast<e57::FloatNode>(node);
+			e57::FloatNode f = static_cast<e57::FloatNode>(node);
 			infoStr += QString("%1 (FLOAT)").arg(f.value());
-        }
-        break;
-        case e57::E57_STRING:
+		}
+		break;
+	case e57::E57_STRING:
 		{
-            e57::StringNode s = static_cast<e57::StringNode>(node);
+			e57::StringNode s = static_cast<e57::StringNode>(node);
 			infoStr += QString(s.value().c_str());
-        }
-        break;
-        case e57::E57_BLOB:
+		}
+		break;
+	case e57::E57_BLOB:
 		{
-            e57::BlobNode b = static_cast<e57::BlobNode>(node);
+			e57::BlobNode b = static_cast<e57::BlobNode>(node);
 			infoStr += QString("BLOB, size=%1").arg(b.byteCount());
-        }
-        break;
-		default:
+		}
+		break;
+	default:
 		{
 			infoStr += QString("INVALID");
 		}

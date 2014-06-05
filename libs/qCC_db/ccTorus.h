@@ -18,6 +18,8 @@
 #ifndef CC_TORUS_PRIMITIVE_HEADER
 #define CC_TORUS_PRIMITIVE_HEADER
 
+//Local
+#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
 //CCLib
@@ -26,12 +28,7 @@
 //! Torus (primitive)
 /** 3D torus primitive (with circular or rectangular section)
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccTorus : public ccGenericPrimitive
-#else
-class ccTorus : public ccGenericPrimitive
-#endif
 {
 public:
 
@@ -47,13 +44,13 @@ public:
 		\param precision drawing precision (main loop angular step = 360/(4*precision), circular section angular step = 360/precision)
 	**/
 	ccTorus(PointCoordinateType insideRadius,
-				PointCoordinateType outsideRadius,
-				double angle_rad = 2.0*M_PI,
-				bool rectangularSection = false,
-				PointCoordinateType rectSectionHeight = 0,
-				const ccGLMatrix* transMat = 0,
-				QString name = QString("Torus"),
-				unsigned precision = 24);
+			PointCoordinateType outsideRadius,
+			double angle_rad = 2.0*M_PI,
+			bool rectangularSection = false,
+			PointCoordinateType rectSectionHeight = 0,
+			const ccGLMatrix* transMat = 0,
+			QString name = QString("Torus"),
+			unsigned precision = 24);
 
 	//! Simplified constructor
 	/** For ccHObject factory only!
@@ -69,8 +66,8 @@ public:
 	virtual ccGenericPrimitive* clone() const;
 
 protected:
-    
-    //inherited from ccGenericPrimitive
+
+	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual bool buildUp();

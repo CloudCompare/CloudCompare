@@ -162,8 +162,8 @@ ccCommandLineParser::ccCommandLineParser()
 
 ccCommandLineParser::~ccCommandLineParser()
 {
-    removeClouds();
-    removeMeshes();
+	removeClouds();
+	removeMeshes();
 }
 
 static void Print(const QString& message)
@@ -303,7 +303,7 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 	}
 
 	//Print(QString("--> result saved to file '%1'").arg(outputFilename)); //DGM: message already logged by FileIOFilter::SaveToFile (or BinFilter?)
-    return QString();
+	return QString();
 }
 
 bool ccCommandLineParser::commandLoad(QStringList& arguments)
@@ -1628,7 +1628,7 @@ bool ccCommandLineParser::commandStatTest(QStringList& arguments, ccProgressDial
 	Print("[STATISTICAL TEST]");
 
 	//distribution
-    CCLib::GenericDistribution* distrib = 0;
+	CCLib::GenericDistribution* distrib = 0;
 	{
 		if (arguments.empty())
 			return Error(QString("Missing parameter: distribution type after \"-%1\" (GAUSS/WEIBULL)").arg(COMMAND_STAT_TEST));
@@ -1697,7 +1697,7 @@ bool ccCommandLineParser::commandStatTest(QStringList& arguments, ccProgressDial
 		bool conversionOk = false;
 		pValue = arguments.takeFirst().toDouble(&conversionOk);
 		if (!conversionOk)
-			return Error(QString("Invalid parameter:  p-value after distribution"));
+			return Error(QString("Invalid parameter: p-value after distribution"));
 	}
 
 	//kNN

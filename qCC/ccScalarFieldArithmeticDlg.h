@@ -27,19 +27,19 @@ class ccScalarFieldArithmeticDlg : public QDialog, public Ui::SFComparisonDlg
 {
 public:
 
-    //! Default constructor
-    ccScalarFieldArithmeticDlg(ccPointCloud* cloud, QWidget* parent = 0);
+	//! Default constructor
+	ccScalarFieldArithmeticDlg(ccPointCloud* cloud, QWidget* parent = 0);
 
-    //! Returns first selected SF index
-    int getSF1Index();
-    //! Returns second selected SF index
-    int getSF2Index();
+	//! Returns first selected SF index
+	int getSF1Index();
+	//! Returns second selected SF index
+	int getSF2Index();
 
-    //! Arithmetic operations
-    enum Operation { PLUS, MINUS, MULTIPLY, DIVIDE };
+	//! Arithmetic operations
+	enum Operation { PLUS, MINUS, MULTIPLY, DIVIDE };
 
-    //! Returns selected operation
-    Operation getOperation();
+	//! Returns selected operation
+	Operation getOperation();
 };
 
-#endif
+#endif //CC_SF_ARITMETHIC_DLG_HEADER

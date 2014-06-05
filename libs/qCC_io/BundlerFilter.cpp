@@ -819,7 +819,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(const char* filename,
 		{
 			assert(mntSamples && mntColors);
 			unsigned k,sampleCount=mntSamples->size();
-         const QRgb blackValue = QColor( Qt::black ).rgb();
+			const QRgb blackValue = QColor( Qt::black ).rgb();
 
 			//back project each MNT samples in this image to get color
 			for (k=0;k<sampleCount;++k)

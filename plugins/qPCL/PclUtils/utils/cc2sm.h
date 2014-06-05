@@ -40,7 +40,7 @@ public:
 
 	PCLCloud getXYZ();
 
-    void getXYZ(pcl::PointCloud<pcl::PointXYZ> & cloud);
+	void getXYZ(pcl::PointCloud<pcl::PointXYZ> & cloud);
 
 	PCLCloud getNormals();
 

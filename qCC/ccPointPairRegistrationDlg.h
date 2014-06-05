@@ -1,3 +1,20 @@
+//##########################################################################
+//#                                                                        #
+//#                            CLOUDCOMPARE                                #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                                                                        #
+//##########################################################################
+
 #ifndef POINT_PAIR_REGISTRATION_DIALOG_HEADER
 #define POINT_PAIR_REGISTRATION_DIALOG_HEADER
 
@@ -31,7 +48,7 @@ public:
 	ccPointPairRegistrationDlg(QWidget* parent = 0);
 
 	//inherited from ccOverlayDialog
-    virtual bool linkWith(ccGLWindow* win);
+	virtual bool linkWith(ccGLWindow* win);
 	virtual bool start();
 	virtual void stop(bool state);
 

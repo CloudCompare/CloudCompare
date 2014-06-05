@@ -26,15 +26,15 @@ class Ui_AsciiSaveDialog;
 //! Dialog for configuration of ASCII files saving sequence
 class AsciiSaveDlg : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
 	//! Default constructor
-    AsciiSaveDlg(QWidget* parent = 0);
+	AsciiSaveDlg(QWidget* parent = 0);
 
 	//! Destructor
-    virtual ~AsciiSaveDlg();
+	virtual ~AsciiSaveDlg();
 
 	//! Returns whether columns names should be be saved in header
 	bool saveColumnsNamesHeader() const;

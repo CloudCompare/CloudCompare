@@ -19,6 +19,7 @@
 #define CC_COLOR_SCALE_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccBasicTypes.h"
 #include "ccSerializableObject.h"
 
@@ -42,18 +43,18 @@ public:
 	//! Constructor from a (relative) position and a color
 	ccColorScaleElement(double relativePos, QColor color) : m_relativePos(relativePos), m_color(color) {}
 
-    //! Sets associated value (relative to scale boundaries)
+	//! Sets associated value (relative to scale boundaries)
 	/** \param pos relative position (always between 0.0 and 1.0!)
 	**/
 	inline void setRelativePos(double pos) { m_relativePos = pos; }
-    //! Returns step position (relative to scale boundaries)
+	//! Returns step position (relative to scale boundaries)
 	/** \return relative position (always between 0.0 and 1.0!)
 	**/
 	inline double getRelativePos() const { return m_relativePos; }
 
-    //! Sets color
+	//! Sets color
 	inline void setColor(QColor color) { m_color = color; }
-    //! Returns color
+	//! Returns color
 	inline const QColor& getColor() const { return m_color; }
 
 	//! Comparison operator between two color scale elements
@@ -83,12 +84,7 @@ protected:
 	Be sure that the 'refresh' method has been called after any modification(s)
 	of the scale steps (position or color).
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccColorScale : public ccSerializableObject
-#else
-class ccColorScale : public ccSerializableObject
-#endif
 {
 public:
 
@@ -266,10 +262,10 @@ protected:
 	//! Sort elements
 	void sort();
 
-    //! Name
+	//! Name
 	QString m_name;
 
-    //! Unique ID
+	//! Unique ID
 	QString m_uuid;
 
 	//! Elements

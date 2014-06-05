@@ -43,12 +43,12 @@ sfEditDlg::sfEditDlg(QWidget* parent/*=0*/)
 	dispValSlider->setRange(0,SLIDERS_STEPS);
 	satValSlider->setRange(0,SLIDERS_STEPS);
 
-	connect(minValSpinBox, SIGNAL(valueChanged(double)), this, SLOT(minValSBChanged(double)));
-	connect(maxValSpinBox, SIGNAL(valueChanged(double)), this, SLOT(maxValSBChanged(double)));
-	connect(minSatSpinBox, SIGNAL(valueChanged(double)), this, SLOT(minSatSBChanged(double)));
-	connect(maxSatSpinBox, SIGNAL(valueChanged(double)), this, SLOT(maxSatSBChanged(double)));
-	connect(dispValSlider, SIGNAL(spanChanged(int,int)), this, SLOT(dispValSliderChanged(int,int)));
-	connect(satValSlider,  SIGNAL(spanChanged(int,int)), this, SLOT(satValSliderChanged(int,int)));
+	connect(minValSpinBox,	SIGNAL(valueChanged(double)), this, SLOT(minValSBChanged(double)));
+	connect(maxValSpinBox,	SIGNAL(valueChanged(double)), this, SLOT(maxValSBChanged(double)));
+	connect(minSatSpinBox,	SIGNAL(valueChanged(double)), this, SLOT(minSatSBChanged(double)));
+	connect(maxSatSpinBox,	SIGNAL(valueChanged(double)), this, SLOT(maxSatSBChanged(double)));
+	connect(dispValSlider,	SIGNAL(spanChanged(int,int)), this, SLOT(dispValSliderChanged(int,int)));
+	connect(satValSlider,	SIGNAL(spanChanged(int,int)), this, SLOT(satValSliderChanged(int,int)));
 
 	//checkboxes
 	connect(nanInGreyCheckBox,			SIGNAL(toggled(bool)), this, SLOT(nanInGrayChanged(bool)));
@@ -383,7 +383,7 @@ void sfEditDlg::logScaleChanged(bool state)
 	if (m_associatedSF->logScale() != state)
 	{
 		m_associatedSF->setLogScale(state);
-		fillDialogWith(m_associatedSF);  //the saturation sliders + the symmetrical scale checkbox may need to be updated!
+		fillDialogWith(m_associatedSF); //the saturation sliders + the symmetrical scale checkbox may need to be updated!
 		emit entitySFHasChanged();
 	}
 }

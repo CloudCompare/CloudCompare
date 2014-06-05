@@ -165,26 +165,26 @@ bool ccMesh::computeNormals(bool perVertex)
 
 bool ccMesh::computePerVertexNormals()
 {
-    if (!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
+	if (!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
 	{
 		ccLog::Warning("[ccMesh::computePerVertexNormals] Vertex set is not a standard cloud?!");
-        return false;
+		return false;
 	}
-	
+
 	unsigned triCount = size();
 	if (triCount == 0)
 	{
 		ccLog::Warning("[ccMesh::computePerVertexNormals] Empty mesh!");
-        return false;
+		return false;
 	}
 	unsigned vertCount = m_associatedCloud->size();
 	if (vertCount < 3)
 	{
 		ccLog::Warning("[ccMesh::computePerVertexNormals] Not enough vertices! (<3)");
-        return false;
+		return false;
 	}
 
-    ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
+	ccPointCloud* cloud = static_cast<ccPointCloud*>(m_associatedCloud);
 
 	//we instantiate a temporary structure to store each vertex normal (uncompressed)
 	std::vector<CCVector3> theNorms;
@@ -198,9 +198,9 @@ bool ccMesh::computePerVertexNormals()
 		return false;
 	}
 
-    //allocate compressed normals array on vertices cloud
-    bool normalsWereAllocated = cloud->hasNormals();
-    if (/*!normalsWereAllocated && */!cloud->resizeTheNormsTable()) //we call it whatever the case (just to be sure)
+	//allocate compressed normals array on vertices cloud
+	bool normalsWereAllocated = cloud->hasNormals();
+	if (/*!normalsWereAllocated && */!cloud->resizeTheNormsTable()) //we call it whatever the case (just to be sure)
 	{
 		//warning message should have been already issued!
 		return false;
@@ -241,10 +241,10 @@ bool ccMesh::computePerVertexNormals()
 	}
 
 	//apply it also to sub-meshes!
-    showNormals_extended(true);
+	showNormals_extended(true);
 
 	if (!normalsWereAllocated)
-        cloud->showNormals(true);
+		cloud->showNormals(true);
 
 	return true;
 }
@@ -255,7 +255,7 @@ bool ccMesh::computePerTriangleNormals()
 	if (triCount == 0)
 	{
 		ccLog::Warning("[ccMesh::computePerTriangleNormals] Empty mesh!");
-        return false;
+		return false;
 	}
 
 	//if some normal indexes already exists, we remove them (easier)
@@ -304,7 +304,7 @@ bool ccMesh::computePerTriangleNormals()
 	}
 
 	//apply it also to sub-meshes!
-    showNormals_extended(true);
+	showNormals_extended(true);
 
 	return true;
 }
@@ -317,7 +317,7 @@ bool ccMesh::normalsShown() const
 bool ccMesh::processScalarField(MESH_SCALAR_FIELD_PROCESS process)
 {
 	if (!m_associatedCloud || !m_associatedCloud->isScalarFieldEnabled())
-        return false;
+		return false;
 
 	unsigned nPts = m_associatedCloud->size();
 

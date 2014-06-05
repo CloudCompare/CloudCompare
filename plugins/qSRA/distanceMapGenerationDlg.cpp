@@ -111,7 +111,7 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	, m_gridColor(Qt::gray)
 	, m_symbolColor(Qt::black)
 {
-    setupUi(this);
+	setupUi(this);
 
 	assert(m_cloud && m_sf && m_profile);
 
@@ -273,16 +273,16 @@ DistanceMapGenerationDlg::DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalar
 	}
 
 	connect(projectionComboBox,				SIGNAL(currentIndexChanged(int)),	this,	SLOT(projectionModeChanged(int)));
-    connect(angularUnitComboBox,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(angularUnitChanged(int)));
-    connect(xStepDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-    connect(hStepDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-    connect(latStepDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-    connect(xMinDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-    connect(xMaxDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-    connect(hMinDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-    connect(hMaxDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-    connect(latMinDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
-    connect(latMaxDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
+	connect(angularUnitComboBox,			SIGNAL(currentIndexChanged(int)),	this,	SLOT(angularUnitChanged(int)));
+	connect(xStepDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
+	connect(hStepDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
+	connect(latStepDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
+	connect(xMinDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
+	connect(xMaxDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
+	connect(hMinDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
+	connect(hMaxDoubleSpinBox,				SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
+	connect(latMinDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
+	connect(latMaxDoubleSpinBox,			SIGNAL(valueChanged(double)),		this,	SLOT(updateGridSteps()));
 	connect(baseRadiusDoubleSpinBox,		SIGNAL(valueChanged(double)),		this,	SLOT(baseRadiusChanged(double)));
 	connect(heightUnitLineEdit,				SIGNAL(editingFinished()),			this,	SLOT(updateHeightUnits()));
 	connect(exportCloudPushButton,			SIGNAL(clicked()),					this,	SLOT(exportMapAsCloud()));
@@ -842,11 +842,11 @@ void DistanceMapGenerationDlg::angularUnitChanged(int index)
 		m_angularUnits = ANG_RAD;
 
 		double PIx2 = 2.0*M_PI;
-		SetSpinBoxValues(xStepDoubleSpinBox,		4, 0.0001, PIx2,   0.1, xStep_rad);
-		SetSpinBoxValues(scaleXStepDoubleSpinBox,	4, 0.0001, PIx2,   0.5, scaleXStep_rad);
-		SetSpinBoxValues(xMinDoubleSpinBox,			4,    0.0, PIx2,   0.5, xMin_rad);
-		SetSpinBoxValues(xMaxDoubleSpinBox,			4,    0.0, PIx2,   0.5, xMax_rad);
-													   
+		SetSpinBoxValues(xStepDoubleSpinBox,		4, 0.0001, PIx2,	0.1, xStep_rad);
+		SetSpinBoxValues(scaleXStepDoubleSpinBox,	4, 0.0001, PIx2,	0.5, scaleXStep_rad);
+		SetSpinBoxValues(xMinDoubleSpinBox,			4,    0.0, PIx2,	0.5, xMin_rad);
+		SetSpinBoxValues(xMaxDoubleSpinBox,			4,    0.0, PIx2,	0.5, xMax_rad);
+
 		double PIdiv2 = M_PI/2.0-0.0001;
 		SetSpinBoxValues(scaleLatStepDoubleSpinBox,	4, 0.0001, PIdiv2, 0.3, scaleLatStep_rad);
 		SetSpinBoxValues(latStepDoubleSpinBox,		4, 0.0001, PIdiv2, 0.3, latStep_rad);
@@ -1150,11 +1150,11 @@ void DistanceMapGenerationDlg::exportMapAsImage()
 	rtfDlg.renderOverlayItemsCheckBox->setChecked(false);
 	rtfDlg.renderOverlayItemsCheckBox->setVisible(false);
 
-    if (rtfDlg.exec())
-    {
-        QApplication::processEvents();
+	if (rtfDlg.exec())
+	{
+		QApplication::processEvents();
 		m_window->renderToFile(qPrintable(rtfDlg.getFilename()),rtfDlg.getZoom(),rtfDlg.dontScalePoints(),rtfDlg.renderOverlayItems());
-    }
+	}
 }
 
 void DistanceMapGenerationDlg::exportProfilesAsDXF()
@@ -1789,8 +1789,8 @@ void DistanceMapGenerationDlg::updateVolumes()
 
 void DistanceMapGenerationDlg::initFromPersistentSettings()
 {
-    QSettings settings;
-    settings.beginGroup("DistanceMapGenerationDialog");
+	QSettings settings;
+	settings.beginGroup("DistanceMapGenerationDialog");
 
 	//read parameters
 	double conicSpanRatio		= settings.value("conicSpanRatio",		conicSpanRatioDoubleSpinBox->value()).toDouble();
@@ -1844,8 +1844,8 @@ void DistanceMapGenerationDlg::initFromPersistentSettings()
 
 void DistanceMapGenerationDlg::saveToPersistentSettings()
 {
-    QSettings settings;
-    settings.beginGroup("DistanceMapGenerationDialog");
+	QSettings settings;
+	settings.beginGroup("DistanceMapGenerationDialog");
 
 	//write parameters
 	settings.setValue("conicSpanRatio",		conicSpanRatioDoubleSpinBox->value());

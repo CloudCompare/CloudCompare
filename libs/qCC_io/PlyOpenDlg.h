@@ -32,10 +32,10 @@ class QComboBox;
 //! Dialog for configuration of PLY files opening sequence
 class PlyOpenDlg : public QDialog, public Ui::PlyOpenDlg
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    PlyOpenDlg(QWidget* parent = 0);
+	PlyOpenDlg(QWidget* parent = 0);
 
 	void setDefaultComboItems(const QStringList& stdPropsText);
 	void setListComboItems(const QStringList& listPropsText);
@@ -51,10 +51,10 @@ public slots:
 	void addSFComboBox(int selectedIndex = 0);
 
 protected slots:
-    void testBeforeAccept();
+	void testBeforeAccept();
 
 signals:
-    void fullyAccepted();
+	void fullyAccepted();
 
 protected:
 

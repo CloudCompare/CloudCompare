@@ -26,8 +26,8 @@
 
 //! Dummy qCC plugin
 /** Replace the 'qDummyPlugin' string by your own plugin class name
-    and then check 'qDummyPlugin.cpp' for more directions (you
-    have to fill-in the blank methods. The most important one is the
+	and then check 'qDummyPlugin.cpp' for more directions (you
+	have to fill-in the blank methods. The most important one is the
 	'getActions' method.  This method should return all actions
 	(QAction objects). CloudCompare will automatically add them to an
 	icon in the plugin toolbar and to an entry in the plugin menu
@@ -40,8 +40,8 @@
 **/
 class qDummyPlugin : public QObject, public ccStdPluginInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(ccStdPluginInterface)
+	Q_OBJECT
+	Q_INTERFACES(ccStdPluginInterface)
 #ifdef CC_QT5
 	//replace qDummy by the plugin name (IID should be unique - let's hope your plugin name is unique ;)
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qDummy")
@@ -52,14 +52,14 @@ public:
 	//! Default constructor
 	qDummyPlugin(QObject* parent=0);
 
-    //inherited from ccPluginInterface
+	//inherited from ccPluginInterface
 	virtual QString getName() const { return "qDummyPlugin"; }
 	virtual QString getDescription() const { return "Dummy plugin (add description here)"; }
-    virtual QIcon getIcon() const;
+	virtual QIcon getIcon() const;
 
-    //inherited from ccStdPluginInterface
+	//inherited from ccStdPluginInterface
 	void onNewSelection(const ccHObject::Container& selectedEntities);
-    virtual void getActions(QActionGroup& group);
+	virtual void getActions(QActionGroup& group);
 
 protected slots:
 

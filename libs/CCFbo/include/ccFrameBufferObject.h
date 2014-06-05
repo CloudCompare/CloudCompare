@@ -20,66 +20,68 @@
 
 #include "ccGlew.h"
 
-const GLenum FBO_COLORS[] = {GL_COLOR_ATTACHMENT0_EXT,
-                             GL_COLOR_ATTACHMENT1_EXT,
-                             GL_COLOR_ATTACHMENT2_EXT,
-                             GL_COLOR_ATTACHMENT3_EXT};
+const GLenum FBO_COLORS[] = {	GL_COLOR_ATTACHMENT0_EXT,
+								GL_COLOR_ATTACHMENT1_EXT,
+								GL_COLOR_ATTACHMENT2_EXT,
+								GL_COLOR_ATTACHMENT3_EXT};
 
 //! F.B.O. encapsulation
 class ccFrameBufferObject
 {
-    public:
-        ccFrameBufferObject();
-        ~ccFrameBufferObject();
+public:
+	ccFrameBufferObject();
+	~ccFrameBufferObject();
 
-        bool init(unsigned w, unsigned h);
+	bool init(unsigned w, unsigned h);
 
-        void reset();
+	void reset();
 
-        void start();
-        void stop();
+	void start();
+	void stop();
 
-        bool initTexture(unsigned index,
-                            GLint internalformat,
-                            GLenum format,
-                            GLenum type,
-                            GLint minMagFilter = GL_LINEAR,
-                            GLenum target = GL_TEXTURE_2D);
+	bool initTexture(	unsigned index,
+						GLint internalformat,
+						GLenum format,
+						GLenum type,
+						GLint minMagFilter = GL_LINEAR,
+						GLenum target = GL_TEXTURE_2D);
 
-        bool initTextures(unsigned count,
-                            GLint internalformat,
-                            GLenum format,
-                            GLenum type,
-                            GLint minMagFilter = GL_LINEAR,
-                            GLenum target = GL_TEXTURE_2D);
+	bool initTextures(	unsigned count,
+						GLint internalformat,
+						GLenum format,
+						GLenum type,
+						GLint minMagFilter = GL_LINEAR,
+						GLenum target = GL_TEXTURE_2D);
 
-        bool initDepth(GLint wrapParam = GL_CLAMP_TO_BORDER,
-                        GLenum internalFormat = GL_DEPTH_COMPONENT24,
-                        GLint minMagFilter = GL_NEAREST,
-                        GLenum textureTarget = GL_TEXTURE_2D);
+	bool initDepth(	GLint wrapParam = GL_CLAMP_TO_BORDER,
+					GLenum internalFormat = GL_DEPTH_COMPONENT24,
+					GLint minMagFilter = GL_NEAREST,
+					GLenum textureTarget = GL_TEXTURE_2D);
 
-        //void bindAll();
+	void setDrawBuffers(GLsizei n, const GLenum* buffers);	//GLenum buffers[n]	= {GL_COLOR_ATTACHMENT0_EXT,GL_COLOR_ATTACHMENT1_EXT};
 
-        void setDrawBuffers(GLsizei n, const GLenum* buffers);	//GLenum buffers[n]	= {GL_COLOR_ATTACHMENT0_EXT,GL_COLOR_ATTACHMENT1_EXT};
+	void setDrawBuffers1();
+	void setDrawBuffersN(GLsizei n); //n=1..4
 
-        void setDrawBuffers1();
-        void setDrawBuffersN(GLsizei n); //n=1..4
+	GLuint getID();
+	GLuint getColorTexture(unsigned i);
+	GLuint getDepthTexture();
 
-        GLuint getID();
-        GLuint getColorTexture(unsigned i);
-        GLuint getDepthTexture();
+protected:
 
-    protected:
+	//! Width
+	unsigned m_width;
+	//! Height
+	unsigned m_height;
 
-        unsigned width,height;
+	//! Depth texture GL ID
+	GLuint m_depthTexture;
 
-        //! Depth texture GL ID
-        GLuint depthTexture;
+	//! Color textures GL IDs
+	GLuint m_colorTextures[4];
 
-        //! Color textures GL IDs
-        GLuint colorTextures[4];
-
-        GLuint fboId;
+	//! ID
+	GLuint m_fboId;
 };
 
 #endif

@@ -61,9 +61,9 @@ bool ccViewportParameters::toFile(QFile& out) const
 	//other parameters (dataVersion>=20)
 	QDataStream outStream(&out);
 	outStream << pixelSize;
-    outStream << zoom;
-    outStream << defaultPointSize;
-    outStream << defaultLineWidth;
+	outStream << zoom;
+	outStream << defaultPointSize;
+	outStream << defaultLineWidth;
 	outStream << perspectiveView;
 	outStream << objectCenteredView;
 	outStream << pivotPoint.x;
@@ -103,9 +103,9 @@ bool ccViewportParameters::fromFile(QFile& in, short dataVersion, int flags)
 	//before version 25, we were saving the inverse of 'pixelSize' ('globalZoom')
 	if (dataVersion < 25)
 		pixelSize = (pixelSize> ZERO_TOLERANCE ? 1.0f/pixelSize : 1.0f);
-    inStream >> zoom;
-    inStream >> defaultPointSize;
-    inStream >> defaultLineWidth;
+	inStream >> zoom;
+	inStream >> defaultPointSize;
+	inStream >> defaultLineWidth;
 	inStream >> perspectiveView;
 	inStream >> objectCenteredView;
 	if (dataVersion >= 36) //we now save the camera center and pivot point in double precision

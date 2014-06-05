@@ -43,10 +43,10 @@
 #include <pcl/io/pcd_io.h>
 
 LoadPCD::LoadPCD()
-    : BaseFilter(FilterDescription("LoadPCD",
-                                   "Load PCD FIle",
-                                   "Load a PCD File",
-                                   ":/toolbar/PclUtils/icons/load.png"))
+	: BaseFilter(FilterDescription(	"LoadPCD",
+									"Load PCD FIle",
+									"Load a PCD File",
+									":/toolbar/PclUtils/icons/load.png"))
 {
 }
 
@@ -87,68 +87,70 @@ int LoadPCD::compute()
 	//for each selected filename
 	for (int k = 0; k < m_filenames.size(); ++k)
 	{
-        Eigen::Vector4f origin;
-        Eigen::Quaternionf orientation;
+		Eigen::Vector4f origin;
+		Eigen::Quaternionf orientation;
 
 		QString filename = m_filenames[k];
 
-        boost::shared_ptr<PCLCloud> cloud_ptr_in = loadSensorMessage(filename, origin, orientation);
-        
+		boost::shared_ptr<PCLCloud> cloud_ptr_in = loadSensorMessage(filename, origin, orientation);
+
 		if (!cloud_ptr_in) //loading failed?
 			return 0;
 
 		PCLCloud::Ptr cloud_ptr;
-        if (!cloud_ptr_in->is_dense) //data may contain nans. Remove them
-        {
-            //now we need to remove nans
-            pcl::PassThrough<PCLCloud> passFilter;
-            passFilter.setInputCloud(cloud_ptr_in);
+		if (!cloud_ptr_in->is_dense) //data may contain nans. Remove them
+		{
+			//now we need to remove nans
+			pcl::PassThrough<PCLCloud> passFilter;
+			passFilter.setInputCloud(cloud_ptr_in);
 
 			cloud_ptr = PCLCloud::Ptr(new PCLCloud);
-            passFilter.filter(*cloud_ptr);
-        }
-        else
+			passFilter.filter(*cloud_ptr);
+		}
+		else
 		{
-            cloud_ptr = cloud_ptr_in;
+			cloud_ptr = cloud_ptr_in;
 		}
 
-        //now we construct a ccGBLSensor with these characteristics
-        ccGBLSensor * sensor = new ccGBLSensor;
+		//now we construct a ccGBLSensor with these characteristics
+		ccGBLSensor * sensor = new ccGBLSensor;
 
-        // get orientation as rot matrix
-        Eigen::Matrix3f eigrot = orientation.toRotationMatrix();
+		// get orientation as rot matrix
+		Eigen::Matrix3f eigrot = orientation.toRotationMatrix();
 
-        // and copy it into a ccGLMatrix
-        ccGLMatrix ccRot;
-        for (int i = 0; i < 3; ++i)
-            for (int j = 0; j < 3; ++j)
-            {
-                ccRot.getColumn(j)[i] = eigrot(i,j);
-            }
+		// and copy it into a ccGLMatrix
+		ccGLMatrix ccRot;
+		for (int i = 0; i < 3; ++i)
+		{
+			for (int j = 0; j < 3; ++j)
+			{
+				ccRot.getColumn(j)[i] = eigrot(i,j);
+			}
+		}
 
-        ccRot.getColumn(3)[3] = 1.0;
+		ccRot.getColumn(3)[3] = 1.0;
 
-        // now in a format good for CloudComapre
-//        ccGLMatrix ccRot = ccGLMatrix::FromQuaternion(orientation.coeffs().data());
+		// now in a format good for CloudComapre
+		//ccGLMatrix ccRot = ccGLMatrix::FromQuaternion(orientation.coeffs().data());
 
-//        ccRot = ccRot.transposed();
-        ccRot.setTranslation(origin.data());
+		//ccRot = ccRot.transposed();
+		ccRot.setTranslation(origin.data());
 
-        sensor->setRigidTransformation(ccRot);
-        sensor->setDeltaPhi(0.05);
-        sensor->setDeltaTheta(0.05);
+		sensor->setRigidTransformation(ccRot);
+		sensor->setDeltaPhi(0.05);
+		sensor->setDeltaTheta(0.05);
 
-        //uncertainty to some default
-        sensor->setUncertainty(0.01);
+		//uncertainty to some default
+		sensor->setUncertainty(0.01);
 
-        ccPointCloud* out_cloud = sm2ccConverter(cloud_ptr).getCCloud();
+		ccPointCloud* out_cloud = sm2ccConverter(cloud_ptr).getCCloud();
 		if (!out_cloud)
 			return -31;
 
-        //do the projection on sensor
-        ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(out_cloud);
-        int errorCode;
-        sensor->project(cloud,errorCode,true);
+		//do the projection on sensor
+		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(out_cloud);
+		int errorCode;
+		sensor->project(cloud,errorCode,true);
 
 		QString cloud_name = QFileInfo(filename).baseName();
 		out_cloud->setName(cloud_name);
@@ -158,7 +160,7 @@ int LoadPCD::compute()
 
 		ccHObject* cloudContainer = new ccHObject(containerName);
 		assert(out_cloud);
-        out_cloud->addChild(sensor);
+		out_cloud->addChild(sensor);
 		cloudContainer->addChild(out_cloud);
 
 		emit newEntity(cloudContainer);

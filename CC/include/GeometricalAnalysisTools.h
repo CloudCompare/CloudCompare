@@ -18,6 +18,8 @@
 #ifndef GEOMETRICAL_ANALYSIS_TOOLS_HEADER
 #define GEOMETRICAL_ANALYSIS_TOOLS_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "Neighbourhood.h"
 #include "DgmOctree.h"
@@ -30,28 +32,20 @@ class GenericProgressCallback;
 class GenericCloud;
 class ScalarField;
 
-//In case we face overflow issues (warning: may slow down computation)
-//#define CC_OVERFLOW_SAFEGAURD
-
 //! Several algorithms to compute point-clouds geometric characteristics  (curvature, density, etc.)
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API GeometricalAnalysisTools : public CCToolbox
-#else
-class GeometricalAnalysisTools : public CCToolbox
-#endif
 {
 public:
 
 	//! Computes the local curvature
-    /** \warning this method assumes the input scalar field is different from output.
-        \param theCloud processed cloud
-        \param cType curvature type
-        \param kernelRadius neighbouring sphere radius
+	/** \warning this method assumes the input scalar field is different from output.
+		\param theCloud processed cloud
+		\param cType curvature type
+		\param kernelRadius neighbouring sphere radius
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
-    **/
+	**/
 	static int computeCurvature(GenericIndexedCloudPersist* theCloud,
 								Neighbourhood::CC_CURVATURE_TYPE cType,
 								PointCoordinateType kernelRadius,
@@ -59,26 +53,26 @@ public:
 								DgmOctree* inputOctree = 0);
 
 	//! Computes the local density (approximate)
-    /** Old method (based only on the distance to the nearest neighbor)
+	/** Old method (based only on the distance to the nearest neighbor)
 		\warning this method assumes the input scalar field is different from output.
-        \param theCloud processed cloud
+		\param theCloud processed cloud
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
-    **/
+	**/
 	static int computeLocalDensityApprox(	GenericIndexedCloudPersist* theCloud,
 											GenericProgressCallback* progressCb = 0,
 											DgmOctree* inputOctree = 0);
 
 	//! Computes the local density (at a given scale)
-    /** Simply counts the number of points falling inside a sphere around each point
+	/** Simply counts the number of points falling inside a sphere around each point
 		\warning this method assumes the input scalar field is different from output.
-        \param theCloud processed cloud
-        \param kernelRadius neighbouring sphere radius
+		\param theCloud processed cloud
+		\param kernelRadius neighbouring sphere radius
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
-    **/
+	**/
 	static int computeLocalDensity(	GenericIndexedCloudPersist* theCloud,
 									PointCoordinateType kernelRadius,
 									GenericProgressCallback* progressCb = 0,
@@ -86,14 +80,14 @@ public:
 
 	//! Computes the local roughness
 	/** Roughness is defined as the distance to the locally (least square) fitted plane.
-        LS plane is computed with all neighbour points inside a sphere.
-        \warning this method assumes the input scalar field is different from output.
-        \param theCloud processed cloud
-        \param kernelRadius neighbouring sphere radius
+		LS plane is computed with all neighbour points inside a sphere.
+		\warning this method assumes the input scalar field is different from output.
+		\param theCloud processed cloud
+		\param kernelRadius neighbouring sphere radius
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
-    **/
+	**/
 	static int computeRoughness(GenericIndexedCloudPersist* theCloud,
 								PointCoordinateType kernelRadius,
 								GenericProgressCallback* progressCb = 0,
@@ -150,14 +144,14 @@ public:
 														const PointCoordinateType* _gravityCenter = 0);
 
 	//! Flag duplicate points
-    /** This method only requires an output scalar field. Duplicate points will be
+	/** This method only requires an output scalar field. Duplicate points will be
 		associated to scalar value 1 (and 0 for the others).
-        \param theCloud processed cloud
+		\param theCloud processed cloud
 		\param minDistanceBetweenPoints min distance between (output) points
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
-    **/
+	**/
 	static int flagDuplicatePoints(	GenericIndexedCloudPersist* theCloud,
 									double minDistanceBetweenPoints = 1.0e-12,
 									GenericProgressCallback* progressCb = 0,

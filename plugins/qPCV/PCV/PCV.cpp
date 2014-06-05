@@ -56,7 +56,7 @@ static const double c_eps = 2.2204e-16;
 static const double c_twist = 4.0;
 static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 {
-    if (N == 0)
+	if (N == 0)
 		return false;
 
 	try
@@ -69,15 +69,15 @@ static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 		return false;
 	}
 
-    if (N == 1)
+	if (N == 1)
 		return true;
 
 	const double Nd = static_cast<double>(N);
-    double area = 4.0*M_PI/Nd;
-    double beta = acos(1.0-2.0/Nd); //return in [0,pi/2] as '1-2/N' goes from 0 to 1 when N --> inf
+	double area = 4.0*M_PI/Nd;
+	double beta = acos(1.0-2.0/Nd); //return in [0,pi/2] as '1-2/N' goes from 0 to 1 when N --> inf
 	double gamma = M_PI-2.0*beta; //in [0,pi]
-    double fuzz = c_eps*2.0*Nd;
-    
+	double fuzz = c_eps*2.0*Nd;
+
 	int Ltemp = static_cast<int>(ceil(gamma/sqrt(area) - fuzz));
 	int L = 2 + std::max(Ltemp,1);
 
@@ -150,8 +150,8 @@ static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 			if (m[i-1] != 0 && m[i] != 0)
 			{
 				offset[i] = offset[i-1]
-							+ static_cast<double>(gcd(m[i],m[i-1])) / static_cast<double>(2*m[i]*m[i-1])
-							+ std::min<double>( c_twist, floor(static_cast<double>(m[i-1])/c_twist) ) / static_cast<double>(m[i-1]);
+				+ static_cast<double>(gcd(m[i],m[i-1])) / static_cast<double>(2*m[i]*m[i-1])
+					+ std::min<double>( c_twist, floor(static_cast<double>(m[i-1])/c_twist) ) / static_cast<double>(m[i-1]);
 			}
 			else
 			{
@@ -168,8 +168,8 @@ static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 				double theta = 2.0*M_PI * (offset[i] + static_cast<double>(j)/static_cast<double>(m[i]));
 
 				dirs[rayIndex++] = CCVector3(	static_cast<PointCoordinateType>(r*cos(theta)),
-												static_cast<PointCoordinateType>(r*sin(theta)),
-												static_cast<PointCoordinateType>(h) );
+					static_cast<PointCoordinateType>(r*sin(theta)),
+					static_cast<PointCoordinateType>(h) );
 			}
 
 			z -= static_cast<double>(m[i]+m[i+1])/Nd;
@@ -178,9 +178,9 @@ static bool SampleSphere(unsigned N, std::vector<CCVector3>& dirs)
 		assert(rayIndex == N-1);
 	}
 
-    dirs[N-1] = CCVector3(0,0,-1);
+	dirs[N-1] = CCVector3(0,0,-1);
 
-    return true;
+	return true;
 }
 
 int PCV::Launch(unsigned numberOfRays,
@@ -263,7 +263,7 @@ bool PCV::Launch(std::vector<CCVector3>& rays,
 		QString infoStr = QString("Rays: %1").arg(numberOfRays);
 		if (mesh)
 			infoStr.append(QString("\nFaces: %1").arg(mesh->size()));
-        else
+		else
 			infoStr.append(QString("\nVertices: %1").arg(numberOfPoints));
 		progressCb->setInfo(qPrintable(infoStr));
 		progressCb->start();

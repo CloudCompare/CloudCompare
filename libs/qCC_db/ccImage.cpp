@@ -44,7 +44,7 @@ ccImage::ccImage()
 #endif
 {
 	setVisible(true);
-    lockVisibility(false);
+	lockVisibility(false);
 	setEnabled(false);
 }
 
@@ -63,7 +63,7 @@ ccImage::ccImage(const QImage& image, const QString& name)
 #endif
 {
 	setVisible(true);
-    lockVisibility(false);
+	lockVisibility(false);
 	setEnabled(true);
 }
 
@@ -109,15 +109,15 @@ void ccImage::setImage(const QImage& image)
 
 bool ccImage::unbindTexture()
 {
-    if (!m_boundWin || !m_textureID)
-        return false;
+	if (!m_boundWin || !m_textureID)
+		return false;
 
 	m_boundWin->releaseTexture(m_textureID);
 
-	m_textureID=0;
-    m_boundWin=0;
+	m_textureID = 0;
+	m_boundWin = 0;
 
-    return true;
+	return true;
 }
 
 bool ccImage::bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture/*=false*/)
@@ -125,19 +125,19 @@ bool ccImage::bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture/*=false*
 	assert(win);
 
 	if (m_image.isNull())
-        return false;
+		return false;
 
-    if (!m_textureID || m_boundWin!=win)
-    {
-        if (m_textureID && m_boundWin!=win)
-            unbindTexture();
+	if (!m_textureID || m_boundWin!=win)
+	{
+		if (m_textureID && m_boundWin!=win)
+			unbindTexture();
 
-        m_boundWin = win;
+		m_boundWin = win;
 		m_textureID = m_boundWin->getTexture(m_image);
 
 		//OpenGL version < 2.0 require texture with 2^n width & height
 		if (!win->supportOpenGLVersion(QGLFormat::OpenGL_Version_2_0)
-			&& glewIsSupported("GL_ARB_texture_non_power_of_two")==0)
+			&& glewIsSupported("GL_ARB_texture_non_power_of_two") == 0)
 		{
 			// update nearest smaller power of 2 (for textures with old OpenGL versions)
 			unsigned paddedWidth = (m_width > 0 ? 1 << (unsigned)floor(log((double)m_width)/log(2.0)) : 0);
@@ -150,7 +150,7 @@ bool ccImage::bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture/*=false*
 			m_texU = 1.0;
 			m_texV = 1.0;
 		}
-    }
+	}
 
 	if (m_textureID != GL_INVALID_TEXTURE_ID)
 	{
@@ -164,19 +164,19 @@ bool ccImage::bindToGlTexture(ccGenericGLDisplay* win, bool pow2Texture/*=false*
 void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 {
 	if (m_image.isNull())
-        return;
+		return;
 
-    if (MACRO_Draw2D(context))
-    {
-        if (MACRO_Foreground(context))
-        {
-            glPushAttrib(GL_COLOR_BUFFER_BIT);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	if (MACRO_Draw2D(context))
+	{
+		if (MACRO_Foreground(context))
+		{
+			glPushAttrib(GL_COLOR_BUFFER_BIT);
+			glEnable(GL_BLEND);
+			glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-            glEnable(GL_TEXTURE_2D);
+			glEnable(GL_TEXTURE_2D);
 
-            if (bindToGlTexture(context._win))
+			if (bindToGlTexture(context._win))
 			{
 				//we make the texture fit inside viewport
 				int realWidth = (int)((float)m_height * m_aspectRatio); //take aspect ratio into account!
@@ -195,21 +195,21 @@ void ccImage::drawMeOnly(CC_DRAW_CONTEXT& context)
 				glEnd();
 			}
 
-            glDisable(GL_TEXTURE_2D);
+			glDisable(GL_TEXTURE_2D);
 
-            glPopAttrib();
-        }
-    }
+			glPopAttrib();
+		}
+	}
 }
 
 void ccImage::setAlpha(float value)
 {
-    if (value<=0)
-        m_texAlpha=0;
-    else if (value>1.0f)
-        m_texAlpha=1.0f;
-    else
-        m_texAlpha = value;
+	if (value <= 0)
+		m_texAlpha = 0;
+	else if (value > 1.0f)
+		m_texAlpha = 1.0f;
+	else
+		m_texAlpha = value;
 }
 
 #ifdef INCLUDE_IMAGE_FILENAME

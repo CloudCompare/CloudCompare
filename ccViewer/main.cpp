@@ -24,7 +24,7 @@
 #ifdef Q_OS_MAC
 #include <QFileOpenEvent>
 #endif
- 
+
 //qCC_db
 #include <ccIncludeGL.h>
 #include <ccTimer.h>
@@ -41,46 +41,46 @@
 
 class ccApplication : public QApplication
 {
-   public:
-      ccApplication( int &argc, char **argv ) :
-         QApplication( argc, argv )
-      {
-         setOrganizationName("CCCorp");
-         setApplicationName("CloudCompareViewer");
+public:
+	ccApplication( int &argc, char **argv ) :
+		QApplication( argc, argv )
+	{
+		setOrganizationName("CCCorp");
+		setApplicationName("CloudCompareViewer");
 #ifdef Q_OS_MAC
-         mViewer = NULL;
-         
-         // Mac OS X apps don't show icons in menus
-         setAttribute( Qt::AA_DontShowIconsInMenus );
+		mViewer = NULL;
+
+		// Mac OS X apps don't show icons in menus
+		setAttribute( Qt::AA_DontShowIconsInMenus );
 #endif
-      }
+	}
 
 #ifdef Q_OS_MAC
-      void  setViewer( ccViewer *inViewer ) { mViewer = inViewer; }
-            
-   protected:
-      bool  event( QEvent *inEvent )
-      {
-         switch ( inEvent->type() )
-         {
-            case QEvent::FileOpen:
-            {
-               if ( mViewer == NULL )
-                  return false;
-               
-               QStringList fileName( static_cast<QFileOpenEvent *>(inEvent)->file() );
-            
-               mViewer->addToDB( fileName );
-               return true;
-            }
-               
-            default:
-               return QApplication::event( inEvent );
-         }
-      }
-   
-   private:
-      ccViewer *mViewer;
+	void  setViewer( ccViewer *inViewer ) { mViewer = inViewer; }
+
+protected:
+	bool  event( QEvent *inEvent )
+	{
+		switch ( inEvent->type() )
+		{
+		case QEvent::FileOpen:
+			{
+				if ( mViewer == NULL )
+					return false;
+
+				QStringList fileName( static_cast<QFileOpenEvent *>(inEvent)->file() );
+
+				mViewer->addToDB( fileName );
+				return true;
+			}
+
+		default:
+			return QApplication::event( inEvent );
+		}
+	}
+
+private:
+	ccViewer *mViewer;
 #endif
 };
 
@@ -93,27 +93,27 @@ int main(int argc, char *argv[])
 #endif
 
 	//OpenGL?
-    if (!QGLFormat::hasOpenGL())
-    {
-        QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
-        return EXIT_FAILURE;
-    }
+	if (!QGLFormat::hasOpenGL())
+	{
+		QMessageBox::critical(0, "Error", "This application needs OpenGL to run!");
+		return EXIT_FAILURE;
+	}
 
-    //common data initialization
+	//common data initialization
 	ccObject::ResetUniqueIDCounter();
-    ccTimer::Init();
+	ccTimer::Init();
 	ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization
 
 	ccViewer w/*(0,Qt::Window|Qt::CustomizeWindowHint)*/;
 #ifdef Q_OS_MAC
-   a.setViewer( &w );
+	a.setViewer( &w );
 #endif
 	w.show();
 
 	//files to open are passed as argument
 	if (argc>1)
-    {
+	{
 		//parse arguments
 		QStringList filenames;
 		int i=1;
@@ -160,14 +160,14 @@ int main(int argc, char *argv[])
 
 		if (!filenames.empty())
 			w.addToDB(filenames);
-    }
+	}
 
-#ifdef Q_OS_MAC   
-   // process events to load any files on the command line
-   QCoreApplication::processEvents();
+#ifdef Q_OS_MAC
+	// process events to load any files on the command line
+	QCoreApplication::processEvents();
 #endif
 
-    w.checkForLoadedEntities();
+	w.checkForLoadedEntities();
 
 	int result = a.exec();
 

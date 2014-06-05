@@ -20,18 +20,19 @@
 
 #include <ui_ptsSamplingDlg.h>
 
+//! Dialog: points sampling on a mesh
 class ccPtsSamplingDlg : public QDialog, public Ui::PointsSamplingDialog
 {
 public:
-    ccPtsSamplingDlg(QWidget* parent = 0);
+	ccPtsSamplingDlg(QWidget* parent = 0);
 
-    bool generateNormals() const;
+	bool generateNormals() const;
 	bool interpolateRGB() const;
 	bool interpolateTexture() const;
 
-    bool useDensity() const;
-    double getDensityValue() const;
-    unsigned getPointsNumber() const;
+	bool useDensity() const;
+	double getDensityValue() const;
+	unsigned getPointsNumber() const;
 
 	void setPointsNumber(int count);
 	void setDensityValue(double density);

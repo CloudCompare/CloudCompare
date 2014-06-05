@@ -17,31 +17,31 @@
 
 #include "ccAskTwoDoubleValuesDlg.h"
 
-ccAskTwoDoubleValuesDlg::ccAskTwoDoubleValuesDlg(
-                            const char* vName1,
-                            const char* vName2,
-                            double minVal,
-                            double maxVal,
-                            double defaultVal1,
-                            double defaultVal2,
-                            int precision/*=6*/,
-                            const char* windowTitle/*=0*/,
-                            QWidget* parent/*=0*/)
-    : QDialog(parent), Ui::AskTwoDoubleValuesDialog()
+ccAskTwoDoubleValuesDlg::ccAskTwoDoubleValuesDlg(	const char* vName1,
+													const char* vName2,
+													double minVal,
+													double maxVal,
+													double defaultVal1,
+													double defaultVal2,
+													int precision/*=6*/,
+													const char* windowTitle/*=0*/,
+													QWidget* parent/*=0*/)
+	: QDialog(parent)
+	, Ui::AskTwoDoubleValuesDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
-    label1->setText(vName1);
-    label2->setText(vName2);
-    doubleSpinBox1->setDecimals(precision);
-    doubleSpinBox2->setDecimals(precision);
-    doubleSpinBox1->setRange(minVal,maxVal);
-    doubleSpinBox2->setRange(minVal,maxVal);
-    doubleSpinBox1->setValue(defaultVal1);
-    doubleSpinBox2->setValue(defaultVal2);
+	label1->setText(vName1);
+	label2->setText(vName2);
+	doubleSpinBox1->setDecimals(precision);
+	doubleSpinBox2->setDecimals(precision);
+	doubleSpinBox1->setRange(minVal,maxVal);
+	doubleSpinBox2->setRange(minVal,maxVal);
+	doubleSpinBox1->setValue(defaultVal1);
+	doubleSpinBox2->setValue(defaultVal2);
 
-    if (windowTitle)
-        setWindowTitle(windowTitle);
+	if (windowTitle)
+		setWindowTitle(windowTitle);
 }

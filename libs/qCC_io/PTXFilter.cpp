@@ -51,7 +51,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	const char* filename,
 									bool* coordinatesShiftEnabled/*=0*/,
 									CCVector3d* coordinatesShift/*=0*/)
 {
-    //open ASCII file for reading
+	//open ASCII file for reading
 	QFile file(filename);
 	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
 		return CC_FERR_READING;

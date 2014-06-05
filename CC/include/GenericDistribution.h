@@ -18,12 +18,8 @@
 #ifndef GENERIC_DISTRIBUTION_HEADER
 #define GENERIC_DISTRIBUTION_HEADER
 
-#ifdef _MSC_VER
-//To get rid of the really annoying warnings about template class exportation
-#pragma warning( disable: 4251 )
-#pragma warning( disable: 4530 )
-#endif
-
+//Local
+#include "CCCoreLib.h"
 #include "CCTypes.h"
 
 //system
@@ -38,23 +34,15 @@ class GenericCloud;
 /** Custom parametric distributions can be implemented through this
 	interface and used for filtering data (see StatisticalTestingTools).
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
-
 class CC_CORE_LIB_API GenericDistribution
-#else
-class GenericDistribution
-#endif
 {
 public:
 
-    //! Default constructor
-    GenericDistribution() : m_isValid(false) {};
+	//! Default constructor
+	GenericDistribution() : m_isValid(false) {}
 
-    //! Default destructor
-    virtual ~GenericDistribution() {};
+	//! Default destructor
+	virtual ~GenericDistribution() {}
 
 	//! Returns distribution name
 	virtual const char* getName() const = 0; 

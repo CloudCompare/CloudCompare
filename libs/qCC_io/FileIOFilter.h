@@ -40,24 +40,24 @@ enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
 					POV					,		/**< Multiple Point-Of-View cloud meta-file (ascii) */
 					MA					,		/**< Maya mesh (ascii) */
 					ICM					,		/**< Calibrated Images meta-file */
-					DM_ASCII    		,		/**< Depth Map (ascii) */
-					BUNDLER     		,		/**< Bundler output (ascii) */
+					DM_ASCII			,		/**< Depth Map (ascii) */
+					BUNDLER				,		/**< Bundler output (ascii) */
 					VTK					,		/**< VTK mesh/cloud file */
 					STL					,		/**< STL mesh file (ascii) */
-                    PCD					,		/**< Point Cloud Library file */
-                    OFF					,		/**< OFF mesh file (ascii) */
-                    PTX					,		/**< PTX cloud file (ascii) */
+					PCD					,		/**< Point Cloud Library file */
+					OFF					,		/**< OFF mesh file (ascii) */
+					PTX					,		/**< PTX cloud file (ascii) */
 #ifdef CC_X3D_SUPPORT
 					X3D					,		/**< X3D mesh file */
 #endif
 #ifdef CC_LAS_SUPPORT
-					LAS         		,		/**< LAS lidar point cloud (binary) */
+					LAS					,		/**< LAS lidar point cloud (binary) */
 #endif
 #ifdef CC_E57_SUPPORT
-					E57         		,		/**< ASTM E2807-11 E57 file */
+					E57					,		/**< ASTM E2807-11 E57 file */
 #endif
 #ifdef CC_PDMS_SUPPORT
-					PDMS         		,		/**< PDMS (.pdmsmac) */
+					PDMS				,		/**< PDMS (.pdmsmac) */
 #endif
 #ifdef CC_DXF_SUPPORT
 					DXF					,		/**< DXF (Autocad) */
@@ -74,7 +74,7 @@ enum CC_FILE_TYPES {UNKNOWN_FILE = 0	,		/**< unknown type */
 const CC_FILE_TYPES CC_FILE_TYPES_ENUMS[] = {UNKNOWN_FILE, SOI, ASCII, BIN,
 												PN, PV, PLY, OBJ, POV,
 												MA, ICM, DM_ASCII, BUNDLER,
-                                                VTK, STL, PCD, OFF, PTX
+												VTK, STL, PCD, OFF, PTX
 #ifdef CC_X3D_SUPPORT
 												,X3D
 #endif
@@ -99,32 +99,32 @@ const CC_FILE_TYPES CC_FILE_TYPES_ENUMS[] = {UNKNOWN_FILE, SOI, ASCII, BIN,
 };
 
 const char CC_FILE_TYPE_FILTERS[][64] = {
-            "All (*.*)",
-            "SOI Soisic Mensi (*.soi)",
-            "ASCII files (*.txt *.asc *.neu *.xyz *.pts *.csv)",
-            "BIN CloudCompare binaries (*.bin)",
-            "PN Point-Normal [binary] (*.pn)",
-            "PV Point-Value [binary] (*.pv)",
-            "PLY Stanford mesh file (*.ply)",
-            "OBJ Wavefront mesh file (*.obj)",
-            "POV Multiple Point-Of-View cloud meta-file [ascii] (*.pov)",
-            "MA Maya ASCII file (*.ma)",
-            "ICM Calibrated Images meta-file (*.icm)",
-            "ASCII Depth Map (*.txt *.asc)",
-            "Snavely's Bundler output (*.out)",
-            "VTK cloud or mesh (*.vtk)",
-            "STL mesh (*.stl)",
-            "PCD Point Cloud Library cloud (*.pcd)",
+			"All (*.*)",
+			"SOI Soisic Mensi (*.soi)",
+			"ASCII files (*.txt *.asc *.neu *.xyz *.pts *.csv)",
+			"BIN CloudCompare binaries (*.bin)",
+			"PN Point-Normal [binary] (*.pn)",
+			"PV Point-Value [binary] (*.pv)",
+			"PLY Stanford mesh file (*.ply)",
+			"OBJ Wavefront mesh file (*.obj)",
+			"POV Multiple Point-Of-View cloud meta-file [ascii] (*.pov)",
+			"MA Maya ASCII file (*.ma)",
+			"ICM Calibrated Images meta-file (*.icm)",
+			"ASCII Depth Map (*.txt *.asc)",
+			"Snavely's Bundler output (*.out)",
+			"VTK cloud or mesh (*.vtk)",
+			"STL mesh (*.stl)",
+			"PCD Point Cloud Library cloud (*.pcd)",
 			"OFF mesh (*.off)",
 			"PTX cloud (*.ptx)" 
 #ifdef CC_X3D_SUPPORT
-            , "X3D mesh file (*.x3d)"
+			, "X3D mesh file (*.x3d)"
 #endif
 #ifdef CC_LAS_SUPPORT
-            , "LAS lidar point cloud (*.las *.laz)"
+			, "LAS lidar point cloud (*.las *.laz)"
 #endif
 #ifdef CC_E57_SUPPORT
-            , "E57 ASTM E2807-11 files (*.e57)"
+			, "E57 ASTM E2807-11 files (*.e57)"
 #endif
 #ifdef CC_PDMS_SUPPORT
 			, "PDMS (*.pdms *.pdmsmac *.mac)"
@@ -141,68 +141,68 @@ const char CC_FILE_TYPE_FILTERS[][64] = {
 };
 
 const char CC_FILE_TYPE_DEFAULT_EXTENSION[][8] = {
-            "",
-            "soi",
-            "asc",
-            "bin",
-            "pn",
-            "pv",
-            "ply",
-            "obj",
-            "pov",
-            "ma",
-            "icm",
-            "txt",
-            "out",
-            "vtk",
-			"stl",
-            "pcd",
-			"off",
-			"ptx"
+				"",
+				"soi",
+				"asc",
+				"bin",
+				"pn",
+				"pv",
+				"ply",
+				"obj",
+				"pov",
+				"ma",
+				"icm",
+				"txt",
+				"out",
+				"vtk",
+				"stl",
+				"pcd",
+				"off",
+				"ptx"
 #ifdef CC_X3D_SUPPORT
-            , "x3d"
+				, "x3d"
 #endif
 #ifdef CC_LAS_SUPPORT
-            , "las"
+				, "las"
 #endif
 #ifdef CC_E57_SUPPORT
-			, "e57"
+				, "e57"
 #endif
 #ifdef CC_PDMS_SUPPORT
-			, "pdms"
+				, "pdms"
 #endif
 #ifdef CC_DXF_SUPPORT
-			, "dxf"
+				, "dxf"
 #endif
 #ifdef CC_GDAL_SUPPORT
-			, "tif"
+				, "tif"
 #endif
 #ifdef CC_FBX_SUPPORT
-			, "fbx"
+				, "fbx"
 #endif
 };
 
 //! Typical I/O filter errors
 enum CC_FILE_ERROR {CC_FERR_NO_ERROR,
-                    CC_FERR_BAD_ARGUMENT,
-                    CC_FERR_UNKNOWN_FILE,
-                    CC_FERR_WRONG_FILE_TYPE,
-                    CC_FERR_WRITING,
-                    CC_FERR_READING,
-                    CC_FERR_NO_SAVE,
-                    CC_FERR_NO_LOAD,
-                    CC_FERR_BAD_ENTITY_TYPE,
-                    CC_FERR_CANCELED_BY_USER,
-                    CC_FERR_NOT_ENOUGH_MEMORY,
+					CC_FERR_BAD_ARGUMENT,
+					CC_FERR_UNKNOWN_FILE,
+					CC_FERR_WRONG_FILE_TYPE,
+					CC_FERR_WRITING,
+					CC_FERR_READING,
+					CC_FERR_NO_SAVE,
+					CC_FERR_NO_LOAD,
+					CC_FERR_BAD_ENTITY_TYPE,
+					CC_FERR_CANCELED_BY_USER,
+					CC_FERR_NOT_ENOUGH_MEMORY,
 					CC_FERR_MALFORMED_FILE,
 					CC_FERR_CONSOLE_ERROR,
 					CC_FERR_BROKEN_DEPENDENCY_ERROR,
-                    CC_FERR_FILE_WAS_WRITTEN_BY_PLUGIN
+					CC_FERR_FILE_WAS_WRITTEN_BY_PLUGIN
 };
 
 //! Generic file I/O filter
 /** Gives static access to file loader.
-    Must be implemented by any specific I/O filter.
+	Must be implemented by any specific I/O filter.
 **/
 class FileIOFilter
 {
@@ -227,23 +227,23 @@ public:
 									const char* filename,
 									CC_FILE_TYPES fType);
 
-    //! Displays (to console) the message corresponding to a given error code
-    /** \param err error code
-        \param action "saving", "reading", etc.
-        \param filename corresponding file
-    **/
+	//! Displays (to console) the message corresponding to a given error code
+	/** \param err error code
+		\param action "saving", "reading", etc.
+		\param filename corresponding file
+	**/
 	static void DisplayErrorMessage(CC_FILE_ERROR err,
 									const QString& action,
 									const QString& filename);
 
 	//! Loads one or more entities from a file
 	/** This method must be implemented by children classes.
-        \param filename file to load
-        \param container container to store loaded entities
+		\param filename file to load
+		\param container container to store loaded entities
 		\param alwaysDisplayLoadDialog always display (eventual) display dialog, even if automatic guess is possible
 		\param coordinatesShiftEnabled whether shift on load has already been defined or not (may be modified by this method)
 		\param coordinatesShift already applied (input) or newly applied (output) shift on load (3D translation)
-        \return error
+		\return error
 	**/
 	virtual CC_FILE_ERROR loadFile(	const char* filename,
 									ccHObject& container,
@@ -253,9 +253,9 @@ public:
 
 	//! Saves an entity (or a group of) to a file
 	/** This method must be implemented by children classes.
-        \param entity entity (or group of) to save
-        \param filename filename
-        \return error
+		\param entity entity (or group of) to save
+		\param filename filename
+		\return error
 	**/
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename) = 0;
 

@@ -265,8 +265,8 @@ bool DistanceMapGenerationTool::ComputeMinAndMaxLatitude_rad(	ccPointCloud* clou
 	const unsigned char Y = (X < 2 ? X+1 : 0);
 
 	for (unsigned n=0; n<count; ++n)
-    {
-        const CCVector3* P = cloud->getPoint(n);
+	{
+		const CCVector3* P = cloud->getPoint(n);
 		CCVector3 relativePos(	P->x - static_cast<PointCoordinateType>(revolutionOrigin.x),
 								P->y - static_cast<PointCoordinateType>(revolutionOrigin.y),
 								P->z - static_cast<PointCoordinateType>(revolutionOrigin.z) );
@@ -415,13 +415,13 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 	double ccw = (counterclockwise ? -1.0 : 1.0);
 
 	for (unsigned n=0; n<count; ++n)
-    {
+	{
 		//we skip invalid values
 		const ScalarType& val = sf->getValue(n);
 		if (!CCLib::ScalarField::ValidValue(val))
 			continue;
 
-        const CCVector3* P = cloud->getPoint(n);
+		const CCVector3* P = cloud->getPoint(n);
 		CCVector3 relativePos(	P->x - static_cast<PointCoordinateType>(revolutionOrigin.x),
 								P->y - static_cast<PointCoordinateType>(revolutionOrigin.y),
 								P->z - static_cast<PointCoordinateType>(revolutionOrigin.z) );
@@ -488,9 +488,9 @@ QSharedPointer<DistanceMapGenerationTool::Map> DistanceMapGenerationTool::Create
 		}
 		++cell.count;
 
-        //if (progressCb)
-        //    progressCb->update(30.0 * (float)n / (float)cloud->size());
-    }
+		//if (progressCb)
+		//	progressCb->update(30.0 * (float)n / (float)cloud->size());
+	}
 
 	//we need to finish the average values computation
 	if (fillStrategy == FILL_STRAT_AVG_DIST)
@@ -1008,8 +1008,8 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 
 	//get projection height
 	for (unsigned n=0; n<cloud->size(); ++n)
-    {
-        CCVector3* P = const_cast<CCVector3*>(cloud->getPoint(n));
+	{
+		CCVector3* P = const_cast<CCVector3*>(cloud->getPoint(n));
 		CCVector3d relativePos(	static_cast<double>(P->x) - revolutionCenter.x,
 								static_cast<double>(P->y) - revolutionCenter.y,
 								static_cast<double>(P->z) - revolutionCenter.z );
@@ -1020,10 +1020,10 @@ bool DistanceMapGenerationTool::ConvertCloudToCylindrical(	ccPointCloud* cloud,
 			ang_rad += 2.0 * M_PI;
 		double height = P->u[Z];
 
-        P->x = static_cast<PointCoordinateType>(ang_rad);
+		P->x = static_cast<PointCoordinateType>(ang_rad);
 		P->y = static_cast<PointCoordinateType>(height);
 		P->z = 0;
-    }
+	}
 
 	cloud->refreshBB();
 	if (cloud->getOctree())
@@ -1058,8 +1058,8 @@ bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
 
 	//get projection height
 	for (unsigned n=0; n<cloud->size(); ++n)
-    {
-        CCVector3* P = const_cast<CCVector3*>(cloud->getPoint(n));
+	{
+		CCVector3* P = const_cast<CCVector3*>(cloud->getPoint(n));
 		CCVector3d relativePos(	static_cast<double>(P->x) - revolutionCenter.x,
 								static_cast<double>(P->y) - revolutionCenter.y,
 								static_cast<double>(P->z) - revolutionCenter.z );
@@ -1073,8 +1073,8 @@ bool DistanceMapGenerationTool::ConvertCloudToConical(	ccPointCloud* cloud,
 												static_cast<PointCoordinateType>(relativePos.u[Y]),
 												static_cast<PointCoordinateType>(relativePos.u[Z]) ); //between 0 and pi/2
 
-        *P = ProjectPointOnCone(ang_rad, lat_rad, latMin_rad, nProj, counterclockwise);
-    }
+		*P = ProjectPointOnCone(ang_rad, lat_rad, latMin_rad, nProj, counterclockwise);
+	}
 
 	cloud->refreshBB();
 	if (cloud->getOctree())

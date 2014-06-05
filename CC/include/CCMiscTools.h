@@ -18,20 +18,15 @@
 #ifndef CC_MISC_TOOLS_HEADER
 #define CC_MISC_TOOLS_HEADER
 
-//local
+//Local
+#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "CCGeom.h"
 
 namespace CCLib
 {
-
 	//! Miscellaneous useful functions (geometrical elements handling)
-	#ifdef CC_USE_AS_DLL
-	#include "CloudCompareDll.h"
 	class CC_CORE_LIB_API CCMiscTools : public CCToolbox
-	#else
-	class CCMiscTools : public CCToolbox
-	#endif
 	{
 	public:
 

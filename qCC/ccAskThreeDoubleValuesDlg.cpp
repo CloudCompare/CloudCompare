@@ -28,29 +28,30 @@ ccAskThreeDoubleValuesDlg::ccAskThreeDoubleValuesDlg(	const QString& vName1,
 														int precision/*=6*/,
 														const char* windowTitle/*=0*/,
 														QWidget* parent/*=0*/)
-    : QDialog(parent), Ui::AskThreeDoubleValuesDialog()
+	: QDialog(parent)
+	, Ui::AskThreeDoubleValuesDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	checkBox->setVisible(false);
 
-    label1->setText(vName1);
-    label2->setText(vName2);
-    label3->setText(vName3);
-    doubleSpinBox1->setRange(minVal,maxVal);
-    doubleSpinBox2->setRange(minVal,maxVal);
-    doubleSpinBox3->setRange(minVal,maxVal);
-    doubleSpinBox1->setValue(defaultVal1);
-    doubleSpinBox2->setValue(defaultVal2);
-    doubleSpinBox3->setValue(defaultVal3);
-    doubleSpinBox1->setDecimals(precision);
-    doubleSpinBox2->setDecimals(precision);
-    doubleSpinBox3->setDecimals(precision);
+	label1->setText(vName1);
+	label2->setText(vName2);
+	label3->setText(vName3);
+	doubleSpinBox1->setRange(minVal,maxVal);
+	doubleSpinBox2->setRange(minVal,maxVal);
+	doubleSpinBox3->setRange(minVal,maxVal);
+	doubleSpinBox1->setValue(defaultVal1);
+	doubleSpinBox2->setValue(defaultVal2);
+	doubleSpinBox3->setValue(defaultVal3);
+	doubleSpinBox1->setDecimals(precision);
+	doubleSpinBox2->setDecimals(precision);
+	doubleSpinBox3->setDecimals(precision);
 
-    if (windowTitle)
-        setWindowTitle(windowTitle);
+	if (windowTitle)
+		setWindowTitle(windowTitle);
 }
 
 void ccAskThreeDoubleValuesDlg::showCheckbox(const QString& label, bool state, const QString* tooltip/*=0*/)

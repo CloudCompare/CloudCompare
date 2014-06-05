@@ -18,6 +18,8 @@
 #ifndef SIMPLE_MESH_HEADER
 #define SIMPLE_MESH_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "GenericIndexedMesh.h"
 #include "GenericChunkedArray.h"
 #include "SimpleTriangle.h"
@@ -31,13 +33,7 @@ class GenericIndexedCloud;
 /** Implements the GenericIndexedMesh interface. This mesh is always associated
 	to a (index based) point cloud that stores the mesh vertexes.
 **/
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API SimpleMesh : virtual public GenericIndexedMesh
-#else
-class SimpleMesh : virtual public GenericIndexedMesh
-#endif
 {
 public:
 
@@ -45,7 +41,7 @@ public:
 	/** \param _theVertices the point cloud containing the vertices
 		\param linkVerticesWithMesh specifies if the vertex cloud should be deleted when the SimpleMesh object is destructed
 	**/
-	SimpleMesh(GenericIndexedCloud* _theVertices, bool linkVerticesWithMesh=false);
+	SimpleMesh(GenericIndexedCloud* _theVertices, bool linkVerticesWithMesh = false);
 
 	//! SimpleMesh destructor
 	virtual ~SimpleMesh();
@@ -86,7 +82,7 @@ public:
 
 protected:
 
-    //! Updates bounding-box with a 3D point
+	//! Updates bounding-box with a 3D point
 	virtual void updateBBWithPoint(const CCVector3* P);
 
 	//! A triangle vertices indexes container
@@ -105,11 +101,11 @@ protected:
 	bool verticesLinked;
 
 	//! Bounding-box min corner
-    CCVector3 bbMin;
+	CCVector3 bbMin;
 	//! Bounding-box min corner
-    CCVector3 bbMax;
-    //! Bounding-box validity
-    bool bbIsValid;
+	CCVector3 bbMax;
+	//! Bounding-box validity
+	bool bbIsValid;
 };
 
 }

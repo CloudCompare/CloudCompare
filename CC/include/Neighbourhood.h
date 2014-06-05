@@ -18,6 +18,8 @@
 #ifndef CC_NEIGHBOURHOOD_HEADER
 #define CC_NEIGHBOURHOOD_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "GenericIndexedCloudPersist.h"
 #include "Matrix.h"
 #include "CCGeom.h"
@@ -31,31 +33,22 @@ namespace CCLib
 
 class GenericIndexedMesh;
 
-//For more precise computations
-//#define CC_NEIGHBOURHOOD_PRECISION_COMPUTINGS
-
 //! A specific point could structure to handle subsets of points, provided with several geometric processings
 /** Typically suited for "nearest neighbours".
 	It implements the GenericIndexCloud interface by
 	inheriting the ReferenceCloud class.
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API Neighbourhood
-#else
-class Neighbourhood
-#endif
 {
 	public:
 
 		//! Geometric properties/elements that can be computed from the set of points (see Neighbourhood::getGeometricalElement)
 		enum CC_GEOM_ELEMENT {  DEPRECATED					= 0,
-                                GRAVITY_CENTER				= 1,
-                                LSQ_PLANE					= 2,
-                                HEIGHT_FUNCTION				= 4,
-                                HEIGHT_FUNCTION_DIRECTIONS	= 8,
-                                QUADRIC_3D					= 16};
+								GRAVITY_CENTER				= 1,
+								LSQ_PLANE					= 2,
+								HEIGHT_FUNCTION				= 4,
+								HEIGHT_FUNCTION_DIRECTIONS	= 8,
+								QUADRIC_3D					= 16};
 
 		//! Curvature type
 		enum CC_CURVATURE_TYPE {GAUSSIAN_CURV, MEAN_CURV};
@@ -66,7 +59,7 @@ class Neighbourhood
 		Neighbourhood(GenericIndexedCloudPersist* associatedCloud);
 
 		//! Default destructor
-		virtual ~Neighbourhood() {};
+		virtual ~Neighbourhood() {}
 
 		//! Resets structure (depreactes all associated geometrical fetaures)
 		virtual void reset();
@@ -209,8 +202,8 @@ class Neighbourhood
 		//! Returns the best interpolating 'height function'
 		/** Returns an array of the form [a,b,c,d,e,f] such as:
 				Z = a + b.X + c.Y + d.X^2 + e.X.Y + f.Y^2
-            Warning: 'X','Y' and 'Z' are output in dimsHF (optional):
-				dimsHF=[index(X),index(Y),index(Z)] where: 0=x, 1=y, 2=z
+			\warning: 'X','Y' and 'Z' are output in dimsHF (optional):
+				dimsHF = [index(X),index(Y),index(Z)] where: 0=x, 1=y, 2=z
 			\return 0 if computation failed
 		**/
 		const PointCoordinateType* getHeightFunction(uchar* dimsHF = 0);
@@ -232,19 +225,19 @@ class Neighbourhood
 
 		//! Height function parameters
 		/** Array [a,b,c,d,e,f] such as: Z = a + b.X + c.Y + d.X^2 + e.X.Y + f.Y^2.
-            Warning: 'X','Y' and 'Z' are defined by 'theHeightFunctionDirections'
-            Only valid if 'structuresValidity & HEIGHT_FUNCTION != 0'.
+			\warning: 'X','Y' and 'Z' are defined by 'theHeightFunctionDirections'
+			Only valid if 'structuresValidity & HEIGHT_FUNCTION != 0'.
 		**/
 		PointCoordinateType theHeightFunction[6];
 		//! Height function dimensions
 		/** Array (index(X),index(Y),index(Z)) where: 0=x, 1=y, 2=z.
-            Only valid if 'structuresValidity & HEIGHT_FUNCTION != 0'.
+			Only valid if 'structuresValidity & HEIGHT_FUNCTION != 0'.
 		**/
 		uchar theHeightFunctionDirections[3];
 		
 		//! Least-square best fitting plane parameters
 		/** Array [a,b,c,d] such as: ax+by+cz=d.
-            Only valid if 'structuresValidity & LSQ_PLANE != 0'.
+			Only valid if 'structuresValidity & LSQ_PLANE != 0'.
 		**/
 		PointCoordinateType theLSQPlaneEquation[4];
 		//! Least-square best fitting plane base vectors
@@ -252,9 +245,9 @@ class Neighbourhood
 		
 		//! Least-square best fitting 3D quadric parameters
 		/** Array [a,b,c,d,e,f,g,l,m,n] such as
-            a.x^2+b.y^2+c.z^2+2e.x.y+2f.y.z+2g.z.x+2l.x+2m.y+2n.z+d = 0.
-            Shouldn't be used directly: use _the3DQuadric instead.
-            Only valid if 'structuresValidity & QUADRIC_3D != 0'.
+			a.x^2+b.y^2+c.z^2+2e.x.y+2f.y.z+2g.z.x+2l.x+2m.y+2n.z+d = 0.
+			Shouldn't be used directly: use _the3DQuadric instead.
+			Only valid if 'structuresValidity & QUADRIC_3D != 0'.
 		**/
 		double the3DQuadric[10];
 		

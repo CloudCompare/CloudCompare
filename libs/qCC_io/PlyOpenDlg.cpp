@@ -26,7 +26,7 @@
 
 PlyOpenDlg::PlyOpenDlg(QWidget* parent) : QDialog(parent), Ui::PlyOpenDlg()
 {
-    setupUi(this);
+	setupUi(this);
 
 	try
 	{
@@ -50,8 +50,8 @@ PlyOpenDlg::PlyOpenDlg(QWidget* parent) : QDialog(parent), Ui::PlyOpenDlg()
 	{
 	}
 
-    connect(addSFToolButton,	SIGNAL(clicked()),			this,	SLOT(addSFComboBox()));
-    connect(buttonBox,			SIGNAL(accepted()),			this,	SLOT(testBeforeAccept()));
+	connect(addSFToolButton,	SIGNAL(clicked()),			this,	SLOT(addSFComboBox()));
+	connect(buttonBox,			SIGNAL(accepted()),			this,	SLOT(testBeforeAccept()));
 	connect(this,				SIGNAL(fullyAccepted()),	this,	SLOT(accept()));
 }
 
@@ -90,20 +90,20 @@ void PlyOpenDlg::setListComboItems(const QStringList& listPropsText)
 
 void PlyOpenDlg::testBeforeAccept()
 {
-    //we need at least two coordinates per point (i.e. 2D)
-    int zeroCoord = 0;
-    if (xComboBox->currentIndex() == 0) ++zeroCoord;
-    if (yComboBox->currentIndex() == 0) ++zeroCoord;
-    if (zComboBox->currentIndex() == 0) ++zeroCoord;
+	//we need at least two coordinates per point (i.e. 2D)
+	int zeroCoord = 0;
+	if (xComboBox->currentIndex() == 0) ++zeroCoord;
+	if (yComboBox->currentIndex() == 0) ++zeroCoord;
+	if (zComboBox->currentIndex() == 0) ++zeroCoord;
 
-    if (zeroCoord > 1)
-    {
-        QMessageBox::warning(0, "Error", "At least two vertex coordinates (X,Y,Z) must be defined!");
-        return;
-    }
+	if (zeroCoord > 1)
+	{
+		QMessageBox::warning(0, "Error", "At least two vertex coordinates (X,Y,Z) must be defined!");
+		return;
+	}
 
-    //we must ensure that no property is assigned to more than one field
-    int n = m_stdPropsText.size();
+	//we must ensure that no property is assigned to more than one field
+	int n = m_stdPropsText.size();
 	int p = m_listPropsText.size();
 
 	assert(n+p >= 2);

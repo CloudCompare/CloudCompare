@@ -78,8 +78,8 @@ bool ccBox::toFile_MeOnly(QFile& out) const
 	//parameters (dataVersion>=21)
 	QDataStream outStream(&out);
 	outStream << m_dims.x;
-    outStream << m_dims.y;
-    outStream << m_dims.z;
+	outStream << m_dims.y;
+	outStream << m_dims.z;
 
 	return true;
 }

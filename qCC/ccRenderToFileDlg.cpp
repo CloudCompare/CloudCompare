@@ -35,92 +35,92 @@ ccRenderToFileDlg::ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QW
 	, w(baseWidth)
 	, h(baseHeight)
 {
-    setupUi(this);
+	setupUi(this);
 
-    //we grab the list of supported image file formats (writing)
-    QList<QByteArray> list = QImageWriter::supportedImageFormats();
-    if (list.size()<1)
-    {
-        ccLog::Error("No supported image format on this platform?!");
-        reject();
-        return;
-    }
-
-    //we convert this list into a proper "filters" string
-    QString firstExtension(list[0].data());
-	QString firstFilter;
-    for (int i=0;i<list.size();++i)
+	//we grab the list of supported image file formats (writing)
+	QList<QByteArray> list = QImageWriter::supportedImageFormats();
+	if (list.size()<1)
 	{
-        filters.append(QString("%1 image (*.%2)\n").arg(QString(list[i].data()).toUpper()).arg(list[i].data()));
+		ccLog::Error("No supported image format on this platform?!");
+		reject();
+		return;
+	}
+
+	//we convert this list into a proper "filters" string
+	QString firstExtension(list[0].data());
+	QString firstFilter;
+	for (int i=0;i<list.size();++i)
+	{
+		filters.append(QString("%1 image (*.%2)\n").arg(QString(list[i].data()).toUpper()).arg(list[i].data()));
 		if (i==0)
 			firstFilter = filters;
 	}
 
 	QSettings settings;
-    settings.beginGroup("RenderToFile");
-    selectedFilter				= settings.value("selectedFilter",firstFilter).toString();
-    QString currentPath			= settings.value("currentPath",QApplication::applicationDirPath()).toString();
-    QString selectedExtension	= settings.value("selectedExtension",firstExtension).toString();
+	settings.beginGroup("RenderToFile");
+	selectedFilter				= settings.value("selectedFilter",firstFilter).toString();
+	QString currentPath			= settings.value("currentPath",QApplication::applicationDirPath()).toString();
+	QString selectedExtension	= settings.value("selectedExtension",firstExtension).toString();
 	QString baseFilename		= settings.value("baseFilename","capture").toString();
-    bool dontScale				= settings.value("dontScaleFeatures",dontScalePoints()).toBool();
-    bool doRenderOverlayItems	= settings.value("renderOverlayItems",renderOverlayItems()).toBool();
-    settings.endGroup();
+	bool dontScale				= settings.value("dontScaleFeatures",dontScalePoints()).toBool();
+	bool doRenderOverlayItems	= settings.value("renderOverlayItems",renderOverlayItems()).toBool();
+	settings.endGroup();
 
 	dontScaleFeaturesCheckBox->setChecked(dontScale);
 	renderOverlayItemsCheckBox->setChecked(doRenderOverlayItems);
-    filenameLineEdit->setText(currentPath+QString("/")+baseFilename+QString(".")+selectedExtension);
+	filenameLineEdit->setText(currentPath+QString("/")+baseFilename+QString(".")+selectedExtension);
 
 	zoomDoubleSpinBox->setValue(s_renderZoom);
 
-    connect(chooseFileButton,           SIGNAL(clicked()),              this, SLOT(chooseFile()));
-    connect(zoomDoubleSpinBox,          SIGNAL(valueChanged(double)),   this, SLOT(updateInfo()));
-    connect(buttonBox,                  SIGNAL(accepted()),             this, SLOT(saveSettings()));
+	connect(chooseFileButton,		SIGNAL(clicked()),				this, SLOT(chooseFile()));
+	connect(zoomDoubleSpinBox,		SIGNAL(valueChanged(double)),	this, SLOT(updateInfo()));
+	connect(buttonBox,				SIGNAL(accepted()),				this, SLOT(saveSettings()));
 
-    updateInfo();
+	updateInfo();
 }
 
 void ccRenderToFileDlg::saveSettings()
 {
-    //we update current file path
-    QFileInfo fi(filenameLineEdit->text());
-    QString currentPath = fi.absolutePath();
+	//we update current file path
+	QFileInfo fi(filenameLineEdit->text());
+	QString currentPath = fi.absolutePath();
 	QString selectedExtension = fi.suffix();
 	QString baseFilename = fi.completeBaseName();
 
-    QSettings settings;
-    settings.beginGroup("RenderToFile");
-    settings.setValue("currentPath",currentPath);
-    settings.setValue("selectedExtension",selectedExtension);
+	QSettings settings;
+	settings.beginGroup("RenderToFile");
+	settings.setValue("currentPath",currentPath);
+	settings.setValue("selectedExtension",selectedExtension);
 	settings.setValue("selectedFilter",selectedFilter);
-    settings.setValue("baseFilename",baseFilename);
-    settings.setValue("dontScaleFeatures",dontScalePoints());
+	settings.setValue("baseFilename",baseFilename);
+	settings.setValue("dontScaleFeatures",dontScalePoints());
 	settings.setValue("renderOverlayItems",renderOverlayItems());
-    settings.endGroup();
+	settings.endGroup();
 }
 
 void ccRenderToFileDlg::chooseFile()
 {
-    QString selectedFileName = QFileDialog::getSaveFileName(this,
-                                                            tr("Save Image"),
-                                                            filenameLineEdit->text(),
-                                                            filters,
+	QString selectedFileName = QFileDialog::getSaveFileName(this,
+															tr("Save Image"),
+															filenameLineEdit->text(),
+															filters,
 															&selectedFilter);
 
-    //if operation is canceled, selectedFileName is empty
-    if (selectedFileName.size()<1)
-        return;
+	//if operation is canceled, selectedFileName is empty
+	if (selectedFileName.size()<1)
+		return;
 
 	filenameLineEdit->setText(selectedFileName);
 }
 
 float ccRenderToFileDlg::getZoom() const
 {
-    return static_cast<float>(zoomDoubleSpinBox->value());
+	return static_cast<float>(zoomDoubleSpinBox->value());
 }
 
 QString ccRenderToFileDlg::getFilename() const
 {
-    return filenameLineEdit->text();
+	return filenameLineEdit->text();
 }
 
 bool ccRenderToFileDlg::dontScalePoints() const
@@ -135,10 +135,10 @@ bool ccRenderToFileDlg::renderOverlayItems() const
 
 void ccRenderToFileDlg::updateInfo()
 {
-    s_renderZoom = getZoom();
+	s_renderZoom = getZoom();
 
-    unsigned w2 = (unsigned)(double(w)*s_renderZoom);
-    unsigned h2 = (unsigned)(double(h)*s_renderZoom);
+	unsigned w2 = (unsigned)(double(w)*s_renderZoom);
+	unsigned h2 = (unsigned)(double(h)*s_renderZoom);
 
-    finalSizeLabel->setText(QString("(%1 x %2)").arg(w2).arg(h2));
+	finalSizeLabel->setText(QString("(%1 x %2)").arg(w2).arg(h2));
 }

@@ -29,7 +29,7 @@ class ccGLWindow;
 **/
 class ccAdjustZoomDlg: public QDialog, public Ui::AdjustZoomDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
@@ -37,12 +37,12 @@ public:
 	virtual ~ccAdjustZoomDlg();
 
 	//! Returns requested zoom
-    double getZoom() const;
+	double getZoom() const;
 
 protected slots:
-    void onZoomChanged(double);
-    void onPixelSizeChanged(double);
-    void onPixelCountChanged(int);
+	void onZoomChanged(double);
+	void onPixelSizeChanged(double);
+	void onPixelCountChanged(int);
 
 protected:
 

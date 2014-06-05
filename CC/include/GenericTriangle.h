@@ -18,43 +18,38 @@
 #ifndef GENERIC_TRIANGLE_HEADER
 #define GENERIC_TRIANGLE_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "CCGeom.h"
 
 namespace CCLib
 {
 
 //! A generic triangle interface for data communication between library and client applications
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API GenericTriangle
-#else
-class GenericTriangle
-#endif
 {
 public:
 
 	//! Default destructor
-	virtual ~GenericTriangle() {};
+	virtual ~GenericTriangle() {}
 
 	//! Returns the first summit (A)
 	/**	Virtual method to access first summit data
 		\return the first summit (as a reference to a Generic3dPoint object)
 	**/
-	virtual const CCVector3* _getA() const =0;
+	virtual const CCVector3* _getA() const = 0;
 
 	//! Returns the second summit (B)
 	/**	Virtual method to access second summit data
 		\return the second summit (as a reference to a Generic3dPoint object)
 	**/
-	virtual const CCVector3* _getB() const =0;
+	virtual const CCVector3* _getB() const = 0;
 
 	//! Returns the third summit (C)
 	/**	Virtual method to access third summit data
 		\return the third summit (as a reference to a Generic3dPoint object)
 	**/
-	virtual const CCVector3* _getC() const =0;
+	virtual const CCVector3* _getC() const = 0;
 };
 
 }

@@ -33,18 +33,18 @@ class ccGenericMesh;
 //! Dialog for cloud/cloud or cloud/mesh comparison setting
 class ccComparisonDlg: public QDialog, public Ui::ComparisonDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
 	//! Comparison type
-    enum CC_COMPARISON_TYPE
-    {
-        CLOUDCLOUD_DIST = 0,
-        CLOUDMESH_DIST  = 1,
-    };
+	enum CC_COMPARISON_TYPE
+	{
+		CLOUDCLOUD_DIST = 0,
+		CLOUDMESH_DIST  = 1,
+	};
 
-    //! Default constructor
+	//! Default constructor
 	ccComparisonDlg(ccHObject* compEntity,
 					ccHObject* refEntity,
 					CC_COMPARISON_TYPE cpType,
@@ -57,38 +57,38 @@ public:
 public slots:
 
 	bool compute();
-    void applyAndExit();
-    void cancelAndExit();
+	void applyAndExit();
+	void cancelAndExit();
 
 protected slots:
-    void showHisto();
+	void showHisto();
 	void split3DCheckboxToggled(bool);
 	void locaModelChanged(int);
 
 protected:
 
-    bool isValid();
-    bool prepareEntitiesForComparison();
-    int computeApproxResults();
-    void updateOctreeLevel(double);
-    int determineBestOctreeLevel(double);
-    void updateDisplay(bool showSF, bool hideRef);
-    void clean();
+	bool isValid();
+	bool prepareEntitiesForComparison();
+	int computeApproxResults();
+	void updateOctreeLevel(double);
+	int determineBestOctreeLevel(double);
+	void updateDisplay(bool showSF, bool hideRef);
+	void clean();
 
-    ccHObject *m_compEnt,*m_refEnt;
-    CCLib::DgmOctree *m_compOctree,*m_refOctree;
-    ccPointCloud* m_compCloud;
-    ccGenericPointCloud* m_refCloud;
-    ccGenericMesh* m_refMesh;
-    CC_COMPARISON_TYPE m_compType;
+	ccHObject *m_compEnt,*m_refEnt;
+	CCLib::DgmOctree *m_compOctree,*m_refOctree;
+	ccPointCloud* m_compCloud;
+	ccGenericPointCloud* m_refCloud;
+	ccGenericMesh* m_refMesh;
+	CC_COMPARISON_TYPE m_compType;
 
-    //! last computed scalar field name
-    QString m_sfName;
+	//! last computed scalar field name
+	QString m_sfName;
 
 	//initial state
-    bool m_refVisibility;
-    bool m_compSFVisibility;
-    QString m_oldSfName;
+	bool m_refVisibility;
+	bool m_compSFVisibility;
+	QString m_oldSfName;
 
 	//! Whether the current SF is a distance field or not
 	bool m_currentSFIsDistance;

@@ -27,13 +27,13 @@ class ccGLWindow;
 //! Generic overlay dialog interface
 class ccOverlayDialog : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
 	//! Default constructor
 	ccOverlayDialog(QWidget* parent = 0);
-	
+
 	//! Destructor
 	virtual ~ccOverlayDialog();
 
@@ -43,15 +43,15 @@ public:
 	**/
 	virtual bool linkWith(ccGLWindow* win);
 
-    //! Starts process
-    /** \return success
-    **/
+	//! Starts process
+	/** \return success
+	**/
 	virtual bool start();
 
-    //! Stops process/dialog
-    /** Automatically emits the 'processFinished' signal (with input state as argument).
-        \param accepted process/dialog result
-    **/
+	//! Stops process/dialog
+	/** Automatically emits the 'processFinished' signal (with input state as argument).
+		\param accepted process/dialog result
+	**/
 	virtual void stop(bool accepted);
 
 	//reimplemented from QDialog
@@ -64,10 +64,10 @@ public:
 
 signals:
 
-    //! Signal emitted when process is finished
-    /** \param accepted specifies how the process finished (accepted or not)
-    **/
-    void processFinished(bool accepted);
+	//! Signal emitted when process is finished
+	/** \param accepted specifies how the process finished (accepted or not)
+	**/
+	void processFinished(bool accepted);
 
 	//! Signal emitted when an overridden key shortcut is pressed
 	/** See ccOverlayDialog::addOverridenShortcut

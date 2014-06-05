@@ -18,6 +18,8 @@
 #ifndef NORMAL_DISTRIBUTION_HEADER
 #define NORMAL_DISTRIBUTION_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "GenericDistribution.h"
 
 namespace CCLib
@@ -26,14 +28,7 @@ namespace CCLib
 //! The Normal/Gaussian statistical distribution
 /** Implements the GenericDistribution interface.
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API NormalDistribution : public GenericDistribution
-#else
-class NormalDistribution : public GenericDistribution
-#endif
 {
 public:
 

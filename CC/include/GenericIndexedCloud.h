@@ -18,6 +18,8 @@
 #ifndef GENERIC_INDEXED_CLOUD_HEADER
 #define GENERIC_INDEXED_CLOUD_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "GenericCloud.h"
 
 namespace CCLib
@@ -26,20 +28,13 @@ namespace CCLib
 //! A generic 3D point cloud with index-based point access
 /** Implements the GenericCloud interface.
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API GenericIndexedCloud : virtual public GenericCloud
-#else
-class GenericIndexedCloud : virtual public GenericCloud
-#endif
 {
 
 public:
 
 	//! Default destructor
-	virtual ~GenericIndexedCloud() {};
+	virtual ~GenericIndexedCloud() {}
 
 	//! Returns the ith point
 	/**	Virtual method to request a point with a specific index.

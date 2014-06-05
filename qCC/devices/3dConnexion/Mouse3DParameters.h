@@ -82,7 +82,7 @@ public:
 
 	//This feature is not handled yet
 	//virtual inline PivotMode pivotMode() const { return m_pivotMode; }
-	//virtual inline void setPivotMode(PivotMode mode) {  if (m_pivotMode != ManualPivot || mode != AutoPivotOverride) m_pivotMode = mode; }
+	//virtual inline void setPivotMode(PivotMode mode) { if (m_pivotMode != ManualPivot || mode != AutoPivotOverride) m_pivotMode = mode; }
 
 	//This feature is set separately for each 3D view
 	//virtual inline PivotVisibility pivotVisibility() const { return m_pivotVisibility; }

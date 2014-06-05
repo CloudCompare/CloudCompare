@@ -272,7 +272,7 @@ void ccRenderingTools::DrawColorRamp(const ccScalarField* sf, ccGLWindow* win, i
 					++it;
 				}
 		}
-      }
+		}
 		else
 		{
 			//convert actual display range to log scale

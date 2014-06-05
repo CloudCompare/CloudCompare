@@ -18,6 +18,8 @@
 #ifndef WEIBULL_DISTRIBUTION_HEADER
 #define WEIBULL_DISTRIBUTION_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "GenericDistribution.h"
 
 namespace CCLib
@@ -26,14 +28,7 @@ namespace CCLib
 //! The Weibull statistical parametric distribution
 /** Implementats the GenericDistribution interface.
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API WeibullDistribution : public GenericDistribution
-#else
-class WeibullDistribution : public GenericDistribution
-#endif
 {
 public:
 
@@ -47,7 +42,7 @@ public:
 		\param _b the Weibull b parameter
 		\param _valueShift a value shift
 	**/
-	WeibullDistribution(ScalarType _a, ScalarType _b, ScalarType _valueShift=0.0);
+	WeibullDistribution(ScalarType _a, ScalarType _b, ScalarType _valueShift = 0);
 
 	//! Returns the distribution parameters
 	/** \param _a a field to transmit the Weibull a paramter
@@ -69,7 +64,7 @@ public:
 		\param _valueShift a value shift
 		return the parameters validity
 	**/
-	bool setParameters(ScalarType _a, ScalarType _b, ScalarType _valueShift=0.0);
+	bool setParameters(ScalarType _a, ScalarType _b, ScalarType _valueShift = 0);
 
 	//! Sets the distribution value shift
 	/** \param vs value shift

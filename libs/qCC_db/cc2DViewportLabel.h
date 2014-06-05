@@ -19,15 +19,11 @@
 #define CC_2D_VIEWPORT_LABEL_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "cc2DViewportObject.h"
 
 //! 2D viewport label
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API cc2DViewportLabel : public cc2DViewportObject
-#else
-class cc2DViewportLabel : public cc2DViewportObject
-#endif
 {
 public:
 
@@ -35,7 +31,7 @@ public:
 	cc2DViewportLabel(const char* name=0);
 
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::VIEWPORT_2D_LABEL; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::VIEWPORT_2D_LABEL; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Returns ROI (relative to screen)
@@ -50,8 +46,8 @@ protected:
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
-    //! Draws the entity only (not its children)
-    virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	//! Draws the entity only (not its children)
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
 
 	//! label ROI
 	/** ROI is relative to screen

@@ -44,8 +44,8 @@ ccGenericMesh::ccGenericMesh(QString name/*=QString()*/)
 	, m_showWired(false)
 	, m_stippling(false)
 {
-    setVisible(true);
-    lockVisibility(false);
+	setVisible(true);
+	lockVisibility(false);
 }
 
 void ccGenericMesh::showNormals(bool state)
@@ -151,10 +151,10 @@ unsigned ccGenericMesh::GET_MAX_LOD_FACES_NUMBER()
 
 void ccGenericMesh::handleColorRamp(CC_DRAW_CONTEXT& context)
 {
-    if (MACRO_Draw2D(context))
-    {
-        if (MACRO_Foreground(context) && !context.sfColorScaleToDisplay)
-        {
+	if (MACRO_Draw2D(context))
+	{
+		if (MACRO_Foreground(context) && !context.sfColorScaleToDisplay)
+		{
 			if (sfShown())
 			{
 				ccGenericPointCloud* vertices = getAssociatedCloud();
@@ -177,8 +177,8 @@ void ccGenericMesh::handleColorRamp(CC_DRAW_CONTEXT& context)
 				cloud->addColorRampInfo(context);
 				//cloud->drawScale(context);
 			}
-        }
-    }
+		}
+	}
 }
 
 void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -217,7 +217,7 @@ void ccGenericMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 		//per-triangle normals?
 		bool showTriNormals = (hasTriNormals() && triNormsShown());
 		//fix 'showNorms'
-        glParams.showNorms = showTriNormals || (vertices->hasNormals() && m_normalsDisplayed);
+		glParams.showNorms = showTriNormals || (vertices->hasNormals() && m_normalsDisplayed);
 
 		//materials & textures
 		bool applyMaterials = (hasMaterials() && materialsShown());

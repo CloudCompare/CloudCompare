@@ -30,13 +30,13 @@
 BundlerImportDlg::BundlerImportDlg(QWidget* parent)
 	: QDialog(parent)
 {
-    setupUi(this);
+	setupUi(this);
 
 	initFromPersistentSettings();
 
-    connect(buttonBox, SIGNAL(accepted()), this, SLOT(acceptAndSaveSettings()));
-    connect(browseImageListFileToolButton, SIGNAL(clicked()), this, SLOT(browseImageListFilename()));
-    connect(browseAltKeypointsFileToolButton, SIGNAL(clicked()), this, SLOT(browseAltKeypointsFilename	()));
+	connect(buttonBox, SIGNAL(accepted()), this, SLOT(acceptAndSaveSettings()));
+	connect(browseImageListFileToolButton, SIGNAL(clicked()), this, SLOT(browseImageListFilename()));
+	connect(browseAltKeypointsFileToolButton, SIGNAL(clicked()), this, SLOT(browseAltKeypointsFilename	()));
 }
 
 BundlerImportDlg::~BundlerImportDlg()
@@ -45,11 +45,11 @@ BundlerImportDlg::~BundlerImportDlg()
 
 void BundlerImportDlg::initFromPersistentSettings()
 {
-    QSettings settings;
-    settings.beginGroup("BundlerImport");
+	QSettings settings;
+	settings.beginGroup("BundlerImport");
 
 	//read parameters
-    double scaleFactor		= settings.value("scaleFactor", imageScaleDoubleSpinBox->value()).toDouble();
+	double scaleFactor		= settings.value("scaleFactor", imageScaleDoubleSpinBox->value()).toDouble();
 	bool orthoRectifyAsCloud= settings.value("orthoRectifyAsClouds", orthoRectifyAsCloudCheckBox->isChecked()).toBool();
 	bool orthoRectifyAsImage= settings.value("orthoRectifyAsImages", orthoRectifyAsImageCheckBox->isChecked()).toBool();
 	bool undistortImages	= settings.value("undistortImages", undistortImagesCheckBox->isChecked()).toBool();
@@ -77,11 +77,11 @@ void BundlerImportDlg::initFromPersistentSettings()
 
 void BundlerImportDlg::acceptAndSaveSettings()
 {
-    QSettings settings;
-    settings.beginGroup("BundlerImport");
+	QSettings settings;
+	settings.beginGroup("BundlerImport");
 
 	//write parameters
-    settings.setValue("scaleFactor", imageScaleDoubleSpinBox->value());
+	settings.setValue("scaleFactor", imageScaleDoubleSpinBox->value());
 	settings.setValue("orthoRectifyAsClouds", orthoRectifyAsCloudCheckBox->isChecked());
 	settings.setValue("orthoRectifyAsImages", orthoRectifyAsImageCheckBox->isChecked());
 	settings.setValue("undistortImages", undistortImagesCheckBox->isChecked());
@@ -92,7 +92,7 @@ void BundlerImportDlg::acceptAndSaveSettings()
 	settings.setValue("importKeypoints", importKeypointsCheckBox->isChecked());
 	settings.setValue("dtmVerticesCount", dtmVerticesSpinBox->value());
 
-    settings.endGroup();
+	settings.endGroup();
 }
 
 bool BundlerImportDlg::useAlternativeKeypoints() const

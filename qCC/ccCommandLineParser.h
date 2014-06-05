@@ -134,13 +134,13 @@ protected:
 	//! Reads out file format
 	static CC_FILE_TYPES getFileFormat(QStringList& arguments);
 
-    //! Saves all clouds
+	//! Saves all clouds
 	/** \param suffix optional suffix
 		\return success
 	**/
 	bool saveClouds(QString suffix = QString());
 
-    //! Saves all meshes
+	//! Saves all meshes
 	/** \param suffix optional suffix
 		\return success
 	**/
@@ -149,7 +149,7 @@ protected:
 	//! Removes all clouds
 	void removeClouds();
 
-    //! Removes all meshes
+	//! Removes all meshes
 	void removeMeshes();
 
 	//! Currently opened point clouds and their filename

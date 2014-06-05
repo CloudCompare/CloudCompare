@@ -18,12 +18,8 @@
 #ifndef FAST_MARCHING_HEADER
 #define FAST_MARCHING_HEADER
 
-#ifdef _MSC_VER
-//To get rid of the really annoying warnings about template class exportation
-#pragma warning( disable: 4251 )
-#pragma warning( disable: 4530 )
-#endif
-
+//Local
+#include "CCCoreLib.h"
 #include "CCConst.h"
 
 //system
@@ -82,14 +78,7 @@ const int c_FastMarchingNeighbourPosShift[] = {	//6  common faces
 	Inspired from the "vtkFastMarching" class of the "Slicer"
 	project (http://www.slicer.org).
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API FastMarching
-#else
-class FastMarching
-#endif
 {
 public:
 
@@ -112,7 +101,7 @@ public:
 	virtual int propagate() = 0;
 
 	/** Finalizes an iteration process
-        Resets the different lists and the grid. This method should be
+		Resets the different lists and the grid. This method should be
 		called after each propagation (before starting a new one).
 	**/
 	virtual void cleanLastPropagation();
@@ -134,16 +123,16 @@ public:
 
 protected:
 
-    //! A generic Fast Marching grid cell
-    class Cell
-    {
-    public:
+	//! A generic Fast Marching grid cell
+	class Cell
+	{
+	public:
 
 		//! Returns infinite time value
 		inline static float T_INF() { return FLT_MAX; }
 
 		//! Possible states of a Fast Marching grid cell
-        enum STATE {	EMPTY_CELL	= 0,
+		enum STATE {	EMPTY_CELL	= 0,
 						FAR_CELL	= 1,
 						TRIAL_CELL	= 2,
 						ACTIVE_CELL	= 3 };
@@ -157,12 +146,12 @@ protected:
 		//! Virtual destructor
 		virtual ~Cell() {}
 
-        //! Cell state
-        STATE state;
+		//! Cell state
+		STATE state;
 
-        //! Front arrival time
-        float T;
-    };
+		//! Front arrival time
+		float T;
+	};
 
 	//! Intializes the grid as a snapshot of an octree structure at a given subdivision level
 	/** \param octree input octree
@@ -205,11 +194,11 @@ protected:
 	**/
 	void initTrialCells();
 
-    //! Instantiates grid in memory
-    /** Grid is also filled with zeros.
-        \param size grid size
-        \return success
-    **/
+	//! Instantiates grid in memory
+	/** Grid is also filled with zeros.
+		\param size grid size
+		\return success
+	**/
 	virtual bool instantiateGrid(unsigned size) = 0;
 
 	//! Grid instantiation helper

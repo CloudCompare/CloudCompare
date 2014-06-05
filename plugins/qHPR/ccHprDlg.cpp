@@ -21,9 +21,9 @@
 
 ccHprDlg::ccHprDlg(QWidget* parent) : QDialog(parent), Ui::HPRDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
 	octreeLevelSpinBox->setRange(2,CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }

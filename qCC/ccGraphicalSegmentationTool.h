@@ -37,7 +37,7 @@ class ccGLWindow;
 //! Graphical segmentation mechanism (with polyline)
 class ccGraphicalSegmentationTool : public ccOverlayDialog, public Ui::GraphicalSegmentationDlg
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
@@ -54,16 +54,16 @@ public:
 	bool addEntity(ccHObject* anObject);
 	
 	//! Returns the number of entites currently in the the 'to be segmented' pool
-	unsigned getNumberOfValidEntities();
+	unsigned getNumberOfValidEntities() const;
 
-    //! Get a pointer to the polyline that has been segmented
-    ccPolyline *getPolyLine() {return m_segmentationPoly;}
+	//! Get a pointer to the polyline that has been segmented
+	ccPolyline *getPolyLine() {return m_segmentationPoly;}
 
 	//! Returns the active 'to be segmented' set
 	const std::set<ccHObject*>& entities() const { return m_toSegment; }
 
 	//inherited from ccOverlayDialog
-    virtual bool linkWith(ccGLWindow* win);
+	virtual bool linkWith(ccGLWindow* win);
 	virtual bool start();
 	virtual void stop(bool accepted);
 
@@ -76,8 +76,8 @@ public:
 protected slots:
 
 	void segmentIn();
-    void segmentOut();
-    void segment(bool);
+	void segmentOut();
+	void segment(bool);
 	void reset();
 	void apply();
 	void applyAndDelete();

@@ -26,7 +26,7 @@ class ccHprDlg : public QDialog, public Ui::HPRDialog
 public:
 
 	//! Default constructor
-    ccHprDlg(QWidget* parent = 0);
+	ccHprDlg(QWidget* parent = 0);
 };
 
 #endif

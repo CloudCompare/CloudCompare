@@ -22,18 +22,14 @@
 #include <CCShareable.h>
 
 //Local
+#include "qCC_db.h"
 #include "ccMaterial.h"
 #include "ccHObject.h"
 
 class ccGenericGLDisplay;
 
 //! Mesh (triangle) material
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccMaterialSet : public std::vector<ccMaterial>, public CCShareable, public ccHObject
-#else
-class ccMaterialSet : public std::vector<ccMaterial>, public CCShareable, public ccHObject
-#endif
 {
 public:
 
@@ -41,7 +37,7 @@ public:
 	ccMaterialSet(QString name=QString());
 
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const {return CC_TYPES::MATERIAL_SET;}
+	virtual CC_CLASS_ENUM getClassID() const {return CC_TYPES::MATERIAL_SET;}
 	virtual bool isShareable() const { return true; }
 
 	//! Finds material by name

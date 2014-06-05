@@ -24,20 +24,20 @@ class SORDialog;
 
 class StatisticalOutliersRemover : public BaseFilter
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    StatisticalOutliersRemover();
+	StatisticalOutliersRemover();
 	virtual ~StatisticalOutliersRemover();
 
 protected:
-    int compute();
-    int openInputDialog();
-    void getParametersFromDialog();
-    
+	int compute();
+	int openInputDialog();
+	void getParametersFromDialog();
+
 	SORDialog* m_dialog;
-    int m_k;
-    float m_std;
+	int m_k;
+	float m_std;
 };
 
 #endif // STATISTICALOUTLIERREMOVER_H

@@ -64,10 +64,10 @@ static CCVector3 ComputeRobustAverageNorm(	CCLib::ReferenceCloud* subset,
 	return Nout;
 }
 
-int ccFastMarchingForNormsDirection::init(ccGenericPointCloud* cloud,
-                                            NormsIndexesTableType* theNorms,
-                                            CCLib::DgmOctree* theOctree,
-                                            uchar level)
+int ccFastMarchingForNormsDirection::init(	ccGenericPointCloud* cloud,
+											NormsIndexesTableType* theNorms,
+											CCLib::DgmOctree* theOctree,
+											uchar level)
 {
 	int result = initGridWithOctree(theOctree, level);
 	if (result < 0)
@@ -116,9 +116,9 @@ int ccFastMarchingForNormsDirection::init(ccGenericPointCloud* cloud,
 float ccFastMarchingForNormsDirection::computePropagationConfidence(DirectionCell* originCell, DirectionCell* destCell) const
 {
 	//1) it depends on the angle between the current cell's orientation
-	//   and its neighbor's orientation (symmetric)
+	//	and its neighbor's orientation (symmetric)
 	//2) it depends on whether the neighbor's relative position is
-	//   compatible with the current cell orientation (symmetric)
+	//	compatible with the current cell orientation (symmetric)
 	CCVector3 AB = destCell->C - originCell->C;
 	AB.normalize();
 
@@ -202,7 +202,7 @@ int ccFastMarchingForNormsDirection::step()
 	if (minTCellIndex == 0)
 		return 0;
 
-	CCLib::FastMarching::Cell* minTCell =  m_theGrid[minTCellIndex];
+	CCLib::FastMarching::Cell* minTCell = m_theGrid[minTCellIndex];
 	assert(minTCell && minTCell->state != DirectionCell::ACTIVE_CELL);
 
 	if (minTCell->T < Cell::T_INF())
@@ -359,17 +359,17 @@ void ccFastMarchingForNormsDirection::initTrialCells()
 	}
 }
 
-int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(ccPointCloud* theCloud,
-                                                                                NormsIndexesTableType* theNorms,
-                                                                                uchar octreeLevel,
-                                                                                CCLib::GenericProgressCallback* progressCb,
-                                                                                CCLib::DgmOctree* inputOctree)
+int ccFastMarchingForNormsDirection::ResolveNormsDirectionByFrontPropagation(	ccPointCloud* theCloud,
+																				NormsIndexesTableType* theNorms,
+																				uchar octreeLevel,
+																				CCLib::GenericProgressCallback* progressCb,
+																				CCLib::DgmOctree* inputOctree)
 {
-    assert(theCloud);
+	assert(theCloud);
 
 	unsigned numberOfPoints = theCloud->size();
 	if (numberOfPoints == 0)
-        return -1;
+		return -1;
 
 	//we compute the octree if none is provided
 	CCLib::DgmOctree* theOctree = inputOctree;

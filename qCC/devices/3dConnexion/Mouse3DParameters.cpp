@@ -73,8 +73,8 @@ const char c_ps_horizonLocked[]		= "HorizonLocked";
 
 void Mouse3DParameters::fromPersistentSettings()
 {
-    QSettings settings;
-    settings.beginGroup(c_ps_groupName);
+	QSettings settings;
+	settings.beginGroup(c_ps_groupName);
 
 	int speedMode		= settings.value(c_ps_speedMode,		(int)LowestSpeed).toInt();
 	int navigationMode	= settings.value(c_ps_navigationMode,	(int)ObjectMode).toInt();
@@ -93,8 +93,8 @@ void Mouse3DParameters::fromPersistentSettings()
 
 void Mouse3DParameters::toPersistentSettings()
 {
-    QSettings settings;
-    settings.beginGroup(c_ps_groupName);
+	QSettings settings;
+	settings.beginGroup(c_ps_groupName);
 
 	settings.setValue(c_ps_speedMode,		(int)m_speedMode);
 	//settings.setValue(c_ps_navigationMode,	(int)m_navigationMode);

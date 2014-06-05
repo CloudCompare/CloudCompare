@@ -56,7 +56,7 @@
 class PoissonReconParamDlg : public QDialog, public Ui::PoissonReconParamDialog
 {
 public:
-    PoissonReconParamDlg(QWidget* parent = 0) : QDialog(parent), Ui::PoissonReconParamDialog()
+	PoissonReconParamDlg(QWidget* parent = 0) : QDialog(parent), Ui::PoissonReconParamDialog()
 	{
 		setupUi(this);
 		setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
@@ -125,15 +125,15 @@ void qPoissonRecon::doAction()
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 
 	//we need one point cloud
-    size_t selNum = selectedEntities.size();
-    if (selNum != 1)
+	size_t selNum = selectedEntities.size();
+	if (selNum != 1)
 	{
 		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
 	//a real point cloud
-    ccHObject* ent = selectedEntities[0];
+	ccHObject* ent = selectedEntities[0];
 	if (!ent->isA(CC_TYPES::POINT_CLOUD))
 	{
 		m_app->dispToConsole("Select a cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -141,7 +141,7 @@ void qPoissonRecon::doAction()
 	}
 
 	//with normals!
-    ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
+	ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
 	if (!pc->hasNormals())
 	{
 		m_app->dispToConsole("Cloud must have normals!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
@@ -291,10 +291,10 @@ void qPoissonRecon::doAction()
 	}
 
 	mesh.resetIterator();
-	unsigned nic         = static_cast<unsigned>(mesh.inCorePoints.size());
-	unsigned noc         = static_cast<unsigned>(mesh.outOfCorePointCount());
-	unsigned nr_faces    = static_cast<unsigned>(mesh.polygonCount());
-	unsigned nr_vertices = nic+noc;
+	unsigned nic			= static_cast<unsigned>(mesh.inCorePoints.size());
+	unsigned noc			= static_cast<unsigned>(mesh.outOfCorePointCount());
+	unsigned nr_faces		= static_cast<unsigned>(mesh.polygonCount());
+	unsigned nr_vertices	= nic+noc;
 
 	//end message
 	m_app->dispToConsole(QString("[PoissonRecon] Job finished (%1 triangles, %2 vertices)").arg(nr_faces).arg(nr_vertices),ccMainAppInterface::STD_CONSOLE_MESSAGE);
@@ -393,13 +393,13 @@ void qPoissonRecon::doAction()
 
 	//currently selected entities parameters may have changed!
 	m_app->updateUI();
-    //currently selected entities appearance may have changed!
+	//currently selected entities appearance may have changed!
 	m_app->refreshAll();
 }
 
 QIcon qPoissonRecon::getIcon() const
 {
-    return QIcon(QString::fromUtf8(":/CC/plugin/qPoissonRecon/qPoissonRecon.png"));
+	return QIcon(QString::fromUtf8(":/CC/plugin/qPoissonRecon/qPoissonRecon.png"));
 }
 
 #ifndef CC_QT5

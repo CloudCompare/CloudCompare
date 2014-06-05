@@ -25,10 +25,10 @@
 //		Output:
 //			shaded image
 //
-//		creation:	    23 avril 2008
-//					    Christian Boucheny (EDF R&D / INRIA)
+//		creation:		23 avril 2008
+//						Christian Boucheny (EDF R&D / INRIA)
 //		modification:	Avril 2009
-//					    Daniel Girardeau-Montaut
+//						Daniel Girardeau-Montaut
 //
 /*****************************************************************/
 
@@ -81,32 +81,32 @@ public:
 
 	void reset();
 
-    //inherited from ccGlFilter
+	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const;
 	virtual bool init(int width, int height, QString shadersPath, QString& error);
 	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0f);
 	virtual GLuint getTexture();
 
-	bool init(int width,
-                int height,
-                bool enableBilateralFilter,
-                bool useReflectTexture,
-                QString shadersPath,
+	bool init(	int width,
+				int height,
+				bool enableBilateralFilter,
+				bool useReflectTexture,
+				QString shadersPath,
 				QString& error,
-                GLenum textureMinMagFilter = GL_LINEAR);
+				GLenum textureMinMagFilter = GL_LINEAR);
 
 	void setParameters(int N, float Kz, float R, float F);
 
 protected:
 
-    void initReflectTexture();
-    GLuint texReflect;
+	void initReflectTexture();
+	GLuint texReflect;
 
 	int w;
 	int	h;
 
-	ccFrameBufferObject*    fbo;
-	ccShader*		        shader;
+	ccFrameBufferObject*	fbo;
+	ccShader*				shader;
 
 	int			N;		// nb of neighbours
 	float		Kz;		// attenuation with distance

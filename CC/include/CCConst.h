@@ -82,8 +82,8 @@ const uchar POINT_OUT_OF_RANGE					=	 2;				/**< Point visibility state: out of 
 const uchar POINT_OUT_OF_FOV					=	 4;				/**< Point visibility state: out of field of view **/
 
 //! Chamfer distances types
-enum CC_CHAMFER_DISTANCE_TYPE { CHAMFER_111			=	0,			/**< Chamfer distance <1-1-1> **/
-								CHAMFER_345			=	1			/**< Chamfer distance <3-4-5> **/
+enum CC_CHAMFER_DISTANCE_TYPE { CHAMFER_111		=	0,				/**< Chamfer distance <1-1-1> **/
+								CHAMFER_345		=	1				/**< Chamfer distance <3-4-5> **/
 };
 
 //! Types of local models (no model, least square best fitting plan, Delaunay 2D1/2 triangulation, height function)

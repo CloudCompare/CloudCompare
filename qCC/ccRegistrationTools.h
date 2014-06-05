@@ -51,7 +51,7 @@ public:
 					bool useDataSFAsWeights = false,
 					bool useModelSFAsWeights = false,
 					QWidget* parent = 0);
-    
+
 };
 
 #endif //CC_REGISTRATION_TOOLS_HEADER

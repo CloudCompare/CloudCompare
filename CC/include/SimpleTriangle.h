@@ -18,11 +18,9 @@
 #ifndef SIMPLE_TRIANGLE_HEADER
 #define SIMPLE_TRIANGLE_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "GenericTriangle.h"
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-#endif
 
 namespace CCLib
 {
@@ -32,11 +30,7 @@ namespace CCLib
 	WARNING: make sure that references don't point to temporary objects!
 	WARNING: not compatible with parallelization.
 **/
-#ifdef CC_USE_AS_DLL
 class CC_CORE_LIB_API SimpleRefTriangle : public GenericTriangle
-#else
-class SimpleRefTriangle : public GenericTriangle
-#endif
 {
 public:
 
@@ -75,11 +69,7 @@ public:
 /** Implements the GenericTriangle class with a triplet of 3D points.
 	Relies on direct storage for speed enhancement and parallelization!
 **/
-#ifdef CC_USE_AS_DLL
 class CC_CORE_LIB_API SimpleTriangle : public GenericTriangle
-#else
-class SimpleTriangle : public GenericTriangle
-#endif
 {
 public:
 

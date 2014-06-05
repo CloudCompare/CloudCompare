@@ -19,6 +19,7 @@
 #define CC_INDEXED_TRANSFORMATION_BUFFER_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccIndexedTransformation.h"
 #include "ccHObject.h"
 
@@ -27,20 +28,15 @@
 #include <vector>
 
 //! Indexed Transformation buffer
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccIndexedTransformationBuffer : public ccHObject, public std::vector< ccIndexedTransformation >
-#else
-class ccIndexedTransformationBuffer : public ccHObject, public std::vector< ccIndexedTransformation >
-#endif
 {
 public:
-    
+
 	//! Default constructor
 	ccIndexedTransformationBuffer(QString name = QString("Trans. buffer"));
 
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::TRANS_BUFFER; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::TRANS_BUFFER; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Sorts transformations based on their index
@@ -98,16 +94,16 @@ public:
 	**/
 	void invalidateBoundingBox();
 
-    //Inherited from ccHObject
-    virtual ccBBox getMyOwnBB();
-    virtual ccBBox getDisplayBB();
+	//Inherited from ccHObject
+	virtual ccBBox getMyOwnBB();
+	virtual ccBBox getDisplayBB();
 
 protected:
 
-    //inherited from ccHObject
+	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-    virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
 
 	//! Bounding box
 	ccBBox m_bBox;

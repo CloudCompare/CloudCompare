@@ -53,7 +53,7 @@ ExtractSIFT::ExtractSIFT()
 	: BaseFilter(FilterDescription(	"Extract SIFT",
 									"Extract SIFT Keypoints",
 									"Extract SIFT keypoints for clouds with intensity/RGB or any scalar field",
-                                    ":/toolbar/PclUtils/icons/sift.png"))
+									":/toolbar/PclUtils/icons/sift.png"))
 	, m_dialog(0)
 {
 }
@@ -264,13 +264,12 @@ QString ExtractSIFT::getErrorMessage(int errorCode)
 	return BaseFilter::getErrorMessage(errorCode);
 }
 
-
-template int estimateSIFT<pcl::PointXYZI, pcl::PointXYZ> (const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud,
-                                                          pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud,
-                                                          int nr_octaves, float min_scale, int nr_scales_per_octave,
-                                                          float min_contrast);
+template int estimateSIFT<pcl::PointXYZI, pcl::PointXYZ> (	const pcl::PointCloud<pcl::PointXYZI>::Ptr in_cloud,
+															pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud,
+															int nr_octaves, float min_scale, int nr_scales_per_octave,
+															float min_contrast);
 
 template int estimateSIFT<pcl::PointXYZRGB, pcl::PointXYZ> (const pcl::PointCloud<pcl::PointXYZRGB>::Ptr in_cloud,
-                                                            pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud,
-                                                            int nr_octaves, float min_scale, int nr_scales_per_octave,
-                                                            float min_contrast);
+															pcl::PointCloud<pcl::PointXYZ>::Ptr out_cloud,
+															int nr_octaves, float min_scale, int nr_scales_per_octave,
+															float min_contrast);

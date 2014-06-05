@@ -18,17 +18,13 @@
 #ifndef MATH_TOOLS_HEADER
 #define MATH_TOOLS_HEADER
 
+//Local
 #include "CCTypes.h"
 
 namespace CCLib
 {
-
-//! Empty class - for classification purpose only
-
-class MathTools
-{
-};
-
+	//! Empty class - for classification purpose only
+	class MathTools {};
 }
 
 #endif //MATH_TOOLS_HEADER

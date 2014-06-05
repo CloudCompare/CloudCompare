@@ -26,12 +26,12 @@
 //! Dialog to define a color gradient (default, with 2 colors, banding, etc.)
 class ccColorGradientDlg : public QDialog, public Ui::ColorGradientDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
 	//! Default constructor
-    ccColorGradientDlg(QWidget* parent);
+	ccColorGradientDlg(QWidget* parent);
 
 	//! Gradient types
 	enum GradientType { Default, TwoColors, Banding };
@@ -52,8 +52,8 @@ public:
 
 protected slots:
 
-    void changeFirstColor();
-    void changeSecondColor();
+	void changeFirstColor();
+	void changeSecondColor();
 };
 
 #endif //CC_COLOR_GRADIENT_DLG_HEADER

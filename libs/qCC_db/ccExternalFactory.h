@@ -19,6 +19,7 @@
 #define CC_EXTERNAL_FACTORY_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 
 //Qt
@@ -30,74 +31,65 @@
   *  Each plugin may define a new factory by subclassing this class.
   *  Factories are then stored in a unique container and used to load custom types.
  **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccExternalFactory
-#else
-class ccExternalFactory
-#endif
 {
 public:
 
-    //! A convenience holder for all factories
-#ifdef QCC_DB_USE_AS_DLL
-    class QCC_DB_LIB_API Container
-#else
-	class Container
-#endif
-    {
-    public:
-        //! Default constructor
-        Container() {}
+	//! A convenience holder for all factories
+	class QCC_DB_LIB_API Container
+	{
+	public:
+		//! Default constructor
+		Container() {}
 
-        //! Returns factory using its (unique) name as key
-        /** \param factoryName unique name
+		//! Returns factory using its (unique) name as key
+		/** \param factoryName unique name
 			\return corresponding factory (or null pointer if not found)
 		**/
-        ccExternalFactory* getFactoryByName(const QString& factoryName) const;
+		ccExternalFactory* getFactoryByName(const QString& factoryName) const;
 
-        //! Adds a new factory to the container
-        /** Any previously existing factory with the same name will be overwritten.
+		//! Adds a new factory to the container
+		/** Any previously existing factory with the same name will be overwritten.
 		**/
-        void addFactory(ccExternalFactory* factory);
+		void addFactory(ccExternalFactory* factory);
 
 		//! Shared pointer type
 		typedef QSharedPointer<Container> Shared;
 
-        //! Returns the unqiue static instance of the external factories container
-        static Container::Shared GetUniqueInstance();
+		//! Returns the unqiue static instance of the external factories container
+		static Container::Shared GetUniqueInstance();
 
-        //! Sets the unqiue static instance of the external factories container
+		//! Sets the unqiue static instance of the external factories container
 		/** A default static instance is provided for convenience but another user defined instance
 			can be declared here instead.
 		**/
-        static void SetUniqueInstance(Container::Shared container);
+		static void SetUniqueInstance(Container::Shared container);
 
 	protected:
 
 		//! Set of factories
 		QMap< QString, ccExternalFactory* > m_factories;
-    };
+	};
 
-    //! Default constructor
+	//! Default constructor
 	/** \param factoryName unique name
 	**/
-    ccExternalFactory(QString factoryName);
+	ccExternalFactory(QString factoryName);
 
-    //! Returns the (unique) name of the factory
+	//! Returns the (unique) name of the factory
 	inline QString getFactoryName() const {return m_factoryName; }
 
-    //! Custom object building method
+	//! Custom object building method
 	/** Similar to ccHObject::New but virtual so as to be reimplemented by the plugin.
 		\param metaName custom object name
 		\return corresponding instance (or 0 if an error occurred)
 	**/
-    virtual ccHObject* buildObject(const QString& metaName) = 0;
+	virtual ccHObject* buildObject(const QString& metaName) = 0;
 
 protected:
 
 	//! Name
-    QString m_factoryName;
+	QString m_factoryName;
 
 };
 

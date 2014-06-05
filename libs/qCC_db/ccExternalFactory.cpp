@@ -26,20 +26,20 @@ ccExternalFactory::ccExternalFactory(QString factoryName)
 
 ccExternalFactory* ccExternalFactory::Container::getFactoryByName(const QString& factoryName) const
 {
-    if (m_factories.contains(factoryName))
-        return m_factories.value(factoryName);
-    else
-        return 0;
+	if (m_factories.contains(factoryName))
+		return m_factories.value(factoryName);
+	else
+		return 0;
 }
 
 void ccExternalFactory::Container::addFactory(ccExternalFactory *factory)
 {
-    if (!factory) //do nothing
-        return;
+	if (!factory) //do nothing
+		return;
 
-    QString name = factory->getFactoryName();
+	QString name = factory->getFactoryName();
 
-    m_factories[name] = factory;
+	m_factories[name] = factory;
 }
 
 ccExternalFactory::Container::Shared ccExternalFactory::Container::GetUniqueInstance()
@@ -48,7 +48,7 @@ ccExternalFactory::Container::Shared ccExternalFactory::Container::GetUniqueInst
 	{
 		s_externalFactoryContainer = Container::Shared(new ccExternalFactory::Container());
 	}
-    return s_externalFactoryContainer;
+	return s_externalFactoryContainer;
 }
 
 void ccExternalFactory::Container::SetUniqueInstance(Container::Shared container)

@@ -18,6 +18,8 @@
 #ifndef CC_PLANE_PRIMITIVE_HEADER
 #define CC_PLANE_PRIMITIVE_HEADER
 
+//Local
+#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
 //Qt
@@ -29,12 +31,7 @@
 //! Plane (primitive)
 /** 3D plane primitive
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccPlane : public ccGenericPrimitive
-#else
-class ccPlane : public ccGenericPrimitive
-#endif
 {
 public:
 
@@ -55,7 +52,7 @@ public:
 	**/
 	ccPlane(QString name = QString("Plane"));
 
-    //! Returns class ID
+	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::PLANE; }
 
 	//inherited from ccGenericPrimitive
@@ -87,8 +84,8 @@ public:
 	static ccPlane* Fit(CCLib::GenericIndexedCloudPersist * cloud, double* rms = 0);
 
 protected:
-    
-    //inherited from ccGenericPrimitive
+
+	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual bool buildUp();

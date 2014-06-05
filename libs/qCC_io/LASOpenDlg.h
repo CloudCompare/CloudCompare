@@ -77,7 +77,7 @@ const char LAS_FIELD_NAMES[][28] = {"X",
 class LASOpenDlg : public QDialog, public Ui::OpenLASFileDialog
 {
 public:
-    
+
 	//! Default constructor
 	LASOpenDlg(QWidget* parent = 0);
 

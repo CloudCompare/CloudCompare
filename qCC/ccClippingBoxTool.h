@@ -82,12 +82,12 @@ protected slots:
 	void shiftZMinus();
 	void shiftZPlus();
 
-    void setFrontView();
-    void setBottomView();
-    void setTopView();
-    void setBackView();
-    void setLeftView();
-    void setRightView();
+	void setFrontView();
+	void setBottomView();
+	void setTopView();
+	void setBackView();
+	void setLeftView();
+	void setRightView();
 
 protected:
 

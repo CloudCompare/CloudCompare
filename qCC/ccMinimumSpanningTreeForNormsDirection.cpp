@@ -40,21 +40,21 @@ class Edge
 public:
 
 	//! Unique edge key type
-    typedef std::pair<size_t, size_t> Key;
+	typedef std::pair<size_t, size_t> Key;
 
 	//! Returns the unique key of an edge (no vertex order)
-    inline static Key ConstructKey(size_t v1, size_t v2)
+	inline static Key ConstructKey(size_t v1, size_t v2)
 	{
 		return v1 > v2 ? std::make_pair(v2, v1) : std::make_pair(v1, v2);
 	}
 
 	//! Default constructor
-    Edge(size_t v1, size_t v2, double weight)
+	Edge(size_t v1, size_t v2, double weight)
 		: m_key(ConstructKey(v1, v2))
 		, m_weight(weight)
-    {
-        assert(m_weight >= 0);
-    }
+	{
+		assert(m_weight >= 0);
+	}
 
 	//! Strict weak ordering operator (required by std::priority_queue)
 	inline bool operator < (const Edge& other) const
@@ -70,7 +70,7 @@ public:
 protected:
 
 	//! Unique key
-    Key m_key;
+	Key m_key;
 	
 	//! Associated weight
 	double m_weight;
@@ -105,46 +105,46 @@ public:
 		return true;
 	}
 
-    //! Returns the number of vertices
+	//! Returns the number of vertices
 	size_t vertexCount() const { return m_vertexNeighbors.size(); }
 
-    //! Returns the number of edges
+	//! Returns the number of edges
 	size_t edgeCount() const { return m_edges.size(); }
 
-    //! Returns the weight associated to an edge (if it exists - returns -1 otherwise)
-    double weight(size_t v1, size_t v2) const
+	//! Returns the weight associated to an edge (if it exists - returns -1 otherwise)
+	double weight(size_t v1, size_t v2) const
 	{
-        assert(v1 < m_vertexNeighbors.size() && v2 < m_vertexNeighbors.size());
-        
+		assert(v1 < m_vertexNeighbors.size() && v2 < m_vertexNeighbors.size());
+
 		// try to find the corresponding edge (otherwise return -1)
 		std::map<Edge::Key, double>::const_iterator it = m_edges.find(Edge::ConstructKey(v1, v2));
 
 		return it == m_edges.end() ? -1 : it->second;
 	}
 
-    //! Adds or updates the edge (v1,v2)
-    void setEdge(size_t v1, size_t v2, double weight = 0)
+	//! Adds or updates the edge (v1,v2)
+	void setEdge(size_t v1, size_t v2, double weight = 0)
 	{
-        assert(v1 < m_vertexNeighbors.size() && v2 < m_vertexNeighbors.size());
+		assert(v1 < m_vertexNeighbors.size() && v2 < m_vertexNeighbors.size());
 
-        m_edges.insert(std::make_pair(Edge::ConstructKey(v1, v2), weight));
-        m_vertexNeighbors[v1].insert(v2);
-        m_vertexNeighbors[v2].insert(v1);
+		m_edges.insert(std::make_pair(Edge::ConstructKey(v1, v2), weight));
+		m_vertexNeighbors[v1].insert(v2);
+		m_vertexNeighbors[v2].insert(v1);
 	}
 
 	//! Returns the set of edges connected to a given vertex
-    inline const std::set<size_t>& getVertexNeighbors(size_t index) const
-    {
-        return m_vertexNeighbors[index];
-    }
+	inline const std::set<size_t>& getVertexNeighbors(size_t index) const
+	{
+		return m_vertexNeighbors[index];
+	}
 
 protected:
 
 	//! Graph edges
 	std::map<Edge::Key, double> m_edges;
-    
+
 	//! Set of neighbors for each vertex
-    std::vector<std::set<size_t> > m_vertexNeighbors;
+	std::vector<std::set<size_t> > m_vertexNeighbors;
 };
 
 static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib::GenericProgressCallback* progressCb = 0)
@@ -167,8 +167,8 @@ static bool ResolveNormalsWithMST(ccPointCloud* cloud, const Graph& graph, CCLib
 #endif
 
 	//reset
-    std::priority_queue<Edge> priorityQueue;
-    std::vector<bool> visited;
+	std::priority_queue<Edge> priorityQueue;
+	std::vector<bool> visited;
 	unsigned visitedCount = 0;
 
 	size_t vertexCount = graph.vertexCount();
@@ -400,13 +400,13 @@ static bool ComputeMSTGraphAtLevel(	const CCLib::DgmOctree::octreeCell& cell,
 		}
 #endif
 
-	    //current point index
+		//current point index
 		unsigned index = cell.points->getPointGlobalIndex(i);
 		const CCVector3& N1 = cloud->getPointNormal(static_cast<unsigned>(index));
 		//const CCVector3* P1 = cloud->getPoint(static_cast<unsigned>(index));
 		for (unsigned j=0; j<neighborCount; ++j)
 		{
-		    //current neighbor index
+			//current neighbor index
 			const unsigned& neighborIndex = nNSS.pointsInNeighbourhood[j].pointIndex;
 			if (index != neighborIndex)
 			{

@@ -37,66 +37,45 @@
 class Test:  public QObject
 {
 private:
-    Q_OBJECT
+	Q_OBJECT
 public:
-    Test()
-    {
+	Test()	{}
 
-    }
-
-   void run()
-    {
-        for (int i = 0; i < 10; i++)
-        {
+	void run()
+	{
+		for (int i = 0; i < 10; i++)
+		{
 #ifndef WIN32
-            usleep(1);
+			usleep(1);
 #endif
-            std::cout << "echo: " << i << std::endl;
-        }
-    }
+			std::cout << "echo: " << i << std::endl;
+		}
+	}
 
 public slots:
-    void hasfinised()
-    {
-        std::cout << "thread finished" << std::endl;
-    }
+
+	void hasfinised()
+	{
+		std::cout << "thread finished" << std::endl;
+	}
 };
 
-//class Test2: public Test
-//{
-//private:
-//    Q_OBJECT
-//public:
-
-//    Test2(){}
-
-
-//    void run()
-//    {
-//        for (int i = 0; i < 5; i++)
-//        {
-//            sleep(1);
-//        }
-//    }
-//};
-
-
-class testfilter: public BaseFilter
+class Testfilter: public BaseFilter
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    testfilter();
+	Testfilter();
 
 	//inherited from BaseFilter
 	virtual int compute();
 protected:
 
 	//inherited from BaseFilter
-    virtual int openInputDialog();
+	virtual int openInputDialog();
 
-    Test* m_app;
-    QThreadPool* m_thread_pool;
+	Test* m_app;
+	QThreadPool* m_thread_pool;
 
 };
 

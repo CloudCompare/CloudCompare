@@ -28,7 +28,7 @@ ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSiz
 	, Ui::ComputeOctreeDialog()
 	, m_bbEditorDlg(0)
 {
-    setupUi(this);
+	setupUi(this);
 
 	headerLabel->setText(QString("Max subdivision level: %1").arg(ccOctree::MAX_OCTREE_LEVEL));
 

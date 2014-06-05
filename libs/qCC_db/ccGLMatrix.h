@@ -19,18 +19,14 @@
 #define CC_GL_MATRIX_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccGLMatrixTpl.h"
 
 //CCLib
 #include <Matrix.h>
 
 //! Float version of ccGLMatrixTpl
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccGLMatrix : public ccGLMatrixTpl<float>
-#else
-class ccGLMatrix : public ccGLMatrixTpl<float>
-#endif
 {
 public:
 
@@ -113,12 +109,7 @@ public:
 };
 
 //! Double version of ccGLMatrixTpl
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccGLMatrixd : public ccGLMatrixTpl<double>
-#else
-class ccGLMatrixd : public ccGLMatrixTpl<double>
-#endif
 {
 public:
 

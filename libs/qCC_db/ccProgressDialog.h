@@ -18,6 +18,9 @@
 #ifndef CC_PROGRESS_DIALOG_HEADER
 #define CC_PROGRESS_DIALOG_HEADER
 
+//Local
+#include "qCC_db.h"
+
 //Qt
 #include <QProgressDialog>
 #include <QMutex>
@@ -29,18 +32,13 @@
 //! Graphical progress indicator (thread-safe)
 /** Implements the GenericProgressCallback interface, in order
 	to be passed to the CCLib algorithms (check the
-    CCLib documentation for more information about the
+	CCLib documentation for more information about the
 	inherited methods).
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccProgressDialog : public QProgressDialog, public CCLib::GenericProgressCallback
-#else
-class ccProgressDialog : public QProgressDialog, public CCLib::GenericProgressCallback
-#endif
 {
 
-Q_OBJECT
+	Q_OBJECT
 
 public:
 
@@ -83,10 +81,10 @@ public slots:
 
 protected:
 
-    //! Current progress value (percent)
+	//! Current progress value (percent)
 	int m_currentValue;
 
-    //! Last displayed progress value (percent)
+	//! Last displayed progress value (percent)
 	int m_lastValue;
 
 	//! Mutex for concurrent access

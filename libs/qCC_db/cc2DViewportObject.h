@@ -19,6 +19,7 @@
 #define CC_2D_VIEWPORT_OBJECT_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 #include "ccGLMatrix.h"
 #include "ccGenericGLDisplay.h"
@@ -27,12 +28,7 @@
 #include <QString>
 
 //! 2D viewport object
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API cc2DViewportObject : public ccHObject
-#else
-class cc2DViewportObject : public ccHObject
-#endif
 {
 public:
 
@@ -40,7 +36,7 @@ public:
 	cc2DViewportObject(QString name=QString());
 
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::VIEWPORT_2D_OBJECT; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::VIEWPORT_2D_OBJECT; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Sets perspective view state
@@ -51,7 +47,7 @@ public:
 
 protected:
 
-    //inherited from ccHObject
+	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 

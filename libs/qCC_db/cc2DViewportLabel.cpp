@@ -96,8 +96,8 @@ void cc2DViewportLabel::drawMeOnly(CC_DRAW_CONTEXT& context)
 		if (params.fov != m_params.fov || params.perspectiveAspectRatio != m_params.perspectiveAspectRatio)
 			return;
 
-		if (   (params.pivotPoint - m_params.pivotPoint).norm() > ZERO_TOLERANCE
-			|| (params.cameraCenter - m_params.cameraCenter).norm() > ZERO_TOLERANCE)
+		if (	(params.pivotPoint - m_params.pivotPoint).norm() > ZERO_TOLERANCE
+			||	(params.cameraCenter - m_params.cameraCenter).norm() > ZERO_TOLERANCE)
 			return;
 	}
 	else

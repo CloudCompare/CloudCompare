@@ -19,6 +19,7 @@
 #define CHUNKED_POINT_CLOUD_HEADER
 
 //Local
+#include "CCCoreLib.h"
 #include "GenericChunkedArray.h"
 #include "GenericIndexedCloudPersist.h"
 #include "PointProjectionTools.h"
@@ -38,12 +39,7 @@ class ScalarField;
 	512 Mo limit. On the counter part, the access to each point is slightly
 	slower (but this shouldn't really be noticeable!).
 **/
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API ChunkedPointCloud : virtual public GenericIndexedCloudPersist
-#else
-class ChunkedPointCloud : virtual public GenericIndexedCloudPersist
-#endif
 {
 public:
 
@@ -79,11 +75,11 @@ public:
 		//! Const version of getPointPersistentPtr
 		inline virtual const CCVector3* getPointPersistentPtr(unsigned index) const { return point(index); }
 
-        //! Applies a rigid transformation to the cloud, for the scaled scale
-        /** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
-            \param trans transformation (scale * rotation matrix + translation vector)
-        **/
-        virtual void applyTransformation(PointProjectionTools::Transformation& trans);
+		//! Applies a rigid transformation to the cloud, for the scaled scale
+		/** WARNING: THIS METHOD IS NOT COMPATIBLE WITH PARALLEL STRATEGIES
+			\param trans transformation (scale * rotation matrix + translation vector)
+		**/
+		virtual void applyTransformation(PointProjectionTools::Transformation& trans);
 
 		//! Resizes the point database
 		/** The cloud database is resized with the specified size. If the new size
@@ -118,9 +114,9 @@ public:
 		**/
 		virtual void addPoint(const CCVector3 &P);
 
-        //! Invalidates bounding box
-        /** Bounding box will be recomputed next time a request is made to 'getBoundingBox'.
-        **/
+		//! Invalidates bounding box
+		/** Bounding box will be recomputed next time a request is made to 'getBoundingBox'.
+		**/
 		virtual void invalidateBoundingBox();
 
 
@@ -167,7 +163,7 @@ public:
 		**/
 		inline virtual void setCurrentInScalarField(int index) { m_currentInScalarFieldIndex=index; }
 
-        //! Returns current INPUT scalar field index (or -1 if none)
+		//! Returns current INPUT scalar field index (or -1 if none)
 		inline virtual int getCurrentInScalarFieldIndex() { return m_currentInScalarFieldIndex; }
 
 		//! Sets the OUTPUT scalar field
@@ -176,7 +172,7 @@ public:
 		**/
 		inline virtual void setCurrentOutScalarField(int index) { m_currentOutScalarFieldIndex=index; }
 
-        //! Returns current OUTPUT scalar field index (or -1 if none)
+		//! Returns current OUTPUT scalar field index (or -1 if none)
 		inline virtual int getCurrentOutScalarFieldIndex() { return m_currentOutScalarFieldIndex; }
 
 		//! Sets both the INPUT & OUTPUT scalar field
@@ -190,7 +186,7 @@ public:
 		/** Warnings:
 			- the name must be unique (the method will fail if a SF with the same name already exists)
 			- this method DOES resize the scalar field to match the current cloud size
-            \param uniqueName scalar field name (must be unique)
+			\param uniqueName scalar field name (must be unique)
 			\return index of this new scalar field (or -1 if an error occurred)
 		**/
 		virtual int addScalarField(const char* uniqueName);
@@ -205,10 +201,10 @@ public:
 
 		//! Deletes a specific scalar field
 		/** WARNING: this operation may modify the scalar fields order
-            (especially if the deleted SF is not the last one). However
-            current IN & OUT scalar fields will stay up-to-date (while
-            their index may change).
-            \param index index of scalar field to be deleted
+			(especially if the deleted SF is not the last one). However
+			current IN & OUT scalar fields will stay up-to-date (while
+			their index may change).
+			\param index index of scalar field to be deleted
 		**/
 		virtual void deleteScalarField(int index);
 

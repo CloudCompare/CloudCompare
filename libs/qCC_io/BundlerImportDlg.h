@@ -26,15 +26,15 @@
 //! Dialog for importation of Snavely's Bundler files
 class BundlerImportDlg : public QDialog, public Ui::BundlerImportDlg
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
 	//! Default constructor
-    BundlerImportDlg(QWidget* parent = 0);
+	BundlerImportDlg(QWidget* parent = 0);
 
 	//! Destructor
-    virtual ~BundlerImportDlg();
+	virtual ~BundlerImportDlg();
 
 	//! Returns whether keypoints should be imported
 	bool importKeypoints() const;
@@ -77,9 +77,9 @@ public:
 	unsigned getDTMVerticesCount() const;
 
 protected slots:
-    void browseImageListFilename();
-    void browseAltKeypointsFilename();
-    void acceptAndSaveSettings();
+	void browseImageListFilename();
+	void browseAltKeypointsFilename();
+	void acceptAndSaveSettings();
 
 protected:
 

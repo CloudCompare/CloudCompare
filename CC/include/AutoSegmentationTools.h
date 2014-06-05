@@ -18,6 +18,8 @@
 #ifndef AUTO_SEGMENTATION_TOOLS_HEADER
 #define AUTO_SEGMENTATION_TOOLS_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "ReferenceCloud.h"
 
@@ -28,19 +30,14 @@ class GenericIndexedCloudPersist;
 class GenericProgressCallback;
 class DgmOctree;
 
-//! A standard container to pack several point clouds together
-/** The auto-segmentation algorithms of this toolbox return a collection of subsets of points
-	corresponding to each segmented part. Such collection is generally stored in this kind of container.
+//! A standard container to store several subsets of points
+/** Several algorithms of the AutoSegmentationTools toolbox return a collection of subsets of points
+	corresponding to each segmented part. Such a collection is generally stored in this type of container.
 **/
 typedef std::vector<ReferenceCloud*> ReferenceCloudContainer;
 
 //! Several point cloud auto-segmentation algorithms (Connected Components, Front propagation, etc.)
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API AutoSegmentationTools : public CCToolbox
-#else
-class AutoSegmentationTools : public CCToolbox
-#endif
 {
 public:
 
@@ -102,7 +99,7 @@ public:
 		\param alpha the gaussian filter kernel size (needed only if a gaussian filtering pass is required)
 		\return success
 	**/
-	static bool frontPropagationBasedSegmentation(GenericIndexedCloudPersist* theCloud,
+	static bool frontPropagationBasedSegmentation(	GenericIndexedCloudPersist* theCloud,
 													ScalarType minSeedDist,
 													uchar octreeLevel,
 													ReferenceCloudContainer& theSegmentedLists,

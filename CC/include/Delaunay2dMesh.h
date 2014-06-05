@@ -18,6 +18,8 @@
 #ifndef DELAUNAY2D_MESH_HEADER
 #define DELAUNAY2D_MESH_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "GenericIndexedMesh.h"
 #include "Neighbourhood.h"
 #include "SimpleTriangle.h"
@@ -28,12 +30,7 @@ namespace CCLib
 class GenericIndexedCloud;
 
 //! A class to compute and handle a Delaunay 2D mesh on a subset of points
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API Delaunay2dMesh : public GenericIndexedMesh
-#else
-class Delaunay2dMesh : public GenericIndexedMesh
-#endif
 {
 public:
 
@@ -52,7 +49,7 @@ public:
 		\param aCloud a point cloud
 		\param passOwnership if true the Delaunay2dMesh destructor will delete the cloud as well
 	**/
-	virtual void linkMeshWith(GenericIndexedCloud* aCloud, bool passOwnership=false);
+	virtual void linkMeshWith(GenericIndexedCloud* aCloud, bool passOwnership = false);
 
 	//! Build the Delaunay mesh on top a set of 2D points
 	/** \param the2dPoints a set of 2D points
@@ -78,7 +75,7 @@ public:
 	//! Returns triangles indexes array (pointer to)
 	/** Handle with care!
 	**/
-	int* getTriangleIndexesArray() { return m_triIndexes; }
+	inline int* getTriangleIndexesArray() { return m_triIndexes; }
 
 	//! Filters out the triangles based on their edge length
 	/** Warning: may remove ALL triangles!
@@ -110,7 +107,7 @@ protected:
 	SimpleTriangle m_dumpTriangle;
 
 	//! Dump triangle index structure to transmit temporary data
-    TriangleSummitsIndexes m_dumpTriangleIndexes;
+	TriangleSummitsIndexes m_dumpTriangleIndexes;
 
 };
 

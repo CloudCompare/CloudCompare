@@ -69,16 +69,16 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	QTextStream stream(&fp);
 	stream.setRealNumberPrecision(12); //TODO: ask the user?
-    
-    //header: "OFF"
-    stream << "OFF" << endl;
-    
-    //2nd line: vertices count / faces count / edges count
-    unsigned vertCount = vertices->size();
-    unsigned triCount = mesh->size();
-    stream << vertCount << ' ' << triCount << ' ' << 0 << endl;
-    
-    //save vertices
+
+	//header: "OFF"
+	stream << "OFF" << endl;
+
+	//2nd line: vertices count / faces count / edges count
+	unsigned vertCount = vertices->size();
+	unsigned triCount = mesh->size();
+	stream << vertCount << ' ' << triCount << ' ' << 0 << endl;
+
+	//save vertices
 	{
 		for (unsigned i=0; i<vertCount; ++i)
 		{
@@ -87,15 +87,15 @@ CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const char* filename)
 			stream << Pglobal.x << ' ' << Pglobal.y << ' ' << Pglobal.z << endl;
 		}
 	}
-    
-    //save triangles
+
+	//save triangles
 	{
 		for (unsigned i=0; i<triCount; ++i)
 		{
 			const CCLib::TriangleSummitsIndexes* tsi = mesh->getTriangleIndexes(i);
 			stream << "3 " << tsi->i1 << ' ' << tsi->i2 << ' ' << tsi->i3 << endl;
 		}
-    }
+	}
 
 	return CC_FERR_NO_ERROR;
 }

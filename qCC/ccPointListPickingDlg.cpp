@@ -74,16 +74,16 @@ ccPointListPickingDlg::ccPointListPickingDlg(QWidget* parent)
 
 	startIndexSpinBox->setValue(s_pickedPointsStartIndex);
 
-	connect(cancelToolButton,       SIGNAL(clicked()),          this,				SLOT(cancelAndExit()));
-	connect(revertToolButton,       SIGNAL(clicked()),          this,				SLOT(removeLastEntry()));
-	connect(validToolButton,        SIGNAL(clicked()),          this,				SLOT(applyAndExit()));
-	connect(exportToolButton,       SIGNAL(clicked()),          exportToolButton,	SLOT(showMenu()));
-	connect(exportASCII_xyz,        SIGNAL(triggered()),        this,				SLOT(exportToASCII_xyz()));
-	connect(exportASCII_ixyz,       SIGNAL(triggered()),        this,				SLOT(exportToASCII_ixyz()));
-	connect(exportToNewCloud,		SIGNAL(triggered()),        this,				SLOT(exportToNewCloud()));
-	connect(exportToNewPolyline,	SIGNAL(triggered()),        this,				SLOT(exportToNewPolyline()));
-	connect(markerSizeSpinBox,      SIGNAL(valueChanged(int)),  this,				SLOT(markerSizeChanged(int)));
-	connect(startIndexSpinBox,      SIGNAL(valueChanged(int)),  this,				SLOT(startIndexChanged(int)));
+	connect(cancelToolButton,		SIGNAL(clicked()),			this,				SLOT(cancelAndExit()));
+	connect(revertToolButton,		SIGNAL(clicked()),			this,				SLOT(removeLastEntry()));
+	connect(validToolButton,		SIGNAL(clicked()),			this,				SLOT(applyAndExit()));
+	connect(exportToolButton,		SIGNAL(clicked()),			exportToolButton,	SLOT(showMenu()));
+	connect(exportASCII_xyz,		SIGNAL(triggered()),		this,				SLOT(exportToASCII_xyz()));
+	connect(exportASCII_ixyz,		SIGNAL(triggered()),		this,				SLOT(exportToASCII_ixyz()));
+	connect(exportToNewCloud,		SIGNAL(triggered()),		this,				SLOT(exportToNewCloud()));
+	connect(exportToNewPolyline,	SIGNAL(triggered()),		this,				SLOT(exportToNewPolyline()));
+	connect(markerSizeSpinBox,		SIGNAL(valueChanged(int)),	this,				SLOT(markerSizeChanged(int)));
+	connect(startIndexSpinBox,		SIGNAL(valueChanged(int)),	this,				SLOT(startIndexChanged(int)));
 
 	updateList();
 }
@@ -209,44 +209,44 @@ void ccPointListPickingDlg::exportToNewCloud()
 
 void ccPointListPickingDlg::exportToNewPolyline()
 {
-    if (!m_associatedCloud)
-        return;
+	if (!m_associatedCloud)
+		return;
 
-    //get all labels
-    std::vector<cc2DLabel*> labels;
-    unsigned count = getPickedPoints(labels);
-    if (count > 1)
-    {
+	//get all labels
+	std::vector<cc2DLabel*> labels;
+	unsigned count = getPickedPoints(labels);
+	if (count > 1)
+	{
 		//we create an "independent" polyline
 		ccPointCloud* vertices = new ccPointCloud("vertices");
-        ccPolyline* polyline = new ccPolyline(vertices);
+		ccPolyline* polyline = new ccPolyline(vertices);
 
-        if (!vertices->reserve(count) || !polyline->reserve(count))
-        {
-            ccLog::Error("Not enough memory!");
+		if (!vertices->reserve(count) || !polyline->reserve(count))
+		{
+			ccLog::Error("Not enough memory!");
 			delete vertices;
-            delete polyline;
-            return;
-        }
+			delete polyline;
+			return;
+		}
 
-        for (unsigned i=0; i<count; ++i)
-        {
-            const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
+		for (unsigned i=0; i<count; ++i)
+		{
+			const cc2DLabel::PickedPoint& PP = labels[i]->getPoint(0);
 			vertices->addPoint(*PP.cloud->getPoint(PP.index));
-        }
+		}
 		polyline->addPointIndex(0,count);
 		polyline->setVisible(true);
 		vertices->setEnabled(false);
 		polyline->addChild(vertices);
 		polyline->setDisplay_recursive(m_associatedCloud->getDisplay());
-        
+
 		MainWindow::TheInstance()->db()->addElement(polyline,true);
 
-    }
-    else
-    {
-        ccLog::Error("Pick at least two points!");
-    }
+	}
+	else
+	{
+		ccLog::Error("Pick at least two points!");
+	}
 }
 
 void ccPointListPickingDlg::applyAndExit()
@@ -318,8 +318,8 @@ void ccPointListPickingDlg::removeLastEntry()
 
 void ccPointListPickingDlg::startIndexChanged(int value)
 {
-	unsigned int   uValue = static_cast<unsigned int>(value);
-   
+	unsigned int uValue = static_cast<unsigned int>(value);
+
 	if (uValue != s_pickedPointsStartIndex)
 	{
 		s_pickedPointsStartIndex = uValue;

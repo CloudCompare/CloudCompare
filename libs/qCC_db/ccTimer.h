@@ -18,27 +18,25 @@
 #ifndef CC_TIMER_HEADER
 #define CC_TIMER_HEADER
 
+//Local
+#include "qCC_db.h"
+
 //! Absolute timer
 /** Timer must be initialized once (with Init) at application/plugin start.
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccTimer
-#else
-class ccTimer
-#endif
 {
 public:
 
-    //! Inits static object
+	//! Inits static object
 	/** Must be called once before any call to ccTimer.
 	**/
-    static void Init();
+	static void Init();
 
-    //! Returns number of seconds since timer was initialized
-    static int Sec();
-    //! Returns number of milli-seconds since timer was initialized
-    static int Msec();
+	//! Returns number of seconds since timer was initialized
+	static int Sec();
+	//! Returns number of milli-seconds since timer was initialized
+	static int Msec();
 
 };
 

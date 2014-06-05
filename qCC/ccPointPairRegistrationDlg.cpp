@@ -1,3 +1,20 @@
+//##########################################################################
+//#                                                                        #
+//#                            CLOUDCOMPARE                                #
+//#                                                                        #
+//#  This program is free software; you can redistribute it and/or modify  #
+//#  it under the terms of the GNU General Public License as published by  #
+//#  the Free Software Foundation; version 2 of the License.               #
+//#                                                                        #
+//#  This program is distributed in the hope that it will be useful,       #
+//#  but WITHOUT ANY WARRANTY; without even the implied warranty of        #
+//#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
+//#  GNU General Public License for more details.                          #
+//#                                                                        #
+//#          COPYRIGHT: EDF R&D / TELECOM ParisTech (ENST-TSI)             #
+//#                                                                        #
+//##########################################################################
+
 #include <ccPointPairRegistrationDlg.h>
 
 //Local
@@ -31,7 +48,7 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 	, m_refPoints("reference points")
 {
 	setupUi(this);
-    setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
+	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
 	connect(showAlignedCheckBox,	SIGNAL(toggled(bool)),	this,	SLOT(showAlignedCloud(bool)));
 	connect(showReferenceCheckBox,	SIGNAL(toggled(bool)),	this,	SLOT(showReferenceCloud(bool)));
@@ -42,11 +59,11 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 	connect(unstackAlignToolButton,	SIGNAL(clicked()),		this,	SLOT(unstackAligned()));
 	connect(unstackRefToolButton,	SIGNAL(clicked()),		this,	SLOT(unstackRef()));
 
-	connect(alignToolButton,		SIGNAL(clicked()),      this,   SLOT(align()));
-	connect(resetToolButton,		SIGNAL(clicked()),      this,   SLOT(reset()));
+	connect(alignToolButton,		SIGNAL(clicked()),		this,	SLOT(align()));
+	connect(resetToolButton,		SIGNAL(clicked()),		this,	SLOT(reset()));
 
-	connect(validToolButton,		SIGNAL(clicked()),      this,   SLOT(apply()));
-    connect(cancelToolButton,		SIGNAL(clicked()),      this,   SLOT(cancel()));
+	connect(validToolButton,		SIGNAL(clicked()),		this,	SLOT(apply()));
+	connect(cancelToolButton,		SIGNAL(clicked()),		this,	SLOT(cancel()));
 
 	m_alignedPoints.setEnabled(true);
 	m_alignedPoints.setVisible(false);
@@ -336,8 +353,8 @@ void ccPointPairRegistrationDlg::processPickedPoint(int cloudUniqueID, unsigned 
 
 		if (P)
 		{
-			CCVector3d   pin = CCVector3d::fromArray(P->u);
-         
+			CCVector3d pin = CCVector3d::fromArray(P->u);
+
 			if (cloud == m_aligned.cloud)
 				addAlignedPoint(pin,m_aligned.cloud,pointIndex,true); //picked points are always shifted by default
 			else if (cloud == m_reference.cloud)

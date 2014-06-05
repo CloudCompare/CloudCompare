@@ -35,11 +35,11 @@ class cc2DLabel;
 class ccPointListPickingDlg : public ccPointPickingGenericInterface, public Ui::PointListPickingDlg
 {
 
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    //! Default constructor
+	//! Default constructor
 	ccPointListPickingDlg(QWidget* parent);
 
 	//! Associates dialog with cloud
@@ -49,43 +49,43 @@ protected slots:
 
 	//! Applies changes and exit
 	void applyAndExit();
-    //! Cancels process and exit
-    void cancelAndExit();
-    //! Exports list to a new cloud
-    void exportToNewCloud();
+	//! Cancels process and exit
+	void cancelAndExit();
+	//! Exports list to a new cloud
+	void exportToNewCloud();
 	//! Exports list to a polyline
 	void exportToNewPolyline();
-    //! Removes last inserted point from list
-    void removeLastEntry();
-    //! Exports list to an 'xyz' ASCII file
-    void exportToASCII_xyz();
-    //! Exports list to an 'ixyz' ASCII file
-    void exportToASCII_ixyz();
+	//! Removes last inserted point from list
+	void removeLastEntry();
+	//! Exports list to an 'xyz' ASCII file
+	void exportToASCII_xyz();
+	//! Exports list to an 'ixyz' ASCII file
+	void exportToASCII_ixyz();
 
-    //! Redraw window when marker size changes
-    void markerSizeChanged(int);
-    //! Redraw window when starting index changes
-    void startIndexChanged(int);
+	//! Redraw window when marker size changes
+	void markerSizeChanged(int);
+	//! Redraw window when starting index changes
+	void startIndexChanged(int);
 
 protected:
 
-    //inherited from ccPointPickingGenericInterface
-    void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y);
+	//inherited from ccPointPickingGenericInterface
+	void processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y);
 
 	//! Gets current (visible) picked points from the associated cloud
 	unsigned getPickedPoints(std::vector<cc2DLabel*>& pickedPoints);
 
-    //! Export format
-    /** See exportToASCII.
-    **/
-    enum ExportFormat { PLP_ASCII_EXPORT_XYZ,
-                        PLP_ASCII_EXPORT_IXYZ,
-    };
+	//! Export format
+	/** See exportToASCII.
+	**/
+	enum ExportFormat {	PLP_ASCII_EXPORT_XYZ,
+						PLP_ASCII_EXPORT_IXYZ,
+	};
 
-    //! Exports list to an ASCII file
-    void exportToASCII(ExportFormat format);
+	//! Exports list to an ASCII file
+	void exportToASCII(ExportFormat format);
 
-    //! Updates point list widget
+	//! Updates point list widget
 	void updateList();
 
 	//! Associated cloud
@@ -95,9 +95,9 @@ protected:
 	unsigned m_lastPreviousID;
 	//! Ordered labels container
 	ccHObject* m_orderedLabelsContainer;
-    //! Existing picked points that the user wants to delete (for proper "cancel" mechanism)
+	//! Existing picked points that the user wants to delete (for proper "cancel" mechanism)
 	ccHObject::Container m_toBeDeleted;
-    //! New picked points that the user has selected (for proper "cancel" mechanism)
+	//! New picked points that the user has selected (for proper "cancel" mechanism)
 	ccHObject::Container m_toBeAdded;
 };
 

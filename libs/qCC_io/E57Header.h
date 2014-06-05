@@ -95,8 +95,8 @@ struct E57ScanHeader
 enum Image2DProjection
 {
 	E57_NO_PROJECTION = 0,	//!< No representation for the image data is present
-    E57_VISUAL = 1,			//!< VisualReferenceRepresentation for the image data
-    E57_PINHOLE = 2,		//!< PinholeRepresentation for the image data
+	E57_VISUAL = 1,			//!< VisualReferenceRepresentation for the image data
+	E57_PINHOLE = 2,		//!< PinholeRepresentation for the image data
 	E57_SPHERICAL = 3,		//!< SphericalRepresentation for the image data
 	E57_CYLINDRICAL = 4		//!< CylindricalRepresentation for the image data
 };
@@ -107,8 +107,8 @@ enum Image2DProjection
 enum Image2DType
 {
 	E57_NO_IMAGE = 0,		//!< No image data
-    E57_JPEG_IMAGE = 1,		//!< JPEG format image data.
-    E57_PNG_IMAGE = 2,		//!< PNG format image data.
+	E57_JPEG_IMAGE = 1,		//!< JPEG format image data.
+	E57_PNG_IMAGE = 2,		//!< PNG format image data.
 	E57_PNG_IMAGE_MASK = 3	//!< PNG format image mask.
 };
 

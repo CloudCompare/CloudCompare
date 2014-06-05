@@ -18,11 +18,8 @@
 #ifndef SCALAR_FIELD_TOOLS_HEADER
 #define SCALAR_FIELD_TOOLS_HEADER
 
-#ifdef _MSC_VER
-//To get rid of the really annoying warnings about template class exportation
-#pragma warning( disable: 4530 )
-#endif
-
+//Local
+#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "DgmOctree.h"
 
@@ -55,12 +52,7 @@ struct KMeanClass
 /** This toolbox provides several algorithms to apply
 	treatments and handle scalar fields
 **/
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API ScalarFieldTools : public CCToolbox
-#else
-class ScalarFieldTools : public CCToolbox
-#endif
 {
 public:
 
@@ -92,32 +84,32 @@ public:
 		\param theOctree the octree, if it has already been computed
 		\return error code (0 if ok)
 	**/
-	static int computeScalarFieldGradient(GenericIndexedCloudPersist* theCloud, 
+	static int computeScalarFieldGradient(	GenericIndexedCloudPersist* theCloud, 
 											bool euclidianDistances, 
 											bool sameInAndOutScalarField,
-											GenericProgressCallback* progressCb=0, 
-											DgmOctree* theOctree=0);
+											GenericProgressCallback* progressCb = 0, 
+											DgmOctree* theOctree = 0);
 
 	//! Computes a spatial gaussian filter on a scalar field associated to a point cloud
 	/** The "amplitutde" of the gaussian filter must be precised (sigma).
 		As 99% of the gaussian distribution is between -3*sigma and +3*sigma
 		around the mean value, this filter will only look for neighbouring
 		points (around each point) in a sphere of radius 3*sigma.
-        It also permits to use the filter as a bilateral filter. Where the wights are computed also considering the
-        distance of the neighbor's scalar value from the current point scalar value. (weighted with gaussian as distances are)
+		It also permits to use the filter as a bilateral filter. Where the wights are computed also considering the
+		distance of the neighbor's scalar value from the current point scalar value. (weighted with gaussian as distances are)
 		Warning: this method assumes the input scalar field is different from output.
 		\param sigma filter variance
 		\param theCloud a point cloud (associated to scalar values)
-        \param sigmaSF the sigma for the bilateral filter. when different than -1 turns the gaussian filter into a bilateral filter
+		\param sigmaSF the sigma for the bilateral filter. when different than -1 turns the gaussian filter into a bilateral filter
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param theOctree the octree, if it has already been computed
 		\return success
 	**/
 	static bool applyScalarFieldGaussianFilter(	PointCoordinateType sigma, 
 												GenericIndexedCloudPersist* theCloud, 
-                                                PointCoordinateType sigmaSF,
-												GenericProgressCallback* progressCb=0, 
-												DgmOctree* theOctree=0);
+												PointCoordinateType sigmaSF,
+												GenericProgressCallback* progressCb = 0, 
+												DgmOctree* theOctree = 0);
 
 	//! Multiplies two scalar fields of the same size
 	/** The first scalar field is updated (S1 = S1*S2).
@@ -125,9 +117,9 @@ public:
 		\param secondCloud the second point cloud (associated to scalar values)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 	**/
-	static void multiplyScalarFields(GenericIndexedCloud* firstCloud, 
+	static void multiplyScalarFields(	GenericIndexedCloud* firstCloud, 
 										GenericIndexedCloud* secondCloud, 
-										GenericProgressCallback* progressCb=0);
+										GenericProgressCallback* progressCb = 0);
 
 	//! Computes an histogram of the scalar field with a given number of classes
 	/** The scalar values are projected in a given number of classes,
@@ -146,7 +138,7 @@ public:
 		\param minV a field to store the minimum value
 		\param maxV a field to store the maximum value
 	**/
-	static void computeScalarFieldExtremas(const GenericCloud* theCloud, 
+	static void computeScalarFieldExtremas(	const GenericCloud* theCloud, 
 											ScalarType& minV, 
 											ScalarType& maxV);
 
@@ -164,10 +156,10 @@ public:
 		\param kmcc an array of size K which will be filled with the computed classes limits (see ScalarFieldTools::KmeanClass)
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 	**/
-	static bool computeKmeans(const GenericCloud* theCloud, 
+	static bool computeKmeans(	const GenericCloud* theCloud, 
 								uchar K, 
 								KMeanClass kmcc[], 
-								GenericProgressCallback* progressCb=0);
+								GenericProgressCallback* progressCb = 0);
 
 	//! Sets the distance value associated to a point
 	/** Generic function that can be used with the GenericCloud::foreach() method.
@@ -204,8 +196,8 @@ protected:
 
 	//! "Cellular" function to apply a gaussian filter on the scalar values of points inside an octree cell
 	/** This function is meant to be applied to all cells of the octree
-        The method also permits to use a bilateral behaviour for the filter. This is automatically switched on
-        if its sigmaSF parameter in additionalParameters is different than -1
+		The method also permits to use a bilateral behaviour for the filter. This is automatically switched on
+		if its sigmaSF parameter in additionalParameters is different than -1
 		(it is of the form DgmOctree::localFunctionPtr).
 		See ScalarFieldTools::applyScalarFieldGaussianFilter.
 		Method parameters (defined in "additionalParameters") are :

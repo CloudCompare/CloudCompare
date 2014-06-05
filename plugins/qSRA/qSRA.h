@@ -30,8 +30,8 @@ class ccPolyline;
 //! Surface of Revolution Analysis plugin
 class qSRA : public QObject, public ccStdPluginInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(ccStdPluginInterface)
+	Q_OBJECT
+	Q_INTERFACES(ccStdPluginInterface)
 #ifdef CC_QT5
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qSRA")
 #endif
@@ -41,14 +41,14 @@ public:
 	//! Default constructor
 	qSRA(QObject* parent = 0);
 
-    //inherited from ccPluginInterface
+	//inherited from ccPluginInterface
 	virtual QString getName() const { return "Surface of Revolution Analysis"; }
 	virtual QString getDescription() const { return "Generates a distance map between a point cloud and a surface of revolution"; }
 	virtual QIcon getIcon() const;
 
-    //inherited from ccStdPluginInterface
+	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-    virtual void getActions(QActionGroup& group);
+	virtual void getActions(QActionGroup& group);
 
 protected slots:
 

@@ -31,10 +31,10 @@
 
 CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-    //ouverture du fichier
-    FILE *fp = fopen(filename, "rt");
-    if (!fp)
-        return CC_FERR_READING;
+	//ouverture du fichier
+	FILE *fp = fopen(filename, "rt");
+	if (!fp)
+		return CC_FERR_READING;
 
 	//buffer
 	char line[MAX_ASCII_FILE_LINE_LENGTH];
@@ -85,7 +85,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bo
 
 	//chargement du fichier (potentiellement plusieurs listes) correspondant
 	ccHObject* entities = FileIOFilter::LoadFromFile(qPrintable(QString("%0/%1").arg(path).arg(cloudFileName)),fType);
-    if (!entities)
+	if (!entities)
 	{
 		fclose(fp);
 		return CC_FERR_READING;
@@ -119,22 +119,22 @@ CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bo
 
 int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, const QString& imageDescFilename)
 {
-    assert(entities);
+	assert(entities);
 
-    //ouverture du fichier
+	//ouverture du fichier
 	QString completeImageDescFilename = QString("%0/%1").arg(path).arg(imageDescFilename);
-    FILE *fp;
-    if ((fp = fopen(qPrintable(completeImageDescFilename), "rt"))==NULL)
-    {
+	FILE *fp;
+	if ((fp = fopen(qPrintable(completeImageDescFilename), "rt"))==NULL)
+	{
 		ccLog::Error(QString("[IcmFilter::loadCalibratedImages] Error opening file %1!").arg(completeImageDescFilename));
-        return -1;
-    }
+		return -1;
+	}
 
 	//buffers
 	char line[MAX_ASCII_FILE_LINE_LENGTH];
-    #ifdef INCLUDE_PHOTOS
+#ifdef INCLUDE_PHOTOS
 	char totalFileName[256];
-	#endif
+#endif
 	int loadedImages = 0;
 
 	//IL FAUDRAIT ETRE PLUS SOUPLE QUE CA !!!
@@ -157,11 +157,11 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			}
 
 			ccLog::Print("[IcmFilter] Image '%s' loaded",imageFileName);
-            CI->setEnabled(false);
+			CI->setEnabled(false);
 			CI->setName(imageFileName);
-            #ifdef INCLUDE_PHOTOS
+#ifdef INCLUDE_PHOTOS
 			CI->setCompleteFileName(totalFileName);
-            #endif
+#endif
 
 			//FOV
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
@@ -228,7 +228,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 
 CC_FILE_ERROR IcmFilter::saveToFile(ccHObject* entity, const char* filename)
 {
-    ccLog::Error("Not available yet!");
+	ccLog::Error("Not available yet!");
 
 	return CC_FERR_NO_ERROR;
 }

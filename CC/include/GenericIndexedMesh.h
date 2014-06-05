@@ -18,6 +18,8 @@
 #ifndef GENERIC_INDEXED_MESH_HEADER
 #define GENERIC_INDEXED_MESH_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "GenericMesh.h"
 
 namespace CCLib
@@ -58,19 +60,12 @@ struct TriangleSummitsIndexes
 //! A generic mesh with index-based vertex access
 /** Implements the GenericMehs interface.
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API GenericIndexedMesh : public GenericMesh
-#else
-class GenericIndexedMesh : public GenericMesh
-#endif
 {
 public:
 
 	//! Default destructor
-	virtual ~GenericIndexedMesh() {};
+	virtual ~GenericIndexedMesh() {}
 
 	//! Returns the ith triangle
 	/**	Virtual method to request a triangle with a specific index.

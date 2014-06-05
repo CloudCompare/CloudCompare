@@ -26,7 +26,7 @@
 
 LASOpenDlg::LASOpenDlg(QWidget* parent) : QDialog(parent), Ui::OpenLASFileDialog()
 {
-    setupUi(this);
+	setupUi(this);
 	autoSkipNextCheckBox->setChecked(false); //just to be sure
 }
 
@@ -62,10 +62,10 @@ void LASOpenDlg::setDimensions(const std::vector<std::string>& dimensions)
 	userDataCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_USER_DATA));
 	pointSourceIDCheckBox->setEnabled(FieldIsPresent(dimensions,LAS_POINT_SOURCE_ID));
 
-    //classifValueCheckBox;
-    //classifSyntheticCheckBox;
-    //classifKeypointCheckBox;
-    //classifWithheldCheckBox;
+	//classifValueCheckBox;
+	//classifSyntheticCheckBox;
+	//classifKeypointCheckBox;
+	//classifWithheldCheckBox;
 }
 
 bool LASOpenDlg::doLoad(LAS_FIELDS field) const

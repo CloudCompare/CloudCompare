@@ -29,7 +29,7 @@ class ccAskThreeDoubleValuesDlg : public QDialog, public Ui::AskThreeDoubleValue
 public:
 	
 	//! Default constructor
-    ccAskThreeDoubleValuesDlg(	const QString& vName1,
+	ccAskThreeDoubleValuesDlg(	const QString& vName1,
 								const QString& vName2,
 								const QString& vName3,
 								double minVal,

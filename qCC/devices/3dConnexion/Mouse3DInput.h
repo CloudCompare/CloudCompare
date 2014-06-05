@@ -40,7 +40,7 @@
 #ifdef CC_WINDOWS
 
 #ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0501  //target at least windows XP
+#define _WIN32_WINNT 0x0501	//target at least windows XP
 #endif
 
 #include <windows.h>
@@ -80,7 +80,7 @@ public:
 	//! Returns current mouse parameters
 	Mouse3DParameters& getMouseParams() { return m_mouseParams; }
 	//! Returns current mouse parameters (const version)
-	const Mouse3DParameters& getMouseParams() const  { return m_mouseParams; }
+	const Mouse3DParameters& getMouseParams() const { return m_mouseParams; }
 
 	//! Default key codes
 	enum VirtualKey

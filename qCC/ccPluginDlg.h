@@ -27,25 +27,28 @@ class QStringList;
 class QTreeWidget;
 class QTreeWidgetItem;
 
+//! Dialog to display the loaded plugin list
 class ccPluginDlg : public QDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
-    ccPluginDlg(const QString &path, const QStringList &fileNames,
-                 QWidget *parent = 0);
+	ccPluginDlg(const QString &path,
+				const QStringList &fileNames,
+				QWidget *parent = 0);
 
 protected:
-    void findPlugins(const QString &path, const QStringList &fileNames);
-    void populateTreeWidget(QObject *plugin, const QString &text);
-    void addItems(QTreeWidgetItem *pluginItem, const char *interfaceName,
-                  const QStringList &features);
+	void findPlugins(const QString &path, const QStringList &fileNames);
+	void populateTreeWidget(QObject *plugin, const QString &text);
+	void addItems(	QTreeWidgetItem *pluginItem,
+					const char *interfaceName,
+					const QStringList &features);
 
-    QLabel *label;
-    QTreeWidget *treeWidget;
-    QPushButton *okButton;
-    QIcon interfaceIcon;
-    QIcon featureIcon;
+	QLabel *label;
+	QTreeWidget *treeWidget;
+	QPushButton *okButton;
+	QIcon interfaceIcon;
+	QIcon featureIcon;
 };
 
 #endif

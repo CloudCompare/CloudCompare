@@ -22,6 +22,7 @@
 #include <Polyline.h>
 
 //Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 
 //system
@@ -33,12 +34,7 @@ class ccPointCloud;
 /** Extends the Polyline class of CCLib.
 Check CCLib documentation for more information about it.
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccPolyline : public CCLib::Polyline, public ccHObject
-#else
-class ccPolyline : public CCLib::Polyline, public ccHObject
-#endif
 {
 public:
 
@@ -61,7 +57,7 @@ public:
 	//inherited methods (ccHObject)
 	virtual bool isSerializable() const { return true; }
 	virtual bool hasColors() const;
-    virtual void applyGLTransformation(const ccGLMatrix& trans);
+	virtual void applyGLTransformation(const ccGLMatrix& trans);
 	virtual unsigned getUniqueIDForDisplay() const;
 
 	//! Defines if the polyline is considered as 2D or 3D
@@ -87,10 +83,10 @@ public:
 	**/
 	void setWidth(PointCoordinateType width);
 
-    //! Returns the width of the line
-    /** \return the width of the line in pixels
-    **/
-    PointCoordinateType getWidth() const { return m_width; }
+	//! Returns the width of the line
+	/** \return the width of the line in pixels
+	**/
+	PointCoordinateType getWidth() const { return m_width; }
 
 	//! Returns the polyline color
 	/** \return a pointer to the polyline RGB color
@@ -147,7 +143,7 @@ public:
 	//! Sets the width of vertex markers
 	void setVertexMarkerWidth(int width) { m_vertMarkWidth = width; }
 	//! Returns the width of vertex markers
-    int getVertexMarkerWidth() const { return m_vertMarkWidth; }
+	int getVertexMarkerWidth() const { return m_vertMarkWidth; }
 
 
 protected:

@@ -18,18 +18,16 @@
 #ifndef CC_MATERIAL_HEADER
 #define CC_MATERIAL_HEADER
 
+//Local
+#include "qCC_db.h"
+
 //Qt
 #include <QImage>
 #include <QString>
 #include <QStringList>
 
 //! Mesh (triangle) material
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 struct QCC_DB_LIB_API ccMaterial
-#else
-struct ccMaterial
-#endif
 {
 	QString name;
 	QImage texture;

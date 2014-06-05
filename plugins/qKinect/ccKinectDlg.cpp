@@ -21,9 +21,9 @@
 
 ccKinectDlg::ccKinectDlg(QWidget* parent) : QDialog(parent), Ui::KinectDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 QString ccKinectDlg::getCloudName() const

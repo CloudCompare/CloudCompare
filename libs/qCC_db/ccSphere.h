@@ -18,6 +18,8 @@
 #ifndef CC_SPHERE_PRIMITIVE_HEADER
 #define CC_SPHERE_PRIMITIVE_HEADER
 
+//Local
+#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
 //CCLib
@@ -26,12 +28,7 @@
 //! Sphere (primitive)
 /** 3D sphere primitive
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccSphere : public ccGenericPrimitive
-#else
-class ccSphere : public ccGenericPrimitive
-#endif
 {
 public:
 
@@ -41,7 +38,7 @@ public:
 		\param name name
 		\param precision drawing precision (angular step = 360/precision)
 	**/
-	ccSphere(PointCoordinateType radius,
+	ccSphere(	PointCoordinateType radius,
 				const ccGLMatrix* transMat = 0,
 				QString name = QString("Sphere"),
 				unsigned precision = 24);
@@ -63,8 +60,8 @@ public:
 	PointCoordinateType getRadius() const { return m_radius; }
 
 protected:
-    
-    //inherited from ccGenericPrimitive
+
+	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual bool buildUp();

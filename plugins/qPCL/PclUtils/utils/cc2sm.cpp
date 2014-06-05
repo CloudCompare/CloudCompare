@@ -124,7 +124,7 @@ PCLCloud cc2smReader::getOneOfXYZ(const int coord_ids)
 	for (int i = 0; i < pnumber; ++i)
 	{
 		m_cc_cloud->getPoint(i, this_point);
-        pcl_cloud->at(i).S5c4laR = (float) this_point[coord_ids];
+		pcl_cloud->at(i).S5c4laR = (float) this_point[coord_ids];
 	}
 
 	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
@@ -155,7 +155,7 @@ PCLCloud cc2smReader::getOneOfNormal(const int coord_ids)
 	for (int i = 0; i < pnumber; ++i)
 	{
 		normal = m_cc_cloud->getPointNormal(i);
-        pcl_cloud->at(i).S5c4laR = (float) normal[coord_ids];
+		pcl_cloud->at(i).S5c4laR = (float) normal[coord_ids];
 	}
 
 	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
@@ -189,8 +189,8 @@ PCLCloud cc2smReader::getXYZ()
 
 void cc2smReader::getXYZ(pcl::PointCloud<pcl::PointXYZ> & cloud)
 {
-    PCLCloud sm = getXYZ();
-    FROM_PCL_CLOUD(sm, cloud);
+	PCLCloud sm = getXYZ();
+	FROM_PCL_CLOUD(sm, cloud);
 }
 
 PCLCloud cc2smReader::getNormals()
@@ -226,7 +226,7 @@ PCLCloud cc2smReader::getFloatScalarField(const std::string field_name)
 	for (int i = 0; i < pnumber; ++i)
 	{
 		scalar = scalar_field->getValue(i);
-        pcl_cloud->at(i).S5c4laR = scalar;
+		pcl_cloud->at(i).S5c4laR = scalar;
 	}
 
 	TO_PCL_CLOUD(*pcl_cloud, *sm_cloud);
@@ -373,7 +373,7 @@ int cc2smReader::getAsSM(PCLCloud &sm_cloud)
 	std::vector<CCLib::ScalarField *> cc_scalar_fields;
 	std::vector<std::string> cc_scalar_fields_names;
 
-	//    pcl_scalar_fields.resize(n_fields);
+	//pcl_scalar_fields.resize(n_fields);
 
 
 	if (n_fields != 0) // DO THIS ONLY IF WE HAVE FIELDS

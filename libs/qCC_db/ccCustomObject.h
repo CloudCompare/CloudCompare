@@ -19,33 +19,29 @@
 #define CC_CUSTOM_OBJECT_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 
 //! Custom hierarchy object
 /** Used internally for deserialization of plugin-defined hierarchy objects
 	(see CC_TYPES::CUSTOM_H_OBJECT).
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccCustomHObject : public ccHObject
-#else
-class ccCustomHObject : public ccHObject
-#endif
 {
 public:
 
-    //! Default constructor
-    /** \param name object name (optional)
-    **/
+	//! Default constructor
+	/** \param name object name (optional)
+	**/
 	ccCustomHObject(QString name = QString())
-        : ccHObject(name)
+		: ccHObject(name)
 	{}
 
 	//inherited from ccHObject
-    virtual bool isSerializable() const { return true; }
+	virtual bool isSerializable() const { return true; }
 
 	// inherited from ccObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CUSTOM_H_OBJECT; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CUSTOM_H_OBJECT; }
 
 	//! Returns the default key for the "class name" metadata
 	/** See ccHObject::New.
@@ -61,22 +57,17 @@ public:
 /** Used internally for deserialization of plugin-defined leaf objects
 	(see CC_TYPES::CUSTOM_LEAF_OBJECT).
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccCustomLeafObject : public ccCustomHObject
-#else
-class ccCustomLeafObject : public ccCustomHObject
-#endif
 {
 public:
 
-    //! Default constructor
-    /** \param name object name (optional)
-    **/
+	//! Default constructor
+	/** \param name object name (optional)
+	**/
 	ccCustomLeafObject(QString name = QString()) : ccCustomHObject(name) {}
 
 	// inherited from ccCustomHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CUSTOM_LEAF_OBJECT; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CUSTOM_LEAF_OBJECT; }
 };
 
 #endif //CC_CUSTOM_OBJECT_HEADER

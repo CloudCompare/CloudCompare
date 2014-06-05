@@ -26,6 +26,7 @@
 #include <GeometricalAnalysisTools.h>
 
 //Local
+#include "qCC_db.h"
 #include "ccGenericPointCloud.h"
 
 //system
@@ -33,12 +34,7 @@
 #include <vector>
 
 //! Compressed normal vectors handler
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccNormalVectors
-#else
-class ccNormalVectors
-#endif
 {
 public:
 
@@ -77,30 +73,30 @@ public:
 	**/
 	static void InvertNormal(normsType &code);
 
-    //! Computes normal at each point of a given cloud
-    /** \param theCloud point cloud on which to process the normals.
-        \param theNormsCodes array in which the normals indexes are stored
-        \param method which kind of model to use for the computation (LS = plane, HF = quadratic Height Function, TRI = triangulation)
+	//! Computes normal at each point of a given cloud
+	/** \param theCloud point cloud on which to process the normals.
+		\param theNormsCodes array in which the normals indexes are stored
+		\param method which kind of model to use for the computation (LS = plane, HF = quadratic Height Function, TRI = triangulation)
 		\param radius local neighborhood radius (not necessary for TRI)
-        \param preferedOrientation specifies a preferred orientation for normals (-1: no preferred orientation, 0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z, 6:+Barycenter, 7:-Barycenter)
-        \param progressCb progress bar
-        \param inputOctree octree associated with theCloud.
+		\param preferedOrientation specifies a preferred orientation for normals (-1: no preferred orientation, 0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z, 6:+Barycenter, 7:-Barycenter)
+		\param progressCb progress bar
+		\param inputOctree octree associated with theCloud.
 		\return success
-    **/
+	**/
 	static bool ComputeCloudNormals(ccGenericPointCloud* theCloud,
-                                    NormsIndexesTableType& theNormsCodes,
-                                    CC_LOCAL_MODEL_TYPES method,
+									NormsIndexesTableType& theNormsCodes,
+									CC_LOCAL_MODEL_TYPES method,
 									PointCoordinateType radius,
-                                    int preferedOrientation = -1,
-                                    CCLib::GenericProgressCallback* progressCb = 0,
-                                    CCLib::DgmOctree* inputOctree = 0);
+									int preferedOrientation = -1,
+									CCLib::GenericProgressCallback* progressCb = 0,
+									CCLib::DgmOctree* inputOctree = 0);
 
 	//! Updates normals orientation based on a preferred orientation
-    /** \param theCloud point cloud on which to process the normals.
-        \param theNormsCodes array in which the normals indexes are stored
-        \param preferedOrientation specifies a preferred orientation for normals (0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z, 6:+Barycenter, 7:-Barycenter, 8:+Zero, 9:-Zero)
+	/** \param theCloud point cloud on which to process the normals.
+		\param theNormsCodes array in which the normals indexes are stored
+		\param preferedOrientation specifies a preferred orientation for normals (0:+X, 1:-X, 2:+Y, 3:-Y, 4:+Z, 5:-Z, 6:+Barycenter, 7:-Barycenter, 8:+Zero, 9:-Zero)
 		\return success
-    **/
+	**/
 	static bool UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 											NormsIndexesTableType& theNormsCodes,
 											int preferedOrientation);
@@ -199,9 +195,9 @@ protected:
 	colorType* m_theNormalHSVColors;
 
 	//! Decompression algorithm
-    static void Quant_dequantize_normal(unsigned q, unsigned level, PointCoordinateType* res);
+	static void Quant_dequantize_normal(unsigned q, unsigned level, PointCoordinateType* res);
 	//! Compression algorithm
-    static unsigned Quant_quantize_normal(const PointCoordinateType* n, unsigned level);
+	static unsigned Quant_quantize_normal(const PointCoordinateType* n, unsigned level);
 
 	//! Cellular method for octree-based normal computation
 	static bool ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCell& cell, void** additionalParameters, CCLib::NormalizedProgress* nProgress = 0);

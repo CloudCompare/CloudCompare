@@ -29,18 +29,18 @@ ccSensor::ccSensor(QString name)
 
 ccSensor::ccSensor(const ccSensor &sensor): ccHObject(sensor.getName())
 {
-    //! Transform
-    this->m_rigidTransformation = sensor.m_rigidTransformation;
+	//! Transform
+	this->m_rigidTransformation = sensor.m_rigidTransformation;
 
-    //! Active index (for displayed position, etc.)
-    this->m_activeIndex = sensor.m_activeIndex;
+	//! Active index (for displayed position, etc.)
+	this->m_activeIndex = sensor.m_activeIndex;
 
-    //! Color of the sensor
-    this->m_color = sensor.m_color;
+	//! Color of the sensor
+	this->m_color = sensor.m_color;
 
-    //! Sensor graphic representation scale
-    this->m_scale = sensor.m_scale;
-    this->m_posBuffer = sensor.m_posBuffer;
+	//! Sensor graphic representation scale
+	this->m_scale = sensor.m_scale;
+	this->m_posBuffer = sensor.m_posBuffer;
 }
 
 bool ccSensor::addPosition(ccGLMatrix& trans, double index)

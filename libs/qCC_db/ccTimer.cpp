@@ -33,7 +33,7 @@ void ccTimer::Init()
 {
 	if (!s_timer.instance)
 	{
-        s_timer.instance = new QTime();
+		s_timer.instance = new QTime();
 		s_timer.instance->start();
 	}
 }

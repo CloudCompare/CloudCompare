@@ -445,14 +445,14 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			//angle
 			CCVector3 P2P3 = *P3-*P2;
 
-            //negatives
-            CCVector3 _P1P2 = -P1P2;
-            CCVector3 _P1P3 = -P1P3;
-            CCVector3 _P2P3 = -P2P3;
+			//negatives
+			CCVector3 _P1P2 = -P1P2;
+			CCVector3 _P1P3 = -P1P3;
+			CCVector3 _P2P3 = -P2P3;
 
 			double angleAtP1 = GetAngle_deg(P1P2,P1P3);
-            double angleAtP2 = GetAngle_deg(P2P3,_P1P2);
-            double angleAtP3 = GetAngle_deg(_P1P3,_P2P3); //should be equal to 180-a1-a2!
+			double angleAtP2 = GetAngle_deg(P2P3,_P1P2);
+			double angleAtP3 = GetAngle_deg(_P1P3,_P2P3); //should be equal to 180-a1-a2!
 			QString angleStr = QString("Angles: A=%1 - B=%3 - C=%5 deg.").arg(angleAtP1,0,'f',precision).arg(angleAtP2,0,'f',precision).arg(angleAtP3,0,'f',precision);
 			body << angleStr;
 		}
@@ -518,13 +518,13 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 		glPushName(getUniqueIDForDisplay());
 	}
 
-    const float c_sizeFactor = 4.0f;
-    bool loop = false;
+	const float c_sizeFactor = 4.0f;
+	bool loop = false;
 
 	size_t count = m_points.size();
-    switch (count)
-    {
-    case 3:
+	switch (count)
+	{
+	case 3:
 		{
 			glPushAttrib(GL_COLOR_BUFFER_BIT);
 			glEnable(GL_BLEND);
@@ -539,7 +539,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			glPopAttrib();
 			loop=true;
 		}
-    case 2:
+	case 2:
 		{
 			//segment width
 			glPushAttrib(GL_LINE_BIT);
@@ -563,7 +563,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 			glPopAttrib();
 		}
 
-    case 1:
+	case 1:
 		{
 			//display point marker as spheres
 			{
@@ -620,7 +620,7 @@ void cc2DLabel::drawMeOnly3D(CC_DRAW_CONTEXT& context)
 				glPopAttrib();
 			}
 		}
-    }
+	}
 
 	if (pushName)
 		glPopName();
@@ -827,12 +827,12 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 	//main rectangle
 	glColor4ubv(defaultBkgColor);
-    glBegin(GL_QUADS);
-    glVertex2i(m_labelROI[0], -m_labelROI[1]);
-    glVertex2i(m_labelROI[0], -m_labelROI[3]);
-    glVertex2i(m_labelROI[2], -m_labelROI[3]);
-    glVertex2i(m_labelROI[2], -m_labelROI[1]);
-    glEnd();
+	glBegin(GL_QUADS);
+	glVertex2i(m_labelROI[0], -m_labelROI[1]);
+	glVertex2i(m_labelROI[0], -m_labelROI[3]);
+	glVertex2i(m_labelROI[2], -m_labelROI[3]);
+	glVertex2i(m_labelROI[2], -m_labelROI[1]);
+	glEnd();
 
 	//if (highlighted)
 	{
@@ -850,18 +850,18 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 
 	//draw close button
 	/*glColor3ubv(ccColor::black);
-    glBegin(GL_LINE_LOOP);
-    glVertex2i(m_closeButtonROI[0],-m_closeButtonROI[1]);
-    glVertex2i(m_closeButtonROI[0],-m_closeButtonROI[3]);
-    glVertex2i(m_closeButtonROI[2],-m_closeButtonROI[3]);
-    glVertex2i(m_closeButtonROI[2],-m_closeButtonROI[1]);
-    glEnd();
-    glBegin(GL_LINES);
-    glVertex2i(m_closeButtonROI[0]+2,-m_closeButtonROI[1]+2);
-    glVertex2i(m_closeButtonROI[2]-2,-m_closeButtonROI[3]-2);
-    glVertex2i(m_closeButtonROI[2]-2,-m_closeButtonROI[1]+2);
-    glVertex2i(m_closeButtonROI[0]+2,-m_closeButtonROI[3]-2);
-    glEnd();
+	glBegin(GL_LINE_LOOP);
+	glVertex2i(m_closeButtonROI[0],-m_closeButtonROI[1]);
+	glVertex2i(m_closeButtonROI[0],-m_closeButtonROI[3]);
+	glVertex2i(m_closeButtonROI[2],-m_closeButtonROI[3]);
+	glVertex2i(m_closeButtonROI[2],-m_closeButtonROI[1]);
+	glEnd();
+	glBegin(GL_LINES);
+	glVertex2i(m_closeButtonROI[0]+2,-m_closeButtonROI[1]+2);
+	glVertex2i(m_closeButtonROI[2]-2,-m_closeButtonROI[3]-2);
+	glVertex2i(m_closeButtonROI[2]-2,-m_closeButtonROI[1]+2);
+	glVertex2i(m_closeButtonROI[0]+2,-m_closeButtonROI[3]-2);
+	glEnd();
 	//*/
 
 	//display text

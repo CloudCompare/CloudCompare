@@ -18,6 +18,8 @@
 #ifndef CC_DISH_PRIMITIVE_HEADER
 #define CC_DISH_PRIMITIVE_HEADER
 
+//Local
+#include "qCC_db.h"
 #include "ccGenericPrimitive.h"
 
 //CCLib
@@ -26,12 +28,7 @@
 //! Dish
 /** Either a section of a sphere, or half of an ellipsoid!
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccDish : public ccGenericPrimitive
-#else
-class ccDish : public ccGenericPrimitive
-#endif
 {
 public:
 
@@ -65,8 +62,8 @@ public:
 	virtual ccGenericPrimitive* clone() const;
 
 protected:
-    
-    //inherited from ccGenericPrimitive
+
+	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual bool buildUp();

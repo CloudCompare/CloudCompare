@@ -26,12 +26,12 @@ class ccSensorComputeScatteringAnglesDlg : public QDialog, public Ui::sensorComp
 {
 public:
 
-    //! Default constructor
-    ccSensorComputeScatteringAnglesDlg(QWidget* parent = 0);
+	//! Default constructor
+	ccSensorComputeScatteringAnglesDlg(QWidget* parent = 0);
 
 	//! Returns whether angles should be converted to degrees
 	bool anglesInDegrees() const;
 
 };
 
-#endif
+#endif //CC_SF_SCATTERING_DLG_HEADER

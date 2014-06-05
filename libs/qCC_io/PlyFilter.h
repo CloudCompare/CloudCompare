@@ -22,12 +22,12 @@
 #include "rply.h"
 
 //! PLY format types
-static const char e_ply_type_names[][12]=
-{   "PLY_INT8", "PLY_UINT8", "PLY_INT16", "PLY_UINT16",
-    "PLY_INT32", "PLY_UIN32", "PLY_FLOAT32", "PLY_FLOAT64",
-    "PLY_CHAR", "PLY_UCHAR", "PLY_SHORT", "PLY_USHORT",
-    "PLY_INT", "PLY_UINT", "PLY_FLOAT", "PLY_DOUBLE",
-    "PLY_LIST"
+static const char e_ply_type_names[][12]= {
+	"PLY_INT8", "PLY_UINT8", "PLY_INT16", "PLY_UINT16",
+	"PLY_INT32", "PLY_UIN32", "PLY_FLOAT32", "PLY_FLOAT64",
+	"PLY_CHAR", "PLY_UCHAR", "PLY_SHORT", "PLY_USHORT",
+	"PLY_INT", "PLY_UINT", "PLY_FLOAT", "PLY_DOUBLE",
+	"PLY_LIST"
 };
 
 //! PLY format storage modes
@@ -61,8 +61,8 @@ class PlyFilter : public FileIOFilter
 {
 public:
 
-    //inherited from FileIOFilter
-    virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
+	//inherited from FileIOFilter
+	virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename);
 
 protected:

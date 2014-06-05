@@ -26,31 +26,31 @@ class ccFBOUtils
 public:
 
 	/***************************************************
-                    OpenGL Textures
+					OpenGL Textures
 	***************************************************/
 
-    static void DisplayTexture2DCorner(GLuint tex, int w, int h);
+	static void DisplayTexture2DCorner(GLuint tex, int w, int h);
 
 	/***************************************************
-                    OpenGL Extensions
+					OpenGL Extensions
 	***************************************************/
 
-    //! Loads all available OpenGL extensions
-    static bool InitGLEW();
+	//! Loads all available OpenGL extensions
+	static bool InitGLEW();
 
-    //! Checks for availability of a given OpenGL extension
-    static bool CheckExtension(const char *extName);
+	//! Checks for availability of a given OpenGL extension
+	static bool CheckExtension(const char *extName);
 
-    //! Shortcut: checks Shaders support
-    static bool CheckShadersAvailability();
+	//! Shortcut: checks Shaders support
+	static bool CheckShadersAvailability();
 
-    //! Shortcut: checks OpenGL FBO support
-    static bool CheckFBOAvailability();
+	//! Shortcut: checks OpenGL FBO support
+	static bool CheckFBOAvailability();
 
 	//! Shortcut: checks OpenGL VBO support
-    static bool CheckVBOAvailability();
+	static bool CheckVBOAvailability();
 
-    //! Shortcut: checks OpenGL VA support
+	//! Shortcut: checks OpenGL VA support
 	static bool CheckVAAvailability();
 };
 

@@ -71,17 +71,17 @@ void qDummyPlugin::doAction()
 	if (!m_app)
 		return;
 
-    /*** HERE STARTS THE ACTION ***/
+	/*** HERE STARTS THE ACTION ***/
 
-    //put your code here
-    //--> you may want to start by asking parameters (with a custom dialog, etc.)
+	//put your code here
+	//--> you may want to start by asking parameters (with a custom dialog, etc.)
 
 	//This is how you can output messages
 	m_app->dispToConsole("[qDummyPlugin] Hello world!",ccMainAppInterface::STD_CONSOLE_MESSAGE); //a standard message is displayed in the console
 	m_app->dispToConsole("[qDummyPlugin] Warning: dummy plugin shouldn't be used as is!",ccMainAppInterface::WRN_CONSOLE_MESSAGE); //a warning message is displayed in the console
 	m_app->dispToConsole("Dummy plugin shouldn't be used as is!",ccMainAppInterface::ERR_CONSOLE_MESSAGE); //an error message is displayed in the console AND an error box will pop-up!
 
-    /*** HERE ENDS THE ACTION ***/
+	/*** HERE ENDS THE ACTION ***/
 
 }
 
@@ -93,7 +93,7 @@ QIcon qDummyPlugin::getIcon() const
 	//open qDummyPlugin.qrc (text file), update the "prefix" and the
 	//icon(s) filename(s). Then save it with the right name (yourPlugin.qrc).
 	//(eventually, remove the original qDummyPlugin.qrc file!)
-    return QIcon(":/CC/plugin/qDummyPlugin/icon.png");
+	return QIcon(":/CC/plugin/qDummyPlugin/icon.png");
 }
 
 #ifndef CC_QT5

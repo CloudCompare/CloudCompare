@@ -50,7 +50,7 @@ class QAbstractItemView;
 //! GUI properties list dialog element
 class ccPropertiesTreeDelegate : public QStyledItemDelegate
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
@@ -93,72 +93,72 @@ public:
 							OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE	,
 	};
 
-    //! Default constructor
-    ccPropertiesTreeDelegate(QStandardItemModel* _model, QAbstractItemView* _view, QObject *parent = 0);
+	//! Default constructor
+	ccPropertiesTreeDelegate(QStandardItemModel* _model, QAbstractItemView* _view, QObject *parent = 0);
 
-    //! Default destructor
-    virtual ~ccPropertiesTreeDelegate();
+	//! Default destructor
+	virtual ~ccPropertiesTreeDelegate();
 
-    //inherited from QStyledItemDelegate
-    virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index ) const;
-    virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+	//inherited from QStyledItemDelegate
+	virtual QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index ) const;
+	virtual QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 	//virtual bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
 	virtual void updateEditorGeometry(QWidget* editor, const QStyleOptionViewItem& option, const QModelIndex& index) const;
-    virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
-    virtual void unbind();
+	virtual void setEditorData(QWidget *editor, const QModelIndex &index) const;
+	virtual void unbind();
 
-    //! Fill property view with QItems corresponding to object's type
-    void fillModel(ccHObject* hObject);
+	//! Fill property view with QItems corresponding to object's type
+	void fillModel(ccHObject* hObject);
 
-    //! Returns currently bound object
-    ccHObject* getCurrentObject();
+	//! Returns currently bound object
+	ccHObject* getCurrentObject();
 
 signals:
-    void ccObjectPropertiesChanged(ccHObject* hObject) const;
-    void ccObjectAppearanceChanged(ccHObject* hObject) const;
-    void ccObjectAndChildrenAppearanceChanged(ccHObject* hObject) const;
+	void ccObjectPropertiesChanged(ccHObject* hObject) const;
+	void ccObjectAppearanceChanged(ccHObject* hObject) const;
+	void ccObjectAndChildrenAppearanceChanged(ccHObject* hObject) const;
 
 protected slots:
-    void updateItem(QStandardItem*);
-    void scalarFieldChanged(int);
-    void colorScaleChanged(int);
-    void colorRampStepsChanged(int);
-    void spawnColorRampEditor();
-    void octreeDisplayTypeChanged(int);
-    void octreeDisplayedLevelChanged(int);
+	void updateItem(QStandardItem*);
+	void scalarFieldChanged(int);
+	void colorScaleChanged(int);
+	void colorRampStepsChanged(int);
+	void spawnColorRampEditor();
+	void octreeDisplayTypeChanged(int);
+	void octreeDisplayedLevelChanged(int);
 	void primitivePrecisionChanged(int);
-    void imageAlphaChanged(int);
-    void applyImageViewport();
+	void imageAlphaChanged(int);
+	void applyImageViewport();
 	void applyLabelViewport();
-    void updateDisplay();
-    void objectDisplayChanged(const QString &);
-    void sensorScaleChanged(double);
+	void updateDisplay();
+	void objectDisplayChanged(const QString &);
+	void sensorScaleChanged(double);
 	void sensorIndexChanged(double);
 	void cloudPointSizeChanged(int);
-    void polyineWidthChanged(int);
+	void polyineWidthChanged(int);
 	void trihedronsScaleChanged(double);
 
 protected:
 
-    void addSeparator(QString title);
+	void addSeparator(QString title);
 	void appendRow(QStandardItem* leftItem, QStandardItem* rightItem, bool openPersistentEditor = false);
 
-    void fillWithHObject(ccHObject*);
-    void fillWithPointCloud(ccGenericPointCloud*);
-    void fillSFWithPointCloud(ccGenericPointCloud*);
-    void fillWithMesh(ccGenericMesh*);
+	void fillWithHObject(ccHObject*);
+	void fillWithPointCloud(ccGenericPointCloud*);
+	void fillSFWithPointCloud(ccGenericPointCloud*);
+	void fillWithMesh(ccGenericMesh*);
 	void fillWithFacet(ccFacet*);
 	void fillWithSensor(ccSensor*);
 	void fillWithTransBuffer(ccIndexedTransformationBuffer*);
-    void fillWithPolyline(ccPolyline*);
-    void fillWithPrimitive(ccGenericPrimitive*);
-    void fillWithPointOctree(ccOctree*);
+	void fillWithPolyline(ccPolyline*);
+	void fillWithPrimitive(ccGenericPrimitive*);
+	void fillWithPointOctree(ccOctree*);
 	void fillWithPointKdTree(ccKdTree*);
-    void fillWithImage(ccImage*);
-    void fillWithCalibratedImage(ccCalibratedImage*);
+	void fillWithImage(ccImage*);
+	void fillWithCalibratedImage(ccCalibratedImage*);
 	void fillWithLabel(cc2DLabel*);
 	void fillWithViewportObject(cc2DViewportObject*);
-    void fillWithGBLSensor(ccGBLSensor*);
+	void fillWithGBLSensor(ccGBLSensor*);
 	void fillWithCameraSensor(ccCameraSensor*);
 	void fillWithMaterialSet(ccMaterialSet*);
 	void fillWithShareable(CCShareable*);
@@ -168,9 +168,9 @@ protected:
 	//! Updates the current model (assuming object is the same)
 	void updateModel();
 
-    ccHObject* m_currentObject;
-    QStandardItemModel* m_model;
-    QAbstractItemView* m_view;
+	ccHObject* m_currentObject;
+	QStandardItemModel* m_model;
+	QAbstractItemView* m_view;
 };
 
 #endif

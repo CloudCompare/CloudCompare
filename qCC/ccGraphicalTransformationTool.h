@@ -34,73 +34,73 @@ class ccHObject;
 **/
 class ccGraphicalTransformationTool : public ccOverlayDialog, public Ui::GraphicalTransformationDlg
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    //! Default constructor
+	//! Default constructor
 	ccGraphicalTransformationTool(QWidget* parent);
 	//! Default destructor
 	virtual ~ccGraphicalTransformationTool();
 
 	//inherited from ccOverlayDialog
-    virtual bool linkWith(ccGLWindow* win);
+	virtual bool linkWith(ccGLWindow* win);
 	virtual bool start();
 	virtual void stop(bool state);
 
-    //! Adds an entity to the 'selected' entities set
-    /** Only the 'selected' entities are moved.
-        \return success, if the entitiy is elligible for graphical transformation
-    **/
+	//! Adds an entity to the 'selected' entities set
+	/** Only the 'selected' entities are moved.
+		\return success, if the entitiy is elligible for graphical transformation
+	**/
 	bool addEntity(ccHObject* anObject);
 
-    //! Returns the number of vald entities (see addEntity)
-    unsigned getNumberOfValidEntities();
+	//! Returns the number of vald entities (see addEntity)
+	unsigned getNumberOfValidEntities();
 
 protected slots:
 
-    //! Applies transformation to selected entities
-    void apply();
+	//! Applies transformation to selected entities
+	void apply();
 
-    //! Resets transformation
-    void reset();
+	//! Resets transformation
+	void reset();
 
-    //! Cancels (no transformation is applied)
-    void cancel();
+	//! Cancels (no transformation is applied)
+	void cancel();
 
 	//! Pauses the transformation mode
 	void pause(bool);
 
-    //! Applies translation (graphically) to selected entities
-    void glTranslate(const CCVector3d&);
+	//! Applies translation (graphically) to selected entities
+	void glTranslate(const CCVector3d&);
 
-    //! Applies rotation (graphically) to selected entities
-    void glRotate(const ccGLMatrixd&);
+	//! Applies rotation (graphically) to selected entities
+	void glRotate(const ccGLMatrixd&);
 
 	//! To capture overridden shortcuts (pause button, etc.)
 	void onShortcutTriggered(int);
 
 protected:
 
-    //! Clear all variables and 'unlink' dialog
-    void clear();
+	//! Clear all variables and 'unlink' dialog
+	void clear();
 
-    //! Updates all selected entities GL transformation matrices
-    void updateAllGLTransformations();
+	//! Updates all selected entities GL transformation matrices
+	void updateAllGLTransformations();
 
-    //! List of entities to be transformed
-    ccHObject* m_toTransform;
+	//! List of entities to be transformed
+	ccHObject* m_toTransform;
 
-    //! Current rotation
-    ccGLMatrixd m_rotation;
+	//! Current rotation
+	ccGLMatrixd m_rotation;
 
-    //! Current translation
-    CCVector3d m_translation;
+	//! Current translation
+	CCVector3d m_translation;
 
-    //! Rotation center
-    /** The rotation center is actually the center of gravity of the selected 'entities'
-    **/
-    CCVector3d m_rotationCenter;
+	//! Rotation center
+	/** The rotation center is actually the center of gravity of the selected 'entities'
+	**/
+	CCVector3d m_rotationCenter;
 };
 
 #endif //CC_GRAPHICAL_TRANSFORMATION_TOOL_HEADER

@@ -94,8 +94,8 @@ void qSRA::onNewSelection(const ccHObject::Container& selectedEntities)
 	}
 
 	bool cloudAndPolylineSelected = (	selectedEntities.size() == 2
-										&& (   (selectedEntities[0]->isA(CC_TYPES::POLY_LINE) && selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD))
-											|| (selectedEntities[1]->isA(CC_TYPES::POLY_LINE) && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD))) );
+										&& (	(selectedEntities[0]->isA(CC_TYPES::POLY_LINE) && selectedEntities[1]->isA(CC_TYPES::POINT_CLOUD))
+											||	(selectedEntities[1]->isA(CC_TYPES::POLY_LINE) && selectedEntities[0]->isA(CC_TYPES::POINT_CLOUD))) );
 	
 	if (m_doCompareCloudToProfile)
 	{
@@ -318,7 +318,7 @@ void qSRA::doProjectCloudDistsInGrid(ccPointCloud* cloud, ccPolyline* polyline)
 
 QIcon qSRA::getIcon() const
 {
-    return QIcon(QString::fromUtf8(":/CC/plugin/qSRA/qSRA.png"));
+	return QIcon(QString::fromUtf8(":/CC/plugin/qSRA/qSRA.png"));
 }
 
 #ifndef CC_QT5

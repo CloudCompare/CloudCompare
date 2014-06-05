@@ -19,7 +19,7 @@
 
 ccPcvDlg::ccPcvDlg(QWidget* parent) : QDialog(parent), Ui::PCVDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }

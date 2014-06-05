@@ -25,12 +25,12 @@
 
 QIcon qSSAO::getIcon() const
 {
-    return QIcon(QString::fromUtf8(":/CC/plugin/qSSAO/cc_ssao.png"));
+	return QIcon(QString::fromUtf8(":/CC/plugin/qSSAO/cc_ssao.png"));
 }
 
 ccGlFilter* qSSAO::getFilter()
 {
-    return new ccSSAOFilter();
+	return new ccSSAOFilter();
 }
 
 #ifndef CC_QT5

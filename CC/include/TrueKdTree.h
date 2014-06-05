@@ -18,7 +18,8 @@
 #ifndef TRUE_KD_TREE_HEADER
 #define TRUE_KD_TREE_HEADER
 
-//local
+//Local
+#include "CCCoreLib.h"
 #include "CCTypes.h"
 #include "CCConst.h"
 #include "ReferenceCloud.h"
@@ -36,12 +37,7 @@ class GenericIndexedCloudPersist;
 class GenericProgressCallback;
 
 //! Proper KD-tree implementation
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API TrueKdTree
-#else
-class TrueKdTree
-#endif
 {
 public:
 
@@ -67,7 +63,6 @@ public:
 
 	protected:
 		const uint8_t type;
-
 	};
 
 	//! Tree node
@@ -84,7 +79,7 @@ public:
 		{
 			if (leftChild) delete leftChild;
 			if (rightChild) delete rightChild;
-		};
+		}
 	};
 
 	//! Tree leaf
@@ -158,7 +153,7 @@ protected:
 	//! Root node
 	BaseNode* m_root;
 
-    //! Associated cloud
+	//! Associated cloud
 	GenericIndexedCloudPersist* m_associatedCloud;
 
 	//! Max error for planarity-based split strategy (see m_errorMeasure)

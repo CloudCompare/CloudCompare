@@ -31,24 +31,24 @@
 #include <stdint.h>
 
 /** Versions:
-   V1.0 = prior to 05/04/2012 = old version
-   V2.0 - 05/04/2012 - upgrade to serialized version with version tracking
-   V2.1 - 07/02/2012 - points & 2D labels upgraded
-   V2.2 - 11/26/2012 - object name is now a QString
-   V2.3 - 02/07/2013 - attribute 'm_selectionBehavior' added to ccHObject class
-   v2.4 - 02/22/2013 - per-cloud point size + whether name is displayed in 3D or not
-   v2.5 - 03/16/2013 - ccViewportParameters structure modified
-   v2.6 - 04/03/2013 - strictly positive scalar field removed and 'hidden' values marker is now NaN
-   v2.7 - 04/12/2013 - Customizable color scales
-   v2.8 - 07/12/2013 - Poylines are now supported
-   v2.9 - 08/14/2013 - ccMeshGroup removed, ccSubMesh added
-   v3.0 - 08/30/2013 - QObject's meta data structure added
-   v3.1 - 09/25/2013 - ccPolyline width added
-   v3.2 - 10/11/2013 - ccFacet (2D polygons) are now supported
-   v3.3 - 12/19/2013 - global scale information is now saved for point clouds
-   v3.4 - 01/09/2014 - ccIndexedTransformation and ccIndexedTransformationBuffer added + CC_CLASS_ENUM is now coded on 64 bits
-   v3.5 - 02/13/2014 - ccSensor class updated
-   v3.6 - 05/30/2014 - ccGLWindow and associated structures (viewport, etc.) now use double precision
+	V1.0 = prior to 05/04/2012 = old version
+	V2.0 - 05/04/2012 - upgrade to serialized version with version tracking
+	V2.1 - 07/02/2012 - points & 2D labels upgraded
+	V2.2 - 11/26/2012 - object name is now a QString
+	V2.3 - 02/07/2013 - attribute 'm_selectionBehavior' added to ccHObject class
+	v2.4 - 02/22/2013 - per-cloud point size + whether name is displayed in 3D or not
+	v2.5 - 03/16/2013 - ccViewportParameters structure modified
+	v2.6 - 04/03/2013 - strictly positive scalar field removed and 'hidden' values marker is now NaN
+	v2.7 - 04/12/2013 - Customizable color scales
+	v2.8 - 07/12/2013 - Poylines are now supported
+	v2.9 - 08/14/2013 - ccMeshGroup removed, ccSubMesh added
+	v3.0 - 08/30/2013 - QObject's meta data structure added
+	v3.1 - 09/25/2013 - ccPolyline width added
+	v3.2 - 10/11/2013 - ccFacet (2D polygons) are now supported
+	v3.3 - 12/19/2013 - global scale information is now saved for point clouds
+	v3.4 - 01/09/2014 - ccIndexedTransformation and ccIndexedTransformationBuffer added + CC_CLASS_ENUM is now coded on 64 bits
+	v3.5 - 02/13/2014 - ccSensor class updated
+	v3.6 - 05/30/2014 - ccGLWindow and associated structures (viewport, etc.) now use double precision
 **/
 const unsigned c_currentDBVersion = 36; //3.6
 
@@ -62,13 +62,13 @@ unsigned ccObject::GetCurrentDBVersion()
 
 void ccObject::ResetUniqueIDCounter()
 {
-    QSettings settings;
+	QSettings settings;
 	settings.setValue(s_uniqueIDKey,static_cast<unsigned>(0));
 }
 
 unsigned ccObject::GetNextUniqueID()
 {
-    unsigned lastID = GetLastUniqueID();
+	unsigned lastID = GetLastUniqueID();
 	++lastID;
 	UpdateLastUniqueID(lastID);
 
@@ -77,12 +77,12 @@ unsigned ccObject::GetNextUniqueID()
 
 unsigned ccObject::GetLastUniqueID()
 {
-    return QSettings().value(s_uniqueIDKey, 0).toInt();
+	return QSettings().value(s_uniqueIDKey, 0).toInt();
 }
 
 void ccObject::UpdateLastUniqueID(unsigned lastID)
 {
-    QSettings().setValue(s_uniqueIDKey, lastID);
+	QSettings().setValue(s_uniqueIDKey, lastID);
 }
 
 ccObject::ccObject(QString name)
@@ -103,10 +103,10 @@ void ccObject::setUniqueID(unsigned ID)
 
 void ccObject::setFlagState(CC_OBJECT_FLAG flag, bool state)
 {
-    if (state)
-        m_flags |= unsigned(flag);
-    else
-        m_flags &= (~unsigned(flag));
+	if (state)
+		m_flags |= unsigned(flag);
+	else
+		m_flags &= (~unsigned(flag));
 }
 
 bool ccObject::toFile(QFile& out) const
@@ -191,12 +191,12 @@ bool ccObject::removeMetaData(QString key)
 
 void ccObject::setMetaData(QString key, QVariant data)
 {
-    m_metaData.insert(key,data);
+	m_metaData.insert(key,data);
 }
 
 bool ccObject::hasMetaData(QString key)
 {
-    return ( m_metaData.find(key) != m_metaData.end());
+	return ( m_metaData.find(key) != m_metaData.end());
 }
 
 bool ccObject::fromFile(QFile& in, short dataVersion, int flags)

@@ -11,7 +11,7 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#               COPYRIGHT: Luca Penasa                                   #
+//#                        COPYRIGHT: Luca Penasa                          #
 //#                                                                        #
 //##########################################################################
 //
@@ -32,7 +32,7 @@
 #include <StatisticalOutliersRemover.h>
 
 qPCL::qPCL()
-    : m_menu(0)
+	: m_menu(0)
 {
 }
 
@@ -97,9 +97,9 @@ int qPCL::addFilter(BaseFilter* filter)
 	m_filters.push_back(filter);
 
 	//connect signals
-	connect(filter, SIGNAL(newEntity(ccHObject*)),          this,   SLOT(handleNewEntity(ccHObject*)));
-	connect(filter, SIGNAL(entityHasChanged(ccHObject*)),   this,   SLOT(handleEntityChange(ccHObject*)));
-	connect(filter, SIGNAL(newErrorMessage(QString)),       this,   SLOT(handleErrorMessage(QString)));
+	connect(filter, SIGNAL(newEntity(ccHObject*)),			this,	SLOT(handleNewEntity(ccHObject*)));
+	connect(filter, SIGNAL(entityHasChanged(ccHObject*)),	this,	SLOT(handleEntityChange(ccHObject*)));
+	connect(filter, SIGNAL(newErrorMessage(QString)),		this,	SLOT(handleErrorMessage(QString)));
 
 	return 1;
 }

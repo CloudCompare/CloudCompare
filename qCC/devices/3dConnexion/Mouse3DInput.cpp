@@ -376,12 +376,12 @@ void Mouse3DInput::on3dmouseInput()
 		}
 	}
 
-	DWORD dwNow = ::GetTickCount();           // Current time;
-	DWORD dwElapsedTime;                      // Elapsed time since we were last here
+	DWORD dwNow = ::GetTickCount();			// Current time;
+	DWORD dwElapsedTime;					// Elapsed time since we were last here
 
 	if (0 == m_lastInputTime)
 	{
-		dwElapsedTime = 10;                    // System timer resolution
+		dwElapsedTime = 10;					// System timer resolution
 	}
 	else 
 	{
@@ -429,7 +429,7 @@ void Mouse3DInput::on3dmouseInput()
 
 	//we integrate time asap so as to loose 'less' accuracy
 	float mouseData2PanZoom = static_cast<float>(c_3dmouseAngularVelocity * (speed * static_cast<double>(dwElapsedTime)));
-	float mouseData2Rotation = static_cast<float>(c_3dmouseAngularVelocity * (speed * static_cast<double>(dwElapsedTime))); // v = w * r,  we don't know r yet so lets assume r=1
+	float mouseData2Rotation = static_cast<float>(c_3dmouseAngularVelocity * (speed * static_cast<double>(dwElapsedTime))); // v = w * r, we don't know r yet so lets assume r=1
 
 	std::map<HANDLE, InputData>::iterator iterator = m_device2Data.begin();
 	while (iterator != m_device2Data.end())
@@ -462,7 +462,7 @@ void Mouse3DInput::on3dmouseInput()
 			if (!m_mouseParams.panZoomEnabled())
 			{
 				// Pan zoom is switched off so set the translation vector values to zero
-				motionData[0] =  motionData[1] =  motionData[2] = 0.0f;
+				motionData[0] = motionData[1] = motionData[2] = 0.0f;
 			}
 			else for (int axis = 0; axis < 3; axis++)
 			{
@@ -477,7 +477,7 @@ void Mouse3DInput::on3dmouseInput()
 			if (!m_mouseParams.rotationEnabled())
 			{
 				// Rotate is switched off so set the rotation vector values to zero
-				motionData[3] =  motionData[4] =  motionData[5] = 0.0f;
+				motionData[3] = motionData[4] = motionData[5] = 0.0f;
 			}
 			else for (int axis = 3; axis < 6; axis++)
 			{
@@ -549,7 +549,7 @@ void Mouse3DInput::onRawInput(UINT nInputCode, HRAWINPUT hRawInput)
 		qDebug ("GetRawInputBuffer returned error %d\n", GetLastError());
 	}
 
-	while (nCount>0 && nCount !=  static_cast<UINT>(-1))
+	while (nCount>0 && nCount != static_cast<UINT>(-1))
 	{
 		PRAWINPUT pri = pRawInput;
 		UINT nInput;
@@ -647,7 +647,7 @@ bool Mouse3DInput::translateRawInputData(UINT nInputCode, PRAWINPUT pRawInput)
 				else
 					m_device2Keystate.erase(pRawInput->header.hDevice);
 
-				//  Only call the keystate change handlers if the app is in foreground
+				// Only call the keystate change handlers if the app is in foreground
 				if (bIsForeground)
 				{
 					unsigned long dwChange = dwKeystate ^ dwOldKeystate;
@@ -695,8 +695,8 @@ void Mouse3DInput::GetQuaternion(const std::vector<float>& vec, float* q)
 	float c3 = cos(pitch);
 	float c2_x_c1 = c2 * c1;
 	
-	q[0] = c3 * c2_x_c1  +  s3 * s2_x_s1;
-	q[1] = s3 * c2_x_c1  -  c3 * s2_x_s1;
-	q[2] = c3 * s2 * c1  +  s3 * c2 * s1;
-	q[3] = c3 * c2 * s1  -  s3 * s2 * c1;
+	q[0] = c3 * c2_x_c1 + s3 * s2_x_s1;
+	q[1] = s3 * c2_x_c1 - c3 * s2_x_s1;
+	q[2] = c3 * s2 * c1 + s3 * c2 * s1;
+	q[3] = c3 * c2 * s1 - s3 * s2 * c1;
 }

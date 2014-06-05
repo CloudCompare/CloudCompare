@@ -64,7 +64,7 @@ class PCVContext
 		int GLAccumPixel(std::vector<int>& visibilityCount);
 
 	protected:
-	   
+
 		void glInit();
 		void drawEntity();
 		void associateToEntity(CCLib::GenericCloud* aCloud, CCLib::GenericMesh* aMesh=NULL);
@@ -81,7 +81,7 @@ class PCVContext
 		CCVector3 m_viewCenter;
 
 		//associated pixel buffer
-        QGLPixelBuffer* m_pixBuffer;
+		QGLPixelBuffer* m_pixBuffer;
 
 		//! Pixel buffer width (pixels)
 		unsigned m_width;

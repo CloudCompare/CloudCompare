@@ -28,8 +28,7 @@ ccInnerRect2DFinder::ccInnerRect2DFinder()
 	, m_cloud(0)
 	, m_X(0)
 	, m_Y(1)
-{
-}
+{}
 
 ccBox* ccInnerRect2DFinder::process( ccGenericPointCloud* cloud, unsigned char zDim/*=2*/ )
 {

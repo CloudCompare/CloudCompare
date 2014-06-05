@@ -47,7 +47,7 @@ ccColorScaleEditorDialog::ccColorScaleEditorDialog(ccColorScalesManager* manager
 {
 	assert(m_manager);
 
-    setupUi(this);
+	setupUi(this);
 
 	colorScaleEditorFrame->setLayout(new QHBoxLayout());
 	colorScaleEditorFrame->layout()->setContentsMargins(0,0,0,0);
@@ -299,7 +299,7 @@ void ccColorScaleEditorDialog::onStepModified(int index)
 	const ColorScaleElementSlider* slider = m_scaleWidget->getStep(index);
 	assert(slider);
 
-    ccDisplayOptionsDlg::SetButtonColor(colorToolButton,slider->getColor());
+	ccDisplayOptionsDlg::SetButtonColor(colorToolButton,slider->getColor());
 	if (m_colorScale)
 	{
 		const double relativePos = slider->getRelativePos();
@@ -363,11 +363,11 @@ void ccColorScaleEditorDialog::changeSelectedStepColor()
 	assert(slider);
 
 	QColor newCol = QColorDialog::getColor(slider->getColor(), this);
-    if (newCol.isValid())
-    {
+	if (newCol.isValid())
+	{
 		//eventually onStepModified will be called (and thus m_modified will be updated)
 		m_scaleWidget->setStepColor(selectedIndex,newCol);
-    }
+	}
 }
 
 void ccColorScaleEditorDialog::changeSelectedStepValue(double value)

@@ -18,6 +18,8 @@
 #ifndef CLOUD_SAMPLING_TOOLS_HEADER
 #define CLOUD_SAMPLING_TOOLS_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "DgmOctree.h"
 
@@ -33,12 +35,7 @@ class ReferenceCloudPersist;
 class SimpleCloud;
 
 //! Several point cloud resampling algorithms (octree-based, random, etc.)
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
 class CC_CORE_LIB_API CloudSamplingTools : public CCToolbox
-#else
-class CloudSamplingTools : public CCToolbox
-#endif
 {
 public:
 
@@ -63,7 +60,7 @@ public:
 	**/
 	static SimpleCloud* resampleCloudWithOctreeAtLevel(	GenericIndexedCloudPersist* theCloud,
 														uchar octreeLevel,
-                                                        RESAMPLING_CELL_METHOD resamplingMethod,
+														RESAMPLING_CELL_METHOD resamplingMethod,
 														GenericProgressCallback* progressCb = 0,
 														DgmOctree* inputOctree = 0);
 
@@ -80,10 +77,10 @@ public:
 		\return the resampled cloud (new cloud)
 	**/
 	static GenericIndexedCloud* resampleCloudWithOctree(GenericIndexedCloudPersist* theCloud,
-                                                        int newNumberOfPoints,
-                                                        RESAMPLING_CELL_METHOD resamplingMethod,
-                                                        GenericProgressCallback* progressCb = 0,
-                                                        DgmOctree* inputOctree = 0);
+														int newNumberOfPoints,
+														RESAMPLING_CELL_METHOD resamplingMethod,
+														GenericProgressCallback* progressCb = 0,
+														DgmOctree* inputOctree = 0);
 
 	//! Subsamples a point cloud (process based on the octree)
 	/** A subsampling algorithm is applied inside each cell of the octree. The
@@ -98,10 +95,10 @@ public:
 		\return a reference cloud corresponding to the subsampling 'selection'
 	**/
 	static ReferenceCloud* subsampleCloudWithOctreeAtLevel(GenericIndexedCloudPersist* theCloud,
-                                                            uchar octreeLevel,
-                                                            SUBSAMPLING_CELL_METHOD subsamplingMethod,
-                                                            GenericProgressCallback* progressCb = 0,
-                                                            DgmOctree* inputOctree = 0);
+															uchar octreeLevel,
+															SUBSAMPLING_CELL_METHOD subsamplingMethod,
+															GenericProgressCallback* progressCb = 0,
+															DgmOctree* inputOctree = 0);
 
 	//! Subsamples a point cloud (process based on the octree)
 	/** Same as 'subsampleCloudWithOctreeAtLevel' method, appart the fact that instead
@@ -116,10 +113,10 @@ public:
 		\return a reference cloud corresponding to the subsampling 'selection'
 	**/
 	static ReferenceCloud* subsampleCloudWithOctree(GenericIndexedCloudPersist* theCloud,
-                                                    int newNumberOfPoints,
-                                                    SUBSAMPLING_CELL_METHOD subsamplingMethod,
-                                                    GenericProgressCallback* progressCb = 0,
-                                                    DgmOctree* inputOctree = 0);
+													int newNumberOfPoints,
+													SUBSAMPLING_CELL_METHOD subsamplingMethod,
+													GenericProgressCallback* progressCb = 0,
+													DgmOctree* inputOctree = 0);
 
 	//! Subsamples a point cloud (process based on random selections)
 	/** A very simple subsampling algorithm that simply consists in selecting
@@ -130,12 +127,12 @@ public:
 		\return a reference cloud corresponding to the subsampling 'selection'
 	**/
 	static ReferenceCloud* subsampleCloudRandomly(	GenericIndexedCloudPersist* theCloud,
-                                                    unsigned newNumberOfPoints,
-                                                    GenericProgressCallback* progressCb = 0);
+													unsigned newNumberOfPoints,
+													GenericProgressCallback* progressCb = 0);
 
 	//! Resamples a point cloud (process based on inter point distance)
 	/** The cloud is resampled so that there is no point nearer than a given distance to other points
-        It works by picking a reference point, removing all points which are to close to this point, and repeating these two steps until the result is reached
+		It works by picking a reference point, removing all points which are to close to this point, and repeating these two steps until the result is reached
 		\param theCloud the point cloud to resample
 		\param minDistance the distance under which a point in the resulting cloud cannot have any neighbour
 		\param theOctree associated octree if available
@@ -143,7 +140,7 @@ public:
 		\return a reference cloud corresponding to the resampling 'selection'
 	**/
 	static ReferenceCloud* resampleCloudSpatially(	GenericIndexedCloudPersist* theCloud,
-                                                    PointCoordinateType minDistance,
+													PointCoordinateType minDistance,
 													DgmOctree* theOctree = 0,
 													GenericProgressCallback* progressCb = 0);
 
@@ -161,7 +158,7 @@ protected:
 		\param nProgress optional (normalized) progress notification (per-point)
 	**/
 	static bool resampleCellAtLevel(const DgmOctree::octreeCell& cell,
-                                    void** additionalParameters,
+									void** additionalParameters,
 									NormalizedProgress* nProgress = 0);
 
 	//! "Cellular" function to select a unique point inside an octree cell
@@ -176,7 +173,7 @@ protected:
 		\param nProgress optional (normalized) progress notification (per-point)
 	**/
 	static bool subsampleCellAtLevel(	const DgmOctree::octreeCell& cell,
-                                        void** additionalParameters,
+										void** additionalParameters,
 										NormalizedProgress* nProgress = 0);
 };
 

@@ -217,22 +217,22 @@ void qHPR::doAction()
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	size_t selNum = selectedEntities.size();
-    if (selNum!=1)
+	if (selNum!=1)
 	{
 		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
-    ccHObject* ent = selectedEntities[0];
-    if (!ent->isA(CC_TYPES::POINT_CLOUD))
+	ccHObject* ent = selectedEntities[0];
+	if (!ent->isA(CC_TYPES::POINT_CLOUD))
 	{
 		m_app->dispToConsole("Select a point cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
-    ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
+	ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
 
 	ccGLWindow* win = m_app->getActiveGLWindow();
-    if (!win)
+	if (!win)
 	{
 		m_app->dispToConsole("No active window!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
@@ -243,12 +243,12 @@ void qHPR::doAction()
 	if (!params.perspectiveView)
 	{
 		m_app->dispToConsole("Perspective mode only!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-        return;
+		return;
 	}
 
 	ccHprDlg dlg(m_app->getMainWindow());
-    if (!dlg.exec())
-        return;
+	if (!dlg.exec())
+		return;
 
 	//progress dialog
 	ccProgressDialog progressCb(false,m_app->getMainWindow());
@@ -258,14 +258,14 @@ void qHPR::doAction()
 	assert(octreeLevel>=0 && octreeLevel<=255);
 
 	//compute octree if cloud hasn't any
-    ccOctree* theOctree = cloud->getOctree();
-    if (!theOctree)
-        theOctree = cloud->computeOctree(&progressCb);
+	ccOctree* theOctree = cloud->getOctree();
+	if (!theOctree)
+		theOctree = cloud->computeOctree(&progressCb);
 
 	if (!theOctree)
 	{
 		m_app->dispToConsole("Couldn't compute octree!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-        return;
+		return;
 	}
 
 	CCVector3d viewPoint = params.cameraCenter;
@@ -276,7 +276,7 @@ void qHPR::doAction()
 		viewPoint = params.pivotPoint + PC;
 	}
 
-    //HPR
+	//HPR
 	CCLib::ReferenceCloud* visibleCells = 0;
 	{
 		QElapsedTimer eTimer;
@@ -300,8 +300,8 @@ void qHPR::doAction()
 		theCellCenters = 0;
 	}
 
-    if (visibleCells)
-    {
+	if (visibleCells)
+	{
 		//DGM: we generate a new cloud now, instead of playing with the points visiblity! (too confusing for the user)
 		/*if (!cloud->isVisibilityTableInstantiated() && !cloud->resetVisibilityArray())
 		{
@@ -327,19 +327,19 @@ void qHPR::doAction()
 			return;
 		}
 
-        for (unsigned i=0; i<visibleCellsCount; ++i)
-        {
+		for (unsigned i=0; i<visibleCellsCount; ++i)
+		{
 			//cell index
-            unsigned index = visibleCells->getPointGlobalIndex(i);
-            
+			unsigned index = visibleCells->getPointGlobalIndex(i);
+
 			//points in this cell...
 			CCLib::ReferenceCloud Yk(theOctree->associatedCloud());
 			theOctree->getPointsInCellByCellIndex(&Yk,cellIndexes[index],static_cast<uchar>(octreeLevel));
 			//...are all visible
 			/*unsigned count = Yk.size();
-            for (unsigned j=0;j<count;++j)
-                pointsVisibility->setValue(Yk.getPointGlobalIndex(j),POINT_VISIBLE);
-            visiblePointCount += count;
+			for (unsigned j=0;j<count;++j)
+				pointsVisibility->setValue(Yk.getPointGlobalIndex(j),POINT_VISIBLE);
+			visiblePointCount += count;
 			//*/
 			if (!visiblePoints.add(Yk))
 			{
@@ -347,9 +347,9 @@ void qHPR::doAction()
 				delete visibleCells;
 				return;
 			}
-        }
+		}
 
-        delete visibleCells;
+		delete visibleCells;
 		visibleCells = 0;
 
 		m_app->dispToConsole(QString("[HPR] Visible points: %1").arg(visiblePointCount));
@@ -382,15 +382,15 @@ void qHPR::doAction()
 				m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			}
 		}
-    }
+	}
 
-    //currently selected entities appearance may have changed!
+	//currently selected entities appearance may have changed!
 	m_app->refreshAll();
 }
 
 QIcon qHPR::getIcon() const
 {
-    return QIcon(QString::fromUtf8(":/CC/plugin/qHPR/cc_hpr.png"));
+	return QIcon(QString::fromUtf8(":/CC/plugin/qHPR/cc_hpr.png"));
 }
 
 #ifndef CC_QT5

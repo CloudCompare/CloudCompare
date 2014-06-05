@@ -18,12 +18,8 @@
 #ifndef REFERENCE_CLOUD_HEADER
 #define REFERENCE_CLOUD_HEADER
 
-#ifdef _MSC_VER
-//To get rid of the really annoying warnings about template class exportation
-#pragma warning( disable: 4251 )
-#pragma warning( disable: 4530 )
-#endif
-
+//Local
+#include "CCCoreLib.h"
 #include "GenericIndexedCloudPersist.h"
 #include "GenericChunkedArray.h"
 
@@ -34,14 +30,7 @@ namespace CCLib
 /** Implements the GenericIndexedCloudPersist interface. A simple point cloud
 	that stores references to Generic3dPoint instances in a vector.
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API ReferenceCloud : public GenericIndexedCloudPersist
-#else
-class ReferenceCloud : public GenericIndexedCloudPersist
-#endif
 {
 public:
 

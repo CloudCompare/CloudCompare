@@ -258,7 +258,7 @@ bool ccCalibratedImage::computeOrthoRectificationParams(CCLib::GenericIndexedClo
 	double *A = new double[8*Neq]; // 8 coefficients: a0 a1 a2 b0 b1 b2 c1 c2
 	double *b = new double[Neq];
 
-    //for all points
+	//for all points
 	{
 		double* _A=A;
 		double* _b=b;
@@ -336,7 +336,7 @@ bool ccCalibratedImage::computeOrthoRectificationParams(CCLib::GenericIndexedClo
 	//init. conjugate gradient
 	cg.initConjugateGradient(X0);
 
-    //conjugate gradient iterations
+	//conjugate gradient iterations
 	{
 		double convergenceThreshold = 1e-8/* * norm*/;  //max. error for convergence
 		for (unsigned i=0; i<1500; ++i)
@@ -507,7 +507,7 @@ ccImage* ccCalibratedImage::orthoRectifyAsImage(CCLib::GenericIndexedCloud* keyp
 	if (orthoImage.isNull()) //not enough memory!
 		return 0;
 
-   const QRgb blackValue = QColor( Qt::black ).rgb();
+	const QRgb blackValue = QColor( Qt::black ).rgb();
 
 	for (unsigned i=0;i<w;++i)
 	{

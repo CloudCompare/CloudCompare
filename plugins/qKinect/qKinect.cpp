@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                       CLOUDCOMPARE PLUGIN: qKinect                        #
+//#                       CLOUDCOMPARE PLUGIN: qKinect                     #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -85,13 +85,13 @@ static unsigned s_depth_count = 0;
 static unsigned s_max_depth_count = 0;
 void depth_cb(freenect_device *dev, void *v_depth, uint32_t timestamp)
 {
-    if (s_depth_data && s_depth_count<s_max_depth_count)
-    {
-        uint16_t *depth = (uint16_t*)v_depth;
+	if (s_depth_data && s_depth_count<s_max_depth_count)
+	{
+		uint16_t *depth = (uint16_t*)v_depth;
 		unsigned mapSize = s_wDepth*s_hDepth;
-        memcpy(s_depth_data + s_depth_count*mapSize, depth, mapSize*sizeof(uint16_t));
-        ++s_depth_count;
-    }
+		memcpy(s_depth_data + s_depth_count*mapSize, depth, mapSize*sizeof(uint16_t));
+		++s_depth_count;
+	}
 }
 
 static uint8_t *s_last_rgb_data = 0;
@@ -100,12 +100,12 @@ static unsigned s_hRgb = 0;
 static unsigned s_rgb_count = 0; //max=1
 void rgb_cb(freenect_device *dev, void *rgb, uint32_t timestamp)
 {
-    if (s_last_rgb_data && s_rgb_count==0)
-    {
-        uint8_t *rgbMap = (uint8_t*)rgb;
-        memcpy(s_last_rgb_data,rgbMap,sizeof(uint8_t)*s_wRgb*s_hRgb*3);
-        ++s_rgb_count;
-    }
+	if (s_last_rgb_data && s_rgb_count==0)
+	{
+		uint8_t *rgbMap = (uint8_t*)rgb;
+		memcpy(s_last_rgb_data,rgbMap,sizeof(uint8_t)*s_wRgb*s_hRgb*3);
+		++s_rgb_count;
+	}
 }
 
 //helper
@@ -145,9 +145,9 @@ void qKinect::doStartGrabbing()
 	if (!m_app)
 		return;
 
-	f_ctx=0;
-    f_dev=0;
-	s_grabIndex=0;
+	f_ctx = 0;
+	f_dev = 0;
+	s_grabIndex = 0;
 
 	if (m_kDlg)
 		delete m_kDlg;
@@ -248,7 +248,7 @@ void qKinect::doStartGrabbing()
 		}
 	}
 
-    int freenect_angle = 0;
+	int freenect_angle = 0;
 	freenect_set_tilt_degs(f_dev,freenect_angle);
 	freenect_set_led(f_dev,LED_RED);
 	freenect_set_depth_callback(f_dev, depth_cb);
@@ -304,7 +304,7 @@ void qKinect::updateRTView()
 		QImage image(s_wDepth,s_hDepth,QImage::Format_RGB888);
 
 		//convert depth array to image
-        const uint16_t* _depth = s_depth_data;
+		const uint16_t* _depth = s_depth_data;
 		unsigned char* _bits = image.bits();
 		for (unsigned i=0;i<s_hDepth*s_wDepth;++i,++_depth,_bits+=3)
 		{
@@ -372,10 +372,10 @@ void qKinect::grabCloud()
 
 	while (s_depth_count<framesAvgCount || (grabRGB && s_rgb_count==0))
 	{
-	    freenect_process_events(f_ctx);
+		freenect_process_events(f_ctx);
 
 		if(s_depth_count == 0 && eTimer.elapsed() > 5000 ) //timeout 5s. without any  data
-            break;
+			break;
 	}
 
 	//success?
@@ -414,42 +414,42 @@ void qKinect::grabCloud()
 			}
 		}
 
-        /*** Depth calibration info ***/
+		/*** Depth calibration info ***/
 
-        //see http://openkinect.org/wiki/Imaging_Information
-        /*static const float minDistance = -10.0f;
-        static const float scaleFactor = .0021f;
-        const float cx = (float)w/2;
-        const float cy = (float)h/2;
-        const float fx = 1.0f/scaleFactor; //* (480.0/640.0);
-        const float fy = 1.0f/scaleFactor; //~476
-        //*/
+		//see http://openkinect.org/wiki/Imaging_Information
+		/*static const float minDistance = -10.0f;
+		static const float scaleFactor = .0021f;
+		const float cx = (float)w/2;
+		const float cy = (float)h/2;
+		const float fx = 1.0f/scaleFactor; //* (480.0/640.0);
+		const float fy = 1.0f/scaleFactor; //~476
+		//*/
 
-        //see http://nicolas.burrus.name/index.php/Research/KinectCalibration
-        static const float minDistance = -10.0f;
-        static const float cx = 339.5f;
-        static const float cy = 242.7f;
-        static const float fx = 594.21f;
-        static const float fy = 591.04f;
-        //*/
+		//see http://nicolas.burrus.name/index.php/Research/KinectCalibration
+		static const float minDistance = -10.0f;
+		static const float cx = 339.5f;
+		static const float cy = 242.7f;
+		static const float fx = 594.21f;
+		static const float fy = 591.04f;
+		//*/
 
-        /*** RGB calibration info ***/
-        static const float fx_rgb = 529.21508098293293f;
-        static const float fy_rgb = 525.56393630057437f;
-        static const float cx_rgb = 328.94272028759258f;
-        static const float cy_rgb = 267.48068171871557f;
+		/*** RGB calibration info ***/
+		static const float fx_rgb = 529.21508098293293f;
+		static const float fy_rgb = 525.56393630057437f;
+		static const float cx_rgb = 328.94272028759258f;
+		static const float cy_rgb = 267.48068171871557f;
 
-        float mat[16]={9.9984628826577793e-01f, 1.2635359098409581e-03f, -1.7487233004436643e-02f, 1.9985242312092553e-02f,
-                        -1.4779096108364480e-03f, 9.9992385683542895e-01f, -1.2251380107679535e-02f, -7.4423738761617583e-04f,
-                        1.7470421412464927e-02f, 1.2275341476520762e-02f, 9.9977202419716948e-01f, -1.0916736334336222e-02f,
-                        0.0f, 0.0f, 0.0f, 1.0f};
+		float mat[16] = {	 9.9984628826577793e-01f, 1.2635359098409581e-03f, -1.7487233004436643e-02f,  1.9985242312092553e-02f,
+							-1.4779096108364480e-03f, 9.9992385683542895e-01f, -1.2251380107679535e-02f, -7.4423738761617583e-04f,
+							1.7470421412464927e-02f, 1.2275341476520762e-02f,  9.9977202419716948e-01f, -1.0916736334336222e-02f,
+							0.0f, 0.0f, 0.0f, 1.0f};
 
-        ccGLMatrix depth2rgb(mat);
-        depth2rgb.transpose();
+		ccGLMatrix depth2rgb(mat);
+		depth2rgb.transpose();
 
-        ccPointCloud* depthMap = new ccPointCloud();
+		ccPointCloud* depthMap = new ccPointCloud();
 		bool hasRGB = s_rgb_count && s_last_rgb_data && m_kDlg->grabRGBCheckBox->isChecked();
-        if (depthMap->reserve(mapSize))
+		if (depthMap->reserve(mapSize))
 		{
 			if (hasRGB)
 			{
@@ -600,7 +600,7 @@ void qKinect::grabCloud()
 			depthMap = 0;
 			//result = -5;
 		}
-    }
+	}
 	else
 	{
 		//no data!
@@ -637,17 +637,17 @@ void qKinect::dialogClosed(int result)
 	freenect_close_device(f_dev);
 	freenect_shutdown(f_ctx);
 
-	s_max_depth_count=0;
+	s_max_depth_count = 0;
 	if (s_depth_data)
 		delete[] s_depth_data;
-    s_depth_data=0;
-	s_depth_count=0;
+	s_depth_data = 0;
+	s_depth_count = 0;
 
 	s_rgb_count=1;
 	if (s_last_rgb_data)
 		delete[] s_last_rgb_data;
-    s_last_rgb_data=0;
-	s_rgb_count=0;
+	s_last_rgb_data = 0;
+	s_rgb_count = 0;
 }
 
 #ifndef CC_QT5

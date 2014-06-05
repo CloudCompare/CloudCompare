@@ -20,6 +20,8 @@
 
 #include <ccIncludeGL.h>
 
+//Local
+#include "qCC_db.h"
 #include "ccGLMatrix.h"
 #include "ccBBox.h"
 #include "ccMaterial.h"
@@ -44,13 +46,13 @@ struct glDrawParams
 struct glDrawContext
 {
 	//! Drawing options (see below)
-    uint16_t flags;
+	uint16_t flags;
 	//! GL screen width
-    int glW;
+	int glW;
 	//! GL screen height
-    int glH;
+	int glH;
 	//! Corresponding GL window
-    ccGenericGLDisplay* _win;
+	ccGenericGLDisplay* _win;
 	//! Current zoom (screen to file rendering mode)
 	float renderZoom;
 
@@ -100,44 +102,44 @@ struct glDrawContext
 	//! Blending strategy (destination)
 	GLenum destBlend;
 
-    //Default constructor
-    glDrawContext()
-    : flags(0)
-    , glW(0)
-    , glH(0)
-    , _win(0)
-	, renderZoom(1.0f)
-    , decimateCloudOnMove(true)
-    , decimateMeshOnMove(true)
-    , sfColorScaleToDisplay(0)
-	, colorRampShader(0)
-	, customRenderingShader(0)
-	, useVBOs(true)
-	, pickedPointsRadius(4)
-	, pickedPointsTextShift(0.0)
-	, dispNumberPrecision(6)
-	, labelsTransparency(100)
-	, sourceBlend(GL_SRC_ALPHA)
-	, destBlend(GL_ONE_MINUS_SRC_ALPHA)
-    {}
+	//Default constructor
+	glDrawContext()
+		: flags(0)
+		, glW(0)
+		, glH(0)
+		, _win(0)
+		, renderZoom(1.0f)
+		, decimateCloudOnMove(true)
+		, decimateMeshOnMove(true)
+		, sfColorScaleToDisplay(0)
+		, colorRampShader(0)
+		, customRenderingShader(0)
+		, useVBOs(true)
+		, pickedPointsRadius(4)
+		, pickedPointsTextShift(0.0)
+		, dispNumberPrecision(6)
+		, labelsTransparency(100)
+		, sourceBlend(GL_SRC_ALPHA)
+		, destBlend(GL_ONE_MINUS_SRC_ALPHA)
+	{}
 };
 typedef glDrawContext CC_DRAW_CONTEXT;
 
 // Drawing flags (type: short)
-#define CC_DRAW_2D                              0x0001
-#define CC_DRAW_3D                              0x0002
-#define CC_DRAW_FOREGROUND                      0x0004
-#define CC_LIGHT_ENABLED                        0x0008
-#define CC_SKIP_UNSELECTED                      0x0010
-#define CC_SKIP_SELECTED                        0x0020
-#define CC_SKIP_ALL                             0x0030		// = CC_SKIP_UNSELECTED | CC_SKIP_SELECTED
-#define CC_DRAW_ENTITY_NAMES                    0x0040
-#define CC_DRAW_POINT_NAMES                     0x0080
+#define CC_DRAW_2D								0x0001
+#define CC_DRAW_3D								0x0002
+#define CC_DRAW_FOREGROUND						0x0004
+#define CC_LIGHT_ENABLED						0x0008
+#define CC_SKIP_UNSELECTED						0x0010
+#define CC_SKIP_SELECTED						0x0020
+#define CC_SKIP_ALL								0x0030		// = CC_SKIP_UNSELECTED | CC_SKIP_SELECTED
+#define CC_DRAW_ENTITY_NAMES					0x0040
+#define CC_DRAW_POINT_NAMES						0x0080
 #define CC_DRAW_TRI_NAMES						0x0100
 #define CC_DRAW_FAST_NAMES_ONLY					0x0200
 #define CC_DRAW_ANY_NAMES						0x03C0		// = CC_DRAW_ENTITY_NAMES | CC_DRAW_POINT_NAMES | CC_DRAW_TRI_NAMES
-#define CC_LOD_ACTIVATED                        0x0400
-#define CC_VIRTUAL_TRANS_ENABLED                0x0800
+#define CC_LOD_ACTIVATED						0x0400
+#define CC_VIRTUAL_TRANS_ENABLED				0x0800
 
 // Drawing flags testing macros (see ccDrawableObject)
 #define MACRO_Draw2D(context) (context.flags & CC_DRAW_2D)
@@ -155,54 +157,50 @@ typedef glDrawContext CC_DRAW_CONTEXT;
 #define MACRO_VirtualTransEnabled(context) (context.flags & CC_VIRTUAL_TRANS_ENABLED)
 
 //! Generic interface for (3D) drawable entities
-#ifdef QCC_DB_USE_AS_DLL
 class QCC_DB_LIB_API ccDrawableObject
-#else
-class ccDrawableObject
-#endif
 {
 public:
 
-    //! Default constructor
-    ccDrawableObject();
+	//! Default constructor
+	ccDrawableObject();
 
-    //! Draws entity and its children
-    virtual void draw(CC_DRAW_CONTEXT& context) = 0;
+	//! Draws entity and its children
+	virtual void draw(CC_DRAW_CONTEXT& context) = 0;
 
-    //! Returns whether entity is visible or not
-    virtual bool isVisible() const;
-    //! Sets entity visibility
-    virtual void setVisible(bool state);
+	//! Returns whether entity is visible or not
+	virtual bool isVisible() const;
+	//! Sets entity visibility
+	virtual void setVisible(bool state);
 	//! Toggles visibility
 	virtual void toggleVisibility();
 
-    //! Returns whether visibilty is locked or not
-    virtual bool isVisiblityLocked() const;
-    //! Locks/unlocks visibilty
-    /** If visibility is locked, the user won't be able to modify it
-        (via the properties tree for instance).
-    **/
-    virtual void lockVisibility(bool state);
+	//! Returns whether visibilty is locked or not
+	virtual bool isVisiblityLocked() const;
+	//! Locks/unlocks visibilty
+	/** If visibility is locked, the user won't be able to modify it
+		(via the properties tree for instance).
+	**/
+	virtual void lockVisibility(bool state);
 
-    //! Returns whether entity is selected or not
-    virtual bool isSelected() const;
-    //! Selects/unselects entity
-    virtual void setSelected(bool state);
+	//! Returns whether entity is selected or not
+	virtual bool isSelected() const;
+	//! Selects/unselects entity
+	virtual void setSelected(bool state);
 
-    //! Returns bounding-box
-    /** If bbox is not relative, any active GL transformation
-        (see setGLTransformation) will be applied to it.
-        Moreover, one can compute a full bounding box, taking
-        into acount every children, or only the ones displayed
-        in a given GL window. Eventualy, one can also choose to
-        compute bbox only with geometrical entities, or also with
-        full GL features.
-        \param relative specifies whether bbox is relative or not
-        \param withGLfeatures include GL features (example: octree grid display) inside BB or not
-        \param window display to compute bbox only with entities displayed in a given GL window
-        \return bounding-box
-    **/
-    virtual ccBBox getBB(bool relative=true, bool withGLfeatures=false, const ccGenericGLDisplay* window = 0) = 0;
+	//! Returns bounding-box
+	/** If bbox is not relative, any active GL transformation
+		(see setGLTransformation) will be applied to it.
+		Moreover, one can compute a full bounding box, taking
+		into acount every children, or only the ones displayed
+		in a given GL window. Eventualy, one can also choose to
+		compute bbox only with geometrical entities, or also with
+		full GL features.
+		\param relative specifies whether bbox is relative or not
+		\param withGLfeatures include GL features (example: octree grid display) inside BB or not
+		\param window display to compute bbox only with entities displayed in a given GL window
+		\return bounding-box
+	**/
+	virtual ccBBox getBB(bool relative=true, bool withGLfeatures=false, const ccGenericGLDisplay* window = 0) = 0;
 
 	//! Returns best-fit bounding-box (if available)
 	/** WARNING: This method is not supported by all entities!
@@ -213,60 +211,60 @@ public:
 	**/
 	virtual ccBBox getFitBB(ccGLMatrix& trans);
 
-    //! Draws absolute (axis aligned) bounding-box
-    virtual void drawBB(const colorType col[]);
+	//! Draws absolute (axis aligned) bounding-box
+	virtual void drawBB(const colorType col[]);
 
-    //! Returns main OpenGL paramters for this entity
+	//! Returns main OpenGL paramters for this entity
 	/** These parameters are deduced from the visiblity states
 		of its different features (points, normals, etc.).
 		\param params a glDrawParams structure
 	**/
 	virtual void getDrawingParameters(glDrawParams& params) const;
 
-    //! Returns whether colors are enabled or not
-    virtual bool hasColors() const;
-    //! Returns whether colors are shown or not
-    virtual bool colorsShown() const;
-    //! Sets colors visibility
-    virtual void showColors(bool state);
+	//! Returns whether colors are enabled or not
+	virtual bool hasColors() const;
+	//! Returns whether colors are shown or not
+	virtual bool colorsShown() const;
+	//! Sets colors visibility
+	virtual void showColors(bool state);
 	//! Toggles colors display state
 	virtual void toggleColors();
 
-    //! Returns whether normals are enabled or not
-    virtual bool hasNormals() const;
-    //! Returns whether normals are shown or not
-    virtual bool normalsShown() const;
-    //! Sets normals visibility
-    virtual void showNormals(bool state);
+	//! Returns whether normals are enabled or not
+	virtual bool hasNormals() const;
+	//! Returns whether normals are shown or not
+	virtual bool normalsShown() const;
+	//! Sets normals visibility
+	virtual void showNormals(bool state);
 	//! Toggles normals display state
 	virtual void toggleNormals();
 
-    /*** scalar fields ***/
+	/*** scalar fields ***/
 
-    //! Returns whether an active scalar field is available or not
-    virtual bool hasDisplayedScalarField() const;
+	//! Returns whether an active scalar field is available or not
+	virtual bool hasDisplayedScalarField() const;
 
-    //! Returns whether one or more scalar fields are instantiated
-    /** WARNING: doesn't mean a scalar field is currently displayed
-        (see ccDrawableObject::hasDisplayedScalarField).
-    **/
-    virtual bool hasScalarFields() const;
+	//! Returns whether one or more scalar fields are instantiated
+	/** WARNING: doesn't mean a scalar field is currently displayed
+		(see ccDrawableObject::hasDisplayedScalarField).
+	**/
+	virtual bool hasScalarFields() const;
 
-    //! Sets active scalarfield visibility
-    virtual void showSF(bool state);
+	//! Sets active scalarfield visibility
+	virtual void showSF(bool state);
 
 	//! Toggles SF display state
 	virtual void toggleSF();
 
 	//! Returns whether active scalar field is visible
-    virtual bool sfShown() const;
+	virtual bool sfShown() const;
 
 	/*** Mesh materials ***/
 
 	//! Toggles material display state
 	virtual void toggleMaterials() {}; //does nothing by default!
 
-    /*** Name display in 3D ***/
+	/*** Name display in 3D ***/
 
 	//! Sets whether name should be displayed in 3D
 	virtual void showNameIn3D(bool state);
@@ -279,18 +277,18 @@ public:
 
 	/*** temporary color ***/
 
-    //! Returns whether colors are currently overriden by a temporary (unique) color
-    /** See ccDrawableObject::setTempColor.
-    **/
-    virtual bool isColorOverriden() const;
+	//! Returns whether colors are currently overriden by a temporary (unique) color
+	/** See ccDrawableObject::setTempColor.
+	**/
+	virtual bool isColorOverriden() const;
 
-    //! Returns current temporary (unique) color
-    virtual const colorType* getTempColor() const;
+	//! Returns current temporary (unique) color
+	virtual const colorType* getTempColor() const;
 
 	//! Sets current temporary (unique)
-    /** \param col rgb color
+	/** \param col rgb color
 		\param autoActivate auto activates temporary color
-    **/
+	**/
 	virtual void setTempColor(const colorType* col, bool autoActivate = true);
 
 	//! Set temporary color activation state
@@ -298,120 +296,120 @@ public:
 
 	/*** associated display management ***/
 
-    //! Unlinks entity from a GL display (only if it belongs to it of course)
-    virtual void removeFromDisplay(const ccGenericGLDisplay* win);
+	//! Unlinks entity from a GL display (only if it belongs to it of course)
+	virtual void removeFromDisplay(const ccGenericGLDisplay* win);
 
-    //! Sets associated GL display
-    virtual void setDisplay(ccGenericGLDisplay* win);
+	//! Sets associated GL display
+	virtual void setDisplay(ccGenericGLDisplay* win);
 
-    //! Returns associated GL display
-    virtual ccGenericGLDisplay* getDisplay() const;
+	//! Returns associated GL display
+	virtual ccGenericGLDisplay* getDisplay() const;
 
-    //! Redraws associated GL display
-    virtual void redrawDisplay();
+	//! Redraws associated GL display
+	virtual void redrawDisplay();
 
-    //! Sets associated GL display 'refreshable' before global refresh
-    /** Only tagged displays will be refreshed when ccGenericGLDisplay::refresh
-        is called (see also MainWindow::RefreshAllGLWindow,
-        MainWindow::refreshAll and ccDrawableObject::refreshDisplay).
-    **/
-    virtual void prepareDisplayForRefresh();
+	//! Sets associated GL display 'refreshable' before global refresh
+	/** Only tagged displays will be refreshed when ccGenericGLDisplay::refresh
+		is called (see also MainWindow::RefreshAllGLWindow,
+		MainWindow::refreshAll and ccDrawableObject::refreshDisplay).
+	**/
+	virtual void prepareDisplayForRefresh();
 
-    //! Refreshes associated GL display
-    /** See ccGenericGLDisplay::refresh.
-    **/
-    virtual void refreshDisplay();
+	//! Refreshes associated GL display
+	/** See ccGenericGLDisplay::refresh.
+	**/
+	virtual void refreshDisplay();
 
-    /*** Transformation matrix management (for display only) ***/
+	/*** Transformation matrix management (for display only) ***/
 
 	//! Associates entity with a GL transformation (rotation + translation)
-    /** WARNING: FOR DISPLAY PURPOSE ONLY (i.e. should only be temporary)
+	/** WARNING: FOR DISPLAY PURPOSE ONLY (i.e. should only be temporary)
 		If the associated GL transformation is enabled (see
-        ccDrawableObject::enableGLTransformation), it will
-        be applied before displaying this entity. It will also be
-        taken into account during computation of a non-relative
-        bounding-box (see ccDrawableObject::getBB). However it
+		ccDrawableObject::enableGLTransformation), it will
+		be applied before displaying this entity. It will also be
+		taken into account during computation of a non-relative
+		bounding-box (see ccDrawableObject::getBB). However it
 		will not be taken into account by any CCLib algorithm (distance
 		computation, etc.) for instance.
-        Note: GL transformation is automatically enabled.
-    **/
-    virtual void setGLTransformation(const ccGLMatrix& trans);
+		Note: GL transformation is automatically enabled.
+	**/
+	virtual void setGLTransformation(const ccGLMatrix& trans);
 
-    //! Enables/disables associated GL transformation
-    /** See ccDrawableObject::setGLTransformation.
-    **/
-    virtual void enableGLTransformation(bool state);
+	//! Enables/disables associated GL transformation
+	/** See ccDrawableObject::setGLTransformation.
+	**/
+	virtual void enableGLTransformation(bool state);
 
 	//! Returns whether a GL transformation is enabled or not
 	virtual bool isGLTransEnabled() const;
 
-    //! Retuns associated GL transformation
-    /** See ccDrawableObject::setGLTransformation.
-    **/
-    virtual const ccGLMatrix& getGLTransformation() const;
+	//! Retuns associated GL transformation
+	/** See ccDrawableObject::setGLTransformation.
+	**/
+	virtual const ccGLMatrix& getGLTransformation() const;
 
-    //! Resets associated GL transformation
-    /** GL transformation is reset to identity.
-        Note: GL transformation is automatically disabled.
-        See ccDrawableObject::setGLTransformation.
-    **/
-    virtual void resetGLTransformation();
+	//! Resets associated GL transformation
+	/** GL transformation is reset to identity.
+		Note: GL transformation is automatically disabled.
+		See ccDrawableObject::setGLTransformation.
+	**/
+	virtual void resetGLTransformation();
 
-    //! Mutliplies (left) current GL transformation by a rotation matrix
-    /** 'GLtrans = M * GLtrans'
-        Note: GL transformation is automatically enabled.
-        See ccDrawableObject::setGLTransformation.
-    **/
-    virtual void rotateGL(const ccGLMatrix& rotMat);
+	//! Mutliplies (left) current GL transformation by a rotation matrix
+	/** 'GLtrans = M * GLtrans'
+		Note: GL transformation is automatically enabled.
+		See ccDrawableObject::setGLTransformation.
+	**/
+	virtual void rotateGL(const ccGLMatrix& rotMat);
 
-    //! Translates current GL transformation by a rotation matrix
-    /** 'GLtrans = GLtrans + T'
-        Note: GL transformation is automatically enabled.
-        See ccDrawableObject::setGLTransformation.
-    **/
-    virtual void translateGL(const CCVector3& trans);
+	//! Translates current GL transformation by a rotation matrix
+	/** 'GLtrans = GLtrans + T'
+		Note: GL transformation is automatically enabled.
+		See ccDrawableObject::setGLTransformation.
+	**/
+	virtual void translateGL(const CCVector3& trans);
 
 protected:
 
-    //! Specifies whether the object is visible or not
-    /** Note: this does not influence the children visibility
-    **/
-    bool m_visible;
+	//! Specifies whether the object is visible or not
+	/** Note: this does not influence the children visibility
+	**/
+	bool m_visible;
 
-    //! Specifies whether the object is selected or not
-    bool m_selected;
+	//! Specifies whether the object is selected or not
+	bool m_selected;
 
-    //! Specifies whether the visibility can be changed by user or not
-    bool m_lockedVisibility;
+	//! Specifies whether the visibility can be changed by user or not
+	bool m_lockedVisibility;
 
-    /*** OpenGL display parameters ***/
+	/*** OpenGL display parameters ***/
 
-    //! Specifies whether colors should be displayed
-    bool m_colorsDisplayed;
-    //! Specifies whether normals should be displayed
-    bool m_normalsDisplayed;
-    //! Specifies whether scalar field should be displayed
-    bool m_sfDisplayed;
+	//! Specifies whether colors should be displayed
+	bool m_colorsDisplayed;
+	//! Specifies whether normals should be displayed
+	bool m_normalsDisplayed;
+	//! Specifies whether scalar field should be displayed
+	bool m_sfDisplayed;
 
-    //! Temporary (unique) color
-    colorType m_tempColor[3];
-    //! Temporary (unique) color activation state
+	//! Temporary (unique) color
+	colorType m_tempColor[3];
+	//! Temporary (unique) color activation state
 	bool m_colorIsOverriden;
 
-    //! Current GL transformation
-    /** See ccDrawableObject::setGLTransformation.
-    **/
-    ccGLMatrix m_glTrans;
-    //! Current GL transformation activation state
-    /** See ccDrawableObject::setGLTransformation.
-    **/
-    bool m_glTransEnabled;
+	//! Current GL transformation
+	/** See ccDrawableObject::setGLTransformation.
+	**/
+	ccGLMatrix m_glTrans;
+	//! Current GL transformation activation state
+	/** See ccDrawableObject::setGLTransformation.
+	**/
+	bool m_glTransEnabled;
 
 	//! Whether name is displayed in 3D or not
 	bool m_showNameIn3D;
 
-    //! Currently associated GL display
-    ccGenericGLDisplay* m_currentDisplay;
+	//! Currently associated GL display
+	ccGenericGLDisplay* m_currentDisplay;
 };
 
 #endif //CC_DRAWABLE_OBJECT_HEADER

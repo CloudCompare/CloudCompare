@@ -40,18 +40,18 @@
 ccPointPropertiesDlg::ccPointPropertiesDlg(QWidget* parent)
 	: ccPointPickingGenericInterface(parent)
 	, Ui::PointPropertiesDlg()
-    , m_pickingMode(POINT_INFO)
+	, m_pickingMode(POINT_INFO)
 {
-    setupUi(this);
-    setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);
+	setupUi(this);
+	setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);
 
-    connect(closeButton,				SIGNAL(clicked()), this, SLOT(onClose()));
-    connect(pointPropertiesButton,		SIGNAL(clicked()), this, SLOT(activatePointPropertiesDisplay()));
-    connect(pointPointDistanceButton,	SIGNAL(clicked()), this, SLOT(activateDistanceDisplay()));
-    connect(pointsAngleButton,			SIGNAL(clicked()), this, SLOT(activateAngleDisplay()));
-    connect(rectZoneToolButton,			SIGNAL(clicked()), this, SLOT(activate2DZonePicking()));
+	connect(closeButton,				SIGNAL(clicked()), this, SLOT(onClose()));
+	connect(pointPropertiesButton,		SIGNAL(clicked()), this, SLOT(activatePointPropertiesDisplay()));
+	connect(pointPointDistanceButton,	SIGNAL(clicked()), this, SLOT(activateDistanceDisplay()));
+	connect(pointsAngleButton,			SIGNAL(clicked()), this, SLOT(activateAngleDisplay()));
+	connect(rectZoneToolButton,			SIGNAL(clicked()), this, SLOT(activate2DZonePicking()));
 	connect(saveLabelButton,			SIGNAL(clicked()), this, SLOT(exportCurrentLabel()));
-    connect(razButton,					SIGNAL(clicked()), this, SLOT(initializeState()));
+	connect(razButton,					SIGNAL(clicked()), this, SLOT(initializeState()));
 
 	//for points picking
 	m_label = new cc2DLabel();
@@ -70,8 +70,8 @@ ccPointPropertiesDlg::~ccPointPropertiesDlg()
 	m_label = 0;
 
 	if (m_rect2DLabel)
-        delete m_rect2DLabel;
-    m_rect2DLabel = 0;
+		delete m_rect2DLabel;
+	m_rect2DLabel = 0;
 }
 
 bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
@@ -94,7 +94,7 @@ bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
 		disconnect(oldWin, SIGNAL(buttonReleased()), this, SLOT(close2DZone()));
 	}
 
-    m_rect2DLabel->setVisible(false);	//=invalid
+	m_rect2DLabel->setVisible(false);	//=invalid
 	m_rect2DLabel->setSelected(true);	//=closed
 	m_label->clear();
 
@@ -113,9 +113,9 @@ bool ccPointPropertiesDlg::linkWith(ccGLWindow* win)
 
 bool ccPointPropertiesDlg::start()
 {
-    activatePointPropertiesDisplay();
+	activatePointPropertiesDisplay();
 
-    return ccPointPickingGenericInterface::start();
+	return ccPointPickingGenericInterface::start();
 }
 
 void ccPointPropertiesDlg::stop(bool state)
@@ -129,12 +129,12 @@ void ccPointPropertiesDlg::stop(bool state)
 	if (m_associatedWin)
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
 
-    ccPointPickingGenericInterface::stop(state);
+	ccPointPickingGenericInterface::stop(state);
 }
 
 void ccPointPropertiesDlg::onClose()
 {
-    stop(false);
+	stop(false);
 }
 
 void ccPointPropertiesDlg::activatePointPropertiesDisplay()
@@ -142,10 +142,10 @@ void ccPointPropertiesDlg::activatePointPropertiesDisplay()
 	if (m_associatedWin)
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
 
-    m_pickingMode = POINT_INFO;
-    pointPropertiesButton->setDown(true);
-    pointPointDistanceButton->setDown(false);
-    pointsAngleButton->setDown(false);
+	m_pickingMode = POINT_INFO;
+	pointPropertiesButton->setDown(true);
+	pointPointDistanceButton->setDown(false);
+	pointsAngleButton->setDown(false);
 	rectZoneToolButton->setDown(false);
 	m_label->setVisible(true);
 	m_rect2DLabel->setVisible(false);
@@ -153,10 +153,10 @@ void ccPointPropertiesDlg::activatePointPropertiesDisplay()
 
 void ccPointPropertiesDlg::activateDistanceDisplay()
 {
-    m_pickingMode = POINT_POINT_DISTANCE;
-    pointPropertiesButton->setDown(false);
-    pointPointDistanceButton->setDown(true);
-    pointsAngleButton->setDown(false);
+	m_pickingMode = POINT_POINT_DISTANCE;
+	pointPropertiesButton->setDown(false);
+	pointPointDistanceButton->setDown(true);
+	pointsAngleButton->setDown(false);
 	rectZoneToolButton->setDown(false);
 	m_label->setVisible(true);
 	m_rect2DLabel->setVisible(false);
@@ -170,10 +170,10 @@ void ccPointPropertiesDlg::activateDistanceDisplay()
 
 void ccPointPropertiesDlg::activateAngleDisplay()
 {
-    m_pickingMode = POINTS_ANGLE;
-    pointPropertiesButton->setDown(false);
-    pointPointDistanceButton->setDown(false);
-    pointsAngleButton->setDown(true);
+	m_pickingMode = POINTS_ANGLE;
+	pointPropertiesButton->setDown(false);
+	pointPointDistanceButton->setDown(false);
+	pointsAngleButton->setDown(true);
 	rectZoneToolButton->setDown(false);
 	m_label->setVisible(true);
 	m_rect2DLabel->setVisible(false);
@@ -187,10 +187,10 @@ void ccPointPropertiesDlg::activateAngleDisplay()
 
 void ccPointPropertiesDlg::activate2DZonePicking()
 {
-    m_pickingMode = RECT_ZONE;
-    pointPropertiesButton->setDown(false);
-    pointPointDistanceButton->setDown(false);
-    pointsAngleButton->setDown(false);
+	m_pickingMode = RECT_ZONE;
+	pointPropertiesButton->setDown(false);
+	pointPointDistanceButton->setDown(false);
+	pointsAngleButton->setDown(false);
 	rectZoneToolButton->setDown(true);
 	m_label->setVisible(false);
 	//m_rect2DLabel->setVisible(false);
@@ -209,8 +209,8 @@ void ccPointPropertiesDlg::initializeState()
 	m_rect2DLabel->setVisible(false);	//=invalid
 	m_rect2DLabel->setSelected(true);	//=closed
 
-    if (m_associatedWin)
-        m_associatedWin->redraw();
+	if (m_associatedWin)
+		m_associatedWin->redraw();
 }
 
 void ccPointPropertiesDlg::exportCurrentLabel()
@@ -256,26 +256,26 @@ void ccPointPropertiesDlg::exportCurrentLabel()
 
 void ccPointPropertiesDlg::processPickedPoint(ccPointCloud* cloud, unsigned pointIndex, int x, int y)
 {
-    assert(cloud);
+	assert(cloud);
 	assert(m_label);
 	assert(m_associatedWin);
 
 	switch(m_pickingMode)
-    {
+	{
 	case POINT_INFO:
 		m_label->clear();
-        break;
-    case POINT_POINT_DISTANCE:
-        if (m_label->size() >= 2)
+		break;
+	case POINT_POINT_DISTANCE:
+		if (m_label->size() >= 2)
 			m_label->clear();
-        break;
-    case POINTS_ANGLE:
-        if (m_label->size() >= 3)
+		break;
+	case POINTS_ANGLE:
+		if (m_label->size() >= 3)
 			m_label->clear();
-        break;
+		break;
 	case RECT_ZONE:
 		return; //we don't use this slot for 2D mode
-    }
+	}
 
 	m_label->addPoint(cloud,pointIndex);
 	m_label->setVisible(true);
@@ -317,8 +317,8 @@ void ccPointPropertiesDlg::processClickedPoint(int x, int y)
 						(float)x,
 						(float)y};
 		m_rect2DLabel->setRoi(roi);
-		m_rect2DLabel->setVisible(true);  //=valid
-		m_rect2DLabel->setSelected(true); //=closed
+		m_rect2DLabel->setVisible(true);	//=valid
+		m_rect2DLabel->setSelected(true);	//=closed
 	}
 
 	if (m_associatedWin)

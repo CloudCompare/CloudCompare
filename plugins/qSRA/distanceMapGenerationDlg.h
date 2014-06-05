@@ -46,15 +46,15 @@ class ccMapWindow;
 //! Dialog for generating a distance map (surface of revolution)
 class DistanceMapGenerationDlg : public QDialog, public Ui::DistanceMapGenerationDlg
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
 	//! Default constructor
-    DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalarField* sf, ccPolyline* polyline, ccMainAppInterface* app=0);
+	DistanceMapGenerationDlg(ccPointCloud* cloud, ccScalarField* sf, ccPolyline* polyline, ccMainAppInterface* app=0);
 
 	//! Default destructor
-    virtual ~DistanceMapGenerationDlg();
+	virtual ~DistanceMapGenerationDlg();
 
 	//! Angular units
 	enum ANGULAR_UNIT { ANG_DEG, ANG_RAD, ANG_GRAD };
@@ -193,7 +193,7 @@ protected:
 	QColor m_gridColor;
 
 	//! Symbols color
-    QColor m_symbolColor;
+	QColor m_symbolColor;
 
 };
 

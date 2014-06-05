@@ -35,38 +35,38 @@ ccCameraParamEditDlg::ccCameraParamEditDlg(QWidget* parent)
 	: ccOverlayDialog(parent)
 	, Ui::CameraParamDlg()
 {
-    setupUi(this);
+	setupUi(this);
 
-    connect(phiSlider,				SIGNAL(valueChanged(int)),		this,   SLOT(iPhiValueChanged(int)));
-    connect(thetaSlider,			SIGNAL(valueChanged(int)),		this,   SLOT(iThetaValueChanged(int)));
-    connect(psiSlider,				SIGNAL(valueChanged(int)),		this,   SLOT(iPsiValueChanged(int)));
-    connect(phiSpinBox,				SIGNAL(valueChanged(double)),	this,   SLOT(dPhiValueChanged(double)));
-    connect(thetaSpinBox,			SIGNAL(valueChanged(double)),	this,   SLOT(dThetaValueChanged(double)));
-    connect(psiSpinBox,				SIGNAL(valueChanged(double)),	this,   SLOT(dPsiValueChanged(double)));
+	connect(phiSlider,				SIGNAL(valueChanged(int)),		this,	SLOT(iPhiValueChanged(int)));
+	connect(thetaSlider,			SIGNAL(valueChanged(int)),		this,	SLOT(iThetaValueChanged(int)));
+	connect(psiSlider,				SIGNAL(valueChanged(int)),		this,	SLOT(iPsiValueChanged(int)));
+	connect(phiSpinBox,				SIGNAL(valueChanged(double)),	this,	SLOT(dPhiValueChanged(double)));
+	connect(thetaSpinBox,			SIGNAL(valueChanged(double)),	this,	SLOT(dThetaValueChanged(double)));
+	connect(psiSpinBox,				SIGNAL(valueChanged(double)),	this,	SLOT(dPsiValueChanged(double)));
 
 	//rotation center
-    connect(rcxDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(pivotChanged()));
-    connect(rcyDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(pivotChanged()));
-    connect(rczDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(pivotChanged()));
+	connect(rcxDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(pivotChanged()));
+	connect(rcyDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(pivotChanged()));
+	connect(rczDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(pivotChanged()));
 
 	//camera center
-    connect(exDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(cameraCenterChanged()));
-    connect(eyDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(cameraCenterChanged()));
-    connect(ezDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,   SLOT(cameraCenterChanged()));
+	connect(exDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(cameraCenterChanged()));
+	connect(eyDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(cameraCenterChanged()));
+	connect(ezDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(cameraCenterChanged()));
 
-    connect(fovDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(fovChanged(double)));
+	connect(fovDoubleSpinBox,		SIGNAL(valueChanged(double)),	this,	SLOT(fovChanged(double)));
 
-    connect(viewUpToolButton,		SIGNAL(clicked()),				this,	SLOT(setTopView()));
-    connect(viewDownToolButton,		SIGNAL(clicked()),				this,	SLOT(setBottomView()));
-    connect(viewFrontToolButton,	SIGNAL(clicked()),				this,	SLOT(setFrontView()));
-    connect(viewBackToolButton,		SIGNAL(clicked()),				this,	SLOT(setBackView()));
-    connect(viewLeftToolButton,		SIGNAL(clicked()),				this,	SLOT(setLeftView()));
-    connect(viewRightToolButton,	SIGNAL(clicked()),				this,	SLOT(setRightView()));
-    connect(viewIso1ToolButton,		SIGNAL(clicked()),				this,	SLOT(setIso1View()));
-    connect(viewIso2ToolButton,		SIGNAL(clicked()),				this,	SLOT(setIso2View()));
+	connect(viewUpToolButton,		SIGNAL(clicked()),				this,	SLOT(setTopView()));
+	connect(viewDownToolButton,		SIGNAL(clicked()),				this,	SLOT(setBottomView()));
+	connect(viewFrontToolButton,	SIGNAL(clicked()),				this,	SLOT(setFrontView()));
+	connect(viewBackToolButton,		SIGNAL(clicked()),				this,	SLOT(setBackView()));
+	connect(viewLeftToolButton,		SIGNAL(clicked()),				this,	SLOT(setLeftView()));
+	connect(viewRightToolButton,	SIGNAL(clicked()),				this,	SLOT(setRightView()));
+	connect(viewIso1ToolButton,		SIGNAL(clicked()),				this,	SLOT(setIso1View()));
+	connect(viewIso2ToolButton,		SIGNAL(clicked()),				this,	SLOT(setIso2View()));
 
-    connect(pushMatrixToolButton,	SIGNAL(clicked()),				this,	SLOT(pushCurrentMatrix()));
-    connect(revertMatrixToolButton,	SIGNAL(clicked()),				this,	SLOT(revertToPushedMatrix()));
+	connect(pushMatrixToolButton,	SIGNAL(clicked()),				this,	SLOT(pushCurrentMatrix()));
+	connect(revertMatrixToolButton,	SIGNAL(clicked()),				this,	SLOT(revertToPushedMatrix()));
 
 	connect(pivotPickingToolButton,	SIGNAL(clicked()),				this,	SLOT(pickPointAsPivot()));
 }
@@ -77,69 +77,69 @@ ccCameraParamEditDlg::~ccCameraParamEditDlg()
 
 void ccCameraParamEditDlg::makeFrameless()
 {
-    setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);
+	setWindowFlags(Qt::FramelessWindowHint |Qt::Tool);
 }
 
 void ccCameraParamEditDlg::iThetaValueChanged(int val)
 {
-    thetaSpinBox->blockSignals(true);
-    thetaSpinBox->setValue((double)val/10);
-    thetaSpinBox->blockSignals(false);
+	thetaSpinBox->blockSignals(true);
+	thetaSpinBox->setValue((double)val/10);
+	thetaSpinBox->blockSignals(false);
 
-    reflectParamChange();
+	reflectParamChange();
 }
 
 void ccCameraParamEditDlg::iPsiValueChanged(int val)
 {
-    psiSpinBox->blockSignals(true);
-    psiSpinBox->setValue((double)val/10);
-    psiSpinBox->blockSignals(false);
+	psiSpinBox->blockSignals(true);
+	psiSpinBox->setValue((double)val/10);
+	psiSpinBox->blockSignals(false);
 
-    reflectParamChange();
+	reflectParamChange();
 }
 
 void ccCameraParamEditDlg::iPhiValueChanged(int val)
 {
-    phiSpinBox->blockSignals(true);
-    phiSpinBox->setValue((double)val/10);
-    phiSpinBox->blockSignals(false);
+	phiSpinBox->blockSignals(true);
+	phiSpinBox->setValue((double)val/10);
+	phiSpinBox->blockSignals(false);
 
-    reflectParamChange();
+	reflectParamChange();
 }
 
 void ccCameraParamEditDlg::dThetaValueChanged(double val)
 {
-    thetaSlider->blockSignals(true);
-    thetaSlider->setValue((int)(val*10.0));
-    thetaSlider->blockSignals(false);
-    reflectParamChange();
+	thetaSlider->blockSignals(true);
+	thetaSlider->setValue((int)(val*10.0));
+	thetaSlider->blockSignals(false);
+	reflectParamChange();
 }
 
 void ccCameraParamEditDlg::dPsiValueChanged(double val)
 {
-    psiSlider->blockSignals(true);
-    psiSlider->setValue((int)(val*10.0));
-    psiSlider->blockSignals(false);
-    reflectParamChange();
+	psiSlider->blockSignals(true);
+	psiSlider->setValue((int)(val*10.0));
+	psiSlider->blockSignals(false);
+	reflectParamChange();
 }
 
 void ccCameraParamEditDlg::dPhiValueChanged(double val)
 {
-    phiSlider->blockSignals(true);
-    phiSlider->setValue((int)(val*10.0));
-    phiSlider->blockSignals(false);
-    reflectParamChange();
+	phiSlider->blockSignals(true);
+	phiSlider->setValue((int)(val*10.0));
+	phiSlider->blockSignals(false);
+	reflectParamChange();
 }
 
 void ccCameraParamEditDlg::cameraCenterChanged()
 {
-    if (!m_associatedWin)
-        return;
+	if (!m_associatedWin)
+		return;
 
 	m_associatedWin->blockSignals(true);
-    m_associatedWin->setCameraPos( CCVector3d(	exDoubleSpinBox->value(),
-												eyDoubleSpinBox->value(),
-												ezDoubleSpinBox->value() ));
+	m_associatedWin->setCameraPos( CCVector3d(	exDoubleSpinBox->value(),
+		eyDoubleSpinBox->value(),
+		ezDoubleSpinBox->value() ));
 	m_associatedWin->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -147,13 +147,13 @@ void ccCameraParamEditDlg::cameraCenterChanged()
 
 void ccCameraParamEditDlg::pivotChanged()
 {
-    if (!m_associatedWin)
-        return;
+	if (!m_associatedWin)
+		return;
 
 	m_associatedWin->blockSignals(true);
-    m_associatedWin->setPivotPoint(CCVector3d(	rcxDoubleSpinBox->value(),
-												rcyDoubleSpinBox->value(),
-												rczDoubleSpinBox->value() ));
+	m_associatedWin->setPivotPoint(CCVector3d(	rcxDoubleSpinBox->value(),
+		rcyDoubleSpinBox->value(),
+		rczDoubleSpinBox->value() ));
 	m_associatedWin->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -161,39 +161,39 @@ void ccCameraParamEditDlg::pivotChanged()
 
 void ccCameraParamEditDlg::fovChanged(double value)
 {
-    if (!m_associatedWin)
-        return;
+	if (!m_associatedWin)
+		return;
 
-    m_associatedWin->setFov(static_cast<float>(value));
-    m_associatedWin->redraw();
+	m_associatedWin->setFov(static_cast<float>(value));
+	m_associatedWin->redraw();
 }
 
 void ccCameraParamEditDlg::pushCurrentMatrix()
 {
-    if (!m_associatedWin)
-        return;
+	if (!m_associatedWin)
+		return;
 
-    ccGLMatrixd mat = m_associatedWin->getBaseViewMat();
+	ccGLMatrixd mat = m_associatedWin->getBaseViewMat();
 
-    std::pair<PushedMatricesMapType::iterator,bool> ret;
-    ret = pushedMatrices.insert(PushedMatricesMapElement(m_associatedWin,mat));
-    if (ret.second == false) //already exists
-        ret.first->second = mat;
+	std::pair<PushedMatricesMapType::iterator,bool> ret;
+	ret = pushedMatrices.insert(PushedMatricesMapElement(m_associatedWin,mat));
+	if (ret.second == false) //already exists
+		ret.first->second = mat;
 
-    buttonsFrame->setEnabled(true);
+	buttonsFrame->setEnabled(true);
 }
 
 void ccCameraParamEditDlg::revertToPushedMatrix()
 {
-    PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
-    if (it == pushedMatrices.end())
-        return;
+	PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
+	if (it == pushedMatrices.end())
+		return;
 
-    initWithMatrix(it->second);
-    m_associatedWin->blockSignals(true);
-    m_associatedWin->setBaseViewMat(it->second);
-    m_associatedWin->blockSignals(false);
-    m_associatedWin->redraw();
+	initWithMatrix(it->second);
+	m_associatedWin->blockSignals(true);
+	m_associatedWin->setBaseViewMat(it->second);
+	m_associatedWin->blockSignals(false);
+	m_associatedWin->redraw();
 }
 
 void ccCameraParamEditDlg::pickPointAsPivot()
@@ -232,58 +232,58 @@ void ccCameraParamEditDlg::processPickedPoint(int cloudUniqueID, unsigned pointI
 
 void ccCameraParamEditDlg::setView(CC_VIEW_ORIENTATION orientation)
 {
-    if (!m_associatedWin)
-        return;
+	if (!m_associatedWin)
+		return;
 
-    PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
+	PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
 
-    m_associatedWin->makeCurrent();
-    ccGLMatrixd mat = ccGLUtils::GenerateViewMat(orientation) * (it->second);
-    initWithMatrix(mat);
-    m_associatedWin->blockSignals(true);
-    m_associatedWin->setBaseViewMat(mat);
-    m_associatedWin->blockSignals(false);
-    m_associatedWin->redraw();
+	m_associatedWin->makeCurrent();
+	ccGLMatrixd mat = ccGLUtils::GenerateViewMat(orientation) * (it->second);
+	initWithMatrix(mat);
+	m_associatedWin->blockSignals(true);
+	m_associatedWin->setBaseViewMat(mat);
+	m_associatedWin->blockSignals(false);
+	m_associatedWin->redraw();
 }
 
 void ccCameraParamEditDlg::setTopView()
 {
-    setView(CC_TOP_VIEW);
+	setView(CC_TOP_VIEW);
 }
 
 void ccCameraParamEditDlg::setBottomView()
 {
-    setView(CC_BOTTOM_VIEW);
+	setView(CC_BOTTOM_VIEW);
 }
 
 void ccCameraParamEditDlg::setFrontView()
 {
-    setView(CC_FRONT_VIEW);
+	setView(CC_FRONT_VIEW);
 }
 
 void ccCameraParamEditDlg::setBackView()
 {
-    setView(CC_BACK_VIEW);
+	setView(CC_BACK_VIEW);
 }
 
 void ccCameraParamEditDlg::setLeftView()
 {
-    setView(CC_LEFT_VIEW);
+	setView(CC_LEFT_VIEW);
 }
 
 void ccCameraParamEditDlg::setRightView()
 {
-    setView(CC_RIGHT_VIEW);
+	setView(CC_RIGHT_VIEW);
 }
 
 void ccCameraParamEditDlg::setIso1View()
 {
-    setView(CC_ISO_VIEW_1);
+	setView(CC_ISO_VIEW_1);
 }
 
 void ccCameraParamEditDlg::setIso2View()
 {
-    setView(CC_ISO_VIEW_2);
+	setView(CC_ISO_VIEW_2);
 }
 
 bool ccCameraParamEditDlg::start()
@@ -297,8 +297,8 @@ bool ccCameraParamEditDlg::start()
 
 void ccCameraParamEditDlg::linkWith(QMdiSubWindow* qWin)
 {
-    //corresponding ccGLWindow
-    ccGLWindow* associatedWin = (qWin ? static_cast<ccGLWindow*>(qWin->widget()) : 0);
+	//corresponding ccGLWindow
+	ccGLWindow* associatedWin = (qWin ? static_cast<ccGLWindow*>(qWin->widget()) : 0);
 
 	linkWith(associatedWin);
 }
@@ -315,37 +315,37 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 		this->disconnect(oldWin);
 	}
 
-    if (m_associatedWin)
-    {
-        initWithMatrix(m_associatedWin->getBaseViewMat());
-        connect(m_associatedWin,	SIGNAL(baseViewMatChanged(const ccGLMatrixdd&)),	this,	SLOT(initWithMatrix(const ccGLMatrixd&)));
-        connect(m_associatedWin,	SIGNAL(cameraPosChanged(const CCVector3d&)),		this,	SLOT(updateCameraCenter(const CCVector3d&)));
-        connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3d&)),		this,	SLOT(updatePivotPoint(const CCVector3d&)));
-        connect(m_associatedWin,	SIGNAL(perspectiveStateChanged()),					this,	SLOT(updateViewMode()));
-        connect(m_associatedWin,	SIGNAL(destroyed(QObject*)),						this,	SLOT(hide()));
+	if (m_associatedWin)
+	{
+		initWithMatrix(m_associatedWin->getBaseViewMat());
+		connect(m_associatedWin,	SIGNAL(baseViewMatChanged(const ccGLMatrixdd&)),	this,	SLOT(initWithMatrix(const ccGLMatrixd&)));
+		connect(m_associatedWin,	SIGNAL(cameraPosChanged(const CCVector3d&)),		this,	SLOT(updateCameraCenter(const CCVector3d&)));
+		connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3d&)),		this,	SLOT(updatePivotPoint(const CCVector3d&)));
+		connect(m_associatedWin,	SIGNAL(perspectiveStateChanged()),					this,	SLOT(updateViewMode()));
+		connect(m_associatedWin,	SIGNAL(destroyed(QObject*)),						this,	SLOT(hide()));
 
-        PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
-        buttonsFrame->setEnabled(it != pushedMatrices.end());
-    }
-    else
-    {
-        hide();
-        buttonsFrame->setEnabled(false);
-    }
+		PushedMatricesMapType::iterator it = pushedMatrices.find(m_associatedWin);
+		buttonsFrame->setEnabled(it != pushedMatrices.end());
+	}
+	else
+	{
+		hide();
+		buttonsFrame->setEnabled(false);
+	}
 
 	return true;
 }
 
 void ccCameraParamEditDlg::reflectParamChange()
 {
-    if (!m_associatedWin)
-        return;
+	if (!m_associatedWin)
+		return;
 
-    ccGLMatrixd mat = getMatrix();
-    m_associatedWin->blockSignals(true);
-    m_associatedWin->setBaseViewMat(mat);
-    m_associatedWin->blockSignals(false);
-    m_associatedWin->redraw();
+	ccGLMatrixd mat = getMatrix();
+	m_associatedWin->blockSignals(true);
+	m_associatedWin->setBaseViewMat(mat);
+	m_associatedWin->blockSignals(false);
+	m_associatedWin->redraw();
 }
 
 void ccCameraParamEditDlg::updateViewMode()
@@ -368,17 +368,17 @@ void ccCameraParamEditDlg::updateViewMode()
 
 void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 {
-    double phi=0, theta=0, psi=0;
-    CCVector3d trans;
-    mat.getParameters(phi,theta,psi,trans);
+	double phi=0, theta=0, psi=0;
+	CCVector3d trans;
+	mat.getParameters(phi,theta,psi,trans);
 
-    //to prevent retro-action!
-    ccGLWindow* win = m_associatedWin;
-    m_associatedWin = 0;
+	//to prevent retro-action!
+	ccGLWindow* win = m_associatedWin;
+	m_associatedWin = 0;
 
-    phiSpinBox->setValue(CC_RAD_TO_DEG*phi);
-    psiSpinBox->setValue(CC_RAD_TO_DEG*psi);
-    thetaSpinBox->setValue(CC_RAD_TO_DEG*theta);
+	phiSpinBox->setValue(CC_RAD_TO_DEG*phi);
+	psiSpinBox->setValue(CC_RAD_TO_DEG*psi);
+	thetaSpinBox->setValue(CC_RAD_TO_DEG*theta);
 
 	m_associatedWin = win;
 
@@ -394,14 +394,14 @@ void ccCameraParamEditDlg::updateCameraCenter(const CCVector3d& P)
 	if (!m_associatedWin)
 		return;
 
-    //to prevent retro-action!
-    ccGLWindow* win = m_associatedWin;
-    m_associatedWin = 0;
+	//to prevent retro-action!
+	ccGLWindow* win = m_associatedWin;
+	m_associatedWin = 0;
 
 	exDoubleSpinBox->setValue(P.x);
 	eyDoubleSpinBox->setValue(P.y);
 	ezDoubleSpinBox->setValue(P.z);
-	
+
 	fovDoubleSpinBox->setValue(win->getViewportParameters().fov);
 
 	m_associatedWin = win;
@@ -412,14 +412,14 @@ void ccCameraParamEditDlg::updatePivotPoint(const CCVector3d& P)
 	if (!m_associatedWin)
 		return;
 
-    //to prevent retro-action!
-    ccGLWindow* win = m_associatedWin;
-    m_associatedWin = 0;
+	//to prevent retro-action!
+	ccGLWindow* win = m_associatedWin;
+	m_associatedWin = 0;
 
 	rcxDoubleSpinBox->setValue(P.x);
 	rcyDoubleSpinBox->setValue(P.y);
 	rczDoubleSpinBox->setValue(P.z);
-	
+
 	fovDoubleSpinBox->setValue(win->getViewportParameters().fov);
 
 	m_associatedWin = win;
@@ -427,15 +427,15 @@ void ccCameraParamEditDlg::updatePivotPoint(const CCVector3d& P)
 
 ccGLMatrixd ccCameraParamEditDlg::getMatrix()
 {
-    double phi = 0, theta = 0, psi = 0;
+	double phi = 0, theta = 0, psi = 0;
 
-    phi     = CC_DEG_TO_RAD * phiSpinBox->value();
-    psi     = CC_DEG_TO_RAD * psiSpinBox->value();
-    theta   = CC_DEG_TO_RAD * thetaSpinBox->value();
+	phi		= CC_DEG_TO_RAD * phiSpinBox->value();
+	psi		= CC_DEG_TO_RAD * psiSpinBox->value();
+	theta	= CC_DEG_TO_RAD * thetaSpinBox->value();
 
-    ccGLMatrixd mat;
-    CCVector3d T(0,0,0);
-    mat.initFromParameters(phi,theta,psi,T);
+	ccGLMatrixd mat;
+	CCVector3d T(0,0,0);
+	mat.initFromParameters(phi,theta,psi,T);
 
-    return mat;
+	return mat;
 }

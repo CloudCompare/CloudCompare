@@ -30,27 +30,27 @@
 ccDrawableObject::ccDrawableObject()
 	: m_currentDisplay(0)
 {
-    setVisible(true);
-    setSelected(false);
-    showColors(false);
-    showNormals(false);
-    showSF(false);
+	setVisible(true);
+	setSelected(false);
+	showColors(false);
+	showNormals(false);
+	showSF(false);
 	lockVisibility(false);
 	showNameIn3D(false);
 
-    enableTempColor(false);
-    setTempColor(ccColor::white,false);
-    resetGLTransformation();
+	enableTempColor(false);
+	setTempColor(ccColor::white,false);
+	resetGLTransformation();
 }
 
 bool ccDrawableObject::isVisible() const
 {
-    return m_visible;
+	return m_visible;
 }
 
 void ccDrawableObject::setVisible(bool state)
 {
-    m_visible = state;
+	m_visible = state;
 }
 
 void ccDrawableObject::toggleVisibility()
@@ -60,27 +60,27 @@ void ccDrawableObject::toggleVisibility()
 
 bool ccDrawableObject::isVisiblityLocked() const
 {
-    return m_lockedVisibility;
+	return m_lockedVisibility;
 }
 
 void ccDrawableObject::lockVisibility(bool state)
 {
-    m_lockedVisibility = state;
+	m_lockedVisibility = state;
 }
 
 bool ccDrawableObject::isSelected() const
 {
-    return m_selected;
+	return m_selected;
 }
 
 void ccDrawableObject::setSelected(bool state)
 {
-    m_selected = state;
+	m_selected = state;
 }
 
 void ccDrawableObject::drawBB(const colorType col[])
 {
-    getBB(true,true,m_currentDisplay).draw(col);
+	getBB(true,true,m_currentDisplay).draw(col);
 }
 
 ccBBox ccDrawableObject::getFitBB(ccGLMatrix& trans)
@@ -88,78 +88,77 @@ ccBBox ccDrawableObject::getFitBB(ccGLMatrix& trans)
 	//Default behavior: returns axis aligned bounding box!
 	trans.toIdentity();
 	return getBB(true,true,m_currentDisplay);
-
 }
 
 void ccDrawableObject::redrawDisplay()
 {
-    if (m_currentDisplay)
-        m_currentDisplay->redraw();
+	if (m_currentDisplay)
+		m_currentDisplay->redraw();
 }
 
 void ccDrawableObject::refreshDisplay()
 {
-    if (m_currentDisplay)
-        m_currentDisplay->refresh();
+	if (m_currentDisplay)
+		m_currentDisplay->refresh();
 }
 
 void ccDrawableObject::prepareDisplayForRefresh()
 {
-    if (m_currentDisplay)
-        m_currentDisplay->toBeRefreshed();
+	if (m_currentDisplay)
+		m_currentDisplay->toBeRefreshed();
 }
 
 void ccDrawableObject::setDisplay(ccGenericGLDisplay* win)
 {
-    if (win && m_currentDisplay!=win)
-        win->invalidateViewport();
+	if (win && m_currentDisplay!=win)
+		win->invalidateViewport();
 
-    m_currentDisplay=win;
+	m_currentDisplay=win;
 }
 
 void ccDrawableObject::removeFromDisplay(const ccGenericGLDisplay* win)
 {
-    if (m_currentDisplay == win)
-        setDisplay(0);
+	if (m_currentDisplay == win)
+		setDisplay(0);
 }
 
 ccGenericGLDisplay* ccDrawableObject::getDisplay() const
 {
-    return m_currentDisplay;
+	return m_currentDisplay;
 }
 
 const ccGLMatrix& ccDrawableObject::getGLTransformation() const
 {
-    return m_glTrans;
+	return m_glTrans;
 }
 
 void ccDrawableObject::setGLTransformation(const ccGLMatrix& trans)
 {
-    m_glTrans = trans;
-    enableGLTransformation(true);
+	m_glTrans = trans;
+	enableGLTransformation(true);
 }
 
 void ccDrawableObject::rotateGL(const ccGLMatrix& rotMat)
 {
-    m_glTrans = rotMat * m_glTrans;
-    enableGLTransformation(true);
+	m_glTrans = rotMat * m_glTrans;
+	enableGLTransformation(true);
 }
 
 void ccDrawableObject::translateGL(const CCVector3& trans)
 {
-    m_glTrans += trans;
-    enableGLTransformation(true);
+	m_glTrans += trans;
+	enableGLTransformation(true);
 }
 
 void ccDrawableObject::resetGLTransformation()
 {
-    enableGLTransformation(false);
-    m_glTrans.toIdentity();
+	enableGLTransformation(false);
+	m_glTrans.toIdentity();
 }
 
 void ccDrawableObject::enableGLTransformation(bool state)
 {
-    m_glTransEnabled = state;
+	m_glTransEnabled = state;
 }
 
 bool ccDrawableObject::isGLTransEnabled() const
@@ -169,7 +168,7 @@ bool ccDrawableObject::isGLTransEnabled() const
 
 void ccDrawableObject::showColors(bool state)
 {
-    m_colorsDisplayed = state;
+	m_colorsDisplayed = state;
 }
 
 void ccDrawableObject::toggleColors()
@@ -179,17 +178,17 @@ void ccDrawableObject::toggleColors()
 
 bool ccDrawableObject::colorsShown() const
 {
-    return m_colorsDisplayed;
+	return m_colorsDisplayed;
 }
 
 bool ccDrawableObject::hasColors() const
 {
-    return false;
+	return false;
 }
 
 void ccDrawableObject::showNormals(bool state)
 {
-    m_normalsDisplayed = state;
+	m_normalsDisplayed = state;
 }
 
 void ccDrawableObject::toggleNormals()
@@ -199,27 +198,27 @@ void ccDrawableObject::toggleNormals()
 
 bool ccDrawableObject::normalsShown() const
 {
-    return m_normalsDisplayed;
+	return m_normalsDisplayed;
 }
 
 bool ccDrawableObject::hasNormals() const
 {
-    return false;
+	return false;
 }
 
 bool ccDrawableObject::hasScalarFields() const
 {
-    return false;
+	return false;
 }
 
 bool ccDrawableObject::hasDisplayedScalarField() const
 {
-    return false;
+	return false;
 }
 
 void ccDrawableObject::showSF(bool state)
 {
-    m_sfDisplayed = state;
+	m_sfDisplayed = state;
 }
 
 void ccDrawableObject::toggleSF()
@@ -229,35 +228,35 @@ void ccDrawableObject::toggleSF()
 
 bool ccDrawableObject::sfShown() const
 {
-    return m_sfDisplayed;
+	return m_sfDisplayed;
 }
 
 void ccDrawableObject::setTempColor(const colorType* col, bool autoActivate/*=true*/)
 {
-    memcpy(m_tempColor,col,3*sizeof(colorType));
+	memcpy(m_tempColor,col,3*sizeof(colorType));
 
-    if (autoActivate)
-        enableTempColor(true);
+	if (autoActivate)
+		enableTempColor(true);
 }
 
 void ccDrawableObject::enableTempColor(bool state)
 {
-    m_colorIsOverriden = state;
+	m_colorIsOverriden = state;
 }
 
 bool ccDrawableObject::isColorOverriden() const
 {
-    return m_colorIsOverriden;
+	return m_colorIsOverriden;
 }
 
 const colorType* ccDrawableObject::getTempColor() const
 {
-    return m_tempColor;
+	return m_tempColor;
 }
 
 void ccDrawableObject::getDrawingParameters(glDrawParams& params) const
 {
- 	//color override
+	//color override
 	if (isColorOverriden())
 	{
 		params.showColors=true;
@@ -266,10 +265,10 @@ void ccDrawableObject::getDrawingParameters(glDrawParams& params) const
 	}
 	else
 	{
-        params.showNorms = hasNormals() && normalsShown();
-        params.showSF = hasDisplayedScalarField() && sfShown();
-        //colors are not displayed if scalar field is displayed
-        params.showColors = !params.showSF && hasColors() && colorsShown();
+		params.showNorms = hasNormals() && normalsShown();
+		params.showSF = hasDisplayedScalarField() && sfShown();
+		//colors are not displayed if scalar field is displayed
+		params.showColors = !params.showSF && hasColors() && colorsShown();
 	}
 }
 

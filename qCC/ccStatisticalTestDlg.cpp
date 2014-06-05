@@ -17,57 +17,57 @@
 
 #include "ccStatisticalTestDlg.h"
 
-ccStatisticalTestDlg::ccStatisticalTestDlg(QString p1Label,
-                                           QString p2Label,
-                                           QString p3Label/*=QString()*/,
-                                           QString windowTitle/*=QString()*/,
-                                           QWidget* parent/*=0*/)
-	: QDialog(parent)
-	, Ui::StatisticalTestDialog()
+ccStatisticalTestDlg::ccStatisticalTestDlg(	QString p1Label,
+											QString p2Label,
+											QString p3Label/*=QString()*/,
+											QString windowTitle/*=QString()*/,
+											QWidget* parent/*=0*/)
+											: QDialog(parent)
+											, Ui::StatisticalTestDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
-    param1Label->setText(p1Label);
-    param2Label->setText(p2Label);
-    if (!p3Label.isNull())
+	param1Label->setText(p1Label);
+	param2Label->setText(p2Label);
+	if (!p3Label.isNull())
 	{
-        param3Label->setText(p3Label);
+		param3Label->setText(p3Label);
 	}
-    else
-    {
-        param3Label->setVisible(false);
-        param3SpinBox->setVisible(false);
-    }
+	else
+	{
+		param3Label->setVisible(false);
+		param3SpinBox->setVisible(false);
+	}
 
-    neighborsSpinBox->setValue(16);
+	neighborsSpinBox->setValue(16);
 
 	if (!windowTitle.isNull())
-        setWindowTitle(windowTitle);
+		setWindowTitle(windowTitle);
 }
 
 double ccStatisticalTestDlg::getParam1() const
 {
-    return param1SpinBox->value();
+	return param1SpinBox->value();
 }
 
 double ccStatisticalTestDlg::getParam2() const
 {
-    return param2SpinBox->value();
+	return param2SpinBox->value();
 }
 
 double ccStatisticalTestDlg::getParam3() const
 {
-    return param3SpinBox->value();
+	return param3SpinBox->value();
 }
 
 int ccStatisticalTestDlg::getNeighborsNumber() const
 {
-    return neighborsSpinBox->value();
+	return neighborsSpinBox->value();
 }
 
 double ccStatisticalTestDlg::getProba() const
 {
-    return probaSpinBox->value();
+	return probaSpinBox->value();
 }

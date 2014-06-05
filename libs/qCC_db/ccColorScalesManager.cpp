@@ -50,7 +50,7 @@ ccColorScalesManager* ccColorScalesManager::GetUniqueInstance()
 		s_uniqueInstance.instance->fromPersistentSettings();
 	}
 
-    return s_uniqueInstance.instance;
+	return s_uniqueInstance.instance;
 }
 
 void ccColorScalesManager::ReleaseUniqueInstance()

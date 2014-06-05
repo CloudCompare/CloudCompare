@@ -85,7 +85,7 @@ int X3DXIOTNodeHandler::startTransform(const X3DAttributes &attr)
 #ifdef _DEBUG
 	std::cout << "Start Transform" << std::endl;
 #endif
-	
+
 	// Get all the X3D tranformation data
 	SFVec3f translation;
 	SFRotation rotation;
@@ -106,8 +106,8 @@ int X3DXIOTNodeHandler::startTransform(const X3DAttributes &attr)
 	{
 		ccGLMatrix mat;
 		mat.initFromParameters(rotation.angle,
-								CCVector3(rotation.x,rotation.y,rotation.z),
-								CCVector3(translation.x,translation.y,translation.z));
+			CCVector3(rotation.x,rotation.y,rotation.z),
+			CCVector3(translation.x,translation.y,translation.z));
 		m_currentLeaf->setGLTransformation(mat);
 	}
 
@@ -309,8 +309,8 @@ int X3DXIOTNodeHandler::startIndexedFaceSet(const X3DAttributes &attr)
 	}
 
 	//Normals (per vertex)
-//	normIndex = attr.getAttributeIndex(ID::normalPerVertex);
-//	bool perVertexNormals=(normIndex != -1 ? attr.getSFBool(normIndex) : true);
+	//	normIndex = attr.getAttributeIndex(ID::normalPerVertex);
+	//	bool perVertexNormals=(normIndex != -1 ? attr.getSFBool(normIndex) : true);
 	//DGM: in fact we don't care
 
 	assert(m_currentLeaf);
@@ -360,112 +360,112 @@ int X3DXIOTNodeHandler::endIndexedFaceSet()
 
 //int X3DXIOTNodeHandler::startSphere(const X3DAttributes &attr)
 //{
-//  std::cout << "Start Sphere\n";
+//	std::cout << "Start Sphere\n";
 //
-//  int index = attr.getAttributeIndex(ID::radius);
-//  float radius = index == -1 ? 1.0 : attr.getSFFloat(index);
+//	int index = attr.getAttributeIndex(ID::radius);
+//	float radius = index == -1 ? 1.0 : attr.getSFFloat(index);
 //
-//  const string name = createUniqueName(attr, "sphere");
-//  GeomUtils::createSphere(name , radius, 20, 20, true, false);
+//	const string name = createUniqueName(attr, "sphere");
+//	GeomUtils::createSphere(name , radius, 20, 20, true, false);
 //
-//  _currentMesh = MeshManager::getSingleton().getByName(name);
-//  _currentEntity = _sceneManager->createEntity(_shapeName, name);
-//  return CONTINUE;
+//	_currentMesh = MeshManager::getSingleton().getByName(name);
+//	_currentEntity = _sceneManager->createEntity(_shapeName, name);
+//	return CONTINUE;
 //}
 //
 //int X3DXIOTNodeHandler::startBox(const X3DAttributes &attr) {
-//  std::cout << "Start Box\n";
-//  _currentEntity = _sceneManager->createEntity(createUniqueName(attr, "shape"), "cube.mesh");
+//	std::cout << "Start Box\n";
+//	_currentEntity = _sceneManager->createEntity(createUniqueName(attr, "shape"), "cube.mesh");
 //
-//  return CONTINUE;
+//	return CONTINUE;
 //}
 //
 //int X3DXIOTNodeHandler::startMaterial(const X3DAttributes &attr) {
-//  std::cout << "Start Material" << std::endl; 
-//  if (!_currentMaterial.isNull())
-//  {
-//	  Pass* pass = _currentMaterial->getTechnique(0)->getPass(0);
-//	  int index = attr.getAttributeIndex(ID::ambientIntensity);
-//	  float ambientIntensity = (index == -1) ? 0.2f : attr.getSFFloat(index);
-//	  index = attr.getAttributeIndex(ID::transparency);
-//	  float transparency = (index == -1) ? 0.0f : attr.getSFFloat(index);
-//	  
-//	  SFColor diffuseColor;
-//	  index = attr.getAttributeIndex(ID::diffuseColor);
-//	  if (index != -1)
-//	  {
-//		  diffuseColor = attr.getSFColor(index);
-//	  }
-//	  else 
-//	  {
-//		  diffuseColor.r = diffuseColor.g = diffuseColor.b = 0.8;
-//	  }
+//	std::cout << "Start Material" << std::endl; 
+//	if (!_currentMaterial.isNull())
+//	{
+//		Pass* pass = _currentMaterial->getTechnique(0)->getPass(0);
+//		int index = attr.getAttributeIndex(ID::ambientIntensity);
+//		float ambientIntensity = (index == -1) ? 0.2f : attr.getSFFloat(index);
+//		index = attr.getAttributeIndex(ID::transparency);
+//		float transparency = (index == -1) ? 0.0f : attr.getSFFloat(index);
+//		
+//		SFColor diffuseColor;
+//		index = attr.getAttributeIndex(ID::diffuseColor);
+//		if (index != -1)
+//		{
+//			diffuseColor = attr.getSFColor(index);
+//		}
+//		else 
+//		{
+//			diffuseColor.r = diffuseColor.g = diffuseColor.b = 0.8;
+//		}
 //
-//	  SFColor specularColor;
-//	  index = attr.getAttributeIndex(ID::specularColor);
-//	  if (index != -1)
-//	  {
-//		  specularColor = attr.getSFColor(index);
-//	  }
+//		SFColor specularColor;
+//		index = attr.getAttributeIndex(ID::specularColor);
+//		if (index != -1)
+//		{
+//			specularColor = attr.getSFColor(index);
+//		}
 //
-//  	  SFColor emissiveColor;    
-//	  index = attr.getAttributeIndex(ID::emissiveColor);
-//	  if (index != -1)
-//	  {
-//		  emissiveColor = attr.getSFColor(index);
-//	  }
-//	  
-//	  index = attr.getAttributeIndex(ID::shininess);
-//	  float shininess = (index == -1) ? 0.2f : attr.getSFFloat(index);
-//	  shininess = Math::Clamp(shininess * 128.0f, 0.0f, 128.0f);
+//			SFColor emissiveColor;
+//		index = attr.getAttributeIndex(ID::emissiveColor);
+//		if (index != -1)
+//		{
+//			emissiveColor = attr.getSFColor(index);
+//		}
+//		
+//		index = attr.getAttributeIndex(ID::shininess);
+//		float shininess = (index == -1) ? 0.2f : attr.getSFFloat(index);
+//		shininess = Math::Clamp(shininess * 128.0f, 0.0f, 128.0f);
 //
-//	  pass->setAmbient(ambientIntensity * diffuseColor.r,
-//					   ambientIntensity * diffuseColor.g,
-//					   ambientIntensity * diffuseColor.b);
-//	  pass->setDiffuse(diffuseColor.r,
-//					   diffuseColor.g,
-//					   diffuseColor.b,
-//					   1.0f - transparency);
-//	  pass->setSpecular(specularColor.r,
-//					   specularColor.g,
-//					   specularColor.b,
-//					   1.0f - transparency);
-//	  
-//	  pass->setSelfIllumination(emissiveColor.r,
+//	pass->setAmbient(	ambientIntensity * diffuseColor.r,
+//						ambientIntensity * diffuseColor.g,
+//						ambientIntensity * diffuseColor.b);
+//	pass->setDiffuse(	diffuseColor.r,
+//						diffuseColor.g,
+//						diffuseColor.b,
+//						1.0f - transparency);
+//	pass->setSpecular(specularColor.r,
+//						specularColor.g,
+//						specularColor.b,
+//						1.0f - transparency);
+//
+//	pass->setSelfIllumination(emissiveColor.r,
 //								emissiveColor.g,
 //								emissiveColor.b);
 //
-//	  pass->setShininess( shininess );
-//      pass->setLightingEnabled(true);
-//  }
+//	ass->setShininess( shininess );
+//	pass->setLightingEnabled(true);
+//	}
 //
-//  return CONTINUE;
+//	return CONTINUE;
 //}
 //
 
 //int X3DXIOTNodeHandler::startIndexedLineSet(const X3DAttributes &attr) {
-//  
-//  _currentGeometry = new IndexedGeometry(createUniqueName(attr, "indexedLineSet"));
+//	
+//	_currentGeometry = new IndexedGeometry(createUniqueName(attr, "indexedLineSet"));
 //
-//  int index = attr.getAttributeIndex(ID::coordIndex);
-//  if (index != -1)
-//	  _currentGeometry->setCoordIndex(attr.getMFInt32(index));
+//	int index = attr.getAttributeIndex(ID::coordIndex);
+//	if (index != -1)
+//		_currentGeometry->setCoordIndex(attr.getMFInt32(index));
 //
-//  index = attr.getAttributeIndex(ID::colorPerVertex);
-//  _currentGeometry->setColorPerVertex(index != -1 ? attr.getSFBool(index) : true);
+//	index = attr.getAttributeIndex(ID::colorPerVertex);
+//	_currentGeometry->setColorPerVertex(index != -1 ? attr.getSFBool(index) : true);
 //
-//  return CONTINUE;
+//	return CONTINUE;
 //}
 //
 //int X3DXIOTNodeHandler::endIndexedLineSet() {
-//  std::cout << "End IndexedLineSet" << std::endl;
+//	std::cout << "End IndexedLineSet" << std::endl;
 // 
-//  _currentManualObject = _sceneManager->createManualObject(_shapeName);
-//  _currentGeometry->createIndexedLineSet(_currentManualObject);
-//  delete _currentGeometry;
-//  _currentGeometry = NULL;
+//	_currentManualObject = _sceneManager->createManualObject(_shapeName);
+//	_currentGeometry->createIndexedLineSet(_currentManualObject);
+//	delete _currentGeometry;
+//	_currentGeometry = NULL;
 //
-//  return CONTINUE;
+//	return CONTINUE;
 //}
 
 #endif

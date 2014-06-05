@@ -148,15 +148,15 @@ ccGenericPrimitive* ccQuadric::clone() const
 
 ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/*=0*/)
 {
-    //number of points
-    unsigned count = cloud->size();
-    if (count < CC_LOCAL_MODEL_MIN_SIZE[HF])
-    {
-        ccLog::Warning(QString("[ccQuadric::fitTo] Not enough points in input cloud to fit a quadric! (%1 at the very least are required)").arg(CC_LOCAL_MODEL_MIN_SIZE[HF]));
-        return 0;
-    }
+	//number of points
+	unsigned count = cloud->size();
+	if (count < CC_LOCAL_MODEL_MIN_SIZE[HF])
+	{
+		ccLog::Warning(QString("[ccQuadric::fitTo] Not enough points in input cloud to fit a quadric! (%1 at the very least are required)").arg(CC_LOCAL_MODEL_MIN_SIZE[HF]));
+		return 0;
+	}
 
-    //project the points on a 2D plane
+	//project the points on a 2D plane
 	CCVector3 G, X, Y, N;
 	{
 		CCLib::Neighbourhood Yk(cloud);
@@ -187,14 +187,14 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 		return 0;
 	}
 
-    cloud->placeIteratorAtBegining();
-    for (unsigned k=0; k<count; ++k)
-    {
-        //projection into local 2D plane ref.
-        CCVector3 P = *(cloud->getNextPoint()) - G;
-        
+	cloud->placeIteratorAtBegining();
+	for (unsigned k=0; k<count; ++k)
+	{
+		//projection into local 2D plane ref.
+		CCVector3 P = *(cloud->getNextPoint()) - G;
+
 		tempCloud.addPoint(CCVector3(P.dot(X),P.dot(Y),P.dot(N)));
-    }
+	}
 
 	CCLib::Neighbourhood Zk(&tempCloud);
 	{
@@ -212,18 +212,18 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	const PointCoordinateType* eq = Zk.getHeightFunction(hfdims);
 	if (!eq)
 	{
-        ccLog::Warning("[ccQuadric::Fit] Failed to fit a quadric!");
-        return 0;
+		ccLog::Warning("[ccQuadric::Fit] Failed to fit a quadric!");
+		return 0;
 	}
 
-    //we recenter the quadric object
-    ccGLMatrix glMat(X,Y,N,G);
+	//we recenter the quadric object
+	ccGLMatrix glMat(X,Y,N,G);
 
 	ccBBox bb = tempCloud.getBB();
 	CCVector2 minXY(bb.minCorner().x,bb.minCorner().y);
 	CCVector2 maxXY(bb.maxCorner().x,bb.maxCorner().y);
 
-    ccQuadric* quadric = new ccQuadric(minXY, maxXY, eq, hfdims, &glMat);
+	ccQuadric* quadric = new ccQuadric(minXY, maxXY, eq, hfdims, &glMat);
 
 	quadric->setMetaData(QString("Equation"),QVariant(quadric->getEquationString()));
 
@@ -252,7 +252,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 		}
 	}
 	
-    return quadric;
+	return quadric;
 }
 
 QString ccQuadric::getEquationString() const

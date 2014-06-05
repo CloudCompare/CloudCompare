@@ -31,7 +31,7 @@ public:
 	//! Default constructor
 	ccInnerRect2DFinder();
 
-    //! Finds the biggest enclosed rectangle
+	//! Finds the biggest enclosed rectangle
 	ccBox* process(	ccGenericPointCloud* cloud, unsigned char zDim = 2 );
 
 protected:

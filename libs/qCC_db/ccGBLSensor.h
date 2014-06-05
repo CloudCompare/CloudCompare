@@ -18,9 +18,9 @@
 #ifndef CC_GROUND_LIDAR_SENSOR_HEADER
 #define CC_GROUND_LIDAR_SENSOR_HEADER
 
-#include "ccSensor.h"
-
 //Local
+#include "qCC_db.h"
+#include "ccSensor.h"
 #include "ccGLMatrix.h"
 
 //CCLib
@@ -41,12 +41,7 @@
 	clouds. See Daniel Girardeau-Montaut's PhD manuscript for more
 	information on this particular topic (Chapter 2, section 2.3.3).
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccGBLSensor : public ccSensor
-#else
-class ccGBLSensor : public ccSensor
-#endif
 {
 public:
 
@@ -60,14 +55,14 @@ public:
 	//! Default constructor
 	ccGBLSensor(ROTATION_ORDER rotOrder = THETA_PHI);
 
-    //! Copy constructor
-    ccGBLSensor(const ccGBLSensor & sensor);
+	//! Copy constructor
+	ccGBLSensor(const ccGBLSensor & sensor);
 
 	//! Destructor
 	virtual ~ccGBLSensor();
 
-    //inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::GBL_SENSOR; };
+	//inherited from ccHObject
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::GBL_SENSOR; };
 	virtual bool isSerializable() const { return true; }
 
 	//! Sets the lateral angular scanning limits
@@ -199,13 +194,13 @@ public:
 	**/
 	const DepthBuffer& getDepthBuffer() const { return m_depthBuffer; }
 
-    //Inherited from ccHObject
-    virtual ccBBox getMyOwnBB();
-    virtual ccBBox getDisplayBB();
+	//Inherited from ccHObject
+	virtual ccBBox getMyOwnBB();
+	virtual ccBBox getDisplayBB();
 
 protected:
 
-    //Inherited from ccHObject
+	//Inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);

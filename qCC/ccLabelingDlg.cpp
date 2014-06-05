@@ -20,25 +20,25 @@
 #include <DgmOctree.h>
 
 ccLabelingDlg::ccLabelingDlg(QWidget* parent/*=0*/)
-    : QDialog(parent), Ui::LabelingDialog()
+	: QDialog(parent), Ui::LabelingDialog()
 {
-    setupUi(this);
-    octreeLevelSpinBox->setMaximum(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
+	setupUi(this);
+	octreeLevelSpinBox->setMaximum(CCLib::DgmOctree::MAX_OCTREE_LEVEL);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 int ccLabelingDlg::getOctreeLevel()
 {
-    return octreeLevelSpinBox->value();
+	return octreeLevelSpinBox->value();
 }
 
 int ccLabelingDlg::getMinPointsNb()
 {
-    return minPtsSpinBox->value();
+	return minPtsSpinBox->value();
 }
 
 bool ccLabelingDlg::randomColors()
 {
-    return (randomColorsCheckBox->checkState()==Qt::Checked);
+	return (randomColorsCheckBox->checkState()==Qt::Checked);
 }

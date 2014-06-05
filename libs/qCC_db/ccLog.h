@@ -18,6 +18,9 @@
 #ifndef CC_LOG_HEADER
 #define CC_LOG_HEADER
 
+//Local
+#include "qCC_db.h"
+
 //system
 #include <stdio.h>
 #include <string.h>
@@ -29,17 +32,12 @@
 /** This interface is meant to be used as a unique (static) instance.
 	It should be thread safe!
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccLog
-#else
-class ccLog
-#endif
 {
 public:
 
 	//! Destructor
-    virtual ~ccLog() {};
+	virtual ~ccLog() {};
 
 	//! Returns the static and unique instance
 	static ccLog* TheInstance();
@@ -47,55 +45,55 @@ public:
 	//! Registers a unique instance
 	static void RegisterInstance(ccLog* logInstance);
 
-    //! Prints out a formated message in console
-    /** Works just like the 'printf' command.
+	//! Prints out a formated message in console
+	/** Works just like the 'printf' command.
 		\return always return 'true'
-    **/
+	**/
 	static bool Print(const char *format, ...);
 
 	//! QString version of 'Print'
 	static bool Print(const QString& message);
 
-    //! Same as Print, but works only in debug mode
-    /** Works just like the 'printf' command.
+	//! Same as Print, but works only in debug mode
+	/** Works just like the 'printf' command.
 		\return always return 'true'
-    **/
+	**/
 	static bool PrintDebug(const char *format, ...);
 
 	//! QString version of 'PrintDebug'
 	static bool PrintDebug(const QString& message);
 
-    //! Prints out a formated warning message in console
-    /** Works just like the 'printf' command.
+	//! Prints out a formated warning message in console
+	/** Works just like the 'printf' command.
 		\return always return 'false'
-    **/
+	**/
 	static bool Warning(const char *format, ...);
 
 	//! QString version of 'Warning'
 	static bool Warning(const QString& message);
 
-    //! Same as Warning, but works only in debug mode
-    /** Works just like the 'printf' command.
+	//! Same as Warning, but works only in debug mode
+	/** Works just like the 'printf' command.
 		\return always return 'false'
-    **/
+	**/
 	static bool WarningDebug(const char *format, ...);
 
 	//! QString version of 'WarningDebug'
 	static bool WarningDebug(const QString& message);
 
-    //! Display an error dialog with formated message
-    /** Works just like the 'printf' command.
+	//! Display an error dialog with formated message
+	/** Works just like the 'printf' command.
 		\return always return 'false'
-    **/
+	**/
 	static bool Error(const char *format, ...);
 
 	//! QString version of 'Error'
 	static bool Error(const QString& message);
 
-    //! Same as Error, but works only in debug mode
-    /** Works just like the 'printf' command.
+	//! Same as Error, but works only in debug mode
+	/** Works just like the 'printf' command.
 		\return always return 'false'
-    **/
+	**/
 	static bool ErrorDebug(const char *format, ...);
 
 	//! QString version of 'ErrorDebug'
@@ -114,13 +112,13 @@ protected:
 		LOG_ERROR_DEBUG		= 5, /**< Error message - debug only (ErrorDebug) **/
 	};
 
-    //! Generic message display method
-    /** To be implemented by child class.
+	//! Generic message display method
+	/** To be implemented by child class.
 		WARNING: MUST BE THREAD SAFE!
 		\param message message
-        \param level message severity
-    **/
-	void virtual displayMessage(const QString& message, MessageLevel level)=0;
+		\param level message severity
+	**/
+	void virtual displayMessage(const QString& message, MessageLevel level) = 0;
 
 };
 

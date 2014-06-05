@@ -28,7 +28,7 @@ class ccRansacSDDlg : public QDialog, public Ui::RansacSDDialog
 public:
 
 	//! Default constructor
-    ccRansacSDDlg(QWidget* parent = 0);
+	ccRansacSDDlg(QWidget* parent = 0);
 
 protected slots:
 

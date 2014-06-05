@@ -43,14 +43,14 @@ static void DrawUnitArrow(int ID, const CCVector3& start, const CCVector3& direc
 		glLoadName(ID);
 	
 	glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
+	glPushMatrix();
 
 	ccGL::Translate(start.x,start.y,start.z);
 	ccGL::Scale(scale,scale,scale);
 
-    //we compute scalar prod between the two vectors
+	//we compute scalar prod between the two vectors
 	CCVector3 Z(0.0,0.0,1.0);
-    PointCoordinateType ps = Z.dot(direction);
+	PointCoordinateType ps = Z.dot(direction);
 	
 	if (ps < 1)
 	{
@@ -90,14 +90,14 @@ static void DrawUnitTorus(int ID, const CCVector3& center, const CCVector3& dire
 		glLoadName(ID);
 	
 	glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
+	glPushMatrix();
 
 	ccGL::Translate(center.x,center.y,center.z);
 	ccGL::Scale(scale,scale,scale);
 
-    //we compute scalar prod between the two vectors
+	//we compute scalar prod between the two vectors
 	CCVector3 Z(0,0,1);
-    PointCoordinateType ps = Z.dot(direction);
+	PointCoordinateType ps = Z.dot(direction);
 	
 	if (ps < 1)
 	{
@@ -134,7 +134,7 @@ static void DrawUnitSphere(int ID, const CCVector3& center, PointCoordinateType 
 		glLoadName(ID);
 	
 	glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
+	glPushMatrix();
 
 	ccGL::Translate(center.x,center.y,center.z);
 	ccGL::Scale(radius,radius,radius);
@@ -320,8 +320,8 @@ bool ccClipBox::move2D(int x, int y, int dx, int dy, int screenWidth, int screen
 	transMat.setTranslation(transMat.getTranslationAsVec3D() + CCVector3d::fromArray(C.u));
 
 	//rotateGL(transMat);
-    m_glTrans = ccGLMatrix(transMat.inverse().data()) * m_glTrans;
-    enableGLTransformation(true);
+	m_glTrans = ccGLMatrix(transMat.inverse().data()) * m_glTrans;
+	enableGLTransformation(true);
 
 	m_lastOrientation = currentOrientation;
 

@@ -193,32 +193,32 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 		break;
 	}
 
-    return 0;
+	return 0;
 }
 
 ccHObject* ccHObject::New(QString pluginId, QString classId, const char* name)
 {
 	ccExternalFactory::Container::Shared externalFactories = ccExternalFactory::Container::GetUniqueInstance();
-    if (!externalFactories)
-        return 0;
+	if (!externalFactories)
+		return 0;
 
-    ccExternalFactory* factory = externalFactories->getFactoryByName(pluginId);
-    if (!factory)
-        return 0;
+	ccExternalFactory* factory = externalFactories->getFactoryByName(pluginId);
+	if (!factory)
+		return 0;
 
-    ccHObject* obj = factory->buildObject(classId);
+	ccHObject* obj = factory->buildObject(classId);
 
-    if (!obj)
-        return 0;
+	if (!obj)
+		return 0;
 
 	if (name)
-        obj->setName(name);
+		obj->setName(name);
 	return obj;
 }
 
 QIcon ccHObject::getIcon() const
 {
-    return QIcon();
+	return QIcon();
 }
 
 void ccHObject::addDependency(ccHObject* otherObject, int flags, bool additive/*=true*/)
@@ -462,7 +462,7 @@ ccBBox ccHObject::getBB(bool relative/*=true*/, bool withGLfeatures/*=false*/, c
 	ccBBox box;
 
 	//if (!isEnabled())
-	//    return box;
+	//	return box;
 
 	if (!display || m_currentDisplay==display)
 		box = (withGLfeatures ? getDisplayBB() : getMyOwnBB());
@@ -505,7 +505,7 @@ void ccHObject::drawNameIn3D(CC_DRAW_CONTEXT& context)
 		return;
 
 	//we display it in the 2D layer in fact!
-    ccBBox bBox = getBB(true,false,m_currentDisplay);
+	ccBBox bBox = getBB(true,false,m_currentDisplay);
 	if (bBox.isValid())
 	{
 		const double* MM = context._win->getModelViewMatd(); //viewMat
@@ -556,8 +556,8 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 	bool drawInThisContext = ((m_visible || m_selected) && m_currentDisplay == context._win);
 
 	//no need to display anything but clouds and meshes in "element picking mode"
-	drawInThisContext &= (( !MACRO_DrawPointNames(context) || isKindOf(CC_TYPES::POINT_CLOUD) ) || 
-		                  ( !MACRO_DrawTriangleNames(context) || isKindOf(CC_TYPES::MESH) ));
+	drawInThisContext &= (	( !MACRO_DrawPointNames(context)	|| isKindOf(CC_TYPES::POINT_CLOUD) ) || 
+							( !MACRO_DrawTriangleNames(context)	|| isKindOf(CC_TYPES::MESH) ));
 
 	//apply 3D 'temporary' transformation (for display only)
 	if (draw3D && m_glTransEnabled)
@@ -804,8 +804,8 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omitChild
 	if (!fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
-    if (omitChildren)
-        return true;
+	if (omitChildren)
+		return true;
 
 	//(serializable) child count (dataVersion>=20)
 	uint32_t serializableCount = 0;
@@ -820,38 +820,38 @@ bool ccHObject::fromFile(QFile& in, short dataVersion, int flags, bool omitChild
 		if (classID == CC_TYPES::OBJECT)
 			return false;
 
-        //create corresponding child object
-        ccHObject* child = New(classID);
+		//create corresponding child object
+		ccHObject* child = New(classID);
 
 		//specifc case of custom objects (defined by plugins)
-        if (classID == CC_TYPES::CUSTOM_H_OBJECT)
-        {
-            //store current position
-            size_t originalFilePos = in.pos();
-            //we need to load the custom object as plain ccCustomHobject
-            child->fromFile(in, dataVersion, flags, true);
+		if (classID == CC_TYPES::CUSTOM_H_OBJECT)
+		{
+			//store current position
+			size_t originalFilePos = in.pos();
+			//we need to load the custom object as plain ccCustomHobject
+			child->fromFile(in, dataVersion, flags, true);
 			//go back to original position
-            in.seek(originalFilePos);
+			in.seek(originalFilePos);
 			//get custom object name and plugin name
 			QString childName = child->getName();
 			QString classId = child->getMetaData(ccCustomHObject::DefautMetaDataClassName()).toString();
-            QString pluginId = child->getMetaData(ccCustomHObject::DefautMetaDataPluginName()).toString();
+			QString pluginId = child->getMetaData(ccCustomHObject::DefautMetaDataPluginName()).toString();
 			//dont' need this instance anymore
 			delete child;
 			child = 0;
 
-            // try to get a new object from external factories
-            ccHObject* newChild = ccHObject::New(pluginId, classId);
-            if (newChild) // found a plugin that can deserialize it
-            {
+			// try to get a new object from external factories
+			ccHObject* newChild = ccHObject::New(pluginId, classId);
+			if (newChild) // found a plugin that can deserialize it
+			{
 				child = newChild;
-            }
-            else
+			}
+			else
 			{
 				ccLog::Warning(QString("[ccHObject::fromFile] Couldn't found any plugin able to deserialize custom object '%1' (class_ID = %2 / plugin_ID = %3").arg(childName).arg(classID).arg(pluginId));
-                return false; // FIXME: for now simply return false. We may want to skip it but I'm not sure if there is a simple way of doing that
+				return false; // FIXME: for now simply return false. We may want to skip it but I'm not sure if there is a simple way of doing that
 			}
-        }
+		}
 
 		assert(child && child->isSerializable());
 		if (child)

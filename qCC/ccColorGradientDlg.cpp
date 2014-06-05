@@ -32,18 +32,20 @@ QColor s_secondColor(Qt::white);
 ccColorGradientDlg::GradientType s_lastType(ccColorGradientDlg::Default);
 static int s_lastFreq = 5;
 
-ccColorGradientDlg::ccColorGradientDlg(QWidget* parent) : QDialog(parent), Ui::ColorGradientDialog()
+ccColorGradientDlg::ccColorGradientDlg(QWidget* parent)
+	: QDialog(parent)
+	, Ui::ColorGradientDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
-    connect(firstColorButton, SIGNAL(clicked()), this, SLOT(changeFirstColor()));
-    connect(secondColorButton, SIGNAL(clicked()), this, SLOT(changeSecondColor()));
+	connect(firstColorButton, SIGNAL(clicked()), this, SLOT(changeFirstColor()));
+	connect(secondColorButton, SIGNAL(clicked()), this, SLOT(changeSecondColor()));
 
 	//restore previous parameters
-    ccDisplayOptionsDlg::SetButtonColor(secondColorButton,s_secondColor);
-    ccDisplayOptionsDlg::SetButtonColor(firstColorButton,s_firstColor);
+	ccDisplayOptionsDlg::SetButtonColor(secondColorButton,s_secondColor);
+	ccDisplayOptionsDlg::SetButtonColor(firstColorButton,s_firstColor);
 	setType(s_lastType);
 	bandingFreqSpinBox->setValue(s_lastFreq);
 }
@@ -103,20 +105,20 @@ int ccColorGradientDlg::getBandingFrequency() const
 
 void ccColorGradientDlg::changeFirstColor()
 {
-    QColor newCol = QColorDialog::getColor(s_firstColor, this);
-    if (newCol.isValid())
-    {
-        s_firstColor = newCol;
-        ccDisplayOptionsDlg::SetButtonColor(firstColorButton,s_firstColor);
-    }
+	QColor newCol = QColorDialog::getColor(s_firstColor, this);
+	if (newCol.isValid())
+	{
+		s_firstColor = newCol;
+		ccDisplayOptionsDlg::SetButtonColor(firstColorButton,s_firstColor);
+	}
 }
 
 void ccColorGradientDlg::changeSecondColor()
 {
-    QColor newCol = QColorDialog::getColor(s_secondColor, this);
-    if (newCol.isValid())
-    {
-        s_secondColor = newCol;
-        ccDisplayOptionsDlg::SetButtonColor(secondColorButton,s_secondColor);
-    }
+	QColor newCol = QColorDialog::getColor(s_secondColor, this);
+	if (newCol.isValid())
+	{
+		s_secondColor = newCol;
+		ccDisplayOptionsDlg::SetButtonColor(secondColorButton,s_secondColor);
+	}
 }

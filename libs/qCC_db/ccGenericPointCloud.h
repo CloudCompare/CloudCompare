@@ -23,6 +23,8 @@
 #include <GenericProgressCallback.h>
 #include <ReferenceCloud.h>
 
+//Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 #include "ccGLMatrix.h"
 #include "ccAdvancedTypes.h"
@@ -47,25 +49,20 @@ class ccOctree;
 	- an octree strucutre
 	- visibility information per point (to hide/display subsets of points)
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccGenericPointCloud : public ccHObject,  virtual public CCLib::GenericIndexedCloudPersist
-#else
-class ccGenericPointCloud : public ccHObject,  virtual public CCLib::GenericIndexedCloudPersist
-#endif
 {
-    friend class ccMesh;
+	friend class ccMesh;
 
 public:
 
-    //! Default constructor
-    ccGenericPointCloud(QString name = QString());
+	//! Default constructor
+	ccGenericPointCloud(QString name = QString());
 
-    //! Default destructor
+	//! Default destructor
 	virtual ~ccGenericPointCloud();
 
 
-    /***************************************************
+	/***************************************************
 						Clone/Copy
 	***************************************************/
 
@@ -104,54 +101,54 @@ public:
 	virtual ccOctree* computeOctree(CCLib::GenericProgressCallback* progressCb=NULL);
 
 	//! Returns associated octree
-    virtual ccOctree* getOctree();
+	virtual ccOctree* getOctree();
 
 	//! Erases the octree
 	virtual void deleteOctree();
 
 
 	/***************************************************
-                    Features getters
+					Features getters
 	***************************************************/
 
-    //! Returns color corresponding to a given scalar value
-    /** The returned value depends on the current scalar field display parameters.
-        It may even be 0 if the value shouldn't be displayed.
-        WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
-    **/
+	//! Returns color corresponding to a given scalar value
+	/** The returned value depends on the current scalar field display parameters.
+		It may even be 0 if the value shouldn't be displayed.
+		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+	**/
 	virtual const colorType* geScalarValueColor(ScalarType d) const = 0;
 
-    //! Returns color corresponding to a given point associated scalar value
-    /** The returned value depends on the current scalar field display parameters.
-        It may even be 0 if the value shouldn't be displayed.
-        WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
-    **/
+	//! Returns color corresponding to a given point associated scalar value
+	/** The returned value depends on the current scalar field display parameters.
+		It may even be 0 if the value shouldn't be displayed.
+		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+	**/
 	virtual const colorType* getPointScalarValueColor(unsigned pointIndex) const = 0;
 
 	//! Returns scalar value associated to a given point
-    /** The returned value is taken from the current displayed scalar field
-        WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
-    **/
+	/** The returned value is taken from the current displayed scalar field
+		WARNING: scalar field must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+	**/
 	virtual ScalarType getPointDisplayedDistance(unsigned pointIndex) const = 0;
 
-    //! Returns color corresponding to a given point
-    /** WARNING: color array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
-    **/
+	//! Returns color corresponding to a given point
+	/** WARNING: color array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+	**/
 	virtual const colorType* getPointColor(unsigned pointIndex) const = 0;
 
-    //! Returns compressed normal corresponding to a given point
-    /** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
-    **/
+	//! Returns compressed normal corresponding to a given point
+	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+	**/
 	virtual const normsType& getPointNormalIndex(unsigned pointIndex) const = 0;
 
-    //! Returns normal corresponding to a given point
-    /** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
-    **/
+	//! Returns normal corresponding to a given point
+	/** WARNING: normals array must be enabled! (see ccDrawableObject::hasDisplayedScalarField)
+	**/
 	virtual const CCVector3& getPointNormal(unsigned pointIndex) const = 0;
 
 
 	/***************************************************
-                    Visibility array
+					Visibility array
 	***************************************************/
 
 	//! Array of "visibility" information for each point
@@ -159,44 +156,44 @@ public:
 	**/
 	typedef GenericChunkedArray<1,uchar> VisibilityTableType;
 
-    //! Returns associated visiblity array
+	//! Returns associated visiblity array
 	virtual VisibilityTableType* getTheVisibilityArray();
 
-    //! Returns a ReferenceCloud equivalent to the visiblity array
+	//! Returns a ReferenceCloud equivalent to the visiblity array
 	virtual CCLib::ReferenceCloud* getTheVisiblePoints() const;
 
 	//! Returns whether the visiblity array is allocated or not
-    virtual bool isVisibilityTableInstantiated() const;
+	virtual bool isVisibilityTableInstantiated() const;
 
-    //! Resets the associated visiblity array
-    /** Warning: allocates the array if it was not done yet!
-    **/
+	//! Resets the associated visiblity array
+	/** Warning: allocates the array if it was not done yet!
+	**/
 	virtual bool resetVisibilityArray();
 
 	//! Erases the points visibility information
 	virtual void unallocateVisibilityArray();
 
 	/***************************************************
-                    Other methods
+					Other methods
 	***************************************************/
 
-    //Inherited from GenericCloud
+	//Inherited from GenericCloud
 	virtual uchar testVisibility(const CCVector3& P) const;
 
-    //Inherited from ccHObject
-    virtual ccBBox getMyOwnBB();
+	//Inherited from ccHObject
+	virtual ccBBox getMyOwnBB();
 
-    //! Forces bounding-box update
-    virtual void refreshBB() = 0;
+	//! Forces bounding-box update
+	virtual void refreshBB() = 0;
 
 	//! Creates a new point cloud with only the 'visible' points (as defined by the visibility array)
 	/** \param removeSelectedPoints if true, exported point are also removed from the current point cloud
-        \return new point cloud with selected points
-    **/
+		\return new point cloud with selected points
+	**/
 	virtual ccGenericPointCloud* createNewCloudFromVisibilitySelection(bool removeSelectedPoints=false) = 0;
 
-    //! Applies a rigid transformation (rotation + translation)
-    virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;
+	//! Applies a rigid transformation (rotation + translation)
+	virtual void applyRigidTransformation(const ccGLMatrix& trans) = 0;
 
 	//! Sets shift applied to original coordinates (information storage only)
 	/** Such a shift can typically be applied at loading time.
@@ -266,14 +263,14 @@ public:
 
 protected:
 
-    //inherited from ccHObject
+	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 
 	//! Per-point visibility table
 	/** If this table is allocated, only values set to POINT_VISIBLE
 		will be considered as visible/selected.
-    **/
+	**/
 	VisibilityTableType* m_pointsVisibility;
 
 	//! Global shift (typically applied at loading time)

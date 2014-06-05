@@ -25,105 +25,105 @@ ccSensorProjectionDlg::ccSensorProjectionDlg(QWidget* parent)
 	: QDialog(parent)
 	, Ui::SensorProjectDialog()
 {
-    setupUi(this);
+	setupUi(this);
 
-    posXEdit->setValidator(new QDoubleValidator(this));
-    posYEdit->setValidator(new QDoubleValidator(this));
-    posZEdit->setValidator(new QDoubleValidator(this));
+	posXEdit->setValidator(new QDoubleValidator(this));
+	posYEdit->setValidator(new QDoubleValidator(this));
+	posZEdit->setValidator(new QDoubleValidator(this));
 
-    x1rot->setValidator(new QDoubleValidator(this));
-    x2rot->setValidator(new QDoubleValidator(this));
-    x3rot->setValidator(new QDoubleValidator(this));
-    y1rot->setValidator(new QDoubleValidator(this));
-    y2rot->setValidator(new QDoubleValidator(this));
-    y3rot->setValidator(new QDoubleValidator(this));
-    z1rot->setValidator(new QDoubleValidator(this));
-    z2rot->setValidator(new QDoubleValidator(this));
-    z3rot->setValidator(new QDoubleValidator(this));
+	x1rot->setValidator(new QDoubleValidator(this));
+	x2rot->setValidator(new QDoubleValidator(this));
+	x3rot->setValidator(new QDoubleValidator(this));
+	y1rot->setValidator(new QDoubleValidator(this));
+	y2rot->setValidator(new QDoubleValidator(this));
+	y3rot->setValidator(new QDoubleValidator(this));
+	z1rot->setValidator(new QDoubleValidator(this));
+	z2rot->setValidator(new QDoubleValidator(this));
+	z3rot->setValidator(new QDoubleValidator(this));
 }
 
 void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 {
-    if( !sensor)
-        return;
+	if( !sensor)
+		return;
 
-    //center
+	//center
 	const float* C = sensor->getRigidTransformation().getTranslation();
-    posXEdit->setText(QString("%1").arg(C[0]));
-    posYEdit->setText(QString("%1").arg(C[1]));
-    posZEdit->setText(QString("%1").arg(C[2]));
+	posXEdit->setText(QString("%1").arg(C[0]));
+	posYEdit->setText(QString("%1").arg(C[1]));
+	posZEdit->setText(QString("%1").arg(C[2]));
 
-    //rotation order
-    if (sensor->getRotationOrder() == ccGBLSensor::THETA_PHI)
-        rotationOrderComboBox->setCurrentIndex(0);
-    else if (sensor->getRotationOrder() == ccGBLSensor::PHI_THETA)
-        rotationOrderComboBox->setCurrentIndex(1);
+	//rotation order
+	if (sensor->getRotationOrder() == ccGBLSensor::THETA_PHI)
+		rotationOrderComboBox->setCurrentIndex(0);
+	else if (sensor->getRotationOrder() == ccGBLSensor::PHI_THETA)
+		rotationOrderComboBox->setCurrentIndex(1);
 
-    //max range
-    maxRangeDoubleSpinBox->setValue(sensor->getSensorRange());
+	//max range
+	maxRangeDoubleSpinBox->setValue(sensor->getSensorRange());
 
-    //uncertainty
-    uncertaintyDoubleSpinBox->setValue(sensor->getUncertainty());
+	//uncertainty
+	uncertaintyDoubleSpinBox->setValue(sensor->getUncertainty());
 
-    //rotation matrix
+	//rotation matrix
 	const ccGLMatrix& rot = sensor->getRigidTransformation();
-    {
+	{
 		const float* mat = rot.data();
-        x1rot->setText(QString::number(mat[0]));
-        x2rot->setText(QString::number(mat[3]));
-        x3rot->setText(QString::number(mat[8]));
-        y1rot->setText(QString::number(mat[1]));
-        y2rot->setText(QString::number(mat[5]));
-        y3rot->setText(QString::number(mat[9]));
-        z1rot->setText(QString::number(mat[2]));
-        z2rot->setText(QString::number(mat[6]));
-        z3rot->setText(QString::number(mat[10]));
-    }
+		x1rot->setText(QString::number(mat[0]));
+		x2rot->setText(QString::number(mat[3]));
+		x3rot->setText(QString::number(mat[8]));
+		y1rot->setText(QString::number(mat[1]));
+		y2rot->setText(QString::number(mat[5]));
+		y3rot->setText(QString::number(mat[9]));
+		z1rot->setText(QString::number(mat[2]));
+		z2rot->setText(QString::number(mat[6]));
+		z3rot->setText(QString::number(mat[10]));
+	}
 
-    //angular steps
-    dPhiSpinBox->setValue(sensor->getDeltaPhi());
-    dThetaSpinBox->setValue(sensor->getDeltaTheta());
+	//angular steps
+	dPhiSpinBox->setValue(sensor->getDeltaPhi());
+	dThetaSpinBox->setValue(sensor->getDeltaTheta());
 }
 
 void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 {
-    if (!sensor)
-        return;
+	if (!sensor)
+		return;
 
-    //rotation order
+	//rotation order
 	ccGBLSensor::ROTATION_ORDER rotOrder = (rotationOrderComboBox->currentIndex() == 0 ? ccGBLSensor::THETA_PHI : ccGBLSensor::PHI_THETA);
-    sensor->setRotationOrder(rotOrder);
+	sensor->setRotationOrder(rotOrder);
 
-    //max. range
-    sensor->setSensorRange(static_cast<ScalarType>(maxRangeDoubleSpinBox->value()));
+	//max. range
+	sensor->setSensorRange(static_cast<ScalarType>(maxRangeDoubleSpinBox->value()));
 
-    //orientation matrix
-    ccGLMatrix rot;
-    {
+	//orientation matrix
+	ccGLMatrix rot;
+	{
 		float* mat = rot.data();
-        mat[0]  = x1rot->text().toFloat();
-        mat[4]  = x2rot->text().toFloat();
-        mat[8]  = x3rot->text().toFloat();
-        mat[1]  = y1rot->text().toFloat();
-        mat[5]  = y2rot->text().toFloat();
-        mat[9]  = y3rot->text().toFloat();
-        mat[2]  = z1rot->text().toFloat();
-        mat[6]  = z2rot->text().toFloat();
-        mat[10] = z3rot->text().toFloat();
-    }
+		mat[0]  = x1rot->text().toFloat();
+		mat[4]  = x2rot->text().toFloat();
+		mat[8]  = x3rot->text().toFloat();
+		mat[1]  = y1rot->text().toFloat();
+		mat[5]  = y2rot->text().toFloat();
+		mat[9]  = y3rot->text().toFloat();
+		mat[2]  = z1rot->text().toFloat();
+		mat[6]  = z2rot->text().toFloat();
+		mat[10] = z3rot->text().toFloat();
+	}
 
-    //center
-    CCVector3 C(static_cast<PointCoordinateType>(posXEdit->text().toDouble()),
-                static_cast<PointCoordinateType>(posYEdit->text().toDouble()),
-                static_cast<PointCoordinateType>(posZEdit->text().toDouble()));
+	//center
+	CCVector3 C(static_cast<PointCoordinateType>(posXEdit->text().toDouble()),
+				static_cast<PointCoordinateType>(posYEdit->text().toDouble()),
+				static_cast<PointCoordinateType>(posZEdit->text().toDouble()));
 	rot.setTranslation(C);
 
 	sensor->setRigidTransformation(rot);
 
-    //angular steps
-    sensor->setDeltaPhi(static_cast<PointCoordinateType>(dPhiSpinBox->value()));
-    sensor->setDeltaTheta(static_cast<PointCoordinateType>(dThetaSpinBox->value()));
+	//angular steps
+	sensor->setDeltaPhi(static_cast<PointCoordinateType>(dPhiSpinBox->value()));
+	sensor->setDeltaTheta(static_cast<PointCoordinateType>(dThetaSpinBox->value()));
 
-    //uncertainty
-    sensor->setUncertainty(static_cast<ScalarType>(uncertaintyDoubleSpinBox->value()));
+	//uncertainty
+	sensor->setUncertainty(static_cast<ScalarType>(uncertaintyDoubleSpinBox->value()));
 }

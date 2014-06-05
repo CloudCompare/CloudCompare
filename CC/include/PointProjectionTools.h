@@ -19,6 +19,7 @@
 #define POINT_PROJECTION_TOOLS_HEADER
 
 //Local
+#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "Matrix.h"
 #include "CCConst.h"
@@ -44,30 +45,24 @@ class GenericCloud;
 class SimpleCloud;
 
 //! Several point cloud re-projection algorithms ("developpee", translation, rotation, etc.)
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API PointProjectionTools : public CCToolbox
-#else
-class PointProjectionTools : public CCToolbox
-#endif
 {
 public:
 
-    //! A scaled geometrical transformation (scale + rotation + translation)
-    /** P' = s.R.P + T
+	//! A scaled geometrical transformation (scale + rotation + translation)
+	/** P' = s.R.P + T
 	**/
 	struct Transformation
 	{
-	    //! Rotation
+		//! Rotation
 		CCLib::SquareMatrix R;
 		//! Translation
 		CCVector3 T;
-        //! Scale
-        PointCoordinateType s;
+		//! Scale
+		PointCoordinateType s;
 
 		//! Default constructor
-        Transformation() : s(PC_ONE) {}
+		Transformation() : s(PC_ONE) {}
 	};
 
 	//! Develops a cylinder-shaped point cloud around its main axis

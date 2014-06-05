@@ -102,9 +102,9 @@ struct PointXYZScalar
 {
 	PCL_ADD_POINT4D;
 	float scalar;
-	EIGEN_MAKE_ALIGNED_OPERATOR_NEW   // make sure our new allocators are aligned
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW		// make sure our new allocators are aligned
 
-} EIGEN_ALIGN16;                    // enforce SSE padding for correct memory alignment
+} EIGEN_ALIGN16;						// enforce SSE padding for correct memory alignment
 
 struct PointXYZScalarRGB
 {
@@ -116,14 +116,14 @@ struct PointXYZScalarRGB
 		{
 			struct
 			{
-				boost::uint8_t   b;
-				boost::uint8_t   g;
-				boost::uint8_t   r;
-				boost::uint8_t   _unused;
+				boost::uint8_t b;
+				boost::uint8_t g;
+				boost::uint8_t r;
+				boost::uint8_t _unused;
 			};
-			float   rgb;
+			float rgb;
 		};
-		boost::uint32_t   rgba;
+		boost::uint32_t rgba;
 	};
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 

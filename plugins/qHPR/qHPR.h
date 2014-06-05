@@ -35,8 +35,8 @@ class QAction;
 **/
 class qHPR : public QObject, public ccStdPluginInterface
 {
-    Q_OBJECT
-    Q_INTERFACES(ccStdPluginInterface)
+	Q_OBJECT
+	Q_INTERFACES(ccStdPluginInterface)
 #ifdef CC_QT5
 	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qHPR")
 #endif
@@ -46,14 +46,14 @@ public:
 	//! Default constructor
 	qHPR(QObject* parent = 0);
 
-    //inherited from ccPluginInterface
+	//inherited from ccPluginInterface
 	virtual QString getName() const { return "Hidden Point Removal"; }
 	virtual QString getDescription() const { return "Hidden Point Removal (Katz et al.)"; }
 	virtual QIcon getIcon() const;
 
-    //inherited from ccStdPluginInterface
+	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-    virtual void getActions(QActionGroup& group);
+	virtual void getActions(QActionGroup& group);
 
 protected slots:
 

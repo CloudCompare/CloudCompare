@@ -117,18 +117,18 @@ public:
 		bool counterclockwise;
 	};
 
-    //! Grid filling strategy
-    enum FillStrategyType {	FILL_STRAT_MIN_DIST			= 0,
+	//! Grid filling strategy
+	enum FillStrategyType {	FILL_STRAT_MIN_DIST			= 0,
 							FILL_STRAT_AVG_DIST			= 1,
 							FILL_STRAT_MAX_DIST			= 2,
-                            INVALID_STRATEGY_TYPE		= 255,
-    };
+							INVALID_STRATEGY_TYPE		= 255,
+	};
 
-    //! Option for handling empty cells
-    enum EmptyCellFillOption {	LEAVE_EMPTY				= 0,
+	//! Option for handling empty cells
+	enum EmptyCellFillOption {	LEAVE_EMPTY				= 0,
 								FILL_WITH_ZERO			= 1,
 								FILL_INTERPOLATE		= 2,
-    };
+	};
 
 	//! Projects a cloud (scalar field) on a revolution surface to generate a 2D map
 	/** Projection can be either cylindrical or spherical.

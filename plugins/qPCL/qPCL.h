@@ -11,7 +11,7 @@
 //#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         #
 //#  GNU General Public License for more details.                          #
 //#                                                                        #
-//#               COPYRIGHT: Luca Penasa                                   #
+//#                        COPYRIGHT: Luca Penasa                          #
 //#                                                                        #
 //##########################################################################
 //
@@ -52,7 +52,7 @@ public:
 
 	//inherited from ccStdPluginInterface
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
-    virtual void getActions(QActionGroup& group);
+	virtual void getActions(QActionGroup& group);
 
 	//! Adds a filter
 	int addFilter(BaseFilter* filter);

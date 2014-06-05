@@ -135,7 +135,7 @@ CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
 #if defined(CC_WINDOWS)
 		::Sleep(500);
 #else
-        usleep(500 * 1000);
+		usleep(500 * 1000);
 #endif
 		pDlg.setValue(pDlg.value()+1);
 		QApplication::processEvents();
@@ -222,8 +222,8 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 		else if (currentObject->isKindOf(CC_TYPES::SENSOR))
 		{
 			ccIndexedTransformationBuffer* buffer = static_cast<ccSensor*>(currentObject)->getPositions();
-            if (buffer)
-                dependencies.insert(buffer);
+			if (buffer)
+				dependencies.insert(buffer);
 		}
 		else if (currentObject->isA(CC_TYPES::LABEL_2D))
 		{
@@ -380,28 +380,28 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 
 	ccHObject* root = ccHObject::New(classID);
 
-    if (!root)
-        return CC_FERR_MALFORMED_FILE;
+	if (!root)
+		return CC_FERR_MALFORMED_FILE;
 
-    if (classID == CC_TYPES::CUSTOM_H_OBJECT)
-    {
-        // store seeking position
-        size_t original_pos = in.pos();
-        // we need to lod it as plain ccCustomHobject
-        root->fromFile(in, static_cast<short>(binVersion), flags, true); // this will load it
-        in.seek(original_pos); // reseek back the file
+	if (classID == CC_TYPES::CUSTOM_H_OBJECT)
+	{
+		// store seeking position
+		size_t original_pos = in.pos();
+		// we need to lod it as plain ccCustomHobject
+		root->fromFile(in, static_cast<short>(binVersion), flags, true); // this will load it
+		in.seek(original_pos); // reseek back the file
 
-        QString classId = root->getMetaData("class_name").toString();
-        QString pluginId = root->getMetaData("plugin_name").toString();
+		QString classId = root->getMetaData("class_name").toString();
+		QString pluginId = root->getMetaData("plugin_name").toString();
 
-        // try to get a new object from external factories
-        ccHObject * new_child = ccHObject::New(pluginId, classId);
-        if (new_child) // found a plugin that can deserialize it
-            root = new_child;
-        else
-            return CC_FERR_FILE_WAS_WRITTEN_BY_PLUGIN;
+		// try to get a new object from external factories
+		ccHObject * new_child = ccHObject::New(pluginId, classId);
+		if (new_child) // found a plugin that can deserialize it
+			root = new_child;
+		else
+			return CC_FERR_FILE_WAS_WRITTEN_BY_PLUGIN;
 
-    }
+	}
 
 	if (!root->fromFile(in,static_cast<short>(binVersion),flags))
 	{
@@ -636,14 +636,14 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				//we have a problem here ;)
 				sensor->setPositions(0);
 
-                //aren't positions optional (so it is writtine in ccGBLSensor.cpp) ?
-                //if so we can simply set them to NULL and go ahead, we do not need to return.
+				//aren't positions optional (so it is writtine in ccGBLSensor.cpp) ?
+				//if so we can simply set them to NULL and go ahead, we do not need to return.
 
 				//DGM: can't delete it, too dangerous (bad pointers ;)
 				//delete root;
 
-                ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
-//				return CC_FERR_MALFORMED_FILE;
+				ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
+				//return CC_FERR_MALFORMED_FILE;
 			}
 		}
 		else if (currentObject->isA(CC_TYPES::LABEL_2D))

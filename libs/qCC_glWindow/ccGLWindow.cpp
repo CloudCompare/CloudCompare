@@ -1824,7 +1824,7 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 		setCursor(QCursor(Qt::PointingHandCursor));
 		break;
 	default:
-	   break;
+		break;
 	}
 
 	m_pickingMode = mode;
@@ -2619,11 +2619,11 @@ int ccGLWindow::startPicking(PICKING_MODE pickingMode, int centerX, int centerY,
 	return selectedID;
 }
 
-void ccGLWindow::displayNewMessage(const QString& message,
-								   MessagePosition pos,
-								   bool append/*=false*/,
-								   int displayMaxDelay_sec/*=2*/,
-								   MessageType type/*=CUSTOM_MESSAGE*/)
+void ccGLWindow::displayNewMessage(	const QString& message,
+									MessagePosition pos,
+									bool append/*=false*/,
+									int displayMaxDelay_sec/*=2*/,
+									MessageType type/*=CUSTOM_MESSAGE*/)
 {
 	if (message.isEmpty())
 	{
@@ -3620,12 +3620,12 @@ void ccGLWindow::displayText(QString text, int x, int y, unsigned char align/*=A
 QString ccGLWindow::getShadersPath()
 {
 #if defined(Q_OS_MAC)
-   // shaders are in the bundle
-   QString  path = QCoreApplication::applicationDirPath();
-   path.remove( "MacOS" );
-   return path + "Shaders";
+	// shaders are in the bundle
+	QString  path = QCoreApplication::applicationDirPath();
+	path.remove( "MacOS" );
+	return path + "Shaders";
 #else
-   return QApplication::applicationDirPath() + "/shaders";
+	return QApplication::applicationDirPath() + "/shaders";
 #endif
 }
 
@@ -3634,12 +3634,12 @@ bool ccGLWindow::InitGLEW()
 {
 #ifdef USE_GLEW
 	
-    // GLEW initialization
+	// GLEW initialization
 	if (!ccFBOUtils::InitGLEW())
 	{
-        ccLog::Warning("[Glew] An error occurred while initializing OpenGL extensions!");
-        return false;
-    }
+		ccLog::Warning("[Glew] An error occurred while initializing OpenGL extensions!");
+		return false;
+	}
 	else
 	{
 		ccLog::Print("[Glew] Initialized!");

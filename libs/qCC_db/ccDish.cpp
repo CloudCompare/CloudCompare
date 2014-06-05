@@ -21,12 +21,12 @@
 #include "ccPointCloud.h"
 #include "ccNormalVectors.h"
 
-ccDish::ccDish(PointCoordinateType radius,
-			   PointCoordinateType height,
-			   PointCoordinateType radius2/*=0*/,
-			   const ccGLMatrix* transMat/*=0*/,
-			   QString name/*="Dish"*/,
-			   unsigned precision/*=24*/)
+ccDish::ccDish(	PointCoordinateType radius,
+				PointCoordinateType height,
+				PointCoordinateType radius2/*=0*/,
+				const ccGLMatrix* transMat/*=0*/,
+				QString name/*="Dish"*/,
+				unsigned precision/*=24*/)
 	: ccGenericPrimitive(name,transMat)
 	, m_baseRadius(radius)
 	, m_secondRadius(radius2)

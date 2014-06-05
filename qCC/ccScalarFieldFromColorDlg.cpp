@@ -29,31 +29,29 @@
 #endif
 
 ccScalarFieldFromColorDlg::ccScalarFieldFromColorDlg(QWidget* parent/*=0*/)
-    : QDialog(parent), Ui::scalarFieldFromColorDlg()
+	: QDialog(parent)
+	, Ui::scalarFieldFromColorDlg()
 {
-
-    setupUi(this);
-    setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
-
-
+	setupUi(this);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 }
 
 bool ccScalarFieldFromColorDlg::getRStatus()
 {
-    return this->checkBoxR->isChecked();
+	return this->checkBoxR->isChecked();
 }
 
 bool ccScalarFieldFromColorDlg::getGStatus()
 {
-    return this->checkBoxG->isChecked();
+	return this->checkBoxG->isChecked();
 }
 
 bool ccScalarFieldFromColorDlg::getBStatus()
 {
-    return this->checkBoxB->isChecked();
+	return this->checkBoxB->isChecked();
 }
 
 bool ccScalarFieldFromColorDlg::getCompositeStatus()
 {
-    return this->checkBoxComposite->isChecked();
+	return this->checkBoxComposite->isChecked();
 }

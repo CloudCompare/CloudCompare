@@ -26,22 +26,22 @@
 #include <QApplication>
 #include <QThread>
 
-testfilter::testfilter()
-: BaseFilter(FilterDescription("Test Filter",
-                               "Test Filter",
-                               "TEST!",
-                               ":/toolbar/PclUtils/icons/pcl.png") )
-, m_app()
+Testfilter::Testfilter()
+	: BaseFilter(FilterDescription(	"Test Filter",
+									"Test Filter",
+									"TEST!",
+									":/toolbar/PclUtils/icons/pcl.png") )
+	, m_app()
 {
 	m_thread_pool = QThreadPool::globalInstance();
 }
 
-int testfilter::openInputDialog()
+int Testfilter::openInputDialog()
 {
 	return 1;
 }
 
-int testfilter::compute()
+int Testfilter::compute()
 {
 	QFuture<void> future = QtConcurrent::run(&(*this->m_app), &Test::run);
 

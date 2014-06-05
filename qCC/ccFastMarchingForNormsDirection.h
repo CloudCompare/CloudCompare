@@ -37,12 +37,12 @@ class ccFastMarchingForNormsDirection : public CCLib::FastMarching
 
 public:
 
-    //! Static entry point (helper)
-	static int ResolveNormsDirectionByFrontPropagation(ccPointCloud* theCloud,
-                                                        NormsIndexesTableType* theNorms,
-                                                        uchar octreeLevel,
-                                                        CCLib::GenericProgressCallback* progressCb = 0,
-                                                        CCLib::DgmOctree* inputOctree = 0);
+	//! Static entry point (helper)
+	static int ResolveNormsDirectionByFrontPropagation(	ccPointCloud* theCloud,
+														NormsIndexesTableType* theNorms,
+														uchar octreeLevel,
+														CCLib::GenericProgressCallback* progressCb = 0,
+														CCLib::DgmOctree* inputOctree = 0);
 	//! Default constructor
 	ccFastMarchingForNormsDirection();
 
@@ -73,9 +73,9 @@ public:
 
 protected:
 
-    //! A Fast Marching grid cell for normals direction resolution
-    class DirectionCell : public CCLib::FastMarching::Cell
-    {
+	//! A Fast Marching grid cell for normals direction resolution
+	class DirectionCell : public CCLib::FastMarching::Cell
+	{
 	public:
 		//! Default constructor
 		DirectionCell()
@@ -93,18 +93,18 @@ protected:
 		virtual ~DirectionCell() {}
 
 		//! The local cell normal
-        CCVector3 N;
+		CCVector3 N;
 		//! The local cell center
-        CCVector3 C;
-        //! the code of the equivalent cell in the octree
-        CCLib::DgmOctree::OctreeCellCodeType cellCode;
-        //! Confidence value
-        float signConfidence;
+		CCVector3 C;
+		//! the code of the equivalent cell in the octree
+		CCLib::DgmOctree::OctreeCellCodeType cellCode;
+		//! Confidence value
+		float signConfidence;
 #ifdef _DEBUG
 		//! Undefined scalar for debug purposes
 		float scalar;
 #endif
-    };
+	};
 
 	//inherited methods (see FastMarchingAlgorithm)
 	virtual float computeTCoefApprox(CCLib::FastMarching::Cell* currentCell, CCLib::FastMarching::Cell* neighbourCell) const;

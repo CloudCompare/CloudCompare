@@ -48,9 +48,9 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
 
 	GDALDataset* poDataset = static_cast<GDALDataset*>(GDALOpen( filename, GA_ReadOnly ));
-    
+
 	if( poDataset != NULL )
-    {
+	{
 		ccLog::Print("Raster file: '%s'", filename);
 		ccLog::Print( "Driver: %s/%s",
 			poDataset->GetDriver()->GetDescription(), 
@@ -427,7 +427,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 		}
 
 		GDALClose(poDataset);
-    }
+	}
 	else
 	{
 		return CC_FERR_UNKNOWN_FILE;

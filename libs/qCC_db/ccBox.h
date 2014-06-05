@@ -18,20 +18,17 @@
 #ifndef CC_BOX_PRIMITIVE_HEADER
 #define CC_BOX_PRIMITIVE_HEADER
 
-#include "ccGenericPrimitive.h"
-
 //CCLib
 #include <CCGeom.h>
+
+//Local
+#include "qCC_db.h"
+#include "ccGenericPrimitive.h"
 
 //! Box (primitive)
 /** 3D box primitive
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccBox : public ccGenericPrimitive
-#else
-class ccBox : public ccGenericPrimitive
-#endif
 {
 public:
 
@@ -51,7 +48,7 @@ public:
 	**/
 	ccBox(QString name = QString("Box"));
 
-    //! Returns class ID
+	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::BOX; }
 
 	//inherited from ccGenericPrimitive
@@ -63,14 +60,14 @@ public:
 
 protected:
 
-    //inherited from ccGenericPrimitive
+	//inherited from ccGenericPrimitive
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual bool buildUp();
 
 	//! Box dimensions
 	CCVector3 m_dims;
-    
+
 };
 
 #endif //CC_BOX_PRIMITIVE_HEADER

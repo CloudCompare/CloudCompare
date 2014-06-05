@@ -32,18 +32,18 @@ class AsciiFilter : public FileIOFilter
 {
 public:
 
-    //inherited from FileIOFilter
-    virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
+	//inherited from FileIOFilter
+	virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename);
 
-	CC_FILE_ERROR loadCloudFromFormatedAsciiFile(const char* filename,
-                                                    ccHObject& container,
+	CC_FILE_ERROR loadCloudFromFormatedAsciiFile(	const char* filename,
+													ccHObject& container,
 													const AsciiOpenDlg::Sequence& openSequence,
-                                                    char separator,
-                                                    unsigned approximateNumberOfLines,
-                                                    qint64 fileSize,
+													char separator,
+													unsigned approximateNumberOfLines,
+													qint64 fileSize,
 													unsigned maxCloudSize,
-                                                    unsigned skipLines=0,
+													unsigned skipLines=0,
 													bool alwaysDisplayLoadDialog=true,
 													bool* coordinatesShiftEnabled=0,
 													CCVector3d* coordinatesShift=0);

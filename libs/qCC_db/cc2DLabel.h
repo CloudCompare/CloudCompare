@@ -19,6 +19,7 @@
 #define CC_2D_LABEL_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccHObject.h"
 #include "ccInteractor.h"
 
@@ -30,12 +31,7 @@
 class ccGenericPointCloud;
 
 //! 2D label (typically attached to points)
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API cc2DLabel : public ccHObject, public ccInteractor
-#else
-class cc2DLabel : public ccHObject, public ccInteractor
-#endif
 {
 public:
 
@@ -43,9 +39,9 @@ public:
 	cc2DLabel(QString name = QString("label"));
 
 	//inherited from ccObject
-    virtual QString getName() const;
+	virtual QString getName() const;
 	//inherited from ccHObject
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::LABEL_2D; }
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::LABEL_2D; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Returns 'raw' name (no replacement of default keywords)
@@ -128,16 +124,16 @@ public:
 
 protected:
 
-    //inherited from ccHObject
+	//inherited from ccHObject
 	virtual bool toFile_MeOnly(QFile& out) const;
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
-    virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
+	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
 	virtual void onDeletionOf(const ccHObject* obj);
 
-    //! Draws the entity only (not its children) - 2D version
-    virtual void drawMeOnly2D(CC_DRAW_CONTEXT& context);
-    //! Draws the entity only (not its children) - 3D version
-    virtual void drawMeOnly3D(CC_DRAW_CONTEXT& context);
+	//! Draws the entity only (not its children) - 2D version
+	virtual void drawMeOnly2D(CC_DRAW_CONTEXT& context);
+	//! Draws the entity only (not its children) - 3D version
+	virtual void drawMeOnly3D(CC_DRAW_CONTEXT& context);
 
 	//! Picked points
 	std::vector<PickedPoint> m_points;

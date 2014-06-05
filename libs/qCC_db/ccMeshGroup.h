@@ -18,28 +18,25 @@
 #ifndef CC_MESH_GROUP_HEADER
 #define CC_MESH_GROUP_HEADER
 
+//Local
+#include "qCC_db.h"
 #include "ccGenericMesh.h"
 
 //! [DEPRECATED] A group of meshes sharing vertices (and associated properties) in a unique cloud
 /** This is an empty shell for backward compatibility.
 	Shouldn't be used anymore. 
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccMeshGroup : public ccGenericMesh
-#else
-class ccMeshGroup : public ccGenericMesh
-#endif
 {
 public:
 
-    //! Default constructor
+	//! Default constructor
 	ccMeshGroup() : ccGenericMesh("[Deprecated] Mesh Group") {}
 
-    //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::MESH_GROUP; }
+	//! Returns class ID
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::MESH_GROUP; }
 
-    //inherited methods (ccGenericMesh)
+	//inherited methods (ccGenericMesh)
 	virtual ccGenericPointCloud* getAssociatedCloud() const { return 0; }
 	virtual ccGenericMesh* clone(ccGenericPointCloud* vertices = 0, ccMaterialSet* clonedMaterials = 0, NormsIndexesTableType* clonedNormsTable = 0, TextureCoordsContainer* cloneTexCoords = 0) { return 0; }
 	virtual void refreshBB() {};

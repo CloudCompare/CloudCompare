@@ -34,7 +34,7 @@ ccGraphicalTransformationTool::ccGraphicalTransformationTool(QWidget* parent)
 
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
 
-    connect(pauseButton,	SIGNAL(toggled(bool)),  this, SLOT(pause(bool)));
+	connect(pauseButton,	SIGNAL(toggled(bool)),	this, SLOT(pause(bool)));
 	connect(okButton,		SIGNAL(clicked()),		this, SLOT(apply()));
 	connect(razButton,		SIGNAL(clicked()),		this, SLOT(reset()));
 	connect(cancelButton,	SIGNAL(clicked()),		this, SLOT(cancel()));
@@ -81,27 +81,27 @@ void ccGraphicalTransformationTool::onShortcutTriggered(int key)
 
 void ccGraphicalTransformationTool::pause(bool state)
 {
-    if (!m_associatedWin)
-        return;
+	if (!m_associatedWin)
+		return;
 
-    if (state)
-    {
+	if (state)
+	{
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_CAMERA);
-        m_associatedWin->displayNewMessage("Transformation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-        m_associatedWin->displayNewMessage("Unpause to transform again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-    }
-    else
-    {
+		m_associatedWin->displayNewMessage("Transformation [PAUSED]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+		m_associatedWin->displayNewMessage("Unpause to transform again",ccGLWindow::UPPER_CENTER_MESSAGE,true,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
+	}
+	else
+	{
 		m_associatedWin->setInteractionMode(ccGLWindow::TRANSFORM_ENTITY);
 		m_associatedWin->displayNewMessage("[Rotation/Translation mode]",ccGLWindow::UPPER_CENTER_MESSAGE,false,3600,ccGLWindow::MANUAL_TRANSFORMATION_MESSAGE);
-    }
+	}
 
 	//update mini-GUI
 	pauseButton->blockSignals(true);
 	pauseButton->setChecked(state);
 	pauseButton->blockSignals(false);
 
-    m_associatedWin->redraw();
+	m_associatedWin->redraw();
 }
 
 void ccGraphicalTransformationTool::clear()

@@ -18,6 +18,8 @@
 #ifndef MANUAL_SEGMENTATION_TOOLS_HEADER
 #define MANUAL_SEGMENTATION_TOOLS_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "CCToolbox.h"
 #include "Neighbourhood.h"
 
@@ -32,14 +34,7 @@ class ReferenceCloud;
 class Polyline;
 
 //! Manual segmentation algorithms (inside/outside a polyline, etc.)
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API ManualSegmentationTools : public CCToolbox
-#else
-class ManualSegmentationTools : public CCToolbox
-#endif
 {
 public:
 

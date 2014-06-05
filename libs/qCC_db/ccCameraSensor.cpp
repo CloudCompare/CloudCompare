@@ -43,12 +43,12 @@ static const float	s_P2 =			static_cast<float>(5.25 * 1.0e-4);				// 2nd tangent
 ccCameraSensor::ccCameraSensor()
 	: ccSensor("Camera Sensor")
 {
-    //graphic representation
-    lockVisibility(false);
-	
+	//graphic representation
+	lockVisibility(false);
+
 	// scale
 	m_scale = 50.0f;
-	
+
 	// projection
 	m_intrinsicParams.focalLength = s_f;
 	m_intrinsicParams.pixelSize[0] = s_sX;
@@ -107,7 +107,7 @@ ccBBox ccCameraSensor::getMyOwnBB()
 //
 //	CCVector3 center = sensorPos.getTranslationAsVec3D();
 //
-//    return ccBBox(center + CCVector3(-1,-1,-1) * m_scale,
+//	return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
 //					center + CCVector3( 1, 1, 1) * m_scale);
 //}
 
@@ -623,10 +623,10 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			upperLeftPoint.x = upperLeftPoint.z * tan(m_intrinsicParams.vFieldOfView / aspectRatio / 2);
 
 			//up arrow
-			const float arrowHeight    = 1.5f * upperLeftPoint.y;
-			const float baseHeight     = 1.2f * upperLeftPoint.y;
-			const float arrowHalfWidth = 0.5f * upperLeftPoint.x;
-			const float baseHalfWidth  = 0.3f * upperLeftPoint.x;
+			const float arrowHeight		= 1.5f * upperLeftPoint.y;
+			const float baseHeight		= 1.2f * upperLeftPoint.y;
+			const float arrowHalfWidth	= 0.5f * upperLeftPoint.x;
+			const float baseHalfWidth	= 0.3f * upperLeftPoint.x;
 
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 			glColor3ubv(m_color.u);

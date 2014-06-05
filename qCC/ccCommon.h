@@ -50,10 +50,10 @@
 //! Common parameters and other stuff
 class ccCommon
 {
-    public:
+public:
 
-        //! Returns current software version
-        static QString GetCCVersion(bool full = true);
+	//! Returns current software version
+	static QString GetCCVersion(bool full = true);
 };
 
 #endif

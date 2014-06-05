@@ -82,7 +82,7 @@ ScalarType ccScalarField::normalize(ScalarType d) const
 	}
 	else //log scale
 	{
-        ScalarType dLog = log10(std::max(static_cast<ScalarType>(fabs(d)), static_cast<ScalarType>(ZERO_TOLERANCE)));
+		ScalarType dLog = log10(std::max(static_cast<ScalarType>(fabs(d)), static_cast<ScalarType>(ZERO_TOLERANCE)));
 		if (dLog <= m_logSaturationRange.start())
 			return 0;
 		else if (dLog >= m_logSaturationRange.stop())
@@ -263,9 +263,9 @@ void ccScalarField::setColorRampSteps(unsigned steps)
 	if (steps > ccColorScale::MAX_STEPS)
 		m_colorRampSteps = ccColorScale::MAX_STEPS;
 	else if (steps < ccColorScale::MIN_STEPS)
-        m_colorRampSteps = ccColorScale::MIN_STEPS;
-    else
-        m_colorRampSteps = steps;
+		m_colorRampSteps = ccColorScale::MIN_STEPS;
+	else
+		m_colorRampSteps = steps;
 }
 
 bool ccScalarField::toFile(QFile& out) const

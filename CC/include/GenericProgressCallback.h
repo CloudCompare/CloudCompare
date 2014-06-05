@@ -18,7 +18,8 @@
 #ifndef GENERIC_PROGRESS_CALLBACK_HEADER
 #define GENERIC_PROGRESS_CALLBACK_HEADER
 
-//CCConst
+//Local
+#include "CCCoreLib.h"
 #include "CCConst.h"
 
 //Qt
@@ -32,19 +33,12 @@ namespace CCLib
 {
 
 //! A generic progress indicator interface to notify algorithms progress to the client application
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API GenericProgressCallback
-#else
-class GenericProgressCallback
-#endif
 {
 public:
 
 	//! Default destructor
-	virtual ~GenericProgressCallback() {};
+	virtual ~GenericProgressCallback() {}
 
 	//! Resets the progress status
 	/** The progress (percentage) is set to 0, and the title/infos are cleared.
@@ -103,7 +97,7 @@ public:
 		\param totalSteps total number of steps
 		\param totalPercentage equivalent percentage
 	**/
-	NormalizedProgress(GenericProgressCallback* callback, unsigned totalSteps, unsigned totalPercentage=100)
+	NormalizedProgress(GenericProgressCallback* callback, unsigned totalSteps, unsigned totalPercentage = 100)
 		: m_percent(0)
 		, m_step(1)
 		, m_percentAdd(1.0f)

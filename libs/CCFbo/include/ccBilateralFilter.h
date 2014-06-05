@@ -42,19 +42,19 @@ class ccBilateralFilter : public ccGlFilter
 {
 public:
 
-    //! Default constructor
+	//! Default constructor
 	/** Default parameters:
 		- halfSpatialSize = 2
 		- spatialSigma = 2.0
 		- depthSigma = 0.4
 	**/
 	ccBilateralFilter();
-    //! Destructor
-    virtual ~ccBilateralFilter();
+	//! Destructor
+	virtual ~ccBilateralFilter();
 
-    void reset();
+	void reset();
 
-    //inherited from ccGlFilter
+	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const;
 	virtual bool init(int width, int height, QString shadersPath, QString& error);
 	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0f);

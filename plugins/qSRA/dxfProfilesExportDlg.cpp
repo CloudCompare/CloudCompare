@@ -29,9 +29,9 @@ DxfProfilesExportDlg::DxfProfilesExportDlg(QWidget* parent)
 	: QDialog(parent)
 	, Ui::DxfProfilesExportDlg()
 {
-    setupUi(this);
+	setupUi(this);
 
-    setWindowFlags(Qt::Tool);
+	setWindowFlags(Qt::Tool);
 
 	connect(vertBrowseToolButton, SIGNAL(clicked()), this, SLOT(browseVertFile()));
 	connect(horizBrowseToolButton, SIGNAL(clicked()), this, SLOT(browseHorizFile()));
@@ -42,8 +42,8 @@ DxfProfilesExportDlg::DxfProfilesExportDlg(QWidget* parent)
 
 void DxfProfilesExportDlg::initFromPersistentSettings()
 {
-    QSettings settings;
-    settings.beginGroup("DxfProfilesExportDialog");
+	QSettings settings;
+	settings.beginGroup("DxfProfilesExportDialog");
 
 	//read parameters
 	bool vertEnabled		= settings.value("vertExportGroup",	true).toBool();
@@ -82,8 +82,8 @@ void DxfProfilesExportDlg::initFromPersistentSettings()
 
 void DxfProfilesExportDlg::acceptAndSaveSettings()
 {
-    QSettings settings;
-    settings.beginGroup("DxfProfilesExportDialog");
+	QSettings settings;
+	settings.beginGroup("DxfProfilesExportDialog");
 
 	//write parameters
 	settings.setValue("vertExportGroup",	vertProfilesGroupBox->isChecked());
@@ -103,7 +103,7 @@ void DxfProfilesExportDlg::acceptAndSaveSettings()
 	settings.setValue("precision",			precisionSpinBox->value());
 	settings.setValue("magnifyCoef",		magnifyCoefSpinBox->value());
 
-    settings.endGroup();
+	settings.endGroup();
 }
 
 void DxfProfilesExportDlg::browseVertFile()

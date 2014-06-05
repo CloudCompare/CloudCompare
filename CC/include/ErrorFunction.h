@@ -18,6 +18,8 @@
 #ifndef ERROR_FUNCTION_HEADER
 #define ERROR_FUNCTION_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "MathTools.h"
 
 namespace CCLib
@@ -35,14 +37,7 @@ static const double c_erfRelativeError = 1e-12;
 	Most of the code comes from "erf.cpp" by Steve Strand
 	(29-Jan-04).
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API ErrorFunction : MathTools
-#else
-class ErrorFunction : MathTools
-#endif
 {
 public:
 

@@ -22,29 +22,27 @@
 #include <CCGeom.h>
 #include <GenericIndexedCloud.h>
 
+//Local
+#include "qCC_db.h"
 #include "ccImage.h"
 #include "ccGLMatrix.h"
 
+//system
 #include <vector>
 
 class ccPointCloud;
 class QDir;
 
 //! Image associated to 3D calibration information
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccCalibratedImage : public ccImage
-#else
-class ccCalibratedImage : public ccImage
-#endif
 {
 public:
 
 	//! Default constructor
 	ccCalibratedImage();
 
-    //! Returns unique class ID
-    virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CALIBRATED_IMAGE; }
+	//! Returns unique class ID
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::CALIBRATED_IMAGE; }
 
 	//! Sets camera focal (in pixels)
 	/** \param focal_pix focal expressed in pixels

@@ -29,9 +29,9 @@
 
 //! Max kernel size
 /** Can't add this as a static const definition (in the header file)
-	as this causes a 'double definition' link error on Windows - if
-	the definition is done in the cpp file - or a 'missing definition'
-	link error on MacOS - if the definition is not done in the cpp file ;)
+as this causes a 'double definition' link error on Windows - if
+the definition is done in the cpp file - or a 'missing definition'
+link error on MacOS - if the definition is not done in the cpp file ;)
 **/
 #define KERNEL_MAX_HALF_SIZE 7
 
@@ -62,7 +62,7 @@ ccGlFilter* ccBilateralFilter::clone() const
 
 ccBilateralFilter::~ccBilateralFilter()
 {
-    reset();
+	reset();
 
 	if (m_dampingPixelDist)
 		delete[] m_dampingPixelDist;
@@ -70,133 +70,133 @@ ccBilateralFilter::~ccBilateralFilter()
 
 void ccBilateralFilter::useExistingViewport(bool state)
 {
-    m_useCurrentViewport = state;
+	m_useCurrentViewport = state;
 }
 
 void ccBilateralFilter::reset()
 {
-    if (m_fbo)
-        delete m_fbo;
-    m_fbo = 0;
+	if (m_fbo)
+		delete m_fbo;
+	m_fbo = 0;
 
-    if (m_shader)
-        delete m_shader;
-    m_shader = 0;
+	if (m_shader)
+		delete m_shader;
+	m_shader = 0;
 
-    m_width = m_height = 0;
+	m_width = m_height = 0;
 }
 
 bool ccBilateralFilter::init(int width, int height, QString shadersPath, QString& error)
 {
-    if (!m_fbo)
-        m_fbo = new ccFrameBufferObject();
-    if (!m_fbo->init(width,height))
-    {
-        //ccLog::Warning("[Bilateral Filter] Can't initialize FBO!");
-        reset();
-        return false;
-    }
+	if (!m_fbo)
+		m_fbo = new ccFrameBufferObject();
+	if (!m_fbo->init(width,height))
+	{
+		//ccLog::Warning("[Bilateral Filter] Can't initialize FBO!");
+		reset();
+		return false;
+	}
 
-    m_fbo->start();
-    m_fbo->initTexture(0,GL_RGB/*GL_RGB32F*/,GL_RGB,GL_FLOAT);
-    m_fbo->stop();
+	m_fbo->start();
+	m_fbo->initTexture(0,GL_RGB/*GL_RGB32F*/,GL_RGB,GL_FLOAT);
+	m_fbo->stop();
 
-    if (!m_shader)
-        m_shader = new ccShader();
-	
-    if (!m_shader->fromFile(shadersPath, "bilateral",error))
-    {
-        //ccLog::Warning(QString("[Bilateral Filter] Can't load shader: %1").arg(error));
-        reset();
-        return false;
-    }
+	if (!m_shader)
+		m_shader = new ccShader();
 
-    m_width = width;
-    m_height = height;
+	if (!m_shader->fromFile(shadersPath, "bilateral",error))
+	{
+		//ccLog::Warning(QString("[Bilateral Filter] Can't load shader: %1").arg(error));
+		reset();
+		return false;
+	}
 
-    return true;
+	m_width = width;
+	m_height = height;
+
+	return true;
 }
 
 void ccBilateralFilter::setParams(unsigned halfSpatialSize, float spatialSigma, float depthSigma)
 {
-    m_halfSpatialSize	= std::min<unsigned>(halfSpatialSize,KERNEL_MAX_HALF_SIZE);
-    m_spatialSigma		= spatialSigma;
-    m_depthSigma		= depthSigma;
+	m_halfSpatialSize	= std::min<unsigned>(halfSpatialSize,KERNEL_MAX_HALF_SIZE);
+	m_spatialSigma		= spatialSigma;
+	m_depthSigma		= depthSigma;
 
 	updateDampingTable();
 }
 
 void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
 {
-    if (!m_fbo || !m_shader)
-        return;
+	if (!m_fbo || !m_shader)
+		return;
 
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
+	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
-    if (!m_useCurrentViewport)
-    {
-        //we must use corner-based screen coordinates
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadIdentity();
-        glOrtho(0.0,(GLdouble)m_width,0.0,(GLdouble)m_height,0.0,1.0);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
-    }
+	if (!m_useCurrentViewport)
+	{
+		//we must use corner-based screen coordinates
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		glOrtho(0.0,(GLdouble)m_width,0.0,(GLdouble)m_height,0.0,1.0);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+	}
 
-    //	HORIZONTAL
-    m_fbo->start();
-    m_fbo->setDrawBuffers1();
+	//	HORIZONTAL
+	m_fbo->start();
+	m_fbo->setDrawBuffers1();
 
-    m_shader->start();
-    m_shader->setUniform1i("s2_I",0);	// image to blur
-    m_shader->setUniform1i("s2_D",1);	// image to modulate filter
-    m_shader->setUniform1f("SX",static_cast<float>(m_width));
-    m_shader->setUniform1f("SY",static_cast<float>(m_height));
-    m_shader->setUniform1i("NHalf",m_halfSpatialSize);
+	m_shader->start();
+	m_shader->setUniform1i("s2_I",0);	// image to blur
+	m_shader->setUniform1i("s2_D",1);	// image to modulate filter
+	m_shader->setUniform1f("SX",static_cast<float>(m_width));
+	m_shader->setUniform1f("SY",static_cast<float>(m_height));
+	m_shader->setUniform1i("NHalf",m_halfSpatialSize);
 	m_shader->setTabUniform1fv("DistCoefs",64,m_dampingPixelDist);
-    m_shader->setUniform1f("SigmaDepth",m_depthSigma);
+	m_shader->setUniform1f("SigmaDepth",m_depthSigma);
 
-    //Texture 1 --> 2D
-    glActiveTexture(GL_TEXTURE1);
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D,texDepth);
+	//Texture 1 --> 2D
+	glActiveTexture(GL_TEXTURE1);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D,texDepth);
 
-    //Texture 0 --> 2D
-    glActiveTexture(GL_TEXTURE0);
-    //glEnable(GL_TEXTURE_2D);
-    //glBindTexture(GL_TEXTURE_2D,texColor);
+	//Texture 0 --> 2D
+	glActiveTexture(GL_TEXTURE0);
+	//glEnable(GL_TEXTURE_2D);
+	//glBindTexture(GL_TEXTURE_2D,texColor);
 
-    ccFBOUtils::DisplayTexture2DCorner(texColor,m_width,m_height);
+	ccFBOUtils::DisplayTexture2DCorner(texColor,m_width,m_height);
 
-    //Texture 0 --> 2D
-    //glActiveTexture(GL_TEXTURE0);
-    //glBindTexture(GL_TEXTURE_2D,0);
-    //glDisable(GL_TEXTURE_2D);
+	//Texture 0 --> 2D
+	//glActiveTexture(GL_TEXTURE0);
+	//glBindTexture(GL_TEXTURE_2D,0);
+	//glDisable(GL_TEXTURE_2D);
 
-    //Texture 1 --> 2D
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D,0);
-    glDisable(GL_TEXTURE_2D);
+	//Texture 1 --> 2D
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D,0);
+	glDisable(GL_TEXTURE_2D);
 
-    m_shader->stop();
-    m_fbo->stop();
+	m_shader->stop();
+	m_fbo->stop();
 
-    if (!m_useCurrentViewport)
-    {
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-        glPopMatrix();
-    }
+	if (!m_useCurrentViewport)
+	{
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+		glPopMatrix();
+	}
 
-    glPopAttrib();
+	glPopAttrib();
 }
 
 GLuint ccBilateralFilter::getTexture()
 {
-    return (m_fbo ? m_fbo->getColorTexture(0) : 0);
+	return (m_fbo ? m_fbo->getColorTexture(0) : 0);
 }
 
 void ccBilateralFilter::updateDampingTable()
@@ -209,10 +209,10 @@ void ccBilateralFilter::updateDampingTable()
 
 	for (unsigned c=0; c<=m_halfSpatialSize; c++)
 	{
-        for (unsigned d=0; d<=m_halfSpatialSize; d++)
-        {
-            //pixel distance based damping
-            m_dampingPixelDist[c*(m_halfSpatialSize+1)+d] = exp(-static_cast<float>(c*c+d*d)/q);
+		for (unsigned d=0; d<=m_halfSpatialSize; d++)
+		{
+			//pixel distance based damping
+			m_dampingPixelDist[c*(m_halfSpatialSize+1)+d] = exp(-static_cast<float>(c*c+d*d)/q);
 		}
 	}
 }

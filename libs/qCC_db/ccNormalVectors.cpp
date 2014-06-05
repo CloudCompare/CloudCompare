@@ -138,14 +138,14 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 												NormsIndexesTableType& theNormsCodes,
 												int preferedOrientation)
 {
-    assert(theCloud);
+	assert(theCloud);
 
 	if (preferedOrientation < 0 || preferedOrientation > 9)
 	{
 		ccLog::Warning(QString("[ccNormalVectors::UpdateNormalOrientations] Invalid parameter (prefered orientation = %1)").arg(preferedOrientation));
 		return false;
 	}
-    
+
 	//prefered orientation
 	CCVector3 orientation(0.0,0.0,0.0);
 	CCVector3 barycenter(0,0,0);
@@ -200,18 +200,18 @@ bool ccNormalVectors::UpdateNormalOrientations(	ccGenericPointCloud* theCloud,
 }
 
 bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
-                                            NormsIndexesTableType& theNormsCodes,
-                                            CC_LOCAL_MODEL_TYPES method,
+											NormsIndexesTableType& theNormsCodes,
+											CC_LOCAL_MODEL_TYPES method,
 											PointCoordinateType radius,
-                                            int preferedOrientation/*=-1*/,
-                                            CCLib::GenericProgressCallback* progressCb/*=0*/,
-                                            CCLib::DgmOctree* inputOctree/*=0*/)
+											int preferedOrientation/*=-1*/,
+											CCLib::GenericProgressCallback* progressCb/*=0*/,
+											CCLib::DgmOctree* inputOctree/*=0*/)
 {
-    assert(theCloud);
+	assert(theCloud);
 
 	unsigned n = theCloud->size();
 	if (n<3)
-        return false;
+		return false;
 
 	CCLib::DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
@@ -229,7 +229,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 		if (!theNormsCodes.resize(n))
 		{
 			if (!inputOctree)
-                delete theOctree;
+				delete theOctree;
 			return false;
 		}
 
@@ -240,7 +240,7 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	{
 		theNormsCodes.clear();
 		if (!inputOctree)
-            delete theOctree;
+			delete theOctree;
 		return false;
 	}
 	//theNorms->fill(0);
@@ -294,8 +294,9 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 															"Normals Computation[HF]");
 		}
 		break;
-    default:
-        break;
+
+	default:
+		break;
 	}
 
 	//error or canceled by user?
@@ -319,13 +320,13 @@ bool ccNormalVectors::ComputeCloudNormals(	ccGenericPointCloud* theCloud,
 	theNorms->release();
 	theNorms = 0;
 
-    //prefered orientation
+	//prefered orientation
 	if (preferedOrientation >= 0)
 		UpdateNormalOrientations(theCloud,theNormsCodes,preferedOrientation);
 
 	if (!inputOctree)
 	{
-        delete theOctree;
+		delete theOctree;
 		theOctree = 0;
 	}
 
@@ -348,7 +349,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithHF(const CCLib::DgmOctree::octreeCe
 
 	//we already know which points are lying in the current cell
 	unsigned n = cell.points->size();
-    nNSS.pointsInNeighbourhood.resize(n);
+	nNSS.pointsInNeighbourhood.resize(n);
 	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 	for (unsigned j=0; j<n; ++j,++it)
 	{
@@ -417,7 +418,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithLS(const CCLib::DgmOctree::octreeCe
 
 	//we already know which points are lying in the current cell
 	unsigned n = cell.points->size();
-    nNSS.pointsInNeighbourhood.resize(n);
+	nNSS.pointsInNeighbourhood.resize(n);
 	{
 		CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 		for (unsigned j=0; j<n; ++j,++it)
@@ -469,7 +470,7 @@ bool ccNormalVectors::ComputeNormsAtLevelWithTri(	const CCLib::DgmOctree::octree
 
 	//we already know which points are lying in the current cell
 	unsigned n = cell.points->size();
-    nNSS.pointsInNeighbourhood.resize(n);
+	nNSS.pointsInNeighbourhood.resize(n);
 	CCLib::DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
 	{
 		for (unsigned j=0; j<n; ++j,++it)
@@ -731,8 +732,8 @@ void ccNormalVectors::ConvertNormalToStrikeAndDip(const CCVector3& N, double& st
 	output is in degrees north of east and then
 	uses a right hand rule for the dip of the plane
 	//*/
-	strike_deg = 180.0 - atan2(N.y,N.x)*CC_RAD_TO_DEG; //atan2 output is between -180 and 180! So strike is always positive here
-	PointCoordinateType x = sqrt(N.x*N.x+N.y*N.y);   /* x is the horizontal magnitude */
+	strike_deg = 180.0 - atan2(N.y,N.x)*CC_RAD_TO_DEG;	//atan2 output is between -180 and 180! So strike is always positive here
+	PointCoordinateType x = sqrt(N.x*N.x+N.y*N.y);		//x is the horizontal magnitude
 	dip_deg = atan2(x,N.z)*CC_RAD_TO_DEG;
 }
 

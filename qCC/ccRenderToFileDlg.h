@@ -25,38 +25,37 @@
 //! Dialog for screen to file rendering
 class ccRenderToFileDlg : public QDialog, public Ui::RenderToFileDialog
 {
-    Q_OBJECT
+	Q_OBJECT
 
-    public:
+public:
 
-		//! Default constructor
-        ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent = 0);
+	//! Default constructor
+	ccRenderToFileDlg(unsigned baseWidth, unsigned baseHeight, QWidget* parent = 0);
 
-		//! On dialog acceptance, returns requested zoom
-        float getZoom() const;
-		//! On dialog acceptance, returns requested output filename
-        QString getFilename() const;
-		//! On dialog acceptance, returns whether points should be scaled or not
-		bool dontScalePoints() const;
-		//! Whether overlay items should be rendered
-		bool renderOverlayItems() const;
+	//! On dialog acceptance, returns requested zoom
+	float getZoom() const;
+	//! On dialog acceptance, returns requested output filename
+	QString getFilename() const;
+	//! On dialog acceptance, returns whether points should be scaled or not
+	bool dontScalePoints() const;
+	//! Whether overlay items should be rendered
+	bool renderOverlayItems() const;
 
 
-    protected slots:
+	protected slots:
 
-        void chooseFile();
-        void updateInfo();
-        void saveSettings();
+		void chooseFile();
+		void updateInfo();
+		void saveSettings();
 
-    protected:
+protected:
 
-        unsigned w;
-        unsigned h;
+	unsigned w;
+	unsigned h;
 
-		QString selectedFilter;
-        QString currentPath;
-        QString filters;
+	QString selectedFilter;
+	QString currentPath;
+	QString filters;
 };
 
-#endif
-
+#endif //CC_RENDER_TO_FILE_DLG_HEADER

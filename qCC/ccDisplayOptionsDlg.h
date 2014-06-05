@@ -38,85 +38,85 @@
 //! Dialog to setup display settings
 class ccDisplayOptionsDlg : public QDialog, public Ui::DisplayOptionsDlg
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 
-    //! Default constructor
-    ccDisplayOptionsDlg(QWidget* parent);
+	//! Default constructor
+	ccDisplayOptionsDlg(QWidget* parent);
 
-    //! Sets a button background color
-    /** Support Windows XP style particularity.
-    **/
-    inline static void SetButtonColor(QAbstractButton* button, const QColor &col)
+	//! Sets a button background color
+	/** Support Windows XP style particularity.
+	**/
+	inline static void SetButtonColor(QAbstractButton* button, const QColor &col)
 	{
 		if (button)
 			button->setStyleSheet(QString("* { background-color: rgb(%1,%2,%3) }").arg(col.red()).arg(col.green()).arg(col.blue()));
 	}
 
-    //! Sets a button text color
-    /** Support Windows XP style particularity.
-    **/
-    static void SetButtonTextColor(QAbstractButton* button, const QColor &col);
+	//! Sets a button text color
+	/** Support Windows XP style particularity.
+	**/
+	static void SetButtonTextColor(QAbstractButton* button, const QColor &col);
 
 signals:
-    void aspectHasChanged();
+	void aspectHasChanged();
 
-protected slots:
-    void changeLightDiffuseColor();
-    void changeLightAmbientColor();
-    void changeLightSpecularColor();
-    void changeMeshFrontDiffuseColor();
-    void changeMeshBackDiffuseColor();
-	void changeMeshSpecularColor();
-    void changePointsColor();
-    void changeBBColor();
-    void changeTextColor();
-    void changeBackgroundColor();
-	void changeHistBackgroundColor();
-	void changeLabelColor();
-    void changeBackgroundGradient();
-    void changeMeshDecimation();
-    void changeCloudDecimation();
-	void changeVBOUsage();
-    void changeCrossDisplayed();
-	void changeColorScaleShowHistogram();
-	void changeColorScaleUseShader();
-	void changeColorScaleRampWidth(int);
-	
-	void changeDefaultFontSize(int);
-	void changeNumberPrecision(int);
-	void changeLabelsTransparency(int);
-	void changeLabelsMarkerSize(int);
+	protected slots:
+		void changeLightDiffuseColor();
+		void changeLightAmbientColor();
+		void changeLightSpecularColor();
+		void changeMeshFrontDiffuseColor();
+		void changeMeshBackDiffuseColor();
+		void changeMeshSpecularColor();
+		void changePointsColor();
+		void changeBBColor();
+		void changeTextColor();
+		void changeBackgroundColor();
+		void changeHistBackgroundColor();
+		void changeLabelColor();
+		void changeBackgroundGradient();
+		void changeMeshDecimation();
+		void changeCloudDecimation();
+		void changeVBOUsage();
+		void changeCrossDisplayed();
+		void changeColorScaleShowHistogram();
+		void changeColorScaleUseShader();
+		void changeColorScaleRampWidth(int);
 
-    void doAccept();
-    void doReject();
-    void apply();
-    void reset();
+		void changeDefaultFontSize(int);
+		void changeNumberPrecision(int);
+		void changeLabelsTransparency(int);
+		void changeLabelsMarkerSize(int);
+
+		void doAccept();
+		void doReject();
+		void apply();
+		void reset();
 
 protected:
 
-    //! Refreshes dialog to reflect new parameters values
-    void refresh();
+	//! Refreshes dialog to reflect new parameters values
+	void refresh();
 
-    QColor lightDiffuseColor;
-    QColor lightAmbientColor;
-    QColor lightSpecularColor;
-    QColor meshFrontDiff;
-    QColor meshBackDiff;
+	QColor lightDiffuseColor;
+	QColor lightAmbientColor;
+	QColor lightSpecularColor;
+	QColor meshFrontDiff;
+	QColor meshBackDiff;
 	QColor meshSpecularColor;
-    QColor pointsDefaultCol;
-    QColor textDefaultCol;
-    QColor backgroundCol;
-    QColor histBackgroundCol;
-    QColor labelCol;
-    QColor bbDefaultCol;
+	QColor pointsDefaultCol;
+	QColor textDefaultCol;
+	QColor backgroundCol;
+	QColor histBackgroundCol;
+	QColor labelCol;
+	QColor bbDefaultCol;
 
-    //! Current parameters
-    ccGui::ParamStruct parameters;
+	//! Current parameters
+	ccGui::ParamStruct parameters;
 
-    //! Old parameters (for restore)
-    ccGui::ParamStruct oldParameters;
+	//! Old parameters (for restore)
+	ccGui::ParamStruct oldParameters;
 };
 
 #endif

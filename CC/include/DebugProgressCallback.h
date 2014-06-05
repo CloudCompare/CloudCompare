@@ -18,6 +18,8 @@
 #ifndef DEBUG_PROGRESS_CALLBACK_HEADER
 #define DEBUG_PROGRESS_CALLBACK_HEADER
 
+//Local
+#include "CCCoreLib.h"
 #include "GenericProgressCallback.h"
 
 namespace CCLib
@@ -26,14 +28,7 @@ namespace CCLib
 //! Displays the progress status and other information about an ongoing process in a text console
 /** Implements the GenericProgressCallback interface.
 **/
-
-#ifdef CC_USE_AS_DLL
-#include "CloudCompareDll.h"
-
 class CC_CORE_LIB_API DebugProgressCallback : public GenericProgressCallback
-#else
-class DebugProgressCallback : public GenericProgressCallback
-#endif
 {
 public:
 

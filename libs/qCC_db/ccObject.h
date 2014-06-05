@@ -19,6 +19,7 @@
 #define CC_OBJECT_HEADER
 
 //Local
+#include "qCC_db.h"
 #include "ccSerializableObject.h"
 
 //Qt
@@ -29,10 +30,9 @@
 #include <stdint.h>
 
 //! Object state flag
-enum CC_OBJECT_FLAG {
-    //CC_UNUSED				=   1, //DGM: not used anymore (former CC_FATHER_DEPENDENT)
-    CC_ENABLED              =   2,
-    CC_LOCKED               =   4,
+enum CC_OBJECT_FLAG {	//CC_UNUSED			= 1, //DGM: not used anymore (former CC_FATHER_DEPENDENT)
+						CC_ENABLED			= 2,
+						CC_LOCKED			= 4,
 };
 
 //Bits for object type flags (64 bits)
@@ -147,69 +147,64 @@ public:
 };
 
 //! Generic "CloudCompare Object" template
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccObject : public ccSerializableObject
-#else
-class ccObject : public ccSerializableObject
-#endif
 {
 public:
 
-    //! Default constructor
-    /** \param name object name (optional)
-    **/
-    ccObject(QString name = QString());
+	//! Default constructor
+	/** \param name object name (optional)
+	**/
+	ccObject(QString name = QString());
 
 	//! Returns current database version
 	static unsigned GetCurrentDBVersion();
 
-    //! Returns class ID
-    virtual CC_CLASS_ENUM getClassID() const = 0;
+	//! Returns class ID
+	virtual CC_CLASS_ENUM getClassID() const = 0;
 
-    //! Returns object name
+	//! Returns object name
 	virtual inline QString getName() const { return m_name; }
 
-    //! Sets object name
+	//! Sets object name
 	virtual inline void setName(const QString& name) { m_name = name; }
 
-    //! Returns object unique ID
+	//! Returns object unique ID
 	virtual inline unsigned getUniqueID() const { return m_uniqueID; }
 
 	//! Changes unique ID
 	/** WARNING: HANDLE WITH CARE!
 		Updates persistent settings (last unique ID) if necessary.
 	**/
-    virtual void setUniqueID(unsigned ID);
+	virtual void setUniqueID(unsigned ID);
 
-    //! Returns whether the object is enabled or not
-    /** Shortcut to access flag CC_ENABLED
-    **/
+	//! Returns whether the object is enabled or not
+	/** Shortcut to access flag CC_ENABLED
+	**/
 	virtual inline bool isEnabled() const { return getFlagState(CC_ENABLED); }
 
-    //! Sets the "enabled" property
-    /** Shortcut to modify flag CC_ENABLED
-    **/
+	//! Sets the "enabled" property
+	/** Shortcut to modify flag CC_ENABLED
+	**/
 	virtual inline void setEnabled(bool state) { setFlagState(CC_ENABLED,state); }
 
-    //! Returns whether the object is locked  or not
-    /** Shortcut to access flag CC_LOCKED
-    **/
+	//! Returns whether the object is locked  or not
+	/** Shortcut to access flag CC_LOCKED
+	**/
 	virtual inline bool isLocked() const { return getFlagState(CC_LOCKED); }
 
-    //! Sets the "enabled" property
-    /** Shortcut to modify flag CC_LOCKED
-    **/
+	//! Sets the "enabled" property
+	/** Shortcut to modify flag CC_LOCKED
+	**/
 	virtual inline void setLocked(bool state) { setFlagState(CC_LOCKED,state); }
 
-    //shortcuts
-    inline bool isGroup() const { return (getClassID() & CC_GROUP_BIT) != 0; }
-    inline bool isLeaf() const {return (getClassID() & CC_LEAF_BIT) != 0; }
-    inline bool isCustom() const {return (getClassID() & CC_CUSTOM_BIT) != 0; }
-    inline bool isHierarchy() const { return (getClassID() & CC_HIERARCH_BIT) != 0; }
+	//shortcuts
+	inline bool isGroup() const { return (getClassID() & CC_GROUP_BIT) != 0; }
+	inline bool isLeaf() const {return (getClassID() & CC_LEAF_BIT) != 0; }
+	inline bool isCustom() const {return (getClassID() & CC_CUSTOM_BIT) != 0; }
+	inline bool isHierarchy() const { return (getClassID() & CC_HIERARCH_BIT) != 0; }
 
-    inline bool isKindOf(CC_CLASS_ENUM type) const { return (getClassID() & type) == type; }
-    inline bool isA(CC_CLASS_ENUM type) const { return (getClassID() == type); }
+	inline bool isKindOf(CC_CLASS_ENUM type) const { return (getClassID() & type) == type; }
+	inline bool isA(CC_CLASS_ENUM type) const { return (getClassID() == type); }
 
 	//! Resets the object's unique ID counter
 	/** Warning: should be called only once, on program startup.
@@ -253,25 +248,25 @@ public:
 	**/
 	void setMetaData(QString key, QVariant data);
 
-    //! Says if a metadata with the given key exists or not
-    /** \param key is the key to look for
-        \return true, if exists
-    **/
-    bool hasMetaData(QString key);
+	//! Says if a metadata with the given key exists or not
+	/** \param key is the key to look for
+		\return true, if exists
+	**/
+	bool hasMetaData(QString key);
 
 	//! Returns meta-data map (const only)
 	const QVariantMap& metaData() const { return m_metaData; }
 
 protected:
 
-    //! Returns flag state
+	//! Returns flag state
 	virtual inline bool getFlagState(CC_OBJECT_FLAG flag) const { return (m_flags & flag); }
 
-    //! Sets flag state
-    /** \param flag object flag to set
-        \param state flag state
-    **/
-    virtual void setFlagState(CC_OBJECT_FLAG flag, bool state);
+	//! Sets flag state
+	/** \param flag object flag to set
+		\param state flag state
+	**/
+	virtual void setFlagState(CC_OBJECT_FLAG flag, bool state);
 
 	//inherited from ccSerializableObject
 	virtual bool toFile(QFile& out) const;
@@ -290,19 +285,19 @@ protected:
 	**/
 	static void UpdateLastUniqueID(unsigned lastID);
 
-    //! Object name
-    QString m_name;
+	//! Object name
+	QString m_name;
 
-    //! Object flags
-    unsigned m_flags;
+	//! Object flags
+	unsigned m_flags;
 
 	//! Associated meta-data
 	QVariantMap m_metaData;
 
 private:
 
-    //! Object unique ID
-    unsigned m_uniqueID;
+	//! Object unique ID
+	unsigned m_uniqueID;
 };
 
 #endif //CC_OBJECT_HEADER

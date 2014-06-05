@@ -22,82 +22,79 @@
 #include <CCGeom.h>
 #include <Matrix.h>
 
+//Local
+#include "qCC_db.h"
 #include "ccGLMatrix.h"
 #include "ccBasicTypes.h"
 
 //! Bounding box structure
 /** Supports several operators such addition (to a matrix or a vector) and
-    multiplication (by a matrix or a scalar).
+	multiplication (by a matrix or a scalar).
 **/
-#ifdef QCC_DB_USE_AS_DLL
-#include "qCC_db.h"
 class QCC_DB_LIB_API ccBBox
-#else
-class ccBBox
-#endif
 {
 public:
 
-    //! Default constructor
-    ccBBox();
-    //! Copy constructor
-    ccBBox(const ccBBox& aBBox);
-    //! Constructor from two vectors (lower min. and upper max. corners)
-    ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner);
+	//! Default constructor
+	ccBBox();
+	//! Copy constructor
+	ccBBox(const ccBBox& aBBox);
+	//! Constructor from two vectors (lower min. and upper max. corners)
+	ccBBox(const CCVector3& bbMinCorner, const CCVector3& bbMaxCorner);
 
-    //! Returns the 'sum' of this bounding-box and another one
-    ccBBox operator + (const ccBBox& aBBox) const;
-    //! In place 'sum' of this bounding-box with another one
-    const ccBBox& operator += (const ccBBox& aBBox);
-    //! Shifts the bounding box with a vector
-    const ccBBox& operator += (const CCVector3& aVector);
-    //! Shifts the bounding box with a vector
-    const ccBBox& operator -= (const CCVector3& aVector);
-    //! Scales the bounding box
-    const ccBBox& operator *= (PointCoordinateType scaleFactor);
-    //! Rotates the bounding box
-    const ccBBox& operator *= (const CCLib::SquareMatrix& aMatrix);
-    //! Applies transformation to the bounding box
-    const ccBBox& operator *= (const ccGLMatrix& mat);
+	//! Returns the 'sum' of this bounding-box and another one
+	ccBBox operator + (const ccBBox& aBBox) const;
+	//! In place 'sum' of this bounding-box with another one
+	const ccBBox& operator += (const ccBBox& aBBox);
+	//! Shifts the bounding box with a vector
+	const ccBBox& operator += (const CCVector3& aVector);
+	//! Shifts the bounding box with a vector
+	const ccBBox& operator -= (const CCVector3& aVector);
+	//! Scales the bounding box
+	const ccBBox& operator *= (PointCoordinateType scaleFactor);
+	//! Rotates the bounding box
+	const ccBBox& operator *= (const CCLib::SquareMatrix& aMatrix);
+	//! Applies transformation to the bounding box
+	const ccBBox& operator *= (const ccGLMatrix& mat);
 
-    //! Resets the bounding box
-    /** (0,0,0) --> (0,0,0)
-    **/
-    void clear();
+	//! Resets the bounding box
+	/** (0,0,0) --> (0,0,0)
+	**/
+	void clear();
 
-    //! 'Enlarges' the bounding box with a point
-    void add(const CCVector3& aPoint);
+	//! 'Enlarges' the bounding box with a point
+	void add(const CCVector3& aPoint);
 
-    //! Returns min corner (const)
-    inline const CCVector3& minCorner() const { return m_bbMin; }
-    //! Returns max corner (const)
-    inline const CCVector3& maxCorner() const { return m_bbMax; }
+	//! Returns min corner (const)
+	inline const CCVector3& minCorner() const { return m_bbMin; }
+	//! Returns max corner (const)
+	inline const CCVector3& maxCorner() const { return m_bbMax; }
 
-    //! Returns min corner
+	//! Returns min corner
 	inline CCVector3& minCorner() { return m_bbMin; }
-    //! Returns max corner
-    inline CCVector3& maxCorner() { return m_bbMax; }
+	//! Returns max corner
+	inline CCVector3& maxCorner() { return m_bbMax; }
 
-    //! Returns center
-    CCVector3 getCenter() const;
-    //! Returns diagonal vector
-    CCVector3 getDiagVec() const;
-    //! Returns diagonal length
-    PointCoordinateType getDiagNorm() const;
+	//! Returns center
+	CCVector3 getCenter() const;
+	//! Returns diagonal vector
+	CCVector3 getDiagVec() const;
+	//! Returns diagonal length
+	PointCoordinateType getDiagNorm() const;
 	//! Returns minimal box dimension
 	PointCoordinateType getMinBoxDim() const;
 	//! Returns maximal box dimension
 	PointCoordinateType getMaxBoxDim() const;
 
-    //! Draws bounding box (OpenGL)
-    /** \param col (R,G,B) color
-    **/
-    void draw(const colorType col[]) const;
+	//! Draws bounding box (OpenGL)
+	/** \param col (R,G,B) color
+	**/
+	void draw(const colorType col[]) const;
 
-    //! Sets bonding box validity
+	//! Sets bonding box validity
 	inline void setValidity(bool state) { m_valid = state; }
 
-    //! Returns whether bounding box is valid or not
+	//! Returns whether bounding box is valid or not
 	inline bool isValid() const { return m_valid; }
 
 	//! Computes min gap (absolute distance) between this bounding-box and another one
@@ -117,12 +114,12 @@ public:
 
 protected:
 
-    //! Lower min. corner
-    CCVector3 m_bbMin;
-    //! Upper max. corner
-    CCVector3 m_bbMax;
-    //! Validity
-    bool m_valid;
+	//! Lower min. corner
+	CCVector3 m_bbMin;
+	//! Upper max. corner
+	CCVector3 m_bbMax;
+	//! Validity
+	bool m_valid;
 };
 
 #endif //CC_BBOX_HEADER

@@ -27,35 +27,196 @@
 //System
 #include <assert.h>
 
+/*********************************/
+/*** CUSTOM QCustomPlot wigets ***/
+/*********************************/
+
+//! Vertical bar with text along side
+class QCPBarsWithText : public QCPBars
+{
+public:
+
+	QCPBarsWithText(QCPAxis* keyAxis, QCPAxis* valueAxis) : QCPBars(keyAxis,valueAxis), m_textOnTheLeft(false) {}
+
+	void setText(QString text) { m_text = QStringList(text); }
+	void appendText(QString text) { m_text.append(text); }
+	void setTextAlignment(bool left) { m_textOnTheLeft = left; }
+
+protected:
+	
+	QStringList m_text;
+	bool m_textOnTheLeft;
+	
+	// reimplemented virtual draw method
+	virtual void draw(QCPPainter *painter)
+	{
+		if (!mKeyAxis || !mValueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
+
+		//switch to standard display
+		QCPBars::draw(painter);
+
+		int fontHeight = painter->fontMetrics().height();
+
+		if (!mData->isEmpty())
+		{
+			double& key = mData->begin()->key;
+			double& value = mData->begin()->value;
+			QPointF P = coordsToPixels(key, value);
+			//apply a small shift
+			int margin = 5; //in pixels
+			if (m_textOnTheLeft)
+				margin = -margin;
+			P.setX(P.x() + margin);
+			//we draw at the 'base' line
+			P.setY(P.y() + fontHeight);
+
+			for (int i=0; i<m_text.size(); ++i)
+			{
+				QPointF Pstart = P;
+				if (m_textOnTheLeft)
+					Pstart.setX(P.x() - painter->fontMetrics().width(m_text[i]));
+				painter->drawText(Pstart,m_text[i]);
+				P.setY(P.y() + fontHeight);
+			}
+		}
+	}
+
+};
+
+//! Colored histogram
+class QCPColoredBars : public QCPBars
+{
+public:
+
+	class QCPColoredBarData : public QCPBarData
+	{
+	public:
+		QCPColoredBarData()
+			: QCPBarData()
+			, color(Qt::blue)
+		{}
+
+		QColor color;
+	};
+	typedef QMap<double, QCPColoredBarData> QCPColoredBarDataMap;
+
+	QCPColoredBars(QCPAxis *keyAxis, QCPAxis *valueAxis) : QCPBars(keyAxis,valueAxis) {}
+	
+	void setData(const QVector<double> &key, const QVector<double> &value)
+	{
+		//no colors? we switch to the standard QCPBars object
+		m_coloredData.clear();
+		QCPBars::setData(key,value);
+	}
+
+	void setData(const QVector<double> &key, const QVector<double> &value, const QVector<QColor>& colors)
+	{
+		Q_ASSERT(colors.size() == key.size());
+
+		mData->clear(); //we duplicate the structures so that other stuff in QCPBarData works!
+
+		int n = qMin(key.size(), value.size());
+
+		for (int i=0; i<n; ++i)
+		{
+			QCPColoredBarData newData;
+			newData.key = key[i];
+			newData.value = value[i];
+			if (colors.size() > i)
+				newData.color = colors[i];
+			m_coloredData.insertMulti(newData.key, newData);
+			mData->insertMulti(newData.key, newData);
+		}
+	}
+
+	inline QRect rect() const { return clipRect(); }
+
+protected:
+
+	// reimplemented virtual draw method
+	virtual void draw(QCPPainter *painter)
+	{
+		//no colors?
+		if (m_coloredData.empty())
+		{
+			//switch to standard display
+			QCPBars::draw(painter);
+		}
+
+		if (!mKeyAxis || !mValueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
+
+		QCPColoredBarDataMap::const_iterator it;
+		for (it = m_coloredData.constBegin(); it != m_coloredData.constEnd(); ++it)
+		{
+			// skip bar if not visible in key axis range:
+			if (it.key()+mWidth*0.5 < mKeyAxis.data()->range().lower || it.key()-mWidth*0.5 > mKeyAxis.data()->range().upper)
+				continue;
+
+			QPolygonF barPolygon = getBarPolygon(it.key(), it.value().value);
+			// draw bar fill:
+			if (mainBrush().style() != Qt::NoBrush && mainBrush().color().alpha() != 0)
+			{
+				QBrush brush = mainBrush();
+				brush.setColor(it.value().color);
+				
+				applyFillAntialiasingHint(painter);
+				painter->setPen(Qt::NoPen);
+				painter->setBrush(brush);
+				painter->drawPolygon(barPolygon);
+			}
+			// draw bar line:
+			if (mainPen().style() != Qt::NoPen && mainPen().color().alpha() != 0)
+			{
+				QPen pen = mainPen();
+				pen.setColor(it.value().color);
+
+				applyDefaultAntialiasingHint(painter);
+				painter->setPen(pen);
+				painter->setBrush(Qt::NoBrush);
+				painter->drawPolyline(barPolygon);
+			}
+		}
+	}
+
+	QCPColoredBarDataMap m_coloredData;
+};
+
+/*********************************/
+/*** ccHistogramWindow stuffs  ***/
+/*********************************/
+
 ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
-	: QGLWidget(parent)
-	, m_viewInitialized(false)
-	, m_numberOfClassesCanBeChanged(false)
+	: QCustomPlot(parent)
+	, m_titlePlot(0)
+	, m_colorScheme(USE_SOLID_COLOR)
+	, m_solidColor(Qt::blue)
+	, m_colorScale(ccColorScalesManager::GetDefaultScale())
 	, m_associatedSF(0)
+	, m_numberOfClassesCanBeChanged(false)
+	, m_histogram(0)
 	, m_minVal(0)
 	, m_maxVal(0)
 	, m_maxHistoVal(0)
-	, m_maxCurveValue(0)
-	, m_xMinusButton(0)
-	, m_yMinusButton(0)
-	, m_xPlusButton(0)
-	, m_yPlusButton(0)
-	, m_buttonSize(13)
+	, m_vertBar(0)
 	, m_drawVerticalIndicator(false)
 	, m_verticalIndicatorPositionPercent(0)
 {
-	memset(m_roi,0,sizeof(int)*4);
-
 	setWindowTitle("Histogram");
 	setFocusPolicy(Qt::StrongFocus);
 
-	setMinimumSize(400,300);
-	resize(400,375);
+	setMinimumSize(300,200);
 
 	//default font for text rendering
 	m_renderingFont.setFamily(QString::fromUtf8("Arial"));
 	m_renderingFont.setBold(false);
 	//m_renderingFont.setWeight(75);
+
+	// make ticks on bottom axis go outward
+	assert(xAxis && yAxis);
+	xAxis->setTickLength(0, 5);
+	xAxis->setSubTickLength(0, 3);
+	yAxis->setTickLength(0, 5);
+	yAxis->setSubTickLength(0, 3);
 }
 
 ccHistogramWindow::~ccHistogramWindow()
@@ -66,40 +227,79 @@ ccHistogramWindow::~ccHistogramWindow()
 void ccHistogramWindow::clear()
 {
 	clearInternal();
-	updateGL();
+	refresh();
 }
 
 void ccHistogramWindow::clearInternal()
 {
+	if (m_associatedSF)
+	{
+		m_associatedSF->release();
+		m_associatedSF = 0;
+	}
+
 	m_histoValues.clear();
 	m_maxHistoVal = 0;
 
 	m_curveValues.clear();
-	m_maxCurveValue = 0.0;
 }
 
-void ccHistogramWindow::closeEvent(QCloseEvent *event)
+void ccHistogramWindow::setTitle(const QString& str)
 {
-	clearInternal();
-	event->accept();
+	m_titleStr = str;
 }
 
-void ccHistogramWindow::setInfoStr(const QString& str)
+void ccHistogramWindow::setAxisLabels(const QString& xLabel, const QString& yLabel)
 {
-	m_infoStr = str;
+	if (xLabel.isNull())
+	{
+		xAxis->setVisible(false);
+	}
+	else
+	{
+		// set labels
+		xAxis->setLabel(xLabel);
+		xAxis->setVisible(true);
+	}
+
+	if (xLabel.isNull())
+	{
+		yAxis->setVisible(false);
+	}
+	else
+	{
+		// set labels
+		yAxis->setLabel(yLabel);
+		yAxis->setVisible(true);
+	}
 }
 
-void ccHistogramWindow::fromSF(ccScalarField* sf,
+void ccHistogramWindow::fromSF(	ccScalarField* sf,
 								unsigned initialNumberOfClasses/*=0*/,
 								bool numberOfClassesCanBeChanged/*=true*/)
 {
-	assert(sf);
+	if (m_associatedSF != sf)
+	{
+		if (m_associatedSF)
+			m_associatedSF->release();
+		m_associatedSF = sf;
+	}
 
-	m_associatedSF = sf;
-	m_minVal = m_associatedSF->getMin();
-	m_maxVal = m_associatedSF->getMax();
-	m_numberOfClassesCanBeChanged = numberOfClassesCanBeChanged;
+	if (m_associatedSF)
+	{
+		m_minVal = m_associatedSF->getMin();
+		m_maxVal = m_associatedSF->getMax();
+		m_numberOfClassesCanBeChanged = numberOfClassesCanBeChanged;
+		m_associatedSF->link();
+	}
+	else
+	{
+		assert(false);
+		m_minVal = m_maxVal = 0;
+		m_numberOfClassesCanBeChanged = false;
+	}
 
+	setColorScheme(USE_SF_SCALE);
 	setNumberOfClasses(initialNumberOfClasses);
 };
 
@@ -132,13 +332,8 @@ void ccHistogramWindow::setCurveValues(const std::vector<double>& curveValues)
 	}
 	catch(std::bad_alloc)
 	{
-		ccLog::Warning("[ccHistogramWindow::fromBinArray] Not enough memory!");
+		ccLog::Warning("[ccHistogramWindow::setCurveValues] Not enough memory!");
 	}
-	
-	//compute max curve value by the way
-	m_maxCurveValue = 0.0;
-	for (size_t i=0; i<m_curveValues.size(); ++i)
-		m_maxCurveValue = std::max(m_maxCurveValue,m_curveValues[i]);
 }
 
 bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
@@ -175,14 +370,15 @@ bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 	if (range > 0.0)
 	{
 		unsigned count = m_associatedSF->currentSize();
+		double step = range/static_cast<double>(binCount);
 		for (unsigned i=0; i<count; ++i)
 		{
 			double val = static_cast<double>(m_associatedSF->getValue(i));
 
-			//we ignore values outside of [m_minVal,m_maxVal]
-			if (val >= m_minVal && val <= m_maxVal)
+			//we ignore values outside of [m_minVal,m_maxVal] (works fro NaN values as well)
+			if (/*ccScalarField::ValidValue(val) &&*/val >= m_minVal && val <= m_maxVal)
 			{
-				size_t bin = static_cast<size_t>( floor((val-m_minVal)*static_cast<double>(binCount)/range) );
+				size_t bin = static_cast<size_t>( floor((val-m_minVal) / step) );
 				++m_histoValues[std::min(bin,binCount-1)];
 			}
 		}
@@ -236,357 +432,208 @@ void ccHistogramWindow::setNumberOfClasses(size_t n)
 	m_maxHistoVal = getMaxHistoVal();
 }
 
-void drawButton(int xButton, int yButton, int buttonSize)
+void ccHistogramWindow::refresh()
 {
-	glBegin(GL_LINE_LOOP);
-	glVertex2i(xButton,yButton);
-	glVertex2i(xButton+buttonSize-1,yButton);
-	glVertex2i(xButton+buttonSize-1,yButton-buttonSize+1);
-	glVertex2i(xButton,yButton-buttonSize+1);
-	glEnd();
-}
+	// set ranges appropriate to show data
+	xAxis->setRange(m_minVal, m_maxVal);
+	yAxis->setRange(0, m_maxHistoVal);
 
-//structure for recursive display of labels
-struct hlabel
-{
-	int leftXpos; 			/**< left label center pos **/
-	int leftXmax; 			/**< left label 'ROI' max **/
-	double leftVal; 		/**< left label value **/
-
-	int rightXpos;			/**< right label center pos **/
-	int rightXmin;			/**< right label 'ROI' min **/
-	double rightVal;		/**< right label value **/
-};
-
-void ccHistogramWindow::paintGL()
-{
-	makeCurrent();
-
-	//for proper display of labels!
-	m_renderingFont.setPointSize(ccGui::Parameters().defaultFontSize);
-	QFontMetrics strMetrics(m_renderingFont);
-	//precision (same as color scale)
-	int precision = static_cast<int>(ccGui::Parameters().displayedNumPrecision);
-
-	//background color
-	const unsigned char* bkgCol = m_displayParameters.getBackgroundColor();
-	glClearColor(	static_cast<float>(bkgCol[0])/255,
-					static_cast<float>(bkgCol[1])/255,
-					static_cast<float>(bkgCol[2])/255,
-					1.0f );
-	glClear(GL_COLOR_BUFFER_BIT);
-
-	int w = width();
-	int h = height();
-
-	//we always reinit the OpenGL context (simpler, safer)
-	glViewport(0,0,width(),height());
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	glOrtho(0,w-1,0,h-1,-1.0,1.0);
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-
-	//default color: text color
-	const unsigned char* textCol = m_displayParameters.getDefaultColor();
-	//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-	glColor3f(	static_cast<float>(textCol[0])/255,
-				static_cast<float>(textCol[1])/255,
-				static_cast<float>(textCol[2])/255 );
-
-	//margins, etc.
-	const int c_outerMargin = 10;
-	const int c_innerMargin = 2;
-	const int c_ticksSize = 5;
-	const int c_strHeight = strMetrics.height();
-	const int c_strDescent = strMetrics.descent();
-
-	//+/- buttons (top-right)
-	if (m_numberOfClassesCanBeChanged)
+	if (!m_titleStr.isEmpty())
 	{
-		int yMin = h-c_outerMargin;
-		int yHalf = yMin-(m_buttonSize/2); //to cope with odd button sizes
-		//"minus"
-		m_xMinusButton = w-(c_outerMargin+2*m_buttonSize+c_innerMargin*2);
-		m_yMinusButton = yMin;
-		drawButton(m_xMinusButton,m_yMinusButton,m_buttonSize);
-		glBegin(GL_LINES);
-		glVertex2i(m_xMinusButton+c_innerMargin,yHalf);
-		glVertex2i(m_xMinusButton+m_buttonSize-1-c_innerMargin-1,yHalf);
-		glEnd();
-
-		//"plus"
-		m_xPlusButton = m_xMinusButton+m_buttonSize+2*c_innerMargin;
-		m_yPlusButton = yMin;
-		drawButton(m_xPlusButton,m_yPlusButton,m_buttonSize);
-		glBegin(GL_LINES);
-		glVertex2i(m_xPlusButton+c_innerMargin,yHalf);
-		glVertex2i(m_xPlusButton+m_buttonSize-1-c_innerMargin-1,yHalf);
-		glVertex2i(m_xPlusButton+m_buttonSize/2,yMin-m_buttonSize+c_innerMargin+1);
-		glVertex2i(m_xPlusButton+m_buttonSize/2,yMin-c_innerMargin-1);
-		glEnd();
-	}
-	else
-	{
-		m_xMinusButton = w;
-		m_yMinusButton = h;
+		// add title layout element
+		if (!m_titlePlot)
+		{
+			//add a row for the title
+			plotLayout()->insertRow(0);
+		}
+		else
+		{
+			//remove previous title
+			plotLayout()->remove(m_titlePlot);
+			m_titlePlot = 0;
+		}
+		m_titlePlot = new QCPPlotTitle(this, QString("%0 [%1 classes]").arg(m_titleStr).arg(m_histoValues.size()));
+		//title font
+		m_renderingFont.setPointSize(ccGui::Parameters().defaultFontSize);
+		m_titlePlot->setFont(m_renderingFont);
+		plotLayout()->addElement(0, 0, m_titlePlot);
 	}
 
-	//top-left corner
-	renderText(	c_outerMargin,
-				c_outerMargin+c_strHeight-c_strDescent,
-				strMetrics.elidedText(QString("%0 [%1 classes]").arg(m_infoStr).arg(m_histoValues.size()),
-				Qt::ElideRight,
-				m_xMinusButton-c_outerMargin),
-				m_renderingFont );
+	//clear previous display
+	m_histogram = 0;
+	m_vertBar = 0;
+	this->clearGraphs();
+	this->clearPlottables();
 
-	//can't go any further without data!
 	if (m_histoValues.empty())
 		return;
 
-	//update horizontal & vertical axes position so that their labels can be properly displayed
-	int maxYLabelWidth = strMetrics.width(QString::number(m_maxHistoVal));
-	QString firstlabel = QString::number(m_minVal,'f',precision);
-	int firstXLabelWidth = strMetrics.width(firstlabel);
-	QString lastlabel = QString::number(m_maxVal,'f',precision);
-	int lastXLabelWidth = strMetrics.width(lastlabel);
-	m_roi[0] = c_outerMargin+std::max(maxYLabelWidth+c_innerMargin,firstXLabelWidth/2);	//Xmin
-	m_roi[1] = c_outerMargin+c_strHeight+c_innerMargin+c_ticksSize;						//Ymin
-	m_roi[2] = w-c_outerMargin-lastXLabelWidth/2;										//Xmax
-	m_roi[3] = h-(2*c_outerMargin+c_strHeight+c_strHeight/2);							//Ymax
-
-	//histogram width
-	int dx = m_roi[2]-m_roi[0];
-	//histogram height
-	int dy = m_roi[3]-m_roi[1];
-	if (dx<2 || dy<2)
-		return;
-
-	//draw both axes
-	glBegin(GL_LINES);
-	//vertical
-	glVertex2i(m_roi[0],m_roi[1]);
-	glVertex2i(m_roi[0],m_roi[3]);
-	//horizontal
-	glVertex2i(m_roi[0],m_roi[1]);
-	glVertex2i(m_roi[2],m_roi[1]);
-	glEnd();
-
-	//horizontal labels
+	//histogram
+	int histoSize = static_cast<int>(m_histoValues.size());
+	double totalSum = 0;
+	double partialSum = 0;
+	if (histoSize > 0)
 	{
-		//draw first value tick & label
-		glBegin(GL_LINES);
-		glVertex2i(m_roi[0],m_roi[1]-c_ticksSize);
-		glVertex2i(m_roi[0],m_roi[1]);
-		glEnd();
-		renderText(m_roi[0]-firstXLabelWidth/2, h-c_outerMargin, firstlabel, m_renderingFont);
+		m_histogram = new QCPColoredBars(xAxis, yAxis);
+		addPlottable(m_histogram);
+		// now we can modify properties of myBars:
+		m_histogram->setName("Histogram");
+		m_histogram->setWidth((m_maxVal - m_minVal) / histoSize);
+		m_histogram->setAntialiasedFill(false);
+		QVector<double> keyData(histoSize);
+		QVector<double> valueData(histoSize);
 
-		//draw last value tick & label
-		glBegin(GL_LINES);
-		glVertex2i(m_roi[0]+dx,m_roi[1]-c_ticksSize);
-		glVertex2i(m_roi[0]+dx,m_roi[1]);
-		glEnd();
-		renderText(m_roi[0]+dx-lastXLabelWidth/2, h-c_outerMargin, lastlabel, m_renderingFont);
-
-		//we recursively display the remaining horizontal labels (unitl there's no room left)
-		hlabel centerLabel;
-		centerLabel.leftXmax = firstXLabelWidth/2;
-		centerLabel.rightXmin = dx-lastXLabelWidth/2;
-
-		//free space available between first and last label?
-		const int c_labelMargin = 2*(strMetrics.width("123456789")/9); //twice the mean (digit) character width
-		if (centerLabel.leftXmax+2*c_labelMargin<centerLabel.rightXmin)
+		HISTOGRAM_COLOR_SCHEME colorScheme = m_colorScheme;
+		ccColorScale::Shared colorScale = (m_colorScale ? m_colorScale : ccColorScalesManager::GetDefaultScale());
+		switch(colorScheme)
 		{
-			centerLabel.leftVal = m_minVal;
-			centerLabel.leftXpos = 0;
-			centerLabel.rightVal = m_maxVal;
-			centerLabel.rightXpos = dx;
-			std::vector<hlabel> currentLevellabels;
-			currentLevellabels.push_back(centerLabel);
-
-			bool proceedWithNextLevel=true;
-			while (proceedWithNextLevel)
+		case USE_SOLID_COLOR:
+			m_histogram->setBrush(QBrush(m_solidColor,Qt::SolidPattern));
+			m_histogram->setPen(QPen(m_solidColor));
+			break;
+		case USE_CUSTOM_COLOR_SCALE:
+			//nothing to do
+			break;
+		case USE_SF_SCALE:
+			if (m_associatedSF && m_associatedSF->getColorScale())
 			{
-				std::vector<hlabel> nextLevelLabels;
-				std::vector< std::pair<int,QString> > strToDisplay;
-				while (!currentLevellabels.empty())
-				{
-					hlabel currentLabel = currentLevellabels.back();
-					currentLevellabels.pop_back();
-
-					//draw corresponding tick
-					int x = (currentLabel.leftXpos+currentLabel.rightXpos)/2;
-					glBegin(GL_LINES);
-					glVertex2i(m_roi[0]+x,m_roi[1]-c_ticksSize);
-					glVertex2i(m_roi[0]+x,m_roi[1]);
-					glEnd();
-
-					//try to draw label as well
-					double value = (currentLabel.leftVal+currentLabel.rightVal)/2.0;
-					QString valueStr = QString::number(value,'f',precision);
-					int valueStrHalfWidth = strMetrics.width(valueStr)/2;
-					if (x-valueStrHalfWidth-c_labelMargin > currentLabel.leftXmax
-						&& x+valueStrHalfWidth+c_labelMargin < currentLabel.rightXmin)
-					{
-						//we push the label str (and position) in 'strToDisplay' vector
-						strToDisplay.push_back(std::pair<int,QString>(m_roi[0]+x-valueStrHalfWidth,valueStr));
-						//renderText(m_roi[0]+x-valueStrHalfWidth, h-c_outerMargin, valueStr, m_renderingFont);
-						//add sub labels to next level queue
-						hlabel leftLabel = currentLabel;
-						leftLabel.rightVal = value;
-						leftLabel.rightXpos = x;
-						leftLabel.rightXmin = x-valueStrHalfWidth;
-
-						hlabel rightLabel = currentLabel;
-						rightLabel.leftVal = value;
-						rightLabel.leftXpos = x;
-						rightLabel.leftXmax = x+valueStrHalfWidth;
-
-						nextLevelLabels.push_back(leftLabel);
-						nextLevelLabels.push_back(rightLabel);
-					}
-					else
-					{
-						//not enough space for current label! we stop here
-						proceedWithNextLevel=false;
-					}
-				}
-
-				if (proceedWithNextLevel)
-				{
-					//we only display labels if 'proceedWithNextLevel' is true
-					while (!strToDisplay.empty())
-					{
-						renderText(strToDisplay.back().first, h-c_outerMargin, strToDisplay.back().second, m_renderingFont);
-						strToDisplay.pop_back();
-					}
-
-					if (nextLevelLabels.empty())
-						proceedWithNextLevel = false;
-					else
-						currentLevellabels = nextLevelLabels;
-				}
+				//we use the SF's color scale
+				colorScale = m_associatedSF->getColorScale();
 			}
+			else
+			{
+				//we'll use the default one...
+				assert(false);
+				colorScheme = USE_CUSTOM_COLOR_SCALE;
+			}
+			break;
+		default:
+			assert(false);
+			colorScheme = USE_CUSTOM_COLOR_SCALE;
+			break;
 		}
-	}
 
-	//vertical labels
-	{
-		const int n = 4;
-		for (int i=0; i<=n; ++i)
+		QVector<QColor> colors;
+		if (colorScheme != USE_SOLID_COLOR)
 		{
-			int y = m_roi[1] + (dy*i)/n;
-			glBegin(GL_LINES);
-			glVertex2i(m_roi[0]-5,y);
-			glVertex2i(m_roi[0],y);
-			glEnd();
-
-			int vi = (int)((float)(m_maxHistoVal*i)/(float)n);
-			QString valueStr = QString::number(vi);
-			renderText(m_roi[0]-strMetrics.width(valueStr)-(c_ticksSize+c_innerMargin), h-(y-c_strHeight/2+c_strDescent), valueStr, m_renderingFont);
+			colors.resize(histoSize);
 		}
-	}
 
-	//vertical scaling
-	unsigned maxDisplayedHistoVal = std::max<unsigned>(m_maxHistoVal,1);
-	double yScale = (double)dy/std::max<double>(m_maxCurveValue,maxDisplayedHistoVal);
-
-	//the histogram itself
-	unsigned totalSum = 0;
-	unsigned partialSum = 0;
-	{
-		float x = static_cast<float>(m_roi[0]+1);
-		float y = static_cast<float>(m_roi[1]+1);
-		float barWidth = static_cast<float>(dx)/static_cast<float>(m_histoValues.size());
-
-		bool useGradientColorForBars = m_displayParameters.useGradientColorForBars();
-		ccColorScale::Shared colorScale = (m_associatedSF && m_associatedSF->getColorScale() ? m_associatedSF->getColorScale() : ccColorScalesManager::GetDefaultScale());
-		assert(colorScale);
-		for (size_t i=0; i<m_histoValues.size(); ++i)
+		for (int i=0; i<histoSize; ++i)
 		{
+			//we take the 'normalized' value at the middle of the class
+			double normVal = (static_cast<double>(i)+0.5) / histoSize;
+
 			totalSum += m_histoValues[i];
-			if (static_cast<double>(i)/m_histoValues.size() < m_verticalIndicatorPositionPercent)
+			if (normVal < m_verticalIndicatorPositionPercent)
 				partialSum += m_histoValues[i];
 
-			//we take the 'normalized' value at the middle of the class
-			double normVal = (static_cast<double>(i)+0.5) / m_histoValues.size();
+			keyData[i] = m_minVal + normVal * (m_maxVal - m_minVal);
+			valueData[i] = m_histoValues[i];
 
-			if (m_associatedSF)
+			//import color for the current bin
+			if (colorScheme != USE_SOLID_COLOR)
 			{
-				//Equivalent SF value
-				double scalarVal = m_minVal + (m_maxVal-m_minVal)*normVal;
-				const colorType* col = m_associatedSF->getColor(static_cast<ScalarType>(scalarVal));
-				glColor3ubv(col ? col : ccColor::lightGrey);
+				const colorType* col = 0;
+				if (colorScheme == USE_SF_SCALE)
+				{
+					//equivalent SF value
+					assert(m_associatedSF);
+					col = m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
+				}
+				else if (colorScheme == USE_CUSTOM_COLOR_SCALE)
+				{
+					//use default gradient
+					assert(colorScale);
+					col = colorScale->getColorByRelativePos(normVal);
+				}
+				if (!col) //hidden values may have no associated color!
+					col = ccColor::lightGrey;
+				colors[i] = QColor(col[0],col[1],col[2]);
 			}
-			else if (useGradientColorForBars)
-			{
-				glColor3ubv(colorScale->getColorByRelativePos(normVal));
-			}
-
-			float barHeight = static_cast<float>(m_histoValues[i] * yScale);
-			glBegin(GL_QUADS);
-			glVertex2f(x,y);
-			glVertex2f(x+barWidth,y);
-			glVertex2f(x+barWidth,y+barHeight);
-			glVertex2f(x,y+barHeight);
-			glEnd();
-
-			x+=barWidth;
 		}
+
+		if (!colors.isEmpty())
+			m_histogram->setData(keyData, valueData, colors);
+		else
+			m_histogram->setData(keyData, valueData);
 	}
 
 	//overlay curve?
-	if (m_curveValues.size() > 1)
+	int curveSize = static_cast<int>(m_curveValues.size());
+	if (curveSize > 1)
 	{
-		float x = static_cast<float>(m_roi[0]+1);
-		float y = static_cast<float>(m_roi[1]+1);
-		float step = static_cast<float>(dx)/static_cast<float>(m_curveValues.size());
-
-		//same as text color by default
-		glColor3ubv(textCol);
-
-		glBegin(GL_LINE_STRIP);
-		for (size_t i=0; i<m_curveValues.size(); ++i)
+		QVector<double> x(curveSize), y(curveSize);
+		
+		double step = (m_maxVal - m_minVal) / (curveSize-1);
+		for (int i=0; i<curveSize; ++i)
 		{
-			glVertex2f(x,y+static_cast<float>(m_curveValues[i]*yScale));
-			x+=step;
+			x[i] = m_minVal + (static_cast<double>(i)/*+0.5*/) * step;
+			y[i] = m_curveValues[i];
 		}
-		glEnd();
+
+		// create graph and assign data to it:
+		addGraph();
+		graph(0)->setData(x, y);
+
+		//default color
+		const unsigned char* col = ccColor::black;
+		QPen pen(QColor(col[0],col[1],col[2]));
+		pen.setWidth(std::max(1,rect().width()/200));
+		graph(0)->setPen(pen);
 	}
 
 	//vertical hint
 	if (m_drawVerticalIndicator)
 	{
-		//red by default
-		glColor3ubv(ccColor::red);
+		m_vertBar = new QCPBarsWithText(xAxis, yAxis);
+		addPlottable(m_vertBar);
+		
+		// now we can modify properties of vertBar
+		m_vertBar->setName("Vertical line");
+		m_vertBar->setWidth(0/*(m_maxVal - m_minVal) / histoSize*/);
+		m_vertBar->setBrush(QBrush(Qt::red));
+		m_vertBar->setPen(QPen(Qt::red));
+		m_vertBar->setAntialiasedFill(false);
+		QVector<double> keyData(1);
+		QVector<double> valueData(1);
 
 		//horizontal position
-		int x = m_roi[0] + 1 + (int)(m_verticalIndicatorPositionPercent*(double)dx);
-		int y = m_roi[3] - c_strHeight;
+		keyData[0] = m_minVal + (m_maxVal-m_minVal) * m_verticalIndicatorPositionPercent;
+		valueData[0] = m_maxHistoVal;
 
-		glBegin(GL_LINES);
-		glVertex2i(x,m_roi[1]);
-		glVertex2i(x,m_roi[3]);
-		glEnd();
+		m_vertBar->setData(keyData,valueData);
 
-		bool leftSide = (m_verticalIndicatorPositionPercent > 0.5);
+		//precision (same as color scale)
+		int precision = static_cast<int>(ccGui::Parameters().displayedNumPrecision);
 		unsigned bin = static_cast<unsigned>(m_verticalIndicatorPositionPercent * m_histoValues.size());
 		QString valueStr = QString("bin %0").arg(bin);
-
-		//Some versions of Qt seem to need glColorf instead of glColorub! (see https://bugreports.qt-project.org/browse/QTBUG-6217)
-		glColor3f(	static_cast<float>(textCol[0])/255,
-					static_cast<float>(textCol[1])/255,
-					static_cast<float>(textCol[2])/255 );
-		renderText(leftSide ? x-strMetrics.width(valueStr)-c_innerMargin : x+c_innerMargin, h-y, valueStr, m_renderingFont);
-		y -= (c_strHeight+c_innerMargin);
-
+		m_vertBar->setText(valueStr);
 		valueStr = QString("< %0 %").arg(100.0*static_cast<double>(partialSum)/static_cast<double>(totalSum),0,'f',3);
-		renderText(leftSide ? x-strMetrics.width(valueStr)-c_innerMargin : x+c_innerMargin, h-y, valueStr, m_renderingFont);
-		y -= (c_strHeight+c_innerMargin);
-
+		m_vertBar->appendText(valueStr);
 		valueStr = QString("val = %0").arg(m_minVal+(m_maxVal-m_minVal)*m_verticalIndicatorPositionPercent,0,'f',precision);
-		renderText(leftSide ? x-strMetrics.width(valueStr)-c_innerMargin : x+c_innerMargin, h-y, valueStr, m_renderingFont);
+		m_vertBar->appendText(valueStr);
+		m_vertBar->setTextAlignment(m_verticalIndicatorPositionPercent > 0.5);
 	}
+
+	rescaleAxes();
+
+	// redraw
+	replot();
+}
+
+void ccHistogramWindow::resizeEvent(QResizeEvent * event)
+{
+	QCustomPlot::resizeEvent(event);
+	
+	if (graph(0))
+	{
+		QPen pen = graph(0)->pen();
+		pen.setWidth(std::max(1,event->size().width()/300));
+		graph(0)->setPen(pen);
+	}
+
+	refresh();
 }
 
 void ccHistogramWindow::mousePressEvent(QMouseEvent *event)
@@ -596,61 +643,26 @@ void ccHistogramWindow::mousePressEvent(QMouseEvent *event)
 
 void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 {
-	bool actionDetected = false;
 	if (event->buttons() & Qt::LeftButton)
 	{
-		int x = event->x();
-		int y = height()-event->y();
-
-		if (m_numberOfClassesCanBeChanged)
+		if (m_histogram && !m_histoValues.empty())
 		{
-			if (m_histoValues.size() > 4) //"minus" button
-			{
-				if (y >= m_yMinusButton-m_buttonSize && y <= m_yMinusButton)
-				{
-					if (x >= m_xMinusButton && x <= m_xMinusButton+m_buttonSize)
-					{
-						setNumberOfClasses(m_histoValues.size()-4);
-						actionDetected = true;
-					}
-				}
-			}
-
-			if (!actionDetected)
-			{
-				if (y >= m_yPlusButton-m_buttonSize && y <= m_yPlusButton) //"plus" button
-				{
-					if (x >= m_xPlusButton && x <= m_xPlusButton+m_buttonSize)
-					{
-						setNumberOfClasses(m_histoValues.size()+4);
-						actionDetected = true;
-					}
-				}
-			}
-		}
-
-		if (!actionDetected) //click anywhere else?
-		{
-			if (x>m_roi[0] && x<=m_roi[2] && y>m_roi[1] && y<=m_roi[3])
+			QRect roi = m_histogram->rect();
+			if (roi.contains(event->pos(),false))
 			{
 				m_drawVerticalIndicator = true;
-				if (m_roi[2] > m_roi[0])
-				{
-					int verticalIndicatorPosition = static_cast<int>(m_histoValues.size()) * (x-m_roi[0]) / (m_roi[2]-m_roi[0]);
-					m_verticalIndicatorPositionPercent = static_cast<double>(verticalIndicatorPosition) / m_histoValues.size();
-				}
-				else
-				{
-					m_verticalIndicatorPositionPercent = 0;
-				}
-				actionDetected = true;
+
+				int verticalIndicatorPosition = (static_cast<int>(m_histoValues.size()) * (event->x() - roi.x())) / roi.width();
+				m_verticalIndicatorPositionPercent = static_cast<double>(verticalIndicatorPosition) / m_histoValues.size();
+
+				refresh();
 			}
 		}
 	}
-	else event->ignore();
-
-	if (actionDetected)
-		updateGL();
+	else
+	{
+		event->ignore();
+	}
 }
 
 void ccHistogramWindow::wheelEvent(QWheelEvent* e)
@@ -666,38 +678,25 @@ void ccHistogramWindow::wheelEvent(QWheelEvent* e)
 		if (m_histoValues.size() > 4)
 		{
 			setNumberOfClasses(std::max<size_t>(4,m_histoValues.size()-4));
-			updateGL();
+			refresh();
 		}
 	}
 	else //if (e->delta() > 0)
 	{
 		setNumberOfClasses(m_histoValues.size()+4);
-		updateGL();
+		refresh();
 	}
 
 	e->accept();
 }
 
-ccHistogramWindow::DisplayParameters::DisplayParameters()
-	: useDefaultParameters(true)
-	, useGradientColor(true)
+ccHistogramWindowDlg::ccHistogramWindowDlg(QWidget* parent/*=0*/)
+	: QDialog(parent)
+	, m_win(new ccHistogramWindow(this))
 {
-	backgroundColor[0] = backgroundColor[1] = backgroundColor[2] = 255;
-	defaultColor[0] = defaultColor[1] = defaultColor[2] = 0;
-}
+	QHBoxLayout* hboxLayout = new QHBoxLayout(this);
+	hboxLayout->addWidget(m_win);
+	hboxLayout->setContentsMargins(0,0,0,0);
 
-const unsigned char* ccHistogramWindow::DisplayParameters::getBackgroundColor() const
-{
-	if (useDefaultParameters)
-		return ccGui::Parameters().histBackgroundCol;
-	else
-		return backgroundColor;
-}
-
-const unsigned char* ccHistogramWindow::DisplayParameters::getDefaultColor() const
-{
-	if (useDefaultParameters)
-		return ccGui::Parameters().textDefaultCol;
-	else
-		return defaultColor;
+	resize(400,275);
 }

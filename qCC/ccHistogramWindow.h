@@ -30,9 +30,16 @@
 
 //qCC_db
 #include <ccScalarField.h>
+#include <ccColorScale.h>
+
+//QCustomPlot
+#include <qcustomplot.h>
+
+class QCPColoredBars;
+class QCPBarsWithText;
 
 //! Histogram widget
-class ccHistogramWindow : public QGLWidget
+class ccHistogramWindow : public QCustomPlot
 {
 	Q_OBJECT
 
@@ -44,8 +51,10 @@ public:
 	//! Destructor
 	virtual ~ccHistogramWindow();
 
-	//! Sets first line
-	void setInfoStr(const QString& str);
+	//! Sets title
+	void setTitle(const QString& str);
+	//! Sets axis labels
+	void setAxisLabels(const QString& xLabel, const QString& yLabel);
 
 	//! Computes histogram from a scalar field
 	/** Number of classes can be freely modified afterwards (if enabled).
@@ -70,43 +79,28 @@ public:
 						double maxVal);
 
 	//! Sets overlay curve values
-	/** Curve will only appear if the number of points matches the current number of classes)
-		\param curveValues curve points 'Y' coordinates (points will be regularly spread over histogram span)
+	/** The curve will only appear over an histogram
+		\param curveValues curve points 'Y' coordinates only (regularly sampled between the min and max histogram values)
 	**/
 	void setCurveValues(const std::vector<double>& curveValues);
 
-	//! Display parameters
-	struct DisplayParameters
-	{
-		//! Whether to use those parameters or the default ones (see ccGui::Parameters)
-		bool useDefaultParameters;
-		//! Background color
-		unsigned char backgroundColor[3];
-		//! Default color
-		unsigned char defaultColor[3];
-		//! Whether to use a gradient color or the default one for the histogram bars
-		bool useGradientColor;
+	enum HISTOGRAM_COLOR_SCHEME { USE_SOLID_COLOR, USE_CUSTOM_COLOR_SCALE, USE_SF_SCALE };
+	//! Sets how the gradient bars should be colored
+	void setColorScheme(HISTOGRAM_COLOR_SCHEME scheme) { m_colorScheme = scheme; }
 
-		//! Returns active background color
-		const unsigned char* getBackgroundColor() const;
-		//! Returns active default color
-		const unsigned char* getDefaultColor() const;
-		//! Returns whether to use a gradient color (for diplaying histogram bars) or not
-		bool useGradientColorForBars() const { return useGradientColor; }
-
-		//! Default constructor
-		DisplayParameters();
-	};
-
-	//! Returns display parameters
-	inline DisplayParameters& displayParameters() { return m_displayParameters; }
-	//! Returns display parameters (const version)
-	inline const DisplayParameters& displayParameters() const { return m_displayParameters; }
-
+	//! Sets solid color
+	/** Only used if color scheme is set to USE_SOLID_COLOR. **/
+	void setSolidColor(QColor color) { m_solidColor = color; }
+	//! Sets gradient color scale
+	/** Only used if color scheme is set to USE_CUSTOM_COLOR_SCALE. **/
+	void setColorScale(ccColorScale::Shared scale) { m_colorScale = scale; }
+	
 	//! Clears the display
 	void clear();
+	//! Updates the display
+	void refresh();
 
-protected:
+protected: //methods
 
 	//! Changes the current number of classes
 	/** Warning: n should be a multiple of 4.
@@ -117,14 +111,8 @@ protected:
 	void mousePressEvent(QMouseEvent *event);
 	void mouseMoveEvent(QMouseEvent *event);
 	void wheelEvent(QWheelEvent* event);
-
-	void closeEvent(QCloseEvent *event);
-
-	//inherited from QGLWidget
-	//void initializeGL();
-	//void resizeGL(int w, int h);
-	void paintGL();
-
+	void resizeEvent(QResizeEvent * event);
+	
 	//! Returns current maximum bin size
 	unsigned getMaxHistoVal();
 
@@ -134,39 +122,44 @@ protected:
 	//! Dynamically computes histogram bins from scalar field
 	bool computeBinArrayFromSF(size_t binCount);
 
-	//! 1st line
-	QString m_infoStr;
-	bool m_viewInitialized;
+protected: //attributes
+
+	//Title
+	QString m_titleStr;
+	bool m_showTitle;
+	QCPPlotTitle* m_titlePlot;
+
+	//! Color scheme
+	HISTOGRAM_COLOR_SCHEME m_colorScheme;
+	//! Solid color
+	QColor m_solidColor;
+	//! Gradient color scale
+	ccColorScale::Shared m_colorScale;
+
+	//! Associated scalar field
+	ccScalarField* m_associatedSF;
+	//Whether the number of classes can be changed or not
+	/** Only possible with an associated scalar field.
+	**/
 	bool m_numberOfClassesCanBeChanged;
 
-	//table and type
-	ccScalarField* m_associatedSF;
-
-	//histogram variables
+	//histogram data
+	QCPColoredBars* m_histogram;
 	std::vector<unsigned> m_histoValues;
 	double m_minVal;
 	double m_maxVal;
 	unsigned m_maxHistoVal;
 
-	//overlay curve
+	//! Overlay curve
 	std::vector<double> m_curveValues;
-	double m_maxCurveValue;
-
-	//histogram display area
-	int m_roi[4];
-	//classes number modification buttons ("+" and "-")
-	int m_xMinusButton,m_yMinusButton,m_xPlusButton,m_yPlusButton;
-	int m_buttonSize;
 
 	//vertical indicator
+	QCPBarsWithText* m_vertBar;
 	bool m_drawVerticalIndicator;
 	double m_verticalIndicatorPositionPercent;
 
 	//! Rendering font
 	QFont m_renderingFont;
-
-	//! Display parameters
-	DisplayParameters m_displayParameters;
 };
 
 //! Encapsulating dialog for ccHistogramWindow
@@ -174,17 +167,10 @@ class ccHistogramWindowDlg : public QDialog
 {
 public:
 	//! Default constructor
-	ccHistogramWindowDlg(QWidget* parent = 0)
-		: QDialog(parent)
-		, m_win(new ccHistogramWindow(this))
-	{
-		QHBoxLayout* hboxLayout = new QHBoxLayout(this);
-		hboxLayout->addWidget(m_win);
-		hboxLayout->setContentsMargins(0,0,0,0);
-	}
+	ccHistogramWindowDlg(QWidget* parent = 0);
 
 	//! Returns encapsulated ccHistogramWindow
-	ccHistogramWindow* window() { return m_win; };
+	inline ccHistogramWindow* window() { return m_win; }
 
 protected:
 

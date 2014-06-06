@@ -73,10 +73,10 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		return -1.0;
 
 	//compute min and max (valid) values
-	ScalarType minV=0,maxV=0;
-	unsigned numberOfElements=0;
+	ScalarType minV = 0, maxV = 0;
+	unsigned numberOfValidValues = 0;
 	{
-		bool firstValidValue=true;
+		bool firstValidValue = true;
 		for (unsigned i=0; i<n; ++i)
 		{
 			ScalarType V = cloud->getPointScalarValue(i);
@@ -94,12 +94,12 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 					else if (V < minV)
 						minV = V;
 				}
-				++numberOfElements;
+				++numberOfValidValues;
 			}
 		}
 	}
 
-	if (numberOfElements == 0)
+	if (numberOfValidValues == 0)
         return -1.0;
 
     if (histoMin)
@@ -108,11 +108,11 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
         maxV = *histoMax;
 
 	//shall we automatically compute the number of classes?
-	if (numberOfClasses==0)
+	if (numberOfClasses == 0)
 	{
-        numberOfClasses = (unsigned)ceil(sqrt((double)numberOfElements));
+        numberOfClasses = static_cast<unsigned>(ceil(sqrt(static_cast<double>(numberOfValidValues))));
 	}
-	if (numberOfClasses<2)
+	if (numberOfClasses < 2)
 	{
         return -2.0; //not enough points/classes
 	}
@@ -180,14 +180,14 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 		double p1 = distrib->computePfromZero(minV);
 		for (unsigned k=1; k<=numberOfClasses; ++k)
 		{
-			double p2 = distrib->computePfromZero(minV + (ScalarType)k * dV / (ScalarType)numberOfClasses);
+			double p2 = distrib->computePfromZero(minV + (k * dV) / numberOfClasses);
 
 			//add the class to the chain
 			Chi2Class currentClass;
 			currentClass.n = histo[k-1];
 			currentClass.pi = p2-p1;
 			if (npis)
-				npis[k-1]= currentClass.pi * (double)numberOfElements;
+				npis[k-1]= currentClass.pi * numberOfValidValues;
 
 			try
 			{
@@ -219,7 +219,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	if (!noClassCompression)
 	{
 		//lowest acceptable value: "K/n" (K=5 generally, but it could be 3 or 1 at the tail!)
-		double minPi = 5.0/static_cast<double>(numberOfElements);
+		double minPi = 5.0/numberOfValidValues;
 
 		while (classes.size() > 2)
 		{
@@ -261,7 +261,7 @@ double StatisticalTestingTools::computeAdaptativeChi2Dist(	const GenericDistribu
 	{
 		for (Chi2ClassList::iterator it = classes.begin(); it != classes.end(); ++it)
 		{
-			double npi = it->pi * (double)numberOfElements;
+			double npi = it->pi * numberOfValidValues;
 			if (npi != 0.0)
 			{
 				double temp = (double)it->n - npi;

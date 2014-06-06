@@ -53,8 +53,8 @@ ccColorLevelsDlg::ccColorLevelsDlg(QWidget* parent, ccGenericPointCloud* pointCl
 	//create histogram view
 	m_histogram = new ccHistogramWindow(this);
 	{
-		m_histogram->displayParameters().useDefaultParameters = false;
-		m_histogram->displayParameters().useGradientColor = false;
+		m_histogram->setColorScheme(ccHistogramWindow::USE_SOLID_COLOR);
+		m_histogram->setSolidColor(Qt::black);
 		//add view
 		histoFrame->setLayout(new QHBoxLayout());
 		histoFrame->layout()->addWidget(m_histogram);		
@@ -104,12 +104,28 @@ void ccColorLevelsDlg::updateHistogram()
 		std::vector<unsigned>* histoValuesR = (histoValues[0].empty() ? 0 : histoValues);
 		std::vector<unsigned>* histoValuesG = (histoValues[1].empty() ? 0 : histoValues+1);
 		std::vector<unsigned>* histoValuesB = (histoValues[2].empty() ? 0 : histoValues+2);
-		
-		//test: for now we send all data into the same histogram!
-		if (channelComboBox->currentIndex() == RGB)
+
+		switch(channelComboBox->currentIndex())
 		{
+		case RGB:
+			m_histogram->setSolidColor(Qt::black);
+			m_histogram->setAxisLabels("R,G,B","");
+			//test: for now we send all data into the same histogram!
 			histoValuesG = histoValuesR;
 			histoValuesB = histoValuesR;
+			break;
+		case RED:
+			m_histogram->setSolidColor(Qt::red);
+			m_histogram->setAxisLabels("Red","");
+			break;
+		case GREEN:
+			m_histogram->setSolidColor(Qt::green);
+			m_histogram->setAxisLabels("Green","");
+			break;
+		case BLUE:
+			m_histogram->setSolidColor(Qt::blue);
+			m_histogram->setAxisLabels("Blue","");
+			break;
 		}
 
 		//project points
@@ -126,17 +142,15 @@ void ccColorLevelsDlg::updateHistogram()
 			}
 		}
 
-		static QString names[4] = {"RGB","Red","Green","Blue"};
 		for (int i=0; i<3; ++i)
 		{
 			if (channelComboBox->currentIndex() == RGB || channelComboBox->currentIndex() == i+1)
 			{
 				m_histogram->fromBinArray(histoValues[i],0.0,256.0);
-				m_histogram->setInfoStr(names[channelComboBox->currentIndex()]);
 				break;
 			}
 		}
-		m_histogram->updateGL();
+		m_histogram->refresh();
 	}
 }
 

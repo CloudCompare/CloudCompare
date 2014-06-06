@@ -4575,11 +4575,15 @@ void MainWindow::doActionComputeStatParams()
 					hDlg->setWindowTitle("[Distribution fitting]");
 					{
 						ccHistogramWindow* histogram = hDlg->window();
-						histogram->setInfoStr(description);
 						histogram->fromBinArray(histo,sf->getMin(),sf->getMax());
 						histo.clear();
 						histogram->setCurveValues(npis);
 						npis.clear();
+						histogram->setTitle(description);
+						histogram->setColorScheme(ccHistogramWindow::USE_CUSTOM_COLOR_SCALE);
+						histogram->setColorScale(sf->getColorScale());
+						histogram->setAxisLabels(sf->getName(),"Count");
+						histogram->refresh();
 					}
 					hDlg->show();
 				}
@@ -7117,8 +7121,10 @@ void MainWindow::showSelectedEntitiesHistogram()
 					numberOfClasses = std::max<unsigned>(4,numberOfClasses);
 					numberOfClasses = std::min<unsigned>(256,numberOfClasses);
 
-					histogram->setInfoStr(QString("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
+					histogram->setTitle(QString("%1 (%2 values) ").arg(sf->getName()).arg(numberOfPoints));
 					histogram->fromSF(sf,numberOfClasses);
+					histogram->setAxisLabels(sf->getName(),"Count");
+					histogram->refresh();
 				}
 				hDlg->show();
 			}

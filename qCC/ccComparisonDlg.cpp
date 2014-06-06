@@ -802,8 +802,9 @@ void ccComparisonDlg::showHisto()
 	hDlg->setWindowTitle(QString("Histogram [%1]").arg(m_compCloud->getName()));
 	{
 		ccHistogramWindow* histogram = hDlg->window();
-		histogram->setInfoStr(QString("Approximate distances (%1 values)").arg(m_compCloud->size()));
-		histogram->fromSF(sf,8);
+		histogram->setTitle(QString("Approximate distances (%1 values)").arg(m_compCloud->size()));
+		histogram->fromSF(sf,8,false);
+		histogram->setAxisLabels("Approximate distances","Count");
 	}
 	hDlg->resize(400,300);
 	hDlg->show();

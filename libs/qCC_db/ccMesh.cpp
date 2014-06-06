@@ -1065,12 +1065,14 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 		//L.O.D.
 		bool lodEnabled = (triNum > GET_MAX_LOD_FACES_NUMBER() && context.decimateMeshOnMove && MACRO_LODActivated(context));
-		int decimStep = (lodEnabled ? (int)ceil((float)triNum*3 / (float)GET_MAX_LOD_FACES_NUMBER()) : 1);
+		int decimStep = (lodEnabled ? static_cast<int>(ceil(static_cast<float>(triNum*3) / GET_MAX_LOD_FACES_NUMBER())) : 1);
 
 		//display parameters
 		glDrawParams glParams;
 		getDrawingParameters(glParams);
-		glParams.showNorms &= bool(MACRO_LightIsEnabled(context));
+		//no normals shading without light!
+		if (!MACRO_LightIsEnabled(context))
+			glParams.showNorms = false;
 
 		//vertices visibility
 		const ccGenericPointCloud::VisibilityTableType* verticesVisibility = m_associatedCloud->getTheVisibilityArray();
@@ -1217,9 +1219,8 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			}
 
 			//we can scan and process each chunk separately in an optimized way
-			unsigned k,chunks = m_triVertIndexes->chunksCount();
-			const colorType* col = 0;
-			for (k=0; k<chunks; ++k)
+			unsigned chunks = m_triVertIndexes->chunksCount();
+			for (unsigned k=0; k<chunks; ++k)
 			{
 				const unsigned chunkSize = m_triVertIndexes->chunkSize(k);
 
@@ -1263,7 +1264,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 #ifdef OPTIM_MEM_CPY
 					for (n=0; n<chunkSize; n+=decimStep, _vertIndexes+=step)
 					{
-						col = currentDisplayedScalarField->getValueColor(*_vertIndexes++);
+						const colorType* col = currentDisplayedScalarField->getValueColor(*_vertIndexes++);
 						*(_rgbColors)++ = *(col)++;
 						*(_rgbColors)++ = *(col)++;
 						*(_rgbColors)++ = *(col)++;
@@ -1281,7 +1282,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 #else
 					for (n=0; n<chunkSize; n+=decimStep, _vertIndexes+=step)
 					{
-						col = currentDisplayedScalarField->getValueColor(_vertIndexes[0]);
+						const colorType* col = currentDisplayedScalarField->getValueColor(_vertIndexes[0]);
 						memcpy(_rgbColors,col,sizeof(colorType)*3);
 						_rgbColors += 3;
 						col = currentDisplayedScalarField->getValueColor(_vertIndexes[1]);
@@ -1301,7 +1302,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 #ifdef OPTIM_MEM_CPY
 					for (n=0; n<chunkSize; n+=decimStep, _vertIndexes+=step)
 					{
-						col = rgbColorsTable->getValue(*_vertIndexes++);
+						const colorType* col = rgbColorsTable->getValue(*_vertIndexes++);
 						*(_rgbColors)++ = *(col)++;
 						*(_rgbColors)++ = *(col)++;
 						*(_rgbColors)++ = *(col)++;
@@ -1448,7 +1449,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 			if (showTextures)
 			{
-				//#define TEST_TEXTURED_BUNDLER_IMPORT
+//#define TEST_TEXTURED_BUNDLER_IMPORT
 #ifdef TEST_TEXTURED_BUNDLER_IMPORT
 				glPushAttrib(GL_COLOR_BUFFER_BIT);
 				glEnable(GL_BLEND);
@@ -1464,7 +1465,7 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 			GLenum triangleDisplayType = lodEnabled ? GL_POINTS : showWired ? GL_LINE_LOOP : GL_TRIANGLES;
 			glBegin(triangleDisplayType);
 
-			for (n=0;n<triNum;++n)
+			for (n=0; n<triNum; ++n)
 			{
 				//current triangle vertices
 				const CCLib::TriangleSummitsIndexes* tsi = (CCLib::TriangleSummitsIndexes*)m_triVertIndexes->getCurrentValue();
@@ -1515,7 +1516,6 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 						N1 = (idx[0] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx[0])).u : 0);
 						N2 = (idx[0] == idx[1] ? N1 : idx[1] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx[1])).u : 0);
 						N3 = (idx[0] == idx[2] ? N1 : idx[2] >= 0 ? ccNormalVectors::GetNormal(m_triNormals->getValue(idx[2])).u : 0);
-
 					}
 					else
 					{

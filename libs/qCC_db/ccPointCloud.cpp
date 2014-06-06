@@ -3004,7 +3004,6 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
 	if (isColorOverriden())
 	{
 		//nothing to do (we don't display true colors, SF or normals!)
-		assert(false);
 		return false;
 	}
 

@@ -156,7 +156,7 @@ void ccScalarField::computeMinAndMax()
 		else
 		{
 			unsigned count = currentSize();
-			unsigned numberOfClasses = (unsigned)ceil(sqrt((double)count));
+			unsigned numberOfClasses = static_cast<unsigned>( ceil(sqrt(static_cast<double>(count))) );
 			numberOfClasses = std::max<unsigned>(std::min<unsigned>(numberOfClasses,MAX_HISTOGRAM_SIZE),4);
 
 			m_histogram.maxValue = 0;
@@ -178,11 +178,12 @@ void ccScalarField::computeMinAndMax()
 
 				//compute histogram
 				{
+					ScalarType step = static_cast<ScalarType>(numberOfClasses)/m_displayRange.maxRange();
 					for (unsigned i=0; i<count; ++i)
 					{
 						const ScalarType& val = getValue(i);
 
-						unsigned bin = static_cast<unsigned>(floor((val-m_displayRange.min())*(ScalarType)numberOfClasses/m_displayRange.maxRange()));
+						unsigned bin = static_cast<unsigned>(floor((val-m_displayRange.min())*step));
 						++m_histogram[std::min(bin,numberOfClasses-1)];
 					}
 				}

@@ -99,6 +99,10 @@ public:
 	void clear();
 	//! Updates the display
 	void refresh();
+	//! Updates the histogram bars only
+	/** Only works if a SF is associated and color scheme is USE_SF_SCALE.
+	**/
+	void refreshBars();
 
 protected: //methods
 
@@ -121,6 +125,9 @@ protected: //methods
 
 	//! Dynamically computes histogram bins from scalar field
 	bool computeBinArrayFromSF(size_t binCount);
+
+	//! Updates overlay curve width depending on the widget display size
+	void updateOverlayCurveWidth(int w, int h);
 
 protected: //attributes
 
@@ -151,6 +158,7 @@ protected: //attributes
 	unsigned m_maxHistoVal;
 
 	//! Overlay curve
+	QCPGraph* m_overlayCurve;
 	std::vector<double> m_curveValues;
 
 	//vertical indicator

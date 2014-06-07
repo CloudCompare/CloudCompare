@@ -9579,7 +9579,7 @@ bool QCustomPlot::addPlottable(QCPAbstractPlottable *plottable)
   
   \see addPlottable, clearPlottables
 */
-bool QCustomPlot::removePlottable(QCPAbstractPlottable *plottable)
+bool QCustomPlot::removePlottable(QCPAbstractPlottable *plottable, bool autoDelete/*=true*/)
 {
   if (!mPlottables.contains(plottable))
   {
@@ -9593,7 +9593,8 @@ bool QCustomPlot::removePlottable(QCPAbstractPlottable *plottable)
   if (QCPGraph *graph = qobject_cast<QCPGraph*>(plottable))
     mGraphs.removeOne(graph);
   // remove plottable:
-  delete plottable;
+  if (autoDelete)
+	delete plottable;
   mPlottables.removeOne(plottable);
   return true;
 }

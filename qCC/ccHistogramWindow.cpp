@@ -197,6 +197,7 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	, m_minVal(0)
 	, m_maxVal(0)
 	, m_maxHistoVal(0)
+	, m_overlayCurve(0)
 	, m_vertBar(0)
 	, m_drawVerticalIndicator(false)
 	, m_verticalIndicatorPositionPercent(0)
@@ -204,7 +205,10 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	setWindowTitle("Histogram");
 	setFocusPolicy(Qt::StrongFocus);
 
-	setMinimumSize(300,200);
+	//setMinimumHeight(100);
+	setSizePolicy(QSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding));
+
+	setAutoAddPlottableToLegend(false);
 
 	//default font for text rendering
 	m_renderingFont.setFamily(QString::fromUtf8("Arial"));
@@ -283,6 +287,8 @@ void ccHistogramWindow::fromSF(	ccScalarField* sf,
 		if (m_associatedSF)
 			m_associatedSF->release();
 		m_associatedSF = sf;
+		if (m_associatedSF)
+			m_associatedSF->link();
 	}
 
 	if (m_associatedSF)
@@ -290,7 +296,6 @@ void ccHistogramWindow::fromSF(	ccScalarField* sf,
 		m_minVal = m_associatedSF->getMin();
 		m_maxVal = m_associatedSF->getMax();
 		m_numberOfClassesCanBeChanged = numberOfClassesCanBeChanged;
-		m_associatedSF->link();
 	}
 	else
 	{
@@ -355,6 +360,21 @@ bool ccHistogramWindow::computeBinArrayFromSF(size_t binCount)
 		return false;
 	}
 
+	//shortcut: same number of classes than the SF own histogram!
+	if (binCount == m_associatedSF->getHistogram().size())
+	{
+		try
+		{
+			m_histoValues = m_associatedSF->getHistogram();
+		}
+		catch(std::bad_alloc)
+		{
+			ccLog::Warning("[ccHistogramWindow::computeBinArrayFromSF] Not enough memory!");
+			return false;
+		}
+		return true;
+	}
+
 	//(try to) create new array
 	try
 	{
@@ -416,12 +436,6 @@ void ccHistogramWindow::setNumberOfClasses(size_t n)
 		return;
 	}
 
-	if (!m_numberOfClassesCanBeChanged)
-	{
-		assert(false);
-		return;
-	}
-
 	if (m_associatedSF)
 	{
 		//dynamically recompute histogram values
@@ -430,6 +444,46 @@ void ccHistogramWindow::setNumberOfClasses(size_t n)
 
 	//update max histogram value
 	m_maxHistoVal = getMaxHistoVal();
+}
+
+void ccHistogramWindow::refreshBars()
+{
+	if (	m_histogram
+		&&	m_colorScheme == USE_SF_SCALE
+		&&	m_associatedSF
+		&&	m_associatedSF->getColorScale())
+	{
+		int histoSize = static_cast<int>(m_histoValues.size());
+
+		//DGM: the bars will be redrawn only if we delete and recreate the graph?!
+		removePlottable(m_histogram,true);
+		m_histogram = new QCPColoredBars(xAxis, yAxis);
+		addPlottable(m_histogram);
+		m_histogram->setWidth((m_maxVal - m_minVal) / histoSize);
+		m_histogram->setAntialiasedFill(false);
+
+		QVector<double> keyData(histoSize);
+		QVector<double> valueData(histoSize);
+		QVector<QColor> colors(histoSize);
+
+		for (int i=0; i<histoSize; ++i)
+		{
+			//we take the 'normalized' value at the middle of the class
+			double normVal = (static_cast<double>(i)+0.5) / histoSize;
+
+			keyData[i] = m_minVal + normVal * (m_maxVal - m_minVal);
+			valueData[i] = m_histoValues[i];
+
+			const colorType* col= m_associatedSF->getColor(static_cast<ScalarType>(keyData[i]));
+			if (!col) //hidden values may have no associated color!
+				col = ccColor::lightGrey;
+			colors[i] = QColor(col[0],col[1],col[2]);
+		}
+
+		m_histogram->setData(keyData, valueData, colors);
+	}
+
+	replot(QCustomPlot::rpImmediate);
 }
 
 void ccHistogramWindow::refresh()
@@ -462,6 +516,7 @@ void ccHistogramWindow::refresh()
 	//clear previous display
 	m_histogram = 0;
 	m_vertBar = 0;
+	m_overlayCurve = 0;
 	this->clearGraphs();
 	this->clearPlottables();
 
@@ -477,7 +532,6 @@ void ccHistogramWindow::refresh()
 		m_histogram = new QCPColoredBars(xAxis, yAxis);
 		addPlottable(m_histogram);
 		// now we can modify properties of myBars:
-		m_histogram->setName("Histogram");
 		m_histogram->setWidth((m_maxVal - m_minVal) / histoSize);
 		m_histogram->setAntialiasedFill(false);
 		QVector<double> keyData(histoSize);
@@ -573,14 +627,18 @@ void ccHistogramWindow::refresh()
 		}
 
 		// create graph and assign data to it:
-		addGraph();
-		graph(0)->setData(x, y);
+		m_overlayCurve = addGraph();
+		m_overlayCurve->setData(x, y);
+		m_overlayCurve->setName("OverlayCurve");
 
-		//default color
-		const unsigned char* col = ccColor::black;
+		//set pen color
+		const unsigned char* col = ccColor::darkGrey;
 		QPen pen(QColor(col[0],col[1],col[2]));
-		pen.setWidth(std::max(1,rect().width()/200));
-		graph(0)->setPen(pen);
+		m_overlayCurve->setPen(pen);
+
+		//set width
+		updateOverlayCurveWidth(rect().width(),rect().height());
+
 	}
 
 	//vertical hint
@@ -590,7 +648,7 @@ void ccHistogramWindow::refresh()
 		addPlottable(m_vertBar);
 		
 		// now we can modify properties of vertBar
-		m_vertBar->setName("Vertical line");
+		m_vertBar->setName("VertLine");
 		m_vertBar->setWidth(0/*(m_maxVal - m_minVal) / histoSize*/);
 		m_vertBar->setBrush(QBrush(Qt::red));
 		m_vertBar->setPen(QPen(Qt::red));
@@ -622,17 +680,26 @@ void ccHistogramWindow::refresh()
 	replot();
 }
 
+void ccHistogramWindow::updateOverlayCurveWidth(int w, int h)
+{
+	if (m_overlayCurve)
+	{
+		int penWidth  = std::max(w,h)/200;
+		if (m_overlayCurve->pen().width() != penWidth)
+		{
+			QPen pen = m_overlayCurve->pen();
+			pen.setWidth(penWidth);
+			m_overlayCurve->setPen(pen);
+		}
+	}
+}
+
 void ccHistogramWindow::resizeEvent(QResizeEvent * event)
 {
 	QCustomPlot::resizeEvent(event);
-	
-	if (graph(0))
-	{
-		QPen pen = graph(0)->pen();
-		pen.setWidth(std::max(1,event->size().width()/300));
-		graph(0)->setPen(pen);
-	}
 
+	updateOverlayCurveWidth(event->size().width(), event->size().height());
+	
 	refresh();
 }
 

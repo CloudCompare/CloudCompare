@@ -1736,7 +1736,7 @@ public:
   QCPAbstractPlottable *plottable(int index);
   QCPAbstractPlottable *plottable();
   bool addPlottable(QCPAbstractPlottable *plottable);
-  bool removePlottable(QCPAbstractPlottable *plottable);
+  bool removePlottable(QCPAbstractPlottable *plottable, bool autoDelete = true);
   bool removePlottable(int index);
   int clearPlottables();
   int plottableCount() const;

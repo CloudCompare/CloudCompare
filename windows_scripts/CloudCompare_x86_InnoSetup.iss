@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.5.3"
+#define MyAppVersion "2.5.4"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.danielgm.net/cc/"
 #define MyAppExeName "CloudCompare.exe"

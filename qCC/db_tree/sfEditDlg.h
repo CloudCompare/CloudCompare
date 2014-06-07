@@ -18,11 +18,13 @@
 #ifndef CC_SF_EDIT_DIALOG_HEADER
 #define CC_SF_EDIT_DIALOG_HEADER
 
+//Qt
 #include <QWidget>
 
 #include <ui_sfEditDlg.h>
 
 class ccScalarField;
+class ccHistogramWindow;
 
 //! GUI scalar field interactor for properties list dialog
 class sfEditDlg : public QWidget, public Ui::SFEditDlg
@@ -39,13 +41,15 @@ public:
 
 public slots:
 
-	void minValSBChanged(double val);
-	void maxValSBChanged(double val);
-	void minSatSBChanged(double val);
-	void maxSatSBChanged(double val);
+	void minValSBChanged(double);
+	void maxValSBChanged(double);
+	void minSatSBChanged(double);
+	void maxSatSBChanged(double);
 
-	void dispValSliderChanged(int,int);
-	void satValSliderChanged(int,int);
+	void minValHistoChanged(double);
+	void maxValHistoChanged(double);
+	void minSatHistoChanged(double);
+	void maxSatHistoChanged(double);
 
 	void nanInGrayChanged(bool);
 	void alwaysShow0Changed(bool);
@@ -67,6 +71,8 @@ protected:
 
 	//! Associated scalar field
 	ccScalarField* m_associatedSF;
+	//! Associated scalar field histogram
+	ccHistogramWindow* m_associatedSFHisto;
 };
 
 #endif //CC_SF_EDIT_DIALOG_HEADER

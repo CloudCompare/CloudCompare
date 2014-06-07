@@ -33,9 +33,6 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qxt )
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/../libs/qcustomplot )
 include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 
-# QXt (TODO: use qxt as a standalone library!)
-set( QXT_HEADERS ../libs/qxt/qxtspanslider.h ../libs/qxt/qxtspanslider_p.h )
-set( QXT_SOURCES ../libs/qxt/qxtspanslider.cpp )
 # QCustomPlot
 set( QCUSTOMPLOT_HEADERS ../libs/qcustomplot/qcustomplot.h )
 set( QCUSTOMPLOT_SOURCES ../libs/qcustomplot/qcustomplot.cpp )

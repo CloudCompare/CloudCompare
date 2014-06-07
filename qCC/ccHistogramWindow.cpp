@@ -18,6 +18,10 @@
 #include "ccHistogramWindow.h"
 #include "ccGuiParameters.h"
 
+//Local
+#include <ccQCustomPlot.h>
+
+
 //qCC_db
 #include <ccColorScalesManager.h>
 
@@ -26,164 +30,6 @@
 
 //System
 #include <assert.h>
-
-/*********************************/
-/*** CUSTOM QCustomPlot wigets ***/
-/*********************************/
-
-//! Vertical bar with text along side
-class QCPBarsWithText : public QCPBars
-{
-public:
-
-	QCPBarsWithText(QCPAxis* keyAxis, QCPAxis* valueAxis) : QCPBars(keyAxis,valueAxis), m_textOnTheLeft(false) {}
-
-	void setText(QString text) { m_text = QStringList(text); }
-	void appendText(QString text) { m_text.append(text); }
-	void setTextAlignment(bool left) { m_textOnTheLeft = left; }
-
-protected:
-	
-	QStringList m_text;
-	bool m_textOnTheLeft;
-	
-	// reimplemented virtual draw method
-	virtual void draw(QCPPainter *painter)
-	{
-		if (!mKeyAxis || !mValueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
-
-		//switch to standard display
-		QCPBars::draw(painter);
-
-		int fontHeight = painter->fontMetrics().height();
-
-		if (!mData->isEmpty())
-		{
-			double& key = mData->begin()->key;
-			double& value = mData->begin()->value;
-			QPointF P = coordsToPixels(key, value);
-			//apply a small shift
-			int margin = 5; //in pixels
-			if (m_textOnTheLeft)
-				margin = -margin;
-			P.setX(P.x() + margin);
-			//we draw at the 'base' line
-			P.setY(P.y() + fontHeight);
-
-			for (int i=0; i<m_text.size(); ++i)
-			{
-				QPointF Pstart = P;
-				if (m_textOnTheLeft)
-					Pstart.setX(P.x() - painter->fontMetrics().width(m_text[i]));
-				painter->drawText(Pstart,m_text[i]);
-				P.setY(P.y() + fontHeight);
-			}
-		}
-	}
-
-};
-
-//! Colored histogram
-class QCPColoredBars : public QCPBars
-{
-public:
-
-	class QCPColoredBarData : public QCPBarData
-	{
-	public:
-		QCPColoredBarData()
-			: QCPBarData()
-			, color(Qt::blue)
-		{}
-
-		QColor color;
-	};
-	typedef QMap<double, QCPColoredBarData> QCPColoredBarDataMap;
-
-	QCPColoredBars(QCPAxis *keyAxis, QCPAxis *valueAxis) : QCPBars(keyAxis,valueAxis) {}
-	
-	void setData(const QVector<double> &key, const QVector<double> &value)
-	{
-		//no colors? we switch to the standard QCPBars object
-		m_coloredData.clear();
-		QCPBars::setData(key,value);
-	}
-
-	void setData(const QVector<double> &key, const QVector<double> &value, const QVector<QColor>& colors)
-	{
-		Q_ASSERT(colors.size() == key.size());
-
-		mData->clear(); //we duplicate the structures so that other stuff in QCPBarData works!
-
-		int n = qMin(key.size(), value.size());
-
-		for (int i=0; i<n; ++i)
-		{
-			QCPColoredBarData newData;
-			newData.key = key[i];
-			newData.value = value[i];
-			if (colors.size() > i)
-				newData.color = colors[i];
-			m_coloredData.insertMulti(newData.key, newData);
-			mData->insertMulti(newData.key, newData);
-		}
-	}
-
-	inline QRect rect() const { return clipRect(); }
-
-protected:
-
-	// reimplemented virtual draw method
-	virtual void draw(QCPPainter *painter)
-	{
-		//no colors?
-		if (m_coloredData.empty())
-		{
-			//switch to standard display
-			QCPBars::draw(painter);
-		}
-
-		if (!mKeyAxis || !mValueAxis) { qDebug() << Q_FUNC_INFO << "invalid key or value axis"; return; }
-
-		QCPColoredBarDataMap::const_iterator it;
-		for (it = m_coloredData.constBegin(); it != m_coloredData.constEnd(); ++it)
-		{
-			// skip bar if not visible in key axis range:
-			if (it.key()+mWidth*0.5 < mKeyAxis.data()->range().lower || it.key()-mWidth*0.5 > mKeyAxis.data()->range().upper)
-				continue;
-
-			QPolygonF barPolygon = getBarPolygon(it.key(), it.value().value);
-			// draw bar fill:
-			if (mainBrush().style() != Qt::NoBrush && mainBrush().color().alpha() != 0)
-			{
-				QBrush brush = mainBrush();
-				brush.setColor(it.value().color);
-				
-				applyFillAntialiasingHint(painter);
-				painter->setPen(Qt::NoPen);
-				painter->setBrush(brush);
-				painter->drawPolygon(barPolygon);
-			}
-			// draw bar line:
-			if (mainPen().style() != Qt::NoPen && mainPen().color().alpha() != 0)
-			{
-				QPen pen = mainPen();
-				pen.setColor(it.value().color);
-
-				applyDefaultAntialiasingHint(painter);
-				painter->setPen(pen);
-				painter->setBrush(Qt::NoBrush);
-				painter->drawPolyline(barPolygon);
-			}
-		}
-	}
-
-	QCPColoredBarDataMap m_coloredData;
-};
-
-/*********************************/
-/*** ccHistogramWindow stuffs  ***/
-/*********************************/
 
 ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	: QCustomPlot(parent)
@@ -201,6 +47,13 @@ ccHistogramWindow::ccHistogramWindow(QWidget* parent/*=0*/)
 	, m_vertBar(0)
 	, m_drawVerticalIndicator(false)
 	, m_verticalIndicatorPositionPercent(0)
+	, m_sfInteractionMode(false)
+	, m_selectedItem(NONE)
+	, m_areaLeft(0)
+	, m_areaRight(0)
+	, m_arrowLeft(0)
+	, m_arrowRight(0)
+	, m_lastMouseClick(0,0)
 {
 	setWindowTitle("Histogram");
 	setFocusPolicy(Qt::StrongFocus);
@@ -246,6 +99,8 @@ void ccHistogramWindow::clearInternal()
 	m_maxHistoVal = 0;
 
 	m_curveValues.clear();
+
+	m_selectedItem = NONE;
 }
 
 void ccHistogramWindow::setTitle(const QString& str)
@@ -456,11 +311,7 @@ void ccHistogramWindow::refreshBars()
 		int histoSize = static_cast<int>(m_histoValues.size());
 
 		//DGM: the bars will be redrawn only if we delete and recreate the graph?!
-		removePlottable(m_histogram,true);
-		m_histogram = new QCPColoredBars(xAxis, yAxis);
-		addPlottable(m_histogram);
-		m_histogram->setWidth((m_maxVal - m_minVal) / histoSize);
-		m_histogram->setAntialiasedFill(false);
+		m_histogram->clearData();
 
 		QVector<double> keyData(histoSize);
 		QVector<double> valueData(histoSize);
@@ -481,6 +332,8 @@ void ccHistogramWindow::refreshBars()
 		}
 
 		m_histogram->setData(keyData, valueData, colors);
+
+		//rescaleAxes();
 	}
 
 	replot(QCustomPlot::rpImmediate);
@@ -489,7 +342,16 @@ void ccHistogramWindow::refreshBars()
 void ccHistogramWindow::refresh()
 {
 	// set ranges appropriate to show data
-	xAxis->setRange(m_minVal, m_maxVal);
+	double minVal = m_minVal;
+	double maxVal = m_maxVal;
+	if (m_sfInteractionMode && m_associatedSF)
+	{
+		double minSat = m_associatedSF->saturationRange().min();
+		double maxSat = m_associatedSF->saturationRange().max();
+		minVal = std::min(minVal,minSat);
+		maxVal = std::max(maxVal,maxSat);
+	}
+	xAxis->setRange(minVal, maxVal);
 	yAxis->setRange(0, m_maxHistoVal);
 
 	if (!m_titleStr.isEmpty())
@@ -514,14 +376,21 @@ void ccHistogramWindow::refresh()
 	}
 
 	//clear previous display
-	m_histogram = 0;
-	m_vertBar = 0;
-	m_overlayCurve = 0;
+	m_histogram		= 0;
+	m_vertBar		= 0;
+	m_overlayCurve	= 0;
+	m_areaLeft		= 0;
+	m_areaRight		= 0;
+	m_arrowLeft		= 0;
+	m_arrowRight	= 0;
 	this->clearGraphs();
 	this->clearPlottables();
 
 	if (m_histoValues.empty())
 		return;
+
+	//default color scale to be used for display
+	ccColorScale::Shared colorScale = (m_colorScale ? m_colorScale : ccColorScalesManager::GetDefaultScale());
 
 	//histogram
 	int histoSize = static_cast<int>(m_histoValues.size());
@@ -538,7 +407,6 @@ void ccHistogramWindow::refresh()
 		QVector<double> valueData(histoSize);
 
 		HISTOGRAM_COLOR_SCHEME colorScheme = m_colorScheme;
-		ccColorScale::Shared colorScale = (m_colorScale ? m_colorScale : ccColorScalesManager::GetDefaultScale());
 		switch(colorScheme)
 		{
 		case USE_SOLID_COLOR:
@@ -638,11 +506,48 @@ void ccHistogramWindow::refresh()
 
 		//set width
 		updateOverlayCurveWidth(rect().width(),rect().height());
-
 	}
+	
+	//sf interaction mode
+	if (m_sfInteractionMode && m_associatedSF)
+	{
+		const ccScalarField::Range& dispRange = m_associatedSF->displayRange();
 
-	//vertical hint
-	if (m_drawVerticalIndicator)
+		m_areaLeft = new QCPHiddenArea(true,xAxis, yAxis);
+		m_areaLeft->setRange(dispRange.min(),dispRange.max());
+		m_areaLeft->setCurrentVal(dispRange.start());
+		addPlottable(m_areaLeft);
+
+		m_areaRight = new QCPHiddenArea(false,xAxis, yAxis);
+		m_areaRight->setRange(dispRange.min(),dispRange.max());
+		m_areaRight->setCurrentVal(dispRange.stop());
+		addPlottable(m_areaRight);
+
+		const ccScalarField::Range& satRange = m_associatedSF->saturationRange();
+
+		m_arrowLeft = new QCPArrow(xAxis, yAxis);
+		m_arrowLeft->setRange(satRange.min(),satRange.max());
+		m_arrowLeft->setCurrentVal(satRange.start());
+		if (colorScale)
+		{
+			const colorType* col = colorScale->getColorByRelativePos(m_associatedSF->symmetricalScale() ? 0.5 : 0,m_associatedSF->getColorRampSteps());
+			if (col)
+				m_arrowLeft->setColor(col[0],col[1],col[2]);
+		}
+		addPlottable(m_arrowLeft);
+
+		m_arrowRight = new QCPArrow(xAxis, yAxis);
+		m_arrowRight->setRange(satRange.min(),satRange.max());
+		m_arrowRight->setCurrentVal(satRange.stop());
+		if (colorScale)
+		{
+			const colorType* col = colorScale->getColorByRelativePos(1.0,m_associatedSF->getColorRampSteps());
+			if (col)
+				m_arrowRight->setColor(col[0],col[1],col[2]);
+		}
+		addPlottable(m_arrowRight);
+	}
+	else if (m_drawVerticalIndicator) //vertical hint
 	{
 		m_vertBar = new QCPBarsWithText(xAxis, yAxis);
 		addPlottable(m_vertBar);
@@ -674,10 +579,91 @@ void ccHistogramWindow::refresh()
 		m_vertBar->setTextAlignment(m_verticalIndicatorPositionPercent > 0.5);
 	}
 
-	rescaleAxes();
+	//rescaleAxes();
 
 	// redraw
 	replot();
+}
+
+void ccHistogramWindow::setMinDispValue(double val)
+{
+	if (m_areaLeft && m_areaLeft->currentVal() != val)
+	{
+		m_areaLeft->setCurrentVal(val);
+
+		if (m_associatedSF)
+		{
+			//auto-update
+			m_associatedSF->setMinDisplayed(static_cast<ScalarType>(val));
+			refreshBars();
+		}
+		else
+		{
+			replot();
+		}
+
+		emit sfMinDispValChanged(val);
+	}
+}
+
+void ccHistogramWindow::setMaxDispValue(double val)
+{
+	if (m_areaRight && m_areaRight->currentVal() != val)
+	{
+		m_areaRight->setCurrentVal(val);
+
+		if (m_associatedSF)
+		{
+			//auto-update
+			m_associatedSF->setMaxDisplayed(static_cast<ScalarType>(val));
+			refreshBars();
+		}
+		else
+		{
+			replot();
+		}
+
+		emit sfMaxDispValChanged(val);
+	}
+}
+
+void ccHistogramWindow::setMinSatValue(double val)
+{
+	if (m_arrowLeft && m_arrowLeft->currentVal() != val)
+	{
+		m_arrowLeft->setCurrentVal(val);
+
+		if (m_associatedSF)
+		{
+			//auto-update
+			m_associatedSF->setSaturationStart(val);
+			refreshBars();
+		}
+		else
+		{
+			replot();
+		}
+
+		emit sfMinSatValChanged(val);
+	}
+}
+
+void ccHistogramWindow::setMaxSatValue(double val)
+{
+	if (m_arrowRight && m_arrowRight->currentVal() != val)
+	{
+		m_arrowRight->setCurrentVal(val);
+
+		if (m_associatedSF)
+		{
+			//auto-update
+			m_associatedSF->setSaturationStop(val);
+			refreshBars();
+		}
+		replot();
+
+		emit sfMaxSatValChanged(val);
+	}
 }
 
 void ccHistogramWindow::updateOverlayCurveWidth(int w, int h)
@@ -705,24 +691,162 @@ void ccHistogramWindow::resizeEvent(QResizeEvent * event)
 
 void ccHistogramWindow::mousePressEvent(QMouseEvent *event)
 {
-	mouseMoveEvent(event);
+	m_lastMouseClick = event->pos();
+
+	if (m_sfInteractionMode)
+	{
+		m_selectedItem = NONE;
+		//check greyed areas (circles)
+		{
+			if (m_areaLeft && m_areaLeft->isSelectable(m_lastMouseClick))
+				m_selectedItem = LEFT_AREA;
+			if (m_areaRight && m_areaRight->isSelectable(m_lastMouseClick))
+			{
+				if (m_selectedItem == NONE)
+					m_selectedItem = RIGHT_AREA;
+				else 
+					m_selectedItem = BOTH_AREAS;
+			}
+		}
+
+		//check yellow triangles
+		if (m_selectedItem == NONE)
+		{
+			if (m_arrowLeft && m_arrowLeft->isSelectable(m_lastMouseClick))
+			m_selectedItem = LEFT_ARROW;
+			if (m_arrowRight && m_arrowRight->isSelectable(m_lastMouseClick))
+			{
+				if (m_selectedItem == NONE)
+					m_selectedItem = RIGHT_ARROW;
+				else 
+					m_selectedItem = BOTH_ARROWS;
+			}
+		}
+	}
+	else
+	{
+		mouseMoveEvent(event);
+	}
 }
 
 void ccHistogramWindow::mouseMoveEvent(QMouseEvent *event)
 {
 	if (event->buttons() & Qt::LeftButton)
 	{
-		if (m_histogram && !m_histoValues.empty())
+		if (m_sfInteractionMode)
 		{
-			QRect roi = m_histogram->rect();
-			if (roi.contains(event->pos(),false))
+			QPoint mousePos = event->pos();
+			if (m_histogram)
 			{
-				m_drawVerticalIndicator = true;
+				QRect rect = m_histogram->rect();
+				mousePos.setX(std::min(rect.x()+rect.width(),std::max(rect.x(),mousePos.x())));
+			}
 
-				int verticalIndicatorPosition = (static_cast<int>(m_histoValues.size()) * (event->x() - roi.x())) / roi.width();
-				m_verticalIndicatorPositionPercent = static_cast<double>(verticalIndicatorPosition) / m_histoValues.size();
+			switch(m_selectedItem)
+			{
+			case NONE:
+				//nothing to do
+				break;
+			case LEFT_AREA:
+				if (m_areaLeft)
+				{
+					double newValue = m_areaLeft->pixelToKey(mousePos.x());
+					if (m_areaRight)
+						newValue = std::min(newValue,m_areaRight->currentVal());
+					setMinDispValue(newValue);
+				}
+				break;
+			case RIGHT_AREA:
+				if (m_areaRight)
+				{
+					double newValue = m_areaRight->pixelToKey(mousePos.x());
+					if (m_areaLeft)
+						newValue = std::max(newValue,m_areaLeft->currentVal());
+					setMaxDispValue(newValue);
+				}
+				break;
+			case BOTH_AREAS:
+				{
+					int dx = m_lastMouseClick.x() - mousePos.x();
+					if (dx < -2)
+					{
+						//going to the right
+						m_selectedItem = RIGHT_AREA;
+						//call the same method again
+						mouseMoveEvent(event);
+						return;
+					}
+					else if (dx > 2)
+					{
+						//going to the left
+						m_selectedItem = LEFT_AREA;
+						//call the same method again
+						mouseMoveEvent(event);
+						return;
+					}
+					//else: nothing we can do right now!
+				}
+				break;
+			case LEFT_ARROW:
+				if (m_arrowLeft)
+				{
+					double newValue = m_arrowLeft->pixelToKey(mousePos.x());
+					if (m_arrowRight)
+						newValue = std::min(newValue,m_arrowRight->currentVal());
+					setMinSatValue(newValue);
+				}
+				break;
+				break;
+			case RIGHT_ARROW:
+				if (m_arrowRight)
+				{
+					double newValue = m_arrowRight->pixelToKey(mousePos.x());
+					if (m_arrowLeft)
+						newValue = std::max(newValue,m_arrowLeft->currentVal());
+					setMaxSatValue(newValue);
+				}
+				break;
+			case BOTH_ARROWS:
+				{
+					int dx = m_lastMouseClick.x() - mousePos.x();
+					if (dx < -2)
+					{
+						//going to the right
+						m_selectedItem = RIGHT_ARROW;
+						//call the same method again
+						mouseMoveEvent(event);
+						return;
+					}
+					else if (dx > 2)
+					{
+						//going to the left
+						m_selectedItem = LEFT_ARROW;
+						//call the same method again
+						mouseMoveEvent(event);
+						return;
+					}
+					//else: nothing we can do right now!
+				}
+				break;
+			default:
+				assert(false);
+				break;
+			}
+		}
+		else
+		{
+			if (m_histogram && !m_histoValues.empty())
+			{
+				QRect roi = m_histogram->rect();
+				if (roi.contains(event->pos(),false))
+				{
+					m_drawVerticalIndicator = true;
 
-				refresh();
+					int verticalIndicatorPosition = (static_cast<int>(m_histoValues.size()) * (event->x() - roi.x())) / roi.width();
+					m_verticalIndicatorPositionPercent = static_cast<double>(verticalIndicatorPosition) / m_histoValues.size();
+
+					refresh();
+				}
 			}
 		}
 	}

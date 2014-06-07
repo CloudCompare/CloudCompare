@@ -37,6 +37,8 @@
 
 class QCPColoredBars;
 class QCPBarsWithText;
+class QCPHiddenArea;
+class QCPArrow;
 
 //! Histogram widget
 class ccHistogramWindow : public QCustomPlot
@@ -104,6 +106,23 @@ public:
 	**/
 	void refreshBars();
 
+public: //SF interactor mode
+
+	//! Enables SF interaction mode
+	void enableSFInteractionMode(bool state) { m_sfInteractionMode = state; }
+
+	void setMinDispValue(double);
+	void setMaxDispValue(double);
+	void setMinSatValue(double);
+	void setMaxSatValue(double);
+
+signals:
+
+	void sfMinDispValChanged(double);
+	void sfMaxDispValChanged(double);
+	void sfMinSatValChanged(double);
+	void sfMaxSatValChanged(double);
+
 protected: //methods
 
 	//! Changes the current number of classes
@@ -168,6 +187,29 @@ protected: //attributes
 
 	//! Rendering font
 	QFont m_renderingFont;
+
+protected: //SF interactor mode
+
+	//! Whether SF interaction mode is enabled or not
+	bool m_sfInteractionMode;
+
+	//! Selectable items in "SF interaction" mode
+	enum SELECTABLE_ITEMS { NONE, LEFT_AREA, RIGHT_AREA, BOTH_AREAS, LEFT_ARROW, RIGHT_ARROW, BOTH_ARROWS };
+	//! Currently selected item
+	SELECTABLE_ITEMS m_selectedItem;
+
+	//! Left greyed area
+	QCPHiddenArea* m_areaLeft;
+	//! Right greyed area
+	QCPHiddenArea* m_areaRight;
+
+	//! Left arrow
+	QCPArrow* m_arrowLeft;
+	//! Right arrow
+	QCPArrow* m_arrowRight;
+
+	//! Last mouse click
+	QPoint m_lastMouseClick;
 };
 
 //! Encapsulating dialog for ccHistogramWindow

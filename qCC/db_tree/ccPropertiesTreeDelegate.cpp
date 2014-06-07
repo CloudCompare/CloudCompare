@@ -113,7 +113,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_CURRENT_COLOR_RAMP:
 			return QSize(70,22);
 		case OBJECT_CLOUD_SF_EDITOR:
-			return QSize(250,160);
+			return QSize(250,200);
 		}
 	}
 

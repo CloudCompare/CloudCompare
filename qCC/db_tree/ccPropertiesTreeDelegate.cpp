@@ -69,13 +69,19 @@
 #include <assert.h>
 
 // Default 'None' string
-const QString c_noDisplayString = QString("None");
-const QString c_defaultPointSizeString = QString("Default");
-const QString c_defaultPolyWidthSizeString = QString("Default Width");
+static const QString c_noneString = QString("None");
+
+// Default color sources string
+static const QString s_rgbColor("RGB");
+static const QString s_sfColor ("Scalar field");
+
+// Other strings
+static const QString c_defaultPointSizeString = QString("Default");
+static const QString c_defaultPolyWidthSizeString = QString("Default Width");
 
 // Default separator colors
-const QBrush SEPARATOR_BACKGROUND_BRUSH(Qt::darkGray);
-const QBrush SEPARATOR_TEXT_BRUSH(Qt::white);
+static const QBrush SEPARATOR_BACKGROUND_BRUSH(Qt::darkGray);
+static const QBrush SEPARATOR_TEXT_BRUSH(Qt::white);
 
 ccPropertiesTreeDelegate::ccPropertiesTreeDelegate(	QStandardItemModel* model,
 													QAbstractItemView* view,
@@ -109,6 +115,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_COLOR_RAMP_STEPS:
 		case OBJECT_CLOUD_POINT_SIZE:
 			return QSize(50,18);
+		case OBJECT_COLOR_SOURCE:
 		case OBJECT_POLYLINE_WIDTH:
 		case OBJECT_CURRENT_COLOR_RAMP:
 			return QSize(70,22);
@@ -349,34 +356,20 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 	//name
 	appendRow( ITEM("Name"), ITEM(_obj->getName(),Qt::ItemIsEditable,OBJECT_NAME) );
 
-	//unique ID
-	appendRow( ITEM("Unique ID"), ITEM(QString::number(_obj->getUniqueID())) );
-
-	//number of children
-	appendRow( ITEM("Children"), ITEM(QString::number(_obj->getChildrenNumber())) );
-
 	//visibility
 	if (!_obj->isVisiblityLocked())
 		appendRow( ITEM("Visible"), CHECKABLE_ITEM(_obj->isVisible(),OBJECT_VISIBILITY) );
-
-	//colors
-	if (_obj->hasColors())
-		appendRow( ITEM("Colors"), CHECKABLE_ITEM(_obj->colorsShown(),OBJECT_COLORS_SHOWN) );
 
 	//normals
 	if (_obj->hasNormals())
 		appendRow( ITEM("Normals"), CHECKABLE_ITEM(_obj->normalsShown(),OBJECT_NORMALS_SHOWN) );
 
-	//scalar fields
-	if (_obj->hasScalarFields())
-		appendRow( ITEM("Scalar Field"), CHECKABLE_ITEM(_obj->sfShown(),OBJECT_SCALAR_FIELD_SHOWN) );
-
 	//name in 3D
 	appendRow( ITEM("Show name (in 3D)"), CHECKABLE_ITEM(_obj->nameShownIn3D(),OBJECT_NAME_IN_3D) );
 
-	//display window
-	if (!_obj->isLocked())
-		appendRow( ITEM("Current Display"), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true );
+	//color source
+	if (_obj->hasColors() || _obj->hasScalarFields())
+		appendRow( ITEM("Colors"), PERSISTENT_EDITOR(OBJECT_COLOR_SOURCE), true );
 
 	//Bounding-box
 	{
@@ -407,6 +400,13 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 						ITEM(QString("X: %0\nY: %1\nZ: %2").arg(bboxCenter.x).arg(bboxCenter.y).arg(bboxCenter.z)) );
 		}
 	}
+
+	//infos (unique ID, children) //DGM: on the same line so as to gain space
+	appendRow( ITEM("Info"), ITEM(QString("Object ID: %1 - Children: %2").arg(_obj->getUniqueID()).arg(_obj->getChildrenNumber())) );
+
+	//display window
+	if (!_obj->isLocked())
+		appendRow( ITEM("Current Display"), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true );
 }
 
 void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
@@ -850,12 +850,12 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			std::vector<ccGLWindow*> glWindows;
 			MainWindow::GetGLWindows(glWindows);
 
-			comboBox->addItem(c_noDisplayString);
+			comboBox->addItem(c_noneString);
 
 			for (unsigned i=0; i<glWindows.size(); ++i)
 				comboBox->addItem(glWindows[i]->windowTitle());
 
-			connect(comboBox, SIGNAL(currentIndexChanged(const QString)), this, SLOT(objectDisplayChanged(const QString)));
+			connect(comboBox, SIGNAL(currentIndexChanged(const QString)), this, SLOT(objectDisplayChanged(const QString&)));
 
 			comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
 			return comboBox;
@@ -867,7 +867,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 			QComboBox *comboBox = new QComboBox(parent);
 
-			comboBox->addItem(QString("none"));
+			comboBox->addItem(QString("None"));
 			int i,nsf = cloud->getNumberOfScalarFields();
 			for (i=0;i<nsf;++i)
 				comboBox->addItem(QString(cloud->getScalarFieldName(i)));
@@ -1038,6 +1038,23 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 				comboBox->addItem(QString::number(i));
 
 			connect(comboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(polyineWidthChanged(int)));
+
+			comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+			return comboBox;
+		}
+	case OBJECT_COLOR_SOURCE:
+		{
+			QComboBox *comboBox = new QComboBox(parent);
+
+			comboBox->addItem(c_noneString);
+			if (m_currentObject)
+			{
+				if (m_currentObject->hasColors())
+					comboBox->addItem(s_rgbColor);
+				if (m_currentObject->hasScalarFields())
+					comboBox->addItem(s_sfColor);
+				connect(comboBox, SIGNAL(currentIndexChanged(const QString)), this, SLOT(colorSourceChanged(const QString&)));
+			}
 
 			comboBox->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
 			return comboBox;
@@ -1246,6 +1263,29 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 			comboBox->setCurrentIndex(cloud->getPointSize());
 			break;
 		}
+	case OBJECT_COLOR_SOURCE:
+		{
+			QComboBox *comboBox = qobject_cast<QComboBox*>(editor);
+			if (!comboBox)
+				return;
+
+			int currentIndex = 0; //no color
+			int lastIndex = currentIndex;
+			if (m_currentObject->hasColors())
+			{
+				++lastIndex;
+				if (m_currentObject->colorsShown())
+					currentIndex = lastIndex;
+			}
+			if (m_currentObject->hasScalarFields())
+			{
+				++lastIndex;
+				if (m_currentObject->sfShown())
+					currentIndex = lastIndex;
+			}
+			comboBox->setCurrentIndex(currentIndex);
+			break;
+		}
 	default:
 		QStyledItemDelegate::setEditorData(editor, index);
 		break;
@@ -1278,10 +1318,6 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			}
 		}
 		break;
-	case OBJECT_COLORS_SHOWN:
-		m_currentObject->showColors(item->checkState() == Qt::Checked);
-		redraw=true;
-		break;
 	case OBJECT_NORMALS_SHOWN:
 		m_currentObject->showNormals(item->checkState() == Qt::Checked);
 		redraw=true;
@@ -1292,10 +1328,6 @@ void ccPropertiesTreeDelegate::updateItem(QStandardItem * item)
 			assert(mesh);
 			mesh->showMaterials(item->checkState() == Qt::Checked);
 		}
-		redraw=true;
-		break;
-	case OBJECT_SCALAR_FIELD_SHOWN:
-		m_currentObject->showSF(item->checkState() == Qt::Checked);
 		redraw=true;
 		break;
 	case OBJECT_SF_SHOW_SCALE:
@@ -1699,7 +1731,7 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
 	if (win)
 		actualDisplayTitle = win->windowTitle();
 	else
-		actualDisplayTitle = c_noDisplayString;
+		actualDisplayTitle = c_noneString;
 
 	if (actualDisplayTitle != newDisplayTitle)
 	{
@@ -1717,4 +1749,32 @@ void ccPropertiesTreeDelegate::objectDisplayChanged(const QString& newDisplayTit
 
 		MainWindow::RefreshAllGLWindow();
 	}
+}
+
+void ccPropertiesTreeDelegate::colorSourceChanged(const QString & source)
+{
+	if (!m_currentObject)
+		return;
+
+	if (source == c_noneString)
+	{
+		m_currentObject->showColors(false);
+		m_currentObject->showSF(false);
+	}
+	else if (source == s_rgbColor)
+	{
+		m_currentObject->showColors(true);
+		m_currentObject->showSF(false);
+	}
+	else if (source == s_sfColor)
+	{
+		m_currentObject->showColors(false);
+		m_currentObject->showSF(true);
+	}
+	else
+	{
+		assert(false);
+	}
+
+	updateDisplay();
 }

@@ -59,9 +59,8 @@ public:
 							OBJECT_NAME								,
 							OBJECT_VISIBILITY						,
 							OBJECT_CURRENT_DISPLAY					,
-							OBJECT_COLORS_SHOWN						,
 							OBJECT_NORMALS_SHOWN					,
-							OBJECT_SCALAR_FIELD_SHOWN				,
+							OBJECT_COLOR_SOURCE						,
 							OBJECT_POLYLINE_WIDTH					,
 							OBJECT_SENSOR_DRAW_FRUSTRUM				,
 							OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES		,
@@ -132,6 +131,7 @@ protected slots:
 	void applyLabelViewport();
 	void updateDisplay();
 	void objectDisplayChanged(const QString &);
+	void colorSourceChanged(const QString &);
 	void sensorScaleChanged(double);
 	void sensorIndexChanged(double);
 	void cloudPointSizeChanged(int);

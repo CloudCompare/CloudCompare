@@ -13,6 +13,8 @@ v2.5.5 ??/??/2014
 		- sliders are replaced by interactors displayed over a representation of the SF histogram
 		- round interactors are used to set the min and max displayed values
 		- triangles interactors are used to set the min and max saturation values
+	* 'Color' and 'Scalar field' visibility checkboxes in the entity 'Properties' dialog have been merged:
+		- a unique combo-box now lets the user choose between no color, RGB or SF colors
 	* New option in the LAS file opening dialog:
 		- 'Force 8-bit colors': to cope with files in which colors are mistakenly coded on 8 bits (instead of 16)
 	* The 'Poisson Surface Reconstruction' plugin (qPoissonRecon) is now based on the version 5.71 of PoissonRecon lib

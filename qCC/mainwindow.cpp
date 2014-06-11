@@ -104,7 +104,7 @@
 #include "ccPointListPickingDlg.h"
 #include "ccNormalComputationDlg.h"
 #include "ccCameraParamEditDlg.h"
-#include "ccScalarFieldArithmeticDlg.h"
+#include "ccScalarFieldArithmeticsDlg.h"
 #include "ccScalarFieldFromColorDlg.h"
 #include "ccSensorComputeDistancesDlg.h"
 #include "ccSensorComputeScatteringAnglesDlg.h"
@@ -156,6 +156,18 @@
 //global static pointer (as there should only be one instance of MainWindow!)
 static MainWindow* s_instance = 0;
 
+//persistent settings key (to be used with QSettings)
+static const QString s_psLoadFile				("LoadFile");
+static const QString s_psSaveFile				("SaveFile");
+static const QString s_psMainWinGeom			("mainWindowGeometry");
+static const QString s_psMainWinState			("mainWindowState");
+static const QString s_psCurrentPath			("currentPath");
+static const QString s_psSelectedFilter			("selectedFilter");
+static const QString s_psSelectedFilterCloud	("selectedFilterCloud");
+static const QString s_psSelectedFilterMesh		("selectedFilterMesh");
+static const QString s_psDuplicatePointsGroup	("duplicatePoints");
+static const QString s_psDuplicatePointsMinDist	("minDist");
+
 //standard message in case of locked vertices
 void DisplayLockedVerticesWarning()
 {
@@ -182,7 +194,7 @@ MainWindow::MainWindow()
 	//Dialog "auto-construction"
 	setupUi(this);
 	QSettings settings;
-	restoreGeometry(settings.value("mainWindowGeometry").toByteArray());
+	restoreGeometry(settings.value(s_psMainWinGeom).toByteArray());
 
 	setWindowTitle(QString("CloudCompare v")+ccCommon::GetCCVersion(false));
 
@@ -270,7 +282,7 @@ MainWindow::MainWindow()
 	QMainWindow::statusBar()->showMessage(QString("Ready"));
 	ccConsole::Print("CloudCompare started!");
 
-	restoreState(settings.value("mainWindowState").toByteArray());
+	restoreState(settings.value(s_psMainWinState).toByteArray());
 }
 
 MainWindow::~MainWindow()
@@ -3004,9 +3016,6 @@ void MainWindow::doActionSamplePoints()
 	refreshAll();
 }
 
-//semi-persistent setting for 'doRemoveDuplicatePoints'
-static double s_minDistanceBetweenPoints = 1.0e-12;
-
 void MainWindow::doRemoveDuplicatePoints()
 {
 	if (m_selectedEntities.empty())
@@ -3016,10 +3025,18 @@ void MainWindow::doRemoveDuplicatePoints()
 	size_t selNum = selectedEntities.size();
 	bool first = true;
 
+	//persistent setting(s)
+	QSettings settings;
+	settings.beginGroup(s_psDuplicatePointsGroup);
+	double minDistanceBetweenPoints = settings.value(s_psDuplicatePointsMinDist,1.0e-12).toDouble();
+
 	bool ok;
-	s_minDistanceBetweenPoints = QInputDialog::getDouble(this, "Remove duplicate points", "Min distance between points:", s_minDistanceBetweenPoints, 0, 1.0e8, 12, &ok);
+	minDistanceBetweenPoints = QInputDialog::getDouble(this, "Remove duplicate points", "Min distance between points:", minDistanceBetweenPoints, 0, 1.0e8, 12, &ok);
 	if (!ok)
 		return;
+
+	//save parameter
+	settings.setValue(s_psDuplicatePointsMinDist,minDistanceBetweenPoints);
 
 	for (size_t i=0; i<selNum; ++i)
 	{
@@ -3043,7 +3060,7 @@ void MainWindow::doRemoveDuplicatePoints()
 			ccOctree* octree = cloud->getOctree();
 			ccProgressDialog pDlg(true,this);
 
-			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(cloud,s_minDistanceBetweenPoints,&pDlg,octree);
+			int result = CCLib::GeometricalAnalysisTools::flagDuplicatePoints(cloud,minDistanceBetweenPoints,&pDlg,octree);
 
 			if (result >= 0)
 			{
@@ -5919,8 +5936,8 @@ void MainWindow::closeEvent(QCloseEvent *event)
 
 	//save the state as settings
 	QSettings settings;
-	settings.setValue("mainWindowGeometry", saveGeometry());
-	settings.setValue("mainWindowState", saveState());
+	settings.setValue(s_psMainWinGeom, saveGeometry());
+	settings.setValue(s_psMainWinState, saveState());
 }
 
 void MainWindow::moveEvent(QMoveEvent* event)
@@ -7501,116 +7518,17 @@ void MainWindow::doActionScalarFieldArithmetic()
 	if (!cloud)
 		return;
 
-	ccScalarFieldArithmeticDlg sfaDlg(cloud,this);
+	ccScalarFieldArithmeticsDlg sfaDlg(cloud,this);
 
 	if (!sfaDlg.exec())
 		return;
 
-	int sf1Idx = sfaDlg.getSF1Index();
-	int sf2Idx = sfaDlg.getSF2Index();
-	ccScalarFieldArithmeticDlg::Operation op = sfaDlg.getOperation();
-
-	if (sf1Idx < 0 || sf2Idx < 0)
-		return;
-
-	CCLib::ScalarField* sf1 = cloud->getScalarField(sf1Idx);
-	CCLib::ScalarField* sf2 = cloud->getScalarField(sf2Idx);
-
-	if (!sf1 || !sf2)
-		return;
-
-	QString opStr;
-	switch (op)
+	if (!sfaDlg.apply(cloud))
 	{
-	case ccScalarFieldArithmeticDlg::PLUS:
-		opStr = "+";
-		break;
-	case ccScalarFieldArithmeticDlg::MINUS:
-		opStr = "-";
-		break;
-	case ccScalarFieldArithmeticDlg::MULTIPLY:
-		opStr = "*";
-		break;
-	case ccScalarFieldArithmeticDlg::DIVIDE:
-		opStr = "/";
-		break;
-	}
-	QString sfName = QString("(SF#%1").arg(sf1Idx)+opStr+QString("SF#%1)").arg(sf2Idx);
-
-	int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
-	if (sfIdx >= 0)
-	{
-		if (sfIdx == sf1Idx || sfIdx == sf2Idx)
-		{
-			ccConsole::Error(QString("Resulting scalar field will have the same name\nas one of the operand (%1)! Rename it first...").arg(sfName));
-			return;
-		}
-
-		if (QMessageBox::warning(	this,
-									"Same scalar field name",
-									"Resulting scalar field already exists! Overwrite it?",
-									QMessageBox::Ok | QMessageBox::Cancel,
-									QMessageBox::Ok ) != QMessageBox::Ok)
-		{
-			return;
-		}
-
-		cloud->deleteScalarField(sfIdx);
+		ccConsole::Error("An error occurred (see Console for more details)");
 	}
 
-	sfIdx = cloud->addScalarField(qPrintable(sfName));
-	if (sfIdx < 0)
-	{
-		ccConsole::Error("Failed to create destination scalar field! (not enough memory?)");
-		return;
-	}
-	CCLib::ScalarField* sfDest = cloud->getScalarField(sfIdx);
-
-	unsigned valCount = sf1->currentSize();
-	if (!sfDest->resize(valCount))
-	{
-		ccConsole::Error("Not enough memory!");
-		sfDest->release();
-		return;
-	}
-
-	assert(valCount == sf2->currentSize() && valCount == sfDest->currentSize());
-
-	for (unsigned i=0; i<valCount; ++i)
-	{
-		ScalarType val = NAN_VALUE;
-
-		//we must handle 'invalid' values
-		const ScalarType& val1 = sf1->getValue(i);
-		if (ccScalarField::ValidValue(val1))
-		{
-			const ScalarType& val2 = sf2->getValue(i);
-			if (ccScalarField::ValidValue(val2))
-			{
-				switch (op)
-				{
-				case ccScalarFieldArithmeticDlg::PLUS:
-					val = val1 + val2;
-					break;
-				case ccScalarFieldArithmeticDlg::MINUS:
-					val = val1 - val2;
-					break;
-				case ccScalarFieldArithmeticDlg::MULTIPLY:
-					val = val1 * val2;
-					break;
-				case ccScalarFieldArithmeticDlg::DIVIDE:
-					val = val1 / val2;
-					break;
-				}
-			}
-		}
-
-		sfDest->setValue(i,val);
-	}
-
-	sfDest->computeMinAndMax();
-	cloud->setCurrentDisplayedScalarField(sfIdx);
-	cloud->showSF(sfIdx >= 0);
+	cloud->showSF(true);
 	cloud->prepareDisplayForRefresh_recursive();
 
 	refreshAll();
@@ -7933,8 +7851,8 @@ void MainWindow::doActionExportCloudsInfo()
 
 	//persistent settings
 	QSettings settings;
-	settings.beginGroup("SaveFile");
-	QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
+	settings.beginGroup(s_psSaveFile);
+	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
 
 	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.csv");
 	if (outputFilename.isEmpty())
@@ -8725,9 +8643,9 @@ void MainWindow::closeAll()
 void MainWindow::loadFile()
 {
 	QSettings settings;
-	settings.beginGroup("LoadFile");
-	QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
-	int currentOpenDlgFilter = settings.value("selectedFilter",BIN).toInt();
+	settings.beginGroup(s_psLoadFile);
+	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
+	int currentOpenDlgFilter = settings.value(s_psSelectedFilter,BIN).toInt();
 
 	// Add all available file extension filters to a single QString.
 	// Each filter entry is separated by double semicolon ";;".
@@ -8805,8 +8723,8 @@ void MainWindow::loadFile()
 	currentOpenDlgFilter = fType;
 
 	//save last loading location
-	settings.setValue("currentPath",currentPath);
-	settings.setValue("selectedFilter",currentOpenDlgFilter);
+	settings.setValue(s_psCurrentPath,currentPath);
+	settings.setValue(s_psSelectedFilter,currentOpenDlgFilter);
 	settings.endGroup();
 }
 
@@ -8830,10 +8748,10 @@ void MainWindow::saveFile()
 
 	//persistent settings
 	QSettings settings;
-	settings.beginGroup("SaveFile");
-	QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
-	int currentCloudSaveDlgFilter = settings.value("selectedFilterCloud",BIN).toInt();
-	int currentMeshSaveDlgFilter = settings.value("selectedFilterMesh",PLY).toInt();
+	settings.beginGroup(s_psSaveFile);
+	QString currentPath = settings.value(s_psCurrentPath,QApplication::applicationDirPath()).toString();
+	int currentCloudSaveDlgFilter = settings.value(s_psSelectedFilterCloud,BIN).toInt();
+	int currentMeshSaveDlgFilter = settings.value(s_psSelectedFilterMesh,PLY).toInt();
 
 	ccHObject clouds("clouds");
 	ccHObject meshes("meshes");
@@ -9113,9 +9031,9 @@ void MainWindow::saveFile()
 	//we update current file path
 	currentPath = QFileInfo(selectedFilename).absolutePath();
 
-	settings.setValue("currentPath",currentPath);
-	settings.setValue("selectedFilterCloud",static_cast<int>(currentCloudSaveDlgFilter));
-	settings.setValue("selectedFilterMesh",static_cast<int>(currentMeshSaveDlgFilter));
+	settings.setValue(s_psCurrentPath,currentPath);
+	settings.setValue(s_psSelectedFilterCloud,static_cast<int>(currentCloudSaveDlgFilter));
+	settings.setValue(s_psSelectedFilterMesh,static_cast<int>(currentMeshSaveDlgFilter));
 	settings.endGroup();
 }
 

@@ -18,17 +18,19 @@
 #ifndef CC_SF_ARITMETHIC_DLG_HEADER
 #define CC_SF_ARITMETHIC_DLG_HEADER
 
-#include <ui_sfComparisonDlg.h>
+#include <ui_sfArithmeticsDlg.h>
 
 class ccPointCloud;
 
 //! Dialog to choose 2 scalar fields (SF) and one operation for arithmetics processing
-class ccScalarFieldArithmeticDlg : public QDialog, public Ui::SFComparisonDlg
+class ccScalarFieldArithmeticsDlg : public QDialog, public Ui::SFArithmeticsDlg
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor
-	ccScalarFieldArithmeticDlg(ccPointCloud* cloud, QWidget* parent = 0);
+	ccScalarFieldArithmeticsDlg(ccPointCloud* cloud, QWidget* parent = 0);
 
 	//! Returns first selected SF index
 	int getSF1Index();
@@ -36,10 +38,50 @@ public:
 	int getSF2Index();
 
 	//! Arithmetic operations
-	enum Operation { PLUS, MINUS, MULTIPLY, DIVIDE };
+	enum Operation {	/* Operations requiring two SFs */
+						PLUS		= 0,
+						MINUS		= 1,
+						MULTIPLY	= 2,
+						DIVIDE		= 3,
+						/* Operations requiring only one SF */
+						SQRT		= 4,
+						POW2		= 5,
+						POW3		= 6,
+						EXP			= 7,
+						LOG			= 8,
+						LOG10		= 9,
+						COS			= 10,
+						SIN			= 11,
+						TAN			= 12,
+						ACOS		= 13,
+						ASIN		= 14,
+						ATAN		= 15,
+						/* Invalid enum. (always last) */
+						INVALID		= 255
+	};
 
 	//! Returns selected operation
-	Operation getOperation();
+	Operation getOperation() const;
+
+	//! Applies operation on a given cloud
+	/** Should be applied on the same cloud as the one input to the constructor
+		Otherwise you'd better know what you're doing ;).
+		\param cloud cloud on which to apply the SF operation
+		\return success
+
+	**/
+	bool apply(ccPointCloud* cloud);
+
+protected slots:
+	
+	//! Called when the operation combo-box is modified
+	void onCurrentIndexChanged(int index);
+
+protected:
+	
+	//! Returns selected operation name
+	QString getOperationName(QString sf1, QString sf2 = QString()) const;
+
 };
 
 #endif //CC_SF_ARITMETHIC_DLG_HEADER

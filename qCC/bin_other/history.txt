@@ -5,6 +5,8 @@ v2.5.5 ??/??/2014
 	* Edit > Colors > Levels
 		- allows the user to edit the color histogram (either all channels at once or channel by channel)
 - Enhancement:
+	* The 'SF arithmetics' method has been enhanced with new operations (applicable on a single SF)
+		* SQRT, POW2, POW3, EXP, LOG, LOG10, COS(radians), SIN(radians), TAN(radians), ACOS, ASIN, ATAN
 	* Point clouds are now pre-loaded in the graphic card memory if possible (via VBOs)
 		- allows for much faster display (up to 15 times!)
 		- tihs feature can be disabled in the "Display Options" dialog ("Other display options" tab)

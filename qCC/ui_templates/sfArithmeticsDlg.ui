@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>SFComparisonDlg</class>
- <widget class="QDialog" name="SFComparisonDlg">
+ <class>SFArithmeticsDlg</class>
+ <widget class="QDialog" name="SFArithmeticsDlg">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -66,6 +66,9 @@
        <property name="currentIndex">
         <number>1</number>
        </property>
+       <property name="maxVisibleItems">
+        <number>20</number>
+       </property>
        <item>
         <property name="text">
          <string>plus</string>
@@ -84,6 +87,66 @@
        <item>
         <property name="text">
          <string>divide</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>sqrt</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>pow2</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>pow3</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>exp</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>log</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>log10</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>cos</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>sin</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>tan</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>acos</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>asin</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>atan</string>
         </property>
        </item>
       </widget>
@@ -127,7 +190,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>SFComparisonDlg</receiver>
+   <receiver>SFArithmeticsDlg</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -143,7 +206,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>SFComparisonDlg</receiver>
+   <receiver>SFArithmeticsDlg</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

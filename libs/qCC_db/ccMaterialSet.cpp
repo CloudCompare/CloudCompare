@@ -75,11 +75,6 @@ bool ccMaterialSet::addMaterial(const ccMaterial& mat)
 	return true;
 }
 
-#define MTL_LOADER_WHITESPACE " \t\n\r"
-
-//! Max number of characters per line in an ASCII file
-const int MAX_ASCII_FILE_LINE_LENGTH	=	4096;
-
 //MTL PARSER INSPIRED FROM KIXOR.NET "objloader" (http://www.kixor.net/dev/objloader/)
 bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSet &materials, QStringList& errors)
 {

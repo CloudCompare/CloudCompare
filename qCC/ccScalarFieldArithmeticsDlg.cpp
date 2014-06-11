@@ -60,12 +60,12 @@ ccScalarFieldArithmeticsDlg::ccScalarFieldArithmeticsDlg(	ccPointCloud* cloud,
 		sf2ComboBox->setCurrentIndex(std::min<unsigned>(1,sfCount-1));
 	}
 
-	connect(operationComboBox, SLOT(currentIndexChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
+	connect(operationComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onCurrentIndexChanged(int)));
 }
 
 void ccScalarFieldArithmeticsDlg::onCurrentIndexChanged(int index)
 {
-	sf2ComboBox->setEnabled(index <= DIVIDE); //only the 4 first operations are 3.3
+	sf2ComboBox->setEnabled(index <= DIVIDE); //only the 4 first operations are between two SFs
 }
 
 int ccScalarFieldArithmeticsDlg::getSF1Index()
@@ -204,7 +204,15 @@ bool ccScalarFieldArithmeticsDlg::apply(ccPointCloud* cloud)
 	}
 
 	//generate new sf name based on the operation
-	QString sfName = getOperationName(QString("(SF#%1").arg(sf1Idx),sf2 ? QString("SF#%1)").arg(sf2Idx) : QString());
+	QString sf1Name(sf1->getName());
+	QString sf2Name;
+	if (sf2)
+	{
+		//for operations involving two SFs, we don't expand the SF names (as the resulting SF name would be tool long!)
+		sf1Name = QString("(SF#%1").arg(sf1Idx);
+		sf2Name = QString("(SF#%1").arg(sf2Idx);
+	}
+	QString sfName = getOperationName(sf1Name,sf2Name);
 
 	int sfIdx = cloud->getScalarFieldIndexByName(qPrintable(sfName));
 	if (sfIdx >= 0)
@@ -286,45 +294,45 @@ bool ccScalarFieldArithmeticsDlg::apply(ccPointCloud* cloud)
 				}
 				break;
 			case SQRT:
-				if (val >= 0)
+				if (val1 >= 0)
 					val = sqrt(val1);
 				break;
 			case POW2:
-				val = val*val;
+				val = val1*val1;
 				break;
 			case POW3:
-				val = val*val*val;
+				val = val1*val1*val1;
 				break;
 			case EXP:
-				val = exp(val);
+				val = exp(val1);
 				break;
 			case LOG:
-				if (val >= 0)
-					val = log(val);
+				if (val1 >= 0)
+					val = log(val1);
 				break;
 			case LOG10:
-				if (val >= 0)
-					val = log10(val);
+				if (val1 >= 0)
+					val = log10(val1);
 				break;
 			case COS:
-				val = cos(val);
+				val = cos(val1);
 				break;
 			case SIN:
-				val = sin(val);
+				val = sin(val1);
 				break;
 			case TAN:
-				val = tan(val);
+				val = tan(val1);
 				break;
 			case ACOS:
-				if (val >= -1 && val <= 1.0)
-					val = acos(val);
+				if (val1 >= -1 && val1 <= 1.0)
+					val = acos(val1);
 				break;
 			case ASIN:
-				if (val >= -1 && val <= 1.0)
-					val = asin(val);
+				if (val1 >= -1 && val1 <= 1.0)
+					val = asin(val1);
 				break;
 			case ATAN:
-				val = atan(val);
+				val = atan(val1);
 				break;
 			default:
 				assert(false);

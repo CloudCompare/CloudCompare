@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>365</width>
-    <height>307</height>
+    <width>390</width>
+    <height>310</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -71,6 +71,9 @@
      <property name="selectionMode">
       <enum>QAbstractItemView::NoSelection</enum>
      </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>80</number>
+     </attribute>
      <attribute name="verticalHeaderDefaultSectionSize">
       <number>18</number>
      </attribute>
@@ -102,6 +105,16 @@
      <column>
       <property name="text">
        <string>Z</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string/>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Error</string>
       </property>
      </column>
     </widget>
@@ -163,6 +176,9 @@
      <property name="selectionMode">
       <enum>QAbstractItemView::NoSelection</enum>
      </property>
+     <attribute name="horizontalHeaderDefaultSectionSize">
+      <number>80</number>
+     </attribute>
      <attribute name="verticalHeaderDefaultSectionSize">
       <number>18</number>
      </attribute>
@@ -194,6 +210,16 @@
      <column>
       <property name="text">
        <string>Z</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string/>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Error</string>
       </property>
      </column>
     </widget>

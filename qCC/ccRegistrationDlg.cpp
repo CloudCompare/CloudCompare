@@ -138,13 +138,43 @@ double ccRegistrationDlg::getMinErrorDecrease() const
 	return val;
 }
 
-ConvergenceMethod ccRegistrationDlg::getConvergenceMethod() const
+ccRegistrationDlg::ConvergenceMethod ccRegistrationDlg::getConvergenceMethod() const
 {
 	if(errorCriterion->isChecked())
 		return CCLib::ICPRegistrationTools::MAX_ERROR_CONVERGENCE;
 	else
 		return CCLib::ICPRegistrationTools::MAX_ITER_CONVERGENCE;
 }
+
+int ccRegistrationDlg::getTransformationFilters() const
+{
+	int filters = 0;
+	switch (rotComboBox->currentIndex())
+	{
+	case 1:
+		filters |= CCLib::ICPRegistrationTools::SKIP_RYZ;
+		break;
+	case 2:
+		filters |= CCLib::ICPRegistrationTools::SKIP_RXZ;
+		break;
+	case 3:
+		filters |= CCLib::ICPRegistrationTools::SKIP_RXY;
+		break;
+	default:
+		//nothing to do
+		break;
+	}
+
+	if (!TxCheckBox->isChecked())
+		filters |= CCLib::ICPRegistrationTools::SKIP_TX;
+	if (!TyCheckBox->isChecked())
+		filters |= CCLib::ICPRegistrationTools::SKIP_TY;
+	if (!TzCheckBox->isChecked())
+		filters |= CCLib::ICPRegistrationTools::SKIP_TZ;
+
+	return filters;
+}
+
 
 void ccRegistrationDlg::setColorsAndLabels()
 {

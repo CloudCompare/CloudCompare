@@ -1894,6 +1894,7 @@ bool ccCommandLineParser::commandICP(QStringList& arguments, QDialog* parent/*=0
 									adjustScale,
 									false,
 									false,
+									CCLib::ICPRegistrationTools::SKIP_NONE,
 									parent ))
 	{
 		ccHObject* data = dataAndModel[0]->getEntity();

@@ -17,6 +17,9 @@
 
 #include "ccRegistrationTools.h"
 
+//Local
+#include "ccRegistrationDlg.h"
+
 //CCLib
 #include <MeshSamplingTools.h>
 #include <GenericIndexedCloudPersist.h>
@@ -47,10 +50,11 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 								unsigned maxIterationCount,
 								unsigned randomSamplingLimit,
 								bool removeFarthestPoints,
-								ConvergenceMethod method,
+								CCLib::ICPRegistrationTools::CONVERGENCE_TYPE method,
 								bool adjustScale,
 								bool useDataSFAsWeights/*=false*/,
 								bool useModelSFAsWeights/*=false*/,
+								int filters/*=CCLib::ICPRegistrationTools::SKIP_NONE*/,
 								QWidget* parent/*=0*/)
 {
 	//progress bar
@@ -145,7 +149,7 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 
 	}
 
-	CCLib::ICPRegistrationTools::CC_ICP_RESULT result;
+	CCLib::ICPRegistrationTools::RESULT_TYPE result;
 
 	result = CCLib::ICPRegistrationTools::RegisterClouds(	modelCloud,
 															dataCloud,
@@ -159,7 +163,8 @@ bool ccRegistrationTools::ICP(	ccHObject* data,
 															removeFarthestPoints,
 															randomSamplingLimit,
 															modelWeights,
-															dataWeights);
+															dataWeights,
+															filters);
 
 	if (result >= CCLib::ICPRegistrationTools::ICP_ERROR)
 	{

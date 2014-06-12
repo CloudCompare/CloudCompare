@@ -113,24 +113,38 @@ class CC_CORE_LIB_API ICPRegistrationTools : public RegistrationTools
 {
 public:
 
-    //! Convergence control method
-    enum CC_ICP_CONVERGENCE_TYPE
-    {
-        MAX_ERROR_CONVERGENCE   = 0,
-        MAX_ITER_CONVERGENCE    = 1,
-    };
+	//! Convergence control method
+	enum CONVERGENCE_TYPE
+	{
+		MAX_ERROR_CONVERGENCE	= 0,
+		MAX_ITER_CONVERGENCE	= 1,
+	};
 
-    //! Errors
-    enum CC_ICP_RESULT
-    {
-        ICP_NOTHING_TO_DO               = 0,
-        ICP_APPLY_TRANSFO               = 1,
-        ICP_ERROR                       = 100,
-        //all errors should be greater than ICP_ERROR
-        ICP_ERROR_REGISTRATION_STEP     = 101,
-        ICP_ERROR_DIST_COMPUTATION      = 102,
-        ICP_ERROR_NOT_ENOUGH_MEMORY     = 103,
-    };
+	//! Errors
+	enum RESULT_TYPE
+	{
+		ICP_NOTHING_TO_DO				= 0,
+		ICP_APPLY_TRANSFO				= 1,
+		ICP_ERROR						= 100,
+		//all errors should be greater than ICP_ERROR
+		ICP_ERROR_REGISTRATION_STEP		= 101,
+		ICP_ERROR_DIST_COMPUTATION		= 102,
+		ICP_ERROR_NOT_ENOUGH_MEMORY		= 103,
+	};
+
+	//! Errors
+	enum TRANSFORMATION_FILTERS
+	{
+		SKIP_NONE			= 0,
+		SKIP_RXY			= 1,
+		SKIP_RYZ			= 2,
+		SKIP_RXZ			= 4,
+		SKIP_ROTATION		= 7,
+		SKIP_TX				= 8,
+		SKIP_TY				= 16,
+		SKIP_TZ				= 32,
+		SKIP_TRANSLATION	= 56,
+	};
 
 	//! Registers two point clouds
 	/** This method implements the ICP algorithm (Besl et al.).
@@ -148,21 +162,23 @@ public:
 		\param samplingLimit maximum number of points per cloud (they are randomly resampled below this limit otherwise)
 		\param modelWeights weights for model points (optional)
 		\param dataWeights weights for data points (optional)
+		\param transformationFilters filters to be applied on the resulting transformation at each step (experimental) - see TRANSFORMATION_FILTERS flags
 		\return algorithm result
 	**/
-	static CC_ICP_RESULT RegisterClouds(GenericIndexedCloudPersist* modelList,
-                                        GenericIndexedCloudPersist* dataList,
-                                        ScaledTransformation& totalTrans,
-                                        CC_ICP_CONVERGENCE_TYPE convType,
-                                        double minErrorDecrease,
-                                        unsigned nbMaxIterations,
-                                        double& finalError,
-                                        bool adjustScale = false,
-                                        GenericProgressCallback* progressCb = 0,
-                                        bool filterOutFarthestPoints = false,
-                                        unsigned samplingLimit = 20000,
+	static RESULT_TYPE RegisterClouds(	GenericIndexedCloudPersist* modelList,
+										GenericIndexedCloudPersist* dataList,
+										ScaledTransformation& totalTrans,
+										CONVERGENCE_TYPE convType,
+										double minErrorDecrease,
+										unsigned nbMaxIterations,
+										double& finalError,
+										bool adjustScale = false,
+										GenericProgressCallback* progressCb = 0,
+										bool filterOutFarthestPoints = false,
+										unsigned samplingLimit = 20000,
 										ScalarField* modelWeights = 0,
-										ScalarField* dataWeights = 0);
+										ScalarField* dataWeights = 0,
+										int transformationFilters = SKIP_NONE);
 };
 
 

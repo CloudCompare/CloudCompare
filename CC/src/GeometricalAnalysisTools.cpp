@@ -697,48 +697,51 @@ CCLib::SquareMatrixd GeometricalAnalysisTools::computeWeightedCrossCovarianceMat
 
 	//shortcuts to output matrix lines
 	CCLib::SquareMatrixd covMat(3);
-	double* l1 = covMat.row(0);
-	double* l2 = covMat.row(1);
-	double* l3 = covMat.row(2);
+	double* r1 = covMat.row(0);
+	double* r2 = covMat.row(1);
+	double* r3 = covMat.row(2);
 
 	P->placeIteratorAtBegining();
 	Q->placeIteratorAtBegining();
 
 	//sums
 	unsigned count = P->size();
-	ScalarType wp = static_cast<ScalarType>(1);
-	ScalarType wq = wp;
 	double wSum = 0.0;
-	for (unsigned i=0;i<count;i++)
+	for (unsigned i=0; i<count; i++)
 	{
 		CCVector3 Pt = *P->getNextPoint()-Gp;
 		CCVector3 Qt = *Q->getNextPoint()-Gq;
 
+		PointCoordinateType wi = PC_ONE;
 		if (weightsP)
 		{
-			wp = weightsP->getValue(i);
+			const ScalarType& wp = weightsP->getValue(i);
 			if (!ScalarField::ValidValue(wp))
 				continue;
+			wi = static_cast<PointCoordinateType>(wp);
 		}
 		if (weightsQ)
 		{
-			wq = weightsQ->getValue(i);
+			const ScalarType& wq = weightsQ->getValue(i);
 			if (!ScalarField::ValidValue(wq))
 				continue;
+			wi *= static_cast<PointCoordinateType>(wq);
 		}
-		ScalarType wpq = wp*wq;
-		Pt *= static_cast<PointCoordinateType>(wpq);
-		wSum += static_cast<double>(wpq);
+		Pt *= wi;
+		wSum += wi;
 
-        l1[0] += Pt.x * Qt.x;
-        l1[1] += Pt.x * Qt.y;
-        l1[2] += Pt.x * Qt.z;
-        l2[0] += Pt.y * Qt.x;
-        l2[1] += Pt.y * Qt.y;
-        l2[2] += Pt.y * Qt.z;
-        l3[0] += Pt.z * Qt.x;
-        l3[1] += Pt.z * Qt.y;
-        l3[2] += Pt.z * Qt.z;
+		//1st row
+        r1[0] += Pt.x * Qt.x;
+        r1[1] += Pt.x * Qt.y;
+        r1[2] += Pt.x * Qt.z;
+		//2nd row
+        r2[0] += Pt.y * Qt.x;
+        r2[1] += Pt.y * Qt.y;
+        r2[2] += Pt.y * Qt.z;
+		//3rd row
+        r3[0] += Pt.z * Qt.x;
+        r3[1] += Pt.z * Qt.y;
+        r3[2] += Pt.z * Qt.z;
 	}
 
 	if (wSum != 0.0)

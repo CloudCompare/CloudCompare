@@ -3996,14 +3996,15 @@ void MainWindow::doActionRegister()
 	model = rDlg.getModelEntity();
 	data = rDlg.getDataEntity();
 
-	double minErrorDecrease			= rDlg.getMinErrorDecrease();
-	unsigned maxIterationCount		= rDlg.getMaxIterationCount();
-	unsigned randomSamplingLimit	= rDlg.randomSamplingLimit();
-	bool removeFarthestPoints		= rDlg.removeFarthestPoints();
-	ConvergenceMethod method		= rDlg.getConvergenceMethod();
-	bool useDataSFAsWeights			= rDlg.useDataSFAsWeights();
-	bool useModelSFAsWeights		= rDlg.useModelSFAsWeights();
-	bool adjustScale				= rDlg.adjustScale();
+	double minErrorDecrease										= rDlg.getMinErrorDecrease();
+	unsigned maxIterationCount									= rDlg.getMaxIterationCount();
+	unsigned randomSamplingLimit								= rDlg.randomSamplingLimit();
+	bool removeFarthestPoints									= rDlg.removeFarthestPoints();
+	bool useDataSFAsWeights										= rDlg.useDataSFAsWeights();
+	bool useModelSFAsWeights									= rDlg.useModelSFAsWeights();
+	bool adjustScale											= rDlg.adjustScale();
+	int transformationFilters									= rDlg.getTransformationFilters();
+	CCLib::ICPRegistrationTools::CONVERGENCE_TYPE method		= rDlg.getConvergenceMethod();
 
 	ccGLMatrix transMat;
 	double finalError = 0.0;
@@ -4022,6 +4023,7 @@ void MainWindow::doActionRegister()
 									adjustScale,
 									useDataSFAsWeights,
 									useModelSFAsWeights,
+									transformationFilters,
 									this))
 	{
 		QString rmsString = QString("Final RMS: %1").arg(finalError);

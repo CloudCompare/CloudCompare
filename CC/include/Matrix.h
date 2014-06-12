@@ -297,8 +297,8 @@ namespace CCLib
 					std::swap(m_values[l][c],m_values[c][l]);
 		}
 
-		//! Returns transpose
-		MatrixTpl toTranspose()
+		//! Returns the transposed version of this matrix
+		MatrixTpl transposed()
 		{
 			MatrixTpl T(*this);
 			T.transpose();

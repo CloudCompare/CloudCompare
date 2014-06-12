@@ -28,8 +28,6 @@
 
 class ccHObject;
 
-typedef CCLib::ICPRegistrationTools::CC_ICP_CONVERGENCE_TYPE ConvergenceMethod;
-
 //! Point cloud or mesh registration dialog
 class ccRegistrationDlg : public QDialog, public Ui::RegistrationDialog
 {
@@ -42,6 +40,9 @@ public:
 
 	//! Default destructor
 	virtual ~ccRegistrationDlg();
+
+	//shortcuts
+	typedef CCLib::ICPRegistrationTools::CONVERGENCE_TYPE ConvergenceMethod;
 
 	//! Returns convergence method
 	ConvergenceMethod getConvergenceMethod() const;
@@ -81,6 +82,11 @@ public:
 	for instance.
 	**/
 	bool adjustScale() const;
+
+	//! Returns active transformation filters
+	/** See CCLib::ICPRegistrationTools::TRANSFORMATION_FILTERS.
+	**/
+	int getTransformationFilters() const;
 
 protected slots:
 	void swapModelAndData();

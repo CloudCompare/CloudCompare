@@ -61,9 +61,14 @@ public:
 	void clear();
 
 	//! Adds a point to the 'align' set
-	bool addAlignedPoint(CCVector3d& P, ccGenericPointCloud* cloud = 0, unsigned pointIndex = 0, bool shifted = true);
+	bool addAlignedPoint(CCVector3d& P, ccGenericPointCloud* cloud = 0, bool shifted = true);
 	//! Adds a point to the 'reference' set
-	bool addReferencePoint(CCVector3d& P, ccGenericPointCloud* cloud = 0, unsigned pointIndex = 0, bool shifted = true);
+	bool addReferencePoint(CCVector3d& P, ccGenericPointCloud* cloud = 0, bool shifted = true);
+
+	//! Removes a point from the 'align' set
+	void removeAlignedPoint(int index);
+	//! Removes a point from the 'reference' set
+	void removeRefPoint(int index);
 
 protected slots:
 
@@ -82,6 +87,9 @@ protected slots:
 	//! Slot called to remove the last point on the 'reference' stack
 	void unstackRef();
 
+	//! Slot called when a "delete" button is pushed
+	void onDelButtonPushed();
+
 	void processPickedPoint(int, unsigned, int, int);
 	void apply();
 	void align();
@@ -95,6 +103,12 @@ protected:
 
 	//! Calls Horn registration (CCLib::HornRegistrationTools)
 	bool callHornRegistration(CCLib::PointProjectionTools::Transformation& trans, double& rms);
+
+	//! Clears the RMS rows
+	void clearRMSColumns();
+
+	//! Adds a point to one of the table (ref./aligned)
+	void addPointToTable(QTableWidget* tableWidget, int rowIndex, const CCVector3d& P, QString pointLabel);
 
 	//! Original cloud context
 	struct cloudContext

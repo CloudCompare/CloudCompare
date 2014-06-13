@@ -152,13 +152,13 @@ int ccRegistrationDlg::getTransformationFilters() const
 	switch (rotComboBox->currentIndex())
 	{
 	case 1:
-		filters |= CCLib::ICPRegistrationTools::SKIP_RYZ;
+		filters |= CCLib::RegistrationTools::SKIP_RYZ;
 		break;
 	case 2:
-		filters |= CCLib::ICPRegistrationTools::SKIP_RXZ;
+		filters |= CCLib::RegistrationTools::SKIP_RXZ;
 		break;
 	case 3:
-		filters |= CCLib::ICPRegistrationTools::SKIP_RXY;
+		filters |= CCLib::RegistrationTools::SKIP_RXY;
 		break;
 	default:
 		//nothing to do
@@ -166,15 +166,14 @@ int ccRegistrationDlg::getTransformationFilters() const
 	}
 
 	if (!TxCheckBox->isChecked())
-		filters |= CCLib::ICPRegistrationTools::SKIP_TX;
+		filters |= CCLib::RegistrationTools::SKIP_TX;
 	if (!TyCheckBox->isChecked())
-		filters |= CCLib::ICPRegistrationTools::SKIP_TY;
+		filters |= CCLib::RegistrationTools::SKIP_TY;
 	if (!TzCheckBox->isChecked())
-		filters |= CCLib::ICPRegistrationTools::SKIP_TZ;
+		filters |= CCLib::RegistrationTools::SKIP_TZ;
 
 	return filters;
 }
-
 
 void ccRegistrationDlg::setColorsAndLabels()
 {

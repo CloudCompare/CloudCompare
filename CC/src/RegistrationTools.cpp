@@ -41,6 +41,94 @@
 
 using namespace CCLib;
 
+void RegistrationTools::FilterTransformation(	const ScaledTransformation& inTrans,
+												int filters,
+												ScaledTransformation& outTrans )
+{
+	outTrans = inTrans;
+
+	//filter translation
+	if (filters & SKIP_TRANSLATION)
+	{
+		if (filters & SKIP_TX)
+			outTrans.T.x = 0;
+		if (filters & SKIP_TY)
+			outTrans.T.y = 0;
+		if (filters & SKIP_TZ)
+			outTrans.T.z = 0;
+	}
+
+	//filter rotation
+	if (inTrans.R.isValid() && (filters & SKIP_ROTATION))
+	{
+		const CCLib::SquareMatrix R(inTrans.R); //copy it in case inTrans and outTrans are the same!
+		outTrans.R.toIdentity();
+		if (filters & SKIP_RYZ) //keep only the rotation component around X
+		{
+			//we use a specific Euler angles convention here
+			if (R.getValue(0,2) < 1.0)
+			{
+				PointCoordinateType phi = -asin(R.getValue(0,2));
+				PointCoordinateType cos_phi = cos(phi);
+				PointCoordinateType theta = atan2(R.getValue(1,2)/cos_phi,R.getValue(2,2)/cos_phi);
+				PointCoordinateType cos_theta = cos(theta);
+				PointCoordinateType sin_theta = sin(theta);
+
+				outTrans.R.setValue(1,1,cos_theta);
+				outTrans.R.setValue(2,2,cos_theta);
+				outTrans.R.setValue(2,1,sin_theta);
+				outTrans.R.setValue(1,2,-sin_theta);
+			}
+			else
+			{
+				//simpler/faster to ignore this (very) specific case!
+			}
+		}
+		else if (filters & SKIP_RXZ) //keep only the rotation component around Y
+		{
+			//we use a specific Euler angles convention here
+			if (R.getValue(2,1) < 1.0)
+			{
+				PointCoordinateType theta = asin(R.getValue(2,1));
+				PointCoordinateType cos_theta = cos(theta);
+				PointCoordinateType phi = atan2(-R.getValue(2,0)/cos_theta,R.getValue(2,2)/cos_theta);
+				PointCoordinateType cos_phi = cos(phi);
+				PointCoordinateType sin_phi = sin(phi);
+
+				outTrans.R.setValue(0,0,cos_phi);
+				outTrans.R.setValue(2,2,cos_phi);
+				outTrans.R.setValue(0,2,sin_phi);
+				outTrans.R.setValue(2,0,-sin_phi);
+			}
+			else
+			{
+				//simpler/faster to ignore this (very) specific case!
+			}
+		}
+		else if (filters & SKIP_RXY) //keep only the rotation component around Z
+		{
+			//we use a specific Euler angles convention here
+			if (R.getValue(2,0) < 1.0)
+			{
+				PointCoordinateType theta_rad = -asin(R.getValue(2,0));
+				PointCoordinateType cos_theta = cos(theta_rad);
+				PointCoordinateType phi_rad = atan2(R.getValue(1,0)/cos_theta, R.getValue(0,0)/cos_theta);
+				PointCoordinateType cos_phi	= cos(phi_rad);
+				PointCoordinateType sin_phi	= sin(phi_rad);
+
+				outTrans.R.setValue(0,0,cos_phi);
+				outTrans.R.setValue(1,1,cos_phi);
+				outTrans.R.setValue(1,0,sin_phi);
+				outTrans.R.setValue(0,1,-sin_phi);
+			}
+			else
+			{
+				//simpler/faster to ignore this (very) specific case!
+			}
+		}
+	}
+}
+
 ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericIndexedCloudPersist* _modelCloud,
 																		GenericIndexedCloudPersist* _dataCloud,
 																		ScaledTransformation& transform,
@@ -308,87 +396,8 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 			//shall we filter some components of the resulting transformation?
 			if (filters != SKIP_NONE)
 			{
-				//filter translation
-				if (filters & SKIP_TRANSLATION)
-				{
-					if (filters & SKIP_TX)
-						currentTrans.T.x = 0;
-					if (filters & SKIP_TY)
-						currentTrans.T.y = 0;
-					if (filters & SKIP_TZ)
-						currentTrans.T.y = 0;
-				}
-
-				//filter rotation
-				if (currentTrans.R.isValid() && (filters & SKIP_ROTATION))
-				{
-					CCLib::SquareMatrix newR(3);
-					newR.toIdentity();
-					if (filters & SKIP_RYZ) //keep only the rotation component around X
-					{
-						//we use a specific Euler angles convention here
-						if (currentTrans.R.getValue(0,2) < 1.0)
-						{
-							PointCoordinateType phi = -asin(currentTrans.R.getValue(0,2));
-							PointCoordinateType cos_phi = cos(phi);
-							PointCoordinateType theta = atan2(currentTrans.R.getValue(1,2)/cos_phi,currentTrans.R.getValue(2,2)/cos_phi);
-							PointCoordinateType cos_theta = cos(theta);
-							PointCoordinateType sin_theta = sin(theta);
-
-							newR.setValue(1,1,cos_theta);
-							newR.setValue(2,2,cos_theta);
-							newR.setValue(2,1,sin_theta);
-							newR.setValue(1,2,-sin_theta);
-						}
-						else
-						{
-							//simpler/faster to ignore this (very) specific case!
-						}
-					}
-					else if (filters & SKIP_RXZ) //keep only the rotation component around Y
-					{
-						//we use a specific Euler angles convention here
-						if (currentTrans.R.getValue(2,1) < 1.0)
-						{
-							PointCoordinateType theta = asin(currentTrans.R.getValue(2,1));
-							PointCoordinateType cos_theta = cos(theta);
-							PointCoordinateType phi = atan2(-currentTrans.R.getValue(2,0)/cos_theta,currentTrans.R.getValue(2,2)/cos_theta);
-							PointCoordinateType cos_phi = cos(phi);
-							PointCoordinateType sin_phi = sin(phi);
-
-							newR.setValue(0,0,cos_phi);
-							newR.setValue(2,2,cos_phi);
-							newR.setValue(0,2,sin_phi);
-							newR.setValue(2,0,-sin_phi);
-						}
-						else
-						{
-							//simpler/faster to ignore this (very) specific case!
-						}
-					}
-					else if (filters & SKIP_RXY) //keep only the rotation component around Z
-					{
-						//we use a specific Euler angles convention here
-						if (currentTrans.R.getValue(2,0) < 1.0)
-						{
-							PointCoordinateType theta_rad = -asin(currentTrans.R.getValue(2,0));
-							PointCoordinateType cos_theta = cos(theta_rad);
-							PointCoordinateType phi_rad = atan2(currentTrans.R.getValue(1,0)/cos_theta, currentTrans.R.getValue(0,0)/cos_theta);
-							PointCoordinateType cos_phi	= cos(phi_rad);
-							PointCoordinateType sin_phi	= sin(phi_rad);
-
-							newR.setValue(0,0,cos_phi);
-							newR.setValue(1,1,cos_phi);
-							newR.setValue(1,0,sin_phi);
-							newR.setValue(0,1,-sin_phi);
-						}
-						else
-						{
-							//simpler/faster to ignore this (very) specific case!
-						}
-					}
-					currentTrans.R = newR;
-				}
+				//filter translation (in place)
+				FilterTransformation(currentTrans,filters,currentTrans);
 			}
 
 			//get rotated data cloud
@@ -537,6 +546,10 @@ double HornRegistrationTools::ComputeRMS(GenericCloud* lCloud,
 		const CCVector3* Ri = rCloud->getNextPoint();
 		const CCVector3* Li = lCloud->getNextPoint();
 		CCVector3 Lit = (trans.R.isValid() ? trans.R * (*Li) : (*Li))*trans.s + trans.T;
+
+#ifdef _DEBUG
+		double dist = (*Ri-Lit).norm();
+#endif
 
 		rms += (*Ri-Lit).norm2();
 	}

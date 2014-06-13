@@ -25,6 +25,7 @@ Big ones:
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
 
 Various:
+[*] Global Shift management enhancement (http://www.danielgm.net/cc/forum/viewtopic.php?t=872)
 [*] Use the official 3dConnexion SDK
 [*] Point pair based alignment tool enhancements (http://www.danielgm.net/cc/forum/viewtopic.php?t=866)
 [*] Dedicated method for isolated points removal (based on the Connected Components one)

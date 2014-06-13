@@ -9,6 +9,9 @@ v2.5.5 ??/??/2014
 		- the error contribution of each point (pair) to the total RMS is displayed in a new column
 			(once the 'Align' button has been pressed)
 		- a new button next to each point allows the user to delete any point at any time
+	* Point-pair based & ICP registration method:
+		- the registration rotation can be constrained around one axis (X, Y or Z)
+		- the registration translation can be constrained around one or several dimensions (Tx, Ty or Tz)
 	* The 'SF arithmetics' method has been enhanced with new operations (applicable on a single SF)
 		- SQRT, POW2, POW3, EXP, LOG, LOG10, COS(radians), SIN(radians), TAN(radians), ACOS, ASIN, ATAN
 	* Point clouds are now pre-loaded in the graphic card memory if possible (via VBOs)
@@ -21,9 +24,6 @@ v2.5.5 ??/??/2014
 		- triangles interactors are used to set the min and max saturation values
 	* 'Color' and 'Scalar field' visibility checkboxes in the entity 'Properties' dialog have been merged:
 		- a unique combo-box now lets the user choose between no color, RGB or SF colors
-	* ICP registration method:
-		- the registration rotation can be constrained around one axis (X, Y or Z)
-		- the registration translation can be constrained around one or several dimensions (Tx, Ty or Tz)
 	* New option in the LAS file opening dialog:
 		- 'Force 8-bit colors': to cope with files in which colors are mistakenly coded on 8 bits (instead of 16)
 	* The 'Poisson Surface Reconstruction' plugin (qPoissonRecon) is now based on the version 5.71 of PoissonRecon lib

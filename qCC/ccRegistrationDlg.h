@@ -84,7 +84,7 @@ public:
 	bool adjustScale() const;
 
 	//! Returns active transformation filters
-	/** See CCLib::ICPRegistrationTools::TRANSFORMATION_FILTERS.
+	/** See CCLib::RegistrationTools::TRANSFORMATION_FILTERS.
 	**/
 	int getTransformationFilters() const;
 

@@ -38,10 +38,35 @@ class ScalarField;
 //! Common point cloud registration algorithms
 class CC_CORE_LIB_API RegistrationTools : public CCToolbox
 {
-protected:
+public:
 
 	//! Shortcut to PointProjectionTools::ScaledTransformation
 	typedef PointProjectionTools::Transformation ScaledTransformation;
+
+	//! Transformation constraints
+	enum TRANSFORMATION_FILTERS
+	{
+		SKIP_NONE			= 0,
+		SKIP_RXY			= 1,
+		SKIP_RYZ			= 2,
+		SKIP_RXZ			= 4,
+		SKIP_ROTATION		= 7,
+		SKIP_TX				= 8,
+		SKIP_TY				= 16,
+		SKIP_TZ				= 32,
+		SKIP_TRANSLATION	= 56,
+	};
+
+	//! 'Filters' a transformation by constraining it along certain rotation axes and translation directions
+	/**	\param inTrans input transformation
+		\param transformationFilters filters to be applied on the resulting transformation at each step (experimental) - see RegistrationTools::TRANSFORMATION_FILTERS flags
+		\param outTrans output transformation
+	**/
+	static void FilterTransformation(	const ScaledTransformation& inTrans,
+										int transformationFilters,
+										ScaledTransformation& outTrans );
+
+protected:
 
 	//! ICP Registration procedure with optional scale estimation
 	/** Determines the best quaternion (a couple qR|qT) and optionally
@@ -132,20 +157,6 @@ public:
 		ICP_ERROR_NOT_ENOUGH_MEMORY		= 103,
 	};
 
-	//! Errors
-	enum TRANSFORMATION_FILTERS
-	{
-		SKIP_NONE			= 0,
-		SKIP_RXY			= 1,
-		SKIP_RYZ			= 2,
-		SKIP_RXZ			= 4,
-		SKIP_ROTATION		= 7,
-		SKIP_TX				= 8,
-		SKIP_TY				= 16,
-		SKIP_TZ				= 32,
-		SKIP_TRANSLATION	= 56,
-	};
-
 	//! Registers two point clouds
 	/** This method implements the ICP algorithm (Besl et al.).
 		Warning: be sure to activate an INPUT/OUTPUT scalar field on the data cloud
@@ -162,7 +173,7 @@ public:
 		\param samplingLimit maximum number of points per cloud (they are randomly resampled below this limit otherwise)
 		\param modelWeights weights for model points (optional)
 		\param dataWeights weights for data points (optional)
-		\param transformationFilters filters to be applied on the resulting transformation at each step (experimental) - see TRANSFORMATION_FILTERS flags
+		\param transformationFilters filters to be applied on the resulting transformation at each step (experimental) - see RegistrationTools::TRANSFORMATION_FILTERS flags
 		\return algorithm result
 	**/
 	static RESULT_TYPE RegisterClouds(	GenericIndexedCloudPersist* modelList,

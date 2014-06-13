@@ -41,6 +41,11 @@
 #include <QMessageBox>
 #include <QToolButton>
 
+//default position of each columns in the aligned and ref. table widgets
+static const int XYZ_COL_INDEX			= 0;
+static const int RMS_COL_INDEX			= 3;
+static const int DEL_BUTTON_COL_INDEX	= 4;
+
 ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 	: ccOverlayDialog(parent)
 	, m_aligned(0)
@@ -380,10 +385,6 @@ void ccPointPairRegistrationDlg::onPointCountChanged()
 	unstackAlignToolButton->setEnabled(m_alignedPoints.size() != 0);
 	unstackRefToolButton->setEnabled(m_refPoints.size() != 0);
 }
-
-static const int XYZ_COL_INDEX			= 0;
-static const int DEL_BUTTON_COL_INDEX	= 3;
-static const int RMS_COL_INDEX			= 4;
 
 static QToolButton* CreateDeleteButton()
 {
@@ -838,6 +839,39 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTool
 		return false;
 	}
 
+	//apply constraints (if any)
+	{
+		int filters = 0;
+		switch (rotComboBox->currentIndex())
+		{
+		case 1:
+			filters |= CCLib::RegistrationTools::SKIP_RYZ;
+			break;
+		case 2:
+			filters |= CCLib::RegistrationTools::SKIP_RXZ;
+			break;
+		case 3:
+			filters |= CCLib::RegistrationTools::SKIP_RXY;
+			break;
+		default:
+			//nothing to do
+			break;
+		}
+
+		if (!TxCheckBox->isChecked())
+			filters |= CCLib::RegistrationTools::SKIP_TX;
+		if (!TyCheckBox->isChecked())
+			filters |= CCLib::RegistrationTools::SKIP_TY;
+		if (!TzCheckBox->isChecked())
+			filters |= CCLib::RegistrationTools::SKIP_TZ;
+
+		if (filters != 0)
+		{
+			CCLib::RegistrationTools::FilterTransformation(trans,filters,trans);
+		}
+	}
+
+	//compute RMS
 	rms = CCLib::HornRegistrationTools::ComputeRMS(&m_alignedPoints, &m_refPoints, trans);
 
 	return true;
@@ -870,16 +904,16 @@ void ccPointPairRegistrationDlg::align()
 				assert(m_alignedPoints.size() == m_refPoints.size());
 				for (unsigned i=0; i<m_alignedPoints.size(); ++i)
 				{
-					const CCVector3* Ri = m_alignedPoints.getPoint(i);
-					const CCVector3* Li = m_refPoints.getPoint(i);
+					const CCVector3* Ri = m_refPoints.getPoint(i);
+					const CCVector3* Li = m_alignedPoints.getPoint(i);
 					CCVector3 Lit = (trans.R.isValid() ? trans.R * (*Li) : (*Li))*trans.s + trans.T;
-					PointCoordinateType rms = (*Ri-Lit).norm();
+					PointCoordinateType dist = (*Ri-Lit).norm();
 
 					QTableWidgetItem* itemA = new QTableWidgetItem();
-					itemA->setData(Qt::EditRole, rms); 
+					itemA->setData(Qt::EditRole, dist); 
 					alignedPointsTableWidget->setItem(i, RMS_COL_INDEX, itemA);
 					QTableWidgetItem* itemR = new QTableWidgetItem();
-					itemR->setData(Qt::EditRole, rms); 
+					itemR->setData(Qt::EditRole, dist); 
 					refPointsTableWidget->setItem(i, RMS_COL_INDEX, itemR);
 				}
 			}

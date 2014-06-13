@@ -23,6 +23,7 @@
 #include <QPixmap>
 #include <QMessageBox>
 #include <QLocale>
+#include <QTime>
 
 #ifdef Q_OS_MAC
 #include <QFileOpenEvent>
@@ -37,9 +38,6 @@
 #include "mainwindow.h"
 #include "ccGuiParameters.h"
 #include "ccCommandLineParser.h"
-
-//system
-#include <time.h>
 
 #ifdef USE_VLD
 //VLD
@@ -96,7 +94,7 @@ int main(int argc, char **argv)
 
 	//splash screen
 	QSplashScreen* splash = 0;
-	clock_t start_time = 0;
+    QTime splashStartTime;
 
 	//Command line mode?
 	bool commandLine = (argc>1 && argv[1][0]=='-');
@@ -110,7 +108,7 @@ int main(int argc, char **argv)
 		}
 
 		//splash screen
-		start_time = clock();
+        splashStartTime.start();
 		QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
 		splash = new QSplashScreen(pixmap,Qt::WindowStaysOnTopHint);
 		splash->show();
@@ -157,9 +155,11 @@ int main(int argc, char **argv)
 		
 		if (splash)
 		{
-			//we want the splash screen to be visible a minimum amount of time (1 s.)
-			while((clock() - start_time) < CLOCKS_PER_SEC)
-				splash->raise();
+            //we want the splash screen to be visible a minimum amount of time (1000 ms.)
+            while(splashStartTime.elapsed() < 1000)
+            {
+                splash->raise();
+            }
 
 			//splash->close();
 			delete splash;

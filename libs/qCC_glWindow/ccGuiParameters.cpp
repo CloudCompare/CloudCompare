@@ -83,7 +83,11 @@ void ccGui::ParamStruct::reset()
 	drawBackgroundGradient		= true;
 	decimateMeshOnMove			= true;
 	decimateCloudOnMove			= true;
+#ifdef CC_LINUX
+	useVBOs						= false; //FIXME DGM: doesn't work on Linux right now?!
+#else
 	useVBOs						= true;
+#endif
 	displayCross				= true;
 
 	pickedPointsSize			= 4;

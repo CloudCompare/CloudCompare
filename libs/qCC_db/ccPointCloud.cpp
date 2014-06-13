@@ -1534,7 +1534,8 @@ void ccPointCloud::glChunkNormalPointer(unsigned chunkIndex, unsigned decimStep,
 	{
 		//we can use VBOs directly
 		m_vbos[chunkIndex].bind();
-		glNormalPointer(GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),(const GLvoid*)m_vbos[chunkIndex].normalShift);
+		const GLbyte* start = 0; //fake pointer used to prevent warnings on Linux
+		glNormalPointer(GL_COORD_TYPE,decimStep*3*sizeof(PointCoordinateType),(const GLvoid*)(start + m_vbos[chunkIndex].normalShift));
 		m_vbos[chunkIndex].release();
 	}
 	else
@@ -1568,7 +1569,8 @@ void ccPointCloud::glChunkColorPointer(unsigned chunkIndex, unsigned decimStep, 
 	{
 		//we can use VBOs directly
 		m_vbos[chunkIndex].bind();
-		glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),(const GLvoid*)m_vbos[chunkIndex].rgbShift);
+		const GLbyte* start = 0; //fake pointer used to prevent warnings on Linux
+		glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),(const GLvoid*)(start + m_vbos[chunkIndex].rgbShift));
 		m_vbos[chunkIndex].release();
 	}
 	else
@@ -1587,7 +1589,8 @@ void ccPointCloud::glChunkSFPointer(unsigned chunkIndex, unsigned decimStep, boo
 		//we can use VBOs directly
 		assert(m_vbos.colorIsSF && m_vbos.sourceSF == m_currentDisplayedScalarField);
 		m_vbos[chunkIndex].bind();
-		glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),(const GLvoid*)m_vbos[chunkIndex].rgbShift);
+		const GLbyte* start = 0; //fake pointer used to prevent warnings on Linux
+		glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),(const GLvoid*)(start + m_vbos[chunkIndex].rgbShift));
 		m_vbos[chunkIndex].release();
 	}
 	else

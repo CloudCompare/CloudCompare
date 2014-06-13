@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>390</width>
-    <height>452</height>
+    <height>380</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -90,6 +90,11 @@
      <row>
       <property name="text">
        <string>3</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>4</string>
       </property>
      </row>
      <column>
@@ -195,6 +200,11 @@
      <row>
       <property name="text">
        <string>3</string>
+      </property>
+     </row>
+     <row>
+      <property name="text">
+       <string>4</string>
       </property>
      </row>
      <column>

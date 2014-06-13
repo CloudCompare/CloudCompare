@@ -544,7 +544,7 @@ protected: // VBO
 	//! Release VBOs
 	void releaseVBOs();
 
-	class VBO : public QGLBuffer
+    class VBO : public QGLBuffer
 	{
 	public:
 		int rgbShift;
@@ -563,7 +563,7 @@ protected: // VBO
 	};
 
 	//! VBO set
-	struct vboSet : std::vector<VBO>
+    struct vboSet : std::vector<VBO*>
 	{
 		//! States of th VBO(s)
 		enum STATES { NEW, INITIALIZED, FAILED };

@@ -149,6 +149,8 @@ protected:
 	//QComboBox* m_columnsType;
 	unsigned m_columnsCount;
 
+    // Resizes dialog width to fit all displayed table columns
+    void resizeWidthToFitTableColumns();
 };
 
 #endif //CC_ASCII_OPEN_DIALOG_HEADER

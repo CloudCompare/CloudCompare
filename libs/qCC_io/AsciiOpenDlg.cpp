@@ -400,6 +400,8 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 
 	//check for invalid columns
 	checkSelectedColumnsValidity(); //will eventually enable of disable the "OK" button
+    // expand dialog width to display all table columns
+    resizeWidthToFitTableColumns();
 }
 
 void AsciiOpenDlg::checkSelectedColumnsValidity()
@@ -594,4 +596,38 @@ void AsciiOpenDlg::shortcutButtonPressed()
 unsigned AsciiOpenDlg::getMaxCloudSize() const
 {
 	return static_cast<unsigned>(floor(m_ui->maxCloudSizeDoubleSpinBox->value() * 1.0e6));
+}
+
+void AsciiOpenDlg::resizeWidthToFitTableColumns()
+{
+/*!
+ * Increases dialog width if table widget contains many columns.
+ * Increases table column widths to fill dialog if only a few
+ * columns are present.
+*/
+    // First make sure all columns are wide enought to fit data
+    // Then get combined width of all columns.
+    m_ui->tableWidget->resizeColumnsToContents();
+    int totalColumnsWidth = m_ui->tableWidget->horizontalHeader()->length();
+
+    // To display whole table widget without h. scrollbars, need to add
+    // table and layout margin pixel values to get a total required dialog width
+    int leftTable, rightTable, leftLayout, rightLayout, top, bottom;
+    m_ui->tableWidget->getContentsMargins(&leftTable, &top, &rightTable, &bottom);
+    m_ui->verticalLayout->getContentsMargins(&leftLayout, &top, &rightLayout, &bottom);
+    int totalMarginsWidth = leftTable + rightTable + leftLayout + rightLayout;
+    int minDialogWidth = totalColumnsWidth + totalMarginsWidth;
+
+    // If table requires more space, resize dialog
+    if (minDialogWidth > this->width())
+        this->resize(minDialogWidth, this->height());
+
+    // Make columns stretchy and auto-resize
+    // This is done differently in Qt5 vs. Qt4
+#if QT_VERSION >= 0x050000
+    m_ui->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#else
+    m_ui->tableWidget->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+#endif
+
 }

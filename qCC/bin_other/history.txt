@@ -32,6 +32,7 @@ v2.5.5 ??/??/2014
 		- only double-precision matrices are used
 		- before that, especially when lots of rotations were applied to an entity, the resulting transformation matrix
 			could have had accumulated too many numerical errors resulting in a slightly shrinked cloud
+	* (Mac OS X) Fonts on "retina" displays are no longer fuzzy
 
 v2.5.4.1 04/22/2014
 - Bug fix:

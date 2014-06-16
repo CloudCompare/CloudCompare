@@ -51,7 +51,7 @@ namespace CCLib
 	{
 	public:
 		//! cell code
-		unsigned cellCode;
+		DgmOctree::OctreeCellCodeType cellCode;
 		//! Indexes of all faces inside cell
 		std::vector<unsigned> faceIndexes;
 

@@ -183,7 +183,7 @@ int smooth_mls(const typename pcl::PointCloud<PointInT>::Ptr &incloud,
 	case (MLSParameters::VOXEL_GRID_DILATION):
 		{
 			smoother.setUpsamplingMethod(pcl::MovingLeastSquares<PointInT, PointOutT>::VOXEL_GRID_DILATION);
-			smoother.setDilationVoxelSize(params.dilation_voxel_size_);
+			smoother.setDilationVoxelSize(static_cast<float>(params.dilation_voxel_size_));
 			smoother.setDilationIterations(params.dilation_iterations_);
 			break;
 		}

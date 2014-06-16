@@ -90,7 +90,7 @@ int SavePCD::compute()
 	ccSensor * sensor(0);
 	for (size_t i = 0; i < n_childs; ++i)
 	{
-		ccHObject * child = cloud->getChild(i);
+		ccHObject * child = cloud->getChild(static_cast<unsigned>(i));
 
 		//try to cast to a ccSensor
 		if (!child->isKindOf(CC_TYPES::SENSOR))

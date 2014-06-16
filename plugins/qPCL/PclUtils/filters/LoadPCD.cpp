@@ -137,11 +137,11 @@ int LoadPCD::compute()
 		ccRot.setTranslation(origin.data());
 
 		sensor->setRigidTransformation(ccRot);
-		sensor->setDeltaPhi(0.05);
-		sensor->setDeltaTheta(0.05);
+		sensor->setDeltaPhi(static_cast<PointCoordinateType>(0.05));
+		sensor->setDeltaTheta(static_cast<PointCoordinateType>(0.05));
 
 		//uncertainty to some default
-		sensor->setUncertainty(0.01);
+		sensor->setUncertainty(static_cast<PointCoordinateType>(0.01));
 
 		ccPointCloud* out_cloud = sm2ccConverter(cloud_ptr).getCCloud();
 		if (!out_cloud)

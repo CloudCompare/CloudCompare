@@ -114,7 +114,6 @@
 #include "ccPointPairRegistrationDlg.h"
 #include "ccExportCoordToSFDlg.h"
 #include "ccPrimitiveFactoryDlg.h"
-#include "ccMouse3DContextMenu.h"
 #include "ccColorScaleEditorDlg.h"
 #include "ccComputeOctreeDlg.h"
 #include "ccAdjustZoomDlg.h"
@@ -580,9 +579,11 @@ void MainWindow::release3DMouse()
 #ifdef CC_3DXWARE_SUPPORT
 	if (m_3dMouseInput)
 	{
-		disconnect(m_3dMouseInput);
+		m_3dMouseInput->disconnect(); //disconnect from the driver
+		disconnect(m_3dMouseInput); //disconnect from Qt ;)
+		
 		delete m_3dMouseInput;
-		m_3dMouseInput=0;
+		m_3dMouseInput = 0;
 	}
 #endif
 }
@@ -600,18 +601,22 @@ void MainWindow::enable3DMouse(bool state, bool silent)
 
 	if (state)
 	{
-		if (Mouse3DInput::DeviceAvailable())
+		m_3dMouseInput = new Mouse3DInput(this);
+		if (m_3dMouseInput->connect(this,"CloudCompare"))
 		{
-			ccLog::Warning("[3D Mouse] Device has been detected!");
-			m_3dMouseInput = new Mouse3DInput(this);
-			QObject::connect(m_3dMouseInput, SIGNAL(sigMove3d(std::vector<float>&)), this, SLOT(on3DMouseMove(std::vector<float>&)));
-			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyDown(int)), this, SLOT(on3DMouseKeyDown(int)));
-			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyUp(int)), this, SLOT(on3DMouseKeyUp(int)));
+			//ccLog::Warning("[3D Mouse] Device has been detected!");
+			QObject::connect(m_3dMouseInput, SIGNAL(sigMove3d(std::vector<float>&)),	this,	SLOT(on3DMouseMove(std::vector<float>&)));
+			QObject::connect(m_3dMouseInput, SIGNAL(sigReleased()),						this,	SLOT(on3DMouseReleased()));
+			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyDown(int)),			this,	SLOT(on3DMouseKeyDown(int)));
+			QObject::connect(m_3dMouseInput, SIGNAL(sigOn3dmouseKeyUp(int)),			this,	SLOT(on3DMouseKeyUp(int)));
 		}
 		else
 		{
+			delete m_3dMouseInput;
+			m_3dMouseInput = 0;
+			
 			if (silent)
-				ccLog::Print("[3D Mouse] No device found");
+				ccLog::Warning("[3D Mouse] No device found");
 			else
 				ccLog::Error("[3D Mouse] No device found");
 			state = false;
@@ -635,41 +640,15 @@ void MainWindow::on3DMouseKeyUp(int)
 	//nothing right now
 }
 
-#ifdef CC_3DXWARE_SUPPORT
-static bool s_3dMouseContextMenuAlreadyShown = false; //DGM: to prevent multiple instances at once
-#endif
 // ANY CHANGE/BUG FIX SHOULD BE REFLECTED TO THE EQUIVALENT METHODS IN QCC "MainWindow.cpp" FILE!
 void MainWindow::on3DMouseKeyDown(int key)
 {
-	if (!m_3dMouseInput)
-		return;
-
 #ifdef CC_3DXWARE_SUPPORT
 
 	switch(key)
 	{
 	case Mouse3DInput::V3DK_MENU:
-		if (!s_3dMouseContextMenuAlreadyShown)
-		{
-				s_3dMouseContextMenuAlreadyShown = true;
-
-				//is there a currently active window?
-				ccGLWindow* activeWin = getActiveGLWindow();
-				if (activeWin)
-				{
-					ccMouse3DContextMenu(&m_3dMouseInput->getMouseParams(),activeWin,this).exec(QCursor::pos());
-					//in case of...
-					updateViewModePopUpMenu(activeWin);
-					updatePivotVisibilityPopUpMenu(activeWin);
-				}
-				else
-				{
-					ccLog::Error("No active 3D view! Select a 3D view first...");
-					return;
-				}
-
-				s_3dMouseContextMenuAlreadyShown = false;
-		}
+		//should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_FIT:
 		{
@@ -698,10 +677,10 @@ void MainWindow::on3DMouseKeyDown(int key)
 		setBackView();
 		break;
 	case Mouse3DInput::V3DK_ROTATE:
-		m_3dMouseInput->getMouseParams().enableRotation(!m_3dMouseInput->getMouseParams().rotationEnabled());
+		//should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_PANZOOM:
-		m_3dMouseInput->getMouseParams().enablePanZoom(!m_3dMouseInput->getMouseParams().panZoomEnabled());
+		//should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_ISO1:
 		setIsoView1();
@@ -710,13 +689,13 @@ void MainWindow::on3DMouseKeyDown(int key)
 		setIsoView2();
 		break;
 	case Mouse3DInput::V3DK_PLUS:
-		m_3dMouseInput->getMouseParams().accelerate();
+		//should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_MINUS:
-		m_3dMouseInput->getMouseParams().slowDown();
+		//should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_DOMINANT:
-		m_3dMouseInput->getMouseParams().toggleDominantMode();
+		//should be handled by the driver now!
 		break;
 	case Mouse3DInput::V3DK_CW:
 	case Mouse3DInput::V3DK_CCW:
@@ -749,116 +728,29 @@ void MainWindow::on3DMouseKeyDown(int key)
 #endif
 }
 
-// ANY CHANGE/BUG FIX SHOULD BE REFLECTED TO THE EQUIVALENT METHODS IN QCC "MainWindow.cpp" FILE!
 void MainWindow::on3DMouseMove(std::vector<float>& vec)
 {
-	//ccLog::PrintDebug(QString("[3D mouse] %1 %2 %3 %4 %5 %6").arg(vec[0]).arg(vec[1]).arg(vec[2]).arg(vec[3]).arg(vec[4]).arg(vec[5]));
-
 #ifdef CC_3DXWARE_SUPPORT
 
-	//no active device?
-	if (!m_3dMouseInput)
-		return;
-
 	ccGLWindow* win = getActiveGLWindow();
-	//no active window?
-	if (!win)
-		return;
 
-	//mouse parameters
-	const Mouse3DParameters& params = m_3dMouseInput->getMouseParams();
-	bool panZoom = params.panZoomEnabled();
-	bool rotate = params.rotationEnabled();
-	if (!panZoom && !rotate)
-		return;
-
-	//view parameters
-	bool objectMode = true;
-	bool perspectiveView = win->getPerspectiveState(objectMode);
-
-	//Viewer based perspective IS 'camera mode'
-	{
-		//Mouse3DParameters::NavigationMode navigationMode = objectMode ? Mouse3DParameters::ObjectMode : Mouse3DParameters::CameraMode;
-		//if (params.navigationMode() != navigationMode)
-		//{
-		//	m_3dMouseInput->getMouseParams().setNavigationMode(navigationMode);
-		//	ccLog::Warning("[3D mouse] Navigation mode has been changed to fit current viewing mode");
-		//}
-	}
-
-	//dominant mode: dominant mode is intended to limit movement to a single direction
-	if (params.dominantModeEnabled())
-	{
-		unsigned dominantDim = 0;
-		for (unsigned i=1; i<6; ++i)
-			if (fabs(vec[i]) > fabs(vec[dominantDim]))
-				dominantDim = i;
-		for (unsigned i=0; i<6; ++i)
-			if (i != dominantDim)
-				vec[i] = 0.0;
-	}
-	if (panZoom)
-	{
-		//Zoom: object moves closer/away (only for ortho. mode)
-		if (!perspectiveView && fabs(vec[1])>ZERO_TOLERANCE)
-		{
-			win->updateZoom(1.0f + vec[1]);
-			vec[1] = 0.0f;
-		}
-
-		//Zoom & Panning: camera moves right/left + up/down + backward/forward (only for perspective mode)
-		if (fabs(vec[0])>ZERO_TOLERANCE || fabs(vec[1])>ZERO_TOLERANCE || fabs(vec[2])>ZERO_TOLERANCE)
-		{
-			const ccViewportParameters& viewParams = win->getViewportParameters();
-
-			float scale = static_cast<float>(std::min(win->width(),win->height()) * viewParams.pixelSize);
-			if (perspectiveView)
-			{
-				float tanFOV = tan(viewParams.fov*static_cast<float>(CC_DEG_TO_RAD)/*/2*/);
-				vec[0] *= tanFOV;
-				vec[2] *= tanFOV;
-				scale /= win->computePerspectiveZoom();
-			}
-			else
-			{
-				scale /= win->getViewportParameters().zoom;
-			}
-
-			if (objectMode)
-				scale = -scale;
-			win->moveCamera(vec[0]*scale,-vec[2]*scale,vec[1]*scale);
-		}
-	}
-
-	if (rotate)
-	{
-		if (	fabs(vec[3]) > ZERO_TOLERANCE
-			||	fabs(vec[4]) > ZERO_TOLERANCE
-			||	fabs(vec[5]) > ZERO_TOLERANCE)
-		{
-			//get corresponding quaternion
-			float q[4];
-			Mouse3DInput::GetQuaternion(vec,q);
-			ccGLMatrixd rotMat = ccGLMatrixd::FromQuaternion(q);
-
-			//horizon locked?
-			if (params.horizonLocked())
-			{
-				rotMat = rotMat.yRotation();
-			}
-
-			win->rotateBaseViewMat(objectMode ? rotMat : rotMat.inverse());
-			win->showPivotSymbol(true);
-		}
-		else
-		{
-			win->showPivotSymbol(false);
-		}
-	}
-
-	win->redraw();
+	//active window?
+	if (win)
+		Mouse3DInput::Apply(vec,win);
 
 #endif
+}
+
+void MainWindow::on3DMouseReleased()
+{
+	//active window?
+	ccGLWindow* win = getActiveGLWindow();
+	if (win && win->getPivotVisibility() == ccGLWindow::PIVOT_SHOW_ON_MOVE)
+	{
+		//we have to hide the pivot symbol!
+		win->showPivotSymbol(false);
+		win->redraw();
+	}
 }
 
 void MainWindow::connectActions()
@@ -1020,6 +912,9 @@ void MainWindow::connectActions()
 	connect(actionToggleActiveSFColorScale,		SIGNAL(triggered()),	this,		SLOT(doActionToggleActiveSFColorScale()));
 	connect(actionShowActiveSFPrevious,			SIGNAL(triggered()),	this,		SLOT(doActionShowActiveSFPrevious()));
 	connect(actionShowActiveSFNext,				SIGNAL(triggered()),	this,		SLOT(doActionShowActiveSFNext()));
+
+	//"Display" menu
+	connect(actionResetGUIElementsPos,			SIGNAL(triggered()),	this,		SLOT(doActionResetGUIElementsPos()));
 
 	//"3D Views" menu
 	connect(menu3DViews,						SIGNAL(aboutToShow()),	this,		SLOT(update3DViewsMenu()));
@@ -2395,7 +2290,7 @@ void MainWindow::doActionSetViewFromSensor()
 	if (win)
 	{
 		//ccViewportParameters params = win->getViewportParameters();
-		win->setPerspectiveState(true,false);
+		setViewerPerspectiveView(win);
 		win->setCameraPos(CCVector3d::fromArray(sensorCenter.u));
 		win->setPivotPoint(CCVector3d::fromArray(sensorCenter.u));
 		//FIXME: more complicated! Depends on the 'rotation order' for GBL sensors for instance
@@ -5913,6 +5808,19 @@ void MainWindow::prepareWindowDeletion(QObject* glWindow)
 	m_ccRoot->updatePropertiesView();
 }
 
+static bool s_autoSaveGuiElementPos = true;
+void MainWindow::doActionResetGUIElementsPos()
+{
+	QSettings settings;
+	settings.remove(s_psMainWinGeom);
+	settings.remove(s_psMainWinState);
+
+	QMessageBox::information(this,"Restart","To finish the process, you'll have to close and restart CloudCompare");
+
+	//to avoid saving them right away!
+	s_autoSaveGuiElementPos = false;
+}
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
 	//if (m_uiFrozen)
@@ -5936,6 +5844,12 @@ void MainWindow::closeEvent(QCloseEvent *event)
 		}
 	}
 
+	if (s_autoSaveGuiElementPos)
+		saveGUIElementsPos();
+}
+
+void MainWindow::saveGUIElementsPos()
+{
 	//save the state as settings
 	QSettings settings;
 	settings.setValue(s_psMainWinGeom, saveGeometry());
@@ -6892,7 +6806,11 @@ void MainWindow::setPivotOff()
 
 void MainWindow::setOrthoView()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	setOrthoView(getActiveGLWindow());
+}
+
+void MainWindow::setOrthoView(ccGLWindow* win)
+{
 	if (win)
 	{
 		win->setPerspectiveState(false,true);
@@ -6901,12 +6819,18 @@ void MainWindow::setOrthoView()
 		//update pop-up menu 'top' icon
 		if (m_viewModePopupButton)
 			m_viewModePopupButton->setIcon(actionSetOrthoView->icon());
+		if (m_pivotVisibilityPopupButton)
+			m_pivotVisibilityPopupButton->setEnabled(true);
 	}
 }
 
 void MainWindow::setCenteredPerspectiveView()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	setCenteredPerspectiveView(getActiveGLWindow());
+}
+
+void MainWindow::setCenteredPerspectiveView(ccGLWindow* win)
+{
 	if (win)
 	{
 		win->setPerspectiveState(true,true);
@@ -6915,12 +6839,18 @@ void MainWindow::setCenteredPerspectiveView()
 		//update pop-up menu 'top' icon
 		if (m_viewModePopupButton)
 			m_viewModePopupButton->setIcon(actionSetCenteredPerspectiveView->icon());
+		if (m_pivotVisibilityPopupButton)
+			m_pivotVisibilityPopupButton->setEnabled(true);
 	}
 }
 
 void MainWindow::setViewerPerspectiveView()
 {
-	ccGLWindow* win = getActiveGLWindow();
+	setViewerPerspectiveView(getActiveGLWindow());
+}
+
+void MainWindow::setViewerPerspectiveView(ccGLWindow* win)
+{
 	if (win)
 	{
 		win->setPerspectiveState(true,false);
@@ -6929,6 +6859,8 @@ void MainWindow::setViewerPerspectiveView()
 		//update pop-up menu 'top' icon
 		if (m_viewModePopupButton)
 			m_viewModePopupButton->setIcon(actionSetViewerPerspectiveView->icon());
+		if (m_pivotVisibilityPopupButton)
+			m_pivotVisibilityPopupButton->setEnabled(false);
 	}
 }
 
@@ -8409,6 +8341,7 @@ void MainWindow::toggleActiveWindowCenteredPerspective()
 		win->togglePerspective(true);
 		win->redraw();
 		updateViewModePopUpMenu(win);
+		updatePivotVisibilityPopUpMenu(win);
 	}
 }
 
@@ -8420,6 +8353,7 @@ void MainWindow::toggleActiveWindowViewerBasedPerspective()
 		win->togglePerspective(false);
 		win->redraw();
 		updateViewModePopUpMenu(win);
+		updatePivotVisibilityPopUpMenu(win);
 	}
 }
 
@@ -9046,14 +8980,6 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 	{
 		updateViewModePopUpMenu(win);
 		updatePivotVisibilityPopUpMenu(win);
-
-
-	}
-	else
-	{
-		if (m_viewModePopupButton)
-		{
-		}
 	}
 }
 

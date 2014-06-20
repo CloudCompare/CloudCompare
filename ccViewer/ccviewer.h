@@ -115,7 +115,8 @@ protected slots:
 	void on3DMouseMove(std::vector<float>&);
 	void on3DMouseKeyUp(int);
 	void on3DMouseKeyDown(int);
-	void setup3DMouse(bool);
+	void on3DMouseReleased();
+	void enable3DMouse(bool state);
 
 	//GL filters
 	void doEnableGLFilter();
@@ -142,12 +143,6 @@ protected:
 
 	//! Releases any connected 3D mouse (if any)
 	void release3DMouse();
-
-	//! Trys to enable (or disable) a 3D mouse device
-	/** \param state whether to enable or disable the device
-		\param silent whether to issue an error message in case of failure
-	**/
-	void enable3DMouse(bool state, bool silent);
 
 	//! Associated GL context
 	ccGLWindow* m_glWindow;

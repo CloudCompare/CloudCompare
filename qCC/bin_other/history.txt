@@ -4,6 +4,9 @@ v2.5.5 ??/??/2014
 - New method:
 	* Edit > Colors > Levels
 		- allows the user to edit the color histogram (either all channels at once or channel by channel)
+	* Display > Reset all GUI elements positions"
+		- removes all persitent information about the position and state of GUI elements (so that the
+			GUI elements are back to their default on next start)
 - Enhancement:
 	* Point-pair based alignment tool:
 		- the error contribution of each point (pair) to the total RMS is displayed in a new column
@@ -33,6 +36,10 @@ v2.5.5 ??/??/2014
 		- before that, especially when lots of rotations were applied to an entity, the resulting transformation matrix
 			could have had accumulated too many numerical errors resulting in a slightly shrinked cloud
 	* (Mac OS X) Fonts on "retina" displays are no longer fuzzy
+	* 3D mouse support: CloudCompare now relies on the official 3dConnexion SDK
+		- wireless devices should now be handled correctly
+		- the option menu is replaced by the official/default one
+		- (support is still limited to Windows only for now)
 
 v2.5.4.1 04/22/2014
 - Bug fix:

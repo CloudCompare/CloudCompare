@@ -363,6 +363,7 @@ protected slots:
 	void doActionEditCamera();
 	void doActionAdjustZoom();
 	void doActionSaveViewportAsCamera();
+	void doActionResetGUIElementsPos();
 
 	//Shaders & plugins
 	void doActionLoadShader();
@@ -410,6 +411,7 @@ protected slots:
 	void on3DMouseMove(std::vector<float>&);
 	void on3DMouseKeyUp(int);
 	void on3DMouseKeyDown(int);
+	void on3DMouseReleased();
 
 	//! Setups 3D mouse (if any)
 	void setup3DMouse(bool);
@@ -442,6 +444,13 @@ protected:
 								bool randomColors,
 								bool selectComponents,
 								bool sortBysize = true);
+
+	//! Saves position and state of all GUI elements
+	void saveGUIElementsPos();
+
+	void setOrthoView(ccGLWindow* win);
+	void setCenteredPerspectiveView(ccGLWindow* win);
+	void setViewerPerspectiveView(ccGLWindow* win);
 
 	void closeEvent(QCloseEvent* event);
 	void moveEvent(QMoveEvent* event);

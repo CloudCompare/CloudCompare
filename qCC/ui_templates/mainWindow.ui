@@ -130,6 +130,7 @@
     <addaction name="separator"/>
     <addaction name="actionConsole"/>
     <addaction name="menuToolbars"/>
+    <addaction name="actionResetGUIElementsPos"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -2535,6 +2536,14 @@
   <action name="actionChangeColorLevels">
    <property name="text">
     <string>Levels</string>
+   </property>
+  </action>
+  <action name="actionResetGUIElementsPos">
+   <property name="text">
+    <string>Reset all GUI elements positions</string>
+   </property>
+   <property name="toolTip">
+    <string>Reset all GUI elements positions (after restart)</string>
    </property>
   </action>
  </widget>

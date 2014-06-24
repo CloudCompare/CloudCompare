@@ -91,9 +91,9 @@ int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* the
 
 	//structure contenant les parametres additionnels
 	PointCoordinateType radius = theOctree->getCellSize(octreeLevel);
-	void* additionalParameters[3] = {	(void*)&euclidianDistances,
-										additionalParameters[1] = (void*)&radius,
-										additionalParameters[2] = (void*)_theGradientNorms
+	void* additionalParameters[3] = {	static_cast<void*>(&euclidianDistances),
+										static_cast<void*>(&radius),
+										static_cast<void*>(_theGradientNorms)
 	};
 
 	int result = 0;
@@ -128,9 +128,9 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 													NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
-	bool euclidianDistances									= *((bool*)additionalParameters[0]);
-	PointCoordinateType radius								= *((PointCoordinateType*)additionalParameters[1]);
-	ScalarField* theGradientNorms							= (ScalarField*)additionalParameters[2];
+	bool euclidianDistances			= *((bool*)additionalParameters[0]);
+	PointCoordinateType radius		= *((PointCoordinateType*)additionalParameters[1]);
+	ScalarField* theGradientNorms	= (ScalarField*)additionalParameters[2];
 
 	//nombre de points dans la cellule courante
 	unsigned n = cell.points->size();
@@ -154,7 +154,7 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 			return false;
 		}
 		DgmOctree::NeighboursSet::iterator it = nNSS.pointsInNeighbourhood.begin();
-		for (unsigned j=0;j<n;++j,++it)
+		for (unsigned j=0; j<n; ++j,++it)
 		{
 			it->point = cell.points->getPointPersistentPtr(j);
 			it->pointIndex = cell.points->getPointGlobalIndex(j);
@@ -179,7 +179,7 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 			unsigned k = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,true);
 
             //if more than one neighbour (the query point itself)
-			if (k>1)
+			if (k > 1)
 			{
 				CCVector3d sum(0,0,0);
 				unsigned counter = 0;
@@ -209,15 +209,15 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 				}
 
 				if (counter != 0)
-					gN = static_cast<ScalarType>(sum.norm()/static_cast<double>(counter));
+					gN = static_cast<ScalarType>(sum.norm()/counter);
 			}
 		}
 
 		if (theGradientNorms)
-			//mode champ scalaire "IN" et "OUT" identique
+			//if "IN" and "OUT" SFs are the same
 			theGradientNorms->setValue(cell.points->getPointGlobalIndex(i),gN);
 		else
-			//mode champs scalaires "IN" et "OUT" differents
+			//if "IN" and "OUT" SFs are different
 			cell.points->setPointScalarValue(i,gN);
 
 		if (nProgress && !nProgress->oneStep())

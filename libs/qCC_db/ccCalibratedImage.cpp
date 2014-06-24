@@ -64,7 +64,7 @@ void ccCalibratedImage::setFocal(float focal_pix, bool deduceFOV/*=true*/)
 
 void ccCalibratedImage::setFovFromFocal(float focal_pix)
 {
-	setFov(static_cast<float>(CC_RAD_TO_DEG*2.0) * atan(static_cast<float>(m_height) / (m_focal_pix*2.0f)));
+	setFov(static_cast<float>(CC_RAD_TO_DEG*2.0) * atan(static_cast<float>(m_height) / (m_focal_pix*2)));
 }
 
 void ccCalibratedImage::setCameraMatrix(const ccGLMatrix& mat)
@@ -90,12 +90,12 @@ bool ccCalibratedImage::undistort()
 		return false;
 
 	//nothing to do
-	if (m_k1==0 && m_k2==0)
+	if (m_k1 == 0 && m_k2 == 0)
 		return true;
 
-	float f2 = m_focal_pix*m_focal_pix;
-	float cx = 0.5f*(float)m_width;
-	float cy = 0.5f*(float)m_height;
+	float f2 = m_focal_pix * m_focal_pix;
+	float cx = 0.5f * m_width;
+	float cy = 0.5f * m_height;
 
 	//look for optimal enlargement coeff
 	float enlargeCoef = 1.0f;
@@ -105,48 +105,48 @@ bool ccCalibratedImage::undistort()
 	//	unsigned step=0;
 	//	while (step<50)
 	//	{
-	//		enlargeCoef = 1.0f+c_stepSize*(float)step;
-	//		float maxcx = 0.5f*enlargeCoef*(float)m_width;
-	//		float maxcy = 0.5f*enlargeCoef*(float)m_height;
+	//		enlargeCoef = 1.0f + c_stepSize * step;
+	//		float maxcx = 0.5f * enlargeCoef * m_width;
+	//		float maxcy = 0.5f * enlargeCoef * m_height;
 	//		float maxp2 = (maxcx*maxcx+maxcy*maxcy)/f2;
-	//		float maxrp = 1.0f+maxp2*(m_k1+m_k2*maxp2);
+	//		float maxrp = 1.0f + maxp2 * (m_k1 + m_k2*maxp2);
 	//		float eqx = maxrp * maxcx;
 	//		float eqy = maxrp * maxcy;
-	//		if ((int)eqx>=cx && (int)eqy>=cy)
+	//		if (static_cast<int>(eqx) >= cx && static_cast<int>(eqy) >= cy)
 	//			break;
 	//		//something wrong!
-	//		if (maxrp<lastrp)
+	//		if (maxrp < lastrp)
 	//		{
-	//			if (step<2)
+	//			if (step < 2)
 	//				return false;
 	//			else
 	//			{
 	//				//step back
-	//				enlargeCoef = 1.0f+c_stepSize*(float)(step-1);
+	//				enlargeCoef = 1.0f + c_stepSize * (step-1);
 	//				break;
 	//			}
 	//		}
-	//		lastrp=maxrp;
+	//		lastrp = maxrp;
 	//		++step;
 	//	}
 	//}
 
-	unsigned newWidth = (unsigned)(enlargeCoef*(float)m_width);
-	unsigned newHeight = (unsigned)(enlargeCoef*(float)m_height);
-	float newCx = 0.5f*(float)newWidth;
-	float newCy = 0.5f*(float)newHeight;
+	unsigned newWidth = static_cast<unsigned>(enlargeCoef * m_width);
+	unsigned newHeight = static_cast<unsigned>(enlargeCoef * m_height);
+	float newCx = 0.5f * newWidth;
+	float newCy = 0.5f * newHeight;
 	QImage image(QSize(newWidth,newHeight),m_image.format());
 	image.fill(0);
 
 	//image undistortion
 	{
-		for (unsigned i=0;i<newWidth;++i)
+		for (unsigned i=0; i<newWidth; ++i)
 		{
-			float x = (float)(i-newCx);
+			float x = static_cast<float>(i-newCx);
 			float x2 = x*x;
-			for (unsigned j=0;j<newHeight;++j)
+			for (unsigned j=0; j<newHeight; ++j)
 			{
-				float y = (float)(j-newCy);
+				float y = static_cast<float>(j-newCy);
 				float y2 = y*y;
 
 				float p2 = (x2+y2)/f2; //p = pix/f
@@ -154,10 +154,15 @@ bool ccCalibratedImage::undistort()
 				float eqx = rp * x + cx;
 				float eqy = rp * y + cy;
 
-				int pixx=(int)eqx;
-				int pixy=(int)eqy;
-				if (pixx>=0 && pixx<(int)m_width && pixy>=0 && pixy<(int)m_height)
+				int pixx = static_cast<int>(eqx);
+				int pixy = static_cast<int>(eqy);
+				if (	pixx >= 0
+					&&	pixx < static_cast<int>(m_width)
+					&&	pixy >= 0
+					&&	pixy < static_cast<int>(m_height))
+				{
 					image.setPixel(i,j,m_image.pixel(pixx,pixy));
+				}
 			}
 		}
 	}
@@ -176,7 +181,7 @@ bool ccCalibratedImage::undistort()
 
 #ifdef USE_LEVMAR
 static unsigned s_funcStepIteration = 0;
-static double s_mean_e=0.0, s_std_e=0.0;
+static double s_mean_e = 0, s_std_e = 0;
 static void func_step(double *X0, double *x, int m, int n, void *data)
 {
 	//we extract parameters
@@ -190,12 +195,12 @@ static void func_step(double *X0, double *x, int m, int n, void *data)
 	const double& c2 = X0[7];
 
 	//global error
-	s_mean_e=0.0;
-	s_std_e=0.0;
+	s_mean_e = 0;
+	s_std_e = 0;
 
-	double* _A = (double*)data;
+	double* _A = static_cast<double*>(data);
 	const unsigned count = (n>>1);
-	double* _x=x;
+	double* _x = x;
 	for(unsigned k=0; k<count; ++k)
 	{
 		const double& xi = _A[0];
@@ -223,8 +228,8 @@ static void func_step(double *X0, double *x, int m, int n, void *data)
 		_A += 4;
 	}
 
-	s_mean_e /= (double)n;
-	s_std_e = sqrt(s_std_e/(double)n - s_mean_e*s_mean_e);
+	s_mean_e /= n;
+	s_std_e = sqrt(s_std_e/n - s_mean_e*s_mean_e);
 
 	++s_funcStepIteration;
 }
@@ -235,21 +240,20 @@ bool ccCalibratedImage::computeOrthoRectificationParams(CCLib::GenericIndexedClo
 	if (!keypoints3D)
 		return false;
 
-	unsigned count = (unsigned)keypointsImage.size();
-	if (count<4)
+	unsigned count = static_cast<unsigned>(keypointsImage.size());
+	if (count < 4)
 		return false;
 
 	//first guess for X (a0 a1 a2 b0 b1 b2 c1 c2)
-	double norm = (double)std::max(m_width,m_height);
-	double X0[8];
-	X0[0] = 1.0/sqrt(norm);
-	X0[1] = 1.0/norm;
-	X0[2] = 1.0/norm;
-	X0[3] = 1.0/sqrt(norm);
-	X0[4] = 1.0/norm;
-	X0[5] = 1.0/norm;
-	X0[6] = 1.0/norm;
-	X0[7] = 1.0/norm;
+	double norm = static_cast<double>(std::max(m_width,m_height));
+	double X0[8] = {	1.0/sqrt(norm),
+						1.0/norm,
+						1.0/norm,
+						1.0/sqrt(norm),
+						1.0/norm,
+						1.0/norm,
+						1.0/norm,
+						1.0/norm };
 
 #ifndef USE_LEVMAR
 
@@ -257,16 +261,25 @@ bool ccCalibratedImage::computeOrthoRectificationParams(CCLib::GenericIndexedClo
 	unsigned Neq = 2*count; //number of equations
 	double *A = new double[8*Neq]; // 8 coefficients: a0 a1 a2 b0 b1 b2 c1 c2
 	double *b = new double[Neq];
+	if (!A || !b)
+	{
+		//not enough memory
+		if (A)
+			delete[] A;
+		if (b)
+			delete[] b;
+		return false;
+	}
 
 	//for all points
 	{
-		double* _A=A;
-		double* _b=b;
+		double* _A = A;
+		double* _b = b;
 		for (unsigned i=0;i<count;++i)
 		{
 			const KeyPoint& kp = keypointsImage[i];
-			double kpx = (double)kp.x;
-			double kpy = (double)kp.y;
+			double kpx = static_cast<double>(kp.x);
+			double kpy = static_cast<double>(kp.y);
 			const CCVector3* P = keypoints3D->getPoint(kp.index);
 
 			*_A++ = 1.0;
@@ -275,9 +288,9 @@ bool ccCalibratedImage::computeOrthoRectificationParams(CCLib::GenericIndexedClo
 			*_A++ = 0.0;
 			*_A++ = 0.0;
 			*_A++ = 0.0;
-			*_A++ = -kpx * (double)P->x;
-			*_A++ = -kpy * (double)P->x;
-			*_b++ = (double)P->x;
+			*_A++ = -kpx * static_cast<double>(P->x);
+			*_A++ = -kpy * static_cast<double>(P->x);
+			*_b++ = static_cast<double>(P->x);
 
 			*_A++ = 0.0;
 			*_A++ = 0.0;
@@ -285,14 +298,14 @@ bool ccCalibratedImage::computeOrthoRectificationParams(CCLib::GenericIndexedClo
 			*_A++ = 1.0;
 			*_A++ = kpx;
 			*_A++ = kpy;
-			*_A++ = -kpx * (double)P->y;
-			*_A++ = -kpy * (double)P->y;
-			*_b++ = (double)P->y;
+			*_A++ = -kpx * static_cast<double>(P->y);
+			*_A++ = -kpy * static_cast<double>(P->y);
+			*_b++ = static_cast<double>(P->y);
 		}
 	}
 
 	//conjugate gradient initialization
-	//we solve tA.A.X=tA.b
+	//we solve tA.A.X = tA.b
 	CCLib::ConjugateGradient<8,double> cg;
 	CCLib::SquareMatrixd& tAA = cg.A();
 	double* tAb = cg.b();
@@ -338,7 +351,7 @@ bool ccCalibratedImage::computeOrthoRectificationParams(CCLib::GenericIndexedClo
 
 	//conjugate gradient iterations
 	{
-		double convergenceThreshold = 1e-8/* * norm*/;  //max. error for convergence
+		double convergenceThreshold = 1.0e-8/* * norm*/;  //max. error for convergence
 		for (unsigned i=0; i<1500; ++i)
 		{
 			double lastError = cg.iterConjugateGradient(X0);
@@ -358,14 +371,14 @@ bool ccCalibratedImage::computeOrthoRectificationParams(CCLib::GenericIndexedClo
 
 
 	delete[] A;
-	A=0;
+	A = 0;
 	delete[] b;
-	b=0;
+	b = 0;
 
 #else
 
 	double* A = new double[count*4];
-	double* _A=A;
+	double* _A = A;
 	for (unsigned i=0;i<count;++i)
 	{
 		const KeyPoint& kp = keypointsImage[i];
@@ -384,7 +397,7 @@ bool ccCalibratedImage::computeOrthoRectificationParams(CCLib::GenericIndexedClo
 	dlevmar_dif(func_step, X0, NULL, 8, count*2, 5000, 0, info, 0, 0, A); //numerical derivatives
 
 	delete[] A;
-	A=0;
+	A = 0;
 
 #endif
 
@@ -427,8 +440,8 @@ ccImage* ccCalibratedImage::orthoRectifyAsImage(CCLib::GenericIndexedCloud* keyp
 	double corners[8];
 	double xi,yi,qi;
 
-	double halfWidth = (double)m_width/2.0;
-	double halfHeight = (double)m_height/2.0;
+	double halfWidth = static_cast<double>(m_width)/2;
+	double halfHeight = static_cast<double>(m_height)/2;
 
 	//top-left
 	xi = -halfWidth;
@@ -465,7 +478,7 @@ ccImage* ccCalibratedImage::orthoRectifyAsImage(CCLib::GenericIndexedCloud* keyp
 	double minC[2] = {corners[0],corners[1]};
 	double maxC[2] = {corners[0],corners[1]};
 
-	for (unsigned k=1;k<4;++k)
+	for (unsigned k=1; k<4; ++k)
 	{
 		const double* C = corners+2*k;
 		if (minC[0] > C[0])
@@ -482,26 +495,26 @@ ccImage* ccCalibratedImage::orthoRectifyAsImage(CCLib::GenericIndexedCloud* keyp
 	//output 3D boundaries (optional)
 	if (minCorner)
 	{
-		minCorner[0]=minC[0];
-		minCorner[1]=minC[1];
+		minCorner[0] = minC[0];
+		minCorner[1] = minC[1];
 	}
 	if (maxCorner)
 	{
-		maxCorner[0]=maxC[0];
-		maxCorner[1]=maxC[1];
+		maxCorner[0] = maxC[0];
+		maxCorner[1] = maxC[1];
 	}
 
 	double dx = maxC[0]-minC[0];
 	double dy = maxC[1]-minC[1];
 
 	double _pixelSize = pixelSize;
-	if (_pixelSize<=0.0)
+	if (_pixelSize <= 0)
 	{
 		unsigned maxSize = std::max(m_width,m_height);
-		_pixelSize = std::max(dx,dy)/(double)maxSize;
+		_pixelSize = std::max(dx,dy)/maxSize;
 	}
-	unsigned w = (unsigned)((double)dx/_pixelSize);
-	unsigned h = (unsigned)((double)dy/_pixelSize);
+	unsigned w = (unsigned)(dx/_pixelSize);
+	unsigned h = (unsigned)(dy/_pixelSize);
 
 	QImage orthoImage(w,h,QImage::Format_ARGB32);
 	if (orthoImage.isNull()) //not enough memory!
@@ -509,27 +522,27 @@ ccImage* ccCalibratedImage::orthoRectifyAsImage(CCLib::GenericIndexedCloud* keyp
 
 	const QRgb blackValue = QColor( Qt::black ).rgb();
 
-	for (unsigned i=0;i<w;++i)
+	for (unsigned i=0; i<w; ++i)
 	{
-		double xip = minC[0]+(double)i*_pixelSize;
-		for (unsigned j=0;j<h;++j)
+		double xip = minC[0] + static_cast<double>(i)*_pixelSize;
+		for (unsigned j=0; j<h; ++j)
 		{
-			double yip = minC[1]+(double)j*_pixelSize;
+			double yip = minC[1] + static_cast<double>(j)*_pixelSize;
 			double q = (c2*xip-a2)*(c1*yip-b1)-(c2*yip-b2)*(c1*xip-a1);
 			double p = (a0-xip)*(c1*yip-b1)-(b0-yip)*(c1*xip-a1);
 			double yi = p/q;
 			yi += halfHeight;
-			int y = (int)yi;
+			int y = static_cast<int>(yi);
 
-			if (y>=0 && y<(int)m_height)
+			if (y >= 0 && y < static_cast<int>(m_height))
 			{
 				q = (c1*xip-a1)*(c2*yip-b2)-(c1*yip-b1)*(c2*xip-a2);
 				p = (a0-xip)*(c2*yip-b2)-(b0-yip)*(c2*xip-a2);
 				double  xi = p/q;
 				xi += halfWidth;
-				int x = (int)xi;
+				int x = static_cast<int>(xi);
 
-				if (x>=0 && x<(int)m_width)
+				if (x >= 0 && x < static_cast<int>(m_width))
 				{
 					QRgb rgb = m_image.pixel(x,y);
 					//pure black pixels are treated as transparent ones!
@@ -556,20 +569,30 @@ ccImage* ccCalibratedImage::orthoRectifyAsImage(CCLib::GenericIndexedCloud* keyp
 	return new ccImage(orthoImage,getName());
 }
 
-bool ccCalibratedImage::OrthoRectifyAsImages(std::vector<ccCalibratedImage*> images, 
-											double a[], double b[], double c[],
-											unsigned maxSize,
-											QDir* outputDir/*=0*/,
-											std::vector<ccImage*>* result/*=0*/,
-											std::vector<std::pair<double,double> >* relativePos/*=0*/)
+bool ccCalibratedImage::OrthoRectifyAsImages(	std::vector<ccCalibratedImage*> images, 
+												double a[], double b[], double c[],
+												unsigned maxSize,
+												QDir* outputDir/*=0*/,
+												std::vector<ccImage*>* result/*=0*/,
+												std::vector<std::pair<double,double> >* relativePos/*=0*/)
 {
-	unsigned count = (unsigned)images.size();
-	if (count==0)
+	unsigned count = static_cast<unsigned>(images.size());
+	if (count == 0)
 		return false;
 
 	//min & max corners for each images
-	double* minCorners = new double[2*count];
-	double* maxCorners = new double[2*count];
+	std::vector<double> minCorners;
+	std::vector<double> maxCorners;
+	try
+	{
+		minCorners.resize(2*count);
+		maxCorners.resize(2*count);
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return false;
+	}
 	//max dimension of all (ortho-rectified) images, horizontally or vertically
 	double maxDimAllImages = 0.0;
 	//corners for the global set
@@ -624,11 +647,11 @@ bool ccCalibratedImage::OrthoRectifyAsImages(std::vector<ccCalibratedImage*> ima
 		corners[7] = (b0+b1*xi+b2*yi)/qi;
 
 		//we look for min and max bounding box
-		double* minC = minCorners+2*k;
-		double* maxC = maxCorners+2*k;
-		maxC[0]=minC[0]=corners[0];
-		maxC[1]=minC[1]=corners[1];
-		for (unsigned k=1;k<4;++k)
+		double* minC = &minCorners[2*k];
+		double* maxC = &maxCorners[2*k];
+		maxC[0] = minC[0] = corners[0];
+		maxC[1] = minC[1] = corners[1];
+		for (unsigned k=1; k<4; ++k)
 		{
 			const double* C = corners+2*k;
 			//dimension: X
@@ -657,7 +680,7 @@ bool ccCalibratedImage::OrthoRectifyAsImages(std::vector<ccCalibratedImage*> ima
 		double dx = maxC[0]-minC[0];
 		double dy = maxC[1]-minC[1];
 		double maxd = std::max(dx,dy);
-		if (maxd>maxDimAllImages)
+		if (maxd > maxDimAllImages)
 			maxDimAllImages=maxd;
 	}
 
@@ -683,29 +706,29 @@ bool ccCalibratedImage::OrthoRectifyAsImages(std::vector<ccCalibratedImage*> ima
 	//projet each image accordingly
 	for (unsigned k=0;k<count;++k)
 	{
-		double* minC = minCorners+2*k;
-		double* maxC = maxCorners+2*k;
+		double* minC = &minCorners[2*k];
+		double* maxC = &maxCorners[2*k];
 		double dx = maxC[0]-minC[0];
 		double dy = maxC[1]-minC[1];
 
 		ccCalibratedImage* image = images[k];
 		unsigned width = images[k]->getW();
 		unsigned height = images[k]->getH();
-		unsigned w = (unsigned)ceil(dx/pixelSize);
-		unsigned h = (unsigned)ceil(dy/pixelSize);
+		unsigned w = static_cast<unsigned>(ceil(dx/pixelSize));
+		unsigned h = static_cast<unsigned>(ceil(dy/pixelSize));
 
 		QImage orthoImage(w,h,QImage::Format_ARGB32);
 		if (orthoImage.isNull()) //not enough memory!
 		{
 			//clear mem.
 			if (result)
+			{
 				while (!result->empty())
 				{
 					delete result->back();
 					result->pop_back();
 				}
-			delete[] minCorners;
-			delete[] maxCorners;
+			}
 			return false;
 		}
 
@@ -720,12 +743,12 @@ bool ccCalibratedImage::OrthoRectifyAsImages(std::vector<ccCalibratedImage*> ima
 		const double& c1 = c[k*3+1];
 		const double& c2 = c[k*3+2];
 
-		for (unsigned i=0;i<w;++i)
+		for (unsigned i=0; i<w; ++i)
 		{
-			double xip = minC[0]+(double)i*pixelSize;
+			double xip = minC[0] + static_cast<double>(i)*pixelSize;
 			for (unsigned j=0;j<h;++j)
 			{
-				double yip = minC[1]+(double)j*pixelSize;
+				double yip = minC[1] + static_cast<double>(j)*pixelSize;
 				double q = (c2*xip-a2)*(c1*yip-b1)-(c2*yip-b2)*(c1*xip-a1);
 				double p = (a0-xip)*(c1*yip-b1)-(b0-yip)*(c1*xip-a1);
 				double yi = p/q;
@@ -734,16 +757,16 @@ bool ccCalibratedImage::OrthoRectifyAsImages(std::vector<ccCalibratedImage*> ima
 				p = (a0-xip)*(c2*yip-b2)-(b0-yip)*(c2*xip-a2);
 				double  xi = p/q;
 
-				xi += 0.5*(double)width;
-				yi += 0.5*(double)height;
+				xi += 0.5 * width;
+				yi += 0.5 * height;
 
-				int x = (int)xi;
-				int y = (int)yi;
-				if (x>=0 && x<(int)width && y>=0 && y<(int)height)
+				int x = static_cast<int>(xi);
+				int y = static_cast<int>(yi);
+				if (x >= 0 && x < static_cast<int>(width) && y >= 0 && y < static_cast<int>(height))
 				{
 					QRgb rgb = image->data().pixel(x,y);
 					//pure black pixels are treated as transparent ones!
-					if (qRed(rgb)+qGreen(rgb)+qBlue(rgb)>0)
+					if (qRed(rgb) + qGreen(rgb) + qBlue(rgb) > 0)
 						orthoImage.setPixel(i,h-1-j,rgb);
 					else
 						orthoImage.setPixel(i,h-1-j,qRgba(qRed(rgb),qGreen(rgb),qBlue(rgb),0));
@@ -786,12 +809,8 @@ bool ccCalibratedImage::OrthoRectifyAsImages(std::vector<ccCalibratedImage*> ima
 			result->push_back(new ccImage(orthoImage,image->getName()));
 	}
 
-	delete[] minCorners;
-	delete[] maxCorners;
-
 	return true;
 }
-
 
 ccPointCloud* ccCalibratedImage::orthoRectifyAsCloud(CCLib::GenericIndexedCloud* keypoints3D, std::vector<KeyPoint>& keypointsImage) const
 {
@@ -832,10 +851,10 @@ ccPointCloud* ccCalibratedImage::orthoRectifyAsCloud(CCLib::GenericIndexedCloud*
 	{
 		for (unsigned pi = 0; pi<m_width; ++pi)
 		{
-			double xi = static_cast<PointCoordinateType>(pi) - 0.5*static_cast<PointCoordinateType>(m_width);
+			double xi = static_cast<double>(pi) - 0.5*static_cast<double>(m_width);
 			for (unsigned pj = 0; pj<m_height; ++pj)
 			{
-				double yi = static_cast<PointCoordinateType>(pj) - 0.5*static_cast<PointCoordinateType>(m_height);
+				double yi = static_cast<double>(pj) - 0.5*static_cast<double>(m_height);
 				double qi = 1.0 + c1*xi + c2*yi;
 				CCVector3 P(static_cast<PointCoordinateType>((a0+a1*xi+a2*yi)/qi),
 							static_cast<PointCoordinateType>((b0+b1*xi+b2*yi)/qi),

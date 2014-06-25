@@ -236,13 +236,13 @@ const ccBBox ccBBox::operator * (const ccGLMatrix& mat)
 	if (m_valid)
 	{
 		rotatedBox.add(mat * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMin.y,m_bbMax.z) * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMax.y,m_bbMin.z) * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMin.y,m_bbMin.z) * m_bbMin);
-		rotatedBox.add(m_bbMax * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMax.y,m_bbMax.z) * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMax.y,m_bbMin.z) * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMin.y,m_bbMax.z) * m_bbMin);
+		rotatedBox.add(mat * CCVector3(m_bbMin.x,m_bbMin.y,m_bbMax.z));
+		rotatedBox.add(mat * CCVector3(m_bbMin.x,m_bbMax.y,m_bbMin.z));
+		rotatedBox.add(mat * CCVector3(m_bbMax.x,m_bbMin.y,m_bbMin.z));
+		rotatedBox.add(mat * m_bbMax);
+		rotatedBox.add(mat * CCVector3(m_bbMin.x,m_bbMax.y,m_bbMax.z));
+		rotatedBox.add(mat * CCVector3(m_bbMax.x,m_bbMax.y,m_bbMin.z));
+		rotatedBox.add(mat * CCVector3(m_bbMax.x,m_bbMin.y,m_bbMax.z));
 	}
 
 	return rotatedBox;
@@ -255,13 +255,13 @@ const ccBBox ccBBox::operator * (const ccGLMatrixd& mat)
 	if (m_valid)
 	{
 		rotatedBox.add(mat * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMin.y,m_bbMax.z) * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMax.y,m_bbMin.z) * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMin.y,m_bbMin.z) * m_bbMin);
-		rotatedBox.add(m_bbMax * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMax.y,m_bbMax.z) * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMax.y,m_bbMin.z) * m_bbMin);
-		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMin.y,m_bbMax.z) * m_bbMin);
+		rotatedBox.add(mat * CCVector3(m_bbMin.x,m_bbMin.y,m_bbMax.z));
+		rotatedBox.add(mat * CCVector3(m_bbMin.x,m_bbMax.y,m_bbMin.z));
+		rotatedBox.add(mat * CCVector3(m_bbMax.x,m_bbMin.y,m_bbMin.z));
+		rotatedBox.add(mat * m_bbMax);
+		rotatedBox.add(mat * CCVector3(m_bbMin.x,m_bbMax.y,m_bbMax.z));
+		rotatedBox.add(mat * CCVector3(m_bbMax.x,m_bbMax.y,m_bbMin.z));
+		rotatedBox.add(mat * CCVector3(m_bbMax.x,m_bbMin.y,m_bbMax.z));
 	}
 
 	return rotatedBox;

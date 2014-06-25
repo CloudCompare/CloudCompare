@@ -196,7 +196,7 @@ void ccClipBox::reset()
 
 void ccClipBox::setAssociatedEntity(ccHObject* associatedEntity)
 {
-	//release precedent one
+	//release previous one
 	if (m_associatedEntity && m_associatedEntity->isKindOf(CC_TYPES::POINT_CLOUD))
 	{
 		ccHObjectCaster::ToGenericPointCloud(m_associatedEntity)->unallocateVisibilityArray();

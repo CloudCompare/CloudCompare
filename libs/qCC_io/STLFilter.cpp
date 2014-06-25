@@ -670,9 +670,9 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 				if (shiftAlreadyEnabled)
 					Pshift = *coordinatesShift;
-				bool applyAll=false;
+				bool applyAll = false;
 				if (	sizeof(PointCoordinateType) < 8
-					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
 				{
 					vertices->setGlobalShift(Pshift);
 					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
@@ -887,7 +887,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 					Pshift = *coordinatesShift;
 				bool applyAll = false;
 				if (	sizeof(PointCoordinateType) < 8
-					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
 				{
 					vertices->setGlobalShift(Pshift);
 					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);

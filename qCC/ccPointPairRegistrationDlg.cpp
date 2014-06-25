@@ -663,8 +663,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccGenericPoi
 					scale = m_aligned.cloud->getGlobalScale();
 					shiftEnabled = true;
 				}
-				bool applyAll = false;
-				if (ccCoordinatesShiftManager::Handle(Pin.u,0,true,shiftEnabled,Pshift,&scale,applyAll))
+				if (ccCoordinatesShiftManager::Handle(Pin.u,0,true,shiftEnabled,Pshift,&scale))
 				{
 					m_refPoints.setGlobalShift(Pshift);
 					m_refPoints.setGlobalScale(scale);

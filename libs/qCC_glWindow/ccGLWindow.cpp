@@ -3005,7 +3005,7 @@ float ccGLWindow::computePerspectiveZoom() const
 
 void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 {
-	//precedent state
+	//previous state
 	bool perspectiveWasEnabled = m_viewportParams.perspectiveView;
 	bool viewWasObjectCentered = m_viewportParams.objectCenteredView;
 

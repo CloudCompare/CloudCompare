@@ -766,7 +766,7 @@ unsigned DgmOctree::getCellIndex(OctreeCellCodeType truncatedCellCode, uchar bit
         }
         else
         {
-            //if the precedent point doesn't correspond, then we have just found the first good one!
+            //if the previous point doesn't correspond, then we have just found the first good one!
             if ((m_thePointsAndTheirCellCodes[middle-1].theCode >> bitDec) != truncatedCellCode)
                 return middle;
             end = middle;
@@ -3353,7 +3353,7 @@ int DgmOctree::extractCCs(const cellCodesContainer& cellCodes, uchar level, bool
 							{
 								int label = neighboursMin[n];
 								assert(label<static_cast<int>(numberOfCells)+2);
-								//we don't process it if it's the same label as the precedent neighbor
+								//we don't process it if it's the same label as the previous neighbor
 								if (label != lastLabel)
 								{
 									equivalentLabels[label] = smallestLabel;
@@ -3578,7 +3578,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtLevel(uchar level,
         OctreeCellCodeType nextCode = (p->theCode >> bitDec);
         if (nextCode != cell.truncatedCode)
         {
-            //if not, we call the user function on the precedent cell
+            //if not, we call the user function on the previous cell
             result = (*func)(cell,additionalParameters,nprogress);
 
 			if (!result)
@@ -3746,7 +3746,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 						//not the same cell anymore?
 						if (cell.truncatedCode != (p->theCode >> currentBitDec))
 						{
-							//we must re-check all the precedently inserted points at this new level
+							//we must re-check all the previous inserted points at this new level
 							//to determine the end of this new cell
 							p = startingElement;
 							elements=1;
@@ -3803,7 +3803,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel(uchar startingLeve
 						//we can simply proceed with its parent cell
 						if (firstSubCell && elements < minNumberOfPointsPerCell)
 						{
-							//precedent level
+							//previous level
 							--cell.level;
 							currentBitDec+=3;
 							cell.truncatedCode>>=3;
@@ -4160,7 +4160,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
 						//not the same cell anymore?
 						if (cellDesc.truncatedCode != (p->theCode >> currentBitDec))
 						{
-							//we must re-check all the precedently inserted points at this new level
+							//we must re-check all the previously inserted points at this new level
 							//to determine the end of this new cell
 							p = startingElement;
 							elements=1;
@@ -4217,7 +4217,7 @@ unsigned DgmOctree::executeFunctionForAllCellsAtStartingLevel_MT(uchar startingL
 						//we can simply proceed with its parent cell
 						if (firstSubCell && elements < minNumberOfPointsPerCell)
 						{
-							//precedent level
+							//previous level
 							--cellDesc.level;
 							currentBitDec+=3;
 							cellDesc.truncatedCode>>=3;

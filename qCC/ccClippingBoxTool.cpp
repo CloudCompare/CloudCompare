@@ -178,7 +178,7 @@ bool ccClippingBoxTool::linkWith(ccGLWindow* win)
 {
 	if (m_associatedWin && m_clipBox)
 	{
-		//remove clipping box from precedent window
+		//remove clipping box from previous window
 		m_associatedWin->removeFromOwnDB(m_clipBox);
 		m_clipBox->disconnect(this);
 		delete m_clipBox;

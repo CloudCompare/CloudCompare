@@ -34,7 +34,7 @@ public:
 	ccApplyTransformationDlg(QWidget* parent = 0);
 
 	//! Returns input matrix
-	ccGLMatrix getTransformation() const;
+	ccGLMatrixd getTransformation() const;
 
 protected slots:
 

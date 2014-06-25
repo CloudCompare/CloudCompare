@@ -107,7 +107,7 @@ bool ccMaterialSet::ParseMTL(QString path, const QString& filename, ccMaterialSe
 		//start material
 		if (tokens.front() == "newmtl")
 		{
-			//push the precedent material
+			//push the previous material
 			if (currentMatIndex >= 0)
 				materials.addMaterial(currentMaterial);
 

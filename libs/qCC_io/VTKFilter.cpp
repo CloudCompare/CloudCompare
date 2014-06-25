@@ -356,7 +356,7 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 						Pshift = *coordinatesShift;
 					bool applyAll = false;
 					if (	sizeof(PointCoordinateType) < 8
-						&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+						&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
 					{
 						vertices->setGlobalShift(Pshift);
 						ccLog::Warning("[VTKFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);

@@ -43,19 +43,20 @@ double ccCoordinatesShiftManager::MaxBoundgBoxDiagonal()
 
 bool ccCoordinatesShiftManager::Handle(	const double* P,
 										double diagonal,
-										bool alwaysDisplayLoadDialog,
-										bool coordinatesTransformationEnabled,
+										bool displayDialogIfNecessary,
+										bool useInputCoordinatesShiftIfPossible,
 										CCVector3d& coordinatesShift,
 										double* coordinatesScale,
-										bool& applyAll)
+										bool* applyAll/*=0*/)
 {
 	assert(P);
 	assert(diagonal >= 0);
 
-	applyAll = false;
+	if (applyAll)
+		*applyAll = false;
 
-	//if we can't display a dialog and no shift is specified, there's nothing we can do...
-	if (!alwaysDisplayLoadDialog && !coordinatesTransformationEnabled)
+	//if we can't display a dialog and no usable shift is specified, there's nothing we can do...
+	if (!displayDialogIfNecessary && !useInputCoordinatesShiftIfPossible)
 	{
 		coordinatesShift = CCVector3d(0,0,0);
 		if (coordinatesScale)
@@ -64,7 +65,7 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 	}
 
 	//default scale
-	double scale = (coordinatesScale ? *coordinatesScale : 1.0);
+	double scale = (coordinatesScale ? std::max(*coordinatesScale,ZERO_TOLERANCE) : 1.0);
 
 	bool needShift =	fabs(P[0]) >= MAX_COORDINATE_ABS_VALUE
 					||	fabs(P[1]) >= MAX_COORDINATE_ABS_VALUE
@@ -75,11 +76,11 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 	//is shift necessary?
 	if ( needShift || needRescale )
 	{
-		//coordinates transformation information already provided? (typically from a precedent entity)
-		if (coordinatesTransformationEnabled)
+		//coordinates transformation information already provided? (typically from a previous entity)
+		if (useInputCoordinatesShiftIfPossible)
 		{
 			//either we are in non interactive mode (which means that shift is 'forced' by caller)
-			if (!alwaysDisplayLoadDialog
+			if (!displayDialogIfNecessary
 				//or we are in interactive mode and existing shift is pertinent
 				|| (fabs(P[0]*scale + coordinatesShift.x) < MAX_COORDINATE_ABS_VALUE
 				&&  fabs(P[1]*scale + coordinatesShift.y) < MAX_COORDINATE_ABS_VALUE
@@ -96,13 +97,15 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 		}
 
 		//let's ask the user for those values
-		assert(alwaysDisplayLoadDialog);
+		assert(displayDialogIfNecessary);
 
 		ccShiftAndScaleCloudDlg sasDlg(P,diagonal);
+		if (!applyAll)
+			sasDlg.showApplyAllButton(false);
 		if (!coordinatesScale)
 			sasDlg.showScaleItems(false);
-		//shift on load already provided? (typically from a precedent file)
-		if (coordinatesTransformationEnabled)
+		//shift on load already provided? (typically from a previous file)
+		if (useInputCoordinatesShiftIfPossible)
 		{
 			sasDlg.setShift(coordinatesShift);
 			if (coordinatesScale)
@@ -128,7 +131,8 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 			coordinatesShift = sasDlg.getShift();
 			if (coordinatesScale)
 				*coordinatesScale = sasDlg.getScale();
-			applyAll = sasDlg.applyAll();
+			if (applyAll)
+				*applyAll = sasDlg.applyAll();
 			return true;
 		}
 	}

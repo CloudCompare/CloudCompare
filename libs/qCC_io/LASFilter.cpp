@@ -577,7 +577,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 				Pshift = *coordinatesShift;
 			bool applyAll = false;
 			if (	sizeof(PointCoordinateType) < 8
-				&&	ccCoordinatesShiftManager::Handle(P.u,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				&&	ccCoordinatesShiftManager::Handle(P.u,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
 			{
 				loadedCloud->setGlobalShift(Pshift);
 				ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
@@ -614,7 +614,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 				{
 					if (loadedCloud->reserveTheRGBTable())
 					{
-						//we must set the color (black) of all the precedently skipped points
+						//we must set the color (black) of all the previously skipped points
 						for (unsigned i=0; i<loadedCloud->size()-1; ++i)
 							loadedCloud->addRGBColor(ccColor::black);
 					}
@@ -644,7 +644,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 						//the color components are on 16 bits!
 						ccLog::Print("[LAS FILE] Color components are coded on 16 bits");
 						colorCompBitShift = 8;
-						//we fix all the precedently read colors
+						//we fix all the previously read colors
 						for (unsigned i=0; i<loadedCloud->size()-1; ++i)
 							loadedCloud->setPointColor(i,ccColor::black); //255 >> 8 = 0!
 					}
@@ -741,7 +741,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 					if (it->sf->reserve(fileChunkSize))
 					{
 						it->sf->link();
-						//we must set the value (firstClassifValue) of all the precedently skipped points
+						//we must set the value (firstClassifValue) of all the previously skipped points
 						ScalarType firstS = static_cast<ScalarType>(it->firstValue);
 						for (unsigned i=0; i<loadedCloud->size()-1; ++i)
 							it->sf->addElement(firstS);

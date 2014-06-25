@@ -732,9 +732,9 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 				if (shiftAlreadyEnabled)
 					Pshift = *coordinatesShift;
-				bool applyAll=false;
+				bool applyAll = false;
 				if (	sizeof(PointCoordinateType) < 8
-					&&	ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll) )
+					&&	ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll) )
 				{
 					cloudDesc.cloud->setGlobalShift(Pshift);
 					ccLog::Warning("[ASCIIFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);

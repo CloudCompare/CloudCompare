@@ -187,13 +187,13 @@ void ccApplyTransformationDlg::updateAll(const ccGLMatrix& mat, bool textForm/*=
 	}
 }
 
-ccGLMatrix ccApplyTransformationDlg::getTransformation() const
+ccGLMatrixd ccApplyTransformationDlg::getTransformation() const
 {
 	//get current input matrix text
 	QString matText = matrixTextEdit->toPlainText();
 	//convert it to a ccGLMatrix
 	bool valid = false;
-	ccGLMatrix mat = ccGLMatrix::FromString(matText,valid);
+	ccGLMatrixd mat = ccGLMatrixd::FromString(matText,valid);
 	assert(valid);
 	//eventually invert it if necessary
 	if (inverseCheckBox->isChecked())

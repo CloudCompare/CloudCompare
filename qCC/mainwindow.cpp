@@ -1620,14 +1620,16 @@ void MainWindow::doActionApplyTransformation()
 	if (!dlg.exec())
 		return;
 
-	ccGLMatrix transMat = dlg.getTransformation();
-	CCVector3 T = transMat.getTranslationAsVec3D();
+	ccGLMatrixd transMat = dlg.getTransformation();
+	CCVector3d T = transMat.getTranslationAsVec3D();
 
 	//test if translation is very big
 	const double maxCoord = ccCoordinatesShiftManager::MaxCoordinateAbsValue();
 	bool coordsAreTooBig = (	fabs(T.x) > maxCoord
 							||	fabs(T.y) > maxCoord
 							||	fabs(T.z) > maxCoord );
+	//CCVector3d Pshift(0,0,0);
+	//double scale = 1.0;
 	bool applyTranslationAsShift = false;
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
@@ -1653,23 +1655,35 @@ void MainWindow::doActionApplyTransformation()
 			{
 				//if the translation is big, we must check that it's actually worsening the situation
 				//(and not improving it - in which case we shouldn't rant ;)
-				CCVector3 C = cloud->getBBCenter();
-				CCVector3 C2 = C;
+				CCVector3d C = CCVector3d::fromArray(cloud->getBBCenter().u);
+				CCVector3d C2 = C;
 				transMat.apply(C2);
-
-				if (C2.norm() > C.norm())
+				
+				//is it worse?
+				if (C2.norm2() > C.norm2())
 				{
 					//TODO: what about the scale?
 					applyTranslationAsShift = (QMessageBox::question(	this,
-												"Big coordinates",
-												"Translation is too big (original precision may be lost!). Do you wish to save it as 'global shift' instead?\n(global shift will only be applied at export time)",
-												QMessageBox::Yes,
-												QMessageBox::No) == QMessageBox::Yes);
+																		"Big coordinates",
+																		"Translation is too big (original precision may be lost!). Do you wish to save it as 'global shift' instead?\n(global shift will only be applied at export time)",
+																		QMessageBox::Yes,
+																		QMessageBox::No) == QMessageBox::Yes);
 					if (applyTranslationAsShift)
 					{
 						//clear transformation translation
 						transMat.setTranslation(CCVector3(0,0,0));
 					}
+					//CCVector3d P = cloud->toGlobal3d(C) + T;
+					//ccGLMatrixd rotMat = transMat; rotMat.clearTranslation();
+					//ccBBox rotatedBox = cloud->getBB() * rotMat;
+					//if (ccCoordinatesShiftManager::Handle(P.u,rotatedBox.getDiagNorm(),true,false,Pshift,&scale))
+					//{
+					//	applyTranslationAsShift = true;
+					//	//clear transformation translation
+					//	transMat.setTranslation(T+Pshift);
+					//	assert(scale != 0);
+					//	transMat.scale(1.0/scale);
+					//}
 				}
 			}
 
@@ -1680,12 +1694,14 @@ void MainWindow::doActionApplyTransformation()
 		{
 			//apply translation as global shift
 			cloud->setGlobalShift(cloud->getGlobalShift() - CCVector3d::fromArray(T.u));
+			//cloud->setGlobalShift(Pshift);
+			//cloud->setGlobalScale(cloud->getGlobalScale() * scale);
 		}
 
 		//we temporarily detach entity, as it may undergo
 		//"severe" modifications (octree deletion, etc.) --> see ccHObject::applyRigidTransformation
 		ccHObjectContext objContext = removeObjectTemporarilyFromDBTree(ent);
-		ent->setGLTransformation(transMat);
+		ent->setGLTransformation(ccGLMatrix(transMat.data()));
 		ent->applyGLTransformation_recursive();
 		ent->prepareDisplayForRefresh_recursive();
 		putObjectBackIntoDBTree(ent,objContext);
@@ -6964,7 +6980,7 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 					s_pickingWindow->setPivotPoint(newPivot);
 
 					const unsigned& precision = s_pickingWindow->getDisplayParameters().displayedNumPrecision;
-					s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear precedent message
+					s_pickingWindow->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE,false); //clear previous message
 					s_pickingWindow->displayNewMessage(QString("Point (%1,%2,%3) set as rotation center").arg(P->x,0,'f',precision).arg(P->y,0,'f',precision).arg(P->z,0,'f',precision),ccGLWindow::LOWER_LEFT_MESSAGE,true);
 				}
 				s_pickingWindow->redraw();
@@ -8425,11 +8441,9 @@ void MainWindow::addToDB(	ccHObject* obj,
 		double P[3] = {center[0],center[1],center[2]};
 		CCVector3d Pshift(0,0,0);
 		double scale = 1.0;
-		bool applyAll = false;
-		bool shiftAlreadyEnabled = false;
 		//here we must test that coordinates are not too big whatever the case because OpenGL
 		//really don't like big ones (even if we work with GLdoubles).
-		if (ccCoordinatesShiftManager::Handle(P,diag,true,shiftAlreadyEnabled,Pshift,&scale,applyAll))
+		if (ccCoordinatesShiftManager::Handle(P,diag,true,false,Pshift,&scale))
 		{
 			//apply global shift
 			if (Pshift.norm2() > 0)

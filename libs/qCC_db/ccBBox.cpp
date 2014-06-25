@@ -229,28 +229,42 @@ const ccBBox& ccBBox::operator *= (const CCLib::SquareMatrix& mat)
 	return *this;
 }
 
-const ccBBox& ccBBox::operator *= (const ccGLMatrix& mat)
+const ccBBox ccBBox::operator * (const ccGLMatrix& mat)
 {
+	ccBBox rotatedBox;
+
 	if (m_valid)
 	{
-		CCVector3 boxCorners[8];
-
-		boxCorners[0] = m_bbMin;
-		boxCorners[1] = CCVector3(m_bbMin.x,m_bbMin.y,m_bbMax.z);
-		boxCorners[2] = CCVector3(m_bbMin.x,m_bbMax.y,m_bbMin.z);
-		boxCorners[3] = CCVector3(m_bbMax.x,m_bbMin.y,m_bbMin.z);
-		boxCorners[4] = m_bbMax;
-		boxCorners[5] = CCVector3(m_bbMin.x,m_bbMax.y,m_bbMax.z);
-		boxCorners[6] = CCVector3(m_bbMax.x,m_bbMax.y,m_bbMin.z);
-		boxCorners[7] = CCVector3(m_bbMax.x,m_bbMin.y,m_bbMax.z);
-
-		clear();
-
-		for (int i=0; i<8; ++i)
-			add(mat*boxCorners[i]);
+		rotatedBox.add(mat * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMin.y,m_bbMax.z) * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMax.y,m_bbMin.z) * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMin.y,m_bbMin.z) * m_bbMin);
+		rotatedBox.add(m_bbMax * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMax.y,m_bbMax.z) * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMax.y,m_bbMin.z) * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMin.y,m_bbMax.z) * m_bbMin);
 	}
 
-	return *this;
+	return rotatedBox;
+}
+
+const ccBBox ccBBox::operator * (const ccGLMatrixd& mat)
+{
+	ccBBox rotatedBox;
+
+	if (m_valid)
+	{
+		rotatedBox.add(mat * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMin.y,m_bbMax.z) * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMax.y,m_bbMin.z) * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMin.y,m_bbMin.z) * m_bbMin);
+		rotatedBox.add(m_bbMax * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMin.x,m_bbMax.y,m_bbMax.z) * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMax.y,m_bbMin.z) * m_bbMin);
+		rotatedBox.add(CCVector3(m_bbMax.x,m_bbMin.y,m_bbMax.z) * m_bbMin);
+	}
+
+	return rotatedBox;
 }
 
 PointCoordinateType ccBBox::minDistTo(const ccBBox& box) const

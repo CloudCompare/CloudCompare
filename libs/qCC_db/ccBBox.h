@@ -55,7 +55,9 @@ public:
 	//! Rotates the bounding box
 	const ccBBox& operator *= (const CCLib::SquareMatrix& aMatrix);
 	//! Applies transformation to the bounding box
-	const ccBBox& operator *= (const ccGLMatrix& mat);
+	const ccBBox operator * (const ccGLMatrix& mat);
+	//! Applies transformation to the bounding box
+	const ccBBox operator * (const ccGLMatrixd& mat);
 
 	//! Resets the bounding box
 	/** (0,0,0) --> (0,0,0)

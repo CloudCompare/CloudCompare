@@ -475,8 +475,8 @@ ccBBox ccHObject::getBB(bool relative/*=true*/, bool withGLfeatures/*=false*/, c
 
 	//apply GL transformation afterwards!
 	if (!display || m_currentDisplay == display)
-		if (box.isValid() && !relative && m_glTransEnabled)
-			box *= m_glTrans;
+		if (!relative && m_glTransEnabled && box.isValid())
+			box = box*m_glTrans;
 
 	return box;
 }

@@ -72,6 +72,11 @@ void ccShiftAndScaleCloudDlg::showScaleItems(bool state)
 	scaleFrame->setVisible(state);
 }
 
+void ccShiftAndScaleCloudDlg::showApplyAllButton(bool state)
+{
+	buttonBox->button(QDialogButtonBox::YesToAll)->setVisible(state);
+}
+
 void ccShiftAndScaleCloudDlg::setShift(const CCVector3d& shift)
 {
 	shiftX->setValue(shift.x);

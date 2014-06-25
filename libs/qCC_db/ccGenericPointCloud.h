@@ -93,7 +93,7 @@ public:
 	//! Computes the cloud octree
 	/** The octree bounding-box is automatically defined as the smallest
 		3D cube that encloses totally the cloud.
-		WARNING: any precedently attached octree will be deleted,
+		WARNING: any previously attached octree will be deleted,
 				 even if new octree computation failed.
 		\param progressCb the caller can get some notification of the process progress through this callback mechanism (see CCLib documentation)
 		\return the computed octree

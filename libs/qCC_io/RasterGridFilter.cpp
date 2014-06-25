@@ -100,7 +100,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 				Pshift = *coordinatesShift;
 			bool applyAll = false;
 			if (	sizeof(PointCoordinateType) < 8
-				&&	ccCoordinatesShiftManager::Handle(origin,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,applyAll))
+				&&	ccCoordinatesShiftManager::Handle(origin,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
 			{
 				pc->setGlobalShift(Pshift);
 				ccLog::Warning("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);

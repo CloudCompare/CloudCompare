@@ -31,11 +31,11 @@ public:
 	//! Handles coordinates shift/scale given the first 3D point and current related parameters
 	static bool Handle(	const double* P,
 						double diagonal,
-						bool alwaysDisplayLoadDialog,
-						bool coordinatesTransformationEnabled,
+						bool displayDialogIfNecessary,
+						bool useInputCoordinatesShiftIfPossible,
 						CCVector3d& coordinatesShift,
 						double* coordinatesScale,
-						bool& applyAll);
+						bool* applyAll = 0);
 
 	//! Returns max coordinate (absolute) value
 	static double MaxCoordinateAbsValue();

@@ -44,6 +44,9 @@ public:
 	//! Whether to show dialog items related to scale
 	void showScaleItems(bool state);
 
+	//! Whether to show the 'Apply all' button or not
+	void showApplyAllButton(bool state);
+
 protected slots:
 
 	//! Loads last shift and/or scale info

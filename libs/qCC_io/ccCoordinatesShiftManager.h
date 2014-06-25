@@ -35,7 +35,8 @@ public:
 						bool useInputCoordinatesShiftIfPossible,
 						CCVector3d& coordinatesShift,
 						double* coordinatesScale,
-						bool* applyAll = 0);
+						bool* applyAll = 0,
+						bool forceDialogDisplay = false);
 
 	//! Returns max coordinate (absolute) value
 	static double MaxCoordinateAbsValue();

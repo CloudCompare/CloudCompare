@@ -1625,12 +1625,13 @@ void MainWindow::doActionApplyTransformation()
 
 	//test if translation is very big
 	const double maxCoord = ccCoordinatesShiftManager::MaxCoordinateAbsValue();
+	const double maxDiag = ccCoordinatesShiftManager::MaxBoundgBoxDiagonal();
 	bool coordsAreTooBig = (	fabs(T.x) > maxCoord
 							||	fabs(T.y) > maxCoord
 							||	fabs(T.z) > maxCoord );
-	//CCVector3d Pshift(0,0,0);
-	//double scale = 1.0;
-	bool applyTranslationAsShift = false;
+	bool updateGlobalShiftAndScale = false;
+	double scaleChange = 1.0;
+	CCVector3d shiftChange(0,0,0);
 
 	//we must backup 'm_selectedEntities' as removeObjectTemporarilyFromDBTree can modify it!
 	ccHObject::Container selectedEntities = m_selectedEntities;
@@ -1662,27 +1663,69 @@ void MainWindow::doActionApplyTransformation()
 				//is it worse?
 				if (C2.norm2() > C.norm2())
 				{
-					//TODO: what about the scale?
-					applyTranslationAsShift = (QMessageBox::question(	this,
-																		"Big coordinates",
-																		"Translation is too big (original precision may be lost!). Do you wish to save it as 'global shift' instead?\n(global shift will only be applied at export time)",
-																		QMessageBox::Yes,
-																		QMessageBox::No) == QMessageBox::Yes);
-					if (applyTranslationAsShift)
+					//existing shift information
+					CCVector3d globalShift = cloud->getGlobalShift();
+					double globalScale = cloud->getGlobalScale();
+					bool cloudAlreadyShifted = cloud->isShifted();
+
+					//position of the transformed cloud center in the global coord. system
+					CCVector3d P = cloud->toGlobal3d(C2);
+					//'diameter' of the transformed cloud in the global coord. system
+					ccGLMatrixd globalTransMat = transMat;
+					globalTransMat.scale(1.0/globalScale);
+					globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
+					ccBBox rotatedBox = cloud->getBB() * globalTransMat;
+					double diag = rotatedBox.getDiagNorm();
+
+					bool needShift =	fabs(P[0]) >= maxCoord
+									||	fabs(P[1]) >= maxCoord
+									||	fabs(P[2]) >= maxCoord;
+
+					bool needRescale = diag > maxDiag;
+
+					if (needShift || needRescale)
 					{
-						//clear transformation translation
-						transMat.setTranslation(CCVector3(0,0,0));
+						if (!cloudAlreadyShifted)
+						{
+							//guess best values from input transformation!
+							globalShift = needShift ? CCVector3d(-T[0],-T[1],fabs(T[2]) >= maxCoord ? -T[2] : 0) : CCVector3d(0,0,0);
+							globalScale = needRescale ? pow(10.0,-static_cast<double>(ceil(log(diag/maxDiag)))) : 1.0;
+						}
 					}
-					//CCVector3d P = cloud->toGlobal3d(C) + T;
-					//ccGLMatrixd rotMat = transMat; rotMat.clearTranslation();
-					//ccBBox rotatedBox = cloud->getBB() * rotMat;
-					//if (ccCoordinatesShiftManager::Handle(P.u,rotatedBox.getDiagNorm(),true,false,Pshift,&scale))
+					else
+					{
+						//the transformed cloud is in a better coord. system!
+						//shall we remove the current global shift/scale?
+						globalScale = 1.0;
+						globalShift = CCVector3d(0,0,0);
+					}
+
+					//ask the user the right values!
+					ccCoordinatesShiftManager::Handle(P.u,diag,true,true,globalShift,&globalScale,0,true);
+
+					//get the relative modification to existing global shift/scale info
+					assert(cloud->getGlobalScale() != 0);
+					scaleChange = globalScale / cloud->getGlobalScale();
+					shiftChange =  (globalShift - cloud->getGlobalShift());
+
+					updateGlobalShiftAndScale = (scaleChange != 1.0 || shiftChange.norm2() != 0);
+
+					//update transformation matrix accordingly
+					if (updateGlobalShiftAndScale)
+					{
+						transMat.scale(scaleChange);
+						transMat.setTranslation(transMat.getTranslationAsVec3D()+shiftChange*scaleChange);
+					}
+					////TODO: what about the scale?
+					//applyTranslationAsShift = (QMessageBox::question(	this,
+					//													"Big coordinates",
+					//													"Translation is too big (original precision may be lost!). Do you wish to save it as 'global shift' instead?\n(global shift will only be applied at export time)",
+					//													QMessageBox::Yes,
+					//													QMessageBox::No) == QMessageBox::Yes);
+					//if (applyTranslationAsShift)
 					//{
-					//	applyTranslationAsShift = true;
 					//	//clear transformation translation
-					//	transMat.setTranslation(T+Pshift);
-					//	assert(scale != 0);
-					//	transMat.scale(1.0/scale);
+					//	transMat.setTranslation(CCVector3(0,0,0));
 					//}
 				}
 			}
@@ -1690,12 +1733,11 @@ void MainWindow::doActionApplyTransformation()
 			firstCloud = false;
 		}
 
-		if (applyTranslationAsShift)
+		if (updateGlobalShiftAndScale)
 		{
 			//apply translation as global shift
-			cloud->setGlobalShift(cloud->getGlobalShift() - CCVector3d::fromArray(T.u));
-			//cloud->setGlobalShift(Pshift);
-			//cloud->setGlobalScale(cloud->getGlobalScale() * scale);
+			cloud->setGlobalShift(cloud->getGlobalShift() + shiftChange);
+			cloud->setGlobalScale(cloud->getGlobalScale() * scaleChange);
 		}
 
 		//we temporarily detach entity, as it may undergo

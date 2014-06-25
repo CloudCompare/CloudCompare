@@ -47,7 +47,8 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 										bool useInputCoordinatesShiftIfPossible,
 										CCVector3d& coordinatesShift,
 										double* coordinatesScale,
-										bool* applyAll/*=0*/)
+										bool* applyAll/*=0*/,
+										bool forceDialogDisplay/*=false*/)
 {
 	assert(P);
 	assert(diagonal >= 0);
@@ -74,7 +75,7 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 	bool needRescale = diagonal > MAX_DIAGONAL_LENGTH;
 
 	//is shift necessary?
-	if ( needShift || needRescale )
+	if ( needShift || needRescale || forceDialogDisplay )
 	{
 		//coordinates transformation information already provided? (typically from a previous entity)
 		if (useInputCoordinatesShiftIfPossible)
@@ -85,7 +86,8 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 				|| (fabs(P[0]*scale + coordinatesShift.x) < MAX_COORDINATE_ABS_VALUE
 				&&  fabs(P[1]*scale + coordinatesShift.y) < MAX_COORDINATE_ABS_VALUE
 				&&  fabs(P[2]*scale + coordinatesShift.z) < MAX_COORDINATE_ABS_VALUE
-				&&  diagonal*scale < MAX_DIAGONAL_LENGTH ))
+				&&  diagonal*scale < MAX_DIAGONAL_LENGTH
+				&&	!forceDialogDisplay) )
 			{
 				//user should use the provided shift information
 				return true;
@@ -121,7 +123,7 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 			}
 			if (needRescale)
 			{
-				sasDlg.setScale(diagonal > MAX_COORDINATE_ABS_VALUE ? pow(10.0,-static_cast<double>(ceil(log(diagonal/MAX_COORDINATE_ABS_VALUE)))) : 1.0);
+				sasDlg.setScale(diagonal > MAX_COORDINATE_ABS_VALUE ? pow(10.0,-static_cast<double>(ceil(log(diagonal/MAX_DIAGONAL_LENGTH)))) : 1.0);
 				sasDlg.scaleInfoFrame->setStyleSheet("color: red;");
 			}
 		}

@@ -6923,6 +6923,10 @@ void MainWindow::doPickRotationCenter()
 	//	return;
 	//}
 
+	//specific case: we prevent the 'point-pair based alignment' tool to process the picked point!
+	if (m_pprDlg)
+		m_pprDlg->pause(true);
+
 	connect(win, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
 	win->setPickingMode(ccGLWindow::POINT_PICKING);
 	win->displayNewMessage("Pick a point to be used as rotation center (click on icon again to cancel)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
@@ -6950,6 +6954,8 @@ void MainWindow::processPickedRotationCenter(int cloudUniqueID, unsigned pointIn
 				if (!params.perspectiveView || params.objectCenteredView)
 				{
 					CCVector3d newPivot = CCVector3d::fromArray(P->u);
+					//apply current GL transformation (if any)
+					cloud->getGLTransformation().apply(newPivot);
 					//compute the equivalent camera center
 					CCVector3d dP = params.pivotPoint - newPivot;
 					CCVector3d MdP = dP; params.viewMat.applyRotation(MdP);
@@ -6975,8 +6981,12 @@ void MainWindow::cancelPickRotationCenter()
 	{
 		disconnect(s_pickingWindow, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
 		s_pickingWindow->setPickingMode(ccGLWindow::DEFAULT_PICKING);
-		s_pickingWindow=0;
+		s_pickingWindow = 0;
 	}
+
+	//specific case: we allow the 'point-pair based alignment' tool to process the picked point!
+	if (m_pprDlg)
+		m_pprDlg->pause(false);
 
 	freezeUI(false);
 }

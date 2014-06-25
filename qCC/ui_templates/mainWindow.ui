@@ -2131,10 +2131,10 @@
     <string>Align (point pairs picking)</string>
    </property>
    <property name="toolTip">
-    <string>Aligns two clouds by picking (at least 3) equivalent point pairs</string>
+    <string>Aligns two clouds by picking (at least 4) equivalent point pairs</string>
    </property>
    <property name="statusTip">
-    <string>Aligns two clouds by picking (at least 3) equivalent point pairs</string>
+    <string>Aligns two clouds by picking (at least 4) equivalent point pairs</string>
    </property>
   </action>
   <action name="actionAddConstantSF">

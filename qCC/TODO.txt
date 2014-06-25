@@ -23,11 +23,11 @@ Big ones:
 	- Let the user specify the precise content of an ASCII file in order to prevent the file opening dialog
 		from appearing (will happen - even in 'silent mode' - if the file has more than 5 columns)
 [*] Point cloud cleanup tools (http://www.cloudcompare.org/forum/viewtopic.php?t=191)
+[*] Volume calculation
 
 Various:
 [*] Global Shift management enhancement (http://www.danielgm.net/cc/forum/viewtopic.php?t=872)
-[*] Use the official 3dConnexion SDK
-[*] Point pair based alignment tool enhancements (http://www.danielgm.net/cc/forum/viewtopic.php?t=866)
+[*] Pre-defined global shift vectors list (http://www.cloudcompare.org/forum/viewtopic.php?t=651)
 [*] Dedicated method for isolated points removal (based on the Connected Components one)
 [*] Support boolean operations on meshes (with Cork for instance) - http://www.danielgm.net/cc/forum/viewtopic.php?t=812
 [*] Import control points from ascii file (for point pair-based registration - http://www.cloudcompare.org/forum/viewtopic.php?t=585)
@@ -35,7 +35,6 @@ Various:
 [*] Use a scalar field (such as scattering angles) in the subsampling method to keep the "best" points
 	Equivalent approach with the local curvature (http://www.cloudcompare.org/forum/viewtopic.php?t=711)
 [*] Add touchpad support (http://www.cloudcompare.org/forum/viewtopic.php?t=671)
-[*] Pre-defined global shift vectors list (http://www.cloudcompare.org/forum/viewtopic.php?t=651)
 [*] Reverse Unroll Feature (http://www.cloudcompare.org/forum/viewtopic.php?t=645)
 [*] Let the user select and handle multiple clouds in the 'Clipping box' tool
 [*] Per-point size based on SF values (http://www.cloudcompare.org/forum/viewtopic.php?t=507)
@@ -46,7 +45,6 @@ Various:
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
 
 From Marco R.
-[*] It can be useful to lock the rotations around X and Y in the cloud alignment.
 [*] The scan origin can also be known by GPS or by topographic survey, and optionally can be set manually and locked.
 
 From Thomas S. (http://www.cloudcompare.org/forum/viewtopic.php?t=550)
@@ -112,4 +110,3 @@ From 'dsims1980'
 
 From Eugene L.
 [*] To be able to transfer color from a jpg image to a mesh or point cloud.
-[*] To perform volume calculation

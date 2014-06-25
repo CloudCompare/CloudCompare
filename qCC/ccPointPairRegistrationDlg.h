@@ -60,15 +60,18 @@ public:
 	//! Clears dialog
 	void clear();
 
+	//! Pauses the dialog
+	void pause(bool state);
+
 	//! Adds a point to the 'align' set
 	bool addAlignedPoint(CCVector3d& P, ccGenericPointCloud* cloud = 0, bool shifted = true);
 	//! Adds a point to the 'reference' set
 	bool addReferencePoint(CCVector3d& P, ccGenericPointCloud* cloud = 0, bool shifted = true);
 
 	//! Removes a point from the 'align' set
-	void removeAlignedPoint(int index);
+	void removeAlignedPoint(int index, bool autoRemoveDualPoint = true);
 	//! Removes a point from the 'reference' set
-	void removeRefPoint(int index);
+	void removeRefPoint(int index, bool autoRemoveDualPoint = true);
 
 protected slots:
 
@@ -140,6 +143,9 @@ protected:
 
 	//! Dedicated window
 	ccGLWindow* m_win;
+
+	//! Whether the dialog is paused or not
+	bool m_paused;
 
 };
 

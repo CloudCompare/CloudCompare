@@ -52,6 +52,7 @@ ccPointPairRegistrationDlg::ccPointPairRegistrationDlg(QWidget* parent/*=0*/)
 	, m_alignedPoints("aligned points")
 	, m_reference(0)
 	, m_refPoints("reference points")
+	, m_paused(false)
 {
 	setupUi(this);
 	setWindowFlags(Qt::FramelessWindowHint | Qt::Tool);
@@ -163,7 +164,7 @@ bool ccPointPairRegistrationDlg::linkWith(ccGLWindow* win)
 
 		m_associatedWin->displayNewMessage(QString(),ccGLWindow::LOWER_LEFT_MESSAGE);
 		m_associatedWin->displayNewMessage("(you can add points 'manually' if necessary)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
-		m_associatedWin->displayNewMessage("Pick equivalent points on both clouds (at least 3 pairs - mind the order)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
+		m_associatedWin->displayNewMessage("Pick equivalent points on both clouds (at least 4 pairs - mind the order)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
 	}
 
 	return true;
@@ -342,9 +343,18 @@ void ccPointPairRegistrationDlg::addManualRefPoint()
 	addReferencePoint(P,0,shifted);
 }
 
+void ccPointPairRegistrationDlg::pause(bool state)
+{
+	m_paused = state;
+	setDisabled(state);
+}
+
 void ccPointPairRegistrationDlg::processPickedPoint(int cloudUniqueID, unsigned pointIndex, int, int)
 {
 	if (!m_associatedWin)
+		return;
+	//no point picking when paused!
+	if (m_paused)
 		return;
 
 	ccHObject* db = m_associatedWin->getOwnDB();
@@ -378,7 +388,7 @@ void ccPointPairRegistrationDlg::processPickedPoint(int cloudUniqueID, unsigned 
 
 void ccPointPairRegistrationDlg::onPointCountChanged()
 {
-	bool canAlign = (m_alignedPoints.size() == m_refPoints.size() && m_refPoints.size()>2); //we need at least 3 points
+	bool canAlign = (m_alignedPoints.size() == m_refPoints.size() && m_refPoints.size() >= 4); //we need at least 4 points
 	alignToolButton->setEnabled(canAlign);
 	validToolButton->setEnabled(canAlign);
 
@@ -559,7 +569,7 @@ void ccPointPairRegistrationDlg::unstackAligned()
 	onPointCountChanged();
 }
 
-void ccPointPairRegistrationDlg::removeAlignedPoint(int index)
+void ccPointPairRegistrationDlg::removeAlignedPoint(int index, bool autoRemoveDualPoint/*=false*/)
 {
 	if (index >= static_cast<int>(m_alignedPoints.size()))
 	{
@@ -612,6 +622,14 @@ void ccPointPairRegistrationDlg::removeAlignedPoint(int index)
 		m_associatedWin->redraw();
 
 	onPointCountChanged();
+
+	//auto-remove the other point?
+	if (	autoRemoveDualPoint
+		&&	index < static_cast<int>(m_refPoints.size())
+		&&	QMessageBox::question(0,"Remove dual point","Remove the equivalent reference point as well?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes )
+	{
+		removeRefPoint(index,false);
+	}
 }
 
 bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccGenericPointCloud* cloud/*=0*/, bool shifted/*=true*/)
@@ -729,7 +747,7 @@ void ccPointPairRegistrationDlg::unstackRef()
 	onPointCountChanged();
 }
 
-void ccPointPairRegistrationDlg::removeRefPoint(int index)
+void ccPointPairRegistrationDlg::removeRefPoint(int index, bool autoRemoveDualPoint/*=false*/)
 {
 	if (index >= static_cast<int>(m_refPoints.size()))
 	{
@@ -782,6 +800,14 @@ void ccPointPairRegistrationDlg::removeRefPoint(int index)
 		m_associatedWin->redraw();
 
 	onPointCountChanged();
+
+	//auto-remove the other point?
+	if (	autoRemoveDualPoint
+		&&	index < static_cast<int>(m_alignedPoints.size())
+		&&	QMessageBox::question(0,"Remove dual point","Remove the equivalent aligned point as well?",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes )
+	{
+		removeAlignedPoint(index,false);
+	}
 }
 
 void ccPointPairRegistrationDlg::showAlignedCloud(bool state)
@@ -822,10 +848,10 @@ bool ccPointPairRegistrationDlg::callHornRegistration(CCLib::PointProjectionTool
 	if (!m_aligned.cloud)
 		return false;
 
-	if (m_alignedPoints.size() != m_refPoints.size() || m_refPoints.size() < 2)
+	if (m_alignedPoints.size() != m_refPoints.size() || m_refPoints.size() < 4)
 	{
 		assert(false);
-		ccLog::Error("Need at least 3 points for each cloud (and the same number of points in both clouds)!");
+		ccLog::Error("Need at least 4 points for each cloud (and the same number of points in both clouds)!");
 		return false;
 	}
 

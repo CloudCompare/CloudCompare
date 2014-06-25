@@ -88,11 +88,10 @@ const GLuint GL_INVALID_LIST_ID = (~0);
 const int CC_GL_FILTER_BANNER_MARGIN = 5;
 
 //'hot zone' display parameters
-static const char c_psi_title[] = "Default point size";
+static const char c_psi_title[] = "default point size";
 static const int c_psi_margin = 16;
 static const int c_psi_iconSize = 16;
-static const unsigned char c_psi_alphaChannel = 200;
-static const unsigned char c_psi_color[4] = {133,193,39,c_psi_alphaChannel};
+static const unsigned char c_psi_color[3] = { 133, 193, 39 }; //"greenish"
 
 /*** Persistent settings ***/
 
@@ -731,29 +730,53 @@ void ccGLWindow::paintGL()
 
 				QFont newFont(m_font); //no need to take zoom into account!
 				newFont.setPointSize(12);
+				newFont.setBold(true);
 
 				glPushAttrib(GL_COLOR_BUFFER_BIT);
 				glEnable(GL_BLEND);
 
-				int xStart = c_psi_margin;
-				int yStart = c_psi_margin;
-
-				if (m_activeGLFilter)
-					yStart += getGlFilterBannerHeight();
-
-				//label
-				QString label(c_psi_title);
-				QRect rect = QFontMetrics(newFont).boundingRect(label);
-				glColor4ubv_safe(c_psi_color);
-				renderText(c_psi_margin,(yStart+c_psi_iconSize/2)+(rect.height()/2)*2/3,label,newFont); // --> 2/3 to compensate the effect of the upper case letter (P)
-
-				//icons
 				int halfW = m_glWidth/2;
 				int halfH = m_glHeight/2;
-				xStart += rect.width()+c_psi_margin;
+
+				//label ('Default point size')
+				QString label(c_psi_title);
+				QRect labelRect = QFontMetrics(newFont).boundingRect(label);
+
+				int xStart = c_psi_margin;
+				int yStart = c_psi_margin;
+				if (m_activeGLFilter)
+					yStart += getGlFilterBannerHeight();
+				int yTextHeight = labelRect.height() * 3/4; // --> factor: to recenter the baseline a little
+				int yTextBottomLine = (yStart+c_psi_iconSize/2)+(yTextHeight/2);
+
+				//total hot zone area size (without margin)
+				if (true)
+				{
+					int totalWidth = /*c_psi_margin + */labelRect.width() + c_psi_margin + c_psi_iconSize + c_psi_margin + c_psi_iconSize/* + c_psi_margin*/;
+					QPoint minAreaCorner(xStart, std::min(yStart, yTextBottomLine - yTextHeight));
+					QPoint maxAreaCorner(xStart+totalWidth, std::max(yStart + c_psi_iconSize, yTextBottomLine));
+					QRect areaRect(	minAreaCorner - QPoint(c_psi_margin,c_psi_margin)/2,
+									maxAreaCorner + QPoint(c_psi_margin,c_psi_margin)/2);
+
+					//draw semi-transparent background
+					glColor4ub(ccColor::darkGrey[0], ccColor::darkGrey[1], ccColor::darkGrey[2], 210);
+					glBegin(GL_QUADS);
+					glVertex2i(-halfW+(areaRect.x()),					halfH-(areaRect.y())					);
+					glVertex2i(-halfW+(areaRect.x()+areaRect.width()),	halfH-(areaRect.y())					);
+					glVertex2i(-halfW+(areaRect.x()+areaRect.width()),	halfH-(areaRect.y()+areaRect.height())	);
+					glVertex2i(-halfW+(areaRect.x()),					halfH-(areaRect.y()+areaRect.height())	);
+					glEnd();
+				}
+
+				//label
+				glColor3ubv_safe(c_psi_color);
+				renderText(xStart,yTextBottomLine,label,newFont);
+
+				//icons
+				xStart += labelRect.width() + c_psi_margin;
 
 				//"minus"
-				ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_minusPix),-halfW+xStart,halfH-(yStart+c_psi_iconSize),c_psi_iconSize,c_psi_iconSize,c_psi_alphaChannel);
+				ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_minusPix),-halfW+xStart,halfH-(yStart+c_psi_iconSize),c_psi_iconSize,c_psi_iconSize);
 				m_hotZoneMinusIconROI[0] = xStart;
 				m_hotZoneMinusIconROI[1] = yStart;
 				m_hotZoneMinusIconROI[2] = xStart+c_psi_iconSize;
@@ -761,18 +784,18 @@ void ccGLWindow::paintGL()
 				xStart += c_psi_iconSize;
 
 				//separator
-				glColor4ub(133,193,39,c_psi_alphaChannel);
+				glColor3ub(133,193,39);
 				glBegin(GL_POINTS);
 				glVertex2i(-halfW+xStart+c_psi_margin/2,halfH-(yStart+c_psi_iconSize/2));
 				glEnd();
 				xStart += c_psi_margin;
 
 				//"plus"
-				ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_plusPix),-halfW+xStart,halfH-(yStart+c_psi_iconSize),c_psi_iconSize,c_psi_iconSize,c_psi_alphaChannel);
-				m_hotZonePlusIconROI[0]=xStart;
-				m_hotZonePlusIconROI[1]=m_hotZoneMinusIconROI[1];
-				m_hotZonePlusIconROI[2]=xStart+c_psi_iconSize;
-				m_hotZonePlusIconROI[3]=m_hotZoneMinusIconROI[3];
+				ccGLUtils::DisplayTexture2DPosition(bindTexture(c_psi_plusPix),-halfW+xStart,halfH-(yStart+c_psi_iconSize),c_psi_iconSize,c_psi_iconSize);
+				m_hotZonePlusIconROI[0] = xStart;
+				m_hotZonePlusIconROI[1] = m_hotZoneMinusIconROI[1];
+				m_hotZonePlusIconROI[2] = xStart+c_psi_iconSize;
+				m_hotZonePlusIconROI[3] = m_hotZoneMinusIconROI[3];
 				xStart += c_psi_iconSize;
 
 				glDisable(GL_BLEND);
@@ -1806,7 +1829,7 @@ void ccGLWindow::setPickingMode(PICKING_MODE mode/*=DEFAULT_PICKING*/)
 	//is the picking mode locked?
 	if (m_pickingModeLocked)
 	{
-		if (mode != m_pickingMode)
+		if (mode != m_pickingMode && mode != DEFAULT_PICKING)
 			ccLog::Warning("[ccGLWindow::setPickingMode] Picking mode is locked! Can't change it...");
 		return;
 	}

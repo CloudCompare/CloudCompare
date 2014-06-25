@@ -280,6 +280,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Constrains the rotation around a single axis (warning: experimental)</string>
+       </property>
        <property name="layoutDirection">
         <enum>Qt::RightToLeft</enum>
        </property>
@@ -329,6 +332,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Constrains the translation along particular axes (warning: experimental)</string>
+       </property>
        <property name="text">
         <string>Tx</string>
        </property>
@@ -345,6 +351,9 @@
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="toolTip">
+        <string>Constrains the translation along particular axes (warning: experimental)</string>
+       </property>
        <property name="text">
         <string>Ty</string>
        </property>
@@ -360,6 +369,9 @@
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
+       </property>
+       <property name="toolTip">
+        <string>Constrains the translation along particular axes (warning: experimental)</string>
        </property>
        <property name="text">
         <string>Tz</string>

@@ -570,7 +570,7 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P,
 	trans.T = CCVector3(0,0,0);
 	trans.s = PC_ONE;
 
-	if (P == 0 || X == 0 || P->size() != X->size() || P->size() < 3)
+	if (P == 0 || X == 0 || P->size() != X->size() || P->size() < 4)
 		return false;
 
 	PointCoordinateType bbMin[3],bbMax[3];

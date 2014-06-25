@@ -9,9 +9,12 @@ v2.5.5 ??/??/2014
 			GUI elements are back to their default on next start)
 - Enhancement:
 	* Point-pair based alignment tool:
+		- minimum number of pairs set to 4 now (3 is not reliable enough)
 		- the error contribution of each point (pair) to the total RMS is displayed in a new column
 			(once the 'Align' button has been pressed)
 		- a new button next to each point allows the user to delete any point at any time
+		- the window rotation center can now be properly picked on the aligned cloud after having clicked
+			on the aligned button
 	* Point-pair based & ICP registration method:
 		- the registration rotation can be constrained around one axis (X, Y or Z)
 		- the registration translation can be constrained around one or several dimensions (Tx, Ty or Tz)
@@ -40,6 +43,8 @@ v2.5.5 ??/??/2014
 		- wireless devices should now be handled correctly
 		- the option menu is replaced by the official/default one
 		- (support is still limited to Windows only for now)
+	* Default point size editing dialog (appearing inside 3D views when the mouse hovers their top-left corner) is now
+		displayed upon a semi-transparent background so as to be always visible even when displayed over a green entity.
 
 v2.5.4.1 04/22/2014
 - Bug fix:

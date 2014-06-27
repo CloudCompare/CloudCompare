@@ -41,6 +41,21 @@ double ccCoordinatesShiftManager::MaxBoundgBoxDiagonal()
 	return MAX_DIAGONAL_LENGTH;
 }
 
+bool ccCoordinatesShiftManager::NeedShift(const CCVector3d& P)
+{
+	return	NeedShift(P.x) || NeedShift(P.y) || NeedShift(P.z);
+}
+
+bool ccCoordinatesShiftManager::NeedShift(double d)
+{
+	return fabs(d) >= MAX_COORDINATE_ABS_VALUE;
+}
+
+bool ccCoordinatesShiftManager::NeedRescale(double d)
+{
+	return fabs(d) >= MAX_DIAGONAL_LENGTH;
+}
+
 bool ccCoordinatesShiftManager::Handle(	const double* P,
 										double diagonal,
 										bool displayDialogIfNecessary,
@@ -68,11 +83,8 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 	//default scale
 	double scale = (coordinatesScale ? std::max(*coordinatesScale,ZERO_TOLERANCE) : 1.0);
 
-	bool needShift =	fabs(P[0]) >= MAX_COORDINATE_ABS_VALUE
-					||	fabs(P[1]) >= MAX_COORDINATE_ABS_VALUE
-					||	fabs(P[2]) >= MAX_COORDINATE_ABS_VALUE;
-
-	bool needRescale = diagonal > MAX_DIAGONAL_LENGTH;
+	bool needShift = NeedShift(P);
+	bool needRescale = NeedRescale(diagonal);
 
 	//is shift necessary?
 	if ( needShift || needRescale || forceDialogDisplay )
@@ -83,11 +95,9 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 			//either we are in non interactive mode (which means that shift is 'forced' by caller)
 			if (!displayDialogIfNecessary
 				//or we are in interactive mode and existing shift is pertinent
-				|| (fabs(P[0]*scale + coordinatesShift.x) < MAX_COORDINATE_ABS_VALUE
-				&&  fabs(P[1]*scale + coordinatesShift.y) < MAX_COORDINATE_ABS_VALUE
-				&&  fabs(P[2]*scale + coordinatesShift.z) < MAX_COORDINATE_ABS_VALUE
-				&&  diagonal*scale < MAX_DIAGONAL_LENGTH
-				&&	!forceDialogDisplay) )
+				|| (	!NeedShift(CCVector3d(P)*scale + coordinatesShift)
+					&&  !NeedRescale(diagonal*scale)
+					&&	!forceDialogDisplay) )
 			{
 				//user should use the provided shift information
 				return true;
@@ -106,27 +116,42 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 			sasDlg.showApplyAllButton(false);
 		if (!coordinatesScale)
 			sasDlg.showScaleItems(false);
+
+		double scale = 1.0;
+		CCVector3d shift(0,0,0);
 		//shift on load already provided? (typically from a previous file)
 		if (useInputCoordinatesShiftIfPossible)
 		{
-			sasDlg.setShift(coordinatesShift);
+			shift = coordinatesShift;
 			if (coordinatesScale)
-				sasDlg.setScale(*coordinatesScale);
+				scale = *coordinatesScale;
 			sasDlg.showWarning(true); //if we are here, it means that the provided shift isn't concordant
 		}
 		else
 		{
 			if (needShift)
-			{
-				sasDlg.setShift(CCVector3d(	-P[0],-P[1],fabs(P[2]) >= MAX_COORDINATE_ABS_VALUE ? -P[2] : 0)); //Z is generally the altitude and is not so big than the others!
-				sasDlg.firstPointFrame->setStyleSheet("color: red;");
-			}
+				shift = BestShift(P);
 			if (needRescale)
+				scale = BestScale(diagonal);
+		}
+
+		//add "suggested" entry
+		int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",shift,scale));
+		sasDlg.makeCurrent(index);
+		//add "last" entry (if available)
+		ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
+		if (sasDlg.getLast(lastInfo))
+		{
+			int lastIndex = sasDlg.addShiftInfo(lastInfo);
+			//automatically make the 'last one' active if it suits our needs!
+			if (	!NeedShift((CCVector3d(P) + lastInfo.shift) * lastInfo.scale )
+				&&  !NeedRescale(diagonal*lastInfo.scale) )
 			{
-				sasDlg.setScale(diagonal > MAX_COORDINATE_ABS_VALUE ? pow(10.0,-static_cast<double>(ceil(log(diagonal/MAX_DIAGONAL_LENGTH)))) : 1.0);
-				sasDlg.scaleInfoFrame->setStyleSheet("color: red;");
+				sasDlg.makeCurrent(lastIndex);
 			}
 		}
+		//add entries from file (if any)
+		sasDlg.addFileInfo();
 
 		if (sasDlg.exec())
 		{
@@ -142,5 +167,29 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 	coordinatesShift = CCVector3d(0,0,0);
 	if (coordinatesScale)
 		*coordinatesScale = 1.0;
+
 	return false;
 }
+
+CCVector3d ccCoordinatesShiftManager::BestShift(const CCVector3d& P)
+{
+	if (!NeedShift(P))
+		return CCVector3d(0,0,0);
+
+	CCVector3d shift(	fabs(P[0]) >= MAX_COORDINATE_ABS_VALUE ? -P[0] : 0,
+						fabs(P[1]) >= MAX_COORDINATE_ABS_VALUE ? -P[1] : 0,
+						fabs(P[2]) >= MAX_COORDINATE_ABS_VALUE ? -P[2] : 0 );
+
+	//round-off to the nearest hundred
+	shift.x = static_cast<int>(shift.x / 100) * 100.0;
+	shift.y = static_cast<int>(shift.y / 100) * 100.0;
+	shift.z = static_cast<int>(shift.z / 100) * 100.0;
+
+	return shift;
+}
+
+double ccCoordinatesShiftManager::BestScale(double d)
+{
+	return d < MAX_DIAGONAL_LENGTH ? 1.0 : pow(10.0,-static_cast<double>(ceil(log(d/MAX_DIAGONAL_LENGTH))));
+}
+

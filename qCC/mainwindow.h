@@ -341,8 +341,7 @@ protected slots:
 	void doActionKMeans();
 	void doActionFrontPropagation();
 	void doActionApplyScale();
-	void doActionEditGlobalShift();
-	void doActionEditGlobalScale();
+	void doActionEditGlobalShiftAndScale();
 	void doActionMatchBBCenters();
 	void doActionUnroll();
 	void doActionCreateGBLSensor();

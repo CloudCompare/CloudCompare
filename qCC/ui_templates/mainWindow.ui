@@ -299,8 +299,7 @@
     <addaction name="actionSegment"/>
     <addaction name="actionCrop"/>
     <addaction name="separator"/>
-    <addaction name="actionEditGlobalShift"/>
-    <addaction name="actionEditGlobalScale"/>
+    <addaction name="actionEditGlobalShiftAndScale"/>
     <addaction name="separator"/>
     <addaction name="menuToggle"/>
     <addaction name="separator"/>
@@ -2366,9 +2365,9 @@
     <string>Cross Section</string>
    </property>
   </action>
-  <action name="actionEditGlobalShift">
+  <action name="actionEditGlobalShiftAndScale">
    <property name="text">
-    <string>Edit global shift</string>
+    <string>Edit global shift and scale</string>
    </property>
   </action>
   <action name="actionScalarFieldFromColor">

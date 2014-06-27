@@ -1863,6 +1863,9 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& 
 	//constant value for cell/sphere inclusion test
 	double maxDiagFactor = squareRadius + (0.75*cs + SQRT_3*params.radius)*cs;
 	PointCoordinateType maxLengthFactor = params.maxHalfLength + static_cast<PointCoordinateType>(cs*SQRT_3/2);
+	PointCoordinateType minLengthFactor = params.onlyPositiveDir ? 0 : -maxLengthFactor;
+	
+	int minHalfLength = params.onlyPositiveDir ? 0 : -params.maxHalfLength;
 
 	//we are going to test all the cells that may intersect this cylinder
 	//dumb bounding-box estimation: place two spheres at the ends of the cylinder
@@ -1870,7 +1873,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& 
 	CCVector3 maxCorner;
 	{
 		CCVector3 C1 = params.center + params.dir * params.maxHalfLength;
-		CCVector3 C2 = params.center - params.dir * params.maxHalfLength;
+		CCVector3 C2 = params.center + params.dir * minHalfLength;
 		CCVector3 corner1 = C1 - CCVector3(params.radius,params.radius,params.radius);
 		CCVector3 corner2 = C1 + CCVector3(params.radius,params.radius,params.radius);
 		CCVector3 corner3 = C2 - CCVector3(params.radius,params.radius,params.radius);
@@ -1926,7 +1929,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& 
 				CCVector3 OC = (cellCenter - params.center);
 				PointCoordinateType dot = OC.dot(params.dir);
 				double d2 = (OC - params.dir * dot).norm2d();
-				if (d2 <= maxDiagFactor && fabs(dot) <= maxLengthFactor) //otherwise cell is totally outside
+				if (d2 <= maxDiagFactor && dot <= maxLengthFactor && dot >= minLengthFactor) //otherwise cell is totally outside
 				{
 					//2nd test: does this cell exists?
 					OctreeCellCodeType truncatedCellCode = generateTruncatedCellCode(cellPos,params.level);
@@ -1948,7 +1951,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& 
 							CCVector3 OP = (*P - params.center);
 							dot = OP.dot(params.dir);
 							d2 = (OP - params.dir * dot).norm2d();
-							if (d2 <= squareRadius && fabs(dot) <= params.maxHalfLength)
+							if (d2 <= squareRadius && dot >= minHalfLength && dot <= params.maxHalfLength)
 							{
 								params.neighbours.push_back(PointDescriptor(P,p->theIndex,dot)); //we save the distance relatively to the center projected on the axis!
 							}
@@ -1985,21 +1988,24 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCyli
 	//constant value for cell/sphere inclusion test
 	double maxDiagFactor = squareRadius + (0.75*cs + SQRT_3*params.radius)*cs;
 	PointCoordinateType maxLengthFactor = params.maxHalfLength + static_cast<PointCoordinateType>(cs*SQRT_3/2);
+	PointCoordinateType minLengthFactor = params.onlyPositiveDir ? 0 : -maxLengthFactor;
 
 	//increase the search cylinder's height
 	params.currentHalfLength += params.radius;
-
 	//no need to chop the max cylinder if the parts are too small!
 	//(takes also into account any 'overflow' above maxHalfLength ;)
 	if (params.maxHalfLength-params.currentHalfLength < params.radius/2)
 		params.currentHalfLength = params.maxHalfLength;
+
+	int currentHalfLengthMinus = params.onlyPositiveDir ? 0 : -params.currentHalfLength;
 
 	//first process potential candidates from the previous pass
 	{
 		for (size_t k=0; k<params.potentialCandidates.size(); /*++k*/)
 		{
 			//potentialCandidates[k].squareDist = 'dot'!
-			if (fabs(params.potentialCandidates[k].squareDistd) <= params.currentHalfLength)
+			if (	params.potentialCandidates[k].squareDistd >= currentHalfLengthMinus
+				&&	params.potentialCandidates[k].squareDistd <= params.currentHalfLength)
 			{
 				params.neighbours.push_back(params.potentialCandidates[k]);
 				//and remove it from the potential list
@@ -2019,7 +2025,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCyli
 	CCVector3 maxCorner;
 	{
 		CCVector3 C1 = params.center + params.dir * params.currentHalfLength;
-		CCVector3 C2 = params.center - params.dir * params.currentHalfLength;
+		CCVector3 C2 = params.center + params.dir * currentHalfLengthMinus;
 		CCVector3 corner1 = C1 - CCVector3(params.radius,params.radius,params.radius);
 		CCVector3 corner2 = C1 + CCVector3(params.radius,params.radius,params.radius);
 		CCVector3 corner3 = C2 - CCVector3(params.radius,params.radius,params.radius);
@@ -2081,7 +2087,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCyli
 					CCVector3 OC = (cellCenter - params.center);
 					PointCoordinateType dot = OC.dot(params.dir);
 					double d2 = (OC - params.dir * dot).norm2d();
-					if (d2 <= maxDiagFactor && fabs(dot) <= maxLengthFactor) //otherwise cell is totally outside
+					if (d2 <= maxDiagFactor && dot <= maxLengthFactor && dot >= minLengthFactor) //otherwise cell is totally outside
 					{
 						//2nd test: does this cell exists?
 						OctreeCellCodeType truncatedCellCode = generateTruncatedCellCode(cellPos.u,params.level);
@@ -2106,7 +2112,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCyli
 								if (d2 <= squareRadius)
 								{
 									//potential candidate?
-									if (fabs(dot) <= params.currentHalfLength)
+									if (dot >= currentHalfLengthMinus && dot <= params.currentHalfLength)
 									{
 										params.neighbours.push_back(PointDescriptor(P,p->theIndex,dot)); //we save the distance relatively to the center projected on the axis!
 									}

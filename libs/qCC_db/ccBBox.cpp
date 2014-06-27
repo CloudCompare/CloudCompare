@@ -54,11 +54,6 @@ CCVector3 ccBBox::getDiagVec() const
 	return (m_bbMax - m_bbMin);
 }
 
-PointCoordinateType ccBBox::getDiagNorm() const
-{
-	return getDiagVec().norm();
-}
-
 PointCoordinateType ccBBox::getMinBoxDim() const
 {
 	CCVector3 V = getDiagVec();

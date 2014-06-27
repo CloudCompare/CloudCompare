@@ -18,6 +18,22 @@ v2.5.5 ??/??/2014
 	* Point-pair based & ICP registration method:
 		- the registration rotation can be constrained around one axis (X, Y or Z)
 		- the registration translation can be constrained around one or several dimensions (Tx, Ty or Tz)
+	* Global Shift & Scale mechanism:
+		- brand new dialog (hopefully clearer)
+		- if CC finds next to its executable file a text file named 'global_shift_list.txt' with
+			5 values per line ("name; Tx; Ty; Tz; scale;" - mind the semicolon characters) it will
+			automatically add those to the dedicated combo-box of the new dialog.
+			This should help a lot users working mainly with the same set of global coordinate systems.
+		- the 'Edit > Edit global shift' and 'Edit > Edit global scale' methods are merged as a single
+			method: 'Edit > Edit global shift and scale'.
+			* It uses approximately the same new dialog but the user can now choose if the modification
+				of the shift and scale parameters should impact the global coordinates system (i.e. at
+				export time) or the local coordinate system (in which case the cloud(s) will be translated
+				and or/rescaled automatically)
+			* this new method can be called on several clouds at once
+		- when a transformation (applied with 'Edit > Apply transformation') causes the cloud coordinates
+			to go overbounds, the same dialog appears in order for the user to update the global shift/scale
+			information instead.
 	* The 'SF arithmetics' method has been enhanced with new operations (applicable on a single SF)
 		- SQRT, POW2, POW3, EXP, LOG, LOG10, COS(radians), SIN(radians), TAN(radians), ACOS, ASIN, ATAN
 	* Point clouds are now pre-loaded in the graphic card memory if possible (via VBOs)

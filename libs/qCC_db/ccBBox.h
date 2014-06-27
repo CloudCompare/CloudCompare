@@ -82,7 +82,9 @@ public:
 	//! Returns diagonal vector
 	CCVector3 getDiagVec() const;
 	//! Returns diagonal length
-	PointCoordinateType getDiagNorm() const;
+	inline PointCoordinateType getDiagNorm() const { return getDiagVec().norm(); }
+	//! Returns diagonal length (double precision)
+	double getDiagNormd() const { return getDiagVec().normd(); }
 	//! Returns minimal box dimension
 	PointCoordinateType getMinBoxDim() const;
 	//! Returns maximal box dimension

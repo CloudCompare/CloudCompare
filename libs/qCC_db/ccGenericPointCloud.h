@@ -231,13 +231,15 @@ public:
 	//! Returns the point back-projected into the original coordinates system
 	template<typename T> inline CCVector3d toGlobal3d(const Vector3Tpl<T>& Plocal) const
 	{
+		// Pglobal = Plocal/scale - shift
 		return CCVector3d::fromArray(Plocal.u) / m_globalScale - m_globalShift;
 	}
 
 	//! Returns the point projected into the local (shifted) coordinates system
 	template<typename T> inline CCVector3d toLocal3d(const Vector3Tpl<T>& Pglobal) const
 	{
-		return CCVector3d::fromArray(Pglobal.u) * m_globalScale + m_globalShift;
+		// Plocal = (Pglobal + shift) * scale
+		return (CCVector3d::fromArray(Pglobal.u) + m_globalShift) * m_globalScale;
 	}
 	//! Returns the point projected into the local (shifted) coordinates system
 	template<typename T> inline CCVector3 toLocal3pc(const Vector3Tpl<T>& Pglobal) const

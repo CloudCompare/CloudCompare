@@ -652,6 +652,8 @@ public:
 		NeighboursSet neighbours;
 		//! subdivision level at which to apply the extraction process
 		unsigned char level;
+		//! Whether to look in both directions or only 
+		bool onlyPositiveDir;
 
 		//! Default constructor
 		CylindricalNeighbourhood()
@@ -660,6 +662,7 @@ public:
 			, radius(0)
 			, maxHalfLength(0)
 			, level(0)
+			, onlyPositiveDir(false)
 		{}
 	};
 

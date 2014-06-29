@@ -29,7 +29,7 @@ class ccCoordinatesShiftManager
 public:
 
 	//! Handles coordinates shift/scale given the first 3D point and current related parameters
-	static bool Handle(	const double* P,
+	static bool Handle(	const CCVector3d& P,
 						double diagonal,
 						bool displayDialogIfNecessary,
 						bool useInputCoordinatesShiftIfPossible,

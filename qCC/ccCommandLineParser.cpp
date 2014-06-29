@@ -1397,6 +1397,8 @@ bool ccCommandLineParser::commandBundler(QStringList& arguments)
 	BundlerFilter().loadFileExtended(	qPrintable(bundlerFilename),
 										tempContainer,
 										false,
+										0,
+										0,
 										altKeypointsFilename,
 										undistortImages,
 										generateColoredDTM,

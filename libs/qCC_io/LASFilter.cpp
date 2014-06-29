@@ -577,7 +577,7 @@ CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bo
 				Pshift = *coordinatesShift;
 			bool applyAll = false;
 			if (	sizeof(PointCoordinateType) < 8
-				&&	ccCoordinatesShiftManager::Handle(P.u,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
+				&&	ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
 			{
 				loadedCloud->setGlobalShift(Pshift);
 				ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);

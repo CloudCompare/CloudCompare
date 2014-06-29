@@ -424,7 +424,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 
 #define POS_MASK	0x00000003
 
-static double s_Point[3] = {0,0,0};
+static CCVector3d s_Point(0,0,0);
 static int s_PointCount = 0;
 static bool s_PointDataCorrupted = false;
 static bool s_ShiftAlreadyEnabled = false;
@@ -444,13 +444,13 @@ static int vertex_cb(p_ply_argument argument)
 	// but it's false if x is NaN.
 	if (val == val)
 	{
-		s_Point[flags & POS_MASK] = val;
+		s_Point.u[flags & POS_MASK] = val;
 	}
 	else
 	{
 		//warning: corrupted data!
 		s_PointDataCorrupted = true;
-		s_Point[flags & POS_MASK] = 0;
+		s_Point.u[flags & POS_MASK] = 0;
 		//return 0;
 	}
 
@@ -468,9 +468,7 @@ static int vertex_cb(p_ply_argument argument)
 			}
 		}
 
-		cloud->addPoint(CCVector3(	static_cast<PointCoordinateType>(s_Point[0]+s_Pshift.u[0]),
-									static_cast<PointCoordinateType>(s_Point[1]+s_Pshift.u[1]),
-									static_cast<PointCoordinateType>(s_Point[2]+s_Pshift.u[2])));
+		cloud->addPoint(CCVector3::fromArray((s_Point + s_Pshift).u));
 		++s_PointCount;
 
 		s_PointDataCorrupted = false;

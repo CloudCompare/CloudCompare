@@ -15,22 +15,27 @@
 //#                                                                        #
 //##########################################################################
 
+#include "BundlerImportDlg.h"
+
+//Qt
 #include <QLineEdit>
 #include <QDoubleSpinBox>
 #include <QToolButton>
 #include <QPushButton>
 #include <QFileDialog>
 #include <QSettings>
+#include <QMessageBox>
 
+//system
 #include <stdio.h>
 #include <assert.h>
-
-#include "BundlerImportDlg.h"
 
 BundlerImportDlg::BundlerImportDlg(QWidget* parent)
 	: QDialog(parent)
 {
 	setupUi(this);
+
+	applyTransfoMatrixTextEdit->setVisible(false);
 
 	initFromPersistentSettings();
 
@@ -77,6 +82,18 @@ void BundlerImportDlg::initFromPersistentSettings()
 
 void BundlerImportDlg::acceptAndSaveSettings()
 {
+	//check matrix validity
+	if (applyTransfoMatrixCheckBox->isChecked())
+	{
+		bool success;
+		ccGLMatrixd::FromString(applyTransfoMatrixTextEdit->toPlainText(),success);
+		if (!success)
+		{
+			QMessageBox::critical(this,"Invalid matrix","Invalid input 4x4 matrix!");
+			return;
+		}
+	}
+
 	QSettings settings;
 	settings.beginGroup("BundlerImport");
 
@@ -93,6 +110,8 @@ void BundlerImportDlg::acceptAndSaveSettings()
 	settings.setValue("dtmVerticesCount", dtmVerticesSpinBox->value());
 
 	settings.endGroup();
+
+	accept();
 }
 
 bool BundlerImportDlg::useAlternativeKeypoints() const
@@ -210,4 +229,15 @@ double BundlerImportDlg::getScaleFactor() const
 unsigned BundlerImportDlg::getDTMVerticesCount() const
 {
 	return dtmVerticesSpinBox->value();
+}
+
+bool BundlerImportDlg::getOptionalTransfoMatrix(ccGLMatrix& mat)
+{
+	if (!applyTransfoMatrixCheckBox->isChecked())
+		return false;
+
+	bool success;
+	mat = ccGLMatrix::FromString(applyTransfoMatrixTextEdit->toPlainText(),success);
+
+	return success;
 }

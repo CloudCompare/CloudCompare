@@ -1635,7 +1635,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			if(arrays.isInvalidData && arrays.isInvalidData[i] != 0)
 				continue;
 
-			double Pd[3]={0,0,0};
+			CCVector3d Pd(0,0,0);
 			if (sphericalMode)
 			{
 				double r = (arrays.xData ? arrays.xData[i] : 0);
@@ -1643,9 +1643,9 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 				double phi = (arrays.zData ? arrays.zData[i] : 0);		//Elevation
 
 				double cos_phi = cos(phi);
-				Pd[0] = r * cos_phi * cos(theta);
-				Pd[1] = r * cos_phi * sin(theta);
-				Pd[2] = r * sin(phi);
+				Pd.x = r * cos_phi * cos(theta);
+				Pd.y = r * cos_phi * sin(theta);
+				Pd.z = r * sin(phi);
 			}
 			//DGM TODO: not handled yet (-->what are the standard cylindrical field names?)
 			/*else if (cylindricalMode)
@@ -1653,20 +1653,20 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 				//from cylindrical coordinates
 				assert(arrays.xData);
 				double theta = (arrays.yData ? arrays.yData[i] : 0);
-				Pd[0] = arrays.xData[i] * cos(theta);
-				Pd[1] = arrays.xData[i] * sin(theta);
+				Pd.x = arrays.xData[i] * cos(theta);
+				Pd.y = arrays.xData[i] * sin(theta);
 				if (arrays.zData)
-					Pd[2] = arrays.zData[i];
+					Pd.z = arrays.zData[i];
 			}
 			//*/
 			else //cartesian
 			{
 				if (arrays.xData)
-					Pd[0] = arrays.xData[i];
+					Pd.x = arrays.xData[i];
 				if (arrays.yData)
-					Pd[1] = arrays.yData[i];
+					Pd.y = arrays.yData[i];
 				if (arrays.zData)
-					Pd[2] = arrays.zData[i];
+					Pd.z = arrays.zData[i];
 			}
 
 			//first point: check for 'big' coordinates
@@ -1683,9 +1683,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 				}
 			}
 
-			CCVector3 P(static_cast<PointCoordinateType>(Pd[0] + s_coordinatesShift.x),
-						static_cast<PointCoordinateType>(Pd[1] + s_coordinatesShift.y),
-						static_cast<PointCoordinateType>(Pd[2] + s_coordinatesShift.z));
+			CCVector3 P = CCVector3::fromArray((Pd + s_coordinatesShift).u);
 			cloud->addPoint(P);
 
 			if (hasNormals)

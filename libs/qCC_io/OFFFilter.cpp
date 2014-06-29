@@ -182,15 +182,15 @@ CC_FILE_ERROR OFFFilter::loadFile(const char* filename, ccHObject& container, bo
 			}
 
 			//read vertex
-			double Pd[3];
+			CCVector3d Pd(0,0,0);
 			{
 				bool vertexIsOk = false;
-				Pd[0] = tokens[0].toDouble(&vertexIsOk);
+				Pd.x = tokens[0].toDouble(&vertexIsOk);
 				if (vertexIsOk)
 				{
-					Pd[1] = tokens[1].toDouble(&vertexIsOk);
+					Pd.y = tokens[1].toDouble(&vertexIsOk);
 					if (vertexIsOk)
-						Pd[2] = tokens[2].toDouble(&vertexIsOk);
+						Pd.z = tokens[2].toDouble(&vertexIsOk);
 				}
 				if (!vertexIsOk)
 				{
@@ -221,10 +221,7 @@ CC_FILE_ERROR OFFFilter::loadFile(const char* filename, ccHObject& container, bo
 				}
 			}
 
-			CCVector3 P(static_cast<PointCoordinateType>(Pd[0] + Pshift.x),
-						static_cast<PointCoordinateType>(Pd[1] + Pshift.y),
-						static_cast<PointCoordinateType>(Pd[2] + Pshift.z));
-
+			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
 			vertices->addPoint(P);
 		}
 	}

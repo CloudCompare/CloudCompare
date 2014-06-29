@@ -103,7 +103,7 @@ public:
 	//! Returns vector norm
 	inline Type norm() const { return sqrt(norm2()); }
 	//! Returns vector norm (forces double precision output)
-	inline Type normd() const { return sqrt(norm2d()); }
+	inline double normd() const { return sqrt(norm2d()); }
 	//! Sets vector norm to unity
 	inline void normalize() { Type n = norm2(); if (n>0) *this /= sqrt(n); }
 	//! Returns a normalized vector which is orthogonal to this one

@@ -34,6 +34,10 @@ v2.5.5 ??/??/2014
 		- when a transformation (applied with 'Edit > Apply transformation') causes the cloud coordinates
 			to go overbounds, the same dialog appears in order for the user to update the global shift/scale
 			information instead.
+	* Bundler (.out) import:
+		- Big coordinates (for keypoints) are now properly handled (with the Global Shift & Scale mechanism)
+		- The user can now input a 4x4 transformation matrix in order to change the keypoints orientation before
+			generating the orthophotos (i.e. this lets fixing the proper Z axis)
 	* The 'SF arithmetics' method has been enhanced with new operations (applicable on a single SF)
 		- SQRT, POW2, POW3, EXP, LOG, LOG10, COS(radians), SIN(radians), TAN(radians), ACOS, ASIN, ATAN
 	* Point clouds are now pre-loaded in the graphic card memory if possible (via VBOs)
@@ -61,6 +65,10 @@ v2.5.5 ??/??/2014
 		- (support is still limited to Windows only for now)
 	* Default point size editing dialog (appearing inside 3D views when the mouse hovers their top-left corner) is now
 		displayed upon a semi-transparent background so as to be always visible even when displayed over a green entity.
+- Bug fix:
+	* Loading only the keypoints from a Bundler file (without the images) would result in a corrupted import
+		(wrong values were read)
+	* qPCL: bug solved in MLSsmoothing with colored clouds
 
 v2.5.4.1 04/22/2014
 - Bug fix:

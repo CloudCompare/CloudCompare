@@ -647,15 +647,15 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			}
 
 			//read vertex
-			double Pd[3];
+			CCVector3d Pd(0,0,0);
 			{
 				bool vertexIsOk=false;
-				Pd[0] = tokens[1].toDouble(&vertexIsOk);
+				Pd.x = tokens[1].toDouble(&vertexIsOk);
 				if (vertexIsOk)
 				{
-					Pd[1] = tokens[2].toDouble(&vertexIsOk);
+					Pd.y = tokens[2].toDouble(&vertexIsOk);
 					if (vertexIsOk)
-						Pd[2] = tokens[3].toDouble(&vertexIsOk);
+						Pd.z = tokens[3].toDouble(&vertexIsOk);
 				}
 				if (!vertexIsOk)
 				{
@@ -665,7 +665,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			}
 
 			//first point: check for 'big' coordinates
-			if (pointCount==0)
+			if (pointCount == 0)
 			{
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
 				if (shiftAlreadyEnabled)
@@ -686,9 +686,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 				}
 			}
 
-			CCVector3 P(static_cast<PointCoordinateType>(Pd[0] + Pshift.x),
-						static_cast<PointCoordinateType>(Pd[1] + Pshift.y),
-						static_cast<PointCoordinateType>(Pd[2] + Pshift.z));
+			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
 
 			//look for existing vertices at the same place! (STL format is so dumb...)
 			{
@@ -879,7 +877,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 				return CC_FERR_READING;
 
 			//first point: check for 'big' coordinates
-			double Pd[3] = { Pf[0], Pf[1], Pf[2] };
+			CCVector3d Pd( Pf[0], Pf[1], Pf[2] );
 			if (pointCount == 0)
 			{
 				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
@@ -901,9 +899,7 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 				}
 			}
 
-			CCVector3 P(static_cast<PointCoordinateType>(Pd[0] + Pshift.x),
-						static_cast<PointCoordinateType>(Pd[1] + Pshift.y),
-						static_cast<PointCoordinateType>(Pd[2] + Pshift.z));
+			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
 
 			//look for existing vertices at the same place! (STL format is so dumb...)
 			{

@@ -261,7 +261,7 @@ void ccColorScaleEditorDialog::setScaleModeToRelative(bool isRelative)
 	if (isRelative)
 		valueDoubleSpinBox->setRange(0.0,100.0); //between 0 and 100%
 	else
-		valueDoubleSpinBox->setRange(-DBL_MAX,DBL_MAX);
+		valueDoubleSpinBox->setRange(-1.0e9,1.0e9);
 	valueDoubleSpinBox->blockSignals(false);
 
 	//update selected slider frame

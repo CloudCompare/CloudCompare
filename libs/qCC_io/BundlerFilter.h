@@ -35,6 +35,8 @@ public:
 	CC_FILE_ERROR loadFileExtended(	const char* filename,
 									ccHObject& container,
 									bool displayLoadDialog,
+									bool* coordinatesShiftEnabled = 0,
+									CCVector3d* coordinatesShift = 0,
 									const QString& altKeypointsFilename = QString(),
 									bool undistortImages = false,
 									bool generateColoredDTM = false,

@@ -450,7 +450,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 				break;
 			}
 
-			double Pd[3] = { tokens[1].toDouble(), tokens[2].toDouble(), tokens[3].toDouble() };
+			CCVector3d Pd( tokens[1].toDouble(), tokens[2].toDouble(), tokens[3].toDouble() );
 
 			//first point: check for 'big' coordinates
 			if (pointsRead == 0)
@@ -475,10 +475,7 @@ CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bo
 			}
 
 			//shifted point
-			CCVector3 P(static_cast<PointCoordinateType>(Pd[0] + Pshift.x),
-						static_cast<PointCoordinateType>(Pd[1] + Pshift.y),
-						static_cast<PointCoordinateType>(Pd[2] + Pshift.z));
-
+			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
 			vertices->addPoint(P);
 			++pointsRead;
 		}

@@ -91,7 +91,7 @@ CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& contai
 			adfGeoTransform[1] = adfGeoTransform[5] = 1;
 		}
 
-		double origin[3] = { adfGeoTransform[0], adfGeoTransform[3], 0.0 };
+		CCVector3d origin( adfGeoTransform[0], adfGeoTransform[3], 0.0 );
 		CCVector3d Pshift(0,0,0);
 		//check for 'big' coordinates
 		{

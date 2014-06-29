@@ -1664,35 +1664,32 @@ void MainWindow::doActionApplyTransformation()
 			if (	!ccCoordinatesShiftManager::NeedShift(Pl)
 				&&	!ccCoordinatesShiftManager::NeedRescale(Dl))
 			{
-				//existing shift information
-				CCVector3d globalShift = cloud->getGlobalShift();
-				double globalScale = cloud->getGlobalScale();
-				bool cloudAlreadyShifted = cloud->isShifted();
-			
-				//test if the translated cloud is not "too big"
-				//we compute the transformation matrix in the global coordinate space
-				ccGLMatrixd globalTransMat = transMat;
-				globalTransMat.scale(1.0/globalScale);
-				globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
-				//and we apply it to the cloud bounding-box
-				ccBBox rotatedBox = cloud->getBB() * globalTransMat;
-				double Dg = rotatedBox.getDiagNorm();
-				CCVector3d Pg = CCVector3d::fromArray(rotatedBox.getCenter().u);
+				//test if the translated cloud is not "too big" (in local coordinate space)
+				ccBBox rotatedBox = cloud->getBB() * transMat;
+				double Dl2 = rotatedBox.getDiagNorm();
+				CCVector3d Pl2 = CCVector3d::fromArray(rotatedBox.getCenter().u);
 
-				bool needShift = ccCoordinatesShiftManager::NeedShift(Pg);
-				bool needRescale = ccCoordinatesShiftManager::NeedRescale(Dg);
+				bool needShift = ccCoordinatesShiftManager::NeedShift(Pl2);
+				bool needRescale = ccCoordinatesShiftManager::NeedRescale(Dl2);
 
 				if (needShift || needRescale)
 				{
-					//if (!cloudAlreadyShifted)
-					//{
-					//	//guess best values from input transformation!
-					//	globalShift = ccCoordinatesShiftManager::BestShift(T);
-					//	globalScale = ccCoordinatesShiftManager::BestScale(Dg);
-					//}
+					//existing shift information
+					CCVector3d globalShift = cloud->getGlobalShift();
+					double globalScale = cloud->getGlobalScale();
+					bool cloudAlreadyShifted = cloud->isShifted();
+			
+					//we compute the transformation matrix in the global coordinate space
+					ccGLMatrixd globalTransMat = transMat;
+					globalTransMat.scale(1.0/globalScale);
+					globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
+					//and we apply it to the cloud bounding-box
+					ccBBox rotatedBox = cloud->getBB() * globalTransMat;
+					double Dg = rotatedBox.getDiagNorm();
+					CCVector3d Pg = CCVector3d::fromArray(rotatedBox.getCenter().u);
 
 					//ask the user the right values!
-					ccShiftAndScaleCloudDlg sasDlg(Pl,Dl,Pg,Dg,this);
+					ccShiftAndScaleCloudDlg sasDlg(Pl2,Dl2,Pg,Dg,this);
 					sasDlg.showApplyAllButton(false);
 					sasDlg.showTitle(true);
 					sasDlg.setKeepGlobalPos(true);
@@ -3210,7 +3207,7 @@ void MainWindow::doActionFilterByValue()
 		}
 	}
 
-	ccAskTwoDoubleValuesDlg dlg("Min","Max",-DBL_MAX,DBL_MAX,minVald,maxVald,8,"Filter by scalar value",this);
+	ccAskTwoDoubleValuesDlg dlg("Min","Max",-1.0e9,1.0e9,minVald,maxVald,8,"Filter by scalar value",this);
 	if (!dlg.exec())
 		return;
 
@@ -3515,7 +3512,7 @@ void MainWindow::doActionSFGaussianFilter()
 	}
 
 	bool ok;
-	sigma = QInputDialog::getDouble(this,"Gaussian filter","sigma:",sigma,DBL_MIN,DBL_MAX,8,&ok);
+	sigma = QInputDialog::getDouble(this,"Gaussian filter","sigma:",sigma,DBL_MIN,1.0e9,8,&ok);
 	if (!ok)
 		return;
 
@@ -3620,7 +3617,7 @@ void MainWindow::doActionSFBilateralFilter()
 	double scalarFieldSigma = range / 4; // using 1/4 of total range
 
 
-	ccAskTwoDoubleValuesDlg dlg("Spatial sigma", "Scalar sigma", DBL_MIN, DBL_MAX, sigma, scalarFieldSigma , 8, 0, this);
+	ccAskTwoDoubleValuesDlg dlg("Spatial sigma", "Scalar sigma", DBL_MIN, 1.0e9, sigma, scalarFieldSigma , 8, 0, this);
 	dlg.doubleSpinBox1->setStatusTip("3*sigma = 98% attenuation");
 	dlg.doubleSpinBox2->setStatusTip("Scalar field's sigma controls how much the filter behaves as a Gaussian Filter\n sigma at +inf uses the whole range of scalars ");
 	if (!dlg.exec())
@@ -4928,7 +4925,7 @@ void MainWindow::doActionSetSFAsCoord()
 						if (!hasDefaultValueForNaN)
 						{
 							bool ok;
-							double out = QInputDialog::getDouble(this,"SF --> coordinate","Enter the coordinate equivalent for NaN values:",defaultValueForNaN,-DBL_MAX,DBL_MAX,6,&ok);
+							double out = QInputDialog::getDouble(this,"SF --> coordinate","Enter the coordinate equivalent for NaN values:",defaultValueForNaN,-1.0e9,1.0e9,6,&ok);
 							if (ok)
 								defaultValueForNaN = static_cast<ScalarType>(out);
 							else
@@ -5128,7 +5125,7 @@ static double s_meshMaxEdgeLength = 0;
 void MainWindow::doActionComputeMesh(CC_TRIANGULATION_TYPES type)
 {
 	bool ok = true;
-	double maxEdgeLength = QInputDialog::getDouble(this,"Triangulate", "Max edge length (0 = no limit)", s_meshMaxEdgeLength, 0, DBL_MAX, 8, &ok);
+	double maxEdgeLength = QInputDialog::getDouble(this,"Triangulate", "Max edge length (0 = no limit)", s_meshMaxEdgeLength, 0, 1.0e9, 8, &ok);
 	if (!ok)
 		return;
 	s_meshMaxEdgeLength = maxEdgeLength;
@@ -7430,7 +7427,7 @@ void MainWindow::doActionAddConstantSF()
 		return;
 	}
 
-	ScalarType sfValue = static_cast<ScalarType>(QInputDialog::getDouble(this,"Add constant value", "value", s_constantSFValue, -DBL_MAX, DBL_MAX, 8, &ok));
+	ScalarType sfValue = static_cast<ScalarType>(QInputDialog::getDouble(this,"Add constant value", "value", s_constantSFValue, -1.0e9, 1.0e9, 8, &ok));
 	if (!ok)
 		return;
 
@@ -7644,7 +7641,7 @@ void MainWindow::doComputePlaneOrientation(bool fitFacet)
 	if (fitFacet)
 	{
 		bool ok = true;
-		maxEdgeLength = QInputDialog::getDouble(this,"Fit facet", "Max edge length (0 = no limit)", s_polygonMaxEdgeLength, 0, DBL_MAX, 8, &ok);
+		maxEdgeLength = QInputDialog::getDouble(this,"Fit facet", "Max edge length (0 = no limit)", s_polygonMaxEdgeLength, 0, 1.0e9, 8, &ok);
 		if (!ok)
 			return;
 		s_polygonMaxEdgeLength = maxEdgeLength;
@@ -8063,7 +8060,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 					return false;
 				}
 				bool ok;
-				double val = QInputDialog::getDouble(parent,"Accurate density","Radius",static_cast<double>(densityKernelSize),DBL_MIN,DBL_MAX,8,&ok);
+				double val = QInputDialog::getDouble(parent,"Accurate density","Radius",static_cast<double>(densityKernelSize),DBL_MIN,1.0e9,8,&ok);
 				if (!ok)
 					return false;
 				densityKernelSize = static_cast<PointCoordinateType>(val);
@@ -8139,7 +8136,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 						return false;
 					}
 					bool ok;
-					double val = QInputDialog::getDouble(parent, "Subdivide mesh", "Kernel size:", static_cast<double>(roughnessKernelSize), DBL_MIN, DBL_MAX, 8, &ok);
+					double val = QInputDialog::getDouble(parent, "Subdivide mesh", "Kernel size:", static_cast<double>(roughnessKernelSize), DBL_MIN, 1.0e9, 8, &ok);
 					if (!ok)
 						return false;
 					roughnessKernelSize = static_cast<PointCoordinateType>(val);
@@ -8565,7 +8562,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 		CCVector3 center = bBox.getCenter();
 		PointCoordinateType diag = bBox.getDiagNorm();
 
-		double P[3] = {center[0],center[1],center[2]};
+		CCVector3d P = CCVector3d::fromArray(center.u);
 		CCVector3d Pshift(0,0,0);
 		double scale = 1.0;
 		//here we must test that coordinates are not too big whatever the case because OpenGL

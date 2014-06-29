@@ -56,7 +56,7 @@ bool ccCoordinatesShiftManager::NeedRescale(double d)
 	return fabs(d) >= MAX_DIAGONAL_LENGTH;
 }
 
-bool ccCoordinatesShiftManager::Handle(	const double* P,
+bool ccCoordinatesShiftManager::Handle(	const CCVector3d& P,
 										double diagonal,
 										bool displayDialogIfNecessary,
 										bool useInputCoordinatesShiftIfPossible,
@@ -65,7 +65,6 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 										bool* applyAll/*=0*/,
 										bool forceDialogDisplay/*=false*/)
 {
-	assert(P);
 	assert(diagonal >= 0);
 
 	if (applyAll)
@@ -95,7 +94,7 @@ bool ccCoordinatesShiftManager::Handle(	const double* P,
 			//either we are in non interactive mode (which means that shift is 'forced' by caller)
 			if (!displayDialogIfNecessary
 				//or we are in interactive mode and existing shift is pertinent
-				|| (	!NeedShift(CCVector3d(P)*scale + coordinatesShift)
+				|| (	!NeedShift(P*scale + coordinatesShift)
 					&&  !NeedRescale(diagonal*scale)
 					&&	!forceDialogDisplay) )
 			{

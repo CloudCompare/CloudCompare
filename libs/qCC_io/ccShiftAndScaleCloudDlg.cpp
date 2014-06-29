@@ -57,6 +57,7 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(const CCVector3d& Pg,
 	: QDialog(parent)
 	, m_ui(0)
 	, m_applyAll(false)
+	, m_cancel(false)
 	, m_activeInfoIndex(-1)
 	, m_originalPoint(Pg)
 	, m_originalDiagonal(Dg)
@@ -80,6 +81,7 @@ ccShiftAndScaleCloudDlg::ccShiftAndScaleCloudDlg(	const CCVector3d& Pl,
 	: QDialog(parent)
 	, m_ui(0)
 	, m_applyAll(false)
+	, m_cancel(false)
 	, m_activeInfoIndex(-1)
 	, m_originalPoint(Pg)
 	, m_originalDiagonal(Dg)
@@ -120,9 +122,9 @@ void ccShiftAndScaleCloudDlg::init()
 	m_ui = new Ui_GlobalShiftAndScaleDlg;
 	m_ui->setupUi(this);
 
-	m_ui->shiftX->setRange(-DBL_MAX,DBL_MAX);
-	m_ui->shiftY->setRange(-DBL_MAX,DBL_MAX);
-	m_ui->shiftZ->setRange(-DBL_MAX,DBL_MAX);
+	m_ui->shiftX->setRange(-1.0e9,1.0e9);
+	m_ui->shiftY->setRange(-1.0e9,1.0e9);
+	m_ui->shiftZ->setRange(-1.0e9,1.0e9);
 
 	updateGlobalAndLocalSystems();
 
@@ -358,6 +360,7 @@ void ccShiftAndScaleCloudDlg::onClick(QAbstractButton* button)
 {
 	bool saveInfo = false;
 	m_applyAll = false;
+	m_cancel = false;
 
 	if (button == m_ui->buttonBox->button(QDialogButtonBox::Yes))
 	{
@@ -370,6 +373,7 @@ void ccShiftAndScaleCloudDlg::onClick(QAbstractButton* button)
 	}
 	else if (button == m_ui->buttonBox->button(QDialogButtonBox::Cancel))
 	{
+		m_cancel = true;
 	}
 
 	if (saveInfo)

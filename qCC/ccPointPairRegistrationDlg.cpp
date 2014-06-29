@@ -282,7 +282,7 @@ static double s_last_az = 0;
 static bool s_last_a_isGlobal = true;
 void ccPointPairRegistrationDlg::addManualAlignedPoint()
 {
-	ccAskThreeDoubleValuesDlg ptsDlg("x","y","z",-DBL_MAX,DBL_MAX,s_last_ax,s_last_ay,s_last_az,8,"Add aligned point",this);
+	ccAskThreeDoubleValuesDlg ptsDlg("x","y","z",-1.0e9,1.0e9,s_last_ax,s_last_ay,s_last_az,8,"Add aligned point",this);
 
 	//if the aligned cloud is shifted, the user has the choice to input virtual point either
 	//in the original coordinate system or the shifted one
@@ -315,7 +315,7 @@ static double s_last_rz = 0;
 static bool s_last_r_isGlobal = true;
 void ccPointPairRegistrationDlg::addManualRefPoint()
 {
-	ccAskThreeDoubleValuesDlg ptsDlg("x","y","z",-DBL_MAX,DBL_MAX,s_last_rx,s_last_ry,s_last_rz,8,"Add reference point",this);
+	ccAskThreeDoubleValuesDlg ptsDlg("x","y","z",-1.0e9,1.0e9,s_last_rx,s_last_ry,s_last_rz,8,"Add reference point",this);
 
 	//if the reference cloud is shifted, the user has the choice to input virtual
 	//points either in the original coordinate system or the shifted one
@@ -663,7 +663,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccGenericPoi
 					scale = m_aligned.cloud->getGlobalScale();
 					shiftEnabled = true;
 				}
-				if (ccCoordinatesShiftManager::Handle(Pin.u,0,true,shiftEnabled,Pshift,&scale))
+				if (ccCoordinatesShiftManager::Handle(Pin,0,true,shiftEnabled,Pshift,&scale))
 				{
 					m_refPoints.setGlobalShift(Pshift);
 					m_refPoints.setGlobalScale(scale);

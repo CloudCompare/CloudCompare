@@ -36,7 +36,7 @@ ccComputeOctreeDlg::ccComputeOctreeDlg(const ccBBox& baseBBox, double minCellSiz
 	if (minCellSize > 0.0)
 	{
 		cellSizeDoubleSpinBox->setMinimum(minCellSize);
-		cellSizeDoubleSpinBox->setMaximum(DBL_MAX);
+		cellSizeDoubleSpinBox->setMaximum(1.0e9);
 	}
 	else
 	{

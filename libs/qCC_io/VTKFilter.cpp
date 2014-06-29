@@ -336,10 +336,10 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 					break;
 				}
 
-				double Pd[3] = {0,0,0};
+				CCVector3d Pd(0,0,0);
 				for (unsigned char j=0; j<3; ++j)
 				{
-					Pd[j] = parts[j].toDouble(&ok);
+					Pd.u[j] = parts[j].toDouble(&ok);
 					if (!ok)
 					{
 						ccLog::Warning("[VTK] Element #%1 of POINTS data is corrupted!",i);
@@ -370,9 +370,8 @@ CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bo
 					}
 				}
 
-				vertices->addPoint(CCVector3(	static_cast<PointCoordinateType>(Pd[0] + Pshift.x),
-												static_cast<PointCoordinateType>(Pd[1] + Pshift.y),
-												static_cast<PointCoordinateType>(Pd[2] + Pshift.z)) );
+				CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
+				vertices->addPoint(P);
 			}
 		//end POINTS
 		}

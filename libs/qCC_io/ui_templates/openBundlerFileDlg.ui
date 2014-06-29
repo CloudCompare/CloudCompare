@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>292</width>
-    <height>479</height>
+    <width>450</width>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -280,7 +280,16 @@
            <property name="spacing">
             <number>0</number>
            </property>
-           <property name="margin">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
             <number>0</number>
            </property>
            <item>
@@ -332,6 +341,26 @@
          </spacer>
         </item>
        </layout>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="applyTransfoMatrixCheckBox">
+        <property name="toolTip">
+         <string>To apply a custom 4x4 transformation matrix to the keypoints before generating orthophotos</string>
+        </property>
+        <property name="text">
+         <string>apply 4x4 transformation matrix</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTextEdit" name="applyTransfoMatrixTextEdit"/>
       </item>
      </layout>
     </widget>
@@ -405,22 +434,6 @@
  <connections>
   <connection>
    <sender>buttonBox</sender>
-   <signal>accepted()</signal>
-   <receiver>BundlerImportDlg</receiver>
-   <slot>accept()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>248</x>
-     <y>254</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>157</x>
-     <y>274</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>buttonBox</sender>
    <signal>rejected()</signal>
    <receiver>BundlerImportDlg</receiver>
    <slot>reject()</slot>
@@ -448,6 +461,22 @@
     <hint type="destinationlabel">
      <x>275</x>
      <y>238</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>applyTransfoMatrixCheckBox</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>applyTransfoMatrixTextEdit</receiver>
+   <slot>setVisible(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>108</x>
+     <y>284</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>153</x>
+     <y>337</y>
     </hint>
    </hints>
   </connection>

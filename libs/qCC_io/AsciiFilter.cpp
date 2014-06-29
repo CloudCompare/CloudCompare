@@ -611,7 +611,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 
 	//buffers
 	ScalarType D = 0;
-	double P[3] = {0,0,0};
+	CCVector3d P(0,0,0);
 	CCVector3d Pshift(0,0,0);
 	CCVector3 N(0,0,0);
 	colorType col[3] = {0,0,0};
@@ -720,11 +720,11 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 		{
 			//(X,Y,Z)
 			if (cloudDesc.xCoordIndex >= 0)
-				P[0] = parts[cloudDesc.xCoordIndex].toDouble();
+				P.x = parts[cloudDesc.xCoordIndex].toDouble();
 			if (cloudDesc.yCoordIndex >= 0)
-				P[1] = parts[cloudDesc.yCoordIndex].toDouble();
+				P.y = parts[cloudDesc.yCoordIndex].toDouble();
 			if (cloudDesc.zCoordIndex >= 0)
-				P[2] = parts[cloudDesc.zCoordIndex].toDouble();
+				P.z = parts[cloudDesc.zCoordIndex].toDouble();
 
 			//first point: check for 'big' coordinates
 			if (pointsRead == 0)
@@ -749,9 +749,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
 			}
 
 			//add point
-			cloudDesc.cloud->addPoint(CCVector3(static_cast<PointCoordinateType>(P[0] + Pshift.x),
-												static_cast<PointCoordinateType>(P[1] + Pshift.y),
-												static_cast<PointCoordinateType>(P[2] + Pshift.z)) );
+			cloudDesc.cloud->addPoint(CCVector3::fromArray((P+Pshift).u));
 
 			//Normal vector
 			if (cloudDesc.hasNorms)

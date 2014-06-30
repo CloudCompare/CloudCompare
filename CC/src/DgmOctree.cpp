@@ -1865,7 +1865,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhood(CylindricalNeighbourhood& 
 	PointCoordinateType maxLengthFactor = params.maxHalfLength + static_cast<PointCoordinateType>(cs*SQRT_3/2);
 	PointCoordinateType minLengthFactor = params.onlyPositiveDir ? 0 : -maxLengthFactor;
 	
-	int minHalfLength = params.onlyPositiveDir ? 0 : -params.maxHalfLength;
+	PointCoordinateType minHalfLength = params.onlyPositiveDir ? 0 : -params.maxHalfLength;
 
 	//we are going to test all the cells that may intersect this cylinder
 	//dumb bounding-box estimation: place two spheres at the ends of the cylinder
@@ -1997,7 +1997,7 @@ size_t DgmOctree::getPointsInCylindricalNeighbourhoodProgressive(ProgressiveCyli
 	if (params.maxHalfLength-params.currentHalfLength < params.radius/2)
 		params.currentHalfLength = params.maxHalfLength;
 
-	int currentHalfLengthMinus = params.onlyPositiveDir ? 0 : -params.currentHalfLength;
+	PointCoordinateType currentHalfLengthMinus = params.onlyPositiveDir ? 0 : -params.currentHalfLength;
 
 	//first process potential candidates from the previous pass
 	{

@@ -636,7 +636,7 @@ void ccHistogramWindow::setMinSatValue(double val)
 		if (m_associatedSF)
 		{
 			//auto-update
-			m_associatedSF->setSaturationStart(val);
+			m_associatedSF->setSaturationStart(static_cast<ScalarType>(val));
 			refreshBars();
 		}
 		else
@@ -657,7 +657,7 @@ void ccHistogramWindow::setMaxSatValue(double val)
 		if (m_associatedSF)
 		{
 			//auto-update
-			m_associatedSF->setSaturationStop(val);
+			m_associatedSF->setSaturationStop(static_cast<ScalarType>(val));
 			refreshBars();
 		}
 		replot();

@@ -1,0 +1,11 @@
+// Before modifying this file, rename it 'global_shift_list.txt'
+//
+// You can place here sets of shift vectors and scale factors (associated to a name).
+// Each set (name) will be displayed in the combo-box above the shift fields of the
+// "Global Shift and Scale" dialog (this dialog typically appears at import time while
+// loading a file with big coordinates).
+//
+// All values are separated by a semicolon character (;):
+//    name; shift(X); shif(Y); shif(Z); scale;
+//
+Ankh morpork ; -621900.0 ; -5114400.0 ; 0.0 ; 1.0 ;

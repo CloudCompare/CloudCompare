@@ -122,7 +122,7 @@ endif()
 install_ext( TARGETS ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
 
 # Auxiliary files
-set( auxFiles bin_other/history.txt bin_other/license.txt )
+set( auxFiles bin_other/history.txt bin_other/license.txt bin_other/global_shift_list_template.txt )
 
 if( WIN32 )
 	# Export Qt dlls

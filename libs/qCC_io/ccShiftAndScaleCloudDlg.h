@@ -111,6 +111,8 @@ protected slots:
 	void onClick(QAbstractButton* button);
 	//! Updates info on the global and local coordinate systems
 	void updateGlobalAndLocalSystems();
+	//! Displays more info about global shift mechanism
+	void displayMoreInfo();
 
 protected:
 

@@ -13,6 +13,8 @@ File I/O:
 - POD files (Pointools)
 - FARO, LEICA, POD file formats (when pigs can fly! None of them ever replied to my emails... not even a simple "no")
 - SHP files (with GDAL?)
+- OpenCTM format (https://github.com/cloudcompare/trunk/issues/146)
+- Visual SFM format (http://www.cloudcompare.org/forum/viewtopic.php?t=550)
 
 *** And from the forum topic or emails 'recent requests' ***
 
@@ -41,6 +43,8 @@ Various:
 [*] Run the PCV plugin on more than one file at a time (or batch process)
 [*] Add interactive measurement features to ccViewer
 [*] Support mesh transparency (and PLY 'alpha' property for instance)
+[*] Convert RGB colors/scalar field to texture when exporting to OBJ mesh file (http://www.danielgm.net/cc/forum/viewtopic.php?t=830)
+
 
 From Thomas S. (http://www.cloudcompare.org/forum/viewtopic.php?t=550)
 [*] If CloudCompare would support VisualSFM, it would be possible to import the VisualSFM-Project (with the saved camera positions).

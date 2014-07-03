@@ -38,8 +38,9 @@
 #include <string.h>
 #include <assert.h>
 
-//declaration of static member
+//declaration of static members
 QSharedPointer<AsciiSaveDlg> AsciiFilter::s_saveDialog(0);
+QSharedPointer<AsciiOpenDlg> AsciiFilter::s_openDialog(0);
 
 QSharedPointer<AsciiSaveDlg> AsciiFilter::GetSaveDialog()
 {
@@ -47,6 +48,14 @@ QSharedPointer<AsciiSaveDlg> AsciiFilter::GetSaveDialog()
 		s_saveDialog = QSharedPointer<AsciiSaveDlg>(new AsciiSaveDlg());
 
 	return s_saveDialog;
+}
+
+QSharedPointer<AsciiOpenDlg> AsciiFilter::GetOpenDialog()
+{
+	if (!s_openDialog)
+		s_openDialog = QSharedPointer<AsciiOpenDlg>(new AsciiOpenDlg());
+
+	return s_openDialog;
 }
 
 CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
@@ -282,7 +291,11 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR AsciiFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR AsciiFilter::loadFile(const char* filename,
+									ccHObject& container,
+									bool alwaysDisplayLoadDialog/*=true*/,
+									bool* coordinatesShiftEnabled/*=0*/,
+									CCVector3d* coordinatesShift/*=0*/)
 {
 	//we get the size of the file to open
 	QFile file(filename);
@@ -294,29 +307,40 @@ CC_FILE_ERROR AsciiFilter::loadFile(const char* filename, ccHObject& container, 
 		return CC_FERR_NO_LOAD;
 
 	//column attribution dialog
-	AsciiOpenDlg aod(filename);
+	//DGM: we ask for the semi-persistent dialog as it may have
+	//been already initialized (by the command-line for instance)
+	QSharedPointer<AsciiOpenDlg> openDialog = GetOpenDialog();
+	s_openDialog.clear(); //release the 'source' dialog (so as to be sure to reset it next time)
+	
+	assert(openDialog);
+	openDialog->setFilename(filename);
 
 	QString dummyStr;
-	if (alwaysDisplayLoadDialog || aod.getColumnsCount() > 5 || !AsciiOpenDlg::CheckOpenSequence(aod.getOpenSequence(),dummyStr))
+	if (	alwaysDisplayLoadDialog
+		||	!openDialog->safeSequence()
+		||	!AsciiOpenDlg::CheckOpenSequence(openDialog->getOpenSequence(),dummyStr) )
 	{
-		if (!aod.exec())
+		if (!openDialog->exec())
 			return CC_FERR_CANCELED_BY_USER;
 	}
 
 	//we compute the approximate line number
-	double averageLineSize = aod.getAverageLineSize();
-	unsigned approximateNumberOfLines = (unsigned)ceil((double)fileSize/averageLineSize);
+	double averageLineSize = openDialog->getAverageLineSize();
+	unsigned approximateNumberOfLines = static_cast<unsigned>(ceil(static_cast<double>(fileSize)/averageLineSize));
 
-	AsciiOpenDlg::Sequence openSequence = aod.getOpenSequence();
+	AsciiOpenDlg::Sequence openSequence = openDialog->getOpenSequence();
+	char separator = static_cast<char>(openDialog->getSeparator());
+	unsigned maxCloudSize = openDialog->getMaxCloudSize();
+	unsigned skipLineCount = openDialog->getSkippedLinesCount();
 
 	return loadCloudFromFormatedAsciiFile(	filename,
 											container,
 											openSequence,
-											(char)aod.getSeparator(),
+											separator,
 											approximateNumberOfLines,
 											fileSize,
-											aod.getMaxCloudSize(),
-											aod.getSkippedLinesCount(),
+											maxCloudSize,
+											skipLineCount,
 											alwaysDisplayLoadDialog,
 											coordinatesShiftEnabled,
 											coordinatesShift);

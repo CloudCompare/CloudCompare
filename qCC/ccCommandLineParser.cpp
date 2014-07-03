@@ -39,6 +39,7 @@
 
 static const char COMMAND_SILENT_MODE[]						= "SILENT";
 static const char COMMAND_OPEN[]							= "O";				//+file name
+static const char COMMAND_OPEN_SKIP_LINES[]					= "SKIP";			//+number of lines to skip
 static const char COMMAND_SUBSAMPLE[]						= "SS";				//+ method (RANDOM/SPATIAL/OCTREE) + parameter (resp. point count / spatial step / octree level)
 static const char COMMAND_CURVATURE[]						= "CURV";			//+ curvature type (MEAN/GAUSS) +
 static const char COMMAND_DENSITY[]							= "DENSITY";		//+ sphere radius
@@ -311,6 +312,39 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	Print("[LOADING]");
 	if (arguments.empty())
 		return Error(QString("Missing parameter: filename after \"-%1\"").arg(COMMAND_OPEN));
+
+	//optional parameters
+	int skipLines = 0;
+	while (!arguments.empty())
+	{
+		QString argument = arguments.front();
+		if (IsCommand(argument,COMMAND_OPEN_SKIP_LINES))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
+			if (arguments.empty())
+				return Error(QString(QString("Missing parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES)));
+
+			bool ok;
+			skipLines = arguments.takeFirst().toInt(&ok);
+			if (!ok)
+				return Error(QString(QString("Invalid parameter: number of lines after '%1'").arg(COMMAND_OPEN_SKIP_LINES)));
+			
+			Print(QString("Will skip %1 lines").arg(skipLines));
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	if (skipLines > 0)
+	{
+		QSharedPointer<AsciiOpenDlg> openDialog = AsciiFilter::GetOpenDialog();
+		assert(openDialog);
+		openDialog->setSkippedLines(skipLines);
+	}
 
 	//open specified file
 	QString filename(arguments.takeFirst());

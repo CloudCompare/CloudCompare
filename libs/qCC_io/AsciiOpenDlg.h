@@ -43,6 +43,26 @@ enum CC_ASCII_OPEN_DLG_TYPES {	ASCII_OPEN_DLG_None			= 0,
 								ASCII_OPEN_DLG_RGB32f		= 13, //RGBA as a single 32 bits float (PCL style)
 };
 
+//! Default ASCII header columns
+class AsciiHeaderColumns
+{
+public:
+	static QString X()  { return "X"; }
+	static QString Y()  { return "Y"; }
+	static QString Z()  { return "Z"; }
+	static QString Nx() { return "Nx"; }
+	static QString Ny() { return "Ny"; }
+	static QString Nz() { return "Nz"; }
+	static QString R()  { return "R"; }
+	static QString G()  { return "G"; }
+	static QString B()  { return "B"; }
+
+	static QString Grey()   { return "Intensity"; }
+	static QString Scalar() { return "SF"; }
+	static QString RGB32i() { return "RGB32i"; }
+	static QString RGB32f() { return "RGB32f"; }
+};
+
 const unsigned ASCII_OPEN_DLG_TYPES_NUMBER = 14;
 const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_NUMBER][24] = {	"Ignore",
 																			"coord. X",
@@ -71,10 +91,17 @@ class AsciiOpenDlg : public QDialog
 public:
 
 	//! Default constructor
-	AsciiOpenDlg(QString filename, QWidget* parent = 0);
+	/** \param parent parent widget
+	**/
+	AsciiOpenDlg(QWidget* parent = 0);
 
 	//! Default destructor
 	virtual ~AsciiOpenDlg();
+
+	//! Sets filename
+	/** \param filename filename
+	**/
+	void setFilename(QString filename);
 
 	//! ASCII open sequence item
 	struct SequenceItem
@@ -86,37 +113,41 @@ public:
 		SequenceItem()
 			: type(ASCII_OPEN_DLG_None)
 			, header()
-		{
-		}
+		{}
 
 		//! Constructor from parameters
 		SequenceItem(CC_ASCII_OPEN_DLG_TYPES _type, const QString& _header)
 			: type(_type)
 			, header(_header)
-		{
-		}
+		{}
 	};
 
 	//! ASCII open sequence
 	typedef std::vector<SequenceItem> Sequence;
 
 	//! Returns the whole "opening" sequence as set by the user
-	Sequence getOpenSequence();
+	Sequence getOpenSequence() const;
 
 	//! Returns number of lines to skip
-	unsigned getSkippedLinesCount() const {return m_skippedLines;}
+	unsigned getSkippedLinesCount() const { return m_skippedLines; }
 
 	//! Returns user selected separator
-	uchar getSeparator() const {return m_separator.cell();}
+	uchar getSeparator() const { return m_separator.cell(); }
 
 	//! Returns roughly estimated average line size (in bytes)
-	double getAverageLineSize() const {return m_averageLineSize;}
+	double getAverageLineSize() const { return m_averageLineSize; }
 
 	//! Returns columns count per line
-	unsigned getColumnsCount() const {return m_columnsCount;}
+	unsigned getColumnsCount() const { return m_columnsCount; }
 
 	//! Returns the max number of points per cloud
 	unsigned getMaxCloudSize() const;
+
+	//! Returns whether the current sequence is 'safe'
+	/** A safe sequence is safe if it matches the header (if any)
+		or if the file has less than 6 columns.
+	**/
+	bool safeSequence() const;
 
 	//! Checks the "opening" sequence as set by the user
 	/** \return validity (+ error message if not)
@@ -124,16 +155,21 @@ public:
 	static bool CheckOpenSequence(const Sequence& sequence, QString& errorMessage);
 
 public slots:
-	void updateTable(const QString &separator);
+	//! Forces the table to update itself
+	void updateTable(const QString& separator);
+	//! Sets the number of lines to skip
+	void setSkippedLines(int linesCount);
 
 protected slots:
 	void testBeforeAccept();
-	void setSkippedLines(int linesCount);
 	void columnsTypeHasChanged(int index);
 	void shortcutButtonPressed();
 	void checkSelectedColumnsValidity();
 
 protected:
+
+	//! Tries to guess the best separator automagically
+	void autoFindBestSeparator();
 
 	//associated UI
 	Ui_AsciiOpenDialog* m_ui;
@@ -149,8 +185,8 @@ protected:
 	//QComboBox* m_columnsType;
 	unsigned m_columnsCount;
 
-    // Resizes dialog width to fit all displayed table columns
-    void resizeWidthToFitTableColumns();
+	// Resizes dialog width to fit all displayed table columns
+	void resizeWidthToFitTableColumns();
 };
 
 #endif //CC_ASCII_OPEN_DIALOG_HEADER

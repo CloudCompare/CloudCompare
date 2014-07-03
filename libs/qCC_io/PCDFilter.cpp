@@ -96,7 +96,7 @@ CC_FILE_ERROR PCDFilter::loadFile(const char* filename, ccHObject& container, bo
 			10, //will be evaluated again
 			fileSize,
 			CC_MAX_NUMBER_OF_POINTS_PER_CLOUD,
-			(unsigned)header.lineCount,
+			static_cast<unsigned>(header.lineCount),
 			false,
 			coordinatesShiftEnabled,
 			coordinatesShift);

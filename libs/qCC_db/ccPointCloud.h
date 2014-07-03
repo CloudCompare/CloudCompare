@@ -275,6 +275,7 @@ public:
 	virtual bool hasNormals() const;
 	virtual bool hasScalarFields() const;
 	virtual bool hasDisplayedScalarField() const;
+	virtual void removeFromDisplay(const ccGenericGLDisplay* win); //for proper VBO release
 
 	//inherited from ccGenericPointCloud
 	virtual const colorType* getPointScalarValueColor(unsigned pointIndex) const;
@@ -519,10 +520,10 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual void notifyGeometryUpdate();
 
-    //inherited from ChunkedPointCloud
+	//inherited from ChunkedPointCloud
 	virtual void swapPoints(unsigned firstIndex, unsigned secondIndex);
 
-    //! Colors
+	//! Colors
 	ColorsTableType* m_rgbColors;
 
 	//! Normals (compressed)

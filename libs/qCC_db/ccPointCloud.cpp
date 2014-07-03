@@ -3287,12 +3287,12 @@ void ccPointCloud::releaseVBOs()
 		//'destroy' all vbos
 		for (size_t i=0; i<m_vbos.size(); ++i)
 		{
-            if (m_vbos[i])
-            {
-                m_vbos[i]->destroy();
-                delete m_vbos[i];
-                m_vbos[i] = 0;
-            }
+			if (m_vbos[i])
+			{
+				m_vbos[i]->destroy();
+				delete m_vbos[i];
+				m_vbos[i] = 0;
+			}
 		}
 	}
 	else
@@ -3307,4 +3307,13 @@ void ccPointCloud::releaseVBOs()
 	m_vbos.sourceSF = 0;
 	m_vbos.totalMemSizeBytes = 0;
 	m_vbos.state = vboSet::NEW;
+}
+
+void ccPointCloud::removeFromDisplay(const ccGenericGLDisplay* win)
+{
+	if (win == m_currentDisplay)
+		releaseVBOs();
+
+	//call parent's method
+	ccGenericPointCloud::removeFromDisplay(win);
 }

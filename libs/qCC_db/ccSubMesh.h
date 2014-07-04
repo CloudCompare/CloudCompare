@@ -34,6 +34,8 @@ public:
 
 	//! Default constructor
 	ccSubMesh(ccMesh* parentMesh);
+	//! Destructor
+	virtual ~ccSubMesh();
 
 	//! Returns class ID
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::SUB_MESH; }

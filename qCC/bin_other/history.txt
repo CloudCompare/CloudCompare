@@ -80,6 +80,7 @@ v2.5.5 ??/??/2014
 	* Loading only the keypoints from a Bundler file (without the images) would result in a corrupted import
 		(wrong values were read)
 	* qPCL: bug solved in MLSsmoothing with colored clouds
+	* Memory leak fixed (when using sub-meshes, typically coming from an OBJ file with multiples parts)
 
 v2.5.4.1 04/22/2014
 - Bug fix:

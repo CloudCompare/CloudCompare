@@ -45,6 +45,15 @@ ccSubMesh::ccSubMesh(ccMesh* parentMesh)
 	showSF(parentMesh ? parentMesh->sfShown() : true);
 }
 
+ccSubMesh::~ccSubMesh()
+{
+	if (m_triIndexes)
+	{
+		m_triIndexes->release();
+		m_triIndexes = 0;
+	}
+}
+
 void ccSubMesh::setAssociatedMesh(ccMesh* mesh)
 {
 	m_associatedMesh = mesh;

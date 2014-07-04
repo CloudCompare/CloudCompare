@@ -44,9 +44,9 @@ struct faceIndexes
 	faceIndexes* nextFace;
 };
 
-CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 {
-	if (!entity || !filename)
+	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container meshes;
@@ -98,7 +98,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	//*/
 
 	//open ASCII file for writing
-	FILE* fp = fopen(filename , "wt");
+	FILE* fp = fopen(qPrintable(filename) , "wt");
 
 	if (!fp)
 		return CC_FERR_WRITING;
@@ -519,7 +519,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR MAFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR MAFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	ccLog::Error("Not available yet!");
 

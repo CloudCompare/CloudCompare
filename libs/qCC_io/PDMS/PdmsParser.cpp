@@ -267,36 +267,42 @@ void PdmsLexer::pushIntoDictionnary(const char *str, Token token, int minSize)
 		dictionnary[std::string(str).substr(0, minSize)] = token;
 }
 
-PdmsFileSession::PdmsFileSession(const char* fileName)
-{
-	strcpy(filename, fileName);
-	file = NULL;
-}
+PdmsFileSession::PdmsFileSession(std::string filename)
+	: m_filename(filename)
+	, m_currentLine(-1)
+	, m_eol(false)
+	, m_eof(false)
+	, m_file(0)
+{}
 
 bool PdmsFileSession::initializeSession()
 {
 	PdmsLexer::initializeSession();
-	file = NULL;
-	file = fopen(filename, "r");
-	if(!file)
+	m_file = fopen(m_filename.c_str(), "r");
+	if (!m_file)
 		return false;
-	currentLine = 1;
-	eol = false;
-	eof = false;
+	
+	m_currentLine = 1;
+	m_eol = false;
+	m_eof = false;
+	
 	return true;
 }
 
 void PdmsFileSession::closeSession(bool destroyLoadedObject)
 {
-	if(file)
-		fclose(file);
-	file = NULL;
+	if (m_file)
+	{
+		fclose(m_file);
+		m_file = NULL;
+	}
+
 	PdmsLexer::closeSession(destroyLoadedObject);
 }
 
 void PdmsFileSession::parseCurrentToken()
 {
-	if(eof && strlen(tokenBuffer) == 0)
+	if(m_eof && strlen(tokenBuffer) == 0)
 		currentToken = PDMS_EOS;
 	else
 		PdmsLexer::parseCurrentToken();
@@ -311,20 +317,20 @@ bool PdmsFileSession::moveForward()
 
 	if(PdmsLexer::moveForward()) return true;
 
-	eol = false;
+	m_eol = false;
 	tokenFilled = false;
 	while(!tokenFilled)
 	{
-		car = getc(file);
+		car = getc(m_file);
 		switch(car)
 		{
 		case '\n':
 			if(n>0)
 			{
 				tokenFilled = true;
-				eol = true;
+				m_eol = true;
 			}
-			currentLine++;
+			m_currentLine++;
 			break;
 		case ' ':
 		case '\t':
@@ -333,7 +339,7 @@ bool PdmsFileSession::moveForward()
 			break;
 		case EOF:
 			tokenFilled = true;
-			eof = true;
+			m_eof = true;
 			break;
 		default:
 			if(n >= c_max_buff_size)
@@ -363,20 +369,20 @@ void PdmsFileSession::skipComment()
 	{
 	case PDMS_COMMENT_LINE:
 		//skip line only if the end of line has not been read in current buffer
-		if(!eol)
+		if(!m_eol)
 		{
 			n = 0;
 			do{
-				car = getc(file);
+				car = getc(m_file);
 				if(car=='\t') car=' ';
 				tokenBuffer[n] = car;
 				if(((n+1)<c_max_buff_size) && ((car!=' ') || (n>0 && tokenBuffer[n-1]!=' '))) n++;
 			} while(car!=EOF && (char)car!='\n');
 			if(car == '\n')
-				currentLine++;
+				m_currentLine++;
 			tokenBuffer[n-1] = '\0';
 		}
-		eol = false;
+		m_eol = false;
 		break;
 	case PDMS_COMMENT_BLOCK:
 		//comment block opening symbol has been met. Search for comment block ending symbol
@@ -385,8 +391,8 @@ void PdmsFileSession::skipComment()
 		commentBlockLevel = 1;
 		n = 0;
 		do{
-			car = getc(file);
-			if(car=='\n') currentLine++;
+			car = getc(m_file);
+			if(car=='\n') m_currentLine++;
 			if(car=='\n' || car=='\t') car = ' ';
 			if(car=='$') commentSymb = true;
 			else if(car=='(' && commentSymb) commentBlockLevel++;
@@ -399,7 +405,7 @@ void PdmsFileSession::skipComment()
 			}
 		} while(car!=EOF && commentBlockLevel>0);
 		tokenBuffer[n-1] = '\0';
-		eol=false;
+		m_eol = false;
 		break;
 	default:
 		break;
@@ -448,7 +454,7 @@ void PdmsFileSession::skipHandleCommand()
 	//"HANDLE(...) does not lie in tokenBuffer, then search it in the file
 	while(!(opened>0 && state==0))
 	{
-		car = getc(file);
+		car = getc(m_file);
 		if(car=='(') {opened++; state++;}
 		else if(car==')') state--;
 	}
@@ -458,9 +464,9 @@ void PdmsFileSession::skipHandleCommand()
 void PdmsFileSession::printWarning(const char* str)
 {
 	if(currentToken == PDMS_EOS)
-		std::cerr << "[" << filename << "]@postprocessing : " << str << std::endl;
+		std::cerr << "[" << m_filename << "]@postprocessing : " << str << std::endl;
 	else
-		std::cerr << "[" << filename << "]@[line " << currentLine << "]::[" << tokenBuffer << "] : " << str << std::endl;
+		std::cerr << "[" << m_filename << "]@[line " << m_currentLine << "]::[" << tokenBuffer << "] : " << str << std::endl;
 }
 
 ///////////////////////////

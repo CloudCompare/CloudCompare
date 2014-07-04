@@ -117,6 +117,21 @@ void AsciiOpenDlg::setSkippedLines(int linesCount)
 	updateTable(m_separator);
 }
 
+static bool CouldBeX (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::X().toUpper()); }
+static bool CouldBeY (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Y().toUpper()); }
+static bool CouldBeZ (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Z().toUpper()); }
+static bool CouldBeR (const QString& colHeader) { return colHeader == AsciiHeaderColumns::R().toUpper() || colHeader.contains("RED"); }
+static bool CouldBeG (const QString& colHeader) { return colHeader == AsciiHeaderColumns::G().toUpper() || colHeader.contains("GREEN"); }
+static bool CouldBeB (const QString& colHeader) { return colHeader == AsciiHeaderColumns::B().toUpper() || colHeader.contains("BLUE"); }
+static bool CouldBeNx(const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Nx().toUpper()) || (colHeader.contains("NORM") && colHeader.contains("X")); }
+static bool CouldBeNy(const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Ny().toUpper()) || (colHeader.contains("NORM") && colHeader.contains("Y")); }
+static bool CouldBeNz(const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Nz().toUpper()) || (colHeader.contains("NORM") && colHeader.contains("Z")); }
+
+static bool CouldBeGrey(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Grey().toUpper(); }
+static bool CouldBeRGBi(const QString& colHeader) { return colHeader == AsciiHeaderColumns::RGB32i().toUpper(); }
+static bool CouldBeRGBf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::RGB32f().toUpper(); }
+static bool CouldBeScal(const QString& colHeader) { return colHeader.contains("SCALAR"); }
+
 static const unsigned MAX_COLUMNS = 256;				//maximum number of columns that can be handled
 static const unsigned LINES_READ_FOR_STATS = 200;		//number of lines read for stats
 static const unsigned DISPLAYED_LINES = 20;				//number of displayed lines
@@ -430,94 +445,88 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 					
 					QString colHeader = headerParts[i].toUpper();
 
-					if ((assignedXYZFlags & X_BIT) == 0 && colHeader.startsWith(AsciiHeaderColumns::X().toUpper()))
+					if ((assignedXYZFlags & X_BIT) == 0 && CouldBeX(colHeader))
 					{
 						//X
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_X);
 						assignedXYZFlags |= X_BIT; //update bit field accordingly
 						m_columnsValidty[i] = true;
 					}
-					else if ((assignedXYZFlags & Y_BIT) == 0 && colHeader.startsWith(AsciiHeaderColumns::Y().toUpper()))
+					else if ((assignedXYZFlags & Y_BIT) == 0 && CouldBeY(colHeader))
 					{
 						//Y
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_Y);
 						assignedXYZFlags |= Y_BIT; //update bit field accordingly
 						m_columnsValidty[i] = true;
 					}
-					else if ((assignedXYZFlags & Z_BIT) == 0 && colHeader.startsWith(AsciiHeaderColumns::Z().toUpper()))
+					else if ((assignedXYZFlags & Z_BIT) == 0 && CouldBeZ(colHeader))
 					{
 						//Z
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_Z);
 						assignedXYZFlags |= Z_BIT; //update bit field accordingly
 						m_columnsValidty[i] = true;
 					}
-					else if ( (assignedRGBFlags & X_BIT) == 0
-						&& (colHeader.startsWith(AsciiHeaderColumns::R().toUpper()) || colHeader.contains("RED")) )
+					else if ( (assignedRGBFlags & X_BIT) == 0 && CouldBeR(colHeader) )
 					{
 						//Red
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_R);
 						assignedRGBFlags |= X_BIT; //update bit field accordingly
 						m_columnsValidty[i] = true;
 					}
-					else if ( (assignedRGBFlags & Y_BIT) == 0
-						&& (colHeader.startsWith(AsciiHeaderColumns::G().toUpper()) || colHeader.contains("GREEN")) )
+					else if ( (assignedRGBFlags & Y_BIT) == 0 && CouldBeG(colHeader) )
 					{
 						//Green
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_G);
 						assignedRGBFlags |= Y_BIT; //update bit field accordingly
 						m_columnsValidty[i] = true;
 					}
-					else if ( (assignedRGBFlags & Z_BIT) == 0
-						&& (colHeader.startsWith(AsciiHeaderColumns::B().toUpper()) || colHeader.contains("BLUE")) )
+					else if ( (assignedRGBFlags & Z_BIT) == 0 && CouldBeB(colHeader) )
 					{
 						//Blue
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_B);
 						assignedRGBFlags |= Z_BIT; //update bit field accordingly
 						m_columnsValidty[i] = true;
 					}
-					else if ( (assignedNormFlags & X_BIT) == 0
-						&& (colHeader.startsWith(AsciiHeaderColumns::Nx().toUpper()) || (colHeader.contains("NORM") && colHeader.contains("X"))) )
+					else if ( (assignedNormFlags & X_BIT) == 0 && CouldBeNx(colHeader) )
 					{
 						//Nx
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_NX);
 						assignedNormFlags |= X_BIT; //update bit field accordingly
 						m_columnsValidty[i] = true;
 					}
-					else if ( (assignedNormFlags & Y_BIT) == 0
-						&& (colHeader.startsWith(AsciiHeaderColumns::Ny().toUpper()) || (colHeader.contains("NORM") && colHeader.contains("Y"))) )
+					else if ( (assignedNormFlags & Y_BIT) == 0 && CouldBeNy(colHeader) )
 					{
 						//Ny
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_NY);
 						assignedNormFlags |= Y_BIT; //update bit field accordingly
 						m_columnsValidty[i] = true;
 					}
-					else if ( (assignedNormFlags & Z_BIT) == 0
-						&& (colHeader.startsWith(AsciiHeaderColumns::Nz().toUpper()) || (colHeader.contains("NORM") && colHeader.contains("Z"))) )
+					else if ( (assignedNormFlags & Z_BIT) == 0 && CouldBeNz(colHeader) )
 					{
 						//Nz
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_NZ);
 						assignedNormFlags |= Z_BIT; //update bit field accordingly
 						m_columnsValidty[i] = true;
 					}
-					else if (colHeader == AsciiHeaderColumns::Grey().toUpper())
+					else if (CouldBeGrey(colHeader))
 					{
 						//Intensity
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_Grey);
 						m_columnsValidty[i] = true;
 					}
-					else if (colHeader == AsciiHeaderColumns::RGB32i().toUpper())
+					else if (CouldBeRGBi(colHeader))
 					{
 						//RGBi
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_RGB32i);
 						m_columnsValidty[i] = true;
 					}
-					else if (colHeader == AsciiHeaderColumns::RGB32f().toUpper())
+					else if (CouldBeRGBf(colHeader))
 					{
 						//RGBf
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_RGB32f);
 						m_columnsValidty[i] = true;
 					}
-					else if (colHeader.contains("SCALAR"))
+					else if (CouldBeScal(colHeader))
 					{
 						//scalar field
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_Scalar);
@@ -767,46 +776,43 @@ bool AsciiOpenDlg::safeSequence() const
 		case ASCII_OPEN_DLG_None:
 			break;
 		case ASCII_OPEN_DLG_X:
-			if (colHeader != AsciiHeaderColumns::X().toUpper())
+			if (!CouldBeX(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_Y:
-			if (colHeader != AsciiHeaderColumns::Y().toUpper())
+			if (!CouldBeY(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_Z:
-			if (colHeader != AsciiHeaderColumns::Z().toUpper())
+			if (!CouldBeZ(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_NX:
-			if (colHeader != AsciiHeaderColumns::Nx().toUpper())
+			if (!CouldBeNx(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_NY:
-			if (colHeader != AsciiHeaderColumns::Ny().toUpper())
+			if (!CouldBeNy(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_NZ:
-			if (colHeader != AsciiHeaderColumns::Nz().toUpper())
+			if (!CouldBeNz(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_R:
-			if (	colHeader != AsciiHeaderColumns::R().toUpper()
-				&&	!colHeader.contains("RED"))
+			if (!CouldBeR(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_G:
-			if (	colHeader != AsciiHeaderColumns::G().toUpper()
-				&&	!colHeader.contains("GREEN"))
+			if (!CouldBeG(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_B:
-			if (	colHeader != AsciiHeaderColumns::B().toUpper()
-				&&	!colHeader.contains("BLUE"))
+			if (!CouldBeB(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_Grey:
-			if (	colHeader != AsciiHeaderColumns::Grey().toUpper()
+			if (	!CouldBeGrey(colHeader)
 				&&	!colHeader.contains("INT"))
 				return false;
 			break;
@@ -814,12 +820,12 @@ bool AsciiOpenDlg::safeSequence() const
 			//a SF name can be anything!
 			break;
 		case ASCII_OPEN_DLG_RGB32i:
-			if (	colHeader != AsciiHeaderColumns::RGB32i().toUpper()
+			if (	!CouldBeRGBi(colHeader)
 				&&	!colHeader.contains("RGB"))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_RGB32f:
-			if (	colHeader != AsciiHeaderColumns::RGB32f().toUpper()
+			if (	!CouldBeRGBf(colHeader)
 				&&	!colHeader.contains("RGB"))
 				return false;
 			break;

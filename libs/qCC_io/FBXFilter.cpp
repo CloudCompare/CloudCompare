@@ -233,7 +233,7 @@ static bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFi
 	return lStatus;
 }
 
-CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
@@ -327,7 +327,7 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, const char* filename)
 	}
 
 	// Save the scene.
-	bool lResult = SaveScene(lSdkManager, lScene, filename);
+	bool lResult = SaveScene(lSdkManager, lScene, qPrintable(filename));
 
 	// Destroy all objects created by the FBX SDK.
 	if( lSdkManager )
@@ -772,7 +772,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 }
 
 
-CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	// Initialize the SDK manager. This object handles memory management.
 	FbxManager* lSdkManager = FbxManager::Create();
@@ -792,7 +792,7 @@ CC_FILE_ERROR FBXFilter::loadFile(const char* filename, ccHObject& container, bo
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	
 	// Use the first argument as the filename for the importer.
-	if (!lImporter->Initialize(filename, -1, lSdkManager->GetIOSettings()))
+	if (!lImporter->Initialize(qPrintable(filename), -1, lSdkManager->GetIOSettings()))
 	{ 
 		ccLog::Warning(QString("[FBX] Error: %1").arg(lImporter->GetStatus().GetErrorString()));
 		result = CC_FERR_READING;

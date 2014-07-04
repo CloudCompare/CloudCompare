@@ -37,9 +37,9 @@ const char CC_SENSOR_ROTATION_ORDER_NAMES[][12] = {	"THETA_PHI",		//Rotation: bo
 													"PHI_THETA"			//Rotation: mirror then body
 };
 
-CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename)
 {
-	if (!entity || !filename)
+	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container hClouds;
@@ -80,7 +80,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
 	QString fullBaseName = QFileInfo(filename).completeBaseName();
 
 	//main file (.POV)
-	FILE* mainFile = fopen(filename,"wt");
+	FILE* mainFile = fopen(qPrintable(filename),"wt");
 	if (!mainFile)
 		return CC_FERR_WRITING;
 
@@ -100,7 +100,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
 		{
 			QString thisFilename = fullBaseName + QString("_%1.bin").arg(i);
 
-			CC_FILE_ERROR error = FileIOFilter::SaveToFile(clouds[i],qPrintable(thisFilename),BIN);
+			CC_FILE_ERROR error = FileIOFilter::SaveToFile(clouds[i],thisFilename,BIN);
 			if (error != CC_FERR_NO_ERROR)
 			{
 				fclose(mainFile);
@@ -152,12 +152,12 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR PovFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-	assert(filename);
+	assert(!filename.isEmpty());
 
 	//opening file
-	FILE* fp = fopen(filename, "rt");
+	FILE* fp = fopen(qPrintable(filename), "rt");
 	if (!fp)
 		return CC_FERR_READING;
 

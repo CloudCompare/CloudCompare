@@ -29,8 +29,8 @@ class PCDFilter : public FileIOFilter
 public:
 
 	//inherited from FileIOFilter
-	virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename);
+	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
 
 protected:
 
@@ -52,7 +52,7 @@ protected:
 		size_t lineCount;
 	};
 
-	CC_FILE_ERROR loadFileBinaryMemMap(const char* filename, ccHObject& container, const PCDHeader& header);
+	CC_FILE_ERROR loadFileBinaryMemMap(QString filename, ccHObject& container, const PCDHeader& header);
 
 	static int ReadScalarFieldMemMap(const QString& fieldname, const InputMemoryFile& mem_file, const PCDHeader& header, ccScalarField& field, size_t count = 0);
 
@@ -62,7 +62,7 @@ protected:
 
 	/*** HELPERS FOR ACCESSING HEADER INFOS ***/
 
-	CC_FILE_ERROR readFileHeader(const char* filename, PCDHeader& header);
+	CC_FILE_ERROR readFileHeader(QString filename, PCDHeader& header);
 
 	static int GetIDOfField(const QString& fieldName, const PCDFilter::PCDHeader& header);
 

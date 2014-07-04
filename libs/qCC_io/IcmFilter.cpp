@@ -29,10 +29,10 @@
 #include <assert.h>
 
 
-CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//ouverture du fichier
-	FILE *fp = fopen(filename, "rt");
+	FILE *fp = fopen(qPrintable(filename), "rt");
 	if (!fp)
 		return CC_FERR_READING;
 
@@ -84,7 +84,7 @@ CC_FILE_ERROR IcmFilter::loadFile(const char* filename, ccHObject& container, bo
 	CC_FILE_TYPES fType = FileIOFilter::GuessFileFormatFromExtension(subFileType);
 
 	//chargement du fichier (potentiellement plusieurs listes) correspondant
-	ccHObject* entities = FileIOFilter::LoadFromFile(qPrintable(QString("%0/%1").arg(path).arg(cloudFileName)),fType);
+	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(cloudFileName),fType);
 	if (!entities)
 	{
 		fclose(fp);
@@ -123,8 +123,8 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 
 	//ouverture du fichier
 	QString completeImageDescFilename = QString("%0/%1").arg(path).arg(imageDescFilename);
-	FILE *fp;
-	if ((fp = fopen(qPrintable(completeImageDescFilename), "rt"))==NULL)
+	FILE* fp = fopen(qPrintable(completeImageDescFilename), "rt");
+	if (fp == NULL)
 	{
 		ccLog::Error(QString("[IcmFilter::loadCalibratedImages] Error opening file %1!").arg(completeImageDescFilename));
 		return -1;
@@ -138,20 +138,20 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 	int loadedImages = 0;
 
 	//IL FAUDRAIT ETRE PLUS SOUPLE QUE CA !!!
-	while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp)!=NULL)
+	while (fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp) != NULL)
 	{
-		if ((line[0]=='D')&&(line[1]=='E')&&(line[2]=='F'))
+		if (line[0] == 'D' && line[1] == 'E' && line[2] == 'F')
 		{
 			char imageFileName[256];
 			sscanf(line,"DEF %s Viewpoint {",imageFileName);
 
-			//on rajoute le chemin
+			//add absolute path
 			ccCalibratedImage* CI = new ccCalibratedImage();
 			QString errorStr;
 			if (!CI->load(QString("%0/%1").arg(path).arg(imageFileName),errorStr))
 			{
+				ccLog::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped...").arg(imageFileName).arg(errorStr));
 				delete CI;
-				ccLog::Warning(QString("[IcmFilter] Failed to load image %1 (%2)! Process stopped ...").arg(imageFileName).arg(errorStr));
 				fclose(fp);
 				return loadedImages;
 			}
@@ -167,13 +167,16 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 			{
 				ccLog::Print("[IcmFilter] Read error (fieldOfView)!");
+				delete CI;
 				fclose(fp);
 				return loadedImages;
 			}
-			float fov_rad=0.0;
+			
+			float fov_rad = 0;
 			sscanf(line,"\t fieldOfView %f\n",&fov_rad);
 			//fov *= CC_RAD_TO_DEG*float(CI->getH())/float(CI->getW());
-			float fov_deg = fov_rad*(float)CC_RAD_TO_DEG;
+			
+			float fov_deg = fov_rad*static_cast<float>(CC_RAD_TO_DEG);
 			CI->setFov(fov_deg);
 			ccLog::Print("\t FOV=%f (degrees)",fov_deg);
 
@@ -182,6 +185,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 			{
 				ccLog::Error("[IcmFilter] Read error (position)!");
+				delete CI;
 				fclose(fp);
 				return loadedImages;
 			}
@@ -194,6 +198,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			if (!fgets(line, MAX_ASCII_FILE_LINE_LENGTH , fp))
 			{
 				ccLog::Error("[IcmFilter] Read error (description)!");
+				delete CI;
 				fclose(fp);
 				return loadedImages;
 			}
@@ -213,6 +218,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			sscanf(line,"\t orientation %f %f %f %f\n",axis,axis+1,axis+2,&angle_rad);
 
 			ccLog::Print("\t Camera orientation=(%f,%f,%f)+[%f]",axis[0],axis[1],axis[2],angle_rad);
+			
 			CI->setCameraMatrix(CCVector3::fromArray(axis),angle_rad,CCVector3::fromArray(t));
 
 			entities->addChild(CI);
@@ -226,7 +232,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 }
 //*/
 
-CC_FILE_ERROR IcmFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR IcmFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	ccLog::Error("Not available yet!");
 

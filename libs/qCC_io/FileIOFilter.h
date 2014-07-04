@@ -224,7 +224,7 @@ public:
 
 	//! Saves an entity (or a group of) to a specific file (with name and type)
 	static CC_FILE_ERROR SaveToFile(ccHObject* entities,
-									const char* filename,
+									const QString& filename,
 									CC_FILE_TYPES fType);
 
 	//! Displays (to console) the message corresponding to a given error code
@@ -245,7 +245,7 @@ public:
 		\param coordinatesShift already applied (input) or newly applied (output) shift on load (3D translation)
 		\return error
 	**/
-	virtual CC_FILE_ERROR loadFile(	const char* filename,
+	virtual CC_FILE_ERROR loadFile(	QString filename,
 									ccHObject& container,
 									bool alwaysDisplayLoadDialog = true,
 									bool* coordinatesShiftEnabled = 0,
@@ -257,10 +257,10 @@ public:
 		\param filename filename
 		\return error
 	**/
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename) = 0;
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename) = 0;
 
 	//! Detecs file type from file extension
-	static CC_FILE_TYPES GuessFileFormatFromExtension(const char* ext);
+	static CC_FILE_TYPES GuessFileFormatFromExtension(QString ext);
 
 	//! Factory: returns a filter given it's type
 	static FileIOFilter* CreateFilter(CC_FILE_TYPES fType);

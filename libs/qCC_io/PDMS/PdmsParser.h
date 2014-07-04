@@ -72,14 +72,13 @@ protected:
 class PdmsFileSession : public PdmsLexer
 {
 protected:
-	static const int s_max_file_name_length = 1024;
-	char filename[s_max_file_name_length];
-	unsigned currentLine;
-	bool eol, eof;
-	FILE *file;
+	std::string m_filename;
+	unsigned m_currentLine;
+	bool m_eol, m_eof;
+	FILE* m_file;
 
 public:
-	PdmsFileSession(const char* fileName);
+	PdmsFileSession(std::string filename);
 	virtual ~PdmsFileSession() {closeSession();}
 	virtual bool initializeSession();
 	virtual void closeSession(bool destroyLoadedObject=false);

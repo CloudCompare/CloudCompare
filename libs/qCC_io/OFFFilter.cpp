@@ -41,7 +41,7 @@
 //System
 #include <string.h>
 
-CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR OFFFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
@@ -117,7 +117,7 @@ static QString GetNextLine(QTextStream& stream)
 	return currentLine;
 }
 
-CC_FILE_ERROR OFFFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR OFFFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//try to open file
 	QFile fp(filename);

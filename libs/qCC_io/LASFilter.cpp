@@ -62,9 +62,9 @@ struct LasField
 	inline const char* getName() { return (type < LAS_INVALID ? LAS_FIELD_NAMES[type] : 0); }
 };
 
-CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 {
-	if (!entity || !filename)
+	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container clouds;
@@ -164,7 +164,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	//open binary file for writing
 	std::ofstream ofs;
-	ofs.open(filename, std::ios::out | std::ios::binary);
+	ofs.open(filename.toStdString(), std::ios::out | std::ios::binary);
 
 	if (ofs.fail())
 		return CC_FERR_WRITING;
@@ -340,11 +340,11 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, const char* filename)
 
 QSharedPointer<LASOpenDlg> s_lasOpenDlg(0);
 
-CC_FILE_ERROR LASFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//opening file
 	std::ifstream ifs;
-	ifs.open(filename, std::ios::in | std::ios::binary);
+	ifs.open(filename.toStdString(), std::ios::in | std::ios::binary);
 
 	if (ifs.fail())
 		return CC_FERR_READING;

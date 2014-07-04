@@ -33,9 +33,9 @@
 //System
 #include <string.h>
 
-CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR VTKFilter::saveToFile(ccHObject* entity, QString filename)
 {
-	if (!entity || !filename)
+	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
 	//look for either a cloud or a mesh
@@ -222,7 +222,7 @@ static bool GetNextNonEmptyLine(QTextStream& stream, QString& line)
 	return true;
 }
 
-CC_FILE_ERROR VTKFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR VTKFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//open ASCII file for reading
 	QFile file(filename);

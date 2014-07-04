@@ -50,7 +50,7 @@
 
 using namespace CCLib;
 
-CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	//ask for output format
 	QMessageBox msgBox(QMessageBox::Question,"Choose output format","Save in BINARY or ASCII format?");
@@ -61,9 +61,9 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename)
 	return saveToFile(entity,filename,msgBox.clickedButton() == asciiButton ? PLY_ASCII : PLY_DEFAULT);
 }
 
-CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_ply_storage_mode storageType)
+CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_storage_mode storageType)
 {
-	if (!entity || !filename)
+	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
 	ccGenericPointCloud* vertices = NULL;
@@ -81,7 +81,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, const char* filename, e_p
 	if (!vertices)
 		return CC_FERR_BAD_ENTITY_TYPE;
 
-	p_ply ply = ply_create(filename, storageType, NULL, 0, NULL);
+	p_ply ply = ply_create(qPrintable(filename), storageType, NULL, 0, NULL);
 	if (!ply)
 		return CC_FERR_WRITING;
 
@@ -679,7 +679,7 @@ static int texCoords_cb(p_ply_argument argument)
 	return 1;
 }
 
-CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//reset statics!
 	s_triCount = 0;
@@ -705,11 +705,11 @@ CC_FILE_ERROR PlyFilter::loadFile(const char* filename, ccHObject& container, bo
 	/****************/
 
 	//open a PLY file for reading
-	p_ply ply = ply_open(filename,NULL, 0, NULL);
+	p_ply ply = ply_open(qPrintable(filename), NULL, 0, NULL);
 	if (!ply)
 		return CC_FERR_READING;
 
-	ccLog::PrintDebug("[PLY] Opening file '%s' ...",filename);
+	ccLog::PrintDebug(QString("[PLY] Opening file '%1' ...").arg(filename));
 
 	if (!ply_read_header(ply))
 	{

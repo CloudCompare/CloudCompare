@@ -39,7 +39,7 @@
 //System
 #include <string.h>
 
-CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
@@ -61,7 +61,7 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, const char* filename)
 	msgBox.exec();
 
 	//try to open file for saving
-	FILE* theFile = fopen(filename,"wb");
+	FILE* theFile = fopen(qPrintable(filename),"wb");
 	if (!theFile)
 		return CC_FERR_WRITING;
 
@@ -303,9 +303,9 @@ static bool TagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 	return true;
 }
 
-CC_FILE_ERROR STLFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-	ccLog::Print("[STL] Loading '%s'",filename);
+	ccLog::Print(QString("[STL] Loading '%1'").arg(filename));
 
 	//try to open the file
 	QFile fp(filename);

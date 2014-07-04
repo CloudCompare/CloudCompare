@@ -76,6 +76,9 @@ v2.5.5 ??/??/2014
 		- (support is still limited to Windows only for now)
 	* Default point size editing dialog (appearing inside 3D views when the mouse hovers their top-left corner) is now
 		displayed upon a semi-transparent background so as to be always visible even when displayed over a green entity.
+	* Non ascii characters in filenames (accents, etc.) are now better handled by file I/O filters
+		(all filters but PLY, OBJ and STL (output only), FBX, DXF, GDAL rasters, PCD
+		 and older/internal formats such as POV, ICM, MA, depth maps)
 - Bug fix:
 	* Loading only the keypoints from a Bundler file (without the images) would result in a corrupted import
 		(wrong values were read)

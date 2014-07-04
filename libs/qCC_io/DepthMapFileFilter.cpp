@@ -29,9 +29,9 @@
 //system
 #include <assert.h>
 
-CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, QString filename)
 {
-	if (!entity || !filename)
+	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container sensors;
@@ -47,9 +47,10 @@ CC_FILE_ERROR DepthMapFileFilter::saveToFile(ccHObject* entity, const char* file
 	}
 
 	//multiple filenames handling
-	QString baseName = QFileInfo(filename).baseName();
+	QFileInfo fi(filename);
+	QString baseName = fi.baseName();
 	baseName.append("_");
-	QString extension = QFileInfo(filename).suffix();
+	QString extension = fi.suffix();
 	if (!extension.isNull())
 		extension.prepend("_");
 
@@ -206,7 +207,7 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR DepthMapFileFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR DepthMapFileFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	ccLog::Error("Not available yet!\n");
 

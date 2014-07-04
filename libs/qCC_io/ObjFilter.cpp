@@ -41,7 +41,7 @@
 //System
 #include <string.h>
 
-CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	if (!entity)
 		return CC_FERR_BAD_ARGUMENT;
@@ -57,7 +57,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
 	}
 
 	//try to open file for saving
-	FILE* theFile = fopen(filename,"wb");
+	FILE* theFile = fopen(qPrintable(filename),"wb");
 	if (!theFile)
 		return CC_FERR_WRITING;
 
@@ -68,7 +68,7 @@ CC_FILE_ERROR ObjFilter::saveToFile(ccHObject* entity, const char* filename)
 	return result;
 }
 
-CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, const char* filename)
+CC_FILE_ERROR ObjFilter::saveToFile(ccGenericMesh* mesh, FILE *theFile, QString filename)
 {
 	assert(theFile && mesh && mesh->size()!=0);
 	unsigned numberOfTriangles = mesh->size();
@@ -341,9 +341,9 @@ struct facetElement
 	}
 };
 
-CC_FILE_ERROR ObjFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-	ccLog::Print("[OBJ] %s",filename);
+	ccLog::Print(QString("[OBJ] ") + filename);
 
 	//open file
 	QFile file(filename);

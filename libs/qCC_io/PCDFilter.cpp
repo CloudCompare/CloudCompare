@@ -33,14 +33,14 @@
 #include <assert.h>
 #include <stdint.h> //for uint fixed-sized types
 
-CC_FILE_ERROR PCDFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR PCDFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	ccLog::Error("Not available yet!");
 
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR PCDFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR PCDFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//read header
 	PCDHeader header;
@@ -90,16 +90,16 @@ CC_FILE_ERROR PCDFilter::loadFile(const char* filename, ccHObject& container, bo
 		
 		qint64 fileSize = QFile(filename).size();
 		return AsciiFilter().loadCloudFromFormatedAsciiFile(filename,
-			container,
-			openSequence,
-			' ',
-			10, //will be evaluated again
-			fileSize,
-			CC_MAX_NUMBER_OF_POINTS_PER_CLOUD,
-			static_cast<unsigned>(header.lineCount),
-			false,
-			coordinatesShiftEnabled,
-			coordinatesShift);
+															container,
+															openSequence,
+															' ',
+															10, //will be evaluated again
+															fileSize,
+															CC_MAX_NUMBER_OF_POINTS_PER_CLOUD,
+															static_cast<unsigned>(header.lineCount),
+															false,
+															coordinatesShiftEnabled,
+															coordinatesShift);
 	}
 	else if (header.data != "binary")
 	{
@@ -110,7 +110,7 @@ CC_FILE_ERROR PCDFilter::loadFile(const char* filename, ccHObject& container, bo
 	return loadFileBinaryMemMap(filename, container, header);
 }
 
-CC_FILE_ERROR PCDFilter::readFileHeader(const char* filename, PCDHeader &header)
+CC_FILE_ERROR PCDFilter::readFileHeader(QString filename, PCDHeader &header)
 {
 	//we get the size of the file to open
 	QFile file(filename);
@@ -377,7 +377,7 @@ int PCDFilter::ReadNormalsMemMap(const InputMemoryFile & mem_file, const PCDHead
 	return 1;
 }
 
-CC_FILE_ERROR PCDFilter::loadFileBinaryMemMap(const char* filename, ccHObject& container, const PCDHeader &header)
+CC_FILE_ERROR PCDFilter::loadFileBinaryMemMap(QString filename, ccHObject& container, const PCDHeader &header)
 {
 	//Should be ok if we are here (header has already been successfully read)
 	//if (!QFile(filename).exists())
@@ -391,7 +391,7 @@ CC_FILE_ERROR PCDFilter::loadFileBinaryMemMap(const char* filename, ccHObject& c
 		return CC_FERR_MALFORMED_FILE;
 
 	//load file in memory
-	InputMemoryFile mem_file(filename);
+	InputMemoryFile mem_file(qPrintable(filename));
 
 	//allocate point cloud
 	size_t pointCount = header.height * header.width;

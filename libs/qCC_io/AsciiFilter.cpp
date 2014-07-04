@@ -58,9 +58,9 @@ QSharedPointer<AsciiOpenDlg> AsciiFilter::GetOpenDialog()
 	return s_openDialog;
 }
 
-CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 {
-	assert(entity && filename);
+	assert(entity && !filename.isEmpty());
 
 	QSharedPointer<AsciiSaveDlg> saveDialog = GetSaveDialog();
 	//if the dialog shouldn't be shown, we'll simply take the default values!
@@ -104,7 +104,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 						subFilename += QString("_%1").arg(cloudCount-counter,6,10,QChar('0'));
 						if (!extension.isEmpty())
 							subFilename += QString(".")+extension;
-						CC_FILE_ERROR result = saveToFile(entity->getChild(i),qPrintable(subFilename));
+						CC_FILE_ERROR result = saveToFile(entity->getChild(i),subFilename);
 						if (result != CC_FERR_NO_ERROR)
 						{
 							return result;
@@ -291,7 +291,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, const char* filename)
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR AsciiFilter::loadFile(const char* filename,
+CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 									ccHObject& container,
 									bool alwaysDisplayLoadDialog/*=true*/,
 									bool* coordinatesShiftEnabled/*=0*/,
@@ -583,7 +583,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 	return cloudDesc;
 }
 
-CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const char* filename,
+CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filename,
 															ccHObject& container,
 															const AsciiOpenDlg::Sequence& openSequence,
 															char separator,

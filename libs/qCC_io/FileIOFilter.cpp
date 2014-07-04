@@ -59,85 +59,85 @@
 //system
 #include <assert.h>
 
-CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(const char* ext)
+CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(QString ext)
 {
-	CC_FILE_TYPES fType = UNKNOWN_FILE;
+	ext = ext.toUpper();
 
-	if (strcmp(ext,"ASC") == 0)
-		fType = ASCII;
-	else if (strcmp(ext,"TXT") == 0)
-		fType = ASCII;
-	else if (strcmp(ext,"XYZ") == 0)
-		fType = ASCII;
-	else if (strcmp(ext,"NEU") == 0)
-		fType = ASCII;
-	else if (strcmp(ext,"PTS") == 0)
-		fType = ASCII;
-	else if (strcmp(ext,"CSV") == 0)
-		fType = ASCII;
-	else if (strcmp(ext,"BIN") == 0)
-		fType = BIN;
-	else if (strcmp(ext,"SOI") == 0)
-		fType = SOI;
-	else if (strcmp(ext,"PN") == 0)
-		fType = PN;
-	else if (strcmp(ext,"PV") == 0)
-		fType = PV;
-	else if (strcmp(ext,"PLY") == 0)
-		fType = PLY;
-	else if (strcmp(ext,"OBJ") == 0)
-		fType = OBJ;
-	else if (strcmp(ext,"POV") == 0)
-		fType = POV;
-	else if (strcmp(ext,"MA") == 0)
-		fType = MA;
-	else if (strcmp(ext,"ICM") == 0)
-		fType = ICM;
-	else if (strcmp(ext,"OUT") == 0)
-		fType = BUNDLER;
-	else if (strcmp(ext,"VTK") == 0)
-		fType = VTK;
-	else if (strcmp(ext,"STL") == 0)
-		fType = STL;
-	else if (strcmp(ext,"PCD") == 0)
-		fType = PCD;
-	else if (strcmp(ext,"OFF") == 0)
-		fType = OFF;
-	else if (strcmp(ext,"PTX") == 0)
-		fType = PTX;
+	if (ext == "ASC")
+		return ASCII;
+	else if (ext == "TXT")
+		return ASCII;
+	else if (ext == "XYZ")
+		return ASCII;
+	else if (ext == "NEU")
+		return ASCII;
+	else if (ext == "PTS")
+		return ASCII;
+	else if (ext == "CSV")
+		return ASCII;
+	else if (ext == "BIN")
+		return BIN;
+	else if (ext == "SOI")
+		return SOI;
+	else if (ext == "PN")
+		return PN;
+	else if (ext == "PV")
+		return PV;
+	else if (ext == "PLY")
+		return PLY;
+	else if (ext == "OBJ")
+		return OBJ;
+	else if (ext == "POV")
+		return POV;
+	else if (ext == "MA")
+		return MA;
+	else if (ext == "ICM")
+		return ICM;
+	else if (ext == "OUT")
+		return BUNDLER;
+	else if (ext == "VTK")
+		return VTK;
+	else if (ext == "STL")
+		return STL;
+	else if (ext == "PCD")
+		return PCD;
+	else if (ext == "OFF")
+		return OFF;
+	else if (ext == "PTX")
+		return PTX;
 #ifdef CC_X3D_SUPPORT
-	else if (strcmp(ext,"X3D") == 0)
-		fType = X3D;
-	else if (strcmp(ext,"WRL") == 0)
-		fType = X3D;
+	else if (ext == "X3D")
+		return X3D;
+	else if (ext == "WRL")
+		return X3D;
 #endif
 #ifdef CC_LAS_SUPPORT
-	else if (strcmp(ext,"LAS") == 0)
-		fType = LAS;
-	else if (strcmp(ext,"LAZ") == 0)
-		fType = LAS; //DGM: LAZ extension is handled by LASFilter
+	else if (ext == "LAS")
+		return LAS;
+	else if (ext == "LAZ")
+		return LAS; //DGM: LAZ extension is handled by LASFilter
 #endif
 #ifdef CC_E57_SUPPORT
-	else if (strcmp(ext,"E57") == 0)
-		fType = E57;
+	else if (ext == "E57")
+		return E57;
 #endif
 #ifdef CC_PDMS_SUPPORT
-	else if (strcmp(ext,"PDMS") == 0 || strcmp(ext,"PDMSMAC") == 0)
-		fType = PDMS;
+	else if (ext == "PDMS" || ext == "PDMSMAC")
+		return PDMS;
 #endif
 #ifdef CC_DXF_SUPPORT
-	else if (strcmp(ext,"DXF") == 0)
-		fType = DXF;
+	else if (ext == "DXF")
+		return DXF;
 #endif
 #ifdef CC_GDAL_SUPPORT
-	else if (strcmp(ext,"TIF") == 0 || strcmp(ext,"TIFF") == 0 || strcmp(ext,"ADF") == 0)
-		fType = RASTER;
+	else if (ext == "TIF" || ext == "TIFF" || ext == "ADF")
+		return RASTER;
 #endif
 #ifdef CC_FBX_SUPPORT
-	else if (strcmp(ext,"FBX") == 0)
-		fType = FBX;
+	else if (ext == "FBX")
+		return FBX;
 #endif
-	return fType;
+	return UNKNOWN_FILE;
 }
 
 FileIOFilter* FileIOFilter::CreateFilter(CC_FILE_TYPES fType)
@@ -246,7 +246,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 		}
 
 		//convert extension to file format
-		fType = GuessFileFormatFromExtension(qPrintable(extension.toUpper()));
+		fType = GuessFileFormatFromExtension(extension);
 
 		//unknown extension?
 		if (fType == UNKNOWN_FILE)
@@ -266,7 +266,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	try
 	{
-		result = fio->loadFile(	qPrintable(filename),
+		result = fio->loadFile(	filename,
 								*container,
 								alwaysDisplayLoadDialog,
 								coordinatesShiftEnabled,
@@ -315,9 +315,9 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	return container;
 }
 
-CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename, CC_FILE_TYPES fType)
+CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const QString& filename, CC_FILE_TYPES fType)
 {
-	if (!entities || !filename || fType == UNKNOWN_FILE)
+	if (!entities || filename.isEmpty() || fType == UNKNOWN_FILE)
 		return CC_FERR_BAD_ARGUMENT;
 
 	FileIOFilter* fio = CreateFilter(fType);
@@ -329,7 +329,7 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const char* filename
 	if (QFileInfo(filename).suffix().isEmpty())
 		completeFileName += QString(".%1").arg(CC_FILE_TYPE_DEFAULT_EXTENSION[fType]);
 
-	CC_FILE_ERROR result = fio->saveToFile(entities, qPrintable(completeFileName));
+	CC_FILE_ERROR result = fio->saveToFile(entities, completeFileName);
 
 	delete fio;
 	fio = 0;
@@ -341,7 +341,7 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
 {
 	QString errorStr;
 
-	bool warning=false;
+	bool warning = false;
 	switch(err)
 	{
 	case CC_FERR_NO_ERROR:

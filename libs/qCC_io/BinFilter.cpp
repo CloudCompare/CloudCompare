@@ -110,9 +110,9 @@ CC_FILE_ERROR _SaveFileV2()
 	return (s_file && s_container ? BinFilter::SaveFileV2(*s_file,s_container) : CC_FERR_BAD_ARGUMENT);
 }
 
-CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, const char* filename)
+CC_FILE_ERROR BinFilter::saveToFile(ccHObject* root, QString filename)
 {
-	if (!root || !filename)
+	if (!root || filename.isNull())
 		return CC_FERR_BAD_ARGUMENT;
 
 	QFile out(filename);
@@ -271,9 +271,9 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 	return result;
 }
 
-CC_FILE_ERROR BinFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
-	ccLog::Print("[BIN] Opening file '%s'...",filename);
+	ccLog::Print(QString("[BIN] Opening file '%1'...").arg(filename));
 
 	//opening file
 	QFile in(filename);

@@ -39,13 +39,13 @@
 
 const char CC_PTX_INTENSITY_FIELD_NAME[] = "Intensity";
 
-CC_FILE_ERROR PTXFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR PTXFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	//not supported
 	return CC_FERR_WRONG_FILE_TYPE;
 }
 
-CC_FILE_ERROR PTXFilter::loadFile(	const char* filename,
+CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 									ccHObject& container,
 									bool alwaysDisplayLoadDialog/*=true*/,
 									bool* coordinatesShiftEnabled/*=0*/,

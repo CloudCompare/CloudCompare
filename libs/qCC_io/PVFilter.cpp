@@ -28,9 +28,9 @@
 //Qt
 #include <QFile>
 
-CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, QString filename)
 {
-	if (!entity || !filename)
+	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container clouds;
@@ -90,7 +90,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-	for (unsigned i=0;i<numberOfPoints;i++)
+	for (unsigned i=0; i<numberOfPoints; i++)
 	{
 		//write point
 		{
@@ -126,7 +126,7 @@ CC_FILE_ERROR PVFilter::saveToFile(ccHObject* entity, const char* filename)
 	return result;
 }
 
-CC_FILE_ERROR PVFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR PVFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//opening file
 	QFile in(filename);

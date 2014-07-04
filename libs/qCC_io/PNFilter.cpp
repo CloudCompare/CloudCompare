@@ -28,9 +28,9 @@
 //default normal value
 static const PointCoordinateType s_defaultNorm[3] = {0,0,1};
 
-CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename)
 {
-	if (!entity || !filename)
+	if (!entity || filename.isEmpty())
 		return CC_FERR_BAD_ARGUMENT;
 
 	ccHObject::Container clouds;
@@ -125,7 +125,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, const char* filename)
 	return result;
 }
 
-CC_FILE_ERROR PNFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR PNFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//opening file
 	QFile in(filename);

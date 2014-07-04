@@ -39,20 +39,20 @@
 #include <QFile>
 #include <QTextStream>
 
-CC_FILE_ERROR X3DFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR X3DFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	//TODO
 	return CC_FERR_NO_SAVE;
 }
 
-CC_FILE_ERROR X3DFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR X3DFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	XIOT::X3DLoader loader;
 	X3DXIOTNodeHandler handler(&container);
 	loader.setNodeHandler(&handler);
 	try
 	{
-		loader.load(filename);
+		loader.load(qPrintable(filename));
 	}
 	catch (XIOT::X3DParseException& e)
 	{

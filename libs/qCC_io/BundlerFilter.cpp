@@ -78,7 +78,7 @@ struct BundlerCamera
 	bool isValid;
 };
 
-CC_FILE_ERROR BundlerFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR BundlerFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	return loadFileExtended(filename,container,true,coordinatesShiftEnabled,coordinatesShift);
 }
@@ -91,7 +91,7 @@ struct ORImageInfo
 	double minC[2],maxC[2]; //local bounding box
 };
 
-CC_FILE_ERROR BundlerFilter::loadFileExtended(	const char* filename,
+CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 												ccHObject& container,
 												bool alwaysDisplayLoadDialog/*=true*/,
 												bool* coordinatesShiftEnabled/*=0*/,
@@ -1027,7 +1027,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const char* filename,
 						//auto save DTM vertices
 						BinFilter bf;
 						QString outputFile = imageDir.absoluteFilePath("colored_dtm_vertices.bin");
-						if (bf.saveToFile(mntCloud,qPrintable(outputFile)) == CC_FERR_NO_ERROR)
+						if (bf.saveToFile(mntCloud,outputFile) == CC_FERR_NO_ERROR)
 							ccLog::Print(QString("[BundlerFilter] Color DTM vertices automatically saved to '%2'").arg(outputFile));
 						else
 							ccLog::Warning(QString("[BundlerFilter] Failed to save DTM vertices to '%2'").arg(outputFile));

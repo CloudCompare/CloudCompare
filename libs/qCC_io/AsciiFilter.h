@@ -33,10 +33,10 @@ class AsciiFilter : public FileIOFilter
 public:
 
 	//inherited from FileIOFilter
-	virtual CC_FILE_ERROR loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, const char* filename);
+	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
+	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
 
-	CC_FILE_ERROR loadCloudFromFormatedAsciiFile(	const char* filename,
+	CC_FILE_ERROR loadCloudFromFormatedAsciiFile(	const QString& filename,
 													ccHObject& container,
 													const AsciiOpenDlg::Sequence& openSequence,
 													char separator,

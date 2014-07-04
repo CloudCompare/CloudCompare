@@ -635,7 +635,7 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 
 }
 
-CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename)
 {
 	//we assume the input entity is either a cloud or a group of clouds (=multiple scans)
 	std::vector<ccPointCloud*> scans;
@@ -655,7 +655,7 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, const char* filename)
 		return CC_FERR_NO_SAVE;
 
 	//Write file to disk
-	e57::ImageFile imf(filename, "w");
+	e57::ImageFile imf(filename.toStdString(), "w");
 	if (!imf.isOpen())
 		return CC_FERR_WRITING;
 
@@ -2038,12 +2038,12 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	return imageObj;
 }
 
-CC_FILE_ERROR E57Filter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	s_alwaysDisplayLoadDialog = alwaysDisplayLoadDialog;
 
 	//Read file from disk
-	e57::ImageFile imf(filename, "r");
+	e57::ImageFile imf(filename.toStdString(), "r");
 	if (!imf.isOpen())
 		return CC_FERR_READING;
 

@@ -22,16 +22,16 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 
-CC_FILE_ERROR SoiFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR SoiFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	ccLog::Print("Function is not implemented yet !");
 	return CC_FERR_NO_SAVE;
 }
 
-CC_FILE_ERROR SoiFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	//open the file
-	FILE *fp = fopen(filename, "rt");
+	FILE *fp = fopen(qPrintable(filename), "rt");
 	if (!fp)
 		return CC_FERR_READING;
 

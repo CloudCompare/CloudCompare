@@ -36,22 +36,22 @@
 //System
 #include <string.h> //for memset
 
-CC_FILE_ERROR RasterGridFilter::saveToFile(ccHObject* entity, const char* filename)
+CC_FILE_ERROR RasterGridFilter::saveToFile(ccHObject* entity, QString filename)
 {
 
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR RasterGridFilter::loadFile(const char* filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
 {
 	GDALAllRegister();
 	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
 
-	GDALDataset* poDataset = static_cast<GDALDataset*>(GDALOpen( filename, GA_ReadOnly ));
+	GDALDataset* poDataset = static_cast<GDALDataset*>(GDALOpen( qPrintable(filename), GA_ReadOnly ));
 
 	if( poDataset != NULL )
 	{
-		ccLog::Print("Raster file: '%s'", filename);
+		ccLog::Print(QString("Raster file: '%1'").arg(filename));
 		ccLog::Print( "Driver: %s/%s",
 			poDataset->GetDriver()->GetDescription(), 
 			poDataset->GetDriver()->GetMetadataItem( GDAL_DMD_LONGNAME ) );

@@ -283,6 +283,7 @@ protected slots:
 	void doActionSFGaussianFilter();
 	void doActionSFBilateralFilter();
 	void doActionSFConvertToRGB();
+	void doActionSFConvertToRandomRGB();
 	void doActionRenameSF();
 	void doActionOpenColorScalesManager();
 	void doActionAddIdField();

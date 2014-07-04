@@ -156,6 +156,7 @@
      <addaction name="actionBilateralFilter"/>
      <addaction name="actionFilterByValue"/>
      <addaction name="actionConvertToRGB"/>
+     <addaction name="actionConvertToRandomRGB"/>
      <addaction name="actionRenameSF"/>
      <addaction name="separator"/>
      <addaction name="actionAddConstantSF"/>
@@ -2543,6 +2544,11 @@
    </property>
    <property name="toolTip">
     <string>Reset all GUI elements positions (after restart)</string>
+   </property>
+  </action>
+  <action name="actionConvertToRandomRGB">
+   <property name="text">
+    <string>Convert to random RGB</string>
    </property>
   </action>
  </widget>

@@ -53,14 +53,18 @@ v2.5.5 ??/??/2014
 	* 'Color' and 'Scalar field' visibility checkboxes in the entity 'Properties' dialog have been merged:
 		- a unique combo-box now lets the user choose between no color, RGB or SF colors
 	* ASCII files loading:
-		* the dialog now handles the header line (if any) in a smarter way (the 'skip lines' count is correctly
+		- the dialog now handles the header line (if any) in a smarter way (the 'skip lines' count is correctly
 			updated, the extracted header is displayed, etc.)
-		* new command line option:
+		- new command line option:
 			* '-SKIP [number of lines]' after '-O' to specify the number of lines that should be skipped
 		* new mechanism to detect the column type based on the header line (if any)
 			* when loading an ASCII file in CloudCompare this should set the columns type automatically
 			* when loading an ASCII file from the command line this should prevent the dialog from appearing
-				(if standard names are used: X, Y, Z, Nx, Ny, Nz, R, G, B, etc.)
+				(if standard names are used: X.., Y.., Z.., Nx, Ny, Nz, Normx, Normy, Normz, R, Red, G, Green, B, Blue, etc.)
+	* New method:
+		- "Edit > Scalar field(s) > Convert to random RGB"
+		- Converts a scalar field to random RGB colors: the user only specifies the number of random colors
+			that will be generated and regularly sampled over the scalar field interval ([sfMin ; sfMax])
 	* New option in the LAS file opening dialog:
 		- 'Force 8-bit colors': to cope with files in which colors are mistakenly coded on 8 bits (instead of 16)
 	* The 'Poisson Surface Reconstruction' plugin (qPoissonRecon) is now based on the version 5.71 of PoissonRecon lib

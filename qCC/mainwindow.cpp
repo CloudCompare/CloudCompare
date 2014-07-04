@@ -832,6 +832,7 @@ void MainWindow::connectActions()
 	connect(actionScalarFieldArithmetic,		SIGNAL(triggered()),	this,		SLOT(doActionScalarFieldArithmetic()));
 	connect(actionScalarFieldFromColor,			SIGNAL(triggered()),	this,		SLOT(doActionScalarFieldFromColor()));
 	connect(actionConvertToRGB,					SIGNAL(triggered()),	this,		SLOT(doActionSFConvertToRGB()));
+	connect(actionConvertToRandomRGB,			SIGNAL(triggered()),	this,		SLOT(doActionSFConvertToRandomRGB()));
 	connect(actionRenameSF,						SIGNAL(triggered()),	this,		SLOT(doActionRenameSF()));
 	connect(actionOpenColorScalesManager,		SIGNAL(triggered()),	this,		SLOT(doActionOpenColorScalesManager()));
 	connect(actionAddIdField,					SIGNAL(triggered()),	this,		SLOT(doActionAddIdField()));
@@ -3273,6 +3274,90 @@ void MainWindow::doActionFilterByValue()
 	refreshAll();
 }
 
+static int s_randomColorsNumber = 256;
+void MainWindow::doActionSFConvertToRandomRGB()
+{
+	bool ok;
+	s_randomColorsNumber = QInputDialog::getInt(this, "Random colors", "Number of random colors (will be regularly sampled over the SF interval):", s_randomColorsNumber, 2, 2147483647, 16, &ok);
+	if (!ok)
+		return;
+	assert(s_randomColorsNumber > 1);
+
+	ColorsTableType* randomColors = new ColorsTableType;
+	if (!randomColors->reserve(static_cast<unsigned>(s_randomColorsNumber)))
+	{
+		ccConsole::Error("Not enough memory!");
+		return;
+	}
+
+	//generate random colors
+	{
+		for (int i=0; i<s_randomColorsNumber; ++i)
+		{
+			colorType col[3];
+			ccColor::Generator::Random(col);
+			randomColors->addElement(col);
+		}
+	}
+
+	//apply random colors
+	size_t selNum = m_selectedEntities.size();
+	for (size_t i=0; i<selNum; ++i)
+	{
+		ccGenericPointCloud* cloud = 0;
+		ccHObject* ent = m_selectedEntities[i];
+
+		bool lockedVertices;
+		cloud = ccHObjectCaster::ToPointCloud(ent,&lockedVertices);
+		if (lockedVertices)
+		{
+			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+			continue;
+		}
+		if (cloud) //TODO
+		{
+			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
+			ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+			//if there is no displayed SF --> nothing to do!
+			if (sf && sf->currentSize() >= pc->size())
+			{
+				if (!pc->resizeTheRGBTable(false))
+				{
+					ccConsole::Error("Not enough memory!");
+					break;
+				}
+				else
+				{
+					ScalarType minSF = sf->getMin();
+					ScalarType maxSF = sf->getMax();
+
+					ScalarType step = (maxSF-minSF)/(s_randomColorsNumber-1);
+					if (step == 0)
+						step = static_cast<ScalarType>(1.0);
+
+					for (unsigned i=0; i<pc->size(); ++i)
+					{
+						ScalarType val = sf->getValue(i);
+						unsigned colIndex = static_cast<unsigned>((val-minSF)/step);
+						if (colIndex == s_randomColorsNumber)
+							--colIndex;
+
+						pc->setPointColor(i,randomColors->getValue(colIndex));
+					}
+
+					pc->showColors(true);
+					pc->showSF(false);
+				}
+			}
+
+			cloud->prepareDisplayForRefresh_recursive();
+		}
+	}
+
+	refreshAll();
+	updateUI();
+}
+
 void MainWindow::doActionSFConvertToRGB()
 {
 	//we first ask the user if the SF colors should be mixed with existing colors
@@ -3280,7 +3365,7 @@ void MainWindow::doActionSFConvertToRGB()
 	{
 		QMessageBox::StandardButton answer = QMessageBox::warning(	this,
 																	"Scalar Field to RGB",
-																	"Mix with existing colors (if relevant)?",
+																	"Mix with existing colors (if any)?",
 																	QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
 																	QMessageBox::Yes );
 		if (answer == QMessageBox::Yes)
@@ -9410,6 +9495,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	actionFilterByValue->setEnabled(atLeastOneSF);
 	actionConvertToRGB->setEnabled(atLeastOneSF);
+	actionConvertToRandomRGB->setEnabled(atLeastOneSF);
 	actionRenameSF->setEnabled(atLeastOneSF);
 	actionAddIdField->setEnabled(atLeastOneCloud);
 	actionComputeStatParams->setEnabled(atLeastOneSF);

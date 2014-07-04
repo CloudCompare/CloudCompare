@@ -325,8 +325,33 @@ void ccGLWindow::initializeGL()
 	InitGLEW();
 
 	//OpenGL version
+	const char* vendorName = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
 	if (!m_silentInitialization)
+	{
 		ccLog::Print("[3D View %i] GL version: %s",m_uniqueID,glGetString(GL_VERSION));
+		ccLog::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
+	}
+
+	ccGui::ParamStruct params = getDisplayParameters();
+
+	//VBO support
+	if (ccFBOUtils::CheckVBOAvailability())
+	{
+		if (params.useVBOs && (!vendorName || QString(vendorName).toUpper().startsWith("ATI")))
+		{
+			if (!m_silentInitialization)
+				ccLog::Warning("[3D View %i] VBO support has been disabled as it may not work on %s cards!\nYou can manually activate it in the display settings (at your own risk!)",m_uniqueID,vendorName);
+			params.useVBOs = false;
+		}
+		else if (!m_silentInitialization)
+		{
+			ccLog::Print("[3D View %i] VBOs available",m_uniqueID);
+		}
+	}
+	else
+	{
+		params.useVBOs = false;
+	}
 
 	//Shaders and other OpenGL extensions
 	m_shadersEnabled = ccFBOUtils::CheckShadersAvailability();
@@ -356,12 +381,7 @@ void ccGLWindow::initializeGL()
 		//color ramp shader
 		if (!m_colorRampShader)
 		{
-			const char* vendorName = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
-			if (!m_silentInitialization)
-				ccLog::Print("[3D View %i] Graphic card manufacturer: %s",m_uniqueID,vendorName);
-
 			//we will update global parameters
-			ccGui::ParamStruct params = getDisplayParameters();
 			params.colorScaleShaderSupported = false;
 
 			GLint maxBytes = 0;
@@ -406,10 +426,11 @@ void ccGLWindow::initializeGL()
 					}
 				}
 			}
-
-			setDisplayParameters(params,hasOverridenDisplayParameters());
 		}
 	}
+
+	//apply (potentially) updated parameters;
+	setDisplayParameters(params,hasOverridenDisplayParameters());
 
 #if 0
 	//OpenGL 3.3+ rendering shader

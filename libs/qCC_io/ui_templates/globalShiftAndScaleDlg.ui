@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>643</width>
-    <height>365</height>
+    <height>389</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -209,6 +209,9 @@
             <height>200</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>This version corresponds to the input (or output) file</string>
+          </property>
           <property name="styleSheet">
            <string notr="true">background-color:rgb(187,224,227);</string>
           </property>
@@ -232,7 +235,7 @@
              </property>
              <property name="text">
               <string>Point in original
-coordinate system</string>
+coordinate system (on disk)</string>
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
@@ -616,6 +619,9 @@ coordinate system</string>
               <width>150</width>
               <height>150</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>This version is the one CloudCompare will work with. Mind the digits!</string>
             </property>
             <property name="styleSheet">
              <string notr="true">background-color:rgb(187,224,227);</string>

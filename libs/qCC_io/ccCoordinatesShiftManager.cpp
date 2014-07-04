@@ -138,19 +138,31 @@ bool ccCoordinatesShiftManager::Handle(	const CCVector3d& P,
 		int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",shift,scale));
 		sasDlg.makeCurrent(index);
 		//add "last" entry (if available)
-		ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
-		if (sasDlg.getLast(lastInfo))
 		{
-			int lastIndex = sasDlg.addShiftInfo(lastInfo);
-			//automatically make the 'last one' active if it suits our needs!
-			if (	!NeedShift((CCVector3d(P) + lastInfo.shift) * lastInfo.scale )
-				&&  !NeedRescale(diagonal*lastInfo.scale) )
-			{
-				sasDlg.makeCurrent(lastIndex);
-			}
+			ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
+			if (sasDlg.getLast(lastInfo))
+				sasDlg.addShiftInfo(lastInfo);
 		}
 		//add entries from file (if any)
 		sasDlg.addFileInfo();
+		//automatically make the first available shift that works
+		//(different than the suggested one) active
+		{
+			for (size_t i=static_cast<size_t>(std::max(0,index+1)); i<sasDlg.infoCount(); ++i)
+			{
+				ccShiftAndScaleCloudDlg::ShiftInfo info;
+				if (sasDlg.getInfo(i,info))
+				{
+					//check if they work
+					if (	!NeedShift((CCVector3d(P) + info.shift) * info.scale )
+						&&  !NeedRescale(diagonal*info.scale) )
+					{
+						sasDlg.makeCurrent(static_cast<int>(i));
+						break;
+					}
+				}
+			}
+		}
 
 		if (sasDlg.exec())
 		{

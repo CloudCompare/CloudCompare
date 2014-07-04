@@ -255,14 +255,14 @@ void ccShiftAndScaleCloudDlg::updateGlobalSystem()
 		diag = m_localDiagonal / getScale();
 	}
 
-	m_ui->xOriginLabel->setText(QString("x = %1").arg(P.x,0,'f',2));
+	m_ui->xOriginLabel->setText(QString("x = %1").arg(P.x,0,'f'));
 	m_ui->xOriginLabel->setStyleSheet(AlmostEq(P.x,m_originalPoint.x) ? QString() : QString("color: purple;"));
-	m_ui->yOriginLabel->setText(QString("y = %1").arg(P.y,0,'f',2));
+	m_ui->yOriginLabel->setText(QString("y = %1").arg(P.y,0,'f'));
 	m_ui->yOriginLabel->setStyleSheet(AlmostEq(P.y,m_originalPoint.y) ? QString() : QString("color: purple;"));
-	m_ui->zOriginLabel->setText(QString("z = %1").arg(P.z,0,'f',2));
+	m_ui->zOriginLabel->setText(QString("z = %1").arg(P.z,0,'f'));
 	m_ui->zOriginLabel->setStyleSheet(AlmostEq(P.z,m_originalPoint.z) ? QString() : QString("color: purple;"));
 
-	m_ui->diagOriginLabel->setText(QString("diagonal = %1").arg(diag,0,'f',2));
+	m_ui->diagOriginLabel->setText(QString("diagonal = %1").arg(diag,0,'f'));
 	m_ui->diagOriginLabel->setStyleSheet(AlmostEq(diag,m_originalDiagonal) ? QString() : QString("color: purple;"));
 }
 
@@ -276,14 +276,20 @@ void ccShiftAndScaleCloudDlg::updateLocalSystem()
 		localDiagonal = m_originalDiagonal * getScale();
 	}
 
-	m_ui->xDestLabel->setText(QString("x = %1").arg(localPoint.x,0,'f',2));
+	//adaptive precision
+	double maxCoord = std::max(fabs(localPoint.x),fabs(localPoint.y));
+	maxCoord = std::max(fabs(localPoint.z),maxCoord);
+	int digitsBeforeDec = static_cast<int>(floor(log10(maxCoord)))+1;
+	int prec = std::max(0,8-digitsBeforeDec);
+
+	m_ui->xDestLabel->setText(QString("x = %1").arg(localPoint.x,0,'f',prec));
 	m_ui->xDestLabel->setStyleSheet(ccCoordinatesShiftManager::NeedShift(localPoint.x) ? QString("color: red;") : QString() );
-	m_ui->yDestLabel->setText(QString("y = %1").arg(localPoint.y,0,'f',2));
+	m_ui->yDestLabel->setText(QString("y = %1").arg(localPoint.y,0,'f',prec));
 	m_ui->yDestLabel->setStyleSheet(ccCoordinatesShiftManager::NeedShift(localPoint.y) ? QString("color: red;") : QString() );
-	m_ui->zDestLabel->setText(QString("z = %1").arg(localPoint.z,0,'f',2));
+	m_ui->zDestLabel->setText(QString("z = %1").arg(localPoint.z,0,'f',prec));
 	m_ui->zDestLabel->setStyleSheet(ccCoordinatesShiftManager::NeedShift(localPoint.z) ? QString("color: red;") : QString() );
 
-	m_ui->diagDestLabel->setText(QString("diagonal = %1").arg(localDiagonal,0,'f',2));
+	m_ui->diagDestLabel->setText(QString("diagonal = %1").arg(localDiagonal,0,'f',prec));
 	m_ui->diagDestLabel->setStyleSheet(ccCoordinatesShiftManager::NeedRescale(localDiagonal) ? QString("color: red;") : QString() );
 }
 
@@ -415,9 +421,19 @@ bool ccShiftAndScaleCloudDlg::getLast(ShiftInfo& info) const
 	return s_lastInfo.valid;
 }
 
+bool ccShiftAndScaleCloudDlg::getInfo(size_t index, ShiftInfo& info) const
+{
+	if (index >= m_defaultInfos.size())
+		return false;
+
+	info = m_defaultInfos[index];
+
+	return true;
+}
+
 void ccShiftAndScaleCloudDlg::makeCurrent(int index)
 {
-	if (s_lastInfo.valid && index >= 0 && index < static_cast<int>(m_defaultInfos.size()))
+	if (index >= 0 && index < static_cast<int>(m_defaultInfos.size()))
 	{
 		m_ui->loadComboBox->setCurrentIndex(index);
 	}

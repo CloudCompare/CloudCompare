@@ -62,7 +62,7 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	m_ui->commentLinesSkippedLabel->hide();
 
 	connect(m_ui->buttonBox,			SIGNAL(accepted()),						this, SLOT(testBeforeAccept()));
-	connect(m_ui->lineEditSeparator,	SIGNAL(textChanged(const QString &)),	this, SLOT(updateTable(const QString &)));
+	connect(m_ui->lineEditSeparator,	SIGNAL(textChanged(const QString &)),	this, SLOT(onSeparatorChange(const QString &)));
 	connect(m_ui->spinBoxSkipLines,		SIGNAL(valueChanged(int)),				this, SLOT(setSkippedLines(int)));
 
 	//shortcut buttons
@@ -114,7 +114,7 @@ void AsciiOpenDlg::setSkippedLines(int linesCount)
 
 	m_skippedLines = static_cast<unsigned>(linesCount);
 
-	updateTable(m_separator);
+	updateTable();
 }
 
 static bool CouldBeX (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::X().toUpper()); }
@@ -154,7 +154,28 @@ static int EnabledBits(unsigned bitField3)
 	return count;
 }
 
-void AsciiOpenDlg::updateTable(const QString &separator)
+void AsciiOpenDlg::onSeparatorChange(const QString& separator)
+{
+	assert(separator.size() == 1);
+	if (separator.length() < 1)
+	{
+		m_ui->asciiCodeLabel->setText("Enter a valid character!");
+		m_ui->buttonBox->setEnabled(false);
+		m_ui->tableWidget->clear();
+		m_columnsValidty.clear();
+		return;
+	}
+
+	//new separator
+	m_separator = separator[0];
+	m_ui->asciiCodeLabel->setText(QString("(ASCII code: %1)").arg(m_separator.unicode()));
+
+	m_headerLine.clear(); //to force re-assignation of columns!
+	
+	updateTable();
+}
+
+void AsciiOpenDlg::updateTable()
 {
 	m_ui->tableWidget->setEnabled(false);
 	m_ui->extractSFNamesFrom1stLineCheckBox->setEnabled(false);
@@ -167,16 +188,6 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 		m_ui->tableWidget->clear();
 		return;
 	}
-
-	if (separator.length() < 1)
-	{
-		m_ui->asciiCodeLabel->setText("Enter a valid character!");
-		m_ui->buttonBox->setEnabled(false);
-		m_ui->tableWidget->clear();
-		m_columnsValidty.clear();
-		return;
-	}
-
 	//we open the file in ASCII mode
 	QFile file(m_filename);
 	if (!file.open(QFile::ReadOnly))
@@ -198,9 +209,6 @@ void AsciiOpenDlg::updateTable(const QString &separator)
 		}
 	}
 
-	//new separator
-	m_separator = separator[0];
-	m_ui->asciiCodeLabel->setText(QString("(ASCII code: %1)").arg(m_separator.unicode()));
 	//if the old setup has less than 3 columns, we forget it
 	if (m_columnsCount < 3)
 	{

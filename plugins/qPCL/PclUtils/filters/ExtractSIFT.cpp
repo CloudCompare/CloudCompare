@@ -223,7 +223,7 @@ int ExtractSIFT::compute()
 		return -53;
 	}
 
-	ccPointCloud* out_cloud_cc = sm2ccConverter(out_cloud_sm).getCCloud();
+	ccPointCloud* out_cloud_cc = sm2ccConverter(out_cloud_sm).getCloud();
 	if (!out_cloud_cc)
 	{
 		//conversion failed (not enough memory?)

@@ -35,7 +35,7 @@ sm2ccConverter::sm2ccConverter(PCLCloud::Ptr sm_cloud)
 	assert(sm_cloud);
 }
 
-ccPointCloud* sm2ccConverter::getCCloud()
+ccPointCloud* sm2ccConverter::getCloud()
 {
 	if (!m_sm_cloud)
 	{
@@ -106,7 +106,7 @@ bool sm2ccConverter::addXYZ(ccPointCloud *cloud)
 
 	size_t pointCount = getNumberOfPoints();
 
-	if (!cloud->reserveThePointsTable((unsigned)pointCount))
+	if (!cloud->reserve(static_cast<unsigned>(pointCount)))
 		return false;
 
 	//add xyz to the given cloud taking xyz infos from the sm cloud
@@ -122,7 +122,7 @@ bool sm2ccConverter::addXYZ(ccPointCloud *cloud)
 
 		cloud->addPoint(P);
 	}
-	
+
 	return true;
 }
 

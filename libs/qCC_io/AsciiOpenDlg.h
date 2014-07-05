@@ -155,8 +155,10 @@ public:
 	static bool CheckOpenSequence(const Sequence& sequence, QString& errorMessage);
 
 public slots:
+	//! Slot called when separator changes
+	void onSeparatorChange(const QString& separator);
 	//! Forces the table to update itself
-	void updateTable(const QString& separator);
+	void updateTable();
 	//! Sets the number of lines to skip
 	void setSkippedLines(int linesCount);
 

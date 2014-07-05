@@ -38,7 +38,7 @@ public:
 	sm2ccConverter(PCLCloud::Ptr sm_cloud);
 
 	//! Converts inut cloud (see constructor) to a ccPointCloud
-	ccPointCloud* getCCloud();
+	ccPointCloud* getCloud();
 
 	bool addXYZ(ccPointCloud *cloud);
 	bool addNormals(ccPointCloud *cloud);

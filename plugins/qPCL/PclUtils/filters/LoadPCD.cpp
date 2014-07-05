@@ -139,18 +139,27 @@ int LoadPCD::compute()
 		sensor->setRigidTransformation(ccRot);
 		sensor->setDeltaPhi(static_cast<PointCoordinateType>(0.05));
 		sensor->setDeltaTheta(static_cast<PointCoordinateType>(0.05));
+		sensor->setVisible(true);
 
 		//uncertainty to some default
 		sensor->setUncertainty(static_cast<PointCoordinateType>(0.01));
 
-		ccPointCloud* out_cloud = sm2ccConverter(cloud_ptr).getCCloud();
+		ccPointCloud* out_cloud = sm2ccConverter(cloud_ptr).getCloud();
 		if (!out_cloud)
 			return -31;
+
+		sensor->setGraphicScale(out_cloud->getBB().getDiagNorm() / 10);
 
 		//do the projection on sensor
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(out_cloud);
 		int errorCode;
-		sensor->project(cloud,errorCode,true);
+		CCLib::SimpleCloud* projectedCloud = sensor->project(cloud,errorCode,true);
+		if (projectedCloud)
+		{
+			//DGM: we don't use it but we still have to delete it!
+			delete projectedCloud;
+			projectedCloud = 0;
+		}
 
 		QString cloud_name = QFileInfo(filename).baseName();
 		out_cloud->setName(cloud_name);
@@ -159,7 +168,6 @@ int LoadPCD::compute()
 		QString containerName = QString("%1 (%2)").arg(fi.fileName()).arg(fi.absolutePath());
 
 		ccHObject* cloudContainer = new ccHObject(containerName);
-		assert(out_cloud);
 		out_cloud->addChild(sensor);
 		cloudContainer->addChild(out_cloud);
 

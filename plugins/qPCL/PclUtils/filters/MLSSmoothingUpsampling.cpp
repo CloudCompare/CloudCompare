@@ -102,7 +102,7 @@ int MLSSmoothingUpsampling::compute()
 	PCLCloud::Ptr sm_normals (new PCLCloud);
 	TO_PCL_CLOUD(*normals, *sm_normals);
 
-	ccPointCloud* new_cloud = sm2ccConverter(sm_normals).getCCloud();
+	ccPointCloud* new_cloud = sm2ccConverter(sm_normals).getCloud();
 	if (!new_cloud)
 	{
 		//conversion failed (not enough memory?)

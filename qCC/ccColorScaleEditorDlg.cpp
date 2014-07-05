@@ -92,7 +92,7 @@ ccColorScaleEditorDialog::~ccColorScaleEditorDialog()
 void ccColorScaleEditorDialog::setAssociatedScalarField(ccScalarField* sf)
 {
 	m_associatedSF = sf;
-	if (m_associatedSF && !m_colorScale || m_colorScale->isRelative()) //we only update those values if the current scale is not absolute!
+	if ((m_associatedSF && !m_colorScale) || m_colorScale->isRelative()) //we only update those values if the current scale is not absolute!
 	{
 		m_minAbsoluteVal = m_associatedSF->getMin();
 		m_maxAbsoluteVal = m_associatedSF->getMax();

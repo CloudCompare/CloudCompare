@@ -136,7 +136,7 @@ void sfEditDlg::fillDialogWith(ccScalarField* sf)
 		histoFrame->setVisible(true);
 		{
 			const ccScalarField::Histogram& histogram = m_associatedSF->getHistogram();
-			unsigned classNumber = static_cast<unsigned>(m_associatedSF->getHistogram().size());
+			unsigned classNumber = static_cast<unsigned>(histogram.size());
 			if (classNumber == 0)
 				classNumber = 128;
 			m_associatedSFHisto->fromSF(m_associatedSF,classNumber,false);

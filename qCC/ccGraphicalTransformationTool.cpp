@@ -344,7 +344,6 @@ void ccGraphicalTransformationTool::apply()
 		ccHObject* toTransform = m_toTransform->getChild(i);
 		toTransform->setGLTransformation(correctedFinalTrans);
 
-		ccHObject* parent = 0;
 		//DGM: warning, applyGLTransformation may delete associated octree!
 		MainWindow::ccHObjectContext objContext = MainWindow::TheInstance()->removeObjectTemporarilyFromDBTree(toTransform);
 		toTransform->applyGLTransformation_recursive();

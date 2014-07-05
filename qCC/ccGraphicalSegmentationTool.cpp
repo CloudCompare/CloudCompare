@@ -333,8 +333,8 @@ bool ccGraphicalSegmentationTool::addEntity(ccHObject* anObject)
 					ccGenericMesh* otherMesh = ccHObjectCaster::ToGenericMesh(*p);
 					if (otherMesh->getAssociatedCloud() == mesh->getAssociatedCloud())
 					{
-						if (otherMesh->isA(CC_TYPES::SUB_MESH) && mesh->isA(CC_TYPES::MESH)
-							|| otherMesh->isA(CC_TYPES::MESH) && mesh->isA(CC_TYPES::SUB_MESH))
+						if ((otherMesh->isA(CC_TYPES::SUB_MESH) && mesh->isA(CC_TYPES::MESH))
+							|| (otherMesh->isA(CC_TYPES::MESH) && mesh->isA(CC_TYPES::SUB_MESH)))
 						{
 							ccLog::Warning("[Graphical Segmentation Tool] Can't mix sub-meshes with their parent mesh!");
 							return false;

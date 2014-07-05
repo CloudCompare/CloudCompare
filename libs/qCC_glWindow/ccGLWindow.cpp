@@ -2900,7 +2900,7 @@ void ccGLWindow::drawPivot()
 		return;
 
 	if (m_pivotVisibility == PIVOT_HIDE ||
-		m_pivotVisibility == PIVOT_SHOW_ON_MOVE && !m_pivotSymbolShown)
+		(m_pivotVisibility == PIVOT_SHOW_ON_MOVE && !m_pivotSymbolShown))
 		return;
 
 	glMatrixMode(GL_MODELVIEW);

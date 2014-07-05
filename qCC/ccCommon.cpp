@@ -21,7 +21,7 @@
 #include "ccCommon.h"
 
 #define CC_VER_NUM "2.5"
-#define CC_SUB_VER "5.beta.20140629" //2014-06-29
+#define CC_SUB_VER "5.beta.20140704" //2014-07-04
 
 //! Returns current version as a string
 QString ccCommon::GetCCVersion(bool full/*=true*/)

@@ -25,6 +25,7 @@
 
 //qCC_db
 #include <ccLog.h>
+#include <ccPlatform.h>
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccScalarField.h>
@@ -164,7 +165,11 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 
 	//open binary file for writing
 	std::ofstream ofs;
-	ofs.open(filename.toStdString().c_str(), std::ios::out | std::ios::binary);
+#ifdef CC_MAC_OS
+	ofs.open(qPrintable(filename), std::ios::out | std::ios::binary);
+#else
+	ofs.open(filename.toStdString(), std::ios::out | std::ios::binary);
+#endif
 
 	if (ofs.fail())
 		return CC_FERR_WRITING;
@@ -344,11 +349,14 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, bool a
 {
 	//opening file
 	std::ifstream ifs;
-	ifs.open(filename.toStdString().c_str(), std::ios::in | std::ios::binary);
+#ifdef CC_MAC_OS
+	ifs.open(qPrintable(filename), std::ios::in | std::ios::binary);
+#else
+	ifs.open(filename.toStdString(), std::ios::in | std::ios::binary);
+#endif
 
 	if (ifs.fail())
 		return CC_FERR_READING;
-
 
 	liblas::Reader reader(liblas::ReaderFactory().CreateWithStream(ifs));
 	unsigned nbOfPoints = 0;

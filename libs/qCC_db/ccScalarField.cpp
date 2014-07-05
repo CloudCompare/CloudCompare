@@ -367,11 +367,11 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 {
 	assert(in.isOpen() && (in.openMode() & QIODevice::ReadOnly));
 
-	if (dataVersion<20)
+	if (dataVersion < 20)
 		return CorruptError();
 
 	//name (dataVersion>=20)
-	if (in.read(m_name,256)<0)
+	if (in.read(m_name,256) < 0)
 		return ReadError();
 
 	//'strictly positive' state (20 <= dataVersion < 26)
@@ -405,7 +405,7 @@ bool ccScalarField::fromFile(QFile& in, short dataVersion, int flags)
 	//convert former 'hidden/NaN' values for non strictly positive SFs (dataVersion < 26)
 	if (dataVersion < 26)
 	{
-		const ScalarType FORMER_BIG_VALUE = (ScalarType)(sqrt(3.4e38f)-1.0f);
+		const ScalarType FORMER_BIG_VALUE = static_cast<ScalarType>(sqrt(3.4e38f)-1.0f);
 
 		for (unsigned i=0; i<m_maxCount; ++i)
 		{

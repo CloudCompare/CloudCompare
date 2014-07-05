@@ -232,7 +232,7 @@ ccQuadric* ccQuadric::Fit(CCLib::GenericIndexedCloudPersist *cloud, double* rms/
 	{
 		const uchar& dX = hfdims[0];
 		const uchar& dY = hfdims[1];
-		const uchar& dZ = hfdims[2];
+//		const uchar& dZ = hfdims[2];
 
 		*rms = 0;
 

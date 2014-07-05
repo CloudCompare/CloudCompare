@@ -207,6 +207,7 @@ enum CC_FILE_ERROR {CC_FERR_NO_ERROR,
 class FileIOFilter
 {
 public:
+   virtual ~FileIOFilter() {}
 
 	//! Loads one or more entities from a file with known type
 	/** \param filename filename

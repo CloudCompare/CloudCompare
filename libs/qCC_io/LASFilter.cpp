@@ -164,7 +164,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 
 	//open binary file for writing
 	std::ofstream ofs;
-	ofs.open(filename.toStdString(), std::ios::out | std::ios::binary);
+	ofs.open(filename.toStdString().c_str(), std::ios::out | std::ios::binary);
 
 	if (ofs.fail())
 		return CC_FERR_WRITING;
@@ -344,7 +344,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, bool a
 {
 	//opening file
 	std::ifstream ifs;
-	ifs.open(filename.toStdString(), std::ios::in | std::ios::binary);
+	ifs.open(filename.toStdString().c_str(), std::ios::in | std::ios::binary);
 
 	if (ifs.fail())
 		return CC_FERR_READING;

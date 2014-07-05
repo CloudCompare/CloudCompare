@@ -1628,7 +1628,6 @@ void MainWindow::doActionApplyTransformation()
 		return;
 
 	ccGLMatrixd transMat = dlg.getTransformation();
-	CCVector3d T = transMat.getTranslationAsVec3D();
 
 	//if the transformation is partly converted to global shift/scale
 	bool updateGlobalShiftAndScale = false;
@@ -1678,7 +1677,6 @@ void MainWindow::doActionApplyTransformation()
 					//existing shift information
 					CCVector3d globalShift = cloud->getGlobalShift();
 					double globalScale = cloud->getGlobalScale();
-					bool cloudAlreadyShifted = cloud->isShifted();
 			
 					//we compute the transformation matrix in the global coordinate space
 					ccGLMatrixd globalTransMat = transMat;
@@ -6055,7 +6053,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 	//}
 	//else
 	{
-		if (m_ccRoot && m_ccRoot->getRootEntity()->getChildrenNumber() == 0
+		if ((m_ccRoot && m_ccRoot->getRootEntity()->getChildrenNumber() == 0)
 			|| QMessageBox::question(	this,
 										"Quit",
 										"Are you sure you want to quit?",
@@ -6486,7 +6484,7 @@ void MainWindow::deactivateSegmentationMode(bool state)
 								ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(segmentationResult);
 
 								int errorCode;
-								CCLib::GenericIndexedCloud* projectedPoints = cloned_sensor->project(cloud,errorCode,true);
+								cloned_sensor->project(cloud,errorCode,true);
 
 								// we need also to do the same for the original cloud
 								sensor->project(ccHObjectCaster::ToGenericPointCloud(entity), errorCode, true);
@@ -8743,8 +8741,6 @@ void MainWindow::addToDB(const QStringList& filenames, CC_FILE_TYPES fType, ccGL
 
 	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
 	CCVector3d addCoordinatesShift(0,0,0);
-	bool addCoordinatesTransEnabled = false;
-	double addCoordinatesScale = 1.0;
 
 	for (int i=0; i<filenames.size(); ++i)
 	{

@@ -441,7 +441,6 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctr
 	//for each point in the cell
 	for (unsigned i=0; i<n; ++i)
 	{
-        ScalarType d = NAN_VALUE;
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		//look for neighbors inside a sphere

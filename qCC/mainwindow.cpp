@@ -4206,7 +4206,7 @@ void MainWindow::doActionRegister()
 				{
 					ccGenericMesh* newMesh = 0;
 					if (mesh->isA(CC_TYPES::MESH))
-						newMesh = static_cast<ccMesh*>(mesh)->clone();
+						newMesh = static_cast<ccMesh*>(mesh)->cloneMesh();
 					else
 					{
 						//FIXME TODO
@@ -7419,7 +7419,7 @@ void MainWindow::doActionClone()
 		}
 		else if (selectedEntities[i]->isA(CC_TYPES::MESH))
 		{
-			clone = ccHObjectCaster::ToMesh(selectedEntities[i])->clone();
+			clone = ccHObjectCaster::ToMesh(selectedEntities[i])->cloneMesh();
 			if (!clone)
 			{
 				ccConsole::Error(QString("An error occurred while cloning mesh %1").arg(selectedEntities[i]->getName()));

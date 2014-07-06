@@ -60,10 +60,10 @@ public:
 		\param cloneTexCoords for internal use
 		\return a copy of this entity
 	**/
-	virtual ccMesh* clone(	ccGenericPointCloud* vertices = 0,
-							ccMaterialSet* clonedMaterials = 0,
-							NormsIndexesTableType* clonedNormsTable = 0,
-							TextureCoordsContainer* cloneTexCoords = 0);
+	virtual ccMesh* cloneMesh(	ccGenericPointCloud* vertices = 0,
+								ccMaterialSet* clonedMaterials = 0,
+								NormsIndexesTableType* clonedNormsTable = 0,
+								TextureCoordsContainer* cloneTexCoords = 0);
 
 	//inherited methods (ccHObject)
 	virtual unsigned getUniqueIDForDisplay() const;

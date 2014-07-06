@@ -293,7 +293,7 @@ public:
 	**/
 	void setCurrentSize(unsigned size)
 	{
-		if (size >= m_maxCount)
+		if (size > m_maxCount)
 		{
 			assert(false);
 			return;
@@ -746,7 +746,7 @@ public:
 	**/
 	void setCurrentSize(unsigned size)
 	{
-		if (size >= m_maxCount)
+		if (size > m_maxCount)
 		{
 			assert(false);
 			return;

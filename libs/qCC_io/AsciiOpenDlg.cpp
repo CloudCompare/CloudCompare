@@ -771,7 +771,7 @@ bool AsciiOpenDlg::safeSequence() const
 	QStringList headerParts = m_headerLine.split(m_separator,QString::SkipEmptyParts);
 
 	//not enough column headers?
-	if (headerParts.size() < seq.size())
+	if (headerParts.size() < static_cast<int>(seq.size()))
 		return false;
 
 	for (int i=0; i<headerParts.size(); ++i)

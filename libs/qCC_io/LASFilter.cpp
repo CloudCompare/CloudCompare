@@ -165,7 +165,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 
 	//open binary file for writing
 	std::ofstream ofs;
-#ifdef CC_MAC_OS
+#if defined(CC_MAC_OS) || _MSC_VER <= 1500
 	ofs.open(qPrintable(filename), std::ios::out | std::ios::binary);
 #else
 	ofs.open(filename.toStdString(), std::ios::out | std::ios::binary);
@@ -349,7 +349,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, bool a
 {
 	//opening file
 	std::ifstream ifs;
-#ifdef CC_MAC_OS
+#if defined(CC_MAC_OS) || _MSC_VER <= 1500
 	ifs.open(qPrintable(filename), std::ios::in | std::ios::binary);
 #else
 	ifs.open(filename.toStdString(), std::ios::in | std::ios::binary);

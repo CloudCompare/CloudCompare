@@ -227,7 +227,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 			--j;
 
 		//we skip points outside the box!
-		if (i<0 || i>=static_cast<int>(grid_size_X) || j<0 || j>=static_cast<int>(grid_size_Y))
+		if (i < 0 || i >= static_cast<int>(grid_size_X) || j < 0 || j >= static_cast<int>(grid_size_Y))
 			continue;
 
 		assert(i >= 0 && j >= 0);
@@ -363,7 +363,7 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 			{
 				HeightGridCell* cell = grid[j];
 				for (unsigned i=0; i<grid_size_X; ++i,++cell)
-					if (cell->nbPoints>1)
+					if (cell->nbPoints > 1)
 						cell->height /= static_cast<PointCoordinateType>(cell->nbPoints);
 			}
 		}
@@ -1065,11 +1065,13 @@ ccPointCloud* ccHeightGridGeneration::Compute(	ccGenericPointCloud* cloud,
 
 						if (heightSF)
 						{
+							heightSF->setCurrentSize(n);
 							heightSF->computeMinAndMax();
 							cloudGrid->setCurrentDisplayedScalarField(heightSFIdx);
 						}
 						if (countSF)
 						{
+							countSF->setCurrentSize(n);
 							countSF->computeMinAndMax();
 							if (!heightSF)
 								cloudGrid->setCurrentDisplayedScalarField(countSFIdx);

@@ -604,7 +604,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				//ccGenericMesh* addedTri = mesh;
 
 				//or clone?
-				ccMesh* cloneMesh = mesh->clone(mesh->getAssociatedCloud()==addedCloud ? this : 0);
+				ccMesh* cloneMesh = mesh->cloneMesh(mesh->getAssociatedCloud()==addedCloud ? this : 0);
 				if (cloneMesh)
 				{
 					//change mesh vertices

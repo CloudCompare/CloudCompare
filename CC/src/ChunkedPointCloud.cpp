@@ -241,18 +241,18 @@ ScalarType ChunkedPointCloud::getPointScalarValue(unsigned pointIndex) const
 
 ScalarField* ChunkedPointCloud::getScalarField(int index) const
 {
-    return (index>=0 && index<(int)m_scalarFields.size() ? m_scalarFields[index] : 0);
+	return (index>=0 && index < static_cast<int>(m_scalarFields.size()) ? m_scalarFields[index] : 0);
 }
 
 const char* ChunkedPointCloud::getScalarFieldName(int index) const
 {
-    return (index>=0 && index<(int)m_scalarFields.size() ? m_scalarFields[index]->getName() : 0);
+    return (index>=0 && index < static_cast<int>(m_scalarFields.size()) ? m_scalarFields[index]->getName() : 0);
 }
 
 int ChunkedPointCloud::addScalarField(const char* uniqueName)
 {
     //we don't accept two SF with the same name!
-    if (getScalarFieldIndexByName(uniqueName)>=0)
+    if (getScalarFieldIndexByName(uniqueName) >= 0)
         return -1;
 
 	//create requested scalar field

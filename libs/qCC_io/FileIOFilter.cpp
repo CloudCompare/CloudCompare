@@ -122,7 +122,7 @@ CC_FILE_TYPES FileIOFilter::GuessFileFormatFromExtension(QString ext)
 		return E57;
 #endif
 #ifdef CC_PDMS_SUPPORT
-	else if (ext == "PDMS" || ext == "PDMSMAC")
+	else if (ext == "MAC" || ext == "PDMS" || ext == "PDMSMAC")
 		return PDMS;
 #endif
 #ifdef CC_DXF_SUPPORT

@@ -51,13 +51,13 @@ public:
 	void setFocal(float focal_pix, bool deduceFOV = true);
 
 	//! Returns focal (in pixels)
-	inline float getFocal() const {return m_focal_pix;}
+	inline float getFocal() const { return m_focal_pix; }
 
 	//! Sets camera f.o.v. (field of view) value in degrees
-	inline void setFov(float fov_deg) {m_fov_deg = fov_deg;}
+	inline void setFov(float fov_deg) { m_fov_deg = fov_deg; }
 
 	//! Returns camera f.o.v. (field of view) value in degrees
-	inline float getFov() const {return m_fov_deg;}
+	inline float getFov() const { return m_fov_deg; }
 
 	//! Sets camera matrix (orientation as an axis + angle)
 	/** \param axis view axis

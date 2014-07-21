@@ -1,15 +1,23 @@
 *** CloudCompare versions history ***
 
+v2.5.5.2 21/06/2014
+- Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'
+	
+v2.5.5.1 17/06/2014
+- Mac OS packaging issue
 v2.5.5 07/06/2014
-- New method:
+- New methods:
 	* Edit > Colors > Levels
 		- allows the user to edit the color histogram (either all channels at once or channel by channel)
-	* Display > Reset all GUI elements positions"
-		- removes all persitent information about the position and state of GUI elements (so that the
+	* Display > Reset all GUI elements positions
+		- removes all persistent information about the position and state of GUI elements (so that the
 			GUI elements are back to their default on next start)
+	* Edit > Scalar field(s) > Convert to random RGB
+		- Converts a scalar field to random RGB colors: the user only specifies the number of random colors
+			that will be generated and regularly sampled over the scalar field interval ([sfMin ; sfMax])
 - Enhancement:
 	* Point-pair based alignment tool:
-		- minimum number of pairs set to 4 now (3 is not reliable enough)
+		- minimum number of pairs set to 4 now (3 was not reliable enough)
 		- the error contribution of each point (pair) to the total RMS is displayed in a new column
 			(once the 'Align' button has been pressed)
 		- a new button next to each point allows the user to delete any point at any time
@@ -17,16 +25,16 @@ v2.5.5 07/06/2014
 			on the aligned button
 	* Point-pair based & ICP registration method:
 		- the registration rotation can be constrained around one axis (X, Y or Z)
-		- the registration translation can be constrained around one or several dimensions (Tx, Ty or Tz)
+		- the registration translation can be constrained along one or several dimensions (Tx, Ty or Tz)
 	* Global Shift & Scale mechanism:
 		- brand new dialog (hopefully clearer)
 		- A 'global_shift_list_template.txt' file can now be found next to CloudCompare's executable file.
 		  The user can edit it and follow the instructions inside:
-			* this file should be renamed 'global_shift_list.txt' and it can contains 5 values per line
+			* this file should be renamed 'global_shift_list.txt' and it should contain 5 values per line
 			  ("name; Tx; Ty; Tz; scale;" - mind the semicolon characters)
 			* all entries in this file will automatically be added to the dedicated combo-box of the new dialog
-			* this should helps a lot users working always with the same global coordinate system(s).
-		- the 'Edit > Edit global shift' and 'Edit > Edit global scale' methods are merged as a single
+			* this should help a lot users working always with the same global coordinate system(s).
+		- the 'Edit > Edit global shift' and 'Edit > Edit global scale' methods have been merged into a single
 			method: 'Edit > Edit global shift and scale'.
 			* It uses approximately the same new dialog but the user can now choose if the modification
 				of the shift and scale parameters should impact the global coordinates system (i.e. at
@@ -34,12 +42,12 @@ v2.5.5 07/06/2014
 				and or/rescaled automatically)
 			* this new method can be called on several clouds at once
 		- when a transformation (applied with 'Edit > Apply transformation') causes the cloud coordinates
-			to go overbounds, the same dialog appears in order for the user to update the global shift/scale
-			information instead.
+			to go overbounds, the same dialog appears in order for the user to optionaly update the global
+			shift/scale information instead.
 	* Bundler (.out) import:
 		- Big coordinates (for keypoints) are now properly handled (with the Global Shift & Scale mechanism)
 		- The user can now input a 4x4 transformation matrix in order to change the keypoints orientation before
-			generating the orthophotos (i.e. this lets fixing the proper Z axis)
+			generating the orthophotos (i.e. this lets defining a custom orthorectification 'Z' axis)
 	* The 'SF arithmetics' method has been enhanced with new operations (applicable on a single SF)
 		- SQRT, POW2, POW3, EXP, LOG, LOG10, COS(radians), SIN(radians), TAN(radians), ACOS, ASIN, ATAN
 	* Point clouds are now pre-loaded in the graphic card memory if possible (via VBOs)
@@ -61,10 +69,6 @@ v2.5.5 07/06/2014
 			* when loading an ASCII file in CloudCompare this should set the columns type automatically
 			* when loading an ASCII file from the command line this should prevent the dialog from appearing
 				(if standard names are used: X.., Y.., Z.., Nx, Ny, Nz, Normx, Normy, Normz, R, Red, G, Green, B, Blue, etc.)
-	* New method:
-		- "Edit > Scalar field(s) > Convert to random RGB"
-		- Converts a scalar field to random RGB colors: the user only specifies the number of random colors
-			that will be generated and regularly sampled over the scalar field interval ([sfMin ; sfMax])
 	* New option in the LAS file opening dialog:
 		- 'Force 8-bit colors': to cope with files in which colors are mistakenly coded on 8 bits (instead of 16)
 	* The 'Poisson Surface Reconstruction' plugin (qPoissonRecon) is now based on the version 5.71 of PoissonRecon lib

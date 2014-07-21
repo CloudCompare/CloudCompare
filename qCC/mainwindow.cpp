@@ -1031,9 +1031,19 @@ void MainWindow::doActionSetColor(bool colorize)
 			else if (cloud->getParent() && cloud->getParent()->isKindOf(CC_TYPES::MESH))
 				cloud->getParent()->showColors(true);
 		}
+		else if (ent->isKindOf(CC_TYPES::PRIMITIVE))
+		{
+			ccGenericPrimitive* prim = ccHObjectCaster::ToPrimitive(ent);
+			colorType col[3] = {static_cast<colorType>(newCol.red()),
+								static_cast<colorType>(newCol.green()),
+								static_cast<colorType>(newCol.blue()) };
+			prim->setColor(col);
+			ent->showColors(true);
+			ent->prepareDisplayForRefresh();
+		}
 		else if (ent->isA(CC_TYPES::POLY_LINE))
 		{
-			ccPolyline * poly = ccHObjectCaster::ToPolyline(ent);
+			ccPolyline* poly = ccHObjectCaster::ToPolyline(ent);
 			colorType col[3] = {static_cast<colorType>(newCol.red()),
 								static_cast<colorType>(newCol.green()),
 								static_cast<colorType>(newCol.blue()) };

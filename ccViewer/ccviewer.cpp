@@ -54,9 +54,8 @@
 #include <assert.h>
 
 //! Current version
-//const double CC_VIEWER_VERSION = 1.31;
-//const QString CC_VIEWER_VERSION_STR = QString::number(CC_VIEWER_VERSION,'f',2);
-const QString CC_VIEWER_VERSION_STR = "1.30.1"; //Special version (1.30 + ply file bug fix)
+const double CC_VIEWER_VERSION = 1.31;
+const QString CC_VIEWER_VERSION_STR = QString::number(CC_VIEWER_VERSION,'f',2);
 
 //Camera parameters dialog
 ccCameraParamEditDlg* s_cpeDlg = 0;

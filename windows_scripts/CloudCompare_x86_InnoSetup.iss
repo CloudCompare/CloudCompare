@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.5.4"
+#define MyAppVersion "2.5.5.2"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.danielgm.net/cc/"
 #define MyAppExeName "CloudCompare.exe"
@@ -43,7 +43,7 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyCCPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-Source: "{#MyVCRedistPath}\vcredist_x86.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit; 
+Source: "{#MyVCRedistPath}\2008\vcredist_x86.exe"; DestDir: {tmp}; Flags: deleteafterinstall 32bit; 
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

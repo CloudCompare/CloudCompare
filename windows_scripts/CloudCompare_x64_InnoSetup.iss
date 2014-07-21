@@ -2,13 +2,13 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "CloudCompare"
-#define MyAppVersion "2.5.4"
+#define MyAppVersion "2.5.5.2"
 #define MyAppPublisher "Daniel Girardeau-Montaut"
 #define MyAppURL "http://www.danielgm.net/cc/"
 #define MyAppExeName "CloudCompare.exe"
 #define MyVCRedistPath "E:\Incoming\vc_redist"
-#define MyCCPath "E:\These\C++\CloudCompare\bin_x64_msvc_2010\CloudCompare"
-#define MyOutputDir "E:\These\C++\CloudCompare\bin_x64_msvc_2010"
+#define MyCCPath "E:\These\C++\CloudCompare\bin_x64_msvc_2012\CloudCompare"
+#define MyOutputDir "E:\These\C++\CloudCompare\bin_x64_msvc_2012"
 #define MyCreationDate GetDateTimeString('mm_dd_yyyy', '', '')
 
 [Setup]
@@ -44,7 +44,7 @@ Name: "quicklaunchicon"; Description: "{cm:CreateQuickLaunchIcon}"; GroupDescrip
 Source: "{#MyCCPath}\CloudCompare.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyCCPath}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-Source: "{#MyVCRedistPath}\vcredist_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit; 
+Source: "{#MyVCRedistPath}\2012\vcredist_x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall 64bit; 
 
 [Icons]
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

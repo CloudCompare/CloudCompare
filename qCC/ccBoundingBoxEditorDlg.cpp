@@ -31,19 +31,19 @@ ccBoundingBoxEditorDlg::ccBoundingBoxEditorDlg(QWidget* parent/*=0*/)
 
 	setWindowFlags(Qt::Tool);
 
-	xDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
-	yDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
-	zDoubleSpinBox->setMinimum(-std::numeric_limits<double>::max());
-	xDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
-	yDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
-	zDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
+	xDoubleSpinBox->setMinimum(-1.0e9);
+	yDoubleSpinBox->setMinimum(-1.0e9);
+	zDoubleSpinBox->setMinimum(-1.0e9);
+	xDoubleSpinBox->setMaximum( 1.0e9);
+	yDoubleSpinBox->setMaximum( 1.0e9);
+	zDoubleSpinBox->setMaximum( 1.0e9);
 
-	dxDoubleSpinBox->setMinimum(0.0);
-	dyDoubleSpinBox->setMinimum(0.0);
-	dzDoubleSpinBox->setMinimum(0.0);
-	dxDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
-	dyDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
-	dzDoubleSpinBox->setMaximum(std::numeric_limits<double>::max());
+	dxDoubleSpinBox->setMinimum(  0.0);
+	dyDoubleSpinBox->setMinimum(  0.0);
+	dzDoubleSpinBox->setMinimum(  0.0);
+	dxDoubleSpinBox->setMaximum(1.0e9);
+	dyDoubleSpinBox->setMaximum(1.0e9);
+	dzDoubleSpinBox->setMaximum(1.0e9);
 
 	connect(pointTypeComboBox,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(reflectChanges(int)));
 	connect(keepSquareCheckBox,	SIGNAL(toggled(bool)),				this,	SLOT(squareModeActivated(bool)));

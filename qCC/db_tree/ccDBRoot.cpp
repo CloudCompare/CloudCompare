@@ -1013,7 +1013,9 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		return false;
 
 	//new parent (can't be a leaf object!)
-	ccHObject *newParent = destParent.isValid() ? static_cast<ccHObject*>(destParent.internalPointer()) : m_treeRoot;
+	ccHObject* newParent = destParent.isValid() ? static_cast<ccHObject*>(destParent.internalPointer()) : m_treeRoot;
+	char newParentName[1024];
+	strcpy(newParentName,newParent->getName().toLocal8Bit().constData());
 	if (newParent && newParent->isLeaf())
 		return false;
 
@@ -1035,6 +1037,8 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		if (!item)
 			continue;
 		//ccLog::Print(QString("[Drag & Drop] Source: %1").arg(item->getName()));
+		char itemName[1024];
+		strcpy(itemName,item->getName().toLocal8Bit().constData());
 
 		//old parent
 		ccHObject* oldParent = item->getParent();
@@ -1043,6 +1047,8 @@ bool ccDBRoot::dropMimeData(const QMimeData* data, Qt::DropAction action, int de
 		//let's check if we can actually move the entity
 		if (oldParent)
 		{
+			char oldParentName[1024];
+			strcpy(oldParentName,oldParent->getName().toLocal8Bit().constData());
 			if (item->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
 				//point cloud == mesh vertices?

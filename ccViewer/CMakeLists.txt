@@ -27,7 +27,7 @@ include_directories( ${CMAKE_CURRENT_BINARY_DIR} )
 project( ccViewer )
 
 set( VERSION_MAJOR 1 )
-set( VERSION_MINOR 30 )
+set( VERSION_MINOR 32 )
 set( VERSION_PATCH 0 )
 
 set( QCC_HEADERS ../qCC/ccOverlayDialog.h ../qCC/ccCameraParamEditDlg.h ../qCC/ccDisplayOptionsDlg.h ../qCC/ccMouse3DContextMenu.h )

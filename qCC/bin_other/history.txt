@@ -1,8 +1,10 @@
 *** CloudCompare versions history ***
 
+v2.5.6 ??/??/2014
+- Bug fix: the spinboxes of the bounding-box editing dialog were oversized
+
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'
-	
 v2.5.5.1 17/06/2014
 - Mac OS packaging issue
 v2.5.5 07/06/2014

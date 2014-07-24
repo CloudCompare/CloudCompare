@@ -120,12 +120,12 @@ bool NormalDistribution::computeParameters(const GenericCloud* cloud)
 	}
 
 	if (counter == 0)
-        return false;
+		return false;
 
-    mean /= static_cast<double>(counter);
-    stddev2 = fabs(stddev2/static_cast<double>(counter) - mean*mean);
+	mean /= counter;
+	stddev2 = fabs(stddev2/counter - mean*mean);
 
-    return setParameters(static_cast<ScalarType>(mean),static_cast<ScalarType>(stddev2));
+	return setParameters(static_cast<ScalarType>(mean),static_cast<ScalarType>(stddev2));
 }
 
 bool NormalDistribution::computeParameters(const ScalarContainer& values)

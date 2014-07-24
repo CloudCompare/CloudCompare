@@ -107,7 +107,7 @@ void ccGenericPointCloud::deleteOctree()
 
 ccOctree* ccGenericPointCloud::getOctree()
 {
-	for (unsigned i=0;i<m_children.size();++i)
+	for (unsigned i=0; i<m_children.size(); ++i)
 	{
 		if (m_children[i]->isA(CC_TYPES::POINT_OCTREE))
 			return static_cast<ccOctree*>(m_children[i]);
@@ -120,15 +120,17 @@ ccOctree* ccGenericPointCloud::computeOctree(CCLib::GenericProgressCallback* pro
 {
 	deleteOctree();
 	ccOctree* octree = new ccOctree(this);
-	if (octree->build(progressCb)>0)
+	if (octree->build(progressCb) > 0)
 	{
 		octree->setDisplay(getDisplay());
+		octree->setVisible(true);
+		octree->setEnabled(false);
 		addChild(octree);
 	}
 	else
 	{
 		delete octree;
-		octree=NULL;
+		octree = NULL;
 	}
 
 	return octree;

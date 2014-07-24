@@ -24,7 +24,7 @@
 
 ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 									QWidget *parent/*=0*/,
-									Qt::WindowFlags flags/*=Qt::SubWindow|Qt::Popup*/)
+									Qt::WindowFlags flags/*=Qt::SubWindow | Qt::Popup*/)
 	: QProgressDialog(parent,flags)
 	, m_currentValue(0)
 	, m_lastValue(-1)
@@ -32,7 +32,7 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	, m_refreshInterval(1)
 {
 	setAutoClose(true);
-	setWindowModality(Qt::ApplicationModal); //not compatible with Qt::QueuedConnection?!
+	setWindowModality(Qt::ApplicationModal);
 
 	setRange(0,100);
 	setMinimumDuration(0);
@@ -46,7 +46,7 @@ ccProgressDialog::ccProgressDialog(	bool showCancelButton,
 	}
 	setCancelButton(cancelButton);
 
-	connect(&m_timer,	SIGNAL(timeout()),			this,	SLOT(refresh())/*, Qt::DirectConnection*/);
+	connect(&m_timer, SIGNAL(timeout()), this, SLOT(refresh())/*, Qt::DirectConnection*/); //can't use DirectConnection here!
 }
 
 void ccProgressDialog::reset()
@@ -118,11 +118,6 @@ void ccProgressDialog::setInfo(const char* infoStr)
 	setLabelText(infoStr);
 	if (isVisible())
 		QApplication::processEvents();
-}
-
-bool ccProgressDialog::isCancelRequested()
-{
-	return wasCanceled();
 }
 
 void ccProgressDialog::start()

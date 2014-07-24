@@ -144,6 +144,32 @@ public:
 													DgmOctree* theOctree = 0,
 													GenericProgressCallback* progressCb = 0);
 
+	//! Statistical Outliers Removal (SOR) filter
+	/** This filter removes points based on their distance relatively to the best fit plane computed above their neighbors.
+		It works by picking a reference point, removing all points which are to close to this point, and repeating these two steps until the result is reached
+		\param theCloud the point cloud to resample
+		\param kernelRadius neighborhood radius
+		\param nSigma number of sigmas under which the points should be kept
+		\param removeIsolatedPoints whether to remove isolated points (i.e. whith 3 points or less in the neighborhood)
+		\param useKnn whether to use a constant number of neighbors instead of a radius
+		\param number of neighbors (if useKnn is true)
+		\param useAbsoluteError whether to use an absolute error instead of 'n' sigmas
+		\param absoluteError absolute error (if useAbsoluteError is true)
+		\param theOctree associated octree if available
+		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
+		\return a reference cloud corresponding to the resampling 'selection'
+	**/
+	static ReferenceCloud* sorFilter(	GenericIndexedCloudPersist* theCloud,
+										PointCoordinateType kernelRadius,
+										double nSigma,
+										bool removeIsolatedPoints = false,
+										bool useKnn = false,
+										int knn = 6,
+										bool useAbsoluteError = true,
+										double absoluteError = 0.0,
+										DgmOctree* theOctree = 0,
+										GenericProgressCallback* progressCb = 0);
+
 protected:
 
 	//! "Cellular" function to replace one set of points (contained in an octree cell) by a unique point
@@ -175,6 +201,22 @@ protected:
 	static bool subsampleCellAtLevel(	const DgmOctree::octreeCell& cell,
 										void** additionalParameters,
 										NormalizedProgress* nProgress = 0);
+
+	//! "Cellular" function to apply the SOR filter inside an octree cell
+	/** This function is meant to be applied to all cells of the octree
+		(it is of the form DgmOctree::localFunctionPtr). It chooses one point
+		from the set of points inside a cell, according to different rules.
+		Method parameters (defined in "additionalParameters") are :
+		- (ReferenceCloud*) reference point cloud to store selected points
+		- (SUBSAMPLING_CELL_METHOD*) subampling method
+		\param cell structure describing the cell on which processing is applied
+		\param additionalParameters see method description
+		\param nProgress optional (normalized) progress notification (per-point)
+	**/
+	static bool applySORFilterAtLevel(	const DgmOctree::octreeCell& cell,
+										void** additionalParameters,
+										NormalizedProgress* nProgress = 0);
+
 };
 
 }

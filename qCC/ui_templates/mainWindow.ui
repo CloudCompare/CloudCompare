@@ -417,6 +417,13 @@
      <addaction name="actionFitFacet"/>
      <addaction name="actionFitQuadric"/>
     </widget>
+    <widget class="QMenu" name="menuClean">
+     <property name="title">
+      <string>Clean</string>
+     </property>
+     <addaction name="actionNoiseFilter"/>
+    </widget>
+    <addaction name="menuClean"/>
     <addaction name="menuProjection"/>
     <addaction name="menuRegistration"/>
     <addaction name="menuDistances"/>
@@ -2549,6 +2556,11 @@
   <action name="actionConvertToRandomRGB">
    <property name="text">
     <string>Convert to random RGB</string>
+   </property>
+  </action>
+  <action name="actionNoiseFilter">
+   <property name="text">
+    <string>Noise filter</string>
    </property>
   </action>
  </widget>

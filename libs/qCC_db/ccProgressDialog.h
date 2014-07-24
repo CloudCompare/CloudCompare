@@ -21,6 +21,9 @@
 //Local
 #include "qCC_db.h"
 
+//CCLib
+#include <CCConst.h>
+
 //Qt
 #include <QProgressDialog>
 #include <QMutex>
@@ -52,9 +55,14 @@ public:
 		\param parent parent widget
 		\param flags window flags
 	**/
-	ccProgressDialog(bool cancelButton = false,
+	ccProgressDialog(	bool cancelButton = false,
 						QWidget *parent = 0,
-						Qt::WindowFlags flags = Qt::SubWindow | Qt::Popup);
+#ifdef CC_QT5
+						Qt::WindowFlags flags = 0 //the Qt::SubWindow or Qt::Popup flags make the cancel button disappear?!
+#else
+						Qt::WindowFlags flags = Qt::SubWindow | Qt::Popup
+#endif
+						);
 
 	//! Destructor (virtual)
 	virtual ~ccProgressDialog() {}
@@ -64,7 +72,7 @@ public:
 	virtual void update(float percent);
 	virtual void setMethodTitle(const char* methodTitle);
 	virtual void setInfo(const char* infoStr);
-	virtual bool isCancelRequested();
+	inline virtual bool isCancelRequested() { return wasCanceled(); }
 	virtual void start();
 	virtual void stop();
 

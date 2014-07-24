@@ -340,17 +340,17 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 	{
 		cell.points->getPoint(i,nNSS.queryPoint);
 
-        //the first point is always the point itself!
+		//the first point is always the point itself!
 		if (cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS) > 1)
 		{
-            //DGM: now we only output the distance to the nearest neighbor
-            double R2 = nNSS.pointsInNeighbourhood[1].squareDistd; //R2 in fact
+			//DGM: now we only output the distance to the nearest neighbor
+			double R2 = nNSS.pointsInNeighbourhood[1].squareDistd; //R2 in fact
 			cell.points->setPointScalarValue(i,static_cast<ScalarType>(sqrt(R2)));
 		}
 		else
 		{
 			//shouldn't happen! Apart if the cloud has only one point...
-            cell.points->setPointScalarValue(i,NAN_VALUE);
+			cell.points->setPointScalarValue(i,NAN_VALUE);
 		}
 
 		if (nProgress && !nProgress->oneStep())
@@ -527,7 +527,7 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 	//for each point in the cell
 	for (unsigned i=0; i<n; ++i)
 	{
-        ScalarType d = NAN_VALUE;
+		ScalarType d = NAN_VALUE;
 		cell.points->getPoint(i,nNSS.queryPoint);
 
 		//look for neighbors inside a sphere
@@ -539,7 +539,7 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 			const unsigned globalIndex = cell.points->getPointGlobalIndex(i);
 			unsigned localIndex = 0;
 			while (localIndex < neighborCount && nNSS.pointsInNeighbourhood[localIndex].pointIndex != globalIndex)
-				++ localIndex;
+				++localIndex;
 			//the query point should be in the nearest neighbors set!
 			assert(localIndex < neighborCount);
 			if (localIndex+1 < neighborCount) //no need to swap with another point if it's already at the end!
@@ -550,9 +550,9 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 			DgmOctreeReferenceCloud neighboursCloud(&nNSS.pointsInNeighbourhood,neighborCount-1); //we don't take the query point into account!
 			Neighbourhood Z(&neighboursCloud);
 
-            const PointCoordinateType* lsq = Z.getLSQPlane();
-            if (lsq)
-                d = fabs(DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint,lsq));
+			const PointCoordinateType* lsq = Z.getLSQPlane();
+			if (lsq)
+				d = fabs(DistanceComputationTools::computePoint2PlaneDistance(&nNSS.queryPoint,lsq));
 
 			//swap the points back to their original position (DGM: not necessary)
 			//if (localIndex+1 < neighborCount)
@@ -561,7 +561,7 @@ bool GeometricalAnalysisTools::computePointsRoughnessInACellAtLevel(const DgmOct
 			//}
 		}
 
-        cell.points->setPointScalarValue(i,d);
+		cell.points->setPointScalarValue(i,d);
 
 		if (nProgress && !nProgress->oneStep())
 			return false;

@@ -106,14 +106,14 @@ public:
 		\warning this method uses the clouds global iterators
 		\param P the cloud to register
 		\param Q the "Closest Point Set"
-		\param pGravityCenter if available, the gravity center of P
-		\param qGravityCenter if available, the gravity center of Q
+		\param pGravityCenter the gravity center of P
+		\param qGravityCenter the gravity center of Q
 		\return cross covariance matrix
 	**/
 	static SquareMatrixd computeCrossCovarianceMatrix(	GenericCloud* P,
 														GenericCloud* Q,
-														const PointCoordinateType* pGravityCenter = 0,
-														const PointCoordinateType* qGravityCenter = 0);
+														const CCVector3& pGravityCenter,
+														const CCVector3& qGravityCenter);
 	
 	//! Computes the cross covariance matrix between two clouds (same size) - weighted version
 	/** Used in the ICP algorithm between the cloud to register and the "Closest Points Set"
@@ -121,16 +121,16 @@ public:
 		\warning this method uses the clouds global iterators
 		\param P the cloud to register
 		\param Q the "Closest Point Set"
-		\param pGravityCenter if available, the gravity center of P
-		\param qGravityCenter if available, the gravity center of Q
+		\param pGravityCenter the gravity center of P
+		\param qGravityCenter the gravity center of Q
 		\param weightsP weights for the points of P (optional)
 		\param weightsQ weights for the points of Q (optional)
 		\return weighted cross covariance matrix
 	**/
 	static SquareMatrixd computeWeightedCrossCovarianceMatrix(	GenericCloud* P,
 																GenericCloud* Q,
-																const PointCoordinateType* pGravityCenter = 0,
-																const PointCoordinateType* qGravityCenter = 0,
+																const CCVector3& pGravityCenter,
+																const CCVector3& qGravityCenter,
 																ScalarField* weightsP = 0,
 																ScalarField* weightsQ = 0);
 

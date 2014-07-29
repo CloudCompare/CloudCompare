@@ -152,7 +152,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 	GenericIndexedCloudPersist* modelCloud = _modelCloud;
 	ScalarField* _modelWeights = modelWeights;
 	{
-		if (_modelCloud->size()>samplingLimit) //shall we resample the clouds? (speed increase)
+		if (_modelCloud->size() > samplingLimit) //shall we resample the clouds? (speed increase)
 		{
 			ReferenceCloud* subModelCloud = CloudSamplingTools::subsampleCloudRandomly(_modelCloud,samplingLimit);
 			if (subModelCloud && modelWeights)
@@ -183,7 +183,7 @@ ICPRegistrationTools::RESULT_TYPE ICPRegistrationTools::RegisterClouds(	GenericI
 	ScalarField* _dataWeights = dataWeights;
 	SimpleCloud* rotatedDataCloud = 0; //temporary structure (rotated vertices)
 	{
-		if (_dataCloud->size()>samplingLimit) //shall we resample the clouds? (speed increase)
+		if (_dataCloud->size() > samplingLimit) //shall we resample the clouds? (speed increase)
 		{
 			dataCloud = CloudSamplingTools::subsampleCloudRandomly(_dataCloud,samplingLimit);
 			if (dataCloud && dataWeights)
@@ -595,7 +595,8 @@ bool RegistrationTools::RegistrationProcedure(	GenericCloud* P,
 	}
 
 	//Cross covariance matrix, eq #24 in Besl92 (but with weights, if any)
-	SquareMatrixd Sigma_px = (weightsP || weightsX) ? GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(P,X,Gp.u,Gx.u,weightsP,weightsX) : GeometricalAnalysisTools::computeCrossCovarianceMatrix(P,X,Gp.u,Gx.u);
+	SquareMatrixd Sigma_px = (weightsP || weightsX	? GeometricalAnalysisTools::computeWeightedCrossCovarianceMatrix(P,X,Gp,Gx,weightsP,weightsX)
+													: GeometricalAnalysisTools::computeCrossCovarianceMatrix(P,X,Gp,Gx) );
 	if (!Sigma_px.isValid())
 		return false;
 

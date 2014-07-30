@@ -50,17 +50,17 @@ QString cc2DLabel::getName() const
 	QString processedName = m_name;
 
 	size_t count = m_points.size();
-	if (count>0)
+	if (count > 0)
 	{
 		processedName.replace(QString("pt_0_idx"),QString::number(m_points[0].index));
-		if (count>1)
+		if (count > 1)
 		{
 			processedName.replace(QString("pt_1_idx"),QString::number(m_points[1].index));
 			if (m_points[0].cloud)
 				processedName.replace(QString("pt_0_cloud_id"),QString::number(m_points[0].cloud->getUniqueID()));
 			if (m_points[1].cloud)
 				processedName.replace(QString("pt_1_cloud_id"),QString::number(m_points[1].cloud->getUniqueID()));
-			if (count>2)
+			if (count > 2)
 			{
 				processedName.replace(QString("pt_2_idx"),QString::number(m_points[2].index));
 				if (m_points[2].cloud)
@@ -210,38 +210,38 @@ bool cc2DLabel::toFile_MeOnly(QFile& out) const
 	if (!ccHObject::toFile_MeOnly(out))
 		return false;
 
-	//points count (dataVersion>=20)
+	//points count (dataVersion >= 20)
 	uint32_t count = (uint32_t)m_points.size();
-	if (out.write((const char*)&count,4)<0)
+	if (out.write((const char*)&count,4) < 0)
 		return WriteError();
 
-	//points & associated cloud ID (dataVersion>=20)
+	//points & associated cloud ID (dataVersion >= 20)
 	for (std::vector<PickedPoint>::const_iterator it=m_points.begin(); it!=m_points.end(); ++it)
 	{
 		//point index
 		uint32_t index = (uint32_t)it->index;
-		if (out.write((const char*)&index,4)<0)
+		if (out.write((const char*)&index,4) < 0)
 			return WriteError();
 		//cloud ID (will be retrieved later --> make sure that the cloud is saved alongside!)
 		uint32_t cloudID = (uint32_t)it->cloud->getUniqueID();
-		if (out.write((const char*)&cloudID,4)<0)
+		if (out.write((const char*)&cloudID,4) < 0)
 			return WriteError();
 	}
 
-	//Relative screen position (dataVersion>=20)
-	if (out.write((const char*)m_screenPos,sizeof(float)*2)<0)
+	//Relative screen position (dataVersion >= 20)
+	if (out.write((const char*)m_screenPos,sizeof(float)*2) < 0)
 		return WriteError();
 
-	//Collapsed state (dataVersion>=20)
-	if (out.write((const char*)&m_showFullBody,sizeof(bool))<0)
+	//Collapsed state (dataVersion >= 20)
+	if (out.write((const char*)&m_showFullBody,sizeof(bool)) < 0)
 		return WriteError();
 
-	//Show in 2D boolean (dataVersion>=21)
-	if (out.write((const char*)&m_dispIn2D,sizeof(bool))<0)
+	//Show in 2D boolean (dataVersion >= 21)
+	if (out.write((const char*)&m_dispIn2D,sizeof(bool)) < 0)
 		return WriteError();
 
-	//Show in 3D boolean (dataVersion>=21)
-	if (out.write((const char*)&m_dispIn3D,sizeof(bool))<0)
+	//Show in 3D boolean (dataVersion >= 21)
+	if (out.write((const char*)&m_dispIn3D,sizeof(bool)) < 0)
 		return WriteError();
 
 	return true;
@@ -252,22 +252,22 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (!ccHObject::fromFile_MeOnly(in, dataVersion, flags))
 		return false;
 
-	//points count (dataVersion>=20)
+	//points count (dataVersion >= 20)
 	uint32_t count = 0;
-	if (in.read((char*)&count,4)<0)
+	if (in.read((char*)&count,4) < 0)
 		return ReadError();
 
-	//points & associated cloud ID (dataVersion>=20)
+	//points & associated cloud ID (dataVersion >= 20)
 	assert(m_points.empty());
 	for (uint32_t i=0; i<count; ++i)
 	{
 		//point index
 		uint32_t index = 0;
-		if (in.read((char*)&index,4)<0)
+		if (in.read((char*)&index,4) < 0)
 			return ReadError();
 		//cloud ID (will be retrieved later --> make sure that the cloud is saved alongside!)
 		uint32_t cloudID = 0;
-		if (in.read((char*)&cloudID,4)<0)
+		if (in.read((char*)&cloudID,4) < 0)
 			return ReadError();
 
 		//[DIRTY] WARNING: temporarily, we set the cloud unique ID in the 'PickedPoint::cloud' pointer!!!
@@ -279,22 +279,22 @@ bool cc2DLabel::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 			return MemoryError();
 	}
 
-	//Relative screen position (dataVersion>=20)
-	if (in.read((char*)m_screenPos,sizeof(float)*2)<0)
+	//Relative screen position (dataVersion >= 20)
+	if (in.read((char*)m_screenPos,sizeof(float)*2) < 0)
 		return ReadError();
 
-	//Collapsed state (dataVersion>=20)
-	if (in.read((char*)&m_showFullBody,sizeof(bool))<0)
+	//Collapsed state (dataVersion >= 20)
+	if (in.read((char*)&m_showFullBody,sizeof(bool)) < 0)
 		return ReadError();
 
-	if (dataVersion>20)
+	if (dataVersion > 20)
 	{
-		//Show in 2D boolean (dataVersion>=21)
-		if (in.read((char*)&m_dispIn2D,sizeof(bool))<0)
+		//Show in 2D boolean (dataVersion >= 21)
+		if (in.read((char*)&m_dispIn2D,sizeof(bool)) < 0)
 			return ReadError();
 
-		//Show in 3D boolean (dataVersion>=21)
-		if (in.read((char*)&m_dispIn3D,sizeof(bool))<0)
+		//Show in 3D boolean (dataVersion >= 21)
+		if (in.read((char*)&m_dispIn3D,sizeof(bool)) < 0)
 			return ReadError();
 	}
 
@@ -308,9 +308,9 @@ double GetAngle_deg(CCVector3& AB, CCVector3& AC)
 	AB.normalize();
 	AC.normalize();
 	double dotprod = AB.dot(AC);
-	if (dotprod<=-1.0)
+	if (dotprod <= -1.0)
 		return 180.0;
-	else if (dotprod>1.0)
+	else if (dotprod > 1.0)
 		return 0.0;
 	return 180.0*acos(dotprod)/M_PI;
 }
@@ -404,6 +404,10 @@ QStringList cc2DLabel::getLabelContent(int precision)
 			QString distStr = QString("Distance = %1").arg(d,0,'f',precision);
 			body << distStr;
 
+			CCVector3 V = *P2-*P1;
+			QString vecStr = QString("Vec: (%1;%2;%3)").arg(V.x,0,'f',precision).arg(V.y,0,'f',precision).arg(V.z,0,'f',precision);
+			body << vecStr;
+
 			AddPointCoordinates(body,pointIndex1,cloud1,precision);
 			AddPointCoordinates(body,pointIndex2,cloud2,precision);
 		}
@@ -470,8 +474,8 @@ bool cc2DLabel::acceptClick(int x, int y, Qt::MouseButton button)
 {
 	if (button == Qt::RightButton)
 	{
-		if (x >= m_lastScreenPos[0]+m_labelROI[0] && x <= m_lastScreenPos[0]+m_labelROI[2]
-			&& y >= m_lastScreenPos[1]-m_labelROI[3] && y <= m_lastScreenPos[1]-m_labelROI[1])
+		if (	x >= m_lastScreenPos[0]+m_labelROI[0] && x <= m_lastScreenPos[0]+m_labelROI[2]
+			&&	y >= m_lastScreenPos[1]-m_labelROI[3] && y <= m_lastScreenPos[1]-m_labelROI[1])
 			{
 				//toggle collapse state
 				m_showFullBody = !m_showFullBody;
@@ -659,7 +663,7 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		//compute arrow head position
 		CCVector3 arrowDest;
 		m_points[0].cloud->getPoint(m_points[0].index,arrowDest);
-		for (unsigned i=1;i<m_points.size();++i)
+		for (unsigned i=1; i<m_points.size(); ++i)
 			arrowDest += *m_points[i].cloud->getPointPersistentPtr(m_points[i].index);
 		arrowDest /= (PointCoordinateType)m_points.size();
 
@@ -724,8 +728,8 @@ void cc2DLabel::drawMeOnly2D(CC_DRAW_CONTEXT& context)
 		//title = titleFontMetrics.elidedText(title,Qt::ElideRight,m_closeButtonROI[0]-2*c_margin);
 	}
 
-	int halfW = (context.glW>>1);
-	int halfH = (context.glH>>1);
+	int halfW = (context.glW >> 1);
+	int halfH = (context.glH >> 1);
 
 	//draw label rectangle
 	int xStart = m_lastScreenPos[0] = (int)((float)context.glW * m_screenPos[0]);

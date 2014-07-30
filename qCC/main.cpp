@@ -156,12 +156,15 @@ int main(int argc, char **argv)
 		if (splash)
 		{
             //we want the splash screen to be visible a minimum amount of time (1000 ms.)
-            while(splashStartTime.elapsed() < 1000)
+            while (splashStartTime.elapsed() < 1000)
             {
                 splash->raise();
+				QApplication::processEvents(); //to let the system breath!
             }
 
-			//splash->close();
+			splash->close();
+			QApplication::processEvents();
+
 			delete splash;
 			splash = 0;
 		}

@@ -825,6 +825,7 @@ void MainWindow::connectActions()
 	connect(actionViewFromSensor,				SIGNAL(triggered()),	this,		SLOT(doActionSetViewFromSensor()));
 	//"Edit > Scalar fields" menu
 	connect(actionShowHistogram,				SIGNAL(triggered()),	this,		SLOT(showSelectedEntitiesHistogram()));
+	connect(actionComputeStatParams,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams()));
 	connect(actionSFGradient,					SIGNAL(triggered()),	this,		SLOT(doActionSFGradient()));
 	connect(actionGaussianFilter,				SIGNAL(triggered()),	this,		SLOT(doActionSFGaussianFilter()));
 	connect(actionBilateralFilter,				SIGNAL(triggered()),	this,		SLOT(doActionSFBilateralFilter()));
@@ -868,7 +869,7 @@ void MainWindow::connectActions()
 	connect(actionCloudMeshDist,				SIGNAL(triggered()),	this,		SLOT(doActionCloudMeshDist()));
 	connect(actionCPS,							SIGNAL(triggered()),	this,		SLOT(doActionComputeCPS()));
 	//"Tools > Statistics" menu
-	connect(actionComputeStatParams,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams()));
+	connect(actionComputeStatParams2,			SIGNAL(triggered()),	this,		SLOT(doActionComputeStatParams())); //duplicated action --> we can't use the same otherwise we get an ugly console warning on Linux :(
 	connect(actionStatisticalTest,				SIGNAL(triggered()),	this,		SLOT(doActionStatisticalTest()));
 	//"Tools > Segmentation" menu
 	connect(actionLabelConnectedComponents,		SIGNAL(triggered()),	this,		SLOT(doActionLabelConnectedComponents()));
@@ -9636,6 +9637,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionRenameSF->setEnabled(atLeastOneSF);
 	actionAddIdField->setEnabled(atLeastOneCloud);
 	actionComputeStatParams->setEnabled(atLeastOneSF);
+	actionComputeStatParams2->setEnabled(atLeastOneSF);
 	actionShowHistogram->setEnabled(atLeastOneSF);
 	actionGaussianFilter->setEnabled(atLeastOneSF);
 	actionBilateralFilter->setEnabled(atLeastOneSF);

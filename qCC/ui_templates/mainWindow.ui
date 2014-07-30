@@ -48,7 +48,7 @@
      <height>21</height>
     </rect>
    </property>
-   <widget class="QMenu" name="menu_File">
+   <widget class="QMenu" name="menuFile">
     <property name="title">
      <string>&amp;File</string>
     </property>
@@ -355,8 +355,8 @@
      <property name="title">
       <string>Statistics</string>
      </property>
-     <addaction name="actionComputeStatParams"/>
      <addaction name="actionStatisticalTest"/>
+     <addaction name="actionComputeStatParams2"/>
     </widget>
     <widget class="QMenu" name="menuDistances">
      <property name="title">
@@ -437,7 +437,7 @@
     <addaction name="separator"/>
     <addaction name="menuSandBox"/>
    </widget>
-   <addaction name="menu_File"/>
+   <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
    <addaction name="menuDisplay"/>
@@ -1178,10 +1178,10 @@
     <string>Compute stat. params</string>
    </property>
    <property name="toolTip">
-    <string>Fits a statistical model to scalar field</string>
+    <string>Fits a statistical model on the active scalar field</string>
    </property>
    <property name="statusTip">
-    <string>Fits a statistical model to scalar field</string>
+    <string>Fits a statistical model on the active scalar field</string>
    </property>
   </action>
   <action name="actionFilterByValue">
@@ -2561,6 +2561,21 @@
   <action name="actionNoiseFilter">
    <property name="text">
     <string>Noise filter</string>
+   </property>
+  </action>
+  <action name="actionComputeStatParams2">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/ccComputeStat.png</normaloff>:/CC/images/ccComputeStat.png</iconset>
+   </property>
+   <property name="text">
+    <string>Compute stat. params (active SF)</string>
+   </property>
+   <property name="toolTip">
+    <string>Fits a statistical model on the active scalar field</string>
+   </property>
+   <property name="statusTip">
+    <string>Fits a statistical model on the active scalar field</string>
    </property>
   </action>
  </widget>

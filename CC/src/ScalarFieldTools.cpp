@@ -43,7 +43,7 @@ void ScalarFieldTools::SetScalarValueToZero(const CCVector3& P, ScalarType& scal
 	scalarValue = 0;
 }
 
-int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* theCloud, bool euclidianDistances, bool sameInAndOutScalarField, GenericProgressCallback* progressCb, DgmOctree* theCloudOctree)
+int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* theCloud, bool euclideanDistances, bool sameInAndOutScalarField, GenericProgressCallback* progressCb, DgmOctree* theCloudOctree)
 {
 	if (!theCloud)
         return -1;
@@ -91,7 +91,7 @@ int ScalarFieldTools::computeScalarFieldGradient(GenericIndexedCloudPersist* the
 
 	//structure contenant les parametres additionnels
 	PointCoordinateType radius = theOctree->getCellSize(octreeLevel);
-	void* additionalParameters[3] = {	static_cast<void*>(&euclidianDistances),
+	void* additionalParameters[3] = {	static_cast<void*>(&euclideanDistances),
 										static_cast<void*>(&radius),
 										static_cast<void*>(_theGradientNorms)
 	};
@@ -128,7 +128,7 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 													NormalizedProgress* nProgress/*=0*/)
 {
 	//variables additionnelles
-	bool euclidianDistances			= *((bool*)additionalParameters[0]);
+	bool euclideanDistances			= *((bool*)additionalParameters[0]);
 	PointCoordinateType radius		= *((PointCoordinateType*)additionalParameters[1]);
 	ScalarField* theGradientNorms	= (ScalarField*)additionalParameters[2];
 
@@ -196,7 +196,7 @@ bool ScalarFieldTools::computeMeanGradientOnPatch(	const DgmOctree::octreeCell& 
 						if (norm2 > ZERO_TOLERANCE)
 						{
                             PointCoordinateType dd = static_cast<PointCoordinateType>(d2 - d1);
-							if (!euclidianDistances || dd*dd < static_cast<PointCoordinateType>(1.01) * norm2)
+							if (!euclideanDistances || dd*dd < static_cast<PointCoordinateType>(1.01) * norm2)
 							{
 								dd /= norm2;
 								sum.x += static_cast<double>(u.x * dd); //warning: and here 'dd'=dd/norm2 ;)

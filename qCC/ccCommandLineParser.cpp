@@ -640,24 +640,24 @@ bool ccCommandLineParser::commandSFGradient(QStringList& arguments, QDialog* par
 	Print("[SF GRADIENT]");
 
 	if (arguments.empty())
-		return Error(QString("Missing parameter: boolean (whether SF is euclidian or not) after \"-%1\"").arg(COMMAND_SF_GRADIENT));
+		return Error(QString("Missing parameter: boolean (whether SF is euclidean or not) after \"-%1\"").arg(COMMAND_SF_GRADIENT));
 
-	QString euclidianStr = arguments.takeFirst().toUpper();
-	bool euclidian = false;
-	if (euclidianStr == "TRUE")
+	QString euclideanStr = arguments.takeFirst().toUpper();
+	bool euclidean = false;
+	if (euclideanStr == "TRUE")
 	{
-		euclidian = true;
+		euclidean = true;
 	}
-	else if (euclidianStr != "FALSE")
+	else if (euclideanStr != "FALSE")
 	{
-		return Error(QString("Invalid boolean value after \"-%1\". Got '%2' instead of TRUE or FALSE.").arg(COMMAND_SF_GRADIENT).arg(euclidianStr));
+		return Error(QString("Invalid boolean value after \"-%1\". Got '%2' instead of TRUE or FALSE.").arg(COMMAND_SF_GRADIENT).arg(euclideanStr));
 	}
 
 	if (m_clouds.empty())
 		return Error(QString("No point cloud on which to compute SF gradient! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_SF_GRADIENT));
 
 	//Call MainWindow generic method
-	void* additionalParameters[1] = {&euclidian};
+	void* additionalParameters[1] = {&euclidean};
 	ccHObject::Container entities;
 	entities.reserve(m_clouds.size());
 	for (unsigned i=0; i<m_clouds.size(); ++i)
@@ -680,7 +680,7 @@ bool ccCommandLineParser::commandSFGradient(QStringList& arguments, QDialog* par
 	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_SF_GRADIENT,entities,parent,additionalParameters))
 	{
 		//save output
-		if (!saveClouds(euclidian ? "EUCLIDIAN_SF_GRAD" : "SF_GRAD"))
+		if (!saveClouds(euclidean ? "EUCLIDEAN_SF_GRAD" : "SF_GRAD"))
 			return false;
 	}
 

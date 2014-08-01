@@ -8256,7 +8256,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 	CCLib::Neighbourhood::CC_CURVATURE_TYPE curvType = CCLib::Neighbourhood::GAUSSIAN_CURV;
 
 	//computeScalarFieldGradient parameters
-	bool euclidian = false;
+	bool euclidean = false;
 
 	//computeRoughness parameters
 	PointCoordinateType roughnessKernelSize = PC_ONE;
@@ -8331,13 +8331,13 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 			//parameters already provided?
 			if (additionalParameters)
 			{
-				euclidian = *static_cast<bool*>(additionalParameters[0]);
+				euclidean = *static_cast<bool*>(additionalParameters[0]);
 			}
 			else //ask the user!
 			{
-				euclidian = (	QMessageBox::question(parent,
+				euclidean = (	QMessageBox::question(parent,
 								"Gradient",
-								"Is the scalar field composed of (euclidian) distances?",
+								"Is the scalar field composed of (euclidean) distances?",
 								QMessageBox::Yes | QMessageBox::No,
 								QMessageBox::No ) == QMessageBox::Yes );
 			}
@@ -8485,7 +8485,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 
 			case CCLIB_ALGO_SF_GRADIENT:
 				result = CCLib::ScalarFieldTools::computeScalarFieldGradient(	cloud,
-																				euclidian,
+																				euclidean,
 																				false,
 																				&pDlg,
 																				octree);

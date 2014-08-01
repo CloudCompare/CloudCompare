@@ -612,7 +612,7 @@ bool ccComparisonDlg::compute()
 	ccProgressDialog progressDlg(true,this);
 
 	//for 3D splitting (cloud-cloud dist. only)
-	CCLib::ReferenceCloud* CPSet=0;
+	CCLib::ReferenceCloud* CPSet = 0;
 	if (split3D)
 	{
 		assert(m_refCloud);

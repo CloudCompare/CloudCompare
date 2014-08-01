@@ -112,7 +112,7 @@
      <item>
       <widget class="QCheckBox" name="preferedOrientationCheckBox">
        <property name="text">
-        <string>Prefered orientation</string>
+        <string>Preferred orientation</string>
        </property>
        <property name="checked">
         <bool>true</bool>

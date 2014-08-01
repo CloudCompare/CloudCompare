@@ -75,17 +75,17 @@ public:
 	//! Computes the geometrical gradient of a scalar field associated to a point cloud
 	/** See Daniel Girardeau-Montaut's PhD manuscript (Chapter 3, section 3.3.2) for more
 		information. As explained in this section, if the scalar field corresponds to
-		(euclidian) distances between the points and another entity, then it is possible
+		(euclidean) distances between the points and another entity, then it is possible
 		to filter out aberrant values.
 		\param theCloud a point cloud (associated to scalar values)
-		\param euclidianDistances indicates if the scalar values are euclidian distances
+		\param euclideanDistances indicates if the scalar values are euclidean distances
 		\param sameInAndOutScalarField specifies that the 'in' and 'out' scalar field of the input point cloud are the same structure
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param theOctree the octree, if it has already been computed
 		\return error code (0 if ok)
 	**/
 	static int computeScalarFieldGradient(	GenericIndexedCloudPersist* theCloud, 
-											bool euclidianDistances, 
+											bool euclideanDistances, 
 											bool sameInAndOutScalarField,
 											GenericProgressCallback* progressCb = 0, 
 											DgmOctree* theOctree = 0);
@@ -183,7 +183,7 @@ protected:
 		See ScalarFieldTools::computeScalarFieldGradient.
 		Method parameters (defined in "additionalParameters") are :
 		- (GenericCloud*) the point cloud
-		- (bool*) specifies if the scalar values are euclidian distances
+		- (bool*) specifies if the scalar values are euclidean distances
 		- (PointCoordinateType*) radius
 		- (std::vector<ScalarType>*) the gradient norms container
 		\param cell structure describing the cell on which processing is applied

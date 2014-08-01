@@ -171,6 +171,7 @@ void AsciiOpenDlg::onSeparatorChange(const QString& separator)
 	m_ui->asciiCodeLabel->setText(QString("(ASCII code: %1)").arg(m_separator.unicode()));
 
 	m_headerLine.clear(); //to force re-assignation of columns!
+	m_columnsValidty.clear();
 	
 	updateTable();
 }

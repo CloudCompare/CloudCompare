@@ -159,18 +159,18 @@ int DistanceComputationTools::computeHausdorffDistance(GenericIndexedCloudPersis
 														DgmOctree* compOctree/*=0*/,
 														DgmOctree* refOctree/*=0*/)
 {
-    assert(comparedCloud && referenceCloud);
+	assert(comparedCloud && referenceCloud);
 
 	//we spatially 'synchronize' the octrees
-	DgmOctree *comparedOctree=compOctree,*referenceOctree=refOctree;
+	DgmOctree *comparedOctree = compOctree, *referenceOctree = refOctree;
 	if (!synchronizeOctrees(comparedCloud,referenceCloud,comparedOctree,referenceOctree, progressCb))
 		return -1;
 
-    //if necessary we try to guess the best octree level for distances computation
+	//if necessary we try to guess the best octree level for distances computation
 	if (params.octreeLevel == 0)
 		params.octreeLevel = comparedOctree->findBestLevelForComparisonWithOctree(referenceOctree);
 
-    //we 'enable' a scalar field  (if it is not already done) to store resulting distances
+	//we 'enable' a scalar field  (if it is not already done) to store resulting distances
 	comparedCloud->enableScalarField();
 	//DGM: we don't reset the previous distances anymore, as they may have been approximated
 	//and we only want to update them (or part of them)
@@ -181,7 +181,7 @@ int DistanceComputationTools::computeHausdorffDistance(GenericIndexedCloudPersis
 
 	if (params.CPSet)
 	{
-        if (!params.CPSet->resize(comparedCloud->size()))
+		if (!params.CPSet->resize(comparedCloud->size()))
 		{
 			if (!compOctree)
 				delete comparedOctree;
@@ -192,15 +192,15 @@ int DistanceComputationTools::computeHausdorffDistance(GenericIndexedCloudPersis
 	}
 
 	//additional parameters
-	void* additionalParameters[4] = {(void*)referenceCloud,
-									 (void*)referenceOctree,
-									 (void*)&params,
-									 (void*)&maxSearchSquareDistd
+	void* additionalParameters[4] = {	(void*)referenceCloud,
+										(void*)referenceOctree,
+										(void*)&params,
+										(void*)&maxSearchSquareDistd
 	};
 
 	int result = 0;
 
-	bool success=false;
+	bool success = false;
 #ifdef ENABLE_CLOUD2MESH_DIST_MT
 	if (params.multiThread)
 	{
@@ -213,7 +213,7 @@ int DistanceComputationTools::computeHausdorffDistance(GenericIndexedCloudPersis
 	else
 #endif
 	{
-		success = (comparedOctree->executeFunctionForAllCellsAtLevel(params.octreeLevel,
+		success = (comparedOctree->executeFunctionForAllCellsAtLevel(	params.octreeLevel,
 																		params.localModel == NO_MODEL ? computeCellHausdorffDistance : computeCellHausdorffDistanceWithLocalModel,
 																		additionalParameters,
 																		progressCb,
@@ -227,22 +227,22 @@ int DistanceComputationTools::computeHausdorffDistance(GenericIndexedCloudPersis
 	}
 
 	if (!compOctree)
-        delete comparedOctree;
+		delete comparedOctree;
 	if (!refOctree)
-        delete referenceOctree;
+		delete referenceOctree;
 
 	return result;
 }
 
 bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* comparedCloud, GenericIndexedCloudPersist* referenceCloud, DgmOctree* &comparedOctree, DgmOctree* &referenceOctree, GenericProgressCallback* progressCb)
 {
-    assert(comparedCloud && referenceCloud);
+	assert(comparedCloud && referenceCloud);
 
 	unsigned nA = comparedCloud->size();
 	unsigned nB = referenceCloud->size();
 
 	if (nA==0 || nB==0)
-        return false;
+		return false;
 
 	//we compute the bounding box of BOTH clouds
 	CCVector3 minsA,minsB,maxsA,maxsB;
@@ -267,19 +267,21 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 	{
 		needToRecalculateOctreeA = false;
 		for (uchar k=0;k<3;k++)
+		{
 			if ((maxD.u[k]!=comparedOctree->getOctreeMaxs().u[k])||(minD.u[k]!=comparedOctree->getOctreeMins().u[k]))
 			{
 				needToRecalculateOctreeA = true;
 				break;
 			}
+		}
 	}
 
 	if (needToRecalculateOctreeA)
 	{
 		if (comparedOctree)
-            comparedOctree->clear();
+			comparedOctree->clear();
 		else
-            comparedOctree = new DgmOctree(comparedCloud);
+			comparedOctree = new DgmOctree(comparedCloud);
 
 		if (comparedOctree->build(minD,maxD,&minPoints,&maxPoints,progressCb)<1)
 		{
@@ -294,24 +296,26 @@ bool DistanceComputationTools::synchronizeOctrees(GenericIndexedCloudPersist* co
 	{
 		needToRecalculateOctreeB = false;
 		for (uchar k=0;k<3;k++)
+		{
 			if ((maxD.u[k]!=referenceOctree->getOctreeMaxs().u[k])||(minD.u[k]!=referenceOctree->getOctreeMins().u[k]))
 			{
 				needToRecalculateOctreeB = true;
 				break;
 			}
+		}
 	}
 
 	if (needToRecalculateOctreeB)
 	{
 		if (referenceOctree)
-            referenceOctree->clear();
+			referenceOctree->clear();
 		else
-            referenceOctree = new DgmOctree(referenceCloud);
+			referenceOctree = new DgmOctree(referenceCloud);
 
 		if (referenceOctree->build(minD,maxD,&minPoints,&maxPoints,progressCb)<1)
 		{
 			if (needToRecalculateOctreeA)
-                comparedOctree->clear();
+				comparedOctree->clear();
 			referenceOctree->clear();
 			return false;
 		}
@@ -386,9 +390,9 @@ bool DistanceComputationTools::computeCellHausdorffDistance(const DgmOctree::oct
 // [1] -> (Octree*): reference cloud octree
 // [2] -> (Cloud2CloudDistanceComputationParams*): parameters
 // [3] -> (ScalarType*): max search distance (squared)
-bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(const DgmOctree::octreeCell& cell,
-                                                                          void** additionalParameters,
-																		  NormalizedProgress* nProgress/*=0*/)
+bool DistanceComputationTools::computeCellHausdorffDistanceWithLocalModel(	const DgmOctree::octreeCell& cell,
+																			void** additionalParameters,
+																			NormalizedProgress* nProgress/*=0*/)
 {
 	//additional parameters
 	GenericIndexedCloudPersist* referenceCloud		= (GenericIndexedCloudPersist*)additionalParameters[0];
@@ -2302,7 +2306,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneRobustMax(	GenericCloud* 
 ScalarType DistanceComputationTools::ComputeCloud2PlaneMaxDistance(	GenericCloud* cloud,
 																	const PointCoordinateType* planeEquation)
 {
-    assert(cloud && planeEquation);
+	assert(cloud && planeEquation);
 
 	//point count
 	unsigned count = cloud->size();
@@ -2313,7 +2317,7 @@ ScalarType DistanceComputationTools::ComputeCloud2PlaneMaxDistance(	GenericCloud
 	//but the norm should always be equal to 1.0!
 	PointCoordinateType norm2 = CCVector3::vnorm2(planeEquation);
 	if (norm2 < ZERO_TOLERANCE)
-        return NAN_VALUE;
+		return NAN_VALUE;
 	assert(fabs(sqrt(norm2) - PC_ONE) <= std::numeric_limits<PointCoordinateType>::epsilon());
 
 	//we search the max distance
@@ -2443,16 +2447,16 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 
 	const int* minIndexesA = octreeA->getMinFillIndexes(octreeLevel);
 	const int* maxIndexesA = octreeA->getMaxFillIndexes(octreeLevel);
-	const int* minIndexesB = octreeA->getMinFillIndexes(octreeLevel);
-	const int* maxIndexesB = octreeA->getMaxFillIndexes(octreeLevel);
+	const int* minIndexesB = octreeB->getMinFillIndexes(octreeLevel);
+	const int* maxIndexesB = octreeB->getMaxFillIndexes(octreeLevel);
 
 	int minIndexes[3],maxIndexes[3];
-	minIndexes[0]=std::min(minIndexesA[0],minIndexesB[0]);
-	minIndexes[1]=std::min(minIndexesA[1],minIndexesB[1]);
-	minIndexes[2]=std::min(minIndexesA[2],minIndexesB[2]);
-	maxIndexes[0]=std::max(maxIndexesA[0],maxIndexesB[0]);
-	maxIndexes[1]=std::max(maxIndexesA[1],maxIndexesB[1]);
-	maxIndexes[2]=std::max(maxIndexesA[2],maxIndexesB[2]);
+	minIndexes[0] = std::min(minIndexesA[0],minIndexesB[0]);
+	minIndexes[1] = std::min(minIndexesA[1],minIndexesB[1]);
+	minIndexes[2] = std::min(minIndexesA[2],minIndexesB[2]);
+	maxIndexes[0] = std::max(maxIndexesA[0],maxIndexesB[0]);
+	maxIndexes[1] = std::max(maxIndexesA[1],maxIndexesB[1]);
+	maxIndexes[2] = std::max(maxIndexesA[2],maxIndexesB[2]);
 
 	unsigned short boxSize[3];
 	boxSize[0] = (unsigned short)(maxIndexes[0] - minIndexes[0]+1);
@@ -2513,7 +2517,7 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 
 	comparedCloud->enableScalarField();
 
-	unsigned maxDi=0;
+	unsigned maxDi = 0;
 	ReferenceCloud Yk(octreeA->associatedCloud());
 
 	while (!theIndexes.empty())
@@ -2536,7 +2540,7 @@ int DistanceComputationTools::computeChamferDistanceBetweenTwoClouds(CC_CHAMFER_
 	}
 
 	delete dg;
-	dg=0;
+	dg = 0;
 
 	if (!compOctree)
 	{

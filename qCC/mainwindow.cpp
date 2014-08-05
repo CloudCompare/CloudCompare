@@ -57,7 +57,7 @@
 #include <ccExternalFactory.h>
 
 //qCC_io
-#include <ccCoordinatesShiftManager.h>
+#include <ccGlobalShiftManager.h>
 #include <ccShiftAndScaleCloudDlg.h>
 
 //qCC includes
@@ -1676,16 +1676,16 @@ void MainWindow::doActionApplyTransformation()
 			double Dl = localBBox.getDiagNormd();
 
 			//the cloud was alright
-			if (	!ccCoordinatesShiftManager::NeedShift(Pl)
-				&&	!ccCoordinatesShiftManager::NeedRescale(Dl))
+			if (	!ccGlobalShiftManager::NeedShift(Pl)
+				&&	!ccGlobalShiftManager::NeedRescale(Dl))
 			{
 				//test if the translated cloud is not "too big" (in local coordinate space)
 				ccBBox rotatedBox = cloud->getBB() * transMat;
 				double Dl2 = rotatedBox.getDiagNorm();
 				CCVector3d Pl2 = CCVector3d::fromArray(rotatedBox.getCenter().u);
 
-				bool needShift = ccCoordinatesShiftManager::NeedShift(Pl2);
-				bool needRescale = ccCoordinatesShiftManager::NeedRescale(Dl2);
+				bool needShift = ccGlobalShiftManager::NeedShift(Pl2);
+				bool needRescale = ccGlobalShiftManager::NeedRescale(Dl2);
 
 				if (needShift || needRescale)
 				{
@@ -1713,8 +1713,8 @@ void MainWindow::doActionApplyTransformation()
 					int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",globalShift,globalScale));
 					//sasDlg.makeCurrent(index);
 					//add "suggested" entry
-					CCVector3d suggestedShift = ccCoordinatesShiftManager::BestShift(Pg);
-					double suggestedScale = ccCoordinatesShiftManager::BestScale(Dg);
+					CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
+					double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
 					index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",suggestedShift,suggestedScale));
 					sasDlg.makeCurrent(index);
 					//add "last" entry (if available)
@@ -1823,7 +1823,7 @@ void MainWindow::doActionApplyScale()
 					double maxy = std::max(fabs(bbox.minCorner().y), fabs(bbox.maxCorner().y)) * sY;
 					double maxz = std::max(fabs(bbox.minCorner().z), fabs(bbox.maxCorner().z)) * sZ;
 
-					const double maxCoord = ccCoordinatesShiftManager::MaxCoordinateAbsValue();
+					const double maxCoord = ccGlobalShiftManager::MaxCoordinateAbsValue();
 					bool coordsWereTooBig = (	maxx > maxCoord
 											||	maxy > maxCoord
 											||	maxz > maxCoord );
@@ -3566,9 +3566,12 @@ void MainWindow::doActionAddIdField()
 			sf->computeMinAndMax();
 			pc->setCurrentDisplayedScalarField(sfIdx);
 			pc->showSF(true);
+			pc->prepareDisplayForRefresh();
 		}
 	}
 
+
+	refreshAll();
 	updateUI();
 }
 
@@ -8792,7 +8795,7 @@ void MainWindow::addToDB(	ccHObject* obj,
 		double scale = 1.0;
 		//here we must test that coordinates are not too big whatever the case because OpenGL
 		//really doesn't like big ones (even if we work with GLdoubles :( ).
-		if (ccCoordinatesShiftManager::Handle(P,diag,true,false,Pshift,&scale))
+		if (ccGlobalShiftManager::Handle(P,diag,ccGlobalShiftManager::DIALOG_IF_NECESSARY,false,Pshift,&scale))
 		{
 			bool needRescale = (scale != 1.0);
 			bool needShift = (Pshift.norm2() > 0);
@@ -8880,13 +8883,19 @@ void MainWindow::addToDB(const QStringList& filenames, CC_FILE_TYPES fType, ccGL
 	//to handle same 'shift on load' for multiple files
 	CCVector3d loadCoordinatesShift(0,0,0);
 	bool loadCoordinatesTransEnabled = false;
+	
+	FileIOFilter::LoadParameters parameters;
+	parameters.alwaysDisplayLoadDialog = true;
+	parameters.shiftHandlingMode = ccGlobalShiftManager::DIALOG_IF_NECESSARY;
+	parameters.coordinatesShift = &loadCoordinatesShift;
+	parameters.coordinatesShiftEnabled = &loadCoordinatesTransEnabled;
 
 	//the same for 'addToDB' (if the first one is not supported, or if the scale remains too big)
 	CCVector3d addCoordinatesShift(0,0,0);
 
 	for (int i=0; i<filenames.size(); ++i)
 	{
-		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i],fType,true,&loadCoordinatesTransEnabled,&loadCoordinatesShift);
+		ccHObject* newGroup = FileIOFilter::LoadFromFile(filenames[i],parameters,fType);
 
 		if (newGroup)
 		{

@@ -271,7 +271,7 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 	return result;
 }
 
-CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	ccLog::Print(QString("[BIN] Opening file '%1'...").arg(filename));
 
@@ -287,7 +287,7 @@ CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, bool a
 
 	if (v1)
 	{
-		return LoadFileV1(in,container,static_cast<unsigned>(firstBytes),alwaysDisplayLoadDialog); //firstBytes == number of scans for V1 files!
+		return LoadFileV1(in,container,static_cast<unsigned>(firstBytes),parameters); //firstBytes == number of scans for V1 files!
 	}
 	else
 	{
@@ -315,7 +315,7 @@ CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, bool a
 		//	return CC_FERR_WRONG_FILE_TYPE;
 		//}
 
-		if (alwaysDisplayLoadDialog)
+		if (parameters.alwaysDisplayLoadDialog)
 		{
 			QProgressDialog pDlg(QString("Loading: %1").arg(QFileInfo(filename).fileName()),QString(),0,0/*static_cast<int>(in.size())*/);
 			pDlg.setWindowTitle("BIN file");
@@ -335,12 +335,9 @@ CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, bool a
 	#else
 				usleep(500 * 1000);
 	#endif
-				if (alwaysDisplayLoadDialog)
-				{
-					pDlg.setValue(pDlg.value()+1);
-					//pDlg.setValue(static_cast<int>(in.pos())); //DGM: in fact, the file reading part is just half of the work!
-					QApplication::processEvents();
-				}
+				pDlg.setValue(pDlg.value()+1);
+				//pDlg.setValue(static_cast<int>(in.pos())); //DGM: in fact, the file reading part is just half of the work!
+				QApplication::processEvents();
 			}
 	
 			s_file = 0;
@@ -773,7 +770,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 
 		currentObject->setUniqueID(lastUniqueIDBeforeLoad+currentObject->getUniqueID());
 
-		for (unsigned i=0;i<currentObject->getChildrenNumber();++i)
+		for (unsigned i=0; i<currentObject->getChildrenNumber(); ++i)
 			toCheck.push_back(currentObject->getChild(i));
 	}
 
@@ -807,7 +804,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 	return result;
 }
 
-CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nbScansTotal, bool alwaysDisplayLoadDialog)
+CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nbScansTotal, const LoadParameters& parameters)
 {
 	ccLog::Print("[BIN] Version 1.0");
 
@@ -841,7 +838,7 @@ CC_FILE_ERROR BinFilter::LoadFileV1(QFile& in, ccHObject& container, unsigned nb
 
 		//progress for this cloud
 		CCLib::NormalizedProgress* nprogress = 0;
-		if (alwaysDisplayLoadDialog)
+		if (parameters.alwaysDisplayLoadDialog)
 		{
 			nprogress = new CCLib::NormalizedProgress(&pdlg,nbOfPoints);
 			pdlg.reset();

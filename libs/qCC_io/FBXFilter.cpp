@@ -19,9 +19,6 @@
 
 #include "FBXFilter.h"
 
-//qCC
-#include "ccCoordinatesShiftManager.h"
-
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccMesh.h>
@@ -368,7 +365,7 @@ QString GetAttributeTypeName(FbxNodeAttribute::EType type)
 }
 
 //converts a FBX mesh to a CC mesh
-static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& parameters)
 {
 	if (!fbxMesh)
 		return 0;
@@ -736,22 +733,10 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 			//coordinate shift management
 			if (i == 0)
 			{
-				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-				if (shiftAlreadyEnabled)
-					Pshift = *coordinatesShift;
-				bool applyAll = false;
-				if (	sizeof(PointCoordinateType) < 8
-					&&	ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
+				if (FileIOFilter::HandleGlobalShift(P,Pshift,parameters))
 				{
 					vertices->setGlobalShift(Pshift);
 					ccLog::Warning("[FBX] Mesh has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
-
-					//we save coordinates shift information
-					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
-					{
-						*coordinatesShiftEnabled = true;
-						*coordinatesShift = Pshift;
-					}
 				}
 			}
 
@@ -772,7 +757,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, bool alwaysDisplayLoadDialog/*=true
 }
 
 
-CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	// Initialize the SDK manager. This object handles memory management.
 	FbxManager* lSdkManager = FbxManager::Create();
@@ -834,7 +819,7 @@ CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, bool a
 					{ 
 					case FbxNodeAttribute::eMesh:
 						{
-							ccMesh* mesh = FromFbxMesh(static_cast<FbxMesh*>(pAttribute),alwaysDisplayLoadDialog,coordinatesShiftEnabled,coordinatesShift);
+							ccMesh* mesh = FromFbxMesh(static_cast<FbxMesh*>(pAttribute),parameters);
 							if (mesh)
 							{
 								//apply transformation

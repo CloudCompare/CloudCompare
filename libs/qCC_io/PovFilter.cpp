@@ -152,7 +152,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename)
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	assert(!filename.isEmpty());
 
@@ -234,7 +234,7 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, bool a
 
 			//chargement du fichier (potentiellement plusieurs listes) correspondant au point de vue en cours
 			CC_FILE_TYPES fType = FileIOFilter::GuessFileFormatFromExtension(subFileType);
-			ccHObject* loadedLists = FileIOFilter::LoadFromFile(qPrintable(QString("%0/%1").arg(path).arg(subFileName)),fType);
+			ccHObject* loadedLists = FileIOFilter::LoadFromFile(qPrintable(QString("%0/%1").arg(path).arg(subFileName)),parameters,fType);
 
 			if (loadedLists)
 			{

@@ -519,7 +519,7 @@ CC_FILE_ERROR MAFilter::saveToFile(ccHObject* entity, QString filename)
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR MAFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR MAFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	ccLog::Error("Not available yet!");
 

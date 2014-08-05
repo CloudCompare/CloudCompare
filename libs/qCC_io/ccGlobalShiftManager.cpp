@@ -16,7 +16,7 @@
 //##########################################################################
 
 //Local
-#include "ccCoordinatesShiftManager.h"
+#include "ccGlobalShiftManager.h"
 #include "ccShiftAndScaleCloudDlg.h"
 
 //qCC_db
@@ -31,53 +31,43 @@
 // Max acceptable diagonal length
 #define MAX_DIAGONAL_LENGTH 1.0e6
 
-double ccCoordinatesShiftManager::MaxCoordinateAbsValue()
+double ccGlobalShiftManager::MaxCoordinateAbsValue()
 {
 	return MAX_COORDINATE_ABS_VALUE;
 }
 
-double ccCoordinatesShiftManager::MaxBoundgBoxDiagonal()
+double ccGlobalShiftManager::MaxBoundgBoxDiagonal()
 {
 	return MAX_DIAGONAL_LENGTH;
 }
 
-bool ccCoordinatesShiftManager::NeedShift(const CCVector3d& P)
+bool ccGlobalShiftManager::NeedShift(const CCVector3d& P)
 {
 	return	NeedShift(P.x) || NeedShift(P.y) || NeedShift(P.z);
 }
 
-bool ccCoordinatesShiftManager::NeedShift(double d)
+bool ccGlobalShiftManager::NeedShift(double d)
 {
 	return fabs(d) >= MAX_COORDINATE_ABS_VALUE;
 }
 
-bool ccCoordinatesShiftManager::NeedRescale(double d)
+bool ccGlobalShiftManager::NeedRescale(double d)
 {
 	return fabs(d) >= MAX_DIAGONAL_LENGTH;
 }
 
-bool ccCoordinatesShiftManager::Handle(	const CCVector3d& P,
-										double diagonal,
-										bool displayDialogIfNecessary,
-										bool useInputCoordinatesShiftIfPossible,
-										CCVector3d& coordinatesShift,
-										double* coordinatesScale,
-										bool* applyAll/*=0*/,
-										bool forceDialogDisplay/*=false*/)
+bool ccGlobalShiftManager::Handle(	const CCVector3d& P,
+									double diagonal,
+									Mode mode,
+									bool useInputCoordinatesShiftIfPossible,
+									CCVector3d& coordinatesShift,
+									double* coordinatesScale,
+									bool* applyAll/*=0*/)
 {
 	assert(diagonal >= 0);
 
 	if (applyAll)
 		*applyAll = false;
-
-	//if we can't display a dialog and no usable shift is specified, there's nothing we can do...
-	if (!displayDialogIfNecessary && !useInputCoordinatesShiftIfPossible)
-	{
-		coordinatesShift = CCVector3d(0,0,0);
-		if (coordinatesScale)
-			*coordinatesScale = 1.0;
-		return false;
-	}
 
 	//default scale
 	double scale = (coordinatesScale ? std::max(*coordinatesScale,ZERO_TOLERANCE) : 1.0);
@@ -85,31 +75,50 @@ bool ccCoordinatesShiftManager::Handle(	const CCVector3d& P,
 	bool needShift = NeedShift(P);
 	bool needRescale = NeedRescale(diagonal);
 
-	//is shift necessary?
-	if ( needShift || needRescale || forceDialogDisplay )
+	//if we can't display a dialog and no usable shift is specified, there's nothing we can do...
+	if (mode == NO_DIALOG && !useInputCoordinatesShiftIfPossible)
 	{
-		//coordinates transformation information already provided? (typically from a previous entity)
-		if (useInputCoordinatesShiftIfPossible)
+		coordinatesShift = CCVector3d(0,0,0);
+		if (coordinatesScale)
+			*coordinatesScale = 1.0;
+
+		if (needShift || needRescale)
+		{
+			ccLog::Warning("[ccGlobalShiftManager] Entity has very big coordinates: original accuracy may be lost! (you should apply a Global Shift or Scale)");
+		}
+
+		return false;
+	}
+
+	//is shift necessary?
+	if ( needShift || needRescale || mode == ALWAYS_DISPLAY_DIALOG )
+	{
+		//shift information already provided? (typically from a previous entity)
+		if (useInputCoordinatesShiftIfPossible && mode != ALWAYS_DISPLAY_DIALOG)
 		{
 			//either we are in non interactive mode (which means that shift is 'forced' by caller)
-			if (!displayDialogIfNecessary
+			if (mode == NO_DIALOG
 				//or we are in interactive mode and existing shift is pertinent
-				|| (	!NeedShift(P*scale + coordinatesShift)
-					&&  !NeedRescale(diagonal*scale)
-					&&	!forceDialogDisplay) )
+				|| (!NeedShift(P*scale + coordinatesShift) && !NeedRescale(diagonal*scale)) )
 			{
 				//user should use the provided shift information
 				return true;
 			}
-			else
-			{
-				//--> otherwise we (should) ask for a better one
-			}
+			//--> otherwise we (should) ask for a better one
 		}
 
-		//let's ask the user for those values
-		assert(displayDialogIfNecessary);
+		//let's deduce the right values (AUTO mode)
+		if (mode == NO_DIALOG_AUTO_SHIFT)
+		{
+			//guess best shift & scale info from input point/diagonal
+			if (needShift)
+				coordinatesShift = BestShift(P);
+			if (coordinatesScale && needRescale)
+				*coordinatesScale = BestScale(diagonal);
+			return true;
+		}
 
+		//otherwise let's ask the user for those values
 		ccShiftAndScaleCloudDlg sasDlg(P,diagonal);
 		if (!applyAll)
 			sasDlg.showApplyAllButton(false);
@@ -118,9 +127,9 @@ bool ccCoordinatesShiftManager::Handle(	const CCVector3d& P,
 
 		double scale = 1.0;
 		CCVector3d shift(0,0,0);
-		//shift on load already provided? (typically from a previous file)
 		if (useInputCoordinatesShiftIfPossible)
 		{
+			//shift on load already provided? (typically from a previous file)
 			shift = coordinatesShift;
 			if (coordinatesScale)
 				scale = *coordinatesScale;
@@ -128,6 +137,7 @@ bool ccCoordinatesShiftManager::Handle(	const CCVector3d& P,
 		}
 		else
 		{
+			//guess best shift & scale info from input point/diagonal
 			if (needShift)
 				shift = BestShift(P);
 			if (needRescale)
@@ -182,7 +192,7 @@ bool ccCoordinatesShiftManager::Handle(	const CCVector3d& P,
 	return false;
 }
 
-CCVector3d ccCoordinatesShiftManager::BestShift(const CCVector3d& P)
+CCVector3d ccGlobalShiftManager::BestShift(const CCVector3d& P)
 {
 	if (!NeedShift(P))
 		return CCVector3d(0,0,0);
@@ -199,7 +209,7 @@ CCVector3d ccCoordinatesShiftManager::BestShift(const CCVector3d& P)
 	return shift;
 }
 
-double ccCoordinatesShiftManager::BestScale(double d)
+double ccGlobalShiftManager::BestScale(double d)
 {
 	return d < MAX_DIAGONAL_LENGTH ? 1.0 : pow(10.0,-static_cast<double>(ceil(log(d/MAX_DIAGONAL_LENGTH))));
 }

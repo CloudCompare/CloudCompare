@@ -33,7 +33,7 @@ class AsciiFilter : public FileIOFilter
 public:
 
 	//inherited from FileIOFilter
-	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
+	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
 
 	CC_FILE_ERROR loadCloudFromFormatedAsciiFile(	const QString& filename,
@@ -43,10 +43,8 @@ public:
 													unsigned approximateNumberOfLines,
 													qint64 fileSize,
 													unsigned maxCloudSize,
-													unsigned skipLines=0,
-													bool alwaysDisplayLoadDialog=true,
-													bool* coordinatesShiftEnabled=0,
-													CCVector3d* coordinatesShift=0);
+													unsigned skipLines,
+													LoadParameters& parameters);
 
 	//! Returns associated dialog (creates it if necessary)
 	static QSharedPointer<AsciiOpenDlg> GetOpenDialog();

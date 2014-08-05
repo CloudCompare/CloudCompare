@@ -35,7 +35,7 @@ class STLFilter : public FileIOFilter
 public:
 
 	//inherited from FileIOFilter
-	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
+	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
 
 protected:
@@ -48,17 +48,13 @@ protected:
 	CC_FILE_ERROR loadASCIIFile(QFile& fp,
 								ccMesh* mesh,
 								ccPointCloud* vertices,
-								bool alwaysDisplayLoadDialog,
-								bool* coordinatesShiftEnabled=0,
-								CCVector3d* coordinatesShift=0);
+								LoadParameters& parameters);
 
 	//! Custom load method for binary files
 	CC_FILE_ERROR loadBinaryFile(QFile& fp,
 								ccMesh* mesh,
 								ccPointCloud* vertices,
-								bool alwaysDisplayLoadDialog,
-								bool* coordinatesShiftEnabled=0,
-								CCVector3d* coordinatesShift=0);
+								LoadParameters& parameters);
 };
 
 #endif //CC_STL_FILTER_HEADER

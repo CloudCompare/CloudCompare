@@ -15,28 +15,30 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_COORDINATES_SHIFT_MANAGER_HEADER
-#define CC_COORDINATES_SHIFT_MANAGER_HEADER
+#ifndef CC_GLOBAL_SHIFT_MANAGER_HEADER
+#define CC_GLOBAL_SHIFT_MANAGER_HEADER
 
 //CCLib
 #include <CCGeom.h>
 
 class ccHObject;
 
-//! Helper class to handle coordinates shift while loading entities (GUI, etc.)
-class ccCoordinatesShiftManager
+//! Helper class to handle big coordinates shift/scale (typically while loading entities)
+class ccGlobalShiftManager
 {
 public:
+
+	//! Strategy to handle coordinates shift/scale
+	enum Mode { NO_DIALOG, NO_DIALOG_AUTO_SHIFT, DIALOG_IF_NECESSARY, ALWAYS_DISPLAY_DIALOG };
 
 	//! Handles coordinates shift/scale given the first 3D point and current related parameters
 	static bool Handle(	const CCVector3d& P,
 						double diagonal,
-						bool displayDialogIfNecessary,
+						Mode mode,
 						bool useInputCoordinatesShiftIfPossible,
 						CCVector3d& coordinatesShift,
 						double* coordinatesScale,
-						bool* applyAll = 0,
-						bool forceDialogDisplay = false);
+						bool* applyAll = 0);
 
 	//! Returns whether a particular point (coordinates) is too big or not
 	static bool NeedShift(const CCVector3d& P);

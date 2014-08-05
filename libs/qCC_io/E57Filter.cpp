@@ -21,7 +21,6 @@
 
 //Local
 #include "E57Header.h"
-#include "ccCoordinatesShiftManager.h"
 
 //libE57
 #include <E57/E57Foundation.h>
@@ -1324,9 +1323,7 @@ static ScalarType s_maxIntensity = 0;
 static ScalarType s_minIntensity = 0;
 
 //for coordinate shif handling
-static bool s_alwaysDisplayLoadDialog = true;
-static bool s_coordinatesShiftEnabled = false;
-static CCVector3d s_coordinatesShift(0,0,0);
+FileIOFilter::LoadParameters s_loadParameters;
 
 ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=true*/)
 {
@@ -1625,6 +1622,7 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 		QApplication::processEvents();
 	}
 
+	CCVector3d Pshift(0,0,0);
 	unsigned size = 0;
 	boost::int64_t realCount = 0;
 	while(size = dataReader.read())
@@ -1672,18 +1670,14 @@ ccHObject* LoadScan(e57::Node& node, QString& guidStr, bool showProgressBar/*=tr
 			//first point: check for 'big' coordinates
 			if (realCount == 0)
 			{
-				bool applyAll = false;
-				if (	sizeof(PointCoordinateType) < 8
-					&&	ccCoordinatesShiftManager::Handle(Pd,0,s_alwaysDisplayLoadDialog,s_coordinatesShiftEnabled,s_coordinatesShift,0,&applyAll))
+				if (FileIOFilter::HandleGlobalShift(Pd,Pshift,s_loadParameters))
 				{
-					cloud->setGlobalShift(s_coordinatesShift);
-					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)",qPrintable(guidStr),s_coordinatesShift.x,s_coordinatesShift.y,s_coordinatesShift.z);
-					if (applyAll)
-						s_coordinatesShiftEnabled = true;
+					cloud->setGlobalShift(Pshift);
+					ccLog::Warning("[E57Filter::loadFile] Cloud %s has been recentered! Translation: (%.2f,%.2f,%.2f)",qPrintable(guidStr),Pshift.x,Pshift.y,Pshift.z);
 				}
 			}
 
-			CCVector3 P = CCVector3::fromArray((Pd + s_coordinatesShift).u);
+			CCVector3 P = CCVector3::fromArray((Pd + Pshift).u);
 			cloud->addPoint(P);
 
 			if (hasNormals)
@@ -2038,9 +2032,9 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	return imageObj;
 }
 
-CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
-	s_alwaysDisplayLoadDialog = alwaysDisplayLoadDialog;
+	s_loadParameters = parameters;
 
 	//Read file from disk
 	e57::ImageFile imf(filename.toStdString(), "r");
@@ -2099,8 +2093,8 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, bool a
 
 		//global progress bar
 		ccProgressDialog pdlg(true);
-		CCLib::NormalizedProgress* nprogress=0;
-		if (scanCount>10)
+		CCLib::NormalizedProgress* nprogress = 0;
+		if (scanCount > 10)
 		{
 			//Too many scans, will display a global progress bar
 			nprogress = new CCLib::NormalizedProgress(&pdlg,scanCount);
@@ -2113,7 +2107,7 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, bool a
 		s_absoluteScanIndex = 0;
 		s_cancelRequestedByUser = false;
 		s_minIntensity = s_maxIntensity = 0;
-		for (unsigned i=0;i<scanCount;++i)
+		for (unsigned i=0; i<scanCount; ++i)
 		{
 			e57::Node scanNode = data3D.get(i);
 			QString scanGUID;
@@ -2146,11 +2140,11 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, bool a
 			pdlg.stop();
 			QApplication::processEvents();
 			delete nprogress;
-			nprogress=0;
+			nprogress = 0;
 		}
 
 		//set global max intensity (saturation) for proper display
-		for (unsigned i=0;i<container.getChildrenNumber();++i)
+		for (unsigned i=0; i<container.getChildrenNumber(); ++i)
 		{
 			if (container.getChild(i)->isA(CC_TYPES::POINT_CLOUD))
 			{
@@ -2165,8 +2159,9 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, bool a
 		}
 	}
 
+	parameters = s_loadParameters;
 
-	////Image data?
+	//Image data?
 	if (!s_cancelRequestedByUser && root.isDefined("/images2D"))
 	{
 		e57::Node n = root.get("/images2D"); //E57 standard: "images2D is a vector for storing two dimensional images"
@@ -2174,7 +2169,7 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, bool a
 			return CC_FERR_MALFORMED_FILE;
 		e57::VectorNode images2D(n);
 
-		unsigned imageCount = (unsigned)images2D.childCount();
+		unsigned imageCount = static_cast<unsigned>(images2D.childCount());
 		if (imageCount)
 		{
 			//progress bar
@@ -2185,7 +2180,7 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, bool a
 			pdlg.start();
 			QApplication::processEvents();
 
-			for (unsigned i=0;i<imageCount;++i)
+			for (unsigned i=0; i<imageCount; ++i)
 			{
 				e57::Node imageNode = images2D.get(i);
 				QString associatedData3DGuid;

@@ -19,9 +19,6 @@
 
 #include "RasterGridFilter.h"
 
-//qCC
-#include "ccCoordinatesShiftManager.h"
-
 //qCC_db
 #include <ccPointCloud.h>
 #include <ccScalarField.h>
@@ -42,7 +39,7 @@ CC_FILE_ERROR RasterGridFilter::saveToFile(ccHObject* entity, QString filename)
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	GDALAllRegister();
 	ccLog::PrintDebug("(GDAL drivers: %i)", GetGDALDriverManager()->GetDriverCount());
@@ -95,22 +92,10 @@ CC_FILE_ERROR RasterGridFilter::loadFile(QString filename, ccHObject& container,
 		CCVector3d Pshift(0,0,0);
 		//check for 'big' coordinates
 		{
-			bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-			if (shiftAlreadyEnabled)
-				Pshift = *coordinatesShift;
-			bool applyAll = false;
-			if (	sizeof(PointCoordinateType) < 8
-				&&	ccCoordinatesShiftManager::Handle(origin,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
+			if (HandleGlobalShift(origin,Pshift,parameters))
 			{
 				pc->setGlobalShift(Pshift);
 				ccLog::Warning("[RasterFilter::loadFile] Raster has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
-
-				//we save coordinates shift information
-				if (applyAll && coordinatesShiftEnabled && coordinatesShift)
-				{
-					*coordinatesShiftEnabled = true;
-					*coordinatesShift = Pshift;
-				}
 			}
 		}
 

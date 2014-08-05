@@ -40,7 +40,7 @@ CC_FILE_ERROR PCDFilter::saveToFile(ccHObject* entity, QString filename)
 	return CC_FERR_NO_ERROR;
 }
 
-CC_FILE_ERROR PCDFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR PCDFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	//read header
 	PCDHeader header;
@@ -97,9 +97,7 @@ CC_FILE_ERROR PCDFilter::loadFile(QString filename, ccHObject& container, bool a
 															fileSize,
 															CC_MAX_NUMBER_OF_POINTS_PER_CLOUD,
 															static_cast<unsigned>(header.lineCount),
-															false,
-															coordinatesShiftEnabled,
-															coordinatesShift);
+															parameters);
 	}
 	else if (header.data != "binary")
 	{

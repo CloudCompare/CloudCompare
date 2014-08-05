@@ -29,7 +29,7 @@
 #include <assert.h>
 
 
-CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	//ouverture du fichier
 	FILE *fp = fopen(qPrintable(filename), "rt");
@@ -83,8 +83,8 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, bool a
 
 	CC_FILE_TYPES fType = FileIOFilter::GuessFileFormatFromExtension(subFileType);
 
-	//chargement du fichier (potentiellement plusieurs listes) correspondant
-	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(cloudFileName),fType);
+	//load the corresponding file (potentially containing several clouds)
+	ccHObject* entities = FileIOFilter::LoadFromFile(QString("%0/%1").arg(path).arg(cloudFileName),parameters,fType);
 	if (!entities)
 	{
 		fclose(fp);

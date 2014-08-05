@@ -16,7 +16,6 @@
 //##########################################################################
 
 #include "PTXFilter.h"
-#include "ccCoordinatesShiftManager.h"
 
 //qCC_db
 #include <ccLog.h>
@@ -47,9 +46,7 @@ CC_FILE_ERROR PTXFilter::saveToFile(ccHObject* entity, QString filename)
 
 CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 									ccHObject& container,
-									bool alwaysDisplayLoadDialog/*=true*/,
-									bool* coordinatesShiftEnabled/*=0*/,
-									CCVector3d* coordinatesShift/*=0*/)
+									LoadParameters& parameters)
 {
 	//open ASCII file for reading
 	QFile file(filename);
@@ -229,22 +226,11 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 						//first point: check for 'big' coordinates
 						if (firstPoint)
 						{
-							bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-							if (shiftAlreadyEnabled)
-								Pshift = *coordinatesShift;
-							bool applyAll = false;
-							if (	sizeof(PointCoordinateType) < 8
-								&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
+							CCVector3d P(Pd);
+							if (HandleGlobalShift(P,Pshift,parameters))
 							{
 								cloud->setGlobalShift(Pshift);
 								ccLog::Warning("[PTXFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
-
-								//we save coordinates shift information
-								if (applyAll && coordinatesShiftEnabled && coordinatesShift)
-								{
-									*coordinatesShiftEnabled = true;
-									*coordinatesShift = Pshift;
-								}
 							}
 							firstPoint = false;
 						}

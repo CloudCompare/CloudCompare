@@ -720,7 +720,7 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename)
 #endif
 }
 
-CC_FILE_ERROR DxfFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR DxfFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 #ifdef CC_DXF_SUPPORT
 	DxfImporter importer(&container);

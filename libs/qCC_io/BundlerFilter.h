@@ -28,15 +28,13 @@ class BundlerFilter : public FileIOFilter
 public:
 
 	//inherited from FileIOFilter
-	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog = true, bool* coordinatesShiftEnabled = 0, CCVector3d* coordinatesShift = 0);
+	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename) {/*NOT IMPLEMENTED*/return CC_FERR_NO_SAVE;}
 
 	//! Specific load method
 	CC_FILE_ERROR loadFileExtended(	const QString& filename,
 									ccHObject& container,
-									bool displayLoadDialog,
-									bool* coordinatesShiftEnabled = 0,
-									CCVector3d* coordinatesShift = 0,
+									LoadParameters& parameters,
 									const QString& altKeypointsFilename = QString(),
 									bool undistortImages = false,
 									bool generateColoredDTM = false,

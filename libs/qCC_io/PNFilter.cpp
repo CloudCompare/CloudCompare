@@ -125,7 +125,7 @@ CC_FILE_ERROR PNFilter::saveToFile(ccHObject* entity, QString filename)
 	return result;
 }
 
-CC_FILE_ERROR PNFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR PNFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	//opening file
 	QFile in(filename);
@@ -140,7 +140,7 @@ CC_FILE_ERROR PNFilter::loadFile(QString filename, ccHObject& container, bool al
 		return CC_FERR_NO_LOAD;
 	if ((fileSize % singlePointSize) != 0)
 		return CC_FERR_MALFORMED_FILE;
-	unsigned numberOfPoints = (unsigned) (fileSize  / singlePointSize);
+	unsigned numberOfPoints = static_cast<unsigned>(fileSize  / singlePointSize);
 
 	//progress dialog
 	ccProgressDialog pdlg(true); //cancel available

@@ -25,6 +25,9 @@
 #include <ccHObject.h>
 #include <ccHObjectCaster.h>
 
+//Local
+#include "ccGlobalShiftManager.h"
+
 //! Max number of characters per line in an ASCII file
 const int MAX_ASCII_FILE_LINE_LENGTH	=	4096;
 
@@ -207,21 +210,38 @@ enum CC_FILE_ERROR {CC_FERR_NO_ERROR,
 class FileIOFilter
 {
 public:
-   virtual ~FileIOFilter() {}
+	virtual ~FileIOFilter() {}
+
+	//! Generic loading parameters
+	struct LoadParameters
+	{
+		//! Default constructor
+		LoadParameters()
+			: shiftHandlingMode(ccGlobalShiftManager::DIALOG_IF_NECESSARY)
+			, alwaysDisplayLoadDialog(true)
+			, coordinatesShiftEnabled(0)
+			, coordinatesShift(0)
+		{}
+
+		//! How to handle big coordinates
+		ccGlobalShiftManager::Mode shiftHandlingMode;
+		//! Wether to always display (eventual) display dialog, even if automatic guess is possible
+		bool alwaysDisplayLoadDialog;
+		//! Whether shift on load has been applied after loading (optional)
+		bool* coordinatesShiftEnabled;
+		//! If applicable, applied shift on load (optional)
+		CCVector3d* coordinatesShift;
+	};
 
 	//! Loads one or more entities from a file with known type
 	/** \param filename filename
+		\param parameters generic loading parameters
 		\param fType file type (if left to UNKNOWN_FILE, file type will be guessed from extension)
-		\param alwaysDisplayLoadDialog always display (eventual) display dialog, even if automatic guess is possible
-		\param coordinatesShiftEnabled whether shift on load has been applied after loading
-		\param coordinatesShift if applicable, applied shift on load (3D translation)
 		\return loaded entities (or 0 if an error occurred)
 	**/
-	static ccHObject* LoadFromFile(const QString& filename,
-									CC_FILE_TYPES fType = UNKNOWN_FILE,
-									bool alwaysDisplayLoadDialog = true,
-									bool* coordinatesShiftEnabled = 0,
-									CCVector3d* coordinatesShift = 0);
+	static ccHObject* LoadFromFile(	const QString& filename,
+									LoadParameters& parameters,
+									CC_FILE_TYPES fType = UNKNOWN_FILE);
 
 	//! Saves an entity (or a group of) to a specific file (with name and type)
 	static CC_FILE_ERROR SaveToFile(ccHObject* entities,
@@ -241,16 +261,12 @@ public:
 	/** This method must be implemented by children classes.
 		\param filename file to load
 		\param container container to store loaded entities
-		\param alwaysDisplayLoadDialog always display (eventual) display dialog, even if automatic guess is possible
-		\param coordinatesShiftEnabled whether shift on load has already been defined or not (may be modified by this method)
-		\param coordinatesShift already applied (input) or newly applied (output) shift on load (3D translation)
+		\param parameters generic loading parameters
 		\return error
 	**/
 	virtual CC_FILE_ERROR loadFile(	QString filename,
 									ccHObject& container,
-									bool alwaysDisplayLoadDialog = true,
-									bool* coordinatesShiftEnabled = 0,
-									CCVector3d* coordinatesShift = 0) = 0;
+									LoadParameters& parameters) = 0;
 
 	//! Saves an entity (or a group of) to a file
 	/** This method must be implemented by children classes.
@@ -265,6 +281,14 @@ public:
 
 	//! Factory: returns a filter given it's type
 	static FileIOFilter* CreateFilter(CC_FILE_TYPES fType);
+
+	//! Shortcut to the ccGlobalShiftManager mechanism specific for files
+	/** \param[in] P sample point (typically the first loaded)
+		\param[out] Pshift global shift
+		\param loadParameters loading parameters
+		\return whether global shift has been defined/enabled
+	**/
+	static bool HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, LoadParameters& loadParameters);
 
 };
 

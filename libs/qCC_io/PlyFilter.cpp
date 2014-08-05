@@ -19,7 +19,6 @@
 
 //Local
 #include "PlyOpenDlg.h"
-#include "ccCoordinatesShiftManager.h"
 
 //Qt
 #include <QProgressDialog>
@@ -427,9 +426,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 static CCVector3d s_Point(0,0,0);
 static int s_PointCount = 0;
 static bool s_PointDataCorrupted = false;
-static bool s_ShiftAlreadyEnabled = false;
-static bool s_AlwaysDisplayLoadDialog = true;
-static bool s_ShiftApplyAll = false;
+static FileIOFilter::LoadParameters s_loadParameters;
 static CCVector3d s_Pshift(0,0,0);
 
 static int vertex_cb(p_ply_argument argument)
@@ -459,9 +456,7 @@ static int vertex_cb(p_ply_argument argument)
 		//first point: check for 'big' coordinates
 		if (s_PointCount == 0)
 		{
-			s_ShiftApplyAll = false; //should already be false!
-			if (	sizeof(PointCoordinateType) < 8
-				&&	ccCoordinatesShiftManager::Handle(s_Point,0,s_AlwaysDisplayLoadDialog,s_ShiftAlreadyEnabled,s_Pshift,0,&s_ShiftApplyAll))
+			if (FileIOFilter::HandleGlobalShift(s_Point,s_Pshift,s_loadParameters))
 			{
 				cloud->setGlobalShift(s_Pshift);
 				ccLog::Warning("[PLYFilter::loadFile] Cloud (vertices) has been recentered! Translation: (%.2f,%.2f,%.2f)",s_Pshift.x,s_Pshift.y,s_Pshift.z);
@@ -679,7 +674,7 @@ static int texCoords_cb(p_ply_argument argument)
 	return 1;
 }
 
-CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	//reset statics!
 	s_triCount = 0;
@@ -692,13 +687,8 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, bool a
 	s_NormalCount = 0;
 	s_PointCount = 0;
 	s_PointDataCorrupted = false;
-	s_AlwaysDisplayLoadDialog = alwaysDisplayLoadDialog;
-	s_ShiftApplyAll = false;
-	s_ShiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-	if (s_ShiftAlreadyEnabled)
-		s_Pshift = *coordinatesShift;
-	else
-		s_Pshift = CCVector3d(0,0,0);
+	s_loadParameters = parameters;
+	s_Pshift = CCVector3d(0,0,0);
 
 	/****************/
 	/***  Header  ***/
@@ -951,7 +941,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, bool a
 	{
 		return CC_FERR_BAD_ENTITY_TYPE;
 	}
-	else if (stdPropsCount < 4 && !alwaysDisplayLoadDialog)
+	else if (stdPropsCount < 4 && !parameters.alwaysDisplayLoadDialog)
 	{
 		//brute force heuristic
 		xIndex = 1;
@@ -976,7 +966,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, bool a
 					++assignedListProperties;
 		}
 
-		if (	alwaysDisplayLoadDialog
+		if (	parameters.alwaysDisplayLoadDialog
 			||	stdPropsCount > assignedStdProperties+1		//+1 because of the first item in the combo box ('none')
 			||	listPropsCount > assignedListProperties+1 )	//+1 because of the first item in the combo box ('none')
 		{
@@ -1012,7 +1002,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, bool a
 			pod.textCoordsComboBox->setCurrentIndex(texCoordsIndex);
 
 			//We execute dialog
-			if (alwaysDisplayLoadDialog && !pod.exec())
+			if (parameters.alwaysDisplayLoadDialog && !pod.exec())
 			{
 				ply_close(ply);
 				return CC_FERR_CANCELED_BY_USER;
@@ -1374,7 +1364,7 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, bool a
 	}
 
 	QProgressDialog pDlg(QString("Loading in progress..."),QString(),0,0);
-	if (alwaysDisplayLoadDialog)
+	if (parameters.alwaysDisplayLoadDialog)
 	{
 		pDlg.setWindowTitle("PLY file");
 		pDlg.show();
@@ -1420,12 +1410,8 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, bool a
 		texCoords=0;
 	}
 
-	//we save coordinates shift information
-	if (s_ShiftApplyAll && coordinatesShiftEnabled && coordinatesShift)
-	{
-		*coordinatesShiftEnabled = true;
-		*coordinatesShift = s_Pshift;
-	}
+	//we save parameters
+	parameters = s_loadParameters;
 
 	//we update scalar field(s)
 	{

@@ -16,7 +16,6 @@
 //##########################################################################
 
 #include "STLFilter.h"
-#include "ccCoordinatesShiftManager.h"
 
 //Qt
 #include <QApplication>
@@ -303,7 +302,7 @@ static bool TagDuplicatedVertices(	const CCLib::DgmOctree::octreeCell& cell,
 	return true;
 }
 
-CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	ccLog::Print(QString("[STL] Loading '%1'").arg(filename));
 
@@ -356,9 +355,9 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, bool a
 
 	CC_FILE_ERROR error = CC_FERR_NO_ERROR;
 	if (ascii)
-		error = loadASCIIFile(fp,mesh,vertices,alwaysDisplayLoadDialog,coordinatesShiftEnabled,coordinatesShift);
+		error = loadASCIIFile(fp,mesh,vertices,parameters);
 	else
-		error = loadBinaryFile(fp,mesh,vertices,alwaysDisplayLoadDialog,coordinatesShiftEnabled,coordinatesShift);
+		error = loadBinaryFile(fp,mesh,vertices,parameters);
 
 	if (error != CC_FERR_NO_ERROR)
 	{
@@ -516,9 +515,7 @@ CC_FILE_ERROR STLFilter::loadFile(QString filename, ccHObject& container, bool a
 CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 									ccMesh* mesh,
 									ccPointCloud* vertices,
-									bool alwaysDisplayLoadDialog,
-									bool* coordinatesShiftEnabled/*=0*/,
-									CCVector3d* coordinatesShift/*=0*/)
+									LoadParameters& parameters)
 {
 	assert(fp.isOpen() && mesh && vertices);
 
@@ -667,22 +664,10 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 			//first point: check for 'big' coordinates
 			if (pointCount == 0)
 			{
-				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-				if (shiftAlreadyEnabled)
-					Pshift = *coordinatesShift;
-				bool applyAll = false;
-				if (	sizeof(PointCoordinateType) < 8
-					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
+				if (HandleGlobalShift(Pd,Pshift,parameters))
 				{
 					vertices->setGlobalShift(Pshift);
 					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
-
-					//we save coordinates shift information
-					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
-					{
-						*coordinatesShiftEnabled = true;
-						*coordinatesShift = Pshift;
-					}
 				}
 			}
 
@@ -816,9 +801,7 @@ CC_FILE_ERROR STLFilter::loadASCIIFile(QFile& fp,
 CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 									ccMesh* mesh,
 									ccPointCloud* vertices,
-									bool alwaysDisplayLoadDialog,
-									bool* coordinatesShiftEnabled/*=0*/,
-									CCVector3d* coordinatesShift/*=0*/)
+									LoadParameters& parameters)
 {
 	assert(fp.isOpen() && mesh && vertices);
 
@@ -880,22 +863,10 @@ CC_FILE_ERROR STLFilter::loadBinaryFile(QFile& fp,
 			CCVector3d Pd( Pf[0], Pf[1], Pf[2] );
 			if (pointCount == 0)
 			{
-				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-				if (shiftAlreadyEnabled)
-					Pshift = *coordinatesShift;
-				bool applyAll = false;
-				if (	sizeof(PointCoordinateType) < 8
-					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
+				if (HandleGlobalShift(Pd,Pshift,parameters))
 				{
 					vertices->setGlobalShift(Pshift);
 					ccLog::Warning("[STLFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
-
-					//we save coordinates shift information
-					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
-					{
-						*coordinatesShiftEnabled = true;
-						*coordinatesShift = Pshift;
-					}
 				}
 			}
 

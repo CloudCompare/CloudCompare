@@ -45,7 +45,7 @@ CC_FILE_ERROR X3DFilter::saveToFile(ccHObject* entity, QString filename)
 	return CC_FERR_NO_SAVE;
 }
 
-CC_FILE_ERROR X3DFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR X3DFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	XIOT::X3DLoader loader;
 	X3DXIOTNodeHandler handler(&container);

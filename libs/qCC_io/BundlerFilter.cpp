@@ -20,7 +20,6 @@
 //Local
 #include "BundlerImportDlg.h"
 #include "BinFilter.h"
-#include "ccCoordinatesShiftManager.h"
 
 //qCC_db
 #include <ccLog.h>
@@ -78,9 +77,9 @@ struct BundlerCamera
 	bool isValid;
 };
 
-CC_FILE_ERROR BundlerFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR BundlerFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
-	return loadFileExtended(filename,container,true,coordinatesShiftEnabled,coordinatesShift);
+	return loadFileExtended(filename,container,parameters);
 }
 
 //ortho-rectified image related information
@@ -93,9 +92,7 @@ struct ORImageInfo
 
 CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 												ccHObject& container,
-												bool alwaysDisplayLoadDialog/*=true*/,
-												bool* coordinatesShiftEnabled/*=0*/,
-												CCVector3d* coordinatesShift/*=0*/,
+												LoadParameters& parameters,
 												const QString& _altKeypointsFilename/*=QString()*/,
 												bool _undistortImages/*=false*/,
 												bool _generateColoredDTM/*=false*/,
@@ -159,7 +156,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	QString imageListFilename = QFileInfo(f).dir().absoluteFilePath("list.txt");
 	QString altKeypointsFilename = QFileInfo(f).dir().absoluteFilePath("pmvs.ply");
 
-	if (alwaysDisplayLoadDialog)
+	if (parameters.alwaysDisplayLoadDialog)
 	{
 		//open dialog
 		BundlerImportDlg biDlg;
@@ -350,22 +347,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				//first point: check for 'big' coordinates
 				if (i == 0)
 				{
-					bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-					if (shiftAlreadyEnabled)
-						Pshift = *coordinatesShift;
-					bool applyAll = false;
-					if (	sizeof(PointCoordinateType) < 8
-						&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll) )
+					if (HandleGlobalShift(Pd,Pshift,parameters))
 					{
 						keypointsCloud->setGlobalShift(Pshift);
 						ccLog::Warning("[BundlerFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
-
-						//we save coordinates shift information
-						if (applyAll && coordinatesShiftEnabled && coordinatesShift)
-						{
-							*coordinatesShiftEnabled = true;
-							*coordinatesShift = Pshift;
-						}
 					}
 				}
 				keypointsCloud->addPoint(CCVector3::fromArray((Pd+Pshift).u));
@@ -480,7 +465,8 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 	//use alternative cloud/mesh as keypoints
 	if (useAltKeypoints)
 	{
-		ccHObject* altKeypointsContainer = FileIOFilter::LoadFromFile(altKeypointsFilename);
+		FileIOFilter::LoadParameters altKeypointsParams;
+		ccHObject* altKeypointsContainer = FileIOFilter::LoadFromFile(altKeypointsFilename,altKeypointsParams);
 		if (	!altKeypointsContainer
 			||	altKeypointsContainer->getChildrenNumber() != 1
 			||	(!altKeypointsContainer->getChild(0)->isKindOf(CC_TYPES::POINT_CLOUD) && !altKeypointsContainer->getChild(0)->isKindOf(CC_TYPES::MESH)))
@@ -1022,7 +1008,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					container.addChild(mntCloud);
 					ccLog::Warning("[BundlerFilter::loadFile] DTM vertices sucessfully generated: clean it if necessary then use 'Edit > Mesh > Compute Delaunay 2D (Best LS plane)' then 'Smooth' to get a proper mesh");
 
-					if (!alwaysDisplayLoadDialog)
+					if (!parameters.alwaysDisplayLoadDialog)
 					{
 						//auto save DTM vertices
 						BinFilter bf;

@@ -19,8 +19,7 @@
 
 #include "LASFilter.h"
 
-//qCC
-#include "ccCoordinatesShiftManager.h"
+//Local
 #include "LASOpenDlg.h"
 
 //qCC_db
@@ -345,7 +344,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 
 QSharedPointer<LASOpenDlg> s_lasOpenDlg(0);
 
-CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	//opening file
 	std::ifstream ifs;
@@ -406,7 +405,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, bool a
 	if (!s_lasOpenDlg)
 		s_lasOpenDlg = QSharedPointer<LASOpenDlg>(new LASOpenDlg());
 	s_lasOpenDlg->setDimensions(dimensions);
-	if (alwaysDisplayLoadDialog && !s_lasOpenDlg->autoSkipMode() && !s_lasOpenDlg->exec())
+	if (parameters.alwaysDisplayLoadDialog && !s_lasOpenDlg->autoSkipMode() && !s_lasOpenDlg->exec())
 	{
 		ifs.close();
 		return CC_FERR_CANCELED_BY_USER;
@@ -580,22 +579,10 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, bool a
 		if (pointsRead == 0)
 		{
 			CCVector3d P( p.GetX(),p.GetY(),p.GetZ() );
-			bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-			if (shiftAlreadyEnabled)
-				Pshift = *coordinatesShift;
-			bool applyAll = false;
-			if (	sizeof(PointCoordinateType) < 8
-				&&	ccCoordinatesShiftManager::Handle(P,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
+			if (HandleGlobalShift(P,Pshift,parameters))
 			{
 				loadedCloud->setGlobalShift(Pshift);
 				ccLog::Warning("[LASFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
-
-				//we save coordinates shift information
-				if (applyAll && coordinatesShiftEnabled && coordinatesShift)
-				{
-					*coordinatesShiftEnabled = true;
-					*coordinatesShift = Pshift;
-				}
 			}
 		}
 

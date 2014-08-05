@@ -40,6 +40,8 @@
 static const char COMMAND_SILENT_MODE[]						= "SILENT";
 static const char COMMAND_OPEN[]							= "O";				//+file name
 static const char COMMAND_OPEN_SKIP_LINES[]					= "SKIP";			//+number of lines to skip
+static const char COMMAND_OPEN_SHIFT_ON_LOAD[]				= "GLOBAL_SHIFT";	//+global shift
+static const char COMMAND_KEYWORD_AUTO[]					= "AUTO";			//"AUTO" keyword
 static const char COMMAND_SUBSAMPLE[]						= "SS";				//+ method (RANDOM/SPATIAL/OCTREE) + parameter (resp. point count / spatial step / octree level)
 static const char COMMAND_CURVATURE[]						= "CURV";			//+ curvature type (MEAN/GAUSS) +
 static const char COMMAND_DENSITY[]							= "DENSITY";		//+ sphere radius
@@ -103,6 +105,25 @@ static int s_precision = 12;
 static bool s_addTimestamp = true;
 //Whether silent mode is activated or not
 static bool s_silentMode = false;
+
+//Loading parameters
+struct CmdLineLoadParameters : public FileIOFilter::LoadParameters
+{
+	CmdLineLoadParameters()
+		: FileIOFilter::LoadParameters()
+		, m_coordinatesShiftEnabled(false)
+		, m_coordinatesShift(0,0,0)
+	{
+		shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
+		alwaysDisplayLoadDialog = false;
+		coordinatesShiftEnabled = &m_coordinatesShiftEnabled;
+		coordinatesShift = &m_coordinatesShift;
+	}
+
+	bool m_coordinatesShiftEnabled;
+	CCVector3d m_coordinatesShift;
+};
+static CmdLineLoadParameters s_loadParameters;
 
 
 bool IsCommand(const QString& token, const char* command)
@@ -333,6 +354,48 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 			
 			Print(QString("Will skip %1 lines").arg(skipLines));
 		}
+		else if (IsCommand(argument,COMMAND_OPEN_SHIFT_ON_LOAD))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
+			if (arguments.empty())
+				return Error(QString(QString("Missing parameter: global shift vector or %1 after '%2'").arg(COMMAND_KEYWORD_AUTO).arg(COMMAND_OPEN_SHIFT_ON_LOAD)));
+
+			QString firstParam = arguments.takeFirst();
+
+			s_loadParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG;
+			s_loadParameters.m_coordinatesShiftEnabled = false;
+			s_loadParameters.m_coordinatesShift = CCVector3d(0,0,0);
+			
+			if (firstParam.toUpper() == COMMAND_KEYWORD_AUTO)
+			{
+				//let CC handles the global shift automatically
+				s_loadParameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+			}
+			else if (arguments.size() < 2)
+			{
+				return Error(QString(QString("Missing parameter: global shift vector after '%1' (3 values expected)").arg(COMMAND_OPEN_SHIFT_ON_LOAD)));
+			}
+			else
+			{
+				bool ok = true;
+				CCVector3d shiftOnLoadVec;
+				shiftOnLoadVec.x = firstParam.toDouble(&ok);
+				if (!ok)
+					return Error(QString(QString("Invalid parameter: X coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SKIP_LINES)));
+				shiftOnLoadVec.y = arguments.takeFirst().toDouble(&ok);
+				if (!ok)
+					return Error(QString(QString("Invalid parameter: Y coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SKIP_LINES)));
+				shiftOnLoadVec.z = arguments.takeFirst().toDouble(&ok);
+				if (!ok)
+					return Error(QString(QString("Invalid parameter: Z coordinate of the global shift vector after '%1'").arg(COMMAND_OPEN_SKIP_LINES)));
+
+				//set the user defined shift vector as default shift information
+				s_loadParameters.m_coordinatesShiftEnabled = true;
+				s_loadParameters.m_coordinatesShift = shiftOnLoadVec;
+			}
+		}
 		else
 		{
 			break;
@@ -349,7 +412,8 @@ bool ccCommandLineParser::commandLoad(QStringList& arguments)
 	//open specified file
 	QString filename(arguments.takeFirst());
 	Print(QString("Opening file: '%1'").arg(filename));
-	ccHObject* db = FileIOFilter::LoadFromFile(filename,UNKNOWN_FILE,false);
+
+	ccHObject* db = FileIOFilter::LoadFromFile(filename,s_loadParameters,UNKNOWN_FILE);
 	if (!db)
 		return Error(QString("Failed to open file '%1'").arg(filename));
 
@@ -1428,11 +1492,11 @@ bool ccCommandLineParser::commandBundler(QStringList& arguments)
 	}
 
 	ccHObject tempContainer;
+	FileIOFilter::LoadParameters parameters;
+	parameters.alwaysDisplayLoadDialog = false;
 	BundlerFilter().loadFileExtended(	qPrintable(bundlerFilename),
 										tempContainer,
-										false,
-										0,
-										0,
+										parameters,
 										altKeypointsFilename,
 										undistortImages,
 										generateColoredDTM,

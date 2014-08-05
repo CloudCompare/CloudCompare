@@ -22,7 +22,7 @@
 #include <ui_globalShiftAndScaleAboutDlg.h>
 
 //Local
-#include "ccCoordinatesShiftManager.h"
+#include "ccGlobalShiftManager.h"
 
 //Qt
 #include <QPushButton>
@@ -283,14 +283,14 @@ void ccShiftAndScaleCloudDlg::updateLocalSystem()
 	int prec = std::max(0,8-digitsBeforeDec);
 
 	m_ui->xDestLabel->setText(QString("x = %1").arg(localPoint.x,0,'f',prec));
-	m_ui->xDestLabel->setStyleSheet(ccCoordinatesShiftManager::NeedShift(localPoint.x) ? QString("color: red;") : QString() );
+	m_ui->xDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.x) ? QString("color: red;") : QString() );
 	m_ui->yDestLabel->setText(QString("y = %1").arg(localPoint.y,0,'f',prec));
-	m_ui->yDestLabel->setStyleSheet(ccCoordinatesShiftManager::NeedShift(localPoint.y) ? QString("color: red;") : QString() );
+	m_ui->yDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.y) ? QString("color: red;") : QString() );
 	m_ui->zDestLabel->setText(QString("z = %1").arg(localPoint.z,0,'f',prec));
-	m_ui->zDestLabel->setStyleSheet(ccCoordinatesShiftManager::NeedShift(localPoint.z) ? QString("color: red;") : QString() );
+	m_ui->zDestLabel->setStyleSheet(ccGlobalShiftManager::NeedShift(localPoint.z) ? QString("color: red;") : QString() );
 
 	m_ui->diagDestLabel->setText(QString("diagonal = %1").arg(localDiagonal,0,'f',prec));
-	m_ui->diagDestLabel->setStyleSheet(ccCoordinatesShiftManager::NeedRescale(localDiagonal) ? QString("color: red;") : QString() );
+	m_ui->diagDestLabel->setStyleSheet(ccGlobalShiftManager::NeedRescale(localDiagonal) ? QString("color: red;") : QString() );
 }
 
 void ccShiftAndScaleCloudDlg::setShift(const CCVector3d& shift)

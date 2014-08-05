@@ -482,11 +482,15 @@ void ccViewer::addToDB(const QStringList& filenames)
 		currentRoot=0;
 	}
 
-	bool scaleAlreadyDisplayed=false;
+	bool scaleAlreadyDisplayed = false;
 
-	for (int i=0;i<filenames.size();++i)
+	FileIOFilter::LoadParameters parameters;
+	parameters.alwaysDisplayLoadDialog = false;
+	parameters.shiftHandlingMode = ccGlobalShiftManager::NO_DIALOG_AUTO_SHIFT;
+
+	for (int i=0; i<filenames.size(); ++i)
 	{
-		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i],UNKNOWN_FILE,false);
+		ccHObject* newEntities = FileIOFilter::LoadFromFile(filenames[i],parameters,UNKNOWN_FILE);
 
 		if (newEntities)
 		{
@@ -494,7 +498,7 @@ void ccViewer::addToDB(const QStringList& filenames)
 
 			if (!scaleAlreadyDisplayed)
 			{
-				for (unsigned i=0;i<newEntities->getChildrenNumber();++i)
+				for (unsigned i=0; i<newEntities->getChildrenNumber(); ++i)
 				{
 					ccHObject* ent = newEntities->getChild(i);
 					if (ent->isA(CC_TYPES::POINT_CLOUD))
@@ -813,7 +817,7 @@ void ccViewer::changeCurrentScalarField(bool state)
 
 	//disable all other actions
 	const QObjectList& children = ui.menuSelectSF->children();
-	for (int i=0;i<children.size();++i)
+	for (int i=0; i<children.size() ;++i)
 	{
 		QAction* act = static_cast<QAction*>(children[i]);
 		act->blockSignals(true);
@@ -822,7 +826,7 @@ void ccViewer::changeCurrentScalarField(bool state)
 	}
 
 	int sfIndex = action->data().toInt();
-	if (sfIndex < (int)cloud->getNumberOfScalarFields())
+	if (sfIndex < static_cast<int>(cloud->getNumberOfScalarFields()))
 	{
 		cloud->setCurrentDisplayedScalarField(sfIndex);
 		//when 'setCurrentDisplayedScalarField' is called, scalar field is automatically shown!

@@ -28,7 +28,7 @@
 #include <ccPointCloud.h>
 
 //qCC_io
-#include <ccCoordinatesShiftManager.h>
+#include <ccGlobalShiftManager.h>
 
 //CC_FBO
 #include <ccGlFilter.h>
@@ -663,7 +663,7 @@ bool ccPointPairRegistrationDlg::addReferencePoint(CCVector3d& Pin, ccGenericPoi
 					scale = m_aligned.cloud->getGlobalScale();
 					shiftEnabled = true;
 				}
-				if (ccCoordinatesShiftManager::Handle(Pin,0,true,shiftEnabled,Pshift,&scale))
+				if (ccGlobalShiftManager::Handle(Pin,0,ccGlobalShiftManager::DIALOG_IF_NECESSARY,shiftEnabled,Pshift,&scale))
 				{
 					m_refPoints.setGlobalShift(Pshift);
 					m_refPoints.setGlobalScale(scale);

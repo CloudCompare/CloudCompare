@@ -16,7 +16,6 @@
 //##########################################################################
 
 #include "ObjFilter.h"
-#include "ccCoordinatesShiftManager.h"
 
 //Qt
 #include <QApplication>
@@ -341,7 +340,7 @@ struct facetElement
 	}
 };
 
-CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	ccLog::Print(QString("[OBJ] ") + filename);
 
@@ -455,22 +454,10 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, bool a
 			//first point: check for 'big' coordinates
 			if (pointsRead == 0)
 			{
-				bool shiftAlreadyEnabled = (coordinatesShiftEnabled && *coordinatesShiftEnabled && coordinatesShift);
-				if (shiftAlreadyEnabled)
-					Pshift = *coordinatesShift;
-				bool applyAll = false;
-				if (	sizeof(PointCoordinateType) < 8
-					&&	ccCoordinatesShiftManager::Handle(Pd,0,alwaysDisplayLoadDialog,shiftAlreadyEnabled,Pshift,0,&applyAll))
+				if (HandleGlobalShift(Pd,Pshift,parameters))
 				{
 					vertices->setGlobalShift(Pshift);
 					ccLog::Warning("[OBJ] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
-
-					//we save coordinates shift information
-					if (applyAll && coordinatesShiftEnabled && coordinatesShift)
-					{
-						*coordinatesShiftEnabled = true;
-						*coordinatesShift = Pshift;
-					}
 				}
 			}
 

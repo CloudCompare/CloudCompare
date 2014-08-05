@@ -221,10 +221,8 @@ FileIOFilter* FileIOFilter::CreateFilter(CC_FILE_TYPES fType)
 }
 
 ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
-										CC_FILE_TYPES fType,
-										bool alwaysDisplayLoadDialog/*=true*/,
-										bool* coordinatesShiftEnabled/*=0*/,
-										CCVector3d* coordinatesShift/*=0*/)
+										LoadParameters& loadParameters,
+										CC_FILE_TYPES fType/*=UNKNOWN_FILE*/)
 {
 	//check file existence
 	QFileInfo fi(filename);
@@ -268,9 +266,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	{
 		result = fio->loadFile(	filename,
 								*container,
-								alwaysDisplayLoadDialog,
-								coordinatesShiftEnabled,
-								coordinatesShift);
+								loadParameters);
 	}
 	catch(...)
 	{
@@ -394,4 +390,26 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
 		ccLog::Warning(outputString);
 	else
 		ccLog::Error(outputString);
+}
+
+bool FileIOFilter::HandleGlobalShift(const CCVector3d& P, CCVector3d& Pshift, LoadParameters& loadParameters)
+{
+	bool shiftAlreadyEnabled = (loadParameters.coordinatesShiftEnabled && *loadParameters.coordinatesShiftEnabled && loadParameters.coordinatesShift);
+	if (shiftAlreadyEnabled)
+		Pshift = *loadParameters.coordinatesShift;
+	bool applyAll = false;
+	if (	sizeof(PointCoordinateType) < 8
+		&&	ccGlobalShiftManager::Handle(P,0,loadParameters.shiftHandlingMode,shiftAlreadyEnabled,Pshift,0,&applyAll) )
+	{
+		//we save coordinates shift information
+		if (applyAll && loadParameters.coordinatesShiftEnabled && loadParameters.coordinatesShift)
+		{
+			*loadParameters.coordinatesShiftEnabled = true;
+			*loadParameters.coordinatesShift = Pshift;
+		}
+
+		return true;
+	}
+
+	return false;
 }

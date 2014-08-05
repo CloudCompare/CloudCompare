@@ -28,7 +28,7 @@ CC_FILE_ERROR SoiFilter::saveToFile(ccHObject* entity, QString filename)
 	return CC_FERR_NO_SAVE;
 }
 
-CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, bool alwaysDisplayLoadDialog/*=true*/, bool* coordinatesShiftEnabled/*=0*/, CCVector3d* coordinatesShift/*=0*/)
+CC_FILE_ERROR SoiFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
 	//open the file
 	FILE *fp = fopen(qPrintable(filename), "rt");

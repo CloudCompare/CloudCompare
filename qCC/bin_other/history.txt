@@ -9,6 +9,7 @@ v2.5.6 ??/??/2014
 			 a fixed number of points (much better if the cloud density is not constant)
 			* possibility an absolute error instead of a relative error
 			* possibility to remove isolated points by the way
+	* Meshes can now be exported in DXF (Autocad) files
 - Enhancements:
 	* The vector coordinates have been restored in the 2-points labels (Point picking tool)
 - Bug fixes:

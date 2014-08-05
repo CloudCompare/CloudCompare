@@ -457,24 +457,31 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename)
 
 	ccHObject::Container polylines;
 	root->filterChildren(polylines,true,CC_TYPES::POLY_LINE);
+	if (root->isKindOf(CC_TYPES::POLY_LINE))
+		polylines.push_back(root);
+	ccHObject::Container meshes;
+	root->filterChildren(meshes,true,CC_TYPES::MESH);
+	if (root->isKindOf(CC_TYPES::MESH))
+		meshes.push_back(root);
 
 	//only polylines are handled for now
 	size_t polyCount = polylines.size();
-	if (!polyCount)
+	size_t meshCount = meshes.size();
+	if (polyCount + meshCount == 0)
 		return CC_FERR_NO_SAVE;
 
 	//get global bounding box
 	ccBBox box;
-	for (size_t i=0; i<polyCount; ++i)
 	{
-		ccBBox polyBox = polylines[i]->getBB();
-		if (i)
+		for (size_t i=0; i<polyCount; ++i)
 		{
+			ccBBox polyBox = polylines[i]->getBB();
 			box += polyBox;
 		}
-		else
+		for (size_t j=0; j<meshCount; ++j)
 		{
-			box = polyBox;
+			ccBBox meshBox = meshes[j]->getBB();
+			box += meshBox;
 		}
 	}
 
@@ -554,7 +561,8 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename)
 
 	//Writing the Layers
 	dw->tableLayers(static_cast<int>(polyCount)+1);
-	QStringList layerNames;
+	QStringList polyLayerNames;
+	QStringList meshLayerNames;
 	{
 		//default layer
 		dxf.writeLayer(*dw, 
@@ -573,12 +581,30 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename)
 			//but it can't be longer than 31 characters (R14 limit)
 			QString layerName = QString("POLYLINE_%1").arg(i+1,3,10,QChar('0'));
 
-			layerNames << layerName;
+			polyLayerNames << layerName;
 			dxf.writeLayer(*dw, 
 				DL_LayerData(layerName.toStdString(), 0), 
 				DL_Attributes(
 				std::string(""),
-				i == 0 ? DL_Codes::green : /*-*/DL_Codes::green, //invisible if negative!
+				DL_Codes::green,
+				static_cast<int>(lineWidth),
+				"CONTINUOUS"));
+		}
+		
+		//mesh layers
+		for (unsigned j=0; j<meshCount; ++j)
+		{
+			//default layer name
+			//TODO: would be better to use the mesh name!
+			//but it can't be longer than 31 characters (R14 limit)
+			QString layerName = QString("MESH_%1").arg(j+1,3,10,QChar('0'));
+
+			meshLayerNames << layerName;
+			dxf.writeLayer(*dw, 
+				DL_LayerData(layerName.toStdString(), 0), 
+				DL_Attributes(
+				std::string(""),
+				DL_Codes::magenta,
 				static_cast<int>(lineWidth),
 				"CONTINUOUS"));
 		}
@@ -642,16 +668,38 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename)
 				flags |= 8; //3D polyline
 			dxf.writePolyline(	*dw,
 								DL_PolylineData(static_cast<int>(vertexCount),0,0,flags),
-								DL_Attributes(layerNames[i].toStdString(), DL_Codes::bylayer, -1, "BYLAYER") );
+								DL_Attributes(polyLayerNames[i].toStdString(), DL_Codes::bylayer, -1, "BYLAYER") );
 
-			for (unsigned i=0; i<vertexCount; ++i)
+			for (unsigned v=0; v<vertexCount; ++v)
 			{
 				CCVector3 P;
-				poly->getPoint(i,P);
+				poly->getPoint(v,P);
 				dxf.writeVertex(*dw, DL_VertexData(	P.x, P.y, P.z ) );
 			}
 
 			dxf.writePolylineEnd(*dw);
+		}
+
+		//write meshes
+		for (unsigned j=0; j<meshCount; ++j)
+		{
+			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(meshes[j]);
+			unsigned triCount = mesh->size();
+			mesh->placeIteratorAtBegining();
+			for (unsigned f=0; f<triCount; ++f)
+			{
+				const CCLib::GenericTriangle* tri = mesh->_getNextTriangle();
+				const CCVector3* A = tri->_getA();
+				const CCVector3* B = tri->_getB();
+				const CCVector3* C = tri->_getC();
+				dxf.write3dFace(*dw,
+								DL_3dFaceData(	A->x,A->y,A->z,
+												B->x,B->y,B->z,
+												C->x,C->y,C->z,
+												C->x,C->y,C->z,
+												lineWidth ),
+								DL_Attributes(meshLayerNames[j].toStdString(), DL_Codes::bylayer, -1, "BYLAYER"));
+			}
 		}
 
 		dw->sectionEnd();

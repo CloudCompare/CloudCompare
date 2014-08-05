@@ -9157,15 +9157,18 @@ void MainWindow::saveFile()
 				selectedFilter = CC_FILE_TYPE_FILTERS[currentMeshSaveDlgFilter];
 
 				//add meshes output file filters
-				filters.append(QString(CC_FILE_TYPE_FILTERS[OBJ])+";;");
-				filters.append(QString(CC_FILE_TYPE_FILTERS[PLY])+";;");
-				filters.append(QString(CC_FILE_TYPE_FILTERS[VTK])+";;");
-				filters.append(QString(CC_FILE_TYPE_FILTERS[STL])+";;");
-				filters.append(QString(CC_FILE_TYPE_FILTERS[OFF])+";;");
-#ifdef CC_X3D_SUPPORT
-				filters.append(QString(CC_FILE_TYPE_FILTERS[X3D])+";;");
+				filters.append(QString(CC_FILE_TYPE_FILTERS[OBJ]) + ";;");
+				filters.append(QString(CC_FILE_TYPE_FILTERS[PLY]) + ";;");
+				filters.append(QString(CC_FILE_TYPE_FILTERS[VTK]) + ";;");
+				filters.append(QString(CC_FILE_TYPE_FILTERS[STL]) + ";;");
+				filters.append(QString(CC_FILE_TYPE_FILTERS[OFF]) + ";;");
+#ifdef CC_DXF_SUPPORT											  
+				filters.append(QString(CC_FILE_TYPE_FILTERS[DXF]) + ";;");
 #endif
-				filters.append(QString(CC_FILE_TYPE_FILTERS[MA])+";;");
+#ifdef CC_X3D_SUPPORT
+				filters.append(QString(CC_FILE_TYPE_FILTERS[X3D]) + ";;");
+#endif
+				filters.append(QString(CC_FILE_TYPE_FILTERS[MA]) + ";;");
 			}
 #ifdef CC_FBX_SUPPORT
 			filters.append(QString(CC_FILE_TYPE_FILTERS[FBX]) + ";;");

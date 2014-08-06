@@ -18,6 +18,8 @@ v2.5.6 ??/??/2014
 				* either 'AUTO' to let CC handle the big coordinates automatically
 				* or the 3 values of the shift vector to apply
 		- Example: 'CloudCompare -O -GLOBAL_SHIFT AUTO myfile.asc'
+	* New options in the Bundler import dialog:
+		- Choose the keyponts/orthophotos vertical axis with radio buttons (X, Y, Z and Custom)
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized
 	* the 'Cancel' button of progress dialogs was invisible on the x64 version

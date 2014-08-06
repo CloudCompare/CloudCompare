@@ -83,7 +83,7 @@ void BundlerImportDlg::initFromPersistentSettings()
 void BundlerImportDlg::acceptAndSaveSettings()
 {
 	//check matrix validity
-	if (applyTransfoMatrixCheckBox->isChecked())
+	if (customVertAxisRadioButton->isChecked())
 	{
 		bool success;
 		ccGLMatrixd::FromString(applyTransfoMatrixTextEdit->toPlainText(),success);
@@ -233,11 +233,33 @@ unsigned BundlerImportDlg::getDTMVerticesCount() const
 
 bool BundlerImportDlg::getOptionalTransfoMatrix(ccGLMatrix& mat)
 {
-	if (!applyTransfoMatrixCheckBox->isChecked())
-		return false;
+	if (xVertAxisRadioButton->isChecked())
+	{
+		//rotation around Y
+		mat.toZero();
+		mat.data()[2]  = -1.0f;
+		mat.data()[5]  =  1.0f;
+		mat.data()[8]  =  1.0f;
+		mat.data()[15] =  1.0f;
+		return true;
+	}
+	else if (yVertAxisRadioButton->isChecked())
+	{
+		//rotation around X
+		mat.toZero();
+		mat.data()[0]  =  1.0f;
+		mat.data()[6]  = -1.0f;
+		mat.data()[9]  = -1.0f;
+		mat.data()[15] =  1.0f;
+		return true;
+	}
+	else if (customVertAxisRadioButton->isChecked())
+	{
+		bool success = false;
+		mat = ccGLMatrix::FromString(applyTransfoMatrixTextEdit->toPlainText(),success);
+		return success;
+	}
 
-	bool success;
-	mat = ccGLMatrix::FromString(applyTransfoMatrixTextEdit->toPlainText(),success);
+	return false;
 
-	return success;
 }

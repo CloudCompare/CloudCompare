@@ -179,7 +179,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 		orthoRectifyImagesAsImages = biDlg.orthoRectifyImagesAsImages();
 		generateColoredDTM = biDlg.generateColoredDTM();
 		coloredDTMVerticesCount = biDlg.getDTMVerticesCount();
-		scaleFactor = (float)biDlg.getScaleFactor();
+		scaleFactor = static_cast<float>(biDlg.getScaleFactor());
 		keepImagesInMemory = biDlg.keepImagesInMemory();
 		imageListFilename = biDlg.getImageListFilename();
 		applyOptMatrix = biDlg.getOptionalTransfoMatrix(orthoOptMatrix);
@@ -689,7 +689,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				}
 			}
 
-			if (keypointsImage.size()<4)
+			if (keypointsImage.size() < 4)
 			{
 				ccLog::Warning(QString("[BundlerFilter::loadFile] Not enough keypoints descriptors for image '%1'!").arg(image->getName()));
 			}
@@ -700,7 +700,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					//for ortho-rectification log
 					ORImageInfo info;
 					double corners[8];
-					ccImage* orthoImage = image->orthoRectifyAsImage(_keypointsCloud,
+					ccImage* orthoImage = image->orthoRectifyAsImage(	_keypointsCloud,
 																		keypointsImage,
 																		OR_pixelSize,
 																		info.minC,
@@ -721,10 +721,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						#define TBI_DEFAULT_TILE_POW 10 // 2^10 = 1024
 						const unsigned tileDim = (1<<TBI_DEFAULT_TILE_POW);
 						unsigned horiTile = (info.w >> TBI_DEFAULT_TILE_POW);
-						if (info.w-horiTile*tileDim!=0)
+						if (info.w-horiTile*tileDim != 0)
 							++horiTile;
 						unsigned vertTile = (info.h >> TBI_DEFAULT_TILE_POW);
-						if (info.h-vertTile*tileDim!=0)
+						if (info.h-vertTile*tileDim != 0)
 							++vertTile;
 						unsigned tiles = horiTile*vertTile;
 						unsigned verts = (horiTile+1)*(vertTile+1);
@@ -750,10 +750,10 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 							//float maxu = 1.0-1.0f/(float)(2*tileDim);
 							float minu = 0.0f;
 							float maxu = 1.0f;
-							float TA[2]={minu,minu};
-							float TB[2]={maxu,minu};
-							float TC[2]={maxu,maxu};
-							float TD[2]={minu,maxu};
+							float TA[2] = {minu,minu};
+							float TB[2] = {maxu,minu};
+							float TC[2] = {maxu,maxu};
+							float TD[2] = {minu,maxu};
 							texCoords->addElement(TA);
 							texCoords->addElement(TB);
 							texCoords->addElement(TC);
@@ -772,11 +772,11 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 						for (unsigned ti=0; ti<=horiTile; ++ti)
 						{
 							unsigned x = std::min(ti*tileDim,info.w);
-							double xRel = (double)x/(double)info.w;
+							double xRel = static_cast<double>(x)/info.w;
 							for (unsigned tj=0; tj<=vertTile; ++tj)
 							{
 								unsigned y = std::min(tj*tileDim,info.h);
-								double yRel = (double)y/(double)info.h;
+								double yRel = static_cast<double>(y)/info.h;
 
 								//add vertices
 								CCVector3 P(info.minC[0]+dcx*xRel,
@@ -788,7 +788,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 								//float T0[2]={xRel,1.0-yRel};
 								//texCoords->addElement(T0);
 
-								if (ti<horiTile && tj<vertTile)
+								if (ti < horiTile && tj < vertTile)
 								{
 									unsigned w = std::min(info.w-x,tileDim);
 									unsigned h = std::min(info.h-y,tileDim);
@@ -827,7 +827,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 #endif
 
 						delete orthoImage;
-						orthoImage=0;
+						orthoImage = 0;
 
 						OR_infos.push_back(info);
 
@@ -955,7 +955,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 			int globalHeight = static_cast<int>((OR_globalCorners[3]-OR_globalCorners[1])/OR_pixelSize);
 			stream << "Global2DBBox" << ' ' << 0 << ' ' << 0 << ' ' << globalWidth-1 << ' ' << globalHeight-1 << endl;
 
-			for (unsigned i=0;i<OR_infos.size();++i)
+			for (unsigned i=0; i<OR_infos.size(); ++i)
 			{
 				stream << "Image" << ' ' << OR_infos[i].name << ' ';
 				stream << "Local3DBBox" << ' ' << OR_infos[i].minC[0] << ' ' << OR_infos[i].minC[1] << ' ' << OR_infos[i].maxC[0] << ' ' << OR_infos[i].maxC[1] << ' ';
@@ -987,7 +987,7 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 				const int* col = mntColors;
 				for (unsigned i=0; i<sampleCount; ++i,col+=4)
 				{
-					if (col[3]>0) //accum
+					if (col[3] > 0) //accum
 					{
 						const CCVector3* X = mntSamples->getPointPersistentPtr(i);
 						colorType avgCol[3]= {	static_cast<colorType>(col[0]/col[3]),
@@ -999,9 +999,9 @@ CC_FILE_ERROR BundlerFilter::loadFileExtended(	const QString& filename,
 					}
 				}
 
-				if (realCount!=0)
+				if (realCount != 0)
 				{
-					if (realCount  <sampleCount)
+					if (realCount < sampleCount)
 						mntCloud->resize(realCount);
 
 					mntCloud->showColors(true);

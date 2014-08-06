@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>450</width>
-    <height>580</height>
+    <height>620</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -280,16 +280,7 @@
            <property name="spacing">
             <number>0</number>
            </property>
-           <property name="leftMargin">
-            <number>0</number>
-           </property>
-           <property name="topMargin">
-            <number>0</number>
-           </property>
-           <property name="rightMargin">
-            <number>0</number>
-           </property>
-           <property name="bottomMargin">
+           <property name="margin">
             <number>0</number>
            </property>
            <item>
@@ -350,17 +341,75 @@
        </widget>
       </item>
       <item>
-       <widget class="QCheckBox" name="applyTransfoMatrixCheckBox">
-        <property name="toolTip">
-         <string>To apply a custom 4x4 transformation matrix to the keypoints before generating orthophotos</string>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Vertical dimension</string>
         </property>
-        <property name="text">
-         <string>apply 4x4 transformation matrix</string>
-        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <layout class="QHBoxLayout" name="horizontalLayout_9">
+           <item>
+            <widget class="QRadioButton" name="xVertAxisRadioButton">
+             <property name="toolTip">
+              <string>Keypoints vertical axis is X (1,0,0)</string>
+             </property>
+             <property name="text">
+              <string>X</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="yVertAxisRadioButton">
+             <property name="toolTip">
+              <string>Keypoints vertical axis is Y (0,1,0)</string>
+             </property>
+             <property name="text">
+              <string>Y</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="zVertAxisRadioButton">
+             <property name="toolTip">
+              <string>Keypoints vertical axis is Z (0,0,1)</string>
+             </property>
+             <property name="text">
+              <string>Z</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="customVertAxisRadioButton">
+             <property name="toolTip">
+              <string>Input a 4x4 transformation matrix that transforms the keypoint vertical axis into (0,0,1)</string>
+             </property>
+             <property name="text">
+              <string>Custom</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QTextEdit" name="applyTransfoMatrixTextEdit">
+           <property name="html">
+            <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;1 0 0 0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 1 0 0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 0 1 0&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt;&quot;&gt;0 0 0 1&lt;/span&gt;&lt;/p&gt;
+&lt;p style=&quot;-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;&quot;&gt;&lt;br /&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </widget>
-      </item>
-      <item>
-       <widget class="QTextEdit" name="applyTransfoMatrixTextEdit"/>
       </item>
      </layout>
     </widget>
@@ -419,6 +468,19 @@
     </widget>
    </item>
    <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
     <widget class="QDialogButtonBox" name="buttonBox">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -465,14 +527,14 @@
    </hints>
   </connection>
   <connection>
-   <sender>applyTransfoMatrixCheckBox</sender>
+   <sender>customVertAxisRadioButton</sender>
    <signal>toggled(bool)</signal>
    <receiver>applyTransfoMatrixTextEdit</receiver>
    <slot>setVisible(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>108</x>
-     <y>284</y>
+     <x>359</x>
+     <y>381</y>
     </hint>
     <hint type="destinationlabel">
      <x>153</x>

@@ -2962,7 +2962,7 @@ CCLib::ReferenceCloud* ccPointCloud::crop2D(const ccPolyline* poly, unsigned cha
 	return ref;
 }
 
-static void CatchGLErrors(const char* context)
+static bool CatchGLErrors(const char* context)
 {
 	//catch GL errors
 	{
@@ -2972,8 +2972,7 @@ static void CatchGLErrors(const char* context)
 		switch(err)
 		{
 		case GL_NO_ERROR:
-			return;
-			break;
+			return false;
 		case GL_INVALID_ENUM:
 			ccLog::Warning("[%s] OpenGL error: invalid enumerator",context);
 			break;
@@ -2984,19 +2983,21 @@ static void CatchGLErrors(const char* context)
 			ccLog::Warning("[%s] OpenGL error: invalid operation",context);
 			break;
 		case GL_STACK_OVERFLOW:
-			ccLog::Error("[%s] OpenGL error: stack overflow",context);
+			ccLog::Warning("[%s] OpenGL error: stack overflow",context);
 			break;
 		case GL_STACK_UNDERFLOW:
-			ccLog::Error("[%s] OpenGL error: stack underflow",context);
+			ccLog::Warning("[%s] OpenGL error: stack underflow",context);
 			break;
 		case GL_OUT_OF_MEMORY:
-			ccLog::Error("[%s] OpenGL error: out of memory",context);
+			ccLog::Warning("[%s] OpenGL error: out of memory",context);
 			break;
 		case GL_INVALID_FRAMEBUFFER_OPERATION:
 			ccLog::Warning("[%s] OpenGL error: invalid framebuffer operation",context);
 			break;
 		}
 	}
+
+	return true;
 }
 
 //DGM: normals are so slow that it's a waste of memory and time to load them in VBOs!
@@ -3109,7 +3110,9 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
 			bool reallocated = false;
             if (!m_vbos[i])
                 m_vbos[i] = new VBO();
-            int vboSizeBytes = m_vbos[i]->init(chunkSize,m_vbos.hasColors,m_vbos.hasNormals,&reallocated);
+            
+			//allocate memory for current VBO
+			int vboSizeBytes = m_vbos[i]->init(chunkSize,m_vbos.hasColors,m_vbos.hasNormals,&reallocated);
 			if (vboSizeBytes > 0)
 			{
                 //ccLog::Print(QString("[VBO] VBO #%1 initialized (ID=%2)").arg(i).arg(m_vbos[i]->bufferId()));
@@ -3175,14 +3178,26 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
                     m_vbos[i]->write(m_vbos[i]->normalShift,s_normBuffer,sizeof(PointCoordinateType)*chunkSize*3);
 				}
 #endif
-
                 m_vbos[i]->release();
 
-				m_vbos.totalMemSizeBytes += vboSizeBytes;
-				pointsInVBOs += chunkSize;
+				//if an error is detected
+				if (CatchGLErrors("ccPointCloud::updateVBOs"))
+				{
+					vboSizeBytes = -1;
+				}
+				else
+				{
+					m_vbos.totalMemSizeBytes += vboSizeBytes;
+					pointsInVBOs += chunkSize;
+				}
 			}
-			else if (vboSizeBytes < 0) //VBO initialization failed
+
+			if (vboSizeBytes < 0) //VBO initialization failed
 			{
+				m_vbos[i]->destroy();
+				delete m_vbos[i];
+				m_vbos[i] = 0;
+
 				//we can stop here
 				if (i == 0)
 				{
@@ -3210,8 +3225,6 @@ bool ccPointCloud::updateVBOs(const glDrawParams& glParams)
 		ccLog::Print(QString("[VBO] VBO(s) (re)initialized for cloud '%1' (%2 Mb = %3% of points could be loaded)").arg(getName()).arg(static_cast<double>(m_vbos.totalMemSizeBytes)/(1<<20),0,'f',2).arg(static_cast<float>(pointsInVBOs)/static_cast<float>(size())*100.0f));
 
 	m_vbos.state = vboSet::INITIALIZED;
-
-	CatchGLErrors("ccPointCloud::updateVBOs");
 
 	return true;
 }

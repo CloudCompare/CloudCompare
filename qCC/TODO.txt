@@ -28,6 +28,7 @@ Big ones:
 [*] Volume calculation
 
 Various:
+[*] Save primitives in DXF files (http://www.cloudcompare.org/forum/viewtopic.php?t=573)
 [*] Edit parameters for qEDL (luminosity, etc.)
 [*] Dedicated method for isolated points removal (based on the Connected Components one)
 [*] Support boolean operations on meshes (with Cork for instance) - http://www.danielgm.net/cc/forum/viewtopic.php?t=812

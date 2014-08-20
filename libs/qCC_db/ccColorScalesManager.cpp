@@ -24,6 +24,9 @@
 //Qt
 #include <QSettings>
 
+//CCLib
+#include <MeshSamplingTools.h>
+
 //System
 #include <assert.h>
 
@@ -69,6 +72,7 @@ ccColorScalesManager::ccColorScalesManager()
 		addScale(Create(RW));
 		addScale(Create(ABS_NORM_GREY));
 		addScale(Create(HSV_360_DEG));
+		addScale(Create(VERTEX_QUALITY));
 	}
 }
 
@@ -222,6 +226,9 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 	case HSV_360_DEG:
 		name = "HSV angle [0-360]";
 		break;
+	case VERTEX_QUALITY:
+		name = "Vertex types default colors";
+		break;
 	default:
 		ccLog::Error(QString("Unhandled pre-defined scale (%1)").arg(scaleType));
 		return ccColorScale::Shared(0);
@@ -268,6 +275,14 @@ ccColorScale::Shared ccColorScalesManager::Create(DEFAULT_SCALES scaleType)
 		scale->insert(ccColorScaleElement(300.0/360.0,Qt::magenta),false);
 		scale->insert(ccColorScaleElement(360.0/360.0,Qt::red),false);
 		scale->setAbsolute(0.0,360.0);
+		break;
+	case VERTEX_QUALITY:
+		scale->insert(ccColorScaleElement(0.0,Qt::blue),false);
+		scale->insert(ccColorScaleElement(0.5,Qt::green),false);
+		scale->insert(ccColorScaleElement(1.0,Qt::red),false);
+		assert(		CCLib::MeshSamplingTools::VERTEX_NORMAL < CCLib::MeshSamplingTools::VERTEX_BORDER
+				&&	CCLib::MeshSamplingTools::VERTEX_BORDER < CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD );
+		scale->setAbsolute(CCLib::MeshSamplingTools::VERTEX_NORMAL,CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD);
 		break;
 	default:
 		assert(false);

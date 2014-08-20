@@ -808,6 +808,8 @@ void MainWindow::connectActions()
 	connect(actionSmoothMeshLaplacian,			SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshLaplacian()));
 	connect(actionSubdivideMesh,				SIGNAL(triggered()),	this,		SLOT(doActionSubdivideMesh()));
 	connect(actionMeasureMeshSurface,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshSurface()));
+	connect(actionMeasureMeshVolume,			SIGNAL(triggered()),	this,		SLOT(doActionMeasureMeshVolume()));
+	connect(actionFlagMeshVetices,				SIGNAL(triggered()),	this,		SLOT(doActionFlagMeshVetices()));
 	//"Edit > Mesh > Scalar Field" menu
 	connect(actionSmoothMeshSF,					SIGNAL(triggered()),	this,		SLOT(doActionSmoothMeshSF()));
 	connect(actionEnhanceMeshSF,				SIGNAL(triggered()),	this,		SLOT(doActionEnhanceMeshSF()));
@@ -2211,6 +2213,125 @@ void MainWindow::doActionClearProperty(int prop)
 	updateUI();
 }
 
+void MainWindow::doActionMeasureMeshVolume()
+{
+	size_t selNum = m_selectedEntities.size();
+	for (size_t i=0; i<selNum; ++i)
+	{
+		ccHObject* ent = m_selectedEntities[i];
+		if (ent->isKindOf(CC_TYPES::MESH))
+		{
+			ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
+			if (mesh)
+			{
+				//first check that the mesh is closed
+				CCLib::MeshSamplingTools::EdgeConnectivityStats stats;
+				if (CCLib::MeshSamplingTools::computeMeshEdgesConnectivity(mesh,stats))
+				{
+					if (stats.edgesNotShared != 0)
+					{
+						ccConsole::Warning(QString("[Mesh Volume Measurer] The computed volume might be invalid (mesh '%1' has holes)").arg(ent->getName()));
+					}
+					else if (stats.edgesSharedByMore != 0)
+					{
+						ccConsole::Warning(QString("[Mesh Volume Measurer] The computed volume might be invalid (mesh '%1' has non-manifold edges)").arg(ent->getName()));
+					}
+				}
+				else
+				{
+					ccConsole::Warning(QString("[Mesh Volume Measurer] The computed volume might be invalid (not enough memory to check if mesh '%1' is closed)").arg(ent->getName()));
+				}
+				//then we compute the mesh volume
+				double V = CCLib::MeshSamplingTools::computeMeshVolume(mesh);
+				//we force the console to display itself
+				forceConsoleDisplay();
+				ccConsole::Print(QString("[Mesh Volume Measurer] Mesh '%1': V=%2 (cube units)").arg(ent->getName()).arg(V));
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+	}
+}
+
+void MainWindow::doActionFlagMeshVetices()
+{
+	size_t selNum = m_selectedEntities.size();
+	bool errors = false;
+	bool success = false;
+	for (size_t i=0; i<selNum; ++i)
+	{
+		ccHObject* ent = m_selectedEntities[i];
+		if (ent->isKindOf(CC_TYPES::MESH))
+		{
+			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
+			ccPointCloud* vertices = ccHObjectCaster::ToPointCloud(mesh ? mesh->getAssociatedCloud() : 0);
+			if (mesh && vertices)
+			{
+				//prepare a new scalar field
+				int sfIdx = vertices->getScalarFieldIndexByName(CC_DEFAULT_MESH_VERT_FLAGS_SF_NAME);
+				if (sfIdx < 0)
+				{
+					sfIdx = vertices->addScalarField(CC_DEFAULT_MESH_VERT_FLAGS_SF_NAME);
+					if (sfIdx < 0)
+					{
+						ccConsole::Warning(QString("Not enough memory to flag the vertices of mesh '%1'!").arg(mesh->getName()));
+						errors = true;
+						continue;
+					}
+				}
+				CCLib::ScalarField* flags = vertices->getScalarField(sfIdx);
+
+				CCLib::MeshSamplingTools::EdgeConnectivityStats stats;
+				if (CCLib::MeshSamplingTools::flagMeshVerticesByType(mesh,flags,&stats))
+				{
+					vertices->setCurrentDisplayedScalarField(sfIdx);
+					ccScalarField* sf = vertices->getCurrentDisplayedScalarField();
+					if (sf)
+					{
+						sf->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::VERTEX_QUALITY));
+						//sf->setColorRampSteps(3); //ugly :(
+					}
+					vertices->showSF(true);
+					mesh->showSF(true);
+					mesh->prepareDisplayForRefresh_recursive();
+					success = true;
+
+					//display stats in the Console as well
+					ccConsole::Print(QString("[Mesh Quality] Mesh '%1' edges: %2 total (normal: %3 / on hole borders: %4 / non-manifold: %5)").arg(ent->getName()).arg(stats.edgesCount).arg(stats.edgesSharedByTwo).arg(stats.edgesNotShared).arg(stats.edgesSharedByMore));
+				}
+				else
+				{
+					vertices->deleteScalarField(sfIdx);
+					sfIdx = -1;
+					ccConsole::Warning(QString("Not enough memory to flag the vertices of mesh '%1'!").arg(mesh->getName()));
+					errors = true;
+				}
+			}
+			else
+			{
+				assert(false);
+			}
+		}
+	}
+
+	refreshAll();
+	updateUI();
+	
+	if (success)
+	{
+		//display reminder
+		forceConsoleDisplay();
+		ccConsole::Print(QString("[Mesh Quality] SF flags: NORMAL = %1 / BORDER = %2 / NON-MANIFOLD = %3").arg(CCLib::MeshSamplingTools::VERTEX_NORMAL).arg(CCLib::MeshSamplingTools::VERTEX_BORDER).arg(CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD));
+	}
+
+	if (errors)
+	{
+		ccConsole::Error("Error(s) occurred! Check the console...");
+	}
+}
+
 void MainWindow::doActionMeasureMeshSurface()
 {
 	size_t selNum = m_selectedEntities.size();
@@ -2220,12 +2341,19 @@ void MainWindow::doActionMeasureMeshSurface()
 		if (ent->isKindOf(CC_TYPES::MESH))
 		{
 			ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(ent);
-			double S = CCLib::MeshSamplingTools::computeMeshArea(mesh);
-			//we force the console to display itself
-			forceConsoleDisplay();
-			ccConsole::Print(QString("[Mesh Surface Measurer] Mesh %1: S=%2 (square units)").arg(ent->getName()).arg(S));
-			if (mesh->size())
-				ccConsole::Print(QString("[Mesh Surface Measurer] Mean triangle surface: %1 (square units)").arg(S/double(mesh->size())));
+			if (mesh)
+			{
+				double S = CCLib::MeshSamplingTools::computeMeshArea(mesh);
+				//we force the console to display itself
+				forceConsoleDisplay();
+				ccConsole::Print(QString("[Mesh Surface Measurer] Mesh %1: S=%2 (square units)").arg(ent->getName()).arg(S));
+				if (mesh->size())
+					ccConsole::Print(QString("[Mesh Surface Measurer] Mean triangle surface: %1 (square units)").arg(S/double(mesh->size())));
+			}
+			else
+			{
+				assert(false);
+			}
 		}
 	}
 }
@@ -9661,6 +9789,8 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	actionSamplePoints->setEnabled(atLeastOneMesh);
 	actionMeasureMeshSurface->setEnabled(atLeastOneMesh);
+	actionMeasureMeshVolume->setEnabled(atLeastOneMesh);
+	actionFlagMeshVetices->setEnabled(atLeastOneMesh);
 	actionSmoothMeshLaplacian->setEnabled(atLeastOneMesh);
 	actionConvertTextureToColor->setEnabled(atLeastOneMesh);
 	actionSubdivideMesh->setEnabled(atLeastOneMesh);

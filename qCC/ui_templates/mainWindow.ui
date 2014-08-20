@@ -234,7 +234,10 @@
      <addaction name="actionSamplePoints"/>
      <addaction name="actionSmoothMeshLaplacian"/>
      <addaction name="actionSubdivideMesh"/>
+     <addaction name="separator"/>
      <addaction name="actionMeasureMeshSurface"/>
+     <addaction name="actionMeasureMeshVolume"/>
+     <addaction name="actionFlagMeshVetices"/>
      <addaction name="separator"/>
      <addaction name="menuMeshScalarField"/>
     </widget>
@@ -2576,6 +2579,19 @@
    </property>
    <property name="statusTip">
     <string>Fits a statistical model on the active scalar field</string>
+   </property>
+  </action>
+  <action name="actionMeasureMeshVolume">
+   <property name="text">
+    <string>Measure volume</string>
+   </property>
+  </action>
+  <action name="actionFlagMeshVetices">
+   <property name="text">
+    <string>Flag vertices by type</string>
+   </property>
+   <property name="toolTip">
+    <string>Flag vertices by type: normal (0), border (1), non manifold (2)</string>
    </property>
   </action>
  </widget>

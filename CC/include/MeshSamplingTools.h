@@ -25,13 +25,16 @@
 
 //system
 #include <vector>
+#include <map>
 
 namespace CCLib
 {
 
 class GenericProgressCallback;
 class GenericMesh;
+class GenericIndexedMesh;
 class SimpleCloud;
+class ScalarField;
 
 //! Mesh sampling algorithms
 class CC_CORE_LIB_API MeshSamplingTools : public CCToolbox
@@ -39,10 +42,65 @@ class CC_CORE_LIB_API MeshSamplingTools : public CCToolbox
 public:
 
 	//! Computes the mesh area
-	/** \param theMesh a mesh
-		\return the the mesh area
+	/** \param mesh triangular mesh
+		\return mesh area
 	**/
-	static double computeMeshArea(GenericMesh* theMesh);
+	static double computeMeshArea(GenericMesh* mesh);
+
+	//! Computes the mesh volume
+	/** \warning Make sure the input mesh is closed!
+		See MeshSamplingTools::computeMeshEdgesConnectivity.
+		\param mesh triangular mesh (closed!)
+		\return mesh volume
+	**/
+	static double computeMeshVolume(GenericMesh* mesh);
+
+	//! Statistics on the edges connectivty of a mesh
+	struct EdgeConnectivityStats
+	{
+		EdgeConnectivityStats()
+			: edgesCount(0)
+			, edgesNotShared(0)
+			, edgesSharedByTwo(0)
+			, edgesSharedByMore(0)
+		{}
+
+		//! Total number of edges
+		unsigned edgesCount;
+		//! Edges not shared (i.e. used by only one triangle)
+		unsigned edgesNotShared;
+		//! Edges shared by exactly two triangles
+		unsigned edgesSharedByTwo;
+		//! Edges shared by more than two triangles
+		unsigned edgesSharedByMore;
+	};
+
+	//! Computes some statistics on the edges connectivty of a mesh
+	/** This methods counts the number of edges shared by 1, 2 or more faces.
+		One ore more edges used only by 1 face each indicates the presence of
+		at least one hole. Edges used by more than two faces are non manifold.
+		\param[in] mesh triangular mesh
+		\param[out] stats output statistics
+		\return false if an error occurred (invalid input or not enough memory)
+	**/
+	static bool computeMeshEdgesConnectivity(GenericIndexedMesh* mesh, EdgeConnectivityStats& stats);
+
+	//! Flags used by the MeshSamplingTools::flagMeshVerticesByType method.
+	enum VertexFlags
+	{
+		VERTEX_NORMAL		= 0,	/**< Normal vertex **/
+		VERTEX_BORDER		= 1,	/**< Vertex on a border/hole **/
+		VERTEX_NON_MANIFOLD	= 2		/**< Vertex on a non-manifold edge **/
+	};
+
+	//! Flags the vertices of a mesh depending on their type
+	/** See MeshSamplingTools::VertexFlags.
+		\param[in] mesh triangular mesh
+		\param[in] flags already allocated scalar field to store the per-vertex flags
+		\param[out] stats output statistics (optional)
+		\return false if an error occurred (invalid input or not enough memory)
+	**/
+	static bool flagMeshVerticesByType(GenericIndexedMesh* mesh, ScalarField* flags, EdgeConnectivityStats* stats = 0);
 
 	//! Samples points on a mesh
 	/** The points are sampled on each triangle randomly, by generating
@@ -56,13 +114,13 @@ public:
 		handled by generating another random number between 0 and 1.
 		If this number is less than Nf, then Ni=Ni+1. The number of points
 		sampled on the triangle will simply be Ni.
-		\param theMesh the mesh to be sampled
+		\param mesh the mesh to be sampled
 		\param samplingDensity the sampling surface density
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param[out] triIndices triangle index for each samples point (output only - optional)
 		\return the sampled points
 	**/
-	static SimpleCloud* samplePointsOnMesh(GenericMesh* theMesh,
+	static SimpleCloud* samplePointsOnMesh(	GenericMesh* mesh,
 											double samplingDensity,
 											GenericProgressCallback* progressCb=0,
 											GenericChunkedArray<1,unsigned>* triIndices=0);
@@ -71,13 +129,13 @@ public:
 	/** See the other version of this method. Instead of specifying a
 		density, it is possible here to specify the total number of
 		points to sample (approximative).
-		\param theMesh the mesh to be sampled
+		\param mesh the mesh to be sampled
 		\param numberOfPoints the desired number of points on the whole mesh
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param[out] triIndices triangle index for each samples point (output only - optional)
 		\return the sampled points
 	**/
-	static SimpleCloud* samplePointsOnMesh(GenericMesh* theMesh,
+	static SimpleCloud* samplePointsOnMesh(	GenericMesh* mesh,
 											unsigned numberOfPoints,
 											GenericProgressCallback* progressCb=0,
 											GenericChunkedArray<1,unsigned>* triIndices=0);
@@ -86,18 +144,31 @@ protected:
 
 	//! Samples points on a mesh - internal method
 	/** See public methods descriptions
-		\param theMesh the mesh to be sampled
+		\param mesh the mesh to be sampled
 		\param samplingDensity the sampling surfacical density
 		\param theoricNumberOfPoints the approximated number of points that will be sampled
 		\param progressCb the client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param[out] triIndices triangle index for each samples point (output only - optional)
 		\return the sampled points
 	**/
-	static SimpleCloud* samplePointsOnMesh(GenericMesh* theMesh,
+	static SimpleCloud* samplePointsOnMesh(	GenericMesh* mesh,
 											double samplingDensity,
 											unsigned theoricNumberOfPoints,
 											GenericProgressCallback* progressCb=0,
 											GenericChunkedArray<1,unsigned>* triIndices=0);
+
+	//! Map used to count the number of triangles using each edge
+	/** Edges are represented by two 32 bits indexes merged as a 64 integer
+	**/
+	typedef std::map<unsigned long long, unsigned> EdgeUsageMap;
+
+	//! Computes the unique key corresponding to an edge
+	static unsigned long long ComputeEdgeKey(unsigned i1, unsigned i2);
+	//! Computes the edge vertex indexes from its unique key
+	static void DecodeEdgeKey(unsigned long long key, unsigned& i1, unsigned& i2);
+
+	//! Creates a map to count the number of triangles using each edge
+	static bool buildMeshEdgeUsageMap(GenericIndexedMesh* mesh, EdgeUsageMap& edgeMap);
 };
 
 }

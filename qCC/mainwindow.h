@@ -335,6 +335,8 @@ protected slots:
 	void doActionComputeMeshLS();
 	void doActionComputeDistToBestFitQuadric3D();
 	void doActionMeasureMeshSurface();
+	void doActionMeasureMeshVolume();
+	void doActionFlagMeshVetices();
 	void doActionSmoothMeshLaplacian();
 	void doActionSubdivideMesh();
 	void doActionComputeCPS();

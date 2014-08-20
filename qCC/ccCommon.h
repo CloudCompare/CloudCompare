@@ -43,6 +43,7 @@
 #define CC_DEFAULT_SQUARED_RANGES_SF_NAME "Ranges (squared)"
 #define CC_DEFAULT_DIP_SF_NAME "Dip (degrees)"
 #define CC_DEFAULT_DIP_DIR_SF_NAME "Dip direction (degrees)"
+#define CC_DEFAULT_MESH_VERT_FLAGS_SF_NAME "Vertex type"
 
 //Qt
 #include <QString>

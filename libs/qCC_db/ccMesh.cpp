@@ -1533,18 +1533,18 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					//do we need to change material?
 					if (lasMtlIndex != newMatlIndex)
 					{
-						assert(newMatlIndex < (int)m_materials->size());
+						assert(newMatlIndex < static_cast<int>(m_materials->size()));
 						glEnd();
 						if (showTextures)
 						{
-							GLuint texID = (newMatlIndex>=0 ? (*m_materials)[newMatlIndex].texID : 0);
-							if (texID>0)
+							GLuint texID = (newMatlIndex >= 0 ? (*m_materials)[newMatlIndex].texID : 0);
+							if (texID > 0)
 								assert(glIsTexture(texID));
 							glBindTexture(GL_TEXTURE_2D, texID);
 						}
 
 						//if we don't have any current material, we apply default one
-						(newMatlIndex>=0 ? (*m_materials)[newMatlIndex] : context.defaultMat).applyGL(glParams.showNorms,false);
+						(newMatlIndex >= 0 ? (*m_materials)[newMatlIndex] : context.defaultMat).applyGL(glParams.showNorms,false);
 						glBegin(triangleDisplayType);
 						lasMtlIndex=newMatlIndex;
 					}
@@ -1553,9 +1553,9 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 					{
 						assert(m_texCoords && m_texCoordIndexes);
 						const int* txInd = m_texCoordIndexes->getValue(n);
-						assert(txInd[0] < (int)m_texCoords->currentSize());
-						assert(txInd[1] < (int)m_texCoords->currentSize());
-						assert(txInd[2] < (int)m_texCoords->currentSize());
+						assert(txInd[0] < static_cast<int>(m_texCoords->currentSize()));
+						assert(txInd[1] < static_cast<int>(m_texCoords->currentSize()));
+						assert(txInd[2] < static_cast<int>(m_texCoords->currentSize()));
 						Tx1 = (txInd[0] >= 0 ? m_texCoords->getValue(txInd[0]) : 0);
 						Tx2 = (txInd[1] >= 0 ? m_texCoords->getValue(txInd[1]) : 0);
 						Tx3 = (txInd[2] >= 0 ? m_texCoords->getValue(txInd[2]) : 0);
@@ -2167,8 +2167,8 @@ void ccMesh::setTexCoordinatesTable(TextureCoordsContainer* texCoordsTable, bool
 	{
 		int childIndex = getChildIndex(m_texCoords);
 		m_texCoords->release();
-		m_texCoords=0;
-		if (childIndex>=0)
+		m_texCoords = 0;
+		if (childIndex >= 0)
 			removeChild(childIndex);
 	}
 

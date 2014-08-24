@@ -23,21 +23,29 @@
 #include <ccPointCloud.h>
 #include <ccMesh.h>
 #include <ccNormalVectors.h>
+#include <ccMaterialSet.h>
 
 //FBX SDK
 #include <fbxsdk.h>
+
+//Qt
+#include <QFileInfo>
+#include <QDir>
 
 //System
 #include <vector>
 #include <assert.h>
 
 // Converts a CC mesh to an FBX mesh
-static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
+static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filename, size_t meshIndex)
 {
 	if (!mesh)
 		return 0;
 
+	FbxNode* lNode = FbxNode::Create(pScene,qPrintable(mesh->getName()));
 	FbxMesh* lMesh = FbxMesh::Create(pScene, qPrintable(mesh->getName()));
+	lNode->SetNodeAttribute(lMesh);
+
 
 	ccGenericPointCloud* cloud = mesh->getAssociatedCloud();
 	if (!cloud)
@@ -139,37 +147,158 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene)
 		for (unsigned i=0; i<vertCount; ++i)
 		{
 			const colorType* C = cloud->getPointColor(i);
-			FbxColor col( FbxDouble3(	static_cast<double>(C[0])/MAX_COLOR_COMP,
-										static_cast<double>(C[1])/MAX_COLOR_COMP,
-										static_cast<double>(C[2])/MAX_COLOR_COMP ) );
+			FbxColor col(	static_cast<double>(C[0])/MAX_COLOR_COMP,
+							static_cast<double>(C[1])/MAX_COLOR_COMP,
+							static_cast<double>(C[2])/MAX_COLOR_COMP,
+							1.0 );
 			lGeometryElementVertexColor->GetDirectArray().Add(col);
 		}
 	}
 
 	// Set material mapping.
-	//FbxGeometryElementMaterial* lMaterialElement = lMesh->CreateElementMaterial();
-	//lMaterialElement->SetMappingMode(FbxGeometryElement::eByPolygon);
-	//lMaterialElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
+	bool hasMaterial = false;
+	if (asCCMesh && asCCMesh->hasMaterials())
+	{
+		FbxString lShadingName  = "Phong";
 
-	// Create polygons. Assign material indices.
+		//directory to save textures
+		QFileInfo info(filename);
+		QString textDirName = info.baseName() + QString(".fbm");
+		QDir baseDir = info.absoluteDir();
+		QDir texDir = QDir(baseDir.absolutePath() + QString("/") + textDirName);
+
+		static const char gDiffuseElementName[] = "DiffuseUV";
+
+		// Create UV for Diffuse channel
+		{
+			FbxGeometryElementUV* lUVDiffuseElement = lMesh->CreateElementUV(gDiffuseElementName);
+			assert(lUVDiffuseElement != 0);
+			lUVDiffuseElement->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+			lUVDiffuseElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
+
+			//fill Direct Array
+			{
+				const TextureCoordsContainer* texCoords = asCCMesh->getTexCoordinatesTable();
+				assert(texCoords);
+				unsigned count = texCoords->currentSize();
+				lUVDiffuseElement->GetDirectArray().SetCount(static_cast<int>(count));
+				for (unsigned i=0; i<count; ++i)
+				{
+					const float* uv = texCoords->getValue(i);
+					lUVDiffuseElement->GetDirectArray().SetAt(i,FbxVector2(uv[0],1.0-uv[1]));
+				}
+			}
+
+			//fill Indexes Array
+			{
+				unsigned triCount = asCCMesh->size();
+				lUVDiffuseElement->GetIndexArray().SetCount(static_cast<int>(3*triCount));
+				assert(asCCMesh->hasPerTriangleTexCoordIndexes());
+				for (unsigned j=0; j<triCount; ++j)
+				{
+					int t1=0, t2=0, t3=0;
+					asCCMesh->getTriangleTexCoordinatesIndexes(j, t1, t2, t3);
+
+					lUVDiffuseElement->GetIndexArray().SetAt(j*3+0,t1);
+					lUVDiffuseElement->GetIndexArray().SetAt(j*3+1,t2);
+					lUVDiffuseElement->GetIndexArray().SetAt(j*3+2,t3);
+				}
+			}
+		}
+
+		const ccMaterialSet* matSet = asCCMesh->getMaterialSet();
+		size_t matCount = matSet->size();
+		for (size_t i=0; i<matCount; ++i)
+		{
+			const ccMaterial& mat = matSet->at(i);
+			FbxSurfacePhong *lMaterial = FbxSurfacePhong::Create(pScene, qPrintable(mat.name));
+
+			lMaterial->Emissive.Set(FbxDouble3(mat.emission[0],mat.emission[1],mat.emission[2]));
+			//lMaterial->EmissiveFactor = mat.emission[3];
+			lMaterial->Ambient.Set(FbxDouble3(mat.ambient[0],mat.ambient[1],mat.ambient[2]));
+			//lMaterial->AmbientFactor = mat.ambient[3];
+			lMaterial->Diffuse.Set(FbxDouble3(mat.diffuseFront[0],mat.diffuseFront[1],mat.diffuseFront[2]));
+			//lMaterial->DiffuseFactor = mat.diffuseFront[3];
+			lMaterial->Specular.Set(FbxDouble3(mat.specular[0],mat.specular[1],mat.specular[2]));
+			//lMaterial->SpecularFactor = mat.specular[3];
+			lMaterial->Shininess = mat.shininessFront;
+			lMaterial->ShadingModel.Set(lShadingName);
+
+			if (!mat.texture.isNull())
+			{
+				if (!texDir.exists())
+				{
+					texDir = baseDir;
+					if (texDir.mkdir(textDirName))
+					{
+						texDir.cd(textDirName);
+					}
+					else
+					{
+						textDirName = QString();
+						ccLog::Warning("[FBX] Failed to create subfolder '%1' to store texture files (files will be stored next to the .fbx file)");
+					}
+				}
+
+				QString baseFilename = QString("mesh_%1_tex_%2.jpg").arg(meshIndex,2,10,QChar('0')).arg(i,3,10,QChar('0'));
+				QString absoluteFilename = texDir.absolutePath() + QString("/") + baseFilename;
+				ccLog::PrintDebug(QString("[FBX] Material '%1' texture: %2").arg(mat.name).arg(absoluteFilename));
+				mat.texture.save(absoluteFilename);
+
+				// Set texture properties.
+				FbxFileTexture* lTexture = FbxFileTexture::Create(pScene,"DiffuseTexture");
+				lTexture->SetFileName(qPrintable(absoluteFilename));
+				lTexture->SetTextureUse(FbxTexture::eStandard);
+				lTexture->SetMappingType(FbxTexture::eUV);
+				lTexture->SetMaterialUse(FbxFileTexture::eModelMaterial);
+				lTexture->SetSwapUV(false);
+				lTexture->SetTranslation(0.0, 0.0);
+				lTexture->SetScale(1.0, 1.0);
+				lTexture->SetRotation(0.0, 0.0);
+				lTexture->UVSet.Set(FbxString(gDiffuseElementName)); // Connect texture to the proper UV
+
+				// don't forget to connect the texture to the corresponding property of the material
+				lMaterial->Diffuse.ConnectSrcObject(lTexture);
+			}
+
+			int matIndex = lNode->AddMaterial(lMaterial);
+			assert(matIndex  == static_cast<int>(i));
+		}
+
+		// Create 'triangle to material index' mapping
+		{
+			FbxGeometryElementMaterial* lMaterialElement = lMesh->CreateElementMaterial();
+			lMaterialElement->SetMappingMode(FbxGeometryElement::eByPolygon);
+			lMaterialElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
+
+			//set the proper material mapping
+			//unsigned triCount = asCCMesh->size();
+			//lMaterialElement->GetIndexArray().SetCount(static_cast<int>(triCount));
+			//assert(asCCMesh->hasPerTriangleMtlIndexes());
+			//for (unsigned j=0; j<triCount; ++j)
+			//{
+			//	int matIndex = asCCMesh->getTriangleMtlIndex(j);
+			//	lMaterialElement->GetIndexArray().SetAt(j,matIndex);
+			//}
+		}
+
+		hasMaterial = true;
+	}
+
+	// Create polygons
 	{
 		for (unsigned j=0; j<faceCount; ++j)
 		{
 			const CCLib::TriangleSummitsIndexes* tsi = mesh->getTriangleIndexes(j);
 
-			lMesh->BeginPolygon(static_cast<int>(j));
+			int matIndex = hasMaterial ? asCCMesh->getTriangleMtlIndex(j) : -1;
+			lMesh->BeginPolygon(matIndex);
 			lMesh->AddPolygon(tsi->i1);
 			lMesh->AddPolygon(tsi->i2);
 			lMesh->AddPolygon(tsi->i3);
 			lMesh->EndPolygon();
 		}
 	}
-
-	FbxNode* lNode = FbxNode::Create(pScene,qPrintable(mesh->getName()));
-
-	lNode->SetNodeAttribute(lMesh);
-
-	//CreateMaterials(pScene, lMesh);
 
 	return lNode;
 }
@@ -315,7 +444,7 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename)
 	{
 		for (size_t i=0; i<meshes.size(); ++i)
 		{
-			FbxNode* meshNode = ToFbxMesh(meshes[i],lScene);
+			FbxNode* meshNode = ToFbxMesh(meshes[i],lScene,filename,i);
 			if (meshNode)
 				lRootNode->AddChild(meshNode);
 			else
@@ -493,7 +622,6 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 		}
 	}
 
-
 	//normals can be per vertices or per-triangle
 	int perPointNormals = -1;
 	int perVertexNormals = -1;
@@ -578,67 +706,181 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 		}
 	}
 
+	//materials
+	ccMaterialSet* materials = 0;
+	{
+		FbxNode* lNode = fbxMesh->GetNode();
+		int lMaterialCount = lNode ? lNode->GetMaterialCount() : 0;
+		for (int i=0; i<lMaterialCount; i++)
+		{
+			FbxSurfaceMaterial *lBaseMaterial = lNode->GetMaterial(i);
+
+			bool isLambert = lBaseMaterial->GetClassId().Is(FbxSurfaceLambert::ClassId);
+			bool isPhong = lBaseMaterial->GetClassId().Is(FbxSurfacePhong::ClassId);
+			if (isLambert || isPhong)
+			{
+				ccMaterial mat(lBaseMaterial->GetName());
+
+				FbxSurfaceLambert* lLambertMat = static_cast<FbxSurfaceLambert*>(lBaseMaterial);
+			
+				for (int k=0; k<3; ++k)
+				{
+					mat.ambient[k] = lLambertMat->Ambient.Get()[k];
+					mat.diffuseFront[k] = mat.diffuseBack[k] = lLambertMat->Diffuse.Get()[k];
+					mat.emission[k] = lLambertMat->Emissive.Get()[k];
+
+					if (isPhong)
+					{
+						FbxSurfacePhong* lPhongMat = static_cast<FbxSurfacePhong*>(lBaseMaterial);
+						mat.specular[k] = lPhongMat->Specular.Get()[k];
+						mat.shininessFront = mat.shininessBack = lPhongMat->Shininess;
+					}
+				}
+
+				//import associated texture (if any)
+				{
+					int lTextureIndex;
+					FBXSDK_FOR_EACH_TEXTURE(lTextureIndex)
+					{
+						FbxProperty lProperty = lBaseMaterial->FindProperty(FbxLayerElement::sTextureChannelNames[lTextureIndex]);
+						if( lProperty.IsValid() )
+						{
+							int lTextureCount = lProperty.GetSrcObjectCount<FbxTexture>();
+							FbxTexture* texture = 0; //we can handle only one texture per material! We'll take the non layered one by default (if any)
+							for (int j = 0; j < lTextureCount; ++j)
+							{
+								//Here we have to check if it's layeredtextures, or just textures:
+								FbxLayeredTexture *lLayeredTexture = lProperty.GetSrcObject<FbxLayeredTexture>(j);
+								if (lLayeredTexture)
+								{
+									//we don't handle layered textures!
+									/*int lNbTextures = lLayeredTexture->GetSrcObjectCount<FbxTexture>();
+									for (int k=0; k<lNbTextures; ++k)
+									{
+										FbxTexture* lTexture = lLayeredTexture->GetSrcObject<FbxTexture>(k);
+										if(lTexture)
+										{
+										}
+									}
+									//*/
+								}
+								else
+								{
+									//non-layered texture
+									FbxTexture* lTexture = lProperty.GetSrcObject<FbxTexture>(j);
+									if(lTexture)
+									{
+										//we take the first non layered texture by default
+										texture = lTexture;
+										break;
+									}
+								}
+							}
+
+							if (texture)
+							{
+								FbxFileTexture *lFileTexture = FbxCast<FbxFileTexture>(texture);
+								if (lFileTexture)
+								{
+									const char* texAbsoluteFilename = lFileTexture->GetFileName();
+									ccLog::PrintDebug(QString("[FBX] Texture absolue filename: %1").arg(texAbsoluteFilename));
+									if (texAbsoluteFilename != 0 && texAbsoluteFilename[0] != 0)
+									{
+										QImage texImage(texAbsoluteFilename);
+										if (!texImage.isNull())
+										{
+											mat.texture = texImage;
+										}
+										else 
+										{
+											ccLog::Warning(QString("[FBX] Failed to load texture file: %1").arg(texAbsoluteFilename));
+										}
+									}
+								}
+							}
+						}
+						//FindAndDisplayTextureInfoByProperty(lProperty, lDisplayHeader, lMaterialIndex); 
+					}
+				}
+
+				if (!materials)
+				{
+					materials = new ccMaterialSet("materials");
+					mesh->addChild(materials);
+				}
+				materials->addMaterial(mat);
+			}
+			else
+			{
+				ccLog::Warning(QString("[FBX] Material '%1' has an unhandled type").arg(lBaseMaterial->GetName()));
+			}
+		}
+	}
+
 	//import textures UV
-	int perVertexUV = -1;
-	bool hasTexUV = false;
+	TextureCoordsContainer* vertTexUVTable = 0;
+	bool hasTexUVIndexes = false;
 	{
 		for (int l=0; l<fbxMesh->GetElementUVCount(); ++l)
 		{
 			FbxGeometryElementUV* leUV = fbxMesh->GetElementUV(l);
 			//per-point UV coordinates
-			if (leUV->GetMappingMode() == FbxGeometryElement::eByControlPoint)
+			if (leUV->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
 			{
-				TextureCoordsContainer* vertTexUVTable = new TextureCoordsContainer();
-				if (!vertTexUVTable->reserve(vertCount) || !mesh->reservePerTriangleTexCoordIndexes())
+				vertTexUVTable = new TextureCoordsContainer();
+				int uvCount = leUV->GetDirectArray().GetCount();
+
+				if (!vertTexUVTable->reserve(uvCount) || !mesh->reservePerTriangleTexCoordIndexes())
 				{
 					vertTexUVTable->release();
+					vertTexUVTable = 0;
 					ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' UV coordinates!").arg(fbxMesh->GetName()));
 				}
 				else
 				{
 					FbxLayerElement::EReferenceMode refMode = leUV->GetReferenceMode();
-					for (int i=0; i<vertCount; ++i)
+					for (int i=0; i<uvCount; ++i)
 					{
-						int id = refMode != FbxGeometryElement::eDirect ? leUV->GetIndexArray().GetAt(i) : i;
-						FbxVector2 uv = leUV->GetDirectArray().GetAt(id);
+						FbxVector2 uv = leUV->GetDirectArray().GetAt(i);
 						//convert to CC-structure
 						float uvf[2] = {static_cast<float>(uv.Buffer()[0]),
-										static_cast<float>(uv.Buffer()[1])};
+										1.0f-static_cast<float>(uv.Buffer()[1])};
 						vertTexUVTable->addElement(uvf);
 					}
-					mesh->addChild(vertTexUVTable);
-					hasTexUV = true;
-				}
-				perVertexUV = -1;
-				break; //no need to look to the other UV fields (can't handle them!)
-			}
-			else if (leUV->GetMappingMode() == FbxGeometryElement::eByPolygonVertex)
-			{
-				//per-vertex UV coordinates
-				perVertexUV = l;
-			}
-		}
-	}
 
-	//per-vertex UV coordinates
-	TextureCoordsContainer* texUVTable = 0;
-	if (perVertexUV >= 0)
-	{
-		texUVTable = new TextureCoordsContainer();
-		if (!texUVTable->reserve(polyVertCount) || !mesh->reservePerTriangleTexCoordIndexes())
-		{
-			texUVTable->release();
-			ccLog::Warning(QString("[FBX] Not enough memory to load mesh '%1' UV coordinates!").arg(fbxMesh->GetName()));
-		}
-		else
-		{
-			mesh->addChild(texUVTable);
-			hasTexUV = true;
+					int indexCount = leUV->GetIndexArray().GetCount();
+					if (refMode == FbxGeometryElement::eIndexToDirect)
+					{
+						hasTexUVIndexes = true;
+						//for (int i=0; i<polyCount; ++i)
+						//{
+						//	mesh->addTriangleTexCoordIndexes(leUV->GetIndexArray().GetAt(3*i),leUV->GetIndexArray().GetAt(3*i+1),leUV->GetIndexArray().GetAt(3*i+2));
+						//}
+					}
+					else if (refMode == FbxGeometryElement::eDirect)
+					{
+						//for (int i=0; i<polyCount; ++i)
+						//{
+						//	mesh->addTriangleTexCoordIndexes(3*i,3*i+1,3*i+2);
+						//}
+					}
+					else
+					{
+						ccLog::Warning(QString("[FBX] UV coordinates for mesh '%1' are encoded in an unhandled mode!") .arg(fbxMesh->GetName()));
+						vertTexUVTable->release();
+						vertTexUVTable = 0;
+					}
+				}
+
+				if (vertTexUVTable)
+					break; //no need to look to the other UV fields (can't handle them!)
+			}
 		}
 	}
 
 	//import polygons
 	{
+		int uvIndex = 0;
 		for (int i=0; i<polyCount; ++i)
 		{
 			int pSize = fbxMesh->GetPolygonSize(i);
@@ -646,6 +888,8 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 			if (pSize > 4)
 			{
 				//not handled for the moment
+				if (!hasTexUVIndexes)
+					uvIndex += pSize;
 				continue;
 			}
 			//we split quads into two triangles
@@ -663,32 +907,47 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 				mesh->addTriangle(i1,i3,i4);
 			}
 
-			if (hasTexUV)
+			if (vertTexUVTable)
 			{
-				if (texUVTable)
+				if (hasTexUVIndexes)
 				{
-					assert(perVertexUV >= 0);
-
-					int uvIndex = static_cast<int>(texUVTable->currentSize());
-					for (int j=0; j<pSize; ++j)
-					{
-						int lTextureUVIndex = fbxMesh->GetTextureUVIndex(i, j);
-						FbxGeometryElementUV* leUV = fbxMesh->GetElementUV(perVertexUV);
-						FbxVector2 uv = leUV->GetDirectArray().GetAt(lTextureUVIndex);
-						//convert to CC-structure
-						float uvf[2] = {static_cast<float>(uv.Buffer()[0]),
-										static_cast<float>(uv.Buffer()[1])};
-						texUVTable->addElement(uvf);
-					}
-					mesh->addTriangleTexCoordIndexes(uvIndex,uvIndex+1,uvIndex+2);
-					if (pSize == 4)
-						mesh->addTriangleTexCoordIndexes(uvIndex,uvIndex+2,uvIndex+3);
+					i1 = fbxMesh->GetTextureUVIndex(i, 0);
+					if (i1 > uvIndex)
+						uvIndex = i1;
+					i2 = fbxMesh->GetTextureUVIndex(i, 1);
+					if (i2 > uvIndex)
+						uvIndex = i2;
+					i3 = fbxMesh->GetTextureUVIndex(i, 2);
+					if (i3 > uvIndex)
+						uvIndex = i3;
 				}
 				else
 				{
-					mesh->addTriangleTexCoordIndexes(i1,i2,i3);
-					if (pSize == 4)
-						mesh->addTriangleTexCoordIndexes(i1,i3,i4);
+					i1 = uvIndex++;
+					i2 = uvIndex++;
+					i3 = uvIndex++;
+				}
+				mesh->addTriangleTexCoordIndexes(i1,i2,i3);
+				if (pSize == 4)
+				{
+					if (hasTexUVIndexes)
+					{
+						i4 = fbxMesh->GetTextureUVIndex(i, 3);
+						if (i4 > uvIndex)
+							uvIndex = i4;
+					}
+					else
+					{
+						i4 = uvIndex++;
+					}
+					mesh->addTriangleTexCoordIndexes(i1,i3,i4);
+				}
+
+				if (uvIndex >= vertTexUVTable->currentSize())
+				{
+					ccLog::Warning(QString("[FBX] Mesh '%1': UV coordinates indexes mismatch!") .arg(fbxMesh->GetName()));
+					vertTexUVTable->release();
+					vertTexUVTable = 0;
 				}
 			}
 
@@ -712,6 +971,12 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 			}
 		}
 		
+		if (vertTexUVTable)
+		{
+			mesh->setTexCoordinatesTable(vertTexUVTable);
+			mesh->addChild(vertTexUVTable);
+		}
+
 		if (mesh->size() == 0)
 		{
 			ccLog::Warning(QString("[FBX] No triangle found in mesh '%1'! (only triangles are supported for the moment)").arg(fbxMesh->GetName()));
@@ -748,9 +1013,48 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 		}
 	}
 
-	//import textures
+	//import material mapping (AFTER LOADING THE POLYGONS!)
+	if (materials)
 	{
-		//TODO
+		int fbxMatCount = fbxMesh->GetElementMaterialCount();
+		for (int i=0; i<fbxMatCount; ++i)
+		{
+			FbxGeometryElementMaterial* lMaterialElement = fbxMesh->GetElementMaterial(i);
+			if (	lMaterialElement->GetMappingMode() == FbxGeometryElement::eByPolygon
+				&&	lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect
+				&&	lMaterialElement->GetIndexArray().GetCount() == fbxMesh->GetPolygonCount())
+			{
+				if (mesh->reservePerTriangleMtlIndexes())
+				{
+					int maxMaterialIndex = static_cast<int>(materials->size());
+					int matElemCount = lMaterialElement->GetIndexArray().GetCount();
+					for (int j=0; j<matElemCount; ++j)
+					{
+						int mtlIndex = lMaterialElement->GetIndexArray().GetAt(j);
+						mesh->addTriangleMtlIndex(mtlIndex < maxMaterialIndex ? mtlIndex : -1);
+					}
+				}
+				else
+				{
+					ccLog::Warning("[FBX] Not enough memory to load materials!");
+				}
+				break;
+			}
+		}
+
+		if (mesh->hasPerTriangleMtlIndexes())
+		{
+			mesh->setMaterialSet(materials);
+			//mesh->addChild(materials);
+			mesh->showMaterials(true);
+		}
+		else
+		{
+			//we failed to load material mapping! No need to kepp the materials...
+			mesh->removeChild(materials);
+			//materials->release();
+			materials = 0;
+		}
 	}
 
 	return mesh;

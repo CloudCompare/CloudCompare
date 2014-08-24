@@ -49,8 +49,9 @@
 	v3.4 - 01/09/2014 - ccIndexedTransformation and ccIndexedTransformationBuffer added + CC_CLASS_ENUM is now coded on 64 bits
 	v3.5 - 02/13/2014 - ccSensor class updated
 	v3.6 - 05/30/2014 - ccGLWindow and associated structures (viewport, etc.) now use double precision
+	v3.7 - 08/24/2014 - Textures are stored and saved as a single DB with only references to them in each material (key = absolute filename)
 **/
-const unsigned c_currentDBVersion = 36; //3.6
+const unsigned c_currentDBVersion = 37; //3.7
 
 // Persistent settings key for storing the last generated entity ID
 static const QString s_uniqueIDKey("UniqueID");

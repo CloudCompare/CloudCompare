@@ -31,6 +31,7 @@
 //Qt
 #include <QFileInfo>
 #include <QDir>
+#include <QMap>
 
 //System
 #include <vector>
@@ -185,7 +186,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 				for (unsigned i=0; i<count; ++i)
 				{
 					const float* uv = texCoords->getValue(i);
-					lUVDiffuseElement->GetDirectArray().SetAt(i,FbxVector2(uv[0],1.0-uv[1]));
+					lUVDiffuseElement->GetDirectArray().SetAt(i,FbxVector2(uv[0],uv[1]));
 				}
 			}
 
@@ -206,6 +207,9 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			}
 		}
 
+		//Textures used in this file
+		QMap<QString,QString> texFilenames;
+
 		const ccMaterialSet* matSet = asCCMesh->getMaterialSet();
 		size_t matCount = matSet->size();
 		for (size_t i=0; i<matCount; ++i)
@@ -224,30 +228,46 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			lMaterial->Shininess = mat.shininessFront;
 			lMaterial->ShadingModel.Set(lShadingName);
 
-			if (!mat.texture.isNull())
+			if (mat.hasTexture())
 			{
-				if (!texDir.exists())
+				QString texFilename = mat.getAbsoluteFilename();
+				
+				//texture has not already been processed
+				if (!texFilenames.contains(texFilename))
 				{
-					texDir = baseDir;
-					if (texDir.mkdir(textDirName))
+					//if necessary, we (try to) create a subfolder to store textures
+					if (!texDir.exists())
 					{
-						texDir.cd(textDirName);
+						texDir = baseDir;
+						if (texDir.mkdir(textDirName))
+						{
+							texDir.cd(textDirName);
+						}
+						else
+						{
+							textDirName = QString();
+							ccLog::Warning("[FBX] Failed to create subfolder '%1' to store texture files (files will be stored next to the .fbx file)");
+						}
 					}
-					else
-					{
-						textDirName = QString();
-						ccLog::Warning("[FBX] Failed to create subfolder '%1' to store texture files (files will be stored next to the .fbx file)");
-					}
-				}
 
-				QString baseFilename = QString("mesh_%1_tex_%2.jpg").arg(meshIndex,2,10,QChar('0')).arg(i,3,10,QChar('0'));
-				QString absoluteFilename = texDir.absolutePath() + QString("/") + baseFilename;
-				ccLog::PrintDebug(QString("[FBX] Material '%1' texture: %2").arg(mat.name).arg(absoluteFilename));
-				mat.texture.save(absoluteFilename);
+					QFileInfo fileInfo(texFilename);
+					QString baseTexName = fileInfo.fileName();
+					//add extension
+					QString extension = QFileInfo(texFilename).suffix();
+					if (fileInfo.suffix().isEmpty())
+						baseTexName += QString(".png");
+
+					QString absoluteFilename = texDir.absolutePath() + QString("/") + baseTexName;
+					ccLog::PrintDebug(QString("[FBX] Material '%1' texture: %2").arg(mat.name).arg(absoluteFilename));
+
+					texFilenames[texFilename] = absoluteFilename;
+				}
+				//mat.texture.save(absoluteFilename);
 
 				// Set texture properties.
 				FbxFileTexture* lTexture = FbxFileTexture::Create(pScene,"DiffuseTexture");
-				lTexture->SetFileName(qPrintable(absoluteFilename));
+				assert(!texFilenames[texFilename].isEmpty());
+				lTexture->SetFileName(qPrintable(texFilenames[texFilename]));
 				lTexture->SetTextureUse(FbxTexture::eStandard);
 				lTexture->SetMappingType(FbxTexture::eUV);
 				lTexture->SetMaterialUse(FbxFileTexture::eModelMaterial);
@@ -263,6 +283,17 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 
 			int matIndex = lNode->AddMaterial(lMaterial);
 			assert(matIndex  == static_cast<int>(i));
+		}
+
+		//don't forget to save the texture files
+		{
+			for (QMap<QString,QString>::ConstIterator it = texFilenames.begin(); it != texFilenames.end(); ++it)
+			{
+				const QImage image = ccMaterial::GetTexture(it.key());
+				image.mirrored().save(it.value());
+			}
+			
+			texFilenames.clear(); //don't need this anymore!
 		}
 
 		// Create 'triangle to material index' mapping
@@ -786,12 +817,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 									ccLog::PrintDebug(QString("[FBX] Texture absolue filename: %1").arg(texAbsoluteFilename));
 									if (texAbsoluteFilename != 0 && texAbsoluteFilename[0] != 0)
 									{
-										QImage texImage(texAbsoluteFilename);
-										if (!texImage.isNull())
-										{
-											mat.texture = texImage;
-										}
-										else 
+										if (!mat.setTexture(texAbsoluteFilename))
 										{
 											ccLog::Warning(QString("[FBX] Failed to load texture file: %1").arg(texAbsoluteFilename));
 										}
@@ -799,7 +825,6 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 								}
 							}
 						}
-						//FindAndDisplayTextureInfoByProperty(lProperty, lDisplayHeader, lMaterialIndex); 
 					}
 				}
 
@@ -844,7 +869,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 						FbxVector2 uv = leUV->GetDirectArray().GetAt(i);
 						//convert to CC-structure
 						float uvf[2] = {static_cast<float>(uv.Buffer()[0]),
-										1.0f-static_cast<float>(uv.Buffer()[1])};
+										static_cast<float>(uv.Buffer()[1])};
 						vertTexUVTable->addElement(uvf);
 					}
 
@@ -943,7 +968,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 					mesh->addTriangleTexCoordIndexes(i1,i3,i4);
 				}
 
-				if (uvIndex >= vertTexUVTable->currentSize())
+				if (uvIndex >= static_cast<int>(vertTexUVTable->currentSize()))
 				{
 					ccLog::Warning(QString("[FBX] Mesh '%1': UV coordinates indexes mismatch!") .arg(fbxMesh->GetName()));
 					vertTexUVTable->release();

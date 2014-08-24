@@ -731,7 +731,7 @@ void DistanceMapGenerationDlg::updateMapTexture()
 			//add new material
 			{
 				ccMaterial material("texture");
-				material.texture = mapImage;
+				material.setTexture(mapImage,QString(),false);
 				materialSet->addMaterial(material);
 				//dirty trick: reset material association so that texture will be refreshed!
 				materialSet->associateTo(0);

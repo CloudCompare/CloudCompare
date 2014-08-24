@@ -259,7 +259,7 @@ bool ccPlane::setAsTexture(QImage image)
 	//add new material
 	{
 		ccMaterial material("texture");
-		material.texture = image;
+		material.setTexture(image,QString(),false);
 		materialSet->addMaterial(material);
 		//dirty trick: reset material association so that texture will be refreshed!
 		materialSet->associateTo(0);

@@ -30,7 +30,8 @@
 struct QCC_DB_LIB_API ccMaterial
 {
 	QString name;
-	QImage texture;
+	QString textureFilename;
+	//QImage texture;
 	float diffuseFront[4];
 	float diffuseBack[4];
 	float ambient[4];
@@ -66,10 +67,36 @@ struct QCC_DB_LIB_API ccMaterial
 	//! Apply parameters (OpenGL)
 	void applyGL(bool lightEnabled, bool skipDiffuse) const;
 
+	//! Returns whether the material has an associated texture or not
+	bool hasTexture() const;
+
+	//! Sets texture
+	/** If no filename is provided, a random one will be generated.
+	**/
+	void setTexture(QImage image, QString absoluteFilename =  QString(), bool mirrorImage = true);
+
+	//! Sets texture
+	/** If the filename is not already in DB, the corresponding file will be loaded.
+		\return whether the file could be loaded (or is already in DB)
+	**/
+	bool setTexture(QString absoluteFilename);
+
+	//! Returns the texture absolute filename (if any)
+	QString getAbsoluteFilename() const { return textureFilename; }
+
+	//! Returns the texture (if any)
+	const QImage getTexture() const;
+
 	//! Helper: makes all active GL light sources neutral (i.e. 'gray')
 	/** WARNING: an OpenGL context must be active!
 	**/
 	static void MakeLightsNeutral();
+
+	//! Returns the texture image associated to a given name
+	static QImage GetTexture(QString absoluteFilename);
+
+	//! Adds a texture to the global texture DB
+	static void AddTexture(QImage image, QString absoluteFilename);
 
 };
 

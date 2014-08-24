@@ -21,9 +21,18 @@
 //Local
 #include "ccMaterial.h"
 #include "ccBasicTypes.h"
+#include "ccLog.h"
+
+//Qt
+#include <QMap>
+#include <QUuid>
 
 //System
 #include <string.h>
+#include <assert.h>
+
+//Textures DB
+QMap<QString, QImage> s_textureDB;
 
 ccMaterial::ccMaterial(QString _name)
 	: name(_name)
@@ -39,7 +48,7 @@ ccMaterial::ccMaterial(QString _name)
 
 ccMaterial::ccMaterial(const ccMaterial& mtl)
 	: name(mtl.name)
-	, texture(mtl.texture)
+	, textureFilename(mtl.textureFilename)
 	, shininessFront(mtl.shininessFront)
 	, shininessBack(mtl.shininessFront)
 	, texID(0)
@@ -93,6 +102,65 @@ void ccMaterial::applyGL(bool lightEnabled, bool skipDiffuse) const
 	}
 }
 
+bool ccMaterial::setTexture(QString absoluteFilename)
+{
+	if (!s_textureDB.contains(absoluteFilename))
+	{
+		//try to load the corresponding file
+		QImage image(absoluteFilename);
+		if (image.isNull())
+		{
+			ccLog::Warning(QString("[ccMaterial] Failed to load image '%1'").arg(absoluteFilename));
+			return false;
+		}
+
+		s_textureDB[absoluteFilename] = image.mirrored();
+	}
+
+	textureFilename = absoluteFilename;
+
+	return true;
+}
+
+void ccMaterial::setTexture(QImage image, QString absoluteFilename/*=QString()*/, bool mirrorImage/*=true*/)
+{
+	if (absoluteFilename.isEmpty())
+	{
+		absoluteFilename = QString("tex_") + QUuid::createUuid().toString();
+		assert(!s_textureDB.contains(absoluteFilename));
+	}
+	else
+	{
+		if (s_textureDB.contains(absoluteFilename))
+		{
+			if (s_textureDB[absoluteFilename].size() != image.size())
+			{
+				ccLog::Warning(QString("[ccMaterial] A texture with the same name (%1) but with a different size has already been loaded!").arg(absoluteFilename));
+			}
+			textureFilename = absoluteFilename;
+			return;
+		}
+	}
+
+	textureFilename = absoluteFilename;
+
+	//insert image into DB if necessary
+	s_textureDB[absoluteFilename] = mirrorImage ? image.mirrored() : image;
+}
+
+const QImage ccMaterial::getTexture() const
+{
+	return s_textureDB[textureFilename];
+}
+
+bool ccMaterial::hasTexture() const
+{
+	if (textureFilename.isEmpty())
+		return false;
+
+	return !s_textureDB[textureFilename].isNull();
+}
+
 void ccMaterial::MakeLightsNeutral()
 {
 	GLint maxLightCount;
@@ -119,4 +187,14 @@ void ccMaterial::MakeLightsNeutral()
 			glLightfv(GL_LIGHT0+i,GL_SPECULAR,specular);
 		}
 	}
+}
+
+QImage ccMaterial::GetTexture(QString absoluteFilename)
+{
+	return s_textureDB[absoluteFilename];
+}
+
+void ccMaterial::AddTexture(QImage image, QString absoluteFilename)
+{
+	s_textureDB[absoluteFilename] = image;
 }

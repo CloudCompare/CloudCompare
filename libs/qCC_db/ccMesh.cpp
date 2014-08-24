@@ -2665,15 +2665,7 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 	if (matIndex >= 0)
 	{
 		const ccMaterial& material = (*m_materials)[matIndex];
-		if (material.texture.isNull())
-		{
-			rgb[0] = (colorType)(material.diffuseFront[0]*MAX_COLOR_COMP);
-			rgb[1] = (colorType)(material.diffuseFront[1]*MAX_COLOR_COMP);
-			rgb[2] = (colorType)(material.diffuseFront[2]*MAX_COLOR_COMP);
-
-			foundMaterial = true;
-		}
-		else
+		if (material.hasTexture())
 		{
 			assert(m_texCoords && m_texCoordIndexes);
 			const int* txInd = m_texCoordIndexes->getValue(triIndex);
@@ -2683,10 +2675,11 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 				if (Tx[0] >= 0 && Tx[0] <= 1.0f && Tx[1] >= 0 && Tx[1] <= 1.0f)
 				{
 					//get color from texture image
-					int xPix = std::min((int)floor(Tx[0]*(float)material.texture.width()),material.texture.width()-1);
-					int yPix = std::min((int)floor(Tx[1]*(float)material.texture.height()),material.texture.height()-1);
+					const QImage texture = material.getTexture();
+					int xPix = std::min(static_cast<int>(floor(Tx[0]*texture.width())),texture.width()-1);
+					int yPix = std::min(static_cast<int>(floor(Tx[1]*texture.height())),texture.height()-1);
 
-					QRgb pixel = material.texture.pixel(xPix,yPix);
+					QRgb pixel = texture.pixel(xPix,yPix);
 
 					rgb[0] = static_cast<colorType>(qRed(pixel));
 					rgb[1] = static_cast<colorType>(qGreen(pixel));
@@ -2695,6 +2688,14 @@ bool ccMesh::getVertexColorFromMaterial(unsigned triIndex, unsigned char vertInd
 					foundMaterial = true;
 				}
 			}
+		}
+		else
+		{
+			rgb[0] = static_cast<colorType>(material.diffuseFront[0]*MAX_COLOR_COMP);
+			rgb[1] = static_cast<colorType>(material.diffuseFront[1]*MAX_COLOR_COMP);
+			rgb[2] = static_cast<colorType>(material.diffuseFront[2]*MAX_COLOR_COMP);
+
+			foundMaterial = true;
 		}
 	}
 
@@ -2722,7 +2723,7 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 	{
 		assert(m_materials);
 		matIndex = m_triMtlIndexes->getValue(triIndex);
-		assert(matIndex < (int)m_materials->size());
+		assert(matIndex < static_cast<int>(m_materials->size()));
 	}
 
 	//do we need to change material?
@@ -2735,11 +2736,11 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 
 	const ccMaterial& material = (*m_materials)[matIndex];
 
-	if (material.texture.isNull())
+	if (!material.hasTexture())
 	{
-		rgb[0] = (colorType)(material.diffuseFront[0]*MAX_COLOR_COMP);
-		rgb[1] = (colorType)(material.diffuseFront[1]*MAX_COLOR_COMP);
-		rgb[2] = (colorType)(material.diffuseFront[2]*MAX_COLOR_COMP);
+		rgb[0] = static_cast<colorType>(material.diffuseFront[0]*MAX_COLOR_COMP);
+		rgb[1] = static_cast<colorType>(material.diffuseFront[1]*MAX_COLOR_COMP);
+		rgb[2] = static_cast<colorType>(material.diffuseFront[2]*MAX_COLOR_COMP);
 		return true;
 	}
 
@@ -2776,10 +2777,11 @@ bool ccMesh::getColorFromMaterial(unsigned triIndex, const CCVector3& P, colorTy
 
 	//get color from texture image
 	{
-		int xPix = std::min(static_cast<int>(floor(x*static_cast<float>(material.texture.width()))),material.texture.width()-1);
-		int yPix = std::min(static_cast<int>(floor(y*static_cast<float>(material.texture.height()))),material.texture.height()-1);
+		const QImage texture = material.getTexture();
+		int xPix = std::min(static_cast<int>(floor(x*static_cast<float>(texture.width()))),texture.width()-1);
+		int yPix = std::min(static_cast<int>(floor(y*static_cast<float>(texture.height()))),texture.height()-1);
 
-		QRgb pixel = material.texture.pixel(xPix,yPix);
+		QRgb pixel = texture.pixel(xPix,yPix);
 
 		rgb[0] = static_cast<colorType>(qRed(pixel));
 		rgb[1] = static_cast<colorType>(qGreen(pixel));

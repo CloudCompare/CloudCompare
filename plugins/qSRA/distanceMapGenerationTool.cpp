@@ -684,10 +684,10 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 	unsigned meshFaceCount = (map->xSteps-1) * (map->ySteps-1) * 2;
 	ccPointCloud* cloud = new ccPointCloud();
 	ccMesh* mesh = new ccMesh(cloud);
+	mesh->addChild(cloud);
 	if (!cloud->reserve(meshVertCount) || !mesh->reserve(meshFaceCount))
 	{
 		//not enough memory
-		delete cloud;
 		delete mesh;
 		return 0;
 	}
@@ -732,8 +732,8 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 				unsigned vertC = vertB + 1;
 				unsigned vertD = vertA + 1;
 
-				mesh->addTriangle(vertB,vertD,vertC);
-				mesh->addTriangle(vertB,vertA,vertD);
+				mesh->addTriangle(vertB,vertC,vertD);
+				mesh->addTriangle(vertB,vertD,vertA);
 			}
 		}
 	}
@@ -779,8 +779,8 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 					unsigned vertC = vertB + 1;
 					unsigned vertD = vertA + 1;
 
-					mesh->addTriangleTexCoordIndexes(vertB,vertD,vertC);
-					mesh->addTriangleTexCoordIndexes(vertB,vertA,vertD);
+					mesh->addTriangleTexCoordIndexes(vertB,vertC,vertD);
+					mesh->addTriangleTexCoordIndexes(vertB,vertD,vertA);
 				}
 			}
 		}
@@ -799,7 +799,7 @@ ccMesh* DistanceMapGenerationTool::ConvertConicalMapToMesh(	const QSharedPointer
 		//set material
 		{
 			ccMaterial material("texture");
-			material.texture = mapTexture;
+			material.setTexture(mapTexture, QString(), false);
 
 			ccMaterialSet* materialSet = new ccMaterialSet();
 			materialSet->addMaterial(material);
@@ -1227,8 +1227,8 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 				unsigned vertC = vertB+1;
 				unsigned vertD = vertA+1;
 
-				mesh->addTriangle(vertB,vertD,vertC);
-				mesh->addTriangle(vertB,vertA,vertD);
+				mesh->addTriangle(vertB,vertC,vertD);
+				mesh->addTriangle(vertB,vertD,vertA);
 			}
 		}
 	}
@@ -1280,8 +1280,8 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 					unsigned vertC = vertB+1;
 					unsigned vertD = vertA+1;
 
-					mesh->addTriangleTexCoordIndexes(vertB,vertD,vertC);
-					mesh->addTriangleTexCoordIndexes(vertB,vertA,vertD);
+					mesh->addTriangleTexCoordIndexes(vertB,vertC,vertD);
+					mesh->addTriangleTexCoordIndexes(vertB,vertD,vertA);
 				}
 			}
 		}
@@ -1302,7 +1302,7 @@ ccMesh* DistanceMapGenerationTool::ConvertProfileToMesh(ccPolyline* profile,
 			ccMaterial material("texture");
 		
 			//invert texture?
-			material.texture = mapTexture;
+			material.setTexture(mapTexture, QString(), false);
 
 			ccMaterialSet* materialSet = new ccMaterialSet();
 			materialSet->addMaterial(material);

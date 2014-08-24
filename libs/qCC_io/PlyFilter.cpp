@@ -222,7 +222,7 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 	if (material)
 	{
 		//Material without texture?
-		if (material->texture.isNull())
+		if (!material->hasTexture())
 		{
 			uniqueColor[0] = (colorType)(material->diffuseFront[0]*MAX_COLOR_COMP);
 			uniqueColor[1] = (colorType)(material->diffuseFront[1]*MAX_COLOR_COMP);
@@ -309,13 +309,16 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 			//texture & texture coordinates?
 			if (material)
 			{
-				assert(!material->texture.isNull() && mesh->getTexCoordinatesTable());
+				assert(material->hasTexture() && mesh->getTexCoordinatesTable());
+				QFileInfo fileInfo(material->getAbsoluteFilename());
+				QString defaultTextureName = fileInfo.fileName();
+				if (fileInfo.suffix().isNull())
+					defaultTextureName += QString(".png");
 				//try to save the texture!
-				const QString defaultTextureName("cc_ply_texture.png");
-				QString textureFilePath = QFileInfo(filename).absolutePath()+QString('/')+defaultTextureName;
-				if (!material->texture.mirrored().save(textureFilePath))
+				QString textureFilePath = QFileInfo(filename).absolutePath() + QString('/') + defaultTextureName;
+				if (!material->getTexture().mirrored().save(textureFilePath)) //mirrored --> see ccMaterial
 				{
-					ccLog::Error("Failed to save texture!");
+					ccLog::Warning(QString("[PLY] Failed to save texture in '%1'!").arg(textureFilePath));
 					material = 0;
 				}
 				else
@@ -324,6 +327,8 @@ CC_FILE_ERROR PlyFilter::saveToFile(ccHObject* entity, QString filename, e_ply_s
 					result = ply_add_comment(ply,qPrintable(QString("TEXTUREFILE %1").arg(defaultTextureName)));
 					//DGM FIXME: is this the right name?
 					result = ply_add_list_property(ply, "texcoord", PLY_UCHAR, PLY_FLOAT); //'texcoord' to mimick Photoscan
+					
+					ccLog::Print(QString("[PLY] Texture file: %1").arg(textureFilePath));
 				}
 			}
 		}
@@ -1489,19 +1494,20 @@ CC_FILE_ERROR PlyFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		{
 			if (!textureFileName.isEmpty())
 			{
-				QString textureFilePath = QFileInfo(filename).absolutePath()+QString('/')+textureFileName;
-				QImage texture = QImage(textureFilePath).mirrored();
-				if (!texture.isNull())
+				QString textureFilePath = QFileInfo(filename).absolutePath() + QString('/') + textureFileName;
+				ccMaterial material(textureFileName);
+				if (material.setTexture(textureFilePath))
 				{
 					if (mesh->reservePerTriangleTexCoordIndexes() && mesh->reservePerTriangleMtlIndexes())
 					{
+						const QImage texture = material.getTexture();
 						ccLog::Print(QString("[PLY][Texture] Successfully loaded texture '%1' (%2x%3 pixels)").arg(textureFileName).arg(texture.width()).arg(texture.height()));
 						//materials
 						ccMaterialSet* materials = new ccMaterialSet("materials");
-						ccMaterial material(textureFileName);
-						material.texture = texture;
-						memcpy(material.specular,ccColor::bright,sizeof(float)*4);
-						memcpy(material.ambient,ccColor::bright,sizeof(float)*4);
+						memcpy(material.diffuseFront,ccColor::bright,sizeof(float)*4);
+						memcpy(material.diffuseBack,ccColor::bright,sizeof(float)*4);
+						memcpy(material.specular,ccColor::darker,sizeof(float)*4);
+						memcpy(material.ambient,ccColor::darker,sizeof(float)*4);
 						materials->push_back(material);
 						mesh->setMaterialSet(materials);
 						mesh->setTexCoordinatesTable(texCoords);

@@ -139,29 +139,10 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 		ccLog::Warning("[FBX] Mesh has no normal! You can manually compute them (select it then call \"Edit > Normals > Compute\")");
 	}
 
-	// colors
-	if (cloud->hasColors())
-	{
-		FbxGeometryElementVertexColor* lGeometryElementVertexColor = lMesh->CreateElementVertexColor();
-		lGeometryElementVertexColor->SetMappingMode(FbxGeometryElement::eByControlPoint);
-		lGeometryElementVertexColor->SetReferenceMode(FbxGeometryElement::eDirect);
-		for (unsigned i=0; i<vertCount; ++i)
-		{
-			const colorType* C = cloud->getPointColor(i);
-			FbxColor col(	static_cast<double>(C[0])/MAX_COLOR_COMP,
-							static_cast<double>(C[1])/MAX_COLOR_COMP,
-							static_cast<double>(C[2])/MAX_COLOR_COMP,
-							1.0 );
-			lGeometryElementVertexColor->GetDirectArray().Add(col);
-		}
-	}
-
 	// Set material mapping.
 	bool hasMaterial = false;
 	if (asCCMesh && asCCMesh->hasMaterials())
 	{
-		FbxString lShadingName  = "Phong";
-
 		//directory to save textures
 		QFileInfo info(filename);
 		QString textDirName = info.baseName() + QString(".fbm");
@@ -218,15 +199,11 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			FbxSurfacePhong *lMaterial = FbxSurfacePhong::Create(pScene, qPrintable(mat.name));
 
 			lMaterial->Emissive.Set(FbxDouble3(mat.emission[0],mat.emission[1],mat.emission[2]));
-			//lMaterial->EmissiveFactor = mat.emission[3];
 			lMaterial->Ambient.Set(FbxDouble3(mat.ambient[0],mat.ambient[1],mat.ambient[2]));
-			//lMaterial->AmbientFactor = mat.ambient[3];
 			lMaterial->Diffuse.Set(FbxDouble3(mat.diffuseFront[0],mat.diffuseFront[1],mat.diffuseFront[2]));
-			//lMaterial->DiffuseFactor = mat.diffuseFront[3];
 			lMaterial->Specular.Set(FbxDouble3(mat.specular[0],mat.specular[1],mat.specular[2]));
-			//lMaterial->SpecularFactor = mat.specular[3];
 			lMaterial->Shininess = mat.shininessFront;
-			lMaterial->ShadingModel.Set(lShadingName);
+			lMaterial->ShadingModel.Set("Phong");
 
 			if (mat.hasTexture())
 			{
@@ -301,19 +278,44 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			FbxGeometryElementMaterial* lMaterialElement = lMesh->CreateElementMaterial();
 			lMaterialElement->SetMappingMode(FbxGeometryElement::eByPolygon);
 			lMaterialElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
-
-			//set the proper material mapping
-			//unsigned triCount = asCCMesh->size();
-			//lMaterialElement->GetIndexArray().SetCount(static_cast<int>(triCount));
-			//assert(asCCMesh->hasPerTriangleMtlIndexes());
-			//for (unsigned j=0; j<triCount; ++j)
-			//{
-			//	int matIndex = asCCMesh->getTriangleMtlIndex(j);
-			//	lMaterialElement->GetIndexArray().SetAt(j,matIndex);
-			//}
 		}
 
 		hasMaterial = true;
+	}
+
+	// colors
+	if (cloud->hasColors())
+	{
+		FbxGeometryElementVertexColor* lGeometryElementVertexColor = lMesh->CreateElementVertexColor();
+		lGeometryElementVertexColor->SetMappingMode(FbxGeometryElement::eByControlPoint);
+		lGeometryElementVertexColor->SetReferenceMode(FbxGeometryElement::eDirect);
+		for (unsigned i=0; i<vertCount; ++i)
+		{
+			const colorType* C = cloud->getPointColor(i);
+			FbxColor col(	static_cast<double>(C[0])/MAX_COLOR_COMP,
+							static_cast<double>(C[1])/MAX_COLOR_COMP,
+							static_cast<double>(C[2])/MAX_COLOR_COMP,
+							1.0 );
+			lGeometryElementVertexColor->GetDirectArray().Add(col);
+		}
+
+		if (!hasMaterial)
+		{
+			//it seems that we have to create a fake material in order for the colors to be displayed (in Unity and FBX Review at least)!
+			FbxSurfacePhong *lMaterial = FbxSurfacePhong::Create(pScene, "ColorMaterial");
+
+			lMaterial->Emissive.Set(FbxDouble3(0,0,0));
+			lMaterial->Ambient.Set(FbxDouble3(0,0,0));
+			lMaterial->Diffuse.Set(FbxDouble3(1,1,1));
+			lMaterial->Specular.Set(FbxDouble3(0,0,0));
+			lMaterial->Shininess = 0;
+			lMaterial->ShadingModel.Set("Phong");
+
+			FbxGeometryElementMaterial* lMaterialElement = lMesh->CreateElementMaterial();
+			lMaterialElement->SetMappingMode(FbxGeometryElement::eAllSame);
+			lMaterialElement->SetReferenceMode(FbxGeometryElement::eDirect);
+			lNode->AddMaterial(lMaterial);
+		}
 	}
 
 	// Create polygons
@@ -756,15 +758,17 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 			
 				for (int k=0; k<3; ++k)
 				{
-					mat.ambient[k] = lLambertMat->Ambient.Get()[k];
-					mat.diffuseFront[k] = mat.diffuseBack[k] = lLambertMat->Diffuse.Get()[k];
-					mat.emission[k] = lLambertMat->Emissive.Get()[k];
+					mat.ambient[k]		= static_cast<float>(lLambertMat->Ambient.Get()[k]);
+					mat.diffuseBack[k]	= static_cast<float>(lLambertMat->Diffuse.Get()[k]);
+					mat.diffuseFront[k]	= mat.diffuseBack[k];
+					mat.emission[k]		= static_cast<float>(lLambertMat->Emissive.Get()[k]);
 
 					if (isPhong)
 					{
 						FbxSurfacePhong* lPhongMat = static_cast<FbxSurfacePhong*>(lBaseMaterial);
-						mat.specular[k] = lPhongMat->Specular.Get()[k];
-						mat.shininessFront = mat.shininessBack = lPhongMat->Shininess;
+						mat.specular[k]		= static_cast<float>(lPhongMat->Specular.Get()[k]);
+						mat.shininessBack	= static_cast<float>(lPhongMat->Shininess);
+						mat.shininessFront	= mat.shininessBack;
 					}
 				}
 
@@ -1047,7 +1051,7 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 			FbxGeometryElementMaterial* lMaterialElement = fbxMesh->GetElementMaterial(i);
 			if (	lMaterialElement->GetMappingMode() == FbxGeometryElement::eByPolygon
 				&&	lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect
-				&&	lMaterialElement->GetIndexArray().GetCount() == fbxMesh->GetPolygonCount())
+				&&	lMaterialElement->GetIndexArray().GetCount() == fbxMesh->GetPolygonCount() )
 			{
 				if (mesh->reservePerTriangleMtlIndexes())
 				{
@@ -1064,6 +1068,28 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 					ccLog::Warning("[FBX] Not enough memory to load materials!");
 				}
 				break;
+			}
+			else if (	lMaterialElement->GetMappingMode() == FbxGeometryElement::eAllSame
+					/*&&	lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect*/ )
+			{
+				int mtlIndex = 0;
+				if (lMaterialElement->GetReferenceMode() == FbxGeometryElement::eIndexToDirect)
+				{
+					assert(lMaterialElement->GetIndexArray().GetCount() > 0); 
+					mtlIndex = lMaterialElement->GetIndexArray().GetAt(0);
+				}
+
+				if (mesh->reservePerTriangleMtlIndexes())
+				{
+					for (unsigned j=0; j<mesh->size(); ++j)
+					{
+						mesh->addTriangleMtlIndex(mtlIndex);
+					}
+				}
+				else
+				{
+					ccLog::Warning("[FBX] Not enough memory to load materials!");
+				}
 			}
 		}
 

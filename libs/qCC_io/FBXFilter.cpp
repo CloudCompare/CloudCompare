@@ -32,6 +32,8 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QMap>
+#include <QMessageBox>
+#include <QPushButton>
 
 //System
 #include <vector>
@@ -289,14 +291,14 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 		FbxGeometryElementVertexColor* lGeometryElementVertexColor = lMesh->CreateElementVertexColor();
 		lGeometryElementVertexColor->SetMappingMode(FbxGeometryElement::eByControlPoint);
 		lGeometryElementVertexColor->SetReferenceMode(FbxGeometryElement::eDirect);
+		lGeometryElementVertexColor->GetDirectArray().SetCount(vertCount);
 		for (unsigned i=0; i<vertCount; ++i)
 		{
 			const colorType* C = cloud->getPointColor(i);
 			FbxColor col(	static_cast<double>(C[0])/MAX_COLOR_COMP,
 							static_cast<double>(C[1])/MAX_COLOR_COMP,
-							static_cast<double>(C[2])/MAX_COLOR_COMP,
-							1.0 );
-			lGeometryElementVertexColor->GetDirectArray().Add(col);
+							static_cast<double>(C[2])/MAX_COLOR_COMP );
+			lGeometryElementVertexColor->GetDirectArray().SetAt(i,col);
 		}
 
 		if (!hasMaterial)
@@ -485,8 +487,40 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename)
 		}
 	}
 
+	int fileFormat = -1;
+
+	//Display a combox box to let the user choose the export file format
+	{
+		FbxManager* pSdkManager = FbxManager::GetDefaultManager();
+		int lFormatCount = pSdkManager ? pSdkManager->GetIOPluginRegistry()->GetWriterFormatCount() : 0;
+
+		if (lFormatCount > 0)
+		{
+			try
+			{
+				QMessageBox msgBox(QMessageBox::Question,"FBX format","Choose output format:");
+				QMap<QAbstractButton*,int> buttons;
+				for (int lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
+				{
+					if (pSdkManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
+					{
+						FbxString lDesc = pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
+						QPushButton *button = msgBox.addButton(lDesc.Buffer(), QMessageBox::AcceptRole);
+						buttons[button] = lFormatIndex;
+					}
+				}
+				msgBox.exec();
+				//get the right format
+				fileFormat = buttons[msgBox.clickedButton()];
+			}
+			catch(...)
+			{
+			}
+		}
+	}
+
 	// Save the scene.
-	bool lResult = SaveScene(lSdkManager, lScene, qPrintable(filename));
+	bool lResult = SaveScene(lSdkManager, lScene, qPrintable(filename),fileFormat);
 
 	// Destroy all objects created by the FBX SDK.
 	if( lSdkManager )

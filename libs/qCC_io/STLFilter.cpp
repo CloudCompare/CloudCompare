@@ -24,7 +24,6 @@
 #include <QString>
 #include <QMessageBox>
 #include <QPushButton>
-#include <QMessageBox>
 #include <QProgressDialog>
 
 //qCC_db
@@ -47,7 +46,7 @@ CC_FILE_ERROR STLFilter::saveToFile(ccHObject* entity, QString filename)
 		return CC_FERR_BAD_ENTITY_TYPE;
 
 	ccGenericMesh* mesh = ccHObjectCaster::ToGenericMesh(entity);
-	if (mesh->size()==0)
+	if (mesh->size() == 0)
 	{
 		ccLog::Warning(QString("[STL] No facet in mesh '%1'!").arg(mesh->getName()));
 		return CC_FERR_NO_ERROR;

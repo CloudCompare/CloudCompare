@@ -476,7 +476,7 @@ bool SaveScan(ccPointCloud* cloud, e57::StructureNode& scanNode, e57::ImageFile&
 
 	//progress bar
 	ccProgressDialog pdlg(true);
-	CCLib::NormalizedProgress nprogress(&pdlg,(unsigned)ceil((double)pointCount/(double)nSize));
+	CCLib::NormalizedProgress nprogress(&pdlg,static_cast<unsigned>(ceil(static_cast<double>(pointCount)/nSize)));
 	pdlg.setMethodTitle("Write E57 file");
 	pdlg.setInfo(qPrintable(QString("Scan #%1 - %2 points").arg(s_absoluteScanIndex).arg(pointCount)));
 	pdlg.start();
@@ -620,8 +620,8 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	//	cameraRepresentation.set("focalLength", e57::FloatNode(imf, calibImage->getFocal()));
 	//	cameraRepresentation.set("pixelHeight", e57::FloatNode(imf, image2DHeader.pinholeRepresentation.pixelHeight));
 	//	cameraRepresentation.set("pixelWidth", e57::FloatNode(imf, image2DHeader.pinholeRepresentation.pixelWidth));
-	//	cameraRepresentation.set("principalPointX", e57::FloatNode(imf, (double)image->getW()/2.0));
-	//	cameraRepresentation.set("principalPointY", e57::FloatNode(imf, (double)image->getH()/2.0));
+	//	cameraRepresentation.set("principalPointX", e57::FloatNode(imf, static_cast<double>(image->getW())/2.0));
+	//	cameraRepresentation.set("principalPointY", e57::FloatNode(imf, static_cast<double>(image->getH())/2.0));
 	//}
 	//else //standard image (TODO: handle cylindrical and spherical cameras!)
 	//{
@@ -994,8 +994,8 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			double offset = e57::ScaledIntegerNode(proto.get("cartesianX")).offset();
 			int64_t minimum = e57::ScaledIntegerNode(proto.get("cartesianX")).minimum();
 			int64_t maximum = e57::ScaledIntegerNode(proto.get("cartesianX")).maximum();
-			header.pointFields.pointRangeMinimum = (double)minimum * scale + offset;	
-			header.pointFields.pointRangeMaximum = (double)maximum * scale + offset;
+			header.pointFields.pointRangeMinimum = minimum * scale + offset;	
+			header.pointFields.pointRangeMaximum = maximum * scale + offset;
 			header.pointFields.pointRangeScaledInteger = scale;
 
 		}
@@ -1013,8 +1013,8 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			double offset = e57::ScaledIntegerNode(proto.get("sphericalRange")).offset();
 			int64_t minimum = e57::ScaledIntegerNode(proto.get("sphericalRange")).minimum();
 			int64_t maximum = e57::ScaledIntegerNode(proto.get("sphericalRange")).maximum();
-			header.pointFields.pointRangeMinimum = (double)minimum * scale + offset;	
-			header.pointFields.pointRangeMaximum = (double)maximum * scale + offset;
+			header.pointFields.pointRangeMinimum = minimum * scale + offset;	
+			header.pointFields.pointRangeMaximum = maximum * scale + offset;
 			header.pointFields.pointRangeScaledInteger = scale;
 
 		}
@@ -1042,8 +1042,8 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			double offset = e57::ScaledIntegerNode(proto.get("sphericalAzimuth")).offset();
 			int64_t minimum = e57::ScaledIntegerNode(proto.get("sphericalAzimuth")).minimum();
 			int64_t maximum = e57::ScaledIntegerNode(proto.get("sphericalAzimuth")).maximum();
-			header.pointFields.angleMinimum = (double)minimum * scale + offset;	
-			header.pointFields.angleMaximum = (double)maximum * scale + offset;
+			header.pointFields.angleMinimum = minimum * scale + offset;	
+			header.pointFields.angleMaximum = maximum * scale + offset;
 			header.pointFields.angleScaledInteger = scale;
 
 		}
@@ -1084,8 +1084,8 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			double offset = e57::ScaledIntegerNode(proto.get("nor:normalX")).offset();
 			int64_t minimum = e57::ScaledIntegerNode(proto.get("nor:normalX")).minimum();
 			int64_t maximum = e57::ScaledIntegerNode(proto.get("nor:normalX")).maximum();
-			header.pointFields.normRangeMinimum = (double)minimum * scale + offset;	
-			header.pointFields.normRangeMaximum = (double)maximum * scale + offset;
+			header.pointFields.normRangeMinimum = minimum * scale + offset;	
+			header.pointFields.normRangeMaximum = maximum * scale + offset;
 			header.pointFields.normRangeScaledInteger = scale;
 
 		}
@@ -1103,9 +1103,9 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 	if(proto.isDefined("timeStamp"))
 	{
 		if( proto.get("timeStamp").type() == e57::E57_INTEGER)
-			header.pointFields.timeMaximum = (double)e57::IntegerNode(proto.get("timeStamp")).maximum();
+			header.pointFields.timeMaximum = static_cast<double>(e57::IntegerNode(proto.get("timeStamp")).maximum());
 		else if( proto.get("timeStamp").type() == e57::E57_FLOAT)
-			header.pointFields.timeMaximum = (double)e57::FloatNode(proto.get("timeStamp")).maximum();
+			header.pointFields.timeMaximum = static_cast<double>(e57::FloatNode(proto.get("timeStamp")).maximum());
 	}
 
 	header.pointFields.intensityField = proto.isDefined("intensity");
@@ -1120,8 +1120,8 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 		e57::StructureNode intbox(scan.get("intensityLimits"));
 		if( intbox.get("intensityMaximum").type() == e57::E57_SCALED_INTEGER )
 		{
-			header.intensityLimits.intensityMaximum = (double)e57::ScaledIntegerNode(intbox.get("intensityMaximum")).scaledValue();
-			header.intensityLimits.intensityMinimum = (double)e57::ScaledIntegerNode(intbox.get("intensityMinimum")).scaledValue();
+			header.intensityLimits.intensityMaximum = e57::ScaledIntegerNode(intbox.get("intensityMaximum")).scaledValue();
+			header.intensityLimits.intensityMinimum = e57::ScaledIntegerNode(intbox.get("intensityMinimum")).scaledValue();
 		}
 		else if( intbox.get("intensityMaximum").type() == e57::E57_FLOAT )
 		{
@@ -1130,8 +1130,8 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 		}
 		else if( intbox.get("intensityMaximum").type() == e57::E57_INTEGER)
 		{
-			header.intensityLimits.intensityMaximum = (double)e57::IntegerNode(intbox.get("intensityMaximum")).value();
-			header.intensityLimits.intensityMinimum = (double)e57::IntegerNode(intbox.get("intensityMinimum")).value();
+			header.intensityLimits.intensityMaximum = static_cast<double>(e57::IntegerNode(intbox.get("intensityMaximum")).value());
+			header.intensityLimits.intensityMinimum = static_cast<double>(e57::IntegerNode(intbox.get("intensityMinimum")).value());
 		}
 	}
 	
@@ -1141,8 +1141,8 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 		{
 			if(header.intensityLimits.intensityMaximum == 0.)
 			{
-				header.intensityLimits.intensityMinimum = (double)e57::IntegerNode(proto.get("intensity")).minimum();
-				header.intensityLimits.intensityMaximum = (double)e57::IntegerNode(proto.get("intensity")).maximum();
+				header.intensityLimits.intensityMinimum = static_cast<double>(e57::IntegerNode(proto.get("intensity")).minimum());
+				header.intensityLimits.intensityMaximum = static_cast<double>(e57::IntegerNode(proto.get("intensity")).maximum());
 			}
 			header.pointFields.intensityScaledInteger = -1.;
 
@@ -1155,8 +1155,8 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			{
 				int64_t minimum = e57::ScaledIntegerNode(proto.get("intensity")).minimum();
 				int64_t maximum = e57::ScaledIntegerNode(proto.get("intensity")).maximum();
-				header.intensityLimits.intensityMinimum = (double)minimum * scale + offset;	
-				header.intensityLimits.intensityMaximum = (double)maximum * scale + offset;
+				header.intensityLimits.intensityMinimum = minimum * scale + offset;	
+				header.intensityLimits.intensityMaximum = maximum * scale + offset;
 			}
 			header.pointFields.intensityScaledInteger = scale;
 		}
@@ -1187,30 +1187,30 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 		e57::StructureNode colorbox(scan.get("colorLimits"));
 		if( colorbox.get("colorRedMaximum").type() == e57::E57_SCALED_INTEGER )
 		{
-			header.colorLimits.colorRedMaximum = (double) e57::ScaledIntegerNode(colorbox.get("colorRedMaximum")).scaledValue();
-			header.colorLimits.colorRedMinimum = (double) e57::ScaledIntegerNode(colorbox.get("colorRedMinimum")).scaledValue();
-			header.colorLimits.colorGreenMaximum = (double) e57::ScaledIntegerNode(colorbox.get("colorGreenMaximum")).scaledValue();
-			header.colorLimits.colorGreenMinimum = (double) e57::ScaledIntegerNode(colorbox.get("colorGreenMinimum")).scaledValue();
-			header.colorLimits.colorBlueMaximum = (double) e57::ScaledIntegerNode(colorbox.get("colorBlueMaximum")).scaledValue();
-			header.colorLimits.colorBlueMinimum = (double) e57::ScaledIntegerNode(colorbox.get("colorBlueMinimum")).scaledValue();
+			header.colorLimits.colorRedMaximum   = e57::ScaledIntegerNode(colorbox.get("colorRedMaximum")  ).scaledValue();
+			header.colorLimits.colorRedMinimum   = e57::ScaledIntegerNode(colorbox.get("colorRedMinimum")  ).scaledValue();
+			header.colorLimits.colorGreenMaximum = e57::ScaledIntegerNode(colorbox.get("colorGreenMaximum")).scaledValue();
+			header.colorLimits.colorGreenMinimum = e57::ScaledIntegerNode(colorbox.get("colorGreenMinimum")).scaledValue();
+			header.colorLimits.colorBlueMaximum  = e57::ScaledIntegerNode(colorbox.get("colorBlueMaximum") ).scaledValue();
+			header.colorLimits.colorBlueMinimum  = e57::ScaledIntegerNode(colorbox.get("colorBlueMinimum") ).scaledValue();
 		}
 		else if( colorbox.get("colorRedMaximum").type() == e57::E57_FLOAT )
 		{
-			header.colorLimits.colorRedMaximum = e57::FloatNode(colorbox.get("colorRedMaximum")).value();
-			header.colorLimits.colorRedMinimum = e57::FloatNode(colorbox.get("colorRedMinimum")).value();
+			header.colorLimits.colorRedMaximum =   e57::FloatNode(colorbox.get("colorRedMaximum")  ).value();
+			header.colorLimits.colorRedMinimum =   e57::FloatNode(colorbox.get("colorRedMinimum")  ).value();
 			header.colorLimits.colorGreenMaximum = e57::FloatNode(colorbox.get("colorGreenMaximum")).value();
 			header.colorLimits.colorGreenMinimum = e57::FloatNode(colorbox.get("colorGreenMinimum")).value();
-			header.colorLimits.colorBlueMaximum = e57::FloatNode(colorbox.get("colorBlueMaximum")).value();
-			header.colorLimits.colorBlueMinimum = e57::FloatNode(colorbox.get("colorBlueMinimum")).value();
+			header.colorLimits.colorBlueMaximum =  e57::FloatNode(colorbox.get("colorBlueMaximum") ).value();
+			header.colorLimits.colorBlueMinimum =  e57::FloatNode(colorbox.get("colorBlueMinimum") ).value();
 		}
 		else if( colorbox.get("colorRedMaximum").type() == e57::E57_INTEGER)
 		{
-			header.colorLimits.colorRedMaximum = (double) e57::IntegerNode(colorbox.get("colorRedMaximum")).value();
-			header.colorLimits.colorRedMinimum = (double) e57::IntegerNode(colorbox.get("colorRedMinimum")).value();
-			header.colorLimits.colorGreenMaximum = (double) e57::IntegerNode(colorbox.get("colorGreenMaximum")).value();
-			header.colorLimits.colorGreenMinimum = (double) e57::IntegerNode(colorbox.get("colorGreenMinimum")).value();
-			header.colorLimits.colorBlueMaximum = (double) e57::IntegerNode(colorbox.get("colorBlueMaximum")).value();
-			header.colorLimits.colorBlueMinimum = (double) e57::IntegerNode(colorbox.get("colorBlueMinimum")).value();
+			header.colorLimits.colorRedMaximum =   static_cast<double>(e57::IntegerNode(colorbox.get("colorRedMaximum")  ).value());
+			header.colorLimits.colorRedMinimum =   static_cast<double>(e57::IntegerNode(colorbox.get("colorRedMinimum")  ).value());
+			header.colorLimits.colorGreenMaximum = static_cast<double>(e57::IntegerNode(colorbox.get("colorGreenMaximum")).value());
+			header.colorLimits.colorGreenMinimum = static_cast<double>(e57::IntegerNode(colorbox.get("colorGreenMinimum")).value());
+			header.colorLimits.colorBlueMaximum =  static_cast<double>(e57::IntegerNode(colorbox.get("colorBlueMaximum") ).value());
+			header.colorLimits.colorBlueMinimum =  static_cast<double>(e57::IntegerNode(colorbox.get("colorBlueMinimum") ).value());
 		}
 	}
 
@@ -1218,13 +1218,13 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 	{
 		if(proto.get("colorRed").type() == e57::E57_INTEGER)
 		{
-			header.colorLimits.colorRedMinimum = (double)e57::IntegerNode(proto.get("colorRed")).minimum();
-			header.colorLimits.colorRedMaximum = (double)e57::IntegerNode(proto.get("colorRed")).maximum();
+			header.colorLimits.colorRedMinimum = static_cast<double>(e57::IntegerNode(proto.get("colorRed")).minimum());
+			header.colorLimits.colorRedMaximum = static_cast<double>(e57::IntegerNode(proto.get("colorRed")).maximum());
 		}
 		else if(proto.get("colorRed").type() == e57::E57_FLOAT)
 		{
-			header.colorLimits.colorRedMinimum = (double)e57::FloatNode(proto.get("colorRed")).minimum();
-			header.colorLimits.colorRedMaximum = (double)e57::FloatNode(proto.get("colorRed")).maximum();
+			header.colorLimits.colorRedMinimum = e57::FloatNode(proto.get("colorRed")).minimum();
+			header.colorLimits.colorRedMaximum = e57::FloatNode(proto.get("colorRed")).maximum();
 		}
 		else if(proto.get("colorRed").type() == e57::E57_SCALED_INTEGER)
 		{
@@ -1232,8 +1232,8 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			double offset = e57::ScaledIntegerNode(proto.get("colorRed")).offset();
 			int64_t minimum = e57::ScaledIntegerNode(proto.get("colorRed")).minimum();
 			int64_t maximum = e57::ScaledIntegerNode(proto.get("colorRed")).maximum();
-			header.colorLimits.colorRedMinimum = (double)minimum * scale + offset;	
-			header.colorLimits.colorRedMaximum = (double)maximum * scale + offset;
+			header.colorLimits.colorRedMinimum = minimum * scale + offset;	
+			header.colorLimits.colorRedMaximum = maximum * scale + offset;
 		}
 	}
 
@@ -1241,13 +1241,13 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 	{
 		if(proto.get("colorGreen").type() == e57::E57_INTEGER)
 		{
-			header.colorLimits.colorGreenMinimum = (double)e57::IntegerNode(proto.get("colorGreen")).minimum();
-			header.colorLimits.colorGreenMaximum = (double)e57::IntegerNode(proto.get("colorGreen")).maximum();
+			header.colorLimits.colorGreenMinimum = static_cast<double>(e57::IntegerNode(proto.get("colorGreen")).minimum());
+			header.colorLimits.colorGreenMaximum = static_cast<double>(e57::IntegerNode(proto.get("colorGreen")).maximum());
 		}
 		else if(proto.get("colorGreen").type() == e57::E57_FLOAT)
 		{
-			header.colorLimits.colorGreenMinimum = (double)e57::FloatNode(proto.get("colorGreen")).minimum();
-			header.colorLimits.colorGreenMaximum = (double)e57::FloatNode(proto.get("colorGreen")).maximum();
+			header.colorLimits.colorGreenMinimum = e57::FloatNode(proto.get("colorGreen")).minimum();
+			header.colorLimits.colorGreenMaximum = e57::FloatNode(proto.get("colorGreen")).maximum();
 		}
 		else if(proto.get("colorGreen").type() == e57::E57_SCALED_INTEGER)
 		{
@@ -1255,21 +1255,21 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			double offset = e57::ScaledIntegerNode(proto.get("colorGreen")).offset();
 			int64_t minimum = e57::ScaledIntegerNode(proto.get("colorGreen")).minimum();
 			int64_t maximum = e57::ScaledIntegerNode(proto.get("colorGreen")).maximum();
-			header.colorLimits.colorGreenMinimum = (double)minimum * scale + offset;	
-			header.colorLimits.colorGreenMaximum = (double)maximum * scale + offset;
+			header.colorLimits.colorGreenMinimum = minimum * scale + offset;	
+			header.colorLimits.colorGreenMaximum = maximum * scale + offset;
 		}
 	}
 	if((header.colorLimits.colorBlueMaximum == 0.) && proto.isDefined("colorBlue"))
 	{
 		if( proto.get("colorBlue").type() == e57::E57_INTEGER)
 		{
-			header.colorLimits.colorBlueMinimum = (double)e57::IntegerNode(proto.get("colorBlue")).minimum();
-			header.colorLimits.colorBlueMaximum = (double)e57::IntegerNode(proto.get("colorBlue")).maximum();
+			header.colorLimits.colorBlueMinimum = static_cast<double>(e57::IntegerNode(proto.get("colorBlue")).minimum());
+			header.colorLimits.colorBlueMaximum = static_cast<double>(e57::IntegerNode(proto.get("colorBlue")).maximum());
 		}
 		else if( proto.get("colorBlue").type() == e57::E57_FLOAT)
 		{
-			header.colorLimits.colorBlueMinimum = (double)e57::FloatNode(proto.get("colorBlue")).minimum();
-			header.colorLimits.colorBlueMaximum = (double)e57::FloatNode(proto.get("colorBlue")).maximum();
+			header.colorLimits.colorBlueMinimum = e57::FloatNode(proto.get("colorBlue")).minimum();
+			header.colorLimits.colorBlueMaximum = e57::FloatNode(proto.get("colorBlue")).maximum();
 		}
 		else if(proto.get("colorBlue").type() == e57::E57_SCALED_INTEGER)
 		{
@@ -1277,8 +1277,8 @@ bool DecodePrototype(e57::StructureNode& scan, e57::StructureNode& proto, E57Sca
 			double offset = e57::ScaledIntegerNode(proto.get("colorBlue")).offset();
 			int64_t minimum = e57::ScaledIntegerNode(proto.get("colorBlue")).minimum();
 			int64_t maximum = e57::ScaledIntegerNode(proto.get("colorBlue")).maximum();
-			header.colorLimits.colorRedMinimum = (double)minimum * scale + offset;	
-			header.colorLimits.colorRedMaximum = (double)maximum * scale + offset;
+			header.colorLimits.colorRedMinimum = minimum * scale + offset;	
+			header.colorLimits.colorRedMaximum = maximum * scale + offset;
 		}
 	}
 	return true;
@@ -1998,7 +1998,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 			if (validPoseMat)
 				calibImage->setCameraMatrix(poseMat);
 
-			double dx = pinhole->pixelWidth * (double)pinhole->imageWidth;
+			double dx = pinhole->pixelWidth * static_cast<double>(pinhole->imageWidth);
 			double f = pinhole->focalLength;
 			double fov_x = 2.0*atan(dx/(2.0*f)); //FIXME: we only take x into account! (we hope it's okay)
 			calibImage->setFov(static_cast<float>(fov_x*180.0/M_PI));

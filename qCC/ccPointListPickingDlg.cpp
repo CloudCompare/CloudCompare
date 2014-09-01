@@ -198,7 +198,7 @@ void ccPointListPickingDlg::exportToNewCloud()
 		{
 			ccLog::Error("Couldn't export picked points as point cloud: not enough memory!");
 			delete cloud;
-			cloud=0;
+			cloud = 0;
 		}
 	}
 	else
@@ -421,9 +421,9 @@ void ccPointListPickingDlg::exportToASCII(ExportFormat format)
 		if (format == PLP_ASCII_EXPORT_IXYZ)
 			fprintf(fp,"%i,",i+startIndex);
 
-		fprintf(fp,"%f,%f,%f\n",static_cast<double>(P->x)*scale + shift.x,
-								static_cast<double>(P->y)*scale + shift.y,
-								static_cast<double>(P->z)*scale + shift.z);
+		fprintf(fp,"%.12f,%.12f,%.12f\n",	static_cast<double>(P->x)/scale - shift.x,
+											static_cast<double>(P->y)/scale - shift.y,
+											static_cast<double>(P->z)/scale - shift.z);
 	}
 
 	fclose(fp);

@@ -65,6 +65,16 @@ void AsciiSaveDlg::enableSavePointCountHeader(bool state)
 	m_ui->pointCountHeaderCheckBox->setChecked(state);
 }
 
+void AsciiSaveDlg::setSaveFloatColors(bool state)
+{
+	m_ui->saveFloatColorsCheckBox->setChecked(state);
+}
+
+bool AsciiSaveDlg::saveFloatColors() const
+{
+	return m_ui->saveFloatColorsCheckBox->isChecked();
+}
+
 uchar AsciiSaveDlg::getSeparator() const
 {
 	switch(m_ui->separatorComboBox->currentIndex())
@@ -131,6 +141,7 @@ void AsciiSaveDlg::initFromPersistentSettings()
 	int sfPrecision			= settings.value("sfPrecision", m_ui->sfPrecisionSpinBox->value()).toInt();
 	int separatorIndex		= settings.value("separator", m_ui->separatorComboBox->currentIndex()).toInt();
 	int orderIndex			= settings.value("saveOrder", m_ui->orderComboBox->currentIndex()).toInt();
+	bool saveFloatColors	= settings.value("saveFloatColors", m_ui->saveFloatColorsCheckBox->isChecked()).toBool();
 
 	//apply parameters
 	m_ui->columnsHeaderCheckBox->setChecked(saveColHeader);
@@ -139,6 +150,7 @@ void AsciiSaveDlg::initFromPersistentSettings()
 	m_ui->sfPrecisionSpinBox->setValue(sfPrecision);
 	m_ui->separatorComboBox->setCurrentIndex(separatorIndex);
 	m_ui->orderComboBox->setCurrentIndex(orderIndex);
+	m_ui->saveFloatColorsCheckBox->setChecked(saveFloatColors);
 
 	settings.endGroup();
 }
@@ -155,6 +167,7 @@ void AsciiSaveDlg::acceptAndSaveSettings()
 	settings.setValue("sfPrecision", m_ui->sfPrecisionSpinBox->value());
 	settings.setValue("separator", m_ui->separatorComboBox->currentIndex());
 	settings.setValue("saveOrder", m_ui->orderComboBox->currentIndex());
+	settings.setValue("saveFloatColors", m_ui->saveFloatColorsCheckBox->isChecked());
 
 	settings.endGroup();
 }

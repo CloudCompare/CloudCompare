@@ -37,25 +37,31 @@ enum CC_ASCII_OPEN_DLG_TYPES {	ASCII_OPEN_DLG_None			= 0,
 								ASCII_OPEN_DLG_R			= 7,
 								ASCII_OPEN_DLG_G			= 8,
 								ASCII_OPEN_DLG_B			= 9,
-								ASCII_OPEN_DLG_Grey			= 10,
-								ASCII_OPEN_DLG_Scalar		= 11,
-								ASCII_OPEN_DLG_RGB32i		= 12, //RGBA as a single 32 bits integer (PCL style)
-								ASCII_OPEN_DLG_RGB32f		= 13, //RGBA as a single 32 bits float (PCL style)
+								ASCII_OPEN_DLG_Rf			= 10,
+								ASCII_OPEN_DLG_Gf			= 11,
+								ASCII_OPEN_DLG_Bf			= 12,
+								ASCII_OPEN_DLG_Grey			= 13,
+								ASCII_OPEN_DLG_Scalar		= 14,
+								ASCII_OPEN_DLG_RGB32i		= 15, //RGBA as a single 32 bits integer (PCL style)
+								ASCII_OPEN_DLG_RGB32f		= 16, //RGBA as a single 32 bits float (PCL style)
 };
 
 //! Default ASCII header columns
 class AsciiHeaderColumns
 {
 public:
-	static QString X()  { return "X"; }
-	static QString Y()  { return "Y"; }
-	static QString Z()  { return "Z"; }
+	static QString X()  { return "X";  }
+	static QString Y()  { return "Y";  }
+	static QString Z()  { return "Z";  }
 	static QString Nx() { return "Nx"; }
 	static QString Ny() { return "Ny"; }
 	static QString Nz() { return "Nz"; }
-	static QString R()  { return "R"; }
-	static QString G()  { return "G"; }
-	static QString B()  { return "B"; }
+	static QString R()  { return "R";  }
+	static QString G()  { return "G";  }
+	static QString B()  { return "B";  }
+	static QString Rf() { return "Rf"; }
+	static QString Gf() { return "Gf"; }
+	static QString Bf() { return "Bf"; }
 
 	static QString Grey()   { return "Intensity"; }
 	static QString Scalar() { return "SF"; }
@@ -63,7 +69,7 @@ public:
 	static QString RGB32f() { return "RGB32f"; }
 };
 
-const unsigned ASCII_OPEN_DLG_TYPES_NUMBER = 14;
+const unsigned ASCII_OPEN_DLG_TYPES_NUMBER = 17;
 const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_NUMBER][24] = {	"Ignore",
 																			"coord. X",
 																			"coord. Y",
@@ -71,9 +77,12 @@ const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_NUMBER][24] = {	"Igno
 																			"Nx",
 																			"Ny",
 																			"Nz",
-																			"Red",
-																			"Green",
-																			"Blue",
+																			"Red (0-255)",
+																			"Green (0-255)",
+																			"Blue (0-255)",
+																			"Red.float (0-1)",
+																			"Green.float (0-1)",
+																			"Blue.float (0-1)",
 																			"Grey",
 																			"Scalar",
 																			"RGBAi",

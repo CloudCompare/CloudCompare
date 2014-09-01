@@ -143,7 +143,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 		for (unsigned i=0; i<ccCloud->getNumberOfScalarFields(); ++i)
 			theScalarFields.push_back(ccCloud->getScalarField(i));
 	}
-	bool writeSF = (theScalarFields.size()!=0);
+	bool writeSF = (theScalarFields.size() != 0);
 
 	//progress dialog
 	ccProgressDialog pdlg(true);
@@ -162,24 +162,25 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 	bool savePointCountHeader = saveDialog->savePointCountHeader();
 	bool swapColorAndSFs = saveDialog->swapColorAndSF();
 	QChar separator(saveDialog->getSeparator());
+	bool saveFloatColors = saveDialog->saveFloatColors();
 
 	if (saveColumnsHeader)
 	{
 		QString header("//");
-		header.append("X");
+		header.append(AsciiHeaderColumns::X());
 		header.append(separator);
-		header.append("Y");
+		header.append(AsciiHeaderColumns::Y());
 		header.append(separator);
-		header.append("Z");
+		header.append(AsciiHeaderColumns::Z());
 
 		if (writeColors && !swapColorAndSFs)
 		{
 			header.append(separator);
-			header.append("R");
+			header.append(saveFloatColors ? AsciiHeaderColumns::Rf() : AsciiHeaderColumns::R());
 			header.append(separator);
-			header.append("G");
+			header.append(saveFloatColors ? AsciiHeaderColumns::Gf() : AsciiHeaderColumns::G());
 			header.append(separator);
-			header.append("B");
+			header.append(saveFloatColors ? AsciiHeaderColumns::Bf() : AsciiHeaderColumns::B());
 		}
 
 		if (writeSF)
@@ -197,21 +198,21 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 		if (writeColors && swapColorAndSFs)
 		{
 			header.append(separator);
-			header.append("R");
+			header.append(saveFloatColors ? AsciiHeaderColumns::Rf() : AsciiHeaderColumns::R());
 			header.append(separator);
-			header.append("G");
+			header.append(saveFloatColors ? AsciiHeaderColumns::Gf() : AsciiHeaderColumns::G());
 			header.append(separator);
-			header.append("B");
+			header.append(saveFloatColors ? AsciiHeaderColumns::Bf() : AsciiHeaderColumns::B());
 		}
 
 		if (writeNorms)
 		{
 			header.append(separator);
-			header.append("Nx");
+			header.append(AsciiHeaderColumns::Nx());
 			header.append(separator);
-			header.append("Ny");
+			header.append(AsciiHeaderColumns::Ny());
 			header.append(separator);
-			header.append("Nz");
+			header.append(AsciiHeaderColumns::Nz());
 		}
 		
 		stream << header << "\n";
@@ -237,20 +238,32 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 		line.append(separator);
 		line.append(QString::number(Pglobal.z,'f',s_coordPrecision));
 
-		QString color;
+		QString colorLine;
 		if (writeColors)
 		{
 			//add rgb color
 			const colorType* col = cloud->getPointColor(i);
-			color.append(separator);
-			color.append(QString::number(col[0]));
-			color.append(separator);
-			color.append(QString::number(col[1]));
-			color.append(separator);
-			color.append(QString::number(col[2]));
+			if (saveFloatColors)
+			{
+				colorLine.append(separator);
+				colorLine.append(QString::number(static_cast<double>(col[0])/MAX_COLOR_COMP));
+				colorLine.append(separator);
+				colorLine.append(QString::number(static_cast<double>(col[1])/MAX_COLOR_COMP));
+				colorLine.append(separator);
+				colorLine.append(QString::number(static_cast<double>(col[2])/MAX_COLOR_COMP));
+			}
+			else
+			{
+				colorLine.append(separator);
+				colorLine.append(QString::number(col[0]));
+				colorLine.append(separator);
+				colorLine.append(QString::number(col[1]));
+				colorLine.append(separator);
+				colorLine.append(QString::number(col[2]));
+			}
 
 			if (!swapColorAndSFs)
-				line.append(color);
+				line.append(colorLine);
 		}
 
 		if (writeSF)
@@ -264,7 +277,7 @@ CC_FILE_ERROR AsciiFilter::saveToFile(ccHObject* entity, QString filename)
 		}
 
 		if (writeColors && swapColorAndSFs)
-			line.append(color);
+			line.append(colorLine);
 
 		if (writeNorms)
 		{
@@ -366,6 +379,7 @@ struct cloudAttributesDescriptor
 	std::vector<CCLib::ScalarField*> scalarFields;
 	bool hasNorms;
 	bool hasRGBColors;
+	bool hasFloatRGBColors[3];
 
 	cloudAttributesDescriptor()
 	{
@@ -379,6 +393,8 @@ struct cloudAttributesDescriptor
 			indexes[i] = -1;
 		hasNorms = false;
 		hasRGBColors = false;
+		hasFloatRGBColors[0] = hasFloatRGBColors[1] = hasFloatRGBColors[2] = false;
+		
 		scalarIndexes.clear();
 		scalarFields.clear();
 	};
@@ -445,7 +461,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 			if (cloud->reserveTheNormsTable())
 			{
 				cloudDesc.xNormIndex = i;
-				cloudDesc.hasNorms=true;
+				cloudDesc.hasNorms = true;
 				cloud->showNormals(true);
 			}
 			else
@@ -457,7 +473,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 			if (cloud->reserveTheNormsTable())
 			{
 				cloudDesc.yNormIndex = i;
-				cloudDesc.hasNorms=true;
+				cloudDesc.hasNorms = true;
 				cloud->showNormals(true);
 			}
 			else
@@ -469,7 +485,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 			if (cloud->reserveTheNormsTable())
 			{
 				cloudDesc.zNormIndex = i;
-				cloudDesc.hasNorms=true;
+				cloudDesc.hasNorms = true;
 				cloud->showNormals(true);
 			}
 			else
@@ -505,11 +521,13 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 				sf->release();
 			}
 			break;
+		case ASCII_OPEN_DLG_Rf:
+			cloudDesc.hasFloatRGBColors[0] = true;
 		case ASCII_OPEN_DLG_R:
 			if (cloud->reserveTheRGBTable())
 			{
 				cloudDesc.redIndex = i;
-				cloudDesc.hasRGBColors=true;
+				cloudDesc.hasRGBColors = true;
 				cloud->showColors(true);
 			}
 			else
@@ -517,11 +535,13 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 				ccLog::Warning("Failed to allocate memory for colors! (skipped)");
 			}
 			break;
+		case ASCII_OPEN_DLG_Gf:
+			cloudDesc.hasFloatRGBColors[1] = true;
 		case ASCII_OPEN_DLG_G:
 			if (cloud->reserveTheRGBTable())
 			{
 				cloudDesc.greenIndex = i;
-				cloudDesc.hasRGBColors=true;
+				cloudDesc.hasRGBColors = true;
 				cloud->showColors(true);
 			}
 			else
@@ -529,11 +549,13 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 				ccLog::Warning("Failed to allocate memory for colors! (skipped)");
 			}
 			break;
+		case ASCII_OPEN_DLG_Bf:
+			cloudDesc.hasFloatRGBColors[2] = true;
 		case ASCII_OPEN_DLG_B:
 			if (cloud->reserveTheRGBTable())
 			{
 				cloudDesc.blueIndex = i;
-				cloudDesc.hasRGBColors=true;
+				cloudDesc.hasRGBColors = true;
 				cloud->showColors(true);
 			}
 			else
@@ -549,7 +571,7 @@ cloudAttributesDescriptor prepareCloud(	const AsciiOpenDlg::Sequence &openSequen
 					cloudDesc.iRgbaIndex = i;
 				else
 					cloudDesc.fRgbaIndex = i;
-				cloudDesc.hasRGBColors=true;
+				cloudDesc.hasRGBColors = true;
 				cloud->showColors(true);
 			}
 			else
@@ -790,11 +812,20 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 				else
 				{
 					if (cloudDesc.redIndex >= 0)
-						col[0] = static_cast<colorType>(parts[cloudDesc.redIndex].toFloat());
+					{
+						float multiplier = cloudDesc.hasFloatRGBColors[0] ? static_cast<float>(MAX_COLOR_COMP) : 1.0f;
+						col[0] = static_cast<colorType>(parts[cloudDesc.redIndex].toFloat() * multiplier);
+					}
 					if (cloudDesc.greenIndex >= 0)
-						col[1] = static_cast<colorType>(parts[cloudDesc.greenIndex].toFloat());
+					{
+						float multiplier = cloudDesc.hasFloatRGBColors[1] ? static_cast<float>(MAX_COLOR_COMP) : 1.0f;
+						col[1] = static_cast<colorType>(parts[cloudDesc.greenIndex].toFloat() * multiplier);
+					}
 					if (cloudDesc.blueIndex >= 0)
-						col[2] = static_cast<colorType>(parts[cloudDesc.blueIndex].toFloat());
+					{
+						float multiplier = cloudDesc.hasFloatRGBColors[2] ? static_cast<float>(MAX_COLOR_COMP) : 1.0f;
+						col[2] = static_cast<colorType>(parts[cloudDesc.blueIndex].toFloat() * multiplier);
+					}
 				}
 				cloudDesc.cloud->addRGBColor(col);
 			}

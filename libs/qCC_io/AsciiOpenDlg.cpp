@@ -120,6 +120,9 @@ void AsciiOpenDlg::setSkippedLines(int linesCount)
 static bool CouldBeX (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::X().toUpper()); }
 static bool CouldBeY (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Y().toUpper()); }
 static bool CouldBeZ (const QString& colHeader) { return colHeader.startsWith(AsciiHeaderColumns::Z().toUpper()); }
+static bool CouldBeRf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Rf().toUpper(); }
+static bool CouldBeGf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Gf().toUpper(); }
+static bool CouldBeBf(const QString& colHeader) { return colHeader == AsciiHeaderColumns::Bf().toUpper(); }
 static bool CouldBeR (const QString& colHeader) { return colHeader == AsciiHeaderColumns::R().toUpper() || colHeader.contains("RED"); }
 static bool CouldBeG (const QString& colHeader) { return colHeader == AsciiHeaderColumns::G().toUpper() || colHeader.contains("GREEN"); }
 static bool CouldBeB (const QString& colHeader) { return colHeader == AsciiHeaderColumns::B().toUpper() || colHeader.contains("BLUE"); }
@@ -395,6 +398,9 @@ void AsciiOpenDlg::updateTable()
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_R,RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_G,RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_B,RGBIcon);
+				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Rf,RGBIcon);
+				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Gf,RGBIcon);
+				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Bf,RGBIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Grey,GreyIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_Scalar,ScalarIcon);
 				columnHeaderWidget->setItemIcon(ASCII_OPEN_DLG_RGB32i,RGBIcon);
@@ -473,6 +479,27 @@ void AsciiOpenDlg::updateTable()
 						//Z
 						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_Z);
 						assignedXYZFlags |= Z_BIT; //update bit field accordingly
+						m_columnsValidty[i] = true;
+					}
+					else if ( (assignedRGBFlags & X_BIT) == 0 && CouldBeRf(colHeader) )
+					{
+						//Red
+						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_Rf);
+						assignedRGBFlags |= X_BIT; //update bit field accordingly
+						m_columnsValidty[i] = true;
+					}
+					else if ( (assignedRGBFlags & Y_BIT) == 0 && CouldBeGf(colHeader) )
+					{
+						//Green
+						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_Gf);
+						assignedRGBFlags |= Y_BIT; //update bit field accordingly
+						m_columnsValidty[i] = true;
+					}
+					else if ( (assignedRGBFlags & Z_BIT) == 0 && CouldBeBf(colHeader) )
+					{
+						//Blue
+						columnHeaderWidget->setCurrentIndex(ASCII_OPEN_DLG_Bf);
+						assignedRGBFlags |= Z_BIT; //update bit field accordingly
 						m_columnsValidty[i] = true;
 					}
 					else if ( (assignedRGBFlags & X_BIT) == 0 && CouldBeR(colHeader) )
@@ -809,14 +836,17 @@ bool AsciiOpenDlg::safeSequence() const
 				return false;
 			break;
 		case ASCII_OPEN_DLG_R:
+		case ASCII_OPEN_DLG_Rf:
 			if (!CouldBeR(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_G:
+		case ASCII_OPEN_DLG_Gf:
 			if (!CouldBeG(colHeader))
 				return false;
 			break;
 		case ASCII_OPEN_DLG_B:
+		case ASCII_OPEN_DLG_Bf:
 			if (!CouldBeB(colHeader))
 				return false;
 			break;
@@ -869,9 +899,11 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 		//we found the right element
 		if (changedCombo == combo)
 		{
-			if (index == int(ASCII_OPEN_DLG_X) ||
+			if (index == int(ASCII_OPEN_DLG_X)  ||
 				index == int(ASCII_OPEN_DLG_NX) ||
-				index == int(ASCII_OPEN_DLG_R))
+				index == int(ASCII_OPEN_DLG_R)  ||
+				index == int(ASCII_OPEN_DLG_Rf)
+				)
 			{
 				//Auto select the next columns type
 				if (i+2<m_columnsCount)
@@ -899,6 +931,11 @@ void AsciiOpenDlg::columnsTypeHasChanged(int index)
 						{
 							nextCombo->setCurrentIndex(ASCII_OPEN_DLG_G);
 							nextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_B);
+						}
+						else if (index == int(ASCII_OPEN_DLG_Rf))
+						{
+							nextCombo->setCurrentIndex(ASCII_OPEN_DLG_Gf);
+							nextNextCombo->setCurrentIndex(ASCII_OPEN_DLG_Bf);
 						}
 					}
 

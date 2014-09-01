@@ -38,6 +38,9 @@ v2.5.6 ??/??/2014
 		- the triangles of the exported meshes (surface of revolution textured with the displacement map)
 			are now in the right order (right hand rule)
 		- memory leak fixed (when displaying a conical projection map)
+	* ASCII import/export:
+		- RGB colors can now be imported or exported as float values (between 0 and 1)
+			instead of unsigned bytes (0-255)
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized
 	* the 'Cancel' button of progress dialogs was invisible on the x64 version
@@ -45,7 +48,7 @@ v2.5.6 ??/??/2014
 	* qSRA: memory leak fixed (when displaying a conical projection map)
 	* the 'original' coordinates displayed in 2D labels (or in the console for picked points) was wrong
 		(global shift was applied in the opposite way).
-	* the 'original' coordinates were wrongly applied when exporting points picked with the
+	* the global shift/scale infos were wrongly applied when exporting points picked with the
 		'Point list picking' tool
 
 v2.5.5.2 21/06/2014

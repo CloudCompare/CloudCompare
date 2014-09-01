@@ -77,6 +77,11 @@ public:
 	//! Returns whether this dialog automatically appears or not
 	bool autoShow() const { return m_autoShow; }
 
+	//! Sets whether to save colors as float values (instead of unsigned bytes)
+	void setSaveFloatColors(bool state);
+	//! Returns whether to save colors as float values (instead of unsigned bytes)
+	bool saveFloatColors() const;
+
 protected slots:
 
 	//! Saves dialog state to persistent settings

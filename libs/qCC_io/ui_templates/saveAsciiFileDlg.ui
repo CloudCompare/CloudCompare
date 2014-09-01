@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>276</width>
-    <height>226</height>
+    <height>249</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -125,6 +125,16 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="saveFloatColorsCheckBox">
+     <property name="toolTip">
+      <string>Save RGB color components as floats values between 0 and 1</string>
+     </property>
+     <property name="text">
+      <string>Save colors as float values (0-1)</string>
+     </property>
     </widget>
    </item>
    <item>

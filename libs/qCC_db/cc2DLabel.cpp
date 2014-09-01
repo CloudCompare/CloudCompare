@@ -319,8 +319,7 @@ void AddPointCoordinates(QStringList& body, unsigned pointIndex, ccGenericPointC
 {
 	assert(cloud);
 	const CCVector3* P = cloud->getPointPersistentPtr(pointIndex);
-	const CCVector3d& shift = cloud->getGlobalShift();
-	bool isShifted = (shift.norm2() != 0);
+	bool isShifted = cloud->isShifted();
 
 	QString coordStr = QString("P#%0:").arg(pointIndex);
 	if (isShifted)
@@ -334,7 +333,7 @@ void AddPointCoordinates(QStringList& body, unsigned pointIndex, ccGenericPointC
 	
 	if (isShifted)
 	{
-		CCVector3d Pg = CCVector3d::fromArray(P->u) + shift;
+		CCVector3d Pg = cloud->toGlobal3d(*P);
 		QString globCoordStr = QString("  [original] (%1;%2;%3)").arg(Pg.x,0,'f',precision).arg(Pg.y,0,'f',precision).arg(Pg.z,0,'f',precision);
 		body << globCoordStr;
 	}

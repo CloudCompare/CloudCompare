@@ -43,6 +43,8 @@ v2.5.6 ??/??/2014
 	* the 'Cancel' button of progress dialogs was invisible on the x64 version
 	* in some very limit cases, the distance computation could enter in an infinite loop
 	* qSRA: memory leak fixed (when displaying a conical projection map)
+	* the 'original' coordinates displayed in 2D labels (or in the console for picked points) was wrong
+		(global shift was applied in the opposite way).
 
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'

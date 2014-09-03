@@ -33,9 +33,7 @@ public:
 	~ccFrameBufferObject();
 
 	bool init(unsigned w, unsigned h);
-
 	void reset();
-
 	void start();
 	void stop();
 
@@ -59,13 +57,17 @@ public:
 					GLenum textureTarget = GL_TEXTURE_2D);
 
 	void setDrawBuffers(GLsizei n, const GLenum* buffers);	//GLenum buffers[n]	= {GL_COLOR_ATTACHMENT0_EXT,GL_COLOR_ATTACHMENT1_EXT};
-
 	void setDrawBuffers1();
 	void setDrawBuffersN(GLsizei n); //n=1..4
 
 	GLuint getID();
 	GLuint getColorTexture(unsigned i);
 	GLuint getDepthTexture();
+
+	//! Returns width
+	inline unsigned width() const { return m_width; }
+	//! Returns height
+	inline unsigned height() const { return m_height; }
 
 protected:
 

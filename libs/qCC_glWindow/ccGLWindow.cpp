@@ -3513,12 +3513,12 @@ bool ccGLWindow::initFBO(int w, int h)
 	//we "disconnect" current FBO, to avoid wrong display/errors
 	//if QT tries to redraw window during initialization
 	ccFrameBufferObject* _fbo = m_fbo;
-	m_fbo=0;
+	m_fbo = 0;
 
 	if (!_fbo)
 		_fbo = new ccFrameBufferObject();
 
-	bool success=false;
+	bool success = false;
 	if (_fbo->init(w,h))
 	{
 		if (_fbo->initTexture(0,GL_RGBA,GL_RGBA,GL_FLOAT))
@@ -3529,8 +3529,8 @@ bool ccGLWindow::initFBO(int w, int h)
 	{
 		ccLog::Warning("[FBO] Initialization failed!");
 		delete _fbo;
-		_fbo=0;
-		m_alwaysUseFBO=false;
+		_fbo = 0;
+		m_alwaysUseFBO = false;
 		return false;
 	}
 

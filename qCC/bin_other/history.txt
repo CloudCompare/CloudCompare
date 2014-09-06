@@ -50,6 +50,8 @@ v2.5.6 ??/??/2014
 		(global shift was applied in the opposite way).
 	* the global shift/scale infos were wrongly applied when exporting points picked with the
 		'Point list picking' tool
+	* for some clouds loaded from an ASCII file and with very particular sizes, the associated scalar fields
+		size could be wrongly set (while the data was correctly loaded) and CC woudln't accept to display them...
 
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'

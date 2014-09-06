@@ -689,15 +689,15 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 
 			//we re-evaluate the average line size
 			{
-				double averageLineSize = (double)file.pos()/(double)(pointsRead+skipLines);
-				double newNbOfLinesApproximation = std::max(1.0, (double)fileSize/averageLineSize - (double)skipLines);
+				double averageLineSize = static_cast<double>(file.pos())/(pointsRead+skipLines);
+				double newNbOfLinesApproximation = std::max(1.0, static_cast<double>(fileSize)/averageLineSize - static_cast<double>(skipLines));
 
 				//if approximation is smaller than actual one, we add 2% by default
 				if (newNbOfLinesApproximation <= pointsRead)
 				{
-					newNbOfLinesApproximation = std::max((double)(cloudChunkPos+cloudChunkSize)+1.0,(double)pointsRead * 1.02);
+					newNbOfLinesApproximation = std::max(static_cast<double>(cloudChunkPos+cloudChunkSize)+1.0,static_cast<double>(pointsRead) * 1.02);
 				}
-				approximateNumberOfLines = (unsigned)ceil(newNbOfLinesApproximation);
+				approximateNumberOfLines = static_cast<unsigned>(ceil(newNbOfLinesApproximation));
 				ccLog::PrintDebug("[ASCII] New approximate nb of lines: %i",approximateNumberOfLines);
 			}
 
@@ -838,7 +838,7 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 			//Scalar distance
 			if (!cloudDesc.scalarIndexes.empty())
 			{
-				for (unsigned j=0; j<cloudDesc.scalarIndexes.size(); ++j)
+				for (size_t j=0; j<cloudDesc.scalarIndexes.size(); ++j)
 				{
 					D = static_cast<ScalarType>( parts[cloudDesc.scalarIndexes[j]].toDouble() );
 					cloudDesc.scalarFields[j]->setValue(pointsRead-cloudChunkPos,D);
@@ -873,8 +873,11 @@ CC_FILE_ERROR AsciiFilter::loadCloudFromFormatedAsciiFile(	const QString& filena
 		//add cloud to output
 		if (!cloudDesc.scalarFields.empty())
 		{
-			for (unsigned j=0;j<cloudDesc.scalarFields.size();++j)
+			for (size_t j=0; j<cloudDesc.scalarFields.size(); ++j)
+			{
+				cloudDesc.scalarFields[j]->resize(cloudDesc.cloud->size(),true,NAN_VALUE);
 				cloudDesc.scalarFields[j]->computeMinAndMax();
+			}
 			cloudDesc.cloud->setCurrentDisplayedScalarField(0);
 			cloudDesc.cloud->showSF(true);
 		}

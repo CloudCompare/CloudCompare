@@ -28,6 +28,8 @@ Big ones:
 [*] Volume calculation
 
 Various:
+[*] Add parameters for the command line to setup the FBX output format (http://www.danielgm.net/cc/forum/viewtopic.php?t=969)
+[*] Add a "Apply all" button for ASCII import
 [*] Save primitives in DXF files (http://www.cloudcompare.org/forum/viewtopic.php?t=573)
 [*] Edit parameters for qEDL (luminosity, etc.)
 [*] Dedicated method for isolated points removal (based on the Connected Components one)

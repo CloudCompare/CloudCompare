@@ -1565,13 +1565,13 @@ void ccPointCloud::glChunkColorPointer(unsigned chunkIndex, unsigned decimStep, 
 	assert(m_rgbColors);
 	assert(sizeof(colorType) == 1);
 
-    if (useVBOs && m_vbos.state == vboSet::INITIALIZED && m_vbos.size() > chunkIndex && m_vbos.hasColors && m_vbos[chunkIndex] && m_vbos[chunkIndex]->isCreated())
+	if (useVBOs && m_vbos.state == vboSet::INITIALIZED && m_vbos.size() > chunkIndex && m_vbos.hasColors && m_vbos[chunkIndex] && m_vbos[chunkIndex]->isCreated())
 	{
 		//we can use VBOs directly
-        m_vbos[chunkIndex]->bind();
+		m_vbos[chunkIndex]->bind();
 		const GLbyte* start = 0; //fake pointer used to prevent warnings on Linux
-        glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),(const GLvoid*)(start + m_vbos[chunkIndex]->rgbShift));
-        m_vbos[chunkIndex]->release();
+		glColorPointer(3,GL_UNSIGNED_BYTE,decimStep*3*sizeof(colorType),(const GLvoid*)(start + m_vbos[chunkIndex]->rgbShift));
+		m_vbos[chunkIndex]->release();
 	}
 	else
 	{

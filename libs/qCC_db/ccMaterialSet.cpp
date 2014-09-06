@@ -244,7 +244,7 @@ bool ccMaterialSet::saveAsMTL(QString path, const QString& baseFilename, QString
 	QMap<QString,QString> filenamesSaved;
 
 	unsigned texIndex = 0;
-	for (ccMaterialSet::const_iterator it = begin(); it!=end(); ++it)
+	for (ccMaterialSet::const_iterator it=begin(); it!=end(); ++it)
 	{
 		stream << endl << "newmtl " << it->name << endl;
 

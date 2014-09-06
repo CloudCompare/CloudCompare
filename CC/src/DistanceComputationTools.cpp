@@ -1984,15 +1984,10 @@ int DistanceComputationTools::computePointCloud2MeshDistance(GenericIndexedCloud
 }
 
 /******* Calcul de distance entre un point et un triangle *****/
-// Inspired from Magic Software, Inc.
-// http://www.magic-software.com
-// http://www.wild-magic.com
-// Copyright (c) 2004.  All Rights Reserved
-//
-// The Wild Magic Library (WML) source code is supplied under the terms of
-// the license agreement http://www.magic-software.com/License/WildMagic.pdf
-// and may not be copied or disclosed except in accordance with the terms of
-// that agreement.
+// Inspired from documents and code by:
+// David Eberly
+// Geometric Tools, LLC
+// http://www.geometrictools.com/
 ScalarType DistanceComputationTools::computePoint2TriangleDistance(const CCVector3* P, const GenericTriangle* theTriangle, bool signedDist)
 {
     assert(P && theTriangle);

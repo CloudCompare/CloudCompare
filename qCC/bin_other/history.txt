@@ -41,6 +41,11 @@ v2.5.6 ??/??/2014
 	* ASCII import/export:
 		- RGB colors can now be imported or exported as float values (between 0 and 1)
 			instead of unsigned bytes (0-255)
+	* PTX import:
+		- Grid translation is now also checked for 'big coordinates' (Global Shift & Scale mechanism)
+		- Cancel button also cancels the normals computation!
+		- sensors corresponding to each scan are automatically created
+
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized
 	* the 'Cancel' button of progress dialogs was invisible on the x64 version
@@ -52,6 +57,7 @@ v2.5.6 ??/??/2014
 		'Point list picking' tool
 	* for some clouds loaded from an ASCII file and with very particular sizes, the associated scalar fields
 		size could be wrongly set (while the data was correctly loaded) and CC woudln't accept to display them...
+	* memory leak when loading PTX files
 
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'

@@ -40,6 +40,7 @@
 #include "ccPolyline.h"
 #include "ccScalarField.h"
 #include "ccGenericGLDisplay.h"
+#include "ccGBLSensor.h"
 
 //system
 #include <assert.h>
@@ -644,6 +645,14 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				newLabel->setVisible(label->isVisible());
 				newLabel->setDisplay(getDisplay());
 				addChild(newLabel);
+			}
+			else if (child->isA(CC_TYPES::GBL_SENSOR))
+			{
+				//copy sensor object
+				ccGBLSensor* sensor = new ccGBLSensor(*static_cast<ccGBLSensor*>(child));
+				addChild(sensor);
+				sensor->setDisplay(getDisplay());
+				sensor->setVisible(child->isVisible());
 			}
 		}
 	}

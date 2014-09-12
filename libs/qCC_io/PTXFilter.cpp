@@ -23,6 +23,7 @@
 #include <ccScalarField.h>
 #include <ccColorScalesManager.h>
 #include <ccProgressDialog.h>
+#include <ccGBLSensor.h>
 
 //CCLib
 #include <Neighbourhood.h>
@@ -44,6 +45,8 @@ CC_FILE_ERROR PTXFilter::saveToFile(ccHObject* entity, QString filename)
 	return CC_FERR_WRONG_FILE_TYPE;
 }
 
+typedef std::pair<PointCoordinateType,unsigned> AngleAndSpan;
+
 CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 									ccHObject& container,
 									LoadParameters& parameters)
@@ -59,10 +62,13 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 	QStringList tokens;
 	bool ok;
 
+	CCVector3d PshiftTrans(0,0,0);
+	CCVector3d PshiftCloud(0,0,0);
+
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 	ScalarType minIntensity = 0;
 	ScalarType maxIntensity = 0;
-	while (result == CC_FERR_NO_ERROR)
+	for (unsigned cloudIndex = 0; result == CC_FERR_NO_ERROR; cloudIndex++)
 	{
 		unsigned width = 0, height = 0;
 		ccGLMatrix sensorTrans, cloudTrans;
@@ -80,10 +86,9 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			if (!ok)
 				return CC_FERR_MALFORMED_FILE;
 
-			ccLog::Print(QString("[PTX] Grid size: %1 x %2").arg(width).arg(height));
+			ccLog::Print(QString("[PTX] Sub-cloud #%1 - grid size: %2 x %3").arg(cloudIndex+1).arg(width).arg(height));
 
 			//read sensor transformation matrix
-			//DGM: TODO what can we do of this? Create a ccSensor?
 			for (int i=0; i<4; ++i)
 			{
 				line = inFile.readLine();
@@ -109,6 +114,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			}
 
 			//read cloud transformation matrix
+			ccGLMatrixd cloudTransD;
 			for (int i=0; i<4; ++i)
 			{
 				line = inFile.readLine();
@@ -116,14 +122,26 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				if (tokens.size() != 4)
 					return CC_FERR_MALFORMED_FILE;
 
-				float* col = cloudTrans.getColumn(i);
+				double* col = cloudTransD.getColumn(i);
 				for (int j=0; j<4; ++j)
 				{
-					col[j] = tokens[j].toFloat(&ok);
+					col[j] = tokens[j].toDouble(&ok);
 					if (!ok)
 						return CC_FERR_MALFORMED_FILE;
 				}
 			}
+
+			//handle Global Shift directly on the first cloud's translation!
+			const CCVector3d& translation = cloudTransD.getTranslationAsVec3D();
+			if (cloudIndex == 0)
+			{
+				if (HandleGlobalShift(translation,PshiftTrans,parameters))
+				{
+					ccLog::Warning("[PTXFilter::loadFile] Cloud has be recentered! Translation: (%.2f,%.2f,%.2f)",PshiftTrans.x,PshiftTrans.y,PshiftTrans.z);
+				}
+			}
+			cloudTransD.setTranslation(translation + PshiftTrans);
+			cloudTrans = ccGLMatrix(cloudTransD.data());
 		}
 
 		//now we can read the grid cells
@@ -147,6 +165,9 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			return CC_FERR_NOT_ENOUGH_MEMORY;
 		}
 
+		//set global shift
+		cloud->setGlobalShift(PshiftTrans);
+
 		//intensities
 		ccScalarField* intensitySF = new ccScalarField(CC_PTX_INTENSITY_FIELD_NAME);
 		if (!intensitySF->reserve(static_cast<unsigned>(size)))
@@ -164,7 +185,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 		}
 		else
 		{
-			ccLog::Warning("[PTX] Not enough memory to save grid structure (requied to compute normals!)");
+			ccLog::Warning("[PTX] Not enough memory to save grid structure (required to compute normals!)");
 		}
 
 		//read points
@@ -176,7 +197,6 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			pdlg.setInfo(qPrintable(QString("Number of cells: %1").arg(size)));
 			pdlg.start();
 
-			CCVector3d Pshift(0,0,0);
 			bool firstPoint = true;
 			bool hasColors = false;
 			bool loadColors = false;
@@ -226,19 +246,22 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 						//first point: check for 'big' coordinates
 						if (firstPoint)
 						{
-							CCVector3d P(Pd);
-							if (HandleGlobalShift(P,Pshift,parameters))
+							if (cloudIndex == 0 && !cloud->isShifted()) //in case the trans. matrix was ok!
 							{
-								cloud->setGlobalShift(Pshift);
-								ccLog::Warning("[PTXFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",Pshift.x,Pshift.y,Pshift.z);
+								CCVector3d P(Pd);
+								if (HandleGlobalShift(P,PshiftCloud,parameters))
+								{
+									cloud->setGlobalShift(PshiftCloud);
+									ccLog::Warning("[PTXFilter::loadFile] Cloud has been recentered! Translation: (%.2f,%.2f,%.2f)",PshiftCloud.x,PshiftCloud.y,PshiftCloud.z);
+								}
 							}
 							firstPoint = false;
 						}
 
 						//add point
-						cloud->addPoint(CCVector3(	static_cast<PointCoordinateType>(Pd[0] + Pshift.x),
-													static_cast<PointCoordinateType>(Pd[1] + Pshift.y),
-													static_cast<PointCoordinateType>(Pd[2] + Pshift.z)) );
+						cloud->addPoint(CCVector3(	static_cast<PointCoordinateType>(Pd[0] + PshiftCloud.x),
+													static_cast<PointCoordinateType>(Pd[1] + PshiftCloud.y),
+													static_cast<PointCoordinateType>(Pd[2] + PshiftCloud.z)) );
 
 						//update index grid
 						if (indexGrid)
@@ -281,6 +304,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			}
 		}
 
+		//is there at least one valid point in this grid?
 		if (cloud->size() == 0)
 		{
 			delete cloud;
@@ -289,7 +313,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			if (result == CC_FERR_NO_ERROR)
 				result = CC_FERR_NO_LOAD;
 		}
-		else if (cloud->size() < cloud->capacity())
+		else if (cloud->size() <= cloud->capacity())
 		{
 			cloud->resize(cloud->size());
 			if (intensitySF)
@@ -300,6 +324,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				intensitySF->setColorScale(ccColorScalesManager::GetDefaultScale(ccColorScalesManager::ABS_NORM_GREY));
 				int intensitySFIndex = cloud->addScalarField(intensitySF);
 
+				//keep track of the min and max intensity
 				if (container.getChildrenNumber() == 0)
 				{
 					minIntensity = intensitySF->getMin();
@@ -315,9 +340,139 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				cloud->setCurrentDisplayedScalarField(intensitySFIndex);
 			}
 
-			//try to compute normals
-			if (indexGrid)
+			if (indexGrid && result != CC_FERR_CANCELED_BY_USER)
 			{
+				//update sensor information
+				{
+					bool validSensor = true;
+					double deltaThetaRad = 0, deltaPhiRad = 0;
+					std::vector< AngleAndSpan > angles;
+					try
+					{
+						//determine the longitudinal angular step
+						//for each line we determine the min and max valid grid point (i.e. != (0,0,0))
+						{
+							const unsigned* _indexGrid = indexGrid;
+							for (unsigned j=0; j<height; ++j)
+							{
+								unsigned minIndex = width;
+								unsigned maxIndex = 0;
+								for (unsigned i=0; i<width; ++i)
+								{
+									if (_indexGrid[i] != 0)
+									{
+										if (i < minIndex)
+											minIndex = i;
+										if (i > maxIndex)
+											maxIndex = i;
+									}
+								}
+							
+								if (maxIndex > minIndex)
+								{
+									//warning: indexes are shifted (0 = no point)
+									CCVector3 P1 = *cloud->getPoint(_indexGrid[minIndex]-1);
+									CCVector3 P2 = *cloud->getPoint(_indexGrid[maxIndex]-1);
+
+									PointCoordinateType t1b = -atan2(P1.y,P1.z);
+									PointCoordinateType t2b = -atan2(P2.y,P2.z);
+									unsigned span = maxIndex-minIndex;
+									ScalarType angleb_rad = static_cast<ScalarType>(fabs(t2b-t1b) / span);
+									angles.push_back(AngleAndSpan(angleb_rad,span));
+								}
+
+								_indexGrid += width;
+							}
+
+							if (!angles.empty())
+							{
+								size_t maxSpanIndex = 0;
+								for (size_t i=1; i<angles.size(); ++i)
+								{
+									if (angles[i].second > angles[maxSpanIndex].second)
+										maxSpanIndex = i;
+								}
+								deltaPhiRad = angles[maxSpanIndex].first;
+								ccLog::Print(QString("[PTX] Detected latitudinal step: %1 degrees").arg(deltaPhiRad * CC_RAD_TO_DEG));
+							}
+							else
+							{
+								ccLog::Warning("[PTX] Not enough valid points to compute sensor angular steps!");
+							}
+						}
+
+						//now determine the latitudinal angular step
+						if (validSensor)
+						{
+							angles.clear();
+							//for each column we determine the min and max valid grid point (i.e. != (0,0,0))
+							for (unsigned i=0; i<width; ++i)
+							{
+								const unsigned* _indexGrid = indexGrid + i;
+								unsigned minIndex = height;
+								unsigned maxIndex = 0;
+								for (unsigned j=0; j<height; ++j)
+								{
+									if (_indexGrid[j*width] != 0)
+									{
+										if (j < minIndex)
+											minIndex = j;
+										if (j > maxIndex)
+											maxIndex = j;
+									}
+								}
+							
+								if (maxIndex > minIndex)
+								{
+									//warning: indexes are shifted (0 = no point)
+									const CCVector3* P1 = cloud->getPoint(_indexGrid[minIndex*width]-1);
+									const CCVector3* P2 = cloud->getPoint(_indexGrid[maxIndex*width]-1);
+
+									PointCoordinateType t1b = atan2(P1->x,P1->y);
+									PointCoordinateType t2b = atan2(P2->x,P2->y);
+									unsigned span = maxIndex-minIndex;
+									ScalarType angleb_rad = static_cast<ScalarType>(fabs(t2b-t1b) / span);
+									angles.push_back(AngleAndSpan(angleb_rad,span));
+								}
+							}
+
+							if (!angles.empty())
+							{
+								size_t maxSpanIndex = 0;
+								for (size_t i=1; i<angles.size(); ++i)
+								{
+									if (angles[i].second > angles[maxSpanIndex].second)
+										maxSpanIndex = i;
+								}
+								deltaThetaRad = angles[maxSpanIndex].first;
+								ccLog::Print(QString("[PTX] Detected longitudinal step: %1 degrees").arg(deltaThetaRad * CC_RAD_TO_DEG));
+							}
+							else
+							{
+								ccLog::Warning("[PTX] Not enough valid points to compute sensor angular steps!");
+								validSensor = false;
+							}
+						}
+					}
+					catch (std::bad_alloc)
+					{
+						ccLog::Warning("[PTX] Not enough memory to compute sensor angular steps!");
+						validSensor = false;
+					}
+
+					ccGBLSensor* sensor = new ccGBLSensor(/*ccGBLSensor::PHI_THETA*/);
+					if (sensor)
+					{
+						sensor->setDeltaPhi(deltaPhiRad);
+						sensor->setDeltaTheta(deltaThetaRad);
+						//sensor->setRigidTransformation(cloudTrans/*sensorTrans*/); //will be called later by applyGLTransformation_recursive
+						sensor->setGraphicScale(PC_ONE/2);
+						sensor->setVisible(false);
+						cloud->addChild(sensor);
+					}
+				}
+
+				//try to compute normals
 				if (cloud->reserveTheNormsTable())
 				{
 					//progress dialog
@@ -331,7 +486,6 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 					CCLib::ReferenceCloud knn(cloud);
 					const int nw = 3;
 					knn.reserve((1+2*nw)*(1+2*nw));
-					bool canceledByUser = false;
 					for (int j=0; j<static_cast<int>(height); ++j)
 					{
 						for (int i=0; i<static_cast<int>(width); ++i, ++_indexGrid)
@@ -446,7 +600,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 								//progress
 								if (!nprogress.oneStep())
 								{
-									canceledByUser = true;
+									result = CC_FERR_CANCELED_BY_USER;
 									//early stop
 									j = height;
 									break;
@@ -455,7 +609,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 						}
 					}
 
-					if (canceledByUser)
+					if (result == CC_FERR_CANCELED_BY_USER)
 					{
 						ccLog::Warning("[PTX] Normal computation canceled by user!");
 						cloud->unallocateNorms();
@@ -467,25 +621,32 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 				}
 			}
 
-			//test: export as depth map
-			//if (true)
-			//{
-			//	_indexGrid = indexGrid;
-			//	for (int j=0; j<static_cast<int>(height); ++j)
-			//	{
-			//		for (int i=0; i<static_cast<int>(width); ++i, ++_indexGrid)
-			//		{
-			//			if (*_indexGrid != 0)
-			//			{
-			//				const CCVector3* P = cloud->getPoint(*_indexGrid-1);
-			//				const_cast<CCVector3*>(P)->x = static_cast<PointCoordinateType>(j);
-			//				const_cast<CCVector3*>(P)->y = static_cast<PointCoordinateType>(i);
-			//			}
-			//		}
-			//	}
-			//}
+			if (indexGrid)
+			{
+				//test: export as depth map
+				//if (true)
+				//{
+				//	_indexGrid = indexGrid;
+				//	for (int j=0; j<static_cast<int>(height); ++j)
+				//	{
+				//		for (int i=0; i<static_cast<int>(width); ++i, ++_indexGrid)
+				//		{
+				//			if (*_indexGrid != 0)
+				//			{
+				//				const CCVector3* P = cloud->getPoint(*_indexGrid-1);
+				//				const_cast<CCVector3*>(P)->x = static_cast<PointCoordinateType>(j);
+				//				const_cast<CCVector3*>(P)->y = static_cast<PointCoordinateType>(i);
+				//			}
+				//		}
+				//	}
+				//}
 
-			//DGM TODO: should we apply the transformation or is it already done?
+				//don't need it anymore
+				delete[] indexGrid;
+				indexGrid = 0;
+			}
+
+			//we apply the transformation
 			cloud->applyGLTransformation_recursive(&cloudTrans);
 
 			cloud->setVisible(true);
@@ -511,7 +672,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			CCLib::ScalarField* sf = static_cast<ccPointCloud*>(obj)->getScalarField(0);
 			if (sf)
 			{
-				static_cast<ccScalarField*>(sf)->setSaturationStart(minIntensity);
+				static_cast<ccScalarField*>(sf)->setSaturationStart(0/*minIntensity*/);
 				static_cast<ccScalarField*>(sf)->setSaturationStop(maxIntensity);
 			}
 		}

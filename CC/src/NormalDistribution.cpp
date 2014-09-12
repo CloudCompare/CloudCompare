@@ -67,7 +67,7 @@ bool NormalDistribution::setParameters(ScalarType mu, ScalarType sigma2)
 	m_chi2ClassesPositions.clear();
 	m_Pi.clear();
 
-	if (m_sigma2 > ZERO_TOLERANCE)
+	if (m_sigma2 >= 0)
 	{
 		setValid(true);
 		m_qFactor = 1.0/(2.0*static_cast<double>(m_sigma2));
@@ -253,8 +253,8 @@ bool NormalDistribution::setChi2ClassesPositions(unsigned numberOfClasses)
 	m_chi2ClassesPositions.clear();
 	m_Pi.clear();
 
-	if (!isValid() || numberOfClasses<2)
-        return false;
+	if (!isValid() || numberOfClasses < 2)
+		return false;
 
 	try
 	{

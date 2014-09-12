@@ -319,7 +319,7 @@ PointCoordinateType* ccGBLSensor::projectNormals(CCLib::GenericCloud* aCloud, Ge
 			CCVector2 Q;
 
 			PointCoordinateType norm = U.norm();
-			if (norm>ZERO_TOLERANCE)
+			if (norm > ZERO_TOLERANCE)
 			{
 				//normal component along sensor viewing dir.
 				S.z = -CCVector3::vdot(N,U.u)/norm;

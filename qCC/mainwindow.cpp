@@ -2744,7 +2744,7 @@ void MainWindow::doActionModifySensor()
 			spDlg.updateGBLSensor(gbl);
 
 			//we re-project cloud
-			if (gbl->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
+			if (gbl->getParent() && gbl->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
 				int errorCode;
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(gbl->getParent());
@@ -3005,8 +3005,24 @@ void MainWindow::doActionShowDepthBuffer()
 			ccGBLSensor* sensor = static_cast<ccGBLSensor*>(m_selectedEntities[0]);
 			if (!sensor->getDepthBuffer().zBuff)
 			{
-				ccConsole::Error("[ShowDepthBuffer] Depth buffer not computed for this sensor.");
-				return;
+				//look for depending cloud
+				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent->getParent());
+				if (cloud)
+				{
+					//force depth buffer computation
+					int errorCode;
+					CCLib::GenericIndexedCloud* projectedPoints = sensor->project(cloud,errorCode,true);
+					if (projectedPoints)
+					{
+						delete projectedPoints;
+						projectedPoints = 0;
+					}
+				}
+				else
+				{
+					ccConsole::Error(QString("Internal error: sensor ('%1') parent is not a point cloud!").arg(sensor->getName()));
+					return;
+				}
 			}
 
 			ccRenderingTools::ShowDepthBuffer(sensor,this);

@@ -2557,29 +2557,45 @@ void MainWindow::doActionSetViewFromSensor()
 
 	//get associated cloud
 	ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
-	assert(cloud);
-
-	ccGLWindow* win = 0;
 	if (cloud)
-		win = static_cast<ccGLWindow*>(cloud->getDisplay());
-	else
-		win = getActiveGLWindow();
+	{
+		ccGLWindow* win = 0;
+		if (cloud)
+			win = static_cast<ccGLWindow*>(cloud->getDisplay());
+		else
+			win = getActiveGLWindow();
 
-	if (win)
-	{
-		//ccViewportParameters params = win->getViewportParameters();
-		setViewerPerspectiveView(win);
-		win->setCameraPos(CCVector3d::fromArray(sensorCenter.u));
-		win->setPivotPoint(CCVector3d::fromArray(sensorCenter.u));
-		//FIXME: more complicated! Depends on the 'rotation order' for GBL sensors for instance
-		win->setView(CC_FRONT_VIEW,false);
-		win->rotateBaseViewMat(ccGLMatrixd(trans.data()));
-		//TODO: can we set the right FOV?
-		win->redraw();
-	}
-	else
-	{
-		ccLog::Warning("[doActionSetViewFromSensor] Failed to get a valid 3D view!");
+		if (win)
+		{
+			//ccViewportParameters params = win->getViewportParameters();
+			setViewerPerspectiveView(win);
+			win->setCameraPos(CCVector3d::fromArray(sensorCenter.u));
+			win->setPivotPoint(CCVector3d::fromArray(sensorCenter.u));
+			//FIXME: more complicated! Depends on the 'rotation order' for GBL sensors for instance
+			//win->setView(CC_FRONT_VIEW,false);
+			ccGLMatrix rot = trans;
+			rot.clearTranslation();
+			//add the 'angular centering' component
+			if (sensor->isA(CC_TYPES::GBL_SENSOR))
+			{
+				ccGBLSensor* gblSensor = static_cast<ccGBLSensor*>(sensor);
+				PointCoordinateType theta = (gblSensor->getThetaMax() + gblSensor->getThetaMin())/2;
+				PointCoordinateType phi = (gblSensor->getPhiMax() + gblSensor->getPhiMin())/2;
+				//FIXME: work in progress
+				ccConsole::Print/*Debug*/(QString("Phi = %1 / Theta = %2").arg(phi).arg(theta));
+				ccGLMatrix rotz; rotz.initFromParameters(/*static_cast<PointCoordinateType>(M_PI/2) - */phi,CCVector3(0,0,1),CCVector3(0,0,0));
+				ccGLMatrix rotx; rotx.initFromParameters(theta,CCVector3(1,0,0),CCVector3(0,0,0));
+				//rot = rot * rotz;
+			}
+			//win->rotateBaseViewMat(ccGLMatrixd(rot.data()));
+			win->setBaseViewMat(ccGLMatrixd(rot.data()));
+			//TODO: can we set the right FOV?
+			win->redraw();
+		}
+		else
+		{
+			ccLog::Warning("[doActionSetViewFromSensor] Failed to get a valid 3D view!");
+		}
 	}
 }
 
@@ -2607,9 +2623,7 @@ void MainWindow::doActionCreateGBLSensor()
 
 			//we compute projection
 			int errorCode;
-			CCLib::GenericIndexedCloud* projectedPoints = sensor->project(cloud,errorCode,true);
-
-			if (projectedPoints)
+			if (sensor->project(cloud,errorCode,true))
 			{
 				cloud->addChild(sensor);
 
@@ -2655,8 +2669,6 @@ void MainWindow::doActionCreateGBLSensor()
 					ccBBox box = cloud->getBB();
 					win->updateConstellationCenterAndZoom(&box);
 				}
-				delete projectedPoints;
-				projectedPoints = 0;
 
 				addToDB(sensor);
 			}
@@ -2746,16 +2758,11 @@ void MainWindow::doActionModifySensor()
 			//we re-project cloud
 			if (gbl->getParent() && gbl->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
 			{
-				int errorCode;
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(gbl->getParent());
 
-				CCLib::GenericIndexedCloud* projectedPoints = gbl->project(cloud,errorCode,true);
-				if (projectedPoints)
+				int errorCode;
+				if (gbl->project(cloud,errorCode,true))
 				{
-					//we don't need the projected points anymore
-					delete projectedPoints;
-					projectedPoints = 0;
-
 					//we display depth buffer
 					ccRenderingTools::ShowDepthBuffer(gbl,this);
 
@@ -3011,11 +3018,9 @@ void MainWindow::doActionShowDepthBuffer()
 				{
 					//force depth buffer computation
 					int errorCode;
-					CCLib::GenericIndexedCloud* projectedPoints = sensor->project(cloud,errorCode,true);
-					if (projectedPoints)
+					if (!sensor->project(cloud,errorCode,true))
 					{
-						delete projectedPoints;
-						projectedPoints = 0;
+						displaySensorProjectErrorString(errorCode);
 					}
 				}
 				else
@@ -6767,18 +6772,15 @@ void MainWindow::deactivateSegmentationMode(bool state)
 
 							if (sensor)
 							{
-								//we create a copy of that
-								ccGBLSensor * cloned_sensor = new ccGBLSensor(*sensor);
-
 								ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(segmentationResult);
-
-								int errorCode;
-								cloned_sensor->project(cloud,errorCode,true);
-
-								// we need also to do the same for the original cloud
-								sensor->project(ccHObjectCaster::ToGenericPointCloud(entity), errorCode, true);
-
-								cloud->addChild(cloned_sensor);
+								if (cloud)
+								{
+									//we create a copy of that
+									ccGBLSensor * clonedSensor = new ccGBLSensor(*sensor);
+									cloud->addChild(clonedSensor);
+								}
+								//remove the associated depth buffer (may have been changed)
+								sensor->clearDepthBuffer();
 							}
 							putObjectBackIntoDBTree(entity,objContext);
 						}

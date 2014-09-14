@@ -50,8 +50,9 @@
 	v3.5 - 02/13/2014 - ccSensor class updated
 	v3.6 - 05/30/2014 - ccGLWindow and associated structures (viewport, etc.) now use double precision
 	v3.7 - 08/24/2014 - Textures are stored and saved as a single DB with only references to them in each material (key = absolute filename)
+	v3.8 - 09/14/2014 - GBL Sensors depth buffer structure has evolved
 **/
-const unsigned c_currentDBVersion = 37; //3.7
+const unsigned c_currentDBVersion = 38; //3.8
 
 // Persistent settings key for storing the last generated entity ID
 static const QString s_uniqueIDKey("UniqueID");

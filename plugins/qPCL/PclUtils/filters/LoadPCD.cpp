@@ -150,16 +150,15 @@ int LoadPCD::compute()
 
 		sensor->setGraphicScale(out_cloud->getBB().getDiagNorm() / 10);
 
-		//do the projection on sensor
-		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(out_cloud);
-		int errorCode;
-		CCLib::SimpleCloud* projectedCloud = sensor->project(cloud,errorCode,true);
-		if (projectedCloud)
-		{
-			//DGM: we don't use it but we still have to delete it!
-			delete projectedCloud;
-			projectedCloud = 0;
-		}
+		////Compute the depth buffer
+		//{
+		//	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(out_cloud);
+		//	int errorCode;
+		//	if (!sensor->project(cloud,errorCode,true))
+		//	{
+		//		//failed to compute the depth buffer!
+		//	}
+		//}
 
 		QString cloud_name = QFileInfo(filename).baseName();
 		out_cloud->setName(cloud_name);

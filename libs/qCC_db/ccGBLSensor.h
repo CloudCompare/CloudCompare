@@ -25,8 +25,9 @@
 
 //CCLib
 #include <GenericCloud.h>
-#include <SimpleCloud.h>
 #include <CCGeom.h>
+
+class ccPointCloud;
 
 //! Ground based LiDAR sensor model
 /** An implementation of the ccSensor interface that can be used
@@ -62,19 +63,19 @@ public:
 	virtual ~ccGBLSensor();
 
 	//inherited from ccHObject
-	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::GBL_SENSOR; };
+	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::GBL_SENSOR; }
 	virtual bool isSerializable() const { return true; }
 
 	//! Sets the lateral angular scanning limits
 	/** \param minV min latitude
 		\param maxV max latitude
 	**/
-	void setPhi(PointCoordinateType minV, PointCoordinateType maxV) { m_phiMin = minV; m_phiMax = maxV; }
+	void setPhi(PointCoordinateType minV, PointCoordinateType maxV);
 
 	//! Sets the lateral angular scanning step
 	/** \param dPhi latitudinal step
 	**/
-	void setDeltaPhi(PointCoordinateType dPhi)  { m_deltaPhi = dPhi; }
+	void setDeltaPhi(PointCoordinateType dPhi);
 
 	//! Returns the lateral minimal angular scanning limit
 	PointCoordinateType getPhiMin() const { return m_phiMin; }
@@ -89,12 +90,12 @@ public:
 	/** \param minV min longitude
 		\param maxV max longitude
 	**/
-	void setTheta(PointCoordinateType minV, PointCoordinateType maxV)  { m_thetaMin = minV; m_thetaMax = maxV; }
+	void setTheta(PointCoordinateType minV, PointCoordinateType maxV);
 
 	//! Sets the vertical angular scanning step
 	/** \param dTheta longitudinal step
 	**/
-	void setDeltaTheta(PointCoordinateType dTheta) { m_deltaTheta = dTheta; }
+	void setDeltaTheta(PointCoordinateType dTheta);
 
 	//! Returns the vertical minimal angular scanning limit
 	PointCoordinateType getThetaMin() const { return m_thetaMin; }
@@ -106,21 +107,21 @@ public:
 	PointCoordinateType getDeltaTheta() const { return m_deltaTheta; }
 
 	//! Returns the sensor max. range
-	ScalarType getSensorRange() const { return m_sensorRange; }
+	PointCoordinateType getSensorRange() const { return m_sensorRange; }
 
 	//! Sets the sensor max. range
 	/** \param range max. range of the sensor
 	**/
-	void setSensorRange(ScalarType range) { m_sensorRange = range; }
+	void setSensorRange(PointCoordinateType range) { m_sensorRange = range; }
 
 	//! Returns the Z-buffer uncertainty on depth values
-	ScalarType getUncertainty() const { return m_uncertainty; }
+	PointCoordinateType getUncertainty() const { return m_uncertainty; }
 
 	//! Sets the Z-buffer uncertainty on depth values
 	/** The uncertainty is used to handle numerical inaccuracies
 		\param u the Z-buffer uncertainty
 	**/
-	void setUncertainty(ScalarType u) { m_uncertainty = u; }
+	void setUncertainty(PointCoordinateType u) { m_uncertainty = u; }
 
 	//! Returns the sensor rotations order
 	ROTATION_ORDER getRotationOrder() const { return m_rotationOrder; }
@@ -135,9 +136,10 @@ public:
 		\param cloud a point cloud
 		\param errorCode error code in case the returned cloud is 0
 		\param autoParameters try to deduce most trivial parameters (min and max angles, max range and uncertainty) from input cloud
+		\param projectedCloud cloud structure to store the projected points
 		\return a point cloud with the projected 2D points (Theta, Phi) + distances to sensor as a scalar field [should be deleted by the user if not used]
 	**/
-	CCLib::SimpleCloud* project(CCLib::GenericCloud* cloud, int& errorCode, bool autoParameters = false);
+	bool project(CCLib::GenericCloud* cloud, int& errorCode, bool autoParameters = false, ccPointCloud* projectedCloud = 0);
 
 	//! Projects a set of point cloud normals in the sensor world
 	/** WARNING: this method uses the cloud global iterator
@@ -168,7 +170,11 @@ public:
 	struct DepthBuffer
 	{
 		//! Z-Buffer grid
-		ScalarType* zBuff;
+		PointCoordinateType* zBuff;
+		//! Anguar step (may differ from the sensor's)
+		PointCoordinateType deltaPhi;
+		//! Anguar step (may differ from the sensor's)
+		PointCoordinateType deltaTheta;
 		//! Buffer width
 		unsigned width;
 		//! Buffer height
@@ -194,6 +200,9 @@ public:
 	**/
 	const DepthBuffer& getDepthBuffer() const { return m_depthBuffer; }
 
+	//! Removes the associated depth buffer
+	void clearDepthBuffer();
+
 	//Inherited from ccHObject
 	virtual ccBBox getMyOwnBB();
 	virtual ccBBox getDisplayBB();
@@ -207,11 +216,11 @@ protected:
 
 	//! Projects a point in the sensor world
 	/** \param[in] sourcePoint 3D point to project
-		\param[out] destPoint projected point in polar coordinates: (theta,phi) or (phi,theta)
+		\param[out] destPoint projected point in polar coordinates: (theta,phi) or (phi,theta) (angles between [-pi,+pi])
 		\param[out] depth distance from the sensor optical center to the source point
 		\param[in] posIndex (optional) sensor position index (see ccIndexedTransformationBuffer)
 	**/
-	void projectPoint(const CCVector3& sourcePoint, CCVector2& destPoint, ScalarType &depth, double posIndex = 0) const;
+	void projectPoint(const CCVector3& sourcePoint, CCVector2& destPoint, PointCoordinateType &depth, double posIndex = 0) const;
 
 	//! lateral minimal angular scanning limit
 	PointCoordinateType m_phiMin;
@@ -219,6 +228,8 @@ protected:
 	PointCoordinateType m_phiMax;
 	//! lateral angular scanning step
 	PointCoordinateType m_deltaPhi;
+	//! Whether the horizontal angular range is shifted (i.e outside of [0 ; 2*pi])
+	bool m_phiRangeIsShifted;
 
 	//! Vertical minimal angular scanning limit
 	PointCoordinateType m_thetaMin;
@@ -226,14 +237,16 @@ protected:
 	PointCoordinateType m_thetaMax;
 	//! Vertical angular scanning step
 	PointCoordinateType m_deltaTheta;
+	//! Whether the vertical angular range is shifted (i.e outside of [0 ; 2*pi])
+	bool m_thetaRangeIsShifted;
 
 	//! Mirrors rotation order
 	ROTATION_ORDER m_rotationOrder;
 
 	//! Sensor max range
-	ScalarType m_sensorRange;
+	PointCoordinateType m_sensorRange;
 	//! Z-buffer uncertainty
-	ScalarType m_uncertainty;
+	PointCoordinateType m_uncertainty;
 
 	//! Associated Z-buffer
 	DepthBuffer m_depthBuffer;

@@ -572,11 +572,7 @@ void qKinect::grabCloud()
 			sensor->setUncertainty(1e-3f);
 			{
 				int errorCode = 0;
-				CCLib::SimpleCloud* cloud = sensor->project(depthMap,errorCode,true);
-				if (cloud)
-					delete cloud;
-				cloud = 0;
-				if (errorCode == 0)
+				if (sensor->project(depthMap,errorCode,true))
 				{
 					sensor->setName("Kinect");
 					sensor->setGraphicScale(20.0f);

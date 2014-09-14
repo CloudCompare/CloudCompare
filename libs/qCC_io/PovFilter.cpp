@@ -298,34 +298,30 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					gls->setDeltaTheta(dTheta);
 
 					int errorCode = 0;
-					CCLib::GenericIndexedCloud* projectedList = gls->project(theCloud,errorCode,true);
-
-					switch (errorCode)
+					if (gls->project(theCloud,errorCode,true))
 					{
-					case -1:
-						ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): nothing to project?! Must be a bug, sorry ;)").arg(i).arg(theCloud->getName()));
-						break;
-					case -2:
-						ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): the resulting depth map seems much too big! Check parameters, or reduce angular steps ...").arg(i).arg(theCloud->getName()));
-						break;
-					case -3:
-						ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): the resulting depth map is void (too small)! Check parameters and input, or increase angular steps ...").arg(i).arg(theCloud->getName()));
-						break;
-					case -4:
-						ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): not enough memory!").arg(i).arg(theCloud->getName()));
-						break;
-					}
-
-					if (projectedList)
-					{
-						delete projectedList;
-						projectedList = 0;
 						theCloud->addChild(gls);
 					}
 					else
 					{
 						delete gls;
 						gls = 0;
+
+						switch (errorCode)
+						{
+						case -1:
+							ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): nothing to project?! Must be a bug, sorry ;)").arg(i).arg(theCloud->getName()));
+							break;
+						case -2:
+							ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): the resulting depth map seems much too big! Check parameters, or reduce angular steps ...").arg(i).arg(theCloud->getName()));
+							break;
+						case -3:
+							ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): the resulting depth map is void (too small)! Check parameters and input, or increase angular steps ...").arg(i).arg(theCloud->getName()));
+							break;
+						case -4:
+							ccLog::Print(QString("[PovFilter::loadFile] Error on cloud #%1 (%2): not enough memory!").arg(i).arg(theCloud->getName()));
+							break;
+						}
 					}
 
 					//theCloud->setName(subFileName);

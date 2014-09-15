@@ -22,6 +22,7 @@
 
 //Local
 #include "ccPointCloud.h"
+#include "ccSphere.h"
 
 //system
 #include <string.h>
@@ -230,7 +231,130 @@ struct Interval
 	}
 };
 
-bool ccGBLSensor::project(CCLib::GenericCloud* theCloud, int& errorCode, bool autoParameters/*false*/, ccPointCloud* projectedCloud/*=0*/)
+bool ccGBLSensor::computeAutoParameters(CCLib::GenericCloud* theCloud)
+{
+	assert(theCloud);
+	if (!theCloud)
+	{
+		//invlalid input parameter
+		return false;
+	}
+
+	unsigned pointCount = theCloud->size();
+
+	std::vector<bool> nonEmptyAnglesH,nonEmptyAnglesV;
+	try
+	{
+		nonEmptyAnglesH.resize(360,false);
+		nonEmptyAnglesV.resize(360,false);
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		return false;
+	}
+	//force no shift for auto search (we'll fix this later if necessary)
+	m_thetaRangeIsShifted = false;
+	m_phiRangeIsShifted = false;
+
+	PointCoordinateType minV = 0, maxV = 0, minH = 0, maxH = 0;
+	PointCoordinateType maxDepth = 0;
+	{
+		//first project all points to compute the (theta,phi) ranges
+		theCloud->placeIteratorAtBegining();
+		for (unsigned i = 0; i<pointCount; ++i)
+		{
+			const CCVector3 *P = theCloud->getNextPoint();
+			CCVector2 Q;
+			PointCoordinateType depth;
+			projectPoint(*P,Q,depth,m_activeIndex);
+
+			//P.x and P.y are inside [-pi;pi] (result of atan2)
+			int angleH = static_cast<int>(Q.x * CC_RAD_TO_DEG);
+			assert(angleH >= -180 && angleH <= 180);
+			if (angleH == 180)
+				angleH = -180;
+			nonEmptyAnglesH[180 + angleH] = true;
+			if (i != 0)
+			{
+				if (minH > Q.x)
+					minH = Q.x;
+				else if (maxH < Q.x)
+					maxH = Q.x;
+			}
+			else
+			{
+				minH = maxH = Q.x;
+			}
+
+			//P.x and P.y are inside [-pi;pi] (result of atan2)
+			int angleV = static_cast<int>(Q.y * CC_RAD_TO_DEG);
+			assert(angleV >= -180 && angleV <= 180);
+			if (angleV == 180)
+				angleV = -180;
+			nonEmptyAnglesV[180 + angleV] = true;
+			if (i != 0)
+			{
+				if (minV > Q.y)
+					minV = Q.y;
+				else if (maxV < Q.y)
+					maxV = Q.y;
+			}
+			else
+			{
+				minV = maxV = Q.y;
+			}
+
+			if (depth > maxDepth)
+				maxDepth = depth;
+		}
+	}
+
+	Interval bestEmptyPartH = Interval::FindBiggest<bool>(nonEmptyAnglesH,false,true);
+	Interval bestEmptyPartV = Interval::FindBiggest<bool>(nonEmptyAnglesV,false,true);
+
+	m_thetaRangeIsShifted = (bestEmptyPartH.start != 0 && bestEmptyPartH.span > 1 && bestEmptyPartH.start + bestEmptyPartH.span < 360);
+	m_phiRangeIsShifted = (bestEmptyPartV.start != 0 && bestEmptyPartV.span > 1 && bestEmptyPartV.start + bestEmptyPartV.span < 360);
+
+	if (m_thetaRangeIsShifted || m_phiRangeIsShifted)
+	{
+		//we re-project all the points in order to update the boundaries!
+		theCloud->placeIteratorAtBegining();
+		for (unsigned i = 0; i<pointCount; ++i)
+		{
+			const CCVector3 *P = theCloud->getNextPoint();
+			CCVector2 Q;
+			PointCoordinateType depth;
+			projectPoint(*P,Q,depth,m_activeIndex);
+
+			if (i != 0)
+			{
+				if (minH > Q.x)
+					minH = Q.x;
+				else if (maxH < Q.x)
+					maxH = Q.x;
+
+				if (minV > Q.y)
+					minV = Q.y;
+				else if (maxV < Q.y)
+					maxV = Q.y;
+			}
+			else
+			{
+				minH = maxH = Q.x;
+				minV = maxV = Q.y;
+			}
+		}
+	}
+
+	setTheta(minH,maxH);
+	setPhi(minV,maxV);
+	setSensorRange(maxDepth);
+
+	return true;
+}
+
+bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCode, ccPointCloud* projectedCloud/*=0*/)
 {
 	assert(theCloud);
 	if (!theCloud)
@@ -238,121 +362,6 @@ bool ccGBLSensor::project(CCLib::GenericCloud* theCloud, int& errorCode, bool au
 		//invlalid input parameter
 		errorCode = -1;
 		return false;
-	}
-
-	unsigned pointCount = theCloud->size();
-
-	if (autoParameters)
-	{
-		std::vector<bool> nonEmptyAnglesH,nonEmptyAnglesV;
-		try
-		{
-			nonEmptyAnglesH.resize(360,false);
-			nonEmptyAnglesV.resize(360,false);
-		}
-		catch(std::bad_alloc)
-		{
-			//not enough memory
-			errorCode = -4;
-			return false;
-		}
-		//force no shift for auto search (we'll fix this later if necessary)
-		m_thetaRangeIsShifted = false;
-		m_phiRangeIsShifted = false;
-
-		PointCoordinateType minV = 0, maxV = 0, minH = 0, maxH = 0;
-		PointCoordinateType maxDepth = 0;
-		{
-			//first project all points to compute the (theta,phi) ranges
-			theCloud->placeIteratorAtBegining();
-			for (unsigned i = 0; i<pointCount; ++i)
-			{
-				const CCVector3 *P = theCloud->getNextPoint();
-				CCVector2 Q;
-				PointCoordinateType depth;
-				projectPoint(*P,Q,depth,m_activeIndex);
-
-				//P.x and P.y are inside [-pi;pi] (result of atan2)
-				int angleH = static_cast<int>(Q.x * CC_RAD_TO_DEG);
-				assert(angleH >= -180 && angleH <= 180);
-				if (angleH == 180)
-					angleH = -180;
-				nonEmptyAnglesH[180 + angleH] = true;
-				if (i != 0)
-				{
-					if (minH > Q.x)
-						minH = Q.x;
-					else if (maxH < Q.x)
-						maxH = Q.x;
-				}
-				else
-				{
-					minH = maxH = Q.x;
-				}
-
-				//P.x and P.y are inside [-pi;pi] (result of atan2)
-				int angleV = static_cast<int>(Q.y * CC_RAD_TO_DEG);
-				assert(angleV >= -180 && angleV <= 180);
-				if (angleV == 180)
-					angleV = -180;
-				nonEmptyAnglesV[180 + angleV] = true;
-				if (i != 0)
-				{
-					if (minV > Q.y)
-						minV = Q.y;
-					else if (maxV < Q.y)
-						maxV = Q.y;
-				}
-				else
-				{
-					minV = maxV = Q.y;
-				}
-
-				if (depth > maxDepth)
-					maxDepth = depth;
-			}
-		}
-
-		Interval bestEmptyPartH = Interval::FindBiggest<bool>(nonEmptyAnglesH,false,true);
-		Interval bestEmptyPartV = Interval::FindBiggest<bool>(nonEmptyAnglesV,false,true);
-
-		m_thetaRangeIsShifted = (bestEmptyPartH.start != 0 && bestEmptyPartH.span > 1 && bestEmptyPartH.start + bestEmptyPartH.span < 360);
-		m_phiRangeIsShifted = (bestEmptyPartV.start != 0 && bestEmptyPartV.span > 1 && bestEmptyPartV.start + bestEmptyPartV.span < 360);
-
-		if (m_thetaRangeIsShifted || m_phiRangeIsShifted)
-		{
-			//we re-project all the points in order to update the boundaries!
-			theCloud->placeIteratorAtBegining();
-			for (unsigned i = 0; i<pointCount; ++i)
-			{
-				const CCVector3 *P = theCloud->getNextPoint();
-				CCVector2 Q;
-				PointCoordinateType depth;
-				projectPoint(*P,Q,depth,m_activeIndex);
-
-				if (i != 0)
-				{
-					if (minH > Q.x)
-						minH = Q.x;
-					else if (maxH < Q.x)
-						maxH = Q.x;
-
-					if (minV > Q.y)
-						minV = Q.y;
-					else if (maxV < Q.y)
-						maxV = Q.y;
-				}
-				else
-				{
-					minH = maxH = Q.x;
-					minV = maxV = Q.y;
-				}
-			}
-		}
-
-		setTheta(minH,maxH);
-		setPhi(minV,maxV);
-		setSensorRange(maxDepth);
 	}
 
 	//clear previous Z-buffer
@@ -397,6 +406,8 @@ bool ccGBLSensor::project(CCLib::GenericCloud* theCloud, int& errorCode, bool au
 		m_depthBuffer.deltaPhi = deltaPhi;
 		memset(m_depthBuffer.zBuff,0,zBuffSize*sizeof(PointCoordinateType));
 	}
+
+	unsigned pointCount = theCloud->size();
 
 	//project points and accumulate them in Z-buffer
 	{
@@ -762,19 +773,35 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glMultMatrixf(sensorPos.data());
 		}
 
+		//test: center as sphere
+		/*{
+			ccSphere sphere(m_scale/10,0,"Center",12);
+			sphere.showColors(true);
+			sphere.setVisible(true);
+			sphere.setEnabled(true);
+
+			CC_DRAW_CONTEXT sphereContext = context;
+			sphereContext.flags &= (~CC_DRAW_ENTITY_NAMES); //we must remove the 'push name flag' so that the sphere doesn't push its own!
+			sphereContext._win = 0;
+
+			sphere.setTempColor(ccColor::magenta);
+			sphere.draw(sphereContext);
+		}
+		//*/
+
 		//sensor head
 		const PointCoordinateType halfHeadSize = static_cast<PointCoordinateType>(0.3);
 		CCVector3 minCorner(-halfHeadSize,-halfHeadSize,-halfHeadSize);
-		CCVector3 maxCorner(halfHeadSize,halfHeadSize,halfHeadSize);
+		CCVector3 maxCorner( halfHeadSize, halfHeadSize, halfHeadSize);
 		minCorner *= m_scale;
 		maxCorner *= m_scale;
 		ccBBox bbHead(minCorner,maxCorner);
-		CCVector3 headCenter(0,0,(1-halfHeadSize)*m_scale);
-		bbHead += headCenter;
+		//CCVector3 headCenter(0,0,(1-halfHeadSize)*m_scale);
+		//bbHead += headCenter;
 		bbHead.draw(m_color.u);
 
 		//sensor legs
-		CCVector3 headConnect = headCenter - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
+		CCVector3 headConnect = /*headCenter*/ - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
 		glColor3ubv(m_color.u);
 		glBegin(GL_LINES);
 		ccGL::Vertex3v(headConnect.u);

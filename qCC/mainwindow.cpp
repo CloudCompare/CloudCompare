@@ -2636,7 +2636,7 @@ void MainWindow::doActionSetViewFromSensor()
 				ccConsole::Print/*Debug*/(QString("Phi = %1 / Theta = %2").arg(phi).arg(theta));
 				ccGLMatrixd rotz; rotz.initFromParameters(phi,CCVector3d(0,0,-1),CCVector3d(0,0,0));
 				ccGLMatrixd roty; roty.initFromParameters(theta,CCVector3d(0,-1,0),CCVector3d(0,0,0));
-				//scannerViewMat = scannerViewMat * rotz/** roty*/;
+				//scannerViewMat = scannerViewMat * roty * rotz;
 			}
 			win->setBaseViewMat(scannerViewMat);
 			//TODO: can we set the right FOV?
@@ -2672,8 +2672,7 @@ void MainWindow::doActionCreateGBLSensor()
 			spDlg.updateGBLSensor(sensor);
 
 			//we compute projection
-			int errorCode;
-			if (sensor->project(cloud,errorCode,true))
+			if (sensor->computeAutoParameters(cloud))
 			{
 				cloud->addChild(sensor);
 
@@ -2686,7 +2685,15 @@ void MainWindow::doActionCreateGBLSensor()
 					sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e3));
 
 				//we display depth buffer
-				ccRenderingTools::ShowDepthBuffer(sensor,this);
+				int errorCode;
+				if (sensor->computeDepthBuffer(cloud,errorCode))
+				{
+					ccRenderingTools::ShowDepthBuffer(sensor,this);
+				}
+				else
+				{
+					displaySensorProjectErrorString(errorCode);
+				}
 
 				////DGM: test
 				//{
@@ -2724,7 +2731,7 @@ void MainWindow::doActionCreateGBLSensor()
 			}
 			else
 			{
-				displaySensorProjectErrorString(errorCode);
+				ccLog::Error("Failed to create sensor");
 				delete sensor;
 				sensor = 0;
 			}
@@ -2811,18 +2818,19 @@ void MainWindow::doActionModifySensor()
 				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(gbl->getParent());
 
 				int errorCode;
-				if (gbl->project(cloud,errorCode,true))
+				if (gbl->computeDepthBuffer(cloud,errorCode))
 				{
 					//we display depth buffer
 					ccRenderingTools::ShowDepthBuffer(gbl,this);
 
 					//in case the sensor position has changed
-					ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
+					/*ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
 					if (win)
 					{
 						ccBBox box = cloud->getBB();
 						win->updateConstellationCenterAndZoom(&box);
 					}
+					//*/
 
 					if (sensor->isVisible() && sensor->isEnabled())
 					{
@@ -3068,7 +3076,7 @@ void MainWindow::doActionShowDepthBuffer()
 				{
 					//force depth buffer computation
 					int errorCode;
-					if (!sensor->project(cloud,errorCode,true))
+					if (!sensor->computeDepthBuffer(cloud,errorCode))
 					{
 						displaySensorProjectErrorString(errorCode);
 					}
@@ -6826,8 +6834,9 @@ void MainWindow::deactivateSegmentationMode(bool state)
 								if (cloud)
 								{
 									//we create a copy of that
-									ccGBLSensor * clonedSensor = new ccGBLSensor(*sensor);
+									ccGBLSensor* clonedSensor = new ccGBLSensor(*sensor);
 									cloud->addChild(clonedSensor);
+									clonedSensor->computeAutoParameters(cloud);
 								}
 								//remove the associated depth buffer (may have been changed)
 								sensor->clearDepthBuffer();
@@ -7321,6 +7330,11 @@ void MainWindow::zoomOnSelectedEntities()
 	if (tempGroup.getChildrenNumber() != 0)
 	{
 		ccBBox box = tempGroup.getBB(false, false, win);
+		if (!box.isValid())
+		{
+			//if the selected entities have no valid bounding-box, then it's maybe only 'GL' objects
+			box = tempGroup.getBB(false, true, win);
+		}
 		win->updateConstellationCenterAndZoom(&box);
 	}
 

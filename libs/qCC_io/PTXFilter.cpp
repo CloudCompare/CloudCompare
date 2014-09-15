@@ -518,6 +518,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 						sensor->setGraphicScale(PC_ONE/2);
 						sensor->setVisible(true);
 						sensor->setEnabled(false);
+						sensor->computeAutoParameters(cloud);
 						cloud->addChild(sensor);
 					}
 				}

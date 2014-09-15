@@ -83,7 +83,7 @@ void ccCameraParamEditDlg::makeFrameless()
 void ccCameraParamEditDlg::iThetaValueChanged(int val)
 {
 	thetaSpinBox->blockSignals(true);
-	thetaSpinBox->setValue((double)val/10);
+	thetaSpinBox->setValue(static_cast<double>(val)/10);
 	thetaSpinBox->blockSignals(false);
 
 	reflectParamChange();
@@ -92,7 +92,7 @@ void ccCameraParamEditDlg::iThetaValueChanged(int val)
 void ccCameraParamEditDlg::iPsiValueChanged(int val)
 {
 	psiSpinBox->blockSignals(true);
-	psiSpinBox->setValue((double)val/10);
+	psiSpinBox->setValue(static_cast<double>(val)/10);
 	psiSpinBox->blockSignals(false);
 
 	reflectParamChange();
@@ -101,7 +101,7 @@ void ccCameraParamEditDlg::iPsiValueChanged(int val)
 void ccCameraParamEditDlg::iPhiValueChanged(int val)
 {
 	phiSpinBox->blockSignals(true);
-	phiSpinBox->setValue((double)val/10);
+	phiSpinBox->setValue(static_cast<double>(val)/10);
 	phiSpinBox->blockSignals(false);
 
 	reflectParamChange();
@@ -110,7 +110,7 @@ void ccCameraParamEditDlg::iPhiValueChanged(int val)
 void ccCameraParamEditDlg::dThetaValueChanged(double val)
 {
 	thetaSlider->blockSignals(true);
-	thetaSlider->setValue((int)(val*10.0));
+	thetaSlider->setValue(static_cast<int>(val*10.0));
 	thetaSlider->blockSignals(false);
 	reflectParamChange();
 }
@@ -118,7 +118,7 @@ void ccCameraParamEditDlg::dThetaValueChanged(double val)
 void ccCameraParamEditDlg::dPsiValueChanged(double val)
 {
 	psiSlider->blockSignals(true);
-	psiSlider->setValue((int)(val*10.0));
+	psiSlider->setValue(static_cast<int>(val*10.0));
 	psiSlider->blockSignals(false);
 	reflectParamChange();
 }
@@ -126,7 +126,7 @@ void ccCameraParamEditDlg::dPsiValueChanged(double val)
 void ccCameraParamEditDlg::dPhiValueChanged(double val)
 {
 	phiSlider->blockSignals(true);
-	phiSlider->setValue((int)(val*10.0));
+	phiSlider->setValue(static_cast<int>(val*10.0));
 	phiSlider->blockSignals(false);
 	reflectParamChange();
 }
@@ -138,8 +138,8 @@ void ccCameraParamEditDlg::cameraCenterChanged()
 
 	m_associatedWin->blockSignals(true);
 	m_associatedWin->setCameraPos( CCVector3d(	exDoubleSpinBox->value(),
-		eyDoubleSpinBox->value(),
-		ezDoubleSpinBox->value() ));
+												eyDoubleSpinBox->value(),
+												ezDoubleSpinBox->value() ));
 	m_associatedWin->blockSignals(false);
 
 	m_associatedWin->redraw();
@@ -318,7 +318,7 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 	if (m_associatedWin)
 	{
 		initWithMatrix(m_associatedWin->getBaseViewMat());
-		connect(m_associatedWin,	SIGNAL(baseViewMatChanged(const ccGLMatrixdd&)),	this,	SLOT(initWithMatrix(const ccGLMatrixd&)));
+		connect(m_associatedWin,	SIGNAL(baseViewMatChanged(const ccGLMatrixd&)),		this,	SLOT(initWithMatrix(const ccGLMatrixd&)));
 		connect(m_associatedWin,	SIGNAL(viewMatRotated(const ccGLMatrixd&)),			this,	SLOT(updateViewMatrix(const ccGLMatrixd&)));
 
 		connect(m_associatedWin,	SIGNAL(cameraPosChanged(const CCVector3d&)),		this,	SLOT(updateCameraCenter(const CCVector3d&)));
@@ -382,14 +382,17 @@ void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 
 	phiSpinBox->blockSignals(true);
 	phiSpinBox->setValue(CC_RAD_TO_DEG*phi);
+	dPhiValueChanged(phiSpinBox->value());
 	phiSpinBox->blockSignals(false);
 	
 	psiSpinBox->blockSignals(true);
 	psiSpinBox->setValue(CC_RAD_TO_DEG*psi);
+	dPsiValueChanged(psiSpinBox->value());
 	psiSpinBox->blockSignals(false);
 
 	thetaSpinBox->blockSignals(true);
 	thetaSpinBox->setValue(CC_RAD_TO_DEG*theta);
+	dThetaValueChanged(thetaSpinBox->value());
 	thetaSpinBox->blockSignals(false);
 
 	if (m_associatedWin)

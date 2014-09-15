@@ -139,7 +139,7 @@ public:
 		\param projectedCloud cloud structure to store the projected points
 		\return a point cloud with the projected 2D points (Theta, Phi) + distances to sensor as a scalar field [should be deleted by the user if not used]
 	**/
-	bool project(CCLib::GenericCloud* cloud, int& errorCode, bool autoParameters = false, ccPointCloud* projectedCloud = 0);
+	bool computeDepthBuffer(CCLib::GenericCloud* cloud, int& errorCode, ccPointCloud* projectedCloud = 0);
 
 	//! Projects a set of point cloud normals in the sensor world
 	/** WARNING: this method uses the cloud global iterator
@@ -202,6 +202,9 @@ public:
 
 	//! Removes the associated depth buffer
 	void clearDepthBuffer();
+
+	//! Computes parameters automatically (all but the angular steps!)
+	bool computeAutoParameters(CCLib::GenericCloud* theCloud);
 
 	//Inherited from ccHObject
 	virtual ccBBox getMyOwnBB();

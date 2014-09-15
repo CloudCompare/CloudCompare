@@ -464,7 +464,7 @@ ccBBox ccHObject::getBB(bool relative/*=true*/, bool withGLfeatures/*=false*/, c
 	//if (!isEnabled())
 	//	return box;
 
-	if (!display || m_currentDisplay==display)
+	if (!display || m_currentDisplay == display)
 		box = (withGLfeatures ? getDisplayBB() : getMyOwnBB());
 
 	for (Container::iterator it = m_children.begin(); it != m_children.end(); ++it)

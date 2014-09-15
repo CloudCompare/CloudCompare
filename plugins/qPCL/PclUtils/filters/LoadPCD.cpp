@@ -113,7 +113,7 @@ int LoadPCD::compute()
 		}
 
 		//now we construct a ccGBLSensor with these characteristics
-		ccGBLSensor * sensor = new ccGBLSensor;
+		ccGBLSensor* sensor = new ccGBLSensor;
 
 		// get orientation as rot matrix
 		Eigen::Matrix3f eigrot = orientation.toRotationMatrix();
@@ -150,15 +150,11 @@ int LoadPCD::compute()
 
 		sensor->setGraphicScale(out_cloud->getBB().getDiagNorm() / 10);
 
-		////Compute the depth buffer
-		//{
-		//	ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(out_cloud);
-		//	int errorCode;
-		//	if (!sensor->project(cloud,errorCode,true))
-		//	{
-		//		//failed to compute the depth buffer!
-		//	}
-		//}
+		//Compute parameters
+		{
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(out_cloud);
+			sensor->computeAutoParameters(cloud);
+		}
 
 		QString cloud_name = QFileInfo(filename).baseName();
 		out_cloud->setName(cloud_name);

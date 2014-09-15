@@ -571,8 +571,7 @@ void qKinect::grabCloud()
 			sensor->setDeltaTheta(0.0017f);
 			sensor->setUncertainty(1e-3f);
 			{
-				int errorCode = 0;
-				if (sensor->project(depthMap,errorCode,true))
+				if (sensor->computeAutoParameters(depthMap))
 				{
 					sensor->setName("Kinect");
 					sensor->setGraphicScale(20.0f);

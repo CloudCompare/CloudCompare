@@ -2535,6 +2535,45 @@ void MainWindow::doActionComputeScatteringAngles()
 	updateUI();
 }
 
+//equivalent to gluLookAt inspired from https://sourceforge.net/projects/glhlib
+void glhLookAt( ccGLMatrixd& matrix, const CCVector3d& eyePosition3D, const CCVector3d& center3D, const CCVector3d& upVector3D )
+{
+   //------------------
+   CCVector3d forward = center3D - eyePosition3D;
+   forward.normalize();
+   //------------------
+   //Side = forward x up
+   CCVector3d side = forward.cross(upVector3D);
+   side.normalize();
+   //------------------
+   //Recompute up as: up = side x forward
+   CCVector3d up = side.cross(forward);
+   //------------------
+   ccGLMatrixd matrix2;
+   matrix2.data()[0]  = side.x;
+   matrix2.data()[4]  = side.y;
+   matrix2.data()[8]  = side.z;
+   matrix2.data()[12] = 0.0;
+   //------------------
+   matrix2.data()[1]  = up.x;
+   matrix2.data()[5]  = up.y;
+   matrix2.data()[9]  = up.z;
+   matrix2.data()[13] = 0.0;
+   //------------------
+   matrix2.data()[2]  = -forward.x;
+   matrix2.data()[6]  = -forward.y;
+   matrix2.data()[10] = -forward.z;
+   matrix2.data()[14] = 0.0;
+   //------------------
+   matrix2.data()[3] = matrix2.data()[7] = matrix2.data()[11] = 0.0;
+   matrix2.data()[15] = 1.0;
+   //------------------
+   CCVector3d shift = -eyePosition3D;
+   matrix2.setTranslation(shift);
+
+   matrix = matrix2;
+}
+
 void MainWindow::doActionSetViewFromSensor()
 {
 	//there should be only one sensor in current selection!
@@ -2569,27 +2608,23 @@ void MainWindow::doActionSetViewFromSensor()
 		{
 			//ccViewportParameters params = win->getViewportParameters();
 			setViewerPerspectiveView(win);
-			win->setCameraPos(CCVector3d::fromArray(sensorCenter.u));
-			win->setPivotPoint(CCVector3d::fromArray(sensorCenter.u));
+			CCVector3d sensorCenterd = CCVector3d::fromArray(sensorCenter.u);
+			win->setCameraPos(sensorCenterd);
+			win->setPivotPoint(sensorCenterd);
 			//FIXME: more complicated! Depends on the 'rotation order' for GBL sensors for instance
-			win->setView(CC_FRONT_VIEW,false);
+			//win->setView(CC_FRONT_VIEW,false);
 
+			//scanner main directions (front and up)
+			CCVector3d scannerX(trans.data()[0],trans.data()[4],trans.data()[8]);
+			CCVector3d scannerZ(trans.data()[2],trans.data()[6],trans.data()[10]);
+
+			//generate corresponding view matrix
+			ccGLMatrixd scannerViewMat;
+			glhLookAt(scannerViewMat, sensorCenterd, sensorCenterd + scannerX, scannerZ);
+
+			//we only keep the translation from the original view matix
 			ccGLMatrixd viewMat = win->getBaseViewMat();
-			double* viewX = viewMat.getColumn(0);
-			double* viewY = viewMat.getColumn(1);
-			double* viewZ = viewMat.getColumn(2);
-			const float* scannerX = trans.getColumn(0);
-			const float* scannerY = trans.getColumn(1);
-			const float* scannerZ = trans.getColumn(2);
-			viewX[0] =  scannerX[0];
-			viewX[1] =  scannerX[1];
-			viewX[2] =  scannerX[2];
-			viewY[0] = -scannerZ[0];
-			viewY[1] = -scannerZ[1];
-			viewY[2] = -scannerZ[2];
-			viewZ[0] =  scannerY[0];
-			viewZ[1] =  scannerY[1];
-			viewZ[2] =  scannerY[2];
+			scannerViewMat.setTranslation(viewMat.getTranslation());
 
 			//add the 'angular centering' component
 			if (sensor->isA(CC_TYPES::GBL_SENSOR))
@@ -2599,11 +2634,11 @@ void MainWindow::doActionSetViewFromSensor()
 				PointCoordinateType phi = (gblSensor->getPhiMax() + gblSensor->getPhiMin())/2;
 				//FIXME: work in progress
 				ccConsole::Print/*Debug*/(QString("Phi = %1 / Theta = %2").arg(phi).arg(theta));
-				ccGLMatrixd rotz; rotz.initFromParameters(-phi,CCVector3d(0,0,1),CCVector3d(0,0,0));
-				ccGLMatrixd rotx; rotx.initFromParameters(theta,CCVector3d(1,0,0),CCVector3d(0,0,0));
-				//viewMat = viewMat * rotz.inverse();
+				ccGLMatrixd rotz; rotz.initFromParameters(phi,CCVector3d(0,0,-1),CCVector3d(0,0,0));
+				ccGLMatrixd roty; roty.initFromParameters(theta,CCVector3d(0,-1,0),CCVector3d(0,0,0));
+				//scannerViewMat = scannerViewMat * rotz/** roty*/;
 			}
-			win->setBaseViewMat(viewMat);
+			win->setBaseViewMat(scannerViewMat);
 			//TODO: can we set the right FOV?
 			win->redraw();
 		}
@@ -7204,7 +7239,6 @@ void MainWindow::doActionEditCamera()
 	}
 
 	m_cpeDlg->linkWith(qWin);
-
 	m_cpeDlg->start();
 
 	updateMDIDialogsPlacement();

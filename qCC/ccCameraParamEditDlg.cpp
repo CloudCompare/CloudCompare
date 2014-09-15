@@ -319,6 +319,8 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 	{
 		initWithMatrix(m_associatedWin->getBaseViewMat());
 		connect(m_associatedWin,	SIGNAL(baseViewMatChanged(const ccGLMatrixdd&)),	this,	SLOT(initWithMatrix(const ccGLMatrixd&)));
+		connect(m_associatedWin,	SIGNAL(viewMatRotated(const ccGLMatrixd&)),			this,	SLOT(updateViewMatrix(const ccGLMatrixd&)));
+
 		connect(m_associatedWin,	SIGNAL(cameraPosChanged(const CCVector3d&)),		this,	SLOT(updateCameraCenter(const CCVector3d&)));
 		connect(m_associatedWin,	SIGNAL(pivotPointChanged(const CCVector3d&)),		this,	SLOT(updatePivotPoint(const CCVector3d&)));
 		connect(m_associatedWin,	SIGNAL(perspectiveStateChanged()),					this,	SLOT(updateViewMode()));
@@ -366,26 +368,34 @@ void ccCameraParamEditDlg::updateViewMode()
 	}
 }
 
+void ccCameraParamEditDlg::updateViewMatrix(const ccGLMatrixd&)
+{
+	if (m_associatedWin)
+		initWithMatrix(m_associatedWin->getBaseViewMat());
+}
+
 void ccCameraParamEditDlg::initWithMatrix(const ccGLMatrixd& mat)
 {
 	double phi=0, theta=0, psi=0;
 	CCVector3d trans;
 	mat.getParameters(phi,theta,psi,trans);
 
-	//to prevent retro-action!
-	ccGLWindow* win = m_associatedWin;
-	m_associatedWin = 0;
-
+	phiSpinBox->blockSignals(true);
 	phiSpinBox->setValue(CC_RAD_TO_DEG*phi);
+	phiSpinBox->blockSignals(false);
+	
+	psiSpinBox->blockSignals(true);
 	psiSpinBox->setValue(CC_RAD_TO_DEG*psi);
-	thetaSpinBox->setValue(CC_RAD_TO_DEG*theta);
+	psiSpinBox->blockSignals(false);
 
-	m_associatedWin = win;
+	thetaSpinBox->blockSignals(true);
+	thetaSpinBox->setValue(CC_RAD_TO_DEG*theta);
+	thetaSpinBox->blockSignals(false);
 
 	if (m_associatedWin)
 	{
-		updatePivotPoint(win->getViewportParameters().pivotPoint);
-		updateCameraCenter(win->getViewportParameters().cameraCenter);
+		updatePivotPoint(m_associatedWin->getViewportParameters().pivotPoint);
+		updateCameraCenter(m_associatedWin->getViewportParameters().cameraCenter);
 	}
 }
 
@@ -412,17 +422,19 @@ void ccCameraParamEditDlg::updatePivotPoint(const CCVector3d& P)
 	if (!m_associatedWin)
 		return;
 
-	//to prevent retro-action!
-	ccGLWindow* win = m_associatedWin;
-	m_associatedWin = 0;
-
+	rcxDoubleSpinBox->blockSignals(true);
+	rcyDoubleSpinBox->blockSignals(true);
+	rczDoubleSpinBox->blockSignals(true);
 	rcxDoubleSpinBox->setValue(P.x);
 	rcyDoubleSpinBox->setValue(P.y);
 	rczDoubleSpinBox->setValue(P.z);
+	rcxDoubleSpinBox->blockSignals(false);
+	rcyDoubleSpinBox->blockSignals(false);
+	rczDoubleSpinBox->blockSignals(false);
 
-	fovDoubleSpinBox->setValue(win->getViewportParameters().fov);
-
-	m_associatedWin = win;
+	fovDoubleSpinBox->blockSignals(true);
+	fovDoubleSpinBox->setValue(m_associatedWin->getViewportParameters().fov);
+	fovDoubleSpinBox->blockSignals(false);
 }
 
 ccGLMatrixd ccCameraParamEditDlg::getMatrix()

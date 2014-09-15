@@ -28,6 +28,7 @@ Big ones:
 [*] Volume calculation
 
 Various:
+[*] Add shortcuts + menu entries to lock the interactive rotation (3D view) around X, Y or Z
 [*] Add parameters for the command line to setup the FBX output format (http://www.danielgm.net/cc/forum/viewtopic.php?t=969)
 [*] Add a "Apply all" button for ASCII import
 [*] Save primitives in DXF files (http://www.cloudcompare.org/forum/viewtopic.php?t=573)

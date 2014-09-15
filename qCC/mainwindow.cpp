@@ -2572,9 +2572,25 @@ void MainWindow::doActionSetViewFromSensor()
 			win->setCameraPos(CCVector3d::fromArray(sensorCenter.u));
 			win->setPivotPoint(CCVector3d::fromArray(sensorCenter.u));
 			//FIXME: more complicated! Depends on the 'rotation order' for GBL sensors for instance
-			//win->setView(CC_FRONT_VIEW,false);
-			ccGLMatrix rot = trans;
-			rot.clearTranslation();
+			win->setView(CC_FRONT_VIEW,false);
+
+			ccGLMatrixd viewMat = win->getBaseViewMat();
+			double* viewX = viewMat.getColumn(0);
+			double* viewY = viewMat.getColumn(1);
+			double* viewZ = viewMat.getColumn(2);
+			const float* scannerX = trans.getColumn(0);
+			const float* scannerY = trans.getColumn(1);
+			const float* scannerZ = trans.getColumn(2);
+			viewX[0] =  scannerX[0];
+			viewX[1] =  scannerX[1];
+			viewX[2] =  scannerX[2];
+			viewY[0] = -scannerZ[0];
+			viewY[1] = -scannerZ[1];
+			viewY[2] = -scannerZ[2];
+			viewZ[0] =  scannerY[0];
+			viewZ[1] =  scannerY[1];
+			viewZ[2] =  scannerY[2];
+
 			//add the 'angular centering' component
 			if (sensor->isA(CC_TYPES::GBL_SENSOR))
 			{
@@ -2583,12 +2599,11 @@ void MainWindow::doActionSetViewFromSensor()
 				PointCoordinateType phi = (gblSensor->getPhiMax() + gblSensor->getPhiMin())/2;
 				//FIXME: work in progress
 				ccConsole::Print/*Debug*/(QString("Phi = %1 / Theta = %2").arg(phi).arg(theta));
-				ccGLMatrix rotz; rotz.initFromParameters(/*static_cast<PointCoordinateType>(M_PI/2) - */phi,CCVector3(0,0,1),CCVector3(0,0,0));
-				ccGLMatrix rotx; rotx.initFromParameters(theta,CCVector3(1,0,0),CCVector3(0,0,0));
-				//rot = rot * rotz;
+				ccGLMatrixd rotz; rotz.initFromParameters(-phi,CCVector3d(0,0,1),CCVector3d(0,0,0));
+				ccGLMatrixd rotx; rotx.initFromParameters(theta,CCVector3d(1,0,0),CCVector3d(0,0,0));
+				//viewMat = viewMat * rotz.inverse();
 			}
-			//win->rotateBaseViewMat(ccGLMatrixd(rot.data()));
-			win->setBaseViewMat(ccGLMatrixd(rot.data()));
+			win->setBaseViewMat(viewMat);
 			//TODO: can we set the right FOV?
 			win->redraw();
 		}
@@ -7182,11 +7197,13 @@ void MainWindow::doActionEditCamera()
 	{
 		m_cpeDlg = new ccCameraParamEditDlg(qWin);
 		//m_cpeDlg->makeFrameless(); //does not work on linux
-		m_cpeDlg->linkWith(qWin);
+		
 		connect(m_mdiArea, SIGNAL(subWindowActivated(QMdiSubWindow*)), m_cpeDlg, SLOT(linkWith(QMdiSubWindow*)));
 
 		registerMDIDialog(m_cpeDlg,Qt::BottomLeftCorner);
 	}
+
+	m_cpeDlg->linkWith(qWin);
 
 	m_cpeDlg->start();
 

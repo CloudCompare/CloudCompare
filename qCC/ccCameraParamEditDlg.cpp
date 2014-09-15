@@ -312,7 +312,7 @@ bool ccCameraParamEditDlg::linkWith(ccGLWindow* win)
 
 	if (oldWin)
 	{
-		this->disconnect(oldWin);
+		m_associatedWin->disconnect(this);
 	}
 
 	if (m_associatedWin)

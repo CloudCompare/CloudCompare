@@ -754,10 +754,27 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 	addSeparator("GBL Sensor");
 
 	//Angular steps (phi)
-	appendRow( ITEM("dPhi"), ITEM(QString::number(_obj->getDeltaPhi())) );
+	PointCoordinateType deltaPhi = _obj->getDeltaPhi();
+	appendRow( ITEM("dPhi"), ITEM(QString("%1 (%2 deg.)").arg(deltaPhi).arg(deltaPhi * CC_RAD_TO_DEG)) );
 
 	//Angular steps (theta)
-	appendRow( ITEM("dTheta"), ITEM(QString::number(_obj->getDeltaTheta())) );
+	PointCoordinateType deltaTheta = _obj->getDeltaTheta();
+	appendRow( ITEM("dTheta"), ITEM(QString("%1 (%2 deg.)").arg(deltaTheta).arg(deltaTheta * CC_RAD_TO_DEG)) );
+
+	//sensor aboslute orientation
+	const ccGLMatrix& trans = _obj->getRigidTransformation();
+	{
+		//sensor center
+		const float* t = trans.getTranslation();
+		appendRow( ITEM("Sensor center"), ITEM(QString("(%1;%2;%3)").arg(t[0]).arg(t[1]).arg(t[2])) );
+		//sensor axes
+		const char axisNames[3] = { 'X', 'Y', 'Z' };
+		for (unsigned i=0; i<3; ++i)
+		{
+			const float* u = trans.getColumn(i);
+			appendRow( ITEM(QString("Sensor %1 axis").arg(axisNames[i])), ITEM(QString("(%1;%2;%3)").arg(u[0]).arg(u[1]).arg(u[2])) );
+		}
+	}
 
 	//Uncertainty
 	appendRow( ITEM("Uncertainty"), ITEM(QString::number(_obj->getUncertainty())) );

@@ -1639,7 +1639,7 @@ void ccGLWindow::recalcModelViewMatrix()
 	//glGetFloatv(GL_MODELVIEW_MATRIX, m_viewMat.data());
 	glGetDoublev(GL_MODELVIEW_MATRIX, m_viewMatd);
 
-	m_validModelviewMatrix=true;
+	m_validModelviewMatrix = true;
 }
 
 const ccGLMatrixd& ccGLWindow::getBaseViewMat()

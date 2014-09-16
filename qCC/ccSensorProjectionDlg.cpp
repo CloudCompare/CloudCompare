@@ -47,11 +47,13 @@ void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 	if( !sensor)
 		return;
 
+	const int precision = sizeof(PointCoordinateType) == 8 ? 12 : 8;
+
 	//center
 	const float* C = sensor->getRigidTransformation().getTranslation();
-	posXEdit->setText(QString("%1").arg(C[0]));
-	posYEdit->setText(QString("%1").arg(C[1]));
-	posZEdit->setText(QString("%1").arg(C[2]));
+	posXEdit->setText(QString::number(C[0],'f',precision));
+	posYEdit->setText(QString::number(C[1],'f',precision));
+	posZEdit->setText(QString::number(C[2],'f',precision));
 
 	//rotation order
 	if (sensor->getRotationOrder() == ccGBLSensor::YAW_THEN_PITCH)
@@ -69,20 +71,22 @@ void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 	const ccGLMatrix& rot = sensor->getRigidTransformation();
 	{
 		const float* mat = rot.data();
-		x1rot->setText(QString::number(mat[0]));
-		x2rot->setText(QString::number(mat[3]));
-		x3rot->setText(QString::number(mat[8]));
-		y1rot->setText(QString::number(mat[1]));
-		y2rot->setText(QString::number(mat[5]));
-		y3rot->setText(QString::number(mat[9]));
-		z1rot->setText(QString::number(mat[2]));
-		z2rot->setText(QString::number(mat[6]));
-		z3rot->setText(QString::number(mat[10]));
+		x1rot->setText(QString::number(mat[0] ,'f',precision));
+		y1rot->setText(QString::number(mat[1] ,'f',precision));
+		z1rot->setText(QString::number(mat[2] ,'f',precision));
+
+		x2rot->setText(QString::number(mat[4] ,'f',precision));
+		y2rot->setText(QString::number(mat[5] ,'f',precision));
+		z2rot->setText(QString::number(mat[6] ,'f',precision));
+
+		x3rot->setText(QString::number(mat[8] ,'f',precision));
+		y3rot->setText(QString::number(mat[9] ,'f',precision));
+		z3rot->setText(QString::number(mat[10],'f',precision));
 	}
 
 	//angular steps
-	pitchStepSpinBox->setValue(sensor->getPitchStep());
-	yawStepSpinBox->setValue(sensor->getYawStep());
+	pitchStepSpinBox->setValue(sensor->getPitchStep() * CC_RAD_TO_DEG);
+	yawStepSpinBox->setValue(sensor->getYawStep() * CC_RAD_TO_DEG);
 }
 
 void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
@@ -102,13 +106,15 @@ void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 	{
 		float* mat = rot.data();
 		mat[0]  = x1rot->text().toFloat();
-		mat[4]  = x2rot->text().toFloat();
-		mat[8]  = x3rot->text().toFloat();
 		mat[1]  = y1rot->text().toFloat();
-		mat[5]  = y2rot->text().toFloat();
-		mat[9]  = y3rot->text().toFloat();
 		mat[2]  = z1rot->text().toFloat();
+
+		mat[4]  = x2rot->text().toFloat();
+		mat[5]  = y2rot->text().toFloat();
 		mat[6]  = z2rot->text().toFloat();
+
+		mat[8]  = x3rot->text().toFloat();
+		mat[9]  = y3rot->text().toFloat();
 		mat[10] = z3rot->text().toFloat();
 	}
 
@@ -121,8 +127,8 @@ void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 	sensor->setRigidTransformation(rot);
 
 	//angular steps
-	sensor->setPitchStep(static_cast<PointCoordinateType>(pitchStepSpinBox->value()));
-	sensor->setYawStep(static_cast<PointCoordinateType>(yawStepSpinBox->value()));
+	sensor->setPitchStep(static_cast<PointCoordinateType>(pitchStepSpinBox->value() * CC_DEG_TO_RAD));
+	sensor->setYawStep(static_cast<PointCoordinateType>(yawStepSpinBox->value() * CC_DEG_TO_RAD));
 
 	//uncertainty
 	sensor->setUncertainty(static_cast<ScalarType>(uncertaintyDoubleSpinBox->value()));

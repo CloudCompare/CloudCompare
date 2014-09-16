@@ -82,7 +82,7 @@ void ccGBLSensor::setPitchRange(PointCoordinateType minPhi, PointCoordinateType 
 	m_phiMin = minPhi;
 	m_phiMax = maxPhi;
 
-	if (m_phiMax >= 2.0*M_PI)
+	if (m_phiMax >= M_PI)
 		m_pitchAnglesAreShifted = true;
 
 	clearDepthBuffer();
@@ -102,7 +102,7 @@ void ccGBLSensor::setYawRange(PointCoordinateType minTehta, PointCoordinateType 
 	m_thetaMin = minTehta;
 	m_thetaMax = maxTheta;
 
-	if (m_thetaMax >= 2.0*M_PI)
+	if (m_thetaMax >= M_PI)
 		m_yawAnglesAreShifted = true;
 
 	clearDepthBuffer();
@@ -176,25 +176,21 @@ bool ccGBLSensor::convertToDepthMapCoords(PointCoordinateType yaw, PointCoordina
 	assert(m_depthBuffer.deltaTheta != 0 && m_depthBuffer.deltaPhi != 0);
 
 	//yaw
+	if (yaw < m_thetaMin || yaw > m_thetaMax)
+		return false;
+	
 	i = static_cast<unsigned>(floor((yaw-m_thetaMin)/m_depthBuffer.deltaTheta));
-	if (i >= m_depthBuffer.width)
-	{
-		if (yaw <= m_thetaMax)
-			--i;
-		else
-			return false;
-	}
-	i = (m_depthBuffer.width-1) - i; //yaw angles are in the wrong way! (because they are expressed relatively to the sensor)
+	if (i == m_depthBuffer.width)
+		--i;
+	//yaw angles are in the wrong way! (because they are expressed relatively to the sensor)
+	i = (m_depthBuffer.width-1) - i;
 	
 	//pitch
+	if (pitch < m_phiMin || pitch > m_phiMax)
+		return false;
 	j = static_cast<unsigned>(floor((pitch-m_phiMin)/m_depthBuffer.deltaPhi));
-	if (j >= m_depthBuffer.height)
-	{
-		if (pitch <= m_phiMax)
-			--j;
-		else
-			return false;
-	}
+	if (j == m_depthBuffer.height)
+		--j;
 
 	return true;
 }
@@ -762,28 +758,60 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		}
 		//*/
 
-		//sensor head
 		const PointCoordinateType halfHeadSize = static_cast<PointCoordinateType>(0.3);
-		CCVector3 minCorner(-halfHeadSize,-halfHeadSize,-halfHeadSize);
-		CCVector3 maxCorner( halfHeadSize, halfHeadSize, halfHeadSize);
-		minCorner *= m_scale;
-		maxCorner *= m_scale;
-		ccBBox bbHead(minCorner,maxCorner);
-		//CCVector3 headCenter(0,0,(1-halfHeadSize)*m_scale);
-		//bbHead += headCenter;
-		bbHead.draw(m_color.u);
+
+		//sensor axes
+		{
+			//increased width
+			glPushAttrib(GL_LINE_BIT);
+			GLint width;
+			glGetIntegerv(GL_LINE_WIDTH,&width);
+			glLineWidth(width+1);
+
+			PointCoordinateType axisLength = halfHeadSize * m_scale;
+			glColor3ubv(ccColor::red);
+			CCVector3 C(0,0,0);
+			glBegin(GL_LINES);
+			ccGL::Vertex3v(C.u);
+			ccGL::Vertex3(C.x+axisLength,C.y,C.z);
+			glEnd();
+			glColor3ubv(ccColor::green);
+			glBegin(GL_LINES);
+			ccGL::Vertex3v(C.u);
+			ccGL::Vertex3(C.x,C.y+axisLength,C.z);
+			glEnd();
+			glColor3ubv(ccColor::blue);
+			glBegin(GL_LINES);
+			ccGL::Vertex3v(C.u);
+			ccGL::Vertex3(C.x,C.y,C.z+axisLength);
+			glEnd();
+
+			glPopAttrib();
+		}
+
+		//sensor head
+		{
+			CCVector3 minCorner(-halfHeadSize,-halfHeadSize,-halfHeadSize);
+			CCVector3 maxCorner( halfHeadSize, halfHeadSize, halfHeadSize);
+			minCorner *= m_scale;
+			maxCorner *= m_scale;
+			ccBBox bbHead(minCorner,maxCorner);
+			bbHead.draw(m_color.u);
+		}
 
 		//sensor legs
-		CCVector3 headConnect = /*headCenter*/ - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
-		glColor3ubv(m_color.u);
-		glBegin(GL_LINES);
-		ccGL::Vertex3v(headConnect.u);
-		ccGL::Vertex3(-m_scale,-m_scale,-m_scale);
-		ccGL::Vertex3v(headConnect.u);
-		ccGL::Vertex3(-m_scale,m_scale,-m_scale);
-		ccGL::Vertex3v(headConnect.u);
-		ccGL::Vertex3(m_scale,0,-m_scale);
-		glEnd();
+		{
+			CCVector3 headConnect = /*headCenter*/ - CCVector3(0,0,static_cast<PointCoordinateType>(halfHeadSize)*m_scale);
+			glColor3ubv(m_color.u);
+			glBegin(GL_LINES);
+			ccGL::Vertex3v(headConnect.u);
+			ccGL::Vertex3(-m_scale,-m_scale,-m_scale);
+			ccGL::Vertex3v(headConnect.u);
+			ccGL::Vertex3(-m_scale,m_scale,-m_scale);
+			ccGL::Vertex3v(headConnect.u);
+			ccGL::Vertex3(m_scale,0,-m_scale);
+			glEnd();
+		}
 
 		if (pushName)
 			glPopName();

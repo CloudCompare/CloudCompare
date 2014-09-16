@@ -649,6 +649,22 @@ public:
 	//! Multiplication by a vector operator (double version)
 	inline Vector3Tpl<double> operator * (const Vector3Tpl<double>& vec) const { return Vector3Tpl<double>(applyX(vec),applyY(vec),applyZ(vec)); }
 
+	//! (in place) Addition operator
+	ccGLMatrixTpl<T>& operator += (const ccGLMatrixTpl<T>& mat)
+	{
+		for (unsigned i=0; i<16; ++i)
+			m_mat[i] += mat.m_mat[i];
+		return (*this);
+	}
+
+	//! (in place) Difference operator
+	ccGLMatrixTpl<T>& operator -= (const ccGLMatrixTpl<T>& mat)
+	{
+		for (unsigned i=0; i<16; ++i)
+			m_mat[i] -= mat.m_mat[i];
+		return (*this);
+	}
+
 	//! (in place) Multiplication operator
 	ccGLMatrixTpl<T>& operator *= (const ccGLMatrixTpl<T>& mat)
 	{

@@ -65,10 +65,10 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 	CCVector3d PshiftTrans(0,0,0);
 	CCVector3d PshiftCloud(0,0,0);
 
-	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	CC_FILE_ERROR result = CC_FERR_NO_LOAD;
 	ScalarType minIntensity = 0;
 	ScalarType maxIntensity = 0;
-	for (unsigned cloudIndex = 0; result == CC_FERR_NO_ERROR; cloudIndex++)
+	for (unsigned cloudIndex = 0; result == CC_FERR_NO_ERROR || result == CC_FERR_NO_LOAD; cloudIndex++)
 	{
 		unsigned width = 0, height = 0;
 		ccGLMatrix sensorTrans, cloudTrans;
@@ -86,7 +86,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			if (!ok)
 				return CC_FERR_MALFORMED_FILE;
 
-			ccLog::Print(QString("[PTX] Sub-cloud #%1 - grid size: %2 x %3").arg(cloudIndex+1).arg(width).arg(height));
+			ccLog::Print(QString("[PTX] Scan #%1 - grid size: %2 x %3").arg(cloudIndex+1).arg(width).arg(height));
 
 			//read sensor transformation matrix
 			for (int i=0; i<4; ++i)
@@ -130,6 +130,17 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 						return CC_FERR_MALFORMED_FILE;
 				}
 			}
+			//make the transform a little bit cleaner (necessary as it's read from ASCII!)
+			{
+				double* X = cloudTransD.getColumn(0);
+				double* Y = cloudTransD.getColumn(1);
+				double* Z = cloudTransD.getColumn(2);
+				CCVector3d::vcross(X,Y,Z);
+				CCVector3d::vcross(Y,Z,X);
+				CCVector3d::vnormalize(X);
+				CCVector3d::vnormalize(Y);
+				CCVector3d::vnormalize(Z);
+			}
 
 			//handle Global Shift directly on the first cloud's translation!
 			const CCVector3d& translation = cloudTransD.getTranslationAsVec3D();
@@ -145,7 +156,6 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 		}
 
 		//now we can read the grid cells
-		unsigned gridSize = width * height;
 		ccPointCloud* cloud = new ccPointCloud();
 		if (container.getChildrenNumber() == 0)
 		{
@@ -159,10 +169,13 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			cloud->setName(QString("unnamed - Cloud %1").arg(container.getChildrenNumber()+1));
 		}
 
+		unsigned gridSize = width * height;
 		if (!cloud->reserve(gridSize))
 		{
+			result = CC_FERR_NOT_ENOUGH_MEMORY;
 			delete cloud;
-			return CC_FERR_NOT_ENOUGH_MEMORY;
+			cloud = 0;
+			break;
 		}
 
 		//set global shift
@@ -309,13 +322,17 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 		if (cloud->size() == 0)
 		{
 			delete cloud;
+			cloud = 0;
 			if (intensitySF)
 				intensitySF->release();
-			if (result == CC_FERR_NO_ERROR)
-				result = CC_FERR_NO_LOAD;
+
+			ccLog::Warning(QString("[PTX] Scan #1 is empty?!").arg(cloudIndex+1));
 		}
 		else if (cloud->size() <= cloud->capacity())
 		{
+			if (result == CC_FERR_NO_LOAD)
+				result = CC_FERR_NO_ERROR; //to make clear that we have loaded at least something!
+			
 			cloud->resize(cloud->size());
 			if (intensitySF)
 			{
@@ -349,12 +366,19 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 					PointCoordinateType minPhi = static_cast<PointCoordinateType>(M_PI), maxPhi = -minPhi;
 					PointCoordinateType minTheta = static_cast<PointCoordinateType>(M_PI), maxTheta = -minTheta;
 					PointCoordinateType deltaPhiRad = 0, deltaThetaRad = 0;
+					PointCoordinateType maxRange = 0;
+
+					//we must test if the angles are shifted (i.e the scan spans above theta = pi)
+					//we'll compute all parameters for both cases, and choose the best one at the end!
+					PointCoordinateType minPhiShifted = minPhi, maxPhiShifted = maxPhi;
+					PointCoordinateType minThetaShifted = minTheta, maxThetaShifted = maxTheta;
 					
 					try
 					{
 						//determine the PITCH angular step
 						{
 							std::vector< AngleAndSpan > angles;
+							std::vector< AngleAndSpan > anglesShifted;
 
 							//for each LINE we determine the min and max valid grid point (i.e. != (0,0,0))
 							const unsigned* _indexGrid = indexGrid;
@@ -376,6 +400,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 								if (maxIndex > minIndex)
 								{
 									PointCoordinateType minPhiCurrentLine = 0, maxPhiCurrentLine = 0;
+									PointCoordinateType minPhiCurrentLineShifted = 0, maxPhiCurrentLineShifted = 0;
 									for (unsigned k=minIndex; k<=maxIndex; ++k)
 									{
 										unsigned index = _indexGrid[k];
@@ -384,17 +409,29 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 											//warning: indexes are shifted (0 = no point)
 											const CCVector3* P = cloud->getPoint(index-1);
 											PointCoordinateType p = atan2(P->z,sqrt(P->x*P->x + P->y*P->y)); //see ccGBLSensor::projectPoint
+											PointCoordinateType pShifted = (p < 0 ? p + static_cast<PointCoordinateType>(2.0*M_PI) : p);
 											if (k != minIndex)
 											{
 												if (minPhiCurrentLine > p)
 													minPhiCurrentLine = p;
 												else if (maxPhiCurrentLine < p)
 													maxPhiCurrentLine = p;
+
+												if (minPhiCurrentLineShifted > pShifted)
+													minPhiCurrentLineShifted = pShifted;
+												else if (maxPhiCurrentLineShifted < pShifted)
+													maxPhiCurrentLineShifted = pShifted;
 											}
 											else
 											{
 												minPhiCurrentLine = maxPhiCurrentLine = p;
+												minPhiCurrentLineShifted = maxPhiCurrentLineShifted = pShifted;
 											}
+
+											//find max range
+											PointCoordinateType range = P->norm();
+											if (range > maxRange)
+												maxRange = range;
 										}
 									}
 
@@ -403,9 +440,17 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 									if (maxPhi < maxPhiCurrentLine)
 										maxPhi = maxPhiCurrentLine;
 
+									if (minPhiShifted > minPhiCurrentLineShifted)
+										minPhiShifted = minPhiCurrentLineShifted;
+									if (maxPhiShifted < maxPhiCurrentLineShifted)
+										maxPhiShifted = maxPhiCurrentLineShifted;
+
 									unsigned span = maxIndex-minIndex+1;
 									ScalarType angle_rad = static_cast<ScalarType>((maxPhiCurrentLine-minPhiCurrentLine) / span);
 									angles.push_back(AngleAndSpan(angle_rad,span));
+
+									ScalarType angleShifted_rad = static_cast<ScalarType>((maxPhiCurrentLineShifted-minPhiCurrentLineShifted) / span);
+									anglesShifted.push_back(AngleAndSpan(angleShifted_rad,span));
 								}
 
 								_indexGrid += width;
@@ -413,7 +458,18 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 							if (!angles.empty())
 							{
-								//we simple take the biggest step evaluation for the widest span!
+								//check the 'shifted' hypothesis
+								PointCoordinateType spanShifted = maxPhiShifted - minPhiShifted;
+								PointCoordinateType span = maxPhi - minPhi;
+								if (spanShifted < 0.99 * span)
+								{
+									//we prefer the shifted version!
+									angles = anglesShifted;
+									minPhi = minPhiShifted;
+									maxPhi = maxPhiShifted;
+								}
+
+								//we simply take the biggest step evaluation for the widest span!
 								size_t maxSpanIndex = 0;
 								for (size_t i=1; i<angles.size(); ++i)
 								{
@@ -438,6 +494,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 						if (validSensor)
 						{
 							std::vector< AngleAndSpan > angles;
+							std::vector< AngleAndSpan > anglesShifted;
 
 							//for each COLUMN we determine the min and max valid grid point (i.e. != (0,0,0))
 							for (unsigned i=0; i<width; ++i)
@@ -460,6 +517,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 								if (maxIndex > minIndex)
 								{
 									PointCoordinateType minThetaCurrentCol = 0, maxThetaCurrentCol = 0;
+									PointCoordinateType minThetaCurrentColShifted = 0, maxThetaCurrentColShifted = 0;
 									for (unsigned k=minIndex; k<=maxIndex; ++k)
 									{
 										unsigned index = _indexGrid[k*width];
@@ -468,8 +526,14 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 											//warning: indexes are shifted (0 = no point)
 											const CCVector3* P = cloud->getPoint(index-1);
 											PointCoordinateType t = atan2(P->y,P->x); //see ccGBLSensor::projectPoint
+											PointCoordinateType tShifted = (t < 0 ? t + static_cast<PointCoordinateType>(2.0*M_PI) : t);
 											if (k != minIndex)
 											{
+												if (minThetaCurrentColShifted > tShifted)
+													minThetaCurrentColShifted = tShifted;
+												else if (maxThetaCurrentColShifted < tShifted)
+													maxThetaCurrentColShifted = tShifted;
+
 												if (minThetaCurrentCol > t)
 													minThetaCurrentCol = t;
 												else if (maxThetaCurrentCol < t)
@@ -478,6 +542,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 											else
 											{
 												minThetaCurrentCol = maxThetaCurrentCol = t;
+												minThetaCurrentColShifted = maxThetaCurrentColShifted = tShifted;
 											}
 										}
 									}
@@ -487,18 +552,37 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 									if (maxTheta < maxThetaCurrentCol)
 										maxTheta = maxThetaCurrentCol;
 
+									if (minThetaShifted > minThetaCurrentColShifted)
+										minThetaShifted = minThetaCurrentColShifted;
+									if (maxThetaShifted < maxThetaCurrentColShifted)
+										maxThetaShifted = maxThetaCurrentColShifted;
+
 									unsigned span = maxIndex-minIndex;
 									ScalarType angle_rad = static_cast<ScalarType>((maxThetaCurrentCol-minThetaCurrentCol) / span);
 									angles.push_back(AngleAndSpan(angle_rad,span));
+
+									ScalarType angleShifted_rad = static_cast<ScalarType>((maxThetaCurrentColShifted-minThetaCurrentColShifted) / span);
+									anglesShifted.push_back(AngleAndSpan(angleShifted_rad,span));
 								}
 							}
 
 							if (!angles.empty())
 							{
+								//check the 'shifted' hypothesis
+								PointCoordinateType spanShifted = maxThetaShifted - minThetaShifted;
+								PointCoordinateType span = maxTheta - minTheta;
+								if (spanShifted < 0.99 * span)
+								{
+									//we prefer the shifted version!
+									angles = anglesShifted;
+									minTheta = minThetaShifted;
+									maxTheta = maxThetaShifted;
+								}
+
+								//we simply take the biggest step evaluation for the widest span!
 								size_t maxSpanIndex = 0;
 								for (size_t i=1; i<angles.size(); ++i)
 								{
-									//we simple take the biggest step evaluation for the widest span!
 									if (	angles[i].second > angles[maxSpanIndex].second
 										||	(angles[i].second == angles[maxSpanIndex].second && angles[i].first > angles[maxSpanIndex].first) )
 									{
@@ -529,7 +613,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 						sensor->setPitchRange(minPhi,maxPhi);
 						sensor->setYawStep(deltaThetaRad);
 						sensor->setYawRange(minTheta,maxTheta);
-						sensor->computeAutoParameters(cloud); //will search for 'holes'!
+						sensor->setSensorRange(maxRange);
 						//sensor->setRigidTransformation(cloudTrans/*sensorTrans*/); //will be called later by applyGLTransformation_recursive
 						sensor->setGraphicScale(PC_ONE/2);
 						sensor->setVisible(true);

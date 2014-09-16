@@ -2535,45 +2535,6 @@ void MainWindow::doActionComputeScatteringAngles()
 	updateUI();
 }
 
-//equivalent to gluLookAt inspired from https://sourceforge.net/projects/glhlib
-void glhLookAt( ccGLMatrixd& matrix, const CCVector3d& eyePosition3D, const CCVector3d& center3D, const CCVector3d& upVector3D )
-{
-   //------------------
-   CCVector3d forward = center3D - eyePosition3D;
-   forward.normalize();
-   //------------------
-   //Side = forward x up
-   CCVector3d side = forward.cross(upVector3D);
-   side.normalize();
-   //------------------
-   //Recompute up as: up = side x forward
-   CCVector3d up = side.cross(forward);
-   //------------------
-   ccGLMatrixd matrix2;
-   matrix2.data()[0]  = side.x;
-   matrix2.data()[4]  = side.y;
-   matrix2.data()[8]  = side.z;
-   matrix2.data()[12] = 0.0;
-   //------------------
-   matrix2.data()[1]  = up.x;
-   matrix2.data()[5]  = up.y;
-   matrix2.data()[9]  = up.z;
-   matrix2.data()[13] = 0.0;
-   //------------------
-   matrix2.data()[2]  = -forward.x;
-   matrix2.data()[6]  = -forward.y;
-   matrix2.data()[10] = -forward.z;
-   matrix2.data()[14] = 0.0;
-   //------------------
-   matrix2.data()[3] = matrix2.data()[7] = matrix2.data()[11] = 0.0;
-   matrix2.data()[15] = 1.0;
-   //------------------
-   CCVector3d shift = -eyePosition3D;
-   matrix2.setTranslation(shift);
-
-   matrix = matrix2;
-}
-
 void MainWindow::doActionSetViewFromSensor()
 {
 	//there should be only one sensor in current selection!
@@ -2602,20 +2563,14 @@ void MainWindow::doActionSetViewFromSensor()
 		if (cloud)
 			win = static_cast<ccGLWindow*>(cloud->getDisplay());
 		else
-			win = getActiveGLWindow();
+			win = static_cast<ccGLWindow*>(sensor->getDisplay());
 
 		if (win)
 		{
-			//ccViewportParameters params = win->getViewportParameters();
-			setViewerPerspectiveView(win);
-			CCVector3d sensorCenterd = CCVector3d::fromArray(sensorCenter.u);
-			win->setCameraPos(sensorCenterd);
-			win->setPivotPoint(sensorCenterd);
-
-			//scanner main directions (front and up)
-			CCVector3d scannerX(trans.data()[0],trans.data()[4],trans.data()[8]);
-			CCVector3d scannerY(trans.data()[1],trans.data()[5],trans.data()[9]);
-			CCVector3d scannerZ(trans.data()[2],trans.data()[6],trans.data()[10]);
+			//scanner main directions
+			CCVector3d scannerX(trans.data()[0],trans.data()[1],trans.data()[2]);
+			CCVector3d scannerY(trans.data()[4],trans.data()[5],trans.data()[6]);
+			CCVector3d scannerZ(trans.data()[8],trans.data()[9],trans.data()[10]);
 
 			//center the view on the scan (angular) center
 			if (sensor->isA(CC_TYPES::GBL_SENSOR))
@@ -2627,24 +2582,11 @@ void MainWindow::doActionSetViewFromSensor()
 				case ccGBLSensor::YAW_THEN_PITCH:
 					{
 						double theta = (gblSensor->getMinYaw() + gblSensor->getMaxYaw())/2;
-						if (gblSensor->yawIsShifted())
-						{
-							//ugly patch: why?!
-							if (theta < M_PI)
-								theta = -theta;
-							else
-								theta = theta - M_PI;
-						}
 						ccGLMatrixd rotz; rotz.initFromParameters(theta,scannerZ,CCVector3d(0,0,0));
 						rotz.applyRotation(scannerX);
 						rotz.applyRotation(scannerY);
 
 						double phi = (gblSensor->getMinPitch() + gblSensor->getMaxPitch())/2;
-						//ugly patch: why?!
-						if (phi < M_PI)
-							phi = -phi;
-						else
-							phi = phi - M_PI;
 						ccGLMatrixd roty; roty.initFromParameters(-phi,scannerY,CCVector3d(0,0,0)); //theta = 0 corresponds to the upward vertical direction!
 						roty.applyRotation(scannerX);
 						roty.applyRotation(scannerZ);
@@ -2654,24 +2596,11 @@ void MainWindow::doActionSetViewFromSensor()
 				case ccGBLSensor::PITCH_THEN_YAW:
 					{
 						double phi = (gblSensor->getMinPitch() + gblSensor->getMaxPitch())/2;
-						//ugly patch: why?!
-						if (phi < M_PI)
-							phi = -phi;
-						else
-							phi = phi - M_PI;
 						ccGLMatrixd roty; roty.initFromParameters(-phi,scannerY,CCVector3d(0,0,0)); //theta = 0 corresponds to the upward vertical direction!
 						roty.applyRotation(scannerX);
 						roty.applyRotation(scannerZ);
 
 						double theta = (gblSensor->getMinYaw() + gblSensor->getMaxYaw())/2;
-						if (gblSensor->yawIsShifted())
-						{
-							//ugly patch: why?!
-							if (theta < M_PI)
-								theta = -theta;
-							else
-								theta = theta - M_PI;
-						}
 						ccGLMatrixd rotz; rotz.initFromParameters(theta,scannerZ,CCVector3d(0,0,0));
 						rotz.applyRotation(scannerX);
 						rotz.applyRotation(scannerY);
@@ -2684,17 +2613,15 @@ void MainWindow::doActionSetViewFromSensor()
 
 			} 
 
-			//generate corresponding view matrix
-			ccGLMatrixd scannerViewMat;
-			glhLookAt(scannerViewMat, sensorCenterd, sensorCenterd + scannerX, scannerZ);
+			//set viewer-based perspective
+			win->setPerspectiveState(true,false);
+			//center camera on sensor
+			CCVector3d sensorCenterd = CCVector3d::fromArray(sensorCenter.u);
+			win->setCameraPos(sensorCenterd);
+			win->setPivotPoint(sensorCenterd);
 
-			//we only keep the translation from the original view matix
-			ccGLMatrixd viewMat = win->getBaseViewMat();
-			scannerViewMat.setTranslation(viewMat.getTranslation());
-
-			win->setBaseViewMat(scannerViewMat);
 			//TODO: can we set the right FOV?
-			win->redraw();
+			win->setCustomView(scannerX,scannerZ,true);
 		}
 		else
 		{

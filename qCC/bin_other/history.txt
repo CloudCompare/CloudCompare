@@ -45,6 +45,12 @@ v2.5.6 ??/??/2014
 		- Grid translation is now also checked for 'big coordinates' (Global Shift & Scale mechanism)
 		- Cancel button also cancels the normals computation!
 		- sensors corresponding to each scan are automatically created
+	* Ground Based Laser Sensor management enhanced:
+		- GBL sensors are now created automatically when clouds are loaded from PTX files (TODO: from E57)
+		- GBL sensor symbol in 3D is now correctly centered on the optical center (and can be used with the magnifier icon to zoom/focus on it)
+		- 'Theta' and 'Phi' are replaced by the clearer 'Yaw' and 'Pitch' names
+		- 'Edit > Sensor > View from sensor' method is now cleverer
+		- 'Edit > Sensor > GBL Sensor > Show depth map' is now cleverer
 
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized

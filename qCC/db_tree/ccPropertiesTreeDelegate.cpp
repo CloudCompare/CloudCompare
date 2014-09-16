@@ -760,25 +760,25 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 	appendRow( ITEM("Drawing scale"), PERSISTENT_EDITOR(OBJECT_SENSOR_DISPLAY_SCALE), true );
 
 	//angles
-	addSeparator("Angular span (degrees)");
+	addSeparator("Angular viewport (degrees)");
 	{
-		//Angular range (phi)
-		PointCoordinateType phiMin = _obj->getPhiMin();
-		PointCoordinateType phiMax = _obj->getPhiMax();
-		appendRow( ITEM("Phi"), ITEM(QString("[%1 ; %2]").arg(phiMin * CC_RAD_TO_DEG,0,'f',2).arg(phiMax * CC_RAD_TO_DEG,0,'f',2)) );
+		//Angular range (yaw)
+		PointCoordinateType yawMin = _obj->getMinYaw();
+		PointCoordinateType yawMax = _obj->getMaxYaw();
+		appendRow( ITEM("Yaw span"), ITEM(QString("[%1 ; %2]").arg(yawMin * CC_RAD_TO_DEG,0,'f',2).arg(yawMax * CC_RAD_TO_DEG,0,'f',2)) );
 
-		//Angular steps (phi)
-		PointCoordinateType deltaPhi = _obj->getDeltaPhi();
-		appendRow( ITEM("dPhi"), ITEM(QString("%1").arg(deltaPhi * CC_RAD_TO_DEG,0,'f',4)) );
+		//Angular steps (yaw)
+		PointCoordinateType yawStep = _obj->getYawStep();
+		appendRow( ITEM("Yaw step"), ITEM(QString("%1").arg(yawStep * CC_RAD_TO_DEG,0,'f',4)) );
 
-		//Angular range (theta)
-		PointCoordinateType thetaMin = _obj->getThetaMin();
-		PointCoordinateType thetaMax = _obj->getThetaMax();
-		appendRow( ITEM("Theta"), ITEM(QString("[%1 ; %2]").arg(thetaMin * CC_RAD_TO_DEG,0,'f',2).arg(thetaMax * CC_RAD_TO_DEG,0,'f',2)) );
+		//Angular range (pitch)
+		PointCoordinateType pitchMin = _obj->getMinPitch();
+		PointCoordinateType pitchMax = _obj->getMaxPitch();
+		appendRow( ITEM("Pitch span"), ITEM(QString("[%1 ; %2]").arg(pitchMin * CC_RAD_TO_DEG,0,'f',2).arg(pitchMax * CC_RAD_TO_DEG,0,'f',2)) );
 
-		//Angular steps (theta)
-		PointCoordinateType deltaTheta = _obj->getDeltaTheta();
-		appendRow( ITEM("dTheta"), ITEM(QString("%1").arg(deltaTheta * CC_RAD_TO_DEG,0,'f',4)) );
+		//Angular steps (pitch)
+		PointCoordinateType pitchStep = _obj->getPitchStep();
+		appendRow( ITEM("Pitch step"), ITEM(QString("%1").arg(pitchStep * CC_RAD_TO_DEG,0,'f',4)) );
 	}
 
 	//sensor aboslute orientation

@@ -145,7 +145,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 		}
 
 		//now we can read the grid cells
-		unsigned size = width * height;
+		unsigned gridSize = width * height;
 		ccPointCloud* cloud = new ccPointCloud();
 		if (container.getChildrenNumber() == 0)
 		{
@@ -159,7 +159,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			cloud->setName(QString("unnamed - Cloud %1").arg(container.getChildrenNumber()+1));
 		}
 
-		if (!cloud->reserve(size))
+		if (!cloud->reserve(gridSize))
 		{
 			delete cloud;
 			return CC_FERR_NOT_ENOUGH_MEMORY;
@@ -170,7 +170,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 		//intensities
 		ccScalarField* intensitySF = new ccScalarField(CC_PTX_INTENSITY_FIELD_NAME);
-		if (!intensitySF->reserve(static_cast<unsigned>(size)))
+		if (!intensitySF->reserve(static_cast<unsigned>(gridSize)))
 		{
 			ccLog::Warning("[PTX] Not enough memory to load intensities!");
 			intensitySF->release();
@@ -178,10 +178,10 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 		}
 
 		//grid for computing normals
-		unsigned* indexGrid = new unsigned[size];
+		unsigned* indexGrid = new unsigned[gridSize];
 		if (indexGrid)
 		{
-			memset(indexGrid,0,sizeof(unsigned)*size);
+			memset(indexGrid,0,sizeof(unsigned)*gridSize);
 		}
 		else
 		{
@@ -192,18 +192,19 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 		{
 			//progress dialog
 			ccProgressDialog pdlg(true);
-			CCLib::NormalizedProgress nprogress(&pdlg,size);
+			CCLib::NormalizedProgress nprogress(&pdlg,gridSize);
 			pdlg.setMethodTitle("Loading PTX file");
-			pdlg.setInfo(qPrintable(QString("Number of cells: %1").arg(size)));
+			pdlg.setInfo(qPrintable(QString("Number of cells: %1").arg(gridSize)));
 			pdlg.start();
 
 			bool firstPoint = true;
 			bool hasColors = false;
 			bool loadColors = false;
+			unsigned* _indexGrid = indexGrid;
 
 			for (unsigned j=0; j<height; ++j)
 			{
-				for (unsigned i=0; i<width; ++i)
+				for (unsigned i=0; i<width; ++i, ++_indexGrid)
 				{
 					line = inFile.readLine();
 					tokens = line.split(" ",QString::SkipEmptyParts);
@@ -265,7 +266,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 						//update index grid
 						if (indexGrid)
-							indexGrid[j*width + i] = cloud->size(); // = index + 1 (as default value = 0)
+							*_indexGrid = cloud->size(); // = index + 1 (default value = 0, means no point)
 
 						//add intensity
 						if (intensitySF)
@@ -347,14 +348,15 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 					bool validSensor = true;
 					PointCoordinateType minPhi = static_cast<PointCoordinateType>(M_PI), maxPhi = -minPhi;
 					PointCoordinateType minTheta = static_cast<PointCoordinateType>(M_PI), maxTheta = -minTheta;
-					double deltaThetaRad = 0, deltaPhiRad = 0;
-					std::vector< AngleAndSpan > angles;
+					PointCoordinateType deltaPhiRad = 0, deltaThetaRad = 0;
 					
 					try
 					{
-						//determine the longitudinal angular step
-						//for each line we determine the min and max valid grid point (i.e. != (0,0,0))
+						//determine the PITCH angular step
 						{
+							std::vector< AngleAndSpan > angles;
+
+							//for each LINE we determine the min and max valid grid point (i.e. != (0,0,0))
 							const unsigned* _indexGrid = indexGrid;
 							for (unsigned j=0; j<height; ++j)
 							{
@@ -371,35 +373,38 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 									}
 								}
 
-								PointCoordinateType minPhiLine = 0, maxPhiLine = 0;
-								for (unsigned k=minIndex; k<=maxIndex; ++k)
+								if (maxIndex > minIndex)
 								{
-									unsigned index = _indexGrid[k];
-									if (index != 0)
+									PointCoordinateType minPhiCurrentLine = 0, maxPhiCurrentLine = 0;
+									for (unsigned k=minIndex; k<=maxIndex; ++k)
 									{
-										//warning: indexes are shifted (0 = no point)
-										const CCVector3* P = cloud->getPoint(index-1);
-										PointCoordinateType p = atan2(P->z,sqrt(P->x*P->x + P->y*P->y));
-										if (k != minIndex)
+										unsigned index = _indexGrid[k];
+										if (index != 0)
 										{
-											if (minPhiLine > p)
-												minPhiLine = p;
-											else if (maxPhiLine < p)
-												maxPhiLine = p;
-										}
-										else
-										{
-											minPhiLine = maxPhiLine = p;
+											//warning: indexes are shifted (0 = no point)
+											const CCVector3* P = cloud->getPoint(index-1);
+											PointCoordinateType p = atan2(P->z,sqrt(P->x*P->x + P->y*P->y)); //see ccGBLSensor::projectPoint
+											if (k != minIndex)
+											{
+												if (minPhiCurrentLine > p)
+													minPhiCurrentLine = p;
+												else if (maxPhiCurrentLine < p)
+													maxPhiCurrentLine = p;
+											}
+											else
+											{
+												minPhiCurrentLine = maxPhiCurrentLine = p;
+											}
 										}
 									}
 
-									if (minPhi > minPhiLine)
-										minPhi = minPhiLine;
-									if (maxPhi < maxPhiLine)
-										maxPhi = maxPhiLine;
+									if (minPhi > minPhiCurrentLine)
+										minPhi = minPhiCurrentLine;
+									if (maxPhi < maxPhiCurrentLine)
+										maxPhi = maxPhiCurrentLine;
 
-									unsigned span = maxIndex-minIndex;
-									ScalarType angle_rad = static_cast<ScalarType>((maxPhiLine-minPhiLine) / span);
+									unsigned span = maxIndex-minIndex+1;
+									ScalarType angle_rad = static_cast<ScalarType>((maxPhiCurrentLine-minPhiCurrentLine) / span);
 									angles.push_back(AngleAndSpan(angle_rad,span));
 								}
 
@@ -408,6 +413,7 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 							if (!angles.empty())
 							{
+								//we simple take the biggest step evaluation for the widest span!
 								size_t maxSpanIndex = 0;
 								for (size_t i=1; i<angles.size(); ++i)
 								{
@@ -417,23 +423,27 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 										maxSpanIndex = i;
 									}
 								}
-								deltaPhiRad = angles[maxSpanIndex].first;
-								ccLog::Print(QString("[PTX] Detected latitudinal step: %1 degrees").arg(deltaPhiRad * CC_RAD_TO_DEG));
+								
+								deltaPhiRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
+								ccLog::Print(QString("[PTX] Detected pitch step: %1 degrees (span [%2 - %3])").arg(deltaPhiRad * CC_RAD_TO_DEG).arg(minPhi * CC_RAD_TO_DEG).arg(maxPhi * CC_RAD_TO_DEG));
 							}
 							else
 							{
-								ccLog::Warning("[PTX] Not enough valid points to compute sensor angular steps!");
+								ccLog::Warning("[PTX] Not enough valid points to compute sensor angular step (pitch)!");
+								validSensor = false;
 							}
 						}
 
-						//now determine the latitudinal angular step
+						//now determine the YAW angular step
 						if (validSensor)
 						{
-							angles.clear();
-							//for each column we determine the min and max valid grid point (i.e. != (0,0,0))
+							std::vector< AngleAndSpan > angles;
+
+							//for each COLUMN we determine the min and max valid grid point (i.e. != (0,0,0))
 							for (unsigned i=0; i<width; ++i)
 							{
 								const unsigned* _indexGrid = indexGrid + i;
+								
 								unsigned minIndex = height;
 								unsigned maxIndex = 0;
 								for (unsigned j=0; j<height; ++j)
@@ -446,36 +456,39 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 											maxIndex = j;
 									}
 								}
-							
-								PointCoordinateType minThetaCol = 0, maxThetaCol = 0;
-								for (unsigned k=minIndex; k<=maxIndex; ++k)
+
+								if (maxIndex > minIndex)
 								{
-									unsigned index = _indexGrid[k*width];
-									if (index != 0)
+									PointCoordinateType minThetaCurrentCol = 0, maxThetaCurrentCol = 0;
+									for (unsigned k=minIndex; k<=maxIndex; ++k)
 									{
-										//warning: indexes are shifted (0 = no point)
-										const CCVector3* P = cloud->getPoint(index-1);
-										PointCoordinateType t = atan2(P->x,P->y);
-										if (k != minIndex)
+										unsigned index = _indexGrid[k*width];
+										if (index != 0)
 										{
-											if (minThetaCol > t)
-												minThetaCol = t;
-											else if (maxThetaCol < t)
-												maxThetaCol = t;
-										}
-										else
-										{
-											minThetaCol = maxThetaCol = t;
+											//warning: indexes are shifted (0 = no point)
+											const CCVector3* P = cloud->getPoint(index-1);
+											PointCoordinateType t = atan2(P->y,P->x); //see ccGBLSensor::projectPoint
+											if (k != minIndex)
+											{
+												if (minThetaCurrentCol > t)
+													minThetaCurrentCol = t;
+												else if (maxThetaCurrentCol < t)
+													maxThetaCurrentCol = t;
+											}
+											else
+											{
+												minThetaCurrentCol = maxThetaCurrentCol = t;
+											}
 										}
 									}
 
-									if (minTheta > minThetaCol)
-										minTheta = minThetaCol;
-									if (maxTheta < maxThetaCol)
-										maxTheta = maxThetaCol;
+									if (minTheta > minThetaCurrentCol)
+										minTheta = minThetaCurrentCol;
+									if (maxTheta < maxThetaCurrentCol)
+										maxTheta = maxThetaCurrentCol;
 
 									unsigned span = maxIndex-minIndex;
-									ScalarType angle_rad = static_cast<ScalarType>((maxThetaCol-minThetaCol) / span);
+									ScalarType angle_rad = static_cast<ScalarType>((maxThetaCurrentCol-minThetaCurrentCol) / span);
 									angles.push_back(AngleAndSpan(angle_rad,span));
 								}
 							}
@@ -485,14 +498,16 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 								size_t maxSpanIndex = 0;
 								for (size_t i=1; i<angles.size(); ++i)
 								{
+									//we simple take the biggest step evaluation for the widest span!
 									if (	angles[i].second > angles[maxSpanIndex].second
 										||	(angles[i].second == angles[maxSpanIndex].second && angles[i].first > angles[maxSpanIndex].first) )
 									{
 										maxSpanIndex = i;
 									}
 								}
-								deltaThetaRad = angles[maxSpanIndex].first;
-								ccLog::Print(QString("[PTX] Detected longitudinal step: %1 degrees").arg(deltaThetaRad * CC_RAD_TO_DEG));
+								
+								deltaThetaRad = static_cast<PointCoordinateType>(angles[maxSpanIndex].first);
+								ccLog::Print(QString("[PTX] Detected yaw step: %1 degrees (span [%2 - %3])").arg(deltaThetaRad * CC_RAD_TO_DEG).arg(minTheta * CC_RAD_TO_DEG).arg(maxTheta * CC_RAD_TO_DEG));
 							}
 							else
 							{
@@ -507,18 +522,18 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 						validSensor = false;
 					}
 
-					ccGBLSensor* sensor = new ccGBLSensor(/*ccGBLSensor::PHI_THETA*/);
+					ccGBLSensor* sensor = new ccGBLSensor(ccGBLSensor::YAW_THEN_PITCH);
 					if (sensor)
 					{
-						sensor->setDeltaPhi(deltaPhiRad);
-						sensor->setPhi(minPhi,maxPhi);
-						sensor->setDeltaTheta(deltaThetaRad);
-						sensor->setTheta(minTheta,maxTheta);
+						sensor->setPitchStep(deltaPhiRad);
+						sensor->setPitchRange(minPhi,maxPhi);
+						sensor->setYawStep(deltaThetaRad);
+						sensor->setYawRange(minTheta,maxTheta);
+						sensor->computeAutoParameters(cloud); //will search for 'holes'!
 						//sensor->setRigidTransformation(cloudTrans/*sensorTrans*/); //will be called later by applyGLTransformation_recursive
 						sensor->setGraphicScale(PC_ONE/2);
 						sensor->setVisible(true);
 						sensor->setEnabled(false);
-						sensor->computeAutoParameters(cloud);
 						cloud->addChild(sensor);
 					}
 				}
@@ -678,24 +693,78 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 
 			if (indexGrid)
 			{
-				//test: export as depth map
-				//if (true)
-				//{
-				//	_indexGrid = indexGrid;
-				//	for (int j=0; j<static_cast<int>(height); ++j)
-				//	{
-				//		for (int i=0; i<static_cast<int>(width); ++i, ++_indexGrid)
-				//		{
-				//			if (*_indexGrid != 0)
-				//			{
-				//				const CCVector3* P = cloud->getPoint(*_indexGrid-1);
-				//				const_cast<CCVector3*>(P)->x = static_cast<PointCoordinateType>(j);
-				//				const_cast<CCVector3*>(P)->y = static_cast<PointCoordinateType>(i);
-				//			}
-				//		}
-				//	}
-				//}
 
+				//test: export as depth map
+#ifdef _DEBUG
+				if (false)
+				{
+					ccPointCloud* dm = new ccPointCloud("Depth map");
+					if (dm->reserve(cloud->size()))
+					{
+						ccScalarField* yawSF = new ccScalarField("Yaw (degrees)");
+						if (!yawSF->reserve(cloud->size()))
+						{
+							yawSF->release();
+							yawSF = 0;
+						}
+						ccScalarField* pitchSF = new ccScalarField("Pitch (degrees)");
+						if (!pitchSF->reserve(cloud->size()))
+						{
+							pitchSF->release();
+							pitchSF = 0;
+						}
+
+						const unsigned* _indexGrid = indexGrid;
+						for (unsigned j=0; j<height; ++j)
+						{
+							for (unsigned i=0; i<width; ++i, ++_indexGrid)
+							{
+								if (*_indexGrid != 0)
+								{
+									const CCVector3* P = cloud->getPoint(*_indexGrid-1);
+
+									CCVector3 Pdm(static_cast<PointCoordinateType>(i),static_cast<PointCoordinateType>(j),P->x);
+									dm->addPoint(Pdm);
+
+									if (yawSF)
+									{
+										ScalarType yaw = static_cast<ScalarType>(atan2(P->y,P->x) * CC_RAD_TO_DEG);
+										yawSF->addElement(yaw);
+									}
+									if (pitchSF)
+									{
+										ScalarType pitch = static_cast<ScalarType>(atan2(P->z,sqrt(P->x*P->x + P->y*P->y)) * CC_RAD_TO_DEG);
+										pitchSF->addElement(pitch);
+									}
+								}
+							}
+						}
+
+						if (yawSF)
+						{
+							yawSF->computeMinAndMax();
+							dm->addScalarField(yawSF);
+							dm->showSF(true);
+							dm->setCurrentDisplayedScalarField(0);
+						}
+						if (pitchSF)
+						{
+							pitchSF->computeMinAndMax();
+							dm->addScalarField(pitchSF);
+							dm->showSF(true);
+							if (!yawSF)
+								dm->setCurrentDisplayedScalarField(0);
+						}
+
+						dm->setVisible(true);
+						cloud->addChild(dm);
+					}
+					else
+					{
+						delete dm;
+					}
+				}
+#endif
 				//don't need it anymore
 				delete[] indexGrid;
 				indexGrid = 0;
@@ -711,7 +780,6 @@ CC_FILE_ERROR PTXFilter::loadFile(	QString filename,
 			container.addChild(cloud);
 
 #ifdef _DEBUG
-			//FIXME
 			//break;
 #endif
 		}

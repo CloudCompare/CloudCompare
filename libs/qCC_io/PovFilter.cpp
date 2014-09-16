@@ -33,8 +33,13 @@
 
 //Ground based LiDAR sensor mirror and body rotation order
 //Refer to ccGBLSensor::ROTATION_ORDER
-const char CC_SENSOR_ROTATION_ORDER_NAMES[][12] = {	"THETA_PHI",		//Rotation: body then mirror
-													"PHI_THETA"			//Rotation: mirror then body
+const char CC_SENSOR_ROTATION_ORDER_NAMES[][15] = {	"YAW_THEN_PITCH",		//Rotation: body then mirror
+													"PITCH_THEN_YAW"			//Rotation: mirror then body
+};
+
+//same as CC_SENSOR_ROTATION_ORDER_NAMES but with the old names (used in versions prior to 2.5.6)
+const char CC_SENSOR_ROTATION_ORDER_OLD_NAMES[][10] = {	"THETA_PHI",		//Rotation: body then mirror
+														"PHI_THETA"			//Rotation: mirror then body
 };
 
 CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename)
@@ -125,7 +130,7 @@ CC_FILE_ERROR PovFilter::saveToFile(ccHObject* entity, QString filename)
 				}
 
 				if (result > 0)
-					result = fprintf(mainFile,"A %f %f\n",gls->getDeltaPhi(),gls->getDeltaTheta());
+					result = fprintf(mainFile,"A %f %f\n",gls->getYawStep(),gls->getPitchStep());
 
 				if (result > 0)
 					result = fprintf(mainFile,"#END_POV\n");
@@ -177,20 +182,27 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		return CC_FERR_READING;
 	}
 
-	char sensorType[12];
-	if (fscanf(fp,"SENSOR_TYPE = %s\n",sensorType)<0)
+	char sensorType[256];
+	if (fscanf(fp,"SENSOR_TYPE = %s\n",sensorType) < 0)
 	{
 		fclose(fp);
 		return CC_FERR_READING;
 	}
 
 	ccGBLSensor::ROTATION_ORDER rotationOrder;
-	if (strcmp(sensorType,CC_SENSOR_ROTATION_ORDER_NAMES[ccGBLSensor::PHI_THETA])==0)
-		rotationOrder = ccGBLSensor::PHI_THETA;
-	else if (strcmp(sensorType,CC_SENSOR_ROTATION_ORDER_NAMES[ccGBLSensor::THETA_PHI])==0)
-		rotationOrder = ccGBLSensor::THETA_PHI;
+	if (	strcmp(sensorType,CC_SENSOR_ROTATION_ORDER_NAMES[ccGBLSensor::YAW_THEN_PITCH]) == 0
+			||	strcmp(sensorType,CC_SENSOR_ROTATION_ORDER_OLD_NAMES[ccGBLSensor::YAW_THEN_PITCH]) == 0)
+	{
+		rotationOrder = ccGBLSensor::YAW_THEN_PITCH;
+	}
+	else if (	strcmp(sensorType,CC_SENSOR_ROTATION_ORDER_NAMES[ccGBLSensor::PITCH_THEN_YAW]) == 0
+		||	strcmp(sensorType,CC_SENSOR_ROTATION_ORDER_OLD_NAMES[ccGBLSensor::PITCH_THEN_YAW]) == 0)
+	{
+		rotationOrder = ccGBLSensor::PITCH_THEN_YAW;
+	}
 	else
 	{
+		ccLog::Warning("[PovFilter::loadFile] Unhandled rotation order description! (%s)",sensorType);
 		fclose(fp);
 		return CC_FERR_READING;
 	}
@@ -219,13 +231,13 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		if ((line[0]=='#')&&(line[1]=='P'))
 		{
 			ccLog::Print(QString(line).trimmed());
-			if (fscanf(fp,"F %s\n",subFileName)<0)
+			if (fscanf(fp,"F %s\n",subFileName) < 0)
 			{
 				ccLog::PrintDebug("[PovFilter::loadFile] Read error (F) !");
 				fclose(fp);
 				return CC_FERR_READING;
 			}
-			if (fscanf(fp,"T %s\n",subFileType)<0)
+			if (fscanf(fp,"T %s\n",subFileType) < 0)
 			{
 				ccLog::PrintDebug("[PovFilter::loadFile] Read error (T) !");
 				fclose(fp);
@@ -266,7 +278,7 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					}
 					else if (line[0]=='A')
 					{
-						sscanf(line,"A %f %f\n",&dPhi,&dTheta);
+						sscanf(line,"A %f %f\n",&dTheta,&dPhi);
 					}
 				}
 
@@ -294,8 +306,8 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					ccGLMatrix trans = rot.inverse();
 					trans.setTranslation(sensorCenter);
 					gls->setRigidTransformation(trans);
-					gls->setDeltaPhi(dPhi);
-					gls->setDeltaTheta(dTheta);
+					gls->setYawStep(dTheta);
+					gls->setPitchStep(dPhi);
 
 					int errorCode = 0;
 					if (gls->computeAutoParameters(theCloud))

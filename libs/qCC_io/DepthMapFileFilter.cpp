@@ -98,22 +98,22 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 	fprintf(fp,"// CLOUDCOMPARE DEPTH MAP\n");
 	fprintf(fp,"// Associated cloud: %s\n",qPrintable(cloud->getName()));
 	fprintf(fp,"// dPhi   = %f [ %f : %f ]\n",
-		sensor->getDeltaPhi(),
-		sensor->getPhiMin(),
-		sensor->getPhiMax());
+		sensor->getPitchStep(),
+		sensor->getMinPitch(),
+		sensor->getMaxPitch());
 	fprintf(fp,"// dTheta = %f [ %f : %f ]\n",
-		sensor->getDeltaTheta(),
-		sensor->getThetaMin(),
-		sensor->getThetaMax());
+		sensor->getYawStep(),
+		sensor->getMinYaw(),
+		sensor->getMaxYaw());
 	fprintf(fp,"// pMax   = %f\n",sensor->getSensorRange());
 	fprintf(fp,"// L      = %i\n",db.width);
 	fprintf(fp,"// H      = %i\n",db.height);
 	fprintf(fp,"/////////////////////////\n");
 
 	//an array of projected normals (same size a depth map)
-	PointCoordinateType* theNorms = NULL;
+	ccGBLSensor::NormalGrid* theNorms = NULL;
 	//an array of projected colors (same size a depth map)
-	colorType* theColors = NULL;
+	ccGBLSensor::ColorGrid* theColors = NULL;
 
 	//if the sensor is associated to a "ccPointCloud", we may also extract
 	//normals and color!
@@ -170,10 +170,11 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 		}
 	}
 
-	PointCoordinateType* _theNorms = theNorms;
-	colorType* _theColors = theColors;
 	ScalarType* _zBuff = db.zBuff;
-
+	if (theNorms)
+		theNorms->placeIteratorAtBegining();
+	if (theColors)
+		theColors->placeIteratorAtBegining();
 	for (unsigned k=0; k<db.height; ++k)
 	{
 		for (unsigned j=0; j<db.width; ++j)
@@ -182,17 +183,19 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 			fprintf(fp,"%i %i %.12f",j,k,*_zBuff++);
 
 			//color
-			if (_theColors)
+			if (theColors)
 			{
-				fprintf(fp," %i %i %i",_theColors[0],_theColors[1],_theColors[2]);
-				_theColors += 3;
+				const colorType* C = theColors->getCurrentValue();
+				fprintf(fp," %i %i %i",C[0],C[1],C[2]);
+				theColors->forwardIterator();
 			}
 
 			//normal
-			if (_theNorms)
+			if (theNorms)
 			{
-				fprintf(fp," %f %f %f",_theNorms[0],_theNorms[1],_theNorms[2]);
-				_theNorms += 3;
+				const PointCoordinateType* N = theNorms->getCurrentValue();
+				fprintf(fp," %f %f %f",N[0],N[1],N[2]);
+				theNorms->forwardIterator();
 			}
 
 			fprintf(fp,"\n");
@@ -200,9 +203,9 @@ CC_FILE_ERROR DepthMapFileFilter::saveToOpenedFile(FILE* fp, ccGBLSensor* sensor
 	}
 
 	if (theNorms)
-		delete[] theNorms;
+		theNorms->release();
 	if (theColors)
-		delete[] theColors;
+		theColors->release();
 
 	return CC_FERR_NO_ERROR;
 }

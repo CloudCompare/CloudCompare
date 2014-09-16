@@ -54,9 +54,9 @@ void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 	posZEdit->setText(QString("%1").arg(C[2]));
 
 	//rotation order
-	if (sensor->getRotationOrder() == ccGBLSensor::THETA_PHI)
+	if (sensor->getRotationOrder() == ccGBLSensor::YAW_THEN_PITCH)
 		rotationOrderComboBox->setCurrentIndex(0);
-	else if (sensor->getRotationOrder() == ccGBLSensor::PHI_THETA)
+	else if (sensor->getRotationOrder() == ccGBLSensor::PITCH_THEN_YAW)
 		rotationOrderComboBox->setCurrentIndex(1);
 
 	//max range
@@ -81,8 +81,8 @@ void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 	}
 
 	//angular steps
-	dPhiSpinBox->setValue(sensor->getDeltaPhi());
-	dThetaSpinBox->setValue(sensor->getDeltaTheta());
+	pitchStepSpinBox->setValue(sensor->getPitchStep());
+	yawStepSpinBox->setValue(sensor->getYawStep());
 }
 
 void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
@@ -91,7 +91,7 @@ void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 		return;
 
 	//rotation order
-	ccGBLSensor::ROTATION_ORDER rotOrder = (rotationOrderComboBox->currentIndex() == 0 ? ccGBLSensor::THETA_PHI : ccGBLSensor::PHI_THETA);
+	ccGBLSensor::ROTATION_ORDER rotOrder = (rotationOrderComboBox->currentIndex() == 0 ? ccGBLSensor::YAW_THEN_PITCH : ccGBLSensor::PITCH_THEN_YAW);
 	sensor->setRotationOrder(rotOrder);
 
 	//max. range
@@ -121,8 +121,8 @@ void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 	sensor->setRigidTransformation(rot);
 
 	//angular steps
-	sensor->setDeltaPhi(static_cast<PointCoordinateType>(dPhiSpinBox->value()));
-	sensor->setDeltaTheta(static_cast<PointCoordinateType>(dThetaSpinBox->value()));
+	sensor->setPitchStep(static_cast<PointCoordinateType>(pitchStepSpinBox->value()));
+	sensor->setYawStep(static_cast<PointCoordinateType>(yawStepSpinBox->value()));
 
 	//uncertainty
 	sensor->setUncertainty(static_cast<ScalarType>(uncertaintyDoubleSpinBox->value()));

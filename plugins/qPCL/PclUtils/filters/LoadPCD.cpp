@@ -137,8 +137,8 @@ int LoadPCD::compute()
 		ccRot.setTranslation(origin.data());
 
 		sensor->setRigidTransformation(ccRot);
-		sensor->setDeltaPhi(static_cast<PointCoordinateType>(0.05));
-		sensor->setDeltaTheta(static_cast<PointCoordinateType>(0.05));
+		sensor->setYawStep(static_cast<PointCoordinateType>(0.05));
+		sensor->setPitchStep(static_cast<PointCoordinateType>(0.05));
 		sensor->setVisible(true);
 
 		//uncertainty to some default

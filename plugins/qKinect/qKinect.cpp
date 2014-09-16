@@ -548,27 +548,27 @@ void qKinect::grabCloud()
 			QString cloudName = m_kDlg->getCloudName() + QString::number(++s_grabIndex);
 			depthMap->setName(qPrintable(cloudName));
 			//associate sensor
-			ccGBLSensor* sensor = new ccGBLSensor(ccGBLSensor::THETA_PHI);
+			ccGBLSensor* sensor = new ccGBLSensor(ccGBLSensor::YAW_THEN_PITCH);
 			ccGLMatrix rot;
 			{
 				float* mat = rot.data();
-				mat[0] = 1.0f;
-				mat[1] = 0.0f;
-				mat[2] = 0.0f;
+				mat[0] =  1.0f;
+				mat[1] =  0.0f;
+				mat[2] =  0.0f;
 
-				mat[4] = 0.0f;
-				mat[5] = 0.0f;
+				mat[4] =  0.0f;
+				mat[5] =  0.0f;
 				mat[6] = -1.0f;
 
-				mat[8] = 0.0f;
-				mat[9] = 1.0f;
+				mat[8] =  0.0f;
+				mat[9] =  1.0f;
 				mat[10] = 0.0f;
 
 				mat[15] = 1.0f;
 			}
 			sensor->setRigidTransformation(rot);
-			sensor->setDeltaPhi(0.0017f);
-			sensor->setDeltaTheta(0.0017f);
+			sensor->setYawStep(0.0017f);
+			sensor->setPitchStep(0.0017f);
 			sensor->setUncertainty(1e-3f);
 			{
 				if (sensor->computeAutoParameters(depthMap))

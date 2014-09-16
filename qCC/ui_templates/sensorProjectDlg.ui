@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>391</width>
-    <height>235</height>
+    <width>400</width>
+    <height>250</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Sensor</string>
+   <string>Sensor parameters</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
@@ -58,179 +58,132 @@
        </property>
        <item>
         <property name="text">
-         <string>vertical then lateral (columns)</string>
+         <string>yaw then pitch (default)</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>lateral then vertical (lines)</string>
+         <string>pitch then yaw</string>
         </property>
        </item>
       </widget>
      </item>
     </layout>
    </item>
+   <item row="2" column="0">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="0">
     <widget class="QTabWidget" name="propertiesTabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
-     <widget class="QWidget" name="tabPosition">
-      <attribute name="title">
-       <string>Position (center)</string>
-      </attribute>
-      <layout class="QVBoxLayout">
-       <item>
-        <layout class="QHBoxLayout">
-         <item>
-          <widget class="QLabel" name="label_2">
-           <property name="text">
-            <string>X</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="posXEdit">
-           <property name="text">
-            <string>0.0</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>Y</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="posYEdit">
-           <property name="text">
-            <string>0.0</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLabel" name="label_4">
-           <property name="text">
-            <string>Z</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QLineEdit" name="posZEdit">
-           <property name="text">
-            <string>0.0</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="tabOrientation">
       <attribute name="title">
-       <string>Orientation</string>
+       <string>Position + Orientation</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="0">
+       <item row="1" column="0">
         <widget class="QLabel" name="label_6">
+         <property name="toolTip">
+          <string>sensor front direction (yaw = 0)</string>
+         </property>
          <property name="text">
           <string>X</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="1" column="1">
         <widget class="QLineEdit" name="x1rot">
          <property name="text">
           <string>1</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
+       <item row="1" column="2">
         <widget class="QLineEdit" name="x2rot">
          <property name="text">
           <string>0</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="3">
+       <item row="1" column="3">
         <widget class="QLineEdit" name="x3rot">
          <property name="text">
           <string>0</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
+       <item row="2" column="0">
         <widget class="QLabel" name="label_7">
+         <property name="toolTip">
+          <string>sensor lateral direction</string>
+         </property>
          <property name="text">
           <string>Y</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="1">
+       <item row="2" column="1">
         <widget class="QLineEdit" name="y1rot">
          <property name="text">
           <string>0</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="2">
+       <item row="2" column="2">
         <widget class="QLineEdit" name="y2rot">
          <property name="text">
           <string>1</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="3">
+       <item row="2" column="3">
         <widget class="QLineEdit" name="y3rot">
          <property name="text">
           <string>0</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="0">
+       <item row="3" column="0">
         <widget class="QLabel" name="label_8">
+         <property name="toolTip">
+          <string>sensor vertical direction (pitch = 0)</string>
+         </property>
          <property name="text">
           <string>Z</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="1">
+       <item row="3" column="1">
         <widget class="QLineEdit" name="z1rot">
          <property name="text">
           <string>0</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="2">
+       <item row="3" column="2">
         <widget class="QLineEdit" name="z2rot">
          <property name="text">
           <string>0</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="3">
+       <item row="3" column="3">
         <widget class="QLineEdit" name="z3rot">
          <property name="text">
           <string>1</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="2">
+       <item row="4" column="2">
         <spacer>
          <property name="orientation">
           <enum>Qt::Vertical</enum>
@@ -242,6 +195,37 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="0" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="toolTip">
+          <string>sensor center</string>
+         </property>
+         <property name="text">
+          <string>C</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="posXEdit">
+         <property name="text">
+          <string>0.0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLineEdit" name="posYEdit">
+         <property name="text">
+          <string>0.0</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLineEdit" name="posZEdit">
+         <property name="text">
+          <string>0.0</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -254,13 +238,16 @@
         <layout class="QHBoxLayout">
          <item>
           <widget class="QLabel" name="label_9">
+           <property name="toolTip">
+            <string>Rotation around the vertical axis</string>
+           </property>
            <property name="text">
-            <string>dPhi (degrees)</string>
+            <string>Yaw (degrees)</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QDoubleSpinBox" name="dPhiSpinBox">
+          <widget class="QDoubleSpinBox" name="yawStepSpinBox">
            <property name="decimals">
             <number>6</number>
            </property>
@@ -281,13 +268,16 @@
         <layout class="QHBoxLayout">
          <item>
           <widget class="QLabel" name="label_10">
+           <property name="toolTip">
+            <string>Rotation around the lateral axis</string>
+           </property>
            <property name="text">
-            <string>dTheta (degrees)</string>
+            <string>Pitch (degrees)</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QDoubleSpinBox" name="dThetaSpinBox">
+          <widget class="QDoubleSpinBox" name="pitchStepSpinBox">
            <property name="decimals">
             <number>6</number>
            </property>
@@ -328,6 +318,9 @@
         <layout class="QHBoxLayout">
          <item>
           <widget class="QLabel" name="label_11">
+           <property name="toolTip">
+            <string>Depth buffer 'uncertainty'</string>
+           </property>
            <property name="text">
             <string>Uncertainty</string>
            </property>
@@ -352,6 +345,9 @@
         <layout class="QHBoxLayout">
          <item>
           <widget class="QLabel" name="label_12">
+           <property name="toolTip">
+            <string>Sensor max range</string>
+           </property>
            <property name="text">
             <string>Max. range</string>
            </property>
@@ -384,16 +380,6 @@
        </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item row="2" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
     </widget>
    </item>
   </layout>

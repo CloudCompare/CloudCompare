@@ -2611,12 +2611,78 @@ void MainWindow::doActionSetViewFromSensor()
 			CCVector3d sensorCenterd = CCVector3d::fromArray(sensorCenter.u);
 			win->setCameraPos(sensorCenterd);
 			win->setPivotPoint(sensorCenterd);
-			//FIXME: more complicated! Depends on the 'rotation order' for GBL sensors for instance
-			//win->setView(CC_FRONT_VIEW,false);
 
 			//scanner main directions (front and up)
 			CCVector3d scannerX(trans.data()[0],trans.data()[4],trans.data()[8]);
+			CCVector3d scannerY(trans.data()[1],trans.data()[5],trans.data()[9]);
 			CCVector3d scannerZ(trans.data()[2],trans.data()[6],trans.data()[10]);
+
+			//center the view on the scan (angular) center
+			if (sensor->isA(CC_TYPES::GBL_SENSOR))
+			{
+				ccGBLSensor* gblSensor = static_cast<ccGBLSensor*>(sensor);
+
+				switch(gblSensor->getRotationOrder())
+				{
+				case ccGBLSensor::YAW_THEN_PITCH:
+					{
+						double theta = (gblSensor->getMinYaw() + gblSensor->getMaxYaw())/2;
+						if (gblSensor->yawIsShifted())
+						{
+							//ugly patch: why?!
+							if (theta < M_PI)
+								theta = -theta;
+							else
+								theta = theta - M_PI;
+						}
+						ccGLMatrixd rotz; rotz.initFromParameters(theta,scannerZ,CCVector3d(0,0,0));
+						rotz.applyRotation(scannerX);
+						rotz.applyRotation(scannerY);
+
+						double phi = (gblSensor->getMinPitch() + gblSensor->getMaxPitch())/2;
+						//ugly patch: why?!
+						if (phi < M_PI)
+							phi = -phi;
+						else
+							phi = phi - M_PI;
+						ccGLMatrixd roty; roty.initFromParameters(-phi,scannerY,CCVector3d(0,0,0)); //theta = 0 corresponds to the upward vertical direction!
+						roty.applyRotation(scannerX);
+						roty.applyRotation(scannerZ);
+
+						break;
+					}
+				case ccGBLSensor::PITCH_THEN_YAW:
+					{
+						double phi = (gblSensor->getMinPitch() + gblSensor->getMaxPitch())/2;
+						//ugly patch: why?!
+						if (phi < M_PI)
+							phi = -phi;
+						else
+							phi = phi - M_PI;
+						ccGLMatrixd roty; roty.initFromParameters(-phi,scannerY,CCVector3d(0,0,0)); //theta = 0 corresponds to the upward vertical direction!
+						roty.applyRotation(scannerX);
+						roty.applyRotation(scannerZ);
+
+						double theta = (gblSensor->getMinYaw() + gblSensor->getMaxYaw())/2;
+						if (gblSensor->yawIsShifted())
+						{
+							//ugly patch: why?!
+							if (theta < M_PI)
+								theta = -theta;
+							else
+								theta = theta - M_PI;
+						}
+						ccGLMatrixd rotz; rotz.initFromParameters(theta,scannerZ,CCVector3d(0,0,0));
+						rotz.applyRotation(scannerX);
+						rotz.applyRotation(scannerY);
+						break;
+					}
+				default:
+					assert(false);
+					break;
+				}
+
+			} 
 
 			//generate corresponding view matrix
 			ccGLMatrixd scannerViewMat;
@@ -2626,18 +2692,6 @@ void MainWindow::doActionSetViewFromSensor()
 			ccGLMatrixd viewMat = win->getBaseViewMat();
 			scannerViewMat.setTranslation(viewMat.getTranslation());
 
-			//add the 'angular centering' component
-			if (sensor->isA(CC_TYPES::GBL_SENSOR))
-			{
-				ccGBLSensor* gblSensor = static_cast<ccGBLSensor*>(sensor);
-				PointCoordinateType theta = (gblSensor->getThetaMax() + gblSensor->getThetaMin())/2;
-				PointCoordinateType phi = (gblSensor->getPhiMax() + gblSensor->getPhiMin())/2;
-				//FIXME: work in progress
-				ccConsole::Print/*Debug*/(QString("Phi = %1 / Theta = %2").arg(phi).arg(theta));
-				ccGLMatrixd rotz; rotz.initFromParameters(phi,CCVector3d(0,0,-1),CCVector3d(0,0,0));
-				ccGLMatrixd roty; roty.initFromParameters(theta,CCVector3d(0,-1,0),CCVector3d(0,0,0));
-				//scannerViewMat = scannerViewMat * roty * rotz;
-			}
 			win->setBaseViewMat(scannerViewMat);
 			//TODO: can we set the right FOV?
 			win->redraw();

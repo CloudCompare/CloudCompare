@@ -22,6 +22,7 @@
 #include "qCC_db.h"
 #include "ccSensor.h"
 #include "ccGLMatrix.h"
+#include "ccAdvancedTypes.h"
 
 //CCLib
 #include <GenericCloud.h>
@@ -29,138 +30,173 @@
 
 class ccPointCloud;
 
-//! Ground based LiDAR sensor model
-/** An implementation of the ccSensor interface that can be used
-	to project a point cloud from the point of view of a ground
-	based laser scanner (generation of a depth map). The scanner
-	should use rotating mirrors/body around two perpendicular axes,
-	such as the Mensi Soisic and GS sensors (but also Riegl's, etc.).
-	The depth map structure can then be used to determine a
-	3D point "visiblity" relatively to the laser scanner point of
-	view. This can be useful for filtering out points that
-	shouldn't be compared while computing the distances between two point
-	clouds. See Daniel Girardeau-Montaut's PhD manuscript for more
-	information on this particular topic (Chapter 2, section 2.3.3).
+//! Ground-based Laser sensor
+/** An implementation of the ccSensor interface that can be used to represent a depth sensor
+	relying on 2 rotations relatively to two perpendicular axes, such as ground based laser
+	scanners typically.
 **/
 class QCC_DB_LIB_API ccGBLSensor : public ccSensor
 {
 public:
 
-	//! The order of inner-rotations of a ground based lidar sensor
-	/** Either along Theta (long.) then Phi (lat.) as Riegl sensors or Mensi/Trimble GS.
-		Or the opposite (as the very old Mensi Soisic).
+	//! The order of inner-rotations of the sensor (body/mirrors)
+	/** Either the first rotation is made around the Z axis (yaw) then around the lateral
+		axis (pitch) as most scanners do today (Leica, Riegl, Faro, etc.). Othewise the
+		opposite order is used (as the very old Mensi Soisic).
 	**/
-	enum ROTATION_ORDER {	THETA_PHI = 0,
-							PHI_THETA = 1};
+	enum ROTATION_ORDER {	YAW_THEN_PITCH = 0,
+							PITCH_THEN_YAW = 1 };
 
 	//! Default constructor
-	ccGBLSensor(ROTATION_ORDER rotOrder = THETA_PHI);
+	/** \param rotOrder inner rotations order
+	**/
+	ccGBLSensor(ROTATION_ORDER rotOrder = YAW_THEN_PITCH);
 
 	//! Copy constructor
-	ccGBLSensor(const ccGBLSensor & sensor);
+	/** \warning The depth buffer is not copied!
+		\param sensor sensor structure to copy
+	**/
+	ccGBLSensor(const ccGBLSensor& sensor);
 
 	//! Destructor
-	virtual ~ccGBLSensor();
+	virtual ~ccGBLSensor() {};
 
 	//inherited from ccHObject
 	virtual CC_CLASS_ENUM getClassID() const { return CC_TYPES::GBL_SENSOR; }
 	virtual bool isSerializable() const { return true; }
+	virtual ccBBox getMyOwnBB();
+	virtual ccBBox getDisplayBB();
 
-	//! Sets the lateral angular scanning limits
-	/** \param minV min latitude
-		\param maxV max latitude
+	//! Determines a 3D point "visibility" relatively to the sensor field of view
+	/** Relies on the sensor associated depth map (see ccGBLSensor::computeDepthBuffer).
+		The depth map is used to determine the "visiblity" of a 3D point relatively to
+		the laser scanner field of view. This can be useful for filtering out points
+		that shouldn't be compared while computing the distances between two point
+		clouds for instance (for more information on this	particular topic, refer to
+		Daniel Girardeau-Montaut's PhD manuscript - Chapter 2, section 2.3.3).
+		\param P the point to test
+		\return the point's visibility (POINT_VISIBLE, POINT_HIDDEN, POINT_OUT_OF_RANGE or POINT_OUT_OF_FOV)
 	**/
-	void setPhi(PointCoordinateType minV, PointCoordinateType maxV);
+	virtual uchar checkVisibility(const CCVector3& P) const;
 
-	//! Sets the lateral angular scanning step
-	/** \param dPhi latitudinal step
+	//! Computes angular parameters automatically (all but the angular steps!)
+	/** WARNING: this method uses the cloud global iterator.
 	**/
-	void setDeltaPhi(PointCoordinateType dPhi);
+	bool computeAutoParameters(CCLib::GenericCloud* theCloud);
 
-	//! Returns the lateral minimal angular scanning limit
-	PointCoordinateType getPhiMin() const { return m_phiMin; }
+public: //setters and getters
 
-	//! Returns the lateral maximal angular scanning limit
-	PointCoordinateType getPhiMax() const { return m_phiMax; }
-
-	//! Returns the lateral angular scanning step
-	PointCoordinateType getDeltaPhi() const { return m_deltaPhi; }
-
-	//! Sets the vertical angular scanning limits
-	/** \param minV min longitude
-		\param maxV max longitude
+	//! Sets the pitch scanning limits
+	/** \param minPhi min pitch angle (in radians)
+		\param maxPhi max pitch angle (in radians)
 	**/
-	void setTheta(PointCoordinateType minV, PointCoordinateType maxV);
+	void setPitchRange(PointCoordinateType minPhi, PointCoordinateType maxPhi);
 
-	//! Sets the vertical angular scanning step
-	/** \param dTheta longitudinal step
+	//! Returns the minimal pitch limit (in radians)
+	inline PointCoordinateType getMinPitch() const { return m_phiMin; }
+
+	//! Returns the maximal pitch limit (in radians)
+	inline PointCoordinateType getMaxPitch() const { return m_phiMax; }
+
+	//! Sets the pitch step
+	/** \param dPhi pitch step (in radians)
 	**/
-	void setDeltaTheta(PointCoordinateType dTheta);
+	void setPitchStep(PointCoordinateType dPhi);
 
-	//! Returns the vertical minimal angular scanning limit
-	PointCoordinateType getThetaMin() const { return m_thetaMin; }
+	//! Returns the lateral pitch step (in radians)
+	inline PointCoordinateType getPitchStep() const { return m_deltaPhi; }
 
-	//! Returns the vertical maximal angular scanning limit
-	PointCoordinateType getThetaMax() const { return m_thetaMax; }
+	//! Returns whether the pitch angles are shifted (i.e. between [0 ; 2pi] instead of [-pi ; pi])
+	bool picthIsShifted() const { return m_pitchAnglesAreShifted; }
 
-	//! Returns the vertical angular scanning step
-	PointCoordinateType getDeltaTheta() const { return m_deltaTheta; }
+	//! Sets the yaw scanning limits
+	/** \param minTheta min yaw angle (in radians)
+		\param maxTheta max yaw angle (in radians)
+	**/
+	void setYawRange(PointCoordinateType minTheta, PointCoordinateType maxTheta);
+
+	//! Returns the minimal yaw limit (in radians)
+	inline PointCoordinateType getMinYaw() const { return m_thetaMin; }
+
+	//! Returns the maximal yaw limit (in radians)
+	inline PointCoordinateType getMaxYaw() const { return m_thetaMax; }
+
+	//! Sets the yaw step
+	/** \param dTheta yaw step (in radians)
+	**/
+	void setYawStep(PointCoordinateType dTheta);
+
+	//! Returns the yaw step (in radians)
+	inline PointCoordinateType getYawStep() const { return m_deltaTheta; }
+
+	//! Returns whether the yaw angles are shifted (i.e. between [0 ; 2pi] instead of [-pi ; pi])
+	bool yawIsShifted() const { return m_yawAnglesAreShifted; }
 
 	//! Returns the sensor max. range
-	PointCoordinateType getSensorRange() const { return m_sensorRange; }
+	inline PointCoordinateType getSensorRange() const { return m_sensorRange; }
 
 	//! Sets the sensor max. range
 	/** \param range max. range of the sensor
 	**/
-	void setSensorRange(PointCoordinateType range) { m_sensorRange = range; }
+	inline void setSensorRange(PointCoordinateType range) { m_sensorRange = range; }
 
 	//! Returns the Z-buffer uncertainty on depth values
-	PointCoordinateType getUncertainty() const { return m_uncertainty; }
+	inline PointCoordinateType getUncertainty() const { return m_uncertainty; }
 
 	//! Sets the Z-buffer uncertainty on depth values
 	/** The uncertainty is used to handle numerical inaccuracies
 		\param u the Z-buffer uncertainty
 	**/
-	void setUncertainty(PointCoordinateType u) { m_uncertainty = u; }
+	inline void setUncertainty(PointCoordinateType u) { m_uncertainty = u; }
 
-	//! Returns the sensor rotations order
+	//! Returns the sensor internal rotations order
 	ROTATION_ORDER getRotationOrder() const { return m_rotationOrder; }
 
-	//! Sets the sensor rotations order
-	/** \param rotOrder the sensor rotations order
+	//! Sets the sensor internal rotations order
+	/** \param rotOrder internal rotations order
 	**/
-	void setRotationOrder(ROTATION_ORDER rotOrder) { m_rotationOrder = rotOrder; }
+	inline void setRotationOrder(ROTATION_ORDER rotOrder) { m_rotationOrder = rotOrder; }
 
-	//! Projects a point cloud along the sensor point of view defined by this instance
-	/** WARNING: this method uses the cloud global iterator
-		\param cloud a point cloud
-		\param errorCode error code in case the returned cloud is 0
-		\param autoParameters try to deduce most trivial parameters (min and max angles, max range and uncertainty) from input cloud
-		\param projectedCloud cloud structure to store the projected points
-		\return a point cloud with the projected 2D points (Theta, Phi) + distances to sensor as a scalar field [should be deleted by the user if not used]
+public: //projection tools
+
+	//! Projects a point in the sensor world
+	/** \param[in] sourcePoint 3D point to project
+		\param[out] destPoint projected point in polar coordinates: (theta,phi) = (yaw,pitch) (angles between [-pi,+pi] or [0 ; 2pi] if the corresponding angle is 'shifted')
+		\param[out] depth distance between the sensor optical center and the 3D point
+		\param[in] posIndex (optional) sensor position index (see ccIndexedTransformationBuffer)
 	**/
-	bool computeDepthBuffer(CCLib::GenericCloud* cloud, int& errorCode, ccPointCloud* projectedCloud = 0);
+	void projectPoint(	const CCVector3& sourcePoint,
+						CCVector2& destPoint,
+						PointCoordinateType &depth,
+						double posIndex = 0 ) const;
+
+	//! 2D grid of normals
+	typedef GenericChunkedArray<3,PointCoordinateType> NormalGrid;
 
 	//! Projects a set of point cloud normals in the sensor world
 	/** WARNING: this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param norms the normals vectors (should have the same size and order as the point cloud)
+		\param posIndex (optional) sensor position index (see ccIndexedTransformationBuffer)
 		\return a bidimensional array of 3D vectors (same size as the depth buffer)
 	**/
-	PointCoordinateType* projectNormals(CCLib::GenericCloud* cloud, GenericChunkedArray<3,PointCoordinateType>& norms) const;
+	NormalGrid* projectNormals(	CCLib::GenericCloud* cloud,
+								const NormalGrid& norms,
+								double posIndex = 0 ) const;
+
+	//! 2D grid of colors
+	typedef GenericChunkedArray<3,colorType> ColorGrid;
 
 	//! Projects a set of point cloud colors in the sensor frame defined by this instance
 	/** WARNING: this method uses the cloud global iterator
 		\param cloud a point cloud
 		\param rgbColors the RGB colors (should have the same size and order as the point cloud)
-		\return a bidimensional array of RGB colors (same size as the depth buffer)
+		\return a set of RGB colors organized as a bidimensional grid (same size as the depth buffer)
 	**/
-	colorType* projectColors(CCLib::GenericCloud* cloud, GenericChunkedArray<3,colorType>& rgbColors) const;
+	ColorGrid* projectColors(	CCLib::GenericCloud* cloud,
+								const ColorGrid& rgbColors ) const;
 
-	//! Determines a point "visibility"
-	/** \param P the point to test
-	**/
-	virtual uchar checkVisibility(const CCVector3& P) const;
+public: //depth buffer management
 
 	//! Sensor "depth map"
 	/** Contains an array of depth values (along each scanned direction) and its dimensions.
@@ -171,9 +207,9 @@ public:
 	{
 		//! Z-Buffer grid
 		PointCoordinateType* zBuff;
-		//! Anguar step (may differ from the sensor's)
+		//! Pitch step (may differ from the sensor's)
 		PointCoordinateType deltaPhi;
-		//! Anguar step (may differ from the sensor's)
+		//! Yaw step (may differ from the sensor's)
 		PointCoordinateType deltaTheta;
 		//! Buffer width
 		unsigned width;
@@ -185,30 +221,32 @@ public:
 		//! Destructor
 		~DepthBuffer();
 
-		//! Applies a mean filter to fill the small holes (lack of information) of the depth map.
-		/**	The depth buffer must have been created before (see GroundBasedLidarSensor::project).
+		//! Clears the buffer
+		void clear();
+
+		//! Applies a mean filter to fill small holes (= lack of information) of the depth map.
+		/**	The depth buffer must have been created before (see GroundBasedLidarSensor::computeDepthBuffer).
 			\return a negative value if an error occurs, 0 otherwise
 		**/
 		int fillHoles();
-
 	};
 
-	//! Returns the corresponding depth buffer
-	/** If the point cloud hasen't been "projected" yet (see GroundBasedLidarSensor::project),
-		dB.zBuff will be 0. Otherwise dB will contain the projection result expressed
-		as a depth buffer.
+	//! Projects a point cloud along the sensor point of view defined by this instance
+	/** WARNING: this method uses the cloud global iterator
+		\param cloud a point cloud
+		\param errorCode error code in case the returned cloud is 0
+		\param projectedCloud optional (empty) cloud to store the projected points
+		\return whether the depth buffer was successfully created or not
 	**/
-	const DepthBuffer& getDepthBuffer() const { return m_depthBuffer; }
+	bool computeDepthBuffer(CCLib::GenericCloud* cloud, int& errorCode, ccPointCloud* projectedCloud = 0);
+
+	//! Returns the associated depth buffer
+	/** Call ccGBLSensor::computeDepthBuffer first otherwise the returned buffer will be 0.
+	**/
+	inline const DepthBuffer& getDepthBuffer() const { return m_depthBuffer; }
 
 	//! Removes the associated depth buffer
 	void clearDepthBuffer();
-
-	//! Computes parameters automatically (all but the angular steps!)
-	bool computeAutoParameters(CCLib::GenericCloud* theCloud);
-
-	//Inherited from ccHObject
-	virtual ccBBox getMyOwnBB();
-	virtual ccBBox getDisplayBB();
 
 protected:
 
@@ -217,31 +255,30 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);
 
-	//! Projects a point in the sensor world
-	/** \param[in] sourcePoint 3D point to project
-		\param[out] destPoint projected point in polar coordinates: (theta,phi) or (phi,theta) (angles between [-pi,+pi])
-		\param[out] depth distance from the sensor optical center to the source point
-		\param[in] posIndex (optional) sensor position index (see ccIndexedTransformationBuffer)
-	**/
-	void projectPoint(const CCVector3& sourcePoint, CCVector2& destPoint, PointCoordinateType &depth, double posIndex = 0) const;
+	//! Converts 2D angular coordinates (yaw,pitch) in integer depth buffer coordinates
+	bool convertToDepthMapCoords(PointCoordinateType yaw, PointCoordinateType pitch, unsigned& i, unsigned& j) const;
 
-	//! lateral minimal angular scanning limit
+	//! Minimal pitch limit (in radians)
+	/** Phi = 0 corresponds to the scanner vertical direction (upward) **/
 	PointCoordinateType m_phiMin;
-	//! lateral maximal angular scanning limit
+	//! Maximal pitch limit (in radians)
+	/** Phi = 0 corresponds to the scanner vertical direction (upward) **/
 	PointCoordinateType m_phiMax;
-	//! lateral angular scanning step
+	//! Pitch step (in radians)
 	PointCoordinateType m_deltaPhi;
-	//! Whether the horizontal angular range is shifted (i.e outside of [0 ; 2*pi])
-	bool m_phiRangeIsShifted;
+	//! Whether the pitch angular range is shifted (i.e in [0 ; 2pi] instead of [-pi ; pi])
+	bool m_pitchAnglesAreShifted;
 
-	//! Vertical minimal angular scanning limit
+	//! Minimal yaw limit (in radians)
+	/** Theta = 0 corresponds to the scanner X direction **/
 	PointCoordinateType m_thetaMin;
-	//! Vertical maximal angular scanning limit
+	//! Maximal yaw limit (in radians)
+	/** Theta = 0 corresponds to the scanner X direction **/
 	PointCoordinateType m_thetaMax;
-	//! Vertical angular scanning step
+	//! Yaw step (in radians)
 	PointCoordinateType m_deltaTheta;
-	//! Whether the vertical angular range is shifted (i.e outside of [0 ; 2*pi])
-	bool m_thetaRangeIsShifted;
+	//! Whether the yaw range is shifted (i.e in [0 ; 2pi] instead of [-pi ; pi]))
+	bool m_yawAnglesAreShifted;
 
 	//! Mirrors rotation order
 	ROTATION_ORDER m_rotationOrder;

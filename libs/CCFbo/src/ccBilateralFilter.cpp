@@ -126,7 +126,7 @@ void ccBilateralFilter::setParams(unsigned halfSpatialSize, float spatialSigma, 
 	updateDampingTable();
 }
 
-void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
+void ccBilateralFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
 {
 	if (!m_fbo || !m_shader)
 		return;

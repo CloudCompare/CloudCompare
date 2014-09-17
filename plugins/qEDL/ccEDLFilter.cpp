@@ -132,7 +132,7 @@ void ccEDLFilter::reset()
 
 bool ccEDLFilter::init(int width, int height, QString shadersPath, QString& error)
 {
-	return init(width, height, GL_RGBA, GL_LINEAR, shadersPath,error);
+	return init(width, height, GL_RGBA, GL_LINEAR, shadersPath, error);
 }
 
 bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minMagFilter, QString shadersPath, QString& error)
@@ -201,7 +201,9 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	if (m_bilateralFilter0.enabled)
 	{
 		if (!m_bilateralFilter0.filter)
+		{
 			m_bilateralFilter0.filter = new ccBilateralFilter();
+		}
 		if (!m_bilateralFilter0.filter->init(width,height,shadersPath,error))
 		{
 			delete m_bilateralFilter0.filter;
@@ -222,7 +224,9 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	if (m_bilateralFilter1.enabled)
 	{
 		if (!m_bilateralFilter1.filter)
+		{
 			m_bilateralFilter1.filter = new ccBilateralFilter();
+		}
 		if (!m_bilateralFilter1.filter->init(width/2,height/2,shadersPath,error))
 		{
 			delete m_bilateralFilter1.filter;
@@ -243,7 +247,9 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	if (m_bilateralFilter2.enabled)
 	{
 		if (!m_bilateralFilter2.filter)
+		{
 			m_bilateralFilter2.filter = new ccBilateralFilter();
+		}
 		if (!m_bilateralFilter2.filter->init(width/4,height/4,shadersPath,error))
 		{
 			delete m_bilateralFilter2.filter;
@@ -267,12 +273,7 @@ bool ccEDLFilter::init(int width, int height, GLenum internalFormat, GLenum minM
 	return true;
 }
 
-void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
-{
-	shade(texDepth, texColor, 0.0f, 1.0f, sqrt(2.0f*(zoom>0.7f ? zoom : 0.7f))); //1.41 ~ sqrt(2)
-}
-
-void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_max, float zoom)
+void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
 {
 	if (!fbo_edl0)
 	{
@@ -286,13 +287,18 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 		return;
 	}
 
+	//perspective mode
+	int perspectiveMode = parameters.perspectiveMode ? 1 : 0;
+	//light-balancing based on the current zoom (for ortho. mode only)
+	float lightMod = perspectiveMode ? 3.0f : sqrt(2.0f*std::max<float>(parameters.zoom,0.7f)); //1.41 ~ sqrt(2)
+
 	glPushAttrib(GL_ALL_ATTRIB_BITS);
 
 	//we must use corner-based screen coordinates
 	glMatrixMode(GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	glOrtho(0.0,(GLdouble)m_screenWidth,0.0,(GLdouble)m_screenHeight,(GLdouble)z_min,(GLdouble)z_max);
+	glOrtho(0.0,(GLdouble)m_screenWidth,0.0,(GLdouble)m_screenHeight,0.0,1.0/*parameters.zNear,parameters.zFar*/);
 	glMatrixMode(GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
@@ -308,11 +314,12 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 
 		shader_edl->setUniform1f("Sx",static_cast<float>(m_screenWidth));
 		shader_edl->setUniform1f("Sy",static_cast<float>(m_screenHeight));
-		shader_edl->setUniform1f("Zoom",zoom);
+		shader_edl->setUniform1f("Zoom",lightMod);
+		shader_edl->setUniform1i("PerspectiveMode",perspectiveMode);
 		shader_edl->setUniform1f("Pix_scale",1.0f);
 		shader_edl->setUniform1f("Exp_scale",exp_scale);
-		shader_edl->setUniform1f("Zm",z_min);
-		shader_edl->setUniform1f("ZM",z_max);
+		shader_edl->setUniform1f("Zm",static_cast<float>(parameters.zNear));
+		shader_edl->setUniform1f("ZM",static_cast<float>(parameters.zFar));
 		shader_edl->setUniform3fv("Light_dir",light_dir);
 		shader_edl->setTabUniform2fv("Neigh_pos_2D",8,neighbours);
 
@@ -343,11 +350,12 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 
 		shader_edl->setUniform1f("Sx",static_cast<float>(m_screenWidth>>1));
 		shader_edl->setUniform1f("Sy",static_cast<float>(m_screenHeight>>1));
-		shader_edl->setUniform1f("Zoom",zoom);
+		shader_edl->setUniform1f("Zoom",lightMod);
+		shader_edl->setUniform1i("PerspectiveMode",perspectiveMode);
 		shader_edl->setUniform1f("Pix_scale",2.0f);
 		shader_edl->setUniform1f("Exp_scale",exp_scale);
-		shader_edl->setUniform1f("Zm",z_min);
-		shader_edl->setUniform1f("ZM",z_max);
+		shader_edl->setUniform1f("Zm",static_cast<float>(parameters.zNear));
+		shader_edl->setUniform1f("ZM",static_cast<float>(parameters.zFar));
 		shader_edl->setUniform3fv("Light_dir",light_dir);
 		shader_edl->setTabUniform2fv("Neigh_pos_2D",8,neighbours);
 		//*/
@@ -379,11 +387,12 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 
 		shader_edl->setUniform1f("Sx",static_cast<float>(m_screenWidth>>2));
 		shader_edl->setUniform1f("Sy",static_cast<float>(m_screenHeight>>2));
-		shader_edl->setUniform1f("Zoom",zoom);
+		shader_edl->setUniform1f("Zoom",lightMod);
+		shader_edl->setUniform1i("PerspectiveMode",perspectiveMode);
 		shader_edl->setUniform1f("Pix_scale",4.0f);
 		shader_edl->setUniform1f("Exp_scale",exp_scale);
-		shader_edl->setUniform1f("Zm",z_min);
-		shader_edl->setUniform1f("ZM",z_max);
+		shader_edl->setUniform1f("Zm",static_cast<float>(parameters.zNear));
+		shader_edl->setUniform1f("ZM",static_cast<float>(parameters.zFar));
 		shader_edl->setUniform3fv("Light_dir",light_dir);
 		shader_edl->setTabUniform2fv("Neigh_pos_2D",8,neighbours);
 		//*/
@@ -409,17 +418,17 @@ void ccEDLFilter::shade(GLuint texDepth, GLuint texColor, float z_min, float z_m
 		if (m_bilateralFilter0.filter)
 		{
 			m_bilateralFilter0.filter->setParams(m_bilateralFilter0.halfSize,m_bilateralFilter0.sigma,m_bilateralFilter0.sigmaZ);
-			m_bilateralFilter0.filter->shade(texDepth,fbo_edl0->getColorTexture(0),zoom);
+			m_bilateralFilter0.filter->shade(texDepth,fbo_edl0->getColorTexture(0),parameters);
 		}
 		if (m_bilateralFilter1.filter)
 		{
 			m_bilateralFilter1.filter->setParams(m_bilateralFilter1.halfSize,m_bilateralFilter1.sigma,m_bilateralFilter1.sigmaZ);
-			m_bilateralFilter1.filter->shade(texDepth,fbo_edl1->getColorTexture(0),zoom);
+			m_bilateralFilter1.filter->shade(texDepth,fbo_edl1->getColorTexture(0),parameters);
 		}
 		if (m_bilateralFilter2.filter)
 		{
 			m_bilateralFilter2.filter->setParams(m_bilateralFilter2.halfSize,m_bilateralFilter2.sigma,m_bilateralFilter2.sigmaZ);
-			m_bilateralFilter2.filter->shade(texDepth,fbo_edl2->getColorTexture(0),zoom);
+			m_bilateralFilter2.filter->shade(texDepth,fbo_edl2->getColorTexture(0),parameters);
 		}
 	}
 	/***	SMOOTH RESULTS	***/

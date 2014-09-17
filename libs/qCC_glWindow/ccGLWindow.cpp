@@ -610,7 +610,14 @@ void ccGLWindow::paintGL()
 			//we process GL filter
 			GLuint depthTex = m_fbo->getDepthTexture();
 			GLuint colorTex = m_fbo->getColorTexture(0);
-			m_activeGLFilter->shade(depthTex, colorTex, (m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //TODO: doesn't work well with EDL in perspective mode!
+			//minimal set of viewport parameters necessary for GL filters
+			ccGlFilter::ViewportParameters parameters;
+			parameters.perspectiveMode = m_viewportParams.perspectiveView;
+			parameters.zFar = m_viewportParams.zFar;
+			parameters.zNear = m_viewportParams.zNear;
+			parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom; //TODO: doesn't work well with EDL in perspective mode!
+			//apply shader
+			m_activeGLFilter->shade(depthTex, colorTex, parameters); 
 
 			ccGLUtils::CatchGLError("ccGLWindow::paintGL/glFilter shade");
 
@@ -1548,10 +1555,11 @@ void ccGLWindow::recalcProjectionMatrix()
 	if (m_viewportParams.perspectiveView)
 	{
 		//we deduce zNear et zFar
-		//DGM: by default we clip zNear just after 0 (not too close,
-		//otherwise it can cause a very strange behavior when looking
-		//at objects with large coordinates)
+		//DGM: the 'zNearCoef' must not be too small, otherwise the loss in accuracy
+		//for the detph buffer is too high and the display is jeopardized, especially
+		//for entities with big coordinates)
 		double zNear = MP * m_viewportParams.zNearCoef;
+		//DGM: what was the purpose of this?!
 		//if (m_viewportParams.objectCenteredView)
 		//	zNear = std::max<double>(CP-MP,zNear);
 		double zFar = std::max<double>(CP+MP,1.0);
@@ -3404,7 +3412,14 @@ bool ccGLWindow::renderToFile(	const char* filename,
 				//we process GL filter
 				GLuint depthTex = fbo->getDepthTexture();
 				GLuint colorTex = fbo->getColorTexture(0);
-				filter->shade(depthTex, colorTex, zoomFactor*(m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom)); //TODO: doesn't work well with EDL in perspective mode!
+				//minimal set of viewport parameters necessary for GL filters
+				ccGlFilter::ViewportParameters parameters;
+				parameters.perspectiveMode = m_viewportParams.perspectiveView;
+				parameters.zFar = m_viewportParams.zFar;
+				parameters.zNear = m_viewportParams.zNear;
+				parameters.zoom = m_viewportParams.perspectiveView ? computePerspectiveZoom() : m_viewportParams.zoom; //TODO: doesn't work well with EDL in perspective mode!
+				//apply shader
+				filter->shade(depthTex, colorTex, parameters);
 
 				ccGLUtils::CatchGLError("ccGLWindow::renderToFile/glFilter shade");
 

@@ -58,7 +58,7 @@ public:
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const;
 	virtual bool init(int width, int height, QString shadersPath, QString& error);
-	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0f);
+	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
 	virtual GLuint getTexture();
 
 	//! Resets filter
@@ -71,13 +71,6 @@ public:
 				GLenum minMagFilter,
 				QString shadersPath,
 				QString& error);
-
-	//! Real shading process
-	void shade(	GLuint texDepth,
-				GLuint texColor,
-				float z_min,
-				float z_max,
-				float zoom);
 
 	//! Returns given texture index
 	GLuint getTexture(int index);

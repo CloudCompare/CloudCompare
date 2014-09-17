@@ -201,7 +201,7 @@ void ccSSAOFilter::sampleSphere()
 	}
 }
 
-void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
+void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters)
 {
 	if (!fbo || !shader)
 	{
@@ -269,7 +269,7 @@ void ccSSAOFilter::shade(GLuint texDepth, GLuint texColor, float zoom)
 	if (bilateralFilter)
 	{
 		bilateralFilter->setParams(bilateralGHalfSize,bilateralGSigma,bilateralGSigmaZ);
-		bilateralFilter->shade(texDepth,fbo->getColorTexture(0),zoom);
+		bilateralFilter->shade(texDepth,fbo->getColorTexture(0),parameters);
 	}
 
 	glMatrixMode(GL_PROJECTION);

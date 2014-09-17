@@ -32,35 +32,6 @@
 //
 /*****************************************************************/
 
-///**************************/
-////
-////	HOW TO USE SSAO FILTER
-////
-//#include "filter_ssao.h"
-//ccSSAOFilter*	filter_ssao;
-//int			ssao_N;		// nb of neighbours
-//float		ssao_Kz;	// attenuation with distance
-//float		ssao_R;		// radius in image of neighbour sphere
-//float		ssao_F;		// amplification
-//void	initSSAOFilter()
-//{
-//	filter_ssao	=	new ccSSAOFilter(wf,hf);
-//	filter_ssao->sampleSphere();
-//	//
-//	ssao_N				=	32;
-//	ssao_Kz				=	500.;
-//	ssao_R				=	0.05;
-//	ssao_F				=	20.;
-//}
-//void computeSSAO()
-//{
-//	filter_ssao->setParameters(ssao_N,ssao_Kz,ssao_R,ssao_F);
-//	filter_ssao->shade(Fbo_d->getDepthTexture(),ssao_use_reflect*ssao_tex_reflect);
-//
-//	tex_ssao = filter_ssao->getTexture();
-//}
-///**************************/
-
 #ifndef	CC_FILTER_SSAO_H
 #define	CC_FILTER_SSAO_H
 
@@ -84,7 +55,7 @@ public:
 	//inherited from ccGlFilter
 	virtual ccGlFilter* clone() const;
 	virtual bool init(int width, int height, QString shadersPath, QString& error);
-	virtual void shade(GLuint texDepth, GLuint texColor, float zoom = 1.0f);
+	virtual void shade(GLuint texDepth, GLuint texColor, ViewportParameters& parameters);
 	virtual GLuint getTexture();
 
 	bool init(	int width,

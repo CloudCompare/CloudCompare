@@ -57,10 +57,31 @@ public:
 						QString shadersPath,
 						QString& error) = 0;
 
+	//! Minimal set of 3D viewport parameters that can be used by shaders
+	struct ViewportParameters
+	{
+		//! Default constructor
+		ViewportParameters()
+			: zoom(1.0)
+			, perspectiveMode(false)
+			, zNear(0.0)
+			, zFar(1.0)
+		{}
+
+		//! Zoom
+		double zoom;
+		//! Whether perspective mode is enabled or not
+		bool perspectiveMode;
+		//! Near clipping plane position (perspective mode only)
+		double zNear;
+		//! Far clipping plane position (perspective mode only)
+		double zFar;
+	};
+
 	//! Applies filter to texture (depth + color)
 	virtual void shade(	GLuint texDepth,
 						GLuint texColor,
-						float zoom = 1.0f) = 0;
+						ViewportParameters& parameters) = 0;
 
 	//! Returns resulting texture
 	virtual GLuint getTexture() = 0;

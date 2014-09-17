@@ -30,6 +30,7 @@ uniform float		Sx;
 uniform float		Sy;
 
 uniform float		Zoom;				// image display zoom (so as to always use - approximately - the same pixels)
+uniform int			PerspectiveMode;	// whether perspective mode is enabled (1) or not (0) - for z-Buffer compensation
 
 uniform vec3		Light_dir;
 /**************************************************/
@@ -37,15 +38,23 @@ uniform vec3		Light_dir;
 
 //  Obscurance (pseudo angle version)
 //	z		neighbour relative elevation
-//	dist	distance to the neighbour
+//	dist	distance to the neighbourx
 float obscurance(float z, float dist)
 {
 	return max(0.0, z) / dist;
 }
 
-float ztransform(float z)
+float ztransform(float z_b)
 {
-	return clamp((z-ZM)/(Zm-ZM), 0.0, 1.0);
+	if (PerspectiveMode == 1)
+	{
+		//'1/z' depth-buffer transformation correction
+		float z_n = 2.0 * z_b - 1.0;
+		z_b = 2.0 * Zm / (ZM + Zm - z_n * (ZM - Zm));
+		z_b = z_b * ZM / (ZM - Zm);
+	}
+
+	return clamp(1.0 - z_b, 0.0, 1.0);
 }
 
 float computeObscurance(float depth, float scale)
@@ -56,7 +65,7 @@ float computeObscurance(float depth, float scale)
 	float sum = 0.0;
 
 	// contribution of each neighbor
-	for(int c=0; c<8;c++)
+	for(int c=0; c<8; c++)
 	{
 		vec2 N_rel_pos = scale * Zoom / vec2(Sx,Sy) * Neigh_pos_2D[c];	//neighbor relative position
 		vec2 N_abs_pos = gl_TexCoord[0].st + N_rel_pos;					//neighbor absolute position

@@ -104,7 +104,7 @@ ccBBox ccPolyline::getMyOwnBB()
 {
 	ccBBox emptyBox;
 	getBoundingBox(emptyBox.minCorner().u, emptyBox.maxCorner().u);
-	emptyBox.setValidity(true);
+	emptyBox.setValidity(!is2DMode() && size() != 0);
 	return emptyBox;
 }
 

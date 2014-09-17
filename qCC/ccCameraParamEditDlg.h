@@ -56,49 +56,50 @@ public:
 	virtual bool start();
 	virtual bool linkWith(ccGLWindow* win);
 
-	public slots:
+public slots:
 
-		//! Links this dialog with a given sub-window
-		void linkWith(QMdiSubWindow* qWin);
+	//! Links this dialog with a given sub-window
+	void linkWith(QMdiSubWindow* qWin);
 
-		//! Inits dialog values with matrix
-		void initWithMatrix(const ccGLMatrixd& mat);
+	//! Inits dialog values with matrix
+	void initWithMatrix(const ccGLMatrixd& mat);
 
-		//! Slots called when the view matrix of the associated window changes
-		void updateViewMatrix(const ccGLMatrixd& dummyMat);
+	//! Slots called when the view matrix of the associated window changes
+	void updateViewMatrix(const ccGLMatrixd& dummyMat);
 
-		//! Updates dialog values with pivot point
-		void updatePivotPoint(const CCVector3d& P);
+	//! Updates dialog values with pivot point
+	void updatePivotPoint(const CCVector3d& P);
 
-		//! Updates dialog values with camera center
-		void updateCameraCenter(const CCVector3d& P);
+	//! Updates dialog values with camera center
+	void updateCameraCenter(const CCVector3d& P);
 
-		//! Updates current view mode
-		void updateViewMode();
+	//! Updates current view mode
+	void updateViewMode();
 
-		void setFrontView();
-		void setBottomView();
-		void setTopView();
-		void setBackView();
-		void setLeftView();
-		void setRightView();
-		void setIso1View();
-		void setIso2View();
+	void setFrontView();
+	void setBottomView();
+	void setTopView();
+	void setBackView();
+	void setLeftView();
+	void setRightView();
+	void setIso1View();
+	void setIso2View();
 
-		void iThetaValueChanged(int);
-		void iPsiValueChanged(int);
-		void iPhiValueChanged(int);
+	void iThetaValueChanged(int);
+	void iPsiValueChanged(int);
+	void iPhiValueChanged(int);
 
-		void dThetaValueChanged(double);
-		void dPsiValueChanged(double);
-		void dPhiValueChanged(double);
+	void dThetaValueChanged(double);
+	void dPsiValueChanged(double);
+	void dPhiValueChanged(double);
 
-		void pivotChanged();
-		void cameraCenterChanged();
-		void fovChanged(double);
+	void pivotChanged();
+	void cameraCenterChanged();
+	void fovChanged(double);
+	void zNearSliderMoved(int);
 
-		void pickPointAsPivot();
-		void processPickedPoint(int, unsigned, int, int);
+	void pickPointAsPivot();
+	void processPickedPoint(int, unsigned, int, int);
 
 protected slots:
 
@@ -115,6 +116,9 @@ protected slots:
 	void revertToPushedMatrix();
 
 protected:
+
+	//! Inits dialog values with specified window
+	void initWith(ccGLWindow* win);
 
 	//! Type of the pushed matrices map structure
 	typedef std::map<ccGLWindow*,ccGLMatrixd> PushedMatricesMapType;

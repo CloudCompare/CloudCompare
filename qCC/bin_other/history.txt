@@ -51,6 +51,11 @@ v2.5.6 ??/??/2014
 		- 'Theta' and 'Phi' are replaced by the clearer 'Yaw' and 'Pitch' names
 		- 'Edit > Sensor > View from sensor' method is now cleverer
 		- 'Edit > Sensor > GBL Sensor > Show depth map' is now cleverer
+	* Camera parameters dialog:
+		- should not 'disconnect' from the current 3D view anymore
+		- new setting: 'zNear relative position' to change the position of the near clipping plane
+			in perspective mode (due to the way near and far clipping planes are handled in CC, this
+			is only a relative position, and it cannot be set at any given depth).
 
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized

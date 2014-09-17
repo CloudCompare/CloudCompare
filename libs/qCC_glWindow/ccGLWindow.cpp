@@ -1551,11 +1551,14 @@ void ccGLWindow::recalcProjectionMatrix()
 		//DGM: by default we clip zNear just after 0 (not too close,
 		//otherwise it can cause a very strange behavior when looking
 		//at objects with large coordinates)
-		double zNear = static_cast<double>(MP)*1.0e-3;
-		if (m_viewportParams.objectCenteredView)
-			zNear = std::max<double>(CP-MP,zNear);
-
+		double zNear = MP * m_viewportParams.zNearCoef;
+		//if (m_viewportParams.objectCenteredView)
+		//	zNear = std::max<double>(CP-MP,zNear);
 		double zFar = std::max<double>(CP+MP,1.0);
+
+		//save actual zNear and zFar parameters
+		m_viewportParams.zNear = zNear;
+		m_viewportParams.zFar = zFar;
 
 		//and aspect ratio
 		double ar = static_cast<double>(m_glWidth)/static_cast<double>(m_glHeight);
@@ -1572,6 +1575,10 @@ void ccGLWindow::recalcProjectionMatrix()
 
 		double halfW = static_cast<double>(m_glWidth)/2;
 		double halfH = static_cast<double>(m_glHeight)/2 * m_viewportParams.orthoAspectRatio;
+
+		//save actual zNear and zFar parameters
+		m_viewportParams.zNear = -maxDist_pix;
+		m_viewportParams.zFar = maxDist_pix;
 
 		glOrtho(-halfW,halfW,-halfH,halfH,-maxDist_pix,maxDist_pix);
 	}
@@ -1599,7 +1606,7 @@ void ccGLWindow::recalcModelViewMatrix()
 	{
 		//for proper aspect ratio handling
 		float ar = (m_glHeight != 0 ? float(m_glWidth)/(float(m_glHeight)*m_viewportParams.perspectiveAspectRatio) : 0.0f);
-		if (ar<1.0)
+		if (ar < 1.0)
 			glScalef(ar,ar,1.0);
 	}
 	else //ortho. mode
@@ -1636,7 +1643,6 @@ void ccGLWindow::recalcModelViewMatrix()
 	}		
 
 	//we save visualization matrix
-	//glGetFloatv(GL_MODELVIEW_MATRIX, m_viewMat.data());
 	glGetDoublev(GL_MODELVIEW_MATRIX, m_viewMatd);
 
 	m_validModelviewMatrix = true;
@@ -1677,8 +1683,8 @@ void ccGLWindow::setStandardOrthoCenter()
 {
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	float halfW = float(m_glWidth)*0.5f;
-	float halfH = float(m_glHeight)*0.5f;
+	float halfW = static_cast<float>(m_glWidth)/2;
+	float halfH = static_cast<float>(m_glHeight)/2;
 	float maxS = std::max(halfW,halfH);
 	glOrtho(-halfW,halfW,-halfH,halfH,-maxS,maxS);
 	glMatrixMode(GL_MODELVIEW);
@@ -3111,6 +3117,27 @@ void ccGLWindow::setFov(float fov)
 	{
 		//update param
 		m_viewportParams.fov = fov;
+		//and camera state (if perspective view is 'on')
+		if (m_viewportParams.perspectiveView)
+		{
+			invalidateViewport();
+			invalidateVisualization();
+		}
+	}
+}
+
+void ccGLWindow::setZNearCoef(double coef)
+{
+	if (coef <= 0)
+	{
+		ccLog::Warning("[ccGLWindow::setZNearCoef] Invalid coef. value!");
+		return;
+	}
+
+	if (m_viewportParams.zNearCoef != coef)
+	{
+		//update param
+		m_viewportParams.zNearCoef = coef;
 		//and camera state (if perspective view is 'on')
 		if (m_viewportParams.perspectiveView)
 		{

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>316</width>
-    <height>600</height>
+    <width>325</width>
+    <height>560</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -693,6 +693,33 @@
        </property>
        <property name="value">
         <double>25.000000000000000</double>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>zNear relative position</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="zNearHorizontalSlider">
+       <property name="minimum">
+        <number>0</number>
+       </property>
+       <property name="maximum">
+        <number>150</number>
+       </property>
+       <property name="value">
+        <number>0</number>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
        </property>
       </widget>
      </item>

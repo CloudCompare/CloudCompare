@@ -70,6 +70,13 @@ public:
 	/** Always true for ortho. mode.
 	**/
 	bool objectCenteredView;
+
+	//! Theoretical perspective 'zNear' relative position
+	double zNearCoef;
+	//! Actual perspective 'zNear' value
+	double zNear;
+	//! Actual perspective 'zFar' value
+	double zFar;
 	
 	//! Rotation pivot point (for object-centered view modes)
 	CCVector3d pivotPoint;

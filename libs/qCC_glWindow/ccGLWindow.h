@@ -330,6 +330,11 @@ public:
 	**/
 	virtual void setFov(float fov);
 
+	//! Sets current camera 'zNear' coefficient
+	/** zNear coef. is only used in perspective mode.
+	**/
+	virtual void setZNearCoef(double coef);
+
 	//! Invalidate current visualization state
 	/** Forces view matrix update and 3D/FBO display.
 	**/

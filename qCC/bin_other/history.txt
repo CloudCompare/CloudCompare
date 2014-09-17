@@ -64,6 +64,9 @@ v2.5.6 ??/??/2014
 	* for some clouds loaded from an ASCII file and with very particular sizes, the associated scalar fields
 		size could be wrongly set (while the data was correctly loaded) and CC woudln't accept to display them...
 	* memory leak when loading PTX files
+	* starting the 'Manual Segmentation tool' (scissors icon) in perspective mode could dramatically change
+		the EDL rendering (anyway, using EDL in perspective mode is not really supported yet ;)
+	* qPoissonRecon: the mutli-threaded version (i.e. the 32 bits version on Windows) could crash sometimes
 
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'

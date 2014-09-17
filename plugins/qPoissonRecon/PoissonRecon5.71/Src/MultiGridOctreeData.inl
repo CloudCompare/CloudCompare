@@ -2707,7 +2707,8 @@ void Octree< Degree , OutputDensity >::GetMCIsoTriangles( Real isoValue , int su
 			std::vector< Vertex > barycenters;
 			std::vector< Vertex >* barycenterPtr = addBarycenter ? & barycenters : NULL;
 #ifdef WITH_OPENMP
-#pragma omp parallel for num_threads( threads ) firstprivate( nKey )
+//DGM: indeed, it crashes sometimes due to concurrent (write) access into the same vector!!!
+//#pragma omp parallel for num_threads( threads ) firstprivate( nKey )
 #endif
 			for( int i=0 ; i<(int)leafNodeCount ; i++ )
 			{

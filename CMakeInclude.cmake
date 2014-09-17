@@ -44,14 +44,12 @@ if( WIN32 )
 
 		#release version
 		foreach( element ${QT_RELEASE_DLLS} )
-			file( GLOB dll_files ${QT_BINARY_DIR}/${element}*.dll )
-			foreach( qtDLL ${dll_files} )
-				if( NOT CMAKE_CONFIGURATION_TYPES )
-					install( FILES ${qtDLL} DESTINATION ${ARGV0} )
-				else()
-					install( FILES ${qtDLL} CONFIGURATIONS Release DESTINATION ${ARGV0} )
-				endif()
-			endforeach()
+			set( qtDLL ${QT_BINARY_DIR}/${element}.dll )
+			if( NOT CMAKE_CONFIGURATION_TYPES )
+				install( FILES ${qtDLL} DESTINATION ${ARGV0} )
+			else()
+				install( FILES ${qtDLL} CONFIGURATIONS Release DESTINATION ${ARGV0} )
+			endif()
 		endforeach()
 		
 		# for mutli-config compiler only
@@ -59,17 +57,15 @@ if( WIN32 )
 		
 			#release with debug info version
 			foreach( element ${QT_RELEASE_DLLS} )
-				file( GLOB dll_files ${QT_BINARY_DIR}/${element}*.dll )
-				foreach( qtDLL ${dll_files} )
-					install( FILES ${qtDLL} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo )
-				endforeach()
+				set( qtDLL ${QT_BINARY_DIR}/${element}.dll )
+				install( FILES ${qtDLL} CONFIGURATIONS RelWithDebInfo DESTINATION ${ARGV0}_withDebInfo )
 			endforeach()
 
 			#debug version
 			if ( NOT USE_QT5 )
 				set( QT_DEBUG_DLLS QtCored${QT_VERSION_MAJOR} QtGuid${QT_VERSION_MAJOR} QtOpenGLd${QT_VERSION_MAJOR} )
 			else()
-				set( QT_DEBUG_DLLS Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5PrintSupportd icuin51 icuuc51 icudt51 )
+				set( QT_DEBUG_DLLS Qt5Cored Qt5Guid Qt5OpenGLd Qt5Widgetsd Qt5Concurrentd Qt5PrintSupportd icuin51 icuuc51 icudt51 )
 				#set( QT_BINARY_DIR ${QT5_ROOT_PATH}/bin )
 			endif()
 			#specific case for the MinGW version of Qts
@@ -79,10 +75,8 @@ if( WIN32 )
 			endif()
 		
 			foreach( element ${QT_DEBUG_DLLS} )
-				file( GLOB dll_files ${QT_BINARY_DIR}/${element}*.dll )
-				foreach( qtDLL ${dll_files} )
-					install( FILES ${qtDLL} CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug )
-				endforeach()
+				set( qtDLL ${QT_BINARY_DIR}/${element}.dll )
+				install( FILES ${qtDLL} CONFIGURATIONS Debug DESTINATION ${ARGV0}_debug )
 			endforeach()
 
 		endif()

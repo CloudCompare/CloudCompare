@@ -81,6 +81,7 @@ static const char COMMAND_ICP_ENABLE_FARTHEST_REMOVAL[]		= "FARTHEST_REMOVAL";
 static const char COMMAND_CLOUD_EXPORT_FORMAT[]				= "C_EXPORT_FMT";
 static const char COMMAND_ASCII_EXPORT_PRECISION[]			= "PREC";
 static const char COMMAND_ASCII_EXPORT_SEPARATOR[]			= "SEP";
+static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_FMT";
 static const char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
 static const char COMMAND_EXPORT_EXTENSION[]				= "EXT";
 static const char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
@@ -2137,7 +2138,7 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 				ccConsole::Warning(QString("Argument '%1' is only applicable to ASCII format!").arg(argument));
 
 			QString separatorStr = arguments.takeFirst().toUpper();
-			printf("%s\n",qPrintable(separatorStr));
+			//printf("%s\n",qPrintable(separatorStr));
 			int index = -1;
 			if (separatorStr == "SPACE")
 				index = 0;
@@ -2157,6 +2158,23 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 				saveDialog->setSeparatorIndex(index);
 				saveDialog->setAutoShow(false);
 			}
+		}
+		else if (IsCommand(argument,COMMAND_FBX_EXPORT_FORMAT))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+
+			if (arguments.empty())
+				return Error(QString(QString("Missing parameter: FBX format (string) after '%1'").arg(COMMAND_FBX_EXPORT_FORMAT)));
+
+			if (type != FBX)
+				ccConsole::Warning(QString("Argument '%1' is only applicable to FBX format!").arg(argument));
+
+			QString formatStr = arguments.takeFirst();
+			ccConsole::Print(QString("FBX format: %1").arg(formatStr));
+
+			//TODO
+
 		}
 		else
 		{

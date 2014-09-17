@@ -88,13 +88,16 @@ int main(int argc, char **argv)
 	//QT initialiation
 	qccApplication app(argc, argv);
 
+	//Force 'english' local so as to get a consistent behavior everywhere
+	QLocale::setDefault(QLocale::English);
+
 #ifdef USE_VLD
 	VLDEnable();
 #endif
 
 	//splash screen
 	QSplashScreen* splash = 0;
-    QTime splashStartTime;
+	QTime splashStartTime;
 
 	//Command line mode?
 	bool commandLine = (argc>1 && argv[1][0]=='-');
@@ -108,7 +111,7 @@ int main(int argc, char **argv)
 		}
 
 		//splash screen
-        splashStartTime.start();
+		splashStartTime.start();
 		QPixmap pixmap(QString::fromUtf8(":/CC/images/imLogoV2Qt.png"));
 		splash = new QSplashScreen(pixmap,Qt::WindowStaysOnTopHint);
 		splash->show();

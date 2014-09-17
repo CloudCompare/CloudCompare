@@ -308,6 +308,8 @@ CC_FILE_ERROR PovFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					gls->setRigidTransformation(trans);
 					gls->setYawStep(dTheta);
 					gls->setPitchStep(dPhi);
+					gls->setVisible(true);
+					gls->setEnabled(false);
 
 					int errorCode = 0;
 					if (gls->computeAutoParameters(theCloud))

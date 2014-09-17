@@ -2393,7 +2393,7 @@ void MainWindow::doActionComputeDistancesFromSensor()
 	if (!cdDlg.exec())
 		return;
 
-	for (int i = 0; i < m_selectedEntities.size(); ++i)
+	for (size_t i=0; i<m_selectedEntities.size(); ++i)
 	{
 		ccSensor* sensor = ccHObjectCaster::ToSensor(m_selectedEntities[i]);
 		assert(sensor);

@@ -494,7 +494,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 						&&	(P.z-static_cast<PointCoordinateType>(zi))*cellSizePlusGap.z <= cellSize.z) )
 					{
 						int cloudIndex = ((zi-indexMins[2]) * static_cast<int>(gridDim[1]) + (yi-indexMins[1])) * static_cast<int>(gridDim[0]) + (xi-indexMins[0]);
-						assert(cloudIndex < refClouds.size());
+						assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex) < refClouds.size());
 
 						if (!refClouds[cloudIndex])
 						{
@@ -529,7 +529,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 						for (int k=indexMins[2]; k<=indexMaxs[2]; ++k)
 						{
 							int cloudIndex = ((k-indexMins[2]) * static_cast<int>(gridDim[1]) + (j-indexMins[1])) * static_cast<int>(gridDim[0]) + (i-indexMins[0]);
-							assert(cloudIndex < refClouds.size());
+							assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex) < refClouds.size());
 
 							if (refClouds[cloudIndex]) //some slices can be empty due to rounding issues!
 							{
@@ -634,7 +634,7 @@ void ccClippingBoxTool::extractSlicesAndContours(bool extractSlices, bool extrac
 					for (int k=indexMins[2]; k<=indexMaxs[2]; ++k)
 					{
 						int cloudIndex = ((k-indexMins[2]) * static_cast<int>(gridDim[1]) + (j-indexMins[1])) * static_cast<int>(gridDim[0]) + (i-indexMins[0]);
-						assert(cloudIndex < clouds.size());
+						assert(cloudIndex >= 0 && static_cast<size_t>(cloudIndex) < clouds.size());
 
 						if (clouds[cloudIndex]) //some slices can be empty due to rounding issues!
 						{

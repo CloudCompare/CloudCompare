@@ -17,9 +17,45 @@
 
 #include "ccSensorProjectionDlg.h"
 
+//Qt
 #include <QMessageBox>
+#include <QValidator>
 
+//qCC_db
 #include <ccGBLSensor.h>
+
+//! Validator class (accepts only double numbers and replaces the comma by a point automatically)
+class CustomDoubleValidator : public QValidator
+{
+public:
+
+	//! Default constructor
+	CustomDoubleValidator(QObject * parent = 0) : QValidator(parent)
+	{}
+
+	//reimplemented from QValidator
+	State validate(QString& input, int& pos) const
+	{
+		for (int i=0; i<input.size(); ++i)
+		{
+			QChar c = input[i];
+			if (c == ',')
+			{
+				input[i] = '.';
+				continue;
+			}
+			else if (c == '.' || c == '-' || c.isDigit())
+			{
+				continue;
+			}
+			else
+			{
+				return Invalid;
+			}
+		}
+		return Acceptable;
+	}
+};
 
 ccSensorProjectionDlg::ccSensorProjectionDlg(QWidget* parent)
 	: QDialog(parent)
@@ -27,19 +63,19 @@ ccSensorProjectionDlg::ccSensorProjectionDlg(QWidget* parent)
 {
 	setupUi(this);
 
-	posXEdit->setValidator(new QDoubleValidator(this));
-	posYEdit->setValidator(new QDoubleValidator(this));
-	posZEdit->setValidator(new QDoubleValidator(this));
+	posXEdit->setValidator(new CustomDoubleValidator(this));
+	posYEdit->setValidator(new CustomDoubleValidator(this));
+	posZEdit->setValidator(new CustomDoubleValidator(this));
 
-	x1rot->setValidator(new QDoubleValidator(this));
-	x2rot->setValidator(new QDoubleValidator(this));
-	x3rot->setValidator(new QDoubleValidator(this));
-	y1rot->setValidator(new QDoubleValidator(this));
-	y2rot->setValidator(new QDoubleValidator(this));
-	y3rot->setValidator(new QDoubleValidator(this));
-	z1rot->setValidator(new QDoubleValidator(this));
-	z2rot->setValidator(new QDoubleValidator(this));
-	z3rot->setValidator(new QDoubleValidator(this));
+	x1rot->setValidator(new CustomDoubleValidator(this));
+	x2rot->setValidator(new CustomDoubleValidator(this));
+	x3rot->setValidator(new CustomDoubleValidator(this));
+	y1rot->setValidator(new CustomDoubleValidator(this));
+	y2rot->setValidator(new CustomDoubleValidator(this));
+	y3rot->setValidator(new CustomDoubleValidator(this));
+	z1rot->setValidator(new CustomDoubleValidator(this));
+	z2rot->setValidator(new CustomDoubleValidator(this));
+	z3rot->setValidator(new CustomDoubleValidator(this));
 }
 
 void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)

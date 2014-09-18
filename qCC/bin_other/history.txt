@@ -73,6 +73,7 @@ v2.5.6 ??/??/2014
 	* starting the 'Manual Segmentation tool' (scissors icon) in perspective mode could dramatically change
 		the EDL rendering (anyway, using EDL in perspective mode is not really supported yet ;)
 	* qPoissonRecon: the mutli-threaded version (i.e. the 32 bits version on Windows) could crash sometimes
+	* 3D mouse: on some configurations, the 3D mouse was not handled properly
 
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'

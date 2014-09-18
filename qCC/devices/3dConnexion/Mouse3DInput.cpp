@@ -248,7 +248,7 @@ void Mouse3DInput::GetMatrix(const std::vector<float>& vec, ccGLMatrixd& mat)
 {
 	assert(vec.size() == 6);
 
-	float axis[3] = { vec[3], vec[4], vec[5] };
+	float axis[3] = { -vec[3], vec[4], -vec[5] };
 
 	Matrix Rd;
 	SPW_ArbitraryAxisToMatrix(Rd,axis,1.0f);
@@ -290,12 +290,12 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 		float& Y = vec[1];
 		float& Z = vec[2];
 
-		//ccLog::Print(QString("Mouse: (%1,%2,%3)").arg(X).arg(Y).arg(Z));
+		//ccLog::Print(QString("Mouse translation: (%1,%2,%3)").arg(X).arg(Y).arg(Z));
 
 		//Zoom: object moves closer/away (only for ortho. mode)
 		if (!perspectiveView && fabs(Z) > ZERO_TOLERANCE)
 		{
-			win->updateZoom(1.0f + Z/1.5f);
+			win->updateZoom(1.0f - Z/1.5f);
 			Z = 0;
 		}
 
@@ -321,7 +321,7 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 
 			if (objectMode)
 				scale = -scale;
-			win->moveCamera(X*scale, Y*scale, Z*scale);
+			win->moveCamera(-X*scale, Y*scale, -Z*scale);
 		}
 	}
 
@@ -331,6 +331,8 @@ void Mouse3DInput::Apply(const std::vector<float>& motionData, ccGLWindow* win)
 			||	fabs(vec[4]) > ZERO_TOLERANCE
 			||	fabs(vec[5]) > ZERO_TOLERANCE)
 		{
+			//ccLog::Print(QString("Mouse rotation: (%1,%2,%3)").arg(vec[3]).arg(vec[4]).arg(vec[5]));
+
 			//get corresponding rotation matrix
 			ccGLMatrixd rotMat;
 			Mouse3DInput::GetMatrix(vec,rotMat);

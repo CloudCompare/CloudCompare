@@ -1170,7 +1170,12 @@ void ccGLWindow::updateConstellationCenterAndZoom(const ccBBox* aBox/*=0*/)
 		//we must go backward so as to see the object!
 		assert(m_viewportParams.fov > ZERO_TOLERANCE);
 		double d = bbDiag / tan(m_viewportParams.fov * CC_DEG_TO_RAD);
-		cameraPos -= getCurrentViewDir() * d;
+
+		CCVector3d cameraDir(0,0,-1);
+		if (!m_viewportParams.objectCenteredView)
+			cameraDir = getCurrentViewDir();
+
+		cameraPos -= cameraDir * d;
 	}
 	setCameraPos(cameraPos);
 
@@ -1830,10 +1835,7 @@ void ccGLWindow::releaseTexture(unsigned texID)
 
 CCVector3d ccGLWindow::getCurrentViewDir() const
 {
-	if (m_viewportParams.objectCenteredView)
-		return CCVector3d(0,0,-1);
-
-	//otherwise view direction is (the opposite of) the 3rd line of the current view matrix
+	//view direction is (the opposite of) the 3rd line of the current view matrix
 	const double* M = m_viewportParams.viewMat.data();
 	CCVector3d axis(-M[2],-M[6],-M[10]);
 	axis.normalize();

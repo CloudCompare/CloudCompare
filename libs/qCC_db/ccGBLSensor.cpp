@@ -189,6 +189,7 @@ bool ccGBLSensor::convertToDepthMapCoords(PointCoordinateType yaw, PointCoordina
 	if (i == m_depthBuffer.width)
 		--i;
 	//yaw angles are in the wrong way! (because they are expressed relatively to the sensor)
+	assert(i < m_depthBuffer.width);
 	i = (m_depthBuffer.width-1) - i;
 	
 	//pitch
@@ -197,6 +198,7 @@ bool ccGBLSensor::convertToDepthMapCoords(PointCoordinateType yaw, PointCoordina
 	j = static_cast<unsigned>(floor((pitch-m_phiMin)/m_depthBuffer.deltaPhi));
 	if (j == m_depthBuffer.height)
 		--j;
+	assert(j < m_depthBuffer.height);
 
 	return true;
 }
@@ -611,7 +613,7 @@ bool ccGBLSensor::computeDepthBuffer(CCLib::GenericCloud* theCloud, int& errorCo
 		int height = static_cast<int>(ceil((m_phiMax-m_phiMin)/m_deltaPhi));
 		if (height > s_MaxDepthBufferSize)
 		{
-			deltaTheta = (m_phiMax-m_phiMin) / static_cast<PointCoordinateType>(s_MaxDepthBufferSize);
+			deltaPhi = (m_phiMax-m_phiMin) / static_cast<PointCoordinateType>(s_MaxDepthBufferSize);
 			height = s_MaxDepthBufferSize;
 		}
 

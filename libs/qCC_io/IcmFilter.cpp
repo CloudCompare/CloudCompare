@@ -18,7 +18,8 @@
 #include "IcmFilter.h"
 
 //qCC_db
-#include <ccCalibratedImage.h>
+#include <ccImage.h>
+#include <ccCameraSensor.h>
 #include <ccLog.h>
 
 //Qt
@@ -109,7 +110,8 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		}
 		char imagesDescriptorFileName[MAX_ASCII_FILE_LINE_LENGTH];
 		sscanf(line,"IMAGES_DESCRIPTOR=%s",imagesDescriptorFileName);
-		int n = loadCalibratedImages(entities,path,imagesDescriptorFileName);
+		
+		int n = LoadCalibratedImages(entities,path,imagesDescriptorFileName,entities->getBB());
 		ccLog::Print("[IcmFilter::loadModelFromIcmFile] %i image(s) loaded ...",n);
 	}
 
@@ -117,7 +119,7 @@ CC_FILE_ERROR IcmFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	return CC_FERR_NO_ERROR;
 }
 
-int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, const QString& imageDescFilename)
+int IcmFilter::LoadCalibratedImages(ccHObject* entities, const QString& path, const QString& imageDescFilename, const ccBBox& globalBBox)
 {
 	assert(entities);
 
@@ -146,7 +148,7 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			sscanf(line,"DEF %s Viewpoint {",imageFileName);
 
 			//add absolute path
-			ccCalibratedImage* CI = new ccCalibratedImage();
+			ccImage* CI = new ccImage();
 			QString errorStr;
 			if (!CI->load(QString("%0/%1").arg(path).arg(imageFileName),errorStr))
 			{
@@ -174,10 +176,8 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 			
 			float fov_rad = 0;
 			sscanf(line,"\t fieldOfView %f\n",&fov_rad);
-			//fov *= CC_RAD_TO_DEG*float(CI->getH())/float(CI->getW());
-			
+
 			float fov_deg = fov_rad*static_cast<float>(CC_RAD_TO_DEG);
-			CI->setFov(fov_deg);
 			ccLog::Print("\t FOV=%f (degrees)",fov_deg);
 
 			//Position
@@ -219,7 +219,22 @@ int IcmFilter::loadCalibratedImages(ccHObject* entities, const QString& path, co
 
 			ccLog::Print("\t Camera orientation=(%f,%f,%f)+[%f]",axis[0],axis[1],axis[2],angle_rad);
 			
-			CI->setCameraMatrix(CCVector3::fromArray(axis),angle_rad,CCVector3::fromArray(t));
+			ccCameraSensor::IntrinsicParameters params;
+			params.vFOV_rad = fov_rad;
+			params.focal_mm = 1.0f; //default focal (for the 3D symbol)
+			params.arrayWidth = CI->getW();
+			params.arrayHeight = CI->getH();
+			ccCameraSensor* sensor = new ccCameraSensor(params);
+
+			ccGLMatrix mat;
+			mat.initFromParameters(angle_rad,CCVector3::fromArray(axis),CCVector3::fromArray(t));
+			sensor->setRigidTransformation(mat);
+
+			sensor->setGraphicScale(globalBBox.getDiagNorm() / 20);
+			sensor->setVisible(true);
+			sensor->setEnabled(false);
+			CI->addChild(sensor);
+			CI->setAssociatedSensor(sensor);
 
 			entities->addChild(CI);
 			++loadedImages;

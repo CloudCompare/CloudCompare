@@ -260,6 +260,39 @@ public:
 		return rotMat;
 	}
 
+	//! Generates a 'viewing' matrix from a looking vector and a 'up' direction (no translation)
+	/** \param forward forward 'view' vector
+		\param up up vector
+		\return corresponding rotation matrix
+	**/
+	static ccGLMatrixTpl<T> FromViewDirAndUpDir(const Vector3Tpl<T>& forward, const Vector3Tpl<T>& up)
+	{
+		Vector3Tpl<T> uForward = forward; uForward.normalize();
+		Vector3Tpl<T> uSide = uForward.cross(up);  uSide.normalize();
+		Vector3Tpl<T> uUp = uSide.cross(uForward); uUp.normalize();
+
+		ccGLMatrixTpl<T> matrix;
+		T* mat = matrix.data();
+		mat[ 0] =  uSide.x ;
+		mat[ 4] =  uSide.y ;
+		mat[ 8] =  uSide.z ;
+		mat[12] =  0 ;
+		mat[ 1] =  uUp.x ;
+		mat[ 5] =  uUp.y ;
+		mat[ 9] =  uUp.z ;
+		mat[13] =  0 ;
+		mat[ 2] = -uForward.x ;
+		mat[ 6] = -uForward.y ;
+		mat[10] = -uForward.z ;
+		mat[14] =  0 ;
+		mat[ 3] =  0;
+		mat[ 7] =  0;
+		mat[11] =  0;
+		mat[15] =  static_cast<T>(1) ;
+
+		return matrix;
+	}
+
 	//! Converts a 'text' matrix to a ccGLMatrix
 	/** \param[in] matText matrix text
 		\param[out] success whether input matrix text is valid or not

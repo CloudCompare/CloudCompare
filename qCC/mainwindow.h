@@ -263,6 +263,7 @@ protected slots:
 	void echoPivotPointChanged(const CCVector3d&);
 	void echoPixelSizeChanged(float);
 
+	void toggleSelectedEntitiesActivation();
 	void toggleSelectedEntitiesVisibility();
 	void toggleSelectedEntitiesNormals();
 	void toggleSelectedEntitiesColors();

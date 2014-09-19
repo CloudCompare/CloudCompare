@@ -260,6 +260,7 @@ MainWindow::MainWindow()
 	connect(m_windowMapper, SIGNAL(mapped(QWidget*)), this, SLOT(setActiveSubWindow(QWidget*)));
 
 	//Keyboard shortcuts
+	connect(actionToggleActivation,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesActivation()));	//'A': toggles selected items activation
 	connect(actionToggleVisibility,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesVisibility()));	//'V': toggles selected items visibility
 	connect(actionToggleNormals,	SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesNormals()));		//'N': toggles selected items normals visibility
 	connect(actionToggleColors,		SIGNAL(triggered()), this, SLOT(toggleSelectedEntitiesColors()));		//'C': toggles selected items colors visibility
@@ -1662,105 +1663,108 @@ void MainWindow::doActionApplyTransformation()
 		//specific test for locked vertices
 		bool lockedVertices;
 		ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent,&lockedVertices);
-		if (cloud && lockedVertices)
+		if (cloud)
 		{
-			DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
-			continue;
-		}
-
-		if (firstCloud)
-		{
-			//test if the translated cloud was already "too big"
-			//(in which case we won't bother the user about the fact
-			//that the transformed cloud will be too big...)
-			ccBBox localBBox = cloud->getBB();
-			CCVector3d Pl = CCVector3d::fromArray(localBBox.minCorner().u);
-			double Dl = localBBox.getDiagNormd();
-
-			//the cloud was alright
-			if (	!ccGlobalShiftManager::NeedShift(Pl)
-				&&	!ccGlobalShiftManager::NeedRescale(Dl))
+			if (lockedVertices)
 			{
-				//test if the translated cloud is not "too big" (in local coordinate space)
-				ccBBox rotatedBox = cloud->getBB() * transMat;
-				double Dl2 = rotatedBox.getDiagNorm();
-				CCVector3d Pl2 = CCVector3d::fromArray(rotatedBox.getCenter().u);
-
-				bool needShift = ccGlobalShiftManager::NeedShift(Pl2);
-				bool needRescale = ccGlobalShiftManager::NeedRescale(Dl2);
-
-				if (needShift || needRescale)
-				{
-					//existing shift information
-					CCVector3d globalShift = cloud->getGlobalShift();
-					double globalScale = cloud->getGlobalScale();
-			
-					//we compute the transformation matrix in the global coordinate space
-					ccGLMatrixd globalTransMat = transMat;
-					globalTransMat.scale(1.0/globalScale);
-					globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
-					//and we apply it to the cloud bounding-box
-					ccBBox rotatedBox = cloud->getBB() * globalTransMat;
-					double Dg = rotatedBox.getDiagNorm();
-					CCVector3d Pg = CCVector3d::fromArray(rotatedBox.getCenter().u);
-
-					//ask the user the right values!
-					ccShiftAndScaleCloudDlg sasDlg(Pl2,Dl2,Pg,Dg,this);
-					sasDlg.showApplyAllButton(false);
-					sasDlg.showTitle(true);
-					sasDlg.setKeepGlobalPos(true);
-					sasDlg.showKeepGlobalPosCheckbox(false); //we don't want the user to mess with this!
-
-					//add "original" entry
-					int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",globalShift,globalScale));
-					//sasDlg.makeCurrent(index);
-					//add "suggested" entry
-					CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
-					double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
-					index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",suggestedShift,suggestedScale));
-					sasDlg.makeCurrent(index);
-					//add "last" entry (if available)
-					ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
-					if (sasDlg.getLast(lastInfo))
-						sasDlg.addShiftInfo(lastInfo);
-					//add entries from file (if any)
-					sasDlg.addFileInfo();
-
-					if (sasDlg.exec())
-					{
-						//get the relative modification to existing global shift/scale info
-						assert(cloud->getGlobalScale() != 0);
-						scaleChange = sasDlg.getScale() / cloud->getGlobalScale();
-						shiftChange =  (sasDlg.getShift() - cloud->getGlobalShift());
-
-						updateGlobalShiftAndScale = (scaleChange != 1.0 || shiftChange.norm2() != 0);
-
-						//update transformation matrix accordingly
-						if (updateGlobalShiftAndScale)
-						{
-							transMat.scale(scaleChange);
-							transMat.setTranslation(transMat.getTranslationAsVec3D()+shiftChange*scaleChange);
-						}
-					}
-					else if (sasDlg.cancelled())
-					{
-						ccLog::Warning("[ApplyTransformation] Process cancelled by user");
-						return;
-					}
-				}
+				DisplayLockedVerticesWarning(ent->getName(),selNum == 1);
+				continue;
 			}
 
-			firstCloud = false;
-		}
+			if (firstCloud)
+			{
+				//test if the translated cloud was already "too big"
+				//(in which case we won't bother the user about the fact
+				//that the transformed cloud will be too big...)
+				ccBBox localBBox = ent->getBB();
+				CCVector3d Pl = CCVector3d::fromArray(localBBox.minCorner().u);
+				double Dl = localBBox.getDiagNormd();
 
-		if (updateGlobalShiftAndScale)
-		{
-			//apply translation as global shift
-			cloud->setGlobalShift(cloud->getGlobalShift() + shiftChange);
-			cloud->setGlobalScale(cloud->getGlobalScale() * scaleChange);
-			const CCVector3d& T = cloud->getGlobalShift();
-			double scale = cloud->getGlobalScale();
-			ccLog::Warning(QString("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scale));
+				//the cloud was alright
+				if (	!ccGlobalShiftManager::NeedShift(Pl)
+					&&	!ccGlobalShiftManager::NeedRescale(Dl))
+				{
+					//test if the translated cloud is not "too big" (in local coordinate space)
+					ccBBox rotatedBox = ent->getBB() * transMat;
+					double Dl2 = rotatedBox.getDiagNorm();
+					CCVector3d Pl2 = CCVector3d::fromArray(rotatedBox.getCenter().u);
+
+					bool needShift = ccGlobalShiftManager::NeedShift(Pl2);
+					bool needRescale = ccGlobalShiftManager::NeedRescale(Dl2);
+
+					if (needShift || needRescale)
+					{
+						//existing shift information
+						CCVector3d globalShift = cloud->getGlobalShift();
+						double globalScale = cloud->getGlobalScale();
+			
+						//we compute the transformation matrix in the global coordinate space
+						ccGLMatrixd globalTransMat = transMat;
+						globalTransMat.scale(1.0/globalScale);
+						globalTransMat.setTranslation(globalTransMat.getTranslationAsVec3D() - globalShift);
+						//and we apply it to the cloud bounding-box
+						ccBBox rotatedBox = cloud->getBB() * globalTransMat;
+						double Dg = rotatedBox.getDiagNorm();
+						CCVector3d Pg = CCVector3d::fromArray(rotatedBox.getCenter().u);
+
+						//ask the user the right values!
+						ccShiftAndScaleCloudDlg sasDlg(Pl2,Dl2,Pg,Dg,this);
+						sasDlg.showApplyAllButton(false);
+						sasDlg.showTitle(true);
+						sasDlg.setKeepGlobalPos(true);
+						sasDlg.showKeepGlobalPosCheckbox(false); //we don't want the user to mess with this!
+
+						//add "original" entry
+						int index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Original",globalShift,globalScale));
+						//sasDlg.makeCurrent(index);
+						//add "suggested" entry
+						CCVector3d suggestedShift = ccGlobalShiftManager::BestShift(Pg);
+						double suggestedScale = ccGlobalShiftManager::BestScale(Dg);
+						index = sasDlg.addShiftInfo(ccShiftAndScaleCloudDlg::ShiftInfo("Suggested",suggestedShift,suggestedScale));
+						sasDlg.makeCurrent(index);
+						//add "last" entry (if available)
+						ccShiftAndScaleCloudDlg::ShiftInfo lastInfo;
+						if (sasDlg.getLast(lastInfo))
+							sasDlg.addShiftInfo(lastInfo);
+						//add entries from file (if any)
+						sasDlg.addFileInfo();
+
+						if (sasDlg.exec())
+						{
+							//get the relative modification to existing global shift/scale info
+							assert(cloud->getGlobalScale() != 0);
+							scaleChange = sasDlg.getScale() / cloud->getGlobalScale();
+							shiftChange =  (sasDlg.getShift() - cloud->getGlobalShift());
+
+							updateGlobalShiftAndScale = (scaleChange != 1.0 || shiftChange.norm2() != 0);
+
+							//update transformation matrix accordingly
+							if (updateGlobalShiftAndScale)
+							{
+								transMat.scale(scaleChange);
+								transMat.setTranslation(transMat.getTranslationAsVec3D()+shiftChange*scaleChange);
+							}
+						}
+						else if (sasDlg.cancelled())
+						{
+							ccLog::Warning("[ApplyTransformation] Process cancelled by user");
+							return;
+						}
+					}
+				}
+
+				firstCloud = false;
+			}
+
+			if (updateGlobalShiftAndScale)
+			{
+				//apply translation as global shift
+				cloud->setGlobalShift(cloud->getGlobalShift() + shiftChange);
+				cloud->setGlobalScale(cloud->getGlobalScale() * scaleChange);
+				const CCVector3d& T = cloud->getGlobalShift();
+				double scale = cloud->getGlobalScale();
+				ccLog::Warning(QString("[ApplyTransformation] Cloud '%1' global shift/scale information has been updated: shift = (%2,%3,%4) / scale = %5").arg(cloud->getName()).arg(T.x).arg(T.y).arg(T.z).arg(scale));
+			}
 		}
 
 		//we temporarily detach entity, as it may undergo
@@ -2546,87 +2550,20 @@ void MainWindow::doActionSetViewFromSensor()
 
 	ccSensor* sensor = ccHObjectCaster::ToSensor(m_selectedEntities[0]);
 	assert(sensor);
-	//sensor center
-	ccIndexedTransformation trans;
-	if (!sensor->getAbsoluteTransformation(trans, sensor->getActiveIndex()))
-	{
-		ccLog::Error("[doActionSetViewFromSensor] Failed to get a valid transformation for current index!");
-		return;
-	}
-	CCVector3 sensorCenter = trans.getTranslationAsVec3D();
 
-	//get associated cloud
-	ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
-	if (cloud)
+	//try to find the associated window
+	ccGenericGLDisplay* win = sensor->getDisplay();
+	if (!win)
 	{
-		ccGLWindow* win = 0;
+		//get associated cloud
+		ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
 		if (cloud)
-			win = static_cast<ccGLWindow*>(cloud->getDisplay());
-		else
-			win = static_cast<ccGLWindow*>(sensor->getDisplay());
+			win = cloud->getDisplay();
+	}
 
-		if (win)
-		{
-			//scanner main directions
-			CCVector3d scannerX(trans.data()[0],trans.data()[1],trans.data()[2]);
-			CCVector3d scannerY(trans.data()[4],trans.data()[5],trans.data()[6]);
-			CCVector3d scannerZ(trans.data()[8],trans.data()[9],trans.data()[10]);
-
-			//center the view on the scan (angular) center
-			if (sensor->isA(CC_TYPES::GBL_SENSOR))
-			{
-				ccGBLSensor* gblSensor = static_cast<ccGBLSensor*>(sensor);
-
-				switch(gblSensor->getRotationOrder())
-				{
-				case ccGBLSensor::YAW_THEN_PITCH:
-					{
-						double theta = (gblSensor->getMinYaw() + gblSensor->getMaxYaw())/2;
-						ccGLMatrixd rotz; rotz.initFromParameters(theta,scannerZ,CCVector3d(0,0,0));
-						rotz.applyRotation(scannerX);
-						rotz.applyRotation(scannerY);
-
-						double phi = (gblSensor->getMinPitch() + gblSensor->getMaxPitch())/2;
-						ccGLMatrixd roty; roty.initFromParameters(-phi,scannerY,CCVector3d(0,0,0)); //theta = 0 corresponds to the upward vertical direction!
-						roty.applyRotation(scannerX);
-						roty.applyRotation(scannerZ);
-
-						break;
-					}
-				case ccGBLSensor::PITCH_THEN_YAW:
-					{
-						double phi = (gblSensor->getMinPitch() + gblSensor->getMaxPitch())/2;
-						ccGLMatrixd roty; roty.initFromParameters(-phi,scannerY,CCVector3d(0,0,0)); //theta = 0 corresponds to the upward vertical direction!
-						roty.applyRotation(scannerX);
-						roty.applyRotation(scannerZ);
-
-						double theta = (gblSensor->getMinYaw() + gblSensor->getMaxYaw())/2;
-						ccGLMatrixd rotz; rotz.initFromParameters(theta,scannerZ,CCVector3d(0,0,0));
-						rotz.applyRotation(scannerX);
-						rotz.applyRotation(scannerY);
-						break;
-					}
-				default:
-					assert(false);
-					break;
-				}
-
-			} 
-
-			//set viewer-based perspective
-			win->setPerspectiveState(true,false);
-			//center camera on sensor
-			CCVector3d sensorCenterd = CCVector3d::fromArray(sensorCenter.u);
-			win->setCameraPos(sensorCenterd);
-			win->setPivotPoint(sensorCenterd);
-
-			//TODO: can we set the right FOV?
-			win->setCustomView(scannerX,scannerZ,true);
-		}
-		else
-		{
-			ccLog::Warning("[doActionSetViewFromSensor] Failed to get a valid 3D view!");
-		}
+	if (sensor->applyViewport(win))
+	{
+		ccConsole::Print("[doActionSetViewFromSensor] Viewport applied");
 	}
 }
 
@@ -7551,34 +7488,50 @@ void MainWindow::cancelPickRotationCenter()
 	freezeUI(false);
 }
 
+enum ToggleEntityState
+{
+	TOGGLE_ENT_ACTIVATION = 0,
+	TOGGLE_ENT_VISIBILITY,
+	TOGGLE_ENT_COLORS,
+	TOGGLE_ENT_NORMALS,
+	TOGGLE_ENT_SF,
+	TOGGLE_ENT_MAT,
+	TOGGLE_ENT_3D_NAME,
+};
+
+void MainWindow::toggleSelectedEntitiesActivation()
+{
+	toggleSelectedEntitiesProp(TOGGLE_ENT_ACTIVATION);
+}
+
 void MainWindow::toggleSelectedEntitiesVisibility()
 {
-	toggleSelectedEntitiesProp(0);
+	toggleSelectedEntitiesProp(TOGGLE_ENT_VISIBILITY);
 }
 
 void MainWindow::toggleSelectedEntitiesColors()
 {
-	toggleSelectedEntitiesProp(1);
+	toggleSelectedEntitiesProp(TOGGLE_ENT_COLORS);
 }
 
 void MainWindow::toggleSelectedEntitiesNormals()
 {
-	toggleSelectedEntitiesProp(2);
+	toggleSelectedEntitiesProp(TOGGLE_ENT_NORMALS);
 }
 
 void MainWindow::toggleSelectedEntitiesSF()
 {
-	toggleSelectedEntitiesProp(3);
+	toggleSelectedEntitiesProp(TOGGLE_ENT_SF);
 }
 
 void MainWindow::toggleSelectedEntitiesMaterials()
 {
-	toggleSelectedEntitiesProp(4);
+	toggleSelectedEntitiesProp(TOGGLE_ENT_MAT);
 }
 
 void MainWindow::toggleSelectedEntities3DName()
 {
-	toggleSelectedEntitiesProp(5);
+	toggleSelectedEntitiesProp(TOGGLE_ENT_3D_NAME);
 }
 
 void MainWindow::toggleSelectedEntitiesProp(int prop)
@@ -7589,22 +7542,25 @@ void MainWindow::toggleSelectedEntitiesProp(int prop)
 	{
 		switch(prop)
 		{
-		case 0: //visibility
+		case TOGGLE_ENT_ACTIVATION:
+			baseEntities[i]->toggleActivation/*_recursive*/();
+			break;
+		case TOGGLE_ENT_VISIBILITY:
 			baseEntities[i]->toggleVisibility_recursive();
 			break;
-		case 1: //colors
+		case TOGGLE_ENT_COLORS:
 			baseEntities[i]->toggleColors_recursive();
 			break;
-		case 2: //normals
+		case TOGGLE_ENT_NORMALS:
 			baseEntities[i]->toggleNormals_recursive();
 			break;
-		case 3: //sf
+		case TOGGLE_ENT_SF:
 			baseEntities[i]->toggleSF_recursive();
 			break;
-		case 4: //material/texture
+		case TOGGLE_ENT_MAT:
 			baseEntities[i]->toggleMaterials_recursive();
 			break;
-		case 5: //name in 3D
+		case TOGGLE_ENT_3D_NAME:
 			baseEntities[i]->toggleShowName_recursive();
 			break;
 		default:

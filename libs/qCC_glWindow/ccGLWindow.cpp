@@ -28,7 +28,6 @@
 #include <ccHObject.h>
 #include <ccHObjectCaster.h>
 #include <ccBBox.h>
-#include <ccCalibratedImage.h>
 #include <cc2DLabel.h>
 #include <ccGenericPointCloud.h>
 #include <ccGenericMesh.h>
@@ -3115,6 +3114,28 @@ void ccGLWindow::setPerspectiveState(bool state, bool objectCenteredView)
 	invalidateVisualization();
 }
 
+void ccGLWindow::setAspectRatio(float ar)
+{
+	if (ar < 0)
+	{
+		ccLog::Warning("[ccGLWindow::setAspectRatio] Invalid AR value!");
+		return;
+	}
+	
+	if (m_viewportParams.perspectiveAspectRatio != ar)
+	{
+		//update param
+		m_viewportParams.perspectiveAspectRatio = ar;
+
+		//and camera state (if perspective view is 'on')
+		if (m_viewportParams.perspectiveView)
+		{
+			invalidateViewport();
+			invalidateVisualization();
+		}
+	}
+}
+
 void ccGLWindow::setFov(float fov)
 {
 	if (fov < ZERO_TOLERANCE)
@@ -3170,34 +3191,6 @@ void ccGLWindow::setViewportParameters(const ccViewportParameters& params)
 	emit cameraPosChanged(m_viewportParams.cameraCenter);
 }
 
-void ccGLWindow::applyImageViewport(ccCalibratedImage* theImage)
-{
-	if (!theImage)
-		return;
-
-	//viewer-based perspective by default
-	setPerspectiveState(true,false);
-
-	//field of view (= OpenGL 'fovy' in radians)
-	setFov(theImage->getFov());
-
-	//set the image camera center as OpenGL camera center
-	ccGLMatrixd trans = ccGLMatrixd(theImage->getCameraMatrix().data());
-	CCVector3d C = trans.inverse().getTranslationAsVec3D();
-	setCameraPos(C);
-
-	//aspect ratio
-	m_viewportParams.perspectiveAspectRatio = static_cast<float>(theImage->getW()) / static_cast<float>(theImage->getH());
-
-	//apply orientation matrix
-	trans.clearTranslation();
-	setBaseViewMat(trans);
-
-	ccLog::Print("[ccGLWindow] Viewport applied");
-
-	redraw();
-}
-
 void ccGLWindow::getViewportArray(int vpArray[])
 {
 	makeCurrent();
@@ -3223,6 +3216,33 @@ void ccGLWindow::updateZoom(float zoomFactor)
 		setZoom(m_viewportParams.zoom*zoomFactor);
 }
 
+void ccGLWindow::setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg/*=0.0f*/, float ar/*=1.0f*/, bool viewerBasedPerspective/*=true*/)
+{
+	//perspective (viewer-based by default)
+	setPerspectiveState(true,!viewerBasedPerspective);
+
+	//field of view (= OpenGL 'fovy' but in degrees)
+	if (fov_deg > 0)
+		setFov(fov_deg);
+
+	//aspect ratio
+	setAspectRatio(ar);
+
+	//set the camera matrix 'translation' as OpenGL camera center
+	CCVector3d T = cameraMatrix.getTranslationAsVec3D();
+	setCameraPos(T);
+	if (viewerBasedPerspective)
+		setPivotPoint(T);
+
+	//apply orientation matrix
+	ccGLMatrixd trans = cameraMatrix;
+	trans.clearTranslation();
+	trans.invert();
+	setBaseViewMat(trans);
+
+	redraw();
+}
+
 void ccGLWindow::setCustomView(const CCVector3d& forward, const CCVector3d& up, bool forceRedraw/*=true*/)
 {
 	makeCurrent();
@@ -3231,32 +3251,11 @@ void ccGLWindow::setCustomView(const CCVector3d& forward, const CCVector3d& up, 
 	if (wasViewerBased)
 		setPerspectiveState(m_viewportParams.perspectiveView,true);
 
-	CCVector3d uForward = forward; uForward.normalize();
-
-	CCVector3d uSide = uForward.cross(up);
-	uSide.normalize();
-	CCVector3d uUp = uSide.cross(uForward);
-	uUp.normalize();
-
-
-	double* mat = m_viewportParams.viewMat.data();
-	mat[0]  =  uSide.x ;
-	mat[4]  =  uSide.y ;
-	mat[8]  =  uSide.z ;
-	mat[1]  =  uUp.x ;
-	mat[5]  =  uUp.y ;
-	mat[9]  =  uUp.z ;
-	mat[2]  = -uForward.x ;
-	mat[6]  = -uForward.y ;
-	mat[10] = -uForward.z ;
+	ccGLMatrixd viewMat = ccGLMatrixd::FromViewDirAndUpDir(forward,up);
+	setBaseViewMat(viewMat);
 
 	if (wasViewerBased)
 		setPerspectiveState(m_viewportParams.perspectiveView,false);
-
-	invalidateVisualization();
-
-	//we emit the 'baseViewMatChanged' signal
-	emit baseViewMatChanged(m_viewportParams.viewMat);
 
 	if (forceRedraw)
 		redraw();

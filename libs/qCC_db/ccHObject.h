@@ -229,6 +229,7 @@ public:
 	ccHObject_recursive_call1(removeFromDisplay,ccGenericGLDisplay*,removeFromDisplay_recursive);
 	ccHObject_recursive_call0(prepareDisplayForRefresh,prepareDisplayForRefresh_recursive);
 	ccHObject_recursive_call0(refreshDisplay,refreshDisplay_recursive);
+	ccHObject_recursive_call0(toggleActivation,toggleActivation_recursive);
 	ccHObject_recursive_call0(toggleVisibility,toggleVisibility_recursive);
 	ccHObject_recursive_call0(toggleColors,toggleColors_recursive);
 	ccHObject_recursive_call0(toggleNormals,toggleNormals_recursive);

@@ -23,6 +23,7 @@
 //Local
 #include "ccPointCloud.h"
 #include "ccSphere.h"
+#include "ccGenericGLDisplay.h"
 
 //system
 #include <string.h>
@@ -47,10 +48,15 @@ ccGBLSensor::ccGBLSensor(ROTATION_ORDER rotOrder/*=YAW_THEN_PITCH*/)
 {
 	//graphic representation
 	lockVisibility(false);
+	setSelectionBehavior(SELECTION_FIT_BBOX);
 }
 
 ccGBLSensor::ccGBLSensor(const ccGBLSensor &sensor): ccSensor(sensor)
 {
+	//graphic representation
+	lockVisibility(false);
+	setSelectionBehavior(SELECTION_FIT_BBOX);
+
 	this->m_phiMin = sensor.m_phiMin;
 	this->m_phiMax = sensor.m_phiMax;
 	this->m_deltaPhi = sensor.m_deltaPhi;
@@ -823,27 +829,111 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 ccBBox ccGBLSensor::getMyOwnBB()
 {
 	return ccBBox();
-	//ccIndexedTransformation sensorPos;
-	//if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
-	//	return ccBBox();
-
-	//CCVector3 center = sensorPos.getTranslationAsVec3D();
-
-	//return ccBBox(center + CCVector3(-1,-1,-1) * m_scale,
-	//				center + CCVector3( 1, 1, 1) * m_scale);
 }
 
 ccBBox ccGBLSensor::getDisplayBB()
 {
-	//return getMyOwnBB();
 	ccIndexedTransformation sensorPos;
 	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
 		return ccBBox();
 
-	CCVector3 center = sensorPos.getTranslationAsVec3D();
+	ccPointCloud cloud;
+	if (!cloud.reserve(8))
+	{
+		//not enough memory?!
+		return ccBBox();
+	}
 
-	return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
-					center + CCVector3( 1, 1, 1) * m_scale);
+	cloud.addPoint(CCVector3(-m_scale,-m_scale,-m_scale));
+	cloud.addPoint(CCVector3(-m_scale,-m_scale, m_scale));
+	cloud.addPoint(CCVector3(-m_scale, m_scale,-m_scale));
+	cloud.addPoint(CCVector3(-m_scale, m_scale, m_scale));
+	cloud.addPoint(CCVector3( m_scale,-m_scale,-m_scale));
+	cloud.addPoint(CCVector3( m_scale,-m_scale, m_scale));
+	cloud.addPoint(CCVector3( m_scale, m_scale,-m_scale));
+	cloud.addPoint(CCVector3( m_scale, m_scale, m_scale));
+
+	cloud.applyRigidTransformation(sensorPos);
+	return cloud.getBB(false);
+}
+
+ccBBox ccGBLSensor::getFitBB(ccGLMatrix& trans)
+{
+	ccIndexedTransformation sensorPos;
+	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+		return ccBBox();
+
+	trans = sensorPos;
+
+	return ccBBox(	CCVector3(-m_scale,-m_scale,-m_scale),
+					CCVector3( m_scale, m_scale, m_scale) );
+}
+
+bool ccGBLSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
+{
+	if (!win)
+	{
+		win = getDisplay();
+		if (!win)
+		{
+			ccLog::Warning("[ccGBLSensor::applyViewport] No associated display!");
+			return false;
+		}
+	}
+	
+	ccIndexedTransformation trans;
+	if (!getActiveAbsoluteTransformation(trans))
+	{
+		return false;
+	}
+	//scanner main directions
+	CCVector3d sensorX(trans.data()[0],trans.data()[1],trans.data()[2]);
+	CCVector3d sensorY(trans.data()[4],trans.data()[5],trans.data()[6]);
+	CCVector3d sensorZ(trans.data()[8],trans.data()[9],trans.data()[10]);
+
+	switch(getRotationOrder())
+	{
+	case ccGBLSensor::YAW_THEN_PITCH:
+		{
+			double theta = (getMinYaw() + getMaxYaw())/2;
+			ccGLMatrixd rotz; rotz.initFromParameters(theta,sensorZ,CCVector3d(0,0,0));
+			rotz.applyRotation(sensorX);
+			rotz.applyRotation(sensorY);
+
+			double phi = (getMinPitch() + getMaxPitch())/2;
+			ccGLMatrixd roty; roty.initFromParameters(-phi,sensorY,CCVector3d(0,0,0)); //theta = 0 corresponds to the upward vertical direction!
+			roty.applyRotation(sensorX);
+			roty.applyRotation(sensorZ);
+
+			break;
+		}
+	case ccGBLSensor::PITCH_THEN_YAW:
+		{
+			double phi = (getMinPitch() + getMaxPitch())/2;
+			ccGLMatrixd roty; roty.initFromParameters(-phi,sensorY,CCVector3d(0,0,0)); //theta = 0 corresponds to the upward vertical direction!
+			roty.applyRotation(sensorX);
+			roty.applyRotation(sensorZ);
+
+			double theta = (getMinYaw() + getMaxYaw())/2;
+			ccGLMatrixd rotz; rotz.initFromParameters(theta,sensorZ,CCVector3d(0,0,0));
+			rotz.applyRotation(sensorX);
+			rotz.applyRotation(sensorY);
+			break;
+		}
+	default:
+		assert(false);
+		break;
+	}
+
+	//center camera on sensor
+	CCVector3d sensorCenterd = CCVector3d::fromArray(trans.getTranslation());
+	ccGLMatrixd viewMat = ccGLMatrixd::FromViewDirAndUpDir(sensorX,sensorZ);
+	viewMat.invert();
+	viewMat.setTranslation(sensorCenterd);
+	//TODO: can we set the right FOV?
+	win->setupProjectiveViewport(viewMat);
+
+	return true;
 }
 
 bool ccGBLSensor::toFile_MeOnly(QFile& out) const

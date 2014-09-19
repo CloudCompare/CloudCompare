@@ -66,6 +66,10 @@ public:
 	virtual bool isSerializable() const { return true; }
 	virtual ccBBox getMyOwnBB();
 	virtual ccBBox getDisplayBB();
+	virtual ccBBox getFitBB(ccGLMatrix& trans);
+
+	//inherited from ccSensor
+	virtual bool applyViewport(ccGenericGLDisplay* win = 0);
 
 	//! Determines a 3D point "visibility" relatively to the sensor field of view
 	/** Relies on the sensor associated depth map (see ccGBLSensor::computeDepthBuffer).

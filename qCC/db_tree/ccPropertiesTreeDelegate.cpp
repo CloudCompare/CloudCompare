@@ -19,6 +19,7 @@
 
 //Local
 #include "sfEditDlg.h"
+#include "matrixDisplayDlg.h"
 #include "../mainwindow.h"
 #include "../ccColorScaleEditorDlg.h"
 #include "../ccColorScaleSelector.h"
@@ -40,7 +41,6 @@
 #include <cc2DLabel.h>
 #include <cc2DViewportLabel.h>
 #include <cc2DViewportObject.h>
-#include <ccCalibratedImage.h>
 #include <ccGBLSensor.h>
 #include <ccCameraSensor.h>
 #include <ccMaterialSet.h>
@@ -121,6 +121,8 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 			return QSize(70,22);
 		case OBJECT_CLOUD_SF_EDITOR:
 			return QSize(250,200);
+		case OBJECT_SENSOR_MATRIX_EDITOR:
+			return QSize(250,120);
 		}
 	}
 
@@ -193,9 +195,6 @@ void ccPropertiesTreeDelegate::fillModel(ccHObject* hObject)
 	else if (m_currentObject->isKindOf(CC_TYPES::IMAGE))
 	{
 		fillWithImage(ccHObjectCaster::ToImage(m_currentObject));
-
-		if (m_currentObject->isA(CC_TYPES::CALIBRATED_IMAGE))
-			fillWithCalibratedImage(ccHObjectCaster::ToCalibratedImage(m_currentObject));
 	}
 	else if (m_currentObject->isA(CC_TYPES::LABEL_2D))
 	{
@@ -268,6 +267,20 @@ void ccPropertiesTreeDelegate::appendRow(QStandardItem* leftItem, QStandardItem*
 			m_view->openPersistentEditor(m_model->index(m_model->rowCount()-1,1));
 	}
 }
+
+void ccPropertiesTreeDelegate::appendWideRow(QStandardItem* item, bool openPersistentEditor/*=true*/)
+{
+	assert(item);
+	assert(m_model);
+
+	if (m_model)
+	{
+		m_model->appendRow(item);
+		if (openPersistentEditor)
+			m_view->openPersistentEditor(m_model->index(m_model->rowCount()-1,0));
+	}
+}
+
 
 void ccPropertiesTreeDelegate::addSeparator(QString title)
 {
@@ -472,8 +485,7 @@ void ccPropertiesTreeDelegate::fillSFWithPointCloud(ccGenericPointCloud* _obj)
 			addSeparator("SF display params");
 
 			//SF edit dialog (warning: 2 columns)
-			m_model->appendRow(PERSISTENT_EDITOR(OBJECT_CLOUD_SF_EDITOR));
-			m_view->openPersistentEditor(m_model->index(m_model->rowCount()-1,0));
+			appendWideRow(PERSISTENT_EDITOR(OBJECT_CLOUD_SF_EDITOR));
 		}
 	}
 }
@@ -648,33 +660,13 @@ void ccPropertiesTreeDelegate::fillWithImage(ccImage* _obj)
 
 	//transparency
 	appendRow( ITEM("Alpha"), PERSISTENT_EDITOR(OBJECT_IMAGE_ALPHA), true );
-}
 
-void ccPropertiesTreeDelegate::fillWithCalibratedImage(ccCalibratedImage* _obj)
-{
-	assert(_obj && m_model);
-
-	addSeparator("Calibrated Image");
-
-	//"Set Viewport" button
-	appendRow( ITEM("Apply Viewport"), PERSISTENT_EDITOR(OBJECT_APPLY_IMAGE_VIEWPORT), true );
-
-	//field of view
-	appendRow( ITEM("f.o.v. (deg)"), ITEM(QString::number(_obj->getFov())) );
-
-	//get camera matrix parameters
-	PointCoordinateType angle_rad;
-	CCVector3 axis3D, t3D;
-	_obj->getCameraMatrix().getParameters(angle_rad, axis3D, t3D);
-
-	//camera position
-	appendRow( ITEM("Optical center"), ITEM(QString("(%0,%1,%2)").arg(t3D.x).arg(t3D.y).arg(t3D.z)) );
-
-	//camera orientation axis
-	appendRow( ITEM("Orientation"), ITEM(QString("(%0,%1,%2)").arg(axis3D.x).arg(axis3D.y).arg(axis3D.z)) );
-
-	//camera orientation angle
-	appendRow( ITEM("Angle (degrees)"), ITEM(QString("%0°").arg(angle_rad*CC_RAD_TO_DEG)) );
+	if (_obj->getAssociatedSensor())
+	{
+		addSeparator("Sensor");
+		//"Set Viewport" button (shortcut to associated sensor)
+		appendRow( ITEM("Apply Viewport"), PERSISTENT_EDITOR(OBJECT_APPLY_IMAGE_VIEWPORT), true );
+	}
 }
 
 void ccPropertiesTreeDelegate::fillWithLabel(cc2DLabel* _obj)
@@ -730,9 +722,20 @@ void ccPropertiesTreeDelegate::fillWithSensor(ccSensor* _obj)
 {
 	assert(_obj && m_model);
 
-	addSeparator("Associated positions");
+	//Sensor drawing scale
+	appendRow( ITEM("Drawing scale"), PERSISTENT_EDITOR(OBJECT_SENSOR_DISPLAY_SCALE), true );
+
+	//"Apply Viewport" button
+	appendRow( ITEM("Apply Viewport"), PERSISTENT_EDITOR(OBJECT_APPLY_SENSOR_VIEWPORT), true );
+
+	//sensor aboslute orientation
+	addSeparator("Position/Orientation");
+	appendWideRow(PERSISTENT_EDITOR(OBJECT_SENSOR_MATRIX_EDITOR));
 
 	//Associated positions
+	addSeparator("Associated positions");
+
+	//number of positions
 	appendRow( ITEM("Count"), ITEM(QString::number(_obj->getPositions() ? _obj->getPositions()->size() : 0)) );
 
 	double minIndex,maxIndex;
@@ -756,9 +759,6 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 	//Uncertainty
 	appendRow( ITEM("Uncertainty"), ITEM(QString::number(_obj->getUncertainty())) );
 
-	//Sensor drawing scale
-	appendRow( ITEM("Drawing scale"), PERSISTENT_EDITOR(OBJECT_SENSOR_DISPLAY_SCALE), true );
-
 	//angles
 	addSeparator("Angular viewport (degrees)");
 	{
@@ -781,22 +781,6 @@ void ccPropertiesTreeDelegate::fillWithGBLSensor(ccGBLSensor* _obj)
 		appendRow( ITEM("Pitch step"), ITEM(QString("%1").arg(pitchStep * CC_RAD_TO_DEG,0,'f',4)) );
 	}
 
-	//sensor aboslute orientation
-	addSeparator("Orientation");
-	{
-		const ccGLMatrix& trans = _obj->getRigidTransformation();
-		//sensor center
-		const float* t = trans.getTranslation();
-		appendRow( ITEM("Center"), ITEM(QString("(%1;%2;%3)").arg(t[0]).arg(t[1]).arg(t[2])) );
-		//sensor axes
-		const char axisNames[3] = { 'X', 'Y', 'Z' };
-		for (unsigned i=0; i<3; ++i)
-		{
-			const float* u = trans.getColumn(i);
-			appendRow( ITEM(QString("%1 axis").arg(axisNames[i])), ITEM(QString("(%1;%2;%3)").arg(u[0]).arg(u[1]).arg(u[2])) );
-		}
-	}
-
 	//Positions
 	fillWithSensor(_obj);
 }
@@ -807,9 +791,29 @@ void ccPropertiesTreeDelegate::fillWithCameraSensor(ccCameraSensor* _obj)
 
 	addSeparator("Camera Sensor");
 
+	const ccCameraSensor::IntrinsicParameters& params = _obj->getIntrinsicParameters();
+
+	//Focal
+	appendRow( ITEM("Focal"), ITEM(QString::number(params.focal_mm)) );
+
+	//Array size
+	appendRow( ITEM("Array size"), ITEM(QString("%1 x %2").arg(params.arrayWidth).arg(params.arrayHeight)) );
+	
+	//Pixel size
+	if (params.pixelSize_mm[0] != 0 || params.pixelSize_mm[1] != 0)
+		appendRow( ITEM("Pixel size"), ITEM(QString("%1 x %2").arg(params.pixelSize_mm[0]).arg(params.pixelSize_mm[1])) );
+
+	//Field of view
+	appendRow( ITEM("F.o.v. (deg.)"), ITEM(QString::number(params.vFOV_rad * CC_RAD_TO_DEG)) );
+
+	//Skewness
+	appendRow( ITEM("Skew"), ITEM(QString::number(params.skew)) );
+
+	addSeparator("Frustrum display");
+
 	//Draw frustrum
-	appendRow( ITEM("Draw frustrum lines"), CHECKABLE_ITEM(_obj->frustrumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTRUM) );
-	appendRow( ITEM("Draw frustrum side planes"), CHECKABLE_ITEM(_obj->frustrumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES) );
+	appendRow( ITEM("Show lines"), CHECKABLE_ITEM(_obj->frustrumIsDrawn(), OBJECT_SENSOR_DRAW_FRUSTRUM) );
+	appendRow( ITEM("Show side planes"), CHECKABLE_ITEM(_obj->frustrumPlanesAreDrawn(), OBJECT_SENSOR_DRAW_FRUSTRUM_PLANES) );
 
 	//Positions
 	fillWithSensor(_obj);
@@ -861,6 +865,20 @@ template<int N, class ElementType> void ccPropertiesTreeDelegate::fillWithChunke
 	fillWithShareable(_obj);
 }
 
+bool ccPropertiesTreeDelegate::isWideEditor(int itemData) const
+{
+	switch (itemData)
+	{
+	case OBJECT_CLOUD_SF_EDITOR:
+	case OBJECT_SENSOR_MATRIX_EDITOR:
+		return true;
+	default:
+		break;
+	}
+
+	return false;
+}
+
 QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 												const QStyleOptionViewItem &option,
 												const QModelIndex &index) const
@@ -870,10 +888,17 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 
 	QStandardItem* item = m_model->itemFromIndex(index);
 
-	if (!item || !item->data().isValid() || (item->column()==0 && item->data().toInt()!=OBJECT_CLOUD_SF_EDITOR))
+	if (!item || !item->data().isValid())
 		return NULL;
 
-	switch (item->data().toInt())
+	int itemData = item->data().toInt();
+	if (item->column() == 0 && !isWideEditor(itemData))
+	{
+		//on the first column, only editors spanning on 2 columns are allowed
+		return NULL;
+	}
+
+	switch (itemData)
 	{
 	case OBJECT_CURRENT_DISPLAY:
 		{
@@ -946,6 +971,12 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			sfd->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
 			return sfd;
 		}
+	case OBJECT_SENSOR_MATRIX_EDITOR:
+		{
+			MatrixDisplayDlg* sfd = new MatrixDisplayDlg(parent);
+			sfd->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+			return sfd;
+		}
 	case OBJECT_OCTREE_TYPE:
 		{
 			QComboBox *comboBox = new QComboBox(parent);
@@ -1011,7 +1042,8 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_TRANS_BUFFER_TRIHDERONS_SCALE:
 		{
 			QDoubleSpinBox* spinBox = new QDoubleSpinBox(parent);
-			spinBox->setRange(1.0e-6, 1.0e6);
+			spinBox->setRange(1.0e-3, 1.0e6);
+			spinBox->setDecimals(3);
 			spinBox->setSingleStep(1.0);
 
 			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(trihedronsScaleChanged(double)));
@@ -1023,6 +1055,15 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 		{
 			QPushButton* button = new QPushButton("Apply",parent);
 			connect(button, SIGNAL(clicked()), this, SLOT(applyImageViewport()));
+
+			button->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
+			button->setMinimumHeight(30);
+			return button;
+		}
+	case OBJECT_APPLY_SENSOR_VIEWPORT:
+		{
+			QPushButton* button = new QPushButton("Apply",parent);
+			connect(button, SIGNAL(clicked()), this, SLOT(applySensorViewport()));
 
 			button->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
 			button->setMinimumHeight(30);
@@ -1040,7 +1081,8 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 	case OBJECT_SENSOR_DISPLAY_SCALE:
 		{
 			QDoubleSpinBox *spinBox = new QDoubleSpinBox(parent);
-			spinBox->setRange(1.0e-6,1.0e6);
+			spinBox->setRange(1.0e-3,1.0e6);
+			spinBox->setDecimals(3);
 			spinBox->setSingleStep(1.0e-1);
 
 			connect(spinBox, SIGNAL(valueChanged(double)), this, SLOT(sensorScaleChanged(double)));
@@ -1107,17 +1149,17 @@ void ccPropertiesTreeDelegate::updateEditorGeometry(QWidget* editor, const QStyl
 
 	QStandardItem* item = m_model->itemFromIndex(index);
 
-	if (	item
-		&&	item->data().isValid()
-		&&	item->data().toInt() == OBJECT_CLOUD_SF_EDITOR
-		&&	item->column() == 0)
+	if (item &&	item->data().isValid() && item->column() == 0)
 	{
-		sfEditDlg *sfd = qobject_cast<sfEditDlg*>(editor);
-		if (!sfd)
-			return;
-		//we must resize the SF edit widget so that it spans on both columns!
-		QRect rect = m_view->visualRect(m_model->index(item->row(),1)); //second column width
-		sfd->resize(option.rect.width()+rect.width(),sfd->height());
+		if (isWideEditor(item->data().toInt()))
+		{
+			QWidget* widget = qobject_cast<QWidget*>(editor);
+			if (!widget)
+				return;
+			//we must resize the SF edit widget so that it spans on both columns!
+			QRect rect = m_view->visualRect(m_model->index(item->row(),1)); //second column width
+			widget->resize(option.rect.width()+rect.width(),widget->height());
+		}
 	}
 }
 
@@ -1128,7 +1170,7 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 
 	QStandardItem* item = m_model->itemFromIndex(index);
 
-	if (!item || !item->data().isValid() || (item->column()==0 && item->data().toInt()!=OBJECT_CLOUD_SF_EDITOR))
+	if (!item || !item->data().isValid() || (item->column()==0 && !isWideEditor(item->data().toInt())))
 		return;
 
 	switch (item->data().toInt())
@@ -1204,6 +1246,25 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 			ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
 			if (sf)
 				sfd->fillDialogWith(sf);
+			break;
+		}
+	case OBJECT_SENSOR_MATRIX_EDITOR:
+		{
+			MatrixDisplayDlg *mdd = qobject_cast<MatrixDisplayDlg*>(editor);
+			if (!mdd)
+				return;
+
+			ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
+			assert(sensor);
+
+			ccIndexedTransformation trans;
+			if (sensor->getActiveAbsoluteTransformation(trans))
+				mdd->fillDialogWith(trans);
+			else
+			{
+				mdd->clear();
+				mdd->setEnabled(false);
+			}
 			break;
 		}
 	case OBJECT_OCTREE_TYPE:
@@ -1663,14 +1724,27 @@ void ccPropertiesTreeDelegate::applyImageViewport()
 	if (!m_currentObject)
 		return;
 
-	ccCalibratedImage* image = ccHObjectCaster::ToCalibratedImage(m_currentObject);
+	ccImage* image = ccHObjectCaster::ToImage(m_currentObject);
 	assert(image);
 
-	ccGLWindow* win = static_cast<ccGLWindow*>(image->getDisplay());
-	if (!win)
+	if (image->getAssociatedSensor() && image->getAssociatedSensor()->applyViewport())
+	{
+		ccLog::Print("[ApplyImageViewport] Viewport applied");
+	}
+}
+
+void ccPropertiesTreeDelegate::applySensorViewport()
+{
+	if (!m_currentObject)
 		return;
 
-	win->applyImageViewport(image);
+	ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
+	assert(sensor);
+
+	if (sensor->applyViewport())
+	{
+		ccLog::Print("[ApplySensorViewport] Viewport applied");
+	}
 }
 
 void ccPropertiesTreeDelegate::applyLabelViewport()
@@ -1694,7 +1768,7 @@ void ccPropertiesTreeDelegate::sensorScaleChanged(double val)
 	if (!m_currentObject)
 		return;
 
-	ccGBLSensor* sensor = ccHObjectCaster::ToGBLSensor(m_currentObject);
+	ccSensor* sensor = ccHObjectCaster::ToSensor(m_currentObject);
 	assert(sensor);
 
 	sensor->setGraphicScale(static_cast<PointCoordinateType>(val));

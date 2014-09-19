@@ -50,7 +50,7 @@
 	v3.5 - 02/13/2014 - ccSensor class updated
 	v3.6 - 05/30/2014 - ccGLWindow and associated structures (viewport, etc.) now use double precision
 	v3.7 - 08/24/2014 - Textures are stored and saved as a single DB with only references to them in each material (key = absolute filename)
-	v3.8 - 09/14/2014 - GBL Sensors depth buffer structure has evolved
+	v3.8 - 09/14/2014 - GBL and camera sensors structures have evolved
 **/
 const unsigned c_currentDBVersion = 38; //3.8
 

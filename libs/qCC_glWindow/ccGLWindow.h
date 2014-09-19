@@ -44,7 +44,6 @@
 
 class ccHObject;
 class ccBBox;
-class ccCalibratedImage;
 class ccShader;
 class ccColorRampShader;
 class ccGlFilter;
@@ -126,6 +125,7 @@ public:
 	virtual QFont getTextDisplayFont() const; //takes rendering zoom into account!
 	virtual const ccViewportParameters& getViewportParameters() const { return m_viewportParams; }
 	inline virtual void makeContextCurrent() { makeCurrent(); }
+	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true);
 
 	//! Displays a status message in the bottom-left corner
 	/** WARNING: currently, 'append' is not supported for SCREEN_CENTER_MESSAGE
@@ -322,13 +322,15 @@ public:
 	//! Sets viewport parameters (all at once)
 	virtual void setViewportParameters(const ccViewportParameters& params);
 
-	//! Applies the same camera parameters as a given calibrated image
-	virtual void applyImageViewport(ccCalibratedImage* image);
-
 	//! Sets current camera f.o.v. (field of view)
 	/** FOV is only used in perspective mode.
 	**/
 	virtual void setFov(float fov);
+
+	//! Sets current camera aspect ratio (width/height)
+	/** AR is only used in perspective mode.
+	**/
+	virtual void setAspectRatio(float ar);
 
 	//! Sets current camera 'zNear' coefficient
 	/** zNear coef. is only used in perspective mode.

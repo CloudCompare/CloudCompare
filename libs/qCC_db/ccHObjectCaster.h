@@ -34,7 +34,6 @@ class ccSensor;
 class ccGBLSensor;
 class ccCameraSensor;
 class ccImage;
-class ccCalibratedImage;
 class cc2DLabel;
 class cc2DViewportObject;
 class cc2DViewportLabel;
@@ -94,9 +93,6 @@ public:
 
 	//! converts current object to ccImage (if possible)
 	static ccImage* ToImage(ccHObject* obj);
-
-	//! converts current object to ccCalibratedImage (if possible)
-	static ccCalibratedImage* ToCalibratedImage(ccHObject* obj);
 
 	//! converts current object to cc2DLabel (if possible)
 	static cc2DLabel* To2DLabel(ccHObject* obj);

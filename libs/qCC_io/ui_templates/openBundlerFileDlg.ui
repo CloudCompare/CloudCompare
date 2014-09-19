@@ -232,7 +232,7 @@
       <item>
        <widget class="QCheckBox" name="keepImagesInMemoryCheckBox">
         <property name="text">
-         <string>keep images in memory</string>
+         <string>keep images (and sensors) in memory</string>
         </property>
        </widget>
       </item>
@@ -280,7 +280,16 @@
            <property name="spacing">
             <number>0</number>
            </property>
-           <property name="margin">
+           <property name="leftMargin">
+            <number>0</number>
+           </property>
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="rightMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
             <number>0</number>
            </property>
            <item>

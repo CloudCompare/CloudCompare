@@ -15,23 +15,40 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_ICM_FILTER_HEADER
-#define CC_ICM_FILTER_HEADER
+#ifndef CC_MATRIX_DISPLAY_DIALOG_HEADER
+#define CC_MATRIX_DISPLAY_DIALOG_HEADER
 
-#include "FileIOFilter.h"
+//Qt
+#include <QWidget>
 
-//! Calibrated images and cloud meta-file I/O filter
-class IcmFilter : public FileIOFilter
+//qCC_db
+#include <ccGLMatrix.h>
+
+#include <ui_matrixDisplayDlg.h>
+
+//! Simple widget to display a 4x4 matrix in various formats
+class MatrixDisplayDlg : public QWidget, public Ui::MatrixDisplayDlg
 {
+	Q_OBJECT
+
 public:
 
-	//inherited from FileIOFilter
-	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
-	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
+	//! Default constructor
+	MatrixDisplayDlg(QWidget* parent = 0);
+
+	//! Clears widget
+	void clear();
+
+	//! Updates dialog with a given (float) matrix
+	void fillDialogWith(const ccGLMatrix& mat);
+	//! Updates dialog with a given (double) matrix
+	void fillDialogWith(const ccGLMatrixd& mat);
 
 protected:
 
-	static int LoadCalibratedImages(ccHObject* entities, const QString& path, const QString& imageDescFilename, const ccBBox& globalBBox);
+	//! Fills the second part of the dialog
+	void fillDialogWith(const CCVector3d& axis, double angle_rad, const CCVector3d& T, int precision);
+
 };
 
-#endif
+#endif //CC_MATRIX_DISPLAY_DIALOG_HEADER

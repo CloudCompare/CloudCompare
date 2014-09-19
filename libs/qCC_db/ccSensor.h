@@ -119,6 +119,12 @@ public:
 	//! Returns the sensor graphic representation scale
 	PointCoordinateType getGraphicScale() const { return m_scale; }
 
+	//! Apply sensor 'viewport' to a 3D view
+	/** \param win 3D view to which to apply the sensor viewport (or the associated 'display' if 0)
+		\return success
+	**/
+	virtual bool applyViewport(ccGenericGLDisplay* win = 0);
+
 protected:
 
 	//inherited from ccHObject

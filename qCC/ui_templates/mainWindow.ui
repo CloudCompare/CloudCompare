@@ -279,6 +279,7 @@
      <property name="title">
       <string>Toggle (recursive)</string>
      </property>
+     <addaction name="actionToggleActivation"/>
      <addaction name="actionToggleVisibility"/>
      <addaction name="actionToggleColors"/>
      <addaction name="actionToggleNormals"/>
@@ -1974,6 +1975,9 @@
    <property name="text">
     <string>Visibility</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle selected entities visibility (recursive)</string>
+   </property>
    <property name="shortcut">
     <string>V</string>
    </property>
@@ -1984,6 +1988,9 @@
   <action name="actionToggleNormals">
    <property name="text">
     <string>Normals</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle selected entities normals (recursive)</string>
    </property>
    <property name="shortcut">
     <string>N</string>
@@ -1996,6 +2003,9 @@
    <property name="text">
     <string>Colors</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle selected entities colors (recursive)</string>
+   </property>
    <property name="shortcut">
     <string>C</string>
    </property>
@@ -2006,6 +2016,9 @@
   <action name="actionToggleSF">
    <property name="text">
     <string>SF</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle selected entities SF (recursive)</string>
    </property>
    <property name="shortcut">
     <string>S</string>
@@ -2173,6 +2186,9 @@
    <property name="text">
     <string>3D name</string>
    </property>
+   <property name="toolTip">
+    <string>Toggle selected entities 3D name display (recursive)</string>
+   </property>
    <property name="shortcut">
     <string>D</string>
    </property>
@@ -2192,6 +2208,9 @@
   <action name="actionToggleMaterials">
    <property name="text">
     <string>Materials/textures</string>
+   </property>
+   <property name="toolTip">
+    <string>Toggle selected entities materials/textures (recursive)</string>
    </property>
    <property name="shortcut">
     <string>M</string>
@@ -2592,6 +2611,20 @@
    </property>
    <property name="toolTip">
     <string>Flag vertices by type: normal (0), border (1), non manifold (2)</string>
+   </property>
+  </action>
+  <action name="actionToggleActivation">
+   <property name="text">
+    <string>Activation (not recursive)</string>
+   </property>
+   <property name="toolTip">
+    <string>Enable/disable selected entities (not recursive)</string>
+   </property>
+   <property name="shortcut">
+    <string>A</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
  </widget>

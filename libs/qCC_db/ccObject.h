@@ -187,6 +187,9 @@ public:
 	**/
 	virtual inline void setEnabled(bool state) { setFlagState(CC_ENABLED,state); }
 
+	//! Toggles the "enabled" property
+	virtual inline void toggleActivation() { setEnabled(!isEnabled()); }
+
 	//! Returns whether the object is locked  or not
 	/** Shortcut to access flag CC_LOCKED
 	**/

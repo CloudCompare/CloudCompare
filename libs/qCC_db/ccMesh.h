@@ -67,6 +67,8 @@ public:
 
 	//inherited methods (ccHObject)
 	virtual unsigned getUniqueIDForDisplay() const;
+	virtual ccBBox getMyOwnBB();
+	virtual bool isSerializable() const { return true; }
 
 	//inherited methods (ccGenericMesh)
 	inline virtual ccGenericPointCloud* getAssociatedCloud() const { return m_associatedCloud; }
@@ -90,10 +92,6 @@ public:
 
 	//const version of getTriangleIndexes
 	const virtual CCLib::TriangleSummitsIndexes* getTriangleIndexes(unsigned triangleIndex) const;
-
-	//inherited methods (ccHObject)
-	virtual ccBBox getMyOwnBB();
-	virtual bool isSerializable() const { return true; }
 
 	//inherited methods (ccDrawableObject)
 	virtual bool hasColors() const;
@@ -351,6 +349,7 @@ protected:
 	virtual bool fromFile_MeOnly(QFile& in, short dataVersion, int flags);
 	virtual void applyGLTransformation(const ccGLMatrix& trans);
 	virtual void onUpdateOf(ccHObject* obj);
+	virtual void onDeletionOf(const ccHObject* obj);
 
 	//! Same as other 'interpolateNormals' method with a set of 3 vertices indexes
 	bool interpolateNormals(unsigned i1, unsigned i2, unsigned i3, const CCVector3& P, CCVector3& N, const int* triNormIndexes = 0);

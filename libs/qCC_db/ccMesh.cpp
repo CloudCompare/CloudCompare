@@ -124,7 +124,7 @@ void ccMesh::setAssociatedCloud(ccGenericPointCloud* cloud)
 	m_associatedCloud = cloud;
 
 	if (m_associatedCloud)
-		m_associatedCloud->addDependency(this,DP_NOTIFY_OTHER_ON_UPDATE);
+		m_associatedCloud->addDependency(this,DP_NOTIFY_OTHER_ON_DELETE | DP_NOTIFY_OTHER_ON_UPDATE);
 
 	m_bBox.setValidity(false);
 }
@@ -136,6 +136,16 @@ void ccMesh::onUpdateOf(ccHObject* obj)
 		m_bBox.setValidity(false);
 		notifyGeometryUpdate(); //for sub-meshes
 	}
+
+	ccGenericMesh::onUpdateOf(obj);
+}
+
+void ccMesh::onDeletionOf(const ccHObject* obj)
+{
+	if (obj == m_associatedCloud)
+		setAssociatedCloud(0);
+
+	ccGenericMesh::onDeletionOf(obj);
 }
 
 bool ccMesh::hasColors() const
@@ -873,6 +883,9 @@ unsigned ccMesh::maxSize() const
 
 void ccMesh::forEach(genericTriangleAction& anAction)
 {
+	if (!m_associatedCloud)
+		return;
+
 	m_triVertIndexes->placeIteratorAtBegining();
 	for (unsigned i=0;i<m_triVertIndexes->currentSize();++i)
 	{
@@ -900,7 +913,7 @@ CCLib::GenericTriangle* ccMesh::_getNextTriangle()
 
 CCLib::GenericTriangle* ccMesh::_getTriangle(unsigned triangleIndex) //temporary
 {
-	assert(triangleIndex<m_triVertIndexes->currentSize());
+	assert(triangleIndex < m_triVertIndexes->currentSize());
 
 	const unsigned* tri = m_triVertIndexes->getValue(triangleIndex);
 	m_currentTriangle.A = m_associatedCloud->getPoint(tri[0]);
@@ -912,7 +925,7 @@ CCLib::GenericTriangle* ccMesh::_getTriangle(unsigned triangleIndex) //temporary
 
 void ccMesh::getTriangleSummits(unsigned triangleIndex, CCVector3& A, CCVector3& B, CCVector3& C)
 {
-	assert(triangleIndex<m_triVertIndexes->currentSize());
+	assert(triangleIndex < m_triVertIndexes->currentSize());
 
 	const unsigned* tri = m_triVertIndexes->getValue(triangleIndex);
 	m_associatedCloud->getPoint(tri[0],A);
@@ -932,7 +945,7 @@ void ccMesh::refreshBB()
 	for (unsigned i=0; i<count; ++i)
 	{
 		const unsigned* tri = m_triVertIndexes->getCurrentValue();
-		assert(tri[0]<m_associatedCloud->size() && tri[1]<m_associatedCloud->size() && tri[2]<m_associatedCloud->size());
+		assert(tri[0] < m_associatedCloud->size() && tri[1] < m_associatedCloud->size() && tri[2] < m_associatedCloud->size());
 		m_bBox.add(*m_associatedCloud->getPoint(tri[0]));
 		m_bBox.add(*m_associatedCloud->getPoint(tri[1]));
 		m_bBox.add(*m_associatedCloud->getPoint(tri[2]));
@@ -1636,9 +1649,10 @@ void ccMesh::drawMeOnly(CC_DRAW_CONTEXT& context)
 
 ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 {
-	assert(m_associatedCloud);
 	if (!m_associatedCloud)
+	{
 		return NULL;
+	}
 
 	ccGenericPointCloud::VisibilityTableType* verticesVisibility = m_associatedCloud->getTheVisibilityArray();
 	if (!verticesVisibility || !verticesVisibility->isAllocated())
@@ -1662,7 +1676,7 @@ ccMesh* ccMesh::createNewMeshFromSelection(bool removeSelectedFaces)
 		//we create a temporary entity with the visible vertices only
 		rc = new CCLib::ReferenceCloud(m_associatedCloud);
 
-		for (unsigned i=0;i<m_associatedCloud->size();++i)
+		for (unsigned i=0; i<m_associatedCloud->size(); ++i)
 			if (verticesVisibility->getValue(i) == POINT_VISIBLE)
 				if (!rc->addPointIndex(i))
 				{

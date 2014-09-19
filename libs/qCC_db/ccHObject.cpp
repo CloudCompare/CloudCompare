@@ -31,8 +31,8 @@
 #include "ccMaterialSet.h"
 #include "ccAdvancedTypes.h"
 #include "ccImage.h"
-#include "ccCalibratedImage.h"
 #include "ccGBLSensor.h"
+#include "ccCameraSensor.h"
 #include "cc2DLabel.h"
 #include "cc2DViewportLabel.h"
 #include "cc2DViewportObject.h"
@@ -148,10 +148,12 @@ ccHObject* ccHObject::New(CC_CLASS_ENUM objectType, const char* name/*=0*/)
 	case CC_TYPES::IMAGE:
 		return new ccImage();
 	case CC_TYPES::CALIBRATED_IMAGE:
-		return new ccCalibratedImage();
+		return 0; //deprecated
 	case CC_TYPES::GBL_SENSOR:
 		//warning: default sensor type set in constructor (see CCLib::GroundBasedLidarSensor::setRotationOrder)
 		return new ccGBLSensor();
+	case CC_TYPES::CAMERA_SENSOR:
+		return new ccCameraSensor();
 	case CC_TYPES::LABEL_2D:
 		return new cc2DLabel(name);
 	case CC_TYPES::VIEWPORT_2D_OBJECT:
@@ -707,12 +709,17 @@ void ccHObject::removeChild(int pos)
 
 	ccHObject* child = m_children[pos];
 
+	//we can't swap as we want to keep the order!
+	//(DGM: do this BEFORE deleting the object (otherwise
+	//the dependency mechanism can 'backfire' ;)
+	m_children.erase(m_children.begin()+pos);
+
 	//backup dependency flags
 	int flags = getDependencyFlagsWith(child);
 
-	//remove any dependency (bilateral)
-	removeDependencyWith(child);	
-	child->removeDependencyWith(this);
+	//remove any dependency
+	removeDependencyWith(child);
+	//child->removeDependencyWith(this); //DGM: no, don't do this otherwise this entity won't be warned that the child has been removed!
 
 	if ((flags & DP_DELETE_OTHER) == DP_DELETE_OTHER)
 	{
@@ -726,9 +733,6 @@ void ccHObject::removeChild(int pos)
 	{
 		child->setParent(0);
 	}
-
-	//we can't swap as we want to keep the order!
-	m_children.erase(m_children.begin()+pos);
 }
 
 void ccHObject::removeAllChildren()

@@ -448,7 +448,9 @@ QVariant ccDBRoot::data(const QModelIndex &index, int role) const
 			return QIcon(QString::fromUtf8(":/CC/images/dbImageSymbol.png"));
 		case CC_TYPES::SENSOR:
 		case CC_TYPES::GBL_SENSOR:
-			return QIcon(QString::fromUtf8(":/CC/images/dbSensorSymbol.png"));
+			return QIcon(QString::fromUtf8(":/CC/images/dbGBLSensorSymbol.png"));
+		case CC_TYPES::CAMERA_SENSOR:
+			return QIcon(QString::fromUtf8(":/CC/images/dbCamSensorSymbol.png"));
 		case CC_TYPES::MATERIAL_SET:
 			return QIcon(QString::fromUtf8(":/CC/images/dbMaterialSymbol.png"));
 		case CC_TYPES::NORMALS_ARRAY:

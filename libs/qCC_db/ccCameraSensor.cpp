@@ -17,147 +17,405 @@
 
 #include "ccCameraSensor.h"
 
-//default parameters
-// Parameters extracted from :
-// "Accuracy and Resolution of Kinect Depth Data for Indoor Mapping Applications"
-// Kourosh Khoshelham and Sander Oude Elberink
-static const int	s_width =		640;						// image width 
-static const int	s_height =		480;						// image height
-static const float	s_f =			static_cast<float>(5.45 * 1.0e-3);				// focal length (real distance in meter)
-static const float	s_sX =			static_cast<float>(9.3 * 1.0e-6);				// pixel size in x (real distance in meter)
-static const float	s_sY =			static_cast<float>(9.3 * 1.0e-6);				// pixel size in y (real distance in meter)
-static const float	s_vFov =		static_cast<float>(43.0 * M_PI / 180.0);		// vertical field of view (in rad)
-static const float	s_skew =		static_cast<float>(0.0);						// skew in image
-static const float	s_pX_offset =	static_cast<float>(-0.063 * 1.0e-3);			// offset of the principal point in x 
-static const float	s_pY_offset =	static_cast<float>(-0.039 * 1.0e-3);			// offset of the principal point in y
-static const float	s_zNear =		static_cast<float>(0.5);						// distance to the closest recordable depth
-static const float	s_zFar =		static_cast<float>(5.0);						// distance to the furthest recordable depth
-static const float	s_A =			static_cast<float>(-2.85 * 1.0e-3);				// coefficient for linearization (in meters^(-1))
-static const float	s_B =			static_cast<float>(3.0);						// constant for linearization (in meters^(-1))
-static const float	s_K1 =			static_cast<float>(2.42 * 1.0e-3);				// 1st radial distortion coefficient (Brown's model) 
-static const float	s_K2 =			static_cast<float>(-1.7 * 1.0e-4);				// 2nd radial distortion coefficient (Brown's model)
-static const float	s_K3 =			static_cast<float>(0.0);						// 3rd radial distortion coefficient (Brown's model)
-static const float	s_P1 =			static_cast<float>(-3.3 * 1.0e-4);				// 1st tangential distortion coefficient (Brown's model)
-static const float	s_P2 =			static_cast<float>(5.25 * 1.0e-4);				// 2nd tangential distortion coefficient (Brown's model)
+//local
+#include "ccPointCloud.h"
+#include "ccMesh.h"
+#include "ccImage.h"
+#include "ccGenericGLDisplay.h"
+
+//CCLib
+#include <ConjugateGradient.h>
+
+//Qt
+#include <QDir>
+#include <QTextStream>
+
+ccCameraSensor::IntrinsicParameters::IntrinsicParameters()
+	: focal_mm(1.0f)
+	, skew(0)
+	, vFOV_rad(0)
+	, zNear_mm(0.001f)
+	, zFar_mm(1000.0f)
+	, arrayWidth(0)
+	, arrayHeight(0)
+{
+	pixelSize_mm[0] = 0;
+	pixelSize_mm[1] = 0;
+}
+
+void ccCameraSensor::IntrinsicParameters::GetKinectDefaults(IntrinsicParameters& params)
+{
+	//default Kinect parameters from:
+	// "Accuracy and Resolution of Kinect Depth Data for Indoor Mapping Applications"
+	// Kourosh Khoshelham and Sander Oude Elberink
+	params.focal_mm        = static_cast<float>(5.45 * 1.0e-3);				// focal length (real distance in meter)
+	params.pixelSize_mm[0] = static_cast<float>(9.3 * 1.0e-6);				// pixel size in x (real distance in meter)
+	params.pixelSize_mm[1] = static_cast<float>(9.3 * 1.0e-6);				// pixel size in y (real distance in meter)
+	params.skew            = static_cast<float>(0.0);						// skew in image
+	params.vFOV_rad        = static_cast<float>(43.0 * M_PI / 180.0);		// vertical field of view (in rad)
+	params.zNear_mm        = static_cast<float>(0.5);						// distance to the closest recordable depth
+	params.zFar_mm         = static_cast<float>(5.0);						// distance to the furthest recordable depth
+	params.arrayWidth      = 640;											// image width
+	params.arrayHeight     = 480;											// image height
+}
+
+ccCameraSensor::BrownDistortionParameters::BrownDistortionParameters()
+{
+	principalPointOffset[0]  = 0;
+	principalPointOffset[1]  = 0;
+	linearDisparityParams[0] = 0;
+	linearDisparityParams[1] = 0;
+	K_BrownParams[0]         = 0;
+	K_BrownParams[1]         = 0;
+	K_BrownParams[2]         = 0;
+	P_BrownParams[0]         = 0;
+	P_BrownParams[1]         = 0;
+}
+
+void ccCameraSensor::BrownDistortionParameters::GetKinectDefaults(BrownDistortionParameters& params)
+{
+	//default Kinect parameters from:
+	// "Accuracy and Resolution of Kinect Depth Data for Indoor Mapping Applications"
+	// Kourosh Khoshelham and Sander Oude Elberink
+	params.principalPointOffset[0]  = static_cast<float>(-0.063 * 1.0e-3);
+	params.principalPointOffset[1]  = static_cast<float>(-0.039 * 1.0e-3);
+	params.linearDisparityParams[0] = static_cast<float>(-2.85 * 1.0e-3);
+	params.linearDisparityParams[1] = static_cast<float>(3.0);
+	params.K_BrownParams[0]         = static_cast<float>(2.42 * 1.0e-3);
+	params.K_BrownParams[1]         = static_cast<float>(-1.7 * 1.0e-4);
+	params.K_BrownParams[2]         = static_cast<float>(0.0);
+	params.P_BrownParams[0]         = static_cast<float>(-3.3 * 1.0e-4);
+	params.P_BrownParams[1]         = static_cast<float>(5.25 * 1.0e-4);
+}
+
+ccCameraSensor::FrustumInformation::FrustumInformation() 
+	: isComputed(false)
+	, drawFrustum(false) 
+	, drawSidePlanes(false)
+	, frustumCorners(0)
+	, frustrumHull(0)
+{}
+
+ccCameraSensor::FrustumInformation::~FrustumInformation()
+{
+	//always delete the hull before the corners, are it depends on them!
+	if (frustrumHull)
+	{
+		delete frustrumHull;
+		frustrumHull = 0;
+	}
+	if (frustumCorners)
+	{
+		delete frustumCorners;
+		frustumCorners = 0;
+	}
+}
+
+bool ccCameraSensor::FrustumInformation::initFrustrumCorners()
+{
+	if (!frustumCorners)
+	{
+		frustumCorners = new ccPointCloud("Frustrum corners");
+	}
+	else
+	{
+		frustumCorners->clear();
+	}
+	
+	if (!frustumCorners->reserve(8))
+	{
+		//not enough memory to load frustum corners!
+		delete frustumCorners;
+		frustumCorners = 0;
+		return false;
+	}
+	return true;
+}
+
+bool ccCameraSensor::FrustumInformation::initFrustrumHull()
+{
+	//we only need to do this once!
+	if (frustrumHull)
+		return true;
+
+	if (!frustumCorners || frustumCorners->size() < 8)
+	{
+		ccLog::Warning("[ccCameraSensor::FrustumInformation::initFrustrumHull] Corners are not initialized!");
+		return false;
+	}
+
+	frustrumHull = new ccMesh(frustumCorners);
+	if (!frustrumHull->reserve(6*2))
+	{
+		ccLog::Warning("[ccCameraSensor::FrustumInformation::initFrustrumHull] Not enough memory!");
+		delete frustrumHull;
+		frustrumHull = 0;
+		return false;
+	}
+
+	frustrumHull->addTriangle(0,2,3);
+	frustrumHull->addTriangle(0,3,1);
+
+	frustrumHull->addTriangle(2,4,5);
+	frustrumHull->addTriangle(2,5,3);
+
+	frustrumHull->addTriangle(4,6,7);
+	frustrumHull->addTriangle(4,7,5);
+
+	frustrumHull->addTriangle(6,0,1);
+	frustrumHull->addTriangle(6,1,7);
+
+	frustrumHull->addTriangle(6,4,2);
+	frustrumHull->addTriangle(6,2,0);
+
+	frustrumHull->addTriangle(1,3,5);
+	frustrumHull->addTriangle(1,5,7);
+
+	frustrumHull->setVisible(true);
+
+	return true;
+}
 
 ccCameraSensor::ccCameraSensor()
 	: ccSensor("Camera Sensor")
+	, m_projectionMatrixIsValid(false)
 {
 	//graphic representation
 	lockVisibility(false);
+	setSelectionBehavior(SELECTION_FIT_BBOX);
+}
 
-	// scale
-	m_scale = 50.0f;
+ccCameraSensor::ccCameraSensor(const IntrinsicParameters& iParams)
+	: ccSensor("Camera Sensor")
+	, m_projectionMatrixIsValid(false)
+{
+	//graphic representation
+	lockVisibility(false);
+	setSelectionBehavior(SELECTION_FIT_BBOX);
 
 	// projection
-	m_intrinsicParams.focalLength = s_f;
-	m_intrinsicParams.pixelSize[0] = s_sX;
-	m_intrinsicParams.pixelSize[1] = s_sY;
-	m_intrinsicParams.skew = s_skew;
-	m_intrinsicParams.vFieldOfView = s_vFov;
-	m_intrinsicParams.zBoundary[0] = s_zNear;
-	m_intrinsicParams.zBoundary[1] = s_zFar;
-	m_intrinsicParams.imageSize[0] = s_width;
-	m_intrinsicParams.imageSize[1] = s_height;
-	computeProjectionMatrix();
-
-	// uncertainty
-	m_uncertaintyParams.principalPointOffset[0] = s_pX_offset;
-	m_uncertaintyParams.principalPointOffset[1] = s_pY_offset;
-	m_uncertaintyParams.linearDisparityParams[0] = s_A;
-	m_uncertaintyParams.linearDisparityParams[1] = s_B;
-	m_uncertaintyParams.K_BrownParams[0] = s_K1;
-	m_uncertaintyParams.K_BrownParams[1] = s_K2;
-	m_uncertaintyParams.K_BrownParams[2] = s_K3;
-	m_uncertaintyParams.P_BrownParams[0] = s_P1;
-	m_uncertaintyParams.P_BrownParams[1] = s_P2;
+	setIntrinsicParameters(iParams);
 }
 
 ccCameraSensor::~ccCameraSensor()
 {
 }
 
-void ccCameraSensor::computeProjectionMatrix()
-{
-	m_projecMatrix.toZero();
-	float* mat = m_projecMatrix.data();
-	mat[0] = m_intrinsicParams.focalLength / m_intrinsicParams.pixelSize[0];
-	mat[4] = m_intrinsicParams.skew;
-	mat[5] = m_intrinsicParams.focalLength / m_intrinsicParams.pixelSize[1];
-	mat[8] = static_cast<float>(m_intrinsicParams.imageSize[0]) / 2;
-	mat[9] = static_cast<float>(m_intrinsicParams.imageSize[1]) / 2;
-	mat[10] = 1.0f;
-}
-
 ccBBox ccCameraSensor::getMyOwnBB()
 {
-	CCVector3 vec;
-	if (getActiveAbsoluteCenter(vec))
-		return ccBBox(vec,vec);
-	else 
-		return ccBBox(); 
+	return ccBBox();
 }
 
-//ccBBox ccCameraSensor::getDisplayBB()
-//{
-//	//return getMyOwnBB();
-//	ccIndexedTransformation sensorPos;
-//	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
-//		return ccBBox();
-//
-//	CCVector3 center = sensorPos.getTranslationAsVec3D();
-//
-//	return ccBBox(	center + CCVector3(-1,-1,-1) * m_scale,
-//					center + CCVector3( 1, 1, 1) * m_scale);
-//}
+ccBBox ccCameraSensor::getDisplayBB()
+{
+	ccIndexedTransformation sensorPos;
+	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+		return ccBBox();
+
+	CCVector3 upperLeftPoint = computeUpperLeftPoint();
+
+	ccPointCloud cloud;
+	if (!cloud.reserve(5))
+	{
+		//not enough memory?!
+		return ccBBox();
+	}
+
+	cloud.addPoint(CCVector3(0,0,0));
+	cloud.addPoint(CCVector3( upperLeftPoint.x, upperLeftPoint.y,-upperLeftPoint.z));
+	cloud.addPoint(CCVector3(-upperLeftPoint.x, upperLeftPoint.y,-upperLeftPoint.z));
+	cloud.addPoint(CCVector3(-upperLeftPoint.x,-upperLeftPoint.y,-upperLeftPoint.z));
+	cloud.addPoint(CCVector3( upperLeftPoint.x,-upperLeftPoint.y,-upperLeftPoint.z));
+
+	//add frustum corners if necessary
+	if (	m_frustrumInfos.isComputed
+		&&	(m_frustrumInfos.drawFrustum || m_frustrumInfos.drawSidePlanes)
+		&&	m_frustrumInfos.frustumCorners )
+	{
+		unsigned cornerCount = m_frustrumInfos.frustumCorners->size();
+		if (cloud.reserve(cloud.size() + cornerCount))
+		{
+			for (unsigned i=0; i<cornerCount; ++i)
+				cloud.addPoint(*m_frustrumInfos.frustumCorners->getPoint(i));
+		}
+	}
+
+	cloud.applyRigidTransformation(sensorPos);
+	return cloud.getBB(false);
+}
+
+ccBBox ccCameraSensor::getFitBB(ccGLMatrix& trans)
+{
+	ccIndexedTransformation sensorPos;
+	if (!getAbsoluteTransformation(sensorPos,m_activeIndex))
+		return ccBBox();
+
+	trans = sensorPos;
+
+	CCVector3 upperLeftPoint = computeUpperLeftPoint();
+	return ccBBox( -upperLeftPoint, CCVector3(upperLeftPoint.x,upperLeftPoint.x,0) );
+}
+
+void ccCameraSensor::setFocal_mm(float f_mm)
+{
+	assert(f_mm > 0);
+	m_intrinsicParams.focal_mm = f_mm;
+
+	//old frustrum is not valid anymore!
+	m_frustrumInfos.isComputed = false;
+	//same thing for the projection matrix
+	m_projectionMatrixIsValid = false;
+}
+
+void ccCameraSensor::setVerticalFov_rad(float fov_rad)
+{
+	assert(fov_rad > 0);
+	m_intrinsicParams.vFOV_rad = fov_rad;
+}
+
+void ccCameraSensor::setIntrinsicParameters(const IntrinsicParameters& params)
+{
+	m_intrinsicParams = params;
+	//old frustrum is not valid anymore!
+	m_frustrumInfos.isComputed = false;
+	//same thing for the projection matrix
+	m_projectionMatrixIsValid = false;
+}
+
+bool ccCameraSensor::applyViewport(ccGenericGLDisplay* win/*=0*/)
+{
+	if (!win)
+	{
+		win = getDisplay();
+		if (!win)
+		{
+			ccLog::Warning("[ccCameraSensor::applyViewport] No associated display!");
+			return false;
+		}
+	}
+	
+	ccIndexedTransformation trans;
+	if (!getActiveAbsoluteTransformation(trans))
+	{
+		return false;
+	}
+
+	if (m_intrinsicParams.arrayHeight <= 0)
+	{
+		ccLog::Warning("[ccCameraSensor::applyViewport] Sensor height is 0!");
+		return false;
+	}
+
+	//aspect ratio
+	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / m_intrinsicParams.arrayHeight;
+	//fov
+	float fov_deg = m_intrinsicParams.vFOV_rad * CC_RAD_TO_DEG;
+	//camera position/orientation
+	ccGLMatrixd transd(trans.data());
+	win->setupProjectiveViewport(transd,fov_deg,ar);
+
+	return true;
+}
+
+bool ccCameraSensor::getProjectionMatrix(ccGLMatrix& matrix)
+{
+	if (!m_projectionMatrixIsValid)
+		computeProjectionMatrix();
+
+	matrix = m_projectionMatrix;
+
+	return m_projectionMatrixIsValid; //even if we have computed the projection matrix, it may still have failed!
+}
+
+void ccCameraSensor::computeProjectionMatrix()
+{
+	if (	m_intrinsicParams.pixelSize_mm[0] != 0
+		&&	m_intrinsicParams.pixelSize_mm[1] != 0)
+	{
+		m_projectionMatrix.toIdentity();
+		m_projectionMatrixIsValid = false;
+		//ccLog::Warning("[ccCameraSensor] Projection matrix can't be computed (pixel size is null!)");
+	}
+	else
+	{
+		m_projectionMatrix.toZero();
+		float* mat = m_projectionMatrix.data();
+		mat[0]  = m_intrinsicParams.focal_mm / m_intrinsicParams.pixelSize_mm[0];
+		mat[4]  = m_intrinsicParams.skew;
+		mat[5]  = m_intrinsicParams.focal_mm / m_intrinsicParams.pixelSize_mm[1];
+		mat[8]  = static_cast<float>(m_intrinsicParams.arrayWidth) / 2;
+		mat[9]  = static_cast<float>(m_intrinsicParams.arrayHeight) / 2;
+		mat[10] = 1.0f;
+
+		m_projectionMatrixIsValid = true;
+	}
+}
 
 bool ccCameraSensor::toFile_MeOnly(QFile& out) const
 {
 	if (!ccSensor::toFile_MeOnly(out))
 		return false;
 
-	//projection matrix (dataVersion>=35)
-	if (!m_projecMatrix.toFile(out))
-		return WriteError();
+	//projection matrix (35 <= dataVersion < 38)
+	//if (!m_projectionMatrix.toFile(out))
+	//	return WriteError();
 
 	/** various parameters (dataVersion>=35) **/
 
 	//IntrinsicParameters
 	QDataStream outStream(&out);
-	outStream << m_intrinsicParams.focalLength;
-	outStream << m_intrinsicParams.imageSize[0];
-	outStream << m_intrinsicParams.imageSize[1];
-	outStream << m_intrinsicParams.pixelSize[0];
-	outStream << m_intrinsicParams.pixelSize[1];
+	outStream << m_intrinsicParams.focal_mm;
+	outStream << m_intrinsicParams.arrayWidth;
+	outStream << m_intrinsicParams.arrayHeight;
+	outStream << m_intrinsicParams.pixelSize_mm[0];
+	outStream << m_intrinsicParams.pixelSize_mm[1];
 	outStream << m_intrinsicParams.skew;
-	outStream << m_intrinsicParams.vFieldOfView;
-	outStream << m_intrinsicParams.zBoundary[0];
-	outStream << m_intrinsicParams.zBoundary[1];
+	outStream << m_intrinsicParams.vFOV_rad;
+	outStream << m_intrinsicParams.zNear_mm;
+	outStream << m_intrinsicParams.zFar_mm;
 
-	//UncertaintyParameters
-	outStream << m_uncertaintyParams.K_BrownParams[0];
-	outStream << m_uncertaintyParams.K_BrownParams[1];
-	outStream << m_uncertaintyParams.K_BrownParams[2];
-	outStream << m_uncertaintyParams.P_BrownParams[0];
-	outStream << m_uncertaintyParams.P_BrownParams[1];
-	outStream << m_uncertaintyParams.principalPointOffset[0];
-	outStream << m_uncertaintyParams.principalPointOffset[1];
-	outStream << m_uncertaintyParams.linearDisparityParams[0];
-	outStream << m_uncertaintyParams.linearDisparityParams[1];
+	//distortion parameters (dataVersion>=38)
+	DistortionModel distModel = m_distortionParams ? m_distortionParams->getModel() : NO_DISTORTION_MODEL;
+	outStream << static_cast<uint32_t>(distModel);
+	
+	if (m_distortionParams)
+	{
+		switch(m_distortionParams->getModel())
+		{
+		case SIMPLE_RADIAL_DISTORTION:
+			{
+				RadialDistortionParameters* params = static_cast<RadialDistortionParameters*>(m_distortionParams.data());
+				outStream << params->k1;
+				outStream << params->k2;
+			}
+			break;
+
+		case BROWN_DISTORTION:
+			{
+				BrownDistortionParameters* params = static_cast<BrownDistortionParameters*>(m_distortionParams.data());
+				outStream << params->K_BrownParams[0];
+				outStream << params->K_BrownParams[1];
+				outStream << params->K_BrownParams[2];
+				outStream << params->P_BrownParams[0];
+				outStream << params->P_BrownParams[1];
+				outStream << params->principalPointOffset[0];
+				outStream << params->principalPointOffset[1];
+				outStream << params->linearDisparityParams[0];
+				outStream << params->linearDisparityParams[1];
+			}
+			break;
+		default:
+			assert(false);
+			break;
+		}
+	}
 	
 	//FrustumInformation
-	outStream << m_frustrumInfos.isComputed;
 	outStream << m_frustrumInfos.drawFrustum;
 	outStream << m_frustrumInfos.drawSidePlanes;
 	outStream << m_frustrumInfos.center.x;
 	outStream << m_frustrumInfos.center.y;
 	outStream << m_frustrumInfos.center.z;
-	for (unsigned i=0; i<8; ++i)
-	{
-		outStream << m_frustrumInfos.frustumCorners[i].x;
-		outStream << m_frustrumInfos.frustumCorners[i].y;
-		outStream << m_frustrumInfos.frustumCorners[i].z;
-	}
 
 	return true;
 }
@@ -171,42 +429,99 @@ bool ccCameraSensor::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	if (dataVersion < 35)
 		return false;
 
-	//projection matrix (dataVersion>=35)
-	if (!m_projecMatrix.fromFile(in,dataVersion,flags))
-		return ReadError();
+	//projection matrix (35 <= dataVersion < 38)
+	if (dataVersion < 38)
+	{
+		//we don't need to save/load this matrix as it is dynamically computed!
+		ccGLMatrix dummyMatrix;
+		if (!dummyMatrix.fromFile(in,dataVersion,flags))
+			return ReadError();
+	}
+	m_projectionMatrixIsValid = false;
 
 	/** various parameters (dataVersion>=35) **/
 
 	//IntrinsicParameters
 	QDataStream inStream(&in);
-	inStream >> m_intrinsicParams.focalLength;
-	inStream >> m_intrinsicParams.imageSize[0];
-	inStream >> m_intrinsicParams.imageSize[1];
-	inStream >> m_intrinsicParams.pixelSize[0];
-	inStream >> m_intrinsicParams.pixelSize[1];
+	inStream >> m_intrinsicParams.focal_mm;
+	inStream >> m_intrinsicParams.arrayWidth;
+	inStream >> m_intrinsicParams.arrayHeight;
+	inStream >> m_intrinsicParams.pixelSize_mm[0];
+	inStream >> m_intrinsicParams.pixelSize_mm[1];
 	inStream >> m_intrinsicParams.skew;
-	inStream >> m_intrinsicParams.vFieldOfView;
-	inStream >> m_intrinsicParams.zBoundary[0];
-	inStream >> m_intrinsicParams.zBoundary[1];
+	inStream >> m_intrinsicParams.vFOV_rad;
+	inStream >> m_intrinsicParams.zNear_mm;
+	inStream >> m_intrinsicParams.zFar_mm;
 
-	//UncertaintyParameters
-	inStream >> m_uncertaintyParams.K_BrownParams[0];
-	inStream >> m_uncertaintyParams.K_BrownParams[1];
-	inStream >> m_uncertaintyParams.K_BrownParams[2];
-	inStream >> m_uncertaintyParams.P_BrownParams[0];
-	inStream >> m_uncertaintyParams.P_BrownParams[1];
-	inStream >> m_uncertaintyParams.principalPointOffset[0];
-	inStream >> m_uncertaintyParams.principalPointOffset[1];
-	inStream >> m_uncertaintyParams.linearDisparityParams[0];
-	inStream >> m_uncertaintyParams.linearDisparityParams[1];
+	//distortion parameters
+	DistortionModel distModel = NO_DISTORTION_MODEL;
+	if (dataVersion < 38)
+	{
+		//before v38, only Brown's paramters were used (and always set)
+		distModel = BROWN_DISTORTION;
+	}
+	else
+	{
+		uint32_t distModeli;
+		inStream >> distModeli;
+		distModel = static_cast<DistortionModel>(distModeli);
+	}
+
+	//load parameters (if any)
+	switch (distModel)
+	{
+	case SIMPLE_RADIAL_DISTORTION:
+		{
+			RadialDistortionParameters* distParams = new RadialDistortionParameters;
+			inStream >> distParams->k1;
+			inStream >> distParams->k2;
+
+			setDistortionParameters(LensDistortionParameters::Shared(distParams));
+		}
+		break;
+
+	case BROWN_DISTORTION:
+		{
+			BrownDistortionParameters* distParams = new BrownDistortionParameters;
+			inStream >> distParams->K_BrownParams[0];
+			inStream >> distParams->K_BrownParams[1];
+			inStream >> distParams->K_BrownParams[2];
+			inStream >> distParams->P_BrownParams[0];
+			inStream >> distParams->P_BrownParams[1];
+			inStream >> distParams->principalPointOffset[0];
+			inStream >> distParams->principalPointOffset[1];
+			inStream >> distParams->linearDisparityParams[0];
+			inStream >> distParams->linearDisparityParams[1];
+
+			setDistortionParameters(LensDistortionParameters::Shared(distParams));
+		}
+		break;
+
+	default:
+		//do nothing
+		break;
+	}
 	
 	//FrustumInformation
-	inStream >> m_frustrumInfos.isComputed;
+	if (dataVersion < 38)
+	{
+		bool dummyBool; //formerly: m_frustrumInfos.isComputed (no need to save/load it!)
+		inStream >> dummyBool;
+	}
+	m_frustrumInfos.isComputed = false;
 	inStream >> m_frustrumInfos.drawFrustum;
 	inStream >> m_frustrumInfos.drawSidePlanes;
 	ccSerializationHelper::CoordsFromDataStream(inStream,flags,m_frustrumInfos.center.u,3);
-	for (unsigned i=0; i<8; ++i)
-		ccSerializationHelper::CoordsFromDataStream(inStream,flags,m_frustrumInfos.frustumCorners[i].u,3);
+
+	if (dataVersion < 38)
+	{
+		//frustrum corners: no need to save/load them!
+		for (unsigned i=0; i<8; ++i)
+		{
+			CCVector3 P;
+			ccSerializationHelper::CoordsFromDataStream(inStream,flags,P.u,3);
+		}
+	}
 
 	return true;
 }
@@ -236,7 +551,7 @@ bool ccCameraSensor::fromGlobalCoordToLocalCoord(const CCVector3& globalCoord, C
 	return true;
 }
 
-bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2i& imageCoord/*, bool withLensError*/) const
+bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCVector2i& imageCoord/*, bool withLensError*/)
 {
 	// Change in 3D image coordinates system for good projection
 	CCVector3 imageCoordSystem(localCoord.x, localCoord.y, -localCoord.z); 
@@ -246,7 +561,9 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 		return false;
 	
 	// projection
-	ccGLMatrix mat = getProjectionMatrix();
+	ccGLMatrix mat;
+	if (!getProjectionMatrix(mat))
+		return false;
 	CCVector3 projCoord = mat * imageCoordSystem; // at this stage, coordinates are homogeneous
 	projCoord = projCoord/projCoord.z; // coordinates are now in pixels
 	CCVector2i initial(static_cast<int>(projCoord.x), static_cast<int>(projCoord.y)); 
@@ -257,8 +574,8 @@ bool ccCameraSensor::fromLocalCoordToImageCoord(const CCVector3& localCoord, CCV
 	//	fromIdealImCoordToRealImCoord(initial, coord);
 
 	//test if the projected point is into the image boundaries (width,height)
-	if (	coord.x < 0 || coord.x >= m_intrinsicParams.imageSize[0]
-		||	coord.y < 0 || coord.y >= m_intrinsicParams.imageSize[1] )
+	if (	coord.x < 0 || coord.x >= m_intrinsicParams.arrayWidth
+		||	coord.y < 0 || coord.y >= m_intrinsicParams.arrayHeight )
 	{
 		return false;
 	}
@@ -278,29 +595,29 @@ bool ccCameraSensor::fromImageCoordToLocalCoord(const CCVector2i& imageCoord, CC
 		fromRealImCoordToIdealImCoord(imageCoord, coord);
 
 	// If specified depth is 0.0, it means that we want unprojection to be made in the focal plane
-	float focal = m_intrinsicParams.focalLength;
+	float focal = m_intrinsicParams.focal_mm;
 	float newDepth = depth;
 	
 	if (abs(depth) < FLT_EPSILON)
 		newDepth = focal;
 
 	// We test if the pixel is into the image boundaries (width*height) and if input depth is positive
-	if (	coord.x < 0 || coord.x >= m_intrinsicParams.imageSize[0]
-		||	coord.y < 0 || coord.y >= m_intrinsicParams.imageSize[1]
+	if (	coord.x < 0 || coord.x >= m_intrinsicParams.arrayWidth
+		||	coord.y < 0 || coord.y >= m_intrinsicParams.arrayHeight
 		||	newDepth < focal)
 	{
 		return false;
 	}
 
 	// Compute local 3D coordinates
-	PointCoordinateType x = (coord.x - m_intrinsicParams.imageSize[0]/2) * m_intrinsicParams.pixelSize[0] / focal;
-	PointCoordinateType y = (coord.y - m_intrinsicParams.imageSize[1]/2) * m_intrinsicParams.pixelSize[1] / focal;
+	PointCoordinateType x = (coord.x - m_intrinsicParams.arrayWidth/2) * m_intrinsicParams.pixelSize_mm[0] / focal;
+	PointCoordinateType y = (coord.y - m_intrinsicParams.arrayHeight/2) * m_intrinsicParams.pixelSize_mm[1] / focal;
 	localCoord = CCVector3(x, y, -PC_ONE) * newDepth;
 	
 	return true;
 }
 
-bool ccCameraSensor::fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector3& localCoord, CCVector2i& imageCoord/*, bool withLensError*/) const
+bool ccCameraSensor::fromGlobalCoordToImageCoord(const CCVector3& globalCoord, CCVector3& localCoord, CCVector2i& imageCoord/*, bool withLensError*/)
 {
 	if (!fromGlobalCoordToLocalCoord(globalCoord,localCoord))
 		return false;
@@ -318,37 +635,64 @@ bool ccCameraSensor::fromImageCoordToGlobalCoord(const CCVector2i& imageCoord, C
 
 bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2i& real, CCVector2i& ideal) const
 {
-	const float& sX = m_intrinsicParams.pixelSize[0];
-	const float& sY = m_intrinsicParams.pixelSize[1];
+	//no distortion parameters?
+	if (!m_distortionParams)
+	{
+		ideal = real;
+		return true;
+	}
 
-	// 1st correction : principal point correction
-	float cx = static_cast<float>(m_intrinsicParams.imageSize[0]) / 2 + m_uncertaintyParams.principalPointOffset[0] / sX; // in pixels
-	float cy = static_cast<float>(m_intrinsicParams.imageSize[1]) / 2 + m_uncertaintyParams.principalPointOffset[1] / sY; // in pixels
+	switch (m_distortionParams->getModel())
+	{
+	case SIMPLE_RADIAL_DISTORTION:
+		{
+			//TODO: we need a pre-computed distortion map to do this!
+		}
+		break;
 
-	// 2nd correction : Brown's lens distortion correction
-	float dx = (static_cast<float>(real.x)-cx) * m_intrinsicParams.pixelSize[0];	// real distance 
-	float dy = (static_cast<float>(real.y)-cy) * m_intrinsicParams.pixelSize[1];	// real distance
-	float dx2 = dx*dx;
-	float dy2 = dy*dy;
-	float r = sqrt(dx2 + dy2);
-	float r2 = r*r;
-	float r4 = r2*r2;
-	float r6 = r4*r2;
-	float K1 = m_uncertaintyParams.K_BrownParams[0];
-	float K2 = m_uncertaintyParams.K_BrownParams[1];
-	float K3 = m_uncertaintyParams.K_BrownParams[2];
-	float P1 = m_uncertaintyParams.P_BrownParams[0];
-	float P2 = m_uncertaintyParams.P_BrownParams[1];
+	case BROWN_DISTORTION:
+		{
+			const BrownDistortionParameters* distParams = static_cast<BrownDistortionParameters*>(m_distortionParams.data());
+			const float& sX = m_intrinsicParams.pixelSize_mm[0];
+			const float& sY = m_intrinsicParams.pixelSize_mm[1];
 
-	// compute new value
-	float correctedX = (dx * (1 + K1*r2 + K2*r4 + K3*r6)  +  P1 * (r2 + 2*dx2)  +  2*P2*dx*dy);
-	float correctedY = (dy * (1 + K1*r2 + K2*r4 + K3*r6)  +  P2 * (r2 + 2*dy2)  +  2*P1*dx*dy);
-	ideal.x = static_cast<int>(correctedX / sX);
-	ideal.y = static_cast<int>(correctedY / sY);
+			// 1st correction : principal point correction
+			float cx = static_cast<float>(m_intrinsicParams.arrayWidth) / 2 + distParams->principalPointOffset[0] / sX; // in pixels
+			float cy = static_cast<float>(m_intrinsicParams.arrayHeight) / 2 + distParams->principalPointOffset[1] / sY; // in pixels
 
-	// We test if the new pixel is into the image boundaries
-	return (	ideal.x >= 0 && ideal.x < m_intrinsicParams.imageSize[0]
-			&&	ideal.y >= 0 && ideal.y < m_intrinsicParams.imageSize[1] );
+			// 2nd correction : Brown's lens distortion correction
+			float dx = (static_cast<float>(real.x)-cx) * m_intrinsicParams.pixelSize_mm[0];	// real distance 
+			float dy = (static_cast<float>(real.y)-cy) * m_intrinsicParams.pixelSize_mm[1];	// real distance
+			float dx2 = dx*dx;
+			float dy2 = dy*dy;
+			float r = sqrt(dx2 + dy2);
+			float r2 = r*r;
+			float r4 = r2*r2;
+			float r6 = r4*r2;
+			float K1 = distParams->K_BrownParams[0];
+			float K2 = distParams->K_BrownParams[1];
+			float K3 = distParams->K_BrownParams[2];
+			float P1 = distParams->P_BrownParams[0];
+			float P2 = distParams->P_BrownParams[1];
+
+			// compute new value
+			float correctedX = (dx * (1 + K1*r2 + K2*r4 + K3*r6)  +  P1 * (r2 + 2*dx2)  +  2*P2*dx*dy);
+			float correctedY = (dy * (1 + K1*r2 + K2*r4 + K3*r6)  +  P2 * (r2 + 2*dy2)  +  2*P1*dx*dy);
+			ideal.x = static_cast<int>(correctedX / sX);
+			ideal.y = static_cast<int>(correctedY / sY);
+
+			// We test if the new pixel is into the image boundaries
+			return (	ideal.x >= 0 && ideal.x < m_intrinsicParams.arrayWidth
+					&&	ideal.y >= 0 && ideal.y < m_intrinsicParams.arrayHeight );
+		}
+
+	default:
+		//not handled?
+		assert(false);
+		break;
+	}
+
+	return false;
 }
 
 //TODO
@@ -359,33 +703,57 @@ bool ccCameraSensor::fromRealImCoordToIdealImCoord(const CCVector2i& real, CCVec
 
 bool ccCameraSensor::computeUncertainty(const CCVector2i& pixel, const float depth, Vector3Tpl<ScalarType>& sigma) const
 {
-	//TODO ==> check if the input pixel coordinate must be the real or ideal projection
-
-	const int& u = pixel.x;
-	const int& v = pixel.y;
-	const int& width = m_intrinsicParams.imageSize[0];
-	const int& height = m_intrinsicParams.imageSize[1];
-
-	// check validity 
-	if (u < 0 || u > width || v < 0 || v > height || depth < FLT_EPSILON)
+	//no distortion parameters?
+	if (!m_distortionParams)
+	{
 		return false;
+	}
 
-	// init parameters
-	const float& mu = m_intrinsicParams.pixelSize[0];
-	const float& A = m_uncertaintyParams.linearDisparityParams[0];
-	const float& f = m_intrinsicParams.focalLength;
-	float sigmaD = mu / 8;
-	float z2 = depth*depth;
+	switch (m_distortionParams->getModel())
+	{
+	case SIMPLE_RADIAL_DISTORTION:
+		//TODO
+		break;
 
-	// computes uncertainty
-	sigma.x = static_cast<ScalarType>(abs(A * (u-width/2) / f * z2 * sigmaD));
-	sigma.y = static_cast<ScalarType>(abs(A * (v-height/2) / f * z2 * sigmaD));
-	sigma.z = static_cast<ScalarType>(abs(A * z2 * sigmaD));
+	case BROWN_DISTORTION:
+		{
+			const BrownDistortionParameters* distParams = static_cast<BrownDistortionParameters*>(m_distortionParams.data());
+			//TODO ==> check if the input pixel coordinate must be the real or ideal projection
 
-	return true;
+			const int& u = pixel.x;
+			const int& v = pixel.y;
+			const int& width = m_intrinsicParams.arrayWidth;
+			const int& height = m_intrinsicParams.arrayHeight;
+
+			// check validity 
+			if (u < 0 || u > width || v < 0 || v > height || depth < FLT_EPSILON)
+				return false;
+
+			// init parameters
+			const float& mu = m_intrinsicParams.pixelSize_mm[0];
+			const float& A = distParams->linearDisparityParams[0];
+			const float& f = m_intrinsicParams.focal_mm;
+			float sigmaD = mu / 8;
+			float z2 = depth*depth;
+
+			// computes uncertainty
+			sigma.x = static_cast<ScalarType>(abs(A * (u-width/2) / f * z2 * sigmaD));
+			sigma.y = static_cast<ScalarType>(abs(A * (v-height/2) / f * z2 * sigmaD));
+			sigma.z = static_cast<ScalarType>(abs(A * z2 * sigmaD));
+
+			return true;
+		}
+
+	default:
+		//not handled?
+		assert(false);
+		break;
+	}
+
+	return false;
 }
 
-bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vector< Vector3Tpl<ScalarType> >& accuracy/*, bool lensCorrection*/) const
+bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vector< Vector3Tpl<ScalarType> >& accuracy/*, bool lensCorrection*/)
 {
 	if (!points)
 		return false;
@@ -421,7 +789,130 @@ bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vect
 	return true;
 }
 
-bool ccCameraSensor::isGlobalCoordInFrustrum(const CCVector3& globalCoord/*, bool withLensCorrection*/) const
+//see http://opencv.willowgarage.com/documentation/cpp/camera_calibration_and_3d_reconstruction.html
+QImage ccCameraSensor::undistort(const QImage& image) const
+{
+	if (image.isNull())
+	{
+		ccLog::Warning("[ccCameraSensor::undistort] Invalid input image!");
+		return QImage();
+	}
+
+	//nothing to do
+	//no distortion parameters?
+	if (!m_distortionParams)
+	{
+		ccLog::Warning("[ccCameraSensor::undistort] No distortion model set!");
+		return QImage();
+	}
+
+	switch (m_distortionParams->getModel())
+	{
+	case SIMPLE_RADIAL_DISTORTION:
+		{
+			const RadialDistortionParameters* params = static_cast<RadialDistortionParameters*>(m_distortionParams.data());
+			const float& k1 = params->k1;
+			const float& k2 = params->k2;
+			if (k1 == 0 && k2 == 0)
+			{
+				ccLog::Warning("[ccCameraSensor::undistort] Invalid radial distortion coefficients!");
+				return QImage();
+			}
+
+			const int& width  = m_intrinsicParams.arrayWidth;
+			const int& height = m_intrinsicParams.arrayHeight;
+
+			//try to reserve memory for new image
+			QImage newImage(QSize(width,height),image.format());
+			if (newImage.isNull())
+			{
+				ccLog::Warning("[ccCameraSensor::undistort] Not enough memory!");
+				return QImage();
+			}
+			newImage.fill(0);
+
+			float focal_pix = convertFocalMMToPix(m_intrinsicParams.focal_mm,m_intrinsicParams.pixelSize_mm[1],m_intrinsicParams.arrayHeight);
+			float f2 = focal_pix * focal_pix;
+			float cx = width / 2.0f;
+			float cy = height / 2.0f;
+
+			//image undistortion
+			{
+				for (int i=0; i<width; ++i)
+				{
+					float x = static_cast<float>(i-cx);
+					float x2 = x*x;
+					for (int j=0; j<height; ++j)
+					{
+						float y = static_cast<float>(j-cy);
+						float y2 = y*y;
+
+						float p2 = (x2+y2)/f2; //p = pix/f
+						float rp = 1.0f+p2*(k1+p2*k2); //r(p) = 1.0 + k1 * ||p||^2 + k2 * ||p||^4
+						float eqx = rp * x + cx;
+						float eqy = rp * y + cy;
+
+						int pixx = static_cast<int>(eqx);
+						int pixy = static_cast<int>(eqy);
+						if (	pixx >= 0
+							&&	pixx < width
+							&&	pixy >= 0
+							&&	pixy < height)
+						{
+							newImage.setPixel(i,j,image.pixel(pixx,pixy));
+						}
+					}
+				}
+			}
+
+			return newImage;
+		}
+		break;
+
+	case BROWN_DISTORTION:
+		//TODO
+		break;
+
+	default:
+		//not handled?
+		assert(false);
+		break;
+	}
+
+	ccLog::Warning("[ccCameraSensor::undistort] Can't undistort the image with the current distortion model!");
+
+	return QImage();
+}
+
+ccImage* ccCameraSensor::undistort(ccImage* image, bool inplace/*=true*/) const
+{
+	if (!image || image->data().isNull())
+	{
+		ccLog::Warning("[ccCameraSensor::undistort] Invalid/empty input image!");
+		return 0;
+	}
+
+	QImage newImage = undistort(image->data());
+	if (newImage.isNull())
+	{
+		//warning message should have been already issued
+		return 0;
+	}
+
+	//update image parameters
+	if (inplace)
+	{
+		image->setData(newImage);
+		return image;
+	}
+	else
+	{
+		return new ccImage(newImage, image->getName() + QString(".undistort"));
+	}
+}
+
+
+bool ccCameraSensor::isGlobalCoordInFrustrum(const CCVector3& globalCoord/*, bool withLensCorrection*/)
 {
 	CCVector3 localCoord;
 	CCVector2i imageCoord;
@@ -431,68 +922,105 @@ bool ccCameraSensor::isGlobalCoordInFrustrum(const CCVector3& globalCoord/*, boo
 		return false;
 
 	// Tests if the projected point is between zNear and zFar
-	float z = localCoord.z;
-	float n = m_intrinsicParams.zBoundary[0];
-	float f = m_intrinsicParams.zBoundary[1];
+	const float& z = localCoord.z;
+	const float& n = m_intrinsicParams.zNear_mm;
+	const float& f = m_intrinsicParams.zFar_mm;
 
 	return (-z <= f && -z > n && abs(f+z) >= FLT_EPSILON && abs(n+z) >= FLT_EPSILON);
 }
 
-void ccCameraSensor::computeFrustumCorners()
+CCVector3 ccCameraSensor::computeUpperLeftPoint() const
 {
-	const float& focal = m_intrinsicParams.focalLength;
-	float aspectRatio = static_cast<float>(m_intrinsicParams.imageSize[1]) / static_cast<float>(m_intrinsicParams.imageSize[0]);
-	float xInFocal = abs( tan(m_intrinsicParams.vFieldOfView / aspectRatio / 2) * focal );
-	float yInFocal = abs( tan(m_intrinsicParams.vFieldOfView / 2) * focal );
-	const float& zNear = m_intrinsicParams.zBoundary[0];
-	const float& zFar = m_intrinsicParams.zBoundary[1];
+	if (m_intrinsicParams.arrayHeight == 0)
+		return CCVector3(0,0,0);
 
-	// compute points of frustum in image coordinate system (attention : in the system, z=-z)
+	float ar = m_intrinsicParams.arrayHeight != 0 ? static_cast<float>(m_intrinsicParams.arrayWidth) / static_cast<float>(m_intrinsicParams.arrayHeight) : 1.0f;
+	float halfFov = m_intrinsicParams.vFOV_rad / 2;
+
+	CCVector3 upperLeftPoint;
+	upperLeftPoint.z = m_scale * m_intrinsicParams.focal_mm;
+	upperLeftPoint.y = upperLeftPoint.z * tan(halfFov);
+	upperLeftPoint.x = upperLeftPoint.z * tan(halfFov * ar);
+
+	return upperLeftPoint;
+}
+
+bool ccCameraSensor::computeFrustumCorners()
+{
+	if (m_intrinsicParams.arrayHeight == 0)
+	{
+		ccLog::Warning("[ccCameraSensor::computeFrustumCorners] Sensor height is 0!");
+		return false;
+	}
+
+	float ar = static_cast<float>(m_intrinsicParams.arrayWidth) / static_cast<float>(m_intrinsicParams.arrayHeight);
+	float halfFov = m_intrinsicParams.vFOV_rad / 2;
+
+	float xIn = abs( tan(halfFov * ar) );
+	float yIn = abs( tan(halfFov     ) );
+	const float& zNear = m_intrinsicParams.zNear_mm;
+	const float& zFar  = m_intrinsicParams.zFar_mm;
+
+	// compute points of frustum in image coordinate system (warning: in the system, z=-z)
+	if (!m_frustrumInfos.initFrustrumCorners())
+	{
+		ccLog::Warning("[ccCameraSensor::computeFrustumCorners] Not enough memory!");
+		return false;
+	}
+
 	// DO NOT MODIFY THE ORDER OF THE CORNERS!! A LOT OF CODE DEPENDS OF THIS ORDER!! 
-	m_frustrumInfos.frustumCorners[0] = CCVector3( xInFocal/focal, yInFocal/focal,-PC_ONE) * zNear;
-	m_frustrumInfos.frustumCorners[1] = CCVector3( xInFocal/focal, yInFocal/focal,-PC_ONE) * zFar;
-	m_frustrumInfos.frustumCorners[2] = CCVector3( xInFocal/focal,-yInFocal/focal,-PC_ONE) * zNear;
-	m_frustrumInfos.frustumCorners[3] = CCVector3( xInFocal/focal,-yInFocal/focal,-PC_ONE) * zFar;
-	m_frustrumInfos.frustumCorners[4] = CCVector3(-xInFocal/focal,-yInFocal/focal,-PC_ONE) * zNear;
-	m_frustrumInfos.frustumCorners[5] = CCVector3(-xInFocal/focal,-yInFocal/focal,-PC_ONE) * zFar;
-	m_frustrumInfos.frustumCorners[6] = CCVector3(-xInFocal/focal, yInFocal/focal,-PC_ONE) * zNear;
-	m_frustrumInfos.frustumCorners[7] = CCVector3(-xInFocal/focal, yInFocal/focal,-PC_ONE) * zFar;
+	m_frustrumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn,-PC_ONE) * zNear);
+	m_frustrumInfos.frustumCorners->addPoint(CCVector3( xIn, yIn,-PC_ONE) * zFar);
+	m_frustrumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn,-PC_ONE) * zNear);
+	m_frustrumInfos.frustumCorners->addPoint(CCVector3( xIn,-yIn,-PC_ONE) * zFar);
+	m_frustrumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn,-PC_ONE) * zNear);
+	m_frustrumInfos.frustumCorners->addPoint(CCVector3(-xIn,-yIn,-PC_ONE) * zFar);
+	m_frustrumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn,-PC_ONE) * zNear);
+	m_frustrumInfos.frustumCorners->addPoint(CCVector3(-xIn, yIn,-PC_ONE) * zFar);
 
 	// compute center of the circumscribed sphere 
-	const float& x0 = m_frustrumInfos.frustumCorners[0].x;
-	const float& y0 = m_frustrumInfos.frustumCorners[0].y;
-	const float& z0 = m_frustrumInfos.frustumCorners[0].z;
-	const float& x5 = m_frustrumInfos.frustumCorners[5].x;
-	const float& y5 = m_frustrumInfos.frustumCorners[5].y;
-	const float& z5 = m_frustrumInfos.frustumCorners[5].z;
-	float z = (abs(z0-z5) < FLT_EPSILON ? z0 : (x0*x0 + y0*y0 + z0*z0 - x5*x5 - y5*y5 - z5*z5) / (2*(z0-z5)));
+	const CCVector3* P0 = m_frustrumInfos.frustumCorners->getPoint(0);
+	const CCVector3* P5 = m_frustrumInfos.frustumCorners->getPoint(5);
+
+	float dz = P0->z-P5->z;
+	float z = (abs(dz) < FLT_EPSILON ? P0->z : (P0->norm2() - P5->norm2()) / (2*dz));
+	
 	m_frustrumInfos.center = CCVector3(0, 0, z);
 
 	// frustrum corners are now computed
 	m_frustrumInfos.isComputed = true;
+
+	return true;
 }
 
-void ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4], CCVector3 frustrumCorners[8], CCVector3 edges[6], CCVector3& center)
+bool ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4], CCVector3 frustrumCorners[8], CCVector3 edges[6], CCVector3& center)
 {
 	if (!m_frustrumInfos.isComputed)
-		computeFrustumCorners();
+		if (!computeFrustumCorners())
+			return false;
+
+	assert(m_frustrumInfos.frustumCorners && m_frustrumInfos.frustumCorners->size() == 8);
 
 	// compute frustrum corners in the global coordinates system
-	fromLocalCoordToGlobalCoord(m_frustrumInfos.frustumCorners[0], frustrumCorners[0]);
-	fromLocalCoordToGlobalCoord(m_frustrumInfos.frustumCorners[1], frustrumCorners[1]);
-	fromLocalCoordToGlobalCoord(m_frustrumInfos.frustumCorners[2], frustrumCorners[2]);
-	fromLocalCoordToGlobalCoord(m_frustrumInfos.frustumCorners[3], frustrumCorners[3]);
-	fromLocalCoordToGlobalCoord(m_frustrumInfos.frustumCorners[4], frustrumCorners[4]);
-	fromLocalCoordToGlobalCoord(m_frustrumInfos.frustumCorners[5], frustrumCorners[5]);
-	fromLocalCoordToGlobalCoord(m_frustrumInfos.frustumCorners[6], frustrumCorners[6]);
-	fromLocalCoordToGlobalCoord(m_frustrumInfos.frustumCorners[7], frustrumCorners[7]);
+	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(0), frustrumCorners[0]);
+	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(1), frustrumCorners[1]);
+	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(2), frustrumCorners[2]);
+	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(3), frustrumCorners[3]);
+	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(4), frustrumCorners[4]);
+	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(5), frustrumCorners[5]);
+	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(6), frustrumCorners[6]);
+	fromLocalCoordToGlobalCoord(*m_frustrumInfos.frustumCorners->getPoint(7), frustrumCorners[7]);
 
 	/*
 	//-- METHOD 1 --//
 	// See "Fast Extraction of Viewing Frustum Planes from the World-View-Projection Matrix" of Gil Gribb and Klaus Hartmann
 	// Attention !! With this method, plane equations are not normalized ! You should add normalization if you need it :
 	// It means that if you have your plane equation in the form (ax + by + cz + d = 0), then --> k = sqrt(a*a + b*b + c*c) and your new coefficients are --> a=a/k, b=b/k, c=c/k, d=d/k
-	ccGLMatrix mat = m_projecMatrix * m_orientMatrix;
+	ccGLMatrix projectionMatrix;
+	if (!getProjectionMatrix(projectionMatrix))
+		return false;
+
+	ccGLMatrix mat = projectionMatrix * m_orientMatrix;
 	float* coeffs = mat.data();
 	// right
 	planeCoefficients[0][0] = coeffs[3] - coeffs[0];
@@ -576,12 +1104,14 @@ void ccCameraSensor::computeGlobalPlaneCoefficients(float planeCoefficients[6][4
 		edges[3] = frustrumCorners[7] - frustrumCorners[6];
 		edges[4] = frustrumCorners[6] - frustrumCorners[0];
 		edges[5] = frustrumCorners[2] - frustrumCorners[0];
-		for (int i=0 ; i<6 ; i++)
+		for (unsigned i=0 ; i<6 ; i++)
 			edges[i].normalize();
 	}
 
 	// compute frustrum center in the global coordinates system
 	fromLocalCoordToGlobalCoord(m_frustrumInfos.center, center);
+
+	return true;
 }
 
 void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
@@ -615,177 +1145,862 @@ void ccCameraSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 			glMultMatrixf(sensorPos.data());
 		}
 
+		CCVector3 upperLeftPoint = computeUpperLeftPoint();
+
+		//up arrow
+		const PointCoordinateType arrowHeight		= 1.5f * upperLeftPoint.y;
+		const PointCoordinateType baseHeight		= 1.2f * upperLeftPoint.y;
+		const PointCoordinateType arrowHalfWidth	= 0.4f * upperLeftPoint.x;
+		const PointCoordinateType baseHalfWidth		= 0.2f * upperLeftPoint.x;
+
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		glColor3ubv(m_color.u);
+
+		//near plane
+		glBegin(GL_LINE_LOOP);
+		ccGL::Vertex3( upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
+		ccGL::Vertex3(-upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
+		ccGL::Vertex3(-upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+		ccGL::Vertex3( upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+		glEnd();
+
+		//side lines
+		glBegin(GL_LINES);
+		glVertex3f(0.0f, 0.0f, 0.0f);
+		ccGL::Vertex3( upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
+		glVertex3f(0.0f, 0.0f, 0.0f);
+		ccGL::Vertex3(-upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
+		glVertex3f(0.0f, 0.0f, 0.0f);
+		ccGL::Vertex3(-upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+		glVertex3f(0.0f, 0.0f, 0.0f);
+		ccGL::Vertex3( upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
+		glEnd();
+
+		//base
+		glBegin(GL_QUADS);
+		ccGL::Vertex3(-baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
+		ccGL::Vertex3( baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
+		ccGL::Vertex3( baseHalfWidth, baseHeight,       -upperLeftPoint.z);
+		ccGL::Vertex3(-baseHalfWidth, baseHeight,       -upperLeftPoint.z);
+		glEnd();
+
+		//arrow
+		glBegin(GL_TRIANGLES);
+		ccGL::Vertex3( 0,              arrowHeight, -upperLeftPoint.z);
+		ccGL::Vertex3(-arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
+		ccGL::Vertex3( arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
+		glEnd();
+
+		//frustrum
+		if (m_frustrumInfos.drawFrustum || m_frustrumInfos.drawSidePlanes)
 		{
-			float aspectRatio = static_cast<float>(m_intrinsicParams.imageSize[1]) / static_cast<float>(m_intrinsicParams.imageSize[0]);
-			CCVector3 upperLeftPoint;
-			upperLeftPoint.z = m_scale * m_intrinsicParams.focalLength;
-			upperLeftPoint.y = upperLeftPoint.z * tan(m_intrinsicParams.vFieldOfView / 2);
-			upperLeftPoint.x = upperLeftPoint.z * tan(m_intrinsicParams.vFieldOfView / aspectRatio / 2);
+			if (!m_frustrumInfos.isComputed)
+				computeFrustumCorners();
 
-			//up arrow
-			const float arrowHeight		= 1.5f * upperLeftPoint.y;
-			const float baseHeight		= 1.2f * upperLeftPoint.y;
-			const float arrowHalfWidth	= 0.5f * upperLeftPoint.x;
-			const float baseHalfWidth	= 0.3f * upperLeftPoint.x;
-
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-			glColor3ubv(m_color.u);
-			
-			//near plane
-			glBegin(GL_LINE_LOOP);
-			glVertex3f( upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-			glVertex3f(-upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-			glVertex3f(-upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-			glVertex3f( upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-			glEnd();
-
-			//side lines
-			glBegin(GL_LINES);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glVertex3f( upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glVertex3f(-upperLeftPoint.x,  upperLeftPoint.y, -upperLeftPoint.z);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glVertex3f(-upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-			glVertex3f(0.0f, 0.0f, 0.0f);
-			glVertex3f( upperLeftPoint.x, -upperLeftPoint.y, -upperLeftPoint.z);
-			glEnd();
-
-			//base
-			glBegin(GL_QUADS);
-			glVertex3f(-baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
-			glVertex3f( baseHalfWidth, upperLeftPoint.y, -upperLeftPoint.z);
-			glVertex3f( baseHalfWidth, baseHeight,  -upperLeftPoint.z);
-			glVertex3f(-baseHalfWidth, baseHeight,  -upperLeftPoint.z);
-			glEnd();
-
-			//arrow
-			glBegin(GL_TRIANGLES);
-			glVertex3f( 0.0f,           arrowHeight, -upperLeftPoint.z);
-			glVertex3f(-arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
-			glVertex3f( arrowHalfWidth, baseHeight,  -upperLeftPoint.z);
-			glEnd();
-
-			//frustrum
-			if (m_frustrumInfos.drawFrustum)
+			if (m_frustrumInfos.frustumCorners && m_frustrumInfos.frustumCorners->size() >= 8)
 			{
-				if (!m_frustrumInfos.isComputed)
-					computeFrustumCorners();
-
-				CCVector3* pts = m_frustrumInfos.frustumCorners;
-
 				//frustum area (lines)
-				glLineWidth(2.0);
-				glBegin(GL_LINE_LOOP);
-				glVertex3fv(pts[0].u);
-				glVertex3fv(pts[1].u);
-				glVertex3fv(pts[3].u);
-				glVertex3fv(pts[2].u);
-				glEnd();
-				glBegin(GL_LINE_LOOP);
-				glVertex3fv(pts[2].u);
-				glVertex3fv(pts[3].u);
-				glVertex3fv(pts[5].u);
-				glVertex3fv(pts[4].u);
-				glEnd();
-				glBegin(GL_LINE_LOOP);
-				glVertex3fv(pts[4].u);
-				glVertex3fv(pts[5].u);
-				glVertex3fv(pts[7].u);
-				glVertex3fv(pts[6].u);
-				glEnd();
-				glBegin(GL_LINE_LOOP);
-				glVertex3fv(pts[6].u);
-				glVertex3fv(pts[7].u);
-				glVertex3fv(pts[1].u);
-				glVertex3fv(pts[0].u);
-				glEnd();
-				glBegin(GL_LINE_LOOP);
-				glVertex3fv(pts[6].u);
-				glVertex3fv(pts[0].u);
-				glVertex3fv(pts[2].u);
-				glVertex3fv(pts[4].u);
-				glEnd();
-				glBegin(GL_LINE_LOOP);
-				glVertex3fv(pts[1].u);
-				glVertex3fv(pts[7].u);
-				glVertex3fv(pts[5].u);
-				glVertex3fv(pts[3].u);
-				glEnd();
-				glLineWidth(1.0f);
+				if (m_frustrumInfos.drawFrustum)
+				{
+					const CCVector3* P0 = m_frustrumInfos.frustumCorners->getPoint(0);
+					const CCVector3* P1 = m_frustrumInfos.frustumCorners->getPoint(1);
+					const CCVector3* P2 = m_frustrumInfos.frustumCorners->getPoint(2);
+					const CCVector3* P3 = m_frustrumInfos.frustumCorners->getPoint(3);
+					const CCVector3* P4 = m_frustrumInfos.frustumCorners->getPoint(4);
+					const CCVector3* P5 = m_frustrumInfos.frustumCorners->getPoint(5);
+					const CCVector3* P6 = m_frustrumInfos.frustumCorners->getPoint(6);
+					const CCVector3* P7 = m_frustrumInfos.frustumCorners->getPoint(7);
+				
+					glPushAttrib(GL_LINE_BIT);
+					glLineWidth(2.0);
+
+					glBegin(GL_LINE_LOOP);
+					ccGL::Vertex3v(P0->u);
+					ccGL::Vertex3v(P1->u);
+					ccGL::Vertex3v(P3->u);
+					ccGL::Vertex3v(P2->u);
+					glEnd();
+					glBegin(GL_LINE_LOOP);
+					ccGL::Vertex3v(P2->u);
+					ccGL::Vertex3v(P3->u);
+					ccGL::Vertex3v(P5->u);
+					ccGL::Vertex3v(P4->u);
+					glEnd();
+					glBegin(GL_LINE_LOOP);
+					ccGL::Vertex3v(P4->u);
+					ccGL::Vertex3v(P5->u);
+					ccGL::Vertex3v(P7->u);
+					ccGL::Vertex3v(P6->u);
+					glEnd();
+					glBegin(GL_LINE_LOOP);
+					ccGL::Vertex3v(P6->u);
+					ccGL::Vertex3v(P7->u);
+					ccGL::Vertex3v(P1->u);
+					ccGL::Vertex3v(P0->u);
+					glEnd();
+					glBegin(GL_LINE_LOOP);
+					ccGL::Vertex3v(P6->u);
+					ccGL::Vertex3v(P0->u);
+					ccGL::Vertex3v(P2->u);
+					ccGL::Vertex3v(P4->u);
+					glEnd();
+					glBegin(GL_LINE_LOOP);
+					ccGL::Vertex3v(P1->u);
+					ccGL::Vertex3v(P7->u);
+					ccGL::Vertex3v(P5->u);
+					ccGL::Vertex3v(P3->u);
+					glEnd();
+
+					glPopAttrib();
+				}
 
 				//frustum area (planes)
-				if (m_frustrumInfos.drawSidePlanes)
+				if (m_frustrumInfos.drawSidePlanes && m_frustrumInfos.initFrustrumHull())
 				{
-					glEnable(GL_BLEND);
-					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
-					glColor4ub(m_color.x, m_color.y, m_color.z, 76);
+					//set the rigth display (just to be sure)
+					m_frustrumInfos.frustrumHull->setDisplay(getDisplay());
+					m_frustrumInfos.frustrumHull->setTempColor(m_color.u);
+					
+					glPushAttrib(GL_COLOR_BUFFER_BIT);
+					//glEnable(GL_BLEND);
+					//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+					//glColor4ub(m_color.x, m_color.y, m_color.z, 76);
 
-					glBegin(GL_QUADS);
-					glVertex3fv(pts[0].u);
-					glVertex3fv(pts[2].u);
-					glVertex3fv(pts[3].u);
-					glVertex3fv(pts[1].u);
-					glVertex3fv(pts[2].u);
-					glVertex3fv(pts[4].u);
-					glVertex3fv(pts[5].u);
-					glVertex3fv(pts[3].u);
-					glVertex3fv(pts[4].u);
-					glVertex3fv(pts[6].u);
-					glVertex3fv(pts[7].u);
-					glVertex3fv(pts[5].u);
-					glVertex3fv(pts[6].u);
-					glVertex3fv(pts[0].u);
-					glVertex3fv(pts[1].u);
-					glVertex3fv(pts[7].u);
-					glVertex3fv(pts[6].u);
-					glVertex3fv(pts[4].u);
-					glVertex3fv(pts[2].u);
-					glVertex3fv(pts[0].u);
-					glVertex3fv(pts[1].u);
-					glVertex3fv(pts[3].u);
-					glVertex3fv(pts[5].u);
-					glVertex3fv(pts[7].u);
-					glEnd();
-					glDisable(GL_BLEND); 
+					m_frustrumInfos.frustrumHull->showWired(false);
+					m_frustrumInfos.frustrumHull->enableStippling(true);
+					m_frustrumInfos.frustrumHull->draw(context);
+
+					glPopAttrib();
 				}
 			}
-
-			//axis (temporary)
-			if (true)
-			{
-				glLineWidth(1.0);
-
-				// right vector
-				glColor3ubv(ccColor::white);
-				glBegin(GL_LINES);
-				glVertex3f(0.0f, 0.0f, 0.0f);
-				glVertex3f(1.0f, 0.0f, 0.0f);
-				glEnd();
-
-				// up vector
-				glColor3ubv(ccColor::green);
-				glBegin(GL_LINES);
-				glVertex3f(0.0f, 0.0f, 0.0f);
-				glVertex3f(0.0f, 1.0f, 0.0f);
-				glEnd();
-
-				// view vector
-				glColor3ubv(ccColor::blue);
-				glBegin(GL_LINES);
-				glVertex3f(0.0f, 0.0f, 0.0f);
-				glVertex3f(0.0f, 0.0f, 1.0f);
-				glEnd();
-			}
-
-			if (pushName)
-				glPopName();
+			//*/
 		}
+
+		//axis (for test)
+		if (true && !pushName)
+		{
+			glPushAttrib(GL_LINE_BIT);
+			glLineWidth(2.0);
+
+			float l = static_cast<float>(fabs(upperLeftPoint.z)/2);
+
+			// right vector
+			glColor3ubv(ccColor::red);
+			glBegin(GL_LINES);
+			glVertex3f(0.0f, 0.0f, 0.0f);
+			glVertex3f(l, 0.0f, 0.0f);
+			glEnd();
+
+			// up vector
+			glColor3ubv(ccColor::green);
+			glBegin(GL_LINES);
+			glVertex3f(0.0f, 0.0f, 0.0f);
+			glVertex3f(0.0f, l, 0.0f);
+			glEnd();
+
+			// view vector
+			glColor3ubv(ccColor::blue);
+			glBegin(GL_LINES);
+			glVertex3f(0.0f, 0.0f, 0.0f);
+			glVertex3f(0.0f, 0.0f, -l);
+			glEnd();
+
+			glPopAttrib();
+		}
+
+		if (pushName)
+			glPopName();
 
 		glPopMatrix();
 	}
 }
 
+float ccCameraSensor::convertFocalPixToMM(float focal_pix, float cddHeight_mm, int imageHeight_pix)
+{
+	if (imageHeight_pix <= 0 || cddHeight_mm < FLT_EPSILON)
+	{
+		//invalid image or CDD size
+		return -1.0f;
+	}
+
+	return focal_pix * cddHeight_mm / imageHeight_pix;
+}
+
+float ccCameraSensor::convertFocalMMToPix(float focal_mm, float cddHeight_mm, int imageHeight_pix)
+{
+	if (imageHeight_pix <= 0 || cddHeight_mm < FLT_EPSILON)
+	{
+		//invalid image or CDD size
+		return -1.0f;
+	}
+
+	return focal_mm * imageHeight_pix / cddHeight_mm;
+}
+
+float ccCameraSensor::ComputeFovRadFromFocalPix(float focal_pix, int imageHeight_pix)
+{
+	if (imageHeight_pix <= 0)
+	{
+		//invalid image size
+		return -1.0f;
+	}
+
+	return 2 * atan( static_cast<float>(imageHeight_pix) / (2*focal_pix) );
+}
+
+float ccCameraSensor::ComputeFovRadFromFocalMm(float focal_mm, float cddHeight_mm)
+{
+	if (cddHeight_mm < FLT_EPSILON)
+	{
+		//invalid CDD size
+		return -1.0f;
+	}
+	
+	return 2 * atan( static_cast<float>(cddHeight_mm) / (2 * focal_mm) );
+}
+
+bool ccCameraSensor::computeOrthoRectificationParams(	const ccImage* image,
+														CCLib::GenericIndexedCloud* keypoints3D,
+														std::vector<KeyPoint>& keypointsImage,
+														double a_out[3],
+														double b_out[3],
+														double c_out[3]) const
+{
+	if (!image || !keypoints3D)
+		return false;
+
+	unsigned count = static_cast<unsigned>(keypointsImage.size());
+	if (count < 4)
+		return false;
+
+	//first guess for X (a0 a1 a2 b0 b1 b2 c1 c2)
+	double norm = static_cast<double>(std::max(image->getW(),image->getH()));
+	double X0[8] = {	1.0/sqrt(norm),
+						1.0/norm,
+						1.0/norm,
+						1.0/sqrt(norm),
+						1.0/norm,
+						1.0/norm,
+						1.0/norm,
+						1.0/norm };
+
+	//compute the A matrix and b vector
+	unsigned Neq = 2*count; //number of equations
+	double *A = new double[8*Neq]; // 8 coefficients: a0 a1 a2 b0 b1 b2 c1 c2
+	double *b = new double[Neq];
+	if (!A || !b)
+	{
+		//not enough memory
+		if (A)
+			delete[] A;
+		if (b)
+			delete[] b;
+		return false;
+	}
+
+	//for all points
+	{
+		double* _A = A;
+		double* _b = b;
+		for (unsigned i=0;i<count;++i)
+		{
+			const KeyPoint& kp = keypointsImage[i];
+			double kpx = static_cast<double>(kp.x);
+			double kpy = static_cast<double>(kp.y);
+			const CCVector3* P = keypoints3D->getPoint(kp.index);
+
+			*_A++ = 1.0;
+			*_A++ = kpx;
+			*_A++ = kpy;
+			*_A++ = 0.0;
+			*_A++ = 0.0;
+			*_A++ = 0.0;
+			*_A++ = -kpx * static_cast<double>(P->x);
+			*_A++ = -kpy * static_cast<double>(P->x);
+			*_b++ = static_cast<double>(P->x);
+
+			*_A++ = 0.0;
+			*_A++ = 0.0;
+			*_A++ = 0.0;
+			*_A++ = 1.0;
+			*_A++ = kpx;
+			*_A++ = kpy;
+			*_A++ = -kpx * static_cast<double>(P->y);
+			*_A++ = -kpy * static_cast<double>(P->y);
+			*_b++ = static_cast<double>(P->y);
+		}
+	}
+
+	//conjugate gradient initialization
+	//we solve tA.A.X = tA.b
+	CCLib::ConjugateGradient<8,double> cg;
+	CCLib::SquareMatrixd& tAA = cg.A();
+	double* tAb = cg.b();
+
+	//compute tA.A and tA.b
+	{
+		for (unsigned i=0; i<8; ++i)
+		{
+			//tA.A part
+			for (unsigned j=i; j<8; ++j)
+			{
+				double sum_prod = 0;
+				const double* _Ai = A+i;
+				const double* _Aj = A+j;
+				for (unsigned k=0; k<Neq; ++k)
+				{
+					//sum_prod += A[(8*2*k)+i]*A[(8*2*k)+j];
+					sum_prod += (*_Ai) * (*_Aj);
+					_Ai += 8;
+					_Aj += 8;
+				}
+				tAA.m_values[j][i] = tAA.m_values[i][j] = sum_prod;
+			}
+
+			//tA.b part
+			{
+				double sum_prod = 0;
+				const double* _Ai = A+i;
+				const double* _b = b;
+				for (unsigned k=0; k<Neq; ++k)
+				{
+					//sum_prod += A[(8*2*k)+i]*b[k];
+					sum_prod += (*_Ai) * (*_b++);
+					_Ai += 8;
+				}
+				tAb[i] = sum_prod;
+			}
+		}
+	}
+
+	//init. conjugate gradient
+	cg.initConjugateGradient(X0);
+
+	//conjugate gradient iterations
+	{
+		double convergenceThreshold = 1.0e-8/* * norm*/;  //max. error for convergence
+		for (unsigned i=0; i<1500; ++i)
+		{
+			double lastError = cg.iterConjugateGradient(X0);
+			if (lastError < convergenceThreshold) //converged
+			{
+				ccLog::PrintDebug(QString("[computeOrthoRectificationParams] Convergence reached in %i iteration(s) (error: %g)").arg(i+1).arg(lastError));
+				break;
+			}
+		}
+	}
+
+	delete[] A;
+	A = 0;
+	delete[] b;
+	b = 0;
+
+	a_out[0] = X0[0];
+	a_out[1] = X0[1];
+	a_out[2] = X0[2];
+	b_out[0] = X0[3];
+	b_out[1] = X0[4];
+	b_out[2] = X0[5];
+	c_out[0] = 1.0;
+	c_out[1] = X0[6];
+	c_out[2] = X0[7];
+
+	return true;
+}
+
+ccImage* ccCameraSensor::orthoRectifyAsImage(	const ccImage* image,
+												CCLib::GenericIndexedCloud* keypoints3D,
+												std::vector<KeyPoint>& keypointsImage,
+												double& pixelSize,
+												double* minCorner/*=0*/,
+												double* maxCorner/*=0*/,
+												double* realCorners/*=0*/) const
+{
+	double a[3],b[3],c[3];
+
+	if (!computeOrthoRectificationParams(image,keypoints3D,keypointsImage,a,b,c))
+		return 0;
+
+	const double& a0 = a[0];
+	const double& a1 = a[1];
+	const double& a2 = a[2];
+	const double& b0 = b[0];
+	const double& b1 = b[1];
+	const double& b2 = b[2];
+	//const double& c0 = c[0];
+	const double& c1 = c[1];
+	const double& c2 = c[2];
+
+	//first, we compute the ortho-rectified image corners
+	double corners[8];
+	double xi,yi,qi;
+
+	int width = static_cast<int>(image->getW());
+	int height = static_cast<int>(image->getH());
+	double halfWidth = 0.5*width;
+	double halfHeight = 0.5*height;
+
+	//top-left
+	xi = -halfWidth;
+	yi = -halfHeight;
+	qi = 1.0+c1*xi+c2*yi;
+	corners[0] = (a0+a1*xi+a2*yi)/qi;
+	corners[1] = (b0+b1*xi+b2*yi)/qi;
+
+	//top-right
+	xi =  halfWidth;
+	yi = -halfHeight;
+	qi = 1.0+c1*xi+c2*yi;
+	corners[2] = (a0+a1*xi+a2*yi)/qi;
+	corners[3] = (b0+b1*xi+b2*yi)/qi;
+
+	//bottom-right
+	xi = halfWidth;
+	yi = halfHeight;
+	qi = 1.0+c1*xi+c2*yi;
+	corners[4] = (a0+a1*xi+a2*yi)/qi;
+	corners[5] = (b0+b1*xi+b2*yi)/qi;
+
+	//bottom-left
+	xi = -halfWidth;
+	yi =  halfHeight;
+	qi = 1.0+c1*xi+c2*yi;
+	corners[6] = (a0+a1*xi+a2*yi)/qi;
+	corners[7] = (b0+b1*xi+b2*yi)/qi;
+
+	if (realCorners)
+		memcpy(realCorners,corners,8*sizeof(double));
+
+	//we look for min and max bounding box
+	double minC[2] = {corners[0],corners[1]};
+	double maxC[2] = {corners[0],corners[1]};
+
+	for (unsigned k=1; k<4; ++k)
+	{
+		const double* C = corners+2*k;
+		if (minC[0] > C[0])
+			minC[0] = C[0];
+		else if (maxC[0] < C[0])
+			maxC[0] = C[0];
+
+		if (minC[1] > C[1])
+			minC[1] = C[1];
+		else if (maxC[1] < C[1])
+			maxC[1] = C[1];
+	}
+
+	//output 3D boundaries (optional)
+	if (minCorner)
+	{
+		minCorner[0] = minC[0];
+		minCorner[1] = minC[1];
+	}
+	if (maxCorner)
+	{
+		maxCorner[0] = maxC[0];
+		maxCorner[1] = maxC[1];
+	}
+
+	double dx = maxC[0]-minC[0];
+	double dy = maxC[1]-minC[1];
+
+	double _pixelSize = pixelSize;
+	if (_pixelSize <= 0)
+	{
+		int maxSize = std::max(width,height);
+		_pixelSize = std::max(dx,dy)/maxSize;
+	}
+	unsigned w = (unsigned)(dx/_pixelSize);
+	unsigned h = (unsigned)(dy/_pixelSize);
+
+	QImage orthoImage(w,h,QImage::Format_ARGB32);
+	if (orthoImage.isNull()) //not enough memory!
+		return 0;
+
+	const QRgb blackValue = QColor( Qt::black ).rgb();
+
+	for (unsigned i=0; i<w; ++i)
+	{
+		double xip = minC[0] + static_cast<double>(i)*_pixelSize;
+		for (unsigned j=0; j<h; ++j)
+		{
+			double yip = minC[1] + static_cast<double>(j)*_pixelSize;
+			double q = (c2*xip-a2)*(c1*yip-b1)-(c2*yip-b2)*(c1*xip-a1);
+			double p = (a0-xip)*(c1*yip-b1)-(b0-yip)*(c1*xip-a1);
+			double yi = p/q;
+			yi += halfHeight;
+			int y = static_cast<int>(yi);
+
+			if (y >= 0 && y < height)
+			{
+				q = (c1*xip-a1)*(c2*yip-b2)-(c1*yip-b1)*(c2*xip-a2);
+				p = (a0-xip)*(c2*yip-b2)-(b0-yip)*(c2*xip-a2);
+				double  xi = p/q;
+				xi += halfWidth;
+				int x = static_cast<int>(xi);
+
+				if (x >= 0 && x < width)
+				{
+					QRgb rgb = image->data().pixel(x,y);
+					//pure black pixels are treated as transparent ones!
+					if (rgb != blackValue)
+						orthoImage.setPixel(i,h-1-j,rgb);
+					else
+						orthoImage.setPixel(i,h-1-j,qRgba(qRed(rgb),qGreen(rgb),qBlue(rgb),0));
+				}
+				else
+				{
+					orthoImage.setPixel(i,h-1-j,qRgba(0,0,0,0)); //black by default
+				}
+			}
+			else
+			{
+				orthoImage.setPixel(i,h-1-j,qRgba(0,0,0,0)); //black by default
+			}
+		}
+	}
+
+	//output pixel size (auto)
+	pixelSize = _pixelSize;
+
+	return new ccImage(orthoImage,getName());
+}
+
+bool ccCameraSensor::OrthoRectifyAsImages(	std::vector<ccImage*> images, 
+											double a[], double b[], double c[],
+											unsigned maxSize,
+											QDir* outputDir/*=0*/,
+											std::vector<ccImage*>* result/*=0*/,
+											std::vector<std::pair<double,double> >* relativePos/*=0*/)
+{
+	size_t count = images.size();
+	if (count == 0)
+	{
+		ccLog::Warning("[OrthoRectifyAsImages] No image to process?!");
+		return false;
+	}
+
+	//min & max corners for each images
+	std::vector<double> minCorners;
+	std::vector<double> maxCorners;
+	try
+	{
+		minCorners.resize(2*count);
+		maxCorners.resize(2*count);
+	}
+	catch(std::bad_alloc)
+	{
+		//not enough memory
+		ccLog::Warning("[OrthoRectifyAsImages] Not enough memory!");
+		return false;
+	}
+	//max dimension of all (ortho-rectified) images, horizontally or vertically
+	double maxDimAllImages = 0;
+	//corners for the global set
+	double globalCorners[4] = { 0, 0, 0, 0};
+
+	//compute output corners and max dimension for all images
+	for (size_t k=0; k<count; ++k)
+	{
+		const double& a0 = a[k*3  ];
+		const double& a1 = a[k*3+1];
+		const double& a2 = a[k*3+2];
+		const double& b0 = b[k*3  ];
+		const double& b1 = b[k*3+1];
+		const double& b2 = b[k*3+2];
+		//const double& c0 = c[k*3];
+		const double& c1 = c[k*3+1];
+		const double& c2 = c[k*3+2];
+
+		//first, we compute the ortho-rectified image corners
+		double corners[8];
+		double xi,yi,qi;
+
+		unsigned width = images[k]->getW();
+		unsigned height = images[k]->getH();
+
+		//top-left
+		xi = -0.5*width;
+		yi = -0.5*height;
+		qi = 1.0+c1*xi+c2*yi;
+		corners[0] = (a0+a1*xi+a2*yi)/qi;
+		corners[1] = (b0+b1*xi+b2*yi)/qi;
+
+		//top-right
+		xi =  0.5*width;
+		//yi = -0.5*height;
+		qi = 1.0+c1*xi+c2*yi;
+		corners[2] = (a0+a1*xi+a2*yi)/qi;
+		corners[3] = (b0+b1*xi+b2*yi)/qi;
+
+		//bottom-right
+		//xi =  0.5*width;
+		yi = 0.5*height;
+		qi = 1.0+c1*xi+c2*yi;
+		corners[4] = (a0+a1*xi+a2*yi)/qi;
+		corners[5] = (b0+b1*xi+b2*yi)/qi;
+
+		//bottom-left
+		xi =  -0.5*width;
+		//yi = 0.5*height;
+		qi = 1.0+c1*xi+c2*yi;
+		corners[6] = (a0+a1*xi+a2*yi)/qi;
+		corners[7] = (b0+b1*xi+b2*yi)/qi;
+
+		//we look for min and max bounding box
+		double* minC = &minCorners[2*k];
+		double* maxC = &maxCorners[2*k];
+		maxC[0] = minC[0] = corners[0];
+		maxC[1] = minC[1] = corners[1];
+		for (unsigned k=1; k<4; ++k)
+		{
+			const double* C = corners+2*k;
+			//dimension: X
+			if (minC[0] > C[0])
+				minC[0] = C[0];
+			else if (maxC[0] < C[0])
+				maxC[0] = C[0];
+
+			if (globalCorners[0] > minC[0])
+				globalCorners[0] = minC[0];
+			if (globalCorners[2] < maxC[0])
+				globalCorners[2] = maxC[0];
+
+			//dimension: Y
+			if (minC[1] > C[1])
+				minC[1] = C[1];
+			else if (maxC[1] < C[1])
+				maxC[1] = C[1];
+
+			if (globalCorners[1] > minC[1])
+				globalCorners[1] = minC[1];
+			if (globalCorners[3] < maxC[1])
+				globalCorners[3] = maxC[1];
+		}
+
+		double dx = maxC[0]-minC[0];
+		double dy = maxC[1]-minC[1];
+		double maxd = std::max(dx,dy);
+		if (maxd > maxDimAllImages)
+			maxDimAllImages=maxd;
+	}
+
+	//deduce pixel size
+	double pixelSize = maxDimAllImages/maxSize;
+
+	if (outputDir)
+	{
+		//write header
+		QFile f(outputDir->absoluteFilePath("ortho_rectification_log.txt"));
+		if (f.open(QIODevice::WriteOnly | QIODevice::Text))
+		{
+			QTextStream stream(&f);
+			stream.setRealNumberPrecision(6);
+			stream << "PixelSize" << ' ' << pixelSize << endl;
+			stream << "Global3DBBox" << ' ' << globalCorners[0] << ' ' << globalCorners[1] << ' ' << globalCorners[2] << ' ' << globalCorners[3] << endl;
+			int globalWidth = static_cast<int>(ceil((globalCorners[2]-globalCorners[0])/pixelSize));
+			int globalHeight = static_cast<int>(ceil((globalCorners[3]-globalCorners[1])/pixelSize));
+			stream << "Global2DBBox" << ' ' << 0 << ' ' << 0 << ' ' << globalWidth-1 << ' ' << globalHeight-1 << endl;
+		}
+	}
+
+	//projet each image accordingly
+	for (size_t k=0; k<count; ++k)
+	{
+		double* minC = &minCorners[2*k];
+		double* maxC = &maxCorners[2*k];
+		double dx = maxC[0]-minC[0];
+		double dy = maxC[1]-minC[1];
+
+		ccImage* image = images[k];
+		unsigned width = images[k]->getW();
+		unsigned height = images[k]->getH();
+		unsigned w = static_cast<unsigned>(ceil(dx/pixelSize));
+		unsigned h = static_cast<unsigned>(ceil(dy/pixelSize));
+
+		QImage orthoImage(w,h,QImage::Format_ARGB32);
+		if (orthoImage.isNull()) //not enough memory!
+		{
+			//clear mem.
+			if (result)
+			{
+				while (!result->empty())
+				{
+					delete result->back();
+					result->pop_back();
+				}
+			}
+			ccLog::Warning("[OrthoRectifyAsImages] Not enough memory!");
+			return false;
+		}
+
+		//ortho rectification parameters
+		const double& a0 = a[k*3  ];
+		const double& a1 = a[k*3+1];
+		const double& a2 = a[k*3+2];
+		const double& b0 = b[k*3  ];
+		const double& b1 = b[k*3+1];
+		const double& b2 = b[k*3+2];
+		//const double& c0 = c[k*3];
+		const double& c1 = c[k*3+1];
+		const double& c2 = c[k*3+2];
+
+		for (unsigned i=0; i<w; ++i)
+		{
+			double xip = minC[0] + static_cast<double>(i)*pixelSize;
+			for (unsigned j=0;j<h;++j)
+			{
+				double yip = minC[1] + static_cast<double>(j)*pixelSize;
+				double q = (c2*xip-a2)*(c1*yip-b1)-(c2*yip-b2)*(c1*xip-a1);
+				double p = (a0-xip)*(c1*yip-b1)-(b0-yip)*(c1*xip-a1);
+				double yi = p/q;
+
+				q = (c1*xip-a1)*(c2*yip-b2)-(c1*yip-b1)*(c2*xip-a2);
+				p = (a0-xip)*(c2*yip-b2)-(b0-yip)*(c2*xip-a2);
+				double  xi = p/q;
+
+				xi += 0.5 * width;
+				yi += 0.5 * height;
+
+				int x = static_cast<int>(xi);
+				int y = static_cast<int>(yi);
+				if (x >= 0 && x < static_cast<int>(width) && y >= 0 && y < static_cast<int>(height))
+				{
+					QRgb rgb = image->data().pixel(x,y);
+					//pure black pixels are treated as transparent ones!
+					if (qRed(rgb) + qGreen(rgb) + qBlue(rgb) > 0)
+						orthoImage.setPixel(i,h-1-j,rgb);
+					else
+						orthoImage.setPixel(i,h-1-j,qRgba(qRed(rgb),qGreen(rgb),qBlue(rgb),0));
+				}
+				else
+					orthoImage.setPixel(i,h-1-j,qRgba(255,0,255,0));
+			}
+		}
+
+		//eventually compute relative pos
+		if (relativePos)
+		{
+			double xShift = (minC[0]-minCorners[0])/pixelSize;
+			double yShift = (minC[1]-minCorners[1])/pixelSize;
+			relativePos->push_back(std::pair<double,double>(xShift,yShift));
+		}
+
+		if (outputDir)
+		{
+			//export image
+			QString exportFilename = QString("ortho_rectified_%1.png").arg(image->getName());
+			orthoImage.save(outputDir->absoluteFilePath(exportFilename));
+
+			//export meta-data
+			QFile f(outputDir->absoluteFilePath("ortho_rectification_log.txt"));
+			if (f.open(QIODevice::WriteOnly | QIODevice::Append | QIODevice::Text)) //always append
+			{
+				double xShiftGlobal = (minC[0]-globalCorners[0])/pixelSize;
+				double yShiftGlobal = (minC[1]-globalCorners[1])/pixelSize;
+				QTextStream stream(&f);
+				stream.setRealNumberPrecision(6);
+				stream << "Image" << ' ' << exportFilename  << ' ';
+				stream << "Local3DBBox" << ' ' << minC[0] << ' ' << minC[1] << ' ' << maxC[0] << ' ' << maxC[1] << ' ';
+				stream << "Local2DBBox" << ' ' << xShiftGlobal << ' ' << yShiftGlobal <<  ' ' << xShiftGlobal+(double)(w-1) << ' ' << yShiftGlobal+(double)(h-1) << endl;
+				f.close();
+			}
+		}
+
+		if (result)
+			result->push_back(new ccImage(orthoImage,image->getName()));
+	}
+
+	return true;
+}
+
+ccPointCloud* ccCameraSensor::orthoRectifyAsCloud(	const ccImage* image,
+													CCLib::GenericIndexedCloud* keypoints3D,
+													std::vector<KeyPoint>& keypointsImage) const
+{
+	double a[3],b[3],c[3];
+
+	if (!computeOrthoRectificationParams(image,keypoints3D,keypointsImage,a,b,c))
+		return 0;
+
+	const double& a0 = a[0];
+	const double& a1 = a[1];
+	const double& a2 = a[2];
+	const double& b0 = b[0];
+	const double& b1 = b[1];
+	const double& b2 = b[2];
+	//const double& c0 = c[0];
+	const double& c1 = c[1];
+	const double& c2 = c[2];
+
+	PointCoordinateType defaultZ = 0;
+
+	unsigned width = image->getW();
+	unsigned height = image->getH();
+
+	ccPointCloud* proj = new ccPointCloud(getName()+QString(".ortho-rectified"));
+	if (!proj->reserve(width*height) || !proj->reserveTheRGBTable())
+	{
+		ccLog::Warning("[orthoRectifyAsCloud] Not enough memory!");
+		delete proj;
+		return 0;
+	}
+	proj->showColors(true);
+
+	unsigned realCount = 0;
+
+	//ortho rectification
+	{
+		for (unsigned pi = 0; pi<width; ++pi)
+		{
+			double xi = static_cast<double>(pi) - 0.5*width;
+			for (unsigned pj = 0; pj<height; ++pj)
+			{
+				double yi = static_cast<double>(pj) - 0.5*height;
+				double qi = 1.0 + c1*xi + c2*yi;
+				CCVector3 P(static_cast<PointCoordinateType>((a0+a1*xi+a2*yi)/qi),
+							static_cast<PointCoordinateType>((b0+b1*xi+b2*yi)/qi),
+							defaultZ);
+
+				//and color?
+				QRgb rgb = image->data().pixel(pi,pj);
+				int r = qRed(rgb);
+				int g = qGreen(rgb);
+				int b = qBlue(rgb);
+				if (r+g+b > 0)
+				{
+					//add point
+					proj->addPoint(P);
+					//and color
+					colorType C[3] = {	static_cast<colorType>(r),
+										static_cast<colorType>(g),
+										static_cast<colorType>(b) };
+					proj->addRGBColor(C);
+					++realCount;
+				}
+			}
+		}
+	}
+
+	if (realCount == 0)
+	{
+		ccLog::Warning(QString("[orthoRectifyAsCloud] Image '%1' was black, nothing to project!").arg(image->getName()));
+		delete proj;
+		proj = 0;
+	}
+	else
+	{
+		proj->resize(realCount);
+	}
+
+	return proj;
+}
+
+/*********************************************************************/
+/*******************                               *******************/
+/*******************  ccOctreeFrustrumIntersector  *******************/
+/*******************                               *******************/
+/*********************************************************************/
 
 bool ccOctreeFrustrumIntersector::build(CCLib::DgmOctree* octree)
 {

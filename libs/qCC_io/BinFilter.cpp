@@ -39,6 +39,8 @@
 #include <cc2DLabel.h>
 #include <ccFacet.h>
 #include <ccSensor.h>
+#include <ccCameraSensor.h>
+#include <ccImage.h>
 
 //system
 #include <set>
@@ -245,6 +247,12 @@ CC_FILE_ERROR BinFilter::SaveFileV2(QFile& out, ccHObject* object)
 				dependencies.insert(facet->getPolygon());
 			if (facet->getContour())
 				dependencies.insert(facet->getContour());
+		}
+		else if (currentObject->isKindOf(CC_TYPES::IMAGE))
+		{
+			ccImage* image = static_cast<ccImage*>(currentObject);
+			if (image->getAssociatedSensor())
+				dependencies.insert(image->getAssociatedSensor());
 		}
 
 		for (std::set<const ccHObject*>::const_iterator it = dependencies.begin(); it != dependencies.end(); ++it)
@@ -606,7 +614,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		}
 		else if (currentObject->isKindOf(CC_TYPES::POLY_LINE))
 		{
-			ccPolyline* poly = static_cast<ccPolyline*>(currentObject);
+			ccPolyline* poly = ccHObjectCaster::ToPolyline(currentObject);
 			intptr_t cloudID = (intptr_t)poly->getAssociatedCloud();
 			ccHObject* cloud = root->find(static_cast<int>(cloudID));
 			if (cloud && cloud->isKindOf(CC_TYPES::POINT_CLOUD))
@@ -623,29 +631,31 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		}
 		else if (currentObject->isKindOf(CC_TYPES::SENSOR))
 		{
-			ccSensor* sensor = static_cast<ccSensor*>(currentObject);
+			ccSensor* sensor = ccHObjectCaster::ToSensor(currentObject);
 			intptr_t bufferID = (intptr_t)sensor->getPositions();
-			ccHObject* buffer = root->find(static_cast<int>(bufferID));
-			if (buffer && buffer->isKindOf(CC_TYPES::TRANS_BUFFER))
-				sensor->setPositions(ccHObjectCaster::ToTransBuffer(buffer));
-			else
+			if (bufferID > 0)
 			{
-				//we have a problem here ;)
-				sensor->setPositions(0);
+				ccHObject* buffer = root->find(static_cast<int>(bufferID));
+				if (buffer && buffer->isKindOf(CC_TYPES::TRANS_BUFFER))
+					sensor->setPositions(ccHObjectCaster::ToTransBuffer(buffer));
+				else
+				{
+					//we have a problem here ;)
+					sensor->setPositions(0);
 
-				//aren't positions optional (so it is writtine in ccGBLSensor.cpp) ?
-				//if so we can simply set them to NULL and go ahead, we do not need to return.
+					//DGM: can't delete it, too dangerous (bad pointers ;)
+					//delete root;
 
-				//DGM: can't delete it, too dangerous (bad pointers ;)
-				//delete root;
+					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
 
-				ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
-				//return CC_FERR_MALFORMED_FILE;
+					//positions are optional, so we can simply set them to NULL and go ahead, we do not need to return.
+					//return CC_FERR_MALFORMED_FILE;
+				}
 			}
 		}
 		else if (currentObject->isA(CC_TYPES::LABEL_2D))
 		{
-			cc2DLabel* label = static_cast<cc2DLabel*>(currentObject);
+			cc2DLabel* label = ccHObjectCaster::To2DLabel(currentObject);
 			std::vector<cc2DLabel::PickedPoint> correctedPickedPoints;
 			//we must check all label 'points'!
 			for (unsigned i=0; i<label->size(); ++i)
@@ -667,7 +677,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						label->getParent()->removeChild(label);
 					//DGM: can't delete it, too dangerous (bad pointers ;)
 					//delete label;
-					label=0;
+					label = 0;
 					break;
 				}
 			}
@@ -755,9 +765,34 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				}
 			}
 		}
+		else if (currentObject->isKindOf(CC_TYPES::IMAGE))
+		{
+			ccImage* image = ccHObjectCaster::ToImage(currentObject);
+			
+			intptr_t sensorID = (intptr_t)image->getAssociatedSensor();
+			if (sensorID > 0)
+			{
+				ccHObject* sensor = root->find(static_cast<int>(sensorID));
+				if (sensor && sensor->isKindOf(CC_TYPES::CAMERA_SENSOR))
+				{
+					image->setAssociatedSensor(ccHObjectCaster::ToCameraSensor(sensor));
+				}
+				else
+				{
+					//we have a problem here ;)
+					image->setAssociatedSensor(0);
+
+					//DGM: can't delete it, too dangerous (bad pointers ;)
+					//delete root;
+
+					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find camera sensor (ID=%1) for image '%2' in the file!").arg(sensorID).arg(image->getName()));
+					//return CC_FERR_MALFORMED_FILE;
+				}
+			}
+		}
 
 		if (currentObject)
-			for (unsigned i=0;i<currentObject->getChildrenNumber();++i)
+			for (unsigned i=0; i<currentObject->getChildrenNumber() ;++i)
 				toCheck.push_back(currentObject->getChild(i));
 	}
 

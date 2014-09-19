@@ -34,7 +34,8 @@
     <file>images/ccPivotAuto.png</file>
     <file>images/ccPivotOff.png</file>
     <file>images/ccPivotOn.png</file>
-    <file>images/dbSensorSymbol.png</file>
+    <file>images/dbGBLSensorSymbol.png</file>
+    <file>images/dbCamSensorSymbol.png</file>
     <file>images/smallTrash.png</file>
     <file>images/smallRectangleSelect.png</file>
     <file>images/im3DxLogo.png</file>

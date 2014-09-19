@@ -29,7 +29,6 @@
 #include "ccOctree.h"
 #include "ccKdTree.h"
 #include "ccImage.h"
-#include "ccCalibratedImage.h"
 #include "ccGBLSensor.h"
 #include "ccCameraSensor.h"
 #include "cc2DLabel.h"
@@ -149,11 +148,6 @@ ccCameraSensor* ccHObjectCaster::ToCameraSensor(ccHObject* obj)
 ccImage* ccHObjectCaster::ToImage(ccHObject* obj)
 {
 	return obj && obj->isKindOf(CC_TYPES::IMAGE) ? static_cast<ccImage*>(obj) : 0;
-}
-
-ccCalibratedImage* ccHObjectCaster::ToCalibratedImage(ccHObject* obj)
-{
-	return obj && obj->isA(CC_TYPES::CALIBRATED_IMAGE) ? static_cast<ccCalibratedImage*>(obj) : 0;
 }
 
 cc2DLabel* ccHObjectCaster::To2DLabel(ccHObject* obj)

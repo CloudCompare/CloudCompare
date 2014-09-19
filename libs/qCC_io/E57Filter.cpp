@@ -34,9 +34,9 @@
 #include <ccPointCloud.h>
 #include <ccProgressDialog.h>
 #include <ccImage.h>
-#include <ccCalibratedImage.h>
 #include <ccColorScalesManager.h>
 #include <ccScalarField.h>
+#include <ccCameraSensor.h>
 
 //Qt
 #include <QApplication>
@@ -590,8 +590,15 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	// Create pose structure for scan (in any)
 	if (image->isA(CC_TYPES::CALIBRATED_IMAGE))
 	{
-		ccGLMatrix poseMat = static_cast<ccCalibratedImage*>(image)->getCameraMatrix();
-		SavePoseInformation(imageNode,imf,poseMat);
+		ccCameraSensor* sensor = static_cast<ccImage*>(image)->getAssociatedSensor();
+		if (sensor)
+		{
+			ccIndexedTransformation poseMat;
+			if (sensor->getActiveAbsoluteTransformation(poseMat))
+			{
+				SavePoseInformation(imageNode,imf,poseMat);
+			}
+		}
 	}
 
 	//save image data as PNG
@@ -612,10 +619,10 @@ void SaveImage(ccImage* image, const QString& scanGUID, e57::ImageFile& imf, e57
 	cameraRepresentation.set("imageWidth", e57::IntegerNode(imf, image->getW()));
 
 	//'pinhole' camera image
-	//if (image->isA(CC_TYPES::CALIBRATED_IMAGE))
+	//if (image->isKindOf(CC_TYPES::IMAGE))
 	//{
 	//	cameraRepresentationStr = "pinholeRepresentation";
-	//	ccCalibratedImage* calibImage = static_cast<ccCalibratedImage*>(image);
+	//	ccImage* calibImage = static_cast<ccImage*>(image);
 	//	//DGM FIXME
 	//	cameraRepresentation.set("focalLength", e57::FloatNode(imf, calibImage->getFocal()));
 	//	cameraRepresentation.set("pixelHeight", e57::FloatNode(imf, image2DHeader.pinholeRepresentation.pixelHeight));
@@ -1993,16 +2000,24 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	case E57_PINHOLE:
 		{
 			PinholeRepresentation* pinhole = static_cast<PinholeRepresentation*>(cameraRepresentation);
-			ccCalibratedImage* calibImage = new ccCalibratedImage();
-			//pixelWidth
+			ccImage* calibImage = new ccImage();
+			ccCameraSensor::IntrinsicParameters params;
+			params.focal_mm = pinhole->focalLength;
+			params.arrayWidth = pinhole->imageSize;
+			params.arrayHeight = pinhole->imageHeight;
+			params.pixelSize_mm[0] = pinhole->pixelWidth; //pixelWidth is in radians!
+			params.pixelSize_mm[1] = pinhole->pixelHeight; //pixelHeight is in radians!
+			double dx = pinhole->pixelHeight * pinhole->imageHeight;
+			params.vFOV_rad = ccCameraSensor::ComputeFovRadFromFocalMm(params.focal_mm,static_cast<float>(dx));
+			
+			ccCameraSensor* sensor = new ccCameraSensor(params);
 			if (validPoseMat)
-				calibImage->setCameraMatrix(poseMat);
+				sensor->setRigidTransformation(poseMat);
 
-			double dx = pinhole->pixelWidth * static_cast<double>(pinhole->imageWidth);
-			double f = pinhole->focalLength;
-			double fov_x = 2.0*atan(dx/(2.0*f)); //FIXME: we only take x into account! (we hope it's okay)
-			calibImage->setFov(static_cast<float>(fov_x*180.0/M_PI));
-			//calibImage->setFocal(f,false); //FIXME: focal handled in pixels only!
+			sensor->setEnabled(false);
+			sensor->setVisible(true);
+			calibImage->addChild(sensor);
+			calibImage->setAssociatedSensor(sensor);
 
 			imageObj = calibImage;
 		}
@@ -2013,7 +2028,7 @@ ccHObject* LoadImage(e57::Node& node, QString& associatedData3DGuid)
 	}
 
 	assert(imageObj);
-	imageObj->setImage(qImage);
+	imageObj->setData(qImage);
 	imageObj->setName(name.c_str());
 
 	//don't forget image aspect ratio

@@ -32,7 +32,6 @@ class ccGenericPrimitive;
 class ccOctree;
 class ccKdTree;
 class ccImage;
-class ccCalibratedImage;
 class ccGBLSensor;
 class ccCameraSensor;
 class ccMaterialSet;
@@ -73,7 +72,9 @@ public:
 							OBJECT_CURRENT_COLOR_RAMP				,
 							OBJECT_IMAGE_ALPHA						,
 							OBJECT_APPLY_IMAGE_VIEWPORT				,
+							OBJECT_APPLY_SENSOR_VIEWPORT			,
 							OBJECT_CLOUD_SF_EDITOR					,
+							OBJECT_SENSOR_MATRIX_EDITOR				,
 							OBJECT_SENSOR_DISPLAY_SCALE				,
 							OBJECT_COLOR_RAMP_STEPS					,
 							OBJECT_MATERIALS						,
@@ -128,6 +129,7 @@ protected slots:
 	void primitivePrecisionChanged(int);
 	void imageAlphaChanged(int);
 	void applyImageViewport();
+	void applySensorViewport();
 	void applyLabelViewport();
 	void updateDisplay();
 	void objectDisplayChanged(const QString &);
@@ -142,6 +144,7 @@ protected:
 
 	void addSeparator(QString title);
 	void appendRow(QStandardItem* leftItem, QStandardItem* rightItem, bool openPersistentEditor = false);
+	void appendWideRow(QStandardItem* item, bool openPersistentEditor = true);
 
 	void fillWithHObject(ccHObject*);
 	void fillWithPointCloud(ccGenericPointCloud*);
@@ -155,7 +158,6 @@ protected:
 	void fillWithPointOctree(ccOctree*);
 	void fillWithPointKdTree(ccKdTree*);
 	void fillWithImage(ccImage*);
-	void fillWithCalibratedImage(ccCalibratedImage*);
 	void fillWithLabel(cc2DLabel*);
 	void fillWithViewportObject(cc2DViewportObject*);
 	void fillWithGBLSensor(ccGBLSensor*);
@@ -164,6 +166,9 @@ protected:
 	void fillWithShareable(CCShareable*);
 	void fillWithMetaData(ccObject*);
 	template<int N, class ElementType> void fillWithChunkedArray(ccChunkedArray<N,ElementType>*);
+
+	//! Returns whether the editor is wide (i.e. spans on two columns) or not
+	bool isWideEditor(int itemData) const;
 
 	//! Updates the current model (assuming object is the same)
 	void updateModel();

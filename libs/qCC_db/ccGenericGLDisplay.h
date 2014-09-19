@@ -190,6 +190,15 @@ public:
 
 	//! Makes the associated OpenGL context active
 	virtual void makeContextCurrent() = 0;
+
+	//! Setups a (projective) camera
+	/** \param cameraMatrix orientation/position matrix of the camera
+		\param fov_deg vertical field of view (in degrees). Optional (ignored if 0).
+		\param ar aspect ratio (width/height)
+		\param viewerBasedPerspective whether the perspective view should be object-centered (false) or camera-centered (true)
+	**/
+	virtual void setupProjectiveViewport(const ccGLMatrixd& cameraMatrix, float fov_deg = 0.0f, float ar = 1.0f, bool viewerBasedPerspective = true) = 0;
+
 };
 
 #endif //CC_GENERIC_GL_DISPLAY

@@ -2159,13 +2159,14 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 				saveDialog->setAutoShow(false);
 			}
 		}
+#ifdef CC_FBX_SUPPORT
 		else if (IsCommand(argument,COMMAND_FBX_EXPORT_FORMAT))
 		{
 			//local option confirmed, we can move on
 			arguments.pop_front();
 
 			if (arguments.empty())
-				return Error(QString(QString("Missing parameter: FBX format (string) after '%1'").arg(COMMAND_FBX_EXPORT_FORMAT)));
+				return Error(QString("Missing parameter: FBX format (string) after '%1'").arg(COMMAND_FBX_EXPORT_FORMAT));
 
 			if (type != FBX)
 				ccConsole::Warning(QString("Argument '%1' is only applicable to FBX format!").arg(argument));
@@ -2174,8 +2175,8 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 			ccConsole::Print(QString("FBX format: %1").arg(formatStr));
 
 			//TODO
-
 		}
+#endif
 		else
 		{
 			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!

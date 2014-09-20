@@ -83,6 +83,7 @@ protected slots:
 	void toggleSunLight(bool);
 	void toggleCustomLight(bool);
 	void toggleFullScreen(bool);
+	void toggleRotationAboutVertAxis();
 	void doActionAbout();
 	void doActionDisplayShortcuts();
 	void setPivotAlwaysOn();

@@ -185,6 +185,7 @@ QStatusBar
     <addaction name="menuLights"/>
     <addaction name="actionGlobalZoom"/>
     <addaction name="actionFullScreen"/>
+    <addaction name="actionLockRotationVertAxis"/>
     <addaction name="separator"/>
     <addaction name="menuSelected"/>
    </widget>
@@ -655,6 +656,20 @@ QStatusBar
   <action name="actionNoFilter">
    <property name="text">
     <string>Remove</string>
+   </property>
+  </action>
+  <action name="actionLockRotationVertAxis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Lock rotation around vert. axis</string>
+   </property>
+   <property name="shortcut">
+    <string>L</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
    </property>
   </action>
  </widget>

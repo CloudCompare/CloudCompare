@@ -132,6 +132,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	//"Options" menu
 	connect(ui.actionGlobalZoom,					SIGNAL(triggered()),						this,	SLOT(setGlobalZoom()));
 	connect(ui.actionFullScreen,					SIGNAL(toggled(bool)),						this,	SLOT(toggleFullScreen(bool)));
+	connect(ui.actionLockRotationVertAxis,			SIGNAL(triggered()),						this,	SLOT(toggleRotationAboutVertAxis()));
 
 	//"Options > Selected" menu
 	connect(ui.actionShowColors,					SIGNAL(toggled(bool)),						this,	SLOT(toggleColorsShown(bool)));
@@ -140,6 +141,7 @@ ccViewer::ccViewer(QWidget *parent, Qt::WindowFlags flags)
 	connect(ui.actionShowColorRamp,					SIGNAL(toggled(bool)),						this,	SLOT(toggleColorbarShown(bool)));
 	connect(ui.actionZoomOnSelectedEntity,			SIGNAL(triggered()),						this,	SLOT(zoomOnSelectedEntity()));
 	connect(ui.actionDelete,						SIGNAL(triggered()),						this,	SLOT(doActionDeleteSelectedEntity()));
+
 
 	//"Shaders" menu
 	connect(ui.actionNoFilter,						SIGNAL(triggered()),						this,	SLOT(doDisableGLFilter()));
@@ -695,6 +697,31 @@ void ccViewer::toggleFullScreen(bool state)
 
 	if (m_glWindow)
 		m_glWindow->redraw();
+}
+
+void ccViewer::toggleRotationAboutVertAxis()
+{
+	if (!m_glWindow)
+		return;
+
+	bool wasLocked = m_glWindow->isVerticalRotationLocked();
+	bool isLocked = !wasLocked;
+
+	m_glWindow->lockVerticalRotation(isLocked);
+
+	ui.actionLockRotationVertAxis->blockSignals(true);
+	ui.actionLockRotationVertAxis->setChecked(isLocked);
+	ui.actionLockRotationVertAxis->blockSignals(false);
+
+	if (isLocked)
+	{
+		m_glWindow->displayNewMessage(QString("[ROTATION LOCKED]"),ccGLWindow::UPPER_CENTER_MESSAGE,false,24*3600,ccGLWindow::ROTAION_LOCK_MESSAGE);
+	}
+	else
+	{
+		m_glWindow->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false,0,ccGLWindow::ROTAION_LOCK_MESSAGE);
+	}
+	m_glWindow->redraw();
 }
 
 void ccViewer::doActionDisplayShortcuts()

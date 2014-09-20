@@ -169,6 +169,7 @@ ccGLWindow::ccGLWindow(	QWidget *parent,
 	, m_overridenDisplayParametersEnabled(false)
 	, m_displayOverlayEntities(true)
 	, m_silentInitialization(silentInitialization)
+	, m_verticalRotationLocked(false)
 {
 	//GL window title
 	setWindowTitle(QString("3D View %1").arg(m_uniqueID));
@@ -1930,6 +1931,9 @@ CCVector3d ccGLWindow::convertMousePositionToOrientation(int x, int y)
 
 	v.x = std::max<double>(std::min<double>(v.x/xc,1),-1);
 	v.y = std::max<double>(std::min<double>(v.y/yc,1),-1);
+
+	if (m_verticalRotationLocked)
+		v.y = 0;
 
 	//square 'radius'
 	double d2 = v.x*v.x + v.y*v.y;

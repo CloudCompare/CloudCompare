@@ -117,6 +117,8 @@
     <addaction name="actionRefresh"/>
     <addaction name="actionToggleCenteredPerspective"/>
     <addaction name="actionToggleViewerBasedPerspective"/>
+    <addaction name="actionLockRotationVertAxis"/>
+    <addaction name="separator"/>
     <addaction name="actionRenderToFile"/>
     <addaction name="actionDisplayOptions"/>
     <addaction name="actionEditCamera"/>
@@ -2622,6 +2624,23 @@
    </property>
    <property name="shortcut">
     <string>A</string>
+   </property>
+   <property name="shortcutContext">
+    <enum>Qt::ApplicationShortcut</enum>
+   </property>
+  </action>
+  <action name="actionLockRotationVertAxis">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Lock rotation about vert. axis</string>
+   </property>
+   <property name="toolTip">
+    <string>Lock manual rotation about the vertical (screen) axis</string>
+   </property>
+   <property name="shortcut">
+    <string>L</string>
    </property>
    <property name="shortcutContext">
     <enum>Qt::ApplicationShortcut</enum>

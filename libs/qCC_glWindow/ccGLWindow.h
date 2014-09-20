@@ -90,6 +90,7 @@ public:
 						CUSTOM_LIGHT_STATE_MESSAGE,
 						MANUAL_TRANSFORMATION_MESSAGE,
 						MANUAL_SEGMENTATION_MESSAGE,
+						ROTAION_LOCK_MESSAGE,
 	};
 
 	//! Pivot symbol visibility
@@ -138,8 +139,8 @@ public:
 	virtual void displayNewMessage(const QString& message,
 									MessagePosition pos,
 									bool append=false,
-									int displayMaxDelay_sec=2,
-									MessageType type=CUSTOM_MESSAGE);
+									int displayMaxDelay_sec = 2,
+									MessageType type = CUSTOM_MESSAGE);
 
 	//! Activates sun light
 	virtual void setSunLight(bool state);
@@ -415,6 +416,12 @@ public:
 
 	//! Returns whether overlay entities (scale, tetrahedron, etc.) are displayed or not
 	bool overlayEntitiesAreDisplayed() const { return m_displayOverlayEntities; }
+
+	//! Locks the manual rotation around the vertical (screen) axis
+	void lockVerticalRotation(bool state) { m_verticalRotationLocked = state; }
+
+	//! Returns whether the manual rotation around the vertical (screen) axis is locked or not
+	bool isVerticalRotationLocked() const { return m_verticalRotationLocked; }
 
 public slots:
 
@@ -783,6 +790,9 @@ protected:
 
 	//! Whether initialization should be silent or not (i.e. no message to console)
 	bool m_silentInitialization;
+
+	//! To lock the manual rotation around the (screen) vertical axis
+	bool m_verticalRotationLocked;
 
 private:
 

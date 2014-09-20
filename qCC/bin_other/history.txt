@@ -19,6 +19,10 @@ v2.5.6 ??/??/2014
 		- the result is only valid if the mesh is closed (CloudCompare will warn you if it's not the case
 			and you can check that yourself with the new 'Flag vertices by type' method (see above).
 	* Meshes can now be exported in DXF (Autocad) files
+	* New 'Display' option:
+		- Display > Lock rotation around vert. axis' (to lock the manual rotation around the screen
+			vertical axis)
+		* Shortcut: 'L'
 - Enhancements:
 	* qEDL (Eye Dome Lighting) now behaves correctly even in perspective mode!
 	* The vector coordinates have been restored in the 2-points labels (Point picking tool)

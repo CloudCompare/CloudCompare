@@ -909,6 +909,7 @@ void MainWindow::connectActions()
 	connect(actionTestFrameRate,				SIGNAL(triggered()),	this,		SLOT(testFrameRate()));
 	connect(actionToggleCenteredPerspective,	SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowCenteredPerspective()));
 	connect(actionToggleViewerBasedPerspective, SIGNAL(triggered()),	this,		SLOT(toggleActiveWindowViewerBasedPerspective()));
+	connect(actionLockRotationVertAxis,			SIGNAL(triggered()),	this,		SLOT(toggleRotationAboutVertAxis()));
 	connect(actionEditCamera,					SIGNAL(triggered()),	this,		SLOT(doActionEditCamera()));
 	connect(actionAdjustZoom,					SIGNAL(triggered()),	this,		SLOT(doActionAdjustZoom()));
 	connect(actionSaveViewportAsObject,			SIGNAL(triggered()),	this,		SLOT(doActionSaveViewportAsCamera()));
@@ -7426,7 +7427,7 @@ void MainWindow::doPickRotationCenter()
 
 	connect(win, SIGNAL(pointPicked(int, unsigned, int, int)), this, SLOT(processPickedRotationCenter(int, unsigned, int, int)));
 	win->setPickingMode(ccGLWindow::POINT_PICKING);
-	win->displayNewMessage("Pick a point to be used as rotation center (click on icon again to cancel)",ccGLWindow::LOWER_LEFT_MESSAGE,true,3600);
+	win->displayNewMessage("Pick a point to be used as rotation center (click on icon again to cancel)",ccGLWindow::LOWER_LEFT_MESSAGE,true,24*3600);
 	win->redraw();
 	s_pickingWindow = win;
 
@@ -8883,6 +8884,32 @@ void MainWindow::toggleActiveWindowViewerBasedPerspective()
 	}
 }
 
+void MainWindow::toggleRotationAboutVertAxis()
+{
+	ccGLWindow* win = getActiveGLWindow();
+	if (win)
+	{
+		bool wasLocked = win->isVerticalRotationLocked();
+		bool isLocked = !wasLocked;
+		
+		win->lockVerticalRotation(isLocked);
+		
+		actionLockRotationVertAxis->blockSignals(true);
+		actionLockRotationVertAxis->setChecked(isLocked);
+		actionLockRotationVertAxis->blockSignals(false);
+
+		if (isLocked)
+		{
+			win->displayNewMessage(QString("[ROTATION LOCKED]"),ccGLWindow::UPPER_CENTER_MESSAGE,false,24*3600,ccGLWindow::ROTAION_LOCK_MESSAGE);
+		}
+		else
+		{
+			win->displayNewMessage(QString(),ccGLWindow::UPPER_CENTER_MESSAGE,false,0,ccGLWindow::ROTAION_LOCK_MESSAGE);
+		}
+		win->redraw();
+	}
+}
+
 void MainWindow::doActionDeleteShader()
 {
 	ccGLWindow* win = getActiveGLWindow();
@@ -9502,6 +9529,10 @@ void MainWindow::on3DViewActivated(QMdiSubWindow* mdiWin)
 	{
 		updateViewModePopUpMenu(win);
 		updatePivotVisibilityPopUpMenu(win);
+
+		actionLockRotationVertAxis->blockSignals(true);
+		actionLockRotationVertAxis->setChecked(win->isVerticalRotationLocked());
+		actionLockRotationVertAxis->blockSignals(false);
 	}
 }
 

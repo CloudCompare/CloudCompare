@@ -224,6 +224,7 @@ protected slots:
 	virtual void toggleActiveWindowCustomLight();
 	virtual void toggleActiveWindowSunLight();
 	virtual void toggleActiveWindowViewerBasedPerspective();
+	virtual void toggleRotationAboutVertAxis();
 	virtual void setGlobalZoom();
 	virtual void zoomOnSelectedEntities();
 	virtual void setPivotAlwaysOn();

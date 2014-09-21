@@ -34,11 +34,11 @@
 #include <PoissonReconLib.h>
 
 //qCC_db
-#include <ccGenericPointCloud.h>
 #include <ccPointCloud.h>
 #include <ccMesh.h>
 #include <ccPlatform.h>
 #include <ccProgressDialog.h>
+#include <ccScalarField.h>
 
 //CCLib
 #include <DistanceComputationTools.h>
@@ -51,6 +51,41 @@
 #include <time.h>
 #include <unistd.h>
 #endif
+
+//Dedicated 'PointStream' for the ccPointCloud structure
+template <class Real> class ccPointStream : public PointStream<Real>
+{
+public:
+	ccPointStream( ccPointCloud* cloud ) : m_cloud(cloud), m_index(0) {}
+	virtual void reset( void ) { m_index = 0; }
+	virtual bool nextPoint( Point3D< Real >& p , Point3D< Real >& n )
+	{
+		if (!m_cloud || m_index == m_cloud->size())
+			return false;
+		//point
+		const CCVector3* P = m_cloud->getPoint(m_index);
+		p[0] = static_cast<Real>(P->x);
+		p[1] = static_cast<Real>(P->y);
+		p[2] = static_cast<Real>(P->z);
+
+		//normal
+		assert(m_cloud->hasNormals());
+		const CCVector3& N = m_cloud->getPointNormal(m_index);
+		n[0] = static_cast<Real>(N.x);
+		n[1] = static_cast<Real>(N.y);
+		n[2] = static_cast<Real>(N.z);
+
+		//auto-forward
+		++m_index;
+
+		return true;
+	}
+
+protected:
+	ccPointCloud* m_cloud;
+	unsigned m_index;
+};
+
 
 //dialog for qPoissonRecon plugin
 class PoissonReconParamDlg : public QDialog, public Ui::PoissonReconParamDialog
@@ -90,30 +125,22 @@ void qPoissonRecon::getActions(QActionGroup& group)
 	group.addAction(m_action);
 }
 
-static PoissonReconLib::Point* s_points = 0;
-static PoissonReconLib::Point* s_normals = 0;
-static unsigned s_count = 0;
+typedef PlyValueVertex< PointCoordinateType > Vertex;
+typedef CoredVectorMeshData< Vertex > PoissonMesh;
+
 static PoissonReconLib::Parameters s_params;
-static CoredVectorMeshData<PoissonReconLib::Vertex>* s_mesh;
-static int s_threadCountUsed = 0;
-static PoissonReconLib* s_poisson = 0;
-
-bool doInit()
-{
-	//invalid parameters
-	if (!s_poisson || !s_points || !s_normals || s_params.depth < 2  || s_count == 0)
-		return false;
-
-	return s_poisson->init(s_count, s_points, s_normals, s_params, &s_threadCountUsed);
-}
+static ccPointCloud* s_cloud = 0;
+static PoissonMesh* s_mesh;
 
 bool doReconstruct()
 {
 	//invalid parameters
-	if (!s_poisson || !s_mesh)
+	if (!s_cloud || !s_mesh)
 		return false;
 
-	return s_poisson->reconstruct(*s_mesh);
+	ccPointStream<PointCoordinateType> pointStream(s_cloud);
+
+	return PoissonReconLib::Reconstruct(s_params, &pointStream, *s_mesh);
 }
 
 void qPoissonRecon::doAction()
@@ -152,9 +179,9 @@ void qPoissonRecon::doAction()
 	//init dialog with semi-persistent settings
 	prpDlg.octreeLevelSpinBox->setValue(s_params.depth);
 	prpDlg.weightDoubleSpinBox->setValue(s_params.pointWeight);
-	prpDlg.minDepthSpinBox->setValue(s_params.minDepth);
-	prpDlg.samplesSpinBox->setValue(static_cast<int>(s_params.samplesPerNode));
-	prpDlg.solverAccuracyDoubleSpinBox->setValue(s_params.solverAccuracy);
+	prpDlg.fullDepthSpinBox->setValue(s_params.fullDepth);
+	prpDlg.samplesPerNodeSpinBox->setValue(s_params.samplesPerNode);
+	prpDlg.densityCheckBox->setChecked(s_params.density);
 
 	if (!prpDlg.exec())
 		return;
@@ -162,46 +189,13 @@ void qPoissonRecon::doAction()
 	//set parameters with dialog settings
 	s_params.depth = prpDlg.octreeLevelSpinBox->value();
 	s_params.pointWeight = static_cast<float>(prpDlg.weightDoubleSpinBox->value());
-	s_params.minDepth = prpDlg.minDepthSpinBox->value();
-	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesSpinBox->value());
-	s_params.solverAccuracy = static_cast<float>(prpDlg.solverAccuracyDoubleSpinBox->value());
-
-	 //TODO: faster, lighter
-	unsigned count = pc->size();
-	PoissonReconLib::Point* points = new PoissonReconLib::Point[count];
-	if (!points)
-	{
-		m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	PoissonReconLib::Point* normals = new PoissonReconLib::Point[count];
-	if (!normals)
-	{
-		delete[] points;
-		m_app->dispToConsole("Not enough memory!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-
-	//copy points and normals in dedicated arrays
-	{
-		for (unsigned i=0; i<count; ++i)
-		{
-			const CCVector3* P = pc->getPoint(i);
-			points[i] = PoissonReconLib::Point(	static_cast<float>(P->x),
-												static_cast<float>(P->y),
-												static_cast<float>(P->z) );
-
-			const CCVector3& N = pc->getPointNormal(i);
-			normals[i] = PoissonReconLib::Point(static_cast<float>(N.x),
-												static_cast<float>(N.y),
-												static_cast<float>(N.z) );
-		}
-	}
+	s_params.fullDepth = prpDlg.fullDepthSpinBox->value();
+	s_params.samplesPerNode = static_cast<float>(prpDlg.samplesPerNodeSpinBox->value());
+	s_params.density = prpDlg.densityCheckBox->isChecked();
 
 	/*** RECONSTRUCTION PROCESS ***/
 
-	CoredVectorMeshData<PoissonReconLib::Vertex> mesh;
+	PoissonMesh mesh;
 
 	//run in a separate thread
 	bool result = false;
@@ -215,70 +209,32 @@ void qPoissonRecon::doAction()
 		pDlg.show();
 		//QApplication::processEvents();
 
-		PoissonReconLib poisson;
-
 		//run in a separate thread
-		s_points = points;
-		s_normals = normals;
-		s_count = count;
+		s_cloud = pc;
 		s_mesh = &mesh;
-		s_threadCountUsed = 1;
-		s_poisson = &poisson;
 
-		//init
-		{
-			QFuture<bool> initFuture = QtConcurrent::run(doInit);
-
-			//wait until process is finished!
-			while (!initFuture.isFinished())
-			{
-				#if defined(CC_WINDOWS)
-				::Sleep(500);
-				#else
-				usleep(500 * 1000);
-				#endif
-
-				pDlg.setValue(pDlg.value()+1);
-				QApplication::processEvents();
-			}
-
-			result = initFuture.result();
-		}
-
-		//release some memory
-		delete[] points;
-		s_points = points = 0;
-		delete[] normals;
-		s_normals = normals = 0;
-
-		//init successful?
-		if (result)
-		{
-			m_app->dispToConsole(QString("[PoissonRecon] Initialization done... starting reconstruction (%1 thread(s))").arg(s_threadCountUsed),ccMainAppInterface::STD_CONSOLE_MESSAGE);
-
-			pDlg.setLabelText(QString("Reconstruction in progress\nlevel: %1 [%2 thread(s)]").arg(s_params.depth).arg(s_threadCountUsed));
-			QApplication::processEvents();
+		pDlg.setLabelText(QString("Reconstruction in progress\nlevel: %1 [%2 thread(s)]").arg(s_params.depth).arg(s_params.threads));
+		QApplication::processEvents();
 			
-			QFuture<bool> future = QtConcurrent::run(doReconstruct);
+		QFuture<bool> future = QtConcurrent::run(doReconstruct);
 
-			//wait until process is finished!
-			while (!future.isFinished())
-			{
-				#if defined(CC_WINDOWS)
-				::Sleep(500);
-				#else
-				usleep(500 * 1000);
-				#endif
+		//wait until process is finished!
+		while (!future.isFinished())
+		{
+#if defined(CC_WINDOWS)
+			::Sleep(500);
+#else
+			usleep(500 * 1000);
+#endif
 
-				pDlg.setValue(pDlg.value()+1);
-				QApplication::processEvents();
-			}
-
-			result = future.result();
+			pDlg.setValue(pDlg.value()+1);
+			QApplication::processEvents();
 		}
+
+		result = future.result();
 
 		s_mesh = 0;
-		s_poisson = 0;
+		s_cloud = 0;
 
 		pDlg.hide();
 		QApplication::processEvents();
@@ -305,28 +261,63 @@ void qPoissonRecon::doAction()
 	
 	if (newPC->reserve(nr_vertices) && newMesh->reserve(nr_faces))
 	{
+		ccScalarField* densitySF = 0;
+		if (s_params.density)
+		{
+			densitySF = new ccScalarField("Density");
+			if (!densitySF->reserve(nr_vertices))
+			{
+				m_app->dispToConsole(QString("[PoissonRecon] Failed to allocate memory for storing density!"),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				densitySF->release();
+				densitySF = 0;
+			}
+		}
+
 		//add 'in core' points
 		{
 			for (unsigned i=0; i<nic; i++)
 			{
-				PoissonReconLib::Vertex& p = mesh.inCorePoints[i];
+				Vertex& p = mesh.inCorePoints[i];
 				CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
 								static_cast<PointCoordinateType>(p.point.coords[1]),
 								static_cast<PointCoordinateType>(p.point.coords[2]) );
 				newPC->addPoint(p2);
+
+				if (densitySF)
+				{
+					ScalarType sf = static_cast<ScalarType>(p.value);
+					densitySF->addElement(sf);
+				}
 			}
 		}
 		//add 'out of core' points
 		{
 			for (unsigned i=0; i<noc; i++)
 			{
-				PoissonReconLib::Vertex p;
+				Vertex p;
 				mesh.nextOutOfCorePoint(p);
 				CCVector3 p2(	static_cast<PointCoordinateType>(p.point.coords[0]),
 								static_cast<PointCoordinateType>(p.point.coords[1]),
 								static_cast<PointCoordinateType>(p.point.coords[2]) );
 				newPC->addPoint(p2);
+
+				if (densitySF)
+				{
+					ScalarType sf = static_cast<ScalarType>(p.value);
+					densitySF->addElement(sf);
+				}
 			}
+		}
+
+		// density SF
+		if (densitySF)
+		{
+			densitySF->computeMinAndMax();
+			densitySF->showNaNValuesInGrey(false);
+			int sfIdx = newPC->addScalarField(densitySF);
+			newPC->setCurrentDisplayedScalarField(sfIdx);
+			newPC->showSF(true);
+			newMesh->showSF(true);
 		}
 
 		//add faces

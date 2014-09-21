@@ -835,7 +835,8 @@ void Octree< Real , Degree >::SetIsoSurface( int depth , int offset , const Slic
 	std::vector< IsoEdge > edges;
 	nKey.set( depth );
 #ifdef WITH_OPENMP
-#pragma omp parallel for num_threads( threads ) firstprivate( nKey , edges )
+//DGM: I have a crash if this part is parallelized!
+//#pragma omp parallel for num_threads( threads ) firstprivate( nKey , edges )
 #endif
 	for( int i=_sNodes.nodeCount[depth]+_sNodes.sliceOffsets[depth][offset] ; i<_sNodes.nodeCount[depth]+_sNodes.sliceOffsets[depth][offset+1] ; i++ )
 	{

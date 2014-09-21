@@ -683,28 +683,28 @@ int Octree< Real , Degree >::SetTree( PointStream< PointReal >* pointStream , in
 		{
 			std::vector< int > temp = pointInfo.pointIndices;
 			pointInfo.pointIndices.resize( indexMap.size() );
-			for( int i=0 ; i<indexMap.size() ; i++ )
+			for( size_t i=0 ; i<indexMap.size() ; i++ )
 				if( indexMap[i]<temp.size() ) pointInfo.pointIndices[i] = temp[ indexMap[i] ];
 				else                          pointInfo.pointIndices[i] = -1;
 		}
 		{
 			std::vector< int > temp = normalInfo.normalIndices;
 			normalInfo.normalIndices.resize( indexMap.size() );
-			for( int i=0 ; i<indexMap.size() ; i++ )
+			for( size_t i=0 ; i<indexMap.size() ; i++ )
 				if( indexMap[i]<temp.size() ) normalInfo.normalIndices[i] = temp[ indexMap[i] ];
 				else                          normalInfo.normalIndices[i] = -1;
 		}
 		{
 			std::vector< Real > temp = centerWeights;
 			centerWeights.resize( indexMap.size() );
-			for( int i=0 ; i<indexMap.size() ; i++ )
+			for( size_t i=0 ; i<indexMap.size() ; i++ )
 				if( indexMap[i]<temp.size() ) centerWeights[i] = temp[ indexMap[i] ];
 				else                          centerWeights[i] = (Real)0;
 		}
 		{
 			std::vector< Real > temp = kernelDensityWeights;
 			kernelDensityWeights.resize( indexMap.size() );
-			for( int i=0 ; i<indexMap.size() ; i++ )
+			for( size_t i=0 ; i<indexMap.size() ; i++ )
 				if( indexMap[i]<temp.size() ) kernelDensityWeights[i] = temp[ indexMap[i] ];
 				else                          kernelDensityWeights[i] = (Real)0;
 		}
@@ -1607,11 +1607,11 @@ Real Octree< Real , Degree >::_WeightedFinerFunctionValue( const _PointData& poi
 template< class Real , int Degree >
 int Octree< Real , Degree >::GetSliceMatrixAndUpdateConstraints( const PointInfo& pointInfo , SparseMatrix< Real >& matrix , Pointer( Real ) constraints , const typename BSplineData< Degree >::Integrator& integrator , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real ) metSolution , bool coarseToFine , int nStart , int nEnd )
 {
-	size_t range = nEnd-nStart;
+	int range = nEnd-nStart;
 	Stencil< double , 5 > stencil , stencils[2][2][2];
 	SetLaplacianStencil ( depth , integrator , stencil );
 	SetLaplacianStencils( depth , integrator , stencils );
-	matrix.Resize( (int)range );
+	matrix.Resize( range );
 	typename TreeOctNode::NeighborKey3 neighborKey3;
 	neighborKey3.set( depth );
 #ifdef WITH_OPENMP
@@ -1665,11 +1665,12 @@ int Octree< Real , Degree >::GetSliceMatrixAndUpdateConstraints( const PointInfo
 template< class Real , int Degree >
 int Octree< Real , Degree >::GetMatrixAndUpdateConstraints( const PointInfo& pointInfo , SparseSymmetricMatrix< Real >& matrix , Pointer( Real ) constraints , const typename BSplineData< Degree >::Integrator& integrator , int depth , const SortedTreeNodes& sNodes , ConstPointer( Real ) metSolution , bool coarseToFine )
 {
-	size_t start = sNodes.nodeCount[depth] , end = sNodes.nodeCount[depth+1] , range = end-start;
+	int start = static_cast<int>(sNodes.nodeCount[depth]) , end = static_cast<int>(sNodes.nodeCount[depth+1]);
+	int range = end-start;
 	Stencil< double , 5 > stencil , stencils[2][2][2];
 	SetLaplacianStencil ( depth , integrator , stencil );
 	SetLaplacianStencils( depth , integrator , stencils );
-	matrix.Resize( (int)range );
+	matrix.Resize( range );
 	typename TreeOctNode::NeighborKey3 neighborKey3;
 	neighborKey3.set( depth );
 #ifdef WITH_OPENMP

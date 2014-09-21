@@ -870,7 +870,7 @@ void Octree< Real , Degree >::SetIsoSurface( int depth , int offset , const Slic
 							if( iter!=sValues.faceEdgeMap.end() )
 							{
 								const std::vector< IsoEdge >& _edges = iter->second;
-								for( int j=0 ; j<_edges.size() ; j++ ) edges.push_back( IsoEdge( _edges[j][flip] , _edges[j][1-flip] ) );
+								for( size_t j=0 ; j<_edges.size() ; j++ ) edges.push_back( IsoEdge( _edges[j][flip] , _edges[j][1-flip] ) );
 							}
 							else fprintf( stderr , "[ERROR] Invalid faces: %d  %d %d\n" , i , d , o ) , exit( 0 );
 						}
@@ -890,7 +890,7 @@ void Octree< Real , Degree >::SetIsoSurface( int depth , int offset , const Slic
 							if( iter!=xValues.faceEdgeMap.end() )
 							{
 								const std::vector< IsoEdge >& _edges = iter->second;
-								for( int j=0 ; j<_edges.size() ; j++ ) edges.push_back( IsoEdge( _edges[j][flip] , _edges[j][1-flip] ) );
+								for( size_t j=0 ; j<_edges.size() ; j++ ) edges.push_back( IsoEdge( _edges[j][flip] , _edges[j][1-flip] ) );
 							}
 							else fprintf( stderr , "[ERROR] Invalid faces: %d  %d %d\n" , i , d , o ) , exit( 0 );
 						}
@@ -906,7 +906,7 @@ void Octree< Real , Degree >::SetIsoSurface( int depth , int offset , const Slic
 					long long start = edge[0] , current = edge[1];
 					while( current!=start )
 					{
-						int idx;
+						size_t idx;
 						for( idx=0 ; idx<edges.size() ; idx++ ) if( edges[idx][0]==current ) break;
 						if( idx==edges.size() )
 						{
@@ -926,10 +926,10 @@ void Octree< Real , Degree >::SetIsoSurface( int depth , int offset , const Slic
 					loops.back().push_back( start );
 				}
 				// Add the loops to the mesh
-				for( int j=0 ; j<loops.size() ; j++ )
+				for( size_t j=0 ; j<loops.size() ; j++ )
 				{
 					std::vector< std::pair< int , Vertex > > polygon( loops[j].size() );
-					for( int k=0 ; k<loops[j].size() ; k++ )
+					for( size_t k=0 ; k<loops[j].size() ; k++ )
 					{
 						long long key = loops[j][k];
 						typename hash_map< long long , std::pair< int , Vertex > >::const_iterator iter;

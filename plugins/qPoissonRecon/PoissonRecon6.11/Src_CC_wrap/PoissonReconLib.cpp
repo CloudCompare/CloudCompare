@@ -22,6 +22,10 @@
 #include <Psapi.h>
 #endif // _WIN32
 
+#ifdef WITH_OPENMP
+#include <omp.h>
+#endif
+
 //PoissonRecon
 #include "../Src/Ply.h"
 #include "../Src/Array.h"

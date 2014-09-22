@@ -47,6 +47,7 @@ protected:
 	bool commandICP							(QStringList& arguments, QDialog* parent = 0);
 	bool commandChangeCloudOutputFormat		(QStringList& arguments);
 	bool commandChangeMeshOutputFormat		(QStringList& arguments);
+	bool commandChangeFBXOutputFormat		(QStringList& arguments);
 	bool setActiveSF						(QStringList& arguments);
 
 protected:

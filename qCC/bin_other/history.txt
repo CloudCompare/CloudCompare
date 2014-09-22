@@ -75,6 +75,11 @@ v2.5.6 ??/??/2014
 			is only a relative position, and it cannot be set at any given depth).
 	* New keyboard shortcuts:
 		- 'A' to toggle all selected entities activation (i.e. enable/disable state)
+	* New command line option:
+		- '-FBX_EXPORT_FMT' to specify the format when exporting meshes to FBX. Available formats
+			are currently (FBX_binary, FBX_ascii, FBX_encrypted, FBX_6.0_binary, FBX_6.0_ascii, FBX_6.0_encrypted).
+			If not set CC will display a message box to let the user select the output format (even in
+			command line mode ;) 
 
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized

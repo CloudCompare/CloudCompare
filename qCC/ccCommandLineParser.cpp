@@ -18,6 +18,7 @@
 //qCC_io
 #include <BundlerFilter.h>
 #include <AsciiFilter.h>
+#include <FBXFilter.h>
 
 //qCC
 #include "ccCommon.h"
@@ -81,7 +82,7 @@ static const char COMMAND_ICP_ENABLE_FARTHEST_REMOVAL[]		= "FARTHEST_REMOVAL";
 static const char COMMAND_CLOUD_EXPORT_FORMAT[]				= "C_EXPORT_FMT";
 static const char COMMAND_ASCII_EXPORT_PRECISION[]			= "PREC";
 static const char COMMAND_ASCII_EXPORT_SEPARATOR[]			= "SEP";
-static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_FMT";
+static const char COMMAND_FBX_EXPORT_FORMAT[]				= "FBX_EXPORT_FMT";
 static const char COMMAND_MESH_EXPORT_FORMAT[]				= "M_EXPORT_FMT";
 static const char COMMAND_EXPORT_EXTENSION[]				= "EXT";
 static const char COMMAND_NO_TIMESTAMP[]					= "NO_TIMESTAMP";
@@ -2159,24 +2160,6 @@ bool ccCommandLineParser::commandChangeCloudOutputFormat(QStringList& arguments)
 				saveDialog->setAutoShow(false);
 			}
 		}
-#ifdef CC_FBX_SUPPORT
-		else if (IsCommand(argument,COMMAND_FBX_EXPORT_FORMAT))
-		{
-			//local option confirmed, we can move on
-			arguments.pop_front();
-
-			if (arguments.empty())
-				return Error(QString("Missing parameter: FBX format (string) after '%1'").arg(COMMAND_FBX_EXPORT_FORMAT));
-
-			if (type != FBX)
-				ccConsole::Warning(QString("Argument '%1' is only applicable to FBX format!").arg(argument));
-
-			QString formatStr = arguments.takeFirst();
-			ccConsole::Print(QString("FBX format: %1").arg(formatStr));
-
-			//TODO
-		}
-#endif
 		else
 		{
 			break; //as soon as we encounter an unrecognized argument, we break the local loop to go back on the main one!
@@ -2219,6 +2202,22 @@ bool ccCommandLineParser::commandChangeMeshOutputFormat(QStringList& arguments)
 
 	return true;
 }
+
+bool ccCommandLineParser::commandChangeFBXOutputFormat(QStringList& arguments)
+{
+	if (arguments.empty())
+		return Error(QString("Missing parameter: FBX format (string) after '%1'").arg(COMMAND_FBX_EXPORT_FORMAT));
+
+	QString formatStr = arguments.takeFirst();
+	ccConsole::Print(QString("FBX format: %1").arg(formatStr));
+
+#ifdef CC_FBX_SUPPORT
+	FBXFilter::SetDefaultOutputFormat(formatStr);
+#endif
+
+	return true;
+}
+
 
 int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 {
@@ -2331,6 +2330,10 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument,COMMAND_MESH_EXPORT_FORMAT))
 		{
 			success = commandChangeMeshOutputFormat(arguments);
+		}
+		else if (IsCommand(argument,COMMAND_FBX_EXPORT_FORMAT))
+		{
+			success = commandChangeFBXOutputFormat(arguments);
 		}
 		else if (IsCommand(argument,COMMAND_SET_ACTIVE_SF))
 		{

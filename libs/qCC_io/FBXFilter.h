@@ -33,6 +33,8 @@ public:
 	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
 
+	//! Sets default output format (will prevent the dialog to appear when saving FBX files)
+	static void SetDefaultOutputFormat(QString format);
 };
 
 #endif //CC_FBX_FILTER_HEADER

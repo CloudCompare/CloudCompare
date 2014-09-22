@@ -394,6 +394,22 @@ static bool SaveScene(FbxManager* pManager, FbxDocument* pScene, const char* pFi
 	return lStatus;
 }
 
+static QString s_defaultOutputFormat;
+
+void FBXFilter::SetDefaultOutputFormat(QString format)
+{
+	s_defaultOutputFormat = format;
+}
+
+QString SanitizeFBXFormatString(QString format)
+{
+	format.replace("(*.fbx)","");
+	format = format.trimmed();
+	format.replace(" ","_");
+	
+	return format;
+}
+
 CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename)
 {
 	if (!entity)
@@ -496,25 +512,62 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename)
 
 		if (lFormatCount > 0)
 		{
-			try
+			if (s_defaultOutputFormat.isEmpty())
 			{
-				QMessageBox msgBox(QMessageBox::Question,"FBX format","Choose output format:");
-				QMap<QAbstractButton*,int> buttons;
+				try
+				{
+					QMessageBox msgBox(QMessageBox::Question,"FBX format","Choose output format:");
+					QMap<QAbstractButton*,int> buttons;
+					for (int lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
+					{
+						if (pSdkManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
+						{
+							FbxString lDesc = pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
+							QPushButton *button = msgBox.addButton(lDesc.Buffer(), QMessageBox::AcceptRole);
+							buttons[button] = lFormatIndex;
+						}
+					}
+					msgBox.exec();
+					//get the right format
+					fileFormat = buttons[msgBox.clickedButton()];
+				}
+				catch(...)
+				{
+				}
+			}
+			else
+			{
+				//try to find the default output format as set by the user
 				for (int lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
 				{
 					if (pSdkManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
 					{
 						FbxString lDesc = pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
-						QPushButton *button = msgBox.addButton(lDesc.Buffer(), QMessageBox::AcceptRole);
-						buttons[button] = lFormatIndex;
+						QString sanitizedDesc = SanitizeFBXFormatString(lDesc.Buffer());
+						if (s_defaultOutputFormat == sanitizedDesc)
+						{
+							ccLog::Print(QString("[FBX] Default output file format: %1").arg(sanitizedDesc));
+							fileFormat = lFormatIndex;
+							break;
+						}
 					}
 				}
-				msgBox.exec();
-				//get the right format
-				fileFormat = buttons[msgBox.clickedButton()];
-			}
-			catch(...)
-			{
+
+				//if we failed to find the specified file format, warn the user and display the list of supported formats
+				if (fileFormat < 0)
+				{
+					ccLog::Warning(QString("[FBX] File format '%1' not supported").arg(s_defaultOutputFormat));
+					ccLog::Print("[FBX] Supported output formats:");
+					for (int lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
+					{
+						if (pSdkManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
+						{
+							FbxString lDesc = pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
+							ccLog::Print(QString("\t- %1").arg(SanitizeFBXFormatString(lDesc.Buffer())));
+						}
+					}
+				}
+
 			}
 		}
 	}

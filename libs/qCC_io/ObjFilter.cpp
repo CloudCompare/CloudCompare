@@ -486,14 +486,19 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			}
 
 			//malformed line?
-			if (tokens.size() < 3)
+			if (tokens.size() < 2)
 			{
 				objWarnings[INVALID_LINE] = true;
 				error = true;
 				break;
 			}
 
-			float T[2] = { tokens[1].toFloat(), tokens[2].toFloat() };
+			float T[2] = { T[0] = tokens[1].toFloat(), 0 };
+
+			if (tokens.size() > 2) //OBJ specification allows for only one value!!!
+			{
+				T[1] = tokens[2].toFloat();
+			}
 
 			texCoords->addElement(T);
 			++texCoordsRead;

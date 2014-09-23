@@ -51,6 +51,7 @@ v2.5.6 ??/??/2014
 	* ASCII import/export:
 		- RGB colors can now be imported or exported as float values (between 0 and 1)
 			instead of unsigned bytes (0-255)
+		- New 'Apply all' button to attempt to load all the files with the same column assignation
 	* PTX import:
 		- grid translation is now also checked for 'big coordinates' (Global Shift & Scale mechanism)
 		- cancel button also cancels the normals computation!

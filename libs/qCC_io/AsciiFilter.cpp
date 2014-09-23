@@ -325,9 +325,21 @@ CC_FILE_ERROR AsciiFilter::loadFile(QString filename,
 	assert(openDialog);
 	openDialog->setFilename(filename);
 
+	bool forceDialogDisplay = parameters.alwaysDisplayLoadDialog;
+	//if we should try to avoid displaying the dialog
+	if (!parameters.alwaysDisplayLoadDialog)
+	{
+		//we must check that the automatically guessed sequence is ok
+		forceDialogDisplay = !openDialog->safeSequence();
+	}
+	if (openDialog->restorePreviousContext())
+	{
+		//if we can/should use the previous sequence ('Apply all')
+		forceDialogDisplay = false;
+	}
+
 	QString dummyStr;
-	if (	parameters.alwaysDisplayLoadDialog
-		||	!openDialog->safeSequence()
+	if (	forceDialogDisplay
 		||	!AsciiOpenDlg::CheckOpenSequence(openDialog->getOpenSequence(),dummyStr) )
 	{
 		if (!openDialog->exec())

@@ -90,6 +90,7 @@ const char ASCII_OPEN_DLG_TYPES_NAMES[ASCII_OPEN_DLG_TYPES_NUMBER][24] = {	"Igno
 																			};
 
 class QComboBox;
+class QPushButton;
 class Ui_AsciiOpenDialog;
 
 //! Dialog for configuration of ASCII files opening sequence
@@ -111,6 +112,11 @@ public:
 	/** \param filename filename
 	**/
 	void setFilename(QString filename);
+
+	//! Restores the previous context ('Apply all' button)
+	/** \return whether a context was saved or not
+	**/
+	bool restorePreviousContext();
 
 	//! ASCII open sequence item
 	struct SequenceItem
@@ -172,7 +178,8 @@ public slots:
 	void setSkippedLines(int linesCount);
 
 protected slots:
-	void testBeforeAccept();
+	bool apply();
+	void applyAll();
 	void columnsTypeHasChanged(int index);
 	void shortcutButtonPressed();
 	void checkSelectedColumnsValidity();
@@ -181,6 +188,9 @@ protected:
 
 	//! Tries to guess the best separator automagically
 	void autoFindBestSeparator();
+
+	// Resizes dialog width to fit all displayed table columns
+	void resizeWidthToFitTableColumns();
 
 	//associated UI
 	Ui_AsciiOpenDialog* m_ui;
@@ -193,11 +203,11 @@ protected:
 	//! Identifies columns with numbers only [mandatory]
 	std::vector<bool> m_columnsValidty;
 
-	//QComboBox* m_columnsType;
 	unsigned m_columnsCount;
 
-	// Resizes dialog width to fit all displayed table columns
-	void resizeWidthToFitTableColumns();
+	QPushButton* m_applyButton;
+	QPushButton* m_applyAllButton;
+	QPushButton* m_cancelButton;
 };
 
 #endif //CC_ASCII_OPEN_DIALOG_HEADER

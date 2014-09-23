@@ -46,6 +46,50 @@
 //Semi-persistent value for max. cloud size
 static double s_maxCloudSizeDoubleSpinBoxValue = (double)CC_MAX_NUMBER_OF_POINTS_PER_CLOUD/1.0e6;
 
+//! Dialog 'context'
+struct AsciiOpenContext
+{
+	//! Default initializer
+	AsciiOpenContext()
+		: separator(' ')
+		, extractSFNameFrom1stLine(false)
+		, maxPointCountPerCloud(0)
+		, skipLines(0)
+		, applyAll(false)
+	{}
+
+	//! Saves state
+	void save(Ui_AsciiOpenDialog* ui)
+	{
+		extractSFNameFrom1stLine = ui->extractSFNamesFrom1stLineCheckBox->isChecked();
+		maxPointCountPerCloud = ui->maxCloudSizeDoubleSpinBox->value();
+		separator = ui->lineEditSeparator->text()[0];
+		skipLines = ui->spinBoxSkipLines->value();
+	}
+
+	//! Restores state
+	void load(Ui_AsciiOpenDialog* ui) const
+	{
+		ui->extractSFNamesFrom1stLineCheckBox->setChecked(extractSFNameFrom1stLine);
+		ui->maxCloudSizeDoubleSpinBox->setValue(maxPointCountPerCloud);
+		ui->lineEditSeparator->setEnabled(false);
+		ui->lineEditSeparator->setText(separator);
+		ui->lineEditSeparator->setEnabled(true);
+		ui->spinBoxSkipLines->setEnabled(false);
+		ui->spinBoxSkipLines->setValue(skipLines);
+		ui->spinBoxSkipLines->setEnabled(true);
+	}
+	
+	AsciiOpenDlg::Sequence sequence;
+	QChar separator;
+	bool extractSFNameFrom1stLine;
+	double maxPointCountPerCloud;
+	int skipLines;
+	bool applyAll;
+};
+//! Semi-persistent loading context
+static AsciiOpenContext s_asciiOpenContext;
+
 AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	: QDialog(parent)
 	//, Ui::AsciiOpenDialog()
@@ -55,13 +99,26 @@ AsciiOpenDlg::AsciiOpenDlg(QWidget* parent)
 	, m_averageLineSize(-1.0)
 	//, m_filename()
 	, m_columnsCount(0)
+	, m_applyButton(0)
+	, m_applyAllButton(0)
+	, m_cancelButton(0)
 {
 	m_ui->setupUi(this);
 
 	//spinBoxSkipLines->setValue(0);
 	m_ui->commentLinesSkippedLabel->hide();
 
-	connect(m_ui->buttonBox,			SIGNAL(accepted()),						this, SLOT(testBeforeAccept()));
+	//"Apply" and "Apply all" buttons
+	m_applyButton = new QPushButton("Apply");
+	m_applyAllButton = new QPushButton("Apply all");
+	m_cancelButton = new QPushButton("Cancel");
+
+	m_ui->buttonBox->addButton(m_applyButton,QDialogButtonBox::ApplyRole);
+	m_ui->buttonBox->addButton(m_applyAllButton,QDialogButtonBox::ApplyRole);
+	m_ui->buttonBox->addButton(m_cancelButton,QDialogButtonBox::RejectRole);
+
+	connect(m_applyButton,				SIGNAL(clicked()),						this, SLOT(apply()));
+	connect(m_applyAllButton,			SIGNAL(clicked()),						this, SLOT(applyAll()));
 	connect(m_ui->lineEditSeparator,	SIGNAL(textChanged(const QString &)),	this, SLOT(onSeparatorChange(const QString &)));
 	connect(m_ui->spinBoxSkipLines,		SIGNAL(valueChanged(int)),				this, SLOT(setSkippedLines(int)));
 
@@ -703,7 +760,8 @@ void AsciiOpenDlg::checkSelectedColumnsValidity()
 		}
 	}
 
-	m_ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(!m_selectedInvalidColumns);
+	m_applyAllButton->setEnabled(!m_selectedInvalidColumns);
+	m_applyButton->setEnabled(!m_selectedInvalidColumns);
 }
 
 bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QString& errorMessage)
@@ -742,18 +800,68 @@ bool AsciiOpenDlg::CheckOpenSequence(const AsciiOpenDlg::Sequence& sequence, QSt
 	return true;
 }
 
-void AsciiOpenDlg::testBeforeAccept()
+bool AsciiOpenDlg::apply()
 {
 	QString errorMessage;
 	if (!CheckOpenSequence(getOpenSequence(),errorMessage))
 	{
 		QMessageBox::warning(0, "Error", errorMessage);
+		return false;
 	}
 	else
 	{
 		s_maxCloudSizeDoubleSpinBoxValue = m_ui->maxCloudSizeDoubleSpinBox->value();
 		accept();
+		return true;
 	}
+}
+
+void AsciiOpenDlg::applyAll()
+{
+	if (!apply())
+		return;
+
+	//backup current open sequence
+	s_asciiOpenContext.save(m_ui);
+	s_asciiOpenContext.sequence = getOpenSequence();
+	s_asciiOpenContext.applyAll = true;
+}
+
+bool AsciiOpenDlg::restorePreviousContext()
+{
+	if (!s_asciiOpenContext.applyAll)
+		return false;
+
+	//restore previous dialog state
+	s_asciiOpenContext.load(m_ui);
+	updateTable();
+
+	//saved sequence and cloud content don't match!!!
+	if (static_cast<size_t>(m_columnsCount) != s_asciiOpenContext.sequence.size())
+	{
+		s_asciiOpenContext.applyAll = false; //cancel the 'Apply All' effect
+		return false;
+	}
+
+	//Restore columns attributes
+	for (unsigned i=0; i<m_columnsCount; i++)
+	{
+		QComboBox* combo = static_cast<QComboBox*>(m_ui->tableWidget->cellWidget(0,i));
+		if (!combo) //yes, it happens if all lines are skipped!
+		{
+			s_asciiOpenContext.applyAll = false; //cancel the 'Apply All' effect
+			return false;
+		}
+		SequenceItem& item = s_asciiOpenContext.sequence[i];
+		combo->setCurrentIndex(item.type);
+	}
+
+	QString errorMessage;
+	if (!CheckOpenSequence(s_asciiOpenContext.sequence,errorMessage))
+	{
+		s_asciiOpenContext.applyAll = false; //cancel the 'Apply All' effect
+	}
+	return s_asciiOpenContext.applyAll;
 }
 
 AsciiOpenDlg::Sequence AsciiOpenDlg::getOpenSequence() const

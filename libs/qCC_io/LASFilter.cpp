@@ -45,7 +45,7 @@
 #include <fstream>				// std::ifstream
 #include <iostream>				// std::cout
 
-//LAS field descriptor
+//! LAS field descriptor
 struct LasField
 {
 	LAS_FIELDS type;
@@ -55,8 +55,25 @@ struct LasField
 	double maxValue;
 	double defaultValue;
 
-	LasField() : type(LAS_INVALID), sf(0), firstValue(0.0), minValue(0.0), maxValue(-1.0), defaultValue(0.0) {}
-	LasField(LAS_FIELDS fieldType, double defaultVal, double min, double max) : type(fieldType), sf(0), firstValue(0.0), minValue(min), maxValue(max), defaultValue(defaultVal) {}
+	//! Default constructor
+	LasField()
+		: type(LAS_INVALID)
+		, sf(0)
+		, firstValue(0.0)
+		, minValue(0.0)
+		, maxValue(-1.0)
+		, defaultValue(0.0)
+	{}
+	
+	//! Constructor with default, min and max allowed values
+	LasField(LAS_FIELDS fieldType, double defaultVal, double min, double max)
+		: type(fieldType)
+		, sf(0)
+		, firstValue(0.0)
+		, minValue(min)
+		, maxValue(max)
+		, defaultValue(defaultVal)
+	{}
 
 	//! Returns officiel field name
 	inline const char* getName() { return (type < LAS_INVALID ? LAS_FIELD_NAMES[type] : 0); }
@@ -88,7 +105,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 	ccGenericPointCloud* theCloud = ccHObjectCaster::ToGenericPointCloud(clouds[0]);
 	unsigned numberOfPoints = theCloud->size();
 
-	if (numberOfPoints==0)
+	if (numberOfPoints == 0)
 	{
 		ccLog::Error("Cloud is empty!");
 		return CC_FERR_BAD_ENTITY_TYPE;
@@ -268,23 +285,23 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 				assert(false);
 				break;
 			case LAS_INTENSITY:
-				point.SetIntensity((boost::uint16_t)it->sf->getValue(i));
+				point.SetIntensity(static_cast<boost::uint16_t>(it->sf->getValue(i)));
 				break;
 			case LAS_RETURN_NUMBER:
-				point.SetReturnNumber((boost::uint16_t)it->sf->getValue(i));
+				point.SetReturnNumber(static_cast<boost::uint16_t>(it->sf->getValue(i)));
 				break;
 			case LAS_NUMBER_OF_RETURNS:
-				point.SetNumberOfReturns((boost::uint16_t)it->sf->getValue(i));
+				point.SetNumberOfReturns(static_cast<boost::uint16_t>(it->sf->getValue(i)));
 				break;
 			case LAS_SCAN_DIRECTION:
-				point.SetScanDirection((boost::uint16_t)it->sf->getValue(i));
+				point.SetScanDirection(static_cast<boost::uint16_t>(it->sf->getValue(i)));
 				break;
 			case LAS_FLIGHT_LINE_EDGE:
-				point.SetFlightLineEdge((boost::uint16_t)it->sf->getValue(i));
+				point.SetFlightLineEdge(static_cast<boost::uint16_t>(it->sf->getValue(i)));
 				break;
 			case LAS_CLASSIFICATION:
 				{
-					boost::uint32_t val = (boost::uint32_t)it->sf->getValue(i);
+					boost::uint32_t val = static_cast<boost::uint32_t>(it->sf->getValue(i));
 					classif.SetClass(val & 31);		//first 5 bits
 					classif.SetSynthetic(val & 32); //6th bit
 					classif.SetKeyPoint(val & 64);	//7th bit
@@ -292,13 +309,13 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 				}
 				break;
 			case LAS_SCAN_ANGLE_RANK:
-				point.SetScanAngleRank((boost::uint8_t)it->sf->getValue(i));
+				point.SetScanAngleRank(static_cast<boost::uint8_t>(it->sf->getValue(i)));
 				break;
 			case LAS_USER_DATA:
-				point.SetUserData((boost::uint8_t)it->sf->getValue(i));
+				point.SetUserData(static_cast<boost::uint8_t>(it->sf->getValue(i)));
 				break;
 			case LAS_POINT_SOURCE_ID:
-				point.SetPointSourceID((boost::uint16_t)it->sf->getValue(i));
+				point.SetPointSourceID(static_cast<boost::uint16_t>(it->sf->getValue(i)));
 				break;
 			case LAS_RED:
 			case LAS_GREEN:
@@ -306,19 +323,19 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 				assert(false);
 				break;
 			case LAS_TIME:
-				point.SetTime((double)it->sf->getValue(i));
+				point.SetTime(static_cast<double>(it->sf->getValue(i)));
 				break;
 			case LAS_CLASSIF_VALUE:
-				classif.SetClass((boost::uint32_t)it->sf->getValue(i));
+				classif.SetClass(static_cast<boost::uint32_t>(it->sf->getValue(i)));
 				break;
 			case LAS_CLASSIF_SYNTHETIC:
-				classif.SetSynthetic((boost::uint32_t)it->sf->getValue(i));
+				classif.SetSynthetic(static_cast<boost::uint32_t>(it->sf->getValue(i)));
 				break;
 			case LAS_CLASSIF_KEYPOINT:
-				classif.SetKeyPoint((boost::uint32_t)it->sf->getValue(i));
+				classif.SetKeyPoint(static_cast<boost::uint32_t>(it->sf->getValue(i)));
 				break;
 			case LAS_CLASSIF_WITHHELD:
-				classif.SetWithheld((boost::uint32_t)it->sf->getValue(i));
+				classif.SetWithheld(static_cast<boost::uint32_t>(it->sf->getValue(i)));
 				break;
 			case LAS_INVALID:
 			default:
@@ -469,12 +486,12 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						{
 							field.sf->computeMinAndMax();
 
-							if (field.type == LAS_CLASSIFICATION
-								|| field.type == LAS_RETURN_NUMBER
-								|| field.type == LAS_NUMBER_OF_RETURNS)
+							if (	field.type == LAS_CLASSIFICATION
+								||	field.type == LAS_RETURN_NUMBER
+								||	field.type == LAS_NUMBER_OF_RETURNS)
 							{
-								int cMin = (int)field.sf->getMin();
-								int cMax = (int)field.sf->getMax();
+								int cMin = static_cast<int>(field.sf->getMin());
+								int cMax = static_cast<int>(field.sf->getMax());
 								field.sf->setColorRampSteps(std::min<int>(cMax-cMin+1,256));
 								//classifSF->setMinSaturation(cMin);
 							}
@@ -490,7 +507,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 								loadedCloud->showSF(!thisChunkHasColors);
 							}
 							field.sf->release();
-							field.sf=0;
+							field.sf = 0;
 						}
 						else
 						{
@@ -506,22 +523,22 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 					QString chunkName("unnamed - Cloud");
 					unsigned n = container.getChildrenNumber();
-					if (n!=0) //if we have more than one cloud, we append an index
+					if (n != 0) //if we have more than one cloud, we append an index
 					{
-						if (n==1)  //we must also update the first one!
+						if (n == 1)  //we must also update the first one!
 							container.getChild(0)->setName(chunkName+QString(" #1"));
 						chunkName += QString(" #%1").arg(n+1);
 					}
 					loadedCloud->setName(chunkName);
 
 					container.addChild(loadedCloud);
-					loadedCloud=0;
+					loadedCloud = 0;
 				}
 				else
 				{
 					//empty cloud?!
 					delete loadedCloud;
-					loadedCloud=0;
+					loadedCloud = 0;
 				}
 			}
 
@@ -557,9 +574,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 			if (s_lasOpenDlg->doLoad(LAS_TIME))
 				fieldsToLoad.push_back(LasField(LAS_TIME,0,0,-1.0)); //8 bytes (double)
 			if (s_lasOpenDlg->doLoad(LAS_RETURN_NUMBER))
-				fieldsToLoad.push_back(LasField(LAS_RETURN_NUMBER,1,1,7)); //3 bits: between 1 and 7
+				fieldsToLoad.push_back(LasField(LAS_RETURN_NUMBER,0,1,7)); //3 bits: between 1 and 7
 			if (s_lasOpenDlg->doLoad(LAS_NUMBER_OF_RETURNS))
-				fieldsToLoad.push_back(LasField(LAS_NUMBER_OF_RETURNS,1,1,7)); //3 bits: between 1 and 7
+				fieldsToLoad.push_back(LasField(LAS_NUMBER_OF_RETURNS,0,1,7)); //3 bits: between 1 and 7
 			if (s_lasOpenDlg->doLoad(LAS_SCAN_DIRECTION))
 				fieldsToLoad.push_back(LasField(LAS_SCAN_DIRECTION,0,0,1)); //1 bit: 0 or 1
 			if (s_lasOpenDlg->doLoad(LAS_FLIGHT_LINE_EDGE))
@@ -633,8 +650,8 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				if (!forced8bitRgbMode && colorCompBitShift == 0)
 				{
 					if (	(col[0] & 0xFF00)
-						||  (col[1] & 0xFF00)
-						||  (col[2] & 0xFF00))
+						||	(col[1] & 0xFF00)
+						||	(col[2] & 0xFF00))
 					{
 						//the color components are on 16 bits!
 						ccLog::Print("[LAS FILE] Color components are coded on 16 bits");
@@ -665,31 +682,31 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				assert(false);
 				break;
 			case LAS_INTENSITY:
-				value = (double)p.GetIntensity();
+				value = static_cast<double>(p.GetIntensity());
 				break;
 			case LAS_RETURN_NUMBER:
-				value = (double)p.GetReturnNumber();
+				value = static_cast<double>(p.GetReturnNumber());
 				break;
 			case LAS_NUMBER_OF_RETURNS:
-				value = (double)p.GetNumberOfReturns();
+				value = static_cast<double>(p.GetNumberOfReturns());
 				break;
 			case LAS_SCAN_DIRECTION:
-				value = (double)p.GetScanDirection();
+				value = static_cast<double>(p.GetScanDirection());
 				break;
 			case LAS_FLIGHT_LINE_EDGE:
-				value = (double)p.GetFlightLineEdge();
+				value = static_cast<double>(p.GetFlightLineEdge());
 				break;
 			case LAS_CLASSIFICATION:
-				value = (double)p.GetClassification().GetClass();
+				value = static_cast<double>(p.GetClassification().GetClass());
 				break;
 			case LAS_SCAN_ANGLE_RANK:
-				value = (double)p.GetScanAngleRank();
+				value = static_cast<double>(p.GetScanAngleRank());
 				break;
 			case LAS_USER_DATA:
-				value = (double)p.GetUserData();
+				value = static_cast<double>(p.GetUserData());
 				break;
 			case LAS_POINT_SOURCE_ID:
-				value = (double)p.GetPointSourceID();
+				value = static_cast<double>(p.GetPointSourceID());
 				break;
 			case LAS_RED:
 			case LAS_GREEN:
@@ -700,16 +717,16 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				value = p.GetTime();
 				break;
 			case LAS_CLASSIF_VALUE:
-				value = (double)(p.GetClassification().GetClass() & 31); //5 bits
+				value = static_cast<double>(p.GetClassification().GetClass() & 31); //5 bits
 				break;
 			case LAS_CLASSIF_SYNTHETIC:
-				value = (double)(p.GetClassification().GetClass() & 32); //bit #6
+				value = static_cast<double>(p.GetClassification().GetClass() & 32); //bit #6
 				break;
 			case LAS_CLASSIF_KEYPOINT:
-				value = (double)(p.GetClassification().GetClass() & 64); //bit #7
+				value = static_cast<double>(p.GetClassification().GetClass() & 64); //bit #7
 				break;
 			case LAS_CLASSIF_WITHHELD:
-				value = (double)(p.GetClassification().GetClass() & 128); //bit #8
+				value = static_cast<double>(p.GetClassification().GetClass() & 128); //bit #8
 				break;
 			case LAS_INVALID:
 			default:

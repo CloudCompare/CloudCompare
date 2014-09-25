@@ -41,11 +41,12 @@ enum LAS_FIELDS {	LAS_X					= 0,
 					LAS_GREEN				= 13,
 					LAS_BLUE				= 14,
 					LAS_TIME				= 15,
+					LAS_EXTRA				= 16,
 					//Sub fields
-					LAS_CLASSIF_VALUE		= 16,
-					LAS_CLASSIF_SYNTHETIC	= 17,
-					LAS_CLASSIF_KEYPOINT	= 18,
-					LAS_CLASSIF_WITHHELD	= 19,
+					LAS_CLASSIF_VALUE		= 17,
+					LAS_CLASSIF_SYNTHETIC	= 18,
+					LAS_CLASSIF_KEYPOINT	= 19,
+					LAS_CLASSIF_WITHHELD	= 20,
 					//Invald flag
 					LAS_INVALID				= 255
 };
@@ -66,6 +67,7 @@ const char LAS_FIELD_NAMES[][28] = {"X",
 									"Green",
 									"Blue",
 									"Time",
+									"extra",
 									"[Classif] Value",
 									"[Classif] Synthetic flag",
 									"[Classif] Key-point flag",
@@ -76,6 +78,8 @@ const char LAS_FIELD_NAMES[][28] = {"X",
 //! Dialog to choose the LAS fields to load
 class LASOpenDlg : public QDialog, public Ui::OpenLASFileDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor
@@ -87,11 +91,53 @@ public:
 	//! Whether to load a given field
 	bool doLoad(LAS_FIELDS field) const;
 
+	//! Enables the 'Extra bytes' frame if bitCount > 0
+	void setExtraBitsCount(unsigned bitCount);
+
+	//! Returns whether extra bytes settings are valid
+	bool extraBytesSettingsAreValid() const;
+
+	//! Extra field type
+	enum ExtraFieldsType {	EXTRA_INVALID,
+							EXTRA_INT8,
+							EXTRA_INT16,
+							EXTRA_INT32,
+							EXTRA_INT64,
+							EXTRA_UINT8,
+							EXTRA_UINT16,
+							EXTRA_UINT32,
+							EXTRA_UINT64,
+							EXTRA_FLOAT,
+							EXTRA_DOUBLE };
+
+	//! Returns the extra fields type (all the same for now)
+	ExtraFieldsType getExtraFieldsType() const;
+
+	//! Returns the extra field(s) size (in bytes)
+	unsigned getExtraFieldsByteSize() const;
+
+	//! Returns the number of extra fields to load
+	unsigned getExtraFieldsCount() const;
+
 	//! Auto-skip mode (to use the same parameters for ALL files afterwards)
 	bool autoSkipMode() const;
 
 	//! Whether 8-bit RGB mode is forced or not
 	bool forced8bitRgbMode() const;
+
+protected slots:
+
+	void extraFieldGroupBoxToggled(bool);
+	void extraFieldsSpinBoxChanged(int);
+	void extraTypeComboBoxChanged(int);
+
+protected:
+
+	//! Updates the GUI depending on whether extra bytes params are valid or not
+	void checkExtraBytesSettings();
+
+	//! Number of available bits in the 'extra bytes' portion
+	int m_extraBitsCount;
 
 };
 

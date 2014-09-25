@@ -24,10 +24,19 @@
 #include <string.h>
 #include <assert.h>
 
-LASOpenDlg::LASOpenDlg(QWidget* parent) : QDialog(parent), Ui::OpenLASFileDialog()
+LASOpenDlg::LASOpenDlg(QWidget* parent)
+	: QDialog(parent)
+	, Ui::OpenLASFileDialog()
+	, m_extraBitsCount(0)
 {
 	setupUi(this);
 	autoSkipNextCheckBox->setChecked(false); //just to be sure
+
+	connect(extraFieldGroupBox,	SIGNAL(toggled(bool)),				this,	SLOT(extraFieldGroupBoxToggled(bool)));
+	connect(extraFieldsSpinBox,	SIGNAL(valueChanged(int)),			this,	SLOT(extraFieldsSpinBoxChanged(int)));
+	connect(extraTypeComboBox,	SIGNAL(currentIndexChanged(int)),	this,	SLOT(extraTypeComboBoxChanged(int)));
+
+	extraFieldGroupBox->setEnabled(false);
 }
 
 bool FieldIsPresent(const std::vector<std::string>& dimensions, LAS_FIELDS field)
@@ -102,6 +111,8 @@ bool LASOpenDlg::doLoad(LAS_FIELDS field) const
 		return blueCheckBox->isEnabled() && blueCheckBox->isChecked();
 	case LAS_TIME:
 		return timeCheckBox->isEnabled() && timeCheckBox->isChecked();
+	case LAS_EXTRA:
+		return extraFieldGroupBox->isEnabled() && extraFieldGroupBox->isChecked() && extraBytesSettingsAreValid();
 	case LAS_CLASSIF_VALUE:
 		return classifCheckBox->isEnabled() && classifCheckBox->isChecked() && decomposeClassifGroupBox->isChecked() && classifValueCheckBox->isChecked();
 	case LAS_CLASSIF_SYNTHETIC:
@@ -117,6 +128,121 @@ bool LASOpenDlg::doLoad(LAS_FIELDS field) const
 	}
 
 	return false;
+}
+
+void LASOpenDlg::setExtraBitsCount(unsigned bitCount)
+{
+	m_extraBitsCount = bitCount;
+	extraFieldGroupBox->setEnabled(bitCount != 0);
+	extraBitsCountLabel->setText(QString::number(bitCount));
+}
+
+LASOpenDlg::ExtraFieldsType LASOpenDlg::getExtraFieldsType() const
+{
+	switch(extraTypeComboBox->currentIndex())
+	{
+	case 0:
+		return EXTRA_INT8;
+	case 1:
+		return EXTRA_INT16;
+	case 2:
+		return EXTRA_INT32;
+	case 3:
+		return EXTRA_INT64;
+	case 4:
+		return EXTRA_UINT8;
+	case 5:
+		return EXTRA_UINT16;
+	case 6:
+		return EXTRA_UINT32;
+	case 7:
+		return EXTRA_UINT64;
+	case 8:
+		return EXTRA_FLOAT;
+	case 9:
+		return EXTRA_DOUBLE;
+	default:
+		break;
+	}
+
+	//shouldn't happen!
+	return EXTRA_INVALID;
+}
+
+unsigned LASOpenDlg::getExtraFieldsCount() const
+{
+	return static_cast<unsigned>(extraFieldsSpinBox->value());
+}
+
+unsigned LASOpenDlg::getExtraFieldsByteSize() const
+{
+	switch(getExtraFieldsType())
+	{
+	case EXTRA_INVALID:
+		return 0;
+	case EXTRA_INT8:
+	case EXTRA_UINT8:
+		return 1;
+		break;
+	case EXTRA_INT16:
+	case EXTRA_UINT16:
+		return 2;
+		break;
+	case EXTRA_INT32:
+	case EXTRA_UINT32:
+	case EXTRA_FLOAT:
+		return 4;
+		break;
+	case EXTRA_INT64:
+	case EXTRA_UINT64:
+	case EXTRA_DOUBLE:
+		return 8;
+		break;
+	default:
+		assert(false);
+		break;
+	}
+	
+	return 0;
+}
+
+bool LASOpenDlg::extraBytesSettingsAreValid() const
+{
+	int fieldCount = extraFieldsSpinBox->value();
+	unsigned fieldSize = getExtraFieldsByteSize() * 8;
+
+	if (fieldSize == 0)
+		return false;
+
+	int totalSize = fieldCount * static_cast<int>(fieldSize);
+
+	return totalSize <= m_extraBitsCount;
+}
+
+void LASOpenDlg::checkExtraBytesSettings()
+{
+	bool isValid = true;
+	if (extraFieldGroupBox->isEnabled() && extraFieldGroupBox->isChecked())
+	{
+		isValid = extraBytesSettingsAreValid();
+	}
+
+	buttonBox->setEnabled(isValid);
+}
+
+void LASOpenDlg::extraFieldGroupBoxToggled(bool)
+{
+	checkExtraBytesSettings();
+}
+
+void LASOpenDlg::extraFieldsSpinBoxChanged(int)
+{
+	checkExtraBytesSettings();
+}
+
+void LASOpenDlg::extraTypeComboBoxChanged(int)
+{
+	checkExtraBytesSettings();
 }
 
 bool LASOpenDlg::autoSkipMode() const

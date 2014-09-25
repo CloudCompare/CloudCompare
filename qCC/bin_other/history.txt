@@ -56,6 +56,11 @@ v2.5.6 ??/??/2014
 		- grid translation is now also checked for 'big coordinates' (Global Shift & Scale mechanism)
 		- cancel button also cancels the normals computation!
 		- sensors corresponding to each scan are automatically created
+	* LAS import:
+		- new handles LAS 1.4 files
+		- the dialog has a new section that allows the user to load the 'extra bytes' per point
+			as scalar fields (the user can set the number of fields and their type - they must
+			all have the same type for now)
 	* Camera sensor management enhanced:
 		- Camera sensors are now created automatically when clouds are loaded from Bundler or ICM files (TODO: from E57)
 		- the camera symbol in 3D is fully configurable (display scale, with or without frustrum, etc.)

@@ -22,7 +22,17 @@ v2.5.6 ??/??/2014
 	* New 'Display' option:
 		- Display > Lock rotation around vert. axis' (to lock the manual rotation around the screen
 			vertical axis)
-		* Shortcut: 'L'
+		- Shortcut: 'L'
+	* Transformation history:
+		- All rigid transformations applied to any 3D object are now 'tracked'. In practice it is
+			accumulated	in a 'history' transformation matrix for each entity. For instance this allows
+			to easily determine the global transformation applied to an entity since loading time (even
+			after multiple manual transformation or automatic registration steps).
+		- a dedicated widget ('Transformation history') has been added to the the 'Properties' dialog.
+			This widget displays the matrix either as a "standard" 4x4 matrix, or as a rotation axis
+			associated to a rotation angle and a translation vector. This widget also allows the user
+			to copy the matrix to the clipboard or to save it as a text file (for opening it later in
+			'Edit > Apply transformation' for instance)
 - Enhancements:
 	* qPoissonRecon upgraded:
 		- now uses the latest PoissonRecon version 6.11

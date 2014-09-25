@@ -67,6 +67,8 @@ ccHObject::ccHObject(QString name/*=QString()*/)
 {
 	setVisible(false);
 	lockVisibility(true);
+	
+	m_glTransHistory.toIdentity();
 }
 
 ccHObject::~ccHObject()
@@ -621,6 +623,11 @@ void ccHObject::draw(CC_DRAW_CONTEXT& context)
 
 	if (draw3D && m_glTransEnabled)
 		glPopMatrix();
+}
+
+void ccHObject::applyGLTransformation(const ccGLMatrix& trans)
+{
+	m_glTransHistory = trans * m_glTransHistory;
 }
 
 void ccHObject::applyGLTransformation_recursive(ccGLMatrix* trans/*=NULL*/)

@@ -182,9 +182,11 @@ bool ccGenericPrimitive::setDrawingPrecision(unsigned steps)
 
 void ccGenericPrimitive::applyGLTransformation(const ccGLMatrix& trans)
 {
+	//transparent call
+	ccMesh::applyGLTransformation(trans);
+
 	//we update the vertices transformation
 	m_transformation = trans * m_transformation;
-	ccMesh::applyGLTransformation(trans);
 }
 
 void ccGenericPrimitive::applyTransformationToVertices()

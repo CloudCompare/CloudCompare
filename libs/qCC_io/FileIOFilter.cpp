@@ -288,6 +288,8 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	unsigned childrenCount = container->getChildrenNumber();
 	if (childrenCount != 0)
 	{
+		//all transformation that could have happened before this point are of no interest for the user ;)
+		container->resetGLTransformationHistory();
 		//we set the main container name as the full filename (with path)
 		container->setName(QString("%1 (%2)").arg(fi.fileName()).arg(fi.absolutePath()));
 		for (unsigned i=0; i<childrenCount; ++i)

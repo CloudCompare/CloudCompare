@@ -73,9 +73,11 @@ bool ccSensor::addPosition(ccGLMatrix& trans, double index)
 
 void ccSensor::applyGLTransformation(const ccGLMatrix& trans)
 {
+	//transparent call
+	ccHObject::applyGLTransformation(trans);
+
 	//we update the rigid transformation
 	m_rigidTransformation = trans * m_rigidTransformation;
-	ccHObject::applyGLTransformation(trans);
 }
 
 void ccSensor::getIndexBounds(double& minIndex, double& maxIndex) const

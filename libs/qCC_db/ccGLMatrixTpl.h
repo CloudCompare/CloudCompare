@@ -29,6 +29,8 @@
 #include <QString>
 #include <QStringList>
 #include <QRegExp>
+#include <QFile>
+#include <QTextStream>
 
 //System
 #include <math.h>
@@ -339,6 +341,48 @@ public:
 				str.append("\n");
 		}
 		return str;
+	}
+
+	//! Saves matrix to an ASCII file
+	/** \param filename output file name
+		\param precision output digits precision
+	***/
+	virtual bool toAsciiFile(QString filename, int precision = 12) const
+	{
+		QFile fp(filename);
+		if (!fp.open(QFile::WriteOnly | QFile::Text))
+			return false;
+
+		QTextStream stream(&fp);
+		stream.setRealNumberPrecision(precision);
+		for (unsigned i=0; i<4; ++i)
+		{
+			stream << m_mat[i] << " " << m_mat[i+4] << " " << m_mat[i+8] << " " << m_mat[i+12] << endl;
+		}
+
+		return (fp.error() == QFile::NoError);
+	}
+
+	//! Loads matrix from an ASCII file
+	/** \param filename input file name
+	***/
+	virtual bool fomAsciiFile(QString filename)
+	{
+		QFile fp(filename);
+		if (!fp.open(QFile::ReadOnly | QFile::Text))
+			return false;
+
+		QTextStream stream(&fp);
+
+		for (unsigned i=0; i<4; ++i)
+		{
+			stream >> m_mat[i];
+			stream >> m_mat[i+4];
+			stream >> m_mat[i+8];
+			stream >> m_mat[i+12];
+		}
+
+		return (fp.error() == QFile::NoError);
 	}
 
 	//! Returns the rotation component around X only

@@ -455,6 +455,9 @@ void ccMesh::setMaterialSet(ccMaterialSet* materialSet, bool autoReleaseOldMater
 
 void ccMesh::applyGLTransformation(const ccGLMatrix& trans)
 {
+	//transparent call
+	ccGenericMesh::applyGLTransformation(trans);
+
 	//vertices should be handled another way!
 
     //we must take care of the triangle normals!
@@ -464,31 +467,37 @@ void ccMesh::applyGLTransformation(const ccGLMatrix& trans)
 
         //if there is more triangle normals than the size of the compressed
 		//normals array, we recompress the array instead of recompressing each normal
-		unsigned i,numTriNormals = m_triNormals->currentSize();
+		unsigned numTriNormals = m_triNormals->currentSize();
         if (numTriNormals>ccNormalVectors::GetNumberOfVectors())
         {
             NormsIndexesTableType* newNorms = new NormsIndexesTableType;
             if (newNorms->reserve(ccNormalVectors::GetNumberOfVectors()))
             {
-                for (i=0;i<ccNormalVectors::GetNumberOfVectors();i++)
-                {
-                    CCVector3 new_n(ccNormalVectors::GetNormal(i));
-                    trans.applyRotation(new_n);
-                    normsType newNormIndex = ccNormalVectors::GetNormIndex(new_n.u);
-                    newNorms->addElement(newNormIndex);
-                }
+				//decode
+				{
+					for (unsigned i=0; i<ccNormalVectors::GetNumberOfVectors(); i++)
+					{
+						CCVector3 new_n(ccNormalVectors::GetNormal(i));
+						trans.applyRotation(new_n);
+						normsType newNormIndex = ccNormalVectors::GetNormIndex(new_n.u);
+						newNorms->addElement(newNormIndex);
+					}
+				}
 
+				//recode
                 m_triNormals->placeIteratorAtBegining();
-                for (i=0;i<numTriNormals;i++)
-                {
-                    m_triNormals->setValue(i,newNorms->getValue(m_triNormals->getCurrentValue()));
-                    m_triNormals->forwardIterator();
-                }
-                recoded=true;
+				{
+					for (unsigned i=0; i<numTriNormals; i++)
+					{
+						m_triNormals->setValue(i,newNorms->getValue(m_triNormals->getCurrentValue()));
+						m_triNormals->forwardIterator();
+					}
+				}
+                recoded = true;
             }
             newNorms->clear();
 			newNorms->release();
-			newNorms=0;
+			newNorms = 0;
         }
 
         //if there is less triangle normals than the compressed normals array size
@@ -498,7 +507,7 @@ void ccMesh::applyGLTransformation(const ccGLMatrix& trans)
         {
             //on recode direct chaque normale
             m_triNormals->placeIteratorAtBegining();
-            for (i=0;i<numTriNormals;i++)
+            for (unsigned i=0; i<numTriNormals; i++)
             {
                 normsType* _theNormIndex = m_triNormals->getCurrentValuePtr();
                 CCVector3 new_n(ccNormalVectors::GetNormal(*_theNormIndex));

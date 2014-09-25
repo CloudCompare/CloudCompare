@@ -7744,7 +7744,11 @@ void MainWindow::doActionClone()
 
 		if (clone)
 		{
+			//copy GL transformation history
+			clone->setGLTransformationHistory(selectedEntities[i]->getGLTransformationHistory());
+			//copy display
 			clone->setDisplay(selectedEntities[i]->getDisplay());
+			
 			addToDB(clone);
 			lastClone = clone;
 		}
@@ -8325,6 +8329,10 @@ void MainWindow::doActionExportCloudsInfo()
 		ccConsole::Error("Failed to open file for writing! (check file permissions)");
 		return;
 	}
+
+	//save last saving location
+	settings.setValue(s_psCurrentPath,QFileInfo(outputFilename).absolutePath());
+	settings.endGroup();
 
 	//write CSV header
 	QTextStream csvStream(&csvFile);

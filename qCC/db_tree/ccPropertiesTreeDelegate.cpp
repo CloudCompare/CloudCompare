@@ -122,6 +122,7 @@ QSize ccPropertiesTreeDelegate::sizeHint(const QStyleOptionViewItem& option, con
 		case OBJECT_CLOUD_SF_EDITOR:
 			return QSize(250,200);
 		case OBJECT_SENSOR_MATRIX_EDITOR:
+		case OBJECT_HISTORY_MATRIX_EDITOR:
 			return QSize(250,120);
 		}
 	}
@@ -420,6 +421,10 @@ void ccPropertiesTreeDelegate::fillWithHObject(ccHObject* _obj)
 	//display window
 	if (!_obj->isLocked())
 		appendRow( ITEM("Current Display"), PERSISTENT_EDITOR(OBJECT_CURRENT_DISPLAY), true );
+
+	//transformation history
+	addSeparator("Transformation history");
+	appendWideRow(PERSISTENT_EDITOR(OBJECT_HISTORY_MATRIX_EDITOR));
 }
 
 void ccPropertiesTreeDelegate::fillWithPointCloud(ccGenericPointCloud* _obj)
@@ -871,6 +876,7 @@ bool ccPropertiesTreeDelegate::isWideEditor(int itemData) const
 	{
 	case OBJECT_CLOUD_SF_EDITOR:
 	case OBJECT_SENSOR_MATRIX_EDITOR:
+	case OBJECT_HISTORY_MATRIX_EDITOR:
 		return true;
 	default:
 		break;
@@ -971,6 +977,7 @@ QWidget* ccPropertiesTreeDelegate::createEditor(QWidget *parent,
 			sfd->setFocusPolicy(Qt::StrongFocus); //Qt doc: << The returned editor widget should have Qt::StrongFocus >>
 			return sfd;
 		}
+	case OBJECT_HISTORY_MATRIX_EDITOR:
 	case OBJECT_SENSOR_MATRIX_EDITOR:
 		{
 			MatrixDisplayDlg* sfd = new MatrixDisplayDlg(parent);
@@ -1246,6 +1253,15 @@ void ccPropertiesTreeDelegate::setEditorData(QWidget *editor, const QModelIndex 
 			ccScalarField* sf = cloud->getCurrentDisplayedScalarField();
 			if (sf)
 				sfd->fillDialogWith(sf);
+			break;
+		}
+	case OBJECT_HISTORY_MATRIX_EDITOR:
+		{
+			MatrixDisplayDlg *mdd = qobject_cast<MatrixDisplayDlg*>(editor);
+			if (!mdd)
+				return;
+
+			mdd->fillDialogWith(m_currentObject->getGLTransformationHistory());
 			break;
 		}
 	case OBJECT_SENSOR_MATRIX_EDITOR:

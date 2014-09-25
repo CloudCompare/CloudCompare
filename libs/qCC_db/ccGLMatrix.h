@@ -64,48 +64,6 @@ public:
 	**/
 	ccGLMatrix(const Vector3Tpl<float>& X, const Vector3Tpl<float>& Y, const Vector3Tpl<float>& Z, const Vector3Tpl<float>& Tr) : ccGLMatrixTpl<float>(X,Y,Z,Tr) {}
 
-	//! Saves matrix to an ASCII file
-	virtual bool toAsciiFile(const char* filename) const
-	{
-		FILE* fp = fopen(filename,"wt");
-		if (!fp)
-			return false;
-
-		for (unsigned i=0; i<4; ++i)
-		{
-			if (fprintf(fp,"%.12f %.12f %.12f %.12f\n",m_mat[i],m_mat[i+4],m_mat[i+8],m_mat[i+12]) < 4)
-			{
-				fclose(fp);
-				return false;
-			}
-		}
-		fclose(fp);
-
-		return true;
-	}
-
-	//! Loads matrix from an ASCII file
-	virtual bool fomAsciiFile(const char* filename)
-	{
-		FILE* fp = fopen(filename,"rt");
-		if (!fp)
-			return false;
-
-		float* mat = m_mat;
-		for (unsigned i=0; i<4; ++i)
-		{
-			if (fscanf(fp,"%f %f %f %f\n",mat,mat+4,mat+8,mat+12) < 4)
-			{
-				fclose(fp);
-				return false;
-			}
-			++mat;
-		}
-		fclose(fp);
-
-		return true;
-	}
-
 };
 
 //! Double version of ccGLMatrixTpl
@@ -145,48 +103,6 @@ public:
 		\param Tr 3 first elements of the last column (last one is 1)
 	**/
 	ccGLMatrixd(const Vector3Tpl<double>& X, const Vector3Tpl<double>& Y, const Vector3Tpl<double>& Z, const Vector3Tpl<double>& Tr) : ccGLMatrixTpl<double>(X,Y,Z,Tr) {}
-	
-	//! Saves matrix to an ASCII file
-	virtual bool toAsciiFile(const char* filename) const
-	{
-		FILE* fp = fopen(filename,"wt");
-		if (!fp)
-			return false;
-
-		for (unsigned i=0; i<4; ++i)
-		{
-			if (fprintf(fp,"%.18lf %.18lf %.18lf %.18lf\n",m_mat[i],m_mat[i+4],m_mat[i+8],m_mat[i+12]) < 4)
-			{
-				fclose(fp);
-				return false;
-			}
-		}
-		fclose(fp);
-
-		return true;
-	}
-
-	//! Loads matrix from an ASCII file
-	virtual bool fomAsciiFile(const char* filename)
-	{
-		FILE* fp = fopen(filename,"rt");
-		if (!fp)
-			return false;
-
-		double* mat = m_mat;
-		for (unsigned i=0; i<4; ++i)
-		{
-			if (fscanf(fp,"%lf %lf %lf %lf\n",mat,mat+4,mat+8,mat+12) < 4)
-			{
-				fclose(fp);
-				return false;
-			}
-			++mat;
-		}
-		fclose(fp);
-
-		return true;
-	}
 
 };
 

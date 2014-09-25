@@ -115,6 +115,9 @@ bool ccPolyline::hasColors() const
 
 void ccPolyline::applyGLTransformation(const ccGLMatrix& trans)
 {
+	//transparent call
+	ccHObject::applyGLTransformation(trans);
+
 	//invalidate the bounding-box
 	//(and we hope the vertices will be updated as well!)
 	m_validBB = false;

@@ -1279,6 +1279,9 @@ void ccPointCloud::applyGLTransformation(const ccGLMatrix& trans)
 
 void ccPointCloud::applyRigidTransformation(const ccGLMatrix& trans)
 {
+	//transparent call
+	ccGenericPointCloud::applyGLTransformation(trans);
+
 	unsigned count = size();
 	for (unsigned i=0; i<count; i++)
 		trans.apply(*point(i));

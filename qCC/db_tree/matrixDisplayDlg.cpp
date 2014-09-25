@@ -20,17 +20,27 @@
 //qCC_gl
 #include <ccGuiParameters.h>
 
+//Qt
+#include <QFileDialog>
+#include <QSettings>
+#include <QClipboard>
+
 MatrixDisplayDlg::MatrixDisplayDlg(QWidget* parent/*=0*/)
 	: QWidget(parent)
 	, Ui::MatrixDisplayDlg()
 {
 	setupUi(this);
 
+	connect(exportToAsciiPushButton,		SIGNAL(clicked()), this, SLOT(exportToASCII()));
+	connect(exportToClipboardPushButton,	SIGNAL(clicked()), this, SLOT(exportToClipboard()));
+
 	show();
 }
 
 void MatrixDisplayDlg::fillDialogWith(const ccGLMatrix& mat)
 {
+	m_mat = ccGLMatrixd(mat.data());
+
 	int precision = ccGui::Parameters().displayedNumPrecision;
 
 	//display as 4x4 matrix
@@ -48,6 +58,8 @@ void MatrixDisplayDlg::fillDialogWith(const ccGLMatrix& mat)
 
 void MatrixDisplayDlg::fillDialogWith(const ccGLMatrixd& mat)
 {
+	m_mat = mat;
+
 	int precision = ccGui::Parameters().displayedNumPrecision;
 
 	//display as 4x4 matrix
@@ -83,4 +95,40 @@ void MatrixDisplayDlg::clear()
 	axisLabel->setText(QString());
 	angleLabel->setText(QString());
 	centerLabel->setText(QString());
+	m_mat.toZero();
+}
+
+void MatrixDisplayDlg::exportToASCII()
+{
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup("LoadFile"); //use the same folder as the load one
+	QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
+
+	QString outputFilename = QFileDialog::getSaveFileName(this, "Select output file", currentPath, "*.mat.txt");
+	if (outputFilename.isEmpty())
+		return;
+
+	if (m_mat.toAsciiFile(outputFilename))
+	{
+		ccLog::Print(QString("Matrix saved as '%1'").arg(outputFilename));
+	}
+	else
+	{
+		ccLog::Error(QString("Failed to save matrix as '%1'").arg(outputFilename));
+	}
+
+	//save last saving location
+	settings.setValue("currentPath",QFileInfo(outputFilename).absolutePath());
+	settings.endGroup();
+}
+
+void MatrixDisplayDlg::exportToClipboard()
+{
+	QClipboard* clipboard = QApplication::clipboard();
+	if (clipboard)
+	{
+		clipboard->setText(m_mat.toString());
+		ccLog::Print("Matrix saved to clipboard!");
+	}
 }

@@ -44,10 +44,22 @@ public:
 	//! Updates dialog with a given (double) matrix
 	void fillDialogWith(const ccGLMatrixd& mat);
 
+public slots:
+
+	//! Exports current matrix to an ASCII file
+	/** Will display a file selection dialog!
+	**/
+	void exportToASCII();
+	//! Exports current matrix to the clipboard
+	void exportToClipboard();
+
 protected:
 
 	//! Fills the second part of the dialog
 	void fillDialogWith(const CCVector3d& axis, double angle_rad, const CCVector3d& T, int precision);
+
+	//! Matrix
+	ccGLMatrixd m_mat;
 
 };
 

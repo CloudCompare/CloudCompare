@@ -229,6 +229,7 @@ public:
 	ccHObject_recursive_call1(removeFromDisplay,ccGenericGLDisplay*,removeFromDisplay_recursive);
 	ccHObject_recursive_call0(prepareDisplayForRefresh,prepareDisplayForRefresh_recursive);
 	ccHObject_recursive_call0(refreshDisplay,refreshDisplay_recursive);
+	ccHObject_recursive_call0(resetGLTransformationHistory,resetGLTransformationHistory_recursive);
 	ccHObject_recursive_call0(toggleActivation,toggleActivation_recursive);
 	ccHObject_recursive_call0(toggleVisibility,toggleVisibility_recursive);
 	ccHObject_recursive_call0(toggleColors,toggleColors_recursive);
@@ -305,6 +306,13 @@ public:
 	//! Returns object unqiue ID used for display
 	virtual unsigned getUniqueIDForDisplay() const { return getUniqueID(); }
 
+	//! Returns the transformation 'history' matrix
+	const ccGLMatrix& getGLTransformationHistory() const { return m_glTransHistory; }
+	//! Sets the transformation 'history' matrix (handle with care!)
+	void setGLTransformationHistory(const ccGLMatrix& mat) { m_glTransHistory = mat; }
+	//! Resets the transformation 'history' matrix
+	void resetGLTransformationHistory() { m_glTransHistory.toIdentity(); }
+
 protected:
 
 	//! Sets parent object
@@ -317,7 +325,7 @@ protected:
 	/** this = rotMat*(this-rotCenter)+(rotCenter+trans)
 		\param trans a ccGLMatrix structure
 	**/
-	virtual void applyGLTransformation(const ccGLMatrix& trans) { /*does nothing by default*/ }
+	virtual void applyGLTransformation(const ccGLMatrix& trans);
 
 	//! Save own object data
 	/** Called by 'toFile' (recursive scheme)
@@ -363,6 +371,12 @@ protected:
 		Second parameter: dependency flags (see DEPENDENCY_FLAGS)
 	**/
 	std::map<ccHObject*,int> m_dependencies;
+
+	//! Cumulative GL transformation
+	/** History of all the applied transformations since the creation of the object
+		as a single transformation.
+	**/
+	ccGLMatrix m_glTransHistory;
 };
 
 /*** Helpers ***/

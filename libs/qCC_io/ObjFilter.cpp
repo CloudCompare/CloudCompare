@@ -545,7 +545,6 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		else if (tokens.front() == "g")
 		{
 			//update new group index
-			totalFacesRead += facesRead;
 			facesRead = 0;
 			//get the group name
 			QString groupName = (tokens.size() > 1 && !tokens[1].isEmpty() ? tokens[1] : "default");
@@ -726,6 +725,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 				//push new triangle
 				baseMesh->addTriangle(A->vIndex, B->vIndex, C->vIndex);
 				++facesRead;
+				++totalFacesRead;
 
 				if (hasMaterial)
 					baseMesh->addTriangleMtlIndex(currentMaterial);
@@ -883,7 +883,7 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	if (!error)
 	{
 		ccLog::Print("[OBJ] %i points, %u faces",pointsRead,totalFacesRead);
-		if (texCoordsRead>0 || normsRead>0)
+		if (texCoordsRead > 0 || normsRead > 0)
 			ccLog::Print("[OBJ] %i tex. coords, %i normals",texCoordsRead,normsRead);
 
 		//do some cleaning

@@ -19,6 +19,10 @@
 
 //Qt
 #include <QMessageBox>
+#include <QSettings>
+#include <QFileDialog>
+#include <QFileInfo>
+#include <QClipboard>
 
 //CCLib
 #include <CCConst.h>
@@ -44,6 +48,8 @@ ccApplyTransformationDlg::ccApplyTransformationDlg(QWidget* parent/*=0*/)
 	connect(buttonBox,				SIGNAL(accepted()),				this,	SLOT(checkMatrixValidityAndAccept()));
 
 	connect(matrixTextEdit,			SIGNAL(textChanged()),			this,	SLOT(onMatrixTextChange()));
+	connect(fromFileToolButton,		SIGNAL(clicked()),				this,	SLOT(loadFromASCIIFile()));
+	connect(fromClipboardToolButton,SIGNAL(clicked()),				this,	SLOT(loadFromClipboard()));
 
 	connect(rxAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
 	connect(ryAxisDoubleSpinBox,	SIGNAL(valueChanged(double)),	this,	SLOT(onRotAngleValueChanged(double)));
@@ -221,4 +227,43 @@ void ccApplyTransformationDlg::checkMatrixValidityAndAccept()
 	s_lastMatrix = matrixTextEdit->toPlainText();
 	s_inverseMatrix = inverseCheckBox->isChecked();
 	s_currentFormIndex = tabWidget->currentIndex();
+}
+
+void ccApplyTransformationDlg::loadFromASCIIFile()
+{
+	//persistent settings
+	QSettings settings;
+	settings.beginGroup("LoadFile");
+	QString currentPath = settings.value("currentPath",QApplication::applicationDirPath()).toString();
+
+	QString inputFilename = QFileDialog::getOpenFileName(this, "Select input file", currentPath, "*.txt");
+	if (inputFilename.isEmpty())
+		return;
+
+	ccGLMatrixd mat;
+	if (mat.fomAsciiFile(inputFilename))
+	{
+		matrixTextEdit->setPlainText(mat.toString());
+	}
+	else
+	{
+		ccLog::Error(QString("Failed to load file '%1'").arg(inputFilename));
+	}
+
+	//save last loading location
+	settings.setValue("currentPath",QFileInfo(inputFilename).absolutePath());
+	settings.endGroup();
+}
+
+void ccApplyTransformationDlg::loadFromClipboard()
+{
+	QClipboard* clipboard = QApplication::clipboard();
+	if (clipboard)
+	{
+		QString clipText = clipboard->text();
+		if (!clipText.isEmpty())
+			matrixTextEdit->setPlainText(clipText);
+		else
+			ccLog::Warning("[ccApplyTransformationDlg] Clipboard is empty");
+	}
 }

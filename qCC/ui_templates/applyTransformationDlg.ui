@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>421</width>
+    <width>508</width>
     <height>370</height>
    </rect>
   </property>
@@ -45,6 +45,26 @@
             </size>
            </property>
           </spacer>
+         </item>
+         <item>
+          <widget class="QToolButton" name="fromFileToolButton">
+           <property name="toolTip">
+            <string>Load matrix from ascii file</string>
+           </property>
+           <property name="text">
+            <string>ASCII file</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QToolButton" name="fromClipboardToolButton">
+           <property name="toolTip">
+            <string>Paste clipboard contents</string>
+           </property>
+           <property name="text">
+            <string>clipboard</string>
+           </property>
+          </widget>
          </item>
          <item>
           <widget class="QToolButton" name="helpToolButton">

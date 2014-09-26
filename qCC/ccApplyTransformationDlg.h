@@ -49,6 +49,11 @@ protected slots:
 	//! Updates dialog when a component of the euleur form changes
 	void onEulerValueChanged(double);
 
+	//! Loads matrix from ASCII file
+	void loadFromASCIIFile();
+	//! Loads matrix from clipboard ("paste")
+	void loadFromClipboard();
+
 protected:
 
 	//! Updates all forms with a given matrix

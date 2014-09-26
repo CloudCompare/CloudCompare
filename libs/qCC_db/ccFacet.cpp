@@ -85,6 +85,10 @@ ccFacet* ccFacet::clone() const
 			return 0;
 		}
 
+		//the copy constructor of ccPolyline creates a new cloud (the copy of this facet's 'contour points')
+		//but set it by default as a child of the polyline (while we want the opposite in a facet)
+		facet->m_contourPolyline->detachChild(facet->m_contourVertices);
+
 		facet->m_contourPolyline->setLocked(m_contourPolyline->isLocked());
 		facet->m_contourVertices->setEnabled(m_contourVertices->isEnabled());
 		facet->m_contourVertices->setVisible(m_contourVertices->isVisible());

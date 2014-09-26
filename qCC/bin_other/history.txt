@@ -36,6 +36,7 @@ v2.5.6 ??/??/2014
 	* New buttons in the 'Apply Transformation' dialog:
 		- 'ASCII file' to import a transformation matrix from an ASCII file (see above)
 		- 'Clipoard' to paste the clipboard contents (hopefully corresponding to a transformation matrix ;)
+
 - Enhancements:
 	* qPoissonRecon upgraded:
 		- now uses the latest PoissonRecon version 6.11
@@ -49,12 +50,15 @@ v2.5.6 ??/??/2014
 		- less memory consumption + original filenames are preserved
 	* FBX file format:
 		- Materials and texture are now supported (input/output)
-	* New command line option:
+	* Command line:
 		- Global Shift can now be configured when opening a file in command line mode:
 			After '-O' (open file) use the '-GLOBAL_SHIFT' option and:
 				* either 'AUTO' to let CC handle the big coordinates automatically
 				* or the 3 values of the shift vector to apply
 			Example: 'CloudCompare -O -GLOBAL_SHIFT AUTO myfile.asc'
+		- '-COMPUTE_PTX_NORMALS' to force CC to compute normals when loading PTX files
+		- default timestamp for output files now incorporates seconds (so as to avoid overwriting
+			files generated too quickly)
 	* New options in the Bundler import dialog:
 		- Choose the keyponts/orthophotos vertical axis with radio buttons (X, Y, Z and Custom)
 	* qSRA (Surface of Revolution Analysis) plugin:
@@ -69,6 +73,9 @@ v2.5.6 ??/??/2014
 		- grid translation is now also checked for 'big coordinates' (Global Shift & Scale mechanism)
 		- cancel button also cancels the normals computation!
 		- sensors corresponding to each scan are automatically created
+		- CC will now ask the user if the normals should be computed or not
+		- when loading PTX file from the command line, normals are not computed by default.
+			Use the option '-COMPUTE_PTX_NORMALS' to force their computation.
 	* LAS import:
 		- new handles LAS 1.4 files
 		- the dialog has a new section that allows the user to load the 'extra bytes' per point

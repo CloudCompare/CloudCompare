@@ -32,6 +32,7 @@ Various:
 [*] Edit parameters for qEDL (luminosity, etc.)
 [*] Dedicated method for isolated points removal (based on the Connected Components one)
 [*] Support boolean operations on meshes (with Cork for instance) - http://www.danielgm.net/cc/forum/viewtopic.php?t=812
+[*] Properly segment meshes in both the graphical segmentation tool and the Cross section tool
 [*] Import control points from ascii file (for point pair-based registration - http://www.cloudcompare.org/forum/viewtopic.php?t=585)
 [*] Use a scalar field (such as scattering angles) in the subsampling method to keep the "best" points
 	Equivalent approach with the local curvature (http://www.cloudcompare.org/forum/viewtopic.php?t=711)

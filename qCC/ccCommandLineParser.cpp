@@ -19,6 +19,7 @@
 #include <BundlerFilter.h>
 #include <AsciiFilter.h>
 #include <FBXFilter.h>
+#include <PTXFilter.h>
 
 //qCC
 #include "ccCommon.h"
@@ -92,6 +93,7 @@ static const char COMMAND_CROP_OUTSIDE[]					= "OUTSIDE";
 static const char COMMAND_SAVE_CLOUDS[]						= "SAVE_CLOUDS";
 static const char COMMAND_SAVE_MESHES[]						= "SAVE_MESHES";
 static const char COMMAND_SET_ACTIVE_SF[]					= "SET_ACTIVE_SF";
+static const char COMMAND_PTX_COMPUTE_NORMALS[]				= "COMPUTE_PTX_NORMALS";
 
 //Current cloud(s) export format (can be modified with the 'COMMAND_CLOUD_EXPORT_FORMAT' option)
 static CC_FILE_TYPES s_CloudExportFormat = BIN;
@@ -141,6 +143,17 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 		return EXIT_SUCCESS;
 	}
 
+	//reset default behavior(s)
+	PTXFilter::SetNormalsComputationBehavior(PTXFilter::NEVER);
+	s_CloudExportFormat = BIN;
+	s_CloudExportExt = CC_FILE_TYPE_DEFAULT_EXTENSION[s_CloudExportFormat];
+	s_MeshExportFormat = BIN;
+	s_MeshExportExt = CC_FILE_TYPE_DEFAULT_EXTENSION[s_MeshExportFormat];
+	s_precision = 12;
+	s_addTimestamp = true;
+	s_silentMode = false;
+
+	//load arguments
 	QStringList arguments;
 	{
 		for (int i=1; i<nargs; ++i) //'i=1' because first argument is always program executable file!
@@ -149,7 +162,6 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 	assert(!arguments.empty());
 
 	//specific command: silent mode (will prevent the console dialog from appearing!
-	s_silentMode = false;
 	if (IsCommand(arguments.front(),COMMAND_SILENT_MODE))
 	{
 		arguments.pop_front();
@@ -159,12 +171,14 @@ int ccCommandLineParser::Parse(int nargs, char** args)
 	QDialog consoleDlg;
 	if (!s_silentMode)
 	{
+		//show console
 		Ui_commandLineDlg commandLineDlg;
 		commandLineDlg.setupUi(&consoleDlg);
 		consoleDlg.show();
 		ccConsole::Init(commandLineDlg.consoleWidget,&consoleDlg);
 	}
 
+	//parse input
 	int result = ccCommandLineParser().parse(arguments,&consoleDlg);
 
 	if (!s_silentMode)
@@ -307,7 +321,7 @@ QString ccCommandLineParser::Export(EntityDesc& entDesc, QString suffix/*=QStrin
 
 	QString outputFilename = baseName;
 	if (s_addTimestamp)
-		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm"));
+		outputFilename += QString("_%1").arg(QDateTime::currentDateTime().toString("yyyy-MM-dd_hh'h'mm_ss"));
 	QString extension = isCloud ? s_CloudExportExt : s_MeshExportExt;
 	if (!extension.isEmpty())
 		outputFilename += QString(".%1").arg(extension);
@@ -2218,6 +2232,13 @@ bool ccCommandLineParser::commandChangeFBXOutputFormat(QStringList& arguments)
 	return true;
 }
 
+bool ccCommandLineParser::commandForcePTXNormalsComputation(QStringList& arguments)
+{
+	//simply change the default filter behavior
+	PTXFilter::SetNormalsComputationBehavior(PTXFilter::ALWAYS);
+
+	return true;
+}
 
 int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 {
@@ -2331,9 +2352,15 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		{
 			success = commandChangeMeshOutputFormat(arguments);
 		}
+		//Set default FBX output format
 		else if (IsCommand(argument,COMMAND_FBX_EXPORT_FORMAT))
 		{
 			success = commandChangeFBXOutputFormat(arguments);
+		}
+		//Force normal computation when importing PTX files
+		else if (IsCommand(argument,COMMAND_PTX_COMPUTE_NORMALS))
+		{
+			success = commandForcePTXNormalsComputation(arguments);
 		}
 		else if (IsCommand(argument,COMMAND_SET_ACTIVE_SF))
 		{

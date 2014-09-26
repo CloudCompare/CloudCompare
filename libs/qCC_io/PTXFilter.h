@@ -31,6 +31,17 @@ public:
 	virtual CC_FILE_ERROR loadFile(QString filename, ccHObject& container, LoadParameters& parameters);
 	virtual CC_FILE_ERROR saveToFile(ccHObject* entity, QString filename);
 
+	//! Behavior regarding whether normals should be automatically computed or not
+	enum ComputeNormalsBehavior { ALWAYS, ASK_USER, NEVER};
+
+	//! Sets the filter default behavior regarding normals computation
+	static void SetNormalsComputationBehavior(ComputeNormalsBehavior option);
+
+protected:
+
+	//! Default behavior regarding normals computation
+	static ComputeNormalsBehavior s_normalCompBehavior;
+
 };
 
 #endif //CC_PTX_FILTER_HEADER

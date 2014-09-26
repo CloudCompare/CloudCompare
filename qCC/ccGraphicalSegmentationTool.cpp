@@ -574,8 +574,8 @@ void ccGraphicalSegmentationTool::segment(bool keepPointsInside)
 	//viewing parameters
 	const double* MM = m_associatedWin->getModelViewMatd(); //viewMat
 	const double* MP = m_associatedWin->getProjectionMatd(); //projMat
-	const GLdouble half_w = (GLdouble)m_associatedWin->width()/2;
-	const GLdouble half_h = (GLdouble)m_associatedWin->height()/2;
+	const GLdouble half_w = static_cast<GLdouble>(m_associatedWin->width())/2;
+	const GLdouble half_h = static_cast<GLdouble>(m_associatedWin->height())/2;
 
 	int VP[4];
 	m_associatedWin->getViewportArray(VP);

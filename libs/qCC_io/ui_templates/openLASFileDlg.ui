@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>300</width>
-    <height>534</height>
+    <height>542</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -246,7 +246,7 @@
    <item>
     <widget class="QGroupBox" name="extraFieldGroupBox">
      <property name="title">
-      <string>Extra bytes (custom field(s))</string>
+      <string>Load additional field(s)</string>
      </property>
      <property name="checkable">
       <bool>true</bool>
@@ -254,102 +254,11 @@
      <property name="checked">
       <bool>false</bool>
      </property>
-     <layout class="QFormLayout" name="formLayout_2">
-      <item row="2" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>fields</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="1">
-       <widget class="QSpinBox" name="extraFieldsSpinBox">
-        <property name="toolTip">
-         <string>number of extra fields</string>
-        </property>
-        <property name="value">
-         <number>1</number>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string>read as</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="1">
-       <widget class="QComboBox" name="extraTypeComboBox">
-        <property name="toolTip">
-         <string>format of the extra field(s) - all the same for now - (warning: total size must be smaller than the number of available bits!)</string>
-        </property>
-        <property name="currentIndex">
-         <number>0</number>
-        </property>
-        <item>
-         <property name="text">
-          <string>Integer (8 bits)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Integer (16 bits)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Integer (32 bits)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Integer (64 bits)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Unsigned integer (8 bits)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Unsigned Integer (16 bits)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Unsigned Integer (32 bits)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Unsigned Integer (64 bits)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Float (32 bits)</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Double (64 bits)</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label">
-        <property name="text">
-         <string>bits per point</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QLabel" name="extraBitsCountLabel">
-        <property name="text">
-         <string>0</string>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="QListWidget" name="evlrListWidget">
+        <property name="selectionMode">
+         <enum>QAbstractItemView::MultiSelection</enum>
         </property>
        </widget>
       </item>

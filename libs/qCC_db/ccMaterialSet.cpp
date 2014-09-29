@@ -330,7 +330,7 @@ bool ccMaterialSet::append(const ccMaterialSet& source)
 		return false;
 	}
 	
-	for (ccMaterialSet::const_iterator it = source.begin(); it!=source.end(); ++it)
+	for (ccMaterialSet::const_iterator it=source.begin(); it!=source.end(); ++it)
 	{
 		push_back(*it);
 		//back().getTexture().detach(); //FIXME: was in the old version (non shared images)... still meaningful? or even necessary?

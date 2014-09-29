@@ -65,6 +65,11 @@ public:
 								NormsIndexesTableType* clonedNormsTable = 0,
 								TextureCoordsContainer* cloneTexCoords = 0);
 
+	//! Merges another mesh into this one
+	/** \param mesh mesh to be merged in this one
+	**/
+	bool merge(const ccMesh* mesh);
+
 	//inherited methods (ccHObject)
 	virtual unsigned getUniqueIDForDisplay() const;
 	virtual ccBBox getMyOwnBB();

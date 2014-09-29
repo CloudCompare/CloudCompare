@@ -508,10 +508,16 @@ public:
 	**/
 	CCLib::ReferenceCloud* crop2D(const ccPolyline* poly, unsigned char orthoDim, bool inside = true);
 
-protected:
-
 	//! Appends a cloud to this one
+	/** Same as the += operator with pointCountBefore == size()
+		\param cloud cloud to be added
+		\parm pointCountBefore the number of points previously contained in this cloud
+		\param whether to copy clouds's children or not
+		\return the resulting point cloud
+	**/
 	const ccPointCloud& append(ccPointCloud* cloud, unsigned pointCountBefore, bool ignoreChildren = false);
+
+protected:
 
     //inherited from ccHObject
 	virtual void drawMeOnly(CC_DRAW_CONTEXT& context);

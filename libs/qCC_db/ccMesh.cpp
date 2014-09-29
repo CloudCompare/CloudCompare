@@ -419,8 +419,8 @@ void ccMesh::setTriNormsTable(NormsIndexesTableType* triNormsTable, bool autoRel
 	{
 		int childIndex = getChildIndex(m_triNormals);
 		m_triNormals->release();
-		m_triNormals=0;
-		if (childIndex>=0)
+		m_triNormals = 0;
+		if (childIndex >= 0)
 			removeChild(childIndex);
 	}
 
@@ -880,6 +880,258 @@ ccMesh* ccMesh::cloneMesh(	ccGenericPointCloud* vertices/*=0*/,
 	return cloneMesh;
 }
 
+bool ccMesh::merge(const ccMesh* mesh)
+{
+	if (!mesh)
+	{
+		assert(false);
+		ccLog::Warning("[ccMesh::merge] Internal error: invalid input!");
+		return false;
+	}
+	if (	!mesh->getAssociatedCloud() || !mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD)
+		||	!m_associatedCloud || !m_associatedCloud->isA(CC_TYPES::POINT_CLOUD))
+	{
+		assert(false);
+		ccLog::Warning("[ccMesh::merge] Requires meshes with standard vertices!");
+		return false;
+	}
+	ccPointCloud* vertices = static_cast<ccPointCloud*>(mesh->getAssociatedCloud());
+
+	//vertices
+	unsigned vertNumBefore = m_associatedCloud->size();
+	//triangles
+	unsigned triNumBefore = size();
+
+	bool success = false;
+
+	while (true) //fake loop for easy breaking/cleaning
+	{
+		//merge vertices
+		unsigned vertIndexShift = 0;
+		if (mesh->getAssociatedCloud() != m_associatedCloud)
+		{
+			unsigned vertAdded = mesh->getAssociatedCloud()->size();
+			static_cast<ccPointCloud*>(m_associatedCloud)->append(vertices,m_associatedCloud->size(),true);
+
+			//not enough memory?
+			if (m_associatedCloud->size() < vertNumBefore + vertAdded)
+			{
+				ccLog::Warning("[ccMesh::merge] Not enough memory!");
+				break;
+			}
+			vertIndexShift = vertNumBefore;
+			m_associatedCloud->setVisible(m_associatedCloud->isVisible() || vertices->isVisible());
+		}
+		showNormals(this->normalsShown() || mesh->normalsShown());
+		showColors(this->colorsShown() || mesh->colorsShown());
+		showSF(this->sfShown() || mesh->sfShown());
+
+		//now for the triangles
+		const unsigned triAdded = mesh->size();
+		bool otherMeshHasMaterials = (mesh->m_materials && mesh->m_triMtlIndexes);
+		bool otherMeshHasTexCoords = (mesh->m_texCoords && mesh->m_texCoordIndexes);
+		bool otherMeshHasTriangleNormals = (mesh->m_triNormals && mesh->m_triNormalIndexes);
+		{
+			//we'll need those arrays later
+			if (	(otherMeshHasMaterials && !m_triMtlIndexes && !reservePerTriangleMtlIndexes())
+				||	(otherMeshHasTexCoords && !m_texCoordIndexes && !reservePerTriangleTexCoordIndexes())
+				||	(otherMeshHasTriangleNormals && !m_triNormalIndexes && !reservePerTriangleNormalIndexes())
+				)
+			{
+				ccLog::Warning("[ccMesh::merge] Not enough memory!");
+				break;
+			}
+
+			if (!reserve(triNumBefore + triAdded))
+			{
+				ccLog::Warning("[ccMesh::merge] Not enough memory!");
+				break;
+			}
+
+			for (unsigned i=0; i<triAdded; ++i)
+			{
+				const CCLib::TriangleSummitsIndexes* tsi = mesh->getTriangleIndexes(i);
+				addTriangle(vertIndexShift+tsi->i1, vertIndexShift+tsi->i2, vertIndexShift+tsi->i3);
+			}
+		}
+
+		//triangle normals
+		bool hasTriangleNormals = m_triNormals && m_triNormalIndexes;
+		if (hasTriangleNormals || otherMeshHasTriangleNormals)
+		{
+			//1st: does the other mesh has triangle normals
+			if (otherMeshHasTriangleNormals)
+			{
+				unsigned triIndexShift = 0;
+				if (m_triNormals != mesh->m_triNormals)
+				{
+					//reserve mem for triangle normals
+					if (!m_triNormals)
+						setTriNormsTable(new NormsIndexesTableType());
+					assert(m_triNormals);
+					unsigned triNormalsCountBefore = m_triNormals->currentSize();
+					if (!m_triNormals->reserve(triNormalsCountBefore + mesh->m_triNormals->currentSize()))
+					{
+						ccLog::Warning("[ccMesh::merge] Not enough memory!");
+						break;
+					}
+					//copy the values
+					{
+						for (unsigned i=0; i<mesh->m_triNormals->currentSize(); ++i)
+							m_triNormals->addElement(mesh->m_triNormals->getValue(i));
+					}
+					triIndexShift = triNormalsCountBefore;
+				}
+
+				//the indexes should have already been resized by the call to 'reserve'!
+				assert(m_triNormalIndexes->capacity() >= triNumBefore + triAdded);
+				//copy the values
+				{
+					for (unsigned i=0; i<mesh->m_triNormalIndexes->currentSize(); ++i)
+					{
+						const int* indexes = mesh->m_triNormalIndexes->getValue(i);
+						int newIndexes[3] = {	indexes[0] < 0 ? -1 : indexes[0] + static_cast<int>(triIndexShift),
+												indexes[1] < 0 ? -1 : indexes[1] + static_cast<int>(triIndexShift),
+												indexes[2] < 0 ? -1 : indexes[2] + static_cast<int>(triIndexShift) };
+						m_triNormalIndexes->addElement(newIndexes);
+					}
+				}
+			}
+			else
+			{
+				//the indexes should have already been resized by the call to 'reserve'!
+				assert(m_triNormalIndexes->capacity() >= triNumBefore + triAdded);
+				//fill the indexes table with default values
+				{
+					int default[3] = {-1,-1,-1};
+					for (unsigned i=0; i<mesh->m_triNormalIndexes->currentSize(); ++i)
+						m_triNormalIndexes->addElement(default);
+				}
+			}
+			showTriNorms(this->triNormsShown() || mesh->triNormsShown());
+		}
+
+		//materials
+		bool hasMaterials = m_materials && m_triMtlIndexes;
+		if (hasMaterials || otherMeshHasMaterials)
+		{
+			//1st: does the other mesh has materials?
+			if (otherMeshHasMaterials)
+			{
+				size_t mtlIndexShift = 0;
+				if (m_materials != mesh->m_materials)
+				{
+					//reserve mem for materials
+					if (!m_materials)
+						setMaterialSet(new ccMaterialSet("materials"));
+					assert(m_materials);
+					size_t mtlCountBefore = m_materials->size();
+					if (!m_materials->append(*(mesh->m_materials)))
+					{
+						ccLog::Warning("[ccMesh::merge] Not enough memory!");
+						break;
+					}
+					mtlIndexShift = mtlCountBefore;
+				}
+
+				//the indexes should have already been resized by the call to 'reserve'!
+				assert(m_triMtlIndexes->capacity() >= triNumBefore + triAdded);
+				//copy the values
+				{
+					for (unsigned i=0; i<mesh->m_triMtlIndexes->currentSize(); ++i)
+					{
+						int index = mesh->m_triMtlIndexes->getValue(i);
+						int newIndex = (index < 0 ? -1 : index + static_cast<int>(mtlIndexShift));
+						m_triMtlIndexes->addElement(newIndex);
+					}
+				}
+			}
+			else
+			{
+				//the indexes should have already been resized by the call to 'reserve'!
+				assert(m_triMtlIndexes->capacity() >= triNumBefore + triAdded);
+				//fill the indexes table with default values
+				{
+					int default = -1;
+					for (unsigned i=0; i<mesh->m_triMtlIndexes->currentSize(); ++i)
+						m_triMtlIndexes->addElement(default);
+				}
+			}
+		}
+		showMaterials(this->materialsShown() || mesh->materialsShown());
+
+		//texture coordinates
+		bool hasTexCoords = m_texCoords && m_texCoordIndexes;
+		if (hasTexCoords || otherMeshHasTexCoords)
+		{
+			//1st: does the other mesh has texture coordinates?
+			if (otherMeshHasTexCoords)
+			{
+				unsigned texCoordIndexShift = 0;
+				if (m_texCoords != mesh->m_texCoords)
+				{
+					//reserve mem for triangle normals
+					if (!m_texCoords)
+						setTexCoordinatesTable(new TextureCoordsContainer());
+					assert(m_texCoords);
+					unsigned texCoordCountBefore = m_texCoords->currentSize();
+					if (!m_texCoords->reserve(texCoordCountBefore + mesh->m_texCoords->currentSize()))
+					{
+						ccLog::Warning("[ccMesh::merge] Not enough memory!");
+						break;
+					}
+					//copy the values
+					{
+						for (unsigned i=0; i<mesh->m_texCoords->currentSize(); ++i)
+							m_texCoords->addElement(mesh->m_texCoords->getValue(i));
+					}
+					texCoordIndexShift = texCoordCountBefore;
+				}
+
+				//the indexes should have already been resized by the call to 'reserve'!
+				assert(m_texCoordIndexes->capacity() >= triNumBefore + triAdded);
+				//copy the values
+				{
+					for (unsigned i=0; i<mesh->m_texCoordIndexes->currentSize(); ++i)
+					{
+						const int* indexes = mesh->m_texCoordIndexes->getValue(i);
+						int newIndexes[3] = {	indexes[0] < 0 ? -1 : indexes[0] + static_cast<int>(texCoordIndexShift),
+												indexes[1] < 0 ? -1 : indexes[1] + static_cast<int>(texCoordIndexShift),
+												indexes[2] < 0 ? -1 : indexes[2] + static_cast<int>(texCoordIndexShift) };
+						m_texCoordIndexes->addElement(newIndexes);
+					}
+				}
+			}
+			else
+			{
+				//the indexes should have already been resized by the call to 'reserve'!
+				assert(m_texCoordIndexes->capacity() >= triNumBefore + triAdded);
+				//fill the indexes table with default values
+				{
+					int default[3] = {-1,-1,-1};
+					for (unsigned i=0; i<mesh->m_texCoordIndexes->currentSize(); ++i)
+						m_texCoordIndexes->addElement(default);
+				}
+			}
+		}
+
+		//the end!
+		showWired(this->isShownAsWire() || mesh->isShownAsWire());
+		enableStippling(this->stipplingEnabled() || mesh->stipplingEnabled());
+		success = true;
+		break;
+	}
+
+	if (!success)
+	{
+		//revert to original state
+		static_cast<ccPointCloud*>(m_associatedCloud)->resize(vertNumBefore);
+		resize(triNumBefore);
+	}
+
+	return success;
+}
+
 unsigned ccMesh::size() const
 {
 	return m_triVertIndexes->currentSize();
@@ -1016,14 +1268,14 @@ bool ccMesh::resize(unsigned n)
 
 	if (m_texCoordIndexes)
 	{
-		int defaultValues[3]={-1,-1,-1};
+		int defaultValues[3] = {-1,-1,-1};
 		if (!m_texCoordIndexes->resize(n,true,defaultValues))
 			return false;
 	}
 
 	if (m_triNormalIndexes)
 	{
-		int defaultValues[3]={-1,-1,-1};
+		int defaultValues[3] = {-1,-1,-1};
 		if (!m_triNormalIndexes->resize(n,true,defaultValues))
 			return false;
 	}

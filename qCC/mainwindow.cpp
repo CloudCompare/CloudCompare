@@ -4115,121 +4115,223 @@ void MainWindow::RemoveSiblingsFromCCObjectList(ccHObject::Container& ccObjects)
 	ccObjects = keptObjects;
 }
 
-void MainWindow::doActionMerge()
+// helper for doActionMerge
+void AddToRemoveList(ccHObject* toRemove, ccHObject::Container& toBeRemovedList)
 {
-	ccPointCloud* firstCloud = 0;
-	ccHObjectContext firstCloudContext;
-
-	//we deselect all selected entities (as they are going to disappear)
-	ccHObject::Container _selectedEntities = m_selectedEntities;
-	if (m_ccRoot)
-		m_ccRoot->unselectAllEntities();
-
-	//we will remove the useless clouds later
-	ccHObject::Container toBeRemoved;
-
-	size_t selNum = _selectedEntities.size();
-	for (size_t i=0; i<selNum; ++i)
+	//is a parent or sibling already in the "toBeRemoved" list?
+	int j = 0;
+	int count = static_cast<int>(toBeRemovedList.size());
+	while (j < count)
 	{
-		ccHObject* ent = _selectedEntities[i];
-		if (!ent)
-			continue;
-
-		//point clouds are simply added to the first selected ones
-		//and then removed
-		if (ent->isKindOf(CC_TYPES::POINT_CLOUD))
+		if (toBeRemovedList[j]->isAncestorOf(toRemove))
 		{
-			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(ent);
-
-			if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD)) //TODO
-			{
-				ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
-
-				if (!firstCloud)
-				{
-					firstCloud = pc;
-					//we temporarily detach the first cloud, as it may undergo
-					//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
-					firstCloudContext = removeObjectTemporarilyFromDBTree(firstCloud);
-				}
-				else
-				{
-					unsigned beforePts = firstCloud->size();
-					unsigned newPts = pc->size();
-					*firstCloud += pc;
-
-					//success?
-					if (firstCloud->size() == beforePts + newPts)
-					{
-						firstCloud->prepareDisplayForRefresh_recursive();
-
-						ccHObject* toRemove = 0;
-						//if the entity to remove is a group with a unique child, we can remove it as well
-						ccHObject* parent = pc->getParent();
-						if (parent && parent->isA(CC_TYPES::HIERARCHY_OBJECT) && parent->getChildrenNumber() == 1 && parent!=firstCloudContext.parent)
-							toRemove = parent;
-						else
-							toRemove = pc;
-
-						//is a parent or sibling already in the "toBeRemoved" list?
-						int j = 0;
-						int count = static_cast<int>(toBeRemoved.size());
-						while (j < count)
-						{
-							if (toBeRemoved[j]->isAncestorOf(toRemove))
-							{
-								toRemove = 0;
-								break;
-							}
-							else if (toRemove->isAncestorOf(toBeRemoved[j]))
-							{
-								toBeRemoved[j] = toBeRemoved.back();
-								toBeRemoved.pop_back();
-								count--;
-								j++;
-							}
-							else
-							{
-								//forward
-								j++;
-							}
-						}
-						if (toRemove)
-							toBeRemoved.push_back(toRemove);
-					}
-					else
-					{
-						ccConsole::Error("Fusion failed! (not enough memory?)");
-						break;
-					}
-					pc=0;
-				}
-			}
+			toRemove = 0;
+			break;
 		}
-		//meshes are placed in a common mesh group
-		else if (ent->isKindOf(CC_TYPES::MESH))
+		else if (toRemove->isAncestorOf(toBeRemovedList[j]))
 		{
-			ccConsole::Warning("Can't merge meshes yet! Sorry ...");
+			toBeRemovedList[j] = toBeRemovedList.back();
+			toBeRemovedList.pop_back();
+			count--;
+			j++;
 		}
 		else
 		{
-			ccConsole::Warning(QString("Entity '%1' is neither a cloud nor a mesh, can't merge it!").arg(ent->getName()));
+			//forward
+			j++;
+		}
+	}
+
+	if (toRemove)
+		toBeRemovedList.push_back(toRemove);
+}
+
+void MainWindow::doActionMerge()
+{
+	//let's look for clouds or meshes (warning: we don't mix them)
+	std::vector<ccPointCloud*> clouds;
+	std::vector<ccMesh*> meshes;
+
+	try
+	{
+		size_t selNum = m_selectedEntities.size();
+		for (size_t i=0; i<selNum; ++i)
+		{
+			ccHObject* ent = m_selectedEntities[i];
+			if (!ent)
+				continue;
+
+			if (ent->isA(CC_TYPES::POINT_CLOUD))
+			{
+				ccPointCloud* cloud = ccHObjectCaster::ToPointCloud(ent);
+				clouds.push_back(cloud);
+			}
+			else if (ent->isKindOf(CC_TYPES::MESH))
+			{
+				ccMesh* mesh = ccHObjectCaster::ToMesh(ent);
+				//this is a purely theoretical test for now!
+				if (mesh && mesh->getAssociatedCloud() && mesh->getAssociatedCloud()->isA(CC_TYPES::POINT_CLOUD))
+				{
+					meshes.push_back(mesh);
+				}
+				else
+				{
+					ccConsole::Warning(QString("Only meshes with standard vertices are handled for now! Can't merge entity '%1'...").arg(ent->getName()));
+				}
+			}
+			else
+			{
+				ccConsole::Warning(QString("Entity '%1' is neither a cloud nor a mesh, can't merge it!").arg(ent->getName()));
+			}
+		}
+	}
+	catch(std::bad_alloc)
+	{
+		ccLog::Error("Not enough memory!");
+		return;
+	}
+
+	if (clouds.empty() && meshes.empty())
+	{
+		ccLog::Error("Select only clouds or meshes!");
+		return;
+	}
+	if (!clouds.empty() && !meshes.empty())
+	{
+		ccLog::Error("Can't mix point clouds and meshes!");
+	}
+
+	//merge clouds?
+	if (!clouds.empty())
+	{
+		//we deselect all selected entities (as most of them are going to disappear)
+		if (m_ccRoot)
+		{
+			m_ccRoot->unselectAllEntities();
+			assert(m_selectedEntities.empty());
+			//m_selectedEntities.clear();
 		}
 
-		//security (we don't want to encounter it again)
-		_selectedEntities[i]=0;
-	}
+		//we will remove the useless clouds/meshes later
+		ccHObject::Container toBeRemoved;
 
-	//something to remove?
-	while (!toBeRemoved.empty())
+		ccPointCloud* firstCloud = 0;
+		ccHObjectContext firstCloudContext;
+
+		for (size_t i=0; i<clouds.size(); ++i)
+		{
+			ccPointCloud* pc = clouds[i];
+			if (!firstCloud)
+			{
+				//we don't delete the first cloud (we'll merge the other one 'inside' it
+				firstCloud = pc;
+				//we still have to temporarily detach the first cloud, as it may undergo
+				//"severe" modifications (octree deletion, etc.) --> see ccPointCloud::operator +=
+				firstCloudContext = removeObjectTemporarilyFromDBTree(firstCloud);
+			}
+			else
+			{
+				unsigned countBefore = firstCloud->size();
+				unsigned countAdded = pc->size();
+				*firstCloud += pc;
+
+				//success?
+				if (firstCloud->size() == countBefore + countAdded)
+				{
+					firstCloud->prepareDisplayForRefresh_recursive();
+
+					ccHObject* toRemove = 0;
+					//if the entity to remove is a group with a unique child, we can remove it as well
+					ccHObject* parent = pc->getParent();
+					if (parent && parent->isA(CC_TYPES::HIERARCHY_OBJECT) && parent->getChildrenNumber() == 1 && parent != firstCloudContext.parent)
+						toRemove = parent;
+					else
+						toRemove = pc;
+
+					AddToRemoveList(toRemove, toBeRemoved);
+				}
+				else
+				{
+					ccConsole::Error("Fusion failed! (not enough memory?)");
+					break;
+				}
+				pc = 0;
+			}
+		}
+
+		//something to remove?
+		while (!toBeRemoved.empty())
+		{
+			if (toBeRemoved.back() && m_ccRoot)
+				m_ccRoot->removeElement(toBeRemoved.back());
+			toBeRemoved.pop_back();
+		}
+
+		//put back first cloud in DB
+		if (firstCloud)
+		{
+			putObjectBackIntoDBTree(firstCloud,firstCloudContext);
+			if (m_ccRoot)
+				m_ccRoot->selectEntity(firstCloud);
+		}
+	}
+	//merge meshes?
+	else if (!meshes.empty())
 	{
-		if (toBeRemoved.back() && m_ccRoot)
-			m_ccRoot->removeElement(toBeRemoved.back());
-		toBeRemoved.pop_back();
-	}
+		bool createSubMeshes = true;
+		//createSubMeshes = (QMessageBox::question(this,"Create sub-meshes","Do you want to create sub-mesh entities corresponding to each source mesh? (requires more memory)",QMessageBox::Yes,QMessageBox::No) == QMessageBox::Yes);
 
-	if (firstCloud)
-		putObjectBackIntoDBTree(firstCloud,firstCloudContext);
+		//meshes are merged
+		ccPointCloud* baseVertices = new ccPointCloud("vertices");
+		ccMesh* baseMesh = new ccMesh(baseVertices);
+		baseMesh->setName("Merged mesh");
+		baseMesh->addChild(baseVertices);
+		baseVertices->setVisible(false);
+		for (size_t i=0; i<meshes.size(); ++i)
+		{
+			ccMesh* mesh = meshes[i];
+
+			unsigned sizeBefore = baseMesh->size();
+			if (!baseMesh->merge(mesh))
+			{
+				ccConsole::Error("Fusion failed! (not enough memory?)");
+				break;
+			}
+			unsigned sizeAfter = baseMesh->size();
+
+			//create corresponding sub-mesh
+			if (createSubMeshes)
+			{
+				ccSubMesh* subMesh = new ccSubMesh(baseMesh);
+				if (subMesh->reserve(sizeAfter-sizeBefore))
+				{
+					subMesh->addTriangleIndex(sizeBefore,sizeAfter);
+					subMesh->setName(mesh->getName());
+					subMesh->showMaterials(baseMesh->materialsShown());
+					subMesh->showNormals(baseMesh->normalsShown());
+					subMesh->showTriNorms(baseMesh->triNormsShown());
+					subMesh->showColors(baseMesh->colorsShown());
+					subMesh->showWired(baseMesh->isShownAsWire());
+					subMesh->enableStippling(baseMesh->stipplingEnabled());
+					subMesh->setVisible(false);
+					baseMesh->addChild(subMesh);
+				}
+				else
+				{
+					ccConsole::Warning(QString("[Merge] Not enough memory to create the sub-mesh corresponding to mesh '%1'!").arg(mesh->getName()));
+					delete subMesh;
+					subMesh = 0;
+				}
+			}
+		}
+		
+		baseMesh->setDisplay_recursive(meshes.front()->getDisplay());
+		baseMesh->setVisible(true);
+		addToDB(baseMesh);
+
+		if (m_ccRoot)
+			m_ccRoot->selectEntity(baseMesh);
+	}
 
 	refreshAll();
 	updateUI();

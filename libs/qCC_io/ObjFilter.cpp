@@ -1005,6 +1005,8 @@ CC_FILE_ERROR ObjFilter::loadFile(QString filename, ccHObject& container, LoadPa
 					}
 					else
 					{
+						delete subTri;
+						subTri = 0;
 						objWarnings[NOT_ENOUGH_MEMORY] = true;
 					}
 				}

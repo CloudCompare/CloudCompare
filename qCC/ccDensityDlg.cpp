@@ -52,8 +52,9 @@ void ccDensityDlg::setRadius(double r)
 	radiusDoubleSpinBox->setValue(r);
 }
 
-void ccDensityDlg::onApproxToggled(bool)
+void ccDensityDlg::onApproxToggled(bool state)
 {
-	if (knnRadioButton->isChecked())
+	knnRadioButton->setEnabled(state);
+	if (!state && knnRadioButton->isChecked())
 		surfRadioButton->setChecked(true);
 }

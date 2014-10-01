@@ -8576,7 +8576,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 			}
 			else //ask the user!
 			{
-				densityKernelSize = GetDefaultCloudKernelSize(entities)/4;
+				densityKernelSize = GetDefaultCloudKernelSize(entities);
 				if (densityKernelSize < 0)
 				{
 					ccConsole::Error("Invalid kernel size!");

@@ -327,6 +327,9 @@ int GeometricalAnalysisTools::computeLocalDensityApprox(GenericIndexedCloudPersi
 	return result;
 }
 
+//volume of a unit sphere
+static double s_UnitSphereVolume = 4.0 * M_PI / 3.0;
+
 //"PER-CELL" METHOD: APPROXIMATE LOCAL DENSITY
 //ADDITIONAL PARAMETERS (0): NONE
 bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const DgmOctree::octreeCell& cell,
@@ -351,8 +354,7 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 		//the first point is always the point itself!
 		if (cell.parentOctree->findNearestNeighborsStartingFromCell(nNSS) > 1)
 		{
-			//DGM: now we only output the distance to the nearest neighbor
-			double R2 = nNSS.pointsInNeighbourhood[1].squareDistd; //R2 in fact
+			double R2 = nNSS.pointsInNeighbourhood[1].squareDistd;
 
 			ScalarType density = NAN_VALUE;
 			if (R2 > ZERO_TOLERANCE)
@@ -375,8 +377,7 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 				case DENSITY_3D:
 					{
 						//sphere area
-						static double volCoef = 4.0 * M_PI / 3.0;
-						double sphereArea =  volCoef * sqrt(R2);
+						double sphereArea =  s_UnitSphereVolume * R2 * sqrt(R2);
 						density = static_cast<ScalarType>(1.0 / sphereArea);
 					}
 					break;
@@ -407,11 +408,11 @@ int GeometricalAnalysisTools::computeLocalDensity(	GenericIndexedCloudPersist* t
 													DgmOctree* inputOctree/*=0*/)
 {
 	if (!theCloud)
-        return -1;
+		return -1;
 
 	unsigned numberOfPoints = theCloud->size();
 	if (numberOfPoints < 3)
-        return -2;
+		return -2;
 
 	//compute the right dimensional coef based on the expected output
 	double dimensionalCoef = 1.0;
@@ -424,7 +425,7 @@ int GeometricalAnalysisTools::computeLocalDensity(	GenericIndexedCloudPersist* t
 		dimensionalCoef = M_PI * (static_cast<double>(kernelRadius) * kernelRadius);
 		break;
 	case DENSITY_3D:
-		dimensionalCoef = (4.0 * M_PI / 3.0) * ((static_cast<double>(kernelRadius) * kernelRadius) * kernelRadius);
+		dimensionalCoef = s_UnitSphereVolume * ((static_cast<double>(kernelRadius) * kernelRadius) * kernelRadius);
 		break;
 	default:
 		assert(false);

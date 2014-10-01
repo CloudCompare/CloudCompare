@@ -47,7 +47,7 @@ public:
 	double getRadius() const;
 
 protected slots:
-	void onApproxToggled(bool);
+	void onPreciseToggled(bool);
 
 };
 

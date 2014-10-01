@@ -24,7 +24,7 @@ ccDensityDlg::ccDensityDlg(QWidget* parent/*=0*/)
 	setupUi(this);
 	setWindowFlags(Qt::Tool);
 
-	connect(approxRadioButton, SIGNAL(toggled(bool)), this, SLOT(onApproxToggled(bool)));
+	connect(preciseRadioButton, SIGNAL(toggled(bool)), this, SLOT(onPreciseToggled(bool)));
 }
 
 CCLib::GeometricalAnalysisTools::Density ccDensityDlg::getDensityType() const
@@ -52,7 +52,7 @@ void ccDensityDlg::setRadius(double r)
 	radiusDoubleSpinBox->setValue(r);
 }
 
-void ccDensityDlg::onApproxToggled(bool state)
+void ccDensityDlg::onPreciseToggled(bool state)
 {
 	knnRadioButton->setEnabled(state);
 	if (!state && knnRadioButton->isChecked())

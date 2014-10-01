@@ -1003,9 +1003,9 @@ bool ccMesh::merge(const ccMesh* mesh)
 				assert(m_triNormalIndexes->capacity() >= triNumBefore + triAdded);
 				//fill the indexes table with default values
 				{
-					int default[3] = {-1,-1,-1};
+					int defaultElement[3] = {-1,-1,-1};
 					for (unsigned i=0; i<mesh->m_triNormalIndexes->currentSize(); ++i)
-						m_triNormalIndexes->addElement(default);
+						m_triNormalIndexes->addElement(defaultElement);
 				}
 			}
 			showTriNorms(this->triNormsShown() || mesh->triNormsShown());
@@ -1052,9 +1052,9 @@ bool ccMesh::merge(const ccMesh* mesh)
 				assert(m_triMtlIndexes->capacity() >= triNumBefore + triAdded);
 				//fill the indexes table with default values
 				{
-					int default = -1;
+					int defaultValue = -1;
 					for (unsigned i=0; i<mesh->m_triMtlIndexes->currentSize(); ++i)
-						m_triMtlIndexes->addElement(default);
+						m_triMtlIndexes->addElement(defaultValue);
 				}
 			}
 		}
@@ -1108,9 +1108,9 @@ bool ccMesh::merge(const ccMesh* mesh)
 				assert(m_texCoordIndexes->capacity() >= triNumBefore + triAdded);
 				//fill the indexes table with default values
 				{
-					int default[3] = {-1,-1,-1};
+					int defaultElement[3] = {-1,-1,-1};
 					for (unsigned i=0; i<mesh->m_texCoordIndexes->currentSize(); ++i)
-						m_texCoordIndexes->addElement(default);
+						m_texCoordIndexes->addElement(defaultElement);
 				}
 			}
 		}

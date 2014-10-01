@@ -51,15 +51,6 @@ v2.5.6 ??/??/2014
 		- less memory consumption + original filenames are preserved
 	* FBX file format:
 		- Materials and texture are now supported (input/output)
-	* Command line:
-		- Global Shift can now be configured when opening a file in command line mode:
-			After '-O' (open file) use the '-GLOBAL_SHIFT' option and:
-				* either 'AUTO' to let CC handle the big coordinates automatically
-				* or the 3 values of the shift vector to apply
-			Example: 'CloudCompare -O -GLOBAL_SHIFT AUTO myfile.asc'
-		- '-COMPUTE_PTX_NORMALS' to force CC to compute normals when loading PTX files
-		- default timestamp for output files now incorporates seconds (so as to avoid overwriting
-			files generated too quickly)
 	* New options in the Bundler import dialog:
 		- Choose the keyponts/orthophotos vertical axis with radio buttons (X, Y, Z and Custom)
 	* qSRA (Surface of Revolution Analysis) plugin:
@@ -100,11 +91,25 @@ v2.5.6 ??/??/2014
 			is only a relative position, and it cannot be set at any given depth).
 	* New keyboard shortcuts:
 		- 'A' to toggle all selected entities activation (i.e. enable/disable state)
-	* New command line option:
-		- '-FBX_EXPORT_FMT' to specify the format when exporting meshes to FBX. Available formats
+	* Density computation:
+		- only one method now with a dedicated dialog:
+			* ability to choose either the precise or approximate methods
+			* ability to choose how the density should be computed (number of neighbors, surface or volume)
+	* Command line:
+		- New option '-FBX_EXPORT_FMT' to specify the format when exporting meshes to FBX. Available formats
 			are currently (FBX_binary, FBX_ascii, FBX_encrypted, FBX_6.0_binary, FBX_6.0_ascii, FBX_6.0_encrypted).
 			If not set CC will display a message box to let the user select the output format (even in
 			command line mode ;) 
+		- Global Shift can now be configured when opening a file in command line mode:
+			After '-O' (open file) use the '-GLOBAL_SHIFT' option and:
+				* either 'AUTO' to let CC handle the big coordinates automatically
+				* or the 3 values of the shift vector to apply
+			Example: 'CloudCompare -O -GLOBAL_SHIFT AUTO myfile.asc'
+		- New option '-COMPUTE_PTX_NORMALS' to force CC to compute normals when loading PTX files
+		- Default timestamp for output files now incorporates seconds (so as to avoid overwriting
+			files generated too quickly)
+		- New option '-TYPE' (after '-DENSITY' or '-APPROX_DENSITY') to specify the type of density to compute
+			* options are: KNN (number of neighbors), SURFACE (surface density) or VOLUME (volume density)
 
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized

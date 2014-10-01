@@ -275,6 +275,7 @@ bool GeometricalAnalysisTools::flagDuplicatePointsInACellAtLevel(	const DgmOctre
 }
 
 int GeometricalAnalysisTools::computeLocalDensityApprox(GenericIndexedCloudPersist* theCloud,
+														Density densityType,
 														GenericProgressCallback* progressCb/*=0*/,
 														DgmOctree* inputOctree/*=0*/)
 {
@@ -282,14 +283,14 @@ int GeometricalAnalysisTools::computeLocalDensityApprox(GenericIndexedCloudPersi
         return -1;
 
 	unsigned numberOfPoints = theCloud->size();
-	if (numberOfPoints<3)
+	if (numberOfPoints < 3)
         return -2;
 
 	DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1)
+		if (theOctree->build(progressCb) < 1)
 		{
 			delete theOctree;
 			return -3;
@@ -298,7 +299,11 @@ int GeometricalAnalysisTools::computeLocalDensityApprox(GenericIndexedCloudPersi
 
 	theCloud->enableScalarField();
 
+	//determine best octree level to perform the computation
 	uchar level = theOctree->findBestLevelForAGivenPopulationPerCell(3);
+
+	//parameters
+	void* additionalParameters[] = { static_cast<void*>(&densityType) };
 
 	int result = 0;
 
@@ -308,9 +313,9 @@ int GeometricalAnalysisTools::computeLocalDensityApprox(GenericIndexedCloudPersi
 	if (theOctree->executeFunctionForAllCellsAtLevel_MT(level,
 #endif
 														&computeApproxPointsDensityInACellAtLevel,
-														0,
+														additionalParameters,
 														progressCb,
-														"Approximate Local Density Computation")==0)
+														"Approximate Local Density Computation") == 0)
 	{
 		//something went wrong
 		result = -4;
@@ -328,6 +333,9 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 																		void** additionalParameters,
 																		NormalizedProgress* nProgress/*=0*/)
 {
+	//extract additional parameter(s)
+	Density densityType = *static_cast<Density*>(additionalParameters[0]);
+	
 	DgmOctree::NearestNeighboursSearchStruct nNSS;
 	nNSS.level								= cell.level;
 	nNSS.alreadyVisitedNeighbourhoodSize	= 0;
@@ -345,7 +353,39 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 		{
 			//DGM: now we only output the distance to the nearest neighbor
 			double R2 = nNSS.pointsInNeighbourhood[1].squareDistd; //R2 in fact
-			cell.points->setPointScalarValue(i,static_cast<ScalarType>(sqrt(R2)));
+
+			ScalarType density = NAN_VALUE;
+			if (R2 > ZERO_TOLERANCE)
+			{
+				switch (densityType)
+				{
+				case DENSITY_KNN:
+					{
+						//we return in fact the (inverse) distance to the nearest neighbor
+						density = static_cast<ScalarType>(1.0 / sqrt(R2));
+					}
+					break;
+				case DENSITY_2D:
+					{
+						//circle area (2D approximation)
+						double circleArea = M_PI * R2;
+						density = static_cast<ScalarType>(1.0 / circleArea);
+					}
+					break;
+				case DENSITY_3D:
+					{
+						//sphere area
+						static double volCoef = 4.0 * M_PI / 3.0;
+						double sphereArea =  volCoef * sqrt(R2);
+						density = static_cast<ScalarType>(1.0 / sphereArea);
+					}
+					break;
+				default:
+					assert(false);
+					break;
+				}
+			}
+			cell.points->setPointScalarValue(i,density);
 		}
 		else
 		{
@@ -361,6 +401,7 @@ bool GeometricalAnalysisTools::computeApproxPointsDensityInACellAtLevel(const Dg
 }
 
 int GeometricalAnalysisTools::computeLocalDensity(	GenericIndexedCloudPersist* theCloud,
+													Density densityType,
 													PointCoordinateType kernelRadius,
 													GenericProgressCallback* progressCb/*=0*/,
 													DgmOctree* inputOctree/*=0*/)
@@ -369,14 +410,32 @@ int GeometricalAnalysisTools::computeLocalDensity(	GenericIndexedCloudPersist* t
         return -1;
 
 	unsigned numberOfPoints = theCloud->size();
-	if (numberOfPoints<3)
+	if (numberOfPoints < 3)
         return -2;
+
+	//compute the right dimensional coef based on the expected output
+	double dimensionalCoef = 1.0;
+	switch (densityType)
+	{
+	case DENSITY_KNN:
+		dimensionalCoef = 1.0;
+		break;
+	case DENSITY_2D:
+		dimensionalCoef = M_PI * (static_cast<double>(kernelRadius) * kernelRadius);
+		break;
+	case DENSITY_3D:
+		dimensionalCoef = (4.0 * M_PI / 3.0) * ((static_cast<double>(kernelRadius) * kernelRadius) * kernelRadius);
+		break;
+	default:
+		assert(false);
+		return -5;
+	}
 
 	DgmOctree* theOctree = inputOctree;
 	if (!theOctree)
 	{
 		theOctree = new DgmOctree(theCloud);
-		if (theOctree->build(progressCb)<1)
+		if (theOctree->build(progressCb) < 1)
 		{
 			delete theOctree;
 			return -3;
@@ -385,13 +444,12 @@ int GeometricalAnalysisTools::computeLocalDensity(	GenericIndexedCloudPersist* t
 
 	theCloud->enableScalarField();
 
+	//determine best octree level to perform the computation
 	uchar level = theOctree->findBestLevelForAGivenNeighbourhoodSizeExtraction(kernelRadius);
-	
-	ScalarType sphereVolume = static_cast<ScalarType>( pow(static_cast<double>(kernelRadius), 3.0)*4.0*M_PI/3.0 ); // volume = 4/3 * pi * r^3
 
 	//parameters
-	void* additionalParameters[2] = {	static_cast<void*>(&kernelRadius),
-										static_cast<void*>(&sphereVolume) };
+	void* additionalParameters[] = {	static_cast<void*>(&kernelRadius),
+										static_cast<void*>(&dimensionalCoef) };
 
 	int result = 0;
 
@@ -425,9 +483,9 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctr
 {
 	//parameter(s)
 	PointCoordinateType radius = *static_cast<PointCoordinateType*>(additionalParameters[0]);
-	ScalarType volume = *static_cast<ScalarType*>(additionalParameters[1]);
+	double dimensionalCoef = *static_cast<double*>(additionalParameters[1]);
 	
-	assert(volume > 0);
+	assert(dimensionalCoef > 0);
 
 	//structure for nearest neighbors search
 	DgmOctree::NearestNeighboursSphericalSearchStruct nNSS;
@@ -447,7 +505,8 @@ bool GeometricalAnalysisTools::computePointsDensityInACellAtLevel(	const DgmOctr
 		//warning: there may be more points at the end of nNSS.pointsInNeighbourhood than the actual nearest neighbors (neighborCount)!
 		unsigned neighborCount = cell.parentOctree->findNeighborsInASphereStartingFromCell(nNSS,radius,false);
 
-		cell.points->setPointScalarValue(i,static_cast<ScalarType>(neighborCount)/volume);
+		ScalarType density = static_cast<ScalarType>(neighborCount/dimensionalCoef);
+		cell.points->setPointScalarValue(i,density);
 
 		if (nProgress && !nProgress->oneStep())
 			return false;

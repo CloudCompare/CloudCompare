@@ -291,8 +291,7 @@ protected slots:
 	void doActionAddIdField();
 	void doActionSetSFAsCoord();
 
-	void doComputeApproximateDensity();
-	void doComputeAccurateDensity();
+	void doComputeDensity();
 	void doComputeCurvature();
 	void doActionSFGradient();
 	void doComputeRoughness();

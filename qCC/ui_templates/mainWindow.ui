@@ -384,14 +384,7 @@
      <property name="title">
       <string>Other</string>
      </property>
-     <widget class="QMenu" name="menuDensity">
-      <property name="title">
-       <string>Density</string>
-      </property>
-      <addaction name="actionAccurateDensity"/>
-      <addaction name="actionApproximateDensity"/>
-     </widget>
-     <addaction name="menuDensity"/>
+     <addaction name="actionComputeDensity"/>
      <addaction name="actionCurvature"/>
      <addaction name="actionRoughness"/>
      <addaction name="actionRemoveDuplicatePoints"/>
@@ -2515,9 +2508,12 @@
     <string>Approximate (dist. to nearest neighbor)</string>
    </property>
   </action>
-  <action name="actionAccurateDensity">
+  <action name="actionComputeDensity">
    <property name="text">
-    <string>Accurate (at a given scale)</string>
+    <string>Density</string>
+   </property>
+   <property name="toolTip">
+    <string>Compute density</string>
    </property>
   </action>
   <action name="actionRemoveDuplicatePoints">

@@ -358,24 +358,27 @@ void ccAlignDlg::estimateDelta()
 		cloud->enableScalarField();
 	}
 
-	CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(cloud, &pDlg);
-	unsigned nb = 0;
+	CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(cloud, CCLib::GeometricalAnalysisTools::DENSITY_KNN, &pDlg);
+	unsigned count = 0;
 	double meanDensity = 0;
 	double meanSqrDensity = 0;
 	for (unsigned i=0; i<cloud->size(); i++)
 	{
 		ScalarType value = cloud->getPointScalarValue(i);
-		if (value == value && value > ZERO_TOLERANCE)
+		if (value == value)
 		{
-			double invValue = 1.0/(double)value;
-			meanDensity += invValue;
-			meanSqrDensity += invValue*invValue;
-			nb++;
+			meanDensity += value;
+			meanSqrDensity += static_cast<double>(value)*value;
+			count++;
 		}
 	}
-	meanDensity /= (double)nb;
-	meanSqrDensity /= (double)nb;
-	double dev = meanSqrDensity-(meanDensity*meanDensity);
+	
+	if (count)
+	{
+		meanDensity /= count;
+		meanSqrDensity /= count;
+	}
+	double dev = meanSqrDensity - (meanDensity*meanDensity);
 
 	delta->setValue(meanDensity+dev);
 	delete sampledData;

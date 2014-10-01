@@ -47,6 +47,7 @@ static const char COMMAND_KEYWORD_AUTO[]					= "AUTO";			//"AUTO" keyword
 static const char COMMAND_SUBSAMPLE[]						= "SS";				//+ method (RANDOM/SPATIAL/OCTREE) + parameter (resp. point count / spatial step / octree level)
 static const char COMMAND_CURVATURE[]						= "CURV";			//+ curvature type (MEAN/GAUSS) +
 static const char COMMAND_DENSITY[]							= "DENSITY";		//+ sphere radius
+static const char COMMAND_DENSITY_TYPE[]					= "TYPE";			//+ density type
 static const char COMMAND_APPROX_DENSITY[]					= "APPROX_DENSITY";
 static const char COMMAND_SF_GRADIENT[]						= "SF_GRAD";
 static const char COMMAND_ROUGHNESS[]						= "ROUGH";
@@ -659,6 +660,32 @@ bool ccCommandLineParser::commandCurvature(QStringList& arguments, QDialog* pare
 	return true;
 }
 
+bool ReadDensityType(QStringList& arguments, CCLib::GeometricalAnalysisTools::Density& density)
+{
+	if (arguments.empty())
+		return Error(QString("Missing parameter: density type after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
+	//read option confirmed, we can move on
+	QString typeArg = arguments.takeFirst().toUpper();
+	if (typeArg == "KNN")
+	{
+		density = CCLib::GeometricalAnalysisTools::DENSITY_KNN;
+	}
+	else if (typeArg == "SURFACE")
+	{
+		density = CCLib::GeometricalAnalysisTools::DENSITY_2D;
+	}
+	else if (typeArg == "VOLUME")
+	{
+		density = CCLib::GeometricalAnalysisTools::DENSITY_3D;
+	}
+	else
+	{
+		return Error(QString("Invalid parameter: density type is expected after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
+	}
+
+	return true;
+}
+
 bool ccCommandLineParser::commandApproxDensity(QStringList& arguments, QDialog* parent/*=0*/)
 {
 	Print("[APPROX DENSITY]");
@@ -668,10 +695,28 @@ bool ccCommandLineParser::commandApproxDensity(QStringList& arguments, QDialog* 
 	//Call MainWindow generic method
 	ccHObject::Container entities;
 	entities.resize(m_clouds.size());
-	for (unsigned i=0; i<m_clouds.size(); ++i)
+	for (size_t i=0; i<m_clouds.size(); ++i)
 		entities[i] = m_clouds[i].pc;
 
-	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_APPROX_DENSITY,entities,parent))
+	//optional parameter: density type
+	CCLib::GeometricalAnalysisTools::Density densityType = CCLib::GeometricalAnalysisTools::DENSITY_3D;
+	if (!arguments.empty())
+	{
+		QString argument = arguments.front();
+		if (IsCommand(argument,COMMAND_DENSITY_TYPE))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+			if (arguments.empty())
+				return Error(QString("Missing parameter: density type after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
+			//read option confirmed, we can move on
+			if (!ReadDensityType(arguments,densityType))
+				return false;
+		}
+	}
+	void* additionalParameters[] = { &densityType };
+
+	if (MainWindow::ApplyCCLibAlgortihm(MainWindow::CCLIB_ALGO_APPROX_DENSITY,entities,parent,additionalParameters))
 	{
 		//save output
 		if (!saveClouds("APPROX_DENSITY"))
@@ -695,11 +740,28 @@ bool ccCommandLineParser::commandDensity(QStringList& arguments, QDialog* parent
 		return Error(QString("Failed to read a numerical parameter: sphere radius (after \"-%1\"). Got '%2' instead.").arg(COMMAND_DENSITY).arg(kernelStr));
 	Print(QString("\tSphere radius: %1").arg(kernelSize));
 
+	//optional parameter: density type
+	CCLib::GeometricalAnalysisTools::Density densityType = CCLib::GeometricalAnalysisTools::DENSITY_3D;
+	if (!arguments.empty())
+	{
+		QString argument = arguments.front();
+		if (IsCommand(argument,COMMAND_DENSITY_TYPE))
+		{
+			//local option confirmed, we can move on
+			arguments.pop_front();
+			if (arguments.empty())
+				return Error(QString("Missing parameter: density type after \"-%1\" (KNN/SURFACE/VOLUME)").arg(COMMAND_DENSITY_TYPE));
+			//read option confirmed, we can move on
+			if (!ReadDensityType(arguments,densityType))
+				return false;
+		}
+	}
+
 	if (m_clouds.empty())
 		return Error(QString("No point cloud on which to compute density! (be sure to open one with \"-%1 [cloud filename]\" before \"-%2\")").arg(COMMAND_OPEN).arg(COMMAND_DENSITY));
 
 	//Call MainWindow generic method
-	void* additionalParameters[1] = {&kernelSize};
+	void* additionalParameters[] = { &kernelSize, &densityType };
 	ccHObject::Container entities;
 	entities.resize(m_clouds.size());
 	for (unsigned i=0; i<m_clouds.size(); ++i)
@@ -2271,6 +2333,11 @@ int ccCommandLineParser::parse(QStringList& arguments, QDialog* parent/*=0*/)
 		else if (IsCommand(argument,COMMAND_DENSITY))
 		{
 			success = commandDensity(arguments,parent);
+		}
+		// "APPROX DENSITY"
+		else if (IsCommand(argument,COMMAND_APPROX_DENSITY))
+		{
+			success = commandApproxDensity(arguments,parent);
 		}
 		// "SF_GRAD" SF GRADIENT
 		else if (IsCommand(argument,COMMAND_SF_GRADIENT))

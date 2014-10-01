@@ -52,15 +52,23 @@ public:
 								GenericProgressCallback* progressCb = 0,
 								DgmOctree* inputOctree = 0);
 
+	enum Density {	DENSITY_KNN,	/**< The number of points inside the neighborhing sphere **/
+					DENSITY_2D,		/**< The number of points divided by the area of the circle that has the same radius as the neighborhing sphere (2D approximation) **/
+					DENSITY_3D,		/**< The number of points divided by the neighborhing sphere volume (3D) **/
+	};
+
 	//! Computes the local density (approximate)
-	/** Old method (based only on the distance to the nearest neighbor)
-		\warning this method assumes the input scalar field is different from output.
+	/** Old method (based only on the distance to the nearest neighbor).
+		\warning As only one neighbor is extracted, the DENSITY_KNN type corresponds in fact to the (inverse) distance to the nearest neighbor.
+		\warning This method assumes the input scalar field is different from the output one.
 		\param theCloud processed cloud
+		\param densityType the 'type' of density to compute
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
 	**/
 	static int computeLocalDensityApprox(	GenericIndexedCloudPersist* theCloud,
+											Density densityType,
 											GenericProgressCallback* progressCb = 0,
 											DgmOctree* inputOctree = 0);
 
@@ -68,12 +76,14 @@ public:
 	/** Simply counts the number of points falling inside a sphere around each point
 		\warning this method assumes the input scalar field is different from output.
 		\param theCloud processed cloud
+		\param densityType the 'type' of density to compute
 		\param kernelRadius neighbouring sphere radius
 		\param progressCb client application can get some notification of the process progress through this callback mechanism (see GenericProgressCallback)
 		\param inputOctree if not set as input, octree will be automatically computed.
 		\return success (0) or error code (<0)
 	**/
 	static int computeLocalDensity(	GenericIndexedCloudPersist* theCloud,
+									Density densityType,
 									PointCoordinateType kernelRadius,
 									GenericProgressCallback* progressCb = 0,
 									DgmOctree* inputOctree = 0);

@@ -123,6 +123,7 @@
 #include "ccBoundingBoxEditorDlg.h"
 #include "ccColorLevelsDlg.h"
 #include "ccSORFilterDlg.h"
+#include "ccDensityDlg.h"
 #include <ui_aboutDlg.h>
 
 //other
@@ -884,8 +885,7 @@ void MainWindow::connectActions()
 	connect(actionFitFacet,						SIGNAL(triggered()),	this,		SLOT(doActionFitFacet()));
 	connect(actionFitQuadric,					SIGNAL(triggered()),	this,		SLOT(doActionFitQuadric()));
 	//"Tools > Other" menu
-	connect(actionApproximateDensity,			SIGNAL(triggered()),	this,		SLOT(doComputeApproximateDensity()));
-	connect(actionAccurateDensity,				SIGNAL(triggered()),	this,		SLOT(doComputeAccurateDensity()));
+	connect(actionComputeDensity,				SIGNAL(triggered()),	this,		SLOT(doComputeDensity()));
 	connect(actionCurvature,					SIGNAL(triggered()),	this,		SLOT(doComputeCurvature()));
 	connect(actionRoughness,					SIGNAL(triggered()),	this,		SLOT(doComputeRoughness()));
 	connect(actionRemoveDuplicatePoints,		SIGNAL(triggered()),	this,		SLOT(doRemoveDuplicatePoints()));
@@ -8239,16 +8239,9 @@ void MainWindow::doShowPrimitiveFactory()
 	m_pfDlg->show();
 }
 
-void MainWindow::doComputeApproximateDensity()
+void MainWindow::doComputeDensity()
 {
-	if (!ApplyCCLibAlgortihm(CCLIB_ALGO_APPROX_DENSITY,m_selectedEntities,this))
-		return;
-	refreshAll();
-	updateUI();
-}
-
-void MainWindow::doComputeAccurateDensity()
-{
+	//we use CCLIB_ALGO_ACCURATE_DENSITY by default (will be modified if necessary)
 	if (!ApplyCCLibAlgortihm(CCLIB_ALGO_ACCURATE_DENSITY,m_selectedEntities,this))
 		return;
 	refreshAll();
@@ -8501,7 +8494,38 @@ void MainWindow::doActionExportCloudsInfo()
 	csvFile.close();
 }
 
-bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget *parent/*=0*/, void** additionalParameters/*=0*/)
+QString GetDensitySFName(CCLib::GeometricalAnalysisTools::Density densityType, bool approx, double densityKernelSize = 0.0)
+{
+	QString sfName;
+
+	//update the name with the density type
+	switch (densityType)
+	{
+	case CCLib::GeometricalAnalysisTools::DENSITY_KNN:
+		sfName = CC_LOCAL_KNN_DENSITY_FIELD_NAME;
+		break;
+	case CCLib::GeometricalAnalysisTools::DENSITY_2D:
+		sfName = CC_LOCAL_SURF_DENSITY_FIELD_NAME;
+		break;
+	case CCLib::GeometricalAnalysisTools::DENSITY_3D:
+		sfName = CC_LOCAL_VOL_DENSITY_FIELD_NAME;
+		break;
+	default:
+		assert(false);
+		break;
+	}
+
+	if (densityType != CCLib::GeometricalAnalysisTools::DENSITY_KNN)
+		sfName += QString(" (r=%2)").arg(densityKernelSize);
+
+	if (approx)
+		sfName += " [approx]";
+
+	return sfName;
+}
+
+
+bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container& entities, QWidget* parent/*=0*/, void** additionalParameters/*=0*/)
 {
 	size_t selNum = entities.size();
 	if (selNum < 1)
@@ -8512,6 +8536,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 
 	//computeDensity parameters
 	PointCoordinateType densityKernelSize = PC_ONE;
+	CCLib::GeometricalAnalysisTools::Density densityType = CCLib::GeometricalAnalysisTools::DENSITY_3D;
 
 	//curvature parameters
 	PointCoordinateType curvKernelSize = -PC_ONE;
@@ -8527,7 +8552,17 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 	{
 	case CCLIB_ALGO_APPROX_DENSITY:
 		{
-			sfName = CC_LOCAL_DENSITY_APPROX_FIELD_NAME;
+			//parameters already provided?
+			if (additionalParameters)
+			{
+				densityType = *static_cast<CCLib::GeometricalAnalysisTools::Density*>(additionalParameters[0]);
+			}
+			else
+			{
+				//shouldn't happen
+				assert(false);
+			}
+			sfName = GetDensitySFName(densityType,true);
 		}
 		break;
 
@@ -8537,6 +8572,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 			if (additionalParameters)
 			{
 				densityKernelSize = *static_cast<PointCoordinateType*>(additionalParameters[0]);
+				densityType = *static_cast<CCLib::GeometricalAnalysisTools::Density*>(additionalParameters[1]);
 			}
 			else //ask the user!
 			{
@@ -8546,14 +8582,29 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 					ccConsole::Error("Invalid kernel size!");
 					return false;
 				}
-				bool ok;
-				double val = QInputDialog::getDouble(parent,"Accurate density","Radius",static_cast<double>(densityKernelSize),DBL_MIN,1.0e9,8,&ok);
-				if (!ok)
+
+				ccDensityDlg dDlg(parent);
+				dDlg.setRadius(densityKernelSize);
+
+				//process cancelled by user
+				if (!dDlg.exec())
 					return false;
-				densityKernelSize = static_cast<PointCoordinateType>(val);
+
+				if (!dDlg.isPrecise())
+				{
+					//Switch to approx density if necessary
+					algo = CCLIB_ALGO_APPROX_DENSITY;
+				}
+				else
+				{
+					//otherwise read kernel size
+					densityKernelSize = static_cast<PointCoordinateType>(dDlg.getRadius());
+				}
+				//and in both cases we need the density type
+				densityType = dDlg.getDensityType();
 			}
 
-			sfName = QString("%1 (r=%2)").arg(CC_LOCAL_DENSITY_FIELD_NAME).arg(densityKernelSize);
+			sfName = GetDensitySFName(densityType,algo == CCLIB_ALGO_APPROX_DENSITY,densityKernelSize);
 		}
 		break;
 
@@ -8673,7 +8724,7 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 				}
 				else //if (!cloud->hasDisplayedScalarField()) //TODO: displayed but not necessarily set as OUTPUT!
 				{
-					cloud=0;
+					cloud = 0;
 				}
 			}
 			break;
@@ -8726,12 +8777,14 @@ bool MainWindow::ApplyCCLibAlgortihm(CC_LIB_ALGORITHM algo, ccHObject::Container
 			{
 			case CCLIB_ALGO_APPROX_DENSITY:
 				result = CCLib::GeometricalAnalysisTools::computeLocalDensityApprox(cloud,
+																					densityType,
 																					&pDlg,
 																					octree);
 				break;
 
 			case CCLIB_ALGO_ACCURATE_DENSITY:
 				result = CCLib::GeometricalAnalysisTools::computeLocalDensity(	cloud,
+																				densityType,
 																				densityKernelSize,
 																				&pDlg,
 																				octree);
@@ -9919,8 +9972,7 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 	actionComputeMeshLS->setEnabled(atLeastOneCloud);
 	//actionComputeQuadric3D->setEnabled(atLeastOneCloud);
 	actionComputeBestFitBB->setEnabled(atLeastOneEntity);
-	actionApproximateDensity->setEnabled(atLeastOneCloud);
-	actionAccurateDensity->setEnabled(atLeastOneCloud);
+	actionComputeDensity->setEnabled(atLeastOneCloud);
 	actionCurvature->setEnabled(atLeastOneCloud);
 	actionRoughness->setEnabled(atLeastOneCloud);
 	actionRemoveDuplicatePoints->setEnabled(atLeastOneCloud);

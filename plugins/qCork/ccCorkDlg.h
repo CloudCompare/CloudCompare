@@ -15,30 +15,45 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_KINECT_DLG_HEADER
-#define CC_KINECT_DLG_HEADER
+#ifndef CC_CORK_DLG_HEADER
+#define CC_CORK_DLG_HEADER
 
-#include "ui_kinectDlg.h"
+#include "ui_corkDlg.h"
 
-//! Dialog for qKinect plugin
-class ccKinectDlg : public QDialog, public Ui::KinectDialog
+//! Dialog for qCork plugin
+class ccCorkDlg : public QDialog, public Ui::CorkDialog
 {
+	Q_OBJECT
+
 public:
 
 	//! Default constructor
-	ccKinectDlg(QWidget* parent = 0);
+	ccCorkDlg(QWidget* parent = 0);
 
-	//! Returns output clound name
-	QString getCloudName() const;
+	//! Supported CSG operations
+	enum CSG_OPERATION { UNION, INTERSECT, DIFF, SYM_DIFF };
 
-	//! Returns output clound name
-	bool grabRGBInfo();
+	//! Set meshes names
+	void setNames(QString A, QString B);
 
-	//! Adds 'resolution mode' string
-	void addMode(const QString& mode);
+	//! Returns the selected operation
+	CSG_OPERATION getSelectedOperation() const { return m_selectedOperation; }
 
-	//! Returns frame averaging
-	unsigned char getFrameAveragingCount() const;
+	//! Returns whether mesh order has been swappped or not
+	bool isSwapped() const { return m_isSwapped; }
+
+protected slots:
+
+	void unionSelected();
+	void intersectSelected();
+	void diffSelected();
+	void symDiffSelected();
+	void swap();
+
+protected:
+
+	CSG_OPERATION m_selectedOperation;
+	bool m_isSwapped;
 };
 
-#endif //CC_KINECT_DLG_HEADER
+#endif //CC_CORK_DLG_HEADER

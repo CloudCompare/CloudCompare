@@ -49,10 +49,8 @@ if( ${OPTION_USE_LIBLAS} )
 		#Release mode only by default
 		target_link_libraries( ${ARGV0} optimized ${LIBLAS_RELEASE_LIBRARY_FILE} )
 		
+		#export DLL
 		if ( ARGV1 )
-			#message( Liblas output dir: ${ARGV1} )
-			
-			#release mode
 			if ( LIBLAS_SHARED_LIBRARY_FILE )
 				string( REPLACE \\ / LIBLAS_SHARED_LIBRARY_FILE ${LIBLAS_SHARED_LIBRARY_FILE} )
 				install( FILES ${LIBLAS_SHARED_LIBRARY_FILE} CONFIGURATIONS Release DESTINATION ${ARGV1} )
@@ -62,10 +60,13 @@ if( ${OPTION_USE_LIBLAS} )
 			elseif( WIN32 )
 				message( SEND_ERROR "No LibLAS DLL file specified (LIBLAS_SHARED_LIBRARY_FILE)" )
 			endif()
+		endif()
 
-			#optional: debug mode
-			if ( LIBLAS_DEBUG_LIBRARY_FILE )
-				target_link_libraries( ${ARGV0} debug ${LIBLAS_DEBUG_LIBRARY_FILE} )
+		#optional: debug mode
+		if ( LIBLAS_DEBUG_LIBRARY_FILE )
+			target_link_libraries( ${ARGV0} debug ${LIBLAS_DEBUG_LIBRARY_FILE} )
+			#export DLL
+			if ( ARGV1 )
 				if ( LIBLAS_SHARED_DEBUG_LIBRARY_FILE )
 					string( REPLACE \\ / LIBLAS_SHARED_DEBUG_LIBRARY_FILE ${LIBLAS_SHARED_DEBUG_LIBRARY_FILE} )
 					install( FILES ${LIBLAS_SHARED_DEBUG_LIBRARY_FILE} CONFIGURATIONS Debug DESTINATION ${ARGV1}_debug )
@@ -83,8 +84,11 @@ if( ${OPTION_USE_LIBLAS} )
 		else()
 			set_property( TARGET ${ARGV0} APPEND PROPERTY COMPILE_DEFINITIONS CC_LAS_SUPPORT )
 		endif()
-	else()
+	
+	else() #if( NOT LIBLAS_RELEASE_LIBRARY_FILE )
+	
 		message( SEND_ERROR "No LibLAS release library file specified (LIBLAS_RELEASE_LIBRARY_FILE)" )
+
 	endif()
 
 endif()

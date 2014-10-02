@@ -36,9 +36,15 @@ v2.5.6 ??/??/2014
 	* New buttons in the 'Apply Transformation' dialog:
 		- 'ASCII file' to import a transformation matrix from an ASCII file (see above)
 		- 'Clipoard' to paste the clipboard contents (hopefully corresponding to a transformation matrix ;)
-	* 'Edit > Merge' method now works with meshes
+	* New plugin: qCork for Mesh Boolean Operation (= Constructive Solid Geometry)
+		- this plugin is based on the LGPL Cork Library (https://github.com/gilbo/cork)
+		- allows to comute the difference, union or intersection of two CLOSED meshes
+		- current limitations:
+			* doesn't keep the mesh(es) attributes (color, nromals, etc.)
+			* only available on Windows
 
 - Enhancements:
+	* The 'Edit > Merge' method now works with meshes
 	* qPoissonRecon upgraded:
 		- now uses the latest PoissonRecon version 6.11
 		- screening activated by default

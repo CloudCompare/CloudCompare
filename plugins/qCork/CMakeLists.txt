@@ -9,18 +9,18 @@ if(POLICY CMP0020)
   cmake_policy(SET CMP0020 OLD)
 endif()
 
-option( INSTALL_QKINECT_PLUGIN "Check to install qKINECT plugin" OFF )
+option( INSTALL_QCORK_PLUGIN "Check to install qCORK plugin" OFF )
 
-if (INSTALL_QKINECT_PLUGIN)
+if (INSTALL_QCORK_PLUGIN)
 
-#CloudCompare 'Kinect' plugin
-project( QKINECT_PLUGIN )
+#CloudCompare Mesh CSG operations plugin (based on the Cork library)
+project( QCORK_PLUGIN )
 
 # libfreenect is needed to build library
-include( LibfreenectSupport.cmake )
+include( CorkSupport.cmake )
 
 include( ../CMakePluginTpl.cmake )
 
-target_link_libfreenect( ${PROJECT_NAME} ${CLOUDCOMPARE_DEST_FOLDER} )
+target_link_cork( ${PROJECT_NAME} )
 
 endif()

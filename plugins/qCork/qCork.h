@@ -1,6 +1,6 @@
 //##########################################################################
 //#                                                                        #
-//#                      CLOUDCOMPARE PLUGIN: qKinect                      #
+//#                       CLOUDCOMPARE PLUGIN: qCork                       #
 //#                                                                        #
 //#  This program is free software; you can redistribute it and/or modify  #
 //#  it under the terms of the GNU General Public License as published by  #
@@ -15,69 +15,51 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef Q_KINECT_PLUGIN_HEADER
-#define Q_KINECT_PLUGIN_HEADER
+#ifndef Q_CORK_PLUGIN_HEADER
+#define Q_CORK_PLUGIN_HEADER
 
 //Qt
 #include <QObject>
 
 #include "../ccStdPluginInterface.h"
 
-class ccKinectDlg;
 class QAction;
 
-//! Kinect 3D stream capture plugin
-/** This plugin is based on libfreenect (https://github.com/OpenKinect/libfreenect)
+//! Mes Boolean Operations (CSG) plugin
+/** This plugin is based on Cork: https://github.com/gilbo/cork
+	Required implementation is CC's dedicated fork: https://github.com/cloudcompare/cork
 **/
-class qKinect : public QObject, public ccStdPluginInterface
+class qCork : public QObject, public ccStdPluginInterface
 {
 	Q_OBJECT
 	Q_INTERFACES(ccStdPluginInterface)
 #ifdef CC_QT5
-	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qKinect")
+	Q_PLUGIN_METADATA(IID "cccorp.cloudcompare.plugin.qCork")
 #endif
 
 public:
 
 	//! Default constructor
-	qKinect(QObject* parent = 0);
-
-	//! Destructor
-	virtual ~qKinect();
+	qCork(QObject* parent = 0);
 
 	//inherited from ccPluginInterface
-	virtual QString getName() const { return "Kinect capture"; }
-	virtual QString getDescription() const { return "Kinect 3D stream capture (with libfreenect)"; }
+	virtual QString getName() const { return "Mesh Boolean Operations"; }
+	virtual QString getDescription() const { return "Mesh Boolean Operations (CSG) based on Cork library"; }
 	virtual QIcon getIcon() const;
 
 	//inherited from ccStdPluginInterface
-	//virtual void onNewSelection(const ccHObject::Container& selectedEntities);
+	virtual void onNewSelection(const ccHObject::Container& selectedEntities);
 	virtual void getActions(QActionGroup& group);
 
 protected slots:
 
-	//! Starts actions
-	void doStartGrabbing();
-
-	//! Grab cloud
-	void grabCloud();
-
-	//! On dialog end
-	void dialogClosed(int);
-
-	//! Updates real time view
-	void updateRTView();
+	//! Starts main action
+	void doAction();
 
 protected:
-
-	//! Associated dialog
-	ccKinectDlg* m_kDlg;
-
-	//! Timer to update RT view
-	QTimer* m_timer;
 
 	//! Associated action
 	QAction* m_action;
 };
 
-#endif //Q_KINECT_PLUGIN_HEADER
+#endif //Q_CORK_PLUGIN_HEADER

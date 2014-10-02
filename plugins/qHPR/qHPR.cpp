@@ -69,7 +69,10 @@ void qHPR::getActions(QActionGroup& group)
 void qHPR::onNewSelection(const ccHObject::Container& selectedEntities)
 {
 	if (m_action)
-		m_action->setEnabled(selectedEntities.size()==1);
+	{
+		//a single point cloud must be selected
+		m_action->setEnabled(selectedEntities.size() == 1 && selectedEntities.front()->isA(CC_TYPES::POINT_CLOUD));
+	}
 }
 
 CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersist* theCloud, const CCVector3d& viewPoint, double fParam)
@@ -103,9 +106,9 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		for (unsigned i=0; i<nbPoints; ++i)
 		{
 			CCVector3d P = CCVector3d::fromArray(theCloud->getPoint(i)->u) - viewPoint;
-			*_pt_array++ = (coordT)P.x;
-			*_pt_array++ = (coordT)P.y;
-			*_pt_array++ = (coordT)P.z;
+			*_pt_array++ = static_cast<coordT>(P.x);
+			*_pt_array++ = static_cast<coordT>(P.y);
+			*_pt_array++ = static_cast<coordT>(P.z);
 
 			//we keep track of the highest 'radius'
 			double r2 = P.norm2();
@@ -140,7 +143,8 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	//array to flag points on the convex hull
 	std::vector<bool> pointBelongsToCvxHull;
 
-	if (!qh_new_qhull(3,nbPoints+1,pt_array,False,(char*)"qhull QJ Qci",0,stderr))
+	static char qHullCommand[] = "qhull QJ Qci";
+	if (!qh_new_qhull(3,nbPoints+1,pt_array,False,qHullCommand,0,stderr))
 	{
 		try
 		{
@@ -171,7 +175,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 	}
 
 	delete[] pt_array;
-	pt_array=0;
+	pt_array = 0;
 
 	qh_freeqhull(!qh_ALL);
 	//free long memory
@@ -202,7 +206,7 @@ CCLib::ReferenceCloud* qHPR::removeHiddenPoints(CCLib::GenericIndexedCloudPersis
 		else //not enough memory
 		{
 			delete visiblePoints;
-			visiblePoints=0;
+			visiblePoints = 0;
 		}
 	}
 
@@ -217,19 +221,14 @@ void qHPR::doAction()
 
 	const ccHObject::Container& selectedEntities = m_app->getSelectedEntities();
 	size_t selNum = selectedEntities.size();
-	if (selNum!=1)
+	if (	selNum != 1
+		||	!selectedEntities.front()->isA(CC_TYPES::POINT_CLOUD))
 	{
 		m_app->dispToConsole("Select only one cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 		return;
 	}
 
-	ccHObject* ent = selectedEntities[0];
-	if (!ent->isA(CC_TYPES::POINT_CLOUD))
-	{
-		m_app->dispToConsole("Select a point cloud!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
-		return;
-	}
-	ccPointCloud* cloud = static_cast<ccPointCloud*>(ent);
+	ccPointCloud* cloud = static_cast<ccPointCloud*>(selectedEntities[0]);
 
 	ccGLWindow* win = m_app->getActiveGLWindow();
 	if (!win)
@@ -255,7 +254,7 @@ void qHPR::doAction()
 
 	//unique parameter: the octree subdivision level
 	int octreeLevel = dlg.octreeLevelSpinBox->value();
-	assert(octreeLevel>=0 && octreeLevel<=255);
+	assert(octreeLevel >= 0 && octreeLevel <= 255);
 
 	//compute octree if cloud hasn't any
 	ccOctree* theOctree = cloud->getOctree();

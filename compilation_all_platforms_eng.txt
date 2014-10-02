@@ -1,11 +1,11 @@
 ********************************************
 *         COMPILATION WITH CMAKE           *
 *                                          *
-*    Last modification: 03/26/2014 (DGM)   *
+*    Last modification: 10/02/2014 (DGM)   *
 *                                          *
 ********************************************
 
-Refer to the wiki (http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake) for up-to-date information.
+for up-to-date information, refer to the wiki (http://www.cloudcompare.org/doc/wiki/index.php5?title=Compilation_CMake).
 
 0) Prerequisites
 
@@ -22,7 +22,7 @@ Refer to the wiki (http://www.cloudcompare.org/doc/wiki/index.php5?title=Compila
         - Make the 'Where is the source code' field point to your local CloudCompare SVN repository.
         - Make the 'Where to build the binaries' field point to ... almost anywhere you want (apart from the same folder as above!)
         - Click on the "Configure" button
-        - Select your generator [already tested: Visual 2008 (32 & 64 bits), Visual 2010 Express (64 bits - see appendix), Code::Blocks (Linux & Windows 32 bits), gcc (Linux 32 & 64 bits)]
+        - Select your generator [already tested: Visual 2008 (32 & 64 bits), Visual 2010 Express (64 bits - see appendix), Visual 2012, Code::Blocks (Linux & Windows 32 bits), gcc (Linux 32 & 64 bits)]
         - Wait for CMake configuration/tests to finish...
 
 2) Before clicking on the 'Generate' button, you may set some options:
@@ -48,6 +48,7 @@ Refer to the wiki (http://www.cloudcompare.org/doc/wiki/index.php5?title=Compila
                 - qPoissonRecon
                 - qRansacSD (SD = Shape Detection)
                 - qSSAO
+				- qCork (CSG)
         - eventually the "CMAKE" group contains a CMAKE_INSTALL_PREFIX which is where qCC (CloudCompare) and ccViewer will be installed (with the 'install' build configuration in your project)
                 Note: On Linux, default install dir is /usr/local (be sure to have administrative rights if you want to install CloudCompare there - or change the default path)
                       On Windows Seven, you may not have the right to 'install' files in Program Files (x86)
@@ -139,6 +140,13 @@ The CloudCompare CMake project will only require that you set the path where lib
 		- comment the 'strcasecmp' definition block (35-37)
 
 	The CMake project will only require that you set the path where dxflib sources are (DXF_LIB_SRC_DIR)
+
+2-8) [Optional] Setup for Cork + MPIR support (qCork plugin)
+
+	If you want to compile the qCork plugin (on Windows only for now), you'll need
+		- MPIR 2.6.0 (http://www.mpir.org/)
+		- the forked version of the Cork library for CC: https://github.com/cloudcompare/cork
+			(see the VS2010 and VS2012 projects shipped with this fork)
 
 3) Generate the project files
 

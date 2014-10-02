@@ -429,14 +429,38 @@ struct EVLR
 	unsigned char reserved[2]; // 2 bytes 
 	unsigned char data_type; // 1 byte 
 	unsigned char options; // 1 byte 
-	char name[32]; // 32 bytes 
+	static const unsigned NAME_MAX_LENGTH = 32;
+	char name[NAME_MAX_LENGTH]; // 32 bytes 
 	unsigned char unused[4]; // 4 bytes 
 	double no_data[3]; // 24 = 3*8 bytes 
 	double min[3]; // 24 = 3*8 bytes 
 	double max[3]; // 24 = 3*8 bytes 
 	double scale[3]; // 24 = 3*8 bytes 
 	double offset[3]; // 24 = 3*8 bytes 
-	char description[32]; // 32 bytes 
+	static const unsigned DESC_MAX_LENGTH = 32;
+	char description[DESC_MAX_LENGTH]; // 32 bytes 
+
+	//! Returns the field name
+	QString getName() const
+	{
+		//if the name uses the full record length (32 bytes)
+		//we must add a 0 at the end so as to make a valid string!
+		char tempName[NAME_MAX_LENGTH+1];
+		memcpy(tempName,name,NAME_MAX_LENGTH);
+		tempName[NAME_MAX_LENGTH] = 0;
+		return QString(tempName);
+	}
+
+	//! Returns the field description
+	QString getDescription() const
+	{
+		//if the name uses the full record length (32 bytes)
+		//we must add a 0 at the end so as to make a valid string!
+		char tempDesc[DESC_MAX_LENGTH+1];
+		memcpy(tempDesc,description,DESC_MAX_LENGTH);
+		tempDesc[DESC_MAX_LENGTH] = 0;
+		return QString(tempDesc);
+	}
 }; // total of 192 bytes 
 
 CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
@@ -488,9 +512,18 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							const liblas::VariableRecord& vlr = vlrs[i];
 							if (vlr.GetUserId(false) == "LASF_Spec" && vlr.GetRecordId() == 4)
 							{
-								const EVLR* evlr = reinterpret_cast<const EVLR*>(&(vlr.GetData()[0]));
-								evlrs.push_back(*evlr);
-								ccLog::PrintDebug(QString("Extra bytes VLR found: %1 (%2)").arg(evlr->name).arg(evlr->description));
+								//EXTRA BYTES record length is 192
+								static unsigned EB_RECORD_SIZE = 192;
+								
+								assert((vlr.GetData().size() % EB_RECORD_SIZE) == 0);
+								unsigned count = vlr.GetData().size() / EB_RECORD_SIZE;
+								const uint8_t* vlrData = &(vlr.GetData()[0]);
+								for (unsigned j=0; j<count; ++j)
+								{
+									const EVLR* evlr = reinterpret_cast<const EVLR*>(vlrData + j*EB_RECORD_SIZE);
+									evlrs.push_back(*evlr);
+									ccLog::PrintDebug(QString("Extra bytes VLR found: %1 (%2)").arg(evlr->getName()).arg(evlr->getDescription()));
+								}
 							}
 						}
 					}
@@ -537,7 +570,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 		assert(!evlrs.empty());
 		for (size_t i=0; i<evlrs.size(); ++i)
 		{
-			s_lasOpenDlg->addEVLR(QString("%1 (%2)").arg(evlrs[i].name).arg(evlrs[i].description));
+			s_lasOpenDlg->addEVLR(QString("%1 (%2)").arg(evlrs[i].getName()).arg(evlrs[i].getDescription()));
 		}
 	}
 
@@ -630,7 +663,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 						}
 						else
 						{
-							ccLog::Warning(QString("[LAS FILE] All '%1' values were the same (%2)! We ignored them...").arg(LAS_FIELD_NAMES[field->type]).arg(field->firstValue));
+							ccLog::Warning(QString("[LAS FILE] All '%1' values were the same (%2)! We ignored them...").arg(field->type == LAS_EXTRA ? field->getName() : QString(LAS_FIELD_NAMES[field->type])).arg(field->firstValue));
 						}
 
 						fieldsToLoad.pop_back();
@@ -744,7 +777,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 							{
 								if (s_lasOpenDlg->doLoadEVLR(i))
 								{
-									QString fieldName(evlrs[i].name);
+									QString fieldName(evlrs[i].getName());
 									if (subFieldCount > 1)
 										fieldName += QString(".%1").arg(j+1);
 

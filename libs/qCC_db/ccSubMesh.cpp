@@ -34,11 +34,13 @@
 
 ccSubMesh::ccSubMesh(ccMesh* parentMesh)
 	: ccGenericMesh("Sub-mesh")
-	, m_associatedMesh(parentMesh)
+	, m_associatedMesh(0)
 	, m_triIndexes(new ReferencesContainer())
 	, m_globalIterator(0)
 {
 	m_triIndexes->link();
+
+	setAssociatedMesh(parentMesh); //must be called so as to set the right dependency!
 
 	showColors(parentMesh ? parentMesh->colorsShown() : true);
 	showNormals(parentMesh ? parentMesh->normalsShown() : true);
@@ -54,8 +56,14 @@ ccSubMesh::~ccSubMesh()
 	}
 }
 
-void ccSubMesh::setAssociatedMesh(ccMesh* mesh)
+void ccSubMesh::setAssociatedMesh(ccMesh* mesh, bool unlinkPreviousOne/*=true*/)
 {
+	if (m_associatedMesh == mesh)
+		return;
+
+	if (m_associatedMesh && unlinkPreviousOne)
+		m_associatedMesh->removeDependencyWith(this);
+
 	m_associatedMesh = mesh;
 
 	if (m_associatedMesh)

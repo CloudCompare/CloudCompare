@@ -134,7 +134,10 @@ public:
 	inline virtual const ccMesh* getAssociatedMesh() const { return m_associatedMesh; }
 
 	//! Sets the associated mesh
-	virtual void setAssociatedMesh(ccMesh* mesh);
+	/** \param mesh parent mesh
+		\param unlinkPreviousOne whether to remove any dependency with the previous parent mesh (if any)
+	**/
+	virtual void setAssociatedMesh(ccMesh* mesh, bool unlinkPreviousOne = true);
 
 	//! Indexes map for createNewSubMeshFromSelection
 	typedef GenericChunkedArray<1,unsigned> IndexMap;

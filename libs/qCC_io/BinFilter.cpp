@@ -449,7 +449,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					ccHObject* mesh = root->find(static_cast<int>(meshID));
 					if (mesh && mesh->isA(CC_TYPES::MESH))
 					{
-						subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(mesh));
+						subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(mesh),false); //'false' because previous mesh is not null (= real mesh ID)!!!
 					}
 					else
 					{
@@ -457,11 +457,11 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 						//normally, the associated mesh should be the sub-mesh's parent!
 						if (subMesh->getParent() && subMesh->getParent()->isA(CC_TYPES::MESH))
 						{
-							subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(subMesh->getParent()));
+							subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(subMesh->getParent()),false); //'false' because previous mesh is not null (= real mesh ID)!!!
 						}
 						else
 						{
-							subMesh->setAssociatedMesh(0);
+							subMesh->setAssociatedMesh(0,false); //'false' because previous mesh is not null (= real mesh ID)!!!
 							//DGM: can't delete it, too dangerous (bad pointers ;)
 							//delete subMesh;
 							ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find associated mesh (ID=%1) for sub-mesh '%2' in the file!").arg(meshID).arg(subMesh->getName()));

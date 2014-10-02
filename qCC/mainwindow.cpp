@@ -4313,7 +4313,7 @@ void MainWindow::doActionMerge()
 					subMesh->showColors(baseMesh->colorsShown());
 					subMesh->showWired(baseMesh->isShownAsWire());
 					subMesh->enableStippling(baseMesh->stipplingEnabled());
-					subMesh->setVisible(false);
+					subMesh->setEnabled(false);
 					baseMesh->addChild(subMesh);
 				}
 				else

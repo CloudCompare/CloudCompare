@@ -19,9 +19,9 @@
 
 #include <ccOctree.h>
 
-static double s_normalThresh = .9;	// this is the cos of the maximal normal deviation
-static int s_minSupport = 500;		// this is the minimal numer of points required for a primitive
-static double s_probability = .01;	// this is the "probability" with which a primitive is overlooked
+static int    s_minSupport       = 500;		// this is the minimal numer of points required for a primitive
+static double s_maxNormalDev_deg = 25.0;	// maximal normal deviation from ideal shape (in degrees)
+static double s_probability      = 0.01;	// probability that no better candidate was overlooked during sampling
 
 ccRansacSDDlg::ccRansacSDDlg(QWidget* parent) : QDialog(parent), Ui::RansacSDDialog()
 {
@@ -32,13 +32,13 @@ ccRansacSDDlg::ccRansacSDDlg(QWidget* parent) : QDialog(parent), Ui::RansacSDDia
 	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
 	supportPointsSpinBox->setValue(s_minSupport);
-	normThreshDoubleSpinBox->setValue(s_normalThresh);
+	maxNormDevAngleSpinBox->setValue(s_maxNormalDev_deg);
 	probaDoubleSpinBox->setValue(s_probability);
 }
 
 void ccRansacSDDlg::saveSettings()
 {
 	s_minSupport = supportPointsSpinBox->value();
-	s_normalThresh = normThreshDoubleSpinBox->value();
+	s_maxNormalDev_deg = maxNormDevAngleSpinBox->value();
 	s_probability = probaDoubleSpinBox->value();
 }

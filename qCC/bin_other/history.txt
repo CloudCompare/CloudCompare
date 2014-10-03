@@ -117,6 +117,8 @@ v2.5.6 ??/??/2014
 			files generated too quickly)
 		- New option '-TYPE' (after '-DENSITY' or '-APPROX_DENSITY') to specify the type of density to compute
 			* options are: KNN (number of neighbors), SURFACE (surface density) or VOLUME (volume density)
+	* qRansac Shape Detection plugin:
+		- parameters have been updated so as to be (much) clearer
 
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized

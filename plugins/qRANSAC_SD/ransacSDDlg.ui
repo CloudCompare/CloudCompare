@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>360</width>
+    <width>400</width>
     <height>225</height>
    </rect>
   </property>
@@ -88,20 +88,17 @@
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>epsilon</string>
+           <string>max distance to primitive</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="epsilonDoubleSpinBox">
           <property name="toolTip">
-           <string>Distance threshold (internally the distance threshold is taken as 3*epsilon!)</string>
+           <string>Maximum distance of samples to the ideal shape</string>
           </property>
-          <property name="statusTip">
-           <string>Distance threshold (internally the distance threshold is taken as 3*epsilon!)</string>
-          </property>
-          <property name="whatsThis">
-           <string>Distance threshold (internally the distance threshold is taken as 3*epsilon!)</string>
+          <property name="prefix">
+           <string>e = </string>
           </property>
           <property name="decimals">
            <number>3</number>
@@ -124,20 +121,17 @@
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>bitmap epsilon</string>
+           <string>sampling resolution</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="bitmapEpsilonDoubleSpinBox">
           <property name="toolTip">
-           <string>Bitmap resolution</string>
+           <string>Should correspond to the distance between neighboring points in the data</string>
           </property>
-          <property name="statusTip">
-           <string>Bitmap resolution</string>
-          </property>
-          <property name="whatsThis">
-           <string>Bitmap resolution</string>
+          <property name="prefix">
+           <string>b = </string>
           </property>
           <property name="decimals">
            <number>3</number>
@@ -160,29 +154,29 @@
         <item>
          <widget class="QLabel" name="label_4">
           <property name="text">
-           <string>normal threshold</string>
+           <string>max normal deviation</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="normThreshDoubleSpinBox">
+         <widget class="QDoubleSpinBox" name="maxNormDevAngleSpinBox">
           <property name="toolTip">
-           <string>This is the cos of the maximal normal deviation</string>
+           <string>Maximum deviation from the ideal shape normal vector (in degrees)</string>
           </property>
-          <property name="statusTip">
-           <string>This is the cos of the maximal normal deviation</string>
+          <property name="prefix">
+           <string>a = </string>
           </property>
-          <property name="whatsThis">
-           <string>This is the cos of the maximal normal deviation</string>
+          <property name="suffix">
+           <string> deg.</string>
           </property>
           <property name="maximum">
-           <double>1.000000000000000</double>
+           <double>90.000000000000000</double>
           </property>
           <property name="singleStep">
-           <double>0.050000000000000</double>
+           <double>1.000000000000000</double>
           </property>
           <property name="value">
-           <double>0.900000000000000</double>
+           <double>25.000000000000000</double>
           </property>
          </widget>
         </item>
@@ -193,20 +187,14 @@
         <item>
          <widget class="QLabel" name="label_5">
           <property name="text">
-           <string>probability</string>
+           <string>overlooking probability</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="probaDoubleSpinBox">
           <property name="toolTip">
-           <string>This is the &quot;probability&quot; with which a primitive is overlooked</string>
-          </property>
-          <property name="statusTip">
-           <string>This is the &quot;probability&quot; with which a primitive is overlooked</string>
-          </property>
-          <property name="whatsThis">
-           <string>This is the &quot;probability&quot; with which a primitive is overlooked</string>
+           <string>Probability that no better candidate was overlooked during sampling (the lower the better!)</string>
           </property>
           <property name="decimals">
            <number>6</number>
@@ -239,13 +227,13 @@
      <item>
       <widget class="QSpinBox" name="supportPointsSpinBox">
        <property name="toolTip">
-        <string>This is the minimal numer of points required for a primitive</string>
+        <string>This is the minimal number of points required for a primitive</string>
        </property>
        <property name="statusTip">
-        <string>This is the minimal numer of points required for a primitive</string>
+        <string>This is the minimal number of points required for a primitive</string>
        </property>
        <property name="whatsThis">
-        <string>This is the minimal numer of points required for a primitive</string>
+        <string>This is the minimal number of points required for a primitive</string>
        </property>
        <property name="minimum">
         <number>10</number>

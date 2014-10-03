@@ -103,9 +103,9 @@ void doDetection()
 }
 
 //for parameters persistence
-static unsigned s_supportPoints = 500;	// this is the minimal numer of points required for a primitive
-static double s_normThresh = 0.9;		// this is the cos of the maximal normal deviation
-static double s_proba = 0.01;			// this is the "probability" with which a primitive is overlooked
+static unsigned s_supportPoints    = 500;	// this is the minimal numer of points required for a primitive
+static double   s_maxNormalDev_deg = 25.0;	// maximal normal deviation from ideal shape (in degrees)
+static double   s_proba            = 0.01;	// probability that no better candidate was overlooked during sampling
 static bool s_primEnabled[5] = {true,true,true,false,false};
 
 void qRansacSD::doAction()
@@ -133,7 +133,7 @@ void qRansacSD::doAction()
 	ccPointCloud* pc = static_cast<ccPointCloud*>(ent);
 
 	//input cloud
-	size_t count = (size_t)pc->size();
+	unsigned count = pc->size();
 	bool hasNorms = pc->hasNormals();
 	PointCoordinateType bbMin[3],bbMax[3];
 	pc->getBoundingBox(bbMin,bbMax);
@@ -158,7 +158,7 @@ void qRansacSD::doAction()
 		Pt.normal[0] = 0.0;
 		Pt.normal[1] = 0.0;
 		Pt.normal[2] = 0.0;
-		for (unsigned i=0;i<(unsigned)count;++i)
+		for (unsigned i=0; i<count; ++i)
 		{
 			const CCVector3* P = pc->getPoint(i);
 			Pt.pos[0] = static_cast<float>(P->x);
@@ -190,12 +190,10 @@ void qRansacSD::doAction()
 
 	//init dialog with default values
 	ccRansacSDDlg rsdDlg(m_app->getMainWindow());
-	rsdDlg.epsilonDoubleSpinBox->setValue(.01f * scale);		// set distance threshold to .01f of bounding box width
-																// NOTE: Internally the distance threshold is taken as 3 * ransacOptions.m_epsilon!!!
-	rsdDlg.bitmapEpsilonDoubleSpinBox->setValue(.02f * scale);	// set bitmap resolution to .02f of bounding box width
-																// NOTE: This threshold is NOT multiplied internally!
+	rsdDlg.epsilonDoubleSpinBox->setValue(.005f * scale);		// set distance threshold to 0.5% of bounding box width
+	rsdDlg.bitmapEpsilonDoubleSpinBox->setValue(.01f * scale);	// set bitmap resolution (= sampling resolution) to 1% of bounding box width
 	rsdDlg.supportPointsSpinBox->setValue(s_supportPoints);
-	rsdDlg.normThreshDoubleSpinBox->setValue(s_normThresh);
+	rsdDlg.maxNormDevAngleSpinBox->setValue(s_maxNormalDev_deg);
 	rsdDlg.probaDoubleSpinBox->setValue(s_proba);
 	rsdDlg.planeCheckBox->setChecked(s_primEnabled[0]);
 	rsdDlg.sphereCheckBox->setChecked(s_primEnabled[1]);
@@ -209,7 +207,7 @@ void qRansacSD::doAction()
 	//for parameters persistence
 	{
 		s_supportPoints = rsdDlg.supportPointsSpinBox->value();
-		s_normThresh = rsdDlg.normThreshDoubleSpinBox->value();
+		s_maxNormalDev_deg = rsdDlg.maxNormDevAngleSpinBox->value();
 		s_proba = rsdDlg.probaDoubleSpinBox->value();
 
 		//consistency check
@@ -234,9 +232,10 @@ void qRansacSD::doAction()
 	//import parameters from dialog
 	RansacShapeDetector::Options ransacOptions;
 	{
-		ransacOptions.m_epsilon			= static_cast<float>(rsdDlg.epsilonDoubleSpinBox->value());
+		ransacOptions.m_epsilon			= static_cast<float>(rsdDlg.epsilonDoubleSpinBox->value() * 3.0); //internally this threshold is multiplied by 3!
 		ransacOptions.m_bitmapEpsilon	= static_cast<float>(rsdDlg.bitmapEpsilonDoubleSpinBox->value());
-		ransacOptions.m_normalThresh	= static_cast<float>(rsdDlg.normThreshDoubleSpinBox->value());
+		ransacOptions.m_normalThresh	= static_cast<float>(cos(rsdDlg.maxNormDevAngleSpinBox->value() * CC_DEG_TO_RAD));
+		assert( ransacOptions.m_normalThresh >= 0 );
 		ransacOptions.m_probability		= static_cast<float>(rsdDlg.probaDoubleSpinBox->value());
 		ransacOptions.m_minSupport		= static_cast<unsigned>(rsdDlg.supportPointsSpinBox->value());
 	}
@@ -252,7 +251,7 @@ void qRansacSD::doAction()
 
 		if (pc->reserveTheNormsTable())
 		{
-			for (size_t i=0; i<count; ++i)
+			for (unsigned i=0; i<count; ++i)
 			{
 				Vec3f& Nvi = cloud[i].normal;
 				CCVector3 Ni = CCVector3::fromArray(Nvi);
@@ -286,7 +285,7 @@ void qRansacSD::doAction()
 	if (rsdDlg.torusCheckBox->isChecked())
 		detector.Add(new TorusPrimitiveShapeConstructor());
 
-	size_t remaining = count;
+	unsigned remaining = count;
 	typedef std::pair< MiscLib::RefCountPtr< PrimitiveShape >, size_t > DetectedShape;
 	MiscLib::Vector< DetectedShape > shapes; // stores the detected shapes
 
@@ -323,7 +322,7 @@ void qRansacSD::doAction()
 			QApplication::processEvents();
 		}
 
-		remaining = s_remainingPoints;
+		remaining = static_cast<unsigned>(s_remainingPoints);
 
 		pDlg.hide();
 		QApplication::processEvents();
@@ -333,7 +332,7 @@ void qRansacSD::doAction()
 	//	remaining = detector.Detect(cloud, 0, cloud.size(), &shapes);
 	//}
 
-#ifdef _DEBUG
+#if 0 //def _DEBUG
 	FILE* fp = fopen("RANS_SD_trace.txt","wt");
 
 	fprintf(fp,"[Options]\n");
@@ -376,7 +375,7 @@ void qRansacSD::doAction()
 		for (MiscLib::Vector<DetectedShape>::const_iterator it = shapes.begin(); it != shapes.end(); ++it)
 		{
 			const PrimitiveShape* shape = it->first;
-			size_t shapePointsCount = it->second;
+			unsigned shapePointsCount = static_cast<unsigned>(it->second);
 
 			//too many points?!
 			if (shapePointsCount > count)
@@ -400,7 +399,7 @@ void qRansacSD::doAction()
 			}			
 			bool saveNormals = pcShape->reserveTheNormsTable();
 
-			for (size_t j=0;j<shapePointsCount;++j)
+			for (unsigned j=0; j<shapePointsCount; ++j)
 			{
 				pcShape->addPoint(CCVector3::fromArray(cloud[count-1-j].pos));
 				if (saveNormals)
@@ -431,25 +430,25 @@ void qRansacSD::doAction()
 
 				//we look for real plane extents
 				float minX,maxX,minY,maxY;
-				for (size_t j=0;j<shapePointsCount;++j)
+				for (unsigned j=0; j<shapePointsCount; ++j)
 				{
 					std::pair<float,float> param;
 					plane->Parameters(cloud[count-1-j].pos,&param);
-					if (j!=0)
+					if (j != 0)
 					{
-						if (minX<param.first)
-							minX=param.first;
-						else if (maxX>param.first)
-							maxX=param.first;
-						if (minY<param.second)
-							minY=param.second;
-						else if (maxY>param.second)
-							maxY=param.second;
+						if (minX < param.first)
+							minX = param.first;
+						else if (maxX > param.first)
+							maxX = param.first;
+						if (minY < param.second)
+							minY = param.second;
+						else if (maxY > param.second)
+							maxY = param.second;
 					}
 					else
 					{
-						minX=maxX=param.first;
-						minY=maxY=param.second;
+						minX = maxX = param.first;
+						minY = maxY = param.second;
 					}
 				}
 

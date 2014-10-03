@@ -361,27 +361,27 @@ ccHObject* ccHObject::find(int uniqueID)
 	return 0;
 }
 
-unsigned ccHObject::filterChildren(Container& filteredChildren, bool recursive/*=false*/, CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/) const
+unsigned ccHObject::filterChildren(	Container& filteredChildren,
+									bool recursive/*=false*/,
+									CC_CLASS_ENUM filter/*=CC_TYPES::OBJECT*/,
+									bool strict/*=false*/) const
 {
 	for (Container::const_iterator it = m_children.begin(); it != m_children.end(); ++it)
 	{
-		if ((*it)->isKindOf(filter))
+		if (	(!strict && (*it)->isKindOf(filter))
+			||	( strict && (*it)->isA(filter)) )
 		{
 			//warning: we have to handle unicity as a sibling may be in the same container as its parent!
 			if (std::find(filteredChildren.begin(),filteredChildren.end(),*it) == filteredChildren.end()) //not yet in output vector?
 			{
 				filteredChildren.push_back(*it);
 			}
-			//else //FIXME (for tests only)
-			//{
-			//	//don't put it twice!
-			//	QString childName = (*it)->getName();
-			//	childName.toUpper();
-			//}
 		}
 
 		if (recursive)
-			(*it)->filterChildren(filteredChildren, true, filter);
+		{
+			(*it)->filterChildren(filteredChildren, true, filter, strict);
+		}
 	}
 
 	return static_cast<unsigned>(filteredChildren.size());

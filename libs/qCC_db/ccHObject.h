@@ -145,9 +145,13 @@ public:
 	/** \param filteredChildren result container
 		\param recursive specifies if the search should be recursive
 		\param filter pattern for children selection
+		\param strict whether the search is strict on the type (i.e 'isA') or not (i.e. 'isKindOf')
 		\return number of collected children
 	**/
-	unsigned filterChildren(Container& filteredChildren, bool recursive = false, CC_CLASS_ENUM filter = CC_TYPES::OBJECT) const;
+	unsigned filterChildren(Container& filteredChildren,
+							bool recursive = false,
+							CC_CLASS_ENUM filter = CC_TYPES::OBJECT,
+							bool strict = false) const;
 
 	//! Detaches a specific child
 	/** This method does not delete the child.

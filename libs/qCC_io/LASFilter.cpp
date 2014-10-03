@@ -516,9 +516,9 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 								static unsigned EB_RECORD_SIZE = 192;
 								
 								assert((vlr.GetData().size() % EB_RECORD_SIZE) == 0);
-								unsigned count = vlr.GetData().size() / EB_RECORD_SIZE;
+								size_t count = vlr.GetData().size() / EB_RECORD_SIZE;
 								const uint8_t* vlrData = &(vlr.GetData()[0]);
-								for (unsigned j=0; j<count; ++j)
+								for (size_t j=0; j<count; ++j)
 								{
 									const EVLR* evlr = reinterpret_cast<const EVLR*>(vlrData + j*EB_RECORD_SIZE);
 									evlrs.push_back(*evlr);

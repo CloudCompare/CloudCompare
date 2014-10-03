@@ -332,12 +332,6 @@ void ccCameraSensor::computeProjectionMatrix()
 	if (	m_intrinsicParams.pixelSize_mm[0] != 0
 		&&	m_intrinsicParams.pixelSize_mm[1] != 0)
 	{
-		m_projectionMatrix.toIdentity();
-		m_projectionMatrixIsValid = false;
-		//ccLog::Warning("[ccCameraSensor] Projection matrix can't be computed (pixel size is null!)");
-	}
-	else
-	{
 		m_projectionMatrix.toZero();
 		float* mat = m_projectionMatrix.data();
 		mat[0]  = m_intrinsicParams.focal_mm / m_intrinsicParams.pixelSize_mm[0];
@@ -348,6 +342,12 @@ void ccCameraSensor::computeProjectionMatrix()
 		mat[10] = 1.0f;
 
 		m_projectionMatrixIsValid = true;
+	}
+	else
+	{
+		m_projectionMatrix.toIdentity();
+		m_projectionMatrixIsValid = false;
+		//ccLog::Warning("[ccCameraSensor] Projection matrix can't be computed (pixel size is null!)");
 	}
 }
 
@@ -755,8 +755,17 @@ bool ccCameraSensor::computeUncertainty(const CCVector2i& pixel, const float dep
 
 bool ccCameraSensor::computeUncertainty(CCLib::ReferenceCloud* points, std::vector< Vector3Tpl<ScalarType> >& accuracy/*, bool lensCorrection*/)
 {
-	if (!points)
+	if (!points || points->size() == 0)
+	{
+		ccLog::Warning("[ccCameraSensor::computeUncertainty] Internal error: invalid input cloud");
 		return false;
+	}
+
+	if (!m_distortionParams || m_distortionParams->getModel() != BROWN_DISTORTION)
+	{
+		ccLog::Warning("[ccCameraSensor::computeUncertainty] Sensor has no associated uncertainty model! (Brown, etc.)");
+		return false;
+	}
 
 	unsigned count = points->size();
 	accuracy.clear();

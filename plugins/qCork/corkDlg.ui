@@ -43,7 +43,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="meshALineEdit"/>
+           <widget class="QLineEdit" name="meshALineEdit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -57,7 +61,11 @@
            </widget>
           </item>
           <item>
-           <widget class="QLineEdit" name="meshBLineEdit"/>
+           <widget class="QLineEdit" name="meshBLineEdit">
+            <property name="readOnly">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>

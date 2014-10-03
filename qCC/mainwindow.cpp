@@ -2407,18 +2407,13 @@ void MainWindow::doActionComputeDistancesFromSensor()
 		if (!sensor)
 			continue; //skip this entity
 
-		//sensor must have a parent cloud -> this error probably could not happen
-		//If in a future cc will permits to have not-cloud-associated sensors this will
-		//ensure to not have bugs
-		if (!sensor->getParent() || !sensor->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
+		//get associated cloud
+		ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;
+		ccPointCloud* cloud = askUserToSelectACloud(defaultCloud, "Select a cloud on which to project the uncertainty:");
+		if (!cloud)
 		{
-			ccConsole::Error("Sensor must be associated with a point cloud!");
 			return;
 		}
-
-		//get associated cloud
-		ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
-		assert(cloud);
 
 		//sensor center
 		CCVector3 sensorCenter;
@@ -2471,23 +2466,23 @@ void MainWindow::doActionComputeScatteringAngles()
 	ccSensor* sensor = ccHObjectCaster::ToSensor(m_selectedEntities[0]);
 	assert(sensor);
 
-	//sensor must have a parent cloud with normal
-	if (!sensor->getParent() || !sensor->getParent()->isKindOf(CC_TYPES::POINT_CLOUD) || !sensor->getParent()->hasNormals())
-	{
-		ccConsole::Error("Sensor must be associated to a point cloud with normals! (compute normals first)");
-		return;
-	}
-
 	//sensor center
 	CCVector3 sensorCenter;
 	if (!sensor->getActiveAbsoluteCenter(sensorCenter))
 		return;
 
 	//get associated cloud
-	ccPointCloud * cloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
-	assert(cloud);
+	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;
+	ccPointCloud* cloud = askUserToSelectACloud(defaultCloud, "Select a cloud on which to project the uncertainty:");
 	if (!cloud)
+	{
 		return;
+	}
+	if (!cloud->hasNormals())
+	{
+		ccConsole::Error("The cloud must have normals!");
+		return;
+	}
 
 	ccSensorComputeScatteringAnglesDlg cdDlg(this);
 	if (!cdDlg.exec())
@@ -2852,7 +2847,6 @@ void MainWindow::doActionProjectUncertainty()
 	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud on which to project the uncertainty:");
 	if (!pointCloud)
 	{
-		assert(false);
 		return;
 	}
 
@@ -2956,7 +2950,6 @@ void MainWindow::doActionCheckPointsInsideFrustrum()
 	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud to filter:");
 	if (!pointCloud)
 	{
-		assert(false);
 		return;
 	}
 
@@ -9997,9 +9990,6 @@ void MainWindow::enableUIItems(dbTreeSelectionInfo& selInfo)
 
 	//menuEdit->setEnabled(atLeastOneEntity);
 	//menuTools->setEnabled(atLeastOneEntity);
-	menuCreateSensor->setEnabled(atLeastOneCloud);
-	menuGroundBasedLidar->setEnabled(atLeastOneGBLSensor);
-	menuCameraSensor->setEnabled(atLeastOneCameraSensor);
 
 	actionZoomAndCenter->setEnabled(atLeastOneEntity && activeWindow);
 	actionSave->setEnabled(atLeastOneEntity);

@@ -249,33 +249,38 @@
      </property>
      <widget class="QMenu" name="menuGroundBasedLidar">
       <property name="title">
-       <string>Ground-Based Lidar</string>
+       <string>Ground-Based Laser</string>
       </property>
+      <property name="icon">
+       <iconset resource="../icones.qrc">
+        <normaloff>:/CC/images/dbGBLSensorSymbol.png</normaloff>:/CC/images/dbGBLSensorSymbol.png</iconset>
+      </property>
+      <addaction name="actionCreateGBLSensor"/>
+      <addaction name="separator"/>
       <addaction name="actionShowDepthBuffer"/>
       <addaction name="actionExportDepthBuffer"/>
      </widget>
-     <widget class="QMenu" name="menuCreateSensor">
-      <property name="title">
-       <string>Create</string>
-      </property>
-      <addaction name="actionCreateGBLSensor"/>
-      <addaction name="actionCreateCameraSensor"/>
-     </widget>
      <widget class="QMenu" name="menuCameraSensor">
       <property name="title">
-       <string>Camera Sensor</string>
+       <string>Camera</string>
       </property>
+      <property name="icon">
+       <iconset resource="../icones.qrc">
+        <normaloff>:/CC/images/dbCamSensorSymbol.png</normaloff>:/CC/images/dbCamSensorSymbol.png</iconset>
+      </property>
+      <addaction name="actionCreateCameraSensor"/>
+      <addaction name="separator"/>
       <addaction name="actionProjectUncertainty"/>
       <addaction name="actionCheckPointsInsideFrustrum"/>
      </widget>
-     <addaction name="menuCreateSensor"/>
      <addaction name="actionModifySensor"/>
+     <addaction name="separator"/>
      <addaction name="menuGroundBasedLidar"/>
      <addaction name="menuCameraSensor"/>
      <addaction name="separator"/>
+     <addaction name="actionViewFromSensor"/>
      <addaction name="actionComputeDistancesFromSensor"/>
      <addaction name="actionComputeScatteringAngles"/>
-     <addaction name="actionViewFromSensor"/>
     </widget>
     <widget class="QMenu" name="menuToggle">
      <property name="title">
@@ -1808,7 +1813,7 @@
   </action>
   <action name="actionModifySensor">
    <property name="text">
-    <string>Modify</string>
+    <string>Edit</string>
    </property>
   </action>
   <action name="actionHeightGridGeneration">
@@ -2453,6 +2458,10 @@
    </property>
   </action>
   <action name="actionViewFromSensor">
+   <property name="icon">
+    <iconset resource="../icones.qrc">
+     <normaloff>:/CC/images/dbViewportSymbol.png</normaloff>:/CC/images/dbViewportSymbol.png</iconset>
+   </property>
    <property name="text">
     <string>View from sensor</string>
    </property>
@@ -2464,12 +2473,12 @@
   </action>
   <action name="actionCreateGBLSensor">
    <property name="text">
-    <string>GBL Sensor</string>
+    <string>Create</string>
    </property>
   </action>
   <action name="actionCreateCameraSensor">
    <property name="text">
-    <string>Camera Sensor</string>
+    <string>Create</string>
    </property>
   </action>
   <action name="actionCheckPointsInsideFrustrum">

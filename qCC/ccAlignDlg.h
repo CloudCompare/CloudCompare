@@ -76,4 +76,4 @@ protected:
 
 };
 
-#endif
+#endif //CC_ALIGN_DLG_HEADER

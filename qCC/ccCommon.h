@@ -45,6 +45,7 @@
 #define CC_DEFAULT_DIP_SF_NAME "Dip (degrees)"
 #define CC_DEFAULT_DIP_DIR_SF_NAME "Dip direction (degrees)"
 #define CC_DEFAULT_MESH_VERT_FLAGS_SF_NAME "Vertex type"
+#define CC_DEFAULT_ID_SF_NAME "Id"
 
 //Qt
 #include <QString>

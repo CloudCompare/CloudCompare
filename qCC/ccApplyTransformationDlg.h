@@ -60,4 +60,4 @@ protected:
 	void updateAll(const ccGLMatrix& mat, bool textForm = true, bool axisAngleForm = true, bool eulerForm = true);
 };
 
-#endif
+#endif //CC_APPLY_TRANSFORMATION_DLG_HEADER

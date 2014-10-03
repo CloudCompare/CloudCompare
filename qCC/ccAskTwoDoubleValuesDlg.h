@@ -36,4 +36,4 @@ public:
 							QWidget* parent = 0);
 };
 
-#endif
+#endif //CC_ASK_TWO_DOUBLE_VALUES_DIALOG_HEADER

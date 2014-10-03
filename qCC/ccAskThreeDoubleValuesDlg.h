@@ -48,4 +48,4 @@ public:
 	bool getCheckboxState() const;
 };
 
-#endif
+#endif //CC_ASK_THREE_DOUBLE_VALUES_DIALOG_HEADER

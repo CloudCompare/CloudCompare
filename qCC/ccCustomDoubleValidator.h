@@ -15,24 +15,44 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GBL_SENSOR_PROJECTION_DIALOG_HEADER
-#define CC_GBL_SENSOR_PROJECTION_DIALOG_HEADER
+#ifndef CC_CUSTOM_DOUBLE_VALIDATOR_HEADER
+#define CC_CUSTOM_DOUBLE_VALIDATOR_HEADER
 
-#include <ui_gblSensorProjectDlg.h>
+//Qt
+#include <QValidator>
+#include <QString>
 
-class ccGBLSensor;
-
-//! Ground-based (lidar) sensor parameters dialog
-class ccGBLSensorProjectionDlg : public QDialog, public Ui::GBLSensorProjectDialog
+//! Validator class (accepts only double numbers and replaces the comma by a point automatically)
+class ccCustomDoubleValidator : public QValidator
 {
 public:
 
 	//! Default constructor
-	ccGBLSensorProjectionDlg(QWidget* parent = 0);
+	ccCustomDoubleValidator(QObject * parent = 0) : QValidator(parent)
+	{}
 
-	void initWithGBLSensor(const ccGBLSensor* sensor);
-	void updateGBLSensor(ccGBLSensor* sensor);
-
+	//reimplemented from QValidator
+	State validate(QString& input, int& pos) const
+	{
+		for (int i=0; i<input.size(); ++i)
+		{
+			QChar c = input[i];
+			if (c == ',')
+			{
+				input[i] = '.';
+				continue;
+			}
+			else if (c == '.' || c == '-' || c.isDigit())
+			{
+				continue;
+			}
+			else
+			{
+				return Invalid;
+			}
+		}
+		return Acceptable;
+	}
 };
 
-#endif //CC_GBL_SENSOR_PROJECTION_DIALOG_HEADER
+#endif // CC_CUSTOM_DOUBLE_VALIDATOR_HEADER

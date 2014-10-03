@@ -1,86 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>GBLSensorProjectDialog</class>
- <widget class="QDialog" name="GBLSensorProjectDialog">
+ <class>CamSensorProjectDialog</class>
+ <widget class="QDialog" name="CamSensorProjectDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>250</height>
+    <height>272</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Sensor parameters</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0">
-    <layout class="QHBoxLayout">
-     <item>
-      <spacer>
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
-       </property>
-       <property name="sizeHint" stdset="0">
-        <size>
-         <width>40</width>
-         <height>20</height>
-        </size>
-       </property>
-      </spacer>
-     </item>
-     <item>
-      <widget class="QLabel" name="label">
-       <property name="toolTip">
-        <string>theta=longitudinal (E-W) / phi=latitudinal (N-S)</string>
-       </property>
-       <property name="text">
-        <string>rotation order</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QComboBox" name="rotationOrderComboBox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="toolTip">
-        <string>theta=longitudinal (E-W) / phi=latitudinal (N-S)</string>
-       </property>
-       <property name="editable">
-        <bool>false</bool>
-       </property>
-       <property name="sizeAdjustPolicy">
-        <enum>QComboBox::AdjustToContents</enum>
-       </property>
-       <item>
-        <property name="text">
-         <string>yaw then pitch (default)</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>pitch then yaw</string>
-        </property>
-       </item>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="2" column="0">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
     <widget class="QTabWidget" name="propertiesTabWidget">
      <property name="currentIndex">
       <number>1</number>
@@ -229,157 +163,239 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabSteps">
-      <attribute name="title">
-       <string>Angular steps</string>
-      </attribute>
-      <layout class="QVBoxLayout">
-       <item>
-        <layout class="QHBoxLayout">
-         <item>
-          <widget class="QLabel" name="label_9">
-           <property name="toolTip">
-            <string>Rotation around the vertical axis</string>
-           </property>
-           <property name="text">
-            <string>Yaw (degrees)</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="yawStepSpinBox">
-           <property name="decimals">
-            <number>6</number>
-           </property>
-           <property name="maximum">
-            <double>360.000000000000000</double>
-           </property>
-           <property name="singleStep">
-            <double>0.000001000000000</double>
-           </property>
-           <property name="value">
-            <double>0.005000000000000</double>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout">
-         <item>
-          <widget class="QLabel" name="label_10">
-           <property name="toolTip">
-            <string>Rotation around the lateral axis</string>
-           </property>
-           <property name="text">
-            <string>Pitch (degrees)</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="pitchStepSpinBox">
-           <property name="decimals">
-            <number>6</number>
-           </property>
-           <property name="maximum">
-            <double>360.000000000000000</double>
-           </property>
-           <property name="singleStep">
-            <double>0.000001000000000</double>
-           </property>
-           <property name="value">
-            <double>0.005000000000000</double>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <spacer>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </widget>
      <widget class="QWidget" name="tabOther">
       <attribute name="title">
-       <string>Other</string>
+       <string>Intrinsic params</string>
       </attribute>
-      <layout class="QVBoxLayout">
-       <item>
-        <layout class="QHBoxLayout">
+      <layout class="QFormLayout" name="formLayout">
+       <item row="0" column="0">
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>focal</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QDoubleSpinBox" name="focalDoubleSpinBox">
+         <property name="decimals">
+          <number>6</number>
+         </property>
+         <property name="maximum">
+          <double>1000000000.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>vert. f.o.v.</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QDoubleSpinBox" name="fovDoubleSpinBox">
+         <property name="maximum">
+          <double>180.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>45.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>array size</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout">
          <item>
-          <widget class="QLabel" name="label_11">
-           <property name="toolTip">
-            <string>Depth buffer 'uncertainty'</string>
-           </property>
-           <property name="text">
-            <string>Uncertainty</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QDoubleSpinBox" name="uncertaintyDoubleSpinBox">
-           <property name="decimals">
-            <number>4</number>
+          <widget class="QSpinBox" name="arrayWSpinBox">
+           <property name="maximum">
+            <number>65536</number>
            </property>
            <property name="singleStep">
-            <double>0.010000000000000</double>
+            <number>100</number>
            </property>
            <property name="value">
-            <double>0.010000000000000</double>
+            <number>800</number>
            </property>
           </widget>
          </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout">
          <item>
-          <widget class="QLabel" name="label_12">
-           <property name="toolTip">
-            <string>Sensor max range</string>
-           </property>
+          <widget class="QLabel" name="label_14">
            <property name="text">
-            <string>Max. range</string>
+            <string>x</string>
            </property>
           </widget>
          </item>
          <item>
-          <widget class="QDoubleSpinBox" name="maxRangeDoubleSpinBox">
+          <widget class="QSpinBox" name="arrayHSpinBox">
            <property name="maximum">
-            <double>1000000000000.000000000000000</double>
+            <number>65536</number>
+           </property>
+           <property name="singleStep">
+            <number>100</number>
            </property>
            <property name="value">
-            <double>1000000000000.000000000000000</double>
+            <number>600</number>
            </property>
           </widget>
          </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </item>
-       <item>
-        <spacer>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>pixel size</string>
          </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QDoubleSpinBox" name="pixWDoubleSpinBox">
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="maximum">
+            <double>1000000000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_15">
+           <property name="text">
+            <string>x</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QDoubleSpinBox" name="pixHDoubleSpinBox">
+           <property name="decimals">
+            <number>6</number>
+           </property>
+           <property name="maximum">
+            <double>1000000000.000000000000000</double>
+           </property>
+           <property name="value">
+            <double>1.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_2">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_11">
+         <property name="text">
+          <string>zNear</string>
          </property>
-        </spacer>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QDoubleSpinBox" name="zNearDoubleSpinBox">
+         <property name="decimals">
+          <number>6</number>
+         </property>
+         <property name="maximum">
+          <double>1000000000.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>zFar</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QDoubleSpinBox" name="zFarDoubleSpinBox">
+         <property name="decimals">
+          <number>6</number>
+         </property>
+         <property name="maximum">
+          <double>1000000000.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>100.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="0">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>skew</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QDoubleSpinBox" name="skewDoubleSpinBox">
+         <property name="maximum">
+          <double>1000000000.000000000000000</double>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>Distortion / uncertainty</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QTextEdit" name="distInfoTextEdit">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+     </property>
     </widget>
    </item>
   </layout>
@@ -389,7 +405,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>GBLSensorProjectDialog</receiver>
+   <receiver>CamSensorProjectDialog</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -405,7 +421,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>GBLSensorProjectDialog</receiver>
+   <receiver>CamSensorProjectDialog</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

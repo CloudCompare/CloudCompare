@@ -15,24 +15,24 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_GBL_SENSOR_PROJECTION_DIALOG_HEADER
-#define CC_GBL_SENSOR_PROJECTION_DIALOG_HEADER
+#ifndef CC_CAMERA_SENSOR_PROJECTION_DIALOG_HEADER
+#define CC_CAMERA_SENSOR_PROJECTION_DIALOG_HEADER
 
-#include <ui_gblSensorProjectDlg.h>
+#include <ui_camSensorProjectDlg.h>
 
-class ccGBLSensor;
+class ccCameraSensor;
 
-//! Ground-based (lidar) sensor parameters dialog
-class ccGBLSensorProjectionDlg : public QDialog, public Ui::GBLSensorProjectDialog
+//! Camera sensor parameters dialog
+class ccCamSensorProjectionDlg : public QDialog, public Ui::CamSensorProjectDialog
 {
 public:
 
 	//! Default constructor
-	ccGBLSensorProjectionDlg(QWidget* parent = 0);
+	ccCamSensorProjectionDlg(QWidget* parent = 0);
 
-	void initWithGBLSensor(const ccGBLSensor* sensor);
-	void updateGBLSensor(ccGBLSensor* sensor);
+	void initWithCamSensor(const ccCameraSensor* sensor);
+	void updateCamSensor(ccCameraSensor* sensor);
 
 };
 
-#endif //CC_GBL_SENSOR_PROJECTION_DIALOG_HEADER
+#endif //CC_CAMERA_SENSOR_PROJECTION_DIALOG_HEADER

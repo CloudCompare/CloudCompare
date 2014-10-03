@@ -79,9 +79,11 @@ v2.5.6 ??/??/2014
 			custom fields defined in the LAS file 'extra bytes' section 
 	* Camera sensor management enhanced:
 		- Camera sensors are now created automatically when clouds are loaded from Bundler or ICM files (TODO: from E57)
+		- A dialog let the user create or edit camera sensors
 		- the camera symbol in 3D is fully configurable (display scale, with or without frustrum, etc.)
 		- camera sensors (and images) can now be saved in BIN files
-		- the 'Project uncertainty' and '
+		- the 'Camera Sensor > Project uncertainty' and 'Camera Sensor > Compute points visibility' are now
+			smarter and can be applied on any point cloud
 	* Ground Based Laser sensors management enhanced:
 		- GBL sensors are now created automatically when clouds are loaded from PTX files (TODO: from E57)
 		- the user can now apply the GBL sensor 'viewport' to the 3D display ("bubble view' mode)

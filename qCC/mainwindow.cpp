@@ -98,6 +98,7 @@
 #include "ccStatisticalTestDlg.h"
 #include "ccLabelingDlg.h"
 #include "ccGBLSensorProjectionDlg.h"
+#include "ccCamSensorProjectionDlg.h"
 #include "ccHeightGridGenerationDlg.h"
 #include "ccUnrollDlg.h"
 #include "ccAlignDlg.h" //Aurelien BEY
@@ -2588,7 +2589,7 @@ void MainWindow::doActionCreateGBLSensor()
 			//we create a new sensor
 			ccGBLSensor* sensor = new ccGBLSensor();
 
-			//we init its parameters with dialog
+			//we init its parameters with the dialog
 			spDlg.updateGBLSensor(sensor);
 
 			//we compute projection
@@ -2663,6 +2664,10 @@ void MainWindow::doActionCreateGBLSensor()
 
 void MainWindow::doActionCreateCameraSensor()
 {
+	ccCamSensorProjectionDlg spDlg(this);
+	if (!spDlg.exec())
+		return;
+
 	//We create the corresponding sensor for each input cloud
 	ccHObject::Container selectedEntities = m_selectedEntities;
 	size_t selNum = selectedEntities.size();
@@ -2679,6 +2684,9 @@ void MainWindow::doActionCreateCameraSensor()
 			ccCameraSensor* sensor = new ccCameraSensor();
 			cloud->addChild(sensor);
 
+			//we init its parameters with the dialog
+			spDlg.updateCamSensor(sensor);
+
 			//we try to guess the sensor relative size (dirty)
 			ccBBox bb = cloud->getBB();
 			double diag = bb.getDiagNorm();
@@ -2686,9 +2694,6 @@ void MainWindow::doActionCreateCameraSensor()
 				sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e-3));
 			else if (diag > 10000.0)
 				sensor->setGraphicScale(static_cast<PointCoordinateType>(1.0e3));
-
-			/*//we update sensor graphic representation
-			sensor->updateGraphicRepresentation();*/
 
 			//set position
 			ccIndexedTransformation trans;
@@ -2725,62 +2730,64 @@ void MainWindow::doActionModifySensor()
 	if (sensor->isA(CC_TYPES::GBL_SENSOR))
 	{
 		ccGBLSensor* gbl = static_cast<ccGBLSensor*>(sensor);
+
 		ccGBLSensorProjectionDlg spDlg(this);
-
 		spDlg.initWithGBLSensor(gbl);
-		if (spDlg.exec())
+		
+		if (!spDlg.exec())
+			return;
+
+		//we update its parameters
+		spDlg.updateGBLSensor(gbl);
+
+		//we re-project the associated cloud (if any)
+		if (gbl->getParent() && gbl->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
 		{
-			//we init its parameters with dialog
-			spDlg.updateGBLSensor(gbl);
+			ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(gbl->getParent());
 
-			//we re-project cloud
-			if (gbl->getParent() && gbl->getParent()->isKindOf(CC_TYPES::POINT_CLOUD))
+			int errorCode;
+			if (gbl->computeDepthBuffer(cloud,errorCode))
 			{
-				ccGenericPointCloud* cloud = ccHObjectCaster::ToGenericPointCloud(gbl->getParent());
-
-				int errorCode;
-				if (gbl->computeDepthBuffer(cloud,errorCode))
-				{
-					//we display depth buffer
-					ccRenderingTools::ShowDepthBuffer(gbl,this);
-
-					//in case the sensor position has changed
-					/*ccGLWindow* win = static_cast<ccGLWindow*>(cloud->getDisplay());
-					if (win)
-					{
-						ccBBox box = cloud->getBB();
-						win->updateConstellationCenterAndZoom(&box);
-					}
-					//*/
-
-					if (sensor->isVisible() && sensor->isEnabled())
-					{
-						sensor->prepareDisplayForRefresh();
-						refreshAll();
-					}
-
-					updateUI();
-				}
-				else
-				{
-					displaySensorProjectErrorString(errorCode);
-				}
+				//we display depth buffer
+				ccRenderingTools::ShowDepthBuffer(gbl,this);
 			}
 			else
 			{
-				ccConsole::Error(QString("Internal error: sensor ('%1') parent is not a point cloud!").arg(sensor->getName()));
+				displaySensorProjectErrorString(errorCode);
 			}
+		}
+		else
+		{
+			//ccConsole::Warning(QString("Internal error: sensor ('%1') parent is not a point cloud!").arg(sensor->getName()));
 		}
 	}
 	//Camera sensors
 	else if (sensor->isA(CC_TYPES::CAMERA_SENSOR))
 	{
 		ccCameraSensor* cam = static_cast<ccCameraSensor*>(sensor);
+
+		ccCamSensorProjectionDlg spDlg(this);
+		spDlg.initWithCamSensor(cam);
+		
+		if (!spDlg.exec())
+			return;
+
+		//we update its parameters
+		spDlg.updateCamSensor(cam);
 	}
 	else
 	{
 		ccConsole::Error("Can't modify this kind of sensor!");
+		return;
 	}
+
+	if (sensor->isVisible() && sensor->isEnabled())
+	{
+		sensor->prepareDisplayForRefresh();
+		refreshAll();
+	}
+
+	updateUI();
 }
 
 ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/)

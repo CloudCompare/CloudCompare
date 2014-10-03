@@ -15,24 +15,45 @@
 //#                                                                        #
 //##########################################################################
 
-#ifndef CC_SENSOR_PROJECTION_DIALOG_HEADER
-#define CC_SENSOR_PROJECTION_DIALOG_HEADER
+#include "ccEntityPickerDlg.h"
 
-#include <ui_sensorProjectDlg.h>
+//Qt
+#include <QDialog>
 
-class ccGBLSensor;
-
-//Ground-based (lidar) sensor parameters dialog
-class ccSensorProjectionDlg : public QDialog, public Ui::SensorProjectDialog
+ccEntityPickerDlg::ccEntityPickerDlg(	const ccHObject::Container& entities,
+										int selectedIndex/*=0*/,
+										QWidget* parent/*=0*/,
+										QString labelStr/*=QString()*/)
+	: QDialog(parent)
+	, Ui::PickEntityDlg()
 {
-public:
+	setupUi(this);
 
-	//! Default constructor
-	ccSensorProjectionDlg(QWidget* parent = 0);
+	setWindowFlags(Qt::Tool/*Qt::Dialog | Qt::WindowStaysOnTopHint*/);
 
-	void initWithGBLSensor(const ccGBLSensor* sensor);
-	void updateGBLSensor(ccGBLSensor* sensor);
+	for (size_t i=0; i<entities.size(); ++i)
+	{
+		//add one line per entity in the combo-box
+		comboBox->addItem(QString("%1 (ID=%2)").arg(entities[i]->getName()).arg(entities[i]->getUniqueID()));
+	}
 
-};
+	if (!labelStr.isNull())
+		label->setText(labelStr);
+}
 
-#endif //CC_SENSOR_PROJECTION_DIALOG_HEADER
+int ccEntityPickerDlg::getSelectedIndex() const
+{
+	return comboBox->currentIndex();
+}
+
+int ccEntityPickerDlg::SelectEntity(const ccHObject::Container& entities,
+									int selectedIndex/*=0*/,
+									QWidget* parent/*=0*/,
+									QString label/*=QString()*/)
+{
+	ccEntityPickerDlg epDlg(entities,selectedIndex,parent,label);
+	if (!epDlg.exec())
+		return -1;
+
+	return epDlg.getSelectedIndex();
+}

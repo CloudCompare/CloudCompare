@@ -97,7 +97,7 @@
 #include "ccPickOneElementDlg.h"
 #include "ccStatisticalTestDlg.h"
 #include "ccLabelingDlg.h"
-#include "ccSensorProjectionDlg.h"
+#include "ccGBLSensorProjectionDlg.h"
 #include "ccHeightGridGenerationDlg.h"
 #include "ccUnrollDlg.h"
 #include "ccAlignDlg.h" //Aurelien BEY
@@ -124,6 +124,7 @@
 #include "ccColorLevelsDlg.h"
 #include "ccSORFilterDlg.h"
 #include "ccDensityDlg.h"
+#include "ccEntityPickerDlg.h"
 #include <ui_aboutDlg.h>
 
 //other
@@ -2570,7 +2571,7 @@ void MainWindow::doActionSetViewFromSensor()
 
 void MainWindow::doActionCreateGBLSensor()
 {
-	ccSensorProjectionDlg spDlg(this);
+	ccGBLSensorProjectionDlg spDlg(this);
 	if (!spDlg.exec())
 		return;
 
@@ -2720,10 +2721,11 @@ void MainWindow::doActionModifySensor()
 
 	ccSensor* sensor = static_cast<ccSensor*>(m_selectedEntities[0]);
 
+	//Ground based laser sensors
 	if (sensor->isA(CC_TYPES::GBL_SENSOR))
 	{
 		ccGBLSensor* gbl = static_cast<ccGBLSensor*>(sensor);
-		ccSensorProjectionDlg spDlg(this);
+		ccGBLSensorProjectionDlg spDlg(this);
 
 		spDlg.initWithGBLSensor(gbl);
 		if (spDlg.exec())
@@ -2770,10 +2772,48 @@ void MainWindow::doActionModifySensor()
 			}
 		}
 	}
+	//Camera sensors
+	else if (sensor->isA(CC_TYPES::CAMERA_SENSOR))
+	{
+		ccCameraSensor* cam = static_cast<ccCameraSensor*>(sensor);
+	}
 	else
 	{
 		ccConsole::Error("Can't modify this kind of sensor!");
 	}
+}
+
+ccPointCloud* MainWindow::askUserToSelectACloud(ccHObject* defaultCloudEntity/*=0*/, QString inviteMessage/*=QString()*/)
+{
+	ccHObject::Container clouds;
+	m_ccRoot->getRootEntity()->filterChildren(clouds,true,CC_TYPES::POINT_CLOUD,true);
+	if (clouds.empty())
+	{
+		ccConsole::Error("No cloud in database!");
+		return 0;
+	}
+	//default selected index
+	int selectedIndex = 0;
+	if (defaultCloudEntity)
+	{
+		for (size_t i=1; i<clouds.size(); ++i)
+		{
+			if (clouds[i] == defaultCloudEntity)
+			{
+				selectedIndex = static_cast<int>(i);
+				break;
+			}
+		}
+	}
+	//ask the user to choose a cloud
+	{
+		selectedIndex = ccEntityPickerDlg::SelectEntity(clouds,selectedIndex,this,inviteMessage);
+		if (selectedIndex < 0)
+			return 0;
+	}
+
+	assert(selectedIndex >= 0 && static_cast<size_t>(selectedIndex) < clouds.size());
+	return ccHObjectCaster::ToPointCloud(clouds[selectedIndex]);
 }
 
 void MainWindow::doActionProjectUncertainty()
@@ -2786,18 +2826,23 @@ void MainWindow::doActionProjectUncertainty()
 	}
 
 	ccCameraSensor* sensor = ccHObjectCaster::ToCameraSensor(m_selectedEntities[0]);
-	assert(sensor);
 	if (!sensor)
-		return;
-
-	//the sensor must be the child of a point cloud, or it is not possible to project anything
-	if (!sensor->getParent() || !sensor->getParent()->isA(CC_TYPES::POINT_CLOUD))
 	{
-		ccConsole::Error("The sensor must be the child of a point cloud!");
+		assert(false);
 		return;
 	}
 
-	ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
+	ccCameraSensor::LensDistortionParameters::Shared distParams = sensor->getDistortionParameters();
+	if (!distParams || distParams->getModel() != ccCameraSensor::BROWN_DISTORTION)
+	{
+		ccLog::Error("Sensor has no associated uncertainty model! (Brown, etc.)");
+		return;
+	}
+
+
+	//we need a cloud to project the uncertainty on!
+	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;
+	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud on which to project the uncertainty:");
 	if (!pointCloud)
 	{
 		assert(false);
@@ -2810,7 +2855,7 @@ void MainWindow::doActionProjectUncertainty()
 		ccConsole::Error("Not enough memory!");
 		return;
 	}
-	points.setPointIndex(0,pointCloud->size());
+	points.addPointIndex(0,pointCloud->size());
 
 	// compute uncertainty
 	std::vector< Vector3Tpl<ScalarType> > accuracy;
@@ -2899,16 +2944,14 @@ void MainWindow::doActionCheckPointsInsideFrustrum()
 	if (!sensor)
 		return;
 
-	//the sensor must be the child of a point cloud, otherwise it won't be possible to project anything
-	if (!sensor->getParent() || !sensor->getParent()->isA(CC_TYPES::POINT_CLOUD))
+	//we need a cloud to filter!
+	ccHObject* defaultCloud = sensor->getParent() && sensor->getParent()->isA(CC_TYPES::POINT_CLOUD) ? sensor->getParent() : 0;
+	ccPointCloud* pointCloud = askUserToSelectACloud(defaultCloud, "Select a cloud to filter:");
+	if (!pointCloud)
 	{
-		ccConsole::Error("The sensor must be the child of a point cloud!");
+		assert(false);
 		return;
 	}
-
-	ccPointCloud* pointCloud = ccHObjectCaster::ToPointCloud(sensor->getParent());
-	if (!pointCloud)
-		return;
 
 	//comupte/get the point cloud's octree
 	ccOctree* octree = pointCloud->getOctree();
@@ -3211,6 +3254,8 @@ void MainWindow::doRemoveDuplicatePoints()
 	//save parameter
 	settings.setValue(s_psDuplicatePointsMinDist,minDistanceBetweenPoints);
 
+	static const char DEFAULT_DUPLICATE_TEMP_SF_NAME[] = "DuplicateFlags";
+
 	for (size_t i=0; i<selNum; ++i)
 	{
 		ccHObject* ent = selectedEntities[i];
@@ -3219,9 +3264,9 @@ void MainWindow::doRemoveDuplicatePoints()
 		if (cloud)
 		{
 			//create temporary SF for 'duplicate flags'
-			int sfIdx = cloud->getScalarFieldIndexByName("DuplicateFlags");
+			int sfIdx = cloud->getScalarFieldIndexByName(DEFAULT_DUPLICATE_TEMP_SF_NAME);
 			if (sfIdx < 0)
-				sfIdx = cloud->addScalarField("DuplicateFlags");
+				sfIdx = cloud->addScalarField(DEFAULT_DUPLICATE_TEMP_SF_NAME);
 			if (sfIdx >= 0)
 				cloud->setCurrentScalarField(sfIdx);
 			else
@@ -3259,7 +3304,7 @@ void MainWindow::doRemoveDuplicatePoints()
 					ccPointCloud* filteredCloud = cloud->filterPointsByScalarValue(0,0);
 					if (filteredCloud)
 					{
-						int sfIdx2 = filteredCloud->getScalarFieldIndexByName("DuplicateFlags");
+						int sfIdx2 = filteredCloud->getScalarFieldIndexByName(DEFAULT_DUPLICATE_TEMP_SF_NAME);
 						assert(sfIdx2 >= 0);
 						filteredCloud->deleteScalarField(sfIdx2);
 						filteredCloud->setName(QString("%1.clean").arg(cloud->getName()));
@@ -3671,9 +3716,9 @@ void MainWindow::doActionAddIdField()
 		{
 			ccPointCloud* pc = static_cast<ccPointCloud*>(cloud);
 
-			int sfIdx = pc->getScalarFieldIndexByName("Id");
+			int sfIdx = pc->getScalarFieldIndexByName(CC_DEFAULT_ID_SF_NAME);
 			if (sfIdx < 0)
-				sfIdx = pc->addScalarField("Id");
+				sfIdx = pc->addScalarField(CC_DEFAULT_ID_SF_NAME);
 			if (sfIdx < 0)
 			{
 				ccLog::Warning("Not enough memory!");
@@ -5748,9 +5793,10 @@ void MainWindow::doActionComputeCPS()
 	}
 	ccPointCloud* cmpPC = static_cast<ccPointCloud*>(compCloud);
 
-	int sfIdx = cmpPC->getScalarFieldIndexByName("tempScalarField");
+	static const char DEFAULT_CPS_TEMP_SF_NAME[] = "CPS temporary";
+	int sfIdx = cmpPC->getScalarFieldIndexByName(DEFAULT_CPS_TEMP_SF_NAME);
 	if (sfIdx < 0)
-		sfIdx = cmpPC->addScalarField("tempScalarField");
+		sfIdx = cmpPC->addScalarField(DEFAULT_CPS_TEMP_SF_NAME);
 	if (sfIdx < 0)
 	{
 		ccConsole::Error("Couldn't allocate a new scalar field for computing distances! Try to free some memory ...");
@@ -8313,9 +8359,10 @@ void MainWindow::doCylindricalNeighbourhoodExtractionTest()
 	}
 
 	//get/Add scalar field
-	int sfIdx = cloud->getScalarFieldIndexByName("CNE test");
+	static const char DEFAULT_CNE_TEST_TEMP_SF_NAME[] = "CNE test";
+	int sfIdx = cloud->getScalarFieldIndexByName(DEFAULT_CNE_TEST_TEMP_SF_NAME);
 	if (sfIdx < 0)
-		sfIdx = cloud->addScalarField("CNE test");
+		sfIdx = cloud->addScalarField(DEFAULT_CNE_TEST_TEMP_SF_NAME);
 	if (sfIdx < 0)
 	{
 		ccConsole::Error("Not enough memory!");

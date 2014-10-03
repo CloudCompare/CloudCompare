@@ -180,6 +180,13 @@ public:
 	**/
 	void putObjectBackIntoDBTree(ccHObject* obj, const ccHObjectContext& context);
 
+	//! Shortcut: asks the user to select one cloud
+	/** \param defaultCloudEntity a cloud to select by default (optional)
+		\param inviteMessage invite message (default is something like 'Please select an entity:') (optional)
+		\return the selected cloud (or null if the user cancelled the operation)
+	**/
+	ccPointCloud* askUserToSelectACloud(ccHObject* defaultCloudEntity = 0, QString inviteMessage = QString());
+
 protected slots:
 
 	//! Creates a new 3D GL sub-window

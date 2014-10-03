@@ -15,7 +15,7 @@
 //#                                                                        #
 //##########################################################################
 
-#include "ccSensorProjectionDlg.h"
+#include "ccGBLSensorProjectionDlg.h"
 
 //Qt
 #include <QMessageBox>
@@ -57,9 +57,9 @@ public:
 	}
 };
 
-ccSensorProjectionDlg::ccSensorProjectionDlg(QWidget* parent)
+ccGBLSensorProjectionDlg::ccGBLSensorProjectionDlg(QWidget* parent)
 	: QDialog(parent)
-	, Ui::SensorProjectDialog()
+	, Ui::GBLSensorProjectDialog()
 {
 	setupUi(this);
 
@@ -78,7 +78,7 @@ ccSensorProjectionDlg::ccSensorProjectionDlg(QWidget* parent)
 	z3rot->setValidator(new CustomDoubleValidator(this));
 }
 
-void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
+void ccGBLSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 {
 	if( !sensor)
 		return;
@@ -125,7 +125,7 @@ void ccSensorProjectionDlg::initWithGBLSensor(const ccGBLSensor* sensor)
 	yawStepSpinBox->setValue(sensor->getYawStep() * CC_RAD_TO_DEG);
 }
 
-void ccSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
+void ccGBLSensorProjectionDlg::updateGBLSensor(ccGBLSensor* sensor)
 {
 	if (!sensor)
 		return;

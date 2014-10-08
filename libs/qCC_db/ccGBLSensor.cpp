@@ -772,8 +772,8 @@ void ccGBLSensor::drawMeOnly(CC_DRAW_CONTEXT& context)
 		{
 			//increased width
 			glPushAttrib(GL_LINE_BIT);
-			GLint width;
-			glGetIntegerv(GL_LINE_WIDTH,&width);
+			GLfloat width;
+			glGetFloatv(GL_LINE_WIDTH,&width);
 			glLineWidth(width+1);
 
 			PointCoordinateType axisLength = halfHeadSize * m_scale;

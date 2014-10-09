@@ -270,7 +270,7 @@ ccHObject* FileIOFilter::LoadFromFile(	const QString& filename,
 	}
 	catch(...)
 	{
-		ccLog::Warning("[I/O] Exception caught during file opening!");
+		ccLog::Warning(QString("[I/O] CC has caught an unhandled exception while loading file '%1'").arg(filename));
 		if (container)
 			container->removeAllChildren();
 		result = CC_FERR_CONSOLE_ERROR;
@@ -327,7 +327,16 @@ CC_FILE_ERROR FileIOFilter::SaveToFile(ccHObject* entities, const QString& filen
 	if (QFileInfo(filename).suffix().isEmpty())
 		completeFileName += QString(".%1").arg(CC_FILE_TYPE_DEFAULT_EXTENSION[fType]);
 
-	CC_FILE_ERROR result = fio->saveToFile(entities, completeFileName);
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+	try
+	{
+		result = fio->saveToFile(entities, completeFileName);
+	}
+	catch(...)
+	{
+		ccLog::Warning(QString("[I/O] CC has caught an unhandled exception while saving file '%1'").arg(filename));
+		result = CC_FERR_CONSOLE_ERROR;
+	}
 
 	delete fio;
 	fio = 0;

@@ -269,7 +269,7 @@ ccPointCloud* ccPointCloud::partialClone(const CCLib::ReferenceCloud* selection,
 	if (activateMultipleScansMode())
 	{
 	scanIndexesTableType* _theScans = source->getTheScansIndexesArray();
-	for (i=0;i<n;++i) cubeVertexesIndexes.setValue(i,_theScans->getValue(i));
+	for (i=0; i<n; ++i) cubeVertexesIndexes.setValue(i,_theScans->getValue(i));
 	}
 	else importScanners=false;
 
@@ -532,7 +532,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 					else
 					{
 						newSF->release();
-						newSF=0;
+						newSF = 0;
 						ccLog::Warning("[ccPointCloud::fusion] Not enough memory: failed to allocate a copy of scalar field '%s'",sf->getName());
 					}
 				}
@@ -630,7 +630,7 @@ const ccPointCloud& ccPointCloud::append(ccPointCloud* addedCloud, unsigned poin
 				//clone label and update points if necessary
 				cc2DLabel* label = static_cast<cc2DLabel*>(child);
 				cc2DLabel* newLabel = new cc2DLabel(label->getName());
-				for (unsigned j=0;j<label->size();++j)
+				for (unsigned j=0; j<label->size(); ++j)
 				{
 					const cc2DLabel::PickedPoint& P = label->getPoint(j);
 					if (P.cloud == addedCloud)
@@ -1434,7 +1434,7 @@ void ccPointCloud::invertNormals()
 		return;
 
 	m_normals->placeIteratorAtBegining();
-	for (unsigned i=0;i<m_normals->currentSize();++i)
+	for (unsigned i=0; i<m_normals->currentSize(); ++i)
 	{
 		ccNormalVectors::InvertNormal(*m_normals->getCurrentValuePtr());
 		m_normals->forwardIterator();
@@ -2168,7 +2168,7 @@ void ccPointCloud::drawMeOnly(CC_DRAW_CONTEXT& context)
 void ccPointCloud::addColorRampInfo(CC_DRAW_CONTEXT& context)
 {
 	int sfIdx = getCurrentDisplayedScalarFieldIndex();
-	if (sfIdx<0)
+	if (sfIdx < 0)
 		return;
 
 	context.sfColorScaleToDisplay = static_cast<ccScalarField*>(getScalarField(sfIdx));
@@ -2201,7 +2201,7 @@ void ccPointCloud::hidePointsByScalarValue(ScalarType minVal, ScalarType maxVal)
 
 	//we use the visibility table to tag the points to filter out
 	unsigned count=size();
-	for (unsigned i=0;i<count;++i)
+	for (unsigned i=0; i<count; ++i)
 	{
 		const ScalarType& val = sf->getValue(i);
 		if (val<minVal || val>maxVal || val != val) //handle NaN values!
@@ -2234,7 +2234,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 
 		//don't need this one anymore
 		delete rc;
-		rc=0;
+		rc = 0;
 	}
 
 	if (!result)
@@ -2272,7 +2272,7 @@ ccGenericPointCloud* ccPointCloud::createNewCloudFromVisibilitySelection(bool re
 		unsigned i,count=size();
 		invrc->reserve(count-result->size());
 
-		for (i=0;i<count;++i)
+		for (i=0; i<count; ++i)
 		if (m_pointsVisibility->getValue(i) != POINT_VISIBLE)
 		invrc->addPointIndex(i); //can't fail see above
 
@@ -2457,7 +2457,7 @@ void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 
 	unsigned numberOfPoints = size();
 
-	CCLib::NormalizedProgress* nprogress=0;
+	CCLib::NormalizedProgress* nprogress = 0;
 	if (progressCb)
 	{
 		progressCb->reset();
@@ -2475,7 +2475,7 @@ void ccPointCloud::unrollOnCylinder(PointCoordinateType radius,
 		center = &C;
 	}
 
-	for (unsigned i=0;i<numberOfPoints;i++)
+	for (unsigned i=0; i<numberOfPoints; i++)
 	{
 		CCVector3 *Q = point(i);
 
@@ -2594,7 +2594,7 @@ void ccPointCloud::unrollOnCone(PointCoordinateType baseRadius,
 	if (nprogress)
 	{
 		delete nprogress;
-		nprogress=0;
+		nprogress = 0;
 	}
 }
 
@@ -2666,7 +2666,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	//colors array (dataVersion>=20)
 	{
 		bool hasColorsArray = hasColors();
-		if (out.write((const char*)&hasColorsArray,sizeof(bool))<0)
+		if (out.write((const char*)&hasColorsArray,sizeof(bool)) < 0)
 			return WriteError();
 		if (hasColorsArray)
 		{
@@ -2679,7 +2679,7 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	//normals array (dataVersion>=20)
 	{
 		bool hasNormalsArray = hasNormals();
-		if (out.write((const char*)&hasNormalsArray,sizeof(bool))<0)
+		if (out.write((const char*)&hasNormalsArray,sizeof(bool)) < 0)
 			return WriteError();
 		if (hasNormalsArray)
 		{
@@ -2693,29 +2693,29 @@ bool ccPointCloud::toFile_MeOnly(QFile& out) const
 	{
 		//number of scalar fields (dataVersion>=20)
 		uint32_t sfCount = (uint32_t)getNumberOfScalarFields();
-		if (out.write((const char*)&sfCount,4)<0)
+		if (out.write((const char*)&sfCount,4) < 0)
 			return WriteError();
 
 		//scalar fields (dataVersion>=20)
-		for (uint32_t i=0;i<sfCount;++i)
+		for (uint32_t i=0; i<sfCount; ++i)
 		{
 			ccScalarField* sf = static_cast<ccScalarField*>(getScalarField(i));
 			assert(sf);
-			if (!sf->toFile(out))
+			if (!sf || !sf->toFile(out))
 				return false;
 		}
 
 		//'show NaN values in grey' state (27>dataVersion>=20)
-		//if (out.write((const char*)&m_greyForNanScalarValues,sizeof(bool))<0)
+		//if (out.write((const char*)&m_greyForNanScalarValues,sizeof(bool)) < 0)
 		//	return WriteError();
 
 		//'show current sf color scale' state (dataVersion>=20)
-		if (out.write((const char*)&m_sfColorScaleDisplayed,sizeof(bool))<0)
+		if (out.write((const char*)&m_sfColorScaleDisplayed,sizeof(bool)) < 0)
 			return WriteError();
 
 		//Displayed scalar field index (dataVersion>=20)
 		int32_t displayedScalarFieldIndex = (int32_t)m_currentDisplayedScalarFieldIndex;
-		if (out.write((const char*)&displayedScalarFieldIndex,4)<0)
+		if (out.write((const char*)&displayedScalarFieldIndex,4) < 0)
 			return WriteError();
 	}
 
@@ -2751,15 +2751,24 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		if (!result)
 			return false;
 
-		//test: look for NaN values
 #ifdef _DEBUG
-		for (unsigned i=0; i<size(); ++i)
+		//test: look for NaN values
 		{
-			if (	point(i)->x != point(i)->x
-				||	point(i)->y != point(i)->y
-				||	point(i)->z != point(i)->z )
+			unsigned nanPointsCount = 0;
+			for (unsigned i=0; i<size(); ++i)
 			{
-				ccLog::Warning("File contains NaN points! (#%i)",i);
+				if (	point(i)->x != point(i)->x
+					||	point(i)->y != point(i)->y
+					||	point(i)->z != point(i)->z )
+				{
+					*point(i) = CCVector3(0,0,0);
+					++nanPointsCount;
+				}
+			}
+
+			if (nanPointsCount)
+			{
+				ccLog::Warning(QString("[BIN] Cloud '%1' contains %2 NaN point(s)!").arg(getName()).arg(nanPointsCount));
 			}
 		}
 #endif
@@ -2768,7 +2777,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//colors array (dataVersion>=20)
 	{
 		bool hasColorsArray = false;
-		if (in.read((char*)&hasColorsArray,sizeof(bool))<0)
+		if (in.read((char*)&hasColorsArray,sizeof(bool)) < 0)
 			return ReadError();
 		if (hasColorsArray)
 		{
@@ -2791,7 +2800,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	//normals array (dataVersion>=20)
 	{
 		bool hasNormalsArray = false;
-		if (in.read((char*)&hasNormalsArray,sizeof(bool))<0)
+		if (in.read((char*)&hasNormalsArray,sizeof(bool)) < 0)
 			return ReadError();
 		if (hasNormalsArray)
 		{
@@ -2815,11 +2824,11 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 	{
 		//number of scalar fields (dataVersion>=20)
 		uint32_t sfCount = 0;
-		if (in.read((char*)&sfCount,4)<0)
+		if (in.read((char*)&sfCount,4) < 0)
 			return ReadError();
 
 		//scalar fields (dataVersion>=20)
-		for (uint32_t i=0;i<sfCount;++i)
+		for (uint32_t i=0; i<sfCount; ++i)
 		{
 			ccScalarField* sf = new ccScalarField();
 			if (!sf->fromFile(in, dataVersion, flags))
@@ -2834,7 +2843,7 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		{
 			//'show NaN values in grey' state (27>dataVersion>=20)
 			bool greyForNanScalarValues = true;
-			if (in.read((char*)&greyForNanScalarValues,sizeof(bool))<0)
+			if (in.read((char*)&greyForNanScalarValues,sizeof(bool)) < 0)
 				return ReadError();
 
 			//update all scalar fields accordingly (old way)
@@ -2845,12 +2854,12 @@ bool ccPointCloud::fromFile_MeOnly(QFile& in, short dataVersion, int flags)
 		}
 
 		//'show current sf color scale' state (dataVersion>=20)
-		if (in.read((char*)&m_sfColorScaleDisplayed,sizeof(bool))<0)
+		if (in.read((char*)&m_sfColorScaleDisplayed,sizeof(bool)) < 0)
 			return ReadError();
 
 		//Displayed scalar field index (dataVersion>=20)
 		int32_t displayedScalarFieldIndex = 0;
-		if (in.read((char*)&displayedScalarFieldIndex,4)<0)
+		if (in.read((char*)&displayedScalarFieldIndex,4) < 0)
 			return ReadError();
 		if (displayedScalarFieldIndex<(int32_t)sfCount)
 			setCurrentDisplayedScalarField(displayedScalarFieldIndex);

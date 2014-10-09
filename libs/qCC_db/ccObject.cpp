@@ -54,37 +54,42 @@
 **/
 const unsigned c_currentDBVersion = 38; //3.8
 
-// Persistent settings key for storing the last generated entity ID
-static const QString s_uniqueIDKey("UniqueID");
+//! Default unique ID generator (using the system persistent settings as we did previously proved to be not reliable)
+static ccUniqueIDGenerator::Shared s_uniqueIDGenerator(new ccUniqueIDGenerator);
+
+void ccObject::SetUniqueIDGenerator(ccUniqueIDGenerator::Shared generator)
+{
+	if (generator == s_uniqueIDGenerator)
+		return;
+
+	//we hope that the previous generator has not been used!
+	assert (!s_uniqueIDGenerator || s_uniqueIDGenerator->getLast() == 0);
+	s_uniqueIDGenerator = generator;
+}
+
+ccUniqueIDGenerator::Shared ccObject::GetUniqueIDGenerator()
+{
+	return s_uniqueIDGenerator;
+}
 
 unsigned ccObject::GetCurrentDBVersion()
 {
 	return c_currentDBVersion;
 }
 
-void ccObject::ResetUniqueIDCounter()
-{
-	QSettings settings;
-	settings.setValue(s_uniqueIDKey,static_cast<unsigned>(0));
-}
-
 unsigned ccObject::GetNextUniqueID()
 {
-	unsigned lastID = GetLastUniqueID();
-	++lastID;
-	UpdateLastUniqueID(lastID);
-
-	return lastID;
+	if (!s_uniqueIDGenerator)
+	{
+		assert(false);
+		s_uniqueIDGenerator = ccUniqueIDGenerator::Shared(new ccUniqueIDGenerator);
+	}
+	return s_uniqueIDGenerator->fetchOne();
 }
 
 unsigned ccObject::GetLastUniqueID()
 {
-	return QSettings().value(s_uniqueIDKey, 0).toInt();
-}
-
-void ccObject::UpdateLastUniqueID(unsigned lastID)
-{
-	QSettings().setValue(s_uniqueIDKey, lastID);
+	return s_uniqueIDGenerator ? s_uniqueIDGenerator->getLast() : 0;
 }
 
 ccObject::ccObject(QString name)
@@ -99,8 +104,10 @@ void ccObject::setUniqueID(unsigned ID)
 	m_uniqueID = ID;
 
 	//updates last unique ID
-	if (m_uniqueID>GetLastUniqueID())
-		UpdateLastUniqueID(m_uniqueID);
+	if (s_uniqueIDGenerator)
+		s_uniqueIDGenerator->update(m_uniqueID);
+	else
+		assert(false);
 }
 
 void ccObject::setFlagState(CC_OBJECT_FLAG flag, bool state)
@@ -118,13 +125,13 @@ bool ccObject::toFile(QFile& out) const
 	//class ID (dataVersion>=20)
 	//DGM: on 64 bits since version 34
 	uint64_t classID = static_cast<uint64_t>(getClassID());
-	if (out.write((const char*)&classID,8)<0)
+	if (out.write((const char*)&classID,8) < 0)
 		return WriteError();
 
 	//unique ID (dataVersion>=20)
 	//DGM: this ID will be usefull to recreate dynamic links between entities!
 	uint32_t uniqueID = (uint32_t)m_uniqueID;
-	if (out.write((const char*)&uniqueID,4)<0)
+	if (out.write((const char*)&uniqueID,4) < 0)
 		return WriteError();
 
 	//name (dataVersion>=22)
@@ -135,14 +142,14 @@ bool ccObject::toFile(QFile& out) const
 
 	//flags (dataVersion>=20)
 	uint32_t objFlags = (uint32_t)m_flags;
-	if (out.write((const char*)&objFlags,4)<0)
+	if (out.write((const char*)&objFlags,4) < 0)
 		return WriteError();
 
 	//meta data (dataVersion>=30)
 	{
 		//count
 		uint32_t metaDataCount = (uint32_t)m_metaData.size();
-		if (out.write((const char*)&metaDataCount,4)<0)
+		if (out.write((const char*)&metaDataCount,4) < 0)
 			return WriteError();
 
 		//"key + value" pairs
@@ -166,14 +173,14 @@ CC_CLASS_ENUM ccObject::ReadClassIDFromFile(QFile& in, short dataVersion)
 	if (dataVersion < 34)
 	{
 		uint32_t _classID = 0;
-		if (in.read((char*)&_classID,4)<0)
+		if (in.read((char*)&_classID,4) < 0)
 			return ReadError();
 		classID = static_cast<CC_CLASS_ENUM>(_classID);
 	}
 	else
 	{
 		uint64_t _classID = 0;
-		if (in.read((char*)&_classID,8)<0)
+		if (in.read((char*)&_classID,8) < 0)
 			return ReadError();
 		classID = static_cast<CC_CLASS_ENUM>(_classID);
 	}
@@ -212,13 +219,13 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags)
 	//Call ccObject::readClassIDFromFile if necessary
 	////class ID (dataVersion>=20)
 	//uint32_t classID = 0;
-	//if (in.read((char*)&classID,4)<0)
+	//if (in.read((char*)&classID,4) < 0)
 	//	return ReadError();
 
 	//unique ID (dataVersion>=20)
 	//DGM: this ID will be usefull to recreate dynamic links between entities!
 	uint32_t uniqueID = 0;
-	if (in.read((char*)&uniqueID,4)<0)
+	if (in.read((char*)&uniqueID,4) < 0)
 		return ReadError();
 	m_uniqueID = (unsigned)uniqueID;
 
@@ -226,7 +233,7 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags)
 	if (dataVersion < 22) //old style
 	{
 		char name[256];
-		if (in.read(name,256)<0)
+		if (in.read(name,256) < 0)
 			return ReadError();
 		setName(name);
 	}
@@ -238,7 +245,7 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags)
 
 	//flags (dataVersion>=20)
 	uint32_t objFlags = 0;
-	if (in.read((char*)&objFlags,4)<0)
+	if (in.read((char*)&objFlags,4) < 0)
 		return ReadError();
 	m_flags = (unsigned)objFlags;
 
@@ -247,7 +254,7 @@ bool ccObject::fromFile(QFile& in, short dataVersion, int flags)
 	{
 		//count
 		uint32_t metaDataCount = 0;
-		if (in.read((char*)&metaDataCount,4)<0)
+		if (in.read((char*)&metaDataCount,4) < 0)
 			return ReadError();
 
 		//"key + value" pairs

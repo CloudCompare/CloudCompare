@@ -24,7 +24,6 @@
 
 //qCC_db
 #include <ccHObject.h>
-class ccProgressDialog;
 
 //qCC
 #include "ccPluginInterface.h"
@@ -33,38 +32,42 @@ class ccProgressDialog;
 //UI Modification flags
 #define CC_PLUGIN_REFRESH_GL_WINDOWS            0x00000001
 #define CC_PLUGIN_REFRESH_ENTITY_BROWSER        0x00000002
-#define CC_PLUGIN_EXPAND_DB_TREE				0x00000004
+#define CC_PLUGIN_EXPAND_DB_TREE                0x00000004
 
 //! Standard CC plugin interface
-/** Version 1.4
-	The plugin is now responsible for its own actions
-	(QAction ;) and the associated ccMainAppInterface
-	interface should give it access to everything it
-	needs.
+/** Version 1.5
+	The plugin is now responsible for its own actions (QAction ;)
+	and the associated ccMainAppInterface member should give it
+	access to everything it needs in the main application.
 **/
 class ccStdPluginInterface : public ccPluginInterface
 {
 public:
 
+	//! Default constructor
+	ccStdPluginInterface() : ccPluginInterface(), m_app(0) {}
+	//! Destructor
+	virtual ~ccStdPluginInterface() {}
+
 	//inherited from ccPluginInterface
-    virtual CC_PLUGIN_TYPE getType() const { return CC_STD_PLUGIN; }
+	virtual CC_PLUGIN_TYPE getType() const { return CC_STD_PLUGIN; }
 
 	//! Sets application entry point
 	/** Called just after plugin creation by qCC
 	**/
-	void setMainAppInterface(ccMainAppInterface* app) { m_app=app; }
+	virtual void setMainAppInterface(ccMainAppInterface* app);
 
-    //! A callback poiner to the main app interface for being used by plugins
-    /**  Any plugin (and its tools) may need to access methods of this interface
-     **/
-    ccMainAppInterface * getMainAppInterface() {return m_app;}
+	//! A callback poiner to the main app interface for being used by plugins
+	/**  Any plugin (and its tools) may need to access methods of this interface
+	**/
+	virtual ccMainAppInterface * getMainAppInterface() { return m_app; }
 
-    //! Returns action(s)
-    virtual void getActions(QActionGroup& group) = 0;
+	//! Returns action(s)
+	virtual void getActions(QActionGroup& group) = 0;
 
 	//! This method is called by the main application whenever the entity selection changes
 	/** Does nothing by default. Should be re-implemented by the plugin if necessary.
-        \param selectedEntities currently selected entities
+		\param selectedEntities currently selected entities
 	**/
 	virtual void onNewSelection(const ccHObject::Container& selectedEntities) { /*ignored by default*/ }
 
@@ -76,4 +79,4 @@ protected:
 
 Q_DECLARE_INTERFACE(ccStdPluginInterface,"edf.rd.CloudCompare.ccStdPluginInterface/1.4")
 
-#endif
+#endif //CC_STD_PLUGIN_INTERFACE_HEADER

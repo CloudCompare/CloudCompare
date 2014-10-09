@@ -30,12 +30,11 @@
 	#endif
 #endif
 
-
 class ccExternalFactory;
 
 //! Plugin type
-enum  CC_PLUGIN_TYPE {  CC_STD_PLUGIN               = 0,
-                        CC_GL_FILTER_PLUGIN         = 1,
+enum  CC_PLUGIN_TYPE {	CC_STD_PLUGIN               = 0,
+						CC_GL_FILTER_PLUGIN         = 1,
 };
 
 //! Standard CC plugin interface
@@ -46,24 +45,24 @@ class ccPluginInterface
 public:
 
 	//! Virtual destructor
-    virtual ~ccPluginInterface() {}
+	virtual ~ccPluginInterface() {}
 
 	//! Returns plugin type (standard or OpenGL filter)
-    virtual CC_PLUGIN_TYPE getType() const = 0;
+	virtual CC_PLUGIN_TYPE getType() const = 0;
 
 	//! Returns (short) name (for menu entry, etc.)
-    virtual QString getName() const = 0;
+	virtual QString getName() const = 0;
 
 	//! Returns long name/description (for tooltip, etc.)
-    virtual QString getDescription() const = 0;
+	virtual QString getDescription() const = 0;
 
 	//! Returns icon
 	/** Should be reimplemented if necessary
 	**/
-    virtual QIcon getIcon() const { return QIcon(); }
+	virtual QIcon getIcon() const { return QIcon(); }
 
-    //! Returns the plugin's custom object factory (if any)
-    /** Plugins may provide a factory to build custom objects.
+	//! Returns the plugin's custom object factory (if any)
+	/** Plugins may provide a factory to build custom objects.
 		This allows qCC_db to properly code and decode the custom
 		objects stream in BIN files. Custom objects must inherit the
 		ccCustomHObject or ccCustomLeafObject interfaces.
@@ -71,8 +70,6 @@ public:
 	virtual ccExternalFactory* getCustomObjectsFactory() const { return 0; }
 };
 
-Q_DECLARE_INTERFACE(ccPluginInterface,
-                    "edf.rd.CloudCompare.ccPluginInterface/2.0")
+Q_DECLARE_INTERFACE(ccPluginInterface,"edf.rd.CloudCompare.ccPluginInterface/2.0")
 
-
-#endif
+#endif //CC_PLUGIN_INTERFACE_HEADER

@@ -31,7 +31,6 @@
 
 //qCC_db
 #include <ccTimer.h>
-#include <ccObject.h>
 #include <ccNormalVectors.h>
 #include <ccColorScalesManager.h>
 
@@ -119,7 +118,6 @@ int main(int argc, char **argv)
 	}
 
 	//global structures initialization
-	ccObject::ResetUniqueIDCounter();
 	ccTimer::Init();
 	ccNormalVectors::GetUniqueInstance(); //force pre-computed normals array initialization
 	ccColorScalesManager::GetUniqueInstance(); //force pre-computed color tables initialization

@@ -407,11 +407,15 @@ void MainWindow::loadPlugins()
 			}
 			else
 			{
+				delete plugin;
+				plugin = 0;
 				ccConsole::Warning("Unsupported or invalid plugin type");
 			}
 		}
 		else
 		{
+			delete plugin;
+			plugin = 0;
 			ccConsole::Warning(QString("[Plugin] %1")/*.arg(pluginsDir.absoluteFilePath(filename))*/.arg(loader.errorString()));
 		}
 	}
@@ -454,7 +458,9 @@ bool MainWindow::dispatchPlugin(QObject *plugin)
 	}
 	ccConsole::Print("Plugin name: [%s]",qPrintable(pluginName));
 
-	switch(ccPlugin->getType())
+	CC_PLUGIN_TYPE type = ccPlugin->getType();
+
+	switch(type)
 	{
 
 	case CC_STD_PLUGIN: //standard plugin
@@ -2330,7 +2336,7 @@ void MainWindow::doActionFlagMeshVetices()
 	{
 		//display reminder
 		forceConsoleDisplay();
-		ccConsole::Print(QString("[Mesh Quality] SF flags: NORMAL = %1 / BORDER = %2 / NON-MANIFOLD = %3").arg(CCLib::MeshSamplingTools::VERTEX_NORMAL).arg(CCLib::MeshSamplingTools::VERTEX_BORDER).arg(CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD));
+		ccConsole::Print(QString("[Mesh Quality] SF flags: %1 (NORMAL) / %2 (BORDER) / (%3) NON-MANIFOLD").arg(CCLib::MeshSamplingTools::VERTEX_NORMAL).arg(CCLib::MeshSamplingTools::VERTEX_BORDER).arg(CCLib::MeshSamplingTools::VERTEX_NON_MANIFOLD));
 	}
 
 	if (errors)
@@ -10365,6 +10371,11 @@ ccDBRoot* MainWindow::db()
 ccHObject* MainWindow::dbRootObject()
 {
 	return (m_ccRoot ? m_ccRoot->getRootEntity() : 0);
+}
+
+ccUniqueIDGenerator::Shared MainWindow::getUniqueIDGenerator()
+{
+	return ccObject::GetUniqueIDGenerator();
 }
 
 MainWindow::ccHObjectContext MainWindow::removeObjectTemporarilyFromDBTree(ccHObject* obj)

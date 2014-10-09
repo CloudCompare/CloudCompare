@@ -15,6 +15,8 @@ include_directories( ${EXTERNAL_LIBS_INCLUDE_DIR} )
 
 file( GLOB header_list *.h)
 file( GLOB source_list *.cpp)
+# force the link with ccStdPluginInterface.cpp
+list( APPEND source_list ${CloudComparePlugins_SOURCE_DIR}/ccStdPluginInterface.cpp )
 file( GLOB ui_list *.ui )
 file( GLOB qrc_list *.qrc )
 file( GLOB rc_list *.rc )

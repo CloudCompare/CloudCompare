@@ -217,6 +217,7 @@ struct BoolOpParameters
 		, corkA(0)
 		, corkB(0)
 		, app(0)
+		, meshesAreOk(false)
 	{}
 
 	ccCorkDlg::CSG_OPERATION operation;
@@ -225,6 +226,7 @@ struct BoolOpParameters
 	QString nameA;
 	QString nameB;
 	ccMainAppInterface* app;
+	bool meshesAreOk;
 };
 static BoolOpParameters s_params;
 
@@ -234,37 +236,39 @@ bool doPerformBooleanOp()
 	if (!s_params.corkA || !s_params.corkB)
 		return false;
 
-	//check meshes
-	bool meshesAreOk = true;
-	{
-		if (s_params.corkA->isSelfIntersecting())
-		{
-			if (s_params.app)
-				s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(s_params.nameA),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			meshesAreOk = false;
-		}
-		else if (!s_params.corkA->isClosed())
-		{
-			if (s_params.app)
-				s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(s_params.nameA),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			meshesAreOk = false;
-		}
-		if (s_params.corkB->isSelfIntersecting())
-		{
-			if (s_params.app)
-				s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(s_params.nameB),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			meshesAreOk = false;
-		}
-		else if (!s_params.corkB->isClosed())
-		{
-			if (s_params.app)
-				s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(s_params.nameB),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
-			meshesAreOk = false;
-		}
-	}
-
 	try
 	{
+		//check meshes
+		s_params.meshesAreOk = true;
+		if (false)
+		{
+			if (s_params.corkA->isSelfIntersecting())
+			{
+				if (s_params.app)
+					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(s_params.nameA),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				s_params.meshesAreOk = false;
+			}
+			else if (!s_params.corkA->isClosed())
+			{
+				if (s_params.app)
+					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(s_params.nameA),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				s_params.meshesAreOk = false;
+			}
+			if (s_params.corkB->isSelfIntersecting())
+			{
+				if (s_params.app)
+					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is self-intersecting! Result may be jeopardized!").arg(s_params.nameB),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				s_params.meshesAreOk = false;
+			}
+			else if (!s_params.corkB->isClosed())
+			{
+				if (s_params.app)
+					s_params.app->dispToConsole(QString("[Cork] Mesh '%1' is not closed! Result may be jeopardized!").arg(s_params.nameB),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
+				s_params.meshesAreOk = false;
+			}
+		}
+
+		//perform the boolean operation
 		switch(s_params.operation)
 		{
 		case ccCorkDlg::UNION:
@@ -286,14 +290,14 @@ bool doPerformBooleanOp()
 		default:
 			assert(false);
 			if (s_params.app)
-				s_params.app->dispToConsole("Unhandled operation?!",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+				s_params.app->dispToConsole("Unhandled operation?!",ccMainAppInterface::WRN_CONSOLE_MESSAGE); //DGM: can't issue an error message (i.e. with dialog) in another thread!
 			break;
 		}
 	}
-	catch(...)
+	catch(std::exception e)
 	{
 		if (s_params.app)
-			s_params.app->dispToConsole(meshesAreOk ? "Computation failed!" : "Computation failed! (check console)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
+			s_params.app->dispToConsole(QString("Exception caught: %1").arg(e.what()),ccMainAppInterface::WRN_CONSOLE_MESSAGE);
 		return false;
 	}
 
@@ -375,6 +379,8 @@ void qCork::doAction()
 
 		if (!future.result())
 		{
+			if (m_app)
+				m_app->dispToConsole(s_params.meshesAreOk ? "Computation failed!" : "Computation failed! (check console)",ccMainAppInterface::ERR_CONSOLE_MESSAGE);
 			//an error occurred
 			return;
 		}

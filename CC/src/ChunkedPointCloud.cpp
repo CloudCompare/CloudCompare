@@ -27,16 +27,20 @@
 using namespace CCLib;
 
 ChunkedPointCloud::ChunkedPointCloud()
+	: GenericIndexedCloudPersist()
+	, m_points(new GenericChunkedArray<3,PointCoordinateType>())
+	, m_validBB(false)
+	, m_currentPointIndex(0)
+	, m_currentInScalarFieldIndex(-1)
+	, m_currentOutScalarFieldIndex(-1)
 {
-	m_points = new GenericChunkedArray<3,PointCoordinateType>();
 	m_points->link();
-
-	clear();
 }
 
 ChunkedPointCloud::~ChunkedPointCloud()
 {
-	clear();
+	deleteAllScalarFields();
+
 	m_points->release();
 }
 
@@ -128,7 +132,7 @@ bool ChunkedPointCloud::reserve(unsigned newNumberOfPoints)
 {
 	//we try to enlarge the 3D points array
 	if (!m_points->reserve(newNumberOfPoints))
-        return false;
+		return false;
 
 	//then the scalarfields
 	for (size_t i=0; i<m_scalarFields.size(); ++i)
@@ -142,7 +146,19 @@ bool ChunkedPointCloud::reserve(unsigned newNumberOfPoints)
 
 void ChunkedPointCloud::addPoint(const CCVector3 &P)
 {
-	m_points->addElement(P.u);
+	//NaN coordinates check
+	if (	P.x != P.x
+		||	P.y != P.y
+		||	P.z != P.z )
+	{
+		//replace NaN point by 0000
+		CCVector3 fakeP(0,0,0);
+		m_points->addElement(fakeP.u);
+	}
+	else
+	{
+		m_points->addElement(P.u);
+	}
 	m_validBB = false;
 }
 
@@ -151,7 +167,7 @@ void ChunkedPointCloud::applyTransformation(PointProjectionTools::Transformation
     unsigned count = size();
 
 	//always apply the scale before everything (applying before or after rotation does not changes anything)
-    if (fabs((double)trans.s - 1.0) > ZERO_TOLERANCE)
+    if (fabs(static_cast<double>(trans.s) - 1.0) > ZERO_TOLERANCE)
     {
         for (unsigned i=0; i<count; ++i)
             *point(i) *= trans.s;

@@ -122,6 +122,8 @@ v2.5.6 ??/??/2014
 			* options are: KNN (number of neighbors), SURFACE (surface density) or VOLUME (volume density)
 	* qRansac Shape Detection plugin:
 		- parameters have been updated so as to be (much) clearer
+	* CC now detects points with NaN coordinates and will automatically replace them by (0,0,0)
+		to avoid (big) issues later
 
 - Bug fixes:
 	* the spinboxes of the bounding-box editing dialog were oversized

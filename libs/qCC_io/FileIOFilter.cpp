@@ -345,41 +345,47 @@ void FileIOFilter::DisplayErrorMessage(CC_FILE_ERROR err, const QString& action,
 	case CC_FERR_NO_ERROR:
 		return; //no message will be displayed!
 	case CC_FERR_BAD_ARGUMENT:
-		errorStr = "[internal] bad argument";
+		errorStr = "bad argument (internal)";
 		break;
 	case CC_FERR_UNKNOWN_FILE:
-		errorStr = "Unknown file";
+		errorStr = "unknown file";
 		break;
 	case CC_FERR_WRONG_FILE_TYPE:
-		errorStr = "Wrong file type (check header)";
+		errorStr = "wrong file type (check header)";
 		break;
 	case CC_FERR_WRITING:
-		errorStr = "Writing error (disk full/no access right?)";
+		errorStr = "writing error (disk full/no access right?)";
 		break;
 	case CC_FERR_READING:
-		errorStr = "Reading error (no access right?)";
+		errorStr = "reading error (no access right?)";
 		break;
 	case CC_FERR_NO_SAVE:
-		errorStr = "Nothing to save";
+		errorStr = "nothing to save";
 		break;
 	case CC_FERR_NO_LOAD:
-		errorStr = "Nothing to load";
+		errorStr = "nothing to load";
 		break;
 	case CC_FERR_BAD_ENTITY_TYPE:
-		errorStr = "Incompatible entity/file types";
+		errorStr = "incompatible entity/file types";
 		break;
 	case CC_FERR_CANCELED_BY_USER:
-		errorStr = "Process canceled by user";
+		errorStr = "process canceled by user";
 		warning=true;
 		break;
 	case CC_FERR_NOT_ENOUGH_MEMORY:
-		errorStr = "Not enough memory";
+		errorStr = "not enough memory";
 		break;
 	case CC_FERR_MALFORMED_FILE:
-		errorStr = "Malformed file";
+		errorStr = "malformed file";
 		break;
 	case CC_FERR_BROKEN_DEPENDENCY_ERROR:
 		errorStr = "dependent entities missing (see Console)";
+		break;
+	case CC_FERR_FILE_WAS_WRITTEN_BY_UNKNOWN_PLUGIN:
+		errorStr = "the file was written by a plugin but none of the loaded plugins can deserialize it";
+		break;
+	case CC_FERR_THIRD_PARTY_LIB:
+		errorStr = "the third-party library in charge of saving/loading the file has thrown an exception";
 		break;
 	case CC_FERR_CONSOLE_ERROR:
 		//error already sent!

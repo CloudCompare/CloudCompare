@@ -404,7 +404,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		if (new_child) // found a plugin that can deserialize it
 			root = new_child;
 		else
-			return CC_FERR_FILE_WAS_WRITTEN_BY_PLUGIN;
+			return CC_FERR_FILE_WAS_WRITTEN_BY_UNKNOWN_PLUGIN;
 
 	}
 

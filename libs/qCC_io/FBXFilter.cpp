@@ -145,15 +145,30 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 	bool hasMaterial = false;
 	if (asCCMesh && asCCMesh->hasMaterials())
 	{
-		//directory to save textures
-		QFileInfo info(filename);
-		QString textDirName = info.baseName() + QString(".fbm");
-		QDir baseDir = info.absoluteDir();
-		QDir texDir = QDir(baseDir.absolutePath() + QString("/") + textDirName);
+		const ccMaterialSet* matSet = asCCMesh->getMaterialSet();
+		size_t matCount = matSet->size();
+
+		//check if we have textures
+		bool hasTextures = asCCMesh->hasTextures();
+		if (hasTextures)
+		{
+			//check that we actually have materials with textures as well!
+			hasTextures = false;
+			for (size_t i=0; i<matCount; ++i)
+			{
+				const ccMaterial& mat = matSet->at(i);
+				if (mat.hasTexture())
+				{
+					hasTextures = true;
+					break;
+				}
+			}
+		}
 
 		static const char gDiffuseElementName[] = "DiffuseUV";
 
 		// Create UV for Diffuse channel
+		if (hasTextures)
 		{
 			FbxGeometryElementUV* lUVDiffuseElement = lMesh->CreateElementUV(gDiffuseElementName);
 			assert(lUVDiffuseElement != 0);
@@ -161,9 +176,10 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			lUVDiffuseElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
 
 			//fill Direct Array
+			const TextureCoordsContainer* texCoords = asCCMesh->getTexCoordinatesTable();
+			assert(texCoords);
+			if (texCoords)
 			{
-				const TextureCoordsContainer* texCoords = asCCMesh->getTexCoordinatesTable();
-				assert(texCoords);
 				unsigned count = texCoords->currentSize();
 				lUVDiffuseElement->GetDirectArray().SetCount(static_cast<int>(count));
 				for (unsigned i=0; i<count; ++i)
@@ -174,10 +190,11 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			}
 
 			//fill Indexes Array
+			assert(asCCMesh->hasPerTriangleTexCoordIndexes());
+			if (asCCMesh->hasPerTriangleTexCoordIndexes())
 			{
 				unsigned triCount = asCCMesh->size();
 				lUVDiffuseElement->GetIndexArray().SetCount(static_cast<int>(3*triCount));
-				assert(asCCMesh->hasPerTriangleTexCoordIndexes());
 				for (unsigned j=0; j<triCount; ++j)
 				{
 					int t1=0, t2=0, t3=0;
@@ -192,9 +209,12 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 
 		//Textures used in this file
 		QMap<QString,QString> texFilenames;
+		//directory to save textures (if any)
+		QFileInfo info(filename);
+		QString textDirName = info.baseName() + QString(".fbm");
+		QDir baseDir = info.absoluteDir();
+		QDir texDir = QDir(baseDir.absolutePath() + QString("/") + textDirName);
 
-		const ccMaterialSet* matSet = asCCMesh->getMaterialSet();
-		size_t matCount = matSet->size();
 		for (size_t i=0; i<matCount; ++i)
 		{
 			const ccMaterial& mat = matSet->at(i);
@@ -207,7 +227,7 @@ static FbxNode* ToFbxMesh(ccGenericMesh* mesh, FbxScene* pScene, QString filenam
 			lMaterial->Shininess = mat.shininessFront;
 			lMaterial->ShadingModel.Set("Phong");
 
-			if (mat.hasTexture())
+			if (hasTextures && mat.hasTexture())
 			{
 				QString texFilename = mat.getAbsoluteFilename();
 				
@@ -447,139 +467,147 @@ CC_FILE_ERROR FBXFilter::saveToFile(ccHObject* entity, QString filename)
 		ccLog::Print("[FBX] Autodesk FBX SDK version %s", lSdkManager->GetVersion());
 	}
 
-	//Create an IOSettings object. This object holds all import/export settings.
-	FbxIOSettings* ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
-	lSdkManager->SetIOSettings(ios);
-
-	//Load plugins from the executable directory (optional)
-	//FbxString lPath = FbxGetApplicationDirectory();
-	//lSdkManager->LoadPluginsDirectory(lPath.Buffer());
-
-	//Create an FBX scene. This object holds most objects imported/exported from/to files.
-	FbxScene* lScene = FbxScene::Create(lSdkManager, "My Scene");
-	if( !lScene )
+	try
 	{
-		ccLog::Warning("[FBX] Error: Unable to create FBX scene!");
-		return CC_FERR_CONSOLE_ERROR;
-	}
+		//Create an IOSettings object. This object holds all import/export settings.
+		FbxIOSettings* ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
+		lSdkManager->SetIOSettings(ios);
 
-	// create scene info
-	{
-		FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(lSdkManager,"SceneInfo");
-		sceneInfo->mTitle = qPrintable(QString("Mesh: ") + (meshes.size() == 1 ? meshes[0]->getName() : QString("Multiple meshes")));
-		sceneInfo->mAuthor = "CloudCompare";
-		sceneInfo->mRevision = "rev. 1.0";
-		sceneInfo->mKeywords = "cloudcompare mesh";
+		//Load plugins from the executable directory (optional)
+		//FbxString lPath = FbxGetApplicationDirectory();
+		//lSdkManager->LoadPluginsDirectory(lPath.Buffer());
 
-		// we need to add the sceneInfo before calling AddThumbNailToScene because
-		// that function is asking the scene for the sceneInfo.
-		lScene->SetSceneInfo(sceneInfo);
-	}
-
-	//create thumbnail
-	//{
-	//	FbxThumbnail* lThumbnail = FbxThumbnail::Create(lScene,"");
-
-	//	lThumbnail->SetDataFormat(FbxThumbnail::eRGB_24);
-	//	lThumbnail->SetSize(FbxThumbnail::e64x64);
-	//	lThumbnail->SetThumbnailImage(cSceneThumbnail);
-
-	//	if (lScene->GetSceneInfo())
-	//	{
-	//		lScene->GetSceneInfo()->SetSceneThumbnail(lThumbnail);
-	//	}
-	//}
-
-	// Build the node tree.
-	FbxNode* lRootNode = lScene->GetRootNode();
-	{
-		for (size_t i=0; i<meshes.size(); ++i)
+		//Create an FBX scene. This object holds most objects imported/exported from/to files.
+		FbxScene* lScene = FbxScene::Create(lSdkManager, "My Scene");
+		if( !lScene )
 		{
-			FbxNode* meshNode = ToFbxMesh(meshes[i],lScene,filename,i);
-			if (meshNode)
-				lRootNode->AddChild(meshNode);
-			else
-				ccLog::Warning(QString("[FBX] Failed to convert mesh '%1' to FBX mesh/node!").arg(meshes[i]->getName()));
+			ccLog::Warning("[FBX] Error: Unable to create FBX scene!");
+			return CC_FERR_CONSOLE_ERROR;
 		}
-	}
 
-	int fileFormat = -1;
-
-	//Display a combox box to let the user choose the export file format
-	{
-		FbxManager* pSdkManager = FbxManager::GetDefaultManager();
-		int lFormatCount = pSdkManager ? pSdkManager->GetIOPluginRegistry()->GetWriterFormatCount() : 0;
-
-		if (lFormatCount > 0)
+		// create scene info
 		{
-			if (s_defaultOutputFormat.isEmpty())
+			FbxDocumentInfo* sceneInfo = FbxDocumentInfo::Create(lSdkManager,"SceneInfo");
+			sceneInfo->mTitle = qPrintable(QString("Mesh: ") + (meshes.size() == 1 ? meshes[0]->getName() : QString("Multiple meshes")));
+			sceneInfo->mAuthor = "CloudCompare";
+			sceneInfo->mRevision = "rev. 1.0";
+			sceneInfo->mKeywords = "cloudcompare mesh";
+
+			// we need to add the sceneInfo before calling AddThumbNailToScene because
+			// that function is asking the scene for the sceneInfo.
+			lScene->SetSceneInfo(sceneInfo);
+		}
+
+		//create thumbnail
+		//{
+		//	FbxThumbnail* lThumbnail = FbxThumbnail::Create(lScene,"");
+
+		//	lThumbnail->SetDataFormat(FbxThumbnail::eRGB_24);
+		//	lThumbnail->SetSize(FbxThumbnail::e64x64);
+		//	lThumbnail->SetThumbnailImage(cSceneThumbnail);
+
+		//	if (lScene->GetSceneInfo())
+		//	{
+		//		lScene->GetSceneInfo()->SetSceneThumbnail(lThumbnail);
+		//	}
+		//}
+
+		// Build the node tree.
+		FbxNode* lRootNode = lScene->GetRootNode();
+		{
+			for (size_t i=0; i<meshes.size(); ++i)
 			{
-				try
+				FbxNode* meshNode = ToFbxMesh(meshes[i],lScene,filename,i);
+				if (meshNode)
+					lRootNode->AddChild(meshNode);
+				else
+					ccLog::Warning(QString("[FBX] Failed to convert mesh '%1' to FBX mesh/node!").arg(meshes[i]->getName()));
+			}
+		}
+
+		int fileFormat = -1;
+
+		//Display a combox box to let the user choose the export file format
+		{
+			FbxManager* pSdkManager = FbxManager::GetDefaultManager();
+			int lFormatCount = pSdkManager ? pSdkManager->GetIOPluginRegistry()->GetWriterFormatCount() : 0;
+
+			if (lFormatCount > 0)
+			{
+				if (s_defaultOutputFormat.isEmpty())
 				{
-					QMessageBox msgBox(QMessageBox::Question,"FBX format","Choose output format:");
-					QMap<QAbstractButton*,int> buttons;
+					try
+					{
+						QMessageBox msgBox(QMessageBox::Question,"FBX format","Choose output format:");
+						QMap<QAbstractButton*,int> buttons;
+						for (int lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
+						{
+							if (pSdkManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
+							{
+								FbxString lDesc = pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
+								QPushButton *button = msgBox.addButton(lDesc.Buffer(), QMessageBox::AcceptRole);
+								buttons[button] = lFormatIndex;
+							}
+						}
+						msgBox.exec();
+						//get the right format
+						fileFormat = buttons[msgBox.clickedButton()];
+					}
+					catch(...)
+					{
+					}
+				}
+				else
+				{
+					//try to find the default output format as set by the user
 					for (int lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
 					{
 						if (pSdkManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
 						{
 							FbxString lDesc = pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
-							QPushButton *button = msgBox.addButton(lDesc.Buffer(), QMessageBox::AcceptRole);
-							buttons[button] = lFormatIndex;
+							QString sanitizedDesc = SanitizeFBXFormatString(lDesc.Buffer());
+							if (s_defaultOutputFormat == sanitizedDesc)
+							{
+								ccLog::Print(QString("[FBX] Default output file format: %1").arg(sanitizedDesc));
+								fileFormat = lFormatIndex;
+								break;
+							}
 						}
 					}
-					msgBox.exec();
-					//get the right format
-					fileFormat = buttons[msgBox.clickedButton()];
-				}
-				catch(...)
-				{
-				}
-			}
-			else
-			{
-				//try to find the default output format as set by the user
-				for (int lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
-				{
-					if (pSdkManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
-					{
-						FbxString lDesc = pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
-						QString sanitizedDesc = SanitizeFBXFormatString(lDesc.Buffer());
-						if (s_defaultOutputFormat == sanitizedDesc)
-						{
-							ccLog::Print(QString("[FBX] Default output file format: %1").arg(sanitizedDesc));
-							fileFormat = lFormatIndex;
-							break;
-						}
-					}
-				}
 
-				//if we failed to find the specified file format, warn the user and display the list of supported formats
-				if (fileFormat < 0)
-				{
-					ccLog::Warning(QString("[FBX] File format '%1' not supported").arg(s_defaultOutputFormat));
-					ccLog::Print("[FBX] Supported output formats:");
-					for (int lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
+					//if we failed to find the specified file format, warn the user and display the list of supported formats
+					if (fileFormat < 0)
 					{
-						if (pSdkManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
+						ccLog::Warning(QString("[FBX] File format '%1' not supported").arg(s_defaultOutputFormat));
+						ccLog::Print("[FBX] Supported output formats:");
+						for (int lFormatIndex=0; lFormatIndex<lFormatCount; lFormatIndex++)
 						{
-							FbxString lDesc = pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
-							ccLog::Print(QString("\t- %1").arg(SanitizeFBXFormatString(lDesc.Buffer())));
+							if (pSdkManager->GetIOPluginRegistry()->WriterIsFBX(lFormatIndex))
+							{
+								FbxString lDesc = pSdkManager->GetIOPluginRegistry()->GetWriterFormatDescription(lFormatIndex);
+								ccLog::Print(QString("\t- %1").arg(SanitizeFBXFormatString(lDesc.Buffer())));
+							}
 						}
 					}
-				}
 
+				}
 			}
 		}
+
+		// Save the scene.
+		bool lResult = SaveScene(lSdkManager, lScene, qPrintable(filename),fileFormat);
+
+		// Destroy all objects created by the FBX SDK.
+		if( lSdkManager )
+			lSdkManager->Destroy();
+
+		return lResult ? CC_FERR_NO_ERROR : CC_FERR_CONSOLE_ERROR;
 	}
-
-	// Save the scene.
-	bool lResult = SaveScene(lSdkManager, lScene, qPrintable(filename),fileFormat);
-
-	// Destroy all objects created by the FBX SDK.
-	if( lSdkManager )
-		lSdkManager->Destroy();
-
-	return lResult ? CC_FERR_NO_ERROR : CC_FERR_CONSOLE_ERROR;
+	catch(...)
+	{
+		ccLog::Warning("[FBX] FBX SDK has thrown an unknown exception!");
+		return CC_FERR_THIRD_PARTY_LIB;
+	}
 }
 
 QString GetAttributeTypeName(FbxNodeAttribute::EType type)
@@ -1201,131 +1229,142 @@ static ccMesh* FromFbxMesh(FbxMesh* fbxMesh, FileIOFilter::LoadParameters& param
 
 CC_FILE_ERROR FBXFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
-	// Initialize the SDK manager. This object handles memory management.
-	FbxManager* lSdkManager = FbxManager::Create();
-
-	// Create the IO settings object.
-	FbxIOSettings *ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
-	lSdkManager->SetIOSettings(ios);
-	
-	// Import options determine what kind of data is to be imported.
-	// True is the default, but here we’ll set some to true explicitly, and others to false.
-	//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_MATERIAL,	true);
-	//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_TEXTURE,	true);
-	
-	// Create an importer using the SDK manager.
-	FbxImporter* lImporter = FbxImporter::Create(lSdkManager,"");
-
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
-	
-	// Use the first argument as the filename for the importer.
-	if (!lImporter->Initialize(qPrintable(filename), -1, lSdkManager->GetIOSettings()))
-	{ 
-		ccLog::Warning(QString("[FBX] Error: %1").arg(lImporter->GetStatus().GetErrorString()));
-		result = CC_FERR_READING;
-	}
-	else
+
+	try
 	{
-		// Create a new scene so that it can be populated by the imported file.
-		FbxScene* lScene = FbxScene::Create(lSdkManager,"myScene");
+		// Initialize the SDK manager. This object handles memory management.
+		FbxManager* lSdkManager = FbxManager::Create();
 
-		// Import the contents of the file into the scene.
-		if (lImporter->Import(lScene))
+		// Create the IO settings object.
+		FbxIOSettings *ios = FbxIOSettings::Create(lSdkManager, IOSROOT);
+		lSdkManager->SetIOSettings(ios);
+	
+		// Import options determine what kind of data is to be imported.
+		// True is the default, but here we’ll set some to true explicitly, and others to false.
+		//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_MATERIAL,	true);
+		//(*(lSdkManager->GetIOSettings())).SetBoolProp(IMP_FBX_TEXTURE,	true);
+	
+		// Create an importer using the SDK manager.
+		FbxImporter* lImporter = FbxImporter::Create(lSdkManager,"");
+
+		// Use the first argument as the filename for the importer.
+		if (!lImporter->Initialize(qPrintable(filename), -1, lSdkManager->GetIOSettings()))
+		{ 
+			ccLog::Warning(QString("[FBX] Error: %1").arg(lImporter->GetStatus().GetErrorString()));
+			result = CC_FERR_READING;
+		}
+		else
 		{
-			// Print the nodes of the scene and their attributes recursively.
-			// Note that we are not printing the root node because it should
-			// not contain any attributes.
-			FbxNode* lRootNode = lScene->GetRootNode();
-			std::vector<FbxNode*> nodes;
-			nodes.push_back(lRootNode);
+			// Create a new scene so that it can be populated by the imported file.
+			FbxScene* lScene = FbxScene::Create(lSdkManager,"myScene");
 
-			while (!nodes.empty())
+			// Import the contents of the file into the scene.
+			if (lImporter->Import(lScene))
 			{
-				FbxNode* lNode = nodes.back();
-				nodes.pop_back();
+				// Print the nodes of the scene and their attributes recursively.
+				// Note that we are not printing the root node because it should
+				// not contain any attributes.
+				FbxNode* lRootNode = lScene->GetRootNode();
+				std::vector<FbxNode*> nodes;
+				nodes.push_back(lRootNode);
 
-				const char* nodeName = lNode->GetName();
-#ifdef _DEBUG
-				ccLog::Print(QString("Node: %1 - %2 properties").arg(nodeName).arg(lNode->GetNodeAttributeCount()));
-#endif
-				// scan the node's attributes.
-				for(int i=0; i<lNode->GetNodeAttributeCount(); i++)
+				while (!nodes.empty())
 				{
-					FbxNodeAttribute* pAttribute = lNode->GetNodeAttributeByIndex(i);
-					FbxNodeAttribute::EType type = pAttribute->GetAttributeType();
+					FbxNode* lNode = nodes.back();
+					nodes.pop_back();
+
+					const char* nodeName = lNode->GetName();
 #ifdef _DEBUG
-					ccLog::Print(QString("\tProp. #%1").arg(GetAttributeTypeName(type)));
+					ccLog::Print(QString("Node: %1 - %2 properties").arg(nodeName).arg(lNode->GetNodeAttributeCount()));
+#endif
+					// scan the node's attributes.
+					for(int i=0; i<lNode->GetNodeAttributeCount(); i++)
+					{
+						FbxNodeAttribute* pAttribute = lNode->GetNodeAttributeByIndex(i);
+						FbxNodeAttribute::EType type = pAttribute->GetAttributeType();
+#ifdef _DEBUG
+						ccLog::Print(QString("\tProp. #%1").arg(GetAttributeTypeName(type)));
 #endif
 
-					switch(type)
-					{ 
-					case FbxNodeAttribute::eMesh:
-						{
-							ccMesh* mesh = FromFbxMesh(static_cast<FbxMesh*>(pAttribute),parameters);
-							if (mesh)
+						switch(type)
+						{ 
+						case FbxNodeAttribute::eMesh:
 							{
-								//apply transformation
-								FbxAMatrix& transform = lNode->EvaluateGlobalTransform();
-								ccGLMatrix mat;
-								float* data = mat.data();
-								for (int c=0; c<4; ++c)
+								ccMesh* mesh = FromFbxMesh(static_cast<FbxMesh*>(pAttribute),parameters);
+								if (mesh)
 								{
-									FbxVector4 C = transform.GetColumn(c);
-									*data++ = static_cast<float>(C[0]);
-									*data++ = static_cast<float>(C[1]);
-									*data++ = static_cast<float>(C[2]);
-									*data++ = static_cast<float>(C[3]);
+									//apply transformation
+									FbxAMatrix& transform = lNode->EvaluateGlobalTransform();
+									ccGLMatrix mat;
+									float* data = mat.data();
+									for (int c=0; c<4; ++c)
+									{
+										FbxVector4 C = transform.GetColumn(c);
+										*data++ = static_cast<float>(C[0]);
+										*data++ = static_cast<float>(C[1]);
+										*data++ = static_cast<float>(C[2]);
+										*data++ = static_cast<float>(C[3]);
+									}
+									mesh->applyGLTransformation_recursive(&mat);
+
+									if (mesh->getName().isEmpty())
+										mesh->setName(nodeName);
+
+									container.addChild(mesh);
 								}
-								mesh->applyGLTransformation_recursive(&mat);
-
-								if (mesh->getName().isEmpty())
-									mesh->setName(nodeName);
-
-								container.addChild(mesh);
 							}
-						}
-						break;
+							break;
 
-					case FbxNodeAttribute::eUnknown: 
-					case FbxNodeAttribute::eNull:
-					case FbxNodeAttribute::eMarker:
-					case FbxNodeAttribute::eSkeleton:
-					case FbxNodeAttribute::eNurbs:
-					case FbxNodeAttribute::ePatch:
-					case FbxNodeAttribute::eCamera:
-					case FbxNodeAttribute::eCameraStereo:
-					case FbxNodeAttribute::eCameraSwitcher:
-					case FbxNodeAttribute::eLight:
-					case FbxNodeAttribute::eOpticalReference:
-					case FbxNodeAttribute::eOpticalMarker:
-					case FbxNodeAttribute::eNurbsCurve:
-					case FbxNodeAttribute::eTrimNurbsSurface:
-					case FbxNodeAttribute::eBoundary:
-					case FbxNodeAttribute::eNurbsSurface:
-					case FbxNodeAttribute::eShape:
-					case FbxNodeAttribute::eLODGroup:
-					case FbxNodeAttribute::eSubDiv:
-					default:
-						//not handled yet
-						break;
+						case FbxNodeAttribute::eUnknown: 
+						case FbxNodeAttribute::eNull:
+						case FbxNodeAttribute::eMarker:
+						case FbxNodeAttribute::eSkeleton:
+						case FbxNodeAttribute::eNurbs:
+						case FbxNodeAttribute::ePatch:
+						case FbxNodeAttribute::eCamera:
+						case FbxNodeAttribute::eCameraStereo:
+						case FbxNodeAttribute::eCameraSwitcher:
+						case FbxNodeAttribute::eLight:
+						case FbxNodeAttribute::eOpticalReference:
+						case FbxNodeAttribute::eOpticalMarker:
+						case FbxNodeAttribute::eNurbsCurve:
+						case FbxNodeAttribute::eTrimNurbsSurface:
+						case FbxNodeAttribute::eBoundary:
+						case FbxNodeAttribute::eNurbsSurface:
+						case FbxNodeAttribute::eShape:
+						case FbxNodeAttribute::eLODGroup:
+						case FbxNodeAttribute::eSubDiv:
+						default:
+							//not handled yet
+							break;
+						}
+					}
+
+					// Recursively add the children.
+					for(int j=0; j<lNode->GetChildCount(); j++)
+					{
+						nodes.push_back(lNode->GetChild(j));
 					}
 				}
-
-				// Recursively add the children.
-				for(int j=0; j<lNode->GetChildCount(); j++)
-				{
-					nodes.push_back(lNode->GetChild(j));
-				}
 			}
+			
+			if (container.getChildrenNumber() == 0)
+				result = CC_FERR_NO_LOAD;
 		}
+
+		// The file is imported, so get rid of the importer.
+		lImporter->Destroy();
+		// Destroy the SDK manager and all the other objects it was handling.
+		lSdkManager->Destroy();
+	}
+	catch(...)
+	{
+		ccLog::Warning("[FBX] FBX SDK has thrown an unknown exception!");
+		result = CC_FERR_THIRD_PARTY_LIB;
 	}
 
-	// The file is imported, so get rid of the importer.
-	lImporter->Destroy();
-	// Destroy the SDK manager and all the other objects it was handling.
-	lSdkManager->Destroy();
-
-	return container.getChildrenNumber() == 0 ? CC_FERR_NO_LOAD : CC_FERR_NO_ERROR;
+	return result;
 }
 
 #endif

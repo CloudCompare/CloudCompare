@@ -140,6 +140,8 @@ v2.5.6 ??/??/2014
 	* qPoissonRecon: the mutli-threaded version (i.e. the 32 bits version on Windows) could crash sometimes
 	* 3D mouse: on some configurations, the 3D mouse was not handled properly
 	* The global shift information was not applied to the cameras when importing Bundler files with large coordinates
+	* Saving E57 files could make CC crash sometimes (due to an internal inconsistency in libE57)
+		+ CC is now more robust to this kind of errors!
 
 v2.5.5.2 21/06/2014
 - Bug fix: primitives color couldn't be changed with 'Edit > Colors > Set unique'

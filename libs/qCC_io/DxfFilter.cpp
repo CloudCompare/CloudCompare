@@ -497,240 +497,268 @@ CC_FILE_ERROR DxfFilter::saveToFile(ccHObject* root, QString filename)
 		return CC_FERR_WRITING;
 	}
 
-	//write header
-	dxf.writeHeader(*dw);
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-	//add dimensions
-	dw->dxfString(9, "$INSBASE");
-	dw->dxfReal(10,0.0);
-	dw->dxfReal(20,0.0);
-	dw->dxfReal(30,0.0);
-	dw->dxfString(9, "$EXTMIN");
-	dw->dxfReal(10,static_cast<double>(box.minCorner().x)-pageMargin);
-	dw->dxfReal(20,static_cast<double>(box.minCorner().y)-pageMargin);
-	dw->dxfReal(30,static_cast<double>(box.minCorner().z)-pageMargin);
-	dw->dxfString(9, "$EXTMAX");
-	dw->dxfReal(10,static_cast<double>(box.maxCorner().x)+pageMargin);
-	dw->dxfReal(20,static_cast<double>(box.maxCorner().y)+pageMargin);
-	dw->dxfReal(30,static_cast<double>(box.maxCorner().z)+pageMargin);
-	dw->dxfString(9, "$LIMMIN");
-	dw->dxfReal(10,static_cast<double>(box.minCorner().x)-pageMargin);
-	dw->dxfReal(20,static_cast<double>(box.minCorner().y)-pageMargin);
-	dw->dxfString(9, "$LIMMAX");
-	dw->dxfReal(10,static_cast<double>(box.maxCorner().x)+pageMargin);
-	dw->dxfReal(20,static_cast<double>(box.maxCorner().y)+pageMargin);
-
-	//close header
-	dw->sectionEnd();
-
-	//Opening the Tables Section
-	dw->sectionTables();
-	//Writing the Viewports
-	dxf.writeVPort(*dw);
-
-	//Writing the Linetypes (all by default)
+	try
 	{
-		dw->tableLineTypes(25);
-		dxf.writeLineType(*dw, DL_LineTypeData("BYBLOCK", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("BYLAYER", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("CONTINUOUS", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO02W100", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO03W100", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO04W100", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO05W100", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("BORDER", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("BORDER2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("BORDERX2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("CENTER", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("CENTER2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("CENTERX2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DASHDOT", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DASHDOT2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DASHDOTX2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DASHED", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DASHED2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DASHEDX2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DIVIDE", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DIVIDE2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DIVIDEX2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DOT", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DOT2", 0));
-		dxf.writeLineType(*dw, DL_LineTypeData("DOTX2", 0));
-		dw->tableEnd();
-	}
+		//write header
+		dxf.writeHeader(*dw);
 
-	//Writing the Layers
-	dw->tableLayers(static_cast<int>(polyCount)+1);
-	QStringList polyLayerNames;
-	QStringList meshLayerNames;
-	{
-		//default layer
-		dxf.writeLayer(*dw, 
-			DL_LayerData("0", 0), 
-			DL_Attributes(
-			std::string(""),		// leave empty
-			DL_Codes::black,		// default color
-			100,					// default width (in 1/100 mm)
-			"CONTINUOUS"));			// default line style
+		//add dimensions
+		dw->dxfString(9, "$INSBASE");
+		dw->dxfReal(10,0.0);
+		dw->dxfReal(20,0.0);
+		dw->dxfReal(30,0.0);
+		dw->dxfString(9, "$EXTMIN");
+		dw->dxfReal(10,static_cast<double>(box.minCorner().x)-pageMargin);
+		dw->dxfReal(20,static_cast<double>(box.minCorner().y)-pageMargin);
+		dw->dxfReal(30,static_cast<double>(box.minCorner().z)-pageMargin);
+		dw->dxfString(9, "$EXTMAX");
+		dw->dxfReal(10,static_cast<double>(box.maxCorner().x)+pageMargin);
+		dw->dxfReal(20,static_cast<double>(box.maxCorner().y)+pageMargin);
+		dw->dxfReal(30,static_cast<double>(box.maxCorner().z)+pageMargin);
+		dw->dxfString(9, "$LIMMIN");
+		dw->dxfReal(10,static_cast<double>(box.minCorner().x)-pageMargin);
+		dw->dxfReal(20,static_cast<double>(box.minCorner().y)-pageMargin);
+		dw->dxfString(9, "$LIMMAX");
+		dw->dxfReal(10,static_cast<double>(box.maxCorner().x)+pageMargin);
+		dw->dxfReal(20,static_cast<double>(box.maxCorner().y)+pageMargin);
 
-		//polylines layers
-		for (unsigned i=0; i<polyCount; ++i)
+		//close header
+		dw->sectionEnd();
+
+		//Opening the Tables Section
+		dw->sectionTables();
+		//Writing the Viewports
+		dxf.writeVPort(*dw);
+
+		//Writing the Linetypes (all by default)
 		{
-			//default layer name
-			//TODO: would be better to use the polyline name!
-			//but it can't be longer than 31 characters (R14 limit)
-			QString layerName = QString("POLYLINE_%1").arg(i+1,3,10,QChar('0'));
-
-			polyLayerNames << layerName;
-			dxf.writeLayer(*dw, 
-				DL_LayerData(layerName.toStdString(), 0), 
-				DL_Attributes(
-				std::string(""),
-				DL_Codes::green,
-				static_cast<int>(lineWidth),
-				"CONTINUOUS"));
+			dw->tableLineTypes(25);
+			dxf.writeLineType(*dw, DL_LineTypeData("BYBLOCK", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("BYLAYER", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("CONTINUOUS", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO02W100", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO03W100", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO04W100", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("ACAD_ISO05W100", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("BORDER", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("BORDER2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("BORDERX2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("CENTER", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("CENTER2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("CENTERX2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DASHDOT", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DASHDOT2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DASHDOTX2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DASHED", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DASHED2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DASHEDX2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DIVIDE", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DIVIDE2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DIVIDEX2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DOT", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DOT2", 0));
+			dxf.writeLineType(*dw, DL_LineTypeData("DOTX2", 0));
+			dw->tableEnd();
 		}
+
+		//Writing the Layers
+		dw->tableLayers(static_cast<int>(polyCount)+1);
+		QStringList polyLayerNames;
+		QStringList meshLayerNames;
+		{
+			//default layer
+			dxf.writeLayer(*dw, 
+				DL_LayerData("0", 0), 
+				DL_Attributes(
+				std::string(""),		// leave empty
+				DL_Codes::black,		// default color
+				100,					// default width (in 1/100 mm)
+				"CONTINUOUS"));			// default line style
+
+			//polylines layers
+			for (unsigned i=0; i<polyCount; ++i)
+			{
+				//default layer name
+				//TODO: would be better to use the polyline name!
+				//but it can't be longer than 31 characters (R14 limit)
+				QString layerName = QString("POLYLINE_%1").arg(i+1,3,10,QChar('0'));
+
+				polyLayerNames << layerName;
+				dxf.writeLayer(*dw, 
+					DL_LayerData(layerName.toStdString(), 0), 
+					DL_Attributes(
+					std::string(""),
+					DL_Codes::green,
+					static_cast<int>(lineWidth),
+					"CONTINUOUS"));
+			}
 		
-		//mesh layers
-		for (unsigned j=0; j<meshCount; ++j)
-		{
-			//default layer name
-			//TODO: would be better to use the mesh name!
-			//but it can't be longer than 31 characters (R14 limit)
-			QString layerName = QString("MESH_%1").arg(j+1,3,10,QChar('0'));
+			//mesh layers
+			for (unsigned j=0; j<meshCount; ++j)
+			{
+				//default layer name
+				//TODO: would be better to use the mesh name!
+				//but it can't be longer than 31 characters (R14 limit)
+				QString layerName = QString("MESH_%1").arg(j+1,3,10,QChar('0'));
 
-			meshLayerNames << layerName;
-			dxf.writeLayer(*dw, 
-				DL_LayerData(layerName.toStdString(), 0), 
-				DL_Attributes(
-				std::string(""),
-				DL_Codes::magenta,
-				static_cast<int>(lineWidth),
-				"CONTINUOUS"));
+				meshLayerNames << layerName;
+				dxf.writeLayer(*dw, 
+					DL_LayerData(layerName.toStdString(), 0), 
+					DL_Attributes(
+					std::string(""),
+					DL_Codes::magenta,
+					static_cast<int>(lineWidth),
+					"CONTINUOUS"));
+			}
 		}
-	}
-	dw->tableEnd();
+		dw->tableEnd();
 
-	//Writing Various Other Tables
-	//dxf.writeStyle(*dw); //DXFLIB V2.5
-	dxf.writeStyle(*dw,DL_StyleData("Standard",0,0.0,0.75,0.0,0,2.5,"txt","")); //DXFLIB V3.3
-	dxf.writeView(*dw);
-	dxf.writeUcs(*dw);
+		//Writing Various Other Tables
+		//dxf.writeStyle(*dw); //DXFLIB V2.5
+		dxf.writeStyle(*dw,DL_StyleData("Standard",0,0.0,0.75,0.0,0,2.5,"txt","")); //DXFLIB V3.3
+		dxf.writeView(*dw);
+		dxf.writeUcs(*dw);
 
-	dw->tableAppid(1);
-	dw->tableAppidEntry(0x12);
-	dw->dxfString(2, "ACAD");
-	dw->dxfInt(70, 0);
-	dw->tableEnd();
+		dw->tableAppid(1);
+		dw->tableAppidEntry(0x12);
+		dw->dxfString(2, "ACAD");
+		dw->dxfInt(70, 0);
+		dw->tableEnd();
 
-	//Writing Dimension Styles
-	dxf.writeDimStyle(	*dw, 
-						/*arrowSize*/1, 
-						/*extensionLineExtension*/1,
-						/*extensionLineOffset*/1,
-						/*dimensionGap*/1,
-						/*dimensionTextSize*/1);
+		//Writing Dimension Styles
+		dxf.writeDimStyle(	*dw, 
+							/*arrowSize*/1, 
+							/*extensionLineExtension*/1,
+							/*extensionLineOffset*/1,
+							/*dimensionGap*/1,
+							/*dimensionTextSize*/1);
 	
-	//Writing Block Records
-	dxf.writeBlockRecord(*dw);
-	dw->tableEnd();
+		//Writing Block Records
+		dxf.writeBlockRecord(*dw);
+		dw->tableEnd();
 
-	//Ending the Tables Section
-	dw->sectionEnd();
-
-	//Writing the Blocks Section
-	{
-		dw->sectionBlocks();
-
-		dxf.writeBlock(*dw,  DL_BlockData("*Model_Space", 0, 0.0, 0.0, 0.0));
-		dxf.writeEndBlock(*dw, "*Model_Space");
-
-		dxf.writeBlock(*dw, DL_BlockData("*Paper_Space", 0, 0.0, 0.0, 0.0));
-		dxf.writeEndBlock(*dw, "*Paper_Space");
-
-		dxf.writeBlock(*dw, DL_BlockData("*Paper_Space0", 0, 0.0, 0.0, 0.0));
-		dxf.writeEndBlock(*dw, "*Paper_Space0");
-
+		//Ending the Tables Section
 		dw->sectionEnd();
-	}
 
-	//Writing the Entities Section
-	{
-		dw->sectionEntities();
-
-		//write polylines
-		for (unsigned i=0; i<polyCount; ++i)
+		//Writing the Blocks Section
 		{
-			const ccPolyline* poly = static_cast<ccPolyline*>(polylines[i]);
-			unsigned vertexCount = poly->size();
-			int flags = poly->isClosed() ? 1 : 0;
-			if (!poly->is2DMode())
-				flags |= 8; //3D polyline
-			dxf.writePolyline(	*dw,
-								DL_PolylineData(static_cast<int>(vertexCount),0,0,flags),
-								DL_Attributes(polyLayerNames[i].toStdString(), DL_Codes::bylayer, -1, "BYLAYER") );
+			dw->sectionBlocks();
 
-			for (unsigned v=0; v<vertexCount; ++v)
-			{
-				CCVector3 P;
-				poly->getPoint(v,P);
-				dxf.writeVertex(*dw, DL_VertexData(	P.x, P.y, P.z ) );
-			}
+			dxf.writeBlock(*dw,  DL_BlockData("*Model_Space", 0, 0.0, 0.0, 0.0));
+			dxf.writeEndBlock(*dw, "*Model_Space");
 
-			dxf.writePolylineEnd(*dw);
+			dxf.writeBlock(*dw, DL_BlockData("*Paper_Space", 0, 0.0, 0.0, 0.0));
+			dxf.writeEndBlock(*dw, "*Paper_Space");
+
+			dxf.writeBlock(*dw, DL_BlockData("*Paper_Space0", 0, 0.0, 0.0, 0.0));
+			dxf.writeEndBlock(*dw, "*Paper_Space0");
+
+			dw->sectionEnd();
 		}
 
-		//write meshes
-		for (unsigned j=0; j<meshCount; ++j)
+		//Writing the Entities Section
 		{
-			ccGenericMesh* mesh = static_cast<ccGenericMesh*>(meshes[j]);
-			unsigned triCount = mesh->size();
-			mesh->placeIteratorAtBegining();
-			for (unsigned f=0; f<triCount; ++f)
+			dw->sectionEntities();
+
+			//write polylines
+			for (unsigned i=0; i<polyCount; ++i)
 			{
-				const CCLib::GenericTriangle* tri = mesh->_getNextTriangle();
-				const CCVector3* A = tri->_getA();
-				const CCVector3* B = tri->_getB();
-				const CCVector3* C = tri->_getC();
-				dxf.write3dFace(*dw,
-								DL_3dFaceData(	A->x,A->y,A->z,
-												B->x,B->y,B->z,
-												C->x,C->y,C->z,
-												C->x,C->y,C->z,
-												lineWidth ),
-								DL_Attributes(meshLayerNames[j].toStdString(), DL_Codes::bylayer, -1, "BYLAYER"));
+				const ccPolyline* poly = static_cast<ccPolyline*>(polylines[i]);
+				unsigned vertexCount = poly->size();
+				int flags = poly->isClosed() ? 1 : 0;
+				if (!poly->is2DMode())
+					flags |= 8; //3D polyline
+				dxf.writePolyline(	*dw,
+									DL_PolylineData(static_cast<int>(vertexCount),0,0,flags),
+									DL_Attributes(polyLayerNames[i].toStdString(), DL_Codes::bylayer, -1, "BYLAYER") );
+
+				for (unsigned v=0; v<vertexCount; ++v)
+				{
+					CCVector3 P;
+					poly->getPoint(v,P);
+					dxf.writeVertex(*dw, DL_VertexData(	P.x, P.y, P.z ) );
+				}
+
+				dxf.writePolylineEnd(*dw);
 			}
+
+			//write meshes
+			for (unsigned j=0; j<meshCount; ++j)
+			{
+				ccGenericMesh* mesh = static_cast<ccGenericMesh*>(meshes[j]);
+				unsigned triCount = mesh->size();
+				mesh->placeIteratorAtBegining();
+				for (unsigned f=0; f<triCount; ++f)
+				{
+					const CCLib::GenericTriangle* tri = mesh->_getNextTriangle();
+					const CCVector3* A = tri->_getA();
+					const CCVector3* B = tri->_getB();
+					const CCVector3* C = tri->_getC();
+					dxf.write3dFace(*dw,
+									DL_3dFaceData(	A->x,A->y,A->z,
+													B->x,B->y,B->z,
+													C->x,C->y,C->z,
+													C->x,C->y,C->z,
+													lineWidth ),
+									DL_Attributes(meshLayerNames[j].toStdString(), DL_Codes::bylayer, -1, "BYLAYER"));
+				}
+			}
+
+			dw->sectionEnd();
 		}
 
-		dw->sectionEnd();
+		//Writing the Objects Section
+		dxf.writeObjects(*dw);
+		dxf.writeObjectsEnd(*dw);
+
+		//Ending and Closing the File
+		dw->dxfEOF();
+		dw->close();
+	}
+	catch(...)
+	{
+		ccLog::Warning("[DXF] DxfLib has thrown an unknown exception!");
+		result = CC_FERR_THIRD_PARTY_LIB;
 	}
 
-	//Writing the Objects Section
-	dxf.writeObjects(*dw);
-	dxf.writeObjectsEnd(*dw);
-
-	//Ending and Closing the File
-	dw->dxfEOF();
-	dw->close();
 	delete dw;
 	dw = 0;
 
-	return CC_FERR_NO_ERROR;
+	return result;
 
 #endif
 }
 
 CC_FILE_ERROR DxfFilter::loadFile(QString filename, ccHObject& container, LoadParameters& parameters)
 {
+	CC_FILE_ERROR result = CC_FERR_NO_LOAD;
+
 #ifdef CC_DXF_SUPPORT
-	DxfImporter importer(&container);
-	if (!DL_Dxf().in(qPrintable(filename), &importer))
+	try
 	{
-		return CC_FERR_READING;
+		DxfImporter importer(&container);
+		if (DL_Dxf().in(qPrintable(filename), &importer))
+		{
+			if (container.getChildrenNumber() != 0)
+				result = CC_FERR_NO_ERROR;
+		}
+		else
+		{
+			result = CC_FERR_READING;
+		}
+	}
+	catch(...)
+	{
+		ccLog::Warning("[DXF] DxfLib has thrown an unknown exception!");
+		result = CC_FERR_THIRD_PARTY_LIB;
 	}
 #else
+	
 	ccLog::Error("[DXF] Not supported in this version!");
+
 #endif
 
-	return container.getChildrenNumber() == 0 ? CC_FERR_NO_LOAD : CC_FERR_NO_ERROR;
+	return result;
 }

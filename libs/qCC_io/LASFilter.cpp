@@ -305,7 +305,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 	}
 	catch (...)
 	{
-		return CC_FERR_WRITING;
+		ccLog::Warning("[LAS] Liblas has thrown an unknown exception!");
+		return CC_FERR_THIRD_PARTY_LIB;
 	}
 
 	//progress dialog
@@ -320,6 +321,8 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 	//liblas::Point point(boost::shared_ptr<liblas::Header>(new liblas::Header(writer->GetHeader())));
 	liblas::Point point(&writer->GetHeader());
 	liblas::Classification classif = point.GetClassification();
+
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
 	for (unsigned i=0; i<numberOfPoints; i++)
 	{
@@ -409,7 +412,16 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 		//set classification (it's mandatory anyway ;)
 		point.SetClassification(classif);
 
-		writer->WritePoint(point);
+		try
+		{
+			writer->WritePoint(point);
+		}
+		catch (...)
+		{
+			ccLog::Warning("[LAS] Liblas has thrown an unknown exception!");
+			result = CC_FERR_THIRD_PARTY_LIB;
+			break;
+		}
 
 		if (!nprogress.oneStep())
 			break;
@@ -418,7 +430,7 @@ CC_FILE_ERROR LASFilter::saveToFile(ccHObject* entity, QString filename)
 	delete writer;
 	ofs.close();
 
-	return CC_FERR_NO_ERROR;
+	return result;
 }
 
 QSharedPointer<LASOpenDlg> s_lasOpenDlg(0);
@@ -615,10 +627,22 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	unsigned int fileChunkPos = 0;
 	unsigned int fileChunkSize = 0;
 
+	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
+
 	while (true)
 	{
 		//if we reach the end of the file, or the max. cloud size limit (in which case we cerate a new chunk)
-		bool newPointAvailable = (nprogress.oneStep() && reader.ReadNextPoint());
+		bool newPointAvailable = false;
+		try
+		{
+			newPointAvailable = (nprogress.oneStep() && reader.ReadNextPoint());
+		}
+		catch (...)
+		{
+			ccLog::Warning("[LAS] Liblas has thrown an unknown exception!");
+			result = CC_FERR_THIRD_PARTY_LIB;
+			break;
+		}
 
 		if (!newPointAvailable || pointsRead == fileChunkPos+fileChunkSize)
 		{
@@ -1065,7 +1089,7 @@ CC_FILE_ERROR LASFilter::loadFile(QString filename, ccHObject& container, LoadPa
 
 	ifs.close();
 
-	return CC_FERR_NO_ERROR;
+	return result;
 }
 
 #endif

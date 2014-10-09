@@ -665,124 +665,137 @@ CC_FILE_ERROR E57Filter::saveToFile(ccHObject* entity, QString filename)
 	if (!imf.isOpen())
 		return CC_FERR_WRITING;
 
-	//get root
-	e57::StructureNode root = imf.root();
-
-	//header info
-
-	/// We are using the E57 v1.0 data format standard fieldnames.
-	/// The standard fieldnames are used without an extension prefix (in the default namespace).
-	/// We explicitly register it for completeness (the reference implementaion would do it for us, if we didn't).
-	imf.extensionsAdd("", E57_V1_0_URI);
-
-	// Set per-file properties.
-	/// Path names: "/formatName", "/majorVersion", "/minorVersion", "/coordinateMetadata"
-	root.set("formatName", e57::StringNode(imf, "ASTM E57 3D Imaging Data File"));
-	root.set("guid", e57::StringNode(imf, GetNewGuid().toStdString()));
-
-	// Get ASTM version number supported by library, so can write it into file
-	int astmMajor;
-	int astmMinor;
-	e57::ustring libraryId;
-	e57::E57Utilities().getVersions(astmMajor, astmMinor, libraryId);
-
-	root.set("versionMajor", e57::IntegerNode(imf,astmMajor));
-	root.set("versionMinor", e57::IntegerNode(imf,astmMinor));
-	root.set("e57LibraryVersion", e57::StringNode(imf,libraryId));
-
-	// Save a dummy string for coordinate system.
-	/// Really should be a valid WKT string identifying the coordinate reference system (CRS).
-	root.set("coordinateMetadata", e57::StringNode(imf, ""));
-
-	// Create creationDateTime structure
-	/// Path name: "/creationDateTime
-	e57::StructureNode creationDateTime = e57::StructureNode(imf);
-	creationDateTime.set("dateTimeValue", e57::FloatNode(imf, 0.0));
-	creationDateTime.set("isAtomicClockReferenced", e57::IntegerNode(imf,0));
-	root.set("creationDateTime", creationDateTime);
-
-	//3D data
-	e57::VectorNode data3D(imf,true);
-	root.set("data3D", data3D);
-
-	//Images
-	e57::VectorNode images2D(imf,true);
-	root.set("images2D", images2D);
-
 	CC_FILE_ERROR result = CC_FERR_NO_ERROR;
 
-	//we store (temporarily) the saved scans associated with
-	//their unique GUID in a map (to retrieve them later if
-	//necessary - for example to associate them with images)
-	QMap<ccHObject*,QString> scansGUID;
-	s_absoluteScanIndex = 0;
-	s_cancelRequestedByUser = false;
-	for (unsigned i=0;i<scans.size();++i)
+	try
 	{
-		ccPointCloud* cloud = scans[i];
-		QString scanGUID = GetNewGuid();
+		//get root
+		e57::StructureNode root = imf.root();
 
-		//create corresponding node
-		e57::StructureNode scanNode = e57::StructureNode(imf);
-		if (SaveScan(cloud, scanNode, imf, data3D, scanGUID))
-		{
-			++s_absoluteScanIndex;
-			scansGUID.insert(cloud,scanGUID);
-		}
-		else
-		{
-			result = CC_FERR_WRITING;
-			break;
-		}
+		//header info
 
-		if (s_cancelRequestedByUser)
-		{
-			result = CC_FERR_CANCELED_BY_USER;
-			break;
-		}
-	}
+		/// We are using the E57 v1.0 data format standard fieldnames.
+		/// The standard fieldnames are used without an extension prefix (in the default namespace).
+		/// We explicitly register it for completeness (the reference implementaion would do it for us, if we didn't).
+		imf.extensionsAdd("", E57_V1_0_URI);
 
-	if (result == CC_FERR_NO_ERROR)
-	{
-		//Save images
-		s_absoluteImageIndex = 0;
-		size_t scanCount = scans.size();
-		for (size_t i=0;i<scanCount;++i)
+		// Set per-file properties.
+		/// Path names: "/formatName", "/majorVersion", "/minorVersion", "/coordinateMetadata"
+		root.set("formatName", e57::StringNode(imf, "ASTM E57 3D Imaging Data File"));
+		root.set("guid", e57::StringNode(imf, GetNewGuid().toStdString()));
+
+		// Get ASTM version number supported by library, so can write it into file
+		int astmMajor;
+		int astmMinor;
+		e57::ustring libraryId;
+		e57::E57Utilities().getVersions(astmMajor, astmMinor, libraryId);
+
+		root.set("versionMajor", e57::IntegerNode(imf,astmMajor));
+		root.set("versionMinor", e57::IntegerNode(imf,astmMinor));
+		root.set("e57LibraryVersion", e57::StringNode(imf,libraryId));
+
+		// Save a dummy string for coordinate system.
+		/// Really should be a valid WKT string identifying the coordinate reference system (CRS).
+		root.set("coordinateMetadata", e57::StringNode(imf, ""));
+
+		// Create creationDateTime structure
+		/// Path name: "/creationDateTime
+		e57::StructureNode creationDateTime = e57::StructureNode(imf);
+		creationDateTime.set("dateTimeValue", e57::FloatNode(imf, 0.0));
+		creationDateTime.set("isAtomicClockReferenced", e57::IntegerNode(imf,0));
+		root.set("creationDateTime", creationDateTime);
+
+		//3D data
+		e57::VectorNode data3D(imf,true);
+		root.set("data3D", data3D);
+
+		//Images
+		e57::VectorNode images2D(imf,true);
+		root.set("images2D", images2D);
+
+		//we store (temporarily) the saved scans associated with
+		//their unique GUID in a map (to retrieve them later if
+		//necessary - for example to associate them with images)
+		QMap<ccHObject*,QString> scansGUID;
+		s_absoluteScanIndex = 0;
+		s_cancelRequestedByUser = false;
+		for (unsigned i=0;i<scans.size();++i)
 		{
 			ccPointCloud* cloud = scans[i];
-			ccHObject::Container images;
-			unsigned imageCount = cloud->filterChildren(images,false,CC_TYPES::IMAGE);
+			QString scanGUID = GetNewGuid();
 
-			if (imageCount!=0)
+			//create corresponding node
+			e57::StructureNode scanNode = e57::StructureNode(imf);
+			if (SaveScan(cloud, scanNode, imf, data3D, scanGUID))
 			{
-				//progress bar
-				ccProgressDialog pdlg(true);
-				CCLib::NormalizedProgress nprogress(&pdlg,imageCount);
-				pdlg.setMethodTitle("Write E57 file");
-				pdlg.setInfo(qPrintable(QString("Cloud #%1 - Images: %2").arg(i).arg(imageCount)));
-				pdlg.start();
-				QApplication::processEvents();
+				++s_absoluteScanIndex;
+				scansGUID.insert(cloud,scanGUID);
+			}
+			else
+			{
+				result = CC_FERR_WRITING;
+				break;
+			}
 
-				for (unsigned j=0;j<imageCount;++j)
+			if (s_cancelRequestedByUser)
+			{
+				result = CC_FERR_CANCELED_BY_USER;
+				break;
+			}
+		}
+
+		if (result == CC_FERR_NO_ERROR)
+		{
+			//Save images
+			s_absoluteImageIndex = 0;
+			size_t scanCount = scans.size();
+			for (size_t i=0;i<scanCount;++i)
+			{
+				ccPointCloud* cloud = scans[i];
+				ccHObject::Container images;
+				unsigned imageCount = cloud->filterChildren(images,false,CC_TYPES::IMAGE);
+
+				if (imageCount!=0)
 				{
-					assert(images[j]->isKindOf(CC_TYPES::IMAGE));
-					assert(scansGUID.contains(cloud));
-					QString scanGUID = scansGUID.value(cloud);
-					SaveImage(static_cast<ccImage*>(images[j]),scanGUID,imf,images2D);
-					++s_absoluteImageIndex;
-					if (!nprogress.oneStep())
+					//progress bar
+					ccProgressDialog pdlg(true);
+					CCLib::NormalizedProgress nprogress(&pdlg,imageCount);
+					pdlg.setMethodTitle("Write E57 file");
+					pdlg.setInfo(qPrintable(QString("Cloud #%1 - Images: %2").arg(i).arg(imageCount)));
+					pdlg.start();
+					QApplication::processEvents();
+
+					for (unsigned j=0;j<imageCount;++j)
 					{
-						s_cancelRequestedByUser = true;
-						i = scanCount; //double break!
-						result = CC_FERR_CANCELED_BY_USER;
-						break;
+						assert(images[j]->isKindOf(CC_TYPES::IMAGE));
+						assert(scansGUID.contains(cloud));
+						QString scanGUID = scansGUID.value(cloud);
+						SaveImage(static_cast<ccImage*>(images[j]),scanGUID,imf,images2D);
+						++s_absoluteImageIndex;
+						if (!nprogress.oneStep())
+						{
+							s_cancelRequestedByUser = true;
+							i = scanCount; //double break!
+							result = CC_FERR_CANCELED_BY_USER;
+							break;
+						}
 					}
 				}
 			}
 		}
-	}
 
-	imf.close();
+		imf.close();
+	}
+	catch(e57::E57Exception e)
+	{
+		ccLog::Warning(QString("[E57] LibE57 has thrown an exception: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
+		result = CC_FERR_THIRD_PARTY_LIB;
+	}
+	catch(...)
+	{
+		ccLog::Warning("[E57] LibE57 has thrown an unknown exception!");
+		result = CC_FERR_THIRD_PARTY_LIB;
+	}
 
 	return result;
 }
@@ -2056,189 +2069,202 @@ CC_FILE_ERROR E57Filter::loadFile(QString filename, ccHObject& container, LoadPa
 	if (!imf.isOpen())
 		return CC_FERR_READING;
 
-	//for normals handling
-	imf.extensionsAdd("nor","http://www.libe57.org/E57_NOR_surface_normals.txt");
-
-	//get root
-	e57::StructureNode root = imf.root();
-
-	//header info
-	e57::StructureNode rootStruct = e57::StructureNode(root);
-	//format name
+	try
 	{
-		if (!ChildNodeToConsole(rootStruct,"formatName"))
-			return CC_FERR_MALFORMED_FILE;
-	}
-	//GUID
-	{
-		if (!ChildNodeToConsole(rootStruct,"guid"))
-			return CC_FERR_MALFORMED_FILE;
-	}
-	//versionMajor
-	{
-		if (!ChildNodeToConsole(rootStruct,"versionMajor"))
-			return CC_FERR_MALFORMED_FILE;
-	}
-	//versionMinor
-	{
-		if (!ChildNodeToConsole(rootStruct,"versionMinor"))
-			return CC_FERR_MALFORMED_FILE;
-	}
+		//for normals handling
+		imf.extensionsAdd("nor","http://www.libe57.org/E57_NOR_surface_normals.txt");
 
-	//unroll structure in tree (it's a quick to check structure + informative for user)
-	ccHObject* fileStructureTree = new ccHObject("File structure");
-	if (!NodeStructureToTree(fileStructureTree,rootStruct))
-			return CC_FERR_MALFORMED_FILE;
-	container.addChild(fileStructureTree);
+		//get root
+		e57::StructureNode root = imf.root();
 
-	//we store (temporarily) the loaded scans associated with
-	//their unique GUID in a map (to retrieve them later if
-	//necessary - for example to associate them with images)
-	QMap<QString,ccHObject*> scans;
-
-	//3D data?
-	if (root.isDefined("/data3D"))
-	{
-		e57::Node n = root.get("/data3D"); //E57 standard: "data3D is a vector for storing an arbitrary number of 3D data sets "
-		if (n.type() != e57::E57_VECTOR)
-			return CC_FERR_MALFORMED_FILE;
-		e57::VectorNode data3D(n);
-
-		unsigned scanCount = (unsigned)data3D.childCount();
-
-		//global progress bar
-		ccProgressDialog pdlg(true);
-		CCLib::NormalizedProgress* nprogress = 0;
-		if (scanCount > 10)
+		//header info
+		e57::StructureNode rootStruct = e57::StructureNode(root);
+		//format name
 		{
-			//Too many scans, will display a global progress bar
-			nprogress = new CCLib::NormalizedProgress(&pdlg,scanCount);
-			pdlg.setMethodTitle("Read E57 file");
-			pdlg.setInfo(qPrintable(QString("Scans: %1").arg(scanCount)));
-			pdlg.start();
-			QApplication::processEvents();
+			if (!ChildNodeToConsole(rootStruct,"formatName"))
+				return CC_FERR_MALFORMED_FILE;
 		}
-		//static states
-		s_absoluteScanIndex = 0;
-		s_cancelRequestedByUser = false;
-		s_minIntensity = s_maxIntensity = 0;
-		for (unsigned i=0; i<scanCount; ++i)
+		//GUID
 		{
-			e57::Node scanNode = data3D.get(i);
-			QString scanGUID;
-			ccHObject* scan = LoadScan(scanNode,scanGUID,nprogress==0);
-			if (scan)
-			{
-				if (scan->getName().isEmpty())
-				{
-					QString name("Scan");
-					e57::ustring nodeName = scanNode.elementName();
-					if (nodeName.c_str() != 0 && nodeName.c_str()[0]!=0)
-						name += QString(nodeName.c_str());
-					else
-						name += QString::number(i);
-					scan->setName(name);
-				}
-				container.addChild(scan);
-
-				//we also add the scan to the GUID/object map
-				if (!scanGUID.isEmpty())
-					scans.insert(scanGUID,scan);
-			}
-			if ((nprogress && !nprogress->oneStep()) || s_cancelRequestedByUser)
-				break;
-			++s_absoluteScanIndex;
+			if (!ChildNodeToConsole(rootStruct,"guid"))
+				return CC_FERR_MALFORMED_FILE;
+		}
+		//versionMajor
+		{
+			if (!ChildNodeToConsole(rootStruct,"versionMajor"))
+				return CC_FERR_MALFORMED_FILE;
+		}
+		//versionMinor
+		{
+			if (!ChildNodeToConsole(rootStruct,"versionMinor"))
+				return CC_FERR_MALFORMED_FILE;
 		}
 
-		if (nprogress)
+		//unroll structure in tree (it's a quick to check structure + informative for user)
+		ccHObject* fileStructureTree = new ccHObject("File structure");
+		if (!NodeStructureToTree(fileStructureTree,rootStruct))
+				return CC_FERR_MALFORMED_FILE;
+		container.addChild(fileStructureTree);
+
+		//we store (temporarily) the loaded scans associated with
+		//their unique GUID in a map (to retrieve them later if
+		//necessary - for example to associate them with images)
+		QMap<QString,ccHObject*> scans;
+
+		//3D data?
+		if (root.isDefined("/data3D"))
 		{
-			pdlg.stop();
-			QApplication::processEvents();
-			delete nprogress;
-			nprogress = 0;
-		}
+			e57::Node n = root.get("/data3D"); //E57 standard: "data3D is a vector for storing an arbitrary number of 3D data sets "
+			if (n.type() != e57::E57_VECTOR)
+				return CC_FERR_MALFORMED_FILE;
+			e57::VectorNode data3D(n);
 
-		//set global max intensity (saturation) for proper display
-		for (unsigned i=0; i<container.getChildrenNumber(); ++i)
-		{
-			if (container.getChild(i)->isA(CC_TYPES::POINT_CLOUD))
-			{
-				ccPointCloud* pc = static_cast<ccPointCloud*>(container.getChild(i));
-				ccScalarField* sf = pc->getCurrentDisplayedScalarField();
-				if (sf)
-				{
-					sf->setSaturationStart(s_minIntensity);
-					sf->setSaturationStop(s_maxIntensity);
-				}
-			}
-		}
-	}
+			unsigned scanCount = (unsigned)data3D.childCount();
 
-	parameters = s_loadParameters;
-
-	//Image data?
-	if (!s_cancelRequestedByUser && root.isDefined("/images2D"))
-	{
-		e57::Node n = root.get("/images2D"); //E57 standard: "images2D is a vector for storing two dimensional images"
-		if (n.type() != e57::E57_VECTOR)
-			return CC_FERR_MALFORMED_FILE;
-		e57::VectorNode images2D(n);
-
-		unsigned imageCount = static_cast<unsigned>(images2D.childCount());
-		if (imageCount)
-		{
-			//progress bar
+			//global progress bar
 			ccProgressDialog pdlg(true);
-			CCLib::NormalizedProgress nprogress(&pdlg,imageCount);
-			pdlg.setMethodTitle("Read E57 file");
-			pdlg.setInfo(qPrintable(QString("Images: %1").arg(imageCount)));
-			pdlg.start();
-			QApplication::processEvents();
-
-			for (unsigned i=0; i<imageCount; ++i)
+			CCLib::NormalizedProgress* nprogress = 0;
+			if (scanCount > 10)
 			{
-				e57::Node imageNode = images2D.get(i);
-				QString associatedData3DGuid;
-				ccHObject* image = LoadImage(imageNode,associatedData3DGuid);
-				if (image)
+				//Too many scans, will display a global progress bar
+				nprogress = new CCLib::NormalizedProgress(&pdlg,scanCount);
+				pdlg.setMethodTitle("Read E57 file");
+				pdlg.setInfo(qPrintable(QString("Scans: %1").arg(scanCount)));
+				pdlg.start();
+				QApplication::processEvents();
+			}
+			//static states
+			s_absoluteScanIndex = 0;
+			s_cancelRequestedByUser = false;
+			s_minIntensity = s_maxIntensity = 0;
+			for (unsigned i=0; i<scanCount; ++i)
+			{
+				e57::Node scanNode = data3D.get(i);
+				QString scanGUID;
+				ccHObject* scan = LoadScan(scanNode,scanGUID,nprogress==0);
+				if (scan)
 				{
-					//no name?
-					if (image->getName().isEmpty())
+					if (scan->getName().isEmpty())
 					{
-						QString name("Image");
-						e57::ustring nodeName = imageNode.elementName();
+						QString name("Scan");
+						e57::ustring nodeName = scanNode.elementName();
 						if (nodeName.c_str() != 0 && nodeName.c_str()[0]!=0)
 							name += QString(nodeName.c_str());
 						else
 							name += QString::number(i);
-						image->setName(name);
+						scan->setName(name);
 					}
-					image->setEnabled(false); //not displayed by default
+					container.addChild(scan);
 
-					//existing link to a loaded scan?
-					ccHObject* parentScan = 0;
-					if (!associatedData3DGuid.isEmpty())
-					{
-						if (scans.contains(associatedData3DGuid))
-							parentScan = scans.value(associatedData3DGuid);
-					}
-
-					if (parentScan)
-						parentScan->addChild(image);
-					else
-						container.addChild(image);
+					//we also add the scan to the GUID/object map
+					if (!scanGUID.isEmpty())
+						scans.insert(scanGUID,scan);
 				}
-
-				if (!nprogress.oneStep())
-				{
-					s_cancelRequestedByUser = true;
+				if ((nprogress && !nprogress->oneStep()) || s_cancelRequestedByUser)
 					break;
+				++s_absoluteScanIndex;
+			}
+
+			if (nprogress)
+			{
+				pdlg.stop();
+				QApplication::processEvents();
+				delete nprogress;
+				nprogress = 0;
+			}
+
+			//set global max intensity (saturation) for proper display
+			for (unsigned i=0; i<container.getChildrenNumber(); ++i)
+			{
+				if (container.getChild(i)->isA(CC_TYPES::POINT_CLOUD))
+				{
+					ccPointCloud* pc = static_cast<ccPointCloud*>(container.getChild(i));
+					ccScalarField* sf = pc->getCurrentDisplayedScalarField();
+					if (sf)
+					{
+						sf->setSaturationStart(s_minIntensity);
+						sf->setSaturationStop(s_maxIntensity);
+					}
 				}
 			}
 		}
-	}
 
-	imf.close();
+		parameters = s_loadParameters;
+
+		//Image data?
+		if (!s_cancelRequestedByUser && root.isDefined("/images2D"))
+		{
+			e57::Node n = root.get("/images2D"); //E57 standard: "images2D is a vector for storing two dimensional images"
+			if (n.type() != e57::E57_VECTOR)
+				return CC_FERR_MALFORMED_FILE;
+			e57::VectorNode images2D(n);
+
+			unsigned imageCount = static_cast<unsigned>(images2D.childCount());
+			if (imageCount)
+			{
+				//progress bar
+				ccProgressDialog pdlg(true);
+				CCLib::NormalizedProgress nprogress(&pdlg,imageCount);
+				pdlg.setMethodTitle("Read E57 file");
+				pdlg.setInfo(qPrintable(QString("Images: %1").arg(imageCount)));
+				pdlg.start();
+				QApplication::processEvents();
+
+				for (unsigned i=0; i<imageCount; ++i)
+				{
+					e57::Node imageNode = images2D.get(i);
+					QString associatedData3DGuid;
+					ccHObject* image = LoadImage(imageNode,associatedData3DGuid);
+					if (image)
+					{
+						//no name?
+						if (image->getName().isEmpty())
+						{
+							QString name("Image");
+							e57::ustring nodeName = imageNode.elementName();
+							if (nodeName.c_str() != 0 && nodeName.c_str()[0]!=0)
+								name += QString(nodeName.c_str());
+							else
+								name += QString::number(i);
+							image->setName(name);
+						}
+						image->setEnabled(false); //not displayed by default
+
+						//existing link to a loaded scan?
+						ccHObject* parentScan = 0;
+						if (!associatedData3DGuid.isEmpty())
+						{
+							if (scans.contains(associatedData3DGuid))
+								parentScan = scans.value(associatedData3DGuid);
+						}
+
+						if (parentScan)
+							parentScan->addChild(image);
+						else
+							container.addChild(image);
+					}
+
+					if (!nprogress.oneStep())
+					{
+						s_cancelRequestedByUser = true;
+						break;
+					}
+				}
+			}
+		}
+
+		imf.close();
+	}
+	catch(e57::E57Exception e)
+	{
+		ccLog::Warning(QString("[E57] LibE57 has thrown an exception: %1").arg(e57::E57Utilities().errorCodeToString(e.errorCode()).c_str()));
+		return CC_FERR_THIRD_PARTY_LIB;
+	}
+	catch(...)
+	{
+		ccLog::Warning("[E57] LibE57 has thrown an unknown exception!");
+		return CC_FERR_THIRD_PARTY_LIB;
+	}
 
 	return s_cancelRequestedByUser ? CC_FERR_CANCELED_BY_USER : CC_FERR_NO_ERROR;
 }

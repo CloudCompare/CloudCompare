@@ -29,6 +29,7 @@
 #include <QApplication>
 #include <QColor>
 #include <QTime>
+#include <QThread>
 
 //system
 #include <assert.h>
@@ -193,6 +194,7 @@ void ccConsole::displayMessage(const QString& message, MessageLevel level)
 	if (m_parentWidget && (level==LOG_ERROR || level==LOG_ERROR_DEBUG))
 	{
 		//we display error message in a popup dialog
-		QMessageBox::warning(m_parentWidget, "Error", message);
+		if( qApp && QThread::currentThread() == qApp->thread() )
+			QMessageBox::warning(m_parentWidget, "Error", message);
 	}
 }

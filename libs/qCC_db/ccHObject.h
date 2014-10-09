@@ -136,7 +136,7 @@ public:
 	/** \param uniqueID child unique ID
 		\return child (or NULL if not found)
 	**/
-	ccHObject* find(int uniqueID);
+	ccHObject* find(unsigned uniqueID);
 
 	//! standard ccHObject container (for children, etc.)
 	typedef std::vector<ccHObject*> Container;
@@ -241,6 +241,9 @@ public:
 	ccHObject_recursive_call0(toggleSF,toggleSF_recursive);
 	ccHObject_recursive_call0(toggleShowName,toggleShowName_recursive);
 	ccHObject_recursive_call0(toggleMaterials,toggleMaterials_recursive);
+
+	//! Returns the max 'unique ID' of this entity and its siblings
+	unsigned findMaxUniqueID_recursive() const;
 
 	//! Applies the active OpenGL transformation to the entity (recursive)
 	/** The input ccGLMatrix should be left to 0, unless you want to apply

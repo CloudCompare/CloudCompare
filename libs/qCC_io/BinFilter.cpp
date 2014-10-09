@@ -360,6 +360,80 @@ CC_FILE_ERROR BinFilter::loadFile(QString filename, ccHObject& container, LoadPa
 	}
 }
 
+inline bool Match(ccHObject* object, unsigned uniqueID, CC_CLASS_ENUM expectedType)
+{
+	return object && object->getUniqueID() == uniqueID && object->isKindOf(expectedType);
+}
+
+ccHObject* FindRobust(ccHObject* root, ccHObject* source, unsigned uniqueID, CC_CLASS_ENUM expectedType)
+{
+	if (source)
+	{
+		//1st test the parent
+		ccHObject* parent = source->getParent();
+		if (Match(parent,uniqueID,expectedType))
+			return parent;
+
+		//now test the children
+		for (unsigned i=0; i<source->getChildrenNumber(); ++i)
+		{
+			ccHObject* child = source->getChild(i);
+			if (Match(child,uniqueID,expectedType))
+				return child;
+		}
+	}
+
+	//now test the whole DB
+	ccHObject* foundObject = 0;
+	{
+		ccHObject::Container hiddenEntities;
+		while (true)
+		{
+			ccHObject* object = root->find(uniqueID);
+			if (object)
+			{
+				//if we found an object, we must also test its type!
+				if (object->isKindOf(expectedType))
+				{
+					foundObject = object;
+					break;
+				}
+
+				/********* BIG UGLY RECOVERY TRICK *********/
+
+				//if the type doesn't match, we may be in front of a degenerate case :(
+				//we'll look if there's other entities with the same ID!!!
+				try
+				{
+					hiddenEntities.push_back(object);
+					//we temporarily 'hide' this entity by removing its unique ID
+					object->setUniqueID(0);
+				}
+				catch(std::bad_alloc)
+				{
+					//not enough memory?! Stop this process (anyway it's already a degenerate case ;)
+					break;
+				}
+
+				/********* BIG UGLY RECOVERY TRICK *********/
+			}
+			else
+			{
+				break;
+			}
+		}
+		//restore original IDs (if necessary)
+		while (!hiddenEntities.empty())
+		{
+			hiddenEntities.back()->setUniqueID(uniqueID);
+			hiddenEntities.pop_back();
+		}
+	}
+
+	//no entity found!
+	return foundObject;
+}
+
 CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 {
 	assert(in.isOpen());
@@ -400,12 +474,11 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		QString pluginId = root->getMetaData("plugin_name").toString();
 
 		// try to get a new object from external factories
-		ccHObject * new_child = ccHObject::New(pluginId, classId);
+		ccHObject* new_child = ccHObject::New(pluginId, classId);
 		if (new_child) // found a plugin that can deserialize it
 			root = new_child;
 		else
 			return CC_FERR_FILE_WAS_WRITTEN_BY_UNKNOWN_PLUGIN;
-
 	}
 
 	if (!root->fromFile(in,static_cast<short>(binVersion),flags))
@@ -428,6 +501,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		toCheck.pop_back();
 
 		assert(currentObject);
+
 		//we check objects that have links to other entities (meshes, polylines, etc.)
 		if (currentObject->isKindOf(CC_TYPES::MESH))
 		{
@@ -435,7 +509,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			if (currentObject->isA(CC_TYPES::MESH_GROUP))
 			{
 				//TODO
-				ccLog::Warning(QString("Mesh groups are deprecated! Entity %1 should be ignored...").arg(currentObject->getName()));
+				ccLog::Warning(QString("[BIN] Mesh groups are deprecated! Entity %1 should be ignored...").arg(currentObject->getName()));
 			}
 			else if (currentObject->isA(CC_TYPES::SUB_MESH))
 			{
@@ -446,8 +520,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t meshID = (intptr_t)subMesh->getAssociatedMesh();
 				if (meshID > 0)
 				{
-					ccHObject* mesh = root->find(static_cast<int>(meshID));
-					if (mesh && mesh->isA(CC_TYPES::MESH))
+					ccHObject* mesh = FindRobust(root,subMesh,static_cast<unsigned>(meshID),CC_TYPES::MESH);
+					if (mesh)
 					{
 						subMesh->setAssociatedMesh(ccHObjectCaster::ToMesh(mesh),false); //'false' because previous mesh is not null (= real mesh ID)!!!
 					}
@@ -464,7 +538,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 							subMesh->setAssociatedMesh(0,false); //'false' because previous mesh is not null (= real mesh ID)!!!
 							//DGM: can't delete it, too dangerous (bad pointers ;)
 							//delete subMesh;
-							ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find associated mesh (ID=%1) for sub-mesh '%2' in the file!").arg(meshID).arg(subMesh->getName()));
+							ccLog::Warning(QString("[BIN] Couldn't find associated mesh (ID=%1) for sub-mesh '%2' in the file!").arg(meshID).arg(subMesh->getName()));
 							return CC_FERR_MALFORMED_FILE;
 						}
 					}
@@ -479,8 +553,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t cloudID = (intptr_t)mesh->getAssociatedCloud();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = root->find(static_cast<int>(cloudID));
-					if (cloud && cloud->isKindOf(CC_TYPES::POINT_CLOUD))
+					ccHObject* cloud = FindRobust(root,mesh,static_cast<unsigned>(cloudID),CC_TYPES::POINT_CLOUD);
+					if (cloud)
 					{
 						mesh->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
 					}
@@ -492,121 +566,134 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 							mesh->setMaterialSet(0,false);
 						//DGM: can't delete it, too dangerous (bad pointers ;)
 						//delete mesh;
-						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find vertices (ID=%1) for mesh '%2' in the file!").arg(cloudID).arg(mesh->getName()));
-						return CC_FERR_MALFORMED_FILE;
-					}
-				}
-
-				//materials
-				ccHObject* materials = 0;
-				intptr_t matSetID = (intptr_t)mesh->getMaterialSet();
-				if (matSetID > 0)
-				{
-					materials = root->find(static_cast<int>(matSetID));
-					if (materials && materials->isA(CC_TYPES::MATERIAL_SET))
-						mesh->setMaterialSet(static_cast<ccMaterialSet*>(materials),false);
-					else
-					{
-						//we have a (less severe) problem here ;)
-						mesh->setMaterialSet(0,false);
-						mesh->showMaterials(false);
-						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared materials set (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
-						result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-
-						//add it to the 'orphans' set
-						if (materials)
-							orphans->addChild(materials);
-						materials = 0;
-					}
-				}
-				//per-triangle normals
-				ccHObject* triNormsTable = 0;
-				intptr_t triNormsTableID = (intptr_t)mesh->getTriNormsTable();
-				if (triNormsTableID > 0)
-				{
-					triNormsTable = root->find(static_cast<int>(triNormsTableID));
-					if (triNormsTable && triNormsTable->isA(CC_TYPES::NORMAL_INDEXES_ARRAY))
-					{
-						mesh->setTriNormsTable(static_cast<NormsIndexesTableType*>(triNormsTable),false);
-					}
-					else
-					{
-						//we have a (less severe) problem here ;)
-						mesh->setTriNormsTable(0,false);
-						mesh->showTriNorms(false);
-						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared normals (ID=%1) for mesh '%2' in the file!").arg(triNormsTableID).arg(mesh->getName()));
-						result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-
-						//add it to the 'orphans' set
-						if (triNormsTable)
-							orphans->addChild(triNormsTable);
-						triNormsTable = 0;
-					}
-				}
-				//per-triangle texture coordinates
-				ccHObject* texCoordsTable = 0;
-				intptr_t texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable();
-				if (texCoordArrayID > 0)
-				{
-					texCoordsTable = root->find(static_cast<int>(texCoordArrayID));
-					if (texCoordsTable && texCoordsTable->isA(CC_TYPES::TEX_COORDS_ARRAY))
-						mesh->setTexCoordinatesTable(static_cast<TextureCoordsContainer*>(texCoordsTable),false);
-					else
-					{
-						//we have a (less severe) problem here ;)
-						mesh->setTexCoordinatesTable(0,false);
-						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find shared texture coordinates (ID=%1) for mesh '%2' in the file!").arg(texCoordArrayID).arg(mesh->getName()));
-						result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
-
-						//add it to the 'orphans' set
-						if (texCoordsTable)
-							orphans->addChild(texCoordsTable);
-						texCoordsTable = 0;
-					}
-				}
-
-				if (checkErrors)
-				{
-					ccGenericPointCloud* pc = mesh->getAssociatedCloud();
-					unsigned faceCount = mesh->size();
-					unsigned vertCount = pc->size();
-					for (unsigned i=0; i<faceCount; ++i)
-					{
-						const CCLib::TriangleSummitsIndexes* tri = mesh->getTriangleIndexes(i);
-						if (	tri->i1 >= vertCount
-							||	tri->i2 >= vertCount
-							||	tri->i3 >= vertCount )
+						if (mesh->getParent())
 						{
-							ccLog::Warning(QString("[BinFilter::loadFileV2] File is corrupted: missing vertices for mesh '%1'!").arg(mesh->getName()));
+							mesh->getParent()->removeDependencyWith(mesh);
+							mesh->getParent()->removeChild(mesh);
+						}
+						ccLog::Warning(QString("[BIN] Couldn't find vertices (ID=%1) for mesh '%2' in the file!").arg(cloudID).arg(mesh->getName()));
+						mesh = 0;
+						//return CC_FERR_MALFORMED_FILE;
+					}
+				}
 
-							//add cloud to the 'orphans' set
-							pc->setName(mesh->getName() + QString(".") + pc->getName());
-							orphans->addChild(pc);
-							if (texCoordsTable)
-							{
-								texCoordsTable->setName(mesh->getName() + QString(".") + texCoordsTable->getName());
-								orphans->addChild(texCoordsTable);
-							}
-							if (triNormsTable)
-							{
-								triNormsTable->setName(mesh->getName() + QString(".") + triNormsTable->getName());
-								orphans->addChild(triNormsTable);
-							}
-							if (materials)
-							{
-								materials->setName(mesh->getName() + QString(".") + materials->getName());
-								orphans->addChild(materials);
-							}
-
-							//delete corrupted mesh
+				if (mesh)
+				{
+					//materials
+					ccHObject* materials = 0;
+					intptr_t matSetID = (intptr_t)mesh->getMaterialSet();
+					if (matSetID > 0)
+					{
+						materials = FindRobust(root,mesh,static_cast<unsigned>(matSetID),CC_TYPES::MATERIAL_SET);
+						if (materials)
+						{
+							mesh->setMaterialSet(static_cast<ccMaterialSet*>(materials),false);
+						}
+						else
+						{
+							//we have a (less severe) problem here ;)
 							mesh->setMaterialSet(0,false);
-							mesh->setTriNormsTable(0,false);
-							mesh->setTexCoordinatesTable(0,false);
-							if (mesh->getParent())
-								mesh->getParent()->removeChild(mesh);
-							mesh = 0;
+							mesh->showMaterials(false);
+							ccLog::Warning(QString("[BIN] Couldn't find shared materials set (ID=%1) for mesh '%2' in the file!").arg(matSetID).arg(mesh->getName()));
+							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
 
-							break;
+							//add it to the 'orphans' set
+							if (materials)
+								orphans->addChild(materials);
+							materials = 0;
+						}
+					}
+					//per-triangle normals
+					ccHObject* triNormsTable = 0;
+					intptr_t triNormsTableID = (intptr_t)mesh->getTriNormsTable();
+					if (triNormsTableID > 0)
+					{
+						triNormsTable = FindRobust(root,mesh,static_cast<unsigned>(triNormsTableID),CC_TYPES::NORMAL_INDEXES_ARRAY);
+						if (triNormsTable)
+						{
+							mesh->setTriNormsTable(static_cast<NormsIndexesTableType*>(triNormsTable),false);
+						}
+						else
+						{
+							//we have a (less severe) problem here ;)
+							mesh->setTriNormsTable(0,false);
+							mesh->showTriNorms(false);
+							ccLog::Warning(QString("[BIN] Couldn't find shared normals (ID=%1) for mesh '%2' in the file!").arg(triNormsTableID).arg(mesh->getName()));
+							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
+
+							//add it to the 'orphans' set
+							if (triNormsTable)
+								orphans->addChild(triNormsTable);
+							triNormsTable = 0;
+						}
+					}
+					//per-triangle texture coordinates
+					ccHObject* texCoordsTable = 0;
+					intptr_t texCoordArrayID = (intptr_t)mesh->getTexCoordinatesTable();
+					if (texCoordArrayID > 0)
+					{
+						texCoordsTable = FindRobust(root,mesh,static_cast<unsigned>(texCoordArrayID),CC_TYPES::TEX_COORDS_ARRAY);
+						if (texCoordsTable)
+						{
+							mesh->setTexCoordinatesTable(static_cast<TextureCoordsContainer*>(texCoordsTable),false);
+						}
+						else
+						{
+							//we have a (less severe) problem here ;)
+							mesh->setTexCoordinatesTable(0,false);
+							ccLog::Warning(QString("[BIN] Couldn't find shared texture coordinates (ID=%1) for mesh '%2' in the file!").arg(texCoordArrayID).arg(mesh->getName()));
+							result = CC_FERR_BROKEN_DEPENDENCY_ERROR;
+
+							//add it to the 'orphans' set
+							if (texCoordsTable)
+								orphans->addChild(texCoordsTable);
+							texCoordsTable = 0;
+						}
+					}
+
+					if (checkErrors)
+					{
+						ccGenericPointCloud* pc = mesh->getAssociatedCloud();
+						unsigned faceCount = mesh->size();
+						unsigned vertCount = pc->size();
+						for (unsigned i=0; i<faceCount; ++i)
+						{
+							const CCLib::TriangleSummitsIndexes* tri = mesh->getTriangleIndexes(i);
+							if (	tri->i1 >= vertCount
+								||	tri->i2 >= vertCount
+								||	tri->i3 >= vertCount )
+							{
+								ccLog::Warning(QString("[BIN] File is corrupted: missing vertices for mesh '%1'!").arg(mesh->getName()));
+
+								//add cloud to the 'orphans' set
+								pc->setName(mesh->getName() + QString(".") + pc->getName());
+								orphans->addChild(pc);
+								if (texCoordsTable)
+								{
+									texCoordsTable->setName(mesh->getName() + QString(".") + texCoordsTable->getName());
+									orphans->addChild(texCoordsTable);
+								}
+								if (triNormsTable)
+								{
+									triNormsTable->setName(mesh->getName() + QString(".") + triNormsTable->getName());
+									orphans->addChild(triNormsTable);
+								}
+								if (materials)
+								{
+									materials->setName(mesh->getName() + QString(".") + materials->getName());
+									orphans->addChild(materials);
+								}
+
+								//delete corrupted mesh
+								mesh->setMaterialSet(0,false);
+								mesh->setTriNormsTable(0,false);
+								mesh->setTexCoordinatesTable(0,false);
+								if (mesh->getParent())
+									mesh->getParent()->removeChild(mesh);
+								mesh = 0;
+
+								break;
+							}
 						}
 					}
 				}
@@ -616,16 +703,18 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		{
 			ccPolyline* poly = ccHObjectCaster::ToPolyline(currentObject);
 			intptr_t cloudID = (intptr_t)poly->getAssociatedCloud();
-			ccHObject* cloud = root->find(static_cast<int>(cloudID));
-			if (cloud && cloud->isKindOf(CC_TYPES::POINT_CLOUD))
+			ccHObject* cloud = FindRobust(root,poly,static_cast<unsigned>(cloudID),CC_TYPES::POINT_CLOUD);
+			if (cloud)
+			{
 				poly->setAssociatedCloud(ccHObjectCaster::ToGenericPointCloud(cloud));
+			}
 			else
 			{
 				//we have a problem here ;)
 				poly->setAssociatedCloud(0);
 				//DGM: can't delete it, too dangerous (bad pointers ;)
 				//delete root;
-				ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find vertices (ID=%1) for polyline '%2' in the file!").arg(cloudID).arg(poly->getName()));
+				ccLog::Warning(QString("[BIN] Couldn't find vertices (ID=%1) for polyline '%2' in the file!").arg(cloudID).arg(poly->getName()));
 				return CC_FERR_MALFORMED_FILE;
 			}
 		}
@@ -635,9 +724,11 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			intptr_t bufferID = (intptr_t)sensor->getPositions();
 			if (bufferID > 0)
 			{
-				ccHObject* buffer = root->find(static_cast<int>(bufferID));
-				if (buffer && buffer->isKindOf(CC_TYPES::TRANS_BUFFER))
+				ccHObject* buffer = FindRobust(root,sensor,static_cast<unsigned>(bufferID),CC_TYPES::TRANS_BUFFER);
+				if (buffer)
+				{
 					sensor->setPositions(ccHObjectCaster::ToTransBuffer(buffer));
+				}
 				else
 				{
 					//we have a problem here ;)
@@ -646,7 +737,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					//DGM: can't delete it, too dangerous (bad pointers ;)
 					//delete root;
 
-					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
+					ccLog::Warning(QString("[BIN] Couldn't find trans. buffer (ID=%1) for sensor '%2' in the file!").arg(bufferID).arg(sensor->getName()));
 
 					//positions are optional, so we can simply set them to NULL and go ahead, we do not need to return.
 					//return CC_FERR_MALFORMED_FILE;
@@ -662,8 +753,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			{
 				const cc2DLabel::PickedPoint& pp = label->getPoint(i);
 				intptr_t cloudID = (intptr_t)pp.cloud;
-				ccHObject* cloud = root->find(static_cast<int>(cloudID));
-				if (cloud && cloud->isKindOf(CC_TYPES::POINT_CLOUD))
+				ccHObject* cloud = FindRobust(root,label,static_cast<unsigned>(cloudID),CC_TYPES::POINT_CLOUD);
+				if (cloud)
 				{
 					ccGenericPointCloud* genCloud = ccHObjectCaster::ToGenericPointCloud(cloud);
 					assert(genCloud->size()>pp.index);
@@ -672,7 +763,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				else
 				{
 					//we have a problem here ;)
-					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find cloud (ID=%1) associated to label '%2' in the file!").arg(cloudID).arg(label->getName()));
+					ccLog::Warning(QString("[BIN] Couldn't find cloud (ID=%1) associated to label '%2' in the file!").arg(cloudID).arg(label->getName()));
 					if (label->getParent())
 						label->getParent()->removeChild(label);
 					//DGM: can't delete it, too dangerous (bad pointers ;)
@@ -703,14 +794,16 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t cloudID = (intptr_t)facet->getOriginPoints();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = root->find(static_cast<int>(cloudID));
+					ccHObject* cloud = FindRobust(root,facet,static_cast<unsigned>(cloudID),CC_TYPES::POINT_CLOUD);
 					if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
+					{
 						facet->setOriginPoints(ccHObjectCaster::ToPointCloud(cloud));
+					}
 					else
 					{
 						//we have a problem here ;)
 						facet->setOriginPoints(0);
-						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find origin points (ID=%1) for facet '%2' in the file!").arg(cloudID).arg(facet->getName()));
+						ccLog::Warning(QString("[BIN] Couldn't find origin points (ID=%1) for facet '%2' in the file!").arg(cloudID).arg(facet->getName()));
 					}
 				}
 			}
@@ -719,14 +812,16 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t cloudID = (intptr_t)facet->getContourVertices();
 				if (cloudID > 0)
 				{
-					ccHObject* cloud = root->find(static_cast<int>(cloudID));
-					if (cloud && cloud->isA(CC_TYPES::POINT_CLOUD))
+					ccHObject* cloud = FindRobust(root,facet,static_cast<unsigned>(cloudID),CC_TYPES::POINT_CLOUD);
+					if (cloud)
+					{
 						facet->setContourVertices(ccHObjectCaster::ToPointCloud(cloud));
+					}
 					else
 					{
 						//we have a problem here ;)
 						facet->setContourVertices(0);
-						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find contour points (ID=%1) for facet '%2' in the file!").arg(cloudID).arg(facet->getName()));
+						ccLog::Warning(QString("[BIN] Couldn't find contour points (ID=%1) for facet '%2' in the file!").arg(cloudID).arg(facet->getName()));
 					}
 				}
 			}
@@ -735,14 +830,16 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t polyID = (intptr_t)facet->getContour();
 				if (polyID > 0)
 				{
-					ccHObject* poly = root->find(static_cast<int>(polyID));
-					if (poly && poly->isA(CC_TYPES::POLY_LINE))
+					ccHObject* poly = FindRobust(root,facet,static_cast<unsigned>(polyID),CC_TYPES::POLY_LINE);
+					if (poly)
+					{
 						facet->setContour(ccHObjectCaster::ToPolyline(poly));
+					}
 					else
 					{
 						//we have a problem here ;)
 						facet->setContourVertices(0);
-						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find contour polyline (ID=%1) for facet '%2' in the file!").arg(polyID).arg(facet->getName()));
+						ccLog::Warning(QString("[BIN] Couldn't find contour polyline (ID=%1) for facet '%2' in the file!").arg(polyID).arg(facet->getName()));
 					}
 				}
 			}
@@ -751,8 +848,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 				intptr_t polyID = (intptr_t)facet->getPolygon();
 				if (polyID > 0)
 				{
-					ccHObject* poly = root->find(static_cast<int>(polyID));
-					if (poly && poly->isA(CC_TYPES::MESH))
+					ccHObject* poly = FindRobust(root,facet,static_cast<unsigned>(polyID),CC_TYPES::POLY_LINE);
+					if (poly)
 					{
 						facet->setPolygon(ccHObjectCaster::ToMesh(poly));
 					}
@@ -760,7 +857,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					{
 						//we have a problem here ;)
 						facet->setContourVertices(0);
-						ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find polygon mesh (ID=%1) for facet '%2' in the file!").arg(polyID).arg(facet->getName()));
+						ccLog::Warning(QString("[BIN] Couldn't find polygon mesh (ID=%1) for facet '%2' in the file!").arg(polyID).arg(facet->getName()));
 					}
 				}
 			}
@@ -772,8 +869,8 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 			intptr_t sensorID = (intptr_t)image->getAssociatedSensor();
 			if (sensorID > 0)
 			{
-				ccHObject* sensor = root->find(static_cast<int>(sensorID));
-				if (sensor && sensor->isKindOf(CC_TYPES::CAMERA_SENSOR))
+				ccHObject* sensor = FindRobust(root,image,static_cast<unsigned>(sensorID),CC_TYPES::CAMERA_SENSOR);
+				if (sensor)
 				{
 					image->setAssociatedSensor(ccHObjectCaster::ToCameraSensor(sensor));
 				}
@@ -785,7 +882,7 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 					//DGM: can't delete it, too dangerous (bad pointers ;)
 					//delete root;
 
-					ccLog::Warning(QString("[BinFilter::loadFileV2] Couldn't find camera sensor (ID=%1) for image '%2' in the file!").arg(sensorID).arg(image->getName()));
+					ccLog::Warning(QString("[BIN] Couldn't find camera sensor (ID=%1) for image '%2' in the file!").arg(sensorID).arg(image->getName()));
 					//return CC_FERR_MALFORMED_FILE;
 				}
 			}
@@ -794,6 +891,36 @@ CC_FILE_ERROR BinFilter::LoadFileV2(QFile& in, ccHObject& container, int flags)
 		if (currentObject)
 			for (unsigned i=0; i<currentObject->getChildrenNumber() ;++i)
 				toCheck.push_back(currentObject->getChild(i));
+	}
+
+	//check for unique IDs duplicate (yes it happens :-( )
+	{
+		std::set<unsigned> uniqueIDs;
+		unsigned maxUniqueID = root->findMaxUniqueID_recursive();
+		assert(toCheck.empty());
+		toCheck.push_back(root);
+		while (!toCheck.empty())
+		{
+			ccHObject* currentObject = toCheck.back();
+			toCheck.pop_back();
+
+			assert(currentObject);
+
+			//check that the ID is not already used (strangely it happens!)
+			unsigned uniqueID = currentObject->getUniqueID();
+			if (uniqueIDs.find(uniqueID) != uniqueIDs.end())
+			{
+				ccLog::Warning(QString("[BIN] Duplicate 'unique ID' found! (ID = %1)").arg(uniqueID));
+				currentObject->setUniqueID(++maxUniqueID);
+			}
+			else
+			{
+				uniqueIDs.insert(uniqueID);
+			}
+
+			for (unsigned i=0; i<currentObject->getChildrenNumber() ;++i)
+				toCheck.push_back(currentObject->getChild(i));
+		}
 	}
 
 	//update 'unique IDs'

@@ -344,7 +344,7 @@ bool ccHObject::addChild(ccHObject* child, int dependencyFlags/*=DP_PARENT_OF_OT
 	return true;
 }
 
-ccHObject* ccHObject::find(int uniqueID)
+ccHObject* ccHObject::find(unsigned uniqueID)
 {
 	//found the right item?
 	if (getUniqueID() == uniqueID)
@@ -662,6 +662,20 @@ void ccHObject::applyGLTransformation_recursive(ccGLMatrix* trans/*=NULL*/)
 
 	if (m_glTransEnabled)
 		resetGLTransformation();
+}
+
+unsigned ccHObject::findMaxUniqueID_recursive() const
+{
+	unsigned id = getUniqueID();
+
+	for (Container::const_iterator it = m_children.begin(); it!=m_children.end(); ++it)
+	{
+		unsigned childMaxID = (*it)->findMaxUniqueID_recursive();
+		if (id < childMaxID)
+			id = childMaxID;
+	}
+
+	return id;
 }
 
 void ccHObject::detachChild(ccHObject* child)
